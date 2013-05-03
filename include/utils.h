@@ -1,0 +1,177 @@
+#ifndef _UTILS_H
+#define _UTILS_H
+
+#include <iostream>
+#include <cstdlib>
+#include <cmath>
+
+#include "gnuplot.h"
+
+/** @brief Electromagnetic coupling constant \f$\alpha_{em}=\frac{e^2}{4\pi\epsilon_0\hbar c}\f$ */
+#define alphaF 1./137.04
+/** @brief \f$\frac{1}{(\hbar c)^2}~[\mathrm b^{-1}]\f$? */
+#define muBarn 1./389.39
+#define pi 3.14159265358979
+//#define sconst 2.1868465E10
+#define sconst 3.89351824E8
+#define sconstb 2.1868465E10
+
+double GetMassFromPDGId(int);
+bool PSF(double,double,double*,double*,double*);
+/**
+ * @brief Defines modified variables of integration to avoid peaks integrations
+ *  (see paper from Vermaseren for details : Two-photon processes, 
+ *  Nucl.Phys.B229 (1983) 347-371)
+ * Returns a set of two modified variables of integration to maintain
+ *  the stability of the integrant. These two new variables are :
+ * - \f$y_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\f$
+ *   the new variable
+ * - \f$\mathrm dy_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\log\frac{x_{min}}{x_{max}}\f$,
+ *   the new variable's differential form
+ * @brief Redefines the variables of integration in order to avoid the
+ *  strong peaking of the integrant.
+ * @param expo_ Exponant
+ * @param xmin_ Minimal value of the variable
+ * @param xmax_ Maximal value of the variable
+ * @param out_ The new variable definition
+ * @param dout_ The differential variant of the new variable definition
+ * \note This method overrides the set of `mapxx` subroutines in ILPAIR,
+ *  with a slight difference according to the sign of the
+ *  \f$\mathrm dy_{out}\f$ parameter :
+ *  - left unchanged :
+ * > `mapw2`, `mapxq`, `mapwx`, `maps2`
+ *  - opposite sign :
+ * > `mapt1`, `mapt2`
+ */
+void Map(double,double,double,double*,double*);
+void Mapla(double,double,int,double,double,double*,double*);
+
+/**
+ * @brief List of input parameters used to start and run the simulation
+ *  job.
+ */
+class InputParameters {
+  public:
+    InputParameters();
+    ~InputParameters();
+    int ncvg; // ??
+    /** @brief Number of Vegas integrations */
+    int itvg;
+    /** @brief First incoming particle's momentum (in GeV/c) */
+    double in1p;
+    /** @brief Second incoming particle's momentum (in GeV/c) */
+    double in2p;
+    /**
+     * The first incoming particle type and kind of interaction :
+     * - 1 - electron,
+     * - 2 - proton elastic,
+     * - 3 - proton inelastic without parton treatment,
+     * - 4 - proton inelastic in parton model
+     * @brief First particle's mode
+     * @note Was named PMOD in ILPAIR
+     */
+    int p1mod;
+    /**
+     * @brief Second particle's mode
+     * @note Was named EMOD in ILPAIR
+     */
+    int p2mod;
+    /** 
+     * The particle code of produced leptons :
+     * - 11 - \f$e^+e^-\f$
+     * - 13 - \f$\mu^+\mu^-\f$
+     * - 15 - \f$\tau^+\tau^-\f$
+     * @brief PDG id of the outgoing leptons
+     */
+    int pair;
+    /**
+     * Set of cuts to apply on the outgoing leptons in order to restrain the 
+     * available kinematic phase space :
+     * - 0 - No cuts at all (for the total cross section)
+     * - 1 - Vermaserens' hypothetical detector cuts : for both leptons,
+     *   + \f$\frac{|p_z|}{|\mathbf p|}\leq 0.75\f$ and \f$p_T\geq 1~\mathrm{GeV}\f$, or 
+     *   + \f$0.75<\frac{|p_z|}{|\mathbf p|}\leq 0.95\f$ and \f$p_z> 1~\mathrm{GeV}\f$,
+     * - 2 - Cuts according to the provided parameters
+     * @brief Set of cuts to apply on the outgoing leptons
+     */
+    int mcut;
+    /** @brief Minimal transverse momentum of the outgoing leptons */
+    double minpt;
+    /** @brief Maximal transverse momentum of the outgoing leptons */
+    double maxpt;
+    /**
+     * @brief Are we generating events ? (true) or are we only computing the
+     * cross-section ? (false)
+     */
+    bool generation;
+    bool debug;
+    /**
+     * @brief The file in which to store the events generation's output
+     */
+    std::ofstream* file;
+    Gnuplot* plot;
+};
+
+/**
+ * @brief List of kinematic cuts to apply on the central and outgoing phase space.
+ */
+class Cuts {
+  public:
+    Cuts();
+    ~Cuts();
+    /** @brief Sets of cuts to apply on the final phase space */
+    int mode;
+    /** @brief Minimal transverse momentum of the single outgoing leptons */
+    double ptmin;
+    /** @brief Maximal transverse momentum of the single outgoing leptons */
+    double ptmax;
+    /** @brief Minimal energy of the central two-photons system */
+    double emin;
+    /** @brief Maximal energy of the central two-photons system */
+    double emax;
+    /** @brief Minimal polar (\f$\theta\f$) angle of the outgoing leptons */
+    double thetamin;
+    /** @brief Maximal polar (\f$\theta\f$) angle of the outgoing leptons */
+    double thetamax;
+};
+
+/**
+ * Kinematic information for one particle
+ * @brief Kinematics of one particle
+ */
+class Particle {
+  public:
+    Particle();
+    ~Particle();
+    /**
+     * Returns a string containing all the particle's kinematics as expressed in
+     * the Les Houches format
+     * @return The LHE line
+     */
+    std::string GetLHEline();
+    /** @brief Particle Data Group integer identifier */
+    int pdgId;
+    /** @brief Role in the considered process */
+    int role;
+    /** @brief Energy */
+    double e;
+    /** @brief Mass */
+    double m;
+    /** @brief Momentum along the \f$x\f$-axis */
+    double px;
+    /** @brief Momentum along the \f$y\f$-axis */
+    double py;
+    /** @brief Momentum along the \f$z\f$-axis */
+    double pz;
+    /** @brief Transverse momentum */
+    double pt;
+    /**
+     * @brief Sets the momentum
+     * @param px_ Momentum along the \f$x\f$-axis
+     * @param py_ Momentum along the \f$y\f$-axis
+     * @param pz_ Momentum along the \f$z\f$-axis
+     */
+    void SetP(double, double, double);
+};
+
+#endif
