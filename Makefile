@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -I include/ -Wall -I /usr/include/gsl -O4 -fPIC -fstack-usage -dD -std=c++11
+CFLAGS = -I include/ -Wall -Wextra -I /usr/include/gsl -O4 -fPIC -fstack-usage #-std=c++11 #-dD
 LDFLAGS = -lgsl -lgslcblas
 VPATH = src include
 CPP_FILES = $(wildcard src/*.cpp)

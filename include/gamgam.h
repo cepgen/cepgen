@@ -23,12 +23,17 @@ class GamGam {
    * @param ndim_ The number of dimensions of the point in the phase space
    * @param q2min_ The minimal value of \f$Q^2\f$
    * @param q2max_ The maximal value of \f$Q^2\f$
+   * @param nOpt_ Optimisation???
    * @param x_[] The ndim_-dimensional point in the phase space on which
    *  the kinematics and the cross-section are computed
+   * @todo Figure out how this nOpt_ parameter is affecting the final
+   *  cross-section computation
    */
   GamGam(int,double,double,int,double x_[]);
   ~GamGam();
   /**
+   * Specifies the incoming particles' kinematics as well as their properties
+   * (role in the process and PDG Id)
    * @brief Sets the momentum and PDG id for the incoming particles
    * @param part_ Role of the particle in the process
    * @param momentum_ 3-momentum of the particle
@@ -42,16 +47,18 @@ class GamGam {
    */
   bool SetOutgoingParticles(int,int);
   /**
-   * Calculates energies and momenta of the 1st, 2nd, 3rd, 4th and 5th particle
-   * in the overall centre of mass frame.
+   * Calculates energies and momenta of the 1st, 2nd (resp. the "proton-like"
+   * and the "electron-like" incoming particles), 3rd (the "proton-like" outgoing
+   * particle), 4th (the two-photons central system) and 5th (the "electron-like"
+   * outgoing particle) particles in the overall centre of mass frame.
    * @brief Energies/momenta computation for the various particles, in the CM
    *  system
    */
   bool Orient();
   /**
    * Contains the expression of the matrix element squared for the process under
-   * considerations. It returns the value of the product of the form factor or
-   * structure functions and the matrix element squared.
+   * considerations. It returns the value of the convolution of the form factor
+   * or structure functions with the central two-photons matrix element squared.
    * @brief Computes the matrix element squared for the requested process
    * @return The full matrix element for the two-photon production of a pair of
    *  spin\f$-\frac{1}{2}-\f$point particles
@@ -76,16 +83,23 @@ class GamGam {
    * \f$s=(\sqrt{s})^{2}\f$) is provided.
    */
   void SetWRange(double,double);
+  /**
+   * @brief Get a particle given its role in the process
+   * @param role_ An integer denoting the particle's role in the selected
+   *  production process
+   */
   Particle GetParticle(int);
   /**
    * Describes the kinematics of the process \f$p_1+p_2\to p_3+p_4+p_5\f$ in
-   * terms of Lorentz-invariant variables. Fills several variables to be used in
-   * PeriPP (essential for the evaluation of the matrix element).
+   * terms of Lorentz-invariant variables. These variables (along with others)
+   * will then be feeded into the PeriPP method (thus are essential for the
+   * evaluation of the full matrix element).
    */
   bool Pickin();
   /**
-   * Is the system's kinematics well defined? Mandatory to perform the point's
-   *  cross-section computation.
+   * Is the system's kinematics well defined and compatible with the process ?
+   * This check is mandatory to perform the (_ndim)-dimensional point's
+   * cross-section computation.
    * @brief Is the system's kinematics well defined?
    * @return A boolean stating if the input kinematics and the final
    *  states are well defined
@@ -101,16 +115,18 @@ class GamGam {
    * Computes the cross-section for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
    *  process with the given kinematics
    * @brief Computes the process' cross section
-   * @return \f$\sigma_{\gamma\gamma\to\ell^{+}\ell^{-}}\f$, the total cross
-   *  section for the given event, provided the phase space region on which it
-   *  is integrated.
+   * @return \f$\frac{\textrm d\sigma}{\mathrm d\mathbf x}(\gamma\gamma\to\ell^{+}\ell^{-})\f$,
+   * the differential cross-section for the given point in the phase space.
    */
   double ComputeXsec(int nm_=1);
+  void FillKinematics();
  private:
   /** @brief Number of dimensions on which the integration has to be performed  */
   int _ndim;
-  /** @brief Array of _ndim components representing the point on which the
-   *   weight in the cross-section is computed  */
+  /**
+   * @brief Array of _ndim components representing the point on which the
+   *  weight in the cross-section is computed
+   */
   double *_x;
   int _nOpt;
   // COMMON/PICKZZ/
@@ -203,6 +219,10 @@ class GamGam {
   /** @brief \f$E_7^\mathrm{lab}\f$, energy of the second outgoing lepton, computed in the lab frame */
   double _e7lab;
   int _pdg7;
+  double _eg1;
+  double _p3_g1[3];
+  double _eg2;
+  double _p3_g2[3];
   // CM energy of the incoming particles' system
   /** @brief \f$s\f$, squared centre of mass energy of the incoming particles' system */
   double _s;
@@ -247,48 +267,49 @@ class GamGam {
   double _a1, _a2;
   // COMMON /LTCOM/
   /**
-   * @brief \f$\gamma\f$ factor of the centre of mass system, used in the 
+   * @brief \f$\gamma\f$ factor of the centre of mass system, used in the
    * computation of the inverse boost for the outgoing leptons
    */
   double _gamma;
   /**
-   * @brief \f$\beta\gamma\f$ factor of the centre of mass system, used in the 
+   * @brief \f$\beta\gamma\f$ factor of the centre of mass system, used in the
    * computation of the inverse boost for the outgoing leptons
    */
   double _betgam;
-  // COMMON /PICKZZ/
-  /** 
+  // COMMON /LEVI/
+  /**
    * @brief \f$\delta_1=m_3^2-m_1^2\f$ as defined in Vermaseren's paper
    * @cite Vermaseren1983347 for the full definition of this quantity
    */
   double _d1;
-  /** 
+  /**
    * @brief \f$\delta_4=m_5^2-m_2^2\f$ as defined in Vermaseren's paper
    * @cite Vermaseren1983347 for the full definition of this quantity
    */
   double _d2;
   double _d3;
-  /** 
+  /**
    * @brief \f$\delta_5=m_4^2-t_1\f$ as defined in Vermaseren's paper
    * @cite Vermaseren1983347 for the full definition of this quantity
    */
   double _d4;
-  /** 
+  /**
    * @brief \f$\delta_2=m_1^2-m_2^2\f$ as defined in Vermaseren's paper
    * @cite Vermaseren1983347 for the full definition of this quantity
    */
   double _d5;
-  /** 
+  /**
    * @brief \f$\delta_6=m_4^2-m_5^2\f$ as defined in Vermaseren's paper
    * @cite Vermaseren1983347 for the full definition of this quantity
    */
   double _d6;
   double _d7;
-  /** 
+  /**
    * @brief \f$\delta_3=t_1-m_2^2\f$ as defined in Vermaseren's paper
    * @cite Vermaseren1983347 for the full definition of this quantity
    */
   double _d8;
+  // COMMON /PICKZZ/
   double _sl1;
   double _w12, _w31, _w52;
   double _tau;
@@ -355,7 +376,7 @@ class GamGam {
   bool setout;
   /** @brief Is the full event's kinematic set ? */
   bool setkin;
-  
+
   // Cuts
   /** @brief Set of cuts to apply on the final phase space */
   Cuts _cuts;

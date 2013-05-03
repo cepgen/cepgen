@@ -4,12 +4,33 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+
 #include "vegas.h"
 #include "utils.h"
 #include "gamgam.h"
 #include "gnuplot.h"
 
-/** @brief Core Monte-Carlo generator */
+/**
+ * This object represents the core of this Monte Carlo generator, with its
+ * allowance to generate the events (using the embedded Vegas object) and to
+ * study the phase space in term of the variation of resulting cross section
+ * while scanning the various parameters (point \f$\textbf{x}\f$ in the
+ * DIM-dimensional phase space).
+ *
+ * The phase space is constrained using the InputParameters object given as an
+ * argument to the constructor, and the differential cross-sections for each
+ * value of the array \f$\textbf{x}\f$ are computed in the f-function defined
+ * outside (but populated inside) this object.
+ *
+ * This f-function embeds a GamGam object which defines all the methods to
+ * obtain this differential cross-section as well as the in- and outgoing
+ * kinematics associated to each particle.
+ *
+ * @author Laurent Forthomme <laurent.forthomme@uclouvain.be>
+ * @date February 2013
+ * @brief Core Monte-Carlo generator
+ *
+ */
 class MCGen {
  public:
   /**
@@ -23,7 +44,7 @@ class MCGen {
   MCGen(InputParameters);
   ~MCGen();
   void LaunchGen(int);
-  /** 
+  /**
    * @brief Returns the set of parameters used to setup the phase space to
    *   integrate
    * @return The InputParameter object embedded in this class
@@ -32,17 +53,16 @@ class MCGen {
   void AnalyzePhaseSpace(std::string);
  private:
   /**
-   * @brief The GamGam object computing the kinematics and the cross-section for the
-   * given point in the phase space
+   * The GamGam object which allows to compute the outgoing particles' kinematics
+   * as well as the cross-section for the given point in the phase space
    */
   GamGam *gg;
   /** @brief The Vegas integrator which will integrate the function */
   Vegas *veg;
   /** @brief Number of dimensions on which to perform the integration */
   int _ndim;
-  int _inp1pdg, _inp2pdg, _outp1pdg, _outp2pdg;
   /** @brief Set of parameters to setup the phase space to integrate */
-  InputParameters _ip;  
+  InputParameters _ip;
 };
 
 /**

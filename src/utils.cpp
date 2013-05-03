@@ -1,7 +1,8 @@
 #include "../include/utils.h"
 
-// values of a, b, c extracted from http://dx.doi.org/10.1016/0550-3213(76)90231-5
-// for 1.110 <= w2 <=1.990
+// values of a, b, c provided from the fits on ep data and retrieved from
+// http://dx.doi.org/10.1016/0550-3213(76)90231-5 with 1.110 <= w2 <=1.990
+
 double abrass[56] = {5.045,5.126,5.390,5.621,5.913,5.955,6.139,6.178,6.125,5.999,
                      5.769,5.622,5.431,5.288,5.175,5.131,5.003,5.065,5.045,5.078,
                      5.145,5.156,5.234,5.298,5.371,5.457,5.543,5.519,5.465,5.384,
@@ -20,7 +21,6 @@ double cbrass[56] = { 0.043, 0.024, 0.000,-0.013,-0.023,-0.069,-0.060,-0.080,-0.
                      -0.245,-0.254,-0.239,-0.302,-0.299,-0.318,-0.383,-0.393,-0.466,-0.588,
                      -0.622,-0.568,-0.574,-0.727,-0.665,-0.704,-0.856,-0.798,-1.048,-0.980,
                      -1.021,-1.092,-1.313,-1.341,-1.266,-1.473};
-
 
 double GetMassFromPDGId(int pdgId_)
 {
@@ -50,10 +50,6 @@ double GetMassFromPDGId(int pdgId_)
   return m;
 }
 
-/**
- * Computes the proton structure function (F.W Brasse et al., DESY 76/11 (1976),
-    http://dx.doi.org/10.1016/0550-3213(76)90231-5)
- */
 bool PSF(double q2_, double mX2_, double* sigT_, double* w1_, double* w2_)
 {
   int nBin;
@@ -62,7 +58,7 @@ bool PSF(double q2_, double mX2_, double* sigT_, double* w1_, double* w2_)
   double mX = std::sqrt(mX2_);
   double mP = GetMassFromPDGId(2212);
   double mPI = 0.135; //FIXME pi0 mass ???
-  
+
   if (mX>=mP+mPI && mX<1.99) {
     if (mX<1.11) {
       nBin = 0;
@@ -89,14 +85,14 @@ bool PSF(double q2_, double mX2_, double* sigT_, double* w1_, double* w2_)
   nu2 = std::pow((mX2_-q2_-std::pow(mP, 2))/(2.*mP), 2);
   logqq0 = log((nu2-q2_)/std::pow((mX2_-std::pow(mP, 2))/(2.*mP), 2))/2.;
   gd2 = std::pow(1./(1-q2_/.71), 4); // dipole form factor of the proton
-  
+
   sigLow = (nBin==0) ? 0. : exp(abrass[nBin]+bbrass[nBin]*logqq0+cbrass[nBin]*std::pow(fabs(logqq0), 3))*gd2;
   sigHigh = exp(abrass[nBin+1]+bbrass[nBin+1]*logqq0+cbrass[nBin+1]*std::pow(fabs(logqq0), 3))*gd2;
-  
+
   *sigT_ = sigLow+xBin*(sigHigh-sigLow)/dx;
   *w1_ = (mX2_-std::pow(mP, 2))/(8.*std::pow(pi, 2)*mP*alphaF)*muBarn*(*sigT_);
   *w2_ = (*w1_)*q2_/(q2_-nu2);
-  
+
   return true;
 }
 
@@ -125,7 +121,7 @@ void Map(double expo_, double xmin_, double xmax_, double* out_, double* dout_)
 void Mapla(double y_, double z_, int u_, double xm_, double xp_, double* x_, double* d_)
 {
   double xmb, xpb, c, yy, zz, alp, alm, am, ap, ax;
-  
+
   xmb = xm_-y_-z_;
   xpb = xp_-y_-z_;
   c = -4.*y_*z_;
@@ -135,7 +131,7 @@ void Mapla(double y_, double z_, int u_, double xm_, double xp_, double* x_, dou
   ap = xpb+alp;
   yy = ap/am;
   zz = std::pow(yy, u_);
-  
+
   *x_ = y_+z_+(am*zz-c/(am*zz))/2.;
   ax = std::sqrt(std::pow(*x_-y_-z_, 2)+c);
   *d_ = ax*log(yy);
@@ -148,11 +144,42 @@ InputParameters::InputParameters() :
   minpt(0.), maxpt(-1.),
   generation(false), debug(false)
 {
-  plot = new Gnuplot();
+  for (int i=0; i<MAX_HISTOS; i++) {
+    this->plot[i] = new Gnuplot();
+  }
 }
 
 InputParameters::~InputParameters()
 {
+  /*for (int i=0; i<MAX_HISTOS; i++) {
+    delete this->plot[i];
+  }*///FIXME ???
+}
+
+bool InputParameters::ReadConfigFile(std::string inFile_)
+{
+  std::ifstream file;
+  file.open(inFile_.c_str(), std::fstream::in);
+  if (!file.is_open()) {
+    return false;
+  }
+  while (!file.eof()) {
+    // ...
+  }
+  file.close();
+  return true;
+}
+
+bool InputParameters::StoreConfigFile(std::string outFile_)
+{
+  std::ofstream file;
+  file.open(outFile_.c_str(), std::fstream::out | std::fstream::trunc);
+  if (!file.is_open()) {
+    return false;
+  }
+  // ...
+  file.close();
+  return true;
 }
 
 Cuts::Cuts() :
@@ -166,7 +193,7 @@ Cuts::~Cuts()
 }
 
 Particle::Particle() :
-  pdgId(-1), role(-1), e(-1.), m(-1.), px(0.), py(0.), pz(0.)
+  pdgId(-1), role(-1), e(-1.), m(-1.), px(0.), py(0.), pz(0.), pt(-1.)
 {
 }
 
@@ -182,3 +209,16 @@ void Particle::SetP(double px_, double py_, double pz_)
   this->pt = std::sqrt(std::pow(this->px, 2)+std::pow(this->py, 2));
 }
 
+/*void Symmetrise(double pxin_, double pyin_, double *pxout_, double *pyout_)
+{
+  double ranphi, rany;
+  gsl_rng *_r = gsl_rng_alloc(gsl_rng_default);
+  gsl_rng_set(_r, 3001187); // sets the MC generator's seed
+  ranphi = gsl_ran_flat(_r, 0., 2.*pi);
+  rany = (gsl_ran_flat(_r, 0., 1.)>=.5) ? 1. : -1.;
+  
+  *pxout_ = pxin_*cos(ranphi) + rany*pyin_*sin(ranphi);
+  *pyout_ = -pxin_*sin(ranphi) + rany*pyin_*cos(ranphi);
+  
+  delete _r;
+}*/

@@ -7,6 +7,7 @@
 
 #include "gnuplot.h"
 
+#define MAX_HISTOS 20
 /** @brief Electromagnetic coupling constant \f$\alpha_{em}=\frac{e^2}{4\pi\epsilon_0\hbar c}\f$ */
 #define alphaF 1./137.04
 /** @brief \f$\frac{1}{(\hbar c)^2}~[\mathrm b^{-1}]\f$? */
@@ -15,12 +16,19 @@
 //#define sconst 2.1868465E10
 #define sconst 3.89351824E8
 #define sconstb 2.1868465E10
+//#define RANMAX 1e8
 
 double GetMassFromPDGId(int);
+
+/**
+ * Computes the proton structure function (F.W Brasse et al., DESY 76/11 (1976),
+ *   http://dx.doi.org/10.1016/0550-3213(76)90231-5)
+ * @cite Brasse1976413
+ */
 bool PSF(double,double,double*,double*,double*);
 /**
  * @brief Defines modified variables of integration to avoid peaks integrations
- *  (see paper from Vermaseren for details : Two-photon processes, 
+ *  (see paper from Vermaseren for details : Two-photon processes,
  *  Nucl.Phys.B229 (1983) 347-371)
  * Returns a set of two modified variables of integration to maintain
  *  the stability of the integrant. These two new variables are :
@@ -45,6 +53,7 @@ bool PSF(double,double,double*,double*,double*);
  */
 void Map(double,double,double,double*,double*);
 void Mapla(double,double,int,double,double,double*,double*);
+//void Symmetrise(double, double, double*, double*);
 
 /**
  * @brief List of input parameters used to start and run the simulation
@@ -54,6 +63,16 @@ class InputParameters {
   public:
     InputParameters();
     ~InputParameters();
+    /**
+     * @brief Reads content from config file to load the variables
+     * @param inFile_ Name of the configuration file to load
+     */
+    bool ReadConfigFile(std::string);
+    /**
+     * @brief Stores the full run configuration to an external config file
+     * @param outFile_ Name of the configuration file to create
+     */
+    bool StoreConfigFile(std::string);
     int ncvg; // ??
     /** @brief Number of Vegas integrations */
     int itvg;
@@ -76,7 +95,7 @@ class InputParameters {
      * @note Was named EMOD in ILPAIR
      */
     int p2mod;
-    /** 
+    /**
      * The particle code of produced leptons :
      * - 11 - \f$e^+e^-\f$
      * - 13 - \f$\mu^+\mu^-\f$
@@ -85,11 +104,11 @@ class InputParameters {
      */
     int pair;
     /**
-     * Set of cuts to apply on the outgoing leptons in order to restrain the 
+     * Set of cuts to apply on the outgoing leptons in order to restrain the
      * available kinematic phase space :
      * - 0 - No cuts at all (for the total cross section)
      * - 1 - Vermaserens' hypothetical detector cuts : for both leptons,
-     *   + \f$\frac{|p_z|}{|\mathbf p|}\leq 0.75\f$ and \f$p_T\geq 1~\mathrm{GeV}\f$, or 
+     *   + \f$\frac{|p_z|}{|\mathbf p|}\leq 0.75\f$ and \f$p_T\geq 1~\mathrm{GeV}\f$, or
      *   + \f$0.75<\frac{|p_z|}{|\mathbf p|}\leq 0.95\f$ and \f$p_z> 1~\mathrm{GeV}\f$,
      * - 2 - Cuts according to the provided parameters
      * @brief Set of cuts to apply on the outgoing leptons
@@ -104,12 +123,25 @@ class InputParameters {
      * cross-section ? (false)
      */
     bool generation;
+    /**
+     * Enables or disables the production of control plots for several kinematic
+     * quantities in this process
+     * @brief Do we need control plots all along the process?
+     */
     bool debug;
     /**
      * @brief The file in which to store the events generation's output
      */
     std::ofstream* file;
-    Gnuplot* plot;
+    /**
+     * List of Gnuplot objects which can be used to produce control plots
+     * all along the cross-section determination and events generation process
+     * @note Maximum number of these can be raised in the utils.h file, but pay
+     * attention to the memory load since these Gnuplot objects are still under
+     * development!
+     * @brief Control plots objects
+     */
+    Gnuplot* plot[MAX_HISTOS];
 };
 
 /**
@@ -153,15 +185,15 @@ class Particle {
     int pdgId;
     /** @brief Role in the considered process */
     int role;
-    /** @brief Energy */
+    /** @brief Energy in GeV */
     double e;
-    /** @brief Mass */
+    /** @brief Mass in GeV */
     double m;
-    /** @brief Momentum along the \f$x\f$-axis */
+    /** @brief Momentum along the \f$x\f$-axis in GeV/c */
     double px;
-    /** @brief Momentum along the \f$y\f$-axis */
+    /** @brief Momentum along the \f$y\f$-axis in GeV/c */
     double py;
-    /** @brief Momentum along the \f$z\f$-axis */
+    /** @brief Momentum along the \f$z\f$-axis in GeV/c */
     double pz;
     /** @brief Transverse momentum */
     double pt;
