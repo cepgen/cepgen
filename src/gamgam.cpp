@@ -8,8 +8,8 @@ GamGam::GamGam(int ndim_, double q2min_, double q2max_, int nOpt_, double x_[]) 
   _p12(0.), _p13(0.), _p14(0.), _p15(0.), _p23(0.),
   _p24(0.), _p25(0.), _p34(0.), _p35(0.), _p45(0.),
   _p1k2(0.), _p2k1(0.),
-  setp1(false), setp2(false), setp3(false), setp5(false), setll(false),
-  setin(false), setout(false), setkin(false),
+  setp1(false), setp2(false), setp3(false), setp5(false),
+  setll(false), setin(false), setout(false), setkin(false),
   _wmin(0.), _wmax(-1.),
   _cotth1(-999999.), _cotth2(999999.)
 {
@@ -584,13 +584,6 @@ bool GamGam::Orient()
   _ec4 = _de3+_de5;
   _ep5 = _ep2-_de5;
 
-#ifdef DEBUG
-  std::cout << "[GamGam::Orient] [DEBUG] central system's energy = " << _ec4 << std::endl;
-  std::cout << "[GamGam::Orient] [DEBUG] central system's momentum = " << _pc4 << std::endl;
-  std::cout << "[GamGam::Orient] [DEBUG] central system's invariant mass = " << _mc4 << std::endl;
-  std::cout << "[GamGam::Orient] [DEBUG] outgoing particles' energy = " << _ep3 << ", " << _ep5 << std::endl;
-#endif
-
   if (_ec4<_mc4) {
 #ifdef ERROR
     std::cerr << "[GamGam::Orient] [ERROR]\n  _ec4<_mc4 : _ec4 = " << _ec4 << ", _mc4 = " << _mc4 << std::endl;
@@ -610,6 +603,12 @@ bool GamGam::Orient()
   _pp5 = std::sqrt(std::pow(_ep5, 2)-_w5);
   _p_p3 = std::sqrt(_dd1/_s)/_p;
 
+#ifdef DEBUG
+  std::cout << "[GamGam::Orient] [DEBUG] central system's energy : E4 = " << _ec4 << std::endl;
+  std::cout << "[GamGam::Orient] [DEBUG] central system's momentum : P4 = " << _pc4 << std::endl;
+  std::cout << "[GamGam::Orient] [DEBUG] central system's invariant mass : M4 = " << _mc4 << std::endl;
+  std::cout << "[GamGam::Orient] [DEBUG] outgoing particles' energy : E3 = " << _ep3 << ", E5 = " << _ep5 << std::endl;
+#endif
   //std::cout << "dd3 = " << _dd3 << std::endl;
 
   _p_p5 = std::sqrt(_dd3/_s)/_p;
@@ -856,6 +855,8 @@ double GamGam::ComputeXsec(int nm_)
   }
   ecm6 = (_w4+_w6-_w7)/(2.*_mc4);
   pcm6 = std::sqrt(std::pow(ecm6, 2)-_w6);
+  
+  //std::cout << "pcm6 = " << pcm6 << ", ecm6 = " << ecm6 << ", w6 = " << _w6 << std::endl; // OKKKKK!!!!
 
   _dj *= dw4*pcm6/(_mc4*sconstb*_s);
   
@@ -864,7 +865,7 @@ double GamGam::ComputeXsec(int nm_)
   e1mp1 = _w1/(_ep1+_p);
   e3mp3 = _w3/(_ep3+_pp3);
   eg = (_w4+_t1-_t2)/(2.*_mc4);
-  pg = std::sqrt(std::pow(eg, 2)-_t1); // POW ok
+  pg = std::sqrt(std::pow(eg, 2)-_t1);
   
   pg3[0] = -_p_p3*_cp3*_ct4-_st4*(_de3-e1mp1+e3mp3+_pp3*_al3);
   pg3[1] = -_p_p3*_sp3;
@@ -879,21 +880,25 @@ double GamGam::ComputeXsec(int nm_)
             << std::endl;
 #endif
 
-  pgp = std::sqrt(std::pow(pg3[0], 2)+std::pow(pg3[1], 2)); // outgoing proton (3)'s transverse momentum // POW ok
-  pgg = std::sqrt(std::pow(pgp, 2)+std::pow(pg3[2], 2)); // outgoing proton (3)'s momentum // POW ok
+  pgp = std::sqrt(std::pow(pg3[0], 2)+std::pow(pg3[1], 2)); // outgoing proton (3)'s transverse momentum
+  pgg = std::sqrt(std::pow(pgp, 2)+std::pow(pg3[2], 2)); // outgoing proton (3)'s momentum
   if (pgg>pgp*.9 && pgg>pg) { //FIXME ???
     pg = pgg;
   }
-
-  stg = pgp/pg;
+  
+  // phi angle
   cpg = pg3[0]/pgp;
   spg = pg3[1]/pgp;
-  ctg = std::sqrt(1.-std::pow(stg, 2)); // POW ok
+  
+  // theta angle
+  stg = pgp/pg;
+  ctg = std::sqrt(1.-std::pow(stg, 2));
   if (pg3[2]<0.) {
     ctg = -ctg;
   }
+  
   xx6 = _x[5];
-
+  
   if (nm_!=0) {
     amap = (_w4-_t1-_t2)/2.;
     bmap = std::sqrt((std::pow(_w4-_t1-_t2, 2)-4.*_t1*_t2)*(1.-4.*_w6/_w4))/2.;
@@ -903,16 +908,19 @@ double GamGam::ComputeXsec(int nm_)
     if (xx6>1.) {
       xx6 = 1.;
     }
+    if (xx6<0.) {
+      xx6 = 0.;
+    }
     _ctcm6 = 1.-2.*xx6;
     ddd = (std::pow(amap, 2)-std::pow(bmap*_ctcm6, 2))/(amap*bmap)*log(ymap);
     _dj = _dj*(ddd/2.);
   }
   // 3D rotation of the first outgoing lepton wrt the CM system
-  _ctcm6 = 1.-2.*xx6;
-  _stcm6 = 2.*std::sqrt(xx6*(1.-xx6));
+  _ctcm6 = 1.-2.*xx6; // cos(theta_cm,6) is between -1 and 1
+  _stcm6 = 2.*std::sqrt(xx6*(1.-xx6)); // definition is OK (according to _ctcm6 def)
 
   //FIXME extra sanity check never introduced in Fortran's subroutine
-  double tmp = (_ndim<7) ? 0. : _x[6];
+  double tmp = (_ndim<7) ? 0.3 : _x[6];
   phicm6 = 2.*pi*tmp;
   // First lepton emitted in the direction of the first incoming particle for
   // the elastic case
@@ -932,15 +940,18 @@ double GamGam::ComputeXsec(int nm_)
             << p3cm6[2] << ")"
             << std::endl;
 #endif
-
   p3c6[2] = ctg*p3cm6[2]-stg*p3cm6[0];
 
   h1 = stg*p3cm6[2]+ctg*p3cm6[0];
+  //std::cout << "h1=" << h1 << std::endl;
+  
   p3c6[0] = cpg*h1-spg*p3cm6[1];
-
+  
   q3c[0] = 2.*p3c6[0];
   q3c[2] = 2.*p3c6[2];
   // q3c[1] == QCY is never defined
+  //std::cout << "qcx = " << q3c[0] << std::endl;
+  //std::cout << "qcz = " << q3c[2] << std::endl; // QCZ ok!!
 
   double p6x, p6y, p6z;
 
@@ -950,21 +961,16 @@ double GamGam::ComputeXsec(int nm_)
   h2 = (_ec4*p3c6[2]+_pc4*ecm6)/_mc4;
   p6x = _ct4*p3c6[0]+_st4*p3c6[0];
   p6z = _ct4*h2-_st4*p3c6[0];
+  
+  /*std::cout << "p6x = " << p6x << std::endl; // wrong (-0.97171198099796430)
+  std::cout << "p6y = " << p6y << std::endl;
+  std::cout << "p6z = " << p6z << std::endl;*/
 
   _qve[0] = _pc4*q3c[2]/_mc4;
   _qve[2] = 2.*p6y;
   hq = _ec4*q3c[2]/_mc4;
   _qve[1] = _ct4*q3c[0]+_st4*hq;
   _qve[3] = _ct4*hq-_st4*q3c[0];
-
-#ifdef DEBUG
-  std::cout << "[GamGam::ComputeXsec] [DEBUG] qve = ("
-            << _qve[0] << ", "
-            << _qve[1] << ", "
-            << _qve[2] << ", "
-            << _qve[3] << ")"
-            << std::endl;
-#endif
 
   _pl6 = std::sqrt(std::pow(_el6, 2)-_w6); // first outgoing lepton's |p|
   /*double test = std::sqrt(std::pow(p6x,2)+std::pow(p6y,2)+std::pow(p6z,2));
@@ -984,8 +990,14 @@ double GamGam::ComputeXsec(int nm_)
   double p7x, p7y, p7z;
   // Second outgoing lepton's 3-momentum
   p7x = _p_p4-p6x;
-  p7y = -p6x;
+  p7y = -p6y;
   p7z = _pc4*_ct4-p6z;
+  // should be P7X=   1.0886407692489968      P7Y= -0.17366271681007375      P7Z=  -32.904157577959587     
+  
+  /*std::cout << "p7x=" << p7x << std::endl;
+  std::cout << "p7y=" << p7y << std::endl;
+  std::cout << "p7z=" << p7z << std::endl;*/
+  
   pp6 = std::sqrt(std::pow(p6x, 2)+std::pow(p6y, 2)); // pT of first outgoing lepton
   pp7 = std::sqrt(std::pow(p7x, 2)+std::pow(p7y, 2)); // pT of second outgoing lepton
 
@@ -996,6 +1008,8 @@ double GamGam::ComputeXsec(int nm_)
   _sp6 = p6y/pp6;
   if (_st6<0) std::cout << "st6<0 : " << _st6 << std::endl;
 
+  /*std::cout << "pp6 = " << pp6 << std::endl;
+  std::cout << "pp7 = " << pp7 << std::endl;*/
   // Second outgoing lepton's kinematics (sin/cos theta/phi)
   _ct7 = p7z/_pl7;
   _st7 = pp7/_pl7;
@@ -1019,10 +1033,12 @@ double GamGam::ComputeXsec(int nm_)
   c1 = (_qve[1]*_sp3-_qve[2]*_cp3)*_p_p3;
   c2 = (_qve[3]*_ep1-_qve[0]*_p)*_p_p3;
   c3 = (_w31*std::pow(_ep1, 2)+2.*_w1*_de3*_ep1-_w1*std::pow(_de3, 2)+std::pow(_p_p3, 2)*std::pow(_ep1, 2))/(_ep3*_p+_pp3*_ct3*_ep1);
+  
   b1 = (_qve[1]*_sp5-_qve[2]*_cp5)*_p_p5;
   b2 = (_qve[3]*_ep2+_qve[0]*_p)*_p_p5;
-
   b3 = (_w52*std::pow(_ep2, 2)+2.*_w2*_de5*_ep2-_w2*std::pow(_de5, 2)+std::pow(_p_p5*_ep2, 2))/(_ep2*_pp5*_ct5-_ep5*_p);
+  
+  //std::cout << "b1, b2, b3 = " << b1 << ", " << b2 << ", " << b3 << std::endl;
 
   r12 = c2*_sp3+_qve[2]*c3;
   r13 = -c2*_cp3-_qve[1]*c3;
@@ -1034,9 +1050,10 @@ double GamGam::ComputeXsec(int nm_)
   }
 #endif
 
-
   r22 = b2*_sp5+_qve[2]*b3;
   r23 = -b2*_cp5-_qve[1]*b3;
+  
+  //std::cout << "r22 = " << r22 << ", r23 = " << r23 << std::endl;
 
   _epsi = _p12*c1*b1+r12*r22+r13*r23;
 
@@ -1045,7 +1062,7 @@ double GamGam::ComputeXsec(int nm_)
 
   _a5 = -(_qve[1]*_cp3+_qve[2]*_sp3)*_p_p3*_p1k2-(_ep1*_qve[0]-_p*_qve[3])*(_cp3*_cp5+_sp3*_sp5)*_p_p3*_p_p5+(_de5*_qve[3]+_qve[0]*(_p+_pp5*_ct5))*c3;
   _a6 = -(_qve[1]*_cp5+_qve[2]*_sp5)*_p_p5*_p2k1-(_ep2*_qve[0]+_p*_qve[3])*(_cp3*_cp5+_sp3*_sp5)*_p_p3*_p_p5+(_de3*_qve[3]-_qve[0]*(_p-_pp3*_ct3))*b3;
-
+  
   // END of GAMGAM subroutine in the FORTRAN version
 
   // INFO from f.f
@@ -1062,13 +1079,20 @@ double GamGam::ComputeXsec(int nm_)
   _pt_l6 = _pl6*_st6;
   //std::cout << "before-after for p6z = " << _p3_l6[2]-_betgam*_el6+_gamma*_pl6*_ct6 << std::endl;
   _p3_l6[2] = _betgam*_el6+_gamma*_pl6*_ct6;
-  _e6lab = _gamma*_el6+_betgam*_pl6*_ct6;
-  //std::cout << "e6lab = " << _e6lab << std::endl;
+  _e6lab = _gamma*_el6+_betgam*_pl6*_ct6; //OK!
 
   _pt_l7 = _pl7*_st7;
-  _p3_l7[2] = _betgam*_el7+_gamma*_pl7*_ct7;
-  _e7lab = _gamma*_el7+_betgam*_pl6*_ct7;
+  _p3_l7[2] = _betgam*_el7+_gamma*_pl7*_ct7;  
+  _e7lab = _gamma*_el7+_betgam*_pl6*_ct7; //OK!
+  
+  /*std::cout << "st6 = " << _st6 << std::endl;
+  std::cout << "st7 = " << _st7 << std::endl;
+  
+  std::cout << "pt6 = " << _pt_l6 << ", pz6 = " << _p3_l6[2] << std::endl;
+  std::cout << "pt7 = " << _pt_l7 << ", pz7 = " << _p3_l7[2] << std::endl;
 
+  std::cout << "e6lab = " << _e6lab << std::endl;
+  std::cout << "e7lab = " << _e7lab << std::endl;*/
   //FIXME Introduce here the kinematic cuts!!!!!
   // Still to be implemented :
   // - cut on mx for the proton remnants (inelastic case)
@@ -1079,16 +1103,18 @@ double GamGam::ComputeXsec(int nm_)
   if (_cuts.mode>=2) {
     cott6 = _p3_l6[2]/_pt_l6;
     cott7 = _p3_l7[2]/_pt_l7;
+    /*std::cout << "cott6 = " << cott6 << std::endl;
+    std::cout << "cott7 = " << cott7 << std::endl;*/
     lmu1 = cott6>=_cotth1
         && cott6<=_cotth2
         && (_pt_l6>=_cuts.ptmin || _cuts.ptmin==-1.)
         && (_pt_l6<=_cuts.ptmax || _cuts.ptmax==-1.)
-        && (_e6lab>=_cuts.emin || _cuts.emin==-1.);
+        && ( _e6lab>=_cuts.emin || _cuts.emin==-1.);
     lmu2 = cott7>=_cotth1
         && cott7<=_cotth2
         && (_pt_l7>=_cuts.ptmin || _cuts.ptmin==-1.)
         && (_pt_l7<=_cuts.ptmax || _cuts.ptmax==-1.)
-        && (_e7lab>=_cuts.emin || _cuts.emin==-1.);
+        && ( _e7lab>=_cuts.emin || _cuts.emin==-1.);
     if (_cuts.mode==2) {
       lcut = lmu1 && lmu2;
     }
@@ -1122,72 +1148,116 @@ double GamGam::ComputeXsec(int nm_)
     return 0.;
   }
   this->FillKinematics();
-  if (_ndim>=6) { // elastic case
-    xsec = sconst*_dj*PeriPP(2, 2);
-    //std::cout << "Elastic x-sec : " << xsec << std::endl;
+  
+  int intgp, intge;
+  
+  switch (_ndim) {
+    case 7: // elastic case
+      intgp = 2;
+      intge = 2;
+      break;
+    case 8: // single-dissociative case
+      intgp = 3;
+      intge = 2;
+      break;
+    case 9: // double-dissociative case
+      intgp = 3;
+      intge = 3;
+      break;
+    default:
+      intgp = 1;
+      intge = 1;
+      break;
   }
+  
+  xsec = sconst*_dj*PeriPP(intgp, intge);
+  //std::cout << "Elastic x-sec : " << xsec << std::endl;
   
   return xsec;
 }
 
 void GamGam::FillKinematics()
 {
-  // Needed to parametrise a random rotation around z-axis
+  double px, py;
   double ranphi;
   int rany, ransign;
+  
+  // Needed to parametrise a random rotation around z-axis
   ranphi = ((double)rand()/RAND_MAX)*2.*pi;
   rany = (((double)rand()/RAND_MAX)>.5) ? 1 : -1;
   ransign = (((double)rand()/RAND_MAX)>.5) ? 1 : -1;
+  
+  /*std::ofstream of;
+  of.open("haha", std::fstream::app);
+  of << ranphi << "\t" << rany << "\t" << ransign << std::endl;
+  of.close();*/
   
   // First incoming proton
   _ep1 = _gamma*_ep1+_betgam*_pp1;
   _p3_p1[0] = _p3_p1[1] = 0.;
   _p3_p1[2] = _gamma*_pp1+_betgam*_ep1;
+  //std::cout << "first incoming particle : E = " << _ep1 << ", p = (" << _p3_p1[0] << ", " << _p3_p1[1] << ", " << _p3_p1[2] << ")" << std::endl;
   
   // Second incoming proton
-  _ep2 = -_gamma*_ep1+_betgam*_pp1;
+  _ep2 = _gamma*_ep2-_betgam*_pp1;
   _p3_p2[0] = _p3_p2[1] = 0.;
-  _p3_p2[2] = _gamma*_pp1-_betgam*_ep1;
+  _p3_p2[2] = -_gamma*_pp1+_betgam*_ep2;
+  //std::cout << "second incoming particle : E = " << _ep2 << ", p = (" << _p3_p2[0] << ", " << _p3_p2[1] << ", " << _p3_p2[2] << ")" << std::endl;
   
   // First outgoing proton
   _ep3 = _gamma*_ep3+_betgam*_ct3*_pp3;
-  _p3_p3[0] = _pp3*_st3*_cp3*cos(ranphi)+rany*_pp3*_st3*_sp3*sin(ranphi);
-  _p3_p3[1] =-_pp3*_st3*_cp3*sin(ranphi)+rany*_pp3*_st3*_sp3*cos(ranphi);
+  px = _pp3*_st3*_cp3;
+  py = _pp3*_st3*_sp3;
+  _p3_p3[0] = px*cos(ranphi)+rany*py*sin(ranphi);
+  _p3_p3[1] =-px*sin(ranphi)+rany*py*cos(ranphi);
   _p3_p3[2] = _gamma*_ct3*_pp3+_betgam*_ep3;
+  //std::cout << "first outgoing particle : E = " << _ep3 << ", p = (" << _p3_p3[0] << ", " << _p3_p3[1] << ", " << _p3_p3[2] << ")" << std::endl;
   
   // Second outgoing proton
   _ep5 = _gamma*_ep5+_betgam*_ct5*_pp5;
-  _p3_p5[0] = _pp5*_st5*_cp5*cos(ranphi)+rany*_pp5*_st5*_sp5*sin(ranphi);
-  _p3_p5[1] =-_pp5*_st5*_cp5*sin(ranphi)+rany*_pp5*_st5*_sp5*cos(ranphi);
+  px = _pp5*_st5*_cp5;
+  py = _pp5*_st5*_sp5;
+  _p3_p5[0] = px*cos(ranphi)+rany*py*sin(ranphi);
+  _p3_p5[1] =-px*sin(ranphi)+rany*py*cos(ranphi);
   _p3_p5[2] = _gamma*_ct5*_pp5+_betgam*_ep5;
   
   // First outgoing lepton
   _el6 = _gamma*_el6+_betgam*_ct6*_pl6;
-  _p3_l6[0] = _pl6*_st6*_cp6*cos(ranphi)+rany*_pl6*_st6*_sp6*sin(ranphi);
-  _p3_l6[1] =-_pl6*_st6*_cp6*sin(ranphi)+rany*_pl6*_st6*_sp6*cos(ranphi);
+  px = _pl6*_st6*_cp6;
+  py = _pl6*_st6*_sp6;
+  _p3_l6[0] = px*cos(ranphi)+rany*py*sin(ranphi);
+  _p3_l6[1] =-px*sin(ranphi)+rany*py*cos(ranphi);
   _p3_l6[2] = _gamma*_ct6*_pl6+_betgam*_el6;
   _pdg6 = ransign*abs(_pdg6);
+  //std::cout << "first outgoing lepton : E = " << _el6 << ", p = (" << _p3_l6[0] << ", " << _p3_l6[1] << ", " << _p3_l6[2] << ")" << std::endl;
   
   // Second outgoing lepton
   _el7 = _gamma*_el7+_betgam*_ct7*_pl7;
-  _p3_l7[0] = _pl7*_st7*_cp7*cos(ranphi)+rany*_pl7*_st7*_sp7*sin(ranphi);
-  _p3_l7[1] =-_pl7*_st7*_cp7*sin(ranphi)+rany*_pl7*_st7*_sp7*cos(ranphi);
+  px = _pl7*_st7*_cp7;
+  py = _pl7*_st7*_sp7;
+  _p3_l7[0] = px*cos(ranphi)+rany*py*sin(ranphi);
+  _p3_l7[1] =-px*sin(ranphi)+rany*py*cos(ranphi);
   _p3_l7[2] = _gamma*_ct7*_pl7+_betgam*_el7;
   _pdg7 = -ransign*abs(_pdg7);
+  //std::cout << "second outgoing lepton : E = " << _el7 << ", p = (" << _p3_l7[0] << ", " << _p3_l7[1] << ", " << _p3_l7[2] << ")" << std::endl;
   
   // First incoming photon
   // Equivalent in LPAIR : PLAB(x, 3)
   _eg1 = (_gamma*_ep1+_betgam*_pp1)-(_gamma*_ep3+_betgam*_ct3*_pp3);
-  _p3_g1[0] = (-_pp3*_st3*_cp3)*cos(ranphi)+rany*(-_pp3*_st3*_sp3)*sin(ranphi);
-  _p3_g1[1] =-(-_pp3*_st3*_cp3)*sin(ranphi)+rany*(-_pp3*_st3*_sp3)*cos(ranphi);
+  px = -_pp3*_st3*_cp3;
+  py = -_pp3*_st3*_sp3;
+  _p3_g1[0] = px*cos(ranphi)+rany*py*sin(ranphi);
+  _p3_g1[1] =-px*sin(ranphi)+rany*py*cos(ranphi);
   _p3_g1[2] = (_gamma*_pp1+_betgam*_ep1)-(_gamma*_ct3*_pp3+_betgam*_ep3);
   
   // Second incoming photon
   // Equivalent in LPAIR : PLAB(x, 4)
   _eg2 = (-_gamma*_ep1+_betgam*_pp1)-(_gamma*_ep5+_betgam*_ct5*_pp5);
-  _p3_g2[0] = (-_pp5*_st5*_cp5)*cos(ranphi)+rany*(-_pp5*_st5*_sp5)*sin(ranphi);
-  _p3_g2[1] = (-_pp5*_st5*_cp5)*cos(ranphi)+rany*(-_pp5*_st5*_sp5)*cos(ranphi);
-  _p3_g2[2] = (_gamma*_pp1-_betgam*_ep1)-(_gamma*_ct5*_p_p5+_betgam*_ep5);
+  px = -_pp5*_st5*_cp5;
+  py = -_pp5*_st5*_sp5;
+  _p3_g2[0] = px*cos(ranphi)+rany*py*sin(ranphi);
+  _p3_g2[1] =-px*sin(ranphi)+rany*py*cos(ranphi);
+  _p3_g2[2] = (_gamma*_pp1-_betgam*_ep1)-(_gamma*_ct5*_pp5+_betgam*_ep5);
   
 }
 

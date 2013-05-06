@@ -5,7 +5,8 @@
  * @author Laurent Forthomme <laurent.forthomme@uclouvain.be>
  * Main caller for the present Monte Carlo generator. Loads the configuration
  * files' variables if set as an argument to this program, else loads a default
- * "LHC-like" configuration
+ * "LHC-like" configuration, then launches the cross-section computation and
+ * the events generation.
  */
 int main(int argc, char* argv[]) {
   InputParameters ip;
@@ -16,7 +17,7 @@ int main(int argc, char* argv[]) {
     ip.p1mod = 2;
     ip.p2mod = 2;
     ip.mcut = 2;
-    ip.minpt = 15.;
+    ip.minpt = 5.;
     ip.debug = true;
   }
   else {
@@ -26,7 +27,7 @@ int main(int argc, char* argv[]) {
     }
   }
   MCGen mg(ip);
-  mg.LaunchGen(1e5);
+  mg.LaunchGen(1e4);
   //mg.AnalyzePhaseSpace("testing");
   return 0;
 }

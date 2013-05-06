@@ -9,15 +9,15 @@ MCGen::MCGen(InputParameters ip_)
   std::cout << "[MCGen::MCGen] [DEBUG] Considered case : " << std::endl;
   if (_ip.p1mod<=2 && _ip.p2mod<=2) {
     std::cout << "\telastic case" << std::endl;
-    _ndim = 6;
+    _ndim = 7;
   }
   else if (_ip.p1mod<=2 || _ip.p2mod<=2) {
     std::cout << "\tsingle-dissociative case" << std::endl;
-    _ndim = 7;
+    _ndim = 8;
   }
   else {
     std::cout << "\tdouble-dissociative case" << std::endl;
-    _ndim = 8;
+    _ndim = 9;
   }
   veg = new Vegas(_ndim,f, &_ip);
   std::cout << "[MCGen::MCGen] [DEBUG] Cuts mode : " << _ip.mcut << std::endl;
@@ -47,7 +47,7 @@ void MCGen::LaunchGen(int count_)
   for (unsigned int i=0; i<sizeof(x)/sizeof(double); i++) {
     x[i] = 0.3;
   }
-  f(x, 8, &_ip);*/
+  std::cout << f(x, (int)(sizeof(x)/sizeof(double)), &_ip) << std::endl;*/
   if (_ip.debug) {
     _ip.plot[0]->SetHistogram(200, -50., 50., "px");
     _ip.plot[1]->SetHistogram(200, -50., 50., "py");
@@ -224,7 +224,10 @@ double f(double* x_, size_t ndim_, void* params_) {
       double ptpair = std::sqrt(std::pow(ol1.px+ol2.px, 2)+std::pow(ol1.py+ol2.py, 2));
       p->plot[5]->Fill(ptpair);
     }
-
+    p->ngen += 1;
+    if ((p->ngen)%10000==0) {
+      std::cout << "[f] ngen = " << p->ngen << std::endl;
+    }
     *(p->file) << ol1.e
        << "\t" << ol1.px
        << "\t" << ol1.py

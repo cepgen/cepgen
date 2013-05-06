@@ -101,13 +101,14 @@ int Vegas::LaunchGeneration(int nEvts_)
 
   InputParameters *inp = (InputParameters*)_F->params;
   inp->generation = true;
+  inp->ngen = 0;
   inp->file = &of;
   _F->params = (void*)inp;
 
   gsl_monte_vegas_params_get(_s, &par);
-  par.stage = 3;
-  par.iterations = 1e2;
-  par.mode = GSL_VEGAS_MODE_IMPORTANCE_ONLY;
+  par.stage = 4;
+  par.iterations = 1;
+  par.mode = GSL_VEGAS_MODE_IMPORTANCE;
   par.verbose = -1;
   gsl_monte_vegas_params_set(_s, &par);
 
@@ -117,7 +118,18 @@ int Vegas::LaunchGeneration(int nEvts_)
   std::cout << "[Vegas::LaunchGeneration] [DEBUG] VEGAS stage after warm-up and cross-section computation" << par.stage << std::endl;
 #endif
 
-  vegas_status = gsl_monte_vegas_integrate(_F, _xl, _xu, _ndim, (size_t)nEvts_, _r, _s, &result, &abserr);
+  int niter = 0;
+  int ngen = 0;
+  while (ngen<nEvts_) {
+    vegas_status = gsl_monte_vegas_integrate(_F, _xl, _xu, _ndim, (size_t)(nEvts_/par.iterations), _r, _s, &result, &abserr);
+    ngen = ((InputParameters*)_F->params)->ngen;
+#ifdef DEBUG
+    std::cout << "[Vegas::LaunchGeneration] [DEBUG] Iteration number " << niter << std::endl;
+    std::cout << "\t" << ngen << " events generated" << std::endl;
+#endif
+    niter++;
+  }
+  std::cout << "--> " << ngen << " events generated after " << niter << " iterations" << std::endl;
   
   of.close();
   /*std::cout << "[Vegas::LaunchGeneration] [DEBUG] chisq/ndof = " << gsl_monte_vegas_chisq(_s) << std::endl;

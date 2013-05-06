@@ -5,6 +5,7 @@ VPATH = src include
 CPP_FILES = $(wildcard src/*.cpp)
 HPP_FILES = $(wildcard includes/*.h)
 OBJ_FILES = main.o $(patsubst src/%.cpp,%.o,$(CPP_FILES))
+RM = rm -f
 
 $(info $(OBJ_FILES))
 
@@ -22,10 +23,10 @@ mcgen: $(OBJ_FILES)
 	$(CC) -c $(CFLAGS) $< -o $@
 
 clean:
-	rm -f *.o
+	$(RM) *.o
 
 cleanest: clean
-	rm -f mcgen
+	$(RM) mcgen
 
 doc: $(CPP_FILES) $(HPP_FILES) Doxyfile
 	doxygen

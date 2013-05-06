@@ -129,6 +129,7 @@ class InputParameters {
      * @brief Do we need control plots all along the process?
      */
     bool debug;
+    int ngen;
     /**
      * @brief The file in which to store the events generation's output
      */
