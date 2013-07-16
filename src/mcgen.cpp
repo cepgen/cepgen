@@ -5,32 +5,58 @@ MCGen::MCGen(InputParameters ip_)
 #ifdef DEBUG
   std::cout << "[MCGen::MCGen] [DEBUG] MCGen initialized !" << std::endl;
 #endif
+  srand(time(0));
   _ip = ip_;
-  std::cout << "[MCGen::MCGen] [DEBUG] Considered case : " << std::endl;
+#ifdef DEBUG
+  std::cout << "[MCGen::MCGen] [DEBUG] Considered topology : ";
+#endif
   if (_ip.p1mod<=2 && _ip.p2mod<=2) {
-    std::cout << "\telastic case" << std::endl;
+#ifdef DEBUG
+    std::cout << "ELASTIC case" << std::endl;
+#endif
     _ndim = 7;
   }
   else if (_ip.p1mod<=2 || _ip.p2mod<=2) {
-    std::cout << "\tsingle-dissociative case" << std::endl;
+#ifdef DEBUG
+    std::cout << "SINGLE-DISSOCIATIVE case" << std::endl;
+#endif
     _ndim = 8;
   }
   else {
-    std::cout << "\tdouble-dissociative case" << std::endl;
+#ifdef DEBUG
+    std::cout << "DOUBLE-DISSOCIATIVE case" << std::endl;
+#endif
     _ndim = 9;
   }
   veg = new Vegas(_ndim,f, &_ip);
+#ifdef DEBUG
   std::cout << "[MCGen::MCGen] [DEBUG] Cuts mode : " << _ip.mcut << std::endl;
   switch(_ip.mcut) {
+    case 1:
+    case 2:
+      std::cout << "[MCGen::MCGen] [DEBUG] Single leptons' transverse momentum condition : ";
+      if (_ip.minpt<=0.) {
+        std::cout << "no pT cut" << std::endl;
+        break;
+      }
+      if (_ip.maxpt>0.) {
+        std::cout << "pT in range [" << _ip.minpt << " GeV/c, " << _ip.maxpt << " GeV/c]" << std::endl;
+        break;
+      }
+      std::cout << "pT > " << _ip.minpt << " GeV/c";
+      if (_ip.mcut==1) {
+        std::cout << " for at least one lepton" << std::endl;
+      }
+      else {
+        std::cout << " for both the leptons" << std::endl;
+      }
+      break;
     case 0:
+    default:
       std::cout << "[MCGen::MCGen] [DEBUG] No cuts applied on the total cross section" << std::endl;
       break;
-    case 2:
-      std::cout << "[MCGen::MCGen] [DEBUG] single lepton's pT in range [" << _ip.minpt << ", " << _ip.maxpt << "]" << std::endl;
-      break;
-    default:
-      break;
   }
+#endif
 }
 
 MCGen::~MCGen()
@@ -41,13 +67,16 @@ MCGen::~MCGen()
   delete veg;
 }
 
-void MCGen::LaunchGen(int count_)
+void MCGen::Test()
 {
-  /*double x[7];
+  double x[7], xsec, err;
   for (unsigned int i=0; i<sizeof(x)/sizeof(double); i++) {
-    x[i] = 0.3;
+    x[i] = 0.5;
   }
-  std::cout << f(x, (int)(sizeof(x)/sizeof(double)), &_ip) << std::endl;*/
+  std::cout << f(x, (int)(sizeof(x)/sizeof(double)), &_ip) << std::endl;
+  veg->Integrate(&xsec, &err);
+  //veg->SetGen();
+  
   if (_ip.debug) {
     _ip.plot[0]->SetHistogram(200, -50., 50., "px");
     _ip.plot[1]->SetHistogram(200, -50., 50., "py");
@@ -59,8 +88,52 @@ void MCGen::LaunchGen(int count_)
     _ip.plot[7]->SetHistogram(1000, -pi, pi, "cosphi6");
     _ip.plot[8]->SetHistogram(1000, -pi, pi, "sinphi6");
   }
-  veg->LaunchIntegration();
+  
+  veg->Generate(1000);
+  
+  if (_ip.debug) {
+    _ip.plot[0]->DrawHistogram();
+    _ip.plot[1]->DrawHistogram();
+    _ip.plot[2]->DrawHistogram();
+    _ip.plot[3]->SetLogy();
+    _ip.plot[3]->DrawHistogram();
+    _ip.plot[4]->SetLogy();
+    _ip.plot[4]->DrawHistogram();
+    _ip.plot[5]->DrawHistogram();
+    _ip.plot[6]->DrawHistogram();
+    _ip.plot[7]->DrawHistogram();
+    _ip.plot[8]->DrawHistogram();
+  }
+
+  
+  
+}
+
+void MCGen::ComputeXsection(double* xsec_, double *err_)
+{
+  veg->Integrate(xsec_, err_);
+#ifdef DEBUG
+  std::cout << "[MCGen::ComputeXsection] [DEBUG] Total cross-section = " << *xsec_ << " +/- " << *err_ << " pb" << std::endl;
+#endif
+}
+
+void MCGen::LaunchGen(const unsigned int count_)
+{
+  
+  if (_ip.debug) {
+    _ip.plot[0]->SetHistogram(200, -50., 50., "px");
+    _ip.plot[1]->SetHistogram(200, -50., 50., "py");
+    _ip.plot[2]->SetHistogram(200, -50., 50., "pz");
+    _ip.plot[3]->SetHistogram(100, 0., 100., "pt");
+    _ip.plot[4]->SetHistogram(100, 0., 100., "invm");
+    _ip.plot[5]->SetHistogram(100, 0., 100., "ptpair");
+    _ip.plot[6]->SetHistogram(1000, -pi, pi, "sinth6");
+    _ip.plot[7]->SetHistogram(1000, -pi, pi, "cosphi6");
+    _ip.plot[8]->SetHistogram(1000, -pi, pi, "sinphi6");
+  }
+  
   veg->LaunchGeneration(count_);
+  
   if (_ip.debug) {
     _ip.plot[0]->DrawHistogram();
     _ip.plot[1]->DrawHistogram();
@@ -76,7 +149,7 @@ void MCGen::LaunchGen(int count_)
   }
 }
 
-void MCGen::AnalyzePhaseSpace(std::string outputFile_) {
+void MCGen::AnalyzePhaseSpace(const std::string outputFile_) {
   const unsigned int numPoints = 1e2;
   const unsigned int numScans = 1e2;
 
@@ -97,10 +170,10 @@ void MCGen::AnalyzePhaseSpace(std::string outputFile_) {
     scanValues[v] = (double)v/(double)numScans;
     outName.str(""); outName << outputFile_ << "_x" << scanValues[v] << ".png";
     gpCmd.str(""); gpCmd << "plot ";
-    for (i=0; i<(unsigned int)abs(_ndim); i++) {
+    for (i=0; i<_ndim; i++) {
       for (j=0; j<numPoints; j++) {
         xpoint = 0.+1.*(double)j/(numPoints-1.);
-        for (k=0; k<(unsigned int)abs(_ndim); k++) {
+        for (k=0; k<_ndim; k++) {
           if (k!=i) {
             x[j][k] = scanValues[v];
           }
@@ -111,12 +184,12 @@ void MCGen::AnalyzePhaseSpace(std::string outputFile_) {
         xsec[j][i] = f(x[j], _ndim, &ip);
       }
       if (i!=0) gpCmd << ", ";
-      gpCmd << "'" << outputFile_ << "' u 1:" << i+2 << " w l title 'x(" << i << ")'";
+      gpCmd << "\"" << outputFile_ << "\" u 1:" << i+2 << " w l title 'x(" << i << ")'";
     }
     of.open(outputFile_.c_str());
     for (i=0; i<numPoints; i++) {
       of << (double)i/(numPoints-1.);
-      for (j=0; j<(unsigned int)abs(_ndim); j++) {
+      for (j=0; j<_ndim; j++) {
         of << "\t" << xsec[i][j];
       }
       of << std::endl;
@@ -181,6 +254,12 @@ double f(double* x_, size_t ndim_, void* params_) {
   cuts.mode = p->mcut;
   cuts.ptmin = p->minpt;
   cuts.ptmax = p->maxpt;
+  cuts.thetamin = p->mintheta;
+  cuts.thetamax = p->maxtheta;
+  cuts.emin = p->minenergy;
+  cuts.emax = p->maxenergy;
+  cuts.mxmin = p->minmx;
+  cuts.mxmax = p->maxmx;
 
   gg = new GamGam(ndim_, q2min, q2max, 0, x_);
   gg->SetIncomingKinematics(1, inp1, inp1pdg);
@@ -195,7 +274,8 @@ double f(double* x_, size_t ndim_, void* params_) {
   }
   ff = gg->ComputeXsec();
 
-  if (ff!=0. && p->generation) { // MC events generation
+  //if (ff!=0. && p->generation) { // MC events generation
+  if (p->store) { // MC events generation
     //gg->FillKinematics();
     
     Particle ip1 = gg->GetParticle(1);

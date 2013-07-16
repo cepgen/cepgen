@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <string>
 #include <cmath>
+#include <ctime>
 #include <cstdlib>
 
 #include "utils.h"
@@ -27,17 +28,20 @@ class GamGam {
    * @param x_[] The ndim_-dimensional point in the phase space on which
    *  the kinematics and the cross-section are computed
    * @todo Figure out how this nOpt_ parameter is affecting the final
-   *  cross-section computation
+   *  cross-section computation and events generation
+   * @todo What are these w12, w31, w52 parameters introduced in the GAMGAM
+   *  subroutine ? And why are they set to 0. ?
    */
-  GamGam(int,double,double,int,double x_[]);
+  GamGam(const unsigned int,double,double,int,double x_[]);
   ~GamGam();
   /**
    * Specifies the incoming particles' kinematics as well as their properties
-   * (role in the process and PDG Id)
+   *  (role in the process and PDG Id)
    * @brief Sets the momentum and PDG id for the incoming particles
    * @param part_ Role of the particle in the process
-   * @param momentum_ 3-momentum of the particle
+   * @param momentum_[] 3-momentum of the particle
    * @param pdgId_ Particle ID according to the PDG convention
+   * @return True if the kinematics was correctly set for the given particle role
    */
   bool SetIncomingKinematics(int,double[],int);
   /**
@@ -46,24 +50,6 @@ class GamGam {
    * @param pdgId_ Particle ID according to the PDG convention
    */
   bool SetOutgoingParticles(int,int);
-  /**
-   * Calculates energies and momenta of the 1st, 2nd (resp. the "proton-like"
-   * and the "electron-like" incoming particles), 3rd (the "proton-like" outgoing
-   * particle), 4th (the two-photons central system) and 5th (the "electron-like"
-   * outgoing particle) particles in the overall centre of mass frame.
-   * @brief Energies/momenta computation for the various particles, in the CM
-   *  system
-   */
-  bool Orient();
-  /**
-   * Contains the expression of the matrix element squared for the process under
-   * considerations. It returns the value of the convolution of the form factor
-   * or structure functions with the central two-photons matrix element squared.
-   * @brief Computes the matrix element squared for the requested process
-   * @return The full matrix element for the two-photon production of a pair of
-   *  spin\f$-\frac{1}{2}-\f$point particles
-   */
-  double PeriPP(int,int);
   /*void SetCutsMode(int mod_) {this->_modcut = mod_;};
   //void SetCutsMode(int);
   void SetMinimumPt(double ptmin_) {this->_ptcut = ptmin_;};
@@ -78,7 +64,7 @@ class GamGam {
   /**
    * @brief Sets the energy range available for the phase space integration
    * @param wmin_ The minimal \f$s\f$ on which the cross section is integrated
-   * @param wmin_ The maximal \f$s\f$ on which the cross section is integrated.
+   * @param wmax_ The maximal \f$s\f$ on which the cross section is integrated.
    *  If negative, the maximal energy available to the system (hence,
    * \f$s=(\sqrt{s})^{2}\f$) is provided.
    */
@@ -89,13 +75,6 @@ class GamGam {
    *  production process
    */
   Particle GetParticle(int);
-  /**
-   * Describes the kinematics of the process \f$p_1+p_2\to p_3+p_4+p_5\f$ in
-   * terms of Lorentz-invariant variables. These variables (along with others)
-   * will then be feeded into the PeriPP method (thus are essential for the
-   * evaluation of the full matrix element).
-   */
-  bool Pickin();
   /**
    * Is the system's kinematics well defined and compatible with the process ?
    * This check is mandatory to perform the (_ndim)-dimensional point's
@@ -120,9 +99,35 @@ class GamGam {
    */
   double ComputeXsec(int nm_=1);
   void FillKinematics();
+  void StoreEvent(std::ofstream*,double);
  private:
+  /**
+   * Calculates energies and momenta of the 1st, 2nd (resp. the "proton-like"
+   * and the "electron-like" incoming particles), 3rd (the "proton-like" outgoing
+   * particle), 4th (the two-photons central system) and 5th (the "electron-like"
+   * outgoing particle) particles in the overall centre of mass frame.
+   * @brief Energies/momenta computation for the various particles, in the CM
+   *  system
+   */
+  bool Orient();
+  /**
+   * Contains the expression of the matrix element squared for the process under
+   * considerations. It returns the value of the convolution of the form factor
+   * or structure functions with the central two-photons matrix element squared.
+   * @brief Computes the matrix element squared for the requested process
+   * @return The full matrix element for the two-photon production of a pair of
+   *  spin\f$-\frac{1}{2}-\f$point particles
+   */
+  double PeriPP(int,int);
+  /**
+   * Describes the kinematics of the process \f$p_1+p_2\to p_3+p_4+p_5\f$ in
+   * terms of Lorentz-invariant variables. These variables (along with others)
+   * will then be feeded into the PeriPP method (thus are essential for the
+   * evaluation of the full matrix element).
+   */
+  bool Pickin();
   /** @brief Number of dimensions on which the integration has to be performed  */
-  int _ndim;
+  unsigned int _ndim;
   /**
    * @brief Array of _ndim components representing the point on which the
    *  weight in the cross-section is computed
@@ -381,7 +386,6 @@ class GamGam {
   /** @brief Set of cuts to apply on the final phase space */
   Cuts _cuts;
   double _wmin, _wmax;
-  double _ptcut, _ecut;
   double _cotth1, _cotth2;
 };
 

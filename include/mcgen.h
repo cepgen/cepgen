@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <ctime>
 
 #include "vegas.h"
 #include "utils.h"
@@ -28,7 +29,8 @@
  *
  * @author Laurent Forthomme <laurent.forthomme@uclouvain.be>
  * @date February 2013
- * @brief Core Monte-Carlo generator
+ * @brief Core of the Monte-Carlo generator ; Computes the cross section for any
+ *  value of the input parameters by calling Vegas on GamGam objects.
  *
  */
 class MCGen {
@@ -43,14 +45,16 @@ class MCGen {
    */
   MCGen(InputParameters);
   ~MCGen();
-  void LaunchGen(int);
+  void Test();
+  void ComputeXsection(double*,double*);
+  void LaunchGen(const unsigned int);
   /**
    * @brief Returns the set of parameters used to setup the phase space to
    *   integrate
    * @return The InputParameter object embedded in this class
    */
   InputParameters GetInputParameters() { return _ip; }
-  void AnalyzePhaseSpace(std::string);
+  void AnalyzePhaseSpace(const std::string);
  private:
   /**
    * The GamGam object which allows to compute the outgoing particles' kinematics
@@ -60,7 +64,7 @@ class MCGen {
   /** @brief The Vegas integrator which will integrate the function */
   Vegas *veg;
   /** @brief Number of dimensions on which to perform the integration */
-  int _ndim;
+  unsigned int _ndim;
   /** @brief Set of parameters to setup the phase space to integrate */
   InputParameters _ip;
 };

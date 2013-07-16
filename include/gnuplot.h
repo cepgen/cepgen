@@ -31,19 +31,23 @@ class Gnuplot {
      */
     void SetOutputFile(std::string);
     /**
-     * @brief Toggles the logarithmic scale for the \f$y\f$-axis
+     * @brief Toggles the grid for both the axes
+     * @param grid_ Do we display the grid on the axes ?
      */
     void SetGrid(bool grid_=true);
     /**
-     * @brief Toggles the grid for both the axes
+     * @brief Toggles the logarithmic scale for the \f$y\f$-axis
+     * @param logy_ Do we use a logarithmic (true) or linear (false) scale for the y axis ?
      */
     void SetLogy(bool logy_=true);
     /**
      * @brief Sets the title for the graph
+     * @param title_ Title of the graph (human-readable string)
      */
     void SetTitle(std::string);
     /**
      * @brief Sets the name for the graph
+     * @param name_ Name of the graph (machine-readable string without spaces or special characters)
      */
     void SetName(std::string);
     /**

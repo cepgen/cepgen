@@ -1,10 +1,12 @@
 CC = g++
-CFLAGS = -I include/ -Wall -Wextra -I /usr/include/gsl -O4 -fPIC -fstack-usage #-std=c++11 #-dD
+CFLAGS = -I include/ -Wall -Wextra -I /usr/include/gsl -O4 -fPIC #-fstack-usage #-std=c++11 #-dD
 LDFLAGS = -lgsl -lgslcblas
+#LDFLAGS = $(gsl-config --libs)
 VPATH = src include
 CPP_FILES = $(wildcard src/*.cpp)
 HPP_FILES = $(wildcard includes/*.h)
-OBJ_FILES = main.o $(patsubst src/%.cpp,%.o,$(CPP_FILES))
+LIB_FILES = $(patsubst src/%.cpp,%.o,$(CPP_FILES))
+OBJ_FILES = main.o $(LIB_FILES)
 RM = rm -f
 
 $(info $(OBJ_FILES))
@@ -31,6 +33,9 @@ cleanest: clean
 doc: $(CPP_FILES) $(HPP_FILES) Doxyfile
 	doxygen
 
-test: tryplot.o gnuplot.o
+plot: tryplot.o gnuplot.o
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+test: test.o $(LIB_FILES)
 	$(CC) -o $@ $^ $(LDFLAGS)
 

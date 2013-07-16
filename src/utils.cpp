@@ -141,8 +141,11 @@ InputParameters::InputParameters() :
   p1mod(2), p2mod(2),
   pair(13),
   mcut(0),
-  minpt(0.), maxpt(-1.),
-  generation(false), debug(false)
+  minpt(0.5), maxpt(-1.),
+  minenergy(1.), maxenergy(-1.),
+  mintheta(5.), maxtheta(175.),
+  minmx(1.07), maxmx(320.),
+  generation(true), store(false), debug(false)
 {
   for (int i=0; i<MAX_HISTOS; i++) {
     this->plot[i] = new Gnuplot();
@@ -159,14 +162,149 @@ InputParameters::~InputParameters()
 bool InputParameters::ReadConfigFile(std::string inFile_)
 {
   std::ifstream file;
+  std::string key, value;
   file.open(inFile_.c_str(), std::fstream::in);
   if (!file.is_open()) {
     return false;
   }
-  while (!file.eof()) {
+  std::cout << "[InputParameters::ReadConfigFile] [DEBUG] File " << inFile_ << " succesfully opened !" << std::endl;
+  std::cout << "======================================================" << std::endl;
+  std::cout << "Configuration file content : " << std::endl;
+  std::cout << "======================================================" << std::endl;
+  do {
     // ...
-  }
+    file >> key >> value;
+    if (key=="IEND") {
+      int iend = (int)atoi(value.c_str());
+      if (iend>1) {
+        this->generation = true;
+      }
+    }
+    else if (key=="NCVG") {
+      this->ncvg = (int)atoi(value.c_str());
+      std::cout << " * Number of Vegas calls                               : " << this->ncvg << std::endl;
+    }
+    else if (key=="ITVG") {
+      this->itvg = (int)atoi(value.c_str());
+      std::cout << " * Number of Vegas iterations                          : " << this->itvg << std::endl;
+    }
+    else if (key=="INPP") {
+      this->in1p = (double)atof(value.c_str());
+      std::cout << " * First incoming particles' momentum                  : " << this->in1p << " GeV/c" << std::endl;
+    }
+    else if (key=="PMOD") {
+      this->p1mod = (int)atoi(value.c_str());
+      std::cout << " * First incoming particles' mode                      : " << this->p1mod << " --> ";
+      switch (this->p1mod) {
+        case 1:
+          std::cout << "electron";
+          break;
+        case 2:
+        default:
+          std::cout << "elastic proton [EPA]";
+          break;
+        case 11:
+          std::cout << "dissociating proton [structure functions]";
+          break;
+        case 12:
+          std::cout << "dissociating proton [structure functions, for MX < 2 GeV, Q**2 < 5 GeV**2]";
+          break;
+        case 101:
+          std::cout << "dissociating proton [parton model, only valence quarks]";
+          break;
+        case 102:
+          std::cout << "dissociating proton [parton model, only sea quarks]";
+          break;
+        case 103:
+          std::cout << "dissociating proton [parton model, valence and sea quarks]";
+          break;
+      }
+      std::cout << std::endl;
+    }
+    else if (key=="INPE") {
+      this->in2p = (double)atof(value.c_str());
+      std::cout << " * Second incoming particles' momentum                 : " << this->in1p << " GeV/c" << std::endl;
+    }
+    else if (key=="EMOD") {
+      this->p2mod = (int)atoi(value.c_str());
+      std::cout << " * Second incoming particles' mode                     : " << this->p2mod << " --> ";
+      switch (this->p2mod) {
+        case 1:
+          std::cout << "electron";
+          break;
+        case 2:
+        default:
+          std::cout << "elastic proton [EPA]";
+          break;
+        case 11:
+          std::cout << "dissociating proton [structure functions]";
+          break;
+        case 12:
+          std::cout << "dissociating proton [structure functions, for MX < 2 GeV, Q**2 < 5 GeV**2]";
+          break;
+        case 101:
+          std::cout << "dissociating proton [parton model, only valence quarks]";
+          break;
+        case 102:
+          std::cout << "dissociating proton [parton model, only sea quarks]";
+          break;
+        case 103:
+          std::cout << "dissociating proton [parton model, valence and sea quarks]";
+          break;
+      }
+      std::cout << std::endl;
+    }
+    else if (key=="PAIR") {
+      this->pair = (int)atoi(value.c_str());
+      std::cout << " * Outgoing leptons pair PDG id                        : " << this->pair << " --> ";
+      switch (this->pair) {
+        case 11:
+        default:
+          std::cout << "electrons";
+          break;
+        case 13:
+          std::cout << "muons";
+          break;
+        case 15:
+          std::cout << "taus";
+          break;
+      }
+      std::cout << std::endl;
+    }
+    else if (key=="MCUT") {
+      this->mcut = (int)atoi(value.c_str());
+      std::cout << " * Set of cuts to apply on the total generation        : " << this->mcut << " --> ";
+      switch (this->mcut) {
+        case 3:
+          std::cout << "cuts on at least one outgoing lepton";
+          break;
+        case 2:
+          std::cout << "cuts on both the outgoing leptons";
+          break;
+        case 1:
+          std::cout << "Vermaseren's hypothetical detector cuts";
+          break;
+        case 0:
+        default:
+          std::cout << "no cuts";
+          break;
+      }
+      std::cout << std::endl;
+    }
+    else if (key=="PTCT") {
+      this->minpt = (double)atof(value.c_str());
+      std::cout << " * Outgoing lepton pairs' minimal transverse momentum  : " << this->minpt << " GeV/c" << std::endl;
+    }
+    else if (key=="ECUT") {
+      this->minpt = (double)atof(value.c_str());
+      std::cout << " * Outgoing lepton pairs' minimal energy               : " << this->minpt << " GeV/c" << std::endl;
+    }
+    else {
+      std::cout << "==> Unrecognized argument : [" << key << "] = " << value << std::endl;
+    }
+  } while (!file.eof());
   file.close();
+  std::cout << "======================================================" << std::endl;
   return true;
 }
 
@@ -184,7 +322,7 @@ bool InputParameters::StoreConfigFile(std::string outFile_)
 
 Cuts::Cuts() :
   ptmin(3.), ptmax(-1.), emin(0.), emax(-1.),
-  thetamin(-180.), thetamax(180.)
+  thetamin(0.), thetamax(180.)
 {
 }
 

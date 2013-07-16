@@ -6,13 +6,14 @@
 #include <cmath>
 
 #include "gnuplot.h"
+//#include "gamgam.h"
 
 #define MAX_HISTOS 20
 /** @brief Electromagnetic coupling constant \f$\alpha_{em}=\frac{e^2}{4\pi\epsilon_0\hbar c}\f$ */
 #define alphaF 1./137.04
 /** @brief \f$\frac{1}{(\hbar c)^2}~[\mathrm b^{-1}]\f$? */
 #define muBarn 1./389.39
-#define pi 3.14159265358979
+#define pi 3.1415926535897932384626434
 //#define sconst 2.1868465E10
 #define sconst 3.89351824E8
 #define sconstb 2.1868465E10
@@ -58,6 +59,7 @@ void Mapla(double,double,int,double,double,double*,double*);
 /**
  * @brief List of input parameters used to start and run the simulation
  *  job.
+ * @note The default parameters are derived from GMUINI in LPAIR
  */
 class InputParameters {
   public:
@@ -97,9 +99,9 @@ class InputParameters {
     int p2mod;
     /**
      * The particle code of produced leptons :
-     * - 11 - \f$e^+e^-\f$
-     * - 13 - \f$\mu^+\mu^-\f$
-     * - 15 - \f$\tau^+\tau^-\f$
+     * - 11 - for \f$e^+e^-\f$ pairs
+     * - 13 - for \f$\mu^+\mu^-\f$ pairs
+     * - 15 - for \f$\tau^+\tau^-\f$ pairs
      * @brief PDG id of the outgoing leptons
      */
     int pair;
@@ -108,8 +110,8 @@ class InputParameters {
      * available kinematic phase space :
      * - 0 - No cuts at all (for the total cross section)
      * - 1 - Vermaserens' hypothetical detector cuts : for both leptons,
-     *   + \f$\frac{|p_z|}{|\mathbf p|}\leq 0.75\f$ and \f$p_T\geq 1~\mathrm{GeV}\f$, or
-     *   + \f$0.75<\frac{|p_z|}{|\mathbf p|}\leq 0.95\f$ and \f$p_z> 1~\mathrm{GeV}\f$,
+     *   + \f$\frac{|p_z|}{|\mathbf p|}\leq\f$ 0.75 and \f$p_T\geq\f$ 1 GeV, or
+     *   + 0.75 \f$<\frac{|p_z|}{|\mathbf p|}\leq\f$ 0.95 and \f$p_z>\f$ 1 GeV,
      * - 2 - Cuts according to the provided parameters
      * @brief Set of cuts to apply on the outgoing leptons
      */
@@ -118,11 +120,18 @@ class InputParameters {
     double minpt;
     /** @brief Maximal transverse momentum of the outgoing leptons */
     double maxpt;
+    double minenergy;
+    double maxenergy;
+    double mintheta;
+    double maxtheta;
+    double minmx;
+    double maxmx;
     /**
      * @brief Are we generating events ? (true) or are we only computing the
      * cross-section ? (false)
      */
     bool generation;
+    bool store;
     /**
      * Enables or disables the production of control plots for several kinematic
      * quantities in this process
@@ -143,6 +152,7 @@ class InputParameters {
      * @brief Control plots objects
      */
     Gnuplot* plot[MAX_HISTOS];
+    //GamGam* gamgam;
 };
 
 /**
@@ -162,10 +172,12 @@ class Cuts {
     double emin;
     /** @brief Maximal energy of the central two-photons system */
     double emax;
-    /** @brief Minimal polar (\f$\theta\f$) angle of the outgoing leptons */
+    /** @brief Minimal polar (\f$\theta_\mathrm{min}\f$) angle of the outgoing leptons, expressed in degrees */
     double thetamin;
-    /** @brief Maximal polar (\f$\theta\f$) angle of the outgoing leptons */
+    /** @brief Maximal polar (\f$\theta_\mathrm{max}\f$) angle of the outgoing leptons, expressed in degrees */
     double thetamax;
+    double mxmin;
+    double mxmax;
 };
 
 /**
@@ -188,7 +200,7 @@ class Particle {
     int role;
     /** @brief Energy in GeV */
     double e;
-    /** @brief Mass in GeV */
+    /** @brief Mass in GeV/c\f$^{2}\f$ */
     double m;
     /** @brief Momentum along the \f$x\f$-axis in GeV/c */
     double px;

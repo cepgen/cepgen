@@ -1,10 +1,16 @@
+//#include "style.C"
+
 void combine()
 {
+  //SetStyle();
+
   ifstream in;
   in.open("test");
 
   const Int_t lepPdg = 13;
   const Int_t n=100;
+  const Int_t maxEvts = -1;
+  //const Int_t maxEvts = 5e5;
 
   stringstream ss;
   Int_t i, j;
@@ -13,9 +19,9 @@ void combine()
   Int_t pdg;
 
   TLine *line;
-  TH1D *h[7], *h_2[7];
+  TH1D *h[9], *h_2[9];
   TH1D *htmp;
-  TCanvas *c[7];
+  TCanvas *c[9];
   TLegend *leg;
   TLorentzVector lep1, lep2;
   
@@ -26,7 +32,9 @@ void combine()
   TTree *tree;
   bool lep1set, lep2set;
 
-  lp = new TFile("lpair-pt5-mumu-elastic.root");
+  //lp = new TFile("lpair-pt5-mumu-elastic.root");
+  //lp = new TFile("lpair-mumu-pt15-8tev-elastic.root");
+  lp = new TFile("lpair-7tev-elastic-nocuts.root");
   tree = (TTree*)(lp->Get("h4444"));
   tree->SetBranchAddress("px", px_);
   tree->SetBranchAddress("py", py_);
@@ -38,18 +46,22 @@ void combine()
 
   h[0] = new TH1D("pt", "p_{T}", 200, 0., 100.);
   h_2[0] = new TH1D("pt_2", "p_{T}", 200, 0., 100.);
-  h[1] = new TH1D("px", "p_{x}", 200, -100., 100.);
-  h_2[1] = new TH1D("px_2", "p_{x}", 200, -100., 100.);
-  h[2] = new TH1D("py", "p_{y}", 200, -100., 100.);
-  h_2[2] = new TH1D("py_2", "p_{y}", 200, -100., 100.);
+  h[1] = new TH1D("px", "p_{x}", 500, -100., 100.);
+  h_2[1] = new TH1D("px_2", "p_{x}", 500, -100., 100.);
+  h[2] = new TH1D("py", "p_{y}", 500, -100., 100.);
+  h_2[2] = new TH1D("py_2", "p_{y}", 500, -100., 100.);
   h[3] = new TH1D("pz", "p_{z}", 200, -100., 100.);
   h_2[3] = new TH1D("pz_2", "p_{z}", 200, -100., 100.);
   h[4] = new TH1D("e", "E", 200, 0., 100.);
   h_2[4] = new TH1D("e_2", "E", 200, 0., 100.);
-  h[5] = new TH1D("mass", "m(l^{+}l^{-})", 200, 0., 100.);
-  h_2[5] = new TH1D("mass_2", "m(l^{+}l^{-})", 200, 0., 100.);
-  h[6] = new TH1D("ptpair", "p_{T}(l^{+}l^{-})", 100, 0., 5.);
-  h_2[6] = new TH1D("ptpair_2", "p_{T}(l^{+}l^{-})", 100, 0., 5.);
+  h[5] = new TH1D("p", "p", 200, 0., 100.);
+  h_2[5] = new TH1D("p_2", "p", 200, 0., 100.);
+  h[6] = new TH1D("mass", "m(l^{+}l^{-})", 200, 0., 100.);
+  h_2[6] = new TH1D("mass_2", "m(l^{+}l^{-})", 200, 0., 100.);
+  h[7] = new TH1D("ptpair", "p_{T}(l^{+}l^{-})", 100, 0., 5.);
+  h_2[7] = new TH1D("ptpair_2", "p_{T}(l^{+}l^{-})", 100, 0., 5.);
+  h[8] = new TH1D("ypair", "y(l^{+}l^{-})", 100, -15., 15.);
+  h_2[8] = new TH1D("ypair_2", "y(l^{+}l^{-})", 100, -15., 15.);
 
   // First fetch the LPAIR++ output
   i = 0;
@@ -62,11 +74,6 @@ void combine()
     if (pdg>0) {
       //lep1.SetPxPyPzE(px, py, pz, e);
       lep1.SetXYZM(px, py, pz, m);
-      h[0]->Fill(pt);
-      h[1]->Fill(px);
-      h[2]->Fill(py);
-      h[3]->Fill(pz);
-      h[4]->Fill(e);
       lep1set = true;
     }
     else {
@@ -75,6 +82,13 @@ void combine()
       lep2set = true;
     }
     if (lep1set && lep2set) {
+      //if (fabs((lep1+lep2).Rapidity())>5.) continue;
+      h[0]->Fill(lep1.Pt());
+      h[1]->Fill(lep1.Px());
+      h[2]->Fill(lep1.Py());
+      h[3]->Fill(lep1.Pz());
+      h[4]->Fill(lep1.E());
+      h[5]->Fill(lep1.P());
       /*double mass = std::sqrt(
 			      std::pow(lep1.M(),2)+
 			      std::pow(lep2.M(),2)+
@@ -86,11 +100,13 @@ void combine()
 				 )
 			      );
 			      hmass->Fill(mass);*/
-      h[5]->Fill((lep1+lep2).M());
-      h[6]->Fill((lep1+lep2).Pt());
+      h[6]->Fill((lep1+lep2).M());
+      h[7]->Fill((lep1+lep2).Pt());
+      h[8]->Fill((lep1+lep2).Rapidity());
       lep1set = lep2set = false;
     }
-    if (i>2e6) break;
+    //    if (i>5e6) break;
+    if (maxEvts>0 && i>maxEvts) break;
     i++;
   }
 
@@ -105,11 +121,6 @@ void combine()
       if (abs(pdgId_[j])!=lepPdg) continue;
       if (pdgId_[j]>0) {
 	lep1.SetXYZM(px_[j], py_[j], pz_[j], m_[j]);
-	h_2[0]->Fill(lep1.Pt());
-	h_2[1]->Fill(px_[j]);
-	h_2[2]->Fill(py_[j]);
-	h_2[3]->Fill(pz_[j]);
-	h_2[4]->Fill(e_[j]);
 	lep1set = true;
       }
       else {
@@ -118,16 +129,26 @@ void combine()
       }
     }
     if (lep1set && lep2set) {
-      h_2[5]->Fill((lep1+lep2).M());
-      h_2[6]->Fill((lep1+lep2).Pt());
+      //if (fabs((lep1+lep2).Rapidity())>5.) continue;
+      h_2[0]->Fill(lep1.Pt());
+      h_2[1]->Fill(lep1.Px());
+      h_2[2]->Fill(lep1.Py());
+      h_2[3]->Fill(lep1.Pz());
+      h_2[4]->Fill(lep1.E());
+      h_2[5]->Fill(lep1.P());
+      h_2[6]->Fill((lep1+lep2).M());
+      h_2[7]->Fill((lep1+lep2).Pt());
+      h_2[8]->Fill((lep1+lep2).Rapidity());
+      lep1set = lep2set = false;
     }
+    if (maxEvts>0 && i>maxEvts) break;
   }
 
   leg = new TLegend(.82, .65, .95, .75);
   leg->SetFillColor(kWhite);
   leg->SetLineColor(kBlack);
 
-  for (i=0; i<7; i++) {
+  for (i=0; i<9; i++) {
     c[i] = new TCanvas(); 
     c[i]->Divide(1,2);
     c[i]->cd(1);

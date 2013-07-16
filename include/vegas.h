@@ -29,8 +29,11 @@ class Vegas {
      * Launches the Vegas integration of the provided function with the
      *  provided input parameters.
      * @brief Launches the integration of the provided function
+     * @param result_ The cross section as integrated by Vegas for the given
+     *  phase space restrictions
+     * @param abserr_ The error associated to the computed cross section
      */
-    int LaunchIntegration();
+    int Integrate(double*,double*);
     /**
      * Launches the Vegas generation of events according to the provided input
      *  parameters.
@@ -38,7 +41,16 @@ class Vegas {
      * @param nEvts_ The number of events to generate
      */
     int LaunchGeneration(int);
+    int Generate(int);
+    void SetGen();
   private:
+    double Treat(double[]);
+    //int GenerateOneEvent(GamGam*);
+    int GenerateOneEvent(std::ofstream*);
+    int _nTreatCalls;
+    double _rTreat;
+    double _mbin;
+    double _ffmax;
     /** @brief GSL's random number generator */
     gsl_rng *_r;
     /** @brief GSL's Vegas integration state structure */
