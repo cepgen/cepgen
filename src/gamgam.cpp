@@ -44,6 +44,7 @@ GamGam::GamGam(const unsigned int ndim_, double q2min_, double q2max_, int nOpt_
 GamGam::~GamGam()
 {
   delete[] _x;
+  delete _part;
 }
 
 bool GamGam::SetOutgoingParticles(int part_, int pdgId_)
@@ -119,21 +120,11 @@ bool GamGam::SetIncomingKinematics(Particle ip1_, Particle ip2_)
   _pdg2 = ip2_.pdgId;
   _w2 = std::pow(_mp2, 2);
 
-  if (setin) { // if the incoming kinematics is fully specified
-    _etot = _ep1+_ep2;
-    _ptot = std::sqrt(std::pow(_p3_p1[0]-_p3_p2[0], 2)
-                     +std::pow(_p3_p1[1]-_p3_p2[1], 2)
-                     +std::pow(_p3_p1[2]-_p3_p2[2], 2));
-  }
-
-#ifdef DEBUG
-  std::cout << "[GamGam::SetIncomingKinematics] [DEBUG] \"" << name_ << "\" (PDG id " << pdgId_ << ") set to\n"
-            << "  E = " << energy_ << " GeV,\n"
-            << "  p = (" << momentum_[0] << ", " << momentum_[1] << ", " << momentum_[2] << ") GeV/c,\n"
-            << "  M = " << mass_ << " GeV/cc"
-            << std::endl;
-#endif
-
+  _etot = _ep1+_ep2;
+  _ptot = std::sqrt(std::pow(_p3_p1[0]-_p3_p2[0], 2)
+                   +std::pow(_p3_p1[1]-_p3_p2[1], 2)
+                   +std::pow(_p3_p1[2]-_p3_p2[2], 2));
+  
   setp1 = setp2 = setin = true;
   setkin = setin && setout;
   return setp1;
