@@ -1,4 +1,4 @@
-#include "../include/utils.h"
+#include "utils.h"
 
 // values of a, b, c provided from the fits on ep data and retrieved from
 // http://dx.doi.org/10.1016/0550-3213(76)90231-5 with 1.110 <= w2 <=1.990
@@ -145,35 +145,61 @@ InputParameters::InputParameters() :
   minenergy(1.), maxenergy(-1.),
   mintheta(5.), maxtheta(175.),
   minmx(1.07), maxmx(320.),
+  itmx(10),
   generation(true), store(false), debug(false)
 {
-  for (int i=0; i<MAX_HISTOS; i++) {
+  /*for (int i=0; i<MAX_HISTOS; i++) {
     this->plot[i] = new Gnuplot();
-  }
+  }*/
 }
 
 InputParameters::~InputParameters()
 {
   /*for (int i=0; i<MAX_HISTOS; i++) {
-    delete this->plot[i];
-  }*///FIXME ???
+    delete[] this->plot[i];
+  }//FIXME ???*/
+  //delete[] this->plot;
+}
+
+void InputParameters::Dump()
+{
+  std::cout << "[InputParameters] Input Parameters DUMP =============" << std::endl;
+  std::cout << "===== Kinematics =====" << std::endl;
+  std::cout << "  Incoming protons-like particles" << std::endl;
+  std::cout << "  -> Mode : " << p1mod << " and " << p2mod << std::endl;
+  std::cout << "  -> Momenta : " << in1p << " and " << in2p << std::endl;
+  std::cout << "  " << std::endl;
+  std::cout << "  " << std::endl;
+  std::cout << "  Leptons pair : " << pair << std::endl;
+  std::cout << "  Cuts mode : " << mcut << std::endl;
+  std::cout << "  -> pT in range [" << minpt << ", " << maxpt << "]" << std::endl;
+  std::cout << "  -> Energy in range [" << minenergy << ", " << maxenergy << "]" << std::endl;
+  std::cout << "  -> Azimuthal angle theta in range [" << mintheta << ", " << maxtheta << "]" << std::endl;
+  std::cout << "  Outgoing remnants' mass in range [" << minmx << ", " << maxmx << "]" << std::endl;
+  std::cout << "===== VEGAS =====" << std::endl;
+  std::cout << "  Maximum number of iterations : " << itmx << std::endl;
+  std::cout << "===== General informaton =====" << std::endl;
+  std::cout << "  Events generation ? " << generation << std::endl;
+  std::cout << "  Events storage ? " << store << std::endl;
+  std::cout << "  Debugging mode ? " << debug << std::endl;
+  std::cout << "[InputParameters] End of DUMP =======================" << std::endl;
 }
 
 bool InputParameters::ReadConfigFile(std::string inFile_)
 {
-  std::ifstream file;
+  std::ifstream f;
   std::string key, value;
-  file.open(inFile_.c_str(), std::fstream::in);
-  if (!file.is_open()) {
+  f.open(inFile_.c_str(), std::fstream::in);
+  if (!f.is_open()) {
     return false;
   }
+#ifdef DEBUG
   std::cout << "[InputParameters::ReadConfigFile] [DEBUG] File " << inFile_ << " succesfully opened !" << std::endl;
   std::cout << "======================================================" << std::endl;
   std::cout << "Configuration file content : " << std::endl;
   std::cout << "======================================================" << std::endl;
-  do {
-    // ...
-    file >> key >> value;
+#endif
+  while (f >> key >> value) {
     if (key=="IEND") {
       int iend = (int)atoi(value.c_str());
       if (iend>1) {
@@ -182,18 +208,25 @@ bool InputParameters::ReadConfigFile(std::string inFile_)
     }
     else if (key=="NCVG") {
       this->ncvg = (int)atoi(value.c_str());
+#ifdef DEBUG
       std::cout << " * Number of Vegas calls                               : " << this->ncvg << std::endl;
+#endif
     }
     else if (key=="ITVG") {
       this->itvg = (int)atoi(value.c_str());
+#ifdef DEBUG
       std::cout << " * Number of Vegas iterations                          : " << this->itvg << std::endl;
+#endif
     }
     else if (key=="INPP") {
       this->in1p = (double)atof(value.c_str());
+#ifdef DEBUG
       std::cout << " * First incoming particles' momentum                  : " << this->in1p << " GeV/c" << std::endl;
+#endif
     }
     else if (key=="PMOD") {
       this->p1mod = (int)atoi(value.c_str());
+#ifdef DEBUG
       std::cout << " * First incoming particles' mode                      : " << this->p1mod << " --> ";
       switch (this->p1mod) {
         case 1:
@@ -220,13 +253,17 @@ bool InputParameters::ReadConfigFile(std::string inFile_)
           break;
       }
       std::cout << std::endl;
+#endif
     }
     else if (key=="INPE") {
       this->in2p = (double)atof(value.c_str());
+#ifdef DEBUG
       std::cout << " * Second incoming particles' momentum                 : " << this->in1p << " GeV/c" << std::endl;
+#endif
     }
     else if (key=="EMOD") {
       this->p2mod = (int)atoi(value.c_str());
+#ifdef DEBUG
       std::cout << " * Second incoming particles' mode                     : " << this->p2mod << " --> ";
       switch (this->p2mod) {
         case 1:
@@ -253,9 +290,11 @@ bool InputParameters::ReadConfigFile(std::string inFile_)
           break;
       }
       std::cout << std::endl;
+#endif
     }
     else if (key=="PAIR") {
       this->pair = (int)atoi(value.c_str());
+#ifdef DEBUG
       std::cout << " * Outgoing leptons pair PDG id                        : " << this->pair << " --> ";
       switch (this->pair) {
         case 11:
@@ -270,9 +309,11 @@ bool InputParameters::ReadConfigFile(std::string inFile_)
           break;
       }
       std::cout << std::endl;
+#endif
     }
     else if (key=="MCUT") {
       this->mcut = (int)atoi(value.c_str());
+#ifdef DEBUG
       std::cout << " * Set of cuts to apply on the total generation        : " << this->mcut << " --> ";
       switch (this->mcut) {
         case 3:
@@ -290,73 +331,50 @@ bool InputParameters::ReadConfigFile(std::string inFile_)
           break;
       }
       std::cout << std::endl;
+#endif
     }
     else if (key=="PTCT") {
       this->minpt = (double)atof(value.c_str());
+#ifdef DEBUG
       std::cout << " * Outgoing lepton pairs' minimal transverse momentum  : " << this->minpt << " GeV/c" << std::endl;
+#endif
     }
     else if (key=="ECUT") {
       this->minpt = (double)atof(value.c_str());
+#ifdef DEBUG
       std::cout << " * Outgoing lepton pairs' minimal energy               : " << this->minpt << " GeV/c" << std::endl;
+#endif
+    }
+    else if (key=="ITMX") {
+      this->itmx = (double)atoi(value.c_str());
+#ifdef DEBUG
+      std::cout << " * Maximal number of VEGAS iterations                  : " << this->itmx << std::endl;
+#endif
     }
     else {
-      std::cout << "==> Unrecognized argument : [" << key << "] = " << value << std::endl;
+      std::cout << "[InputParameters::ReadConfigFile] <WARNING> Unrecognized argument : [" << key << "] = " << value << std::endl;
     }
-  } while (!file.eof());
-  file.close();
+  }
+  f.close();
   std::cout << "======================================================" << std::endl;
   return true;
 }
 
 bool InputParameters::StoreConfigFile(std::string outFile_)
 {
-  std::ofstream file;
-  file.open(outFile_.c_str(), std::fstream::out | std::fstream::trunc);
-  if (!file.is_open()) {
+  std::ofstream f;
+  f.open(outFile_.c_str(), std::fstream::out | std::fstream::trunc);
+  if (!f.is_open()) {
     return false;
   }
   // ...
-  file.close();
+  f.close();
   return true;
 }
 
 Cuts::Cuts() :
   ptmin(3.), ptmax(-1.), emin(0.), emax(-1.),
   thetamin(0.), thetamax(180.)
-{
-}
+{}
 
-Cuts::~Cuts()
-{
-}
-
-Particle::Particle() :
-  pdgId(-1), role(-1), e(-1.), m(-1.), px(0.), py(0.), pz(0.), pt(-1.)
-{
-}
-
-Particle::~Particle()
-{
-}
-
-void Particle::SetP(double px_, double py_, double pz_)
-{
-  this->px = px_;
-  this->py = py_;
-  this->pz = pz_;
-  this->pt = std::sqrt(std::pow(this->px, 2)+std::pow(this->py, 2));
-}
-
-/*void Symmetrise(double pxin_, double pyin_, double *pxout_, double *pyout_)
-{
-  double ranphi, rany;
-  gsl_rng *_r = gsl_rng_alloc(gsl_rng_default);
-  gsl_rng_set(_r, 3001187); // sets the MC generator's seed
-  ranphi = gsl_ran_flat(_r, 0., 2.*pi);
-  rany = (gsl_ran_flat(_r, 0., 1.)>=.5) ? 1. : -1.;
-  
-  *pxout_ = pxin_*cos(ranphi) + rany*pyin_*sin(ranphi);
-  *pyout_ = -pxin_*sin(ranphi) + rany*pyin_*cos(ranphi);
-  
-  delete _r;
-}*/
+Cuts::~Cuts() {}

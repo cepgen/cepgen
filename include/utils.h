@@ -6,6 +6,7 @@
 #include <cmath>
 
 #include "gnuplot.h"
+#include "particle.h"
 //#include "gamgam.h"
 
 #define MAX_HISTOS 20
@@ -66,6 +67,10 @@ class InputParameters {
     InputParameters();
     ~InputParameters();
     /**
+     * @brief Dumps the input parameters in the console
+     */
+    void Dump();
+    /**
      * @brief Reads content from config file to load the variables
      * @param inFile_ Name of the configuration file to load
      */
@@ -120,17 +125,29 @@ class InputParameters {
     double minpt;
     /** @brief Maximal transverse momentum of the outgoing leptons */
     double maxpt;
+    /** @brief Minimal energy of the outgoing leptons */
     double minenergy;
+    /** @brief Maximal energy of the outgoing leptons */
     double maxenergy;
+    /** @brief Minimal polar angle \f$\theta\f$ of the outgoing leptons */
     double mintheta;
+    /** @brief Maximal polar angle \f$\theta\f$ of the outgoing leptons */
     double maxtheta;
     double minmx;
     double maxmx;
+    /**
+     * @brief Maximal number of iterations to perform by VEGAS
+     */
+    int itmx;
     /**
      * @brief Are we generating events ? (true) or are we only computing the
      * cross-section ? (false)
      */
     bool generation;
+    /**
+     * @brief Are the events generated in this run to be stored in the output
+     * file ?
+     */
     bool store;
     /**
      * Enables or disables the production of control plots for several kinematic
@@ -138,11 +155,15 @@ class InputParameters {
      * @brief Do we need control plots all along the process?
      */
     bool debug;
+    /**
+     * @brief Number of events already generated in this run
+     */
     int ngen;
     /**
      * @brief The file in which to store the events generation's output
      */
     std::ofstream* file;
+    std::ofstream* file_debug; //FIXME dropme!
     /**
      * List of Gnuplot objects which can be used to produce control plots
      * all along the cross-section determination and events generation process
@@ -178,45 +199,6 @@ class Cuts {
     double thetamax;
     double mxmin;
     double mxmax;
-};
-
-/**
- * Kinematic information for one particle
- * @brief Kinematics of one particle
- */
-class Particle {
-  public:
-    Particle();
-    ~Particle();
-    /**
-     * Returns a string containing all the particle's kinematics as expressed in
-     * the Les Houches format
-     * @return The LHE line
-     */
-    std::string GetLHEline();
-    /** @brief Particle Data Group integer identifier */
-    int pdgId;
-    /** @brief Role in the considered process */
-    int role;
-    /** @brief Energy in GeV */
-    double e;
-    /** @brief Mass in GeV/c\f$^{2}\f$ */
-    double m;
-    /** @brief Momentum along the \f$x\f$-axis in GeV/c */
-    double px;
-    /** @brief Momentum along the \f$y\f$-axis in GeV/c */
-    double py;
-    /** @brief Momentum along the \f$z\f$-axis in GeV/c */
-    double pz;
-    /** @brief Transverse momentum */
-    double pt;
-    /**
-     * @brief Sets the momentum
-     * @param px_ Momentum along the \f$x\f$-axis
-     * @param py_ Momentum along the \f$y\f$-axis
-     * @param pz_ Momentum along the \f$z\f$-axis
-     */
-    void SetP(double, double, double);
 };
 
 #endif

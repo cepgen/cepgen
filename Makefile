@@ -1,23 +1,28 @@
-CC = g++
-CFLAGS = -I include/ -Wall -Wextra -I /usr/include/gsl -O4 -fPIC #-fstack-usage #-std=c++11 #-dD
-LDFLAGS = -lgsl -lgslcblas
+CFLAGS = -Wall -Wextra -I$(INCLUDEDIR) -I$(PYTHIADIR)/include -I$(GSLDIR) -L$(PYTHIADIR)/lib/archive -lpythia8 -llhapdfdummy -O4 -fPIC
+LDFLAGS = -lgsl -lgslcblas $(PYTHIADIR)/lib/archive/libpythia8.a $(PYTHIADIR)/lib/archive/liblhapdfdummy.a
+#LDFLAGS = -lgsl -lgslcblas -Linclude/pythia6 -lPythia6
 #LDFLAGS = $(gsl-config --libs)
 VPATH = src include
+############################################
 CPP_FILES = $(wildcard src/*.cpp)
 HPP_FILES = $(wildcard includes/*.h)
 LIB_FILES = $(patsubst src/%.cpp,%.o,$(CPP_FILES))
 OBJ_FILES = main.o $(LIB_FILES)
+############################################
+CC = g++
 RM = rm -f
+############################################
+INCLUDEDIR = include
+PYTHIADIR = include/pythia8175
+GSLDIR = /usr/include/gsl
+############################################
 
 $(info $(OBJ_FILES))
 
-all: mcgen clean
+all: mcgen xsect clean
 
 mcgen: $(OBJ_FILES)
 	$(CC) -o $@ $^ $(LDFLAGS)
-
-#mcgen.o: main.cpp mcgen.cpp mcgen.h
-#	$(CC) -c $(CFLAGS) $<
 
 .PHONY: all
 
@@ -36,6 +41,9 @@ doc: $(CPP_FILES) $(HPP_FILES) Doxyfile
 plot: tryplot.o gnuplot.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-test: test.o $(LIB_FILES)
+xsect: utils/xsect.o $(LIB_FILES)
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+pytest: test.o $(LIB_FILES)
 	$(CC) -o $@ $^ $(LDFLAGS)
 

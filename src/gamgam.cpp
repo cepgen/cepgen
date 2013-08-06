@@ -1,4 +1,4 @@
-#include "../include/gamgam.h"
+#include "gamgam.h"
 
 GamGam::GamGam(const unsigned int ndim_, double q2min_, double q2max_, int nOpt_, double x_[]) :
   _ep1(-1), _w1(-1),
@@ -30,6 +30,8 @@ GamGam::GamGam(const unsigned int ndim_, double q2min_, double q2max_, int nOpt_
 
   _x = new double[ndim_];
   std::copy(x_, x_+ndim_, _x);
+    
+  _part = new std::map<int,Particle>;
 
 #ifdef DEBUG
   std::cout << "[GamGam::GamGam] [DEBUG] number of integration parameters : " << ndim_ << std::endl;
@@ -95,6 +97,46 @@ bool GamGam::SetOutgoingParticles(int part_, int pdgId_)
   }
 #endif
   return true;
+}
+
+bool GamGam::SetIncomingKinematics(Particle ip1_, Particle ip2_)
+{
+  _p3_p1[0] = ip1_.px;
+  _p3_p1[1] = ip1_.py;
+  _p3_p1[2] = ip1_.pz;
+  _ep1 = ip1_.e;
+  _mp1 = ip1_.m;
+  _pp1 = ip1_.p;
+  _pdg1 = ip1_.pdgId;
+  _w1 = std::pow(_mp1, 2);
+
+  _p3_p2[0] = ip2_.px;
+  _p3_p2[1] = ip2_.py;
+  _p3_p2[2] = ip2_.pz;
+  _ep2 = ip2_.e;
+  _mp2 = ip2_.m;
+  _pp2 = ip2_.p;
+  _pdg2 = ip2_.pdgId;
+  _w2 = std::pow(_mp2, 2);
+
+  if (setin) { // if the incoming kinematics is fully specified
+    _etot = _ep1+_ep2;
+    _ptot = std::sqrt(std::pow(_p3_p1[0]-_p3_p2[0], 2)
+                     +std::pow(_p3_p1[1]-_p3_p2[1], 2)
+                     +std::pow(_p3_p1[2]-_p3_p2[2], 2));
+  }
+
+#ifdef DEBUG
+  std::cout << "[GamGam::SetIncomingKinematics] [DEBUG] \"" << name_ << "\" (PDG id " << pdgId_ << ") set to\n"
+            << "  E = " << energy_ << " GeV,\n"
+            << "  p = (" << momentum_[0] << ", " << momentum_[1] << ", " << momentum_[2] << ") GeV/c,\n"
+            << "  M = " << mass_ << " GeV/cc"
+            << std::endl;
+#endif
+
+  setp1 = setp2 = setin = true;
+  setkin = setin && setout;
+  return setp1;
 }
 
 bool GamGam::SetIncomingKinematics(int part_, double momentum_[3], int pdgId_)
@@ -456,7 +498,10 @@ bool GamGam::Pickin()
 #endif
   }
   /////
-
+  if (_x[3]>1. or _x[3]<-1.) {
+    std::cerr << "[GamGam::Pickin] [ERROR] x[3] = " << _x[3] << std::endl;
+    return false;
+  }
   yy4 = cos(pi*_x[3]);
   dd = _dd1*_dd2;
   _p12 = (_s-_w1-_w2)/2.;
@@ -1112,54 +1157,49 @@ double GamGam::ComputeXsec(int nm_)
   // - ...
 
   lcut = false; // Event discarded by default
-
-  if (_cuts.mode>=2) {
-    cott6 = pz6/_pt_l6;
-    cott7 = pz7/_pt_l7;
-    /*std::cout << "cott6 = " << cott6 << std::endl;
-    std::cout << "cott7 = " << cott7 << std::endl;*/ // FIXME these are alright!
-    lmu1 = cott6>=_cotth1
-        && cott6<=_cotth2
-        && (_pt_l6>=_cuts.ptmin || _cuts.ptmin==-1.)
-        && (_pt_l6<=_cuts.ptmax || _cuts.ptmax==-1.)
-        && ( _e6lab>=_cuts.emin || _cuts.emin ==-1.)
-        && ( _e6lab<=_cuts.emax || _cuts.emax ==-1.);
-    lmu2 = cott7>=_cotth1
-        && cott7<=_cotth2
-        && (_pt_l7>=_cuts.ptmin || _cuts.ptmin==-1.)
-        && (_pt_l7<=_cuts.ptmax || _cuts.ptmax==-1.)
-        && ( _e7lab>=_cuts.emin || _cuts.emin ==-1.)
-        && ( _e7lab<=_cuts.emax || _cuts.emax ==-1.);
-    if (_cuts.mode==2) {
-      lcut = lmu1 && lmu2;
-    }
-    else { // mode >= 3
-      lcut = lmu1 || lmu2;
-    }
-  }
-  else if (_cuts.mode==1) {
-    // Vermaseren's hypothetical detector cuts
-    cost6 = pz6/std::sqrt(std::pow(pz6,2)+std::pow(_pt_l6,2));
-    cost7 = pz7/std::sqrt(std::pow(pz7,2)+std::pow(_pt_l7,2));
-    lcut = ((fabs(cost6)<=0.75 && _pt_l6>=1.) || (fabs(cost6)<=0.95 && fabs(cost6)>0.75 && fabs(_p3_l6[2])>1.)) &&
-           ((fabs(cost7)<=0.75 && _pt_l7>=1.) || (fabs(cost7)<=0.95 && fabs(cost7)>0.75 && fabs(_p3_l7[2])>1.));
-
-  }
-  else if (_cuts.mode==0) {
-    lcut = true;
+  cott6 = pz6/_pt_l6;
+  cott7 = pz7/_pt_l7;
+  lmu1 = cott6>=_cotth1
+      && cott6<=_cotth2
+      && (_pt_l6>=_cuts.ptmin || _cuts.ptmin<=0.)
+      && (_pt_l6<=_cuts.ptmax || _cuts.ptmax<=0.)
+      && ( _e6lab>=_cuts.emin || _cuts.emin <=0.)
+      && ( _e6lab<=_cuts.emax || _cuts.emax <=0.);
+  lmu2 = cott7>=_cotth1
+      && cott7<=_cotth2
+      && (_pt_l7>=_cuts.ptmin || _cuts.ptmin<=0.)
+      && (_pt_l7<=_cuts.ptmax || _cuts.ptmax<=0.)
+      && ( _e7lab>=_cuts.emin || _cuts.emin <=0.)
+      && ( _e7lab<=_cuts.emax || _cuts.emax <=0.);
+  switch (_cuts.mode) {
+    case 0:
+      lcut = true;
+      break;
+    case 1: // Vermaseren's hypothetical detector cuts
+      cost6 = pz6/std::sqrt(std::pow(pz6,2)+std::pow(_pt_l6,2));
+      cost7 = pz7/std::sqrt(std::pow(pz7,2)+std::pow(_pt_l7,2));
+      lcut = ((fabs(cost6)<=0.75 && _pt_l6>=1.) || (fabs(cost6)<=0.95 && fabs(cost6)>0.75 && fabs(_p3_l6[2])>1.)) &&
+             ((fabs(cost7)<=0.75 && _pt_l7>=1.) || (fabs(cost7)<=0.95 && fabs(cost7)>0.75 && fabs(_p3_l7[2])>1.));
+      break;
+    case 2:
+      lcut = lmu1 and lmu2;
+      break;
+    case 3:
+    default:
+      lcut = lmu1 or lmu2;
+      break;
   }
 
   // Cut on mass of final hadronic system (MX)
   /*if (_ndim>7 && (std::pow(mx,2)<std::pow(_cuts.mxmin,2) || std::pow(mx,2)>std::pow(_cuts.mxmax,2))) {
     lcut = false;
   }*/
-  
   // Cut on the proton's Q2 (first photon propagator T1)
   if (_t1<_qp2max || _t1>_qp2min) {
     lcut = false;
   }
 
-  if (!lcut) {
+  if (!lcut) { // Dismiss the cuts-failing events in the xsection computation
     return 0.;
   }
   this->FillKinematics();
@@ -1170,6 +1210,7 @@ double GamGam::ComputeXsec(int nm_)
     case 7: // elastic case
       intgp = 2;
       intge = 2;
+      xsec = sconst*_dj*this->PeriPP(intgp, intge);
       break;
     case 8: // single-dissociative case
       intgp = 3;
@@ -1185,7 +1226,6 @@ double GamGam::ComputeXsec(int nm_)
       break;
   }
   //std::cout << "dj = " << _dj << std::endl;
-  xsec = sconst*_dj*PeriPP(intgp, intge);
   //std::cout << "Elastic x-sec : " << xsec << std::endl;
   return xsec;
 }
@@ -1196,8 +1236,7 @@ void GamGam::FillKinematics()
   double px, py, pz;
   double ranphi, cp, sp;
   int rany, ransign;
-  
-  //std::cout << _gamma << "\t" << _betgam << std::endl;
+  Particle part;
   
   // Needed to parametrise a random rotation around z-axis
   //std::cout << "rand = " << ((double)rand()/RAND_MAX)*2.*pi << std::endl;
@@ -1217,84 +1256,79 @@ void GamGam::FillKinematics()
   sp = -1.;*/
   
   // First incoming proton
-  _p3_p1[0] = _p3_p1[1] = 0.;
-  _p3_p1[2] = _gamma*_pp1+_betgam*_ep1;
-  _ep1 = _gamma*_ep1+_betgam*_pp1;
-  //std::cout << "first incoming particle : E = " << _ep1 << ", p = (" << _p3_p1[0] << ", " << _p3_p1[1] << ", " << _p3_p1[2] << ")" << std::endl;
+  part.SetP(0., 0., _gamma*_pp1+_betgam*_ep1, _gamma*_ep1+_betgam*_pp1);
+  part.role = 1;
+  part.pdgId = _pdg1;
+  this->_part->insert(std::pair<int,Particle>(part.role, part));
   
   // Second incoming proton
-  _p3_p2[0] = _p3_p2[1] = 0.;
-  _p3_p2[2] = -_gamma*_pp1+_betgam*_ep2;
-  _ep2 = _gamma*_ep2-_betgam*_pp1;
-  //std::cout << "second incoming particle : E = " << _ep2 << ", p = (" << _p3_p2[0] << ", " << _p3_p2[1] << ", " << _p3_p2[2] << ")" << std::endl;
+  Particle ip2;
+  part.SetP(0., 0., -_gamma*_pp1+_betgam*_ep2, _gamma*_ep2-_betgam*_pp1);
+  part.role = 2;
+  part.pdgId = _pdg2;
+  this->_part->insert(std::pair<int,Particle>(part.role, part));
   
   // First outgoing proton
+  Particle op1;
   px = _pp3*_st3*_cp3;
   py = _pp3*_st3*_sp3;
   pz = _pp3*_ct3;
-  
-  ///
-  _p3_p3[0] = px*cp+rany*py*sp;
-  _p3_p3[1] =-px*sp+rany*py*cp;
-  _p3_p3[2] = _gamma*pz  +_betgam*_ep3;
-  _ep3      = _gamma*_ep3+_betgam*pz;
-  //std::cout << "first outgoing particle : E = " << _ep3 << ", p = (" << _p3_p3[0] << ", " << _p3_p3[1] << ", " << _p3_p3[2] << ")" << std::endl;
+  part.SetP(px*cp+rany*py*sp, -px*sp+rany*py*cp, _gamma*pz  +_betgam*_ep3, _gamma*_ep3+_betgam*pz);
+  part.role = 3;
+  part.pdgId = _pdg3;
+  this->_part->insert(std::pair<int,Particle>(part.role, part));
   
   // Second outgoing proton
+  Particle op2;
   px = _pp5*_st5*_cp5;
   py = _pp5*_st5*_sp5;
   pz = _pp5*_ct5;
-  ///
-  _p3_p5[0] = px*cp+rany*py*sp;
-  _p3_p5[1] =-px*sp+rany*py*cp;
-  _p3_p5[2] = _gamma*pz  +_betgam*_ep5;
-  _ep5      = _gamma*_ep5+_betgam*pz;
+  part.SetP(px*cp+rany*py*sp, -px*sp+rany*py*cp, _gamma*pz  +_betgam*_ep5, _gamma*_ep5+_betgam*pz);
+  part.role = 5;
+  part.pdgId = _pdg5;
+  this->_part->insert(std::pair<int,Particle>(part.role, part));
   
   // First outgoing lepton
+  Particle ol1;
   px = _pl6*_st6*_cp6;
   py = _pl6*_st6*_sp6;
   pz = _pl6*_ct6;
-  ///
-  _p3_l6[0] = px*cp+rany*py*sp;
-  _p3_l6[1] =-px*sp+rany*py*cp;
-  _p3_l6[2] = _gamma*pz  +_betgam*_el6; // extra boost in the z direction for the inelastic case
-  _el6      = _gamma*_el6+_betgam*(_pl6*_ct6);
-  _pdg6 = ransign*abs(_pdg6);
-  //std::cout << "first outgoing lepton : E = " << _el6 << ", p = (" << _p3_l6[0] << ", " << _p3_l6[1] << ", " << _p3_l6[2] << ")" << std::endl;
+  part.SetP(px*cp+rany*py*sp, -px*sp+rany*py*cp, _gamma*pz+_betgam*_el6, _gamma*_el6+_betgam*(_pl6*_ct6));
+  part.role = 6;
+  part.pdgId = ransign*abs(_pdg6);
+  this->_part->insert(std::pair<int,Particle>(part.role, part));
   
   // Second outgoing lepton
+  Particle ol2;
   px = _pl7*_st7*_cp7;
   py = _pl7*_st7*_sp7;
   pz = _pl7*_ct7;
-  ///
-  _p3_l7[0] = px*cp+rany*py*sp;
-  _p3_l7[1] =-px*sp+rany*py*cp;
-  _p3_l7[2] = _gamma*pz  +_betgam*_el7;
-  _el7      = _gamma*_el7+_betgam*pz;
-  _pdg7 = -ransign*abs(_pdg7);
-  //std::cout << "second outgoing lepton : E = " << _el7 << ", p = (" << _p3_l7[0] << ", " << _p3_l7[1] << ", " << _p3_l7[2] << ")" << std::endl;
+  part.SetP(px*cp+rany*py*sp, -px*sp+rany*py*cp, _gamma*pz+_betgam*_el7, _gamma*_el7+_betgam*pz);
+  part.role = 7;
+  part.pdgId = -ransign*abs(_pdg7);
+  this->_part->insert(std::pair<int,Particle>(part.role, part));
   
   // First incoming photon
   // Equivalent in LPAIR : PLAB(x, 3)
+  Particle ph1;
   px = _p3_p1[0]-_pp3*_st3*_cp3;
   py = _p3_p1[1]-_pp3*_st3*_sp3;
   pz = _p3_p1[2]-_p3_p3[2];
-  ///
-  _p3_g1[0] = px*cp+rany*py*sp;
-  _p3_g1[1] =-px*sp+rany*py*cp;
-  _p3_g1[2] = pz;
-  _eg1      = _ep1-_ep5;
+  part.SetP(px*cp+rany*py*sp, -px*sp+rany*py*cp, pz, _ep1-_ep5);
+  part.role = 41;
+  part.pdgId = 22;
+  this->_part->insert(std::pair<int,Particle>(part.role, part));
   
   // Second incoming photon
   // Equivalent in LPAIR : PLAB(x, 4)
+  Particle ph2;
   px = _p3_p2[0]-_pp5*_st5*_cp5;
   py = _p3_p2[1]-_pp5*_st5*_sp5;
   pz = _p3_p2[2]-_p3_p5[2];
-  ///
-  _p3_g2[0] = px*cp+rany*py*sp;
-  _p3_g2[1] =-px*sp+rany*py*cp;
-  _p3_g2[2] = pz;
-  _eg2      = _ep2-_ep5;
+  part.SetP(px*cp+rany*py*sp, -px*sp+rany*py*cp, pz, _ep2-_ep5);
+  part.role = 42;
+  part.pdgId = 22;
+  this->_part->insert(std::pair<int,Particle>(part.role, part));
   
   /*gmux = -_t2/(_ep1*_eg2-_pp1*_p3_g2[2])/2.;
   gmuy = (_ep1*_eg2-_pp1*_p3_g2[2])/(_ep2*_eg2+_pp2*_p3_g2[2]);
@@ -1431,87 +1465,38 @@ double GamGam::PeriPP(int nup_, int ndown_)
   return peripp;
 }
 
-Particle GamGam::GetParticle(int role_)
+Particle* GamGam::GetParticle(int role_)
 {
-  Particle p;
-  switch(role_) {
-    case 1:
-      p.e = _ep1;
-      p.m = _mp1;
-      p.SetP(_p3_p1[0], _p3_p1[1], _p3_p1[2]);
-      p.pdgId = _pdg1;
-      break;
-    case 2:
-      p.e = _ep2;
-      p.m = _mp2;
-      p.SetP(_p3_p2[0], _p3_p2[1], _p3_p2[2]);
-      p.pdgId = _pdg2;
-      break;
-    case 3:
-      p.e = _ep3;
-      p.m = _mp3;
-      p.SetP(_p3_p3[0], _p3_p3[1], _p3_p3[2]);
-      p.pdgId = _pdg3;
-      break;
-    case 5:
-      p.e = _ep5;
-      p.m = _mp5;
-      p.SetP(_p3_p5[0], _p3_p5[1], _p3_p5[2]);
-      p.pdgId = _pdg5;
-      break;
-    case 6:
-      p.e = _el6;
-      p.m = _ml6;
-      p.SetP(_p3_l6[0], _p3_l6[1], _p3_l6[2]);
-      p.pdgId = _pdg6;
-      break;
-    case 7:
-      p.e = _el7;
-      p.m = _ml7;
-      p.SetP(_p3_l7[0], _p3_l7[1], _p3_l7[2]);
-      p.pdgId = _pdg7;
-      break;
-    case 41: // First incoming photon
-      p.m = 0.;
-      //p.e = _ep1-_ep3;
-      //p.SetP(_p3_p1[0]-_p3_p3[0], _p3_p1[1]-_p3_p3[1], _p3_p1[2]-_p3_p3[2]);
-      p.e = _eg1;
-      p.SetP(_p3_g1[0], _p3_g1[1], _p3_g1[2]);
-      p.pdgId = 22;
-      break;
-    case 42: // Second incoming photon
-      p.m = 0.;
-      //p.e = _ep2-_ep5;
-      //p.SetP(_p3_p2[0]-_p3_p5[0], _p3_p2[1]-_p3_p5[1], _p3_p2[2]-_p3_p5[2]);
-      p.e = _eg2;
-      p.SetP(_p3_g2[0], _p3_g2[1], _p3_g2[2]);
-      p.pdgId = 22;
-      break;
-    default:
-      break;
+  std::map<int,Particle>::iterator out = this->_part->find(role_);
+  if (out!=this->_part->end()) {
+    return &(out->second);
   }
-  return p;
+  else {
+    return new Particle();
+  }
 }
 
-void GamGam::StoreEvent(std::ofstream *file_, double weight_)
+void GamGam::StoreEvent(std::ofstream *file_, double weight_=1.)
 {
-  Particle ol1 = GetParticle(6);
-  Particle ol2 = GetParticle(7);
-  *file_ << ol1.e << "\t"
-         << ol1.px << "\t"
-         << ol1.py << "\t"
-         << ol1.pz << "\t"
-         << ol1.pt << "\t"
-         << ol1.m << "\t"
-         << ol1.pdgId
+  Particle *ol1 = GetParticle(6);
+  Particle *ol2 = GetParticle(7);
+  *file_ << ol1->e << "\t"
+         << ol1->px << "\t"
+         << ol1->py << "\t"
+         << ol1->pz << "\t"
+         << ol1->pt << "\t"
+         << ol1->m << "\t"
+         << ol1->pdgId << "\t"
+         << weight_
          << std::endl;
-  *file_ << ol2.e << "\t"
-         << ol2.px << "\t"
-         << ol2.py << "\t"
-         << ol2.pz << "\t"
-         << ol2.pt << "\t"
-         << ol2.m << "\t"
-         << ol2.pdgId
+  *file_ << ol2->e << "\t"
+         << ol2->px << "\t"
+         << ol2->py << "\t"
+         << ol2->pz << "\t"
+         << ol2->pt << "\t"
+         << ol2->m << "\t"
+         << ol2->pdgId << "\t"
+         << weight_
          << std::endl;
 }
 

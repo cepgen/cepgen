@@ -8,6 +8,7 @@
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
+#include <map>
 
 #include "utils.h"
 
@@ -45,6 +46,14 @@ class GamGam {
    */
   bool SetIncomingKinematics(int,double[],int);
   /**
+   * Specifies the incoming particles' kinematics as well as their properties
+   * using two Particle objects.
+   * @brief Sets the momentum and PDG id for the incoming particles
+   * @param ip1_ Information on the first incoming particle
+   * @param ip2_ Information on the second incoming particle
+   */
+  bool SetIncomingKinematics(Particle,Particle);
+  /**
    * @brief Sets the PDG id for the outgoing particles
    * @param part_ Role of the particle in the process
    * @param pdgId_ Particle ID according to the PDG convention
@@ -74,7 +83,7 @@ class GamGam {
    * @param role_ An integer denoting the particle's role in the selected
    *  production process
    */
-  Particle GetParticle(int);
+  Particle* GetParticle(int);
   /**
    * Is the system's kinematics well defined and compatible with the process ?
    * This check is mandatory to perform the (_ndim)-dimensional point's
@@ -387,6 +396,8 @@ class GamGam {
   Cuts _cuts;
   double _wmin, _wmax;
   double _cotth1, _cotth2;
+  // Particles
+  std::map<int,Particle> *_part;
 };
 
 #endif

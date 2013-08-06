@@ -1,4 +1,4 @@
-#include "../include/gnuplot.h"
+#include "gnuplot.h"
 
 std::string GetRandomString(int nLetters_)
 {
@@ -42,7 +42,8 @@ void Gnuplot::SetOutputFile(std::string outFile_)
 {
   _outputFile = outFile_;
   //fprintf(_pipe,"set term epslatex\n");
-  fprintf(_pipe,"set term pngcairo\n");
+  fprintf(_pipe,"set term pngcairo transparent enhanced font 'arial,10' fontscale 1.0 size 800, 600\n");
+  //fprintf(_pipe,"set term pngcairo\n");
   fprintf(_pipe,"set key right top\n");
   //fprintf(_pipe,"set key left bottom\n");
   fprintf(_pipe,"set output '%s'\n",outFile_.c_str());

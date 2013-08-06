@@ -1,4 +1,4 @@
-#include "../include/mcgen.h"
+#include "mcgen.h"
 
 MCGen::MCGen(InputParameters ip_)
 {
@@ -29,7 +29,7 @@ MCGen::MCGen(InputParameters ip_)
     _ndim = 9;
   }
   veg = new Vegas(_ndim,f, &_ip);
-#ifdef DEBUG
+//#ifdef DEBUG
   std::cout << "[MCGen::MCGen] [DEBUG] Cuts mode : " << _ip.mcut << std::endl;
   switch(_ip.mcut) {
     case 1:
@@ -56,7 +56,7 @@ MCGen::MCGen(InputParameters ip_)
       std::cout << "[MCGen::MCGen] [DEBUG] No cuts applied on the total cross section" << std::endl;
       break;
   }
-#endif
+//#endif
 }
 
 MCGen::~MCGen()
@@ -89,7 +89,7 @@ void MCGen::Test()
     _ip.plot[8]->SetHistogram(1000, -pi, pi, "sinphi6");
   }
   
-  veg->Generate(1000);
+  //veg->Generate(1000);
   
   if (_ip.debug) {
     _ip.plot[0]->DrawHistogram();
@@ -278,52 +278,53 @@ double f(double* x_, size_t ndim_, void* params_) {
   if (p->store) { // MC events generation
     //gg->FillKinematics();
     
-    Particle ip1 = gg->GetParticle(1);
-    Particle ip2 = gg->GetParticle(2);
-    Particle op1 = gg->GetParticle(3);
-    Particle ga1 = gg->GetParticle(41);
-    Particle ga2 = gg->GetParticle(42);
-    Particle op2 = gg->GetParticle(5);
-    Particle ol1 = gg->GetParticle(6);
-    Particle ol2 = gg->GetParticle(7);
+    /*Particle *ip1 = gg->GetParticle(1);
+    Particle *ip2 = gg->GetParticle(2);
+    Particle *op1 = gg->GetParticle(3);
+    Particle *ga1 = gg->GetParticle(41);
+    Particle *ga2 = gg->GetParticle(42);
+    Particle *op2 = gg->GetParticle(5);*/
+    Particle *ol1 = gg->GetParticle(6);
+    Particle *ol2 = gg->GetParticle(7);
     if (p->debug) {
-      if (ol1.pdgId<0) {
-        p->plot[0]->Fill(ol1.px);
-        p->plot[1]->Fill(ol1.py);
-        p->plot[2]->Fill(ol1.pz);
-        p->plot[3]->Fill(ol1.pt);
+      if (ol1->pdgId<0) {
+        p->plot[0]->Fill(ol1->px);
+        p->plot[1]->Fill(ol1->py);
+        p->plot[2]->Fill(ol1->pz);
+        p->plot[3]->Fill(ol1->pt);
       }
       else {
-        p->plot[0]->Fill(ol2.px);
-        p->plot[1]->Fill(ol2.py);
-        p->plot[2]->Fill(ol2.pz);
-        p->plot[3]->Fill(ol2.pt);
+        p->plot[0]->Fill(ol2->px);
+        p->plot[1]->Fill(ol2->py);
+        p->plot[2]->Fill(ol2->pz);
+        p->plot[3]->Fill(ol2->pt);
       }
-      double mass = std::sqrt(std::pow(ol1.m,2)+std::pow(ol2.m,2)+2*(ol1.e*ol2.e-ol1.px*ol2.px-ol1.py*ol2.py-ol1.pz*ol2.pz));
+      double mass = std::sqrt(std::pow(ol1->m,2)+std::pow(ol2->m,2)+2*(ol1->e*ol2->e-ol1->px*ol2->px-ol1->py*ol2->py-ol1->pz*ol2->pz));
       p->plot[4]->Fill(mass);
-      double ptpair = std::sqrt(std::pow(ol1.px+ol2.px, 2)+std::pow(ol1.py+ol2.py, 2));
+      double ptpair = std::sqrt(std::pow(ol1->px+ol2->px, 2)+std::pow(ol1->py+ol2->py, 2));
       p->plot[5]->Fill(ptpair);
     }
     p->ngen += 1;
     if ((p->ngen)%10000==0) {
       std::cout << "[f] ngen = " << p->ngen << std::endl;
     }
-    *(p->file) << ol1.e
-       << "\t" << ol1.px
-       << "\t" << ol1.py
-       << "\t" << ol1.pz
-       << "\t" << ol1.pt
-       << "\t" << ol1.m
-       << "\t" << ol1.pdgId
+    *(p->file) << ol1->e
+       << "\t" << ol1->px
+       << "\t" << ol1->py
+       << "\t" << ol1->pz
+       << "\t" << ol1->pt
+       << "\t" << ol1->m
+       << "\t" << ol1->pdgId
        << std::endl;
-    *(p->file) << ol2.e
-       << "\t" << ol2.px
-       << "\t" << ol2.py
-       << "\t" << ol2.pz
-       << "\t" << ol2.pt
-       << "\t" << ol2.m
-       << "\t" << ol2.pdgId
+    *(p->file) << ol2->e
+       << "\t" << ol2->px
+       << "\t" << ol2->py
+       << "\t" << ol2->pz
+       << "\t" << ol2->pt
+       << "\t" << ol2->m
+       << "\t" << ol2->pdgId
        << std::endl;
+    std::cout << GetLHEvent(gg, true);
     //*(p->file) << ga1.px << "\t" << ga1.py << "\t" << ga1.pz << "\t" << ga1.e << std::endl;
   }
 

@@ -32,9 +32,9 @@ void combine()
   TTree *tree;
   bool lep1set, lep2set;
 
-  //lp = new TFile("lpair-pt5-mumu-elastic.root");
+  lp = new TFile("lpair-pt5-mumu-elastic.root");
   //lp = new TFile("lpair-mumu-pt15-8tev-elastic.root");
-  lp = new TFile("lpair-7tev-elastic-nocuts.root");
+  //lp = new TFile("lpair-7tev-elastic-nocuts.root");
   tree = (TTree*)(lp->Get("h4444"));
   tree->SetBranchAddress("px", px_);
   tree->SetBranchAddress("py", py_);

@@ -10,6 +10,7 @@
 #include "utils.h"
 #include "gamgam.h"
 #include "gnuplot.h"
+#include "lhe.h"
 
 /**
  * This object represents the core of this Monte Carlo generator, with its
@@ -46,6 +47,10 @@ class MCGen {
   MCGen(InputParameters);
   ~MCGen();
   void Test();
+  /**
+   * Computes the cross-section for the run defined by this object. This returns
+   * the cross-section as well as the absolute error computed along.
+   */
   void ComputeXsection(double*,double*);
   void LaunchGen(const unsigned int);
   /**
