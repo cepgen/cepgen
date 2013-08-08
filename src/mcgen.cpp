@@ -2,34 +2,33 @@
 
 MCGen::MCGen(InputParameters ip_)
 {
+  std::string topo;
 #ifdef DEBUG
   std::cout << "[MCGen::MCGen] [DEBUG] MCGen initialized !" << std::endl;
 #endif
   srand(time(0));
+
   _ip = ip_;
-#ifdef DEBUG
-  std::cout << "[MCGen::MCGen] [DEBUG] Considered topology : ";
-#endif
+
   if (_ip.p1mod<=2 && _ip.p2mod<=2) {
-#ifdef DEBUG
-    std::cout << "ELASTIC case" << std::endl;
-#endif
+    topo = "ELASTIC case";
     _ndim = 7;
   }
   else if (_ip.p1mod<=2 || _ip.p2mod<=2) {
-#ifdef DEBUG
-    std::cout << "SINGLE-DISSOCIATIVE case" << std::endl;
-#endif
+    topo = "SINGLE-DISSOCIATIVE case";
     _ndim = 8;
   }
   else {
-#ifdef DEBUG
-    std::cout << "DOUBLE-DISSOCIATIVE case" << std::endl;
-#endif
+    topo = "DOUBLE-DISSOCIATIVE case";
     _ndim = 9;
   }
+#ifdef DEBUG
+  std::cout << "[MCGen::MCGen] [DEBUG] Considered topology : " << topo << std::endl;
+#endif
+
   veg = new Vegas(_ndim,f, &_ip);
-//#ifdef DEBUG
+
+#ifdef DEBUG
   std::cout << "[MCGen::MCGen] [DEBUG] Cuts mode : " << _ip.mcut << std::endl;
   switch(_ip.mcut) {
     case 1:
@@ -40,7 +39,10 @@ MCGen::MCGen(InputParameters ip_)
         break;
       }
       if (_ip.maxpt>0.) {
-        std::cout << "pT in range [" << _ip.minpt << " GeV/c, " << _ip.maxpt << " GeV/c]" << std::endl;
+        std::cout << "pT in range [" 
+                  << _ip.minpt << " GeV/c, " 
+                  << _ip.maxpt << " GeV/c]" 
+                  << std::endl;
         break;
       }
       std::cout << "pT > " << _ip.minpt << " GeV/c";
@@ -56,7 +58,7 @@ MCGen::MCGen(InputParameters ip_)
       std::cout << "[MCGen::MCGen] [DEBUG] No cuts applied on the total cross section" << std::endl;
       break;
   }
-//#endif
+#endif
 }
 
 MCGen::~MCGen()
@@ -69,11 +71,15 @@ MCGen::~MCGen()
 
 void MCGen::Test()
 {
-  double x[7], xsec, err;
+  double x[7];
+  _ip.mcut = 2;
+  _ip.minpt = 0.1;
+  _ip.Dump();
   for (unsigned int i=0; i<sizeof(x)/sizeof(double); i++) {
-    x[i] = 0.5;
+    x[i] = 0.1;
   }
   std::cout << f(x, (int)(sizeof(x)/sizeof(double)), &_ip) << std::endl;
+  /*double xsec, err;
   veg->Integrate(&xsec, &err);
   //veg->SetGen();
   
@@ -104,9 +110,7 @@ void MCGen::Test()
     _ip.plot[7]->DrawHistogram();
     _ip.plot[8]->DrawHistogram();
   }
-
-  
-  
+  */
 }
 
 void MCGen::ComputeXsection(double* xsec_, double *err_)
@@ -273,6 +277,10 @@ double f(double* x_, size_t ndim_, void* params_) {
     return 0.;
   }
   ff = gg->ComputeXsec();
+  if (ff==0.) {
+    delete gg;
+    return ff;
+  }
 
   //if (ff!=0. && p->generation) { // MC events generation
   if (p->store) { // MC events generation
@@ -324,7 +332,7 @@ double f(double* x_, size_t ndim_, void* params_) {
        << "\t" << ol2->m
        << "\t" << ol2->pdgId
        << std::endl;
-    std::cout << GetLHEvent(gg, true);
+    //std::cout << GetLHEvent(gg, true);
     //*(p->file) << ga1.px << "\t" << ga1.py << "\t" << ga1.pz << "\t" << ga1.e << std::endl;
   }
 

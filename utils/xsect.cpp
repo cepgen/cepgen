@@ -16,13 +16,14 @@ int main(int argc, char* argv[]) {
   std::ofstream tmp;
   int it;
 
-  max = 10.;
+  // max = 10.;
+  max = 2.5;
 
   if (argc>1) {
     it = atoi(argv[1]);
   }
   else {
-    it = 10;
+    it = 50;
   }
 
   ip.in1p = 3500.;
@@ -31,7 +32,9 @@ int main(int argc, char* argv[]) {
   ip.p1mod = 2;
   ip.p2mod = 2;
   ip.mcut = 2;
-
+  //ip.itmx = 5;
+  ip.generation = false;
+  ip.Dump();
   tmp.open("tmp/xsec.dat");
   for (int i=0; i<it; i++) {
     minpt = (double)i/(double)it*max;

@@ -6,7 +6,7 @@ VPATH = src include
 ############################################
 CPP_FILES = $(wildcard src/*.cpp)
 HPP_FILES = $(wildcard includes/*.h)
-LIB_FILES = $(patsubst src/%.cpp,%.o,$(CPP_FILES))
+LIB_FILES = $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 OBJ_FILES = main.o $(LIB_FILES)
 ############################################
 CC = g++
@@ -17,20 +17,20 @@ PYTHIADIR = include/pythia8175
 GSLDIR = /usr/include/gsl
 ############################################
 
-$(info $(OBJ_FILES))
+#$(info $(OBJ_FILES))
 
-all: mcgen xsect clean
+all: mcgen xsect
 
 mcgen: $(OBJ_FILES)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 .PHONY: all
 
-%.o: %.cpp
+obj/%.o: %.cpp
 	$(CC) -c $(CFLAGS) $< -o $@
 
 clean:
-	$(RM) *.o
+	$(RM) obj/*.o
 
 cleanest: clean
 	$(RM) mcgen

@@ -274,11 +274,10 @@ class GamGam {
   double _t1, _t2;
   // COMMON /LEVI/
   double _gram;
-  double _dd1, _dd2, _dd3, _dd4, _dd5;
+  double _dd1, _dd2, _dd3, _dd5;
   double _delta;
   double _g4;
   double _sa1, _sa2;
-  double _a1, _a2;
   // COMMON /LTCOM/
   /**
    * @brief \f$\gamma\f$ factor of the centre of mass system, used in the
@@ -295,38 +294,29 @@ class GamGam {
    * @brief \f$\delta_1=m_3^2-m_1^2\f$ as defined in Vermaseren's paper
    * @cite Vermaseren1983347 for the full definition of this quantity
    */
-  double _d1;
+  double _w31;
   /**
    * @brief \f$\delta_4=m_5^2-m_2^2\f$ as defined in Vermaseren's paper
    * @cite Vermaseren1983347 for the full definition of this quantity
    */
-  double _d2;
-  double _d3;
+  double _w52;
   /**
    * @brief \f$\delta_5=m_4^2-t_1\f$ as defined in Vermaseren's paper
    * @cite Vermaseren1983347 for the full definition of this quantity
    */
-  double _d4;
+  double _dd4;
   /**
    * @brief \f$\delta_2=m_1^2-m_2^2\f$ as defined in Vermaseren's paper
    * @cite Vermaseren1983347 for the full definition of this quantity
    */
-  double _d5;
+  double _w12;
   /**
    * @brief \f$\delta_6=m_4^2-m_5^2\f$ as defined in Vermaseren's paper
    * @cite Vermaseren1983347 for the full definition of this quantity
    */
-  double _d6;
-  double _d7;
-  /**
-   * @brief \f$\delta_3=t_1-m_2^2\f$ as defined in Vermaseren's paper
-   * @cite Vermaseren1983347 for the full definition of this quantity
-   */
-  double _d8;
+  double _tau;
   // COMMON /PICKZZ/
   double _sl1;
-  double _w12, _w31, _w52;
-  double _tau;
   // COMMON /QVEC/   // 0 = E, 1-3 = p
   double _qve[4];
   // COMMON /VARIAB/

@@ -19,8 +19,8 @@ int main(int argc, char* argv[]) {
     ip.pair = 13;
     ip.p1mod = 2;
     ip.p2mod = 2;
-    ip.mcut = 0;
-    ip.minpt = 0.;
+    ip.mcut = 2;
+    ip.minpt = 5.;
     //ip.debug = true;
   }
   else {
@@ -35,14 +35,12 @@ int main(int argc, char* argv[]) {
   }
   MCGen mg(ip);
   ip.Dump();
-  double xsec, err;
+  /*double xsec, err;
   mg.ComputeXsection(&xsec, &err);
-
   if (ip.generation) {
-    mg.LaunchGen(5e4);
-    //mg.Test();
-  }
-  //mg.Test();
+    mg.LaunchGen(1e5);
+  }*/
+  mg.Test();
   //mg.AnalyzePhaseSpace("testing/psprobe");*/
   return 0;
 }

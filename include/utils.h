@@ -81,8 +81,6 @@ class InputParameters {
      */
     bool StoreConfigFile(std::string);
     int ncvg; // ??
-    /** @brief Number of Vegas integrations */
-    int itvg;
     /** @brief First incoming particle's momentum (in GeV/c) */
     double in1p;
     /** @brief Second incoming particle's momentum (in GeV/c) */
@@ -135,6 +133,8 @@ class InputParameters {
     double maxtheta;
     double minmx;
     double maxmx;
+    /** @brief Number of Vegas integrations */
+    int itvg;
     /**
      * @brief Maximal number of iterations to perform by VEGAS
      */

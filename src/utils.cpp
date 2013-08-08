@@ -145,7 +145,7 @@ InputParameters::InputParameters() :
   minenergy(1.), maxenergy(-1.),
   mintheta(5.), maxtheta(175.),
   minmx(1.07), maxmx(320.),
-  itmx(10),
+  itvg(5000), itmx(10),
   generation(true), store(false), debug(false)
 {
   /*for (int i=0; i<MAX_HISTOS; i++) {
@@ -168,8 +168,6 @@ void InputParameters::Dump()
   std::cout << "  Incoming protons-like particles" << std::endl;
   std::cout << "  -> Mode : " << p1mod << " and " << p2mod << std::endl;
   std::cout << "  -> Momenta : " << in1p << " and " << in2p << std::endl;
-  std::cout << "  " << std::endl;
-  std::cout << "  " << std::endl;
   std::cout << "  Leptons pair : " << pair << std::endl;
   std::cout << "  Cuts mode : " << mcut << std::endl;
   std::cout << "  -> pT in range [" << minpt << ", " << maxpt << "]" << std::endl;

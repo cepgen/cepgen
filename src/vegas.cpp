@@ -1,6 +1,7 @@
 #include "vegas.h"
 
-Vegas::Vegas(int dim_, double f_(double*,size_t,void*), InputParameters* inParam_)
+Vegas::Vegas(int dim_, double f_(double*,size_t,void*), InputParameters* inParam_) :
+  _nTreatCalls(0)
 {
   gsl_monte_vegas_params par;
   /* x content :
@@ -17,24 +18,26 @@ Vegas::Vegas(int dim_, double f_(double*,size_t,void*), InputParameters* inParam
   _xl = new double[dim_];
   _xu = new double[dim_];
   
-  _nTreatCalls = 0;
-
   for (int i=0; i<dim_; i++) {
     _xl[i] = 0.;
     _xu[i] = 1.;
   }
   _ndim = (size_t)dim_;
-  _ncalls = 14000; // equivalent in LPAIR : NCVG->NCALLS
   _nIter = inParam_->itmx;
+  _ncalls = inParam_->itvg;
   _s = gsl_monte_vegas_alloc(_ndim);
   gsl_monte_vegas_params_get(_s, &par);
   par.stage = 0;
   par.iterations = _nIter;
   par.verbose = -1;
+  //par.mode = GSL_VEGAS_MODE_IMPORTANCE;
+  //par.mode = GSL_VEGAS_MODE_STRATIFIED;
+  //par.mode = GSL_VEGAS_MODE_IMPORTANCE_ONLY;
+  //par.alpha = 1.;
   gsl_monte_vegas_params_set(_s, &par);
   gsl_rng_env_setup(); //FIXME ???
   _r = gsl_rng_alloc(gsl_rng_default);
-  //gsl_rng_set(_r, 3001187); // sets the MC generator's seed
+  //gsl_rng_set(_r, 301187); // sets the MC generator's seed
 
 #ifdef DEBUG
   std::cout << "[Vegas::Vegas] [DEBUG]"
@@ -75,7 +78,7 @@ int Vegas::Integrate(double *result_, double *abserr_)
   gsl_monte_vegas_params_get(_s, &par);
   par.stage = 0;
   gsl_monte_vegas_params_set(_s, &par);
-  vegas_status = gsl_monte_vegas_integrate(_F, _xl, _xu, _ndim, 1e3, _r, _s, result_, abserr_);
+  vegas_status = gsl_monte_vegas_integrate(_F, _xl, _xu, _ndim, 1000, _r, _s, result_, abserr_);
 
 #ifdef DEBUG
   std::cout << "[Vegas::Integrate] [DEBUG] Vegas warm-up finished !" << std::endl;
@@ -95,13 +98,17 @@ int Vegas::Integrate(double *result_, double *abserr_)
 #ifdef DEBUG
     std::cout << "[Vegas::Integrate] [DEBUG] chisq/ndof = " << gsl_monte_vegas_chisq(_s) << std::endl;
 #endif
-  //} while (fabs(gsl_monte_vegas_chisq(_s)-1.)>.5);
+  //} while (fabs(gsl_monte_vegas_chisq(_s)-1.)>.2);
 
 #ifdef DEBUG
-  std::cout << "[Vegas::Integrate] [DEBUG] (" << vegas_status << ") -> Computed cross-section = (" << *result_ << " +/- " << *abserr_ << ") pb" << std::endl;
+  std::cout << "[Vegas::Integrate] [DEBUG] (" << vegas_status << ") -> Computed cross-section = (" 
+            << *result_ << " +/- "
+            << *abserr_ << ") pb"
+            << std::endl;
 #endif
-  gsl_monte_vegas_params_get(_s, &par);
-  //std::cout << "--> " << _s->bins << std::endl;
+  /*gsl_monte_vegas_params_get(_s, &par);
+  std::cout << "--> " << _s->bins << std::endl;
+  std::cout << "--> " << _s->boxes << std::endl;*/
   return vegas_status;
 }
 
