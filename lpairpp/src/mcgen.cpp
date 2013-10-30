@@ -247,9 +247,9 @@ double f(double* x_, size_t ndim_, void* params_) {
                        << "\t" << gg.GetEvent()->GetByRole(5)->p
                        << std::endl;
     }
-    std::cout << "=============================" << std::endl;
-    gg.GetEvent()->GetByRole(41)->Dump();
-    gg.GetEvent()->GetByRole(42)->Dump();
+    //std::cout << "=============================" << std::endl;
+    //gg.GetEvent()->GetByRole(41)->Dump();
+    //gg.GetEvent()->GetByRole(42)->Dump();
     //gg.GetEvent()->Dump();
     //*(p->file) << ga1.px << "\t" << ga1.py << "\t" << ga1.pz << "\t" << ga1.e << std::endl;
   }

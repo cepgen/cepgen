@@ -792,7 +792,7 @@ void GamGam::ComputeSqS()
 
   k = 0.;
   for (int i=0; i<3; i++) {
-    k += _p3_p1[i]*_p3_p2[i];
+    k -= _p3_p1[i]*_p3_p2[i];
   }
   _s = std::pow(_mp1,2)+std::pow(_mp2,2)+2.*(_ep1*_ep2+k);
   _sqs = sqrt(_s);
@@ -1293,7 +1293,7 @@ GamGam::FillKinematics(bool symmetrise_)
   }
   ol2.SetMother(this->_ev->GetByRole(4));
   this->_ev->SetParticle(&ol2);
-  
+  /*
   // First incoming photon
   // Equivalent in LPAIR : PLAB(x, 3)
   Particle ph1(41, 22);
@@ -1327,7 +1327,7 @@ GamGam::FillKinematics(bool symmetrise_)
   }
   ph2.SetMother(this->_ev->GetByRole(2));
   this->_ev->SetParticle(&ph2);
-  
+  */
   /*gmux = -_t2/(_ep1*_eg2-_pp1*_p3_g2[2])/2.;
   gmuy = (_ep1*_eg2-_pp1*_p3_g2[2])/(_ep2*_eg2+_pp2*_p3_g2[2]);
   gmuw = std::pow(_ep1+_eg2, 2)-std::pow(_pp1+_p3_g2[2], 2);

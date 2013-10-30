@@ -33,11 +33,11 @@ void combine()
   TTree *tree;
   bool lep1set, lep2set, pset;
 
-  //lp = new TFile("/home/forthomme/LpairAnalysis/trunk/samples/lpair-pt5-mumu-elastic.root");
-  lp = new TFile("/home/forthomme/LpairAnalysis/trunk/samples/lpair-7tev-elastic-pt5.root");
-  //lp = new TFile("/home/forthomme/LpairAnalysis/trunk/samples/lpair-mumu-pt15-8tev-elastic.root");
-  //lp = new TFile("/home/forthomme/LpairAnalysis/trunk/samples/lpair-7tev-elastic-nocuts.root");
-  //lp = new TFile("/home/forthomme/LpairAnalysis/trunk/samples/lpair-7tev-elastic-pt10-theta0to180.root");
+  //lp = new TFile("samples/lpair-pt5-mumu-elastic.root");
+  lp = new TFile("samples/lpair-7tev-elastic-pt5.root");
+  //lp = new TFile("samples/lpair-mumu-pt15-8tev-elastic.root");
+  //lp = new TFile("samples/lpair-7tev-elastic-nocuts.root");
+  //lp = new TFile("samples/lpair-7tev-elastic-pt10-theta0to180.root");
   tree = (TTree*)(lp->Get("h4444"));
   tree->SetBranchAddress("px", px_);
   tree->SetBranchAddress("py", py_);

@@ -52,12 +52,11 @@ bool
 Particle::SetP(double p_[3], double E_=-1.)
 {
   if (E_<0.) {
-    this->SetP(p_[0], p_[1], p_[2]);
+    return this->SetP(p_[0], p_[1], p_[2]);
   }
   else {
-    this->SetP(p_[0], p_[1], p_[2], E_);
+    return this->SetP(p_[0], p_[1], p_[2], E_);
   }
-  return true;
 }
 
 Particle*

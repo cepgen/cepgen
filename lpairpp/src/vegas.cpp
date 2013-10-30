@@ -98,7 +98,7 @@ Vegas::Integrate(double *result_, double *abserr_)
   par.iterations = _ip->itvg;
   gsl_monte_vegas_params_set(_s, &par);
   _ip->Dump();
-  vegas_status = gsl_monte_vegas_integrate(_F, _xl, _xu, _ndim, 5000, _r, _s, result_, abserr_);
+  vegas_status = gsl_monte_vegas_integrate(_F, _xl, _xu, _ndim, 100000, _r, _s, result_, abserr_);
 
 #ifdef DEBUG
   std::cout << "[Vegas::Integrate] [DEBUG] Vegas warm-up finished !" << std::endl;
@@ -295,8 +295,8 @@ Vegas::GenerateOneEvent()
   } while (y>_fmax[_j]);
   //std::cout << y << std::endl;
   // Select x values in this Vegas bin
-  jj = _j-1;
-  //jj = _j; //FIXME!!!!!!! Ugly ugly bad bad
+  //jj = _j-1;
+  jj = _j; //FIXME!!!!!!! Ugly ugly bad bad
   for (unsigned int i=0; i<_ndim; i++) {
     jjj = jj/_mbin;
     _n[i] = jj-jjj*_mbin;
@@ -389,8 +389,6 @@ Vegas::SetGen(std::ofstream *of_)
   double sig, sigp;
   //#endif
 
-  _j = 0; //FIXME!!!!! ?????
-
   _ip->ngen = 0;
   _ip->file = of_;
 #ifdef DEBUG
@@ -409,8 +407,8 @@ Vegas::SetGen(std::ofstream *of_)
   }
 
   for (int i=0; i<max; i++) {
-    jj = i-1;
-    //jj = i; //FIXME !!!!!
+    //jj = i-1;
+    jj = i; //FIXME !!!!!
     for (unsigned int j=0; j<_ndim; j++) {
       //jjj = floor(jj/_mbin); //FIXME floor or ceil???
       jjj = jj/_mbin;
