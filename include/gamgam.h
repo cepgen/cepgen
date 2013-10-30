@@ -10,9 +10,59 @@
 #include <cstdlib>
 #include <map>
 
+#include "event.h"
 #include "utils.h"
 
 /**
+ * @brief List of kinematic cuts to apply on the central and outgoing phase space.
+ */
+class GamGamKinematics {
+  public:
+    GamGamKinematics();
+    ~GamGamKinematics();
+    void Dump();
+    /**
+     * Type of kinematics to consider for the process. Can either be :
+     *  * 0 for the electron-electron elastic case
+     *  * 1 for the proton-proton elastic case
+     *  * 2 for the proton-proton single-dissociative (or inelastic) case
+     *  * 3 for the proton-proton double-dissociative case
+     * @brief Type of kinematics to consider for the phase space
+     */
+    int kinematics;
+    /** @brief Sets of cuts to apply on the final phase space */
+    int mode;
+    /** @brief Minimal transverse momentum of the single outgoing leptons */
+    double ptmin;
+    /** @brief Maximal transverse momentum of the single outgoing leptons */
+    double ptmax;
+    /** @brief Minimal energy of the central two-photons system */
+    double emin;
+    /** @brief Maximal energy of the central two-photons system */
+    double emax;
+    /** @brief Minimal polar (\f$\theta_\mathrm{min}\f$) angle of the outgoing leptons, expressed in degrees */
+    double thetamin;
+    /** @brief Maximal polar (\f$\theta_\mathrm{max}\f$) angle of the outgoing leptons, expressed in degrees */
+    double thetamax;
+    double mxmin;
+    double mxmax;
+    /** @brief The minimal value of \f$Q^2\f$ */
+    double q2min;
+    /** @brief The maximal value of \f$Q^2\f$ */
+    double q2max;
+    /** @brief The minimal \f$s\f$ on which the cross section is integrated */
+    double wmin;
+    /** @brief The maximal \f$s\f$ on which the cross section is integrated.
+     *  If negative, the maximal energy available to the system (hence,
+     * \f$s=(\sqrt{s})^{2}\f$) is provided.*/
+    double wmax;
+};
+
+/**
+ * Full class of methods and objects to compute the full analytic matrix element
+ * @cite Vermaseren1983347 for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$ process
+ * according to a set of kinematic constraints provided for the incoming and
+ * outgoing particles (the GamGamKinematics object).
  * @brief Computes the matrix element for a \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
  *  process
  */
@@ -23,28 +73,24 @@ class GamGam {
    * and the cross-section of this phase space point.
    * @brief Class constructor
    * @param ndim_ The number of dimensions of the point in the phase space
-   * @param q2min_ The minimal value of \f$Q^2\f$
-   * @param q2max_ The maximal value of \f$Q^2\f$
    * @param nOpt_ Optimisation???
-   * @param x_[] The ndim_-dimensional point in the phase space on which
+   * @param x_[] The (@a ndim_)-dimensional point in the phase space on which
    *  the kinematics and the cross-section are computed
-   * @todo Figure out how this nOpt_ parameter is affecting the final
+   * @todo Figure out how this @a nOpt_ parameter is affecting the final
    *  cross-section computation and events generation
-   * @todo What are these w12, w31, w52 parameters introduced in the GAMGAM
-   *  subroutine ? And why are they set to 0. ?
    */
-  GamGam(const unsigned int,double,double,int,double x_[]);
+  GamGam(const unsigned int ndim_,int nOpt_,double x_[]);
   ~GamGam();
   /**
    * Specifies the incoming particles' kinematics as well as their properties
-   *  (role in the process and PDG Id)
+   *  (role in the process and code according to the PDG convention)
    * @brief Sets the momentum and PDG id for the incoming particles
    * @param part_ Role of the particle in the process
    * @param momentum_[] 3-momentum of the particle
    * @param pdgId_ Particle ID according to the PDG convention
    * @return True if the kinematics was correctly set for the given particle role
    */
-  bool SetIncomingKinematics(int,double[],int);
+  bool SetIncomingKinematics(int part_,double momentum_[3],int pdgId_);
   /**
    * Specifies the incoming particles' kinematics as well as their properties
    * using two Particle objects.
@@ -52,13 +98,13 @@ class GamGam {
    * @param ip1_ Information on the first incoming particle
    * @param ip2_ Information on the second incoming particle
    */
-  bool SetIncomingKinematics(Particle,Particle);
+  bool SetIncomingKinematics(Particle ip1_,Particle ip2_);
   /**
    * @brief Sets the PDG id for the outgoing particles
    * @param part_ Role of the particle in the process
    * @param pdgId_ Particle ID according to the PDG convention
    */
-  bool SetOutgoingParticles(int,int);
+  bool SetOutgoingParticles(int part_,int pdgId_);
   /*void SetCutsMode(int mod_) {this->_modcut = mod_;};
   //void SetCutsMode(int);
   void SetMinimumPt(double ptmin_) {this->_ptcut = ptmin_;};
@@ -69,24 +115,17 @@ class GamGam {
    *  final state
    * @param cuts_ The Cuts object containing the kinematic parameters
    */
-  void SetCuts(Cuts);
-  /**
-   * @brief Sets the energy range available for the phase space integration
-   * @param wmin_ The minimal \f$s\f$ on which the cross section is integrated
-   * @param wmax_ The maximal \f$s\f$ on which the cross section is integrated.
-   *  If negative, the maximal energy available to the system (hence,
-   * \f$s=(\sqrt{s})^{2}\f$) is provided.
-   */
-  void SetWRange(double,double);
+  void SetCuts(GamGamKinematics cuts_);
   /**
    * @brief Get a particle given its role in the process
    * @param role_ An integer denoting the particle's role in the selected
    *  production process
    */
-  Particle* GetParticle(int);
+  Particle* GetParticle(int role_);
+  void SetParticle(int,Particle*);
   /**
    * Is the system's kinematics well defined and compatible with the process ?
-   * This check is mandatory to perform the (_ndim)-dimensional point's
+   * This check is mandatory to perform the (@a _ndim)-dimensional point's
    * cross-section computation.
    * @brief Is the system's kinematics well defined?
    * @return A boolean stating if the input kinematics and the final
@@ -107,8 +146,13 @@ class GamGam {
    * the differential cross-section for the given point in the phase space.
    */
   double ComputeXsec(int nm_=1);
-  void FillKinematics();
+  void FillKinematics(bool symmetrise_=false);
   void StoreEvent(std::ofstream*,double);
+  double GetT1() { return this->_t1; };
+  void GetT1extrema(double& t1min_, double& t1max_) { t1min_=this->_t1min; t1max_=this->_t1max; };
+  double GetT2() { return this->_t2; };
+  void GetT2extrema(double& t2min_, double& t2max_) { t2min_=this->_t2min; t2max_=this->_t2max; };
+  inline Event* GetEvent() { return this->_ev; };
  private:
   /**
    * Calculates energies and momenta of the 1st, 2nd (resp. the "proton-like"
@@ -138,13 +182,12 @@ class GamGam {
   /** @brief Number of dimensions on which the integration has to be performed  */
   unsigned int _ndim;
   /**
-   * @brief Array of _ndim components representing the point on which the
+   * @brief Array of @a _ndim components representing the point on which the
    *  weight in the cross-section is computed
    */
   double *_x;
   int _nOpt;
   // COMMON/PICKZZ/
-  // incoming particles' 4-momentum
   /** @brief \f$\mathbf p_1\f$, 3-momentum of the first proton-like incoming particle */
   double _p3_p1[3];
   /** @brief \f$\left|\mathbf p_1\right|\f$, 3-momentum norm of the first proton-like incoming particle */
@@ -155,6 +198,7 @@ class GamGam {
   double _mp1;
   /** @brief \f$m_1^2\f$, squared mass of the first proton-like incoming particle */
   double _w1;
+  /** @brief PDG identifier of the first proton-like incoming particle */
   int _pdg1;
   /** @brief \f$\mathbf p_2\f$, 3-momentum of the second incoming particle */
   double _p3_p2[3];
@@ -166,8 +210,8 @@ class GamGam {
   double _mp2;
   /** @brief \f$m_2^2\f$, squared mass of the second proton-like incoming particle */
   double _w2;
+  /** @brief PDG identifier of the second proton-like incoming particle */
   int _pdg2;
-  // first outgoing particles' 4-momentum
   /** @brief \f$\mathbf p_3\f$, 3-momentum of the first proton-like outgoing particle */
   double _p3_p3[3];
   /** @brief \f$\left|\mathbf p_3\right|\f$, 3-momentum norm of the first proton-like outgoing particle */
@@ -178,8 +222,8 @@ class GamGam {
   double _mp3;
   /** @brief \f$m_3^2\f$, squared mass of the first proton-like outgoing particle */
   double _w3;
+  /** @brief PDG identifier of the first proton-like outgoing particle */
   int _pdg3;
-  // central system's momentum
   /** @brief \f$\mathbf p_4\f$, 3-momentum of the two-photon central system */
   double _p3_c4[3];
   /** @brief \f$\left|\mathbf p_4\right|\f$, 3-momentum norm of the two-photon central system */
@@ -190,7 +234,6 @@ class GamGam {
   double _mc4;
   /** @brief \f$m_4^2\f$, squared mass of the two-photon central system */
   double _w4;
-  // second outgoing particles' 4-momentum
   /** @brief \f$\mathbf p_5\f$, 3-momentum of the second proton-like outgoing particle */
   double _p3_p5[3];
   /** @brief \f$\left|\mathbf p_5\right|\f$, 3-momentum norm of the second proton-like outgoing particle */
@@ -201,8 +244,8 @@ class GamGam {
   double _mp5;
   /** @brief \f$m_5^2\f$, squared mass of the second proton-like outgoing particle */
   double _w5;
+  /** @brief PDG identifier of the second proton-like outgoing particle */
   int _pdg5;
-  // outgoing leptons' 4-momentum
   /** @brief \f$\mathbf p_6\f$, 3-momentum of the first outgoing lepton */
   double _p3_l6[3];
   /** @brief \f$\left|\mathbf p_6\right|\f$, 3-momentum norm of the first outgoing lepton */
@@ -217,6 +260,7 @@ class GamGam {
   double _pt_l6;
   /** @brief \f$E_6^\mathrm{lab}\f$, energy of the first outgoing lepton, computed in the lab frame */
   double _e6lab;
+  /** @brief PDG identifier of the first outgoing lepton */
   int _pdg6;
   /** @brief \f$\mathbf p_7\f$, 3-momentum of the second outgoing lepton */
   double _p3_l7[3];
@@ -232,10 +276,15 @@ class GamGam {
   double _pt_l7;
   /** @brief \f$E_7^\mathrm{lab}\f$, energy of the second outgoing lepton, computed in the lab frame */
   double _e7lab;
+  /** @brief PDG identifier of the second outgoing lepton */
   int _pdg7;
+  /** @brief Energy of the first central photon of momentum \f$t_1\f$ */
   double _eg1;
+  /** @brief 3-momentum of the second central photon of momentum \f$t_1\f$ */
   double _p3_g1[3];
+  /** @brief Energy of the second central photon of momentum \f$t_2\f$ */
   double _eg2;
+  /** @brief 3-momentum of the second central photon of momentum \f$t_2\f$ */
   double _p3_g2[3];
   // CM energy of the incoming particles' system
   /** @brief \f$s\f$, squared centre of mass energy of the incoming particles' system */
@@ -271,7 +320,8 @@ class GamGam {
   double _d1dq, _d1dq2, _q1dq, _q1dq2;
   // COMMON /EXTRA/
   double _s1, _s2;
-  double _t1, _t2;
+  double _t1, _t1min, _t1max;
+  double _t2, _t2min, _t2max;
   // COMMON /LEVI/
   double _gram;
   double _dd1, _dd2, _dd3, _dd5;
@@ -383,11 +433,11 @@ class GamGam {
 
   // Cuts
   /** @brief Set of cuts to apply on the final phase space */
-  Cuts _cuts;
-  double _wmin, _wmax;
+  GamGamKinematics _cuts;
   double _cotth1, _cotth2;
   // Particles
-  std::map<int,Particle> *_part;
+  Event *_ev;
+  //std::map<int,Particle> *_part;
 };
 
 #endif

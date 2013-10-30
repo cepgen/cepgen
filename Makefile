@@ -1,4 +1,6 @@
-CFLAGS = -Wall -Wextra -I$(INCLUDEDIR) -I$(PYTHIADIR)/include -I$(GSLDIR) -L$(PYTHIADIR)/lib/archive -lpythia8 -llhapdfdummy -O4 -fPIC
+EXEC=clpair
+#CFLAGS = -Wall -Wextra -I$(INCLUDEDIR) -I$(PYTHIADIR)/include -I$(GSLDIR) -L$(PYTHIADIR)/lib/archive -lpythia8 -llhapdfdummy -O4 -fPIC
+CFLAGS = -Wall -Wextra -I$(INCLUDEDIR) -I$(PYTHIADIR)/include -I$(GSLDIR) -L$(PYTHIADIR)/lib/archive -lpythia8 -llhapdfdummy -g
 LDFLAGS = -lgsl -lgslcblas $(PYTHIADIR)/lib/archive/libpythia8.a $(PYTHIADIR)/lib/archive/liblhapdfdummy.a
 #LDFLAGS = -lgsl -lgslcblas -Linclude/pythia6 -lPythia6
 #LDFLAGS = $(gsl-config --libs)
@@ -19,18 +21,18 @@ GSLDIR = /usr/include/gsl
 
 #$(info $(OBJ_FILES))
 
-all: mcgen xsect
+all: $(EXEC) xsect
 
-mcgen: $(OBJ_FILES)
+$(EXEC): $(OBJ_FILES)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 .PHONY: all
 
-obj/%.o: %.cpp
+obj/%.o: %.cpp %.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 clean:
-	$(RM) obj/*.o
+	$(RM) obj/*.o $(EXEC)
 
 cleanest: clean
 	$(RM) mcgen
@@ -44,6 +46,6 @@ plot: tryplot.o gnuplot.o
 xsect: utils/xsect.o $(LIB_FILES)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-pytest: test.o $(LIB_FILES)
+probe: utils/probe.o $(LIB_FILES)
 	$(CC) -o $@ $^ $(LDFLAGS)
 

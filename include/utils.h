@@ -2,10 +2,12 @@
 #define _UTILS_H
 
 #include <iostream>
+#include <iomanip>
 #include <cstdlib>
 #include <cmath>
+#include <fstream>
 
-#include "gnuplot.h"
+//#include "gnuplot.h"
 #include "particle.h"
 //#include "gamgam.h"
 
@@ -20,6 +22,13 @@
 #define sconstb 2.1868465E10
 //#define RANMAX 1e8
 
+
+/**
+ * Gets the mass in GeV/c**2 of a particle given its PDG identifier
+ * @brief Gets the mass of a particle
+ * @param pdgId_ PDG ID of the particle whose mass is requested
+ * @return Mass of the particle in GeV/c**2
+ */
 double GetMassFromPDGId(int);
 
 /**
@@ -74,13 +83,12 @@ class InputParameters {
      * @brief Reads content from config file to load the variables
      * @param inFile_ Name of the configuration file to load
      */
-    bool ReadConfigFile(std::string);
+    bool ReadConfigFile(std::string inFile_);
     /**
      * @brief Stores the full run configuration to an external config file
      * @param outFile_ Name of the configuration file to create
      */
-    bool StoreConfigFile(std::string);
-    int ncvg; // ??
+    bool StoreConfigFile(std::string outFile_);
     /** @brief First incoming particle's momentum (in GeV/c) */
     double in1p;
     /** @brief Second incoming particle's momentum (in GeV/c) */
@@ -101,7 +109,7 @@ class InputParameters {
      */
     int p2mod;
     /**
-     * The particle code of produced leptons :
+     * The particle code of produced leptons, as defined by the PDG convention :
      * - 11 - for \f$e^+e^-\f$ pairs
      * - 13 - for \f$\mu^+\mu^-\f$ pairs
      * - 15 - for \f$\tau^+\tau^-\f$ pairs
@@ -113,15 +121,25 @@ class InputParameters {
      * available kinematic phase space :
      * - 0 - No cuts at all (for the total cross section)
      * - 1 - Vermaserens' hypothetical detector cuts : for both leptons,
-     *   + \f$\frac{|p_z|}{|\mathbf p|}\leq\f$ 0.75 and \f$p_T\geq\f$ 1 GeV, or
-     *   + 0.75 \f$<\frac{|p_z|}{|\mathbf p|}\leq\f$ 0.95 and \f$p_z>\f$ 1 GeV,
-     * - 2 - Cuts according to the provided parameters
+     *   + \f$\frac{|p_z|}{|\mathbf p|}\leq\f$ 0.75 and \f$p_T\geq\f$ 1 GeV/c,
+     *   or
+     *   + 0.75 \f$<\frac{|p_z|}{|\mathbf p|}\leq\f$ 0.95 and \f$p_z>\f$ 1 GeV/c,
+     * - 2 - Cuts on both the outgoing leptons, according to the provided cuts
+     *   parameters
+     * - 3 - Cuts on at least one outgoing lepton, according to the provided
+     *   cut parameters
      * @brief Set of cuts to apply on the outgoing leptons
      */
     int mcut;
-    /** @brief Minimal transverse momentum of the outgoing leptons */
+    /**
+     * Minimal transverse momentum cut to apply on the outgoing lepton(s)
+     * @brief Minimal \f$p_T\f$ of the outgoing leptons
+     */
     double minpt;
-    /** @brief Maximal transverse momentum of the outgoing leptons */
+    /**
+     * Maximal transverse momentum cut to apply on the outgoing lepton(s)
+     * @brief Maximal \f$p_T\f$ of the outgoing leptons
+     */
     double maxpt;
     /** @brief Minimal energy of the outgoing leptons */
     double minenergy;
@@ -131,14 +149,26 @@ class InputParameters {
     double mintheta;
     /** @brief Maximal polar angle \f$\theta\f$ of the outgoing leptons */
     double maxtheta;
+    /**
+     * Minimal mass of the outgoing proton remnants, \f$M_X\f$, in
+     * GeV/c\f${}^{2}\f$.
+     * @brief Minimal \f$M_X\f$ of the outgoing proton remnants
+     */
     double minmx;
+    /**
+     * Maximal mass of the outgoing proton remnants, \f$M_X\f$, in
+     * GeV/c\f${}^{2}\f$.
+     * @brief Maximal \f$M_X\f$ of the outgoing proton remnants
+     */
     double maxmx;
-    /** @brief Number of Vegas integrations */
+    int ncvg; // ??
+    /** @brief Maximal number of iterations to perform by VEGAS */
     int itvg;
     /**
-     * @brief Maximal number of iterations to perform by VEGAS
+     * @brief Maximal number of TREAT calls
+     * @fixme Is it correctly implemented ?
      */
-    int itmx;
+    int ntreat;
     /**
      * @brief Are we generating events ? (true) or are we only computing the
      * cross-section ? (false)
@@ -156,6 +186,10 @@ class InputParameters {
      */
     bool debug;
     /**
+     * @brief Maximal number of events to generate in this run
+     */
+    int maxgen;
+    /**
      * @brief Number of events already generated in this run
      */
     int ngen;
@@ -172,33 +206,9 @@ class InputParameters {
      * development!
      * @brief Control plots objects
      */
-    Gnuplot* plot[MAX_HISTOS];
+    //Gnuplot* plot[MAX_HISTOS];
     //GamGam* gamgam;
-};
-
-/**
- * @brief List of kinematic cuts to apply on the central and outgoing phase space.
- */
-class Cuts {
-  public:
-    Cuts();
-    ~Cuts();
-    /** @brief Sets of cuts to apply on the final phase space */
-    int mode;
-    /** @brief Minimal transverse momentum of the single outgoing leptons */
-    double ptmin;
-    /** @brief Maximal transverse momentum of the single outgoing leptons */
-    double ptmax;
-    /** @brief Minimal energy of the central two-photons system */
-    double emin;
-    /** @brief Maximal energy of the central two-photons system */
-    double emax;
-    /** @brief Minimal polar (\f$\theta_\mathrm{min}\f$) angle of the outgoing leptons, expressed in degrees */
-    double thetamin;
-    /** @brief Maximal polar (\f$\theta_\mathrm{max}\f$) angle of the outgoing leptons, expressed in degrees */
-    double thetamax;
-    double mxmin;
-    double mxmax;
+    bool symmetrise;
 };
 
 #endif

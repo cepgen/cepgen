@@ -27,15 +27,15 @@ double GetMassFromPDGId(int pdgId_)
   double m;
   switch(abs(pdgId_)) {
   case 2212: // proton
-    //m = .938272046;
-    m = .93830001354217529; // FROM LPAIR
+    m = .938272046;
+    //m = .93830001354217529; // FROM LPAIR
     break;
   case 11: // electron
     m = .510998928e-3;
     break;
   case 13: // muon
-    //m = .1056583715;
-    m = .10570000112056732; // FROM LPAIR
+    m = .1056583715;
+    //m = .10570000112056732; // FROM LPAIR
     break;
   case 15: // tau
     m = 1.77682;
@@ -142,11 +142,15 @@ InputParameters::InputParameters() :
   pair(13),
   mcut(0),
   minpt(0.5), maxpt(-1.),
-  minenergy(1.), maxenergy(-1.),
+  minenergy(0.), maxenergy(-1.),
   mintheta(5.), maxtheta(175.),
+  //mintheta(0.), maxtheta(180.),
   minmx(1.07), maxmx(320.),
-  itvg(5000), itmx(10),
-  generation(true), store(false), debug(false)
+  ncvg(14000), itvg(10),
+  ntreat(1),
+  generation(true), store(false), debug(false),
+  maxgen(1e4),
+  symmetrise(true)
 {
   /*for (int i=0; i<MAX_HISTOS; i++) {
     this->plot[i] = new Gnuplot();
@@ -163,28 +167,60 @@ InputParameters::~InputParameters()
 
 void InputParameters::Dump()
 {
-  std::cout << "[InputParameters] Input Parameters DUMP =============" << std::endl;
-  std::cout << "===== Kinematics =====" << std::endl;
-  std::cout << "  Incoming protons-like particles" << std::endl;
-  std::cout << "  -> Mode : " << p1mod << " and " << p2mod << std::endl;
-  std::cout << "  -> Momenta : " << in1p << " and " << in2p << std::endl;
-  std::cout << "  Leptons pair : " << pair << std::endl;
-  std::cout << "  Cuts mode : " << mcut << std::endl;
-  std::cout << "  -> pT in range [" << minpt << ", " << maxpt << "]" << std::endl;
-  std::cout << "  -> Energy in range [" << minenergy << ", " << maxenergy << "]" << std::endl;
-  std::cout << "  -> Azimuthal angle theta in range [" << mintheta << ", " << maxtheta << "]" << std::endl;
-  std::cout << "  Outgoing remnants' mass in range [" << minmx << ", " << maxmx << "]" << std::endl;
-  std::cout << "===== VEGAS =====" << std::endl;
-  std::cout << "  Maximum number of iterations : " << itmx << std::endl;
-  std::cout << "===== General informaton =====" << std::endl;
-  std::cout << "  Events generation ? " << generation << std::endl;
-  std::cout << "  Events storage ? " << store << std::endl;
-  std::cout << "  Debugging mode ? " << debug << std::endl;
-  std::cout << "[InputParameters] End of DUMP =======================" << std::endl;
+  std::string cutsmode, particles;
+
+  switch(mcut) {
+    case 1:
+      cutsmode = "Vermaseren"; break;
+    case 2:
+      cutsmode = "both"; break;
+    case 3:
+      cutsmode = "single"; break;
+    case 0:
+    default:
+      cutsmode = "none"; break;
+  }
+  switch(pair) {
+    case 11:
+      particles = "electrons"; break;
+    case 13:
+    default: 
+      particles = "muons"; break;
+    case 15:
+      particles = "taus"; break;
+  }
+  std::cout
+    << "[InputParameters] Dump ======================" << std::endl
+    << "===== Kinematics" << std::endl
+    << "------ Incoming protons-like particles" << std::endl
+    << std::setw(35) << "Mode : " << std::setw(4) << p1mod << ", " << std::setw(4) << p2mod << std::endl
+    << std::setw(35) << "Momenta [GeV/c] : " << std::setw(4) << in1p << ", " << std::setw(4) << in2p << std::endl
+    << "------ Outgoing leptons" << std::endl
+    << std::setw(35) << "Pair : " << std::setw(2) << pair << " " << std::setw(7) << particles << std::endl
+    << std::setw(35) << "Cuts mode : " << std::setw(1) << mcut << " (" << std::setw(6) << cutsmode << ")" << std::endl
+    << std::setw(35) << "pT [GeV/c] : " << "[" << std::setw(3) << minpt << ", " << std::setw(3) << maxpt << "]" << std::endl
+    << std::setw(35) << "Energy [GeV] : " << "[" << std::setw(3) << minenergy << ", " << std::setw(3) << maxenergy << "]" << std::endl
+    << std::setw(35) << "Azimuthal angle theta [deg] : " << "[" << std::setw(3) << mintheta << ", " << std::setw(3) << maxtheta << "]" << std::endl
+    << "------ Outgoing remnants" << std::endl
+    << std::setw(35) << "Minimal mass [GeV/c**2] : " << std::setw(10) << minmx << std::endl
+    << std::setw(35) << "Maximal mass [GeV/c**2] : " << std::setw(10) << maxmx << std::endl
+    << "===== VEGAS" << std::endl
+    << std::setw(35) << "Maximum number of iterations : " << std::setw(10) << itvg << std::endl
+    << std::setw(35) << "Number of function calls : " << std::setw(10) << ncvg << std::endl
+    << "===== General informaton" << std::endl
+    << std::setw(35) << "Events generation : " << std::setw(10) << generation << std::endl
+    << std::setw(35) << "Number of events to generate : " << std::setw(10) << maxgen << std::endl
+    << std::setw(35) << "Number of TREAT calls : " << std::setw(10) << ntreat << std::endl
+    << std::setw(35) << "Events storage : " << std::setw(10) << store << std::endl
+    << std::setw(35) << "Debugging mode : " << std::setw(10) << debug << std::endl
+    << std::setw(35) << "Is Output file opened ? " << std::setw(10) << file->is_open() << std::endl
+    << std::setw(35) << "Is Debug file opened ? " << std::setw(10) << file_debug->is_open() << std::endl
+    << "[InputParameters] EndDump ===================" << std::endl;
 }
 
 bool InputParameters::ReadConfigFile(std::string inFile_)
 {
+  //#define DEBUG true
   std::ifstream f;
   std::string key, value;
   f.open(inFile_.c_str(), std::fstream::in);
@@ -198,6 +234,8 @@ bool InputParameters::ReadConfigFile(std::string inFile_)
   std::cout << "======================================================" << std::endl;
 #endif
   while (f >> key >> value) {
+    //std::cout << "[" << key << "] = " << value << std::endl;
+    //if (strncmp(key.c_str(), "#")==0) continue; // FIXME need to ensure there is no extra space before !
     if (key=="IEND") {
       int iend = (int)atoi(value.c_str());
       if (iend>1) {
@@ -207,7 +245,7 @@ bool InputParameters::ReadConfigFile(std::string inFile_)
     else if (key=="NCVG") {
       this->ncvg = (int)atoi(value.c_str());
 #ifdef DEBUG
-      std::cout << " * Number of Vegas calls                               : " << this->ncvg << std::endl;
+      std::cout << " * Number of function calls                            : " << this->ncvg << std::endl;
 #endif
     }
     else if (key=="ITVG") {
@@ -232,7 +270,7 @@ bool InputParameters::ReadConfigFile(std::string inFile_)
           break;
         case 2:
         default:
-          std::cout << "elastic proton [EPA]";
+          std::cout << "elastic proton";
           break;
         case 11:
           std::cout << "dissociating proton [structure functions]";
@@ -254,7 +292,7 @@ bool InputParameters::ReadConfigFile(std::string inFile_)
 #endif
     }
     else if (key=="INPE") {
-      this->in2p = (double)atof(value.c_str());
+      this->in2p = -(double)atof(value.c_str()); //FIXME
 #ifdef DEBUG
       std::cout << " * Second incoming particles' momentum                 : " << this->in1p << " GeV/c" << std::endl;
 #endif
@@ -338,15 +376,21 @@ bool InputParameters::ReadConfigFile(std::string inFile_)
 #endif
     }
     else if (key=="ECUT") {
-      this->minpt = (double)atof(value.c_str());
+      this->minenergy = (double)atof(value.c_str());
 #ifdef DEBUG
-      std::cout << " * Outgoing lepton pairs' minimal energy               : " << this->minpt << " GeV/c" << std::endl;
+      std::cout << " * Outgoing lepton pairs' minimal energy               : " << this->minenergy << " GeV/c" << std::endl;
 #endif
     }
-    else if (key=="ITMX") {
-      this->itmx = (double)atoi(value.c_str());
+    else if (key=="NTRT") {
+      this->ntreat = (double)atoi(value.c_str());
 #ifdef DEBUG
-      std::cout << " * Maximal number of VEGAS iterations                  : " << this->itmx << std::endl;
+      std::cout << " * Number of TREAT calls                               : " << this->ntreat << std::endl;
+#endif
+    }
+    else if (key=="NGEN") {
+      this->maxgen = (double)atoi(value.c_str());
+#ifdef DEBUG
+      std::cout << " * Number of events to generate                        : " << this->maxgen << std::endl;
 #endif
     }
     else {
@@ -355,6 +399,7 @@ bool InputParameters::ReadConfigFile(std::string inFile_)
   }
   f.close();
   std::cout << "======================================================" << std::endl;
+  //#define DEBUG false
   return true;
 }
 
@@ -366,13 +411,11 @@ bool InputParameters::StoreConfigFile(std::string outFile_)
     return false;
   }
   // ...
+  if (this->itvg!=-1) f << "ITVG  " << this->itvg << std::endl;
+  if (this->minenergy!=-1) f << "ECUT  " << this->minenergy << std::endl;
+  if (this->ntreat!=-1) f << "NTRT  " << this->ntreat << std::endl;
+  // ...
   f.close();
   return true;
 }
 
-Cuts::Cuts() :
-  ptmin(3.), ptmax(-1.), emin(0.), emax(-1.),
-  thetamin(0.), thetamax(180.)
-{}
-
-Cuts::~Cuts() {}

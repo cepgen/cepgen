@@ -24,10 +24,17 @@ typedef enum {
  */
 class Gnuplot {
   public:
-    Gnuplot(std::string outFile_="") ;
+    /**
+     * @brief Class constructor
+     */
+    Gnuplot(std::string outFile_="");
+    /**
+     * @brief Class destructor
+     */
     ~Gnuplot();
     /**
      * Sets the file on which the graph has to be produced
+     * @brief Sets the output file for the graph
      */
     void SetOutputFile(std::string);
     /**

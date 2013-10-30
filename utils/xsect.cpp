@@ -1,13 +1,9 @@
 #include <iostream>
 #include <fstream>
 
-#include "mcgen.h"
+#include "../include/mcgen.h"
 /**
  * @author Laurent Forthomme <laurent.forthomme@uclouvain.be>
- * Main caller for this Monte Carlo generator. Loads the configuration files'
- * variables if set as an argument to this program, else loads a default
- * "LHC-like" configuration, then launches the cross-section computation and
- * the events generation.
  */
 int main(int argc, char* argv[]) {
   InputParameters ip;
@@ -17,7 +13,7 @@ int main(int argc, char* argv[]) {
   int it;
 
   // max = 10.;
-  max = 2.5;
+  max = 10.;
 
   if (argc>1) {
     it = atoi(argv[1]);

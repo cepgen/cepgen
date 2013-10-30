@@ -1,6 +1,6 @@
 #include "gamgam.h"
 
-GamGam::GamGam(const unsigned int ndim_, double q2min_, double q2max_, int nOpt_, double x_[]) :
+GamGam::GamGam(const unsigned int ndim_, int nOpt_, double x_[]) :
   _ep1(-1), _w1(-1),
   _ep2(-1), _w2(-1.),
   _w3(-1.), _w4(-1.), _w5(-1.), _w6(-1.), _w7(-1.),
@@ -10,32 +10,22 @@ GamGam::GamGam(const unsigned int ndim_, double q2min_, double q2max_, int nOpt_
   _p1k2(0.), _p2k1(0.),
   setp1(false), setp2(false), setp3(false), setp5(false),
   setll(false), setin(false), setout(false), setkin(false),
-  _wmin(0.), _wmax(-1.),
   _cotth1(-99999.), _cotth2(99999.)
 {
   _ndim = ndim_;
-  _q2min = q2min_;
-  _q2max = q2max_;
-  _qp2min = -q2min_;
-  _qp2max = -q2max_;
   _nOpt = nOpt_;
   std::cout << std::setprecision(16);
   
   //srand(time(0));
-  
-  //FIXME ???
-  _w12 = 0.;
-  _w31 = 0.;
-  _w52 = 0.;
 
   _x = new double[ndim_];
   std::copy(x_, x_+ndim_, _x);
     
-  _part = new std::map<int,Particle>;
+  _ev = new Event();
 
 #ifdef DEBUG
   std::cout << "[GamGam::GamGam] [DEBUG] number of integration parameters : " << ndim_ << std::endl;
-  for (int i=0; i<ndim_; i++) {
+  for (unsigned int i=0; i<(unsigned int)ndim_; i++) {
     std::cout << "  _x[" << i << "] = " << _x[i] << std::endl;
   }
 #endif
@@ -44,10 +34,11 @@ GamGam::GamGam(const unsigned int ndim_, double q2min_, double q2max_, int nOpt_
 GamGam::~GamGam()
 {
   delete[] _x;
-  delete _part;
+  delete _ev;
 }
 
-bool GamGam::SetOutgoingParticles(int part_, int pdgId_)
+bool
+GamGam::SetOutgoingParticles(int part_, int pdgId_)
 {
   double mass_;
 
@@ -100,7 +91,8 @@ bool GamGam::SetOutgoingParticles(int part_, int pdgId_)
   return true;
 }
 
-bool GamGam::SetIncomingKinematics(Particle ip1_, Particle ip2_)
+bool
+GamGam::SetIncomingKinematics(Particle ip1_, Particle ip2_)
 {
   _p3_p1[0] = ip1_.px;
   _p3_p1[1] = ip1_.py;
@@ -121,19 +113,30 @@ bool GamGam::SetIncomingKinematics(Particle ip1_, Particle ip2_)
   _w2 = std::pow(_mp2, 2);
 
   _etot = _ep1+_ep2;
-  _ptot = std::sqrt(std::pow(_p3_p1[0]-_p3_p2[0], 2)
-                   +std::pow(_p3_p1[1]-_p3_p2[1], 2)
-                   +std::pow(_p3_p1[2]-_p3_p2[2], 2));
+  _ptot = std::sqrt(std::pow(_p3_p1[0]+_p3_p2[0], 2)
+                   +std::pow(_p3_p1[1]+_p3_p2[1], 2)
+                   +std::pow(_p3_p1[2]+_p3_p2[2], 2));
   
+  ip1_.role = 1; 
+  ip2_.role = 2;
+  this->_ev->SetParticle(&ip1_);
+  this->_ev->SetParticle(&ip2_);
+  /*this->_ip1 = ip1_;
+  this->_ip2 = ip2_;*/
+
   setp1 = setp2 = setin = true;
   setkin = setin && setout;
   return setp1;
 }
 
-bool GamGam::SetIncomingKinematics(int part_, double momentum_[3], int pdgId_)
+bool
+GamGam::SetIncomingKinematics(int part_, double momentum_[3], int pdgId_)
 {
+#ifdef DEBUG
   std::string name;
+#endif
   double mass, energy, mom2tmp;
+  Particle p;
 
   mass = GetMassFromPDGId(pdgId_);
 
@@ -145,9 +148,14 @@ bool GamGam::SetIncomingKinematics(int part_, double momentum_[3], int pdgId_)
   }
   energy = std::sqrt(mom2tmp+std::pow(mass,2));
 
+  p.role = part_;
+  p.pdgId = pdgId_;
+  p.SetP(momentum_, energy);
   switch(part_) {
   case 1:
+#ifdef DEBUG
     name = "incoming particle 1";
+#endif
     std::copy(momentum_, momentum_+3, _p3_p1);
     _pp1 = std::sqrt(mom2tmp);
     _ep1 = energy;
@@ -157,7 +165,9 @@ bool GamGam::SetIncomingKinematics(int part_, double momentum_[3], int pdgId_)
     setp1 = true;
     break;
   case 2:
+#ifdef DEBUG
     name = "incoming particle 2";
+#endif
     std::copy(momentum_, momentum_+3, _p3_p2);
     _pp2 = std::sqrt(mom2tmp);
     _ep2 = energy;
@@ -169,13 +179,15 @@ bool GamGam::SetIncomingKinematics(int part_, double momentum_[3], int pdgId_)
   default:
     return false;
   }
+  //p.Dump();
+  this->_ev->SetParticle(&p);
   setin = setp1 && setp2;
 
   if (setin) { // if the incoming kinematics is fully specified
     _etot = _ep1+_ep2;
-    _ptot = std::sqrt(std::pow(_p3_p1[0]-_p3_p2[0], 2)
-                     +std::pow(_p3_p1[1]-_p3_p2[1], 2)
-                     +std::pow(_p3_p1[2]-_p3_p2[2], 2));
+    _ptot = std::sqrt(std::pow(_p3_p1[0]+_p3_p2[0], 2)
+                     +std::pow(_p3_p1[1]+_p3_p2[1], 2)
+                     +std::pow(_p3_p1[2]+_p3_p2[2], 2));
   }
 
   setkin = setin && setout;
@@ -183,13 +195,15 @@ bool GamGam::SetIncomingKinematics(int part_, double momentum_[3], int pdgId_)
   std::cout << "[GamGam::SetIncomingKinematics] [DEBUG] \"" << name_ << "\" (PDG id " << pdgId_ << ") set to\n"
             << "  E = " << energy_ << " GeV,\n"
             << "  p = (" << momentum_[0] << ", " << momentum_[1] << ", " << momentum_[2] << ") GeV/c,\n"
-            << "  M = " << mass_ << " GeV/cc"
+            << "  M = " << mass << " GeV/cc"
             << std::endl;
 #endif
+
   return true;
 }
 
-bool GamGam::Pickin()
+bool
+GamGam::Pickin()
 {
   double sig, sig1, sig2; // sig1 = sigma and sig2 = sigma' in [1]
   double sp, ss, st;
@@ -199,8 +213,7 @@ bool GamGam::Pickin()
   double smax, ds2;
   double s1p, s1m, s1pp, s1pm, s2p;
   double sl2, sl3, sl4, sl5, sl6, sl7;
-  double t1min, t1max, dt1;
-  double t2min, t2max, dt2;
+  double dt1, dt2;
   double t13, t25;
   double rl1, rl2, rl4;
   double r1, r2, r3, r4;
@@ -254,8 +267,8 @@ bool GamGam::Pickin()
   rl1 = std::pow(ss, 2)-4.*_w1*_s; // lambda(s, m1**2, m2**2)
 
   if (rl1<=0.) {
-    std::cerr << "[GamGam::Pickin] [ERROR]"
-              << "\n  rl1 = " << rl1 << " <= 0" << std::endl;
+    /*std::cerr << "[GamGam::Pickin] [FATAL]"
+      << "\n  rl1 = " << rl1 << " <= 0" << std::endl;*/
     return false;
   }
   _sl1 = std::sqrt(rl1);
@@ -278,51 +291,49 @@ bool GamGam::Pickin()
 
   rl2 = std::pow(sp, 2)-4.*_s*_w3; // lambda(s, m3**2, sigma)
   if (rl2<=0.) {
-#ifdef ERROR
-    std::cerr << "[GamGam::Pickin] [ERROR]"
+    std::cerr << "[GamGam::Pickin] [FATAL]"
               << "\n  rl2 = " << rl2 << " <= 0" << std::endl;
-#endif
     return false;
   }
   sl2 = std::sqrt(rl2);
 
   //std::cout << " ==> sl2 = " << sl2 << std::endl;
 
-  t1max = _w1+_w3-(ss*sp+_sl1*sl2)/(2.*_s); // definition from eq. (A.4) in [1]
-  t1min = (_w31*_dd3+(_dd3-_w31)*(_dd3*_w1-_w31*_w2)/_s)/t1max; // definition from eq. (A.5) in [1]
+  _t1max = _w1+_w3-(ss*sp+_sl1*sl2)/(2.*_s); // definition from eq. (A.4) in [1]
+  _t1min = (_w31*_dd3+(_dd3-_w31)*(_dd3*_w1-_w31*_w2)/_s)/_t1max; // definition from eq. (A.5) in [1]
 
-  /*std::cout << "first definition of t1min = " << t1min << std::endl;
+  //std::cout << "t1max, t1min = " << _t1max << ", " << _t1min << std::endl;
+
+  /*std::cout << "first definition of t1min = " << _t1min << std::endl;
   std::cout << "d1, d3 = " << _w31 << ", " << _dd3 << std::endl;
   std::cout << "ss, sp = " << ss << ", " << sp << std::endl;
   std::cout << "sl1, sl2 = " << _sl1 << ", " << sl2 << std::endl;
-  std::cout << "t1max, s, w2 = " << t1max << ", " << _s << ", " << _w2 << std::endl;*/
-  //std::cout << "[before the thresholds] t1min = " << t1min << ", t1max = " << t1max << std::endl;
+  std::cout << "t1max, s, w2 = " << _t1max << ", " << _s << ", " << _w2 << std::endl;*/
 
   // FIXME dropped in CDF version
-  if (t1max>_qp2min or t1min<_qp2max) {
-    std::cerr << "[GamGam::Pickin] [ERROR]"
-              << "\n  t1max>_qp2min or t1min<_qp2max :"
-              << "\n  t1max = " << t1max
-              << "\n  t1min = " << t1min
+  if (_t1max>-_cuts.q2min or _t1min<-_cuts.q2max) {
+    std::cerr << "[GamGam::Pickin] [FATAL]"
+              << "\n    t1max = " << std::setw(8) << _t1max << " > -q2min = " << std::setw(8) << -_cuts.q2min
+              << "\n or t1min = " << std::setw(8) << _t1min << " < -q2max = " << std::setw(8) << -_cuts.q2max
               << std::endl;
     return false;
   }
-  if (t1max<_qp2max) {
-    t1max = _qp2max;
+  if (_t1max<-_cuts.q2max) {
+    _t1max = -_cuts.q2max;
   }
-  if (t1min>_qp2min) {
-    t1min = _qp2min;
+  if (_t1min>-_cuts.q2min) {
+    _t1min = -_cuts.q2min;
   }
+  //std::cout << "t1min, t1max = " << _t1min << ", " << _t1max << std::endl;
   /////
-  //std::cout << "[after the thresholds] t1min = " << t1min << ", t1max = " << t1max << std::endl;
 
   // t1, the first photon propagator, is defined here
-  Map(_x[0], t1min, t1max, &_t1, &dt1);
+  Map(_x[0], _t1min, _t1max, &_t1, &dt1);
   // changes wrt mapt1 : dx->-dx
   dt1 = -dt1;
 #ifdef DEBUG
   std::cout << "[GamGam::Pickin] [DEBUG] definition of t1 according to"
-            << " (t1min, t1max) = (" << t1min << ", " << t1max << ")"
+            << " (t1min, t1max) = (" << _t1min << ", " << _t1max << ")"
             << "\n  _t1 = " << _t1
             << std::endl;
 #endif
@@ -338,7 +349,7 @@ bool GamGam::Pickin()
 
   _sa1 =-std::pow(_t1-_w31, 2)/4.+_w1*_t1;
   if (_sa1>=0.) {
-    std::cerr << "[GamGam::Pickin] [ERROR]"
+    std::cerr << "[GamGam::Pickin] [FATAL]"
               << "\n  _sa1>=0 : " << _sa1
               << std::endl;
     return false;
@@ -399,18 +410,16 @@ bool GamGam::Pickin()
   //std::cout << (std::pow(r1, 2)-4.*_w2*s2x) << ", s2x = " << std::pow(r2, 2) << " <-> " << -4.*_w5*s2x << ", " << (4.*_w2*s2x) << std::endl;
   rl4 = (std::pow(r1, 2)-4.*_w2*s2x)*(std::pow(r2, 2)-4.*_w5*s2x);
   if (rl4<=0.) {
-#ifdef ERROR
-    std::cerr << "[GamGam::Pickin] [ERROR]\n  rl4<=0 : " << rl4 << std::endl;
-#endif
+    //std::cerr << "[GamGam::Pickin] [FATAL]\n  rl4<=0 : " << rl4 << std::endl;
     return false;
   }
   sl4 = std::sqrt(rl4);
   // t2max, t2min definitions from eq. (A.12) and (A.13) in [1]
-  t2max = _w2+_w5-(r1*r2+sl4)/(2.*s2x);
-  t2min = (_w52*_dd4+(_dd4-_w52)*(_dd4*_w2-_w52*_t1)/s2x)/t2max;
+  _t2max = _w2+_w5-(r1*r2+sl4)/(2.*s2x);
+  _t2min = (_w52*_dd4+(_dd4-_w52)*(_dd4*_w2-_w52*_t1)/s2x)/_t2max;
 
   // t2, the second photon propagator, is defined here
-  Map(_x[1], t2min, t2max, &_t2, &dt2);
+  Map(_x[1], _t2min, _t2max, &_t2, &dt2);
   // changes wrt mapt2 : dx->-dx
   //std::cout << "_t2 = " << _t2 << std::endl;
 
@@ -434,17 +443,13 @@ bool GamGam::Pickin()
 
   _sa2 = -std::pow(r4, 2)/4.+_w2*_t2;
   if (_sa2>=0.) {
-#ifdef ERROR
-    std::cerr << "[GamGam::Pickin] [ERROR]\n  _sa2 = " << _sa2 << " >= 0" << std::endl;
-#endif
+    std::cerr << "[GamGam::Pickin] [FATAL]\n  _sa2 = " << _sa2 << " >= 0" << std::endl;
     return false;
   }
   sl6 = 2.*std::sqrt(-_sa2);
   _g4 = -std::pow(r3, 2)/4.+_t1*_t2;
   if (_g4>=0.) {
-#ifdef ERROR
-    std::cerr << "[GamGam::Pickin] [ERROR]\n  _g4 = " << _g4 << " >= 0" << std::endl;
-#endif
+    std::cerr << "[GamGam::Pickin] [FATAL]\n  _g4 = " << _g4 << " >= 0" << std::endl;
     return false;
   }
   sl7 = std::sqrt(-_g4)*2.;
@@ -478,20 +483,20 @@ bool GamGam::Pickin()
   // (http://stackoverflow.com/questions/570669/checking-if-a-double-or-float-is-nan-in-c)
   // FIXME dropped in CDF version
   if (!(_dd2>=0.) && !(_dd2<0.)) { // NaN
-#ifdef ERROR
-    std::cerr << "[GamGam::Pickin] [ERROR] : dd2 == NaN" << std::endl;
+    //#ifdef ERROR
+    /*std::cerr << "[GamGam::Pickin] [ERROR] : dd2 == NaN" << std::endl;
     std::cerr << "  dd2 = " << _dd2 << "\n"
               << "  s2 = " << _s2 << "\n"
               << "  s2p = " << s2p << "\n"
               << "  s2min = " << s2min << "\n"
-              << "  t2min = " << t2min << "\n"
-              << "  t2max = " << t2max
-              << std::endl;
-#endif
+              << "  t2min = " << _t2min << "\n"
+              << "  t2max = " << _t2max
+              << std::endl;*/
+    //#endif
   }
   /////
   if (_x[3]>1. or _x[3]<-1.) {
-    std::cerr << "[GamGam::Pickin] [ERROR] x[3] = " << _x[3] << std::endl;
+    std::cerr << "[GamGam::Pickin] [FATAL] x[3] = " << _x[3] << std::endl;
     return false;
   }
   yy4 = cos(pi*_x[3]);
@@ -501,9 +506,7 @@ bool GamGam::Pickin()
   delb = (2.*_w2*r3+r4*st)*(4.*_p12*_t1-(_t1-_w31)*st)/(16.*ap);
 
   if (dd<=0.) {
-#ifdef ERROR
-    std::cerr << "[GamGam::Pickin] [ERROR]\n  dd = " << dd << " <= 0" << std::endl;
-#endif
+    //std::cerr << "[GamGam::Pickin] [FATAL]\n  dd = " << dd << " <= 0" << std::endl;
     return false;
   }
 
@@ -513,9 +516,7 @@ bool GamGam::Pickin()
   //std::cout << "pickin's _s1 = " << _s1 << std::endl;
 
   if (ap>=0.) {
-#ifdef ERROR
-    std::cerr << "[GamGam::Pickin] [ERROR]\n  ap = " << ap << " >= 0" << std::endl;
-#endif
+    std::cerr << "[GamGam::Pickin] [FATAL]\n  ap = " << ap << " >= 0" << std::endl;
     return false;
   }
 
@@ -567,7 +568,7 @@ bool GamGam::Pickin()
       s1p = see/s1m;
     }
     _dd3 = -_w2*(s1p-_s1)*(s1m-_s1)/4.; // 13
-    //std::cout << "--> (13) : s1m=" << s1m << ", s1p=" << s1p << ", dd3=" << _dd3 << std::endl;
+    //if (_dd3==0) std::cout << "--> (13) : s1=" << _s1 << " s1m=" << s1m << ", s1p=" << s1p << ", dd3=" << _dd3 << std::endl;
   }
   else { // 14
     s1p = (_s*(_t2*(_s-_w5+_t2-_w1)-_w1*_w5)+_w1*_w5*(_w1+_w5-_t2))/(t25*(_s-_w12));
@@ -596,15 +597,14 @@ bool GamGam::Pickin()
   return true;
 }
 
-bool GamGam::Orient()
+bool
+GamGam::Orient()
 {
   double re, rr, a1;
 
   bool pck = Pickin();
   if (!pck || _dj==0.) {
-#ifdef ERROR
-    std::cerr << "[GamGam::Orient] [ERROR] Pickin() failed : (bool)" << pck << ", _dj = " << _dj << std::endl;
-#endif
+    //std::cerr << "[GamGam::Orient] [FATAL] Pickin() failed : (bool)" << pck << ", _dj = " << _dj << std::endl;
     return false;
   }
   re = 1./(2.*_sqs);
@@ -627,9 +627,7 @@ bool GamGam::Orient()
   _ep5 = _ep2-_de5;
 
   if (_ec4<_mc4) {
-#ifdef ERROR
-    std::cerr << "[GamGam::Orient] [ERROR]\n  _ec4<_mc4 : _ec4 = " << _ec4 << ", _mc4 = " << _mc4 << std::endl;
-#endif
+    std::cerr << "[GamGam::Orient] [FATAL]\n  _ec4<_mc4 : _ec4 = " << _ec4 << ", _mc4 = " << _mc4 << std::endl;
     return false;
   }
   // What if the protons' momenta are not along the z-axis?
@@ -637,9 +635,7 @@ bool GamGam::Orient()
   _pc4 = std::sqrt((std::pow(_ec4, 2)-std::pow(_mc4, 2)));
 
   if (_pc4==0.) {
-#ifdef ERROR
-    std::cerr << "[GamGam::Orient] [ERROR]\n  _pzc4==0" << std::endl;
-#endif
+    std::cerr << "[GamGam::Orient] [FATAL]\n  _pzc4==0" << std::endl;
     return false;
   }
   _pp5 = std::sqrt(std::pow(_ep5, 2)-_w5);
@@ -677,9 +673,7 @@ bool GamGam::Orient()
   /////
 
   if (_st3>1. or _st5>1.) {
-#ifdef ERROR
-    std::cerr << "[GamGam::Orient] [ERROR]\n  _st3>1 or _st5>1 : _st3 = " << _st5 << ", _st5 = " << _st5 << std::endl;
-#endif
+    std::cerr << "[GamGam::Orient] [FATAL]\n  _st3>1 or _st5>1 : _st3 = " << _st5 << ", _st5 = " << _st5 << std::endl;
     return false;
   }
   _ct3 = std::sqrt(1.-std::pow(_st3, 2));
@@ -700,9 +694,7 @@ bool GamGam::Orient()
   _be5 = std::pow(_st5, 2)/(1.-_ct5);
 
   if (_dd5<0.) {
-#ifdef ERROR
-    std::cerr << "[GamGam::Orient] [ERROR]\n  _dd5<0 : " << _dd5 << std::endl;
-#endif
+    //std::cerr << "[GamGam::Orient] [FATAL]\n  _dd5<0 : " << _dd5 << std::endl;
     return false;
   }
 
@@ -711,9 +703,7 @@ bool GamGam::Orient()
   _st4 = _p_p4/_pc4;
 
   if (_st4>1.) {
-#ifdef ERROR
-    std::cerr << "[GamGam::Orient] [ERROR]\n  _st4>1 : " << _st4 << std::endl;
-#endif
+    std::cerr << "[GamGam::Orient] [FATAL]\n  _st4>1 : " << _st4 << std::endl;
     return false;
   }
   _ct4 = std::sqrt(1.-std::pow(_st4, 2));
@@ -744,11 +734,11 @@ bool GamGam::Orient()
   //std::cout << "rr = " << rr << ", sp3 = " << fabs(_sp3) << ", sp5 = " << fabs(_sp5) << std::endl;
 
   if (fabs(_sp3)>1. || fabs(_sp5)>1.) {
-    std::cerr << "[GamGam::Orient] [ERROR]\n  |_sp3|>1 or |_sp5|>1 :\n"
+    /*std::cerr << "[GamGam::Orient] [FATAL]\n  |_sp3|>1 or |_sp5|>1 :\n"
               << "   |_sp3| = " << fabs(_sp3) << "\n"
               << "  _sp3**2 = " << std::pow(_sp3, 2) << "\n"
               << "   |_sp5| = " << fabs(_sp5) << "\n"
-              << "  _sp5**2 = " << std::pow(_sp5, 2) << std::endl;
+              << "  _sp5**2 = " << std::pow(_sp5, 2) << std::endl;*/
     return false;
   }
 
@@ -813,7 +803,8 @@ void GamGam::ComputeSqS()
 
 }
 
-double GamGam::ComputeXsec(int nm_)
+double
+GamGam::ComputeXsec(int nm_)
 {
 
   // WARNING ====> PP5-->_p_p5
@@ -850,24 +841,24 @@ double GamGam::ComputeXsec(int nm_)
   xsec = 0.;
 
   if (!setout) {
-    std::cout << "[GamGam::ComputeXsec] [ERROR]\n  : output state not set !" << std::endl;
+    std::cout << "[GamGam::ComputeXsec] [FATAL]\n  : output state not set !" << std::endl;
     return 0.;
   }
   ComputeSqS();
   //std::cout << "wmax = " << _wmax << std::endl;
-  if (_wmax<0) _wmax = _s;
+  if (_cuts.wmax<0) _cuts.wmax = _s;
 
   // the minimal energy for the central system is its outgoing leptons' mass
   // energy (or wmin_ if specified)
   wmin = std::pow(_ml6+_ml7,2); // POW ok
 
-  if (wmin<_wmin) wmin = _wmin; // lower limit on wmin if specified
+  if (wmin<_cuts.wmin) wmin = _cuts.wmin; // lower limit on wmin if specified
 
   // the maximal energy for the central system is its CM energy with the
   // outgoing particles' mass energy substracted (or _wmax if specified)
   wmax = std::pow(_sqs-_mp3-_mp5,2); // POW ok
 
-  if (wmax>_wmax) wmax = _wmax; // upper limit on wmax if specified
+  if (wmax>_cuts.wmax) wmax = _cuts.wmax; // upper limit on wmax if specified
 
 #ifdef DEBUG
   std::cout << "[GamGam::ComputeXsec] [DEBUG]"
@@ -891,9 +882,7 @@ double GamGam::ComputeXsec(int nm_)
     _dj = 0.;
   }
   if (_dj==0.) {
-#ifdef ERROR
-    std::cout << "[GamGam::ComputeXsec] [ERROR]\n  _dj = " << _dj << std::endl;
-#endif
+    //std::cout << "[GamGam::ComputeXsec] [FATAL]\n  _dj = " << _dj << std::endl;
     return 0.;
   }
   ecm6 = (_w4+_w6-_w7)/(2.*_mc4);
@@ -1135,6 +1124,7 @@ double GamGam::ComputeXsec(int nm_)
       && (_pt_l7<=_cuts.ptmax || _cuts.ptmax<0.)
       && ( _e7lab>=_cuts.emin || _cuts.emin <=0.)
       && ( _e7lab<=_cuts.emax || _cuts.emax <0.);
+  //std::cout << " >>>>>>> " << lmu1 << " & " << lmu2 << std::endl;
   switch (_cuts.mode) {
     case 0:
     default:
@@ -1153,6 +1143,7 @@ double GamGam::ComputeXsec(int nm_)
       lcut = lmu1 or lmu2;
       break;
   }
+    //std::cout << ">>> failed the cuts" << std::endl;
 
   // Cut on mass of final hadronic system (MX)
   /*if (_ndim>7 && (std::pow(mx,2)<std::pow(_cuts.mxmin,2) || std::pow(mx,2)>std::pow(_cuts.mxmax,2))) {
@@ -1160,15 +1151,14 @@ double GamGam::ComputeXsec(int nm_)
   }*/
 
   // Cut on the proton's Q2 (first photon propagator T1)
-  if (_t1<_qp2max || _t1>_qp2min) {
+  if (_t1<-_cuts.q2max || _t1>-_cuts.q2min) {
     lcut = false;
   }
 
   if (!lcut) { // Dismiss the cuts-failing events in the xsection computation
     return 0.;
   }
-  this->FillKinematics();
-  
+  //this->FillKinematics();
   int intgp, intge;
   
   switch (_ndim) {
@@ -1195,23 +1185,25 @@ double GamGam::ComputeXsec(int nm_)
   return xsec;
 }
 
-void GamGam::FillKinematics()
+void
+GamGam::FillKinematics(bool symmetrise_)
 {
   //double gmux, gmuy, gmuw, gmunu;
   double px, py, pz;
   double ranphi, cp, sp;
-  int rany, ransign;
-  Particle part;
+  int rany, ransign, ranz, role;
   
   // Needed to parametrise a random rotation around z-axis
   //std::cout << "rand = " << ((double)rand()/RAND_MAX)*2.*pi << std::endl;
-  rany = ((double)rand()>=.5*(double)RAND_MAX) ? 1 : -1;
-  ransign = ((double)rand()>=.5*(double)RAND_MAX) ? 1 : -1;
-  ranphi = ((double)rand()/(double)RAND_MAX)*2.*pi;
+  rany = ((double)rand()>=.5*RAND_MAX) ? 1 : -1;
+  ransign = ((double)rand()>=.5*RAND_MAX) ? 1 : -1;
+  ranphi = ((double)rand()/RAND_MAX)*2.*pi;
+  ranz = 1;
+  if (symmetrise_) {
+    ranz = ((double)rand()>=.5*RAND_MAX) ? 1 : -1;
+  }
   cp = cos(ranphi);
   sp = sin(ranphi);
-  /*cp = ((double)rand()/RAND_MAX)*2.-1.;
-  sp = sqrt(1-pow(cp, 2));*/
   
   /*std::ofstream of;
   of.open("haha", std::fstream::app);
@@ -1219,81 +1211,122 @@ void GamGam::FillKinematics()
   of.close();*/
   /*cp = 1.;
   sp = -1.;*/
-  
+ 
   // First incoming proton
-  part.SetP(0., 0., _gamma*_p+_betgam*_ep1, _gamma*_ep1+_betgam*_p);
-  part.role = 1;
-  part.pdgId = _pdg1;
-  this->_part->insert(std::pair<int,Particle>(part.role, part));
+  Particle ip1(1, _pdg1);
+  if (!ip1.SetP(0., 0.,
+                _gamma*_p  +_betgam*_ep1,
+                _gamma*_ep1+_betgam*_p  )) {
+    std::cerr << "Invalid incoming proton 1" << std::endl;
+  }
+  this->_ev->SetParticle(&ip1);
   
   // Second incoming proton
-  Particle ip2;
-  part.SetP(0., 0., -_gamma*_p+_betgam*_ep2, _gamma*_ep2-_betgam*_p);
-  part.role = 2;
-  part.pdgId = _pdg2;
-  this->_part->insert(std::pair<int,Particle>(part.role, part));
+  Particle ip2(2, _pdg2);
+  if (!ip2.SetP(0., 0.,
+                -_gamma*_p  +_betgam*_ep2,
+                 _gamma*_ep2-_betgam*_p  )) {
+    std::cerr << "Invalid incoming proton 2" << std::endl;
+  }
+  this->_ev->SetParticle(&ip2);
+  //this->_part->insert(std::pair<int,Particle>(part.role, part));
+  //this->SetParticle(part.role, &part);
   
   // First outgoing proton
-  Particle op1;
+  Particle op1(3, _pdg3);
   px = _pp3*_st3*_cp3;
   py = _pp3*_st3*_sp3;
-  pz = _pp3*_ct3;
-  part.SetP(px*cp+rany*py*sp, -px*sp+rany*py*cp, _gamma*pz  +_betgam*_ep3, _gamma*_ep3+_betgam*pz);
-  part.role = 3;
-  part.pdgId = _pdg3;
-  this->_part->insert(std::pair<int,Particle>(part.role, part));
+  pz = _pp3*_ct3*ranz;
+  if (!op1.SetP( px*cp+rany*py*sp,
+                -px*sp+rany*py*cp,
+                 _gamma*pz  +_betgam*_ep3,
+                 _gamma*_ep3+_betgam*pz  )) {
+    std::cerr << "Invalid outgoing proton 1" << std::endl;
+  }
+  op1.SetMother(this->_ev->GetByRole(1));
+  this->_ev->SetParticle(&op1);
   
   // Second outgoing proton
-  Particle op2;
+  Particle op2(5, _pdg5);
   px = _pp5*_st5*_cp5;
   py = _pp5*_st5*_sp5;
-  pz = _pp5*_ct5;
-  part.SetP(px*cp+rany*py*sp, -px*sp+rany*py*cp, _gamma*pz  +_betgam*_ep5, _gamma*_ep5+_betgam*pz);
-  part.role = 5;
-  part.pdgId = _pdg5;
-  this->_part->insert(std::pair<int,Particle>(part.role, part));
+  pz = _pp5*_ct5*ranz;
+  if (!op2.SetP( px*cp+rany*py*sp,
+                -px*sp+rany*py*cp,
+                 _gamma*pz  +_betgam*_ep5,
+                 _gamma*_ep5+_betgam*pz  )) {
+    std::cerr << "Invalid outgoing proton 2" << std::endl;
+  }
+  op2.SetMother(this->_ev->GetByRole(2));
+  this->_ev->SetParticle(&op2);
+
+  Particle cs(4);
+  cs.SetMother(this->_ev->GetByRole(41));
+  this->_ev->SetParticle(&cs);
   
   // First outgoing lepton
-  Particle ol1;
+  role = (ransign<0) ? 6 : 7;
+  Particle ol1(role, ransign*abs(_pdg6));
   px = _pl6*_st6*_cp6;
   py = _pl6*_st6*_sp6;
-  pz = _pl6*_ct6;
-  part.SetP(px*cp+rany*py*sp, -px*sp+rany*py*cp, _gamma*pz+_betgam*_el6, _gamma*_el6+_betgam*(_pl6*_ct6));
-  part.role = 6;
-  part.pdgId = ransign*abs(_pdg6);
-  this->_part->insert(std::pair<int,Particle>(part.role, part));
+  pz = _pl6*_ct6*ranz;
+  if (!ol1.SetP( px*cp+rany*py*sp,
+                -px*sp+rany*py*cp,
+                 _gamma*pz  +_betgam*_el6,
+                 _gamma*_el6+_betgam*pz  )) {
+    std::cerr << "Invalid outgoing lepton 1" << std::endl;
+  }
+  ol1.SetMother(this->_ev->GetByRole(4));
+  this->_ev->SetParticle(&ol1);
   
   // Second outgoing lepton
-  Particle ol2;
+  role = (ransign<0) ? 7 : 6;
+  Particle ol2(role, -ransign*abs(_pdg7));
   px = _pl7*_st7*_cp7;
   py = _pl7*_st7*_sp7;
-  pz = _pl7*_ct7;
-  part.SetP(px*cp+rany*py*sp, -px*sp+rany*py*cp, _gamma*pz+_betgam*_el7, _gamma*_el7+_betgam*pz);
-  part.role = 7;
-  part.pdgId = -ransign*abs(_pdg7);
-  this->_part->insert(std::pair<int,Particle>(part.role, part));
+  pz = _pl7*_ct7*ranz;
+  if (!ol2.SetP( px*cp+rany*py*sp,
+                -px*sp+rany*py*cp,
+		 _gamma*pz  +_betgam*_el7,
+		 _gamma*_el7+_betgam*pz  )) {
+    std::cerr << "Invalid outgoing lepton 2" << std::endl;
+  }
+  ol2.SetMother(this->_ev->GetByRole(4));
+  this->_ev->SetParticle(&ol2);
   
   // First incoming photon
   // Equivalent in LPAIR : PLAB(x, 3)
-  Particle ph1;
+  Particle ph1(41, 22);
   px = _p3_p1[0]-_pp3*_st3*_cp3;
   py = _p3_p1[1]-_pp3*_st3*_sp3;
-  pz = _p3_p1[2]-_p3_p3[2];
-  part.SetP(px*cp+rany*py*sp, -px*sp+rany*py*cp, pz, _ep1-_ep5);
-  part.role = 41;
-  part.pdgId = 22;
-  this->_part->insert(std::pair<int,Particle>(part.role, part));
+  pz = _p3_p1[2]-_pp3*_ct3*ranz;
+  std::cout << _p3_p1[0] << ", " << _p3_p1[2] << std::endl;
+  std::cout << "photon 1: p = (" << px << ", " << py << ", " << pz << ")" << std::endl;
+  if (!ph1.SetP( px*cp+rany*py*sp,
+                -px*sp+rany*py*cp,
+		 _gamma*pz         +_betgam*(_ep1-_ep3),
+		 _gamma*(_ep1-_ep3)+_betgam*pz)) {
+    //std::cerr << "Invalid photon 1" << std::endl;
+  }
+  ph1.SetMother(this->_ev->GetByRole(1));
+  this->_ev->SetParticle(&ph1);
   
   // Second incoming photon
   // Equivalent in LPAIR : PLAB(x, 4)
-  Particle ph2;
+  Particle ph2(42, 22);
   px = _p3_p2[0]-_pp5*_st5*_cp5;
   py = _p3_p2[1]-_pp5*_st5*_sp5;
-  pz = _p3_p2[2]-_p3_p5[2];
-  part.SetP(px*cp+rany*py*sp, -px*sp+rany*py*cp, pz, _ep2-_ep5);
-  part.role = 42;
-  part.pdgId = 22;
-  this->_part->insert(std::pair<int,Particle>(part.role, part));
+  pz = _p3_p2[2]-_pp5*_ct5*ranz;
+  std::cout << _p3_p2[0] << ", " << _p3_p2[2] << std::endl;
+  std::cout << "photon 2: p = (" << px << ", " << py << ", " << pz << ")" << std::endl;
+  if (!ph2.SetP( px*cp+rany*py*sp,
+                -px*sp+rany*py*cp,
+                 _gamma*pz         +_betgam*(_ep2-_ep5),
+                 _gamma*(_ep2-_ep5)+_betgam*pz)) {
+    //std::cerr << "Invalid photon 2" << std::endl;
+  }
+  ph2.SetMother(this->_ev->GetByRole(2));
+  this->_ev->SetParticle(&ph2);
   
   /*gmux = -_t2/(_ep1*_eg2-_pp1*_p3_g2[2])/2.;
   gmuy = (_ep1*_eg2-_pp1*_p3_g2[2])/(_ep2*_eg2+_pp2*_p3_g2[2]);
@@ -1302,7 +1335,7 @@ void GamGam::FillKinematics()
     gmuw = std::sqrt(gmuw);
   }
   else {
-    std::cerr << "[GamGam::FillKinematics] [ERROR] W**2 = " << gmuw << " < 0" << std::endl;
+    std::cerr << "[GamGam::FillKinematics] [FATAL] W**2 = " << gmuw << " < 0" << std::endl;
     gmuw = 0.;
   }
   gmunu = gmuy*2.*GetMassFromPDGId(2212)/_ep1/_ep2;
@@ -1315,25 +1348,25 @@ void GamGam::FillKinematics()
             << std::endl;
 #endif
   */
+  //this->_ev->Dump();
 }
 
-void GamGam::SetCuts(Cuts cuts_)
+void
+GamGam::SetCuts(GamGamKinematics cuts_)
 {
   _cuts = cuts_;
   _cotth1 = 1./tan(cuts_.thetamax*pi/180.);
   _cotth2 = 1./tan(cuts_.thetamin*pi/180.);  
+#ifdef DEBUG
+  std::cout << "[GamGam::SetCuts] [DEBUG]"
+            << "\n\tcot(theta1) = " << _cotth1
+            << "\n\tcot(theta2) = " << _cotth2
+            << std::endl;
+#endif
 }
 
-void GamGam::SetWRange(double wmin_, double wmax_)
-{
-  _wmin = wmin_;
-  _wmax = wmax_;
-  if (setin) {
-
-  }
-}
-
-double GamGam::PeriPP(int nup_, int ndown_)
+double
+GamGam::PeriPP(int nup_, int ndown_)
 {
   double rho = .585; // 1.05
   double cc1 = .86926; // .6303
@@ -1443,38 +1476,42 @@ double GamGam::PeriPP(int nup_, int ndown_)
   return peripp;
 }
 
-Particle* GamGam::GetParticle(int role_)
-{
-  std::map<int,Particle>::iterator out = this->_part->find(role_);
-  if (out!=this->_part->end()) {
-    return &(out->second);
-  }
-  else {
-    return new Particle();
-  }
-}
+GamGamKinematics::GamGamKinematics() :
+  ptmin(3.), ptmax(-1.),
+  emin(0.), emax(-1.),
+  thetamin(0.), thetamax(180.),
+  mxmin(0.), mxmax(-1.),
+  q2min(0.), q2max(1.e5),
+  wmin(0.), wmax(-1.)
+{}
 
-void GamGam::StoreEvent(std::ofstream *file_, double weight_=1.)
+GamGamKinematics::~GamGamKinematics() {}
+
+void
+GamGamKinematics::Dump()
 {
-  Particle *ol1 = GetParticle(6);
-  Particle *ol2 = GetParticle(7);
-  *file_ << ol1->e << "\t"
-         << ol1->px << "\t"
-         << ol1->py << "\t"
-         << ol1->pz << "\t"
-         << ol1->pt << "\t"
-         << ol1->m << "\t"
-         << ol1->pdgId << "\t"
-         << weight_
-         << std::endl;
-  *file_ << ol2->e << "\t"
-         << ol2->px << "\t"
-         << ol2->py << "\t"
-         << ol2->pz << "\t"
-         << ol2->pt << "\t"
-         << ol2->m << "\t"
-         << ol2->pdgId << "\t"
-         << weight_
-         << std::endl;
+  std::string s_mode;
+  switch (this->mode) {
+    case 0: s_mode = "none"; break;      
+    case 1: s_mode = "single"; break;      
+    case 2: s_mode = "both"; break;
+    default: s_mode = "unknown"; break;
+  }
+  std::cout
+    << "[GamGamKinematics] Dump =========" << std::endl
+    << std::setw(25) << "Cuts mode :" << std::setw(2) << this->mode << "->" << std::setw(4) << s_mode << std::endl    
+    << "===== Single leptons" << std::endl
+    << std::setw(25) << "Minimal pT :" << std::setw(8) << this->ptmin << std::endl
+    << std::setw(25) << "Maximal pT :" << std::setw(8) << this->ptmax << std::endl
+    << std::setw(25) << "Minimal energy :" << std::setw(8) << this->emin << std::endl
+    << std::setw(25) << "Maximal energy :" << std::setw(8) << this->emax << std::endl
+    << std::setw(25) << "Minimal azimuthal angle :" << std::setw(8) << this->thetamin << std::endl
+    << std::setw(25) << "Maximal azimuthal angle :" << std::setw(8) << this->thetamax << std::endl
+    << "===== Central kinematics" << std::endl
+    << std::setw(25) << "Minimal Q**2 :" << std::setw(8) << this->q2min << std::endl
+    << std::setw(25) << "Maximal Q**2 :" << std::setw(8) << this->q2max << std::endl
+    << std::setw(25) << "Minimal W :" << std::setw(8) << this->wmin << std::endl
+    << std::setw(25) << "Maximal W :" << std::setw(8) << this->wmax << std::endl
+    << "[GamGamKinematics] EndDump ======" << std::endl;
 }
 

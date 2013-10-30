@@ -11,22 +11,20 @@ MCGen::MCGen(InputParameters ip_)
   _ip = ip_;
 
   if (_ip.p1mod<=2 && _ip.p2mod<=2) {
-    topo = "ELASTIC case";
+    topo = "ELASTIC proton/proton";
     _ndim = 7;
   }
   else if (_ip.p1mod<=2 || _ip.p2mod<=2) {
-    topo = "SINGLE-DISSOCIATIVE case";
+    topo = "SINGLE-DISSOCIATIVE proton";
     _ndim = 8;
   }
   else {
-    topo = "DOUBLE-DISSOCIATIVE case";
-    _ndim = 9;
+    topo = "DOUBLE-DISSOCIATIVE protons";
+    _ndim = 8;
   }
 #ifdef DEBUG
-  std::cout << "[MCGen::MCGen] [DEBUG] Considered topology : " << topo << std::endl;
+  std::cout << "[MCGen::MCGen] [DEBUG] Considered topology : " << topo << " case" << std::endl;
 #endif
-
-  veg = new Vegas(_ndim,f, &_ip);
 
 #ifdef DEBUG
   std::cout << "[MCGen::MCGen] [DEBUG] Cuts mode : " << _ip.mcut << std::endl;
@@ -66,156 +64,84 @@ MCGen::~MCGen()
 #ifdef DEBUG
   std::cout << "[MCGen::~MCGen] [DEBUG] MCGen destructed !" << std::endl;
 #endif
-  delete veg;
 }
 
 void MCGen::Test()
 {
   double x[7];
+  int num = 5;
+  double ext;
   _ip.mcut = 2;
   _ip.minpt = 0.1;
-  _ip.Dump();
-  for (unsigned int i=0; i<sizeof(x)/sizeof(double); i++) {
+  //_ip.Dump();
+  /*for (unsigned int i=0; i<sizeof(x)/sizeof(double); i++) {
     x[i] = 0.1;
   }
-  std::cout << f(x, (int)(sizeof(x)/sizeof(double)), &_ip) << std::endl;
-  /*double xsec, err;
-  veg->Integrate(&xsec, &err);
-  //veg->SetGen();
-  
-  if (_ip.debug) {
-    _ip.plot[0]->SetHistogram(200, -50., 50., "px");
-    _ip.plot[1]->SetHistogram(200, -50., 50., "py");
-    _ip.plot[2]->SetHistogram(200, -50., 50., "pz");
-    _ip.plot[3]->SetHistogram(100, 0., 100., "pt");
-    _ip.plot[4]->SetHistogram(100, 0., 100., "invm");
-    _ip.plot[5]->SetHistogram(100, 0., 100., "ptpair");
-    _ip.plot[6]->SetHistogram(1000, -pi, pi, "sinth6");
-    _ip.plot[7]->SetHistogram(1000, -pi, pi, "cosphi6");
-    _ip.plot[8]->SetHistogram(1000, -pi, pi, "sinphi6");
+  std::cout << f(x, (int)(sizeof(x)/sizeof(double)), &_ip) << std::endl;*/
+  ext = 1./num;
+  int i1,i2,i3,i4,i5,i6,i7;
+  for (i1=0; i1<=num; i1++) {
+    x[0] = i1*ext;
+    for (i2=0; i2<=num; i2++) {
+      x[1] = i2*ext;
+      for (i3=0; i3<=num; i3++) {
+        x[2] = i3*ext;
+        for (i4=0; i4<=num; i4++) {
+          x[3] = i4*ext;
+          for (i5=0; i5<=num; i5++) {
+            x[4] = i5*ext;
+            for (i6=0; i6<=num; i6++) {
+              x[5] = i6*ext;
+              for (i7=0; i7<=num; i7++) {
+                x[6] = i7*ext;
+                std::cout << " -- " << x[0]
+                          << "\t" << x[1]
+                          << "\t" << x[2]
+                          << "\t" << x[3]
+                          << "\t" << x[4]
+                          << "\t" << x[5]
+                          << "\t" << x[6]
+                          << std::endl;
+                f(x, (int)(sizeof(x)/sizeof(double)), &_ip);
+              }
+            }
+          }
+        }
+      }
+    }
   }
-  
-  //veg->Generate(1000);
-  
-  if (_ip.debug) {
-    _ip.plot[0]->DrawHistogram();
-    _ip.plot[1]->DrawHistogram();
-    _ip.plot[2]->DrawHistogram();
-    _ip.plot[3]->SetLogy();
-    _ip.plot[3]->DrawHistogram();
-    _ip.plot[4]->SetLogy();
-    _ip.plot[4]->DrawHistogram();
-    _ip.plot[5]->DrawHistogram();
-    _ip.plot[6]->DrawHistogram();
-    _ip.plot[7]->DrawHistogram();
-    _ip.plot[8]->DrawHistogram();
-  }
-  */
 }
 
 void MCGen::ComputeXsection(double* xsec_, double *err_)
 {
+  veg = new Vegas(_ndim,f, &_ip);
+  std::cout << "before integrating" << std::endl;
   veg->Integrate(xsec_, err_);
 #ifdef DEBUG
   std::cout << "[MCGen::ComputeXsection] [DEBUG] Total cross-section = " << *xsec_ << " +/- " << *err_ << " pb" << std::endl;
 #endif
+  std::cout << "after integrating" << std::endl;
+  delete veg;
 }
 
-void MCGen::LaunchGen(const unsigned int count_)
+void MCGen::LaunchGen()
 {
-  
-  if (_ip.debug) {
-    _ip.plot[0]->SetHistogram(200, -50., 50., "px");
-    _ip.plot[1]->SetHistogram(200, -50., 50., "py");
-    _ip.plot[2]->SetHistogram(200, -50., 50., "pz");
-    _ip.plot[3]->SetHistogram(100, 0., 100., "pt");
-    _ip.plot[4]->SetHistogram(100, 0., 100., "invm");
-    _ip.plot[5]->SetHistogram(100, 0., 100., "ptpair");
-    _ip.plot[6]->SetHistogram(1000, -pi, pi, "sinth6");
-    _ip.plot[7]->SetHistogram(1000, -pi, pi, "cosphi6");
-    _ip.plot[8]->SetHistogram(1000, -pi, pi, "sinphi6");
-  }
-  
-  veg->LaunchGeneration(count_);
-  
-  if (_ip.debug) {
-    _ip.plot[0]->DrawHistogram();
-    _ip.plot[1]->DrawHistogram();
-    _ip.plot[2]->DrawHistogram();
-    _ip.plot[3]->SetLogy();
-    _ip.plot[3]->DrawHistogram();
-    _ip.plot[4]->SetLogy();
-    _ip.plot[4]->DrawHistogram();
-    _ip.plot[5]->DrawHistogram();
-    _ip.plot[6]->DrawHistogram();
-    _ip.plot[7]->DrawHistogram();
-    _ip.plot[8]->DrawHistogram();
-  }
+  veg = new Vegas(_ndim,f, &_ip);
+  //veg->LaunchGeneration();
+  veg->LaunchMyGeneration();
+  delete veg;
 }
 
-void MCGen::AnalyzePhaseSpace(const std::string outputFile_) {
-  const unsigned int numPoints = 1e2;
-  const unsigned int numScans = 1e2;
-
-  unsigned int v, i, j, k;
-  std::stringstream outName, gpCmd, ss;
-  std::ofstream of;
-  double xpoint;
-  double scanValues[numScans];
-
-  double x[numPoints][_ndim];
-  double xsec[numPoints][_ndim];
-  Gnuplot plot;
-
-  InputParameters ip = _ip;
-  ip.debug = true;
-
-  for (v=0; v<numScans; v++) {
-    scanValues[v] = (double)v/(double)numScans;
-    outName.str(""); outName << outputFile_ << "_x" << scanValues[v] << ".png";
-    gpCmd.str(""); gpCmd << "plot ";
-    for (i=0; i<_ndim; i++) {
-      for (j=0; j<numPoints; j++) {
-        xpoint = 0.+1.*(double)j/(numPoints-1.);
-        for (k=0; k<_ndim; k++) {
-          if (k!=i) {
-            x[j][k] = scanValues[v];
-          }
-          else {
-            x[j][k] = xpoint;
-          }
-        }
-        xsec[j][i] = f(x[j], _ndim, &ip);
-      }
-      if (i!=0) gpCmd << ", ";
-      gpCmd << "\"" << outputFile_ << "\" u 1:" << i+2 << " w l title 'x(" << i << ")'";
-    }
-    of.open(outputFile_.c_str());
-    for (i=0; i<numPoints; i++) {
-      of << (double)i/(numPoints-1.);
-      for (j=0; j<_ndim; j++) {
-        of << "\t" << xsec[i][j];
-      }
-      of << std::endl;
-    }
-    ss.str(""); ss << "Variation of x(i), with all others x(j) = " << scanValues[v];
-    plot.SetTitle(ss.str());
-    plot.SetOutputFile(outName.str());
-    plot.SetXAxisTitle("x(i)");
-    plot.SetLogy();
-    of.close();
-    plot << gpCmd.str();
-  }
-}
+int i = 0;
 
 double f(double* x_, size_t ndim_, void* params_) {
   //double etot, ptot;
-  double q2min, q2max;
   double ff;
   int inp1pdg, inp2pdg, outp1pdg, outp2pdg;
   InputParameters *p;
-  GamGam *gg;
+  GamGamKinematics cuts;
 
+  i += 1;
   p = (InputParameters*)params_;
 
   //FIXME at some point introduce non head-on colliding beams ?
@@ -238,23 +164,24 @@ double f(double* x_, size_t ndim_, void* params_) {
 #endif
 
   if (p->p1mod<=2 && p->p2mod<=2) {
-    q2min = 0.;
-    q2max = 1.e5;
+    cuts.q2min = 0.;
+    cuts.q2max = 1e5;
     inp1pdg = 2212;
     inp2pdg = 2212;
     outp1pdg = 2212;
     outp2pdg = 2212;
+    cuts.kinematics = 1;
   }
   else {
     //FIXME for the inelastic case
-    q2min = 0.;
-    q2max = 1.e5;
+    cuts.q2min = 0.;
+    cuts.q2max = 1e5;
     inp1pdg = 2212;
     inp2pdg = 2212;
     outp1pdg = 2212;
     outp2pdg = 2212;
+    cuts.kinematics = 2; //FIXME
   }
-  Cuts cuts;
   cuts.mode = p->mcut;
   cuts.ptmin = p->minpt;
   cuts.ptmax = p->maxpt;
@@ -264,79 +191,68 @@ double f(double* x_, size_t ndim_, void* params_) {
   cuts.emax = p->maxenergy;
   cuts.mxmin = p->minmx;
   cuts.mxmax = p->maxmx;
-
-  gg = new GamGam(ndim_, q2min, q2max, 0, x_);
-  gg->SetIncomingKinematics(1, inp1, inp1pdg);
-  gg->SetIncomingKinematics(2, inp2, inp2pdg);
-  gg->SetOutgoingParticles(3, outp1pdg); // First outgoing proton
-  gg->SetOutgoingParticles(5, outp2pdg); // Second outgoing proton
-  gg->SetOutgoingParticles(6, p->pair); // Outgoing leptons
-  gg->SetCuts(cuts);
-  if (!gg->IsKinematicsDefined()) {
+  
+  GamGam gg(ndim_, 0, x_);
+  gg.SetIncomingKinematics(1, inp1, inp1pdg);
+  gg.SetIncomingKinematics(2, inp2, inp2pdg);
+  gg.SetOutgoingParticles(3, outp1pdg); // First outgoing proton
+  gg.SetOutgoingParticles(5, outp2pdg); // Second outgoing proton
+  gg.SetOutgoingParticles(6, p->pair); // Outgoing leptons
+  gg.SetCuts(cuts);
+  //cuts.Dump();
+  //std::cout << "After the sets..." << std::endl;
+  if (!gg.IsKinematicsDefined()) {
     std::cout << "[f] [ERROR] Kinematics is not properly set" << std::endl;
     return 0.;
   }
-  ff = gg->ComputeXsec();
-  if (ff==0.) {
-    delete gg;
-    return ff;
+  ff = gg.ComputeXsec();
+//#ifdef DEBUG
+  if (i==1) {
+    std::cout << "--> f at first step = " << ff << std::endl;
+    std::cout << "=========================" << std::endl;
+    cuts.Dump();
+    std::cout << "=========================" << std::endl;
   }
+//#endif
+  
+  /*double tmin,tmax;
+  gg->GetT1extrema(tmin, tmax);
+  std::cout << "T1\t" << gg->GetT1() << "\t" << tmin << "\t" << tmax << std::endl;
+  gg->GetT2extrema(tmin, tmax);
+  std::cout << "T2\t" << gg->GetT2() << "\t" << tmin << "\t" << tmax << std::endl;
+  std::cout << "F\t" << ff << std::endl;*/
 
-  //if (ff!=0. && p->generation) { // MC events generation
+  if (ff<0.) {
+    /*if (p->store)
+      std::cout << "/////////////////// " << ff << std::endl;*/
+    return 0.;
+  }
+  
+  //if (p->store && p->ngen<p->maxgen) { // MC events generation
   if (p->store) { // MC events generation
-    //gg->FillKinematics();
-    
-    /*Particle *ip1 = gg->GetParticle(1);
-    Particle *ip2 = gg->GetParticle(2);
-    Particle *op1 = gg->GetParticle(3);
-    Particle *ga1 = gg->GetParticle(41);
-    Particle *ga2 = gg->GetParticle(42);
-    Particle *op2 = gg->GetParticle(5);*/
-    Particle *ol1 = gg->GetParticle(6);
-    Particle *ol2 = gg->GetParticle(7);
-    if (p->debug) {
-      if (ol1->pdgId<0) {
-        p->plot[0]->Fill(ol1->px);
-        p->plot[1]->Fill(ol1->py);
-        p->plot[2]->Fill(ol1->pz);
-        p->plot[3]->Fill(ol1->pt);
-      }
-      else {
-        p->plot[0]->Fill(ol2->px);
-        p->plot[1]->Fill(ol2->py);
-        p->plot[2]->Fill(ol2->pz);
-        p->plot[3]->Fill(ol2->pt);
-      }
-      double mass = std::sqrt(std::pow(ol1->m,2)+std::pow(ol2->m,2)+2*(ol1->e*ol2->e-ol1->px*ol2->px-ol1->py*ol2->py-ol1->pz*ol2->pz));
-      p->plot[4]->Fill(mass);
-      double ptpair = std::sqrt(std::pow(ol1->px+ol2->px, 2)+std::pow(ol1->py+ol2->py, 2));
-      p->plot[5]->Fill(ptpair);
+    //p->ngen += 1;
+    //std::cout << ">> new value for ngen = " << p->ngen << std::endl;
+    /*if (p->store && p->ngen==0) {
+      std::cout << "number of events generated : " << p->ngen << std::endl;
     }
-    p->ngen += 1;
     if ((p->ngen)%10000==0) {
-      std::cout << "[f] ngen = " << p->ngen << std::endl;
+      //std::cout << "[f] ngen = " << p->ngen << std::endl;
+    }*/
+    //std::cout << "number of events generated : " << p->ngen << std::endl;
+    gg.FillKinematics(p->symmetrise);
+    gg.GetEvent()->Store(p->file);
+    if (p->file_debug->is_open()) {
+      *(p->file_debug) << (gg.GetEvent()->GetByRole(5)->p-gg.GetEvent()->GetByRole(1)->p)
+                       << "\t" << gg.GetEvent()->GetByRole(3)->p
+                       << "\t" << gg.GetEvent()->GetByRole(5)->p
+                       << std::endl;
     }
-    *(p->file) << ol1->e
-       << "\t" << ol1->px
-       << "\t" << ol1->py
-       << "\t" << ol1->pz
-       << "\t" << ol1->pt
-       << "\t" << ol1->m
-       << "\t" << ol1->pdgId
-       << std::endl;
-    *(p->file) << ol2->e
-       << "\t" << ol2->px
-       << "\t" << ol2->py
-       << "\t" << ol2->pz
-       << "\t" << ol2->pt
-       << "\t" << ol2->m
-       << "\t" << ol2->pdgId
-       << std::endl;
-    //std::cout << GetLHEvent(gg, true);
+    std::cout << "=============================" << std::endl;
+    gg.GetEvent()->GetByRole(41)->Dump();
+    gg.GetEvent()->GetByRole(42)->Dump();
+    //gg.GetEvent()->Dump();
     //*(p->file) << ga1.px << "\t" << ga1.py << "\t" << ga1.pz << "\t" << ga1.e << std::endl;
   }
-
-  delete gg;
   return ff;
 }
 

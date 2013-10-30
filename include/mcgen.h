@@ -7,10 +7,8 @@
 #include <ctime>
 
 #include "vegas.h"
-#include "utils.h"
 #include "gamgam.h"
-#include "gnuplot.h"
-#include "lhe.h"
+//#include "gnuplot.h"
 
 /**
  * This object represents the core of this Monte Carlo generator, with its
@@ -30,8 +28,7 @@
  *
  * @author Laurent Forthomme <laurent.forthomme@uclouvain.be>
  * @date February 2013
- * @brief Core of the Monte-Carlo generator ; Computes the cross section for any
- *  value of the input parameters by calling Vegas on GamGam objects.
+ * @brief Core of the Monte-Carlo generator
  *
  */
 class MCGen {
@@ -44,7 +41,7 @@ class MCGen {
    * @param ip_ List of input parameters defining the phase space
    *  on which to perform the integration
    */
-  MCGen(InputParameters);
+  MCGen(InputParameters ip_);
   ~MCGen();
   void Test();
   /**
@@ -52,7 +49,7 @@ class MCGen {
    * the cross-section as well as the absolute error computed along.
    */
   void ComputeXsection(double*,double*);
-  void LaunchGen(const unsigned int);
+  void LaunchGen();
   /**
    * @brief Returns the set of parameters used to setup the phase space to
    *   integrate

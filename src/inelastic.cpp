@@ -6,6 +6,7 @@ InelasticParticle::InelasticParticle()
   _py->readString("Beams:eCM = 8000.");
   _py->init("include/pythia8175/xmldoc/Index.xml");
   _py->init(2212, 2212, 7000.);
+  _had = Pythia8::HadronLevel();
   _ev = _py->event;
 }
 
@@ -28,5 +29,5 @@ void InelasticParticle::Hadronise()
   //Pythia6Interface::pygive(s.str().c_str());*/
   
   //_py->readString("SoftQCD::singleDiffractive = on");
-  _py->readString("Diffraction::Pomflux = 5"); // MBR, as implemented by Robert Ciesielski and Konstantin Goulianos
+  //_py->readString("Diffraction::Pomflux = 5"); // MBR, as implemented by Robert Ciesielski and Konstantin Goulianos
 }

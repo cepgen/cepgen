@@ -32,16 +32,31 @@
   } pydat3_;
 }*/
 
-class InelasticParticle {
+/**
+ * Class containing the information on a particle supposed to decay or
+ * fragment in the process
+ */
+class InelasticParticle : public Particle {
   public:
     InelasticParticle();
     ~InelasticParticle();
     void PDF2PDG();
+    /**
+     * Hadronises the particle with Pythia, and builds the shower
+     * (list of Particle objects) embedded in this object
+     * @brief Hadronises the particle using Pythia
+     */
     void Hadronise();
   private:
+    /**
+     * @brief List of particles produced with this decay
+     * Shower of particles arising from the decay of this
+     * inelastic particle
+     */
     std::vector<Particle> *_shower;
     Pythia8::Pythia *_py;
-    Pythia8::Event _ev;    
+    Pythia8::Event _ev;
+    Pythia8::HadronLevel _had;
 };
 
 #endif
