@@ -45,8 +45,9 @@ class Vegas {
     //double Treat(double f_(double*,size_t,void*));
     //double Treat(gsl_monte_function*,double*);
     double Treat(double* x_,InputParameters* ip_);
-    inline double Treat(double* x_) { return this->Treat(x_,(InputParameters*)(this->_F->params)); };
-    //double Treat(double[]);
+    inline double Treat(double* x_) { return this->Treat(x_,(InputParameters*)this->_F->params); };
+    inline double F(double* x_) { return this->_F->f(x_, this->_ndim, (void*)this->_F->params); }
+    inline double F(double* x_,InputParameters* ip_) { return this->_F->f(x_, this->_ndim, (void*)ip_); }
     /**
      * Stores the event characterized by its _ndim-dimensional point in the phase
      * space to the output file
@@ -70,7 +71,7 @@ class Vegas {
     int _nTreatCalls;
     int _nTreat;
     double _rTreat;
-    int _mbin;
+    double _mbin;
     int *_n;
     int *_nm;
     double *_fmax;

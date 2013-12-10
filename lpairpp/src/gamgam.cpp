@@ -208,9 +208,10 @@ GamGam::Pickin()
   double sig, sig1, sig2; // sig1 = sigma and sig2 = sigma' in [1]
   double sp, ss, st;
   double sb, sd, se;
+  double smax;
   double splus, s2x;
   double s2min, s2max;
-  double smax, ds2;
+  double ds2;
   double s1p, s1m, s1pp, s1pm, s2p;
   double sl2, sl3, sl4, sl5, sl6, sl7;
   double dt1, dt2;
@@ -286,8 +287,8 @@ GamGam::Pickin()
 
   sp = _s+_w3-sig1;
 
-  _dd3 = sig1-_w2;
-  //std::cout << "sig1 = " << sig1 << ", w2 = " << _w2 << ", d3 = " << _dd3 << std::endl;
+  _d3 = sig1-_w2;
+  //std::cout << "sig1 = " << sig1 << ", w2 = " << _w2 << ", d3 = " << _d3 << std::endl;
 
   rl2 = std::pow(sp, 2)-4.*_s*_w3; // lambda(s, m3**2, sigma)
   if (rl2<=0.) {
@@ -300,15 +301,17 @@ GamGam::Pickin()
   //std::cout << " ==> sl2 = " << sl2 << std::endl;
 
   _t1max = _w1+_w3-(ss*sp+_sl1*sl2)/(2.*_s); // definition from eq. (A.4) in [1]
-  _t1min = (_w31*_dd3+(_dd3-_w31)*(_dd3*_w1-_w31*_w2)/_s)/_t1max; // definition from eq. (A.5) in [1]
+  _t1min = (_w31*_d3+(_d3-_w31)*(_d3*_w1-_w31*_w2)/_s)/_t1max; // definition from eq. (A.5) in [1]
 
-  //std::cout << "t1max, t1min = " << _t1max << ", " << _t1min << std::endl;
-
-  /*std::cout << "first definition of t1min = " << _t1min << std::endl;
-  std::cout << "d1, d3 = " << _w31 << ", " << _dd3 << std::endl;
-  std::cout << "ss, sp = " << ss << ", " << sp << std::endl;
-  std::cout << "sl1, sl2 = " << _sl1 << ", " << sl2 << std::endl;
-  std::cout << "t1max, s, w2 = " << _t1max << ", " << _s << ", " << _w2 << std::endl;*/
+  //std::cout << "w1=" << _w1 << "\tw3=" << _w3 << std::endl;
+  //std::cout << "w31=" << _w31 << ", d3=" << _d3 << ", w1=" << _w1 << ", w2=" << _w2 << ", s=" << _s << ", t1max=" << _t1max << std::endl;
+  //std::cout << "t1min, t1max = " << _t1min << ", " << _t1max << std::endl;
+  /*std::cout << "q2min, q2max = " << -_cuts.q2min << ", " << -_cuts.q2max << std::endl;
+  std::cout << "first definition of t1min = " << _t1min << std::endl;
+  std::cout << "d1, d3 = " << _w31 << ", " << _d3 << std::endl;*/
+  //std::cout << "ss, sp = " << ss << ", " << sp << std::endl; //OK
+  //std::cout << "sl1, sl2 = " << _sl1 << ", " << sl2 << std::endl; //OK
+  /*std::cout << "t1max, s, w2 = " << _t1max << ", " << _s << ", " << _w2 << std::endl;*/
 
   // FIXME dropped in CDF version
   if (_t1max>-_cuts.q2min or _t1min<-_cuts.q2max) {
@@ -324,7 +327,6 @@ GamGam::Pickin()
   if (_t1min>-_cuts.q2min) {
     _t1min = -_cuts.q2min;
   }
-  //std::cout << "t1min, t1max = " << _t1min << ", " << _t1max << std::endl;
   /////
 
   // t1, the first photon propagator, is defined here
@@ -348,6 +350,7 @@ GamGam::Pickin()
   //std::cout << "===> t13 = " << t13 << std::endl;
 
   _sa1 =-std::pow(_t1-_w31, 2)/4.+_w1*_t1;
+  //printf("%20f\t%e\t%e\n", _t1, _w31, _w1);
   if (_sa1>=0.) {
     std::cerr << "[GamGam::Pickin] [FATAL]"
               << "\n  _sa1>=0 : " << _sa1
@@ -357,25 +360,30 @@ GamGam::Pickin()
 
   sl3 = std::sqrt(-_sa1);
 
+  //printf("%f\t%f\t%f\n", _sl1, sl3, _w1);
   // one computes splus and (s2x=s2max)
   if (_w1!=0.) {
     sb =(_s*(_t1-_w31)+_w12*t13)/(2.*_w1)+_w3;
     sd = _sl1*sl3/_w1;
     se =(_s*(_t1*(_s+t13-_w2)-_w2*_w31)+_w3*(_w12*d8+_w2*_w3))/_w1;
     if (fabs((sb-sd)/sd)>=1.) {
+      //std::cout << 1 << std::endl;
       splus = sb-sd;
       s2max = se/splus;
     }
     else {
+      //std::cout << 2 << std::endl;
       s2max = sb+sd;
       splus = se/s2max;
     }
   }
   else {
+    std::cout << 3 << std::endl;
     // 3
     s2max = (_s*(_t1*(_s+d8-_w3)-_w2*_w3)+_w2*_w3*(_w2+_w3-_t1))/(ss*t13);
     splus = sig2;
   }
+  //std::cout << "splus=" << splus << "\ts2max=" << s2max << std::endl;
   // 4
   s2x = s2max;
 #ifdef DEBUG
@@ -417,6 +425,7 @@ GamGam::Pickin()
   // t2max, t2min definitions from eq. (A.12) and (A.13) in [1]
   _t2max = _w2+_w5-(r1*r2+sl4)/(2.*s2x);
   _t2min = (_w52*_dd4+(_dd4-_w52)*(_dd4*_w2-_w52*_t1)/s2x)/_t2max;
+  //printf("%f\t%f\t%f\t%f\t%f\t%f\n", _w52, _dd4, _w2, _t1, s2x, _t2max);
 
   // t2, the second photon propagator, is defined here
   Map(_x[1], _t2min, _t2max, &_t2, &dt2);
@@ -749,18 +758,12 @@ GamGam::Orient()
 
 #ifdef DEBUG
   std::cout << "[GamGam::Orient] [DEBUG] Kinematic quantities"
-            << "\n  cos(theta3) = " << _ct3
-            << "\n  sin(theta3) = " << _st3
-            << "\n  cos(phi3) = " << _cp3
-            << "\n  sin(phi3) = " << _sp3
-            << "\n  cos(theta4) = " << _ct4
-            << "\n  sin(theta4) = " << _st4
-            << "\n  cos(phi4) = " << _ct4
-            << "\n  sin(phi4) = " << _st4
-            << "\n  cos(theta5) = " << _ct5
-            << "\n  sin(theta5) = " << _ct5
-            << "\n  cos(phi5) = " << _cp5
-            << "\n  sin(phi5) = " << _cp5
+            << "\n  cos(theta3) = " << _ct3 << "\t  sin(theta3) = " << _st3
+            << "\n  cos( phi3 ) = " << _cp3 << "\t  sin( phi3 ) = " << _sp3
+            << "\n  cos(theta4) = " << _ct4 << "\t  sin(theta4) = " << _st4
+            << "\n  cos( phi4 ) = " << _ct4 << "\t  sin( phi4 ) = " << _st4
+            << "\n  cos(theta5) = " << _ct5 << "\t  sin(theta5) = " << _ct5
+            << "\n  cos( phi5 ) = " << _cp5 << "\t  sin( phi5 ) = " << _cp5
             << std::endl;
 #endif
 
@@ -769,8 +772,8 @@ GamGam::Orient()
     std::cout << "[GamGam::Orient] [DEBUG] fabs(_p_p4+_p_p3*_cp3+_cp5*_p_p5)<fabs(fabs(a1)-_p_p4)"
               << "\n  pp4 = " << _p_p4
               << "\n  pp5 = " << _p_p5
-              << "\n  cp3 = " << _cp3
-              << "\n  cp5 = " << _cp5
+              << "\n  cos(phi3) = cp3 = " << _cp3
+              << "\n  cos(phi5) = cp5 = " << _cp5
               << "\n  a1 = " << a1
               << std::endl;
 #endif
@@ -808,7 +811,7 @@ GamGam::ComputeXsec(int nm_)
 {
 
   // WARNING ====> PP5-->_p_p5
-  //               P5--->_pp5
+  //                P5-->_pp5
   double xsec;
   double dw4;
   double wmin, wmax;
@@ -1189,7 +1192,6 @@ void
 GamGam::FillKinematics(bool symmetrise_)
 {
   //double gmux, gmuy, gmuw, gmunu;
-  double px, py, pz;
   double ranphi, cp, sp;
   int rany, ransign, ranz, role;
   
@@ -1214,18 +1216,24 @@ GamGam::FillKinematics(bool symmetrise_)
  
   // First incoming proton
   Particle ip1(1, _pdg1);
-  if (!ip1.SetP(0., 0.,
-                _gamma*_p  +_betgam*_ep1,
-                _gamma*_ep1+_betgam*_p  )) {
+  _plab_ip1[0] = 0.;
+  _plab_ip1[1] = 0.;
+  _plab_ip1[2] = _gamma*_p  +_betgam*_ep1;
+  _plab_ip1[3] = _gamma*_ep1+_betgam*_p;
+  //std::cout << "incoming proton 1: p = (" << _plab_ip1[0] << ", " << _plab_ip1[1] << ", " << _plab_ip1[2] << ", " << _plab_ip1[3] << ")" << std::endl;
+  if (!ip1.SetP(0., 0., _plab_ip1[2], _plab_ip1[3])) {
     std::cerr << "Invalid incoming proton 1" << std::endl;
   }
   this->_ev->SetParticle(&ip1);
   
   // Second incoming proton
   Particle ip2(2, _pdg2);
-  if (!ip2.SetP(0., 0.,
-                -_gamma*_p  +_betgam*_ep2,
-                 _gamma*_ep2-_betgam*_p  )) {
+  _plab_ip2[0] = 0.;
+  _plab_ip2[1] = 0.;
+  _plab_ip2[2] = -_gamma*_p  +_betgam*_ep2;
+  _plab_ip2[3] =  _gamma*_ep2-_betgam*_p;
+  //std::cout << "incoming proton 2: p = (" << _plab_ip2[0] << ", " << _plab_ip2[1] << ", " << _plab_ip2[2] << ", " << _plab_ip2[3] << ")" << std::endl;
+  if (!ip2.SetP(0., 0., _plab_ip2[2], _plab_ip2[3])) {
     std::cerr << "Invalid incoming proton 2" << std::endl;
   }
   this->_ev->SetParticle(&ip2);
@@ -1234,13 +1242,15 @@ GamGam::FillKinematics(bool symmetrise_)
   
   // First outgoing proton
   Particle op1(3, _pdg3);
-  px = _pp3*_st3*_cp3;
-  py = _pp3*_st3*_sp3;
-  pz = _pp3*_ct3*ranz;
-  if (!op1.SetP( px*cp+rany*py*sp,
-                -px*sp+rany*py*cp,
-                 _gamma*pz  +_betgam*_ep3,
-                 _gamma*_ep3+_betgam*pz  )) {
+  _plab_op1[0] = _pp3*_st3*_cp3;
+  _plab_op1[1] = _pp3*_st3*_sp3;
+  _plab_op1[2] = _gamma*_pp3*_ct3*ranz+_betgam*_ep3;
+  _plab_op1[3] = _gamma*_ep3          +_betgam*_pp3*_ct3*ranz;
+  //std::cout << "outgoing proton 1: p = (" << _plab_op1[0] << ", " << _plab_op1[1] << ", " << _plab_op1[2] << ", " << _plab_op1[3] << ")" << std::endl;
+  if (!op1.SetP( _plab_op1[0]*cp+rany*_plab_op1[1]*sp,
+                -_plab_op1[0]*sp+rany*_plab_op1[1]*cp,
+                 _plab_op1[2],
+                 _plab_op1[3])) {
     std::cerr << "Invalid outgoing proton 1" << std::endl;
   }
   op1.SetMother(this->_ev->GetByRole(1));
@@ -1248,13 +1258,15 @@ GamGam::FillKinematics(bool symmetrise_)
   
   // Second outgoing proton
   Particle op2(5, _pdg5);
-  px = _pp5*_st5*_cp5;
-  py = _pp5*_st5*_sp5;
-  pz = _pp5*_ct5*ranz;
-  if (!op2.SetP( px*cp+rany*py*sp,
-                -px*sp+rany*py*cp,
-                 _gamma*pz  +_betgam*_ep5,
-                 _gamma*_ep5+_betgam*pz  )) {
+  _plab_op2[0] = _pp5*_st5*_cp5;
+  _plab_op2[1] = _pp5*_st5*_sp5;
+  _plab_op2[2] = _gamma*_pp5*_ct5*ranz+_betgam*_ep5;
+  _plab_op2[3] = _gamma*_ep5          +_betgam*_pp5*_ct5*ranz;
+  //std::cout << "outgoing proton 2: p = (" << _plab_op2[0] << ", " << _plab_op2[1] << ", " << _plab_op2[2] << ", " << _plab_op2[3] << ")" << std::endl;
+  if (!op2.SetP( _plab_op2[0]*cp+rany*_plab_op2[1]*sp,
+                -_plab_op2[0]*sp+rany*_plab_op2[1]*cp,
+                 _plab_op2[2],
+                 _plab_op2[3])) {
     std::cerr << "Invalid outgoing proton 2" << std::endl;
   }
   op2.SetMother(this->_ev->GetByRole(2));
@@ -1267,13 +1279,14 @@ GamGam::FillKinematics(bool symmetrise_)
   // First outgoing lepton
   role = (ransign<0) ? 6 : 7;
   Particle ol1(role, ransign*abs(_pdg6));
-  px = _pl6*_st6*_cp6;
-  py = _pl6*_st6*_sp6;
-  pz = _pl6*_ct6*ranz;
-  if (!ol1.SetP( px*cp+rany*py*sp,
-                -px*sp+rany*py*cp,
-                 _gamma*pz  +_betgam*_el6,
-                 _gamma*_el6+_betgam*pz  )) {
+  _plab_ol1[0] = _pl6*_st6*_cp6;
+  _plab_ol1[1] = _pl6*_st6*_sp6;
+  _plab_ol1[2] = _gamma*_pl6*_ct6*ranz+_betgam*_el6;
+  _plab_ol1[3] = _gamma*_el6          +_betgam*_pl6*_ct6*ranz;
+  if (!ol1.SetP( _plab_ol1[0]*cp+rany*_plab_ol1[1]*sp,
+                -_plab_ol1[0]*sp+rany*_plab_ol1[1]*cp,
+                 _plab_ol1[2],
+                 _plab_ol1[3])) {
     std::cerr << "Invalid outgoing lepton 1" << std::endl;
   }
   ol1.SetMother(this->_ev->GetByRole(4));
@@ -1282,30 +1295,31 @@ GamGam::FillKinematics(bool symmetrise_)
   // Second outgoing lepton
   role = (ransign<0) ? 7 : 6;
   Particle ol2(role, -ransign*abs(_pdg7));
-  px = _pl7*_st7*_cp7;
-  py = _pl7*_st7*_sp7;
-  pz = _pl7*_ct7*ranz;
-  if (!ol2.SetP( px*cp+rany*py*sp,
-                -px*sp+rany*py*cp,
-		 _gamma*pz  +_betgam*_el7,
-		 _gamma*_el7+_betgam*pz  )) {
+  _plab_ol2[0] = _pl7*_st7*_cp7;
+  _plab_ol2[1] = _pl7*_st7*_sp7;
+  _plab_ol2[2] = _gamma*_pl7*_ct7*ranz+_betgam*_el7;
+  _plab_ol2[3] = _gamma*_el7          +_betgam*_pl7*_ct7*ranz;
+  if (!ol2.SetP( _plab_ol2[0]*cp+rany*_plab_ol2[1]*sp,
+                -_plab_ol2[0]*sp+rany*_plab_ol2[1]*cp,
+		 _plab_ol2[2],
+		 _plab_ol2[3])) {
     std::cerr << "Invalid outgoing lepton 2" << std::endl;
   }
   ol2.SetMother(this->_ev->GetByRole(4));
   this->_ev->SetParticle(&ol2);
-  /*
+  
   // First incoming photon
   // Equivalent in LPAIR : PLAB(x, 3)
   Particle ph1(41, 22);
-  px = _p3_p1[0]-_pp3*_st3*_cp3;
-  py = _p3_p1[1]-_pp3*_st3*_sp3;
-  pz = _p3_p1[2]-_pp3*_ct3*ranz;
-  std::cout << _p3_p1[0] << ", " << _p3_p1[2] << std::endl;
-  std::cout << "photon 1: p = (" << px << ", " << py << ", " << pz << ")" << std::endl;
-  if (!ph1.SetP( px*cp+rany*py*sp,
-                -px*sp+rany*py*cp,
-		 _gamma*pz         +_betgam*(_ep1-_ep3),
-		 _gamma*(_ep1-_ep3)+_betgam*pz)) {
+  _plab_ph1[0] = _plab_ip1[0]-_plab_op1[0];
+  _plab_ph1[1] = _plab_ip1[1]-_plab_op1[1];
+  _plab_ph1[2] = _plab_ip1[2]-_plab_op1[2];
+  _plab_ph1[3] = _plab_ip1[3]-_plab_op1[3];
+  //std::cout << "photon 1: p = (" << _plab_ph1[0] << ", " << _plab_ph1[1] << ", " << _plab_ph1[2] << ", " << _plab_ph1[3] << ")" << std::endl;
+  if (!ph1.SetP( _plab_ph1[0]*cp+rany*_plab_ph1[1]*sp,
+                -_plab_ph1[0]*sp+rany*_plab_ph1[1]*cp,
+		 _plab_ph1[2],
+		 _plab_ph1[3])) {
     //std::cerr << "Invalid photon 1" << std::endl;
   }
   ph1.SetMother(this->_ev->GetByRole(1));
@@ -1314,23 +1328,23 @@ GamGam::FillKinematics(bool symmetrise_)
   // Second incoming photon
   // Equivalent in LPAIR : PLAB(x, 4)
   Particle ph2(42, 22);
-  px = _p3_p2[0]-_pp5*_st5*_cp5;
-  py = _p3_p2[1]-_pp5*_st5*_sp5;
-  pz = _p3_p2[2]-_pp5*_ct5*ranz;
-  std::cout << _p3_p2[0] << ", " << _p3_p2[2] << std::endl;
-  std::cout << "photon 2: p = (" << px << ", " << py << ", " << pz << ")" << std::endl;
-  if (!ph2.SetP( px*cp+rany*py*sp,
-                -px*sp+rany*py*cp,
-                 _gamma*pz         +_betgam*(_ep2-_ep5),
-                 _gamma*(_ep2-_ep5)+_betgam*pz)) {
+  _plab_ph2[0] = _plab_ip2[0]-_plab_op2[0];
+  _plab_ph2[1] = _plab_ip2[1]-_plab_op2[1];
+  _plab_ph2[2] = _plab_ip2[2]-_plab_op2[2];
+  _plab_ph2[3] = _plab_ip2[3]-_plab_op2[3];
+  //std::cout << "photon 2: p = (" << _plab_ph2[0] << ", " << _plab_ph2[1] << ", " << _plab_ph2[2] << ", " << _plab_ph2[3] << ")" << std::endl;
+  if (!ph2.SetP( _plab_ph2[0]*cp+rany*_plab_ph2[1]*sp,
+                -_plab_ph2[0]*sp+rany*_plab_ph2[1]*cp,
+                 _plab_ph2[2],
+                 _plab_ph2[3])) {
     //std::cerr << "Invalid photon 2" << std::endl;
   }
   ph2.SetMother(this->_ev->GetByRole(2));
   this->_ev->SetParticle(&ph2);
-  */
-  /*gmux = -_t2/(_ep1*_eg2-_pp1*_p3_g2[2])/2.;
-  gmuy = (_ep1*_eg2-_pp1*_p3_g2[2])/(_ep2*_eg2+_pp2*_p3_g2[2]);
-  gmuw = std::pow(_ep1+_eg2, 2)-std::pow(_pp1+_p3_g2[2], 2);
+  /*  
+  gmux = -_t2/(_ep1*_eg2-_pp1*_p3_g2[2])/2.;
+  gmuy = (_ep1*_plab_ph2[3]-_pp1*_plab_ph2[2])/(_ep2*_plab_ph2[3]+_pp2*_plab_ph2[2]);
+  gmuw = std::pow(_ep1+_plab_ph2[3], 2)-std::pow(_pp1+_plab_ph2[2], 2);
   if (gmuw>=0.) {
     gmuw = std::sqrt(gmuw);
   }
@@ -1339,14 +1353,14 @@ GamGam::FillKinematics(bool symmetrise_)
     gmuw = 0.;
   }
   gmunu = gmuy*2.*GetMassFromPDGId(2212)/_ep1/_ep2;
-#ifdef DEBUG
+  //#ifdef DEBUG
   std::cout << "[GamGam::FillKinematics] [DEBUG]"
-            << "\n\tgmux = " << gmux
-            << "\n\tgmuy = " << gmuy
-            << "\n\tgmuw = " << gmuw
-            //<< "\n\tgmunu = " << gmunu
+            << "\n\t gmux = " << gmux
+            << "\n\t gmuy = " << gmuy
+            << "\n\t gmuw = " << gmuw
+            << "\n\tgmunu = " << gmunu
             << std::endl;
-#endif
+  //#endif
   */
   //this->_ev->Dump();
 }

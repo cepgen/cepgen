@@ -14,16 +14,17 @@ int main(int argc, char* argv[]) {
   if (argc==1) {
     std::cout << "[Main] [DEBUG] No config file provided. Setting the default parameters." << std::endl;
     ip.in1p = 3500.;
-    ip.in2p = -3500.;
+    ip.in2p = 3500.;
     /*ip.in1p = 4000.;
-    ip.in2p = -4000.;*/
+    ip.in2p = 4000.;*/
     ip.pair = 13;
     ip.p1mod = 2;
     ip.p2mod = 2;
     ip.mcut = 2;
-    ip.minenergy = 1.;
+    ip.minenergy = 0.;
     ip.minpt = 5.;
-    ip.maxgen = 1e5;
+    ip.maxgen = 1e4;
+    //ip.SetEtaRange(-2.5, 2.5);
     //ip.debug = true;
   }
   else {
@@ -36,7 +37,7 @@ int main(int argc, char* argv[]) {
       return -1;
     }
   }
-  std::srand(std::time(0));
+  //std::srand(std::time(0));
   /*std::cout << (double)rand()/(double)RAND_MAX << std::endl;
   std::cout << (double)rand()/(double)RAND_MAX << std::endl;
   std::cout << (double)rand()/(double)RAND_MAX << std::endl;*/
@@ -60,9 +61,9 @@ int main(int argc, char* argv[]) {
     out << xsec << "\t" << err << std::endl;
   }
   out.close();*/
-  std::cout << "before computing the cross-section" << std::endl;
+  //std::cout << "before computing the cross-section" << std::endl;
   mg.ComputeXsection(&xsec, &err);
-  std::cout << " --> xsect = " << xsec << " +/- " << err << std::endl;
+  //std::cout << "--> Computed cross-section = " << xsec << " +/- " << err << " pb" << std::endl;
 
   if (ip.generation) {
     mg.LaunchGen();

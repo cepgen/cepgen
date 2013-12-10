@@ -76,6 +76,12 @@ class InputParameters {
     InputParameters();
     ~InputParameters();
     /**
+     * @brief Sets the pseudo-rapidity range for the produced leptons
+     * @param etamin_ The minimal value of \f$\eta\$f for the outgoing leptons
+     * @param etamax_ The maximal value of \f$\eta\$f for the outgoing leptons
+     */
+    void SetEtaRange(double etamin_, double etamax_);
+    /**
      * @brief Dumps the input parameters in the console
      */
     void Dump();
@@ -149,6 +155,8 @@ class InputParameters {
     double mintheta;
     /** @brief Maximal polar angle \f$\theta\f$ of the outgoing leptons */
     double maxtheta;
+    double minq2;
+    double maxq2;
     /**
      * Minimal mass of the outgoing proton remnants, \f$M_X\f$, in
      * GeV/c\f${}^{2}\f$.
@@ -166,9 +174,10 @@ class InputParameters {
     int itvg;
     /**
      * @brief Maximal number of TREAT calls
-     * @fixme Is it correctly implemented ?
+     * @note Is it correctly implemented ?
      */
     int ntreat;
+    int npoints;
     /**
      * @brief Are we generating events ? (true) or are we only computing the
      * cross-section ? (false)
@@ -196,6 +205,9 @@ class InputParameters {
     /**
      * @brief The file in which to store the events generation's output
      */
+    int gpdf;
+    int spdf;
+    int qpdf;
     std::ofstream* file;
     std::ofstream* file_debug; //FIXME dropme!
     /**

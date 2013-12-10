@@ -131,7 +131,7 @@ class GamGam {
    * @return A boolean stating if the input kinematics and the final
    *  states are well defined
    */
-  bool IsKinematicsDefined() { return setkin; }
+  inline bool IsKinematicsDefined() { return setkin; }
   /**
    * Computes the centre of mass energy for the system,
    *  according to the incoming particles' kinematics
@@ -148,10 +148,31 @@ class GamGam {
   double ComputeXsec(int nm_=1);
   void FillKinematics(bool symmetrise_=false);
   void StoreEvent(std::ofstream*,double);
-  double GetT1() { return this->_t1; };
-  void GetT1extrema(double& t1min_, double& t1max_) { t1min_=this->_t1min; t1max_=this->_t1max; };
-  double GetT2() { return this->_t2; };
-  void GetT2extrema(double& t2min_, double& t2max_) { t2min_=this->_t2min; t2max_=this->_t2max; };
+  /**
+   * Returns the value for the first photon virtuality
+   * @return \f$t_1\f$, the first photon virtuality
+   */
+  inline double GetT1() { return this->_t1; };
+  /**
+   * Returns the two limit values for the first photon virtuality
+   * @param t1min_ The minimal value for \f$t_1\f$
+   * @param t1max_ The maximal value for \f$t_1\f$
+   */
+  inline void GetT1extrema(double& t1min_, double& t1max_) { t1min_=this->_t1min; t1max_=this->_t1max; };
+  /**
+   * Returns the value for the second photon virtuality
+   * @return \f$t_2\f$, the second photon virtuality
+   */
+  inline double GetT2() { return this->_t2; };
+  /**
+   * Returns the two limit values for the second photon virtuality
+   * @param t2min_ The minimal value for \f$t_2\f$
+   * @param t2max_ The maximal value for \f$t_2\f$
+   */
+  inline void GetT2extrema(double& t2min_, double& t2max_) { t2min_=this->_t2min; t2max_=this->_t2max; };
+  inline double GetS1() { return this->_s1; };
+  inline double GetS2() { return this->_s2; };
+  inline double GetD3() { return this->_d3; };
   inline Event* GetEvent() { return this->_ev; };
  private:
   /**
@@ -300,6 +321,7 @@ class GamGam {
   /** @brief Maximal \f$Q^2\f$ exchange */
   double _q2max;
   double _qp2min, _qp2max;
+  double _d3;
   // COMMON /ACCURA/
   double _acc3;
   double _acc4;
@@ -431,6 +453,8 @@ class GamGam {
   /** @brief Is the full event's kinematic set ? */
   bool setkin;
 
+  double _plab_ip1[4], _plab_ip2[4], _plab_op1[4], _plab_op2[4];
+  double _plab_ol1[4], _plab_ol2[4], _plab_ph1[4], _plab_ph2[4];
   // Cuts
   /** @brief Set of cuts to apply on the final phase space */
   GamGamKinematics _cuts;

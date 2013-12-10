@@ -1,5 +1,6 @@
 #include "vegas.h"
-//#include "vegas-vermaseren.c"
+
+#define COORD(s,i,j) ((s)->xi[(i)*(s)->dim + (j)])
 
 Vegas::Vegas(int dim_, double f_(double*,size_t,void*), InputParameters* inParam_) :
   _nTreatCalls(0), _mbin(3),
@@ -33,7 +34,6 @@ Vegas::Vegas(int dim_, double f_(double*,size_t,void*), InputParameters* inParam
   _ndim = (size_t)dim_;
   _nIter = inParam_->itvg;
   _ncalls = inParam_->ncvg;
-  _nTreat = inParam_->ntreat;
   _s = gsl_monte_vegas_alloc(_ndim);
   gsl_monte_vegas_params_get(_s, &par);
   par.stage = 0;
@@ -94,11 +94,11 @@ Vegas::Integrate(double *result_, double *abserr_)
   // VEGAS warm up!
   gsl_monte_vegas_params_get(_s, &par);
   par.stage = 0;
-  par.verbose = 0;
+  par.verbose = -1;
   par.iterations = _ip->itvg;
   gsl_monte_vegas_params_set(_s, &par);
-  _ip->Dump();
-  vegas_status = gsl_monte_vegas_integrate(_F, _xl, _xu, _ndim, 100000, _r, _s, result_, abserr_);
+  //_ip->Dump();
+  vegas_status = gsl_monte_vegas_integrate(_F, _xl, _xu, _ndim, 10000, _r, _s, result_, abserr_);
 
 #ifdef DEBUG
   std::cout << "[Vegas::Integrate] [DEBUG] Vegas warm-up finished !" << std::endl;
@@ -107,7 +107,7 @@ Vegas::Integrate(double *result_, double *abserr_)
   //FILE *fveg = fopen("vegas","w");
   gsl_monte_vegas_params_get(_s, &par);
   par.stage = 1;
-  par.verbose = -1;
+  par.verbose = 0;
   //par.ostream = fveg;
   gsl_monte_vegas_params_set(_s, &par);
 
@@ -201,10 +201,7 @@ Vegas::LaunchMyGeneration()
   std::cout << "[Vegas::LaunchMyGeneration] [DEBUG] " << _ip->maxgen << " events will be generated" << std::endl;
   i = 0;
   while (i<_ip->maxgen) {
-    if (this->GenerateOneEvent()) {
-      //std::cout << ">>> " << i << std::endl;
-      i++;
-    }
+    if (this->GenerateOneEvent()) i++;
   }
   std::cout << "[Vegas::LaunchMyGeneration] [DEBUG] " << i << " events generated in \"" << fn << "\"" << std::endl;
   of.close();
@@ -220,7 +217,7 @@ Vegas::GenerateOneEvent()
   int jj, jjj;
   double x[_ndim];
   
-  ami = 1./(double)_mbin;
+  ami = 1./_mbin;
   max = pow(_mbin, _ndim);
   //std::cout << "ffmax = " << _ffmax << ", fmax2 = " << _fmax2 << ", j = " << _j << ", fmold = " << _fmold << std::endl;
 
@@ -252,7 +249,7 @@ Vegas::GenerateOneEvent()
 	  std::cout << "new correc = " << _correc << std::endl;
           _corre2 = 0.;
           _fmax2 = 0.;
-          std::cout << "_j => " << _j << std::endl;
+          //std::cout << "_j => " << _j << std::endl;
           //_j = -1; //FIXME to ensure the first condition is respected
           return this->GenerateOneEvent(); //GOTO 4
         }
@@ -267,8 +264,8 @@ Vegas::GenerateOneEvent()
       x[k] = ((double)rand()/RAND_MAX+_n[k])*ami;
     }
     // Compute weight for x value
-    if (_nTreat>0) _weight = Treat(x);
-    else _weight = _F->f(x, _ndim, (void*)_F->params);
+    if (_ip->ntreat>0) _weight = Treat(x);
+    else _weight = this->F(x);
     // Parameter for correction of correction
     if (_weight>_fmax[_j]) {
       if (_weight>_fmax2) _fmax2 = _weight;
@@ -307,9 +304,8 @@ Vegas::GenerateOneEvent()
   //std::cout << "jjj = " << jjj << ", jj = " << jj << ", j-1 = " << _j-1 << std::endl;
 
   // Get weight for selected x value
-  //std::cout << ">>> " << _nTreat << std::endl;
-  if (_nTreat>0) _weight = Treat(x);
-  else _weight = _F->f(x, _ndim, (void*)_F->params);
+  if (_ip->ntreat>0) _weight = Treat(x);
+  else _weight = this->F(x);
   //std::cout << ">>> " << _weight << std::endl;
 
   // Eject if weight is too low
@@ -355,8 +351,8 @@ Vegas::StoreEvent(double *x_)
   }
   _ip->store = true;
   //std::cout << "-------> storing the event !" << std::endl;
-  if (_nTreat>0) _weight = Treat(x_);
-  else _weight = _F->f(x_, _ndim, (void*)_ip);
+  if (_ip->ntreat>0) _weight = Treat(x_);
+  else _weight = this->F(x_);
   //std::cout << _weight-_F->f(x_, _ndim, (void*)_F->params) << std::endl;
   //_F->f(x_, _ndim, (void*)_F->params);
   _ip->ngen += 1;
@@ -378,7 +374,7 @@ Vegas::SetGen(std::ofstream *of_)
   double jjj;
   double sum, sum2, sum2p;
   int n[10];
-  int npoin = 100; //FIXME in GMUINI!!!
+  int npoin = _ip->npoints;
   double fsum, fsum2;
   double z;
   double x[_ndim];
@@ -414,21 +410,23 @@ Vegas::SetGen(std::ofstream *of_)
       jjj = jj/_mbin;
       n[j] = jj-jjj*_mbin;
       //std::cout << "--> j(" << j << ") : n = " << n[j] << ", jj = " << jj << ", jjj = " << jjj << std::endl;
-      jj = jjj;
+      jj = jjj+1;
     }
     fsum = 0.;
     fsum2 = 0.;
     for (int j=0; j<npoin; j++) {
       for (unsigned int k=0; k<_ndim; k++) {
         x[k] = ((double)rand()/RAND_MAX+n[k])/_mbin;
-	//std::cout << "x[" << k << "] = " << x[k] << std::endl;
       }
-      if (_nTreat>0) z = this->Treat(x);
-      else z = _F->f(x, _ndim, (void*)_F->params);
+      if (_ip->ntreat>0) z = this->Treat(x);
+      else z = this->F(x);
+      if (z<0) std::cout << "z=" << z << std::endl;
       if (z>_fmax[i]) _fmax[i] = z;
       fsum += z;
       fsum2 += pow(z, 2);
+      //std::cout << fsum << std::endl;
     }
+    //std::cout << "fsum=" << fsum << std::endl;
     av = fsum/npoin;
     av2 = fsum2/npoin;
     sig2 = av2-pow(av, 2);
@@ -442,6 +440,7 @@ Vegas::SetGen(std::ofstream *of_)
     //#ifdef DEBUG
     eff = 1.e4;
     if (_fmax[i]!=0.) eff = _fmax[i]/av;
+    //std::cout << "fmax(" << i << ") = " << _fmax[i] << std::endl;
     //std::cout << "fsum = " << fsum << ", fsum2 = " << fsum2 << std::endl;
     /*std::cout << "[Vegas::SetGen] [DEBUG] in iteration #" << i << " :"
 	      << "\n\tav   = " << av
@@ -472,9 +471,13 @@ Vegas::SetGen(std::ofstream *of_)
   eff1 = eff1/(max*sum);
   eff2 = _ffmax/sum;
   std::cout << "[Vegas::SetGen] [DEBUG]"
-            << "\n\tsig = " << sig << ", sigp = " << sigp
+            << "\n\tAverage function value     = sum   = " << sum
+            << "\n\tOverall standard deviation = sig   = " << sig
+	    << "\n\tAverage standard deviation = sigp  = " << sigp
+	    << "\n\tMaximum function value     = ffmax = " << _ffmax
+	    << "\n\tAverage inefficiency       = eff1  = " << eff1 
+	    << "\n\tOverall inefficiency       = eff2  = " << eff2 
             << "\n\teff = " << eff 
-	    << ", eff1 = " << eff1 << ", eff2 = " << eff2 
 	    << std::endl;
   //#endif
 }
@@ -495,6 +498,7 @@ Vegas::Treat(double *x_, InputParameters* ip_)
     _rTreat = pow(ndo, _ndim);
   }
   w = _rTreat;
+  //std::cout << "rtreat = " << _rTreat << std::endl;
   for (unsigned int i=0; i<_ndim; i++) {
     xx = x_[i]*ndo;
     j = xx;
@@ -502,20 +506,21 @@ Vegas::Treat(double *x_, InputParameters* ip_)
     y = xx-j;
     //std::cout << "y[" << i << "] = " << y << ", jj = " << jj << ", ndo = " << ndo << std::endl;
     if (j<=0) {
-      dd = _s->xi[0+i*_ndim];
+      dd = COORD(_s,0,i);
     }
     else {
-      dd = _s->xi[jj*_ndim+i]-_s->xi[j*_ndim+i];
+      //std::cout << "J>0" << std::endl;
+      dd = COORD(_s,jj,i)-COORD(_s,j,i);
     }
-    z[i] = _s->xi[jj*_ndim+i]-dd*(1.-y);
+    z[i] = COORD(_s,jj,i)-dd*(1.-y);
     w = w*dd;
-    //std::cout << "dd[" << i << "]->" << dd << " --> w=" << w << std::endl;
+    //std::cout << "dd[" << i << "]-> z[" << i << "]=" << z[i] << ", dd=" << dd << " --> w=" << w << ", y=" << y << ", j=" << j << ", jj=" << jj << std::endl;
   }
   //std::cout << "weight = " << w << std::endl;
-  //_ip->Dump();
+  //ip_->Dump();
 #ifdef DEBUG
   std::cout << "[Vegas::Treat] [DEBUG] w = " << w << ", dd = " << dd << ", ndo = " << ndo << ", r = " << _rTreat << std::endl;
 #endif
-  return w*_F->f(z, _ndim, (void*)ip_);
+  return w*this->F(z, ip_);
 }
 

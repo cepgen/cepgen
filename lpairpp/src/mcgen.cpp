@@ -114,13 +114,10 @@ void MCGen::Test()
 
 void MCGen::ComputeXsection(double* xsec_, double *err_)
 {
+  std::cout << "[MCGen::ComputeXsection] Starting the computation of the process cross-section" << std::endl;
   veg = new Vegas(_ndim,f, &_ip);
-  std::cout << "before integrating" << std::endl;
   veg->Integrate(xsec_, err_);
-#ifdef DEBUG
-  std::cout << "[MCGen::ComputeXsection] [DEBUG] Total cross-section = " << *xsec_ << " +/- " << *err_ << " pb" << std::endl;
-#endif
-  std::cout << "after integrating" << std::endl;
+  std::cout << "[MCGen::ComputeXsection] Total cross-section = " << *xsec_ << " +/- " << *err_ << " pb" << std::endl;
   delete veg;
 }
 
@@ -145,8 +142,8 @@ double f(double* x_, size_t ndim_, void* params_) {
   p = (InputParameters*)params_;
 
   //FIXME at some point introduce non head-on colliding beams ?
-  double inp1[3] = {0., 0., p->in1p};
-  double inp2[3] = {0., 0., p->in2p};
+  double inp1[3] = {0., 0.,  p->in1p};
+  double inp2[3] = {0., 0., -p->in2p}; //FIXME at this stage or at the InputParameters::in2p definition ?
 
   ff = 0.;
 
@@ -164,8 +161,6 @@ double f(double* x_, size_t ndim_, void* params_) {
 #endif
 
   if (p->p1mod<=2 && p->p2mod<=2) {
-    cuts.q2min = 0.;
-    cuts.q2max = 1e5;
     inp1pdg = 2212;
     inp2pdg = 2212;
     outp1pdg = 2212;
@@ -174,14 +169,14 @@ double f(double* x_, size_t ndim_, void* params_) {
   }
   else {
     //FIXME for the inelastic case
-    cuts.q2min = 0.;
-    cuts.q2max = 1e5;
     inp1pdg = 2212;
     inp2pdg = 2212;
     outp1pdg = 2212;
     outp2pdg = 2212;
     cuts.kinematics = 2; //FIXME
   }
+  cuts.q2min = p->minq2;
+  cuts.q2max = p->maxq2;
   cuts.mode = p->mcut;
   cuts.ptmin = p->minpt;
   cuts.ptmax = p->maxpt;
@@ -206,14 +201,14 @@ double f(double* x_, size_t ndim_, void* params_) {
     return 0.;
   }
   ff = gg.ComputeXsec();
-//#ifdef DEBUG
+#ifdef DEBUG
   if (i==1) {
     std::cout << "--> f at first step = " << ff << std::endl;
     std::cout << "=========================" << std::endl;
     cuts.Dump();
     std::cout << "=========================" << std::endl;
   }
-//#endif
+#endif
   
   /*double tmin,tmax;
   gg->GetT1extrema(tmin, tmax);
@@ -241,10 +236,24 @@ double f(double* x_, size_t ndim_, void* params_) {
     //std::cout << "number of events generated : " << p->ngen << std::endl;
     gg.FillKinematics(p->symmetrise);
     gg.GetEvent()->Store(p->file);
+
+    double t1min, t1max, t2min, t2max;
+    gg.GetT1extrema(t1min, t1max);
+    gg.GetT2extrema(t2min, t2max);
+
     if (p->file_debug->is_open()) {
       *(p->file_debug) << (gg.GetEvent()->GetByRole(5)->p-gg.GetEvent()->GetByRole(1)->p)
                        << "\t" << gg.GetEvent()->GetByRole(3)->p
                        << "\t" << gg.GetEvent()->GetByRole(5)->p
+		       << "\t" << gg.GetT1()
+		       << "\t" << t1min
+		       << "\t" << t1max
+		       << "\t" << gg.GetT2()
+		       << "\t" << t2min
+		       << "\t" << t2max
+		       << "\t" << gg.GetS1()
+		       << "\t" << gg.GetS2()
+		       << "\t" << gg.GetD3()
                        << std::endl;
     }
     //std::cout << "=============================" << std::endl;

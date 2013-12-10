@@ -37,7 +37,7 @@ class Event {
      * @param of_ The file stream on which the event record has to be saved
      * @param weight_ The weight of the event
      */
-    void StoreLHERecord(std::ofstream*, const double weight_=1.);
+    void StoreLHERecord(std::ofstream* of_, const double weight_=1.);
     /**
      * Stores in a file (raw format) all the kinematics on the outgoing leptons
      * @param weight_ The weight of the event
