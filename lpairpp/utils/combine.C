@@ -23,8 +23,24 @@
 #define S1 20
 #define S2 21
 #define D3 22
+#define WTREAT 23
+#define ZTREAT 24
+#define XIN0TREAT 25
+#define XIN1TREAT 26
+#define XIN2TREAT 27
+#define XIN3TREAT 28
+#define XIN4TREAT 29
+#define XIN5TREAT 30
+#define XIN6TREAT 31
+#define XOUT0TREAT 32
+#define XOUT1TREAT 33
+#define XOUT2TREAT 34
+#define XOUT3TREAT 35
+#define XOUT4TREAT 36
+#define XOUT5TREAT 37
+#define XOUT6TREAT 38
 
-#define NHIST 23
+#define NHIST 39
 
 void combine()
 {
@@ -35,7 +51,7 @@ void combine()
   const Int_t lepPdg = 13;
   const Int_t n=100;
   //const Int_t maxEvts = -1;
-  const Int_t maxEvts = 1e4;
+  const Int_t maxEvts = 2e4;
   const Double_t ep = 3500.;
   const Double_t pi = acos(-1);
 
@@ -44,20 +60,30 @@ void combine()
 
   Double_t px, py, pz, pt, e, m, eta, q2m, pp3, pp5, weight;
   Double_t t1, t1min, t1max, t2, t2min, t2max, s1, s2, d3;
+  Double_t wtreat, ztreat, xintreat[10], xoutreat[10];
   Int_t pdg;
 
   TLine *line;
   TH1D *h_lpairpp[NHIST], *h_lpairor[NHIST];
   TH1D *htmp;
   TCanvas *c[NHIST];
+  Bool_t show[NHIST];
   TLegend *leg;
   TLorentzVector lep1, lep2, prot;
   TPaveText *text;
+
+  for (Int_t i=0; i<NHIST; i++) {
+    //if (i<23) show[i] = false;
+    //else 
+      show[i] = true;
+  }
   
   // LPAIR's TTree definition
   Double_t px_[n], py_[n], pz_[n], e_[n], m_[n], eta_[n];
   Int_t pdgId_[n], npart_;
+  Int_t insg_;
   Double_t t1_, t1min_, t1max_, t2_, t2min_, t2max_, s1_, s2_, d3_;
+  Double_t wtreat_, valtreat_, xtreat_[10], ztreat_[10];
   TFile *lp;
   TTree *tree;
   bool lep1set, lep2set, pset;
@@ -86,6 +112,11 @@ void combine()
   tree->SetBranchAddress("s1", &s1_);
   tree->SetBranchAddress("s2", &s2_);
   tree->SetBranchAddress("d3", &d3_);
+  tree->SetBranchAddress("wtreat", &wtreat_);
+  tree->SetBranchAddress("valtreat", &valtreat_);
+  tree->SetBranchAddress("xtreat", xtreat_);
+  tree->SetBranchAddress("ztreat", ztreat_);
+  tree->SetBranchAddress("insetgen", insg_);
 
   gStyle->SetOptStat(0);
 
@@ -135,12 +166,45 @@ void combine()
   h_lpairor[S2] = new TH1D("s2_2", "s_{2}", 250, 0., .5e6);
   h_lpairpp[D3] = new TH1D("d3", "#delta_{3}", 200, 0., 1.e6);
   h_lpairor[D3] = new TH1D("d3_2", "#delta_{3}", 200, 0., 1.e6);
+  h_lpairpp[WTREAT] = new TH1D("wtrt", "w_{treat}", 100, 0., 10);
+  h_lpairor[WTREAT] = new TH1D("wtrt_2", "w_{treat}", 100, 0., 10);
+  h_lpairpp[ZTREAT] = new TH1D("ztrt", "z_{treat}", 100, 0., 200);
+  h_lpairor[ZTREAT] = new TH1D("ztrt_2", "z_{treat}", 100, 0., 200);
+  h_lpairpp[XIN0TREAT] = new TH1D("xintrt0", "x^{in}_{treat}[0]", 100, 0., 1.);
+  h_lpairor[XIN0TREAT] = new TH1D("xintrt0_2", "x^{in}_{treat}[0]", 100, 0., 1.);
+  h_lpairpp[XIN1TREAT] = new TH1D("xintrt1", "x^{in}_{treat}[1]", 100, 0., 1.);
+  h_lpairor[XIN1TREAT] = new TH1D("xintrt1_2", "x^{in}_{treat}[1]", 100, 0., 1.);
+  h_lpairpp[XIN2TREAT] = new TH1D("xintrt2", "x^{in}_{treat}[2]", 100, 0., 1.);
+  h_lpairor[XIN2TREAT] = new TH1D("xintrt2_2", "x^{in}_{treat}[2]", 100, 0., 1.);
+  h_lpairpp[XIN3TREAT] = new TH1D("xintrt3", "x^{in}_{treat}[3]", 100, 0., 1.);
+  h_lpairor[XIN3TREAT] = new TH1D("xintrt3_2", "x^{in}_{treat}[3]", 100, 0., 1.);
+  h_lpairpp[XIN4TREAT] = new TH1D("xintrt4", "x^{in}_{treat}[4]", 100, 0., 1.);
+  h_lpairor[XIN4TREAT] = new TH1D("xintrt4_2", "x^{in}_{treat}[4]", 100, 0., 1.);
+  h_lpairpp[XIN5TREAT] = new TH1D("xintrt5", "x^{in}_{treat}[5]", 100, 0., 1.);
+  h_lpairor[XIN5TREAT] = new TH1D("xintrt5_2", "x^{in}_{treat}[5]", 100, 0., 1.);
+  h_lpairpp[XIN6TREAT] = new TH1D("xintrt6", "x^{in}_{treat}[6]", 100, 0., 1.);
+  h_lpairor[XIN6TREAT] = new TH1D("xintrt6_2", "x^{in}_{treat}[6]", 100, 0., 1.);
+  h_lpairpp[XOUT0TREAT] = new TH1D("xoutrt0", "x^{out}_{treat}[0]", 100, 0., 1.);
+  h_lpairor[XOUT0TREAT] = new TH1D("xoutrt0_2", "x^{out}_{treat}[0]", 100, 0., 1.);
+  h_lpairpp[XOUT1TREAT] = new TH1D("xoutrt1", "x^{out}_{treat}[1]", 100, 0., 1.);
+  h_lpairor[XOUT1TREAT] = new TH1D("xoutrt1_2", "x^{out}_{treat}[1]", 100, 0., 1.);
+  h_lpairpp[XOUT2TREAT] = new TH1D("xoutrt2", "x^{out}_{treat}[2]", 100, 0., 1.);
+  h_lpairor[XOUT2TREAT] = new TH1D("xoutrt2_2", "x^{out}_{treat}[2]", 100, 0., 1.);
+  h_lpairpp[XOUT3TREAT] = new TH1D("xoutrt3", "x^{out}_{treat}[3]", 100, 0., 1.);
+  h_lpairor[XOUT3TREAT] = new TH1D("xoutrt3_2", "x^{out}_{treat}[3]", 100, 0., 1.);
+  h_lpairpp[XOUT4TREAT] = new TH1D("xoutrt4", "x^{out}_{treat}[4]", 100, 0., 1.);
+  h_lpairor[XOUT4TREAT] = new TH1D("xoutrt4_2", "x^{out}_{treat}[4]", 100, 0., 1.);
+  h_lpairpp[XOUT5TREAT] = new TH1D("xoutrt5", "x^{out}_{treat}[5]", 100, 0., 1.);
+  h_lpairor[XOUT5TREAT] = new TH1D("xoutrt5_2", "x^{out}_{treat}[5]", 100, 0., 1.);
+  h_lpairpp[XOUT6TREAT] = new TH1D("xoutrt6", "x^{out}_{treat}[6]", 100, 0., 1.);
+  h_lpairor[XOUT6TREAT] = new TH1D("xoutrt6_2", "x^{out}_{treat}[6]", 100, 0., 1.);
 
   // First fetch the LPAIR++ output
   in.open("test");
   i = 0;
   lep1set = lep2set = false;
   while(in >> e >> px >> py >> pz >> pt >> m >> eta >> pdg >> weight) {
+    if (maxEvts>0 && i/2>maxEvts) break;
     if (i%2==0 && (i/2)%10000==0) {
       cout << "[LPAIR++] Event #" << i/2 << endl;
     }
@@ -183,7 +247,6 @@ void combine()
       lep1set = lep2set = false;
     }
     i++;
-    if (maxEvts>0 && i/2>maxEvts) break;
   }
   in.close();
 
@@ -202,9 +265,34 @@ void combine()
   }
   in.close();
 
-
+  in.open("test_vegas");
+  while (in >> wtreat 
+	 >> ztreat 
+	 >> xoutreat[0] >> xoutreat[1] >> xoutreat[2] >> xoutreat[3] >> xoutreat[4] >> xoutreat[5] >> xoutreat[6]
+	 >> xintreat[0] >> xintreat[1] >> xintreat[2] >> xintreat[3] >> xintreat[4] >> xintreat[5] >> xintreat[6]
+	 ) {
+    h_lpairpp[WTREAT]->Fill(wtreat);
+    h_lpairpp[ZTREAT]->Fill(ztreat);
+    h_lpairpp[XIN0TREAT]->Fill(xintreat[0]);
+    h_lpairpp[XIN1TREAT]->Fill(xintreat[1]);
+    h_lpairpp[XIN2TREAT]->Fill(xintreat[2]);
+    h_lpairpp[XIN3TREAT]->Fill(xintreat[3]);
+    h_lpairpp[XIN4TREAT]->Fill(xintreat[4]);
+    h_lpairpp[XIN5TREAT]->Fill(xintreat[5]);
+    h_lpairpp[XIN6TREAT]->Fill(xintreat[6]);
+    h_lpairpp[XOUT0TREAT]->Fill(xoutreat[0]);
+    h_lpairpp[XOUT1TREAT]->Fill(xoutreat[1]);
+    h_lpairpp[XOUT2TREAT]->Fill(xoutreat[2]);
+    h_lpairpp[XOUT3TREAT]->Fill(xoutreat[3]);
+    h_lpairpp[XOUT4TREAT]->Fill(xoutreat[4]);
+    h_lpairpp[XOUT5TREAT]->Fill(xoutreat[5]);
+    h_lpairpp[XOUT6TREAT]->Fill(xoutreat[6]);
+  }
+  in.close();
+  
   // Then fetch the LPAIR output (converted as a TTree)
   for (i=0; i<tree->GetEntries(); i++) {
+    if (maxEvts>0 && i>maxEvts) break;
     if (i%10000==0) {
       cout << "[ LPAIR ] Event #" << i << endl;
     }
@@ -215,6 +303,23 @@ void combine()
     h_lpairor[S1]->Fill(s1_);
     h_lpairor[S2]->Fill(s2_);
     h_lpairor[D3]->Fill(d3_);
+    h_lpairor[WTREAT]->Fill(wtreat_);
+    h_lpairor[ZTREAT]->Fill(valtreat_);
+    h_lpairor[XIN0TREAT]->Fill(xtreat_[0]);
+    h_lpairor[XIN1TREAT]->Fill(xtreat_[1]);
+    h_lpairor[XIN2TREAT]->Fill(xtreat_[2]);
+    h_lpairor[XIN3TREAT]->Fill(xtreat_[3]);
+    h_lpairor[XIN4TREAT]->Fill(xtreat_[4]);
+    h_lpairor[XIN5TREAT]->Fill(xtreat_[5]);
+    h_lpairor[XIN6TREAT]->Fill(xtreat_[6]);
+    h_lpairor[XOUT0TREAT]->Fill(ztreat_[0]);
+    h_lpairor[XOUT1TREAT]->Fill(ztreat_[1]);
+    h_lpairor[XOUT2TREAT]->Fill(ztreat_[2]);
+    h_lpairor[XOUT3TREAT]->Fill(ztreat_[3]);
+    h_lpairor[XOUT4TREAT]->Fill(ztreat_[4]);
+    h_lpairor[XOUT5TREAT]->Fill(ztreat_[5]);
+    h_lpairor[XOUT6TREAT]->Fill(ztreat_[6]);
+    
     lep1set = lep2set = false;
     pset = false;
     tree->GetEntry(i);
@@ -258,7 +363,6 @@ void combine()
       h_lpairor[YPAIR]->Fill((lep1+lep2).Rapidity());
       lep1set = lep2set = false;
     }
-    if (maxEvts>0 && i>maxEvts) break;
   }
 
   leg = new TLegend(.76, .71, .89, .81);
@@ -275,7 +379,12 @@ void combine()
   text->SetShadowColor(kWhite);
   text->SetTextFont(42);
 
+  Int_t n = 0.1;
+
+  Double_t max;
+
   for (i=0; i<NHIST; i++) {
+    if (!show[i]) continue;
     c[i] = new TCanvas(); 
     c[i]->Divide(1,2);
 
@@ -320,10 +429,13 @@ void combine()
     h_lpairor[i]->SetFillStyle(3001);
     h_lpairor[i]->SetLineColor(kBlack);
     h_lpairor[i]->SetLineWidth(1);
+
     //h_lpairor[i]->Scale(1./h_lpairor[i]->Integral());
     h_lpairor[i]->Draw();
     h_lpairpp[i]->Draw("SAME");
-    if (i==0) {
+    max = TMath::Max(h_lpairor[i]->GetBinContent(h_lpairor[i]->GetMaximumBin()), h_lpairpp[i]->GetBinContent(h_lpairpp[i]->GetMaximumBin()));
+    h_lpairor[i]->GetYaxis()->SetRangeUser(.01, max*1.2);
+    if (n==0) {
       leg->AddEntry(h_lpairpp[i], "LPAIR++");
       leg->AddEntry(h_lpairor[i], "LPAIR");
     }
@@ -341,5 +453,6 @@ void combine()
     htmp->GetYaxis()->SetTitle("LPAIR++/LPAIR");
     htmp->Draw("E");
     line->Draw();
+    n++;
   }
 }

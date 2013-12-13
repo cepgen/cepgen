@@ -2,9 +2,12 @@
 #define _VEGAS_H
 
 #include <fstream>
+#include <cstdio> // remove (DEBUG)
 #include <gsl/gsl_monte_vegas.h>
 
 #include "gamgam.h"
+
+#define MAX_ND 50
 
 /** @brief Vegas Monte-Carlo integrator instance */
 class Vegas {
@@ -20,7 +23,7 @@ class Vegas {
      * @param inParam_ A list of parameters to define the phase space on which
      *  this integration is performed (embedded in an InputParameters object)
      */
-    Vegas(int dim_,double f_(double*,size_t,void*),InputParameters* inParam_);
+    Vegas(const int dim_,double f_(double*,size_t,void*),InputParameters* inParam_);
     /**
      * @brief Class destructor
      */
@@ -35,6 +38,20 @@ class Vegas {
      */
     int Integrate(double* result_,double* abserr_);
     /**
+     * Vegas algorithm to perform the (_dim)-dimensional Monte Carlo integration
+     * of a given function as described in @cite PeterLepage1978192
+     * @author Primary author : G.P. Lepage
+     * @author This C++ implementation : L. Forthomme
+     * @date September 1976
+     * @date Reviewed in Apr 1978
+     * @date FTN5 version 21 Aug 1984
+     * @date This C++ implementation is from 12 Dec 2013
+     * @param result_ The cross section as integrated by Vegas for the given
+     *  phase space restrictions
+     * @param abserr_ The error associated to the computed cross section
+     */
+    int MyIntegrate(double* result_,double* abserr_);
+    /**
      * Launches the Vegas generation of events according to the provided input
      *  parameters.
      * @brief Launches the generation of events
@@ -44,8 +61,9 @@ class Vegas {
   private:
     //double Treat(double f_(double*,size_t,void*));
     //double Treat(gsl_monte_function*,double*);
-    double Treat(double* x_,InputParameters* ip_);
-    inline double Treat(double* x_) { return this->Treat(x_,(InputParameters*)this->_F->params); };
+    double Treat(double* x_,InputParameters* ip_,bool storedbg_=false);
+    inline double Treat(double* x_) { return this->Treat(x_,(InputParameters*)this->_F->params); }
+    inline double Treat(double* x_,bool storedbg_) { return this->Treat(x_,(InputParameters*)this->_F->params,storedbg_); }
     inline double F(double* x_) { return this->_F->f(x_, this->_ndim, (void*)this->_F->params); }
     inline double F(double* x_,InputParameters* ip_) { return this->_F->f(x_, this->_ndim, (void*)ip_); }
     /**
@@ -68,13 +86,6 @@ class Vegas {
     //int GenerateOneEvent(GamGam*);
     //int GenerateOneEvent(std::ofstream*);
     /** @brief Number of times the Vegas::Treat method has been called */
-    int _nTreatCalls;
-    int _nTreat;
-    double _rTreat;
-    double _mbin;
-    int *_n;
-    int *_nm;
-    double *_fmax;
     /**
      * Sets all the generation mode variables and align them to the integration 
      * grid set while computing the cross-section
@@ -82,7 +93,6 @@ class Vegas {
      * @param of_ The file stream where to store the events after their generation
      */
     void SetGen(std::ofstream* of_);
-    double _ffmax;
     /** @brief GSL's random number generator */
     gsl_rng *_r;
     /** @brief GSL's Vegas integration state structure */
@@ -90,7 +100,16 @@ class Vegas {
     /** @brief The wrapped-up function to integrate, along with the input parameters */
     gsl_monte_function *_F;
     /** @brief The number of dimensions on which to integrate the function */
-    size_t _ndim;
+    const size_t _ndim;
+    int _ndo;
+    int _nTreatCalls;
+    int _nTreat;
+    double _rTreat;
+    double _mbin;
+    double _ffmax;
+    int *_n;
+    int *_nm;
+    double *_fmax;
     /** @brief Number of points to generate in order to integrate the function */
     size_t _nIter;
     /** @brief Fixed number of function calls to use */
@@ -106,6 +125,10 @@ class Vegas {
     double _fmdiff;
     double _fmold;
     int _j;
+    bool _force_correction;
+    double *_xi[MAX_ND];
+    double *_d[MAX_ND];
+    double *_di[MAX_ND];
     InputParameters *_ip;
 };
 

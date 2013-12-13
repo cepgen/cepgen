@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
     ip.mcut = 2;
     ip.minenergy = 0.;
     ip.minpt = 5.;
-    ip.maxgen = 1e4;
+    ip.maxgen = 2e4;
     //ip.SetEtaRange(-2.5, 2.5);
     //ip.debug = true;
   }
@@ -42,8 +42,9 @@ int main(int argc, char* argv[]) {
   std::cout << (double)rand()/(double)RAND_MAX << std::endl;
   std::cout << (double)rand()/(double)RAND_MAX << std::endl;*/
   ip.generation = true;
-  std::ofstream of("test");
-  std::ofstream fd("test_q2");
+  std::ofstream of, fd;
+  of.open("test");
+  fd.open("test_q2");
   ip.file = &of;
   ip.file_debug = &fd;
   /*ip.minenergy = 0.;
@@ -72,6 +73,8 @@ int main(int argc, char* argv[]) {
   ip.StoreConfigFile("lastrun.card");
   //mg.Test();
   //mg.AnalyzePhaseSpace("testing/psprobe");*/
+  of.close();
+  fd.close();
   return 0;
 }
 

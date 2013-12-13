@@ -7,7 +7,6 @@ MCGen::MCGen(InputParameters ip_)
   std::cout << "[MCGen::MCGen] [DEBUG] MCGen initialized !" << std::endl;
 #endif
   srand(time(0));
-
   _ip = ip_;
 
   if (_ip.p1mod<=2 && _ip.p2mod<=2) {
@@ -57,10 +56,12 @@ MCGen::MCGen(InputParameters ip_)
       break;
   }
 #endif
+  veg = new Vegas(_ndim,f, &_ip);
 }
 
 MCGen::~MCGen()
 {
+  delete veg;
 #ifdef DEBUG
   std::cout << "[MCGen::~MCGen] [DEBUG] MCGen destructed !" << std::endl;
 #endif
@@ -115,18 +116,19 @@ void MCGen::Test()
 void MCGen::ComputeXsection(double* xsec_, double *err_)
 {
   std::cout << "[MCGen::ComputeXsection] Starting the computation of the process cross-section" << std::endl;
-  veg = new Vegas(_ndim,f, &_ip);
-  veg->Integrate(xsec_, err_);
+  //veg = new Vegas(_ndim,f, &_ip);
+  //veg->Integrate(xsec_, err_);
+  veg->MyIntegrate(xsec_, err_);
   std::cout << "[MCGen::ComputeXsection] Total cross-section = " << *xsec_ << " +/- " << *err_ << " pb" << std::endl;
-  delete veg;
+  //delete veg;
 }
 
 void MCGen::LaunchGen()
 {
-  veg = new Vegas(_ndim,f, &_ip);
+  //veg = new Vegas(_ndim,f, &_ip);
   //veg->LaunchGeneration();
   veg->LaunchMyGeneration();
-  delete veg;
+  //delete veg;
 }
 
 int i = 0;
@@ -238,10 +240,10 @@ double f(double* x_, size_t ndim_, void* params_) {
     gg.GetEvent()->Store(p->file);
 
     double t1min, t1max, t2min, t2max;
-    gg.GetT1extrema(t1min, t1max);
-    gg.GetT2extrema(t2min, t2max);
 
     if (p->file_debug->is_open()) {
+      gg.GetT1extrema(t1min, t1max);
+      gg.GetT2extrema(t2min, t2max);
       *(p->file_debug) << (gg.GetEvent()->GetByRole(5)->p-gg.GetEvent()->GetByRole(1)->p)
                        << "\t" << gg.GetEvent()->GetByRole(3)->p
                        << "\t" << gg.GetEvent()->GetByRole(5)->p

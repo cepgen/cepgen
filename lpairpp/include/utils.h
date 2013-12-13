@@ -203,11 +203,20 @@ class InputParameters {
      */
     int ngen;
     /**
-     * @brief The file in which to store the events generation's output
+     * @brief PDFLIB group to use
      */
     int gpdf;
+    /**
+     * @brief PDFLIB set to use
+     */
     int spdf;
+    /**
+     * @brief Number of quarks
+     */
     int qpdf;
+    /**
+     * @brief The file in which to store the events generation's output
+     */
     std::ofstream* file;
     std::ofstream* file_debug; //FIXME dropme!
     /**
