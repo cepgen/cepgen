@@ -51,7 +51,7 @@ void combine()
   const Int_t lepPdg = 13;
   const Int_t n=100;
   //const Int_t maxEvts = -1;
-  const Int_t maxEvts = 2e4;
+  const Int_t maxEvts = 1e5;
   const Double_t ep = 3500.;
   const Double_t pi = acos(-1);
 
@@ -73,8 +73,8 @@ void combine()
   TPaveText *text;
 
   for (Int_t i=0; i<NHIST; i++) {
-    //if (i<23) show[i] = false;
-    //else 
+    if (i==24 || (i>=25 && i<=31)) show[i] = false;
+    else 
       show[i] = true;
   }
   
@@ -166,8 +166,8 @@ void combine()
   h_lpairor[S2] = new TH1D("s2_2", "s_{2}", 250, 0., .5e6);
   h_lpairpp[D3] = new TH1D("d3", "#delta_{3}", 200, 0., 1.e6);
   h_lpairor[D3] = new TH1D("d3_2", "#delta_{3}", 200, 0., 1.e6);
-  h_lpairpp[WTREAT] = new TH1D("wtrt", "w_{treat}", 100, 0., 10);
-  h_lpairor[WTREAT] = new TH1D("wtrt_2", "w_{treat}", 100, 0., 10);
+  h_lpairpp[WTREAT] = new TH1D("wtrt", "w_{treat}", 100, 0., 4);
+  h_lpairor[WTREAT] = new TH1D("wtrt_2", "w_{treat}", 100, 0., 4);
   h_lpairpp[ZTREAT] = new TH1D("ztrt", "z_{treat}", 100, 0., 200);
   h_lpairor[ZTREAT] = new TH1D("ztrt_2", "z_{treat}", 100, 0., 200);
   h_lpairpp[XIN0TREAT] = new TH1D("xintrt0", "x^{in}_{treat}[0]", 100, 0., 1.);
@@ -200,7 +200,7 @@ void combine()
   h_lpairor[XOUT6TREAT] = new TH1D("xoutrt6_2", "x^{out}_{treat}[6]", 100, 0., 1.);
 
   // First fetch the LPAIR++ output
-  in.open("test");
+  in.open("test_1Mevts");
   i = 0;
   lep1set = lep2set = false;
   while(in >> e >> px >> py >> pz >> pt >> m >> eta >> pdg >> weight) {
@@ -250,8 +250,10 @@ void combine()
   }
   in.close();
 
-  in.open("test_q2");
+  in.open("test_q2_1Mevts");
+  i = 0;
   while (in >> q2m >> pp3 >> pp5 >> t1 >> t1min >> t1max >> t2 >> t2min >> t2max >> s1 >> s2 >> d3) {
+    if (maxEvts>0 && i>maxEvts) break;
     h_lpairpp[Q2]->Fill(-q2m);
     h_lpairpp[PPROTON]->Fill(pp3);
     h_lpairpp[PPROTON]->Fill(pp5);
@@ -262,15 +264,18 @@ void combine()
     h_lpairpp[S1]->Fill(s1);
     h_lpairpp[S2]->Fill(s2);
     h_lpairpp[D3]->Fill(d3);
+    i++;
   }
   in.close();
 
-  in.open("test_vegas");
+  in.open("test_vegas_1Mevts");
+  i = 0;
   while (in >> wtreat 
 	 >> ztreat 
 	 >> xoutreat[0] >> xoutreat[1] >> xoutreat[2] >> xoutreat[3] >> xoutreat[4] >> xoutreat[5] >> xoutreat[6]
 	 >> xintreat[0] >> xintreat[1] >> xintreat[2] >> xintreat[3] >> xintreat[4] >> xintreat[5] >> xintreat[6]
 	 ) {
+    if (maxEvts>0 && i>maxEvts) break;
     h_lpairpp[WTREAT]->Fill(wtreat);
     h_lpairpp[ZTREAT]->Fill(ztreat);
     h_lpairpp[XIN0TREAT]->Fill(xintreat[0]);
@@ -287,6 +292,7 @@ void combine()
     h_lpairpp[XOUT4TREAT]->Fill(xoutreat[4]);
     h_lpairpp[XOUT5TREAT]->Fill(xoutreat[5]);
     h_lpairpp[XOUT6TREAT]->Fill(xoutreat[6]);
+    i++;
   }
   in.close();
   
@@ -401,6 +407,7 @@ void combine()
     c_2->SetGrid(1,1);
 
     c[i]->cd(1);
+    h_lpairpp[i]->Sumw2();
     h_lpairpp[i]->SetFillColor(kBlue);
     //h_lpairpp[i]->SetFillStyle(3005);
     h_lpairpp[i]->SetFillStyle(3003);
@@ -419,6 +426,7 @@ void combine()
     h_lpairpp[i]->GetYaxis()->SetLabelFont(43);
     h_lpairpp[i]->GetYaxis()->SetLabelSize(14);
     //h_lpairpp[i]->Scale(1./h_lpairpp[i]->Integral());
+    h_lpairor[i]->Sumw2();
     h_lpairor[i]->SetTitle("");
     h_lpairor[i]->GetYaxis()->SetTitle(ss.str().c_str());
     h_lpairor[i]->GetYaxis()->SetTitleFont(43);
@@ -429,10 +437,11 @@ void combine()
     h_lpairor[i]->SetFillStyle(3001);
     h_lpairor[i]->SetLineColor(kBlack);
     h_lpairor[i]->SetLineWidth(1);
+    h_lpairor[i]->SetLineStyle(2);
 
     //h_lpairor[i]->Scale(1./h_lpairor[i]->Integral());
-    h_lpairor[i]->Draw();
-    h_lpairpp[i]->Draw("SAME");
+    h_lpairor[i]->Draw("HIST");
+    h_lpairpp[i]->Draw("HIST SAME");
     max = TMath::Max(h_lpairor[i]->GetBinContent(h_lpairor[i]->GetMaximumBin()), h_lpairpp[i]->GetBinContent(h_lpairpp[i]->GetMaximumBin()));
     h_lpairor[i]->GetYaxis()->SetRangeUser(.01, max*1.2);
     if (n==0) {
@@ -444,15 +453,19 @@ void combine()
 
     c[i]->cd(2);
     line = new TLine(h_lpairpp[i]->GetXaxis()->GetXmin(),1., h_lpairpp[i]->GetXaxis()->GetXmax(), 1.);
-    line->SetLineColor(kRed);
-    line->SetLineWidth(2);
+    //line->SetLineColor(kBlue);
+    //line->SetLineWidth(1);
     htmp = (TH1D*)h_lpairpp[i]->Clone();
-    htmp->Divide(h_lpairor[i]);
+    htmp->SetFillStyle(3001);
+    htmp->SetFillColor(1);
+    htmp->SetMarkerStyle(7);
+    htmp->Divide((TH1D*)h_lpairpp[i]->Clone(), (TH1D*)h_lpairor[i]->Clone(), 1, 1, "B");
     htmp->SetTitle("");
     htmp->GetXaxis()->SetTitle(h_lpairpp[i]->GetTitle());
     htmp->GetYaxis()->SetTitle("LPAIR++/LPAIR");
     htmp->Draw("E");
     line->Draw();
+    htmp->Draw("E SAME");
     n++;
   }
 }

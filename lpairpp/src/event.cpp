@@ -3,11 +3,13 @@
 Event::Event()
 {
   this->_part = new std::map<int,Particle>;
+  this->_null = new Particle();
 }
 
 Event::~Event()
 {
   delete this->_part;
+  delete this->_null;
 }
 
 Particle*
@@ -18,7 +20,7 @@ Event::GetByRole(int role_)
     return &(out->second);
   }
   else {
-    return new Particle();
+    return this->_null;
   }
 }
 
@@ -33,7 +35,6 @@ Event::SetParticle(Particle *part_)
   }
   Particle *tmp = this->GetByRole(part_->role);
   if (!tmp->isValid) {
-    delete tmp;
     this->_part->insert(std::pair<int,Particle>(part_->role, *part_));
     return 0;
   }
@@ -48,12 +49,12 @@ Event::StoreLHERecord(std::ofstream *of_, const double weight_)
 {
   std::map<int,Particle>::iterator p;
   for (p=this->_part->begin(); p!=this->_part->end(); p++) {
-    *of_ << std::setw(8) << p->second.e << "\t"
+    *of_ << std::setw(8) << p->second.E() << "\t"
          << std::setw(8) << p->second.px << "\t"
          << std::setw(8) << p->second.py << "\t"
          << std::setw(8) << p->second.pz << "\t"
          << std::setw(8) << p->second.pt << "\t"
-         << std::setw(8) << p->second.m << "\t"
+         << std::setw(8) << p->second.M() << "\t"
          << std::setw(8) << p->second.eta << "\t"
          << std::setw(8) << p->second.pdgId << "\t"
          << std::setw(8) << weight_
@@ -66,22 +67,22 @@ Event::Store(std::ofstream *of_, double weight_)
 {
   Particle *l1 = this->GetByRole(6);
   Particle *l2 = this->GetByRole(7);
-  *of_ << std::setw(8) << l1->e << "\t"
+  *of_ << std::setw(8) << l1->E() << "\t"
        << std::setw(8) << l1->px << "\t"
        << std::setw(8) << l1->py << "\t"
        << std::setw(8) << l1->pz << "\t"
        << std::setw(8) << l1->pt << "\t"
-       << std::setw(8) << l1->m << "\t"
+       << std::setw(8) << l1->M() << "\t"
        << std::setw(8) << l1->eta << "\t"
        << std::setw(8) << l1->pdgId << "\t"
        << std::setw(8) << weight_
        << std::endl;
-  *of_ << std::setw(8) << l2->e << "\t"
+  *of_ << std::setw(8) << l2->E() << "\t"
        << std::setw(8) << l2->px << "\t"
        << std::setw(8) << l2->py << "\t"
        << std::setw(8) << l2->pz << "\t"
        << std::setw(8) << l2->pt << "\t"
-       << std::setw(8) << l2->m << "\t"
+       << std::setw(8) << l2->M() << "\t"
        << std::setw(8) << l2->eta << "\t"
        << std::setw(8) << l2->pdgId << "\t"
        << std::setw(8) << weight_

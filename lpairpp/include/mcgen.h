@@ -49,7 +49,7 @@ class MCGen {
    * the cross-section as well as the absolute error computed along.
    */
   void ComputeXsection(double*,double*);
-  void LaunchGen();
+  void LaunchGeneration();
   /**
    * @brief Returns the set of parameters used to setup the phase space to
    *   integrate
@@ -65,8 +65,6 @@ class MCGen {
   GamGam *gg;
   /** @brief The Vegas integrator which will integrate the function */
   Vegas *veg;
-  /** @brief Number of dimensions on which to perform the integration */
-  unsigned int _ndim;
   /** @brief Set of parameters to setup the phase space to integrate */
   InputParameters _ip;
 };

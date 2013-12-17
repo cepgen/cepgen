@@ -83,16 +83,6 @@ class GamGam {
   ~GamGam();
   /**
    * Specifies the incoming particles' kinematics as well as their properties
-   *  (role in the process and code according to the PDG convention)
-   * @brief Sets the momentum and PDG id for the incoming particles
-   * @param part_ Role of the particle in the process
-   * @param momentum_[] 3-momentum of the particle
-   * @param pdgId_ Particle ID according to the PDG convention
-   * @return True if the kinematics was correctly set for the given particle role
-   */
-  bool SetIncomingKinematics(int part_,double momentum_[3],int pdgId_);
-  /**
-   * Specifies the incoming particles' kinematics as well as their properties
    * using two Particle objects.
    * @brief Sets the momentum and PDG id for the incoming particles
    * @param ip1_ Information on the first incoming particle
@@ -138,6 +128,7 @@ class GamGam {
    * @brief Computes \f$\sqrt{s}\f$ for the system
    */
   void ComputeSqS();
+  double ComputeMX(double x_, double outmass_, double* dw_);
   /**
    * Computes the cross-section for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
    *  process with the given kinematics
@@ -173,6 +164,10 @@ class GamGam {
   inline double GetS1() { return this->_s1; };
   inline double GetS2() { return this->_s2; };
   inline double GetD3() { return this->_d3; };
+  inline double GetU1() { return this->_u1; };
+  inline double GetU2() { return this->_u2; };
+  inline double GetV1() { return this->_v1; };
+  inline double GetV2() { return this->_v2; };
   inline Event* GetEvent() { return this->_ev; };
  private:
   /**
@@ -367,11 +362,13 @@ class GamGam {
    * @cite Vermaseren1983347 for the full definition of this quantity
    */
   double _w31;
+  double _dw31;
   /**
    * @brief \f$\delta_4=m_5^2-m_2^2\f$ as defined in Vermaseren's paper
    * @cite Vermaseren1983347 for the full definition of this quantity
    */
   double _w52;
+  double _dw52;
   /**
    * @brief \f$\delta_5=m_4^2-t_1\f$ as defined in Vermaseren's paper
    * @cite Vermaseren1983347 for the full definition of this quantity
@@ -455,6 +452,8 @@ class GamGam {
 
   double _plab_ip1[4], _plab_ip2[4], _plab_op1[4], _plab_op2[4];
   double _plab_ol1[4], _plab_ol2[4], _plab_ph1[4], _plab_ph2[4];
+
+  double _u1, _u2, _v1, _v2;
   // Cuts
   /** @brief Set of cuts to apply on the final phase space */
   GamGamKinematics _cuts;

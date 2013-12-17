@@ -49,6 +49,7 @@ class Event {
     void Dump();
   private:
     std::map<int,Particle> *_part;
+    Particle *_null;
 };
 
 #endif

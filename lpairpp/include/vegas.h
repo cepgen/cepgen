@@ -58,6 +58,7 @@ class Vegas {
      */
     int LaunchGeneration();
     void LaunchMyGeneration();
+    void DumpGrid();
   private:
     //double Treat(double f_(double*,size_t,void*));
     //double Treat(gsl_monte_function*,double*);
@@ -101,7 +102,7 @@ class Vegas {
     gsl_monte_function *_F;
     /** @brief The number of dimensions on which to integrate the function */
     const size_t _ndim;
-    int _ndo;
+    unsigned int _ndo;
     int _nTreatCalls;
     int _nTreat;
     double _rTreat;

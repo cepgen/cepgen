@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include "utils.h"
+
 /**
  * Kinematic information for one particle
  * @brief Kinematics of one particle
@@ -30,10 +32,6 @@ class Particle {
     int pdgId;
     /** @brief Role in the considered process */
     int role;
-    /** @brief Energy, in GeV */
-    double e;
-    /** @brief Mass in GeV/c\f$^{2}\f$ */
-    double m;
     /** @brief Momentum along the \f$x\f$-axis in GeV/c */
     double px;
     /** @brief Momentum along the \f$y\f$-axis in GeV/c */
@@ -54,18 +52,31 @@ class Particle {
      */
     int status;
     /**
+     * Gets the particle's mass in GeV/c\f$^{2}\f$.
+     * @brief Gets the particle's mass
+     * @return The particle's mass
+     */
+    inline double M() { return this->m; };
+    bool M(double m_);
+    /**
      * @brief Sets the 3-momentum associated to the particle
      * @param px_ Momentum along the \f$x\f$-axis, in GeV/c
      * @param py_ Momentum along the \f$y\f$-axis, in GeV/c
      * @param pz_ Momentum along the \f$z\f$-axis, in GeV/c
      */
-    inline bool SetP(double px_,double py_,double pz_) {
-      this->px=px_;
-      this->py=py_;
-      this->pz=pz_;
+    inline bool P(double px_,double py_,double pz_) {
+      this->px=px_; this->py=py_; this->pz=pz_;
       this->pt=sqrt(pow(px_,2)+pow(py_,2));
       this->p=sqrt(pow(this->pt,2)+pow(pz_,2));
-      this->eta=(this->pt!=0.)?log((this->p+fabs(this->pz))/this->pt)*(this->pz/fabs(this->pz)):9999.*(this->pz/fabs(this->pz));
+      this->M(-1.);
+      if (this->E()<0.) {
+	if (this->M()>=0.) this->E(sqrt(pow(this->p,2)-pow(this->M(),2)));
+	else return false;
+      }
+      else this->E(-1.);
+      this->eta=(this->pt!=0.)
+	? log((this->p+fabs(this->pz))/this->pt)*(this->pz/fabs(this->pz))
+	: 9999.*(this->pz/fabs(this->pz));
       //this->eta=0.5*log((this->p+this->pz)/(this->p-this->pz));
       this->isValid = true;
       return true;
@@ -79,14 +90,15 @@ class Particle {
      * @param pz_ Momentum along the \f$z\f$-axis, in GeV/c
      * @param E_ Energy, in GeV
      */
-    inline bool SetP(double px_,double py_,double pz_,double E_) {
-      this->SetP(px_,py_,pz_);
-      this->SetE(E_);
+    inline bool P(double px_,double py_,double pz_,double E_) {
+      this->P(px_,py_,pz_);
       if (pow(E_,2)<pow(this->p,2)) {
         //std::cout << "--> " << pow(E_,2)-pow(this->p,2) << "\t" << E_ << "\t" << this->p << std::endl;
         return false;
       }
-      this->m = sqrt(pow(E_,2)-pow(this->p,2));
+      if (this->M()<0.) {
+	this->M(sqrt(pow(this->E(),2)-pow(this->p,2)));
+      }
       this->isValid = true;
       return true;
     };
@@ -95,12 +107,13 @@ class Particle {
      * @param p_ 3-momentum
      * @param E_ Energy, in GeV
      */
-    bool SetP(double p_[3],double E_);
+    bool P(double p_[3],double E_);
     /**
      * @brief Sets the particle's energy
      * @param E_ Energy, in GeV
      */
-    inline void SetE(double E_) { this->e=E_; };
+    inline void E(double E_) { this->e=E_; };
+    inline double E() { return this->e; };
     /** @brief Gets the particle's squared mass */
     inline double M2() { return std::pow(this->m,2); };
     /** @brief Is this particle a valid particle which can be used for kinematic computations ? */
@@ -127,6 +140,10 @@ class Particle {
      */
     Particle* GetDaughter(const unsigned int num_=0);
   private:
+    /** @brief Energy, in GeV */
+    double e;
+    /** @brief Mass in GeV/c\f$^{2}\f$ */
+    double m;
     Particle *_mother;
     std::vector<Particle> *_daugh;
     bool isPrimary;

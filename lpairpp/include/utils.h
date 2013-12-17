@@ -76,9 +76,12 @@ class InputParameters {
     InputParameters();
     ~InputParameters();
     /**
+     * Defines the range to cover in pseudo-rapidity for the outgoing leptons
+     * produced in this process. This method converts this range into a range
+     * in \f$\theta\f$, the polar angle.
      * @brief Sets the pseudo-rapidity range for the produced leptons
-     * @param etamin_ The minimal value of \f$\eta\$f for the outgoing leptons
-     * @param etamax_ The maximal value of \f$\eta\$f for the outgoing leptons
+     * @param etamin_ The minimal value of \f$\eta\f$ for the outgoing leptons
+     * @param etamax_ The maximal value of \f$\eta\f$ for the outgoing leptons
      */
     void SetEtaRange(double etamin_, double etamax_);
     /**
@@ -86,6 +89,8 @@ class InputParameters {
      */
     void Dump();
     /**
+     * Reads the list of parameters to be used in this cross-section
+     * computation/events generation from an external input card.
      * @brief Reads content from config file to load the variables
      * @param inFile_ Name of the configuration file to load
      */

@@ -1,11 +1,12 @@
 #include "vegas.h"
 
-#define COORD(s,i,j) ((s)->xi[(i)*(s)->dim + (j)])
+//#define COORD(s,i,j) ((s)->xi[(i)*(s)->dim + (j)])
 
 Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), InputParameters* inParam_) :
   _ndim(dim_), _ndo(50),
   _nTreatCalls(0), _mbin(3),
   _ffmax(0.), _correc(0.), _corre2(0.), _fmax2(0.), _fmdiff(0.), _fmold(0.),
+  _j(0),
   _force_correction(false)
 {
   gsl_monte_vegas_params par;
@@ -85,7 +86,7 @@ Vegas::~Vegas()
   delete[] _nm;
   delete[] _fmax;
   for (int i=0; i<MAX_ND; i++) {
-    //delete[] _xi[i];
+    delete[] _xi[i];
     delete[] _d[i];
     delete[] _di[i];
   }
@@ -135,9 +136,6 @@ Vegas::Integrate(double *result_, double *abserr_)
             << *abserr_ << ") pb"
             << std::endl;
 #endif
-  /*gsl_monte_vegas_params_get(_s, &par);
-  std::cout << "--> " << _s->bins << std::endl;
-  std::cout << "--> " << _s->boxes << std::endl;*/
   return vegas_status;
 }
 
@@ -145,7 +143,6 @@ int Vegas::MyIntegrate(double *result_, double *abserr_)
 {
   unsigned int ndm, nd, npg;
   int ng, now;
-  double s1, s2, s3, s4;
   unsigned int i, j;
   int k;
   const double one = 1.;
@@ -153,7 +150,7 @@ int Vegas::MyIntegrate(double *result_, double *abserr_)
   double avgi, sd, tsi, ti;
   double chi2a, rel, ti2, si, si2, swgt, schi, scalls;
   double calls, dxg, dv2g, xnd, xo, xn, xjac, rc, dr;
-  double f, f1, f2, w, wgt;
+  double f, f2, wgt;
   double fb, f2b;
   double x[_ndim], dx[_ndim], kg[_ndim], dt[_ndim], qran[_ndim], xin[MAX_ND], r[MAX_ND];
   int ia[_ndim];
@@ -162,7 +159,7 @@ int Vegas::MyIntegrate(double *result_, double *abserr_)
   for (j=0; j<MAX_ND; j++) {
     xin[j] = r[j] = 0.;
     for (i=0; i<_ndim; i++) {
-      _d[j][i] = _di[j][i] = _xi[i][j] = 0.;
+      _d[j][i] = _di[j][i] = _xi[j][i] = 0.;
     }
   }
   for (i=0; i<_ndim; i++) {
@@ -295,8 +292,6 @@ int Vegas::MyIntegrate(double *result_, double *abserr_)
 	wgt *= (xo*xnd);
       }
       f = this->F(x)*wgt;
-      f1 = f/calls;
-      w = wgt/calls;
       
       f2 = std::pow(f, 2);
       fb += f;
@@ -365,10 +360,6 @@ int Vegas::MyIntegrate(double *result_, double *abserr_)
     else rel = 0.;
     
     if (rel<=fabs(acc) or it>=_ip->itvg) now = 2;
-    s1 = avgi;
-    s2 = sd;
-    s3 = ti;
-    s4 = tsi;
     
     for (j=0; j<_ndim; j++) {
       xo = _d[0][j];
@@ -421,20 +412,9 @@ int Vegas::MyIntegrate(double *result_, double *abserr_)
       _xi[nd-1][j] = one;
     }
   } while (it<_ip->itvg and fabs(acc)<rel);
-  s1 = avgi;
-  s2 = sd;
-  s3 = chi2a;
 
-   // DUMP THE GRID
-  for (i=0; i<_ndim; i++) {
-    for (j=0; j<MAX_ND; j++) {
-      std::cout << i << "\t" << j << "\t" << _xi[j][i] << std::endl;
-    }
-  }
-  //exit(0);
-
-  *result_ = s1;
-  *abserr_ = s2;
+  *result_ = avgi;
+  *abserr_ = sd;
   return 0;
 }
 
@@ -518,7 +498,6 @@ Vegas::LaunchMyGeneration()
 bool
 Vegas::GenerateOneEvent()
 {
-  // ...
   // Inherited from GMUGNA
   double ami, max;
   double y;
@@ -527,7 +506,6 @@ Vegas::GenerateOneEvent()
   
   ami = 1./_mbin;
   max = pow(_mbin, _ndim);
-  //std::cout << "ffmax = " << _ffmax << ", fmax2 = " << _fmax2 << ", j = " << _j << ", fmold = " << _fmold << std::endl;
 
   // Correction cycles are started
   if (_j!=0) {
@@ -541,7 +519,6 @@ Vegas::GenerateOneEvent()
 #endif
     if (_correc<1.) {
       if ((double)rand()/RAND_MAX>=_correc) {
-	//GOTO 7
 	goto line7;
       }
       _correc = -1.;
@@ -564,7 +541,6 @@ Vegas::GenerateOneEvent()
     }
     // Accept event
     if (_weight>=_fmdiff*(double)rand()/RAND_MAX+_fmold) { // FIXME!!!!
-      //std::cout << "-------> yes !" << std::endl;
       return this->StoreEvent(x);
     }
     goto line4;
@@ -582,7 +558,6 @@ Vegas::GenerateOneEvent()
 	_ffmax = _fmax2;
 	_correc = (_nm[_j]-1.)*_fmdiff/_ffmax*_fmax2/_ffmax-_corre2;
       }
-      //std::cout << "new correc = " << _correc << std::endl;
       _corre2 = 0.;
       _fmax2 = 0.;
       goto line4;
@@ -592,7 +567,6 @@ Vegas::GenerateOneEvent()
 
   // Normal generation cycle
   // Select a Vegas bin and reject if fmax is too little
-  //y = 1.e5;
  line1:
   do {
     // ...
@@ -612,10 +586,8 @@ Vegas::GenerateOneEvent()
   // Get weight for selected x value
   if (_ip->ntreat>0) _weight = this->Treat(x);
   else _weight = this->F(x);
-  //std::cout << ">>> " << _weight << std::endl;
 
   // Eject if weight is too low
-  //if (y>_weight or (!(_weight>=0) and !(_weight<=0))) {
   if (y>_weight) {
     //std::cout << "ERROR : y>weight => " << y << ">" << _weight << ", " << _j << std::endl;
     //_force_correction = false;
@@ -624,7 +596,6 @@ Vegas::GenerateOneEvent()
     goto line1;
   }
 
-  //std::cout << "weight=" << _weight << ", fmax=" << _fmax[_j] << ", ffmax=" << _ffmax << std::endl;
   if (_weight<=_fmax[_j]) _j = 0;
   // Init correction cycle if weight is higher than fmax or ffmax
   else if (_weight<=_ffmax) {
@@ -640,37 +611,30 @@ Vegas::GenerateOneEvent()
     _ffmax = _weight;
     _correc = (_nm[_j]-1.)*_fmdiff/_ffmax*_weight/_ffmax-1.;
   }
-  //#ifdef DEBUG
-  //std::cout << "[Vegas::GenerateOneEvent] [DEBUG] correc = " << _correc << ", j = " << _j << std::endl;
-  //#endif
-  //std::cout << "accepted event !" << std::endl;
+#ifdef DEBUG
+  std::cout << "[Vegas::GenerateOneEvent] [DEBUG] correc = " << _correc << ", j = " << _j << std::endl;
+#endif
   // Return with an accepted event
   return this->StoreEvent(x);
-  //return true;
 }
 
 bool
 Vegas::StoreEvent(double *x_)
 {
   if (_weight<=0.) {
-//#ifdef DEBUG
+#ifdef DEBUG
     std::cout << "[Vegas::StoreEvent] [DEBUG] Tried to store event while the weight is <= 0 : " << _weight << std::endl;
-//#endif
+#endif
     return false;
   }
   _ip->store = true;
-  //std::cout << "-------> storing the event !" << std::endl;
   if (_ip->ntreat>0) _weight = Treat(x_,true);
   else _weight = this->F(x_);
-  //std::cout << _weight-_F->f(x_, _ndim, (void*)_F->params) << std::endl;
-  //_F->f(x_, _ndim, (void*)_F->params);
   _ip->ngen += 1;
   _ip->store = false;
   if (_ip->ngen%10000==0) {
     std::cout << "[Vegas::StoreEvent] Generated events : " << _ip->ngen << std::endl;
   }
-  //std::cout << "--> " << _ip->ngen << std::endl;
-
   return true;
 }
 
@@ -803,27 +767,32 @@ Vegas::SetGen(std::ofstream *of_)
   //#endif
 }
 
+void
+Vegas::DumpGrid()
+{
+  unsigned int i,j;
+  // DUMP THE GRID
+  for (i=0; i<_ndim; i++) {
+    for (j=0; j<MAX_ND; j++) {
+      std::cout << i << "\t" << j << "\t" << _xi[j][i] << std::endl;
+    }
+  }
+}
+
 double
 Vegas::Treat(double *x_, InputParameters* ip_, bool storedbg_)
 {
-  double w, xx, y, dd;
+  double w, xx, y, dd, f;
   int j;
   double z[_ndim];
 
   if (_nTreatCalls==0) {
     _nTreatCalls = 1;
-    std::cout << "ndo=" << _ndo << std::endl;
     _rTreat = std::pow(_ndo, _ndim);
     if (remove("test_vegas")!=0) {
       std::cerr << "Error while trying to delete test_vegas" << std::endl;
     }
-    /*// DUMP THE GRID
-    for (unsigned int i=0; i<_ndim; i++) {
-      for (j=0; j<MAX_ND; j++) {
-	std::cout << i << "\t" << j << "\t" << _xi[j][i] << std::endl;
-      }
-    }
-    exit(0);*/
+    //this->DumpGrid();
   }
   w = _rTreat;
   //std::cout << "rtreat = " << _rTreat << std::endl;
@@ -832,41 +801,34 @@ Vegas::Treat(double *x_, InputParameters* ip_, bool storedbg_)
     xx = x_[i]*_ndo-1;
     j = xx;
     y = xx-j;
-    //std::cout << "y[" << i << "] = " << y << ", jj = " << jj << std::endl;
-    //std::cout << i << "\t" << std::setprecision(20) << xx << "\t" << j << "\t" << jj << "\t" << y << std::endl;
     if (j<=0) {
-      //dd = COORD(_s,1,i);
       dd = _xi[0][i];
     }
     else {
-      //dd = COORD(_s,j+1,i)-COORD(_s,j,i);
       dd = _xi[j+1][i]-_xi[j][i];
-      //if (i==0) std::cout << "---> " << dd << "\t" << _xi[j][i] << std::endl;
     }
-    //z[i] = COORD(_s,j+1,i)-dd*(1.-y);
     z[i] = _xi[j+1][i]-dd*(1.-y);
     w = w*dd;
-    //std::cout << i << "\t" << j << "\t" << dd << "\t" << x_[i] << "\t" << z[i] << "\t" << y << "\t" << w << std::endl;
   }
 
+  f = this->F(z, ip_);
+
   if (storedbg_) {
-    std::ofstream f;
-    f.open("test_vegas", std::ios::app);
-    f << w 
-      << "\t" << w*this->F(z, ip_);
+    std::ofstream df;
+    df.open("test_vegas", std::ios::app);
+    df << w 
+       << "\t" << w*f;
     for (unsigned int i=0; i<_ndim; i++) {
-      f << "\t" << z[i];
+      df << "\t" << z[i];
     }
     for (unsigned int i=0; i<_ndim; i++) {
-      f << "\t" << x_[i];
+      df << "\t" << x_[i];
     }
-    f << std::endl;
-    f.close();
+    df << std::endl;
+    df.close();
   }
-  //std::cout << w << "\t" << this->F(z) << "\t" << w*this->F(z) << std::endl;
-  //ip_->Dump();
 #ifdef DEBUG
   std::cout << "[Vegas::Treat] [DEBUG] w = " << w << ", dd = " << dd << ", ndo = " << _ndo << ", r = " << _rTreat << std::endl;
 #endif
-  return w*this->F(z, ip_);
+  return w*f;
 }

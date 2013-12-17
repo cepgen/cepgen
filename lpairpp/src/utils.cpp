@@ -24,30 +24,16 @@ double cbrass[56] = { 0.043, 0.024, 0.000,-0.013,-0.023,-0.069,-0.060,-0.080,-0.
 
 double GetMassFromPDGId(int pdgId_)
 {
-  double m;
   switch(abs(pdgId_)) {
-  case 2212: // proton
-    m = .938272046;
-    //m = .93830001354217529; // FROM LPAIR
-    break;
-  case 11: // electron
-    m = .510998928e-3;
-    break;
-  case 13: // muon
-    m = .1056583715;
-    //m = .10570000112056732; // FROM LPAIR
-    break;
-  case 15: // tau
-    m = 1.77682;
-    break;
-  case 22: // photon
-    m = 0.;
-    break;
-  default:
-    m = 0.;
-    break;
+  case 2212:return 0.938272046;    // proton
+  case 11:  return 0.510998928e-3; // electron
+  case 13:  return 0.1056583715;   // muon
+  case 15:  return 1.77682;        // tau
+  case 22:  return 0.;             // photon
+  case 211: return 0.13957018;     // pi+
+  case 111: return 0.1349766;      // pi0
+  default:  return -1.;
   }
-  return m;
 }
 
 bool PSF(double q2_, double mX2_, double* sigT_, double* w1_, double* w2_)
@@ -147,8 +133,8 @@ InputParameters::InputParameters() :
   //mintheta(0.), maxtheta(180.),
   minq2(0.), maxq2(1.e5),
   minmx(1.07), maxmx(320.),
-  ncvg(14000), itvg(10),
-  //ncvg(100000), itvg(10),
+  //ncvg(14000), itvg(10),
+  ncvg(100000), itvg(10),
   ntreat(1), npoints(100),
   generation(true), store(false), debug(false),
   maxgen(1e5),

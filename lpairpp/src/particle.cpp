@@ -2,21 +2,26 @@
 
 Particle::Particle() :
   pdgId(-1), role(-1),
-  e(-1.), m(-1.),
   px(0.), py(0.), pz(0.), pt(-1.), eta(0.),
-  isValid(false), isPrimary(true)
+  isValid(false),
+  e(-1.), m(-1.),
+  isPrimary(true)
 {
   //this->SetMother(new Particle());
 }
 
 Particle::Particle(int role_, int pdgId_) :
   role(-1),
-  e(-1.), m(-1.),
   px(0.), py(0.), pz(0.), pt(-1.), eta(0.),
-  isValid(false), isPrimary(true)
+  isValid(false),
+  e(-1.), m(-1.),
+  isPrimary(true)
 {
   this->role = role_;
   this->pdgId = pdgId_;
+  if (this->pdgId!=0) {
+    this->M(-1.);
+  }
   //this->_mother = new Particle();
 }
 
@@ -49,14 +54,24 @@ std::string Particle::GetLHEline(bool revert_)
 }
 
 bool
-Particle::SetP(double p_[3], double E_=-1.)
+Particle::P(double p_[3], double E_=-1.)
 {
-  if (E_<0.) {
-    return this->SetP(p_[0], p_[1], p_[2]);
+  if (E_<0.) return this->P(p_[0], p_[1], p_[2]);
+  else return this->P(p_[0], p_[1], p_[2], E_);
+}
+
+bool
+Particle::M(double m_)
+{
+  double mass;
+  if (m_>=0.) this->m = m_;
+  else if (this->pdgId!=0) {
+    mass = GetMassFromPDGId(this->pdgId);
+    if (mass<0.) return false;
+    this->m = mass;
   }
-  else {
-    return this->SetP(p_[0], p_[1], p_[2], E_);
-  }
+  else return false;
+  return true;
 }
 
 Particle*
