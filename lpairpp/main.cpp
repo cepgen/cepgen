@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
 
   mg.ComputeXsection(&xsec, &err);
   if (ip.generation) {
-    mg.LaunchGeneration();
+    //mg.LaunchGeneration();
   }
   
   ip.StoreConfigFile("lastrun.card");

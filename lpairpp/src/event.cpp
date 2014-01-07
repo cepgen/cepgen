@@ -34,7 +34,7 @@ Event::SetParticle(Particle *part_)
     return -1;
   }
   Particle *tmp = this->GetByRole(part_->role);
-  if (!tmp->isValid) {
+  if (!tmp->Valid()) {
     this->_part->insert(std::pair<int,Particle>(part_->role, *part_));
     return 0;
   }

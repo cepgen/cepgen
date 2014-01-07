@@ -65,6 +65,7 @@ bool PSF(double,double,double*,double*,double*);
 void Map(double,double,double,double*,double*);
 void Mapla(double,double,int,double,double,double*,double*);
 //void Symmetrise(double, double, double*, double*);
+void Lorenb(double u_, double ps_[], double pi_[], double pf_[]);
 
 /**
  * @brief List of input parameters used to start and run the simulation

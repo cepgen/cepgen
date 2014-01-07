@@ -1,11 +1,10 @@
 #include "particle.h"
 
 Particle::Particle() :
-  pdgId(-1), role(-1),
+  pdgId(0), role(-1),
   px(0.), py(0.), pz(0.), pt(-1.), eta(0.),
-  isValid(false),
   e(-1.), m(-1.),
-  isPrimary(true)
+  _isPrimary(true)
 {
   //this->SetMother(new Particle());
 }
@@ -13,9 +12,8 @@ Particle::Particle() :
 Particle::Particle(int role_, int pdgId_) :
   role(-1),
   px(0.), py(0.), pz(0.), pt(-1.), eta(0.),
-  isValid(false),
   e(-1.), m(-1.),
-  isPrimary(true)
+  _isPrimary(true)
 {
   this->role = role_;
   this->pdgId = pdgId_;
@@ -29,7 +27,16 @@ Particle::~Particle() {
   //delete this->_mother;
 }
 
-std::string Particle::GetLHEline(bool revert_)
+bool
+Particle::Valid()
+{
+  if (this->pdgId==0) return false;
+  if (this->p==0. and this->M()==0.) return false;
+  return true;
+}
+
+std::string
+Particle::GetLHEline(bool revert_)
 {
   std::stringstream line;
   /*line << pdgId << "\t"
@@ -77,27 +84,30 @@ Particle::M(double m_)
 Particle*
 Particle::GetMother()
 {
-  if (!this->isPrimary) return this->_mother;
+  if (!this->_isPrimary) return this->_mother;
   return (Particle*)NULL;
 }
 
 void
 Particle::Dump()
 {
-  if (this->isValid) {
-    std::cout << "[Particle] DUMP"
+  if (this->Valid()) {
+    std::cout << "[Particle::Dump]"
 	      << "\n\tRole = " << this->role
 	      << "\n\tPDG id = " << this->pdgId
 	      << "\n\tP = (" << this->px << ", " << this->py << ", " << this->pz << ") GeV"
 	      << "\n\tPt = " << this->pt << " GeV"
-	      << "\n\tE = " << this->e << " GeV"
-	      << "\n\tM = " << this->m << " GeV"
+	      << "\n\tE = " << this->E() << " GeV"
+	      << "\n\tM = " << this->M() << " GeV"
 	      << "\n\teta = " << this->eta
-	      << "\n\tIs valid ? " << this->isValid << std::endl;
-    if (!this->isPrimary) {
+	      << "\n\tIs valid ? " << this->Valid() << std::endl;
+    if (!this->_isPrimary) {
       std::cout << "\tMother = " << this->GetMother()->role 
 		<< " (pdgId=" << this->GetMother()->pdgId << ")"
 		<< std::endl;
     }
+  }
+  else {
+    std::cout << "[Particle::Dump] ERROR: Particle is invalid" << std::endl;
   }
 }

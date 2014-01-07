@@ -27,6 +27,11 @@ class Particle {
      * history (mother/daughters), its kinematics, and its status
      */
     std::string GetLHEline(bool revert_=false);
+    /**
+     * Dumps into the standard output stream all the available information on this
+     * particle
+     * @brief Dumps all the information on this particle
+     */
     void Dump();
     /** @brief Particle Data Group integer identifier */
     int pdgId;
@@ -57,6 +62,7 @@ class Particle {
      * @return The particle's mass
      */
     inline double M() { return this->m; };
+    /** @brief Set the particle's mass in GeV/c\f${}^\mathrm{2}\f$ */
     bool M(double m_);
     /**
      * @brief Sets the 3-momentum associated to the particle
@@ -78,7 +84,6 @@ class Particle {
 	? log((this->p+fabs(this->pz))/this->pt)*(this->pz/fabs(this->pz))
 	: 9999.*(this->pz/fabs(this->pz));
       //this->eta=0.5*log((this->p+this->pz)/(this->p-this->pz));
-      this->isValid = true;
       return true;
     };
     /**
@@ -93,13 +98,11 @@ class Particle {
     inline bool P(double px_,double py_,double pz_,double E_) {
       this->P(px_,py_,pz_);
       if (pow(E_,2)<pow(this->p,2)) {
-        //std::cout << "--> " << pow(E_,2)-pow(this->p,2) << "\t" << E_ << "\t" << this->p << std::endl;
         return false;
       }
       if (this->M()<0.) {
 	this->M(sqrt(pow(this->E(),2)-pow(this->p,2)));
       }
-      this->isValid = true;
       return true;
     };
     /**
@@ -113,16 +116,17 @@ class Particle {
      * @param E_ Energy, in GeV
      */
     inline void E(double E_) { this->e=E_; };
+    /** @brief Gets the particle's energy */
     inline double E() { return this->e; };
     /** @brief Gets the particle's squared mass */
     inline double M2() { return std::pow(this->m,2); };
     /** @brief Is this particle a valid particle which can be used for kinematic computations ? */
-    bool isValid;
+    bool Valid();
     /**
      * @brief Sets the mother particle (from which this particle arises)
      * @param part_ A Particle object containing all the information on the mother particle
      */
-    inline void SetMother(Particle* part_) { this->_mother=part_; this->isPrimary=false; };
+    inline void SetMother(Particle* part_) { this->_mother=part_; this->_isPrimary=false; };
     /**
      * @brief Gets the mother particle from which this particle arises
      */
@@ -146,7 +150,7 @@ class Particle {
     double m;
     Particle *_mother;
     std::vector<Particle> *_daugh;
-    bool isPrimary;
+    bool _isPrimary;
 };
 
 #endif

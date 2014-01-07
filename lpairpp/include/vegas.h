@@ -57,7 +57,7 @@ class Vegas {
      * @brief Launches the generation of events
      */
     int LaunchGeneration();
-    void LaunchMyGeneration();
+    void Generate();
     void DumpGrid();
   private:
     //double Treat(double f_(double*,size_t,void*));

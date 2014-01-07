@@ -79,7 +79,7 @@ void MCGen::ComputeXsection(double* xsec_, double *err_)
 
 void MCGen::LaunchGeneration()
 {
-  veg->LaunchMyGeneration();
+  veg->Generate();
 }
 
 int i = 0;
@@ -90,7 +90,7 @@ double f(double* x_, size_t ndim_, void* params_) {
   //int inp1pdg, inp2pdg;
   int outp1pdg, outp2pdg;
   InputParameters *p;
-  GamGamKinematics cuts;
+  GamGamKinematics kin;
 
   i += 1;
   p = (InputParameters*)params_;
@@ -123,7 +123,7 @@ double f(double* x_, size_t ndim_, void* params_) {
     in2 = new Particle(2, 2212);
     in2->P(0., 0., -p->in2p);
     outp1pdg = outp2pdg = 2212;
-    cuts.kinematics = 1;
+    kin.kinematics = 1;
     break;
   case 8:
     in1 = new Particle(1, 2212);
@@ -132,7 +132,7 @@ double f(double* x_, size_t ndim_, void* params_) {
     in2->P(0., 0., -p->in2p);
     outp1pdg = 2;
     outp2pdg = 2212;
-    cuts.kinematics = 2;
+    kin.kinematics = 2;
     break;
   case 9:
     in1 = new Particle(1, 2212);
@@ -140,24 +140,25 @@ double f(double* x_, size_t ndim_, void* params_) {
     in2 = new Particle(2, 2212);
     in2->P(0., 0., -p->in2p);
     outp1pdg = outp2pdg = 2;
-    cuts.kinematics = 3;
+    kin.kinematics = 3;
     break;
   }
 
-  cuts.q2min = p->minq2;
-  cuts.q2max = p->maxq2;
-  cuts.mode = p->mcut;
-  cuts.ptmin = p->minpt;
-  cuts.ptmax = p->maxpt;
-  cuts.thetamin = p->mintheta;
-  cuts.thetamax = p->maxtheta;
-  cuts.emin = p->minenergy;
-  cuts.emax = p->maxenergy;
-  cuts.mxmin = p->minmx;
-  cuts.mxmax = p->maxmx;
+  kin.q2min = p->minq2;
+  kin.q2max = p->maxq2;
+  kin.mode = p->mcut;
+  kin.ptmin = p->minpt;
+  kin.ptmax = p->maxpt;
+  kin.thetamin = p->mintheta;
+  kin.thetamax = p->maxtheta;
+  kin.emin = p->minenergy;
+  kin.emax = p->maxenergy;
+  kin.mxmin = p->minmx;
+  kin.mxmax = p->maxmx;
   
   GamGam gg(ndim_, 0, x_);
-  gg.SetCuts(cuts);
+  gg.SetKinematics(kin);
+  //kin.Dump();
   gg.SetIncomingKinematics(*in1, *in2);
   gg.SetOutgoingParticles(3, outp1pdg); // First outgoing proton
   gg.SetOutgoingParticles(5, outp2pdg); // Second outgoing proton
@@ -166,12 +167,12 @@ double f(double* x_, size_t ndim_, void* params_) {
     std::cout << "[f] [ERROR] Kinematics is not properly set" << std::endl;
     return 0.;
   }
-  ff = gg.ComputeXsec();
+  ff = gg.ComputeWeight();
 #ifdef DEBUG
   if (i==1) {
     std::cout << "--> f at first step = " << ff << std::endl;
     std::cout << "=========================" << std::endl;
-    cuts.Dump();
+    kin.Dump();
     std::cout << "=========================" << std::endl;
   }
 #endif
@@ -181,8 +182,9 @@ double f(double* x_, size_t ndim_, void* params_) {
   }
   
   if (p->store) { // MC events generation
-    gg.FillKinematics(p->symmetrise);
-    gg.GetEvent()->Store(p->file);
+    gg.FillKinematics(false);
+    Event ev = *(gg.GetEvent());
+    ev.Store(p->file);
 
     double t1min, t1max, t2min, t2max;
 
@@ -190,9 +192,9 @@ double f(double* x_, size_t ndim_, void* params_) {
       gg.GetT1extrema(t1min, t1max);
       gg.GetT2extrema(t2min, t2max);
       *(p->file_debug)
-	<< (gg.GetEvent()->GetByRole(5)->p-gg.GetEvent()->GetByRole(1)->p)
-	<< "\t" << gg.GetEvent()->GetByRole(3)->p
-	<< "\t" << gg.GetEvent()->GetByRole(5)->p
+	<< (ev.GetByRole(5)->p-ev.GetByRole(1)->p)
+	<< "\t" << ev.GetByRole(3)->p
+	<< "\t" << ev.GetByRole(5)->p
 	<< "\t" << gg.GetT1()
 	<< "\t" << t1min
 	<< "\t" << t1max

@@ -155,7 +155,6 @@ int Vegas::MyIntegrate(double *result_, double *abserr_)
   double x[_ndim], dx[_ndim], kg[_ndim], dt[_ndim], qran[_ndim], xin[MAX_ND], r[MAX_ND];
   int ia[_ndim];
 
-
   for (j=0; j<MAX_ND; j++) {
     xin[j] = r[j] = 0.;
     for (i=0; i<_ndim; i++) {
@@ -476,7 +475,7 @@ Vegas::LaunchGeneration()
 }
 
 void
-Vegas::LaunchMyGeneration()
+Vegas::Generate()
 {
   //count_ = 1;
   std::ofstream of;

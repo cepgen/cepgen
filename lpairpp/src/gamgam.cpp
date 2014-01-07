@@ -43,16 +43,16 @@ GamGam::SetOutgoingParticles(int part_, int pdgId_)
   double mass_;
 
   mass_ = GetMassFromPDGId(pdgId_);
-  if (mass_<0) {
+  if (mass_<0 or pdgId_==2) { //FIXME!!!
     if (_cuts.kinematics==1) return false;
     int xind;
     double outm;
-    if (_cuts.kinematics==2) {
+    if (_cuts.kinematics==2) { // single-dissociative case
       xind = 7;
       outm = _mp1;
       mass_ = this->ComputeMX(_x[xind], outm, &_dw31);
     }
-    else if (_cuts.kinematics==3) {
+    else if (_cuts.kinematics==3) { // double-dissociative case
       xind = 8;
       if (part_==3) outm = _mp1;
       else if (part_==5 && _mp3>0.) outm = _mp3;
@@ -93,8 +93,8 @@ GamGam::SetOutgoingParticles(int part_, int pdgId_)
   default:
     return false;
   }
-  setout = setp3 && setp5 && setll;
-  setkin = setin && setout;
+  setout = setp3 and setp5 andsetll;
+  setkin = setin and setout;
 #ifdef DEBUG
   std::cout << "[GamGam::SetOutgoingParticles] [DEBUG] Particle \"" << part_ << "\" has PDG id " << pdgId_ << std::endl;
   if (setout) {
@@ -146,11 +146,8 @@ GamGam::SetIncomingKinematics(Particle ip1_, Particle ip2_)
                    +std::pow(p1.py+p2.py, 2)
                    +std::pow(p1.pz+p2.pz, 2));
 
-  setin = p1.isValid && p2.isValid;
+  setin = p1.Valid() and p2.Valid();
   setkin = setin && setout;
-  if (setkin) {
-    this->ComputeSqS();
-  }
   return setkin;
 }
 
@@ -237,6 +234,7 @@ GamGam::Pickin()
   std::cout << "[GamGam::Pickin] [DEBUG] _s2 = " << _s2 << std::endl;
 #endif
 
+  //std::cout << "s=" << _s << ", w3=" << _w3 << ", sig1=" << sig1 << std::endl;
   sp = _s+_w3-sig1;
 
   _d3 = sig1-_w2;
@@ -249,6 +247,7 @@ GamGam::Pickin()
   }
   sl2 = std::sqrt(rl2);
 
+  //std::cout << "ss=" << ss << ", sp=" << sp << ", sl1=" << _sl1 << ", sl2=" << sl2 << std::endl;
   _t1max = _w1+_w3-(ss*sp+_sl1*sl2)/(2.*_s); // definition from eq. (A.4) in [1]
   _t1min = (_w31*_d3+(_d3-_w31)*(_d3*_w1-_w31*_w2)/_s)/_t1max; // definition from eq. (A.5) in [1]
 
@@ -546,7 +545,10 @@ GamGam::Orient()
   _ep2 = re*(_s-_w12);
 
 #ifdef DEBUG
-  std::cout << "[GamGam::Orient] [DEBUG]\n  re = " << re << "\n  _w12 = " << _w12 << std::endl;
+  std::cout << "[GamGam::Orient] [DEBUG]"
+	    << "\n  re = " << re 
+	    << "\n  _w12 = " << _w12 
+	    << std::endl;
   std::cout << "[GamGam::Orient] [DEBUG] incoming particles' energy = " << _ep1 << ", " << _ep2 << std::endl;
 #endif
 
@@ -714,19 +716,19 @@ GamGam::Orient()
 }
 
 void
-GamGam::ComputeSqS()
+GamGam::ComputeCMenergy()
 {
   double k;
 
   k = 0.;
   for (int i=0; i<3; i++) {
-    k -= _p3_p1[i]*_p3_p2[i];
+    k += _p3_p1[i]*_p3_p2[i];
   }
-  _s = std::pow(_mp1,2)+std::pow(_mp2,2)+2.*(_ep1*_ep2+k);
+  _s = std::pow(_mp1,2)+std::pow(_mp2,2)+2.*(_ep1*_ep2-k);
   _sqs = sqrt(_s);
 
 #ifdef DEBUG
-  std::cout << "[GamGam::ComputeSqS] [DEBUG] Centre of mass energy : " << _sqs << " GeV" << std::endl;
+  std::cout << "[GamGam::ComputeCMenergy] [DEBUG] Centre of mass energy : " << _sqs << " GeV" << std::endl;
 #endif
 
 }
@@ -736,6 +738,10 @@ GamGam::ComputeMX(double x_, double outmass_, double *dw_)
 {
   double wx2min, wx2max;
   double mx2, dmx2;
+
+  if (_sqs<0.) {
+    this->ComputeCMenergy();
+  }
   
   wx2min = std::pow(std::max(GetMassFromPDGId(2212)+GetMassFromPDGId(211), _cuts.mxmin), 2);
   wx2max = std::pow(std::min(_sqs-_mp2-2.*outmass_, _cuts.mxmax), 2);
@@ -746,7 +752,7 @@ GamGam::ComputeMX(double x_, double outmass_, double *dw_)
 	    << "\tMX**2 in range [" << wx2min << ", " << wx2max << "]" << std::endl
 	    << "\tx = " << x_ << std::endl
 	    << "\tMX**2 = " << mx2 << ", dMX**2 = " << dmx2 << std::endl
-	    << "\tMX = " << sqrt(mx2) << std::endl;
+	    << "\tMX = " << sqrt(mx2) << ", dMX = " << sqrt(dmx2) << std::endl;
 #endif
 
   *dw_ = sqrt(dmx2);
@@ -754,12 +760,12 @@ GamGam::ComputeMX(double x_, double outmass_, double *dw_)
 }
 
 double
-GamGam::ComputeXsec(int nm_)
+GamGam::ComputeWeight(int nm_)
 {
 
   // WARNING ====> PP5-->_p_p5
   //                P5-->_pp5
-  double xsec;
+  double weight;
   double dw4;
   double wmin, wmax;
   double e1mp1, e3mp3;
@@ -788,13 +794,13 @@ GamGam::ComputeXsec(int nm_)
   double cott6, cott7, cost6, cost7;
   bool lcut, lmu1, lmu2;
 
-  xsec = 0.;
+  weight = 0.;
 
   if (!setout) {
-    std::cout << "[GamGam::ComputeXsec] [FATAL]\n  : output state not set !" << std::endl;
+    std::cout << "[GamGam::ComputeWeight] [FATAL]\n  : output state not set !" << std::endl;
     return 0.;
   }
-  ComputeSqS();
+  ComputeCMenergy();
   //std::cout << "wmax = " << _wmax << std::endl;
   if (_cuts.wmax<0) _cuts.wmax = _s;
 
@@ -811,7 +817,7 @@ GamGam::ComputeXsec(int nm_)
   if (wmax>_cuts.wmax) wmax = _cuts.wmax; // upper limit on wmax if specified
 
 #ifdef DEBUG
-  std::cout << "[GamGam::ComputeXsec] [DEBUG]"
+  std::cout << "[GamGam::ComputeWeight] [DEBUG]"
             << "\n  wmin = " << wmin
             << "\n  wmax = " << wmax
             << "\n  wmax/wmin = " << wmax/wmin
@@ -821,7 +827,7 @@ GamGam::ComputeXsec(int nm_)
   _mc4 = std::sqrt(_w4);
 
 #ifdef DEBUG
-  std::cout << "[GamGam::ComputeXsec] [DEBUG] Computed value for w4 = " << _w4 << " -> mc4 = " << _mc4 << std::endl;
+  std::cout << "[GamGam::ComputeWeight] [DEBUG] Computed value for w4 = " << _w4 << " -> mc4 = " << _mc4 << std::endl;
 #endif
 
   if (!Orient()) {
@@ -832,14 +838,13 @@ GamGam::ComputeXsec(int nm_)
     _dj = 0.;
   }
   if (_dj==0.) {
-    //std::cout << "[GamGam::ComputeXsec] [FATAL]\n  _dj = " << _dj << std::endl;
+    //std::cout << "[GamGam::ComputeWeight] [FATAL]\n  _dj = " << _dj << std::endl;
     return 0.;
   }
   ecm6 = (_w4+_w6-_w7)/(2.*_mc4);
   pcm6 = std::sqrt(std::pow(ecm6, 2)-_w6);
   
   //std::cout << "pcm6 = " << pcm6 << ", ecm6 = " << ecm6 << ", w6 = " << _w6 << std::endl; // OKKKKK!!!!
-
   _dj *= dw4*pcm6/(_mc4*sconstb*_s);
   
   // Let the most obscure part of this code begin...
@@ -854,7 +859,7 @@ GamGam::ComputeXsec(int nm_)
   pgz = _mc4*_de3/(_ec4+_pc4)-_ec4*_de3*_al4/_mc4-_p_p3*_cp3*_ec4*_st4/_mc4+_ec4*_ct4/_mc4*(_pp3*_al3+e3mp3-e1mp1);
 
 #ifdef DEBUG
-  std::cout << "[GamGam::ComputeXsec] [DEBUG] pg3 = ("
+  std::cout << "[GamGam::ComputeWeight] [DEBUG] pg3 = ("
             << pg3[0] << ", "
             << pg3[1] << ", "
             << pg3[2] << "), pg3**2 = "
@@ -902,7 +907,7 @@ GamGam::ComputeXsec(int nm_)
   _ctcm6 = 1.-2.*xx6; // cos(theta_cm,6) is between -1 and 1
   _stcm6 = 2.*std::sqrt(xx6*(1.-xx6)); // definition is OK (according to _ctcm6 def)
 #ifdef DEBUG
-  std::cout << "[GamGam::ComputeXsec] [DEBUG]\n\tctcm6 = " << _ctcm6 << "\n\tstcm6 = " << _stcm6 << std::endl;
+  std::cout << "[GamGam::ComputeWeight] [DEBUG]\n\tctcm6 = " << _ctcm6 << "\n\tstcm6 = " << _stcm6 << std::endl;
 #endif
 
   phicm6 = 2.*pi*_x[6];
@@ -916,7 +921,7 @@ GamGam::ComputeXsec(int nm_)
   pcm6z = pcm6*_ctcm6;
 
 #ifdef DEBUG
-  std::cout << "[GamGam::ComputeXsec] [DEBUG] p3cm6 = ("
+  std::cout << "[GamGam::ComputeWeight] [DEBUG] p3cm6 = ("
             << pcm6x << ", "
             << pcm6y << ", "
             << pcm6z << ")"
@@ -953,7 +958,7 @@ GamGam::ComputeXsec(int nm_)
   _pl7 = std::sqrt(std::pow(_el7, 2)-_w7); // second outgoing lepton's |p| //OK
 
 #ifdef DEBUG
-  std::cout << "[GamGam::ComputeXsec] [DEBUG] (outgoing kinematics)"
+  std::cout << "[GamGam::ComputeWeight] [DEBUG] (outgoing kinematics)"
             << "\n\tfirst outgoing lepton : p, E = " << _pl6 << ", " << _el6
             << "\n\tsecond outgoing lepton : p, E = " << _pl7 << ", " << _el7
             << std::endl;
@@ -983,7 +988,7 @@ GamGam::ComputeXsec(int nm_)
   _sp7 = p7y/pp7;
 
 #ifdef DEBUG
-  std::cout << "[GamGam::ComputeXsec] [DEBUG] (outgoing trajectories)"
+  std::cout << "[GamGam::ComputeWeight] [DEBUG] (outgoing trajectories)"
             << "\n\tfirst outgoing lepton : cos(theta) = " << _ct6 << ", sin(theta) = " << _st6
             << "\n\tfirst outgoing lepton : cos(phi) = " << _cp6 << ", sin(phi) = " << _sp6
             << "\n\tsecond outgoing lepton : cos(theta) = " << _ct7 << ", sin(theta) = " << _st7
@@ -1008,7 +1013,7 @@ GamGam::ComputeXsec(int nm_)
   r13 = -c2*_cp3-_qve[1]*c3;
 
 #ifdef DEBUG
-  std::cout << "[GamGam::ComputeXsec] [DEBUG]" << std::endl;
+  std::cout << "[GamGam::ComputeWeight] [DEBUG]" << std::endl;
   for (unsigned int i=0; i<sizeof(_qve)/sizeof(double); i++) {
     std::cout << "  _qve[" << i << "] = " << _qve[i] << std::endl;
   }
@@ -1038,10 +1043,10 @@ GamGam::ComputeXsec(int nm_)
 
   if (_cuts.mode==0) {
 #ifdef DEBUG
-    std::cout << "[GamGam::ComputeXsec] [DEBUG] No cuts applied on the outgoing leptons kinematics !" << std::endl;
+    std::cout << "[GamGam::ComputeWeight] [DEBUG] No cuts applied on the outgoing leptons kinematics !" << std::endl;
 #endif
   }
-  // Kinematics computation for both muons
+  // Kinematics computation for both leptons
   _pt_l6 = _pl6*_st6;
   pz6 = _betgam*_el6+_gamma*_pl6*_ct6;
   _e6lab = _gamma*_el6+_betgam*_pl6*_ct6;
@@ -1059,6 +1064,7 @@ GamGam::ComputeXsec(int nm_)
   cott6 = pz6/_pt_l6;
   cott7 = pz7/_pt_l7;
 
+  // Cuts on outgoing leptons' kinematics
   lmu1 = cott6>=_cotth1
       && cott6<=_cotth2
       && (_pt_l6>=_cuts.ptmin || _cuts.ptmin<=0.)
@@ -1071,7 +1077,7 @@ GamGam::ComputeXsec(int nm_)
       && (_pt_l7<=_cuts.ptmax || _cuts.ptmax<0.)
       && ( _e7lab>=_cuts.emin || _cuts.emin <=0.)
       && ( _e7lab<=_cuts.emax || _cuts.emax <0.);
-  //std::cout << " >>>>>>> " << lmu1 << " & " << lmu2 << std::endl;
+
   switch (_cuts.mode) {
     case 0:
     default:
@@ -1091,46 +1097,54 @@ GamGam::ComputeXsec(int nm_)
       break;
   }
     //std::cout << ">>> failed the cuts" << std::endl;
+  //std::cout << "haah" << std::endl;
+
 
   // Cut on mass of final hadronic system (MX)
-  /*if (_ndim>7 && (std::pow(mx,2)<std::pow(_cuts.mxmin,2) || std::pow(mx,2)>std::pow(_cuts.mxmax,2))) {
-    lcut = false;
-  }*/
+  if (_cuts.kinematics>1) {
+    if (_mp3<_cuts.mxmin || _mp3>_cuts.mxmax) return 0.;
+    if (_cuts.kinematics==3) {
+      if (_mp5<_cuts.mxmin || _mp5>_cuts.mxmax) return 0.;
+    }
+  }
 
   // Cut on the proton's Q2 (first photon propagator T1)
   if (_t1<-_cuts.q2max || _t1>-_cuts.q2min) {
     lcut = false;
   }
 
-  if (!lcut) { // Dismiss the cuts-failing events in the xsection computation
+  if (!lcut) { // Dismiss the cuts-failing events in the cross-section computation
     return 0.;
   }
+
   int intgp, intge;
-  
-  switch (_cuts.kinematics) {
-    case 1: // elastic case
-      intgp = 2;
-      intge = 2;
-      xsec = sconst*_dj*this->PeriPP(intgp, intge);
-      break;
-    case 2: // single-dissociative case
-      intgp = 3;
-      intge = 2;
-      xsec = sconst*_dj*this->PeriPP(intgp, intge)*_dw31;
-      break;
-    case 3: // double-dissociative case
-      intgp = 3;
-      intge = 3;
-      xsec = sconst*_dj*this->PeriPP(intgp, intge)*_dw31*_dw52;
-      break;
-    default:
-      intgp = 1;
-      intge = 1;
-      break;
+
+  switch (_cuts.kinematics) { // FIXME inherited from CDF version
+  default:
+  case 0: // ep case
+    intgp = intge = 1; // DESY
+    //intgp = intge = 0; // CDF
+    weight = sconst*_dj*this->PeriPP(intgp, intge);
+    break;
+  case 1: // elastic case
+    intgp = intge = 2; // DESY
+    //intgp = intge = 1; // CDF
+    weight = sconst*_dj*this->PeriPP(intgp, intge);
+    break;
+  case 2: // single-dissociative case
+    intgp = 3; // DESY
+    intge = 2; // DESY
+    /*intgp = 2; // CDF
+      intge = 1; // CDF*/
+    weight = sconst*_dj*this->PeriPP(intgp, intge)*_dw31;
+    break;
+  case 3: // double-dissociative case
+    intgp = intge = 3; // DESY
+    //intgp = intge = 2; // CDF
+    weight = sconst*_dj*this->PeriPP(intgp, intge)*_dw31*_dw52;
+    break;
   }
-  //std::cout << "dj = " << _dj << std::endl;
-  //std::cout << "Elastic x-sec : " << xsec << std::endl;
-  return xsec;
+  return weight;
 }
 
 void
@@ -1311,17 +1325,76 @@ GamGam::FillKinematics(bool symmetrise_)
 }
 
 void
-GamGam::SetCuts(GamGamKinematics cuts_)
+GamGam::SetKinematics(GamGamKinematics cuts_)
 {
   _cuts = cuts_;
   _cotth1 = 1./tan(cuts_.thetamax*pi/180.);
   _cotth2 = 1./tan(cuts_.thetamin*pi/180.);  
 #ifdef DEBUG
-  std::cout << "[GamGam::SetCuts] [DEBUG]"
+  std::cout << "[GamGam::SetKinematics] [DEBUG]"
             << "\n\tcot(theta1) = " << _cotth1
             << "\n\tcot(theta2) = " << _cotth2
             << std::endl;
 #endif
+}
+
+void
+GamGam::PrepareHadronisation()
+{
+  int nfinal;
+  int i2part10, i2part11;
+  double ranudq, ulmdq, ulmq;
+  double ranmxp, ranmxt;
+  double pmxp;
+  double pmxda[4];
+  double partp[4], partpb[4];
+  /*int i2mo110, i2mo111;
+  int i2da110, i2da111;
+  int i2da210, i2da211;
+  int i2stat10, i2stat11;*/
+
+  nfinal = 2;
+  ranudq = (double)rand()/RAND_MAX;
+  if (ranudq<1./9.) {
+    i2part10 = 2;
+    i2part11 = 2203;
+  }
+  else if (ranudq<5./9.) {
+    i2part10 = 2;
+    i2part11 = 2101;
+  }
+  else {
+    i2part10 = 2;
+    i2part11 = 2103;
+  }
+  ulmdq = GetMassFromPDGId(i2part10);
+  ulmq = GetMassFromPDGId(i2part11);
+  // ...
+
+  // Choose random direction in MX frame
+  ranmxp = 2.*pi*(double)rand()/RAND_MAX;
+  ranmxt = acos(2.*(double)rand()/RAND_MAX-1.);
+
+  // Compute momentum of decay particles from MX
+  pmxp = sqrt(pow(pow(_ev->GetByRole(3)->M(), 2)+pow(ulmq, 2), 2)/(4.*pow(_ev->GetByRole(3)->M(), 2))-pow(ulmq, 2));
+
+  // Build 4-vectors and boost decay particles
+  pmxda[0] = sin(ranmxt)*cos(ranmxp)*pmxp;
+  pmxda[1] = sin(ranmxt)*sin(ranmxp)*pmxp;
+  pmxda[2] = cos(ranmxt)*pmxp;
+  pmxda[3] = sqrt(pow(pmxp, 2)+pow(ulmdq, 2));
+
+  partp[0] = _ev->GetByRole(3)->px;
+  partp[1] = _ev->GetByRole(3)->py;
+  partp[2] = _ev->GetByRole(3)->pz;
+  partp[3] = _ev->GetByRole(3)->E();
+
+  Lorenb(_ev->GetByRole(3)->M(), partp, pmxda, partpb);
+
+  pmxda[0] = -pmxda[0]; pmxda[1] = -pmxda[1]; pmxda[2] = -pmxda[2];
+  pmxda[3] = sqrt(pow(pmxp, 2)+pow(ulmq, 2));
+
+  Lorenb(_ev->GetByRole(3)->M(), partp, pmxda, partpb);
 }
 
 double
@@ -1339,30 +1412,31 @@ GamGam::PeriPP(int nup_, int ndown_)
   double rhot, qqq, qdq;
   double t11, t12, t21, t22;
   double peripp;
-  //double xu;
+
+  // Implicitely needed : full event kinematics, such as :
+  // * _t1, _t2
+  // * _mp1, _mp2 (--> _w1, _w2)
+  // * _mp3, _mp5 (--> _w3, _w5)
 
 #ifdef DEBUG
   std::cout << "[GamGam::PeriPP] [DEBUG]\n  Nup = " << nup_ << "\n  Ndown = " << ndown_ << std::endl;
 #endif
 
   switch(nup_) {
-  case 1:
+  case 1: // DESY
+      //case 0: // CDF
     _u1 = 1.;
     _u2 = 1.;
     break;
-  case 2:
+  case 2: // DESY
+    //case 1: // CDF
     xt = std::pow(1.-_t1/.71, 2);
     _tau = _t1/(4*_w1);
     _u1 = std::pow(2.79/xt, 2);
     _u2 = (1./std::pow(xt, 2)-_u1*_tau)/(1.-_tau);
-    /*xt = 1.-_t1/.71;
-    xt = xt*xt;
-    xu = 2.79/xt;
-    _u1  = xu*xu;
-    _tau = _t1/(4.*_w1);
-    _u2  = (1./(xt*xt)-xu*xu*_tau)/(1.-_tau);*/
     break;
-  case 4:
+  case 4: // DESY
+    // does not exist in CDF version
     std::cout << "[GamGam::PeriPP] [DEBUG] Result of PSF : " << PSF(_t1, _w3, &dummy, &psfw1, &psfw2) << std::endl;
     std::cout << "after PSF : " << psfw1 << "\t" << psfw2 << std::endl;
     _u1 = -psfw1*(2.*_mp1)/_t1;
@@ -1373,18 +1447,19 @@ GamGam::PeriPP(int nup_, int ndown_)
     en = _w31-_t1;
     _tau = _t1/(4.*_w1);
     rhot = rho-_t1;
-    //std::cout << _w31 << "\t" << _t1 << "\t" << _tau << "\t" << rhot << std::endl;
     _u1 = (-cc1*std::pow(rho/rhot, 2)*_w31-cc2*_w1*std::pow(1.-x, 4)/(x*(x*cp-2*bp)+1.))/_t1;
     _u2 = (-_tau*_u1-dd1*_w31*_t1*(rho/rhot)*std::pow(_w31/en, 2)/(rhot*_w1))/(1.-std::pow(en, 2)/(4.*_w1*_t1));
     break;
   }
 
   switch(ndown_) {
-  case 1:
+  case 1: // DESY
+    //case 0: // CDF
     _v1 = 1.;
     _v2 = 1.;
     break;
-  case 2:
+  case 2: // DESY
+    //case 1: // CDF
     xt = std::pow(1.-_t2/.71, 2);
     _tau = _t2/(4.*_w2);
     _v1 = std::pow(2.79/xt, 2);
@@ -1457,6 +1532,7 @@ GamGamKinematics::Dump()
     default: s_mode = "unknown"; break;
   }
   std::cout
+    << std::setfill(' ')
     << "[GamGamKinematics] Dump =========" << std::endl
     << std::setw(25) << "Cuts mode :" << std::setw(2) << this->mode << "->" << std::setw(4) << s_mode << std::endl    
     << "===== Single leptons" << std::endl

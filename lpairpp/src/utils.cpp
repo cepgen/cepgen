@@ -25,14 +25,18 @@ double cbrass[56] = { 0.043, 0.024, 0.000,-0.013,-0.023,-0.069,-0.060,-0.080,-0.
 double GetMassFromPDGId(int pdgId_)
 {
   switch(abs(pdgId_)) {
-  case 2212:return 0.938272046;    // proton
-  case 11:  return 0.510998928e-3; // electron
-  case 13:  return 0.1056583715;   // muon
-  case 15:  return 1.77682;        // tau
-  case 22:  return 0.;             // photon
-  case 211: return 0.13957018;     // pi+
-  case 111: return 0.1349766;      // pi0
-  default:  return -1.;
+  case 2:    return 0.33;           // u (from PYTHIA6.4)
+  case 11:   return 0.510998928e-3; // electron
+  case 13:   return 0.1056583715;   // muon
+  case 15:   return 1.77682;        // tau
+  case 22:   return 0.;             // photon
+  case 211:  return 0.13957018;     // pi+
+  case 111:  return 0.1349766;      // pi0
+  case 2101: return 0.57933;        // (ud)0 (from PYTHIA6.4)
+  case 2103: return 0.77133;        // (ud)1 (from PYTHIA6.4)
+  case 2203: return 0.77133;        // (uu)1 (from PYTHIA6.4)
+  case 2212: return 0.938272046;    // proton
+  default:   return -1.;
   }
 }
 
@@ -121,6 +125,22 @@ void Mapla(double y_, double z_, int u_, double xm_, double xp_, double* x_, dou
   *x_ = y_+z_+(am*zz-c/(am*zz))/2.;
   ax = std::sqrt(std::pow(*x_-y_-z_, 2)+c);
   *d_ = ax*log(yy);
+}
+
+void Lorenb(double u_, double ps_[4], double pi_[4], double pf_[4])
+{
+  double fn;
+
+  if (ps_[3]!=u_) {
+    pf_[3] = (pi_[3]*ps_[3]+pi_[2]*ps_[2]+pi_[1]*ps_[1]+pi_[0]*ps_[0])/u_;
+    fn = (pf_[3]+pi_[3])/(ps_[3]+u_);
+    pf_[0] = pi_[0]+fn*ps_[0];
+    pf_[1] = pi_[1]+fn*ps_[1];
+    pf_[2] = pi_[2]+fn*ps_[2];
+  }
+  else {
+    std::copy(pi_, pi_+4, pf_);
+  }
 }
 
 InputParameters::InputParameters() :

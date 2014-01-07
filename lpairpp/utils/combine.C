@@ -408,9 +408,9 @@ void combine()
 
     c[i]->cd(1);
     h_lpairpp[i]->Sumw2();
-    h_lpairpp[i]->SetFillColor(kBlue);
+    h_lpairpp[i]->SetFillColor(kRed);
     //h_lpairpp[i]->SetFillStyle(3005);
-    h_lpairpp[i]->SetFillStyle(3003);
+    h_lpairpp[i]->SetFillStyle(3005);
     h_lpairpp[i]->SetLineColor(kBlack);
     h_lpairpp[i]->SetLineWidth(1);
     //ss.str(""); ss << "#frac{1}{#sigma} #frac{d#sigma}{d" << h_lpairpp[i]->GetTitle() << "}";
@@ -432,9 +432,9 @@ void combine()
     h_lpairor[i]->GetYaxis()->SetTitleFont(43);
     h_lpairor[i]->GetYaxis()->SetTitleSize(14);
     h_lpairor[i]->GetYaxis()->SetTitleOffset(1.4);
-    h_lpairor[i]->SetFillColor(kRed);
+    h_lpairor[i]->SetFillColor(kBlue);
     //h_lpairor[i]->SetFillStyle(3004);
-    h_lpairor[i]->SetFillStyle(3001);
+    h_lpairor[i]->SetFillStyle(3004);
     h_lpairor[i]->SetLineColor(kBlack);
     h_lpairor[i]->SetLineWidth(1);
     h_lpairor[i]->SetLineStyle(2);

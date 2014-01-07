@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <map>
 
+#include "process.h"
 #include "event.h"
 #include "utils.h"
 
@@ -66,7 +67,7 @@ class GamGamKinematics {
  * @brief Computes the matrix element for a \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
  *  process
  */
-class GamGam {
+class GamGam : public Process {
  public:
   /**
    * Sets the mandatory parameters used in the methods computing the kinematics
@@ -95,23 +96,12 @@ class GamGam {
    * @param pdgId_ Particle ID according to the PDG convention
    */
   bool SetOutgoingParticles(int part_,int pdgId_);
-  /*void SetCutsMode(int mod_) {this->_modcut = mod_;};
-  //void SetCutsMode(int);
-  void SetMinimumPt(double ptmin_) {this->_ptcut = ptmin_;};
-  void SetMinimumE(double emin_) {this->_ecut = emin_;};
-  void SetThetaRange(double,double);*/
   /**
    * @brief Sets the list of kinematic cuts to apply on the outgoing particles'
    *  final state
    * @param cuts_ The Cuts object containing the kinematic parameters
    */
-  void SetCuts(GamGamKinematics cuts_);
-  /**
-   * @brief Get a particle given its role in the process
-   * @param role_ An integer denoting the particle's role in the selected
-   *  production process
-   */
-  Particle* GetParticle(int role_);
+  void SetKinematics(GamGamKinematics cuts_);
   void SetParticle(int,Particle*);
   /**
    * Is the system's kinematics well defined and compatible with the process ?
@@ -127,17 +117,24 @@ class GamGam {
    *  according to the incoming particles' kinematics
    * @brief Computes \f$\sqrt{s}\f$ for the system
    */
-  void ComputeSqS();
+  void ComputeCMenergy();
+  /**
+   * Computes the mass of the outgoing proton remnant if any
+   * @brief Computes the ougoing proton remnant mass
+   * @param x_ A random number (between 0 and 1)
+   * @param outmass_ The maximal outgoing particles' invariant mass
+   * @param dw_ The size of the integration bin
+   * @return The mass of the outgoing proton remnant
+   */
   double ComputeMX(double x_, double outmass_, double* dw_);
   /**
    * Computes the cross-section for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
    *  process with the given kinematics
-   * @brief Computes the process' cross section
+   * @brief Computes the process' weight for the given point
    * @return \f$\frac{\textrm d\sigma}{\mathrm d\mathbf x}(\gamma\gamma\to\ell^{+}\ell^{-})\f$,
    * the differential cross-section for the given point in the phase space.
    */
-  double ComputeXsec(int nm_=1);
-  void FillKinematics(bool symmetrise_=false);
+  double ComputeWeight(int nm_=1);
   void StoreEvent(std::ofstream*,double);
   /**
    * Returns the value for the first photon virtuality
@@ -168,6 +165,18 @@ class GamGam {
   inline double GetU2() { return this->_u2; };
   inline double GetV1() { return this->_v1; };
   inline double GetV2() { return this->_v2; };
+  /**
+   * Fills the private Event object with all the Particle object contained
+   * in this event.
+   * @brief Fills the Event object with the particles' kinematics
+   */
+  void FillKinematics(bool symmetrise_=false);
+  /**
+   * Returns the complete list of Particle with their role in the process for
+   * the point considered in the phase space as an Event object.
+   * @brief Returns the event content (list of particles with an assigned role)
+   * @return The Event object containing all the generated Particle objects
+   */
   inline Event* GetEvent() { return this->_ev; };
  private:
   /**
@@ -179,6 +188,7 @@ class GamGam {
    *  system
    */
   bool Orient();
+  void PrepareHadronisation();
   /**
    * Contains the expression of the matrix element squared for the process under
    * considerations. It returns the value of the convolution of the form factor
@@ -459,6 +469,7 @@ class GamGam {
   GamGamKinematics _cuts;
   double _cotth1, _cotth2;
   // Particles
+  /** @brief Event object containing all the information on the in- and outgoing particles */
   Event *_ev;
   //std::map<int,Particle> *_part;
 };
