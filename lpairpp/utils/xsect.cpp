@@ -25,9 +25,10 @@ int main(int argc, char* argv[]) {
   ip.in1p = 3500.;
   ip.in2p = 3500.;
   ip.pair = 13;
-  ip.p1mod = 2;
-  //ip.p1mod = 11;
-  ip.p2mod = 2;
+  //ip.p1mod = 2;
+  ip.p1mod = 11;
+  //ip.p2mod = 2;
+  ip.p2mod = 11;
   ip.mcut = 2;
   ip.minenergy = 0.;
   //ip.itmx = 5;
@@ -35,8 +36,9 @@ int main(int argc, char* argv[]) {
   std::cout << "test" << std::endl;
   ip.Dump();
 
-  tmp.open("tmp/xsec_lpairpp_elastic.dat");
+  //tmp.open("tmp/xsec_lpairpp_elastic.dat");
   //tmp.open("tmp/xsec_lpairpp_singleinelastic.dat");
+  tmp.open("tmp/xsec_lpairpp_doubleinelastic.dat");
 
   for (int i=0; i<it; i++) {
     minpt = (double)i/(double)it*max;

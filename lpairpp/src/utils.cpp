@@ -92,7 +92,6 @@ void Map(double expo_, double xmin_, double xmax_, double* out_, double* dout_)
 {
   double y, out;
   y = xmax_/xmin_;
-  //std::cout << "===> map : a = " << y << ", b = " << expo_ << ", a^b = " << std::pow(y, expo_) << std::endl;
   out = xmin_*std::pow(y, expo_);
   *out_ = out;
   *dout_ = out*log(y);

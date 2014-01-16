@@ -40,28 +40,36 @@ GamGam::~GamGam()
 bool
 GamGam::SetOutgoingParticles(int part_, int pdgId_)
 {
-  double mass_;
+  double mass_, outm, dm;
 
   mass_ = GetMassFromPDGId(pdgId_);
+
   if (mass_<0 or pdgId_==2) { //FIXME!!!
-    if (_cuts.kinematics==1) return false;
-    int xind;
-    double outm;
-    if (_cuts.kinematics>=2) { // single-dissociative case
-      xind = 7;
+    switch (_cuts.kinematics) {
+    case 1: // elastic
+    default:
+      return false;
+    case 2: // single-dissociative
       outm = _mp1;
-      mass_ = this->ComputeMX(_x[xind], outm, &_dw31);
+      mass_ = this->ComputeMX(_x[7], outm, &_dw31);
+      break;
+    case 3: // double-dissociative
+      int ind;
+      if (part_==3) {
+	outm = _mp1;
+	ind = 7;
+      }
+      else if (part_==5 && _mp3>0.) {
+	outm = _mp3;
+	ind = 8;
+      }
+      else {
+	return false;
+      }
+      mass_ = this->ComputeMX(_x[ind], outm, &dm);
+      //std::cout << part_ << "\t" << dm << "\t" << mass_ << std::endl;
     }
-    if (_cuts.kinematics==3) { // double-dissociative case
-      xind = 8;
-      if (part_==3) outm = _mp1;
-      else if (part_==5 && _mp3>0.) outm = _mp3;
-      else return false;
-      mass_ = this->ComputeMX(_x[xind], outm, &_dw52);
-    }
-    else return false;
   }
-  //std::cout << part_ << "\t" << mass_ << std::endl;
 
   switch(part_) {
   case 3:
@@ -69,6 +77,7 @@ GamGam::SetOutgoingParticles(int part_, int pdgId_)
     _mp3 = mass_;
     _w3 = std::pow(_mp3, 2);
     _pdg3 = pdgId_;
+    _dw31 = dm;
     setp3 = true;
     break;
   case 5:
@@ -76,6 +85,7 @@ GamGam::SetOutgoingParticles(int part_, int pdgId_)
     _mp5 = mass_;
     _w5 = std::pow(_mp5, 2);
     _pdg5 = pdgId_;
+    _dw52 = dm;
     setp5 = true;
     break;
   case 6:
@@ -225,9 +235,7 @@ GamGam::Pickin()
 
   if (_nOpt==0) {
     smax = _s+_w3-2.*_mp3*_sqs;
-    //std::cout << "smax = " << smax << std::endl;
     Map(_x[2], sig1, smax, &_s2, &ds2);
-    //std::cout << "After mapping : s2 = " << _s2 << ", ds2 = " << ds2 << std::endl;
     sig1 = _s2; //FIXME!!!!!!!!!!!!!!!!!!!!
   }
 #ifdef DEBUG
@@ -241,8 +249,8 @@ GamGam::Pickin()
 
   rl2 = std::pow(sp, 2)-4.*_s*_w3; // lambda(s, m3**2, sigma)
   if (rl2<=0.) {
-    std::cerr << "[GamGam::Pickin] [FATAL]"
-              << "\n  rl2 = " << rl2 << " <= 0" << std::endl;
+    /*std::cerr << "[GamGam::Pickin] [FATAL]"
+      << "\n  rl2 = " << rl2 << " <= 0" << std::endl;*/
     return false;
   }
   sl2 = std::sqrt(rl2);
@@ -252,14 +260,14 @@ GamGam::Pickin()
   _t1min = (_w31*_d3+(_d3-_w31)*(_d3*_w1-_w31*_w2)/_s)/_t1max; // definition from eq. (A.5) in [1]
 
   // FIXME dropped in CDF version
-  if (_t1max>-_cuts.q2min or _t1min<-_cuts.q2max) {
+  if (_t1max>-_cuts.q2min or (_cuts.q2max!=-1. and _t1min<-_cuts.q2max)) {
     /*std::cerr << "[GamGam::Pickin] [FATAL]"
               << "\n    t1max = " << std::setw(8) << _t1max << " > -q2min = " << std::setw(8) << -_cuts.q2min
               << "\n or t1min = " << std::setw(8) << _t1min << " < -q2max = " << std::setw(8) << -_cuts.q2max
-              << std::endl;
-	      return false;*/
+              << std::endl;*/
+    return false;
   }
-  if (_t1max<-_cuts.q2max) {
+  if (_cuts.q2max!=-1. and _t1max<-_cuts.q2max) {
     _t1max = -_cuts.q2max;
   }
   if (_t1min>-_cuts.q2min) {
@@ -743,8 +751,11 @@ GamGam::ComputeMX(double x_, double outmass_, double *dw_)
     this->ComputeCMenergy();
   }
   
-  wx2min = std::pow(std::max(GetMassFromPDGId(2212)+GetMassFromPDGId(211), _cuts.mxmin), 2);
-  wx2max = std::pow(std::min(_sqs-_mp2-2.*outmass_, _cuts.mxmax), 2);
+  /*wx2min = std::pow(std::max(GetMassFromPDGId(2212)+GetMassFromPDGId(211), _cuts.mxmin), 2);
+    wx2max = std::pow(std::min(_sqs-_mp2-2.*outmass_, _cuts.mxmax), 2);*/
+  
+  wx2min = std::pow(GetMassFromPDGId(2212)+GetMassFromPDGId(211), 2);
+  wx2max = std::pow(_sqs-_mp2-2.*outmass_, 2);
   Map(x_, wx2min, wx2max, &mx2, &dmx2);
 
 #ifdef DEBUG
@@ -797,7 +808,7 @@ GamGam::ComputeWeight(int nm_)
   weight = 0.;
 
   if (!setout) {
-    std::cout << "[GamGam::ComputeWeight] [FATAL]\n  : output state not set !" << std::endl;
+    std::cerr << "[GamGam::ComputeWeight] [FATAL]\n  : output state not set !" << std::endl;
     return 0.;
   }
   ComputeCMenergy();
@@ -837,7 +848,7 @@ GamGam::ComputeWeight(int nm_)
     _dj = 0.;
   }
   if (_dj==0.) {
-    //std::cout << "[GamGam::ComputeWeight] [FATAL]\n  _dj = " << _dj << std::endl;
+    //std::cerr << "[GamGam::ComputeWeight] [FATAL]\n  _dj = " << _dj << std::endl;
     return 0.;
   }
   ecm6 = (_w4+_w6-_w7)/(2.*_mc4);
@@ -1096,8 +1107,6 @@ GamGam::ComputeWeight(int nm_)
       lcut = lmu1 or lmu2;
       break;
   }
-  //std::cout << "haah" << std::endl;
-
 
   // Cut on mass of final hadronic system (MX)
   if (_cuts.kinematics>1) {
@@ -1109,7 +1118,7 @@ GamGam::ComputeWeight(int nm_)
   }
 
   // Cut on the proton's Q2 (first photon propagator T1)
-  if (_t1<-_cuts.q2max or _t1>-_cuts.q2min) {
+  if ((_cuts.q2max!=-1. and _t1<-_cuts.q2max) or _t1>-_cuts.q2min) {
     lcut = false;
   }
 
@@ -1142,8 +1151,8 @@ GamGam::ComputeWeight(int nm_)
     break;
   case 3: // double-dissociative case
     intgp = intge = 3; // DESY
-    //std::cout << "--> " << this->PeriPP(intgp, intge) << std::endl;
     //intgp = intge = 2; // CDF
+    //std::cout << _dw31 << "\t" << _dw52 << "\t" << this->PeriPP(intgp, intge) << "\t" << _dj << std::endl;
     weight = sconst*_dj*this->PeriPP(intgp, intge)*std::pow(_dw31*_dw52,2);
     //std::cout << "--> " << _dw52 << "\t" << _dw31 << std::endl;
     break;
@@ -1495,7 +1504,7 @@ GamGam::PeriPP(int nup_, int ndown_)
     _tau = _t2/(4.*_w2);
     rhot = rho-_t2;
     _v1 = (-cc1*std::pow(rho/rhot, 2)*_w52-cc2*_w2*std::pow(1.-x, 4)/(x*(x*cp-2.*bp)+1))/_t2;
-    _v2 = (-_tau*_w1-dd1*_w52*_t2*(rho/rhot)*std::pow(_w52/en, 2)/(rhot*_w2))/(1.-std::pow(en, 2)/(4.*_w2*_t2));
+    _v2 = (-_tau*_v1-dd1*_w52*_t2*(rho/rhot)*std::pow(_w52/en, 2)/(rhot*_w2))/(1.-std::pow(en, 2)/(4.*_w2*_t2));
     break;
   }
 #ifdef DEBUG

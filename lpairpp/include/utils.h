@@ -7,21 +7,15 @@
 #include <cmath>
 #include <fstream>
 
-//#include "gnuplot.h"
 #include "particle.h"
-//#include "gamgam.h"
 
-#define MAX_HISTOS 20
 /** @brief Electromagnetic coupling constant \f$\alpha_{em}=\frac{e^2}{4\pi\epsilon_0\hbar c}\f$ */
 #define alphaF 1./137.04
 /** @brief \f$\frac{1}{(\hbar c)^2}~[\mathrm b^{-1}]\f$? */
 #define muBarn 1./389.39
 #define pi 3.1415926535897932384626434
-//#define sconst 2.1868465E10
 #define sconst 3.89351824E8
 #define sconstb 2.1868465E10
-//#define RANMAX 1e8
-
 
 /**
  * Gets the mass in GeV/c**2 of a particle given its PDG identifier
@@ -246,8 +240,6 @@ class InputParameters {
      * development!
      * @brief Control plots objects
      */
-    //Gnuplot* plot[MAX_HISTOS];
-    //GamGam* gamgam;
     bool symmetrise;
 };
 

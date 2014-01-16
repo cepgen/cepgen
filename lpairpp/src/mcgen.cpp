@@ -68,7 +68,7 @@ MCGen::MCGen(InputParameters ip_)
     x[i] = 0.4;
   }
   std::cout << ">>> " << f(x, ndim, (void*)&ip_) << std::endl;
-  //exit(0);*/
+  exit(0);*/
 }
 
 MCGen::~MCGen()
@@ -146,6 +146,8 @@ double f(double* x_, size_t ndim_, void* params_) {
 
   kin.q2min = p->minq2;
   kin.q2max = p->maxq2;
+  //kin.q2min = 0; //FIXME
+  //kin.q2max = -1; //FIXME
   kin.mode = p->mcut;
   kin.ptmin = p->minpt;
   kin.ptmax = p->maxpt;
@@ -155,7 +157,9 @@ double f(double* x_, size_t ndim_, void* params_) {
   kin.emax = p->maxenergy;
   kin.mxmin = p->minmx;
   kin.mxmax = p->maxmx;
-  
+  //kin.mxmin = 0; //FIXME
+  //kin.mxmax = 100000; //FIXME
+
   GamGam gg(ndim_, 0, x_);
   gg.SetKinematics(kin);
   gg.SetIncomingKinematics(*in1, *in2);
