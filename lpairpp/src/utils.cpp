@@ -25,10 +25,12 @@ double cbrass[56] = { 0.043, 0.024, 0.000,-0.013,-0.023,-0.069,-0.060,-0.080,-0.
 double GetMassFromPDGId(int pdgId_)
 {
   switch(abs(pdgId_)) {
+  case 1:    return 0.33;           // d (from PYTHIA6.4)
   case 2:    return 0.33;           // u (from PYTHIA6.4)
   case 11:   return 0.510998928e-3; // electron
   case 13:   return 0.1056583715;   // muon
   case 15:   return 1.77682;        // tau
+  case 21:   return 0.;             // gluon
   case 22:   return 0.;             // photon
   case 211:  return 0.13957018;     // pi+
   case 111:  return 0.1349766;      // pi0

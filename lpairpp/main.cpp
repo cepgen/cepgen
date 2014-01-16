@@ -18,11 +18,13 @@ int main(int argc, char* argv[]) {
     ip.in2p = 3500.;
     ip.pair = 13;
     ip.p1mod = 11;
-    ip.p2mod = 2;
+    ip.p2mod = 11;
     ip.mcut = 2;
-    ip.minenergy = 1.;
+    ip.minenergy = 0.; //FIXME
     ip.minpt = 5.;
-    ip.maxgen = 1e5;
+    ip.maxgen = 1e1;
+    //ip.ncvg = 5e3; //FIXME
+    //ip.maxgen = 1e5;
     //ip.SetEtaRange(-2.5, 2.5);
   }
   else {
@@ -47,7 +49,7 @@ int main(int argc, char* argv[]) {
 
   mg.ComputeXsection(&xsec, &err);
   if (ip.generation) {
-    //mg.LaunchGeneration();
+    mg.LaunchGeneration();
   }
   
   ip.StoreConfigFile("lastrun.card");

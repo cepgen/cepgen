@@ -31,31 +31,57 @@ class GamGamKinematics {
      * @brief Type of kinematics to consider for the phase space
      */
     int kinematics;
-    /** @brief Sets of cuts to apply on the final phase space */
+    /**
+     * @brief Sets of cuts to apply on the final phase space
+     */
     int mode;
-    /** @brief Minimal transverse momentum of the single outgoing leptons */
+    /**
+     * @brief Minimal transverse momentum of the single outgoing leptons
+     */
     double ptmin;
-    /** @brief Maximal transverse momentum of the single outgoing leptons */
+    /**
+     * @brief Maximal transverse momentum of the single outgoing leptons
+     */
     double ptmax;
-    /** @brief Minimal energy of the central two-photons system */
+    /**
+     * @brief Minimal energy of the central two-photons system
+     */
     double emin;
-    /** @brief Maximal energy of the central two-photons system */
+    /**
+     * @brief Maximal energy of the central two-photons system
+     */
     double emax;
-    /** @brief Minimal polar (\f$\theta_\mathrm{min}\f$) angle of the outgoing leptons, expressed in degrees */
+    /**
+     * @brief Minimal polar (\f$\theta_\mathrm{min}\f$) angle of the outgoing leptons, expressed in degrees
+     */
     double thetamin;
-    /** @brief Maximal polar (\f$\theta_\mathrm{max}\f$) angle of the outgoing leptons, expressed in degrees */
+    /**
+     * @brief Maximal polar (\f$\theta_\mathrm{max}\f$) angle of the outgoing leptons, expressed in degrees
+     */
     double thetamax;
+    /**
+     * @brief Minimal mass (in GeV/c\f${}^\mathrm{2}\f$) of the outgoing proton remnant(s)
+     */
     double mxmin;
+    /**
+     * @brief Maximal mass (in GeV/c\f${}^\mathrm{2}\f$) of the outgoing proton remnant(s)
+     */
     double mxmax;
-    /** @brief The minimal value of \f$Q^2\f$ */
+    /**
+     * @brief The minimal value of \f$Q^2\f$
+     */
     double q2min;
-    /** @brief The maximal value of \f$Q^2\f$ */
+    /**
+     * @brief The maximal value of \f$Q^2\f$
+     */
     double q2max;
-    /** @brief The minimal \f$s\f$ on which the cross section is integrated */
+    /**
+     * @brief The minimal \f$s\f$ on which the cross section is integrated
+     */
     double wmin;
-    /** @brief The maximal \f$s\f$ on which the cross section is integrated.
-     *  If negative, the maximal energy available to the system (hence,
-     * \f$s=(\sqrt{s})^{2}\f$) is provided.*/
+    /**
+     * @brief The maximal \f$s\f$ on which the cross section is integrated. If negative, the maximal energy available to the system (hence, \f$s=(\sqrt{s})^{2}\f$) is provided.
+     */
     double wmax;
 };
 
@@ -97,19 +123,15 @@ class GamGam : public Process {
    */
   bool SetOutgoingParticles(int part_,int pdgId_);
   /**
-   * @brief Sets the list of kinematic cuts to apply on the outgoing particles'
-   *  final state
+   * @brief Sets the list of kinematic cuts to apply on the outgoing particles' final state
    * @param cuts_ The Cuts object containing the kinematic parameters
    */
   void SetKinematics(GamGamKinematics cuts_);
-  void SetParticle(int,Particle*);
   /**
    * Is the system's kinematics well defined and compatible with the process ?
-   * This check is mandatory to perform the (@a _ndim)-dimensional point's
-   * cross-section computation.
+   * This check is mandatory to perform the (@a _ndim)-dimensional point's cross-section computation.
    * @brief Is the system's kinematics well defined?
-   * @return A boolean stating if the input kinematics and the final
-   *  states are well defined
+   * @return A boolean stating if the input kinematics and the final states are well defined
    */
   inline bool IsKinematicsDefined() { return setkin; }
   /**
@@ -128,11 +150,11 @@ class GamGam : public Process {
    */
   double ComputeMX(double x_, double outmass_, double* dw_);
   /**
-   * Computes the cross-section for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
-   *  process with the given kinematics
+   * Computes the cross-section for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$ process with the given kinematics
    * @brief Computes the process' weight for the given point
-   * @return \f$\frac{\textrm d\sigma}{\mathrm d\mathbf x}(\gamma\gamma\to\ell^{+}\ell^{-})\f$,
-   * the differential cross-section for the given point in the phase space.
+   * @param nm_ ???
+   * @return \f$\frac{\textrm d\sigma}{\mathrm d\mathbf x}(\gamma\gamma\to\ell^{+}\ell^{-})\f$, the differential cross-section for the given point in the phase space.
+   * @todo Find out what this @a nm_ parameter does...
    */
   double ComputeWeight(int nm_=1);
   void StoreEvent(std::ofstream*,double);
@@ -168,48 +190,45 @@ class GamGam : public Process {
   /**
    * Fills the private Event object with all the Particle object contained
    * in this event.
+   * The particle roles in this process are defined as following : @n
+   * @image latex lpair_kinematics.pdf Detailed particle roles in the two-photon process as defined by the @a GamGam object. The incoming protons/electrons are denoted by a role 1, and 2, as the outgoing protons/protons remnants/electrons carry the indices 3 and 5. The two outgoing leptons have the roles 6 and 7, while the lepton/antilepton distinction is done randomly (thus, the arrow convention is irrelevant here).
    * @brief Fills the Event object with the particles' kinematics
    */
   void FillKinematics(bool symmetrise_=false);
   /**
-   * Returns the complete list of Particle with their role in the process for
-   * the point considered in the phase space as an Event object.
+   * Sets all the kinematic variables for the outgoing proton remnants in order
+   * to be able to hadronise them afterwards
+   * @param part_ Particle to "prepare" for the hadronisation to be performed
+   */
+  void PrepareHadronisation(Particle *part_);
+  /**
+   * Returns the complete list of Particle with their role in the process for the point considered in the phase space as an Event object.
    * @brief Returns the event content (list of particles with an assigned role)
    * @return The Event object containing all the generated Particle objects
    */
   inline Event* GetEvent() { return this->_ev; };
  private:
   /**
-   * Calculates energies and momenta of the 1st, 2nd (resp. the "proton-like"
-   * and the "electron-like" incoming particles), 3rd (the "proton-like" outgoing
-   * particle), 4th (the two-photons central system) and 5th (the "electron-like"
-   * outgoing particle) particles in the overall centre of mass frame.
-   * @brief Energies/momenta computation for the various particles, in the CM
-   *  system
+   * Calculates energies and momenta of the 1st, 2nd (resp. the "proton-like" and the "electron-like" incoming particles), 3rd (the "proton-like" outgoing particle), 4th (the two-photons central system) and 5th (the "electron-like" outgoing particle) particles in the overall centre of mass frame.
+   * @brief Energies/momenta computation for the various particles, in the CM system
    */
   bool Orient();
-  void PrepareHadronisation();
   /**
-   * Contains the expression of the matrix element squared for the process under
-   * considerations. It returns the value of the convolution of the form factor
-   * or structure functions with the central two-photons matrix element squared.
+   * Contains the expression of the matrix element squared for the process under considerations. It returns the value of the convolution of the form factor or structure functions with the central two-photons matrix element squared.
    * @brief Computes the matrix element squared for the requested process
-   * @return The full matrix element for the two-photon production of a pair of
-   *  spin\f$-\frac{1}{2}-\f$point particles
+   * @return The full matrix element for the two-photon production of a pair of spin\f$-\frac{1}{2}-\f$point particles
    */
   double PeriPP(int,int);
   /**
-   * Describes the kinematics of the process \f$p_1+p_2\to p_3+p_4+p_5\f$ in
-   * terms of Lorentz-invariant variables. These variables (along with others)
-   * will then be feeded into the PeriPP method (thus are essential for the
-   * evaluation of the full matrix element).
+   * Describes the kinematics of the process \f$p_1+p_2\to p_3+p_4+p_5\f$ in terms of Lorentz-invariant variables. These variables (along with others) will then be feeded into the PeriPP method (thus are essential for the evaluation of the full matrix element).
    */
   bool Pickin();
-  /** @brief Number of dimensions on which the integration has to be performed  */
+  /**
+   * @brief Number of dimensions on which the integration has to be performed.
+   */
   unsigned int _ndim;
   /**
-   * @brief Array of @a _ndim components representing the point on which the
-   *  weight in the cross-section is computed
+   * @brief Array of @a _ndim components representing the point on which the weight in the cross-section is computed
    */
   double *_x;
   int _nOpt;

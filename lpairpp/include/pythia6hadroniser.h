@@ -1,9 +1,17 @@
+#ifndef _PYTHIA6HADRONISER_H
+#define _PYTHIA6HADRONISER_H
+
 #include "hadroniser.h"
 
 extern "C"
 {
   extern double pymass_(int&);
   extern void pyexec_();
+  extern void pygive_(const char*,int);
+  extern void pyckbd_();
+  extern void pylist_(int&);
+  extern void pyjoin_(int&,int&);
+  extern void pyname_(int&,char*,int);
   extern struct
   {
     int n, npad, k[5][4000];
@@ -20,7 +28,20 @@ class Pythia6Hadroniser : public Hadroniser
   Pythia6Hadroniser();
   ~Pythia6Hadroniser();
   bool Hadronise(Particle* part_);
+  bool Hadronise(Event* ev_);
  private:
-  inline static double pymass(int pdgid) { return pymass_(pdgid); };
-  inline static void pyexec() { return pyexec_(); };
+  inline static double pymass(int pdgid_) { return pymass_(pdgid_); };
+  inline static void pyexec() { pyexec_(); };
+  inline static void pyckbd() { pyckbd_(); };
+  inline static void pygive(const std::string &line_) { pygive_(line_.c_str(),line_.length()); };
+  inline static void pylist(int mlist_) { pylist_(mlist_); };
+  inline static std::string pyname(int pdgid_) { char out[5]; pyname_(pdgid_, out, 5); return std::string(out,5); };
+  /**
+   * @brief Connect entries with colour flow information
+   * @param njoin_ Number of particles to join in the colour flow
+   * @param ijoin_ List of particles to join in the colour flow
+   */
+  inline static void pyjoin(int njoin_, int ijoin_[2]) { return pyjoin_(njoin_,*ijoin_); };
 };
+
+#endif

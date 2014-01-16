@@ -24,9 +24,9 @@ MCGen::MCGen(InputParameters ip_)
     topo = "DOUBLE-DISSOCIATIVE protons";
     ndim = 9;
   }
-#ifdef DEBUG
+  //#ifdef DEBUG
   std::cout << "[MCGen::MCGen] [DEBUG] Considered topology : " << topo << " case" << std::endl;
-#endif
+  //#endif
 
 #ifdef DEBUG
   std::cout << "[MCGen::MCGen] [DEBUG] Cuts mode : " << _ip.mcut << std::endl;
@@ -60,6 +60,15 @@ MCGen::MCGen(InputParameters ip_)
   }
 #endif
   veg = new Vegas(ndim,f, &_ip);
+
+  // For debugging purposes
+  
+  /*double x[ndim];
+  for (unsigned int i=0; i<ndim; i++) {
+    x[i] = 0.4;
+  }
+  std::cout << ">>> " << f(x, ndim, (void*)&ip_) << std::endl;
+  //exit(0);*/
 }
 
 MCGen::~MCGen()
@@ -85,9 +94,7 @@ void MCGen::LaunchGeneration()
 int i = 0;
 
 double f(double* x_, size_t ndim_, void* params_) {
-  //double etot, ptot;
   double ff;
-  //int inp1pdg, inp2pdg;
   int outp1pdg, outp2pdg;
   InputParameters *p;
   GamGamKinematics kin;
@@ -96,9 +103,6 @@ double f(double* x_, size_t ndim_, void* params_) {
   p = (InputParameters*)params_;
 
   //FIXME at some point introduce non head-on colliding beams ?
-
-  //double inp1[3] = {0., 0.,  p->in1p};
-  //double inp2[3] = {0., 0., -p->in2p}; //FIXME at this stage or at the InputParameters::in2p definition ?
 
   ff = 0.;
 
@@ -115,30 +119,26 @@ double f(double* x_, size_t ndim_, void* params_) {
 
   Particle *in1, *in2;
 
+  //FIXME electrons ?
+
+  in1 = new Particle(1, 2212);
+  in1->P(0., 0.,  p->in1p);
+
+  in2 = new Particle(2, 2212);
+  in2->P(0., 0., -p->in2p);
+  
   switch(ndim_) {
   case 7:
   default:
-    in1 = new Particle(1, 2212);
-    in1->P(0., 0.,  p->in1p);
-    in2 = new Particle(2, 2212);
-    in2->P(0., 0., -p->in2p);
     outp1pdg = outp2pdg = 2212;
     kin.kinematics = 1;
     break;
   case 8:
-    in1 = new Particle(1, 2212);
-    in1->P(0., 0.,  p->in1p);
-    in2 = new Particle(2, 2212);
-    in2->P(0., 0., -p->in2p);
     outp1pdg = 2;
     outp2pdg = 2212;
     kin.kinematics = 2;
     break;
   case 9:
-    in1 = new Particle(1, 2212);
-    in1->P(0., 0.,  p->in1p);
-    in2 = new Particle(2, 2212);
-    in2->P(0., 0., -p->in2p);
     outp1pdg = outp2pdg = 2;
     kin.kinematics = 3;
     break;
@@ -158,7 +158,6 @@ double f(double* x_, size_t ndim_, void* params_) {
   
   GamGam gg(ndim_, 0, x_);
   gg.SetKinematics(kin);
-  //kin.Dump();
   gg.SetIncomingKinematics(*in1, *in2);
   gg.SetOutgoingParticles(3, outp1pdg); // First outgoing proton
   gg.SetOutgoingParticles(5, outp2pdg); // Second outgoing proton
@@ -183,18 +182,31 @@ double f(double* x_, size_t ndim_, void* params_) {
   
   if (p->store) { // MC events generation
     gg.FillKinematics(false);
-    Event ev = *(gg.GetEvent());
-    ev.Store(p->file);
+    if (kin.kinematics>1) {
+      gg.PrepareHadronisation(gg.GetEvent()->GetByRole(3));
+      /*if (kin.kinematics==3) {
+	gg.PrepareHadronisation(gg.GetEvent()->GetByRole(5));
+	}*/
+      //if (algo_=="pythia6") {
+      //std::cout << "hadronisation using pythia6" << std::endl;
+      //Pythia6Hadroniser py;
+      //py.Hadronise(gg.GetEvent());
+      Jetset7Hadroniser js;
+      js.Hadronise(gg.GetEvent());
+      //}
+    }
+      
+    //gg.GetEvent()->Store(p->file);
 
-    double t1min, t1max, t2min, t2max;
+    /*double t1min, t1max, t2min, t2max;
 
     if (p->file_debug->is_open()) {
       gg.GetT1extrema(t1min, t1max);
       gg.GetT2extrema(t2min, t2max);
       *(p->file_debug)
-	<< (ev.GetByRole(5)->p-ev.GetByRole(1)->p)
-	<< "\t" << ev.GetByRole(3)->p
-	<< "\t" << ev.GetByRole(5)->p
+	<< (gg.GetEvent()->GetByRole(5)->p-gg.GetEvent()->GetByRole(1)->p)
+	<< "\t" << gg.GetEvent()->GetByRole(3)->p
+	<< "\t" << gg.GetEvent()->GetByRole(5)->p
 	<< "\t" << gg.GetT1()
 	<< "\t" << t1min
 	<< "\t" << t1max
@@ -209,11 +221,12 @@ double f(double* x_, size_t ndim_, void* params_) {
 	<< "\t" << gg.GetV1()
 	<< "\t" << gg.GetV2()
 	<< std::endl;
-    }
+	}*/
   }
 
   delete in1;
   delete in2;
+
   return ff;
 }
 

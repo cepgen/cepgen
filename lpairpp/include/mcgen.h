@@ -8,7 +8,27 @@
 
 #include "vegas.h"
 #include "gamgam.h"
-//#include "gnuplot.h"
+
+#include "pythia6hadroniser.h"
+#include "jetset7hadroniser.h"
+
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @image latex lpair_logo.pdf
+ * @mainpage Principles
+ * This Monte Carlo generator, based on the LPAIR code developed in the
+ * early 1990s by J. Vermaseren *et al*@cite Vermaseren1983347, allows to compute
+ * the cross-section and to generate events for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
+ * process in high energy physics.
+ * 
+ * The main operation is the integration of the matrix element (given as a GamGam
+ * object, subset of a Process object) performed by *Vegas*, an importance sampling
+ * algorithm written in 1972 by G. P. Lepage@cite PeterLepage1978192. 
+ *
+ */
+
+////////////////////////////////////////////////////////////////////////////////
 
 /**
  * This object represents the core of this Monte Carlo generator, with its

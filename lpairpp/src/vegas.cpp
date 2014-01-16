@@ -233,7 +233,7 @@ int Vegas::MyIntegrate(double *result_, double *abserr_)
       dr -= rc;
       xin[i] = xn-(xn-xo)*dr;
       //std::cout << i << "\t" << j << "\t" << k << "\t" << dr << "\t" << xin[i] << std::endl;
-      if (i<ndm-1) goto line5;
+      if (i<ndm-1) goto line5; //FIXME need to remove these gotos
       for (i=0; i<ndm; i++) {
 	_xi[i][j] = xin[i];
 	//std::cout << i << "\t" << j << "\t" << _xi[i][j] << std::endl;
@@ -316,7 +316,7 @@ int Vegas::MyIntegrate(double *result_, double *abserr_)
     }
     for (k=_ndim-1; k>=0; k--) {
       kg[k] = fmod(kg[k], ng)+1;
-      if (kg[k]!=1) goto line11;
+      if (kg[k]!=1) goto line11; //FIXME need to remove these goto
     }
     /*for (j=0; j<_ndim; j++) {
       for (i=0; i<ndm; i++) {
@@ -352,7 +352,11 @@ int Vegas::MyIntegrate(double *result_, double *abserr_)
     if (sd!=0.) sd = sqrt(one/sd);
     else sd = tsi;
     
-    std::cout << "--> iteration " << it << ", average = " << avgi << ", sigma = " << sd << ", chi2 = " << chi2a << std::endl;
+    std::cout << "--> iteration " 
+	      << std::setfill(' ') << std::setw(3) << it << " : "
+	      << "average = " << std::setprecision(5) << std::setw(14) << avgi 
+	      << "sigma = " << std::setprecision(5) << std::setw(14) << sd 
+	      << "chi2 = " << chi2a << std::endl;
 
     // Refine grid
     if (sd!=0.) rel = fabs(sd/avgi);
@@ -403,7 +407,7 @@ int Vegas::MyIntegrate(double *result_, double *abserr_)
       if (dr==0.) xin[i] = xn;
       else xin[i] = xn-(xn-xo)*dr/r[k-1];
       i++;
-      if (i<ndm) goto line26;
+      if (i<ndm) goto line26; //FIXME need to remove these goto
 
       for (i=0; i<ndm; i++) {
 	_xi[i][j] = xin[i];
@@ -446,7 +450,6 @@ Vegas::LaunchGeneration()
   gsl_monte_vegas_params_get(_s, &par);
   std::cout << "[Vegas::LaunchGeneration] [DEBUG] VEGAS stage after warm-up and cross-section computation : " << par.stage << std::endl;
 #endif
-  std::cout << "dump after xsec computation" << std::endl;
   _ip->Dump();
 
   niter = 0;
@@ -518,7 +521,7 @@ Vegas::GenerateOneEvent()
 #endif
     if (_correc<1.) {
       if ((double)rand()/RAND_MAX>=_correc) {
-	goto line7;
+	goto line7; //FIXME need to remove these goto
       }
       _correc = -1.;
     }

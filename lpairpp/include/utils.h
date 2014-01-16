@@ -94,11 +94,13 @@ class InputParameters {
      * computation/events generation from an external input card.
      * @brief Reads content from config file to load the variables
      * @param inFile_ Name of the configuration file to load
+     * @return A boolean stating whether this input configuration file is correct or not
      */
     bool ReadConfigFile(std::string inFile_);
     /**
      * @brief Stores the full run configuration to an external config file
      * @param outFile_ Name of the configuration file to create
+     * @return A boolean stating whether this output configuration file is correctly written or not
      */
     bool StoreConfigFile(std::string outFile_);
     /** @brief First incoming particle's momentum (in GeV/c) */
@@ -161,7 +163,13 @@ class InputParameters {
     double mintheta;
     /** @brief Maximal polar angle \f$\theta\f$ of the outgoing leptons */
     double maxtheta;
+    /**
+     * @brief Minimal value of \f$Q^2\f$, the internal photons lines' virtuality
+     */
     double minq2;
+    /**
+     * @brief Maximal value of \f$Q^2\f$, the internal photons lines' virtuality
+     */
     double maxq2;
     /**
      * Minimal mass of the outgoing proton remnants, \f$M_X\f$, in
@@ -176,13 +184,18 @@ class InputParameters {
      */
     double maxmx;
     int ncvg; // ??
-    /** @brief Maximal number of iterations to perform by VEGAS */
+    /**
+     * @brief Maximal number of iterations to perform by VEGAS
+     */
     int itvg;
     /**
      * @brief Maximal number of TREAT calls
      * @note Is it correctly implemented ?
      */
     int ntreat;
+    /**
+     * @brief Number of points to "shoot" in each integration bin by the algorithm
+     */
     int npoints;
     /**
      * @brief Are we generating events ? (true) or are we only computing the

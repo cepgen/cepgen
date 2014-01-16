@@ -8,7 +8,9 @@ VPATH = src include
 ############################################
 CPP_FILES = $(wildcard src/*.cpp)
 HPP_FILES = $(wildcard includes/*.h)
-LIB_FILES = $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES)) $(patsubst external/%.f,obj/%.o,$(PYTHIA6SRC))
+LIB_FILES = $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES)) \
+	$(patsubst external/%.f,obj/%.fo,$(PYTHIA6SRC)) \
+	$(patsubst external/%.f,obj/%.fo,$(JETSET7SRC))
 OBJ_FILES = main.o $(LIB_FILES)
 ############################################
 CC = g++
@@ -17,6 +19,7 @@ RM = rm -f
 ############################################
 INCLUDEDIR = include/
 PYTHIA6SRC = $(wildcard external/pythia-6.*.f)
+JETSET7SRC = $(wildcard external/jetset7*.f)
 PYTHIADIR = include/pythia8175
 GSLDIR = /usr/include/gsl
 ############################################
@@ -26,14 +29,14 @@ GSLDIR = /usr/include/gsl
 all: $(EXEC) xsect
 
 $(EXEC): $(OBJ_FILES)
-	$(CC) -o $@ $^ $(LDFLAGS)
+	$(CC) -g -o $@ $^ $(LDFLAGS)
 
 .PHONY: all
 
 obj/%.o: %.cpp %.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-obj/%.o: external/%.f
+obj/%.fo: external/%.f
 	$(CF) -c $(FFLAGS) $< -o $@
 
 clean:

@@ -47,12 +47,12 @@ GamGam::SetOutgoingParticles(int part_, int pdgId_)
     if (_cuts.kinematics==1) return false;
     int xind;
     double outm;
-    if (_cuts.kinematics==2) { // single-dissociative case
+    if (_cuts.kinematics>=2) { // single-dissociative case
       xind = 7;
       outm = _mp1;
       mass_ = this->ComputeMX(_x[xind], outm, &_dw31);
     }
-    else if (_cuts.kinematics==3) { // double-dissociative case
+    if (_cuts.kinematics==3) { // double-dissociative case
       xind = 8;
       if (part_==3) outm = _mp1;
       else if (part_==5 && _mp3>0.) outm = _mp3;
@@ -93,7 +93,7 @@ GamGam::SetOutgoingParticles(int part_, int pdgId_)
   default:
     return false;
   }
-  setout = setp3 and setp5 andsetll;
+  setout = setp3 and setp5 and setll;
   setkin = setin and setout;
 #ifdef DEBUG
   std::cout << "[GamGam::SetOutgoingParticles] [DEBUG] Particle \"" << part_ << "\" has PDG id " << pdgId_ << std::endl;
@@ -116,8 +116,8 @@ GamGam::SetIncomingKinematics(Particle ip1_, Particle ip2_)
   ip2_.role = (ip2_.pz>0.) ? 1:2;
   if (ip1_.role==ip2_.role) return false;
 
-  this->_ev->SetParticle(&ip1_);
-  this->_ev->SetParticle(&ip2_);
+  this->_ev->AddParticle(&ip1_);
+  this->_ev->AddParticle(&ip2_);
 
   p1 = *(this->_ev->GetByRole(1));
   p2 = *(this->_ev->GetByRole(2));
@@ -128,7 +128,7 @@ GamGam::SetIncomingKinematics(Particle ip1_, Particle ip2_)
   _ep1 = p1.E();
   _mp1 = p1.M();
   _w1 = p1.M2();
-  _pp1 = p1.p;
+  _pp1 = p1.P();
   _pdg1 = p1.pdgId;
   setp1 = true;
 
@@ -138,7 +138,7 @@ GamGam::SetIncomingKinematics(Particle ip1_, Particle ip2_)
   _ep2 = p2.E();
   _mp2 = p2.M();
   _w2 = p2.M2();
-  _pp2 = p2.p;
+  _pp2 = p2.P();
   _pdg2 = p2.pdgId;
 
   _etot = p1.E()+p2.E();
@@ -253,11 +253,11 @@ GamGam::Pickin()
 
   // FIXME dropped in CDF version
   if (_t1max>-_cuts.q2min or _t1min<-_cuts.q2max) {
-    std::cerr << "[GamGam::Pickin] [FATAL]"
+    /*std::cerr << "[GamGam::Pickin] [FATAL]"
               << "\n    t1max = " << std::setw(8) << _t1max << " > -q2min = " << std::setw(8) << -_cuts.q2min
               << "\n or t1min = " << std::setw(8) << _t1min << " < -q2max = " << std::setw(8) << -_cuts.q2max
               << std::endl;
-    return false;
+	      return false;*/
   }
   if (_t1max<-_cuts.q2max) {
     _t1max = -_cuts.q2max;
@@ -801,20 +801,19 @@ GamGam::ComputeWeight(int nm_)
     return 0.;
   }
   ComputeCMenergy();
-  //std::cout << "wmax = " << _wmax << std::endl;
   if (_cuts.wmax<0) _cuts.wmax = _s;
 
   // the minimal energy for the central system is its outgoing leptons' mass
   // energy (or wmin_ if specified)
   wmin = std::pow(_ml6+_ml7,2); // POW ok
 
-  if (wmin<_cuts.wmin) wmin = _cuts.wmin; // lower limit on wmin if specified
+  if (fabs(wmin)<fabs(_cuts.wmin)) wmin = _cuts.wmin; // lower limit on wmin if specified
 
   // the maximal energy for the central system is its CM energy with the
   // outgoing particles' mass energy substracted (or _wmax if specified)
   wmax = std::pow(_sqs-_mp3-_mp5,2); // POW ok
 
-  if (wmax>_cuts.wmax) wmax = _cuts.wmax; // upper limit on wmax if specified
+  if (fabs(wmax)>fabs(_cuts.wmax)) wmax = _cuts.wmax; // upper limit on wmax if specified
 
 #ifdef DEBUG
   std::cout << "[GamGam::ComputeWeight] [DEBUG]"
@@ -844,8 +843,8 @@ GamGam::ComputeWeight(int nm_)
   ecm6 = (_w4+_w6-_w7)/(2.*_mc4);
   pcm6 = std::sqrt(std::pow(ecm6, 2)-_w6);
   
-  //std::cout << "pcm6 = " << pcm6 << ", ecm6 = " << ecm6 << ", w6 = " << _w6 << std::endl; // OKKKKK!!!!
   _dj *= dw4*pcm6/(_mc4*sconstb*_s);
+  //std::cout << "pcm6 = " << pcm6 << ", ecm6 = " << ecm6 << ", w6 = " << _w6 << ", dj = " << _dj << std::endl; // OKKKKK!!!!
   
   // Let the most obscure part of this code begin...
 
@@ -965,9 +964,9 @@ GamGam::ComputeWeight(int nm_)
 #endif
   double p7x, p7y, p7z;
   // Second outgoing lepton's 3-momentum
-  p7x = _p_p4-p6x; //OK
-  p7y = -p6y; //OK
-  p7z = _pc4*_ct4-p6z; //OK
+  p7x = _p_p4-p6x;
+  p7y = -p6y;
+  p7z = _pc4*_ct4-p6z;
   
   pp6 = std::sqrt(std::pow(p6x, 2)+std::pow(p6y, 2)); // pT of first outgoing lepton
   pp7 = std::sqrt(std::pow(p7x, 2)+std::pow(p7y, 2)); // pT of second outgoing lepton
@@ -1039,6 +1038,7 @@ GamGam::ComputeWeight(int nm_)
   ////////////////////////////////////////////////////////////////
 
   _gamma = _etot/_sqs;
+  //_gamma = 1.; //FIXME!!!!!!!
   _betgam = _ptot/_sqs;
 
   if (_cuts.mode==0) {
@@ -1067,16 +1067,16 @@ GamGam::ComputeWeight(int nm_)
   // Cuts on outgoing leptons' kinematics
   lmu1 = cott6>=_cotth1
       && cott6<=_cotth2
-      && (_pt_l6>=_cuts.ptmin || _cuts.ptmin<=0.)
-      && (_pt_l6<=_cuts.ptmax || _cuts.ptmax<0.)
-      && ( _e6lab>=_cuts.emin || _cuts.emin <=0.)
-      && ( _e6lab<=_cuts.emax || _cuts.emax <0.);
+      && (_pt_l6>=_cuts.ptmin or _cuts.ptmin<=0.)
+      && (_pt_l6<=_cuts.ptmax or _cuts.ptmax< 0.)
+      && (_e6lab>=_cuts.emin  or _cuts.emin <=0.)
+      && (_e6lab<=_cuts.emax  or _cuts.emax < 0.);
   lmu2 = cott7>=_cotth1
       && cott7<=_cotth2
-      && (_pt_l7>=_cuts.ptmin || _cuts.ptmin<=0.)
-      && (_pt_l7<=_cuts.ptmax || _cuts.ptmax<0.)
-      && ( _e7lab>=_cuts.emin || _cuts.emin <=0.)
-      && ( _e7lab<=_cuts.emax || _cuts.emax <0.);
+      && (_pt_l7>=_cuts.ptmin or _cuts.ptmin<=0.)
+      && (_pt_l7<=_cuts.ptmax or _cuts.ptmax< 0.)
+      && (_e7lab>=_cuts.emin  or _cuts.emin <=0.)
+      && (_e7lab<=_cuts.emax  or _cuts.emax < 0.);
 
   switch (_cuts.mode) {
     case 0:
@@ -1086,8 +1086,8 @@ GamGam::ComputeWeight(int nm_)
     case 1: // Vermaseren's hypothetical detector cuts
       cost6 = pz6/std::sqrt(std::pow(pz6,2)+std::pow(_pt_l6,2));
       cost7 = pz7/std::sqrt(std::pow(pz7,2)+std::pow(_pt_l7,2));
-      lcut = ((fabs(cost6)<=0.75 && _pt_l6>=1.) || (fabs(cost6)<=0.95 && fabs(cost6)>0.75 && fabs(_p3_l6[2])>1.)) &&
-             ((fabs(cost7)<=0.75 && _pt_l7>=1.) || (fabs(cost7)<=0.95 && fabs(cost7)>0.75 && fabs(_p3_l7[2])>1.));
+      lcut = ((fabs(cost6)<=0.75 and _pt_l6>=1.) or (fabs(cost6)<=0.95 and fabs(cost6)>0.75 and fabs(_p3_l6[2])>1.)) and
+             ((fabs(cost7)<=0.75 and _pt_l7>=1.) or (fabs(cost7)<=0.95 and fabs(cost7)>0.75 and fabs(_p3_l7[2])>1.));
       break;
     case 2:
       lcut = lmu1 and lmu2;
@@ -1096,20 +1096,20 @@ GamGam::ComputeWeight(int nm_)
       lcut = lmu1 or lmu2;
       break;
   }
-    //std::cout << ">>> failed the cuts" << std::endl;
   //std::cout << "haah" << std::endl;
 
 
   // Cut on mass of final hadronic system (MX)
   if (_cuts.kinematics>1) {
-    if (_mp3<_cuts.mxmin || _mp3>_cuts.mxmax) return 0.;
+    if (_mp3<_cuts.mxmin or _mp3>_cuts.mxmax) return 0.;
     if (_cuts.kinematics==3) {
-      if (_mp5<_cuts.mxmin || _mp5>_cuts.mxmax) return 0.;
+      //std::cout << "----> " << _mp5 << "\t" << _cuts.mxmin << ", " << _cuts.mxmax << std::endl;
+      if (_mp5<_cuts.mxmin or _mp5>_cuts.mxmax) return 0.;
     }
   }
 
   // Cut on the proton's Q2 (first photon propagator T1)
-  if (_t1<-_cuts.q2max || _t1>-_cuts.q2min) {
+  if (_t1<-_cuts.q2max or _t1>-_cuts.q2min) {
     lcut = false;
   }
 
@@ -1136,12 +1136,16 @@ GamGam::ComputeWeight(int nm_)
     intge = 2; // DESY
     /*intgp = 2; // CDF
       intge = 1; // CDF*/
-    weight = sconst*_dj*this->PeriPP(intgp, intge)*_dw31;
+    weight = sconst*_dj*this->PeriPP(intgp, intge)*std::pow(_dw31,2);
+    //std::cout << sconst << "\t" << _dj << "\t" << this->PeriPP(intgp,intge) << "\t" << intgp << "\t" << intge << "\t" << std::pow(_dw31,2) << std::endl;
+    //std::cout << weight << std::endl;
     break;
   case 3: // double-dissociative case
     intgp = intge = 3; // DESY
+    //std::cout << "--> " << this->PeriPP(intgp, intge) << std::endl;
     //intgp = intge = 2; // CDF
-    weight = sconst*_dj*this->PeriPP(intgp, intge)*_dw31*_dw52;
+    weight = sconst*_dj*this->PeriPP(intgp, intge)*std::pow(_dw31*_dw52,2);
+    //std::cout << "--> " << _dw52 << "\t" << _dw31 << std::endl;
     break;
   }
   return weight;
@@ -1155,7 +1159,6 @@ GamGam::FillKinematics(bool symmetrise_)
   int rany, ransign, ranz, role;
   
   // Needed to parametrise a random rotation around z-axis
-  //std::cout << "rand = " << ((double)rand()/RAND_MAX)*2.*pi << std::endl;
   rany = ((double)rand()>=.5*RAND_MAX) ? 1 : -1;
   ransign = ((double)rand()>=.5*RAND_MAX) ? 1 : -1;
   ranphi = ((double)rand()/RAND_MAX)*2.*pi;
@@ -1166,24 +1169,16 @@ GamGam::FillKinematics(bool symmetrise_)
   cp = cos(ranphi);
   sp = sin(ranphi);
   
-  /*std::ofstream of;
-  of.open("haha", std::fstream::app);
-  of << ranphi << "\t" << rany << "\t" << ransign << std::endl;
-  of.close();*/
-  /*cp = 1.;
-  sp = -1.;*/
- 
   // First incoming proton
   Particle ip1(1, _pdg1);
   _plab_ip1[0] = 0.;
   _plab_ip1[1] = 0.;
   _plab_ip1[2] = _gamma*_p  +_betgam*_ep1;
   _plab_ip1[3] = _gamma*_ep1+_betgam*_p;
-  //std::cout << "incoming proton 1: p = (" << _plab_ip1[0] << ", " << _plab_ip1[1] << ", " << _plab_ip1[2] << ", " << _plab_ip1[3] << ")" << std::endl;
   if (!ip1.P(0., 0., _plab_ip1[2], _plab_ip1[3])) {
     std::cerr << "Invalid incoming proton 1" << std::endl;
   }
-  this->_ev->SetParticle(&ip1);
+  this->_ev->AddParticle(&ip1);
   
   // Second incoming proton
   Particle ip2(2, _pdg2);
@@ -1191,13 +1186,12 @@ GamGam::FillKinematics(bool symmetrise_)
   _plab_ip2[1] = 0.;
   _plab_ip2[2] = -_gamma*_p  +_betgam*_ep2;
   _plab_ip2[3] =  _gamma*_ep2-_betgam*_p;
-  //std::cout << "incoming proton 2: p = (" << _plab_ip2[0] << ", " << _plab_ip2[1] << ", " << _plab_ip2[2] << ", " << _plab_ip2[3] << ")" << std::endl;
   if (!ip2.P(0., 0., _plab_ip2[2], _plab_ip2[3])) {
     std::cerr << "Invalid incoming proton 2" << std::endl;
   }
-  this->_ev->SetParticle(&ip2);
+  this->_ev->AddParticle(&ip2);
   //this->_part->insert(std::pair<int,Particle>(part.role, part));
-  //this->SetParticle(part.role, &part);
+  //this->AddParticle(part.role, &part);
   
   // First outgoing proton
   Particle op1(3, _pdg3);
@@ -1205,15 +1199,17 @@ GamGam::FillKinematics(bool symmetrise_)
   _plab_op1[1] = _pp3*_st3*_sp3;
   _plab_op1[2] = _gamma*_pp3*_ct3*ranz+_betgam*_ep3;
   _plab_op1[3] = _gamma*_ep3          +_betgam*_pp3*_ct3*ranz;
-  //std::cout << "outgoing proton 1: p = (" << _plab_op1[0] << ", " << _plab_op1[1] << ", " << _plab_op1[2] << ", " << _plab_op1[3] << ")" << std::endl;
   if (!op1.P( _plab_op1[0]*cp+rany*_plab_op1[1]*sp,
                 -_plab_op1[0]*sp+rany*_plab_op1[1]*cp,
                  _plab_op1[2],
                  _plab_op1[3])) {
     std::cerr << "Invalid outgoing proton 1" << std::endl;
   }
-  op1.SetMother(this->_ev->GetByRole(1));
-  this->_ev->SetParticle(&op1);
+  //op1.SetMother(this->_ev->GetByRole(1));
+  if (_cuts.kinematics>1) {
+    op1.M(_mp3);
+  }
+  this->_ev->AddParticle(&op1);
   
   // Second outgoing proton
   Particle op2(5, _pdg5);
@@ -1221,19 +1217,54 @@ GamGam::FillKinematics(bool symmetrise_)
   _plab_op2[1] = _pp5*_st5*_sp5;
   _plab_op2[2] = _gamma*_pp5*_ct5*ranz+_betgam*_ep5;
   _plab_op2[3] = _gamma*_ep5          +_betgam*_pp5*_ct5*ranz;
-  //std::cout << "outgoing proton 2: p = (" << _plab_op2[0] << ", " << _plab_op2[1] << ", " << _plab_op2[2] << ", " << _plab_op2[3] << ")" << std::endl;
   if (!op2.P( _plab_op2[0]*cp+rany*_plab_op2[1]*sp,
                 -_plab_op2[0]*sp+rany*_plab_op2[1]*cp,
                  _plab_op2[2],
                  _plab_op2[3])) {
     std::cerr << "Invalid outgoing proton 2" << std::endl;
   }
-  op2.SetMother(this->_ev->GetByRole(2));
-  this->_ev->SetParticle(&op2);
+  //op2.SetMother(this->_ev->GetByRole(2));
+  if (_cuts.kinematics==3) {
+    op2.M(_mp5);
+  }
+  this->_ev->AddParticle(&op2);
 
+  // First incoming photon
+  // Equivalent in LPAIR : PLAB(x, 3)
+  Particle ph1(41, 22);
+  _plab_ph1[0] = _plab_ip1[0]-_plab_op1[0];
+  _plab_ph1[1] = _plab_ip1[1]-_plab_op1[1];
+  _plab_ph1[2] = _plab_ip1[2]-_plab_op1[2];
+  _plab_ph1[3] = _plab_ip1[3]-_plab_op1[3];
+  if (!ph1.P( _plab_ph1[0]*cp+rany*_plab_ph1[1]*sp,
+                -_plab_ph1[0]*sp+rany*_plab_ph1[1]*cp,
+		 _plab_ph1[2],
+		 _plab_ph1[3])) {
+    //std::cerr << "Invalid photon 1" << std::endl;
+  }
+  //ph1.SetMother(this->_ev->GetByRole(1));
+  this->_ev->AddParticle(&ph1);
+  
+  // Second incoming photon
+  // Equivalent in LPAIR : PLAB(x, 4)
+  Particle ph2(42, 22);
+  _plab_ph2[0] = _plab_ip2[0]-_plab_op2[0];
+  _plab_ph2[1] = _plab_ip2[1]-_plab_op2[1];
+  _plab_ph2[2] = _plab_ip2[2]-_plab_op2[2];
+  _plab_ph2[3] = _plab_ip2[3]-_plab_op2[3];
+  if (!ph2.P( _plab_ph2[0]*cp+rany*_plab_ph2[1]*sp,
+                -_plab_ph2[0]*sp+rany*_plab_ph2[1]*cp,
+                 _plab_ph2[2],
+                 _plab_ph2[3])) {
+    //std::cerr << "Invalid photon 2" << std::endl;
+  }
+  //ph2.SetMother(this->_ev->GetByRole(2));
+  this->_ev->AddParticle(&ph2);
+
+  // Central (two-photon) system
   Particle cs(4);
-  cs.SetMother(this->_ev->GetByRole(41));
-  this->_ev->SetParticle(&cs);
+  //cs.SetMother(this->_ev->GetByRole(41));
+  this->_ev->AddParticle(&cs);
   
   // First outgoing lepton
   role = (ransign<0) ? 6 : 7;
@@ -1248,8 +1279,8 @@ GamGam::FillKinematics(bool symmetrise_)
                  _plab_ol1[3])) {
     std::cerr << "Invalid outgoing lepton 1" << std::endl;
   }
-  ol1.SetMother(this->_ev->GetByRole(4));
-  this->_ev->SetParticle(&ol1);
+  //ol1.SetMother(this->_ev->GetByRole(4));
+  this->_ev->AddParticle(&ol1);
   
   // Second outgoing lepton
   role = (ransign<0) ? 7 : 6;
@@ -1264,42 +1295,21 @@ GamGam::FillKinematics(bool symmetrise_)
 		 _plab_ol2[3])) {
     std::cerr << "Invalid outgoing lepton 2" << std::endl;
   }
-  ol2.SetMother(this->_ev->GetByRole(4));
-  this->_ev->SetParticle(&ol2);
+  //ol2.SetMother(this->_ev->GetByRole(4));
+  this->_ev->AddParticle(&ol2);
+
+
+  // Relations between particles
+
+  this->_ev->GetByRole(3)->SetMother(this->_ev->GetByRole(1));
+  this->_ev->GetByRole(5)->SetMother(this->_ev->GetByRole(2));
+  this->_ev->GetByRole(41)->SetMother(this->_ev->GetByRole(1));
+  this->_ev->GetByRole(42)->SetMother(this->_ev->GetByRole(2));
+  this->_ev->GetByRole(4)->SetMother(this->_ev->GetByRole(41));
+  this->_ev->GetByRole(6)->SetMother(this->_ev->GetByRole(4));
+  this->_ev->GetByRole(7)->SetMother(this->_ev->GetByRole(4));
+
   
-  // First incoming photon
-  // Equivalent in LPAIR : PLAB(x, 3)
-  Particle ph1(41, 22);
-  _plab_ph1[0] = _plab_ip1[0]-_plab_op1[0];
-  _plab_ph1[1] = _plab_ip1[1]-_plab_op1[1];
-  _plab_ph1[2] = _plab_ip1[2]-_plab_op1[2];
-  _plab_ph1[3] = _plab_ip1[3]-_plab_op1[3];
-  //std::cout << "photon 1: p = (" << _plab_ph1[0] << ", " << _plab_ph1[1] << ", " << _plab_ph1[2] << ", " << _plab_ph1[3] << ")" << std::endl;
-  if (!ph1.P( _plab_ph1[0]*cp+rany*_plab_ph1[1]*sp,
-                -_plab_ph1[0]*sp+rany*_plab_ph1[1]*cp,
-		 _plab_ph1[2],
-		 _plab_ph1[3])) {
-    //std::cerr << "Invalid photon 1" << std::endl;
-  }
-  ph1.SetMother(this->_ev->GetByRole(1));
-  this->_ev->SetParticle(&ph1);
-  
-  // Second incoming photon
-  // Equivalent in LPAIR : PLAB(x, 4)
-  Particle ph2(42, 22);
-  _plab_ph2[0] = _plab_ip2[0]-_plab_op2[0];
-  _plab_ph2[1] = _plab_ip2[1]-_plab_op2[1];
-  _plab_ph2[2] = _plab_ip2[2]-_plab_op2[2];
-  _plab_ph2[3] = _plab_ip2[3]-_plab_op2[3];
-  //std::cout << "photon 2: p = (" << _plab_ph2[0] << ", " << _plab_ph2[1] << ", " << _plab_ph2[2] << ", " << _plab_ph2[3] << ")" << std::endl;
-  if (!ph2.P( _plab_ph2[0]*cp+rany*_plab_ph2[1]*sp,
-                -_plab_ph2[0]*sp+rany*_plab_ph2[1]*cp,
-                 _plab_ph2[2],
-                 _plab_ph2[3])) {
-    //std::cerr << "Invalid photon 2" << std::endl;
-  }
-  ph2.SetMother(this->_ev->GetByRole(2));
-  this->_ev->SetParticle(&ph2);
   /*  
   gmux = -_t2/(_ep1*_eg2-_pp1*_p3_g2[2])/2.;
   gmuy = (_ep1*_plab_ph2[3]-_pp1*_plab_ph2[2])/(_ep2*_plab_ph2[3]+_pp2*_plab_ph2[2]);
@@ -1339,44 +1349,42 @@ GamGam::SetKinematics(GamGamKinematics cuts_)
 }
 
 void
-GamGam::PrepareHadronisation()
+GamGam::PrepareHadronisation(Particle *part_)
 {
-  int nfinal;
-  int i2part10, i2part11;
+  int singlet_id, doublet_id;
   double ranudq, ulmdq, ulmq;
   double ranmxp, ranmxt;
   double pmxp;
   double pmxda[4];
-  double partp[4], partpb[4];
-  /*int i2mo110, i2mo111;
-  int i2da110, i2da111;
-  int i2da210, i2da211;
-  int i2stat10, i2stat11;*/
+  double partpb[4];
 
-  nfinal = 2;
+#ifdef DEBUG
+  std::cout << "[GamGam::PrepareHadronisation] [DEBUG] Hadronisation preparation called !" << std::endl;
+#endif
+
   ranudq = (double)rand()/RAND_MAX;
   if (ranudq<1./9.) {
-    i2part10 = 2;
-    i2part11 = 2203;
+    singlet_id = 1;
+    doublet_id = 2203;
   }
   else if (ranudq<5./9.) {
-    i2part10 = 2;
-    i2part11 = 2101;
+    singlet_id = 2;
+    doublet_id = 2101;
   }
   else {
-    i2part10 = 2;
-    i2part11 = 2103;
+    singlet_id = 2;
+    doublet_id = 2103;
   }
-  ulmdq = GetMassFromPDGId(i2part10);
-  ulmq = GetMassFromPDGId(i2part11);
-  // ...
+  ulmdq = GetMassFromPDGId(doublet_id);
+  ulmq = GetMassFromPDGId(singlet_id);
 
   // Choose random direction in MX frame
   ranmxp = 2.*pi*(double)rand()/RAND_MAX;
   ranmxt = acos(2.*(double)rand()/RAND_MAX-1.);
 
   // Compute momentum of decay particles from MX
-  pmxp = sqrt(pow(pow(_ev->GetByRole(3)->M(), 2)+pow(ulmq, 2), 2)/(4.*pow(_ev->GetByRole(3)->M(), 2))-pow(ulmq, 2));
+  //PMXP=DSQRT((MX**2-ULMDQ**2+ULMQ**2)**2/4.0/MX/MX - ULMQ**2 )
+  pmxp = std::sqrt(std::pow( part_->M2() - std::pow(ulmdq, 2) + std::pow(ulmq, 2), 2) / (4.*part_->M2()) - std::pow(ulmq, 2));
 
   // Build 4-vectors and boost decay particles
   pmxda[0] = sin(ranmxt)*cos(ranmxp)*pmxp;
@@ -1384,17 +1392,33 @@ GamGam::PrepareHadronisation()
   pmxda[2] = cos(ranmxt)*pmxp;
   pmxda[3] = sqrt(pow(pmxp, 2)+pow(ulmdq, 2));
 
-  partp[0] = _ev->GetByRole(3)->px;
-  partp[1] = _ev->GetByRole(3)->py;
-  partp[2] = _ev->GetByRole(3)->pz;
-  partp[3] = _ev->GetByRole(3)->E();
+  Lorenb(part_->M(), part_->P4(), pmxda, partpb);
 
-  Lorenb(_ev->GetByRole(3)->M(), partp, pmxda, partpb);
+  Particle singlet(10, singlet_id);
+  singlet.status = 3;
+  if (!singlet.P(partpb)) {
+#ifdef ERROR
+    std::cerr << "[GamGam::PrepareHadronisation] ERROR while setting the 4-momentum of singlet" << std::endl;
+#endif
+  }
 
-  pmxda[0] = -pmxda[0]; pmxda[1] = -pmxda[1]; pmxda[2] = -pmxda[2];
+  this->_ev->AddParticle(&singlet);
+
+  pmxda[0] = -pmxda[0];
+  pmxda[1] = -pmxda[1];
+  pmxda[2] = -pmxda[2];
   pmxda[3] = sqrt(pow(pmxp, 2)+pow(ulmq, 2));
 
-  Lorenb(_ev->GetByRole(3)->M(), partp, pmxda, partpb);
+  Lorenb(part_->M(), part_->P4(), pmxda, partpb);
+  
+  Particle doublet(11, doublet_id);
+  doublet.status = 3;
+  if (!doublet.P(partpb)) {
+#ifdef ERROR
+    std::cout << "[GamGam::PrepareHadronisation] ERROR while setting the 4-momentum of doublet" << std::endl;
+#endif
+  }
+  this->_ev->AddParticle(&doublet);
 }
 
 double
