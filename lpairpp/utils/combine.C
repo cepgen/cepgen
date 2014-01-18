@@ -371,12 +371,14 @@ void combine()
     }
   }
 
-  leg = new TLegend(.76, .71, .89, .81);
+  leg = new TLegend(.78, .71, .94, .84);
   leg->SetFillColor(kWhite);
   leg->SetLineColor(kBlack);
 
-  text = new TPaveText(.66, .83, .91, .89, "NDC");
+  //text = new TPaveText(.66, .83, .91, .89, "NDC");
   //text = new TPaveText(.65, 1.04, .9, 1.09, "NDC");
+  text = new TPaveText(.1, .925, 1.015, .98, "NDC");
+  text->SetTextAlign(33);
   ss.str(""); ss << "LPAIR/LPAIR++ with " << maxEvts << " events";
   text->AddText(ss.str().c_str());
   text->SetFillColor(kWhite);
@@ -410,31 +412,36 @@ void combine()
     h_lpairpp[i]->Sumw2();
     h_lpairpp[i]->SetFillColor(kRed);
     //h_lpairpp[i]->SetFillStyle(3005);
-    h_lpairpp[i]->SetFillStyle(3005);
+    h_lpairpp[i]->SetFillStyle(3002);
+    //h_lpairpp[i]->SetBorderColor(kBlack);
     h_lpairpp[i]->SetLineColor(kBlack);
     h_lpairpp[i]->SetLineWidth(1);
     //ss.str(""); ss << "#frac{1}{#sigma} #frac{d#sigma}{d" << h_lpairpp[i]->GetTitle() << "}";
     ss.str(""); ss << "#frac{dN}{d" << h_lpairpp[i]->GetTitle() << "}";
     h_lpairpp[i]->GetXaxis()->SetTitleFont(43);
-    h_lpairpp[i]->GetXaxis()->SetTitleSize(14);
+    h_lpairpp[i]->GetXaxis()->SetTitleSize(16);
     h_lpairpp[i]->GetXaxis()->SetTitleOffset(4.);
     h_lpairpp[i]->GetYaxis()->SetTitleFont(43);
-    h_lpairpp[i]->GetYaxis()->SetTitleSize(14);
+    h_lpairpp[i]->GetYaxis()->SetTitleSize(16);
     h_lpairpp[i]->GetYaxis()->SetTitleOffset(1.4);
     h_lpairpp[i]->GetXaxis()->SetLabelFont(43);
-    h_lpairpp[i]->GetXaxis()->SetLabelSize(14);
+    h_lpairpp[i]->GetXaxis()->SetLabelSize(16);
     h_lpairpp[i]->GetYaxis()->SetLabelFont(43);
-    h_lpairpp[i]->GetYaxis()->SetLabelSize(14);
+    h_lpairpp[i]->GetYaxis()->SetLabelSize(16);
     //h_lpairpp[i]->Scale(1./h_lpairpp[i]->Integral());
     h_lpairor[i]->Sumw2();
     h_lpairor[i]->SetTitle("");
     h_lpairor[i]->GetYaxis()->SetTitle(ss.str().c_str());
     h_lpairor[i]->GetYaxis()->SetTitleFont(43);
-    h_lpairor[i]->GetYaxis()->SetTitleSize(14);
+    h_lpairor[i]->GetYaxis()->SetTitleSize(16);
     h_lpairor[i]->GetYaxis()->SetTitleOffset(1.4);
+    h_lpairor[i]->GetXaxis()->SetLabelFont(43);
+    h_lpairor[i]->GetXaxis()->SetLabelSize(16);
+    h_lpairor[i]->GetYaxis()->SetLabelFont(43);
+    h_lpairor[i]->GetYaxis()->SetLabelSize(16);
     h_lpairor[i]->SetFillColor(kBlue);
     //h_lpairor[i]->SetFillStyle(3004);
-    h_lpairor[i]->SetFillStyle(3004);
+    h_lpairor[i]->SetFillStyle(3002);
     h_lpairor[i]->SetLineColor(kBlack);
     h_lpairor[i]->SetLineWidth(1);
     h_lpairor[i]->SetLineStyle(2);
@@ -445,8 +452,8 @@ void combine()
     max = TMath::Max(h_lpairor[i]->GetBinContent(h_lpairor[i]->GetMaximumBin()), h_lpairpp[i]->GetBinContent(h_lpairpp[i]->GetMaximumBin()));
     h_lpairor[i]->GetYaxis()->SetRangeUser(.01, max*1.2);
     if (n==0) {
-      leg->AddEntry(h_lpairpp[i], "LPAIR++");
-      leg->AddEntry(h_lpairor[i], "LPAIR");
+      leg->AddEntry(h_lpairpp[i], "LPAIR++", "F");
+      leg->AddEntry(h_lpairor[i], "LPAIR", "F");
     }
     leg->Draw("SAME");
     text->Draw();
@@ -463,6 +470,8 @@ void combine()
     htmp->SetTitle("");
     htmp->GetXaxis()->SetTitle(h_lpairpp[i]->GetTitle());
     htmp->GetYaxis()->SetTitle("LPAIR++/LPAIR");
+    htmp->GetYaxis()->SetLabelSize(14);
+    htmp->GetYaxis()->SetTitleOffset(1.4);
     htmp->Draw("E");
     line->Draw();
     htmp->Draw("E SAME");

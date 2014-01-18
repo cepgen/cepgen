@@ -1,27 +1,26 @@
 EXEC=clpair
 #USE_PYTHIA6 = 1
 ############################################
-CFLAGS = -Wall -Wextra -I$(INCLUDEDIR) -I$(GSLDIR) -llhapdfdummy -g
-FFLAGS = -w -g
-LDFLAGS = -lgsl -lgslcblas -I$(INCLUDEDIR) -I$(GSLDIR) -lgfortran
-VPATH = src include
+PYTHIA6SRC = $(wildcard external/pythia-6.*.f)
+JETSET7SRC = $(wildcard external/jetset7*.f)
+PYTHIA8LIB = $(wildcard external/libpythia8*.so)
+INCLUDEDIR = include/
 ############################################
-CPP_FILES = $(wildcard src/*.cpp)
-HPP_FILES = $(wildcard includes/*.h)
-LIB_FILES = $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES)) \
-	$(patsubst external/%.f,obj/%.fo,$(PYTHIA6SRC)) \
-	$(patsubst external/%.f,obj/%.fo,$(JETSET7SRC))
-OBJ_FILES = main.o $(LIB_FILES)
+CFLAGS     = -Wall -Wextra -I$(INCLUDEDIR) -llhapdfdummy -g
+FFLAGS     = -w -g
+LDFLAGS    = -I$(INCLUDEDIR) -lgfortran
+VPATH      = src include
+############################################
+CPP_FILES  = $(wildcard src/*.cpp)
+HPP_FILES  = $(wildcard includes/*.h)
+LIB_FILES  = $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES)) \
+	     $(patsubst external/%.f,obj/%.fo,$(PYTHIA6SRC)) \
+	     $(patsubst external/%.f,obj/%.fo,$(JETSET7SRC))
+OBJ_FILES  = main.o $(LIB_FILES)
 ############################################
 CC = g++
 CF = gfortran
 RM = rm -f
-############################################
-INCLUDEDIR = include/
-PYTHIA6SRC = $(wildcard external/pythia-6.*.f)
-JETSET7SRC = $(wildcard external/jetset7*.f)
-PYTHIADIR = include/pythia8175
-GSLDIR = /usr/include/gsl
 ############################################
 
 #$(info $(OBJ_FILES))
@@ -42,11 +41,9 @@ obj/%.fo: external/%.f
 clean:
 	$(RM) obj/*.o $(EXEC)
 
-cleanest: clean
-	$(RM) mcgen
-
 doc: $(CPP_FILES) $(HPP_FILES) Doxyfile
 	doxygen
+	cd doc/latex && make && gnome-open refman.pdf &
 
 xsect: utils/xsect.o $(LIB_FILES)
 	$(CC) -o $@ $^ $(LDFLAGS)

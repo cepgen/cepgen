@@ -45,7 +45,8 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
   // Filling the common block to propagate to JETSET7
   njoin = 0;
   lujets_.n = pl.size();
-  for (p=pl.begin(), np=0; p!=pl.end() && np<4000; p++, np++) {
+  for (p=pl.begin(); p!=pl.end(); p++) {
+    np = (*p)->id;
     lujets_.p[0][np] = (*p)->px;
     lujets_.p[1][np] = (*p)->py;
     lujets_.p[2][np] = (*p)->pz;
@@ -58,11 +59,11 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
     lujets_.k[3][np] = 0; // daughter 1
     lujets_.k[4][np] = 0; // daughter 2
     
-    std::cout << "---> " << this->luname((*p)->pdgId) << std::endl;
+    std::cout << "---> " << this->luname((*p)->pdgId) << "\t" << np << std::endl;
     
-    for (int i=0; i<5; i++) {
+    /*for (int i=0; i<5; i++) {
       lujets_.v[i][np] = 0.;
-    }
+      }*/
     if ((*p)->status==3) {
       jlpsf[njoin] = np+1; //FIXME need to sort this vector<Particle*> !
       njoin++;
@@ -71,12 +72,12 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
 
   if (njoin==0) return false;
   
-#ifdef DEBUG
+  //#ifdef DEBUG
   std::cout << "[Jetset7Hadroniser::Hadronise] [DEBUG] Joining " << njoin << " particle(s) in a same string" << std::endl;
   for (int i=0; i<njoin; i++) {
     std::cout << "--> " << jlpsf[i] << " (pdgId=" << lujets_.k[1][jlpsf[i]-1] << ")" << std::endl;
   }
-#endif
+  //#endif
 
   this->lujoin(njoin, jlpsf);
   //this->lulist(1);

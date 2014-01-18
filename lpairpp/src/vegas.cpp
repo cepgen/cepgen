@@ -9,7 +9,6 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), InputParameters* i
   _j(0),
   _force_correction(false)
 {
-  gsl_monte_vegas_params par;
   /* x content :
       0 = t1 mapping
       1 = t2 mapping
@@ -38,24 +37,8 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), InputParameters* i
     _xl[i] = 0.;
     _xu[i] = 1.;
   }
-  //_ndim = (size_t)dim_;
   _nIter = inParam_->itvg;
   _ncalls = inParam_->ncvg;
-  _s = gsl_monte_vegas_alloc(_ndim);
-  gsl_monte_vegas_params_get(_s, &par);
-  par.stage = 0;
-  par.iterations = _nIter;
-  par.verbose = -1;
-  //par.mode = GSL_VEGAS_MODE_IMPORTANCE;
-  //par.mode = GSL_VEGAS_MODE_STRATIFIED;
-  //par.mode = GSL_VEGAS_MODE_IMPORTANCE_ONLY;
-  //par.alpha = 1.;
-  gsl_monte_vegas_params_set(_s, &par);
-  gsl_rng_env_setup(); //FIXME ???
-  _r = gsl_rng_alloc(gsl_rng_default);
-  //gsl_rng_set(_r, 301187); // sets the MC generator's seed
-  //
-  // ...
 
 #ifdef DEBUG
   std::cout << "[Vegas::Vegas] [DEBUG]"
@@ -65,21 +48,12 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), InputParameters* i
             << std::endl;
 #endif
 
-  // GSL function to integrate on the whole phase space, provided with its input
-  // parameters
-  _F = new gsl_monte_function;
-  _F->f=f_;
-  _F->dim = (size_t)_ndim;
-  _F->params = (void*)inParam_;
-  _ip = (InputParameters*)_F->params;
+  _ip = inParam_;
+  _f = f_;
 }
 
 Vegas::~Vegas()
 {
-  gsl_monte_vegas_free(_s);
-  gsl_rng_free(_r);
-
-  delete _F;
   delete[] _xl;
   delete[] _xu;
   delete[] _n;
@@ -92,54 +66,7 @@ Vegas::~Vegas()
   }
 }
 
-int
-Vegas::Integrate(double *result_, double *abserr_)
-{
-  int vegas_status;
-  gsl_monte_vegas_params par;
-
-#ifdef DEBUG
-  std::cout << "[Vegas::Integrate] [DEBUG] Vegas warm-up started !" << std::endl;
-#endif
-
-  vegas_status = gsl_monte_vegas_init(_s);
-  // VEGAS warm up!
-  gsl_monte_vegas_params_get(_s, &par);
-  par.stage = 0;
-  par.verbose = -1;
-  par.iterations = _ip->itvg;
-  gsl_monte_vegas_params_set(_s, &par);
-  //_ip->Dump();
-  vegas_status = gsl_monte_vegas_integrate(_F, _xl, _xu, _ndim, 10000, _r, _s, result_, abserr_);
-
-#ifdef DEBUG
-  std::cout << "[Vegas::Integrate] [DEBUG] Vegas warm-up finished !" << std::endl;
-#endif
-  
-  //FILE *fveg = fopen("vegas","w");
-  gsl_monte_vegas_params_get(_s, &par);
-  par.stage = 1;
-  par.verbose = 0;
-  //par.ostream = fveg;
-  gsl_monte_vegas_params_set(_s, &par);
-
-  //do {
-  vegas_status = gsl_monte_vegas_integrate(_F, _xl, _xu, _ndim, _ncalls, _r, _s, result_, abserr_);
-#ifdef DEBUG
-  std::cout << "[Vegas::Integrate] [DEBUG] chisq/ndof = " << gsl_monte_vegas_chisq(_s) << std::endl;
-#endif
-  //} while (fabs(gsl_monte_vegas_chisq(_s)-1.)>.1);
-
-#ifdef DEBUG
-  std::cout << "[Vegas::Integrate] [DEBUG] (" << vegas_status << ") -> Computed cross-section = (" 
-            << *result_ << " +/- "
-            << *abserr_ << ") pb"
-            << std::endl;
-#endif
-  return vegas_status;
-}
-
-int Vegas::MyIntegrate(double *result_, double *abserr_)
+int Vegas::Integrate(double *result_, double *abserr_)
 {
   unsigned int ndm, nd, npg;
   int ng, now;
@@ -419,62 +346,6 @@ int Vegas::MyIntegrate(double *result_, double *abserr_)
   *result_ = avgi;
   *abserr_ = sd;
   return 0;
-}
-
-int
-Vegas::LaunchGeneration()
-{
-  int vegas_status;
-  int niter, ngen;
-  double result, abserr;
-  std::ofstream of, fd;
-  gsl_monte_vegas_params par; 
-
-  std::cout << "[Vegas::LaunchGeneration] [DEBUG] Number of events to generate = " << _ip->maxgen << std::endl;
-
-  _ip->store = true;
-  _ip->ngen = 0;
-  _ip->file = &of;
-  //_ip->file_debug = &fd;
-
-  gsl_monte_vegas_params_get(_s, &par);
-  par.stage = 2;
-  par.iterations = 1;
-  //par.mode = GSL_VEGAS_MODE_IMPORTANCE;
-  par.verbose = -1;
-  gsl_monte_vegas_params_set(_s, &par);
-
-  of.open("test", std::ios_base::out);
-  //fd.open("debug", std::ios_base::out);
-#ifdef DEBUG
-  gsl_monte_vegas_params_get(_s, &par);
-  std::cout << "[Vegas::LaunchGeneration] [DEBUG] VEGAS stage after warm-up and cross-section computation : " << par.stage << std::endl;
-#endif
-  _ip->Dump();
-
-  niter = 0;
-  ngen = 0;
-  vegas_status = 0;
-  while (ngen<_ip->maxgen) {
-    //vegas_status = gsl_monte_vegas_integrate(_F, _xl, _xu, _ndim, (size_t)(_ip->maxgen/(10*par.iterations)), _r, _s, &result, &abserr);
-    vegas_status = gsl_monte_vegas_integrate(_F, _xl, _xu, _ndim, (size_t)_ip->maxgen, _r, _s, &result, &abserr);
-    ngen = _ip->ngen;
-//#ifdef DEBUG
-    std::cout << "[Vegas::LaunchGeneration] [DEBUG] Iteration number " << niter
-              << "\n\t" << ngen << " events generated"
-              << std::endl;
-//#endif
-    niter++;
-  }
-  std::cout << "--> " << ngen << " events generated after " << niter << " iteration(s)" << std::endl;
-  
-  of.close();
-#ifdef DEBUG
-  std::cout << "[Vegas::LaunchGeneration] [DEBUG] chisq/ndof = " << gsl_monte_vegas_chisq(_s) << std::endl;
-  std::cout << "[Vegas::LaunchGeneration] [DEBUG] (" << vegas_status << ") -> result : " << result << " +/- " << abserr << std::endl;
-#endif
-
-  return vegas_status;
 }
 
 void

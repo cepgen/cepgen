@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
     ip.in2p = 3500.;
     ip.pair = 13;
     ip.p1mod = 11;
-    ip.p2mod = 11;
+    ip.p2mod = 2;
     ip.mcut = 2;
     ip.minenergy = 0.; //FIXME
     ip.minpt = 5.;

@@ -3,7 +3,6 @@
 
 #include <fstream>
 #include <cstdio> // remove (DEBUG)
-#include <gsl/gsl_monte_vegas.h>
 
 #include "gamgam.h"
 
@@ -14,7 +13,7 @@ class Vegas {
   public:
     /**
      * Constructs the class by booking the memory and structures for the
-     *  GSL Vegas integrator. This code from the GNU scientific library is based
+     *  Vegas integrator. This code from the GNU scientific library is based
      *  on the Vegas Monte Carlo integration algorithm developed by P. Lepage.
      * @cite PeterLepage1978192
      * @param dim_ The number of dimensions on which the function will
@@ -29,15 +28,6 @@ class Vegas {
      */
     ~Vegas();
     /**
-     * Launches the Vegas integration of the provided function with the
-     *  provided input parameters.
-     * @brief Launches the integration of the provided function
-     * @param result_ The cross section as integrated by Vegas for the given
-     *  phase space restrictions
-     * @param abserr_ The error associated to the computed cross section
-     */
-    int Integrate(double* result_,double* abserr_);
-    /**
      * Vegas algorithm to perform the (_dim)-dimensional Monte Carlo integration
      * of a given function as described in @cite PeterLepage1978192
      * @author Primary author : G.P. Lepage
@@ -50,7 +40,7 @@ class Vegas {
      *  phase space restrictions
      * @param abserr_ The error associated to the computed cross section
      */
-    int MyIntegrate(double* result_,double* abserr_);
+    int Integrate(double* result_,double* abserr_);
     /**
      * Launches the Vegas generation of events according to the provided input
      *  parameters.
@@ -60,13 +50,11 @@ class Vegas {
     void Generate();
     void DumpGrid();
   private:
-    //double Treat(double f_(double*,size_t,void*));
-    //double Treat(gsl_monte_function*,double*);
     double Treat(double* x_,InputParameters* ip_,bool storedbg_=false);
-    inline double Treat(double* x_) { return this->Treat(x_,(InputParameters*)this->_F->params); }
-    inline double Treat(double* x_,bool storedbg_) { return this->Treat(x_,(InputParameters*)this->_F->params,storedbg_); }
-    inline double F(double* x_) { return this->_F->f(x_, this->_ndim, (void*)this->_F->params); }
-    inline double F(double* x_,InputParameters* ip_) { return this->_F->f(x_, this->_ndim, (void*)ip_); }
+    inline double Treat(double* x_) { return this->Treat(x_,(InputParameters*)this->_ip); }
+    inline double Treat(double* x_,bool storedbg_) { return this->Treat(x_,(InputParameters*)this->_ip,storedbg_); }
+    inline double F(double* x_) { return this->_f(x_, this->_ndim, (void*)this->_ip); }
+    inline double F(double* x_,InputParameters* ip_) { return this->_f(x_, this->_ndim, (void*)ip_); }
     /**
      * Stores the event characterized by its _ndim-dimensional point in the phase
      * space to the output file
@@ -84,9 +72,6 @@ class Vegas {
      * computed weight for the phase space point)
      */
     bool GenerateOneEvent();
-    //int GenerateOneEvent(GamGam*);
-    //int GenerateOneEvent(std::ofstream*);
-    /** @brief Number of times the Vegas::Treat method has been called */
     /**
      * Sets all the generation mode variables and align them to the integration 
      * grid set while computing the cross-section
@@ -94,14 +79,9 @@ class Vegas {
      * @param of_ The file stream where to store the events after their generation
      */
     void SetGen(std::ofstream* of_);
-    /** @brief GSL's random number generator */
-    gsl_rng *_r;
-    /** @brief GSL's Vegas integration state structure */
-    gsl_monte_vegas_state *_s;
-    /** @brief The wrapped-up function to integrate, along with the input parameters */
-    gsl_monte_function *_F;
     /** @brief The number of dimensions on which to integrate the function */
     const size_t _ndim;
+    double (*_f)(double* x_, size_t ndim_, void* params_);
     unsigned int _ndo;
     int _nTreatCalls;
     int _nTreat;

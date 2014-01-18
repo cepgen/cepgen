@@ -51,7 +51,7 @@ GamGam::SetOutgoingParticles(int part_, int pdgId_)
       return false;
     case 2: // single-dissociative
       outm = _mp1;
-      mass_ = this->ComputeMX(_x[7], outm, &_dw31);
+      mass_ = this->ComputeMX(_x[7], outm, &dm);
       break;
     case 3: // double-dissociative
       int ind;
@@ -129,8 +129,8 @@ GamGam::SetIncomingKinematics(Particle ip1_, Particle ip2_)
   this->_ev->AddParticle(&ip1_);
   this->_ev->AddParticle(&ip2_);
 
-  p1 = *(this->_ev->GetByRole(1));
-  p2 = *(this->_ev->GetByRole(2));
+  p1 = *(this->_ev->GetOneByRole(1));
+  p2 = *(this->_ev->GetOneByRole(2));
 
   _p3_p1[0] = p1.px;
   _p3_p1[1] = p1.py;
@@ -1310,13 +1310,13 @@ GamGam::FillKinematics(bool symmetrise_)
 
   // Relations between particles
 
-  this->_ev->GetByRole(3)->SetMother(this->_ev->GetByRole(1));
-  this->_ev->GetByRole(5)->SetMother(this->_ev->GetByRole(2));
-  this->_ev->GetByRole(41)->SetMother(this->_ev->GetByRole(1));
-  this->_ev->GetByRole(42)->SetMother(this->_ev->GetByRole(2));
-  this->_ev->GetByRole(4)->SetMother(this->_ev->GetByRole(41));
-  this->_ev->GetByRole(6)->SetMother(this->_ev->GetByRole(4));
-  this->_ev->GetByRole(7)->SetMother(this->_ev->GetByRole(4));
+  this->_ev->GetOneByRole(3)->SetMother(this->_ev->GetOneByRole(1));
+  this->_ev->GetOneByRole(5)->SetMother(this->_ev->GetOneByRole(2));
+  this->_ev->GetOneByRole(41)->SetMother(this->_ev->GetOneByRole(1));
+  this->_ev->GetOneByRole(42)->SetMother(this->_ev->GetOneByRole(2));
+  this->_ev->GetOneByRole(4)->SetMother(this->_ev->GetOneByRole(41));
+  this->_ev->GetOneByRole(6)->SetMother(this->_ev->GetOneByRole(4));
+  this->_ev->GetOneByRole(7)->SetMother(this->_ev->GetOneByRole(4));
 
   
   /*  
@@ -1403,7 +1403,8 @@ GamGam::PrepareHadronisation(Particle *part_)
 
   Lorenb(part_->M(), part_->P4(), pmxda, partpb);
 
-  Particle singlet(10, singlet_id);
+  Particle singlet(part_->role, singlet_id);
+  //Particle singlet(10, singlet_id);
   singlet.status = 3;
   if (!singlet.P(partpb)) {
 #ifdef ERROR
@@ -1420,7 +1421,8 @@ GamGam::PrepareHadronisation(Particle *part_)
 
   Lorenb(part_->M(), part_->P4(), pmxda, partpb);
   
-  Particle doublet(11, doublet_id);
+  Particle doublet(part_->role, doublet_id);
+  //Particle doublet(11, doublet_id);
   doublet.status = 3;
   if (!doublet.P(partpb)) {
 #ifdef ERROR

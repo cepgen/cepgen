@@ -5,6 +5,7 @@ Particle::Particle() :
   px(0.), py(0.), pz(0.), status(0), e(-1.), m(-1.),
   _isPrimary(true)
 {
+  this->name = "";
 }
 
 Particle::Particle(int role_, int pdgId_) :
@@ -12,6 +13,7 @@ Particle::Particle(int role_, int pdgId_) :
   px(0.), py(0.), pz(0.), status(0), e(-1.), m(-1.),
   _isPrimary(true)
 {
+  this->name = "";
   this->role = role_;
   this->pdgId = pdgId_;
   if (this->pdgId!=0) {
@@ -156,7 +158,9 @@ Particle::GetDaughters()
 #endif
     out.push_back((Particle*)(*it));
   }
+#ifdef DEBUG
   std::cout << "[Particle::GetDaughters] [DEBUG] Returning a vector containing " << out.size() << " particle(s)" << std::endl;
+#endif
   return out;
 }
  

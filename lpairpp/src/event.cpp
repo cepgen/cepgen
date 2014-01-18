@@ -3,7 +3,7 @@
 Event::Event()
 {
   this->_null = new Particle();
-  this->_part = new std::map<int,Particle>();
+  this->_part = new std::multimap<int,Particle>();
 }
 
 Event::~Event()
@@ -12,24 +12,36 @@ Event::~Event()
   delete this->_part;
 }
 
-Particle*
+std::vector<Particle*>
 Event::GetByRole(int role_)
 {
-  std::map<int,Particle>::iterator out = this->_part->find(role_);
-  if (out!=this->_part->end()) {
-    //std::cout << "[Event::GetByRole] [DEBUG] Particle with role " << role_ << " successfully returned (pdgId=" << out->second.pdgId << ")" << std::endl;
-    return &out->second;
+  int i;
+  std::vector<Particle*> out;
+  std::pair<std::multimap<int,Particle>::iterator,std::multimap<int,Particle>::iterator> ret = this->_part->equal_range(role_);
+  std::multimap<int,Particle>::iterator it;
+
+  for (it=ret.first, i=0; it!=ret.second && i<100; it++, i++) {
+    out.push_back(&(it->second));
+  }
+  return out;
+  /*  if (ret!=this->_part->end()) {
+#ifdef DEBUG
+    std::cout << "[Event::GetByRole] [DEBUG] Particle with role " << role_ << " successfully returned (pdgId=" << ret->second.pdgId << ")" << std::endl;
+#endif
+    return &ret->second;
   }
   else {
-    //std::cout << "[Event::GetByRole] [DEBUG] Failed to locate particle with role " << role_ << " !" << std::endl;
+#ifdef DEBUG
+    std::cout << "[Event::GetByRole] [DEBUG] Failed to locate particle with role " << role_ << " !" << std::endl;
+#endif
     return this->_null;
-  }
+    }*/
 }
 
 Particle*
 Event::GetById(int id_)
 {
-  std::map<int,Particle>::iterator out;
+  std::multimap<int,Particle>::iterator out;
   for (out=this->_part->begin(); out!=this->_part->end(); out++) {
     if (out->second.id==id_) {
       return &out->second;
@@ -38,8 +50,19 @@ Event::GetById(int id_)
   return this->_null;
 }
 
+std::vector<int>
+Event::GetRoles()
+{
+  std::multimap<int,Particle>::iterator it, end;
+  std::vector<int> out;
+  for (it=this->_part->begin(), end=this->_part->end(); it!=end; it=this->_part->upper_bound(it->first)) {
+    out.push_back(it->first);
+  }
+  return out;
+}
+
 int
-Event::AddParticle(Particle *part_)
+Event::AddParticle(Particle *part_, bool replace_)
 {
 #ifdef DEBUG
   std::cout << "[Event::AddParticle] [DEBUG] Particle with PDGid = " << part_->pdgId << " has role " << part_->role << std::endl;
@@ -47,13 +70,22 @@ Event::AddParticle(Particle *part_)
   if (part_->role<=0) {
     return -1;
   }
-  if (!this->GetByRole(part_->role)->Valid()) {
-    part_->id = this->_part->size(); //FIXME is there any better way of introducing this id ?
+  std::vector<Particle*> part_with_same_role = this->GetByRole(part_->role);
+  part_->id = this->_part->size(); //FIXME is there any better way of introducing this id ?
+  if (part_with_same_role.size()==0 or !replace_) {
     this->_part->insert(std::pair<int,Particle>(part_->role, *part_));
-    //this->GetByRole(part_->role)->id = this->_part->size();
-    return 0;
+    return 1;
   }
   else {
+    part_with_same_role.at(0) = part_;
+    return 0;
+  }
+  /*if (!this->GetByRole(part_->role)->Valid()) {
+    part_->id = this->_part->size(); //FIXME is there any better way of introducing this id ?
+    this->_part->insert(std::pair<int,Particle>(part_->role, *part_));
+    return 0;
+    }*/
+  /*else {
 #ifdef DEBUG
     std::cout << "[Event::AddParticle] [DEBUG] Replacing an existing particle : " 
 	      << part_->role << " (pdgId=" << part_->pdgId << ", p=" << part_->P() << ") --> " 
@@ -61,13 +93,13 @@ Event::AddParticle(Particle *part_)
 #endif
     this->_part->at(part_->role) = *part_;
     return 1;
-  }
+    }*/
 }
 
 void
 Event::StoreLHERecord(std::ofstream *of_, const double weight_)
 {
-  std::map<int,Particle>::iterator p;
+  std::multimap<int,Particle>::iterator p;
   for (p=this->_part->begin(); p!=this->_part->end(); p++) {
     *of_ << std::setw(8) << p->second.E() << "\t"
          << std::setw(8) << p->second.px << "\t"
@@ -85,8 +117,9 @@ Event::StoreLHERecord(std::ofstream *of_, const double weight_)
 void
 Event::Store(std::ofstream *of_, double weight_)
 {
-  Particle *l1 = this->GetByRole(6);
-  Particle *l2 = this->GetByRole(7);
+  Particle *l1 = this->GetByRole(6).at(0);
+  Particle *l2 = this->GetByRole(7).at(0);
+  
   *of_ << std::setw(8) << l1->E() << "\t"
        << std::setw(8) << l1->px << "\t"
        << std::setw(8) << l1->py << "\t"
@@ -113,22 +146,45 @@ std::vector<Particle*>
 Event::GetParticles()
 {
   std::vector<Particle*> out;
-  std::map<int,Particle>::iterator it;
+  std::multimap<int,Particle>::iterator it;
   for (it=this->_part->begin(); it!=this->_part->end(); it++) {
     out.push_back(&it->second);
-    //std::cout << it->second.id << "\t" << it->second.role << "\t" << it->second.pdgId << "\t" << it->second.P() << std::endl;
-    //std::cout << it->first << std::endl;
   }
   return out;
+}
+
+std::vector<Particle*>
+Event::GetStableParticles()
+{
+  std::vector<Particle*> out;
+  std::multimap<int,Particle>::iterator it;
+  for (it=this->_part->begin(); it!=this->_part->end(); it++) {
+    if (it->second.status==1) {
+      out.push_back(&it->second);
+    }
+  }
+  return out;  
 }
 
 void
 Event::Dump()
 {
-  std::map<int,Particle>::iterator out;
+  std::multimap<int,Particle>::iterator it;
   std::cout << "[Event::Dump]" << std::endl;
-  for (out=this->_part->begin(); out!=this->_part->end(); out++) {
-    out->second.Dump();
-    std::cout << "=========================" << std::endl;
+  for (it=this->_part->begin(); it!=this->_part->end(); it++) {
+    std::cout << "Particle " << std::setw(3) << it->second.id << " :"// << std::endl
+	      << "\tPDG id = " << std::setw(5) << it->second.pdgId;
+    if (it->second.name!="")
+      std::cout << " (" << it->second.name << ")";
+    else std::cout << "\t";
+    //std::cout << std::endl;
+    std::cout << "\t\tRole " << std::setw(2) << it->second.role// << std::endl
+	      << "\t\tStatus " << std::setw(2) << it->second.status;
+      //<< std::endl;
+    if (it->second.GetMother()!=(Particle*)NULL)
+      std::cout << "\tMother id : " << std::setw(3) << it->second.GetMother()->id;
+    std::cout << std::endl;
+    //it->second.Dump();
+    //std::cout << "=========================" << std::endl;
   }
 }

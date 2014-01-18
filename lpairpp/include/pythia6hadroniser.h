@@ -1,8 +1,9 @@
 #ifndef _PYTHIA6HADRONISER_H
 #define _PYTHIA6HADRONISER_H
 
-#include "hadroniser.h"
+#include <algorithm>
 
+#include "hadroniser.h"
 extern "C"
 {
   extern double pymass_(int&);
@@ -35,7 +36,14 @@ class Pythia6Hadroniser : public Hadroniser
   inline static void pyckbd() { pyckbd_(); };
   inline static void pygive(const std::string &line_) { pygive_(line_.c_str(),line_.length()); };
   inline static void pylist(int mlist_) { pylist_(mlist_); };
-  inline static std::string pyname(int pdgid_) { char out[5]; pyname_(pdgid_, out, 5); return std::string(out,5); };
+  inline static std::string pyname(int pdgid_) {
+    char out[6];
+    std::string s;
+    pyname_(pdgid_, out, 6);
+    s = std::string(out,6);
+    s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+    return s;
+  };
   /**
    * @brief Connect entries with colour flow information
    * @param njoin_ Number of particles to join in the colour flow

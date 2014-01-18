@@ -47,6 +47,7 @@ class Particle {
      * @brief Particle Data Group integer identifier
      */
     int pdgId;
+    std::string name;
     /**
      * @brief Role in the considered process
      */

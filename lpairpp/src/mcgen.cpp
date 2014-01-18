@@ -24,9 +24,9 @@ MCGen::MCGen(InputParameters ip_)
     topo = "DOUBLE-DISSOCIATIVE protons";
     ndim = 9;
   }
-  //#ifdef DEBUG
+#ifdef DEBUG
   std::cout << "[MCGen::MCGen] [DEBUG] Considered topology : " << topo << " case" << std::endl;
-  //#endif
+#endif
 
 #ifdef DEBUG
   std::cout << "[MCGen::MCGen] [DEBUG] Cuts mode : " << _ip.mcut << std::endl;
@@ -82,7 +82,7 @@ MCGen::~MCGen()
 void MCGen::ComputeXsection(double* xsec_, double *err_)
 {
   std::cout << "[MCGen::ComputeXsection] Starting the computation of the process cross-section" << std::endl;
-  veg->MyIntegrate(xsec_, err_);
+  veg->Integrate(xsec_, err_);
   std::cout << "[MCGen::ComputeXsection] Total cross-section = " << *xsec_ << " +/- " << *err_ << " pb" << std::endl;
 }
 
@@ -187,19 +187,25 @@ double f(double* x_, size_t ndim_, void* params_) {
   if (p->store) { // MC events generation
     gg.FillKinematics(false);
     if (kin.kinematics>1) {
-      gg.PrepareHadronisation(gg.GetEvent()->GetByRole(3));
+      gg.PrepareHadronisation(gg.GetEvent()->GetOneByRole(3));
       /*if (kin.kinematics==3) {
-	gg.PrepareHadronisation(gg.GetEvent()->GetByRole(5));
+	gg.PrepareHadronisation(gg.GetEvent()->GetOneByRole(5));
 	}*/
       //if (algo_=="pythia6") {
       //std::cout << "hadronisation using pythia6" << std::endl;
-      //Pythia6Hadroniser py;
-      //py.Hadronise(gg.GetEvent());
-      Jetset7Hadroniser js;
-      js.Hadronise(gg.GetEvent());
+      Pythia6Hadroniser py;
+      py.Hadronise(gg.GetEvent());
+      //Jetset7Hadroniser js;
+      //js.Hadronise(gg.GetEvent());
       //}
     }
-      
+    
+    gg.GetEvent()->Dump();
+    /*std::vector<Particle*> pp = gg.GetEvent()->GetParticles();
+    std::vector<Particle*>::iterator p;
+    for (p=pp.begin(); p!=pp.end(); p++) {
+      std::cout << "--> " << (*p)->pdgId << ", " << (*p)->role << std::endl;
+      }*/
     //gg.GetEvent()->Store(p->file);
 
     /*double t1min, t1max, t2min, t2max;
@@ -208,9 +214,9 @@ double f(double* x_, size_t ndim_, void* params_) {
       gg.GetT1extrema(t1min, t1max);
       gg.GetT2extrema(t2min, t2max);
       *(p->file_debug)
-	<< (gg.GetEvent()->GetByRole(5)->p-gg.GetEvent()->GetByRole(1)->p)
-	<< "\t" << gg.GetEvent()->GetByRole(3)->p
-	<< "\t" << gg.GetEvent()->GetByRole(5)->p
+	<< (gg.GetEvent()->GetByRole(5)->p-gg.GetEvent()->GetOneByRole(1)->p)
+	<< "\t" << gg.GetEvent()->GetOneByRole(3)->p
+	<< "\t" << gg.GetEvent()->GetOneByRole(5)->p
 	<< "\t" << gg.GetT1()
 	<< "\t" << t1min
 	<< "\t" << t1max
