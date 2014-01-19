@@ -143,24 +143,18 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
   //this->pylist(2);
 
   for (int p=0; p<pyjets_.n; p++) {
-    /*isprimary = false;
-    for (int i=0; i<njoin; i++) {
-      if (p==jlpsf[i]-1) {
-	isprimary = true;
-	break;
-      }
-    }
-    if (isprimary) continue;*/
-    //if (p<2*njoin+1) continue;
 
-    Particle pa(p+10, pyjets_.k[1][p]);
+    if (pyjets_.k[0][p]==0) continue;
+
+    Particle pa;
     pa.id = p;
-    pa.role = ev_->GetById(jlpsf[0][0]-1)->role; //FIXMEEEEEEEEEEEEEEEEEEEEEEEEE!!!!!!!!!!
+    pa.role = ev_->GetById(pyjets_.k[2][p]-1)->role; // Child particle inherits its mother's role
     pa.status = pyjets_.k[0][p];
     pa.pdgId = pyjets_.k[1][p];
     pa.P(pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p]);
     pa.M(pyjets_.p[4][p]);
     pa.name = this->pyname(pa.pdgId);
+    pa.charge = (float)(this->pyp(p+1,6));
 
     if (pyjets_.k[2][p]!=0) {
 #ifdef DEBUG
@@ -171,5 +165,6 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
 
     ev_->AddParticle(&pa);
   }
+
   return true;
 }

@@ -122,9 +122,11 @@ double f(double* x_, size_t ndim_, void* params_) {
   //FIXME electrons ?
 
   in1 = new Particle(1, 2212);
+  in1->charge = 1;
   in1->P(0., 0.,  p->in1p);
 
   in2 = new Particle(2, 2212);
+  in2->charge = 1;
   in2->P(0., 0., -p->in2p);
   
   switch(ndim_) {

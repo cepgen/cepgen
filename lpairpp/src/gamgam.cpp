@@ -1187,7 +1187,7 @@ GamGam::FillKinematics(bool symmetrise_)
   if (!ip1.P(0., 0., _plab_ip1[2], _plab_ip1[3])) {
     std::cerr << "Invalid incoming proton 1" << std::endl;
   }
-  this->_ev->AddParticle(&ip1);
+  this->_ev->AddParticle(&ip1, true);
   
   // Second incoming proton
   Particle ip2(2, _pdg2);
@@ -1198,7 +1198,7 @@ GamGam::FillKinematics(bool symmetrise_)
   if (!ip2.P(0., 0., _plab_ip2[2], _plab_ip2[3])) {
     std::cerr << "Invalid incoming proton 2" << std::endl;
   }
-  this->_ev->AddParticle(&ip2);
+  this->_ev->AddParticle(&ip2, true);
   //this->_part->insert(std::pair<int,Particle>(part.role, part));
   //this->AddParticle(part.role, &part);
   
@@ -1218,7 +1218,7 @@ GamGam::FillKinematics(bool symmetrise_)
   if (_cuts.kinematics>1) {
     op1.M(_mp3);
   }
-  this->_ev->AddParticle(&op1);
+  this->_ev->AddParticle(&op1, true);
   
   // Second outgoing proton
   Particle op2(5, _pdg5);
@@ -1236,7 +1236,7 @@ GamGam::FillKinematics(bool symmetrise_)
   if (_cuts.kinematics==3) {
     op2.M(_mp5);
   }
-  this->_ev->AddParticle(&op2);
+  this->_ev->AddParticle(&op2, true);
 
   // First incoming photon
   // Equivalent in LPAIR : PLAB(x, 3)
@@ -1252,6 +1252,7 @@ GamGam::FillKinematics(bool symmetrise_)
     //std::cerr << "Invalid photon 1" << std::endl;
   }
   //ph1.SetMother(this->_ev->GetByRole(1));
+  ph1.charge = 0;
   this->_ev->AddParticle(&ph1);
   
   // Second incoming photon
@@ -1268,6 +1269,7 @@ GamGam::FillKinematics(bool symmetrise_)
     //std::cerr << "Invalid photon 2" << std::endl;
   }
   //ph2.SetMother(this->_ev->GetByRole(2));
+  ph2.charge = 0;
   this->_ev->AddParticle(&ph2);
 
   // Central (two-photon) system
@@ -1289,6 +1291,7 @@ GamGam::FillKinematics(bool symmetrise_)
     std::cerr << "Invalid outgoing lepton 1" << std::endl;
   }
   //ol1.SetMother(this->_ev->GetByRole(4));
+  ol1.charge = ransign;
   this->_ev->AddParticle(&ol1);
   
   // Second outgoing lepton
@@ -1304,6 +1307,7 @@ GamGam::FillKinematics(bool symmetrise_)
 		 _plab_ol2[3])) {
     std::cerr << "Invalid outgoing lepton 2" << std::endl;
   }
+  ol2.charge = -ransign;
   //ol2.SetMother(this->_ev->GetByRole(4));
   this->_ev->AddParticle(&ol2);
 

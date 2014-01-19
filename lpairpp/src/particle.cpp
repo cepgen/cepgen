@@ -1,19 +1,17 @@
 #include "particle.h"
 
 Particle::Particle() :
-  id(-1), pdgId(0), role(-1),
+  id(-1), pdgId(0), charge(999.), name(""), role(-1),
   px(0.), py(0.), pz(0.), status(0), e(-1.), m(-1.),
   _isPrimary(true)
 {
-  this->name = "";
 }
 
 Particle::Particle(int role_, int pdgId_) :
-  id(-1), role(-1),
+  id(-1), charge(999.), name(""), role(-1),
   px(0.), py(0.), pz(0.), status(0), e(-1.), m(-1.),
   _isPrimary(true)
 {
-  this->name = "";
   this->role = role_;
   this->pdgId = pdgId_;
   if (this->pdgId!=0) {

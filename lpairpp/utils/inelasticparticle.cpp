@@ -6,6 +6,11 @@ int main() {
 
   Event ev;
   
+  Particle pp1(1, 2212);
+  pp1.P(1., -1., 10.);
+  pp1.status = 1;
+  ev.AddParticle(&pp1);
+
   Particle p1(5, 1);
   p1.P(1., -15., 100.);
   p1.status = 3;
@@ -29,7 +34,7 @@ int main() {
 
   //Jetset7Hadroniser js;
   //js.Hadronise(&ev);
-  ev.Dump();
+  ev.Dump(true);
 
   return 0;
 }

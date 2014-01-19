@@ -66,7 +66,7 @@ class Event {
     /**
      * Dumps all the known information on every Particle object contained in this Event container in the output stream
      */
-    void Dump();
+    void Dump(bool stable_=false);
     /**
      * @brief Gets a vector of particles in the event
      * @return A vector containing all the pointers to the Particle objects contained in the event

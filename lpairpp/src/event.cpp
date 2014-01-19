@@ -72,28 +72,12 @@ Event::AddParticle(Particle *part_, bool replace_)
   }
   std::vector<Particle*> part_with_same_role = this->GetByRole(part_->role);
   part_->id = this->_part->size(); //FIXME is there any better way of introducing this id ?
-  if (part_with_same_role.size()==0 or !replace_) {
-    this->_part->insert(std::pair<int,Particle>(part_->role, *part_));
-    return 1;
-  }
-  else {
+  if (replace_ and part_with_same_role.size()!=0) {
     part_with_same_role.at(0) = part_;
     return 0;
   }
-  /*if (!this->GetByRole(part_->role)->Valid()) {
-    part_->id = this->_part->size(); //FIXME is there any better way of introducing this id ?
-    this->_part->insert(std::pair<int,Particle>(part_->role, *part_));
-    return 0;
-    }*/
-  /*else {
-#ifdef DEBUG
-    std::cout << "[Event::AddParticle] [DEBUG] Replacing an existing particle : " 
-	      << part_->role << " (pdgId=" << part_->pdgId << ", p=" << part_->P() << ") --> " 
-	      << tmp->role << " (pdgId=" << tmp->pdgId << ", p=" << part_->P() << ")" << std::endl;
-#endif
-    this->_part->at(part_->role) = *part_;
-    return 1;
-    }*/
+  this->_part->insert(std::pair<int,Particle>(part_->role, *part_));
+  return 1;
 }
 
 void
@@ -167,22 +151,28 @@ Event::GetStableParticles()
 }
 
 void
-Event::Dump()
+Event::Dump(bool stable_)
 {
   std::multimap<int,Particle>::iterator it;
   std::cout << "[Event::Dump]" << std::endl;
+  std::cout << "Particle" << "\t" << "PDG id" << "\t\t" << "Charge" << "\t" << "Role" << "\t" << "Status" << "\t" << "Mother" << std::endl;
+  std::cout << "--------" << "\t" << "------" << "\t\t" << "------" << "\t" << "----" << "\t" << "------" << "\t" << "------" << std::endl;
   for (it=this->_part->begin(); it!=this->_part->end(); it++) {
-    std::cout << "Particle " << std::setw(3) << it->second.id << " :"// << std::endl
-	      << "\tPDG id = " << std::setw(5) << it->second.pdgId;
+    if (stable_ and it->second.status!=1) continue;
+    std::cout << std::setw(8) << it->second.id
+	      << "\t" << std::setw(6) << it->second.pdgId;
     if (it->second.name!="")
       std::cout << " (" << it->second.name << ")";
     else std::cout << "\t";
+    if (it->second.charge!=999.)
+      std::cout << "\t" << std::setprecision(2) << std::setw(6) << it->second.charge;
+    else std::cout << "\t";
     //std::cout << std::endl;
-    std::cout << "\t\tRole " << std::setw(2) << it->second.role// << std::endl
-	      << "\t\tStatus " << std::setw(2) << it->second.status;
+    std::cout << "\t" << std::setw(4) << it->second.role// << std::endl
+	      << "\t" << std::setw(6) << it->second.status;
       //<< std::endl;
     if (it->second.GetMother()!=(Particle*)NULL)
-      std::cout << "\tMother id : " << std::setw(3) << it->second.GetMother()->id;
+      std::cout << "\t" << std::setw(6) << it->second.GetMother()->id;
     std::cout << std::endl;
     //it->second.Dump();
     //std::cout << "=========================" << std::endl;

@@ -13,6 +13,7 @@ extern "C"
   extern void pylist_(int&);
   extern void pyjoin_(int&,int&);
   extern void pyname_(int&,char*,int);
+  extern double pyp_(int&,int&);
   extern struct
   {
     int n, npad, k[5][4000];
@@ -36,6 +37,7 @@ class Pythia6Hadroniser : public Hadroniser
   inline static void pyckbd() { pyckbd_(); };
   inline static void pygive(const std::string &line_) { pygive_(line_.c_str(),line_.length()); };
   inline static void pylist(int mlist_) { pylist_(mlist_); };
+  inline static double pyp(int role_, int qty_) { return pyp_(role_,qty_); };
   inline static std::string pyname(int pdgid_) {
     char out[6];
     std::string s;
