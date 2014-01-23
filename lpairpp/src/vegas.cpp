@@ -351,21 +351,15 @@ int Vegas::Integrate(double *result_, double *abserr_)
 void
 Vegas::Generate()
 {
-  //count_ = 1;
-  std::ofstream of;
-  std::string fn;
   int i;
   
-  fn = "test";
-  of.open(fn.c_str());
-  this->SetGen(&of);
+  this->SetGen();
   std::cout << "[Vegas::Generate] [DEBUG] " << _ip->maxgen << " events will be generated" << std::endl;
   i = 0;
   while (i<_ip->maxgen) {
     if (this->GenerateOneEvent()) i++;
   }
-  std::cout << "[Vegas::Generate] [DEBUG] " << i << " events generated in \"" << fn << "\"" << std::endl;
-  of.close();
+  std::cout << "[Vegas::Generate] [DEBUG] " << i << " events generated" << std::endl;
 }
 
 bool
@@ -512,12 +506,10 @@ Vegas::StoreEvent(double *x_)
 }
 
 void
-Vegas::SetGen(std::ofstream *of_)
+Vegas::SetGen()
 {
   int max;
   int jj, jjj;
-  //int jj;
-  //double jjj;
   double sum, sum2, sum2p;
   int n[10];
   int npoin = _ip->npoints;
@@ -531,10 +523,7 @@ Vegas::SetGen(std::ofstream *of_)
   double sig, sigp;
   //#endif
 
-  //std::cout << "in setgen" << std::endl;
-
   _ip->ngen = 0;
-  _ip->file = of_;
 #ifdef DEBUG
   std::cout << "[Vegas::SetGen] [DEBUG] maxgen = " << _ip->maxgen << std::endl;
   _ip->Dump();

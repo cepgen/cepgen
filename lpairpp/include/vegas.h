@@ -76,9 +76,8 @@ class Vegas {
      * Sets all the generation mode variables and align them to the integration 
      * grid set while computing the cross-section
      * @brief Prepare the class for events generation
-     * @param of_ The file stream where to store the events after their generation
      */
-    void SetGen(std::ofstream* of_);
+    void SetGen();
     /** @brief The number of dimensions on which to integrate the function */
     const size_t _ndim;
     double (*_f)(double* x_, size_t ndim_, void* params_);
