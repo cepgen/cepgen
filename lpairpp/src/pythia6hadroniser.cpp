@@ -138,7 +138,6 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
 
   //this->pylist(2);
 
-  //this->pyjoin(njoin[0], jlpsf[0]);
   this->pyexec();
   //this->pylist(2);
 
@@ -148,7 +147,9 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
 
     Particle pa;
     pa.id = p;
-    pa.role = ev_->GetById(pyjets_.k[2][p]-1)->role; // Child particle inherits its mother's role
+    if (ev_->GetById(pyjets_.k[2][p]-1)!=(Particle*)NULL) {
+      pa.role = ev_->GetById(pyjets_.k[2][p]-1)->role; // Child particle inherits its mother's role
+    }
     pa.status = pyjets_.k[0][p];
     pa.pdgId = pyjets_.k[1][p];
     pa.P(pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p]);

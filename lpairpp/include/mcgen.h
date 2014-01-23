@@ -8,6 +8,7 @@
 
 #include "vegas.h"
 #include "gamgam.h"
+#include "inputparameters.h"
 
 #include "pythia6hadroniser.h"
 #include "jetset7hadroniser.h"

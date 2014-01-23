@@ -359,12 +359,12 @@ Vegas::Generate()
   fn = "test";
   of.open(fn.c_str());
   this->SetGen(&of);
-  std::cout << "[Vegas::LaunchMyGeneration] [DEBUG] " << _ip->maxgen << " events will be generated" << std::endl;
+  std::cout << "[Vegas::Generate] [DEBUG] " << _ip->maxgen << " events will be generated" << std::endl;
   i = 0;
   while (i<_ip->maxgen) {
     if (this->GenerateOneEvent()) i++;
   }
-  std::cout << "[Vegas::LaunchMyGeneration] [DEBUG] " << i << " events generated in \"" << fn << "\"" << std::endl;
+  std::cout << "[Vegas::Generate] [DEBUG] " << i << " events generated in \"" << fn << "\"" << std::endl;
   of.close();
 }
 

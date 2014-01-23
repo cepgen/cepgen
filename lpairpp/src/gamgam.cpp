@@ -1163,7 +1163,9 @@ GamGam::ComputeWeight(int nm_)
 void
 GamGam::FillKinematics(bool symmetrise_)
 {
-  //double gmux, gmuy, gmuw, gmunu;
+#ifdef DEBUG
+  double gmux, gmuy, gmuw, gmunu;
+#endif
   double ranphi, cp, sp;
   int rany, ransign, ranz, role;
   
@@ -1214,8 +1216,7 @@ GamGam::FillKinematics(bool symmetrise_)
                  _plab_op1[3])) {
     std::cerr << "Invalid outgoing proton 1" << std::endl;
   }
-  //op1.SetMother(this->_ev->GetByRole(1));
-  if (_cuts.kinematics>1) {
+  if (_cuts.kinematics>=2) {
     op1.M(_mp3);
   }
   this->_ev->AddParticle(&op1, true);
@@ -1232,7 +1233,6 @@ GamGam::FillKinematics(bool symmetrise_)
                  _plab_op2[3])) {
     std::cerr << "Invalid outgoing proton 2" << std::endl;
   }
-  //op2.SetMother(this->_ev->GetByRole(2));
   if (_cuts.kinematics==3) {
     op2.M(_mp5);
   }
@@ -1249,9 +1249,7 @@ GamGam::FillKinematics(bool symmetrise_)
                 -_plab_ph1[0]*sp+rany*_plab_ph1[1]*cp,
 		 _plab_ph1[2],
 		 _plab_ph1[3])) {
-    //std::cerr << "Invalid photon 1" << std::endl;
   }
-  //ph1.SetMother(this->_ev->GetByRole(1));
   ph1.charge = 0;
   this->_ev->AddParticle(&ph1);
   
@@ -1268,13 +1266,11 @@ GamGam::FillKinematics(bool symmetrise_)
                  _plab_ph2[3])) {
     //std::cerr << "Invalid photon 2" << std::endl;
   }
-  //ph2.SetMother(this->_ev->GetByRole(2));
   ph2.charge = 0;
   this->_ev->AddParticle(&ph2);
 
   // Central (two-photon) system
   Particle cs(4);
-  //cs.SetMother(this->_ev->GetByRole(41));
   this->_ev->AddParticle(&cs);
   
   // First outgoing lepton
@@ -1290,7 +1286,6 @@ GamGam::FillKinematics(bool symmetrise_)
                  _plab_ol1[3])) {
     std::cerr << "Invalid outgoing lepton 1" << std::endl;
   }
-  //ol1.SetMother(this->_ev->GetByRole(4));
   ol1.charge = ransign;
   this->_ev->AddParticle(&ol1);
   
@@ -1308,7 +1303,6 @@ GamGam::FillKinematics(bool symmetrise_)
     std::cerr << "Invalid outgoing lepton 2" << std::endl;
   }
   ol2.charge = -ransign;
-  //ol2.SetMother(this->_ev->GetByRole(4));
   this->_ev->AddParticle(&ol2);
 
 
@@ -1323,7 +1317,7 @@ GamGam::FillKinematics(bool symmetrise_)
   this->_ev->GetOneByRole(7)->SetMother(this->_ev->GetOneByRole(4));
 
   
-  /*  
+#ifdef DEBUG
   gmux = -_t2/(_ep1*_eg2-_pp1*_p3_g2[2])/2.;
   gmuy = (_ep1*_plab_ph2[3]-_pp1*_plab_ph2[2])/(_ep2*_plab_ph2[3]+_pp2*_plab_ph2[2]);
   gmuw = std::pow(_ep1+_plab_ph2[3], 2)-std::pow(_pp1+_plab_ph2[2], 2);
@@ -1335,16 +1329,13 @@ GamGam::FillKinematics(bool symmetrise_)
     gmuw = 0.;
   }
   gmunu = gmuy*2.*GetMassFromPDGId(2212)/_ep1/_ep2;
-  //#ifdef DEBUG
   std::cout << "[GamGam::FillKinematics] [DEBUG]"
             << "\n\t gmux = " << gmux
             << "\n\t gmuy = " << gmuy
             << "\n\t gmuw = " << gmuw
             << "\n\tgmunu = " << gmunu
             << std::endl;
-  //#endif
-  */
-  //this->_ev->Dump();
+#endif
 }
 
 void
@@ -1396,7 +1387,6 @@ GamGam::PrepareHadronisation(Particle *part_)
   ranmxt = acos(2.*(double)rand()/RAND_MAX-1.);
 
   // Compute momentum of decay particles from MX
-  //PMXP=DSQRT((MX**2-ULMDQ**2+ULMQ**2)**2/4.0/MX/MX - ULMQ**2 )
   pmxp = std::sqrt(std::pow( part_->M2() - std::pow(ulmdq, 2) + std::pow(ulmq, 2), 2) / (4.*part_->M2()) - std::pow(ulmq, 2));
 
   // Build 4-vectors and boost decay particles
@@ -1408,7 +1398,6 @@ GamGam::PrepareHadronisation(Particle *part_)
   Lorenb(part_->M(), part_->P4(), pmxda, partpb);
 
   Particle singlet(part_->role, singlet_id);
-  //Particle singlet(10, singlet_id);
   singlet.status = 3;
   if (!singlet.P(partpb)) {
 #ifdef ERROR
@@ -1426,7 +1415,6 @@ GamGam::PrepareHadronisation(Particle *part_)
   Lorenb(part_->M(), part_->P4(), pmxda, partpb);
   
   Particle doublet(part_->role, doublet_id);
-  //Particle doublet(11, doublet_id);
   doublet.status = 3;
   if (!doublet.P(partpb)) {
 #ifdef ERROR

@@ -5,11 +5,10 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <sstream>
 #include <iomanip>
 
 #include "particle.h"
-
-//#include "pythia6hadroniser.h"
 
 /**
  * Class containing all the information on the in- and outgoing particles' kinematics
@@ -20,6 +19,10 @@ class Event {
     Event();
     ~Event();
     /**
+     * @brief Copies all the relevant quantities from one Event object to another
+     */
+    Event& operator=(const Event&);
+    /**
      * Returns the list of pointers to the Particle objects corresponding to a certain role in the process kinematics
      * @brief Gets a list of particles by their role in the event
      * @param role_ The role the particles have to play in the process
@@ -28,7 +31,7 @@ class Event {
     std::vector<Particle*> GetByRole(int role_);
     Particle* GetOneByRole(int role_) { 
       std::vector<Particle*> out = this->GetByRole(role_);
-      if (out.size()==0) return _null;
+      if (out.size()==0) return (Particle*)NULL;
       else return out.at(0);
     };
     /**
@@ -56,10 +59,11 @@ class Event {
      * @param of_ The file stream on which the event record has to be saved
      * @param weight_ The weight of the event
      */
-    void StoreLHERecord(std::ofstream* of_, const double weight_=1.);
+    std::string GetLHERecord(const double weight_=1.);
     /**
-     * Stores in a file (raw format) all the kinematics on the outgoing leptons
+     * Returns all the kinematics on the outgoing leptons in a common LHE event format
      * @param weight_ The weight of the event
+     * @return A string containing the event information in a LHE format
      */
     void Store(std::ofstream*,double weight_=1.);
     //void Hadronise(std::string algo_="");
@@ -77,10 +81,9 @@ class Event {
      * @brief Number of particles in the event
      * @return The number of particles in the event, as an integer
      */
-    inline int NumParticles() { return this->_part->size(); };
+    inline int NumParticles() { return this->_part.size(); };
   private:
-    std::multimap<int,Particle> *_part;
-    Particle *_null;
+    std::multimap<int,Particle> _part;
 };
 
 #endif

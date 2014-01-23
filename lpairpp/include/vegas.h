@@ -4,6 +4,7 @@
 #include <fstream>
 #include <cstdio> // remove (DEBUG)
 
+#include "inputparameters.h"
 #include "gamgam.h"
 
 #define MAX_ND 50
@@ -46,7 +47,6 @@ class Vegas {
      *  parameters.
      * @brief Launches the generation of events
      */
-    int LaunchGeneration();
     void Generate();
     void DumpGrid();
   private:

@@ -11,8 +11,7 @@
 #include <map>
 
 #include "process.h"
-#include "event.h"
-#include "utils.h"
+#include "inputparameters.h"
 
 /**
  * @brief List of kinematic cuts to apply on the central and outgoing phase space.

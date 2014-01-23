@@ -1,10 +1,13 @@
-#include "../include/event.h"
+#include <fstream>
+
+#include "../include/eventslist.h"
 #include "../include/pythia6hadroniser.h"
 #include "../include/jetset7hadroniser.h"
 
 int main() {
 
   Event ev;
+  std::ofstream of("hahaha");
   
   Particle pp1(1, 2212);
   pp1.P(1., -1., 10.);
@@ -30,11 +33,16 @@ int main() {
   //p.E(1.312);
 
   Pythia6Hadroniser py;
-  py.Hadronise(&ev);
+  //py.Hadronise(&ev);
 
   //Jetset7Hadroniser js;
   //js.Hadronise(&ev);
-  ev.Dump(true);
+  //ev.Dump(true);
+
+  EventsList el(&of);
+  el.AddEvent(&ev);
+  el.Info();
+
 
   return 0;
 }

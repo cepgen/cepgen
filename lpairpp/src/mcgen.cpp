@@ -88,7 +88,22 @@ void MCGen::ComputeXsection(double* xsec_, double *err_)
 
 void MCGen::LaunchGeneration()
 {
+  // LHE file preparation
+
+  /**(_ip.file) << "<LesHouchesEvents version=\"1.0\">" << std::endl;
+  *(_ip.file) << "<header>This file was created from the output of the LPAIR++ generator</header>" << std::endl;
+  *(_ip.file) << "<init>" << std::endl
+	      << "2212 2212"
+	      << std::setprecision(2) << _ip.in1p << " "
+	      << std::setprecision(2) << _ip.in2p << " "
+	      << "0 0 10042 10042 2 1" << std::endl
+	      << "0.10508723460E+01 0.96530000000E-02 0.26731120000E-03 0" << std::endl
+	      << "</init>" << std::endl;*/
+
   veg->Generate();
+
+  //*(_ip.file) << "</LesHouchesEvents>" << std::endl;
+
 }
 
 int i = 0;
@@ -187,28 +202,26 @@ double f(double* x_, size_t ndim_, void* params_) {
   }
   
   if (p->store) { // MC events generation
+    Pythia6Hadroniser py; //FIXME need to move this one step higher (in main ?)
+
     gg.FillKinematics(false);
-    if (kin.kinematics>1) {
+    if (kin.kinematics>=2) {
       gg.PrepareHadronisation(gg.GetEvent()->GetOneByRole(3));
-      /*if (kin.kinematics==3) {
+      if (kin.kinematics==3) {
 	gg.PrepareHadronisation(gg.GetEvent()->GetOneByRole(5));
-	}*/
-      //if (algo_=="pythia6") {
-      //std::cout << "hadronisation using pythia6" << std::endl;
-      Pythia6Hadroniser py;
-      py.Hadronise(gg.GetEvent());
+      }
+      //py.Hadronise(gg.GetEvent());
       //Jetset7Hadroniser js;
       //js.Hadronise(gg.GetEvent());
-      //}
     }
-    
     gg.GetEvent()->Dump();
-    /*std::vector<Particle*> pp = gg.GetEvent()->GetParticles();
-    std::vector<Particle*>::iterator p;
-    for (p=pp.begin(); p!=pp.end(); p++) {
-      std::cout << "--> " << (*p)->pdgId << ", " << (*p)->role << std::endl;
-      }*/
+    std::cout << "before dumping the info" << std::endl;
+    p->eventslist->Info();
+    std::cout << "before adding the event" << std::endl;
+    p->eventslist->AddEvent(gg.GetEvent());
+    //gg.GetEvent()->Dump();
     //gg.GetEvent()->Store(p->file);
+    //gg.GetEvent()->StoreLHERecord(p->file);
 
     /*double t1min, t1max, t2min, t2max;
 
