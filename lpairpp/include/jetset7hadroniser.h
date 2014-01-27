@@ -1,7 +1,11 @@
 #ifndef _JETSET7HADRONISER_H
 #define _JETSET7HADRONISER_H
 
+#include <algorithm>
+
 #include "hadroniser.h"
+
+#define NAME_CHR 16
 
 extern "C"
 {
@@ -13,7 +17,7 @@ extern "C"
   extern struct
   {
     int n, k[5][4000];
-    double p[5][4000], v[5][4000];
+    float p[5][4000], v[5][4000];
   } lujets_;
 }
 
@@ -31,7 +35,14 @@ class Jetset7Hadroniser : public Hadroniser
   inline static double ulmass(int pdgid_) { return ulmass_(pdgid_); };
   inline static void luexec() { luexec_(); };
   inline static void lulist(int mlist_) { lulist_(mlist_); };
-  inline static std::string luname(int pdgid_) { char out[5]; luname_(pdgid_, out, 5); return std::string(out,5); };
+  inline static std::string luname(int pdgid_) {
+    char out[NAME_CHR];
+    std::string s;
+    luname_(pdgid_, out, NAME_CHR);
+    s = std::string(out, NAME_CHR);
+    s.erase(remove(s.begin(), s.end(), ' '), s.end());
+    return s;
+  };
   /**
    * @brief Connect entries with colour flow information
    * @param njoin_ Number of particles to join in the colour flow

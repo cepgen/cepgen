@@ -6,7 +6,7 @@ JETSET7SRC = $(wildcard external/jetset7*.f)
 PYTHIA8LIB = $(wildcard external/libpythia8*.so)
 INCLUDEDIR = include/
 ############################################
-CFLAGS     = -Wall -Wextra -I$(INCLUDEDIR) -llhapdfdummy -g
+CFLAGS     = -Wall -Wextra -I$(INCLUDEDIR) -g
 FFLAGS     = -w -g
 LDFLAGS    = -I$(INCLUDEDIR) -lgfortran
 VPATH      = src include
@@ -23,12 +23,21 @@ CF = gfortran
 RM = rm -f
 ############################################
 
+############# FIXME ########################
+RFLAGS = $(shell root-config --cflags)
+RLIBS = $(shell root-config --libs)
+RHEAD = $(shell root-config --incdir)
+############################################
+
 #$(info $(OBJ_FILES))
 
 all: $(EXEC) xsect
 
 $(EXEC): $(OBJ_FILES)
 	$(CC) -g -o $@ $^ $(LDFLAGS)
+
+test: obj/test.oxx $(LIB_FILES)
+	$(CC) -g -o $@ $^ $(LDFLAGS) $(RLIBS)
 
 .PHONY: all
 
@@ -37,6 +46,9 @@ obj/%.o: %.cpp %.h
 
 obj/%.fo: external/%.f
 	$(CF) -c $(FFLAGS) $< -o $@
+
+obj/%.oxx: %.cxx
+	$(CC) -c $(CFLAGS) -I$(RHEAD) $(RFLAGS) $< -o $@
 
 clean:
 	$(RM) obj/*.o $(EXEC)

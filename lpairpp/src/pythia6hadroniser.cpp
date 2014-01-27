@@ -7,6 +7,9 @@ Pythia6Hadroniser::Pythia6Hadroniser()
 
 Pythia6Hadroniser::~Pythia6Hadroniser()
 {
+#ifdef DEBUG
+  std::cout << "[Pythia6Hadroniser::~Pythia6Hadroniser] [DEBUG] Destructor called" << std::endl;
+#endif
 }
 
 bool
@@ -25,9 +28,7 @@ Pythia6Hadroniser::Hadronise(Particle *part_)
   pyjets_.k[4][0] = 0; // daughter 2
 
   this->pyexec();
-  //pyjets_.v[0][0] = 0;
   std::cout << "[Pythia6Hadroniser::Hadronise] INFO" << std::endl;
-  //part_->Dump();
   return true;
 }
 
@@ -64,9 +65,6 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
   ev_->Dump();
 #endif
 
-  // Muting the unneeded information
-  //this->pygive("");
-
   // Filling the common block to propagate to PYTHIA6
   pyjets_.n = 0;
 
@@ -84,17 +82,17 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
       pyjets_.k[0][np] = (*p)->status;
       pyjets_.k[1][np] = (*p)->pdgId;
       
-      if ((*p)->GetMother()!=(Particle*)NULL) {
-	pyjets_.k[2][np] = (*p)->GetMother()->id+1; // mother
+      if ((*p)->GetMother()!=-1) {
+	pyjets_.k[2][np] = (*p)->GetMother()+1; // mother
       }
       else {
 	pyjets_.k[2][np] = 0; // mother
       }
       
-      daug = (*p)->GetDaughters();
+      daug = ev_->GetDaughters(*p);
       if (daug.size()!=0) {
-	pyjets_.k[3][np] = (*p)->GetDaughters().front()->id+1; // daughter 1
-	pyjets_.k[4][np] = (*p)->GetDaughters().back()->id+1; // daughter 2
+	pyjets_.k[3][np] = (*p)->GetDaughters().front()+1; // daughter 1
+	pyjets_.k[4][np] = (*p)->GetDaughters().back()+1; // daughter 2
       }
       else {
 	pyjets_.k[3][np] = 0; // daughter 1
@@ -135,9 +133,6 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
     }
     this->pyjoin(njoin[i], jlpsf[i]);
   }
-
-  //this->pylist(2);
-
   this->pyexec();
   //this->pylist(2);
 
@@ -147,19 +142,28 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
 
     Particle pa;
     pa.id = p;
+    pa.pdgId = pyjets_.k[1][p];
     if (ev_->GetById(pyjets_.k[2][p]-1)!=(Particle*)NULL) {
+      //std::cout << "Particle : " << pa.id << " with pdg : " << pa.pdgId << std::endl;
+      //std::cout << "->mother : " << ev_->GetById(pyjets_.k[2][p]-1)->id << " with pdg : " << ev_->GetById(pyjets_.k[2][p]-1)->pdgId << " and role : " << ev_->GetById(pyjets_.k[2][p]-1)->role << std::endl;
       pa.role = ev_->GetById(pyjets_.k[2][p]-1)->role; // Child particle inherits its mother's role
     }
     pa.status = pyjets_.k[0][p];
-    pa.pdgId = pyjets_.k[1][p];
     pa.P(pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p]);
     pa.M(pyjets_.p[4][p]);
     pa.name = this->pyname(pa.pdgId);
     pa.charge = (float)(this->pyp(p+1,6));
 
+    /*if (pa.status==1) {
+      this->_hadrons->push_back(pa);
+      }*/
+
     if (pyjets_.k[2][p]!=0) {
 #ifdef DEBUG
-      std::cout << "[Pythia6Hadroniser::Hadronise] [DEBUG] " << "(pdgId=" << pa.pdgId << ") has mother (pdgId=" << pyjets_.k[1][pyjets_.k[2][p]-1] << ")" << std::endl;
+      std::cout << "[Pythia6Hadroniser::Hadronise] [DEBUG] "
+		<< pa.id << " (pdgId=" << pa.pdgId << ") has mother "
+		<< pyjets_.k[2][p] << " (pdgId=" << pyjets_.k[1][pyjets_.k[2][p]-1] << ")"
+		<< std::endl;
 #endif
       pa.SetMother(ev_->GetById(pyjets_.k[2][p]-1));
     }

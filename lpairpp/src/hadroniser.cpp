@@ -9,5 +9,8 @@ Hadroniser::Hadroniser() :
 Hadroniser::~Hadroniser()
 {
   delete _hadrons;
+#ifdef DEBUG
+  std::cout << "[Hadroniser::~Hadroniser] [DEBUG] Destructor called" << std::endl;
+#endif
 }
 

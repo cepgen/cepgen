@@ -10,13 +10,10 @@
  * the events generation.
  */
 int main(int argc, char* argv[]) {
-  InputParameters ip;
+  Parameters ip;
+  Event ev;
   double xsec, err;
-  std::ofstream of, fd;
-  //HEPRUP hr;
-  EventsList *ev;
-
-  ev = new EventsList(&of, 1000);
+  Pythia6Hadroniser had;
 
   if (argc==1) {
     std::cout << "[Main] [DEBUG] No config file provided. Setting the default parameters." << std::endl;
@@ -29,8 +26,8 @@ int main(int argc, char* argv[]) {
     ip.minenergy = 0.; //FIXME
     ip.minpt = 5.;
     ip.maxgen = 1e1;
-    ip.itvg = 1;
     ip.ncvg = 5e3; //FIXME
+    ip.hadroniser = &had;
     //ip.maxgen = 1e5;
     //ip.SetEtaRange(-2.5, 2.5);
   }
@@ -44,31 +41,29 @@ int main(int argc, char* argv[]) {
       return -1;
     }
   }
-
-  //hrp.SetParameters(ip);
-
   ip.generation = true;
+  std::ofstream of, fd;
   of.open("test");
-  fd.open("test_q2");
+  //fd.open("test_q2");
   ip.file = &of;
-  ip.file_debug = &fd;
+  //ip.file_debug = &fd;
   ip.Dump();
 
-  MCGen mg(ip);
+  MCGen mg(&ip);
 
   mg.ComputeXsection(&xsec, &err);
   if (ip.generation) {
-    //ev->Info();
-    //ip.eventslist = ev;
-    ip.eventslist = new EventsList(&of, 1000);
-    mg.LaunchGeneration();
-    ip.eventslist->Info();
-    //std::cout << "--> " << ip.eventslist->NumEvents() << std::endl;
+    for (int i=0; i<ip.maxgen; i++) {
+      ev = *mg.GenerateOneEvent();
+      //ev.Dump();
+      //std::cout << ev.GetLHERecord();
+    }
+    //mg.LaunchGeneration();
   }
   
+
   ip.StoreConfigFile("lastrun.card");
 
-  delete ev;
   of.close();
   fd.close();
   return 0;

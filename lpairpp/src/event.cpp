@@ -2,24 +2,26 @@
 
 Event::Event()
 {
+  //this->_part = new std::multimap<int,Particle>();
 }
 
 Event::~Event()
 {
+  //delete this->_part;
 }
 
-Event&
+/*Event&
 Event::operator=(const Event &ev_)
 {
   this->_part = ev_._part;
   return *this;
-}
+  }*/
 
-std::vector<Particle*>
+Particles
 Event::GetByRole(int role_)
 {
   int i;
-  std::vector<Particle*> out;
+  Particles out;
   std::pair<std::multimap<int,Particle>::iterator,std::multimap<int,Particle>::iterator> ret = this->_part.equal_range(role_);
   std::multimap<int,Particle>::iterator it;
 
@@ -61,7 +63,7 @@ Event::AddParticle(Particle *part_, bool replace_)
   if (part_->role<=0) {
     return -1;
   }
-  std::vector<Particle*> part_with_same_role = this->GetByRole(part_->role);
+  Particles part_with_same_role = this->GetByRole(part_->role);
   part_->id = this->_part.size(); //FIXME is there any better way of introducing this id ?
   if (replace_ and part_with_same_role.size()!=0) {
     part_with_same_role.at(0) = part_;
@@ -74,35 +76,56 @@ Event::AddParticle(Particle *part_, bool replace_)
 std::string
 Event::GetLHERecord(const double weight_)
 {
-  std::multimap<int,Particle>::iterator p;
-
+  //std::multimap<int,Particle>::iterator p;
   std::stringstream ss;
+  Particles particles, daughters;
+  Particles::iterator p, dg;
+  int min_id, max_id;
 
+  //FIXME need to fetch the vector (not the multimap), so that we can sort on the particle unique identifier (also TODO!!!)
   ss << "<event>" << std::endl;
   ss << this->NumParticles() << "\t0\t0.2983460E-04\t0.9118800E+02\t0.7546772E-02\t0.1300000E+00" << std::endl;
-  for (p=this->_part.begin(); p!=this->_part.end(); p++) {
-    if (p->second.status==0) p->second.status = 1;
-    ss << std::setw(4) << p->second.id+1 << "\t"
-       << std::setw(4) << p->second.status << "\t"
-       << std::setw(4) << p->second.pdgId << "\t";
-    if (p->second.GetMother()!=(Particle*)NULL) {
-      ss << std::setw(4) << p->second.GetMother()->id+1 << "\t";
+  particles = this->GetParticles();
+  for (p=particles.begin(); p!=particles.end(); p++) {
+    if ((*p)->status==0) (*p)->status = 1;
+    
+    ss << std::setw(4) << (*p)->id+1 << "  "
+       << std::setw(3) << (*p)->status << "  "
+       << std::setw(5) << (*p)->pdgId << "  ";
+    if (!(*p)->Primary()) {
+      ss << std::setw(2) << (*p)->GetMother()+1 << "  ";
     }
     else {
-      ss << std::setw(4) << "0" << "\t";
+      ss << std::setw(2) << "0" << "  ";
     }
-    ss << std::setw(4) << "0" << "\t";
-    ss << std::setw(4) << "0" << "\t";
-    ss << std::setw(4) << "0" << "\t";
-    ss << std::setw(8) << p->second.px << "\t"
-       << std::setw(8) << p->second.py << "\t"
-       << std::setw(8) << p->second.pz << "\t"
-       << std::setw(8) << p->second.E() << "\t"
-       << std::setw(8) << p->second.M() << "\t"
-       << std::setw(8) << weight_
-       << std::endl;
+    daughters = this->GetDaughters(*p);
+    max_id = 0;
+    min_id = 999;
+    if (daughters.size()>0) {
+      for (dg=daughters.begin(); dg!=daughters.end(); dg++) {
+	if ((*dg)->id>this->NumParticles() or (*dg)->id<0) continue; //FIXMEEEEEEEEEEEEEEEEEEEEEE
+	if ((*dg)->id>max_id) max_id = (*dg)->id;
+	if ((*dg)->id<min_id) min_id = (*dg)->id;
+      }
+      if (min_id==max_id) 
+	ss << std::setw(4) << min_id << "  " << std::setw(4) << "0";
+      else 
+	ss << std::setw(4) << min_id << "  " << std::setw(4) << max_id;
+    }
+    else {
+      ss << std::setw(4) << "0" << "  " << std::setw(4) << "0";
+    }
+    ss << std::setw(4) << "  " << "0" << "  "; 
+    ss << std::setw(12) << (*p)->px << "  " 
+       << std::setw(12) << (*p)->py << "  " 
+       << std::setw(12) << (*p)->pz << "  " 
+       << std::setw(12) << (*p)->E() << "  " 
+       << std::setw(12) << (*p)->M() << "  " 
+       << std::setw(4) << weight_ 
+       << std::endl; 
   }
   ss << "</event>" << std::endl;
+
   return ss.str();
 }
 
@@ -134,51 +157,59 @@ Event::Store(std::ofstream *of_, double weight_)
        << std::endl;
 }
 
-std::vector<Particle*>
+Particles
 Event::GetParticles()
 {
-  std::vector<Particle*> out;
+  Particles out;
   std::multimap<int,Particle>::iterator it;
   for (it=this->_part.begin(); it!=this->_part.end(); it++) {
     out.push_back(&it->second);
   }
+  std::sort(out.begin(), out.end());
   return out;
 }
 
-std::vector<Particle*>
+Particles
 Event::GetStableParticles()
 {
-  std::vector<Particle*> out;
+  Particles out;
   std::multimap<int,Particle>::iterator it;
   for (it=this->_part.begin(); it!=this->_part.end(); it++) {
-    if (it->second.status==1) {
+    if (it->second.status==0 or it->second.status==1) {
       out.push_back(&it->second);
     }
   }
+  std::sort(out.begin(), out.end());
   return out;  
 }
 
 void
 Event::Dump(bool stable_)
 {
-  std::multimap<int,Particle>::iterator it;
+  //std::multimap<int,Particle>::iterator it;
+  Particles particles;
+  Particles::iterator p;
+
+  particles = this->GetParticles();
   std::cout << "[Event::Dump]" << std::endl;
   std::cout << "Particle" << "\t" << "PDG id" << "\t\t" << "Charge" << "\t" << "Role" << "\t" << "Status" << "\t" << "Mother" << std::endl;
   std::cout << "--------" << "\t" << "------" << "\t\t" << "------" << "\t" << "----" << "\t" << "------" << "\t" << "------" << std::endl;
-  for (it=this->_part.begin(); it!=this->_part.end(); it++) {
-    if (stable_ and it->second.status!=1) continue;
-    std::cout << std::setw(8) << it->second.id
-	      << "\t" << std::setw(6) << it->second.pdgId;
-    if (it->second.name!="")
-      std::cout << " (" << it->second.name << ")";
-    else std::cout << "\t";
-    if (it->second.charge!=999.)
-      std::cout << "\t" << std::setprecision(2) << std::setw(6) << it->second.charge;
-    else std::cout << "\t";
-    std::cout << "\t" << std::setw(4) << it->second.role
-	      << "\t" << std::setw(6) << it->second.status;
-    if (it->second.GetMother()!=(Particle*)NULL)
-      std::cout << "\t" << std::setw(6) << it->second.GetMother()->id;
+  for (p=particles.begin(); p!=particles.end(); p++) {
+    if (stable_ and (*p)->status!=1) continue;
+    std::cout << std::setw(8) << (*p)->id
+	      << "\t" << std::setw(6) << (*p)->pdgId;
+    if ((*p)->name!="")
+      std::cout << " " << std::setw(6) << (*p)->name;
+    else
+      std::cout << "\t";
+    std::cout << "\t";
+    if ((*p)->charge!=999.)
+	std::cout << std::setprecision(2) << std::setw(6) << (*p)->charge;
+    std::cout << "\t" << std::setw(4) << (*p)->role
+	      << "\t" << std::setw(6) << (*p)->status;
+      //<< std::endl;
+    if ((*p)->GetMother()!=-1)
+      std::cout << "\t" << std::setw(6) << (*p)->GetMother();
     std::cout << std::endl;
   }
 }

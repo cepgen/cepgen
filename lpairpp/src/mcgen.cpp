@@ -1,6 +1,7 @@
 #include "mcgen.h"
 
-MCGen::MCGen(InputParameters ip_)
+MCGen::MCGen(Parameters *ip_) :
+  _xsec(-1.), _xsec_error(-1.)
 {
   unsigned int ndim;
   std::string topo;
@@ -10,13 +11,14 @@ MCGen::MCGen(InputParameters ip_)
 #endif
 
   srand(time(0));
-  _ip = ip_;
+  
+  _par = ip_;
 
-  if (_ip.p1mod<=2 && _ip.p2mod<=2) {
+  if (_par->p1mod<=2 && _par->p2mod<=2) {
     topo = "ELASTIC proton/proton";
     ndim = 7;
   }
-  else if (_ip.p1mod<=2 || _ip.p2mod<=2) {
+  else if (_par->p1mod<=2 || _par->p2mod<=2) {
     topo = "SINGLE-DISSOCIATIVE proton";
     ndim = 8;
   }
@@ -29,24 +31,24 @@ MCGen::MCGen(InputParameters ip_)
 #endif
 
 #ifdef DEBUG
-  std::cout << "[MCGen::MCGen] [DEBUG] Cuts mode : " << _ip.mcut << std::endl;
-  switch(_ip.mcut) {
+  std::cout << "[MCGen::MCGen] [DEBUG] Cuts mode : " << _par->mcut << std::endl;
+  switch(_par->mcut) {
     case 1:
     case 2:
       std::cout << "[MCGen::MCGen] [DEBUG] Single leptons' transverse momentum condition : ";
-      if (_ip.minpt<=0.) {
+      if (_par->minpt<=0.) {
         std::cout << "no pT cut" << std::endl;
         break;
       }
-      if (_ip.maxpt>0.) {
+      if (_par->maxpt>0.) {
         std::cout << "pT in range [" 
-                  << _ip.minpt << " GeV/c, " 
-                  << _ip.maxpt << " GeV/c]" 
+                  << _par->minpt << " GeV/c, " 
+                  << _par->maxpt << " GeV/c]" 
                   << std::endl;
         break;
       }
-      std::cout << "pT > " << _ip.minpt << " GeV/c";
-      if (_ip.mcut==1) {
+      std::cout << "pT > " << _par->minpt << " GeV/c";
+      if (_par->mcut==1) {
         std::cout << " for at least one lepton" << std::endl;
       }
       else {
@@ -59,51 +61,62 @@ MCGen::MCGen(InputParameters ip_)
       break;
   }
 #endif
-  veg = new Vegas(ndim,f, &_ip);
-
-  // For debugging purposes
-  
-  /*double x[ndim];
-  for (unsigned int i=0; i<ndim; i++) {
-    x[i] = 0.4;
-  }
-  std::cout << ">>> " << f(x, ndim, (void*)&ip_) << std::endl;
-  exit(0);*/
+  veg = new Vegas(ndim,f, _par);
 }
 
 MCGen::~MCGen()
 {
   delete veg;
 #ifdef DEBUG
-  std::cout << "[MCGen::~MCGen] [DEBUG] MCGen destructed !" << std::endl;
+  std::cout << "[MCGen::~MCGen] [DEBUG] Destructor called" << std::endl;
 #endif
 }
 
-void MCGen::ComputeXsection(double* xsec_, double *err_)
+void
+MCGen::ComputeXsection(double* xsec_, double *err_)
 {
   std::cout << "[MCGen::ComputeXsection] Starting the computation of the process cross-section" << std::endl;
   veg->Integrate(xsec_, err_);
+  this->_xsec = *xsec_;
+  this->_xsec_error = *err_;
   std::cout << "[MCGen::ComputeXsection] Total cross-section = " << *xsec_ << " +/- " << *err_ << " pb" << std::endl;
 }
 
-void MCGen::LaunchGeneration()
+Event*
+MCGen::GenerateOneEvent()
+{
+  bool good = false;
+  while (!good) {
+    good = veg->GenerateOneEvent();
+  }
+  return (Event*)_par->last_event;
+}
+
+void
+MCGen::LaunchGeneration()
 {
   // LHE file preparation
-
-  /**(_ip.file) << "<LesHouchesEvents version=\"1.0\">" << std::endl;
-  *(_ip.file) << "<header>This file was created from the output of the LPAIR++ generator</header>" << std::endl;
-  *(_ip.file) << "<init>" << std::endl
-	      << "2212 2212"
-	      << std::setprecision(2) << _ip.in1p << " "
-	      << std::setprecision(2) << _ip.in2p << " "
-	      << "0 0 10042 10042 2 1" << std::endl
-	      << "0.10508723460E+01 0.96530000000E-02 0.26731120000E-03 0" << std::endl
-	      << "</init>" << std::endl;*/
+  if (!_par->file->is_open()) {
+    std::cerr << "[MCGen::LaunchGeneration] [ERROR] output file is not opened !" << std::endl;
+  }
+  //#ifdef DEBUG
+  else {
+    std::cout << "[MCGen::LaunchGeneration] [DEBUG] output file is correctly opened !" << std::endl;
+  }
+  //#endif
+  *(_par->file) << "<LesHouchesEvents version=\"1.0\">" << std::endl;
+  *(_par->file) << "<header>This file was created from the output of the LPAIR++ generator</header>" << std::endl;
+  *(_par->file) << "<init>" << std::endl
+	       << "2212 2212 "
+	       << std::setprecision(2) << _par->in1p << " "
+	       << std::setprecision(2) << _par->in2p << " "
+	       << "0 0 10042 10042 2 1" << std::endl
+	       << this->_xsec << " " << this->_xsec_error << " 0.26731120000E-03 0" << std::endl
+	       << "</init>" << std::endl;
 
   veg->Generate();
-
-  //*(_ip.file) << "</LesHouchesEvents>" << std::endl;
-
+  
+  *(_par->file) << "</LesHouchesEvents>" << std::endl;
 }
 
 int i = 0;
@@ -111,11 +124,11 @@ int i = 0;
 double f(double* x_, size_t ndim_, void* params_) {
   double ff;
   int outp1pdg, outp2pdg;
-  InputParameters *p;
+  Parameters *p;
   GamGamKinematics kin;
 
   i += 1;
-  p = (InputParameters*)params_;
+  p = (Parameters*)params_;
 
   //FIXME at some point introduce non head-on colliding beams ?
 
@@ -202,26 +215,18 @@ double f(double* x_, size_t ndim_, void* params_) {
   }
   
   if (p->store) { // MC events generation
-    Pythia6Hadroniser py; //FIXME need to move this one step higher (in main ?)
-
     gg.FillKinematics(false);
     if (kin.kinematics>=2) {
       gg.PrepareHadronisation(gg.GetEvent()->GetOneByRole(3));
       if (kin.kinematics==3) {
 	gg.PrepareHadronisation(gg.GetEvent()->GetOneByRole(5));
       }
-      //py.Hadronise(gg.GetEvent());
-      //Jetset7Hadroniser js;
-      //js.Hadronise(gg.GetEvent());
+      p->hadroniser->Hadronise(gg.GetEvent()); 
     }
-    gg.GetEvent()->Dump();
-    std::cout << "before dumping the info" << std::endl;
-    p->eventslist->Info();
-    std::cout << "before adding the event" << std::endl;
-    p->eventslist->AddEvent(gg.GetEvent());
-    //gg.GetEvent()->Dump();
+    
+    //*(p->file) << gg.GetEvent()->GetLHERecord();
+    *(p->last_event) = *(gg.GetEvent());
     //gg.GetEvent()->Store(p->file);
-    //gg.GetEvent()->StoreLHERecord(p->file);
 
     /*double t1min, t1max, t2min, t2max;
 

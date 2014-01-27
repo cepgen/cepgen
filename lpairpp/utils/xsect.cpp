@@ -6,11 +6,12 @@
  * @author Laurent Forthomme <laurent.forthomme@uclouvain.be>
  */
 int main(int argc, char* argv[]) {
-  InputParameters ip;
+  Parameters ip;
   double xsec, err, minpt;
   double max;
   std::ofstream tmp;
   int it;
+  MCGen *mg;
 
   // max = 10.;
   max = 10.;
@@ -43,7 +44,7 @@ int main(int argc, char* argv[]) {
   for (int i=0; i<it; i++) {
     minpt = (double)i/(double)it*max;
     ip.minpt = minpt;
-    MCGen *mg = new MCGen(ip);
+    mg = new MCGen(&ip);
     mg->ComputeXsection(&xsec, &err);
     std::cout << minpt << "\t" << xsec << "\t" << err << std::endl;
     tmp << minpt << "\t" << xsec << "\t" << err << std::endl;

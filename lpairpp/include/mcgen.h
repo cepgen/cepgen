@@ -8,10 +8,7 @@
 
 #include "vegas.h"
 #include "gamgam.h"
-#include "inputparameters.h"
-
-#include "pythia6hadroniser.h"
-#include "jetset7hadroniser.h"
+#include "parameters.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -55,28 +52,35 @@
 class MCGen {
  public:
   /**
-   * Sets the number of dimensions on which to perform the integration, according
-   *  to the set of input parameters given as an argument and propagated to the
-   *  whole object
+   * Sets the number of dimensions on which to perform the integration, according to the set of input parameters given as an argument and propagated to the whole object
    * @brief Class constructor
-   * @param ip_ List of input parameters defining the phase space
-   *  on which to perform the integration
+   * @param[in] ip_ List of input parameters defining the phase space on which to perform the integration
    */
-  MCGen(InputParameters ip_);
+  MCGen(Parameters *ip_);
   ~MCGen();
   void Test();
   /**
-   * Computes the cross-section for the run defined by this object. This returns
-   * the cross-section as well as the absolute error computed along.
+   * Computes the cross-section for the run defined by this object. This returns the cross-section as well as the absolute error computed along.
+   * @brief Compute the cross-section for the given process
+   * @param[out] xsec_ The computed cross-section, in pb
+   * @param[out] err_ The absolute integration error on the computed cross-section, in pb
    */
-  void ComputeXsection(double*,double*);
+  void ComputeXsection(double* xsec_,double* err_);
+  /**
+   * Generates one single event given the phase space computed by Vegas in the integration step
+   * @return A pointer to the Event object generated in this run
+   */
+  Event* GenerateOneEvent();
+  /**
+   * Launches the full events generation 
+   * @deprecated This method is to be suppressed since the events generation can now be launched one event at a time using the @a GenerateOneEvent method
+   */
   void LaunchGeneration();
   /**
-   * @brief Returns the set of parameters used to setup the phase space to
-   *   integrate
-   * @return The InputParameter object embedded in this class
+   * @brief Returns the set of parameters used to setup the phase space to integrate
+   * @return The Parameter object embedded in this class
    */
-  InputParameters GetInputParameters() { return _ip; }
+  Parameters GetParameters() { return *_par; }
   void AnalyzePhaseSpace(const std::string);
  private:
   /**
@@ -87,7 +91,9 @@ class MCGen {
   /** @brief The Vegas integrator which will integrate the function */
   Vegas *veg;
   /** @brief Set of parameters to setup the phase space to integrate */
-  InputParameters _ip;
+  Parameters *_par;
+  double _xsec;
+  double _xsec_error;
 };
 
 /**

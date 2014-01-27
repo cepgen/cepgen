@@ -3,14 +3,14 @@
 Particle::Particle() :
   id(-1), pdgId(0), charge(999.), name(""), role(-1),
   px(0.), py(0.), pz(0.), status(0), e(-1.), m(-1.),
-  _isPrimary(true)
+  _mother(-1), _isPrimary(true)
 {
 }
 
 Particle::Particle(int role_, int pdgId_) :
   id(-1), charge(999.), name(""), role(-1),
   px(0.), py(0.), pz(0.), status(0), e(-1.), m(-1.),
-  _isPrimary(true)
+  _mother(-1), _isPrimary(true)
 {
   this->role = role_;
   this->pdgId = pdgId_;
@@ -20,6 +20,10 @@ Particle::Particle(int role_, int pdgId_) :
 }
 
 Particle::~Particle() {
+#ifdef DEBUG
+  std::cout << "[Particle::~Particle] [DEBUG] Destructor called" << std::endl;
+#endif
+  //if (this->_mother!=(Particle*)NULL) delete this->_mother;
 }
 
 Particle&
@@ -89,37 +93,28 @@ Particle::M(double m_)
 void
 Particle::SetMother(Particle* part_)
 {
-  this->_mother = part_;
+  this->_mother = part_->id;
   this->_isPrimary = false;
 #ifdef DEBUG
   std::cout << "[Particle::SetMother] [DEBUG] Particle "
-	    << part_->role << " (pdgId=" << part_->pdgId << ") is the new mother of "
-	    << this->role << " (pdgId=" << this->pdgId << ")" << std::endl;
+	    << part_->id+1 << " (pdgId=" << part_->pdgId << ") is the new mother of "
+	    << this->id+1 << " (pdgId=" << this->pdgId << ")" << std::endl;
 #endif
   part_->AddDaughter(this);
 };
 
-Particle*
-Particle::GetMother()
-{
-  if (!this->_isPrimary) {
-    return this->_mother;
-  }
-  return (Particle*)NULL;
-}
-
 bool
 Particle::AddDaughter(Particle* part_)
 {
-  std::pair<std::set<Particle*>::iterator,bool> ret;
-  ret = this->_daugh.insert(part_);
+  std::pair<std::set<int>::iterator,bool> ret;
+  ret = this->_daugh.insert(part_->id);
 #ifdef DEBUG
-  std::set<Particle*>::iterator it;
+  std::set<int>::iterator it;
   std::cout << "[Particle::AddDaughter] [DEBUG] Particle "
 	    << this->role << " (pdgId=" << this->pdgId << ") has now "
 	    << this->NumDaughters() << " daughter(s) : " << std::endl;
   for (it=this->_daugh.begin(); it!=this->_daugh.end(); it++) {
-    std::cout << " * " << (*it)->role << " (pdgId=" << (*it)->pdgId << ")" << std::endl;
+    std::cout << " * " << *it << std::endl;
   }
 #endif
 
@@ -129,7 +124,7 @@ Particle::AddDaughter(Particle* part_)
 	      << part_->role << " (pdgId=" << part_->pdgId << ") is a new daughter of "
 	      << this->role << " (pdgId=" << this->pdgId << ")" << std::endl;
 #endif
-    if (part_->GetMother()!=(Particle*)NULL) {
+    if (!part_->Primary() && part_->GetMother()!=-1) {
       part_->SetMother(this);
     }
   }
@@ -137,11 +132,11 @@ Particle::AddDaughter(Particle* part_)
   return ret.second;
 }
 
-std::vector<Particle*>
+std::vector<int>
 Particle::GetDaughters()
 {
-  std::vector<Particle*> out;
-  std::set<Particle*>::iterator it;
+  std::vector<int> out;
+  std::set<int>::iterator it;
   
   if (this->_daugh.empty()) return out;
   
@@ -151,10 +146,11 @@ Particle::GetDaughters()
 #endif
   
   for (it=this->_daugh.begin(); it!=this->_daugh.end(); it++) {
+    if (*it==-1) continue;
 #ifdef DEBUG
-    std::cout << " * " << (*it)->role << " (pdgId=" << (*it)->pdgId << ")" << std::endl;
+    std::cout << " * " << *it << std::endl;
 #endif
-    out.push_back((Particle*)(*it));
+    out.push_back(*it);
   }
 #ifdef DEBUG
   std::cout << "[Particle::GetDaughters] [DEBUG] Returning a vector containing " << out.size() << " particle(s)" << std::endl;
@@ -165,7 +161,7 @@ Particle::GetDaughters()
 void
 Particle::Dump()
 {
-  std::vector<Particle*> daugh;
+  std::vector<int> daugh;
 
   if (this->Valid()) {
     std::cout << "[Particle::Dump]"
@@ -181,19 +177,15 @@ Particle::Dump()
 	      << "\n  eta = " << this->Eta()
 	      << "\n  Is valid ? " << this->Valid()
 	      << "\n  Is primary ? " << this->_isPrimary << std::endl;
-    if (!this->_isPrimary) {
-      std::cout << "  Mother = " << this->GetMother()->role 
-		<< " (pdgId=" << this->GetMother()->pdgId << ")"
-		<< std::endl;
+    if (!this->Primary()) {
+      std::cout << "  Mother = " << this->GetMother() << std::endl;
     }
 
     daugh = this->GetDaughters();
 
     std::cout << "  Daughters (" << this->NumDaughters() << ")" << std::endl;
     for (unsigned int i=0; i<this->NumDaughters(); i++) {
-      std::cout << "   * Id = " << daugh[i]->id << ", role = " << daugh[i]->role
-		<< " (pdgId=" << daugh[i]->pdgId << ")"
-		<< std::endl; 
+      std::cout << "   * Id = " << daugh[i] << std::endl; 
     }
   }
   else {

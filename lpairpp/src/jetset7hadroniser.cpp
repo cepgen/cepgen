@@ -7,6 +7,9 @@ Jetset7Hadroniser::Jetset7Hadroniser()
 
 Jetset7Hadroniser::~Jetset7Hadroniser()
 {
+#ifdef DEBUG
+  std::cout << "[Jetset7Hadroniser::~Jetset7Hadroniser] [DEBUG] Destructor called" << std::endl;
+#endif
 }
 
 bool
@@ -33,85 +36,134 @@ bool
 Jetset7Hadroniser::Hadronise(Event *ev_)
 {
   int np;
-  std::vector<Particle*> pl = ev_->GetParticles();
-  std::vector<Particle*>::iterator p;
-  std::ostringstream oss;
-  //bool isprimary;
-  int njoin, jlpsf[2];
+  std::vector<int> rl;
+  std::vector<int>::iterator r;
 
-  //std::cout << "[Jetset7Hadroniser::Hadronise] INFO" << std::endl;
-  //ev_->Dump();
+  std::vector<Particle*> pr;
+  std::vector<Particle*>::iterator p;
+
+  std::vector<Particle*> daug;
+
+  std::ostringstream oss;
+  const int max_part_in_str = 3;
+  const int max_str_in_evt = 2;
+  //bool isprimary;
+  int id1, id2;
+  int njoin[max_str_in_evt], jlrole[max_str_in_evt], jlpsf[max_str_in_evt][max_part_in_str];
+
+  rl = ev_->GetRoles();
+
+  // First we initialise the string fragmentation variables
+  for (int i=0; i<max_str_in_evt; i++) {
+    jlrole[i] = -1;
+    njoin[i] = 0;
+    for (int j=0; j<max_part_in_str; j++) jlpsf[i][j] = -1;
+  }
+
+#ifdef DEBUG
+  std::cout << "[Jetset7Hadroniser::Hadronise] [DEBUG] Dump of the event before the hadronisation" << std::endl;
+  ev_->Dump();
+#endif
 
   // Filling the common block to propagate to JETSET7
-  njoin = 0;
-  lujets_.n = pl.size();
-  for (p=pl.begin(); p!=pl.end(); p++) {
-    np = (*p)->id;
-    lujets_.p[0][np] = (*p)->px;
-    lujets_.p[1][np] = (*p)->py;
-    lujets_.p[2][np] = (*p)->pz;
-    lujets_.p[3][np] = (*p)->E();
-    lujets_.p[4][np] = (*p)->M();
+  lujets_.n = 0;
 
-    lujets_.k[0][np] = (*p)->status;
-    lujets_.k[1][np] = (*p)->pdgId;
-    lujets_.k[2][np] = 0; // mother
-    lujets_.k[3][np] = 0; // daughter 1
-    lujets_.k[4][np] = 0; // daughter 2
-    
-    std::cout << "---> " << this->luname((*p)->pdgId) << "\t" << np << std::endl;
-    
-    /*for (int i=0; i<5; i++) {
-      lujets_.v[i][np] = 0.;
-      }*/
-    if ((*p)->status==3) {
-      jlpsf[njoin] = np+1; //FIXME need to sort this vector<Particle*> !
-      njoin++;
+  for (r=rl.begin(), id1=0; r!=rl.end(); r++) {
+    pr = ev_->GetByRole(*r);
+    for (p=pr.begin(), id2=0; p!=pr.end(); p++) {
+      np = (*p)->id;
+      
+      lujets_.p[0][np] = (*p)->px;
+      lujets_.p[1][np] = (*p)->py;
+      lujets_.p[2][np] = (*p)->pz;
+      lujets_.p[3][np] = (*p)->E();
+      lujets_.p[4][np] = (*p)->M();
+      
+      lujets_.k[0][np] = (*p)->status-1;
+      lujets_.k[1][np] = (*p)->pdgId;
+      
+      if ((*p)->GetMother()!=-1) {
+	lujets_.k[2][np] = (*p)->GetMother()+1; // mother
+      }
+      else {
+	lujets_.k[2][np] = 0; // mother
+      }
+
+      daug = ev_->GetDaughters(*p);
+      if (daug.size()!=0) {
+	lujets_.k[3][np] = (*p)->GetDaughters().front()+1; // daughter 1
+	lujets_.k[4][np] = (*p)->GetDaughters().back()+1; // daughter 2
+      }
+      else {
+	lujets_.k[3][np] = 0; // daughter 1
+	lujets_.k[4][np] = 0; // daughter 2
+      }
+      
+      for (int i=0; i<5; i++) {
+	lujets_.v[i][np] = 0.;
+      }
+            
+      if ((*p)->status==3) {
+	jlrole[id1] = (*p)->role;
+	jlpsf[id1][id2] = (*p)->id+1;
+	njoin[id1]++;
+	id2++;
+      }
+      lujets_.n++;
+    }
+    if (jlrole[id1]!=-1) {
+      id1++;
     }
   }
 
-  if (njoin==0) return false;
-  
-  //#ifdef DEBUG
-  std::cout << "[Jetset7Hadroniser::Hadronise] [DEBUG] Joining " << njoin << " particle(s) in a same string" << std::endl;
-  for (int i=0; i<njoin; i++) {
-    std::cout << "--> " << jlpsf[i] << " (pdgId=" << lujets_.k[1][jlpsf[i]-1] << ")" << std::endl;
-  }
-  //#endif
+#ifdef DEBUG
+  std::cout << "[Jetset7Hadroniser::Hadronise] [DEBUG] Passed the string construction stage" << std::endl;
+#endif
 
-  this->lujoin(njoin, jlpsf);
-  //this->lulist(1);
+  for (int i=0; i<max_str_in_evt; i++) {
+    if (njoin[i]<2) continue;
+#ifdef DEBUG
+    std::cout << "[Jetset7Hadroniser::Hadronise] [DEBUG] Joining " << njoin[i] << " particle in a same string (" << i << ") with role " << jlrole[i] << std::endl;
+#endif
+    for (int j=0; j<max_part_in_str; j++) {
+      if (jlpsf[i][j]==-1) continue;
+#ifdef DEBUG
+      std::cout << " * " << jlpsf[i][j] << " (pdgId=" << lujets_.k[1][jlpsf[i][j]-1] << ")" << std::endl;
+#endif
+    }
+    this->lujoin(njoin[i], jlpsf[i]);
+  }
   this->luexec();
   //this->lulist(2);
 
   for (int p=0; p<lujets_.n; p++) {
-    /*isprimary = false;
-    for (int i=0; i<njoin; i++) {
-      if (p==jlpsf[i]-1) {
-	isprimary = true;
-	break;
-      }
-    }
-    if (isprimary) continue;*/
-    //if (p<2*njoin+1) continue;
 
-    Particle pa(p+10, lujets_.k[1][p]);
+    if (lujets_.k[0][p]==0) continue;
+
+    Particle pa;
     pa.id = p;
-    pa.role = p+10;
-    pa.status = lujets_.k[0][p];
     pa.pdgId = lujets_.k[1][p];
+    if (ev_->GetById(lujets_.k[2][p]-1)!=(Particle*)NULL) {
+      pa.role = ev_->GetById(lujets_.k[2][p]-1)->role; // Child particle inherits its mother's role
+    }
+    pa.status = lujets_.k[0][p];
     pa.P(lujets_.p[0][p], lujets_.p[1][p], lujets_.p[2][p], lujets_.p[3][p]);
     pa.M(lujets_.p[4][p]);
+    pa.name = this->luname(pa.pdgId);
+    //pa.charge = (float)(this->lup(p+1,6));
 
     if (lujets_.k[2][p]!=0) {
 #ifdef DEBUG
-      std::cout << "[Jetset7Hadroniser::Hadronise] [DEBUG] " << "(pdgId=" << pa.pdgId << ") has mother (pdgId=" << lujets_.k[1][lujets_.k[2][p]-1] << ")" << std::endl;
+      std::cout << "[Jetset7Hadroniser::Hadronise] [DEBUG] "
+		<< pa.id << " (pdgId=" << pa.pdgId << ") has mother "
+		<< lujets_.k[2][p] << " (pdgId=" << lujets_.k[1][lujets_.k[2][p]-1] << ")"
+		<< std::endl;
 #endif
       pa.SetMother(ev_->GetById(lujets_.k[2][p]-1));
     }
-    
-    this->_hadrons->push_back(pa);
-    //ev_->AddParticle(&pa);
+
+    ev_->AddParticle(&pa);
   }
+
   return true;
 }

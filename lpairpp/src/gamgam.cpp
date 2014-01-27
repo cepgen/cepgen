@@ -1201,8 +1201,6 @@ GamGam::FillKinematics(bool symmetrise_)
     std::cerr << "Invalid incoming proton 2" << std::endl;
   }
   this->_ev->AddParticle(&ip2, true);
-  //this->_part->insert(std::pair<int,Particle>(part.role, part));
-  //this->AddParticle(part.role, &part);
   
   // First outgoing proton
   Particle op1(3, _pdg3);
@@ -1216,7 +1214,7 @@ GamGam::FillKinematics(bool symmetrise_)
                  _plab_op1[3])) {
     std::cerr << "Invalid outgoing proton 1" << std::endl;
   }
-  if (_cuts.kinematics>=2) {
+  if (_cuts.kinematics>1) {
     op1.M(_mp3);
   }
   this->_ev->AddParticle(&op1, true);
@@ -1249,8 +1247,10 @@ GamGam::FillKinematics(bool symmetrise_)
                 -_plab_ph1[0]*sp+rany*_plab_ph1[1]*cp,
 		 _plab_ph1[2],
 		 _plab_ph1[3])) {
+    //std::cerr << "Invalid photon 1" << std::endl;
   }
   ph1.charge = 0;
+  ph1.status = 0;
   this->_ev->AddParticle(&ph1);
   
   // Second incoming photon
@@ -1267,10 +1267,12 @@ GamGam::FillKinematics(bool symmetrise_)
     //std::cerr << "Invalid photon 2" << std::endl;
   }
   ph2.charge = 0;
+  ph2.status = 0;
   this->_ev->AddParticle(&ph2);
 
   // Central (two-photon) system
   Particle cs(4);
+  cs.status = -1;
   this->_ev->AddParticle(&cs);
   
   // First outgoing lepton
@@ -1312,11 +1314,10 @@ GamGam::FillKinematics(bool symmetrise_)
   this->_ev->GetOneByRole(5)->SetMother(this->_ev->GetOneByRole(2));
   this->_ev->GetOneByRole(41)->SetMother(this->_ev->GetOneByRole(1));
   this->_ev->GetOneByRole(42)->SetMother(this->_ev->GetOneByRole(2));
-  this->_ev->GetOneByRole(4)->SetMother(this->_ev->GetOneByRole(41));
+  //this->_ev->GetOneByRole(4)->SetMother(this->_ev->GetOneByRole(41)); //FIXME!!!!
   this->_ev->GetOneByRole(6)->SetMother(this->_ev->GetOneByRole(4));
   this->_ev->GetOneByRole(7)->SetMother(this->_ev->GetOneByRole(4));
 
-  
 #ifdef DEBUG
   gmux = -_t2/(_ep1*_eg2-_pp1*_p3_g2[2])/2.;
   gmuy = (_ep1*_plab_ph2[3]-_pp1*_plab_ph2[2])/(_ep2*_plab_ph2[3]+_pp2*_plab_ph2[2]);
@@ -1336,6 +1337,7 @@ GamGam::FillKinematics(bool symmetrise_)
             << "\n\tgmunu = " << gmunu
             << std::endl;
 #endif
+  //this->_ev->Dump();
 }
 
 void
@@ -1399,6 +1401,7 @@ GamGam::PrepareHadronisation(Particle *part_)
 
   Particle singlet(part_->role, singlet_id);
   singlet.status = 3;
+  singlet.SetMother(this->_ev->GetOneByRole(3));
   if (!singlet.P(partpb)) {
 #ifdef ERROR
     std::cerr << "[GamGam::PrepareHadronisation] ERROR while setting the 4-momentum of singlet" << std::endl;
@@ -1416,6 +1419,7 @@ GamGam::PrepareHadronisation(Particle *part_)
   
   Particle doublet(part_->role, doublet_id);
   doublet.status = 3;
+  doublet.SetMother(this->_ev->GetOneByRole(3));
   if (!doublet.P(partpb)) {
 #ifdef ERROR
     std::cout << "[GamGam::PrepareHadronisation] ERROR while setting the 4-momentum of doublet" << std::endl;
@@ -1516,11 +1520,6 @@ GamGam::PeriPP(int nup_, int ndown_)
   t12 = 128.*(-_bb*(_dd2+_g6)-2.*(_t1+2.*_w6)*(_sa2*qqq+std::pow(_a6, 2)))*_t1;
   t21 = 128.*(-_bb*(_dd4+_g5)-2.*(_t2+2.*_w6)*(_sa1*qqq+std::pow(_a5, 2)))*_t2;
   t22 = 512.*(_bb*(std::pow(_delta, 2)-_gram)-std::pow(_epsi-_delta*(qdq+_q1dq2), 2)-_sa1*std::pow(_a6, 2)-_sa2*std::pow(_a5, 2)-_sa1*_sa2*qqq);
-
-  /*std::cout << "t11 = " << t11 << std::endl;
-  std::cout << "t12 = " << t12 << std::endl;
-  std::cout << "t21 = " << t21 << std::endl;
-  std::cout << "t22 = " << t22 << std::endl;*/
 
   peripp = (((_u1*_v1*t11+_u2*_v1*t21+_u1*_v2*t12+_u2*_v2*t22)/(_t1*_t2*_bb))/(_t1*_t2*_bb))/4.;
 

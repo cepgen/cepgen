@@ -11,7 +11,9 @@
 #include <map>
 
 #include "process.h"
-#include "inputparameters.h"
+#include "event.h"
+#include "parameters.h"
+#include "utils.h"
 
 /**
  * @brief List of kinematic cuts to apply on the central and outgoing phase space.
@@ -20,6 +22,9 @@ class GamGamKinematics {
   public:
     GamGamKinematics();
     ~GamGamKinematics();
+    /**
+     * @brief Dumps all the parameters used in this process cross-section computation / events generation
+     */
     void Dump();
     /**
      * Type of kinematics to consider for the process. Can either be :
@@ -95,35 +100,33 @@ class GamGamKinematics {
 class GamGam : public Process {
  public:
   /**
-   * Sets the mandatory parameters used in the methods computing the kinematics
-   * and the cross-section of this phase space point.
+   * Sets the mandatory parameters used in the methods computing the kinematics and the cross-section of this phase space point.
    * @brief Class constructor
-   * @param ndim_ The number of dimensions of the point in the phase space
-   * @param nOpt_ Optimisation???
-   * @param x_[] The (@a ndim_)-dimensional point in the phase space on which
-   *  the kinematics and the cross-section are computed
-   * @todo Figure out how this @a nOpt_ parameter is affecting the final
-   *  cross-section computation and events generation
+   * @param[in] ndim_ The number of dimensions of the point in the phase space
+   * @param[in] nOpt_ Optimisation???
+   * @param[in] x_[] The (@a ndim_)-dimensional point in the phase space on which the kinematics and the cross-section are computed
+   * @todo Figure out how this @a nOpt_ parameter is affecting the final cross-section computation and events generation
    */
   GamGam(const unsigned int ndim_,int nOpt_,double x_[]);
   ~GamGam();
   /**
-   * Specifies the incoming particles' kinematics as well as their properties
-   * using two Particle objects.
+   * Specifies the incoming particles' kinematics as well as their properties using two Particle objects.
    * @brief Sets the momentum and PDG id for the incoming particles
-   * @param ip1_ Information on the first incoming particle
-   * @param ip2_ Information on the second incoming particle
+   * @param[in] ip1_ Information on the first incoming particle
+   * @param[in] ip2_ Information on the second incoming particle
+   * @return A boolean stating whether or not the incoming kinematics is properly set for this event
    */
   bool SetIncomingKinematics(Particle ip1_,Particle ip2_);
   /**
    * @brief Sets the PDG id for the outgoing particles
-   * @param part_ Role of the particle in the process
-   * @param pdgId_ Particle ID according to the PDG convention
+   * @param[in] part_ Role of the particle in the process
+   * @param[in] pdgId_ Particle ID according to the PDG convention
+   * @return A boolean stating whether or not the outgoing kinematics is properly set for this event
    */
   bool SetOutgoingParticles(int part_,int pdgId_);
   /**
    * @brief Sets the list of kinematic cuts to apply on the outgoing particles' final state
-   * @param cuts_ The Cuts object containing the kinematic parameters
+   * @param[in] cuts_ The Cuts object containing the kinematic parameters
    */
   void SetKinematics(GamGamKinematics cuts_);
   /**
@@ -142,16 +145,16 @@ class GamGam : public Process {
   /**
    * Computes the mass of the outgoing proton remnant if any
    * @brief Computes the ougoing proton remnant mass
-   * @param x_ A random number (between 0 and 1)
-   * @param outmass_ The maximal outgoing particles' invariant mass
-   * @param dw_ The size of the integration bin
+   * @param[in] x_ A random number (between 0 and 1)
+   * @param[in] outmass_ The maximal outgoing particles' invariant mass
+   * @param[out] dw_ The size of the integration bin
    * @return The mass of the outgoing proton remnant
    */
   double ComputeMX(double x_, double outmass_, double* dw_);
   /**
    * Computes the cross-section for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$ process with the given kinematics
    * @brief Computes the process' weight for the given point
-   * @param nm_ ???
+   * @param[in] nm_ ???
    * @return \f$\frac{\textrm d\sigma}{\mathrm d\mathbf x}(\gamma\gamma\to\ell^{+}\ell^{-})\f$, the differential cross-section for the given point in the phase space.
    * @todo Find out what this @a nm_ parameter does...
    */
@@ -164,8 +167,8 @@ class GamGam : public Process {
   inline double GetT1() { return this->_t1; };
   /**
    * Returns the two limit values for the first photon virtuality
-   * @param t1min_ The minimal value for \f$t_1\f$
-   * @param t1max_ The maximal value for \f$t_1\f$
+   * @param[out] t1min_ The minimal value for \f$t_1\f$
+   * @param[out] t1max_ The maximal value for \f$t_1\f$
    */
   inline void GetT1extrema(double& t1min_, double& t1max_) { t1min_=this->_t1min; t1max_=this->_t1max; };
   /**
@@ -175,8 +178,8 @@ class GamGam : public Process {
   inline double GetT2() { return this->_t2; };
   /**
    * Returns the two limit values for the second photon virtuality
-   * @param t2min_ The minimal value for \f$t_2\f$
-   * @param t2max_ The maximal value for \f$t_2\f$
+   * @param[out] t2min_ The minimal value for \f$t_2\f$
+   * @param[out] t2max_ The maximal value for \f$t_2\f$
    */
   inline void GetT2extrema(double& t2min_, double& t2max_) { t2min_=this->_t2min; t2max_=this->_t2max; };
   inline double GetS1() { return this->_s1; };
@@ -191,13 +194,14 @@ class GamGam : public Process {
    * in this event.
    * The particle roles in this process are defined as following : @n
    * @image latex lpair_kinematics.pdf Detailed particle roles in the two-photon process as defined by the @a GamGam object. The incoming protons/electrons are denoted by a role 1, and 2, as the outgoing protons/protons remnants/electrons carry the indices 3 and 5. The two outgoing leptons have the roles 6 and 7, while the lepton/antilepton distinction is done randomly (thus, the arrow convention is irrelevant here).
+   * @param[in] symmetrise_ Do we have to symmetrise the event (randomise the production of the positively- and negatively-charged lepton) ?
    * @brief Fills the Event object with the particles' kinematics
    */
   void FillKinematics(bool symmetrise_=false);
   /**
    * Sets all the kinematic variables for the outgoing proton remnants in order
    * to be able to hadronise them afterwards
-   * @param part_ Particle to "prepare" for the hadronisation to be performed
+   * @param[in] part_ Particle to "prepare" for the hadronisation to be performed
    */
   void PrepareHadronisation(Particle *part_);
   /**

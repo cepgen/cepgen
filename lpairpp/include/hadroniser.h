@@ -20,13 +20,14 @@ class Hadroniser
   /**
    * @brief Main caller to hadronise a particle
    */
-  inline bool Hadronise(Particle *part_) { return (!(part_->Valid() && part_->status!=2)); };
+  inline virtual bool Hadronise(Particle *part_) { return (part_!=(Particle*)NULL && part_->status!=2); };
   /**
    * Launches the hadroniser on the full event information
    * @brief Hadronises a full event
-   * @param ev_ The event to hadronise
+   * @param[inout] ev_ The event to hadronise
+   * @return A boolean stating whether or not the hadronisation occured successfully
    */
-  inline bool Hadronise(Event *ev_);
+  inline virtual bool Hadronise(Event *ev_) { ev_->Dump(); return false; };
   /**
    * Gets the full list of hadrons (as Particle objects) produced by the hadronisation
    * @return A vector of Particle containing all the hadrons produced

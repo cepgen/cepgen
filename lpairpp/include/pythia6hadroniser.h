@@ -4,6 +4,9 @@
 #include <algorithm>
 
 #include "hadroniser.h"
+
+#define NAME_CHR 16
+
 extern "C"
 {
   extern double pymass_(int&);
@@ -39,17 +42,18 @@ class Pythia6Hadroniser : public Hadroniser
   inline static void pylist(int mlist_) { pylist_(mlist_); };
   inline static double pyp(int role_, int qty_) { return pyp_(role_,qty_); };
   inline static std::string pyname(int pdgid_) {
-    char out[6];
+    char out[NAME_CHR];
     std::string s;
-    pyname_(pdgid_, out, 6);
-    s = std::string(out,6);
-    s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+    pyname_(pdgid_, out, NAME_CHR);
+    s = std::string(out, NAME_CHR);
+    //s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+    s.erase(remove(s.begin(), s.end(), ' '), s.end());
     return s;
   };
   /**
    * @brief Connect entries with colour flow information
-   * @param njoin_ Number of particles to join in the colour flow
-   * @param ijoin_ List of particles to join in the colour flow
+   * @param[in] njoin_ Number of particles to join in the colour flow
+   * @param[in] ijoin_ List of particles unique identifier to join in the colour flow
    */
   inline static void pyjoin(int njoin_, int ijoin_[2]) { return pyjoin_(njoin_,*ijoin_); };
 };

@@ -2,7 +2,7 @@
 
 //#define COORD(s,i,j) ((s)->xi[(i)*(s)->dim + (j)])
 
-Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), InputParameters* inParam_) :
+Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inParam_) :
   _ndim(dim_), _ndo(50),
   _nTreatCalls(0), _mbin(3),
   _ffmax(0.), _correc(0.), _corre2(0.), _fmax2(0.), _fmdiff(0.), _fmold(0.),
@@ -54,6 +54,9 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), InputParameters* i
 
 Vegas::~Vegas()
 {
+#ifdef DEBUG
+  std::cout << "[Vegas::~Vegas] [DEBUG] Destructor called" << std::endl;
+#endif
   delete[] _xl;
   delete[] _xu;
   delete[] _n;
@@ -351,8 +354,14 @@ int Vegas::Integrate(double *result_, double *abserr_)
 void
 Vegas::Generate()
 {
+  //count_ = 1;
+  std::ofstream of;
+  std::string fn;
   int i;
   
+  //fn = "test";
+  //of.open(fn.c_str());
+  //this->SetGen(_ip->file);
   this->SetGen();
   std::cout << "[Vegas::Generate] [DEBUG] " << _ip->maxgen << " events will be generated" << std::endl;
   i = 0;
@@ -360,6 +369,7 @@ Vegas::Generate()
     if (this->GenerateOneEvent()) i++;
   }
   std::cout << "[Vegas::Generate] [DEBUG] " << i << " events generated" << std::endl;
+  //of.close();
 }
 
 bool
@@ -371,6 +381,7 @@ Vegas::GenerateOneEvent()
   int jj, jjj;
   double x[_ndim];
   
+  y = -1.;
   ami = 1./_mbin;
   max = pow(_mbin, _ndim);
 
@@ -435,6 +446,7 @@ Vegas::GenerateOneEvent()
   // Normal generation cycle
   // Select a Vegas bin and reject if fmax is too little
  line1:
+  //double* Vegas::SelectBin() //FIXME need to implement it this way instead of these bloody goto...!
   do {
     // ...
     _j = (double)rand()/RAND_MAX*max;
@@ -499,7 +511,7 @@ Vegas::StoreEvent(double *x_)
   else _weight = this->F(x_);
   _ip->ngen += 1;
   _ip->store = false;
-  if (_ip->ngen%10000==0) {
+  if (_ip->ngen%1000==0) {
     std::cout << "[Vegas::StoreEvent] Generated events : " << _ip->ngen << std::endl;
   }
   return true;
@@ -518,10 +530,10 @@ Vegas::SetGen()
   double x[_ndim];
   double sig2;
   double av, av2;
-  //#ifdef DEBUG
+#ifdef DEBUG
   double eff, eff1, eff2;
   double sig, sigp;
-  //#endif
+#endif
 
   _ip->ngen = 0;
 #ifdef DEBUG
@@ -534,14 +546,6 @@ Vegas::SetGen()
   sum2p = 0.;
   max = pow(_mbin, _ndim);
 
-  /*for (int i=1; i<=10; i++) {
-    for (int j=0; j<_ndim; j++) {
-      x[j] = 0.1*i;
-    }
-    std::cout << x[0] << "\t" << this->Treat(x) << std::endl;
-    }*/
-
-  //exit(0);
   for (int i=0; i<max; i++) {
     _nm[i] = 0;
     _fmax[i] = 0.;
@@ -549,12 +553,9 @@ Vegas::SetGen()
 
   for (int i=1; i<=max; i++) {
     jj = i-1;
-    //jj = i; //FIXME !!!!!
     for (unsigned int j=1; j<=_ndim; j++) {
-      //jjj = floor(jj/_mbin); //FIXME floor or ceil???
       jjj = jj/_mbin;
       n[j-1] = jj-jjj*_mbin;
-      //std::cout << "--> j(" << j << ") : n = " << n[j] << ", jj = " << jj << ", jjj = " << jjj << std::endl;
       jj = jjj;
     }
     fsum = fsum2 = 0.;
@@ -564,27 +565,24 @@ Vegas::SetGen()
       }
       if (_ip->ntreat>0) z = this->Treat(x);
       else z = this->F(x);
-      //if (z<0) std::cout << "z=" << z << std::endl;
       if (z>_fmax[i-1]) _fmax[i-1] = z;
       fsum += z;
       fsum2 += std::pow(z, 2);
-      //std::cout << fsum << std::endl;
     }
-    //std::cout << "fsum=" << fsum << std::endl;
     av = fsum/npoin;
     av2 = fsum2/npoin;
     sig2 = av2-pow(av, 2);
-    //#ifdef DEBUG
+#ifdef DEBUG
     sig = sqrt(sig2);
-    //#endif
+#endif
     sum += av;
     sum2 += av2;
     sum2p += sig2;
     if (_fmax[i-1]>_ffmax) _ffmax = _fmax[i-1];
-    //#ifdef DEBUG
+#ifdef DEBUG
     eff = 1.e4;
     if (_fmax[i-1]!=0.) eff = _fmax[i-1]/av;
-    /*std::cout << "[Vegas::SetGen] [DEBUG] in iteration #" << i << " :"
+    std::cout << "[Vegas::SetGen] [DEBUG] in iteration #" << i << " :"
 	      << "\n\tav   = " << av
 	      << "\n\tsig  = " << sig
 	      << "\n\tfmax = " << _fmax[i]
@@ -594,20 +592,15 @@ Vegas::SetGen()
       std::cout << n[j];
       if (j!=_ndim-1) std::cout << ", ";
     }
-    std::cout << ")" << std::endl;*/
-    //#endif
-    /*std::cout << i << "\t" << av << "\t" << sig << "\t" << _fmax[i-1] << "\t" << eff << "\t";
-    for (unsigned int j=0; j<_ndim; j++) {
-      std::cout << n[j] << " ";
-    }
-    std::cout << std::endl;*/
+    std::cout << ")" << std::endl;
+#endif
   }
 
   sum = sum/max;
   sum2 = sum2/max;
   sum2p = sum2p/max;
 
-  //#ifdef DEBUG
+#ifdef DEBUG
   sig = sqrt(sum2-pow(sum, 2));
   sigp = sqrt(sum2p);
   eff1 = 0.;
@@ -626,7 +619,7 @@ Vegas::SetGen()
 	    << "\n\tOverall inefficiency       =  eff2  = " << eff2 
             << "\n\teff = " << eff 
 	    << std::endl;
-  //#endif
+#endif
 }
 
 void
@@ -642,7 +635,7 @@ Vegas::DumpGrid()
 }
 
 double
-Vegas::Treat(double *x_, InputParameters* ip_, bool storedbg_)
+Vegas::Treat(double *x_, Parameters* ip_, bool storedbg_)
 {
   double w, xx, y, dd, f;
   int j;

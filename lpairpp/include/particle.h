@@ -27,8 +27,12 @@ class Particle {
      */
     Particle& operator=(const Particle&);
     /**
+     * @brief Comparison operator to enable the sorting of particles in an event according to their unique identifier
+     */
+    inline bool operator<(const Particle& rhs) { std::cout << this->id << "\t" << rhs.id << "\t" << (this->id<rhs.id) << std::endl; return this->id<rhs.id; };
+    /**
      * Returns a string containing all the particle's kinematics as expressed in the Les Houches format
-     * @param revert_ Is the event symmetric ? If set to true, the third component of the momentum is reverted.
+     * @param[in] revert_ Is the event symmetric ? If set to true, the third component of the momentum is reverted.
      * @return The LHE line associated to the particle, and containing the particle's history (mother/daughters), its kinematics, and its status
      */
     std::string GetLHEline(bool revert_=false);
@@ -47,7 +51,13 @@ class Particle {
      * @brief Particle Data Group integer identifier
      */
     int pdgId;
+    /**
+     * @brief The particle's electric charge (given as a float number, for the quarks and bound states)
+     */
     float charge;
+    /**
+     * @brief Particle's name in a human-readable format
+     */
     std::string name;
     /**
      * @brief Role in the considered process
@@ -86,9 +96,9 @@ class Particle {
     inline double M2() { return std::pow(this->m,2); };
     /**
      * @brief Sets the 3-momentum associated to the particle
-     * @param px_ Momentum along the \f$x\f$-axis, in GeV/c
-     * @param py_ Momentum along the \f$y\f$-axis, in GeV/c
-     * @param pz_ Momentum along the \f$z\f$-axis, in GeV/c
+     * @param[in] px_ Momentum along the \f$x\f$-axis, in GeV/c
+     * @param[in] py_ Momentum along the \f$y\f$-axis, in GeV/c
+     * @param[in] pz_ Momentum along the \f$z\f$-axis, in GeV/c
      * @return A boolean stating the validity of this particle (according to its 4-momentum norm)
      */
     inline bool P(double px_,double py_,double pz_) {
@@ -111,14 +121,25 @@ class Particle {
       return (this->Pt()!=0.)
 	? log((this->P()+fabs(this->pz))/this->Pt())*(this->pz/fabs(this->pz))
 	: 9999.*(this->pz/fabs(this->pz));
-    }
+    };
+    /**
+     * Computes and returns \f$y\f$, the rapidity of the particle
+     * @brief Rapidity
+     * @return The rapidity of the particle
+     */
+    inline double Rapidity() { return log((this->E()+this->pz)/(this->E()-this->pz))/2.; };
+    inline double Phi() {
+      return (this->px==0. && this->py==0. && this->pz==0.)
+	? 0.
+	: atan2(this->P(), this->pz);
+    };
     /**
      * Sets the 4-momentum associated to the particle, and computes its (invariant) mass.
      * @brief Sets the 4-momentum associated to the particle
-     * @param px_ Momentum along the \f$x\f$-axis, in GeV/c
-     * @param py_ Momentum along the \f$y\f$-axis, in GeV/c
-     * @param pz_ Momentum along the \f$z\f$-axis, in GeV/c
-     * @param E_ Energy, in GeV
+     * @param[in] px_ Momentum along the \f$x\f$-axis, in GeV/c
+     * @param[in] py_ Momentum along the \f$y\f$-axis, in GeV/c
+     * @param[in] pz_ Momentum along the \f$z\f$-axis, in GeV/c
+     * @param[in] E_ Energy, in GeV
      * @return A boolean stating the validity of the particle's kinematics
      */
     inline bool P(double px_,double py_,double pz_,double E_) {
@@ -129,14 +150,14 @@ class Particle {
     };
     /**
      * @brief Sets the 4-momentum associated to the particle
-     * @param p_ 3-momentum
-     * @param E_ Energy, in GeV
+     * @param[in] p_ 3-momentum
+     * @param[in] E_ Energy, in GeV
      * @return A boolean stating the validity of the particle's kinematics
      */
     bool P(double p_[3],double E_);
     /**
      * @brief Sets the 4-momentum associated to the particle
-     * @param p_ 4-momentum
+     * @param[in] p_ 4-momentum
      * @return A boolean stating the validity of the particle's kinematics
      */
     inline bool P(double p_[4]) { 
@@ -171,7 +192,7 @@ class Particle {
     inline double Pt() { return std::sqrt(std::pow(this->px,2)+std::pow(this->py,2)); };
     /**
      * @brief Sets the particle's energy
-     * @param E_ Energy, in GeV
+     * @param[in] E_ Energy, in GeV
      */
     inline void E(double E_) { this->e=E_; };
     /**
@@ -185,17 +206,18 @@ class Particle {
     /**
      * Sets the "mother" of this particle (particle from which this particle is issued)
      * @brief Sets the mother particle (from which this particle arises)
-     * @param part_ A Particle object containing all the information on the mother particle
+     * @param[in] part_ A Particle object containing all the information on the mother particle
      */
     void SetMother(Particle* part_);
     /**
-     * @brief Gets the mother particle from which this particle arises
+     * @brief Gets the unique identifier to the mother particle from which this particle arises
+     * @return An integer representing the unique identifier to the mother of this particle in the event
      */
-    Particle* GetMother();
+    inline int GetMother() { return this->_mother; };
     /**
      * Adds a "daughter" to this particle (one of its decay product(s))
      * @brief Specify a decay product for this particle
-     * @param part_ The Particle object in which this particle will desintegrate or convert
+     * @param[in] part_ The Particle object in which this particle will desintegrate or convert
      * @return A boolean stating if the particle has been added to the daughters list or if it was already present before
      */
     bool AddDaughter(Particle* part_);
@@ -204,17 +226,21 @@ class Particle {
      */
     inline unsigned int NumDaughters() { return this->_daugh.size(); };
     /**
-     * @brief Gets a vector containing all the daughters from this particle
-     * @return A Particle objects vector containing all the daughters' kinematic information
+     * @brief Gets a vector containing all the daughters unique identifiers from this particle
+     * @return An integer vector containing all the daughters' unique identifier in the event
      */
-    std::vector<Particle*> GetDaughters();
+    std::vector<int> GetDaughters();
     void PDF2PDG();
     /**
      * Hadronises the particle with Pythia, and builds the shower (list of Particle objects) embedded in this object
-     * @param algo_ Algorithm in use to hadronise the particle
+     * @param[in] algo_ Algorithm in use to hadronise the particle
      * @brief Hadronises the particle using Pythia
      */
     bool Hadronise(std::string algo_);
+    /**
+     * @brief Is this particle a primary particle ?
+     */
+    inline bool Primary() { return this->_isPrimary; };
   private:
     /**
      * @brief Energy, in GeV
@@ -227,11 +253,11 @@ class Particle {
     /**
      * @brief Mother particle
      */
-    Particle *_mother;
+    int _mother;
     /**
      * @brief List of daughter particles
      */
-    std::set<Particle*> _daugh;
+    std::set<int> _daugh;
     /**
      * @brief Is the particle a primary particle ?
      */
@@ -239,5 +265,6 @@ class Particle {
     double p3[3];
     double p4[4];
 };
+
 
 #endif
