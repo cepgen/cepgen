@@ -1,5 +1,5 @@
-#ifndef _INPUTPARAMETERS_H
-#define _INPUTPARAMETERS_H
+#ifndef _PARAMETERS_H
+#define _PARAMETERS_H
 
 #include <iostream>
 #include <iomanip>
@@ -7,26 +7,25 @@
 #include <cmath>
 #include <fstream>
 
-#include "eventslist.h"
-#include "lheutils.h"
+//#include "particle.h"
+#include "event.h"
+
+#include "pythia6hadroniser.h"
+#include "jetset7hadroniser.h"
 
 /**
- * @brief List of input parameters used to start and run the simulation
- *  job.
+ * @brief List of parameters used to start and run the simulation job.
  * @note The default parameters are derived from GMUINI in LPAIR
  */
-class InputParameters {
+class Parameters {
   public:
-    InputParameters();
-    ~InputParameters();
-    HEPRUP GetEventsInfo();
+    Parameters();
+    ~Parameters();
     /**
-     * Defines the range to cover in pseudo-rapidity for the outgoing leptons
-     * produced in this process. This method converts this range into a range
-     * in \f$\theta\f$, the polar angle.
+     * Defines the range to cover in pseudo-rapidity for the outgoing leptons produced in this process. This method converts this range into a range in \f$\theta\f$, the polar angle.
      * @brief Sets the pseudo-rapidity range for the produced leptons
-     * @param etamin_ The minimal value of \f$\eta\f$ for the outgoing leptons
-     * @param etamax_ The maximal value of \f$\eta\f$ for the outgoing leptons
+     * @param[in] etamin_ The minimal value of \f$\eta\f$ for the outgoing leptons
+     * @param[in] etamax_ The maximal value of \f$\eta\f$ for the outgoing leptons
      */
     void SetEtaRange(double etamin_, double etamax_);
     /**
@@ -34,16 +33,15 @@ class InputParameters {
      */
     void Dump();
     /**
-     * Reads the list of parameters to be used in this cross-section
-     * computation/events generation from an external input card.
+     * Reads the list of parameters to be used in this cross-section computation/events generation from an external input card.
      * @brief Reads content from config file to load the variables
-     * @param inFile_ Name of the configuration file to load
+     * @param[in] inFile_ Name of the configuration file to load
      * @return A boolean stating whether this input configuration file is correct or not
      */
     bool ReadConfigFile(std::string inFile_);
     /**
      * @brief Stores the full run configuration to an external config file
-     * @param outFile_ Name of the configuration file to create
+     * @param[in] outFile_ Name of the configuration file to create
      * @return A boolean stating whether this output configuration file is correctly written or not
      */
     bool StoreConfigFile(std::string outFile_);
@@ -75,17 +73,14 @@ class InputParameters {
      */
     int pair;
     /**
-     * Set of cuts to apply on the outgoing leptons in order to restrain the
-     * available kinematic phase space :
+     * Set of cuts to apply on the outgoing leptons in order to restrain the available kinematic phase space :
      * - 0 - No cuts at all (for the total cross section)
      * - 1 - Vermaserens' hypothetical detector cuts : for both leptons,
      *   + \f$\frac{|p_z|}{|\mathbf p|}\leq\f$ 0.75 and \f$p_T\geq\f$ 1 GeV/c,
      *   or
      *   + 0.75 \f$<\frac{|p_z|}{|\mathbf p|}\leq\f$ 0.95 and \f$p_z>\f$ 1 GeV/c,
-     * - 2 - Cuts on both the outgoing leptons, according to the provided cuts
-     *   parameters
-     * - 3 - Cuts on at least one outgoing lepton, according to the provided
-     *   cut parameters
+     * - 2 - Cuts on both the outgoing leptons, according to the provided cuts parameters
+     * - 3 - Cuts on at least one outgoing lepton, according to the provided cut parameters
      * @brief Set of cuts to apply on the outgoing leptons
      */
     int mcut;
@@ -116,14 +111,12 @@ class InputParameters {
      */
     double maxq2;
     /**
-     * Minimal mass of the outgoing proton remnants, \f$M_X\f$, in
-     * GeV/c\f${}^{2}\f$.
+     * Minimal mass of the outgoing proton remnants, \f$M_X\f$, in GeV/c\f${}^{2}\f$.
      * @brief Minimal \f$M_X\f$ of the outgoing proton remnants
      */
     double minmx;
     /**
-     * Maximal mass of the outgoing proton remnants, \f$M_X\f$, in
-     * GeV/c\f${}^{2}\f$.
+     * Maximal mass of the outgoing proton remnants, \f$M_X\f$, in GeV/c\f${}^{2}\f$.
      * @brief Maximal \f$M_X\f$ of the outgoing proton remnants
      */
     double maxmx;
@@ -152,8 +145,7 @@ class InputParameters {
      */
     bool store;
     /**
-     * Enables or disables the production of control plots for several kinematic
-     * quantities in this process
+     * Enables or disables the production of control plots for several kinematic quantities in this process
      * @brief Do we need control plots all along the process?
      */
     bool debug;
@@ -181,17 +173,20 @@ class InputParameters {
      * @brief The file in which to store the events generation's output
      */
     std::ofstream* file;
-    std::ofstream* file_debug; //FIXME dropme!
     /**
-     * List of Gnuplot objects which can be used to produce control plots
-     * all along the cross-section determination and events generation process
-     * @note Maximum number of these can be raised in the utils.h file, but pay
-     * attention to the memory load since these Gnuplot objects are still under
-     * development!
+     * List of Gnuplot objects which can be used to produce control plots all along the cross-section determination and events generation process
+     * @note Maximum number of these can be raised in the utils.h file, but pay attention to the memory load since these Gnuplot objects are still under development!
      * @brief Control plots objects
      */
     bool symmetrise;
-    EventsList* eventslist;
+    /**
+     * @brief The pointer to the last event produced in this run
+     */
+    Event* last_event;
+    /**
+     * @brief Hadronisation algorithm to use for the proton(s) remnants fragmentation
+     */
+    Hadroniser* hadroniser;
 };
 
 #endif

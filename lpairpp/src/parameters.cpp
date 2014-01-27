@@ -1,6 +1,6 @@
-#include "inputparameters.h"
+#include "parameters.h"
 
-InputParameters::InputParameters() :
+Parameters::Parameters() :
   p1mod(2), p2mod(2),
   pair(13),
   mcut(0),
@@ -14,48 +14,42 @@ InputParameters::InputParameters() :
   ncvg(100000), itvg(10),
   ntreat(1), npoints(100),
   generation(true), store(false), debug(false),
-  maxgen(1e5),
+  maxgen(1e5), ngen(0),
   gpdf(5), spdf(4), qpdf(12),
   symmetrise(true)
 {
+  this->last_event = new Event();
   /*for (int i=0; i<MAX_HISTOS; i++) {
     this->plot[i] = new Gnuplot();
   }*/
+  this->file = (std::ofstream*)NULL;
 }
 
-InputParameters::~InputParameters()
+Parameters::~Parameters()
 {
+#ifdef DEBUG
+  std::cout << "[Parameters::~Parameters] [DEBUG] Destructor called" << std::endl;
+#endif
   /*for (int i=0; i<MAX_HISTOS; i++) {
     delete[] this->plot[i];
   }//FIXME ???*/
   //delete[] this->plot;
+  delete this->last_event;
 }
 
-HEPRUP
-InputParameters::GetEventsInfo()
-{
-  HEPRUP out(1);
-  if (this->p1mod==1) out.idbmup[0] = 11;
-  if (this->p2mod==1) out.idbmup[1] = 11;
-  out.ebmup[0] = this->in1p;
-  out.ebmup[1] = this->in2p;
-
-  return out;
-}
-
-void InputParameters::SetEtaRange(double etamin_, double etamax_)
+void Parameters::SetEtaRange(double etamin_, double etamax_)
 {
   this->mintheta = 2.*atan(exp(-etamax_))/pi*180.;
   this->maxtheta = 2.*atan(exp(-etamin_))/pi*180.;
 #ifdef DEBUG
-  std::cout << "[InputParameters::SetEtaRange] [DEBUG]"
+  std::cout << "[Parameters::SetEtaRange] [DEBUG]"
 	    << "\n\teta(min) = " << std::setw(5) << etamin_ << " -> theta(min) = " << this->mintheta
 	    << "\n\teta(max) = " << std::setw(5) << etamax_ << " -> theta(max) = " << this->maxtheta
 	    << std::endl;
 #endif
 }
 
-void InputParameters::Dump()
+void Parameters::Dump()
 {
   std::string cutsmode, particles;
 
@@ -81,7 +75,7 @@ void InputParameters::Dump()
   }
   std::cout 
     << std::left
-    << "[InputParameters::Dump] BEGINNING dump ===============" << std::endl << std::endl
+    << "[Parameters::Dump] BEGINNING dump ===============" << std::endl << std::endl
     << " _" << std::setfill('_') << std::setw(52) << "_/¯ INCOMING- AND OUTGOING KINEMATICS ¯\\_" << std::setfill(' ') << "_ " << std::endl
     << "| " << std::right << std::setw(52) << " |" << std::left << std::endl
     << "|-" << std::setfill('-') << std::setw(50) << " Incoming protons-like particles " << std::setfill(' ') << "-|" << std::endl
@@ -115,15 +109,14 @@ void InputParameters::Dump()
     << "| " << std::setw(40) << "Number of events to generate" << std::setw(10) << maxgen << " |" << std::endl
     << "| " << std::setw(40) << "Events storage ? " << std::setw(10) << store << " |" << std::endl
     << "| " << std::setw(40) << "Debugging mode ? " << std::setw(10) << debug << " |" << std::endl
-    << "| " << std::setw(40) << "Is Output file opened ? " << std::setw(10) << file->is_open() << " |" << std::endl
-    //<< "| " << std::setw(40) << "Is Debug file opened ? " << std::setw(10) << file_debug->is_open() << " |" << std::endl
+    << "| " << std::setw(40) << "Is Output file opened ? " << std::setw(10) << (file!=(std::ofstream*)NULL && file->is_open()) << " |" << std::endl
     << "|_" << std::right << std::setfill('_') << std::setw(52) << "_|" << std::left << std::endl
     //<< " -" << std::right << std::setfill('-') << std::setw(52) << "- " << std::left << std::endl
     << std::endl
-    << "[InputParameters::Dump] END of dump ==================" << std::endl;
+    << "[Parameters::Dump] END of dump ==================" << std::endl;
 }
 
-bool InputParameters::ReadConfigFile(std::string inFile_)
+bool Parameters::ReadConfigFile(std::string inFile_)
 {
   std::ifstream f;
   std::string key, value;
@@ -132,7 +125,7 @@ bool InputParameters::ReadConfigFile(std::string inFile_)
     return false;
   }
 #ifdef DEBUG
-  std::cout << "[InputParameters::ReadConfigFile] [DEBUG] File " << inFile_ << " succesfully opened !" << std::endl
+  std::cout << "[Parameters::ReadConfigFile] [DEBUG] File " << inFile_ << " succesfully opened !" << std::endl
             << "======================================================" << std::endl
             << "Configuration file content : " << std::endl
             << "======================================================" << std::endl
@@ -313,7 +306,7 @@ bool InputParameters::ReadConfigFile(std::string inFile_)
 #endif
     }
     else {
-      std::cout << std::setw(60) << "[InputParameters::ReadConfigFile] <WARNING> Unrecognized argument : [" << key << "] = " << value << std::endl;
+      std::cout << std::setw(60) << "[Parameters::ReadConfigFile] <WARNING> Unrecognized argument : [" << key << "] = " << value << std::endl;
     }
   }
   f.close();
@@ -321,7 +314,7 @@ bool InputParameters::ReadConfigFile(std::string inFile_)
   return true;
 }
 
-bool InputParameters::StoreConfigFile(std::string outFile_)
+bool Parameters::StoreConfigFile(std::string outFile_)
 {
   std::ofstream f;
   f.open(outFile_.c_str(), std::fstream::out | std::fstream::trunc);
