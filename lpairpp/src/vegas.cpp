@@ -507,7 +507,8 @@ Vegas::StoreEvent(double *x_)
     return false;
   }
   _ip->store = true;
-  if (_ip->ntreat>0) _weight = Treat(x_,true);
+  //if (_ip->ntreat>0) _weight = Treat(x_,true);
+  if (_ip->ntreat>0) _weight = Treat(x_);
   else _weight = this->F(x_);
   _ip->ngen += 1;
   _ip->store = false;
@@ -644,7 +645,7 @@ Vegas::Treat(double *x_, Parameters* ip_, bool storedbg_)
   if (_nTreatCalls==0) {
     _nTreatCalls = 1;
     _rTreat = std::pow(_ndo, _ndim);
-    if (remove("test_vegas")!=0) {
+    if (storedbg_ && remove("test_vegas")!=0) {
       std::cerr << "Error while trying to delete test_vegas" << std::endl;
     }
     //this->DumpGrid();

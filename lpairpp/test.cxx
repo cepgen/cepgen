@@ -23,8 +23,8 @@ int main() {
   TCanvas *c_npart;
   TLegend *leg;
   TTree *tree;
-  Pythia6Hadroniser had;
-  //Jetset7Hadroniser had;
+  //Pythia6Hadroniser had;
+  Jetset7Hadroniser had;
 
   ip.in1p = 3500.;
   ip.in2p = 3500.;
@@ -119,7 +119,8 @@ int main() {
     //std::cout << ev.GetLHERecord();
   }
 
-  tree->SaveAs("events_lpairpp_pythia.root");
+  //tree->SaveAs("events_lpairpp_pythia.root");
+  tree->SaveAs("events_lpairpp_jetset.root");
 
   /*gStyle->SetOptStat(0);
 

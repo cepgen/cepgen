@@ -73,11 +73,11 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
     for (p=pr.begin(), id2=0; p!=pr.end(); p++) {
       np = (*p)->id;
       
-      lujets_.p[0][np] = (*p)->px;
-      lujets_.p[1][np] = (*p)->py;
-      lujets_.p[2][np] = (*p)->pz;
-      lujets_.p[3][np] = (*p)->E();
-      lujets_.p[4][np] = (*p)->M();
+      lujets_.p[0][np] = (float)(*p)->px;
+      lujets_.p[1][np] = (float)(*p)->py;
+      lujets_.p[2][np] = (float)(*p)->pz;
+      lujets_.p[3][np] = (float)(*p)->E();
+      lujets_.p[4][np] = (float)(*p)->M();
       
       lujets_.k[0][np] = (*p)->status-1;
       lujets_.k[1][np] = (*p)->pdgId;
@@ -150,7 +150,7 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
     pa.P(lujets_.p[0][p], lujets_.p[1][p], lujets_.p[2][p], lujets_.p[3][p]);
     pa.M(lujets_.p[4][p]);
     pa.name = this->luname(pa.pdgId);
-    //pa.charge = (float)(this->lup(p+1,6));
+    pa.charge = this->luchge(pa.pdgId);
 
     if (lujets_.k[2][p]!=0) {
 #ifdef DEBUG

@@ -9,11 +9,12 @@
 
 extern "C"
 {
-  extern double ulmass_(int&);
+  extern float ulmass_(int&);
   extern void luexec_();
   extern void lulist_(int&);
   extern void lujoin_(int&,int&);
   extern void luname_(int&,char*,int);
+  extern int luchge_(int&);
   extern struct
   {
     int n, k[5][4000];
@@ -32,7 +33,8 @@ class Jetset7Hadroniser : public Hadroniser
   bool Hadronise(Particle* part_);
   bool Hadronise(Event* ev_);
  private:
-  inline static double ulmass(int pdgid_) { return ulmass_(pdgid_); };
+  inline static double ulmass(int pdgid_) { return (double)ulmass_(pdgid_); };
+  inline static float luchge(int pdgid_) { return luchge_(pdgid_)/3.; };
   inline static void luexec() { luexec_(); };
   inline static void lulist(int mlist_) { lulist_(mlist_); };
   inline static std::string luname(int pdgid_) {
