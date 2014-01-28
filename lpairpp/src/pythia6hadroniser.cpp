@@ -3,6 +3,7 @@
 Pythia6Hadroniser::Pythia6Hadroniser()
 {
   _name = "Pythia6";
+  this->pygive("MSTU(21)=1");
 }
 
 Pythia6Hadroniser::~Pythia6Hadroniser()

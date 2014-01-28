@@ -3,6 +3,7 @@
 Jetset7Hadroniser::Jetset7Hadroniser()
 {
   _name = "Jetset7";
+  this->lugive("MSTU(21)=0");
 }
 
 Jetset7Hadroniser::~Jetset7Hadroniser()

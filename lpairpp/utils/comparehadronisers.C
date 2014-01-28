@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 
 #include "TFile.h"
 #include "TTree.h"
@@ -43,6 +44,9 @@ void comparehadronisers() {
 
   TLorentzVector part;
 
+  TPaveText *text;
+  std::stringstream ss;
+
   Int_t num_remn;
 
   f_js = new TFile("events_lpairpp_jetset_100kevts.root");
@@ -51,6 +55,16 @@ void comparehadronisers() {
   t_js = (TTree*)f_js->Get("h4444");
   t_py = (TTree*)f_py->Get("h4444");
 
+  TString title[NHIST];
+  title[NREMN] = "Number of particles in the proton remnants";
+  title[REMN_MX] = "M_{X}";
+  title[REMN_ETA] = "#eta^{remnants}";
+  title[REMN_PHI] = "#phi^{remnants}";
+  title[REMN_PX] = "p_{x}^{remnants}";
+  title[REMN_PY] = "p_{y}^{remnants}";
+  title[REMN_PZ] = "p_{z}^{remnants}";
+  title[REMN_PT] = "p_{T}^{remnants}";
+    
   h_js[NREMN] = new TH1D("h_remn_js", "", 50, -.5, 49.5);
   h_py[NREMN] = new TH1D("h_remn_py", "", 50, -.5, 49.5);
   h_js[REMN_MX] = new TH1D("h_mtot_remn_js", "", 200, 0., 50);
@@ -149,16 +163,30 @@ void comparehadronisers() {
   gStyle->SetOptStat(0);
 
   for (int p=0; p<NHIST; p++) {
+
+    text = new TPaveText(.4, .92, .93, .96, "NDC");
+    text->SetTextAlign(33);
+    ss.str(""); ss << "LPAIR++ with " << t_js->GetEntries() << " events";
+    text->AddText(ss.str().c_str());
+    text->SetFillColor(kWhite);
+    text->SetLineColor(kWhite);
+    text->SetLineWidth(0);
+    text->SetShadowColor(kWhite);
+    text->SetTextFont(42);
+
     c[p] = new TCanvas(h_js[p]->GetName());
     l[p] = new TLegend(.6, .72, .78, .82);
     l[p]->SetFillColor(kWhite);
     l[p]->SetLineColor(kWhite);
+    l[p]->SetTextFont(42);
     h_js[p]->SetLineColor(kRed);
     h_js[p]->Draw();
+    h_js[p]->GetXaxis()->SetTitle(title[p]);
     h_py[p]->Draw("SAME");
     l[p]->AddEntry(h_js[p], "Jetset 7.410");
     l[p]->AddEntry(h_py[p], "Pythia 6.4.28");
     l[p]->Draw("SAME");
+    text->Draw();
   }
 
 }
