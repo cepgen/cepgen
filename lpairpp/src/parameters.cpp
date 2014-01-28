@@ -19,9 +19,6 @@ Parameters::Parameters() :
   symmetrise(true)
 {
   this->last_event = new Event();
-  /*for (int i=0; i<MAX_HISTOS; i++) {
-    this->plot[i] = new Gnuplot();
-  }*/
   this->file = (std::ofstream*)NULL;
 }
 
@@ -30,10 +27,6 @@ Parameters::~Parameters()
 #ifdef DEBUG
   std::cout << "[Parameters::~Parameters] [DEBUG] Destructor called" << std::endl;
 #endif
-  /*for (int i=0; i<MAX_HISTOS; i++) {
-    delete[] this->plot[i];
-  }//FIXME ???*/
-  //delete[] this->plot;
   delete this->last_event;
 }
 

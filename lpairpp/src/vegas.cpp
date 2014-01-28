@@ -7,7 +7,7 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
   _nTreatCalls(0), _mbin(3),
   _ffmax(0.), _correc(0.), _corre2(0.), _fmax2(0.), _fmdiff(0.), _fmold(0.),
   _j(0),
-  _force_correction(false)
+  _force_correction(false), _grid_prepared(false)
 {
   /* x content :
       0 = t1 mapping
@@ -359,9 +359,6 @@ Vegas::Generate()
   std::string fn;
   int i;
   
-  //fn = "test";
-  //of.open(fn.c_str());
-  //this->SetGen(_ip->file);
   this->SetGen();
   std::cout << "[Vegas::Generate] [DEBUG] " << _ip->maxgen << " events will be generated" << std::endl;
   i = 0;
@@ -369,7 +366,6 @@ Vegas::Generate()
     if (this->GenerateOneEvent()) i++;
   }
   std::cout << "[Vegas::Generate] [DEBUG] " << i << " events generated" << std::endl;
-  //of.close();
 }
 
 bool
@@ -381,6 +377,11 @@ Vegas::GenerateOneEvent()
   int jj, jjj;
   double x[_ndim];
   
+  if (!_grid_prepared) {
+    this->SetGen();
+    _grid_prepared = true;
+  }
+
   y = -1.;
   ami = 1./_mbin;
   max = pow(_mbin, _ndim);
@@ -445,35 +446,42 @@ Vegas::GenerateOneEvent()
 
   // Normal generation cycle
   // Select a Vegas bin and reject if fmax is too little
- line1:
+  //line1:
   //double* Vegas::SelectBin() //FIXME need to implement it this way instead of these bloody goto...!
+  //int count = 0;
   do {
-    // ...
-    _j = (double)rand()/RAND_MAX*max;
-    y = (double)rand()/RAND_MAX*_ffmax;
-    _nm[_j] += 1;
-  } while (y>_fmax[_j]);
-  // Select x values in this Vegas bin
-  jj = _j;
-  for (unsigned int i=0; i<_ndim; i++) {
-    jjj = jj/_mbin;
-    _n[i] = jj-jjj*_mbin;
-    x[i] = ((double)rand()/RAND_MAX+_n[i])*ami;
-    jj = jjj;
-  }
-
-  // Get weight for selected x value
-  if (_ip->ntreat>0) _weight = this->Treat(x);
-  else _weight = this->F(x);
-
-  // Eject if weight is too low
-  if (y>_weight) {
-    //std::cout << "ERROR : y>weight => " << y << ">" << _weight << ", " << _j << std::endl;
-    //_force_correction = false;
-    //_force_returnto1 = true;
-    //return this->GenerateOneEvent();
-    goto line1;
-  }
+    do {
+      // ...
+      _j = (double)rand()/RAND_MAX*max;
+      y = (double)rand()/RAND_MAX*_ffmax;
+      _nm[_j] += 1;
+    } while (y>_fmax[_j]);
+    // Select x values in this Vegas bin
+    jj = _j;
+    for (unsigned int i=0; i<_ndim; i++) {
+      jjj = jj/_mbin;
+      _n[i] = jj-jjj*_mbin;
+      x[i] = ((double)rand()/RAND_MAX+_n[i])*ami;
+      jj = jjj;
+    }
+    
+    // Get weight for selected x value
+    if (_ip->ntreat>0) _weight = this->Treat(x);
+    else _weight = this->F(x);
+    
+    //std::cout << ">>> " << _weight << std::endl;
+    
+    // Eject if weight is too low
+    //if (y>_weight) {
+      //std::cout << "ERROR : y>weight => " << y << ">" << _weight << ", " << _j << std::endl;
+      //_force_correction = false;
+      //_force_returnto1 = true;
+      //return this->GenerateOneEvent();
+      //goto line1;
+    //}
+    //count++;
+    //std::cout << "trial " << count << std::endl;
+  } while (y>_weight);
 
   if (_weight<=_fmax[_j]) _j = 0;
   // Init correction cycle if weight is higher than fmax or ffmax
@@ -507,7 +515,6 @@ Vegas::StoreEvent(double *x_)
     return false;
   }
   _ip->store = true;
-  //if (_ip->ntreat>0) _weight = Treat(x_,true);
   if (_ip->ntreat>0) _weight = Treat(x_);
   else _weight = this->F(x_);
   _ip->ngen += 1;
@@ -531,16 +538,16 @@ Vegas::SetGen()
   double x[_ndim];
   double sig2;
   double av, av2;
-#ifdef DEBUG
+
+  //#ifdef DEBUG
   double eff, eff1, eff2;
   double sig, sigp;
-#endif
-
-  _ip->ngen = 0;
-#ifdef DEBUG
   std::cout << "[Vegas::SetGen] [DEBUG] maxgen = " << _ip->maxgen << std::endl;
   _ip->Dump();
-#endif
+  //#endif
+
+  _ip->ngen = 0;
+
   // ...
   sum = 0.;
   sum2 = 0.;
@@ -573,16 +580,15 @@ Vegas::SetGen()
     av = fsum/npoin;
     av2 = fsum2/npoin;
     sig2 = av2-pow(av, 2);
-#ifdef DEBUG
-    sig = sqrt(sig2);
-#endif
     sum += av;
     sum2 += av2;
     sum2p += sig2;
     if (_fmax[i-1]>_ffmax) _ffmax = _fmax[i-1];
-#ifdef DEBUG
+    //#ifdef DEBUG
+    sig = sqrt(sig2);
     eff = 1.e4;
     if (_fmax[i-1]!=0.) eff = _fmax[i-1]/av;
+#ifdef DEBUG
     std::cout << "[Vegas::SetGen] [DEBUG] in iteration #" << i << " :"
 	      << "\n\tav   = " << av
 	      << "\n\tsig  = " << sig
@@ -601,7 +607,7 @@ Vegas::SetGen()
   sum2 = sum2/max;
   sum2p = sum2p/max;
 
-#ifdef DEBUG
+  //#ifdef DEBUG
   sig = sqrt(sum2-pow(sum, 2));
   sigp = sqrt(sum2p);
   eff1 = 0.;
@@ -620,7 +626,7 @@ Vegas::SetGen()
 	    << "\n\tOverall inefficiency       =  eff2  = " << eff2 
             << "\n\teff = " << eff 
 	    << std::endl;
-#endif
+  //#endif
 }
 
 void
@@ -639,6 +645,7 @@ double
 Vegas::Treat(double *x_, Parameters* ip_, bool storedbg_)
 {
   double w, xx, y, dd, f;
+  unsigned int i;
   int j;
   double z[_ndim];
 
@@ -650,9 +657,8 @@ Vegas::Treat(double *x_, Parameters* ip_, bool storedbg_)
     }
     //this->DumpGrid();
   }
+
   w = _rTreat;
-  //std::cout << "rtreat = " << _rTreat << std::endl;
-  unsigned int i;
   for (i=0; i<_ndim; i++) {
     xx = x_[i]*_ndo-1;
     j = xx;

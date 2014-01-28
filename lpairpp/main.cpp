@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
   Parameters ip;
   Event ev;
   double xsec, err;
-  Pythia6Hadroniser had;
+  //Pythia6Hadroniser had;
 
   if (argc==1) {
     std::cout << "[Main] [DEBUG] No config file provided. Setting the default parameters." << std::endl;
@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
     ip.minpt = 5.;
     ip.maxgen = 1e1;
     ip.ncvg = 5e3; //FIXME
-    ip.hadroniser = &had;
+    //ip.hadroniser = &had;
     //ip.maxgen = 1e5;
     //ip.SetEtaRange(-2.5, 2.5);
   }

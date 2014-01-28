@@ -104,6 +104,7 @@ class Vegas {
     double *_d[MAX_ND];
     double *_di[MAX_ND];
     Parameters *_ip;
+    bool _grid_prepared;
 };
 
 #endif

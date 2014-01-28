@@ -23,8 +23,8 @@ int main() {
   TCanvas *c_npart;
   TLegend *leg;
   TTree *tree;
-  Pythia6Hadroniser had;
-  //Jetset7Hadroniser had;
+  //Pythia6Hadroniser had;
+  Jetset7Hadroniser had;
 
   ip.in1p = 3500.;
   ip.in2p = 3500.;
@@ -81,6 +81,7 @@ int main() {
     ev = *mg.GenerateOneEvent();
     //particles = ev.GetByRole(3);
     //particles = ev.GetStableParticles();
+    //#ifdef DEBUG
     particles = ev.GetParticles();
     //std::cout << "--> " << particles.size() << std::endl;
     /*n_outgoing = 0;
@@ -115,12 +116,13 @@ int main() {
     h_npart_outgoing_neutral->Fill(n_outgoing_neutral);*/
 
     tree->Fill();
+    //#endif
     //ev.Dump();
     //std::cout << ev.GetLHERecord();
   }
 
-  tree->SaveAs("events_lpairpp_pythia.root");
-  //tree->SaveAs("events_lpairpp_jetset.root");
+  //tree->SaveAs("events_lpairpp_pythia.root");
+  tree->SaveAs("events_lpairpp_jetset.root");
 
   /*gStyle->SetOptStat(0);
 

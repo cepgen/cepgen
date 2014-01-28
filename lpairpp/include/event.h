@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <algorithm>
 
-#include "lheutils.h"
+//#include "lheutils.h"
 #include "particle.h"
 
 typedef std::vector<Particle*> Particles;
@@ -122,7 +122,7 @@ class Event {
      * @return The number of particles in the event, as an integer
      */
     inline int NumParticles() { return this->_part.size(); };
-    HEPEUP event_info;
+    //HEPEUP event_info;
   private:
     std::multimap<int,Particle> _part;
 };
