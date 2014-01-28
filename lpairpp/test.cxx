@@ -79,6 +79,7 @@ int main() {
 
   for (int i=0; i<100000; i++) {
     ev = *mg.GenerateOneEvent();
+    if (i%10000==0) std::cout << "event " << i << " generated" << std::endl;
     //particles = ev.GetByRole(3);
     //particles = ev.GetStableParticles();
     //#ifdef DEBUG

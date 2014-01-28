@@ -519,9 +519,11 @@ Vegas::StoreEvent(double *x_)
   else _weight = this->F(x_);
   _ip->ngen += 1;
   _ip->store = false;
+#ifdef DEBUG
   if (_ip->ngen%1000==0) {
     std::cout << "[Vegas::StoreEvent] Generated events : " << _ip->ngen << std::endl;
   }
+#endif
   return true;
 }
 
@@ -539,12 +541,12 @@ Vegas::SetGen()
   double sig2;
   double av, av2;
 
-  //#ifdef DEBUG
+#ifdef DEBUG
   double eff, eff1, eff2;
   double sig, sigp;
   std::cout << "[Vegas::SetGen] [DEBUG] maxgen = " << _ip->maxgen << std::endl;
   _ip->Dump();
-  //#endif
+#endif
 
   _ip->ngen = 0;
 
@@ -584,11 +586,11 @@ Vegas::SetGen()
     sum2 += av2;
     sum2p += sig2;
     if (_fmax[i-1]>_ffmax) _ffmax = _fmax[i-1];
-    //#ifdef DEBUG
+#ifdef DEBUG
     sig = sqrt(sig2);
     eff = 1.e4;
     if (_fmax[i-1]!=0.) eff = _fmax[i-1]/av;
-#ifdef DEBUG
+    //#ifdef DEBUG
     std::cout << "[Vegas::SetGen] [DEBUG] in iteration #" << i << " :"
 	      << "\n\tav   = " << av
 	      << "\n\tsig  = " << sig
@@ -607,7 +609,7 @@ Vegas::SetGen()
   sum2 = sum2/max;
   sum2p = sum2p/max;
 
-  //#ifdef DEBUG
+#ifdef DEBUG
   sig = sqrt(sum2-pow(sum, 2));
   sigp = sqrt(sum2p);
   eff1 = 0.;
@@ -626,7 +628,7 @@ Vegas::SetGen()
 	    << "\n\tOverall inefficiency       =  eff2  = " << eff2 
             << "\n\teff = " << eff 
 	    << std::endl;
-  //#endif
+#endif
 }
 
 void

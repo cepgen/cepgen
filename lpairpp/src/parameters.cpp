@@ -68,7 +68,7 @@ void Parameters::Dump()
   }
   std::cout 
     << std::left
-    << "[Parameters::Dump] BEGINNING dump ===============" << std::endl << std::endl
+    << "[Parameters::Dump] BEGINNING dump ====================" << std::endl << std::endl
     << " _" << std::setfill('_') << std::setw(52) << "_/¯ INCOMING- AND OUTGOING KINEMATICS ¯\\_" << std::setfill(' ') << "_ " << std::endl
     << "| " << std::right << std::setw(52) << " |" << std::left << std::endl
     << "|-" << std::setfill('-') << std::setw(50) << " Incoming protons-like particles " << std::setfill(' ') << "-|" << std::endl
@@ -106,7 +106,7 @@ void Parameters::Dump()
     << "|_" << std::right << std::setfill('_') << std::setw(52) << "_|" << std::left << std::endl
     //<< " -" << std::right << std::setfill('-') << std::setw(52) << "- " << std::left << std::endl
     << std::endl
-    << "[Parameters::Dump] END of dump ==================" << std::endl;
+    << "[Parameters::Dump] END of dump =======================" << std::endl;
 }
 
 bool Parameters::ReadConfigFile(std::string inFile_)
