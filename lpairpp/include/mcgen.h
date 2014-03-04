@@ -58,6 +58,7 @@ class MCGen {
    */
   MCGen(Parameters *ip_);
   ~MCGen();
+  void PrintHeader();
   void Test();
   /**
    * Computes the cross-section for the run defined by this object. This returns the cross-section as well as the absolute error computed along.

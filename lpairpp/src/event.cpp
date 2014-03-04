@@ -1,8 +1,9 @@
 #include "event.h"
 
-Event::Event()
+Event::Event() :
+  time_cpu(-1.)
 {
-  //this->_part = new std::multimap<int,Particle>();
+  //this->_part = new ParticlesMap();
 }
 
 Event::~Event()
@@ -10,20 +11,21 @@ Event::~Event()
   //delete this->_part;
 }
 
-/*Event&
+Event&
 Event::operator=(const Event &ev_)
 {
   this->_part = ev_._part;
+  this->time_cpu = ev_.time_cpu;
   return *this;
-  }*/
+}
 
 Particles
 Event::GetByRole(int role_)
 {
   int i;
   Particles out;
-  std::pair<std::multimap<int,Particle>::iterator,std::multimap<int,Particle>::iterator> ret = this->_part.equal_range(role_);
-  std::multimap<int,Particle>::iterator it;
+  std::pair<ParticlesMap::iterator,ParticlesMap::iterator> ret = this->_part.equal_range(role_);
+  ParticlesMap::iterator it;
 
   for (it=ret.first, i=0; it!=ret.second && i<100; it++, i++) {
     out.push_back(&(it->second));
@@ -34,7 +36,7 @@ Event::GetByRole(int role_)
 Particle*
 Event::GetById(int id_)
 {
-  std::multimap<int,Particle>::iterator out;
+  ParticlesMap::iterator out;
   for (out=this->_part.begin(); out!=this->_part.end(); out++) {
     if (out->second.id==id_) {
       return &out->second;
@@ -46,7 +48,7 @@ Event::GetById(int id_)
 std::vector<int>
 Event::GetRoles()
 {
-  std::multimap<int,Particle>::iterator it, end;
+  ParticlesMap::iterator it, end;
   std::vector<int> out;
   for (it=this->_part.begin(), end=this->_part.end(); it!=end; it=this->_part.upper_bound(it->first)) {
     out.push_back(it->first);
@@ -73,10 +75,25 @@ Event::AddParticle(Particle *part_, bool replace_)
   return 1;
 }
 
+int
+Event::AddParticle(int role_, bool replace_)
+{
+  int out;
+  if (role_<=0) {
+    return -1;
+  }
+  np = new Particle();
+  np->role = role_;
+  out = this->AddParticle(np, replace_);
+
+  delete np;
+  return out;
+}
+
 std::string
 Event::GetLHERecord(const double weight_)
 {
-  //std::multimap<int,Particle>::iterator p;
+  //ParticlesMap::iterator p;
   std::stringstream ss;
   Particles particles, daughters;
   Particles::iterator p, dg;
@@ -114,9 +131,9 @@ Event::GetLHERecord(const double weight_)
 	if ((*dg)->id<min_id) min_id = (*dg)->id;
       }
       if (min_id==max_id) 
-	ss << std::setw(4) << min_id << "  " << std::setw(4) << "0";
+	ss << std::setw(4) << min_id+1 << "  " << std::setw(4) << "0";
       else 
-	ss << std::setw(4) << min_id << "  " << std::setw(4) << max_id;
+	ss << std::setw(4) << min_id+1 << "  " << std::setw(4) << max_id+1;
     }
     else {
       ss << std::setw(4) << "0" << "  " << std::setw(4) << "0";
@@ -167,11 +184,12 @@ Particles
 Event::GetParticles()
 {
   Particles out;
-  std::multimap<int,Particle>::iterator it;
+  ParticlesMap::iterator it;
+  //std::sort(this->_part.begin(), this->_part.end());
   for (it=this->_part.begin(); it!=this->_part.end(); it++) {
     out.push_back(&it->second);
   }
-  std::sort(out.begin(), out.end());
+  std::sort(out.begin(), out.end(), compareParticlePtrs);
   return out;
 }
 
@@ -179,7 +197,7 @@ Particles
 Event::GetStableParticles()
 {
   Particles out;
-  std::multimap<int,Particle>::iterator it;
+  ParticlesMap::iterator it;
   for (it=this->_part.begin(); it!=this->_part.end(); it++) {
     if (it->second.status==0 or it->second.status==1) {
       out.push_back(&it->second);
@@ -192,7 +210,7 @@ Event::GetStableParticles()
 void
 Event::Dump(bool stable_)
 {
-  //std::multimap<int,Particle>::iterator it;
+  //ParticlesMap::iterator it;
   Particles particles;
   Particles::iterator p;
 

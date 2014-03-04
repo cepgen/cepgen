@@ -25,6 +25,7 @@ extern "C"
 }
 
 /**
+ * Full interface to the Pythia6 @cite Sjostrand:2006za algorithm. It can be used in a single particle decay mode as well as a full event hadronisation using the string model, as in Jetset.
  * @brief Pythia6 hadronisation algorithm
  */
 class Pythia6Hadroniser : public Hadroniser
@@ -56,6 +57,7 @@ class Pythia6Hadroniser : public Hadroniser
    * @param[in] ijoin_ List of particles unique identifier to join in the colour flow
    */
   inline static void pyjoin(int njoin_, int ijoin_[2]) { return pyjoin_(njoin_,*ijoin_); };
+  void PrepareHadronisation(Event *ev_);
 };
 
 #endif

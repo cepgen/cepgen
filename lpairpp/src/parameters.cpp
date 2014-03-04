@@ -20,6 +20,7 @@ Parameters::Parameters() :
 {
   this->last_event = new Event();
   this->file = (std::ofstream*)NULL;
+  this->hadroniser = (Hadroniser*)NULL;
 }
 
 Parameters::~Parameters()
@@ -66,47 +67,53 @@ void Parameters::Dump()
     case 15:
       particles = "taus"; break;
   }
+  const int wb = 65;
+  const int wt = 50;
+  int wp = wb-wt-2;
   std::cout 
     << std::left
-    << "[Parameters::Dump] BEGINNING dump ====================" << std::endl << std::endl
-    << " _" << std::setfill('_') << std::setw(52) << "_/¯ INCOMING- AND OUTGOING KINEMATICS ¯\\_" << std::setfill(' ') << "_ " << std::endl
-    << "| " << std::right << std::setw(52) << " |" << std::left << std::endl
-    << "|-" << std::setfill('-') << std::setw(50) << " Incoming protons-like particles " << std::setfill(' ') << "-|" << std::endl
-    << "| " << std::right << std::setw(52) << " |" << std::left << std::endl
-    << "| " << std::setw(40) << "Mode" << std::setw(4) << p1mod << ", " << std::setw(4) << p2mod << " |" << std::endl
-    << "| " << std::setw(40) << "Momenta [GeV/c]" << std::setw(4) << in1p << ", " << std::setw(4) << in2p << " |" << std::endl
-    << "| " << std::right << std::setw(52) << " |" << std::left << std::endl
-    << "|-" << std::setfill('-') << std::setw(50) << " Outgoing leptons " << std::setfill(' ') << "-|" << std::endl
-    << "| " << std::right << std::setw(52) << " |" << std::left << std::endl
-    << "| " << std::setw(40) << "Pair" << std::setw(2) << pair << " " << std::setw(7) << particles << " |" << std::endl
-    << "| " << std::setw(40) << "Cuts mode" << std::setw(1) << mcut << " (" << std::setw(6) << cutsmode << ")" << " |" << std::endl
-    << "| " << std::setw(40) << "pT [GeV/c]" << "[" << std::setw(3) << minpt << ", " << std::setw(3) << maxpt << "]" << " |" << std::endl
-    << "| " << std::setw(40) << "Energy [GeV]" << "[" << std::setw(3) << minenergy << ", " << std::setw(3) << maxenergy << "]" << " |" << std::endl
-    << "| " << std::setw(40) << "Polar angle theta [deg]" << "[" << std::setw(3) << mintheta << ", " << std::setw(3) << maxtheta << "]" << " |" << std::endl
-    << "| " << std::right << std::setw(52) << " |" << std::left << std::endl
-    << "|-" << std::setfill('-') << std::setw(50) << " Outgoing remnants " << std::setfill(' ') << "-|" << std::endl
-    << "| " << std::right << std::setw(52) << " |" << std::left << std::endl
-    << "| " << std::setw(40) << "Minimal mass [GeV/c**2]" << std::setw(10) << minmx << " |" << std::endl
-    << "| " << std::setw(40) << "Maximal mass [GeV/c**2]" << std::setw(10) << maxmx << " |" << std::endl
-    << "| " << std::right << std::setw(52) << " |" << std::left << std::endl
-    << "|_" << std::setfill('_') << std::setw(52) << "_/¯ VEGAS INTEGRATION PARAMETERS ¯\\_" << std::setfill(' ') << "_|" << std::endl
-    << "| " << std::right << std::setw(52) << " |" << std::left << std::endl
-    << "| " << std::setw(40) << "Maximum number of iterations" << std::setw(10) << itvg << " |" << std::endl
-    << "| " << std::setw(40) << "Number of function calls" << std::setw(10) << ncvg << " |" << std::endl
-    << "| " << std::setw(40) << "Number of points to try per bin" << std::setw(10) << npoints << " |" << std::endl
-    << "| " << std::setw(40) << "Is the integration smoothed (TREAT) ? " << std::setw(10) << ntreat << " |" << std::endl
-    << "| " << std::right << std::setw(52) << " |" << std::left << std::endl
-    << "|_" << std::setfill('_') << std::setw(52) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "_|" << std::endl
-    << "| " << std::right << std::setw(52) << " |" << std::left << std::endl
-    << "| " << std::setw(40) << "Events generation ? " << std::setw(10) << generation << " |" << std::endl
-    << "| " << std::setw(40) << "Number of events to generate" << std::setw(10) << maxgen << " |" << std::endl
-    << "| " << std::setw(40) << "Events storage ? " << std::setw(10) << store << " |" << std::endl
-    << "| " << std::setw(40) << "Debugging mode ? " << std::setw(10) << debug << " |" << std::endl
-    << "| " << std::setw(40) << "Is Output file opened ? " << std::setw(10) << (file!=(std::ofstream*)NULL && file->is_open()) << " |" << std::endl
-    << "|_" << std::right << std::setfill('_') << std::setw(52) << "_|" << std::left << std::endl
-    //<< " -" << std::right << std::setfill('-') << std::setw(52) << "- " << std::left << std::endl
+    << "[Parameters::Dump] BEGINNING dump " << std::setfill('=') << std::setw(wb-32) << "" << std::endl
     << std::endl
-    << "[Parameters::Dump] END of dump =======================" << std::endl;
+    << " _" << std::setfill('_') << std::setw(wb) << "_/¯ INCOMING- AND OUTGOING KINEMATICS ¯\\_" << std::setfill(' ') << "_ " << std::endl
+    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
+    << "|_" << std::setfill('_') << std::setw(wb-2) << " Incoming protons-like particles " << std::setfill(' ') << "_|" << std::endl
+    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
+    << "| " << std::setw(wt) << "Mode" << std::setw(3) << p1mod << ", " << std::setw(3) << p2mod << std::setw(wp-8) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Momenta [GeV/c]" << std::setw(5) << in1p << ", " << std::setw(5) << in2p << std::setw(wp-12) << "" << " |" << std::endl
+    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
+    << "|_" << std::setfill('_') << std::setw(wb-2) << " Outgoing leptons " << std::setfill(' ') << "_|" << std::endl
+    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
+    << "| " << std::setw(wt) << "Pair" << std::setw(2) << pair << " " << std::setw(wp-3) << particles << " |" << std::endl
+    << "| " << std::setw(wt) << "Cuts mode" << std::setw(2) << mcut << " (" << std::setw(wp-5) << cutsmode << ")" << " |" << std::endl
+    << "| " << std::setw(wt) << "Lepton(s)' pT in range [GeV/c]" << "[" << std::setw(4) << minpt << ", " << std::setw(4) << maxpt << "]" << std::setw(wp-12) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Lepton(s)' energy in range [GeV]" << "[" << std::setw(4) << minenergy << ", " << std::setw(4) << maxenergy << "]" << std::setw(wp-12) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Polar angle theta in range [deg]" << "[" << std::setw(3) << mintheta << ", " << std::setw(3) << maxtheta << "]" << std::setw(wp-10) << "" << " |" << std::endl
+    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
+    << "|_" << std::setfill('_') << std::setw(wb-2) << " Outgoing remnants " << std::setfill(' ') << "_|" << std::endl
+    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl;
+    if (this->hadroniser!=(Hadroniser*)NULL)
+  std::cout << "| " << std::setw(wt) << "Hadronisation algorithm" << std::setw(12) << hadroniser->GetName() << std::setw(wp-12) << "" << " |" << std::endl;
+  std::cout << "| " << std::setw(wt) << "Minimal mass [GeV/c**2]" << std::setw(wp) << minmx << " |" << std::endl
+    << "| " << std::setw(wt) << "Maximal mass [GeV/c**2]" << std::setw(wp) << maxmx << " |" << std::endl
+    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
+    << "|_" << std::setfill('_') << std::setw(wb) << "_/¯ VEGAS INTEGRATION PARAMETERS ¯\\_" << std::setfill(' ') << "_|" << std::endl
+    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
+    << "| " << std::setw(wt) << "Maximum number of iterations" << std::setw(wp) << itvg << " |" << std::endl
+    << "| " << std::setw(wt) << "Number of function calls" << std::setw(wp) << ncvg << " |" << std::endl
+    << "| " << std::setw(wt) << "Number of points to try per bin" << std::setw(wp) << npoints << " |" << std::endl
+    << "| " << std::setw(wt) << "Is the integration smoothed (TREAT) ? " << std::setw(wp) << ntreat << " |" << std::endl
+    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
+    << "|_" << std::setfill('_') << std::setw(wb) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "_|" << std::endl
+    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
+    << "| " << std::setw(wt) << "Events generation ? " << std::setw(wp) << generation << " |" << std::endl
+    << "| " << std::setw(wt) << "Number of events to generate" << std::setw(wp) << maxgen << " |" << std::endl
+    << "| " << std::setw(wt) << "Events storage ? " << std::setw(wp) << store << " |" << std::endl
+    << "| " << std::setw(wt) << "Debugging mode ? " << std::setw(wp) << debug << " |" << std::endl
+    << "| " << std::setw(wt) << "Is Output file opened ? " << std::setw(wp) << (file!=(std::ofstream*)NULL && file->is_open()) << " |" << std::endl
+    << "|_" << std::right << std::setfill('_') << std::setw(wb) << "_|" << std::left << std::endl
+    //<< " -" << std::right << std::setfill('-') << std::setw(wb) << "- " << std::left << std::endl
+    << std::endl
+    << "[Parameters::Dump] END of dump " << std::setfill('=') << std::setw(wb-29) << "" << std::endl;
 }
 
 bool Parameters::ReadConfigFile(std::string inFile_)

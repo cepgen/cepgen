@@ -13,7 +13,9 @@ int main(int argc, char* argv[]) {
   Parameters ip;
   Event ev;
   double xsec, err;
+  //Herwig6Hadroniser had;
   //Pythia6Hadroniser had;
+  Jetset7Hadroniser had;
 
   if (argc==1) {
     std::cout << "[Main] [DEBUG] No config file provided. Setting the default parameters." << std::endl;
@@ -21,13 +23,14 @@ int main(int argc, char* argv[]) {
     ip.in2p = 3500.;
     ip.pair = 13;
     ip.p1mod = 11;
+    //ip.p1mod = 2;
     ip.p2mod = 2;
     ip.mcut = 2;
     ip.minenergy = 0.; //FIXME
     ip.minpt = 5.;
-    ip.maxgen = 1e1;
+    ip.maxgen = 1e0;
     ip.ncvg = 5e3; //FIXME
-    //ip.hadroniser = &had;
+    ip.hadroniser = &had;
     //ip.maxgen = 1e5;
     //ip.SetEtaRange(-2.5, 2.5);
   }
@@ -41,31 +44,25 @@ int main(int argc, char* argv[]) {
       return -1;
     }
   }
-  ip.generation = true;
-  std::ofstream of, fd;
-  of.open("test");
-  //fd.open("test_q2");
-  ip.file = &of;
-  //ip.file_debug = &fd;
-  ip.Dump();
 
+  ip.generation = true;
+  //std::ofstream of;
+  //of.open("test");
   MCGen mg(&ip);
+  ip.Dump();
 
   mg.ComputeXsection(&xsec, &err);
   if (ip.generation) {
     for (int i=0; i<ip.maxgen; i++) {
       ev = *mg.GenerateOneEvent();
-      //ev.Dump();
       //std::cout << ev.GetLHERecord();
     }
     //mg.LaunchGeneration();
   }
-  
 
   ip.StoreConfigFile("lastrun.card");
 
-  of.close();
-  fd.close();
+  //of.close();
   return 0;
 }
 

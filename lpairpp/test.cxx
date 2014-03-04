@@ -3,10 +3,6 @@
 #include "include/mcgen.h"
 
 // ROOT includes
-#include "TH1.h"
-#include "TCanvas.h"
-#include "TLegend.h"
-#include "TStyle.h"
 #include "TTree.h"
 
 /**
@@ -19,12 +15,9 @@ int main() {
   double xsec, err;
   Particles particles;
   Particles::iterator p;
-  //TH1D *h_npart_outgoing, *h_npart_outgoing_charged, *h_npart_outgoing_neutral;
-  TCanvas *c_npart;
-  TLegend *leg;
   TTree *tree;
-  //Pythia6Hadroniser had;
-  Jetset7Hadroniser had;
+  Pythia6Hadroniser had;
+  //Jetset7Hadroniser had;
 
   ip.in1p = 3500.;
   ip.in2p = 3500.;
@@ -48,13 +41,22 @@ int main() {
   mg.ComputeXsection(&xsec, &err);
 
   const int maxpart = 1000;
+  //const int ngen = 1e4;
+  const int ngen = 1e1;
 
   int np;
+  double xsect, errxsect;
+  double mx_p1, mx_p2;
   double eta[maxpart], phi[maxpart], rapidity[maxpart];
   double px[maxpart], py[maxpart], pz[maxpart], pt[maxpart], E[maxpart], M[maxpart], charge[maxpart];
   int PID[maxpart], parentid[maxpart], isstable[maxpart], role[maxpart];
+  float gen_time;
 
   tree = new TTree("h4444", "A TTree containing information from the events produced from LPAIR++");
+  tree->Branch("xsect", &xsect, "xsect/D");
+  tree->Branch("errxsect", &errxsect, "errxsect/D");
+  tree->Branch("MX1", &mx_p1, "MX1/D");
+  tree->Branch("MX2", &mx_p2, "MX2/D");
   tree->Branch("npart", &np, "npart/I");
   tree->Branch("Eta", eta, "eta[npart]/D");
   tree->Branch("phi", phi, "phi[npart]/D");
@@ -70,30 +72,20 @@ int main() {
   tree->Branch("E", E, "E[npart]/D");
   tree->Branch("m", M, "M[npart]/D");
   tree->Branch("charge", charge, "charge[npart]/D");
+  tree->Branch("gen_time", &gen_time, "gen_time/F");
 
-  /*h_npart_outgoing = new TH1D("h_npart_outgoing", "Number of outgoing particles (proton remnants)", 100, 0., 100.);
-  h_npart_outgoing_charged = new TH1D("h_npart_outgoing_charged", "Number of charged outgoing particles (proton remnants)", 100, 0., 100.);
-  h_npart_outgoing_neutral = new TH1D("h_npart_outgoing_neutral", "Number of neutral outgoing particles (proton remnants)", 100, 0., 100.);*/
-
-  int n_outgoing, n_outgoing_charged, n_outgoing_neutral;
-
-  for (int i=0; i<100000; i++) {
+  xsect = xsec;
+  errxsect = err;
+  for (int i=0; i<ngen; i++) {
     ev = *mg.GenerateOneEvent();
     if (i%10000==0) std::cout << "event " << i << " generated" << std::endl;
-    //particles = ev.GetByRole(3);
+    //ev.Dump();
     //particles = ev.GetStableParticles();
-    //#ifdef DEBUG
     particles = ev.GetParticles();
-    //std::cout << "--> " << particles.size() << std::endl;
-    /*n_outgoing = 0;
-    n_outgoing_charged = 0;
-    n_outgoing_neutral = 0;*/
+    mx_p1 = ev.GetOneByRole(3)->M();
+    mx_p2 = ev.GetOneByRole(5)->M();
+    gen_time = ev.time_cpu;
     for (p=particles.begin(), np=0; p!=particles.end(); p++) {
-      /*if ((*p)->status==1) {
-	n_outgoing++;
-	if ((*p)->charge!=0.) n_outgoing_charged++;
-	else n_outgoing_neutral++;
-	}*/
       eta[np] = (*p)->Eta();
       phi[np] = (*p)->Phi();
       rapidity[np] = (*p)->Rapidity();
@@ -112,40 +104,13 @@ int main() {
       //std::cout << ":: " << (*p)->role << "\t" << (*p)->status << "\t" << (*p)->id << "\t" << (*p)->pdgId << "\t" << (*p)->name << std::endl;
       np++;
     }
-    /*h_npart_outgoing->Fill(n_outgoing);
-    h_npart_outgoing_charged->Fill(n_outgoing_charged);
-    h_npart_outgoing_neutral->Fill(n_outgoing_neutral);*/
 
     tree->Fill();
-    //#endif
-    //ev.Dump();
     //std::cout << ev.GetLHERecord();
   }
 
-  //tree->SaveAs("events_lpairpp_pythia.root");
-  tree->SaveAs("events_lpairpp_jetset.root");
-
-  /*gStyle->SetOptStat(0);
-
-  c_npart = new TCanvas();
-  leg = new TLegend(.65, .7, .85, .85);
-  leg->SetFillColor(kWhite);
-  leg->SetLineColor(kWhite);
-
-  h_npart_outgoing_charged->Draw();
-  h_npart_outgoing_charged->SetLineColor(kRed);
-  leg->AddEntry(h_npart_outgoing_charged, "Charged particles");
-
-  h_npart_outgoing_neutral->Draw("SAME");
-  h_npart_outgoing_neutral->SetLineColor(kGreen);
-  leg->AddEntry(h_npart_outgoing_neutral, "Neutral particles");
-
-  h_npart_outgoing->Draw("SAME");
-  leg->AddEntry(h_npart_outgoing, "All particles");
-
-  leg->Draw();*/
-
-  //c_npart->SaveAs("num_particles.png");
+  tree->SaveAs("events_lpairpp_pythia.root");
+  //tree->SaveAs("events_lpairpp_jetset.root");
 
   return 0;
 }

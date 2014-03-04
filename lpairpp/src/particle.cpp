@@ -152,6 +152,7 @@ Particle::GetDaughters()
 #endif
     out.push_back(*it);
   }
+  std::sort(out.begin(), out.end());
 #ifdef DEBUG
   std::cout << "[Particle::GetDaughters] [DEBUG] Returning a vector containing " << out.size() << " particle(s)" << std::endl;
 #endif

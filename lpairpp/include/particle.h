@@ -7,6 +7,7 @@
 #include <string>
 #include <set>
 #include <vector>
+#include <algorithm>
 
 #include "utils.h"
 
@@ -30,6 +31,7 @@ class Particle {
      * @brief Comparison operator to enable the sorting of particles in an event according to their unique identifier
      */
     inline bool operator<(const Particle& rhs) { std::cout << this->id << "\t" << rhs.id << "\t" << (this->id<rhs.id) << std::endl; return this->id<rhs.id; };
+    //inline bool operator<(const Particle *rhs) { std::cout << this->id << "\t" << rhs->id << "\t" << (this->id<rhs->id) << std::endl; return this->id<rhs->id; };
     /**
      * Returns a string containing all the particle's kinematics as expressed in the Les Houches format
      * @param[in] revert_ Is the event symmetric ? If set to true, the third component of the momentum is reverted.
@@ -266,5 +268,6 @@ class Particle {
     double p4[4];
 };
 
+inline bool compareParticlePtrs(Particle* a, Particle* b) { return a->id<b->id; }
 
 #endif

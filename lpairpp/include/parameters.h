@@ -11,7 +11,9 @@
 #include "event.h"
 
 #include "pythia6hadroniser.h"
+#include "pythia8hadroniser.h"
 #include "jetset7hadroniser.h"
+#include "herwig6hadroniser.h"
 
 /**
  * @brief List of parameters used to start and run the simulation job.

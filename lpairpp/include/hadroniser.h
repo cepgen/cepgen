@@ -33,6 +33,7 @@ class Hadroniser
    * @return A vector of Particle containing all the hadrons produced
    */
   inline std::vector<Particle> GetHadrons() { return *(this->_hadrons); };
+  inline std::string GetName() { return this->_name; };
  protected:
   /** @brief Name of the hadroniser */
   std::string _name;

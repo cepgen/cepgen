@@ -11,7 +11,11 @@
 //#include "lheutils.h"
 #include "particle.h"
 
+/**
+ * @brief Convention to simplify the user interface while fetching a list of particles in the event
+ */
 typedef std::vector<Particle*> Particles;
+typedef std::multimap<int,Particle> ParticlesMap;
 
 /**
  * Class containing all the information on the in- and outgoing particles' kinematics
@@ -24,7 +28,7 @@ class Event {
     /**
      * @brief Copies all the relevant quantities from one Event object to another
      */
-    //Event& operator=(const Event&);
+    Event& operator=(const Event&);
     /**
      * Returns the list of pointers to the Particle objects corresponding to a certain role in the process kinematics
      * @brief Gets a list of particles by their role in the event
@@ -89,6 +93,7 @@ class Event {
      *  * -1 if the requested role to edit is undefined or incorrect
      */
     int AddParticle(Particle* part_, bool replace_=false);
+    int AddParticle(int role_, bool replace_=false);
     /**
      * Returns an event block in a LHE format (a XML-style) with all the information on the particles composing this event
      * @brief Gets the LHE block for this event
@@ -122,9 +127,11 @@ class Event {
      * @return The number of particles in the event, as an integer
      */
     inline int NumParticles() { return this->_part.size(); };
+    float time_cpu;
     //HEPEUP event_info;
   private:
-    std::multimap<int,Particle> _part;
+    ParticlesMap _part;
+    Particle *np;
 };
 
 #endif

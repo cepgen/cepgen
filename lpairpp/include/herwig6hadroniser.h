@@ -1,40 +1,44 @@
-#ifndef _JETSET7HADRONISER_H
-#define _JETSET7HADRONISER_H
+#ifndef _HERWIG6HADRONISER_H
+#define _HERWIG6HADRONISER_H
 
 #include <algorithm>
 
 #include "hadroniser.h"
-
-#define NAME_CHR 16
+#define NMXHEP 4000
+//#define NAME_CHR 16
 
 extern "C"
 {
-  extern float ulmass_(int&);
-  extern void luexec_();
-  extern void lugive_(const char*,int);
-  extern void lulist_(int&);
-  extern void lujoin_(int&,int&);
-  extern void luname_(int&,char*,int);
-  extern int luchge_(int&);
-  extern struct
-  {
-    int n, k[5][4000];
-    float p[5][4000], v[5][4000];
-  } lujets_;
+  void hwdhad_();
+  void hwaend_();
+  extern struct {
+    int nevhep, nhep, isthep[NMXHEP], idhep[NMXHEP];
+    int jmohep[NMXHEP][2], jdahep[NMXHEP][2];
+    double phep[NMXHEP][5], vhep[NMXHEP][4];
+  } hepevt_;
+  
+  /* COMMON/FFS/TB,BT
+     COMMON/SFF/IT1,IB1,IT2,IB2 */
+  /*struct {
+    double tb, bt;
+  } ffs_;
+  struct {
+    int it1, ib1, it2, ib2;
+  } sff_;*/
 }
 
 /**
- * @brief Jetset7 hadronisation algorithm
+ * @brief Herwig6 hadronisation algorithm
  */
-class Jetset7Hadroniser : public Hadroniser
+class Herwig6Hadroniser : public Hadroniser
 {
  public:
-  Jetset7Hadroniser();
-  ~Jetset7Hadroniser();
-  bool Hadronise(Particle* part_);
+  Herwig6Hadroniser();
+  ~Herwig6Hadroniser();
   bool Hadronise(Event* ev_);
  private:
-  inline static double ulmass(int pdgid_) { return (double)ulmass_(pdgid_); };
+  inline static void hwdhad() { hwdhad_(); };
+  /*inline static double ulmass(int pdgid_) { return (double)ulmass_(pdgid_); };
   inline static void luexec() { luexec_(); };
   inline static void lugive(const std::string &line_) { lugive_(line_.c_str(),line_.length()); };
   inline static float luchge(int pdgid_) { return luchge_(pdgid_)/3.; };
@@ -46,14 +50,13 @@ class Jetset7Hadroniser : public Hadroniser
     s = std::string(out, NAME_CHR);
     s.erase(remove(s.begin(), s.end(), ' '), s.end());
     return s;
-  };
+  };*/
   /**
    * @brief Connect entries with colour flow information
    * @param njoin_ Number of particles to join in the colour flow
    * @param ijoin_ List of particles to join in the colour flow
    */
-  inline static void lujoin(int njoin_, int ijoin_[2]) { return lujoin_(njoin_,*ijoin_); };
-  void PrepareHadronisation(Event *ev_);
+  //inline static void lujoin(int njoin_, int ijoin_[2]) { return lujoin_(njoin_,*ijoin_); };
 };
 
 #endif

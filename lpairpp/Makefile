@@ -1,29 +1,34 @@
 EXEC=clpair
-#USE_PYTHIA6 = 1
 ############################################
 PYTHIA6SRC = $(wildcard external/pythia-6.*.f)
 JETSET7SRC = $(wildcard external/jetset7*.f)
-PYTHIA8LIB = $(wildcard external/libpythia8*.so)
+PYTHIA8SRC = $(wildcard external/pythia8*/)
+HERWIG6SRC = $(wildcard external/herwig6*.f)
+PYTHIA8LIB = $(PYTHIA8SRC)lib
 INCLUDEDIR = include/
 ############################################
-CFLAGS     = -Wall -Wextra -I$(INCLUDEDIR) -g
+CFLAGS     = -Wall -Wextra -I$(INCLUDEDIR) -D$(SVNDEV) -g #-I$(PYTHIA8SRC)/include
 FFLAGS     = -w -g
-LDFLAGS    = -I$(INCLUDEDIR) -lgfortran
-VPATH      = src include
+LDFLAGS    = -I$(INCLUDEDIR) -lgfortran -L$(PYTHIA8LIB) -I$(PYTHIA8SRC)include -lpythia8 -llhapdfdummy
+VPATH      = src:include:$(PYTHIA8SRC)/include
+#LD_LIBRARY_PATH = $(LD_LIBRARY_PATH):$(PYTHIA8LIB)
+SVNDEV = 'SVN_REV="$(shell svnversion -nq .)"'
 ############################################
 CPP_FILES  = $(wildcard src/*.cpp)
 HPP_FILES  = $(wildcard includes/*.h)
 LIB_FILES  = $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES)) \
 	     $(patsubst external/%.f,obj/%.fo,$(PYTHIA6SRC)) \
-	     $(patsubst external/%.f,obj/%.fo,$(JETSET7SRC))
-OBJ_FILES  = main.o $(LIB_FILES)
+	     $(patsubst external/%.f,obj/%.fo,$(HERWIG6SRC)) \
+	     $(patsubst external/%.f,obj/%.fo,$(JETSET7SRC)) 
+	     #-L$(PYTHIA8LIB) -I$(PYTHIA8SRC)/include -lpythia8
 ############################################
-CC = g++
+#CC = g++
+CC = clang++
 CF = gfortran
 RM = rm -f
 ############################################
 
-############# FIXME ########################
+############# FIXME : ROOT #################
 RFLAGS = $(shell root-config --cflags)
 RLIBS = $(shell root-config --libs)
 RHEAD = $(shell root-config --incdir)
@@ -31,15 +36,18 @@ RHEAD = $(shell root-config --incdir)
 
 #$(info $(OBJ_FILES))
 
-all: $(EXEC) xsect
+all: $(EXEC) #xsect
 
-$(EXEC): $(OBJ_FILES)
-	$(CC) -g -o $@ $^ $(LDFLAGS)
+$(EXEC): main.o $(LIB_FILES)
+	$(CC) -g -o $@ $^ $(LDFLAGS) -L$(PYTHIA8LIB) -lpythia8 -llhapdfdummy
 
 test: obj/test.oxx $(LIB_FILES)
 	$(CC) -g -o $@ $^ $(LDFLAGS) $(RLIBS)
 
 .PHONY: all
+
+obj/pythia8hadroniser.o: pythia8hadroniser.cpp pythia8hadroniser.h
+	$(CC) -c $(CFLAGS) -llhapdfdummy $< -o $@
 
 obj/%.o: %.cpp %.h
 	$(CC) -c $(CFLAGS) $< -o $@
@@ -64,4 +72,4 @@ probe: utils/probe.o $(LIB_FILES)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 intest: utils/inelasticparticle.o $(LIB_FILES)
-	$(CC) -o $@ $^ $(LDFLAGS)
+	$(CC) -o $@ $^ $(LDFLAGS) -I$(PYTHIA8SRC)/include/

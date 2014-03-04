@@ -51,6 +51,8 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
   //bool isprimary;
   int id1, id2;
   int njoin[max_str_in_evt], jlrole[max_str_in_evt], jlpsf[max_str_in_evt][max_part_in_str];
+  
+  this->PrepareHadronisation(ev_);
 
   rl = ev_->GetRoles();
 
@@ -83,12 +85,8 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
       pyjets_.k[0][np] = (*p)->status;
       pyjets_.k[1][np] = (*p)->pdgId;
       
-      if ((*p)->GetMother()!=-1) {
-	pyjets_.k[2][np] = (*p)->GetMother()+1; // mother
-      }
-      else {
-	pyjets_.k[2][np] = 0; // mother
-      }
+      if ((*p)->GetMother()!=-1) pyjets_.k[2][np] = (*p)->GetMother()+1; // mother
+      else pyjets_.k[2][np] = 0; // mother
       
       daug = ev_->GetDaughters(*p);
       if (daug.size()!=0) {
@@ -139,7 +137,10 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
 
   for (int p=0; p<pyjets_.n; p++) {
 
-    if (pyjets_.k[0][p]==0) continue;
+    // First we filter the particles with status <= 0 :
+    //  Status code = -1 : CLPAIR "internal" particles (not to be interacted with)
+    //                 0 : Pythia6 empty lines
+    if (pyjets_.k[0][p]<=0) continue;
 
     Particle pa;
     pa.id = p;
@@ -174,3 +175,86 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
 
   return true;
 }
+
+void
+Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
+{
+  int singlet_id, doublet_id;
+  double ranudq, ulmdq, ulmq;
+  double ranmxp, ranmxt;
+  double pmxp;
+  double pmxda[4];
+  double partpb[4];
+
+#ifdef DEBUG
+  std::cout << "[GamGam::PrepareHadronisation] [DEBUG] Hadronisation preparation called !" << std::endl;
+#endif
+
+  Particles pp;
+  Particles::iterator p;
+  
+  pp = ev_->GetParticles();
+  for (p=pp.begin(); p!=pp.end(); p++) {
+    if ((*p)->status==21) { // One proton to be fragmented
+      ranudq = (double)rand()/RAND_MAX;
+      if (ranudq<1./9.) {
+        singlet_id = 1;
+        doublet_id = 2203;
+      }
+      else if (ranudq<5./9.) {
+        singlet_id = 2;
+        doublet_id = 2101;
+      }
+      else {
+        singlet_id = 2;
+        doublet_id = 2103;
+      }
+      ulmdq = GetMassFromPDGId(doublet_id);
+      ulmq = GetMassFromPDGId(singlet_id);
+
+      // Choose random direction in MX frame
+      ranmxp = 2.*pi*(double)rand()/RAND_MAX;
+      ranmxt = acos(2.*(double)rand()/RAND_MAX-1.);
+
+      // Compute momentum of decay particles from MX
+      pmxp = std::sqrt(std::pow( (*p)->M2() - std::pow(ulmdq, 2) + std::pow(ulmq, 2), 2) / (4.*(*p)->M2()) - std::pow(ulmq, 2));
+
+      // Build 4-vectors and boost decay particles
+      pmxda[0] = sin(ranmxt)*cos(ranmxp)*pmxp;
+      pmxda[1] = sin(ranmxt)*sin(ranmxp)*pmxp;
+      pmxda[2] = cos(ranmxt)*pmxp;
+      pmxda[3] = sqrt(pow(pmxp, 2)+pow(ulmdq, 2));
+
+      Lorenb((*p)->M(), (*p)->P4(), pmxda, partpb);
+
+      Particle singlet((*p)->role, singlet_id);
+      singlet.status = 3;
+      singlet.SetMother(ev_->GetOneByRole((*p)->role));
+      if (!singlet.P(partpb)) {
+    #ifdef ERROR
+        std::cerr << "[GamGam::PrepareHadronisation] ERROR while setting the 4-momentum of singlet" << std::endl;
+    #endif
+      }
+
+      ev_->AddParticle(&singlet);
+
+      pmxda[0] = -pmxda[0];
+      pmxda[1] = -pmxda[1];
+      pmxda[2] = -pmxda[2];
+      pmxda[3] = sqrt(pow(pmxp, 2)+pow(ulmq, 2));
+
+      Lorenb((*p)->M(), (*p)->P4(), pmxda, partpb);
+      
+      Particle doublet((*p)->role, doublet_id);
+      doublet.status = 3;
+      doublet.SetMother(ev_->GetOneByRole((*p)->role));
+      if (!doublet.P(partpb)) {
+    #ifdef ERROR
+        std::cout << "[GamGam::PrepareHadronisation] ERROR while setting the 4-momentum of doublet" << std::endl;
+    #endif
+      }
+      ev_->AddParticle(&doublet);    
+    }
+  }
+}
+
