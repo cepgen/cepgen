@@ -4,7 +4,7 @@
 #include <fstream>
 #include <cstdio> // remove (DEBUG)
 
-#include "gamgam.h"
+#include "parameters.h"
 
 #define MAX_ND 50
 

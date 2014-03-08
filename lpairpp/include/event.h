@@ -29,6 +29,7 @@ class Event {
      * @brief Copies all the relevant quantities from one Event object to another
      */
     Event& operator=(const Event&);
+    inline void clear() { this->_part.clear(); };
     /**
      * Returns the list of pointers to the Particle objects corresponding to a certain role in the process kinematics
      * @brief Gets a list of particles by their role in the event

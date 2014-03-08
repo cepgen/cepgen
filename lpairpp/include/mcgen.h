@@ -7,8 +7,6 @@
 #include <ctime>
 
 #include "vegas.h"
-#include "gamgam.h"
-#include "parameters.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -20,8 +18,8 @@
  * the cross-section and to generate events for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
  * process in high energy physics.
  * 
- * The main operation is the integration of the matrix element (given as a GamGam
- * object, subset of a Process object) performed by *Vegas*, an importance sampling
+ * The main operation is the integration of the matrix element (given as a 
+ * subset of a Process object) performed by *Vegas*, an importance sampling
  * algorithm written in 1972 by G. P. Lepage@cite PeterLepage1978192. 
  *
  */
@@ -40,7 +38,7 @@
  * value of the array \f$\textbf{x}\f$ are computed in the f-function defined
  * outside (but populated inside) this object.
  *
- * This f-function embeds a GamGam object which defines all the methods to
+ * This f-function embeds a Process object which defines all the methods to
  * obtain this differential cross-section as well as the in- and outgoing
  * kinematics associated to each particle.
  *
@@ -51,6 +49,11 @@
  */
 class MCGen {
  public:
+  /**
+   * Sets the number of dimensions on which to perform the integration, according to the set of input parameters given as an argument and propagated to the whole object
+   * @brief Class constructor
+   */
+  MCGen();
   /**
    * Sets the number of dimensions on which to perform the integration, according to the set of input parameters given as an argument and propagated to the whole object
    * @brief Class constructor
@@ -81,20 +84,17 @@ class MCGen {
    * @brief Returns the set of parameters used to setup the phase space to integrate
    * @return The Parameter object embedded in this class
    */
-  Parameters GetParameters() { return *_par; }
   void AnalyzePhaseSpace(const std::string);
+  Parameters* parameters;
+  /** @brief Last event generated in this run */
+  Event *last_event;
  private:
-  /**
-   * The GamGam object which allows to compute the outgoing particles' kinematics
-   * as well as the cross-section for the given point in the phase space
-   */
-  GamGam *gg;
+  void BuildVegas();
   /** @brief The Vegas integrator which will integrate the function */
   Vegas *veg;
-  /** @brief Set of parameters to setup the phase space to integrate */
-  Parameters *_par;
   double _xsec;
   double _xsec_error;
+  bool _xsec_comp;
 };
 
 /**

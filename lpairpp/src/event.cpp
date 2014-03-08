@@ -101,13 +101,13 @@ Event::GetLHERecord(const double weight_)
 
   //FIXME need to fetch the vector (not the multimap), so that we can sort on the particle unique identifier (also TODO!!!)
   ss << "<event>" << std::endl;
-  /*ss << this->NumParticles() << "\t"
-     << this->event_info.idprup << "\t"
+  ss << this->NumParticles() << "\t"
+     /*<< this->event_info.idprup << "\t"
      << this->event_info.xwgtup << "\t"
      << this->event_info.scalup << "\t" // scale of the event, in GeV
      << this->event_info.aqedup << "\t" // alphaQED
-     << this->event_info.aqcdup // alphaQCD
-     << std::endl;*/
+     << this->event_info.aqcdup // alphaQCD*/
+     << std::endl;
   particles = this->GetParticles();
   for (p=particles.begin(); p!=particles.end(); p++) {
     if ((*p)->status==0) (*p)->status = 1;

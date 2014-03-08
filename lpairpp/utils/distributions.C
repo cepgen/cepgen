@@ -76,15 +76,18 @@ void distributions()
   
   // LPAIR's TTree definition
   Double_t xsect_lp, errxsect_lp, mx_lp;
+  Double_t txsect_lp, terrxsect_lp;
   Double_t px_lp[n], py_lp[n], pz_lp[n], e_lp[n], m_lp[n], eta_lp[n];
   Int_t pdgId_lp[n], npart_lp, stable_lp[n], mother_lp[n];
   Double_t charge_lp[n];
 
   Double_t xsect_clp, errxsect_clp, mx_clp;
+  Double_t txsect_clp, terrxsect_clp;
   Double_t px_clp[n], py_clp[n], pz_clp[n], pt_clp[n], e_clp[n], m_clp[n], eta_clp[n];
   Int_t pdgId_clp[n], npart_clp, role_clp[n], stable_clp[n], mother_clp[n];
   Double_t charge_clp[n];
 
+  Int_t n_clp, n_lp;
   TFile *lp, *clp;
   TTree *t_lp, *t_clp;
   bool lep1set, lep2set, pset;
@@ -93,8 +96,8 @@ void distributions()
   lp = new TFile("samples/lpair-7tev-singlediss-pt5.root");
   t_lp = (TTree*)(lp->Get("h4444"));
   t_lp->SetBranchAddress("ip", &npart_lp);
-  t_lp->SetBranchAddress("xsect", &xsect_lp);
-  t_lp->SetBranchAddress("errxsect", &errxsect_lp);
+  t_lp->SetBranchAddress("xsect", &txsect_lp);
+  t_lp->SetBranchAddress("errxsect", &terrxsect_lp);
   t_lp->SetBranchAddress("MX", &mx_lp);
   t_lp->SetBranchAddress("px", px_lp);
   t_lp->SetBranchAddress("py", py_lp);
@@ -108,15 +111,16 @@ void distributions()
   t_lp->SetBranchAddress("parent", mother_lp);
 
   hadroniser = "Jetset 7.410";
-  hadroniser = "Pythia 6.4.28";
+  //hadroniser = "Pythia 6.4.28";
 
   //clp = new TFile("events_lpairpp_jetset_100kevts.root");
   //clp = new TFile("events_lpairpp_pythia_100kevts.root");
-  clp = new TFile("events_lpairpp_pythia.root");
+  clp = new TFile("events_lpairpp_jetset.root");
+  //clp = new TFile("events_lpairpp_pythia.root");
   t_clp = (TTree*)(clp->Get("h4444"));
   t_clp->SetBranchAddress("npart", &npart_clp);
-  t_clp->SetBranchAddress("xsect", &xsect_clp);
-  t_clp->SetBranchAddress("errxsect", &errxsect_clp);
+  t_clp->SetBranchAddress("xsect", &txsect_clp);
+  t_clp->SetBranchAddress("errxsect", &terrxsect_clp);
   t_clp->SetBranchAddress("MX1", &mx_clp);
   t_clp->SetBranchAddress("Eta", eta_clp);
   t_clp->SetBranchAddress("px", px_clp);
@@ -181,18 +185,26 @@ void distributions()
   h_lpairor[REMN_E] = new TH1D("rm_e_2", "E^{remnants}", 175, 0., 3500.);
 
   // First fetch the LPAIR++ output
-  for (i=0; i<t_clp->GetEntries(); i++) {
+  n_clp = t_clp->GetEntries();
+  n_lp = t_lp->GetEntries();
+
+  for (i=0; i<n_clp; i++) {
     if (maxEvts>0 && i>maxEvts) break;
 
     tot_remn.SetXYZM(0., 0., 0., 0.);
     lep1set = lep2set = false;
     nremn = nremn_ch = nremn_nt = 0;
 
-    if (i%20000==0) {
+    t_clp->GetEntry(i);
+
+    if (i==0) {
+      xsect_clp = txsect_clp;
+      errxsect_clp = terrxsect_clp;
+      cout << "[LPAIR++] Sigma = " << xsect_clp << " +/- " << errxsect_clp << endl;
+    }
+    else if (i%20000==0) {
       cout << "[LPAIR++] Event #" << i << endl;
     }
-
-    t_clp->GetEntry(i);
 
     for (j=0; j<npart_clp; j++) {
       if (pdgId_clp[j]==-lepPdg) {
@@ -241,9 +253,17 @@ void distributions()
   }
 
   // Then fetch the LPAIR output (as a TTree)
-  for (i=0; i<t_lp->GetEntries(); i++) {
+  for (i=0; i<n_lp; i++) {
     if (maxEvts>0 && i>maxEvts) break;
-    if (i%20000==0) {
+
+    t_lp->GetEntry(i);
+
+    if (i==0) {
+      xsect_lp = txsect_lp;
+      errxsect_lp = terrxsect_lp;
+      cout << "[ LPAIR ] Sigma = " << xsect_lp << " +/- " << errxsect_lp << endl;
+    }
+    else if (i%20000==0) {
       cout << "[ LPAIR ] Event #" << i << endl;
     }
 
@@ -251,8 +271,6 @@ void distributions()
     lep1set = lep2set = false;
     pset = false;
     nremn = nremn_ch = nremn_nt = 0;
-
-    t_lp->GetEntry(i);
 
     for (j=0; j<npart_lp; j++) {
       if (pdgId_lp[j]==-lepPdg) {
@@ -406,10 +424,10 @@ void distributions()
     htmp->Draw("E SAME");
 
     c[i]->cd(1);
-    h_lpairpp[i]->Scale(xsect_clp/t_clp->GetEntries());
-    h_lpairor[i]->Scale(xsect_lp/t_lp->GetEntries());
-    max = TMath::Max(h_lpairor[i]->GetBinContent(h_lpairor[i]->GetMaximumBin()), h_lpairpp[i]->GetBinContent(h_lpairpp[i]->GetMaximumBin()));
-    h_lpairor[i]->GetYaxis()->SetRangeUser(.01, max*1.2);
+    h_lpairpp[i]->Scale(xsect_clp/n_clp);
+    h_lpairor[i]->Scale(xsect_lp/n_lp);
+    //max = TMath::Max(h_lpairor[i]->GetBinContent(h_lpairor[i]->GetMaximumBin()), h_lpairpp[i]->GetBinContent(h_lpairpp[i]->GetMaximumBin()));
+    //h_lpairor[i]->GetYaxis()->SetRangeUser(.01, max*1.2);
     leg->Draw("SAME");
     text->Draw();
 

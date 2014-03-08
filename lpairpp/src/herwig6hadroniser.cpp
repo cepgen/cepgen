@@ -16,11 +16,14 @@ Herwig6Hadroniser::~Herwig6Hadroniser()
 bool
 Herwig6Hadroniser::Hadronise(Event *ev_)
 {
-  std::cout << "[Herwig6Hadroniser::Hadronise]" << std::endl;
-  
   int i;
+  Particles pp;
   Particles::iterator p;
-  Particles pp = ev_->GetParticles();
+
+  std::cout << "[Herwig6Hadroniser::Hadronise]" << std::endl;
+  ev_->Dump();
+  
+  pp = ev_->GetParticles();
   for (p=pp.begin(), i=0; p!=pp.end() && i<NMXHEP; p++, i++) {
     if ((*p)->status==3) (*p)->status = 193; //FIXME workaround for cluster fragmentation
   

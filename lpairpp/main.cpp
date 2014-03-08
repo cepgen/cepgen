@@ -10,59 +10,57 @@
  * the events generation.
  */
 int main(int argc, char* argv[]) {
-  Parameters ip;
-  Event ev;
   double xsec, err;
+  MCGen mg;
+  Event ev;
+  GamGamLL proc;
   //Herwig6Hadroniser had;
   //Pythia6Hadroniser had;
   Jetset7Hadroniser had;
 
   if (argc==1) {
     std::cout << "[Main] [DEBUG] No config file provided. Setting the default parameters." << std::endl;
-    ip.in1p = 3500.;
-    ip.in2p = 3500.;
-    ip.pair = 13;
-    ip.p1mod = 11;
-    //ip.p1mod = 2;
-    ip.p2mod = 2;
-    ip.mcut = 2;
-    ip.minenergy = 0.; //FIXME
-    ip.minpt = 5.;
-    ip.maxgen = 1e0;
-    ip.ncvg = 5e3; //FIXME
-    ip.hadroniser = &had;
-    //ip.maxgen = 1e5;
-    //ip.SetEtaRange(-2.5, 2.5);
+    mg.parameters->in1p = 3500.;
+    mg.parameters->in2p = 3500.;
+    mg.parameters->pair = 13;
+    mg.parameters->p1mod = 11;
+    //mg.parameters->p1mod = 2;
+    mg.parameters->p2mod = 2;
+    mg.parameters->mcut = 2;
+    mg.parameters->minenergy = 0.; //FIXME
+    mg.parameters->minpt = 5.;
+    //mg.parameters->SetEtaRange(-2.5, 2.5);
+    mg.parameters->ncvg = 5e3; //FIXME
+    mg.parameters->generation = true;
+    mg.parameters->maxgen = 1e0;
+    //mg.parameters->maxgen = 1e5;
+    mg.parameters->hadroniser = &had;
+    mg.parameters->process = &proc;
   }
   else {
 #ifdef DEBUG
     std::cout << "[Main] [DEBUG] Reading config file stored in " << argv[1] << std::endl;
 #endif
-    if (!ip.ReadConfigFile(std::string(argv[1]))) {
+    if (!mg.parameters->ReadConfigFile(std::string(argv[1]))) {
       std::cout << "=== Error reading the configuration !" << std::endl;
       std::cout << "  Please check your input file (" << std::string(argv[1]) << ")" << std::endl;
       return -1;
     }
   }
 
-  ip.generation = true;
-  //std::ofstream of;
-  //of.open("test");
-  MCGen mg(&ip);
-  ip.Dump();
+  mg.parameters->Dump();
 
   mg.ComputeXsection(&xsec, &err);
-  if (ip.generation) {
-    for (int i=0; i<ip.maxgen; i++) {
+  if (mg.parameters->generation) {
+    for (int i=0; i<mg.parameters->maxgen; i++) {
       ev = *mg.GenerateOneEvent();
-      //std::cout << ev.GetLHERecord();
+      std::cout << ev.GetLHERecord();
     }
     //mg.LaunchGeneration();
   }
 
-  ip.StoreConfigFile("lastrun.card");
+  mg.parameters->StoreConfigFile("lastrun.card");
 
-  //of.close();
   return 0;
 }
 

@@ -7,8 +7,7 @@
 #include <cmath>
 #include <fstream>
 
-//#include "particle.h"
-#include "event.h"
+#include "gamgamll.h"
 
 #include "pythia6hadroniser.h"
 #include "pythia8hadroniser.h"
@@ -189,6 +188,7 @@ class Parameters {
      * @brief Hadronisation algorithm to use for the proton(s) remnants fragmentation
      */
     Hadroniser* hadroniser;
+    Process* process;
 };
 
 #endif

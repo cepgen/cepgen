@@ -51,7 +51,7 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
   //bool isprimary;
   int id1, id2;
   int njoin[max_str_in_evt], jlrole[max_str_in_evt], jlpsf[max_str_in_evt][max_part_in_str];
-
+  
   this->PrepareHadronisation(ev_);
 
   rl = ev_->GetRoles();
@@ -82,12 +82,12 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
       lujets_.p[3][np] = (float)(*p)->E();
       lujets_.p[4][np] = (float)(*p)->M();
       
-      lujets_.k[0][np] = (*p)->status-1;
+      lujets_.k[0][np] = (*p)->status;
       lujets_.k[1][np] = (*p)->pdgId;
       
       if ((*p)->GetMother()!=-1) lujets_.k[2][np] = (*p)->GetMother()+1; // mother
       else lujets_.k[2][np] = 0; // mother
-
+      
       daug = ev_->GetDaughters(*p);
       if (daug.size()!=0) {
 	lujets_.k[3][np] = (*p)->GetDaughters().front()+1; // daughter 1
@@ -101,7 +101,7 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
       for (int i=0; i<5; i++) {
 	lujets_.v[i][np] = 0.;
       }
-            
+      
       if ((*p)->status==3) {
 	jlrole[id1] = (*p)->role;
 	jlpsf[id1][id2] = (*p)->id+1;
@@ -137,7 +137,10 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
 
   for (int p=0; p<lujets_.n; p++) {
 
-    if (lujets_.k[0][p]==0) continue;
+    // First we filter the particles with status <= 0 :
+    //  Status code = -1 : CLPAIR "internal" particles (not to be interacted with)
+    //                 0 : Jetset7 empty lines
+    if (lujets_.k[0][p]<=0) continue;
 
     Particle pa;
     pa.id = p;
@@ -186,7 +189,7 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
   
   pp = ev_->GetParticles();
   for (p=pp.begin(); p!=pp.end(); p++) {
-    if ((*p)->status==21) { // One proton to be fragmented
+    if ((*p)->status==-2) { // One proton to be fragmented
       ranudq = (double)rand()/RAND_MAX;
       if (ranudq<1./9.) {
         singlet_id = 1;
@@ -248,3 +251,4 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
     }
   }
 }
+

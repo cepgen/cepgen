@@ -5,22 +5,39 @@
 
 #include "hadroniser.h"
 
+/** @brief Maximal number of characters to fetch for the particle's name */
 #define NAME_CHR 16
 
 extern "C"
 {
+  /** @brief Get the particle's mass in GeV from the Pythia6 module */
   extern double pymass_(int&);
+  /** @brief Launch the Pythia6 fragmentation */
   extern void pyexec_();
+  /** @brief Set a parameter value to the Pythia6 module */
   extern void pygive_(const char*,int);
   extern void pyckbd_();
+  /** @brief Lists all the particles in the event in a human-readable format */
   extern void pylist_(int&);
+  /** @brief Joins two coloured particles in a colour singlet */
   extern void pyjoin_(int&,int&);
+  /** @brief Get a particle's human-readable name from the Pythia6 module */
   extern void pyname_(int&,char*,int);
+  /** @brief Get information on a particle from the Pythia6 module */
   extern double pyp_(int&,int&);
+
+  /** @brief Particles content of the event */
   extern struct
   {
-    int n, npad, k[5][4000];
-    double p[5][4000], v[5][4000];
+    /** @brief Number of particles in the event */
+    int n;
+    int npad;
+    /** @brief Particles' general information (status, PDG id, mother, daughter 1, daughter 2) */
+    int k[5][4000];
+    /** @brief Particles' kinematics, in GeV (px, py, pz, E, M) */
+    double p[5][4000];
+    /** @brief Primary vertex for the particles */
+    double v[5][4000];
   } pyjets_;
 }
 

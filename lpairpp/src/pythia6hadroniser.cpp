@@ -146,8 +146,13 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
     pa.id = p;
     pa.pdgId = pyjets_.k[1][p];
     if (ev_->GetById(pyjets_.k[2][p]-1)!=(Particle*)NULL) {
-      //std::cout << "Particle : " << pa.id << " with pdg : " << pa.pdgId << std::endl;
-      //std::cout << "->mother : " << ev_->GetById(pyjets_.k[2][p]-1)->id << " with pdg : " << ev_->GetById(pyjets_.k[2][p]-1)->pdgId << " and role : " << ev_->GetById(pyjets_.k[2][p]-1)->role << std::endl;
+      /*std::cout << "Particle : " << std::setw(3) << pa.id 
+		<< " with pdg : " << std::setw(5) << pa.pdgId
+		<< " and role : " << std::setw(3) << pa.role
+		<< " ->mother : " << std::setw(3) << ev_->GetById(pyjets_.k[2][p]-1)->id 
+		<< " with pdg : " << std::setw(5) << ev_->GetById(pyjets_.k[2][p]-1)->pdgId
+		<< " and role : " << std::setw(3) << ev_->GetById(pyjets_.k[2][p]-1)->role
+		<< std::endl;*/
       pa.role = ev_->GetById(pyjets_.k[2][p]-1)->role; // Child particle inherits its mother's role
     }
     pa.status = pyjets_.k[0][p];
@@ -195,7 +200,7 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
   
   pp = ev_->GetParticles();
   for (p=pp.begin(); p!=pp.end(); p++) {
-    if ((*p)->status==21) { // One proton to be fragmented
+    if ((*p)->status==-2) { // One proton to be fragmented
       ranudq = (double)rand()/RAND_MAX;
       if (ranudq<1./9.) {
         singlet_id = 1;

@@ -22,8 +22,8 @@ LIB_FILES  = $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES)) \
 	     $(patsubst external/%.f,obj/%.fo,$(JETSET7SRC)) 
 	     #-L$(PYTHIA8LIB) -I$(PYTHIA8SRC)/include -lpythia8
 ############################################
-#CC = g++
-CC = clang++
+CC = g++
+#CC = clang++
 CF = gfortran
 RM = rm -f
 ############################################

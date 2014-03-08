@@ -21,7 +21,7 @@
  * @param pdgId_ PDG ID of the particle whose mass is requested
  * @return Mass of the particle in GeV/c**2
  */
-double GetMassFromPDGId(int);
+double GetMassFromPDGId(int pdgId_);
 
 /**
  * Computes the proton structure function (F.W Brasse et al., DESY 76/11 (1976),
@@ -47,7 +47,7 @@ bool PSF(double,double,double*,double*,double*);
  *  - opposite sign :
  * > `mapt1`, `mapt2`
  */
-void Map(double,double,double,double*,double*);
+void Map(double expo_, double xmin_, double xmax_, double* out_, double* dout_);
 void Mapla(double,double,int,double,double,double*,double*);
 //void Symmetrise(double, double, double*, double*);
 void Lorenb(double u_, double ps_[], double pi_[], double pf_[]);

@@ -74,7 +74,16 @@ void Parameters::Dump()
     << std::left
     << "[Parameters::Dump] BEGINNING dump " << std::setfill('=') << std::setw(wb-32) << "" << std::endl
     << std::endl
-    << " _" << std::setfill('_') << std::setw(wb) << "_/¯ INCOMING- AND OUTGOING KINEMATICS ¯\\_" << std::setfill(' ') << "_ " << std::endl
+    << " _" << std::setfill('_') << std::setw(wb) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "_ " << std::endl
+    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
+    << "| " << std::setw(wt-15) << "Process to generate" << std::right << std::setw(27) << process->GetName() << std::left << std::setw(wp-12) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Events generation ? " << std::setw(wp) << generation << " |" << std::endl
+    << "| " << std::setw(wt) << "Number of events to generate" << std::setw(wp) << maxgen << " |" << std::endl
+    << "| " << std::setw(wt) << "Events storage ? " << std::setw(wp) << store << " |" << std::endl
+    << "| " << std::setw(wt) << "Debugging mode ? " << std::setw(wp) << debug << " |" << std::endl
+    << "| " << std::setw(wt) << "Is Output file opened ? " << std::setw(wp) << (file!=(std::ofstream*)NULL && file->is_open()) << " |" << std::endl
+    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
+    << "|_" << std::setfill('_') << std::setw(wb) << "_/¯ INCOMING- AND OUTGOING KINEMATICS ¯\\_" << std::setfill(' ') << "_|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|_" << std::setfill('_') << std::setw(wb-2) << " Incoming protons-like particles " << std::setfill(' ') << "_|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
@@ -102,14 +111,6 @@ void Parameters::Dump()
     << "| " << std::setw(wt) << "Number of function calls" << std::setw(wp) << ncvg << " |" << std::endl
     << "| " << std::setw(wt) << "Number of points to try per bin" << std::setw(wp) << npoints << " |" << std::endl
     << "| " << std::setw(wt) << "Is the integration smoothed (TREAT) ? " << std::setw(wp) << ntreat << " |" << std::endl
-    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "|_" << std::setfill('_') << std::setw(wb) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "_|" << std::endl
-    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "| " << std::setw(wt) << "Events generation ? " << std::setw(wp) << generation << " |" << std::endl
-    << "| " << std::setw(wt) << "Number of events to generate" << std::setw(wp) << maxgen << " |" << std::endl
-    << "| " << std::setw(wt) << "Events storage ? " << std::setw(wp) << store << " |" << std::endl
-    << "| " << std::setw(wt) << "Debugging mode ? " << std::setw(wp) << debug << " |" << std::endl
-    << "| " << std::setw(wt) << "Is Output file opened ? " << std::setw(wp) << (file!=(std::ofstream*)NULL && file->is_open()) << " |" << std::endl
     << "|_" << std::right << std::setfill('_') << std::setw(wb) << "_|" << std::left << std::endl
     //<< " -" << std::right << std::setfill('-') << std::setw(wb) << "- " << std::left << std::endl
     << std::endl

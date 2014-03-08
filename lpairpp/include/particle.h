@@ -129,7 +129,7 @@ class Particle {
      * @brief Rapidity
      * @return The rapidity of the particle
      */
-    inline double Rapidity() { return log((this->E()+this->pz)/(this->E()-this->pz))/2.; };
+    inline double Rapidity() { return (this->E()<0.) ? 999. : log((this->E()+this->pz)/(this->E()-this->pz))/2.; };
     inline double Phi() {
       return (this->px==0. && this->py==0. && this->pz==0.)
 	? 0.
@@ -200,7 +200,7 @@ class Particle {
     /**
      * @brief Gets the particle's energy
      */
-    inline double E() { return this->e; };
+    inline double E() { return (this->e<0.) ? std::sqrt(this->M2()+std::pow(this->P(),2)) : this->e; };
     /**
      * @brief Is this particle a valid particle which can be used for kinematic computations ?
      */

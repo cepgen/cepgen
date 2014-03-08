@@ -1,11 +1,8 @@
 #include "mcgen.h"
 
-MCGen::MCGen(Parameters *ip_) :
+MCGen::MCGen() :
   _xsec(-1.), _xsec_error(-1.)
 {
-  unsigned int ndim;
-  std::string topo;
-
   this->PrintHeader();
 
 #ifdef DEBUG
@@ -14,61 +11,19 @@ MCGen::MCGen(Parameters *ip_) :
 
   srand(time(0));
   
-  _par = ip_;
+  this->parameters = new Parameters;
+}
 
-  if (_par->p1mod<=2 && _par->p2mod<=2) {
-    topo = "ELASTIC proton/proton";
-    ndim = 7;
-  }
-  else if (_par->p1mod<=2 || _par->p2mod<=2) {
-    topo = "SINGLE-DISSOCIATIVE proton";
-    ndim = 8;
-  }
-  else {
-    topo = "DOUBLE-DISSOCIATIVE protons";
-    ndim = 9;
-  }
-#ifdef DEBUG
-  std::cout << "[MCGen::MCGen] [DEBUG] Considered topology : " << topo << " case" << std::endl;
-#endif
-
-#ifdef DEBUG
-  std::cout << "[MCGen::MCGen] [DEBUG] Cuts mode : " << _par->mcut << std::endl;
-  switch(_par->mcut) {
-    case 1:
-    case 2:
-      std::cout << "[MCGen::MCGen] [DEBUG] Single leptons' transverse momentum condition : ";
-      if (_par->minpt<=0.) {
-        std::cout << "no pT cut" << std::endl;
-        break;
-      }
-      if (_par->maxpt>0.) {
-        std::cout << "pT in range [" 
-                  << _par->minpt << " GeV/c, " 
-                  << _par->maxpt << " GeV/c]" 
-                  << std::endl;
-        break;
-      }
-      std::cout << "pT > " << _par->minpt << " GeV/c";
-      if (_par->mcut==1) {
-        std::cout << " for at least one lepton" << std::endl;
-      }
-      else {
-        std::cout << " for both the leptons" << std::endl;
-      }
-      break;
-    case 0:
-    default:
-      std::cout << "[MCGen::MCGen] [DEBUG] No cuts applied on the total cross section" << std::endl;
-      break;
-  }
-#endif
-  veg = new Vegas(ndim,f, _par);
+MCGen::MCGen(Parameters *ip_) 
+{
+  this->parameters = ip_;
+  this->BuildVegas();
 }
 
 MCGen::~MCGen()
 {
   delete veg;
+  delete parameters;
 #ifdef DEBUG
   std::cout << "[MCGen::~MCGen] [DEBUG] Destructor called" << std::endl;
 #endif
@@ -121,25 +76,89 @@ MCGen::PrintHeader()
   std::cout << std::setw(bw+3) << std::setfill('-') << "" << std::endl;
 }
 
+
+void
+MCGen::BuildVegas()
+{
+  unsigned int ndim;
+  std::string topo;
+
+  if (this->parameters->p1mod<=2 && this->parameters->p2mod<=2) {
+    topo = "ELASTIC proton/proton";
+    ndim = 7;
+  }
+  else if (this->parameters->p1mod<=2 || this->parameters->p2mod<=2) {
+    topo = "SINGLE-DISSOCIATIVE proton";
+    ndim = 8;
+  }
+  else {
+    topo = "DOUBLE-DISSOCIATIVE protons";
+    ndim = 9;
+  }
+#ifdef DEBUG
+  std::cout << "[MCGen::MCGen] [DEBUG] Considered topology : " << topo << " case" << std::endl;
+#endif
+
+#ifdef DEBUG
+  std::cout << "[MCGen::MCGen] [DEBUG] Cuts mode : " << this->parameters->mcut << std::endl;
+  switch(this->parameters->mcut) {
+    case 1:
+    case 2:
+      std::cout << "[MCGen::MCGen] [DEBUG] Single leptons' transverse momentum condition : ";
+      if (this->parameters->minpt<=0.) {
+        std::cout << "no pT cut" << std::endl;
+        break;
+      }
+      if (this->parameters->maxpt>0.) {
+        std::cout << "pT in range [" 
+                  << this->parameters->minpt << " GeV/c, " 
+                  << this->parameters->maxpt << " GeV/c]" 
+                  << std::endl;
+        break;
+      }
+      std::cout << "pT > " << this->parameters->minpt << " GeV/c";
+      if (this->parameters->mcut==1) {
+        std::cout << " for at least one lepton" << std::endl;
+      }
+      else {
+        std::cout << " for both the leptons" << std::endl;
+      }
+      break;
+    case 0:
+    default:
+      std::cout << "[MCGen::MCGen] [DEBUG] No cuts applied on the total cross section" << std::endl;
+      break;
+  }
+#endif
+  veg = new Vegas(ndim,f, this->parameters);
+}
+
 void
 MCGen::ComputeXsection(double* xsec_, double *err_)
 {
+  this->BuildVegas();
   std::cout << "[MCGen::ComputeXsection] Starting the computation of the process cross-section" << std::endl;
   veg->Integrate(xsec_, err_);
   this->_xsec = *xsec_;
   this->_xsec_error = *err_;
   std::cout << "[MCGen::ComputeXsection] Total cross-section = " << *xsec_ << " +/- " << *err_ << " pb" << std::endl;
+  this->_xsec_comp = true;
 }
 
 Event*
 MCGen::GenerateOneEvent()
 {
   bool good = false;
-  float time;  
-
+  float time;
   std::clock_t c_start, c_stop;
 
   c_start = std::clock();
+
+  if (!this->_xsec_comp) {
+    double xsec, err;
+    this->ComputeXsection(&xsec, &err);
+  }
+
   while (!good) {
     good = veg->GenerateOneEvent();
   }
@@ -150,15 +169,16 @@ MCGen::GenerateOneEvent()
 	    << "  Generation time (CPU time) : " << std::setprecision(8) << (c_stop-c_start) << " cycles" << std::endl;
 #endif
   time = (c_stop-c_start)/CLOCKS_PER_SEC*1000.;
- _par->last_event->time_cpu = time;
-  return (Event*)_par->last_event;
+  this->last_event = this->parameters->last_event;
+  this->last_event->time_cpu = time;
+  return (Event*)this->last_event;
 }
 
 void
 MCGen::LaunchGeneration()
 {
   // LHE file preparation
-  if (!_par->file->is_open()) {
+  if (!this->parameters->file->is_open()) {
     std::cerr << "[MCGen::LaunchGeneration] [ERROR] output file is not opened !" << std::endl;
   }
   //#ifdef DEBUG
@@ -166,27 +186,26 @@ MCGen::LaunchGeneration()
     std::cout << "[MCGen::LaunchGeneration] [DEBUG] output file is correctly opened !" << std::endl;
   }
   //#endif
-  *(_par->file) << "<LesHouchesEvents version=\"1.0\">" << std::endl;
-  *(_par->file) << "<header>This file was created from the output of the CLPAIR generator</header>" << std::endl;
-  *(_par->file) << "<init>" << std::endl
+  *(this->parameters->file) << "<LesHouchesEvents version=\"1.0\">" << std::endl;
+  *(this->parameters->file) << "<header>This file was created from the output of the CLPAIR generator</header>" << std::endl;
+  *(this->parameters->file) << "<init>" << std::endl
 	       << "2212 2212 "
-	       << std::setprecision(2) << _par->in1p << " "
-	       << std::setprecision(2) << _par->in2p << " "
+	       << std::setprecision(2) << this->parameters->in1p << " "
+	       << std::setprecision(2) << this->parameters->in2p << " "
 	       << "0 0 10042 10042 2 1" << std::endl
 	       << this->_xsec << " " << this->_xsec_error << " 0.26731120000E-03 0" << std::endl
 	       << "</init>" << std::endl;
 
   veg->Generate();
   
-  *(_par->file) << "</LesHouchesEvents>" << std::endl;
+  *(this->parameters->file) << "</LesHouchesEvents>" << std::endl;
 }
 
 double f(double* x_, size_t ndim_, void* params_) {
   double ff;
   int outp1pdg, outp2pdg;
   Parameters *p;
-  GamGamKinematics kin;
-  GamGam gg(ndim_, 0, x_);
+  Kinematics kin;
   Particle *in1, *in2;
 
   p = (Parameters*)params_;
@@ -249,57 +268,40 @@ double f(double* x_, size_t ndim_, void* params_) {
   //kin.mxmin = 0; //FIXME
   //kin.mxmax = 100000; //FIXME
 
-  gg.SetKinematics(kin);
-  gg.SetIncomingKinematics(*in1, *in2);
-  gg.SetOutgoingParticles(3, outp1pdg); // First outgoing proton
-  gg.SetOutgoingParticles(5, outp2pdg); // Second outgoing proton
-  gg.SetOutgoingParticles(6, p->pair); // Outgoing leptons
-  if (!gg.IsKinematicsDefined()) {
+  p->process->GetEvent()->clear();
+  p->process->SetPoint(ndim_, x_);
+  p->process->SetKinematics(kin);
+  p->process->SetIncomingParticles(*in1, *in2);
+  p->process->SetOutgoingParticles(3, outp1pdg); // First outgoing proton
+  p->process->SetOutgoingParticles(5, outp2pdg); // Second outgoing proton
+  p->process->SetOutgoingParticles(6, p->pair); // Outgoing leptons
+  if (!p->process->IsKinematicsDefined()) {
     std::cout << "[f] [ERROR] Kinematics is not properly set" << std::endl;
     return 0.;
   }
-  ff = gg.ComputeWeight();
+  ff = p->process->ComputeWeight();
   
   if (ff<0.) {
     return 0.;
   }
   if (p->store) { // MC events generation
-    gg.FillKinematics(false);
+    p->process->FillKinematics(false);
     if (kin.kinematics>1) {
-      gg.GetEvent()->Dump();
-      std::cout << "[f] [DEBUG] Before calling the hadroniser (" << p->hadroniser->GetName() << ")" << std::endl;
-      p->hadroniser->Hadronise(gg.GetEvent()); 
-      gg.GetEvent()->Dump();
+#ifdef DEBUG
+      std::cout << "[f] [DEBUG] Event before calling the hadroniser (" << p->hadroniser->GetName() << ")" << std::endl;
+      p->process->GetEvent()->Dump();
+#endif
+      p->hadroniser->Hadronise(p->process->GetEvent());
+#ifdef DEBUG
+      std::cout << "[f] [DEBUG] Event after calling the hadroniser (" << p->hadroniser->GetName() << ")" << std::endl;
+      p->process->GetEvent()->Dump();
+#endif
     }
     
-    //*(p->file) << gg.GetEvent()->GetLHERecord();
-    *(p->last_event) = *(gg.GetEvent());
-    //gg.GetEvent()->Store(p->file);
+    //*(p->file) << p->process->GetEvent()->GetLHERecord();
+    *(p->last_event) = *(p->process->GetEvent());
+    //p->process->GetEvent()->Store(p->file);
 
-    /*double t1min, t1max, t2min, t2max;
-
-    if (p->file_debug->is_open()) {
-      gg.GetT1extrema(t1min, t1max);
-      gg.GetT2extrema(t2min, t2max);
-      *(p->file_debug)
-	<< (gg.GetEvent()->GetByRole(5)->p-gg.GetEvent()->GetOneByRole(1)->p)
-	<< "\t" << gg.GetEvent()->GetOneByRole(3)->p
-	<< "\t" << gg.GetEvent()->GetOneByRole(5)->p
-	<< "\t" << gg.GetT1()
-	<< "\t" << t1min
-	<< "\t" << t1max
-	<< "\t" << gg.GetT2()
-	<< "\t" << t2min
-	<< "\t" << t2max
-	<< "\t" << gg.GetS1()
-	<< "\t" << gg.GetS2()
-	<< "\t" << gg.GetD3()
-	<< "\t" << gg.GetU1()
-	<< "\t" << gg.GetU2()
-	<< "\t" << gg.GetV1()
-	<< "\t" << gg.GetV2()
-	<< std::endl;
-	}*/
   }
 
   delete in1;
