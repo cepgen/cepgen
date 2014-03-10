@@ -7,9 +7,10 @@ HERWIG6SRC = $(wildcard external/herwig6*.f)
 PYTHIA8LIB = $(PYTHIA8SRC)lib
 INCLUDEDIR = include/
 ############################################
-CFLAGS     = -Wall -Wextra -I$(INCLUDEDIR) -D$(SVNDEV) -g #-I$(PYTHIA8SRC)/include
+CFLAGS     = -Wall -Wextra -fno-exceptions -Wpointer-arith \
+	     -I$(INCLUDEDIR) -D$(SVNDEV) -g #-I$(PYTHIA8SRC)/include
 FFLAGS     = -w -g
-LDFLAGS    = -I$(INCLUDEDIR) -lgfortran -L$(PYTHIA8LIB) -I$(PYTHIA8SRC)include -lpythia8 -llhapdfdummy
+LDFLAGS    = -I$(INCLUDEDIR) -lgfortran -L$(PYTHIA8LIB) -I$(PYTHIA8SRC)include -lpythia8 -llhapdfdummy -Wl,-O2
 VPATH      = src:include:$(PYTHIA8SRC)/include
 #LD_LIBRARY_PATH = $(LD_LIBRARY_PATH):$(PYTHIA8LIB)
 SVNDEV = 'SVN_REV="$(shell svnversion -nq .)"'
