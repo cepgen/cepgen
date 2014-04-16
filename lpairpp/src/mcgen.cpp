@@ -227,11 +227,11 @@ double f(double* x_, size_t ndim_, void* params_) {
 
   //FIXME electrons ?
 
-  in1 = new Particle(1, 2212);
+  in1 = new Particle(1, p->in1pdg);
   in1->charge = 1;
   in1->P(0., 0.,  p->in1p);
 
-  in2 = new Particle(2, 2212);
+  in2 = new Particle(2, p->in2pdg);
   in2->charge = 1;
   in2->P(0., 0., -p->in2p);
   
@@ -277,6 +277,7 @@ double f(double* x_, size_t ndim_, void* params_) {
   p->process->SetOutgoingParticles(6, p->pair); // Outgoing leptons
   if (!p->process->IsKinematicsDefined()) {
     std::cout << "[f] [ERROR] Kinematics is not properly set" << std::endl;
+    p->process->GetEvent()->Dump();
     return 0.;
   }
   ff = p->process->ComputeWeight();

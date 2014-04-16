@@ -42,7 +42,7 @@ class Process
    * @return A boolean stating if the input kinematics and the final states are
    * well defined
    */
-  virtual inline bool IsKinematicsDefined() { return _setkin; }
+  inline bool IsKinematicsDefined() { return _setkin; }
   /**
    * Specifies the incoming particles' kinematics as well as their properties
    * using two Particle objects.
@@ -82,10 +82,10 @@ class Process
    * @brief Returns the event content (list of particles with an assigned role)
    * @return The Event object containing all the generated Particle objects
    */
-  virtual inline Event* GetEvent() { return this->_ev; };
-  virtual inline unsigned int ndim() const { return this->_ndim; };
-  virtual inline double x(const unsigned int idx_) { return (idx_>=this->_ndim)?-1.:this->_x[idx_]; }
-  virtual inline std::string GetName() { return this->_name; };
+  inline Event* GetEvent() { return this->_ev; };
+  inline unsigned int ndim() const { return this->_ndim; };
+  inline double x(const unsigned int idx_) { return (idx_>=this->_ndim)?-1.:this->_x[idx_]; }
+  inline std::string GetName() { return this->_name; };
  protected:
   double* _x;
   unsigned int _ndim;

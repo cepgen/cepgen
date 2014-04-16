@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <fstream>
+#include <string>
 
 #include "gamgamll.h"
 #include "gampomvmll.h"
@@ -51,6 +52,8 @@ class Parameters {
     double in1p;
     /** @brief Second incoming particle's momentum (in GeV/c) */
     double in2p;
+    int in1pdg;
+    int in2pdg;
     /**
      * The first incoming particle type and kind of interaction :
      * - 1 - electron,

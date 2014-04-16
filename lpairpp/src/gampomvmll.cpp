@@ -1,7 +1,6 @@
 #include "gampomvmll.h"
 
 GamPomVMLL::GamPomVMLL():
-  _name("gamma,pomeron->VM->l+,l-"),
   _epsilm(0.0808),
   _wmin(20.), _wmax(0.),
   _q2min(4.), _q2max(100.),
@@ -13,6 +12,8 @@ GamPomVMLL::GamPomVMLL():
   _gephot_first(true),
   _fraggl_begin(true)
 {
+  _name = "gamma,pomeron->VM->l+,l-";
+  std::cout << "GamPomVMLL::GamPomVMLL created" << std::endl;
   pe = 100.;
   dme = 0.000511; // electron mass
   pp = 100.;
@@ -458,11 +459,24 @@ GamPomVMLL::GEPhot(int igammd_)
   }
 }
 
-bool GamPomVMLL::SetIncomingParticles(Particle, Particle){}
-bool GamPomVMLL::SetOutgoingParticles(int, int){}
-void GamPomVMLL::FillKinematics(bool){}
-void GamPomVMLL::SetKinematics(Kinematics){}
-void GamPomVMLL::ComputeCMenergy(){}
-double GamPomVMLL::ComputeMX(double x_, double outmass_, double* dw_){}
-void GamPomVMLL::StoreEvent(std::ofstream*,double){}
-void GamPomVMLL::PrepareHadronisation(Particle *part_){}
+/*bool
+GamPomVMLL::SetIncomingParticles(Particle, Particle){}
+
+bool
+GamPomVMLL::SetOutgoingParticles(int, int){}
+
+void
+GamPomVMLL::FillKinematics(bool){}
+
+void
+GamPomVMLL::SetKinematics(Kinematics){}
+
+void
+GamPomVMLL::ComputeCMenergy(){}
+
+void
+GamPomVMLL::StoreEvent(std::ofstream*,double){}
+
+void
+GamPomVMLL::PrepareHadronisation(Particle *part_){}
+*/

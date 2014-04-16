@@ -1,6 +1,7 @@
 #include "parameters.h"
 
 Parameters::Parameters() :
+  in1pdg(2212), in2pdg(2212),
   p1mod(2), p2mod(2),
   pair(13),
   mcut(0),
@@ -88,6 +89,7 @@ void Parameters::Dump()
     << "|_" << std::setfill('_') << std::setw(wb-2) << " Incoming protons-like particles " << std::setfill(' ') << "_|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "| " << std::setw(wt) << "Mode" << std::setw(3) << p1mod << ", " << std::setw(3) << p2mod << std::setw(wp-8) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Incoming particles" << std::setw(5) << in1pdg << ", " << std::setw(5) << in2pdg << std::setw(wp-12) << "" << " |" << std::endl
     << "| " << std::setw(wt) << "Momenta [GeV/c]" << std::setw(5) << in1p << ", " << std::setw(5) << in2p << std::setw(wp-12) << "" << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|_" << std::setfill('_') << std::setw(wb-2) << " Outgoing leptons " << std::setfill(' ') << "_|" << std::endl
@@ -100,8 +102,8 @@ void Parameters::Dump()
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|_" << std::setfill('_') << std::setw(wb-2) << " Outgoing remnants " << std::setfill(' ') << "_|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl;
-    if (this->hadroniser!=(Hadroniser*)NULL)
-  std::cout << "| " << std::setw(wt) << "Hadronisation algorithm" << std::setw(12) << hadroniser->GetName() << std::setw(wp-12) << "" << " |" << std::endl;
+  if (this->hadroniser!=(Hadroniser*)NULL)
+    std::cout << "| " << std::setw(wt) << "Hadronisation algorithm" << std::setw(12) << hadroniser->GetName() << std::setw(wp-12) << "" << " |" << std::endl;
   std::cout << "| " << std::setw(wt) << "Minimal mass [GeV/c**2]" << std::setw(wp) << minmx << " |" << std::endl
     << "| " << std::setw(wt) << "Maximal mass [GeV/c**2]" << std::setw(wp) << maxmx << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl

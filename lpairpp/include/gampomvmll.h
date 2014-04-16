@@ -13,15 +13,14 @@ class GamPomVMLL : public Process
  public:
   GamPomVMLL();
   ~GamPomVMLL();
-  bool SetIncomingParticles(Particle, Particle);
-  bool SetOutgoingParticles(int, int);
-  void FillKinematics(bool);
-  void SetKinematics(Kinematics);
-  void ComputeCMenergy();
-  double ComputeMX(double x_, double outmass_, double* dw_);
+  //bool SetIncomingParticles(Particle, Particle);
+  //bool SetOutgoingParticles(int, int);
+  //void FillKinematics(bool);
+  //void SetKinematics(Kinematics);
+  //void ComputeCMenergy();
   double ComputeWeight();
-  void StoreEvent(std::ofstream*,double);
-  void PrepareHadronisation(Particle *part_);
+  //void StoreEvent(std::ofstream*,double);
+  //void PrepareHadronisation(Particle *part_);
  private:
   void GenGam();
   /**
@@ -69,7 +68,6 @@ class GamPomVMLL : public Process
    */
   void DecVM();
 
-  std::string _name;
   int ifragp, ifragv;
   /**
    * PDG code for produced vector meson (should have \f$J^{PC}=1^{--}\f$)

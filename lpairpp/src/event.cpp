@@ -93,7 +93,6 @@ Event::AddParticle(int role_, bool replace_)
 std::string
 Event::GetLHERecord(const double weight_)
 {
-  //ParticlesMap::iterator p;
   std::stringstream ss;
   Particles particles, daughters;
   Particles::iterator p, dg;
@@ -185,7 +184,6 @@ Event::GetParticles()
 {
   Particles out;
   ParticlesMap::iterator it;
-  //std::sort(this->_part.begin(), this->_part.end());
   for (it=this->_part.begin(); it!=this->_part.end(); it++) {
     out.push_back(&it->second);
   }
@@ -210,10 +208,11 @@ Event::GetStableParticles()
 void
 Event::Dump(bool stable_)
 {
-  //ParticlesMap::iterator it;
   Particles particles;
   Particles::iterator p;
+  double pxtot, pytot, pztot, etot;
 
+  pxtot = pytot = pztot = etot = 0.;
   particles = this->GetParticles();
   std::cout << "[Event::Dump]" << std::endl;
   std::cout << std::left;
@@ -221,7 +220,7 @@ Event::Dump(bool stable_)
   std::cout << "--------" << "\t" << "------" << "\t\t" << "------" << "\t" << "----" << "\t" << "------" << "\t" << "------" << "\t" << "----------------------------------" << std::endl;
   for (p=particles.begin(); p!=particles.end(); p++) {
     if (stable_ and (*p)->status!=1) continue;
-    std::cout << std::setw(8) << (*p)->id
+    std::cout << std::setfill(' ') << std::setw(8) << (*p)->id
 	      << "\t" << std::setw(6) << (*p)->pdgId;
     if ((*p)->name!="") {
       std::cout << std::setw(6) << (*p)->name;
@@ -232,7 +231,6 @@ Event::Dump(bool stable_)
 	std::cout << std::setprecision(2) << std::setw(6) << (*p)->charge;
     std::cout << "\t" << std::setw(4) << (*p)->role
 	      << "\t" << std::setw(6) << (*p)->status << "\t";
-      //<< std::endl;
     if ((*p)->GetMother()!=-1)
       std::cout << std::setw(8) << (*p)->GetMother();
     else std::cout << std::setw(8) << "";
@@ -241,5 +239,16 @@ Event::Dump(bool stable_)
     std::cout << std::setprecision(2) << std::setw(8) << (*p)->pz << " ";
     std::cout << std::setprecision(2) << std::setw(8) << (*p)->E() << " ";
     std::cout << std::endl;
+    pxtot += (*p)->px;
+    pytot += (*p)->py;
+    pztot += (*p)->pz;
+    etot += (*p)->E();
   }
+  std::cout << std::setfill('-') << std::setw(97) << "" << std::endl
+	    << std::setfill(' ') << "Total:\t\t\t\t\t\t\t\t"
+	    << std::setprecision(2) << std::setw(8) << pxtot << " "
+	    << std::setprecision(2) << std::setw(8) << pytot << " "
+	    << std::setprecision(2) << std::setw(8) << pztot << " "
+	    << std::setprecision(2) << std::setw(8) << etot << " "
+	    << std::endl;
 }
