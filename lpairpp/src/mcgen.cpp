@@ -130,7 +130,7 @@ MCGen::BuildVegas()
       break;
   }
 #endif
-  veg = new Vegas(ndim,f, this->parameters);
+  veg = new Vegas(ndim, f, this->parameters);
 }
 
 void
@@ -286,12 +286,13 @@ double f(double* x_, size_t ndim_, void* params_) {
   }
   if (p->store) { // MC events generation
     p->process->FillKinematics(false);
+    //if (p->process->GetEvent()->GetByRole(42)[0]->E()<0) return 0.; //FIXME workaround to avoid (very) unphysical events
     if (kin.kinematics>1) {
 #ifdef DEBUG
       std::cout << "[f] [DEBUG] Event before calling the hadroniser (" << p->hadroniser->GetName() << ")" << std::endl;
       p->process->GetEvent()->Dump();
 #endif
-      p->hadroniser->Hadronise(p->process->GetEvent());
+      if (!p->hadroniser->Hadronise(p->process->GetEvent())) return 0.; //FIXME
 #ifdef DEBUG
       std::cout << "[f] [DEBUG] Event after calling the hadroniser (" << p->hadroniser->GetName() << ")" << std::endl;
       p->process->GetEvent()->Dump();

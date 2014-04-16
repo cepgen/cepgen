@@ -547,6 +547,11 @@ GamGamLL::Orient()
   _ec4 = _de3+_de5;
   _ep5 = _ep2-_de5;
 
+  /*if (_ep3>_ep1 or _ep5>_ep2) {
+    // FIXME workaround to avoid very unphysical events...
+    return false;
+  }*/
+
   if (_ec4<_mc4) {
     /*std::cerr << "[GamGamLL::Orient] [FATAL]" << std::endl
       << "  _ec4<_mc4 : _ec4 = " << _ec4 << ", _mc4 = " << _mc4 << std::endl;*/
@@ -754,8 +759,10 @@ GamGamLL::ComputeMX(double x_, double outmass_, double *dw_)
 }
 
 double
-GamGamLL::ComputeWeight(int nm_)
+//GamGamLL::ComputeWeight(int nm_)
+GamGamLL::ComputeWeight()
 {
+  int nm_ = 1; //FIXME...
 
   // WARNING ====> PP5-->_p_p5
   //                P5-->_pp5
@@ -1143,6 +1150,8 @@ GamGamLL::FillKinematics(bool symmetrise_)
   ranz = 1;
   if (symmetrise_) {
     ranz = ((double)rand()>=.5*RAND_MAX) ? 1 : -1;
+    //_pp3 *= ranz;
+    //_pp5 *= ranz;
   }
   cp = cos(ranphi);
   sp = sin(ranphi);
@@ -1173,8 +1182,8 @@ GamGamLL::FillKinematics(bool symmetrise_)
   Particle op1(3, _pdg3);
   _plab_op1[0] = _pp3*_st3*_cp3;
   _plab_op1[1] = _pp3*_st3*_sp3;
-  _plab_op1[2] = _gamma*_pp3*_ct3*ranz+_betgam*_ep3;
-  _plab_op1[3] = _gamma*_ep3          +_betgam*_pp3*_ct3*ranz;
+  _plab_op1[2] = _gamma*_pp3*_ct3+_betgam*_ep3;
+  _plab_op1[3] = _gamma*_ep3     +_betgam*_pp3*_ct3;
   if (!op1.P( _plab_op1[0]*cp+rany*_plab_op1[1]*sp,
                 -_plab_op1[0]*sp+rany*_plab_op1[1]*cp,
                  _plab_op1[2],
@@ -1185,14 +1194,17 @@ GamGamLL::FillKinematics(bool symmetrise_)
     op1.status = -2;
     op1.M(_mp3);
   }
+  else {
+    op1.status = -1;
+  }
   this->_ev->AddParticle(&op1, true);
   
   // Second outgoing proton
   Particle op2(5, _pdg5);
   _plab_op2[0] = _pp5*_st5*_cp5;
   _plab_op2[1] = _pp5*_st5*_sp5;
-  _plab_op2[2] = _gamma*_pp5*_ct5*ranz+_betgam*_ep5;
-  _plab_op2[3] = _gamma*_ep5          +_betgam*_pp5*_ct5*ranz;
+  _plab_op2[2] = _gamma*_pp5*_ct5+_betgam*_ep5;
+  _plab_op2[3] = _gamma*_ep5     +_betgam*_pp5*_ct5;
   if (!op2.P( _plab_op2[0]*cp+rany*_plab_op2[1]*sp,
                 -_plab_op2[0]*sp+rany*_plab_op2[1]*cp,
                  _plab_op2[2],
@@ -1200,8 +1212,11 @@ GamGamLL::FillKinematics(bool symmetrise_)
     std::cerr << "Invalid outgoing proton 2" << std::endl;
   }
   if (_cuts.kinematics==3) {
-    op2.status = 21;
+    op2.status = -2;
     op2.M(_mp5);
+  }
+  else {
+    op2.status = -1;
   }
   this->_ev->AddParticle(&op2, true);
 
@@ -1249,8 +1264,8 @@ GamGamLL::FillKinematics(bool symmetrise_)
   Particle ol1(role, ransign*abs(_pdg6));
   _plab_ol1[0] = _pl6*_st6*_cp6;
   _plab_ol1[1] = _pl6*_st6*_sp6;
-  _plab_ol1[2] = _gamma*_pl6*_ct6*ranz+_betgam*_el6;
-  _plab_ol1[3] = _gamma*_el6          +_betgam*_pl6*_ct6*ranz;
+  _plab_ol1[2] = _gamma*_pl6*_ct6+_betgam*_el6;
+  _plab_ol1[3] = _gamma*_el6     +_betgam*_pl6*_ct6;
   if (!ol1.P( _plab_ol1[0]*cp+rany*_plab_ol1[1]*sp,
                 -_plab_ol1[0]*sp+rany*_plab_ol1[1]*cp,
                  _plab_ol1[2],
@@ -1265,8 +1280,8 @@ GamGamLL::FillKinematics(bool symmetrise_)
   Particle ol2(role, -ransign*abs(_pdg7));
   _plab_ol2[0] = _pl7*_st7*_cp7;
   _plab_ol2[1] = _pl7*_st7*_sp7;
-  _plab_ol2[2] = _gamma*_pl7*_ct7*ranz+_betgam*_el7;
-  _plab_ol2[3] = _gamma*_el7          +_betgam*_pl7*_ct7*ranz;
+  _plab_ol2[2] = _gamma*_pl7*_ct7+_betgam*_el7;
+  _plab_ol2[3] = _gamma*_el7     +_betgam*_pl7*_ct7;
   if (!ol2.P( _plab_ol2[0]*cp+rany*_plab_ol2[1]*sp,
                 -_plab_ol2[0]*sp+rany*_plab_ol2[1]*cp,
 		 _plab_ol2[2],

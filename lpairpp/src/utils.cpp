@@ -1,5 +1,7 @@
 #include "utils.h"
 
+#define random() (double)rand()/RAND_MAX
+
 // values of a, b, c provided from the fits on ep data and retrieved from
 // http://dx.doi.org/10.1016/0550-3213(76)90231-5 with 1.110 <= w2 <=1.990
 
@@ -142,4 +144,77 @@ void Lorenb(double u_, double ps_[4], double pi_[4], double pf_[4])
   else {
     std::copy(pi_, pi_+4, pf_);
   }
+}
+
+double RanBW(double er_, double gamma_, double emin_, double emax_)
+{
+  double a, b, e;
+
+  if (gamma_<1.e-3*er_) {
+    return er_;
+  }
+  a = atan(2.*(emax_-er_)/gamma_);
+  b = atan(2.*(emin_-er_)/gamma_);
+  e = er_+gamma_*tan(random()*(a-b)+b)/2.;
+  if (e<emax_) {
+    return e;
+  }
+  return emax_;
+}
+
+double GenerT(double tmin_, double tmax_, double b_, double anexp_)
+{
+  double c0, c1, bloc, z, t;
+  int iter;
+
+  bloc = b_;
+  if (b_<.1) {
+    std::cerr << "[GenerT] ERROR: B=" << b_ << std::endl;
+    //CALL ERRLOG (20, 'W: GENERT: B < 0.1')
+    bloc = .1;
+  }
+  if (tmin_>=tmax_) {
+    std::cerr << "[GenerT] ERROR: TMIN=" << tmin_ << ", TMAX=" << tmax_ << " => return TMIN=" << tmin_ << std::endl;
+    //CALL ERRLOG (21, 'S: GENERT: TMIN >= TMAX')
+    return tmin_;
+  }
+
+  iter = 0;
+  do {
+    if (anexp_<=1.) {
+      // power law exponent is 0 or illegal                                                                                                                      
+      //  => generate pure exp(bt) spectrum 
+      if (bloc*(tmax_-tmin_)>=25.) {
+	t = tmin_-log(random())/bloc;
+#ifdef DEBUG
+	std::cout << "[GenerT] DEBUG: Method 1: T=" << t << std::endl;
+#endif
+      }
+      else {
+	t = tmin_-log(1.-random()*(1.-exp(bloc*(tmin_-tmax_))))/bloc;
+#ifdef DEBUG
+	std::cout << "[GenerT] DEBUG: Method 2: T=" << t << std::endl;
+#endif
+      }
+    }
+    else {
+      // New 16.5.07 BL:
+      // Generate mixed exp(bt)/power law spectrum
+      // d sigma/d t = exp (-n*ln(-bt/n+1)) = (-bt/n+1)^-n
+      // Limit for small bt: exp (bt + c t^2) with c=b^2/2n
+      // Limit for large bt>>n: t^-n
+      c1 = std::pow(anexp_+bloc*tmin_, 1.-anexp_);
+      c0 = std::pow(anexp_+bloc*tmax_, 1.-anexp_);
+      z = random();
+      t = -(anexp_-std::pow(z*(c1-c0)+c0, 1./(1.-anexp_)))/bloc;
+    }
+    iter++;
+  } while ((t<tmin_ or t>tmax_) and iter<=100);
+  if (iter>100) {
+    //CALL ERRLOG (22, 'W: GENT: More than 100 iterations!')
+    std::cout << "[GenerT] WARNING: more than 100 iterations!" << std::endl
+	      << "TMIN: " << tmin_ << ", TMAX: " << tmax_ << " BLOC: " << bloc << ", T: " << t
+	      << std::endl;
+  }
+  return t;
 }

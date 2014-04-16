@@ -37,6 +37,7 @@ bool
 Pythia6Hadroniser::Hadronise(Event *ev_)
 {
   int np;
+  bool quarks_built;
   std::vector<int> rl;
   std::vector<int>::iterator r;
 
@@ -52,7 +53,8 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
   int id1, id2;
   int njoin[max_str_in_evt], jlrole[max_str_in_evt], jlpsf[max_str_in_evt][max_part_in_str];
   
-  this->PrepareHadronisation(ev_);
+  quarks_built = this->PrepareHadronisation(ev_);
+  if (!quarks_built) return quarks_built;
 
   rl = ev_->GetRoles();
 
@@ -140,19 +142,13 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
     // First we filter the particles with status <= 0 :
     //  Status code = -1 : CLPAIR "internal" particles (not to be interacted with)
     //                 0 : Pythia6 empty lines
-    if (pyjets_.k[0][p]<=0) continue;
+    //if (pyjets_.k[0][p]<=0 or pyjets_.k[0][p]==13 or pyjets_.k[0][p]==12) continue;
+    if (pyjets_.k[0][p]<=0 or pyjets_.k[0][p]==13) continue;
 
     Particle pa;
     pa.id = p;
     pa.pdgId = pyjets_.k[1][p];
     if (ev_->GetById(pyjets_.k[2][p]-1)!=(Particle*)NULL) {
-      /*std::cout << "Particle : " << std::setw(3) << pa.id 
-		<< " with pdg : " << std::setw(5) << pa.pdgId
-		<< " and role : " << std::setw(3) << pa.role
-		<< " ->mother : " << std::setw(3) << ev_->GetById(pyjets_.k[2][p]-1)->id 
-		<< " with pdg : " << std::setw(5) << ev_->GetById(pyjets_.k[2][p]-1)->pdgId
-		<< " and role : " << std::setw(3) << ev_->GetById(pyjets_.k[2][p]-1)->role
-		<< std::endl;*/
       pa.role = ev_->GetById(pyjets_.k[2][p]-1)->role; // Child particle inherits its mother's role
     }
     pa.status = pyjets_.k[0][p];
@@ -160,10 +156,6 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
     pa.M(pyjets_.p[4][p]);
     pa.name = this->pyname(pa.pdgId);
     pa.charge = (float)(this->pyp(p+1,6));
-
-    /*if (pa.status==1) {
-      this->_hadrons->push_back(pa);
-      }*/
 
     if (pyjets_.k[2][p]!=0) {
 #ifdef DEBUG
@@ -181,7 +173,7 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
   return true;
 }
 
-void
+bool
 Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
 {
   int singlet_id, doublet_id;
@@ -214,8 +206,8 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
         singlet_id = 2;
         doublet_id = 2103;
       }
-      ulmdq = GetMassFromPDGId(doublet_id);
-      ulmq = GetMassFromPDGId(singlet_id);
+      ulmdq = pymass(doublet_id);
+      ulmq = pymass(singlet_id);
 
       // Choose random direction in MX frame
       ranmxp = 2.*pi*(double)rand()/RAND_MAX;
@@ -232,6 +224,10 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
 
       Lorenb((*p)->M(), (*p)->P4(), pmxda, partpb);
 
+      if (!(partpb[0]<0) and !(partpb[0]>0)) {
+        return false;
+      }
+
       Particle singlet((*p)->role, singlet_id);
       singlet.status = 3;
       singlet.SetMother(ev_->GetOneByRole((*p)->role));
@@ -240,7 +236,6 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
         std::cerr << "[GamGam::PrepareHadronisation] ERROR while setting the 4-momentum of singlet" << std::endl;
     #endif
       }
-
       ev_->AddParticle(&singlet);
 
       pmxda[0] = -pmxda[0];
@@ -258,8 +253,9 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
         std::cout << "[GamGam::PrepareHadronisation] ERROR while setting the 4-momentum of doublet" << std::endl;
     #endif
       }
-      ev_->AddParticle(&doublet);    
+      ev_->AddParticle(&doublet);
     }
   }
+  return true;
 }
 

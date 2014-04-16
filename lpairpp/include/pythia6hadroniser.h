@@ -74,7 +74,7 @@ class Pythia6Hadroniser : public Hadroniser
    * @param[in] ijoin_ List of particles unique identifier to join in the colour flow
    */
   inline static void pyjoin(int njoin_, int ijoin_[2]) { return pyjoin_(njoin_,*ijoin_); };
-  void PrepareHadronisation(Event *ev_);
+  bool PrepareHadronisation(Event *ev_);
 };
 
 #endif

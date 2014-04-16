@@ -216,24 +216,30 @@ Event::Dump(bool stable_)
 
   particles = this->GetParticles();
   std::cout << "[Event::Dump]" << std::endl;
-  std::cout << "Particle" << "\t" << "PDG id" << "\t\t" << "Charge" << "\t" << "Role" << "\t" << "Status" << "\t" << "Mother" << std::endl;
-  std::cout << "--------" << "\t" << "------" << "\t\t" << "------" << "\t" << "----" << "\t" << "------" << "\t" << "------" << std::endl;
+  std::cout << std::left;
+  std::cout << "Particle" << "\t" << "PDG id" << "\t\t" << "Charge" << "\t" << "Role" << "\t" << "Status" << "\t" << "Mother" << "\t\t" << "4-Momentum [GeV]" << std::endl;
+  std::cout << "--------" << "\t" << "------" << "\t\t" << "------" << "\t" << "----" << "\t" << "------" << "\t" << "------" << "\t" << "----------------------------------" << std::endl;
   for (p=particles.begin(); p!=particles.end(); p++) {
     if (stable_ and (*p)->status!=1) continue;
     std::cout << std::setw(8) << (*p)->id
 	      << "\t" << std::setw(6) << (*p)->pdgId;
-    if ((*p)->name!="")
-      std::cout << " " << std::setw(6) << (*p)->name;
-    else
-      std::cout << "\t";
+    if ((*p)->name!="") {
+      std::cout << std::setw(6) << (*p)->name;
+    }
+    else std::cout << "\t";
     std::cout << "\t";
     if ((*p)->charge!=999.)
 	std::cout << std::setprecision(2) << std::setw(6) << (*p)->charge;
     std::cout << "\t" << std::setw(4) << (*p)->role
-	      << "\t" << std::setw(6) << (*p)->status;
+	      << "\t" << std::setw(6) << (*p)->status << "\t";
       //<< std::endl;
     if ((*p)->GetMother()!=-1)
-      std::cout << "\t" << std::setw(6) << (*p)->GetMother();
+      std::cout << std::setw(8) << (*p)->GetMother();
+    else std::cout << std::setw(8) << "";
+    std::cout << std::setprecision(2) << std::setw(8) << (*p)->px << " ";
+    std::cout << std::setprecision(2) << std::setw(8) << (*p)->py << " ";
+    std::cout << std::setprecision(2) << std::setw(8) << (*p)->pz << " ";
+    std::cout << std::setprecision(2) << std::setw(8) << (*p)->E() << " ";
     std::cout << std::endl;
   }
 }

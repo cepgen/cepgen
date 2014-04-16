@@ -3,7 +3,8 @@
 Jetset7Hadroniser::Jetset7Hadroniser()
 {
   _name = "Jetset7";
-  this->lugive("MSTU(21)=1");
+  //this->lugive("MSTU(21)=1");
+  //this->lugive("MSTJ(1)=1");
 }
 
 Jetset7Hadroniser::~Jetset7Hadroniser()
@@ -37,6 +38,7 @@ bool
 Jetset7Hadroniser::Hadronise(Event *ev_)
 {
   int np;
+  bool quarks_built;
   std::vector<int> rl;
   std::vector<int>::iterator r;
 
@@ -52,7 +54,8 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
   int id1, id2;
   int njoin[max_str_in_evt], jlrole[max_str_in_evt], jlpsf[max_str_in_evt][max_part_in_str];
   
-  this->PrepareHadronisation(ev_);
+  quarks_built = this->PrepareHadronisation(ev_);
+  if (!quarks_built) return quarks_built;
 
   rl = ev_->GetRoles();
 
@@ -170,7 +173,7 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
   return true;
 }
 
-void
+bool
 Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
 {
   int singlet_id, doublet_id;
@@ -203,8 +206,8 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
         singlet_id = 2;
         doublet_id = 2103;
       }
-      ulmdq = GetMassFromPDGId(doublet_id);
-      ulmq = GetMassFromPDGId(singlet_id);
+      ulmdq = ulmass(doublet_id);
+      ulmq = ulmass(singlet_id);
 
       // Choose random direction in MX frame
       ranmxp = 2.*pi*(double)rand()/RAND_MAX;
@@ -212,6 +215,10 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
 
       // Compute momentum of decay particles from MX
       pmxp = std::sqrt(std::pow( (*p)->M2() - std::pow(ulmdq, 2) + std::pow(ulmq, 2), 2) / (4.*(*p)->M2()) - std::pow(ulmq, 2));
+
+      /*if (!(pmxda[0]<0) and !(pmxda[0]>0)) { //NaN
+	std::cout << "-----> " << pmxp << ", " << ranmxt << ", " << ranmxp << std::endl;
+	}*/
 
       // Build 4-vectors and boost decay particles
       pmxda[0] = sin(ranmxt)*cos(ranmxp)*pmxp;
@@ -221,13 +228,21 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
 
       Lorenb((*p)->M(), (*p)->P4(), pmxda, partpb);
 
+      if (!(partpb[0]<0) and !(partpb[0]>0)) {
+	/*std::cout << "=== " << pmxp << "\t" << ulmdq << "\t" << ulmq << "\t" << (*p)->M() << std::endl;
+	for (int i=0; i<4; i++) {
+	  std::cout << "(" << i << ")-> " << pmxda[i] << " --> " << partpb[i] << std::endl;
+	  }*/
+	return false;
+      }
+
       Particle singlet((*p)->role, singlet_id);
       singlet.status = 3;
       singlet.SetMother(ev_->GetOneByRole((*p)->role));
       if (!singlet.P(partpb)) {
-    #ifdef ERROR
+	//#ifdef ERROR
         std::cerr << "[GamGam::PrepareHadronisation] ERROR while setting the 4-momentum of singlet" << std::endl;
-    #endif
+	//#endif
       }
 
       ev_->AddParticle(&singlet);
@@ -243,12 +258,13 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
       doublet.status = 3;
       doublet.SetMother(ev_->GetOneByRole((*p)->role));
       if (!doublet.P(partpb)) {
-    #ifdef ERROR
+	//#ifdef ERROR
         std::cout << "[GamGam::PrepareHadronisation] ERROR while setting the 4-momentum of doublet" << std::endl;
-    #endif
+	//#endif
       }
       ev_->AddParticle(&doublet);    
     }
   }
+  return true;
 }
 

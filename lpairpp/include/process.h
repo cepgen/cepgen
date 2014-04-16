@@ -18,7 +18,7 @@ class Process
   /**
    * @brief Returns the weight for this point in the phase-space
    */
-  virtual double ComputeWeight(int nm_=1)=0;
+  virtual double ComputeWeight()=0;
   /**
    * Sets the phase space point to compute the weight associated to it.
    * @brief Sets the phase space point to compute

@@ -8,6 +8,7 @@
 #include <fstream>
 
 #include "gamgamll.h"
+#include "gampomvmll.h"
 
 #include "pythia6hadroniser.h"
 #include "pythia8hadroniser.h"

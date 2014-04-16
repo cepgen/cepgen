@@ -14,25 +14,25 @@ int main(int argc, char* argv[]) {
   MCGen mg;
   Event ev;
   GamGamLL proc;
+  //GamPomVMLL proc;
   //Herwig6Hadroniser had;
   //Pythia6Hadroniser had;
   Jetset7Hadroniser had;
 
   if (argc==1) {
     std::cout << "[Main] [DEBUG] No config file provided. Setting the default parameters." << std::endl;
-    mg.parameters->in1p = 3500.;
-    mg.parameters->in2p = 3500.;
+    mg.parameters->in1p = 4000.;
+    mg.parameters->in2p = 4000.;
     mg.parameters->pair = 13;
-    mg.parameters->p1mod = 11;
-    //mg.parameters->p1mod = 2;
+    mg.parameters->p1mod = 2;
     mg.parameters->p2mod = 2;
     mg.parameters->mcut = 2;
     mg.parameters->minenergy = 0.; //FIXME
-    mg.parameters->minpt = 5.;
+    mg.parameters->minpt = 15.;
     //mg.parameters->SetEtaRange(-2.5, 2.5);
-    mg.parameters->ncvg = 5e3; //FIXME
+    //mg.parameters->ncvg = 5e3; //FIXME
     mg.parameters->generation = true;
-    mg.parameters->maxgen = 1e0;
+    mg.parameters->maxgen = 2;
     //mg.parameters->maxgen = 1e5;
     mg.parameters->hadroniser = &had;
     mg.parameters->process = &proc;
@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
   }
 
   mg.parameters->Dump();
-
+  
   mg.ComputeXsection(&xsec, &err);
   if (mg.parameters->generation) {
     for (int i=0; i<mg.parameters->maxgen; i++) {
@@ -58,8 +58,8 @@ int main(int argc, char* argv[]) {
     }
     //mg.LaunchGeneration();
   }
-
-  mg.parameters->StoreConfigFile("lastrun.card");
+  
+  //mg.parameters->StoreConfigFile("lastrun.card");
 
   return 0;
 }

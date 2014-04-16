@@ -17,14 +17,14 @@ int main() {
   Particles::iterator p;
   TTree *tree;
   GamGamLL proc;
-  //Pythia6Hadroniser had;
-  Jetset7Hadroniser had;
+  Pythia6Hadroniser had;
+  //Jetset7Hadroniser had;
 
   mg.parameters->in1p = 3500.;
   mg.parameters->in2p = 3500.;
   mg.parameters->pair = 13;
   mg.parameters->p1mod = 11;
-  mg.parameters->p2mod = 2;
+  mg.parameters->p2mod = 11;
   mg.parameters->mcut = 2;
   mg.parameters->minenergy = 0.; //FIXME
   mg.parameters->minpt = 5.;
@@ -34,6 +34,7 @@ int main() {
   //mg.parameters->ncvg = 5e3; //FIXME
   //mg.parameters->maxgen = 1e5;
   //mg.parameters->SetEtaRange(-2.5, 2.5);
+  mg.parameters->SetEtaRange(-999., 999.);
 
   mg.parameters->generation = true;
   mg.parameters->Dump();
@@ -108,7 +109,10 @@ int main() {
       else nremn_nt[1]++;
     }
 
-    //if (nremn_ch[0]%2==0) std::cout << "event " << i << " has " << nremn_ch << " charged and " << nremn_nt << " neutral remnants" << std::endl;
+    if (nremn_ch[0]%2==0) {
+      //ev.Dump();
+      //std::cout << "event " << i << " has " << nremn_ch << " charged and " << nremn_nt << " neutral remnants" << std::endl;
+    }
     gen_time = ev.time_cpu;
     for (p=particles.begin(), np=0; p!=particles.end(); p++) {
       eta[np] = (*p)->Eta();
@@ -135,7 +139,10 @@ int main() {
   }
 
   //tree->SaveAs("events_lpairpp_pythia.root");
-  tree->SaveAs("events_lpairpp_jetset.root");
+  //tree->SaveAs("events_lpairpp_jetset.root");
+  //tree->SaveAs("events_lpairpp_elastic_pt5.root");
+  tree->SaveAs("events_lpairpp_singlediss_pythia_pt5.root");
+  //tree->SaveAs("events_lpairpp_doublediss_pythia_pt5.root");
 
   return 0;
 }

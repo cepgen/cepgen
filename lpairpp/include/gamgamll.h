@@ -11,8 +11,6 @@
 #include <map>
 
 #include "process.h"
-#include "parameters.h"
-#include "utils.h"
 
 /**
  * Full class of methods and objects to compute the full analytic matrix element
@@ -26,7 +24,7 @@
  * electrons carry the indices 3 and 5. The two outgoing leptons have the roles
  * 6 and 7, while the lepton/antilepton distinction is done randomly (thus, the
  * arrow convention is irrelevant here).
- * @brief Computes the matrix element for a \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
+ * @brief Computes the matrix element for a CE \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
  *  process
  */
 class GamGamLL : public Process
@@ -71,7 +69,8 @@ class GamGamLL : public Process
    * the differential cross-section for the given point in the phase space.
    * @todo Find out what this @a nm_ parameter does...
    */
-  double ComputeWeight(int nm_=1);
+  //double ComputeWeight(int nm_=1);
+  double ComputeWeight();
   void StoreEvent(std::ofstream*,double);
   /**
    * Returns the value for the first photon virtuality
@@ -122,7 +121,7 @@ class GamGamLL : public Process
   bool Orient();
   /**
    * Contains the expression of the matrix element squared for the
-   * \f$\gamma\gamma\rightarror\ell^{+}\ell^{-}\f$ process. It returns the
+   * \f$\gamma\gamma\rightarrow\ell^{+}\ell^{-}\f$ process. It returns the
    * value of the convolution of the form factor or structure functions with
    * the central two-photons matrix element squared.
    * @brief Computes the matrix element squared for the requested process

@@ -53,7 +53,7 @@ class Jetset7Hadroniser : public Hadroniser
    * @param ijoin_ List of particles to join in the colour flow
    */
   inline static void lujoin(int njoin_, int ijoin_[2]) { return lujoin_(njoin_,*ijoin_); };
-  void PrepareHadronisation(Event *ev_);
+  bool PrepareHadronisation(Event *ev_);
 };
 
 #endif

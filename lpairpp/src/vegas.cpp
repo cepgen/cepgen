@@ -29,8 +29,8 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
   }
   // ...
   _n = new int[dim_];
-  _nm = new int[7000];
-  _fmax = new double[7000];
+  _nm = new int[20000];
+  _fmax = new double[20000];
   // ...
   
   for (int i=0; i<dim_; i++) {

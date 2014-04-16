@@ -52,4 +52,16 @@ void Mapla(double,double,int,double,double,double*,double*);
 //void Symmetrise(double, double, double*, double*);
 void Lorenb(double u_, double ps_[], double pi_[], double pf_[]);
 
+/**
+ * Generate random number with Breit-Wigner distribution
+ * @return Random number between emin_ and emax_ with Breit-Wigner distribution:
+ *  \f$\frac{1}{(E-E_r)^2+\Gamma^2/4}\f$
+ * @param er_ Maximum of distribution
+ * @param gamma_ Width of distribution
+ * @param emin_ Minimal value of RanBW
+ * @param emax_ Maximal value of RanBW
+ */
+double RanBW(double er_, double gamma_, double emin_, double emax_);
+double GenerT(double tmin_, double tmax_, double b_, double anexp_);
+
 #endif
