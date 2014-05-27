@@ -2,28 +2,31 @@
 
 Particle::Particle() :
   id(-1), pdgId(0), charge(999.), name(""), role(-1),
-  px(0.), py(0.), pz(0.), status(0), e(-1.), m(-1.),
-  _mother(-1), _isPrimary(true)
+  helicity(0.),
+  status(0), _m(-1.),
+  _isPrimary(true)
 {
+  for (int i=0; i<4; i++) _p4[i] = 0.;
 }
 
 Particle::Particle(int role_, int pdgId_) :
   id(-1), charge(999.), name(""), role(-1),
-  px(0.), py(0.), pz(0.), status(0), e(-1.), m(-1.),
-  _mother(-1), _isPrimary(true)
+  status(0), _m(-1.),
+  _isPrimary(true)
 {
   this->role = role_;
   this->pdgId = pdgId_;
+  for (int i=0; i<4; i++) _p4[i] = 0.;
   if (this->pdgId!=0) {
     this->M(-1.);
   }
 }
 
-Particle::~Particle() {
+Particle::~Particle()
+{
 #ifdef DEBUG
   std::cout << "[Particle::~Particle] [DEBUG] Destructor called" << std::endl;
 #endif
-  //if (this->_mother!=(Particle*)NULL) delete this->_mother;
 }
 
 Particle&
@@ -34,8 +37,30 @@ Particle::operator=(const Particle &part_)
   if (this->id==-1) {
     this->id = part_.id;
   }
-  this->P(part_.px, part_.py, part_.pz, part_.e);
-  this->M(part_.m);
+  this->P(part_.Px(), part_.Py(), part_.Pz(), part_.E());
+  this->M(part_._m);
+
+  return *this;
+}
+
+Particle&
+Particle::operator+(const Particle &part_)
+{
+  pdgId = (part_.pdgId==pdgId) ? pdgId : -1;
+  role = (part_.role==role) ? role : -1;
+  for (int i=0; i<4; i++) _p4[i]+= part_._p4[i];
+  M(-1.);
+
+  return *this;
+}
+
+Particle&
+Particle::operator-(const Particle &part_)
+{
+  pdgId = (part_.pdgId==pdgId) ? pdgId : -1;
+  role = (part_.role==role) ? role : -1;
+  for (int i=0; i<4; i++) _p4[i]-= part_._p4[i];
+  M(-1.);
 
   return *this;
 }
@@ -54,14 +79,14 @@ Particle::GetLHEline(bool revert_)
   std::stringstream line;
 
   if (revert_) {
-    pz = -pz;
+    _p4[2] = -_p4[2];
   }
 
   line << pdgId << "\t";
   line << "1 1 2 0 0" << "\t";
-  line << px << "\t";
-  line << py << "\t";
-  line << pz << "\t";
+  line << Px() << "\t";
+  line << Py() << "\t";
+  line << Pz() << "\t";
   line << E() << "\t";
   line << M() << "\t";
   line << "0." << "\t";
@@ -70,30 +95,33 @@ Particle::GetLHEline(bool revert_)
 }
 
 bool
-Particle::P(double p_[3], double E_=-1.)
-{
-  if (E_<0.) return this->P(p_[0], p_[1], p_[2]);
-  else return this->P(p_[0], p_[1], p_[2], E_);
-}
-
-bool
 Particle::M(double m_)
 {
   double mass;
-  if (m_>=0.) this->m = m_;
+  if (m_>=0.) this->_m = m_;
   else if (this->pdgId!=0) {
     mass = GetMassFromPDGId(this->pdgId);
     if (mass<0.) return false;
-    this->m = mass;
+    if (this->_p4[3]<0.) {
+      this->_m = mass;
+      this->_p4[3] = std::pow(this->P(), 2)+this->M2();
+      return true;
+    }
+    if (std::pow(this->E(), 2)-std::pow(this->P(), 2)!=std::pow(mass, 2)) mass = std::sqrt(std::pow(this->E(), 2)-std::pow(this->P(), 2));
+    this->_m = mass;
+    return true;
   }
-  else return false;
-  return true;
+  else if (this->E()>=0. and this->P()>=0.) {
+    this->_m = std::sqrt(std::pow(this->E(), 2)-std::pow(this->P(), 2));
+    return true;
+  }
+  return false;
 }
 
 void
 Particle::SetMother(Particle* part_)
 {
-  this->_mother = part_->id;
+  this->_moth.insert(part_->id);
   this->_isPrimary = false;
 #ifdef DEBUG
   std::cout << "[Particle::SetMother] [DEBUG] Particle "
@@ -124,7 +152,7 @@ Particle::AddDaughter(Particle* part_)
 	      << part_->role << " (pdgId=" << part_->pdgId << ") is a new daughter of "
 	      << this->role << " (pdgId=" << this->pdgId << ")" << std::endl;
 #endif
-    if (!part_->Primary() && part_->GetMother()!=-1) {
+    if (!part_->Primary() && part_->GetMothers().size()<1) {
       part_->SetMother(this);
     }
   }
@@ -165,21 +193,24 @@ Particle::Dump()
   std::vector<int> daugh;
 
   if (this->Valid()) {
-    std::cout << "[Particle::Dump]"
-	      << "\n  Id = " << this->id
-	      << "\n  Role = " << this->role
-	      << "\n  Status = " << this->status
-	      << "\n  PDG id = " << this->pdgId
-	      << "\n  P = (" << this->px << ", " << this->py << ", " << this->pz << ") GeV"
-	      << "\n  |P| = " << this->P() << " GeV"
-	      << "\n  Pt = " << this->Pt() << " GeV"
-	      << "\n  E = " << this->E() << " GeV"
-	      << "\n  M = " << this->M() << " GeV"
-	      << "\n  eta = " << this->Eta()
-	      << "\n  Is valid ? " << this->Valid()
-	      << "\n  Is primary ? " << this->_isPrimary << std::endl;
+    std::cout << "[Particle::Dump]" << std::endl
+	      << "  Id = " << this->id << std::endl
+	      << "  Role = " << this->role << std::endl
+	      << "  Status = " << this->status << std::endl
+	      << "  PDG id = " << this->pdgId << std::endl
+	      << "  P = (" << this->Px() << ", " << this->Py() << ", " << this->Pz() << ") GeV" << std::endl
+	      << "  |P| = " << this->P() << " GeV" << std::endl
+	      << "  Pt = " << this->Pt() << " GeV" << std::endl
+	      << "  E = " << this->E() << " GeV" << std::endl
+	      << "  M = " << this->M() << " GeV" << std::endl
+	      << "  eta = " << this->Eta() << std::endl
+	      << "  Is valid ? " << this->Valid() << std::endl
+	      << "  Is primary ? " << this->_isPrimary << std::endl;
     if (!this->Primary()) {
-      std::cout << "  Mother = " << this->GetMother() << std::endl;
+      ParticlesIds::iterator m;
+      std::cout << "  Mothers = ";
+      for (m=_moth.begin(); m!=_moth.end(); m++) std::cout << (*m) << " ";
+      std::cout << std::endl;
     }
 
     daugh = this->GetDaughters();
@@ -192,4 +223,63 @@ Particle::Dump()
   else {
     std::cout << "[Particle::Dump] ERROR: Particle with role \"" << this->role << "\" is invalid" << std::endl;
   }
+}
+
+void
+Particle::LorentzBoost(double m_, double p_[4])
+{
+  double pf4, fn;
+
+  if (p_[3]!=m_) {
+    pf4 = 0.;
+    for (int i=0; i<4; i++) {
+      pf4 += this->_p4[i]*p_[i];
+    }
+    pf4 /= m_;
+    fn = (pf4+this->E())/(p_[3]+m_);
+    for (int i=0; i<3; i++) {
+      this->_p4[i] += fn*p_[i];
+    }
+  }
+}
+
+void
+Particle::LorentzBoost(double p_[3])
+{
+  double p2, gamma, bp, gamma2;
+
+  p2 = std::pow(p_[0], 2)+std::pow(p_[1], 2)+std::pow(p_[2], 2);
+  gamma = 1./std::sqrt(1.-p2);
+  bp = 0.;
+  for (int i=0; i<3; i++) bp+= p_[i]*_p4[i];
+  //bp = p_[0]*_p4[0]+p_[1]*_p4[1]+p_[2]*_p4[2];
+
+  if (p2>0.) gamma2 = (gamma-1.)/p2;
+  else gamma2 = 0.;
+
+  for (int i=0; i<3; i++) {
+    this->_p4[i] += gamma2*bp*p_[i]+gamma*p_[i]*E();
+  }
+  //this->E(gamma*E()+bp);
+}
+
+void
+Particle::RotateThetaPhi(double theta_, double phi_)
+{
+  double rotmtx[3][3], mom[3]; //FIXME check this! cos(phi)->-sin(phi) & sin(phi)->cos(phi) --> phi->phi+pi/2 ?
+  rotmtx[0][0] = -sin(phi_); rotmtx[0][1] = -cos(theta_)*cos(phi_); rotmtx[0][2] =  sin(theta_)*cos(phi_);
+  rotmtx[1][0] =  cos(phi_); rotmtx[1][1] = -cos(theta_)*sin(phi_); rotmtx[1][2] =  sin(theta_)*sin(phi_);
+  rotmtx[2][0] =  0.;        rotmtx[2][1] =  sin(theta_);           rotmtx[2][2] =  cos(theta_);
+
+  for (int i=0; i<3; i++) {
+    mom[i] = 0.;
+    for (int j=0; j<3; j++) {
+      mom[i] += rotmtx[i][j]*this->_p4[j];
+    }
+  }
+
+  std::copy(mom, mom+3, this->_p4);
+  //this->_p4[0] *= sin(theta_)*cos(phi_);
+  //this->_p4[1] *= sin(theta_)*sin(phi_);
+  //this->_p4[2] *= cos(theta_);
 }

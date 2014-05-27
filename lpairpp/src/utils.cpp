@@ -1,32 +1,8 @@
 #include "utils.h"
 
-#define random() (double)rand()/RAND_MAX
-
-// values of a, b, c provided from the fits on ep data and retrieved from
-// http://dx.doi.org/10.1016/0550-3213(76)90231-5 with 1.110 <= w2 <=1.990
-
-double abrass[56] = {5.045,5.126,5.390,5.621,5.913,5.955,6.139,6.178,6.125,5.999,
-                     5.769,5.622,5.431,5.288,5.175,5.131,5.003,5.065,5.045,5.078,
-                     5.145,5.156,5.234,5.298,5.371,5.457,5.543,5.519,5.465,5.384,
-                     5.341,5.320,5.275,5.290,5.330,5.375,5.428,5.478,5.443,5.390,
-                     5.333,5.296,5.223,5.159,5.146,5.143,5.125,5.158,5.159,5.178,
-                     5.182,5.195,5.160,5.195,5.163,5.172};
-double bbrass[56] = {0.798,1.052,1.213,1.334,1.397,1.727,1.750,1.878,1.887,1.927,
-                     2.041,2.089,2.148,2.205,2.344,2.324,2.535,2.464,2.564,2.610,
-                     2.609,2.678,2.771,2.890,2.982,3.157,3.183,3.315,3.375,3.450,
-                     3.477,3.471,3.554,3.633,3.695,3.804,3.900,4.047,4.290,4.519,
-                     4.709,4.757,4.840,5.017,5.015,5.129,5.285,5.322,5.545,5.623,
-                     5.775,5.894,6.138,6.151,6.301,6.542};
-double cbrass[56] = { 0.043, 0.024, 0.000,-0.013,-0.023,-0.069,-0.060,-0.080,-0.065,-0.056,
-                     -0.065,-0.056,-0.043,-0.034,-0.054,-0.018,-0.046,-0.015,-0.029,-0.048,
-                     -0.032,-0.045,-0.084,-0.115,-0.105,-0.159,-0.164,-0.181,-0.203,-0.223,
-                     -0.245,-0.254,-0.239,-0.302,-0.299,-0.318,-0.383,-0.393,-0.466,-0.588,
-                     -0.622,-0.568,-0.574,-0.727,-0.665,-0.704,-0.856,-0.798,-1.048,-0.980,
-                     -1.021,-1.092,-1.313,-1.341,-1.266,-1.473};
-
 double GetMassFromPDGId(int pdgId_)
 {
-  switch(abs(pdgId_)) {
+  switch (abs(pdgId_)) {
   case 1:    return 0.33;           // d (from PYTHIA6.4)
   case 2:    return 0.33;           // u (from PYTHIA6.4)
   case 11:   return 0.510998928e-3; // electron
@@ -36,6 +12,7 @@ double GetMassFromPDGId(int pdgId_)
   case 22:   return 0.;             // photon
   case 211:  return 0.13957018;     // pi+
   case 111:  return 0.1349766;      // pi0
+  case 553:  return 20.;            // J/psi //FIXME FIXME FIXME
   case 2101: return 0.57933;        // (ud)0 (from PYTHIA6.4)
   case 2103: return 0.77133;        // (ud)1 (from PYTHIA6.4)
   case 2203: return 0.77133;        // (uu)1 (from PYTHIA6.4)
@@ -44,50 +21,30 @@ double GetMassFromPDGId(int pdgId_)
   }
 }
 
-bool PSF(double q2_, double mX2_, double* sigT_, double* w1_, double* w2_)
+double GetWidthFromPDGId(int pdgId_)
 {
-  int nBin;
-  double xBin, dx, nu2, logqq0, gd2;
-  double sigLow, sigHigh;
-  double mX = std::sqrt(mX2_);
-  double mP = GetMassFromPDGId(2212);
-  double mPI = 0.135; //FIXME pi0 mass ???
-
-  if (mX>=mP+mPI && mX<1.99) {
-    if (mX<1.11) {
-      nBin = 0;
-      xBin = mX-mP-mPI;
-      dx = 1.11-mP-mPI; // Delta w bin sizes
-    }
-    else if (mX<1.77) { // w in [1.11, 1.77[
-      dx = 0.015; // Delta w bin sizes
-      nBin = (mX-1.11)/dx+1;
-      xBin = fmod(mX-1.11, dx);
-    }
-    else { // w in [1.77, 1.99[
-      dx = 0.02; // Delta w bin sizes
-      nBin = (mX-1.77)/dx+45;
-      xBin = fmod(mX-1.77, dx);
-    }
+  switch (abs(pdgId_)) {
+  case 553:  return 10.; //FIXME
+  default:   return -1.;
   }
-  else {
-    *sigT_ = 0.;
-    *w1_ = 0.;
-    *w2_ = 0.;
-    return false;
+}
+
+double GetBRFromPDGId(int pdgId_)
+{
+  switch (abs(pdgId_)) {
+  case 113:   return 1.0;    // rho0->pi+ pi-
+  case 223:   return 0.0221; // omega->pi+ pi-
+  case 333:   return 0.491;  // phi->K+ K-
+  case 3332:  return 0.344;  // phi->KL0 KS0 //FIXME FIXME FIXME
+  case 444:   return 0.0598; // J/psi->l+ l-
+  case 20443: return 0.0425; // psi'->l+ l- X
+  case 553:   return 0.0250; // Upsilon(1s)->l+ l-
+  case 20553: return 0.0200; // Upsilon(2s)->l+ l- X
+  case 30553: return 0.0217; // Upsilon(3s)->l+ l- X
+    //case 40113: // rho(1450)->pi+ pi- rho0
+    //case 10333: // phi(1680)->K Kbar
+  default: return -1;
   }
-  nu2 = std::pow((mX2_-q2_-std::pow(mP, 2))/(2.*mP), 2);
-  logqq0 = log((nu2-q2_)/std::pow((mX2_-std::pow(mP, 2))/(2.*mP), 2))/2.;
-  gd2 = std::pow(1./(1-q2_/.71), 4); // dipole form factor of the proton
-
-  sigLow = (nBin==0) ? 0. : exp(abrass[nBin]+bbrass[nBin]*logqq0+cbrass[nBin]*std::pow(fabs(logqq0), 3))*gd2;
-  sigHigh = exp(abrass[nBin+1]+bbrass[nBin+1]*logqq0+cbrass[nBin+1]*std::pow(fabs(logqq0), 3))*gd2;
-
-  *sigT_ = sigLow+xBin*(sigHigh-sigLow)/dx;
-  *w1_ = (mX2_-std::pow(mP, 2))/(8.*std::pow(pi, 2)*mP*alphaF)*muBarn*(*sigT_);
-  *w2_ = (*w1_)*q2_/(q2_-nu2);
-
-  return true;
 }
 
 void Map(double expo_, double xmin_, double xmax_, double* out_, double* dout_)
@@ -155,7 +112,7 @@ double RanBW(double er_, double gamma_, double emin_, double emax_)
   }
   a = atan(2.*(emax_-er_)/gamma_);
   b = atan(2.*(emin_-er_)/gamma_);
-  e = er_+gamma_*tan(random()*(a-b)+b)/2.;
+  e = er_+gamma_*tan(drand()*(a-b)+b)/2.;
   if (e<emax_) {
     return e;
   }
@@ -166,6 +123,8 @@ double GenerT(double tmin_, double tmax_, double b_, double anexp_)
 {
   double c0, c1, bloc, z, t;
   int iter;
+
+  // Generate spectrum by method of R. Lausen
 
   bloc = b_;
   if (b_<.1) {
@@ -185,13 +144,13 @@ double GenerT(double tmin_, double tmax_, double b_, double anexp_)
       // power law exponent is 0 or illegal                                                                                                                      
       //  => generate pure exp(bt) spectrum 
       if (bloc*(tmax_-tmin_)>=25.) {
-	t = tmin_-log(random())/bloc;
+	t = tmin_-log(drand())/bloc;
 #ifdef DEBUG
 	std::cout << "[GenerT] DEBUG: Method 1: T=" << t << std::endl;
 #endif
       }
       else {
-	t = tmin_-log(1.-random()*(1.-exp(bloc*(tmin_-tmax_))))/bloc;
+	t = tmin_-log(1.-drand()*(1.-exp(bloc*(tmin_-tmax_))))/bloc;
 #ifdef DEBUG
 	std::cout << "[GenerT] DEBUG: Method 2: T=" << t << std::endl;
 #endif
@@ -205,7 +164,7 @@ double GenerT(double tmin_, double tmax_, double b_, double anexp_)
       // Limit for large bt>>n: t^-n
       c1 = std::pow(anexp_+bloc*tmin_, 1.-anexp_);
       c0 = std::pow(anexp_+bloc*tmax_, 1.-anexp_);
-      z = random();
+      z = drand();
       t = -(anexp_-std::pow(z*(c1-c0)+c0, 1./(1.-anexp_)))/bloc;
     }
     iter++;
@@ -218,3 +177,47 @@ double GenerT(double tmin_, double tmax_, double b_, double anexp_)
   }
   return t;
 }
+
+double GenTDL(double tmin_, double tmax_, double b_, int n_)
+{
+  int iter;
+  double t, w;
+
+  if (tmin_>tmax_) {
+    std::cerr << "[GenTDL] ERROR: TMIN=" << tmin_ << ", TMAX=" << tmax_ << " => return TMIN=" << tmin_ << std::endl;
+    return tmin_;
+  }
+
+  iter = 0;
+  do {
+    if (b_*(tmax_-tmin_)>=25.) {
+      t = tmin_-log(drand())/b_;
+#ifdef DEBUG
+      std::cout << "[GenTDL] DEBUG: Method 1: T=" << t << std::endl;
+#endif
+    }
+    else {
+      t = tmin_-log(1.-drand()*(1.-exp(b_*(tmin_-tmax_))))/b_;
+#ifdef DEBUG
+      std::cout << "[GenTDL] DEBUG: Method 2: T=" << t << std::endl;
+#endif
+    }
+    w = std::pow((1.+1.41*tmin_)/(1.+1.41*t), n_);
+    iter += 1;
+  } while ((t<tmin_ or t>tmax_ or w<drand()) and iter<=100);
+  if (iter>100) {
+    //CALL ERRLOG (22, 'W: GENTDL: More than 100 iterations!')
+    std::cout << "[GenTDL] WARNING: more than 100 iterations!" << std::endl
+	      << "TMIN: " << tmin_ << ", TMAX: " << tmax_ << ", T: " << t
+	      << std::endl;
+  }
+  return t;
+}
+
+int Heli(double longFr_)
+{
+  if (drand()<longFr_) return 0; // longitudinal photon
+  else if (drand()<.5) return 1; // transverse photon
+  else return -1;
+}
+

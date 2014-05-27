@@ -1,13 +1,11 @@
 #include "vegas.h"
 
-//#define COORD(s,i,j) ((s)->xi[(i)*(s)->dim + (j)])
-
 Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inParam_) :
   _ndim(dim_), _ndo(50),
   _nTreatCalls(0), _mbin(3),
   _ffmax(0.), _correc(0.), _corre2(0.), _fmax2(0.), _fmdiff(0.), _fmold(0.),
   _j(0),
-  _force_correction(false), _grid_prepared(false)
+  _grid_prepared(false)
 {
   /* x content :
       0 = t1 mapping
@@ -137,12 +135,9 @@ int Vegas::Integrate(double *result_, double *abserr_)
   ndm = nd-1;
   dxg *= xnd;
   xjac = one;
-  //std::cout << k << "\t" << ng << "\t" << calls << "\t" << dxg << "\t" << dv2g << "\t" << xnd << "\t" << ndm << std::endl;
-  //exit(0);
   for (i=0; i<_ndim; i++) {
     dx[i] = _xu[i]-_xl[i];
     xjac *= dx[i];
-    //std::cout << i << "\t" << xjac << "\t" << dx[i] << std::endl;
   }
 
   // Rebin preserving bin density
@@ -162,11 +157,9 @@ int Vegas::Integrate(double *result_, double *abserr_)
       i++;
       dr -= rc;
       xin[i] = xn-(xn-xo)*dr;
-      //std::cout << i << "\t" << j << "\t" << k << "\t" << dr << "\t" << xin[i] << std::endl;
       if (i<ndm-1) goto line5; //FIXME need to remove these gotos
       for (i=0; i<ndm; i++) {
 	_xi[i][j] = xin[i];
-	//std::cout << i << "\t" << j << "\t" << _xi[i][j] << std::endl;
       }
       _xi[nd-1][j] = one;
     }
@@ -189,13 +182,9 @@ int Vegas::Integrate(double *result_, double *abserr_)
     for (k=0; k<(int)npg; k++) {
       for (j=0; j<_ndim; j++) {
 	qran[j] = (double)rand()/RAND_MAX;
-	//if (j%2==0) qran[j] = 0.7;
-	//else qran[j] = 0.78;
-	//qran[j] = 0.7;
       }
       wgt = xjac;
       for (j=0; j<_ndim; j++) {
-	//iaj = ia[j] = xn = (kg[j]-qran[j])*dxg+one;
 	xn = (kg[j]-qran[j])*dxg;
 	iaj = ia[j] = int(xn);
 	iaj1 = iaj-1;
@@ -248,12 +237,6 @@ int Vegas::Integrate(double *result_, double *abserr_)
       kg[k] = fmod(kg[k], ng)+1;
       if (kg[k]!=1) goto line11; //FIXME need to remove these goto
     }
-    /*for (j=0; j<_ndim; j++) {
-      for (i=0; i<ndm; i++) {
-	std::cout << "->" << i << "\t" << j << "\t" << _d[i][j] << std::endl;
-      }
-    }
-    exit(0);*/
     
     // Final results for this iteration
     ti /= calls;
@@ -283,7 +266,7 @@ int Vegas::Integrate(double *result_, double *abserr_)
     else sd = tsi;
     
     std::cout << "--> iteration " 
-	      << std::setfill(' ') << std::setw(3) << it << " : "
+	      << std::setfill(' ') << std::setw(2) << it << " : "
 	      << "average = " << std::setprecision(5) << std::setw(14) << avgi 
 	      << "sigma = " << std::setprecision(5) << std::setw(14) << sd 
 	      << "chi2 = " << chi2a << std::endl;
@@ -332,7 +315,6 @@ int Vegas::Integrate(double *result_, double *abserr_)
       line26:
 	now += 1;
       } while (rc>dr);
-      //for (i=0; i<ndm; i++) {
       dr -= rc;
       if (dr==0.) xin[i] = xn;
       else xin[i] = xn-(xn-xo)*dr/r[k-1];
@@ -354,7 +336,6 @@ int Vegas::Integrate(double *result_, double *abserr_)
 void
 Vegas::Generate()
 {
-  //count_ = 1;
   std::ofstream of;
   std::string fn;
   int i;
@@ -448,7 +429,6 @@ Vegas::GenerateOneEvent()
   // Select a Vegas bin and reject if fmax is too little
   //line1:
   //double* Vegas::SelectBin() //FIXME need to implement it this way instead of these bloody goto...!
-  //int count = 0;
   do {
     do {
       // ...
@@ -469,8 +449,6 @@ Vegas::GenerateOneEvent()
     if (_ip->ntreat>0) _weight = this->Treat(x);
     else _weight = this->F(x);
     
-    //std::cout << ">>> " << _weight << std::endl;
-    
     // Eject if weight is too low
     //if (y>_weight) {
       //std::cout << "ERROR : y>weight => " << y << ">" << _weight << ", " << _j << std::endl;
@@ -479,8 +457,6 @@ Vegas::GenerateOneEvent()
       //return this->GenerateOneEvent();
       //goto line1;
     //}
-    //count++;
-    //std::cout << "trial " << count << std::endl;
   } while (y>_weight);
 
   if (_weight<=_fmax[_j]) _j = 0;

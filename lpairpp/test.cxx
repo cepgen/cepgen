@@ -12,47 +12,48 @@
 int main() {
   MCGen mg;
   Event ev;
-  double xsec, err;
-  Particles particles, remn;
-  Particles::iterator p;
-  TTree *tree;
   GamGamLL proc;
   Pythia6Hadroniser had;
   //Jetset7Hadroniser had;
 
+  double xsec, err;
+  ParticlesRef particles, remn;
+  ParticlesRef::iterator p;
+  TTree *tree;
+
+  const int maxpart = 1000;
+  const int ngen = 1e5;
+  //const int ngen = 1e1;
+
   mg.parameters->in1p = 3500.;
   mg.parameters->in2p = 3500.;
   mg.parameters->pair = 13;
-  mg.parameters->p1mod = 11;
-  mg.parameters->p2mod = 11;
+  mg.parameters->p1mod = 2;
+  mg.parameters->p2mod = 2;
   mg.parameters->mcut = 2;
   mg.parameters->minenergy = 0.; //FIXME
   mg.parameters->minpt = 5.;
-  mg.parameters->maxgen = 1e1;
+  mg.parameters->maxgen = ngen;
   mg.parameters->hadroniser = &had;
   mg.parameters->process = &proc;
   //mg.parameters->ncvg = 5e3; //FIXME
-  //mg.parameters->maxgen = 1e5;
   //mg.parameters->SetEtaRange(-2.5, 2.5);
-  mg.parameters->SetEtaRange(-999., 999.);
+  //mg.parameters->SetEtaRange(-999., 999.);
 
   mg.parameters->generation = true;
   mg.parameters->Dump();
 
   mg.ComputeXsection(&xsec, &err);
 
-  const int maxpart = 1000;
-  const int ngen = 1e5;
-  //const int ngen = 1e1;
-
   int np;
   double xsect, errxsect;
   double mx_p1, mx_p2;
   double eta[maxpart], phi[maxpart], rapidity[maxpart];
   double px[maxpart], py[maxpart], pz[maxpart], pt[maxpart], E[maxpart], M[maxpart], charge[maxpart];
-  int PID[maxpart], parentid[maxpart], isstable[maxpart], role[maxpart];
+  int PID[maxpart], parentid[maxpart], isstable[maxpart], role[maxpart], status[maxpart];
   float gen_time;
   int nremn_ch[2], nremn_nt[2];
+  int hadr_trials, litigious_events;
 
   tree = new TTree("h4444", "A TTree containing information from the events produced from LPAIR++");
   tree->Branch("xsect", &xsect, "xsect/D");
@@ -72,14 +73,17 @@ int main() {
   tree->Branch("icode", PID, "PID[npart]/I");
   tree->Branch("role", role, "role[npart]/I");
   tree->Branch("parent", parentid, "parent[npart]/I");
+  tree->Branch("status", status, "status[npart]/I");
   tree->Branch("stable", isstable, "isstable[npart]/I");
   tree->Branch("E", E, "E[npart]/D");
   tree->Branch("m", M, "M[npart]/D");
   tree->Branch("charge", charge, "charge[npart]/D");
   tree->Branch("gen_time", &gen_time, "gen_time/F");
+  tree->Branch("hadronisation_trials", &hadr_trials, "hadronisation_trials/I");
 
   xsect = xsec;
   errxsect = err;
+  litigious_events = 0;
   for (int i=0; i<ngen; i++) {
     ev = *mg.GenerateOneEvent();
     if (i%10000==0) std::cout << "event " << i << " generated" << std::endl;
@@ -88,6 +92,7 @@ int main() {
     particles = ev.GetParticles();
     mx_p1 = ev.GetOneByRole(3)->M();
     mx_p2 = ev.GetOneByRole(5)->M();
+    hadr_trials = ev.num_hadronisation_trials;
 
     // Proton 1
     remn = ev.GetByRole(3);
@@ -109,23 +114,27 @@ int main() {
       else nremn_nt[1]++;
     }
 
-    if (nremn_ch[0]%2==0) {
+    if (nremn_ch[0]%2==0 or nremn_ch[1]%2==0) {
       //ev.Dump();
-      //std::cout << "event " << i << " has " << nremn_ch << " charged and " << nremn_nt << " neutral remnants" << std::endl;
+      std::cout << "--> Event " << i << " contains" << std::endl
+		<< "\t-> Remnants 1: " << nremn_ch[0] << " charged and " << nremn_nt[0] << " neutral remnants" << std::endl
+		<< "\t-> Remnants 2: " << nremn_ch[1] << " charged and " << nremn_nt[1] << " neutral remnants" << std::endl;
+      litigious_events++;
     }
     gen_time = ev.time_cpu;
     for (p=particles.begin(), np=0; p!=particles.end(); p++) {
       eta[np] = (*p)->Eta();
       phi[np] = (*p)->Phi();
       rapidity[np] = (*p)->Rapidity();
-      px[np] = (*p)->px;
-      py[np] = (*p)->py;
-      pz[np] = (*p)->pz;
+      px[np] = (*p)->Px();
+      py[np] = (*p)->Py();
+      pz[np] = (*p)->Pz();
       pt[np] = (*p)->Pt();
       E[np] = (*p)->E();
       M[np] = (*p)->M();
       PID[np] = (*p)->pdgId;
-      parentid[np] = (*p)->GetMother();
+      parentid[np] = *(*p)->GetMothers().begin();
+      status[np] = (*p)->status;
       isstable[np] = ((*p)->status==0 or (*p)->status==1);
       charge[np] = (*p)->charge;
       role[np] = (*p)->role;
@@ -137,11 +146,13 @@ int main() {
     tree->Fill();
     //std::cout << ev.GetLHERecord();
   }
+  std::cout << "Number of litigious events = " << litigious_events << " -> fraction = " << (double)litigious_events/ngen*100 << "%" << std::endl;
 
+  tree->SaveAs("events.root");
   //tree->SaveAs("events_lpairpp_pythia.root");
   //tree->SaveAs("events_lpairpp_jetset.root");
   //tree->SaveAs("events_lpairpp_elastic_pt5.root");
-  tree->SaveAs("events_lpairpp_singlediss_pythia_pt5.root");
+  //tree->SaveAs("events_lpairpp_singlediss_pythia_pt5.root");
   //tree->SaveAs("events_lpairpp_doublediss_pythia_pt5.root");
 
   return 0;

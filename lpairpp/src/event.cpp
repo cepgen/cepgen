@@ -1,7 +1,8 @@
 #include "event.h"
 
 Event::Event() :
-  time_cpu(-1.)
+  num_hadronisation_trials(0),
+  time_generation(-1.), time_total(-1.)
 {
   //this->_part = new ParticlesMap();
 }
@@ -15,15 +16,17 @@ Event&
 Event::operator=(const Event &ev_)
 {
   this->_part = ev_._part;
-  this->time_cpu = ev_.time_cpu;
+  this->time_generation = ev_.time_generation;
+  this->time_total = ev_.time_total;
+  this->num_hadronisation_trials = ev_.num_hadronisation_trials;
   return *this;
 }
 
-Particles
+ParticlesRef
 Event::GetByRole(int role_)
 {
   int i;
-  Particles out;
+  ParticlesRef out;
   std::pair<ParticlesMap::iterator,ParticlesMap::iterator> ret = this->_part.equal_range(role_);
   ParticlesMap::iterator it;
 
@@ -65,7 +68,7 @@ Event::AddParticle(Particle *part_, bool replace_)
   if (part_->role<=0) {
     return -1;
   }
-  Particles part_with_same_role = this->GetByRole(part_->role);
+  ParticlesRef part_with_same_role = this->GetByRole(part_->role);
   part_->id = this->_part.size(); //FIXME is there any better way of introducing this id ?
   if (replace_ and part_with_same_role.size()!=0) {
     part_with_same_role.at(0) = part_;
@@ -94,8 +97,8 @@ std::string
 Event::GetLHERecord(const double weight_)
 {
   std::stringstream ss;
-  Particles particles, daughters;
-  Particles::iterator p, dg;
+  ParticlesRef particles, daughters;
+  ParticlesRef::iterator p, dg;
   int min_id, max_id;
 
   //FIXME need to fetch the vector (not the multimap), so that we can sort on the particle unique identifier (also TODO!!!)
@@ -115,7 +118,7 @@ Event::GetLHERecord(const double weight_)
        << std::setw(3) << (*p)->status << "  "
        << std::setw(5) << (*p)->pdgId << "  ";
     if (!(*p)->Primary()) {
-      ss << std::setw(2) << (*p)->GetMother()+1 << "  ";
+      ss << std::setw(2) << *((*p)->GetMothers().begin())+1 << "  ";
     }
     else {
       ss << std::setw(2) << "0" << "  ";
@@ -138,9 +141,9 @@ Event::GetLHERecord(const double weight_)
       ss << std::setw(4) << "0" << "  " << std::setw(4) << "0";
     }
     ss << std::setw(4) << "  " << "0" << "  "; 
-    ss << std::setw(12) << (*p)->px << "  " 
-       << std::setw(12) << (*p)->py << "  " 
-       << std::setw(12) << (*p)->pz << "  " 
+    ss << std::setw(12) << (*p)->Px() << "  " 
+       << std::setw(12) << (*p)->Py() << "  " 
+       << std::setw(12) << (*p)->Pz() << "  " 
        << std::setw(12) << (*p)->E() << "  " 
        << std::setw(12) << (*p)->M() << "  " 
        << std::setw(4) << weight_ 
@@ -158,9 +161,9 @@ Event::Store(std::ofstream *of_, double weight_)
   Particle *l2 = this->GetByRole(7).at(0);
   
   *of_ << std::setw(8) << l1->E() << "\t"
-       << std::setw(8) << l1->px << "\t"
-       << std::setw(8) << l1->py << "\t"
-       << std::setw(8) << l1->pz << "\t"
+       << std::setw(8) << l1->Px() << "\t"
+       << std::setw(8) << l1->Py() << "\t"
+       << std::setw(8) << l1->Pz() << "\t"
        << std::setw(8) << l1->Pt() << "\t"
        << std::setw(8) << l1->M() << "\t"
        << std::setw(8) << l1->Eta() << "\t"
@@ -168,9 +171,9 @@ Event::Store(std::ofstream *of_, double weight_)
        << std::setw(8) << weight_
        << std::endl;
   *of_ << std::setw(8) << l2->E() << "\t"
-       << std::setw(8) << l2->px << "\t"
-       << std::setw(8) << l2->py << "\t"
-       << std::setw(8) << l2->pz << "\t"
+       << std::setw(8) << l2->Px() << "\t"
+       << std::setw(8) << l2->Py() << "\t"
+       << std::setw(8) << l2->Pz() << "\t"
        << std::setw(8) << l2->Pt() << "\t"
        << std::setw(8) << l2->M() << "\t"
        << std::setw(8) << l2->Eta() << "\t"
@@ -179,10 +182,10 @@ Event::Store(std::ofstream *of_, double weight_)
        << std::endl;
 }
 
-Particles
+ParticlesRef
 Event::GetParticles()
 {
-  Particles out;
+  ParticlesRef out;
   ParticlesMap::iterator it;
   for (it=this->_part.begin(); it!=this->_part.end(); it++) {
     out.push_back(&it->second);
@@ -191,10 +194,10 @@ Event::GetParticles()
   return out;
 }
 
-Particles
+ParticlesRef
 Event::GetStableParticles()
 {
-  Particles out;
+  ParticlesRef out;
   ParticlesMap::iterator it;
   for (it=this->_part.begin(); it!=this->_part.end(); it++) {
     if (it->second.status==0 or it->second.status==1) {
@@ -208,16 +211,17 @@ Event::GetStableParticles()
 void
 Event::Dump(bool stable_)
 {
-  Particles particles;
-  Particles::iterator p;
+  ParticlesRef particles;
+  ParticlesRef::iterator p;
   double pxtot, pytot, pztot, etot;
+  int sign;
 
   pxtot = pytot = pztot = etot = 0.;
   particles = this->GetParticles();
   std::cout << "[Event::Dump]" << std::endl;
   std::cout << std::left;
-  std::cout << "Particle" << "\t" << "PDG id" << "\t\t" << "Charge" << "\t" << "Role" << "\t" << "Status" << "\t" << "Mother" << "\t\t" << "4-Momentum [GeV]" << std::endl;
-  std::cout << "--------" << "\t" << "------" << "\t\t" << "------" << "\t" << "----" << "\t" << "------" << "\t" << "------" << "\t" << "----------------------------------" << std::endl;
+  std::cout << "Particle" << "\t" << "PDG id" << "\t\t" << "Charge" << "\t" << "Role" << "\t" << "Status" << "\t" << "Mother" << "\t\t\t" << "4-Momentum [GeV]" << std::endl;
+  std::cout << "--------" << "\t" << "------" << "\t\t" << "------" << "\t" << "----" << "\t" << "------" << "\t" << "------" << "\t" << "---------------------------------------" << std::endl;
   for (p=particles.begin(); p!=particles.end(); p++) {
     if (stable_ and (*p)->status!=1) continue;
     std::cout << std::setfill(' ') << std::setw(8) << (*p)->id
@@ -231,24 +235,38 @@ Event::Dump(bool stable_)
 	std::cout << std::setprecision(2) << std::setw(6) << (*p)->charge;
     std::cout << "\t" << std::setw(4) << (*p)->role
 	      << "\t" << std::setw(6) << (*p)->status << "\t";
-    if ((*p)->GetMother()!=-1)
-      std::cout << std::setw(8) << (*p)->GetMother();
+    if ((*p)->GetMothers().size()>0) {
+      std::cout << std::setw(2) << *((*p)->GetMothers().begin()) 
+		<< " (" << std::right << std::setw(2) << this->GetById(*((*p)->GetMothers().begin()))->role << std::left << ") ";
+    }
     else std::cout << std::setw(8) << "";
-    std::cout << std::setprecision(2) << std::setw(8) << (*p)->px << " ";
-    std::cout << std::setprecision(2) << std::setw(8) << (*p)->py << " ";
-    std::cout << std::setprecision(2) << std::setw(8) << (*p)->pz << " ";
-    std::cout << std::setprecision(2) << std::setw(8) << (*p)->E() << " ";
+    std::cout << std::right;
+    std::cout << std::setprecision(3) << std::setw(9) << (*p)->Px() << " ";
+    std::cout << std::setprecision(3) << std::setw(9) << (*p)->Py() << " ";
+    std::cout << std::setprecision(3) << std::setw(9) << (*p)->Pz() << " ";
+    std::cout << std::setprecision(3) << std::setw(9) << (*p)->E() << " ";
+    std::cout << std::left;
     std::cout << std::endl;
-    pxtot += (*p)->px;
-    pytot += (*p)->py;
-    pztot += (*p)->pz;
-    etot += (*p)->E();
+    if ((*p)->status>=0 and (*p)->status<=1) {
+      sign = ((*p)->role==1 or (*p)->role==2) ? -1 : 1;
+      pxtot += sign*(*p)->Px();
+      pytot += sign*(*p)->Py();
+      pztot += sign*(*p)->Pz();
+      etot += sign*(*p)->E();
+    }
   }
-  std::cout << std::setfill('-') << std::setw(97) << "" << std::endl
+  // We set a threshold to the computation precision
+  if (fabs(pxtot)<1.e-12) pxtot = 0.;
+  if (fabs(pytot)<1.e-12) pytot = 0.;
+  if (fabs(pztot)<1.e-12) pztot = 0.;
+  if (fabs(etot)<1.e-12) etot = 0.;
+  //
+  std::cout << std::setfill('-') << std::setw(103) << "" << std::endl
 	    << std::setfill(' ') << "Total:\t\t\t\t\t\t\t\t"
-	    << std::setprecision(2) << std::setw(8) << pxtot << " "
-	    << std::setprecision(2) << std::setw(8) << pytot << " "
-	    << std::setprecision(2) << std::setw(8) << pztot << " "
-	    << std::setprecision(2) << std::setw(8) << etot << " "
-	    << std::endl;
+	    << std::right
+	    << std::setprecision(2) << std::setw(9) << pxtot << " "
+	    << std::setprecision(2) << std::setw(9) << pytot << " "
+	    << std::setprecision(2) << std::setw(9) << pztot << " "
+	    << std::setprecision(2) << std::setw(9) << etot << " "
+	    << std::left << std::endl;
 }

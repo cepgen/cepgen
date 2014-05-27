@@ -12,6 +12,8 @@ extern "C"
 {
   /** @brief Get the particle's mass in GeV from the Pythia6 module */
   extern double pymass_(int&);
+  /** @brief Get the resonant particle's width in GeV from the Pythia6 module */
+  //extern double pywidt_(int&);
   /** @brief Launch the Pythia6 fragmentation */
   extern void pyexec_();
   /** @brief Set a parameter value to the Pythia6 module */
@@ -54,6 +56,7 @@ class Pythia6Hadroniser : public Hadroniser
   bool Hadronise(Event* ev_);
  private:
   inline static double pymass(int pdgid_) { return pymass_(pdgid_); };
+  //inline static double pywidt(int pdgid_) { return pywidt_(pdgid_); };
   inline static void pyexec() { pyexec_(); };
   inline static void pyckbd() { pyckbd_(); };
   inline static void pygive(const std::string &line_) { pygive_(line_.c_str(),line_.length()); };

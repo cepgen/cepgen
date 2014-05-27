@@ -12,7 +12,6 @@ CFLAGS     = -Wall -Wextra -fno-exceptions -Wpointer-arith \
 FFLAGS     = -w -g
 LDFLAGS    = -I$(INCLUDEDIR) -lgfortran -L$(PYTHIA8LIB) -I$(PYTHIA8SRC)include -lpythia8 -llhapdfdummy -Wl,-O2
 VPATH      = src:include:$(PYTHIA8SRC)/include
-#LD_LIBRARY_PATH = $(LD_LIBRARY_PATH):$(PYTHIA8LIB)
 SVNDEV = 'SVN_REV="$(shell svnversion -nq .)"'
 ############################################
 CPP_FILES  = $(wildcard src/*.cpp)
@@ -35,20 +34,17 @@ RLIBS = $(shell root-config --libs)
 RHEAD = $(shell root-config --incdir)
 ############################################
 
-#$(info $(OBJ_FILES))
+##$(info $(OBJ_FILES))
+
+.PHONY: all
 
 all: $(EXEC) #xsect
 
 $(EXEC): main.o $(LIB_FILES)
 	$(CC) -g -o $@ $^ $(LDFLAGS) -L$(PYTHIA8LIB) -lpythia8 -llhapdfdummy
 
-test: obj/test.oxx $(LIB_FILES)
-	$(CC) -g -o $@ $^ $(LDFLAGS) $(RLIBS)
-
-.PHONY: all
-
-obj/pythia8hadroniser.o: pythia8hadroniser.cpp pythia8hadroniser.h
-	$(CC) -c $(CFLAGS) -llhapdfdummy $< -o $@
+#obj/pythia8hadroniser.o: pythia8hadroniser.cpp pythia8hadroniser.h
+#	$(CC) -c $(CFLAGS) -llhapdfdummy $< -o $@
 
 obj/%.o: %.cpp %.h
 	$(CC) -c $(CFLAGS) $< -o $@
@@ -59,8 +55,11 @@ obj/%.fo: external/%.f
 obj/%.oxx: %.cxx
 	$(CC) -c $(CFLAGS) -I$(RHEAD) $(RFLAGS) $< -o $@
 
+plots/%.oxx: plots/%.cxx
+	$(CC) -c $(CFLAGS) -I$(RHEAD) $(RFLAGS) $< -o $@
+
 clean:
-	$(RM) obj/*.o $(EXEC)
+	$(RM) obj/*.o $(EXEC) test
 
 doc: $(CPP_FILES) $(HPP_FILES) Doxyfile
 	doxygen
@@ -74,3 +73,9 @@ probe: utils/probe.o $(LIB_FILES)
 
 intest: utils/inelasticparticle.o $(LIB_FILES)
 	$(CC) -o $@ $^ $(LDFLAGS) -I$(PYTHIA8SRC)/include/
+
+plotter: plots/main.oxx $(LIB_FILES)
+	$(CC) -o $@ $^ $(LDFLAGS) $(RLIBS)
+
+test: obj/test.oxx $(LIB_FILES)
+	$(CC) -g -o $@ $^ $(LDFLAGS) $(RLIBS)

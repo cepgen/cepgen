@@ -31,13 +31,16 @@ class Hadroniser
    * Gets the full list of hadrons (as Particle objects) produced by the hadronisation
    * @return A vector of Particle containing all the hadrons produced
    */
-  inline std::vector<Particle> GetHadrons() { return *(this->_hadrons); };
+  inline Particles GetHadrons() { return *(this->_hadrons); };
+  /**
+   * @brief Returns the human-readable name of the hadroniser used
+   */
   inline std::string GetName() { return this->_name; };
  protected:
   /** @brief Name of the hadroniser */
   std::string _name;
   /** @brief List of hadrons produced by this hadronisation process */
-  std::vector<Particle> *_hadrons;
+  Particles *_hadrons;
 };
 
 #endif

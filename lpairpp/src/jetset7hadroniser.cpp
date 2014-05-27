@@ -17,17 +17,17 @@ Jetset7Hadroniser::~Jetset7Hadroniser()
 bool
 Jetset7Hadroniser::Hadronise(Particle *part_)
 {
-  lujets_.p[0][0] = part_->px;
-  lujets_.p[1][0] = part_->py;
-  lujets_.p[2][0] = part_->pz;
+  lujets_.p[0][0] = part_->Px();
+  lujets_.p[1][0] = part_->Py();
+  lujets_.p[2][0] = part_->Pz();
   lujets_.p[3][0] = part_->E();
   lujets_.p[4][0] = part_->M();
 
   lujets_.k[0][0] = 1; // status
   lujets_.k[1][0] = 2; // particle id
-  lujets_.k[2][0] = 0; // mother
-  lujets_.k[3][0] = 0; // daughter 1
-  lujets_.k[4][0] = 0; // daughter 2
+  lujets_.k[2][0] = 0; // mother 1
+  lujets_.k[3][0] = 0; // mother 2
+  lujets_.k[4][0] = 0; // daughter
 
   this->luexec();
   std::cout << "[Jetset7Hadroniser::Hadronise] INFO" << std::endl;
@@ -37,15 +37,13 @@ Jetset7Hadroniser::Hadronise(Particle *part_)
 bool
 Jetset7Hadroniser::Hadronise(Event *ev_)
 {
-  int np;
+  int np, oldnpart;
   bool quarks_built;
   std::vector<int> rl;
   std::vector<int>::iterator r;
 
-  std::vector<Particle*> pr;
-  std::vector<Particle*>::iterator p;
-
-  std::vector<Particle*> daug;
+  ParticlesRef pr, daug;
+  ParticlesRef::iterator p;
 
   std::ostringstream oss;
   const int max_part_in_str = 3;
@@ -74,22 +72,30 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
   // Filling the common block to propagate to JETSET7
   lujets_.n = 0;
 
+  int status;
+
   for (r=rl.begin(), id1=0; r!=rl.end(); r++) {
     pr = ev_->GetByRole(*r);
+    //std::cout << "--> role " << *r << " contains " << pr.size() << " particles" << std::endl;
     for (p=pr.begin(), id2=0; p!=pr.end(); p++) {
       np = (*p)->id;
       
-      lujets_.p[0][np] = (float)(*p)->px;
-      lujets_.p[1][np] = (float)(*p)->py;
-      lujets_.p[2][np] = (float)(*p)->pz;
+      //(*p)->Dump();
+
+      lujets_.p[0][np] = (float)(*p)->Px();
+      lujets_.p[1][np] = (float)(*p)->Py();
+      lujets_.p[2][np] = (float)(*p)->Pz();
       lujets_.p[3][np] = (float)(*p)->E();
       lujets_.p[4][np] = (float)(*p)->M();
+
+      if ((*p)->status==-1 or (*p)->status==0) status = 21;
+      else status = (*p)->status;
       
-      lujets_.k[0][np] = (*p)->status;
+      lujets_.k[0][np] = status;
       lujets_.k[1][np] = (*p)->pdgId;
       
-      if ((*p)->GetMother()!=-1) lujets_.k[2][np] = (*p)->GetMother()+1; // mother
-      else lujets_.k[2][np] = 0; // mother
+      if ((*p)->GetMothers().size()>0) lujets_.k[2][np] = *((*p)->GetMothers().begin())+1; // mother
+      else lujets_.k[2][np] = 0; // no mother registered
       
       daug = ev_->GetDaughters(*p);
       if (daug.size()!=0) {
@@ -106,6 +112,9 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
       }
       
       if ((*p)->status==3) {
+	//FIXME workaround
+	lujets_.k[0][np] = 1;
+	//FIXME
 	jlrole[id1] = (*p)->role;
 	jlpsf[id1][id2] = (*p)->id+1;
 	njoin[id1]++;
@@ -117,6 +126,9 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
       id1++;
     }
   }
+
+  oldnpart = lujets_.n;
+  //this->lulist(2);
 
 #ifdef DEBUG
   std::cout << "[Jetset7Hadroniser::Hadronise] [DEBUG] Passed the string construction stage" << std::endl;
@@ -140,10 +152,15 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
 
   for (int p=0; p<lujets_.n; p++) {
 
+    //FIXME FIXME FIXME FIXME need to reimplement this first filter under this philosophy
     // First we filter the particles with status <= 0 :
     //  Status code = -1 : CLPAIR "internal" particles (not to be interacted with)
     //                 0 : Jetset7 empty lines
-    if (lujets_.k[0][p]<=0) continue;
+    //if (lujets_.k[0][p]<=0) continue;
+    //FIXME FIXME FIXME FIXME
+
+    // We filter the first particles already present in the event
+    if (p<oldnpart) continue;
 
     Particle pa;
     pa.id = p;
@@ -170,6 +187,8 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
     ev_->AddParticle(&pa);
   }
 
+  ev_->Dump();
+
   return true;
 }
 
@@ -187,13 +206,19 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
   std::cout << "[GamGam::PrepareHadronisation] [DEBUG] Hadronisation preparation called !" << std::endl;
 #endif
 
-  Particles pp;
-  Particles::iterator p;
+  ParticlesRef pp;
+  ParticlesRef::iterator p;
   
+  //ev_->Dump();
+
   pp = ev_->GetParticles();
   for (p=pp.begin(); p!=pp.end(); p++) {
     if ((*p)->status==-2) { // One proton to be fragmented
-      ranudq = (double)rand()/RAND_MAX;
+
+      //(*p)->Dump();
+      //std::cout << "m2 = " << (*p)->M2() << std::endl;
+      
+      ranudq = drand();
       if (ranudq<1./9.) {
         singlet_id = 1;
         doublet_id = 2203;
@@ -210,8 +235,8 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
       ulmq = ulmass(singlet_id);
 
       // Choose random direction in MX frame
-      ranmxp = 2.*pi*(double)rand()/RAND_MAX;
-      ranmxt = acos(2.*(double)rand()/RAND_MAX-1.);
+      ranmxp = 2.*pi*drand();       // phi angle
+      ranmxt = acos(2.*drand()-1.); // theta angle
 
       // Compute momentum of decay particles from MX
       pmxp = std::sqrt(std::pow( (*p)->M2() - std::pow(ulmdq, 2) + std::pow(ulmq, 2), 2) / (4.*(*p)->M2()) - std::pow(ulmq, 2));
@@ -221,10 +246,10 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
 	}*/
 
       // Build 4-vectors and boost decay particles
-      pmxda[0] = sin(ranmxt)*cos(ranmxp)*pmxp;
-      pmxda[1] = sin(ranmxt)*sin(ranmxp)*pmxp;
-      pmxda[2] = cos(ranmxt)*pmxp;
-      pmxda[3] = sqrt(pow(pmxp, 2)+pow(ulmdq, 2));
+      pmxda[0] = pmxp*sin(ranmxt)*cos(ranmxp);
+      pmxda[1] = pmxp*sin(ranmxt)*sin(ranmxp);
+      pmxda[2] = pmxp*cos(ranmxt);
+      pmxda[3] = std::sqrt(std::pow(pmxp, 2)+std::pow(ulmq, 2));
 
       Lorenb((*p)->M(), (*p)->P4(), pmxda, partpb);
 
@@ -244,13 +269,15 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
         std::cerr << "[GamGam::PrepareHadronisation] ERROR while setting the 4-momentum of singlet" << std::endl;
 	//#endif
       }
-
+      //std::cout << "singlet, mass = " << singlet.M() << std::endl;
+      //singlet.Dump();
+      singlet.M(-1); //FIXME
       ev_->AddParticle(&singlet);
 
       pmxda[0] = -pmxda[0];
       pmxda[1] = -pmxda[1];
       pmxda[2] = -pmxda[2];
-      pmxda[3] = sqrt(pow(pmxp, 2)+pow(ulmq, 2));
+      pmxda[3] = std::sqrt(std::pow(pmxp, 2)+std::pow(ulmdq, 2));
 
       Lorenb((*p)->M(), (*p)->P4(), pmxda, partpb);
       
@@ -262,6 +289,8 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
         std::cout << "[GamGam::PrepareHadronisation] ERROR while setting the 4-momentum of doublet" << std::endl;
 	//#endif
       }
+      //std::cout << "doublet, mass = " << doublet.M() << std::endl;
+      doublet.M(-1); //FIXME
       ev_->AddParticle(&doublet);    
     }
   }

@@ -7,6 +7,7 @@
 #include <ctime>
 
 #include "vegas.h"
+#include "physics.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +34,7 @@
  * while scanning the various parameters (point \f$\textbf{x}\f$ in the
  * DIM-dimensional phase space).
  *
- * The phase space is constrained using the InputParameters object given as an
+ * The phase space is constrained using the Parameters object given as an
  * argument to the constructor, and the differential cross-sections for each
  * value of the array \f$\textbf{x}\f$ are computed in the f-function defined
  * outside (but populated inside) this object.
@@ -85,6 +86,9 @@ class MCGen {
    * @return The Parameter object embedded in this class
    */
   void AnalyzePhaseSpace(const std::string);
+  /**
+   * @brief Physical Parameters used in the events generation and cross-section computation
+   */
   Parameters* parameters;
   /** @brief Last event generated in this run */
   Event *last_event;

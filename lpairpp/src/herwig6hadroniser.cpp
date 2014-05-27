@@ -17,8 +17,8 @@ bool
 Herwig6Hadroniser::Hadronise(Event *ev_)
 {
   int i;
-  Particles pp;
-  Particles::iterator p;
+  ParticlesRef pp;
+  ParticlesRef::iterator p;
 
   std::cout << "[Herwig6Hadroniser::Hadronise]" << std::endl;
   ev_->Dump();
@@ -29,9 +29,9 @@ Herwig6Hadroniser::Hadronise(Event *ev_)
   
     hepevt_.idhep[i] = (*p)->pdgId;
     hepevt_.isthep[i] = (*p)->status;
-    hepevt_.phep[i][0] = (*p)->px;
-    hepevt_.phep[i][1] = (*p)->py;
-    hepevt_.phep[i][2] = (*p)->pz;
+    hepevt_.phep[i][0] = (*p)->Px();
+    hepevt_.phep[i][1] = (*p)->Py();
+    hepevt_.phep[i][2] = (*p)->Pz();
     hepevt_.phep[i][3] = (*p)->E();
     hepevt_.phep[i][4] = (*p)->M();
     for (int j=0; j<4; j++) {

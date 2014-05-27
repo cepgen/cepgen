@@ -3,7 +3,6 @@
 GamGamLL::GamGamLL(int nOpt_) :
   _ep1(-1), _w1(-1), _ep2(-1), _w2(-1.),
   _w3(-1.), _w4(-1.), _w5(-1.), _w6(-1.), _w7(-1.),
-  _sqs(-1.),
   _p12(0.), _p13(0.), _p14(0.), _p15(0.), _p23(0.), _p24(0.), _p25(0.), _p34(0.), _p35(0.), _p45(0.),
   _p1k2(0.), _p2k1(0.),
   setp1(false), setp2(false), setp3(false), setp5(false), setll(false),
@@ -14,11 +13,8 @@ GamGamLL::GamGamLL(int nOpt_) :
   _name = "gamma,gamma->l+,l-";
 }
 
-GamGamLL::~GamGamLL()
-{}
-
 bool
-GamGamLL::SetOutgoingParticles(int part_, int pdgId_)
+GamGamLL::SetOutgoingParticles(int part_, int pdgId_, int mothRole_)
 {
   double mass_, outm, dm;
 
@@ -100,13 +96,21 @@ bool
 GamGamLL::SetIncomingParticles(Particle ip1_, Particle ip2_)
 {
   Particle *p1, *p2;
+  double k, *p31, *p32;
   int role1, role2;
 
-  role1 = (ip1_.pz>0.) ? 1:2;
-  role2 = (ip2_.pz>0.) ? 1:2;
+  role1 = (ip1_.Pz()>0.) ? 1:2;
+  role2 = (ip2_.Pz()>0.) ? 1:2;
   if (role1==role2) return false;
   ip1_.role = role1;
   ip2_.role = role2;
+
+  k = 0.;
+  p31 = ip1_.P4();
+  p32 = ip2_.P4();
+  for (int i=0; i<3; i++) k += p31[i]*p32[i];
+  _s = ip1_.M2()+ip2_.M2()+2.*(ip1_.E()*ip2_.E()-k);
+  _ecm = sqrt(_s);
 
   this->_ev->AddParticle(&ip1_);
   this->_ev->AddParticle(&ip2_);
@@ -114,9 +118,6 @@ GamGamLL::SetIncomingParticles(Particle ip1_, Particle ip2_)
   p1 = this->_ev->GetOneByRole(1);
   p2 = this->_ev->GetOneByRole(2);
 
-  _p3_p1[0] = p1->px;
-  _p3_p1[1] = p1->py;
-  _p3_p1[2] = p1->pz;
   _ep1 = p1->E();
   _mp1 = p1->M();
   _w1 = p1->M2();
@@ -124,9 +125,6 @@ GamGamLL::SetIncomingParticles(Particle ip1_, Particle ip2_)
   _pdg1 = p1->pdgId;
   setp1 = true;
 
-  _p3_p2[0] = p2->px;
-  _p3_p2[1] = p2->py;
-  _p3_p2[2] = p2->pz;
   _ep2 = p2->E();
   _mp2 = p2->M();
   _w2 = p2->M2();
@@ -134,9 +132,9 @@ GamGamLL::SetIncomingParticles(Particle ip1_, Particle ip2_)
   _pdg2 = p2->pdgId;
 
   _etot = p1->E()+p2->E();
-  _ptot = std::sqrt(std::pow(p1->px+p2->px, 2)
-                   +std::pow(p1->py+p2->py, 2)
-                   +std::pow(p1->pz+p2->pz, 2));
+  _ptot = std::sqrt(std::pow(p1->Px()+p2->Px(), 2)
+                   +std::pow(p1->Py()+p2->Py(), 2)
+                   +std::pow(p1->Pz()+p2->Pz(), 2));
 
   _setin = p1->Valid() and p2->Valid();
   _setkin = _setin && _setout;
@@ -212,8 +210,9 @@ GamGamLL::Pickin()
   }
   _sl1 = std::sqrt(rl1);
 
+  _s2 = ds2 = 0.;
   if (_nOpt==0) {
-    smax = _s+_w3-2.*_mp3*_sqs;
+    smax = _s+_w3-2.*_mp3*_ecm;
     Map(x(2), sig1, smax, &_s2, &ds2);
     sig1 = _s2; //FIXME!!!!!!!!!!!!!!!!!!!!
   }
@@ -526,7 +525,7 @@ GamGamLL::Orient()
     //std::cerr << "[GamGamLL::Orient] [FATAL] Pickin() failed : (bool)" << pck << ", _dj = " << _dj << std::endl;
     return false;
   }
-  re = 1./(2.*_sqs);
+  re = 1./(2.*_ecm);
   _ep1 = re*(_s+_w12);
   _ep2 = re*(_s-_w12);
 
@@ -711,39 +710,17 @@ GamGamLL::Orient()
   return true;
 }
 
-void
-GamGamLL::ComputeCMenergy()
-{
-  double k;
-
-  k = 0.;
-  for (int i=0; i<3; i++) {
-    k += _p3_p1[i]*_p3_p2[i];
-  }
-  _s = std::pow(_mp1,2)+std::pow(_mp2,2)+2.*(_ep1*_ep2-k);
-  _sqs = sqrt(_s);
-
-#ifdef DEBUG
-  std::cout << "[GamGamLL::ComputeCMenergy] [DEBUG] Centre of mass energy : " << _sqs << " GeV" << std::endl;
-#endif
-
-}
-
 double
 GamGamLL::ComputeMX(double x_, double outmass_, double *dw_)
 {
   double wx2min, wx2max;
   double mx2, dmx2;
 
-  if (_sqs<0.) {
-    this->ComputeCMenergy();
-  }
-  
   /*wx2min = std::pow(std::max(GetMassFromPDGId(2212)+GetMassFromPDGId(211), _cuts.mxmin), 2);
-    wx2max = std::pow(std::min(_sqs-_mp2-2.*outmass_, _cuts.mxmax), 2);*/
+    wx2max = std::pow(std::min(_ecm-_mp2-2.*outmass_, _cuts.mxmax), 2);*/
   
   wx2min = std::pow(GetMassFromPDGId(2212)+GetMassFromPDGId(211), 2);
-  wx2max = std::pow(_sqs-_mp2-2.*outmass_, 2);
+  wx2max = std::pow(_ecm-_mp2-2.*outmass_, 2);
   Map(x_, wx2min, wx2max, &mx2, &dmx2);
 
 #ifdef DEBUG
@@ -795,6 +772,9 @@ GamGamLL::ComputeWeight()
   double cott6, cott7, cost6, cost7;
   bool lcut, lmu1, lmu2;
 
+  // COMMON /QVEC/   // 0 = E, 1-3 = p
+  double qve[4];
+
   weight = 0.;
 
   if (!_setout) {
@@ -802,7 +782,7 @@ GamGamLL::ComputeWeight()
 	      << "  Output state not set !" << std::endl;
     return 0.;
   }
-  ComputeCMenergy();
+
   if (_cuts.wmax<0) _cuts.wmax = _s;
 
   // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
@@ -810,7 +790,7 @@ GamGamLL::ComputeWeight()
   if (fabs(wmin)<fabs(_cuts.wmin)) wmin = _cuts.wmin;
 
   // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or _wmax if specified)
-  wmax = std::pow(_sqs-_mp3-_mp5,2);
+  wmax = std::pow(_ecm-_mp3-_mp5,2);
   if (fabs(wmax)>fabs(_cuts.wmax)) wmax = _cuts.wmax;
 
 #ifdef DEBUG
@@ -944,11 +924,11 @@ GamGamLL::ComputeWeight()
   p6x = _ct4*pc6x+_st4*h2;
   p6z = _ct4*h2-_st4*pc6x;
   
-  _qve[0] = _pc4*qcz/_mc4;
-  _qve[2] = 2.*p6y;
+  qve[0] = _pc4*qcz/_mc4;
+  qve[2] = 2.*p6y;
   hq = _ec4*qcz/_mc4;
-  _qve[1] = _ct4*qcx+_st4*hq;
-  _qve[3] = _ct4*hq-_st4*qcx;
+  qve[1] = _ct4*qcx+_st4*hq;
+  qve[3] = _ct4*hq-_st4*qcx;
 
   _pl6 = std::sqrt(std::pow(_el6, 2)-_w6); // first outgoing lepton's |p|
 
@@ -996,34 +976,34 @@ GamGamLL::ComputeWeight()
 
   _bb = _t1*_t2+(_w4*std::pow(_stcm6, 2)+4.*_w6*std::pow(_ctcm6, 2))*std::pow(pg, 2);
   // Q0=QVE[0], QX=QVE[1], QY=QVE[2], QZ=QVE[3]
-  c1 = (_qve[1]*_sp3-_qve[2]*_cp3)*_p_p3;
-  c2 = (_qve[3]*_ep1-_qve[0]*_p)*_p_p3;
+  c1 = (qve[1]*_sp3-qve[2]*_cp3)*_p_p3;
+  c2 = (qve[3]*_ep1-qve[0]*_p)*_p_p3;
   c3 = (_w31*std::pow(_ep1, 2)+2.*_w1*_de3*_ep1-_w1*std::pow(_de3, 2)+std::pow(_p_p3, 2)*std::pow(_ep1, 2))/(_ep3*_p+_pp3*_ct3*_ep1);
   
-  b1 = (_qve[1]*_sp5-_qve[2]*_cp5)*_p_p5; //OK
-  b2 = (_qve[3]*_ep2+_qve[0]*_p)*_p_p5; //OK
+  b1 = (qve[1]*_sp5-qve[2]*_cp5)*_p_p5; //OK
+  b2 = (qve[3]*_ep2+qve[0]*_p)*_p_p5; //OK
   b3 = (_w52*std::pow(_ep2, 2)+2.*_w2*_de5*_ep2-_w2*std::pow(_de5, 2)+std::pow(_p_p5*_ep2, 2))/(_ep2*_pp5*_ct5-_ep5*_p); //OK
   
-  r12 = c2*_sp3+_qve[2]*c3;
-  r13 = -c2*_cp3-_qve[1]*c3;
+  r12 = c2*_sp3+qve[2]*c3;
+  r13 = -c2*_cp3-qve[1]*c3;
 
 #ifdef DEBUG
   std::cout << "[GamGamLL::ComputeWeight] [DEBUG]" << std::endl;
-  for (unsigned int i=0; i<sizeof(_qve)/sizeof(double); i++) {
-    std::cout << "  _qve[" << i << "] = " << _qve[i] << std::endl;
+  for (unsigned int i=0; i<sizeof(qve)/sizeof(double); i++) {
+    std::cout << "  qve[" << i << "] = " << qve[i] << std::endl;
   }
 #endif
 
-  r22 = b2*_sp5+_qve[2]*b3;
-  r23 = -b2*_cp5-_qve[1]*b3;
+  r22 = b2*_sp5+qve[2]*b3;
+  r23 = -b2*_cp5-qve[1]*b3;
   
   _epsi = _p12*c1*b1+r12*r22+r13*r23;
 
   _g5 = _w1*std::pow(c1, 2)+std::pow(r12, 2)+std::pow(r13, 2);
   _g6 = _w2*std::pow(b1, 2)+std::pow(r22, 2)+std::pow(r23, 2);
 
-  _a5 = -(_qve[1]*_cp3+_qve[2]*_sp3)*_p_p3*_p1k2-(_ep1*_qve[0]-_p*_qve[3])*(_cp3*_cp5+_sp3*_sp5)*_p_p3*_p_p5+(_de5*_qve[3]+_qve[0]*(_p+_pp5*_ct5))*c3; //OK
-  _a6 = -(_qve[1]*_cp5+_qve[2]*_sp5)*_p_p5*_p2k1-(_ep2*_qve[0]+_p*_qve[3])*(_cp3*_cp5+_sp3*_sp5)*_p_p3*_p_p5+(_de3*_qve[3]-_qve[0]*(_p-_pp3*_ct3))*b3; //OK
+  _a5 = -(qve[1]*_cp3+qve[2]*_sp3)*_p_p3*_p1k2-(_ep1*qve[0]-_p*qve[3])*(_cp3*_cp5+_sp3*_sp5)*_p_p3*_p_p5+(_de5*qve[3]+qve[0]*(_p+_pp5*_ct5))*c3; //OK
+  _a6 = -(qve[1]*_cp5+qve[2]*_sp5)*_p_p5*_p2k1-(_ep2*qve[0]+_p*qve[3])*(_cp3*_cp5+_sp3*_sp5)*_p_p3*_p_p5+(_de3*qve[3]-qve[0]*(_p-_pp3*_ct3))*b3; //OK
 
   ////////////////////////////////////////////////////////////////
   // END of GAMGAMLL subroutine in the FORTRAN version
@@ -1033,8 +1013,8 @@ GamGamLL::ComputeWeight()
   // INFO from f.f
   ////////////////////////////////////////////////////////////////
 
-  _gamma = _etot/_sqs;
-  _betgam = _ptot/_sqs;
+  _gamma = _etot/_ecm;
+  _betgam = _ptot/_ecm;
 
   if (_cuts.mode==0) {
 #ifdef DEBUG
@@ -1055,18 +1035,19 @@ GamGamLL::ComputeWeight()
   cott7 = pz7/_pt_l7;
 
   // Cuts on outgoing leptons' kinematics
+
   lmu1 = cott6>=_cotth1
-      && cott6<=_cotth2
-      && (_pt_l6>=_cuts.ptmin or _cuts.ptmin<=0.)
-      && (_pt_l6<=_cuts.ptmax or _cuts.ptmax< 0.)
-      && (_e6lab>=_cuts.emin  or _cuts.emin <=0.)
-      && (_e6lab<=_cuts.emax  or _cuts.emax < 0.);
+     and cott6<=_cotth2
+     and (_pt_l6>=_cuts.ptmin or _cuts.ptmin<=0.)
+     and (_pt_l6<=_cuts.ptmax or _cuts.ptmax<=0.)
+     and (_e6lab>=_cuts.emin  or _cuts.emin <=0.)
+     and (_e6lab<=_cuts.emax  or _cuts.emax <=0.);
   lmu2 = cott7>=_cotth1
-      && cott7<=_cotth2
-      && (_pt_l7>=_cuts.ptmin or _cuts.ptmin<=0.)
-      && (_pt_l7<=_cuts.ptmax or _cuts.ptmax< 0.)
-      && (_e7lab>=_cuts.emin  or _cuts.emin <=0.)
-      && (_e7lab<=_cuts.emax  or _cuts.emax < 0.);
+     and cott7<=_cotth2
+     and (_pt_l7>=_cuts.ptmin or _cuts.ptmin<=0.)
+     and (_pt_l7<=_cuts.ptmax or _cuts.ptmax<=0.)
+     and (_e7lab>=_cuts.emin  or _cuts.emin <=0.)
+     and (_e7lab<=_cuts.emax  or _cuts.emax <=0.);
 
   switch (_cuts.mode) {
     case 0:
@@ -1076,8 +1057,8 @@ GamGamLL::ComputeWeight()
     case 1: // Vermaseren's hypothetical detector cuts
       cost6 = pz6/std::sqrt(std::pow(pz6,2)+std::pow(_pt_l6,2));
       cost7 = pz7/std::sqrt(std::pow(pz7,2)+std::pow(_pt_l7,2));
-      lcut = ((fabs(cost6)<=0.75 and _pt_l6>=1.) or (fabs(cost6)<=0.95 and fabs(cost6)>0.75 and fabs(_p3_l6[2])>1.)) and
-             ((fabs(cost7)<=0.75 and _pt_l7>=1.) or (fabs(cost7)<=0.95 and fabs(cost7)>0.75 and fabs(_p3_l7[2])>1.));
+      lcut = ((fabs(cost6)<=0.75 and _pt_l6>=1.) or (fabs(cost6)<=0.95 and fabs(cost6)>0.75 and fabs(pz6)>1.)) and
+             ((fabs(cost7)<=0.75 and _pt_l7>=1.) or (fabs(cost7)<=0.95 and fabs(cost7)>0.75 and fabs(pz7)>1.));
       break;
     case 2:
       lcut = lmu1 and lmu2;
@@ -1131,6 +1112,7 @@ GamGamLL::ComputeWeight()
     weight = sconst*_dj*this->PeriPP(intgp, intge)*std::pow(_dw31*_dw52,2);
     break;
   }
+
   return weight;
 }
 
@@ -1142,6 +1124,8 @@ GamGamLL::FillKinematics(bool symmetrise_)
 #endif
   double ranphi, cp, sp;
   int rany, ransign, ranz, role;
+  double plab_ip1[4], plab_ip2[4], plab_op1[4], plab_op2[4];
+  double plab_ol1[4], plab_ol2[4], plab_ph1[4], plab_ph2[4];
   
   // Needed to parametrise a random rotation around z-axis
   rany = ((double)rand()>=.5*RAND_MAX) ? 1 : -1;
@@ -1158,57 +1142,61 @@ GamGamLL::FillKinematics(bool symmetrise_)
   
   // First incoming proton
   Particle ip1(1, _pdg1);
-  _plab_ip1[0] = 0.;
-  _plab_ip1[1] = 0.;
-  _plab_ip1[2] = _gamma*_p  +_betgam*_ep1;
-  _plab_ip1[3] = _gamma*_ep1+_betgam*_p;
-  if (!ip1.P(0., 0., _plab_ip1[2], _plab_ip1[3])) {
+  plab_ip1[0] = 0.;
+  plab_ip1[1] = 0.;
+  plab_ip1[2] = _gamma*_p  +_betgam*_ep1;
+  plab_ip1[3] = _gamma*_ep1+_betgam*_p;
+  if (!ip1.P(0., 0., plab_ip1[2], plab_ip1[3])) {
     std::cerr << "Invalid incoming proton 1" << std::endl;
   }
   this->_ev->AddParticle(&ip1, true);
   
   // Second incoming proton
   Particle ip2(2, _pdg2);
-  _plab_ip2[0] = 0.;
-  _plab_ip2[1] = 0.;
-  _plab_ip2[2] = -_gamma*_p  +_betgam*_ep2;
-  _plab_ip2[3] =  _gamma*_ep2-_betgam*_p;
-  if (!ip2.P(0., 0., _plab_ip2[2], _plab_ip2[3])) {
+  plab_ip2[0] = 0.;
+  plab_ip2[1] = 0.;
+  plab_ip2[2] = -_gamma*_p  +_betgam*_ep2;
+  plab_ip2[3] =  _gamma*_ep2-_betgam*_p;
+  if (!ip2.P(0., 0., plab_ip2[2], plab_ip2[3])) {
     std::cerr << "Invalid incoming proton 2" << std::endl;
   }
   this->_ev->AddParticle(&ip2, true);
   
   // First outgoing proton
   Particle op1(3, _pdg3);
-  _plab_op1[0] = _pp3*_st3*_cp3;
-  _plab_op1[1] = _pp3*_st3*_sp3;
-  _plab_op1[2] = _gamma*_pp3*_ct3+_betgam*_ep3;
-  _plab_op1[3] = _gamma*_ep3     +_betgam*_pp3*_ct3;
-  if (!op1.P( _plab_op1[0]*cp+rany*_plab_op1[1]*sp,
-                -_plab_op1[0]*sp+rany*_plab_op1[1]*cp,
-                 _plab_op1[2],
-                 _plab_op1[3])) {
+  plab_op1[0] = _pp3*_st3*_cp3;
+  plab_op1[1] = _pp3*_st3*_sp3;
+  plab_op1[2] = _gamma*_pp3*_ct3+_betgam*_ep3;
+  plab_op1[3] = _gamma*_ep3     +_betgam*_pp3*_ct3;
+  if (!op1.P( plab_op1[0]*cp+rany*plab_op1[1]*sp,
+             -plab_op1[0]*sp+rany*plab_op1[1]*cp,
+              plab_op1[2],
+              plab_op1[3])) {
     std::cerr << "Invalid outgoing proton 1" << std::endl;
   }
   if (_cuts.kinematics>1) {
     op1.status = -2;
+    //std::cout << "M before : " << op1.M() << std::endl;
     op1.M(_mp3);
+    //std::cout << "M as mp3 : " << _mp3 << std::endl;
+    //std::cout << "M  after : " << op1.M() << std::endl;
   }
   else {
-    op1.status = -1;
+    op1.status = 1;
+    op1.M(-1); //FIXME
   }
   this->_ev->AddParticle(&op1, true);
   
   // Second outgoing proton
   Particle op2(5, _pdg5);
-  _plab_op2[0] = _pp5*_st5*_cp5;
-  _plab_op2[1] = _pp5*_st5*_sp5;
-  _plab_op2[2] = _gamma*_pp5*_ct5+_betgam*_ep5;
-  _plab_op2[3] = _gamma*_ep5     +_betgam*_pp5*_ct5;
-  if (!op2.P( _plab_op2[0]*cp+rany*_plab_op2[1]*sp,
-                -_plab_op2[0]*sp+rany*_plab_op2[1]*cp,
-                 _plab_op2[2],
-                 _plab_op2[3])) {
+  plab_op2[0] = _pp5*_st5*_cp5;
+  plab_op2[1] = _pp5*_st5*_sp5;
+  plab_op2[2] = _gamma*_pp5*_ct5+_betgam*_ep5;
+  plab_op2[3] = _gamma*_ep5     +_betgam*_pp5*_ct5;
+  if (!op2.P( plab_op2[0]*cp+rany*plab_op2[1]*sp,
+             -plab_op2[0]*sp+rany*plab_op2[1]*cp,
+              plab_op2[2],
+              plab_op2[3])) {
     std::cerr << "Invalid outgoing proton 2" << std::endl;
   }
   if (_cuts.kinematics==3) {
@@ -1216,21 +1204,25 @@ GamGamLL::FillKinematics(bool symmetrise_)
     op2.M(_mp5);
   }
   else {
-    op2.status = -1;
+    op2.status = 1;
+    /*std::cout << "----> " << _pp5*_pp5-_ep5*_ep5 << ", " << _gamma << ", " << _betgam << std::endl;
+    std::cout << "second proton left undecayed : m = " << op2.M() << std::endl;
+    op2.Dump();*/
+    op2.M(-1); //FIXME
   }
   this->_ev->AddParticle(&op2, true);
 
   // First incoming photon
   // Equivalent in LPAIR : PLAB(x, 3)
   Particle ph1(41, 22);
-  _plab_ph1[0] = _plab_ip1[0]-_plab_op1[0];
-  _plab_ph1[1] = _plab_ip1[1]-_plab_op1[1];
-  _plab_ph1[2] = _plab_ip1[2]-_plab_op1[2];
-  _plab_ph1[3] = _plab_ip1[3]-_plab_op1[3];
-  if (!ph1.P( _plab_ph1[0]*cp+rany*_plab_ph1[1]*sp,
-                -_plab_ph1[0]*sp+rany*_plab_ph1[1]*cp,
-		 _plab_ph1[2],
-		 _plab_ph1[3])) {
+  plab_ph1[0] = plab_ip1[0]-plab_op1[0];
+  plab_ph1[1] = plab_ip1[1]-plab_op1[1];
+  plab_ph1[2] = plab_ip1[2]-plab_op1[2];
+  plab_ph1[3] = plab_ip1[3]-plab_op1[3];
+  if (!ph1.P( plab_ph1[0]*cp+rany*plab_ph1[1]*sp,
+             -plab_ph1[0]*sp+rany*plab_ph1[1]*cp,
+	      plab_ph1[2],
+	      plab_ph1[3])) {
     //std::cerr << "Invalid photon 1" << std::endl;
   }
   ph1.charge = 0;
@@ -1240,14 +1232,14 @@ GamGamLL::FillKinematics(bool symmetrise_)
   // Second incoming photon
   // Equivalent in LPAIR : PLAB(x, 4)
   Particle ph2(42, 22);
-  _plab_ph2[0] = _plab_ip2[0]-_plab_op2[0];
-  _plab_ph2[1] = _plab_ip2[1]-_plab_op2[1];
-  _plab_ph2[2] = _plab_ip2[2]-_plab_op2[2];
-  _plab_ph2[3] = _plab_ip2[3]-_plab_op2[3];
-  if (!ph2.P( _plab_ph2[0]*cp+rany*_plab_ph2[1]*sp,
-                -_plab_ph2[0]*sp+rany*_plab_ph2[1]*cp,
-                 _plab_ph2[2],
-                 _plab_ph2[3])) {
+  plab_ph2[0] = plab_ip2[0]-plab_op2[0];
+  plab_ph2[1] = plab_ip2[1]-plab_op2[1];
+  plab_ph2[2] = plab_ip2[2]-plab_op2[2];
+  plab_ph2[3] = plab_ip2[3]-plab_op2[3];
+  if (!ph2.P( plab_ph2[0]*cp+rany*plab_ph2[1]*sp,
+             -plab_ph2[0]*sp+rany*plab_ph2[1]*cp,
+              plab_ph2[2],
+              plab_ph2[3])) {
     //std::cerr << "Invalid photon 2" << std::endl;
   }
   ph2.charge = 0;
@@ -1255,40 +1247,44 @@ GamGamLL::FillKinematics(bool symmetrise_)
   this->_ev->AddParticle(&ph2);
 
   // Central (two-photon) system
-  Particle cs(4);
+  Particle cs(4, 22);
   cs.status = -1;
   this->_ev->AddParticle(&cs);
   
   // First outgoing lepton
   role = (ransign<0) ? 6 : 7;
   Particle ol1(role, ransign*abs(_pdg6));
-  _plab_ol1[0] = _pl6*_st6*_cp6;
-  _plab_ol1[1] = _pl6*_st6*_sp6;
-  _plab_ol1[2] = _gamma*_pl6*_ct6+_betgam*_el6;
-  _plab_ol1[3] = _gamma*_el6     +_betgam*_pl6*_ct6;
-  if (!ol1.P( _plab_ol1[0]*cp+rany*_plab_ol1[1]*sp,
-                -_plab_ol1[0]*sp+rany*_plab_ol1[1]*cp,
-                 _plab_ol1[2],
-                 _plab_ol1[3])) {
+  plab_ol1[0] = _pl6*_st6*_cp6;
+  plab_ol1[1] = _pl6*_st6*_sp6;
+  plab_ol1[2] = _gamma*_pl6*_ct6+_betgam*_el6;
+  plab_ol1[3] = _gamma*_el6     +_betgam*_pl6*_ct6;
+  if (!ol1.P( plab_ol1[0]*cp+rany*plab_ol1[1]*sp,
+             -plab_ol1[0]*sp+rany*plab_ol1[1]*cp,
+              plab_ol1[2],
+              plab_ol1[3])) {
     std::cerr << "Invalid outgoing lepton 1" << std::endl;
   }
   ol1.charge = ransign;
+  ol1.status = 1;
+  ol1.M(-1); //FIXME
   this->_ev->AddParticle(&ol1);
   
   // Second outgoing lepton
   role = (ransign<0) ? 7 : 6;
   Particle ol2(role, -ransign*abs(_pdg7));
-  _plab_ol2[0] = _pl7*_st7*_cp7;
-  _plab_ol2[1] = _pl7*_st7*_sp7;
-  _plab_ol2[2] = _gamma*_pl7*_ct7+_betgam*_el7;
-  _plab_ol2[3] = _gamma*_el7     +_betgam*_pl7*_ct7;
-  if (!ol2.P( _plab_ol2[0]*cp+rany*_plab_ol2[1]*sp,
-                -_plab_ol2[0]*sp+rany*_plab_ol2[1]*cp,
-		 _plab_ol2[2],
-		 _plab_ol2[3])) {
+  plab_ol2[0] = _pl7*_st7*_cp7;
+  plab_ol2[1] = _pl7*_st7*_sp7;
+  plab_ol2[2] = _gamma*_pl7*_ct7+_betgam*_el7;
+  plab_ol2[3] = _gamma*_el7     +_betgam*_pl7*_ct7;
+  if (!ol2.P( plab_ol2[0]*cp+rany*plab_ol2[1]*sp,
+             -plab_ol2[0]*sp+rany*plab_ol2[1]*cp,
+	      plab_ol2[2],
+              plab_ol2[3])) {
     std::cerr << "Invalid outgoing lepton 2" << std::endl;
   }
   ol2.charge = -ransign;
+  ol2.status = 1;
+  ol2.M(-1); //FIXME
   this->_ev->AddParticle(&ol2);
 
   // Relations between particles
@@ -1297,7 +1293,8 @@ GamGamLL::FillKinematics(bool symmetrise_)
   this->_ev->GetOneByRole(5)->SetMother(this->_ev->GetOneByRole(2));
   this->_ev->GetOneByRole(41)->SetMother(this->_ev->GetOneByRole(1));
   this->_ev->GetOneByRole(42)->SetMother(this->_ev->GetOneByRole(2));
-  this->_ev->GetOneByRole(4)->SetMother(this->_ev->GetOneByRole(41)); //FIXME!!!!
+  this->_ev->GetOneByRole(4)->SetMother(this->_ev->GetOneByRole(41));
+  this->_ev->GetOneByRole(4)->SetMother(this->_ev->GetOneByRole(42));
   this->_ev->GetOneByRole(6)->SetMother(this->_ev->GetOneByRole(4));
   this->_ev->GetOneByRole(7)->SetMother(this->_ev->GetOneByRole(4));
 
@@ -1305,8 +1302,8 @@ GamGamLL::FillKinematics(bool symmetrise_)
 
 #ifdef DEBUG
   gmux = -_t2/(_ep1*_eg2-_pp1*_p3_g2[2])/2.;
-  gmuy = (_ep1*_plab_ph2[3]-_pp1*_plab_ph2[2])/(_ep2*_plab_ph2[3]+_pp2*_plab_ph2[2]);
-  gmuw = std::pow(_ep1+_plab_ph2[3], 2)-std::pow(_pp1+_plab_ph2[2], 2);
+  gmuy = (_ep1*plab_ph2[3]-_pp1*plab_ph2[2])/(_ep2*plab_ph2[3]+_pp2*plab_ph2[2]);
+  gmuw = std::pow(_ep1+plab_ph2[3], 2)-std::pow(_pp1+plab_ph2[2], 2);
   if (gmuw>=0.) {
     gmuw = std::sqrt(gmuw);
   }
@@ -1373,7 +1370,7 @@ GamGamLL::PeriPP(int nup_, int ndown_)
   case 2: // DESY
     //case 1: // CDF
     xt = std::pow(1.-_t1/.71, 2);
-    _tau = _t1/(4*_w1);
+    _tau = _t1/(4.*_w1);
     _u1 = std::pow(2.79/xt, 2);
     _u2 = (1./std::pow(xt, 2)-_u1*_tau)/(1.-_tau);
     break;

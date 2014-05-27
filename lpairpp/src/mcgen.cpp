@@ -149,11 +149,6 @@ Event*
 MCGen::GenerateOneEvent()
 {
   bool good = false;
-  float time;
-  std::clock_t c_start, c_stop;
-
-  c_start = std::clock();
-
   if (!this->_xsec_comp) {
     double xsec, err;
     this->ComputeXsection(&xsec, &err);
@@ -162,15 +157,8 @@ MCGen::GenerateOneEvent()
   while (!good) {
     good = veg->GenerateOneEvent();
   }
-  c_stop = std::clock();
-#ifdef DEBUG
-  //if (c_stop!=c_start)
-  std::cout << "[MCGen::GenerateOneEvent] [DEBUG]" << std::endl
-	    << "  Generation time (CPU time) : " << std::setprecision(8) << (c_stop-c_start) << " cycles" << std::endl;
-#endif
-  time = (c_stop-c_start)/CLOCKS_PER_SEC*1000.;
+
   this->last_event = this->parameters->last_event;
-  this->last_event->time_cpu = time;
   return (Event*)this->last_event;
 }
 
@@ -207,8 +195,14 @@ double f(double* x_, size_t ndim_, void* params_) {
   Parameters *p;
   Kinematics kin;
   Particle *in1, *in2;
+  Timer tmr;
+  // c_start, c_stop;                                                                                                                                            
+  bool hadronised;
+  double num_hadr_trials;
 
   p = (Parameters*)params_;
+
+  tmr.reset();
 
   //FIXME at some point introduce non head-on colliding beams ?
 
@@ -228,11 +222,11 @@ double f(double* x_, size_t ndim_, void* params_) {
   //FIXME electrons ?
 
   in1 = new Particle(1, p->in1pdg);
-  in1->charge = 1;
+  in1->charge = p->in1pdg/abs(p->in1pdg);
   in1->P(0., 0.,  p->in1p);
 
   in2 = new Particle(2, p->in2pdg);
-  in2->charge = 1;
+  in2->charge = p->in2pdg/abs(p->in2pdg);
   in2->P(0., 0., -p->in2p);
   
   switch(ndim_) {
@@ -272,8 +266,8 @@ double f(double* x_, size_t ndim_, void* params_) {
   p->process->SetPoint(ndim_, x_);
   p->process->SetKinematics(kin);
   p->process->SetIncomingParticles(*in1, *in2);
-  p->process->SetOutgoingParticles(3, outp1pdg); // First outgoing proton
-  p->process->SetOutgoingParticles(5, outp2pdg); // Second outgoing proton
+  p->process->SetOutgoingParticles(3, outp1pdg, 1); // First outgoing proton
+  p->process->SetOutgoingParticles(5, outp2pdg, 2); // Second outgoing proton
   p->process->SetOutgoingParticles(6, p->pair); // Outgoing leptons
   if (!p->process->IsKinematicsDefined()) {
     std::cout << "[f] [ERROR] Kinematics is not properly set" << std::endl;
@@ -288,18 +282,42 @@ double f(double* x_, size_t ndim_, void* params_) {
   if (p->store) { // MC events generation
     p->process->FillKinematics(false);
     //if (p->process->GetEvent()->GetByRole(42)[0]->E()<0) return 0.; //FIXME workaround to avoid (very) unphysical events
+    p->process->GetEvent()->time_generation = tmr.elapsed();
+
     if (kin.kinematics>1) {
 #ifdef DEBUG
       std::cout << "[f] [DEBUG] Event before calling the hadroniser (" << p->hadroniser->GetName() << ")" << std::endl;
       p->process->GetEvent()->Dump();
 #endif
-      if (!p->hadroniser->Hadronise(p->process->GetEvent())) return 0.; //FIXME
+      num_hadr_trials = 0;
+      do {
+	hadronised = p->hadroniser->Hadronise(p->process->GetEvent());
+#ifdef DEBUG
+	if (num_hadr_trials>0) {
+	  std::cout << "[f] [DEBUG] Hadronisation failed. Trying for the " << num_hadr_trials+1 << "th time" << std::endl;
+	}
+#endif
+	num_hadr_trials++;
+      } while (!hadronised and num_hadr_trials<=p->hadroniser_max_trials);
+      p->process->GetEvent()->num_hadronisation_trials = num_hadr_trials;
+#ifdef DEBUG
+      std::cout << "[f] [DEBUG] Event hadronisation succeded after " << p->process->GetEvent()->num_hadronisation_trials << " trial(s)" << std::endl;
+#endif
+
+      if (num_hadr_trials>p->hadroniser_max_trials) return 0.; //FIXME
 #ifdef DEBUG
       std::cout << "[f] [DEBUG] Event after calling the hadroniser (" << p->hadroniser->GetName() << ")" << std::endl;
       p->process->GetEvent()->Dump();
 #endif
     }
+    p->process->GetEvent()->time_total = tmr.elapsed();
     
+#ifdef DEBUG
+  std::cout << "[f] [DEBUG]" << std::endl
+	    << "       Generation time : " << std::setprecision(8) << p->process->GetEvent()->time_generation << " sec" << std::endl;
+	    << "  Total (+ hadr.) time : " << std::setprecision(8) << p->process->GetEvent()->time_total << " sec" << std::endl;
+#endif
+
     //*(p->file) << p->process->GetEvent()->GetLHERecord();
     *(p->last_event) = *(p->process->GetEvent());
     //p->process->GetEvent()->Store(p->file);

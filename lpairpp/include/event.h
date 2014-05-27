@@ -14,7 +14,8 @@
 /**
  * @brief Convention to simplify the user interface while fetching a list of particles in the event
  */
-typedef std::vector<Particle*> Particles;
+typedef std::vector<Particle> Particles;
+typedef std::vector<Particle*> ParticlesRef;
 typedef std::multimap<int,Particle> ParticlesMap;
 
 /**
@@ -29,21 +30,24 @@ class Event {
      * @brief Copies all the relevant quantities from one Event object to another
      */
     Event& operator=(const Event&);
-    inline void clear() { this->_part.clear(); };
+    /**
+     * @brief Empties the whole event content
+     */
+    inline void clear() { this->_part.clear(); this->time_generation=-1.; this->time_total=-1.; };
     /**
      * Returns the list of pointers to the Particle objects corresponding to a certain role in the process kinematics
      * @brief Gets a list of particles by their role in the event
      * @param[in] role_ The role the particles have to play in the process
      * @return A vector of pointers to the requested Particle objects
      */
-    Particles GetByRole(int role_);
+    ParticlesRef GetByRole(int role_);
     /**
      * Returns the first Particle object in the particles list whose role corresponds to the given argument
      * @param[in] role_ The role the particle has to play in the event
      * @return A Particle object corresponding to the first particle found in this event
      */
     inline Particle* GetOneByRole(int role_) { 
-      Particles out = this->GetByRole(role_);
+      ParticlesRef out = this->GetByRole(role_);
       if (out.size()==0) return (Particle*)NULL;
       else return out.at(0);
     };
@@ -60,9 +64,9 @@ class Event {
      * @param[in] ids_ The unique identifiers to the particles to be selected in the event
      * @return A vector of pointers to the requested Particle objects
      */
-    inline Particles GetByIds(std::vector<int> ids_) {
+    inline ParticlesRef GetByIds(std::vector<int> ids_) {
       std::vector<int>::iterator id;
-      Particles out;
+      ParticlesRef out;
       for (id=ids_.begin(); id!=ids_.end(); id++) out.push_back(this->GetById(*id));
       return out;
     }
@@ -71,13 +75,21 @@ class Event {
      * @param[in] part_ The pointer to the Particle object from which we want to extract the mother particle
      * @return A pointer to the mother Particle object
      */
-    inline Particle* GetMother(Particle* part_) { return this->GetById(part_->GetMother()); };
+    inline ParticlesRef GetMothers(Particle* part_) {
+      ParticlesRef out;
+      ParticlesIds moth = part_->GetMothers();
+      ParticlesIds::iterator m;
+      for (m=moth.begin(); m!=moth.end(); m++) {
+	out.push_back(this->GetById(*m));
+      }
+      return out;
+    }; // FIXME
     /**
      * @brief Gets a vector containing all the daughters from a particle
      * @param[in] part_ The particle for which the daughter particles have to be retrieved
      * @return A Particle objects vector containing all the daughters' kinematic information
      */
-    inline Particles GetDaughters(Particle* part_) { return this->GetByIds(part_->GetDaughters()); };
+    inline ParticlesRef GetDaughters(Particle* part_) { return this->GetByIds(part_->GetDaughters()); };
     /**
      * Gets a list of roles for the given event (really process-dependant for the central system)
      * @return A vector of integers corresponding to all the roles the particles can play in the event
@@ -94,6 +106,15 @@ class Event {
      *  * -1 if the requested role to edit is undefined or incorrect
      */
     int AddParticle(Particle* part_, bool replace_=false);
+    /**
+     * @brief Creates a new particle in the event, with no kinematic information but the role it has to play in the process
+     * @param[in] role_ The role the particle will play in the process
+     * @param[in] replace_ Do we replace the particle if already present in the event or do we append another particle with the same role ?
+     * @return
+     *  * 1 if a new Particle object has been inserted in the event
+     *  * 0 if an existing Particle object has been modified
+     *  * -1 if the requested role to edit is undefined or incorrect
+     */
     int AddParticle(int role_, bool replace_=false);
     /**
      * Returns an event block in a LHE format (a XML-style) with all the information on the particles composing this event
@@ -117,22 +138,35 @@ class Event {
      * @brief Gets a vector of particles in the event
      * @return A vector containing all the pointers to the Particle objects contained in the event
      */
-    Particles GetParticles();
+    ParticlesRef GetParticles();
     /**
      * @brief Gets a vector of stable particles in the event
      * @return A vector containing all the pointers to the stable Particle objects contained in the event
      */
-    Particles GetStableParticles();
+    ParticlesRef GetStableParticles();
     /**
      * @brief Number of particles in the event
      * @return The number of particles in the event, as an integer
      */
     inline int NumParticles() { return this->_part.size(); };
-    float time_cpu;
+    /**
+     * @brief Number of trials before the event was "correctly" hadronised
+     */
+    int num_hadronisation_trials;
+    /**
+     * The time took by the generator to build the event without hadronising it, in seconds
+     * @brief Time needed to generate the event at parton level
+     */
+    float time_generation;
+    /**
+     * The time took by the generator to build and hadronise the event, in seconds
+     * @brief Time needed to generate the hadronised (if needed) event
+     */
+    float time_total;
     //HEPEUP event_info;
   private:
     ParticlesMap _part;
-    Particle *np;
+    Particle* np;
 };
 
 #endif

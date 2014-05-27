@@ -18,12 +18,23 @@
  * according to a set of kinematic constraints provided for the incoming and
  * outgoing particles (the Kinematics object).
  * The particle roles in this process are defined as following : @n
- * @image latex lpair_kinematics.pdf Detailed particle roles in the two-photon
- * process as defined by the @a GamGamLL object. The incoming protons/electrons
- * are denoted by a role 1, and 2, as the outgoing protons/protons remnants/
- * electrons carry the indices 3 and 5. The two outgoing leptons have the roles
- * 6 and 7, while the lepton/antilepton distinction is done randomly (thus, the
- * arrow convention is irrelevant here).
+ * @image latex lpair_kinematics.pdf Detailed particle roles in the two-photon process as defined by the @a GamGamLL object. The incoming protons/electrons are denoted by a role 1, and 2, as the outgoing protons/protons remnants/ electrons carry the indices 3 and 5. The two outgoing leptons have the roles 6 and 7, while the lepton/antilepton distinction is done randomly (thus, the arrow convention is irrelevant here).
+ *
+ * The @a f function created by this Process child has its @a _ndim -dimensional
+ * coordinates mapped as :
+ * - 0 = \f$t_1\f$, first incoming photon's virtuality
+ * - 1 = \f$t_2\f$, second incoming photon's virtuality
+ * - 2 = \f$s_2\f$ mapping
+ * - 3 = yy4 = \f$\cos\left(\pi x_3\right)\f$ definition
+ * - 4 = \f$w_4\f$, the two-photon system's invariant mass
+ * - 5 = xx6 = \f$\frac{1}{2}\left(1-\cos\theta^\text{CM}_6\right)\f$ definition (3D rotation of the first outgoing lepton with respect to the two-photon centre-of-mass system). If the @a nm_ optimisation flag is set this angle coefficient value becomes 
+ *   \f[\frac{1}{2}\left(\frac{a_\text{map}}{b_\text{map}}\frac{\beta-1}{\beta+1}+1\right)\f]
+ *   with \f$a_\text{map}=\frac{1}{2}\left(w_4-t_1-t_2\right)\f$, \f$b_\text{map}=\frac{1}{2}\sqrt{\left(\left(w_4-t_1-t_2\right)^2-4t_1t_2\right)\left(1-4\frac{w_6}{w_4}\right)}\f$, and \f$\beta=\left(\frac{a_\text{map}+b_\text{map}}{a_\text{map}-b_\text{map}}\right)^{2x_5-1}\f$
+ *   and the @a _dj element is scaled by a factor \f$\frac{1}{2}\frac{\left(a_\text{map}^2-b_\text{map}^2\cos^2\theta^\text{CM}_6\right)}{a_\text{map}b_\text{map}}\log\left(\frac{a_\text{map}+b_\text{map}}{a_\text{map}-b_\text{map}}\right)\f$
+ * - 6 = _phicm6_, or \f$\phi_6^\text{CM}\f$ the rotation angle of the dilepton system in the centre-of-mass
+ *   system
+ * - 7 = \f$x_q\f$, \f$w_X\f$ mappings, as used in the single- and double-dissociative
+ *   cases only
  * @brief Computes the matrix element for a CE \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
  *  process
  */
@@ -40,17 +51,22 @@ class GamGamLL : public Process
    * cross-section computation and events generation
    */
   GamGamLL(int nOpt_=0);
-  ~GamGamLL();
+  //~GamGamLL();
+  /**
+   * Computes the cross-section for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
+   * process with the given kinematics
+   * @brief Computes the process' weight for the given point
+   * @param[in] nm_ ???
+   * @return \f[\frac{\textrm d\sigma}{\mathrm d\mathbf x}(\gamma\gamma\to\ell^{+}\ell^{-}),\f]
+   * the differential cross-section for the given point in the phase space.
+   * @todo Find out what this @a nm_ parameter does...
+   */
+  //double ComputeWeight(int nm_=1);
+  double ComputeWeight();
   bool SetIncomingParticles(Particle, Particle);
-  bool SetOutgoingParticles(int, int);
+  bool SetOutgoingParticles(int, int, int mothRole_=-1);
   void FillKinematics(bool);
   void SetKinematics(Kinematics);
-  /**
-   * Computes the centre of mass energy for the system,
-   *  according to the incoming particles' kinematics
-   * @brief Computes \f$\sqrt{s}\f$ for the system
-   */
-  void ComputeCMenergy();
   /**
    * Computes the mass of the outgoing proton remnant if any
    * @brief Computes the ougoing proton remnant mass
@@ -60,17 +76,6 @@ class GamGamLL : public Process
    * @return The mass of the outgoing proton remnant
    */
   double ComputeMX(double x_, double outmass_, double* dw_);
-  /**
-   * Computes the cross-section for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
-   * process with the given kinematics
-   * @brief Computes the process' weight for the given point
-   * @param[in] nm_ ???
-   * @return \f$\frac{\textrm d\sigma}{\mathrm d\mathbf x}(\gamma\gamma\to\ell^{+}\ell^{-})\f$,
-   * the differential cross-section for the given point in the phase space.
-   * @todo Find out what this @a nm_ parameter does...
-   */
-  //double ComputeWeight(int nm_=1);
-  double ComputeWeight();
   void StoreEvent(std::ofstream*,double);
   /**
    * Returns the value for the first photon virtuality
@@ -113,7 +118,7 @@ class GamGamLL : public Process
    * Calculates energies and momenta of the 1st, 2nd (resp. the "proton-like"
    * and the "electron-like" incoming particles), 3rd (the "proton-like"
    * outgoing particle), 4th (the two-photons central system) and 5th (the
-   * "electron-like" outgoing particle) particles in the overall centre of mass
+   * "electron-like" outgoing particle) particles in the overall centre-of-mass
    * frame.
    * @brief Energies/momenta computation for the various particles, in the CM
    * system
@@ -126,7 +131,14 @@ class GamGamLL : public Process
    * the central two-photons matrix element squared.
    * @brief Computes the matrix element squared for the requested process
    * @return The full matrix element for the two-photon production of a pair of
-   * spin\f$-\frac{1}{2}-\f$point particles
+   * spin\f$-\frac{1}{2}-\f$point particles. It is noted as
+   * \f[
+   *  M = \frac{1}{4bt_1 t_2}\sum_{i=1}^2\sum_{j=1}^2 u_i v_j t_{ij} = \frac{1}{4}\frac{u_1 v_1 t_{11}+u_2 v_1 t_{21}+u_1 v_2 t_{12}+u_2 v_2 t_{22}}{t_1 t_2 b}
+   * \f]
+   * where \f$b\f$ = @a _bb is defined in @a ComputeWeight as :
+   * \f[
+   *  b = t_1 t_2+\left(w_{\gamma\gamma}\sin^2{\theta^\text{CM}_6}+4m_\ell\cos^2{\theta^\text{CM}_6}\right) p_g^2
+   * \f]
    */
   double PeriPP(int,int);
   /**
@@ -136,19 +148,8 @@ class GamGamLL : public Process
    * evaluation of the full matrix element).
    */
   bool Pickin();
-  /**
-   * @brief Number of dimensions on which the integration has to be performed.
-   */
-  unsigned int _ndim;
-  /**
-   * @brief Array of @a _ndim components representing the point on which the
-   * weight in the cross-section is computed
-   */
-  double *_x;
   int _nOpt;
   // COMMON/PICKZZ/
-  /** @brief \f$\mathbf p_1\f$, 3-momentum of the first proton-like incoming particle */
-  double _p3_p1[3];
   /** @brief \f$\left|\mathbf p_1\right|\f$, 3-momentum norm of the first proton-like incoming particle */
   double _pp1;
   /** @brief \f$E_1\f$, energy of the first proton-like incoming particle */
@@ -159,8 +160,6 @@ class GamGamLL : public Process
   double _w1;
   /** @brief PDG identifier of the first proton-like incoming particle */
   int _pdg1;
-  /** @brief \f$\mathbf p_2\f$, 3-momentum of the second incoming particle */
-  double _p3_p2[3];
   /** @brief \f$\left|\mathbf p_2\right|\f$, 3-momentum norm of the second proton-like incoming particle */
   double _pp2;
   /** @brief \f$E_2\f$, energy of the second proton-like incoming particle */
@@ -171,8 +170,6 @@ class GamGamLL : public Process
   double _w2;
   /** @brief PDG identifier of the second proton-like incoming particle */
   int _pdg2;
-  /** @brief \f$\mathbf p_3\f$, 3-momentum of the first proton-like outgoing particle */
-  double _p3_p3[3];
   /** @brief \f$\left|\mathbf p_3\right|\f$, 3-momentum norm of the first proton-like outgoing particle */
   double _pp3;
   /** @brief \f$E_3\f$, energy of the first proton-like outgoing particle */
@@ -183,8 +180,6 @@ class GamGamLL : public Process
   double _w3;
   /** @brief PDG identifier of the first proton-like outgoing particle */
   int _pdg3;
-  /** @brief \f$\mathbf p_4\f$, 3-momentum of the two-photon central system */
-  double _p3_c4[3];
   /** @brief \f$\left|\mathbf p_4\right|\f$, 3-momentum norm of the two-photon central system */
   double _pc4;
   /** @brief \f$E_4\f$, energy of the two-photon central system */
@@ -193,8 +188,6 @@ class GamGamLL : public Process
   double _mc4;
   /** @brief \f$m_4^2\f$, squared mass of the two-photon central system */
   double _w4;
-  /** @brief \f$\mathbf p_5\f$, 3-momentum of the second proton-like outgoing particle */
-  double _p3_p5[3];
   /** @brief \f$\left|\mathbf p_5\right|\f$, 3-momentum norm of the second proton-like outgoing particle */
   double _pp5;
   /** @brief \f$E_5\f$, energy of the second proton-like outgoing particle */
@@ -205,8 +198,6 @@ class GamGamLL : public Process
   double _w5;
   /** @brief PDG identifier of the second proton-like outgoing particle */
   int _pdg5;
-  /** @brief \f$\mathbf p_6\f$, 3-momentum of the first outgoing lepton */
-  double _p3_l6[3];
   /** @brief \f$\left|\mathbf p_6\right|\f$, 3-momentum norm of the first outgoing lepton */
   double _pl6;
   /** @brief \f$E_6\f$, energy of the first outgoing lepton */
@@ -221,8 +212,6 @@ class GamGamLL : public Process
   double _e6lab;
   /** @brief PDG identifier of the first outgoing lepton */
   int _pdg6;
-  /** @brief \f$\mathbf p_7\f$, 3-momentum of the second outgoing lepton */
-  double _p3_l7[3];
   /** @brief \f$\left|\mathbf p_7\right|\f$, 3-momentum norm of the second outgoing lepton */
   double _pl7;
   /** @brief \f$E_7\f$, energy of the second outgoing lepton */
@@ -245,11 +234,6 @@ class GamGamLL : public Process
   double _eg2;
   /** @brief 3-momentum of the second central photon of momentum \f$t_2\f$ */
   double _p3_g2[3];
-  // CM energy of the incoming particles' system
-  /** @brief \f$s\f$, squared centre of mass energy of the incoming particles' system */
-  double _s;
-  /** @brief \f$\sqrt{s}\f$, centre of mass energy of the incoming particles' system */
-  double _sqs;
   /** @brief Total energy provided by the two incoming proton-like particles */
   double _etot;
   /** @brief Total momentum provided by the two incoming proton-like particles (along the \f$z\f$-axis) */
@@ -264,9 +248,9 @@ class GamGamLL : public Process
   double _acc3;
   double _acc4;
   // COMMON /ANGU/
-  /** @brief \f$\cos\theta_6^\mathrm{CM}\f$, production angle of the first outgoing lepton, computed in the centre of mass system. */
+  /** @brief \f$\cos\theta_6^\mathrm{CM}\f$, production angle of the first outgoing lepton, computed in the centre-of-mass system. */
   double _ctcm6;
-  /** @brief \f$\sin\theta_6^\mathrm{CM}\f$, production angle of the first outgoing lepton, computed in the centre of mass system. */
+  /** @brief \f$\sin\theta_6^\mathrm{CM}\f$, production angle of the first outgoing lepton, computed in the centre-of-mass system. */
   double _stcm6;
   // COMMON /CIVITA/
   double _epsi;
@@ -274,7 +258,15 @@ class GamGamLL : public Process
   double _a5, _a6;
   double _bb;
   // COMMON /DOTP/
-  double _p12, _p13, _p14, _p15, _p23, _p24, _p25, _p34, _p35, _p45;
+  /**
+   * @brief \f$p_{12} = \frac{1}{2}\left(s-m_{p_1}^2-m_{p_2}^2\right)\f$
+   */
+  double _p12;
+  /**
+   * @brief \f$p_{13} = -\frac{1}{2}\left(t_1-m_{p_1}^2-m_{p_3}^2\right)\f$
+   */
+  double _p13;
+  double _p14, _p15, _p23, _p24, _p25, _p34, _p35, _p45;
   double _p1k2, _p2k1;
   // COMMON /DOTPS/
   double _d1dq, _d1dq2, _q1dq, _q1dq2;
@@ -285,17 +277,22 @@ class GamGamLL : public Process
   // COMMON /LEVI/
   double _gram;
   double _dd1, _dd2, _dd3, _dd5;
+  /**
+   * Invariant used to tame divergences in the matrix element computation. It is defined as
+   * \f[\Delta = \left(p_1\cdot p_2\right)\left(q_1\cdot q_2\right)-\left(p_1\cdot q_2\right)\left(p_2\cdot q_1\right)\f]
+   * with \f$p_i, q_i\f$ the 4-momenta associated to the incoming proton-like particle and to the photon emitted from it.
+   */
   double _delta;
   double _g4;
   double _sa1, _sa2;
   // COMMON /LTCOM/
   /**
-   * @brief \f$\gamma\f$ factor of the centre of mass system, used in the
+   * @brief \f$\gamma\f$ factor of the centre-of-mass system, used in the
    * computation of the inverse boost for the outgoing leptons
    */
   double _gamma;
   /**
-   * @brief \f$\beta\gamma\f$ factor of the centre of mass system, used in the
+   * @brief \f$\beta\gamma\f$ factor of the centre-of-mass system, used in the
    * computation of the inverse boost for the outgoing leptons
    */
   double _betgam;
@@ -329,17 +326,15 @@ class GamGamLL : public Process
   double _tau;
   // COMMON /PICKZZ/
   double _sl1;
-  // COMMON /QVEC/   // 0 = E, 1-3 = p
-  double _qve[4];
   // COMMON /VARIAB/
   double _p;
   /** @brief \f$\cos\theta_3\f$ of the first outgoing proton-like particle */
   double _ct3;
   /** @brief \f$\sin\theta_3\f$ of the first outgoing proton-like particle */
   double _st3;
-  /** @brief \f$\cos\theta_4\f$ of the two-photons centre of mass system */
+  /** @brief \f$\cos\theta_4\f$ of the two-photons centre-of-mass system */
   double _ct4;
-  /** @brief \f$\sin\theta_4\f$ of the two-photons centre of mass system */
+  /** @brief \f$\sin\theta_4\f$ of the two-photons centre-of-mass system */
   double _st4;
   /** @brief \f$\cos\theta_5\f$ of the second outgoing proton-like particle */
   double _ct5;
@@ -387,14 +382,9 @@ class GamGamLL : public Process
   /** @brief Is the outgoing leptons' state set ? */
   bool setll;
 
-  double _plab_ip1[4], _plab_ip2[4], _plab_op1[4], _plab_op2[4];
-  double _plab_ol1[4], _plab_ol2[4], _plab_ph1[4], _plab_ph2[4];
-
   double _u1, _u2, _v1, _v2;
 
   double _cotth1, _cotth2;
-
-  Kinematics _cuts;
 };
 
 #endif

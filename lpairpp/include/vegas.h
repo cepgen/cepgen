@@ -29,7 +29,7 @@ class Vegas {
      * Vegas algorithm to perform the (_dim)-dimensional Monte Carlo integration of a given function as described in @cite PeterLepage1978192
      * @author Primary author : G.P. Lepage
      * @author This C++ implementation : L. Forthomme
-     * @date September 1976
+     * @date Sep 1976
      * @date Reviewed in Apr 1978
      * @date FTN5 version 21 Aug 1984
      * @date This C++ implementation is from 12 Dec 2013
@@ -51,6 +51,12 @@ class Vegas {
      */
     bool GenerateOneEvent();
   private:
+    /**
+     * Transforms the function to integrate into a numerically stable function where poles are tamed.
+     * @param[in] x_ The @a _ndim -dimensional point at which the stabilised function is to be evaluated
+     * @param[in] ip_ The physics parameters to apply to the function to evaluate
+     * @param[in] storedbg_ A debugging flag to set whether or not the internal variables of this method need to be stored for further processing
+     */
     double Treat(double* x_,Parameters* ip_,bool storedbg_=false);
     inline double Treat(double* x_) { return this->Treat(x_,(Parameters*)this->_ip); }
     inline double Treat(double* x_,bool storedbg_) { return this->Treat(x_,(Parameters*)this->_ip,storedbg_); }
@@ -71,26 +77,50 @@ class Vegas {
      * @brief Prepare the class for events generation
      */
     void SetGen();
+    /**
+     * Debugging method used to dump the integration grid in the standard output stream.
+     */
     void DumpGrid();
-    /** @brief The number of dimensions on which to integrate the function */
+    /**
+     * @brief The number of dimensions on which to integrate the function
+     */
     const size_t _ndim;
+    /**
+     * @brief The function which will be integrated by this Vegas instance
+     * @param x_ The point at which this function is evaluated
+     * @param ndim_ The number of degrees of freedom this function has
+     * @param params_ A "_void_-ified" Parameters object to define the boundaries of the phase space (physics constraints)
+     */
     double (*_f)(double* x_, size_t ndim_, void* params_);
     unsigned int _ndo;
     int _nTreatCalls;
-    int _nTreat;
     double _rTreat;
     double _mbin;
+    /**
+     * @brief Maximal value of the function in the considered integration range
+     */
     double _ffmax;
     int *_n;
     int *_nm;
+    /**
+     * @brief Maximal value of the function at one given point
+     */
     double *_fmax;
-    /** @brief Number of points to generate in order to integrate the function */
+    /**
+     * @brief Number of points to generate in order to integrate the function
+     */
     size_t _nIter;
-    /** @brief Fixed number of function calls to use */
+    /**
+     * @brief Fixed number of function calls to use
+     */
     size_t _ncalls;
-    /** @brief Lower bounds for the points to generate */
+    /**
+     * @brief Lower bounds for the points to generate
+     */
     double *_xl;
-    /** @brief Upper bounds for the points to generate */
+    /**
+     * @brief Upper bounds for the points to generate
+     */
     double *_xu;
     double _correc;
     double _weight;
@@ -99,10 +129,12 @@ class Vegas {
     double _fmdiff;
     double _fmold;
     int _j;
-    bool _force_correction;
     double *_xi[MAX_ND];
     double *_d[MAX_ND];
     double *_di[MAX_ND];
+    /**
+     * @brief List of parameters to specify the integration range and the physics determining the phase space
+     */
     Parameters *_ip;
     bool _grid_prepared;
 };

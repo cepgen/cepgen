@@ -17,8 +17,8 @@ Pythia8Hadroniser::Hadronise(Event* ev_)
   //Pythia8::StringFragmentation string;
   //Pythia8::BeamParticle bp;
 
-  Particles::iterator p;
-  Particles part;
+  ParticlesRef part;
+  ParticlesRef::iterator p;
 
   part = ev_->GetParticles();
 

@@ -17,6 +17,7 @@ Parameters::Parameters() :
   generation(true), store(false), debug(false),
   maxgen(1e5), ngen(0),
   gpdf(5), spdf(4), qpdf(12),
+  hadroniser_max_trials(5),
   symmetrise(true)
 {
   this->last_event = new Event();
@@ -52,9 +53,9 @@ void Parameters::Dump()
     case 1:
       cutsmode = "Vermaseren"; break;
     case 2:
-      cutsmode = "both"; break;
+      cutsmode = "both leptons"; break;
     case 3:
-      cutsmode = "single"; break;
+      cutsmode = "single lepton"; break;
     case 0:
     default:
       cutsmode = "none"; break;
@@ -69,7 +70,7 @@ void Parameters::Dump()
       particles = "taus"; break;
   }
   const int wb = 65;
-  const int wt = 50;
+  const int wt = 40;
   int wp = wb-wt-2;
   std::cout 
     << std::left
@@ -77,30 +78,30 @@ void Parameters::Dump()
     << std::endl
     << " _" << std::setfill('_') << std::setw(wb) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "_ " << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "| " << std::setw(wt-15) << "Process to generate" << std::right << std::setw(27) << process->GetName() << std::left << std::setw(wp-12) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Process to generate"  << std::setw(wp) << process->GetName() << " |" << std::endl
     << "| " << std::setw(wt) << "Events generation ? " << std::setw(wp) << generation << " |" << std::endl
     << "| " << std::setw(wt) << "Number of events to generate" << std::setw(wp) << maxgen << " |" << std::endl
     << "| " << std::setw(wt) << "Events storage ? " << std::setw(wp) << store << " |" << std::endl
     << "| " << std::setw(wt) << "Debugging mode ? " << std::setw(wp) << debug << " |" << std::endl
-    << "| " << std::setw(wt) << "Is Output file opened ? " << std::setw(wp) << (file!=(std::ofstream*)NULL && file->is_open()) << " |" << std::endl
+    << "| " << std::setw(wt) << "Output file opened ? " << std::setw(wp) << (file!=(std::ofstream*)NULL && file->is_open()) << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|_" << std::setfill('_') << std::setw(wb) << "_/¯ INCOMING- AND OUTGOING KINEMATICS ¯\\_" << std::setfill(' ') << "_|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "|_" << std::setfill('_') << std::setw(wb-2) << " Incoming protons-like particles " << std::setfill(' ') << "_|" << std::endl
+    << "|-" << std::setfill('-') << std::setw(wb-2) << " Incoming protons-like particles " << std::setfill(' ') << "-|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "| " << std::setw(wt) << "Mode" << std::setw(3) << p1mod << ", " << std::setw(3) << p2mod << std::setw(wp-8) << "" << " |" << std::endl
     << "| " << std::setw(wt) << "Incoming particles" << std::setw(5) << in1pdg << ", " << std::setw(5) << in2pdg << std::setw(wp-12) << "" << " |" << std::endl
     << "| " << std::setw(wt) << "Momenta [GeV/c]" << std::setw(5) << in1p << ", " << std::setw(5) << in2p << std::setw(wp-12) << "" << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "|_" << std::setfill('_') << std::setw(wb-2) << " Outgoing leptons " << std::setfill(' ') << "_|" << std::endl
+    << "|-" << std::setfill('-') << std::setw(wb-2) << " Outgoing leptons " << std::setfill(' ') << "-|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "| " << std::setw(wt) << "Pair" << std::setw(2) << pair << " " << std::setw(wp-3) << particles << " |" << std::endl
-    << "| " << std::setw(wt) << "Cuts mode" << std::setw(2) << mcut << " (" << std::setw(wp-5) << cutsmode << ")" << " |" << std::endl
+    << "| " << std::setw(wt) << "Pair" << std::setw(2) << pair << " -> " << std::setw(wp-6) << particles << " |" << std::endl
+    << "| " << std::setw(wt) << "Cuts mode" << std::setw(2) << mcut << " -> " << std::setw(wp-6) << cutsmode << " |" << std::endl
     << "| " << std::setw(wt) << "Lepton(s)' pT in range [GeV/c]" << "[" << std::setw(4) << minpt << ", " << std::setw(4) << maxpt << "]" << std::setw(wp-12) << "" << " |" << std::endl
     << "| " << std::setw(wt) << "Lepton(s)' energy in range [GeV]" << "[" << std::setw(4) << minenergy << ", " << std::setw(4) << maxenergy << "]" << std::setw(wp-12) << "" << " |" << std::endl
     << "| " << std::setw(wt) << "Polar angle theta in range [deg]" << "[" << std::setw(3) << mintheta << ", " << std::setw(3) << maxtheta << "]" << std::setw(wp-10) << "" << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "|_" << std::setfill('_') << std::setw(wb-2) << " Outgoing remnants " << std::setfill(' ') << "_|" << std::endl
+    << "|-" << std::setfill('-') << std::setw(wb-2) << " Outgoing remnants " << std::setfill(' ') << "-|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl;
   if (this->hadroniser!=(Hadroniser*)NULL)
     std::cout << "| " << std::setw(wt) << "Hadronisation algorithm" << std::setw(12) << hadroniser->GetName() << std::setw(wp-12) << "" << " |" << std::endl;
@@ -112,7 +113,7 @@ void Parameters::Dump()
     << "| " << std::setw(wt) << "Maximum number of iterations" << std::setw(wp) << itvg << " |" << std::endl
     << "| " << std::setw(wt) << "Number of function calls" << std::setw(wp) << ncvg << " |" << std::endl
     << "| " << std::setw(wt) << "Number of points to try per bin" << std::setw(wp) << npoints << " |" << std::endl
-    << "| " << std::setw(wt) << "Is the integration smoothed (TREAT) ? " << std::setw(wp) << ntreat << " |" << std::endl
+    << "| " << std::setw(wt) << "Integration smoothed (TREAT) ? " << std::setw(wp) << ntreat << " |" << std::endl
     << "|_" << std::right << std::setfill('_') << std::setw(wb) << "_|" << std::left << std::endl
     //<< " -" << std::right << std::setfill('-') << std::setw(wb) << "- " << std::left << std::endl
     << std::endl

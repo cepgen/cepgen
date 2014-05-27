@@ -48,11 +48,17 @@ class Parameters {
      * @return A boolean stating whether this output configuration file is correctly written or not
      */
     bool StoreConfigFile(std::string outFile_);
-    /** @brief First incoming particle's momentum (in GeV/c) */
+    /** @brief First incoming particle's momentum (in \f$\text{GeV}/c\f$) */
     double in1p;
-    /** @brief Second incoming particle's momentum (in GeV/c) */
+    /** @brief Second incoming particle's momentum (in \f$\text{GeV}/c\f$) */
     double in2p;
+    /**
+     * @brief First beam/primary particle's PDG identifier
+     */
     int in1pdg;
+    /**
+     * @brief Second beam/primary particle's PDG identifier
+     */
     int in2pdg;
     /**
      * The first incoming particle type and kind of interaction :
@@ -81,9 +87,9 @@ class Parameters {
      * Set of cuts to apply on the outgoing leptons in order to restrain the available kinematic phase space :
      * - 0 - No cuts at all (for the total cross section)
      * - 1 - Vermaserens' hypothetical detector cuts : for both leptons,
-     *   + \f$\frac{|p_z|}{|\mathbf p|}\leq\f$ 0.75 and \f$p_T\geq\f$ 1 GeV/c,
+     *   + \f$\frac{|p_z|}{|\mathbf p|}\leq\f$ 0.75 and \f$p_T\geq 1~\text{GeV}/c\f$,
      *   or
-     *   + 0.75 \f$<\frac{|p_z|}{|\mathbf p|}\leq\f$ 0.95 and \f$p_z>\f$ 1 GeV/c,
+     *   + 0.75 \f$<\frac{|p_z|}{|\mathbf p|}\leq\f$ 0.95 and \f$p_z> 1~\text{GeV}/c\f$,
      * - 2 - Cuts on both the outgoing leptons, according to the provided cuts parameters
      * - 3 - Cuts on at least one outgoing lepton, according to the provided cut parameters
      * @brief Set of cuts to apply on the outgoing leptons
@@ -116,12 +122,12 @@ class Parameters {
      */
     double maxq2;
     /**
-     * Minimal mass of the outgoing proton remnants, \f$M_X\f$, in GeV/c\f${}^{2}\f$.
+     * Minimal mass of the outgoing proton remnants, \f$M_X\f$, in \f$\text{GeV}/c^{2}\f$.
      * @brief Minimal \f$M_X\f$ of the outgoing proton remnants
      */
     double minmx;
     /**
-     * Maximal mass of the outgoing proton remnants, \f$M_X\f$, in GeV/c\f${}^{2}\f$.
+     * Maximal mass of the outgoing proton remnants, \f$M_X\f$, in \f$\text{GeV}/c^{2}\f$.
      * @brief Maximal \f$M_X\f$ of the outgoing proton remnants
      */
     double maxmx;
@@ -175,6 +181,10 @@ class Parameters {
      */
     int qpdf;
     /**
+     * @brief Maximal number of trials for the hadronisation of the proton(s) remnants
+     */
+    int hadroniser_max_trials;
+    /**
      * @brief The file in which to store the events generation's output
      */
     std::ofstream* file;
@@ -192,6 +202,9 @@ class Parameters {
      * @brief Hadronisation algorithm to use for the proton(s) remnants fragmentation
      */
     Hadroniser* hadroniser;
+    /**
+     * @brief The process for which the cross-section will be computed and the events will be generated
+     */
     Process* process;
 };
 
