@@ -8,8 +8,8 @@
 #include <fstream>
 #include <string>
 
-#include "gamgamll.h"
-#include "gampomvmll.h"
+#include "../models/gamgamll.h"
+#include "../models/gampomvmll.h"
 
 #include "pythia6hadroniser.h"
 #include "pythia8hadroniser.h"
@@ -189,9 +189,11 @@ class Parameters {
      */
     std::ofstream* file;
     /**
-     * List of Gnuplot objects which can be used to produce control plots all along the cross-section determination and events generation process
-     * @note Maximum number of these can be raised in the utils.h file, but pay attention to the memory load since these Gnuplot objects are still under development!
-     * @brief Control plots objects
+     * @brief Type of format the event will be stored into
+     */
+    std::string output_format;
+    /**
+     * @brief Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?
      */
     bool symmetrise;
     /**

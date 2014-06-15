@@ -46,4 +46,28 @@ Particles EPA(Particle el_, Particle pr_, int mode_, PhysicsBoundaries b_);
  */
 bool PSF(double,double,double*,double*,double*);
 
+/**
+ * @brief Vector meson particles and their decay mode
+ */
+typedef enum {
+  RHO_TO_PIPI = 113,
+  OMEGA_TO_PIPI = 223,
+  PHI_TO_KK = 333,
+  PHI_TO_KLKS = 3332,
+  JPSI_TO_LL = 444,
+  PSIP_TO_LLX = 20443,
+  UPS1S_TO_LL = 553,
+  UPS2S_TO_LLX = 20553,
+  UPS3S_TO_LLX = 30553,
+  RHO1450_TO_PIPIRHO0 = 40113,
+  PHI1680_TO_KKBAR = 10333
+} VMDecay;
+
+/**
+ * Gets the branching ratio for a decay process, given its VMDecay identifier
+ * @param[in] processId_ The identifier of the process
+ * @return Branching ratio for the process
+ */
+double GetBRFromProcessId(VMDecay processId_);
+
 #endif

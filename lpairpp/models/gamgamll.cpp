@@ -1,6 +1,7 @@
 #include "gamgamll.h"
 
 GamGamLL::GamGamLL(int nOpt_) :
+  _nOpt(nOpt_),
   _ep1(-1), _w1(-1), _ep2(-1), _w2(-1.),
   _w3(-1.), _w4(-1.), _w5(-1.), _w6(-1.), _w7(-1.),
   _p12(0.), _p13(0.), _p14(0.), _p15(0.), _p23(0.), _p24(0.), _p25(0.), _p34(0.), _p35(0.), _p45(0.),
@@ -8,9 +9,7 @@ GamGamLL::GamGamLL(int nOpt_) :
   setp1(false), setp2(false), setp3(false), setp5(false), setll(false),
   _cotth1(-99999.), _cotth2(99999.)
 {
-  // Free unused (so far) parameter. Still need to understand its role
-  _nOpt = nOpt_;
-  _name = "gamma,gamma->l+,l-";
+  _name = PROCESS_NAME;
 }
 
 bool
@@ -34,12 +33,12 @@ GamGamLL::SetOutgoingParticles(int part_, int pdgId_, int mothRole_)
     case 3: // double-dissociative
       int ind;
       if (part_==3) { // First outgoing proton remnant
-	outm = _mp1;
-	ind = 7;
+	      outm = _mp1;
+	      ind = 7;
       }
       else if (part_==5 && _mp3>0.) { // Second outgoing proton remnant (if first is defined)
-	outm = _mp3;
-	ind = 8;
+	      outm = _mp3;
+	      ind = 8;
       }
       else return false;
       mass_ = this->ComputeMX(x(ind), outm, &dm);

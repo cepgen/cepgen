@@ -56,21 +56,43 @@ class Vegas {
      * @param[in] x_ The @a _ndim -dimensional point at which the stabilised function is to be evaluated
      * @param[in] ip_ The physics parameters to apply to the function to evaluate
      * @param[in] storedbg_ A debugging flag to set whether or not the internal variables of this method need to be stored for further processing
+     * @return Tamed function value at this point @a x_
      */
     double Treat(double* x_,Parameters* ip_,bool storedbg_=false);
+    /**
+     * Evaluates the smoothed version of the function to be integrated at a point @a x_, using the default Parameters object @a _ip 
+     * @param[in] x_ The point at which the tamed function is to be evaluated
+     * @return Tamed function value at this point @a x_
+     */
     inline double Treat(double* x_) { return this->Treat(x_,(Parameters*)this->_ip); }
+    /**
+     * Evaluates the smoothed version of the function to be integrated at a point @a x_
+     * @param[in] x_ The point at which the tamed function is to be evaluated
+     * @return Tamed function value at this point @a x_
+     */
     inline double Treat(double* x_,bool storedbg_) { return this->Treat(x_,(Parameters*)this->_ip,storedbg_); }
+    /**
+     * Evaluates the function to be integrated at a point @a x_, using the default Parameters object @a _ip
+     * @param[in] x_ The point at which the function is to be evaluated
+     * @return Function value at this point @a x_
+     */
     inline double F(double* x_) { return this->_f(x_, this->_ndim, (void*)this->_ip); }
+    /**
+     * Evaluates the function to be integrated at a point @a x_, given a set of Parameters @a ip_
+     * @param[in] x_ The point at which the function is to be evaluated
+     * @param[in] ip_ A set of parameters to fully define the function
+     * @return Function value at this point @a x_
+     */
     inline double F(double* x_,Parameters* ip_) { return this->_f(x_, this->_ndim, (void*)ip_); }
     /**
      * Stores the event characterized by its _ndim-dimensional point in the phase
      * space to the output file
      * @brief Stores the event in the output file
-     * @brief x_ The _ndim-dimensional point in the phase space defining the unique
+     * @param[in] x_ The @a _ndim-dimensional point in the phase space defining the unique
      * event to store
      * @return A boolean stating whether or not the event could be saved
      */
-    bool StoreEvent(double*);
+    bool StoreEvent(double* x_);
     /**
      * Sets all the generation mode variables and align them to the integration 
      * grid set while computing the cross-section
@@ -93,8 +115,17 @@ class Vegas {
      */
     double (*_f)(double* x_, size_t ndim_, void* params_);
     unsigned int _ndo;
+    /**
+     * Has the Treat function already been called once ?
+     */
     int _nTreatCalls;
+    /**
+     * \f$r = \text{ndo}^\text{ndim}\f$ value of the Treat function
+     */
     double _rTreat;
+    /**
+     * @brief Integration grid size parameter
+     */
     double _mbin;
     /**
      * @brief Maximal value of the function in the considered integration range
@@ -123,11 +154,20 @@ class Vegas {
      */
     double *_xu;
     double _correc;
+    /**
+     * @brief Weight of the point in the total integration
+     */
     double _weight;
     double _corre2;
+    /**
+     * @brief Square of the maximal function value in the integration grid
+     * */
     double _fmax2;
     double _fmdiff;
     double _fmold;
+    /**
+     * @brief Selected bin at which the function will be evaluated
+     */
     int _j;
     double *_xi[MAX_ND];
     double *_d[MAX_ND];
@@ -136,6 +176,9 @@ class Vegas {
      * @brief List of parameters to specify the integration range and the physics determining the phase space
      */
     Parameters *_ip;
+    /**
+     * @brief Flag to define whether or not the grid has been prepared using @a SetGen (very time-consuming operation, thus needs to be called once)
+     */
     bool _grid_prepared;
 };
 

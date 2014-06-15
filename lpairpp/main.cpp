@@ -13,8 +13,8 @@ int main(int argc, char* argv[]) {
   double xsec, err;
   MCGen mg;
   Event ev;
-  GamGamLL proc;
-  //GamPomVMLL proc;
+  //GamGamLL proc;
+  GamPomVMLL proc;
   //Herwig6Hadroniser had;
   Pythia6Hadroniser had;
   //Jetset7Hadroniser had;

@@ -8,6 +8,7 @@
 #include <fstream>
 #include <ctime>
 
+
 /**
  * @brief Provides a random number generated along a uniform distribution
  * between 0 and 1
@@ -56,12 +57,16 @@ class Timer
 /**
  * Gets the mass in GeV/c**2 of a particle given its PDG identifier
  * @brief Gets the mass of a particle
- * @param pdgId_ PDG ID of the particle whose mass is requested
- * @return Mass of the particle in GeV/c**2
+ * @param pdgId_ PDG ID of the particle
+ * @return Mass of the particle in \f$\text{GeV}/c^2\f$
  */
 double GetMassFromPDGId(int pdgId_);
+/**
+ * Gets the total decay width for one particle to be decayed
+ * @param[in] pdgId_ PDG ID of the particle
+ * @return Decay width in GeV
+ */
 double GetWidthFromPDGId(int pdgId_);
-double GetBRFromPDGId(int pdgId_);
 
 /**
  * @brief Defines modified variables of integration to avoid peaks integrations (see @cite Vermaseren1983347 for details)

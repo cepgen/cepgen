@@ -5,18 +5,20 @@ JETSET7SRC = $(wildcard external/jetset7*.f)
 PYTHIA8SRC = $(wildcard external/pythia8*/)
 HERWIG6SRC = $(wildcard external/herwig6*.f)
 PYTHIA8LIB = $(PYTHIA8SRC)lib
-INCLUDEDIR = include/
+INCLUDEDIR = -Imodels/ -Iinclude/
 ############################################
 CFLAGS     = -Wall -Wextra -fno-exceptions -Wpointer-arith \
-	     -I$(INCLUDEDIR) -D$(SVNDEV) -g #-I$(PYTHIA8SRC)/include
+	     $(INCLUDEDIR) -D$(SVNDEV) -g #-I$(PYTHIA8SRC)/include
 FFLAGS     = -w -g
-LDFLAGS    = -I$(INCLUDEDIR) -lgfortran -L$(PYTHIA8LIB) -I$(PYTHIA8SRC)include -lpythia8 -llhapdfdummy -Wl,-O2
-VPATH      = src:include:$(PYTHIA8SRC)/include
+LDFLAGS    = $(INCLUDEDIR) -lgfortran -L$(PYTHIA8LIB) -I$(PYTHIA8SRC)include -lpythia8 -llhapdfdummy -Wl,-O2
+VPATH      = src:include:models:$(PYTHIA8SRC)/include
 SVNDEV = 'SVN_REV="$(shell svnversion -nq .)"'
 ############################################
 CPP_FILES  = $(wildcard src/*.cpp)
-HPP_FILES  = $(wildcard includes/*.h)
+MOD_FILES  = $(wildcard models/*.cpp)
+HPP_FILES  = $(wildcard include/*.h)
 LIB_FILES  = $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES)) \
+	     $(patsubst models/%.cpp,obj/%.o,$(MOD_FILES)) \
 	     $(patsubst external/%.f,obj/%.fo,$(PYTHIA6SRC)) \
 	     $(patsubst external/%.f,obj/%.fo,$(HERWIG6SRC)) \
 	     $(patsubst external/%.f,obj/%.fo,$(JETSET7SRC)) 

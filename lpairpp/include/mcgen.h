@@ -62,6 +62,9 @@ class MCGen {
    */
   MCGen(Parameters *ip_);
   ~MCGen();
+  /**
+   * @brief Dumps this program's header into the standard output stream
+   */
   void PrintHeader();
   void Test();
   /**
@@ -93,12 +96,28 @@ class MCGen {
   /** @brief Last event generated in this run */
   Event *last_event;
  private:
+  /**
+   * @brief Calls the Vegas constructor (once, just before the first integration attempt)
+   */
   void BuildVegas();
   /** @brief The Vegas integrator which will integrate the function */
   Vegas *veg;
+  /**
+   * @brief The cross-section computed at the last integration
+   */
   double _xsec;
+  /**
+   * @brief The error on the cross-section as computed at the last integration
+   */
   double _xsec_error;
+  /**
+   * @brief Has a first integration beed already performed ?
+   */
   bool _xsec_comp;
+  /**
+   * @brief Has the Vegas object already been constructed in this MCGen instance
+   */
+  bool _vegas_built;
 };
 
 /**

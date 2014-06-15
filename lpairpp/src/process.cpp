@@ -2,11 +2,11 @@
 
 Process::Process() :
   _ndim(0), _point_set(false),
-  _setin(false), _setout(false), _setkin(false),
-  _name("<invalid process>")
+  _setin(false), _setout(false), _setkin(false)
 {
   // This is where the particles will be stored
   _ev = new Event();
+  _name = "<invalid process>";
 }
 
 Process::~Process()

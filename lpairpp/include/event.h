@@ -8,7 +8,6 @@
 #include <iomanip>
 #include <algorithm>
 
-//#include "lheutils.h"
 #include "particle.h"
 
 /**
@@ -165,7 +164,13 @@ class Event {
     float time_total;
     //HEPEUP event_info;
   private:
+    /**
+     * List of particles in the event, mapped to their role in this event
+     */
     ParticlesMap _part;
+    /**
+     * Empty particle returned to the get-ers if no particle matches the requirements
+     */
     Particle* np;
 };
 

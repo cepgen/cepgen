@@ -1,6 +1,9 @@
 #ifndef _GAMGAMLL_H
 #define _GAMGAMLL_H
 
+#define PROCESS_NAME "pp -> p(*) (gamma gamma -> l+ l-) p(*)"
+#define PROCESS_DESCRIPTION "Two-photon production of lepton pairs"
+
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
@@ -10,7 +13,7 @@
 #include <cstdlib>
 #include <map>
 
-#include "process.h"
+#include "../include/process.h"
 
 /**
  * Full class of methods and objects to compute the full analytic matrix element

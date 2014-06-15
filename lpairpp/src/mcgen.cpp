@@ -1,7 +1,7 @@
 #include "mcgen.h"
 
 MCGen::MCGen() :
-  _xsec(-1.), _xsec_error(-1.)
+  _xsec(-1.), _xsec_error(-1.), _vegas_built(false)
 {
   this->PrintHeader();
 
@@ -99,44 +99,15 @@ MCGen::BuildVegas()
   std::cout << "[MCGen::MCGen] [DEBUG] Considered topology : " << topo << " case" << std::endl;
 #endif
 
-#ifdef DEBUG
-  std::cout << "[MCGen::MCGen] [DEBUG] Cuts mode : " << this->parameters->mcut << std::endl;
-  switch(this->parameters->mcut) {
-    case 1:
-    case 2:
-      std::cout << "[MCGen::MCGen] [DEBUG] Single leptons' transverse momentum condition : ";
-      if (this->parameters->minpt<=0.) {
-        std::cout << "no pT cut" << std::endl;
-        break;
-      }
-      if (this->parameters->maxpt>0.) {
-        std::cout << "pT in range [" 
-                  << this->parameters->minpt << " GeV/c, " 
-                  << this->parameters->maxpt << " GeV/c]" 
-                  << std::endl;
-        break;
-      }
-      std::cout << "pT > " << this->parameters->minpt << " GeV/c";
-      if (this->parameters->mcut==1) {
-        std::cout << " for at least one lepton" << std::endl;
-      }
-      else {
-        std::cout << " for both the leptons" << std::endl;
-      }
-      break;
-    case 0:
-    default:
-      std::cout << "[MCGen::MCGen] [DEBUG] No cuts applied on the total cross section" << std::endl;
-      break;
-  }
-#endif
   veg = new Vegas(ndim, f, this->parameters);
+  _vegas_built = true;
 }
 
 void
 MCGen::ComputeXsection(double* xsec_, double *err_)
 {
-  this->BuildVegas();
+  if (!_vegas_built) this->BuildVegas();
+
   std::cout << "[MCGen::ComputeXsection] Starting the computation of the process cross-section" << std::endl;
   veg->Integrate(xsec_, err_);
   this->_xsec = *xsec_;

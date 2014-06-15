@@ -3,7 +3,8 @@
 
 #include <algorithm>
 
-#include "process.h"
+#include "../include/utils.h"
+#include "../include/process.h"
 
 /**
  * @brief Computes the matrix element for a CE \f$\gamma\mathbb{P}\rightarrow \rho,\omega,\phi,J/\psi,\Upsilon,\ldots\rightarrow\ell^+\ell^-\f$ process
@@ -22,10 +23,11 @@ class GamPomVMLL : public Process
   //void StoreEvent(std::ofstream*,double);
   //void PrepareHadronisation(Particle *part_);
  private:
+  void GDIBeg();
+  void GenEvtDi();
   void GenGam();
   inline void GenBEl() {};
   inline void GenBPr() {};
-  void GDIBeg();
   /**
    * Generate \f$m_X^p\f$, \f$m_X^\text{VM}\f$ and \f$t\f$ and determine if the generated combination is kinematically allowed
    * @author Benno List
@@ -73,6 +75,18 @@ class GamPomVMLL : public Process
    */
   void GenDif();
   void FixPhot(Particle* phot_, Particle* ele_, double *q2_, Particle pel_, double egamma_);
+  /**
+   * Calculate relative photon luminosity for photon flux produced by @a GEPhot, weighted by VM propagator and cross section
+   * @return _genmxt_f Total VM flux, relative to \f$e\f$ flux
+   * @return _genmxt_df Error of @a _genmxt_f
+   * @return _genmxt_ft Relative VM flux for transverse VMs
+   * @return _genmxt_dft Error of @a _genmxt_ft
+   * @return _genmxt_fl Relative VM flux for longitudinal VMs
+   * @return _genmxt_dfl Error of @a _genmxt_fl
+   * @author T. Jansen 
+   * @date 07 Apr 1993
+   */
+  void VMFlux();
 
   /**
    * Minimal \f$\cos\theta\f$ of scattered electron
@@ -118,7 +132,7 @@ class GamPomVMLL : public Process
 
   ////
   /**
-   * PDG code for produced vector meson (should have \f$J^{PC}=1^{--}\f$)
+   * Type of vector meson (should have \f$J^{PC}=1^{--}\f$) to produce, and decay mode
    * Possible values:
    *  - 113 : \f$\rho\f$
    *  - 223 : \f$\omega\f$
@@ -131,9 +145,9 @@ class GamPomVMLL : public Process
    *  - 40113 : \f$\rho(1450)\rightarrow\pi^+\pi^-\rho^0\f$
    *  - 10333 : \f$\phi(1680)\rightarrow K\bar K\f$
    *  - *22 : diffr. gamma dissoc. (special value)*
-   * @brief PDG code for produced vector meson
+   * @brief Type of vector meson to produce and its decay channel
    */
-  int itypvm;
+  VMDecay itypvm;
   /**
    * @brief Index of diffractive \f$q\bar q\f$ states
    */
@@ -355,6 +369,22 @@ class GamPomVMLL : public Process
   double _e1;
   double _pz2;
   double _e2;
+  
+  double _vmflux_f;
+  double _vmflux_df;
+  double _vmflux_fl;
+  double _vmflux_dfl;
+  double _vmflux_ft;
+  double _vmflux_dft;
+  int _iacct;
+  int _iaccl;
+  int _isum;
+  int _igent;
+  int _igenl;
+  double _qsumt;
+  double _qsuml;
+  double _dsumt;
+  double _dsuml;
 };
 
 #endif

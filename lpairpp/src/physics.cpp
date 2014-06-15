@@ -352,3 +352,21 @@ Particles EPA(Particle el_, Particle pr_, int mode_, PhysicsBoundaries b_)
 
   return op;
 }
+
+double GetBRFromProcessId(VMDecay processId_)
+{
+  switch (abs(processId_)) {
+  case RHO_TO_PIPI:         return 1.0;    // rho0->pi+ pi-
+  case OMEGA_TO_PIPI:       return 0.0221; // omega->pi+ pi-
+  case PHI_TO_KK:           return 0.491;  // phi->K+ K-
+  case PHI_TO_KLKS:         return 0.344;  // phi->KL0 KS0 //FIXME FIXME FIXME
+  case JPSI_TO_LL:          return 0.0598; // J/psi->l+ l-
+  case PSIP_TO_LLX:         return 0.0425; // psi'->l+ l- X
+  case UPS1S_TO_LL:         return 0.0250; // Upsilon(1s)->l+ l-
+  case UPS2S_TO_LLX:        return 0.0200; // Upsilon(2s)->l+ l- X
+  case UPS3S_TO_LLX:        return 0.0217; // Upsilon(3s)->l+ l- X
+  case RHO1450_TO_PIPIRHO0: // rho(1450)->pi+ pi- rho0
+  case PHI1680_TO_KKBAR: // phi(1680)->K Kbar
+  default: return -1;
+  }
+}

@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "include/utils.h"
 
 double GetMassFromPDGId(int pdgId_)
 {
@@ -26,24 +26,6 @@ double GetWidthFromPDGId(int pdgId_)
   switch (abs(pdgId_)) {
   case 553:  return 10.; //FIXME
   default:   return -1.;
-  }
-}
-
-double GetBRFromPDGId(int pdgId_)
-{
-  switch (abs(pdgId_)) {
-  case 113:   return 1.0;    // rho0->pi+ pi-
-  case 223:   return 0.0221; // omega->pi+ pi-
-  case 333:   return 0.491;  // phi->K+ K-
-  case 3332:  return 0.344;  // phi->KL0 KS0 //FIXME FIXME FIXME
-  case 444:   return 0.0598; // J/psi->l+ l-
-  case 20443: return 0.0425; // psi'->l+ l- X
-  case 553:   return 0.0250; // Upsilon(1s)->l+ l-
-  case 20553: return 0.0200; // Upsilon(2s)->l+ l- X
-  case 30553: return 0.0217; // Upsilon(3s)->l+ l- X
-    //case 40113: // rho(1450)->pi+ pi- rho0
-    //case 10333: // phi(1680)->K Kbar
-  default: return -1;
   }
 }
 

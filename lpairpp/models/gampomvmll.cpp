@@ -11,7 +11,8 @@
 #define OL2 7
 
 GamPomVMLL::GamPomVMLL():
-  _cthelb(-.9962), _eelmin(8.),
+  // Parameters from steer.text
+  /*_cthelb(-.9962), _eelmin(8.),
   _lambda(0.), _eprop(2.5), _xi(1.), _chi(1.),
   _epsilw(0.225), _epsilm(0.0808), _alpha1(0.), _alph1m(_alpha1),
   _igammd(1), _egamma(3.), _wmin(20.), _wmax(0.),
@@ -19,16 +20,29 @@ GamPomVMLL::GamPomVMLL():
   _ymin(0.), _ymax(1.),
   _b0(4.), _wb0(95.), _amxb0(14.), _anexp(0.),
   _wsig0(95.),
+  _q2(0.),*/
+
+  // Parameters from GDIINI
+  _cthelb(-1.), _eelmin(0.),
+  _lambda(0.), _eprop(2.), _xi(1.), _chi(0.),
+  _epsilw(0.0808), _epsilm(0.0808), _alpha1(0.25), _alph1m(-1.),
+  _igammd(1), _egamma(3.), _wmin(0.), _wmax(0.),
+  _q2min(0.), _q2max(0.),
+  _ymin(0.), _ymax(1.),
+  _b0(10.), _wb0(14.), _amxb0(0.), _anexp(0.),
+  _wsig0(14.),
   _q2(0.),
+
   _genmxt_begin(true),
   _gengam_first(true),
   _gephot_first(true),
   _fraggl_begin(true),
-  _photint_swei(0.), _photint_swei2(0.), _photint_sweit(0.), _photint_sweit2(0.), _photint_sweil(0.), _photint_sweil2(0.)
+  _photint_swei(0.), _photint_swei2(0.), _photint_sweit(0.), _photint_sweit2(0.), _photint_sweil(0.), _photint_sweil2(0.),
+  _vmflux_f(0.), _vmflux_df(0.), _vmflux_fl(0.), _vmflux_dfl(0.), _vmflux_ft(0.), _vmflux_dft(0.)
 {
   _name = "gamma,pomeron->VM->l+,l-";
 
-  itypvm = 553;
+  itypvm = UPS1S_TO_LL;
   ifragp = 0;
   deminp = 0.236;
   ifragv = 0;
@@ -38,8 +52,13 @@ GamPomVMLL::GamPomVMLL():
   ipom = 3;
   ivm = 4;
 
-  _br = GetBRFromPDGId(itypvm); //FIXME what about other final states ???
+  _br = GetBRFromProcessId(itypvm); //FIXME what about other final states ???
 
+  // From gdiffv.F
+  
+  // Set up for event generation (note: some of the parameters are set/calculated/changed during this step)
+  this->GDIBeg();
+  
 }
 
 GamPomVMLL::~GamPomVMLL()
@@ -186,7 +205,7 @@ GamPomVMLL::GDIBeg()
 void
 GamPomVMLL::GenGam()
 {
-  int igen, igent, igenl, iacc, iacct, iaccl, iter;
+  int igen, igent, igenl, iacc, iter;
   int heli;
   double smax, egammin;
   double r, wt;
@@ -214,7 +233,7 @@ GamPomVMLL::GenGam()
     _gengam_first = false;
 
 
-    igen = igent = igenl = iacc = iacct = iaccl = 0;
+    igen = igent = igenl = iacc = _iacct = _iaccl = 0;
 
     smax = std::pow(_wmax, 2);
     egammin = std::pow(_wmin, 2)/4./_ev->GetOneByRole(2)->Pz();
@@ -332,8 +351,8 @@ GamPomVMLL::GenGam()
 
     //CALL SHSW (10, 3, SNGL (PCM (5)), 1.0)
       
-    if (heli==0) iaccl++;
-    else iacct++;
+    if (heli==0) _iaccl++;
+    else _iacct++;
     iacc++;
 
     _gengam_first = false;
@@ -344,7 +363,8 @@ GamPomVMLL::GenGam()
 double
 GamPomVMLL::ComputeWeight()
 {
-  this->GenGam();
+  this->GenEvtDi();
+  //this->GenGam();
   return 0.;
 }
 
@@ -354,7 +374,20 @@ GamPomVMLL::ComputeWeight()
   this->GenBPr();
   this->GenGam();
   this->GenDif();
+  this->GenDif();
   }*/
+
+void
+GamPomVMLL::GenEvtDi()
+{
+#ifdef DEBUG
+  std::cout << "[GamPomVMLL::GenEvtDi] [DEBUG] Generating the event" << std::endl;
+#endif
+
+  // Generate photon and virtual vector meson
+  this->GenGam();
+  this->GenDif();
+}
 
 double
 GamPomVMLL::GenMXT(double* wght)
@@ -857,6 +890,42 @@ GamPomVMLL::FixPhot(Particle* phot_, Particle* ele_, double *q2_, Particle pel_,
   *q2_ = std::pow(_dme, 2)+std::pow(y, 2)/(1.-y);
   (*phot_).P(pgam);
   (*ele_).P(pe);
+}
+
+void
+GamPomVMLL::VMFlux()
+{
+  
+  if (_igammd==-1) {
+    _vmflux_f = _vmflux_ft = 1.;
+    _vmflux_fl = 0.;
+    _vmflux_df = _vmflux_dft = _vmflux_dfl = 0.;
+  }
+  else if (_igammd==0 or _isum==0) {
+    _vmflux_f = _vmflux_ft = 0.3;
+    _vmflux_df = _vmflux_dft = 0.1;
+    _vmflux_fl = _vmflux_dft = 0.;
+  }
+  
+  if (_iacct>0) {
+    _vmflux_ft = _dsumt/_isum*_iacct/_igent;
+    _vmflux_dft = _vmflux_ft*std::sqrt((_qsumt/_dsumt-_dsumt/_isum)/(_isum-1)+(double)(_igent-_iacct)/_igent/_iacct);
+  }
+  else {
+    _vmflux_ft = _vmflux_dft = 0.;
+  }
+  
+  if (_iaccl>0) {
+    _vmflux_fl = _dsuml/_isum*_iaccl/_igenl;
+    _vmflux_dfl = _vmflux_fl*std::sqrt((_qsuml/_dsuml-_dsuml/_isum)/(_isum-1)+(double)(_igenl-_iaccl)/_igenl/_iaccl);
+  }
+  else {
+    _vmflux_fl = _vmflux_dfl = 0.;
+  }
+  
+  _vmflux_f = _vmflux_ft+_vmflux_fl;
+  _vmflux_df = std::sqrt(std::pow(_vmflux_dft, 2)+std::pow(_vmflux_dfl, 2));
+  
 }
 
 /*bool

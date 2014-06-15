@@ -23,6 +23,7 @@ Parameters::Parameters() :
   this->last_event = new Event();
   this->file = (std::ofstream*)NULL;
   this->hadroniser = (Hadroniser*)NULL;
+  this->output_format = "lhe";
 }
 
 Parameters::~Parameters()
