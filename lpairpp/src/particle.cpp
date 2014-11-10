@@ -1,7 +1,7 @@
 #include "particle.h"
 
 Particle::Particle() :
-  id(-1), pdgId(0), charge(999.), name(""), role(-1),
+  id(-1), pdgId((ParticleId)0), charge(999.), name(""), role(-1),
   helicity(0.),
   status(0), _m(-1.),
   _isPrimary(true)
@@ -9,13 +9,11 @@ Particle::Particle() :
   for (int i=0; i<4; i++) _p4[i] = 0.;
 }
 
-Particle::Particle(int role_, int pdgId_) :
-  id(-1), charge(999.), name(""), role(-1),
+Particle::Particle(int role_, ParticleId pdgId_) :
+  id(-1), pdgId(pdgId_), charge(999.), name(""), role(role_),
   status(0), _m(-1.),
   _isPrimary(true)
 {
-  this->role = role_;
-  this->pdgId = pdgId_;
   for (int i=0; i<4; i++) _p4[i] = 0.;
   if (this->pdgId!=0) {
     this->M(-1.);
@@ -44,9 +42,9 @@ Particle::operator=(const Particle &part_)
 }
 
 Particle&
-Particle::operator+(const Particle &part_)
+Particle::operator+=(const Particle &part_)
 {
-  pdgId = (part_.pdgId==pdgId) ? pdgId : -1;
+  pdgId = (part_.pdgId==pdgId) ? pdgId : (ParticleId)(-1);
   role = (part_.role==role) ? role : -1;
   for (int i=0; i<4; i++) _p4[i]+= part_._p4[i];
   M(-1.);
@@ -57,7 +55,7 @@ Particle::operator+(const Particle &part_)
 Particle&
 Particle::operator-(const Particle &part_)
 {
-  pdgId = (part_.pdgId==pdgId) ? pdgId : -1;
+  pdgId = (part_.pdgId==pdgId) ? pdgId : (ParticleId)(-1);
   role = (part_.role==role) ? role : -1;
   for (int i=0; i<4; i++) _p4[i]-= part_._p4[i];
   M(-1.);
@@ -134,10 +132,10 @@ Particle::SetMother(Particle* part_)
 bool
 Particle::AddDaughter(Particle* part_)
 {
-  std::pair<std::set<int>::iterator,bool> ret;
+  std::pair<ParticlesIds::iterator,bool> ret;
   ret = this->_daugh.insert(part_->id);
 #ifdef DEBUG
-  std::set<int>::iterator it;
+  ParticlesIds::iterator it;
   std::cout << "[Particle::AddDaughter] [DEBUG] Particle "
 	    << this->role << " (pdgId=" << this->pdgId << ") has now "
 	    << this->NumDaughters() << " daughter(s) : " << std::endl;
@@ -152,7 +150,7 @@ Particle::AddDaughter(Particle* part_)
 	      << part_->role << " (pdgId=" << part_->pdgId << ") is a new daughter of "
 	      << this->role << " (pdgId=" << this->pdgId << ")" << std::endl;
 #endif
-    if (!part_->Primary() && part_->GetMothers().size()<1) {
+    if (!part_->Primary() && part_->GetMothersIds().size()<1) {
       part_->SetMother(this);
     }
   }
@@ -164,7 +162,7 @@ std::vector<int>
 Particle::GetDaughters()
 {
   std::vector<int> out;
-  std::set<int>::iterator it;
+  ParticlesIds::iterator it;
   
   if (this->_daugh.empty()) return out;
   
@@ -225,6 +223,7 @@ Particle::Dump()
   }
 }
 
+//double*
 void
 Particle::LorentzBoost(double m_, double p_[4])
 {
@@ -237,13 +236,17 @@ Particle::LorentzBoost(double m_, double p_[4])
     }
     pf4 /= m_;
     fn = (pf4+this->E())/(p_[3]+m_);
+    /*for (int i=0; i<3; i++) {
+      __tmp3[i] = this->_p4[i] + fn*p_[i];
+    }*/
     for (int i=0; i<3; i++) {
       this->_p4[i] += fn*p_[i];
     }
   }
+  //return __tmp3;
 }
 
-void
+double*
 Particle::LorentzBoost(double p_[3])
 {
   double p2, gamma, bp, gamma2;
@@ -258,9 +261,10 @@ Particle::LorentzBoost(double p_[3])
   else gamma2 = 0.;
 
   for (int i=0; i<3; i++) {
-    this->_p4[i] += gamma2*bp*p_[i]+gamma*p_[i]*E();
+    __tmp3[i] = this->_p4[i] + gamma2*bp*p_[i]+gamma*p_[i]*E();
   }
   //this->E(gamma*E()+bp);
+  return __tmp3;
 }
 
 void

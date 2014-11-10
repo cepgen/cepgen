@@ -10,6 +10,7 @@
 #include <algorithm>
 
 #include "utils.h"
+//#include "lheutils.h"
 
 typedef std::set<int> ParticlesIds;
 
@@ -23,7 +24,7 @@ class Particle {
     /**
      * @brief Object constructor (providing the role of the particle in the process, and its Particle Data Group identifier)
      */
-    Particle(int role_,int pdgId_=0);
+    Particle(int role_,ParticleId pdgId_=(ParticleId)0);
     ~Particle();
     /**
      * @brief Copies all the relevant quantities from one Particle object to another
@@ -32,7 +33,7 @@ class Particle {
     /**
      * @brief Adds two particles' momenta to create a combined particle
      */
-    Particle& operator+(const Particle&);
+    Particle& operator+=(const Particle&);
     /**
      * @brief Substracts two particles' momenta to extract a particle's kinematics
      */
@@ -56,11 +57,12 @@ class Particle {
      * @brief Dumps all the information on this particle
      */
     void Dump();
+    //double* LorentzBoost(double m_, double p_[4]);
     void LorentzBoost(double m_, double p_[4]);
     /**
      * Lorentz boost from ROOT
      */
-    void LorentzBoost(double p_[3]);
+    double* LorentzBoost(double p_[3]);
     /**
      * @brief Unique identifier of the particle (in a Event object context)
      */
@@ -70,7 +72,7 @@ class Particle {
      * _The Monte Carlo particle numbering scheme [...] is intended to facilitate interfacing between event generators, detector simulators, and analysis packages used in particle physics._
      * @brief Particle Data Group integer identifier
      */
-    int pdgId;
+    ParticleId pdgId;
     /**
      * @brief The particle's electric charge (given as a float number, for the quarks and bound states)
      */
@@ -100,11 +102,6 @@ class Particle {
      * @brief Momentum along the \f$z\f$-axis in \f$\text{GeV}/c\f$
      */
     inline double Pz() const { return this->_p4[2]; };
-    /**
-     * Codes 1-10 correspond to currently existing partons/particles, and larger codes contain partons/particles which no longer exist, or other kinds of event information
-     * @brief Particle status
-     */
-    int status;
     /**
      * Gets the particle's mass in \f$\text{GeV}/c^{2}\f$.
      * @brief Gets the particle's mass
@@ -143,11 +140,11 @@ class Particle {
      * @brief Azimuthal angle
      * @return The azimuthal angle of the particle
      */
-    inline double Phi() const {
+    /*inline double Phi() const {
       return (this->Px()==0. && this->Py()==0. && this->Pz()==0.)
 	? 0.
 	: atan2(this->P(), this->Pz());
-    };
+	};*/
     /**
      * @brief Sets the 3-momentum associated to the particle
      * @param[in] px_ Momentum along the \f$x\f$-axis, in \f$\text{GeV}/c\f$
@@ -202,11 +199,6 @@ class Particle {
      */
     inline double P() const { return std::sqrt(std::pow(this->Pt(),2)+std::pow(this->Pz(),2)); };
     /**
-     * @brief Returns the particle's 3-momentum
-     * @return The particle's 3-momentum as a 3 components double array
-     */
-    //inline double* P3() { double *p3 = new double(3); std::copy(this->_p4, this->_p4+3, p3); return p3; };
-    /**
      * Builds and returns the particle's 4-momentum as an array ordered as 
      * \f$(\mathbf p, E) = (p_x, p_y, p_z, E)\f$
      * @brief Returns the particle's 4-momentum
@@ -216,6 +208,12 @@ class Particle {
       this->_p4[3] = this->E();
       return this->_p4;
     };
+    inline std::vector<double> P5() const {
+      std::vector<double> out(this->_p4, this->_p4+3);
+      out.push_back(this->E());
+      out.push_back(this->_m);
+      return out;
+    }
     /**
      * @brief Sets the particle's energy
      * @param[in] E_ Energy, in GeV
@@ -230,6 +228,8 @@ class Particle {
      */
     inline double E2() const { return std::pow(this->E(), 2); };
     void RotateThetaPhi(double theta_, double phi_);
+    inline double Theta() const { return atan2(Pt(), Pz()); }
+    inline double Phi() const { return atan2(Py(), Px()); }
     /**
      * @brief Is this particle a valid particle which can be used for kinematic computations ?
      */
@@ -244,7 +244,7 @@ class Particle {
      * @brief Gets the unique identifier to the mother particle from which this particle arises
      * @return An integer representing the unique identifier to the mother of this particle in the event
      */
-    inline ParticlesIds GetMothers() { return this->_moth; };
+    inline ParticlesIds GetMothersIds() const { return this->_moth; }
     /**
      * Adds a "daughter" to this particle (one of its decay product(s))
      * @brief Specify a decay product for this particle
@@ -272,7 +272,12 @@ class Particle {
     /**
      * @brief Is this particle a primary particle ?
      */
-    inline bool Primary() { return this->_isPrimary; };
+    inline bool Primary() const { return this->_isPrimary; }
+    /**
+     * Codes 1-10 correspond to currently existing partons/particles, and larger codes contain partons/particles which no longer exist, or other kinds of event information
+     * @brief Particle status
+     */
+    int status;
   private:
     /**
      * @brief Mass in \f$\text{GeV}/c^2\f$
@@ -296,8 +301,10 @@ class Particle {
      * - 3: \f$E\f$ (in \f$\text{GeV}\f$)
      */
     double _p4[4];
+    double __tmp3[3], __tmp4[4];
 };
 
+inline bool compareParticle(Particle a, Particle b) { return a.id<b.id; }
 inline bool compareParticlePtrs(Particle* a, Particle* b) { return a->id<b->id; }
 
 #endif

@@ -31,8 +31,8 @@ class Process
    */
   inline virtual bool SetIncomingParticles(Particle ip1_,Particle ip2_) { 
     double k = 0., *p1 = ip1_.P4(), *p2 = ip2_.P4();
-    ip1_.role=(ip1_.Pz()>0.)?1:2; _ev->AddParticle(&ip1_);
-    ip2_.role=(ip2_.Pz()>0.)?1:2; _ev->AddParticle(&ip2_);
+    ip1_.role=(ip1_.Pz()>0.)?1:2; _ev->AddParticle(ip1_);
+    ip2_.role=(ip2_.Pz()>0.)?1:2; _ev->AddParticle(ip2_);
     for (int i=0; i<3; i++) k += p1[i]*p2[i];
     _s = ip1_.M2()+ip2_.M2()+2.*(ip1_.E()*ip2_.E()-k);
     _ecm = sqrt(_s);
@@ -46,8 +46,8 @@ class Process
    * @return A boolean stating whether or not the outgoing kinematics is
    * properly set for this event
    */
-  inline virtual bool SetOutgoingParticles(int part_,int pdgId_, int mothRole_=-1) {
-    _ev->AddParticle(new Particle(part_, pdgId_));
+  inline virtual bool SetOutgoingParticles(int part_, ParticleId pdgId_, int mothRole_=-1) {
+    _ev->AddParticle(Particle(part_, pdgId_));
     if (mothRole_!=-1) _ev->GetOneByRole(part_)->SetMother(_ev->GetOneByRole(mothRole_));
     return true;
   };

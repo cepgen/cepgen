@@ -2,6 +2,7 @@
 #define _PHYSICS_H
 
 #include "event.h"
+#include "hadroniser.h"
 
 /**
  * List of physical constraints to apply on the phase space
@@ -37,7 +38,7 @@ class PhysicsBoundaries
   double zmax;
 };
 
-Particles EPA(Particle el_, Particle pr_, int mode_, PhysicsBoundaries b_);
+Particles EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_);
 
 /**
  * Computes the proton structure function (F.W Brasse et al., DESY 76/11 (1976),
@@ -49,7 +50,8 @@ bool PSF(double,double,double*,double*,double*);
 /**
  * @brief Vector meson particles and their decay mode
  */
-typedef enum {
+typedef enum
+{
   RHO_TO_PIPI = 113,
   OMEGA_TO_PIPI = 223,
   PHI_TO_KK = 333,
@@ -68,6 +70,14 @@ typedef enum {
  * @param[in] processId_ The identifier of the process
  * @return Branching ratio for the process
  */
-double GetBRFromProcessId(VMDecay processId_);
+double GetBRFromProcessId(ParticleId vmId_);
+
+/**
+ * Decay a vector meson given its branching fractions
+ * @param[in] part_ A Particle object containing all the physical and kinematic quantities for its decay
+ * @param[in] had_ The default hadroniser object to use for the default decay
+ * @return A vector of Particle objects
+ */
+Particles VMDecayer(Particle part_, Hadroniser *had_);
 
 #endif

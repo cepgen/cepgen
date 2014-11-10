@@ -92,33 +92,33 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
       else status = (*p)->status;
       
       lujets_.k[0][np] = status;
-      lujets_.k[1][np] = (*p)->pdgId;
+      lujets_.k[1][np] = (ParticleId)((*p)->pdgId);
       
-      if ((*p)->GetMothers().size()>0) lujets_.k[2][np] = *((*p)->GetMothers().begin())+1; // mother
+      if ((*p)->GetMothersIds().size()>0) lujets_.k[2][np] = *((*p)->GetMothersIds().begin())+1; // mother
       else lujets_.k[2][np] = 0; // no mother registered
       
       daug = ev_->GetDaughters(*p);
       if (daug.size()!=0) {
-	lujets_.k[3][np] = (*p)->GetDaughters().front()+1; // daughter 1
-	lujets_.k[4][np] = (*p)->GetDaughters().back()+1; // daughter 2
+        lujets_.k[3][np] = (*p)->GetDaughters().front()+1; // daughter 1
+        lujets_.k[4][np] = (*p)->GetDaughters().back()+1; // daughter 2
       }
       else {
-	lujets_.k[3][np] = 0; // daughter 1
-	lujets_.k[4][np] = 0; // daughter 2
+        lujets_.k[3][np] = 0; // daughter 1
+        lujets_.k[4][np] = 0; // daughter 2
       }
       
       for (int i=0; i<5; i++) {
-	lujets_.v[i][np] = 0.;
+        lujets_.v[i][np] = 0.;
       }
       
       if ((*p)->status==3) {
-	//FIXME workaround
-	lujets_.k[0][np] = 1;
-	//FIXME
-	jlrole[id1] = (*p)->role;
-	jlpsf[id1][id2] = (*p)->id+1;
-	njoin[id1]++;
-	id2++;
+        //FIXME workaround
+        lujets_.k[0][np] = 1;
+        //FIXME
+        jlrole[id1] = (*p)->role;
+        jlpsf[id1][id2] = (*p)->id+1;
+        njoin[id1]++;
+        id2++;
       }
       lujets_.n++;
     }
@@ -164,7 +164,7 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
 
     Particle pa;
     pa.id = p;
-    pa.pdgId = lujets_.k[1][p];
+    pa.pdgId = (ParticleId)(lujets_.k[1][p]);
     if (ev_->GetById(lujets_.k[2][p]-1)!=(Particle*)NULL) {
       pa.role = ev_->GetById(lujets_.k[2][p]-1)->role; // Child particle inherits its mother's role
     }
@@ -184,7 +184,7 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
       pa.SetMother(ev_->GetById(lujets_.k[2][p]-1));
     }
 
-    ev_->AddParticle(&pa);
+    ev_->AddParticle(pa);
   }
 
   ev_->Dump();
@@ -195,7 +195,7 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
 bool
 Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
 {
-  int singlet_id, doublet_id;
+  ParticleId singlet_id, doublet_id;
   double ranudq, ulmdq, ulmq;
   double ranmxp, ranmxt;
   double pmxp;
@@ -220,16 +220,16 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
       
       ranudq = drand();
       if (ranudq<1./9.) {
-        singlet_id = 1;
-        doublet_id = 2203;
+        singlet_id = QUARK_D;
+        doublet_id = DIQUARK_UU1;
       }
       else if (ranudq<5./9.) {
-        singlet_id = 2;
-        doublet_id = 2101;
+        singlet_id = QUARK_U;
+        doublet_id = DIQUARK_UD0;
       }
       else {
-        singlet_id = 2;
-        doublet_id = 2103;
+        singlet_id = QUARK_U;
+        doublet_id = DIQUARK_UD1;
       }
       ulmdq = ulmass(doublet_id);
       ulmq = ulmass(singlet_id);
@@ -263,7 +263,7 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
 
       Particle singlet((*p)->role, singlet_id);
       singlet.status = 3;
-      singlet.SetMother(ev_->GetOneByRole((*p)->role));
+      //singlet.SetMother(ev_->GetOneByRole((*p)->role));
       if (!singlet.P(partpb)) {
 	//#ifdef ERROR
         std::cerr << "[GamGam::PrepareHadronisation] ERROR while setting the 4-momentum of singlet" << std::endl;
@@ -272,7 +272,7 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
       //std::cout << "singlet, mass = " << singlet.M() << std::endl;
       //singlet.Dump();
       singlet.M(-1); //FIXME
-      ev_->AddParticle(&singlet);
+      //ev_->AddParticle(singlet);
 
       pmxda[0] = -pmxda[0];
       pmxda[1] = -pmxda[1];
@@ -291,7 +291,43 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
       }
       //std::cout << "doublet, mass = " << doublet.M() << std::endl;
       doublet.M(-1); //FIXME
-      ev_->AddParticle(&doublet);    
+
+      if ((*p)->NumDaughters()==0) {
+        singlet.SetMother(ev_->GetById((*p)->id));
+        doublet.SetMother(ev_->GetById((*p)->id));
+
+        ev_->AddParticle(singlet);
+        ev_->AddParticle(doublet);
+#ifdef DEBUG
+        std::cout << "[GamGam::PrepareHadronisation] [DEBUG] Quark/diquark content succesfully added to the event!" << std::endl;
+#endif
+      }
+      else { // Quark/diquark content already present in the event
+	      std::vector<int> daugh;
+	      std::vector<int>::iterator did;
+
+#ifdef DEBUG
+	      std::cout << "[GamGam::PrepareHadronisation] [DEBUG] Quark/diquark content already present in the event!" << std::endl
+		        << "  Role of these particles: " << (*p)->role << std::endl;
+#endif
+	      daugh = (*p)->GetDaughters();
+	      for (did=daugh.begin(); did!=daugh.end(); did++) {
+	        if (ev_->GetById(*did)->pdgId==1 or ev_->GetById(*did)->pdgId==2) { // Quark
+	          singlet.SetMother(ev_->GetById((*p)->id));
+	          *(ev_->GetById(*did)) = singlet;
+#ifdef DEBUG
+            std::cout << "[GamGam::PrepareHadronisation] [DEBUG] Singlet replaced" << std::endl;
+#endif
+	        }
+	        else { // Diquark
+	          doublet.SetMother(ev_->GetById((*p)->id));
+	          *(ev_->GetById(*did)) = doublet;
+#ifdef DEBUG
+            std::cout << "[GamGam::PrepareHadronisation] [DEBUG] Doublet replaced" << std::endl;
+#endif
+	        }
+	      }
+      }
     }
   }
   return true;

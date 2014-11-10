@@ -40,7 +40,7 @@ class Jetset7Hadroniser : public Hadroniser
    */
   inline static double ulmass(int pdgid_) { return (double)ulmass_(pdgid_); };
   /**
-   * Administrate the fragmentation and decay chain. It may be called several times, but only entries which have not yet been treated (more precisely, have 1 <= KS <= 10) can be affected by further calls. This may apply if more jets/particles have been added by the user, or if particles previously considered stable are now allowed to decay. The actions that will be taken during a LUEXEC call can be tailored extensively via the LUDAT1 - LUDAT3 commonblocks, in particular by setting the MSTJ values suitably.
+   * Administrate the fragmentation and decay chain. It may be called several times, but only entries which have not yet been treated (more precisely, have 1 \f$\leq\f$ KS \f$\leq\f$ 10) can be affected by further calls. This may apply if more jets/particles have been added by the user, or if particles previously considered stable are now allowed to decay. The actions that will be taken during a LUEXEC call can be tailored extensively via the LUDAT1 - LUDAT3 commonblocks, in particular by setting the MSTJ values suitably.
    */
   inline static void luexec() { luexec_(); };
   /**

@@ -8,8 +8,7 @@
 #include <fstream>
 #include <string>
 
-#include "../models/gamgamll.h"
-#include "../models/gampomvmll.h"
+#include "../processes/processes.h"
 
 #include "pythia6hadroniser.h"
 #include "pythia8hadroniser.h"
@@ -55,11 +54,11 @@ class Parameters {
     /**
      * @brief First beam/primary particle's PDG identifier
      */
-    int in1pdg;
+    ParticleId in1pdg;
     /**
      * @brief Second beam/primary particle's PDG identifier
      */
-    int in2pdg;
+    ParticleId in2pdg;
     /**
      * The first incoming particle type and kind of interaction :
      * - 1 - electron,
@@ -82,7 +81,7 @@ class Parameters {
      * - 15 - for \f$\tau^+\tau^-\f$ pairs
      * @brief PDG id of the outgoing leptons
      */
-    int pair;
+    ParticleId pair;
     /**
      * Set of cuts to apply on the outgoing leptons in order to restrain the available kinematic phase space :
      * - 0 - No cuts at all (for the total cross section)

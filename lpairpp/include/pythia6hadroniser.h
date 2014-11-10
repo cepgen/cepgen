@@ -27,6 +27,8 @@ extern "C"
   extern void pyname_(int&,char*,int);
   /** @brief Get information on a particle from the Pythia6 module */
   extern double pyp_(int&,int&);
+  /** @brief Stores one parton/particle in the PYJETS common block */
+  extern void py1ent_(int&,int&,double&,double&,double&);
 
   /** @brief Particles content of the event */
   extern struct
@@ -62,6 +64,8 @@ class Pythia6Hadroniser : public Hadroniser
   inline static void pygive(const std::string &line_) { pygive_(line_.c_str(),line_.length()); };
   inline static void pylist(int mlist_) { pylist_(mlist_); };
   inline static double pyp(int role_, int qty_) { return pyp_(role_,qty_); };
+  //inline static void py1ent(int* kf_, double* pe_, double theta_, double phi_) { int one=1; py1ent_(&one, kf_, pe_, theta_, phi_); }
+  //inline static void py1ent(int* kf_, double* pe_, double theta_, double phi_) { py1ent_(1, kf_, pe_, theta_, phi_); }
   inline static std::string pyname(int pdgid_) {
     char out[NAME_CHR];
     std::string s;

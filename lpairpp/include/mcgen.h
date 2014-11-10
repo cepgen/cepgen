@@ -89,6 +89,7 @@ class MCGen {
    * @return The Parameter object embedded in this class
    */
   void AnalyzePhaseSpace(const std::string);
+  //HEPRUP GetHEPRUP();
   /**
    * @brief Physical Parameters used in the events generation and cross-section computation
    */

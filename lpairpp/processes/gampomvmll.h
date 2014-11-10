@@ -6,6 +6,22 @@
 #include "../include/utils.h"
 #include "../include/process.h"
 
+#define IBE 1
+#define ISCE 3
+#define IGAM 41
+#define IVVM 411
+
+#define IBP 2
+#define IDIFP 5
+#define IPOM 42
+
+#define IDIFV 43
+#define IGLUE 431
+#define IVM 4
+
+#define OL1 6
+#define OL2 7
+
 /**
  * @brief Computes the matrix element for a CE \f$\gamma\mathbb{P}\rightarrow \rho,\omega,\phi,J/\psi,\Upsilon,\ldots\rightarrow\ell^+\ell^-\f$ process
  */
@@ -16,16 +32,32 @@ class GamPomVMLL : public Process
   ~GamPomVMLL();
   //bool SetIncomingParticles(Particle, Particle);
   //bool SetOutgoingParticles(int, int);
-  //void FillKinematics(bool);
+  void FillKinematics(bool);
   //void SetKinematics(Kinematics);
   //void ComputeCMenergy();
   double ComputeWeight();
   //void StoreEvent(std::ofstream*,double);
   //void PrepareHadronisation(Particle *part_);
  private:
+ /**
+  * Set up the generator for event generation
+  * @author Benno List
+  * @date 31 Jan 1993 (INIGEN)
+  * @date 14 Jun 1995 (GDIBEG)
+  * @note Some of the parameters are set/calculated/changed during this step
+  */
   void GDIBeg();
+  void GDIEvt();
+  /**
+   * Generate a diffractive vector meson production event
+   */
   void GenEvtDi();
+  /**
+   * Take 5-vectors of colliding \f$e\f$ and \f$p\f$ and generate a virtual photon, the momentum transfer of the pomeron, and the diffractive masses at the \f$p\f$ and VM vertices
+   */
   void GenGam();
+  double OneEvent();
+
   inline void GenBEl() {};
   inline void GenBPr() {};
   /**
@@ -35,6 +67,12 @@ class GamPomVMLL : public Process
    * @date 10 May 1994 (GENMXT)
    */
   double GenMXT(double* wght);
+  /**
+   * Take 5-vectors of colliding \f$\gamma\f$ and \f$p\f$ and generate a diffractive state
+   * @param[in] tpom_ Momentum transfer of the pomeron
+   * @param[in] yhat_ \f$\hat y=\sin^2(\theta^\ast/2)\f$ where \f$\theta^\ast\f$ is the scattering angle in the \f$\gamma p\f$ CMS
+   */
+  void GenDif();
   /**
    * Generate one event with unweighted photon & electron
    * * according to WWA :
@@ -48,8 +86,12 @@ class GamPomVMLL : public Process
    *   - calculate integrated factor over the spectrum:
    *     kinematical bounds : \f$\left[Y_{\text{min}},  Y_{\text{max}}\right] (W_{\text{min}})\f$, 
    *                       \f$\left[Q^2_{\text{min}}, Q^2_{\text{max}}\right] (Q^2_{\text{cutoff}})\f$
+   * @param[out] q2_ Virtuality of photon (positive!): \f$Q^2 = -q^2\f$
+   * @param[out] heli_ Photon helicity: 0: longitudinal, 1, -1: transverse polarization
+   * @author T. Jansen
+   * @date 6 Apr 1993
    */
-  void GEPhot(int* heli_);
+  void GEPhot(double* q2_, int* heli_);
   double PXMass(double mmin_, double mmax_);
   /**
    * Generate hadronic mass between @a mmin_ and @a mmax_ for VM vertex
@@ -69,11 +111,29 @@ class GamPomVMLL : public Process
    */
   void DecVM();
   /**
-   * Take 5-vectors of colliding \f$\gamma\f$ and \f$p\f$ and generate a diffractive state
-   * @param[in] tpom_ Momentum transfer of the pomeron
-   * @param[in] yhat_ \f$\hat y=\sin^2(\theta^\ast/2)\f$ where \f$\theta^\ast\f$ is the scattering angle in the \f$\gamma p\f$ CMS
+   * Generate photon with energy between @a emin_ and electron energy and \f$Q^2\f$ less than @a q2max_, calculate 5-vector of scattered electron.
+   * @param[in] emin_ Minimal allowed energy
+   * @param[in] q2max_ Maximal allowed \f$Q^2\f$
+   * @param[in] pel_ Incoming electron kinematics
+   * @param[out] phot_ Photon kinematics (mass is set to \f$-\sqrt Q^2\f$)
+   * @param[out] ele_ Outgoing electron kinematics
+   * @param[out] q2_ Absolute Photon momentum squared (positive!)
+   * @author Benno List
+   * @date 22 Jan 1993
+   * @note Up to now only real photons with 1/k spectrum
+   * @note Sets @a _ihel, @a _ftrans, @a _epsil
    */
-  void GenDif();
+  void GenPhot(Particle* phot_, Particle* ele_, double *q2_, Particle pel_, double emin_, double q2max_);
+  /**
+   * Generate photon with fixed energy @a _egamma, and calculate scattered electron kinematics.
+   * @param[in] pel_ Incoming electron kinematics
+   * @param[in] egamma_ Photon energy
+   * @param[out] phot_ Photon kinematics (mass is set to \f$-\sqrt Q^2\f$)
+   * @param[out] ele_ Outgoing electron kinematics
+   * @param[out] q2_ Absolute Photon momentum squared (positive!)
+   * @author Benno List
+   * @date 28 Apr 1993
+   */
   void FixPhot(Particle* phot_, Particle* ele_, double *q2_, Particle pel_, double egamma_);
   /**
    * Calculate relative photon luminosity for photon flux produced by @a GEPhot, weighted by VM propagator and cross section
@@ -87,6 +147,11 @@ class GamPomVMLL : public Process
    * @date 07 Apr 1993
    */
   void VMFlux();
+
+  int _event_heli;
+  double _event_egammin;
+  double _event_smax;
+  double _event_propmx;
 
   /**
    * Minimal \f$\cos\theta\f$ of scattered electron
@@ -122,7 +187,7 @@ class GamPomVMLL : public Process
    *  - 995 : diffractive pomeron-VM scattering (glueball production)
    *    see P.E.SCHLEIN (1994): Phys. Lett. B332, 136-140.
    */
-  int ifragv;
+  ParticleId ifragv;
   /**
    * Minimal mass of diffractive VM state.
    * If value is too small (smaller than \f$m_{\pi^0}\f$), sets value to \f$m_{\text{VM}}+\f$ some offset
@@ -147,7 +212,7 @@ class GamPomVMLL : public Process
    *  - *22 : diffr. gamma dissoc. (special value)*
    * @brief Type of vector meson to produce and its decay channel
    */
-  VMDecay itypvm;
+  ParticleId itypvm;
   /**
    * @brief Index of diffractive \f$q\bar q\f$ states
    */
@@ -304,7 +369,7 @@ class GamPomVMLL : public Process
    *  - 0.0217 for \f$\Upsilon(3s)\rightarrow \ell^+ \ell^- X\f$ (including cascade decays)
    */
   double _br;
-  double _w2;
+  double _gengam_w2;
   /**
    * @brief Absolute of square-momentum of virtual photon
    */
@@ -323,12 +388,12 @@ class GamPomVMLL : public Process
   double _gengam_yhat;
   double _gengam_t;
 
+  //static bool _gephot_first; // FIXME FIXME no static variables should be allowed here !
   bool _gephot_first;
   double _gephot_pel[5];
   double _gephot_ppr[5];
   double _gephot_pph[5];
   double _gephot_ppe[5];
-  double _gephot_q2;
   int _gephot_heli;
 
   bool _fraggl_begin;
@@ -379,12 +444,14 @@ class GamPomVMLL : public Process
   int _iacct;
   int _iaccl;
   int _isum;
+  int _igen;
   int _igent;
   int _igenl;
   double _qsumt;
   double _qsuml;
   double _dsumt;
   double _dsuml;
+
 };
 
 #endif

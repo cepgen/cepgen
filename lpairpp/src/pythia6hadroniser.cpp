@@ -86,24 +86,24 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
       else status = (*p)->status;
       
       pyjets_.k[0][np] = status;
-      pyjets_.k[1][np] = (*p)->pdgId;
+      pyjets_.k[1][np] = (int)((*p)->pdgId);
       
       //if ((*p)->GetMother()!=-1) pyjets_.k[2][np] = (*p)->GetMother()+1; // mother
-      if ((*p)->GetMothers().size()>0) pyjets_.k[2][np] = *((*p)->GetMothers().begin())+1; // mother
+      if ((*p)->GetMothersIds().size()>0) pyjets_.k[2][np] = *((*p)->GetMothersIds().begin())+1; // mother
       else pyjets_.k[2][np] = 0; // mother
       
       daug = ev_->GetDaughters(*p);
       if (daug.size()!=0) {
-	pyjets_.k[3][np] = (*p)->GetDaughters().front()+1; // daughter 1
-	pyjets_.k[4][np] = (*p)->GetDaughters().back()+1; // daughter 2
+        pyjets_.k[3][np] = (*p)->GetDaughters().front()+1; // daughter 1
+        pyjets_.k[4][np] = (*p)->GetDaughters().back()+1; // daughter 2
       }
       else {
-	pyjets_.k[3][np] = 0; // daughter 1
-	pyjets_.k[4][np] = 0; // daughter 2
+        pyjets_.k[3][np] = 0; // daughter 1
+        pyjets_.k[4][np] = 0; // daughter 2
       }
       
       for (int i=0; i<5; i++) {
-	pyjets_.v[i][np] = 0.;
+        pyjets_.v[i][np] = 0.;
       }
       
       if ((*p)->status==3) {
@@ -169,7 +169,7 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
 
     Particle pa;
     pa.id = p;
-    pa.pdgId = pyjets_.k[1][p];
+    pa.pdgId = (ParticleId)pyjets_.k[1][p];
     if (ev_->GetById(pyjets_.k[2][p]-1)!=(Particle*)NULL) {
       pa.role = ev_->GetById(pyjets_.k[2][p]-1)->role; // Child particle inherits its mother's role
     }
@@ -189,7 +189,7 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
       pa.SetMother(ev_->GetById(pyjets_.k[2][p]-1));
     }
 
-    ev_->AddParticle(&pa);
+    ev_->AddParticle(pa);
   }
 
   return true;
@@ -198,7 +198,7 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
 bool
 Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
 {
-  int singlet_id, doublet_id;
+  ParticleId singlet_id, doublet_id;
   double ranudq, ulmdq, ulmq;
   double ranmxp, ranmxt;
   double pmxp;
@@ -217,16 +217,16 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
     if ((*p)->status==-2) { // One proton to be fragmented
       ranudq = (double)rand()/RAND_MAX;
       if (ranudq<1./9.) {
-        singlet_id = 1;
-        doublet_id = 2203;
+        singlet_id = QUARK_D;
+        doublet_id = DIQUARK_UU1;
       }
       else if (ranudq<5./9.) {
-        singlet_id = 2;
-        doublet_id = 2101;
+        singlet_id = QUARK_U;
+        doublet_id = DIQUARK_UD0;
       }
       else {
-        singlet_id = 2;
-        doublet_id = 2103;
+        singlet_id = QUARK_U;
+        doublet_id = DIQUARK_UD1;
       }
       ulmdq = pymass(doublet_id);
       ulmq = pymass(singlet_id);
@@ -277,15 +277,14 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
       doublet.M(-1); //FIXME
 
       if ((*p)->NumDaughters()==0) {
-	singlet.SetMother(ev_->GetById((*p)->id));
-	doublet.SetMother(ev_->GetById((*p)->id));
+        singlet.SetMother(ev_->GetById((*p)->id));
+        doublet.SetMother(ev_->GetById((*p)->id));
 
-	ev_->AddParticle(&singlet);
-	ev_->AddParticle(&doublet);
+        ev_->AddParticle(singlet);
+        ev_->AddParticle(doublet);
 #ifdef DEBUG
-	std::cout << "[GamGam::PrepareHadronisation] [DEBUG] Quark/diquark content succesfully added to the event!" << std::endl;
+        std::cout << "[GamGam::PrepareHadronisation] [DEBUG] Quark/diquark content succesfully added to the event!" << std::endl;
 #endif
-
       }
       else { // Quark/diquark content already present in the event
 	std::vector<int> daugh;

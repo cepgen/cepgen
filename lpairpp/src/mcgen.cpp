@@ -22,7 +22,7 @@ MCGen::MCGen(Parameters *ip_)
 
 MCGen::~MCGen()
 {
-  delete veg;
+  if (_vegas_built) delete veg;
   delete parameters;
 #ifdef DEBUG
   std::cout << "[MCGen::~MCGen] [DEBUG] Destructor called" << std::endl;
@@ -124,7 +124,6 @@ MCGen::GenerateOneEvent()
     double xsec, err;
     this->ComputeXsection(&xsec, &err);
   }
-
   while (!good) {
     good = veg->GenerateOneEvent();
   }
@@ -160,9 +159,23 @@ MCGen::LaunchGeneration()
   *(this->parameters->file) << "</LesHouchesEvents>" << std::endl;
 }
 
-double f(double* x_, size_t ndim_, void* params_) {
+/*HEPRUP
+MCGen::GetHEPRUP()
+{
+  HEPRUP out(1); // only one single type of processes
+  out.idbmup[0] = this->parameters->in1pdg;
+  out.idbmup[1] = this->parameters->in2pdg;
+  out.ebmup[0] = this->parameters->in1p;
+  out.ebmup[1] = this->parameters->in2p;
+  out.xsecup[0] = this->_xsec;
+  out.xerrup[0] = this->_xsec_error;
+  return out;
+  }*/
+
+double f(double* x_, size_t ndim_, void* params_)
+{
   double ff;
-  int outp1pdg, outp2pdg;
+  ParticleId outp1pdg, outp2pdg;
   Parameters *p;
   Kinematics kin;
   Particle *in1, *in2;
@@ -203,16 +216,17 @@ double f(double* x_, size_t ndim_, void* params_) {
   switch(ndim_) {
   case 7:
   default:
-    outp1pdg = outp2pdg = 2212;
+    outp1pdg = p->in1pdg;
+    outp2pdg = p->in2pdg;
     kin.kinematics = 1;
     break;
   case 8:
-    outp1pdg = 2;
-    outp2pdg = 2212;
+    outp1pdg = QUARK_U;
+    outp2pdg = p->in2pdg;
     kin.kinematics = 2;
     break;
   case 9:
-    outp1pdg = outp2pdg = 2;
+    outp1pdg = outp2pdg = QUARK_U;
     kin.kinematics = 3;
     break;
   }
@@ -233,7 +247,6 @@ double f(double* x_, size_t ndim_, void* params_) {
   //kin.mxmin = 0; //FIXME
   //kin.mxmax = 100000; //FIXME
 
-  p->process->GetEvent()->clear();
   p->process->SetPoint(ndim_, x_);
   p->process->SetKinematics(kin);
   p->process->SetIncomingParticles(*in1, *in2);
@@ -294,6 +307,8 @@ double f(double* x_, size_t ndim_, void* params_) {
     //p->process->GetEvent()->Store(p->file);
 
   }
+  //p->process->ClearEvent();
+  p->process->GetEvent()->clear(); // need to move this sw else ?
 
   delete in1;
   delete in2;

@@ -47,7 +47,7 @@ class Event {
      */
     inline Particle* GetOneByRole(int role_) { 
       ParticlesRef out = this->GetByRole(role_);
-      if (out.size()==0) return (Particle*)NULL;
+      if (out.size()==0) return 0;
       else return out.at(0);
     };
     /**
@@ -57,6 +57,7 @@ class Event {
      * @return A pointer to the requested Particle object
      */
     Particle* GetById(int id_);
+    const Particle GetConstById(int id_) const;
     /**
      * Returns the pointers to the Particle objects corresponding to the unique identifiers in the event
      * @brief Gets a vector of particles by their unique identifier in the event
@@ -76,10 +77,19 @@ class Event {
      */
     inline ParticlesRef GetMothers(Particle* part_) {
       ParticlesRef out;
-      ParticlesIds moth = part_->GetMothers();
+      const ParticlesIds moth = part_->GetMothersIds();
       ParticlesIds::iterator m;
       for (m=moth.begin(); m!=moth.end(); m++) {
-	out.push_back(this->GetById(*m));
+      	out.push_back(this->GetById(*m));
+      }
+      return out;
+    }; // FIXME
+    inline Particles GetConstMothers(Particle* part_) const {
+      Particles out;
+      const ParticlesIds moth = part_->GetMothersIds();
+      ParticlesIds::iterator m;
+      for (m=moth.begin(); m!=moth.end(); m++) {
+      	out.push_back(this->GetConstById(*m));
       }
       return out;
     }; // FIXME
@@ -93,7 +103,7 @@ class Event {
      * Gets a list of roles for the given event (really process-dependant for the central system)
      * @return A vector of integers corresponding to all the roles the particles can play in the event
      */
-    std::vector<int> GetRoles();
+    std::vector<int> GetRoles() const;
     /**
      * Sets the information on one particle in the process
      * @brief Add a particle to the event
@@ -104,7 +114,7 @@ class Event {
      *  * 0 if an existing Particle object has been modified
      *  * -1 if the requested role to edit is undefined or incorrect
      */
-    int AddParticle(Particle* part_, bool replace_=false);
+    int AddParticle(Particle part_, bool replace_=false);
     /**
      * @brief Creates a new particle in the event, with no kinematic information but the role it has to play in the process
      * @param[in] role_ The role the particle will play in the process
@@ -115,13 +125,14 @@ class Event {
      *  * -1 if the requested role to edit is undefined or incorrect
      */
     int AddParticle(int role_, bool replace_=false);
+    //HEPEUP GetHEPEUP() const;
     /**
      * Returns an event block in a LHE format (a XML-style) with all the information on the particles composing this event
      * @brief Gets the LHE block for this event
      * @param[in] weight_ The weight of the event
      * @return A string containing the kinematic quantities for each of the particles in the event, formatted as the LHE standard requires.
      */
-    std::string GetLHERecord(const double weight_=1.);
+    //std::string GetLHERecord(const double weight_=1.);
     /**
      * Stores in a file (raw format) all the kinematics on the outgoing leptons
      * @param[in] weight_ The weight of the event
@@ -138,6 +149,7 @@ class Event {
      * @return A vector containing all the pointers to the Particle objects contained in the event
      */
     ParticlesRef GetParticles();
+    Particles GetConstParticles() const;
     /**
      * @brief Gets a vector of stable particles in the event
      * @return A vector containing all the pointers to the stable Particle objects contained in the event
@@ -147,7 +159,7 @@ class Event {
      * @brief Number of particles in the event
      * @return The number of particles in the event, as an integer
      */
-    inline int NumParticles() { return this->_part.size(); };
+    inline int NumParticles() const { return this->_part.size(); };
     /**
      * @brief Number of trials before the event was "correctly" hadronised
      */

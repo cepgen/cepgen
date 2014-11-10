@@ -1,9 +1,9 @@
 #include "parameters.h"
 
 Parameters::Parameters() :
-  in1pdg(2212), in2pdg(2212),
+  in1pdg(PROTON), in2pdg(PROTON),
   p1mod(2), p2mod(2),
-  pair(13),
+  pair(MUON),
   mcut(0),
   minpt(0.5), maxpt(-1.),
   minenergy(1.), maxenergy(-1.),
@@ -31,7 +31,7 @@ Parameters::~Parameters()
 #ifdef DEBUG
   std::cout << "[Parameters::~Parameters] [DEBUG] Destructor called" << std::endl;
 #endif
-  delete this->last_event;
+  delete last_event;
 }
 
 void Parameters::SetEtaRange(double etamin_, double etamax_)
@@ -79,7 +79,7 @@ void Parameters::Dump()
     << std::endl
     << " _" << std::setfill('_') << std::setw(wb) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "_ " << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "| " << std::setw(wt) << "Process to generate"  << std::setw(wp) << process->GetName() << " |" << std::endl
+    << "| " << std::setw(wt) << "Process to generate"  << std::setw(wp) << process->GetName() << std::endl
     << "| " << std::setw(wt) << "Events generation ? " << std::setw(wp) << generation << " |" << std::endl
     << "| " << std::setw(wt) << "Number of events to generate" << std::setw(wp) << maxgen << " |" << std::endl
     << "| " << std::setw(wt) << "Events storage ? " << std::setw(wp) << store << " |" << std::endl
@@ -208,13 +208,13 @@ bool Parameters::ReadConfigFile(std::string inFile_)
 #endif
     }
     else if (key=="PAIR") {
-      this->pair = (int)atoi(value.c_str());
+      this->pair = (ParticleId)atoi(value.c_str());
 #ifdef DEBUG
       std::cout << std::setw(60) << " * Outgoing leptons' PDG id   " << this->pair << " --> ";
       switch (this->pair) {
-        case 11: default: std::cout << "electrons"; break;
-        case 13:          std::cout << "muons"; break;
-        case 15:          std::cout << "taus"; break;
+        case ELECTRON: default: std::cout << "electrons"; break;
+        case MUON:              std::cout << "muons"; break;
+        case TAU:               std::cout << "taus"; break;
       }
       std::cout << std::endl;
 #endif

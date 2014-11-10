@@ -451,7 +451,7 @@ Vegas::GenerateOneEvent()
     
     // Eject if weight is too low
     //if (y>_weight) {
-      //std::cout << "ERROR : y>weight => " << y << ">" << _weight << ", " << _j << std::endl;
+    //std::cout << "ERROR : y>weight => " << y << ">" << _weight << ", " << _j << std::endl;
       //_force_correction = false;
       //_force_returnto1 = true;
       //return this->GenerateOneEvent();
@@ -516,6 +516,8 @@ Vegas::SetGen()
   double x[_ndim];
   double sig2;
   double av, av2;
+
+  //#define DEBUG
 
 #ifdef DEBUG
   double eff, eff1, eff2;
@@ -605,6 +607,7 @@ Vegas::SetGen()
             << "\n\teff = " << eff 
 	    << std::endl;
 #endif
+  //#undef DEBUG
 }
 
 void

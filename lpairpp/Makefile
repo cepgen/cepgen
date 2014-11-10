@@ -4,21 +4,24 @@ PYTHIA6SRC = $(wildcard external/pythia-6.*.f)
 JETSET7SRC = $(wildcard external/jetset7*.f)
 PYTHIA8SRC = $(wildcard external/pythia8*/)
 HERWIG6SRC = $(wildcard external/herwig6*.f)
-PYTHIA8LIB = $(PYTHIA8SRC)lib
-INCLUDEDIR = -Imodels/ -Iinclude/
+PYTHIA8LIB = $(PYTHIA8SRC)lib/archive
+INCLUDEDIR = -Iprocesses/ -Iinclude/ -Iexternal/
 ############################################
-CFLAGS     = -Wall -Wextra -fno-exceptions -Wpointer-arith \
+#CFLAGS     = -fexceptions 
+CFLAGS     = -Wall -Wextra -fexceptions -Wpointer-arith \
 	     $(INCLUDEDIR) -D$(SVNDEV) -g #-I$(PYTHIA8SRC)/include
+#LDFLAGS    = $(INCLUDEDIR) -lgfortran -L$(PYTHIA8LIB) -I$(PYTHIA8SRC)include -lpythia8 -llhapdfdummy -Wl,-O2
+LDFLAGS    = $(INCLUDEDIR) -lgfortran -Wl,-O2 -L$(PYTHIA8LIB) -lpythia8 -llhapdfdummy
+#LDFLAGS    = $(INCLUDEDIR) -lgfortran -Wl,-O2
 FFLAGS     = -w -g
-LDFLAGS    = $(INCLUDEDIR) -lgfortran -L$(PYTHIA8LIB) -I$(PYTHIA8SRC)include -lpythia8 -llhapdfdummy -Wl,-O2
-VPATH      = src:include:models:$(PYTHIA8SRC)/include
+VPATH      = src:include:processes:$(PYTHIA8SRC)/include
 SVNDEV = 'SVN_REV="$(shell svnversion -nq .)"'
 ############################################
 CPP_FILES  = $(wildcard src/*.cpp)
-MOD_FILES  = $(wildcard models/*.cpp)
-HPP_FILES  = $(wildcard include/*.h)
+MOD_FILES  = $(wildcard processes/*.cpp)
+HPP_FILES  = $(wildcard include/*.h,external/*.h)
 LIB_FILES  = $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES)) \
-	     $(patsubst models/%.cpp,obj/%.o,$(MOD_FILES)) \
+	     $(patsubst processes/%.cpp,obj/%.o,$(MOD_FILES)) \
 	     $(patsubst external/%.f,obj/%.fo,$(PYTHIA6SRC)) \
 	     $(patsubst external/%.f,obj/%.fo,$(HERWIG6SRC)) \
 	     $(patsubst external/%.f,obj/%.fo,$(JETSET7SRC)) 
@@ -43,7 +46,10 @@ RHEAD = $(shell root-config --incdir)
 all: $(EXEC) #xsect
 
 $(EXEC): main.o $(LIB_FILES)
-	$(CC) -g -o $@ $^ $(LDFLAGS) -L$(PYTHIA8LIB) -lpythia8 -llhapdfdummy
+	$(CC) -g -o $@ $^ $(LDFLAGS) #-L$(PYTHIA8LIB) -lpythia8 -llhapdfdummy
+
+diffvm: diffvm.o $(LIB_FILES)
+	$(CC) -g -o $@ $^ $(LDFLAGS) #-L$(PYTHIA8LIB) -lpythia8 -llhapdfdummy
 
 #obj/pythia8hadroniser.o: pythia8hadroniser.cpp pythia8hadroniser.h
 #	$(CC) -c $(CFLAGS) -llhapdfdummy $< -o $@

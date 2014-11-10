@@ -59,15 +59,12 @@ class GamGamLL : public Process
    * Computes the cross-section for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
    * process with the given kinematics
    * @brief Computes the process' weight for the given point
-   * @param[in] nm_ ???
-   * @return \f[\frac{\textrm d\sigma}{\mathrm d\mathbf x}(\gamma\gamma\to\ell^{+}\ell^{-}),\f]
+   * @return \f$\mathrm d\sigma(\mathbf x)(\gamma\gamma\to\ell^{+}\ell^{-})\f$,
    * the differential cross-section for the given point in the phase space.
-   * @todo Find out what this @a nm_ parameter does...
    */
-  //double ComputeWeight(int nm_=1);
   double ComputeWeight();
   bool SetIncomingParticles(Particle, Particle);
-  bool SetOutgoingParticles(int, int, int mothRole_=-1);
+  bool SetOutgoingParticles(int, ParticleId, int);
   void FillKinematics(bool);
   void SetKinematics(Kinematics);
   /**
@@ -162,7 +159,7 @@ class GamGamLL : public Process
   /** @brief \f$m_1^2\f$, squared mass of the first proton-like incoming particle */
   double _w1;
   /** @brief PDG identifier of the first proton-like incoming particle */
-  int _pdg1;
+  ParticleId _pdg1;
   /** @brief \f$\left|\mathbf p_2\right|\f$, 3-momentum norm of the second proton-like incoming particle */
   double _pp2;
   /** @brief \f$E_2\f$, energy of the second proton-like incoming particle */
@@ -172,7 +169,7 @@ class GamGamLL : public Process
   /** @brief \f$m_2^2\f$, squared mass of the second proton-like incoming particle */
   double _w2;
   /** @brief PDG identifier of the second proton-like incoming particle */
-  int _pdg2;
+  ParticleId _pdg2;
   /** @brief \f$\left|\mathbf p_3\right|\f$, 3-momentum norm of the first proton-like outgoing particle */
   double _pp3;
   /** @brief \f$E_3\f$, energy of the first proton-like outgoing particle */
@@ -182,7 +179,7 @@ class GamGamLL : public Process
   /** @brief \f$m_3^2\f$, squared mass of the first proton-like outgoing particle */
   double _w3;
   /** @brief PDG identifier of the first proton-like outgoing particle */
-  int _pdg3;
+  ParticleId _pdg3;
   /** @brief \f$\left|\mathbf p_4\right|\f$, 3-momentum norm of the two-photon central system */
   double _pc4;
   /** @brief \f$E_4\f$, energy of the two-photon central system */
@@ -200,7 +197,7 @@ class GamGamLL : public Process
   /** @brief \f$m_5^2\f$, squared mass of the second proton-like outgoing particle */
   double _w5;
   /** @brief PDG identifier of the second proton-like outgoing particle */
-  int _pdg5;
+  ParticleId _pdg5;
   /** @brief \f$\left|\mathbf p_6\right|\f$, 3-momentum norm of the first outgoing lepton */
   double _pl6;
   /** @brief \f$E_6\f$, energy of the first outgoing lepton */
@@ -214,7 +211,7 @@ class GamGamLL : public Process
   /** @brief \f$E_6^\mathrm{lab}\f$, energy of the first outgoing lepton, computed in the lab frame */
   double _e6lab;
   /** @brief PDG identifier of the first outgoing lepton */
-  int _pdg6;
+  ParticleId _pdg6;
   /** @brief \f$\left|\mathbf p_7\right|\f$, 3-momentum norm of the second outgoing lepton */
   double _pl7;
   /** @brief \f$E_7\f$, energy of the second outgoing lepton */
@@ -228,7 +225,7 @@ class GamGamLL : public Process
   /** @brief \f$E_7^\mathrm{lab}\f$, energy of the second outgoing lepton, computed in the lab frame */
   double _e7lab;
   /** @brief PDG identifier of the second outgoing lepton */
-  int _pdg7;
+  ParticleId _pdg7;
   /** @brief Energy of the first central photon of momentum \f$t_1\f$ */
   double _eg1;
   /** @brief 3-momentum of the second central photon of momentum \f$t_1\f$ */

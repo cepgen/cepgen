@@ -25,7 +25,7 @@ class Kinematics
   void Dump();
   /**
    * Type of kinematics to consider for the process. Can either be :
-   *  * 0 for the electron-electron elastic case
+   *  * 0 for the electron-proton elastic case
    *  * 1 for the proton-proton elastic case
    *  * 2 for the proton-proton single-dissociative (or inelastic) case
    *  * 3 for the proton-proton double-dissociative case

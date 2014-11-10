@@ -3,31 +3,51 @@
 #include "include/mcgen.h"
 
 // ROOT includes
+#include "TFile.h"
 #include "TTree.h"
 
 /**
+ * Generation of events and storage in a ROOT format
  * @author Laurent Forthomme <laurent.forthomme@uclouvain.be>
  * @date 27 jan 2014
  */
 int main() {
+  const Int_t maxpart = 500;
+
+  //const int ngen = 1e5;
+  const int ngen = 1e4;
+
   MCGen mg;
   Event ev;
   GamGamLL proc;
-  Pythia6Hadroniser had;
-  //Jetset7Hadroniser had;
+  //Pythia6Hadroniser had;
+  Jetset7Hadroniser had;
 
   double xsec, err;
   ParticlesRef particles, remn;
   ParticlesRef::iterator p;
+  
+  TFile *file;
   TTree *tree;
+  
+  int np;
+  double xsect, errxsect;
+  double mx_p1, mx_p2;
+  double eta[maxpart], phi[maxpart], rapidity[maxpart];
+  double px[maxpart], py[maxpart], pz[maxpart], pt[maxpart], E[maxpart], M[maxpart], charge[maxpart];
+  int PID[maxpart], parentid[maxpart], isstable[maxpart], role[maxpart], status[maxpart];
+  float gen_time, tot_time;
+  int nremn_ch[2], nremn_nt[2];
+  int hadr_trials, litigious_events;
+  
+  file = new TFile("events.root", "RECREATE");
+  if (!file) {
+    std::cout << "ERROR while trying to create the output file!" << std::endl;
+  }
 
-  const int maxpart = 1000;
-  const int ngen = 1e5;
-  //const int ngen = 1e1;
-
-  mg.parameters->in1p = 3500.;
-  mg.parameters->in2p = 3500.;
-  mg.parameters->pair = 13;
+  mg.parameters->in1p = 4000.;
+  mg.parameters->in2p = 4000.;
+  mg.parameters->pair = MUON;
   mg.parameters->p1mod = 2;
   mg.parameters->p2mod = 2;
   mg.parameters->mcut = 2;
@@ -44,16 +64,6 @@ int main() {
   mg.parameters->Dump();
 
   mg.ComputeXsection(&xsec, &err);
-
-  int np;
-  double xsect, errxsect;
-  double mx_p1, mx_p2;
-  double eta[maxpart], phi[maxpart], rapidity[maxpart];
-  double px[maxpart], py[maxpart], pz[maxpart], pt[maxpart], E[maxpart], M[maxpart], charge[maxpart];
-  int PID[maxpart], parentid[maxpart], isstable[maxpart], role[maxpart], status[maxpart];
-  float gen_time;
-  int nremn_ch[2], nremn_nt[2];
-  int hadr_trials, litigious_events;
 
   tree = new TTree("h4444", "A TTree containing information from the events produced from LPAIR++");
   tree->Branch("xsect", &xsect, "xsect/D");
@@ -78,8 +88,10 @@ int main() {
   tree->Branch("E", E, "E[npart]/D");
   tree->Branch("m", M, "M[npart]/D");
   tree->Branch("charge", charge, "charge[npart]/D");
-  tree->Branch("gen_time", &gen_time, "gen_time/F");
+  tree->Branch("generation_time", &gen_time, "gen_time/F");
+  tree->Branch("total_time", &tot_time, "gen_time/F");
   tree->Branch("hadronisation_trials", &hadr_trials, "hadronisation_trials/I");
+  tree->Branch("event", &ev);
 
   xsect = xsec;
   errxsect = err;
@@ -117,11 +129,12 @@ int main() {
     if (nremn_ch[0]%2==0 or nremn_ch[1]%2==0) {
       //ev.Dump();
       std::cout << "--> Event " << i << " contains" << std::endl
-		<< "\t-> Remnants 1: " << nremn_ch[0] << " charged and " << nremn_nt[0] << " neutral remnants" << std::endl
-		<< "\t-> Remnants 2: " << nremn_ch[1] << " charged and " << nremn_nt[1] << " neutral remnants" << std::endl;
+                << "\t-> Remnants 1: " << nremn_ch[0] << " charged and " << nremn_nt[0] << " neutral remnants" << std::endl
+                << "\t-> Remnants 2: " << nremn_ch[1] << " charged and " << nremn_nt[1] << " neutral remnants" << std::endl;
       litigious_events++;
     }
-    gen_time = ev.time_cpu;
+    gen_time = ev.time_generation;
+    tot_time = ev.time_total;
     for (p=particles.begin(), np=0; p!=particles.end(); p++) {
       eta[np] = (*p)->Eta();
       phi[np] = (*p)->Phi();
@@ -133,7 +146,7 @@ int main() {
       E[np] = (*p)->E();
       M[np] = (*p)->M();
       PID[np] = (*p)->pdgId;
-      parentid[np] = *(*p)->GetMothers().begin();
+      parentid[np] = *(*p)->GetMothersIds().begin();
       status[np] = (*p)->status;
       isstable[np] = ((*p)->status==0 or (*p)->status==1);
       charge[np] = (*p)->charge;
@@ -148,12 +161,17 @@ int main() {
   }
   std::cout << "Number of litigious events = " << litigious_events << " -> fraction = " << (double)litigious_events/ngen*100 << "%" << std::endl;
 
-  tree->SaveAs("events.root");
+  //tree->SaveAs("events.root");
   //tree->SaveAs("events_lpairpp_pythia.root");
   //tree->SaveAs("events_lpairpp_jetset.root");
   //tree->SaveAs("events_lpairpp_elastic_pt5.root");
   //tree->SaveAs("events_lpairpp_singlediss_pythia_pt5.root");
   //tree->SaveAs("events_lpairpp_doublediss_pythia_pt5.root");
+  file->Write();
+  file->Close();
+  
+  //delete file;
+  //delete tree;
 
   return 0;
 }

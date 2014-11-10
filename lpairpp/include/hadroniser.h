@@ -17,7 +17,9 @@ class Hadroniser
   Hadroniser();
   ~Hadroniser();
   /**
-   * @brief Main caller to hadronise a particle
+   * @brief Main caller to hadronise a single particle
+   * @param[in] part_ The Particle object which will be hadronised
+   * @return A boolean stating whether or not the hadronisation occured successfully
    */
   inline virtual bool Hadronise(Particle *part_) { return (part_!=(Particle*)NULL && part_->status!=2); };
   /**
@@ -37,9 +39,13 @@ class Hadroniser
    */
   inline std::string GetName() { return this->_name; };
  protected:
-  /** @brief Name of the hadroniser */
+  /**
+   * @brief Name of the hadroniser
+   */
   std::string _name;
-  /** @brief List of hadrons produced by this hadronisation process */
+  /**
+   * @brief List of hadrons produced by this hadronisation process
+   */
   Particles *_hadrons;
 };
 

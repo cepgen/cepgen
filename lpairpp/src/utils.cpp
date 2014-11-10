@@ -1,31 +1,32 @@
-#include "include/utils.h"
+#include "utils.h"
 
-double GetMassFromPDGId(int pdgId_)
+double GetMassFromPDGId(ParticleId pdgId_)
 {
   switch (abs(pdgId_)) {
-  case 1:    return 0.33;           // d (from PYTHIA6.4)
-  case 2:    return 0.33;           // u (from PYTHIA6.4)
-  case 11:   return 0.510998928e-3; // electron
-  case 13:   return 0.1056583715;   // muon
-  case 15:   return 1.77682;        // tau
-  case 21:   return 0.;             // gluon
-  case 22:   return 0.;             // photon
-  case 211:  return 0.13957018;     // pi+
-  case 111:  return 0.1349766;      // pi0
-  case 553:  return 20.;            // J/psi //FIXME FIXME FIXME
-  case 2101: return 0.57933;        // (ud)0 (from PYTHIA6.4)
-  case 2103: return 0.77133;        // (ud)1 (from PYTHIA6.4)
-  case 2203: return 0.77133;        // (uu)1 (from PYTHIA6.4)
-  case 2212: return 0.938272046;    // proton
-  default:   return -1.;
+  case QUARK_D:     return 0.33;           // mass from PYTHIA6.4
+  case QUARK_U:     return 0.33;           // mass from PYTHIA6.4
+  case ELECTRON:    return 0.510998928e-3;
+  case MUON:        return 0.1056583715;
+  case TAU:         return 1.77682;
+  case GLUON:       return 0.;
+  case PHOTON:      return 0.;
+  case PI_PLUS:     return 0.13957018;
+  case PI_0:        return 0.1349766;
+  case J_PSI:       return 20.;            // J/psi //FIXME FIXME FIXME
+  case DIQUARK_UD0: return 0.57933;
+  case DIQUARK_UD1: return 0.77133;
+  case DIQUARK_UU1: return 0.77133;
+  case PROTON:      return 0.938272046;
+  case NEUTRON:     return 0.939565346;
+  default:          return -1.;
   }
 }
 
-double GetWidthFromPDGId(int pdgId_)
+double GetWidthFromPDGId(ParticleId pdgId_)
 {
   switch (abs(pdgId_)) {
-  case 553:  return 10.; //FIXME
-  default:   return -1.;
+  case J_PSI:  return 5.; //FIXME
+  default:     return -1.;
   }
 }
 

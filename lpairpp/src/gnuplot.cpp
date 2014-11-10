@@ -1,4 +1,4 @@
-#include "include/gnuplot.h"
+#include "gnuplot.h"
 
 std::string GetRandomString(int nLetters_)
 {

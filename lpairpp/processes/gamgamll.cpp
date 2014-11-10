@@ -13,7 +13,7 @@ GamGamLL::GamGamLL(int nOpt_) :
 }
 
 bool
-GamGamLL::SetOutgoingParticles(int part_, int pdgId_, int mothRole_)
+GamGamLL::SetOutgoingParticles(int part_, ParticleId pdgId_, int)
 {
   double mass_, outm, dm;
 
@@ -111,8 +111,8 @@ GamGamLL::SetIncomingParticles(Particle ip1_, Particle ip2_)
   _s = ip1_.M2()+ip2_.M2()+2.*(ip1_.E()*ip2_.E()-k);
   _ecm = sqrt(_s);
 
-  this->_ev->AddParticle(&ip1_);
-  this->_ev->AddParticle(&ip2_);
+  this->_ev->AddParticle(ip1_);
+  this->_ev->AddParticle(ip2_);
 
   p1 = this->_ev->GetOneByRole(1);
   p2 = this->_ev->GetOneByRole(2);
@@ -545,14 +545,9 @@ GamGamLL::Orient()
   _ec4 = _de3+_de5;
   _ep5 = _ep2-_de5;
 
-  /*if (_ep3>_ep1 or _ep5>_ep2) {
-    // FIXME workaround to avoid very unphysical events...
-    return false;
-  }*/
-
   if (_ec4<_mc4) {
-    /*std::cerr << "[GamGamLL::Orient] [FATAL]" << std::endl
-      << "  _ec4<_mc4 : _ec4 = " << _ec4 << ", _mc4 = " << _mc4 << std::endl;*/
+    std::cerr << "[GamGamLL::Orient] [FATAL]" << std::endl
+	      << "  _ec4<_mc4 : _ec4 = " << _ec4 << ", _mc4 = " << _mc4 << std::endl;
     return false;
   }
   // What if the protons' momenta are not along the z-axis?
@@ -560,8 +555,8 @@ GamGamLL::Orient()
   _pc4 = std::sqrt((std::pow(_ec4, 2)-std::pow(_mc4, 2)));
 
   if (_pc4==0.) {
-    /*std::cerr << "[GamGamLL::Orient] [FATAL]" << std::endl
-      << "  _pzc4==0" << std::endl;*/
+    std::cerr << "[GamGamLL::Orient] [FATAL]" << std::endl
+	      << "  _pzc4==0" << std::endl;
     return false;
   }
   _pp5 = std::sqrt(std::pow(_ep5, 2)-_w5);
@@ -718,7 +713,7 @@ GamGamLL::ComputeMX(double x_, double outmass_, double *dw_)
   /*wx2min = std::pow(std::max(GetMassFromPDGId(2212)+GetMassFromPDGId(211), _cuts.mxmin), 2);
     wx2max = std::pow(std::min(_ecm-_mp2-2.*outmass_, _cuts.mxmax), 2);*/
   
-  wx2min = std::pow(GetMassFromPDGId(2212)+GetMassFromPDGId(211), 2);
+  wx2min = std::pow(GetMassFromPDGId(PROTON)+GetMassFromPDGId(PI_PLUS), 2);
   wx2max = std::pow(_ecm-_mp2-2.*outmass_, 2);
   Map(x_, wx2min, wx2max, &mx2, &dmx2);
 
@@ -735,7 +730,6 @@ GamGamLL::ComputeMX(double x_, double outmass_, double *dw_)
 }
 
 double
-//GamGamLL::ComputeWeight(int nm_)
 GamGamLL::ComputeWeight()
 {
   int nm_ = 1; //FIXME...
@@ -923,11 +917,11 @@ GamGamLL::ComputeWeight()
   p6x = _ct4*pc6x+_st4*h2;
   p6z = _ct4*h2-_st4*pc6x;
   
-  qve[0] = _pc4*qcz/_mc4;
-  qve[2] = 2.*p6y;
+  qve[0] = _pc4*qcz/_mc4; // E
+  qve[2] = 2.*p6y; // Py
   hq = _ec4*qcz/_mc4;
-  qve[1] = _ct4*qcx+_st4*hq;
-  qve[3] = _ct4*hq-_st4*qcx;
+  qve[1] = _ct4*qcx+_st4*hq; // Px
+  qve[3] = _ct4*hq-_st4*qcx; // Pz
 
   _pl6 = std::sqrt(std::pow(_el6, 2)-_w6); // first outgoing lepton's |p|
 
@@ -1148,7 +1142,7 @@ GamGamLL::FillKinematics(bool symmetrise_)
   if (!ip1.P(0., 0., plab_ip1[2], plab_ip1[3])) {
     std::cerr << "Invalid incoming proton 1" << std::endl;
   }
-  this->_ev->AddParticle(&ip1, true);
+  this->_ev->AddParticle(ip1, true);
   
   // Second incoming proton
   Particle ip2(2, _pdg2);
@@ -1159,7 +1153,7 @@ GamGamLL::FillKinematics(bool symmetrise_)
   if (!ip2.P(0., 0., plab_ip2[2], plab_ip2[3])) {
     std::cerr << "Invalid incoming proton 2" << std::endl;
   }
-  this->_ev->AddParticle(&ip2, true);
+  this->_ev->AddParticle(ip2, true);
   
   // First outgoing proton
   Particle op1(3, _pdg3);
@@ -1184,7 +1178,7 @@ GamGamLL::FillKinematics(bool symmetrise_)
     op1.status = 1;
     op1.M(-1); //FIXME
   }
-  this->_ev->AddParticle(&op1, true);
+  this->_ev->AddParticle(op1, true);
   
   // Second outgoing proton
   Particle op2(5, _pdg5);
@@ -1209,11 +1203,11 @@ GamGamLL::FillKinematics(bool symmetrise_)
     op2.Dump();*/
     op2.M(-1); //FIXME
   }
-  this->_ev->AddParticle(&op2, true);
+  this->_ev->AddParticle(op2, true);
 
   // First incoming photon
   // Equivalent in LPAIR : PLAB(x, 3)
-  Particle ph1(41, 22);
+  Particle ph1(41, PHOTON);
   plab_ph1[0] = plab_ip1[0]-plab_op1[0];
   plab_ph1[1] = plab_ip1[1]-plab_op1[1];
   plab_ph1[2] = plab_ip1[2]-plab_op1[2];
@@ -1226,11 +1220,11 @@ GamGamLL::FillKinematics(bool symmetrise_)
   }
   ph1.charge = 0;
   ph1.status = -1;
-  this->_ev->AddParticle(&ph1);
+  this->_ev->AddParticle(ph1);
   
   // Second incoming photon
   // Equivalent in LPAIR : PLAB(x, 4)
-  Particle ph2(42, 22);
+  Particle ph2(42, PHOTON);
   plab_ph2[0] = plab_ip2[0]-plab_op2[0];
   plab_ph2[1] = plab_ip2[1]-plab_op2[1];
   plab_ph2[2] = plab_ip2[2]-plab_op2[2];
@@ -1243,16 +1237,16 @@ GamGamLL::FillKinematics(bool symmetrise_)
   }
   ph2.charge = 0;
   ph2.status = -1;
-  this->_ev->AddParticle(&ph2);
+  this->_ev->AddParticle(ph2);
 
   // Central (two-photon) system
-  Particle cs(4, 22);
+  Particle cs(4, PHOTON);
   cs.status = -1;
-  this->_ev->AddParticle(&cs);
+  this->_ev->AddParticle(cs);
   
   // First outgoing lepton
   role = (ransign<0) ? 6 : 7;
-  Particle ol1(role, ransign*abs(_pdg6));
+  Particle ol1(role, (ParticleId)(ransign*abs((int)_pdg6)));
   plab_ol1[0] = _pl6*_st6*_cp6;
   plab_ol1[1] = _pl6*_st6*_sp6;
   plab_ol1[2] = _gamma*_pl6*_ct6+_betgam*_el6;
@@ -1266,11 +1260,11 @@ GamGamLL::FillKinematics(bool symmetrise_)
   ol1.charge = ransign;
   ol1.status = 1;
   ol1.M(-1); //FIXME
-  this->_ev->AddParticle(&ol1);
+  this->_ev->AddParticle(ol1);
   
   // Second outgoing lepton
   role = (ransign<0) ? 7 : 6;
-  Particle ol2(role, -ransign*abs(_pdg7));
+  Particle ol2(role, (ParticleId)(-ransign*abs((int)_pdg7)));
   plab_ol2[0] = _pl7*_st7*_cp7;
   plab_ol2[1] = _pl7*_st7*_sp7;
   plab_ol2[2] = _gamma*_pl7*_ct7+_betgam*_el7;
@@ -1284,16 +1278,19 @@ GamGamLL::FillKinematics(bool symmetrise_)
   ol2.charge = -ransign;
   ol2.status = 1;
   ol2.M(-1); //FIXME
-  this->_ev->AddParticle(&ol2);
+  this->_ev->AddParticle(ol2);
 
   // Relations between particles
 
   this->_ev->GetOneByRole(3)->SetMother(this->_ev->GetOneByRole(1));
-  this->_ev->GetOneByRole(5)->SetMother(this->_ev->GetOneByRole(2));
   this->_ev->GetOneByRole(41)->SetMother(this->_ev->GetOneByRole(1));
+
+  this->_ev->GetOneByRole(5)->SetMother(this->_ev->GetOneByRole(2));
   this->_ev->GetOneByRole(42)->SetMother(this->_ev->GetOneByRole(2));
+
   this->_ev->GetOneByRole(4)->SetMother(this->_ev->GetOneByRole(41));
   this->_ev->GetOneByRole(4)->SetMother(this->_ev->GetOneByRole(42));
+
   this->_ev->GetOneByRole(6)->SetMother(this->_ev->GetOneByRole(4));
   this->_ev->GetOneByRole(7)->SetMother(this->_ev->GetOneByRole(4));
 
@@ -1310,7 +1307,7 @@ GamGamLL::FillKinematics(bool symmetrise_)
     std::cerr << "[GamGamLL::FillKinematics] [FATAL] W**2 = " << gmuw << " < 0" << std::endl;
     gmuw = 0.;
   }
-  gmunu = gmuy*2.*GetMassFromPDGId(2212)/_ep1/_ep2;
+  gmunu = gmuy*2.*GetMassFromPDGId(PROTON)/_ep1/_ep2;
   std::cout << "[GamGamLL::FillKinematics] [DEBUG]" << std::endl
             << "   gmux = " << gmux << std::endl
             << "   gmuy = " << gmuy << std::endl
