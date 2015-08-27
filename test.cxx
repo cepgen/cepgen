@@ -19,8 +19,8 @@ int main() {
 
   MCGen mg;
   Event ev;
-  //GamGamLL proc;
-  PPtoLL proc;
+  GamGamLL proc;
+  //PPtoLL proc;
   //Pythia6Hadroniser had;
   Jetset7Hadroniser had;
 
@@ -49,14 +49,14 @@ int main() {
   mg.parameters->in1p = 4000.;
   mg.parameters->in2p = 4000.;
   mg.parameters->pair = MUON;
-  mg.parameters->p1mod = 2;
-  mg.parameters->p2mod = 2;
+  mg.parameters->remnant_mode = 11;
   mg.parameters->mcut = 2;
   mg.parameters->minenergy = 0.; //FIXME
   mg.parameters->minpt = 5.;
   mg.parameters->maxgen = ngen;
   mg.parameters->hadroniser = &had;
   mg.parameters->process = &proc;
+  mg.parameters->process_mode = 1; // el-el
   //mg.parameters->ncvg = 5e3; //FIXME
   //mg.parameters->SetEtaRange(-2.5, 2.5);
   //mg.parameters->SetEtaRange(-999., 999.);
@@ -92,7 +92,7 @@ int main() {
   tree->Branch("generation_time", &gen_time, "gen_time/F");
   tree->Branch("total_time", &tot_time, "gen_time/F");
   tree->Branch("hadronisation_trials", &hadr_trials, "hadronisation_trials/I");
-  tree->Branch("event", &ev);
+  //tree->Branch("event", &ev);
 
   xsect = xsec;
   errxsect = err;
