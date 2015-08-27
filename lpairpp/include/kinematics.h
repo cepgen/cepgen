@@ -53,15 +53,13 @@ class Kinematics
    */
   double emax;
   /**
-   * @brief Minimal polar (\f$\theta_\mathrm{min}\f$) angle of the outgoing
-   * leptons, expressed in degrees
+   * @brief Minimal rapidity (\f$\eta\f$) of the outgoing lepton
    */
-  double thetamin;
+  double etamin;
   /**
-   * @brief Maximal polar (\f$\theta_\mathrm{max}\f$) angle of the outgoing
-   * leptons, expressed in degrees
+   * @brief Maximal rapidity (\f$\eta\f$) of the outgoing lepton
    */
-  double thetamax;
+  double etamax;
   /**
    * @brief Minimal mass (in GeV/c\f${}^\mathrm{2}\f$) of the outgoing proton
    * remnant(s)
@@ -90,6 +88,8 @@ class Kinematics
    * \f$s=(\sqrt{s})^{2}\f$) is provided.
    */
   double wmax;
+  double ptdiffmin;
+  double ptdiffmax;
 };
 
 #endif

@@ -24,12 +24,12 @@ class Parameters {
     Parameters();
     ~Parameters();
     /**
-     * Defines the range to cover in pseudo-rapidity for the outgoing leptons produced in this process. This method converts this range into a range in \f$\theta\f$, the polar angle.
-     * @brief Sets the pseudo-rapidity range for the produced leptons
-     * @param[in] etamin_ The minimal value of \f$\eta\f$ for the outgoing leptons
-     * @param[in] etamax_ The maximal value of \f$\eta\f$ for the outgoing leptons
+     * Defines the range to cover in polar angle for the outgoing leptons produced in this process. This method converts this range into a range in rapidity.
+     * @brief Sets the polar angle range for the produced leptons
+     * @param[in] thetamin_ The minimal value of \f$\theta\f$ for the outgoing leptons
+     * @param[in] thetamax_ The maximal value of \f$\theta\f$ for the outgoing leptons
      */
-    void SetEtaRange(double etamin_, double etamax_);
+    void SetThetaRange(double thetamin_, double thetamax_);
     /**
      * @brief Dumps the input parameters in the console
      */
@@ -66,14 +66,9 @@ class Parameters {
      * - 3 - proton inelastic without parton treatment,
      * - 4 - proton inelastic in parton model
      * @brief First particle's mode
-     * @note Was named PMOD in ILPAIR
+     * @note Was named PMOD/EMOD in ILPAIR
      */
-    int p1mod;
-    /**
-     * @brief Second particle's mode
-     * @note Was named EMOD in ILPAIR
-     */
-    int p2mod;
+    int remnant_mode;
     /**
      * The particle code of produced leptons, as defined by the PDG convention :
      * - 11 - for \f$e^+e^-\f$ pairs
@@ -82,6 +77,7 @@ class Parameters {
      * @brief PDG id of the outgoing leptons
      */
     ParticleId pair;
+    int process_mode;
     /**
      * Set of cuts to apply on the outgoing leptons in order to restrain the available kinematic phase space :
      * - 0 - No cuts at all (for the total cross section)
@@ -108,10 +104,10 @@ class Parameters {
     double minenergy;
     /** @brief Maximal energy of the outgoing leptons */
     double maxenergy;
-    /** @brief Minimal polar angle \f$\theta\f$ of the outgoing leptons */
-    double mintheta;
-    /** @brief Maximal polar angle \f$\theta\f$ of the outgoing leptons */
-    double maxtheta;
+    /** @brief Minimal pseudorapidity \f$\eta\f$ of the outgoing leptons */
+    double mineta;
+    /** @brief Maximal pseudorapidity \f$\eta\f$ of the outgoing leptons */
+    double maxeta;
     /**
      * @brief Minimal value of \f$Q^2\f$, the internal photons lines' virtuality
      */

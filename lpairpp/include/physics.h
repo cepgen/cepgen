@@ -4,6 +4,12 @@
 #include "event.h"
 #include "hadroniser.h"
 
+extern "C"
+{
+  extern void grv95lo_(double&,double&,double&,double&,double&,double&,double&,double&);
+}
+
+
 /**
  * List of physical constraints to apply on the phase space
  */
@@ -79,5 +85,8 @@ double GetBRFromProcessId(ParticleId vmId_);
  * @return A vector of Particle objects
  */
 Particles VMDecayer(Particle part_, Hadroniser *had_);
+
+double ElasticFlux(double x_, double kt2_);
+double InelasticFlux(double x_, double kt2_, double mx_);
 
 #endif

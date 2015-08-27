@@ -66,7 +66,6 @@ class MCGen {
    * @brief Dumps this program's header into the standard output stream
    */
   void PrintHeader();
-  void Test();
   /**
    * Computes the cross-section for the run defined by this object. This returns the cross-section as well as the absolute error computed along.
    * @brief Compute the cross-section for the given process

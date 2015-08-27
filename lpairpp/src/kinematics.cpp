@@ -3,9 +3,10 @@
 Kinematics::Kinematics() :
   ptmin(3.), ptmax(-1.),
   emin(0.), emax(-1.),
-  thetamin(0.), thetamax(180.),
+  etamin(-999.), etamax(999.),
   q2min(0.), q2max(1.e5),
-  wmin(0.), wmax(-1.)
+  wmin(0.), wmax(-1.),
+  ptdiffmin(0.), ptdiffmax(300.) //FIXME need to load this from somewhere else
 {}
 
 Kinematics::~Kinematics() {}
@@ -29,8 +30,8 @@ Kinematics::Dump()
     << std::setw(25) << "Maximal pT :" << std::setw(8) << this->ptmax << std::endl
     << std::setw(25) << "Minimal energy :" << std::setw(8) << this->emin << std::endl
     << std::setw(25) << "Maximal energy :" << std::setw(8) << this->emax << std::endl
-    << std::setw(25) << "Minimal azimuthal angle :" << std::setw(8) << this->thetamin << std::endl
-    << std::setw(25) << "Maximal azimuthal angle :" << std::setw(8) << this->thetamax << std::endl
+    << std::setw(25) << "Minimal pseudorapidity :" << std::setw(8) << this->etamin << std::endl
+    << std::setw(25) << "Maximal pseudorapidity :" << std::setw(8) << this->etamax << std::endl
     << "===== Central kinematics" << std::endl
     << std::setw(25) << "Minimal Q**2 :" << std::setw(8) << this->q2min << std::endl
     << std::setw(25) << "Maximal Q**2 :" << std::setw(8) << this->q2max << std::endl

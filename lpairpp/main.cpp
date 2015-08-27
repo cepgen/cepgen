@@ -14,15 +14,15 @@ int main(int argc, char* argv[]) {
   double xsec, err;
   MCGen mg;
   Event ev;
-  //GamGamLL proc;
+  GamGamLL proc;
   //GamPomVMLL proc;
-  PPtoLL proc;
+  //PPtoLL proc;
   //Herwig6Hadroniser had;
   Pythia6Hadroniser had;
   //Jetset7Hadroniser had;//FIXME FIXME FIXME buggy !
   std::ofstream output;
   //std::ofstream output2;
-
+  
   LHEF::Writer writer(std::cout);
 
   if (argc==1) {
@@ -34,14 +34,13 @@ int main(int argc, char* argv[]) {
     //mg.parameters->in1p = 27.55;
     //mg.parameters->in2p = 820.;
     mg.parameters->pair = MUON;
-    mg.parameters->p1mod = 2;
-    mg.parameters->p2mod = 2;
+    mg.parameters->remnant_mode = 11;
     //mg.parameters->in1pdg = 11;
     mg.parameters->mcut = 2;
     mg.parameters->minenergy = 0.; //FIXME
     mg.parameters->minpt = 15.;
     //mg.parameters->SetEtaRange(-2.5, 2.5);
-    mg.parameters->ncvg = 5e3; //FIXME
+    //mg.parameters->ncvg = 5e3; //FIXME
     mg.parameters->generation = true;
     //mg.parameters->maxgen = 200000;
     mg.parameters->maxgen = 2;
@@ -79,8 +78,6 @@ int main(int argc, char* argv[]) {
   if (mg.parameters->generation) {
 
     //output.open("events.lhe");
-    //output2.open("events2.lhe");
-    //output << mg.GetHEPRUP().GetLHERecordBegin();
 
     hep_run.IDBMUP = std::pair<long,long>(mg.parameters->in1pdg, mg.parameters->in2pdg);
     hep_run.EBMUP = std::pair<double,double>(mg.parameters->in1p, mg.parameters->in2p);
@@ -92,12 +89,13 @@ int main(int argc, char* argv[]) {
     hep_run.XMAXUP.push_back(0.2673112e-3); //FIXME value extracted from the LPAIR-to-LHE converter
 
     writer.heprup = hep_run;
-    writer.headerBlock() << "This LHEF file was created by C-LPAIR";
+    writer.headerBlock() << "This LHEF file was created by C-LPAIR" << endl
+                         << "Process : " << proc.GetName();
     writer.init();    
 
     for (int i=0; i<mg.parameters->maxgen; i++) {
       if (i%10000==0)
-	std::cout << "Generating event #" << i+1 << std::endl;
+        std::cout << "Generating event #" << i+1 << std::endl;
       ev = *mg.GenerateOneEvent();
       //output << ev.GetHEPEUP().GetLHERecord();
       //output << ev.GetLHERecord();
@@ -107,22 +105,22 @@ int main(int argc, char* argv[]) {
       particles = ev.GetConstParticles();
       hep_event.NUP = particles.size();
       for (part=particles.begin(); part!=particles.end(); part++) {
-	status = part->status;
-	//if (status<-1) continue;
-	if (status==0) status = 1;
+        status = part->status;
+        //if (status<-1) continue;
+        if (status==0) status = 1;
 
-	//hep_event.NUP++;
+        //hep_event.NUP++;
 
-	mothers = part->GetMothersIds();
-	if (!mothers.size()) moth = std::make_pair(0, 0);
-	else if (mothers.size()==1) moth = std::make_pair(*mothers.begin()+1, 0);
-	else moth = std::make_pair(*mothers.begin()+1, *mothers.end()+1);
+        mothers = part->GetMothersIds();
+        if (!mothers.size()) moth = std::make_pair(0, 0);
+        else if (mothers.size()==1) moth = std::make_pair(*mothers.begin()+1, 0);
+        else moth = std::make_pair(*mothers.begin()+1, *mothers.end()+1);
 
-	hep_event.IDUP.push_back(static_cast<int>(part->pdgId));
-	hep_event.ISTUP.push_back(status);
-	hep_event.PUP.push_back(part->P5());
-	hep_event.MOTHUP.push_back(moth);
-	hep_event.ICOLUP.push_back(std::pair<int,int>(0, 0));
+        hep_event.IDUP.push_back(static_cast<int>(part->pdgId));
+        hep_event.ISTUP.push_back(status);
+        hep_event.PUP.push_back(part->P5());
+        hep_event.MOTHUP.push_back(moth);
+        hep_event.ICOLUP.push_back(std::pair<int,int>(0, 0));
 
       }
       //writer.eventComments() << "haha";

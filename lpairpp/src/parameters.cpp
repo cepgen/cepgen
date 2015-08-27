@@ -2,13 +2,14 @@
 
 Parameters::Parameters() :
   in1pdg(PROTON), in2pdg(PROTON),
-  p1mod(2), p2mod(2),
+  remnant_mode(11),
   pair(MUON),
+  process_mode(1),
   mcut(0),
   minpt(0.5), maxpt(-1.),
   minenergy(1.), maxenergy(-1.),
-  mintheta(5.), maxtheta(175.),
-  //mintheta(0.), maxtheta(180.),
+  //minrapidity(-5.), maxrapidity(5.),
+  mineta(-5.), maxeta(5.),
   minq2(0.), maxq2(1.e5),
   minmx(1.07), maxmx(320.),
   //ncvg(14000), itvg(10),
@@ -34,23 +35,23 @@ Parameters::~Parameters()
   delete last_event;
 }
 
-void Parameters::SetEtaRange(double etamin_, double etamax_)
+void Parameters::SetThetaRange(double thetamin_, double thetamax_)
 {
-  this->mintheta = 2.*atan(exp(-etamax_))/pi*180.;
-  this->maxtheta = 2.*atan(exp(-etamin_))/pi*180.;
+  this->mineta = -log(tan(thetamax_/180.*pi/2.));
+  this->maxeta = -log(tan(thetamin_/180.*pi/2.));
 #ifdef DEBUG
   std::cout << "[Parameters::SetEtaRange] [DEBUG]"
-	    << "\n\teta(min) = " << std::setw(5) << etamin_ << " -> theta(min) = " << this->mintheta
-	    << "\n\teta(max) = " << std::setw(5) << etamax_ << " -> theta(max) = " << this->maxtheta
+	    << "\n\teta(min) = " << std::setw(5) << this->mineta << " -> theta(min) = " << thetamin_
+	    << "\n\teta(max) = " << std::setw(5) << this->maxeta << " -> theta(max) = " << thetamax_
 	    << std::endl;
 #endif
 }
 
 void Parameters::Dump()
 {
-  std::string cutsmode, particles;
+  std::string cutsmode, particles, pmode;
 
-  switch(mcut) {
+  switch (mcut) {
     case 1:
       cutsmode = "Vermaseren"; break;
     case 2:
@@ -61,7 +62,7 @@ void Parameters::Dump()
     default:
       cutsmode = "none"; break;
   }
-  switch(pair) {
+  switch (pair) {
     case 11:
       particles = "electrons"; break;
     case 13:
@@ -69,6 +70,17 @@ void Parameters::Dump()
       particles = "muons"; break;
     case 15:
       particles = "taus"; break;
+  }
+  switch (process_mode) {
+    case 1:
+    default:
+      pmode = "elastic-elastic"; break;
+    case 2:
+      pmode = "elastic-inelastic"; break;
+    case 3:
+      pmode = "inelastic-elastic"; break;
+    case 4:
+      pmode = "inelastic-inelastic"; break;
   }
   const int wb = 65;
   const int wt = 40;
@@ -86,13 +98,24 @@ void Parameters::Dump()
     << "| " << std::setw(wt) << "Debugging mode ? " << std::setw(wp) << debug << " |" << std::endl
     << "| " << std::setw(wt) << "Output file opened ? " << std::setw(wp) << (file!=(std::ofstream*)NULL && file->is_open()) << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "|_" << std::setfill('_') << std::setw(wb) << "_/¯ INCOMING- AND OUTGOING KINEMATICS ¯\\_" << std::setfill(' ') << "_|" << std::endl
+    << "|-" << std::setfill('-') << std::setw(wb-2) << " Vegas integration parameters" << std::setfill(' ') << "-|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "|-" << std::setfill('-') << std::setw(wb-2) << " Incoming protons-like particles " << std::setfill(' ') << "-|" << std::endl
+    << "| " << std::setw(wt) << "Maximum number of iterations" << std::setw(wp) << itvg << " |" << std::endl
+    << "| " << std::setw(wt) << "Number of function calls" << std::setw(wp) << ncvg << " |" << std::endl
+    << "| " << std::setw(wt) << "Number of points to try per bin" << std::setw(wp) << npoints << " |" << std::endl
+    << "| " << std::setw(wt) << "Integration smoothed (TREAT) ? " << std::setw(wp) << ntreat << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "| " << std::setw(wt) << "Mode" << std::setw(3) << p1mod << ", " << std::setw(3) << p2mod << std::setw(wp-8) << "" << " |" << std::endl
+    << "|_" << std::setfill('_') << std::setw(wb) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill(' ') << "_|" << std::endl
+    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
+    << "|-" << std::setfill('-') << std::setw(wb-2) << " Incoming particles " << std::setfill(' ') << "-|" << std::endl
+    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
+    << "| " << std::setw(wt) << "Subprocess' mode" << std::setw(15) << pmode << std::setw(wp-15) << "" << " |" << std::endl
     << "| " << std::setw(wt) << "Incoming particles" << std::setw(5) << in1pdg << ", " << std::setw(5) << in2pdg << std::setw(wp-12) << "" << " |" << std::endl
     << "| " << std::setw(wt) << "Momenta [GeV/c]" << std::setw(5) << in1p << ", " << std::setw(5) << in2p << std::setw(wp-12) << "" << " |" << std::endl
+    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
+    << "|-" << std::setfill('-') << std::setw(wb-2) << " Incoming photons " << std::setfill(' ') << "-|" << std::endl
+    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
+    << "| " << std::setw(wt) << "Virtuality in range [GeV^2]" << "[" << std::setw(4) << minq2 << ", " << std::setw(6) << maxq2 << "]" << std::setw(wp-14) << "" << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|-" << std::setfill('-') << std::setw(wb-2) << " Outgoing leptons " << std::setfill(' ') << "-|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
@@ -100,23 +123,16 @@ void Parameters::Dump()
     << "| " << std::setw(wt) << "Cuts mode" << std::setw(2) << mcut << " -> " << std::setw(wp-6) << cutsmode << " |" << std::endl
     << "| " << std::setw(wt) << "Lepton(s)' pT in range [GeV/c]" << "[" << std::setw(4) << minpt << ", " << std::setw(4) << maxpt << "]" << std::setw(wp-12) << "" << " |" << std::endl
     << "| " << std::setw(wt) << "Lepton(s)' energy in range [GeV]" << "[" << std::setw(4) << minenergy << ", " << std::setw(4) << maxenergy << "]" << std::setw(wp-12) << "" << " |" << std::endl
-    << "| " << std::setw(wt) << "Polar angle theta in range [deg]" << "[" << std::setw(3) << mintheta << ", " << std::setw(3) << maxtheta << "]" << std::setw(wp-10) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Pseudorapidity in range" << "[" << std::setw(3) << mineta << ", " << std::setw(3) << maxeta << "]" << std::setw(wp-10) << "" << " |" << std::endl
+    //<< "| " << std::setw(wt) << "Polar angle theta in range [deg]" << "[" << std::setw(3) << mintheta << ", " << std::setw(3) << maxtheta << "]" << std::setw(wp-10) << "" << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|-" << std::setfill('-') << std::setw(wb-2) << " Outgoing remnants " << std::setfill(' ') << "-|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl;
   if (this->hadroniser!=(Hadroniser*)NULL)
     std::cout << "| " << std::setw(wt) << "Hadronisation algorithm" << std::setw(12) << hadroniser->GetName() << std::setw(wp-12) << "" << " |" << std::endl;
-  std::cout << "| " << std::setw(wt) << "Minimal mass [GeV/c**2]" << std::setw(wp) << minmx << " |" << std::endl
-    << "| " << std::setw(wt) << "Maximal mass [GeV/c**2]" << std::setw(wp) << maxmx << " |" << std::endl
-    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "|_" << std::setfill('_') << std::setw(wb) << "_/¯ VEGAS INTEGRATION PARAMETERS ¯\\_" << std::setfill(' ') << "_|" << std::endl
-    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "| " << std::setw(wt) << "Maximum number of iterations" << std::setw(wp) << itvg << " |" << std::endl
-    << "| " << std::setw(wt) << "Number of function calls" << std::setw(wp) << ncvg << " |" << std::endl
-    << "| " << std::setw(wt) << "Number of points to try per bin" << std::setw(wp) << npoints << " |" << std::endl
-    << "| " << std::setw(wt) << "Integration smoothed (TREAT) ? " << std::setw(wp) << ntreat << " |" << std::endl
+  std::cout << "| " << std::setw(wt) << "Minimal mass [GeV/c^2]" << std::setw(wp) << minmx << " |" << std::endl
+	<< "| " << std::setw(wt) << "Maximal mass [GeV/c^2]" << std::setw(wp) << maxmx << " |" << std::endl
     << "|_" << std::right << std::setfill('_') << std::setw(wb) << "_|" << std::left << std::endl
-    //<< " -" << std::right << std::setfill('-') << std::setw(wb) << "- " << std::left << std::endl
     << std::endl
     << "[Parameters::Dump] END of dump " << std::setfill('=') << std::setw(wb-29) << "" << std::endl;
 }
@@ -169,11 +185,24 @@ bool Parameters::ReadConfigFile(std::string inFile_)
       std::cout << std::setw(60) << " * First incoming particles' momentum" << this->in1p << " GeV/c" << std::endl;
 #endif
     }
-    else if (key=="PMOD") {
-      this->p1mod = (int)atoi(value.c_str());
+    else if (key=="MODE") {
+      this->process_mode = (int)atoi(value.c_str());
+#ifdef DEBUG
+      std::cout << std::setw(60) << " * Subprocess' mode" << this->process_mode << " --> ";
+      switch (this->process_mode) {
+        case 1: default: std::cout << "elastic-elastic"; break;
+        case 2:          std::cout << "elastic-inelastic"; break;
+        case 3:          std::cout << "inelastic-elastic"; break;
+        case 4:          std::cout << "inelastic-inelastic"; break;
+      }
+      std::cout << std::endl;
+#endif
+    }
+    else if (key=="PMOD" or key=="EMOD") {
+      this->remnant_mode = (int)atoi(value.c_str());
 #ifdef DEBUG
       std::cout << std::setw(60) << " * First incoming particles' mode" << this->p1mod << " --> ";
-      switch (this->p1mod) {
+      switch (this->remnant_mode) {
         case 1:          std::cout << "electron"; break;
         case 2: default: std::cout << "elastic proton"; break;
         case 11:         std::cout << "dissociating proton [structure functions]"; break;
@@ -189,22 +218,6 @@ bool Parameters::ReadConfigFile(std::string inFile_)
       this->in2p = (double)atof(value.c_str());
 #ifdef DEBUG
       std::cout << std::setw(60) << " * Second incoming particles' momentum" << this->in1p << " GeV/c" << std::endl;
-#endif
-    }
-    else if (key=="EMOD") {
-      this->p2mod = (int)atoi(value.c_str());
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * Second incoming particles' mode" << this->p2mod << " --> ";
-      switch (this->p2mod) {
-        case 1:           std::cout << "electron"; break;
-        case 2: default:  std::cout << "elastic proton [EPA]"; break;
-        case 11:          std::cout << "dissociating proton [structure functions]"; break;
-        case 12:          std::cout << "dissociating proton [structure functions, for MX < 2 GeV, Q^2 < 5 GeV^2]"; break;
-        case 101:         std::cout << "dissociating proton [parton model, only valence quarks]"; break;
-        case 102:         std::cout << "dissociating proton [parton model, only sea quarks]"; break;
-        case 103:         std::cout << "dissociating proton [parton model, valence and sea quarks]"; break;
-      }
-      std::cout << std::endl;
 #endif
     }
     else if (key=="PAIR") {
@@ -257,13 +270,15 @@ bool Parameters::ReadConfigFile(std::string inFile_)
 #endif
     }
     else if (key=="THMN") {
-      this->mintheta = (double)atof(value.c_str());
+      //this->mintheta = (double)atof(value.c_str());
+      //this->SetThetaRange((double)atof(value.c_str()), 0.); // FIXME FIXME
 #ifdef DEBUG
       std::cout << std::setw(60) << " * Minimal polar production angle for the leptons" << this->mintheta << std::endl;
 #endif
     }
     else if (key=="THMX") {
-      this->maxtheta = (double)atof(value.c_str());
+      //this->maxtheta = (double)atof(value.c_str());
+      //this->SetThetaRange(0., (double)atof(value.c_str())); //FIXME FIXME
 #ifdef DEBUG
       std::cout << std::setw(60) << " * Maximal polar production angle for the leptons" << this->maxtheta << std::endl;
 #endif

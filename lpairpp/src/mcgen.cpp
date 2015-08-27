@@ -9,16 +9,14 @@ MCGen::MCGen() :
   std::cout << "[MCGen::MCGen] [DEBUG] MCGen initialized !" << std::endl;
 #endif
 
-  srand(time(0));
+  srand(time(0)); // Random number initialization
   
   this->parameters = new Parameters;
 }
 
-MCGen::MCGen(Parameters *ip_) 
-{
-  this->parameters = ip_;
-  this->BuildVegas();
-}
+MCGen::MCGen(Parameters *ip_) :
+  parameters(ip_)
+{}
 
 MCGen::~MCGen()
 {
@@ -80,26 +78,21 @@ MCGen::PrintHeader()
 void
 MCGen::BuildVegas()
 {
-  unsigned int ndim;
-  std::string topo;
-
-  if (this->parameters->p1mod<=2 && this->parameters->p2mod<=2) {
-    topo = "ELASTIC proton/proton";
-    ndim = 7;
-  }
-  else if (this->parameters->p1mod<=2 || this->parameters->p2mod<=2) {
-    topo = "SINGLE-DISSOCIATIVE proton";
-    ndim = 8;
-  }
-  else {
-    topo = "DOUBLE-DISSOCIATIVE protons";
-    ndim = 9;
-  }
 #ifdef DEBUG
+  std::string topo;
+  if (parameters->process_mode==1) {
+    topo = "ELASTIC proton/proton";
+  }
+  else if (parameters->process_mode==2 or parameters->process_mode==3) {
+    topo = "SINGLE-DISSOCIATIVE proton";
+  }
+  else if (parameters->process_mode==4) {
+    topo = "DOUBLE-DISSOCIATIVE protons";
+  }
   std::cout << "[MCGen::MCGen] [DEBUG] Considered topology : " << topo << " case" << std::endl;
 #endif
 
-  veg = new Vegas(ndim, f, this->parameters);
+  veg = new Vegas(parameters->process->GetNdim(parameters->process_mode), f, parameters);
   _vegas_built = true;
 }
 
@@ -159,28 +152,13 @@ MCGen::LaunchGeneration()
   *(this->parameters->file) << "</LesHouchesEvents>" << std::endl;
 }
 
-/*HEPRUP
-MCGen::GetHEPRUP()
-{
-  HEPRUP out(1); // only one single type of processes
-  out.idbmup[0] = this->parameters->in1pdg;
-  out.idbmup[1] = this->parameters->in2pdg;
-  out.ebmup[0] = this->parameters->in1p;
-  out.ebmup[1] = this->parameters->in2p;
-  out.xsecup[0] = this->_xsec;
-  out.xerrup[0] = this->_xsec_error;
-  return out;
-  }*/
-
 double f(double* x_, size_t ndim_, void* params_)
 {
   double ff;
-  ParticleId outp1pdg, outp2pdg;
   Parameters *p;
   Kinematics kin;
   Particle *in1, *in2;
   Timer tmr;
-  // c_start, c_stop;                                                                                                                                            
   bool hadronised;
   double num_hadr_trials;
 
@@ -197,14 +175,11 @@ double f(double* x_, size_t ndim_, void* params_)
 	    << "function f called ; some parameters :" << std::endl
             << "  pz(p1) = " << p->in1p << std::endl
             << "  pz(p2) = " << p->in2p << std::endl
-            << "   f(p1) = " << p->p1mod << std::endl
-            << "   f(p2) = " << p->p2mod << std::endl
+            << "  remnant mode = " << p->remnant_mode << std::endl
 	    << "=====================================" << std::endl;
 #endif
 
-
   //FIXME electrons ?
-
   in1 = new Particle(1, p->in1pdg);
   in1->charge = p->in1pdg/abs(p->in1pdg);
   in1->P(0., 0.,  p->in1p);
@@ -212,25 +187,26 @@ double f(double* x_, size_t ndim_, void* params_)
   in2 = new Particle(2, p->in2pdg);
   in2->charge = p->in2pdg/abs(p->in2pdg);
   in2->P(0., 0., -p->in2p);
-  
-  switch(ndim_) {
-  case 7:
-  default:
-    outp1pdg = p->in1pdg;
-    outp2pdg = p->in2pdg;
-    kin.kinematics = 1;
-    break;
-  case 8:
-    outp1pdg = QUARK_U;
-    outp2pdg = p->in2pdg;
-    kin.kinematics = 2;
-    break;
-  case 9:
-    outp1pdg = outp2pdg = QUARK_U;
-    kin.kinematics = 3;
-    break;
-  }
 
+  p->process->SetIncomingParticles(*in1, *in2);
+
+  kin.kinematics = p->process_mode;
+
+  switch (kin.kinematics) {
+    case 1:
+      p->process->SetOutgoingParticles(3, PROTON, 1); // First outgoing proton
+      p->process->SetOutgoingParticles(5, PROTON, 2); // Second outgoing proton
+    case 2:
+      p->process->SetOutgoingParticles(3, PROTON, 1); // First outgoing proton
+      p->process->SetOutgoingParticles(5, QUARK_U, 2); // Second outgoing proton remnant
+    case 3:
+      p->process->SetOutgoingParticles(3, QUARK_U, 1); // First outgoing proton
+      p->process->SetOutgoingParticles(5, PROTON, 2); // Second outgoing proton remnant
+    case 4:
+      p->process->SetOutgoingParticles(3, QUARK_U, 1); // First outgoing proton
+      p->process->SetOutgoingParticles(5, QUARK_U, 2); // Second outgoing proton remnant
+  }
+  
   kin.q2min = p->minq2;
   kin.q2max = p->maxq2;
   //kin.q2min = 0; //FIXME
@@ -238,20 +214,21 @@ double f(double* x_, size_t ndim_, void* params_)
   kin.mode = p->mcut;
   kin.ptmin = p->minpt;
   kin.ptmax = p->maxpt;
-  kin.thetamin = p->mintheta;
-  kin.thetamax = p->maxtheta;
+  /*if (p->mintheta>=0. and p->maxtheta>=0.) { // FIXME need conversion from rapidity
+    kin.thetamin = p->mintheta;
+    kin.thetamax = p->maxtheta;
+  }
+  else {*/
+    kin.etamin = p->mineta;
+    kin.etamax = p->maxeta;
+  //}
   kin.emin = p->minenergy;
   kin.emax = p->maxenergy;
   kin.mxmin = p->minmx;
   kin.mxmax = p->maxmx;
-  //kin.mxmin = 0; //FIXME
-  //kin.mxmax = 100000; //FIXME
-
+  
   p->process->SetPoint(ndim_, x_);
   p->process->SetKinematics(kin);
-  p->process->SetIncomingParticles(*in1, *in2);
-  p->process->SetOutgoingParticles(3, outp1pdg, 1); // First outgoing proton
-  p->process->SetOutgoingParticles(5, outp2pdg, 2); // Second outgoing proton
   p->process->SetOutgoingParticles(6, p->pair); // Outgoing leptons
   if (!p->process->IsKinematicsDefined()) {
     std::cout << "[f] [ERROR] Kinematics is not properly set" << std::endl;
@@ -260,12 +237,10 @@ double f(double* x_, size_t ndim_, void* params_)
   }
   ff = p->process->ComputeWeight();
   
-  if (ff<0.) {
-    return 0.;
-  }
+  if (ff<0.) return 0.;
+  
   if (p->store) { // MC events generation
     p->process->FillKinematics(false);
-    //if (p->process->GetEvent()->GetByRole(42)[0]->E()<0) return 0.; //FIXME workaround to avoid (very) unphysical events
     p->process->GetEvent()->time_generation = tmr.elapsed();
 
     if (kin.kinematics>1) {
@@ -275,13 +250,13 @@ double f(double* x_, size_t ndim_, void* params_)
 #endif
       num_hadr_trials = 0;
       do {
-	hadronised = p->hadroniser->Hadronise(p->process->GetEvent());
+        hadronised = p->hadroniser->Hadronise(p->process->GetEvent());
 #ifdef DEBUG
-	if (num_hadr_trials>0) {
-	  std::cout << "[f] [DEBUG] Hadronisation failed. Trying for the " << num_hadr_trials+1 << "th time" << std::endl;
-	}
+        if (num_hadr_trials>0) {
+          std::cout << "[f] [DEBUG] Hadronisation failed. Trying for the " << num_hadr_trials+1 << "th time" << std::endl;
+        }
 #endif
-	num_hadr_trials++;
+        num_hadr_trials++;
       } while (!hadronised and num_hadr_trials<=p->hadroniser_max_trials);
       p->process->GetEvent()->num_hadronisation_trials = num_hadr_trials;
 #ifdef DEBUG

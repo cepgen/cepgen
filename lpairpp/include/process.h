@@ -19,7 +19,7 @@ class Process
   /**
    * @brief Returns the weight for this point in the phase-space
    */
-  inline virtual double ComputeWeight() { std::cout << "***WARNING*** Calling ComputeWeight on a non-process!" << std::endl; return -1; };
+  inline virtual double ComputeWeight() { std::cout << "***ERROR*** Calling ComputeWeight on an invalid process!" << std::endl; return -1; }
   /**
    * Specifies the incoming particles' kinematics as well as their properties
    * using two Particle objects.
@@ -37,7 +37,7 @@ class Process
     _s = ip1_.M2()+ip2_.M2()+2.*(ip1_.E()*ip2_.E()-k);
     _ecm = sqrt(_s);
     _setin=true; return _setin;
-  };
+  }
   /**
    * @brief Sets the PDG id for the outgoing particles
    * @param[in] part_ Role of the particle in the process
@@ -58,7 +58,17 @@ class Process
    * production of the positively- and negatively-charged lepton) ?
    * @brief Fills the Event object with the particles' kinematics
    */
-  inline virtual void FillKinematics(bool symmetrise_=false) { if (symmetrise_) std::cout << "symmetrised" << std::endl; };
+  inline virtual void FillKinematics(bool symmetrise_=false) { if (symmetrise_) std::cout << "symmetrised" << std::endl; }
+  /**
+   * @brief Returns the number of dimensions on which the integration has to be performed
+   * @param[in] process_mode_ Type of subprocess to consider :
+   *  - 1: Elastic-elastic
+   *  - 2: Elastic-inelastic
+   *  - 3: Inelastic-elastic
+   *  - 4: Inelastic-inelastic
+   * @return Number of dimensions on which to integrate
+   */
+  inline virtual int GetNdim(int) const { return 10; }
   /**
    * Sets the phase space point to compute the weight associated to it.
    * @brief Sets the phase space point to compute
@@ -76,7 +86,7 @@ class Process
    * final state
    * @param[in] cuts_ The Cuts object containing the kinematic parameters
    */
-  inline virtual void SetKinematics(Kinematics cuts_) { _cuts=cuts_; };
+  inline virtual void SetKinematics(Kinematics cuts_) { _cuts=cuts_; }
   /**
    * Is the system's kinematics well defined and compatible with the process ?
    * This check is mandatory to perform the (@a _ndim)-dimensional point's
@@ -97,11 +107,11 @@ class Process
    * @brief Returns the event content (list of particles with an assigned role)
    * @return The Event object containing all the generated Particle objects
    */
-  inline Event* GetEvent() { return this->_ev; };
+  inline Event* GetEvent() { return this->_ev; }
   /**
    * @brief Returns the number of dimensions on which the integration is performed
    */
-  inline unsigned int ndim() const { return this->_ndim; };
+  inline unsigned int ndim() const { return this->_ndim; }
   /**
    * @brief Returns the value of a component of the @a _ndim -dimensional point considered
    */
@@ -109,7 +119,7 @@ class Process
   /**
    * @brief Returns the human-readable name of the process considered
    */
-  inline std::string GetName() { return this->_name; };
+  inline std::string GetName() { return this->_name; }
  protected:
   /**
    * @brief Array of @a _ndim components representing the point on which the

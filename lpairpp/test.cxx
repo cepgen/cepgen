@@ -19,7 +19,8 @@ int main() {
 
   MCGen mg;
   Event ev;
-  GamGamLL proc;
+  //GamGamLL proc;
+  PPtoLL proc;
   //Pythia6Hadroniser had;
   Jetset7Hadroniser had;
 

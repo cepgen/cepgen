@@ -18,7 +18,6 @@ static std::stringstream error;
  */
 #define drand() (double)(rand())/RAND_MAX
 
-
 /**
  * An object which enables to extract the processing time between two steps in
  * this software's flow
@@ -176,5 +175,8 @@ double GenTDL(double tmin_, double tmax_, double b_, int n_);
  * @date 28 Apr 2014
  */
 int Heli(double longFr_);
+double ThetaToEta(double theta_);
+double EtaToTheta(double eta_);
+double EtaToY(double eta_, double m_, double pt_);
 
 #endif

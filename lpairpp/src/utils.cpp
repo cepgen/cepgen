@@ -204,3 +204,18 @@ int Heli(double longFr_)
   else return -1;
 }
 
+double ThetaToEta(double theta_)
+{
+  return -log(tan(theta_/180.*pi/2.));
+}
+
+double EtaToTheta(double eta_)
+{
+  return 2.*atan(exp(-eta_))*180./pi;
+}
+
+double EtaToY(double eta_, double m_, double pt_)
+{
+  const double mt = pow(m_, 2)+pow(pt_, 2);
+  return asinh(sqrt((((pow(mt, 2)-pow(m_, 2))*cosh(2*eta_)+pow(m_, 2))/pow(mt, 2)-1.)/2.));
+}

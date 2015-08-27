@@ -12,6 +12,17 @@ GamGamLL::GamGamLL(int nOpt_) :
   _name = PROCESS_NAME;
 }
 
+int
+GamGamLL::GetNdim(int process_mode_) const
+{
+  std::cout << "Number of dimensions requested : " << process_mode_ << std::endl;
+  switch (process_mode_) {
+	case 1: return 7;
+	case 2: case 3: return 8;
+	case 4: default: return 9;
+  }
+}
+
 bool
 GamGamLL::SetOutgoingParticles(int part_, ParticleId pdgId_, int)
 {
@@ -547,7 +558,8 @@ GamGamLL::Orient()
 
   if (_ec4<_mc4) {
     std::cerr << "[GamGamLL::Orient] [FATAL]" << std::endl
-	      << "  _ec4<_mc4 : _ec4 = " << _ec4 << ", _mc4 = " << _mc4 << std::endl;
+              << "  _ec4<_mc4 : _ec4 = " << _ec4 << ", _mc4 = " << _mc4 << std::endl;
+    std::cerr << "  -> de3, de5 = " << _de3 << ", " << _de5 << std::endl;
     return false;
   }
   // What if the protons' momenta are not along the z-axis?
@@ -1320,9 +1332,10 @@ GamGamLL::FillKinematics(bool symmetrise_)
 void
 GamGamLL::SetKinematics(Kinematics cuts_)
 {
+  double thetamin = EtaToTheta(_cuts.etamin), thetamax = EtaToTheta(_cuts.etamax);
   _cuts = cuts_;
-  _cotth1 = 1./tan(cuts_.thetamax*pi/180.);
-  _cotth2 = 1./tan(cuts_.thetamin*pi/180.);  
+  _cotth1 = 1./tan(thetamax*pi/180.);
+  _cotth2 = 1./tan(thetamin*pi/180.);  
 #ifdef DEBUG
   std::cout << "[GamGamLL::SetKinematics] [DEBUG]" << std::endl
             << "  cot(theta1) = " << _cotth1 << std::endl

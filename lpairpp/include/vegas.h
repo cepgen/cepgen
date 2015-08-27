@@ -7,6 +7,7 @@
 #include "parameters.h"
 
 #define MAX_ND 50
+#define ONE 1.
 
 /**
  * Main occurence of the Monte-Carlo integrator@cite PeterLepage1978192 developed by G.P. Lepage in 1978
@@ -39,6 +40,23 @@ class Vegas {
      */
     int Integrate(double* result_,double* abserr_);
     /**
+     * First stage of the integration process : Initialization of cumulative variables (no grid so far) 
+     * @param ncalls_ Number of function calls to be performed
+     * @return 0, if this part, along with parts 2 and 3 were performed successfully 
+     */
+    int Vegas1(int ncalls_=-1);
+    /**
+     * Second stage of the integration process : Grid initialization
+     * @param ncalls_ Number of function calls to be performed
+     * @return 0, if this part, along with part 3 were performed successfully 
+     */
+    int Vegas2(int ncalls_=-1);
+    /**
+     * Third stage of the integration process : Main loop 
+     * @return 0, if this part was performed successfully 
+     */
+    int Vegas3();
+    /**
      * Launches the Vegas generation of events according to the provided input
      *  parameters.
      * @brief Launches the generation of events
@@ -68,6 +86,7 @@ class Vegas {
     /**
      * Evaluates the smoothed version of the function to be integrated at a point @a x_
      * @param[in] x_ The point at which the tamed function is to be evaluated
+     * @param[in] storedbg_ A debugging flag to set whether or not the internal variables of this method need to be stored for further processing
      * @return Tamed function value at this point @a x_
      */
     inline double Treat(double* x_,bool storedbg_) { return this->Treat(x_,(Parameters*)this->_ip,storedbg_); }
@@ -138,14 +157,6 @@ class Vegas {
      */
     double *_fmax;
     /**
-     * @brief Number of points to generate in order to integrate the function
-     */
-    size_t _nIter;
-    /**
-     * @brief Fixed number of function calls to use
-     */
-    size_t _ncalls;
-    /**
      * @brief Lower bounds for the points to generate
      */
     double *_xl;
@@ -177,9 +188,37 @@ class Vegas {
      */
     Parameters *_ip;
     /**
-     * @brief Flag to define whether or not the grid has been prepared using @a SetGen (very time-consuming operation, thus needs to be called once)
+     * @brief Flag to define whether or not the grid has been prepared for integration
      */
     bool _grid_prepared;
+    /**
+     * @brief Flag to define whether or not the generation has been prepared using @a SetGen (very time-consuming operation, thus needs to be called once)
+     */
+    bool _generation_prepared;
+    /**
+     * @brief Total number of iterations for the current Vegas instance
+     */
+    int _mds;
+    double _acc;
+    double _alph;
+    int _it;
+    double _si;
+    double _si2;
+    double _swgt;
+    double _schi;
+    double _scalls;
+    unsigned int _nd;
+    int _ng;
+    unsigned int _npg;
+    double _calls;
+    double _dxg;
+    double _dv2g;
+    double _xnd;
+    unsigned int _ndm;
+    double _xjac;
+    int _now;
+    double _vegas_result;
+    double _vegas_abserr;
 };
 
 #endif
