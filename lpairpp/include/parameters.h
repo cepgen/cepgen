@@ -11,7 +11,6 @@
 #include "../processes/processes.h"
 
 #include "pythia6hadroniser.h"
-#include "pythia8hadroniser.h"
 #include "jetset7hadroniser.h"
 #include "herwig6hadroniser.h"
 
