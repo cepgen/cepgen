@@ -5,7 +5,9 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
   _nTreatCalls(0), _mbin(3),
   _ffmax(0.), _correc(0.), _corre2(0.), _fmax2(0.), _fmdiff(0.), _fmold(0.),
   _j(0),
-  _grid_prepared(false)
+  _ip(inParam_),
+  _grid_prepared(false), _generation_prepared(false),
+  _mds(1), _acc(1.e-4), _alph(1.5), _it(0)
 {
   /* x content :
       0 = t1 mapping
@@ -35,19 +37,23 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
     _xl[i] = 0.;
     _xu[i] = 1.;
   }
-  _nIter = inParam_->itvg;
-  _ncalls = inParam_->ncvg;
-
+  
 #ifdef DEBUG
   std::cout << "[Vegas::Vegas] [DEBUG]"
             << "\n  Number of integration dimensions : " << dim_
-            << "\n  Number of iterations : " << _nIter
-            << "\n  Number of function calls : " << _ncalls
+            << "\n  Number of iterations : " << inParam_->itvg
+            << "\n  Number of function calls : " << inParam->ncvg
             << std::endl;
 #endif
 
-  _ip = inParam_;
+  for (unsigned int j=0; j<MAX_ND; j++) {
+    for (unsigned int i=0; i<_ndim; i++) {
+      _d[j][i] = _di[j][i] = _xi[j][i] = 0.;
+    }
+  }
+
   _f = f_;
+  
 }
 
 Vegas::~Vegas()
@@ -67,147 +73,173 @@ Vegas::~Vegas()
   }
 }
 
-int Vegas::Integrate(double *result_, double *abserr_)
+int
+Vegas::Integrate(double *result_, double *abserr_)
 {
-  unsigned int ndm, nd, npg;
-  int ng, now;
-  unsigned int i, j;
-  int k;
-  const double one = 1.;
-  int it, iaj, iaj1;
-  double avgi, sd, tsi, ti;
-  double chi2a, rel, ti2, si, si2, swgt, schi, scalls;
-  double calls, dxg, dv2g, xnd, xo, xn, xjac, rc, dr;
-  double f, f2, wgt;
-  double fb, f2b;
-  double x[_ndim], dx[_ndim], kg[_ndim], dt[_ndim], qran[_ndim], xin[MAX_ND], r[MAX_ND];
-  int ia[_ndim];
-
-  for (j=0; j<MAX_ND; j++) {
-    xin[j] = r[j] = 0.;
-    for (i=0; i<_ndim; i++) {
-      _d[j][i] = _di[j][i] = _xi[j][i] = 0.;
-    }
-  }
-  for (i=0; i<_ndim; i++) {
-    x[i] = dx[i] = kg[i] = dt[i] = qran[i] = 0.;
-  }
-
-  // Parameters
-  int mds = 1;
-  double acc = 1.e-4;
-  double alph = 1.5;
-
   if (_ip->itvg<0) {
-    std::cerr << "[Vegas::MyIntegrate] [ERROR] Vegas called with a negative number of maximum iterations. No execution." << std::endl;
+    std::cerr << "[Vegas::Integrate] [ERROR] Vegas called with a negative number of maximum iterations. No execution." << std::endl;
     return -1;
   }
   _ndo = 1;
-  for (j=0; j<_ndim; j++) {
-    _xi[0][j] = one;
+  for (unsigned int j=0; j<_ndim; j++) {
+    _xi[0][j] = ONE;
   }
+  if (!_grid_prepared) {
+    std::cout << "[Vegas::Integrate] [INFO] Preparing the grid (1e5 function calls)" << std::endl;
+    Vegas1(100000);
+    _grid_prepared = true;
+  }
+  std::cout << "[Vegas::Integrate] [INFO] Launching the cross-section computation" << std::endl;
+  if (Vegas1()>=0) {
+    *result_ = _vegas_result;
+    *abserr_ = _vegas_abserr;
+  }
+  return 0;
+}
 
+int
+Vegas::Vegas1(int ncalls_)
+{
   // Entry VEGAS1
-  it = 0;
-  si = si2 = swgt = schi = scalls = 0.;
+  _it = 0;
+  _si = _si2 = _swgt = _schi = _scalls = 0.;
+  return Vegas2(ncalls_);
+}
 
+int
+Vegas::Vegas2(int ncalls_)
+{
+  int k;
+  double xo;
+  double dr;
+  double xn;
+  double xin[MAX_ND];
+  
+  int calls = (ncalls_<1) ? _ip->ncvg : ncalls_;
+  
   // Entry VEGAS2
-  nd = MAX_ND;
-  ng = 1;
-  if (mds!=0) {
-    ng = std::pow(_ip->ncvg/2., 1./_ndim);
-    mds = 1;
-    if (2*ng-MAX_ND>=0) {
-      mds = -1;
-      npg = ng/MAX_ND+1;
-      nd = ng/npg;
-      ng = npg*nd;
+  _nd = MAX_ND;
+  _ng = 1;
+  if (_mds!=0) {
+    _ng = std::pow(calls/2., 1./_ndim);
+    _mds = 1;
+    if (2*_ng-MAX_ND>=0) {
+      _mds = -1;
+      _npg = _ng/MAX_ND+1;
+      _nd = _ng/_npg;
+      _ng = _npg*_nd;
     }
   }
 
-  k = std::pow(ng, _ndim);
-  npg = _ip->ncvg/k;
-  if (npg<2) npg = 2;
-  calls = npg*k;
-  dxg = one/ng;
-  dv2g = std::pow(dxg, 2*_ndim)/npg/npg/(npg-one);
-  xnd = nd;
-  ndm = nd-1;
-  dxg *= xnd;
-  xjac = one;
-  for (i=0; i<_ndim; i++) {
-    dx[i] = _xu[i]-_xl[i];
-    xjac *= dx[i];
+  k = std::pow(_ng, _ndim);
+  _npg = calls/k;
+  if (_npg<2) _npg = 2;
+  _calls = _npg*k;
+  _dxg = ONE/_ng;
+  _dv2g = std::pow(_dxg, 2*_ndim)/_npg/_npg/(_npg-ONE);
+  _xnd = _nd;
+  _ndm = _nd-1;
+  _dxg *= _xnd;
+  _xjac = ONE;
+  for (unsigned int i=0; i<_ndim; i++) {
+    _xjac *= (_xu[i]-_xl[i]);
   }
 
   // Rebin preserving bin density
-  if (nd!=_ndo) {
-    rc = _ndo/xnd;
-    for (j=0; j<_ndim; j++) {
+  if (_nd!=_ndo) {
+    for (unsigned int j=0; j<_ndim; j++) {
       k = 0;
       xo = dr = xn = 0.;
-      i = -1;
+      unsigned int i = -1;
       do {
-	dr += one;
-	xn = _xi[k][j];
-	k++;
-      line5:
-	now += 1;
-      } while (rc>dr);
+        dr += ONE;
+        xn = _xi[k][j];
+        k++;
+  line5:
+        _now += 1;
+      } while (dr<_ndo/_xnd);
       i++;
-      dr -= rc;
+      dr -= (_ndo/_xnd);
       xin[i] = xn-(xn-xo)*dr;
-      if (i<ndm-1) goto line5; //FIXME need to remove these gotos
-      for (i=0; i<ndm; i++) {
-	_xi[i][j] = xin[i];
+      if (i<_ndm-1) goto line5; //FIXME need to remove these gotos
+      for (unsigned int i=0; i<_ndm; i++) {
+        _xi[i][j] = xin[i];
       }
-      _xi[nd-1][j] = one;
+      _xi[_nd-1][j] = ONE;
     }
-    _ndo = nd;
+    _ndo = _nd;
+  }
+  return Vegas3();
+}
+
+int
+Vegas::Vegas3()
+{
+  double rc;
+  double xo;
+  double dr;
+  double xn;
+  double xin[MAX_ND];
+  double tsi, ti, ti2;
+  double kg[_ndim], dt[_ndim];
+  double fb, f2b;
+  double qran[_ndim];
+  double f, f2, wgt;
+  int ia[_ndim];
+  double avgi, sd;
+  double chi2a, rel;
+  double r[MAX_ND];
+  
+  double x[_ndim];
+  
+  for (unsigned int i=0; i<_ndim; i++) {
+    dt[i] = 0.;
+  }
+  for (unsigned int j=0; j<MAX_ND; j++) {
+    r[j] = 0.;
   }
 
   // Entry VEGAS3
   // Main integration loop
   do {
-    it++;
+    _it++;
     tsi = ti = 0.;
-    for (j=0; j<_ndim; j++) {
+    for (unsigned int j=0; j<_ndim; j++) {
       kg[j] = 1;
-      for (i=1; i<nd; i++) {
-	_di[i][j] = _d[i][j] = ti;
+      for (unsigned int i=1; i<_nd; i++) {
+      	_di[i][j] = _d[i][j] = ti;
       }
     }
   line11:
     f2b = fb = 0.;
-    for (k=0; k<(int)npg; k++) {
-      for (j=0; j<_ndim; j++) {
-	qran[j] = (double)rand()/RAND_MAX;
+    for (unsigned int k=0; k<_npg; k++) {
+      for (unsigned int j=0; j<_ndim; j++) {
+        qran[j] = (double)rand()/RAND_MAX;
       }
-      wgt = xjac;
-      for (j=0; j<_ndim; j++) {
-	xn = (kg[j]-qran[j])*dxg;
-	iaj = ia[j] = int(xn);
-	iaj1 = iaj-1;
-	if (iaj<=1) {
-	  xo = _xi[iaj][j];
-	  rc = (xn-iaj)*xo;
-	}
-	else {
-	  xo = _xi[iaj][j]-_xi[iaj1][j];
-	  rc = _xi[iaj1][j]+(xn-iaj)*xo;
-	}
-	x[j] = _xl[j]+rc*dx[j];
-	if (x[j]>1. or x[j]<0.)
-	  std::cout << "-------> j=" << j 
-		    << "\tx[j]=" << x[j] 
-		    << "\txo=" << xo 
-		    << "\trc=" << rc 
-		    << "\tiaj=" << iaj 
-		    << "\t(xn-iaj)=" << (xn-iaj) 
-		    << "\txi[iaj1][j]=" << _xi[iaj1][j]
-		    << "\txi[iaj][j]=" << _xi[iaj][j]
-		    << std::endl;
-	wgt *= (xo*xnd);
+      wgt = _xjac;
+      for (unsigned int j=0; j<_ndim; j++) {
+        xn = (kg[j]-qran[j])*_dxg;
+        ia[j] = static_cast<int>(xn);
+        if (ia[j]<=1) {
+          xo = _xi[ia[j]][j];
+          rc = (xn-ia[j])*xo;
+        }
+        else {
+          xo = _xi[ia[j]][j]-_xi[ia[j]-1][j];
+          rc = _xi[ia[j]-1][j]+(xn-ia[j])*xo;
+        }
+        x[j] = _xl[j]+rc*(_xu[j]-_xl[j]);
+        if (x[j]>1. or x[j]<0.)
+          std::cout << "-------> j=" << j 
+                    << "\tx[j]=" << x[j] 
+                    << "\txo=" << xo 
+                    << "\trc=" << rc 
+                    << "\tiaj=" << ia[j] 
+                    << "\t(xn-iaj)=" << (xn-ia[j]) 
+                    << "\txi[iaj1][j]=" << _xi[ia[j]-1][j]
+                    << "\txi[iaj][j]=" << _xi[ia[j]][j]
+                    << std::endl;
+                    wgt *= (xo*_xnd);
       }
       f = this->F(x)*wgt;
       
@@ -215,121 +247,119 @@ int Vegas::Integrate(double *result_, double *abserr_)
       fb += f;
       f2b += f2;
       
-      for (j=0; j<_ndim; j++) {
-	iaj = ia[j];
-	_di[iaj][j] += f/calls;
-	if (mds>=0) _d[iaj][j] += f2;
+      for (unsigned int j=0; j<_ndim; j++) {
+        _di[ia[j]][j] += f/_calls;
+        if (_mds>=0) _d[ia[j]][j] += f2;
       }
     }
 
-    f2b *= npg;
+    f2b *= _npg;
     f2b = sqrt(f2b);
     f2b = fabs((f2b-fb)*(f2b+fb));
     ti += fb;
     tsi += f2b;
-    if (mds<0) {
-      for (j=0; j<_ndim; j++) {
-	iaj = ia[j];
-	_d[iaj][j] += f2b;
+    if (_mds<0) {
+      for (unsigned int j=0; j<_ndim; j++) {
+        _d[ia[j]][j] += f2b;
       }
     }
-    for (k=_ndim-1; k>=0; k--) {
-      kg[k] = fmod(kg[k], ng)+1;
+    for (int k=_ndim-1; k>=0; k--) {
+      kg[k] = fmod(kg[k], _ng)+1;
       if (kg[k]!=1) goto line11; //FIXME need to remove these goto
     }
     
     // Final results for this iteration
-    ti /= calls;
-    tsi *= dv2g;
+    ti /= _calls;
+    tsi *= _dv2g;
     ti2 = std::pow(ti, 2);
     
     if (tsi==0) wgt = 0.;
     else wgt = ti2/tsi;
     
-    si += ti*wgt;
-    si2 += ti2;
-    swgt += wgt;
-    schi += ti2*wgt;
+    _si += ti*wgt;
+    _si2 += ti2;
+    _swgt += wgt;
+    _schi += ti2*wgt;
     
-    if (swgt==0) avgi = ti;
-    else avgi = si/swgt;
+    if (_swgt==0) avgi = ti;
+    else avgi = _si/_swgt;
     
-    if (si2==0) sd = tsi;
-    else sd = swgt*it/si2;
+    if (_si2==0) sd = tsi;
+    else sd = _swgt*_it/_si2;
     
-    scalls += calls;
+    _scalls += _calls;
     chi2a = 0.;
     
-    if (it>1) chi2a = sd*(schi/swgt-pow(avgi, 2))/(it-1);
+    if (_it>1) chi2a = sd*(_schi/_swgt-pow(avgi, 2))/(_it-1);
     
-    if (sd!=0.) sd = sqrt(one/sd);
+    if (sd!=0.) sd = sqrt(ONE/sd);
     else sd = tsi;
     
     std::cout << "--> iteration " 
-	      << std::setfill(' ') << std::setw(2) << it << " : "
-	      << "average = " << std::setprecision(5) << std::setw(14) << avgi 
-	      << "sigma = " << std::setprecision(5) << std::setw(14) << sd 
-	      << "chi2 = " << chi2a << std::endl;
+              << std::setfill(' ') << std::setw(2) << _it << " : "
+              << "average = " << std::setprecision(5) << std::setw(14) << avgi 
+              << "sigma = " << std::setprecision(5) << std::setw(14) << sd 
+              << "chi2 = " << chi2a << std::endl;
 
     // Refine grid
     if (sd!=0.) rel = fabs(sd/avgi);
     else rel = 0.;
     
-    if (rel<=fabs(acc) or it>=_ip->itvg) now = 2;
+    if (rel<=fabs(_acc) or _it>=_ip->itvg) _now = 2;
     
-    for (j=0; j<_ndim; j++) {
+    for (unsigned int j=0; j<_ndim; j++) {
       xo = _d[0][j];
       xn = _d[1][j];
       _d[0][j] = (xo+xn)/2.;
       dt[j] = _d[0][j];
-      for (i=1; i<ndm; i++) {
-	_d[i][j] = xo+xn;
-	xo = xn;
-	xn = _d[i+1][j];
-	_d[i][j] = (_d[i][j]+xn)/3.;
-	dt[j] += _d[i][j];
+      for (unsigned int i=1; i<_ndm; i++) {
+        _d[i][j] = xo+xn;
+        xo = xn;
+        xn = _d[i+1][j];
+        _d[i][j] = (_d[i][j]+xn)/3.;
+        dt[j] += _d[i][j];
       }
-      _d[nd][j] = (xn+xo)/2.;
-      dt[j] += _d[nd][j];
+      _d[_nd][j] = (xn+xo)/2.;
+      dt[j] += _d[_nd][j];
     }
     
-    for (j=0; j<_ndim; j++) {
+    for (unsigned int j=0; j<_ndim; j++) {
       rc = 0.;
-      for (i=0; i<nd; i++) {
-	r[i] = 0.;
-	if (_d[i][j]>0.) {
-	  xo = dt[j]/_d[i][j];
-	  r[i] = std::pow((xo-one)/xo/log(xo), alph);
-	}
-	rc += r[i];
+      for (unsigned int i=0; i<_nd; i++) {
+        r[i] = 0.;
+        if (_d[i][j]>0.) {
+          xo = dt[j]/_d[i][j];
+          r[i] = std::pow((xo-ONE)/xo/log(xo), _alph);
+        }
+        rc += r[i];
       }
-      rc /= xnd;
+      rc /= _xnd;
       dr = xn = 0.;
-      k = 0;
-      i = 0;
+      int k = 0;
+      unsigned int i = 0;
       do {
-	dr += r[k];
-	xo = xn;
-	xn = _xi[k][j];
-	k++;
-      line26:
-	now += 1;
+        dr += r[k];
+        xo = xn;
+        xn = _xi[k][j];
+        k++;
+  line26:
+        _now += 1;
       } while (rc>dr);
       dr -= rc;
       if (dr==0.) xin[i] = xn;
       else xin[i] = xn-(xn-xo)*dr/r[k-1];
       i++;
-      if (i<ndm) goto line26; //FIXME need to remove these goto
+      if (i<_ndm) goto line26; //FIXME need to remove these goto
 
-      for (i=0; i<ndm; i++) {
-	_xi[i][j] = xin[i];
+      for (unsigned int i=0; i<_ndm; i++) {
+        _xi[i][j] = xin[i];
       }
-      _xi[nd-1][j] = one;
+      _xi[_nd-1][j] = ONE;
     }
-  } while (it<_ip->itvg and fabs(acc)<rel);
+  } while (_it<_ip->itvg and fabs(_acc)<rel);
 
-  *result_ = avgi;
-  *abserr_ = sd;
+  _vegas_result = avgi;
+  _vegas_abserr = sd;
   return 0;
 }
 
@@ -358,9 +388,9 @@ Vegas::GenerateOneEvent()
   int jj, jjj;
   double x[_ndim];
   
-  if (!_grid_prepared) {
+  if (!_generation_prepared) {
     this->SetGen();
-    _grid_prepared = true;
+    _generation_prepared = true;
   }
 
   y = -1.;
@@ -379,7 +409,7 @@ Vegas::GenerateOneEvent()
 #endif
     if (_correc<1.) {
       if ((double)rand()/RAND_MAX>=_correc) {
-	goto line7; //FIXME need to remove these goto
+        goto line7; //FIXME need to remove these goto
       }
       _correc = -1.;
     }
@@ -412,11 +442,11 @@ Vegas::GenerateOneEvent()
       _fmax[_j] = _fmax2;
       _fmdiff = _fmax2-_fmold;
       if (_fmax2<_ffmax) {
-	_correc = (_nm[_j]-1.)*_fmdiff/_ffmax-_corre2;
+        _correc = (_nm[_j]-1.)*_fmdiff/_ffmax-_corre2;
       }
       else {
-	_ffmax = _fmax2;
-	_correc = (_nm[_j]-1.)*_fmdiff/_ffmax*_fmax2/_ffmax-_corre2;
+        _ffmax = _fmax2;
+        _correc = (_nm[_j]-1.)*_fmdiff/_ffmax*_fmax2/_ffmax-_corre2;
       }
       _corre2 = 0.;
       _fmax2 = 0.;
@@ -451,7 +481,7 @@ Vegas::GenerateOneEvent()
     
     // Eject if weight is too low
     //if (y>_weight) {
-      //std::cout << "ERROR : y>weight => " << y << ">" << _weight << ", " << _j << std::endl;
+    //std::cout << "ERROR : y>weight => " << y << ">" << _weight << ", " << _j << std::endl;
       //_force_correction = false;
       //_force_returnto1 = true;
       //return this->GenerateOneEvent();
@@ -516,6 +546,8 @@ Vegas::SetGen()
   double x[_ndim];
   double sig2;
   double av, av2;
+
+  //#define DEBUG
 
 #ifdef DEBUG
   double eff, eff1, eff2;
@@ -598,13 +630,14 @@ Vegas::SetGen()
             << "\n\tAverage function value     =  sum   = " << sum
             << "\n\tAverage function value**2  =  sum2  = " << sum2
             << "\n\tOverall standard deviation =  sig   = " << sig
-	    << "\n\tAverage standard deviation =  sigp  = " << sigp
-	    << "\n\tMaximum function value     = ffmax  = " << _ffmax
-	    << "\n\tAverage inefficiency       =  eff1  = " << eff1 
-	    << "\n\tOverall inefficiency       =  eff2  = " << eff2 
+            << "\n\tAverage standard deviation =  sigp  = " << sigp
+            << "\n\tMaximum function value     = ffmax  = " << _ffmax
+            << "\n\tAverage inefficiency       =  eff1  = " << eff1 
+            << "\n\tOverall inefficiency       =  eff2  = " << eff2 
             << "\n\teff = " << eff 
-	    << std::endl;
+            << std::endl;
 #endif
+  //#undef DEBUG
 }
 
 void

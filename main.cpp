@@ -24,26 +24,22 @@ int main(int argc, char* argv[]) {
   
   if (argc==1) {
     std::cout << "[Main] [DEBUG] No config file provided. Setting the default parameters." << std::endl;
-    //mg.parameters->in1p = 3500.;
-    //mg.parameters->in2p = 3500.;
     mg.parameters->in1p = 4000.;
     mg.parameters->in2p = 4000.;
-    //mg.parameters->in1p = 27.55;
-    //mg.parameters->in2p = 820.;
     mg.parameters->pair = MUON;
     mg.parameters->remnant_mode = 11;
-    //mg.parameters->in1pdg = 11;
     mg.parameters->mcut = 2;
     mg.parameters->minenergy = 0.; //FIXME
-    mg.parameters->minpt = 15.;
-    //mg.parameters->SetEtaRange(-2.5, 2.5);
+    mg.parameters->minpt = 5.;
+    mg.parameters->mineta = -2.5;
+    mg.parameters->maxeta = 2.5;
     //mg.parameters->ncvg = 5e3; //FIXME
     mg.parameters->generation = true;
-    //mg.parameters->maxgen = 200000;
     mg.parameters->maxgen = 2;
     //mg.parameters->maxgen = 1e5;
     mg.parameters->hadroniser = &had;
     mg.parameters->process = &proc;
+    mg.parameters->process_mode = 2;
   }
   else {
 #ifdef DEBUG
@@ -67,8 +63,6 @@ int main(int argc, char* argv[]) {
   Particles particles;
   Particles::const_iterator part;
   int status;
-  ParticlesIds mothers;
-  std::pair<int,int> moth;
 
   if (mg.parameters->generation) {
 
@@ -76,21 +70,6 @@ int main(int argc, char* argv[]) {
       if (i%10000==0)
         std::cout << "Generating event #" << i+1 << std::endl;
       ev = *mg.GenerateOneEvent();
-
-      particles = ev.GetConstParticles();
-      for (part=particles.begin(); part!=particles.end(); part++) {
-        status = part->status;
-        //if (status<-1) continue;
-        if (status==0) status = 1;
-
-        //hep_event.NUP++;
-
-        mothers = part->GetMothersIds();
-        if (!mothers.size()) moth = std::make_pair(0, 0);
-        else if (mothers.size()==1) moth = std::make_pair(*mothers.begin()+1, 0);
-        else moth = std::make_pair(*mothers.begin()+1, *mothers.end()+1);
-
-      }
       ev.Dump();
     }
 

@@ -109,7 +109,7 @@ void Parameters::Dump()
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|-" << std::setfill('-') << std::setw(wb-2) << " Incoming particles " << std::setfill(' ') << "-|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "| " << std::setw(wt) << "Subprocess' mode" << std::setw(15) << pmode << std::setw(wp-15) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Subprocess' mode" << std::setw(20) << pmode << std::setw(wp-20) << "" << " |" << std::endl
     << "| " << std::setw(wt) << "Incoming particles" << std::setw(5) << in1pdg << ", " << std::setw(5) << in2pdg << std::setw(wp-12) << "" << " |" << std::endl
     << "| " << std::setw(wt) << "Momenta [GeV/c]" << std::setw(5) << in1p << ", " << std::setw(5) << in2p << std::setw(wp-12) << "" << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
@@ -123,7 +123,7 @@ void Parameters::Dump()
     << "| " << std::setw(wt) << "Cuts mode" << std::setw(2) << mcut << " -> " << std::setw(wp-6) << cutsmode << " |" << std::endl
     << "| " << std::setw(wt) << "Lepton(s)' pT in range [GeV/c]" << "[" << std::setw(4) << minpt << ", " << std::setw(4) << maxpt << "]" << std::setw(wp-12) << "" << " |" << std::endl
     << "| " << std::setw(wt) << "Lepton(s)' energy in range [GeV]" << "[" << std::setw(4) << minenergy << ", " << std::setw(4) << maxenergy << "]" << std::setw(wp-12) << "" << " |" << std::endl
-    << "| " << std::setw(wt) << "Pseudorapidity in range" << "[" << std::setw(3) << mineta << ", " << std::setw(3) << maxeta << "]" << std::setw(wp-10) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Pseudorapidity in range" << "[" << std::setw(4) << mineta << ", " << std::setw(4) << maxeta << "]" << std::setw(wp-12) << "" << " |" << std::endl
     //<< "| " << std::setw(wt) << "Polar angle theta in range [deg]" << "[" << std::setw(3) << mintheta << ", " << std::setw(3) << maxtheta << "]" << std::setw(wp-10) << "" << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|-" << std::setfill('-') << std::setw(wb-2) << " Outgoing remnants " << std::setfill(' ') << "-|" << std::endl
