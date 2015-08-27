@@ -1332,7 +1332,7 @@ GamGamLL::FillKinematics(bool symmetrise_)
 void
 GamGamLL::SetKinematics(Kinematics cuts_)
 {
-  double thetamin = EtaToTheta(_cuts.etamin), thetamax = EtaToTheta(_cuts.etamax);
+  double thetamin = EtaToTheta(_cuts.etamax), thetamax = EtaToTheta(_cuts.etamin);
   _cuts = cuts_;
   _cotth1 = 1./tan(thetamax*pi/180.);
   _cotth2 = 1./tan(thetamin*pi/180.);  
