@@ -50,27 +50,6 @@ class Vegas {
     bool GenerateOneEvent();
   private:
     /**
-     * Transforms the function to integrate into a numerically stable function where poles are tamed.
-     * @param[in] x_ The @a _ndim -dimensional point at which the stabilised function is to be evaluated
-     * @param[in] ip_ The physics parameters to apply to the function to evaluate
-     * @param[in] storedbg_ A debugging flag to set whether or not the internal variables of this method need to be stored for further processing
-     * @return Tamed function value at this point @a x_
-     */
-    double Treat(double* x_,Parameters* ip_,bool storedbg_=false);
-    /**
-     * Evaluates the smoothed version of the function to be integrated at a point @a x_, using the default Parameters object @a fInputParameters 
-     * @param[in] x_ The point at which the tamed function is to be evaluated
-     * @return Tamed function value at this point @a x_
-     */
-    inline double Treat(double* x_) { return Treat(x_, fInputParameters); }
-    /**
-     * Evaluates the smoothed version of the function to be integrated at a point @a x_
-     * @param[in] x_ The point at which the tamed function is to be evaluated
-     * @param[in] storedbg_ A debugging flag to set whether or not the internal variables of this method need to be stored for further processing
-     * @return Tamed function value at this point @a x_
-     */
-    inline double Treat(double* x_,bool storedbg_) { return Treat(x_, fInputParameters,storedbg_); }
-    /**
      * Evaluates the function to be integrated at a point @a x_, using the default Parameters object @a fInputParameters
      * @param[in] x_ The point at which the function is to be evaluated
      * @return Function value at this point @a x_
@@ -106,14 +85,6 @@ class Vegas {
      * @brief The number of dimensions on which to integrate the function
      */
     unsigned int fStateBins;
-    /**
-     * Has the Treat function already been called once ?
-     */
-    int _nTreatCalls;
-    /**
-     * \f$r = \text{ndo}^\text{ndim}\f$ value of the Treat function
-     */
-    double _rTreat;
     /**
      * @brief Integration grid size parameter
      */

@@ -7,7 +7,6 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
   fGridPrepared(false), fGenerationPrepared(false),
   fFmax(0), fFGlobalMax(0.), fN(0)
   /*fFunction->dim(dim_), fStateBins(50),
-  _nTreatCalls(0), fMbin(3),
   _fmax2(0.), _fmdiff(0.), _fmold(0.),
   fJ(0),
   fStateMode(1), _acc(1.e-4), _alph(1.5), fStateSamples(0)*/
@@ -169,8 +168,6 @@ Vegas::GenerateOneEvent()
       x[k] = ((double)rand()/RAND_MAX+fN[k])*ami;
     }
     // Compute weight for x value
-    /*if (fInputParameters->ntreat>0) _weight = Treat(x);
-    else _weight = this->F(x);*/
     _weight = F(x);
     // Parameter for correction of correction
     if (_weight>fFmax[fJ]) {
@@ -225,8 +222,6 @@ Vegas::GenerateOneEvent()
     }
     
     // Get weight for selected x value
-    /*if (fInputParameters->ntreat>0) _weight = this->Treat(x);
-    else _weight = this->F(x);*/
     _weight = F(x);
     
     // Eject if weight is too low
@@ -271,8 +266,6 @@ Vegas::StoreEvent(double *x_)
     return false;
   }
   fInputParameters->store = true;
-  /*if (fInputParameters->ntreat>0) _weight = Treat(x_);
-  else _weight = this->F(x_);*/
   _weight = F(x_);
   fInputParameters->ngen += 1;
   fInputParameters->store = false;
@@ -337,8 +330,6 @@ Vegas::SetGen()
       for (unsigned int k=0; k<fFunction->dim; k++) {
         x[k] = ((double)rand()/RAND_MAX+n[k])/fMbin;
       }
-      /*if (fInputParameters->ntreat>0) z = this->Treat(x);
-      else z = this->F(x);*/
       z = F(x);
       if (z>fFmax[i]) fFmax[i] = z;
       fsum += z;
@@ -409,56 +400,3 @@ Vegas::DumpGrid()
   }
 }
 
-double
-Vegas::Treat(double *x_, Parameters* ip_, bool storedbg_)
-{
-  double w, xx, y, dd, f;
-  unsigned int i;
-  int j;
-  double z[fFunction->dim];
-
-  if (_nTreatCalls==0) {
-    _nTreatCalls = 1;
-    _rTreat = std::pow(fStateBins, fFunction->dim);
-    if (storedbg_ && remove("test_vegas")!=0) {
-      std::cerr << "Error while trying to delete test_vegas" << std::endl;
-    }
-    //this->DumpGrid();
-  }
-
-  w = _rTreat;
-  for (i=0; i<fFunction->dim; i++) {
-    xx = x_[i]*fStateBins-1;
-    j = xx;
-    y = xx-j;
-    if (j<=0) {
-      dd = fCoord[0][i];
-    }
-    else {
-      dd = fCoord[j+1][i]-fCoord[j][i];
-    }
-    z[i] = fCoord[j+1][i]-dd*(1.-y);
-    w = w*dd;
-  }
-
-  f = this->F(z, ip_);
-
-  if (storedbg_) {
-    std::ofstream df;
-    df.open("test_vegas", std::ios::app);
-    df << w 
-       << "\t" << w*f;
-    for (unsigned int i=0; i<fFunction->dim; i++) {
-      df << "\t" << z[i];
-    }
-    for (unsigned int i=0; i<fFunction->dim; i++) {
-      df << "\t" << x_[i];
-    }
-    df << std::endl;
-    df.close();
-  }
-#ifdef DEBUG
-  std::cout << "[Vegas::Treat] [DEBUG] w = " << w << ", dd = " << dd << ", ndo = " << fStateBins << ", r = " << _rTreat << std::endl;
-#endif
-  return w*f;
-}
