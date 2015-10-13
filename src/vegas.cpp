@@ -1,36 +1,14 @@
 #include "vegas.h"
 
 Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inParam_) :
-  fMbin(3), fStateSamples(0),
+  fMbin(3),
   fJ(0), fCorrec(0.), fCorrec2(0.),
   fInputParameters(inParam_),
   fGridPrepared(false), fGenerationPrepared(false),
   fFmax(0), fFGlobalMax(0.), fN(0)
-  /*fFunction->dim(dim_), fStateBins(50),
-  _fmax2(0.), _fmdiff(0.), _fmold(0.),
-  fJ(0),
-  fStateMode(1), _acc(1.e-4), _alph(1.5), fStateSamples(0)*/
 {
-  /* x content :
-      0 = t1 mapping
-      1 = t2 mapping
-      2 = s2 mapping
-      3 = yy4 definition
-      4 = w4 mapping
-      5 = xx6 definition
-      6 = phicm6 definition
-    ( 7 = xq, wx mappings   ) <- single- and double-dissociative only
-  */
-
   fXlow = new double[dim_];
   fXup = new double[dim_];
-  /*for (int i=0; i<fMaxNbins; i++) {
-    fCoord[i] = new double[dim_];
-    fValue[i] = new double[dim_];
-    _di[i] = new double[dim_];
-  }
-  // ...
-  // ...*/
   
   for (int i=0; i<dim_; i++) {
     fXlow[i] = 0.;
@@ -38,43 +16,31 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
   }
   
 #ifdef DEBUG
-  std::cout << "[Vegas::Vegas] [DEBUG]"
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]"
             << "\n  Number of integration dimensions : " << dim_
             << "\n  Number of iterations : " << inParam_->itvg
             << "\n  Number of function calls : " << inParam->ncvg
             << std::endl;
 #endif
 
-  /*for (unsigned int j=0; j<fMaxNbins; j++) {
-    for (unsigned int i=0; i<fFunction->dim; i++) {
-      fValue[j][i] = _di[j][i] = fCoord[j][i] = 0.;
-    }
-  }*/
-
   fFunction = new gsl_monte_function;
   fFunction->f = f_;
   fFunction->dim = dim_;
   fFunction->params = (void*)(inParam_);
   fNumConverg = inParam_->ncvg;
-  fNumIter = inParam_->itvg;
-  
+  fNumIter = inParam_->itvg; 
 }
 
 Vegas::~Vegas()
 {
 #ifdef DEBUG
-  std::cout << "[Vegas::~Vegas] [DEBUG] Destructor called" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Destructor called" << std::endl;
 #endif
   delete[] fXlow;
   delete[] fXup;
   delete[] _nm;
   if (fFmax) delete[] fFmax;
   if (fN) delete[] fN;
-  /*for (int i=0; i<fMaxNbins; i++) {
-    delete[] fCoord[i];
-    delete[] fValue[i];
-    delete[] _di[i];
-  }*/
   delete fFunction;
 }
 
@@ -90,8 +56,6 @@ Vegas::Integrate(double *result_, double *abserr_)
   int veg_res;
   
   double res, err;
-  
-  std::cout << "Will launch vegas on " << fFunction->dim << " dimensions" << std::endl;
   
   // Launch Vegas
   gsl_monte_vegas_state* state = gsl_monte_vegas_alloc(fFunction->dim);
@@ -118,22 +82,24 @@ Vegas::Generate()
   int i;
   
   this->SetGen();
-  std::cout << "[Vegas::Generate] [DEBUG] " << fInputParameters->maxgen << " events will be generated" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " " << fInputParameters->maxgen << " events will be generated" << std::endl;
   i = 0;
   while (i<fInputParameters->maxgen) {
     if (this->GenerateOneEvent()) i++;
   }
-  std::cout << "[Vegas::Generate] [DEBUG] " << i << " events generated" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " " << i << " events generated" << std::endl;
 }
 
 bool
 Vegas::GenerateOneEvent()
 {
   // Inherited from GMUGNA
+  double weight;
   double ami, max;
   double y;
   int jj, jjj;
   double x[fFunction->dim];
+  double fmax_old, fmax_diff, fmax2;
   
   if (!fGenerationPrepared) {
     this->SetGen();
@@ -148,7 +114,7 @@ Vegas::GenerateOneEvent()
   if (fJ!=0) {
   line4:
 #ifdef DEBUG
-    std::cout << "[Vegas::GenerateOneEvent] [DEBUG] Correction cycles are started."
+    std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Correction cycles are started."
 	      << "\n\tj = " << fJ
 	      << "\n\tcorrec = " << fCorrec
 	      << "\n\tcorre2 = " << fCorrec2
@@ -168,34 +134,34 @@ Vegas::GenerateOneEvent()
       x[k] = ((double)rand()/RAND_MAX+fN[k])*ami;
     }
     // Compute weight for x value
-    _weight = F(x);
+    weight = F(x);
     // Parameter for correction of correction
-    if (_weight>fFmax[fJ]) {
-      if (_weight>_fmax2) _fmax2 = _weight;
+    if (weight>fFmax[fJ]) {
+      if (weight>fmax2) fmax2 = weight;
       fCorrec2 -= 1.;
       fCorrec += 1.;
     }
     // Accept event
-    if (_weight>=_fmdiff*(double)rand()/RAND_MAX+_fmold) { // FIXME!!!!
+    if (weight>=fmax_diff*(double)rand()/RAND_MAX+fmax_old) { // FIXME!!!!
       return this->StoreEvent(x);
     }
     goto line4;
   line7:
     // Correction if too big weight is found while correction
     // (All your bases are belong to us...)
-    if (_fmax2>fFmax[fJ]) {
-      _fmold = fFmax[fJ];
-      fFmax[fJ] = _fmax2;
-      _fmdiff = _fmax2-_fmold;
-      if (_fmax2<fFGlobalMax) {
-        fCorrec = (_nm[fJ]-1.)*_fmdiff/fFGlobalMax-fCorrec2;
+    if (fmax2>fFmax[fJ]) {
+      fmax_old = fFmax[fJ];
+      fFmax[fJ] = fmax2;
+      fmax_diff = fmax2-fmax_old;
+      if (fmax2<fFGlobalMax) {
+        fCorrec = (_nm[fJ]-1.)*fmax_diff/fFGlobalMax-fCorrec2;
       }
       else {
-        fFGlobalMax = _fmax2;
-        fCorrec = (_nm[fJ]-1.)*_fmdiff/fFGlobalMax*_fmax2/fFGlobalMax-fCorrec2;
+        fFGlobalMax = fmax2;
+        fCorrec = (_nm[fJ]-1.)*fmax_diff/fFGlobalMax*fmax2/fFGlobalMax-fCorrec2;
       }
       fCorrec2 = 0.;
-      _fmax2 = 0.;
+      fmax2 = 0.;
       goto line4;
       //return this->GenerateOneEvent(); //GOTO 4
     }
@@ -222,56 +188,51 @@ Vegas::GenerateOneEvent()
     }
     
     // Get weight for selected x value
-    _weight = F(x);
+    weight = F(x);
     
     // Eject if weight is too low
-    //if (y>_weight) {
-    //std::cout << "ERROR : y>weight => " << y << ">" << _weight << ", " << fJ << std::endl;
+    //if (y>weight) {
+      //std::cout << "ERROR : y>weight => " << y << ">" << weight << ", " << fJ << std::endl;
       //_force_correction = false;
       //_force_returnto1 = true;
       //return this->GenerateOneEvent();
       //goto line1;
     //}
-  } while (y>_weight);
+  } while (y>weight);
 
-  if (_weight<=fFmax[fJ]) fJ = 0;
+  if (weight<=fFmax[fJ]) fJ = 0;
   // Init correction cycle if weight is higher than fmax or ffmax
-  else if (_weight<=fFGlobalMax) {
-    _fmold = fFmax[fJ];
-    fFmax[fJ] = _weight;
-    _fmdiff = _weight-_fmold;
-    fCorrec = (_nm[fJ]-1.)*_fmdiff/fFGlobalMax-1.;
+  else if (weight<=fFGlobalMax) {
+    fmax_old = fFmax[fJ];
+    fFmax[fJ] = weight;
+    fmax_diff = weight-fmax_old;
+    fCorrec = (_nm[fJ]-1.)*fmax_diff/fFGlobalMax-1.;
   }
   else {
-    _fmold = fFmax[fJ];
-    fFmax[fJ] = _weight;
-    _fmdiff = _weight-_fmold;
-    fFGlobalMax = _weight;
-    fCorrec = (_nm[fJ]-1.)*_fmdiff/fFGlobalMax*_weight/fFGlobalMax-1.;
+    fmax_old = fFmax[fJ];
+    fFmax[fJ] = weight;
+    fmax_diff = weight-fmax_old;
+    fFGlobalMax = weight;
+    fCorrec = (_nm[fJ]-1.)*fmax_diff/fFGlobalMax*weight/fFGlobalMax-1.;
   }
 #ifdef DEBUG
-  std::cout << "[Vegas::GenerateOneEvent] [DEBUG] correc = " << fCorrec << ", j = " << fJ << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] correc = " << fCorrec << ", j = " << fJ << std::endl;
 #endif
   // Return with an accepted event
-  return this->StoreEvent(x);
+  if (weight>0.) return this->StoreEvent(x);
+  return false;
 }
 
 bool
 Vegas::StoreEvent(double *x_)
 {
-  if (_weight<=0.) {
-#ifdef DEBUG
-    std::cout << "[Vegas::StoreEvent] [DEBUG] Tried to store event while the weight is <= 0 : " << _weight << std::endl;
-#endif
-    return false;
-  }
   fInputParameters->store = true;
-  _weight = F(x_);
+  F(x_);
   fInputParameters->ngen += 1;
   fInputParameters->store = false;
 #ifdef DEBUG
   if (fInputParameters->ngen%1000==0) {
-    std::cout << "[Vegas::StoreEvent] Generated events : " << fInputParameters->ngen << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " Generated events : " << fInputParameters->ngen << std::endl;
   }
 #endif
   return true;
@@ -347,7 +308,7 @@ Vegas::SetGen()
     eff = 1.e4;
     if (fFmax[i]!=0.) eff = fFmax[i]/av;
     //#ifdef DEBUG
-    std::cout << "[Vegas::SetGen] [DEBUG] in iteration #" << i << " :"
+    std::cout << __PRETTY_FUNCTION__ << " [DEBUG] in iteration #" << i << " :"
 	      << "\n\tav   = " << av
 	      << "\n\tsig  = " << sig
 	      << "\n\tfmax = " << fFmax[i]
@@ -374,7 +335,7 @@ Vegas::SetGen()
   }
   eff1 = eff1/(max*sum);
   eff2 = fFGlobalMax/sum;
-  std::cout << "[Vegas::SetGen] [DEBUG]"
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]"
             << "\n\tAverage function value     =  sum   = " << sum
             << "\n\tAverage function value**2  =  sum2  = " << sum2
             << "\n\tOverall standard deviation =  sig   = " << sig
@@ -386,17 +347,5 @@ Vegas::SetGen()
             << std::endl;
 #endif
 //#undef DEBUG
-}
-
-void
-Vegas::DumpGrid()
-{
-  unsigned int i,j;
-  // DUMP THE GRID
-  for (i=0; i<fFunction->dim; i++) {
-    for (j=0; j<fMaxNbins; j++) {
-      std::cout << i << "\t" << j << "\t" << fCoord[j][i] << std::endl;
-    }
-  }
 }
 

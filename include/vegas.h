@@ -78,14 +78,6 @@ class Vegas {
      */
     void SetGen();
     /**
-     * Debugging method used to dump the integration grid in the standard output stream.
-     */
-    void DumpGrid();
-    /**
-     * @brief The number of dimensions on which to integrate the function
-     */
-    unsigned int fStateBins;
-    /**
      * @brief Integration grid size parameter
      */
     double fMbin;
@@ -98,25 +90,11 @@ class Vegas {
      */
     double *fXup;
     /**
-     * @brief Weight of the point in the total integration
-     */
-    double _weight;
-    /**
-     * @brief Square of the maximal function value in the integration grid
-     * */
-    double _fmax2;
-    double _fmdiff;
-    double _fmold;
-    int fStateSamples;
-    /**
      * @brief Selected bin at which the function will be evaluated
      */
     int fJ;
     double fCorrec;
     double fCorrec2;
-    double *fCoord[fMaxNbins];
-    double *fValue[fMaxNbins];
-    double *_di[fMaxNbins];
     /**
      * @brief List of parameters to specify the integration range and the physics determining the phase space
      */
@@ -139,27 +117,6 @@ class Vegas {
     double fFGlobalMax;
     int *fN;
     int *_nm;
-    /**
-     * @brief Total number of iterations for the current Vegas instance
-     */
-    int fStateMode;
-    double _acc;
-    double _alph;
-    double fStateWeightedIntegralSum;
-    double _si2;
-    double fStateSumWeights;
-    double fStateChiSum;
-    double _scalls;
-    unsigned int fBins;
-    unsigned int fBoxes;
-    unsigned int fBoxesPerBin;
-    double fCalls;
-    double _dxg;
-    double _dv2g;
-    double _xnd;
-    unsigned int _ndm;
-    double _xjac;
-    int _now;
     double _vegas_result;
     double _vegas_abserr;
     /**
