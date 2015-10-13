@@ -120,33 +120,29 @@ Vegas::GenerateOneEvent()
 	      << "\n\tcorre2 = " << fCorrec2
 	      << std::endl;
 #endif
-    if (fCorrec<1.) {
-      if ((double)rand()/RAND_MAX>=fCorrec) {
-        goto line7; //FIXME need to remove these goto
-      }
-      fCorrec = -1.;
-    }
-    else {
+    if (fCorrec>=1.) {
       fCorrec -= 1.;
     }
-    // Select x values in Vegas bin
-    for (unsigned int k=0; k<fFunction->dim; k++) {
-      x[k] = ((double)rand()/RAND_MAX+fN[k])*ami;
+    if ((double)rand()/RAND_MAX<fCorrec) {
+      fCorrec = -1.;
+      // Select x values in Vegas bin
+      for (unsigned int k=0; k<fFunction->dim; k++) {
+        x[k] = ((double)rand()/RAND_MAX+fN[k])*ami;
+      }
+      // Compute weight for x value
+      weight = F(x);
+      // Parameter for correction of correction
+      if (weight>fFmax[fJ]) {
+        if (weight>fmax2) fmax2 = weight;
+        fCorrec2 -= 1.;
+        fCorrec += 1.;
+      }
+      // Accept event
+      if (weight>=fmax_diff*(double)rand()/RAND_MAX+fmax_old) { // FIXME!!!!
+        return this->StoreEvent(x);
+      }
+      goto line4;
     }
-    // Compute weight for x value
-    weight = F(x);
-    // Parameter for correction of correction
-    if (weight>fFmax[fJ]) {
-      if (weight>fmax2) fmax2 = weight;
-      fCorrec2 -= 1.;
-      fCorrec += 1.;
-    }
-    // Accept event
-    if (weight>=fmax_diff*(double)rand()/RAND_MAX+fmax_old) { // FIXME!!!!
-      return this->StoreEvent(x);
-    }
-    goto line4;
-  line7:
     // Correction if too big weight is found while correction
     // (All your bases are belong to us...)
     if (fmax2>fFmax[fJ]) {

@@ -151,9 +151,6 @@ MCGen::LaunchGeneration()
 
 double f(double* x_, size_t ndim_, void* params_)
 {
-  /*((Parameters*)params_)->process->SetPoint(ndim_, x_);
-  return ((Parameters*)params_)->process->ComputeWeight(); //FIXME*/
-  
   double ff;
   Parameters *p;
   Kinematics kin;
