@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <cstdio> // remove (DEBUG)
+#include <gsl/gsl_monte_vegas.h>
 
 #include "parameters.h"
 
@@ -82,27 +83,27 @@ class Vegas {
      * @param[in] x_ The point at which the tamed function is to be evaluated
      * @return Tamed function value at this point @a x_
      */
-    inline double Treat(double* x_) { return this->Treat(x_,(Parameters*)this->_ip); }
+    inline double Treat(double* x_) { return Treat(x_,(Parameters*)this->_ip); }
     /**
      * Evaluates the smoothed version of the function to be integrated at a point @a x_
      * @param[in] x_ The point at which the tamed function is to be evaluated
      * @param[in] storedbg_ A debugging flag to set whether or not the internal variables of this method need to be stored for further processing
      * @return Tamed function value at this point @a x_
      */
-    inline double Treat(double* x_,bool storedbg_) { return this->Treat(x_,(Parameters*)this->_ip,storedbg_); }
+    inline double Treat(double* x_,bool storedbg_) { return Treat(x_,(Parameters*)this->_ip,storedbg_); }
     /**
      * Evaluates the function to be integrated at a point @a x_, using the default Parameters object @a _ip
      * @param[in] x_ The point at which the function is to be evaluated
      * @return Function value at this point @a x_
      */
-    inline double F(double* x_) { return this->_f(x_, this->_ndim, (void*)this->_ip); }
+    inline double F(double* x_) { return fFunction->f(x_, this->_ndim, (void*)this->_ip); }
     /**
      * Evaluates the function to be integrated at a point @a x_, given a set of Parameters @a ip_
      * @param[in] x_ The point at which the function is to be evaluated
      * @param[in] ip_ A set of parameters to fully define the function
      * @return Function value at this point @a x_
      */
-    inline double F(double* x_,Parameters* ip_) { return this->_f(x_, this->_ndim, (void*)ip_); }
+    inline double F(double* x_,Parameters* ip_) { return fFunction->f(x_, this->_ndim, (void*)ip_); }
     /**
      * Stores the event characterized by its _ndim-dimensional point in the phase
      * space to the output file
@@ -218,7 +219,7 @@ class Vegas {
      * @param ndim_ The number of degrees of freedom this function has
      * @param params_ A "_void_-ified" Parameters object to define the boundaries of the phase space (physics constraints)
      */
-    double (*_f)(double* x_, size_t ndim_, void* params_);
+    gsl_monte_function *fFunction;
 };
 
 #endif

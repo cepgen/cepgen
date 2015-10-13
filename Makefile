@@ -9,8 +9,8 @@ INCLUDEDIR = -Iprocesses/ -Iinclude/ -Iexternal/
 SVNDEV = 'SVN_REV="$(shell svnversion -nq .)"'
 #CFLAGS     = -fexceptions 
 CFLAGS     = -Wall -Wextra -fexceptions -Wpointer-arith \
-	     $(INCLUDEDIR) -D$(SVNDEV) -g #-I$(PYTHIA8SRC)/include
-LDFLAGS    = $(INCLUDEDIR) -lgfortran -Wl,-O2
+	     $(INCLUDEDIR) -lgsl -g
+LDFLAGS    = $(INCLUDEDIR) -lgfortran -lgsl -lgslcblas -Wl,-O2
 #LDFLAGS    = $(INCLUDEDIR) -lgfortran -Wl,-O2
 FFLAGS     = -w -g
 VPATH      = src:include:processes:$(PYTHIA8SRC)/include

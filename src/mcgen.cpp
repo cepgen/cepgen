@@ -1,7 +1,7 @@
 #include "mcgen.h"
 
 MCGen::MCGen() :
-  _xsec(-1.), _xsec_error(-1.), _vegas_built(false)
+  veg(0), _xsec(-1.), _xsec_error(-1.)
 {
   this->PrintHeader();
 
@@ -20,7 +20,7 @@ MCGen::MCGen(Parameters *ip_) :
 
 MCGen::~MCGen()
 {
-  if (_vegas_built) delete veg;
+  if (veg) delete veg;
   delete parameters;
 #ifdef DEBUG
   std::cout << "[MCGen::~MCGen] [DEBUG] Destructor called" << std::endl;
@@ -43,8 +43,6 @@ MCGen::PrintHeader()
 	    << "| " << std::setw(sp) << "" << "#            #       #####  ###### # ##### " << std::setw(sp+1) << "" << "|" << std::endl
 	    << "| " << std::setw(sp) << "" << "#    #       #       #      #    # # #   # " << std::setw(sp+1) << "" << "|" << std::endl
 	    << "| " << std::setw(sp) << "" << " ####        ####### #      #    # # #    #" << std::setw(sp+1) << "" << "|" << std::endl
-	    << "| " << std::setw(bw) << "" << "|" << std::endl
-            << "| " << "Version "<< std::setw(bw-8) << SVN_REV << "|" << std::endl
 	    << "| " << std::setw(bw) << "" << "|" << std::endl
 	    << "| " << std::setw(bw) << "" << "|" << std::endl
 	    << "| " << std::setw(bw) << "Copyright (C) 2014  Laurent Forthomme" << "|" << std::endl
@@ -93,13 +91,12 @@ MCGen::BuildVegas()
 #endif
 
   veg = new Vegas(parameters->process->GetNdim(parameters->process_mode), f, parameters);
-  _vegas_built = true;
 }
 
 void
 MCGen::ComputeXsection(double* xsec_, double *err_)
 {
-  if (!_vegas_built) this->BuildVegas();
+  if (!veg) this->BuildVegas();
 
   std::cout << "[MCGen::ComputeXsection] Starting the computation of the process cross-section" << std::endl;
   veg->Integrate(xsec_, err_);
@@ -154,6 +151,9 @@ MCGen::LaunchGeneration()
 
 double f(double* x_, size_t ndim_, void* params_)
 {
+  ((Parameters*)params_)->process->SetPoint(ndim_, x_);
+  return ((Parameters*)params_)->process->ComputeWeight(); //FIXME
+  
   double ff;
   Parameters *p;
   Kinematics kin;

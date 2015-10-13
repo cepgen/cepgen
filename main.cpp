@@ -13,17 +13,18 @@ int main(int argc, char* argv[]) {
   double xsec, err;
   MCGen mg;
   Event ev;
-  GamGamLL proc;
   //GamPomVMLL proc;
   //PPtoLL proc;
-  //Herwig6Hadroniser had;
-  Pythia6Hadroniser had;
-  //Jetset7Hadroniser had;//FIXME FIXME FIXME buggy !
   std::ofstream output;
   //std::ofstream output2;
   
   if (argc==1) {
     std::cout << "[Main] [DEBUG] No config file provided. Setting the default parameters." << std::endl;
+    
+    mg.parameters->hadroniser = new Pythia6Hadroniser;
+    mg.parameters->process = new TestProcess;
+    mg.parameters->process_mode = 2;
+    
     mg.parameters->in1p = 4000.;
     mg.parameters->in2p = 4000.;
     mg.parameters->pair = MUON;
@@ -37,9 +38,6 @@ int main(int argc, char* argv[]) {
     mg.parameters->generation = true;
     mg.parameters->maxgen = 2;
     //mg.parameters->maxgen = 1e5;
-    mg.parameters->hadroniser = &had;
-    mg.parameters->process = &proc;
-    mg.parameters->process_mode = 2;
   }
   else {
 #ifdef DEBUG

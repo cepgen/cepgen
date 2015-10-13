@@ -1,13 +1,13 @@
 #include "vegas.h"
 
 Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inParam_) :
-  _ndim(dim_), _ndo(50),
+  _ndim(dim_)/*, _ndo(50),
   _nTreatCalls(0), _mbin(3),
   _ffmax(0.), _correc(0.), _corre2(0.), _fmax2(0.), _fmdiff(0.), _fmold(0.),
   _j(0),
   _ip(inParam_),
   _grid_prepared(false), _generation_prepared(false),
-  _mds(1), _acc(1.e-4), _alph(1.5), _it(0)
+  _mds(1), _acc(1.e-4), _alph(1.5), _it(0)*/
 {
   /* x content :
       0 = t1 mapping
@@ -22,7 +22,7 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
 
   _xl = new double[dim_];
   _xu = new double[dim_];
-  for (int i=0; i<MAX_ND; i++) {
+  /*for (int i=0; i<MAX_ND; i++) {
     _xi[i] = new double[dim_];
     _d[i] = new double[dim_];
     _di[i] = new double[dim_];
@@ -31,7 +31,7 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
   _n = new int[dim_];
   _nm = new int[20000];
   _fmax = new double[20000];
-  // ...
+  // ...*/
   
   for (int i=0; i<dim_; i++) {
     _xl[i] = 0.;
@@ -46,13 +46,16 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
             << std::endl;
 #endif
 
-  for (unsigned int j=0; j<MAX_ND; j++) {
+  /*for (unsigned int j=0; j<MAX_ND; j++) {
     for (unsigned int i=0; i<_ndim; i++) {
       _d[j][i] = _di[j][i] = _xi[j][i] = 0.;
     }
-  }
+  }*/
 
-  _f = f_;
+  fFunction = new gsl_monte_function;
+  fFunction->f = f_;
+  fFunction->dim = dim_;
+  fFunction->params = (void*)(inParam_);
   
 }
 
@@ -63,20 +66,38 @@ Vegas::~Vegas()
 #endif
   delete[] _xl;
   delete[] _xu;
-  delete[] _n;
+  /*delete[] _n;
   delete[] _nm;
   delete[] _fmax;
   for (int i=0; i<MAX_ND; i++) {
     delete[] _xi[i];
     delete[] _d[i];
     delete[] _di[i];
-  }
+  }*/
+  delete fFunction;
 }
 
 int
 Vegas::Integrate(double *result_, double *abserr_)
 {
-  if (_ip->itvg<0) {
+  // Initialise the random number generator
+  const gsl_rng_type* rng_type;
+  gsl_rng* rng;
+  gsl_rng_env_setup();
+  rng_type = gsl_rng_default;
+  rng = gsl_rng_alloc(rng_type);
+  unsigned int calls = 500000;
+  
+  // Launch Vegas
+  gsl_monte_vegas_state* state = gsl_monte_vegas_alloc(fFunction->dim);
+  // Vegas warmup
+  int res = gsl_monte_vegas_integrate(fFunction, _xl, _xu, _ndim, 10000, rng, state, result_, abserr_);
+  std::cout << "res=" << res << std::endl;
+  do {
+    gsl_monte_vegas_integrate (fFunction, _xl, _xu, _ndim, calls/5, rng, state, result_, abserr_);
+    printf ("result = % .6f sigma = % .6f chisq/dof = %.1f\n", result_, abserr_, gsl_monte_vegas_chisq (state));
+  } while (fabs(gsl_monte_vegas_chisq(state)-1.)>0.5);
+  /*if (_ip->itvg<0) {
     std::cerr << "[Vegas::Integrate] [ERROR] Vegas called with a negative number of maximum iterations. No execution." << std::endl;
     return -1;
   }
@@ -93,7 +114,7 @@ Vegas::Integrate(double *result_, double *abserr_)
     *result_ = _vegas_result;
     *abserr_ = _vegas_abserr;
   }
-  return 0;
+  return 0;*/
 }
 
 int

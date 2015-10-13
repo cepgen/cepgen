@@ -114,10 +114,6 @@ class MCGen {
    * @brief Has a first integration beed already performed ?
    */
   bool _xsec_comp;
-  /**
-   * @brief Has the Vegas object already been constructed in this MCGen instance
-   */
-  bool _vegas_built;
 };
 
 /**
