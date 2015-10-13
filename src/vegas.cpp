@@ -81,9 +81,8 @@ Vegas::Integrate(double *result_, double *abserr_)
     return -1;
   }
   _ndo = 1;
-  for (unsigned int j=0; j<_ndim; j++) {
-    _xi[0][j] = ONE;
-  }
+  for (unsigned int j=0; j<_ndim; j++) _xi[0][j] = ONE;
+  
   if (!_grid_prepared) {
     std::cout << "[Vegas::Integrate] [INFO] Preparing the grid (1e5 function calls)" << std::endl;
     Vegas1(100000);
@@ -231,7 +230,8 @@ Vegas::Vegas3()
         x[j] = _xl[j]+rc*(_xu[j]-_xl[j]);
         if (x[j]>1. or x[j]<0.)
           std::cout << "-------> j=" << j 
-                    << "\tx[j]=" << x[j] 
+                    << "\tx[j]=" << x[j]
+                    << "\tx in range[" << _xl[j] << ", " << _xu[j] << "]" 
                     << "\txo=" << xo 
                     << "\trc=" << rc 
                     << "\tiaj=" << ia[j] 

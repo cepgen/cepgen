@@ -201,7 +201,7 @@ class Vegas {
     double _schi;
     double _scalls;
     unsigned int _nd;
-    int _ng;
+    unsigned int _ng;
     unsigned int _npg;
     double _calls;
     double _dxg;
