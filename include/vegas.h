@@ -71,6 +71,7 @@ class Vegas {
      * @return A boolean stating whether or not the event could be saved
      */
     bool StoreEvent(double* x_);
+    bool CorrectionCycle();
     /**
      * Sets all the generation mode variables and align them to the integration 
      * grid set while computing the cross-section

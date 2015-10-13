@@ -95,11 +95,11 @@ Vegas::GenerateOneEvent()
 {
   // Inherited from GMUGNA
   double weight;
-  double ami, max;
+  double max;
   double y;
   int jj, jjj;
   double x[fFunction->dim];
-  double fmax_old, fmax_diff, fmax2;
+  double fmax_old, fmax_diff;
   
   if (!fGenerationPrepared) {
     this->SetGen();
@@ -107,60 +107,11 @@ Vegas::GenerateOneEvent()
   }
 
   y = -1.;
-  ami = 1./fMbin;
   max = pow(fMbin, fFunction->dim);
 
   // Correction cycles are started
   if (fJ!=0) {
-  line4:
-#ifdef DEBUG
-    std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Correction cycles are started."
-	      << "\n\tj = " << fJ
-	      << "\n\tcorrec = " << fCorrec
-	      << "\n\tcorre2 = " << fCorrec2
-	      << std::endl;
-#endif
-    if (fCorrec>=1.) {
-      fCorrec -= 1.;
-    }
-    if ((double)rand()/RAND_MAX<fCorrec) {
-      fCorrec = -1.;
-      // Select x values in Vegas bin
-      for (unsigned int k=0; k<fFunction->dim; k++) {
-        x[k] = ((double)rand()/RAND_MAX+fN[k])*ami;
-      }
-      // Compute weight for x value
-      weight = F(x);
-      // Parameter for correction of correction
-      if (weight>fFmax[fJ]) {
-        if (weight>fmax2) fmax2 = weight;
-        fCorrec2 -= 1.;
-        fCorrec += 1.;
-      }
-      // Accept event
-      if (weight>=fmax_diff*(double)rand()/RAND_MAX+fmax_old) { // FIXME!!!!
-        return this->StoreEvent(x);
-      }
-      goto line4;
-    }
-    // Correction if too big weight is found while correction
-    // (All your bases are belong to us...)
-    if (fmax2>fFmax[fJ]) {
-      fmax_old = fFmax[fJ];
-      fFmax[fJ] = fmax2;
-      fmax_diff = fmax2-fmax_old;
-      if (fmax2<fFGlobalMax) {
-        fCorrec = (_nm[fJ]-1.)*fmax_diff/fFGlobalMax-fCorrec2;
-      }
-      else {
-        fFGlobalMax = fmax2;
-        fCorrec = (_nm[fJ]-1.)*fmax_diff/fFGlobalMax*fmax2/fFGlobalMax-fCorrec2;
-      }
-      fCorrec2 = 0.;
-      fmax2 = 0.;
-      goto line4;
-      //return this->GenerateOneEvent(); //GOTO 4
-    }
+    while (CorrectionCycle()) {;}
   }
 
   // Normal generation cycle
@@ -179,7 +130,7 @@ Vegas::GenerateOneEvent()
     for (unsigned int i=0; i<fFunction->dim; i++) {
       jjj = jj/fMbin;
       fN[i] = jj-jjj*fMbin;
-      x[i] = ((double)rand()/RAND_MAX+fN[i])*ami;
+      x[i] = ((double)rand()/RAND_MAX+fN[i])/fMbin;
       jj = jjj;
     }
     
@@ -216,6 +167,62 @@ Vegas::GenerateOneEvent()
 #endif
   // Return with an accepted event
   if (weight>0.) return this->StoreEvent(x);
+  return false;
+}
+
+bool
+Vegas::CorrectionCycle()
+{
+  double x[fFunction->dim];
+  double weight;
+  double fmax_old = 0., fmax_diff = 0., fmax2 = 0.;
+  
+#ifdef DEBUG
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Correction cycles are started."
+      << "\n\tj = " << fJ
+      << "\n\tcorrec = " << fCorrec
+      << "\n\tcorre2 = " << fCorrec2
+      << std::endl;
+#endif
+  if (fCorrec>=1.) {
+    fCorrec -= 1.;
+  }
+  if ((double)rand()/RAND_MAX<fCorrec) {
+    fCorrec = -1.;
+    // Select x values in Vegas bin
+    for (unsigned int k=0; k<fFunction->dim; k++) {
+      x[k] = ((double)rand()/RAND_MAX+fN[k])/fMbin;
+    }
+    // Compute weight for x value
+    weight = F(x);
+    // Parameter for correction of correction
+    if (weight>fFmax[fJ]) {
+      if (weight>fmax2) fmax2 = weight;
+      fCorrec2 -= 1.;
+      fCorrec += 1.;
+    }
+    // Accept event
+    if (weight>=fmax_diff*(double)rand()/RAND_MAX+fmax_old) { // FIXME!!!!
+      return this->StoreEvent(x);
+    }
+    return false;
+  }
+  // Correction if too big weight is found while correction
+  // (All your bases are belong to us...)
+  if (fmax2>fFmax[fJ]) {
+    fmax_old = fFmax[fJ];
+    fFmax[fJ] = fmax2;
+    fmax_diff = fmax2-fmax_old;
+    if (fmax2<fFGlobalMax) {
+      fCorrec = (_nm[fJ]-1.)*fmax_diff/fFGlobalMax-fCorrec2;
+    }
+    else {
+      fFGlobalMax = fmax2;
+      fCorrec = (_nm[fJ]-1.)*fmax_diff/fFGlobalMax*fmax2/fFGlobalMax-fCorrec2;
+    }
+    fCorrec2 = 0.;
+    fmax2 = 0.;
+  }
   return false;
 }
 
