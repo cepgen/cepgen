@@ -20,11 +20,50 @@ typedef std::set<int> ParticlesIds;
  */
 class Particle {
   public:
+    enum ParticleCode {
+      QUARK_D = 1,
+      QUARK_U = 2,
+      ELECTRON = 11,
+      MUON = 13,
+      TAU = 15,
+      GLUON = 21,
+      PHOTON = 22,
+      PI_PLUS = 211,
+      PI_0 = 111,
+      RHO_770_0 = 113,
+      OMEGA_782 = 223,
+      J_PSI = 443,
+      PHI_1680 = 100333,
+      UPSILON_1S = 553,
+      UPSILON_2S = 100553,
+      UPSILON_3S = 200553,
+      DIQUARK_UD0 = 2101,
+      DIQUARK_UD1 = 2103,
+      DIQUARK_UU1 = 2203,
+      PROTON = 2212,
+      NEUTRON = 2112,
+      POMERON = 990,
+      REGGEON = 110
+    };
+    /**
+     * Gets the mass in GeV/c**2 of a particle given its PDG identifier
+     * @brief Gets the mass of a particle
+     * @param pdgId_ PDG ID of the particle
+     * @return Mass of the particle in \f$\text{GeV}/c^2\f$
+     */
+    static double GetMassFromPDGId(Particle::ParticleCode pdgId_);
+    /**
+     * Gets the total decay width for one particle to be decayed
+     * @param[in] pdgId_ PDG ID of the particle
+     * @return Decay width in GeV
+     */
+    static double GetWidthFromPDGId(Particle::ParticleCode pdgId_);
+    
     Particle();
     /**
      * @brief Object constructor (providing the role of the particle in the process, and its Particle Data Group identifier)
      */
-    Particle(int role_,ParticleId pdgId_=(ParticleId)0);
+    Particle(int role_,ParticleCode pdgId_=(ParticleCode)0);
     ~Particle();
     /**
      * @brief Copies all the relevant quantities from one Particle object to another
@@ -72,7 +111,7 @@ class Particle {
      * _The Monte Carlo particle numbering scheme [...] is intended to facilitate interfacing between event generators, detector simulators, and analysis packages used in particle physics._
      * @brief Particle Data Group integer identifier
      */
-    ParticleId pdgId;
+    ParticleCode pdgId;
     /**
      * @brief The particle's electric charge (given as a float number, for the quarks and bound states)
      */

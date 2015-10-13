@@ -1,7 +1,7 @@
 #include "particle.h"
 
 Particle::Particle() :
-  id(-1), pdgId((ParticleId)0), charge(999.), name(""), role(-1),
+  id(-1), pdgId((ParticleCode)0), charge(999.), name(""), role(-1),
   helicity(0.),
   status(0), _m(-1.),
   _isPrimary(true)
@@ -9,7 +9,7 @@ Particle::Particle() :
   for (int i=0; i<4; i++) _p4[i] = 0.;
 }
 
-Particle::Particle(int role_, ParticleId pdgId_) :
+Particle::Particle(int role_, ParticleCode pdgId_) :
   id(-1), pdgId(pdgId_), charge(999.), name(""), role(role_),
   status(0), _m(-1.),
   _isPrimary(true)
@@ -44,7 +44,7 @@ Particle::operator=(const Particle &part_)
 Particle&
 Particle::operator+=(const Particle &part_)
 {
-  pdgId = (part_.pdgId==pdgId) ? pdgId : (ParticleId)(-1);
+  pdgId = (part_.pdgId==pdgId) ? pdgId : (ParticleCode)(-1);
   role = (part_.role==role) ? role : -1;
   for (int i=0; i<4; i++) _p4[i]+= part_._p4[i];
   M(-1.);
@@ -55,7 +55,7 @@ Particle::operator+=(const Particle &part_)
 Particle&
 Particle::operator-(const Particle &part_)
 {
-  pdgId = (part_.pdgId==pdgId) ? pdgId : (ParticleId)(-1);
+  pdgId = (part_.pdgId==pdgId) ? pdgId : (ParticleCode)(-1);
   role = (part_.role==role) ? role : -1;
   for (int i=0; i<4; i++) _p4[i]-= part_._p4[i];
   M(-1.);
@@ -286,4 +286,36 @@ Particle::RotateThetaPhi(double theta_, double phi_)
   //this->_p4[0] *= sin(theta_)*cos(phi_);
   //this->_p4[1] *= sin(theta_)*sin(phi_);
   //this->_p4[2] *= cos(theta_);
+}
+
+double
+Particle::GetMassFromPDGId(Particle::ParticleCode pdgId_)
+{
+  switch (abs(pdgId_)) {
+  case QUARK_D:     return 0.33;           // mass from PYTHIA6.4
+  case QUARK_U:     return 0.33;           // mass from PYTHIA6.4
+  case ELECTRON:    return 0.510998928e-3;
+  case MUON:        return 0.1056583715;
+  case TAU:         return 1.77682;
+  case GLUON:       return 0.;
+  case PHOTON:      return 0.;
+  case PI_PLUS:     return 0.13957018;
+  case PI_0:        return 0.1349766;
+  case J_PSI:       return 20.;            // J/psi //FIXME FIXME FIXME
+  case DIQUARK_UD0: return 0.57933;
+  case DIQUARK_UD1: return 0.77133;
+  case DIQUARK_UU1: return 0.77133;
+  case PROTON:      return 0.938272046;
+  case NEUTRON:     return 0.939565346;
+  default:          return -1.;
+  }
+}
+
+double
+Particle::GetWidthFromPDGId(Particle::ParticleCode pdgId_)
+{
+  switch (abs(pdgId_)) {
+  case J_PSI:  return 5.; //FIXME
+  default:     return -1.;
+  }
 }

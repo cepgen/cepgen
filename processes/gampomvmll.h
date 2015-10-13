@@ -187,7 +187,7 @@ class GamPomVMLL : public Process
    *  - 995 : diffractive pomeron-VM scattering (glueball production)
    *    see P.E.SCHLEIN (1994): Phys. Lett. B332, 136-140.
    */
-  ParticleId ifragv;
+  Particle::ParticleCode ifragv;
   /**
    * Minimal mass of diffractive VM state.
    * If value is too small (smaller than \f$m_{\pi^0}\f$), sets value to \f$m_{\text{VM}}+\f$ some offset
@@ -212,7 +212,7 @@ class GamPomVMLL : public Process
    *  - *22 : diffr. gamma dissoc. (special value)*
    * @brief Type of vector meson to produce and its decay channel
    */
-  ParticleId itypvm;
+  Particle::ParticleCode itypvm;
   /**
    * @brief Index of diffractive \f$q\bar q\f$ states
    */

@@ -191,17 +191,17 @@ double f(double* x_, size_t ndim_, void* params_)
 
   switch (kin.kinematics) {
     case 1:
-      p->process->SetOutgoingParticles(3, PROTON, 1); // First outgoing proton
-      p->process->SetOutgoingParticles(5, PROTON, 2); // Second outgoing proton
+      p->process->SetOutgoingParticles(3, Particle::PROTON, 1); // First outgoing proton
+      p->process->SetOutgoingParticles(5, Particle::PROTON, 2); // Second outgoing proton
     case 2:
-      p->process->SetOutgoingParticles(3, PROTON, 1); // First outgoing proton
-      p->process->SetOutgoingParticles(5, QUARK_U, 2); // Second outgoing proton remnant
+      p->process->SetOutgoingParticles(3, Particle::PROTON, 1); // First outgoing proton
+      p->process->SetOutgoingParticles(5, Particle::QUARK_U, 2); // Second outgoing proton remnant
     case 3:
-      p->process->SetOutgoingParticles(3, QUARK_U, 1); // First outgoing proton
-      p->process->SetOutgoingParticles(5, PROTON, 2); // Second outgoing proton remnant
+      p->process->SetOutgoingParticles(3, Particle::QUARK_U, 1); // First outgoing proton
+      p->process->SetOutgoingParticles(5, Particle::PROTON, 2); // Second outgoing proton remnant
     case 4:
-      p->process->SetOutgoingParticles(3, QUARK_U, 1); // First outgoing proton
-      p->process->SetOutgoingParticles(5, QUARK_U, 2); // Second outgoing proton remnant
+      p->process->SetOutgoingParticles(3, Particle::QUARK_U, 1); // First outgoing proton
+      p->process->SetOutgoingParticles(5, Particle::QUARK_U, 2); // Second outgoing proton remnant
   }
   
   kin.q2min = p->minq2;

@@ -20,7 +20,7 @@ class Process
     InelasticElastic = 3,
     InelasticInelastic = 4
   };
-  enum RemnantMode {
+  enum StructureFunctions {
     Electron = 1,
     SuriYennie = 11,
     SuriYennieLowQ2 = 12,
@@ -62,7 +62,7 @@ class Process
    * @return A boolean stating whether or not the outgoing kinematics is
    * properly set for this event
    */
-  inline virtual bool SetOutgoingParticles(int part_, ParticleId pdgId_, int mothRole_=-1) {
+  inline virtual bool SetOutgoingParticles(int part_, Particle::ParticleCode pdgId_, int mothRole_=-1) {
     _ev->AddParticle(Particle(part_, pdgId_));
     if (mothRole_!=-1) _ev->GetOneByRole(part_)->SetMother(_ev->GetOneByRole(mothRole_));
     return true;

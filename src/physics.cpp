@@ -38,7 +38,7 @@ PSF(double q2_, double mX2_, double* sigT_, double* w1_, double* w2_)
   double xBin, dx, nu2, logqq0, gd2;
   double sigLow, sigHigh;
   double mX = std::sqrt(mX2_);
-  double mP = GetMassFromPDGId(PROTON);
+  double mP = Particle::GetMassFromPDGId(Particle::PROTON);
   double mPI = 0.135; //FIXME pi0 mass ???
 
   if (mX>=mP+mPI && mX<1.99) {
@@ -382,7 +382,7 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
 
   Particle outgam = op[0]-op[1];
   outgam.role = 3;
-  outgam.pdgId = PHOTON;
+  outgam.pdgId = Particle::PHOTON;
   outgam.helicity = Heli(lf);
   outgam.id = op.size();
   outgam.SetMother(&(op[0]));
@@ -395,7 +395,7 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
 }
 
 double
-GetBRFromProcessId(ParticleId vmId_)
+GetBRFromProcessId(Particle::ParticleCode vmId_)
 {
   switch (abs((VMDecay)vmId_)) {
   case RHO_TO_PIPI:         return 1.0;    // rho0->pi+ pi-
@@ -451,7 +451,7 @@ ElasticFlux(double x_, double kt2_)
   
   double Q2_ela, G_dip, G_E, G_M;
   double ela1, ela2, ela3;
-  const double mp2 = pow(GetMassFromPDGId(PROTON), 2);
+  const double mp2 = pow(Particle::GetMassFromPDGId(Particle::PROTON), 2);
   
   Q2_ela = (kt2_+pow(x_, 2)*mp2)/(1.-x_);
   G_dip = 1./pow(1.+Q2_ela/0.71, 2);
@@ -475,8 +475,8 @@ InelasticFlux(double x_, double kt2_, double mx_)
   double f_ine;
   
   const double alpha_em = 1./137.035;
-  const double mp2 = pow(GetMassFromPDGId(PROTON), 2);
-  const double mpi = pow(GetMassFromPDGId(PI_0), 2);
+  const double mp2 = pow(Particle::GetMassFromPDGId(Particle::PROTON), 2);
+  const double mpi = pow(Particle::GetMassFromPDGId(Particle::PI_0), 2);
 
   double mx2 = pow(mx_, 2);
   double Q2min, Q2, mu2;

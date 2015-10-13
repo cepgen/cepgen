@@ -24,13 +24,13 @@ GamGamLL::GetNdim(int process_mode_) const
 }
 
 bool
-GamGamLL::SetOutgoingParticles(int part_, ParticleId pdgId_, int)
+GamGamLL::SetOutgoingParticles(int part_, Particle::ParticleCode pdgId_, int)
 {
   double mass_, outm, dm;
 
   if (!_point_set) return false;
 
-  mass_ = GetMassFromPDGId(pdgId_);
+  mass_ = Particle::GetMassFromPDGId(pdgId_);
 
   if (mass_<0 or pdgId_==2) { //FIXME!!!
     switch (_cuts.kinematics) {
@@ -725,7 +725,7 @@ GamGamLL::ComputeMX(double x_, double outmass_, double *dw_)
   /*wx2min = std::pow(std::max(GetMassFromPDGId(2212)+GetMassFromPDGId(211), _cuts.mxmin), 2);
     wx2max = std::pow(std::min(_ecm-_mp2-2.*outmass_, _cuts.mxmax), 2);*/
   
-  wx2min = std::pow(GetMassFromPDGId(PROTON)+GetMassFromPDGId(PI_PLUS), 2);
+  wx2min = std::pow(Particle::GetMassFromPDGId(Particle::PROTON)+Particle::GetMassFromPDGId(Particle::PI_PLUS), 2);
   wx2max = std::pow(_ecm-_mp2-2.*outmass_, 2);
   Map(x_, wx2min, wx2max, &mx2, &dmx2);
 
@@ -1219,7 +1219,7 @@ GamGamLL::FillKinematics(bool symmetrise_)
 
   // First incoming photon
   // Equivalent in LPAIR : PLAB(x, 3)
-  Particle ph1(41, PHOTON);
+  Particle ph1(41, Particle::PHOTON);
   plab_ph1[0] = plab_ip1[0]-plab_op1[0];
   plab_ph1[1] = plab_ip1[1]-plab_op1[1];
   plab_ph1[2] = plab_ip1[2]-plab_op1[2];
@@ -1236,7 +1236,7 @@ GamGamLL::FillKinematics(bool symmetrise_)
   
   // Second incoming photon
   // Equivalent in LPAIR : PLAB(x, 4)
-  Particle ph2(42, PHOTON);
+  Particle ph2(42, Particle::PHOTON);
   plab_ph2[0] = plab_ip2[0]-plab_op2[0];
   plab_ph2[1] = plab_ip2[1]-plab_op2[1];
   plab_ph2[2] = plab_ip2[2]-plab_op2[2];
@@ -1252,13 +1252,13 @@ GamGamLL::FillKinematics(bool symmetrise_)
   this->_ev->AddParticle(ph2);
 
   // Central (two-photon) system
-  Particle cs(4, PHOTON);
+  Particle cs(4, Particle::PHOTON);
   cs.status = -1;
   this->_ev->AddParticle(cs);
   
   // First outgoing lepton
   role = (ransign<0) ? 6 : 7;
-  Particle ol1(role, (ParticleId)(ransign*abs((int)_pdg6)));
+  Particle ol1(role, static_cast<Particle::ParticleCode>(ransign*abs((int)_pdg6)));
   plab_ol1[0] = _pl6*_st6*_cp6;
   plab_ol1[1] = _pl6*_st6*_sp6;
   plab_ol1[2] = _gamma*_pl6*_ct6+_betgam*_el6;
@@ -1276,7 +1276,7 @@ GamGamLL::FillKinematics(bool symmetrise_)
   
   // Second outgoing lepton
   role = (ransign<0) ? 7 : 6;
-  Particle ol2(role, (ParticleId)(-ransign*abs((int)_pdg7)));
+  Particle ol2(role, static_cast<Particle::ParticleCode>(-ransign*abs((int)_pdg7)));
   plab_ol2[0] = _pl7*_st7*_cp7;
   plab_ol2[1] = _pl7*_st7*_sp7;
   plab_ol2[2] = _gamma*_pl7*_ct7+_betgam*_el7;
@@ -1319,7 +1319,7 @@ GamGamLL::FillKinematics(bool symmetrise_)
     std::cerr << "[GamGamLL::FillKinematics] [FATAL] W**2 = " << gmuw << " < 0" << std::endl;
     gmuw = 0.;
   }
-  gmunu = gmuy*2.*GetMassFromPDGId(PROTON)/_ep1/_ep2;
+  gmunu = gmuy*2.*Particle::GetMassFromPDGId(Particle::PROTON)/_ep1/_ep2;
   std::cout << "[GamGamLL::FillKinematics] [DEBUG]" << std::endl
             << "   gmux = " << gmux << std::endl
             << "   gmuy = " << gmuy << std::endl

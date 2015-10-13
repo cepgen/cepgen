@@ -53,11 +53,11 @@ class Parameters {
     /**
      * @brief First beam/primary particle's PDG identifier
      */
-    ParticleId in1pdg;
+    Particle::ParticleCode in1pdg;
     /**
      * @brief Second beam/primary particle's PDG identifier
      */
-    ParticleId in2pdg;
+    Particle::ParticleCode in2pdg;
     /**
      * The first incoming particle type and kind of interaction :
      * - 1 - electron,
@@ -75,7 +75,7 @@ class Parameters {
      * - 15 - for \f$\tau^+\tau^-\f$ pairs
      * @brief PDG id of the outgoing leptons
      */
-    ParticleId pair;
+    Particle::ParticleCode pair;
     Process::ProcessMode process_mode;
     /**
      * Set of cuts to apply on the outgoing leptons in order to restrain the available kinematic phase space :

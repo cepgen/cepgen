@@ -1,35 +1,5 @@
 #include "utils.h"
 
-double GetMassFromPDGId(ParticleId pdgId_)
-{
-  switch (abs(pdgId_)) {
-  case QUARK_D:     return 0.33;           // mass from PYTHIA6.4
-  case QUARK_U:     return 0.33;           // mass from PYTHIA6.4
-  case ELECTRON:    return 0.510998928e-3;
-  case MUON:        return 0.1056583715;
-  case TAU:         return 1.77682;
-  case GLUON:       return 0.;
-  case PHOTON:      return 0.;
-  case PI_PLUS:     return 0.13957018;
-  case PI_0:        return 0.1349766;
-  case J_PSI:       return 20.;            // J/psi //FIXME FIXME FIXME
-  case DIQUARK_UD0: return 0.57933;
-  case DIQUARK_UD1: return 0.77133;
-  case DIQUARK_UU1: return 0.77133;
-  case PROTON:      return 0.938272046;
-  case NEUTRON:     return 0.939565346;
-  default:          return -1.;
-  }
-}
-
-double GetWidthFromPDGId(ParticleId pdgId_)
-{
-  switch (abs(pdgId_)) {
-  case J_PSI:  return 5.; //FIXME
-  default:     return -1.;
-  }
-}
-
 void Map(double expo_, double xmin_, double xmax_, double* out_, double* dout_)
 {
   double y, out;

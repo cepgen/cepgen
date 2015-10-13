@@ -92,7 +92,7 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
       else status = (*p)->status;
       
       lujets_.k[0][np] = status;
-      lujets_.k[1][np] = (ParticleId)((*p)->pdgId);
+      lujets_.k[1][np] = static_cast<Particle::ParticleCode>((*p)->pdgId);
       
       if ((*p)->GetMothersIds().size()>0) lujets_.k[2][np] = *((*p)->GetMothersIds().begin())+1; // mother
       else lujets_.k[2][np] = 0; // no mother registered
@@ -164,7 +164,7 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
 
     Particle pa;
     pa.id = p;
-    pa.pdgId = (ParticleId)(lujets_.k[1][p]);
+    pa.pdgId = static_cast<Particle::ParticleCode>(lujets_.k[1][p]);
     if (ev_->GetById(lujets_.k[2][p]-1)!=(Particle*)NULL) {
       pa.role = ev_->GetById(lujets_.k[2][p]-1)->role; // Child particle inherits its mother's role
     }
@@ -195,7 +195,7 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
 bool
 Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
 {
-  ParticleId singlet_id, doublet_id;
+  Particle::ParticleCode singlet_id, doublet_id;
   double ranudq, ulmdq, ulmq;
   double ranmxp, ranmxt;
   double pmxp;
@@ -220,16 +220,16 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
       
       ranudq = drand();
       if (ranudq<1./9.) {
-        singlet_id = QUARK_D;
-        doublet_id = DIQUARK_UU1;
+        singlet_id = Particle::QUARK_D;
+        doublet_id = Particle::DIQUARK_UU1;
       }
       else if (ranudq<5./9.) {
-        singlet_id = QUARK_U;
-        doublet_id = DIQUARK_UD0;
+        singlet_id = Particle::QUARK_U;
+        doublet_id = Particle::DIQUARK_UD0;
       }
       else {
-        singlet_id = QUARK_U;
-        doublet_id = DIQUARK_UD1;
+        singlet_id = Particle::QUARK_U;
+        doublet_id = Particle::DIQUARK_UD1;
       }
       ulmdq = ulmass(doublet_id);
       ulmq = ulmass(singlet_id);

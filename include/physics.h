@@ -76,7 +76,7 @@ typedef enum
  * @param[in] processId_ The identifier of the process
  * @return Branching ratio for the process
  */
-double GetBRFromProcessId(ParticleId vmId_);
+double GetBRFromProcessId(Particle::ParticleCode vmId_);
 
 /**
  * Decay a vector meson given its branching fractions

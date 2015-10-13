@@ -1,9 +1,9 @@
 #include "parameters.h"
 
 Parameters::Parameters() :
-  in1pdg(PROTON), in2pdg(PROTON),
+  in1pdg(Particle::PROTON), in2pdg(Particle::PROTON),
   remnant_mode(11),
-  pair(MUON),
+  pair(Particle::MUON),
   process_mode(Process::ElasticElastic),
   mcut(0),
   minpt(0.5), maxpt(-1.),
@@ -199,7 +199,7 @@ bool Parameters::ReadConfigFile(std::string inFile_)
 #endif
     }
     else if (key=="PMOD" or key=="EMOD") {
-      this->remnant_mode = static_cast<Process::RemnantMode>(atoi(value.c_str()));
+      this->remnant_mode = static_cast<Process::StructureFunctions>(atoi(value.c_str()));
 #ifdef DEBUG
       std::cout << std::setw(60) << " * First incoming particles' mode" << this->p1mod << " --> ";
       switch (this->remnant_mode) {
@@ -220,7 +220,7 @@ bool Parameters::ReadConfigFile(std::string inFile_)
 #endif
     }
     else if (key=="PAIR") {
-      this->pair = (ParticleId)atoi(value.c_str());
+      this->pair = (Particle::ParticleCode)atoi(value.c_str());
 #ifdef DEBUG
       std::cout << std::setw(60) << " * Outgoing leptons' PDG id   " << this->pair << " --> ";
       switch (this->pair) {
