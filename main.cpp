@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
     
     mg.parameters->hadroniser = new Pythia6Hadroniser;
     mg.parameters->process = new GamGamLL;
-    mg.parameters->process_mode = 1;
+    mg.parameters->process_mode = Process::ElasticElastic;
     //mg.parameters->itvg = 2;
     
     mg.parameters->in1p = 4000.;

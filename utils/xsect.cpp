@@ -30,10 +30,9 @@ int main(int argc, char* argv[]) {
   ip.in1p = 3500.;
   ip.in2p = 3500.;
   ip.process = new GamGamLL;
-  ip.pair = 13;
-  ip.p1mod = 2;
-  //ip.p1mod = 11;
-  ip.p2mod = 2;
+  ip.process_mode = Process::ElasticElastic;
+  ip.pair = MUON;
+  ip.remnant_mode = 11;
   //ip.p2mod = 11;
   /*ip.maxtheta = 0;
     ip.maxtheta = 180;*/

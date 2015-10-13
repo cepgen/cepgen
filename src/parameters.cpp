@@ -4,7 +4,7 @@ Parameters::Parameters() :
   in1pdg(PROTON), in2pdg(PROTON),
   remnant_mode(11),
   pair(MUON),
-  process_mode(1),
+  process_mode(Process::ElasticElastic),
   mcut(0),
   minpt(0.5), maxpt(-1.),
   minenergy(1.), maxenergy(-1.),
@@ -186,30 +186,29 @@ bool Parameters::ReadConfigFile(std::string inFile_)
 #endif
     }
     else if (key=="MODE") {
-      this->process_mode = (int)atoi(value.c_str());
+      this->process_mode = static_cast<Process::ProcessMode>(atoi(value.c_str()));
 #ifdef DEBUG
       std::cout << std::setw(60) << " * Subprocess' mode" << this->process_mode << " --> ";
       switch (this->process_mode) {
-        case 1: default: std::cout << "elastic-elastic"; break;
-        case 2:          std::cout << "elastic-inelastic"; break;
-        case 3:          std::cout << "inelastic-elastic"; break;
-        case 4:          std::cout << "inelastic-inelastic"; break;
+        case ElasticElastic: default: std::cout << "elastic-elastic"; break;
+        case ElasticInelastic:        std::cout << "elastic-inelastic"; break;
+        case InelasticElastic:        std::cout << "inelastic-elastic"; break;
+        case InelasticInelastic:      std::cout << "inelastic-inelastic"; break;
       }
       std::cout << std::endl;
 #endif
     }
     else if (key=="PMOD" or key=="EMOD") {
-      this->remnant_mode = (int)atoi(value.c_str());
+      this->remnant_mode = static_cast<Process::RemnantMode>(atoi(value.c_str()));
 #ifdef DEBUG
       std::cout << std::setw(60) << " * First incoming particles' mode" << this->p1mod << " --> ";
       switch (this->remnant_mode) {
-        case 1:          std::cout << "electron"; break;
-        case 2: default: std::cout << "elastic proton"; break;
-        case 11:         std::cout << "dissociating proton [structure functions]"; break;
-        case 12:         std::cout << "dissociating proton [structure functions, for MX < 2 GeV, Q^2 < 5 GeV^2]"; break;
-        case 101:        std::cout << "dissociating proton [parton model, only valence quarks]"; break;
-        case 102:        std::cout << "dissociating proton [parton model, only sea quarks]"; break;
-        case 103:        std::cout << "dissociating proton [parton model, valence and sea quarks]"; break;
+        case Electron:        std::cout << "electron"; break;
+        case SuriYennie:      std::cout << "dissociating proton [structure functions]"; break;
+        case SuriYennieLowQ2: std::cout << "dissociating proton [structure functions, for MX < 2 GeV, Q^2 < 5 GeV^2]"; break;
+        case FioreVal:        std::cout << "dissociating proton [parton model, only valence quarks]"; break;
+        case FioreSea:        std::cout << "dissociating proton [parton model, only sea quarks]"; break;
+        case Fiore:           std::cout << "dissociating proton [parton model, valence and sea quarks]"; break;
       }
       std::cout << std::endl;
 #endif

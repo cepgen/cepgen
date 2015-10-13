@@ -14,6 +14,22 @@
 class Process
 {
  public:
+  enum ProcessMode {
+    ElasticElastic = 1,
+    ElasticInelastic = 2,
+    InelasticElastic = 3,
+    InelasticInelastic = 4
+  };
+  enum RemnantMode {
+    Electron = 1,
+    SuriYennie = 11,
+    SuriYennieLowQ2 = 12,
+    SzczurekUleshchenko = 15,
+    FioreVal = 101,
+    FioreSea = 102,
+    Fiore = 103
+  };
+   
   Process();
   virtual ~Process();
   /**

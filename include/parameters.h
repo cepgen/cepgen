@@ -76,7 +76,7 @@ class Parameters {
      * @brief PDG id of the outgoing leptons
      */
     ParticleId pair;
-    int process_mode;
+    Process::ProcessMode process_mode;
     /**
      * Set of cuts to apply on the outgoing leptons in order to restrain the available kinematic phase space :
      * - 0 - No cuts at all (for the total cross section)
