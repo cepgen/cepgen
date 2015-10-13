@@ -1,13 +1,16 @@
 #include "vegas.h"
 
 Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inParam_) :
-  _ndim(dim_)/*, _ndo(50),
-  _nTreatCalls(0), _mbin(3),
-  _ffmax(0.), _correc(0.), _corre2(0.), _fmax2(0.), _fmdiff(0.), _fmold(0.),
-  _j(0),
-  _ip(inParam_),
-  _grid_prepared(false), _generation_prepared(false),
-  _mds(1), _acc(1.e-4), _alph(1.5), _it(0)*/
+  fMbin(3), fStateSamples(0),
+  fJ(0), fCorrec(0.), fCorrec2(0.),
+  fGridPrepared(false), fGenerationPrepared(false),
+  fInputParameters(inParam_),
+  fFmax(0), fFGlobalMax(0.), fN(0)
+  /*fFunction->dim(dim_), fStateBins(50),
+  _nTreatCalls(0), fMbin(3),
+  _fmax2(0.), _fmdiff(0.), _fmold(0.),
+  fJ(0),
+  fStateMode(1), _acc(1.e-4), _alph(1.5), fStateSamples(0)*/
 {
   /* x content :
       0 = t1 mapping
@@ -20,22 +23,19 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
     ( 7 = xq, wx mappings   ) <- single- and double-dissociative only
   */
 
-  _xl = new double[dim_];
-  _xu = new double[dim_];
-  /*for (int i=0; i<MAX_ND; i++) {
-    _xi[i] = new double[dim_];
-    _d[i] = new double[dim_];
+  fXlow = new double[dim_];
+  fXup = new double[dim_];
+  /*for (int i=0; i<fMaxNbins; i++) {
+    fCoord[i] = new double[dim_];
+    fValue[i] = new double[dim_];
     _di[i] = new double[dim_];
   }
   // ...
-  _n = new int[dim_];
-  _nm = new int[20000];
-  _fmax = new double[20000];
   // ...*/
   
   for (int i=0; i<dim_; i++) {
-    _xl[i] = 0.;
-    _xu[i] = 1.;
+    fXlow[i] = 0.;
+    fXup[i] = 1.;
   }
   
 #ifdef DEBUG
@@ -46,9 +46,9 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
             << std::endl;
 #endif
 
-  /*for (unsigned int j=0; j<MAX_ND; j++) {
-    for (unsigned int i=0; i<_ndim; i++) {
-      _d[j][i] = _di[j][i] = _xi[j][i] = 0.;
+  /*for (unsigned int j=0; j<fMaxNbins; j++) {
+    for (unsigned int i=0; i<fFunction->dim; i++) {
+      fValue[j][i] = _di[j][i] = fCoord[j][i] = 0.;
     }
   }*/
 
@@ -56,6 +56,8 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
   fFunction->f = f_;
   fFunction->dim = dim_;
   fFunction->params = (void*)(inParam_);
+  fNumConverg = inParam_->ncvg;
+  fNumIter = inParam_->itvg;
   
 }
 
@@ -64,14 +66,14 @@ Vegas::~Vegas()
 #ifdef DEBUG
   std::cout << "[Vegas::~Vegas] [DEBUG] Destructor called" << std::endl;
 #endif
-  delete[] _xl;
-  delete[] _xu;
-  /*delete[] _n;
+  delete[] fXlow;
+  delete[] fXup;
   delete[] _nm;
-  delete[] _fmax;
-  for (int i=0; i<MAX_ND; i++) {
-    delete[] _xi[i];
-    delete[] _d[i];
+  if (fFmax) delete[] fFmax;
+  if (fN) delete[] fN;
+  /*for (int i=0; i<fMaxNbins; i++) {
+    delete[] fCoord[i];
+    delete[] fValue[i];
     delete[] _di[i];
   }*/
   delete fFunction;
@@ -86,28 +88,35 @@ Vegas::Integrate(double *result_, double *abserr_)
   gsl_rng_env_setup();
   rng_type = gsl_rng_default;
   rng = gsl_rng_alloc(rng_type);
-  unsigned int calls = 500000;
+  int veg_res;
+  
+  double res, err;
+  
+  std::cout << "Will launch vegas on " << fFunction->dim << " dimensions" << std::endl;
   
   // Launch Vegas
   gsl_monte_vegas_state* state = gsl_monte_vegas_alloc(fFunction->dim);
   // Vegas warmup
-  int res = gsl_monte_vegas_integrate(fFunction, _xl, _xu, _ndim, 10000, rng, state, result_, abserr_);
-  std::cout << "res=" << res << std::endl;
-  do {
-    gsl_monte_vegas_integrate (fFunction, _xl, _xu, _ndim, calls/5, rng, state, result_, abserr_);
-    printf ("result = % .6f sigma = % .6f chisq/dof = %.1f\n", result_, abserr_, gsl_monte_vegas_chisq (state));
-  } while (fabs(gsl_monte_vegas_chisq(state)-1.)>0.5);
-  /*if (_ip->itvg<0) {
+  if (!fGridPrepared) {
+    veg_res = gsl_monte_vegas_integrate(fFunction, fXlow, fXup, fFunction->dim, 10000, rng, state, &res, &err);
+    fGridPrepared = true;
+  }
+  for (unsigned int i=0; i<fNumIter; i++) {
+    veg_res = gsl_monte_vegas_integrate(fFunction, fXlow, fXup, fFunction->dim, fNumConverg/5, rng, state, &res, &err);
+    printf ("result = % .6f sigma = % .6f chisq/dof = %.1f\n", res, err, gsl_monte_vegas_chisq(state));
+  }
+  
+  *result_ = res;
+  *abserr_ = err;
+  /*if (fInputParameters->itvg<0) {
     std::cerr << "[Vegas::Integrate] [ERROR] Vegas called with a negative number of maximum iterations. No execution." << std::endl;
     return -1;
   }
-  _ndo = 1;
-  for (unsigned int j=0; j<_ndim; j++) _xi[0][j] = ONE;
+  fStateBins = 1;
+  for (unsigned int j=0; j<fFunction->dim; j++) fCoord[0][j] = ONE;
   
-  if (!_grid_prepared) {
     std::cout << "[Vegas::Integrate] [INFO] Preparing the grid (1e5 function calls)" << std::endl;
     Vegas1(100000);
-    _grid_prepared = true;
   }
   std::cout << "[Vegas::Integrate] [INFO] Launching the cross-section computation" << std::endl;
   if (Vegas1()>=0) {
@@ -115,14 +124,15 @@ Vegas::Integrate(double *result_, double *abserr_)
     *abserr_ = _vegas_abserr;
   }
   return 0;*/
+  return veg_res;
 }
 
 int
 Vegas::Vegas1(int ncalls_)
 {
   // Entry VEGAS1
-  _it = 0;
-  _si = _si2 = _swgt = _schi = _scalls = 0.;
+  fStateSamples = 0;
+  fStateWeightedIntegralSum = _si2 = fStateSumWeights = fStateChiSum = _scalls = 0.;
   return Vegas2(ncalls_);
 }
 
@@ -130,64 +140,68 @@ int
 Vegas::Vegas2(int ncalls_)
 {
   int k;
-  double xo;
+  double bin_width;
   double dr;
   double xn;
-  double xin[MAX_ND];
+  double xin[fMaxNbins];
   
-  int calls = (ncalls_<1) ? _ip->ncvg : ncalls_;
+  int calls = (ncalls_<1) ? fInputParameters->ncvg : ncalls_;
   
   // Entry VEGAS2
-  _nd = MAX_ND;
-  _ng = 1;
-  if (_mds!=0) {
-    _ng = std::pow(calls/2., 1./_ndim);
-    _mds = 1;
-    if (2*_ng-MAX_ND>=0) {
-      _mds = -1;
-      _npg = _ng/MAX_ND+1;
-      _nd = _ng/_npg;
-      _ng = _npg*_nd;
+  fBins = fMaxNbins;
+  fBoxes = 1;
+  if (fStateMode!=0) {
+    fBoxes = std::pow(calls/2., 1./fFunction->dim);
+    fStateMode = 1;
+    if (2*fBoxes>=fMaxNbins) {
+      fStateMode = -1;
+      fBoxesPerBin = fBoxes/fMaxNbins+1;
+      fBins = fBoxes/fBoxesPerBin;
+      fBoxes = fBoxesPerBin*fBins;
     }
   }
 
-  k = std::pow(_ng, _ndim);
-  _npg = calls/k;
-  if (_npg<2) _npg = 2;
-  _calls = _npg*k;
-  _dxg = ONE/_ng;
-  _dv2g = std::pow(_dxg, 2*_ndim)/_npg/_npg/(_npg-ONE);
-  _xnd = _nd;
-  _ndm = _nd-1;
+  k = std::pow(fBoxes, fFunction->dim);
+  fBoxesPerBin = calls/k;
+  if (fBoxesPerBin<2) fBoxesPerBin = 2;
+  fCalls = fBoxesPerBin*k;
+  _dxg = ONE/fBoxes;
+  _dv2g = std::pow(_dxg, 2*fFunction->dim)/fBoxesPerBin/fBoxesPerBin/(fBoxesPerBin-ONE);
+  _xnd = fBins;
+  _ndm = fBins-1;
   _dxg *= _xnd;
+  
+  // Compute the state "volume"
   _xjac = ONE;
-  for (unsigned int i=0; i<_ndim; i++) {
-    _xjac *= (_xu[i]-_xl[i]);
+  for (unsigned int i=0; i<fFunction->dim; i++) {
+    _xjac *= (fXup[i]-fXlow[i]);
   }
 
   // Rebin preserving bin density
-  if (_nd!=_ndo) {
-    for (unsigned int j=0; j<_ndim; j++) {
+  if (fBins!=fStateBins) {
+    // resize_grid(state, fBins) ///////////////////////////////////////////////
+    for (unsigned int j=0; j<fFunction->dim; j++) {
       k = 0;
-      xo = dr = xn = 0.;
+      bin_width = dr = xn = 0.;
       unsigned int i = -1;
       do {
         dr += ONE;
-        xn = _xi[k][j];
+        xn = fCoord[k][j];
         k++;
   line5:
         _now += 1;
-      } while (dr<_ndo/_xnd);
+      } while (dr<fStateBins/_xnd);
       i++;
-      dr -= (_ndo/_xnd);
-      xin[i] = xn-(xn-xo)*dr;
+      dr -= (fStateBins/_xnd);
+      xin[i] = xn-(xn-bin_width)*dr;
       if (i<_ndm-1) goto line5; //FIXME need to remove these gotos
       for (unsigned int i=0; i<_ndm; i++) {
-        _xi[i][j] = xin[i];
+        fCoord[i][j] = xin[i];
       }
-      _xi[_nd-1][j] = ONE;
+      fCoord[fBins-1][j] = ONE;
     }
-    _ndo = _nd;
+    fStateBins = fBins;
+    ////////////////////////////////////////////////////////////////////////////
   }
   return Vegas3();
 }
@@ -196,128 +210,130 @@ int
 Vegas::Vegas3()
 {
   double rc;
-  double xo;
   double dr;
-  double xn;
-  double xin[MAX_ND];
-  double tsi, ti, ti2;
-  double kg[_ndim], dt[_ndim];
-  double fb, f2b;
-  double qran[_ndim];
-  double f, f2, wgt;
-  int ia[_ndim];
+  double xin[fMaxNbins];
+  double tsi, intgrl, intgrl_sq;
+  double kg[fFunction->dim];
+  double fb, f_sq_sum;
+  double qran[fFunction->dim];
+  double f, f_sq, wgt;
+  int ia[fFunction->dim];
   double avgi, sd;
   double chi2a, rel;
-  double r[MAX_ND];
   
-  double x[_ndim];
+  double x[fFunction->dim];
   
-  for (unsigned int i=0; i<_ndim; i++) {
-    dt[i] = 0.;
-  }
-  for (unsigned int j=0; j<MAX_ND; j++) {
-    r[j] = 0.;
-  }
-
   // Entry VEGAS3
   // Main integration loop
   do {
-    _it++;
-    tsi = ti = 0.;
-    for (unsigned int j=0; j<_ndim; j++) {
+    fStateSamples++;
+    tsi = intgrl = 0.;
+    for (unsigned int j=0; j<fFunction->dim; j++) {
       kg[j] = 1;
-      for (unsigned int i=1; i<_nd; i++) {
-      	_di[i][j] = _d[i][j] = ti;
+      for (unsigned int i=1; i<fBins; i++) {
+      	_di[i][j] = fValue[i][j] = intgrl;
       }
     }
   line11:
-    f2b = fb = 0.;
-    for (unsigned int k=0; k<_npg; k++) {
-      for (unsigned int j=0; j<_ndim; j++) {
+    f_sq_sum = fb = 0.;
+    for (unsigned int k=0; k<fBoxesPerBin; k++) {
+      // random_point(x, bin, &bin_vol, fStateBox, fXlow, fXup, state, rnd) ////
+      double bin_width;
+      double xn;
+      
+      for (unsigned int j=0; j<fFunction->dim; j++) {
         qran[j] = (double)rand()/RAND_MAX;
       }
       wgt = _xjac;
-      for (unsigned int j=0; j<_ndim; j++) {
+      for (unsigned int j=0; j<fFunction->dim; j++) {
         xn = (kg[j]-qran[j])*_dxg;
         ia[j] = static_cast<int>(xn);
         if (ia[j]<=1) {
-          xo = _xi[ia[j]][j];
-          rc = (xn-ia[j])*xo;
+          bin_width = fCoord[ia[j]][j];
+          rc = (xn-ia[j])*bin_width;
         }
         else {
-          xo = _xi[ia[j]][j]-_xi[ia[j]-1][j];
-          rc = _xi[ia[j]-1][j]+(xn-ia[j])*xo;
+          bin_width = fCoord[ia[j]][j]-fCoord[ia[j]-1][j];
+          rc = fCoord[ia[j]-1][j]+(xn-ia[j])*bin_width;
         }
-        x[j] = _xl[j]+rc*(_xu[j]-_xl[j]);
+        x[j] = fXlow[j]+rc*(fXup[j]-fXlow[j]);
         if (x[j]>1. or x[j]<0.)
           std::cout << "-------> j=" << j 
                     << "\tx[j]=" << x[j]
-                    << "\tx in range[" << _xl[j] << ", " << _xu[j] << "]" 
-                    << "\txo=" << xo 
+                    << "\tx in range[" << fXlow[j] << ", " << fXup[j] << "]" 
+                    << "\txo=" << bin_width 
                     << "\trc=" << rc 
                     << "\tiaj=" << ia[j] 
                     << "\t(xn-iaj)=" << (xn-ia[j]) 
-                    << "\txi[iaj1][j]=" << _xi[ia[j]-1][j]
-                    << "\txi[iaj][j]=" << _xi[ia[j]][j]
+                    << "\txi[iaj1][j]=" << fCoord[ia[j]-1][j]
+                    << "\txi[iaj][j]=" << fCoord[ia[j]][j]
                     << std::endl;
-                    wgt *= (xo*_xnd);
+                    wgt *= (bin_width*_xnd);
       }
+      //////////////////////////////////////////////////////////////////////////
+      // wgt = bin_vol * jacbin
+      
       f = this->F(x)*wgt;
       
-      f2 = std::pow(f, 2);
+      f_sq = std::pow(f, 2);
       fb += f;
-      f2b += f2;
+      f_sq_sum += f_sq;
       
-      for (unsigned int j=0; j<_ndim; j++) {
-        _di[ia[j]][j] += f/_calls;
-        if (_mds>=0) _d[ia[j]][j] += f2;
+      for (unsigned int j=0; j<fFunction->dim; j++) {
+        _di[ia[j]][j] += f/fCalls;
+        if (fStateMode>=0)
+          // accumulate_distribution (state, bin, f_sq) ////////////////////////
+          fValue[ia[j]][j] += f_sq;
+          //////////////////////////////////////////////////////////////////////
       }
     }
 
-    f2b *= _npg;
-    f2b = sqrt(f2b);
-    f2b = fabs((f2b-fb)*(f2b+fb));
-    ti += fb;
-    tsi += f2b;
-    if (_mds<0) {
-      for (unsigned int j=0; j<_ndim; j++) {
-        _d[ia[j]][j] += f2b;
+    f_sq_sum *= fBoxesPerBin;
+    f_sq_sum = sqrt(f_sq_sum);
+    f_sq_sum = fabs((f_sq_sum-fb)*(f_sq_sum+fb));
+    intgrl += fb;
+    tsi += f_sq_sum;
+    if (fStateMode<0) {
+      for (unsigned int j=0; j<fFunction->dim; j++) {
+        // accumulate_distribution (state, bin, f_sq) //////////////////////////
+        fValue[ia[j]][j] += f_sq_sum;
+        ////////////////////////////////////////////////////////////////////////
       }
     }
-    for (int k=_ndim-1; k>=0; k--) {
-      kg[k] = fmod(kg[k], _ng)+1;
+    for (int k=fFunction->dim-1; k>=0; k--) {
+      kg[k] = fmod(kg[k], fBoxes)+1;
       if (kg[k]!=1) goto line11; //FIXME need to remove these goto
     }
     
     // Final results for this iteration
-    ti /= _calls;
+    intgrl /= fCalls;
     tsi *= _dv2g;
-    ti2 = std::pow(ti, 2);
+    intgrl_sq = std::pow(intgrl, 2);
     
     if (tsi==0) wgt = 0.;
-    else wgt = ti2/tsi;
+    else wgt = intgrl_sq/tsi;
     
-    _si += ti*wgt;
-    _si2 += ti2;
-    _swgt += wgt;
-    _schi += ti2*wgt;
+    fStateWeightedIntegralSum += intgrl*wgt;
+    _si2 += intgrl_sq;
+    fStateSumWeights += wgt;
+    fStateChiSum += intgrl_sq*wgt;
     
-    if (_swgt==0) avgi = ti;
-    else avgi = _si/_swgt;
+    if (fStateSumWeights==0) avgi = intgrl;
+    else avgi = fStateWeightedIntegralSum/fStateSumWeights;
     
     if (_si2==0) sd = tsi;
-    else sd = _swgt*_it/_si2;
+    else sd = fStateSumWeights*fStateSamples/_si2;
     
-    _scalls += _calls;
+    _scalls += fCalls;
     chi2a = 0.;
     
-    if (_it>1) chi2a = sd*(_schi/_swgt-pow(avgi, 2))/(_it-1);
+    if (fStateSamples>1) chi2a = sd*(fStateChiSum/fStateSumWeights-pow(avgi, 2))/(fStateSamples-1);
     
     if (sd!=0.) sd = sqrt(ONE/sd);
     else sd = tsi;
     
     std::cout << "--> iteration " 
-              << std::setfill(' ') << std::setw(2) << _it << " : "
+              << std::setfill(' ') << std::setw(2) << fStateSamples << " : "
               << "average = " << std::setprecision(5) << std::setw(14) << avgi 
               << "sigma = " << std::setprecision(5) << std::setw(14) << sd 
               << "chi2 = " << chi2a << std::endl;
@@ -326,58 +342,68 @@ Vegas::Vegas3()
     if (sd!=0.) rel = fabs(sd/avgi);
     else rel = 0.;
     
-    if (rel<=fabs(_acc) or _it>=_ip->itvg) _now = 2;
+    if (rel<=fabs(_acc) or fStateSamples>=fInputParameters->itvg) _now = 2;
     
-    for (unsigned int j=0; j<_ndim; j++) {
-      xo = _d[0][j];
-      xn = _d[1][j];
-      _d[0][j] = (xo+xn)/2.;
-      dt[j] = _d[0][j];
+    // refine_grid(state) //////////////////////////////////////////////////////
+    double bin_width;
+    double weight[fMaxNbins];
+    double newg;
+    double oldg[fFunction->dim];
+    
+    for (unsigned int j=0; j<fMaxNbins; j++) {
+      weight[j] = 0.;
+    }
+    for (unsigned int j=0; j<fFunction->dim; j++) {
+      bin_width = fValue[0][j];
+      newg = fValue[1][j];
+      fValue[0][j] = (bin_width+newg)/2.;
+      oldg[j] = fValue[0][j];
       for (unsigned int i=1; i<_ndm; i++) {
-        _d[i][j] = xo+xn;
-        xo = xn;
-        xn = _d[i+1][j];
-        _d[i][j] = (_d[i][j]+xn)/3.;
-        dt[j] += _d[i][j];
+        fValue[i][j] = bin_width+newg;
+        bin_width = newg;
+        newg = fValue[i+1][j];
+        fValue[i][j] = (fValue[i][j]+newg)/3.;
+        oldg[j] += fValue[i][j];
       }
-      _d[_nd][j] = (xn+xo)/2.;
-      dt[j] += _d[_nd][j];
+      fValue[fBins][j] = (newg+bin_width)/2.;
+      oldg[j] += fValue[fBins][j];
     }
     
-    for (unsigned int j=0; j<_ndim; j++) {
+    for (unsigned int j=0; j<fFunction->dim; j++) {
       rc = 0.;
-      for (unsigned int i=0; i<_nd; i++) {
-        r[i] = 0.;
-        if (_d[i][j]>0.) {
-          xo = dt[j]/_d[i][j];
-          r[i] = std::pow((xo-ONE)/xo/log(xo), _alph);
+      for (unsigned int i=0; i<fBins; i++) {
+        weight[i] = 0.;
+        if (fValue[i][j]>0.) {
+          bin_width = oldg[j]/fValue[i][j];
+          weight[i] = std::pow((bin_width-ONE)/bin_width/log(bin_width), _alph);
         }
-        rc += r[i];
+        rc += weight[i];
       }
       rc /= _xnd;
-      dr = xn = 0.;
+      dr = newg = 0.;
       int k = 0;
       unsigned int i = 0;
       do {
-        dr += r[k];
-        xo = xn;
-        xn = _xi[k][j];
+        dr += weight[k];
+        bin_width = newg;
+        newg = fCoord[k][j];
         k++;
   line26:
         _now += 1;
       } while (rc>dr);
       dr -= rc;
-      if (dr==0.) xin[i] = xn;
-      else xin[i] = xn-(xn-xo)*dr/r[k-1];
+      if (dr==0.) xin[i] = newg;
+      else xin[i] = newg-(newg-bin_width)*dr/weight[k-1];
       i++;
       if (i<_ndm) goto line26; //FIXME need to remove these goto
 
       for (unsigned int i=0; i<_ndm; i++) {
-        _xi[i][j] = xin[i];
+        fCoord[i][j] = xin[i];
       }
-      _xi[_nd-1][j] = ONE;
+      fCoord[fBins-1][j] = ONE;
     }
-  } while (_it<_ip->itvg and fabs(_acc)<rel);
+    ////////////////////////////////////////////////////////////////////////////
+  } while (fStateSamples<fInputParameters->itvg and fabs(_acc)<rel);
 
   _vegas_result = avgi;
   _vegas_abserr = sd;
@@ -392,9 +418,9 @@ Vegas::Generate()
   int i;
   
   this->SetGen();
-  std::cout << "[Vegas::Generate] [DEBUG] " << _ip->maxgen << " events will be generated" << std::endl;
+  std::cout << "[Vegas::Generate] [DEBUG] " << fInputParameters->maxgen << " events will be generated" << std::endl;
   i = 0;
-  while (i<_ip->maxgen) {
+  while (i<fInputParameters->maxgen) {
     if (this->GenerateOneEvent()) i++;
   }
   std::cout << "[Vegas::Generate] [DEBUG] " << i << " events generated" << std::endl;
@@ -407,48 +433,49 @@ Vegas::GenerateOneEvent()
   double ami, max;
   double y;
   int jj, jjj;
-  double x[_ndim];
+  double x[fFunction->dim];
   
-  if (!_generation_prepared) {
+  if (!fGenerationPrepared) {
     this->SetGen();
-    _generation_prepared = true;
+    fGenerationPrepared = true;
   }
 
   y = -1.;
-  ami = 1./_mbin;
-  max = pow(_mbin, _ndim);
+  ami = 1./fMbin;
+  max = pow(fMbin, fFunction->dim);
 
   // Correction cycles are started
-  if (_j!=0) {
+  if (fJ!=0) {
   line4:
 #ifdef DEBUG
     std::cout << "[Vegas::GenerateOneEvent] [DEBUG] Correction cycles are started."
-	      << "\n\tj = " << _j
-	      << "\n\tcorrec = " << _correc
-	      << "\n\tcorre2 = " << _corre2
+	      << "\n\tj = " << fJ
+	      << "\n\tcorrec = " << fCorrec
+	      << "\n\tcorre2 = " << fCorrec2
 	      << std::endl;
 #endif
-    if (_correc<1.) {
-      if ((double)rand()/RAND_MAX>=_correc) {
+    if (fCorrec<1.) {
+      if ((double)rand()/RAND_MAX>=fCorrec) {
         goto line7; //FIXME need to remove these goto
       }
-      _correc = -1.;
+      fCorrec = -1.;
     }
     else {
-      _correc -= 1.;
+      fCorrec -= 1.;
     }
     // Select x values in Vegas bin
-    for (unsigned int k=0; k<_ndim; k++) {
-      x[k] = ((double)rand()/RAND_MAX+_n[k])*ami;
+    for (unsigned int k=0; k<fFunction->dim; k++) {
+      x[k] = ((double)rand()/RAND_MAX+fN[k])*ami;
     }
     // Compute weight for x value
-    if (_ip->ntreat>0) _weight = Treat(x);
-    else _weight = this->F(x);
+    /*if (fInputParameters->ntreat>0) _weight = Treat(x);
+    else _weight = this->F(x);*/
+    _weight = F(x);
     // Parameter for correction of correction
-    if (_weight>_fmax[_j]) {
+    if (_weight>fFmax[fJ]) {
       if (_weight>_fmax2) _fmax2 = _weight;
-      _corre2 -= 1.;
-      _correc += 1.;
+      fCorrec2 -= 1.;
+      fCorrec += 1.;
     }
     // Accept event
     if (_weight>=_fmdiff*(double)rand()/RAND_MAX+_fmold) { // FIXME!!!!
@@ -458,18 +485,18 @@ Vegas::GenerateOneEvent()
   line7:
     // Correction if too big weight is found while correction
     // (All your bases are belong to us...)
-    if (_fmax2>_fmax[_j]) {
-      _fmold = _fmax[_j];
-      _fmax[_j] = _fmax2;
+    if (_fmax2>fFmax[fJ]) {
+      _fmold = fFmax[fJ];
+      fFmax[fJ] = _fmax2;
       _fmdiff = _fmax2-_fmold;
-      if (_fmax2<_ffmax) {
-        _correc = (_nm[_j]-1.)*_fmdiff/_ffmax-_corre2;
+      if (_fmax2<fFGlobalMax) {
+        fCorrec = (_nm[fJ]-1.)*_fmdiff/fFGlobalMax-fCorrec2;
       }
       else {
-        _ffmax = _fmax2;
-        _correc = (_nm[_j]-1.)*_fmdiff/_ffmax*_fmax2/_ffmax-_corre2;
+        fFGlobalMax = _fmax2;
+        fCorrec = (_nm[fJ]-1.)*_fmdiff/fFGlobalMax*_fmax2/fFGlobalMax-fCorrec2;
       }
-      _corre2 = 0.;
+      fCorrec2 = 0.;
       _fmax2 = 0.;
       goto line4;
       //return this->GenerateOneEvent(); //GOTO 4
@@ -483,26 +510,27 @@ Vegas::GenerateOneEvent()
   do {
     do {
       // ...
-      _j = (double)rand()/RAND_MAX*max;
-      y = (double)rand()/RAND_MAX*_ffmax;
-      _nm[_j] += 1;
-    } while (y>_fmax[_j]);
+      fJ = (double)rand()/RAND_MAX*max;
+      y = (double)rand()/RAND_MAX*fFGlobalMax;
+      _nm[fJ] += 1;
+    } while (y>fFmax[fJ]);
     // Select x values in this Vegas bin
-    jj = _j;
-    for (unsigned int i=0; i<_ndim; i++) {
-      jjj = jj/_mbin;
-      _n[i] = jj-jjj*_mbin;
-      x[i] = ((double)rand()/RAND_MAX+_n[i])*ami;
+    jj = fJ;
+    for (unsigned int i=0; i<fFunction->dim; i++) {
+      jjj = jj/fMbin;
+      fN[i] = jj-jjj*fMbin;
+      x[i] = ((double)rand()/RAND_MAX+fN[i])*ami;
       jj = jjj;
     }
     
     // Get weight for selected x value
-    if (_ip->ntreat>0) _weight = this->Treat(x);
-    else _weight = this->F(x);
+    /*if (fInputParameters->ntreat>0) _weight = this->Treat(x);
+    else _weight = this->F(x);*/
+    _weight = F(x);
     
     // Eject if weight is too low
     //if (y>_weight) {
-    //std::cout << "ERROR : y>weight => " << y << ">" << _weight << ", " << _j << std::endl;
+    //std::cout << "ERROR : y>weight => " << y << ">" << _weight << ", " << fJ << std::endl;
       //_force_correction = false;
       //_force_returnto1 = true;
       //return this->GenerateOneEvent();
@@ -510,23 +538,23 @@ Vegas::GenerateOneEvent()
     //}
   } while (y>_weight);
 
-  if (_weight<=_fmax[_j]) _j = 0;
+  if (_weight<=fFmax[fJ]) fJ = 0;
   // Init correction cycle if weight is higher than fmax or ffmax
-  else if (_weight<=_ffmax) {
-    _fmold = _fmax[_j];
-    _fmax[_j] = _weight;
+  else if (_weight<=fFGlobalMax) {
+    _fmold = fFmax[fJ];
+    fFmax[fJ] = _weight;
     _fmdiff = _weight-_fmold;
-    _correc = (_nm[_j]-1.)*_fmdiff/_ffmax-1.;
+    fCorrec = (_nm[fJ]-1.)*_fmdiff/fFGlobalMax-1.;
   }
   else {
-    _fmold = _fmax[_j];
-    _fmax[_j] = _weight;
+    _fmold = fFmax[fJ];
+    fFmax[fJ] = _weight;
     _fmdiff = _weight-_fmold;
-    _ffmax = _weight;
-    _correc = (_nm[_j]-1.)*_fmdiff/_ffmax*_weight/_ffmax-1.;
+    fFGlobalMax = _weight;
+    fCorrec = (_nm[fJ]-1.)*_fmdiff/fFGlobalMax*_weight/fFGlobalMax-1.;
   }
 #ifdef DEBUG
-  std::cout << "[Vegas::GenerateOneEvent] [DEBUG] correc = " << _correc << ", j = " << _j << std::endl;
+  std::cout << "[Vegas::GenerateOneEvent] [DEBUG] correc = " << fCorrec << ", j = " << fJ << std::endl;
 #endif
   // Return with an accepted event
   return this->StoreEvent(x);
@@ -541,14 +569,15 @@ Vegas::StoreEvent(double *x_)
 #endif
     return false;
   }
-  _ip->store = true;
-  if (_ip->ntreat>0) _weight = Treat(x_);
-  else _weight = this->F(x_);
-  _ip->ngen += 1;
-  _ip->store = false;
+  fInputParameters->store = true;
+  /*if (fInputParameters->ntreat>0) _weight = Treat(x_);
+  else _weight = this->F(x_);*/
+  _weight = F(x_);
+  fInputParameters->ngen += 1;
+  fInputParameters->store = false;
 #ifdef DEBUG
-  if (_ip->ngen%1000==0) {
-    std::cout << "[Vegas::StoreEvent] Generated events : " << _ip->ngen << std::endl;
+  if (fInputParameters->ngen%1000==0) {
+    std::cout << "[Vegas::StoreEvent] Generated events : " << fInputParameters->ngen << std::endl;
   }
 #endif
   return true;
@@ -561,50 +590,56 @@ Vegas::SetGen()
   int jj, jjj;
   double sum, sum2, sum2p;
   int n[10];
-  int npoin = _ip->npoints;
+  int npoin = fInputParameters->npoints;
   double fsum, fsum2;
   double z;
-  double x[_ndim];
+  double x[fFunction->dim];
   double sig2;
   double av, av2;
 
-  //#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
   double eff, eff1, eff2;
   double sig, sigp;
-  std::cout << "[Vegas::SetGen] [DEBUG] maxgen = " << _ip->maxgen << std::endl;
-  _ip->Dump();
+  
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] maxgen = " << fInputParameters->maxgen << std::endl;
+  fInputParameters->Dump();
 #endif
 
-  _ip->ngen = 0;
+  _nm = new int[20000];
+  fFmax = new double[20000];
+  fN = new int[fFunction->dim];
+
+  fInputParameters->ngen = 0;
 
   // ...
   sum = 0.;
   sum2 = 0.;
   sum2p = 0.;
-  max = pow(_mbin, _ndim);
+  max = pow(fMbin, fFunction->dim);
 
   for (int i=0; i<max; i++) {
     _nm[i] = 0;
-    _fmax[i] = 0.;
+    fFmax[i] = 0.;
   }
 
-  for (int i=1; i<=max; i++) {
-    jj = i-1;
-    for (unsigned int j=1; j<=_ndim; j++) {
-      jjj = jj/_mbin;
-      n[j-1] = jj-jjj*_mbin;
+  for (int i=0; i<max; i++) {
+    jj = i;
+    for (unsigned int j=0; j<fFunction->dim; j++) {
+      jjj = jj/fMbin;
+      n[j] = jj-jjj*fMbin;
       jj = jjj;
     }
     fsum = fsum2 = 0.;
-    for (int j=1; j<=npoin; j++) {
-      for (unsigned int k=1; k<=_ndim; k++) {
-        x[k-1] = ((double)rand()/RAND_MAX+n[k-1])/_mbin;
+    for (int j=0; j<npoin; j++) {
+      for (unsigned int k=0; k<fFunction->dim; k++) {
+        x[k] = ((double)rand()/RAND_MAX+n[k])/fMbin;
       }
-      if (_ip->ntreat>0) z = this->Treat(x);
-      else z = this->F(x);
-      if (z>_fmax[i-1]) _fmax[i-1] = z;
+      /*if (fInputParameters->ntreat>0) z = this->Treat(x);
+      else z = this->F(x);*/
+      z = F(x);
+      if (z>fFmax[i]) fFmax[i] = z;
       fsum += z;
       fsum2 += std::pow(z, 2);
     }
@@ -614,21 +649,21 @@ Vegas::SetGen()
     sum += av;
     sum2 += av2;
     sum2p += sig2;
-    if (_fmax[i-1]>_ffmax) _ffmax = _fmax[i-1];
+    if (fFmax[i]>fFGlobalMax) fFGlobalMax = fFmax[i];
 #ifdef DEBUG
     sig = sqrt(sig2);
     eff = 1.e4;
-    if (_fmax[i-1]!=0.) eff = _fmax[i-1]/av;
+    if (fFmax[i]!=0.) eff = fFmax[i]/av;
     //#ifdef DEBUG
     std::cout << "[Vegas::SetGen] [DEBUG] in iteration #" << i << " :"
 	      << "\n\tav   = " << av
 	      << "\n\tsig  = " << sig
-	      << "\n\tfmax = " << _fmax[i]
+	      << "\n\tfmax = " << fFmax[i]
 	      << "\n\teff  = " << eff
 	      << "\n\tn = (";
-    for (unsigned int j=0; j<_ndim; j++) {
+    for (unsigned int j=0; j<fFunction->dim; j++) {
       std::cout << n[j];
-      if (j!=_ndim-1) std::cout << ", ";
+      if (j!=fFunction->dim-1) std::cout << ", ";
     }
     std::cout << ")" << std::endl;
 #endif
@@ -643,22 +678,22 @@ Vegas::SetGen()
   sigp = sqrt(sum2p);
   eff1 = 0.;
   for (int i=0; i<max; i++) {
-    eff1 += _fmax[i];
+    eff1 += fFmax[i];
   }
   eff1 = eff1/(max*sum);
-  eff2 = _ffmax/sum;
+  eff2 = fFGlobalMax/sum;
   std::cout << "[Vegas::SetGen] [DEBUG]"
             << "\n\tAverage function value     =  sum   = " << sum
             << "\n\tAverage function value**2  =  sum2  = " << sum2
             << "\n\tOverall standard deviation =  sig   = " << sig
             << "\n\tAverage standard deviation =  sigp  = " << sigp
-            << "\n\tMaximum function value     = ffmax  = " << _ffmax
+            << "\n\tMaximum function value     = ffmax  = " << fFGlobalMax
             << "\n\tAverage inefficiency       =  eff1  = " << eff1 
             << "\n\tOverall inefficiency       =  eff2  = " << eff2 
             << "\n\teff = " << eff 
             << std::endl;
 #endif
-  //#undef DEBUG
+//#undef DEBUG
 }
 
 void
@@ -666,9 +701,9 @@ Vegas::DumpGrid()
 {
   unsigned int i,j;
   // DUMP THE GRID
-  for (i=0; i<_ndim; i++) {
-    for (j=0; j<MAX_ND; j++) {
-      std::cout << i << "\t" << j << "\t" << _xi[j][i] << std::endl;
+  for (i=0; i<fFunction->dim; i++) {
+    for (j=0; j<fMaxNbins; j++) {
+      std::cout << i << "\t" << j << "\t" << fCoord[j][i] << std::endl;
     }
   }
 }
@@ -679,11 +714,11 @@ Vegas::Treat(double *x_, Parameters* ip_, bool storedbg_)
   double w, xx, y, dd, f;
   unsigned int i;
   int j;
-  double z[_ndim];
+  double z[fFunction->dim];
 
   if (_nTreatCalls==0) {
     _nTreatCalls = 1;
-    _rTreat = std::pow(_ndo, _ndim);
+    _rTreat = std::pow(fStateBins, fFunction->dim);
     if (storedbg_ && remove("test_vegas")!=0) {
       std::cerr << "Error while trying to delete test_vegas" << std::endl;
     }
@@ -691,17 +726,17 @@ Vegas::Treat(double *x_, Parameters* ip_, bool storedbg_)
   }
 
   w = _rTreat;
-  for (i=0; i<_ndim; i++) {
-    xx = x_[i]*_ndo-1;
+  for (i=0; i<fFunction->dim; i++) {
+    xx = x_[i]*fStateBins-1;
     j = xx;
     y = xx-j;
     if (j<=0) {
-      dd = _xi[0][i];
+      dd = fCoord[0][i];
     }
     else {
-      dd = _xi[j+1][i]-_xi[j][i];
+      dd = fCoord[j+1][i]-fCoord[j][i];
     }
-    z[i] = _xi[j+1][i]-dd*(1.-y);
+    z[i] = fCoord[j+1][i]-dd*(1.-y);
     w = w*dd;
   }
 
@@ -712,17 +747,17 @@ Vegas::Treat(double *x_, Parameters* ip_, bool storedbg_)
     df.open("test_vegas", std::ios::app);
     df << w 
        << "\t" << w*f;
-    for (unsigned int i=0; i<_ndim; i++) {
+    for (unsigned int i=0; i<fFunction->dim; i++) {
       df << "\t" << z[i];
     }
-    for (unsigned int i=0; i<_ndim; i++) {
+    for (unsigned int i=0; i<fFunction->dim; i++) {
       df << "\t" << x_[i];
     }
     df << std::endl;
     df.close();
   }
 #ifdef DEBUG
-  std::cout << "[Vegas::Treat] [DEBUG] w = " << w << ", dd = " << dd << ", ndo = " << _ndo << ", r = " << _rTreat << std::endl;
+  std::cout << "[Vegas::Treat] [DEBUG] w = " << w << ", dd = " << dd << ", ndo = " << fStateBins << ", r = " << _rTreat << std::endl;
 #endif
   return w*f;
 }

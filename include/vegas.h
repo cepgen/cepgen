@@ -7,7 +7,7 @@
 
 #include "parameters.h"
 
-#define MAX_ND 50
+#define fMaxNbins 50
 #define ONE 1.
 
 /**
@@ -79,31 +79,31 @@ class Vegas {
      */
     double Treat(double* x_,Parameters* ip_,bool storedbg_=false);
     /**
-     * Evaluates the smoothed version of the function to be integrated at a point @a x_, using the default Parameters object @a _ip 
+     * Evaluates the smoothed version of the function to be integrated at a point @a x_, using the default Parameters object @a fInputParameters 
      * @param[in] x_ The point at which the tamed function is to be evaluated
      * @return Tamed function value at this point @a x_
      */
-    inline double Treat(double* x_) { return Treat(x_,(Parameters*)this->_ip); }
+    inline double Treat(double* x_) { return Treat(x_, fInputParameters); }
     /**
      * Evaluates the smoothed version of the function to be integrated at a point @a x_
      * @param[in] x_ The point at which the tamed function is to be evaluated
      * @param[in] storedbg_ A debugging flag to set whether or not the internal variables of this method need to be stored for further processing
      * @return Tamed function value at this point @a x_
      */
-    inline double Treat(double* x_,bool storedbg_) { return Treat(x_,(Parameters*)this->_ip,storedbg_); }
+    inline double Treat(double* x_,bool storedbg_) { return Treat(x_, fInputParameters,storedbg_); }
     /**
-     * Evaluates the function to be integrated at a point @a x_, using the default Parameters object @a _ip
+     * Evaluates the function to be integrated at a point @a x_, using the default Parameters object @a fInputParameters
      * @param[in] x_ The point at which the function is to be evaluated
      * @return Function value at this point @a x_
      */
-    inline double F(double* x_) { return fFunction->f(x_, this->_ndim, (void*)this->_ip); }
+    inline double F(double* x_) { return fFunction->f(x_, fFunction->dim, (void*)fInputParameters); }
     /**
      * Evaluates the function to be integrated at a point @a x_, given a set of Parameters @a ip_
      * @param[in] x_ The point at which the function is to be evaluated
      * @param[in] ip_ A set of parameters to fully define the function
      * @return Function value at this point @a x_
      */
-    inline double F(double* x_,Parameters* ip_) { return fFunction->f(x_, this->_ndim, (void*)ip_); }
+    inline double F(double* x_,Parameters* ip_) { return fFunction->f(x_, fFunction->dim, (void*)ip_); }
     /**
      * Stores the event characterized by its _ndim-dimensional point in the phase
      * space to the output file
@@ -126,8 +126,7 @@ class Vegas {
     /**
      * @brief The number of dimensions on which to integrate the function
      */
-    const size_t _ndim;
-    unsigned int _ndo;
+    unsigned int fStateBins;
     /**
      * Has the Treat function already been called once ?
      */
@@ -139,72 +138,72 @@ class Vegas {
     /**
      * @brief Integration grid size parameter
      */
-    double _mbin;
+    double fMbin;
     /**
      * @brief Maximal value of the function in the considered integration range
      */
-    double _ffmax;
-    int *_n;
+    double fFGlobalMax;
+    int *fN;
     int *_nm;
     /**
      * @brief Maximal value of the function at one given point
      */
-    double *_fmax;
+    double *fFmax;
     /**
      * @brief Lower bounds for the points to generate
      */
-    double *_xl;
+    double *fXlow;
     /**
      * @brief Upper bounds for the points to generate
      */
-    double *_xu;
-    double _correc;
+    double *fXup;
     /**
      * @brief Weight of the point in the total integration
      */
     double _weight;
-    double _corre2;
     /**
      * @brief Square of the maximal function value in the integration grid
      * */
     double _fmax2;
     double _fmdiff;
     double _fmold;
+    int fStateSamples;
     /**
      * @brief Selected bin at which the function will be evaluated
      */
-    int _j;
-    double *_xi[MAX_ND];
-    double *_d[MAX_ND];
-    double *_di[MAX_ND];
+    int fJ;
+    double fCorrec;
+    double fCorrec2;
+    double *fCoord[fMaxNbins];
+    double *fValue[fMaxNbins];
+    double *_di[fMaxNbins];
     /**
      * @brief List of parameters to specify the integration range and the physics determining the phase space
      */
-    Parameters *_ip;
+    Parameters *fInputParameters;
     /**
      * @brief Flag to define whether or not the grid has been prepared for integration
      */
-    bool _grid_prepared;
+    bool fGridPrepared;
     /**
      * @brief Flag to define whether or not the generation has been prepared using @a SetGen (very time-consuming operation, thus needs to be called once)
      */
-    bool _generation_prepared;
+    bool fGenerationPrepared;
     /**
      * @brief Total number of iterations for the current Vegas instance
      */
-    int _mds;
+    int fStateMode;
     double _acc;
     double _alph;
-    int _it;
-    double _si;
+    double fStateWeightedIntegralSum;
     double _si2;
-    double _swgt;
-    double _schi;
+    double fStateSumWeights;
+    double fStateChiSum;
     double _scalls;
-    unsigned int _nd;
-    unsigned int _ng;
-    unsigned int _npg;
-    double _calls;
+    unsigned int fBins;
+    unsigned int fBoxes;
+    unsigned int fBoxesPerBin;
+    double fCalls;
     double _dxg;
     double _dv2g;
     double _xnd;
@@ -220,6 +219,8 @@ class Vegas {
      * @param params_ A "_void_-ified" Parameters object to define the boundaries of the phase space (physics constraints)
      */
     gsl_monte_function *fFunction;
+    int fNumConverg;
+    unsigned int fNumIter;
 };
 
 #endif
