@@ -66,7 +66,12 @@ Vegas::Integrate(double *result_, double *abserr_)
   }
   for (unsigned int i=0; i<fNumIter; i++) {
     veg_res = gsl_monte_vegas_integrate(fFunction, fXlow, fXup, fFunction->dim, fNumConverg/5, rng, state, &res, &err);
-    printf ("result = % .6f sigma = % .6f chisq/dof = %.1f\n", res, err, gsl_monte_vegas_chisq(state));
+    std::cout << "--> iteration " 
+      	      << std::setfill(' ') << std::setw(2) << (i+1) << " : "
+	            << "average = " << std::setprecision(5) << std::setw(14) << res
+	            << "sigma = " << std::setprecision(5) << std::setw(14) << err
+      	      << "chi2 = " << gsl_monte_vegas_chisq(state)
+              << std::endl;
   }
   
   *result_ = res;

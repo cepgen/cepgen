@@ -23,8 +23,8 @@ int main(int argc, char* argv[]) {
     
     mg.parameters->hadroniser = new Pythia6Hadroniser;
     mg.parameters->process = new GamGamLL;
-    mg.parameters->process_mode = 2;
-    mg.parameters->itvg = 2;
+    mg.parameters->process_mode = 1;
+    //mg.parameters->itvg = 2;
     
     mg.parameters->in1p = 4000.;
     mg.parameters->in2p = 4000.;
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     mg.parameters->minpt = 5.;
     mg.parameters->mineta = -2.5;
     mg.parameters->maxeta = 2.5;
-    mg.parameters->ncvg = 5e3; //FIXME
+    //mg.parameters->ncvg = 5e3; //FIXME
     mg.parameters->generation = true;
     mg.parameters->maxgen = 2;
     //mg.parameters->maxgen = 1e5;

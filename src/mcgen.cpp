@@ -227,11 +227,9 @@ double f(double* x_, size_t ndim_, void* params_)
   p->process->SetPoint(ndim_, x_);
   p->process->SetKinematics(kin);
   p->process->SetOutgoingParticles(6, p->pair); // Outgoing leptons
-  if (!p->process->IsKinematicsDefined()) {
-    std::cout << "[f] [ERROR] Kinematics is not properly set" << std::endl;
-    p->process->GetEvent()->Dump();
-    return 0.;
-  }
+  
+  if (!p->process->IsKinematicsDefined()) return 0.;
+  
   ff = p->process->ComputeWeight();
   
   if (ff<0.) return 0.;
