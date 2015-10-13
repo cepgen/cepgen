@@ -28,35 +28,14 @@ class Vegas {
      */
     ~Vegas();
     /**
-     * Vegas algorithm to perform the (_dim)-dimensional Monte Carlo integration of a given function as described in @cite PeterLepage1978192
+     * Vegas algorithm to perform the n-dimensional Monte Carlo integration of a given function as described in @cite PeterLepage1978192
      * @author Primary author : G.P. Lepage
-     * @author This C++ implementation : L. Forthomme
-     * @date Sep 1976
-     * @date Reviewed in Apr 1978
-     * @date FTN5 version 21 Aug 1984
-     * @date This C++ implementation is from 12 Dec 2013
+     * @author This C++ implementation : GSL
      * @param[out] result_ The cross section as integrated by Vegas for the given phase space restrictions
      * @param[out] abserr_ The error associated to the computed cross section
      * @return 0 if the integration was performed successfully
      */
     int Integrate(double* result_,double* abserr_);
-    /**
-     * First stage of the integration process : Initialization of cumulative variables (no grid so far) 
-     * @param ncalls_ Number of function calls to be performed
-     * @return 0, if this part, along with parts 2 and 3 were performed successfully 
-     */
-    int Vegas1(int ncalls_=-1);
-    /**
-     * Second stage of the integration process : Grid initialization
-     * @param ncalls_ Number of function calls to be performed
-     * @return 0, if this part, along with part 3 were performed successfully 
-     */
-    int Vegas2(int ncalls_=-1);
-    /**
-     * Third stage of the integration process : Main loop 
-     * @return 0, if this part was performed successfully 
-     */
-    int Vegas3();
     /**
      * Launches the Vegas generation of events according to the provided input
      *  parameters.
@@ -140,16 +119,6 @@ class Vegas {
      */
     double fMbin;
     /**
-     * @brief Maximal value of the function in the considered integration range
-     */
-    double fFGlobalMax;
-    int *fN;
-    int *_nm;
-    /**
-     * @brief Maximal value of the function at one given point
-     */
-    double *fFmax;
-    /**
      * @brief Lower bounds for the points to generate
      */
     double *fXlow;
@@ -189,6 +158,16 @@ class Vegas {
      * @brief Flag to define whether or not the generation has been prepared using @a SetGen (very time-consuming operation, thus needs to be called once)
      */
     bool fGenerationPrepared;
+    /**
+     * @brief Maximal value of the function at one given point
+     */
+    double *fFmax;
+    /**
+     * @brief Maximal value of the function in the considered integration range
+     */
+    double fFGlobalMax;
+    int *fN;
+    int *_nm;
     /**
      * @brief Total number of iterations for the current Vegas instance
      */
