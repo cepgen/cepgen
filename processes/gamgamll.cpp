@@ -96,7 +96,7 @@ GamGamLL::SetOutgoingParticles(int part_, Particle::ParticleCode pdgId_, int)
   _setout = setp3 and setp5 and setll;
   _setkin = _setin and _setout;
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Particle \"" << part_ << "\" has PDG id " << pdgId_ << std::endl;
+  PrintDebug(Form("Particle %d has PDG id=%d", part_, pdgId_));
   if (_setout) {
     std::cout << "  --> Outgoing state is fully set" << std::endl;
   }
@@ -155,7 +155,7 @@ GamGamLL::SetIncomingParticles(Particle ip1_, Particle ip2_)
   _setkin = _setin && _setout;
 }
 
-bool
+void
 GamGamLL::Pickin()
 {
   double sig, sig1, sig2; // sig1 = sigma and sig2 = sigma' in [1]
@@ -179,7 +179,7 @@ GamGamLL::Pickin()
   double d6, d8;
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] _nOpt = " << _nOpt << std::endl;
+  PrintDebug(Form("_nOpt = %i", _nOpt));
 #endif
   _dj = 0.;
 
@@ -190,10 +190,9 @@ GamGamLL::Pickin()
   sig2 = std::pow(sig, 2);
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]" << std::endl
-            << "\tmc4  = " << _mc4 << std::endl
-            << "\tsig1 = " << sig1 << std::endl
-            << "\tsig2 = " << sig2 << std::endl;
+  PrintDebug(Form("mc4 = %f\n\t"
+                  "sig1 = %f\n\t"
+                  "sig2 = %f", _mc4, sig1, sig2));
 #endif
 
   // Mass difference between the first outgoing particle and the first incoming
@@ -209,20 +208,18 @@ GamGamLL::Pickin()
   d6 = _w4-_w5;
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]" << std::endl
-            << "\tw1 = " << _w1 << std::endl
-            << "\tw2 = " << _w2 << std::endl
-            << "\tw3 = " << _w3 << std::endl
-            << "\tw4 = " << _w4 << std::endl
-            << "\tw5 = " << _w5 << std::endl;
+  PrintDebug(Form("w1 = %f\n\t"
+                  "w2 = %f\n\t"
+                  "w3 = %f\n\t"
+                  "w4 = %f\n\t"
+                  "w5 = %f\n\t",
+                  _w1, _w2, _w3, _w4, _w5));
 #endif
 
   ss = _s+_w12;
+  
   rl1 = std::pow(ss, 2)-4.*_w1*_s; // lambda(s, m1**2, m2**2)
-
-  if (rl1<=0.) {
-    return false;
-  }
+  if (rl1<=0.) throw Exception(__PRETTY_FUNCTION__, Form("rl1 = %f <= 0", rl1), JustWarning);
   _sl1 = std::sqrt(rl1);
 
   _s2 = ds2 = 0.;
@@ -232,7 +229,7 @@ GamGamLL::Pickin()
     sig1 = _s2; //FIXME!!!!!!!!!!!!!!!!!!!!
   }
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] _s2 = " << _s2 << std::endl;
+  PrintDebug(Form("s2 = %d", _s2));
 #endif
 
   //std::cout << "s=" << _s << ", w3=" << _w3 << ", sig1=" << sig1 << std::endl;
@@ -241,9 +238,7 @@ GamGamLL::Pickin()
   _d3 = sig1-_w2;
 
   rl2 = std::pow(sp, 2)-4.*_s*_w3; // lambda(s, m3**2, sigma)
-  if (rl2<=0.) {
-    return false;
-  }
+  if (rl2<=0.) throw Exception(__PRETTY_FUNCTION__, Form("rl2 = %f <= 0", rl2), JustWarning);
   sl2 = std::sqrt(rl2);
 
   //std::cout << "ss=" << ss << ", sp=" << sp << ", sl1=" << _sl1 << ", sl2=" << sl2 << std::endl;
@@ -251,18 +246,13 @@ GamGamLL::Pickin()
   _t1min = (_w31*_d3+(_d3-_w31)*(_d3*_w1-_w31*_w2)/_s)/_t1max; // definition from eq. (A.5) in [1]
 
   // FIXME dropped in CDF version
-  if (_t1max>-_cuts.q2min or (_cuts.q2max!=-1. and _t1min<-_cuts.q2max)) {
-    /*std::cerr << "[GamGamLL::Pickin] [FATAL]" << std::endl
-              << "     t1max = " << std::setw(8) << _t1max << " > -q2min = " << std::setw(8) << -_cuts.q2min << std::endl
-              << "  or t1min = " << std::setw(8) << _t1min << " < -q2max = " << std::setw(8) << -_cuts.q2max << std::endl;*/
-    return false;
-  }
-  if (_cuts.q2max!=-1. and _t1max<-_cuts.q2max) {
-    _t1max = -_cuts.q2max;
-  }
-  if (_t1min>-_cuts.q2min) {
-    _t1min = -_cuts.q2min;
-  }
+  if (_t1max>-_cuts.q2min)
+    throw Exception(__PRETTY_FUNCTION__, Form("t1max = %f > -q2min = %f", _t1max, -_cuts.q2min), Fatal);
+  if (_t1min<-_cuts.q2max and _cuts.q2max>=0.)
+    throw Exception(__PRETTY_FUNCTION__, Form("t1min = %f < -q2max = %f", _t1min, -_cuts.q2max), Fatal);
+    
+  if (_t1max<-_cuts.q2max and _cuts.q2max>=0.) _t1max = -_cuts.q2max;
+  if (_t1min>-_cuts.q2min)                     _t1min = -_cuts.q2min;
   /////
 
   // t1, the first photon propagator, is defined here
@@ -270,9 +260,8 @@ GamGamLL::Pickin()
   // changes wrt mapt1 : dx->-dx
   dt1 = -dt1;
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] definition of t1 according to"
-            << "\t(t1min, t1max) = (" << _t1min << ", " << _t1max << ")" << std::endl
-            << "\t_t1 = " << _t1 << std::endl;
+  PrintDebug(Form("Definition of t1 = %f according to\n\t"
+                  "(t1min, t1max) = (%f, %f)", _t1, _t1min, _t1max));
 #endif
 
   _dd4 = _w4-_t1;
@@ -282,9 +271,7 @@ GamGamLL::Pickin()
 
   _sa1 =-std::pow(_t1-_w31, 2)/4.+_w1*_t1;
   if (_sa1>=0.) {
-    std::cerr << __PRETTY_FUNCTION__ << " [FATAL]" << std::endl
-              << "  _sa1>=0 : " << _sa1 << std::endl;
-    return false;
+    throw Exception(__PRETTY_FUNCTION__, Form("_sa1 = %d >= 0", _sa1), Fatal);
   }
 
   sl3 = std::sqrt(-_sa1);
@@ -312,14 +299,14 @@ GamGamLL::Pickin()
   // 4
   s2x = s2max;
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] s2x = s2max = " << s2x << std::endl;
+  PrintDebug(Form("s2x = s2max = %f", s2x));
 #endif
 
   if (_nOpt<0) { // 5
     if (splus>sig2) {
       sig2 = splus;
 #ifdef DEBUG
-      std::cout << __PRETTY_FUNCTION__ << " [DEBUG] sig2 truncated to splus = " << splus << std::endl;
+      PrintDebug(Form("sig2 truncated to splus = %f", splus));
 #endif
     }
     if (_nOpt<-1) {
@@ -335,18 +322,16 @@ GamGamLL::Pickin()
   }
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] s2x = " << s2x << std::endl;
+  PrintDebug(Form("s2x = %f", s2x));
 #endif
   // 7
   r1 = s2x-d8;
   r2 = s2x-d6;
+  
   rl4 = (std::pow(r1, 2)-4.*_w2*s2x)*(std::pow(r2, 2)-4.*_w5*s2x);
-  if (rl4<=0.) {
-    /*std::cerr << "[GamGamLL::Pickin] [FATAL]" << std::endl
-      << "  rl4<=0 : " << rl4 << std::endl;*/
-    return false;
-  }
+  if (rl4<=0.) throw Exception(__PRETTY_FUNCTION__, Form("rl4 = %f <= 0", rl4), Fatal);
   sl4 = std::sqrt(rl4);
+  
   // t2max, t2min definitions from eq. (A.12) and (A.13) in [1]
   _t2max = _w2+_w5-(r1*r2+sl4)/(2.*s2x);
   _t2min = (_w52*_dd4+(_dd4-_w52)*(_dd4*_w2-_w52*_t1)/s2x)/_t2max;
@@ -362,11 +347,10 @@ GamGamLL::Pickin()
   r4 = _w52-_t2;
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]" << std::endl
-            << "  r1 = " << r1 << std::endl
-            << "  r2 = " << r2 << std::endl
-            << "  r3 = " << r3 << std::endl
-            << "  r4 = " << r4 << std::endl;
+  PrintDebug(Form("r1 = %f\n\t"
+                  "r2 = %f\n\t"
+                  "r3 = %f\n\t"
+                  "r4 = %f", r1, r2, r3, r4));
 #endif
 
   b = r3*r4-2.*(_t1+_w2)*_t2;
@@ -375,16 +359,12 @@ GamGamLL::Pickin()
 
   _sa2 = -std::pow(r4, 2)/4.+_w2*_t2;
   if (_sa2>=0.) {
-    std::cerr << __PRETTY_FUNCTION__ << " [FATAL]" << std::endl
-	      << "  _sa2 = " << _sa2 << " >= 0" << std::endl;
-    return false;
+    throw Exception(__PRETTY_FUNCTION__, Form("_sa2 = %f >= 0", _sa2), Fatal);
   }
   sl6 = 2.*std::sqrt(-_sa2);
   _g4 = -std::pow(r3, 2)/4.+_t1*_t2;
   if (_g4>=0.) {
-    std::cerr << __PRETTY_FUNCTION__ << " [FATAL]" << std::endl
-	      << "  _g4 = " << _g4 << " >= 0" << std::endl;
-    return false;
+    throw Exception(__PRETTY_FUNCTION__, Form("_g4 = %f >= 0", _g4), Fatal);
   }
   sl7 = std::sqrt(-_g4)*2.;
   sl5 = sl6*sl7;
@@ -429,8 +409,7 @@ GamGamLL::Pickin()
   }
   /////
   if (x(3)>1. or x(3)<-1.) {
-    std::cerr << __PRETTY_FUNCTION__ << " [FATAL] x[3] = " << x(3) << std::endl;
-    return false;
+    throw Exception(__PRETTY_FUNCTION__, Form("x(3) = %d", x(3)), Fatal);
   }
   yy4 = cos(pi*x(3));
   dd = _dd1*_dd2;
@@ -439,24 +418,20 @@ GamGamLL::Pickin()
   delb = (2.*_w2*r3+r4*st)*(4.*_p12*_t1-(_t1-_w31)*st)/(16.*ap);
 
   if (dd<=0.) {
-    /*std::cerr << "[GamGamLL::Pickin] [FATAL]" << std::endl
-      << "  dd = " << dd << " <= 0" << std::endl;*/
-    return false;
+    throw Exception(__PRETTY_FUNCTION__, Form("dd = %d <= 0", dd), Fatal);
   }
 
   _delta = delb-yy4*st*std::sqrt(dd)/(2.*ap);
   _s1 = _t2+_w1+(2.*_p12*r3-4.*_delta)/st;
 
   if (ap>=0.) {
-    std::cerr << __PRETTY_FUNCTION__ << " [FATAL]" << std::endl
-	      << "  ap = " << ap << " >= 0" << std::endl;
-    return false;
+    throw Exception(__PRETTY_FUNCTION__, Form("ap = %d >= 0", ap), Fatal);
   }
 
   _dj = ds2*dt1*dt2*std::pow(pi, 2)/(8.*_sl1*std::sqrt(-ap));
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] _dj = " << _dj << std::endl;
+  PrintDebug(Form("_dj = %d", _dj));
 #endif
 
   _gram = (1.-std::pow(yy4, 2))*dd/ap;
@@ -526,29 +501,28 @@ GamGamLL::Pickin()
   _dd4 = -_t1*(_s1-s1pp)*(_s1-s1pm)/4.;
   _acc4 = (_s1-s1pm)/(_s1+s1pm);
   _dd5 = _dd1+_dd3+((_p12*(_t1-_w31)/2.-_w1*_p2k1)*(_p2k1*(_t2-_w52)-_w2*r3)-_delta*(2.*_p12*_p2k1-_w2*(_t1-_w31)))/_p2k1;
-
-  return true;
 }
 
-bool
+void
 GamGamLL::Orient()
 {
   double re, rr, a1;
 
-  bool pck = Pickin();
-  if (!pck || _dj==0.) {
-    //std::cerr << "[GamGamLL::Orient] [FATAL] Pickin() failed : (bool)" << pck << ", _dj = " << _dj << std::endl;
-    return false;
+  try {
+    Pickin();
+  } catch (Exception& e) { throw e; }
+  
+  if (_dj==0.) {
+    throw Exception(__PRETTY_FUNCTION__, Form("Pickin failed: dj = %f", _dj), Fatal);
   }
+  
   re = 1./(2.*_ecm);
   _ep1 = re*(_s+_w12);
   _ep2 = re*(_s-_w12);
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]" << std::endl
-	    << "  re = " << re << std::endl
-	    << "  _w12 = " << _w12 << std::endl;
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] incoming particles' energy = " << _ep1 << ", " << _ep2 << std::endl;
+  PrintDebug(Form(" re = %f\n\t_w12 = %f", re, _w12));
+  PrintDebug(Form("Incoming particles' energy = %f, %f", _ep1, _ep2));
 #endif
 
   _p = re*_sl1;
@@ -562,29 +536,25 @@ GamGamLL::Orient()
   _ep5 = _ep2-_de5;
 
   if (_ec4<_mc4) {
-    std::cerr << __PRETTY_FUNCTION__ << " [FATAL]" << std::endl
-              << "  _ec4<_mc4 : _ec4 = " << _ec4 << ", _mc4 = " << _mc4 << std::endl;
-    std::cerr << "  -> de3, de5 = " << _de3 << ", " << _de5 << std::endl;
-    return false;
+    throw Exception(__PRETTY_FUNCTION__, Form("_ec4 = %f < _mc4 = %f\n\t==> de3 = %f, de5 = %f", _ec4, _mc4, _de3, _de5), Fatal);
   }
   // What if the protons' momenta are not along the z-axis?
   _pp3 = std::sqrt(std::pow(_ep3, 2)-_w3);
   _pc4 = std::sqrt((std::pow(_ec4, 2)-std::pow(_mc4, 2)));
 
   if (_pc4==0.) {
-    std::cerr << __PRETTY_FUNCTION__ << " [FATAL]" << std::endl
-	      << "  _pzc4==0" << std::endl;
-    return false;
+    throw Exception(__PRETTY_FUNCTION__, "_pzc4==0", Fatal);
   }
   _pp5 = std::sqrt(std::pow(_ep5, 2)-_w5);
   _p_p3 = std::sqrt(_dd1/_s)/_p;
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]" << std::endl
-            << "\tcentral system's energy : E4 = " << _ec4 << std::endl
-            << "\tcentral system's momentum : P4 = " << _pc4 << std::endl
-            << "\tcentral system's invariant mass : M4 = " << _mc4 << std::endl
-            << "\toutgoing particles' energy : E3 = " << _ep3 << ", E5 = " << _ep5 << std::endl;
+  PrintDebug(Form("Central system's energy: E4 = %f\n\t"
+                  "                 momentum: p4 = %f\n\t"
+                  "                 invariant mass: m4 = %f\n\t"
+                  "Outgoing particles' energy: E3 = %f\n\t"
+                  "                            E5 = %f",
+                  _ec4, _pc4, _mc4, _ep3, _ep5));
 #endif
 
   _p_p5 = std::sqrt(_dd3/_s)/_p;
@@ -592,7 +562,7 @@ GamGamLL::Orient()
   _st5 = _p_p5/_pp5;
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] _st3 = " << _st3 << ", _st5 = " << _st5 << std::endl;
+  PrintDebug(Form("st3 = %d\n\tst5 = %d", _st3, _st5));
 #endif
 
   // FIXME there should be a more beautiful way to check for nan!
@@ -612,11 +582,9 @@ GamGamLL::Orient()
   }
   /////
 
-  if (_st3>1. or _st5>1.) {
-    std::cerr << __PRETTY_FUNCTION__<< " [FATAL]" << std::endl
-	      << "  _st3>1 or _st5>1 : _st3 = " << _st5 << ", _st5 = " << _st5 << std::endl;
-    return false;
-  }
+  if (_st3>1.) throw Exception(__PRETTY_FUNCTION__, Form("st3 = %f > 1", _st3), Fatal);
+  if (_st5>1.) throw Exception(__PRETTY_FUNCTION__, Form("st5 = %f > 1", _st5), Fatal);
+
   _ct3 = std::sqrt(1.-std::pow(_st3, 2));
   _ct5 = std::sqrt(1.-std::pow(_st5, 2));
 
@@ -625,7 +593,7 @@ GamGamLL::Orient()
   }
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] _ct3 = " << _ct3 << ", _ct5 = " << _ct5 << std::endl;
+  PrintDebug(Form("ct3 = %d\n\tct5 = %d", _ct3, _ct5));
 #endif
 
   if (_ep2*_ep5>_p25) {
@@ -634,21 +602,14 @@ GamGamLL::Orient()
   _al3 = std::pow(_st3, 2)/(1.+_ct3);
   _be5 = std::pow(_st5, 2)/(1.-_ct5);
 
-  if (_dd5<0.) {
-    /*std::cerr << "[GamGamLL::Orient] [FATAL]" << std::endl
-      << "  _dd5<0 : " << _dd5 << std::endl;*/
-    return false;
-  }
+  if (_dd5<0.) throw Exception(__PRETTY_FUNCTION__, Form("dd5 = %f < 0", _dd5), Fatal);
 
   // Centre of mass system kinematics (theta4 and phi4)
   _p_p4 = std::sqrt(_dd5/_s)/_p;
   _st4 = _p_p4/_pc4;
 
-  if (_st4>1.) {
-    std::cerr << __PRETTY_FUNCTION__ << " [FATAL]" << std::endl
-	      << "  _st4>1 : " << _st4 << std::endl;
-    return false;
-  }
+  if (_st4>1.) throw Exception(__PRETTY_FUNCTION__, Form("st4 = %f > 1", _st4), Fatal);
+  
   _ct4 = std::sqrt(1.-std::pow(_st4, 2));
   if (_ep1*_ec4<_p14) {
     _ct4 =-_ct4;
@@ -666,7 +627,7 @@ GamGamLL::Orient()
   }
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] _ct4 = " << _ct4 << ", _al4 = " << _al4 << ", _be4 = " << _be4 << std::endl;
+  PrintDebug(Form("ct4 = %f\n\tal4 = %f, be4 = %f", _ct4, _al4, _be4));
 #endif
 
   //std::cout << "pp3 = " << _p_p3 << ", pp5 = " << _p_p5 << std::endl;
@@ -676,15 +637,8 @@ GamGamLL::Orient()
   _sp5 = -rr/_p_p5;
   //std::cout << "rr = " << rr << ", sp3 = " << fabs(_sp3) << ", sp5 = " << fabs(_sp5) << std::endl;
 
-  if (fabs(_sp3)>1. || fabs(_sp5)>1.) {
-    /*std::cerr << "[GamGamLL::Orient] [FATAL]" << std::endl
-	      << "  |_sp3|>1 or |_sp5|>1 :" << std::endl
-              << "   |_sp3| = " << fabs(_sp3) << std::endl
-              << "  _sp3**2 = " << std::pow(_sp3, 2) << std::endl
-              << "   |_sp5| = " << fabs(_sp5) << std::endl
-              << "  _sp5**2 = " << std::pow(_sp5, 2) << std::endl;*/
-    return false;
-  }
+  if (fabs(_sp3)>1.) throw Exception(__PRETTY_FUNCTION__, Form("sp3 = %f > 1", _sp3), Fatal);
+  if (fabs(_sp5)>1.) throw Exception(__PRETTY_FUNCTION__, Form("sp5 = %f > 1", _sp5), Fatal);
 
   _cp3 = -std::sqrt(1.-std::pow(_sp3, 2));
   _cp5 = -std::sqrt(1.-std::pow(_sp5, 2));
@@ -692,34 +646,27 @@ GamGamLL::Orient()
   a1 = _p_p3*_cp3-_p_p5*_cp5; //OK!!!
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Kinematic quantities" << std::endl
-            << "\tcos(theta3) = " << _ct3 << "\t  sin(theta3) = " << _st3 << std::endl
-            << "\tcos( phi3 ) = " << _cp3 << "\t  sin( phi3 ) = " << _sp3 << std::endl
-            << "\tcos(theta4) = " << _ct4 << "\t  sin(theta4) = " << _st4 << std::endl
-            << "\tcos( phi4 ) = " << _ct4 << "\t  sin( phi4 ) = " << _st4 << std::endl
-            << "\tcos(theta5) = " << _ct5 << "\t  sin(theta5) = " << _ct5 << std::endl
-            << "\tcos( phi5 ) = " << _cp5 << "\t  sin( phi5 ) = " << _cp5 << std::endl;
+  PrintDebug(Form("Kinematic quantities\n\t"
+                  "cos(theta3) = %1.2f\tsin(theta3) = %1.2f\tcos( phi3 ) = %1.2f\tsin( phi3 ) = %1.2f\n\t"
+                  "cos(theta4) = %1.2f\tsin(theta4) = %1.2f\tcos( phi4 ) = %1.2f\tsin( phi4 ) = %1.2f\n\t"
+                  "cos(theta5) = %1.2f\tsin(theta5) = %1.2f\tcos( phi5 ) = %1.2f\tsin( phi5 ) = %1.2f",
+                  _ct3, _st3, _cp3, _sp3,
+                  _ct4, _st4, _cp4, _sp4,
+                  _ct5, _st5, _cp5, _sp5));
 #endif
 
   if (fabs(_p_p4+_p_p3*_cp3+_cp5*_p_p5)<fabs(fabs(a1)-_p_p4)) {
 #ifdef DEBUG
-    std::cout << __PRETTY_FUNCTION__ << " [DEBUG] fabs(_p_p4+_p_p3*_cp3+_cp5*_p_p5)<fabs(fabs(a1)-_p_p4)" << std::endl
-              << "  pp4 = " << _p_p4 << std::endl
-              << "  pp5 = " << _p_p5 << std::endl
-              << "  cos(phi3) = cp3 = " << _cp3 << std::endl
-              << "  cos(phi5) = cp5 = " << _cp5 << std::endl
-              << "  a1 = " << a1 << std::endl;
+    PrintDebug(Form("|pp4+pp3*cos(phi3)+pp5*cos(phi5)| < | |a1|-pp4 |\n\t"
+                    "pp4 = %f\tpp5 = %f\n\t"
+                    "cos(phi3) = %f\tcos(phi5) = %f"
+                    "a1 = %f",
+                    _p_p4, _p_p5, _cp3, _cp5, a1));
 #endif
-    return true;
+    return;
   }
-  if (a1<0.) {
-    _cp5 = -_cp5;
-  }
-  else {
-    _cp3 = -_cp3;
-  }
-
-  return true;
+  if (a1<0.) _cp5 = -_cp5;
+  else       _cp3 = -_cp3;
 }
 
 double
@@ -736,11 +683,9 @@ GamGamLL::ComputeMX(double x_, double outmass_, double *dw_)
   Map(x_, wx2min, wx2max, &mx2, &dmx2);
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]" << std::endl
-	    << "\tMX**2 in range [" << wx2min << ", " << wx2max << "]" << std::endl
-	    << "\tx = " << x_ << std::endl
-	    << "\tMX**2 = " << mx2 << ", dMX**2 = " << dmx2 << std::endl
-	    << "\tMX = " << sqrt(mx2) << ", dMX = " << sqrt(dmx2) << std::endl;
+  PrintDebug(Form("mX^2 in range (%f, %f), x = %f\n\t"
+                  "mX^2 = %f, d(mX^2) = %f\n\t"
+                  "mX = %f, d(mX) = %f", wx2min, wx2max, x_, mx2, dmx2, sqrt(mx2), sqrt(dmx2)));
 #endif
 
   *dw_ = sqrt(dmx2);
@@ -788,11 +733,7 @@ GamGamLL::ComputeWeight()
 
   weight = 0.;
 
-  if (!_setout) {
-    std::cerr << __PRETTY_FUNCTION__ << " [FATAL]" << std::endl
-	      << "  Output state not set !" << std::endl;
-    return 0.;
-  }
+  if (!_setout) throw Exception(__PRETTY_FUNCTION__, "Output state not set!", Fatal);
 
   if (_cuts.wmax<0) _cuts.wmax = _s;
 
@@ -805,30 +746,26 @@ GamGamLL::ComputeWeight()
   if (fabs(wmax)>fabs(_cuts.wmax)) wmax = _cuts.wmax;
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]" << std::endl
-            << "\twmin = " << wmin << std::endl
-            << "\twmax = " << wmax << std::endl
-            << "\twmax/wmin = " << wmax/wmin << std::endl;
+  PrintDebug(Form("\twmin = %f\n\twmax = %f\n\twmax/wmin = %f", wmin, wmax, wmax/wmin));
 #endif
   Map(x(4),wmin,wmax,&_w4,&dw4);
   _mc4 = std::sqrt(_w4);
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Computed value for w4 = " << _w4 << " -> mc4 = " << _mc4 << std::endl;
+  PrintDebug(Form("Computed value for w4 = %f -> mc4 = %f", _w4, _mc4));
 #endif
 
-  if (!Orient()) {
+  try {
+    Orient();
+  } catch (Exception& e) {
+    e.Dump();
     return 0.;
   }
 
-  if (_t1>0. or _t2>0.) {
-    _dj = 0.;
-  }
-  if (_dj==0.) {
-    /*std::cerr << "[GamGamLL::ComputeWeight] [FATAL]" << std::endl
-      << "  _dj = " << _dj << std::endl;*/
-    return 0.;
-  }
+  if (_t1>0.) throw Exception(__PRETTY_FUNCTION__, Form("t1 = %f > 0", _t1), Fatal);
+  if (_t2>0.) throw Exception(__PRETTY_FUNCTION__, Form("t2 = %f > 0", _t2), Fatal);
+  if (_dj==0.) throw Exception(__PRETTY_FUNCTION__, Form("dj = %f", _dj), Fatal);
+  
   ecm6 = (_w4+_w6-_w7)/(2.*_mc4);
   pcm6 = std::sqrt(std::pow(ecm6, 2)-_w6);
   
@@ -847,12 +784,11 @@ GamGamLL::ComputeWeight()
   pgz = _mc4*_de3/(_ec4+_pc4)-_ec4*_de3*_al4/_mc4-_p_p3*_cp3*_ec4*_st4/_mc4+_ec4*_ct4/_mc4*(_pp3*_al3+e3mp3-e1mp1);
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] pg3 = ("
-            << pg3[0] << ", "
-            << pg3[1] << ", "
-            << pg3[2] << "), pg3**2 = "
-            << std::sqrt(std::pow(pg3[0], 2)+std::pow(pg3[1], 2)+std::pow(pg3[2], 2))
-            << std::endl;
+  PrintDebug(Form("pg3 = (%f, %f, %f)\n\t"
+                  "pg3^2 = %f",
+                  pg3[0], pg3[1], pg3[2],
+                  std::sqrt(std::pow(pg3[0], 2)+std::pow(pg3[1], 2)+std::pow(pg3[2], 2))
+                 ));
 #endif
 
   pgp = std::sqrt(std::pow(pgx, 2)+std::pow(pgy, 2)); // outgoing proton (3)'s transverse momentum
@@ -895,9 +831,7 @@ GamGamLL::ComputeWeight()
   _ctcm6 = 1.-2.*xx6; // cos(theta_cm,6) is between -1 and 1
   _stcm6 = 2.*std::sqrt(xx6*(1.-xx6)); // definition is OK (according to _ctcm6 def)
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]" << std::endl
-	    << "\tctcm6 = " << _ctcm6 << std::endl
-	    << "\tstcm6 = " << _stcm6 << std::endl;
+  PrintDebug(Form("\tctcm6 = %f\n\tstcm6 = %f", _ctcm6, _stcm6));
 #endif
 
   phicm6 = 2.*pi*x(6);
@@ -911,11 +845,7 @@ GamGamLL::ComputeWeight()
   pcm6z = pcm6*_ctcm6;
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] p3cm6 = ("
-            << pcm6x << ", "
-            << pcm6y << ", "
-            << pcm6z << ")"
-            << std::endl;
+  PrintDebug(Form("p3cm6 = (%f, %f, %f)", pcm6x, pcm6y, pcm6z));
 #endif
 
   pc6z = ctg*pcm6z-stg*pcm6x;
@@ -948,9 +878,9 @@ GamGamLL::ComputeWeight()
   _pl7 = std::sqrt(std::pow(_el7, 2)-_w7); // second outgoing lepton's |p|
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] (outgoing kinematics)" << std::endl
-            << "   first outgoing lepton: p, E = " << _pl6 << ", " << _el6 << std::endl
-            << "  second outgoing lepton: p, E = " << _pl7 << ", " << _el7 << std::endl;
+  PrintDebug(Form("Outgoing kinematics\n\t"
+                  " first outgoing lepton: p = %f, E = %f\n\t"
+                  "second outgoing lepton: p = %f, E = %f"), _pl6, _el6, _pl7, _el7);
 #endif
 
   double p7x, p7y, p7z;
@@ -975,11 +905,11 @@ GamGamLL::ComputeWeight()
   _sp7 = p7y/pp7;
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] (outgoing trajectories)" << std::endl
-            << "\t first outgoing lepton: cos(theta) = " << _ct6 << ", sin(theta) = " << _st6 << std::endl
-            << "\t first outgoing lepton: cos( phi ) = " << _cp6 << ", sin( phi ) = " << _sp6 << std::endl
-            << "\tsecond outgoing lepton: cos(theta) = " << _ct7 << ", sin(theta) = " << _st7 << std::endl
-            << "\tsecond outgoing lepton: cos( phi ) = " << _cp7 << ", sin( phi ) = " << _sp7 << std::endl;
+  PrintDebug(Form(" first outgoing lepton: cos(theta) = %f, sin(theta) = %f\n\t"
+                  " first outgoing lepton: cos( phi ) = %f, sin( phi ) = %f\n\t"
+                  "second outgoing lepton: cos(theta) = %f, sin(theta) = %f\n\t"
+                  "second outgoing lepton: cos( phi ) = %f, sin( phi ) = %f"),
+             _ct6, _st6, _cp6, _sp6, _ct7, _st7, _cp7, _sp7);
 #endif
 
   _q1dq = eg*(2.*ecm6-_mc4)-2.*pg*pcm6*_ctcm6;
@@ -999,10 +929,7 @@ GamGamLL::ComputeWeight()
   r13 = -c2*_cp3-qve[1]*c3;
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]" << std::endl;
-  for (unsigned int i=0; i<sizeof(qve)/sizeof(double); i++) {
-    std::cout << "  qve[" << i << "] = " << qve[i] << std::endl;
-  }
+  PrintDebug(Form("qve = (%d, %d, %d, %d)", qve[0], qve[1], qve[2], qve[3]));
 #endif
 
   r22 = b2*_sp5+qve[2]*b3;
@@ -1029,7 +956,7 @@ GamGamLL::ComputeWeight()
 
   if (_cuts.mode==0) {
 #ifdef DEBUG
-    std::cout << __PRETTY_FUNCTION__ << " [DEBUG] No cuts applied on the outgoing leptons kinematics !" << std::endl;
+    PrintDebug(Form("No cuts applied on the outgoing leptons kinematics!"));
 #endif
   }
   // Kinematics computation for both leptons
@@ -1322,15 +1249,14 @@ GamGamLL::FillKinematics(bool symmetrise_)
     gmuw = std::sqrt(gmuw);
   }
   else {
-    std::cerr << __PRETTY_FUNCTION__ << " [FATAL] W**2 = " << gmuw << " < 0" << std::endl;
+    throw Exception(__PRETTY_FUNCTION__, Form("W^2 = %f < 0", gmuw), Fatal);
     gmuw = 0.;
   }
   gmunu = gmuy*2.*Particle::GetMassFromPDGId(Particle::PROTON)/_ep1/_ep2;
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]" << std::endl
-            << "\t gmux = " << gmux << std::endl
-            << "\t gmuy = " << gmuy << std::endl
-            << "\t gmuw = " << gmuw << std::endl
-            << "\tgmunu = " << gmunu << std::endl;
+  PrintDebug(Form(" gmux = %f\n\t"
+                  " gmux = %f\n\t"
+                  " gmuw = %f\n\t"
+                  "gmunu = %f", gmux, gmuy, gmuw, gmunu));
 #endif
   //fEvent->Dump();
 }
@@ -1343,9 +1269,7 @@ GamGamLL::SetKinematics(Kinematics cuts_)
   _cotth1 = 1./tan(thetamax*pi/180.);
   _cotth2 = 1./tan(thetamin*pi/180.);  
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]" << std::endl
-            << "\tcot(theta1) = " << _cotth1 << std::endl
-            << "\tcot(theta2) = " << _cotth2 << std::endl;
+  PrintDebug(Form("cot(theta1) = %f\n\tcot(theta2) = %f", _cotth1, _cotth2));
 #endif
 }
 
@@ -1371,9 +1295,7 @@ GamGamLL::PeriPP(int nup_, int ndown_)
   // * _mp3, _mp5 (--> _w3, _w5)
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]" << std::endl
-	    << "\t Nup  = " << nup_ << std::endl
-	    << "\tNdown = " << ndown_ << std::endl;
+  PrintDebug(Form(" Nup  = %d\n\tNdown = %d", nup_, ndown_));
 #endif
 
   switch(nup_) {
@@ -1392,9 +1314,6 @@ GamGamLL::PeriPP(int nup_, int ndown_)
   case 4: // DESY
     // does not exist in CDF version
     PSF(_t1, _w3, &dummy, &psfw1, &psfw2);
-#ifdef DEBUG
-    std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Result of PSF : " << PSF(_t1, _w3, &dummy, &psfw1, &psfw2) << std::endl;
-#endif
     _u1 = -psfw1*(2.*_mp1)/_t1;
     _u2 = psfw2/(2.*_mp1);
     break;
@@ -1431,11 +1350,10 @@ GamGamLL::PeriPP(int nup_, int ndown_)
     break;
   }
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]" << std::endl
-            << "\tu1 = " << _u1 << std::endl
-            << "\tu2 = " << _u2 << std::endl
-            << "\tv1 = " << _v1 << std::endl
-            << "\tv2 = " << _v2 << std::endl;
+  PrintDebug(Form("u1 = %f\n\t"
+                  "u2 = %f\n\t"
+                  "v1 = %f\n\t"
+                  "v2 = %f", _u1, _u2, _v1, _v2));
 #endif
 
   qqq = std::pow(_q1dq, 2);
@@ -1448,13 +1366,10 @@ GamGamLL::PeriPP(int nup_, int ndown_)
   peripp = (((_u1*_v1*t11+_u2*_v1*t21+_u1*_v2*t12+_u2*_v2*t22)/(_t1*_t2*_bb))/(_t1*_t2*_bb))/4.;
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]" << std::endl
-            << "\tt11 = " << t11 << std::endl
-            << "\tt12 = " << t12 << std::endl
-            << "\tt21 = " << t21 << std::endl
-            << "\tt22 = " << t22 << std::endl
-            << "\ttau = " << _tau << std::endl
-            << "\t--> PeriPP = " << peripp << std::endl;
+  PrintDebug(Form("t11 = %5.2f\tt12 = %5.2f\n\t"
+                  "t21 = %5.2f\tt22 = %5.2f\n\t"
+                  "tau = %f\n\t"
+                  "=> PeriPP = %f", t11, t12, t21, t22, _tau, peripp));
 #endif
   return peripp;
 }

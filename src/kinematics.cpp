@@ -23,7 +23,7 @@ Kinematics::Dump()
   }
   std::cout
     << std::setfill(' ')
-      << __PRETTY_FUNCTION__ << " Dump" << std::endl
+    << __PRETTY_FUNCTION__ << " Dump" << std::endl
     << std::setw(25) << "Cuts mode :" << std::setw(2) << this->mode << "->" << std::setw(4) << s_mode << std::endl    
     << "===== Single leptons" << std::endl
     << std::setw(25) << "Minimal pT :" << std::setw(8) << this->ptmin << std::endl

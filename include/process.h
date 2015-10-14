@@ -35,7 +35,7 @@ class Process
   /**
    * @brief Returns the weight for this point in the phase-space
    */
-  inline virtual double ComputeWeight() { std::cout << "***ERROR*** Calling ComputeWeight on an invalid process!" << std::endl; return -1; }
+  inline virtual double ComputeWeight() { throw Exception(__PRETTY_FUNCTION__, "Calling ComputeWeight on an invalid process!", Fatal); }
   /**
    * Specifies the incoming particles' kinematics as well as their properties
    * using two Particle objects.

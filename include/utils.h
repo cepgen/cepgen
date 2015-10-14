@@ -9,6 +9,9 @@
 #include <sstream>
 #include <ctime>
 #include <stdexcept>
+#include <stdarg.h>  // For va_start, etc.
+
+#include "Exception.h"
 
 static std::stringstream error;
 
@@ -17,6 +20,8 @@ static std::stringstream error;
  * between 0 and 1
  */
 #define drand() (double)(rand())/RAND_MAX
+
+std::string Form(const std::string fmt, ...);
 
 /**
  * An object which enables to extract the processing time between two steps in

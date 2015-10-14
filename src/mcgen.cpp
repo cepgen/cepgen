@@ -6,7 +6,7 @@ MCGen::MCGen() :
   this->PrintHeader();
 
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] MCGen initialized !" << std::endl;
+  PrintDebug("Generator initialized");
 #endif
 
   srand(time(0)); // Random number initialization
@@ -23,7 +23,7 @@ MCGen::~MCGen()
   if (fVegas) delete fVegas;
   delete parameters;
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Destructor called" << std::endl;
+  PrintDebug("Destructor called");
 #endif
 }
 
@@ -87,7 +87,7 @@ MCGen::BuildVegas()
     case Process::InelasticInelastic:
       topo = "DOUBLE-DISSOCIATIVE protons"; break;
   }
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Considered topology : " << topo << " case" << std::endl;
+  PrintDebug(Form("Considered topology: %s case", topo));
 #endif
   
   fVegas = new Vegas(parameters->process->GetNdim(parameters->process_mode), f, parameters);
@@ -98,12 +98,15 @@ MCGen::ComputeXsection(double* xsec_, double *err_)
 {
   if (!fVegas) BuildVegas();
 
-  std::cout << __PRETTY_FUNCTION__ << " Starting the computation of the process cross-section" << std::endl;
+  PrintInfo("Starting the computation of the process cross-section");
+  
   fVegas->Integrate(xsec_, err_);
+  
   fCrossSection = *xsec_;
   fCrossSectionError = *err_;
-  std::cout << __PRETTY_FUNCTION__ << " Total cross-section = " << *xsec_ << " +/- " << *err_ << " pb" << std::endl;
   fHasCrossSection = true;
+  
+  PrintInfo(Form("Total cross section: %f +/- %f pb", *xsec_, *err_));
 }
 
 Event*
@@ -127,11 +130,11 @@ MCGen::LaunchGeneration()
 {
   // LHE file preparation
   if (!this->parameters->file->is_open()) {
-    std::cerr << __PRETTY_FUNCTION__ << " [ERROR] output file is not opened !" << std::endl;
+    PrintDebug("Output file is not opened");
   }
   //#ifdef DEBUG
   else {
-    std::cout << __PRETTY_FUNCTION__ << " [DEBUG] output file is correctly opened !" << std::endl;
+    PrintInfo("Output file successfully opened");
   }
   //#endif
   *(this->parameters->file) << "<LesHouchesEvents version=\"1.0\">" << std::endl;
@@ -229,7 +232,11 @@ double f(double* x_, size_t ndim_, void* params_)
 
   if (!p->process->IsKinematicsDefined()) return 0.;
   
-  ff = p->process->ComputeWeight();
+  try {
+    ff = p->process->ComputeWeight();
+  } catch (Exception& e) {
+    e.Dump();
+  }
   
   if (ff<0.) return 0.;
   
@@ -239,7 +246,7 @@ double f(double* x_, size_t ndim_, void* params_)
 
     if (kin.kinematics>1) {
 #ifdef DEBUG
-      std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Event before calling the hadroniser (" << p->hadroniser->GetName() << ")" << std::endl;
+      PrintDebug(Form("Event before calling the hadroniser (%s)", p->Hadroniser->GetName()));
       p->process->GetEvent()->Dump();
 #endif
       num_hadr_trials = 0;
@@ -247,28 +254,28 @@ double f(double* x_, size_t ndim_, void* params_)
         hadronised = p->hadroniser->Hadronise(p->process->GetEvent());
 #ifdef DEBUG
         if (num_hadr_trials>0) {
-          std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Hadronisation failed. Trying for the " << num_hadr_trials+1 << "th time" << std::endl;
+          PrintDebug(Form("Hadronisation failed. Trying for the %dth time", num_hadr_trials+1));
         }
 #endif
         num_hadr_trials++;
       } while (!hadronised and num_hadr_trials<=p->hadroniser_max_trials);
       p->process->GetEvent()->num_hadronisation_trials = num_hadr_trials;
 #ifdef DEBUG
-      std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Event hadronisation succeded after " << p->process->GetEvent()->num_hadronisation_trials << " trial(s)" << std::endl;
+      PrintDebug(Form("Event hadronisation succeeded after %d trial(s)", p->process->GetEvent()->num_hadronisation_trials));
 #endif
 
       if (num_hadr_trials>p->hadroniser_max_trials) return 0.; //FIXME
 #ifdef DEBUG
-      std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Event after calling the hadroniser (" << p->hadroniser->GetName() << ")" << std::endl;
+      PrintDebug(Form("Event after calling the hadroniser (%s)", p->hadroniser->GetName()));
       p->process->GetEvent()->Dump();
 #endif
     }
     p->process->GetEvent()->time_total = tmr.elapsed();
     
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]" << std::endl
-	    << "       Generation time : " << std::setprecision(8) << p->process->GetEvent()->time_generation << " sec" << std::endl;
-	    << "  Total (+ hadr.) time : " << std::setprecision(8) << p->process->GetEvent()->time_total << " sec" << std::endl;
+  PrintDebug(Form("Generation time:       %5.6f sec\n\t"
+                  "Total time (gen+hadr): %5.6f sec",
+                  p->process->GetEvent()->time_generation, p->process->GetEvent()->time_total));
 #endif
 
     *(p->last_event) = *(p->process->GetEvent());

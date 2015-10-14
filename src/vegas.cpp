@@ -16,11 +16,9 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
   }
   
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]"
-            << "\n  Number of integration dimensions : " << dim_
-            << "\n  Number of iterations : " << inParam_->itvg
-            << "\n  Number of function calls : " << inParam->ncvg
-            << std::endl;
+  PrintDebug(Form("Number of integration dimensions: %d\n\t"
+                  "Number of iterations:             %d\n\t"
+                  "Number of function calls:         %d", dim_, inParam_->itvg, inParam_->ncvg));
 #endif
 
   fFunction = new gsl_monte_function;
@@ -34,7 +32,7 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
 Vegas::~Vegas()
 {
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Destructor called" << std::endl;
+  PrintDebug("Destructor called");
 #endif
   delete[] fXlow;
   delete[] fXup;
@@ -96,12 +94,14 @@ Vegas::Generate()
   int i;
   
   this->SetGen();
-  std::cout << __PRETTY_FUNCTION__ << " " << fInputParameters->maxgen << " events will be generated" << std::endl;
+
   i = 0;
+
+  PrintInfo(Form("%d events will be generated", fInputParameters->maxgen));
   while (i<fInputParameters->maxgen) {
     if (this->GenerateOneEvent()) i++;
   }
-  std::cout << __PRETTY_FUNCTION__ << " " << i << " events generated" << std::endl;
+  PrintInfo(Form("%d events generated", i));
 }
 
 bool
@@ -177,7 +177,7 @@ Vegas::GenerateOneEvent()
     fCorrec = (_nm[fJ]-1.)*fmax_diff/fFGlobalMax*weight/fFGlobalMax-1.;
   }
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] correc = " << fCorrec << ", j = " << fJ << std::endl;
+  PrintDebug(Form("Correc.: %f, j = %d", fCorrec, fJ));
 #endif
   // Return with an accepted event
   if (weight>0.) return this->StoreEvent(x);
@@ -274,8 +274,7 @@ Vegas::SetGen()
 #ifdef DEBUG
   double eff, eff1, eff2;
   double sig, sigp;
-  
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] maxgen = " << fInputParameters->maxgen << std::endl;
+  PrintDebug(Form("MaxGen = %d", fInputParameters->maxgen));
   fInputParameters->Dump();
 #endif
 

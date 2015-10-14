@@ -2,14 +2,14 @@
 
 Herwig6Hadroniser::Herwig6Hadroniser()
 {
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Constructor called" << std::endl;
+  PrintDebug(Form("Constructor called"));
   _name = "Herwig6";
 }
 
 Herwig6Hadroniser::~Herwig6Hadroniser()
 {
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Destructor called" << std::endl;
+  PrintDebug(Form("Destructor called"));
 #endif
 }
 

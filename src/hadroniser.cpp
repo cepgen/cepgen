@@ -10,7 +10,7 @@ Hadroniser::~Hadroniser()
 {
   delete _hadrons;
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Destructor called" << std::endl;
+  PrintDebug(Form("Destructor called"));
 #endif
 }
 
