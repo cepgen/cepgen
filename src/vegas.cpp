@@ -50,20 +50,24 @@ Vegas::Integrate(double *result_, double *abserr_)
   // Initialise the random number generator
   const gsl_rng_type* rng_type;
   gsl_rng* rng;
+  gsl_monte_vegas_state* state;
   gsl_rng_env_setup();
   rng_type = gsl_rng_default;
-  rng = gsl_rng_alloc(rng_type);
   int veg_res;
   
   double res, err;
+
+  // Prepare Vegas
+  rng = gsl_rng_alloc(rng_type);
+  state = gsl_monte_vegas_alloc(fFunction->dim);
   
   // Launch Vegas
-  gsl_monte_vegas_state* state = gsl_monte_vegas_alloc(fFunction->dim);
-  // Vegas warmup
+  /// Warmup (prepare the grid)
   if (!fGridPrepared) {
     veg_res = gsl_monte_vegas_integrate(fFunction, fXlow, fXup, fFunction->dim, 10000, rng, state, &res, &err);
     fGridPrepared = true;
   }
+  /// Integration
   for (unsigned int i=0; i<fNumIter; i++) {
     veg_res = gsl_monte_vegas_integrate(fFunction, fXlow, fXup, fFunction->dim, fNumConverg/5, rng, state, &res, &err);
     std::cout << "--> iteration " 
@@ -74,8 +78,13 @@ Vegas::Integrate(double *result_, double *abserr_)
               << std::endl;
   }
   
+  // Clean Vegas
+  gsl_monte_vegas_free(state);
+  gsl_rng_free(rng);
+  
   *result_ = res;
   *abserr_ = err;
+  
   return veg_res;
 }
 

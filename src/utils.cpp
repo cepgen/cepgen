@@ -9,7 +9,7 @@ void Map(double expo_, double xmin_, double xmax_, double* out_, double* dout_)
   *dout_ = out*log(y);
 #ifdef DEBUG
   std::cout << "=====================================" << std::endl;
-  std::cout << "[Map] [DEBUG]"
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]"
             << "\n  min = " << xmin_
             << "\n  max = " << xmax_
             << "\n  max/min = " << y
@@ -81,13 +81,11 @@ double GenerT(double tmin_, double tmax_, double b_, double anexp_)
 
   bloc = b_;
   if (b_<.1) {
-    std::cerr << "[GenerT] ERROR: B=" << b_ << std::endl;
-    //CALL ERRLOG (20, 'W: GENERT: B < 0.1')
+    std::cerr << __PRETTY_FUNCTION__ << " ERROR: B=" << b_ << std::endl;
     bloc = .1;
   }
   if (tmin_>=tmax_) {
-    std::cerr << "[GenerT] ERROR: TMIN=" << tmin_ << ", TMAX=" << tmax_ << " => return TMIN=" << tmin_ << std::endl;
-    //CALL ERRLOG (21, 'S: GENERT: TMIN >= TMAX')
+    std::cerr << __PRETTY_FUNCTION__ << " ERROR: TMIN=" << tmin_ << ", TMAX=" << tmax_ << " => return TMIN=" << tmin_ << std::endl;
     return tmin_;
   }
 
@@ -99,13 +97,13 @@ double GenerT(double tmin_, double tmax_, double b_, double anexp_)
       if (bloc*(tmax_-tmin_)>=25.) {
 	t = tmin_-log(drand())/bloc;
 #ifdef DEBUG
-	std::cout << "[GenerT] DEBUG: Method 1: T=" << t << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " DEBUG: Method 1: T=" << t << std::endl;
 #endif
       }
       else {
 	t = tmin_-log(1.-drand()*(1.-exp(bloc*(tmin_-tmax_))))/bloc;
 #ifdef DEBUG
-	std::cout << "[GenerT] DEBUG: Method 2: T=" << t << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " DEBUG: Method 2: T=" << t << std::endl;
 #endif
       }
     }
@@ -123,8 +121,7 @@ double GenerT(double tmin_, double tmax_, double b_, double anexp_)
     iter++;
   } while ((t<tmin_ or t>tmax_) and iter<=100);
   if (iter>100) {
-    //CALL ERRLOG (22, 'W: GENT: More than 100 iterations!')
-    std::cout << "[GenerT] WARNING: more than 100 iterations!" << std::endl
+    std::cout << __PRETTY_FUNCTION__ << " WARNING: more than 100 iterations!" << std::endl
 	      << "TMIN: " << tmin_ << ", TMAX: " << tmax_ << " BLOC: " << bloc << ", T: " << t
 	      << std::endl;
   }
@@ -137,7 +134,7 @@ double GenTDL(double tmin_, double tmax_, double b_, int n_)
   double t, w;
 
   if (tmin_>tmax_) {
-    std::cerr << "[GenTDL] ERROR: TMIN=" << tmin_ << ", TMAX=" << tmax_ << " => return TMIN=" << tmin_ << std::endl;
+    std::cerr << __PRETTY_FUNCTION__ << " ERROR: TMIN=" << tmin_ << ", TMAX=" << tmax_ << " => return TMIN=" << tmin_ << std::endl;
     return tmin_;
   }
 
@@ -146,21 +143,20 @@ double GenTDL(double tmin_, double tmax_, double b_, int n_)
     if (b_*(tmax_-tmin_)>=25.) {
       t = tmin_-log(drand())/b_;
 #ifdef DEBUG
-      std::cout << "[GenTDL] DEBUG: Method 1: T=" << t << std::endl;
+      std::cout << __PRETTY_FUNCTION__ << " DEBUG: Method 1: T=" << t << std::endl;
 #endif
     }
     else {
       t = tmin_-log(1.-drand()*(1.-exp(b_*(tmin_-tmax_))))/b_;
 #ifdef DEBUG
-      std::cout << "[GenTDL] DEBUG: Method 2: T=" << t << std::endl;
+      std::cout << __PRETTY_FUNCTION__ << " DEBUG: Method 2: T=" << t << std::endl;
 #endif
     }
     w = std::pow((1.+1.41*tmin_)/(1.+1.41*t), n_);
     iter += 1;
   } while ((t<tmin_ or t>tmax_ or w<drand()) and iter<=100);
   if (iter>100) {
-    //CALL ERRLOG (22, 'W: GENTDL: More than 100 iterations!')
-    std::cout << "[GenTDL] WARNING: more than 100 iterations!" << std::endl
+    std::cout << __PRETTY_FUNCTION__ << " WARNING: more than 100 iterations!" << std::endl
 	      << "TMIN: " << tmin_ << ", TMAX: " << tmax_ << ", T: " << t
 	      << std::endl;
   }

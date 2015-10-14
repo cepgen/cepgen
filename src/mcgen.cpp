@@ -1,12 +1,12 @@
 #include "mcgen.h"
 
 MCGen::MCGen() :
-  veg(0), _xsec(-1.), _xsec_error(-1.)
+  fVegas(0), fCrossSection(-1.), fCrossSectionError(-1.)
 {
   this->PrintHeader();
 
 #ifdef DEBUG
-  std::cout << "[MCGen::MCGen] [DEBUG] MCGen initialized !" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] MCGen initialized !" << std::endl;
 #endif
 
   srand(time(0)); // Random number initialization
@@ -15,15 +15,15 @@ MCGen::MCGen() :
 }
 
 MCGen::MCGen(Parameters *ip_) :
-  parameters(ip_)
+  parameters(ip_), fVegas(0)
 {}
 
 MCGen::~MCGen()
 {
-  if (veg) delete veg;
+  if (fVegas) delete fVegas;
   delete parameters;
 #ifdef DEBUG
-  std::cout << "[MCGen::~MCGen] [DEBUG] Destructor called" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Destructor called" << std::endl;
 #endif
 }
 
@@ -78,47 +78,47 @@ MCGen::BuildVegas()
 {
 #ifdef DEBUG
   std::string topo;
-  if (parameters->process_mode==1) {
-    topo = "ELASTIC proton/proton";
+  switch (parameters->process_mode) {
+    case Process::ElasticElastic:
+      topo = "ELASTIC proton/proton"; break;
+    case Process::ElasticInelastic:
+    case Process::InelasticElastic:
+      topo = "SINGLE-DISSOCIATIVE proton"; break;
+    case Process::InelasticInelastic:
+      topo = "DOUBLE-DISSOCIATIVE protons"; break;
   }
-  else if (parameters->process_mode==2 or parameters->process_mode==3) {
-    topo = "SINGLE-DISSOCIATIVE proton";
-  }
-  else if (parameters->process_mode==4) {
-    topo = "DOUBLE-DISSOCIATIVE protons";
-  }
-  std::cout << "[MCGen::MCGen] [DEBUG] Considered topology : " << topo << " case" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Considered topology : " << topo << " case" << std::endl;
 #endif
-
-  veg = new Vegas(parameters->process->GetNdim(parameters->process_mode), f, parameters);
+  
+  fVegas = new Vegas(parameters->process->GetNdim(parameters->process_mode), f, parameters);
 }
 
 void
 MCGen::ComputeXsection(double* xsec_, double *err_)
 {
-  if (!veg) this->BuildVegas();
+  if (!fVegas) BuildVegas();
 
-  std::cout << "[MCGen::ComputeXsection] Starting the computation of the process cross-section" << std::endl;
-  veg->Integrate(xsec_, err_);
-  this->_xsec = *xsec_;
-  this->_xsec_error = *err_;
-  std::cout << "[MCGen::ComputeXsection] Total cross-section = " << *xsec_ << " +/- " << *err_ << " pb" << std::endl;
-  this->_xsec_comp = true;
+  std::cout << __PRETTY_FUNCTION__ << " Starting the computation of the process cross-section" << std::endl;
+  fVegas->Integrate(xsec_, err_);
+  fCrossSection = *xsec_;
+  fCrossSectionError = *err_;
+  std::cout << __PRETTY_FUNCTION__ << " Total cross-section = " << *xsec_ << " +/- " << *err_ << " pb" << std::endl;
+  fHasCrossSection = true;
 }
 
 Event*
 MCGen::GenerateOneEvent()
 {
   bool good = false;
-  if (!this->_xsec_comp) {
+  if (!fHasCrossSection) {
     double xsec, err;
-    this->ComputeXsection(&xsec, &err);
+    ComputeXsection(&xsec, &err);
   }
   while (!good) {
-    good = veg->GenerateOneEvent();
+    good = fVegas->GenerateOneEvent();
   }
 
-  this->last_event = this->parameters->last_event;
+  last_event = this->parameters->last_event;
   return (Event*)this->last_event;
 }
 
@@ -127,11 +127,11 @@ MCGen::LaunchGeneration()
 {
   // LHE file preparation
   if (!this->parameters->file->is_open()) {
-    std::cerr << "[MCGen::LaunchGeneration] [ERROR] output file is not opened !" << std::endl;
+    std::cerr << __PRETTY_FUNCTION__ << " [ERROR] output file is not opened !" << std::endl;
   }
   //#ifdef DEBUG
   else {
-    std::cout << "[MCGen::LaunchGeneration] [DEBUG] output file is correctly opened !" << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " [DEBUG] output file is correctly opened !" << std::endl;
   }
   //#endif
   *(this->parameters->file) << "<LesHouchesEvents version=\"1.0\">" << std::endl;
@@ -141,10 +141,10 @@ MCGen::LaunchGeneration()
 	       << std::setprecision(2) << this->parameters->in1p << " "
 	       << std::setprecision(2) << this->parameters->in2p << " "
 	       << "0 0 10042 10042 2 1" << std::endl
-	       << this->_xsec << " " << this->_xsec_error << " 0.26731120000E-03 0" << std::endl
+	       << fCrossSection << " " << fCrossSectionError << " 0.26731120000E-03 0" << std::endl
 	       << "</init>" << std::endl;
 
-  veg->Generate();
+  fVegas->Generate();
   
   *(this->parameters->file) << "</LesHouchesEvents>" << std::endl;
 }
@@ -176,38 +176,12 @@ double f(double* x_, size_t ndim_, void* params_)
 	    << "=====================================" << std::endl;
 #endif
 
-  //FIXME electrons ?
-  in1 = new Particle(1, p->in1pdg);
-  in1->charge = p->in1pdg/abs(p->in1pdg);
-  in1->P(0., 0.,  p->in1p);
-
-  in2 = new Particle(2, p->in2pdg);
-  in2->charge = p->in2pdg/abs(p->in2pdg);
-  in2->P(0., 0., -p->in2p);
-
-  p->process->SetIncomingParticles(*in1, *in2);
+  p->process->SetPoint(ndim_, x_);
+  p->process->GetEvent()->clear(); // need to move this sw else ?
 
   kin.kinematics = p->process_mode;
-
-  switch (kin.kinematics) {
-    case 1:
-      p->process->SetOutgoingParticles(3, Particle::PROTON, 1); // First outgoing proton
-      p->process->SetOutgoingParticles(5, Particle::PROTON, 2); // Second outgoing proton
-    case 2:
-      p->process->SetOutgoingParticles(3, Particle::PROTON, 1); // First outgoing proton
-      p->process->SetOutgoingParticles(5, Particle::QUARK_U, 2); // Second outgoing proton remnant
-    case 3:
-      p->process->SetOutgoingParticles(3, Particle::QUARK_U, 1); // First outgoing proton
-      p->process->SetOutgoingParticles(5, Particle::PROTON, 2); // Second outgoing proton remnant
-    case 4:
-      p->process->SetOutgoingParticles(3, Particle::QUARK_U, 1); // First outgoing proton
-      p->process->SetOutgoingParticles(5, Particle::QUARK_U, 2); // Second outgoing proton remnant
-  }
-  
   kin.q2min = p->minq2;
   kin.q2max = p->maxq2;
-  //kin.q2min = 0; //FIXME
-  //kin.q2max = -1; //FIXME
   kin.mode = p->mcut;
   kin.ptmin = p->minpt;
   kin.ptmax = p->maxpt;
@@ -224,10 +198,35 @@ double f(double* x_, size_t ndim_, void* params_)
   kin.mxmin = p->minmx;
   kin.mxmax = p->maxmx;
   
-  p->process->SetPoint(ndim_, x_);
   p->process->SetKinematics(kin);
+
+  switch (kin.kinematics) {
+    case Process::ElasticElastic:
+      p->process->SetOutgoingParticles(3, Particle::PROTON, 1); // First outgoing proton
+      p->process->SetOutgoingParticles(5, Particle::PROTON, 2); // Second outgoing proton
+    case Process::ElasticInelastic:
+      p->process->SetOutgoingParticles(3, Particle::PROTON, 1); // First outgoing proton
+      p->process->SetOutgoingParticles(5, Particle::QUARK_U, 2); // Second outgoing proton remnant
+    case Process::InelasticElastic:
+      p->process->SetOutgoingParticles(3, Particle::QUARK_U, 1); // First outgoing proton
+      p->process->SetOutgoingParticles(5, Particle::PROTON, 2); // Second outgoing proton remnant
+    case Process::InelasticInelastic:
+      p->process->SetOutgoingParticles(3, Particle::QUARK_U, 1); // First outgoing proton
+      p->process->SetOutgoingParticles(5, Particle::QUARK_U, 2); // Second outgoing proton remnant
+  }
   p->process->SetOutgoingParticles(6, p->pair); // Outgoing leptons
   
+  //FIXME electrons ?
+  in1 = new Particle(1, p->in1pdg);
+  in1->charge = p->in1pdg/abs(p->in1pdg);
+  in1->P(0., 0.,  p->in1p);
+
+  in2 = new Particle(2, p->in2pdg);
+  in2->charge = p->in2pdg/abs(p->in2pdg);
+  in2->P(0., 0., -p->in2p);  
+  
+  p->process->SetIncomingParticles(*in1, *in2);
+
   if (!p->process->IsKinematicsDefined()) return 0.;
   
   ff = p->process->ComputeWeight();
@@ -240,7 +239,7 @@ double f(double* x_, size_t ndim_, void* params_)
 
     if (kin.kinematics>1) {
 #ifdef DEBUG
-      std::cout << "[f] [DEBUG] Event before calling the hadroniser (" << p->hadroniser->GetName() << ")" << std::endl;
+      std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Event before calling the hadroniser (" << p->hadroniser->GetName() << ")" << std::endl;
       p->process->GetEvent()->Dump();
 #endif
       num_hadr_trials = 0;
@@ -248,31 +247,30 @@ double f(double* x_, size_t ndim_, void* params_)
         hadronised = p->hadroniser->Hadronise(p->process->GetEvent());
 #ifdef DEBUG
         if (num_hadr_trials>0) {
-          std::cout << "[f] [DEBUG] Hadronisation failed. Trying for the " << num_hadr_trials+1 << "th time" << std::endl;
+          std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Hadronisation failed. Trying for the " << num_hadr_trials+1 << "th time" << std::endl;
         }
 #endif
         num_hadr_trials++;
       } while (!hadronised and num_hadr_trials<=p->hadroniser_max_trials);
       p->process->GetEvent()->num_hadronisation_trials = num_hadr_trials;
 #ifdef DEBUG
-      std::cout << "[f] [DEBUG] Event hadronisation succeded after " << p->process->GetEvent()->num_hadronisation_trials << " trial(s)" << std::endl;
+      std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Event hadronisation succeded after " << p->process->GetEvent()->num_hadronisation_trials << " trial(s)" << std::endl;
 #endif
 
       if (num_hadr_trials>p->hadroniser_max_trials) return 0.; //FIXME
 #ifdef DEBUG
-      std::cout << "[f] [DEBUG] Event after calling the hadroniser (" << p->hadroniser->GetName() << ")" << std::endl;
+      std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Event after calling the hadroniser (" << p->hadroniser->GetName() << ")" << std::endl;
       p->process->GetEvent()->Dump();
 #endif
     }
     p->process->GetEvent()->time_total = tmr.elapsed();
     
 #ifdef DEBUG
-  std::cout << "[f] [DEBUG]" << std::endl
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]" << std::endl
 	    << "       Generation time : " << std::setprecision(8) << p->process->GetEvent()->time_generation << " sec" << std::endl;
 	    << "  Total (+ hadr.) time : " << std::setprecision(8) << p->process->GetEvent()->time_total << " sec" << std::endl;
 #endif
 
-    //*(p->file) << p->process->GetEvent()->GetLHERecord();
     *(p->last_event) = *(p->process->GetEvent());
     //p->process->GetEvent()->Store(p->file);
 

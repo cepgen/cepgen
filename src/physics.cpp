@@ -310,11 +310,11 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
       
       // Update upper EPA bound
       if (epa>epamax) {
-        if (epa>1.1*epamax) std::cout << "[EPA] INFO: EPA > 1.1*EPAMAX !" << std::endl;
-        else if (epa>1.01*epamax) std::cout << "[EPA] INFO: EPA > 1.01*EPAMAX !" << std::endl;
-        else std::cout << "[EPA] INFO: EPA > EPAMAX !" << std::endl;
+        if (epa>1.1*epamax) std::cout << __PRETTY_FUNCTION__ << " INFO: EPA > 1.1*EPAMAX !" << std::endl;
+        else if (epa>1.01*epamax) std::cout << __PRETTY_FUNCTION__ << " INFO: EPA > 1.01*EPAMAX !" << std::endl;
+        else std::cout << __PRETTY_FUNCTION__ << " INFO: EPA > EPAMAX !" << std::endl;
         epamax = epa;
-        std::cout << "[EPA] INFO: update of maximal weight : " << epamax << std::endl;
+        std::cout << __PRETTY_FUNCTION__ << " INFO: update of maximal weight : " << epamax << std::endl;
       }
       
       // Global counter for overall integration
@@ -326,7 +326,7 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
       qsuml += std::pow(epal, 2);
       
       if (irnd>10000) { // Kin. loop failed
-        std::cerr << "[EPA] ERROR: Kinematic loop failed after " << irnd << " trials." << std::endl
+        std::cerr << __PRETTY_FUNCTION__ << " ERROR: Kinematic loop failed after " << irnd << " trials." << std::endl
 		  << "  EPAMAX too high for efficient mc! EPAMAX=" << epamax << std::endl;
         //CALL ERRLOG (285, 'F: GEPHOT: More than 10000 iterations!')
         exit(0);
@@ -357,7 +357,7 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
     ierr2++;
 
     if (ierr2>100) {
-      std::cerr << "[EPA] ERROR: too many problems for CTHE or STHE:" << std::endl
+      std::cerr << __PRETTY_FUNCTION__ << " ERROR: too many problems for CTHE or STHE:" << std::endl
 		<< "  CTHE=" << cthe << ", STHE=" << sthe << std::endl;
     }
   } while (fabs(cthe)>1. or fabs(sthe)>1.);
@@ -428,11 +428,11 @@ Particles
 VMDecayer(Particle part_, Hadroniser *had_)
 {
   if (part_.status!=1) {
-    error.str(""); error << "[VMDecayer] ERROR: Particle has status" << part_.status;
+    error.str(""); error << __PRETTY_FUNCTION__ << " ERROR: Particle has status" << part_.status;
     throw std::runtime_error(error.str());
   }
   if (part_.M()<2.5) {
-    error.str(""); error << "[VMDecayer] ERROR: Particle has a too small mass (" << part_.M() << " GeV)";
+    error.str(""); error << __PRETTY_FUNCTION__ << " ERROR: Particle has a too small mass (" << part_.M() << " GeV)";
     throw std::runtime_error(error.str());
   }
   /*

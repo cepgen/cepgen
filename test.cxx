@@ -21,8 +21,8 @@ int main() {
   Event ev;
   GamGamLL proc;
   //PPtoLL proc;
-  //Pythia6Hadroniser had;
-  Jetset7Hadroniser had;
+  Pythia6Hadroniser had;
+  //Jetset7Hadroniser had;
 
   double xsec, err;
   ParticlesRef particles, remn;

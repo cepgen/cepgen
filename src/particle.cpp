@@ -23,7 +23,7 @@ Particle::Particle(int role_, ParticleCode pdgId_) :
 Particle::~Particle()
 {
 #ifdef DEBUG
-  std::cout << "[Particle::~Particle] [DEBUG] Destructor called" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Destructor called" << std::endl;
 #endif
 }
 
@@ -122,7 +122,7 @@ Particle::SetMother(Particle* part_)
   this->_moth.insert(part_->id);
   this->_isPrimary = false;
 #ifdef DEBUG
-  std::cout << "[Particle::SetMother] [DEBUG] Particle "
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Particle "
 	    << part_->id+1 << " (pdgId=" << part_->pdgId << ") is the new mother of "
 	    << this->id+1 << " (pdgId=" << this->pdgId << ")" << std::endl;
 #endif
@@ -136,7 +136,7 @@ Particle::AddDaughter(Particle* part_)
   ret = this->_daugh.insert(part_->id);
 #ifdef DEBUG
   ParticlesIds::iterator it;
-  std::cout << "[Particle::AddDaughter] [DEBUG] Particle "
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Particle "
 	    << this->role << " (pdgId=" << this->pdgId << ") has now "
 	    << this->NumDaughters() << " daughter(s) : " << std::endl;
   for (it=this->_daugh.begin(); it!=this->_daugh.end(); it++) {
@@ -146,7 +146,7 @@ Particle::AddDaughter(Particle* part_)
 
   if (ret.second) {
 #ifdef DEBUG
-    std::cout << "[Particle::AddDaughter] [DEBUG] Particle " 
+    std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Particle " 
 	      << part_->role << " (pdgId=" << part_->pdgId << ") is a new daughter of "
 	      << this->role << " (pdgId=" << this->pdgId << ")" << std::endl;
 #endif
@@ -168,7 +168,7 @@ Particle::GetDaughters()
   
   out.reserve(this->_daugh.size());
 #ifdef DEBUG
-  std::cout << "[Particle::GetDaughters] [DEBUG] Reserved " << this->_daugh.size() << " slot(s) for the daughter particle(s)" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Reserved " << this->_daugh.size() << " slot(s) for the daughter particle(s)" << std::endl;
 #endif
   
   for (it=this->_daugh.begin(); it!=this->_daugh.end(); it++) {
@@ -180,7 +180,7 @@ Particle::GetDaughters()
   }
   std::sort(out.begin(), out.end());
 #ifdef DEBUG
-  std::cout << "[Particle::GetDaughters] [DEBUG] Returning a vector containing " << out.size() << " particle(s)" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Returning a vector containing " << out.size() << " particle(s)" << std::endl;
 #endif
   return out;
 }
@@ -191,19 +191,21 @@ Particle::Dump()
   std::vector<int> daugh;
 
   if (this->Valid()) {
-    std::cout << "[Particle::Dump]" << std::endl
-	      << "  Id = " << this->id << std::endl
-	      << "  Role = " << this->role << std::endl
-	      << "  Status = " << this->status << std::endl
-	      << "  PDG id = " << this->pdgId << std::endl
-	      << "  P = (" << this->Px() << ", " << this->Py() << ", " << this->Pz() << ") GeV" << std::endl
-	      << "  |P| = " << this->P() << " GeV" << std::endl
-	      << "  Pt = " << this->Pt() << " GeV" << std::endl
-	      << "  E = " << this->E() << " GeV" << std::endl
-	      << "  M = " << this->M() << " GeV" << std::endl
-	      << "  eta = " << this->Eta() << std::endl
-	      << "  Is valid ? " << this->Valid() << std::endl
-	      << "  Is primary ? " << this->_isPrimary << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << std::endl
+	            << "  Id = " << this->id << std::endl
+	            << "  Role = " << this->role << std::endl
+	            << "  Status = " << this->status << std::endl
+	            << "  PDG id = " << this->pdgId << std::endl
+	            << "  P = (" << this->Px() << ", "
+                           << this->Py() << ", "
+                           << this->Pz() << ") GeV" << std::endl
+	            << "  |P| = " << this->P() << " GeV" << std::endl
+	            << "  Pt = " << this->Pt() << " GeV" << std::endl
+	            << "  E = " << this->E() << " GeV" << std::endl
+	            << "  M = " << this->M() << " GeV" << std::endl
+	            << "  eta = " << this->Eta() << std::endl
+	            << "  Is valid ? " << this->Valid() << std::endl
+	            << "  Is primary ? " << this->_isPrimary << std::endl;
     if (!this->Primary()) {
       ParticlesIds::iterator m;
       std::cout << "  Mothers = ";
@@ -219,7 +221,7 @@ Particle::Dump()
     }
   }
   else {
-    std::cout << "[Particle::Dump] ERROR: Particle with role \"" << this->role << "\" is invalid" << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " ERROR: Particle with role \"" << this->role << "\" is invalid" << std::endl;
   }
 }
 

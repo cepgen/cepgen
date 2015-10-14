@@ -9,7 +9,7 @@ Pythia6Hadroniser::Pythia6Hadroniser()
 Pythia6Hadroniser::~Pythia6Hadroniser()
 {
 #ifdef DEBUG
-  std::cout << "[Pythia6Hadroniser::~Pythia6Hadroniser] [DEBUG] Destructor called" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Destructor called" << std::endl;
 #endif
 }
 
@@ -29,7 +29,7 @@ Pythia6Hadroniser::Hadronise(Particle *part_)
   pyjets_.k[4][0] = 0; // daughter 2
 
   this->pyexec();
-  std::cout << "[Pythia6Hadroniser::Hadronise] INFO" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " INFO" << std::endl;
   return true;
 }
 
@@ -62,7 +62,7 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
   }
 
 #ifdef DEBUG
-  std::cout << "[Pythia6Hadroniser::Hadronise] [DEBUG] Dump of the event before the hadronisation" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Dump of the event before the hadronisation" << std::endl;
   ev_->Dump();
 #endif
 
@@ -123,14 +123,14 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
   oldnpart = pyjets_.n;
 
 #ifdef DEBUG
-  std::cout << "[Pythia6Hadroniser::Hadronise] [DEBUG] Passed the string construction stage." << std::endl
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Passed the string construction stage." << std::endl
 	    << "  " << str_in_evt << " string objects were identified and constructed" << std::endl;
 #endif
 
   for (int i=0; i<str_in_evt; i++) {
     if (num_part_in_str[i]<2) continue;
 #ifdef DEBUG
-    std::cout << "[Pythia6Hadroniser::Hadronise] [DEBUG] Joining " << num_part_in_str[i] << " particle in a same string (" << i << ") with role " << jlrole[i] << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Joining " << num_part_in_str[i] << " particle in a same string (" << i << ") with role " << jlrole[i] << std::endl;
 #endif
     for (int j=0; j<num_part_in_str[i]; j++) {
       if (jlpsf[i][j]==-1) continue;
@@ -150,7 +150,7 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
   if (pyjets_.k[1][criteria]==2212 and pyjets_.k[0][criteria]==1) {
     //this->pylist(2);
 #ifdef ERROR
-    std::cerr << "[Pythia6Hadroniser::Hadronise] [ERROR] System non-inelastic" << std::endl;
+    std::cerr << __PRETTY_FUNCTION__ << " [ERROR] System non-inelastic" << std::endl;
 #endif
     return false;
   }
@@ -181,7 +181,7 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
 
     if (pyjets_.k[2][p]!=0) {
 #ifdef DEBUG
-      std::cout << "[Pythia6Hadroniser::Hadronise] [DEBUG] "
+      std::cout << __PRETTY_FUNCTION__ << " [DEBUG] "
 		<< pa.id << " (pdgId=" << pa.pdgId << ") has mother "
 		<< pyjets_.k[2][p] << " (pdgId=" << pyjets_.k[1][pyjets_.k[2][p]-1] << ")"
 		<< std::endl;
@@ -206,7 +206,7 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
   double partpb[4];
 
 #ifdef DEBUG
-  std::cout << "[GamGam::PrepareHadronisation] [DEBUG] Hadronisation preparation called !" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Hadronisation preparation called !" << std::endl;
 #endif
 
   ParticlesRef pp;
@@ -254,7 +254,7 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
       singlet.status = 3;
       if (!singlet.P(partpb)) {
 #ifdef ERROR
-        std::cerr << "[GamGam::PrepareHadronisation] ERROR while setting the 4-momentum of singlet" << std::endl;
+        std::cerr << __PRETTY_FUNCTION__ << " ERROR while setting the 4-momentum of singlet" << std::endl;
 #endif
       }
       singlet.M(-1); //FIXME
@@ -270,7 +270,7 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
       doublet.status = 3;
       if (!doublet.P(partpb)) {
 #ifdef ERROR
-        std::cout << "[GamGam::PrepareHadronisation] ERROR while setting the 4-momentum of doublet" << std::endl;
+        std::cout << __PRETTY_FUNCTION__ << " ERROR while setting the 4-momentum of doublet" << std::endl;
 #endif
       }
       //std::cout << "doublet, mass = " << doublet.M() << std::endl;
@@ -283,7 +283,7 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
         ev_->AddParticle(singlet);
         ev_->AddParticle(doublet);
 #ifdef DEBUG
-        std::cout << "[GamGam::PrepareHadronisation] [DEBUG] Quark/diquark content succesfully added to the event!" << std::endl;
+        std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Quark/diquark content succesfully added to the event!" << std::endl;
 #endif
       }
       else { // Quark/diquark content already present in the event
@@ -291,7 +291,7 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
 	std::vector<int>::iterator did;
 
 #ifdef DEBUG
-	std::cout << "[GamGam::PrepareHadronisation] [DEBUG] Quark/diquark content already present in the event!" << std::endl
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Quark/diquark content already present in the event!" << std::endl
 		  << "  Role of these particles: " << (*p)->role << std::endl;
 #endif
 	daugh = (*p)->GetDaughters();
@@ -300,14 +300,14 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
 	    singlet.SetMother(ev_->GetById((*p)->id));
 	    *(ev_->GetById(*did)) = singlet;
 #ifdef DEBUG
-	    std::cout << "[GamGam::PrepareHadronisation] [DEBUG] Singlet replaced" << std::endl;
+      std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Singlet replaced" << std::endl;
 #endif
 	  }
 	  else { // Diquark
 	    doublet.SetMother(ev_->GetById((*p)->id));
 	    *(ev_->GetById(*did)) = doublet;
 #ifdef DEBUG
-	    std::cout << "[GamGam::PrepareHadronisation] [DEBUG] Doublet replaced" << std::endl;
+      std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Doublet replaced" << std::endl;
 #endif
 	  }
 	}

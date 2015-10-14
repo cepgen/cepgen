@@ -63,9 +63,9 @@ class GamGamLL : public Process
    * the differential cross-section for the given point in the phase space.
    */
   double ComputeWeight();
-  int GetNdim(int) const;
-  bool SetIncomingParticles(Particle, Particle);
-  bool SetOutgoingParticles(int, Particle::ParticleCode, int);
+  int GetNdim(ProcessMode) const;
+  void SetIncomingParticles(Particle, Particle);
+  void SetOutgoingParticles(int, Particle::ParticleCode, int);
   void FillKinematics(bool);
   void SetKinematics(Kinematics);
   /**

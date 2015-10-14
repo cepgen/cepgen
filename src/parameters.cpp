@@ -30,7 +30,7 @@ Parameters::Parameters() :
 Parameters::~Parameters()
 {
 #ifdef DEBUG
-  std::cout << "[Parameters::~Parameters] [DEBUG] Destructor called" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Destructor called" << std::endl;
 #endif
   delete last_event;
 }
@@ -40,7 +40,7 @@ void Parameters::SetThetaRange(double thetamin_, double thetamax_)
   this->mineta = -log(tan(thetamax_/180.*pi/2.));
   this->maxeta = -log(tan(thetamin_/180.*pi/2.));
 #ifdef DEBUG
-  std::cout << "[Parameters::SetEtaRange] [DEBUG]"
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]"
 	    << "\n\teta(min) = " << std::setw(5) << this->mineta << " -> theta(min) = " << thetamin_
 	    << "\n\teta(max) = " << std::setw(5) << this->maxeta << " -> theta(max) = " << thetamax_
 	    << std::endl;
@@ -87,7 +87,7 @@ void Parameters::Dump()
   int wp = wb-wt-2;
   std::cout 
     << std::left
-    << "[Parameters::Dump] BEGINNING dump " << std::setfill('=') << std::setw(wb-32) << "" << std::endl
+    << __PRETTY_FUNCTION__ << " BEGINNING dump " << std::setfill('=') << std::setw(wb-32) << "" << std::endl
     << std::endl
     << " _" << std::setfill('_') << std::setw(wb) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "_ " << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
@@ -131,10 +131,10 @@ void Parameters::Dump()
   if (this->hadroniser!=(Hadroniser*)NULL)
     std::cout << "| " << std::setw(wt) << "Hadronisation algorithm" << std::setw(12) << hadroniser->GetName() << std::setw(wp-12) << "" << " |" << std::endl;
   std::cout << "| " << std::setw(wt) << "Minimal mass [GeV/c^2]" << std::setw(wp) << minmx << " |" << std::endl
-	<< "| " << std::setw(wt) << "Maximal mass [GeV/c^2]" << std::setw(wp) << maxmx << " |" << std::endl
-    << "|_" << std::right << std::setfill('_') << std::setw(wb) << "_|" << std::left << std::endl
-    << std::endl
-    << "[Parameters::Dump] END of dump " << std::setfill('=') << std::setw(wb-29) << "" << std::endl;
+          	<< "| " << std::setw(wt) << "Maximal mass [GeV/c^2]" << std::setw(wp) << maxmx << " |" << std::endl
+            << "|_" << std::right << std::setfill('_') << std::setw(wb) << "_|" << std::left << std::endl
+            << std::endl
+            << __PRETTY_FUNCTION__ << " END of dump " << std::setfill('=') << std::setw(wb-29) << "" << std::endl;
 }
 
 bool Parameters::ReadConfigFile(std::string inFile_)
@@ -146,7 +146,7 @@ bool Parameters::ReadConfigFile(std::string inFile_)
     return false;
   }
 #ifdef DEBUG
-  std::cout << "[Parameters::ReadConfigFile] [DEBUG] File " << inFile_ << " succesfully opened !" << std::endl
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] File " << inFile_ << " succesfully opened !" << std::endl
             << "======================================================" << std::endl
             << "Configuration file content : " << std::endl
             << "======================================================" << std::endl
@@ -325,7 +325,7 @@ bool Parameters::ReadConfigFile(std::string inFile_)
 #endif
     }
     else {
-      std::cout << std::setw(60) << "[Parameters::ReadConfigFile] <WARNING> Unrecognized argument : [" << key << "] = " << value << std::endl;
+      std::cout << std::setw(60) << __PRETTY_FUNCTION__ << " <WARNING> Unrecognized argument : [" << key << "] = " << value << std::endl;
     }
   }
   f.close();

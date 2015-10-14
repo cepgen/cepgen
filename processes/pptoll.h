@@ -11,7 +11,7 @@ class PPtoLL : public Process
  public:
   PPtoLL();
   ~PPtoLL();
-  int GetNdim(int) const;
+  int GetNdim(ProcessMode) const;
   double ComputeWeight();
   void FillKinematics(bool symmetrise_=false);
  private:

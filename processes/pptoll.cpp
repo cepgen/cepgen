@@ -9,12 +9,17 @@ PPtoLL::~PPtoLL()
 {}
 
 int
-PPtoLL::GetNdim(int process_mode_) const
+PPtoLL::GetNdim(ProcessMode process_mode_) const
 {
   switch (process_mode_) {
-	case 1: return 8;
-	case 2: case 3: return 9;
-	case 4: default: return 10;
+    case ElasticElastic:
+    default:
+      return 8;
+    case ElasticInelastic:
+    case InelasticElastic:
+      return 9;
+    case InelasticInelastic:
+      return 10;
   }
 }
 
@@ -36,7 +41,7 @@ PPtoLL::ComputeWeight()
   
   // Outgoing leptons
   double ymin, ymax;
-  //ymin = EtaToY(_cuts.etamin, _ev->GetOneByRole(6)->M(), pt);
+  //ymin = EtaToY(_cuts.etamin, fEvent->GetOneByRole(6)->M(), pt);
   //ymax = EtaToY(_cuts.etamax);
   ///////////////////////////////////
   ymin = _cuts.etamin;             //
@@ -52,9 +57,9 @@ PPtoLL::ComputeWeight()
   if (_cuts.kinematics>1) {
     _mx = _cuts.mxmin+(_cuts.mxmax-_cuts.mxmin)*x(8);
     if (_cuts.kinematics>2) _my = _cuts.mxmin+(_cuts.mxmax-_cuts.mxmin)*x(9);
-    else _my = _ev->GetOneByRole(2)->M();
+    else _my = fEvent->GetOneByRole(2)->M();
   }
-  else _mx = _ev->GetOneByRole(1)->M();
+  else _mx = fEvent->GetOneByRole(1)->M();
 
   
   // Jacobian computation
@@ -74,7 +79,7 @@ PPtoLL::ComputeWeight()
   jac *= 2.*pi;
   
   if (!IsKinematicsDefined()) {
-    std::cerr << "[PPtoLL::ComputeWeight] ERROR: Event kinematics not properly defined !" << std::endl;
+    std::cerr << __PRETTY_FUNCTION__ << " ERROR: Event kinematics not properly defined !" << std::endl;
     return -1.;
   }
   
@@ -91,10 +96,10 @@ PPtoLL::INCqqbar()
   int idif, idely;
   double pdif, dely_min, dely_max;
   const double alpha_em = 1./137.035;
-  const double mp = _ev->GetOneByRole(1)->M();
-  const double mp2 = _ev->GetOneByRole(1)->M2();
-  const double ml = _ev->GetOneByRole(6)->M();
-  const double ml2 = _ev->GetOneByRole(6)->M2();
+  const double mp = fEvent->GetOneByRole(1)->M();
+  const double mp2 = fEvent->GetOneByRole(1)->M2();
+  const double ml = fEvent->GetOneByRole(6)->M();
+  const double ml2 = fEvent->GetOneByRole(6)->M2();
   double units;
 
   iterm11 = 1; // Long-long
@@ -240,10 +245,10 @@ PPtoLL::INCqqbar()
   
   // FIXME FIXME FIXME
   double q10, q1z, q20, q2z;
-  q10 = x1*_ev->GetOneByRole(1)->E();
-  q1z = x1*_ev->GetOneByRole(1)->Pz();
-  q20 = x1*_ev->GetOneByRole(2)->E();
-  q2z = x1*_ev->GetOneByRole(2)->Pz();
+  q10 = x1*fEvent->GetOneByRole(1)->E();
+  q1z = x1*fEvent->GetOneByRole(1)->Pz();
+  q20 = x1*fEvent->GetOneByRole(2)->E();
+  q2z = x1*fEvent->GetOneByRole(2)->Pz();
   
   qcaptx = pcaptx;
   qcapty = pcapty;
@@ -252,7 +257,7 @@ PPtoLL::INCqqbar()
   //     four-momenta of the outgoing protons (or remnants)
   //=================================================================
 
-  px_plus = (1.-x1)*_ev->GetOneByRole(1)->Pz()*sqrt(2.);
+  px_plus = (1.-x1)*fEvent->GetOneByRole(1)->Pz()*sqrt(2.);
   px_minus = (pow(_mx, 2)+pow(q1tx, 2)+pow(q1ty, 2))/2./px_plus;
       
   _px_0 = (px_plus+px_minus)/sqrt(2.);
@@ -260,7 +265,7 @@ PPtoLL::INCqqbar()
   _px_x = -q1tx;
   _px_y = -q1ty;
       
-  py_minus = (1.-x2)*_ev->GetOneByRole(2)->Pz()*sqrt(2.); // warning! sign of pz??
+  py_minus = (1.-x2)*fEvent->GetOneByRole(2)->Pz()*sqrt(2.); // warning! sign of pz??
   py_plus = (pow(_my, 2)+pow(q2tx, 2)+pow(q2ty, 2))/2./py_minus;
       
   _py_0 = (py_plus+py_minus)/sqrt(2.);
@@ -275,20 +280,20 @@ PPtoLL::INCqqbar()
   //     four-momenta of the outgoing l^+ and l^-
   //=================================================================
 
-  p10 = alpha1*_ev->GetOneByRole(1)->E()+beta1*_ev->GetOneByRole(2)->E();
+  p10 = alpha1*fEvent->GetOneByRole(1)->E()+beta1*fEvent->GetOneByRole(2)->E();
   p1x = pt1x;
   p1y = pt1y;
-  p1z = alpha1*_ev->GetOneByRole(1)->Pz()+beta1*_ev->GetOneByRole(2)->Pz();
+  p1z = alpha1*fEvent->GetOneByRole(1)->Pz()+beta1*fEvent->GetOneByRole(2)->Pz();
 
   _pl1_0 = sqrt(pow(pt1, 2)+ml2)*cosh(_y1);
   _pl1_x = pt1x;
   _pl1_y = pt1y;
   _pl1_z = sqrt(pow(pt1, 2)+ml2)*sinh(_y1);
 
-  p20 = alpha2*_ev->GetOneByRole(1)->E()+beta2*_ev->GetOneByRole(2)->E();
+  p20 = alpha2*fEvent->GetOneByRole(1)->E()+beta2*fEvent->GetOneByRole(2)->E();
   p2x = pt2x;
   p2y = pt2y;
-  p2z = alpha2*_ev->GetOneByRole(1)->Pz()+beta2*_ev->GetOneByRole(2)->Pz();
+  p2z = alpha2*fEvent->GetOneByRole(1)->Pz()+beta2*fEvent->GetOneByRole(2)->Pz();
   
   _pl2_0 = sqrt(pow(pt2, 2)+ml2)*cosh(_y2);
   _pl2_x = pt2x;
@@ -328,7 +333,7 @@ PPtoLL::INCqqbar()
     
     double term1, term2, term3, term4, term5, term6, term7, term8, term9, term10;
     double auxil_gamgam, g_em;
-    const double ml = _ev->GetOneByRole(6)->M();
+    const double ml = fEvent->GetOneByRole(6)->M();
     
     term1 = 6.*pow(ml, 8);
     term2 = -3.*pow(ml, 4)*pow(that, 2);
@@ -513,8 +518,8 @@ PPtoLL::FillKinematics(bool symmetrise_)
     op1.status = 1;
     op1.M(-1); //FIXME
   }
-  op1.SetMother(_ev->GetOneByRole(1));
-  this->_ev->AddParticle(op1, true);
+  op1.SetMother(fEvent->GetOneByRole(1));
+  fEvent->AddParticle(op1, true);
   
   //=================================================================
   //     second outgoing proton
@@ -531,15 +536,15 @@ PPtoLL::FillKinematics(bool symmetrise_)
     op2.status = 1;
     op2.M(-1); //FIXME
   }
-  op2.SetMother(_ev->GetOneByRole(2));
-  this->_ev->AddParticle(op2, true);
+  op2.SetMother(fEvent->GetOneByRole(2));
+  fEvent->AddParticle(op2, true);
 
   // PDG id for the outgoing leptons
 
   Particle::ParticleCode lepton1, lepton2;
   int sign = (drand()>.5) ? +1 : -1;
-  lepton1 = static_cast<Particle::ParticleCode>( sign*(int)_ev->GetOneByRole(6)->pdgId);
-  lepton2 = static_cast<Particle::ParticleCode>(-sign*(int)_ev->GetOneByRole(6)->pdgId);
+  lepton1 = static_cast<Particle::ParticleCode>( sign*(int)fEvent->GetOneByRole(6)->pdgId);
+  lepton2 = static_cast<Particle::ParticleCode>(-sign*(int)fEvent->GetOneByRole(6)->pdgId);
 
   //=================================================================
   //     first outgoing lepton
@@ -550,8 +555,8 @@ PPtoLL::FillKinematics(bool symmetrise_)
   }
   ol1.status = 1;
   ol1.M(-1); //FIXME
-  ol1.SetMother(_ev->GetOneByRole(1)); //FIXME
-  this->_ev->AddParticle(ol1, true);
+  ol1.SetMother(fEvent->GetOneByRole(1)); //FIXME
+  fEvent->AddParticle(ol1, true);
 
   //=================================================================
   //     second outgoing lepton
@@ -562,6 +567,6 @@ PPtoLL::FillKinematics(bool symmetrise_)
   }
   ol2.status = 1;
   ol2.M(-1); //FIXME
-  ol2.SetMother(_ev->GetOneByRole(2)); //FIXME
-  this->_ev->AddParticle(ol2, true);
+  ol2.SetMother(fEvent->GetOneByRole(2)); //FIXME
+  fEvent->AddParticle(ol2, true);
 }

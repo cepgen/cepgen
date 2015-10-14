@@ -129,14 +129,14 @@ int Gnuplot::Fill(double value_, double weight_)
   if (value_<_histLow) {
     _histUnderflow += weight_;
 #ifdef ERROR
-    std::cout << "[Gnuplot::Fill] [WARNING] value in underflow bin (" << value_ << ")" << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " [WARNING] value in underflow bin (" << value_ << ")" << std::endl;
 #endif
     return 2;
   }
   if (value_>_histHigh) {
     _histOverflow += weight_;
 #ifdef ERROR
-    std::cout << "[Gnuplot::Fill] [WARNING] value in overflow bin (" << value_ << ")" << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " [WARNING] value in overflow bin (" << value_ << ")" << std::endl;
 #endif
     return 3;
   }
@@ -144,7 +144,7 @@ int Gnuplot::Fill(double value_, double weight_)
     if (value_>=_histBounds[i] && value_<_histBounds[i+1]) {
       _histValues[i] += weight_;
 #ifdef DEBUG
-      std::cout << "[Gnuplot::Fill] [DEBUG] value in good range (" << value_ << "), bin " << i << std::endl;
+      std::cout << __PRETTY_FUNCTION__ << " [DEBUG] value in good range (" << value_ << "), bin " << i << std::endl;
 #endif
       return 1;
     }
@@ -165,7 +165,7 @@ int Gnuplot::DrawHistogram()
   if (_outputFile=="" && _name!="") {
     of << _name << ".png";
     this->SetOutputFile(of.str());
-    std::cout << "[Gnuplot::DrawHistogram] [DEBUG] output name = " << of.str() << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " [DEBUG] output name = " << of.str() << std::endl;
   }
   
   tmp.open(_tmpFile.c_str());

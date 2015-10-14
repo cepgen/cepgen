@@ -101,19 +101,19 @@ class MCGen {
    */
   void BuildVegas();
   /** @brief The Vegas integrator which will integrate the function */
-  Vegas *veg;
+  Vegas *fVegas;
   /**
    * @brief The cross-section computed at the last integration
    */
-  double _xsec;
+  double fCrossSection;
   /**
    * @brief The error on the cross-section as computed at the last integration
    */
-  double _xsec_error;
+  double fCrossSectionError;
   /**
    * @brief Has a first integration beed already performed ?
    */
-  bool _xsec_comp;
+  bool fHasCrossSection;
 };
 
 /**

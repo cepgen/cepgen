@@ -65,7 +65,7 @@ GamPomVMLL::GDIBeg()
   _dmn = Particle::GetMassFromPDGId(Particle::NEUTRON);
   _dmvm = Particle::GetMassFromPDGId((Particle::ParticleCode)itypvm);
   _dwvm = Particle::GetWidthFromPDGId((Particle::ParticleCode)itypvm); //FIXME
-  _dml = _ev->GetOneByRole(OL1)->M();
+  _dml = fEvent->GetOneByRole(OL1)->M();
 
   // For elastic N* production at p vertex initialize DMNST, DWNST
   if (abs(ifragp)>2) {
@@ -74,16 +74,16 @@ GamPomVMLL::GDIBeg()
     if (_dmnst<=0.) {
       //WRITE (ERTEXT, '(''F: GDIBEG: Mass of'',I8,''not known!'')'), IFRAGP
       //CALL ERRLOG (10, ERTEXT)
-      std::cerr << "[GamPomVMLL::GDIBeg] ERROR: Mass of " << ifragp << " not known!" << std::endl;
+      std::cerr << __PRETTY_FUNCTION__ << " ERROR: Mass of " << ifragp << " not known!" << std::endl;
       exit(0);
     }
   }
 
   // Check that beam particle is proton or antiproton
-  if (abs(_ev->GetOneByRole(1)->pdgId)!=Particle::PROTON and abs(_ev->GetOneByRole(2)->pdgId)!=Particle::PROTON) {
+  if (abs(fEvent->GetOneByRole(1)->pdgId)!=Particle::PROTON and abs(fEvent->GetOneByRole(2)->pdgId)!=Particle::PROTON) {
     //WRITE (ERTEXT, '(''F: GDIBEG: Beam proton must be proton or antiproton. IBEAMP ='',I8)'), IBEAMP
     //CALL ERRLOG (11, ERTEXT)
-    std::cerr << "[GamPomVMLL::GDIBeg] ERROR: Beam proton must be proton or antiproton. IBEAMP = " << _ev->GetOneByRole(1)->pdgId << " / " << _ev->GetOneByRole(2)->pdgId << std::endl;
+    std::cerr << __PRETTY_FUNCTION__ << " ERROR: Beam proton must be proton or antiproton. IBEAMP = " << fEvent->GetOneByRole(1)->pdgId << " / " << fEvent->GetOneByRole(2)->pdgId << std::endl;
     exit(0);
   }
 
@@ -97,11 +97,11 @@ GamPomVMLL::GDIBeg()
   // If necessary, initialize DEMINP, AMASSV
   if (deminp<_dmn+_dmpi0-_dmp) {
     deminp = _dmn+_dmpi0-_dmp+0.1;
-    std::cout << "[GamPomVMLL::GDIBeg] INFO: DEMINP set to " << deminp << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " INFO: DEMINP set to " << deminp << std::endl;
   }
   if (abs(ifragp)>2 and deminp<_dmnst-2.*_dwnst-_dmp) {
     deminp = _dmnst-2.*_dwnst-_dmp;
-    std::cout << "[GamPomVMLL::GDIBeg] INFO: DEMINP set to " << deminp << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " INFO: DEMINP set to " << deminp << std::endl;
   }
 
   if (amassv<2.*_dmpi) {
@@ -111,17 +111,17 @@ GamPomVMLL::GDIBeg()
     else if ((itypvm/10)%10==5) amassv = 10.; // Upsilon states: minimum is Upsilon (1S) pi+ pi- state
     else {
       //CALL ERRLOG (12, 'F: GDIBEG: Unknown quark content of vector meson')
-      std::cerr << "[GamPomVMLL::GDIBeg] ERROR: Unknown quark content of vector meson" << std::endl;
+      std::cerr << __PRETTY_FUNCTION__ << " ERROR: Unknown quark content of vector meson" << std::endl;
       exit(0);
     }
-    std::cout << "[GamPomVMLL::GDIBeg] INFO: AMASSV set to " << amassv << std::endl;    
+    std::cout << __PRETTY_FUNCTION__ << " INFO: AMASSV set to " << amassv << std::endl;    
   }
 
   if ((int)ifragv>100) {
     r = Particle::GetMassFromPDGId(ifragv)+_dmvm;
     if (amassv<r) {
       amassv = r+1.;
-      std::cout << "[GamPomVMLL::GDIBeg] INFO: AMASSV set to " << amassv << std::endl;
+      std::cout << __PRETTY_FUNCTION__ << " INFO: AMASSV set to " << amassv << std::endl;
     }
   }
 
@@ -134,29 +134,29 @@ GamPomVMLL::GDIBeg()
 
   if (_wmin<wminmin) {
     _wmin = wminmin+1.;
-    std::cout << "[GamPomVMLL::GDIBeg] INFO: WMIN set to " << _wmin << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " INFO: WMIN set to " << _wmin << std::endl;
   }
 
   // If necessary, initialize WMAX
   if (_wmax<=_wmin) {
-    _wmax = std::sqrt(4.*_pz1*_pz2+_ev->GetOneByRole(1)->M2()+_ev->GetOneByRole(2)->M2());
-    std::cout << "[GamPomVMLL::GDIBeg] INFO: WMAX set to " << _wmax << std::endl;
+    _wmax = std::sqrt(4.*_pz1*_pz2+fEvent->GetOneByRole(1)->M2()+fEvent->GetOneByRole(2)->M2());
+    std::cout << __PRETTY_FUNCTION__ << " INFO: WMAX set to " << _wmax << std::endl;
   }
 
   // If necessary, initialize Q2MIN
   if (_eelmin>0. and _cthelb>-1. and _q2min<2.*_pz1*_eelmin*(1.+_cthelb)) {
     _q2min = 2.*_pz1*_eelmin*(1.+_cthelb);
-    std::cout << "[GamPomVMLL::GDIBeg] INFO: Q2MIN set to " << _q2min << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " INFO: Q2MIN set to " << _q2min << std::endl;
   }
 
   // If necessary, initialize Q2MAX
   if (_q2max<0.) {
     _q2max = fabs(_q2max);
-    std::cout << "[GamPomVMLL::GDIBeg] INFO: Q2MAX set to " << _q2max << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " INFO: Q2MAX set to " << _q2max << std::endl;
   }
   if (_q2max<=_q2min) {
-    _q2max = 4.*_pz1*_pz2+_ev->GetOneByRole(IBE)->M2()+_ev->GetOneByRole(IBP)->M2();
-    std::cout << "[GamPomVMLL::GDIBeg] INFO: Q2MAX set to " << _q2max << std::endl;
+    _q2max = 4.*_pz1*_pz2+fEvent->GetOneByRole(IBE)->M2()+fEvent->GetOneByRole(IBP)->M2();
+    std::cout << __PRETTY_FUNCTION__ << " INFO: Q2MAX set to " << _q2max << std::endl;
   }
 
   // If necessary, initialize AMXB0
@@ -172,19 +172,19 @@ GamPomVMLL::GDIBeg()
   // If necessary, initialize BR
   if (_br==0.) {
     _br = 1.;
-    std::cout << "[GamPomVMLL::GDIBeg] INFO: BR set to " << _br << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " INFO: BR set to " << _br << std::endl;
     //CALL ERRLOG (13, 'W: GDIBEG: BR was 0.0. Set to 1.0')
   }
   else if (_br>1.) {
     _br /= 100.;
-    std::cout << "[GamPomVMLL::GDIBeg] INFO: BR was > 1.0. Scaled down by 100 to " << _br << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " INFO: BR was > 1.0. Scaled down by 100 to " << _br << std::endl;
     //CALL ERRLOG (14, 'W: GDIBEG: BR was > 0.0. Scaled down by 100.')
   }
 
   // If necessary, initialize ALPH1M
   if (_alph1m<0.) {
     _alph1m = _alpha1;
-    std::cout << "[GamPomVMLL::GDIBeg] INFO: ALPH1M set to " << _alph1m << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " INFO: ALPH1M set to " << _alph1m << std::endl;
     //CALL ERRLOG (15, 'I: GDIBEG: ALPH1M was set to ALPHA1')
   }
 }
@@ -199,7 +199,7 @@ void
 GamPomVMLL::GenEvtDi()
 {
 #ifdef DEBUG
-  std::cout << "[GamPomVMLL::GenEvtDi] [DEBUG] Generating the event" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Generating the event" << std::endl;
 #endif
 
   // GenBPr, GenBEl are done implicitely once the incoming particles are set for the process
@@ -227,14 +227,14 @@ GamPomVMLL::GenGam()
   const unsigned int n = 10000;
 
   if (_gengam_first) {
-    //_s = 4.*_ev->GetOneByRole(1)->pz*_ev->GetOneByRole(2)->pz; //FIXME FIXME FIXME
-    _pz1 = fabs(_ev->GetOneByRole(1)->Pz()); //FIXME absolute value ???
-    _pz2 = fabs(_ev->GetOneByRole(2)->Pz());
-    _e1 = _ev->GetOneByRole(1)->E();
-    _e2 = _ev->GetOneByRole(2)->E();
-    _s = _ev->GetOneByRole(1)->M2()+_ev->GetOneByRole(2)->M2()+2*_e1*_e2-2*_pz1*_pz2;
+    //_s = 4.*fEvent->GetOneByRole(1)->pz*fEvent->GetOneByRole(2)->pz; //FIXME FIXME FIXME
+    _pz1 = fabs(fEvent->GetOneByRole(1)->Pz()); //FIXME absolute value ???
+    _pz2 = fabs(fEvent->GetOneByRole(2)->Pz());
+    _e1 = fEvent->GetOneByRole(1)->E();
+    _e2 = fEvent->GetOneByRole(2)->E();
+    _s = fEvent->GetOneByRole(1)->M2()+fEvent->GetOneByRole(2)->M2()+2*_e1*_e2-2*_pz1*_pz2;
     _ecm = std::sqrt(_s);
-    _wmax = std::sqrt(_s+_ev->GetOneByRole(1)->M2()+_ev->GetOneByRole(2)->M2());
+    _wmax = std::sqrt(_s+fEvent->GetOneByRole(1)->M2()+fEvent->GetOneByRole(2)->M2());
 
     this->GDIBeg();
 
@@ -244,7 +244,7 @@ GamPomVMLL::GenGam()
     _igen = _igent = _igenl = iacc = _iacct = _iaccl = 0;
 
     _event_smax = std::pow(_wmax, 2);
-    _event_egammin = std::pow(_wmin, 2)/4./_ev->GetOneByRole(2)->Pz();
+    _event_egammin = std::pow(_wmin, 2)/4./fEvent->GetOneByRole(2)->Pz();
 
     _gengam_w2 = std::pow(_wsig0, 2);
     
@@ -259,13 +259,13 @@ GamPomVMLL::GenGam()
     }
 
     if (sw<=0.) {
-      std::cerr << "[GamPomVMLL::GenGam] ERROR: SW = " << sw << std::endl
+      std::cerr << __PRETTY_FUNCTION__ << " ERROR: SW = " << sw << std::endl
 		<< "  Cross section calculation impossible!" << std::endl;
       //CALL ERRLOG (60, 'F: GENGAM: SW < 0')
       exit(0);
     }
 
-    std::cout << "[GamPomVMLL::GenGam] INFO: t/mx-combinations generated: " << n << std::endl
+    std::cout << __PRETTY_FUNCTION__ << " INFO: t/mx-combinations generated: " << n << std::endl
 	      << "  Weight of t/mx-combinations accepted: " << sw << " (sw2 = " << sw2 << ", sw2bar = " << sw2bar << ")" << std::endl;
     
     _event_propmx = std::max(1., _xi*_q2min/(std::pow(_lambda, 2)+_xi*_chi*_q2min))/std::pow(1.+_q2min/std::pow(_lambda, 2), _eprop);
@@ -303,17 +303,17 @@ GamPomVMLL::OneEvent()
   double wt;
 
   // Generate photons
-  Particle pgam(41, Particle::PHOTON), pesc(5, _ev->GetOneByRole(IBE)->pdgId);
+  Particle pgam(41, Particle::PHOTON), pesc(5, fEvent->GetOneByRole(IBE)->pdgId);
   //std::cout << "-> " << _igammd << std::endl;
 
   if (_igammd<0) { // Fixed photon energy
     //CALL FIXPHOT (PGAM, PESC, Q2, PPART8 (1, IBE), DBLE (EGAMMA))
-    FixPhot(&pgam, &pesc, &_q2, *(_ev->GetOneByRole(1)), _egamma);
+    FixPhot(&pgam, &pesc, &_q2, *(fEvent->GetOneByRole(1)), _egamma);
     _event_heli = Heli(0.);
   }
   else if (_igammd==0) { // Simple 1/k spectrum
     //CALL GENPHOT (PGAM, PESC, Q2, PPART8 (1, IBE), EGAMMIN, 0.0D0)
-    GenPhot(&pgam, &pesc, &_q2, *(_ev->GetOneByRole(1)), _event_egammin, 0.);
+    GenPhot(&pgam, &pesc, &_q2, *(fEvent->GetOneByRole(1)), _event_egammin, 0.);
     _event_heli = Heli(0.);
   }
   else {
@@ -333,18 +333,18 @@ GamPomVMLL::OneEvent()
   
   // Determine actual CM energy
   
-  pcm[3] = pgam.P(3)+_ev->GetOneByRole(2)->E();
+  pcm[3] = pgam.P(3)+fEvent->GetOneByRole(2)->E();
   //std::cout << "pcm[3]=" << pcm[3] << std::endl;
   _gengam_w2 = std::pow(pcm[3], 2);
   for (int i=0; i<3; i++) {
-    pcm[i] = pgam.P(i)+_ev->GetOneByRole(2)->P(i);
+    pcm[i] = pgam.P(i)+fEvent->GetOneByRole(2)->P(i);
     _gengam_w2-= std::pow(pcm[i], 2);
   }
   //std::cout << "--> w2 = " << _gengam_w2 << std::endl;
   //exit(0);
   
   if (_gengam_w2<0.) {
-    std::cerr << "[GamPomVMLL::GenGam] ERROR: W2 = " << _gengam_w2 << " < 0" << std::endl;
+    std::cerr << __PRETTY_FUNCTION__ << " ERROR: W2 = " << _gengam_w2 << " < 0" << std::endl;
     return -1.;
   }
   pcm[4] = std::sqrt(_gengam_w2);
@@ -382,11 +382,11 @@ GamPomVMLL::OneEvent()
   //CALL SHSW (10, 2, SNGL (PCM (5)), WGHT)
   
   if (weight>1.001) {
-    std::cerr << "[GamPomVMLL::GenGam] ERROR: WEIGHT = " << weight << " > 1.001" << std::endl;	
+    std::cerr << __PRETTY_FUNCTION__ << " ERROR: WEIGHT = " << weight << " > 1.001" << std::endl;	
     //CALL ERRLOG (62, 'W: GENGAM: WGHT > 1.001')
   }
   else if (wt>1.001) {
-    std::cerr << "[GamPomVMLL::GenGam] ERROR: WT = " << wt << " > 1.001" << std::endl;	
+    std::cerr << __PRETTY_FUNCTION__ << " ERROR: WT = " << wt << " > 1.001" << std::endl;	
     //CALL ERRLOG (63, 'W: GENGAM: WT > 1.001')
   }
   return weight;
@@ -590,12 +590,12 @@ GamPomVMLL::PXMass(double mmin_, double mmax_)
       m2 = std::pow(fact*drand()+m2min, -1./_epsilm);
     }
     if (m2<mmin2) {
-      std::cerr << "[GamPomVMLL::PXMass] ERROR: M2 = " << m2 << " < MMIN**2 = " << mmin2 << std::endl;
+      std::cerr << __PRETTY_FUNCTION__ << " ERROR: M2 = " << m2 << " < MMIN**2 = " << mmin2 << std::endl;
       //CALL ERRLOG (100, 'S: PXMASS: M2 < MMIN**2!')
       m2 = mmin2;
     }
     else if (m2>mmax2) {
-      std::cerr << "[GamPomVMLL::PXMass] ERROR: M2 = " << m2 << " > MMAX**2 = " << mmax2 << std::endl;
+      std::cerr << __PRETTY_FUNCTION__ << " ERROR: M2 = " << m2 << " > MMAX**2 = " << mmax2 << std::endl;
       //CALL ERRLOG (101, 'S: PXMASS: M2 > MMAX**2!')
       m2 = mmax2;
     }
@@ -612,12 +612,12 @@ GamPomVMLL::PXMass(double mmin_, double mmax_)
   } while (1.6*drand()>y and iter<=100);
 
   if (y>1.6) {
-    std::cout << "[GamPomVMLL::PXMass] WARNING: Y = " << y << " for M2 = " << m2 << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " WARNING: Y = " << y << " for M2 = " << m2 << std::endl;
     //CALL ERRLOG (102, 'W: PXMASS: Y > 1.6')
   }
 
   if (iter>100) {
-    std::cout << "[GamPomVMLL::PXMass] WARNING: more than 100 iterations!" << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " WARNING: more than 100 iterations!" << std::endl;
     //CALL ERRLOG (103, 'W: PXMASS: More than 100 iterations!')
   }
 
@@ -651,12 +651,12 @@ GamPomVMLL::VXMass(double mmin_, double mmax_)
     m2 = std::pow(fact*drand()+m2min, -1./_epsilm);
   }
   if (m2<mmin2) {
-    std::cerr << "[GamPomVMLL::VXMass] ERROR: M2 = " << m2 << " < MMIN**2 = " << mmin2 << std::endl;
+    std::cerr << __PRETTY_FUNCTION__ << " ERROR: M2 = " << m2 << " < MMIN**2 = " << mmin2 << std::endl;
     //CALL ERRLOG (100, 'S: VXMASS: M2 < MMIN**2!')
     m2 = mmin2;
   }
   else if (m2>mmax2) {
-    std::cerr << "[GamPomVMLL::VXMass] ERROR: M2 = " << m2 << " > MMAX**2 = " << mmax2 << std::endl;
+    std::cerr << __PRETTY_FUNCTION__ << " ERROR: M2 = " << m2 << " > MMAX**2 = " << mmax2 << std::endl;
     //CALL ERRLOG (101, 'S: VXMASS: M2 > MMAX**2!')
     m2 = mmax2;
   }
@@ -688,7 +688,7 @@ GamPomVMLL::FragGl()
   dmass = _ppcms8[idifv][4];
 
   if (dmass<_dmvm+glumas) {
-    std::cerr << "[GamPomVMLL::FragGl] ERROR: not enough energy!" << std::endl;
+    std::cerr << __PRETTY_FUNCTION__ << " ERROR: not enough energy!" << std::endl;
     //CALL ERRLOG (90, 'F: FRAGGL: Not enough energy!')
     exit(0);
   }
@@ -754,7 +754,7 @@ GamPomVMLL::FragGl()
   _pcmvm[3] = std::sqrt(_pcmvm[3]);
 
   if (fabs(std::pow(pout, 2)-std::pow(_pcmvm[0], 2)-std::pow(_pcmvm[1], 2)-std::pow(_pcmvm[2], 2))>std::pow(pout, 2)/100.) {
-    std::cerr << "[GamPomVMLL::FragGl] WARNING: POUT <> |PCMVM|" << std::endl;
+    std::cerr << __PRETTY_FUNCTION__ << " WARNING: POUT <> |PCMVM|" << std::endl;
     //CALL ERRLOG (91, 'W: FRAGGL: POUT <> |PCMVM|')
   }
 
@@ -765,7 +765,7 @@ GamPomVMLL::FragGl()
   }
   pcmglu[3] = std::sqrt(pcmglu[3]);
 
-  npart = _ev->NumParticles(); //FIXME
+  npart = fEvent->NumParticles(); //FIXME
  
   idahep[idifv][0] = npart+1;
   idahep[idifv][1] = npart+2;
@@ -784,13 +784,13 @@ GamPomVMLL::FragGl()
   mohep[iglue][0] = idifv;
   mohep[iglue][1] = 0;*/
   Particle glueball(43, ifragv);
-  glueball.SetMother(_ev->GetOneByRole(4)); // 4 = idifv
+  glueball.SetMother(fEvent->GetOneByRole(4)); // 4 = idifv
   glueball.M(dmasgl);
   glueball.P(pcmglu);
   glueball.LorentzBoost(_ppcms8[idifv][4], _ppcms8[idifv]);
   //glueball.P() -> Lorentz boost
   glueball.status = 1;
-  _ev->AddParticle(glueball);
+  fEvent->AddParticle(glueball);
 
   // Vector meson quantities
   /*ivm = npart+2;
@@ -803,12 +803,12 @@ GamPomVMLL::FragGl()
   mohep[ivm][0] = idifv;
   mohep[ivm][1] = 0;*/
   Particle VM(4, itypvm);
-  VM.SetMother(_ev->GetOneByRole(42)); // 42 = idifv // FIXME???
+  VM.SetMother(fEvent->GetOneByRole(42)); // 42 = idifv // FIXME???
   VM.M(dmasvm);
   VM.P(_pcmvm);
   VM.LorentzBoost(_ppcms8[idifv][4], _ppcms8[idifv]);
   VM.status = 1;
-  _ev->AddParticle(VM);
+  fEvent->AddParticle(VM);
 
   npart += 2;
 
@@ -828,7 +828,7 @@ GamPomVMLL::GEPhot(double* q2_, int* heli_)
   PhysicsBoundaries pb;
 
 #ifdef DEBUG
-  std::cout << "[GamPomVMLL::GEPhot] [DEBUG] Function called" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Function called" << std::endl;
 #endif
   
   pb.wmin = _wmin;
@@ -838,26 +838,26 @@ GamPomVMLL::GEPhot(double* q2_, int* heli_)
   pb.q2min = _q2min;
   pb.q2max = _q2max;
 
-  //_ev->GetOneByRole(IP1)->Dump();
-  //_ev->Dump();
-  //std::cout << "Before EPA : " << _ev->NumParticles() << " particles" << std::endl;
-  epa_result = EPA(_ev->GetOneByRole(IBE), _ev->GetOneByRole(IBP), _igammd, pb, q2_);
+  //fEvent->GetOneByRole(IP1)->Dump();
+  //fEvent->Dump();
+  //std::cout << "Before EPA : " << fEvent->NumParticles() << " particles" << std::endl;
+  epa_result = EPA(fEvent->GetOneByRole(IBE), fEvent->GetOneByRole(IBP), _igammd, pb, q2_);
   for (p=epa_result.begin(); p!=epa_result.end(); p++) {
     if (p->role==2) { // electron/proton from EPA
       p->role = ISCE;
-      *(_ev->GetOneByRole(ISCE)) = *p;
+      *(fEvent->GetOneByRole(ISCE)) = *p;
       continue;
     }
     if (p->role==3) { // photon from EPA
       p->role = IGAM;
       p->E(-1);
       *heli_ = p->helicity;
-      _ev->AddParticle(*p);
+      fEvent->AddParticle(*p);
       continue;
     }
   }
-  //std::cout << "After EPA : " << _ev->NumParticles() << " particles" << std::endl;
-  //_ev->Dump();
+  //std::cout << "After EPA : " << fEvent->NumParticles() << " particles" << std::endl;
+  //fEvent->Dump();
 
 }
 
@@ -872,12 +872,12 @@ GamPomVMLL::GenDif()
 
   // Check scattering angle in CMS
   if (_gengam_yhat<0.) {
-    std::cerr << "[GamPomVMLL::GenDif] ERROR: YHAT < 0! YHAT = " << _gengam_yhat << std::endl;
+    std::cerr << __PRETTY_FUNCTION__ << " ERROR: YHAT < 0! YHAT = " << _gengam_yhat << std::endl;
     _gengam_yhat = 0.;
     //CALL ERRLOG (70, 'S: GENDIF: YHAT < 0!')
   }
   else if (_gengam_yhat>1.) {
-    std::cerr << "[GamPomVMLL::GenDif] ERROR: YHAT > 1! YHAT = " << _gengam_yhat << std::endl;
+    std::cerr << __PRETTY_FUNCTION__ << " ERROR: YHAT > 1! YHAT = " << _gengam_yhat << std::endl;
     _gengam_yhat = 1.;
     //CALL ERRLOG (71, 'S: GENDIF: YHAT > 1!')
   }
@@ -903,7 +903,7 @@ GamPomVMLL::GenDif()
   pcmvmx[3] = std::sqrt(pcmvmx[3]);
 
   if (fabs(std::pow(pout, 2)-std::pow(pcmvmx[0], 2)-std::pow(pcmvmx[1], 2)-std::pow(pcmvmx[2], 2))>std::pow(pout, 2)/100.) {
-    std::cout << "[GamPomVMLL::GenDif] WARNING: POUT <> |PCMVMX|" << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " WARNING: POUT <> |PCMVMX|" << std::endl;
     //CALL ERRLOG (72, 'W: GENDIF: POUT <> |PCMVMX|')
     std::cout << "  POUT   = " << pout << std::endl;
     std::cout << "  PCMVMX = (" << pcmvmx[0] << ", " << pcmvmx[1] << ", " << pcmvmx[2] << ")" << std::endl;
@@ -930,17 +930,17 @@ GamPomVMLL::GenDif()
   // Virtual pomeron
   Particle pom(42, Particle::POMERON);
   pom.status = 3;
-  pom.SetMother(_ev->GetOneByRole(2));
+  pom.SetMother(fEvent->GetOneByRole(2));
   pom.P(pcmpom[0], pcmpom[1], pcmpom[2], pcmpom[3]);
   //#ifdef DEBUG
-  std::cout << "[GamPomVMLL::GenDif] [DEBUG] Virtual pomeron : " << pcmpom[4] << " <> " << pom.M() << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Virtual pomeron : " << pcmpom[4] << " <> " << pom.M() << std::endl;
   //#endif
-  _ev->AddParticle(pom); // Pomeron
+  fEvent->AddParticle(pom); // Pomeron
 
   // Diffractive proton state
-  Particle dps(5, _ev->GetOneByRole(2)->pdgId);
+  Particle dps(5, fEvent->GetOneByRole(2)->pdgId);
   dps.status = 1;
-  dps.SetMother(_ev->GetOneByRole(2));
+  dps.SetMother(fEvent->GetOneByRole(2));
   if (ifragp==1 or ifragp==-1 or ifragp==2) { // proton-dissociative case
     if (_genmxt_dmxp<1.48) dps.pdgId = (Particle::ParticleCode)12212;
     else if (_genmxt_dmxp<1.6) dps.pdgId = (Particle::ParticleCode)2124;
@@ -958,13 +958,13 @@ GamPomVMLL::GenDif()
   std::cout << "------> " << std::pow(pcmpx[3], 2)-std::pow(pcmpx[0], 2)-std::pow(pcmpx[1], 2)-std::pow(pcmpx[2], 2) << std::endl;
   dps.M(-1);
   //#ifdef DEBUG
-  std::cout << "[GamPomVMLL::GenDif] [DEBUG] Diffractive proton : " << pcmpx[4] << " <> " << dps.M() << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Diffractive proton : " << pcmpx[4] << " <> " << dps.M() << std::endl;
   //#endif
-  _ev->AddParticle(dps);
+  fEvent->AddParticle(dps);
 
   // Diffractive meson state
   Particle dms(8, (Particle::ParticleCode)itypvm);
-  dms.SetMother(_ev->GetOneByRole(5));
+  dms.SetMother(fEvent->GetOneByRole(5));
   //FIXME dual mothers!
   if (ifragv!=0) {
     if (itypvm==22) dms.pdgId = Particle::REGGEON;
@@ -973,9 +973,9 @@ GamPomVMLL::GenDif()
   dms.status = 1;
   dms.P(pcmvmx[0], pcmvmx[1], pcmvmx[2], pcmvmx[3]);
   //#ifdef DEBUG
-  std::cout << "[GamPomVMLL::GenDif] [DEBUG] Diffractive meson : " << pcmvmx[4] << " <> " << dms.M() << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Diffractive meson : " << pcmvmx[4] << " <> " << dms.M() << std::endl;
   //#endif
-  _ev->AddParticle(dms);
+  fEvent->AddParticle(dms);
 }
 
 void
@@ -1019,7 +1019,7 @@ GamPomVMLL::GenPhot(Particle* phot_, Particle* ele_, double *q2_, Particle pel_,
   do {
     r = exp(drand()*log(emin_/emax));
     if (r>=1.) {
-      std::cout << "[GamPomVMLL::GenPhot] Warning: R = " << r << " > 1" << std::endl;
+      std::cout << __PRETTY_FUNCTION__ << " Warning: R = " << r << " > 1" << std::endl;
     }
     pe[3] = 0.;
     *q2_ = 0.;

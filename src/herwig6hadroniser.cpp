@@ -2,14 +2,14 @@
 
 Herwig6Hadroniser::Herwig6Hadroniser()
 {
-  std::cout << "[Herwig6Hadroniser::Herwig6Hadroniser] [DEBUG] Constructor called" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Constructor called" << std::endl;
   _name = "Herwig6";
 }
 
 Herwig6Hadroniser::~Herwig6Hadroniser()
 {
 #ifdef DEBUG
-  std::cout << "[Herwig6Hadroniser::~Herwig6Hadroniser] [DEBUG] Destructor called" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Destructor called" << std::endl;
 #endif
 }
 
@@ -20,7 +20,7 @@ Herwig6Hadroniser::Hadronise(Event *ev_)
   ParticlesRef pp;
   ParticlesRef::iterator p;
 
-  std::cout << "[Herwig6Hadroniser::Hadronise]" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << std::endl;
   ev_->Dump();
   
   pp = ev_->GetParticles();

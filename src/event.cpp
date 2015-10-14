@@ -75,7 +75,7 @@ int
 Event::AddParticle(Particle part_, bool replace_)
 {
 #ifdef DEBUG
-  std::cout << "[Event::AddParticle] [DEBUG] Particle with PDGid = " << part_.pdgId << " has role " << part_.role << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Particle with PDGid = " << part_.pdgId << " has role " << part_.role << std::endl;
 #endif
   if (part_.role<=0) {
     return -1;
@@ -105,104 +105,6 @@ Event::AddParticle(int role_, bool replace_)
   return out;
 }
 
-/*HEPEUP
-Event::GetHEPEUP() const
-{
-  const Particles particles = this->GetConstParticles();
-  Particles::const_iterator p;
-  ParticlesRef daughters;
-  ParticlesRef::iterator dg;
-  int np, status;
-
-  std::cout << "particles = " << this->NumParticles() << std::endl;
-
-  HEPEUP out;
-  out.nup = this->NumParticles();
-  out.idprup = 1; //FIXME what about multiple subprocesses ?
-
-  std::cout << "aaa -> " << out.GetLHERecord() << std::endl;
-
-  np = 0;
-  for (p=particles.begin(); p!=particles.end(); p++) {
-    std::cout << "--> " << p->pdgId << std::endl;
-    out.idup[np] = p->pdgId;
-    status = (p->status==0) ? 1 : p->status;
-    out.istup[np] = status;
-    if (!p->Primary()) {
-      out.mothup[np][0] = *(p->GetMothersIds().begin())+1;
-      out.mothup[np][1] = *(p->GetMothersIds().end())+1;
-    }
-    for (int i=0; i<5; i++) {
-      out.pup[np][i] = p->P(i);
-    }
-    out.spinup[np] = p->helicity;
-    np++;
-    std::cout << out.istup[np] << ", " << out.pup[np][0] << std::endl;
-  }
-  return out;
-  }*/
-
-/*std::string
-Event::GetLHERecord(const double weight_)
-{
-  std::stringstream ss;
-  ParticlesRef particles, daughters;
-  ParticlesRef::iterator p, dg;
-  int min_id, max_id;
-
-  //FIXME need to fetch the vector (not the multimap), so that we can sort on the particle unique identifier (also TODO!!!)
-  ss << "<event>" << std::endl;
-  ss << this->NumParticles() << "\t"
-     << this->event_info.idprup << "\t"
-     << this->event_info.xwgtup << "\t"
-     << this->event_info.scalup << "\t" // scale of the event, in GeV
-     << this->event_info.aqedup << "\t" // alphaQED
-     << this->event_info.aqcdup // alphaQCD
-     << std::endl;
-  particles = this->GetParticles();
-  for (p=particles.begin(); p!=particles.end(); p++) {
-    if ((*p)->status==0) (*p)->status = 1;
-    
-    ss << std::setw(4) << (*p)->id+1 << "  "
-       << std::setw(3) << (*p)->status << "  "
-       << std::setw(5) << (*p)->pdgId << "  ";
-    if (!(*p)->Primary()) {
-      ss << std::setw(2) << *((*p)->GetMothersIds().begin())+1 << "  ";
-    }
-    else {
-      ss << std::setw(2) << "0" << "  ";
-    }
-    daughters = this->GetDaughters(*p);
-    max_id = 0;
-    min_id = 999;
-    if (daughters.size()>0) {
-      for (dg=daughters.begin(); dg!=daughters.end(); dg++) {
-	      if ((*dg)->id>this->NumParticles() or (*dg)->id<0) continue; //FIXMEEEEEEEEEEEEEEEEEEEEEE
-	      if ((*dg)->id>max_id) max_id = (*dg)->id;
-	      if ((*dg)->id<min_id) min_id = (*dg)->id;
-      }
-      if (min_id==max_id) 
-      	ss << std::setw(4) << min_id+1 << "  " << std::setw(4) << "0";
-      else 
-      	ss << std::setw(4) << min_id+1 << "  " << std::setw(4) << max_id+1;
-    }
-    else {
-      ss << std::setw(4) << "0" << "  " << std::setw(4) << "0";
-    }
-    ss << std::setw(4) << "  " << "0" << "  "; 
-    ss << std::setw(12) << (*p)->Px() << "  " 
-       << std::setw(12) << (*p)->Py() << "  " 
-       << std::setw(12) << (*p)->Pz() << "  " 
-       << std::setw(12) << (*p)->E() << "  " 
-       << std::setw(12) << (*p)->M() << "  " 
-       << std::setw(4) << weight_ 
-       << std::endl; 
-  }
-  ss << "</event>" << std::endl;
-
-  return ss.str();
-}
-*/
 void
 Event::Store(std::ofstream *of_, double weight_)
 {
@@ -279,7 +181,7 @@ Event::Dump(bool stable_)
 
   pxtot = pytot = pztot = etot = 0.;
   particles = this->GetParticles();
-  std::cout << "[Event::Dump]" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << std::endl;
   std::cout << std::left;
   std::cout << "Particle" << "\t" << "PDG id" << "\t\t" << "Charge" << "\t" << "Role" << "\t" << "Status" << "\t" << "Mother" << "\t\t\t" << "4-Momentum [GeV]" << std::endl;
   std::cout << "--------" << "\t" << "------" << "\t\t" << "------" << "\t" << "----" << "\t" << "------" << "\t" << "------" << "\t" << "---------------------------------------" << std::endl;

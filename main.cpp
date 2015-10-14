@@ -19,17 +19,17 @@ int main(int argc, char* argv[]) {
   //std::ofstream output2;
   
   if (argc==1) {
-    std::cout << "[Main] [DEBUG] No config file provided. Setting the default parameters." << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " [DEBUG] No config file provided. Setting the default parameters." << std::endl;
     
     mg.parameters->hadroniser = new Pythia6Hadroniser;
     mg.parameters->process = new GamGamLL;
     mg.parameters->process_mode = Process::ElasticElastic;
+    mg.parameters->remnant_mode = Process::SuriYennie;
     //mg.parameters->itvg = 2;
     
     mg.parameters->in1p = 4000.;
     mg.parameters->in2p = 4000.;
-    mg.parameters->pair = MUON;
-    mg.parameters->remnant_mode = 11;
+    mg.parameters->pair = Particle::MUON;
     mg.parameters->mcut = 2;
     mg.parameters->minenergy = 0.; //FIXME
     mg.parameters->minpt = 5.;
@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
   }
   else {
 #ifdef DEBUG
-    std::cout << "[Main] [DEBUG] Reading config file stored in " << argv[1] << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Reading config file stored in " << argv[1] << std::endl;
 #endif
     if (!mg.parameters->ReadConfigFile(std::string(argv[1]))) {
       std::cout << "=== Error reading the configuration !" << std::endl;

@@ -1,11 +1,11 @@
 #include "process.h"
 
 Process::Process() :
-  _ndim(0), _point_set(false),
+  _x(0), _ndim(0), _point_set(false),
   _setin(false), _setout(false), _setkin(false)
 {
   // This is where the particles will be stored
-  _ev = new Event();
+  fEvent = new Event();
   _name = "<invalid process>";
 }
 
@@ -14,7 +14,7 @@ Process::~Process()
   if (_point_set) {
     delete[] _x;
   }
-  delete _ev;
+  delete fEvent;
 }
 
 void
@@ -24,7 +24,7 @@ Process::SetPoint(const unsigned int ndim_,double x_[])
   _ndim = ndim_;
 
   // Phase space coordinate becomes a protected attribute
-  _x = new double[ndim_];
+  if (!_x) _x = new double[ndim_];
 
   std::copy(x_, x_+ndim_, _x);
   
@@ -38,7 +38,7 @@ Process::SetPoint(const unsigned int ndim_,double x_[])
 void
 Process::DumpPoint()
 {
-  std::cout << "[GamGam::DumpPoint] number of integration parameters : " << _ndim << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " number of integration parameters : " << _ndim << std::endl;
   for (unsigned int i=0; i<(unsigned int)_ndim; i++) {
     std::cout << "  x[" << i << "] = " << _x[i] << std::endl;
   }

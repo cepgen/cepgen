@@ -10,7 +10,7 @@ Jetset7Hadroniser::Jetset7Hadroniser()
 Jetset7Hadroniser::~Jetset7Hadroniser()
 {
 #ifdef DEBUG
-  std::cout << "[Jetset7Hadroniser::~Jetset7Hadroniser] [DEBUG] Destructor called" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Destructor called" << std::endl;
 #endif
 }
 
@@ -30,7 +30,7 @@ Jetset7Hadroniser::Hadronise(Particle *part_)
   lujets_.k[4][0] = 0; // daughter
 
   this->luexec();
-  std::cout << "[Jetset7Hadroniser::Hadronise] INFO" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " INFO" << std::endl;
   return true;
 }
 
@@ -65,7 +65,7 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
   }
 
 #ifdef DEBUG
-  std::cout << "[Jetset7Hadroniser::Hadronise] [DEBUG] Dump of the event before the hadronisation" << std::endl;
+  std::cout <<__PRETTY_FUNCTION__ << " [DEBUG] Dump of the event before the hadronisation" << std::endl;
   ev_->Dump();
 #endif
 
@@ -131,13 +131,13 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
   //this->lulist(2);
 
 #ifdef DEBUG
-  std::cout << "[Jetset7Hadroniser::Hadronise] [DEBUG] Passed the string construction stage" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Passed the string construction stage" << std::endl;
 #endif
 
   for (int i=0; i<max_str_in_evt; i++) {
     if (njoin[i]<2) continue;
 #ifdef DEBUG
-    std::cout << "[Jetset7Hadroniser::Hadronise] [DEBUG] Joining " << njoin[i] << " particle in a same string (" << i << ") with role " << jlrole[i] << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Joining " << njoin[i] << " particle in a same string (" << i << ") with role " << jlrole[i] << std::endl;
 #endif
     for (int j=0; j<max_part_in_str; j++) {
       if (jlpsf[i][j]==-1) continue;
@@ -176,10 +176,10 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
 
     if (lujets_.k[2][p]!=0) {
 #ifdef DEBUG
-      std::cout << "[Jetset7Hadroniser::Hadronise] [DEBUG] "
-		<< pa.id << " (pdgId=" << pa.pdgId << ") has mother "
-		<< lujets_.k[2][p] << " (pdgId=" << lujets_.k[1][lujets_.k[2][p]-1] << ")"
-		<< std::endl;
+      std::cout << __PRETTY_FUNCTION__ << " [DEBUG] "
+		            << pa.id << " (pdgId=" << pa.pdgId << ") has mother "
+		            << lujets_.k[2][p] << " (pdgId=" << lujets_.k[1][lujets_.k[2][p]-1] << ")"
+		            << std::endl;
 #endif
       pa.SetMother(ev_->GetById(lujets_.k[2][p]-1));
     }
@@ -203,7 +203,7 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
   double partpb[4];
 
 #ifdef DEBUG
-  std::cout << "[GamGam::PrepareHadronisation] [DEBUG] Hadronisation preparation called !" << std::endl;
+  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Hadronisation preparation called !" << std::endl;
 #endif
 
   ParticlesRef pp;
@@ -266,7 +266,7 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
       //singlet.SetMother(ev_->GetOneByRole((*p)->role));
       if (!singlet.P(partpb)) {
 	//#ifdef ERROR
-        std::cerr << "[GamGam::PrepareHadronisation] ERROR while setting the 4-momentum of singlet" << std::endl;
+        std::cerr << __PRETTY_FUNCTION__ << " ERROR while setting the 4-momentum of singlet" << std::endl;
 	//#endif
       }
       //std::cout << "singlet, mass = " << singlet.M() << std::endl;
@@ -286,7 +286,7 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
       doublet.SetMother(ev_->GetOneByRole((*p)->role));
       if (!doublet.P(partpb)) {
 	//#ifdef ERROR
-        std::cout << "[GamGam::PrepareHadronisation] ERROR while setting the 4-momentum of doublet" << std::endl;
+        std::cout << __PRETTY_FUNCTION__ << " ERROR while setting the 4-momentum of doublet" << std::endl;
 	//#endif
       }
       //std::cout << "doublet, mass = " << doublet.M() << std::endl;
@@ -299,7 +299,7 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
         ev_->AddParticle(singlet);
         ev_->AddParticle(doublet);
 #ifdef DEBUG
-        std::cout << "[GamGam::PrepareHadronisation] [DEBUG] Quark/diquark content succesfully added to the event!" << std::endl;
+        std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Quark/diquark content succesfully added to the event!" << std::endl;
 #endif
       }
       else { // Quark/diquark content already present in the event
@@ -307,7 +307,7 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
 	      std::vector<int>::iterator did;
 
 #ifdef DEBUG
-	      std::cout << "[GamGam::PrepareHadronisation] [DEBUG] Quark/diquark content already present in the event!" << std::endl
+        std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Quark/diquark content already present in the event!" << std::endl
 		        << "  Role of these particles: " << (*p)->role << std::endl;
 #endif
 	      daugh = (*p)->GetDaughters();
@@ -316,14 +316,14 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
 	          singlet.SetMother(ev_->GetById((*p)->id));
 	          *(ev_->GetById(*did)) = singlet;
 #ifdef DEBUG
-            std::cout << "[GamGam::PrepareHadronisation] [DEBUG] Singlet replaced" << std::endl;
+            std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Singlet replaced" << std::endl;
 #endif
 	        }
 	        else { // Diquark
 	          doublet.SetMother(ev_->GetById((*p)->id));
 	          *(ev_->GetById(*did)) = doublet;
 #ifdef DEBUG
-            std::cout << "[GamGam::PrepareHadronisation] [DEBUG] Doublet replaced" << std::endl;
+            std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Doublet replaced" << std::endl;
 #endif
 	        }
 	      }
