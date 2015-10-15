@@ -32,7 +32,7 @@ GamGamLL::SetOutgoingParticles(int part_, Particle::ParticleCode pdgId_, int)
 {
   double mass_, outm, dm;
 
-  if (!Process::_point_set) return;
+  if (!Process::fIsPointSet) return;
 
   mass_ = Particle::GetMassFromPDGId(pdgId_);
 
@@ -678,7 +678,7 @@ GamGamLL::ComputeMX(double x_, double outmass_, double *dw_)
   /*wx2min = std::pow(std::max(GetMassFromPDGId(2212)+GetMassFromPDGId(211), _cuts.mxmin), 2);
     wx2max = std::pow(std::min(_ecm-_mp2-2.*outmass_, _cuts.mxmax), 2);*/
   
-  wx2min = std::pow(Particle::GetMassFromPDGId(Particle::PROTON)+Particle::GetMassFromPDGId(Particle::PI_PLUS), 2);
+  wx2min = std::pow(Particle::GetMassFromPDGId(Particle::Proton)+Particle::GetMassFromPDGId(Particle::PiPlus), 2);
   wx2max = std::pow(_ecm-_mp2-2.*outmass_, 2);
   Map(x_, wx2min, wx2max, &mx2, &dmx2);
 
@@ -1152,7 +1152,7 @@ GamGamLL::FillKinematics(bool symmetrise_)
 
   // First incoming photon
   // Equivalent in LPAIR : PLAB(x, 3)
-  Particle ph1(41, Particle::PHOTON);
+  Particle ph1(41, Particle::Photon);
   plab_ph1[0] = plab_ip1[0]-plab_op1[0];
   plab_ph1[1] = plab_ip1[1]-plab_op1[1];
   plab_ph1[2] = plab_ip1[2]-plab_op1[2];
@@ -1169,7 +1169,7 @@ GamGamLL::FillKinematics(bool symmetrise_)
   
   // Second incoming photon
   // Equivalent in LPAIR : PLAB(x, 4)
-  Particle ph2(42, Particle::PHOTON);
+  Particle ph2(42, Particle::Photon);
   plab_ph2[0] = plab_ip2[0]-plab_op2[0];
   plab_ph2[1] = plab_ip2[1]-plab_op2[1];
   plab_ph2[2] = plab_ip2[2]-plab_op2[2];
@@ -1185,7 +1185,7 @@ GamGamLL::FillKinematics(bool symmetrise_)
   fEvent->AddParticle(ph2);
 
   // Central (two-photon) system
-  Particle cs(4, Particle::PHOTON);
+  Particle cs(4, Particle::Photon);
   cs.status = -1;
   fEvent->AddParticle(cs);
   

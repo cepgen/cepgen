@@ -6,8 +6,17 @@
 #include <string>
 #include <cstdlib> // exit()
 
-#define PrintInfo(m) Exception(__PRETTY_FUNCTION__, m, Info).Dump();
-#define PrintDebug(m) Exception(__PRETTY_FUNCTION__, m, Debug).Dump();
+enum LoggingLevel {
+  Nothing = 0,
+  Warning = 1,
+  Error = 2,
+  Information = 3,
+  Debug = 4
+};
+static LoggingLevel kLoggingLevel = Warning;
+
+#define PrintInfo(m)  if (kLoggingLevel>Nothing) { Exception(__PRETTY_FUNCTION__, m, Info).Dump(); }
+#define PrintDebug(m) if (kLoggingLevel>=Debug)  { Exception(__PRETTY_FUNCTION__, m, Debugging).Dump(); }
 
 /**
  * \brief Enumeration of exception severities
@@ -18,7 +27,7 @@ typedef enum
 {
   Undefined=-1,
   Info,
-  Debug,
+  Debugging,
   JustWarning,
   Fatal
 } ExceptionType;
@@ -58,7 +67,7 @@ class Exception
       switch (Type()) {
         case JustWarning: return "\033[34;1mJustWarning\033[0m";
         case Info: return "\033[33;1mInfo\033[0m";
-        case Debug: return "\033[32;1mDebug\033[0m";
+        case Debugging: return "\033[32;1mDebug\033[0m";
         case Fatal: return "\033[31;1mFatal\033[0m";
         case Undefined: default: return "\33[7;1mUndefined\033[0m";
       }
@@ -66,20 +75,20 @@ class Exception
     
     inline void Dump(std::ostream& os=std::cerr) const {
       if (Type()==Info) {
-        os << "======================= \033[33;1mInformation\033[0m =======================" << std::endl
+        os << "============================ \033[33;1mInformation\033[0m ============================" << std::endl
            << " From:        " << From() << std::endl;
       }
       else {
-        os << "=================== Exception detected! ===================" << std::endl
+        os << "======================== Exception detected! ========================" << std::endl
            << " Class:       " << TypeString() << std::endl
            << " Raised by:   " << From() << std::endl;
       }
       os << " Description: " << std::endl
          << "\t" << Description() << std::endl;
       if (ErrorNumber()!=0)
-        os << "-----------------------------------------------------------" << std::endl
+        os << "---------------------------------------------------------------------" << std::endl
            << " Error #" << ErrorNumber() << std::endl;
-      os << "===========================================================" << std::endl;
+      os << "=====================================================================" << std::endl;
     }
     inline std::string OneLine() const {
       std::ostringstream os;

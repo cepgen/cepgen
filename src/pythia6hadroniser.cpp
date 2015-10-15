@@ -217,15 +217,15 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
     if ((*p)->status==-2) { // One proton to be fragmented
       ranudq = (double)rand()/RAND_MAX;
       if (ranudq<1./9.) {
-        singlet_id = Particle::QUARK_D;
+        singlet_id = Particle::dQuark;
         doublet_id = Particle::DIQUARK_UU1;
       }
       else if (ranudq<5./9.) {
-        singlet_id = Particle::QUARK_U;
+        singlet_id = Particle::uQuark;
         doublet_id = Particle::DIQUARK_UD0;
       }
       else {
-        singlet_id = Particle::QUARK_U;
+        singlet_id = Particle::uQuark;
         doublet_id = Particle::DIQUARK_UD1;
       }
       ulmdq = pymass(doublet_id);

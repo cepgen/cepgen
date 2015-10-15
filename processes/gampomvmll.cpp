@@ -58,11 +58,11 @@ GamPomVMLL::GDIBeg()
   double r;
   double wminmin;
 
-  _dme = Particle::GetMassFromPDGId(Particle::ELECTRON);
-  _dmp = Particle::GetMassFromPDGId(Particle::PROTON);
-  _dmpi = Particle::GetMassFromPDGId(Particle::PI_PLUS);
-  _dmpi0 = Particle::GetMassFromPDGId(Particle::PI_0);
-  _dmn = Particle::GetMassFromPDGId(Particle::NEUTRON);
+  _dme = Particle::GetMassFromPDGId(Particle::Electron);
+  _dmp = Particle::GetMassFromPDGId(Particle::Proton);
+  _dmpi = Particle::GetMassFromPDGId(Particle::PiPlus);
+  _dmpi0 = Particle::GetMassFromPDGId(Particle::PiZero);
+  _dmn = Particle::GetMassFromPDGId(Particle::Neutron);
   _dmvm = Particle::GetMassFromPDGId((Particle::ParticleCode)itypvm);
   _dwvm = Particle::GetWidthFromPDGId((Particle::ParticleCode)itypvm); //FIXME
   _dml = fEvent->GetOneByRole(OL1)->M();
@@ -80,7 +80,7 @@ GamPomVMLL::GDIBeg()
   }
 
   // Check that beam particle is proton or antiproton
-  if (abs(fEvent->GetOneByRole(1)->pdgId)!=Particle::PROTON and abs(fEvent->GetOneByRole(2)->pdgId)!=Particle::PROTON) {
+  if (abs(fEvent->GetOneByRole(1)->pdgId)!=Particle::Proton and abs(fEvent->GetOneByRole(2)->pdgId)!=Particle::Proton) {
     //WRITE (ERTEXT, '(''F: GDIBEG: Beam proton must be proton or antiproton. IBEAMP ='',I8)'), IBEAMP
     //CALL ERRLOG (11, ERTEXT)
     std::cerr << __PRETTY_FUNCTION__ << " ERROR: Beam proton must be proton or antiproton. IBEAMP = " << fEvent->GetOneByRole(1)->pdgId << " / " << fEvent->GetOneByRole(2)->pdgId << std::endl;
@@ -303,7 +303,7 @@ GamPomVMLL::OneEvent()
   double wt;
 
   // Generate photons
-  Particle pgam(41, Particle::PHOTON), pesc(5, fEvent->GetOneByRole(IBE)->pdgId);
+  Particle pgam(41, Particle::Photon), pesc(5, fEvent->GetOneByRole(IBE)->pdgId);
   //std::cout << "-> " << _igammd << std::endl;
 
   if (_igammd<0) { // Fixed photon energy
@@ -928,7 +928,7 @@ GamPomVMLL::GenDif()
   pcmpom[4] = -std::sqrt(std::pow(pcmpom[0], 2)+std::pow(pcmpom[1], 2)+std::pow(pcmpom[2], 2)-std::pow(pcmpom[3], 2));
 
   // Virtual pomeron
-  Particle pom(42, Particle::POMERON);
+  Particle pom(42, Particle::Pomeron);
   pom.status = 3;
   pom.SetMother(fEvent->GetOneByRole(2));
   pom.P(pcmpom[0], pcmpom[1], pcmpom[2], pcmpom[3]);
@@ -967,7 +967,7 @@ GamPomVMLL::GenDif()
   dms.SetMother(fEvent->GetOneByRole(5));
   //FIXME dual mothers!
   if (ifragv!=0) {
-    if (itypvm==22) dms.pdgId = Particle::REGGEON;
+    if (itypvm==22) dms.pdgId = Particle::Reggeon;
     else dms.pdgId = static_cast<Particle::ParticleCode>(10*((itypvm/10)%100));
   }
   dms.status = 1;

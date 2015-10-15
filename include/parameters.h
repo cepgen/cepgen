@@ -59,15 +59,11 @@ class Parameters {
      */
     Particle::ParticleCode in2pdg;
     /**
-     * The first incoming particle type and kind of interaction :
-     * - 1 - electron,
-     * - 2 - proton elastic,
-     * - 3 - proton inelastic without parton treatment,
-     * - 4 - proton inelastic in parton model
-     * @brief First particle's mode
+     * The first incoming particle type and kind of interaction
+     * @brief Outgoing primary particles' behaviour
      * @note Was named PMOD/EMOD in ILPAIR
      */
-    int remnant_mode;
+    Process::StructureFunctions remnant_mode;
     /**
      * The particle code of produced leptons, as defined by the PDG convention :
      * - 11 - for \f$e^+e^-\f$ pairs

@@ -1,9 +1,9 @@
 #include "parameters.h"
 
 Parameters::Parameters() :
-  in1pdg(Particle::PROTON), in2pdg(Particle::PROTON),
-  remnant_mode(11),
-  pair(Particle::MUON),
+  in1pdg(Particle::Proton), in2pdg(Particle::Proton),
+  remnant_mode(Process::SuriYennie),
+  pair(Particle::Muon),
   process_mode(Process::ElasticElastic),
   mcut(0),
   minpt(0.5), maxpt(-1.),
@@ -29,9 +29,8 @@ Parameters::Parameters() :
 
 Parameters::~Parameters()
 {
-#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Destructor called" << std::endl;
-#endif
+  PrintDebug("Destructor called");
+  
   delete last_event;
 }
 
@@ -39,56 +38,39 @@ void Parameters::SetThetaRange(double thetamin_, double thetamax_)
 {
   this->mineta = -log(tan(thetamax_/180.*pi/2.));
   this->maxeta = -log(tan(thetamin_/180.*pi/2.));
-#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]"
-	    << "\n\teta(min) = " << std::setw(5) << this->mineta << " -> theta(min) = " << thetamin_
-	    << "\n\teta(max) = " << std::setw(5) << this->maxeta << " -> theta(max) = " << thetamax_
-	    << std::endl;
-#endif
+
+  PrintDebug(Form("eta(min) = %5.2f => theta(min) = %5.2f"
+                  "eta(max) = %5.2f => theta(max) = %5.2f",
+                  mineta, thetamin_, maxeta, thetamax_));
 }
 
 void Parameters::Dump()
 {
   std::string cutsmode, particles, pmode;
+  std::ostringstream os;
 
   switch (mcut) {
-    case 1:
-      cutsmode = "Vermaseren"; break;
-    case 2:
-      cutsmode = "both leptons"; break;
-    case 3:
-      cutsmode = "single lepton"; break;
-    case 0:
-    default:
-      cutsmode = "none"; break;
+    case 1:           cutsmode = "Vermaseren"; break;
+    case 2:           cutsmode = "both leptons"; break;
+    case 3:           cutsmode = "single lepton"; break;
+    case 0:  default: cutsmode = "none"; break;
   }
   switch (pair) {
-    case 11:
-      particles = "electrons"; break;
-    case 13:
-    default: 
-      particles = "muons"; break;
-    case 15:
-      particles = "taus"; break;
+    case 11:          particles = "electrons"; break;
+    case 13: default: particles = "muons"; break;
+    case 15:          particles = "taus"; break;
   }
   switch (process_mode) {
-    case 1:
-    default:
-      pmode = "elastic-elastic"; break;
-    case 2:
-      pmode = "elastic-inelastic"; break;
-    case 3:
-      pmode = "inelastic-elastic"; break;
-    case 4:
-      pmode = "inelastic-inelastic"; break;
+    case 1:  default: pmode = "elastic-elastic"; break;
+    case 2:           pmode = "elastic-inelastic"; break;
+    case 3:           pmode = "inelastic-elastic"; break;
+    case 4:           pmode = "inelastic-inelastic"; break;
   }
   const int wb = 65;
   const int wt = 40;
   int wp = wb-wt-2;
-  std::cout 
+  os 
     << std::left
-    << __PRETTY_FUNCTION__ << " BEGINNING dump " << std::setfill('=') << std::setw(wb-32) << "" << std::endl
-    << std::endl
     << " _" << std::setfill('_') << std::setw(wb) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "_ " << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "| " << std::setw(wt) << "Process to generate"  << std::setw(wp) << process->GetName() << std::endl
@@ -129,12 +111,11 @@ void Parameters::Dump()
     << "|-" << std::setfill('-') << std::setw(wb-2) << " Outgoing remnants " << std::setfill(' ') << "-|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl;
   if (this->hadroniser!=(Hadroniser*)NULL)
-    std::cout << "| " << std::setw(wt) << "Hadronisation algorithm" << std::setw(12) << hadroniser->GetName() << std::setw(wp-12) << "" << " |" << std::endl;
-  std::cout << "| " << std::setw(wt) << "Minimal mass [GeV/c^2]" << std::setw(wp) << minmx << " |" << std::endl
-          	<< "| " << std::setw(wt) << "Maximal mass [GeV/c^2]" << std::setw(wp) << maxmx << " |" << std::endl
-            << "|_" << std::right << std::setfill('_') << std::setw(wb) << "_|" << std::left << std::endl
-            << std::endl
-            << __PRETTY_FUNCTION__ << " END of dump " << std::setfill('=') << std::setw(wb-29) << "" << std::endl;
+    os << "| " << std::setw(wt) << "Hadronisation algorithm" << std::setw(12) << hadroniser->GetName() << std::setw(wp-12) << "" << " |" << std::endl;
+  os << "| " << std::setw(wt) << "Minimal mass [GeV/c^2]" << std::setw(wp) << minmx << " |" << std::endl
+             << "| " << std::setw(wt) << "Maximal mass [GeV/c^2]" << std::setw(wp) << maxmx << " |" << std::endl
+             << "|_" << std::right << std::setfill('_') << std::setw(wb) << "_|" << std::left;
+  PrintInfo(os.str());
 }
 
 bool Parameters::ReadConfigFile(std::string inFile_)
@@ -145,13 +126,14 @@ bool Parameters::ReadConfigFile(std::string inFile_)
   if (!f.is_open()) {
     return false;
   }
-#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] File " << inFile_ << " succesfully opened !" << std::endl
-            << "======================================================" << std::endl
-            << "Configuration file content : " << std::endl
-            << "======================================================" << std::endl
-            << std::left;
-#endif
+
+  PrintDebug(Form("File %s succesfully opened!", inFile_));
+  std::ostringstream os;
+  os << "======================================================" << std::endl
+     << "Configuration file content : " << std::endl
+     << "======================================================" << std::endl
+     << std::left;
+
   while (f >> key >> value) {
     //std::cout << std::setw(60) << "[" << key << "] = " << value << std::endl;
     //if (strncmp(key.c_str(), "#")==0) continue; // FIXME need to ensure there is no extra space before !
@@ -163,173 +145,132 @@ bool Parameters::ReadConfigFile(std::string inFile_)
     }
     else if (key=="NCVG") {
       this->ncvg = (int)atoi(value.c_str());
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * Number of function calls" << this->ncvg << std::endl;
-#endif
+      os << std::setw(60) << " * Number of function calls" << this->ncvg << std::endl;
     }
     else if (key=="NCSG") {
       this->npoints = (int)atoi(value.c_str());
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * Number of points to probe" << this->npoints << std::endl;
-#endif
+      os << std::setw(60) << " * Number of points to probe" << this->npoints << std::endl;
     }
     else if (key=="ITVG") {
       this->itvg = (int)atoi(value.c_str());
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * Number of Vegas iterations" << this->itvg << std::endl;
-#endif
+      os << std::setw(60) << " * Number of Vegas iterations" << this->itvg << std::endl;
     }
     else if (key=="INPP") {
       this->in1p = (double)atof(value.c_str());
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * First incoming particles' momentum" << this->in1p << " GeV/c" << std::endl;
-#endif
+      os << std::setw(60) << " * First incoming particles' momentum" << this->in1p << " GeV/c" << std::endl;
     }
     else if (key=="MODE") {
       this->process_mode = static_cast<Process::ProcessMode>(atoi(value.c_str()));
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * Subprocess' mode" << this->process_mode << " --> ";
+      os << std::setw(60) << " * Subprocess' mode" << this->process_mode << " --> ";
       switch (this->process_mode) {
-        case ElasticElastic: default: std::cout << "elastic-elastic"; break;
-        case ElasticInelastic:        std::cout << "elastic-inelastic"; break;
-        case InelasticElastic:        std::cout << "inelastic-elastic"; break;
-        case InelasticInelastic:      std::cout << "inelastic-inelastic"; break;
+        case Process::ElasticElastic: default: os << "elastic-elastic"; break;
+        case Process::ElasticInelastic:        os << "elastic-inelastic"; break;
+        case Process::InelasticElastic:        os << "inelastic-elastic"; break;
+        case Process::InelasticInelastic:      os << "inelastic-inelastic"; break;
       }
-      std::cout << std::endl;
-#endif
+      os << std::endl;
     }
     else if (key=="PMOD" or key=="EMOD") {
       this->remnant_mode = static_cast<Process::StructureFunctions>(atoi(value.c_str()));
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * First incoming particles' mode" << this->p1mod << " --> ";
+      os << std::setw(60) << " * Outgoing primary particles' mode" << this->remnant_mode << " --> ";
       switch (this->remnant_mode) {
-        case Electron:        std::cout << "electron"; break;
-        case SuriYennie:      std::cout << "dissociating proton [structure functions]"; break;
-        case SuriYennieLowQ2: std::cout << "dissociating proton [structure functions, for MX < 2 GeV, Q^2 < 5 GeV^2]"; break;
-        case FioreVal:        std::cout << "dissociating proton [parton model, only valence quarks]"; break;
-        case FioreSea:        std::cout << "dissociating proton [parton model, only sea quarks]"; break;
-        case Fiore:           std::cout << "dissociating proton [parton model, valence and sea quarks]"; break;
+        case Process::Electron:        os << "electron"; break;
+        case Process::SuriYennie:      os << "dissociating proton [SY structure functions]"; break;
+        case Process::SuriYennieLowQ2: os << "dissociating proton [SY structure functions, for MX < 2 GeV, Q^2 < 5 GeV^2]"; break;
+        case Process::SzczurekUleshchenko: os << "dissociating proton [SU structure functions]"; break;
+        case Process::FioreVal:        os << "dissociating proton [parton model, only valence quarks]"; break;
+        case Process::FioreSea:        os << "dissociating proton [parton model, only sea quarks]"; break;
+        case Process::Fiore:           os << "dissociating proton [parton model, valence and sea quarks]"; break;
       }
-      std::cout << std::endl;
-#endif
+      os << std::endl;
     }
     else if (key=="INPE") {
       this->in2p = (double)atof(value.c_str());
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * Second incoming particles' momentum" << this->in1p << " GeV/c" << std::endl;
-#endif
+      os << std::setw(60) << " * Second incoming particles' momentum" << this->in1p << " GeV/c" << std::endl;
     }
     else if (key=="PAIR") {
       this->pair = (Particle::ParticleCode)atoi(value.c_str());
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * Outgoing leptons' PDG id   " << this->pair << " --> ";
+      os << std::setw(60) << " * Outgoing leptons' PDG id   " << this->pair << " --> ";
       switch (this->pair) {
-        case ELECTRON: default: std::cout << "electrons"; break;
-        case MUON:              std::cout << "muons"; break;
-        case TAU:               std::cout << "taus"; break;
+        case Particle::Electron: default: os << "electrons"; break;
+        case Particle::Muon:              os << "muons"; break;
+        case Particle::Tau:               os << "taus"; break;
       }
-      std::cout << std::endl;
-#endif
+      os << std::endl;
     }
     else if (key=="MCUT") {
       this->mcut = (int)atoi(value.c_str());
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * Set of cuts to apply on the total generation  " << this->mcut << " --> ";
+      os << std::setw(60) << " * Set of cuts to apply on the total generation  " << this->mcut << " --> ";
       switch (this->mcut) {
-        case 0: default: std::cout << "no cuts"; break;
-        case 3:          std::cout << "cuts on at least one outgoing lepton"; break;
-        case 2:          std::cout << "cuts on both the outgoing leptons"; break;
-        case 1:          std::cout << "Vermaseren's hypothetical detector cuts"; break;
+        case 0: default: os << "no cuts"; break;
+        case 3:          os << "cuts on at least one outgoing lepton"; break;
+        case 2:          os << "cuts on both the outgoing leptons"; break;
+        case 1:          os << "Vermaseren's hypothetical detector cuts"; break;
       }
-      std::cout << std::endl;
-#endif
+      os << std::endl;
     }
     else if (key=="PTCT") {
       this->minpt = (double)atof(value.c_str());
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * Single outgoing lepton's minimal transverse momentum" << this->minpt << " GeV/c" << std::endl;
-#endif
+      os << std::setw(60) << " * Single outgoing lepton's minimal transverse momentum" << this->minpt << " GeV/c" << std::endl;
     }
     else if (key=="ECUT") {
       this->minenergy = (double)atof(value.c_str());
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * Single outgoing lepton's minimal energy" << this->minenergy << " GeV" << std::endl;
-#endif
+      os << std::setw(60) << " * Single outgoing lepton's minimal energy" << this->minenergy << " GeV" << std::endl;
     }
     else if (key=="NTRT") {
       this->ntreat = (double)atoi(value.c_str());
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * Number of TREAT calls" << this->ntreat << std::endl;
-#endif
+      os << std::setw(60) << " * Number of TREAT calls" << this->ntreat << std::endl;
     }
     else if (key=="NGEN") {
       this->maxgen = (double)atoi(value.c_str());
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * Number of events to generate" << this->maxgen << std::endl;
-#endif
+      os << std::setw(60) << " * Number of events to generate" << this->maxgen << std::endl;
     }
     else if (key=="THMN") {
       //this->mintheta = (double)atof(value.c_str());
       //this->SetThetaRange((double)atof(value.c_str()), 0.); // FIXME FIXME
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * Minimal polar production angle for the leptons" << this->mintheta << std::endl;
-#endif
+      os << std::setw(60) << " * Minimal polar production angle for the leptons" << EtaToTheta(mineta) << std::endl;
     }
     else if (key=="THMX") {
       //this->maxtheta = (double)atof(value.c_str());
       //this->SetThetaRange(0., (double)atof(value.c_str())); //FIXME FIXME
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * Maximal polar production angle for the leptons" << this->maxtheta << std::endl;
-#endif
+      os << std::setw(60) << " * Maximal polar production angle for the leptons" << EtaToTheta(maxeta) << std::endl;
     }
     else if (key=="Q2MN") {
       this->minq2 = (double)atof(value.c_str());
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * Minimal Q^2 for the incoming photons" << this->minq2 << " GeV^2" << std::endl;
-#endif
+      os << std::setw(60) << " * Minimal Q^2 for the incoming photons" << this->minq2 << " GeV^2" << std::endl;
     }
     else if (key=="Q2MX") {
       this->maxq2 = (double)atof(value.c_str());
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * Maximal Q^2 for the incoming photons" << this->maxq2 << " GeV^2" << std::endl;
-#endif
+      os << std::setw(60) << " * Maximal Q^2 for the incoming photons" << this->maxq2 << " GeV^2" << std::endl;
     }
     else if (key=="MXMN") {
       this->minmx = (double)atof(value.c_str());
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * Minimal invariant mass of proton remnants" << this->minmx << " GeV/c^2" << std::endl;
-#endif
+      os << std::setw(60) << " * Minimal invariant mass of proton remnants" << this->minmx << " GeV/c^2" << std::endl;
     }
     else if (key=="MXMX") {
       this->maxmx = (double)atof(value.c_str());
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * Maximal invariant mass of proton remnants" << this->maxmx << " GeV/c^2" << std::endl;
-#endif
+      os << std::setw(60) << " * Maximal invariant mass of proton remnants" << this->maxmx << " GeV/c^2" << std::endl;
     }
     else if (key=="GPDF") {
       this->gpdf = (double)atoi(value.c_str());
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * GPDF" << this->gpdf << std::endl;
-#endif
+      os << std::setw(60) << " * GPDF" << this->gpdf << std::endl;
     }
     else if (key=="SPDF") {
       this->spdf = (double)atoi(value.c_str());
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * SPDF" << this->spdf << std::endl;
-#endif
+      os << std::setw(60) << " * SPDF" << this->spdf << std::endl;
     }
     else if (key=="QPDF") {
       this->qpdf = (double)atoi(value.c_str());
-#ifdef DEBUG
-      std::cout << std::setw(60) << " * QPDF" << this->qpdf << std::endl;
-#endif
+      os << std::setw(60) << " * QPDF" << this->qpdf << std::endl;
     }
     else {
-      std::cout << std::setw(60) << __PRETTY_FUNCTION__ << " <WARNING> Unrecognized argument : [" << key << "] = " << value << std::endl;
+      PrintInfo(Form("<WARNING> Unrecognized argument : [%s] = %s", key, value));
     }
   }
   f.close();
-  std::cout << std::right << "======================================================" << std::endl;
+  
+  PrintInfo(os.str());
+  
   return true;
 }
 

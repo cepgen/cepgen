@@ -75,7 +75,7 @@ int
 Event::AddParticle(Particle part_, bool replace_)
 {
 #ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Particle with PDGid = " << part_.pdgId << " has role " << part_.role << std::endl;
+  PrintDebug(Form("Particle with PDGid = %d has role ", part_.pdgId, part_.role));
 #endif
   if (part_.role<=0) {
     return -1;
@@ -178,38 +178,25 @@ Event::Dump(bool stable_)
   ParticlesRef::iterator p;
   double pxtot, pytot, pztot, etot;
   int sign;
+  std::ostringstream os;
 
   pxtot = pytot = pztot = etot = 0.;
   particles = this->GetParticles();
-  std::cout << __PRETTY_FUNCTION__ << std::endl;
-  std::cout << std::left;
-  std::cout << "Particle" << "\t" << "PDG id" << "\t\t" << "Charge" << "\t" << "Role" << "\t" << "Status" << "\t" << "Mother" << "\t\t\t" << "4-Momentum [GeV]" << std::endl;
-  std::cout << "--------" << "\t" << "------" << "\t\t" << "------" << "\t" << "----" << "\t" << "------" << "\t" << "------" << "\t" << "---------------------------------------" << std::endl;
   for (p=particles.begin(); p!=particles.end(); p++) {
     if (stable_ and (*p)->status!=1) continue;
-    std::cout << std::setfill(' ') << std::setw(8) << (*p)->id
-	      << "\t" << std::setw(6) << (*p)->pdgId;
-    if ((*p)->name!="") {
-      std::cout << std::setw(6) << (*p)->name;
-    }
-    else std::cout << "\t";
-    std::cout << "\t";
-    if ((*p)->charge!=999.)
-    	std::cout << std::setprecision(2) << std::setw(6) << (*p)->charge;
-    std::cout << "\t" << std::setw(4) << (*p)->role
-	      << "\t" << std::setw(6) << (*p)->status << "\t";
-    if ((*p)->GetMothersIds().size()>0) {
-      std::cout << std::setw(2) << *((*p)->GetMothersIds().begin()) 
-		<< " (" << std::right << std::setw(2) << this->GetById(*((*p)->GetMothersIds().begin()))->role << std::left << ") ";
-    }
-    else std::cout << std::setw(8) << "";
-    std::cout << std::right;
-    std::cout << std::setprecision(3) << std::setw(9) << (*p)->Px() << " ";
-    std::cout << std::setprecision(3) << std::setw(9) << (*p)->Py() << " ";
-    std::cout << std::setprecision(3) << std::setw(9) << (*p)->Pz() << " ";
-    std::cout << std::setprecision(3) << std::setw(9) << (*p)->E() << " ";
-    std::cout << std::left;
-    std::cout << std::endl;
+    os << std::setfill(' ') << std::setw(8) << (*p)->id
+	     << "\t" << std::setw(6) << (*p)->pdgId;
+    if ((*p)->name!="") os << std::setw(6) << (*p)->name;
+    else                os << "\t";
+    os << "\t";
+    if ((*p)->charge!=999.)	os << Form("%6.2f\t", (*p)->charge);
+    else                    os << "\t";
+    os << Form("%4d\t%6d\t", (*p)->role, (*p)->status);
+    if ((*p)->GetMothersIds().size()>0) 
+      os << Form("%2d(%2d)", *((*p)->GetMothersIds().begin()), this->GetById(*((*p)->GetMothersIds().begin()))->role);
+    else
+      os << "     ";
+    os << Form("%9.3f %9.3f %9.3f %9.3f\n\t", (*p)->Px(), (*p)->Py(), (*p)->Pz(), (*p)->E());
     if ((*p)->status>=0 and (*p)->status<=1) {
       sign = ((*p)->role==1 or (*p)->role==2) ? -1 : 1;
       pxtot += sign*(*p)->Px();
@@ -224,12 +211,10 @@ Event::Dump(bool stable_)
   if (fabs(pztot)<1.e-12) pztot = 0.;
   if (fabs(etot)<1.e-12) etot = 0.;
   //
-  std::cout << std::setfill('-') << std::setw(103) << "" << std::endl
-	    << std::setfill(' ') << "Total:\t\t\t\t\t\t\t\t"
-	    << std::right
-	    << std::setprecision(2) << std::setw(9) << pxtot << " "
-	    << std::setprecision(2) << std::setw(9) << pytot << " "
-	    << std::setprecision(2) << std::setw(9) << pztot << " "
-	    << std::setprecision(2) << std::setw(9) << etot << " "
-	    << std::left << std::endl;
+  PrintInfo(Form(
+  "Particle\tPDG id\t\tCharge\tRole\tStatus\tMother\t\t\t4-Momentum [GeV]\n\t"
+  "--------\t------\t\t------\t----\t------\t------\t---------------------------------------\n\t"
+  "%s\n\t"
+  "-------------------------------------------------------------------------------------------------------\n\t"
+  "Total:\t\t\t\t\t\t\t\t%9.4f %9.4f %9.4f %9.4f", os.str().c_str(), pxtot, pytot, pztot, etot));
 }

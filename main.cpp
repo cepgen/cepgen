@@ -2,6 +2,8 @@
 
 #include "include/mcgen.h"
 
+using namespace std;
+
 /**
  * @author Laurent Forthomme <laurent.forthomme@uclouvain.be>
  * Main caller for this Monte Carlo generator. Loads the configuration files'
@@ -11,15 +13,17 @@
  */
 int main(int argc, char* argv[]) {
   double xsec, err;
+  kLoggingLevel = Debug;
+  
   MCGen mg;
   Event ev;
   //GamPomVMLL proc;
   //PPtoLL proc;
-  std::ofstream output;
-  //std::ofstream output2;
+  ofstream output;
+  //ofstream output2;
   
   if (argc==1) {
-    std::cout << __PRETTY_FUNCTION__ << " [DEBUG] No config file provided. Setting the default parameters." << std::endl;
+    PrintInfo("No config file provided. Setting the default parameters.");
     
     mg.parameters->hadroniser = new Pythia6Hadroniser;
     mg.parameters->process = new GamGamLL;
@@ -42,11 +46,11 @@ int main(int argc, char* argv[]) {
   }
   else {
 #ifdef DEBUG
-    std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Reading config file stored in " << argv[1] << std::endl;
+    PrintDebug(Form("Reading config file stored in %s", argv[1]));
 #endif
-    if (!mg.parameters->ReadConfigFile(std::string(argv[1]))) {
-      std::cout << "=== Error reading the configuration !" << std::endl;
-      std::cout << "  Please check your input file (" << std::string(argv[1]) << ")" << std::endl;
+    if (!mg.parameters->ReadConfigFile(string(argv[1]))) {
+      PrintInfo(Form("Error reading the configuration!\n\t"
+                     "Please check your input file (%s)", argv[1]));
       return -1;
     }
   }
@@ -67,7 +71,7 @@ int main(int argc, char* argv[]) {
 
     for (int i=0; i<mg.parameters->maxgen; i++) {
       if (i%10000==0)
-        std::cout << "Generating event #" << i+1 << std::endl;
+        cout << "Generating event #" << i+1 << endl;
       ev = *mg.GenerateOneEvent();
       ev.Dump();
     }

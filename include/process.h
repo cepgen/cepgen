@@ -103,7 +103,7 @@ class Process
   inline virtual void SetKinematics(Kinematics cuts_) { _cuts=cuts_; }
   /**
    * Is the system's kinematics well defined and compatible with the process ?
-   * This check is mandatory to perform the (@a _ndim)-dimensional point's
+   * This check is mandatory to perform the (@a fNumDimensions)-dimensional point's
    * cross-section computation.
    * @brief Is the system's kinematics well defined?
    * @return A boolean stating if the input kinematics and the final states are
@@ -126,21 +126,21 @@ class Process
   /**
    * @brief Returns the number of dimensions on which the integration is performed
    */
-  inline unsigned int ndim() const { return _ndim; }
+  inline unsigned int ndim() const { return fNumDimensions; }
   /**
-   * @brief Returns the value of a component of the @a _ndim -dimensional point considered
+   * @brief Returns the value of a component of the @a fNumDimensions -dimensional point considered
    */
-  inline double x(const unsigned int idx_) { return (idx_>=_ndim)?-1.:_x[idx_]; }
+  inline double x(const unsigned int idx_) { return (idx_>=fNumDimensions)?-1.:fX[idx_]; }
   /**
    * @brief Returns the human-readable name of the process considered
    */
   inline std::string GetName() { return _name; }
  protected:
   /**
-   * @brief Array of @a _ndim components representing the point on which the
+   * @brief Array of @a fNumDimensions components representing the point on which the
    * weight in the cross-section is computed
    */
-  double* _x;
+  double* fX;
   /**
    * @brief \f$s\f$, squared centre of mass energy of the incoming particles' system, in \f$\mathrm{GeV}^2\f$
    */
@@ -152,7 +152,7 @@ class Process
   /**
    * @brief Number of dimensions on which the integration has to be performed.
    */
-  unsigned int _ndim;
+  unsigned int fNumDimensions;
   /**
    * @brief Set of cuts to apply on the final phase space
    */
@@ -165,7 +165,7 @@ class Process
   /**
    * @brief Is the phase space point set ?
    */
-  bool _point_set;
+  bool fIsPointSet;
   /**
    * @brief Are the event's incoming particles set ?
    */

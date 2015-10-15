@@ -3,12 +3,10 @@
 MCGen::MCGen() :
   fVegas(0), fCrossSection(-1.), fCrossSectionError(-1.)
 {
-  this->PrintHeader();
-
-#ifdef DEBUG
   PrintDebug("Generator initialized");
-#endif
-
+  
+  this->PrintHeader();
+  
   srand(time(0)); // Random number initialization
   
   this->parameters = new Parameters;
@@ -20,11 +18,10 @@ MCGen::MCGen(Parameters *ip_) :
 
 MCGen::~MCGen()
 {
+  PrintDebug("Destructor called");
+  
   if (fVegas) delete fVegas;
   delete parameters;
-#ifdef DEBUG
-  PrintDebug("Destructor called");
-#endif
 }
 
 void
@@ -76,19 +73,19 @@ MCGen::PrintHeader()
 void
 MCGen::BuildVegas()
 {
-#ifdef DEBUG
-  std::string topo;
-  switch (parameters->process_mode) {
-    case Process::ElasticElastic:
-      topo = "ELASTIC proton/proton"; break;
-    case Process::ElasticInelastic:
-    case Process::InelasticElastic:
-      topo = "SINGLE-DISSOCIATIVE proton"; break;
-    case Process::InelasticInelastic:
-      topo = "DOUBLE-DISSOCIATIVE protons"; break;
+  if (kLoggingLevel>=Debug) {
+    std::string topo;
+    switch (parameters->process_mode) {
+      case Process::ElasticElastic:
+        topo = "ELASTIC proton/proton"; break;
+      case Process::ElasticInelastic:
+      case Process::InelasticElastic:
+        topo = "SINGLE-DISSOCIATIVE proton"; break;
+      case Process::InelasticInelastic:
+        topo = "DOUBLE-DISSOCIATIVE protons"; break;
+    }
+    PrintDebug(Form("Considered topology: %s case", topo));
   }
-  PrintDebug(Form("Considered topology: %s case", topo));
-#endif
   
   fVegas = new Vegas(parameters->process->GetNdim(parameters->process_mode), f, parameters);
 }
@@ -129,14 +126,9 @@ void
 MCGen::LaunchGeneration()
 {
   // LHE file preparation
-  if (!this->parameters->file->is_open()) {
-    PrintDebug("Output file is not opened");
-  }
-  //#ifdef DEBUG
-  else {
-    PrintInfo("Output file successfully opened");
-  }
-  //#endif
+  if (!this->parameters->file->is_open()) { PrintDebug("Output file is not opened"); }
+  else                                    { PrintDebug("Output file successfully opened"); }
+  
   *(this->parameters->file) << "<LesHouchesEvents version=\"1.0\">" << std::endl;
   *(this->parameters->file) << "<header>This file was created from the output of the CLPAIR generator</header>" << std::endl;
   *(this->parameters->file) << "<init>" << std::endl
@@ -170,15 +162,10 @@ double f(double* x_, size_t ndim_, void* params_)
 
   ff = 0.;
 
-#ifdef DEBUG
-  std::cout << "=====================================" << std::endl
-	    << "function f called ; some parameters :" << std::endl
-            << "  pz(p1) = " << p->in1p << std::endl
-            << "  pz(p2) = " << p->in2p << std::endl
-            << "  remnant mode = " << p->remnant_mode << std::endl
-	    << "=====================================" << std::endl;
-#endif
-
+  PrintDebug(Form("Function f called -- some parameters:\n\t"
+                  "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
+                  "  remnant mode: %d", p->in1p, p->in2p, p->remnant_mode));
+  
   p->process->SetPoint(ndim_, x_);
   p->process->GetEvent()->clear(); // need to move this sw else ?
 
@@ -205,17 +192,17 @@ double f(double* x_, size_t ndim_, void* params_)
 
   switch (kin.kinematics) {
     case Process::ElasticElastic:
-      p->process->SetOutgoingParticles(3, Particle::PROTON, 1); // First outgoing proton
-      p->process->SetOutgoingParticles(5, Particle::PROTON, 2); // Second outgoing proton
+      p->process->SetOutgoingParticles(3, Particle::Proton, 1); // First outgoing proton
+      p->process->SetOutgoingParticles(5, Particle::Proton, 2); // Second outgoing proton
     case Process::ElasticInelastic:
-      p->process->SetOutgoingParticles(3, Particle::PROTON, 1); // First outgoing proton
-      p->process->SetOutgoingParticles(5, Particle::QUARK_U, 2); // Second outgoing proton remnant
+      p->process->SetOutgoingParticles(3, Particle::Proton, 1); // First outgoing proton
+      p->process->SetOutgoingParticles(5, Particle::uQuark, 2); // Second outgoing proton remnant
     case Process::InelasticElastic:
-      p->process->SetOutgoingParticles(3, Particle::QUARK_U, 1); // First outgoing proton
-      p->process->SetOutgoingParticles(5, Particle::PROTON, 2); // Second outgoing proton remnant
+      p->process->SetOutgoingParticles(3, Particle::uQuark, 1); // First outgoing proton
+      p->process->SetOutgoingParticles(5, Particle::Proton, 2); // Second outgoing proton remnant
     case Process::InelasticInelastic:
-      p->process->SetOutgoingParticles(3, Particle::QUARK_U, 1); // First outgoing proton
-      p->process->SetOutgoingParticles(5, Particle::QUARK_U, 2); // Second outgoing proton remnant
+      p->process->SetOutgoingParticles(3, Particle::uQuark, 1); // First outgoing proton
+      p->process->SetOutgoingParticles(5, Particle::uQuark, 2); // Second outgoing proton remnant
   }
   p->process->SetOutgoingParticles(6, p->pair); // Outgoing leptons
   
@@ -245,38 +232,35 @@ double f(double* x_, size_t ndim_, void* params_)
     p->process->GetEvent()->time_generation = tmr.elapsed();
 
     if (kin.kinematics>1) {
-#ifdef DEBUG
-      PrintDebug(Form("Event before calling the hadroniser (%s)", p->Hadroniser->GetName()));
-      p->process->GetEvent()->Dump();
-#endif
+
+      PrintDebug(Form("Event before calling the hadroniser (%s)", p->hadroniser->GetName()));
+      if (kLoggingLevel>=Debug) p->process->GetEvent()->Dump();
+      
       num_hadr_trials = 0;
       do {
         hadronised = p->hadroniser->Hadronise(p->process->GetEvent());
-#ifdef DEBUG
+
         if (num_hadr_trials>0) {
           PrintDebug(Form("Hadronisation failed. Trying for the %dth time", num_hadr_trials+1));
         }
-#endif
+        
         num_hadr_trials++;
       } while (!hadronised and num_hadr_trials<=p->hadroniser_max_trials);
       p->process->GetEvent()->num_hadronisation_trials = num_hadr_trials;
-#ifdef DEBUG
+
       PrintDebug(Form("Event hadronisation succeeded after %d trial(s)", p->process->GetEvent()->num_hadronisation_trials));
-#endif
 
       if (num_hadr_trials>p->hadroniser_max_trials) return 0.; //FIXME
-#ifdef DEBUG
+      
       PrintDebug(Form("Event after calling the hadroniser (%s)", p->hadroniser->GetName()));
-      p->process->GetEvent()->Dump();
-#endif
+      if (kLoggingLevel>=Debug) p->process->GetEvent()->Dump();
     }
     p->process->GetEvent()->time_total = tmr.elapsed();
     
-#ifdef DEBUG
-  PrintDebug(Form("Generation time:       %5.6f sec\n\t"
-                  "Total time (gen+hadr): %5.6f sec",
-                  p->process->GetEvent()->time_generation, p->process->GetEvent()->time_total));
-#endif
+    PrintDebug(Form("Generation time:       %5.6f sec\n\t"
+                    "Total time (gen+hadr): %5.6f sec",
+                    p->process->GetEvent()->time_generation,
+                    p->process->GetEvent()->time_total));
 
     *(p->last_event) = *(p->process->GetEvent());
     //p->process->GetEvent()->Store(p->file);

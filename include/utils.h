@@ -21,6 +21,7 @@ static std::stringstream error;
  */
 #define drand() (double)(rand())/RAND_MAX
 
+/// Formats a string using a printf style format descriptor.
 std::string Form(const std::string fmt, ...);
 
 /**

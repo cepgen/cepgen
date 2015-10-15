@@ -15,11 +15,9 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
     fXup[i] = 1.;
   }
   
-#ifdef DEBUG
   PrintDebug(Form("Number of integration dimensions: %d\n\t"
                   "Number of iterations:             %d\n\t"
                   "Number of function calls:         %d", dim_, inParam_->itvg, inParam_->ncvg));
-#endif
 
   fFunction = new gsl_monte_function;
   fFunction->f = f_;
@@ -31,9 +29,8 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
 
 Vegas::~Vegas()
 {
-#ifdef DEBUG
   PrintDebug("Destructor called");
-#endif
+  
   delete[] fXlow;
   delete[] fXup;
   delete[] _nm;
@@ -68,12 +65,7 @@ Vegas::Integrate(double *result_, double *abserr_)
   /// Integration
   for (unsigned int i=0; i<fNumIter; i++) {
     veg_res = gsl_monte_vegas_integrate(fFunction, fXlow, fXup, fFunction->dim, fNumConverg/5, rng, state, &res, &err);
-    std::cout << "--> iteration " 
-      	      << std::setfill(' ') << std::setw(2) << (i+1) << " : "
-	            << "average = " << std::setprecision(5) << std::setw(14) << res
-	            << "sigma = " << std::setprecision(5) << std::setw(14) << err
-      	      << "chi2 = " << gsl_monte_vegas_chisq(state)
-              << std::endl;
+    std::cout << Form("-> iteration %2d: average = %8.3f   sigma = %8.3f   chi2 = %4.3f", i+1, res, err, gsl_monte_vegas_chisq(state)) << std::endl;
   }
   
   // Clean Vegas
@@ -176,9 +168,9 @@ Vegas::GenerateOneEvent()
     fFGlobalMax = weight;
     fCorrec = (_nm[fJ]-1.)*fmax_diff/fFGlobalMax*weight/fFGlobalMax-1.;
   }
-#ifdef DEBUG
+  
   PrintDebug(Form("Correc.: %f, j = %d", fCorrec, fJ));
-#endif
+  
   // Return with an accepted event
   if (weight>0.) return this->StoreEvent(x);
   return false;
@@ -191,13 +183,11 @@ Vegas::CorrectionCycle()
   double weight;
   double fmax_old = 0., fmax_diff = 0., fmax2 = 0.;
   
-#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Correction cycles are started."
-      << "\n\tj = " << fJ
-      << "\n\tcorrec = " << fCorrec
-      << "\n\tcorre2 = " << fCorrec2
-      << std::endl;
-#endif
+  PrintDebug(Form("Correction cycles are started.\n\t"
+                  "j = %f"
+                  "correc = %f"
+                  "corre2 = %f", fJ, fCorrec2));
+  
   if (fCorrec>=1.) {
     fCorrec -= 1.;
   }
@@ -247,11 +237,11 @@ Vegas::StoreEvent(double *x_)
   F(x_);
   fInputParameters->ngen += 1;
   fInputParameters->store = false;
-#ifdef DEBUG
+  
   if (fInputParameters->ngen%1000==0) {
-    std::cout << __PRETTY_FUNCTION__ << " Generated events : " << fInputParameters->ngen << std::endl;
+    PrintDebug(Form("Generated events: %d", fInputParameters->ngen));
   }
-#endif
+  
   return true;
 }
 
@@ -269,14 +259,14 @@ Vegas::SetGen()
   double sig2;
   double av, av2;
 
-//#define DEBUG
-
-#ifdef DEBUG
+  // Variables for debugging
   double eff, eff1, eff2;
   double sig, sigp;
-  PrintDebug(Form("MaxGen = %d", fInputParameters->maxgen));
-  fInputParameters->Dump();
-#endif
+  std::ostringstream os;
+  if (kLoggingLevel>=Debug) {
+    PrintDebug(Form("MaxGen = %d", fInputParameters->maxgen));
+    fInputParameters->Dump();
+  }
 
   _nm = new int[20000];
   fFmax = new double[20000];
@@ -319,49 +309,43 @@ Vegas::SetGen()
     sum2 += av2;
     sum2p += sig2;
     if (fFmax[i]>fFGlobalMax) fFGlobalMax = fFmax[i];
-#ifdef DEBUG
-    sig = sqrt(sig2);
-    eff = 1.e4;
-    if (fFmax[i]!=0.) eff = fFmax[i]/av;
-    //#ifdef DEBUG
-    std::cout << __PRETTY_FUNCTION__ << " [DEBUG] in iteration #" << i << " :"
-	      << "\n\tav   = " << av
-	      << "\n\tsig  = " << sig
-	      << "\n\tfmax = " << fFmax[i]
-	      << "\n\teff  = " << eff
-	      << "\n\tn = (";
-    for (unsigned int j=0; j<fFunction->dim; j++) {
-      std::cout << n[j];
-      if (j!=fFunction->dim-1) std::cout << ", ";
+
+    if (kLoggingLevel>=Debug) {
+      sig = sqrt(sig2);
+      eff = 1.e4;
+      if (fFmax[i]!=0.) eff = fFmax[i]/av;
+      for (unsigned int j=0; j<fFunction->dim; j++) { os << n[j]; if (j!=fFunction->dim-1) os << ", "; }
+      PrintDebug(Form("In iteration #%d:\n\t"
+	                    "av   = %f\n\t"
+	                    "sig  = %f\n\t"
+                      "fmax = %f\n\t"
+                      "eff  = %f\n\t"
+                      "n = (%s)", i, av, sig, fFmax[i], eff, os.str().c_str()));
+      std::cout << ")" << std::endl;
     }
-    std::cout << ")" << std::endl;
-#endif
   }
 
   sum = sum/max;
   sum2 = sum2/max;
   sum2p = sum2p/max;
 
-#ifdef DEBUG
-  sig = sqrt(sum2-pow(sum, 2));
-  sigp = sqrt(sum2p);
-  eff1 = 0.;
-  for (int i=0; i<max; i++) {
-    eff1 += fFmax[i];
+  if (kLoggingLevel>=Debug) {
+    sig = sqrt(sum2-pow(sum, 2));
+    sigp = sqrt(sum2p);
+    
+    eff1 = 0.;
+    for (int i=0; i<max; i++) eff1 += (fFmax[i]/(max*sum));
+    eff2 = fFGlobalMax/sum;
+    
+    PrintDebug(Form("Average function value     =  sum   = %f\n\t"
+                    "Average function value     =  sum   = %f\n\t"
+                    "Average function value**2  =  sum2  = %f\n\t"
+                    "Overall standard deviation =  sig   = %f\n\t"
+                    "Average standard deviation =  sigp  = %f\n\t"
+                    "Maximum function value     = ffmax  = %f\n\t"
+                    "Average inefficiency       =  eff1  = %f\n\t"
+                    "Overall inefficiency       =  eff2  = %f\n\t"
+                    "eff = %f", sum, sum2, sig, sigp, fFGlobalMax, eff1, eff2, eff));
   }
-  eff1 = eff1/(max*sum);
-  eff2 = fFGlobalMax/sum;
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]"
-            << "\n\tAverage function value     =  sum   = " << sum
-            << "\n\tAverage function value**2  =  sum2  = " << sum2
-            << "\n\tOverall standard deviation =  sig   = " << sig
-            << "\n\tAverage standard deviation =  sigp  = " << sigp
-            << "\n\tMaximum function value     = ffmax  = " << fFGlobalMax
-            << "\n\tAverage inefficiency       =  eff1  = " << eff1 
-            << "\n\tOverall inefficiency       =  eff2  = " << eff2 
-            << "\n\teff = " << eff 
-            << std::endl;
-#endif
-//#undef DEBUG
 }
 

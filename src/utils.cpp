@@ -7,18 +7,13 @@ void Map(double expo_, double xmin_, double xmax_, double* out_, double* dout_)
   out = xmin_*std::pow(y, expo_);
   *out_ = out;
   *dout_ = out*log(y);
-#ifdef DEBUG
-  std::cout << "=====================================" << std::endl;
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG]"
-            << "\n  min = " << xmin_
-            << "\n  max = " << xmax_
-            << "\n  max/min = " << y
-            << "\n  exponent = " << expo_
-            << "\n  output = " << *out_
-            << "\n  d(output) = "<< *dout_
-            << std::endl;
-  std::cout << "=====================================" << std::endl;
-#endif
+  PrintDebug(Form("min = %f\n\t"
+                  "max = %f\n\t"
+                  "max/min = %f\n\t"
+                  "exponent = %f\n\t"
+                  "output = %f\n\t"
+                  "d(output) = %f",
+                  xmin_, xmax_, y, expo_, *out_, *dout_));
 }
 
 void Mapla(double y_, double z_, int u_, double xm_, double xp_, double* x_, double* d_)
@@ -81,30 +76,26 @@ double GenerT(double tmin_, double tmax_, double b_, double anexp_)
 
   bloc = b_;
   if (b_<.1) {
-    std::cerr << __PRETTY_FUNCTION__ << " ERROR: B=" << b_ << std::endl;
+    PrintInfo(Form("ERROR: B=%f < 1", b_));
     bloc = .1;
   }
   if (tmin_>=tmax_) {
-    std::cerr << __PRETTY_FUNCTION__ << " ERROR: TMIN=" << tmin_ << ", TMAX=" << tmax_ << " => return TMIN=" << tmin_ << std::endl;
+    PrintInfo(Form("ERROR: TMIN=%f >= TMAX=%f => return TMIN=%f", tmin_, tmax_, tmin_))
     return tmin_;
   }
 
   iter = 0;
   do {
     if (anexp_<=1.) {
-      // power law exponent is 0 or illegal                                                                                                                      
+      // power law exponent is 0 or illegal
       //  => generate pure exp(bt) spectrum 
       if (bloc*(tmax_-tmin_)>=25.) {
-	t = tmin_-log(drand())/bloc;
-#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " DEBUG: Method 1: T=" << t << std::endl;
-#endif
+	      t = tmin_-log(drand())/bloc;
+        PrintDebug(Form("Method 1: T=%f", t));
       }
       else {
-	t = tmin_-log(1.-drand()*(1.-exp(bloc*(tmin_-tmax_))))/bloc;
-#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " DEBUG: Method 2: T=" << t << std::endl;
-#endif
+	      t = tmin_-log(1.-drand()*(1.-exp(bloc*(tmin_-tmax_))))/bloc;
+        PrintDebug(Form("Method 2: T=%f", t));
       }
     }
     else {
@@ -121,9 +112,8 @@ double GenerT(double tmin_, double tmax_, double b_, double anexp_)
     iter++;
   } while ((t<tmin_ or t>tmax_) and iter<=100);
   if (iter>100) {
-    std::cout << __PRETTY_FUNCTION__ << " WARNING: more than 100 iterations!" << std::endl
-	      << "TMIN: " << tmin_ << ", TMAX: " << tmax_ << " BLOC: " << bloc << ", T: " << t
-	      << std::endl;
+    PrintInfo(Form("WARNING: more than 100 iterations!\n\t"
+                   "TMIN: %f, TMAX: %f, BLOC: %f, T: %f", tmin_, tmax_, bloc, t));
   }
   return t;
 }
@@ -134,7 +124,7 @@ double GenTDL(double tmin_, double tmax_, double b_, int n_)
   double t, w;
 
   if (tmin_>tmax_) {
-    std::cerr << __PRETTY_FUNCTION__ << " ERROR: TMIN=" << tmin_ << ", TMAX=" << tmax_ << " => return TMIN=" << tmin_ << std::endl;
+    PrintInfo(Form("ERROR: TMIN=%f, TMAX=%f => return TMIN=%f", tmin_, tmax_, tmin_));
     return tmin_;
   }
 
@@ -142,23 +132,18 @@ double GenTDL(double tmin_, double tmax_, double b_, int n_)
   do {
     if (b_*(tmax_-tmin_)>=25.) {
       t = tmin_-log(drand())/b_;
-#ifdef DEBUG
-      std::cout << __PRETTY_FUNCTION__ << " DEBUG: Method 1: T=" << t << std::endl;
-#endif
+      PrintDebug(Form("Method 1: T=%f", t));
     }
     else {
       t = tmin_-log(1.-drand()*(1.-exp(b_*(tmin_-tmax_))))/b_;
-#ifdef DEBUG
-      std::cout << __PRETTY_FUNCTION__ << " DEBUG: Method 2: T=" << t << std::endl;
-#endif
+      PrintDebug(Form("Method 2: T=%f", t));
     }
     w = std::pow((1.+1.41*tmin_)/(1.+1.41*t), n_);
     iter += 1;
   } while ((t<tmin_ or t>tmax_ or w<drand()) and iter<=100);
   if (iter>100) {
-    std::cout << __PRETTY_FUNCTION__ << " WARNING: more than 100 iterations!" << std::endl
-	      << "TMIN: " << tmin_ << ", TMAX: " << tmax_ << ", T: " << t
-	      << std::endl;
+    PrintInfo(Form("WARNING: more than 100 iterations!\n\t"
+                   "TMIN: %f, TMAX: %f, T: %f", tmin_, tmax_, t));
   }
   return t;
 }
@@ -188,26 +173,22 @@ double EtaToY(double eta_, double m_, double pt_)
 
 std::string
 Form(const std::string fmt, ...)
-{
-  // Formats a string using a printf style format descriptor.
-  // Existing string contents will be overwritten.
-  
+{  
   int size = ((int)fmt.size()) * 2 + 50;   // Use a rubric appropriate for your code
   std::string str;
   va_list ap;
-  while (1) {     // Maximum two passes on a POSIX system...
-      str.resize(size);
-      va_start(ap, fmt);
-      int n = vsnprintf((char *)str.data(), size, fmt.c_str(), ap);
-      va_end(ap);
-      if (n > -1 && n < size) {  // Everything worked
-          str.resize(n);
-          return str;
-      }
-      if (n > -1)  // Needed size returned
-          size = n + 1;   // For null char
-      else
-          size *= 2;      // Guess at a larger size (OS specific)
+  while (true) {     // Maximum two passes on a POSIX system...
+    str.resize(size);
+    va_start(ap, fmt);
+    int n = vsnprintf((char*)str.data(), size, fmt.c_str(), ap);
+    va_end(ap);
+    if (n>-1 and n<size) {  // Everything worked
+      str.resize(n);
+      return str;
+    }
+    if (n>-1)  // Needed size returned
+         size = n + 1;   // For null char
+    else size *= 2;      // Guess at a larger size (OS specific)
   }
   return str;
 }  

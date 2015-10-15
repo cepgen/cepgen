@@ -22,9 +22,7 @@ Particle::Particle(int role_, ParticleCode pdgId_) :
 
 Particle::~Particle()
 {
-#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Destructor called" << std::endl;
-#endif
+  PrintDebug("Destructor called");
 }
 
 Particle&
@@ -121,11 +119,10 @@ Particle::SetMother(Particle* part_)
 {
   this->_moth.insert(part_->id);
   this->_isPrimary = false;
-#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Particle "
-	    << part_->id+1 << " (pdgId=" << part_->pdgId << ") is the new mother of "
-	    << this->id+1 << " (pdgId=" << this->pdgId << ")" << std::endl;
-#endif
+  
+  PrintDebug(Form("Particle %2d (pdgId=%4d) is the new mother of %2d (pdgId=%4d)",
+                  part_->id+1, part_->pdgId, id+1, pdgId));
+  
   part_->AddDaughter(this);
 };
 
@@ -134,22 +131,21 @@ Particle::AddDaughter(Particle* part_)
 {
   std::pair<ParticlesIds::iterator,bool> ret;
   ret = this->_daugh.insert(part_->id);
-#ifdef DEBUG
-  ParticlesIds::iterator it;
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Particle "
-	    << this->role << " (pdgId=" << this->pdgId << ") has now "
-	    << this->NumDaughters() << " daughter(s) : " << std::endl;
-  for (it=this->_daugh.begin(); it!=this->_daugh.end(); it++) {
-    std::cout << " * " << *it << std::endl;
-  }
-#endif
 
+  if (kLoggingLevel>=Debug) {
+    std::ostringstream os;
+    ParticlesIds::iterator it;
+    for (it=this->_daugh.begin(); it!=this->_daugh.end(); it++) {
+      os << " * " << *it << std::endl;
+    }
+    PrintDebug(Form("Particle %2d (pdgId=%4d) has now %2d daughter(s):\n\t"
+                    "%s", role, pdgId, NumDaughters(), os.str().c_str()));
+  }
+  
   if (ret.second) {
-#ifdef DEBUG
-    std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Particle " 
-	      << part_->role << " (pdgId=" << part_->pdgId << ") is a new daughter of "
-	      << this->role << " (pdgId=" << this->pdgId << ")" << std::endl;
-#endif
+    PrintDebug(Form("Particle %2d (pdgId=%4d) is a new daughter of %2d (pdgId=%4d)",
+                    part_->role, part_->pdgId, role, pdgId));
+    
     if (!part_->Primary() && part_->GetMothersIds().size()<1) {
       part_->SetMother(this);
     }
@@ -167,21 +163,17 @@ Particle::GetDaughters()
   if (this->_daugh.empty()) return out;
   
   out.reserve(this->_daugh.size());
-#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Reserved " << this->_daugh.size() << " slot(s) for the daughter particle(s)" << std::endl;
-#endif
+  
+  PrintDebug(Form("Reserved %d slot(s) for the daughter particle(s)", _daugh.size()));
   
   for (it=this->_daugh.begin(); it!=this->_daugh.end(); it++) {
     if (*it==-1) continue;
-#ifdef DEBUG
-    std::cout << " * " << *it << std::endl;
-#endif
     out.push_back(*it);
   }
   std::sort(out.begin(), out.end());
-#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Returning a vector containing " << out.size() << " particle(s)" << std::endl;
-#endif
+  
+  PrintDebug(Form("Returning a vector containing %d particle(s)", out.size()))
+  
   return out;
 }
  
@@ -294,21 +286,21 @@ double
 Particle::GetMassFromPDGId(Particle::ParticleCode pdgId_)
 {
   switch (abs(pdgId_)) {
-  case QUARK_D:     return 0.33;           // mass from PYTHIA6.4
-  case QUARK_U:     return 0.33;           // mass from PYTHIA6.4
-  case ELECTRON:    return 0.510998928e-3;
-  case MUON:        return 0.1056583715;
-  case TAU:         return 1.77682;
-  case GLUON:       return 0.;
-  case PHOTON:      return 0.;
-  case PI_PLUS:     return 0.13957018;
-  case PI_0:        return 0.1349766;
-  case J_PSI:       return 20.;            // J/psi //FIXME FIXME FIXME
+  case dQuark:      return 0.33;           // mass from PYTHIA6.4
+  case uQuark:      return 0.33;           // mass from PYTHIA6.4
+  case Electron:    return 0.510998928e-3;
+  case Muon:        return 0.1056583715;
+  case Tau:         return 1.77682;
+  case Gluon:       return 0.;
+  case Photon:      return 0.;
+  case PiPlus:      return 0.13957018;
+  case PiZero:      return 0.1349766;
+  case JPsi:        return 20.;            // J/psi //FIXME FIXME FIXME
   case DIQUARK_UD0: return 0.57933;
   case DIQUARK_UD1: return 0.77133;
   case DIQUARK_UU1: return 0.77133;
-  case PROTON:      return 0.938272046;
-  case NEUTRON:     return 0.939565346;
+  case Proton:      return 0.938272046;
+  case Neutron:     return 0.939565346;
   default:          return -1.;
   }
 }
@@ -317,7 +309,7 @@ double
 Particle::GetWidthFromPDGId(Particle::ParticleCode pdgId_)
 {
   switch (abs(pdgId_)) {
-  case J_PSI:  return 5.; //FIXME
+  case JPsi:  return 5.; //FIXME
   default:     return -1.;
   }
 }
