@@ -21,7 +21,8 @@ int main(int argc, char* argv[]) {
   ofstream output;
   //ofstream output2;
   
-  kLoggingLevel = Debug;
+  Logger::GetInstance()->Level = Logger::Debug;
+  //Logger::GetInstance()->OutputStream = ofstream("log.txt");
   
   if (argc==1) {
     Info("No config file provided. Setting the default parameters.");

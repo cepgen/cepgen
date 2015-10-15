@@ -57,7 +57,7 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
     for (int j=0; j<max_part_in_str; j++) jlpsf[i][j] = -1;
   }
   
-  if (kLoggingLevel>=Debug) {
+  if (Logger::GetInstance()->Level>=Logger::Debug) {
     Debug("Dump of the event before the hadronisation");
     ev_->Dump();
   }

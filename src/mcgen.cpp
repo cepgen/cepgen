@@ -1,7 +1,5 @@
 #include "mcgen.h"
 
-//static LoggingLevel kLoggingLevel = Warning;
-
 MCGen::MCGen() :
   fVegas(0), fCrossSection(-1.), fCrossSectionError(-1.)
 {
@@ -41,7 +39,7 @@ MCGen::PrintHeader()
 void
 MCGen::BuildVegas()
 {
-  if (kLoggingLevel>=Debug) {
+  if (Logger::GetInstance()->Level>=Logger::Debug) {
     std::string topo;
     switch (parameters->process_mode) {
       case Process::ElasticElastic:
@@ -202,8 +200,8 @@ double f(double* x_, size_t ndim_, void* params_)
 
     if (kin.kinematics!=Process::ElasticElastic) {
 
-      Debug(Form("Event before calling the hadroniser (%s)", p->hadroniser->GetName()));
-      if (kLoggingLevel>=Debug) p->process->GetEvent()->Dump();
+      Debug(Form("Event before calling the hadroniser (%s)", p->hadroniser->GetName().c_str()));
+      if (Logger::GetInstance()->Level>=Logger::Debug) p->process->GetEvent()->Dump();
       
       num_hadr_trials = 0;
       do {
@@ -223,8 +221,8 @@ double f(double* x_, size_t ndim_, void* params_)
 
       if (num_hadr_trials>p->hadroniser_max_trials) return 0.; //FIXME
       
-      Debug(Form("Event after calling the hadroniser (%s)", p->hadroniser->GetName()));
-      if (kLoggingLevel>=Debug) p->process->GetEvent()->Dump();
+      Debug(Form("Event after calling the hadroniser (%s)", p->hadroniser->GetName().c_str()));
+      if (Logger::GetInstance()->Level>=Logger::Debug) p->process->GetEvent()->Dump();
     }
     p->process->GetEvent()->time_total = tmr.elapsed();
     

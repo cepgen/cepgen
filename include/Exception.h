@@ -6,12 +6,14 @@
 #include <string>
 #include <cstdlib> // exit()
 
-enum LoggingLevel { Nothing, Error, Warning, Information, Debug, DebugInsideLoop };
-//extern LoggingLevel kLoggingLevel;
+#include "Logger.h"
 
-#define Info(m)  if (kLoggingLevel>Nothing) { Exception(__PRETTY_FUNCTION__, m, Info).Dump(); }
-#define Debug(m) if (kLoggingLevel>=Debug)  { Exception(__PRETTY_FUNCTION__, m, Debugging).Dump(); }
-#define DebugInsideLoop(m) if (kLoggingLevel>=DebugInsideLoop) { Exception(__PRETTY_FUNCTION__, m, Debugging).Dump(); }
+#define Info(m) \
+  if (Logger::GetInstance()->Level>Logger::Nothing) { Exception(__PRETTY_FUNCTION__, m, Info).Dump(Logger::GetInstance()->OutputStream); }
+#define Debug(m) \
+  if (Logger::GetInstance()->Level>=Logger::Debug)  { Exception(__PRETTY_FUNCTION__, m, Debugging).Dump(Logger::GetInstance()->OutputStream); }
+#define DebugInsideLoop(m) \
+  if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) { Exception(__PRETTY_FUNCTION__, m, Debugging).Dump(Logger::GetInstance()->OutputStream); }
 
 /**
  * \brief Enumeration of exception severities
@@ -101,4 +103,3 @@ class Exception
 
 #endif
 
-static LoggingLevel kLoggingLevel = Warning;

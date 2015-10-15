@@ -96,7 +96,7 @@ GamGamLL::SetOutgoingParticles(int part_, Particle::ParticleCode pdgId_, int)
   _setout = setp3 and setp5 and setll;
   _setkin = _setin and _setout;
   
-  if (kLoggingLevel>=DebugInsideLoop) {
+  if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
     DebugInsideLoop(Form("Particle %d has PDG id=%d", part_, pdgId_));
     if (_setout) {
       std::cout << "  --> Outgoing state is fully set" << std::endl;
@@ -649,9 +649,9 @@ GamGamLL::ComputeMX(double x_, double outmass_, double *dw_)
   wx2max = std::pow(_ecm-_mp2-2.*outmass_, 2);
   Map(x_, wx2min, wx2max, &mx2, &dmx2);
 
-  Debug(Form("mX^2 in range (%f, %f), x = %f\n\t"
-                  "mX^2 = %f, d(mX^2) = %f\n\t"
-                  "mX = %f, d(mX) = %f", wx2min, wx2max, x_, mx2, dmx2, sqrt(mx2), sqrt(dmx2)));
+  DebugInsideLoop(Form("mX^2 in range (%f, %f), x = %f\n\t"
+                       "mX^2 = %f, d(mX^2) = %f\n\t"
+                       "mX = %f, d(mX) = %f", wx2min, wx2max, x_, mx2, dmx2, sqrt(mx2), sqrt(dmx2)));
 
   *dw_ = sqrt(dmx2);
   return sqrt(mx2);
@@ -721,7 +721,7 @@ GamGamLL::ComputeWeight()
     Orient();
   } catch (Exception& e) {
     //e.Dump();
-    //if (kLoggingLevel>=Warning) e.Dump();
+    //if (Logger::GetInstance()->Level>=Logger::Warning) e.Dump();
     return 0.;
   }
 
@@ -1193,7 +1193,7 @@ GamGamLL::FillKinematics(bool symmetrise_)
 
   //std::cout << "---> " << __PRETTY_FUNCTION__ << ", " << __FILE__ << std::endl;
 
-  if (kLoggingLevel>=DebugInsideLoop) {
+  if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
     gmux = -_t2/(_ep1*_eg2-_pp1*_p3_g2[2])/2.;
     gmuy = (_ep1*plab_ph2[3]-_pp1*plab_ph2[2])/(_ep2*plab_ph2[3]+_pp2*plab_ph2[2]);
     gmuw = std::pow(_ep1+plab_ph2[3], 2)-std::pow(_pp1+plab_ph2[2], 2);

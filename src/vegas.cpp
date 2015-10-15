@@ -263,9 +263,8 @@ Vegas::SetGen()
   double eff, eff1, eff2;
   double sig, sigp;
   std::ostringstream os;
-  if (kLoggingLevel>=Debug) {
+  if (Logger::GetInstance()->Level>=Logger::Debug) {
     Debug(Form("MaxGen = %d", fInputParameters->maxgen));
-    fInputParameters->Dump();
   }
 
   _nm = new int[20000];
@@ -310,7 +309,7 @@ Vegas::SetGen()
     sum2p += sig2;
     if (fFmax[i]>fFGlobalMax) fFGlobalMax = fFmax[i];
 
-    if (kLoggingLevel>=Debug) {
+    if (Logger::GetInstance()->Level>=Logger::Debug) {
       sig = sqrt(sig2);
       eff = 1.e4;
       if (fFmax[i]!=0.) eff = fFmax[i]/av;
@@ -330,7 +329,7 @@ Vegas::SetGen()
   sum2 = sum2/max;
   sum2p = sum2p/max;
 
-  if (kLoggingLevel>=Debug) {
+  if (Logger::GetInstance()->Level>=Logger::Debug) {
     sig = sqrt(sum2-pow(sum, 2));
     sigp = sqrt(sum2p);
     

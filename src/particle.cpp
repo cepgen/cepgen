@@ -130,7 +130,7 @@ Particle::AddDaughter(Particle* part_)
   std::pair<ParticlesIds::iterator,bool> ret;
   ret = fDaughters.insert(part_->id);
 
-  if (kLoggingLevel>=Debug) {
+  if (Logger::GetInstance()->Level>=Logger::Debug) {
     std::ostringstream os;
     ParticlesIds::iterator it;
     for (it=fDaughters.begin(); it!=fDaughters.end(); it++) os << Form("\n\t * %d", *it);
@@ -160,7 +160,7 @@ Particle::GetDaughters()
   
   out.reserve(fDaughters.size());
   
-  Debug(Form("Reserved %d slot(s) for the daughter particle(s)", fDaughters.size()));
+  DebugInsideLoop(Form("Reserved %d slot(s) for the daughter particle(s)", fDaughters.size()));
   
   for (it=fDaughters.begin(); it!=fDaughters.end(); it++) {
     if (*it==-1) continue;
@@ -168,7 +168,7 @@ Particle::GetDaughters()
   }
   std::sort(out.begin(), out.end());
   
-  Debug(Form("Returning a vector containing %d particle(s)", out.size()))
+  DebugInsideLoop(Form("Returning a vector containing %d particle(s)", out.size()))
   
   return out;
 }
