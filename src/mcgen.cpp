@@ -161,15 +161,19 @@ double f(double* x_, size_t ndim_, void* params_)
     case Process::ElasticElastic:
       p->process->SetOutgoingParticles(3, Particle::Proton, 1); // First outgoing proton
       p->process->SetOutgoingParticles(5, Particle::Proton, 2); // Second outgoing proton
+      break;
     case Process::ElasticInelastic:
-      p->process->SetOutgoingParticles(3, Particle::Proton, 1); // First outgoing proton
-      p->process->SetOutgoingParticles(5, Particle::uQuark, 2); // Second outgoing proton remnant
+      //p->process->SetOutgoingParticles(3, Particle::Proton, 1); // First outgoing proton
+      //p->process->SetOutgoingParticles(5, Particle::uQuark, 2); // Second outgoing proton remnant
+      break;
     case Process::InelasticElastic:
       p->process->SetOutgoingParticles(3, Particle::uQuark, 1); // First outgoing proton
       p->process->SetOutgoingParticles(5, Particle::Proton, 2); // Second outgoing proton remnant
+      break;
     case Process::InelasticInelastic:
       p->process->SetOutgoingParticles(3, Particle::uQuark, 1); // First outgoing proton
       p->process->SetOutgoingParticles(5, Particle::uQuark, 2); // Second outgoing proton remnant
+      break;
   }
   p->process->SetOutgoingParticles(6, p->pair); // Outgoing leptons
   

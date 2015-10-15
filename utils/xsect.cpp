@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
   ip.process = new GamGamLL;
   ip.hadroniser = new Pythia6Hadroniser;
   ip.process_mode = Process::InelasticElastic;
-  ip.pair = Particle::MUON;
+  ip.pair = Particle::Muon;
   ip.remnant_mode = Process::SuriYennie;
   //ip.p2mod = 11;
   /*ip.maxtheta = 0;
