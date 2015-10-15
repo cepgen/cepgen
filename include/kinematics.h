@@ -27,8 +27,9 @@ class Kinematics
    * Type of kinematics to consider for the process. Can either be :
    *  * 0 for the electron-proton elastic case
    *  * 1 for the proton-proton elastic case
-   *  * 2 for the proton-proton single-dissociative (or inelastic) case
-   *  * 3 for the proton-proton double-dissociative case
+   *  * 2 for the proton-proton single-dissociative (or inelastic-elastic) case
+   *  * 3 for the proton-proton single-dissociative (or elastic-inelastic) case
+   *  * 4 for the proton-proton double-dissociative case
    * @brief Type of kinematics to consider for the phase space
    */
   int kinematics;

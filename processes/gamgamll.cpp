@@ -95,15 +95,16 @@ GamGamLL::SetOutgoingParticles(int part_, Particle::ParticleCode pdgId_, int)
   }
   _setout = setp3 and setp5 and setll;
   _setkin = _setin and _setout;
-#ifdef DEBUG
-  PrintDebug(Form("Particle %d has PDG id=%d", part_, pdgId_));
-  if (_setout) {
-    std::cout << "  --> Outgoing state is fully set" << std::endl;
+  
+  if (kLoggingLevel>=DebugInsideLoop) {
+    DebugInsideLoop(Form("Particle %d has PDG id=%d", part_, pdgId_));
+    if (_setout) {
+      std::cout << "  --> Outgoing state is fully set" << std::endl;
+    }
+    if (_setkin) {
+      std::cout << "  --> Kinematics is fully set" << std::endl;
+    }
   }
-  if (_setkin) {
-    std::cout << "  --> Kinematics is fully set" << std::endl;
-  }
-#endif
 }
 
 void
@@ -177,10 +178,9 @@ GamGamLL::Pickin()
   double dd, delb;
   double sbb, sdd, see, ssb, ssd, sse;
   double d6, d8;
-
-#ifdef DEBUG
-  PrintDebug(Form("_nOpt = %i", _nOpt));
-#endif
+  
+  DebugInsideLoop(Form("Optimised mode? %i", _nOpt));
+  
   _dj = 0.;
 
   _w4 = std::pow(_mc4, 2);
@@ -189,11 +189,9 @@ GamGamLL::Pickin()
   sig1 = std::pow(sig, 2);
   sig2 = std::pow(sig, 2);
 
-#ifdef DEBUG
-  PrintDebug(Form("mc4 = %f\n\t"
-                  "sig1 = %f\n\t"
-                  "sig2 = %f", _mc4, sig1, sig2));
-#endif
+  DebugInsideLoop(Form("mc4 = %f\n\t"
+                       "sig1 = %f\n\t"
+                       "sig2 = %f", _mc4, sig1, sig2));
 
   // Mass difference between the first outgoing particle and the first incoming
   // particle
@@ -207,14 +205,12 @@ GamGamLL::Pickin()
   // outgoing particle
   d6 = _w4-_w5;
 
-#ifdef DEBUG
-  PrintDebug(Form("w1 = %f\n\t"
-                  "w2 = %f\n\t"
-                  "w3 = %f\n\t"
-                  "w4 = %f\n\t"
-                  "w5 = %f\n\t",
-                  _w1, _w2, _w3, _w4, _w5));
-#endif
+  DebugInsideLoop(Form("w1 = %f\n\t"
+                       "w2 = %f\n\t"
+                       "w3 = %f\n\t"
+                       "w4 = %f\n\t"
+                       "w5 = %f\n\t",
+                       _w1, _w2, _w3, _w4, _w5));
 
   ss = _s+_w12;
   
@@ -228,9 +224,8 @@ GamGamLL::Pickin()
     Map(x(2), sig1, smax, &_s2, &ds2);
     sig1 = _s2; //FIXME!!!!!!!!!!!!!!!!!!!!
   }
-#ifdef DEBUG
-  PrintDebug(Form("s2 = %d", _s2));
-#endif
+  
+  DebugInsideLoop(Form("s2 = %d", _s2));
 
   //std::cout << "s=" << _s << ", w3=" << _w3 << ", sig1=" << sig1 << std::endl;
   sp = _s+_w3-sig1;
@@ -247,10 +242,10 @@ GamGamLL::Pickin()
 
   // FIXME dropped in CDF version
   if (_t1max>-_cuts.q2min)
-    throw Exception(__PRETTY_FUNCTION__, Form("t1max = %f > -q2min = %f", _t1max, -_cuts.q2min), Fatal);
+    throw Exception(__PRETTY_FUNCTION__, Form("t1max = %f > -q2min = %f", _t1max, -_cuts.q2min), JustWarning);
   if (_t1min<-_cuts.q2max and _cuts.q2max>=0.)
-    throw Exception(__PRETTY_FUNCTION__, Form("t1min = %f < -q2max = %f", _t1min, -_cuts.q2max), Fatal);
-    
+    throw Exception(__PRETTY_FUNCTION__, Form("t1min = %f < -q2max = %f", _t1min, -_cuts.q2max), JustWarning);
+  
   if (_t1max<-_cuts.q2max and _cuts.q2max>=0.) _t1max = -_cuts.q2max;
   if (_t1min>-_cuts.q2min)                     _t1min = -_cuts.q2min;
   /////
@@ -259,10 +254,9 @@ GamGamLL::Pickin()
   Map(x(0), _t1min, _t1max, &_t1, &dt1);
   // changes wrt mapt1 : dx->-dx
   dt1 = -dt1;
-#ifdef DEBUG
-  PrintDebug(Form("Definition of t1 = %f according to\n\t"
-                  "(t1min, t1max) = (%f, %f)", _t1, _t1min, _t1max));
-#endif
+  
+  DebugInsideLoop(Form("Definition of t1 = %f according to\n\t"
+                       "(t1min, t1max) = (%f, %f)", _t1, _t1min, _t1max));
 
   _dd4 = _w4-_t1;
   d8 = _t1-_w2;
@@ -298,16 +292,13 @@ GamGamLL::Pickin()
   }
   // 4
   s2x = s2max;
-#ifdef DEBUG
-  PrintDebug(Form("s2x = s2max = %f", s2x));
-#endif
-
+  
+  DebugInsideLoop(Form("s2x = s2max = %f", s2x));
+  
   if (_nOpt<0) { // 5
     if (splus>sig2) {
       sig2 = splus;
-#ifdef DEBUG
-      PrintDebug(Form("sig2 truncated to splus = %f", splus));
-#endif
+      DebugInsideLoop(Form("sig2 truncated to splus = %f", splus));
     }
     if (_nOpt<-1) {
       Map(x(2), sig2, s2max, &_s2, &ds2);
@@ -321,9 +312,8 @@ GamGamLL::Pickin()
     s2x = _s2;
   }
 
-#ifdef DEBUG
-  PrintDebug(Form("s2x = %f", s2x));
-#endif
+  DebugInsideLoop(Form("s2x = %f", s2x));
+  
   // 7
   r1 = s2x-d8;
   r2 = s2x-d6;
@@ -346,12 +336,7 @@ GamGamLL::Pickin()
   r3 = _dd4-_t2;
   r4 = _w52-_t2;
 
-#ifdef DEBUG
-  PrintDebug(Form("r1 = %f\n\t"
-                  "r2 = %f\n\t"
-                  "r3 = %f\n\t"
-                  "r4 = %f", r1, r2, r3, r4));
-#endif
+  DebugInsideLoop(Form("r1 = %f\n\tr2 = %f\n\tr3 = %f\n\tr4 = %f", r1, r2, r3, r4));
 
   b = r3*r4-2.*(_t1+_w2)*_t2;
   c = _t2*d6*d8+(d6-d8)*(d6*_w2-d8*_w5);
@@ -430,9 +415,7 @@ GamGamLL::Pickin()
 
   _dj = ds2*dt1*dt2*std::pow(pi, 2)/(8.*_sl1*std::sqrt(-ap));
 
-#ifdef DEBUG
-  PrintDebug(Form("_dj = %d", _dj));
-#endif
+  DebugInsideLoop(Form("_dj = %d", _dj));
 
   _gram = (1.-std::pow(yy4, 2))*dd/ap;
 
@@ -520,10 +503,8 @@ GamGamLL::Orient()
   _ep1 = re*(_s+_w12);
   _ep2 = re*(_s-_w12);
 
-#ifdef DEBUG
-  PrintDebug(Form(" re = %f\n\t_w12 = %f", re, _w12));
-  PrintDebug(Form("Incoming particles' energy = %f, %f", _ep1, _ep2));
-#endif
+  DebugInsideLoop(Form(" re = %f\n\t_w12 = %f", re, _w12));
+  DebugInsideLoop(Form("Incoming particles' energy = %f, %f", _ep1, _ep2));
 
   _p = re*_sl1;
 
@@ -548,22 +529,18 @@ GamGamLL::Orient()
   _pp5 = std::sqrt(std::pow(_ep5, 2)-_w5);
   _p_p3 = std::sqrt(_dd1/_s)/_p;
 
-#ifdef DEBUG
-  PrintDebug(Form("Central system's energy: E4 = %f\n\t"
-                  "                 momentum: p4 = %f\n\t"
-                  "                 invariant mass: m4 = %f\n\t"
-                  "Outgoing particles' energy: E3 = %f\n\t"
-                  "                            E5 = %f",
-                  _ec4, _pc4, _mc4, _ep3, _ep5));
-#endif
+  DebugInsideLoop(Form("Central system's energy: E4 = %f\n\t"
+                       "                 momentum: p4 = %f\n\t"
+                       "                 invariant mass: m4 = %f\n\t"
+                       "Outgoing particles' energy: E3 = %f\n\t"
+                       "                            E5 = %f",
+                       _ec4, _pc4, _mc4, _ep3, _ep5));
 
   _p_p5 = std::sqrt(_dd3/_s)/_p;
   _st3 = _p_p3/_pp3;
   _st5 = _p_p5/_pp5;
 
-#ifdef DEBUG
-  PrintDebug(Form("st3 = %d\n\tst5 = %d", _st3, _st5));
-#endif
+  DebugInsideLoop(Form("st3 = %d\n\tst5 = %d", _st3, _st5));
 
   // FIXME there should be a more beautiful way to check for nan!
   // (http://stackoverflow.com/questions/570669/checking-if-a-double-or-float-is-nan-in-c)
@@ -588,13 +565,9 @@ GamGamLL::Orient()
   _ct3 = std::sqrt(1.-std::pow(_st3, 2));
   _ct5 = std::sqrt(1.-std::pow(_st5, 2));
 
-  if (_ep1*_ep3<_p13) {
-    _ct3 = -_ct3;
-  }
+  if (_ep1*_ep3<_p13) _ct3 *= -1.;
 
-#ifdef DEBUG
-  PrintDebug(Form("ct3 = %d\n\tct5 = %d", _ct3, _ct5));
-#endif
+  DebugInsideLoop(Form("ct3 = %d\n\tct5 = %d", _ct3, _ct5));
 
   if (_ep2*_ep5>_p25) {
     _ct5 = -_ct5;
@@ -626,9 +599,7 @@ GamGamLL::Orient()
     _al4 = std::pow(_st4, 2)/_be4;
   }
 
-#ifdef DEBUG
-  PrintDebug(Form("ct4 = %f\n\tal4 = %f, be4 = %f", _ct4, _al4, _be4));
-#endif
+  DebugInsideLoop(Form("ct4 = %f\n\tal4 = %f, be4 = %f", _ct4, _al4, _be4));
 
   //std::cout << "pp3 = " << _p_p3 << ", pp5 = " << _p_p5 << std::endl;
 
@@ -645,25 +616,21 @@ GamGamLL::Orient()
 
   a1 = _p_p3*_cp3-_p_p5*_cp5; //OK!!!
 
-#ifdef DEBUG
-  PrintDebug(Form("Kinematic quantities\n\t"
-                  "cos(theta3) = %1.2f\tsin(theta3) = %1.2f\tcos( phi3 ) = %1.2f\tsin( phi3 ) = %1.2f\n\t"
-                  "cos(theta4) = %1.2f\tsin(theta4) = %1.2f\tcos( phi4 ) = %1.2f\tsin( phi4 ) = %1.2f\n\t"
-                  "cos(theta5) = %1.2f\tsin(theta5) = %1.2f\tcos( phi5 ) = %1.2f\tsin( phi5 ) = %1.2f",
-                  _ct3, _st3, _cp3, _sp3,
-                  _ct4, _st4, _cp4, _sp4,
-                  _ct5, _st5, _cp5, _sp5));
-#endif
+  DebugInsideLoop(Form("Kinematic quantities\n\t"
+                       "cos(theta3) = %1.4f\tsin(theta3) = %1.4f\tcos( phi3 ) = %1.4f\tsin( phi3 ) = %1.4f\n\t"
+                       "cos(theta4) = %1.4f\tsin(theta4) = %1.4f\n\t"
+                       "cos(theta5) = %1.4f\tsin(theta5) = %1.4f\tcos( phi5 ) = %1.4f\tsin( phi5 ) = %1.4f",
+                       _ct3, _st3, _cp3, _sp3,
+                       _ct4, _st4,
+                       _ct5, _st5, _cp5, _sp5));
 
   if (fabs(_p_p4+_p_p3*_cp3+_cp5*_p_p5)<fabs(fabs(a1)-_p_p4)) {
-#ifdef DEBUG
-    PrintDebug(Form("|pp4+pp3*cos(phi3)+pp5*cos(phi5)| < | |a1|-pp4 |\n\t"
-                    "pp4 = %f\tpp5 = %f\n\t"
-                    "cos(phi3) = %f\tcos(phi5) = %f"
-                    "a1 = %f",
-                    _p_p4, _p_p5, _cp3, _cp5, a1));
-#endif
-    return;
+    throw Exception(__PRETTY_FUNCTION__, 
+                    Form("|pp4+pp3*cos(phi3)+pp5*cos(phi5)| < | |a1|-pp4 |\n\t"
+                         "pp4 = %f\tpp5 = %f\n\t"
+                         "cos(phi3) = %f\tcos(phi5) = %f"
+                         "a1 = %f",
+                         _p_p4, _p_p5, _cp3, _cp5, a1), JustWarning);
   }
   if (a1<0.) _cp5 = -_cp5;
   else       _cp3 = -_cp3;
@@ -682,11 +649,9 @@ GamGamLL::ComputeMX(double x_, double outmass_, double *dw_)
   wx2max = std::pow(_ecm-_mp2-2.*outmass_, 2);
   Map(x_, wx2min, wx2max, &mx2, &dmx2);
 
-#ifdef DEBUG
-  PrintDebug(Form("mX^2 in range (%f, %f), x = %f\n\t"
+  Debug(Form("mX^2 in range (%f, %f), x = %f\n\t"
                   "mX^2 = %f, d(mX^2) = %f\n\t"
                   "mX = %f, d(mX) = %f", wx2min, wx2max, x_, mx2, dmx2, sqrt(mx2), sqrt(dmx2)));
-#endif
 
   *dw_ = sqrt(dmx2);
   return sqrt(mx2);
@@ -744,26 +709,24 @@ GamGamLL::ComputeWeight()
   // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or _wmax if specified)
   wmax = std::pow(_ecm-_mp3-_mp5,2);
   if (fabs(wmax)>fabs(_cuts.wmax)) wmax = _cuts.wmax;
-
-#ifdef DEBUG
-  PrintDebug(Form("\twmin = %f\n\twmax = %f\n\twmax/wmin = %f", wmin, wmax, wmax/wmin));
-#endif
+  
+  DebugInsideLoop(Form("wmin = %f\n\twmax = %f\n\twmax/wmin = %f", wmin, wmax, wmax/wmin));
+  
   Map(x(4),wmin,wmax,&_w4,&dw4);
   _mc4 = std::sqrt(_w4);
-
-#ifdef DEBUG
-  PrintDebug(Form("Computed value for w4 = %f -> mc4 = %f", _w4, _mc4));
-#endif
-
+  
+  DebugInsideLoop(Form("Computed value for w4 = %f -> mc4 = %f", _w4, _mc4));
+  
   try {
     Orient();
   } catch (Exception& e) {
-    e.Dump();
+    //e.Dump();
+    //if (kLoggingLevel>=Warning) e.Dump();
     return 0.;
   }
 
-  if (_t1>0.) throw Exception(__PRETTY_FUNCTION__, Form("t1 = %f > 0", _t1), Fatal);
-  if (_t2>0.) throw Exception(__PRETTY_FUNCTION__, Form("t2 = %f > 0", _t2), Fatal);
+  if (_t1>0.)  throw Exception(__PRETTY_FUNCTION__, Form("t1 = %f > 0", _t1), Fatal);
+  if (_t2>0.)  throw Exception(__PRETTY_FUNCTION__, Form("t2 = %f > 0", _t2), Fatal);
   if (_dj==0.) throw Exception(__PRETTY_FUNCTION__, Form("dj = %f", _dj), Fatal);
   
   ecm6 = (_w4+_w6-_w7)/(2.*_mc4);
@@ -782,15 +745,13 @@ GamGamLL::ComputeWeight()
   pgx = -_p_p3*_cp3*_ct4-_st4*(_de3-e1mp1+e3mp3+_pp3*_al3);
   pgy = -_p_p3*_sp3;
   pgz = _mc4*_de3/(_ec4+_pc4)-_ec4*_de3*_al4/_mc4-_p_p3*_cp3*_ec4*_st4/_mc4+_ec4*_ct4/_mc4*(_pp3*_al3+e3mp3-e1mp1);
-
-#ifdef DEBUG
-  PrintDebug(Form("pg3 = (%f, %f, %f)\n\t"
-                  "pg3^2 = %f",
-                  pg3[0], pg3[1], pg3[2],
-                  std::sqrt(std::pow(pg3[0], 2)+std::pow(pg3[1], 2)+std::pow(pg3[2], 2))
-                 ));
-#endif
-
+  
+  DebugInsideLoop(Form("pg3 = (%f, %f, %f)\n\t"
+                       "pg3^2 = %f",
+                       pgx, pgy, pgz,
+                       std::sqrt(std::pow(pgx, 2)+std::pow(pgy, 2)+std::pow(pgz, 2))
+                      ));
+  
   pgp = std::sqrt(std::pow(pgx, 2)+std::pow(pgy, 2)); // outgoing proton (3)'s transverse momentum
   pgg = std::sqrt(std::pow(pgp, 2)+std::pow(pgz, 2)); // outgoing proton (3)'s momentum
   if (pgg>pgp*.9 && pgg>pg) { //FIXME ???
@@ -830,10 +791,9 @@ GamGamLL::ComputeWeight()
   // 3D rotation of the first outgoing lepton wrt the CM system
   _ctcm6 = 1.-2.*xx6; // cos(theta_cm,6) is between -1 and 1
   _stcm6 = 2.*std::sqrt(xx6*(1.-xx6)); // definition is OK (according to _ctcm6 def)
-#ifdef DEBUG
-  PrintDebug(Form("\tctcm6 = %f\n\tstcm6 = %f", _ctcm6, _stcm6));
-#endif
-
+  
+  DebugInsideLoop(Form("ctcm6 = %f\n\tstcm6 = %f", _ctcm6, _stcm6));
+  
   phicm6 = 2.*pi*x(6);
 
   cpcm6 = cos(phicm6);
@@ -843,15 +803,12 @@ GamGamLL::ComputeWeight()
   pcm6x = pcm6*_stcm6*cpcm6;
   pcm6y = pcm6*_stcm6*spcm6;
   pcm6z = pcm6*_ctcm6;
-
-#ifdef DEBUG
-  PrintDebug(Form("p3cm6 = (%f, %f, %f)", pcm6x, pcm6y, pcm6z));
-#endif
-
-  pc6z = ctg*pcm6z-stg*pcm6x;
+  
+  DebugInsideLoop(Form("p3cm6 = (%f, %f, %f)", pcm6x, pcm6y, pcm6z));
 
   h1 = stg*pcm6z+ctg*pcm6x;
-  
+
+  pc6z = ctg*pcm6z-stg*pcm6x;  
   pc6x = cpg*h1-spg*pcm6y;
   
   qcx = 2.*pc6x;
@@ -865,9 +822,10 @@ GamGamLL::ComputeWeight()
   p6x = _ct4*pc6x+_st4*h2;
   p6z = _ct4*h2-_st4*pc6x;
   
+  hq = _ec4*qcz/_mc4;
+  
   qve[0] = _pc4*qcz/_mc4; // E
   qve[2] = 2.*p6y; // Py
-  hq = _ec4*qcz/_mc4;
   qve[1] = _ct4*qcx+_st4*hq; // Px
   qve[3] = _ct4*hq-_st4*qcx; // Pz
 
@@ -877,11 +835,10 @@ GamGamLL::ComputeWeight()
   _el7 = _ec4-_el6;
   _pl7 = std::sqrt(std::pow(_el7, 2)-_w7); // second outgoing lepton's |p|
 
-#ifdef DEBUG
-  PrintDebug(Form("Outgoing kinematics\n\t"
-                  " first outgoing lepton: p = %f, E = %f\n\t"
-                  "second outgoing lepton: p = %f, E = %f"), _pl6, _el6, _pl7, _el7);
-#endif
+  DebugInsideLoop(Form("Outgoing kinematics\n\t"
+                       " first outgoing lepton: p = %f, E = %f\n\t"
+                       "second outgoing lepton: p = %f, E = %f",
+                       _pl6, _el6, _pl7, _el7));
 
   double p7x, p7y, p7z;
   // Second outgoing lepton's 3-momentum
@@ -904,13 +861,11 @@ GamGamLL::ComputeWeight()
   _cp7 = p7x/pp7;
   _sp7 = p7y/pp7;
 
-#ifdef DEBUG
-  PrintDebug(Form(" first outgoing lepton: cos(theta) = %f, sin(theta) = %f\n\t"
-                  " first outgoing lepton: cos( phi ) = %f, sin( phi ) = %f\n\t"
-                  "second outgoing lepton: cos(theta) = %f, sin(theta) = %f\n\t"
-                  "second outgoing lepton: cos( phi ) = %f, sin( phi ) = %f"),
-             _ct6, _st6, _cp6, _sp6, _ct7, _st7, _cp7, _sp7);
-#endif
+  DebugInsideLoop(Form(" first outgoing lepton: cos(theta) = %f, sin(theta) = %f\n\t"
+                       " first outgoing lepton: cos( phi ) = %f, sin( phi ) = %f\n\t"
+                       "second outgoing lepton: cos(theta) = %f, sin(theta) = %f\n\t"
+                       "second outgoing lepton: cos( phi ) = %f, sin( phi ) = %f",
+                       _ct6, _st6, _cp6, _sp6, _ct7, _st7, _cp7, _sp7));
 
   _q1dq = eg*(2.*ecm6-_mc4)-2.*pg*pcm6*_ctcm6;
   _q1dq2 = (_w4-_t1-_t2)/2.;
@@ -927,11 +882,9 @@ GamGamLL::ComputeWeight()
   
   r12 = c2*_sp3+qve[2]*c3;
   r13 = -c2*_cp3-qve[1]*c3;
-
-#ifdef DEBUG
-  PrintDebug(Form("qve = (%d, %d, %d, %d)", qve[0], qve[1], qve[2], qve[3]));
-#endif
-
+  
+  DebugInsideLoop(Form("qve = (%d, %d, %d, %d)", qve[0], qve[1], qve[2], qve[3]));
+  
   r22 = b2*_sp5+qve[2]*b3;
   r23 = -b2*_cp5-qve[1]*b3;
   
@@ -955,9 +908,7 @@ GamGamLL::ComputeWeight()
   _betgam = _ptot/_ecm;
 
   if (_cuts.mode==0) {
-#ifdef DEBUG
-    PrintDebug(Form("No cuts applied on the outgoing leptons kinematics!"));
-#endif
+    Debug(Form("No cuts applied on the outgoing leptons kinematics!"));
   }
   // Kinematics computation for both leptons
   _pt_l6 = _pl6*_st6;
@@ -1038,13 +989,14 @@ GamGamLL::ComputeWeight()
     weight = sconst*_dj*PeriPP(intgp, intge);
     break;
   case 2: // single-dissociative case
+  case 3:
     intgp = 3; // DESY
     intge = 2; // DESY
     /*intgp = 2; // CDF
       intge = 1; // CDF*/
     weight = sconst*_dj*PeriPP(intgp, intge)*std::pow(_dw31,2);
     break;
-  case 3: // double-dissociative case
+  case 4: // double-dissociative case
     intgp = intge = 3; // DESY
     //intgp = intge = 2; // CDF
     weight = sconst*_dj*PeriPP(intgp, intge)*std::pow(_dw31*_dw52,2);
@@ -1056,14 +1008,14 @@ GamGamLL::ComputeWeight()
 
 void
 GamGamLL::FillKinematics(bool symmetrise_)
-{
-#ifdef DEBUG
-  double gmux, gmuy, gmuw, gmunu;
-#endif
+{  
   double ranphi, cp, sp;
   int rany, ransign, ranz, role;
   double plab_ip1[4], plab_ip2[4], plab_op1[4], plab_op2[4];
   double plab_ol1[4], plab_ol2[4], plab_ph1[4], plab_ph2[4];
+  
+  // debugging variables
+  double gmux, gmuy, gmuw, gmunu;
   
   // Needed to parametrise a random rotation around z-axis
   rany = ((double)rand()>=.5*RAND_MAX) ? 1 : -1;
@@ -1241,23 +1193,23 @@ GamGamLL::FillKinematics(bool symmetrise_)
 
   //std::cout << "---> " << __PRETTY_FUNCTION__ << ", " << __FILE__ << std::endl;
 
-#ifdef DEBUG
-  gmux = -_t2/(_ep1*_eg2-_pp1*_p3_g2[2])/2.;
-  gmuy = (_ep1*plab_ph2[3]-_pp1*plab_ph2[2])/(_ep2*plab_ph2[3]+_pp2*plab_ph2[2]);
-  gmuw = std::pow(_ep1+plab_ph2[3], 2)-std::pow(_pp1+plab_ph2[2], 2);
-  if (gmuw>=0.) {
-    gmuw = std::sqrt(gmuw);
+  if (kLoggingLevel>=DebugInsideLoop) {
+    gmux = -_t2/(_ep1*_eg2-_pp1*_p3_g2[2])/2.;
+    gmuy = (_ep1*plab_ph2[3]-_pp1*plab_ph2[2])/(_ep2*plab_ph2[3]+_pp2*plab_ph2[2]);
+    gmuw = std::pow(_ep1+plab_ph2[3], 2)-std::pow(_pp1+plab_ph2[2], 2);
+    if (gmuw>=0.) {
+      gmuw = std::sqrt(gmuw);
+    }
+    else {
+      throw Exception(__PRETTY_FUNCTION__, Form("W^2 = %f < 0", gmuw), Fatal);
+      gmuw = 0.;
+    }
+    gmunu = gmuy*2.*Particle::GetMassFromPDGId(Particle::Proton)/_ep1/_ep2;
+    DebugInsideLoop(Form(" gmux = %f\n\t"
+                              " gmux = %f\n\t"
+                              " gmuw = %f\n\t"
+                              "gmunu = %f", gmux, gmuy, gmuw, gmunu));
   }
-  else {
-    throw Exception(__PRETTY_FUNCTION__, Form("W^2 = %f < 0", gmuw), Fatal);
-    gmuw = 0.;
-  }
-  gmunu = gmuy*2.*Particle::GetMassFromPDGId(Particle::PROTON)/_ep1/_ep2;
-  PrintDebug(Form(" gmux = %f\n\t"
-                  " gmux = %f\n\t"
-                  " gmuw = %f\n\t"
-                  "gmunu = %f", gmux, gmuy, gmuw, gmunu));
-#endif
   //fEvent->Dump();
 }
 
@@ -1267,10 +1219,9 @@ GamGamLL::SetKinematics(Kinematics cuts_)
   double thetamin = EtaToTheta(_cuts.etamax), thetamax = EtaToTheta(_cuts.etamin);
   _cuts = cuts_;
   _cotth1 = 1./tan(thetamax*pi/180.);
-  _cotth2 = 1./tan(thetamin*pi/180.);  
-#ifdef DEBUG
-  PrintDebug(Form("cot(theta1) = %f\n\tcot(theta2) = %f", _cotth1, _cotth2));
-#endif
+  _cotth2 = 1./tan(thetamin*pi/180.);
+  
+  DebugInsideLoop(Form("cot(theta1) = %f\n\tcot(theta2) = %f", _cotth1, _cotth2));
 }
 
 double
@@ -1294,9 +1245,7 @@ GamGamLL::PeriPP(int nup_, int ndown_)
   // * _mp1, _mp2 (--> _w1, _w2)
   // * _mp3, _mp5 (--> _w3, _w5)
 
-#ifdef DEBUG
-  PrintDebug(Form(" Nup  = %d\n\tNdown = %d", nup_, ndown_));
-#endif
+  DebugInsideLoop(Form(" Nup  = %d\n\tNdown = %d", nup_, ndown_));
 
   switch(nup_) {
   case 1: // DESY
@@ -1349,12 +1298,8 @@ GamGamLL::PeriPP(int nup_, int ndown_)
     _v2 = (-_tau*_v1-dd1*_w52*_t2*(rho/rhot)*std::pow(_w52/en, 2)/(rhot*_w2))/(1.-std::pow(en, 2)/(4.*_w2*_t2));
     break;
   }
-#ifdef DEBUG
-  PrintDebug(Form("u1 = %f\n\t"
-                  "u2 = %f\n\t"
-                  "v1 = %f\n\t"
-                  "v2 = %f", _u1, _u2, _v1, _v2));
-#endif
+  
+  DebugInsideLoop(Form("u1 = %f\n\tu2 = %f\n\tv1 = %f\n\tv2 = %f", _u1, _u2, _v1, _v2));
 
   qqq = std::pow(_q1dq, 2);
   qdq = 4.*_w6-_w4;
@@ -1365,11 +1310,10 @@ GamGamLL::PeriPP(int nup_, int ndown_)
 
   peripp = (((_u1*_v1*t11+_u2*_v1*t21+_u1*_v2*t12+_u2*_v2*t22)/(_t1*_t2*_bb))/(_t1*_t2*_bb))/4.;
 
-#ifdef DEBUG
-  PrintDebug(Form("t11 = %5.2f\tt12 = %5.2f\n\t"
-                  "t21 = %5.2f\tt22 = %5.2f\n\t"
-                  "tau = %f\n\t"
-                  "=> PeriPP = %f", t11, t12, t21, t22, _tau, peripp));
-#endif
+  DebugInsideLoop(Form("t11 = %5.2f\tt12 = %5.2f\n\t"
+                       "t21 = %5.2f\tt22 = %5.2f\n\t"
+                       "tau = %f\n\t"
+                       "=> PeriPP = %f", t11, t12, t21, t22, _tau, peripp));
+  
   return peripp;
 }

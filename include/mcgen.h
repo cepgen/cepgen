@@ -125,4 +125,3 @@ class MCGen {
 double f(double*,size_t,void*);
 
 #endif
-

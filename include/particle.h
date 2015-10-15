@@ -30,16 +30,16 @@ class Particle {
       Photon = 22,
       PiPlus = 211,
       PiZero = 111,
-      RHO_770_0 = 113,
-      OMEGA_782 = 223,
+      Rho770_0 = 113,
+      Omega782 = 223,
       JPsi= 443,
-      PHI_1680 = 100333,
-      UPSILON_1S = 553,
-      UPSILON_2S = 100553,
-      UPSILON_3S = 200553,
-      DIQUARK_UD0 = 2101,
-      DIQUARK_UD1 = 2103,
-      DIQUARK_UU1 = 2203,
+      Phi1680 = 100333,
+      Upsilon1S = 553,
+      Upsilon2S = 100553,
+      Upsilon3S = 200553,
+      ud0Diquark = 2101,
+      ud1Diquark = 2103,
+      uu1Diquark = 2203,
       Proton = 2212,
       Neutron = 2112,
       Pomeron = 990,
@@ -80,11 +80,11 @@ class Particle {
     /**
      * @brief Comparison operator to enable the sorting of particles in an event according to their unique identifier
      */
-    inline bool operator<(const Particle& rhs) { std::cout << this->id << "\t" << rhs.id << "\t" << (this->id<rhs.id) << std::endl; return this->id<rhs.id; };
+    inline bool operator<(const Particle& rhs) { std::cout << id << "\t" << rhs.id << "\t" << (id<rhs.id) << std::endl; return id<rhs.id; };
     /**
      * @brief Comparison operator to enable the sorting of Particle objects' pointers in an event according to their reference's unique identifier
      */
-    inline bool operator<(const Particle *rhs) { std::cout << this->id << "\t" << rhs->id << "\t" << (this->id<rhs->id) << std::endl; return this->id<rhs->id; };
+    inline bool operator<(const Particle *rhs) { std::cout << id << "\t" << rhs->id << "\t" << (id<rhs->id) << std::endl; return id<rhs->id; };
     /**
      * Returns a string containing all the particle's kinematics as expressed in the Les Houches format
      * @param[in] revert_ Is the event symmetric ? If set to true, the third component of the momentum is reverted.
@@ -132,21 +132,21 @@ class Particle {
     /**
      * @brief Momentum along the \f$x\f$-axis in \f$\text{GeV}/c\f$
      */
-    inline double Px() const { return this->_p4[0]; };
+    inline double Px() const { return fP4[0]; };
     /**
      * @brief Momentum along the \f$y\f$-axis in \f$\text{GeV}/c\f$
      */
-    inline double Py() const { return this->_p4[1]; };
+    inline double Py() const { return fP4[1]; };
     /**
      * @brief Momentum along the \f$z\f$-axis in \f$\text{GeV}/c\f$
      */
-    inline double Pz() const { return this->_p4[2]; };
+    inline double Pz() const { return fP4[2]; };
     /**
      * Gets the particle's mass in \f$\text{GeV}/c^{2}\f$.
      * @brief Gets the particle's mass
      * @return The particle's mass
      */
-    inline double M() const { return this->_m; };
+    inline double M() const { return fMass; };
     /**
      * Set the mass of the particle in \f$\text{GeV}/c^{2}\f$ according to a value given as an argument. This method ensures that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
      * @param m_ The mass in \f$\text{GeV}/c^{2}\f$ to set
@@ -157,33 +157,33 @@ class Particle {
     /**
      * @brief Gets the particle's squared mass
      */
-    inline double M2() const { return std::pow(this->_m,2); };
+    inline double M2() const { return std::pow(fMass,2); };
     /**
      * Computes and returns \f$\eta\f$, the pseudo-rapidity of the particle
      * @brief Pseudo-rapidity
      * @return The pseudo-rapidity of the particle
      */
     inline double Eta() {
-      return (this->Pt()!=0.)
-	? log((this->P()+fabs(this->Pz()))/this->Pt())*(this->Pz()/fabs(this->Pz()))
-	: 9999.*(this->Pz()/fabs(this->Pz()));
+      return (Pt()!=0.)
+	      ? log((P()+fabs(Pz()))/Pt())*(Pz()/fabs(Pz()))
+	      : 9999.*(Pz()/fabs(Pz()));
     };
     /**
      * Computes and returns \f$y\f$, the rapidity of the particle
      * @brief Rapidity
      * @return The rapidity of the particle
      */
-    inline double Rapidity() { return (this->E()<0.) ? 999. : log((this->E()+this->Pz())/(this->E()-this->Pz()))/2.; };
+    inline double Rapidity() { return (E()<0.) ? 999. : log((E()+Pz())/(E()-Pz()))/2.; };
     /**
      * Computes and returns \f$\phi\f$, the azimuthal angle of the particle in the transverse plane
      * @brief Azimuthal angle
      * @return The azimuthal angle of the particle
      */
     /*inline double Phi() const {
-      return (this->Px()==0. && this->Py()==0. && this->Pz()==0.)
-	? 0.
-	: atan2(this->P(), this->Pz());
-	};*/
+      return (Px()==0. && Py()==0. && Pz()==0.)
+	      ? 0.
+	      : atan2(P(), Pz());
+    };*/
     /**
      * @brief Sets the 3-momentum associated to the particle
      * @param[in] px_ Momentum along the \f$x\f$-axis, in \f$\text{GeV}/c\f$
@@ -192,8 +192,8 @@ class Particle {
      * @return A boolean stating the validity of this particle (according to its 4-momentum norm)
      */
     inline bool P(double px_,double py_,double pz_) {
-      double pp4[] = { px_, py_, pz_, -1. }; std::copy(pp4, pp4+4, this->_p4);
-      this->M(-1.); this->E(-1.);
+      double pp4[] = { px_, py_, pz_, -1. }; std::copy(pp4, pp4+4, fP4);
+      M(-1.); E(-1.);
       return true;
     };
     /**
@@ -205,15 +205,15 @@ class Particle {
      * @param[in] E_ Energy, in GeV
      * @return A boolean stating the validity of the particle's kinematics
      */
-    inline bool P(double px_,double py_,double pz_,double E_) { double pp4[] = { px_, py_, pz_, E_ }; return this->P(pp4); };
+    inline bool P(double px_,double py_,double pz_,double E_) { double pp4[] = { px_, py_, pz_, E_ }; return P(pp4); };
     /**
      * @brief Sets the 4-momentum associated to the particle
      * @param[in] p_ 4-momentum
      * @return A boolean stating the validity of the particle's kinematics
      */
     inline bool P(double p_[4]) { 
-      std::copy(p_, p_+4, this->_p4);
-      if (p_[3]<0.) return this->P(p_[0], p_[1], p_[2]);
+      std::copy(p_, p_+4, fP4);
+      if (p_[3]<0.) return P(p_[0], p_[1], p_[2]);
       else return true;
     };
     /**
@@ -224,19 +224,19 @@ class Particle {
      * @return The requested component of the energy-momentum for the particle
      */
     inline double P(int c_) const {
-      if (c_>=0 and c_<4) return _p4[c_];
-      else if (c_==4) return this->M();
+      if (c_>=0 and c_<4) return fP4[c_];
+      else if (c_==4) return M();
       else return -999.;
     };
     /**
      * @brief Transverse momentum, in \f$\text{GeV}/c\f$
      */
-    inline double Pt() const { return std::sqrt(std::pow(this->Px(),2)+std::pow(this->Py(),2)); };
+    inline double Pt() const { return std::sqrt(std::pow(Px(),2)+std::pow(Py(),2)); };
     /**
      * @brief Norm of the 3-momentum, in \f$\text{GeV}/c\f$
      * @return The particle's 3-momentum norm as a double precision float
      */
-    inline double P() const { return std::sqrt(std::pow(this->Pt(),2)+std::pow(this->Pz(),2)); };
+    inline double P() const { return std::sqrt(std::pow(Pt(),2)+std::pow(Pz(),2)); };
     /**
      * Builds and returns the particle's 4-momentum as an array ordered as 
      * \f$(\mathbf p, E) = (p_x, p_y, p_z, E)\f$
@@ -244,28 +244,28 @@ class Particle {
      * @return The particle's 4-momentum as a 4 components double array
      */
     inline double* P4() {
-      this->_p4[3] = this->E();
-      return this->_p4;
+      fP4[3] = E();
+      return fP4;
     };
     inline std::vector<double> P5() const {
-      std::vector<double> out(this->_p4, this->_p4+3);
-      out.push_back(this->E());
-      out.push_back(this->_m);
+      std::vector<double> out(fP4, fP4+3);
+      out.push_back(E());
+      out.push_back(fMass);
       return out;
     }
     /**
      * @brief Sets the particle's energy
      * @param[in] E_ Energy, in GeV
      */
-    inline void E(double E_) { this->_p4[3] = (E_<0.) ? std::sqrt(this->M2()+std::pow(this->P(),2)) : E_; };
+    inline void E(double E_) { fP4[3] = (E_<0.) ? std::sqrt(M2()+std::pow(P(),2)) : E_; };
     /**
      * @brief Gets the particle's energy in GeV
      */
-    inline double E() const { return (this->_p4[3]<0.) ? std::sqrt(this->M2()+std::pow(this->P(),2)) : this->_p4[3]; };
+    inline double E() const { return (fP4[3]<0.) ? std::sqrt(M2()+std::pow(P(),2)) : fP4[3]; };
     /**
      * @brief Gets the particle's squared energy in \f$\text{GeV}^\text{2}\f$
      */
-    inline double E2() const { return std::pow(this->E(), 2); };
+    inline double E2() const { return std::pow(E(), 2); };
     void RotateThetaPhi(double theta_, double phi_);
     inline double Theta() const { return atan2(Pt(), Pz()); }
     inline double Phi() const { return atan2(Py(), Px()); }
@@ -283,7 +283,7 @@ class Particle {
      * @brief Gets the unique identifier to the mother particle from which this particle arises
      * @return An integer representing the unique identifier to the mother of this particle in the event
      */
-    inline ParticlesIds GetMothersIds() const { return this->_moth; }
+    inline ParticlesIds GetMothersIds() const { return fMothers; }
     /**
      * Adds a "daughter" to this particle (one of its decay product(s))
      * @brief Specify a decay product for this particle
@@ -294,7 +294,7 @@ class Particle {
     /**
      * @brief Gets the number of daughter particles arising from this one
      */
-    inline unsigned int NumDaughters() { return this->_daugh.size(); };
+    inline unsigned int NumDaughters() { return fDaughters.size(); };
     /**
      * @brief Gets a vector containing all the daughters unique identifiers from this particle
      * @return An integer vector containing all the daughters' unique identifier in the event
@@ -311,7 +311,7 @@ class Particle {
     /**
      * @brief Is this particle a primary particle ?
      */
-    inline bool Primary() const { return this->_isPrimary; }
+    inline bool Primary() const { return fIsPrimary; }
     /**
      * Codes 1-10 correspond to currently existing partons/particles, and larger codes contain partons/particles which no longer exist, or other kinds of event information
      * @brief Particle status
@@ -321,25 +321,25 @@ class Particle {
     /**
      * @brief Mass in \f$\text{GeV}/c^2\f$
      */
-    double _m;
+    double fMass;
     /**
      * @brief List of mother particles
      */
-    ParticlesIds _moth;
+    ParticlesIds fMothers;
     /**
      * @brief List of daughter particles
      */
-    ParticlesIds _daugh;
+    ParticlesIds fDaughters;
     /**
      * @brief Is the particle a primary particle ?
      */
-    bool _isPrimary;
+    bool fIsPrimary;
     /**
      * List of components to characterise the particle's kinematics :
      * - 0-2: \f$\mathbf p = (p_x, p_y, p_z)\f$ (in \f$\text{GeV}/c\f$)
      * - 3: \f$E\f$ (in \f$\text{GeV}\f$)
      */
-    double _p4[4];
+    double fP4[4];
     double __tmp3[3], __tmp4[4];
 };
 

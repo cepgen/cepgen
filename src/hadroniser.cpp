@@ -1,16 +1,13 @@
 #include "hadroniser.h"
 
-Hadroniser::Hadroniser() :
-  _name("undefined")
-{
-  _hadrons = new std::vector<Particle>();
-}
+Hadroniser::Hadroniser(std::string name_) :
+  fName(name_), fHadrons(new std::vector<Particle>())
+{}
 
 Hadroniser::~Hadroniser()
 {
-  delete _hadrons;
-#ifdef DEBUG
-  PrintDebug(Form("Destructor called"));
-#endif
+  Debug(Form("Destructor called"));
+  
+  delete fHadrons;
 }
 

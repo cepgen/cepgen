@@ -94,7 +94,7 @@ class Process
   /**
    * @brief Dumps the evaluated point's coordinates in the standard output stream
    */
-  void DumpPoint();
+  void DumpPoint(const ExceptionType& et);
   /**
    * @brief Sets the list of kinematic cuts to apply on the outgoing particles'
    * final state

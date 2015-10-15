@@ -14,14 +14,14 @@
 class Hadroniser
 {
  public:
-  Hadroniser();
+   Hadroniser(std::string name_="unnamed_hadroniser");
   ~Hadroniser();
   /**
    * @brief Main caller to hadronise a single particle
    * @param[in] part_ The Particle object which will be hadronised
    * @return A boolean stating whether or not the hadronisation occured successfully
    */
-  inline virtual bool Hadronise(Particle *part_) { return (part_!=(Particle*)NULL && part_->status!=2); };
+  inline virtual bool Hadronise(Particle *part_) { return (part_!=(Particle*)NULL and part_->status!=2); };
   /**
    * Launches the hadroniser on the full event information
    * @brief Hadronises a full event
@@ -33,20 +33,20 @@ class Hadroniser
    * Gets the full list of hadrons (as Particle objects) produced by the hadronisation
    * @return A vector of Particle containing all the hadrons produced
    */
-  inline Particles GetHadrons() { return *(this->_hadrons); };
+  inline Particles GetHadrons() { return *fHadrons; };
   /**
    * @brief Returns the human-readable name of the hadroniser used
    */
-  inline std::string GetName() { return this->_name; };
+  inline std::string GetName() { return fName; };
  protected:
   /**
    * @brief Name of the hadroniser
    */
-  std::string _name;
+  std::string fName;
   /**
    * @brief List of hadrons produced by this hadronisation process
    */
-  Particles *_hadrons;
+  Particles *fHadrons;
 };
 
 #endif

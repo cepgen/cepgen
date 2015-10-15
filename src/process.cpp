@@ -26,16 +26,18 @@ Process::SetPoint(const unsigned int ndim_,double x_[])
 
   std::copy(x_, x_+ndim_, fX);  
   fIsPointSet = true;
-  if (kLoggingLevel>=Debug) DumpPoint();
+  if (kLoggingLevel>=DebugInsideLoop) DumpPoint(Debugging);
 }
 
 void
-Process::DumpPoint()
+Process::DumpPoint(const ExceptionType& et=Info)
 {
   std::ostringstream os;
   for (unsigned int i=0; i<(unsigned int)fNumDimensions; i++) {
     os << Form("  x(%2d) = %8.6f\n\t", i, fX[i]);
   }
-  PrintInfo(Form("Number of integration parameters: %d\n\t"
-                 "%s", fNumDimensions, os.str().c_str()));
+  if (et<Debugging) { Info(Form("Number of integration parameters: %d\n\t"
+                                "%s", fNumDimensions, os.str().c_str())); }
+  else           {   Debug(Form("Number of integration parameters: %d\n\t"
+                                "%s", fNumDimensions, os.str().c_str())); }
 }

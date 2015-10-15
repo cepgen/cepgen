@@ -7,13 +7,13 @@ void Map(double expo_, double xmin_, double xmax_, double* out_, double* dout_)
   out = xmin_*std::pow(y, expo_);
   *out_ = out;
   *dout_ = out*log(y);
-  PrintDebug(Form("min = %f\n\t"
-                  "max = %f\n\t"
-                  "max/min = %f\n\t"
-                  "exponent = %f\n\t"
-                  "output = %f\n\t"
-                  "d(output) = %f",
-                  xmin_, xmax_, y, expo_, *out_, *dout_));
+  DebugInsideLoop(Form("min = %f\n\t"
+                            "max = %f\n\t"
+                            "max/min = %f\n\t"
+                            "exponent = %f\n\t"
+                            "output = %f\n\t"
+                            "d(output) = %f",
+                            xmin_, xmax_, y, expo_, *out_, *dout_));
 }
 
 void Mapla(double y_, double z_, int u_, double xm_, double xp_, double* x_, double* d_)
@@ -76,11 +76,11 @@ double GenerT(double tmin_, double tmax_, double b_, double anexp_)
 
   bloc = b_;
   if (b_<.1) {
-    PrintInfo(Form("ERROR: B=%f < 1", b_));
+    Info(Form("ERROR: B=%f < 1", b_));
     bloc = .1;
   }
   if (tmin_>=tmax_) {
-    PrintInfo(Form("ERROR: TMIN=%f >= TMAX=%f => return TMIN=%f", tmin_, tmax_, tmin_))
+    Info(Form("ERROR: TMIN=%f >= TMAX=%f => return TMIN=%f", tmin_, tmax_, tmin_))
     return tmin_;
   }
 
@@ -91,11 +91,11 @@ double GenerT(double tmin_, double tmax_, double b_, double anexp_)
       //  => generate pure exp(bt) spectrum 
       if (bloc*(tmax_-tmin_)>=25.) {
 	      t = tmin_-log(drand())/bloc;
-        PrintDebug(Form("Method 1: T=%f", t));
+        Debug(Form("Method 1: T=%f", t));
       }
       else {
 	      t = tmin_-log(1.-drand()*(1.-exp(bloc*(tmin_-tmax_))))/bloc;
-        PrintDebug(Form("Method 2: T=%f", t));
+        Debug(Form("Method 2: T=%f", t));
       }
     }
     else {
@@ -112,7 +112,7 @@ double GenerT(double tmin_, double tmax_, double b_, double anexp_)
     iter++;
   } while ((t<tmin_ or t>tmax_) and iter<=100);
   if (iter>100) {
-    PrintInfo(Form("WARNING: more than 100 iterations!\n\t"
+    Info(Form("WARNING: more than 100 iterations!\n\t"
                    "TMIN: %f, TMAX: %f, BLOC: %f, T: %f", tmin_, tmax_, bloc, t));
   }
   return t;
@@ -124,7 +124,7 @@ double GenTDL(double tmin_, double tmax_, double b_, int n_)
   double t, w;
 
   if (tmin_>tmax_) {
-    PrintInfo(Form("ERROR: TMIN=%f, TMAX=%f => return TMIN=%f", tmin_, tmax_, tmin_));
+    Info(Form("ERROR: TMIN=%f, TMAX=%f => return TMIN=%f", tmin_, tmax_, tmin_));
     return tmin_;
   }
 
@@ -132,17 +132,17 @@ double GenTDL(double tmin_, double tmax_, double b_, int n_)
   do {
     if (b_*(tmax_-tmin_)>=25.) {
       t = tmin_-log(drand())/b_;
-      PrintDebug(Form("Method 1: T=%f", t));
+      Debug(Form("Method 1: T=%f", t));
     }
     else {
       t = tmin_-log(1.-drand()*(1.-exp(b_*(tmin_-tmax_))))/b_;
-      PrintDebug(Form("Method 2: T=%f", t));
+      Debug(Form("Method 2: T=%f", t));
     }
     w = std::pow((1.+1.41*tmin_)/(1.+1.41*t), n_);
     iter += 1;
   } while ((t<tmin_ or t>tmax_ or w<drand()) and iter<=100);
   if (iter>100) {
-    PrintInfo(Form("WARNING: more than 100 iterations!\n\t"
+    Info(Form("WARNING: more than 100 iterations!\n\t"
                    "TMIN: %f, TMAX: %f, T: %f", tmin_, tmax_, t));
   }
   return t;

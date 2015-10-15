@@ -1,16 +1,13 @@
 #include "pythia6hadroniser.h"
 
-Pythia6Hadroniser::Pythia6Hadroniser()
+Pythia6Hadroniser::Pythia6Hadroniser() : Hadroniser("Pythia6")
 {
-  _name = "Pythia6";
   //this->pygive("MSTU(21)=1");
 }
 
 Pythia6Hadroniser::~Pythia6Hadroniser()
 {
-#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Destructor called" << std::endl;
-#endif
+  Debug("Destructor called");
 }
 
 bool
@@ -29,7 +26,6 @@ Pythia6Hadroniser::Hadronise(Particle *part_)
   pyjets_.k[4][0] = 0; // daughter 2
 
   this->pyexec();
-  std::cout << __PRETTY_FUNCTION__ << " INFO" << std::endl;
   return true;
 }
 
@@ -50,7 +46,7 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
   int jlrole[max_str_in_evt], jlpsf[max_str_in_evt][max_part_in_str];
   int oldnpart, criteria; //FIXME find an other name...
   
-  this->PrepareHadronisation(ev_);
+  try { PrepareHadronisation(ev_); } catch (Exception& e) { e.Dump(); throw e; }
 
   rl = ev_->GetRoles();
 
@@ -60,12 +56,12 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
     num_part_in_str[i] = 0;
     for (int j=0; j<max_part_in_str; j++) jlpsf[i][j] = -1;
   }
-
-#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Dump of the event before the hadronisation" << std::endl;
-  ev_->Dump();
-#endif
-
+  
+  if (kLoggingLevel>=Debug) {
+    Debug("Dump of the event before the hadronisation");
+    ev_->Dump();
+  }
+  
   // Filling the common block to propagate to PYTHIA6
   pyjets_.n = 0;
   str_in_evt = 0;
@@ -108,10 +104,10 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
       
       if ((*p)->status==3) {
         pyjets_.k[0][np] = 1; //FIXME PYTHIA/JETSET workaround
-	jlrole[str_in_evt] = (*p)->role;
-	jlpsf[str_in_evt][part_in_str] = (*p)->id+1;
-	num_part_in_str[str_in_evt]++;
-	part_in_str++;
+	      jlrole[str_in_evt] = (*p)->role;
+	      jlpsf[str_in_evt][part_in_str] = (*p)->id+1;
+	      num_part_in_str[str_in_evt]++;
+	      part_in_str++;
       }
       pyjets_.n++;
     }
@@ -119,25 +115,20 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
       str_in_evt++;
     }
   }
-
   oldnpart = pyjets_.n;
-
-#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Passed the string construction stage." << std::endl
-	    << "  " << str_in_evt << " string objects were identified and constructed" << std::endl;
-#endif
-
+  
+  std::ostringstream dbg;  
+  
   for (int i=0; i<str_in_evt; i++) {
     if (num_part_in_str[i]<2) continue;
-#ifdef DEBUG
-    std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Joining " << num_part_in_str[i] << " particle in a same string (" << i << ") with role " << jlrole[i] << std::endl;
-#endif
+    
+    std::ostringstream os;
     for (int j=0; j<num_part_in_str[i]; j++) {
-      if (jlpsf[i][j]==-1) continue;
-#ifdef DEBUG
-      std::cout << " * " << jlpsf[i][j] << " (pdgId=" << pyjets_.k[1][jlpsf[i][j]-1] << ")" << std::endl;
-#endif
+      if (jlpsf[i][j]!=-1) os << Form("\n\t * %2d (pdgId=%4d)", jlpsf[i][j], pyjets_.k[1][jlpsf[i][j]-1]);
     }
+    dbg << Form("Joining %d particle(s) in a same string (%d) with role %d"
+               "%s", num_part_in_str[i], i, jlrole[i], os.str().c_str());
+    
     this->pyjoin(num_part_in_str[i], jlpsf[i]);
     //this->pyexec();//FIXME FIXME FIXME
   }
@@ -149,10 +140,7 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
 
   if (pyjets_.k[1][criteria]==2212 and pyjets_.k[0][criteria]==1) {
     //this->pylist(2);
-#ifdef ERROR
-    std::cerr << __PRETTY_FUNCTION__ << " [ERROR] System non-inelastic" << std::endl;
-#endif
-    return false;
+    throw Exception(__PRETTY_FUNCTION__, "System is non-inelastic", JustWarning);
   }
 
   for (int p=0; p<pyjets_.n; p++) {
@@ -180,17 +168,14 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
     pa.charge = (float)(this->pyp(p+1,6));
 
     if (pyjets_.k[2][p]!=0) {
-#ifdef DEBUG
-      std::cout << __PRETTY_FUNCTION__ << " [DEBUG] "
-		<< pa.id << " (pdgId=" << pa.pdgId << ") has mother "
-		<< pyjets_.k[2][p] << " (pdgId=" << pyjets_.k[1][pyjets_.k[2][p]-1] << ")"
-		<< std::endl;
-#endif
+      dbg << Form("\n\t%2d (pdgId=%4d) has mother %2d (pdgId=%4d)", pa.id, pa.pdgId, pyjets_.k[2][p], pyjets_.k[1][pyjets_.k[2][p]-1]);
       pa.SetMother(ev_->GetById(pyjets_.k[2][p]-1));
     }
 
     ev_->AddParticle(pa);
   }
+  Debug(Form("Passed the string construction stage.\n\t %d string objects were identified and constructed",
+             "%s", str_in_evt, dbg.str().c_str()));
 
   return true;
 }
@@ -205,9 +190,7 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
   double pmxda[4];
   double partpb[4];
 
-#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Hadronisation preparation called !" << std::endl;
-#endif
+  Debug("Hadronisation preparation called!");
 
   ParticlesRef pp;
   ParticlesRef::iterator p;
@@ -218,15 +201,15 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
       ranudq = (double)rand()/RAND_MAX;
       if (ranudq<1./9.) {
         singlet_id = Particle::dQuark;
-        doublet_id = Particle::DIQUARK_UU1;
+        doublet_id = Particle::uu1Diquark;
       }
       else if (ranudq<5./9.) {
         singlet_id = Particle::uQuark;
-        doublet_id = Particle::DIQUARK_UD0;
+        doublet_id = Particle::ud0Diquark;
       }
       else {
         singlet_id = Particle::uQuark;
-        doublet_id = Particle::DIQUARK_UD1;
+        doublet_id = Particle::ud1Diquark;
       }
       ulmdq = pymass(doublet_id);
       ulmq = pymass(singlet_id);
@@ -253,9 +236,7 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
       Particle singlet((*p)->role, singlet_id);
       singlet.status = 3;
       if (!singlet.P(partpb)) {
-#ifdef ERROR
-        std::cerr << __PRETTY_FUNCTION__ << " ERROR while setting the 4-momentum of singlet" << std::endl;
-#endif
+        throw Exception(__PRETTY_FUNCTION__, "ERROR while setting the 4-momentum of singlet", JustWarning);
       }
       singlet.M(-1); //FIXME
 
@@ -269,9 +250,7 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
       Particle doublet((*p)->role, doublet_id);
       doublet.status = 3;
       if (!doublet.P(partpb)) {
-#ifdef ERROR
-        std::cout << __PRETTY_FUNCTION__ << " ERROR while setting the 4-momentum of doublet" << std::endl;
-#endif
+        throw Exception(__PRETTY_FUNCTION__, "ERROR while setting the 4-momentum of doublet", JustWarning);
       }
       //std::cout << "doublet, mass = " << doublet.M() << std::endl;
       doublet.M(-1); //FIXME
@@ -282,35 +261,28 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
 
         ev_->AddParticle(singlet);
         ev_->AddParticle(doublet);
-#ifdef DEBUG
-        std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Quark/diquark content succesfully added to the event!" << std::endl;
-#endif
+        
+        Debug("Quark/diquark content succesfully added to the event!");
       }
       else { // Quark/diquark content already present in the event
-	std::vector<int> daugh;
-	std::vector<int>::iterator did;
+	      std::vector<int> daugh;
+	      std::vector<int>::iterator did;
 
-#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Quark/diquark content already present in the event!" << std::endl
-		  << "  Role of these particles: " << (*p)->role << std::endl;
-#endif
-	daugh = (*p)->GetDaughters();
-	for (did=daugh.begin(); did!=daugh.end(); did++) {
-	  if (ev_->GetById(*did)->pdgId==1 or ev_->GetById(*did)->pdgId==2) { // Quark
-	    singlet.SetMother(ev_->GetById((*p)->id));
-	    *(ev_->GetById(*did)) = singlet;
-#ifdef DEBUG
-      std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Singlet replaced" << std::endl;
-#endif
-	  }
-	  else { // Diquark
-	    doublet.SetMother(ev_->GetById((*p)->id));
-	    *(ev_->GetById(*did)) = doublet;
-#ifdef DEBUG
-      std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Doublet replaced" << std::endl;
-#endif
-	  }
-	}
+        Debug(Form("Quark/diquark content already present in the event!\n\tRole of these particles: %d", (*p)->role));
+        
+	      daugh = (*p)->GetDaughters();
+	      for (did=daugh.begin(); did!=daugh.end(); did++) {
+	        if (ev_->GetById(*did)->pdgId==1 or ev_->GetById(*did)->pdgId==2) { // Quark
+	          singlet.SetMother(ev_->GetById((*p)->id));
+	          *(ev_->GetById(*did)) = singlet;
+            Debug("Singlet replaced")
+	        }
+	        else { // Diquark
+	          doublet.SetMother(ev_->GetById((*p)->id));
+	          *(ev_->GetById(*did)) = doublet;
+            Debug("Doublet replaced")
+	        }
+	      }
       }
     }
   }

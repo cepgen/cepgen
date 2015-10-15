@@ -13,7 +13,6 @@ using namespace std;
  */
 int main(int argc, char* argv[]) {
   double xsec, err;
-  kLoggingLevel = Debug;
   
   MCGen mg;
   Event ev;
@@ -22,18 +21,20 @@ int main(int argc, char* argv[]) {
   ofstream output;
   //ofstream output2;
   
+  kLoggingLevel = Debug;
+  
   if (argc==1) {
-    PrintInfo("No config file provided. Setting the default parameters.");
+    Info("No config file provided. Setting the default parameters.");
     
     mg.parameters->hadroniser = new Pythia6Hadroniser;
     mg.parameters->process = new GamGamLL;
-    mg.parameters->process_mode = Process::ElasticElastic;
+    mg.parameters->process_mode = Process::InelasticElastic;
     mg.parameters->remnant_mode = Process::SuriYennie;
     //mg.parameters->itvg = 2;
     
     mg.parameters->in1p = 4000.;
     mg.parameters->in2p = 4000.;
-    mg.parameters->pair = Particle::MUON;
+    mg.parameters->pair = Particle::Muon;
     mg.parameters->mcut = 2;
     mg.parameters->minenergy = 0.; //FIXME
     mg.parameters->minpt = 5.;
@@ -45,12 +46,10 @@ int main(int argc, char* argv[]) {
     //mg.parameters->maxgen = 1e5;
   }
   else {
-#ifdef DEBUG
-    PrintDebug(Form("Reading config file stored in %s", argv[1]));
-#endif
+    Debug(Form("Reading config file stored in %s", argv[1]));
     if (!mg.parameters->ReadConfigFile(string(argv[1]))) {
-      PrintInfo(Form("Error reading the configuration!\n\t"
-                     "Please check your input file (%s)", argv[1]));
+      Info(Form("Error reading the configuration!\n\t"
+                "Please check your input file (%s)", argv[1]));
       return -1;
     }
   }

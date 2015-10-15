@@ -3,26 +3,24 @@
 Particle::Particle() :
   id(-1), pdgId((ParticleCode)0), charge(999.), name(""), role(-1),
   helicity(0.),
-  status(0), _m(-1.),
-  _isPrimary(true)
+  status(0), fMass(-1.),
+  fIsPrimary(true)
 {
-  for (int i=0; i<4; i++) _p4[i] = 0.;
+  for (int i=0; i<4; i++) fP4[i] = 0.;
 }
 
 Particle::Particle(int role_, ParticleCode pdgId_) :
   id(-1), pdgId(pdgId_), charge(999.), name(""), role(role_),
-  status(0), _m(-1.),
-  _isPrimary(true)
+  status(0), fMass(-1.),
+  fIsPrimary(true)
 {
-  for (int i=0; i<4; i++) _p4[i] = 0.;
-  if (this->pdgId!=0) {
-    this->M(-1.);
-  }
+  for (int i=0; i<4; i++) fP4[i] = 0.;
+  if (pdgId!=0) M(-1.);
 }
 
 Particle::~Particle()
 {
-  PrintDebug("Destructor called");
+  DebugInsideLoop("Destructor called");
 }
 
 Particle&
@@ -34,7 +32,7 @@ Particle::operator=(const Particle &part_)
     this->id = part_.id;
   }
   this->P(part_.Px(), part_.Py(), part_.Pz(), part_.E());
-  this->M(part_._m);
+  this->M(part_.fMass);
 
   return *this;
 }
@@ -44,7 +42,7 @@ Particle::operator+=(const Particle &part_)
 {
   pdgId = (part_.pdgId==pdgId) ? pdgId : (ParticleCode)(-1);
   role = (part_.role==role) ? role : -1;
-  for (int i=0; i<4; i++) _p4[i]+= part_._p4[i];
+  for (int i=0; i<4; i++) fP4[i]+= part_.fP4[i];
   M(-1.);
 
   return *this;
@@ -55,7 +53,7 @@ Particle::operator-(const Particle &part_)
 {
   pdgId = (part_.pdgId==pdgId) ? pdgId : (ParticleCode)(-1);
   role = (part_.role==role) ? role : -1;
-  for (int i=0; i<4; i++) _p4[i]-= part_._p4[i];
+  for (int i=0; i<4; i++) fP4[i]-= part_.fP4[i];
   M(-1.);
 
   return *this;
@@ -64,8 +62,8 @@ Particle::operator-(const Particle &part_)
 bool
 Particle::Valid()
 {
-  if (this->pdgId==0) return false;
-  if (this->P()==0. and this->M()==0.) return false;
+  if (pdgId==0) return false;
+  if (P()==0. and M()==0.) return false;
   return true;
 }
 
@@ -75,7 +73,7 @@ Particle::GetLHEline(bool revert_)
   std::stringstream line;
 
   if (revert_) {
-    _p4[2] = -_p4[2];
+    fP4[2] = -fP4[2];
   }
 
   line << pdgId << "\t";
@@ -94,21 +92,21 @@ bool
 Particle::M(double m_)
 {
   double mass;
-  if (m_>=0.) this->_m = m_;
-  else if (this->pdgId!=0) {
-    mass = GetMassFromPDGId(this->pdgId);
+  if (m_>=0.) fMass = m_;
+  else if (pdgId!=0) {
+    mass = GetMassFromPDGId(pdgId);
     if (mass<0.) return false;
-    if (this->_p4[3]<0.) {
-      this->_m = mass;
-      this->_p4[3] = std::pow(this->P(), 2)+this->M2();
+    if (fP4[3]<0.) {
+      fMass = mass;
+      fP4[3] = std::pow(P(), 2)+M2();
       return true;
     }
-    if (std::pow(this->E(), 2)-std::pow(this->P(), 2)!=std::pow(mass, 2)) mass = std::sqrt(std::pow(this->E(), 2)-std::pow(this->P(), 2));
-    this->_m = mass;
+    if (std::pow(E(), 2)-std::pow(P(), 2)!=std::pow(mass, 2)) mass = std::sqrt(std::pow(E(), 2)-std::pow(P(), 2));
+    fMass = mass;
     return true;
   }
-  else if (this->E()>=0. and this->P()>=0.) {
-    this->_m = std::sqrt(std::pow(this->E(), 2)-std::pow(this->P(), 2));
+  else if (E()>=0. and P()>=0.) {
+    fMass = std::sqrt(std::pow(E(), 2)-std::pow(P(), 2));
     return true;
   }
   return false;
@@ -117,10 +115,10 @@ Particle::M(double m_)
 void
 Particle::SetMother(Particle* part_)
 {
-  this->_moth.insert(part_->id);
-  this->_isPrimary = false;
+  fMothers.insert(part_->id);
+  fIsPrimary = false;
   
-  PrintDebug(Form("Particle %2d (pdgId=%4d) is the new mother of %2d (pdgId=%4d)",
+  Debug(Form("Particle %2d (pdgId=%4d) is the new mother of %2d (pdgId=%4d)",
                   part_->id+1, part_->pdgId, id+1, pdgId));
   
   part_->AddDaughter(this);
@@ -130,20 +128,18 @@ bool
 Particle::AddDaughter(Particle* part_)
 {
   std::pair<ParticlesIds::iterator,bool> ret;
-  ret = this->_daugh.insert(part_->id);
+  ret = fDaughters.insert(part_->id);
 
   if (kLoggingLevel>=Debug) {
     std::ostringstream os;
     ParticlesIds::iterator it;
-    for (it=this->_daugh.begin(); it!=this->_daugh.end(); it++) {
-      os << " * " << *it << std::endl;
-    }
-    PrintDebug(Form("Particle %2d (pdgId=%4d) has now %2d daughter(s):\n\t"
+    for (it=fDaughters.begin(); it!=fDaughters.end(); it++) os << Form("\n\t * %d", *it);
+    Debug(Form("Particle %2d (pdgId=%4d) has now %2d daughter(s):"
                     "%s", role, pdgId, NumDaughters(), os.str().c_str()));
   }
   
   if (ret.second) {
-    PrintDebug(Form("Particle %2d (pdgId=%4d) is a new daughter of %2d (pdgId=%4d)",
+    Debug(Form("Particle %2d (pdgId=%4d) is a new daughter of %2d (pdgId=%4d)",
                     part_->role, part_->pdgId, role, pdgId));
     
     if (!part_->Primary() && part_->GetMothersIds().size()<1) {
@@ -160,19 +156,19 @@ Particle::GetDaughters()
   std::vector<int> out;
   ParticlesIds::iterator it;
   
-  if (this->_daugh.empty()) return out;
+  if (fDaughters.empty()) return out;
   
-  out.reserve(this->_daugh.size());
+  out.reserve(fDaughters.size());
   
-  PrintDebug(Form("Reserved %d slot(s) for the daughter particle(s)", _daugh.size()));
+  Debug(Form("Reserved %d slot(s) for the daughter particle(s)", fDaughters.size()));
   
-  for (it=this->_daugh.begin(); it!=this->_daugh.end(); it++) {
+  for (it=fDaughters.begin(); it!=fDaughters.end(); it++) {
     if (*it==-1) continue;
     out.push_back(*it);
   }
   std::sort(out.begin(), out.end());
   
-  PrintDebug(Form("Returning a vector containing %d particle(s)", out.size()))
+  Debug(Form("Returning a vector containing %d particle(s)", out.size()))
   
   return out;
 }
@@ -182,38 +178,36 @@ Particle::Dump()
 {
   std::vector<int> daugh;
 
-  if (this->Valid()) {
-    std::cout << __PRETTY_FUNCTION__ << std::endl
-	            << "  Id = " << this->id << std::endl
-	            << "  Role = " << this->role << std::endl
-	            << "  Status = " << this->status << std::endl
-	            << "  PDG id = " << this->pdgId << std::endl
-	            << "  P = (" << this->Px() << ", "
-                           << this->Py() << ", "
-                           << this->Pz() << ") GeV" << std::endl
-	            << "  |P| = " << this->P() << " GeV" << std::endl
-	            << "  Pt = " << this->Pt() << " GeV" << std::endl
-	            << "  E = " << this->E() << " GeV" << std::endl
-	            << "  M = " << this->M() << " GeV" << std::endl
-	            << "  eta = " << this->Eta() << std::endl
-	            << "  Is valid ? " << this->Valid() << std::endl
-	            << "  Is primary ? " << this->_isPrimary << std::endl;
-    if (!this->Primary()) {
+  if (Valid()) {
+    Info(Form("Id: %2d\n\t"
+                   "Role: %2d\n\t"
+                   "Status: %4d\n\t"
+                   "pdgId: %4d\n\t"
+                   "(E,P) = (%4.2f, %4.2f, %4.2f, %4.2f)\n\t"
+                   "  (|P| = p = %4.2f)\n\t"
+                   " Pt = %4.2f\n\t"
+                   " M = %4.2f\n\t"
+                   "Eta = %4.3f\n\t"
+                   "Valid? %d Primary? %d",
+                   id, role, status, pdgId,
+                   E(), Px(), Py(), Pz(), P(), Pt(), M(), Eta(),
+                   Valid(), Primary()));
+    if (!Primary()) {
       ParticlesIds::iterator m;
       std::cout << "  Mothers = ";
-      for (m=_moth.begin(); m!=_moth.end(); m++) std::cout << (*m) << " ";
+      for (m=fMothers.begin(); m!=fMothers.end(); m++) std::cout << (*m) << " ";
       std::cout << std::endl;
     }
 
-    daugh = this->GetDaughters();
+    daugh = GetDaughters();
 
-    std::cout << "  Daughters (" << this->NumDaughters() << ")" << std::endl;
-    for (unsigned int i=0; i<this->NumDaughters(); i++) {
+    std::cout << "  Daughters (" << NumDaughters() << ")" << std::endl;
+    for (unsigned int i=0; i<NumDaughters(); i++) {
       std::cout << "   * Id = " << daugh[i] << std::endl; 
     }
   }
   else {
-    std::cout << __PRETTY_FUNCTION__ << " ERROR: Particle with role \"" << this->role << "\" is invalid" << std::endl;
+    throw Exception(__PRETTY_FUNCTION__, Form("Particle with role \"%d\" is invalid", role), Fatal);
   }
 }
 
@@ -226,15 +220,15 @@ Particle::LorentzBoost(double m_, double p_[4])
   if (p_[3]!=m_) {
     pf4 = 0.;
     for (int i=0; i<4; i++) {
-      pf4 += this->_p4[i]*p_[i];
+      pf4 += fP4[i]*p_[i];
     }
     pf4 /= m_;
-    fn = (pf4+this->E())/(p_[3]+m_);
+    fn = (pf4+E())/(p_[3]+m_);
     /*for (int i=0; i<3; i++) {
-      __tmp3[i] = this->_p4[i] + fn*p_[i];
+      __tmp3[i] = fP4[i] + fn*p_[i];
     }*/
     for (int i=0; i<3; i++) {
-      this->_p4[i] += fn*p_[i];
+      fP4[i] += fn*p_[i];
     }
   }
   //return __tmp3;
@@ -248,16 +242,16 @@ Particle::LorentzBoost(double p_[3])
   p2 = std::pow(p_[0], 2)+std::pow(p_[1], 2)+std::pow(p_[2], 2);
   gamma = 1./std::sqrt(1.-p2);
   bp = 0.;
-  for (int i=0; i<3; i++) bp+= p_[i]*_p4[i];
-  //bp = p_[0]*_p4[0]+p_[1]*_p4[1]+p_[2]*_p4[2];
+  for (int i=0; i<3; i++) bp+= p_[i]*fP4[i];
+  //bp = p_[0]*fP4[0]+p_[1]*fP4[1]+p_[2]*fP4[2];
 
   if (p2>0.) gamma2 = (gamma-1.)/p2;
   else gamma2 = 0.;
 
   for (int i=0; i<3; i++) {
-    __tmp3[i] = this->_p4[i] + gamma2*bp*p_[i]+gamma*p_[i]*E();
+    __tmp3[i] = fP4[i] + gamma2*bp*p_[i]+gamma*p_[i]*E();
   }
-  //this->E(gamma*E()+bp);
+  //E(gamma*E()+bp);
   return __tmp3;
 }
 
@@ -272,14 +266,14 @@ Particle::RotateThetaPhi(double theta_, double phi_)
   for (int i=0; i<3; i++) {
     mom[i] = 0.;
     for (int j=0; j<3; j++) {
-      mom[i] += rotmtx[i][j]*this->_p4[j];
+      mom[i] += rotmtx[i][j]*fP4[j];
     }
   }
 
-  std::copy(mom, mom+3, this->_p4);
-  //this->_p4[0] *= sin(theta_)*cos(phi_);
-  //this->_p4[1] *= sin(theta_)*sin(phi_);
-  //this->_p4[2] *= cos(theta_);
+  std::copy(mom, mom+3, fP4);
+  //fP4[0] *= sin(theta_)*cos(phi_);
+  //fP4[1] *= sin(theta_)*sin(phi_);
+  //fP4[2] *= cos(theta_);
 }
 
 double
@@ -296,9 +290,9 @@ Particle::GetMassFromPDGId(Particle::ParticleCode pdgId_)
   case PiPlus:      return 0.13957018;
   case PiZero:      return 0.1349766;
   case JPsi:        return 20.;            // J/psi //FIXME FIXME FIXME
-  case DIQUARK_UD0: return 0.57933;
-  case DIQUARK_UD1: return 0.77133;
-  case DIQUARK_UU1: return 0.77133;
+  case ud0Diquark:  return 0.57933;
+  case ud1Diquark:  return 0.77133;
+  case uu1Diquark:  return 0.77133;
   case Proton:      return 0.938272046;
   case Neutron:     return 0.939565346;
   default:          return -1.;

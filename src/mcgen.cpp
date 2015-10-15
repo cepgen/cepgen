@@ -1,11 +1,13 @@
 #include "mcgen.h"
 
+//static LoggingLevel kLoggingLevel = Warning;
+
 MCGen::MCGen() :
   fVegas(0), fCrossSection(-1.), fCrossSectionError(-1.)
 {
-  PrintDebug("Generator initialized");
+  Debug("Generator initialized");
   
-  this->PrintHeader();
+  try { this->PrintHeader(); }  catch (Exception& e) { e.Dump(); }
   
   srand(time(0)); // Random number initialization
   
@@ -18,7 +20,7 @@ MCGen::MCGen(Parameters *ip_) :
 
 MCGen::~MCGen()
 {
-  PrintDebug("Destructor called");
+  Debug("Destructor called");
   
   if (fVegas) delete fVegas;
   delete parameters;
@@ -27,46 +29,12 @@ MCGen::~MCGen()
 void
 MCGen::PrintHeader()
 {
-  const int bw = 64;
-  const int lw = 43;
-  int sp = (bw-lw)/2;
-
-  std::cout << std::setw(bw+3) << std::setfill('-') << "" << std::endl;
-  std::cout << std::setfill(' ') << std::left
-	    << "| " << std::setw(sp) << "" << "             #                             " << std::setw(sp+1) << "" << "|" << std::endl  
-	    << "| " << std::setw(sp) << "" << " ####        #       #####    ##   # ##### " << std::setw(sp+1) << "" << "|" << std::endl
-	    << "| " << std::setw(sp) << "" << "#    #       #       #    #  #  #  # #    #" << std::setw(sp+1) << "" << "|" << std::endl
-	    << "| " << std::setw(sp) << "" << "#      ##### #       #    # #    # # #    #" << std::setw(sp+1) << "" << "|" << std::endl
-	    << "| " << std::setw(sp) << "" << "#            #       #####  ###### # ##### " << std::setw(sp+1) << "" << "|" << std::endl
-	    << "| " << std::setw(sp) << "" << "#    #       #       #      #    # # #   # " << std::setw(sp+1) << "" << "|" << std::endl
-	    << "| " << std::setw(sp) << "" << " ####        ####### #      #    # # #    #" << std::setw(sp+1) << "" << "|" << std::endl
-	    << "| " << std::setw(bw) << "" << "|" << std::endl
-	    << "| " << std::setw(bw) << "" << "|" << std::endl
-	    << "| " << std::setw(bw) << "Copyright (C) 2014  Laurent Forthomme" << "|" << std::endl
-	    << "| " << std::setw(bw) << "                   <laurent.forthomme@uclouvain.be>" << "|" << std::endl
-	    << "| " << std::setw(bw) << "              2005  Nicolas Schul" << "|" << std::endl
-	    << "| " << std::setw(bw) << "              XXXX  Bryan (f.f in CDF version)" << "|" << std::endl
-	    << "| " << std::setw(bw) << "         1991-1992  Olaf Duenger" << "|" << std::endl
-	    << "| " << std::setw(bw) << "              199X  Dariusz Bocian" << "|" << std::endl
-	    << "| " << std::setw(bw) << "              1996  MGVH (gmubeg.f in DESY version)" << "|" << std::endl
-	    << "| " << std::setw(bw) << "              1994  ZEUS offline group" << "|" << std::endl
-	    << "| " << std::setw(bw) << "              197X  Jos Vermaseren" << "|" << std::endl
-	    << "| " << std::setw(bw) << "" << "|" << std::endl
-	    << "| " << std::setw(bw) << "This program is free software: you can redistribute it and/or" << "|" << std::endl
-	    << "| " << std::setw(bw) << "modify it under the terms of the GNU General Public License as" << "|" << std::endl
-	    << "| " << std::setw(bw) << "published by the Free Software Foundation, either version 3 of" << "|" << std::endl
-	    << "| " << std::setw(bw) << "the License, or any later version." << "|" << std::endl
-	    << "| " << std::setw(bw) << "" << "|" << std::endl
-	    << "| " << std::setw(bw) << "This program is distributed in the hope that it will be useful," << "|" << std::endl
-	    << "| " << std::setw(bw) << "but WITHOUT ANY WARRANTY; without even the implied warranty of" << "|" << std::endl
-	    << "| " << std::setw(bw) << "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the" << "|" << std::endl
-	    << "| " << std::setw(bw) << "GNU General Public License for more details." << "|" << std::endl
-	    << "| " << std::setw(bw) << "" << "|" << std::endl
-	    << "| " << std::setw(bw) << "You should have received a copy of the GNU General Public" << "|" << std::endl
-	    << "| " << std::setw(bw) << "License along with this program.  If not, see" << "|" << std::endl
-	    << "| " << std::setw(bw) << "<http://www.gnu.org/licenses/>." << "|" << std::endl
-	    << "| " << std::setw(bw) << "" << "|" << std::endl;
-  std::cout << std::setw(bw+3) << std::setfill('-') << "" << std::endl;
+  std::string tmp;
+  std::ifstream f("README");
+  if (!f.good()) throw Exception(__PRETTY_FUNCTION__, "Failed to open README file", JustWarning);
+  while (f>>tmp) {
+    std::cout << tmp << std::endl;
+  }
 }
 
 
@@ -84,7 +52,7 @@ MCGen::BuildVegas()
       case Process::InelasticInelastic:
         topo = "DOUBLE-DISSOCIATIVE protons"; break;
     }
-    PrintDebug(Form("Considered topology: %s case", topo));
+    Debug(Form("Considered topology: %s case", topo.c_str()));
   }
   
   fVegas = new Vegas(parameters->process->GetNdim(parameters->process_mode), f, parameters);
@@ -95,7 +63,7 @@ MCGen::ComputeXsection(double* xsec_, double *err_)
 {
   if (!fVegas) BuildVegas();
 
-  PrintInfo("Starting the computation of the process cross-section");
+  Info("Starting the computation of the process cross-section");
   
   fVegas->Integrate(xsec_, err_);
   
@@ -103,7 +71,7 @@ MCGen::ComputeXsection(double* xsec_, double *err_)
   fCrossSectionError = *err_;
   fHasCrossSection = true;
   
-  PrintInfo(Form("Total cross section: %f +/- %f pb", *xsec_, *err_));
+  Info(Form("Total cross section: %f +/- %f pb", *xsec_, *err_));
 }
 
 Event*
@@ -126,8 +94,8 @@ void
 MCGen::LaunchGeneration()
 {
   // LHE file preparation
-  if (!this->parameters->file->is_open()) { PrintDebug("Output file is not opened"); }
-  else                                    { PrintDebug("Output file successfully opened"); }
+  if (!this->parameters->file->is_open()) { Debug("Output file is not opened"); }
+  else                                    { Debug("Output file successfully opened"); }
   
   *(this->parameters->file) << "<LesHouchesEvents version=\"1.0\">" << std::endl;
   *(this->parameters->file) << "<header>This file was created from the output of the CLPAIR generator</header>" << std::endl;
@@ -162,9 +130,10 @@ double f(double* x_, size_t ndim_, void* params_)
 
   ff = 0.;
 
-  PrintDebug(Form("Function f called -- some parameters:\n\t"
-                  "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
-                  "  remnant mode: %d", p->in1p, p->in2p, p->remnant_mode));
+  DebugInsideLoop(Form("Function f called -- some parameters:\n\t"
+                            "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
+                            "  remnant mode: %d",
+                            p->in1p, p->in2p, p->remnant_mode));
   
   p->process->SetPoint(ndim_, x_);
   p->process->GetEvent()->clear(); // need to move this sw else ?
@@ -231,33 +200,35 @@ double f(double* x_, size_t ndim_, void* params_)
     p->process->FillKinematics(false);
     p->process->GetEvent()->time_generation = tmr.elapsed();
 
-    if (kin.kinematics>1) {
+    if (kin.kinematics!=Process::ElasticElastic) {
 
-      PrintDebug(Form("Event before calling the hadroniser (%s)", p->hadroniser->GetName()));
+      Debug(Form("Event before calling the hadroniser (%s)", p->hadroniser->GetName()));
       if (kLoggingLevel>=Debug) p->process->GetEvent()->Dump();
       
       num_hadr_trials = 0;
       do {
-        hadronised = p->hadroniser->Hadronise(p->process->GetEvent());
+        try {
+          hadronised = p->hadroniser->Hadronise(p->process->GetEvent());
+        } catch (Exception& e) { e.Dump(); }
 
         if (num_hadr_trials>0) {
-          PrintDebug(Form("Hadronisation failed. Trying for the %dth time", num_hadr_trials+1));
+          Debug(Form("Hadronisation failed. Trying for the %dth time", num_hadr_trials+1));
         }
         
         num_hadr_trials++;
       } while (!hadronised and num_hadr_trials<=p->hadroniser_max_trials);
       p->process->GetEvent()->num_hadronisation_trials = num_hadr_trials;
 
-      PrintDebug(Form("Event hadronisation succeeded after %d trial(s)", p->process->GetEvent()->num_hadronisation_trials));
+      Debug(Form("Event hadronisation succeeded after %d trial(s)", p->process->GetEvent()->num_hadronisation_trials));
 
       if (num_hadr_trials>p->hadroniser_max_trials) return 0.; //FIXME
       
-      PrintDebug(Form("Event after calling the hadroniser (%s)", p->hadroniser->GetName()));
+      Debug(Form("Event after calling the hadroniser (%s)", p->hadroniser->GetName()));
       if (kLoggingLevel>=Debug) p->process->GetEvent()->Dump();
     }
     p->process->GetEvent()->time_total = tmr.elapsed();
     
-    PrintDebug(Form("Generation time:       %5.6f sec\n\t"
+    Debug(Form("Generation time:       %5.6f sec\n\t"
                     "Total time (gen+hadr): %5.6f sec",
                     p->process->GetEvent()->time_generation,
                     p->process->GetEvent()->time_total));

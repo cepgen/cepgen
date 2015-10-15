@@ -1,8 +1,7 @@
 #include "jetset7hadroniser.h"
 
-Jetset7Hadroniser::Jetset7Hadroniser()
+Jetset7Hadroniser::Jetset7Hadroniser() : Hadroniser("Jetset7")
 {
-  _name = "Jetset7";
   //this->lugive("MSTU(21)=1");
   //this->lugive("MSTJ(1)=1");
 }
@@ -221,15 +220,15 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
       ranudq = drand();
       if (ranudq<1./9.) {
         singlet_id = Particle::dQuark;
-        doublet_id = Particle::DIQUARK_UU1;
+        doublet_id = Particle::uu1Diquark;
       }
       else if (ranudq<5./9.) {
         singlet_id = Particle::uQuark;
-        doublet_id = Particle::DIQUARK_UD0;
+        doublet_id = Particle::ud0Diquark;
       }
       else {
         singlet_id = Particle::uQuark;
-        doublet_id = Particle::DIQUARK_UD1;
+        doublet_id = Particle::ud1Diquark;
       }
       ulmdq = ulmass(doublet_id);
       ulmq = ulmass(singlet_id);

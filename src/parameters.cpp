@@ -29,7 +29,7 @@ Parameters::Parameters() :
 
 Parameters::~Parameters()
 {
-  PrintDebug("Destructor called");
+  Debug("Destructor called");
   
   delete last_event;
 }
@@ -39,7 +39,7 @@ void Parameters::SetThetaRange(double thetamin_, double thetamax_)
   this->mineta = -log(tan(thetamax_/180.*pi/2.));
   this->maxeta = -log(tan(thetamin_/180.*pi/2.));
 
-  PrintDebug(Form("eta(min) = %5.2f => theta(min) = %5.2f"
+  Debug(Form("eta(min) = %5.2f => theta(min) = %5.2f"
                   "eta(max) = %5.2f => theta(max) = %5.2f",
                   mineta, thetamin_, maxeta, thetamax_));
 }
@@ -66,11 +66,12 @@ void Parameters::Dump()
     case 3:           pmode = "inelastic-elastic"; break;
     case 4:           pmode = "inelastic-inelastic"; break;
   }
-  const int wb = 65;
+  const int wb = 67;
   const int wt = 40;
   int wp = wb-wt-2;
   os 
     << std::left
+    << std::endl
     << " _" << std::setfill('_') << std::setw(wb) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "_ " << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "| " << std::setw(wt) << "Process to generate"  << std::setw(wp) << process->GetName() << std::endl
@@ -113,9 +114,8 @@ void Parameters::Dump()
   if (this->hadroniser!=(Hadroniser*)NULL)
     os << "| " << std::setw(wt) << "Hadronisation algorithm" << std::setw(12) << hadroniser->GetName() << std::setw(wp-12) << "" << " |" << std::endl;
   os << "| " << std::setw(wt) << "Minimal mass [GeV/c^2]" << std::setw(wp) << minmx << " |" << std::endl
-             << "| " << std::setw(wt) << "Maximal mass [GeV/c^2]" << std::setw(wp) << maxmx << " |" << std::endl
-             << "|_" << std::right << std::setfill('_') << std::setw(wb) << "_|" << std::left;
-  PrintInfo(os.str());
+             << "| " << std::setw(wt) << "Maximal mass [GeV/c^2]" << std::setw(wp) << maxmx << " |";
+  Info(os.str());
 }
 
 bool Parameters::ReadConfigFile(std::string inFile_)
@@ -127,7 +127,7 @@ bool Parameters::ReadConfigFile(std::string inFile_)
     return false;
   }
 
-  PrintDebug(Form("File %s succesfully opened!", inFile_));
+  Debug(Form("File %s succesfully opened!", inFile_));
   std::ostringstream os;
   os << "======================================================" << std::endl
      << "Configuration file content : " << std::endl
@@ -264,12 +264,12 @@ bool Parameters::ReadConfigFile(std::string inFile_)
       os << std::setw(60) << " * QPDF" << this->qpdf << std::endl;
     }
     else {
-      PrintInfo(Form("<WARNING> Unrecognized argument : [%s] = %s", key, value));
+      Info(Form("<WARNING> Unrecognized argument : [%s] = %s", key, value));
     }
   }
   f.close();
   
-  PrintInfo(os.str());
+  Info(os.str());
   
   return true;
 }

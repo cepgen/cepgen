@@ -34,7 +34,7 @@ GamPomVMLL::GamPomVMLL():
 {
   _name = "gamma,pomeron->VM->l+,l-";
 
-  itypvm = Particle::UPSILON_1S;
+  itypvm = Particle::Upsilon1S;
   ifragp = 0;
   deminp = 0.236;
   ifragv = (Particle::ParticleCode)0;
@@ -72,36 +72,31 @@ GamPomVMLL::GDIBeg()
     _dmnst = Particle::GetMassFromPDGId(static_cast<Particle::ParticleCode>(ifragp));
     _dmnst = Particle::GetWidthFromPDGId(static_cast<Particle::ParticleCode>(ifragp));
     if (_dmnst<=0.) {
-      //WRITE (ERTEXT, '(''F: GDIBEG: Mass of'',I8,''not known!'')'), IFRAGP
-      //CALL ERRLOG (10, ERTEXT)
-      std::cerr << __PRETTY_FUNCTION__ << " ERROR: Mass of " << ifragp << " not known!" << std::endl;
-      exit(0);
+      throw Exception(__PRETTY_FUNCTION__, Form("Mass of %d not known!", ifragp), Fatal);
     }
   }
 
   // Check that beam particle is proton or antiproton
-  if (abs(fEvent->GetOneByRole(1)->pdgId)!=Particle::Proton and abs(fEvent->GetOneByRole(2)->pdgId)!=Particle::Proton) {
-    //WRITE (ERTEXT, '(''F: GDIBEG: Beam proton must be proton or antiproton. IBEAMP ='',I8)'), IBEAMP
-    //CALL ERRLOG (11, ERTEXT)
-    std::cerr << __PRETTY_FUNCTION__ << " ERROR: Beam proton must be proton or antiproton. IBEAMP = " << fEvent->GetOneByRole(1)->pdgId << " / " << fEvent->GetOneByRole(2)->pdgId << std::endl;
-    exit(0);
+  if  (abs((int)fEvent->GetOneByRole(1)->pdgId)!=Particle::Proton
+   and abs((int)fEvent->GetOneByRole(2)->pdgId)!=Particle::Proton) {
+    throw Exception(__PRETTY_FUNCTION__, Form("Beam proton must be proton or antiproton. IBEAMP = %d / %d", fEvent->GetOneByRole(1)->pdgId, fEvent->GetOneByRole(2)->pdgId), Fatal);
   }
 
   // If necessary, initialize LAMBDA
   if (_lambda<=0.) {
-    if (itypvm==22) _lambda = Particle::GetMassFromPDGId(Particle::RHO_770_0);
+    if (itypvm==22) _lambda = Particle::GetMassFromPDGId(Particle::Rho770_0);
     else _lambda = _dmvm;
-    //std::cout << "[GamPomVMLL::GDIBeg] INFO: LAMBDA set to " << _lambda << std::endl;
+    //Info(Form("LAMBDA set to %f", _lambda));
   }
 
   // If necessary, initialize DEMINP, AMASSV
   if (deminp<_dmn+_dmpi0-_dmp) {
     deminp = _dmn+_dmpi0-_dmp+0.1;
-    std::cout << __PRETTY_FUNCTION__ << " INFO: DEMINP set to " << deminp << std::endl;
+    Info(Form("DEMINP set to %f", deminp));
   }
   if (abs(ifragp)>2 and deminp<_dmnst-2.*_dwnst-_dmp) {
     deminp = _dmnst-2.*_dwnst-_dmp;
-    std::cout << __PRETTY_FUNCTION__ << " INFO: DEMINP set to " << deminp << std::endl;
+    Info(Form("DEMINP set to %f", deminp));
   }
 
   if (amassv<2.*_dmpi) {
@@ -110,18 +105,16 @@ GamPomVMLL::GDIBeg()
     else if ((itypvm/10)%10==4) amassv = 4.0; // psi states: minimum is J/psi pi+ pi- state
     else if ((itypvm/10)%10==5) amassv = 10.; // Upsilon states: minimum is Upsilon (1S) pi+ pi- state
     else {
-      //CALL ERRLOG (12, 'F: GDIBEG: Unknown quark content of vector meson')
-      std::cerr << __PRETTY_FUNCTION__ << " ERROR: Unknown quark content of vector meson" << std::endl;
-      exit(0);
+      throw Exception(__PRETTY_FUNCTION__, "Unknown quark content of vector meson", Fatal);
     }
-    std::cout << __PRETTY_FUNCTION__ << " INFO: AMASSV set to " << amassv << std::endl;    
+    Info(Form("AMASSV set to %f", amassv));
   }
 
   if ((int)ifragv>100) {
     r = Particle::GetMassFromPDGId(ifragv)+_dmvm;
     if (amassv<r) {
       amassv = r+1.;
-      std::cout << __PRETTY_FUNCTION__ << " INFO: AMASSV set to " << amassv << std::endl;
+      Info(Form("AMASSV set to %f", amassv));
     }
   }
 
@@ -134,29 +127,29 @@ GamPomVMLL::GDIBeg()
 
   if (_wmin<wminmin) {
     _wmin = wminmin+1.;
-    std::cout << __PRETTY_FUNCTION__ << " INFO: WMIN set to " << _wmin << std::endl;
+    Info(Form("WMIN set to %f", _wmin));
   }
 
   // If necessary, initialize WMAX
   if (_wmax<=_wmin) {
     _wmax = std::sqrt(4.*_pz1*_pz2+fEvent->GetOneByRole(1)->M2()+fEvent->GetOneByRole(2)->M2());
-    std::cout << __PRETTY_FUNCTION__ << " INFO: WMAX set to " << _wmax << std::endl;
+    Info(Form("WMAX set to %f", _wmax));
   }
 
   // If necessary, initialize Q2MIN
   if (_eelmin>0. and _cthelb>-1. and _q2min<2.*_pz1*_eelmin*(1.+_cthelb)) {
     _q2min = 2.*_pz1*_eelmin*(1.+_cthelb);
-    std::cout << __PRETTY_FUNCTION__ << " INFO: Q2MIN set to " << _q2min << std::endl;
+    Info(Form("Q2MIN set to %f", _q2min));
   }
 
   // If necessary, initialize Q2MAX
   if (_q2max<0.) {
     _q2max = fabs(_q2max);
-    std::cout << __PRETTY_FUNCTION__ << " INFO: Q2MAX set to " << _q2max << std::endl;
+    Info(Form("Q2MAX set to %f", _q2max));
   }
   if (_q2max<=_q2min) {
     _q2max = 4.*_pz1*_pz2+fEvent->GetOneByRole(IBE)->M2()+fEvent->GetOneByRole(IBP)->M2();
-    std::cout << __PRETTY_FUNCTION__ << " INFO: Q2MAX set to " << _q2max << std::endl;
+    Info(Form("Q2MAX set to %f", _q2max));
   }
 
   // If necessary, initialize AMXB0
@@ -166,26 +159,23 @@ GamPomVMLL::GDIBeg()
       else _amxb0 = std::sqrt(_dmp+_dmvm);
     }
     else _amxb0 = _dmvm;
-    //std::cout << "[GamPomVMLL::GDIBeg] INFO: AMXB0 set to " << _amxb0 << std::endl;
+    //Info(Form("AMXB0 set to %f", _amxb0));
   }
 
   // If necessary, initialize BR
   if (_br==0.) {
     _br = 1.;
-    std::cout << __PRETTY_FUNCTION__ << " INFO: BR set to " << _br << std::endl;
-    //CALL ERRLOG (13, 'W: GDIBEG: BR was 0.0. Set to 1.0')
+    Info(Form("BR set to %f", _br));
   }
   else if (_br>1.) {
     _br /= 100.;
-    std::cout << __PRETTY_FUNCTION__ << " INFO: BR was > 1.0. Scaled down by 100 to " << _br << std::endl;
-    //CALL ERRLOG (14, 'W: GDIBEG: BR was > 0.0. Scaled down by 100.')
+    Info(Form("BR was > 1. Scaled down by 100 to %f", _br));
   }
 
   // If necessary, initialize ALPH1M
   if (_alph1m<0.) {
     _alph1m = _alpha1;
-    std::cout << __PRETTY_FUNCTION__ << " INFO: ALPH1M set to " << _alph1m << std::endl;
-    //CALL ERRLOG (15, 'I: GDIBEG: ALPH1M was set to ALPHA1')
+    Info(Form("ALPH1M set to %f", _alph1m));
   }
 }
 
@@ -198,9 +188,7 @@ GamPomVMLL::GDIEvt()
 void
 GamPomVMLL::GenEvtDi()
 {
-#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Generating the event" << std::endl;
-#endif
+  DebugInsideLoop("Generating the event");
 
   // GenBPr, GenBEl are done implicitely once the incoming particles are set for the process
   this->GenGam();
@@ -259,23 +247,20 @@ GamPomVMLL::GenGam()
     }
 
     if (sw<=0.) {
-      std::cerr << __PRETTY_FUNCTION__ << " ERROR: SW = " << sw << std::endl
-		<< "  Cross section calculation impossible!" << std::endl;
-      //CALL ERRLOG (60, 'F: GENGAM: SW < 0')
-      exit(0);
+      throw Exception(__PRETTY_FUNCTION__, Form("SW = %d\n\tCross section calculation impossible!", sw), Fatal);
     }
 
-    std::cout << __PRETTY_FUNCTION__ << " INFO: t/mx-combinations generated: " << n << std::endl
-	      << "  Weight of t/mx-combinations accepted: " << sw << " (sw2 = " << sw2 << ", sw2bar = " << sw2bar << ")" << std::endl;
+    Info(Form("t/mx-combinations generated: %d\n\t"
+                   "Weight of t/mx-combinations accepted: %f (sw2 = %f, sw2bar = %f)", n, sw, sw2, sw2bar));
     
     _event_propmx = std::max(1., _xi*_q2min/(std::pow(_lambda, 2)+_xi*_chi*_q2min))/std::pow(1.+_q2min/std::pow(_lambda, 2), _eprop);
     sigwt = std::pow(_gengam_w2/_event_smax, (2.*_epsilw))/_event_propmx*sw*n;
     sw2bar = std::max(sw2bar, 1.);
     dsigwt = sigwt*std::sqrt(sw2*sw2bar/n)/sw;
 
-    std::cout << "  sigwt = " << sigwt << ", dsigwt = " << dsigwt << ", propmx = " << _event_propmx << std::endl;
+    //std::cout << "  sigwt = " << sigwt << ", dsigwt = " << dsigwt << ", propmx = " << _event_propmx << std::endl;
 
-    // Print gamma-n cross section for W values in WVAL (skipped!)
+    //  gamma-n cross section for W values in WVAL (skipped!)
 
     _gengam_first = false;
   }
@@ -344,8 +329,8 @@ GamPomVMLL::OneEvent()
   //exit(0);
   
   if (_gengam_w2<0.) {
-    std::cerr << __PRETTY_FUNCTION__ << " ERROR: W2 = " << _gengam_w2 << " < 0" << std::endl;
-    return -1.;
+    throw Exception(__PRETTY_FUNCTION__, Form("W2 = %f < 0", _gengam_w2), JustWarning);
+    return -1;
   }
   pcm[4] = std::sqrt(_gengam_w2);
   
@@ -381,14 +366,8 @@ GamPomVMLL::OneEvent()
   
   //CALL SHSW (10, 2, SNGL (PCM (5)), WGHT)
   
-  if (weight>1.001) {
-    std::cerr << __PRETTY_FUNCTION__ << " ERROR: WEIGHT = " << weight << " > 1.001" << std::endl;	
-    //CALL ERRLOG (62, 'W: GENGAM: WGHT > 1.001')
-  }
-  else if (wt>1.001) {
-    std::cerr << __PRETTY_FUNCTION__ << " ERROR: WT = " << wt << " > 1.001" << std::endl;	
-    //CALL ERRLOG (63, 'W: GENGAM: WT > 1.001')
-  }
+  if (weight>1.001)  throw Exception(__PRETTY_FUNCTION__, Form("WEIGHT = %f > 1.001", weight), JustWarning);
+  else if (wt>1.001) throw Exception(__PRETTY_FUNCTION__, Form("ERROR: WT = %f > 1.001", wt), JustWarning);
   return weight;
   //return -1;
 }
@@ -827,9 +806,7 @@ GamPomVMLL::GEPhot(double* q2_, int* heli_)
   std::vector<Particle>::iterator p;
   PhysicsBoundaries pb;
 
-#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Function called" << std::endl;
-#endif
+  Debug("Function called")
   
   pb.wmin = _wmin;
   pb.wmax = _wmax; // FIXME not present!
@@ -932,9 +909,9 @@ GamPomVMLL::GenDif()
   pom.status = 3;
   pom.SetMother(fEvent->GetOneByRole(2));
   pom.P(pcmpom[0], pcmpom[1], pcmpom[2], pcmpom[3]);
-  //#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Virtual pomeron : " << pcmpom[4] << " <> " << pom.M() << std::endl;
-  //#endif
+  
+  DebugInsideLoop(Form("Virtual pomeron: %5.3f <> %5.3f", pcmpom[4], pom.M()));
+  
   fEvent->AddParticle(pom); // Pomeron
 
   // Diffractive proton state
@@ -957,9 +934,9 @@ GamPomVMLL::GenDif()
   std::cout << pcmpx[2] << std::endl;
   std::cout << "------> " << std::pow(pcmpx[3], 2)-std::pow(pcmpx[0], 2)-std::pow(pcmpx[1], 2)-std::pow(pcmpx[2], 2) << std::endl;
   dps.M(-1);
-  //#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Diffractive proton : " << pcmpx[4] << " <> " << dps.M() << std::endl;
-  //#endif
+  
+  DebugInsideLoop(Form("Diffractive proton: %5.3f <> %5.3f", pcmpx[4], dps.M()));
+  
   fEvent->AddParticle(dps);
 
   // Diffractive meson state
@@ -972,9 +949,9 @@ GamPomVMLL::GenDif()
   }
   dms.status = 1;
   dms.P(pcmvmx[0], pcmvmx[1], pcmvmx[2], pcmvmx[3]);
-  //#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Diffractive meson : " << pcmvmx[4] << " <> " << dms.M() << std::endl;
-  //#endif
+  
+  DebugInsideLoop(Form("Diffractive meson: %5.3f <> %5.3f", pcmvmx[4], dms.M()));
+  
   fEvent->AddParticle(dms);
 }
 

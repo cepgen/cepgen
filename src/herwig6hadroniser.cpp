@@ -1,16 +1,13 @@
 #include "herwig6hadroniser.h"
 
-Herwig6Hadroniser::Herwig6Hadroniser()
+Herwig6Hadroniser::Herwig6Hadroniser() : Hadroniser("Herwig6")
 {
-  PrintDebug(Form("Constructor called"));
-  _name = "Herwig6";
+  Debug(Form("Constructor called"));
 }
 
 Herwig6Hadroniser::~Herwig6Hadroniser()
 {
-#ifdef DEBUG
-  PrintDebug(Form("Destructor called"));
-#endif
+  Debug(Form("Destructor called"));
 }
 
 bool

@@ -74,9 +74,8 @@ Event::GetRoles() const
 int
 Event::AddParticle(Particle part_, bool replace_)
 {
-#ifdef DEBUG
-  PrintDebug(Form("Particle with PDGid = %d has role ", part_.pdgId, part_.role));
-#endif
+  DebugInsideLoop(Form("Particle with PDGid = %d has role ", part_.pdgId, part_.role));
+  
   if (part_.role<=0) {
     return -1;
   }
@@ -211,7 +210,7 @@ Event::Dump(bool stable_)
   if (fabs(pztot)<1.e-12) pztot = 0.;
   if (fabs(etot)<1.e-12) etot = 0.;
   //
-  PrintInfo(Form(
+  Info(Form(
   "Particle\tPDG id\t\tCharge\tRole\tStatus\tMother\t\t\t4-Momentum [GeV]\n\t"
   "--------\t------\t\t------\t----\t------\t------\t---------------------------------------\n\t"
   "%s\n\t"

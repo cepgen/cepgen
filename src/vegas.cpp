@@ -15,7 +15,7 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
     fXup[i] = 1.;
   }
   
-  PrintDebug(Form("Number of integration dimensions: %d\n\t"
+  Debug(Form("Number of integration dimensions: %d\n\t"
                   "Number of iterations:             %d\n\t"
                   "Number of function calls:         %d", dim_, inParam_->itvg, inParam_->ncvg));
 
@@ -29,7 +29,7 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
 
 Vegas::~Vegas()
 {
-  PrintDebug("Destructor called");
+  Debug("Destructor called");
   
   delete[] fXlow;
   delete[] fXup;
@@ -65,7 +65,7 @@ Vegas::Integrate(double *result_, double *abserr_)
   /// Integration
   for (unsigned int i=0; i<fNumIter; i++) {
     veg_res = gsl_monte_vegas_integrate(fFunction, fXlow, fXup, fFunction->dim, fNumConverg/5, rng, state, &res, &err);
-    std::cout << Form("-> iteration %2d: average = %8.3f   sigma = %8.3f   chi2 = %4.3f", i+1, res, err, gsl_monte_vegas_chisq(state)) << std::endl;
+    std::cout << Form(">> Iteration %2d: average = %8.4f   sigma = %8.4f   chi2 = %4.3f", i+1, res, err, gsl_monte_vegas_chisq(state)) << std::endl;
   }
   
   // Clean Vegas
@@ -89,11 +89,11 @@ Vegas::Generate()
 
   i = 0;
 
-  PrintInfo(Form("%d events will be generated", fInputParameters->maxgen));
+  Info(Form("%d events will be generated", fInputParameters->maxgen));
   while (i<fInputParameters->maxgen) {
     if (this->GenerateOneEvent()) i++;
   }
-  PrintInfo(Form("%d events generated", i));
+  Info(Form("%d events generated", i));
 }
 
 bool
@@ -169,7 +169,7 @@ Vegas::GenerateOneEvent()
     fCorrec = (_nm[fJ]-1.)*fmax_diff/fFGlobalMax*weight/fFGlobalMax-1.;
   }
   
-  PrintDebug(Form("Correc.: %f, j = %d", fCorrec, fJ));
+  Debug(Form("Correc.: %f, j = %d", fCorrec, fJ));
   
   // Return with an accepted event
   if (weight>0.) return this->StoreEvent(x);
@@ -183,7 +183,7 @@ Vegas::CorrectionCycle()
   double weight;
   double fmax_old = 0., fmax_diff = 0., fmax2 = 0.;
   
-  PrintDebug(Form("Correction cycles are started.\n\t"
+  Debug(Form("Correction cycles are started.\n\t"
                   "j = %f"
                   "correc = %f"
                   "corre2 = %f", fJ, fCorrec2));
@@ -239,7 +239,7 @@ Vegas::StoreEvent(double *x_)
   fInputParameters->store = false;
   
   if (fInputParameters->ngen%1000==0) {
-    PrintDebug(Form("Generated events: %d", fInputParameters->ngen));
+    Debug(Form("Generated events: %d", fInputParameters->ngen));
   }
   
   return true;
@@ -264,7 +264,7 @@ Vegas::SetGen()
   double sig, sigp;
   std::ostringstream os;
   if (kLoggingLevel>=Debug) {
-    PrintDebug(Form("MaxGen = %d", fInputParameters->maxgen));
+    Debug(Form("MaxGen = %d", fInputParameters->maxgen));
     fInputParameters->Dump();
   }
 
@@ -314,14 +314,15 @@ Vegas::SetGen()
       sig = sqrt(sig2);
       eff = 1.e4;
       if (fFmax[i]!=0.) eff = fFmax[i]/av;
+      os.str("");
       for (unsigned int j=0; j<fFunction->dim; j++) { os << n[j]; if (j!=fFunction->dim-1) os << ", "; }
-      PrintDebug(Form("In iteration #%d:\n\t"
-	                    "av   = %f\n\t"
-	                    "sig  = %f\n\t"
-                      "fmax = %f\n\t"
-                      "eff  = %f\n\t"
-                      "n = (%s)", i, av, sig, fFmax[i], eff, os.str().c_str()));
-      std::cout << ")" << std::endl;
+      DebugInsideLoop(Form("In iteration #%d:\n\t"
+	                              "av   = %f\n\t"
+	                              "sig  = %f\n\t"
+                                "fmax = %f\n\t"
+                                "eff  = %f\n\t"
+                                "n = (%s)",
+                                i, av, sig, fFmax[i], eff, os.str().c_str()));
     }
   }
 
@@ -337,7 +338,7 @@ Vegas::SetGen()
     for (int i=0; i<max; i++) eff1 += (fFmax[i]/(max*sum));
     eff2 = fFGlobalMax/sum;
     
-    PrintDebug(Form("Average function value     =  sum   = %f\n\t"
+    Debug(Form("Average function value     =  sum   = %f\n\t"
                     "Average function value     =  sum   = %f\n\t"
                     "Average function value**2  =  sum2  = %f\n\t"
                     "Overall standard deviation =  sig   = %f\n\t"
