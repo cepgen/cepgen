@@ -32,7 +32,7 @@ class Event {
     /**
      * @brief Empties the whole event content
      */
-    inline void clear() { this->_part.clear(); this->time_generation=-1.; this->time_total=-1.; };
+    inline void clear() { fParticles.clear(); time_generation=-1.; time_total=-1.; };
     /**
      * Returns the list of pointers to the Particle objects corresponding to a certain role in the process kinematics
      * @brief Gets a list of particles by their role in the event
@@ -46,7 +46,7 @@ class Event {
      * @return A Particle object corresponding to the first particle found in this event
      */
     inline Particle* GetOneByRole(int role_) { 
-      ParticlesRef out = this->GetByRole(role_);
+      ParticlesRef out = GetByRole(role_);
       if (out.size()==0) return 0;
       else return out.at(0);
     };
@@ -67,7 +67,7 @@ class Event {
     inline ParticlesRef GetByIds(std::vector<int> ids_) {
       std::vector<int>::iterator id;
       ParticlesRef out;
-      for (id=ids_.begin(); id!=ids_.end(); id++) out.push_back(this->GetById(*id));
+      for (id=ids_.begin(); id!=ids_.end(); id++) out.push_back(GetById(*id));
       return out;
     }
     /**
@@ -80,7 +80,7 @@ class Event {
       const ParticlesIds moth = part_->GetMothersIds();
       ParticlesIds::iterator m;
       for (m=moth.begin(); m!=moth.end(); m++) {
-      	out.push_back(this->GetById(*m));
+      	out.push_back(GetById(*m));
       }
       return out;
     }; // FIXME
@@ -89,7 +89,7 @@ class Event {
       const ParticlesIds moth = part_->GetMothersIds();
       ParticlesIds::iterator m;
       for (m=moth.begin(); m!=moth.end(); m++) {
-      	out.push_back(this->GetConstById(*m));
+      	out.push_back(GetConstById(*m));
       }
       return out;
     }; // FIXME
@@ -98,7 +98,7 @@ class Event {
      * @param[in] part_ The particle for which the daughter particles have to be retrieved
      * @return A Particle objects vector containing all the daughters' kinematic information
      */
-    inline ParticlesRef GetDaughters(Particle* part_) { return this->GetByIds(part_->GetDaughters()); };
+    inline ParticlesRef GetDaughters(Particle* part_) { return GetByIds(part_->GetDaughters()); };
     /**
      * Gets a list of roles for the given event (really process-dependant for the central system)
      * @return A vector of integers corresponding to all the roles the particles can play in the event
@@ -159,7 +159,7 @@ class Event {
      * @brief Number of particles in the event
      * @return The number of particles in the event, as an integer
      */
-    inline int NumParticles() const { return this->_part.size(); };
+    inline int NumParticles() const { return fParticles.size(); };
     /**
      * @brief Number of trials before the event was "correctly" hadronised
      */
@@ -179,7 +179,7 @@ class Event {
     /**
      * List of particles in the event, mapped to their role in this event
      */
-    ParticlesMap _part;
+    ParticlesMap fParticles;
     /**
      * Empty particle returned to the get-ers if no particle matches the requirements
      */

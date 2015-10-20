@@ -1,7 +1,6 @@
 #ifndef _GAMGAMLL_H
 #define _GAMGAMLL_H
 
-#define PROCESS_NAME "pp -> p(*) (gamma gamma -> l+ l-) p(*)"
 #define PROCESS_DESCRIPTION "Two-photon production of lepton pairs"
 
 #include <iostream>

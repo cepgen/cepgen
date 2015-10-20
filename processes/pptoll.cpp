@@ -1,9 +1,7 @@
 #include "pptoll.h"
 
-PPtoLL::PPtoLL()
-{
-  _name = "gamma,gamma->l+,l- (kT-factorization approach)";
-}
+PPtoLL::PPtoLL() : Process("gamma,gamma->l+,l- (kT-factorization approach)")
+{}
 
 PPtoLL::~PPtoLL()
 {}
@@ -29,9 +27,9 @@ PPtoLL::ComputeWeight()
   double lqmin, lqmax;
   double jac, weight;
   
-  //lqmin = std::log(std::sqrt(_cuts.q2min));
+  //lqmin = std::log(std::sqrt(fCuts.q2min));
   lqmin = -10.; //FIXME
-  lqmax = std::log(std::sqrt(_cuts.q2max));
+  lqmax = std::log(std::sqrt(fCuts.q2max));
   
   // Incoming photons
   _q1t = std::exp(lqmin+(lqmax-lqmin)*x(0));
@@ -41,22 +39,22 @@ PPtoLL::ComputeWeight()
   
   // Outgoing leptons
   double ymin, ymax;
-  //ymin = EtaToY(_cuts.etamin, fEvent->GetOneByRole(6)->M(), pt);
-  //ymax = EtaToY(_cuts.etamax);
+  //ymin = EtaToY(fCuts.etamin, fEvent->GetOneByRole(6)->M(), pt);
+  //ymax = EtaToY(fCuts.etamax);
   ///////////////////////////////////
-  ymin = _cuts.etamin;             //
-  ymax = _cuts.etamax;             //
+  ymin = fCuts.etamin;             //
+  ymax = fCuts.etamax;             //
   ///////////// FIXME ///////////////
   
   _y1 = ymin+(ymax-ymin)*x(4);
   _y2 = ymin+(ymax-ymin)*x(5);
-  _ptdiff = _cuts.ptdiffmin+(_cuts.ptdiffmax-_cuts.ptdiffmin)*x(6);
+  _ptdiff = fCuts.ptdiffmin+(fCuts.ptdiffmax-fCuts.ptdiffmin)*x(6);
   _phiptdiff = 2.*pi*x(7);
 
   // Outgoing protons (or remnants)
-  if (_cuts.kinematics>1) {
-    _mx = _cuts.mxmin+(_cuts.mxmax-_cuts.mxmin)*x(8);
-    if (_cuts.kinematics>2) _my = _cuts.mxmin+(_cuts.mxmax-_cuts.mxmin)*x(9);
+  if (fCuts.kinematics>1) {
+    _mx = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(8);
+    if (fCuts.kinematics>2) _my = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(9);
     else _my = fEvent->GetOneByRole(2)->M();
   }
   else _mx = fEvent->GetOneByRole(1)->M();
@@ -70,10 +68,10 @@ PPtoLL::ComputeWeight()
   jac *= 2.*pi;
   jac *= (ymax-ymin);
   jac *= (ymax-ymin);
-  if (_cuts.kinematics>1) {
-    jac *= (_cuts.mxmax-_cuts.mxmin);
-    if (_cuts.kinematics>2) {
-      jac *= (_cuts.mxmax-_cuts.mxmin);
+  if (fCuts.kinematics>1) {
+    jac *= (fCuts.mxmax-fCuts.mxmin);
+    if (fCuts.kinematics>2) {
+      jac *= (fCuts.mxmax-fCuts.mxmin);
     }
   }
   jac *= 2.*pi;
@@ -186,10 +184,10 @@ PPtoLL::INCqqbar()
   pt2y = (ptsumy-ptdiffy)/2.;
   pt2 = sqrt(pow(pt2x, 2)+pow(pt2y, 2));
   
-  if (pt1<_cuts.ptmin or pt2<_cuts.ptmin) {
+  if (pt1<fCuts.ptmin or pt2<fCuts.ptmin) {
     return 0.;
   }
-  /*if (pt1>_cuts.ptmax or pt2>_cuts.ptmax) {
+  /*if (pt1>fCuts.ptmax or pt2>fCuts.ptmax) {
     return 0.;
   }*/
   amt1 = sqrt(pow(pt1, 2)+ml2);
@@ -454,7 +452,7 @@ PPtoLL::INCqqbar()
   //     of inelastic distributions
   //============================================
   
-  switch (_cuts.kinematics) {
+  switch (fCuts.kinematics) {
     case 1: // elastic-elastic
       f1 = ElasticFlux(x1, q1t2);
       f2 = ElasticFlux(x2, q2t2);
@@ -510,7 +508,7 @@ PPtoLL::FillKinematics(bool symmetrise_)
   if (!op1.P(_px_x, _px_y, _px_z, _px_0)) {
     std::cerr << "Invalid outgoing proton 1" << std::endl;
   }
-  if (_cuts.kinematics>1) {
+  if (fCuts.kinematics>1) {
     op1.status = -2;
     op1.M(_mx);
   }
@@ -528,7 +526,7 @@ PPtoLL::FillKinematics(bool symmetrise_)
   if (!op2.P(_py_x, _py_y, _py_z, _py_0)) {
     std::cerr << "Invalid outgoing proton 2" << std::endl;
   }
-  if (_cuts.kinematics==3) {
+  if (fCuts.kinematics==3) {
     op2.status = -2;
     op2.M(_my);
   }

@@ -1,6 +1,6 @@
 #include "gampomvmll.h"
 
-GamPomVMLL::GamPomVMLL():
+GamPomVMLL::GamPomVMLL(): Process("gamma,pomeron->VM->l+,l-"),
   // Parameters from steer.text
   _cthelb(-.9962), _eelmin(8.),
   _lambda(0.), _eprop(2.5), _xi(1.), _chi(1.),
@@ -32,8 +32,6 @@ GamPomVMLL::GamPomVMLL():
   _photint_swei(0.), _photint_swei2(0.), _photint_sweit(0.), _photint_sweit2(0.), _photint_sweil(0.), _photint_sweil2(0.),
   _vmflux_f(0.), _vmflux_df(0.), _vmflux_fl(0.), _vmflux_dfl(0.), _vmflux_ft(0.), _vmflux_dft(0.)
 {
-  _name = "gamma,pomeron->VM->l+,l-";
-
   itypvm = Particle::Upsilon1S;
   ifragp = 0;
   deminp = 0.236;

@@ -20,7 +20,7 @@ Particle::Particle(int role_, ParticleCode pdgId_) :
 
 Particle::~Particle()
 {
-  DebugInsideLoop("Destructor called");
+  //DebugInsideLoop("Destructor called");
 }
 
 Particle&

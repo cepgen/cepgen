@@ -16,8 +16,8 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
   }
   
   Debug(Form("Number of integration dimensions: %d\n\t"
-                  "Number of iterations:             %d\n\t"
-                  "Number of function calls:         %d", dim_, inParam_->itvg, inParam_->ncvg));
+             "Number of iterations:             %d\n\t"
+             "Number of function calls:         %d", dim_, inParam_->itvg, inParam_->ncvg));
 
   fFunction = new gsl_monte_function;
   fFunction->f = f_;
@@ -33,7 +33,7 @@ Vegas::~Vegas()
   
   delete[] fXlow;
   delete[] fXup;
-  delete[] _nm;
+  delete[] fNm;
   if (fFmax) delete[] fFmax;
   if (fN) delete[] fN;
   delete fFunction;
@@ -129,7 +129,7 @@ Vegas::GenerateOneEvent()
       // ...
       fJ = (double)rand()/RAND_MAX*max;
       y = (double)rand()/RAND_MAX*fFGlobalMax;
-      _nm[fJ] += 1;
+      fNm[fJ] += 1;
     } while (y>fFmax[fJ]);
     // Select x values in this Vegas bin
     jj = fJ;
@@ -159,14 +159,14 @@ Vegas::GenerateOneEvent()
     fmax_old = fFmax[fJ];
     fFmax[fJ] = weight;
     fmax_diff = weight-fmax_old;
-    fCorrec = (_nm[fJ]-1.)*fmax_diff/fFGlobalMax-1.;
+    fCorrec = (fNm[fJ]-1.)*fmax_diff/fFGlobalMax-1.;
   }
   else {
     fmax_old = fFmax[fJ];
     fFmax[fJ] = weight;
     fmax_diff = weight-fmax_old;
     fFGlobalMax = weight;
-    fCorrec = (_nm[fJ]-1.)*fmax_diff/fFGlobalMax*weight/fFGlobalMax-1.;
+    fCorrec = (fNm[fJ]-1.)*fmax_diff/fFGlobalMax*weight/fFGlobalMax-1.;
   }
   
   Debug(Form("Correc.: %f, j = %d", fCorrec, fJ));
@@ -218,11 +218,11 @@ Vegas::CorrectionCycle()
     fFmax[fJ] = fmax2;
     fmax_diff = fmax2-fmax_old;
     if (fmax2<fFGlobalMax) {
-      fCorrec = (_nm[fJ]-1.)*fmax_diff/fFGlobalMax-fCorrec2;
+      fCorrec = (fNm[fJ]-1.)*fmax_diff/fFGlobalMax-fCorrec2;
     }
     else {
       fFGlobalMax = fmax2;
-      fCorrec = (_nm[fJ]-1.)*fmax_diff/fFGlobalMax*fmax2/fFGlobalMax-fCorrec2;
+      fCorrec = (fNm[fJ]-1.)*fmax_diff/fFGlobalMax*fmax2/fFGlobalMax-fCorrec2;
     }
     fCorrec2 = 0.;
     fmax2 = 0.;
@@ -267,7 +267,7 @@ Vegas::SetGen()
     Debug(Form("MaxGen = %d", fInputParameters->maxgen));
   }
 
-  _nm = new int[20000];
+  fNm = new int[20000];
   fFmax = new double[20000];
   fN = new int[fFunction->dim];
 
@@ -280,7 +280,7 @@ Vegas::SetGen()
   max = pow(fMbin, fFunction->dim);
 
   for (int i=0; i<max; i++) {
-    _nm[i] = 0;
+    fNm[i] = 0;
     fFmax[i] = 0.;
   }
 

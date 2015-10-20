@@ -28,6 +28,16 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
+ * The function to be integrated, which returns the value of the weight of an
+ * event, including the matrix element of the process, all the kinematic
+ * factors, and the cut restrictions. \f$x\f$ is an array of random numbers used
+ * to select a random point inside the phase space.
+ */
+double f(double*,size_t,void*);
+
+////////////////////////////////////////////////////////////////////////////////
+
+/**
  * This object represents the core of this Monte Carlo generator, with its
  * allowance to generate the events (using the embedded Vegas object) and to
  * study the phase space in term of the variation of resulting cross section
@@ -83,11 +93,14 @@ class MCGen {
    * @deprecated This method is to be suppressed since the events generation can now be launched one event at a time using the @a GenerateOneEvent method
    */
   void LaunchGeneration();
-  /**
-   * @brief Returns the set of parameters used to setup the phase space to integrate
-   * @return The Parameter object embedded in this class
-   */
-  void AnalyzePhaseSpace(const std::string);
+  inline size_t GetNdim() { return parameters->process->GetNdim(parameters->process_mode); }
+  inline double ComputePoint(double* x_) {
+    double res = f(x_, GetNdim(), (void*)parameters);
+    std::ostringstream os;
+    for (unsigned int i=0; i<GetNdim(); i++) { os << x_[i] << " "; }
+    Debug(Form("Result for x[%d] = ( %s):\n\t%10.6f", GetNdim(), os.str().c_str(), res));
+    return res;
+  }
   //HEPRUP GetHEPRUP();
   /**
    * @brief Physical Parameters used in the events generation and cross-section computation
@@ -95,6 +108,7 @@ class MCGen {
   Parameters* parameters;
   /** @brief Last event generated in this run */
   Event *last_event;
+  //void ComputePointValue() const;
  private:
   /**
    * @brief Calls the Vegas constructor (once, just before the first integration attempt)
@@ -115,13 +129,5 @@ class MCGen {
    */
   bool fHasCrossSection;
 };
-
-/**
- * The function to be integrated, which returns the value of the weight of an
- * event, including the matrix element of the process, all the kinematic
- * factors, and the cut restrictions. \f$x\f$ is an array of random numbers used
- * to select a random point inside the phase space.
- */
-double f(double*,size_t,void*);
 
 #endif

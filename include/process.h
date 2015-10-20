@@ -22,6 +22,7 @@ class Process
   };
   enum StructureFunctions {
     Electron = 1,
+    ElasticProton = 2,
     SuriYennie = 11,
     SuriYennieLowQ2 = 12,
     SzczurekUleshchenko = 15,
@@ -30,7 +31,7 @@ class Process
     Fiore = 103
   };
    
-  Process();
+  Process(std::string name_="<invalid process>");
   virtual ~Process();
   /**
    * @brief Returns the weight for this point in the phase-space
@@ -100,7 +101,7 @@ class Process
    * final state
    * @param[in] cuts_ The Cuts object containing the kinematic parameters
    */
-  inline virtual void SetKinematics(Kinematics cuts_) { _cuts=cuts_; }
+  inline virtual void SetKinematics(Kinematics cuts_) { fCuts=cuts_; }
   /**
    * Is the system's kinematics well defined and compatible with the process ?
    * This check is mandatory to perform the (@a fNumDimensions)-dimensional point's
@@ -134,7 +135,7 @@ class Process
   /**
    * @brief Returns the human-readable name of the process considered
    */
-  inline std::string GetName() { return _name; }
+  inline std::string GetName() { return fName; }
  protected:
   /**
    * @brief Array of @a fNumDimensions components representing the point on which the
@@ -156,7 +157,7 @@ class Process
   /**
    * @brief Set of cuts to apply on the final phase space
    */
-  Kinematics _cuts;
+  Kinematics fCuts;
   /**
    * @brief Event object containing all the information on the in- and outgoing
    * particles
@@ -181,7 +182,7 @@ class Process
   /**
    * @brief Name of the process (useful for logging and debugging)
    */
-  std::string _name;
+  std::string fName;
 };
 
 #endif

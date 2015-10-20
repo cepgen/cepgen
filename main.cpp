@@ -35,6 +35,8 @@ int main(int argc, char* argv[]) {
     
     mg.parameters->in1p = 4000.;
     mg.parameters->in2p = 4000.;
+    mg.parameters->in1p = 3500.;
+    mg.parameters->in2p = 3500.;
     mg.parameters->pair = Particle::Muon;
     mg.parameters->mcut = 2;
     mg.parameters->minenergy = 0.; //FIXME
@@ -57,6 +59,14 @@ int main(int argc, char* argv[]) {
 
   // We might want to cross-check visually the validity of our run
   mg.parameters->Dump();
+
+  double x[9] = { 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
+  //for (unsigned int i=0; i<mg.GetNdim()/2; i++) { x[i*2] = 0.2; }
+  //for (unsigned int i=0; i<mg.GetNdim(); i++) { x[i] = (i+1)*0.1; }
+  //double x[9] = { 0.28950314, 0.13319218, 0.62257359, 0.01415460, 0.43977024, 0.60647596, 0.24439744, 0.40325279, 0.5 };
+  //double x[9] = { 0.333, 0.336, 0.662, 0.069, 0.444, 0.403, 0.319, 0.321, 0.5};
+  //mg.ComputePoint(x);
+  //exit(0);
   
   // Let there be cross-section...
   mg.ComputeXsection(&xsec, &err);

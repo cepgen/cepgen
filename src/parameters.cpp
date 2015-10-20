@@ -24,7 +24,7 @@ Parameters::Parameters() :
   this->last_event = new Event();
   this->file = (std::ofstream*)NULL;
   this->hadroniser = (Hadroniser*)NULL;
-  this->output_format = "lhe";
+  //this->output_format = "lhe";
 }
 
 Parameters::~Parameters()
@@ -56,15 +56,15 @@ void Parameters::Dump()
     case 0:  default: cutsmode = "none"; break;
   }
   switch (pair) {
-    case 11:          particles = "electrons"; break;
-    case 13: default: particles = "muons"; break;
-    case 15:          particles = "taus"; break;
+    case Particle::Electron:      particles = "electrons"; break;
+    case Particle::Muon: default: particles = "muons"; break;
+    case Particle::Tau:           particles = "taus"; break;
   }
   switch (process_mode) {
-    case 1:  default: pmode = "elastic-elastic"; break;
-    case 2:           pmode = "elastic-inelastic"; break;
-    case 3:           pmode = "inelastic-elastic"; break;
-    case 4:           pmode = "inelastic-inelastic"; break;
+    case Process::ElasticElastic: default: pmode = "elastic-elastic"; break;
+    case Process::ElasticInelastic:        pmode = "elastic-inelastic"; break;
+    case Process::InelasticElastic:        pmode = "inelastic-elastic"; break;
+    case Process::InelasticInelastic:      pmode = "inelastic-inelastic"; break;
   }
   const int wb = 67;
   const int wt = 40;
@@ -127,16 +127,14 @@ bool Parameters::ReadConfigFile(std::string inFile_)
     return false;
   }
 
-  Debug(Form("File %s succesfully opened!", inFile_));
+  Debug(Form("File '%s' succesfully opened!", inFile_.c_str()));
   std::ostringstream os;
-  os << "======================================================" << std::endl
-     << "Configuration file content : " << std::endl
-     << "======================================================" << std::endl
-     << std::left;
+  os << "Configuration file content : " << "\n\t";
 
   while (f >> key >> value) {
     //std::cout << std::setw(60) << "[" << key << "] = " << value << std::endl;
     //if (strncmp(key.c_str(), "#")==0) continue; // FIXME need to ensure there is no extra space before !
+    if (key[0]=='#') continue;
     if (key=="IEND") {
       int iend = (int)atoi(value.c_str());
       if (iend>1) {
@@ -145,36 +143,38 @@ bool Parameters::ReadConfigFile(std::string inFile_)
     }
     else if (key=="NCVG") {
       this->ncvg = (int)atoi(value.c_str());
-      os << std::setw(60) << " * Number of function calls" << this->ncvg << std::endl;
+      os << " * Number of function calls: " << this->ncvg << "\n\t";
     }
     else if (key=="NCSG") {
       this->npoints = (int)atoi(value.c_str());
-      os << std::setw(60) << " * Number of points to probe" << this->npoints << std::endl;
+      os << " * Number of points to probe: " << this->npoints << "\n\t";
     }
     else if (key=="ITVG") {
       this->itvg = (int)atoi(value.c_str());
-      os << std::setw(60) << " * Number of Vegas iterations" << this->itvg << std::endl;
+      os << " * Number of Vegas iterations: " << this->itvg << "\n\t";
     }
     else if (key=="INPP") {
       this->in1p = (double)atof(value.c_str());
-      os << std::setw(60) << " * First incoming particles' momentum" << this->in1p << " GeV/c" << std::endl;
+      os << " * First incoming particles' momentum: " << this->in1p << " GeV/c\n\t";
     }
     else if (key=="MODE") {
       this->process_mode = static_cast<Process::ProcessMode>(atoi(value.c_str()));
-      os << std::setw(60) << " * Subprocess' mode" << this->process_mode << " --> ";
+      os << " * Subprocess' mode: " << this->process_mode << " --> ";
       switch (this->process_mode) {
         case Process::ElasticElastic: default: os << "elastic-elastic"; break;
         case Process::ElasticInelastic:        os << "elastic-inelastic"; break;
         case Process::InelasticElastic:        os << "inelastic-elastic"; break;
         case Process::InelasticInelastic:      os << "inelastic-inelastic"; break;
       }
-      os << std::endl;
+      os << "\n\t";
     }
     else if (key=="PMOD" or key=="EMOD") {
       this->remnant_mode = static_cast<Process::StructureFunctions>(atoi(value.c_str()));
-      os << std::setw(60) << " * Outgoing primary particles' mode" << this->remnant_mode << " --> ";
+      os << " * Outgoing primary particles' mode: " << this->remnant_mode
+	 << "\n\t\t --> ";
       switch (this->remnant_mode) {
         case Process::Electron:        os << "electron"; break;
+        case Process::ElasticProton:   os << "elastic proton"; break;
         case Process::SuriYennie:      os << "dissociating proton [SY structure functions]"; break;
         case Process::SuriYennieLowQ2: os << "dissociating proton [SY structure functions, for MX < 2 GeV, Q^2 < 5 GeV^2]"; break;
         case Process::SzczurekUleshchenko: os << "dissociating proton [SU structure functions]"; break;
@@ -182,89 +182,91 @@ bool Parameters::ReadConfigFile(std::string inFile_)
         case Process::FioreSea:        os << "dissociating proton [parton model, only sea quarks]"; break;
         case Process::Fiore:           os << "dissociating proton [parton model, valence and sea quarks]"; break;
       }
-      os << std::endl;
+      os << "\n\t";
     }
     else if (key=="INPE") {
       this->in2p = (double)atof(value.c_str());
-      os << std::setw(60) << " * Second incoming particles' momentum" << this->in1p << " GeV/c" << std::endl;
+      os << " * Second incoming particles' momentum: " << this->in1p << " GeV/c\n\t";
     }
     else if (key=="PAIR") {
       this->pair = (Particle::ParticleCode)atoi(value.c_str());
-      os << std::setw(60) << " * Outgoing leptons' PDG id   " << this->pair << " --> ";
+      os << " * Outgoing leptons' PDG id: " << this->pair
+	 << "\n\t\t --> ";
       switch (this->pair) {
         case Particle::Electron: default: os << "electrons"; break;
         case Particle::Muon:              os << "muons"; break;
         case Particle::Tau:               os << "taus"; break;
       }
-      os << std::endl;
+      os << "\n\t";
     }
     else if (key=="MCUT") {
       this->mcut = (int)atoi(value.c_str());
-      os << std::setw(60) << " * Set of cuts to apply on the total generation  " << this->mcut << " --> ";
+      os << " * Set of cuts to apply on the total generation  : " << this->mcut
+	 << "\n\t\t --> ";
       switch (this->mcut) {
         case 0: default: os << "no cuts"; break;
         case 3:          os << "cuts on at least one outgoing lepton"; break;
         case 2:          os << "cuts on both the outgoing leptons"; break;
         case 1:          os << "Vermaseren's hypothetical detector cuts"; break;
       }
-      os << std::endl;
+      os << "\n\t";
     }
     else if (key=="PTCT") {
       this->minpt = (double)atof(value.c_str());
-      os << std::setw(60) << " * Single outgoing lepton's minimal transverse momentum" << this->minpt << " GeV/c" << std::endl;
+      os << " * Single outgoing lepton's minimal transverse momentum: " << this->minpt << " GeV/c\n\t";
     }
     else if (key=="ECUT") {
       this->minenergy = (double)atof(value.c_str());
-      os << std::setw(60) << " * Single outgoing lepton's minimal energy" << this->minenergy << " GeV" << std::endl;
+      os << " * Single outgoing lepton's minimal energy: " << this->minenergy << " GeV\n\t";
     }
     else if (key=="NTRT") {
       this->ntreat = (double)atoi(value.c_str());
-      os << std::setw(60) << " * Number of TREAT calls" << this->ntreat << std::endl;
+      os << " * Number of TREAT calls: " << this->ntreat << "\n\t";
     }
     else if (key=="NGEN") {
       this->maxgen = (double)atoi(value.c_str());
-      os << std::setw(60) << " * Number of events to generate" << this->maxgen << std::endl;
+      os << " * Number of events to generate: " << this->maxgen << "\n\t";
     }
     else if (key=="THMN") {
       //this->mintheta = (double)atof(value.c_str());
       //this->SetThetaRange((double)atof(value.c_str()), 0.); // FIXME FIXME
-      os << std::setw(60) << " * Minimal polar production angle for the leptons" << EtaToTheta(mineta) << std::endl;
+      os << " * Minimal polar production angle for the leptons" << EtaToTheta(mineta) << "\n\t";
     }
     else if (key=="THMX") {
       //this->maxtheta = (double)atof(value.c_str());
       //this->SetThetaRange(0., (double)atof(value.c_str())); //FIXME FIXME
-      os << std::setw(60) << " * Maximal polar production angle for the leptons" << EtaToTheta(maxeta) << std::endl;
+      os << " * Maximal polar production angle for the leptons" << EtaToTheta(maxeta) << "\n\t";
     }
     else if (key=="Q2MN") {
       this->minq2 = (double)atof(value.c_str());
-      os << std::setw(60) << " * Minimal Q^2 for the incoming photons" << this->minq2 << " GeV^2" << std::endl;
+      os << " * Minimal Q^2 for the incoming photons: " << this->minq2 << " GeV^2\n\t";
     }
     else if (key=="Q2MX") {
       this->maxq2 = (double)atof(value.c_str());
-      os << std::setw(60) << " * Maximal Q^2 for the incoming photons" << this->maxq2 << " GeV^2" << std::endl;
+      os << " * Maximal Q^2 for the incoming photons: " << this->maxq2 << " GeV^2\n\t";
     }
     else if (key=="MXMN") {
       this->minmx = (double)atof(value.c_str());
-      os << std::setw(60) << " * Minimal invariant mass of proton remnants" << this->minmx << " GeV/c^2" << std::endl;
+      os << " * Minimal invariant mass of proton remnants: " << this->minmx << " GeV/c^2\n\t";
     }
     else if (key=="MXMX") {
       this->maxmx = (double)atof(value.c_str());
-      os << std::setw(60) << " * Maximal invariant mass of proton remnants" << this->maxmx << " GeV/c^2" << std::endl;
+      os << " * Maximal invariant mass of proton remnants: " << this->maxmx << " GeV/c^2\n\t";
     }
     else if (key=="GPDF") {
       this->gpdf = (double)atoi(value.c_str());
-      os << std::setw(60) << " * GPDF" << this->gpdf << std::endl;
+      os << " * GPDF: " << this->gpdf << "\n\t";
     }
     else if (key=="SPDF") {
       this->spdf = (double)atoi(value.c_str());
-      os << std::setw(60) << " * SPDF" << this->spdf << std::endl;
+      os << " * SPDF: " << this->spdf << "\n\t";
     }
     else if (key=="QPDF") {
       this->qpdf = (double)atoi(value.c_str());
-      os << std::setw(60) << " * QPDF" << this->qpdf << std::endl;
+      os << " * QPDF: " << this->qpdf << "\n\t";
     }
     else {
-      Info(Form("<WARNING> Unrecognized argument : [%s] = %s", key, value));
+      Info(Form("<WARNING> Unrecognized argument : [%s] = %s", key.c_str(), value.c_str()));
     }
   }
   f.close();

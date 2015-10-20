@@ -19,13 +19,9 @@ int main(int argc, char* argv[]) {
   //max = 14000.;
   min = 0.;
   max = 50.;
-
-  if (argc>1) {
-    it = atoi(argv[1]);
-  }
-  else {
-    it = 100;
-  }
+  it = 100;
+  
+  if (argc>1) it = atoi(argv[1]);
 
   ip.in1p = 3500.;
   ip.in2p = 3500.;
@@ -34,19 +30,17 @@ int main(int argc, char* argv[]) {
   ip.process_mode = Process::InelasticElastic;
   ip.pair = Particle::Muon;
   ip.remnant_mode = Process::SuriYennie;
-  //ip.p2mod = 11;
-  /*ip.maxtheta = 0;
-    ip.maxtheta = 180;*/
   //ip.SetThetaRange(5., 175.);
   //ip.SetThetaRange(0., 180.);
-  //ip.SetEtaRange(-999., 999.);
-  ip.mineta = -5.;
+  ip.mineta =-5.;
   ip.maxeta = 5.;
   //ip.maxmx = 1000.;
   ip.mcut = 2;
   ip.minenergy = 0.;
+  // DEBUG
   //ip.itmx = 5;
-  //ip.ncvg = 10000;
+  //ip.ncvg = 1000;
+  //
   ip.minpt = 15.;
   ip.generation = false;
   ip.Dump();

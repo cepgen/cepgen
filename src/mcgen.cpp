@@ -28,11 +28,16 @@ void
 MCGen::PrintHeader()
 {
   std::string tmp;
-  std::ifstream f("README");
-  if (!f.good()) throw Exception(__PRETTY_FUNCTION__, "Failed to open README file", JustWarning);
-  while (f>>tmp) {
-    std::cout << tmp << std::endl;
+  std::ostringstream os;
+  std::ifstream hf("README");
+  if (!hf.good()) throw Exception(__PRETTY_FUNCTION__, "Failed to open README file", JustWarning);
+  while (true) {
+    if (!hf.good()) break;
+    getline(hf, tmp);
+    os << "\n " << tmp;
   }
+  hf.close();
+  Info(os.str().c_str());
 }
 
 
@@ -43,17 +48,17 @@ MCGen::BuildVegas()
     std::string topo;
     switch (parameters->process_mode) {
       case Process::ElasticElastic:
-        topo = "ELASTIC proton/proton"; break;
+        topo = "elastic proton/proton"; break;
       case Process::ElasticInelastic:
       case Process::InelasticElastic:
-        topo = "SINGLE-DISSOCIATIVE proton"; break;
+        topo = "single-dissociative proton"; break;
       case Process::InelasticInelastic:
-        topo = "DOUBLE-DISSOCIATIVE protons"; break;
+        topo = "double-dissociative protons"; break;
     }
     Debug(Form("Considered topology: %s case", topo.c_str()));
   }
   
-  fVegas = new Vegas(parameters->process->GetNdim(parameters->process_mode), f, parameters);
+  fVegas = new Vegas(GetNdim(), f, parameters);
 }
 
 void
@@ -119,8 +124,15 @@ double f(double* x_, size_t ndim_, void* params_)
   Timer tmr;
   bool hadronised;
   double num_hadr_trials;
+  std::ostringstream os;
 
-  p = (Parameters*)params_;
+  p = static_cast<Parameters*>(params_);
+
+  //if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
+  if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
+    os.str(""); for (unsigned int i=0; i<ndim_; i++) { os << x_[i] << " "; }
+    DebugInsideLoop(Form("Computing dim-%d point ( %s)", ndim_, os.str().c_str()));
+  }
 
   tmr.reset();
 
@@ -133,30 +145,40 @@ double f(double* x_, size_t ndim_, void* params_)
                             "  remnant mode: %d",
                             p->in1p, p->in2p, p->remnant_mode));
   
-  p->process->SetPoint(ndim_, x_);
-  p->process->GetEvent()->clear(); // need to move this sw else ?
-
   kin.kinematics = p->process_mode;
   kin.q2min = p->minq2;
   kin.q2max = p->maxq2;
   kin.mode = p->mcut;
   kin.ptmin = p->minpt;
   kin.ptmax = p->maxpt;
-  /*if (p->mintheta>=0. and p->maxtheta>=0.) { // FIXME need conversion from rapidity
-    kin.thetamin = p->mintheta;
-    kin.thetamax = p->maxtheta;
-  }
-  else {*/
-    kin.etamin = p->mineta;
-    kin.etamax = p->maxeta;
-  //}
+  kin.etamin = p->mineta;
+  kin.etamax = p->maxeta;
   kin.emin = p->minenergy;
   kin.emax = p->maxenergy;
   kin.mxmin = p->minmx;
   kin.mxmax = p->maxmx;
   
   p->process->SetKinematics(kin);
+  p->process->SetPoint(ndim_, x_);
+  p->process->GetEvent()->clear(); // need to move this sw else ?
 
+  // Start by adding primary particles
+  //FIXME electrons ?
+  in1 = new Particle(1, p->in1pdg);
+  in1->charge = p->in1pdg/abs(p->in1pdg);
+  in1->P(0., 0.,  p->in1p);
+
+  in2 = new Particle(2, p->in2pdg);
+  in2->charge = p->in2pdg/abs(p->in2pdg);
+  in2->P(0., 0., -p->in2p);  
+  
+  p->process->SetIncomingParticles(*in1, *in2);
+
+  // Then add outgoing leptons
+  p->process->SetOutgoingParticles(6, p->pair);
+  p->process->SetOutgoingParticles(7, p->pair);
+
+  // Then add outgoing protons or remnants
   switch (kin.kinematics) {
     case Process::ElasticElastic:
       p->process->SetOutgoingParticles(3, Particle::Proton, 1); // First outgoing proton
@@ -175,26 +197,11 @@ double f(double* x_, size_t ndim_, void* params_)
       p->process->SetOutgoingParticles(5, Particle::uQuark, 2); // Second outgoing proton remnant
       break;
   }
-  p->process->SetOutgoingParticles(6, p->pair); // Outgoing leptons
-  
-  //FIXME electrons ?
-  in1 = new Particle(1, p->in1pdg);
-  in1->charge = p->in1pdg/abs(p->in1pdg);
-  in1->P(0., 0.,  p->in1p);
 
-  in2 = new Particle(2, p->in2pdg);
-  in2->charge = p->in2pdg/abs(p->in2pdg);
-  in2->P(0., 0., -p->in2p);  
-  
-  p->process->SetIncomingParticles(*in1, *in2);
-
+  // Check that everything is there
   if (!p->process->IsKinematicsDefined()) return 0.;
   
-  try {
-    ff = p->process->ComputeWeight();
-  } catch (Exception& e) {
-    e.Dump();
-  }
+  try { ff = p->process->ComputeWeight(); } catch (Exception& e) { e.Dump(); }
   
   if (ff<0.) return 0.;
   
@@ -209,13 +216,9 @@ double f(double* x_, size_t ndim_, void* params_)
       
       num_hadr_trials = 0;
       do {
-        try {
-          hadronised = p->hadroniser->Hadronise(p->process->GetEvent());
-        } catch (Exception& e) { e.Dump(); }
+        try { hadronised = p->hadroniser->Hadronise(p->process->GetEvent()); } catch (Exception& e) { e.Dump(); }
 
-        if (num_hadr_trials>0) {
-          Debug(Form("Hadronisation failed. Trying for the %dth time", num_hadr_trials+1));
-        }
+        if (num_hadr_trials>0) { Debug(Form("Hadronisation failed. Trying for the %dth time", num_hadr_trials+1)); }
         
         num_hadr_trials++;
       } while (!hadronised and num_hadr_trials<=p->hadroniser_max_trials);
@@ -231,9 +234,9 @@ double f(double* x_, size_t ndim_, void* params_)
     p->process->GetEvent()->time_total = tmr.elapsed();
     
     Debug(Form("Generation time:       %5.6f sec\n\t"
-                    "Total time (gen+hadr): %5.6f sec",
-                    p->process->GetEvent()->time_generation,
-                    p->process->GetEvent()->time_total));
+               "Total time (gen+hadr): %5.6f sec",
+               p->process->GetEvent()->time_generation,
+               p->process->GetEvent()->time_total));
 
     *(p->last_event) = *(p->process->GetEvent());
     //p->process->GetEvent()->Store(p->file);
@@ -245,6 +248,11 @@ double f(double* x_, size_t ndim_, void* params_)
   delete in1;
   delete in2;
 
+  if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
+    os.str(""); for (unsigned int i=0; i<ndim_; i++) { os << Form("%10.8f ", x_[i]); }
+    Debug(Form("f value for  dim-%d point ( %s): %4.4f", ndim_, os.str().c_str(), ff));
+  }
+  
   return ff;
 }
 

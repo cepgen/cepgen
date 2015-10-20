@@ -1,9 +1,7 @@
 #include "gamgamww.h"
 
-GamGamWW::GamGamWW()
-{
-  _name = "gamma,gamma->W+,W-";
-}
+GamGamWW::GamGamWW() : Process("gamma,gamma->W+,W-")
+{}
 
 GamGamWW::~GamGamWW()
 {}

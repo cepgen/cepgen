@@ -1,13 +1,10 @@
 #include "process.h"
 
-Process::Process() :
+Process::Process(std::string name_) :
   fX(0), fNumDimensions(0), fIsPointSet(false),
-  _setin(false), _setout(false), _setkin(false)
-{
-  // This is where the particles will be stored
-  fEvent = new Event();
-  _name = "<invalid process>";
-}
+  _setin(false), _setout(false), _setkin(false),
+  fEvent(new Event), fName(name_)
+{}
 
 Process::~Process()
 {

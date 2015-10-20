@@ -4,21 +4,21 @@ Event::Event() :
   num_hadronisation_trials(0),
   time_generation(-1.), time_total(-1.)
 {
-  //this->_part = new ParticlesMap();
+  //fParticles = new ParticlesMap();
 }
 
 Event::~Event()
 {
-  //delete this->_part;
+  //delete fParticles;
 }
 
 Event&
 Event::operator=(const Event &ev_)
 {
-  this->_part = ev_._part;
-  this->time_generation = ev_.time_generation;
-  this->time_total = ev_.time_total;
-  this->num_hadronisation_trials = ev_.num_hadronisation_trials;
+  fParticles = ev_.fParticles;
+  time_generation = ev_.time_generation;
+  time_total = ev_.time_total;
+  num_hadronisation_trials = ev_.num_hadronisation_trials;
   return *this;
 }
 
@@ -27,7 +27,7 @@ Event::GetByRole(int role_)
 {
   int i;
   ParticlesRef out;
-  std::pair<ParticlesMap::iterator,ParticlesMap::iterator> ret = this->_part.equal_range(role_);
+  std::pair<ParticlesMap::iterator,ParticlesMap::iterator> ret = fParticles.equal_range(role_);
   ParticlesMap::iterator it;
 
   for (it=ret.first, i=0; it!=ret.second && i<100; it++, i++) {
@@ -40,7 +40,7 @@ Particle*
 Event::GetById(int id_)
 {
   ParticlesMap::iterator out;
-  for (out=this->_part.begin(); out!=this->_part.end(); out++) {
+  for (out=fParticles.begin(); out!=fParticles.end(); out++) {
     if (out->second.id==id_) {
       return &out->second;
     }
@@ -52,7 +52,7 @@ const Particle
 Event::GetConstById(int id_) const
 {
   ParticlesMap::const_iterator out;
-  for (out=this->_part.begin(); out!=this->_part.end(); out++) {
+  for (out=fParticles.begin(); out!=fParticles.end(); out++) {
     if (out->second.id==id_) {
       return static_cast<Particle>(out->second);
     }
@@ -65,7 +65,7 @@ Event::GetRoles() const
 {
   ParticlesMap::const_iterator it, end;
   std::vector<int> out;
-  for (it=this->_part.begin(), end=this->_part.end(); it!=end; it=this->_part.upper_bound(it->first)) {
+  for (it=fParticles.begin(), end=fParticles.end(); it!=end; it=fParticles.upper_bound(it->first)) {
     out.push_back(it->first);
   }
   return out;
@@ -74,18 +74,18 @@ Event::GetRoles() const
 int
 Event::AddParticle(Particle part_, bool replace_)
 {
-  DebugInsideLoop(Form("Particle with PDGid = %d has role ", part_.pdgId, part_.role));
+  DebugInsideLoop(Form("Particle with PDGid = %d has role %d", part_.pdgId, part_.role));
   
   if (part_.role<=0) {
     return -1;
   }
-  ParticlesRef part_with_same_role = this->GetByRole(part_.role);
-  part_.id = this->_part.size(); //FIXME is there any better way of introducing this id ?
+  ParticlesRef part_with_same_role = GetByRole(part_.role);
+  part_.id = fParticles.size(); //FIXME is there any better way of introducing this id ?
   if (replace_ and part_with_same_role.size()!=0) {
     part_with_same_role.at(0) = &part_;
     return 0;
   }
-  this->_part.insert(std::pair<int,Particle>(part_.role, part_));
+  fParticles.insert(std::pair<int,Particle>(part_.role, part_));
   return 1;
 }
 
@@ -98,7 +98,7 @@ Event::AddParticle(int role_, bool replace_)
   }
   np = new Particle();
   np->role = role_;
-  out = this->AddParticle(*np, replace_);
+  out = AddParticle(*np, replace_);
 
   delete np;
   return out;
@@ -107,8 +107,8 @@ Event::AddParticle(int role_, bool replace_)
 void
 Event::Store(std::ofstream *of_, double weight_)
 {
-  Particle *l1 = this->GetByRole(6).at(0);
-  Particle *l2 = this->GetByRole(7).at(0);
+  Particle *l1 = GetByRole(6).at(0);
+  Particle *l2 = GetByRole(7).at(0);
   
   *of_ << std::setw(8) << l1->E() << "\t"
        << std::setw(8) << l1->Px() << "\t"
@@ -137,7 +137,7 @@ Event::GetParticles()
 {
   ParticlesRef out;
   ParticlesMap::iterator it;
-  for (it=this->_part.begin(); it!=this->_part.end(); it++) {
+  for (it=fParticles.begin(); it!=fParticles.end(); it++) {
     out.push_back(&it->second);
   }
   std::sort(out.begin(), out.end(), compareParticlePtrs);
@@ -149,7 +149,7 @@ Event::GetConstParticles() const
 {
   Particles out;
   ParticlesMap::const_iterator it;
-  for (it=this->_part.begin(); it!=this->_part.end(); it++) {
+  for (it=fParticles.begin(); it!=fParticles.end(); it++) {
     out.push_back(static_cast<Particle>(it->second));
   }
   std::sort(out.begin(), out.end(), compareParticle);
@@ -161,7 +161,7 @@ Event::GetStableParticles()
 {
   ParticlesRef out;
   ParticlesMap::iterator it;
-  for (it=this->_part.begin(); it!=this->_part.end(); it++) {
+  for (it=fParticles.begin(); it!=fParticles.end(); it++) {
     if (it->second.status==0 or it->second.status==1) {
       out.push_back(&it->second);
     }
@@ -180,19 +180,18 @@ Event::Dump(bool stable_)
   std::ostringstream os;
 
   pxtot = pytot = pztot = etot = 0.;
-  particles = this->GetParticles();
+  particles = GetParticles();
   for (p=particles.begin(); p!=particles.end(); p++) {
     if (stable_ and (*p)->status!=1) continue;
-    os << std::setfill(' ') << std::setw(8) << (*p)->id
-	     << "\t" << std::setw(6) << (*p)->pdgId;
-    if ((*p)->name!="") os << std::setw(6) << (*p)->name;
+    os << Form("\t%2d\t%6d", (*p)->id, (*p)->pdgId);
+    if ((*p)->name!="") os << Form("%6s", (*p)->name.c_str());
     else                os << "\t";
     os << "\t";
-    if ((*p)->charge!=999.)	os << Form("%6.2f\t", (*p)->charge);
+    if ((*p)->charge!=999.) os << Form("%6.2f\t", (*p)->charge);
     else                    os << "\t";
     os << Form("%4d\t%6d\t", (*p)->role, (*p)->status);
     if ((*p)->GetMothersIds().size()>0) 
-      os << Form("%2d(%2d)", *((*p)->GetMothersIds().begin()), this->GetById(*((*p)->GetMothersIds().begin()))->role);
+      os << Form("%2d(%2d)", *((*p)->GetMothersIds().begin()), GetById(*((*p)->GetMothersIds().begin()))->role);
     else
       os << "     ";
     os << Form("%9.3f %9.3f %9.3f %9.3f\n\t", (*p)->Px(), (*p)->Py(), (*p)->Pz(), (*p)->E());

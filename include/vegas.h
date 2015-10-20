@@ -117,9 +117,7 @@ class Vegas {
      */
     double fFGlobalMax;
     int *fN;
-    int *_nm;
-    double _vegas_result;
-    double _vegas_abserr;
+    int *fNm;
     /**
      * @brief The function which will be integrated by this Vegas instance
      * @param x_ The point at which this function is evaluated

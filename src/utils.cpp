@@ -7,12 +7,9 @@ void Map(double expo_, double xmin_, double xmax_, double* out_, double* dout_)
   out = xmin_*std::pow(y, expo_);
   *out_ = out;
   *dout_ = out*log(y);
-  DebugInsideLoop(Form("min = %f\n\t"
-                            "max = %f\n\t"
-                            "max/min = %f\n\t"
+  DebugInsideLoop(Form("min = %f\n\tmax = %f\n\tmax/min = %f\n\t"
                             "exponent = %f\n\t"
-                            "output = %f\n\t"
-                            "d(output) = %f",
+                            "output = %f\n\td(output) = %f",
                             xmin_, xmax_, y, expo_, *out_, *dout_));
 }
 

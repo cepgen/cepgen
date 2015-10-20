@@ -1,9 +1,7 @@
 #include "test.h"
 
-TestProcess::TestProcess()
-{
-  _name = "test process";
-}
+TestProcess::TestProcess() : Process("<test process>")
+{}
 
 TestProcess::~TestProcess()
 {}

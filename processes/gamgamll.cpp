@@ -1,6 +1,6 @@
 #include "gamgamll.h"
 
-GamGamLL::GamGamLL(int nOpt_) :
+GamGamLL::GamGamLL(int nOpt_) : Process("pp -> p(*) (gamma gamma -> l+ l-) p(*)"),
   _nOpt(nOpt_),
   _ep1(-1), _w1(-1), _ep2(-1), _w2(-1.),
   _w3(-1.), _w4(-1.), _w5(-1.), _w6(-1.), _w7(-1.),
@@ -8,9 +8,7 @@ GamGamLL::GamGamLL(int nOpt_) :
   _p1k2(0.), _p2k1(0.),
   setp1(false), setp2(false), setp3(false), setp5(false), setll(false),
   _cotth1(-99999.), _cotth2(99999.)
-{
-  _name = std::string(PROCESS_NAME);
-}
+{}
 
 int
 GamGamLL::GetNdim(ProcessMode process_mode_) const
@@ -30,41 +28,35 @@ GamGamLL::GetNdim(ProcessMode process_mode_) const
 void
 GamGamLL::SetOutgoingParticles(int part_, Particle::ParticleCode pdgId_, int)
 {
-  double mass_, outm, dm;
+  double mass, outm, dm;
 
   if (!Process::fIsPointSet) return;
 
-  mass_ = Particle::GetMassFromPDGId(pdgId_);
-
-  if (mass_<0 or pdgId_==2) { //FIXME!!!
-    switch (_cuts.kinematics) {
+  mass = Particle::GetMassFromPDGId(pdgId_);
+  
+  if (pdgId_==Particle::uQuark or mass<0) {
+    switch (fCuts.kinematics) {
       case Process::ElasticElastic: // elastic
       default:
         return;
       case Process::ElasticInelastic: // single-dissociative
       case Process::InelasticElastic:
-        outm = _mp1;
-        mass_ = ComputeMX(x(7), outm, &dm);
+	// FIXME need to add the elastic-inelastic case!
+        mass = ComputeMX(x(7), _ml6, &dm);
         break;
       case Process::InelasticInelastic: // double-dissociative
         int ind;
-        if (part_==3) { // First outgoing proton remnant
-	        outm = _mp1;
-	        ind = 7;
-        }
-        else if (part_==5 && _mp3>0.) { // Second outgoing proton remnant (if first is defined)
-	        outm = _mp3;
-	        ind = 8;
-        }
+        if (part_==3)                 ind = 7; // First outgoing proton remnant
+        else if (part_==5 && _mp3>0.) ind = 8; // Second outgoing proton remnant (if first is defined)
         else return;
-        mass_ = ComputeMX(x(ind), outm, &dm);
+        mass = ComputeMX(x(ind), _ml6, &dm);
     }
   }
 
   switch(part_) {
   case 3:
     // First outgoing proton (or remnant)
-    _mp3 = mass_;
+    _mp3 = mass;
     _w3 = std::pow(_mp3, 2);
     _pdg3 = pdgId_;
     _dw31 = dm;
@@ -72,7 +64,7 @@ GamGamLL::SetOutgoingParticles(int part_, Particle::ParticleCode pdgId_, int)
     break;
   case 5:
     // Second outgoing proton (or remnant)
-    _mp5 = mass_;
+    _mp5 = mass;
     _w5 = std::pow(_mp5, 2);
     _pdg5 = pdgId_;
     _dw52 = dm;
@@ -81,11 +73,11 @@ GamGamLL::SetOutgoingParticles(int part_, Particle::ParticleCode pdgId_, int)
   case 6:
   case 7:
     // First outgoing lepton
-    _ml6 = mass_;
+    _ml6 = mass;
     _w6 = std::pow(_ml6, 2);
     _pdg6 = pdgId_;
     // Second outgoing lepton
-    _ml7 = mass_;
+    _ml7 = mass;
     _w7 = std::pow(_ml7, 2);
     _pdg7 = pdgId_;
     setll = true;
@@ -209,7 +201,7 @@ GamGamLL::Pickin()
                        "w2 = %f\n\t"
                        "w3 = %f\n\t"
                        "w4 = %f\n\t"
-                       "w5 = %f\n\t",
+                       "w5 = %f",
                        _w1, _w2, _w3, _w4, _w5));
 
   ss = _s+_w12;
@@ -241,13 +233,13 @@ GamGamLL::Pickin()
   _t1min = (_w31*_d3+(_d3-_w31)*(_d3*_w1-_w31*_w2)/_s)/_t1max; // definition from eq. (A.5) in [1]
 
   // FIXME dropped in CDF version
-  if (_t1max>-_cuts.q2min)
-    throw Exception(__PRETTY_FUNCTION__, Form("t1max = %f > -q2min = %f", _t1max, -_cuts.q2min), JustWarning);
-  if (_t1min<-_cuts.q2max and _cuts.q2max>=0.)
-    throw Exception(__PRETTY_FUNCTION__, Form("t1min = %f < -q2max = %f", _t1min, -_cuts.q2max), JustWarning);
+  if (_t1max>-fCuts.q2min)
+    throw Exception(__PRETTY_FUNCTION__, Form("t1max = %f > -q2min = %f", _t1max, -fCuts.q2min), JustWarning);
+  if (_t1min<-fCuts.q2max and fCuts.q2max>=0.)
+    throw Exception(__PRETTY_FUNCTION__, Form("t1min = %f < -q2max = %f", _t1min, -fCuts.q2max), JustWarning);
   
-  if (_t1max<-_cuts.q2max and _cuts.q2max>=0.) _t1max = -_cuts.q2max;
-  if (_t1min>-_cuts.q2min)                     _t1min = -_cuts.q2min;
+  if (_t1max<-fCuts.q2max and fCuts.q2max>=0.) _t1max = -fCuts.q2max;
+  if (_t1min>-fCuts.q2min)                     _t1min = -fCuts.q2min;
   /////
 
   // t1, the first photon propagator, is defined here
@@ -637,11 +629,9 @@ GamGamLL::ComputeMX(double x_, double outmass_, double *dw_)
   double wx2min, wx2max;
   double mx2, dmx2;
 
-  /*wx2min = std::pow(std::max(GetMassFromPDGId(2212)+GetMassFromPDGId(211), _cuts.mxmin), 2);
-    wx2max = std::pow(std::min(_ecm-_mp2-2.*outmass_, _cuts.mxmax), 2);*/
+  wx2min = std::pow(std::max(Particle::GetMassFromPDGId(Particle::Proton)+Particle::GetMassFromPDGId(Particle::PiPlus), fCuts.mxmin), 2);
+  wx2max = std::pow(std::min(_ecm-_mp2-2.*outmass_, fCuts.mxmax), 2);
   
-  wx2min = std::pow(Particle::GetMassFromPDGId(Particle::Proton)+Particle::GetMassFromPDGId(Particle::PiPlus), 2);
-  wx2max = std::pow(_ecm-_mp2-2.*outmass_, 2);
   Map(x_, wx2min, wx2max, &mx2, &dmx2);
 
   DebugInsideLoop(Form("mX^2 in range (%f, %f), x = %f\n\t"
@@ -695,15 +685,16 @@ GamGamLL::ComputeWeight()
 
   if (!_setout) throw Exception(__PRETTY_FUNCTION__, "Output state not set!", JustWarning);
 
-  if (_cuts.wmax<0) _cuts.wmax = _s;
+  if (fCuts.wmax<0) fCuts.wmax = _s;
 
   // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
   wmin = std::pow(_ml6+_ml7,2);
-  if (fabs(wmin)<fabs(_cuts.wmin)) wmin = _cuts.wmin;
+  if (fabs(wmin)<fabs(fCuts.wmin)) wmin = fCuts.wmin;
 
   // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or _wmax if specified)
   wmax = std::pow(_ecm-_mp3-_mp5,2);
-  if (fabs(wmax)>fabs(_cuts.wmax)) wmax = _cuts.wmax;
+  DebugInsideLoop(Form("sqrt(s)=%f\n\tm(X1)=%f\tm(X2)=%f", _ecm, _mp3, _mp5));
+  if (fabs(wmax)>fabs(fCuts.wmax)) wmax = fCuts.wmax;
   
   DebugInsideLoop(Form("wmin = %f\n\twmax = %f\n\twmax/wmin = %f", wmin, wmax, wmax/wmin));
   
@@ -902,7 +893,7 @@ GamGamLL::ComputeWeight()
   _gamma = _etot/_ecm;
   _betgam = _ptot/_ecm;
 
-  if (_cuts.mode==0) {
+  if (fCuts.mode==0) {
     Debug(Form("No cuts applied on the outgoing leptons kinematics!"));
   }
   // Kinematics computation for both leptons
@@ -922,18 +913,18 @@ GamGamLL::ComputeWeight()
 
   lmu1 = cott6>=_cotth1
      and cott6<=_cotth2
-     and (_pt_l6>=_cuts.ptmin or _cuts.ptmin<=0.)
-     and (_pt_l6<=_cuts.ptmax or _cuts.ptmax<=0.)
-     and (_e6lab>=_cuts.emin  or _cuts.emin <=0.)
-     and (_e6lab<=_cuts.emax  or _cuts.emax <=0.);
+     and (_pt_l6>=fCuts.ptmin or fCuts.ptmin<=0.)
+     and (_pt_l6<=fCuts.ptmax or fCuts.ptmax<=0.)
+     and (_e6lab>=fCuts.emin  or fCuts.emin <=0.)
+     and (_e6lab<=fCuts.emax  or fCuts.emax <=0.);
   lmu2 = cott7>=_cotth1
      and cott7<=_cotth2
-     and (_pt_l7>=_cuts.ptmin or _cuts.ptmin<=0.)
-     and (_pt_l7<=_cuts.ptmax or _cuts.ptmax<=0.)
-     and (_e7lab>=_cuts.emin  or _cuts.emin <=0.)
-     and (_e7lab<=_cuts.emax  or _cuts.emax <=0.);
+     and (_pt_l7>=fCuts.ptmin or fCuts.ptmin<=0.)
+     and (_pt_l7<=fCuts.ptmax or fCuts.ptmax<=0.)
+     and (_e7lab>=fCuts.emin  or fCuts.emin <=0.)
+     and (_e7lab<=fCuts.emax  or fCuts.emax <=0.);
 
-  switch (_cuts.mode) {
+  switch (fCuts.mode) {
     case 0:
     default:
       lcut = true;
@@ -953,15 +944,15 @@ GamGamLL::ComputeWeight()
   }
 
   // Cut on mass of final hadronic system (MX)
-  if (_cuts.kinematics>1) {
-    if (_mp3<_cuts.mxmin or _mp3>_cuts.mxmax) return 0.;
-    if (_cuts.kinematics==4) {
-      if (_mp5<_cuts.mxmin or _mp5>_cuts.mxmax) return 0.;
+  if (fCuts.kinematics>1) {
+    if (_mp3<fCuts.mxmin or _mp3>fCuts.mxmax) return 0.;
+    if (fCuts.kinematics==4) {
+      if (_mp5<fCuts.mxmin or _mp5>fCuts.mxmax) return 0.;
     }
   }
 
   // Cut on the proton's Q2 (first photon propagator T1)
-  if ((_cuts.q2max!=-1. and _t1<-_cuts.q2max) or _t1>-_cuts.q2min) {
+  if ((fCuts.q2max!=-1. and _t1<-fCuts.q2max) or _t1>-fCuts.q2min) {
     lcut = false;
   }
 
@@ -971,7 +962,7 @@ GamGamLL::ComputeWeight()
 
   int intgp, intge;
 
-  switch (_cuts.kinematics) { // FIXME inherited from CDF version
+  switch (fCuts.kinematics) { // FIXME inherited from CDF version
   default:
   case 0: // ep case
     intgp = intge = 1; // DESY
@@ -1059,7 +1050,7 @@ GamGamLL::FillKinematics(bool symmetrise_)
               plab_op1[3])) {
     std::cerr << "Invalid outgoing proton 1" << std::endl;
   }
-  if (_cuts.kinematics>1) {
+  if (fCuts.kinematics>1) {
     op1.status = -2;
     //std::cout << "M before : " << op1.M() << std::endl;
     op1.M(_mp3);
@@ -1084,7 +1075,7 @@ GamGamLL::FillKinematics(bool symmetrise_)
               plab_op2[3])) {
     std::cerr << "Invalid outgoing proton 2" << std::endl;
   }
-  if (_cuts.kinematics==4) {
+  if (fCuts.kinematics==4) {
     op2.status = -2;
     op2.M(_mp5);
   }
@@ -1186,8 +1177,6 @@ GamGamLL::FillKinematics(bool symmetrise_)
   fEvent->GetOneByRole(6)->SetMother(fEvent->GetOneByRole(4));
   fEvent->GetOneByRole(7)->SetMother(fEvent->GetOneByRole(4));
 
-  //std::cout << "---> " << __PRETTY_FUNCTION__ << ", " << __FILE__ << std::endl;
-
   if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
     gmux = -_t2/(_ep1*_eg2-_pp1*_p3_g2[2])/2.;
     gmuy = (_ep1*plab_ph2[3]-_pp1*plab_ph2[2])/(_ep2*plab_ph2[3]+_pp2*plab_ph2[2]);
@@ -1211,8 +1200,8 @@ GamGamLL::FillKinematics(bool symmetrise_)
 void
 GamGamLL::SetKinematics(Kinematics cuts_)
 {
-  double thetamin = EtaToTheta(_cuts.etamax), thetamax = EtaToTheta(_cuts.etamin);
-  _cuts = cuts_;
+  double thetamin = EtaToTheta(fCuts.etamax), thetamax = EtaToTheta(fCuts.etamin);
+  fCuts = cuts_;
   _cotth1 = 1./tan(thetamax*pi/180.);
   _cotth2 = 1./tan(thetamin*pi/180.);
   
