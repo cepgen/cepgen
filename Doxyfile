@@ -38,7 +38,7 @@ PROJECT_NAME           = "LPAIR++"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = "0.2"
+PROJECT_NUMBER         = "0.3"
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -735,7 +735,8 @@ WARN_LOGFILE           =
 
 INPUT                  = main.cpp \
                          include/ \
-			 models/
+			 processes/ \
+			 hadronisers/
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

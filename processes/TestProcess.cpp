@@ -1,4 +1,4 @@
-#include "test.h"
+#include "TestProcess.h"
 
 TestProcess::TestProcess() : GenericProcess("<test process>")
 {}

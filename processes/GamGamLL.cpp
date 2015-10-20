@@ -1,4 +1,4 @@
-#include "gamgamll.h"
+#include "GamGamLL.h"
 
 GamGamLL::GamGamLL(int nOpt_) : GenericProcess("pp -> p(*) (gamma gamma -> l+ l-) p(*)"),
   _nOpt(nOpt_),

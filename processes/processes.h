@@ -1,4 +1,4 @@
-#include "gamgamll.h"
-#include "gampomvmll.h"
-#include "pptoll.h"
-#include "test.h"
+#include "GamGamLL.h"
+//#include "GamPomVMLL.h"
+#include "PPtoLL.h"
+#include "TestProcess.h"

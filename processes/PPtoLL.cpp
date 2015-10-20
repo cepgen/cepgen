@@ -1,4 +1,4 @@
-#include "pptoll.h"
+#include "PPtoLL.h"
 
 PPtoLL::PPtoLL() : GenericProcess("gamma,gamma->l+,l- (kT-factorization approach)")
 {}

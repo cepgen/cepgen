@@ -1,4 +1,4 @@
-#include "gampomvmll.h"
+#include "GamPomVMLL.h"
 
 GamPomVMLL::GamPomVMLL() : GenericProcess("gamma,pomeron->VM->l+,l-"),
   // Parameters from steer.text
