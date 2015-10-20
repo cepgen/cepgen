@@ -22,6 +22,7 @@ int main(int argc, char* argv[]) {
   //ofstream output2;
   
   Logger::GetInstance()->Level = Logger::Debug;
+  //Logger::GetInstance()->Level = Logger::DebugInsideLoop;
   //Logger::GetInstance()->OutputStream = ofstream("log.txt");
   
   if (argc==1) {

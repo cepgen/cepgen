@@ -32,8 +32,8 @@ int main(int argc, char* argv[]) {
   ip.remnant_mode = Process::SuriYennie;
   //ip.SetThetaRange(5., 175.);
   //ip.SetThetaRange(0., 180.);
-  ip.mineta =-5.;
-  ip.maxeta = 5.;
+  ip.mineta =-2.5;
+  ip.maxeta = 2.5;
   //ip.maxmx = 1000.;
   ip.mcut = 2;
   ip.minenergy = 0.;

@@ -612,12 +612,12 @@ GamGamLL::Orient()
                        _ct5, _st5, _cp5, _sp5));
 
   if (fabs(_p_p4+_p_p3*_cp3+_cp5*_p_p5)<fabs(fabs(a1)-_p_p4)) {
-    throw Exception(__PRETTY_FUNCTION__, 
-                    Form("|pp4+pp3*cos(phi3)+pp5*cos(phi5)| < | |a1|-pp4 |\n\t"
+    DebugInsideLoop(Form("|pp4+pp3*cos(phi3)+pp5*cos(phi5)| < | |a1|-pp4 |\n\t"
                          "pp4 = %f\tpp5 = %f\n\t"
                          "cos(phi3) = %f\tcos(phi5) = %f"
                          "a1 = %f",
-                         _p_p4, _p_p5, _cp3, _cp5, a1), JustWarning);
+                         _p_p4, _p_p5, _cp3, _cp5, a1));
+    return;
   }
   if (a1<0.) _cp5 = -_cp5;
   else       _cp3 = -_cp3;
@@ -703,9 +703,7 @@ GamGamLL::ComputeWeight()
   
   DebugInsideLoop(Form("Computed value for w4 = %f -> mc4 = %f", _w4, _mc4));
   
-  try {
-    Orient();
-  } catch (Exception& e) {
+  try { Orient(); } catch (Exception& e) {
     //e.Dump();
     //if (Logger::GetInstance()->Level>=Logger::Warning) e.Dump();
     return 0.;
