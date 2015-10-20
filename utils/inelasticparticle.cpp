@@ -41,7 +41,9 @@ int main() {
   delete p1;
   delete p2;*/
   
-  Particle vm(1, J_PSI);
+  Particle vm(1, Particle::JPsi);
+  vm.P(1., 1., 0.);
+  try { vm.Dump(); } catch (Exception& e) { e.Dump(); }
   
   return 0;
 }

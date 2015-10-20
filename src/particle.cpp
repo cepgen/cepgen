@@ -175,40 +175,31 @@ Particle::GetDaughters()
  
 void
 Particle::Dump()
-{
+{  
+  if (!Valid()) throw Exception(__PRETTY_FUNCTION__, Form("Particle with role \"%d\" is invalid", role), Fatal);
+  
   std::vector<int> daugh;
-
-  if (Valid()) {
-    Info(Form("Id: %2d\n\t"
-                   "Role: %2d\n\t"
-                   "Status: %4d\n\t"
-                   "pdgId: %4d\n\t"
-                   "(E,P) = (%4.2f, %4.2f, %4.2f, %4.2f)\n\t"
-                   "  (|P| = p = %4.2f)\n\t"
-                   " Pt = %4.2f\n\t"
-                   " M = %4.2f\n\t"
-                   "Eta = %4.3f\n\t"
-                   "Valid? %d Primary? %d",
-                   id, role, status, pdgId,
-                   E(), Px(), Py(), Pz(), P(), Pt(), M(), Eta(),
-                   Valid(), Primary()));
-    if (!Primary()) {
-      ParticlesIds::iterator m;
-      std::cout << "  Mothers = ";
-      for (m=fMothers.begin(); m!=fMothers.end(); m++) std::cout << (*m) << " ";
-      std::cout << std::endl;
-    }
-
-    daugh = GetDaughters();
-
-    std::cout << "  Daughters (" << NumDaughters() << ")" << std::endl;
-    for (unsigned int i=0; i<NumDaughters(); i++) {
-      std::cout << "   * Id = " << daugh[i] << std::endl; 
-    }
+  std::ostringstream osm, osd;
+  if (!Primary()) {
+    ParticlesIds::iterator m;
+    osm << "\n\t\tMothers = ";
+    for (m=fMothers.begin(); m!=fMothers.end(); m++) osm << (*m) << " ";
   }
-  else {
-    throw Exception(__PRETTY_FUNCTION__, Form("Particle with role \"%d\" is invalid", role), Fatal);
-  }
+  daugh = GetDaughters();
+  for (unsigned int i=0; i<NumDaughters(); i++) osd << "\n\t\t* Id = " << daugh[i];
+  Info(Form("Id:\t%4d\t"
+            "role:\t%4d\n\t"
+            "Status:\t%4d\t"
+            "PDG Id:\t%4d\n\t"
+            "(E,P) = (%4.2f, %4.2f, %4.2f, %4.2f) GeV\t"
+            "(|P| = p = %4.2f GeV)\n\t"
+            " Pt = %4.2f GeV\teta = %4.3f\n\t"
+            " M = %4.2f GeV\n\t"
+            "Primary? %d%s\n\t"
+            "Daughters (%d)",
+            id, role, status, pdgId,
+            E(), Px(), Py(), Pz(), P(), Pt(), Eta(), M(),
+            Primary(), osm.str().c_str(), NumDaughters(), osd.str().c_str()));
 }
 
 //double*
