@@ -27,7 +27,9 @@ int main(int argc, char* argv[]) {
   ip.in2p = 3500.;
   ip.process = new GamGamLL;
   ip.hadroniser = new Pythia6Hadroniser;
-  ip.process_mode = Process::InelasticElastic;
+  //ip.process_mode = Process::ElasticElastic;
+  //ip.process_mode = Process::InelasticElastic;
+  ip.process_mode = Process::InelasticInelastic;
   ip.pair = Particle::Muon;
   ip.remnant_mode = Process::SuriYennie;
   //ip.SetThetaRange(5., 175.);
@@ -46,14 +48,14 @@ int main(int argc, char* argv[]) {
   ip.Dump();
 
   //tmp.open("tmp/xsec_lpairpp_elastic.dat");
-  tmp.open("tmp/xsec_lpairpp_singleinelastic.dat");
-  //tmp.open("tmp/xsec_lpairpp_doubleinelastic.dat");
+  //tmp.open("tmp/xsec_lpairpp_singleinelastic.dat");
+  tmp.open("tmp/xsec_lpairpp_doubleinelastic_v2.dat");
   //tmp.open("tmp/xsec_sqs_lpairpp_elastic_noetacut.dat");
   //tmp.open("tmp.dat");
   //tmp.open("tmp/xsec_sqs_lpairpp_singleinelastic_noetacut.dat");
   //tmp.open("tmp/xsec_sqs_lpairpp_doubleinelastic_noetacut.dat");
   mg = new MCGen(&ip);
-  for (int i=0; i<it; i++) {
+  for (int i=0; i<=it; i++) {
     minpt = min+i/(double)it*(max-min);
     mg->parameters->minpt = minpt;
     //sqs = min+(double)i/(double)it*(max-min);

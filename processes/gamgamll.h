@@ -72,10 +72,11 @@ class GamGamLL : public Process
    * @brief Computes the ougoing proton remnant mass
    * @param[in] x_ A random number (between 0 and 1)
    * @param[in] outmass_ The maximal outgoing particles' invariant mass
+   * @param[in] lepmass_ The outgoing leptons' mass
    * @param[out] dw_ The size of the integration bin
    * @return The mass of the outgoing proton remnant
    */
-  double ComputeMX(double x_, double outmass_, double* dw_);
+  double ComputeMX(double x_, double outmass_, double lepmass_, double* dw_);
   void StoreEvent(std::ofstream*,double);
   /**
    * Returns the value for the first photon virtuality

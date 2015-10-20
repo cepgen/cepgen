@@ -42,14 +42,14 @@ GamGamLL::SetOutgoingParticles(int part_, Particle::ParticleCode pdgId_, int)
       case Process::ElasticInelastic: // single-dissociative
       case Process::InelasticElastic:
 	// FIXME need to add the elastic-inelastic case!
-        mass = ComputeMX(x(7), _ml6, &dm);
+        mass = ComputeMX(x(7), fEvent->GetOneByRole(1)->M(), _ml6, &dm);
         break;
       case Process::InelasticInelastic: // double-dissociative
         int ind;
-        if (part_==3)                 ind = 7; // First outgoing proton remnant
-        else if (part_==5 && _mp3>0.) ind = 8; // Second outgoing proton remnant (if first is defined)
+        if (part_==3)                 { ind = 7; mass = _mp2; } // First outgoing proton remnant
+        else if (part_==5 && _mp3>0.) { ind = 8; mass = _mp3; } // Second outgoing proton remnant (if first is defined)
         else return;
-        mass = ComputeMX(x(ind), _ml6, &dm);
+        mass = ComputeMX(x(ind), mass, _ml6, &dm);
     }
   }
 
@@ -624,13 +624,13 @@ GamGamLL::Orient()
 }
 
 double
-GamGamLL::ComputeMX(double x_, double outmass_, double *dw_)
+GamGamLL::ComputeMX(double x_, double outmass_, double lepmass_, double *dw_)
 {
   double wx2min, wx2max;
   double mx2, dmx2;
 
   wx2min = std::pow(std::max(Particle::GetMassFromPDGId(Particle::Proton)+Particle::GetMassFromPDGId(Particle::PiPlus), fCuts.mxmin), 2);
-  wx2max = std::pow(std::min(_ecm-_mp2-2.*outmass_, fCuts.mxmax), 2);
+  wx2max = std::pow(std::min(_ecm-outmass_-2.*lepmass_, fCuts.mxmax), 2);
   
   Map(x_, wx2min, wx2max, &mx2, &dmx2);
 

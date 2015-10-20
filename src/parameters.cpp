@@ -157,6 +157,26 @@ bool Parameters::ReadConfigFile(std::string inFile_)
       this->in1p = (double)atof(value.c_str());
       os << " * First incoming particles' momentum: " << this->in1p << " GeV/c\n\t";
     }
+    else if (key=="PROC") {
+      if (value=="lpair") {
+	this->process = new GamGamLL;
+	os << " * Process: LPAIR\n\t";
+      }
+      else if (value=="pptoll") {
+	this->process = new PPtoLL;
+	os << " * Process: PPTOLL\n\t";
+      }
+    }
+    else if (key=="HADR") {
+      if (value=="pythia6") {
+	this->hadroniser = new Pythia6Hadroniser;
+	os << " * Hadroniser: Pythia6\n\t";
+      }
+      if (value=="jetset7") {
+	this->hadroniser = new Jetset7Hadroniser;
+	os << " * Hadroniser: Jetset7\n\t";
+      }
+    }
     else if (key=="MODE") {
       this->process_mode = static_cast<Process::ProcessMode>(atoi(value.c_str()));
       os << " * Subprocess' mode: " << this->process_mode << " --> ";
@@ -236,6 +256,14 @@ bool Parameters::ReadConfigFile(std::string inFile_)
       //this->maxtheta = (double)atof(value.c_str());
       //this->SetThetaRange(0., (double)atof(value.c_str())); //FIXME FIXME
       os << " * Maximal polar production angle for the leptons" << EtaToTheta(maxeta) << "\n\t";
+    }
+    else if (key=="ETMN") {
+      this->mineta = (double)atof(value.c_str());
+      os << " * Minimal pseudo-rapidity for the leptons: " << this->mineta << "\n\t";
+    }
+    else if (key=="ETMX") {
+      this->maxeta = (double)atof(value.c_str());
+      os << " * Maximal pseudo-rapidity for the leptons: " << this->maxeta << "\n\t";
     }
     else if (key=="Q2MN") {
       this->minq2 = (double)atof(value.c_str());
