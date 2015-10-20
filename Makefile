@@ -4,7 +4,7 @@ PYTHIA6SRC = $(wildcard external/pythia-6.*.f)
 JETSET7SRC = $(wildcard external/jetset7*.f)
 HERWIG6SRC = $(wildcard external/herwig6*.f)
 EXTERNALSRC= $(wildcard external/*.f)
-INCLUDEDIR = -Iprocesses/ -Iinclude/ -Iexternal/
+INCLUDEDIR = -Iprocesses/ -Iinclude/ -Iexternal/ -Ihadronisers/
 ############################################
 SVNDEV = 'SVN_REV="$(shell svnversion -nq .)"'
 #CFLAGS     = -fexceptions 
@@ -13,13 +13,15 @@ CFLAGS     = -Wall -Wextra -fexceptions -Wpointer-arith \
 LDFLAGS    = $(INCLUDEDIR) -lgfortran -lgsl -lgslcblas -Wl,-O2
 #LDFLAGS    = $(INCLUDEDIR) -lgfortran -Wl,-O2
 FFLAGS     = -w -g
-VPATH      = src:include:processes:$(PYTHIA8SRC)/include
+VPATH      = src:include:processes:hadronisers:$(PYTHIA8SRC)/include
 ############################################
 CPP_FILES  = $(wildcard src/*.cpp)
-MOD_FILES  = $(wildcard processes/*.cpp)
+PRO_FILES  = $(wildcard processes/*.cpp)
+HAD_FILES  = $(wildcard hadronisers/*.cpp)
 HPP_FILES  = $(wildcard include/*.h,external/*.h)
 LIB_FILES  = $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES)) \
-	     $(patsubst processes/%.cpp,obj/%.o,$(MOD_FILES)) \
+	     $(patsubst processes/%.cpp,obj/%.o,$(PRO_FILES)) \
+	     $(patsubst hadronisers/%.cpp,obj/%.o,$(HAD_FILES)) \
 	     $(patsubst external/%.f,obj/%.fo,$(EXTERNALSRC)) 
 ############################################
 CC = g++

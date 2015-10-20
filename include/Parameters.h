@@ -8,7 +8,7 @@
 #include <fstream>
 #include <string>
 
-#include "../processes/processes.h"
+#include "processes.h"
 
 #include "Pythia6Hadroniser.h"
 #include "Jetset7Hadroniser.h"

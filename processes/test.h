@@ -1,7 +1,7 @@
-#ifndef TEST_H
-#define TEST_H
+#ifndef Test_h
+#define Test_h
 
-#include "../include/GenericProcess.h"
+#include "GenericProcess.h"
 
 class TestProcess : public GenericProcess
 {

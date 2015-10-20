@@ -3,8 +3,8 @@
 
 #include <algorithm>
 
-#include "../include/utils.h"
-#include "../include/GenericProcess.h"
+#include "utils.h"
+#include "GenericProcess.h"
 
 #define IBE 1
 #define ISCE 3
