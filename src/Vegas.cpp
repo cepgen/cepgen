@@ -1,4 +1,4 @@
-#include "vegas.h"
+#include "Vegas.h"
 
 Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inParam_) :
   fMbin(3),

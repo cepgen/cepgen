@@ -1,10 +1,10 @@
-#include "parameters.h"
+#include "Parameters.h"
 
 Parameters::Parameters() :
   in1pdg(Particle::Proton), in2pdg(Particle::Proton),
-  remnant_mode(Process::SuriYennie),
+  remnant_mode(GenericProcess::SuriYennie),
   pair(Particle::Muon),
-  process_mode(Process::ElasticElastic),
+  process_mode(GenericProcess::ElasticElastic),
   mcut(0),
   minpt(0.5), maxpt(-1.),
   minenergy(1.), maxenergy(-1.),
@@ -23,7 +23,7 @@ Parameters::Parameters() :
 {
   this->last_event = new Event();
   this->file = (std::ofstream*)NULL;
-  this->hadroniser = (Hadroniser*)NULL;
+  this->hadroniser = (GenericHadroniser*)NULL;
   //this->output_format = "lhe";
 }
 
@@ -61,10 +61,10 @@ void Parameters::Dump()
     case Particle::Tau:           particles = "taus"; break;
   }
   switch (process_mode) {
-    case Process::ElasticElastic: default: pmode = "elastic-elastic"; break;
-    case Process::ElasticInelastic:        pmode = "elastic-inelastic"; break;
-    case Process::InelasticElastic:        pmode = "inelastic-elastic"; break;
-    case Process::InelasticInelastic:      pmode = "inelastic-inelastic"; break;
+    case GenericProcess::ElasticElastic: default: pmode = "elastic-elastic"; break;
+    case GenericProcess::ElasticInelastic:        pmode = "elastic-inelastic"; break;
+    case GenericProcess::InelasticElastic:        pmode = "inelastic-elastic"; break;
+    case GenericProcess::InelasticInelastic:      pmode = "inelastic-inelastic"; break;
   }
   const int wb = 67;
   const int wt = 40;
@@ -111,7 +111,7 @@ void Parameters::Dump()
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|-" << std::setfill('-') << std::setw(wb-2) << " Outgoing remnants " << std::setfill(' ') << "-|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl;
-  if (this->hadroniser!=(Hadroniser*)NULL)
+  if (this->hadroniser!=(GenericHadroniser*)NULL)
     os << "| " << std::setw(wt) << "Hadronisation algorithm" << std::setw(12) << hadroniser->GetName() << std::setw(wp-12) << "" << " |" << std::endl;
   os << "| " << std::setw(wt) << "Minimal mass [GeV/c^2]" << std::setw(wp) << minmx << " |" << std::endl
              << "| " << std::setw(wt) << "Maximal mass [GeV/c^2]" << std::setw(wp) << maxmx << " |";
@@ -178,29 +178,29 @@ bool Parameters::ReadConfigFile(std::string inFile_)
       }
     }
     else if (key=="MODE") {
-      this->process_mode = static_cast<Process::ProcessMode>(atoi(value.c_str()));
+      this->process_mode = static_cast<GenericProcess::ProcessMode>(atoi(value.c_str()));
       os << " * Subprocess' mode: " << this->process_mode << " --> ";
       switch (this->process_mode) {
-        case Process::ElasticElastic: default: os << "elastic-elastic"; break;
-        case Process::ElasticInelastic:        os << "elastic-inelastic"; break;
-        case Process::InelasticElastic:        os << "inelastic-elastic"; break;
-        case Process::InelasticInelastic:      os << "inelastic-inelastic"; break;
+        case GenericProcess::ElasticElastic: default: os << "elastic-elastic"; break;
+        case GenericProcess::ElasticInelastic:        os << "elastic-inelastic"; break;
+        case GenericProcess::InelasticElastic:        os << "inelastic-elastic"; break;
+        case GenericProcess::InelasticInelastic:      os << "inelastic-inelastic"; break;
       }
       os << "\n\t";
     }
     else if (key=="PMOD" or key=="EMOD") {
-      this->remnant_mode = static_cast<Process::StructureFunctions>(atoi(value.c_str()));
+      this->remnant_mode = static_cast<GenericProcess::StructureFunctions>(atoi(value.c_str()));
       os << " * Outgoing primary particles' mode: " << this->remnant_mode
 	 << "\n\t\t --> ";
       switch (this->remnant_mode) {
-        case Process::Electron:        os << "electron"; break;
-        case Process::ElasticProton:   os << "elastic proton"; break;
-        case Process::SuriYennie:      os << "dissociating proton [SY structure functions]"; break;
-        case Process::SuriYennieLowQ2: os << "dissociating proton [SY structure functions, for MX < 2 GeV, Q^2 < 5 GeV^2]"; break;
-        case Process::SzczurekUleshchenko: os << "dissociating proton [SU structure functions]"; break;
-        case Process::FioreVal:        os << "dissociating proton [parton model, only valence quarks]"; break;
-        case Process::FioreSea:        os << "dissociating proton [parton model, only sea quarks]"; break;
-        case Process::Fiore:           os << "dissociating proton [parton model, valence and sea quarks]"; break;
+        case GenericProcess::Electron:        os << "electron"; break;
+        case GenericProcess::ElasticProton:   os << "elastic proton"; break;
+        case GenericProcess::SuriYennie:      os << "dissociating proton [SY structure functions]"; break;
+        case GenericProcess::SuriYennieLowQ2: os << "dissociating proton [SY structure functions, for MX < 2 GeV, Q^2 < 5 GeV^2]"; break;
+        case GenericProcess::SzczurekUleshchenko: os << "dissociating proton [SU structure functions]"; break;
+        case GenericProcess::FioreVal:        os << "dissociating proton [parton model, only valence quarks]"; break;
+        case GenericProcess::FioreSea:        os << "dissociating proton [parton model, only sea quarks]"; break;
+        case GenericProcess::Fiore:           os << "dissociating proton [parton model, valence and sea quarks]"; break;
       }
       os << "\n\t";
     }

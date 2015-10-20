@@ -1,5 +1,5 @@
-#ifndef _KINEMATICS_H
-#define _KINEMATICS_H
+#ifndef Kinematics_h
+#define Kinematics_h
 
 #include <iostream>
 #include <iomanip>

@@ -1,13 +1,13 @@
-#ifndef _MCGen_H
-#define _MCGen_H
+#ifndef MCGen_h
+#define MCGen_h
 
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <ctime>
 
-#include "vegas.h"
-#include "physics.h"
+#include "Vegas.h"
+#include "Physics.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 

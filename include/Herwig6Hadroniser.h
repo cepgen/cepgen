@@ -3,7 +3,7 @@
 
 #include <algorithm>
 
-#include "hadroniser.h"
+#include "GenericHadroniser.h"
 
 #define NMXHEP 4000
 //#define NAME_CHR 16
@@ -31,7 +31,7 @@ extern "C"
 /**
  * @brief Herwig6 hadronisation algorithm
  */
-class Herwig6Hadroniser : public Hadroniser
+class Herwig6Hadroniser : public GenericHadroniser
 {
  public:
   Herwig6Hadroniser();

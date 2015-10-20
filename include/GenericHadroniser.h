@@ -1,21 +1,21 @@
-#ifndef _HADRONISER_H
-#define _HADRONISER_H
+#ifndef GenericHadroniser_h
+#define GenericHadroniser_h
 
 #include <string>
 #include <vector>
 
-#include "event.h"
+#include "Event.h"
 
 /**
  * Class template to define any hadroniser as a general object with defined methods
  * @author Laurent Forthomme <laurent.forthomme@uclouvain.be>
  * @date January 2014
  */
-class Hadroniser
+class GenericHadroniser
 {
  public:
-   Hadroniser(std::string name_="unnamed_hadroniser");
-  ~Hadroniser();
+  GenericHadroniser(std::string name_="unnamed_hadroniser");
+  virtual ~GenericHadroniser();
   /**
    * @brief Main caller to hadronise a single particle
    * @param[in] part_ The Particle object which will be hadronised

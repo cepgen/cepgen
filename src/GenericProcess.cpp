@@ -1,19 +1,19 @@
-#include "process.h"
+#include "GenericProcess.h"
 
-Process::Process(std::string name_) :
+GenericProcess::GenericProcess(std::string name_) :
   fX(0), fNumDimensions(0), fIsPointSet(false),
-  _setin(false), _setout(false), _setkin(false),
+  fIsInStateSet(false), fIsOutStateSet(false), fIsKinematicSet(false),
   fEvent(new Event), fName(name_)
 {}
 
-Process::~Process()
+GenericProcess::~GenericProcess()
 {
   if (fIsPointSet) delete[] fX;
   delete fEvent;
 }
 
 void
-Process::SetPoint(const unsigned int ndim_,double x_[])
+GenericProcess::SetPoint(const unsigned int ndim_,double x_[])
 {
   // Number of dimensions on which the integration will be performed
   fNumDimensions = ndim_;
@@ -28,7 +28,7 @@ Process::SetPoint(const unsigned int ndim_,double x_[])
 }
 
 void
-Process::DumpPoint(const ExceptionType& et=Info)
+GenericProcess::DumpPoint(const ExceptionType& et=Info)
 {
   std::ostringstream os;
   for (unsigned int i=0; i<(unsigned int)fNumDimensions; i++) {

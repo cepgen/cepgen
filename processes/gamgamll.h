@@ -1,5 +1,5 @@
-#ifndef _GAMGAMLL_H
-#define _GAMGAMLL_H
+#ifndef GamGamLL_h
+#define GamGamLL_h
 
 #define PROCESS_DESCRIPTION "Two-photon production of lepton pairs"
 
@@ -12,7 +12,7 @@
 #include <cstdlib>
 #include <map>
 
-#include "../include/process.h"
+#include "../include/GenericProcess.h"
 
 /**
  * Full class of methods and objects to compute the full analytic matrix element
@@ -40,7 +40,7 @@
  * @brief Computes the matrix element for a CE \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
  *  process
  */
-class GamGamLL : public Process
+class GamGamLL : public GenericProcess
 {
  public:
   /**

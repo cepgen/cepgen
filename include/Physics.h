@@ -1,8 +1,8 @@
-#ifndef _PHYSICS_H
-#define _PHYSICS_H
+#ifndef Physics_h
+#define Physics_h
 
-#include "event.h"
-#include "hadroniser.h"
+#include "Event.h"
+#include "GenericHadroniser.h"
 
 extern "C"
 {
@@ -84,7 +84,7 @@ double GetBRFromProcessId(Particle::ParticleCode vmId_);
  * @param[in] had_ The default hadroniser object to use for the default decay
  * @return A vector of Particle objects
  */
-Particles VMDecayer(Particle part_, Hadroniser *had_);
+Particles VMDecayer(Particle part_, GenericHadroniser *had_);
 
 double ElasticFlux(double x_, double kt2_);
 double InelasticFlux(double x_, double kt2_, double mx_);

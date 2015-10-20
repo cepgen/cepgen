@@ -1,4 +1,4 @@
-#include "event.h"
+#include "Event.h"
 
 Event::Event() :
   num_hadronisation_trials(0),

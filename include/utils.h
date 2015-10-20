@@ -1,5 +1,5 @@
-#ifndef _UTILS_H
-#define _UTILS_H
+#ifndef utils_h
+#define utils_h
 
 #include <iostream>
 #include <iomanip>

@@ -1,4 +1,4 @@
-#include "physics.h"
+#include "Physics.h"
 
 PhysicsBoundaries::PhysicsBoundaries() :
   wmin(20.), wmax(0.),
@@ -425,7 +425,7 @@ GetBRFromProcessId(Particle::ParticleCode vmId_)
 }
 
 Particles
-VMDecayer(Particle part_, Hadroniser *had_)
+VMDecayer(Particle part_, GenericHadroniser *had_)
 {
   if (part_.status!=1) {
     error.str(""); error << __PRETTY_FUNCTION__ << " ERROR: Particle has status" << part_.status;

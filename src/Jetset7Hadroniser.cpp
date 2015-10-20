@@ -1,6 +1,6 @@
-#include "jetset7hadroniser.h"
+#include "Jetset7Hadroniser.h"
 
-Jetset7Hadroniser::Jetset7Hadroniser() : Hadroniser("Jetset7")
+Jetset7Hadroniser::Jetset7Hadroniser() : GenericHadroniser("Jetset7")
 {
   //this->lugive("MSTU(21)=1");
   //this->lugive("MSTJ(1)=1");

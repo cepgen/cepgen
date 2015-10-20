@@ -1,9 +1,9 @@
-#ifndef _PROCESS_H
-#define _PROCESS_H
+#ifndef GenericProcess_h
+#define GenericProcess_h
 
-#include "kinematics.h"
-#include "event.h"
-#include "physics.h"
+#include "Kinematics.h"
+#include "Event.h"
+#include "Physics.h"
 
 /**
  * Class template to define any process to compute using this MC
@@ -11,7 +11,7 @@
  * @author Laurent Forthomme <laurent.forthomme@uclouvain.be>
  * @date January 2014
  */
-class Process
+class GenericProcess
 {
  public:
   enum ProcessMode {
@@ -31,8 +31,8 @@ class Process
     Fiore = 103
   };
    
-  Process(std::string name_="<invalid process>");
-  virtual ~Process();
+  GenericProcess(std::string name_="<invalid process>");
+  virtual ~GenericProcess();
   /**
    * @brief Returns the weight for this point in the phase-space
    */
@@ -111,11 +111,11 @@ class Process
    * well defined
    */
   inline bool IsKinematicsDefined() {
-    if   (fEvent->GetByRole(1).size()!=0 and fEvent->GetByRole(2).size()!=0) _setin = true;
+    if   (fEvent->GetByRole(1).size()!=0 and fEvent->GetByRole(2).size()!=0) fIsInStateSet = true;
     if  ((fEvent->GetByRole(3).size()!=0 and fEvent->GetByRole(5).size()!=0)
-     and (fEvent->GetByRole(6).size()!=0 or  fEvent->GetByRole(7).size()!=0)) _setout = true;
-    _setkin = _setin and _setout;
-    return _setkin;
+     and (fEvent->GetByRole(6).size()!=0 or  fEvent->GetByRole(7).size()!=0)) fIsOutStateSet = true;
+    fIsKinematicSet = fIsInStateSet and fIsOutStateSet;
+    return fIsKinematicSet;
   }
   /**
    * Returns the complete list of Particle with their role in the process for
@@ -170,15 +170,15 @@ class Process
   /**
    * @brief Are the event's incoming particles set ?
    */
-  bool _setin;
+  bool fIsInStateSet;
   /**
    * @brief Are the event's outgoing particles set ?
    */
-  bool _setout;
+  bool fIsOutStateSet;
   /**
    * @brief Is the full event's kinematic set ?
    */
-  bool _setkin;
+  bool fIsKinematicSet;
   /**
    * @brief Name of the process (useful for logging and debugging)
    */

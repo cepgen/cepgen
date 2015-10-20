@@ -1,9 +1,9 @@
-#ifndef _PYTHIA6HADRONISER_H
-#define _PYTHIA6HADRONISER_H
+#ifndef Pythia6Hadroniser_h
+#define Pythia6Hadroniser_h
 
 #include <algorithm>
 
-#include "hadroniser.h"
+#include "GenericHadroniser.h"
 
 /** @brief Maximal number of characters to fetch for the particle's name */
 #define NAME_CHR 16
@@ -49,7 +49,7 @@ extern "C"
  * Full interface to the Pythia6 @cite Sjostrand:2006za algorithm. It can be used in a single particle decay mode as well as a full event hadronisation using the string model, as in Jetset.
  * @brief Pythia6 hadronisation algorithm
  */
-class Pythia6Hadroniser : public Hadroniser
+class Pythia6Hadroniser : public GenericHadroniser
 {
  public:
   Pythia6Hadroniser();

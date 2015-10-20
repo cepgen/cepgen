@@ -1,5 +1,5 @@
-#ifndef _PARTICLE_H
-#define _PARTICLE_H
+#ifndef Particle_h
+#define Particle_h
 
 #include <iostream>
 #include <sstream>
@@ -10,7 +10,7 @@
 #include <algorithm>
 
 #include "utils.h"
-//#include "lheutils.h"
+//#include "LHEutils.h"
 
 typedef std::set<int> ParticlesIds;
 

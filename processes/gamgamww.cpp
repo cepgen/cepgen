@@ -1,6 +1,6 @@
 #include "gamgamww.h"
 
-GamGamWW::GamGamWW() : Process("gamma,gamma->W+,W-")
+GamGamWW::GamGamWW() : GenericProcess("gamma,gamma->W+,W-")
 {}
 
 GamGamWW::~GamGamWW()

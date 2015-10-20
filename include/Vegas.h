@@ -1,11 +1,11 @@
-#ifndef _VEGAS_H
-#define _VEGAS_H
+#ifndef Vegas_h
+#define Vegas_h
 
 #include <fstream>
 #include <cstdio> // remove (DEBUG)
 #include <gsl/gsl_monte_vegas.h>
 
-#include "parameters.h"
+#include "Parameters.h"
 
 #define fMaxNbins 50
 #define ONE 1.

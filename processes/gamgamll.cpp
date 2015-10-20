@@ -1,6 +1,6 @@
 #include "gamgamll.h"
 
-GamGamLL::GamGamLL(int nOpt_) : Process("pp -> p(*) (gamma gamma -> l+ l-) p(*)"),
+GamGamLL::GamGamLL(int nOpt_) : GenericProcess("pp -> p(*) (gamma gamma -> l+ l-) p(*)"),
   _nOpt(nOpt_),
   _ep1(-1), _w1(-1), _ep2(-1), _w2(-1.),
   _w3(-1.), _w4(-1.), _w5(-1.), _w6(-1.), _w7(-1.),
@@ -30,21 +30,21 @@ GamGamLL::SetOutgoingParticles(int part_, Particle::ParticleCode pdgId_, int)
 {
   double mass, outm, dm;
 
-  if (!Process::fIsPointSet) return;
+  if (!GenericProcess::fIsPointSet) return;
 
   mass = Particle::GetMassFromPDGId(pdgId_);
   
   if (pdgId_==Particle::uQuark or mass<0) {
     switch (fCuts.kinematics) {
-      case Process::ElasticElastic: // elastic
+      case GenericProcess::ElasticElastic: // elastic
       default:
         return;
-      case Process::ElasticInelastic: // single-dissociative
-      case Process::InelasticElastic:
+      case GenericProcess::ElasticInelastic: // single-dissociative
+      case GenericProcess::InelasticElastic:
 	// FIXME need to add the elastic-inelastic case!
         mass = ComputeMX(x(7), fEvent->GetOneByRole(1)->M(), _ml6, &dm);
         break;
-      case Process::InelasticInelastic: // double-dissociative
+      case GenericProcess::InelasticInelastic: // double-dissociative
         int ind;
         if (part_==3)                 { ind = 7; mass = _mp2; } // First outgoing proton remnant
         else if (part_==5 && _mp3>0.) { ind = 8; mass = _mp3; } // Second outgoing proton remnant (if first is defined)
@@ -85,15 +85,15 @@ GamGamLL::SetOutgoingParticles(int part_, Particle::ParticleCode pdgId_, int)
   default:
     return;
   }
-  _setout = setp3 and setp5 and setll;
-  _setkin = _setin and _setout;
+  fIsOutStateSet = setp3 and setp5 and setll;
+  fIsKinematicSet = fIsInStateSet and fIsOutStateSet;
   
   if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
     DebugInsideLoop(Form("Particle %d has PDG id=%d", part_, pdgId_));
-    if (_setout) {
+    if (fIsOutStateSet) {
       std::cout << "  --> Outgoing state is fully set" << std::endl;
     }
-    if (_setkin) {
+    if (fIsKinematicSet) {
       std::cout << "  --> Kinematics is fully set" << std::endl;
     }
   }
@@ -144,8 +144,8 @@ GamGamLL::SetIncomingParticles(Particle ip1_, Particle ip2_)
                    +std::pow(p1->Py()+p2->Py(), 2)
                    +std::pow(p1->Pz()+p2->Pz(), 2));
 
-  _setin = p1->Valid() and p2->Valid();
-  _setkin = _setin && _setout;
+  fIsInStateSet = p1->Valid() and p2->Valid();
+  fIsKinematicSet = fIsInStateSet && fIsOutStateSet;
 }
 
 void
@@ -683,7 +683,7 @@ GamGamLL::ComputeWeight()
 
   weight = 0.;
 
-  if (!_setout) throw Exception(__PRETTY_FUNCTION__, "Output state not set!", JustWarning);
+  if (!fIsOutStateSet) throw Exception(__PRETTY_FUNCTION__, "Output state not set!", JustWarning);
 
   if (fCuts.wmax<0) fCuts.wmax = _s;
 

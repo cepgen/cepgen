@@ -1,13 +1,13 @@
-#include "pythia6hadroniser.h"
+#include "Pythia6Hadroniser.h"
 
-Pythia6Hadroniser::Pythia6Hadroniser() : Hadroniser("Pythia6")
+Pythia6Hadroniser::Pythia6Hadroniser() : GenericHadroniser("Pythia6")
 {
   //this->pygive("MSTU(21)=1");
 }
 
 Pythia6Hadroniser::~Pythia6Hadroniser()
 {
-  Debug("Destructor called");
+  //Debug("Destructor called");
 }
 
 bool

@@ -1,4 +1,4 @@
-#include "particle.h"
+#include "Particle.h"
 
 Particle::Particle() :
   id(-1), pdgId((ParticleCode)0), charge(999.), name(""), role(-1),

@@ -1,13 +1,13 @@
-#include "herwig6hadroniser.h"
+#include "Herwig6Hadroniser.h"
 
-Herwig6Hadroniser::Herwig6Hadroniser() : Hadroniser("Herwig6")
+Herwig6Hadroniser::Herwig6Hadroniser() : GenericHadroniser("Herwig6")
 {
-  Debug(Form("Constructor called"));
+  //Debug(Form("Constructor called"));
 }
 
 Herwig6Hadroniser::~Herwig6Hadroniser()
 {
-  Debug(Form("Destructor called"));
+  //Debug(Form("Destructor called"));
 }
 
 bool

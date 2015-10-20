@@ -1,9 +1,9 @@
-#ifndef _JETSET7HADRONISER_H
-#define _JETSET7HADRONISER_H
+#ifndef Jetset7Hadroniser_h
+#define Jetset7Hadroniser_h
 
 #include <algorithm>
 
-#include "hadroniser.h"
+#include "GenericHadroniser.h"
 
 #define NAME_CHR 16
 
@@ -26,7 +26,7 @@ extern "C"
 /**
  * @brief Jetset7 hadronisation algorithm
  */
-class Jetset7Hadroniser : public Hadroniser
+class Jetset7Hadroniser : public GenericHadroniser
 {
  public:
   Jetset7Hadroniser();

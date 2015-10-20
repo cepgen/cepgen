@@ -1,5 +1,5 @@
-#ifndef _EVENT_H
-#define _EVENT_H
+#ifndef Event_h
+#define Event_h
 
 #include <map>
 #include <vector>
@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <algorithm>
 
-#include "particle.h"
+#include "Particle.h"
 
 /**
  * @brief Convention to simplify the user interface while fetching a list of particles in the event

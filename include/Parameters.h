@@ -1,5 +1,5 @@
-#ifndef _PARAMETERS_H
-#define _PARAMETERS_H
+#ifndef Parameters_h
+#define Parameters_h
 
 #include <iostream>
 #include <iomanip>
@@ -10,9 +10,9 @@
 
 #include "../processes/processes.h"
 
-#include "pythia6hadroniser.h"
-#include "jetset7hadroniser.h"
-#include "herwig6hadroniser.h"
+#include "Pythia6Hadroniser.h"
+#include "Jetset7Hadroniser.h"
+#include "Herwig6Hadroniser.h"
 
 /**
  * @brief List of parameters used to start and run the simulation job.
@@ -63,7 +63,7 @@ class Parameters {
      * @brief Outgoing primary particles' behaviour
      * @note Was named PMOD/EMOD in ILPAIR
      */
-    Process::StructureFunctions remnant_mode;
+    GenericProcess::StructureFunctions remnant_mode;
     /**
      * The particle code of produced leptons, as defined by the PDG convention :
      * - 11 - for \f$e^+e^-\f$ pairs
@@ -72,7 +72,7 @@ class Parameters {
      * @brief PDG id of the outgoing leptons
      */
     Particle::ParticleCode pair;
-    Process::ProcessMode process_mode;
+    GenericProcess::ProcessMode process_mode;
     /**
      * Set of cuts to apply on the outgoing leptons in order to restrain the available kinematic phase space :
      * - 0 - No cuts at all (for the total cross section)
@@ -193,11 +193,11 @@ class Parameters {
     /**
      * @brief Hadronisation algorithm to use for the proton(s) remnants fragmentation
      */
-    Hadroniser* hadroniser;
+    GenericHadroniser* hadroniser;
     /**
      * @brief The process for which the cross-section will be computed and the events will be generated
      */
-    Process* process;
+    GenericProcess* process;
 };
 
 #endif

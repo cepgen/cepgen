@@ -1,5 +1,5 @@
-#ifndef _LHEUTILS_H
-#define _LHEUTILS_H
+#ifndef LHEutils_h
+#define LHEutils_h
 
 #include <iostream>
 #include <iomanip>

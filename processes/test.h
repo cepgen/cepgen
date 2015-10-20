@@ -1,9 +1,9 @@
 #ifndef TEST_H
 #define TEST_H
 
-#include "../include/process.h"
+#include "../include/GenericProcess.h"
 
-class TestProcess : public Process
+class TestProcess : public GenericProcess
 {
  public:
   TestProcess();

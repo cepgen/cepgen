@@ -1,6 +1,6 @@
 #include "test.h"
 
-TestProcess::TestProcess() : Process("<test process>")
+TestProcess::TestProcess() : GenericProcess("<test process>")
 {}
 
 TestProcess::~TestProcess()

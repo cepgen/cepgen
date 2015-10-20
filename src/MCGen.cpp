@@ -1,4 +1,4 @@
-#include "mcgen.h"
+#include "MCGen.h"
 
 MCGen::MCGen() :
   fVegas(0), fCrossSection(-1.), fCrossSectionError(-1.)
@@ -47,12 +47,12 @@ MCGen::BuildVegas()
   if (Logger::GetInstance()->Level>=Logger::Debug) {
     std::string topo;
     switch (parameters->process_mode) {
-      case Process::ElasticElastic:
+      case GenericProcess::ElasticElastic:
         topo = "elastic proton/proton"; break;
-      case Process::ElasticInelastic:
-      case Process::InelasticElastic:
+      case GenericProcess::ElasticInelastic:
+      case GenericProcess::InelasticElastic:
         topo = "single-dissociative proton"; break;
-      case Process::InelasticInelastic:
+      case GenericProcess::InelasticInelastic:
         topo = "double-dissociative protons"; break;
     }
     Debug(Form("Considered topology: %s case", topo.c_str()));
@@ -180,19 +180,19 @@ double f(double* x_, size_t ndim_, void* params_)
 
   // Then add outgoing protons or remnants
   switch (kin.kinematics) {
-    case Process::ElasticElastic:
+    case GenericProcess::ElasticElastic:
       p->process->SetOutgoingParticles(3, Particle::Proton, 1); // First outgoing proton
       p->process->SetOutgoingParticles(5, Particle::Proton, 2); // Second outgoing proton
       break;
-    case Process::ElasticInelastic:
+    case GenericProcess::ElasticInelastic:
       //p->process->SetOutgoingParticles(3, Particle::Proton, 1); // First outgoing proton
       //p->process->SetOutgoingParticles(5, Particle::uQuark, 2); // Second outgoing proton remnant
       break;
-    case Process::InelasticElastic:
+    case GenericProcess::InelasticElastic:
       p->process->SetOutgoingParticles(3, Particle::uQuark, 1); // First outgoing proton
       p->process->SetOutgoingParticles(5, Particle::Proton, 2); // Second outgoing proton remnant
       break;
-    case Process::InelasticInelastic:
+    case GenericProcess::InelasticInelastic:
       p->process->SetOutgoingParticles(3, Particle::uQuark, 1); // First outgoing proton
       p->process->SetOutgoingParticles(5, Particle::uQuark, 2); // Second outgoing proton remnant
       break;
@@ -209,7 +209,7 @@ double f(double* x_, size_t ndim_, void* params_)
     p->process->FillKinematics(false);
     p->process->GetEvent()->time_generation = tmr.elapsed();
 
-    if (kin.kinematics!=Process::ElasticElastic) {
+    if (kin.kinematics!=GenericProcess::ElasticElastic) {
 
       Debug(Form("Event before calling the hadroniser (%s)", p->hadroniser->GetName().c_str()));
       if (Logger::GetInstance()->Level>=Logger::Debug) p->process->GetEvent()->Dump();

@@ -1,4 +1,4 @@
-#include "lheutils.h"
+#include "LHEutils.h"
 
 HEPRUP::HEPRUP(const int nprup_) :
   idwtup(2), nprup(nprup_)

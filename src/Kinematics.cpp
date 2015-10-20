@@ -1,4 +1,4 @@
-#include "kinematics.h"
+#include "Kinematics.h"
 
 Kinematics::Kinematics() :
   ptmin(3.), ptmax(-1.),
