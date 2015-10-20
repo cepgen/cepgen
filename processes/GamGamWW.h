@@ -1,7 +1,7 @@
-#ifndef _GAMGAMWW_H
-#define _GAMGAMWW_H
+#ifndef GamGamWW_h
+#define GamGamWW_h
 
-#include "GenericProcess.h"
+#include "../include/GenericProcess.h"
 
 /**
  * @brief Computes the matrix element for a CE \f$\gamma\gamma\rightarrow W^+W^-\f$ process

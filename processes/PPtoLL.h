@@ -1,7 +1,7 @@
-#ifndef _PPTOLL_H
-#define _PPTOLL_H
+#ifndef PPtoLL_h
+#define PPtoLL_h
 
-#include "GenericProcess.h"
+#include "../include/GenericProcess.h"
 
 /**
  * @brief Computes the matrix element for a CE \f$\gamma\gamma\rightarrow \ell^+\ell^-\f$ process using \f$k_T\f$-factorization approach

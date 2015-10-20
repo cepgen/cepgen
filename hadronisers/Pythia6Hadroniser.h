@@ -3,7 +3,7 @@
 
 #include <algorithm>
 
-#include "GenericHadroniser.h"
+#include "../include/GenericHadroniser.h"
 
 /** @brief Maximal number of characters to fetch for the particle's name */
 #define NAME_CHR 16

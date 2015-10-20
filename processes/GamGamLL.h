@@ -12,7 +12,7 @@
 #include <cstdlib>
 #include <map>
 
-#include "GenericProcess.h"
+#include "../include/GenericProcess.h"
 
 /**
  * Full class of methods and objects to compute the full analytic matrix element

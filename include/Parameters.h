@@ -8,11 +8,8 @@
 #include <fstream>
 #include <string>
 
-#include "processes.h"
-
-#include "Pythia6Hadroniser.h"
-#include "Jetset7Hadroniser.h"
-#include "Herwig6Hadroniser.h"
+#include "../processes/processes.h"
+#include "../hadronisers/hadronisers.h"
 
 /**
  * @brief List of parameters used to start and run the simulation job.

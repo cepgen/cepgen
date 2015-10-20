@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "include/mcgen.h"
+#include "include/MCGen.h"
 
 using namespace std;
 
@@ -30,8 +30,8 @@ int main(int argc, char* argv[]) {
     
     mg.parameters->hadroniser = new Pythia6Hadroniser;
     mg.parameters->process = new GamGamLL;
-    mg.parameters->process_mode = Process::InelasticElastic;
-    mg.parameters->remnant_mode = Process::SuriYennie;
+    mg.parameters->process_mode = GenericProcess::InelasticElastic;
+    mg.parameters->remnant_mode = GenericProcess::SuriYennie;
     //mg.parameters->itvg = 2;
     
     mg.parameters->in1p = 4000.;

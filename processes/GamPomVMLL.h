@@ -1,10 +1,10 @@
-#ifndef _GAMPOMVMLL_H
-#define _GAMPOMVMLL_H
+#ifndef GamPomVMLL_h
+#define GamPomVMLL_h
 
 #include <algorithm>
 
-#include "utils.h"
-#include "GenericProcess.h"
+#include "../include/utils.h"
+#include "../include/GenericProcess.h"
 
 #define IBE 1
 #define ISCE 3
