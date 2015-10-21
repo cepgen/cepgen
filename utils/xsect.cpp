@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "../include/mcgen.h"
+#include "../include/MCGen.h"
 /**
  * @author Laurent Forthomme <laurent.forthomme@uclouvain.be>
  */
@@ -17,9 +17,9 @@ int main(int argc, char* argv[]) {
   //max = 10.;
   //min = 0.;
   //max = 14000.;
-  min = 0.;
-  max = 50.;
-  it = 100;
+  min = 10.;
+  max = 60.;
+  it = 50;
   
   if (argc>1) it = atoi(argv[1]);
 
@@ -27,11 +27,11 @@ int main(int argc, char* argv[]) {
   ip.in2p = 3500.;
   ip.process = new GamGamLL;
   ip.hadroniser = new Pythia6Hadroniser;
-  //ip.process_mode = Process::ElasticElastic;
-  //ip.process_mode = Process::InelasticElastic;
-  ip.process_mode = Process::InelasticInelastic;
+  //ip.process_mode = GenericProcess::ElasticElastic;
+  //ip.process_mode = GenericProcess::InelasticElastic;
+  ip.process_mode = GenericProcess::InelasticInelastic;
   ip.pair = Particle::Muon;
-  ip.remnant_mode = Process::SuriYennie;
+  ip.remnant_mode = GenericProcess::SuriYennie;
   //ip.SetThetaRange(5., 175.);
   //ip.SetThetaRange(0., 180.);
   ip.mineta =-2.5;
@@ -40,8 +40,8 @@ int main(int argc, char* argv[]) {
   ip.mcut = 2;
   ip.minenergy = 0.;
   // DEBUG
-  //ip.itmx = 5;
-  //ip.ncvg = 1000;
+  ip.itvg = 5;
+  ip.ncvg = 50000;
   //
   ip.minpt = 15.;
   ip.generation = false;

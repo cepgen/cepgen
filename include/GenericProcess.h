@@ -51,8 +51,8 @@ class GenericProcess
     ip1_.role=(ip1_.Pz()>0.)?1:2; fEvent->AddParticle(ip1_);
     ip2_.role=(ip2_.Pz()>0.)?1:2; fEvent->AddParticle(ip2_);
     for (int i=0; i<3; i++) k += p1[i]*p2[i];
-    _s = ip1_.M2()+ip2_.M2()+2.*(ip1_.E()*ip2_.E()-k);
-    _ecm = sqrt(_s);
+    fS = ip1_.M2()+ip2_.M2()+2.*(ip1_.E()*ip2_.E()-k);
+    fSqS = sqrt(fS);
   }
   /**
    * @brief Sets the PDG id for the outgoing particles
@@ -145,11 +145,11 @@ class GenericProcess
   /**
    * @brief \f$s\f$, squared centre of mass energy of the incoming particles' system, in \f$\mathrm{GeV}^2\f$
    */
-  double _s;
+  double fS;
   /**
    * @brief \f$\sqrt s\f$, centre of mass energy of the incoming particles' system, in \f$\mathrm{GeV}\f$
    */
-  double _ecm;
+  double fSqS;
   /**
    * @brief Number of dimensions on which the integration has to be performed.
    */

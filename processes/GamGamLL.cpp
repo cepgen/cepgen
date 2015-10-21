@@ -117,8 +117,8 @@ GamGamLL::SetIncomingParticles(Particle ip1_, Particle ip2_)
   p31 = ip1_.P4();
   p32 = ip2_.P4();
   for (int i=0; i<3; i++) k += p31[i]*p32[i];
-  _s = ip1_.M2()+ip2_.M2()+2.*(ip1_.E()*ip2_.E()-k);
-  _ecm = sqrt(_s);
+  fS = ip1_.M2()+ip2_.M2()+2.*(ip1_.E()*ip2_.E()-k);
+  fSqS = sqrt(fS);
 
   fEvent->AddParticle(ip1_);
   fEvent->AddParticle(ip2_);
@@ -204,33 +204,35 @@ GamGamLL::Pickin()
                        "w5 = %f",
                        _w1, _w2, _w3, _w4, _w5));
 
-  ss = _s+_w12;
+  //Info(Form("w31 = %f\n\tw52 = %f\n\tw12 = %f", _w31, _w52, _w12));
   
-  rl1 = std::pow(ss, 2)-4.*_w1*_s; // lambda(s, m1**2, m2**2)
+  ss = fS+_w12;
+  
+  rl1 = std::pow(ss, 2)-4.*_w1*fS; // lambda(s, m1**2, m2**2)
   if (rl1<=0.) throw Exception(__PRETTY_FUNCTION__, Form("rl1 = %f <= 0", rl1), JustWarning);
   _sl1 = std::sqrt(rl1);
 
   _s2 = ds2 = 0.;
   if (_nOpt==0) {
-    smax = _s+_w3-2.*_mp3*_ecm;
+    smax = fS+_w3-2.*_mp3*fSqS;
     Map(x(2), sig1, smax, &_s2, &ds2);
     sig1 = _s2; //FIXME!!!!!!!!!!!!!!!!!!!!
   }
   
-  DebugInsideLoop(Form("s2 = %d", _s2));
+  DebugInsideLoop(Form("s2 = %f", _s2));
 
   //std::cout << "s=" << _s << ", w3=" << _w3 << ", sig1=" << sig1 << std::endl;
-  sp = _s+_w3-sig1;
+  sp = fS+_w3-sig1;
 
   _d3 = sig1-_w2;
 
-  rl2 = std::pow(sp, 2)-4.*_s*_w3; // lambda(s, m3**2, sigma)
+  rl2 = std::pow(sp, 2)-4.*fS*_w3; // lambda(s, m3**2, sigma)
   if (rl2<=0.) throw Exception(__PRETTY_FUNCTION__, Form("rl2 = %f <= 0", rl2), JustWarning);
   sl2 = std::sqrt(rl2);
 
   //std::cout << "ss=" << ss << ", sp=" << sp << ", sl1=" << _sl1 << ", sl2=" << sl2 << std::endl;
-  _t1max = _w1+_w3-(ss*sp+_sl1*sl2)/(2.*_s); // definition from eq. (A.4) in [1]
-  _t1min = (_w31*_d3+(_d3-_w31)*(_d3*_w1-_w31*_w2)/_s)/_t1max; // definition from eq. (A.5) in [1]
+  _t1max = _w1+_w3-(ss*sp+_sl1*sl2)/(2.*fS); // definition from eq. (A.4) in [1]
+  _t1min = (_w31*_d3+(_d3-_w31)*(_d3*_w1-_w31*_w2)/fS)/_t1max; // definition from eq. (A.5) in [1]
 
   // FIXME dropped in CDF version
   if (_t1max>-fCuts.q2min)
@@ -257,16 +259,16 @@ GamGamLL::Pickin()
 
   _sa1 =-std::pow(_t1-_w31, 2)/4.+_w1*_t1;
   if (_sa1>=0.) {
-    throw Exception(__PRETTY_FUNCTION__, Form("_sa1 = %d >= 0", _sa1), JustWarning);
+    throw Exception(__PRETTY_FUNCTION__, Form("_sa1 = %f >= 0", _sa1), JustWarning);
   }
 
   sl3 = std::sqrt(-_sa1);
 
   // one computes splus and (s2x=s2max)
   if (_w1!=0.) {
-    sb =(_s*(_t1-_w31)+_w12*t13)/(2.*_w1)+_w3;
+    sb =(fS*(_t1-_w31)+_w12*t13)/(2.*_w1)+_w3;
     sd = _sl1*sl3/_w1;
-    se =(_s*(_t1*(_s+t13-_w2)-_w2*_w31)+_w3*(_w12*d8+_w2*_w3))/_w1;
+    se =(fS*(_t1*(fS+t13-_w2)-_w2*_w31)+_w3*(_w12*d8+_w2*_w3))/_w1;
     if (fabs((sb-sd)/sd)>=1.) {
       splus = sb-sd;
       s2max = se/splus;
@@ -276,10 +278,8 @@ GamGamLL::Pickin()
       splus = se/s2max;
     }
   }
-  else {
-    std::cout << 3 << std::endl;
-    // 3
-    s2max = (_s*(_t1*(_s+d8-_w3)-_w2*_w3)+_w2*_w3*(_w2+_w3-_t1))/(ss*t13);
+  else { // 3
+    s2max = (fS*(_t1*(fS+d8-_w3)-_w2*_w3)+_w2*_w3*(_w2+_w3-_t1))/(ss*t13);
     splus = sig2;
   }
   // 4
@@ -353,67 +353,56 @@ GamGamLL::Pickin()
     s2p = c/(_t2*s2min);
   }
   // 9
-  if (_nOpt>1) {
-    Map(x(2), s2min, s2max, &_s2, &ds2);
-  }
-  else if (_nOpt==1) { // _nOpt=1
-    Mapla(_t1, _w2, x(2), s2min, s2max, &_s2, &ds2);
-  }
+  if (_nOpt>1)       Map(x(2), s2min, s2max, &_s2, &ds2);
+  else if (_nOpt==1) Mapla(_t1, _w2, x(2), s2min, s2max, &_s2, &ds2);
+
   ap = -std::pow(_s2+d8, 2)/4.+_s2*_t1;
-  if (_w1!=0.) {
-    _dd1 = -_w1*(_s2-s2max)*(_s2-splus)/4.;
-  }
-  else { // 10
-    _dd1 = ss*t13*(_s2-s2max)/4.;
-  }
+  //Info(Form("s2 = %f, s2max = %f, splus = %f", _s2, s2max, splus));
+  if (_w1!=0.) _dd1 = -_w1*(_s2-s2max)*(_s2-splus)/4.; // 10
+  else         _dd1 = ss*t13*(_s2-s2max)/4.;
   // 11
   _dd2 = -_t2*(_s2-s2p)*(_s2-s2min)/4.;
-
+  //Info(Form("t2 =%f\n\ts2 =%f\n\ts2p=%f\n\ts2min=%f\n\tdd2=%f",_t2, _s2, s2p, s2min, _dd2));
   // FIXME there should be a more beautiful way to check for nan!
   // (http://stackoverflow.com/questions/570669/checking-if-a-double-or-float-is-nan-in-c)
   // FIXME dropped in CDF version
-  if (!(_dd2>=0.) && !(_dd2<0.)) { // NaN
-#ifdef ERROR
-    std::cerr << __PRETTY_FUNCTION__ << " [ERROR] : dd2 == NaN" << std::endl;
-    std::cerr << "  dd2 = " << _dd2 << std::endl
-              << "  s2 = " << _s2 << std::endl
-              << "  s2p = " << s2p << std::endl
-              << "  s2min = " << s2min << std::endl
-              << "  t2min = " << _t2min << std::endl
-              << "  t2max = " << _t2max << std::endl;
-#endif
+  if (!(_dd2>=0.) and !(_dd2<0.)) { // NaN
+    throw Exception(__PRETTY_FUNCTION__,
+		    Form("dd2 == NaN\n\tdd2 = %f\n\t"
+			 "s2 = %f\ts2p = %f\n\t"
+			 "s2min = %f\n\t"
+			 "t2min = %f\tt2max = %f",
+			 _dd2, _s2, s2p, s2min, _t2min, _t2max),
+		    JustWarning);
   }
-  /////
-  if (x(3)>1. or x(3)<0.)
-    throw Exception(__PRETTY_FUNCTION__, Form("x(3) = %d", x(3)), JustWarning);
     
   yy4 = cos(pi*x(3));
   dd = _dd1*_dd2;
-  _p12 = (_s-_w1-_w2)/2.;
+  _p12 = (fS-_w1-_w2)/2.;
   st = _s2-_t1-_w2;
   delb = (2.*_w2*r3+r4*st)*(4.*_p12*_t1-(_t1-_w31)*st)/(16.*ap);
 
-  if (dd<=0.) throw Exception(__PRETTY_FUNCTION__, Form("dd = %d <= 0", dd), JustWarning);
+  if (dd<=0.) throw Exception(__PRETTY_FUNCTION__, Form("dd = %f <= 0\n\tdd1 = %f\tdd2 = %f", dd, _dd1, _dd2), JustWarning);
 
   _delta = delb-yy4*st*std::sqrt(dd)/(2.*ap);
   _s1 = _t2+_w1+(2.*_p12*r3-4.*_delta)/st;
 
-  if (ap>=0.) throw Exception(__PRETTY_FUNCTION__, Form("ap = %d >= 0", ap), JustWarning);
+  if (ap>=0.) throw Exception(__PRETTY_FUNCTION__, Form("ap = %f >= 0", ap), JustWarning);
 
   _dj = ds2*dt1*dt2*std::pow(pi, 2)/(8.*_sl1*std::sqrt(-ap));
 
-  DebugInsideLoop(Form("_dj = %d", _dj));
+  DebugInsideLoop(Form("dj=%f", _dj));
 
   _gram = (1.-std::pow(yy4, 2))*dd/ap;
 
   _p13 = -t13/2.;
   _p14 = (_tau+_s1-_w3)/2.;
-  _p15 = (_s+_t2-_s1-_w2)/2.;
-  _p23 = (_s+_t1-_s2-_w1)/2.;
+  _p15 = (fS+_t2-_s1-_w2)/2.;
+  _p23 = (fS+_t1-_s2-_w1)/2.;
   _p24 = (_s2-_tau-_w5)/2.;
   _p25 = -t25/2.;
   _p34 = (_s1-_w3-_w4)/2.;
-  _p35 = (_s+_w4-_s1-_s2)/2.;
+  _p35 = (fS+_w4-_s1-_s2)/2.;
   _p45 = (_s2-_w4-_w5)/2.;
 
   _p1k2 = (_s1-_t2-_w1)/2.;
@@ -421,9 +410,9 @@ GamGamLL::Pickin()
 
 
   if (_w2!=0.) {
-    sbb = (_s*(_t2-_w52)-_w12*t25)/(2.*_w2)+_w5;
+    sbb = (fS*(_t2-_w52)-_w12*t25)/(2.*_w2)+_w5;
     sdd = _sl1*sl6/(2.*_w2);
-    see = (_s*(_t2*(_s+t25-_w1)-_w1*_w52)+_w5*(_w1*_w5-_w12*(_t2-_w1)))/_w2;
+    see = (fS*(_t2*(fS+t25-_w1)-_w1*_w52)+_w5*(_w1*_w5-_w12*(_t2-_w1)))/_w2;
     if (sbb/sdd>=0.) {
       s1p = sbb+sdd;
       s1m = see/s1p;
@@ -431,14 +420,12 @@ GamGamLL::Pickin()
       // (http://stackoverflow.com/questions/570669/checking-if-a-double-or-float-is-nan-in-c)
       // FIXME dropped in CDF version
       if (!(_dd2>=0.) && !(_dd2<0.)) { // NaN
-#ifdef ERROR
-        std::cout << __PRETTY_FUNCTION__ << " [ERROR] : dd2 == NaN" << std::endl;
-        std::cout << "  dd2 = " << _dd2 << std::endl
-		  << "   s1 = " << _s1 << std::endl
-                  << "  s1p = " << s1p << std::endl
-		  << "  s1m = " << s1m << std::endl
-                  << "   w2 = " << _w2 << std::endl;
-#endif
+	throw Exception(__PRETTY_FUNCTION__,
+			Form("dd2 == NaN\n\tdd2 = %f\n\t"
+			     "s1 = %f\ts1p = %f\ts1m = %f\n\t"
+			     "w2 = %f",
+			     _dd2, _s1, s1p, s1m, _w2),
+			JustWarning);
       }
       /////
     }
@@ -449,8 +436,8 @@ GamGamLL::Pickin()
     _dd3 = -_w2*(s1p-_s1)*(s1m-_s1)/4.; // 13
   }
   else { // 14
-    s1p = (_s*(_t2*(_s-_w5+_t2-_w1)-_w1*_w5)+_w1*_w5*(_w1+_w5-_t2))/(t25*(_s-_w12));
-    _dd3 = -t25*(_s-_w12)*(s1p-_s1)/4.;
+    s1p = (fS*(_t2*(fS-_w5+_t2-_w1)-_w1*_w5)+_w1*_w5*(_w1+_w5-_t2))/(t25*(fS-_w12));
+    _dd3 = -t25*(fS-_w12)*(s1p-_s1)/4.;
   }
   // 15
   _acc3 = (s1p-_s1)/(s1p+_s1);
@@ -486,9 +473,9 @@ GamGamLL::Orient()
     throw Exception(__PRETTY_FUNCTION__, Form("Pickin failed: dj = %f", _dj), JustWarning);
   }
   
-  re = 1./(2.*_ecm);
-  _ep1 = re*(_s+_w12);
-  _ep2 = re*(_s-_w12);
+  re = 1./(2.*fSqS);
+  _ep1 = re*(fS+_w12);
+  _ep2 = re*(fS-_w12);
 
   DebugInsideLoop(Form(" re = %f\n\t_w12 = %f", re, _w12));
   DebugInsideLoop(Form("Incoming particles' energy = %f, %f", _ep1, _ep2));
@@ -514,7 +501,7 @@ GamGamLL::Orient()
     throw Exception(__PRETTY_FUNCTION__, "_pzc4==0", JustWarning);
   }
   _pp5 = std::sqrt(std::pow(_ep5, 2)-_w5);
-  _p_p3 = std::sqrt(_dd1/_s)/_p;
+  _p_p3 = std::sqrt(_dd1/fS)/_p;
 
   DebugInsideLoop(Form("Central system's energy: E4 = %f\n\t"
                        "                 momentum: p4 = %f\n\t"
@@ -523,11 +510,11 @@ GamGamLL::Orient()
                        "                            E5 = %f",
                        _ec4, _pc4, _mc4, _ep3, _ep5));
 
-  _p_p5 = std::sqrt(_dd3/_s)/_p;
+  _p_p5 = std::sqrt(_dd3/fS)/_p;
   _st3 = _p_p3/_pp3;
   _st5 = _p_p5/_pp5;
 
-  DebugInsideLoop(Form("st3 = %d\n\tst5 = %d", _st3, _st5));
+  DebugInsideLoop(Form("st3 = %f\n\tst5 = %f", _st3, _st5));
 
   // FIXME there should be a more beautiful way to check for nan!
   // (http://stackoverflow.com/questions/570669/checking-if-a-double-or-float-is-nan-in-c)
@@ -554,7 +541,7 @@ GamGamLL::Orient()
 
   if (_ep1*_ep3<_p13) _ct3 *= -1.;
 
-  DebugInsideLoop(Form("ct3 = %d\n\tct5 = %d", _ct3, _ct5));
+  DebugInsideLoop(Form("ct3 = %f\n\tct5 = %f", _ct3, _ct5));
 
   if (_ep2*_ep5>_p25) {
     _ct5 = -_ct5;
@@ -565,7 +552,7 @@ GamGamLL::Orient()
   if (_dd5<0.) throw Exception(__PRETTY_FUNCTION__, Form("dd5 = %f < 0", _dd5), JustWarning);
 
   // Centre of mass system kinematics (theta4 and phi4)
-  _p_p4 = std::sqrt(_dd5/_s)/_p;
+  _p_p4 = std::sqrt(_dd5/fS)/_p;
   _st4 = _p_p4/_pc4;
 
   if (_st4>1.) throw Exception(__PRETTY_FUNCTION__, Form("st4 = %f > 1", _st4), JustWarning);
@@ -590,7 +577,7 @@ GamGamLL::Orient()
 
   //std::cout << "pp3 = " << _p_p3 << ", pp5 = " << _p_p5 << std::endl;
 
-  rr  = std::sqrt(-_gram/_s)/(_p*_p_p4);
+  rr  = std::sqrt(-_gram/fS)/(_p*_p_p4);
   _sp3 = rr/_p_p3;
   _sp5 = -rr/_p_p5;
   //std::cout << "rr = " << rr << ", sp3 = " << fabs(_sp3) << ", sp5 = " << fabs(_sp5) << std::endl;
@@ -630,7 +617,7 @@ GamGamLL::ComputeMX(double x_, double outmass_, double lepmass_, double *dw_)
   double mx2, dmx2;
 
   wx2min = std::pow(std::max(Particle::GetMassFromPDGId(Particle::Proton)+Particle::GetMassFromPDGId(Particle::PiPlus), fCuts.mxmin), 2);
-  wx2max = std::pow(std::min(_ecm-outmass_-2.*lepmass_, fCuts.mxmax), 2);
+  wx2max = std::pow(std::min(fSqS-outmass_-2.*lepmass_, fCuts.mxmax), 2);
   
   Map(x_, wx2min, wx2max, &mx2, &dmx2);
 
@@ -685,15 +672,15 @@ GamGamLL::ComputeWeight()
 
   if (!fIsOutStateSet) throw Exception(__PRETTY_FUNCTION__, "Output state not set!", JustWarning);
 
-  if (fCuts.wmax<0) fCuts.wmax = _s;
+  if (fCuts.wmax<0) fCuts.wmax = fS;
 
   // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
   wmin = std::pow(_ml6+_ml7,2);
   if (fabs(wmin)<fabs(fCuts.wmin)) wmin = fCuts.wmin;
 
   // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or _wmax if specified)
-  wmax = std::pow(_ecm-_mp3-_mp5,2);
-  DebugInsideLoop(Form("sqrt(s)=%f\n\tm(X1)=%f\tm(X2)=%f", _ecm, _mp3, _mp5));
+  wmax = std::pow(fSqS-_mp3-_mp5,2);
+  DebugInsideLoop(Form("sqrt(s)=%f\n\tm(X1)=%f\tm(X2)=%f", fSqS, _mp3, _mp5));
   if (fabs(wmax)>fabs(fCuts.wmax)) wmax = fCuts.wmax;
   
   DebugInsideLoop(Form("wmin = %f\n\twmax = %f\n\twmax/wmin = %f", wmin, wmax, wmax/wmin));
@@ -716,7 +703,7 @@ GamGamLL::ComputeWeight()
   ecm6 = (_w4+_w6-_w7)/(2.*_mc4);
   pcm6 = std::sqrt(std::pow(ecm6, 2)-_w6);
   
-  _dj *= dw4*pcm6/(_mc4*sconstb*_s);
+  _dj *= dw4*pcm6/(_mc4*sconstb*fS);
   
   // Let the most obscure part of this code begin...
 
@@ -867,7 +854,7 @@ GamGamLL::ComputeWeight()
   r12 = c2*_sp3+qve[2]*c3;
   r13 = -c2*_cp3-qve[1]*c3;
   
-  DebugInsideLoop(Form("qve = (%d, %d, %d, %d)", qve[0], qve[1], qve[2], qve[3]));
+  DebugInsideLoop(Form("qve = (%f, %f, %f, %f)", qve[0], qve[1], qve[2], qve[3]));
   
   r22 = b2*_sp5+qve[2]*b3;
   r23 = -b2*_cp5-qve[1]*b3;
@@ -888,8 +875,8 @@ GamGamLL::ComputeWeight()
   // INFO from f.f
   ////////////////////////////////////////////////////////////////
 
-  _gamma = _etot/_ecm;
-  _betgam = _ptot/_ecm;
+  _gamma = _etot/fSqS;
+  _betgam = _ptot/fSqS;
 
   if (fCuts.mode==0) {
     Debug(Form("No cuts applied on the outgoing leptons kinematics!"));

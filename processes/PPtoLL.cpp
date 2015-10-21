@@ -159,7 +159,7 @@ PPtoLL::INCqqbar()
   double z1p, z1m, z2p, z2m;
   double f1, f2;
   
-  stild = _s/2.*(1+sqrt(1.-(4*pow(mp2, 2))/pow(_s, 2)));
+  stild = fS/2.*(1+sqrt(1.-(4*pow(mp2, 2))/pow(fS, 2)));
   
   // Inner photons
   q1tx = _q1t*cos(_phiq1t);
@@ -210,16 +210,16 @@ PPtoLL::INCqqbar()
   //     auxiliary quantities
   //=================================================================
 
-  alpha1 = amt1/_ecm*exp(_y1);
-  alpha2 = amt2/_ecm*exp(_y2);
-  beta1  = amt1/_ecm*exp(-_y1);
-  beta2  = amt2/_ecm*exp(-_y2);
+  alpha1 = amt1/fSqS*exp(_y1);
+  alpha2 = amt2/fSqS*exp(_y2);
+  beta1  = amt1/fSqS*exp(-_y1);
+  beta2  = amt2/fSqS*exp(-_y2);
 
   q1t2 = pow(q1tx, 2)+pow(q1ty, 2);
   q2t2 = pow(q2tx, 2)+pow(q2ty, 2);
 
   x2 = 0.; //FIXME figure out where this comes from
-  delta_x1 = (pow(_mx, 2)+q2t2)/((1.-x2)*_s);
+  delta_x1 = (pow(_mx, 2)+q2t2)/((1.-x2)*fS);
 
   //x1 = alpha1+alpha2+delta_x1;
   x1 = alpha1+alpha2;
@@ -307,7 +307,7 @@ PPtoLL::INCqqbar()
   double shat, mll;
   double that1, that2, that, uhat1, uhat2, uhat;
   
-  shat = _s*x1*x2;
+  shat = fS*x1*x2;
 
   that1 = pow(q10-p10, 2)-pow(q1tx-p1x, 2)-pow(q1ty-p1y, 2)-pow(q1z-p1z, 2);
   uhat1 = pow(q10-p20, 2)-pow(q1tx-p2x, 2)-pow(q1ty-p2y, 2)-pow(q1z-p2z, 2);
@@ -426,8 +426,8 @@ PPtoLL::INCqqbar()
     double sudakov_1, sudakov_2;
     double ratio1, ratio2;
     
-    amat2_1 = pow(4.*pi*alpha_em, 2)*pow(x1*x2*_s, 2)*aux2_1*2.*z1p*z1m*t1abs/(q1t2*q2t2);
-    amat2_2 = pow(4.*pi*alpha_em, 2)*pow(x1*x2*_s, 2)*aux2_2*2.*z2p*z2m*t2abs/(q1t2*q2t2);
+    amat2_1 = pow(4.*pi*alpha_em, 2)*pow(x1*x2*fS, 2)*aux2_1*2.*z1p*z1m*t1abs/(q1t2*q2t2);
+    amat2_2 = pow(4.*pi*alpha_em, 2)*pow(x1*x2*fS, 2)*aux2_2*2.*z2p*z2m*t2abs/(q1t2*q2t2);
 
     //=================================================================
     //     symmetrization
@@ -438,8 +438,8 @@ PPtoLL::INCqqbar()
     xx1 = alpha1+alpha2;
     xx2 = beta1+beta2;
 
-    sudakov_2 = (pow(_mx, 2)-pow(mp, 2)+q2t2+xx2*pow(mp, 2))/((1.-xx2)*_s);
-    sudakov_1 = (q1t2 + xx1*pow(mp, 2))/((1.-xx1)*_s);
+    sudakov_2 = (pow(_mx, 2)-pow(mp, 2)+q2t2+xx2*pow(mp, 2))/((1.-xx2)*fS);
+    sudakov_1 = (q1t2 + xx1*pow(mp, 2))/((1.-xx1)*fS);
     ratio1 = sudakov_1 / xx1;
     ratio2 = sudakov_2 / xx2;
 
@@ -481,7 +481,7 @@ PPtoLL::INCqqbar()
   //=================================================================
 
   double aintegral;
-  aintegral = (2.*pi)*1./(16.*pow(pi, 2)*pow(x1*x2*_s, 2)) * amat2
+  aintegral = (2.*pi)*1./(16.*pow(pi, 2)*pow(x1*x2*fS, 2)) * amat2
             * f1/pi*f2/pi*(1./4.)*units
             * 0.5*4./(4.*pi);
 

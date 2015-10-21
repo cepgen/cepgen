@@ -213,14 +213,14 @@ GamPomVMLL::GenGam()
   const unsigned int n = 10000;
 
   if (_gengam_first) {
-    //_s = 4.*fEvent->GetOneByRole(1)->pz*fEvent->GetOneByRole(2)->pz; //FIXME FIXME FIXME
+    //fS = 4.*fEvent->GetOneByRole(1)->pz*fEvent->GetOneByRole(2)->pz; //FIXME FIXME FIXME
     _pz1 = fabs(fEvent->GetOneByRole(1)->Pz()); //FIXME absolute value ???
     _pz2 = fabs(fEvent->GetOneByRole(2)->Pz());
     _e1 = fEvent->GetOneByRole(1)->E();
     _e2 = fEvent->GetOneByRole(2)->E();
-    _s = fEvent->GetOneByRole(1)->M2()+fEvent->GetOneByRole(2)->M2()+2*_e1*_e2-2*_pz1*_pz2;
-    _ecm = std::sqrt(_s);
-    _wmax = std::sqrt(_s+fEvent->GetOneByRole(1)->M2()+fEvent->GetOneByRole(2)->M2());
+    fS = fEvent->GetOneByRole(1)->M2()+fEvent->GetOneByRole(2)->M2()+2*_e1*_e2-2*_pz1*_pz2;
+    fSqS = std::sqrt(fS);
+    _wmax = std::sqrt(fS+fEvent->GetOneByRole(1)->M2()+fEvent->GetOneByRole(2)->M2());
 
     this->GDIBeg();
 
@@ -419,7 +419,7 @@ GamPomVMLL::GenMXT(double* wght)
       //std::cout << "a-> " << _b0 << " " << _alpha1 << " " << _wmin << " " << _wb0 << std::endl;
     }
     else if ((ifragp==1 or ifragp==-1 or ifragp==2) and ifragv!=(int)0) {
-      _genmxt_bmin = _b0+4.*_alpha1*log(4.*std::pow(_amxb0, 2)/(_wb0*_ecm));
+      _genmxt_bmin = _b0+4.*_alpha1*log(4.*std::pow(_amxb0, 2)/(_wb0*fSqS));
       //std::cout << "b" << std::endl;
     }
     else {
@@ -442,7 +442,7 @@ GamPomVMLL::GenMXT(double* wght)
     case 1:
     case -1:
     case 2:
-      _genmxt_dmxp = PXMass(_dmp+deminp, _ecm);
+      _genmxt_dmxp = PXMass(_dmp+deminp, fSqS);
       break;
     default:
       _genmxt_dmxp = RanBW(_dmnst, _dwnst, _dmp+deminp, _dmnst+2.*_dwnst);
@@ -450,7 +450,7 @@ GamPomVMLL::GenMXT(double* wght)
   }
   
   if (ifragv!=(int)0) {
-    _genmxt_dmxv = VXMass(amassv, _ecm);
+    _genmxt_dmxv = VXMass(amassv, fSqS);
   }
   else {
     dmmin = _dmvm-3.*_dwvm;
@@ -490,7 +490,7 @@ GamPomVMLL::GenMXT(double* wght)
   
   if (_genmxt_b<.5) _genmxt_b = .5;
   //std::cout << "before genert" << std::endl;
-  _gengam_t = GenerT(0., _s, _genmxt_b, 1.*_anexp);
+  _gengam_t = GenerT(0., fS, _genmxt_b, 1.*_anexp);
   //CALL GENERT (T, 0.0D0, S, B, 1D0*ANEXP)
 
   // Calculate actual minimal and maximal t for the generated masses
