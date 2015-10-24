@@ -24,9 +24,9 @@ LIB_FILES  = $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES)) \
 	     $(patsubst hadronisers/%.cpp,obj/%.o,$(HAD_FILES)) \
 	     $(patsubst external/%.f,obj/%.fo,$(EXTERNALSRC)) 
 ############################################
-CC = g++
-#CC = clang++
-CF = gfortran
+CC = @g++
+#CC = @clang++
+CF = @gfortran
 RM = rm -f
 ############################################
 
@@ -44,24 +44,31 @@ all: $(EXEC)
 
 $(EXEC): main.o $(LIB_FILES)
 	$(CC) -g -o $@ $^ $(LDFLAGS)
+	@echo "Linking $<..."
 
 diffvm: diffvm.o $(LIB_FILES)
 	$(CC) -g -o $@ $^ $(LDFLAGS)
+	@echo "Linking $<..."
 
 pptoll: cpptoll.o $(LIB_FILES)
 	$(CC) -g -o $@ $^ $(LDFLAGS)
+	@echo "Linking $<..."
 
 obj/%.o: %.cpp %.h
 	$(CC) -c $(CFLAGS) $< -o $@
+	@echo "Building $<..."
 
 obj/%.fo: external/%.f
 	$(CF) -c $(FFLAGS) $< -o $@
+	@echo "Building (F77) $<..."
 
 obj/%.oxx: %.cxx
 	$(CC) -c $(CFLAGS) -I$(RHEAD) $(RFLAGS) $< -o $@
+	@echo "Building (ROOT) $<..."
 
 plots/%.oxx: plots/%.cxx
 	$(CC) -c $(CFLAGS) -I$(RHEAD) $(RFLAGS) $< -o $@
+	@echo "Building (ROOT) $<..."
 
 clean:
 	$(RM) obj/*.o $(EXEC) test
@@ -72,12 +79,15 @@ doc: $(CPP_FILES) $(HPP_FILES) Doxyfile
 
 xsect: utils/xsect.o $(LIB_FILES)
 	$(CC) -o $@ $^ $(LDFLAGS)
+	@echo "Linking $<..."
 
 probe: utils/probe.o $(LIB_FILES)
 	$(CC) -o $@ $^ $(LDFLAGS)
+	@echo "Linking $<..."
 
 intest: utils/inelasticparticle.o $(LIB_FILES)
 	$(CC) -o $@ $^ $(LDFLAGS) -I$(PYTHIA8SRC)/include/
+	@echo "Linking $<..."
 
 plotter: plots/main.oxx $(LIB_FILES)
 	$(CC) -o $@ $^ $(LDFLAGS) $(RLIBS)

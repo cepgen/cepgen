@@ -45,17 +45,8 @@ void
 MCGen::BuildVegas()
 {
   if (Logger::GetInstance()->Level>=Logger::Debug) {
-    std::string topo;
-    switch (parameters->process_mode) {
-      case GenericProcess::ElasticElastic:
-        topo = "elastic proton/proton"; break;
-      case GenericProcess::ElasticInelastic:
-      case GenericProcess::InelasticElastic:
-        topo = "single-dissociative proton"; break;
-      case GenericProcess::InelasticInelastic:
-        topo = "double-dissociative protons"; break;
-    }
-    Debug(Form("Considered topology: %s case", topo.c_str()));
+    std::ostringstream topo; topo << parameters->process_mode;
+    Debug(Form("Considered topology: %s case", topo.str().c_str()));
   }
   
   fVegas = new Vegas(GetNdim(), f, parameters);
@@ -201,8 +192,7 @@ double f(double* x_, size_t ndim_, void* params_)
   // Check that everything is there
   if (!p->process->IsKinematicsDefined()) return 0.;
   
-  try { ff = p->process->ComputeWeight(); } catch (Exception& e) { e.Dump(); }
-  
+  ff = p->process->ComputeWeight();
   if (ff<0.) return 0.;
   
   if (p->store) { // MC events generation

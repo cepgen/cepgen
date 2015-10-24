@@ -1,9 +1,9 @@
 #include "GenericProcess.h"
 
 GenericProcess::GenericProcess(std::string name_) :
-  fX(0), fNumDimensions(0), fIsPointSet(false),
+  fX(0), fNumDimensions(0), fEvent(new Event), fIsPointSet(false),
   fIsInStateSet(false), fIsOutStateSet(false), fIsKinematicSet(false),
-  fEvent(new Event), fName(name_)
+  fName(name_)
 {}
 
 GenericProcess::~GenericProcess()
