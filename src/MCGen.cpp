@@ -81,7 +81,7 @@ MCGen::GenerateOneEvent()
   }
 
   last_event = this->parameters->last_event;
-  return (Event*)this->last_event;
+  return static_cast<Event*>(last_event);
 }
 
 void
@@ -136,7 +136,7 @@ double f(double* x_, size_t ndim_, void* params_)
                             "  remnant mode: %d",
                             p->in1p, p->in2p, p->remnant_mode));
   
-  kin.kinematics = p->process_mode;
+  kin.kinematics = static_cast<unsigned int>(p->process_mode);
   kin.q2min = p->minq2;
   kin.q2max = p->maxq2;
   kin.mode = p->mcut;
@@ -170,7 +170,7 @@ double f(double* x_, size_t ndim_, void* params_)
   p->process->SetOutgoingParticles(7, p->pair);
 
   // Then add outgoing protons or remnants
-  switch (kin.kinematics) {
+  switch (p->process_mode) {
     case GenericProcess::ElasticElastic:
       p->process->SetOutgoingParticles(3, Particle::Proton, 1); // First outgoing proton
       p->process->SetOutgoingParticles(5, Particle::Proton, 2); // Second outgoing proton
@@ -191,7 +191,8 @@ double f(double* x_, size_t ndim_, void* params_)
 
   // Check that everything is there
   if (!p->process->IsKinematicsDefined()) return 0.;
-  
+
+  p->process->BeforeComputeWeight();
   ff = p->process->ComputeWeight();
   if (ff<0.) return 0.;
   

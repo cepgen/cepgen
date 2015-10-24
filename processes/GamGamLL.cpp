@@ -94,55 +94,6 @@ GamGamLL::SetOutgoingParticles(int part_, Particle::ParticleCode pdgId_, int)
   }
 }
 
-void
-GamGamLL::SetIncomingParticles(Particle ip1_, Particle ip2_)
-{
-  Particle *p1, *p2;
-  double k, *p31, *p32;
-  int role1, role2;
-
-  role1 = (ip1_.Pz()>0.) ? 1:2;
-  role2 = (ip2_.Pz()>0.) ? 1:2;
-  if (role1==role2) return;
-  
-  ip1_.role = role1;
-  ip2_.role = role2;
-
-  k = 0.;
-  p31 = ip1_.P4();
-  p32 = ip2_.P4();
-  for (int i=0; i<3; i++) k += p31[i]*p32[i];
-  fS = ip1_.M2()+ip2_.M2()+2.*(ip1_.E()*ip2_.E()-k);
-  fSqS = sqrt(fS);
-
-  fEvent->AddParticle(ip1_);
-  fEvent->AddParticle(ip2_);
-
-  p1 = fEvent->GetOneByRole(1);
-  p2 = fEvent->GetOneByRole(2);
-
-  _ep1 = p1->E();
-  _mp1 = p1->M();
-  _w1 = p1->M2();
-  _pp1 = p1->P();
-  _pdg1 = p1->pdgId;
-  setp1 = true;
-
-  _ep2 = p2->E();
-  _mp2 = p2->M();
-  _w2 = p2->M2();
-  _pp2 = p2->P();
-  _pdg2 = p2->pdgId;
-
-  _etot = p1->E()+p2->E();
-  _ptot = std::sqrt(std::pow(p1->Px()+p2->Px(), 2)
-                   +std::pow(p1->Py()+p2->Py(), 2)
-                   +std::pow(p1->Pz()+p2->Pz(), 2));
-
-  fIsInStateSet = p1->Valid() and p2->Valid();
-  fIsKinematicSet = fIsInStateSet && fIsOutStateSet;
-}
-
 bool
 GamGamLL::Pickin()
 {
@@ -623,6 +574,33 @@ GamGamLL::ComputeMX(double x_, double outmass_, double lepmass_, double *dw_)
 
   *dw_ = sqrt(dmx2);
   return sqrt(mx2);
+}
+
+void
+GamGamLL::BeforeComputeWeight()
+{
+  Particle *p1 = fEvent->GetOneByRole(1), *p2 = fEvent->GetOneByRole(2);
+
+  _ep1 = p1->E();
+  _mp1 = p1->M();
+  _w1 = p1->M2();
+  _pp1 = p1->P();
+  _pdg1 = p1->pdgId;
+  setp1 = true;
+
+  _ep2 = p2->E();
+  _mp2 = p2->M();
+  _w2 = p2->M2();
+  _pp2 = p2->P();
+  _pdg2 = p2->pdgId;
+
+  _etot = p1->E()+p2->E();
+  _ptot = std::sqrt(std::pow(p1->Px()+p2->Px(), 2)
+                   +std::pow(p1->Py()+p2->Py(), 2)
+                   +std::pow(p1->Pz()+p2->Pz(), 2));
+
+  fIsInStateSet = p1->Valid() and p2->Valid();
+  fIsKinematicSet = fIsInStateSet && fIsOutStateSet;
 }
 
 double

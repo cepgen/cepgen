@@ -54,6 +54,7 @@ class GamGamLL : public GenericProcess
    */
   GamGamLL(int nOpt_=0);
   //~GamGamLL();
+  void BeforeComputeWeight();
   /**
    * Computes the cross-section for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
    * process with the given kinematics
@@ -63,7 +64,6 @@ class GamGamLL : public GenericProcess
    */
   double ComputeWeight();
   int GetNdim(ProcessMode) const;
-  void SetIncomingParticles(Particle, Particle);
   void SetOutgoingParticles(int, Particle::ParticleCode, int);
   void FillKinematics(bool);
   void SetKinematics(Kinematics);

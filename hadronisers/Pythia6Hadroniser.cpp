@@ -198,7 +198,7 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
   pp = ev_->GetParticles();
   for (p=pp.begin(); p!=pp.end(); p++) {
     if ((*p)->status==-2) { // One proton to be fragmented
-      ranudq = (double)rand()/RAND_MAX;
+      ranudq = drand();
       if (ranudq<1./9.) {
         singlet_id = Particle::dQuark;
         doublet_id = Particle::uu1Diquark;
@@ -229,9 +229,7 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
 
       Lorenb((*p)->M(), (*p)->P4(), pmxda, partpb);
 
-      if (!(partpb[0]<0) and !(partpb[0]>0)) {
-        return false;
-      }
+      if (!(partpb[0]<0) and !(partpb[0]>0)) return false;
 
       Particle singlet((*p)->role, singlet_id);
       singlet.status = 3;
@@ -265,8 +263,8 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
         Debug("Quark/diquark content succesfully added to the event!");
       }
       else { // Quark/diquark content already present in the event
-	      std::vector<int> daugh;
-	      std::vector<int>::iterator did;
+        std::vector<int> daugh;
+        std::vector<int>::iterator did;
 
         Debug(Form("Quark/diquark content already present in the event!\n\tRole of these particles: %d", (*p)->role));
         

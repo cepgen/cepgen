@@ -35,6 +35,7 @@ class GenericProcess
   
   GenericProcess(std::string name_="<invalid process>");
   virtual ~GenericProcess();
+  inline virtual void BeforeComputeWeight() {;}
   /**
    * @brief Returns the weight for this point in the phase-space
    */
@@ -48,7 +49,7 @@ class GenericProcess
    * @return A boolean stating whether or not the incoming kinematics is
    * properly set for this event
    */
-  inline virtual void SetIncomingParticles(Particle ip1_,Particle ip2_) { 
+  inline void SetIncomingParticles(Particle ip1_,Particle ip2_) { 
     double k = 0., *p1 = ip1_.P4(), *p2 = ip2_.P4();
     ip1_.role=(ip1_.Pz()>0.)?1:2; fEvent->AddParticle(ip1_);
     ip2_.role=(ip2_.Pz()>0.)?1:2; fEvent->AddParticle(ip2_);
