@@ -6,6 +6,7 @@
 #include <cmath>
 #include <string>
 #include <set>
+#include <map>
 #include <vector>
 #include <algorithm>
 
@@ -21,6 +22,7 @@ typedef std::set<int> ParticlesIds;
 class Particle {
   public:
     enum ParticleCode {
+      invalidParticle = 0,
       dQuark = 1,
       uQuark = 2,
       Electron = 11,
@@ -49,13 +51,13 @@ class Particle {
     /**
      * Gets the mass in GeV/c**2 of a particle given its PDG identifier
      * @brief Gets the mass of a particle
-     * @param pdgId_ PDG ID of the particle
+     * @param pdgId_ ParticleCode (PDG ID)
      * @return Mass of the particle in \f$\text{GeV}/c^2\f$
      */
     static double GetMassFromPDGId(Particle::ParticleCode pdgId_);
     /**
      * Gets the total decay width for one particle to be decayed
-     * @param[in] pdgId_ PDG ID of the particle
+     * @param[in] ParticleCode (PDG ID)
      * @return Decay width in GeV
      */
     static double GetWidthFromPDGId(Particle::ParticleCode pdgId_);
@@ -64,7 +66,7 @@ class Particle {
     /**
      * @brief Object constructor (providing the role of the particle in the process, and its Particle Data Group identifier)
      */
-    Particle(int role_,ParticleCode pdgId_=(ParticleCode)0);
+    Particle(int role_,ParticleCode pdgId_=Particle::invalidParticle);
     ~Particle();
     /**
      * @brief Copies all the relevant quantities from one Particle object to another
@@ -108,12 +110,6 @@ class Particle {
      */
     int id;
     /**
-     * Unique identifier for a particle type. From @cite Beringer:1900zz :
-     * _The Monte Carlo particle numbering scheme [...] is intended to facilitate interfacing between event generators, detector simulators, and analysis packages used in particle physics._
-     * @brief Particle Data Group integer identifier
-     */
-    ParticleCode pdgId;
-    /**
      * @brief The particle's electric charge (given as a float number, for the quarks and bound states)
      */
     float charge;
@@ -125,6 +121,11 @@ class Particle {
      * @brief Role in the considered process
      */
     int role;
+    inline void SetPDGId(ParticleCode pdg) {
+      fPDGid = pdg;
+      charge = pdg/abs(pdg);
+    }
+    inline ParticleCode GetPDGId() const { return fPDGid; }
     /**
      * Particle's helicity
      * @fixme Float??
@@ -332,6 +333,12 @@ class Particle {
      */
     ParticlesIds fDaughters;
     /**
+     * Unique identifier for a particle type. From @cite Beringer:1900zz :
+     * _The Monte Carlo particle numbering scheme [...] is intended to facilitate interfacing between event generators, detector simulators, and analysis packages used in particle physics._
+     * @brief Particle Data Group integer identifier
+     */
+    ParticleCode fPDGid;
+    /**
      * @brief Is the particle a primary particle ?
      */
     bool fIsPrimary;
@@ -346,5 +353,9 @@ class Particle {
 
 inline bool compareParticle(Particle a, Particle b) { return a.id<b.id; }
 inline bool compareParticlePtrs(Particle* a, Particle* b) { return a->id<b->id; }
+
+typedef std::vector<Particle> Particles;
+typedef std::vector<Particle*> ParticlesRef;
+typedef std::multimap<int,Particle> ParticlesMap;
 
 #endif

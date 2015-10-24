@@ -74,7 +74,7 @@ Event::GetRoles() const
 int
 Event::AddParticle(Particle part_, bool replace_)
 {
-  DebugInsideLoop(Form("Particle with PDGid = %d has role %d", part_.pdgId, part_.role));
+  DebugInsideLoop(Form("Particle with PDGid = %d has role %d", part_.GetPDGId(), part_.role));
   
   if (part_.role<=0) {
     return -1;
@@ -117,7 +117,7 @@ Event::Store(std::ofstream *of_, double weight_)
        << std::setw(8) << l1->Pt() << "\t"
        << std::setw(8) << l1->M() << "\t"
        << std::setw(8) << l1->Eta() << "\t"
-       << std::setw(8) << l1->pdgId << "\t"
+       << std::setw(8) << l1->GetPDGId() << "\t"
        << std::setw(8) << weight_
        << std::endl;
   *of_ << std::setw(8) << l2->E() << "\t"
@@ -127,7 +127,7 @@ Event::Store(std::ofstream *of_, double weight_)
        << std::setw(8) << l2->Pt() << "\t"
        << std::setw(8) << l2->M() << "\t"
        << std::setw(8) << l2->Eta() << "\t"
-       << std::setw(8) << l2->pdgId << "\t"
+       << std::setw(8) << l2->GetPDGId() << "\t"
        << std::setw(8) << weight_
        << std::endl;
 }
@@ -183,9 +183,9 @@ Event::Dump(bool stable_)
   particles = GetParticles();
   for (p=particles.begin(); p!=particles.end(); p++) {
     if (stable_ and (*p)->status!=1) continue;
-    os << Form("\n %2d\t%6d", (*p)->id, (*p)->pdgId);
+    os << Form("\n %2d\t%6d", (*p)->id, (*p)->GetPDGId());
     if ((*p)->name!="") os << Form("%6s", (*p)->name.c_str());
-    //else                os << std::setw(6) << Particle::ParticleCode(abs((*p)->pdgId));
+    //else                os << std::setw(6) << Particle::ParticleCode(abs((*p)->GetPDGId()));
     else                os << "\t";
     os << "\t";
     if ((*p)->charge!=999.) os << Form("%6.2f\t", (*p)->charge);

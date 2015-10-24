@@ -75,9 +75,9 @@ GamPomVMLL::GDIBeg()
   }
 
   // Check that beam particle is proton or antiproton
-  if  (abs((int)fEvent->GetOneByRole(1)->pdgId)!=Particle::Proton
-   and abs((int)fEvent->GetOneByRole(2)->pdgId)!=Particle::Proton) {
-    throw Exception(__PRETTY_FUNCTION__, Form("Beam proton must be proton or antiproton. IBEAMP = %d / %d", fEvent->GetOneByRole(1)->pdgId, fEvent->GetOneByRole(2)->pdgId), Fatal);
+  if  (abs((int)fEvent->GetOneByRole(1)->GetPDGId())!=Particle::Proton
+   and abs((int)fEvent->GetOneByRole(2)->GetPDGId())!=Particle::Proton) {
+    throw Exception(__PRETTY_FUNCTION__, Form("Beam proton must be proton or antiproton. IBEAMP = %d / %d", fEvent->GetOneByRole(1)->GetPDGId(), fEvent->GetOneByRole(2)->GetPDGId()), Fatal);
   }
 
   // If necessary, initialize LAMBDA
@@ -286,7 +286,7 @@ GamPomVMLL::OneEvent()
   double wt;
 
   // Generate photons
-  Particle pgam(41, Particle::Photon), pesc(5, fEvent->GetOneByRole(IBE)->pdgId);
+  Particle pgam(41, Particle::Photon), pesc(5, fEvent->GetOneByRole(IBE)->GetPDGId());
   //std::cout << "-> " << _igammd << std::endl;
 
   if (_igammd<0) { // Fixed photon energy
@@ -913,21 +913,21 @@ GamPomVMLL::GenDif()
   fEvent->AddParticle(pom); // Pomeron
 
   // Diffractive proton state
-  Particle dps(5, fEvent->GetOneByRole(2)->pdgId);
+  Particle dps(5, fEvent->GetOneByRole(2)->GetPDGId());
   dps.status = 1;
   dps.SetMother(fEvent->GetOneByRole(2));
   if (ifragp==1 or ifragp==-1 or ifragp==2) { // proton-dissociative case
-    if (_genmxt_dmxp<1.48) dps.pdgId = (Particle::ParticleCode)12212;
-    else if (_genmxt_dmxp<1.6) dps.pdgId = (Particle::ParticleCode)2124;
+    if (_genmxt_dmxp<1.48) dps.SetPDGId((Particle::ParticleCode)12212);
+    else if (_genmxt_dmxp<1.6) dps.SetPDGId((Particle::ParticleCode)2124);
     else if (_genmxt_dmxp<1.9) {
       r = drand();
-      if (r<.5) dps.pdgId = (Particle::ParticleCode)12216;
-      else if (r<.83) dps.pdgId = (Particle::ParticleCode)22124;
-      else dps.pdgId = (Particle::ParticleCode)42212;
+      if (r<.5) dps.SetPDGId((Particle::ParticleCode)12216);
+      else if (r<.83) dps.SetPDGId((Particle::ParticleCode)22124);
+      else dps.SetPDGId((Particle::ParticleCode)42212);
     }
-    else dps.pdgId = (Particle::ParticleCode)2210;
+    else dps.SetPDGId((Particle::ParticleCode)2210);
   }
-  else if (ifragp!=0) dps.pdgId = (Particle::ParticleCode)abs(ifragp);
+  else if (ifragp!=0) dps.SetPDGId((Particle::ParticleCode)abs(ifragp));
   dps.P(pcmpx[0], pcmpx[1], pcmpx[2], pcmpx[3]);
   std::cout << pcmpx[2] << std::endl;
   std::cout << "------> " << std::pow(pcmpx[3], 2)-std::pow(pcmpx[0], 2)-std::pow(pcmpx[1], 2)-std::pow(pcmpx[2], 2) << std::endl;
@@ -942,8 +942,8 @@ GamPomVMLL::GenDif()
   dms.SetMother(fEvent->GetOneByRole(5));
   //FIXME dual mothers!
   if (ifragv!=0) {
-    if (itypvm==22) dms.pdgId = Particle::Reggeon;
-    else dms.pdgId = static_cast<Particle::ParticleCode>(10*((itypvm/10)%100));
+    if (itypvm==22) dms.SetPDGId(Particle::Reggeon);
+    else dms.SetPDGId(static_cast<Particle::ParticleCode>(10*((itypvm/10)%100)));
   }
   dms.status = 1;
   dms.P(pcmvmx[0], pcmvmx[1], pcmvmx[2], pcmvmx[3]);

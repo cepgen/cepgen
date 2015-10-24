@@ -16,6 +16,8 @@
   if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) { Exception(__PRETTY_FUNCTION__, m, Debugging).Dump(Logger::GetInstance()->OutputStream); }
 #define Warning(m) \
   if (Logger::GetInstance()->Level>=Logger::Warning)  { Exception(__PRETTY_FUNCTION__, m, JustWarning).Dump(Logger::GetInstance()->OutputStream); }
+#define Error(m) \
+  if (Logger::GetInstance()->Level>=Logger::Error)  { Exception(__PRETTY_FUNCTION__, m, Error).Dump(Logger::GetInstance()->OutputStream); }
 
 /**
  * \brief Enumeration of exception severities
@@ -28,6 +30,7 @@ typedef enum
   Info,
   Debugging,
   JustWarning,
+  Error,
   Fatal
 } ExceptionType;
 
@@ -67,6 +70,7 @@ class Exception
         case JustWarning: return "\033[34;1mJustWarning\033[0m";
         case Info: return "\033[33;1mInfo\033[0m";
         case Debugging: return "\033[32;1mDebug\033[0m";
+        case Error: return "\033[31;1mError\033[0m";
         case Fatal: return "\033[31;1mFatal\033[0m";
         case Undefined: default: return "\33[7;1mUndefined\033[0m";
       }

@@ -82,7 +82,7 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
       else status = (*p)->status;
       
       pyjets_.k[0][np] = status;
-      pyjets_.k[1][np] = (int)((*p)->pdgId);
+      pyjets_.k[1][np] = (int)((*p)->GetPDGId());
       
       //if ((*p)->GetMother()!=-1) pyjets_.k[2][np] = (*p)->GetMother()+1; // mother
       if ((*p)->GetMothersIds().size()>0) pyjets_.k[2][np] = *((*p)->GetMothersIds().begin())+1; // mother
@@ -157,18 +157,18 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
 
     Particle pa;
     pa.id = p;
-    pa.pdgId = static_cast<Particle::ParticleCode>(pyjets_.k[1][p]);
+    pa.SetPDGId(static_cast<Particle::ParticleCode>(pyjets_.k[1][p]));
     if (ev_->GetById(pyjets_.k[2][p]-1)!=(Particle*)NULL) {
       pa.role = ev_->GetById(pyjets_.k[2][p]-1)->role; // Child particle inherits its mother's role
     }
     pa.status = pyjets_.k[0][p];
     pa.P(pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p]);
     pa.M(pyjets_.p[4][p]);
-    pa.name = this->pyname(pa.pdgId);
+    pa.name = this->pyname(pa.GetPDGId());
     pa.charge = (float)(this->pyp(p+1,6));
 
     if (pyjets_.k[2][p]!=0) {
-      dbg << Form("\n\t%2d (pdgId=%4d) has mother %2d (pdgId=%4d)", pa.id, pa.pdgId, pyjets_.k[2][p], pyjets_.k[1][pyjets_.k[2][p]-1]);
+      dbg << Form("\n\t%2d (pdgId=%4d) has mother %2d (pdgId=%4d)", pa.id, pa.GetPDGId(), pyjets_.k[2][p], pyjets_.k[1][pyjets_.k[2][p]-1]);
       pa.SetMother(ev_->GetById(pyjets_.k[2][p]-1));
     }
 
@@ -270,7 +270,8 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
         
         daugh = (*p)->GetDaughters();
         for (did=daugh.begin(); did!=daugh.end(); did++) {
-          if (ev_->GetById(*did)->pdgId==1 or ev_->GetById(*did)->pdgId==2) { // Quark
+          if (ev_->GetById(*did)->GetPDGId()==Particle::uQuark
+	   or ev_->GetById(*did)->GetPDGId()==Particle::dQuark) { // Quark
             singlet.SetMother(ev_->GetById((*p)->id));
             *(ev_->GetById(*did)) = singlet;
             Debug("Singlet replaced");

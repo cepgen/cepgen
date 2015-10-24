@@ -88,7 +88,7 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
       else status = (*p)->status;
       
       lujets_.k[0][np] = status;
-      lujets_.k[1][np] = static_cast<Particle::ParticleCode>((*p)->pdgId);
+      lujets_.k[1][np] = static_cast<Particle::ParticleCode>((*p)->GetPDGId());
       
       if ((*p)->GetMothersIds().size()>0) lujets_.k[2][np] = *((*p)->GetMothersIds().begin())+1; // mother
       else lujets_.k[2][np] = 0; // no mother registered
@@ -162,18 +162,18 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
 
     Particle pa;
     pa.id = p;
-    pa.pdgId = static_cast<Particle::ParticleCode>(lujets_.k[1][p]);
+    pa.SetPDGId(static_cast<Particle::ParticleCode>(lujets_.k[1][p]));
     if (ev_->GetById(lujets_.k[2][p]-1)!=(Particle*)NULL) {
       pa.role = ev_->GetById(lujets_.k[2][p]-1)->role; // Child particle inherits its mother's role
     }
     pa.status = lujets_.k[0][p];
     pa.P(lujets_.p[0][p], lujets_.p[1][p], lujets_.p[2][p], lujets_.p[3][p]);
     pa.M(lujets_.p[4][p]);
-    pa.name = this->luname(pa.pdgId);
-    pa.charge = this->luchge(pa.pdgId);
+    pa.name = this->luname(pa.GetPDGId());
+    pa.charge = this->luchge(pa.GetPDGId());
 
     if (lujets_.k[2][p]!=0) {
-      dbg << Form("\n\t%2d (pdgId=%4d) has mother %2d (pdgId=%4d)", pa.id, pa.pdgId, lujets_.k[2][p], lujets_.k[1][lujets_.k[2][p]-1]);
+      dbg << Form("\n\t%2d (pdgId=%4d) has mother %2d (pdgId=%4d)", pa.id, pa.GetPDGId(), lujets_.k[2][p], lujets_.k[1][lujets_.k[2][p]-1]);
       pa.SetMother(ev_->GetById(lujets_.k[2][p]-1));
     }
 
@@ -286,7 +286,8 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
         
         daugh = (*p)->GetDaughters();
         for (did=daugh.begin(); did!=daugh.end(); did++) {
-          if (ev_->GetById(*did)->pdgId==1 or ev_->GetById(*did)->pdgId==2) { // Quark
+          if (ev_->GetById(*did)->GetPDGId()==Particle::uQuark
+           or ev_->GetById(*did)->GetPDGId()==Particle::dQuark) { // Quark
             singlet.SetMother(ev_->GetById((*p)->id));
             *(ev_->GetById(*did)) = singlet;
             Debug("Singlet replaced");

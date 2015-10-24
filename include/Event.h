@@ -1,7 +1,6 @@
 #ifndef Event_h
 #define Event_h
 
-#include <map>
 #include <vector>
 #include <string>
 #include <fstream>
@@ -9,13 +8,6 @@
 #include <algorithm>
 
 #include "Particle.h"
-
-/**
- * @brief Convention to simplify the user interface while fetching a list of particles in the event
- */
-typedef std::vector<Particle> Particles;
-typedef std::vector<Particle*> ParticlesRef;
-typedef std::multimap<int,Particle> ParticlesMap;
 
 /**
  * Class containing all the information on the in- and outgoing particles' kinematics

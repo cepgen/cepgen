@@ -366,7 +366,7 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
 
   //std::cout << "=> " << eesc << ", " << el_->M2() << std::endl;
   pesc = -sqrt(std::pow(eesc, 2)-el_->M2());
-  Particle outele(2, op[0].pdgId);
+  Particle outele(2, op[0].GetPDGId());
   outele.P(
     pesc*sthe*cos(phi),
     pesc*sthe*sin(phi),
@@ -382,7 +382,7 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
 
   Particle outgam = op[0]-op[1];
   outgam.role = 3;
-  outgam.pdgId = Particle::Photon;
+  outgam.SetPDGId(Particle::Photon);
   outgam.helicity = Heli(lf);
   outgam.id = op.size();
   outgam.SetMother(&(op[0]));

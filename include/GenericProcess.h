@@ -30,45 +30,35 @@ class GenericProcess
     FioreSea = 102,
     Fiore = 103
   };
+  enum ParticleRole {
+    IncomingBeam1 = 1,
+    IncomingBeam2 = 2,
+    Parton1 = 41,
+    Parton2 = 42,
+    CentralSystem = 4,
+    OutgoingBeam1 = 3,
+    OutgoingBeam2 = 5,
+    CentralParticle1 = 6,
+    CentralParticle2 = 7
+  };
   friend std::ostream& operator<<(std::ostream& os, const GenericProcess::ProcessMode& pm);
   friend std::ostream& operator<<(std::ostream& os, const GenericProcess::StructureFunctions& sf);
+
+  typedef std::map<ParticleRole,Particle::ParticleCode> ParticlesRoleMap;
+  typedef std::pair<ParticleRole,Particle::ParticleCode> ParticleWithRole;
+  typedef ParticlesRoleMap IncomingState;
+  typedef ParticlesRoleMap OutgoingState;
   
   GenericProcess(std::string name_="<invalid process>");
   virtual ~GenericProcess();
+
+  inline virtual void AddEventContent() {;}
+  void PrepareKinematics();
   inline virtual void BeforeComputeWeight() {;}
   /**
    * @brief Returns the weight for this point in the phase-space
    */
   inline virtual double ComputeWeight() { throw Exception(__PRETTY_FUNCTION__, "Calling ComputeWeight on an invalid process!", Fatal); }
-  /**
-   * Specifies the incoming particles' kinematics as well as their properties
-   * using two Particle objects.
-   * @brief Sets the momentum and PDG id for the incoming particles
-   * @param[in] ip1_ Information on the first incoming particle
-   * @param[in] ip2_ Information on the second incoming particle
-   * @return A boolean stating whether or not the incoming kinematics is
-   * properly set for this event
-   */
-  inline void SetIncomingParticles(Particle ip1_,Particle ip2_) { 
-    double k = 0., *p1 = ip1_.P4(), *p2 = ip2_.P4();
-    ip1_.role=(ip1_.Pz()>0.)?1:2; fEvent->AddParticle(ip1_);
-    ip2_.role=(ip2_.Pz()>0.)?1:2; fEvent->AddParticle(ip2_);
-    for (int i=0; i<3; i++) k += p1[i]*p2[i];
-    fS = ip1_.M2()+ip2_.M2()+2.*(ip1_.E()*ip2_.E()-k);
-    fSqS = sqrt(fS);
-  }
-  /**
-   * @brief Sets the PDG id for the outgoing particles
-   * @param[in] part_ Role of the particle in the process
-   * @param[in] pdgId_ Particle ID according to the PDG convention
-   * @param[in] mothRole_ Integer role of the outgoing particle's mother
-   * @return A boolean stating whether or not the outgoing kinematics is
-   * properly set for this event
-   */
-  inline virtual void SetOutgoingParticles(int part_, Particle::ParticleCode pdgId_, int mothRole_=-1) {
-    fEvent->AddParticle(Particle(part_, pdgId_));
-    if (mothRole_!=-1) fEvent->GetOneByRole(part_)->SetMother(fEvent->GetOneByRole(mothRole_));
-  };
   /**
    * Fills the private Event object with all the Particle object contained
    * in this event.
@@ -140,11 +130,43 @@ class GenericProcess
    */
   inline std::string GetName() { return fName; }
  protected:
+  void SetEventContent(IncomingState is, OutgoingState os);
+  /**
+   * Specifies the incoming particles' kinematics as well as their properties
+   * using two Particle objects.
+   * @brief Sets the momentum and PDG id for the incoming particles
+   * @param[in] ip1_ Information on the first incoming particle
+   * @param[in] ip2_ Information on the second incoming particle
+   * @return A boolean stating whether or not the incoming kinematics is
+   * properly set for this event
+   */
+  inline void SetIncomingParticles(Particle ip1_,Particle ip2_) { 
+    double k = 0., *p1 = ip1_.P4(), *p2 = ip2_.P4();
+    ip1_.role=(ip1_.Pz()>0.)?1:2; fEvent->AddParticle(ip1_);
+    ip2_.role=(ip2_.Pz()>0.)?1:2; fEvent->AddParticle(ip2_);
+    for (int i=0; i<3; i++) k += p1[i]*p2[i];
+    fS = ip1_.M2()+ip2_.M2()+2.*(ip1_.E()*ip2_.E()-k);
+    fSqS = sqrt(fS);
+  }
+  /**
+   * @brief Sets the PDG id for the outgoing particles
+   * @param[in] part_ Role of the particle in the process
+   * @param[in] pdgId_ Particle ID according to the PDG convention
+   * @param[in] mothRole_ Integer role of the outgoing particle's mother
+   * @return A boolean stating whether or not the outgoing kinematics is
+   * properly set for this event
+   */
+  inline virtual void SetOutgoingParticles(int part_, Particle::ParticleCode pdgId_, int mothRole_=-1) {
+    fEvent->AddParticle(Particle(part_, pdgId_));
+    if (mothRole_!=-1) fEvent->GetOneByRole(part_)->SetMother(fEvent->GetOneByRole(mothRole_));
+  };
   /**
    * @brief Array of @a fNumDimensions components representing the point on which the
    * weight in the cross-section is computed
    */
   double* fX;
+  IncomingState fIncomingState;
+  OutgoingState fOutgoingState;
   /**
    * @brief \f$s\f$, squared centre of mass energy of the incoming particles' system, in \f$\mathrm{GeV}^2\f$
    */
@@ -186,6 +208,9 @@ class GenericProcess
    * @brief Name of the process (useful for logging and debugging)
    */
   std::string fName;
+  
+ private:
+
 };
 
 #endif

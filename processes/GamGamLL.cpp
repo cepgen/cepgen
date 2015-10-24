@@ -10,6 +10,21 @@ GamGamLL::GamGamLL(int nOpt_) : GenericProcess("pp -> p(*) (gamma gamma -> l+ l-
   _cotth1(-99999.), _cotth2(99999.)
 {}
 
+void
+GamGamLL::AddEventContent()
+{
+  IncomingState is; OutgoingState os;
+  is.insert(ParticleWithRole(IncomingBeam1, Particle::Proton));
+  os.insert(ParticleWithRole(OutgoingBeam1, Particle::Proton));
+  is.insert(ParticleWithRole(IncomingBeam2, Particle::Proton));
+  os.insert(ParticleWithRole(OutgoingBeam2, Particle::Proton));
+  is.insert(ParticleWithRole(Parton1, Particle::Photon));
+  is.insert(ParticleWithRole(Parton2, Particle::Photon));
+  os.insert(ParticleWithRole(CentralParticle1, Particle::Muon));
+  os.insert(ParticleWithRole(CentralParticle2, Particle::Muon));
+  GenericProcess::SetEventContent(is, os);
+}
+
 int
 GamGamLL::GetNdim(ProcessMode process_mode_) const
 {
@@ -17,80 +32,6 @@ GamGamLL::GetNdim(ProcessMode process_mode_) const
     case ElasticElastic: default:                 return 7;
     case ElasticInelastic: case InelasticElastic: return 8;
     case InelasticInelastic:                      return 9;
-  }
-}
-
-void
-GamGamLL::SetOutgoingParticles(int part_, Particle::ParticleCode pdgId_, int)
-{
-  double mass, outm, dm;
-
-  if (!GenericProcess::fIsPointSet) return;
-
-  mass = Particle::GetMassFromPDGId(pdgId_);
-  
-  if (pdgId_==Particle::uQuark or mass<0) {
-    switch (fCuts.kinematics) {
-      case GenericProcess::ElasticElastic: // elastic
-      default:
-        return;
-      case GenericProcess::ElasticInelastic: // single-dissociative
-      case GenericProcess::InelasticElastic:
-	// FIXME need to add the elastic-inelastic case!
-        mass = ComputeMX(x(7), fEvent->GetOneByRole(1)->M(), _ml6, &dm);
-        break;
-      case GenericProcess::InelasticInelastic: // double-dissociative
-        int ind;
-        if (part_==3)                 { ind = 7; mass = _mp2; } // First outgoing proton remnant
-        else if (part_==5 && _mp3>0.) { ind = 8; mass = _mp3; } // Second outgoing proton remnant (if first is defined)
-        else return;
-        mass = ComputeMX(x(ind), mass, _ml6, &dm);
-    }
-  }
-
-  switch(part_) {
-  case 3:
-    // First outgoing proton (or remnant)
-    _mp3 = mass;
-    _w3 = std::pow(_mp3, 2);
-    _pdg3 = pdgId_;
-    _dw31 = dm;
-    setp3 = true;
-    break;
-  case 5:
-    // Second outgoing proton (or remnant)
-    _mp5 = mass;
-    _w5 = std::pow(_mp5, 2);
-    _pdg5 = pdgId_;
-    _dw52 = dm;
-    setp5 = true;
-    break;
-  case 6:
-  case 7:
-    // First outgoing lepton
-    _ml6 = mass;
-    _w6 = std::pow(_ml6, 2);
-    _pdg6 = pdgId_;
-    // Second outgoing lepton
-    _ml7 = mass;
-    _w7 = std::pow(_ml7, 2);
-    _pdg7 = pdgId_;
-    setll = true;
-    break;
-  default:
-    return;
-  }
-  fIsOutStateSet = setp3 and setp5 and setll;
-  fIsKinematicSet = fIsInStateSet and fIsOutStateSet;
-  
-  if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
-    DebugInsideLoop(Form("Particle %d has PDG id=%d", part_, pdgId_));
-    if (fIsOutStateSet) {
-      std::cout << "  --> Outgoing state is fully set" << std::endl;
-    }
-    if (fIsKinematicSet) {
-      std::cout << "  --> Kinematics is fully set" << std::endl;
-    }
   }
 }
 
@@ -579,28 +520,63 @@ GamGamLL::ComputeMX(double x_, double outmass_, double lepmass_, double *dw_)
 void
 GamGamLL::BeforeComputeWeight()
 {
+  if (!GenericProcess::fIsPointSet) return;
+  
   Particle *p1 = fEvent->GetOneByRole(1), *p2 = fEvent->GetOneByRole(2);
 
   _ep1 = p1->E();
   _mp1 = p1->M();
   _w1 = p1->M2();
   _pp1 = p1->P();
-  _pdg1 = p1->pdgId;
+  _pdg1 = p1->GetPDGId();
   setp1 = true;
 
   _ep2 = p2->E();
   _mp2 = p2->M();
   _w2 = p2->M2();
   _pp2 = p2->P();
-  _pdg2 = p2->pdgId;
+  _pdg2 = p2->GetPDGId();
 
   _etot = p1->E()+p2->E();
   _ptot = std::sqrt(std::pow(p1->Px()+p2->Px(), 2)
                    +std::pow(p1->Py()+p2->Py(), 2)
                    +std::pow(p1->Pz()+p2->Pz(), 2));
 
-  fIsInStateSet = p1->Valid() and p2->Valid();
-  fIsKinematicSet = fIsInStateSet && fIsOutStateSet;
+  double thetamin = EtaToTheta(fCuts.etamax), thetamax = EtaToTheta(fCuts.etamin);
+  _cotth1 = 1./tan(thetamax*pi/180.);
+  _cotth2 = 1./tan(thetamin*pi/180.);
+  DebugInsideLoop(Form("cot(theta1) = %f\n\tcot(theta2) = %f", _cotth1, _cotth2));
+
+  Particle* p;
+  p = fEvent->GetOneByRole(GenericProcess::CentralParticle1); _ml6 = p->M(); _w6 = p->M2();
+  p = fEvent->GetOneByRole(GenericProcess::CentralParticle2); _ml7 = p->M(); _w7 = p->M2();
+  
+  double m;
+  switch (fCuts.kinematics) {
+  case GenericProcess::ElasticElastic:
+    _w31 = _w52 = 0.;
+    break;
+  case GenericProcess::ElasticInelastic: case GenericProcess::InelasticElastic:
+    m = ComputeMX(x(7), fEvent->GetOneByRole(GenericProcess::IncomingBeam1)->M(), _ml6, &_dw31);
+    fEvent->GetOneByRole(GenericProcess::OutgoingBeam1)->M(m);
+  case GenericProcess::InelasticInelastic:
+    m = ComputeMX(x(7), fEvent->GetOneByRole(GenericProcess::IncomingBeam2)->M(), fEvent->GetOneByRole(GenericProcess::CentralParticle1)->M(), &_dw31);
+    fEvent->GetOneByRole(GenericProcess::OutgoingBeam1)->M(m);
+    m = ComputeMX(x(7), fEvent->GetOneByRole(GenericProcess::OutgoingBeam1)->M(), fEvent->GetOneByRole(GenericProcess::CentralParticle1)->M(), &_dw52);
+    fEvent->GetOneByRole(GenericProcess::OutgoingBeam2)->M(m);    
+  }
+  _mp3 = fEvent->GetOneByRole(GenericProcess::OutgoingBeam1)->M();
+  _mp5 = fEvent->GetOneByRole(GenericProcess::OutgoingBeam2)->M();
+  _w3 = std::pow(_mp3, 2);
+  _w5 = std::pow(_mp5, 2);
+  _pdg3 = fEvent->GetOneByRole(GenericProcess::OutgoingBeam1)->GetPDGId();
+  _pdg5 = fEvent->GetOneByRole(GenericProcess::OutgoingBeam2)->GetPDGId();
+  
+  if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
+    IsKinematicsDefined();
+    if (fIsOutStateSet)  std::cout << "  --> Outgoing state is fully set" << std::endl;
+    if (fIsKinematicSet) std::cout << "  --> Kinematics is fully set" << std::endl;
+  }
 }
 
 double
@@ -952,7 +928,7 @@ GamGamLL::FillKinematics(bool symmetrise_)
 {  
   double ranphi, cp, sp;
   int rany, ransign, ranz, role;
-  double plab_ip1[4], plab_ip2[4], plab_op1[4], plab_op2[4];
+  double plab_op1[4], plab_op2[4];
   double plab_ol1[4], plab_ol2[4], plab_ph1[4], plab_ph2[4];
   
   // debugging variables
@@ -972,76 +948,66 @@ GamGamLL::FillKinematics(bool symmetrise_)
   sp = sin(ranphi);
   
   // First incoming proton
-  Particle ip1(1, _pdg1);
-  plab_ip1[0] = 0.;
-  plab_ip1[1] = 0.;
-  plab_ip1[2] = _gamma*_p  +_betgam*_ep1;
-  plab_ip1[3] = _gamma*_ep1+_betgam*_p;
-  if (!ip1.P(0., 0., plab_ip1[2], plab_ip1[3])) {
-    std::cerr << "Invalid incoming proton 1" << std::endl;
-  }
-  fEvent->AddParticle(ip1, true);
+  Particle* ip1 = fEvent->GetOneByRole(1);
+  ip1->SetPDGId(_pdg1);
+  double plab_ip1[] = { 0., 0., _gamma*_p+_betgam*_ep1, _gamma*_ep1+_betgam*_p };
+  if (!ip1->P(0., 0., plab_ip1[2], plab_ip1[3])) { Error("Invalid incoming proton 1"); }
   
   // Second incoming proton
-  Particle ip2(2, _pdg2);
-  plab_ip2[0] = 0.;
-  plab_ip2[1] = 0.;
-  plab_ip2[2] = -_gamma*_p  +_betgam*_ep2;
-  plab_ip2[3] =  _gamma*_ep2-_betgam*_p;
-  if (!ip2.P(0., 0., plab_ip2[2], plab_ip2[3])) {
-    std::cerr << "Invalid incoming proton 2" << std::endl;
-  }
-  fEvent->AddParticle(ip2, true);
+  Particle* ip2 = fEvent->GetOneByRole(2);
+  ip2->SetPDGId(_pdg2);
+  double plab_ip2[] = { 0., 0., -_gamma*_p+_betgam*_ep2, _gamma*_ep2-_betgam*_p };
+  if (!ip2->P(0., 0., plab_ip2[2], plab_ip2[3])) { Error("Invalid incoming proton 2"); }
   
   // First outgoing proton
-  Particle op1(3, _pdg3);
+  Particle* op1 = fEvent->GetOneByRole(3);
+  op1->SetPDGId(_pdg3);
   plab_op1[0] = _pp3*_st3*_cp3;
   plab_op1[1] = _pp3*_st3*_sp3;
   plab_op1[2] = _gamma*_pp3*_ct3+_betgam*_ep3;
   plab_op1[3] = _gamma*_ep3     +_betgam*_pp3*_ct3;
-  if (!op1.P( plab_op1[0]*cp+rany*plab_op1[1]*sp,
-             -plab_op1[0]*sp+rany*plab_op1[1]*cp,
-              plab_op1[2],
-              plab_op1[3])) {
-    std::cerr << "Invalid outgoing proton 1" << std::endl;
+  if (!op1->P( plab_op1[0]*cp+rany*plab_op1[1]*sp,
+              -plab_op1[0]*sp+rany*plab_op1[1]*cp,
+               plab_op1[2],
+               plab_op1[3])) {
+    Error("Invalid outgoing proton 1");
   }
-  if (fCuts.kinematics>1) {
-    op1.status = -2;
+  if (fCuts.kinematics>1) { // fragmenting remnants
+    op1->status = -2;
     //std::cout << "M before : " << op1.M() << std::endl;
-    op1.M(_mp3);
+    op1->M(_mp3);
     //std::cout << "M as mp3 : " << _mp3 << std::endl;
     //std::cout << "M  after : " << op1.M() << std::endl;
   }
-  else {
-    op1.status = 1;
-    op1.M(-1); //FIXME
+  else { // stable proton
+    op1->status = 1;
+    op1->M(-1); //FIXME
   }
-  fEvent->AddParticle(op1, true);
   
   // Second outgoing proton
-  Particle op2(5, _pdg5);
+  Particle* op2 = fEvent->GetOneByRole(5);
+  op2->SetPDGId(_pdg5);
   plab_op2[0] = _pp5*_st5*_cp5;
   plab_op2[1] = _pp5*_st5*_sp5;
   plab_op2[2] = _gamma*_pp5*_ct5+_betgam*_ep5;
   plab_op2[3] = _gamma*_ep5     +_betgam*_pp5*_ct5;
-  if (!op2.P( plab_op2[0]*cp+rany*plab_op2[1]*sp,
-             -plab_op2[0]*sp+rany*plab_op2[1]*cp,
-              plab_op2[2],
-              plab_op2[3])) {
-    std::cerr << "Invalid outgoing proton 2" << std::endl;
+  if (!op2->P( plab_op2[0]*cp+rany*plab_op2[1]*sp,
+              -plab_op2[0]*sp+rany*plab_op2[1]*cp,
+               plab_op2[2],
+               plab_op2[3])) {
+    Error("Invalid outgoing proton 2");
   }
-  if (fCuts.kinematics==4) {
-    op2.status = -2;
-    op2.M(_mp5);
+  if (fCuts.kinematics==4) { // fragmenting remnants
+    op2->status = -2;
+    op2->M(_mp5);
   }
-  else {
-    op2.status = 1;
+  else { // stable proton
+    op2->status = 1;
     /*std::cout << "----> " << _pp5*_pp5-_ep5*_ep5 << ", " << _gamma << ", " << _betgam << std::endl;
     std::cout << "second proton left undecayed : m = " << op2.M() << std::endl;
     op2.Dump();*/
-    op2.M(-1); //FIXME
+    op2->M(-1); //FIXME
   }
-  fEvent->AddParticle(op2, true);
 
   // First incoming photon
   // Equivalent in LPAIR : PLAB(x, 3)
@@ -1155,12 +1121,7 @@ GamGamLL::FillKinematics(bool symmetrise_)
 void
 GamGamLL::SetKinematics(Kinematics cuts_)
 {
-  double thetamin = EtaToTheta(fCuts.etamax), thetamax = EtaToTheta(fCuts.etamin);
   fCuts = cuts_;
-  _cotth1 = 1./tan(thetamax*pi/180.);
-  _cotth2 = 1./tan(thetamin*pi/180.);
-  
-  DebugInsideLoop(Form("cot(theta1) = %f\n\tcot(theta2) = %f", _cotth1, _cotth2));
 }
 
 double

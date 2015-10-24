@@ -13,7 +13,7 @@ using namespace std;
  */
 int main(int argc, char* argv[]) {
   double xsec, err;
-  
+
   MCGen mg;
   Event ev;
   //GamPomVMLL proc;

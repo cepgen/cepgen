@@ -541,8 +541,8 @@ PPtoLL::FillKinematics(bool symmetrise_)
 
   Particle::ParticleCode lepton1, lepton2;
   int sign = (drand()>.5) ? +1 : -1;
-  lepton1 = static_cast<Particle::ParticleCode>( sign*(int)fEvent->GetOneByRole(6)->pdgId);
-  lepton2 = static_cast<Particle::ParticleCode>(-sign*(int)fEvent->GetOneByRole(6)->pdgId);
+  lepton1 = static_cast<Particle::ParticleCode>( sign*(int)fEvent->GetOneByRole(6)->GetPDGId());
+  lepton2 = static_cast<Particle::ParticleCode>(-sign*(int)fEvent->GetOneByRole(6)->GetPDGId());
 
   //=================================================================
   //     first outgoing lepton

@@ -28,6 +28,17 @@ GenericProcess::SetPoint(const unsigned int ndim_,double x_[])
 }
 
 void
+GenericProcess::PrepareKinematics()
+{
+  Particle *ip1 = fEvent->GetOneByRole(IncomingBeam1), *ip2 = fEvent->GetOneByRole(IncomingBeam2);
+  double *p1 = ip1->P4(), *p2 = ip2->P4(), k = 0.;
+
+  for (unsigned int i=0; i<3; i++) k += p1[i]*p2[i];
+  fS = ip1->M2()+ip2->M2()+2.*(ip1->E()*ip2->E()-k);
+  fSqS = sqrt(fS);
+}
+
+void
 GenericProcess::DumpPoint(const ExceptionType& et=Info)
 {
   std::ostringstream os;
@@ -40,14 +51,49 @@ GenericProcess::DumpPoint(const ExceptionType& et=Info)
                                 "%s", fNumDimensions, os.str().c_str())); }
 }
 
+void
+GenericProcess::SetEventContent(IncomingState is, OutgoingState os)
+{
+  bool has_cs = false;
+  for (IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++) {
+    fEvent->AddParticle(Particle(ip->first, ip->second)); Particle* p = fEvent->GetOneByRole(ip->first);
+    p->status = 0;
+    switch (ip->first) {
+      case IncomingBeam1: case IncomingBeam2: break;
+      case Parton1: p->SetMother(fEvent->GetOneByRole(IncomingBeam1)); break;
+      case Parton2: p->SetMother(fEvent->GetOneByRole(IncomingBeam2)); break;
+      case CentralSystem: p->SetMother(fEvent->GetOneByRole(Parton1)); has_cs = true; break;
+      default: break;
+    }
+  }
+
+  if (!has_cs) {
+    Particle* moth = fEvent->GetOneByRole(Parton1);
+    Particle cs(4, moth->GetPDGId());
+    cs.SetMother(moth);
+    fEvent->AddParticle(cs);
+  }
+  for (OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++) {
+    fEvent->AddParticle(Particle(op->first, op->second)); Particle* p = fEvent->GetOneByRole(op->first);
+    p->status = 0;
+    switch (op->first) {
+      case OutgoingBeam1: p->SetMother(fEvent->GetOneByRole(IncomingBeam1)); break;
+      case OutgoingBeam2: p->SetMother(fEvent->GetOneByRole(IncomingBeam2)); break;
+      case CentralParticle1: p->SetMother(fEvent->GetOneByRole(CentralSystem)); break;
+      case CentralParticle2: p->SetMother(fEvent->GetOneByRole(CentralSystem)); break;
+      default: break;
+    }
+  }
+}
+
 std::ostream&
 operator<<(std::ostream& os, const GenericProcess::ProcessMode& pm)
 {
   switch (pm) {
-  case GenericProcess::ElasticElastic:      os << "Elastic/Elastic"; break;
-  case GenericProcess::InelasticElastic:    os << "Inelastic/Elastic"; break;
-  case GenericProcess::ElasticInelastic:    os << "Elastic/Inelastic"; break;
-  case GenericProcess::InelasticInelastic:  os << "Inelastic/Inelastic"; break;    
+    case GenericProcess::ElasticElastic:      os << "Elastic/Elastic"; break;
+    case GenericProcess::InelasticElastic:    os << "Inelastic/Elastic"; break;
+    case GenericProcess::ElasticInelastic:    os << "Elastic/Inelastic"; break;
+    case GenericProcess::InelasticInelastic:  os << "Inelastic/Inelastic"; break;    
   }
   return os;
 }
@@ -56,14 +102,14 @@ std::ostream&
 operator<<(std::ostream& os, const GenericProcess::StructureFunctions& sf)
 {
   switch (sf) {
-  case GenericProcess::Electron:            os << "electron"; break;
-  case GenericProcess::ElasticProton:       os << "elastic proton"; break;
-  case GenericProcess::SuriYennie:          os << "dissociating proton [SY structure functions]"; break;
-  case GenericProcess::SuriYennieLowQ2:     os << "dissociating proton [SY structure functions, for MX < 2 GeV, Q^2 < 5 GeV^2]"; break;
-  case GenericProcess::SzczurekUleshchenko: os << "dissociating proton [SU structure functions]"; break;
-  case GenericProcess::FioreVal:            os << "dissociating proton [parton model, only valence quarks]"; break;
-  case GenericProcess::FioreSea:            os << "dissociating proton [parton model, only sea quarks]"; break;
-  case GenericProcess::Fiore:               os << "dissociating proton [parton model, valence and sea quarks]"; break;
+    case GenericProcess::Electron:            os << "electron"; break;
+    case GenericProcess::ElasticProton:       os << "elastic proton"; break;
+    case GenericProcess::SuriYennie:          os << "dissociating proton [SY structure functions]"; break;
+    case GenericProcess::SuriYennieLowQ2:     os << "dissociating proton [SY structure functions, for MX < 2 GeV, Q^2 < 5 GeV^2]"; break;
+    case GenericProcess::SzczurekUleshchenko: os << "dissociating proton [SU structure functions]"; break;
+    case GenericProcess::FioreVal:            os << "dissociating proton [parton model, only valence quarks]"; break;
+    case GenericProcess::FioreSea:            os << "dissociating proton [parton model, only sea quarks]"; break;
+    case GenericProcess::Fiore:               os << "dissociating proton [parton model, valence and sea quarks]"; break;
   }
   return os;
 }

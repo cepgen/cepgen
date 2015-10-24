@@ -40,7 +40,6 @@ MCGen::PrintHeader()
   Info(os.str().c_str());
 }
 
-
 void
 MCGen::BuildVegas()
 {
@@ -111,11 +110,12 @@ double f(double* x_, size_t ndim_, void* params_)
   double ff;
   Parameters *p;
   Kinematics kin;
-  Particle *in1, *in2;
   Timer tmr;
   bool hadronised;
   double num_hadr_trials;
   std::ostringstream os;
+  Event* ev;
+  Particle* part;
 
   p = static_cast<Parameters*>(params_);
 
@@ -150,45 +150,38 @@ double f(double* x_, size_t ndim_, void* params_)
   kin.mxmax = p->maxmx;
   
   p->process->SetKinematics(kin);
+
+  ev = p->process->GetEvent();
+  ev->clear();
+  p->process->AddEventContent();
   p->process->SetPoint(ndim_, x_);
-  p->process->GetEvent()->clear(); // need to move this sw else ?
-
-  // Start by adding primary particles
-  //FIXME electrons ?
-  in1 = new Particle(1, p->in1pdg);
-  in1->charge = p->in1pdg/abs(p->in1pdg);
-  in1->P(0., 0.,  p->in1p);
-
-  in2 = new Particle(2, p->in2pdg);
-  in2->charge = p->in2pdg/abs(p->in2pdg);
-  in2->P(0., 0., -p->in2p);  
   
-  p->process->SetIncomingParticles(*in1, *in2);
+  part = ev->GetOneByRole(GenericProcess::IncomingBeam1);
+  part->SetPDGId(p->in1pdg);
+  part->P(0., 0., p->in1p);
+  part->charge = p->in1pdg/abs(p->in1pdg);
 
+  part = ev->GetOneByRole(GenericProcess::IncomingBeam2);
+  part->SetPDGId(p->in2pdg);
+  part->P(0., 0., -p->in2p);
+  part->charge = p->in2pdg/abs(p->in2pdg);
+  
   // Then add outgoing leptons
-  p->process->SetOutgoingParticles(6, p->pair);
-  p->process->SetOutgoingParticles(7, p->pair);
+  ev->GetOneByRole(GenericProcess::CentralParticle1)->SetPDGId(p->pair);
+  ev->GetOneByRole(GenericProcess::CentralParticle2)->SetPDGId(p->pair);
 
   // Then add outgoing protons or remnants
   switch (p->process_mode) {
-    case GenericProcess::ElasticElastic:
-      p->process->SetOutgoingParticles(3, Particle::Proton, 1); // First outgoing proton
-      p->process->SetOutgoingParticles(5, Particle::Proton, 2); // Second outgoing proton
-      break;
+    case GenericProcess::ElasticElastic: break; // nothing to change in the event
     case GenericProcess::ElasticInelastic:
-      //p->process->SetOutgoingParticles(3, Particle::Proton, 1); // First outgoing proton
-      //p->process->SetOutgoingParticles(5, Particle::uQuark, 2); // Second outgoing proton remnant
-      break;
-    case GenericProcess::InelasticElastic:
-      p->process->SetOutgoingParticles(3, Particle::uQuark, 1); // First outgoing proton
-      p->process->SetOutgoingParticles(5, Particle::Proton, 2); // Second outgoing proton remnant
-      break;
-    case GenericProcess::InelasticInelastic:
-      p->process->SetOutgoingParticles(3, Particle::uQuark, 1); // First outgoing proton
-      p->process->SetOutgoingParticles(5, Particle::uQuark, 2); // Second outgoing proton remnant
+    case GenericProcess::InelasticElastic: // set one of the outgoing protons to be fragmented
+      ev->GetOneByRole(GenericProcess::OutgoingBeam1)->SetPDGId(Particle::uQuark); break;
+    case GenericProcess::InelasticInelastic: // set both the outgoing protons to be fragmented
+      ev->GetOneByRole(GenericProcess::OutgoingBeam1)->SetPDGId(Particle::uQuark);
+      ev->GetOneByRole(GenericProcess::OutgoingBeam2)->SetPDGId(Particle::uQuark);
       break;
   }
-
+  
   // Check that everything is there
   if (!p->process->IsKinematicsDefined()) return 0.;
 
@@ -196,6 +189,7 @@ double f(double* x_, size_t ndim_, void* params_)
   ff = p->process->ComputeWeight();
   if (ff<0.) return 0.;
   
+  //ev->Dump();
   if (p->store) { // MC events generation
     p->process->FillKinematics(false);
     p->process->GetEvent()->time_generation = tmr.elapsed();
@@ -237,9 +231,6 @@ double f(double* x_, size_t ndim_, void* params_)
   }
   //p->process->ClearEvent();
   p->process->GetEvent()->clear(); // need to move this sw else ?
-
-  delete in1;
-  delete in2;
 
   if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
     os.str(""); for (unsigned int i=0; i<ndim_; i++) { os << Form("%10.8f ", x_[i]); }
