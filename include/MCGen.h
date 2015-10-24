@@ -98,7 +98,7 @@ class MCGen {
     double res = f(x_, GetNdim(), (void*)parameters);
     std::ostringstream os;
     for (unsigned int i=0; i<GetNdim(); i++) { os << x_[i] << " "; }
-    Debug(Form("Result for x[%d] = ( %s):\n\t%10.6f", GetNdim(), os.str().c_str(), res));
+    Debug(Form("Result for x[%i] = ( %s):\n\t%10.6f", GetNdim(), os.str().c_str(), res));
     return res;
   }
   //HEPRUP GetHEPRUP();

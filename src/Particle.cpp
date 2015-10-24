@@ -298,3 +298,34 @@ Particle::GetWidthFromPDGId(Particle::ParticleCode pdgId_)
   default:     return -1.;
   }
 }
+
+std::ostream&
+operator<<(std::ostream& os, const Particle::ParticleCode& pc)
+{
+  switch (pc) {
+  case Particle::dQuark:     os << "d quark"; break;
+  case Particle::uQuark:     os << "u quark"; break;
+  case Particle::Electron:   os << "Electron"; break;
+  case Particle::Muon:       os << "Muon"; break;
+  case Particle::Tau:        os << "Tau"; break;
+  case Particle::Gluon:      os << "Gluon"; break;
+  case Particle::Photon:     os << "Photon"; break;
+  case Particle::PiPlus:     os << "Pi+"; break;
+  case Particle::PiZero:     os << "Pi0"; break;
+  case Particle::Rho770_0:   os << "Rho(770)0"; break;
+  case Particle::Omega782:   os << "Omega(782)"; break;
+  case Particle::JPsi:       os << "J/Psi"; break;
+  case Particle::Phi1680:    os << "Phi(1680)"; break;
+  case Particle::Upsilon1S:  os << "Upsilon(1S)"; break;
+  case Particle::Upsilon2S:  os << "Upsilon(2S)"; break;
+  case Particle::Upsilon3S:  os << "Upsilon(3S)"; break;
+  case Particle::ud0Diquark: os << "(ud)0 di-quark"; break;
+  case Particle::ud1Diquark: os << "(ud)1 di-quark"; break;
+  case Particle::uu1Diquark: os << "(uu)1 di-quark"; break;
+  case Particle::Proton:     os << "Proton"; break;
+  case Particle::Neutron:    os << "Neutron"; break;
+  case Particle::Pomeron:    os << "Pomeron"; break;
+  case Particle::Reggeon:    os << "Reggeon"; break;
+  }
+  return os;
+}

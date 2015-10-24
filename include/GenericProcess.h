@@ -30,7 +30,9 @@ class GenericProcess
     FioreSea = 102,
     Fiore = 103
   };
-   
+  friend std::ostream& operator<<(std::ostream& os, const GenericProcess::ProcessMode& pm);
+  friend std::ostream& operator<<(std::ostream& os, const GenericProcess::StructureFunctions& sf);
+  
   GenericProcess(std::string name_="<invalid process>");
   virtual ~GenericProcess();
   /**

@@ -14,6 +14,8 @@
   if (Logger::GetInstance()->Level>=Logger::Debug)  { Exception(__PRETTY_FUNCTION__, m, Debugging).Dump(Logger::GetInstance()->OutputStream); }
 #define DebugInsideLoop(m) \
   if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) { Exception(__PRETTY_FUNCTION__, m, Debugging).Dump(Logger::GetInstance()->OutputStream); }
+#define Warning(m) \
+  if (Logger::GetInstance()->Level>=Logger::Warning)  { Exception(__PRETTY_FUNCTION__, m, JustWarning).Dump(Logger::GetInstance()->OutputStream); }
 
 /**
  * \brief Enumeration of exception severities
@@ -72,20 +74,20 @@ class Exception
     
     inline void Dump(std::ostream& os=std::cerr) const {
       if (Type()==Info) {
-        os << "============================ \033[33;1mInformation\033[0m ============================" << std::endl
+        os << "================================= \033[33;1mInformation\033[0m =================================" << std::endl
            << " From:        " << From() << std::endl;
       }
       else {
-        os << "======================== Exception detected! ========================" << std::endl
+        os << "============================= Exception detected! =============================" << std::endl
            << " Class:       " << TypeString() << std::endl
            << " Raised by:   " << From() << std::endl;
       }
       os << " Description: " << std::endl
          << "\t" << Description() << std::endl;
       if (ErrorNumber()!=0)
-        os << "---------------------------------------------------------------------" << std::endl
+        os << "-------------------------------------------------------------------------------" << std::endl
            << " Error #" << ErrorNumber() << std::endl;
-      os << "=====================================================================" << std::endl;
+      os << "===============================================================================" << std::endl;
     }
     inline std::string OneLine() const {
       std::ostringstream os;

@@ -222,6 +222,8 @@ double f(double* x_, size_t ndim_, void* params_)
         
         num_hadr_trials++;
       } while (!hadronised and num_hadr_trials<=p->hadroniser_max_trials);
+      if (!hadronised) return 0.; //FIXME
+      
       p->process->GetEvent()->num_hadronisation_trials = num_hadr_trials;
 
       Debug(Form("Event hadronisation succeeded after %d trial(s)", p->process->GetEvent()->num_hadronisation_trials));

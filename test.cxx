@@ -1,17 +1,17 @@
 #include <iostream>
 
-#include "include/mcgen.h"
 
 // ROOT includes
 #include "TFile.h"
 #include "TTree.h"
 
+#include "include/MCGen.h"
 /**
  * Generation of events and storage in a ROOT format
  * @author Laurent Forthomme <laurent.forthomme@uclouvain.be>
  * @date 27 jan 2014
  */
-int main() {
+int main(int argc, char* argv[]) {
   const Int_t maxpart = 500;
 
   //const int ngen = 1e5;
@@ -19,9 +19,7 @@ int main() {
 
   MCGen mg;
   Event ev;
-  GamGamLL proc;
   //PPtoLL proc;
-  Pythia6Hadroniser had;
   //Jetset7Hadroniser had;
 
   double xsec, err;
@@ -45,22 +43,31 @@ int main() {
   if (!file) {
     std::cout << "ERROR while trying to create the output file!" << std::endl;
   }
-
-  mg.parameters->in1p = 4000.;
-  mg.parameters->in2p = 4000.;
-  mg.parameters->pair = MUON;
-  mg.parameters->remnant_mode = 11;
-  mg.parameters->mcut = 2;
-  mg.parameters->minenergy = 0.; //FIXME
-  mg.parameters->minpt = 5.;
-  mg.parameters->maxgen = ngen;
-  mg.parameters->hadroniser = &had;
-  mg.parameters->process = &proc;
-  mg.parameters->process_mode = 1; // el-el
-  //mg.parameters->ncvg = 5e3; //FIXME
-  //mg.parameters->SetEtaRange(-2.5, 2.5);
-  //mg.parameters->SetEtaRange(-999., 999.);
-
+  if (argc==1) {
+    mg.parameters->in1p = 3500.;
+    mg.parameters->in2p = 3500.;
+    mg.parameters->pair = Particle::Muon;
+    mg.parameters->mcut = 2;
+    mg.parameters->minenergy = 0.; //FIXME
+    mg.parameters->minpt = 5.;
+    mg.parameters->maxgen = ngen;
+    mg.parameters->hadroniser = new Pythia6Hadroniser;
+    mg.parameters->remnant_mode = GenericProcess::SuriYennie;
+    mg.parameters->process = new GamGamLL;
+    mg.parameters->process_mode = GenericProcess::ElasticElastic; // el-el
+    //mg.parameters->ncvg = 5e3; //FIXME
+    //mg.parameters->SetEtaRange(-2.5, 2.5);
+    //mg.parameters->SetEtaRange(-999., 999.);
+  }
+  else {
+    Debug(Form("Reading config file stored in %s", argv[1]));
+    if (!mg.parameters->ReadConfigFile(std::string(argv[1]))) {
+      Info(Form("Error reading the configuration!\n\t"
+		"Please check your input file (%s)", argv[1]));
+      return -1;
+    }
+  }
+    
   mg.parameters->generation = true;
   mg.parameters->Dump();
 
@@ -71,7 +78,7 @@ int main() {
   tree->Branch("errxsect", &errxsect, "errxsect/D");
   tree->Branch("MX1", &mx_p1, "MX1/D");
   tree->Branch("MX2", &mx_p2, "MX2/D");
-  tree->Branch("npart", &np, "npart/I");
+  tree->Branch("ip", &np, "npart/I");
   tree->Branch("nremn_charged", nremn_ch, "nremn_charged[2]/I");
   tree->Branch("nremn_neutral", nremn_nt, "nremn_neutral[2]/I");
   tree->Branch("Eta", eta, "eta[npart]/D");

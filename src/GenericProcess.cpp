@@ -39,3 +39,31 @@ GenericProcess::DumpPoint(const ExceptionType& et=Info)
   else           {   Debug(Form("Number of integration parameters: %d\n\t"
                                 "%s", fNumDimensions, os.str().c_str())); }
 }
+
+std::ostream&
+operator<<(std::ostream& os, const GenericProcess::ProcessMode& pm)
+{
+  switch (pm) {
+  case GenericProcess::ElasticElastic:      os << "Elastic/Elastic"; break;
+  case GenericProcess::InelasticElastic:    os << "Inelastic/Elastic"; break;
+  case GenericProcess::ElasticInelastic:    os << "Elastic/Inelastic"; break;
+  case GenericProcess::InelasticInelastic:  os << "Inelastic/Inelastic"; break;    
+  }
+  return os;
+}
+
+std::ostream&
+operator<<(std::ostream& os, const GenericProcess::StructureFunctions& sf)
+{
+  switch (sf) {
+  case GenericProcess::Electron:            os << "electron"; break;
+  case GenericProcess::ElasticProton:       os << "elastic proton"; break;
+  case GenericProcess::SuriYennie:          os << "dissociating proton [SY structure functions]"; break;
+  case GenericProcess::SuriYennieLowQ2:     os << "dissociating proton [SY structure functions, for MX < 2 GeV, Q^2 < 5 GeV^2]"; break;
+  case GenericProcess::SzczurekUleshchenko: os << "dissociating proton [SU structure functions]"; break;
+  case GenericProcess::FioreVal:            os << "dissociating proton [parton model, only valence quarks]"; break;
+  case GenericProcess::FioreSea:            os << "dissociating proton [parton model, only sea quarks]"; break;
+  case GenericProcess::Fiore:               os << "dissociating proton [parton model, valence and sea quarks]"; break;
+  }
+  return os;
+}

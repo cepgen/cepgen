@@ -14,14 +14,9 @@ int
 GamGamLL::GetNdim(ProcessMode process_mode_) const
 {
   switch (process_mode_) {
-    case ElasticElastic:
-    default:
-      return 7;
-    case ElasticInelastic:
-    case InelasticElastic:
-      return 8;
-    case InelasticInelastic:
-      return 9;
+    case ElasticElastic: default:                 return 7;
+    case ElasticInelastic: case InelasticElastic: return 8;
+    case InelasticInelastic:                      return 9;
   }
 }
 
@@ -148,7 +143,7 @@ GamGamLL::SetIncomingParticles(Particle ip1_, Particle ip2_)
   fIsKinematicSet = fIsInStateSet && fIsOutStateSet;
 }
 
-void
+bool
 GamGamLL::Pickin()
 {
   double sig, sig1, sig2; // sig1 = sigma and sig2 = sigma' in [1]
@@ -209,7 +204,7 @@ GamGamLL::Pickin()
   ss = fS+_w12;
   
   rl1 = std::pow(ss, 2)-4.*_w1*fS; // lambda(s, m1**2, m2**2)
-  if (rl1<=0.) throw Exception(__PRETTY_FUNCTION__, Form("rl1 = %f <= 0", rl1), JustWarning);
+  if (rl1<=0.) { Warning(Form("rl1 = %f <= 0", rl1)); return false; }
   _sl1 = std::sqrt(rl1);
 
   _s2 = ds2 = 0.;
@@ -227,7 +222,7 @@ GamGamLL::Pickin()
   _d3 = sig1-_w2;
 
   rl2 = std::pow(sp, 2)-4.*fS*_w3; // lambda(s, m3**2, sigma)
-  if (rl2<=0.) throw Exception(__PRETTY_FUNCTION__, Form("rl2 = %f <= 0", rl2), JustWarning);
+  if (rl2<=0.) { Warning(Form("rl2 = %f <= 0", rl2)); return false; }
   sl2 = std::sqrt(rl2);
 
   //std::cout << "ss=" << ss << ", sp=" << sp << ", sl1=" << _sl1 << ", sl2=" << sl2 << std::endl;
@@ -235,11 +230,12 @@ GamGamLL::Pickin()
   _t1min = (_w31*_d3+(_d3-_w31)*(_d3*_w1-_w31*_w2)/fS)/_t1max; // definition from eq. (A.5) in [1]
 
   // FIXME dropped in CDF version
-  if (_t1max>-fCuts.q2min)
-    throw Exception(__PRETTY_FUNCTION__, Form("t1max = %f > -q2min = %f", _t1max, -fCuts.q2min), JustWarning);
-  if (_t1min<-fCuts.q2max and fCuts.q2max>=0.)
-    throw Exception(__PRETTY_FUNCTION__, Form("t1min = %f < -q2max = %f", _t1min, -fCuts.q2max), JustWarning);
-  
+  if (_t1max>-fCuts.q2min) {
+    Warning(Form("t1max = %f > -q2min = %f", _t1max, -fCuts.q2min)); return false;
+  }
+  if (_t1min<-fCuts.q2max and fCuts.q2max>=0.) {
+    Warning(Form("t1min = %f < -q2max = %f", _t1min, -fCuts.q2max)); return false;
+  }
   if (_t1max<-fCuts.q2max and fCuts.q2max>=0.) _t1max = -fCuts.q2max;
   if (_t1min>-fCuts.q2min)                     _t1min = -fCuts.q2min;
   /////
@@ -259,7 +255,7 @@ GamGamLL::Pickin()
 
   _sa1 =-std::pow(_t1-_w31, 2)/4.+_w1*_t1;
   if (_sa1>=0.) {
-    throw Exception(__PRETTY_FUNCTION__, Form("_sa1 = %f >= 0", _sa1), JustWarning);
+    Warning(Form("_sa1 = %f >= 0", _sa1)); return false;
   }
 
   sl3 = std::sqrt(-_sa1);
@@ -311,7 +307,7 @@ GamGamLL::Pickin()
   r2 = s2x-d6;
   
   rl4 = (std::pow(r1, 2)-4.*_w2*s2x)*(std::pow(r2, 2)-4.*_w5*s2x);
-  if (rl4<=0.) throw Exception(__PRETTY_FUNCTION__, Form("rl4 = %f <= 0", rl4), JustWarning);
+  if (rl4<=0.) { Warning(Form("rl4 = %f <= 0", rl4)); return false; }
   sl4 = std::sqrt(rl4);
   
   // t2max, t2min definitions from eq. (A.12) and (A.13) in [1]
@@ -335,12 +331,12 @@ GamGamLL::Pickin()
   t25 = _t2-_w2-_w5;
 
   _sa2 = -std::pow(r4, 2)/4.+_w2*_t2;
-  if (_sa2>=0.) throw Exception(__PRETTY_FUNCTION__, Form("_sa2 = %f >= 0", _sa2), JustWarning);
+  if (_sa2>=0.) { Warning(Form("_sa2 = %f >= 0", _sa2)); return false; }
   
   sl6 = 2.*std::sqrt(-_sa2);
   
   _g4 = -std::pow(r3, 2)/4.+_t1*_t2;
-  if (_g4>=0.)  throw Exception(__PRETTY_FUNCTION__, Form("_g4 = %f >= 0", _g4), JustWarning);
+  if (_g4>=0.)  { Warning(Form("_g4 = %f >= 0", _g4)); return false; }
   
   sl7 = std::sqrt(-_g4)*2.;
   sl5 = sl6*sl7;
@@ -367,27 +363,26 @@ GamGamLL::Pickin()
   // (http://stackoverflow.com/questions/570669/checking-if-a-double-or-float-is-nan-in-c)
   // FIXME dropped in CDF version
   if (!(_dd2>=0.) and !(_dd2<0.)) { // NaN
-    throw Exception(__PRETTY_FUNCTION__,
-		    Form("dd2 == NaN\n\tdd2 = %f\n\t"
-			 "s2 = %f\ts2p = %f\n\t"
-			 "s2min = %f\n\t"
-			 "t2min = %f\tt2max = %f",
-			 _dd2, _s2, s2p, s2min, _t2min, _t2max),
-		    JustWarning);
+    Warning(Form("dd2 == NaN\n\tdd2 = %f\n\t"
+                 "s2 = %f\ts2p = %f\n\t"
+                 "s2min = %f\n\t"
+                 "t2min = %f\tt2max = %f",
+                 _dd2, _s2, s2p, s2min, _t2min, _t2max));
+    return false;
   }
-    
+  
   yy4 = cos(pi*x(3));
   dd = _dd1*_dd2;
   _p12 = (fS-_w1-_w2)/2.;
   st = _s2-_t1-_w2;
   delb = (2.*_w2*r3+r4*st)*(4.*_p12*_t1-(_t1-_w31)*st)/(16.*ap);
 
-  if (dd<=0.) throw Exception(__PRETTY_FUNCTION__, Form("dd = %f <= 0\n\tdd1 = %f\tdd2 = %f", dd, _dd1, _dd2), JustWarning);
+  if (dd<=0.) { Warning(Form("dd = %f <= 0\n\tdd1 = %f\tdd2 = %f", dd, _dd1, _dd2)); return false; }
 
   _delta = delb-yy4*st*std::sqrt(dd)/(2.*ap);
   _s1 = _t2+_w1+(2.*_p12*r3-4.*_delta)/st;
 
-  if (ap>=0.) throw Exception(__PRETTY_FUNCTION__, Form("ap = %f >= 0", ap), JustWarning);
+  if (ap>=0.) { Warning(Form("ap = %f >= 0", ap)); return false; }
 
   _dj = ds2*dt1*dt2*std::pow(pi, 2)/(8.*_sl1*std::sqrt(-ap));
 
@@ -420,12 +415,11 @@ GamGamLL::Pickin()
       // (http://stackoverflow.com/questions/570669/checking-if-a-double-or-float-is-nan-in-c)
       // FIXME dropped in CDF version
       if (!(_dd2>=0.) && !(_dd2<0.)) { // NaN
-	throw Exception(__PRETTY_FUNCTION__,
-			Form("dd2 == NaN\n\tdd2 = %f\n\t"
-			     "s1 = %f\ts1p = %f\ts1m = %f\n\t"
-			     "w2 = %f",
-			     _dd2, _s1, s1p, s1m, _w2),
-			JustWarning);
+        Warning(Form("dd2 == NaN\n\tdd2 = %f\n\t"
+                     "s1 = %f\ts1p = %f\ts1m = %f\n\t"
+                     "w2 = %f",
+                     _dd2, _s1, s1p, s1m, _w2));
+        return false;
       }
       /////
     }
@@ -458,19 +452,18 @@ GamGamLL::Pickin()
   _dd4 = -_t1*(_s1-s1pp)*(_s1-s1pm)/4.;
   _acc4 = (_s1-s1pm)/(_s1+s1pm);
   _dd5 = _dd1+_dd3+((_p12*(_t1-_w31)/2.-_w1*_p2k1)*(_p2k1*(_t2-_w52)-_w2*r3)-_delta*(2.*_p12*_p2k1-_w2*(_t1-_w31)))/_p2k1;
+
+  return true;
 }
 
-void
+bool
 GamGamLL::Orient()
 {
   double re, rr, a1;
 
-  try {
-    Pickin();
-  } catch (Exception& e) { throw e; }
-  
-  if (_dj==0.) {
-    throw Exception(__PRETTY_FUNCTION__, Form("Pickin failed: dj = %f", _dj), JustWarning);
+  if (!Pickin() or _dj==0.) {
+    Warning(Form("Pickin failed! dj = %f", _dj));
+    return false;
   }
   
   re = 1./(2.*fSqS);
@@ -491,14 +484,16 @@ GamGamLL::Orient()
   _ep5 = _ep2-_de5;
 
   if (_ec4<_mc4) {
-    throw Exception(__PRETTY_FUNCTION__, Form("_ec4 = %f < _mc4 = %f\n\t==> de3 = %f, de5 = %f", _ec4, _mc4, _de3, _de5), JustWarning);
+    Warning(Form("_ec4 = %f < _mc4 = %f\n\t==> de3 = %f, de5 = %f", _ec4, _mc4, _de3, _de5));
+    return false;
   }
   // What if the protons' momenta are not along the z-axis?
   _pp3 = std::sqrt(std::pow(_ep3, 2)-_w3);
   _pc4 = std::sqrt((std::pow(_ec4, 2)-std::pow(_mc4, 2)));
 
   if (_pc4==0.) {
-    throw Exception(__PRETTY_FUNCTION__, "_pzc4==0", JustWarning);
+    Warning("_pzc4==0");
+    return false;
   }
   _pp5 = std::sqrt(std::pow(_ep5, 2)-_w5);
   _p_p3 = std::sqrt(_dd1/fS)/_p;
@@ -533,8 +528,8 @@ GamGamLL::Orient()
   }
   /////
 
-  if (_st3>1.) throw Exception(__PRETTY_FUNCTION__, Form("st3 = %f > 1", _st3), JustWarning);
-  if (_st5>1.) throw Exception(__PRETTY_FUNCTION__, Form("st5 = %f > 1", _st5), JustWarning);
+  if (_st3>1.) { Warning(Form("st3 = %f > 1", _st3)); return false; }
+  if (_st5>1.) { Warning(Form("st5 = %f > 1", _st5)); return false; }
 
   _ct3 = std::sqrt(1.-std::pow(_st3, 2));
   _ct5 = std::sqrt(1.-std::pow(_st5, 2));
@@ -549,13 +544,13 @@ GamGamLL::Orient()
   _al3 = std::pow(_st3, 2)/(1.+_ct3);
   _be5 = std::pow(_st5, 2)/(1.-_ct5);
 
-  if (_dd5<0.) throw Exception(__PRETTY_FUNCTION__, Form("dd5 = %f < 0", _dd5), JustWarning);
+  if (_dd5<0.) { Warning(Form("dd5 = %f < 0", _dd5)); return false; }
 
   // Centre of mass system kinematics (theta4 and phi4)
   _p_p4 = std::sqrt(_dd5/fS)/_p;
   _st4 = _p_p4/_pc4;
 
-  if (_st4>1.) throw Exception(__PRETTY_FUNCTION__, Form("st4 = %f > 1", _st4), JustWarning);
+  if (_st4>1.) { Warning(Form("st4 = %f > 1", _st4)); return false; }
   
   _ct4 = std::sqrt(1.-std::pow(_st4, 2));
   if (_ep1*_ec4<_p14) {
@@ -582,8 +577,8 @@ GamGamLL::Orient()
   _sp5 = -rr/_p_p5;
   //std::cout << "rr = " << rr << ", sp3 = " << fabs(_sp3) << ", sp5 = " << fabs(_sp5) << std::endl;
 
-  if (fabs(_sp3)>1.) throw Exception(__PRETTY_FUNCTION__, Form("sp3 = %f > 1", _sp3), JustWarning);
-  if (fabs(_sp5)>1.) throw Exception(__PRETTY_FUNCTION__, Form("sp5 = %f > 1", _sp5), JustWarning);
+  if (fabs(_sp3)>1.) { Warning(Form("sp3 = %f > 1", _sp3)); return false; }
+  if (fabs(_sp5)>1.) { Warning(Form("sp5 = %f > 1", _sp5)); return false; }
 
   _cp3 = -std::sqrt(1.-std::pow(_sp3, 2));
   _cp5 = -std::sqrt(1.-std::pow(_sp5, 2));
@@ -604,10 +599,11 @@ GamGamLL::Orient()
                          "cos(phi3) = %f\tcos(phi5) = %f"
                          "a1 = %f",
                          _p_p4, _p_p5, _cp3, _cp5, a1));
-    return;
+    return true;
   }
   if (a1<0.) _cp5 = -_cp5;
   else       _cp3 = -_cp3;
+  return true;
 }
 
 double
@@ -670,7 +666,7 @@ GamGamLL::ComputeWeight()
 
   weight = 0.;
 
-  if (!fIsOutStateSet) throw Exception(__PRETTY_FUNCTION__, "Output state not set!", JustWarning);
+  if (!fIsOutStateSet) { Warning("Output state not set!"); return 0.; }
 
   if (fCuts.wmax<0) fCuts.wmax = fS;
 
@@ -690,15 +686,11 @@ GamGamLL::ComputeWeight()
   
   DebugInsideLoop(Form("Computed value for w4 = %f -> mc4 = %f", _w4, _mc4));
   
-  try { Orient(); } catch (Exception& e) {
-    //e.Dump();
-    //if (Logger::GetInstance()->Level>=Logger::Warning) e.Dump();
-    return 0.;
-  }
+  if (!Orient()) return 0.;
 
-  if (_t1>0.)  throw Exception(__PRETTY_FUNCTION__, Form("t1 = %f > 0", _t1), JustWarning);
-  if (_t2>0.)  throw Exception(__PRETTY_FUNCTION__, Form("t2 = %f > 0", _t2), JustWarning);
-  if (_dj==0.) throw Exception(__PRETTY_FUNCTION__, Form("dj = %f", _dj), JustWarning);
+  if (_t1>0.)  { Warning(Form("t1 = %f > 0", _t1)); return 0.; }
+  if (_t2>0.)  { Warning(Form("t2 = %f > 0", _t2)); return 0.; }
+  if (_dj==0.) { Warning(Form("dj = %f", _dj)); return 0.; }
   
   ecm6 = (_w4+_w6-_w7)/(2.*_mc4);
   pcm6 = std::sqrt(std::pow(ecm6, 2)-_w6);
@@ -779,7 +771,7 @@ GamGamLL::ComputeWeight()
 
   h1 = stg*pcm6z+ctg*pcm6x;
 
-  pc6z = ctg*pcm6z-stg*pcm6x;  
+  pc6z = ctg*pcm6z-stg*pcm6x;
   pc6x = cpg*h1-spg*pcm6y;
   
   qcx = 2.*pc6x;
@@ -1170,7 +1162,7 @@ GamGamLL::FillKinematics(bool symmetrise_)
       gmuw = std::sqrt(gmuw);
     }
     else {
-      throw Exception(__PRETTY_FUNCTION__, Form("W^2 = %f < 0", gmuw), JustWarning);
+      Warning(Form("W^2 = %f < 0", gmuw));
       gmuw = 0.;
     }
     gmunu = gmuy*2.*Particle::GetMassFromPDGId(Particle::Proton)/_ep1/_ep2;

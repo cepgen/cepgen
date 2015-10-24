@@ -15,7 +15,7 @@ Parameters::Parameters() :
   //ncvg(14000), itvg(10),
   ncvg(100000), itvg(10),
   ntreat(1), npoints(100),
-  generation(true), store(false), debug(false),
+  generation(true), store(false),
   maxgen(1e5), ngen(0),
   gpdf(5), spdf(4), qpdf(12),
   hadroniser_max_trials(5),
@@ -46,7 +46,7 @@ void Parameters::SetThetaRange(double thetamin_, double thetamax_)
 
 void Parameters::Dump()
 {
-  std::string cutsmode, particles, pmode;
+  std::string cutsmode, particles;
   std::ostringstream os;
 
   switch (mcut) {
@@ -60,13 +60,7 @@ void Parameters::Dump()
     case Particle::Muon: default: particles = "muons"; break;
     case Particle::Tau:           particles = "taus"; break;
   }
-  switch (process_mode) {
-    case GenericProcess::ElasticElastic: default: pmode = "elastic-elastic"; break;
-    case GenericProcess::ElasticInelastic:        pmode = "elastic-inelastic"; break;
-    case GenericProcess::InelasticElastic:        pmode = "inelastic-elastic"; break;
-    case GenericProcess::InelasticInelastic:      pmode = "inelastic-inelastic"; break;
-  }
-  const int wb = 67;
+  const int wb = 77;
   const int wt = 40;
   int wp = wb-wt-2;
   os 
@@ -78,7 +72,7 @@ void Parameters::Dump()
     << "| " << std::setw(wt) << "Events generation ? " << std::setw(wp) << generation << " |" << std::endl
     << "| " << std::setw(wt) << "Number of events to generate" << std::setw(wp) << maxgen << " |" << std::endl
     << "| " << std::setw(wt) << "Events storage ? " << std::setw(wp) << store << " |" << std::endl
-    << "| " << std::setw(wt) << "Debugging mode ? " << std::setw(wp) << debug << " |" << std::endl
+    << "| " << std::setw(wt) << "Debugging mode ? " << std::setw(wp) << (Logger::GetInstance()->Level) << " |" << std::endl
     << "| " << std::setw(wt) << "Output file opened ? " << std::setw(wp) << (file!=(std::ofstream*)NULL && file->is_open()) << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|-" << std::setfill('-') << std::setw(wb-2) << " Vegas integration parameters" << std::setfill(' ') << "-|" << std::endl
@@ -92,8 +86,8 @@ void Parameters::Dump()
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|-" << std::setfill('-') << std::setw(wb-2) << " Incoming particles " << std::setfill(' ') << "-|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "| " << std::setw(wt) << "Subprocess' mode" << std::setw(20) << pmode << std::setw(wp-20) << "" << " |" << std::endl
-    << "| " << std::setw(wt) << "Incoming particles" << std::setw(5) << in1pdg << ", " << std::setw(5) << in2pdg << std::setw(wp-12) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Subprocess' mode" << std::setw(20) << process_mode << std::setw(wp-20) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Incoming particles" << std::setw(7) << in1pdg << ", " << std::setw(7) << in2pdg << std::setw(wp-16) << "" << " |" << std::endl
     << "| " << std::setw(wt) << "Momenta [GeV/c]" << std::setw(5) << in1p << ", " << std::setw(5) << in2p << std::setw(wp-12) << "" << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|-" << std::setfill('-') << std::setw(wb-2) << " Incoming photons " << std::setfill(' ') << "-|" << std::endl
@@ -102,11 +96,11 @@ void Parameters::Dump()
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|-" << std::setfill('-') << std::setw(wb-2) << " Outgoing leptons " << std::setfill(' ') << "-|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "| " << std::setw(wt) << "Pair" << std::setw(2) << pair << " -> " << std::setw(wp-6) << particles << " |" << std::endl
+    << "| " << std::setw(wt) << "Pair" << std::setw(2) << (int)pair << " -> " << std::setw(wp-6) << pair << " |" << std::endl
     << "| " << std::setw(wt) << "Cuts mode" << std::setw(2) << mcut << " -> " << std::setw(wp-6) << cutsmode << " |" << std::endl
-    << "| " << std::setw(wt) << "Lepton(s)' pT in range [GeV/c]" << "[" << std::setw(4) << minpt << ", " << std::setw(4) << maxpt << "]" << std::setw(wp-12) << "" << " |" << std::endl
-    << "| " << std::setw(wt) << "Lepton(s)' energy in range [GeV]" << "[" << std::setw(4) << minenergy << ", " << std::setw(4) << maxenergy << "]" << std::setw(wp-12) << "" << " |" << std::endl
-    << "| " << std::setw(wt) << "Pseudorapidity in range" << "[" << std::setw(4) << mineta << ", " << std::setw(4) << maxeta << "]" << std::setw(wp-12) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Lepton(s)' pT in range [GeV/c]" << std::right << "[" << std::setw(5) << minpt << ", " << std::setw(5) << maxpt << "]" << std::left << std::setw(wp-14) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Lepton(s)' energy in range [GeV]" << std::right << "[" << std::setw(5) << minenergy << ", " << std::setw(5) << maxenergy << "]" << std::left << std::setw(wp-14) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Pseudorapidity in range" << std::right << "[" << std::setw(5) << mineta << ", " << std::setw(5) << maxeta << "]" << std::left << std::setw(wp-14) << "" << " |" << std::endl
     //<< "| " << std::setw(wt) << "Polar angle theta in range [deg]" << "[" << std::setw(3) << mintheta << ", " << std::setw(3) << maxtheta << "]" << std::setw(wp-10) << "" << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|-" << std::setfill('-') << std::setw(wb-2) << " Outgoing remnants " << std::setfill(' ') << "-|" << std::endl
@@ -140,6 +134,9 @@ bool Parameters::ReadConfigFile(std::string inFile_)
       if (iend>1) {
         this->generation = true;
       }
+    }
+    else if (key=="DEBG") {
+      Logger::GetInstance()->Level = static_cast<Logger::LoggingLevel>(atoi(value.c_str()));
     }
     else if (key=="NCVG") {
       this->ncvg = (int)atoi(value.c_str());
@@ -179,30 +176,12 @@ bool Parameters::ReadConfigFile(std::string inFile_)
     }
     else if (key=="MODE") {
       this->process_mode = static_cast<GenericProcess::ProcessMode>(atoi(value.c_str()));
-      os << " * Subprocess' mode: " << this->process_mode << " --> ";
-      switch (this->process_mode) {
-        case GenericProcess::ElasticElastic: default: os << "elastic-elastic"; break;
-        case GenericProcess::ElasticInelastic:        os << "elastic-inelastic"; break;
-        case GenericProcess::InelasticElastic:        os << "inelastic-elastic"; break;
-        case GenericProcess::InelasticInelastic:      os << "inelastic-inelastic"; break;
-      }
-      os << "\n\t";
+      os << " * Subprocess' mode: " << (unsigned int)this->process_mode << " --> " << this->process_mode << "\n\t";
     }
     else if (key=="PMOD" or key=="EMOD") {
       this->remnant_mode = static_cast<GenericProcess::StructureFunctions>(atoi(value.c_str()));
-      os << " * Outgoing primary particles' mode: " << this->remnant_mode
-	 << "\n\t\t --> ";
-      switch (this->remnant_mode) {
-        case GenericProcess::Electron:        os << "electron"; break;
-        case GenericProcess::ElasticProton:   os << "elastic proton"; break;
-        case GenericProcess::SuriYennie:      os << "dissociating proton [SY structure functions]"; break;
-        case GenericProcess::SuriYennieLowQ2: os << "dissociating proton [SY structure functions, for MX < 2 GeV, Q^2 < 5 GeV^2]"; break;
-        case GenericProcess::SzczurekUleshchenko: os << "dissociating proton [SU structure functions]"; break;
-        case GenericProcess::FioreVal:        os << "dissociating proton [parton model, only valence quarks]"; break;
-        case GenericProcess::FioreSea:        os << "dissociating proton [parton model, only sea quarks]"; break;
-        case GenericProcess::Fiore:           os << "dissociating proton [parton model, valence and sea quarks]"; break;
-      }
-      os << "\n\t";
+      os << " * Outgoing primary particles' mode: " << (unsigned int)this->remnant_mode
+	 << "\n\t\t --> " << this->remnant_mode << "\n\t";
     }
     else if (key=="INPE") {
       this->in2p = (double)atof(value.c_str());
@@ -210,14 +189,8 @@ bool Parameters::ReadConfigFile(std::string inFile_)
     }
     else if (key=="PAIR") {
       this->pair = (Particle::ParticleCode)atoi(value.c_str());
-      os << " * Outgoing leptons' PDG id: " << this->pair
-	 << "\n\t\t --> ";
-      switch (this->pair) {
-        case Particle::Electron: default: os << "electrons"; break;
-        case Particle::Muon:              os << "muons"; break;
-        case Particle::Tau:               os << "taus"; break;
-      }
-      os << "\n\t";
+      os << " * Outgoing leptons' PDG id: " << (int)this->pair
+	 << "\n\t\t --> " << this->pair << "\n\t";
     }
     else if (key=="MCUT") {
       this->mcut = (int)atoi(value.c_str());

@@ -183,8 +183,9 @@ Event::Dump(bool stable_)
   particles = GetParticles();
   for (p=particles.begin(); p!=particles.end(); p++) {
     if (stable_ and (*p)->status!=1) continue;
-    os << Form("\t%2d\t%6d", (*p)->id, (*p)->pdgId);
+    os << Form("\n %2d\t%6d", (*p)->id, (*p)->pdgId);
     if ((*p)->name!="") os << Form("%6s", (*p)->name.c_str());
+    //else                os << std::setw(6) << Particle::ParticleCode(abs((*p)->pdgId));
     else                os << "\t";
     os << "\t";
     if ((*p)->charge!=999.) os << Form("%6.2f\t", (*p)->charge);
@@ -193,10 +194,10 @@ Event::Dump(bool stable_)
     if ((*p)->GetMothersIds().size()>0) 
       os << Form("%2d(%2d)", *((*p)->GetMothersIds().begin()), GetById(*((*p)->GetMothersIds().begin()))->role);
     else
-      os << "     ";
-    os << Form("%9.3f %9.3f %9.3f %9.3f\n\t", (*p)->Px(), (*p)->Py(), (*p)->Pz(), (*p)->E());
-    if ((*p)->status>=0 and (*p)->status<=1) {
-      sign = ((*p)->role==1 or (*p)->role==2) ? -1 : 1;
+      os << "      ";
+    os << Form("% 9.3f % 9.3f % 9.3f % 9.3f", (*p)->Px(), (*p)->Py(), (*p)->Pz(), (*p)->E());
+    if ((*p)->status==0 or (*p)->status==1) {
+      sign = ((*p)->status==0) ? -1 : 1;
       pxtot += sign*(*p)->Px();
       pytot += sign*(*p)->Py();
       pztot += sign*(*p)->Pz();
@@ -209,10 +210,10 @@ Event::Dump(bool stable_)
   if (fabs(pztot)<1.e-12) pztot = 0.;
   if (fabs(etot)<1.e-12) etot = 0.;
   //
-  Info(Form(
-  "Particle\tPDG id\t\tCharge\tRole\tStatus\tMother\t\t\t4-Momentum [GeV]\n\t"
-  "--------\t------\t\t------\t----\t------\t------\t---------------------------------------\n\t"
-  "%s\n\t"
-  "-------------------------------------------------------------------------------------------------------\n\t"
-  "Total:\t\t\t\t\t\t\t\t%9.4f %9.4f %9.4f %9.4f", os.str().c_str(), pxtot, pytot, pztot, etot));
+  Info(Form("Events content:\n"
+  "Part.\tPDG id\t\tCharge\tRole\tStatus\tMother\t\t4-Momentum [GeV]\n"
+  "----\t------\t\t------\t----\t------\t------\t-------------------------------------"
+  "%s\n"
+  "---------------------------------------------------------------------------------------------\n"
+  "Total:\t\t\t\t\t\t      % 9.4f % 9.4f % 9.4f % 9.4f", os.str().c_str(), pxtot, pytot, pztot, etot));
 }

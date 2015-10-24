@@ -45,6 +45,7 @@ class Particle {
       Pomeron = 990,
       Reggeon = 110
     };
+    friend std::ostream& operator<<(std::ostream& os, const Particle::ParticleCode& pc);
     /**
      * Gets the mass in GeV/c**2 of a particle given its PDG identifier
      * @brief Gets the mass of a particle

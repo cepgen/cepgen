@@ -124,7 +124,7 @@ class GamGamLL : public GenericProcess
    * @brief Energies/momenta computation for the various particles, in the CM
    * system
    */
-  void Orient();
+  bool Orient();
   /**
    * Contains the expression of the matrix element squared for the
    * \f$\gamma\gamma\rightarrow\ell^{+}\ell^{-}\f$ process. It returns the
@@ -148,7 +148,7 @@ class GamGamLL : public GenericProcess
    * will then be feeded into the @a PeriPP method (thus are essential for the
    * evaluation of the full matrix element).
    */
-  void Pickin();
+  bool Pickin();
   int _nOpt;
   // COMMON/PICKZZ/
   /** @brief \f$\left|\mathbf p_1\right|\f$, 3-momentum norm of the first proton-like incoming particle */

@@ -22,7 +22,8 @@ class Logger
     ~Logger() { fBuilt=false; }
     static Logger* GetInstance();
     
-    enum LoggingLevel { Nothing, Error, Warning, Information, Debug, DebugInsideLoop };
+    enum LoggingLevel { Nothing=0, Error, Warning, Information, Debug, DebugInsideLoop };
+    friend std::ostream& operator<<(std::ostream& os, const Logger::LoggingLevel& lvl);
     LoggingLevel Level;
     std::ostream& OutputStream;
 

@@ -143,11 +143,6 @@ class Parameters {
      */
     bool store;
     /**
-     * Enables or disables the production of control plots for several kinematic quantities in this process
-     * @brief Do we need control plots all along the process?
-     */
-    bool debug;
-    /**
      * @brief Maximal number of events to generate in this run
      */
     int maxgen;

@@ -8,9 +8,7 @@ Jetset7Hadroniser::Jetset7Hadroniser() : GenericHadroniser("Jetset7")
 
 Jetset7Hadroniser::~Jetset7Hadroniser()
 {
-#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Destructor called" << std::endl;
-#endif
+  //Debug("Destructor called");
 }
 
 bool
@@ -29,7 +27,6 @@ Jetset7Hadroniser::Hadronise(Particle *part_)
   lujets_.k[4][0] = 0; // daughter
 
   this->luexec();
-  std::cout << __PRETTY_FUNCTION__ << " INFO" << std::endl;
   return true;
 }
 
@@ -62,12 +59,12 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
     njoin[i] = 0;
     for (int j=0; j<max_part_in_str; j++) jlpsf[i][j] = -1;
   }
-
-#ifdef DEBUG
-  std::cout <<__PRETTY_FUNCTION__ << " [DEBUG] Dump of the event before the hadronisation" << std::endl;
-  ev_->Dump();
-#endif
-
+  
+  if (Logger::GetInstance()->Level>=Logger::Debug) {
+    Debug("Dump of the event before the hadronisation");
+    ev_->Dump();
+  }
+  
   // Filling the common block to propagate to JETSET7
   lujets_.n = 0;
 
@@ -126,6 +123,8 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
     }
   }
 
+  std::ostringstream dbg;
+
   oldnpart = lujets_.n;
   //this->lulist(2);
 
@@ -174,19 +173,14 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
     pa.charge = this->luchge(pa.pdgId);
 
     if (lujets_.k[2][p]!=0) {
-#ifdef DEBUG
-      std::cout << __PRETTY_FUNCTION__ << " [DEBUG] "
-		            << pa.id << " (pdgId=" << pa.pdgId << ") has mother "
-		            << lujets_.k[2][p] << " (pdgId=" << lujets_.k[1][lujets_.k[2][p]-1] << ")"
-		            << std::endl;
-#endif
+      dbg << Form("\n\t%2d (pdgId=%4d) has mother %2d (pdgId=%4d)", pa.id, pa.pdgId, lujets_.k[2][p], lujets_.k[1][lujets_.k[2][p]-1]);
       pa.SetMother(ev_->GetById(lujets_.k[2][p]-1));
     }
 
     ev_->AddParticle(pa);
   }
-
-  ev_->Dump();
+  Debug(Form("Passed the string construction stage.\n\t %d string objects were identified and constructed",
+             "%s", max_str_in_evt, dbg.str().c_str()));
 
   return true;
 }
@@ -201,22 +195,14 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
   double pmxda[4];
   double partpb[4];
 
-#ifdef DEBUG
-  std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Hadronisation preparation called !" << std::endl;
-#endif
+  Debug("Hadronisation preparation called!");
 
   ParticlesRef pp;
   ParticlesRef::iterator p;
   
-  //ev_->Dump();
-
   pp = ev_->GetParticles();
   for (p=pp.begin(); p!=pp.end(); p++) {
     if ((*p)->status==-2) { // One proton to be fragmented
-
-      //(*p)->Dump();
-      //std::cout << "m2 = " << (*p)->M2() << std::endl;
-      
       ranudq = drand();
       if (ranudq<1./9.) {
         singlet_id = Particle::dQuark;
@@ -253,20 +239,14 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
       Lorenb((*p)->M(), (*p)->P4(), pmxda, partpb);
 
       if (!(partpb[0]<0) and !(partpb[0]>0)) {
-	/*std::cout << "=== " << pmxp << "\t" << ulmdq << "\t" << ulmq << "\t" << (*p)->M() << std::endl;
-	for (int i=0; i<4; i++) {
-	  std::cout << "(" << i << ")-> " << pmxda[i] << " --> " << partpb[i] << std::endl;
-	  }*/
-	return false;
+        return false;
       }
 
       Particle singlet((*p)->role, singlet_id);
       singlet.status = 3;
       //singlet.SetMother(ev_->GetOneByRole((*p)->role));
       if (!singlet.P(partpb)) {
-	//#ifdef ERROR
-        std::cerr << __PRETTY_FUNCTION__ << " ERROR while setting the 4-momentum of singlet" << std::endl;
-	//#endif
+        throw Exception(__PRETTY_FUNCTION__, "ERROR while setting the 4-momentum of singlet", JustWarning);
       }
       //std::cout << "singlet, mass = " << singlet.M() << std::endl;
       //singlet.Dump();
@@ -284,9 +264,7 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
       doublet.status = 3;
       doublet.SetMother(ev_->GetOneByRole((*p)->role));
       if (!doublet.P(partpb)) {
-	//#ifdef ERROR
-        std::cout << __PRETTY_FUNCTION__ << " ERROR while setting the 4-momentum of doublet" << std::endl;
-	//#endif
+        throw Exception(__PRETTY_FUNCTION__, "ERROR while setting the 4-momentum of doublet", JustWarning);
       }
       //std::cout << "doublet, mass = " << doublet.M() << std::endl;
       doublet.M(-1); //FIXME
@@ -297,35 +275,28 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
 
         ev_->AddParticle(singlet);
         ev_->AddParticle(doublet);
-#ifdef DEBUG
-        std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Quark/diquark content succesfully added to the event!" << std::endl;
-#endif
+        
+        Debug("Quark/diquark content succesfully added to the event!");
       }
       else { // Quark/diquark content already present in the event
 	      std::vector<int> daugh;
 	      std::vector<int>::iterator did;
 
-#ifdef DEBUG
-        std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Quark/diquark content already present in the event!" << std::endl
-		        << "  Role of these particles: " << (*p)->role << std::endl;
-#endif
-	      daugh = (*p)->GetDaughters();
-	      for (did=daugh.begin(); did!=daugh.end(); did++) {
-	        if (ev_->GetById(*did)->pdgId==1 or ev_->GetById(*did)->pdgId==2) { // Quark
-	          singlet.SetMother(ev_->GetById((*p)->id));
-	          *(ev_->GetById(*did)) = singlet;
-#ifdef DEBUG
-            std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Singlet replaced" << std::endl;
-#endif
-	        }
-	        else { // Diquark
-	          doublet.SetMother(ev_->GetById((*p)->id));
-	          *(ev_->GetById(*did)) = doublet;
-#ifdef DEBUG
-            std::cout << __PRETTY_FUNCTION__ << " [DEBUG] Doublet replaced" << std::endl;
-#endif
-	        }
-	      }
+        Debug(Form("Quark/diquark content already present in the event!\n\tRole of these particles: %d", (*p)->role));
+        
+        daugh = (*p)->GetDaughters();
+        for (did=daugh.begin(); did!=daugh.end(); did++) {
+          if (ev_->GetById(*did)->pdgId==1 or ev_->GetById(*did)->pdgId==2) { // Quark
+            singlet.SetMother(ev_->GetById((*p)->id));
+            *(ev_->GetById(*did)) = singlet;
+            Debug("Singlet replaced");
+          }
+          else { // Diquark
+            doublet.SetMother(ev_->GetById((*p)->id));
+            *(ev_->GetById(*did)) = doublet;
+            Debug("Doublet replaced");
+          }
+        }
       }
     }
   }

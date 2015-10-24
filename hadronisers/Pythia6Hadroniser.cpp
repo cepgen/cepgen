@@ -270,19 +270,19 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
 
         Debug(Form("Quark/diquark content already present in the event!\n\tRole of these particles: %d", (*p)->role));
         
-	      daugh = (*p)->GetDaughters();
-	      for (did=daugh.begin(); did!=daugh.end(); did++) {
-	        if (ev_->GetById(*did)->pdgId==1 or ev_->GetById(*did)->pdgId==2) { // Quark
-	          singlet.SetMother(ev_->GetById((*p)->id));
-	          *(ev_->GetById(*did)) = singlet;
-            Debug("Singlet replaced")
-	        }
-	        else { // Diquark
-	          doublet.SetMother(ev_->GetById((*p)->id));
-	          *(ev_->GetById(*did)) = doublet;
-            Debug("Doublet replaced")
-	        }
-	      }
+        daugh = (*p)->GetDaughters();
+        for (did=daugh.begin(); did!=daugh.end(); did++) {
+          if (ev_->GetById(*did)->pdgId==1 or ev_->GetById(*did)->pdgId==2) { // Quark
+            singlet.SetMother(ev_->GetById((*p)->id));
+            *(ev_->GetById(*did)) = singlet;
+            Debug("Singlet replaced");
+          }
+          else { // Diquark
+            doublet.SetMother(ev_->GetById((*p)->id));
+            *(ev_->GetById(*did)) = doublet;
+            Debug("Doublet replaced");
+          }
+        }
       }
     }
   }
