@@ -10,14 +10,9 @@ int
 PPtoLL::GetNdim(ProcessMode process_mode_) const
 {
   switch (process_mode_) {
-    case ElasticElastic:
-    default:
-      return 8;
-    case ElasticInelastic:
-    case InelasticElastic:
-      return 9;
-    case InelasticInelastic:
-      return 10;
+    case ElasticElastic: default:                 return 8;
+    case ElasticInelastic: case InelasticElastic: return 9;
+    case InelasticInelastic:                      return 10;
   }
 }
 
