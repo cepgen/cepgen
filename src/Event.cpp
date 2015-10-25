@@ -22,6 +22,26 @@ Event::operator=(const Event &ev_)
   return *this;
 }
 
+void
+Event::clear()
+{
+  fParticles.clear();
+  time_generation = -1.;
+  time_total = -1.;
+}
+
+void
+Event::Init()
+{
+  fLastParticle = fParticles.end();
+}
+
+void
+Event::Restore()
+{
+  fParticles.erase(fLastParticle, fParticles.end());
+}
+
 ParticlesRef
 Event::GetByRole(int role_)
 {

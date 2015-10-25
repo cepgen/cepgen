@@ -19,7 +19,7 @@ static std::stringstream error;
  * @brief Provides a random number generated along a uniform distribution
  * between 0 and 1
  */
-#define drand() (double)(rand())/RAND_MAX
+inline double drand() { srand (time(NULL)); return static_cast<double>(rand())/RAND_MAX; }
 
 /// Formats a string using a printf style format descriptor.
 std::string Form(const std::string fmt, ...);
@@ -68,11 +68,12 @@ class Timer
  * - \f$y_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\f$ the new variable
  * - \f$\mathrm dy_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\log\frac{x_{min}}{x_{max}}\f$, the new variable's differential form
  * @brief Redefines the variables of integration in order to avoid the strong peaking of the integrant.
- * @param expo_ Exponant
- * @param xmin_ Minimal value of the variable
- * @param xmax_ Maximal value of the variable
- * @param out_ The new variable definition
- * @param dout_ The differential variant of the new variable definition
+ * @param[in] expo_ Exponant
+ * @param[in] xmin_ Minimal value of the variable
+ * @param[in] xmax_ Maximal value of the variable
+ * @param[out] out_ The new variable definition
+ * @param[out] dout_ The differential variant of the new variable definition
+ * @param[in] var_name_ The variable name
  * @note This method overrides the set of `mapxx` subroutines in ILPAIR, with a slight difference according to the sign of the
  *  \f$\mathrm dy_{out}\f$ parameter :
  *  - left unchanged :
@@ -80,7 +81,7 @@ class Timer
  *  - opposite sign :
  * > `mapt1`, `mapt2`
  */
-void Map(double expo_, double xmin_, double xmax_, double* out_, double* dout_);
+void Map(double expo_, double xmin_, double xmax_, double* out_, double* dout_, const std::string& var_name_="");
 void Mapla(double,double,int,double,double,double*,double*);
 //void Symmetrise(double, double, double*, double*);
 

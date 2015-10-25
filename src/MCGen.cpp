@@ -57,7 +57,8 @@ MCGen::ComputeXsection(double* xsec_, double *err_)
   if (!fVegas) BuildVegas();
 
   Info("Starting the computation of the process cross-section");
-  
+
+  PrepareFunction();
   fVegas->Integrate(xsec_, err_);
   
   fCrossSection = *xsec_;
@@ -105,11 +106,31 @@ MCGen::LaunchGeneration()
   *(this->parameters->file) << "</LesHouchesEvents>" << std::endl;
 }
 
+void
+MCGen::PrepareFunction()
+{
+  Kinematics kin;
+  kin.kinematics = static_cast<unsigned int>(parameters->process_mode);
+  kin.q2min = parameters->minq2;
+  kin.q2max = parameters->maxq2;
+  kin.mode = parameters->mcut;
+  kin.ptmin = parameters->minpt;
+  kin.ptmax = parameters->maxpt;
+  kin.etamin = parameters->mineta;
+  kin.etamax = parameters->maxeta;
+  kin.emin = parameters->minenergy;
+  kin.emax = parameters->maxenergy;
+  kin.mxmin = parameters->minmx;
+  kin.mxmax = parameters->maxmx;
+  parameters->process->AddEventContent();
+  parameters->process->SetKinematics(kin);
+  Debug("Function prepared to be integrated!");
+}
+
 double f(double* x_, size_t ndim_, void* params_)
 {
   double ff;
   Parameters *p;
-  Kinematics kin;
   Timer tmr;
   bool hadronised;
   double num_hadr_trials;
@@ -118,8 +139,8 @@ double f(double* x_, size_t ndim_, void* params_)
   Particle* part;
 
   p = static_cast<Parameters*>(params_);
+  p->process->SetPoint(ndim_, x_);
 
-  //if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
   if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
     os.str(""); for (unsigned int i=0; i<ndim_; i++) { os << x_[i] << " "; }
     DebugInsideLoop(Form("Computing dim-%d point ( %s)", ndim_, os.str().c_str()));
@@ -132,44 +153,31 @@ double f(double* x_, size_t ndim_, void* params_)
   ff = 0.;
 
   DebugInsideLoop(Form("Function f called -- some parameters:\n\t"
-                            "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
-                            "  remnant mode: %d",
-                            p->in1p, p->in2p, p->remnant_mode));
+                       "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
+                       "  remnant mode: %d",
+                       p->in1p, p->in2p, p->remnant_mode));
+    
+  float now = tmr.elapsed();
+  //std::cout << "0: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
+  p->process->ClearEvent();
+  //std::cout << "1: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
   
-  kin.kinematics = static_cast<unsigned int>(p->process_mode);
-  kin.q2min = p->minq2;
-  kin.q2max = p->maxq2;
-  kin.mode = p->mcut;
-  kin.ptmin = p->minpt;
-  kin.ptmax = p->maxpt;
-  kin.etamin = p->mineta;
-  kin.etamax = p->maxeta;
-  kin.emin = p->minenergy;
-  kin.emax = p->maxenergy;
-  kin.mxmin = p->minmx;
-  kin.mxmax = p->maxmx;
-  
-  p->process->SetKinematics(kin);
-
   ev = p->process->GetEvent();
-  ev->clear();
-  p->process->AddEventContent();
-  p->process->SetPoint(ndim_, x_);
   
   part = ev->GetOneByRole(GenericProcess::IncomingBeam1);
   part->SetPDGId(p->in1pdg);
   part->P(0., 0., p->in1p);
-  part->charge = p->in1pdg/abs(p->in1pdg);
 
   part = ev->GetOneByRole(GenericProcess::IncomingBeam2);
   part->SetPDGId(p->in2pdg);
   part->P(0., 0., -p->in2p);
-  part->charge = p->in2pdg/abs(p->in2pdg);
-  
+  //std::cout << "2: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
+
   // Then add outgoing leptons
   ev->GetOneByRole(GenericProcess::CentralParticle1)->SetPDGId(p->pair);
   ev->GetOneByRole(GenericProcess::CentralParticle2)->SetPDGId(p->pair);
 
+  //std::cout << "3: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
   // Then add outgoing protons or remnants
   switch (p->process_mode) {
     case GenericProcess::ElasticElastic: break; // nothing to change in the event
@@ -185,8 +193,14 @@ double f(double* x_, size_t ndim_, void* params_)
   // Check that everything is there
   if (!p->process->IsKinematicsDefined()) return 0.;
 
+  //std::cout << "4: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
+  // Prepare the function to be integrated
   p->process->BeforeComputeWeight();
+  p->process->PrepareKinematics();
+
+  //std::cout << "5: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
   ff = p->process->ComputeWeight();
+  //std::cout << "6: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
   if (ff<0.) return 0.;
   
   //ev->Dump();
@@ -194,7 +208,7 @@ double f(double* x_, size_t ndim_, void* params_)
     p->process->FillKinematics(false);
     p->process->GetEvent()->time_generation = tmr.elapsed();
 
-    if (kin.kinematics!=GenericProcess::ElasticElastic) {
+    if (p->process_mode!=GenericProcess::ElasticElastic) {
 
       Debug(Form("Event before calling the hadroniser (%s)", p->hadroniser->GetName().c_str()));
       if (Logger::GetInstance()->Level>=Logger::Debug) p->process->GetEvent()->Dump();
@@ -229,8 +243,6 @@ double f(double* x_, size_t ndim_, void* params_)
     //p->process->GetEvent()->Store(p->file);
 
   }
-  //p->process->ClearEvent();
-  p->process->GetEvent()->clear(); // need to move this sw else ?
 
   if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
     os.str(""); for (unsigned int i=0; i<ndim_; i++) { os << Form("%10.8f ", x_[i]); }

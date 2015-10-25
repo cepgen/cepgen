@@ -53,6 +53,7 @@ class GenericProcess
   virtual ~GenericProcess();
 
   inline virtual void AddEventContent() {;}
+  void ClearEvent();
   void PrepareKinematics();
   inline virtual void BeforeComputeWeight() {;}
   /**
@@ -130,6 +131,7 @@ class GenericProcess
    */
   inline std::string GetName() { return fName; }
  protected:
+  inline virtual void AddEventKinematics() {;}
   void SetEventContent(IncomingState is, OutgoingState os);
   /**
    * Specifies the incoming particles' kinematics as well as their properties

@@ -65,8 +65,7 @@ class GamGamLL : public GenericProcess
    */
   double ComputeWeight();
   int GetNdim(ProcessMode) const;
-  void FillKinematics(bool);
-  void SetKinematics(Kinematics);
+  void FillKinematics(/*bool*/);
   /**
    * Computes the mass of the outgoing proton remnant if any
    * @brief Computes the ougoing proton remnant mass

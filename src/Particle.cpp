@@ -3,19 +3,16 @@
 Particle::Particle() :
   id(-1), charge(999.), name(""), role(-1),
   helicity(0.),
-  status(0), fPDGid(invalidParticle), fMass(-1.),
+  status(0), fMass(-1.), fPDGid(invalidParticle), fP4({ 0., 0., 0., -1. }),
   fIsPrimary(true)
-{
-  for (int i=0; i<4; i++) fP4[i] = 0.;
-}
+{}
 
 Particle::Particle(int role_, ParticleCode pdgId_) :
   id(-1), charge(999.), name(""), role(role_),
-  status(0), fPDGid(pdgId_), fMass(-1.),
+  status(0), fMass(-1.), fPDGid(pdgId_), fP4({ 0., 0., 0., -1. }),
   fIsPrimary(true)
 {
-  for (int i=0; i<4; i++) fP4[i] = 0.;
-  if (fPDGid!=invalidParticle) M(-1.);
+  if (fPDGid!=invalidParticle) SetM();
 }
 
 Particle::~Particle()
@@ -32,7 +29,7 @@ Particle::operator=(const Particle &part_)
     this->id = part_.id;
   }
   this->P(part_.Px(), part_.Py(), part_.Pz(), part_.E());
-  this->M(part_.fMass);
+  this->SetM(part_.fMass);
 
   return *this;
 }
@@ -43,7 +40,7 @@ Particle::operator+=(const Particle &part_)
   fPDGid = (part_.fPDGid==fPDGid) ? fPDGid : invalidParticle;
   role = (part_.role==role) ? role : -1;
   for (int i=0; i<4; i++) fP4[i]+= part_.fP4[i];
-  M(-1.);
+  SetM();
 
   return *this;
 }
@@ -54,7 +51,7 @@ Particle::operator-(const Particle &part_)
   fPDGid = (part_.fPDGid==fPDGid) ? fPDGid : invalidParticle;
   role = (part_.role==role) ? role : -1;
   for (int i=0; i<4; i++) fP4[i]-= part_.fP4[i];
-  M(-1.);
+  SetM();
 
   return *this;
 }
@@ -89,19 +86,20 @@ Particle::GetLHEline(bool revert_)
 }
 
 bool
-Particle::M(double m_)
+Particle::SetM(double m_)
 {
   double mass;
   if (m_>=0.) fMass = m_;
   else if (fPDGid!=invalidParticle) {
     mass = GetMassFromPDGId(fPDGid);
     if (mass<0.) return false;
-    if (fP4[3]<0.) {
+    if (fP4[3]<0.) { // invalid energy
       fMass = mass;
       fP4[3] = std::pow(P(), 2)+M2();
       return true;
     }
-    if (std::pow(E(), 2)-std::pow(P(), 2)!=std::pow(mass, 2)) mass = std::sqrt(std::pow(E(), 2)-std::pow(P(), 2));
+    if (std::pow(E(), 2)-std::pow(P(), 2)!=std::pow(mass, 2))
+      mass = std::sqrt(std::pow(E(), 2)-std::pow(P(), 2));
     fMass = mass;
     return true;
   }
@@ -118,8 +116,8 @@ Particle::SetMother(Particle* part_)
   fMothers.insert(part_->id);
   fIsPrimary = false;
   
-  Debug(Form("Particle %2d (pdgId=%4d) is the new mother of %2d (pdgId=%4d)",
-	     part_->id+1, part_->GetPDGId(), id+1, fPDGid));
+  DebugInsideLoop(Form("Particle %2d (pdgId=%4d) is the new mother of %2d (pdgId=%4d)",
+                       part_->id+1, part_->GetPDGId(), id+1, fPDGid));
   
   part_->AddDaughter(this);
 };
@@ -130,17 +128,17 @@ Particle::AddDaughter(Particle* part_)
   std::pair<ParticlesIds::iterator,bool> ret;
   ret = fDaughters.insert(part_->id);
 
-  if (Logger::GetInstance()->Level>=Logger::Debug) {
+  if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
     std::ostringstream os;
     ParticlesIds::iterator it;
-    for (it=fDaughters.begin(); it!=fDaughters.end(); it++) os << Form("\n\t * %d", *it);
-    Debug(Form("Particle %2d (pdgId=%4d) has now %2d daughter(s):"
-               "%s", role, fPDGid, NumDaughters(), os.str().c_str()));
+    for (it=fDaughters.begin(); it!=fDaughters.end(); it++) os << Form("\n\t * id=%d", *it);
+    DebugInsideLoop(Form("Particle %2d (pdgId=%4d) has now %2d daughter(s):"
+                         "%s", role, fPDGid, NumDaughters(), os.str().c_str()));
   }
   
   if (ret.second) {
-    Debug(Form("Particle %2d (pdgId=%4d) is a new daughter of %2d (pdgId=%4d)",
-	       part_->role, part_->GetPDGId(), role, fPDGid));
+    DebugInsideLoop(Form("Particle %2d (pdgId=%4d) is a new daughter of %2d (pdgId=%4d)",
+                         part_->role, part_->GetPDGId(), role, fPDGid));
     
     if (!part_->Primary() && part_->GetMothersIds().size()<1) {
       part_->SetMother(this);
@@ -160,7 +158,7 @@ Particle::GetDaughters()
   
   out.reserve(fDaughters.size());
   
-  DebugInsideLoop(Form("Reserved %d slot(s) for the daughter particle(s)", fDaughters.size()));
+  //DebugInsideLoop(Form("Reserved %d slot(s) for the daughter particle(s)", fDaughters.size()));
   
   for (it=fDaughters.begin(); it!=fDaughters.end(); it++) {
     if (*it==-1) continue;
@@ -168,7 +166,7 @@ Particle::GetDaughters()
   }
   std::sort(out.begin(), out.end());
   
-  DebugInsideLoop(Form("Returning a vector containing %d particle(s)", out.size()))
+  //DebugInsideLoop(Form("Returning a vector containing %d particle(s)", out.size()))
   
   return out;
 }
@@ -179,7 +177,7 @@ Particle::Dump()
   //if (!Valid()) throw Exception(__PRETTY_FUNCTION__, Form("Particle with role \"%d\" is invalid", role), Fatal);
   
   std::vector<int> daugh;
-  std::ostringstream osm, osd;
+  std::ostringstream osm, osd, os;
   if (!Primary()) {
     ParticlesIds::iterator m;
     osm << "\n\t\tMothers = ";
@@ -187,17 +185,18 @@ Particle::Dump()
   }
   daugh = GetDaughters();
   for (unsigned int i=0; i<NumDaughters(); i++) osd << "\n\t\t* Id = " << daugh[i];
-  Info(Form("Id:\t%4d\t"
-            "role:\t%4d\n\t"
-            "Status:\t%4d\t"
-            "PDG Id:\t%4d\n\t"
+  os << fPDGid;
+  Info(Form("Id:\t%3d\t"
+            "role:\t%3d\t"
+            "status:\t% 3d\n\t"
+            "PDG Id:\t%4d -> %s\n\t"
             "(E,P) = (%4.2f, %4.2f, %4.2f, %4.2f) GeV\t"
             "(|P| = p = %4.2f GeV)\n\t"
-            " Pt = %4.2f GeV\teta = %4.3f\n\t"
-            " M = %4.2f GeV\n\t"
+            " Pt = %5.4f GeV\teta = %4.3f\n\t"
+            "  M = %5.4f GeV\n\t"
             "Primary? %d%s\n\t"
             "Daughters (%d)",
-            id, role, status, fPDGid,
+            id, role, status, fPDGid, os.str().c_str(),
             E(), Px(), Py(), Pz(), P(), Pt(), Eta(), M(),
             Primary(), osm.str().c_str(), NumDaughters(), osd.str().c_str()));
 }

@@ -510,11 +510,11 @@ PPtoLL::FillKinematics(bool symmetrise_)
   }
   if (fCuts.kinematics>1) {
     op1.status = -2;
-    op1.M(_mx);
+    op1.SetM();
   }
   else {
     op1.status = 1;
-    op1.M(-1); //FIXME
+    op1.SetM(); //FIXME
   }
   op1.SetMother(fEvent->GetOneByRole(1));
   fEvent->AddParticle(op1, true);
@@ -528,11 +528,11 @@ PPtoLL::FillKinematics(bool symmetrise_)
   }
   if (fCuts.kinematics==3) {
     op2.status = -2;
-    op2.M(_my);
+    op2.SetM(_my);
   }
   else {
     op2.status = 1;
-    op2.M(-1); //FIXME
+    op2.SetM(); //FIXME
   }
   op2.SetMother(fEvent->GetOneByRole(2));
   fEvent->AddParticle(op2, true);
@@ -552,7 +552,7 @@ PPtoLL::FillKinematics(bool symmetrise_)
     std::cerr << "Invalid outgoing lepton 1" << std::endl;
   }
   ol1.status = 1;
-  ol1.M(-1); //FIXME
+  ol1.SetM(); //FIXME
   ol1.SetMother(fEvent->GetOneByRole(1)); //FIXME
   fEvent->AddParticle(ol1, true);
 
@@ -564,7 +564,7 @@ PPtoLL::FillKinematics(bool symmetrise_)
     std::cerr << "Invalid outgoing lepton 2" << std::endl;
   }
   ol2.status = 1;
-  ol2.M(-1); //FIXME
+  ol2.SetM(); //FIXME
   ol2.SetMother(fEvent->GetOneByRole(2)); //FIXME
   fEvent->AddParticle(ol2, true);
 }

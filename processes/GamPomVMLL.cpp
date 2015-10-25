@@ -762,7 +762,7 @@ GamPomVMLL::FragGl()
   mohep[iglue][1] = 0;*/
   Particle glueball(43, ifragv);
   glueball.SetMother(fEvent->GetOneByRole(4)); // 4 = idifv
-  glueball.M(dmasgl);
+  glueball.SetM(dmasgl);
   glueball.P(pcmglu);
   glueball.LorentzBoost(_ppcms8[idifv][4], _ppcms8[idifv]);
   //glueball.P() -> Lorentz boost
@@ -781,7 +781,7 @@ GamPomVMLL::FragGl()
   mohep[ivm][1] = 0;*/
   Particle VM(4, itypvm);
   VM.SetMother(fEvent->GetOneByRole(42)); // 42 = idifv // FIXME???
-  VM.M(dmasvm);
+  VM.SetM(dmasvm);
   VM.P(_pcmvm);
   VM.LorentzBoost(_ppcms8[idifv][4], _ppcms8[idifv]);
   VM.status = 1;
@@ -825,7 +825,7 @@ GamPomVMLL::GEPhot(double* q2_, int* heli_)
     }
     if (p->role==3) { // photon from EPA
       p->role = IGAM;
-      p->E(-1);
+      p->SetE();
       *heli_ = p->helicity;
       fEvent->AddParticle(*p);
       continue;
@@ -931,7 +931,7 @@ GamPomVMLL::GenDif()
   dps.P(pcmpx[0], pcmpx[1], pcmpx[2], pcmpx[3]);
   std::cout << pcmpx[2] << std::endl;
   std::cout << "------> " << std::pow(pcmpx[3], 2)-std::pow(pcmpx[0], 2)-std::pow(pcmpx[1], 2)-std::pow(pcmpx[2], 2) << std::endl;
-  dps.M(-1);
+  dps.SetM();
   
   DebugInsideLoop(Form("Diffractive proton: %5.3f <> %5.3f", pcmpx[4], dps.M()));
   

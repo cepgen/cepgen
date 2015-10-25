@@ -155,7 +155,7 @@ class Particle {
      * @brief Set the particle's mass in \f$\text{GeV}/c^{2}\f$
      * @return A boolean stating whether or not the mass was correctly set
      */
-    bool M(double m_);
+    bool SetM(double m_=-1.);
     /**
      * @brief Gets the particle's squared mass
      */
@@ -195,7 +195,7 @@ class Particle {
      */
     inline bool P(double px_,double py_,double pz_) {
       double pp4[] = { px_, py_, pz_, -1. }; std::copy(pp4, pp4+4, fP4);
-      M(-1.); E(-1.);
+      SetM(); SetE();
       return true;
     };
     /**
@@ -259,7 +259,7 @@ class Particle {
      * @brief Sets the particle's energy
      * @param[in] E_ Energy, in GeV
      */
-    inline void E(double E_) { fP4[3] = (E_<0.) ? std::sqrt(M2()+std::pow(P(),2)) : E_; };
+    inline void SetE(double E_=-1.) { fP4[3] = (E_<0.) ? std::sqrt(M2()+std::pow(P(),2)) : E_; };
     /**
      * @brief Gets the particle's energy in GeV
      */

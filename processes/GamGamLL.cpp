@@ -15,11 +15,11 @@ GamGamLL::AddEventContent()
 {
   IncomingState is; OutgoingState os;
   is.insert(ParticleWithRole(IncomingBeam1, Particle::Proton));
-  os.insert(ParticleWithRole(OutgoingBeam1, Particle::Proton));
   is.insert(ParticleWithRole(IncomingBeam2, Particle::Proton));
-  os.insert(ParticleWithRole(OutgoingBeam2, Particle::Proton));
   is.insert(ParticleWithRole(Parton1, Particle::Photon));
   is.insert(ParticleWithRole(Parton2, Particle::Photon));
+  os.insert(ParticleWithRole(OutgoingBeam1, Particle::Proton));
+  os.insert(ParticleWithRole(OutgoingBeam2, Particle::Proton));
   os.insert(ParticleWithRole(CentralParticle1, Particle::Muon));
   os.insert(ParticleWithRole(CentralParticle2, Particle::Muon));
   GenericProcess::SetEventContent(is, os);
@@ -102,7 +102,7 @@ GamGamLL::Pickin()
   _s2 = ds2 = 0.;
   if (_nOpt==0) {
     smax = fS+_w3-2.*_mp3*fSqS;
-    Map(x(2), sig1, smax, &_s2, &ds2);
+    Map(x(2), sig1, smax, &_s2, &ds2, "s2");
     sig1 = _s2; //FIXME!!!!!!!!!!!!!!!!!!!!
   }
   
@@ -133,7 +133,7 @@ GamGamLL::Pickin()
   /////
 
   // t1, the first photon propagator, is defined here
-  Map(x(0), _t1min, _t1max, &_t1, &dt1);
+  Map(x(0), _t1min, _t1max, &_t1, &dt1, "t1");
   // changes wrt mapt1 : dx->-dx
   dt1 = -dt1;
   
@@ -181,7 +181,7 @@ GamGamLL::Pickin()
       DebugInsideLoop(Form("sig2 truncated to splus = %f", splus));
     }
     if (_nOpt<-1) {
-      Map(x(2), sig2, s2max, &_s2, &ds2);
+      Map(x(2), sig2, s2max, &_s2, &ds2, "s2");
     }
     else { // _nOpt==-1
       Mapla(_t1, _w2, x(2), sig2, s2max, &_s2, &ds2);
@@ -207,7 +207,7 @@ GamGamLL::Pickin()
   _t2min = (_w52*_dd4+(_dd4-_w52)*(_dd4*_w2-_w52*_t1)/s2x)/_t2max;
 
   // t2, the second photon propagator, is defined here
-  Map(x(1), _t2min, _t2max, &_t2, &dt2);
+  Map(x(1), _t2min, _t2max, &_t2, &dt2, "t2");
   // changes wrt mapt2 : dx->-dx
 
   dt2 = -dt2;
@@ -241,7 +241,7 @@ GamGamLL::Pickin()
     s2p = c/(_t2*s2min);
   }
   // 9
-  if (_nOpt>1)       Map(x(2), s2min, s2max, &_s2, &ds2);
+  if (_nOpt>1)       Map(x(2), s2min, s2max, &_s2, &ds2, "s2");
   else if (_nOpt==1) Mapla(_t1, _w2, x(2), s2min, s2max, &_s2, &ds2);
 
   ap = -std::pow(_s2+d8, 2)/4.+_s2*_t1;
@@ -406,18 +406,8 @@ GamGamLL::Orient()
   // FIXME there should be a more beautiful way to check for nan!
   // (http://stackoverflow.com/questions/570669/checking-if-a-double-or-float-is-nan-in-c)
   // FIXME dropped in CDF version
-  if (!(_dd3>=0.) && !(_dd3<0.)) { // NaN
-#ifdef ERROR
-    std::cerr << __PRETTY_FUNCTION__ << " [ERROR]" << std::endl
-	      << "  dd3 == NaN" << std::endl;
-#endif
-  }
-  if (!(_dd1>=0.) && !(_dd1<0.)) { // NaN
-#ifdef ERROR
-    std::cerr << __PRETTY_FUNCTION__ << " [ERROR]" << std::endl
-	      << "  dd1 == NaN" << std::endl;
-#endif
-  }
+  if (!(_dd3>=0.) && !(_dd3<0.)) { Error("dd3 == NaN"); } // NaN
+  if (!(_dd1>=0.) && !(_dd1<0.)) { Error("dd1 == NaN"); } // NaN
   /////
 
   if (_st3>1.) { Warning(Form("st3 = %f > 1", _st3)); return false; }
@@ -507,7 +497,7 @@ GamGamLL::ComputeMX(double x_, double outmass_, double lepmass_, double *dw_)
   wx2min = std::pow(std::max(Particle::GetMassFromPDGId(Particle::Proton)+Particle::GetMassFromPDGId(Particle::PiPlus), fCuts.mxmin), 2);
   wx2max = std::pow(std::min(fSqS-outmass_-2.*lepmass_, fCuts.mxmax), 2);
   
-  Map(x_, wx2min, wx2max, &mx2, &dmx2);
+  Map(x_, wx2min, wx2max, &mx2, &dmx2, "mx2");
 
   DebugInsideLoop(Form("mX^2 in range (%f, %f), x = %f\n\t"
                        "mX^2 = %f, d(mX^2) = %f\n\t"
@@ -522,7 +512,7 @@ GamGamLL::BeforeComputeWeight()
 {
   if (!GenericProcess::fIsPointSet) return;
   
-  Particle *p1 = fEvent->GetOneByRole(1), *p2 = fEvent->GetOneByRole(2);
+  Particle *p1 = fEvent->GetOneByRole(IncomingBeam1), *p2 = fEvent->GetOneByRole(IncomingBeam2);
 
   _ep1 = p1->E();
   _mp1 = p1->M();
@@ -554,16 +544,18 @@ GamGamLL::BeforeComputeWeight()
   double m;
   switch (fCuts.kinematics) {
   case GenericProcess::ElasticElastic:
-    _w31 = _w52 = 0.;
-    break;
+    _dw31 = _dw52 = 0.; break;
   case GenericProcess::ElasticInelastic: case GenericProcess::InelasticElastic:
-    m = ComputeMX(x(7), fEvent->GetOneByRole(GenericProcess::IncomingBeam1)->M(), _ml6, &_dw31);
-    fEvent->GetOneByRole(GenericProcess::OutgoingBeam1)->M(m);
+    m = ComputeMX(x(7), fEvent->GetOneByRole(GenericProcess::IncomingBeam1)->M(), fEvent->GetOneByRole(GenericProcess::CentralParticle1)->M(), &_dw31);
+    fEvent->GetOneByRole(GenericProcess::OutgoingBeam1)->SetM(m);
+    fEvent->GetOneByRole(GenericProcess::OutgoingBeam2)->SetM(Particle::GetMassFromPDGId(fEvent->GetOneByRole(GenericProcess::OutgoingBeam2)->GetPDGId())); //FIXME
+    break;
   case GenericProcess::InelasticInelastic:
     m = ComputeMX(x(7), fEvent->GetOneByRole(GenericProcess::IncomingBeam2)->M(), fEvent->GetOneByRole(GenericProcess::CentralParticle1)->M(), &_dw31);
-    fEvent->GetOneByRole(GenericProcess::OutgoingBeam1)->M(m);
+    fEvent->GetOneByRole(GenericProcess::OutgoingBeam1)->SetM(m);
     m = ComputeMX(x(7), fEvent->GetOneByRole(GenericProcess::OutgoingBeam1)->M(), fEvent->GetOneByRole(GenericProcess::CentralParticle1)->M(), &_dw52);
-    fEvent->GetOneByRole(GenericProcess::OutgoingBeam2)->M(m);    
+    fEvent->GetOneByRole(GenericProcess::OutgoingBeam2)->SetM(m);
+    break;
   }
   _mp3 = fEvent->GetOneByRole(GenericProcess::OutgoingBeam1)->M();
   _mp5 = fEvent->GetOneByRole(GenericProcess::OutgoingBeam2)->M();
@@ -635,7 +627,7 @@ GamGamLL::ComputeWeight()
   
   DebugInsideLoop(Form("wmin = %f\n\twmax = %f\n\twmax/wmin = %f", wmin, wmax, wmax/wmin));
   
-  Map(x(4),wmin,wmax,&_w4,&dw4);
+  Map(x(4),wmin,wmax,&_w4,&dw4, "w4");
   _mc4 = std::sqrt(_w4);
   
   DebugInsideLoop(Form("Computed value for w4 = %f -> mc4 = %f", _w4, _mc4));
@@ -924,12 +916,10 @@ GamGamLL::ComputeWeight()
 }
 
 void
-GamGamLL::FillKinematics(bool symmetrise_)
+GamGamLL::FillKinematics(/*bool symmetrise_*/)
 {  
   double ranphi, cp, sp;
-  int rany, ransign, ranz, role;
-  double plab_op1[4], plab_op2[4];
-  double plab_ol1[4], plab_ol2[4], plab_ph1[4], plab_ph2[4];
+  int rany, ransign/*, ranz*/;
   
   // debugging variables
   double gmux, gmuy, gmuw, gmunu;
@@ -938,34 +928,34 @@ GamGamLL::FillKinematics(bool symmetrise_)
   rany = ((double)rand()>=.5*RAND_MAX) ? 1 : -1;
   ransign = ((double)rand()>=.5*RAND_MAX) ? 1 : -1;
   ranphi = ((double)rand()/RAND_MAX)*2.*pi;
-  ranz = 1;
+  /*ranz = 1;
   if (symmetrise_) {
     ranz = ((double)rand()>=.5*RAND_MAX) ? 1 : -1;
     //_pp3 *= ranz;
     //_pp5 *= ranz;
-  }
+    }*/
   cp = cos(ranphi);
   sp = sin(ranphi);
   
   // First incoming proton
-  Particle* ip1 = fEvent->GetOneByRole(1);
+  Particle* ip1 = fEvent->GetOneByRole(IncomingBeam1);
   ip1->SetPDGId(_pdg1);
-  double plab_ip1[] = { 0., 0., _gamma*_p+_betgam*_ep1, _gamma*_ep1+_betgam*_p };
+  double plab_ip1[4] = { 0., 0., _gamma*_p+_betgam*_ep1, _gamma*_ep1+_betgam*_p };
   if (!ip1->P(0., 0., plab_ip1[2], plab_ip1[3])) { Error("Invalid incoming proton 1"); }
   
   // Second incoming proton
-  Particle* ip2 = fEvent->GetOneByRole(2);
+  Particle* ip2 = fEvent->GetOneByRole(IncomingBeam2);
   ip2->SetPDGId(_pdg2);
-  double plab_ip2[] = { 0., 0., -_gamma*_p+_betgam*_ep2, _gamma*_ep2-_betgam*_p };
+  double plab_ip2[4] = { 0., 0., -_gamma*_p+_betgam*_ep2, _gamma*_ep2-_betgam*_p };
   if (!ip2->P(0., 0., plab_ip2[2], plab_ip2[3])) { Error("Invalid incoming proton 2"); }
   
   // First outgoing proton
-  Particle* op1 = fEvent->GetOneByRole(3);
+  Particle* op1 = fEvent->GetOneByRole(OutgoingBeam1);
   op1->SetPDGId(_pdg3);
-  plab_op1[0] = _pp3*_st3*_cp3;
-  plab_op1[1] = _pp3*_st3*_sp3;
-  plab_op1[2] = _gamma*_pp3*_ct3+_betgam*_ep3;
-  plab_op1[3] = _gamma*_ep3     +_betgam*_pp3*_ct3;
+  double plab_op1[4] = { _pp3*_st3*_cp3,
+                         _pp3*_st3*_sp3,
+                         _gamma*_pp3*_ct3+_betgam*_ep3,
+                         _gamma*_ep3     +_betgam*_pp3*_ct3 };
   if (!op1->P( plab_op1[0]*cp+rany*plab_op1[1]*sp,
               -plab_op1[0]*sp+rany*plab_op1[1]*cp,
                plab_op1[2],
@@ -975,22 +965,22 @@ GamGamLL::FillKinematics(bool symmetrise_)
   if (fCuts.kinematics>1) { // fragmenting remnants
     op1->status = -2;
     //std::cout << "M before : " << op1.M() << std::endl;
-    op1->M(_mp3);
+    op1->SetM(_mp3);
     //std::cout << "M as mp3 : " << _mp3 << std::endl;
     //std::cout << "M  after : " << op1.M() << std::endl;
   }
   else { // stable proton
     op1->status = 1;
-    op1->M(-1); //FIXME
+    op1->SetM(); //FIXME
   }
   
   // Second outgoing proton
-  Particle* op2 = fEvent->GetOneByRole(5);
+  Particle* op2 = fEvent->GetOneByRole(OutgoingBeam2);
   op2->SetPDGId(_pdg5);
-  plab_op2[0] = _pp5*_st5*_cp5;
-  plab_op2[1] = _pp5*_st5*_sp5;
-  plab_op2[2] = _gamma*_pp5*_ct5+_betgam*_ep5;
-  plab_op2[3] = _gamma*_ep5     +_betgam*_pp5*_ct5;
+  double plab_op2[4] = { _pp5*_st5*_cp5,
+                         _pp5*_st5*_sp5,
+                         _gamma*_pp5*_ct5+_betgam*_ep5,
+                         _gamma*_ep5     +_betgam*_pp5*_ct5 };
   if (!op2->P( plab_op2[0]*cp+rany*plab_op2[1]*sp,
               -plab_op2[0]*sp+rany*plab_op2[1]*cp,
                plab_op2[2],
@@ -999,104 +989,87 @@ GamGamLL::FillKinematics(bool symmetrise_)
   }
   if (fCuts.kinematics==4) { // fragmenting remnants
     op2->status = -2;
-    op2->M(_mp5);
+    op2->SetM(_mp5);
   }
   else { // stable proton
     op2->status = 1;
     /*std::cout << "----> " << _pp5*_pp5-_ep5*_ep5 << ", " << _gamma << ", " << _betgam << std::endl;
     std::cout << "second proton left undecayed : m = " << op2.M() << std::endl;
     op2.Dump();*/
-    op2->M(-1); //FIXME
+    op2->SetM(); //FIXME
   }
 
   // First incoming photon
   // Equivalent in LPAIR : PLAB(x, 3)
-  Particle ph1(41, Particle::Photon);
-  plab_ph1[0] = plab_ip1[0]-plab_op1[0];
-  plab_ph1[1] = plab_ip1[1]-plab_op1[1];
-  plab_ph1[2] = plab_ip1[2]-plab_op1[2];
-  plab_ph1[3] = plab_ip1[3]-plab_op1[3];
-  if (!ph1.P( plab_ph1[0]*cp+rany*plab_ph1[1]*sp,
-             -plab_ph1[0]*sp+rany*plab_ph1[1]*cp,
-	      plab_ph1[2],
-	      plab_ph1[3])) {
-    //std::cerr << "Invalid photon 1" << std::endl;
+  Particle* ph1 = fEvent->GetOneByRole(Parton1);
+  double plab_ph1[4] = { plab_ip1[0]-plab_op1[0],
+                         plab_ip1[1]-plab_op1[1],
+                         plab_ip1[2]-plab_op1[2],
+                         plab_ip1[3]-plab_op1[3] };
+  if (!ph1->P( plab_ph1[0]*cp+rany*plab_ph1[1]*sp,
+              -plab_ph1[0]*sp+rany*plab_ph1[1]*cp,
+               plab_ph1[2],
+               plab_ph1[3])) {
+    //Error("Invalid photon 1");
   }
-  ph1.charge = 0;
-  ph1.status = -1;
-  fEvent->AddParticle(ph1);
+  ph1->charge = 0;
+  ph1->status = -1; // "incoming beam"
   
   // Second incoming photon
   // Equivalent in LPAIR : PLAB(x, 4)
-  Particle ph2(42, Particle::Photon);
-  plab_ph2[0] = plab_ip2[0]-plab_op2[0];
-  plab_ph2[1] = plab_ip2[1]-plab_op2[1];
-  plab_ph2[2] = plab_ip2[2]-plab_op2[2];
-  plab_ph2[3] = plab_ip2[3]-plab_op2[3];
-  if (!ph2.P( plab_ph2[0]*cp+rany*plab_ph2[1]*sp,
-             -plab_ph2[0]*sp+rany*plab_ph2[1]*cp,
-              plab_ph2[2],
-              plab_ph2[3])) {
-    //std::cerr << "Invalid photon 2" << std::endl;
+  Particle* ph2 = fEvent->GetOneByRole(Parton2);
+  double plab_ph2[4] = { plab_ip2[0]-plab_op2[0],
+                         plab_ip2[1]-plab_op2[1],
+                         plab_ip2[2]-plab_op2[2],
+                         plab_ip2[3]-plab_op2[3] };
+  if (!ph2->P( plab_ph2[0]*cp+rany*plab_ph2[1]*sp,
+              -plab_ph2[0]*sp+rany*plab_ph2[1]*cp,
+               plab_ph2[2],
+               plab_ph2[3])) {
+    //Error("Invalid photon 2");
   }
-  ph2.charge = 0;
-  ph2.status = -1;
-  fEvent->AddParticle(ph2);
+  ph2->charge = 0;
+  ph2->status = -1; // "incoming beam"
 
   // Central (two-photon) system
-  Particle cs(4, Particle::Photon);
-  cs.status = -1;
-  fEvent->AddParticle(cs);
+  Particle* cs = fEvent->GetOneByRole(CentralSystem);
+  cs->status = -1;
+
+  ParticleRole role_ol1, role_ol2;
+  if (ransign<0) { role_ol1 = CentralParticle1; role_ol2 = CentralParticle2; }
+  else           { role_ol1 = CentralParticle2; role_ol2 = CentralParticle1; }
   
   // First outgoing lepton
-  role = (ransign<0) ? 6 : 7;
-  Particle ol1(role, static_cast<Particle::ParticleCode>(ransign*abs((int)_pdg6)));
-  plab_ol1[0] = _pl6*_st6*_cp6;
-  plab_ol1[1] = _pl6*_st6*_sp6;
-  plab_ol1[2] = _gamma*_pl6*_ct6+_betgam*_el6;
-  plab_ol1[3] = _gamma*_el6     +_betgam*_pl6*_ct6;
-  if (!ol1.P( plab_ol1[0]*cp+rany*plab_ol1[1]*sp,
-             -plab_ol1[0]*sp+rany*plab_ol1[1]*cp,
-              plab_ol1[2],
-              plab_ol1[3])) {
-    std::cerr << "Invalid outgoing lepton 1" << std::endl;
+  Particle* ol1 = fEvent->GetOneByRole(role_ol1);
+  ol1->SetPDGId(static_cast<Particle::ParticleCode>(ransign*abs((int)_pdg6)));
+  double plab_ol1[4] = { _pl6*_st6*_cp6,
+                         _pl6*_st6*_sp6,
+                         _gamma*_pl6*_ct6+_betgam*_el6,
+                         _gamma*_el6     +_betgam*_pl6*_ct6 };
+  if (!ol1->P( plab_ol1[0]*cp+rany*plab_ol1[1]*sp,
+              -plab_ol1[0]*sp+rany*plab_ol1[1]*cp,
+               plab_ol1[2],
+               plab_ol1[3])) {
+    Error("Invalid outgoing lepton 1");
   }
-  ol1.charge = ransign;
-  ol1.status = 1;
-  ol1.M(-1); //FIXME
-  fEvent->AddParticle(ol1);
+  ol1->status = 1;
+  ol1->SetM(); //FIXME
   
   // Second outgoing lepton
-  role = (ransign<0) ? 7 : 6;
-  Particle ol2(role, static_cast<Particle::ParticleCode>(-ransign*abs((int)_pdg7)));
-  plab_ol2[0] = _pl7*_st7*_cp7;
-  plab_ol2[1] = _pl7*_st7*_sp7;
-  plab_ol2[2] = _gamma*_pl7*_ct7+_betgam*_el7;
-  plab_ol2[3] = _gamma*_el7     +_betgam*_pl7*_ct7;
-  if (!ol2.P( plab_ol2[0]*cp+rany*plab_ol2[1]*sp,
-             -plab_ol2[0]*sp+rany*plab_ol2[1]*cp,
-	      plab_ol2[2],
-              plab_ol2[3])) {
-    std::cerr << "Invalid outgoing lepton 2" << std::endl;
+  Particle* ol2 = fEvent->GetOneByRole(role_ol2);
+  ol2->SetPDGId(static_cast<Particle::ParticleCode>(ransign*abs((int)_pdg7)));
+  double plab_ol2[4] = { _pl7*_st7*_cp7,
+                         _pl7*_st7*_sp7,
+                         _gamma*_pl7*_ct7+_betgam*_el7,
+                         _gamma*_el7     +_betgam*_pl7*_ct7 };
+  if (!ol2->P( plab_ol2[0]*cp+rany*plab_ol2[1]*sp,
+              -plab_ol2[0]*sp+rany*plab_ol2[1]*cp,
+	       plab_ol2[2],
+               plab_ol2[3])) {
+    Error("Invalid outgoing lepton 2");
   }
-  ol2.charge = -ransign;
-  ol2.status = 1;
-  ol2.M(-1); //FIXME
-  fEvent->AddParticle(ol2);
-
-  // Relations between particles
-
-  fEvent->GetOneByRole(3)->SetMother(fEvent->GetOneByRole(1));
-  fEvent->GetOneByRole(41)->SetMother(fEvent->GetOneByRole(1));
-
-  fEvent->GetOneByRole(5)->SetMother(fEvent->GetOneByRole(2));
-  fEvent->GetOneByRole(42)->SetMother(fEvent->GetOneByRole(2));
-
-  fEvent->GetOneByRole(4)->SetMother(fEvent->GetOneByRole(41));
-  fEvent->GetOneByRole(4)->SetMother(fEvent->GetOneByRole(42));
-
-  fEvent->GetOneByRole(6)->SetMother(fEvent->GetOneByRole(4));
-  fEvent->GetOneByRole(7)->SetMother(fEvent->GetOneByRole(4));
+  ol2->status = 1;
+  ol2->SetM(); //FIXME
 
   if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
     gmux = -_t2/(_ep1*_eg2-_pp1*_p3_g2[2])/2.;
@@ -1116,12 +1089,6 @@ GamGamLL::FillKinematics(bool symmetrise_)
                               "gmunu = %f", gmux, gmuy, gmuw, gmunu));
   }
   //fEvent->Dump();
-}
-
-void
-GamGamLL::SetKinematics(Kinematics cuts_)
-{
-  fCuts = cuts_;
 }
 
 double

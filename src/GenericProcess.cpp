@@ -28,6 +28,14 @@ GenericProcess::SetPoint(const unsigned int ndim_,double x_[])
 }
 
 void
+GenericProcess::ClearEvent()
+{
+  fEvent->Restore();
+  //AddEventContent();
+  AddEventKinematics();
+}
+
+void
 GenericProcess::PrepareKinematics()
 {
   Particle *ip1 = fEvent->GetOneByRole(IncomingBeam1), *ip2 = fEvent->GetOneByRole(IncomingBeam2);
@@ -47,16 +55,19 @@ GenericProcess::DumpPoint(const ExceptionType& et=Info)
   }
   if (et<Debugging) { Info(Form("Number of integration parameters: %d\n\t"
                                 "%s", fNumDimensions, os.str().c_str())); }
-  else           {   Debug(Form("Number of integration parameters: %d\n\t"
-                                "%s", fNumDimensions, os.str().c_str())); }
+  else              { Debug(Form("Number of integration parameters: %d\n\t"
+                                 "%s", fNumDimensions, os.str().c_str())); }
 }
 
 void
 GenericProcess::SetEventContent(IncomingState is, OutgoingState os)
 {
   bool has_cs = false;
+  // Incoming particles (incl. eventual partons)
   for (IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++) {
-    fEvent->AddParticle(Particle(ip->first, ip->second)); Particle* p = fEvent->GetOneByRole(ip->first);
+    fEvent->AddParticle(Particle(ip->first, ip->second));
+    Particle* p = fEvent->GetOneByRole(ip->first);
+    //p->SetM(ip-second);
     p->status = 0;
     switch (ip->first) {
       case IncomingBeam1: case IncomingBeam2: break;
@@ -66,15 +77,18 @@ GenericProcess::SetEventContent(IncomingState is, OutgoingState os)
       default: break;
     }
   }
-
+  // Prepare the central system if not already there
   if (!has_cs) {
     Particle* moth = fEvent->GetOneByRole(Parton1);
     Particle cs(4, moth->GetPDGId());
     cs.SetMother(moth);
     fEvent->AddParticle(cs);
   }
+  // Outgoing particles (central, and outgoing primary particles or remnants)
   for (OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++) {
-    fEvent->AddParticle(Particle(op->first, op->second)); Particle* p = fEvent->GetOneByRole(op->first);
+    fEvent->AddParticle(Particle(op->first, op->second));
+    Particle* p = fEvent->GetOneByRole(op->first);
+    //p->SetM(ip->second);
     p->status = 0;
     switch (op->first) {
       case OutgoingBeam1: p->SetMother(fEvent->GetOneByRole(IncomingBeam1)); break;
@@ -84,6 +98,7 @@ GenericProcess::SetEventContent(IncomingState is, OutgoingState os)
       default: break;
     }
   }
+  fEvent->Init();
 }
 
 std::ostream&

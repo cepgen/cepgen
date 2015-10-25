@@ -95,21 +95,21 @@ class MCGen {
   void LaunchGeneration();
   inline size_t GetNdim() { return parameters->process->GetNdim(parameters->process_mode); }
   inline double ComputePoint(double* x_) {
+    PrepareFunction();
     double res = f(x_, GetNdim(), (void*)parameters);
     std::ostringstream os;
     for (unsigned int i=0; i<GetNdim(); i++) { os << x_[i] << " "; }
     Debug(Form("Result for x[%i] = ( %s):\n\t%10.6f", GetNdim(), os.str().c_str(), res));
     return res;
   }
-  //HEPRUP GetHEPRUP();
   /**
    * @brief Physical Parameters used in the events generation and cross-section computation
    */
   Parameters* parameters;
   /** @brief Last event generated in this run */
   Event *last_event;
-  //void ComputePointValue() const;
  private:
+  void PrepareFunction();
   /**
    * @brief Calls the Vegas constructor (once, just before the first integration attempt)
    */

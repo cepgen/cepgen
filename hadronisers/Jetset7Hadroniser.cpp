@@ -168,7 +168,7 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
     }
     pa.status = lujets_.k[0][p];
     pa.P(lujets_.p[0][p], lujets_.p[1][p], lujets_.p[2][p], lujets_.p[3][p]);
-    pa.M(lujets_.p[4][p]);
+    pa.SetM(lujets_.p[4][p]);
     pa.name = this->luname(pa.GetPDGId());
     pa.charge = this->luchge(pa.GetPDGId());
 
@@ -202,101 +202,99 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
   
   pp = ev_->GetParticles();
   for (p=pp.begin(); p!=pp.end(); p++) {
-    if ((*p)->status==-2) { // One proton to be fragmented
-      ranudq = drand();
-      if (ranudq<1./9.) {
-        singlet_id = Particle::dQuark;
-        doublet_id = Particle::uu1Diquark;
-      }
-      else if (ranudq<5./9.) {
-        singlet_id = Particle::uQuark;
-        doublet_id = Particle::ud0Diquark;
-      }
-      else {
-        singlet_id = Particle::uQuark;
-        doublet_id = Particle::ud1Diquark;
-      }
-      ulmdq = ulmass(doublet_id);
-      ulmq = ulmass(singlet_id);
+    if ((*p)->status==-2) continue;
+    // One proton to be fragmented
+    ranudq = drand();
+    if (ranudq<1./9.) {
+      singlet_id = Particle::dQuark;
+      doublet_id = Particle::uu1Diquark;
+    }
+    else if (ranudq<5./9.) {
+      singlet_id = Particle::uQuark;
+      doublet_id = Particle::ud0Diquark;
+    }
+    else {
+      singlet_id = Particle::uQuark;
+      doublet_id = Particle::ud1Diquark;
+    }
+    ulmdq = ulmass(doublet_id);
+    ulmq = ulmass(singlet_id);
+    
+    // Choose random direction in MX frame
+    ranmxp = 2.*pi*drand();       // phi angle
+    ranmxt = acos(2.*drand()-1.); // theta angle
+    
+    // Compute momentum of decay particles from MX
+    pmxp = std::sqrt(std::pow( (*p)->M2() - std::pow(ulmdq, 2) + std::pow(ulmq, 2), 2) / (4.*(*p)->M2()) - std::pow(ulmq, 2));
+    
+    /*if (!(pmxda[0]<0) and !(pmxda[0]>0)) { //NaN
+      std::cout << "-----> " << pmxp << ", " << ranmxt << ", " << ranmxp << std::endl;
+      }*/
+    
+    // Build 4-vectors and boost decay particles
+    pmxda[0] = pmxp*sin(ranmxt)*cos(ranmxp);
+    pmxda[1] = pmxp*sin(ranmxt)*sin(ranmxp);
+    pmxda[2] = pmxp*cos(ranmxt);
+    pmxda[3] = std::sqrt(std::pow(pmxp, 2)+std::pow(ulmq, 2));
+    
+    Lorenb((*p)->M(), (*p)->P4(), pmxda, partpb);
+    
+    if (!(partpb[0]<0) and !(partpb[0]>0)) return false;
+    
+    Particle singlet((*p)->role, singlet_id);
+    singlet.status = 3;
+    //singlet.SetMother(ev_->GetOneByRole((*p)->role));
+    if (!singlet.P(partpb)) {
+      throw Exception(__PRETTY_FUNCTION__, "ERROR while setting the 4-momentum of singlet", JustWarning);
+    }
+    //std::cout << "singlet, mass = " << singlet.M() << std::endl;
+    //singlet.Dump();
+    singlet.SetM(); //FIXME
+    //ev_->AddParticle(singlet);
+    
+    pmxda[0] = -pmxda[0];
+    pmxda[1] = -pmxda[1];
+    pmxda[2] = -pmxda[2];
+    pmxda[3] = std::sqrt(std::pow(pmxp, 2)+std::pow(ulmdq, 2));
+    
+    Lorenb((*p)->M(), (*p)->P4(), pmxda, partpb);
+    
+    Particle doublet((*p)->role, doublet_id);
+    doublet.status = 3;
+    doublet.SetMother(ev_->GetOneByRole((*p)->role));
+    if (!doublet.P(partpb)) {
+      throw Exception(__PRETTY_FUNCTION__, "ERROR while setting the 4-momentum of doublet", JustWarning);
+    }
+    //std::cout << "doublet, mass = " << doublet.M() << std::endl;
+    doublet.SetM(); //FIXME
+    
+    if ((*p)->NumDaughters()==0) {
+      singlet.SetMother(ev_->GetById((*p)->id));
+      doublet.SetMother(ev_->GetById((*p)->id));
 
-      // Choose random direction in MX frame
-      ranmxp = 2.*pi*drand();       // phi angle
-      ranmxt = acos(2.*drand()-1.); // theta angle
-
-      // Compute momentum of decay particles from MX
-      pmxp = std::sqrt(std::pow( (*p)->M2() - std::pow(ulmdq, 2) + std::pow(ulmq, 2), 2) / (4.*(*p)->M2()) - std::pow(ulmq, 2));
-
-      /*if (!(pmxda[0]<0) and !(pmxda[0]>0)) { //NaN
-	std::cout << "-----> " << pmxp << ", " << ranmxt << ", " << ranmxp << std::endl;
-	}*/
-
-      // Build 4-vectors and boost decay particles
-      pmxda[0] = pmxp*sin(ranmxt)*cos(ranmxp);
-      pmxda[1] = pmxp*sin(ranmxt)*sin(ranmxp);
-      pmxda[2] = pmxp*cos(ranmxt);
-      pmxda[3] = std::sqrt(std::pow(pmxp, 2)+std::pow(ulmq, 2));
-
-      Lorenb((*p)->M(), (*p)->P4(), pmxda, partpb);
-
-      if (!(partpb[0]<0) and !(partpb[0]>0)) {
-        return false;
-      }
-
-      Particle singlet((*p)->role, singlet_id);
-      singlet.status = 3;
-      //singlet.SetMother(ev_->GetOneByRole((*p)->role));
-      if (!singlet.P(partpb)) {
-        throw Exception(__PRETTY_FUNCTION__, "ERROR while setting the 4-momentum of singlet", JustWarning);
-      }
-      //std::cout << "singlet, mass = " << singlet.M() << std::endl;
-      //singlet.Dump();
-      singlet.M(-1); //FIXME
-      //ev_->AddParticle(singlet);
-
-      pmxda[0] = -pmxda[0];
-      pmxda[1] = -pmxda[1];
-      pmxda[2] = -pmxda[2];
-      pmxda[3] = std::sqrt(std::pow(pmxp, 2)+std::pow(ulmdq, 2));
-
-      Lorenb((*p)->M(), (*p)->P4(), pmxda, partpb);
+      ev_->AddParticle(singlet);
+      ev_->AddParticle(doublet);
+        
+      Debug("Quark/diquark content succesfully added to the event!");
+    }
+    else { // Quark/diquark content already present in the event
+      std::vector<int> daugh;
+      std::vector<int>::iterator did;
       
-      Particle doublet((*p)->role, doublet_id);
-      doublet.status = 3;
-      doublet.SetMother(ev_->GetOneByRole((*p)->role));
-      if (!doublet.P(partpb)) {
-        throw Exception(__PRETTY_FUNCTION__, "ERROR while setting the 4-momentum of doublet", JustWarning);
-      }
-      //std::cout << "doublet, mass = " << doublet.M() << std::endl;
-      doublet.M(-1); //FIXME
-
-      if ((*p)->NumDaughters()==0) {
-        singlet.SetMother(ev_->GetById((*p)->id));
-        doublet.SetMother(ev_->GetById((*p)->id));
-
-        ev_->AddParticle(singlet);
-        ev_->AddParticle(doublet);
-        
-        Debug("Quark/diquark content succesfully added to the event!");
-      }
-      else { // Quark/diquark content already present in the event
-	      std::vector<int> daugh;
-	      std::vector<int>::iterator did;
-
-        Debug(Form("Quark/diquark content already present in the event!\n\tRole of these particles: %d", (*p)->role));
-        
-        daugh = (*p)->GetDaughters();
-        for (did=daugh.begin(); did!=daugh.end(); did++) {
-          if (ev_->GetById(*did)->GetPDGId()==Particle::uQuark
-           or ev_->GetById(*did)->GetPDGId()==Particle::dQuark) { // Quark
-            singlet.SetMother(ev_->GetById((*p)->id));
-            *(ev_->GetById(*did)) = singlet;
-            Debug("Singlet replaced");
-          }
-          else { // Diquark
-            doublet.SetMother(ev_->GetById((*p)->id));
-            *(ev_->GetById(*did)) = doublet;
-            Debug("Doublet replaced");
-          }
+      Debug(Form("Quark/diquark content already present in the event!\n\tRole of these particles: %d", (*p)->role));
+      
+      daugh = (*p)->GetDaughters();
+      for (did=daugh.begin(); did!=daugh.end(); did++) {
+        if (ev_->GetById(*did)->GetPDGId()==Particle::uQuark
+         or ev_->GetById(*did)->GetPDGId()==Particle::dQuark) { // Quark
+          singlet.SetMother(ev_->GetById((*p)->id));
+          *(ev_->GetById(*did)) = singlet;
+          Debug("Singlet replaced");
+        }
+        else { // Diquark
+          doublet.SetMother(ev_->GetById((*p)->id));
+          *(ev_->GetById(*did)) = doublet;
+          Debug("Doublet replaced");
         }
       }
     }
