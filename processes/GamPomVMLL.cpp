@@ -764,7 +764,8 @@ GamPomVMLL::FragGl()
   glueball.SetMother(fEvent->GetOneByRole(4)); // 4 = idifv
   glueball.SetM(dmasgl);
   glueball.P(pcmglu);
-  glueball.LorentzBoost(_ppcms8[idifv][4], _ppcms8[idifv]);
+  Particle::Momentum p_difv_cms(_ppcms8[idifv][0], _ppcms8[idifv][1], _ppcms8[idifv][2], _ppcms8[idifv][3]);
+  glueball.LorentzBoost(_ppcms8[idifv][4], p_difv_cms);
   //glueball.P() -> Lorentz boost
   glueball.status = 1;
   fEvent->AddParticle(glueball);
@@ -783,7 +784,8 @@ GamPomVMLL::FragGl()
   VM.SetMother(fEvent->GetOneByRole(42)); // 42 = idifv // FIXME???
   VM.SetM(dmasvm);
   VM.P(_pcmvm);
-  VM.LorentzBoost(_ppcms8[idifv][4], _ppcms8[idifv]);
+  Particle::Momentum p_vm_cms(_ppcms8[ivm][0], _ppcms8[ivm][1], _ppcms8[ivm][2], _ppcms8[ivm][3]);
+  VM.LorentzBoost(_ppcms8[idifv][4], p_vm_cms);
   VM.status = 1;
   fEvent->AddParticle(VM);
 

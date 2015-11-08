@@ -3,13 +3,13 @@
 Particle::Particle() :
   id(-1), charge(999.), name(""), role(-1),
   helicity(0.),
-  status(0), fMass(-1.), fPDGid(invalidParticle), fP4({ 0., 0., 0., -1. }),
+  status(0), fMass(-1.), fPDGid(invalidParticle),
   fIsPrimary(true)
 {}
 
 Particle::Particle(int role_, ParticleCode pdgId_) :
   id(-1), charge(999.), name(""), role(role_),
-  status(0), fMass(-1.), fPDGid(pdgId_), fP4({ 0., 0., 0., -1. }),
+  status(0), fMass(-1.), fPDGid(pdgId_),
   fIsPrimary(true)
 {
   if (fPDGid!=invalidParticle) SetM();
@@ -34,12 +34,38 @@ Particle::operator=(const Particle &part_)
   return *this;
 }
 
+Particle::Momentum&
+Particle::Momentum::operator+=(const Particle::Momentum& mom_)
+{
+  fPx += mom_.fPx;
+  fPy += mom_.fPy;
+  fPz += mom_.fPz;
+  fE += mom_.fE; //FIXME not supposed to be this way!
+  return *this;
+}
+
+Particle::Momentum&
+Particle::Momentum::operator-=(const Particle::Momentum& mom_)
+{
+  fPx -= mom_.fPx;
+  fPy -= mom_.fPy;
+  fPz -= mom_.fPz;
+  fE -= mom_.fE; //FIXME not supposed to be this way!
+  return *this;
+}
+
+double
+Particle::Momentum::operator*(const Particle::Momentum& mom_)
+{
+  return fE*mom_.fE-(fPx*mom_.fPx+fPy*mom_.fPy+fPz*mom_.fPz);
+}
+
 Particle&
 Particle::operator+=(const Particle &part_)
 {
   fPDGid = (part_.fPDGid==fPDGid) ? fPDGid : invalidParticle;
   role = (part_.role==role) ? role : -1;
-  for (int i=0; i<4; i++) fP4[i]+= part_.fP4[i];
+  fMomentum += part_.fMomentum;
   SetM();
 
   return *this;
@@ -50,7 +76,7 @@ Particle::operator-(const Particle &part_)
 {
   fPDGid = (part_.fPDGid==fPDGid) ? fPDGid : invalidParticle;
   role = (part_.role==role) ? role : -1;
-  for (int i=0; i<4; i++) fP4[i]-= part_.fP4[i];
+  fMomentum -= part_.fMomentum;
   SetM();
 
   return *this;
@@ -70,7 +96,7 @@ Particle::GetLHEline(bool revert_)
   std::stringstream line;
 
   if (revert_) {
-    fP4[2] = -fP4[2];
+    fMomentum.SetP(2, -fMomentum.P(2));
   }
 
   line << fPDGid << "\t";
@@ -93,9 +119,9 @@ Particle::SetM(double m_)
   else if (fPDGid!=invalidParticle) {
     mass = GetMassFromPDGId(fPDGid);
     if (mass<0.) return false;
-    if (fP4[3]<0.) { // invalid energy
+    if (fMomentum.E()<0.) { // invalid energy
       fMass = mass;
-      fP4[3] = std::pow(P(), 2)+M2();
+      fMomentum.SetE(std::pow(P(), 2)+M2());
       return true;
     }
     if (std::pow(E(), 2)-std::pow(P(), 2)!=std::pow(mass, 2))
@@ -203,43 +229,43 @@ Particle::Dump()
 
 //double*
 void
-Particle::LorentzBoost(double m_, double p_[4])
+Particle::LorentzBoost(double m_, const Particle::Momentum& mom_)
 {
   double pf4, fn;
 
-  if (p_[3]!=m_) {
+  if (mom_.P(3)!=m_) {
     pf4 = 0.;
     for (int i=0; i<4; i++) {
-      pf4 += fP4[i]*p_[i];
+      pf4 += fMomentum.P(i)*mom_.P(i);
     }
     pf4 /= m_;
-    fn = (pf4+E())/(p_[3]+m_);
+    fn = (pf4+E())/(fMomentum.P(3)+m_);
     /*for (int i=0; i<3; i++) {
-      __tmp3[i] = fP4[i] + fn*p_[i];
+      __tmp3[i] = fMomentum.P(i) + fn*p_[i];
     }*/
     for (int i=0; i<3; i++) {
-      fP4[i] += fn*p_[i];
+      fMomentum.SetP(i, fMomentum.P(i)+fn*mom_.P(i));
     }
   }
   //return __tmp3;
 }
 
 double*
-Particle::LorentzBoost(double p_[3])
+Particle::LorentzBoost(const Particle::Momentum& mom_)
 {
   double p2, gamma, bp, gamma2;
 
-  p2 = std::pow(p_[0], 2)+std::pow(p_[1], 2)+std::pow(p_[2], 2);
+  p2 = mom_.P2();
   gamma = 1./std::sqrt(1.-p2);
   bp = 0.;
-  for (int i=0; i<3; i++) bp+= p_[i]*fP4[i];
+  for (int i=0; i<3; i++) bp+= mom_.P(i)*fMomentum.P(i);
   //bp = p_[0]*fP4[0]+p_[1]*fP4[1]+p_[2]*fP4[2];
 
   if (p2>0.) gamma2 = (gamma-1.)/p2;
   else gamma2 = 0.;
 
   for (int i=0; i<3; i++) {
-    __tmp3[i] = fP4[i] + gamma2*bp*p_[i]+gamma*p_[i]*E();
+    __tmp3[i] = fMomentum.P(i) + gamma2*bp*mom_.P(i)+gamma*mom_.P(i)*E();
   }
   //E(gamma*E()+bp);
   return __tmp3;
@@ -256,11 +282,11 @@ Particle::RotateThetaPhi(double theta_, double phi_)
   for (int i=0; i<3; i++) {
     mom[i] = 0.;
     for (int j=0; j<3; j++) {
-      mom[i] += rotmtx[i][j]*fP4[j];
+      mom[i] += rotmtx[i][j]*fMomentum.P(j);
     }
   }
 
-  std::copy(mom, mom+3, fP4);
+  fMomentum.SetP(mom[0], mom[1], mom[2]);
   //fP4[0] *= sin(theta_)*cos(phi_);
   //fP4[1] *= sin(theta_)*sin(phi_);
   //fP4[2] *= cos(theta_);

@@ -47,6 +47,52 @@ class Particle {
       Pomeron = 990,
       Reggeon = 110
     };
+    class Momentum {
+      public:
+        inline Momentum() : fPx(0.), fPy(0.), fPz(0.), fE(-1.) {;}
+        inline Momentum(double x_, double y_, double z_, double t_=-1.) :
+          fPx(x_), fPy(y_), fPz(z_), fE(t_) {;}
+        inline ~Momentum() {;}
+
+        Momentum& operator+=(const Momentum&);
+        Momentum& operator-=(const Momentum&);
+        double operator*(const Momentum&); // scalar product
+
+        inline bool SetP(double px_,double py_,double pz_, double e_) {
+          SetP(px_, py_, pz_); SetE(e_);
+          return true;
+        }
+        inline void SetP(double px_,double py_,double pz_) {
+          fPx = px_; fPy = py_, fPz = pz_;
+        }
+        inline void SetP(unsigned int i, double p_) {
+          switch (i) {
+            case 0: fPx = p_; break;
+            case 1: fPy = p_; break;
+            case 2: fPz = p_; break;
+            case 3: fE = p_; break;
+            default: return;
+          }
+        }
+        inline void SetE(double e_) { fE = e_; }
+        inline double P(unsigned int i) const {
+          switch (i) {
+            case 0: return fPx;
+            case 1: return fPy;
+            case 2: return fPz;
+            case 3: return fE;
+            default: return -1.;
+          }
+        }
+        inline double E() const { return P(3); }
+        inline double P2() const { return pow(P(0),2)+pow(P(1),2)+pow(P(2),2); }
+        inline double M() const { return sqrt(pow(E(),2)-P2()); }
+      private:
+        double fPx;
+        double fPy;
+        double fPz;
+        double fE;
+    };
     friend std::ostream& operator<<(std::ostream& os, const Particle::ParticleCode& pc);
     /**
      * Gets the mass in GeV/c**2 of a particle given its PDG identifier
@@ -100,11 +146,11 @@ class Particle {
      */
     void Dump();
     //double* LorentzBoost(double m_, double p_[4]);
-    void LorentzBoost(double m_, double p_[4]);
+    void LorentzBoost(double m_, const Momentum& mom_);
     /**
      * Lorentz boost from ROOT
      */
-    double* LorentzBoost(double p_[3]);
+    double* LorentzBoost(const Momentum& mom_);
     /**
      * @brief Unique identifier of the particle (in a Event object context)
      */
@@ -134,15 +180,15 @@ class Particle {
     /**
      * @brief Momentum along the \f$x\f$-axis in \f$\text{GeV}/c\f$
      */
-    inline double Px() const { return fP4[0]; };
+    inline double Px() const { return fMomentum.P(0); };
     /**
      * @brief Momentum along the \f$y\f$-axis in \f$\text{GeV}/c\f$
      */
-    inline double Py() const { return fP4[1]; };
+    inline double Py() const { return fMomentum.P(1); };
     /**
      * @brief Momentum along the \f$z\f$-axis in \f$\text{GeV}/c\f$
      */
-    inline double Pz() const { return fP4[2]; };
+    inline double Pz() const { return fMomentum.P(2); };
     /**
      * Gets the particle's mass in \f$\text{GeV}/c^{2}\f$.
      * @brief Gets the particle's mass
@@ -165,7 +211,7 @@ class Particle {
      * @brief Pseudo-rapidity
      * @return The pseudo-rapidity of the particle
      */
-    inline double Eta() {
+    inline double Eta() const {
       return (Pt()!=0.)
 	      ? log((P()+fabs(Pz()))/Pt())*(Pz()/fabs(Pz()))
 	      : 9999.*(Pz()/fabs(Pz()));
@@ -194,7 +240,7 @@ class Particle {
      * @return A boolean stating the validity of this particle (according to its 4-momentum norm)
      */
     inline bool P(double px_,double py_,double pz_) {
-      double pp4[] = { px_, py_, pz_, -1. }; std::copy(pp4, pp4+4, fP4);
+      fMomentum.SetP(px_, py_, pz_);
       SetM(); SetE();
       return true;
     };
@@ -213,9 +259,9 @@ class Particle {
      * @param[in] p_ 4-momentum
      * @return A boolean stating the validity of the particle's kinematics
      */
-    inline bool P(double p_[4]) { 
-      std::copy(p_, p_+4, fP4);
-      if (p_[3]<0.) return P(p_[0], p_[1], p_[2]);
+    inline bool P(double p_[4]) {
+      fMomentum.SetP(p_[0], p_[1], p_[2], p_[3]);
+      if (p_[3]<0.) return fMomentum.M()==fMass;
       else return true;
     };
     /**
@@ -226,7 +272,7 @@ class Particle {
      * @return The requested component of the energy-momentum for the particle
      */
     inline double P(int c_) const {
-      if (c_>=0 and c_<4) return fP4[c_];
+      if (c_>=0 and c_<4) return fMomentum.P(c_);
       else if (c_==4) return M();
       else return -999.;
     };
@@ -245,12 +291,13 @@ class Particle {
      * @brief Returns the particle's 4-momentum
      * @return The particle's 4-momentum as a 4 components double array
      */
-    inline double* P4() {
-      fP4[3] = E();
-      return fP4;
-    };
+    inline double* P4() const {
+      double out[4] = { fMomentum.P(0), fMomentum.P(1), fMomentum.P(2), E() };
+      return out;
+    }
     inline std::vector<double> P5() const {
-      std::vector<double> out(fP4, fP4+3);
+      double* in = P4();
+      std::vector<double> out(in, in+3);
       out.push_back(E());
       out.push_back(fMass);
       return out;
@@ -259,11 +306,14 @@ class Particle {
      * @brief Sets the particle's energy
      * @param[in] E_ Energy, in GeV
      */
-    inline void SetE(double E_=-1.) { fP4[3] = (E_<0.) ? std::sqrt(M2()+std::pow(P(),2)) : E_; };
+    inline void SetE(double E_=-1.) {
+      if (E_<0.) E_ = sqrt(M2()+pow(P(),2));
+      fMomentum.SetE(E_);
+    }
     /**
      * @brief Gets the particle's energy in GeV
      */
-    inline double E() const { return (fP4[3]<0.) ? std::sqrt(M2()+std::pow(P(),2)) : fP4[3]; };
+    inline double E() const { return (fMomentum.E()<0.) ? std::sqrt(M2()+std::pow(P(),2)) : fMomentum.E(); };
     /**
      * @brief Gets the particle's squared energy in \f$\text{GeV}^\text{2}\f$
      */
@@ -342,12 +392,7 @@ class Particle {
      * @brief Is the particle a primary particle ?
      */
     bool fIsPrimary;
-    /**
-     * List of components to characterise the particle's kinematics :
-     * - 0-2: \f$\mathbf p = (p_x, p_y, p_z)\f$ (in \f$\text{GeV}/c\f$)
-     * - 3: \f$E\f$ (in \f$\text{GeV}\f$)
-     */
-    double fP4[4];
+    Momentum fMomentum;
     double __tmp3[3], __tmp4[4];
 };
 

@@ -7,7 +7,6 @@ EXTERNALSRC= $(wildcard external/*.f)
 INCLUDEDIR = -Iprocesses/ -Iinclude/ -Iexternal/ -Ihadronisers/
 ############################################
 SVNDEV = 'SVN_REV="$(shell svnversion -nq .)"'
-#CFLAGS     = -fexceptions 
 CFLAGS     = -Wall -Wextra -fexceptions -Wpointer-arith \
 	     $(INCLUDEDIR) -lgsl -g
 LDFLAGS    = $(INCLUDEDIR) -lgfortran -lgsl -lgslcblas -Wl,-O2
@@ -24,8 +23,8 @@ LIB_FILES  = $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES)) \
 	     $(patsubst hadronisers/%.cpp,obj/%.o,$(HAD_FILES)) \
 	     $(patsubst external/%.f,obj/%.fo,$(EXTERNALSRC)) 
 ############################################
-CC = @g++
-#CC = @clang++
+#CC = @g++
+CC = @clang++
 CF = @gfortran
 RM = rm -f
 ############################################
