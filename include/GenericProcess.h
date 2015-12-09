@@ -135,6 +135,7 @@ class GenericProcess
     if (mothRole_!=-1) fEvent->GetOneByRole(part_)->SetMother(fEvent->GetOneByRole(mothRole_));
   };
   inline Particle* GetParticle(const GenericProcess::ParticleRole& role, unsigned int id=0) {
+    if (id==0) return fEvent->GetOneByRole(role);
     ParticlesRef pp = fEvent->GetByRole(role);
     if (!pp.size() or id>pp.size()) return 0;
     return pp.at(id);
