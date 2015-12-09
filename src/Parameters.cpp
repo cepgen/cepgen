@@ -67,8 +67,10 @@ void Parameters::Dump()
     << std::left
     << std::endl
     << " _" << std::setfill('_') << std::setw(wb) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "_ " << std::endl
-    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "| " << std::setw(wt) << "Process to generate"  << std::setw(wp) << process->GetName() << std::endl
+    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl;
+  if (process)
+    os << "| " << std::setw(wt) << "Process to generate"  << std::setw(wp) << process->GetName() << std::endl;
+  os
     << "| " << std::setw(wt) << "Events generation ? " << std::setw(wp) << generation << " |" << std::endl
     << "| " << std::setw(wt) << "Number of events to generate" << std::setw(wp) << maxgen << " |" << std::endl
     << "| " << std::setw(wt) << "Events storage ? " << std::setw(wp) << store << " |" << std::endl
@@ -105,7 +107,7 @@ void Parameters::Dump()
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|-" << std::setfill('-') << std::setw(wb-2) << " Outgoing remnants " << std::setfill(' ') << "-|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl;
-  if (this->hadroniser!=(GenericHadroniser*)NULL)
+  if (hadroniser)
     os << "| " << std::setw(wt) << "Hadronisation algorithm" << std::setw(12) << hadroniser->GetName() << std::setw(wp-12) << "" << " |" << std::endl;
   os << "| " << std::setw(wt) << "Minimal mass [GeV/c^2]" << std::setw(wp) << minmx << " |" << std::endl
              << "| " << std::setw(wt) << "Maximal mass [GeV/c^2]" << std::setw(wp) << maxmx << " |";

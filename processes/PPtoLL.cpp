@@ -520,9 +520,9 @@ PPtoLL::FillKinematics(bool)
   //     first outgoing proton
   //=================================================================
   Particle op1(3);
-  if (!op1.P(_px_x, _px_y, _px_z, _px_0)) {
-    std::cerr << "Invalid outgoing proton 1" << std::endl;
-  }
+  Particle::Momentum p_op1(_px_x, _px_y, _px_z, _px_0);
+  op1.SetMomentum(p_op1);
+  // Error("Invalid outgoing proton 1");
   if (fCuts.kinematics>1) {
     op1.status = Particle::Undecayed;
     op1.SetM();
@@ -538,9 +538,9 @@ PPtoLL::FillKinematics(bool)
   //     second outgoing proton
   //=================================================================
   Particle op2(5);
-  if (!op2.P(_py_x, _py_y, _py_z, _py_0)) {
-    std::cerr << "Invalid outgoing proton 2" << std::endl;
-  }
+  Particle::Momentum p_op2(_py_x, _py_y, _py_z, _py_0);
+  op2.SetMomentum(p_op2);
+  // Error("Invalid outgoing proton 2");
   if (fCuts.kinematics==3) {
     op2.status = Particle::Undecayed;
     op2.SetM(_my);

@@ -512,7 +512,7 @@ GamGamLL::BeforeComputeWeight()
 {
   if (!GenericProcess::fIsPointSet) return;
   
-  Particle *p1 = fEvent->GetOneByRole(IncomingBeam1), *p2 = fEvent->GetOneByRole(IncomingBeam2);
+  Particle *p1 = GetParticle(IncomingBeam1), *p2 = GetParticle(IncomingBeam2);
 
   _ep1 = p1->E();
   _mp1 = p1->M();
@@ -538,31 +538,31 @@ GamGamLL::BeforeComputeWeight()
   DebugInsideLoop(Form("cot(theta1) = %f\n\tcot(theta2) = %f", _cotth1, _cotth2));
 
   Particle* p;
-  p = fEvent->GetOneByRole(GenericProcess::CentralParticle1); _w6 = p->M2();
-  p = fEvent->GetOneByRole(GenericProcess::CentralParticle2); _w7 = p->M2();
+  p = GetParticle(CentralParticle1); _w6 = p->M2();
+  p = GetParticle(CentralParticle2); _w7 = p->M2();
   
   double m;
   switch (fCuts.kinematics) {
   case GenericProcess::ElasticElastic:
     _dw31 = _dw52 = 0.; break;
   case GenericProcess::ElasticInelastic: case GenericProcess::InelasticElastic:
-    m = ComputeMX(x(7), fEvent->GetOneByRole(GenericProcess::IncomingBeam1)->M(), fEvent->GetOneByRole(GenericProcess::CentralParticle1)->M(), &_dw31);
-    fEvent->GetOneByRole(GenericProcess::OutgoingBeam1)->SetM(m);
-    fEvent->GetOneByRole(GenericProcess::OutgoingBeam2)->SetM(Particle::GetMassFromPDGId(fEvent->GetOneByRole(GenericProcess::OutgoingBeam2)->GetPDGId())); //FIXME
+    m = ComputeMX(x(7), GetParticle(IncomingBeam1)->M(), GetParticle(CentralParticle1)->M(), &_dw31);
+    GetParticle(OutgoingBeam1)->SetM(m);
+    GetParticle(OutgoingBeam2)->SetM(Particle::GetMassFromPDGId(GetParticle(OutgoingBeam2)->GetPDGId())); //FIXME
     break;
   case GenericProcess::InelasticInelastic:
-    m = ComputeMX(x(7), fEvent->GetOneByRole(GenericProcess::IncomingBeam2)->M(), fEvent->GetOneByRole(GenericProcess::CentralParticle1)->M(), &_dw31);
-    fEvent->GetOneByRole(GenericProcess::OutgoingBeam1)->SetM(m);
-    m = ComputeMX(x(7), fEvent->GetOneByRole(GenericProcess::OutgoingBeam1)->M(), fEvent->GetOneByRole(GenericProcess::CentralParticle1)->M(), &_dw52);
-    fEvent->GetOneByRole(GenericProcess::OutgoingBeam2)->SetM(m);
+    m = ComputeMX(x(7), GetParticle(IncomingBeam2)->M(), GetParticle(CentralParticle1)->M(), &_dw31);
+    GetParticle(OutgoingBeam1)->SetM(m);
+    m = ComputeMX(x(7), GetParticle(OutgoingBeam1)->M(), GetParticle(CentralParticle1)->M(), &_dw52);
+    GetParticle(OutgoingBeam2)->SetM(m);
     break;
   }
-  _mp3 = fEvent->GetOneByRole(GenericProcess::OutgoingBeam1)->M();
-  _mp5 = fEvent->GetOneByRole(GenericProcess::OutgoingBeam2)->M();
+  _mp3 = GetParticle(OutgoingBeam1)->M();
+  _mp5 = GetParticle(OutgoingBeam2)->M();
   _w3 = std::pow(_mp3, 2);
   _w5 = std::pow(_mp5, 2);
-  _pdg3 = fEvent->GetOneByRole(GenericProcess::OutgoingBeam1)->GetPDGId();
-  _pdg5 = fEvent->GetOneByRole(GenericProcess::OutgoingBeam2)->GetPDGId();
+  _pdg3 = GetParticle(OutgoingBeam1)->GetPDGId();
+  _pdg5 = GetParticle(OutgoingBeam2)->GetPDGId();
   
   /*if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
     IsKinematicsDefined();
@@ -617,7 +617,7 @@ GamGamLL::ComputeWeight()
   if (fCuts.wmax<0) fCuts.wmax = fS;
 
   // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
-  wmin = std::pow(fEvent->GetOneByRole(GenericProcess::CentralParticle1)->M()+fEvent->GetOneByRole(GenericProcess::CentralParticle2)->M(),2);
+  wmin = std::pow(GetParticle(CentralParticle1)->M()+GetParticle(CentralParticle2)->M(),2);
   if (fabs(wmin)<fabs(fCuts.wmin)) wmin = fCuts.wmin;
 
   // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or _wmax if specified)
@@ -936,21 +936,21 @@ GamGamLL::FillKinematics(bool)
     }*/
   
   // First incoming proton
-  Particle* ip1 = fEvent->GetOneByRole(IncomingBeam1);
+  Particle* ip1 = GetParticle(IncomingBeam1);
   ip1->SetPDGId(_pdg1);
   Particle::Momentum plab_ip1(0., 0., _gamma*_p+_betgam*_ep1, _gamma*_ep1+_betgam*_p);
   ip1->SetMomentum(plab_ip1);
   // Error("Invalid incoming proton 1");
   
   // Second incoming proton
-  Particle* ip2 = fEvent->GetOneByRole(IncomingBeam2);
+  Particle* ip2 = GetParticle(IncomingBeam2);
   ip2->SetPDGId(_pdg2);
   Particle::Momentum plab_ip2(0., 0., -_gamma*_p+_betgam*_ep2, _gamma*_ep2-_betgam*_p);
   ip2->SetMomentum(plab_ip2);
   // Error("Invalid incoming proton 2");
   
   // First outgoing proton
-  Particle* op1 = fEvent->GetOneByRole(OutgoingBeam1);
+  Particle* op1 = GetParticle(OutgoingBeam1);
   op1->SetPDGId(_pdg3);
   Particle::Momentum plab_op1( _pp3*_st3*_cp3,
                                _pp3*_st3*_sp3,
@@ -972,7 +972,7 @@ GamGamLL::FillKinematics(bool)
   }
   
   // Second outgoing proton
-  Particle* op2 = fEvent->GetOneByRole(OutgoingBeam2);
+  Particle* op2 = GetParticle(OutgoingBeam2);
   op2->SetPDGId(_pdg5);
   Particle::Momentum plab_op2( _pp5*_st5*_cp5,
                                _pp5*_st5*_sp5,
@@ -995,7 +995,7 @@ GamGamLL::FillKinematics(bool)
 
   // First incoming photon
   // Equivalent in LPAIR : PLAB(x, 3)
-  Particle* ph1 = fEvent->GetOneByRole(Parton1);
+  Particle* ph1 = GetParticle(Parton1);
   Particle::Momentum plab_ph1 = plab_ip1-plab_op1;
   plab_ph1.RotatePhi(ranphi, rany);
   ph1->SetMomentum(plab_ph1);
@@ -1005,7 +1005,7 @@ GamGamLL::FillKinematics(bool)
   
   // Second incoming photon
   // Equivalent in LPAIR : PLAB(x, 4)
-  Particle* ph2 = fEvent->GetOneByRole(Parton2);
+  Particle* ph2 = GetParticle(Parton2);
   Particle::Momentum plab_ph2 = plab_ip1-plab_op2;
   plab_ph2.RotatePhi(rany, rany);
   ph2->SetMomentum(plab_ph2);
@@ -1014,7 +1014,7 @@ GamGamLL::FillKinematics(bool)
   ph2->status = Particle::Incoming; // "incoming beam"
 
   // Central (two-photon) system
-  Particle* cs = fEvent->GetOneByRole(CentralSystem);
+  Particle* cs = GetParticle(CentralSystem);
   cs->status = Particle::Incoming;
 
   ParticleRole role_ol1, role_ol2;
@@ -1022,7 +1022,7 @@ GamGamLL::FillKinematics(bool)
   else           { role_ol1 = CentralParticle2; role_ol2 = CentralParticle1; }
   
   // First outgoing lepton
-  Particle* ol1 = fEvent->GetOneByRole(role_ol1);
+  Particle* ol1 = GetParticle(role_ol1);
   ol1->SetPDGId(ol1->GetPDGId(), ransign);
   Particle::Momentum plab_ol1( _pl6*_st6*_cp6,
                                _pl6*_st6*_sp6,
@@ -1035,7 +1035,7 @@ GamGamLL::FillKinematics(bool)
   ol1->SetM(); //FIXME
   
   // Second outgoing lepton
-  Particle* ol2 = fEvent->GetOneByRole(role_ol2);
+  Particle* ol2 = GetParticle(role_ol2);
   ol2->SetPDGId(ol2->GetPDGId(), -ransign);
   Particle::Momentum plab_ol2( _pl7*_st7*_cp7,
                                _pl7*_st7*_sp7,

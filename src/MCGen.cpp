@@ -58,7 +58,7 @@ MCGen::ComputeXsection(double* xsec_, double *err_)
 
   Info("Starting the computation of the process cross-section");
 
-  PrepareFunction();
+  try { PrepareFunction(); } catch (Exception& e) { e.Dump(); }
   fVegas->Integrate(xsec_, err_);
   
   fCrossSection = *xsec_;
@@ -109,6 +109,9 @@ MCGen::LaunchGeneration()
 void
 MCGen::PrepareFunction()
 {
+  if (!parameters->process) {
+    throw Exception(__PRETTY_FUNCTION__, "No process defined!", Fatal);
+  }
   Kinematics kin;
   kin.kinematics = static_cast<unsigned int>(parameters->process_mode);
   kin.q2min = parameters->minq2;

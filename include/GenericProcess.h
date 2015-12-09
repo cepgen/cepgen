@@ -134,6 +134,14 @@ class GenericProcess
     fEvent->AddParticle(Particle(part_, pdgId_));
     if (mothRole_!=-1) fEvent->GetOneByRole(part_)->SetMother(fEvent->GetOneByRole(mothRole_));
   };
+  inline Particle* GetParticle(const GenericProcess::ParticleRole& role, unsigned int id=0) {
+    ParticlesRef pp = fEvent->GetByRole(role);
+    if (!pp.size() or id>pp.size()) return 0;
+    return pp.at(id);
+  }
+  inline Particle* GetParticle(unsigned int id) {
+    return fEvent->GetById(id);
+  }
   /**
    * @brief Array of @a fNumDimensions components representing the point on which the
    * weight in the cross-section is computed

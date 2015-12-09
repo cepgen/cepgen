@@ -53,9 +53,7 @@ int main(int argc, char* argv[]) {
     mg.parameters->maxgen = ngen;
     mg.parameters->hadroniser = new Pythia6Hadroniser;
     mg.parameters->remnant_mode = GenericProcess::SuriYennie;
-    //mg.parameters->process = new GamGamLL;
-    mg.parameters->process = new PPtoLL;
-    mg.parameters->process_mode = GenericProcess::ElasticElastic; // el-el
+    mg.parameters->process_mode = GenericProcess::ElasticElastic;
     //mg.parameters->ncvg = 5e3; //FIXME
     //mg.parameters->SetEtaRange(-2.5, 2.5);
     //mg.parameters->SetEtaRange(-999., 999.);
@@ -119,7 +117,8 @@ int main(int argc, char* argv[]) {
     remn = ev.GetByRole(3);
     nremn_ch[0] = nremn_nt[0] = 0;
     for (p=remn.begin(); p!=remn.end(); p++) {
-      if ((*p)->status!=0 and (*p)->status!=1) continue; // we only count stable particles
+      if ( (*p)->status!=Particle::Undefined
+       and (*p)->status!=Particle::FinalState) continue; // we only count stable particles
       if ((int)(*p)->charge!=(*p)->charge) continue; // to get rid of partons
       if ((int)(*p)->charge%2!=0) nremn_ch[0]++;
       else nremn_nt[0]++;
@@ -129,7 +128,8 @@ int main(int argc, char* argv[]) {
     remn = ev.GetByRole(5);
     nremn_ch[1] = nremn_nt[1] = 0;
     for (p=remn.begin(); p!=remn.end(); p++) {
-      if ((*p)->status!=0 and (*p)->status!=1) continue; // we only count stable particles
+      if ( (*p)->status!=Particle::Undefined
+       and (*p)->status!=Particle::FinalState) continue; // we only count stable particles
       if ((int)(*p)->charge!=(*p)->charge) continue; // to get rid of partons
       if ((int)(*p)->charge%2!=0) nremn_ch[1]++;
       else nremn_nt[1]++;

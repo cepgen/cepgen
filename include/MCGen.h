@@ -93,7 +93,10 @@ class MCGen {
    * @deprecated This method is to be suppressed since the events generation can now be launched one event at a time using the @a GenerateOneEvent method
    */
   void LaunchGeneration();
-  inline size_t GetNdim() { return parameters->process->GetNdim(parameters->process_mode); }
+  inline size_t GetNdim() {
+    if (!parameters->process) return 0;
+    return parameters->process->GetNdim(parameters->process_mode);
+  }
   inline double ComputePoint(double* x_) {
     PrepareFunction();
     double res = f(x_, GetNdim(), (void*)parameters);
