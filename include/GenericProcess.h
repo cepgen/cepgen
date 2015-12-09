@@ -30,22 +30,11 @@ class GenericProcess
     FioreSea = 102,
     Fiore = 103
   };
-  enum ParticleRole {
-    IncomingBeam1 = 1,
-    IncomingBeam2 = 2,
-    Parton1 = 41,
-    Parton2 = 42,
-    CentralSystem = 4,
-    OutgoingBeam1 = 3,
-    OutgoingBeam2 = 5,
-    CentralParticle1 = 6,
-    CentralParticle2 = 7
-  };
   friend std::ostream& operator<<(std::ostream& os, const GenericProcess::ProcessMode& pm);
   friend std::ostream& operator<<(std::ostream& os, const GenericProcess::StructureFunctions& sf);
 
-  typedef std::map<ParticleRole,Particle::ParticleCode> ParticlesRoleMap;
-  typedef std::pair<ParticleRole,Particle::ParticleCode> ParticleWithRole;
+  typedef std::map<Particle::Role,Particle::ParticleCode> ParticlesRoleMap;
+  typedef std::pair<Particle::Role,Particle::ParticleCode> ParticleWithRole;
   typedef ParticlesRoleMap IncomingState;
   typedef ParticlesRoleMap OutgoingState;
   
@@ -134,7 +123,7 @@ class GenericProcess
     fEvent->AddParticle(Particle(part_, pdgId_));
     if (mothRole_!=-1) fEvent->GetOneByRole(part_)->SetMother(fEvent->GetOneByRole(mothRole_));
   };
-  inline Particle* GetParticle(const GenericProcess::ParticleRole& role, unsigned int id=0) {
+  inline Particle* GetParticle(const Particle::Role& role, unsigned int id=0) {
     if (id==0) return fEvent->GetOneByRole(role);
     ParticlesRef pp = fEvent->GetByRole(role);
     if (!pp.size() or id>pp.size()) return 0;

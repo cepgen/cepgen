@@ -30,6 +30,7 @@ class GamPomVMLL : public GenericProcess
  public:
   GamPomVMLL();
   ~GamPomVMLL();
+  void AddEventContent();
   //bool SetIncomingParticles(Particle, Particle);
   //bool SetOutgoingParticles(int, int);
   void FillKinematics(bool);

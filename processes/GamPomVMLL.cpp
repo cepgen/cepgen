@@ -51,6 +51,21 @@ GamPomVMLL::~GamPomVMLL()
 }
 
 void
+GamPomVMLL::AddEventContent()
+{
+  IncomingState is; OutgoingState os;
+  is.insert(ParticleWithRole(Particle::IncomingBeam1,    Particle::Proton));
+  is.insert(ParticleWithRole(Particle::IncomingBeam2,    Particle::Proton));
+  is.insert(ParticleWithRole(Particle::Parton1,          Particle::Pomeron));
+  is.insert(ParticleWithRole(Particle::Parton2,          Particle::Photon));
+  os.insert(ParticleWithRole(Particle::OutgoingBeam1,    Particle::Proton));
+  os.insert(ParticleWithRole(Particle::OutgoingBeam2,    Particle::Proton));
+  os.insert(ParticleWithRole(Particle::CentralParticle1, Particle::Muon));
+  os.insert(ParticleWithRole(Particle::CentralParticle2, Particle::Muon));
+  GenericProcess::SetEventContent(is, os);
+}
+
+void
 GamPomVMLL::GDIBeg()
 {
   double r;
@@ -767,7 +782,7 @@ GamPomVMLL::FragGl()
   Particle::Momentum p_difv_cms(_ppcms8[idifv][0], _ppcms8[idifv][1], _ppcms8[idifv][2], _ppcms8[idifv][3]);
   glueball.LorentzBoost(_ppcms8[idifv][4], p_difv_cms);
   //glueball.P() -> Lorentz boost
-  glueball.status = 1;
+  glueball.status = Particle::Undefined;
   fEvent->AddParticle(glueball);
 
   // Vector meson quantities
@@ -786,7 +801,7 @@ GamPomVMLL::FragGl()
   VM.P(_pcmvm);
   Particle::Momentum p_vm_cms(_ppcms8[ivm][0], _ppcms8[ivm][1], _ppcms8[ivm][2], _ppcms8[ivm][3]);
   VM.LorentzBoost(_ppcms8[idifv][4], p_vm_cms);
-  VM.status = 1;
+  VM.status = Particle::Undefined;
   fEvent->AddParticle(VM);
 
   npart += 2;
@@ -906,7 +921,7 @@ GamPomVMLL::GenDif()
 
   // Virtual pomeron
   Particle pom(42, Particle::Pomeron);
-  pom.status = 3;
+  pom.status = Particle::DebugResonance;
   pom.SetMother(fEvent->GetOneByRole(2));
   pom.P(pcmpom[0], pcmpom[1], pcmpom[2], pcmpom[3]);
   
@@ -916,7 +931,7 @@ GamPomVMLL::GenDif()
 
   // Diffractive proton state
   Particle dps(5, fEvent->GetOneByRole(2)->GetPDGId());
-  dps.status = 1;
+  dps.status = Particle::Undefined;
   dps.SetMother(fEvent->GetOneByRole(2));
   if (ifragp==1 or ifragp==-1 or ifragp==2) { // proton-dissociative case
     if (_genmxt_dmxp<1.48) dps.SetPDGId((Particle::ParticleCode)12212);
@@ -947,7 +962,7 @@ GamPomVMLL::GenDif()
     if (itypvm==22) dms.SetPDGId(Particle::Reggeon);
     else dms.SetPDGId(static_cast<Particle::ParticleCode>(10*((itypvm/10)%100)));
   }
-  dms.status = 1;
+  dms.status = Particle::Undefined;
   dms.P(pcmvmx[0], pcmvmx[1], pcmvmx[2], pcmvmx[3]);
   
   DebugInsideLoop(Form("Diffractive meson: %5.3f <> %5.3f", pcmvmx[4], dms.M()));

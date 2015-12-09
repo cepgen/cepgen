@@ -39,7 +39,7 @@ void
 GenericProcess::PrepareKinematics()
 {
   if (!IsKinematicsDefined()) return; // FIXME dump some information...
-  Particle *ip1 = fEvent->GetOneByRole(IncomingBeam1), *ip2 = fEvent->GetOneByRole(IncomingBeam2);
+  Particle *ip1 = GetParticle(Particle::IncomingBeam1), *ip2 = GetParticle(Particle::IncomingBeam2);
   Particle::Momentum p1 = ip1->GetMomentum(), p2 = ip2->GetMomentum();
 
   double k = 0.;
@@ -70,20 +70,20 @@ GenericProcess::SetEventContent(IncomingState is, OutgoingState os)
   // Incoming particles (incl. eventual partons)
   for (IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++) {
     fEvent->AddParticle(Particle(ip->first, ip->second));
-    Particle* p = fEvent->GetOneByRole(ip->first);
+    Particle* p = GetParticle(ip->first);
     //p->SetM(ip-second);
     p->status = Particle::Undefined;
     switch (ip->first) {
-      case IncomingBeam1: case IncomingBeam2: break;
-      case Parton1: p->SetMother(fEvent->GetOneByRole(IncomingBeam1)); break;
-      case Parton2: p->SetMother(fEvent->GetOneByRole(IncomingBeam2)); break;
-      case CentralSystem: p->SetMother(fEvent->GetOneByRole(Parton1)); has_cs = true; break;
+      case Particle::IncomingBeam1: case Particle::IncomingBeam2: break;
+      case Particle::Parton1: p->SetMother(GetParticle(Particle::IncomingBeam1)); break;
+      case Particle::Parton2: p->SetMother(GetParticle(Particle::IncomingBeam2)); break;
+      case Particle::CentralSystem: p->SetMother(GetParticle(Particle::Parton1)); has_cs = true; break;
       default: break;
     }
   }
   // Prepare the central system if not already there
   if (!has_cs) {
-    Particle* moth = fEvent->GetOneByRole(Parton1);
+    Particle* moth = GetParticle(Particle::Parton1);
     Particle cs(4, moth->GetPDGId());
     cs.SetMother(moth);
     fEvent->AddParticle(cs);
@@ -91,14 +91,14 @@ GenericProcess::SetEventContent(IncomingState is, OutgoingState os)
   // Outgoing particles (central, and outgoing primary particles or remnants)
   for (OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++) {
     fEvent->AddParticle(Particle(op->first, op->second));
-    Particle* p = fEvent->GetOneByRole(op->first);
+    Particle* p = GetParticle(op->first);
     //p->SetM(ip->second);
     p->status = Particle::Undefined;
     switch (op->first) {
-      case OutgoingBeam1: p->SetMother(fEvent->GetOneByRole(IncomingBeam1)); break;
-      case OutgoingBeam2: p->SetMother(fEvent->GetOneByRole(IncomingBeam2)); break;
-      case CentralParticle1: p->SetMother(fEvent->GetOneByRole(CentralSystem)); break;
-      case CentralParticle2: p->SetMother(fEvent->GetOneByRole(CentralSystem)); break;
+      case Particle::OutgoingBeam1: p->SetMother(GetParticle(Particle::IncomingBeam1)); break;
+      case Particle::OutgoingBeam2: p->SetMother(GetParticle(Particle::IncomingBeam2)); break;
+      case Particle::CentralParticle1: p->SetMother(GetParticle(Particle::CentralSystem)); break;
+      case Particle::CentralParticle2: p->SetMother(GetParticle(Particle::CentralSystem)); break;
       default: break;
     }
   }
@@ -108,8 +108,8 @@ GenericProcess::SetEventContent(IncomingState is, OutgoingState os)
 void
 GenericProcess::SetIncomingKinematics(Particle::Momentum p1, Particle::Momentum p2)
 {
-  fEvent->GetOneByRole(IncomingBeam1)->SetMomentum(p1);
-  fEvent->GetOneByRole(IncomingBeam2)->SetMomentum(p2);
+  GetParticle(Particle::IncomingBeam1)->SetMomentum(p1);
+  GetParticle(Particle::IncomingBeam2)->SetMomentum(p2);
 }
 
 std::ostream&

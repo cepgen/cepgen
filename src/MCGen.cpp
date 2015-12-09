@@ -171,8 +171,8 @@ double f(double* x_, size_t ndim_, void* params_)
   //std::cout << "2: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();*/
 
   // Then add outgoing leptons
-  ev->GetOneByRole(GenericProcess::CentralParticle1)->SetPDGId(p->pair);
-  ev->GetOneByRole(GenericProcess::CentralParticle2)->SetPDGId(p->pair);
+  ev->GetOneByRole(Particle::CentralParticle1)->SetPDGId(p->pair);
+  ev->GetOneByRole(Particle::CentralParticle2)->SetPDGId(p->pair);
 
   //std::cout << "3: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
   // Then add outgoing protons or remnants
@@ -180,10 +180,10 @@ double f(double* x_, size_t ndim_, void* params_)
     case GenericProcess::ElasticElastic: break; // nothing to change in the event
     case GenericProcess::ElasticInelastic:
     case GenericProcess::InelasticElastic: // set one of the outgoing protons to be fragmented
-      ev->GetOneByRole(GenericProcess::OutgoingBeam1)->SetPDGId(Particle::uQuark); break;
+      ev->GetOneByRole(Particle::OutgoingBeam1)->SetPDGId(Particle::uQuark); break;
     case GenericProcess::InelasticInelastic: // set both the outgoing protons to be fragmented
-      ev->GetOneByRole(GenericProcess::OutgoingBeam1)->SetPDGId(Particle::uQuark);
-      ev->GetOneByRole(GenericProcess::OutgoingBeam2)->SetPDGId(Particle::uQuark);
+      ev->GetOneByRole(Particle::OutgoingBeam1)->SetPDGId(Particle::uQuark);
+      ev->GetOneByRole(Particle::OutgoingBeam2)->SetPDGId(Particle::uQuark);
       break;
   }
   

@@ -56,7 +56,19 @@ class Particle {
       FinalState = 1,
       Resonance = 2,
       DebugResonance = 3,
-      PythiaHIncoming = 21
+      PythiaHIncoming = 21,
+      HerwigFragment = 193 //FIXME
+    };
+    enum Role {
+      IncomingBeam1 = 1,
+      IncomingBeam2 = 2,
+      Parton1 = 41,
+      Parton2 = 42,
+      CentralSystem = 4,
+      OutgoingBeam1 = 3,
+      OutgoingBeam2 = 5,
+      CentralParticle1 = 6,
+      CentralParticle2 = 7
     };
     class Momentum {
       public:

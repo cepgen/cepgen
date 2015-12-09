@@ -10,14 +10,14 @@ void
 PPtoLL::AddEventContent()
 {
   IncomingState is; OutgoingState os;
-  is.insert(ParticleWithRole(IncomingBeam1, Particle::Proton));
-  is.insert(ParticleWithRole(IncomingBeam2, Particle::Proton));
-  is.insert(ParticleWithRole(Parton1, Particle::Photon));
-  is.insert(ParticleWithRole(Parton2, Particle::Photon));
-  os.insert(ParticleWithRole(OutgoingBeam1, Particle::Proton));
-  os.insert(ParticleWithRole(OutgoingBeam2, Particle::Proton));
-  os.insert(ParticleWithRole(CentralParticle1, Particle::Muon));
-  os.insert(ParticleWithRole(CentralParticle2, Particle::Muon));
+  is.insert(ParticleWithRole(Particle::IncomingBeam1,    Particle::Proton));
+  is.insert(ParticleWithRole(Particle::IncomingBeam2,    Particle::Proton));
+  is.insert(ParticleWithRole(Particle::Parton1,          Particle::Photon));
+  is.insert(ParticleWithRole(Particle::Parton2,          Particle::Photon));
+  os.insert(ParticleWithRole(Particle::OutgoingBeam1,    Particle::Proton));
+  os.insert(ParticleWithRole(Particle::OutgoingBeam2,    Particle::Proton));
+  os.insert(ParticleWithRole(Particle::CentralParticle1, Particle::Muon));
+  os.insert(ParticleWithRole(Particle::CentralParticle2, Particle::Muon));
   GenericProcess::SetEventContent(is, os);
 }
 

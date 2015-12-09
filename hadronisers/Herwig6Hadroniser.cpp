@@ -22,10 +22,10 @@ Herwig6Hadroniser::Hadronise(Event *ev_)
   
   pp = ev_->GetParticles();
   for (p=pp.begin(), i=0; p!=pp.end() && i<NMXHEP; p++, i++) {
-    if ((*p)->status==3) (*p)->status = 193; //FIXME workaround for cluster fragmentation
+    if ((*p)->status==Particle::Undecayed) (*p)->status = Particle::HerwigFragment; //FIXME workaround for cluster fragmentation
   
     hepevt_.idhep[i] = (*p)->GetPDGId();
-    hepevt_.isthep[i] = (*p)->status;
+    hepevt_.isthep[i] = static_cast<int>((*p)->status);
     hepevt_.phep[i][0] = (*p)->Px();
     hepevt_.phep[i][1] = (*p)->Py();
     hepevt_.phep[i][2] = (*p)->Pz();
