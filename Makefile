@@ -23,8 +23,8 @@ LIB_FILES  = $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES)) \
 	     $(patsubst hadronisers/%.cpp,obj/%.o,$(HAD_FILES)) \
 	     $(patsubst external/%.f,obj/%.fo,$(EXTERNALSRC)) 
 ############################################
-#CC = @g++
-CC = @clang++
+CC = @g++
+#CC = @clang++
 CF = @gfortran
 RM = rm -f
 ############################################

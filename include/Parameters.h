@@ -9,6 +9,7 @@
 #include <string>
 
 #include "../processes/processes.h"
+//#include "GenericProcess.h"
 #include "../hadronisers/hadronisers.h"
 
 /**
@@ -183,13 +184,13 @@ class Parameters {
      */
     Event* last_event;
     /**
-     * @brief Hadronisation algorithm to use for the proton(s) remnants fragmentation
-     */
-    GenericHadroniser* hadroniser;
-    /**
      * @brief The process for which the cross-section will be computed and the events will be generated
      */
     GenericProcess* process;
+    /**
+     * @brief Hadronisation algorithm to use for the proton(s) remnants fragmentation
+     */
+    GenericHadroniser* hadroniser;
 };
 
 #endif

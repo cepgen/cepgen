@@ -3,13 +3,13 @@
 Particle::Particle() :
   id(-1), charge(999.), name(""), role(-1),
   helicity(0.),
-  status(0), fMass(-1.), fPDGid(invalidParticle),
+  status(Undefined), fMass(-1.), fPDGid(invalidParticle),
   fIsPrimary(true)
 {}
 
 Particle::Particle(int role_, ParticleCode pdgId_) :
   id(-1), charge(999.), name(""), role(role_),
-  status(0), fMass(-1.), fPDGid(pdgId_),
+  status(Undefined), fMass(-1.), fPDGid(pdgId_),
   fIsPrimary(true)
 {
   if (fPDGid!=invalidParticle) SetM();
@@ -52,6 +52,17 @@ Particle::Momentum::operator-=(const Particle::Momentum& mom_)
   fPz -= mom_.fPz;
   fE -= mom_.fE; //FIXME not supposed to be this way!
   return *this;
+}
+
+Particle::Momentum&
+Particle::Momentum::operator-(const Particle::Momentum& mom_)
+{
+  fPx -= mom_.fPx;
+  fPy -= mom_.fPy;
+  fPz -= mom_.fPz;
+  fE -= mom_.fE; //FIXME not supposed to be this way!
+  return *this;
+
 }
 
 double

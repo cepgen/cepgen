@@ -65,7 +65,7 @@ class GamGamLL : public GenericProcess
    */
   double ComputeWeight();
   int GetNdim(ProcessMode) const;
-  void FillKinematics(/*bool*/);
+  void FillKinematics(bool);
   /**
    * Computes the mass of the outgoing proton remnant if any
    * @brief Computes the ougoing proton remnant mass
@@ -202,30 +202,22 @@ class GamGamLL : public GenericProcess
   double _pl6;
   /** @brief \f$E_6\f$, energy of the first outgoing lepton */
   double _el6;
-  /** @brief \f$m_6\f$, mass of the first outgoing lepton */
-  double _ml6;
   /** @brief \f$m_6^2\f$, squared mass of the first outgoing lepton */
   double _w6;
   /** @brief \f$p_{T,6}\f$, transverse momentum of the first outgoing lepton */
   double _pt_l6;
   /** @brief \f$E_6^\mathrm{lab}\f$, energy of the first outgoing lepton, computed in the lab frame */
   double _e6lab;
-  /** @brief PDG identifier of the first outgoing lepton */
-  Particle::ParticleCode _pdg6;
   /** @brief \f$\left|\mathbf p_7\right|\f$, 3-momentum norm of the second outgoing lepton */
   double _pl7;
   /** @brief \f$E_7\f$, energy of the second outgoing lepton */
   double _el7;
-  /** @brief \f$m_7\f$, mass of the second outgoing lepton */
-  double _ml7;
   /** @brief \f$m_7^2\f$, squared mass of the second outgoing lepton */
   double _w7;
   /** @brief \f$p_{T,7}\f$, transverse momentum of the second outgoing lepton */
   double _pt_l7;
   /** @brief \f$E_7^\mathrm{lab}\f$, energy of the second outgoing lepton, computed in the lab frame */
   double _e7lab;
-  /** @brief PDG identifier of the second outgoing lepton */
-  Particle::ParticleCode _pdg7;
   /** @brief Energy of the first central photon of momentum \f$t_1\f$ */
   double _eg1;
   /** @brief 3-momentum of the second central photon of momentum \f$t_1\f$ */

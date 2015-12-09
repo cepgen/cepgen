@@ -32,18 +32,22 @@ GenericProcess::ClearEvent()
 {
   fEvent->Restore();
   //AddEventContent();
-  AddEventKinematics();
+  //AddEventKinematics();
 }
 
 void
 GenericProcess::PrepareKinematics()
 {
+  if (!IsKinematicsDefined()) return; // FIXME dump some information...
   Particle *ip1 = fEvent->GetOneByRole(IncomingBeam1), *ip2 = fEvent->GetOneByRole(IncomingBeam2);
-  double *p1 = ip1->P4(), *p2 = ip2->P4(), k = 0.;
+  Particle::Momentum p1 = ip1->GetMomentum(), p2 = ip2->GetMomentum();
 
-  for (unsigned int i=0; i<3; i++) k += p1[i]*p2[i];
-  fS = ip1->M2()+ip2->M2()+2.*(ip1->E()*ip2->E()-k);
+  double k = 0.;
+  for (unsigned int i=0; i<3; i++) k += p1.P(i)*p2.P(i);
+  fS = ip1->M2()+ip2->M2()+2.*(p1.E()*p2.E()-k);
   fSqS = sqrt(fS);
+  
+  DebugInsideLoop(Form("Kinematics successfully prepared! sqrt(s) = %.2f", fSqS));
 }
 
 void
@@ -68,7 +72,7 @@ GenericProcess::SetEventContent(IncomingState is, OutgoingState os)
     fEvent->AddParticle(Particle(ip->first, ip->second));
     Particle* p = fEvent->GetOneByRole(ip->first);
     //p->SetM(ip-second);
-    p->status = 0;
+    p->status = Particle::Undefined;
     switch (ip->first) {
       case IncomingBeam1: case IncomingBeam2: break;
       case Parton1: p->SetMother(fEvent->GetOneByRole(IncomingBeam1)); break;
@@ -89,7 +93,7 @@ GenericProcess::SetEventContent(IncomingState is, OutgoingState os)
     fEvent->AddParticle(Particle(op->first, op->second));
     Particle* p = fEvent->GetOneByRole(op->first);
     //p->SetM(ip->second);
-    p->status = 0;
+    p->status = Particle::Undefined;
     switch (op->first) {
       case OutgoingBeam1: p->SetMother(fEvent->GetOneByRole(IncomingBeam1)); break;
       case OutgoingBeam2: p->SetMother(fEvent->GetOneByRole(IncomingBeam2)); break;
@@ -99,6 +103,13 @@ GenericProcess::SetEventContent(IncomingState is, OutgoingState os)
     }
   }
   fEvent->Init();
+}
+
+void
+GenericProcess::SetIncomingKinematics(Particle::Momentum p1, Particle::Momentum p2)
+{
+  fEvent->GetOneByRole(IncomingBeam1)->SetMomentum(p1);
+  fEvent->GetOneByRole(IncomingBeam2)->SetMomentum(p2);
 }
 
 std::ostream&

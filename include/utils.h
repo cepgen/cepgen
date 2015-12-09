@@ -86,17 +86,6 @@ void Mapla(double,double,int,double,double,double*,double*);
 //void Symmetrise(double, double, double*, double*);
 
 /**
- * Lorentz boost of a 4-vector (from CERNLIB)
- * @param pi_ Input 4-vector to boost
- * @param pf_ Output boosted 4-vector
- * @author L. Pape
- * @date 20 Aug 1975
- * @author Ian McLaren (mclareni), CERN/CN
- * @date 14 Feb 1996
- */
-void Lorenb(double u_, double ps_[], double pi_[], double pf_[]);
-
-/**
  * Generate random number with Breit-Wigner distribution
  * @return Random number between emin_ and emax_ with Breit-Wigner distribution:
  *  \f$\frac{1}{(E-E_r)^2+\Gamma^2/4}\f$

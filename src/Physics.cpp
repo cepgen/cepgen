@@ -424,7 +424,7 @@ GetBRFromProcessId(Particle::ParticleCode vmId_)
   }
 }
 
-Particles
+/*Particles
 VMDecayer(Particle part_, GenericHadroniser *had_)
 {
   if (part_.status!=1) {
@@ -435,13 +435,11 @@ VMDecayer(Particle part_, GenericHadroniser *had_)
     error.str(""); error << __PRETTY_FUNCTION__ << " ERROR: Particle has a too small mass (" << part_.M() << " GeV)";
     throw std::runtime_error(error.str());
   }
-  /*
-    if (iret<=-2)...
-   */
+  //if (iret<=-2)...
   if (!had_->Hadronise(&part_)) {
     
   }
-}
+}*/
 
 double
 ElasticFlux(double x_, double kt2_)
@@ -519,5 +517,21 @@ InelasticFlux(double x_, double kt2_, double mx_)
   f_ine = alpha_em/pi*(1.-x_)*f_aux/kt2_;
 
   return f_ine;
+}
+
+void Lorenb(double u_, const Particle::Momentum& ps_, double pi_[4], double pf_[4])
+{
+  double fn;
+
+  if (ps_.E()!=u_) {
+    pf_[3] = (pi_[3]*ps_.E()+pi_[2]*ps_.Pz()+pi_[1]*ps_.Py()+pi_[0]*ps_.Px())/u_;
+    fn = (pf_[3]+pi_[3])/(ps_.E()+u_);
+    for (unsigned int i=0; i<3; i++) {
+      pf_[i] = pi_[i]+fn*ps_.P(i);
+    }
+  }
+  else {
+    std::copy(pi_, pi_+4, pf_);
+  }
 }
 

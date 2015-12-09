@@ -182,7 +182,8 @@ Event::GetStableParticles()
   ParticlesRef out;
   ParticlesMap::iterator it;
   for (it=fParticles.begin(); it!=fParticles.end(); it++) {
-    if (it->second.status==0 or it->second.status==1) {
+    if (it->second.status==Particle::Undefined
+     or it->second.status==Particle::FinalState) {
       out.push_back(&it->second);
     }
   }
@@ -202,8 +203,8 @@ Event::Dump(bool stable_)
   pxtot = pytot = pztot = etot = 0.;
   particles = GetParticles();
   for (p=particles.begin(); p!=particles.end(); p++) {
-    if (stable_ and (*p)->status!=1) continue;
-    os << Form("\n %2d\t%6d", (*p)->id, (*p)->GetPDGId());
+    if (stable_ and (*p)->status!=Particle::FinalState) continue;
+    os << Form("\n %2d\t%+6d", (*p)->id, (*p)->GetIntPDGId());
     if ((*p)->name!="") os << Form("%6s", (*p)->name.c_str());
     //else                os << std::setw(6) << Particle::ParticleCode(abs((*p)->GetPDGId()));
     else                os << "\t";
@@ -216,8 +217,10 @@ Event::Dump(bool stable_)
     else
       os << "      ";
     os << Form("% 9.3f % 9.3f % 9.3f % 9.3f", (*p)->Px(), (*p)->Py(), (*p)->Pz(), (*p)->E());
-    if ((*p)->status==0 or (*p)->status==1) {
-      sign = ((*p)->status==0) ? -1 : 1;
+    if ((*p)->status==Particle::Undefined
+     or (*p)->status==Particle::FinalState
+     or (*p)->status==Particle::Undecayed) {
+      sign = ((*p)->status==Particle::Undefined) ? -1 : 1;
       pxtot += sign*(*p)->Px();
       pytot += sign*(*p)->Py();
       pztot += sign*(*p)->Pz();

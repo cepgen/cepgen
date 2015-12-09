@@ -338,14 +338,15 @@ Vegas::SetGen()
     eff2 = fFGlobalMax/sum;
     
     Debug(Form("Average function value     =  sum   = %f\n\t"
-                    "Average function value     =  sum   = %f\n\t"
-                    "Average function value**2  =  sum2  = %f\n\t"
-                    "Overall standard deviation =  sig   = %f\n\t"
-                    "Average standard deviation =  sigp  = %f\n\t"
-                    "Maximum function value     = ffmax  = %f\n\t"
-                    "Average inefficiency       =  eff1  = %f\n\t"
-                    "Overall inefficiency       =  eff2  = %f\n\t"
-                    "eff = %f", sum, sum2, sig, sigp, fFGlobalMax, eff1, eff2, eff));
+               "Average function value     =  sum   = %f\n\t"
+               "Average function value**2  =  sum2  = %f\n\t"
+               "Overall standard deviation =  sig   = %f\n\t"
+               "Average standard deviation =  sigp  = %f\n\t"
+               "Maximum function value     = ffmax  = %f\n\t"
+               "Average inefficiency       =  eff1  = %f\n\t"
+               "Overall inefficiency       =  eff2  = %f\n\t"
+               "eff = %f",
+               sum, sum2, sig, sigp, fFGlobalMax, eff1, eff2, eff));
   }
 }
 

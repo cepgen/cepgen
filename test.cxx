@@ -53,7 +53,8 @@ int main(int argc, char* argv[]) {
     mg.parameters->maxgen = ngen;
     mg.parameters->hadroniser = new Pythia6Hadroniser;
     mg.parameters->remnant_mode = GenericProcess::SuriYennie;
-    mg.parameters->process = new GamGamLL;
+    //mg.parameters->process = new GamGamLL;
+    mg.parameters->process = new PPtoLL;
     mg.parameters->process_mode = GenericProcess::ElasticElastic; // el-el
     //mg.parameters->ncvg = 5e3; //FIXME
     //mg.parameters->SetEtaRange(-2.5, 2.5);
@@ -153,7 +154,7 @@ int main(int argc, char* argv[]) {
       pt[np] = (*p)->Pt();
       E[np] = (*p)->E();
       M[np] = (*p)->M();
-      PID[np] = (*p)->pdgId;
+      PID[np] = (*p)->GetIntPDGId();
       parentid[np] = *(*p)->GetMothersIds().begin();
       status[np] = (*p)->status;
       isstable[np] = ((*p)->status==0 or (*p)->status==1);

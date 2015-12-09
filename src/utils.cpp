@@ -33,22 +33,6 @@ void Mapla(double y_, double z_, int u_, double xm_, double xp_, double* x_, dou
   *d_ = ax*log(yy);
 }
 
-void Lorenb(double u_, double ps_[4], double pi_[4], double pf_[4])
-{
-  double fn;
-
-  if (ps_[3]!=u_) {
-    pf_[3] = (pi_[3]*ps_[3]+pi_[2]*ps_[2]+pi_[1]*ps_[1]+pi_[0]*ps_[0])/u_;
-    fn = (pf_[3]+pi_[3])/(ps_[3]+u_);
-    pf_[0] = pi_[0]+fn*ps_[0];
-    pf_[1] = pi_[1]+fn*ps_[1];
-    pf_[2] = pi_[2]+fn*ps_[2];
-  }
-  else {
-    std::copy(pi_, pi_+4, pf_);
-  }
-}
-
 double RanBW(double er_, double gamma_, double emin_, double emax_)
 {
   double a, b, e;

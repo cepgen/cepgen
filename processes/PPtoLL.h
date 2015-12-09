@@ -14,6 +14,7 @@ class PPtoLL : public GenericProcess
   int GetNdim(ProcessMode) const;
   double ComputeWeight();
   void FillKinematics(bool symmetrise_=false);
+  void AddEventContent();
  private:
   double INCqqbar();
   

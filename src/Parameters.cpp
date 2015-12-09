@@ -19,11 +19,11 @@ Parameters::Parameters() :
   maxgen(1e5), ngen(0),
   gpdf(5), spdf(4), qpdf(12),
   hadroniser_max_trials(5),
-  symmetrise(true)
+  symmetrise(true),
+  process(0), hadroniser(0)
 {
   this->last_event = new Event();
   this->file = (std::ofstream*)NULL;
-  this->hadroniser = (GenericHadroniser*)NULL;
   //this->output_format = "lhe";
 }
 
@@ -156,22 +156,22 @@ bool Parameters::ReadConfigFile(std::string inFile_)
     }
     else if (key=="PROC") {
       if (value=="lpair") {
-	this->process = new GamGamLL;
-	os << " * Process: LPAIR\n\t";
+      	this->process = new GamGamLL;
+      	os << " * Process: LPAIR\n\t";
       }
       else if (value=="pptoll") {
-	this->process = new PPtoLL;
-	os << " * Process: PPTOLL\n\t";
+	      this->process = new PPtoLL;
+	      os << " * Process: PPTOLL\n\t";
       }
     }
     else if (key=="HADR") {
       if (value=="pythia6") {
-	this->hadroniser = new Pythia6Hadroniser;
-	os << " * Hadroniser: Pythia6\n\t";
+	      this->hadroniser = new Pythia6Hadroniser;
+	      os << " * Hadroniser: Pythia6\n\t";
       }
       if (value=="jetset7") {
-	this->hadroniser = new Jetset7Hadroniser;
-	os << " * Hadroniser: Jetset7\n\t";
+	      this->hadroniser = new Jetset7Hadroniser;
+	      os << " * Hadroniser: Jetset7\n\t";
       }
     }
     else if (key=="MODE") {

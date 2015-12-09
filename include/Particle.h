@@ -47,6 +47,17 @@ class Particle {
       Pomeron = 990,
       Reggeon = 110
     };
+    enum Status {
+      PrimordialIncoming = -9,
+      Incoming = -1,
+      Undecayed = -3,
+      sPropagator = -2,
+      Undefined = 0,
+      FinalState = 1,
+      Resonance = 2,
+      DebugResonance = 3,
+      PythiaHIncoming = 21
+    };
     class Momentum {
       public:
         inline Momentum() : fPx(0.), fPy(0.), fPz(0.), fE(-1.) {;}
@@ -56,6 +67,7 @@ class Particle {
 
         Momentum& operator+=(const Momentum&);
         Momentum& operator-=(const Momentum&);
+        Momentum& operator-(const Momentum&);
         double operator*(const Momentum&); // scalar product
 
         inline bool SetP(double px_,double py_,double pz_, double e_) {
@@ -84,9 +96,19 @@ class Particle {
             default: return -1.;
           }
         }
-        inline double E() const { return P(3); }
+        inline double Px() const { return fPx; }
+        inline double Py() const { return fPy; }
+        inline double Pz() const { return fPz; }
+        inline double Pt() const { return sqrt(pow(Px(),2)+Py()); }
         inline double P2() const { return pow(P(0),2)+pow(P(1),2)+pow(P(2),2); }
+        inline double E() const { return fE; }
         inline double M() const { return sqrt(pow(E(),2)-P2()); }
+        inline void RotatePhi(double phi, double rany) {
+          double px = fPx*cos(phi)+fPy*sin(phi)*rany,
+                 py =-fPx*sin(phi)+fPy*cos(phi)*rany;
+          fPx = px;
+          fPy = py;
+        }
       private:
         double fPx;
         double fPy;
@@ -167,11 +189,17 @@ class Particle {
      * @brief Role in the considered process
      */
     int role;
-    inline void SetPDGId(ParticleCode pdg) {
+    inline void SetPDGId(ParticleCode pdg, float ch=-999.) {
       fPDGid = pdg;
-      charge = pdg/abs(pdg);
+      if (ch==-999.) charge = pdg/abs(pdg);
+      else charge = ch;
     }
     inline ParticleCode GetPDGId() const { return fPDGid; }
+    inline int GetIntPDGId() const {
+      int pdg = static_cast<int>(fPDGid);
+      if (pdg>10 and pdg<16 and pdg%2!=0) return static_cast<int>(-charge)*pdg;
+      else return pdg;
+    }
     /**
      * Particle's helicity
      * @fixme Float??
@@ -180,15 +208,15 @@ class Particle {
     /**
      * @brief Momentum along the \f$x\f$-axis in \f$\text{GeV}/c\f$
      */
-    inline double Px() const { return fMomentum.P(0); };
+    inline double Px() const { return fMomentum.Px(); };
     /**
      * @brief Momentum along the \f$y\f$-axis in \f$\text{GeV}/c\f$
      */
-    inline double Py() const { return fMomentum.P(1); };
+    inline double Py() const { return fMomentum.Py(); };
     /**
      * @brief Momentum along the \f$z\f$-axis in \f$\text{GeV}/c\f$
      */
-    inline double Pz() const { return fMomentum.P(2); };
+    inline double Pz() const { return fMomentum.Pz(); };
     /**
      * Gets the particle's mass in \f$\text{GeV}/c^{2}\f$.
      * @brief Gets the particle's mass
@@ -232,6 +260,14 @@ class Particle {
 	      ? 0.
 	      : atan2(P(), Pz());
     };*/
+    inline void SetMomentum(const Momentum& mom) {
+      fMomentum = mom;
+      if (fMass>=0.) {
+        double e = sqrt(fMomentum.P2()+pow(fMass,2));
+        fMomentum.SetE(e);
+      }
+    }
+    inline Momentum GetMomentum() const { return fMomentum; }
     /**
      * @brief Sets the 3-momentum associated to the particle
      * @param[in] px_ Momentum along the \f$x\f$-axis, in \f$\text{GeV}/c\f$
@@ -291,17 +327,17 @@ class Particle {
      * @brief Returns the particle's 4-momentum
      * @return The particle's 4-momentum as a 4 components double array
      */
-    inline double* P4() const {
+    /*inline double* P4() const {
       double out[4] = { fMomentum.P(0), fMomentum.P(1), fMomentum.P(2), E() };
       return out;
-    }
-    inline std::vector<double> P5() const {
+    }*/
+    /*inline std::vector<double> P5() const {
       double* in = P4();
       std::vector<double> out(in, in+3);
       out.push_back(E());
       out.push_back(fMass);
       return out;
-    }
+    }*/
     /**
      * @brief Sets the particle's energy
      * @param[in] E_ Energy, in GeV
@@ -368,7 +404,7 @@ class Particle {
      * Codes 1-10 correspond to currently existing partons/particles, and larger codes contain partons/particles which no longer exist, or other kinds of event information
      * @brief Particle status
      */
-    int status;
+    Status status;
   private:
     /**
      * @brief Mass in \f$\text{GeV}/c^2\f$

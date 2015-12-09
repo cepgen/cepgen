@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
   if (argc==1) {
     Info("No config file provided. Setting the default parameters.");
     
-    mg.parameters->hadroniser = new Pythia6Hadroniser;
+    //mg.parameters->hadroniser = new Pythia6Hadroniser;
     mg.parameters->process = new GamGamLL;
     mg.parameters->process_mode = GenericProcess::InelasticElastic;
     mg.parameters->remnant_mode = GenericProcess::SuriYennie;
@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
     mg.parameters->minpt = 5.;
     mg.parameters->mineta = -2.5;
     mg.parameters->maxeta = 2.5;
-    //mg.parameters->ncvg = 5e3; //FIXME
+    mg.parameters->ncvg = 5e4; //FIXME
     mg.parameters->generation = true;
     mg.parameters->maxgen = 2;
     //mg.parameters->maxgen = 1e5;

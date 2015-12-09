@@ -166,7 +166,7 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
     if (ev_->GetById(lujets_.k[2][p]-1)!=(Particle*)NULL) {
       pa.role = ev_->GetById(lujets_.k[2][p]-1)->role; // Child particle inherits its mother's role
     }
-    pa.status = lujets_.k[0][p];
+    pa.status = static_cast<Particle::Status>(lujets_.k[0][p]);
     pa.P(lujets_.p[0][p], lujets_.p[1][p], lujets_.p[2][p], lujets_.p[3][p]);
     pa.SetM(lujets_.p[4][p]);
     pa.name = this->luname(pa.GetPDGId());
@@ -202,7 +202,7 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
   
   pp = ev_->GetParticles();
   for (p=pp.begin(); p!=pp.end(); p++) {
-    if ((*p)->status==-2) continue;
+    if ((*p)->status==Particle::Undecayed) continue;
     // One proton to be fragmented
     ranudq = drand();
     if (ranudq<1./9.) {
@@ -237,12 +237,12 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
     pmxda[2] = pmxp*cos(ranmxt);
     pmxda[3] = std::sqrt(std::pow(pmxp, 2)+std::pow(ulmq, 2));
     
-    Lorenb((*p)->M(), (*p)->P4(), pmxda, partpb);
+    Lorenb((*p)->M(), (*p)->GetMomentum(), pmxda, partpb);
     
     if (!(partpb[0]<0) and !(partpb[0]>0)) return false;
     
     Particle singlet((*p)->role, singlet_id);
-    singlet.status = 3;
+    singlet.status = Particle::DebugResonance;
     //singlet.SetMother(ev_->GetOneByRole((*p)->role));
     if (!singlet.P(partpb)) {
       throw Exception(__PRETTY_FUNCTION__, "ERROR while setting the 4-momentum of singlet", JustWarning);
@@ -257,10 +257,10 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
     pmxda[2] = -pmxda[2];
     pmxda[3] = std::sqrt(std::pow(pmxp, 2)+std::pow(ulmdq, 2));
     
-    Lorenb((*p)->M(), (*p)->P4(), pmxda, partpb);
+    Lorenb((*p)->M(), (*p)->GetMomentum(), pmxda, partpb);
     
     Particle doublet((*p)->role, doublet_id);
-    doublet.status = 3;
+    doublet.status = Particle::DebugResonance;
     doublet.SetMother(ev_->GetOneByRole((*p)->role));
     if (!doublet.P(partpb)) {
       throw Exception(__PRETTY_FUNCTION__, "ERROR while setting the 4-momentum of doublet", JustWarning);

@@ -6,6 +6,21 @@ PPtoLL::PPtoLL() : GenericProcess("gamma,gamma->l+,l- (kT-factorization approach
 PPtoLL::~PPtoLL()
 {}
 
+void
+PPtoLL::AddEventContent()
+{
+  IncomingState is; OutgoingState os;
+  is.insert(ParticleWithRole(IncomingBeam1, Particle::Proton));
+  is.insert(ParticleWithRole(IncomingBeam2, Particle::Proton));
+  is.insert(ParticleWithRole(Parton1, Particle::Photon));
+  is.insert(ParticleWithRole(Parton2, Particle::Photon));
+  os.insert(ParticleWithRole(OutgoingBeam1, Particle::Proton));
+  os.insert(ParticleWithRole(OutgoingBeam2, Particle::Proton));
+  os.insert(ParticleWithRole(CentralParticle1, Particle::Muon));
+  os.insert(ParticleWithRole(CentralParticle2, Particle::Muon));
+  GenericProcess::SetEventContent(is, os);
+}
+
 int
 PPtoLL::GetNdim(ProcessMode process_mode_) const
 {
@@ -76,10 +91,10 @@ PPtoLL::ComputeWeight()
   }
   jac *= 2.*pi;
   
-  if (!IsKinematicsDefined()) {
+  /*if (!IsKinematicsDefined()) {
     std::cerr << __PRETTY_FUNCTION__ << " ERROR: Event kinematics not properly defined !" << std::endl;
     return -1.;
-  }
+  }*/
   
   weight = jac*INCqqbar();
   
@@ -499,7 +514,7 @@ PPtoLL::INCqqbar()
 }
 
 void
-PPtoLL::FillKinematics(bool symmetrise_)
+PPtoLL::FillKinematics(bool)
 {
   //=================================================================
   //     first outgoing proton
@@ -509,11 +524,11 @@ PPtoLL::FillKinematics(bool symmetrise_)
     std::cerr << "Invalid outgoing proton 1" << std::endl;
   }
   if (fCuts.kinematics>1) {
-    op1.status = -2;
+    op1.status = Particle::Undecayed;
     op1.SetM();
   }
   else {
-    op1.status = 1;
+    op1.status = Particle::FinalState;
     op1.SetM(); //FIXME
   }
   op1.SetMother(fEvent->GetOneByRole(1));
@@ -527,11 +542,11 @@ PPtoLL::FillKinematics(bool symmetrise_)
     std::cerr << "Invalid outgoing proton 2" << std::endl;
   }
   if (fCuts.kinematics==3) {
-    op2.status = -2;
+    op2.status = Particle::Undecayed;
     op2.SetM(_my);
   }
   else {
-    op2.status = 1;
+    op2.status = Particle::FinalState;
     op2.SetM(); //FIXME
   }
   op2.SetMother(fEvent->GetOneByRole(2));
@@ -541,17 +556,18 @@ PPtoLL::FillKinematics(bool symmetrise_)
 
   Particle::ParticleCode lepton1, lepton2;
   int sign = (drand()>.5) ? +1 : -1;
-  lepton1 = static_cast<Particle::ParticleCode>( sign*(int)fEvent->GetOneByRole(6)->GetPDGId());
-  lepton2 = static_cast<Particle::ParticleCode>(-sign*(int)fEvent->GetOneByRole(6)->GetPDGId());
+  lepton1 = fEvent->GetOneByRole(6)->GetPDGId();
+  lepton2 = fEvent->GetOneByRole(6)->GetPDGId();
 
   //=================================================================
   //     first outgoing lepton
   //=================================================================
   Particle ol1(6, lepton1);
+  ol1.SetPDGId(lepton1, sign);
   if (!ol1.P(_pl1_x, _pl1_y, _pl1_z, _pl1_0)) {
     std::cerr << "Invalid outgoing lepton 1" << std::endl;
   }
-  ol1.status = 1;
+  ol1.status = Particle::FinalState;
   ol1.SetM(); //FIXME
   ol1.SetMother(fEvent->GetOneByRole(1)); //FIXME
   fEvent->AddParticle(ol1, true);
@@ -560,10 +576,11 @@ PPtoLL::FillKinematics(bool symmetrise_)
   //     second outgoing lepton
   //=================================================================
   Particle ol2(7, lepton2);
+  ol2.SetPDGId(lepton2, -sign);
   if (!ol2.P(_pl2_x, _pl2_y, _pl2_z, _pl2_0)) {
     std::cerr << "Invalid outgoing lepton 2" << std::endl;
   }
-  ol2.status = 1;
+  ol2.status = Particle::FinalState;
   ol2.SetM(); //FIXME
   ol2.SetMother(fEvent->GetOneByRole(2)); //FIXME
   fEvent->AddParticle(ol2, true);

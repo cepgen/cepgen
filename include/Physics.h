@@ -2,13 +2,14 @@
 #define Physics_h
 
 #include "Event.h"
-#include "GenericHadroniser.h"
+//#include "GenericHadroniser.h"
 
 extern "C"
 {
   extern void grv95lo_(double&,double&,double&,double&,double&,double&,double&,double&);
 }
 
+class GenericHadroniser; // forward
 
 /**
  * List of physical constraints to apply on the phase space
@@ -84,9 +85,21 @@ double GetBRFromProcessId(Particle::ParticleCode vmId_);
  * @param[in] had_ The default hadroniser object to use for the default decay
  * @return A vector of Particle objects
  */
-Particles VMDecayer(Particle part_, GenericHadroniser *had_);
+//Particles VMDecayer(Particle part_, GenericHadroniser *had_);
 
 double ElasticFlux(double x_, double kt2_);
 double InelasticFlux(double x_, double kt2_, double mx_);
+
+/**
+ * Lorentz boost of a 4-vector (from CERNLIB)
+ * @param pi_ Input 4-vector to boost
+ * @param pf_ Output boosted 4-vector
+ * @author L. Pape
+ * @date 20 Aug 1975
+ * @author Ian McLaren (mclareni), CERN/CN
+ * @date 14 Feb 1996
+ */
+void Lorenb(double u_, const Particle::Momentum& ps_, double pi_[], double pf_[]);
+
 
 #endif

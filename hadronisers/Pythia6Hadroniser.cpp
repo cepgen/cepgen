@@ -32,7 +32,8 @@ Pythia6Hadroniser::Hadronise(Particle *part_)
 bool
 Pythia6Hadroniser::Hadronise(Event *ev_)
 {
-  int np, status;
+  int np;
+  Particle::Status status;
   std::vector<int> rl;
   std::vector<int>::iterator r;
 
@@ -79,7 +80,7 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
       pyjets_.p[4][np] = (double)(*p)->M();
       (*p)->Dump();
 
-      if ((*p)->status<=0) status = 21;
+      if ((*p)->status<=0) status = Particle::PythiaHIncoming;
       else status = (*p)->status;
       pylist(2);
       pyjets_.k[0][np] = status;
@@ -103,7 +104,7 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
         pyjets_.v[i][np] = 0.;
       }
       
-      if ((*p)->status==3) {
+      if ((*p)->status==Particle::DebugResonance) {
         pyjets_.k[0][np] = 1; //FIXME PYTHIA/JETSET workaround
         jlrole[str_in_evt] = (*p)->role;
         jlpsf[str_in_evt][part_in_str] = (*p)->id+1;
@@ -162,7 +163,7 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
     if (ev_->GetById(pyjets_.k[2][p]-1)!=(Particle*)NULL) {
       pa.role = ev_->GetById(pyjets_.k[2][p]-1)->role; // Child particle inherits its mother's role
     }
-    pa.status = pyjets_.k[0][p];
+    pa.status = static_cast<Particle::Status>(pyjets_.k[0][p]);
     pa.P(pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p]);
     pa.SetM(pyjets_.p[4][p]);
     pa.name = this->pyname(pa.GetPDGId());
@@ -198,7 +199,7 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
   
   pp = ev_->GetParticles();
   for (p=pp.begin(); p!=pp.end(); p++) {
-    if ((*p)->status!=-2) continue;
+    if ((*p)->status!=Particle::Undecayed) continue;
     // One proton to be fragmented
     ranudq = drand();
     if (ranudq<1./9.) {
@@ -231,12 +232,12 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
     pmxda[2] = pmxp*cos(ranmxt);
     pmxda[3] = std::sqrt(std::pow(pmxp, 2)+std::pow(ulmq, 2));
     
-    Lorenb((*p)->M(), (*p)->P4(), pmxda, partpb);
+    Lorenb((*p)->M(), (*p)->GetMomentum(), pmxda, partpb);
     
     if (!(partpb[0]<0) and !(partpb[0]>0)) return false;
     
     Particle singlet((*p)->role, singlet_id);
-    singlet.status = 3;
+    singlet.status = Particle::DebugResonance;
     if (!singlet.P(partpb)) {
       throw Exception(__PRETTY_FUNCTION__, "ERROR while setting the 4-momentum of singlet", JustWarning);
     }
@@ -248,10 +249,10 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
     pmxda[2] = -pmxda[2];
     pmxda[3] = std::sqrt(std::pow(pmxp, 2)+std::pow(ulmdq, 2));
     
-    Lorenb((*p)->M(), (*p)->P4(), pmxda, partpb);
+    Lorenb((*p)->M(), (*p)->GetMomentum(), pmxda, partpb);
     
     Particle doublet((*p)->role, doublet_id);
-    doublet.status = 3;
+    doublet.status = Particle::DebugResonance;
     if (!doublet.P(partpb)) {
       throw Exception(__PRETTY_FUNCTION__, "ERROR while setting the 4-momentum of doublet", JustWarning);
     }

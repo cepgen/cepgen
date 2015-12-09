@@ -136,9 +136,10 @@ double f(double* x_, size_t ndim_, void* params_)
   double num_hadr_trials;
   std::ostringstream os;
   Event* ev;
-  Particle* part;
 
   p = static_cast<Parameters*>(params_);
+  Particle::Momentum p1(0., 0., p->in1p), p2(0., 0., -p->in2p);
+  p->process->SetIncomingKinematics(p1, p2);
   p->process->SetPoint(ndim_, x_);
 
   if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
@@ -157,21 +158,14 @@ double f(double* x_, size_t ndim_, void* params_)
                        "  remnant mode: %d",
                        p->in1p, p->in2p, p->remnant_mode));
     
-  float now = tmr.elapsed();
+  //float now = tmr.elapsed();
   //std::cout << "0: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
   p->process->ClearEvent();
   //std::cout << "1: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
   
   ev = p->process->GetEvent();
   
-  part = ev->GetOneByRole(GenericProcess::IncomingBeam1);
-  part->SetPDGId(p->in1pdg);
-  part->P(0., 0., p->in1p);
-
-  part = ev->GetOneByRole(GenericProcess::IncomingBeam2);
-  part->SetPDGId(p->in2pdg);
-  part->P(0., 0., -p->in2p);
-  //std::cout << "2: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
+  //std::cout << "2: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();*/
 
   // Then add outgoing leptons
   ev->GetOneByRole(GenericProcess::CentralParticle1)->SetPDGId(p->pair);
@@ -190,26 +184,26 @@ double f(double* x_, size_t ndim_, void* params_)
       break;
   }
   
-  // Check that everything is there
-  if (!p->process->IsKinematicsDefined()) return 0.;
-
   //std::cout << "4: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
   // Prepare the function to be integrated
-  p->process->BeforeComputeWeight();
   p->process->PrepareKinematics();
+  p->process->BeforeComputeWeight();
 
   //std::cout << "5: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
   ff = p->process->ComputeWeight();
   //std::cout << "6: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
   if (ff<0.) return 0.;
   
-  //ev->Dump();
   if (p->store) { // MC events generation
     p->process->FillKinematics(false);
     p->process->GetEvent()->time_generation = tmr.elapsed();
 
+    if (!p->hadroniser) {
+      *(p->last_event) = *(p->process->GetEvent());
+      return ff;
+    }
     if (p->process_mode!=GenericProcess::ElasticElastic) {
-
+      
       Debug(Form("Event before calling the hadroniser (%s)", p->hadroniser->GetName().c_str()));
       if (Logger::GetInstance()->Level>=Logger::Debug) p->process->GetEvent()->Dump();
       
