@@ -13,13 +13,13 @@ Parameters::Parameters() :
   minq2(0.), maxq2(1.e5),
   minmx(1.07), maxmx(320.),
   //ncvg(14000), itvg(10),
-  ncvg(100000), itvg(10),
-  ntreat(1), npoints(100),
+  ncvg(100000), itvg(10), npoints(100),
   generation(true), store(false),
   maxgen(1e5), ngen(0),
   gpdf(5), spdf(4), qpdf(12),
   hadroniser_max_trials(5),
   symmetrise(true),
+  first_run(true),
   process(0), hadroniser(0)
 {
   this->last_event = new Event();
@@ -82,7 +82,6 @@ void Parameters::Dump()
     << "| " << std::setw(wt) << "Maximum number of iterations" << std::setw(wp) << itvg << " |" << std::endl
     << "| " << std::setw(wt) << "Number of function calls" << std::setw(wp) << ncvg << " |" << std::endl
     << "| " << std::setw(wt) << "Number of points to try per bin" << std::setw(wp) << npoints << " |" << std::endl
-    << "| " << std::setw(wt) << "Integration smoothed (TREAT) ? " << std::setw(wp) << ntreat << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|_" << std::setfill('_') << std::setw(wb) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill(' ') << "_|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
@@ -114,16 +113,16 @@ void Parameters::Dump()
   Info(os.str());
 }
 
-bool Parameters::ReadConfigFile(std::string inFile_)
+bool Parameters::ReadConfigFile(const char* inFile_)
 {
   std::ifstream f;
   std::string key, value;
-  f.open(inFile_.c_str(), std::fstream::in);
+  f.open(inFile_, std::fstream::in);
   if (!f.is_open()) {
     return false;
   }
 
-  Debug(Form("File '%s' succesfully opened!", inFile_.c_str()));
+  Debug(Form("File '%s' succesfully opened!", inFile_));
   std::ostringstream os;
   os << "Configuration file content : " << "\n\t";
 
@@ -183,7 +182,7 @@ bool Parameters::ReadConfigFile(std::string inFile_)
     else if (key=="PMOD" or key=="EMOD") {
       this->remnant_mode = static_cast<GenericProcess::StructureFunctions>(atoi(value.c_str()));
       os << " * Outgoing primary particles' mode: " << (unsigned int)this->remnant_mode
-	 << "\n\t\t --> " << this->remnant_mode << "\n\t";
+      	 << " --> " << this->remnant_mode << "\n\t";
     }
     else if (key=="INPE") {
       this->in2p = (double)atof(value.c_str());
@@ -192,12 +191,12 @@ bool Parameters::ReadConfigFile(std::string inFile_)
     else if (key=="PAIR") {
       this->pair = (Particle::ParticleCode)atoi(value.c_str());
       os << " * Outgoing leptons' PDG id: " << (int)this->pair
-	 << "\n\t\t --> " << this->pair << "\n\t";
+         << " --> " << this->pair << "\n\t";
     }
     else if (key=="MCUT") {
       this->mcut = (int)atoi(value.c_str());
       os << " * Set of cuts to apply on the total generation  : " << this->mcut
-	 << "\n\t\t --> ";
+         << " --> ";
       switch (this->mcut) {
         case 0: default: os << "no cuts"; break;
         case 3:          os << "cuts on at least one outgoing lepton"; break;
@@ -213,10 +212,6 @@ bool Parameters::ReadConfigFile(std::string inFile_)
     else if (key=="ECUT") {
       this->minenergy = (double)atof(value.c_str());
       os << " * Single outgoing lepton's minimal energy: " << this->minenergy << " GeV\n\t";
-    }
-    else if (key=="NTRT") {
-      this->ntreat = (double)atoi(value.c_str());
-      os << " * Number of TREAT calls: " << this->ntreat << "\n\t";
     }
     else if (key=="NGEN") {
       this->maxgen = (double)atoi(value.c_str());
@@ -290,7 +285,6 @@ bool Parameters::StoreConfigFile(std::string outFile_)
   if (this->itvg!=-1) f << "ITVG  " << this->itvg << std::endl;
   if (this->minenergy!=-1) f << "ECUT  " << this->minenergy << std::endl;
   if (this->minenergy!=-1) f << "PTCT  " << this->minpt << std::endl;
-  if (this->ntreat!=-1) f << "NTRT  " << this->ntreat << std::endl;
   // ...
   f.close();
   return true;

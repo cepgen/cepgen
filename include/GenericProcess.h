@@ -14,12 +14,16 @@
 class GenericProcess
 {
  public:
+  /// Type of outgoing process kinematics to be considered (elastic/dissociative final states)
   enum ProcessMode {
     ElasticElastic = 1,
     ElasticInelastic = 2,
     InelasticElastic = 3,
     InelasticInelastic = 4
   };
+  friend std::ostream& operator<<(std::ostream& os, const GenericProcess::ProcessMode& pm);
+  
+  /// Proton structure function to be used in the outgoing state description
   enum StructureFunctions {
     Electron = 1,
     ElasticProton = 2,
@@ -30,7 +34,6 @@ class GenericProcess
     FioreSea = 102,
     Fiore = 103
   };
-  friend std::ostream& operator<<(std::ostream& os, const GenericProcess::ProcessMode& pm);
   friend std::ostream& operator<<(std::ostream& os, const GenericProcess::StructureFunctions& sf);
 
   typedef std::map<Particle::Role,Particle::ParticleCode> ParticlesRoleMap;
@@ -41,13 +44,20 @@ class GenericProcess
   GenericProcess(std::string name_="<invalid process>");
   virtual ~GenericProcess();
 
-  inline virtual void AddEventContent() {;}
-  void ClearEvent();
+  /// Restore the Event object to its initial state
+  inline void ClearEvent() { fEvent->Restore(); }
+  /// Set the kinematics of the incoming state particles
+  void SetIncomingKinematics(Particle::Momentum p1, Particle::Momentum p2);
+  /// Compute the incoming state kinematics
   void PrepareKinematics();
+  
+  // --- virtual (process-defined) methods
+
+  /// Set the incoming and outgoing state to be expected in the process
+  inline virtual void AddEventContent() {;}
+  /// Prepare the process for its integration over the whole phase space
   inline virtual void BeforeComputeWeight() {;}
-  /**
-   * @brief Returns the weight for this point in the phase-space
-   */
+  /// Compute the weight for this point in the phase-space
   inline virtual double ComputeWeight() { throw Exception(__PRETTY_FUNCTION__, "Calling ComputeWeight on an invalid process!", Fatal); }
   /**
    * Fills the private Event object with all the Particle object contained
@@ -58,8 +68,7 @@ class GenericProcess
    */
   inline virtual void FillKinematics(bool symmetrise_=false) {
     Info("Virtual method called");
-    if (symmetrise_) Info("Symmetrised");
-        
+    if (symmetrise_) Info("The kinematics is symmetrised");
   }
   /**
    * @brief Returns the number of dimensions on which the integration has to be performed
@@ -79,9 +88,7 @@ class GenericProcess
    * which the kinematics and the cross-section are computed
    */
   void SetPoint(const unsigned int ndim_,double x_[]);
-  /**
-   * @brief Dumps the evaluated point's coordinates in the standard output stream
-   */
+  /// Dump the evaluated point's coordinates in the standard output stream
   void DumpPoint(const ExceptionType& et);
   /**
    * @brief Sets the list of kinematic cuts to apply on the outgoing particles'
@@ -92,93 +99,59 @@ class GenericProcess
   /**
    * Returns the complete list of Particle with their role in the process for
    * the point considered in the phase space as an Event object.
-   * @brief Returns the event content (list of particles with an assigned role)
+   * @brief Get the event content (list of particles with an assigned role)
    * @return The Event object containing all the generated Particle objects
    */
   inline Event* GetEvent() { return fEvent; }
-  /**
-   * @brief Returns the number of dimensions on which the integration is performed
-   */
+  ///Get the number of dimensions on which the integration is performed
   inline unsigned int ndim() const { return fNumDimensions; }
-  /**
-   * @brief Returns the value of a component of the @a fNumDimensions -dimensional point considered
-   */
+  /// Get the value of a component of the @a fNumDimensions -dimensional point considered
   inline double x(const unsigned int idx_) { return (idx_>=fNumDimensions)?-1.:fX[idx_]; }
-  /**
-   * @brief Returns the human-readable name of the process considered
-   */
+  /// Get a human-readable name of the process considered
   inline std::string GetName() { return fName; }
-  void SetIncomingKinematics(Particle::Momentum p1, Particle::Momentum p2);
+  
  protected:
+  /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
   void SetEventContent(IncomingState is, OutgoingState os);
-  /**
-   * @brief Sets the PDG id for the outgoing particles
-   * @param[in] part_ Role of the particle in the process
-   * @param[in] pdgId_ Particle ID according to the PDG convention
-   * @param[in] mothRole_ Integer role of the outgoing particle's mother
-   * @return A boolean stating whether or not the outgoing kinematics is
-   * properly set for this event
-   */
-  inline virtual void SetOutgoingParticles(int part_, Particle::ParticleCode pdgId_, int mothRole_=-1) {
-    fEvent->AddParticle(Particle(part_, pdgId_));
-    if (mothRole_!=-1) fEvent->GetOneByRole(part_)->SetMother(fEvent->GetOneByRole(mothRole_));
-  };
+  
+  inline ParticlesRef GetParticles(const Particle::Role& role) { return fEvent->GetByRole(role); }
+  /// Get the pointer to one particle in the event (using its role)
   inline Particle* GetParticle(const Particle::Role& role, unsigned int id=0) {
     if (id==0) return fEvent->GetOneByRole(role);
     ParticlesRef pp = fEvent->GetByRole(role);
     if (!pp.size() or id>pp.size()) return 0;
     return pp.at(id);
   }
-  inline Particle* GetParticle(unsigned int id) {
-    return fEvent->GetById(id);
-  }
-  /**
-   * @brief Array of @a fNumDimensions components representing the point on which the
-   * weight in the cross-section is computed
-   */
+  /// Get the pointer to one particle in the event (using its identifier)
+  inline Particle* GetParticle(unsigned int id) { return fEvent->GetById(id); }
+  
+  // --- 
+  
+  /// Array of @a fNumDimensions components representing the point on which the weight in the cross-section is computed
   double* fX;
+  /// List of incoming state particles (including intermediate partons)
   IncomingState fIncomingState;
+  /// List of outgoing state particles
   OutgoingState fOutgoingState;
-  /**
-   * @brief \f$s\f$, squared centre of mass energy of the incoming particles' system, in \f$\mathrm{GeV}^2\f$
-   */
+  /// \f$s\f$, squared centre of mass energy of the incoming particles' system, in \f$\mathrm{GeV}^2\f$
   double fS;
-  /**
-   * @brief \f$\sqrt s\f$, centre of mass energy of the incoming particles' system, in \f$\mathrm{GeV}\f$
-   */
+  /// \f$\sqrt s\f$, centre of mass energy of the incoming particles' system (in GeV)
   double fSqS;
-  /**
-   * @brief Number of dimensions on which the integration has to be performed.
-   */
+  /// Number of dimensions on which the integration has to be performed.
   unsigned int fNumDimensions;
-  /**
-   * @brief Set of cuts to apply on the final phase space
-   */
+  /// Set of cuts to apply on the final phase space
   Kinematics fCuts;
-  /**
-   * @brief Event object containing all the information on the in- and outgoing
-   * particles
-   */
+  /// Event object containing all the information on the in- and outgoing particles
   Event* fEvent;
-  /**
-   * @brief Is the phase space point set ?
-   */
+  /// Is the phase space point set?
   bool fIsPointSet;
-  /**
-   * @brief Are the event's incoming particles set ?
-   */
+  /// Are the event's incoming particles set?
   bool fIsInStateSet;
-  /**
-   * @brief Are the event's outgoing particles set ?
-   */
+  /// Are the event's outgoing particles set?
   bool fIsOutStateSet;
-  /**
-   * @brief Is the full event's kinematic set ?
-   */
+  /// Is the full event's kinematic set?
   bool fIsKinematicSet;
-  /**
-   * @brief Name of the process (useful for logging and debugging)
-   */
+  /// Name of the process (useful for logging and debugging)
   std::string fName;
   
  private:
@@ -191,9 +164,9 @@ class GenericProcess
    * well defined
    */
   inline bool IsKinematicsDefined() {
-    if   (fEvent->GetByRole(1).size()!=0 and fEvent->GetByRole(2).size()!=0) fIsInStateSet = true;
-    if  ((fEvent->GetByRole(3).size()!=0 and fEvent->GetByRole(5).size()!=0)
-     and (fEvent->GetByRole(6).size()!=0 or  fEvent->GetByRole(7).size()!=0)) fIsOutStateSet = true;
+    if (GetParticles(Particle::IncomingBeam1).size()!=0 and GetParticles(Particle::IncomingBeam2).size()!=0) fIsInStateSet = true;
+    if  ((GetParticles(Particle::OutgoingBeam1).size()!=0   and GetParticles(Particle::OutgoingBeam2).size()!=0)
+     and (GetParticles(Particle::CentralParticle1).size()!=0 or GetParticles(Particle::CentralParticle2).size()!=0)) fIsOutStateSet = true;
     fIsKinematicSet = fIsInStateSet and fIsOutStateSet;
     return fIsKinematicSet;
   }

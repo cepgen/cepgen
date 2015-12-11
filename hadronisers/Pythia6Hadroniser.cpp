@@ -13,9 +13,9 @@ Pythia6Hadroniser::~Pythia6Hadroniser()
 bool
 Pythia6Hadroniser::Hadronise(Particle *part_)
 {
-  pyjets_.p[0][0] = part_->Px();
-  pyjets_.p[1][0] = part_->Py();
-  pyjets_.p[2][0] = part_->Pz();
+  pyjets_.p[0][0] = part_->GetMomentum().Px();
+  pyjets_.p[1][0] = part_->GetMomentum().Py();
+  pyjets_.p[2][0] = part_->GetMomentum().Pz();
   pyjets_.p[3][0] = part_->E();
   pyjets_.p[4][0] = part_->M();
 
@@ -34,8 +34,8 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
 {
   int np;
   Particle::Status status;
-  std::vector<int> rl;
-  std::vector<int>::iterator r;
+  ParticleRoles rl;
+  ParticleRoles::iterator r;
 
   ParticlesRef pr, daug;
   ParticlesRef::iterator p;
@@ -73,9 +73,9 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
     for (p=pr.begin(); p!=pr.end(); p++) {
       np = (*p)->id;
       
-      pyjets_.p[0][np] = (double)(*p)->Px();
-      pyjets_.p[1][np] = (double)(*p)->Py();
-      pyjets_.p[2][np] = (double)(*p)->Pz();
+      pyjets_.p[0][np] = (double)(*p)->GetMomentum().Px();
+      pyjets_.p[1][np] = (double)(*p)->GetMomentum().Py();
+      pyjets_.p[2][np] = (double)(*p)->GetMomentum().Pz();
       pyjets_.p[3][np] = (double)(*p)->E();
       pyjets_.p[4][np] = (double)(*p)->M();
       (*p)->Dump();
@@ -164,7 +164,7 @@ Pythia6Hadroniser::Hadronise(Event *ev_)
       pa.role = ev_->GetById(pyjets_.k[2][p]-1)->role; // Child particle inherits its mother's role
     }
     pa.status = static_cast<Particle::Status>(pyjets_.k[0][p]);
-    pa.P(pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p]);
+    pa.SetMomentum(Particle::Momentum(pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p]));
     pa.SetM(pyjets_.p[4][p]);
     pa.name = this->pyname(pa.GetPDGId());
     pa.charge = (float)(this->pyp(p+1,6));
@@ -238,7 +238,7 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
     
     Particle singlet((*p)->role, singlet_id);
     singlet.status = Particle::DebugResonance;
-    if (!singlet.P(partpb)) {
+    if (!singlet.SetMomentum(partpb)) {
       throw Exception(__PRETTY_FUNCTION__, "ERROR while setting the 4-momentum of singlet", JustWarning);
     }
     //singlet.SetM(); //FIXME
@@ -253,7 +253,7 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
     
     Particle doublet((*p)->role, doublet_id);
     doublet.status = Particle::DebugResonance;
-    if (!doublet.P(partpb)) {
+    if (!doublet.SetMomentum(partpb)) {
       throw Exception(__PRETTY_FUNCTION__, "ERROR while setting the 4-momentum of doublet", JustWarning);
     }
     //std::cout << "doublet, mass = " << doublet.M() << std::endl;

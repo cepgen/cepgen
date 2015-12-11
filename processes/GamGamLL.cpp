@@ -512,25 +512,24 @@ GamGamLL::BeforeComputeWeight()
 {
   if (!GenericProcess::fIsPointSet) return;
   
-  Particle *p1 = GetParticle(Particle::IncomingBeam1), *p2 = GetParticle(Particle::IncomingBeam2);
+  Particle *p1 = GetParticle(Particle::IncomingBeam1),
+           *p2 = GetParticle(Particle::IncomingBeam2);
 
   _ep1 = p1->E();
   _mp1 = p1->M();
   _w1 = p1->M2();
-  _pp1 = p1->P();
+  _pp1 = p1->GetMomentum().P();
   _pdg1 = p1->GetPDGId();
   setp1 = true;
 
   _ep2 = p2->E();
   _mp2 = p2->M();
   _w2 = p2->M2();
-  _pp2 = p2->P();
+  _pp2 = p2->GetMomentum().P();
   _pdg2 = p2->GetPDGId();
 
   _etot = p1->E()+p2->E();
-  _ptot = std::sqrt(std::pow(p1->Px()+p2->Px(), 2)
-                   +std::pow(p1->Py()+p2->Py(), 2)
-                   +std::pow(p1->Pz()+p2->Pz(), 2));
+  _ptot = (p1->GetMomentum()+p2->GetMomentum()).P();
 
   double thetamin = EtaToTheta(fCuts.etamax), thetamax = EtaToTheta(fCuts.etamin);
   _cotth1 = 1./tan(thetamax*pi/180.);

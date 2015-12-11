@@ -95,7 +95,7 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
 
   Particles op;
   el_->id = 0;
-  el_->role = 1;
+  el_->role = Particle::IncomingBeam1;
   //el_->Dump();
   op.push_back(*el_);
   //op[0].Dump();
@@ -136,13 +136,14 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
     // Calculate CMS s=(P+K)**2
 
     psum = 0.;
-    for (int i=0; i<3; i++) psum+= pr_->P(i)*el_->P(i);
+    for (int i=0; i<3; i++) psum+= pr_->GetMomentum().P(i)*el_->GetMomentum().P(i);
     elpr = pr_->E()*el_->E()-psum; // 4-vector product
 
     esmp2 = std::pow(2.*elpr+el_->M2(), 2);
-    Particle tot = *el_;
+    Particle::Momentum ptot = el_->GetMomentum()+pr_->GetMomentum();
+    /*Particle tot = *el_;
     tot += *pr_;
-    s = tot.E2();
+    s = tot.E2();*/ ///FIXME FIXME FIXME
     //std::cout << "-> s = " << std::sqrt(s) << std::endl;
 
     // Evaluate photon flux in proton rest frame: set EEL to approx. 50TeV
@@ -366,22 +367,23 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
 
   //std::cout << "=> " << eesc << ", " << el_->M2() << std::endl;
   pesc = -sqrt(std::pow(eesc, 2)-el_->M2());
-  Particle outele(2, op[0].GetPDGId());
-  outele.P(
+  Particle outele(Particle::OutgoingBeam1, op[0].GetPDGId());
+  outele.SetMomentum(Particle::Momentum(
     pesc*sthe*cos(phi),
     pesc*sthe*sin(phi),
     pesc*cthe,
     eesc
-  );
+  ));
   //std::cout << "-> " << pesc << ", " << sthe << ", " << cthe << std::endl;
   //outele.Dump();
   outele.id = op.size();
-  outele.role = 2;
+  outele.role = Particle::OutgoingBeam1;
   outele.SetMother(&(op[0]));
   op.push_back(outele);
 
-  Particle outgam = op[0]-op[1];
-  outgam.role = 3;
+  Particle outgam;
+  outgam.role = Particle::Parton1;
+  outgam.SetMomentum(op[0].GetMomentum()-op[1].GetMomentum());
   outgam.SetPDGId(Particle::Photon);
   outgam.helicity = Heli(lf);
   outgam.id = op.size();

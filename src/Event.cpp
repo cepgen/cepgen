@@ -43,7 +43,7 @@ Event::Restore()
 }
 
 ParticlesRef
-Event::GetByRole(int role_)
+Event::GetByRole(Particle::Role role_)
 {
   int i;
   ParticlesRef out;
@@ -77,14 +77,14 @@ Event::GetConstById(int id_) const
       return static_cast<Particle>(out->second);
     }
   }
-  return 0;
+  return Particle();
 }
 
-std::vector<int>
+ParticleRoles
 Event::GetRoles() const
 {
   ParticlesMap::const_iterator it, end;
-  std::vector<int> out;
+  ParticleRoles out;
   for (it=fParticles.begin(), end=fParticles.end(); it!=end; it=fParticles.upper_bound(it->first)) {
     out.push_back(it->first);
   }
@@ -105,12 +105,12 @@ Event::AddParticle(Particle part_, bool replace_)
     part_with_same_role.at(0) = &part_;
     return 0;
   }
-  fParticles.insert(std::pair<int,Particle>(part_.role, part_));
+  fParticles.insert(std::pair<Particle::Role,Particle>(part_.role, part_));
   return 1;
 }
 
 int
-Event::AddParticle(int role_, bool replace_)
+Event::AddParticle(Particle::Role role_, bool replace_)
 {
   int out;
   if (role_<=0) {
@@ -127,26 +127,26 @@ Event::AddParticle(int role_, bool replace_)
 void
 Event::Store(std::ofstream *of_, double weight_)
 {
-  Particle *l1 = GetByRole(6).at(0);
-  Particle *l2 = GetByRole(7).at(0);
+  Particle *l1 = GetOneByRole(Particle::CentralParticle1);
+  Particle *l2 = GetOneByRole(Particle::CentralParticle2);
   
   *of_ << std::setw(8) << l1->E() << "\t"
-       << std::setw(8) << l1->Px() << "\t"
-       << std::setw(8) << l1->Py() << "\t"
-       << std::setw(8) << l1->Pz() << "\t"
-       << std::setw(8) << l1->Pt() << "\t"
+       << std::setw(8) << l1->GetMomentum().Px() << "\t"
+       << std::setw(8) << l1->GetMomentum().Py() << "\t"
+       << std::setw(8) << l1->GetMomentum().Pz() << "\t"
+       << std::setw(8) << l1->GetMomentum().Pt() << "\t"
        << std::setw(8) << l1->M() << "\t"
-       << std::setw(8) << l1->Eta() << "\t"
+       << std::setw(8) << l1->GetMomentum().Eta() << "\t"
        << std::setw(8) << l1->GetPDGId() << "\t"
        << std::setw(8) << weight_
        << std::endl;
   *of_ << std::setw(8) << l2->E() << "\t"
-       << std::setw(8) << l2->Px() << "\t"
-       << std::setw(8) << l2->Py() << "\t"
-       << std::setw(8) << l2->Pz() << "\t"
-       << std::setw(8) << l2->Pt() << "\t"
+       << std::setw(8) << l2->GetMomentum().Px() << "\t"
+       << std::setw(8) << l2->GetMomentum().Py() << "\t"
+       << std::setw(8) << l2->GetMomentum().Pz() << "\t"
+       << std::setw(8) << l2->GetMomentum().Pt() << "\t"
        << std::setw(8) << l2->M() << "\t"
-       << std::setw(8) << l2->Eta() << "\t"
+       << std::setw(8) << l2->GetMomentum().Eta() << "\t"
        << std::setw(8) << l2->GetPDGId() << "\t"
        << std::setw(8) << weight_
        << std::endl;
@@ -216,14 +216,14 @@ Event::Dump(bool stable_)
       os << Form("%2d(%2d)", *((*p)->GetMothersIds().begin()), GetById(*((*p)->GetMothersIds().begin()))->role);
     else
       os << "      ";
-    os << Form("% 9.3f % 9.3f % 9.3f % 9.3f", (*p)->Px(), (*p)->Py(), (*p)->Pz(), (*p)->E());
+    os << Form("% 9.3f % 9.3f % 9.3f % 9.3f", (*p)->GetMomentum().Px(), (*p)->GetMomentum().Py(), (*p)->GetMomentum().Pz(), (*p)->E());
     if ((*p)->status==Particle::Undefined
      or (*p)->status==Particle::FinalState
      or (*p)->status==Particle::Undecayed) {
       sign = ((*p)->status==Particle::Undefined) ? -1 : 1;
-      pxtot += sign*(*p)->Px();
-      pytot += sign*(*p)->Py();
-      pztot += sign*(*p)->Pz();
+      pxtot += sign*(*p)->GetMomentum().Px();
+      pytot += sign*(*p)->GetMomentum().Py();
+      pztot += sign*(*p)->GetMomentum().Pz();
       etot += sign*(*p)->E();
     }
   }

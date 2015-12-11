@@ -28,26 +28,14 @@ GenericProcess::SetPoint(const unsigned int ndim_,double x_[])
 }
 
 void
-GenericProcess::ClearEvent()
-{
-  fEvent->Restore();
-  //AddEventContent();
-  //AddEventKinematics();
-}
-
-void
 GenericProcess::PrepareKinematics()
 {
   if (!IsKinematicsDefined()) return; // FIXME dump some information...
-  Particle *ip1 = GetParticle(Particle::IncomingBeam1), *ip2 = GetParticle(Particle::IncomingBeam2);
-  Particle::Momentum p1 = ip1->GetMomentum(), p2 = ip2->GetMomentum();
-
-  double k = 0.;
-  for (unsigned int i=0; i<3; i++) k += p1.P(i)*p2.P(i);
-  fS = ip1->M2()+ip2->M2()+2.*(p1.E()*p2.E()-k);
-  fSqS = sqrt(fS);
+  fSqS = CMEnergy(*GetParticle(Particle::IncomingBeam1),
+                  *GetParticle(Particle::IncomingBeam2));
+  fS = pow(fSqS, 2);
   
-  DebugInsideLoop(Form("Kinematics successfully prepared! sqrt(s) = %.2f", fSqS));
+  Debug(Form("Kinematics successfully prepared! sqrt(s) = %.2f", fSqS));
 }
 
 void
@@ -71,12 +59,12 @@ GenericProcess::SetEventContent(IncomingState is, OutgoingState os)
   for (IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++) {
     fEvent->AddParticle(Particle(ip->first, ip->second));
     Particle* p = GetParticle(ip->first);
-    //p->SetM(ip-second);
     p->status = Particle::Undefined;
     switch (ip->first) {
-      case Particle::IncomingBeam1: case Particle::IncomingBeam2: break;
-      case Particle::Parton1: p->SetMother(GetParticle(Particle::IncomingBeam1)); break;
-      case Particle::Parton2: p->SetMother(GetParticle(Particle::IncomingBeam2)); break;
+      case Particle::IncomingBeam1:
+      case Particle::IncomingBeam2: break;
+      case Particle::Parton1:       p->SetMother(GetParticle(Particle::IncomingBeam1)); break;
+      case Particle::Parton2:       p->SetMother(GetParticle(Particle::IncomingBeam2)); break;
       case Particle::CentralSystem: p->SetMother(GetParticle(Particle::Parton1)); has_cs = true; break;
       default: break;
     }
@@ -84,7 +72,7 @@ GenericProcess::SetEventContent(IncomingState is, OutgoingState os)
   // Prepare the central system if not already there
   if (!has_cs) {
     Particle* moth = GetParticle(Particle::Parton1);
-    Particle cs(4, moth->GetPDGId());
+    Particle cs(Particle::CentralSystem, moth->GetPDGId());
     cs.SetMother(moth);
     fEvent->AddParticle(cs);
   }
@@ -92,11 +80,10 @@ GenericProcess::SetEventContent(IncomingState is, OutgoingState os)
   for (OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++) {
     fEvent->AddParticle(Particle(op->first, op->second));
     Particle* p = GetParticle(op->first);
-    //p->SetM(ip->second);
     p->status = Particle::Undefined;
     switch (op->first) {
-      case Particle::OutgoingBeam1: p->SetMother(GetParticle(Particle::IncomingBeam1)); break;
-      case Particle::OutgoingBeam2: p->SetMother(GetParticle(Particle::IncomingBeam2)); break;
+      case Particle::OutgoingBeam1:    p->SetMother(GetParticle(Particle::IncomingBeam1)); break;
+      case Particle::OutgoingBeam2:    p->SetMother(GetParticle(Particle::IncomingBeam2)); break;
       case Particle::CentralParticle1: p->SetMother(GetParticle(Particle::CentralSystem)); break;
       case Particle::CentralParticle2: p->SetMother(GetParticle(Particle::CentralSystem)); break;
       default: break;
@@ -108,8 +95,8 @@ GenericProcess::SetEventContent(IncomingState is, OutgoingState os)
 void
 GenericProcess::SetIncomingKinematics(Particle::Momentum p1, Particle::Momentum p2)
 {
-  GetParticle(Particle::IncomingBeam1)->SetMomentum(p1);
-  GetParticle(Particle::IncomingBeam2)->SetMomentum(p2);
+  if (!GetParticle(Particle::IncomingBeam1)->SetMomentum(p1)) { Error("Invalid incoming beam 1"); }
+  if (!GetParticle(Particle::IncomingBeam2)->SetMomentum(p2)) { Error("Invalid incoming beam 2"); }
 }
 
 std::ostream&

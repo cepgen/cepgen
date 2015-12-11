@@ -170,26 +170,30 @@ double f(double* x_, size_t ndim_, void* params_)
   
   //std::cout << "2: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();*/
 
-  // Then add outgoing leptons
-  ev->GetOneByRole(Particle::CentralParticle1)->SetPDGId(p->pair);
-  ev->GetOneByRole(Particle::CentralParticle2)->SetPDGId(p->pair);
+  if (p->first_run) {
+    // Then add outgoing leptons
+    ev->GetOneByRole(Particle::CentralParticle1)->SetPDGId(p->pair);
+    ev->GetOneByRole(Particle::CentralParticle2)->SetPDGId(p->pair);
 
-  //std::cout << "3: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
-  // Then add outgoing protons or remnants
-  switch (p->process_mode) {
-    case GenericProcess::ElasticElastic: break; // nothing to change in the event
-    case GenericProcess::ElasticInelastic:
-    case GenericProcess::InelasticElastic: // set one of the outgoing protons to be fragmented
-      ev->GetOneByRole(Particle::OutgoingBeam1)->SetPDGId(Particle::uQuark); break;
-    case GenericProcess::InelasticInelastic: // set both the outgoing protons to be fragmented
-      ev->GetOneByRole(Particle::OutgoingBeam1)->SetPDGId(Particle::uQuark);
-      ev->GetOneByRole(Particle::OutgoingBeam2)->SetPDGId(Particle::uQuark);
-      break;
+    //std::cout << "3: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
+    // Then add outgoing protons or remnants
+    switch (p->process_mode) {
+      case GenericProcess::ElasticElastic: break; // nothing to change in the event
+      case GenericProcess::ElasticInelastic:
+      case GenericProcess::InelasticElastic: // set one of the outgoing protons to be fragmented
+        ev->GetOneByRole(Particle::OutgoingBeam1)->SetPDGId(Particle::uQuark); break;
+      case GenericProcess::InelasticInelastic: // set both the outgoing protons to be fragmented
+        ev->GetOneByRole(Particle::OutgoingBeam1)->SetPDGId(Particle::uQuark);
+        ev->GetOneByRole(Particle::OutgoingBeam2)->SetPDGId(Particle::uQuark);
+        break;
+    }
+    
+    //std::cout << "4: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
+    // Prepare the function to be integrated
+    p->process->PrepareKinematics();
+    p->first_run = false;
   }
-  
-  //std::cout << "4: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
-  // Prepare the function to be integrated
-  p->process->PrepareKinematics();
+   
   p->process->BeforeComputeWeight();
 
   //std::cout << "5: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();

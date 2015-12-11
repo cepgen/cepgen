@@ -67,34 +67,42 @@ PPtoLL::ComputeWeight()
   _phiptdiff = 2.*pi*x(7);
 
   // Outgoing protons (or remnants)
-  if (fCuts.kinematics>1) {
-    _mx = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(8);
-    if (fCuts.kinematics>2) _my = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(9);
-    else _my = fEvent->GetOneByRole(2)->M();
+  switch (fCuts.kinematics) {
+    case 0: default: { Error("PPtoLL is intended for p-on-p collisions! Aborting!"); exit(0); break; }
+    case 1: 
+      _mx = GetParticle(Particle::IncomingBeam1)->M();
+      _my = GetParticle(Particle::IncomingBeam2)->M();
+      break;
+    case 2:
+      _mx = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(8);
+      _my = GetParticle(Particle::IncomingBeam2)->M();
+      break;
+    case 3:
+      _mx = GetParticle(Particle::IncomingBeam1)->M();
+      _my = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(8);
+      break;
+    case 4:
+      _mx = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(8);
+      _my = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(9);
+      break;
   }
-  else _mx = fEvent->GetOneByRole(1)->M();
-
   
   // Jacobian computation
   jac = 1.;
-  jac *= (lqmax-lqmin)*_q1t;
-  jac *= (lqmax-lqmin)*_q2t;
-  jac *= 2.*pi;
-  jac *= 2.*pi;
-  jac *= (ymax-ymin);
-  jac *= (ymax-ymin);
+  jac *= (lqmax-lqmin)*_q1t; // d(q1t) . q1t
+  jac *= (lqmax-lqmin)*_q2t; // d(q2t) . q2t
+  jac *= 2.*pi; // d(phi1)
+  jac *= 2.*pi; // d(phi2)
+  jac *= (ymax-ymin); // d(y1)
+  jac *= (ymax-ymin); // d(y2)
   if (fCuts.kinematics>1) {
-    jac *= (fCuts.mxmax-fCuts.mxmin);
-    if (fCuts.kinematics>2) {
-      jac *= (fCuts.mxmax-fCuts.mxmin);
+    jac *= (fCuts.mxmax-fCuts.mxmin); // d(mx/y)
+    if (fCuts.kinematics>3) {
+      jac *= (fCuts.mxmax-fCuts.mxmin); // d(my/x)
     }
   }
-  jac *= 2.*pi;
-  
-  /*if (!IsKinematicsDefined()) {
-    std::cerr << __PRETTY_FUNCTION__ << " ERROR: Event kinematics not properly defined !" << std::endl;
-    return -1.;
-  }*/
+  jac *= (fCuts.ptdiffmax-fCuts.ptdiffmin); // d(Dpt)
+  jac *= 2.*pi; // d(phiDpt)
   
   weight = jac*INCqqbar();
   
@@ -109,10 +117,8 @@ PPtoLL::INCqqbar()
   int idif, idely;
   double pdif, dely_min, dely_max;
   const double alpha_em = 1./137.035;
-  const double mp = fEvent->GetOneByRole(1)->M();
-  const double mp2 = fEvent->GetOneByRole(1)->M2();
-  const double ml = fEvent->GetOneByRole(6)->M();
-  const double ml2 = fEvent->GetOneByRole(6)->M2();
+  const double mp = Particle::GetMassFromPDGId(Particle::Proton), mp2 = pow(mp, 2);
+  const double ml = GetParticle(Particle::CentralParticle1)->M(), ml2 = pow(ml, 2);
   double units;
 
   iterm11 = 1; // Long-long
@@ -154,7 +160,7 @@ PPtoLL::INCqqbar()
   //     conversion factor
   //     1/GeV^2 --> pb
   //=================================================================
-  units = 10.e4*pow(197.3271, 2);
+  units = 1.e4*pow(197.3271, 2);
   
   //=================================================================
   //     matrix element computation
@@ -225,15 +231,15 @@ PPtoLL::INCqqbar()
   //     auxiliary quantities
   //=================================================================
 
-  alpha1 = amt1/fSqS*exp(_y1);
-  alpha2 = amt2/fSqS*exp(_y2);
+  alpha1 = amt1/fSqS*exp( _y1);
+  alpha2 = amt2/fSqS*exp( _y2);
   beta1  = amt1/fSqS*exp(-_y1);
   beta2  = amt2/fSqS*exp(-_y2);
 
   q1t2 = pow(q1tx, 2)+pow(q1ty, 2);
   q2t2 = pow(q2tx, 2)+pow(q2ty, 2);
 
-  x2 = 0.; //FIXME figure out where this comes from
+  //x2 = 0.; //FIXME figure out where this comes from
   delta_x1 = (pow(_mx, 2)+q2t2)/((1.-x2)*fS);
 
   //x1 = alpha1+alpha2+delta_x1;
@@ -257,11 +263,27 @@ PPtoLL::INCqqbar()
   double p10, p1x, p1y, p1z, p12, p20, p2x, p2y, p2z, p22;
   
   // FIXME FIXME FIXME
-  double q10, q1z, q20, q2z;
-  q10 = x1*fEvent->GetOneByRole(1)->E();
-  q1z = x1*fEvent->GetOneByRole(1)->Pz();
-  q20 = x1*fEvent->GetOneByRole(2)->E();
-  q2z = x1*fEvent->GetOneByRole(2)->Pz();
+  const double ak10 = GetParticle(Particle::IncomingBeam1)->E(),
+               ak1z = fabs(GetParticle(Particle::IncomingBeam1)->GetMomentum().Pz()),
+               ak20 = GetParticle(Particle::IncomingBeam2)->E(),
+               ak2z = fabs(GetParticle(Particle::IncomingBeam2)->GetMomentum().Pz());
+  
+  //=================================================================
+  //     additional conditions for energy-momentum conservation
+  //=================================================================
+  
+  const double s1_eff = x1*fS-pow(_q1t,2), s2_eff = x2*fS-pow(_q2t,2);
+  const double invm = sqrt(pow(amt1,2)+pow(amt2,2)+2.*amt1*amt2*cosh(_y1-_y2)-pow(ptsum,2));
+  
+  switch (fCuts.kinematics) {
+    case 2:
+      if (sqrt(s1_eff)<=(_my+invm)) return 0.;
+    case 3:
+      if (sqrt(s2_eff)<=(_mx+invm)) return 0.;
+    case 4:
+      if (sqrt(s1_eff)<=(_my+invm)) return 0.;
+      if (sqrt(s2_eff)<=(_mx+invm)) return 0.;
+  }
   
   qcaptx = pcaptx;
   qcapty = pcapty;
@@ -270,7 +292,7 @@ PPtoLL::INCqqbar()
   //     four-momenta of the outgoing protons (or remnants)
   //=================================================================
 
-  px_plus = (1.-x1)*fEvent->GetOneByRole(1)->Pz()*sqrt(2.);
+  px_plus = (1.-x1)*ak1z*sqrt(2.);
   px_minus = (pow(_mx, 2)+pow(q1tx, 2)+pow(q1ty, 2))/2./px_plus;
       
   _px_0 = (px_plus+px_minus)/sqrt(2.);
@@ -278,7 +300,7 @@ PPtoLL::INCqqbar()
   _px_x = -q1tx;
   _px_y = -q1ty;
       
-  py_minus = (1.-x2)*fEvent->GetOneByRole(2)->Pz()*sqrt(2.); // warning! sign of pz??
+  py_minus = (1.-x2)*ak2z*sqrt(2.); // warning! sign of pz??
   py_plus = (pow(_my, 2)+pow(q2tx, 2)+pow(q2ty, 2))/2./py_minus;
       
   _py_0 = (py_plus+py_minus)/sqrt(2.);
@@ -293,28 +315,37 @@ PPtoLL::INCqqbar()
   //     four-momenta of the outgoing l^+ and l^-
   //=================================================================
 
-  p10 = alpha1*fEvent->GetOneByRole(1)->E()+beta1*fEvent->GetOneByRole(2)->E();
+  p10 = alpha1*ak10+beta1*ak20;
   p1x = pt1x;
   p1y = pt1y;
-  p1z = alpha1*fEvent->GetOneByRole(1)->Pz()+beta1*fEvent->GetOneByRole(2)->Pz();
+  p1z = alpha1*ak1z+beta1*ak2z;
 
   _pl1_0 = sqrt(pow(pt1, 2)+ml2)*cosh(_y1);
   _pl1_x = pt1x;
   _pl1_y = pt1y;
   _pl1_z = sqrt(pow(pt1, 2)+ml2)*sinh(_y1);
 
-  p20 = alpha2*fEvent->GetOneByRole(1)->E()+beta2*fEvent->GetOneByRole(2)->E();
+  p20 = alpha2*ak10+beta2*ak20;
   p2x = pt2x;
   p2y = pt2y;
-  p2z = alpha2*fEvent->GetOneByRole(1)->Pz()+beta2*fEvent->GetOneByRole(2)->Pz();
+  p2z = alpha2*ak1z+beta2*ak2z;
   
   _pl2_0 = sqrt(pow(pt2, 2)+ml2)*cosh(_y2);
   _pl2_x = pt2x;
   _pl2_y = pt2y;
   _pl2_z = sqrt(pow(pt2, 2)+ml2)*sinh(_y2);
 
-  p12 = pow(p10, 2)-pow(p1x, 2)-pow(p1y, 2)-pow(p1z, 2);
-  p22 = pow(p20, 2)-pow(p2x, 2)-pow(p2y, 2)-pow(p2z, 2);
+  //=================================================================
+  //     four-momenta squared of the virtual photons
+  //=================================================================
+
+  //FIXME FIXME FIXME ////////////
+  const double q10 = ak10, q20 = ak20;
+  const double q1z = ak1z, q2z = ak2z;
+  ////////////////////////////////
+  
+  q12 = pow(q10, 2)-pow(q1tx, 2)-pow(q1ty, 2)-pow(q1z, 2);
+  q22 = pow(q20, 2)-pow(q2tx, 2)-pow(q2ty, 2)-pow(q2z, 2);
 
   //=================================================================
   //     Mendelstam variables
@@ -322,7 +353,8 @@ PPtoLL::INCqqbar()
   double shat, mll;
   double that1, that2, that, uhat1, uhat2, uhat;
   
-  shat = fS*x1*x2;
+  //shat = fS*x1*x2; // ishat = 1 (approximation)
+  shat = pow(q10+q20, 2)-pow(q1tx+q2tx, 2)-pow(q1ty+q2ty, 2)-pow(q1z+q2z, 2); // ishat = 2 (exact formula)
 
   that1 = pow(q10-p10, 2)-pow(q1tx-p1x, 2)-pow(q1ty-p1y, 2)-pow(q1z-p1z, 2);
   uhat1 = pow(q10-p20, 2)-pow(q1tx-p2x, 2)-pow(q1ty-p2y, 2)-pow(q1z-p2z, 2);
@@ -346,7 +378,7 @@ PPtoLL::INCqqbar()
     
     double term1, term2, term3, term4, term5, term6, term7, term8, term9, term10;
     double auxil_gamgam, g_em;
-    const double ml = fEvent->GetOneByRole(6)->M();
+    const double ml = GetParticle(Particle::CentralParticle1)->M();
     
     term1 = 6.*pow(ml, 8);
     term2 = -3.*pow(ml, 4)*pow(that, 2);
@@ -369,31 +401,25 @@ PPtoLL::INCqqbar()
     //     Wolfgang's formulae
     //=================================================================
 
-    double ak1_x, ak1_y, ak2_x, ak2_y;
-    double t1abs, t2abs;
-    double eps12, eps22;
     double Phi10, Phi11_x, Phi11_y, Phi102, Phi112, Phi11_dot_e, Phi11_cross_e;
     double Phi20, Phi21_x, Phi21_y, Phi202, Phi212, Phi21_dot_e, Phi21_cross_e;
     double aux2_1, aux2_2;
 
-    ak1_x = z1m*pt1x-z1p*pt2x;
-    ak1_y = z1m*pt1y-z1p*pt2y;
+    const double ak1_x = z1m*pt1x-z1p*pt2x, ak1_y = z1m*pt1y-z1p*pt2y;
+    const double ak2_x = z2m*pt1x-z2p*pt2x, ak2_y = z2m*pt1y-z2p*pt2y;
 
-    ak2_x = z2m*pt1x-z2p*pt2x;
-    ak2_y = z2m*pt1y-z2p*pt2y;
+    const double t1abs = (q1t2+x1*(pow(_mx, 2)-mp2)+pow(x1, 2)*mp2)/(1.-x1);
+    const double t2abs = (q2t2+x2*(pow(_my, 2)-mp2)+pow(x2, 2)*mp2)/(1.-x2);
 
-    t1abs = (q1t2+x1*(pow(_mx, 2)-pow(mp, 2))+pow(x1, 2)*pow(mp, 2))/(1.-x1);
-    t2abs = (q2t2+x2*(pow(_my, 2)-pow(mp, 2))+pow(x2, 2)*pow(mp, 2))/(1.-x2);
-
-    eps12 = pow(ml, 2)+z1p*z1m*t1abs;
-    eps22 = pow(ml, 2)+z2p*z2m*t2abs;
+    const double eps12 = pow(ml, 2)+z1p*z1m*t1abs;
+    const double eps22 = pow(ml, 2)+z2p*z2m*t2abs;
 
     Phi10 = 1./(pow(ak1_x+z1p*q2tx, 2)+pow(ak1_y+z1p*q2ty, 2)+eps12)
            -1./(pow(ak1_x-z1m*q2tx, 2)+pow(ak1_y-z1m*q2ty, 2)+eps12);
     Phi11_x = (ak1_x+z1p*q2tx)/(pow(ak1_x+z1p*q2tx, 2)+pow(ak1_y+z1p*q2ty, 2)+eps12)
-           -(ak1_x-z1m*q2tx)/(pow(ak1_x-z1m*q2tx, 2)+pow(ak1_y-z1m*q2ty, 2)+eps12);
+             -(ak1_x-z1m*q2tx)/(pow(ak1_x-z1m*q2tx, 2)+pow(ak1_y-z1m*q2ty, 2)+eps12);
     Phi11_y = (ak1_y+z1p*q2ty)/(pow(ak1_x+z1p*q2tx, 2)+pow(ak1_y+z1p*q2ty, 2)+eps12)
-           -(ak1_y-z1m*q2ty)/(pow(ak1_x-z1m*q2tx, 2)+pow(ak1_y-z1m*q2ty, 2)+eps12);
+             -(ak1_y-z1m*q2ty)/(pow(ak1_x-z1m*q2tx, 2)+pow(ak1_y-z1m*q2ty, 2)+eps12);
 
     Phi102 = Phi10*Phi10;
     Phi112 = pow(Phi11_x, 2)+pow(Phi11_y, 2);
@@ -441,7 +467,7 @@ PPtoLL::INCqqbar()
     double sudakov_1, sudakov_2;
     double ratio1, ratio2;
     
-    amat2_1 = pow(4.*pi*alpha_em, 2)*pow(x1*x2*fS, 2)*aux2_1*2.*z1p*z1m*t1abs/(q1t2*q2t2);
+    amat2_1 = pow(4.*pi*alpha_em, 2)*pow(x1*x2*fS, 2)*aux2_1*2.*z1p*z1m*t1abs/(q1t2*q2t2)*t2abs/q2t2;
     amat2_2 = pow(4.*pi*alpha_em, 2)*pow(x1*x2*fS, 2)*aux2_2*2.*z2p*z2m*t2abs/(q1t2*q2t2);
 
     //=================================================================
@@ -453,8 +479,8 @@ PPtoLL::INCqqbar()
     xx1 = alpha1+alpha2;
     xx2 = beta1+beta2;
 
-    sudakov_2 = (pow(_mx, 2)-pow(mp, 2)+q2t2+xx2*pow(mp, 2))/((1.-xx2)*fS);
-    sudakov_1 = (q1t2 + xx1*pow(mp, 2))/((1.-xx1)*fS);
+    sudakov_2 = (pow(_mx, 2)-mp2+q2t2+xx2*mp2)/((1.-xx2)*fS);
+    sudakov_1 = (q1t2 + xx1*mp2)/((1.-xx1)*fS);
     ratio1 = sudakov_1 / xx1;
     ratio2 = sudakov_2 / xx2;
 
@@ -517,71 +543,59 @@ void
 PPtoLL::FillKinematics(bool)
 {
   //=================================================================
-  //     first outgoing proton
+  //     outgoing protons
   //=================================================================
-  Particle op1(3);
-  Particle::Momentum p_op1(_px_x, _px_y, _px_z, _px_0);
-  op1.SetMomentum(p_op1);
-  // Error("Invalid outgoing proton 1");
-  if (fCuts.kinematics>1) {
-    op1.status = Particle::Undecayed;
-    op1.SetM();
+  Particle *op1 = GetParticle(Particle::OutgoingBeam1),
+           *op2 = GetParticle(Particle::OutgoingBeam2);
+  switch (fCuts.kinematics) {
+    case 1:
+      op1->status = Particle::FinalState;
+      op2->status = Particle::FinalState;
+      break;
+    case 2:
+      op1->status = Particle::Undecayed; op1->SetM();
+      op2->status = Particle::FinalState;
+      break;
+    case 3:
+      op1->status = Particle::FinalState;
+      op2->status = Particle::Undecayed; op2->SetM();
+      break;
+    case 4:
+      op1->status = Particle::Undecayed; op1->SetM();
+      op2->status = Particle::Undecayed; op2->SetM();
+      break;    
   }
-  else {
-    op1.status = Particle::FinalState;
-    op1.SetM(); //FIXME
-  }
-  op1.SetMother(fEvent->GetOneByRole(1));
-  fEvent->AddParticle(op1, true);
   
-  //=================================================================
-  //     second outgoing proton
-  //=================================================================
-  Particle op2(5);
-  Particle::Momentum p_op2(_py_x, _py_y, _py_z, _py_0);
-  op2.SetMomentum(p_op2);
-  // Error("Invalid outgoing proton 2");
-  if (fCuts.kinematics==3) {
-    op2.status = Particle::Undecayed;
-    op2.SetM(_my);
+  if (!op1->SetMomentum(_px_x, _px_y, _px_z, _px_0)) {
+    Error(Form("Invalid outgoing proton 1: energy: %.2f", _px_0));
   }
-  else {
-    op2.status = Particle::FinalState;
-    op2.SetM(); //FIXME
+  
+  if (!op2->SetMomentum(_py_x, _py_y, _py_z, _py_0)) {
+    Error(Form("Invalid outgoing proton 2: energy: %.2f", _py_0));
   }
-  op2.SetMother(fEvent->GetOneByRole(2));
-  fEvent->AddParticle(op2, true);
 
   // PDG id for the outgoing leptons
 
   Particle::ParticleCode lepton1, lepton2;
   int sign = (drand()>.5) ? +1 : -1;
-  lepton1 = fEvent->GetOneByRole(6)->GetPDGId();
-  lepton2 = fEvent->GetOneByRole(6)->GetPDGId();
+  lepton1 = GetParticle(Particle::CentralParticle1)->GetPDGId();
+  lepton2 = GetParticle(Particle::CentralParticle2)->GetPDGId();
 
   //=================================================================
   //     first outgoing lepton
   //=================================================================
-  Particle ol1(6, lepton1);
-  ol1.SetPDGId(lepton1, sign);
-  if (!ol1.P(_pl1_x, _pl1_y, _pl1_z, _pl1_0)) {
-    std::cerr << "Invalid outgoing lepton 1" << std::endl;
+  Particle* ol1 = GetParticle(Particle::CentralParticle1);
+  ol1->SetPDGId(lepton1, sign);
+  if (!ol1->SetMomentum(_pl1_x, _pl1_y, _pl1_z, _pl1_0)) {
+    Error("Invalid outgoing lepton 1");
   }
-  ol1.status = Particle::FinalState;
-  ol1.SetM(); //FIXME
-  ol1.SetMother(fEvent->GetOneByRole(1)); //FIXME
-  fEvent->AddParticle(ol1, true);
 
   //=================================================================
   //     second outgoing lepton
   //=================================================================
-  Particle ol2(7, lepton2);
-  ol2.SetPDGId(lepton2, -sign);
-  if (!ol2.P(_pl2_x, _pl2_y, _pl2_z, _pl2_0)) {
-    std::cerr << "Invalid outgoing lepton 2" << std::endl;
+  Particle* ol2 = GetParticle(Particle::CentralParticle2);
+  ol2->SetPDGId(lepton2, -sign);
+  if (!ol2->SetMomentum(_pl2_x, _pl2_y, _pl2_z, _pl2_0)) {
+    Error("Invalid outgoing lepton 2");
   }
-  ol2.status = Particle::FinalState;
-  ol2.SetM(); //FIXME
-  ol2.SetMother(fEvent->GetOneByRole(2)); //FIXME
-  fEvent->AddParticle(ol2, true);
 }

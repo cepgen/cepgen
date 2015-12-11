@@ -26,9 +26,9 @@ Herwig6Hadroniser::Hadronise(Event *ev_)
   
     hepevt_.idhep[i] = (*p)->GetPDGId();
     hepevt_.isthep[i] = static_cast<int>((*p)->status);
-    hepevt_.phep[i][0] = (*p)->Px();
-    hepevt_.phep[i][1] = (*p)->Py();
-    hepevt_.phep[i][2] = (*p)->Pz();
+    hepevt_.phep[i][0] = (*p)->GetMomentum().Px();
+    hepevt_.phep[i][1] = (*p)->GetMomentum().Py();
+    hepevt_.phep[i][2] = (*p)->GetMomentum().Pz();
     hepevt_.phep[i][3] = (*p)->E();
     hepevt_.phep[i][4] = (*p)->M();
     for (int j=0; j<4; j++) {

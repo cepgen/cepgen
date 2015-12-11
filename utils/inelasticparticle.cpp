@@ -3,6 +3,8 @@
 //#include "../hadronisers/Pythia8Hadroniser.h"
 #include "../include/Physics.h"
 
+using namespace std;
+
 int main() {
 
   /*Event ev;
@@ -45,7 +47,7 @@ int main() {
   vm.P(1., 1., 0.);
   try { vm.Dump(); } catch (Exception& e) { e.Dump(); }*/
 
-  Logger::GetInstance()->Level = Logger::Debug;
+  /*Logger::GetInstance()->Level = Logger::Debug;
   Event ev;
   Particle q(1, Particle::uQuark);
   q.status = -2;
@@ -55,7 +57,18 @@ int main() {
   Pythia6Hadroniser h;
   //Jetset7Hadroniser h;
   try { h.Hadronise(&ev); } catch (Exception &e) { e.Dump(); }
-  ev.Dump();
+  ev.Dump();*/
+  
+  Particle ele(1, Particle::Electron);
+  ele.SetMomentum(0., 0., 27.5);
+  //ele.SetM();
+  ele.Dump();
+  
+  Particle pro(2, Particle::Proton);
+  pro.SetMomentum(0., 0., -920.0);
+  pro.Dump();
+  
+  cout << CMEnergy(ele, pro) << endl;
   
   return 0;
 }
