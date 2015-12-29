@@ -7,7 +7,7 @@ TestProcess::~TestProcess()
 {}
 
 int
-TestProcess::GetNdim(int process_mode_) const
+TestProcess::GetNdim(int) const
 {
   return 3;
 }

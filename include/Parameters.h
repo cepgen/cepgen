@@ -9,6 +9,7 @@
 #include <string>
 
 #include "../processes/processes.h"
+//#include "GenericProcess.h"
 #include "../hadronisers/hadronisers.h"
 
 /**
@@ -36,7 +37,7 @@ class Parameters {
      * @param[in] inFile_ Name of the configuration file to load
      * @return A boolean stating whether this input configuration file is correct or not
      */
-    bool ReadConfigFile(std::string inFile_);
+    bool ReadConfigFile(const char* inFile_);
     /**
      * @brief Stores the full run configuration to an external config file
      * @param[in] outFile_ Name of the configuration file to create
@@ -124,11 +125,6 @@ class Parameters {
      */
     int itvg;
     /**
-     * @brief Maximal number of TREAT calls
-     * @note Is it correctly implemented ?
-     */
-    int ntreat;
-    /**
      * @brief Number of points to "shoot" in each integration bin by the algorithm
      */
     int npoints;
@@ -178,18 +174,19 @@ class Parameters {
      * @brief Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?
      */
     bool symmetrise;
+    bool first_run;
     /**
      * @brief The pointer to the last event produced in this run
      */
     Event* last_event;
     /**
-     * @brief Hadronisation algorithm to use for the proton(s) remnants fragmentation
-     */
-    GenericHadroniser* hadroniser;
-    /**
      * @brief The process for which the cross-section will be computed and the events will be generated
      */
     GenericProcess* process;
+    /**
+     * @brief Hadronisation algorithm to use for the proton(s) remnants fragmentation
+     */
+    GenericHadroniser* hadroniser;
 };
 
 #endif

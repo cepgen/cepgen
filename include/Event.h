@@ -1,7 +1,6 @@
 #ifndef Event_h
 #define Event_h
 
-#include <map>
 #include <vector>
 #include <string>
 #include <fstream>
@@ -9,13 +8,6 @@
 #include <algorithm>
 
 #include "Particle.h"
-
-/**
- * @brief Convention to simplify the user interface while fetching a list of particles in the event
- */
-typedef std::vector<Particle> Particles;
-typedef std::vector<Particle*> ParticlesRef;
-typedef std::multimap<int,Particle> ParticlesMap;
 
 /**
  * Class containing all the information on the in- and outgoing particles' kinematics
@@ -32,23 +24,25 @@ class Event {
     /**
      * @brief Empties the whole event content
      */
-    inline void clear() { fParticles.clear(); time_generation=-1.; time_total=-1.; };
+    void clear();
+    void Init();
+    void Restore();
     /**
      * Returns the list of pointers to the Particle objects corresponding to a certain role in the process kinematics
      * @brief Gets a list of particles by their role in the event
      * @param[in] role_ The role the particles have to play in the process
      * @return A vector of pointers to the requested Particle objects
      */
-    ParticlesRef GetByRole(int role_);
+    ParticlesRef GetByRole(Particle::Role role_);
     /**
      * Returns the first Particle object in the particles list whose role corresponds to the given argument
      * @param[in] role_ The role the particle has to play in the event
      * @return A Particle object corresponding to the first particle found in this event
      */
-    inline Particle* GetOneByRole(int role_) { 
-      ParticlesRef out = GetByRole(role_);
-      if (out.size()==0) return 0;
-      else return out.at(0);
+    inline Particle* GetOneByRole(Particle::Role role_) {
+      ParticlesMap::iterator it = fParticles.find(role_);
+      if (it!=fParticles.end()) return &(it->second);
+      return 0;
     };
     /**
      * Returns the pointer to the Particle object corresponding to a unique identifier in the event
@@ -103,7 +97,7 @@ class Event {
      * Gets a list of roles for the given event (really process-dependant for the central system)
      * @return A vector of integers corresponding to all the roles the particles can play in the event
      */
-    std::vector<int> GetRoles() const;
+    ParticleRoles GetRoles() const;
     /**
      * Sets the information on one particle in the process
      * @brief Add a particle to the event
@@ -124,7 +118,7 @@ class Event {
      *  * 0 if an existing Particle object has been modified
      *  * -1 if the requested role to edit is undefined or incorrect
      */
-    int AddParticle(int role_, bool replace_=false);
+    int AddParticle(Particle::Role role_, bool replace_=false);
     //HEPEUP GetHEPEUP() const;
     /**
      * Returns an event block in a LHE format (a XML-style) with all the information on the particles composing this event
@@ -159,7 +153,7 @@ class Event {
      * @brief Number of particles in the event
      * @return The number of particles in the event, as an integer
      */
-    inline int NumParticles() const { return fParticles.size(); };
+    inline unsigned int NumParticles() const { return fParticles.size(); };
     /**
      * @brief Number of trials before the event was "correctly" hadronised
      */
@@ -180,6 +174,7 @@ class Event {
      * List of particles in the event, mapped to their role in this event
      */
     ParticlesMap fParticles;
+    ParticlesMap::iterator fLastParticle;
     /**
      * Empty particle returned to the get-ers if no particle matches the requirements
      */

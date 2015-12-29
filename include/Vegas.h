@@ -11,7 +11,7 @@
 #define ONE 1.
 
 /**
- * Main occurence of the Monte-Carlo integrator@cite PeterLepage1978192 developed by G.P. Lepage in 1978
+ * Main occurence of the Monte-Carlo integrator @cite PeterLepage1978192 developed by G.P. Lepage in 1978
  * @brief Vegas Monte-Carlo integrator instance
  */
 class Vegas {
@@ -71,61 +71,44 @@ class Vegas {
      * @return A boolean stating whether or not the event could be saved
      */
     bool StoreEvent(double* x_);
-    bool CorrectionCycle();
+    bool CorrectionCycle(double* x_);
     /**
      * Sets all the generation mode variables and align them to the integration 
      * grid set while computing the cross-section
      * @brief Prepare the class for events generation
      */
     void SetGen();
-    /**
-     * @brief Integration grid size parameter
-     */
+    /// Integration grid size parameter
     double fMbin;
-    /**
-     * @brief Lower bounds for the points to generate
-     */
+    /// Lower bounds for the points to generate
     double *fXlow;
-    /**
-     * @brief Upper bounds for the points to generate
-     */
+    /// Upper bounds for the points to generate
     double *fXup;
-    /**
-     * @brief Selected bin at which the function will be evaluated
-     */
+    /// Selected bin at which the function will be evaluated
     int fJ;
     double fCorrec;
     double fCorrec2;
-    /**
-     * @brief List of parameters to specify the integration range and the physics determining the phase space
-     */
+    /// List of parameters to specify the integration range and the physics determining the phase space
     Parameters *fInputParameters;
-    /**
-     * @brief Flag to define whether or not the grid has been prepared for integration
-     */
+    /// Has the grid been prepared for integration?
     bool fGridPrepared;
-    /**
-     * @brief Flag to define whether or not the generation has been prepared using @a SetGen (very time-consuming operation, thus needs to be called once)
-     */
+    /// Has the generation been prepared using @a SetGen call? (very time-consuming operation, thus needs to be called once)
     bool fGenerationPrepared;
-    /**
-     * @brief Maximal value of the function at one given point
-     */
+    bool fHasCorrection;
+    /// Maximal value of the function at one given point
     double *fFmax;
-    /**
-     * @brief Maximal value of the function in the considered integration range
-     */
+    double fFmax2;
+    double fFmaxDiff;
+    double fFmaxOld;
+    /// Maximal value of the function in the considered integration range
     double fFGlobalMax;
     int *fN;
     int *fNm;
-    /**
-     * @brief The function which will be integrated by this Vegas instance
-     * @param x_ The point at which this function is evaluated
-     * @param ndim_ The number of degrees of freedom this function has
-     * @param params_ A "_void_-ified" Parameters object to define the boundaries of the phase space (physics constraints)
-     */
+    /// GSL structure storing the function to be integrated by this Vegas instance (along with its parameters)
     gsl_monte_function *fFunction;
+    /// Number of function calls to be computed for each point
     int fNumConverg;
+    /// Number of iterations for the integration
     unsigned int fNumIter;
 };
 

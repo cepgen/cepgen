@@ -15,18 +15,20 @@ int main(int argc, char* argv[]) {
 
   // max = 10.;
   //max = 10.;
-  //min = 0.;
+  min = 0.;
+  max = 50.;
+  it = 100;
   //max = 14000.;
-  min = 10.;
+  /*min = 10.;
   max = 60.;
-  it = 50;
+  it = 50;*/
   
   if (argc>1) it = atoi(argv[1]);
 
   ip.in1p = 3500.;
   ip.in2p = 3500.;
   ip.process = new GamGamLL;
-  ip.hadroniser = new Pythia6Hadroniser;
+  //ip.hadroniser = new Pythia6Hadroniser;
   //ip.process_mode = GenericProcess::ElasticElastic;
   //ip.process_mode = GenericProcess::InelasticElastic;
   ip.process_mode = GenericProcess::InelasticInelastic;
@@ -36,12 +38,12 @@ int main(int argc, char* argv[]) {
   //ip.SetThetaRange(0., 180.);
   ip.mineta =-2.5;
   ip.maxeta = 2.5;
-  //ip.maxmx = 1000.;
+  ip.maxmx = 1000.;
   ip.mcut = 2;
   ip.minenergy = 0.;
   // DEBUG
-  ip.itvg = 5;
-  ip.ncvg = 50000;
+  //ip.itvg = 5;
+  //ip.ncvg = 50000;
   //
   ip.minpt = 15.;
   ip.generation = false;

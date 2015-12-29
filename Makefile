@@ -7,7 +7,6 @@ EXTERNALSRC= $(wildcard external/*.f)
 INCLUDEDIR = -Iprocesses/ -Iinclude/ -Iexternal/ -Ihadronisers/
 ############################################
 SVNDEV = 'SVN_REV="$(shell svnversion -nq .)"'
-#CFLAGS     = -fexceptions 
 CFLAGS     = -Wall -Wextra -fexceptions -Wpointer-arith \
 	     $(INCLUDEDIR) -lgsl -g
 LDFLAGS    = $(INCLUDEDIR) -lgfortran -lgsl -lgslcblas -Wl,-O2
@@ -43,32 +42,32 @@ RHEAD = $(shell root-config --incdir)
 all: $(EXEC)
 
 $(EXEC): main.o $(LIB_FILES)
-	$(CC) -g -o $@ $^ $(LDFLAGS)
 	@echo "Linking $<..."
+	$(CC) -g -o $@ $^ $(LDFLAGS)
 
 diffvm: diffvm.o $(LIB_FILES)
-	$(CC) -g -o $@ $^ $(LDFLAGS)
 	@echo "Linking $<..."
+	$(CC) -g -o $@ $^ $(LDFLAGS)
 
 pptoll: cpptoll.o $(LIB_FILES)
-	$(CC) -g -o $@ $^ $(LDFLAGS)
 	@echo "Linking $<..."
+	$(CC) -g -o $@ $^ $(LDFLAGS)
 
 obj/%.o: %.cpp %.h
-	$(CC) -c $(CFLAGS) $< -o $@
 	@echo "Building $<..."
+	$(CC) -c $(CFLAGS) $< -o $@
 
 obj/%.fo: external/%.f
-	$(CF) -c $(FFLAGS) $< -o $@
 	@echo "Building (F77) $<..."
+	$(CF) -c $(FFLAGS) $< -o $@
 
 obj/%.oxx: %.cxx
-	$(CC) -c $(CFLAGS) -I$(RHEAD) $(RFLAGS) $< -o $@
 	@echo "Building (ROOT) $<..."
+	$(CC) -c $(CFLAGS) -I$(RHEAD) $(RFLAGS) $< -o $@
 
 plots/%.oxx: plots/%.cxx
-	$(CC) -c $(CFLAGS) -I$(RHEAD) $(RFLAGS) $< -o $@
 	@echo "Building (ROOT) $<..."
+	$(CC) -c $(CFLAGS) -I$(RHEAD) $(RFLAGS) $< -o $@
 
 clean:
 	$(RM) obj/*.o $(EXEC) test
@@ -78,16 +77,16 @@ doc: $(CPP_FILES) $(HPP_FILES) Doxyfile
 	cd doc/latex && make && gnome-open refman.pdf &
 
 xsect: utils/xsect.o $(LIB_FILES)
-	$(CC) -o $@ $^ $(LDFLAGS)
 	@echo "Linking $<..."
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 probe: utils/probe.o $(LIB_FILES)
-	$(CC) -o $@ $^ $(LDFLAGS)
 	@echo "Linking $<..."
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 intest: utils/inelasticparticle.o $(LIB_FILES)
-	$(CC) -o $@ $^ $(LDFLAGS) -I$(PYTHIA8SRC)/include/
 	@echo "Linking $<..."
+	$(CC) -o $@ $^ $(LDFLAGS) -I$(PYTHIA8SRC)/include/
 
 plotter: plots/main.oxx $(LIB_FILES)
 	$(CC) -o $@ $^ $(LDFLAGS) $(RLIBS)

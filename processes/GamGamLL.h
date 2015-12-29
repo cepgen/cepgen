@@ -32,7 +32,7 @@
  * - 5 = xx6 = \f$\frac{1}{2}\left(1-\cos\theta^\text{CM}_6\right)\f$ definition (3D rotation of the first outgoing lepton with respect to the two-photon centre-of-mass system). If the @a nm_ optimisation flag is set this angle coefficient value becomes 
  *   \f[\frac{1}{2}\left(\frac{a_\text{map}}{b_\text{map}}\frac{\beta-1}{\beta+1}+1\right)\f]
  *   with \f$a_\text{map}=\frac{1}{2}\left(w_4-t_1-t_2\right)\f$, \f$b_\text{map}=\frac{1}{2}\sqrt{\left(\left(w_4-t_1-t_2\right)^2-4t_1t_2\right)\left(1-4\frac{w_6}{w_4}\right)}\f$, and \f$\beta=\left(\frac{a_\text{map}+b_\text{map}}{a_\text{map}-b_\text{map}}\right)^{2x_5-1}\f$
- *   and the @a _dj element is scaled by a factor \f$\frac{1}{2}\frac{\left(a_\text{map}^2-b_\text{map}^2\cos^2\theta^\text{CM}_6\right)}{a_\text{map}b_\text{map}}\log\left(\frac{a_\text{map}+b_\text{map}}{a_\text{map}-b_\text{map}}\right)\f$
+ *   and the @a fJacobian element is scaled by a factor \f$\frac{1}{2}\frac{\left(a_\text{map}^2-b_\text{map}^2\cos^2\theta^\text{CM}_6\right)}{a_\text{map}b_\text{map}}\log\left(\frac{a_\text{map}+b_\text{map}}{a_\text{map}-b_\text{map}}\right)\f$
  * - 6 = _phicm6_, or \f$\phi_6^\text{CM}\f$ the rotation angle of the dilepton system in the centre-of-mass
  *   system
  * - 7 = \f$x_q\f$, \f$w_X\f$ mappings, as used in the single- and double-dissociative
@@ -54,6 +54,7 @@ class GamGamLL : public GenericProcess
    */
   GamGamLL(int nOpt_=0);
   //~GamGamLL();
+  void AddEventContent();
   void BeforeComputeWeight();
   /**
    * Computes the cross-section for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
@@ -64,9 +65,7 @@ class GamGamLL : public GenericProcess
    */
   double ComputeWeight();
   int GetNdim(ProcessMode) const;
-  void SetOutgoingParticles(int, Particle::ParticleCode, int);
   void FillKinematics(bool);
-  void SetKinematics(Kinematics);
   /**
    * Computes the mass of the outgoing proton remnant if any
    * @brief Computes the ougoing proton remnant mass
@@ -150,132 +149,115 @@ class GamGamLL : public GenericProcess
    */
   bool Pickin();
   int _nOpt;
-  // COMMON/PICKZZ/
-  /** @brief \f$\left|\mathbf p_1\right|\f$, 3-momentum norm of the first proton-like incoming particle */
+  
+  // --- PICKZZ common block
+  
+  /// \f$\left|\mathbf p_1\right|\f$, 3-momentum norm of the first proton-like incoming particle
   double _pp1;
-  /** @brief \f$E_1\f$, energy of the first proton-like incoming particle */
+  /// \f$E_1\f$, energy of the first proton-like incoming particle
   double _ep1;
-  /** @brief \f$m_1\f$, mass of the first proton-like incoming particle */
+  /// \f$m_1\f$, mass of the first proton-like incoming particle
   double _mp1;
-  /** @brief \f$m_1^2\f$, squared mass of the first proton-like incoming particle */
+  /// \f$m_1^2\f$, squared mass of the first proton-like incoming particle
   double _w1;
-  /** @brief PDG identifier of the first proton-like incoming particle */
+  /// PDG identifier of the first proton-like incoming particle
   Particle::ParticleCode _pdg1;
-  /** @brief \f$\left|\mathbf p_2\right|\f$, 3-momentum norm of the second proton-like incoming particle */
+  /// \f$\left|\mathbf p_2\right|\f$, 3-momentum norm of the second proton-like incoming particle
   double _pp2;
-  /** @brief \f$E_2\f$, energy of the second proton-like incoming particle */
+  /// \f$E_2\f$, energy of the second proton-like incoming particle
   double _ep2;
-  /** @brief \f$m_2\f$, mass of the second proton-like incoming particle */
+  /// \f$m_2\f$, mass of the second proton-like incoming particle
   double _mp2;
-  /** @brief \f$m_2^2\f$, squared mass of the second proton-like incoming particle */
+  /// \f$m_2^2\f$, squared mass of the second proton-like incoming particle
   double _w2;
-  /** @brief PDG identifier of the second proton-like incoming particle */
-  Particle::ParticleCode _pdg2;
-  /** @brief \f$\left|\mathbf p_3\right|\f$, 3-momentum norm of the first proton-like outgoing particle */
+  /// \f$\left|\mathbf p_3\right|\f$, 3-momentum norm of the first proton-like outgoing particle
   double _pp3;
-  /** @brief \f$E_3\f$, energy of the first proton-like outgoing particle */
+  /// \f$E_3\f$, energy of the first proton-like outgoing particle
   double _ep3;
-  /** @brief \f$m_3\f$, mass of the first proton-like outgoing particle */
+  /// \f$m_3\f$, mass of the first proton-like outgoing particle
   double _mp3;
-  /** @brief \f$m_3^2\f$, squared mass of the first proton-like outgoing particle */
+  /// \f$m_3^2\f$, squared mass of the first proton-like outgoing particle
   double _w3;
-  /** @brief PDG identifier of the first proton-like outgoing particle */
-  Particle::ParticleCode _pdg3;
-  /** @brief \f$\left|\mathbf p_4\right|\f$, 3-momentum norm of the two-photon central system */
+  /// \f$\left|\mathbf p_4\right|\f$, 3-momentum norm of the two-photon central system
   double _pc4;
-  /** @brief \f$E_4\f$, energy of the two-photon central system */
+  /// \f$E_4\f$, energy of the two-photon central system
   double _ec4;
-  /** @brief \f$m_4\f$, mass of the two-photon central system */
+  /// \f$m_4\f$, mass of the two-photon central system
   double _mc4;
-  /** @brief \f$m_4^2\f$, squared mass of the two-photon central system */
+  /// \f$m_4^2\f$, squared mass of the two-photon central system
   double _w4;
-  /** @brief \f$\left|\mathbf p_5\right|\f$, 3-momentum norm of the second proton-like outgoing particle */
+  /// \f$\left|\mathbf p_5\right|\f$, 3-momentum norm of the second proton-like outgoing particle
   double _pp5;
-  /** @brief \f$E_5\f$, energy of the second proton-like outgoing particle */
+  /// \f$E_5\f$, energy of the second proton-like outgoing particle
   double _ep5;
-  /** @brief \f$m_5\f$, mass of the second proton-like outgoing particle */
+  /// \f$m_5\f$, mass of the second proton-like outgoing particle
   double _mp5;
-  /** @brief \f$m_5^2\f$, squared mass of the second proton-like outgoing particle */
+  /// \f$m_5^2\f$, squared mass of the second proton-like outgoing particle
   double _w5;
-  /** @brief PDG identifier of the second proton-like outgoing particle */
-  Particle::ParticleCode _pdg5;
-  /** @brief \f$\left|\mathbf p_6\right|\f$, 3-momentum norm of the first outgoing lepton */
-  double _pl6;
-  /** @brief \f$E_6\f$, energy of the first outgoing lepton */
-  double _el6;
-  /** @brief \f$m_6\f$, mass of the first outgoing lepton */
-  double _ml6;
-  /** @brief \f$m_6^2\f$, squared mass of the first outgoing lepton */
+  /// \f$m_6^2\f$, squared mass of the first outgoing lepton
   double _w6;
-  /** @brief \f$p_{T,6}\f$, transverse momentum of the first outgoing lepton */
+  /// \f$p_{T,6}\f$, transverse momentum of the first outgoing lepton
   double _pt_l6;
-  /** @brief \f$E_6^\mathrm{lab}\f$, energy of the first outgoing lepton, computed in the lab frame */
+  /// \f$E_6^\mathrm{lab}\f$, energy of the first outgoing lepton, computed in the lab frame
   double _e6lab;
-  /** @brief PDG identifier of the first outgoing lepton */
-  Particle::ParticleCode _pdg6;
-  /** @brief \f$\left|\mathbf p_7\right|\f$, 3-momentum norm of the second outgoing lepton */
-  double _pl7;
-  /** @brief \f$E_7\f$, energy of the second outgoing lepton */
-  double _el7;
-  /** @brief \f$m_7\f$, mass of the second outgoing lepton */
-  double _ml7;
-  /** @brief \f$m_7^2\f$, squared mass of the second outgoing lepton */
+  //// \f$m_7^2\f$, squared mass of the second outgoing lepton
   double _w7;
-  /** @brief \f$p_{T,7}\f$, transverse momentum of the second outgoing lepton */
+  /// \f$p_{T,7}\f$, transverse momentum of the second outgoing lepton
   double _pt_l7;
-  /** @brief \f$E_7^\mathrm{lab}\f$, energy of the second outgoing lepton, computed in the lab frame */
+  /// \f$E_7^\mathrm{lab}\f$, energy of the second outgoing lepton, computed in the lab frame
   double _e7lab;
-  /** @brief PDG identifier of the second outgoing lepton */
-  Particle::ParticleCode _pdg7;
-  /** @brief Energy of the first central photon of momentum \f$t_1\f$ */
+  /// Energy of the first central photon of momentum \f$t_1\f$
   double _eg1;
-  /** @brief 3-momentum of the second central photon of momentum \f$t_1\f$ */
+  /// 3-momentum of the second central photon of momentum \f$t_1\f$
   double _p3_g1[3];
-  /** @brief Energy of the second central photon of momentum \f$t_2\f$ */
+  /// Energy of the second central photon of momentum \f$t_2\f$
   double _eg2;
-  /** @brief 3-momentum of the second central photon of momentum \f$t_2\f$ */
+  /// 3-momentum of the second central photon of momentum \f$t_2\f$
   double _p3_g2[3];
-  /** @brief Total energy provided by the two incoming proton-like particles */
+  /// Total energy provided by the two incoming proton-like particles
   double _etot;
-  /** @brief Total momentum provided by the two incoming proton-like particles (along the \f$z\f$-axis) */
+  /// Total momentum provided by the two incoming proton-like particles (along the \f$z\f$-axis)
   double _ptot;
-  /** @brief Minimal \f$Q^2\f$ exchange */
+  /// Minimal \f$Q^2\f$ exchange
   double _q2min;
-  /** @brief Maximal \f$Q^2\f$ exchange */
+  /// Maximal \f$Q^2\f$ exchange
   double _q2max;
   double _qp2min, _qp2max;
   double _d3;
-  // COMMON /ACCURA/
+  
+  // --- ACCURA common block
+  
   double _acc3;
   double _acc4;
-  // COMMON /ANGU/
-  /** @brief \f$\cos\theta_6^\mathrm{CM}\f$, production angle of the first outgoing lepton, computed in the centre-of-mass system. */
-  double _ctcm6;
-  /** @brief \f$\sin\theta_6^\mathrm{CM}\f$, production angle of the first outgoing lepton, computed in the centre-of-mass system. */
-  double _stcm6;
-  // COMMON /CIVITA/
+  
+  // --- CIVITA common block
+  
   double _epsi;
   double _g5, _g6;
   double _a5, _a6;
   double _bb;
-  // COMMON /DOTP/
-  /**
-   * @brief \f$p_{12} = \frac{1}{2}\left(s-m_{p_1}^2-m_{p_2}^2\right)\f$
-   */
+  
+  // --- DOTP common block
+  
+  /// \f$p_{12} = \frac{1}{2}\left(s-m_{p_1}^2-m_{p_2}^2\right)\f$
   double _p12;
-  /**
-   * @brief \f$p_{13} = -\frac{1}{2}\left(t_1-m_{p_1}^2-m_{p_3}^2\right)\f$
-   */
+  /// \f$p_{13} = -\frac{1}{2}\left(t_1-m_{p_1}^2-m_{p_3}^2\right)\f$
   double _p13;
   double _p14, _p15, _p23, _p24, _p25, _p34, _p35, _p45;
   double _p1k2, _p2k1;
-  // COMMON /DOTPS/
+  
+  // --- DOTPS common block
+  
   double _d1dq, _d1dq2, _q1dq, _q1dq2;
-  // COMMON /EXTRA/
+  
+  // --- EXTRA common block
+  
   double _s1, _s2;
   double _t1, _t1min, _t1max;
   double _t2, _t2min, _t2max;
-  // COMMON /LEVI/
+  
+  // --- LEVI common block
+  
   double _gram;
   double _dd1, _dd2, _dd3, _dd5;
   /**
@@ -286,18 +268,9 @@ class GamGamLL : public GenericProcess
   double _delta;
   double _g4;
   double _sa1, _sa2;
-  // COMMON /LTCOM/
-  /**
-   * @brief \f$\gamma\f$ factor of the centre-of-mass system, used in the
-   * computation of the inverse boost for the outgoing leptons
-   */
-  double _gamma;
-  /**
-   * @brief \f$\beta\gamma\f$ factor of the centre-of-mass system, used in the
-   * computation of the inverse boost for the outgoing leptons
-   */
-  double _betgam;
-  // COMMON /LEVI/
+  
+  // --- LEVI common block
+  
   /**
    * @brief \f$\delta_1=m_3^2-m_1^2\f$ as defined in Vermaseren's paper
    * @cite Vermaseren1983347 for the full definition of this quantity
@@ -325,62 +298,56 @@ class GamGamLL : public GenericProcess
    * @cite Vermaseren1983347 for the full definition of this quantity
    */
   double _tau;
-  // COMMON /PICKZZ/
+  
+  // --- PICKZZ common block
+  
   double _sl1;
-  // COMMON /VARIAB/
+  
+  // --- VARIAB common block
+  
   double _p;
-  /** @brief \f$\cos\theta_3\f$ of the first outgoing proton-like particle */
+  /// \f$\cos\theta_3\f$ of the first outgoing proton-like particle
   double _ct3;
-  /** @brief \f$\sin\theta_3\f$ of the first outgoing proton-like particle */
+  /// \f$\sin\theta_3\f$ of the first outgoing proton-like particle
   double _st3;
-  /** @brief \f$\cos\theta_4\f$ of the two-photons centre-of-mass system */
+  /// \f$\cos\theta_4\f$ of the two-photons centre-of-mass system
   double _ct4;
-  /** @brief \f$\sin\theta_4\f$ of the two-photons centre-of-mass system */
+  /// \f$\sin\theta_4\f$ of the two-photons centre-of-mass system
   double _st4;
-  /** @brief \f$\cos\theta_5\f$ of the second outgoing proton-like particle */
+  /// \f$\cos\theta_5\f$ of the second outgoing proton-like particle
   double _ct5;
-  /** @brief \f$\sin\theta_5\f$ of the second outgoing proton-like particle */
+  /// \f$\sin\theta_5\f$ of the second outgoing proton-like particle
   double _st5;
-  /** @brief \f$\cos\phi_3\f$ of the first outgoing proton-like particle */
+  /// \f$\cos\phi_3\f$ of the first outgoing proton-like particle
   double _cp3;
-  /** @brief \f$\sin\phi_3\f$ of the first outgoing proton-like particle */
+  /// \f$\sin\phi_3\f$ of the first outgoing proton-like particle
   double _sp3;
-  /** @brief \f$\cos\phi_5\f$ of the second outgoing proton-like particle */
+  /// \f$\cos\phi_5\f$ of the second outgoing proton-like particle
   double _cp5;
-  /** @brief \f$\sin\phi_5\f$ of the second outgoing proton-like particle */
+  /// \f$\sin\phi_5\f$ of the second outgoing proton-like particle
   double _sp5;
-  // COMMON /VARIAC/
+  
+  // --- VARIAC common block
+  
   double _al3, _al4;
   double _be4, _be5;
   double _de3, _de5;
   double _p_p3, _p_p4, _p_p5;
-  // COMMON /VARIAD/
-  /** @brief \f$\cos\theta_6\f$ of the first outgoing lepton */
-  double _ct6;
-  /** @brief \f$\sin\theta_6\f$ of the first outgoing lepton */
-  double _st6;
-  /** @brief \f$\cos\theta_7\f$ of the second outgoing lepton */
-  double _ct7;
-  /** @brief \f$\sin\theta_7\f$ of the second outgoing lepton */
-  double _st7;
-  /** @brief \f$\cos\phi_6\f$ of the first outgoing lepton */
-  double _cp6;
-  /** @brief \f$\sin\phi_6\f$ of the first outgoing lepton */
-  double _sp6;
-  /** @brief \f$\cos\phi_7\f$ of the second outgoing lepton */
-  double _cp7;
-  /** @brief \f$\sin\phi_7\f$ of the second outgoing lepton */
-  double _sp7;
-  double _dj;
-  /** @brief Is the first incoming proton-like particle's kinematic set ? */
+  
+  // --- VARIAD common block
+  
+  Particle::Momentum _p6cm;
+  Particle::Momentum _p7cm;
+  double fJacobian;
+  /// Is the first incoming proton-like particle's kinematic set ?
   bool setp1;
-  /** @brief Is the second incoming proton-like particle's kinematic set ? */
+  /// Is the second incoming proton-like particle's kinematic set ?
   bool setp2;
-  /** @brief Is the first outgoing proton-like particle's kinematic set ? */
+  /// Is the first outgoing proton-like particle's kinematic set ?
   bool setp3;
-  /** @brief Is the second outgoing proton-like particle's kinematic set ? */
+  /// Is the second outgoing proton-like particle's kinematic set ?
   bool setp5;
-  /** @brief Is the outgoing leptons' state set ? */
+  /// Is the outgoing leptons' state set ?
   bool setll;
 
   double _u1, _u2, _v1, _v2;

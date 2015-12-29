@@ -18,10 +18,8 @@ MCGen::MCGen(Parameters *ip_) :
 
 MCGen::~MCGen()
 {
-  Debug("Destructor called");
-  
   if (fVegas) delete fVegas;
-  delete parameters;
+  if (parameters) delete parameters;
 }
 
 void
@@ -40,7 +38,6 @@ MCGen::PrintHeader()
   Info(os.str().c_str());
 }
 
-
 void
 MCGen::BuildVegas()
 {
@@ -58,7 +55,8 @@ MCGen::ComputeXsection(double* xsec_, double *err_)
   if (!fVegas) BuildVegas();
 
   Info("Starting the computation of the process cross-section");
-  
+
+  try { PrepareFunction(); } catch (Exception& e) { e.Dump(); }
   fVegas->Integrate(xsec_, err_);
   
   fCrossSection = *xsec_;
@@ -85,41 +83,44 @@ MCGen::GenerateOneEvent()
 }
 
 void
-MCGen::LaunchGeneration()
+MCGen::PrepareFunction()
 {
-  // LHE file preparation
-  if (!this->parameters->file->is_open()) { Debug("Output file is not opened"); }
-  else                                    { Debug("Output file successfully opened"); }
-  
-  *(this->parameters->file) << "<LesHouchesEvents version=\"1.0\">" << std::endl;
-  *(this->parameters->file) << "<header>This file was created from the output of the CLPAIR generator</header>" << std::endl;
-  *(this->parameters->file) << "<init>" << std::endl
-	       << "2212 2212 "
-	       << std::setprecision(2) << this->parameters->in1p << " "
-	       << std::setprecision(2) << this->parameters->in2p << " "
-	       << "0 0 10042 10042 2 1" << std::endl
-	       << fCrossSection << " " << fCrossSectionError << " 0.26731120000E-03 0" << std::endl
-	       << "</init>" << std::endl;
-
-  fVegas->Generate();
-  
-  *(this->parameters->file) << "</LesHouchesEvents>" << std::endl;
+  if (!parameters->process) {
+    throw Exception(__PRETTY_FUNCTION__, "No process defined!", Fatal);
+  }
+  Kinematics kin;
+  kin.kinematics = static_cast<unsigned int>(parameters->process_mode);
+  kin.q2min = parameters->minq2;
+  kin.q2max = parameters->maxq2;
+  kin.mode = parameters->mcut;
+  kin.ptmin = parameters->minpt;
+  kin.ptmax = parameters->maxpt;
+  kin.etamin = parameters->mineta;
+  kin.etamax = parameters->maxeta;
+  kin.emin = parameters->minenergy;
+  kin.emax = parameters->maxenergy;
+  kin.mxmin = parameters->minmx;
+  kin.mxmax = parameters->maxmx;
+  parameters->process->AddEventContent();
+  parameters->process->SetKinematics(kin);
+  Debug("Function prepared to be integrated!");
 }
 
 double f(double* x_, size_t ndim_, void* params_)
 {
   double ff;
   Parameters *p;
-  Kinematics kin;
-  Particle *in1, *in2;
   Timer tmr;
   bool hadronised;
   double num_hadr_trials;
   std::ostringstream os;
+  Event* ev;
 
   p = static_cast<Parameters*>(params_);
+  Particle::Momentum p1(0., 0., p->in1p), p2(0., 0., -p->in2p);
+  p->process->SetIncomingKinematics(p1, p2);
+  p->process->SetPoint(ndim_, x_);
 
-  //if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
   if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
     os.str(""); for (unsigned int i=0; i<ndim_; i++) { os << x_[i] << " "; }
     DebugInsideLoop(Form("Computing dim-%d point ( %s)", ndim_, os.str().c_str()));
@@ -132,76 +133,56 @@ double f(double* x_, size_t ndim_, void* params_)
   ff = 0.;
 
   DebugInsideLoop(Form("Function f called -- some parameters:\n\t"
-                            "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
-                            "  remnant mode: %d",
-                            p->in1p, p->in2p, p->remnant_mode));
+                       "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
+                       "  remnant mode: %d",
+                       p->in1p, p->in2p, p->remnant_mode));
+    
+  //float now = tmr.elapsed();
+  //std::cout << "0: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
+  p->process->ClearEvent();
+  //std::cout << "1: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
   
-  kin.kinematics = static_cast<unsigned int>(p->process_mode);
-  kin.q2min = p->minq2;
-  kin.q2max = p->maxq2;
-  kin.mode = p->mcut;
-  kin.ptmin = p->minpt;
-  kin.ptmax = p->maxpt;
-  kin.etamin = p->mineta;
-  kin.etamax = p->maxeta;
-  kin.emin = p->minenergy;
-  kin.emax = p->maxenergy;
-  kin.mxmin = p->minmx;
-  kin.mxmax = p->maxmx;
+  ev = p->process->GetEvent();
   
-  p->process->SetKinematics(kin);
-  p->process->SetPoint(ndim_, x_);
-  p->process->GetEvent()->clear(); // need to move this sw else ?
+  //std::cout << "2: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();*/
 
-  // Start by adding primary particles
-  //FIXME electrons ?
-  in1 = new Particle(1, p->in1pdg);
-  in1->charge = p->in1pdg/abs(p->in1pdg);
-  in1->P(0., 0.,  p->in1p);
+  if (p->first_run) {
+    // Then add outgoing leptons
+    ev->GetOneByRole(Particle::CentralParticle1)->SetPDGId(p->pair);
+    ev->GetOneByRole(Particle::CentralParticle2)->SetPDGId(p->pair);
 
-  in2 = new Particle(2, p->in2pdg);
-  in2->charge = p->in2pdg/abs(p->in2pdg);
-  in2->P(0., 0., -p->in2p);  
-  
-  p->process->SetIncomingParticles(*in1, *in2);
-
-  // Then add outgoing leptons
-  p->process->SetOutgoingParticles(6, p->pair);
-  p->process->SetOutgoingParticles(7, p->pair);
-
-  // Then add outgoing protons or remnants
-  switch (p->process_mode) {
-    case GenericProcess::ElasticElastic:
-      p->process->SetOutgoingParticles(3, Particle::Proton, 1); // First outgoing proton
-      p->process->SetOutgoingParticles(5, Particle::Proton, 2); // Second outgoing proton
-      break;
-    case GenericProcess::ElasticInelastic:
-      //p->process->SetOutgoingParticles(3, Particle::Proton, 1); // First outgoing proton
-      //p->process->SetOutgoingParticles(5, Particle::uQuark, 2); // Second outgoing proton remnant
-      break;
-    case GenericProcess::InelasticElastic:
-      p->process->SetOutgoingParticles(3, Particle::uQuark, 1); // First outgoing proton
-      p->process->SetOutgoingParticles(5, Particle::Proton, 2); // Second outgoing proton remnant
-      break;
-    case GenericProcess::InelasticInelastic:
-      p->process->SetOutgoingParticles(3, Particle::uQuark, 1); // First outgoing proton
-      p->process->SetOutgoingParticles(5, Particle::uQuark, 2); // Second outgoing proton remnant
-      break;
+    //std::cout << "3: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
+    // Then add outgoing protons or remnants
+    switch (p->process_mode) {
+      case GenericProcess::ElasticElastic: break; // nothing to change in the event
+      case GenericProcess::ElasticInelastic:
+      case GenericProcess::InelasticElastic: // set one of the outgoing protons to be fragmented
+        ev->GetOneByRole(Particle::OutgoingBeam1)->SetPDGId(Particle::uQuark); break;
+      case GenericProcess::InelasticInelastic: // set both the outgoing protons to be fragmented
+        ev->GetOneByRole(Particle::OutgoingBeam1)->SetPDGId(Particle::uQuark);
+        ev->GetOneByRole(Particle::OutgoingBeam2)->SetPDGId(Particle::uQuark);
+        break;
+    }
+    
+    //std::cout << "4: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
+    // Prepare the function to be integrated
+    p->process->PrepareKinematics();
+    p->first_run = false;
   }
-
-  // Check that everything is there
-  if (!p->process->IsKinematicsDefined()) return 0.;
-
+   
   p->process->BeforeComputeWeight();
+
+  //std::cout << "5: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
   ff = p->process->ComputeWeight();
+  //std::cout << "6: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
   if (ff<0.) return 0.;
   
   if (p->store) { // MC events generation
     p->process->FillKinematics(false);
     p->process->GetEvent()->time_generation = tmr.elapsed();
 
-    if (kin.kinematics!=GenericProcess::ElasticElastic) {
-
+    if (p->hadroniser and p->process_mode!=GenericProcess::ElasticElastic) {
+      
       Debug(Form("Event before calling the hadroniser (%s)", p->hadroniser->GetName().c_str()));
       if (Logger::GetInstance()->Level>=Logger::Debug) p->process->GetEvent()->Dump();
       
@@ -235,11 +216,6 @@ double f(double* x_, size_t ndim_, void* params_)
     //p->process->GetEvent()->Store(p->file);
 
   }
-  //p->process->ClearEvent();
-  p->process->GetEvent()->clear(); // need to move this sw else ?
-
-  delete in1;
-  delete in2;
 
   if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
     os.str(""); for (unsigned int i=0; i<ndim_; i++) { os << Form("%10.8f ", x_[i]); }

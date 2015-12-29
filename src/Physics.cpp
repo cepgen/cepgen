@@ -95,7 +95,7 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
 
   Particles op;
   el_->id = 0;
-  el_->role = 1;
+  el_->role = Particle::IncomingBeam1;
   //el_->Dump();
   op.push_back(*el_);
   //op[0].Dump();
@@ -136,13 +136,14 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
     // Calculate CMS s=(P+K)**2
 
     psum = 0.;
-    for (int i=0; i<3; i++) psum+= pr_->P(i)*el_->P(i);
+    for (int i=0; i<3; i++) psum+= pr_->GetMomentum().P(i)*el_->GetMomentum().P(i);
     elpr = pr_->E()*el_->E()-psum; // 4-vector product
 
     esmp2 = std::pow(2.*elpr+el_->M2(), 2);
-    Particle tot = *el_;
+    Particle::Momentum ptot = el_->GetMomentum()+pr_->GetMomentum();
+    /*Particle tot = *el_;
     tot += *pr_;
-    s = tot.E2();
+    s = tot.E2();*/ ///FIXME FIXME FIXME
     //std::cout << "-> s = " << std::sqrt(s) << std::endl;
 
     // Evaluate photon flux in proton rest frame: set EEL to approx. 50TeV
@@ -268,11 +269,11 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
         emsqr = (std::pow(y*elpr, 2)+(*q2_)*pr_->M2())/(std::pow(elpr, 2)+el_->M2()*pr_->M2());
         
         if (emsqr<0.) {
-          std::cerr << "[EPA] WARNING: problem with sqrt(emsqr)= " << emsqr << ": y, Q2 pair rejected" << std::endl;
+          Warning(Form("problem with sqrt(emsqr)=%.4f: y, Q2 pair rejected", emsqr));
           //CALL ERRLOG (280, 'S: GEPHOT: EMSQR<0!')
           ierr1++;
           if (ierr1>10) {
-            std::cerr << "[EPA] ERROR: too many sqrt problems: try WWA" << std::endl;
+            Error("too many sqrt problems: try WWA");
             //CALL ERRLOG (281, 'F: GEPHOT: EMSQR<0 too often!')
             exit(0);
           }
@@ -310,11 +311,11 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
       
       // Update upper EPA bound
       if (epa>epamax) {
-        if (epa>1.1*epamax) std::cout << __PRETTY_FUNCTION__ << " INFO: EPA > 1.1*EPAMAX !" << std::endl;
-        else if (epa>1.01*epamax) std::cout << __PRETTY_FUNCTION__ << " INFO: EPA > 1.01*EPAMAX !" << std::endl;
-        else std::cout << __PRETTY_FUNCTION__ << " INFO: EPA > EPAMAX !" << std::endl;
+        if (epa>1.1*epamax)       { Info("EPA > 1.1*EPAMAX!"); }
+        else if (epa>1.01*epamax) { Info("EPA > 1.01*EPAMAX!"); }
+        else                      { Info("EPA > EPAMAX!"); }
         epamax = epa;
-        std::cout << __PRETTY_FUNCTION__ << " INFO: update of maximal weight : " << epamax << std::endl;
+        Info(Form("update of maximal weight: %f", epamax));
       }
       
       // Global counter for overall integration
@@ -326,8 +327,8 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
       qsuml += std::pow(epal, 2);
       
       if (irnd>10000) { // Kin. loop failed
-        std::cerr << __PRETTY_FUNCTION__ << " ERROR: Kinematic loop failed after " << irnd << " trials." << std::endl
-		  << "  EPAMAX too high for efficient mc! EPAMAX=" << epamax << std::endl;
+        Error(Form("Kinematic loop failed after %d"" trials."
+                   "\n  EPAMAX too high for efficient mc! EPAMAX=%.4f", irnd, epamax));
         //CALL ERRLOG (285, 'F: GEPHOT: More than 10000 iterations!')
         exit(0);
       }
@@ -357,8 +358,8 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
     ierr2++;
 
     if (ierr2>100) {
-      std::cerr << __PRETTY_FUNCTION__ << " ERROR: too many problems for CTHE or STHE:" << std::endl
-		<< "  CTHE=" << cthe << ", STHE=" << sthe << std::endl;
+      Error(Form("too many problems for CTHE or STHE:"
+            		 "\n\tCTHE=%.4f, STHE=%.4f", cthe, sthe));
     }
   } while (fabs(cthe)>1. or fabs(sthe)>1.);
 
@@ -366,23 +367,24 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
 
   //std::cout << "=> " << eesc << ", " << el_->M2() << std::endl;
   pesc = -sqrt(std::pow(eesc, 2)-el_->M2());
-  Particle outele(2, op[0].pdgId);
-  outele.P(
+  Particle outele(Particle::OutgoingBeam1, op[0].GetPDGId());
+  outele.SetMomentum(Particle::Momentum(
     pesc*sthe*cos(phi),
     pesc*sthe*sin(phi),
     pesc*cthe,
     eesc
-  );
+  ));
   //std::cout << "-> " << pesc << ", " << sthe << ", " << cthe << std::endl;
   //outele.Dump();
   outele.id = op.size();
-  outele.role = 2;
+  outele.role = Particle::OutgoingBeam1;
   outele.SetMother(&(op[0]));
   op.push_back(outele);
 
-  Particle outgam = op[0]-op[1];
-  outgam.role = 3;
-  outgam.pdgId = Particle::Photon;
+  Particle outgam;
+  outgam.role = Particle::Parton1;
+  outgam.SetMomentum(op[0].GetMomentum()-op[1].GetMomentum());
+  outgam.SetPDGId(Particle::Photon);
   outgam.helicity = Heli(lf);
   outgam.id = op.size();
   outgam.SetMother(&(op[0]));
@@ -424,7 +426,7 @@ GetBRFromProcessId(Particle::ParticleCode vmId_)
   }
 }
 
-Particles
+/*Particles
 VMDecayer(Particle part_, GenericHadroniser *had_)
 {
   if (part_.status!=1) {
@@ -435,13 +437,11 @@ VMDecayer(Particle part_, GenericHadroniser *had_)
     error.str(""); error << __PRETTY_FUNCTION__ << " ERROR: Particle has a too small mass (" << part_.M() << " GeV)";
     throw std::runtime_error(error.str());
   }
-  /*
-    if (iret<=-2)...
-   */
+  //if (iret<=-2)...
   if (!had_->Hadronise(&part_)) {
     
   }
-}
+}*/
 
 double
 ElasticFlux(double x_, double kt2_)
@@ -449,19 +449,17 @@ ElasticFlux(double x_, double kt2_)
   double f_ela;
   const double alpha_em = 1./137.035;
   
-  double Q2_ela, G_dip, G_E, G_M;
-  double ela1, ela2, ela3;
   const double mp2 = pow(Particle::GetMassFromPDGId(Particle::Proton), 2);
   
-  Q2_ela = (kt2_+pow(x_, 2)*mp2)/(1.-x_);
-  G_dip = 1./pow(1.+Q2_ela/0.71, 2);
-  G_E = G_dip;
-  G_M = 2.79*G_dip;
+  const double Q2_ela = (kt2_+pow(x_, 2)*mp2)/(1.-x_);
+  const double G_dip = 1./pow(1.+Q2_ela/0.71, 2);
+  const double G_E = G_dip;
+  const double G_M = 2.79*G_dip;
   
-  ela1 = pow(kt2_/(kt2_+pow(x_, 2)*mp2), 2);
-  ela2 = (4.*mp2*pow(G_E, 2)+Q2_ela*pow(G_M, 2))/(4.*mp2+Q2_ela);
-  ela3 = 1.-(Q2_ela-kt2_)/Q2_ela;
-  //ela3 = 1.-pow(x_, 2)*mp2/Q2_ela/(1.-x_);
+  const double ela1 = pow(kt2_/(kt2_+pow(x_, 2)*mp2), 2);
+  const double ela2 = (4.*mp2*pow(G_E, 2)+Q2_ela*pow(G_M, 2))/(4.*mp2+Q2_ela);
+  //const double ela3 = 1.-(Q2_ela-kt2_)/Q2_ela;
+  //const double ela3 = 1.-pow(x_, 2)*mp2/Q2_ela/(1.-x_);
   //f_ela = alpha_em/pi*(1.-x_+pow(x_, 2)/4.)*ela1*ela2*ela3/kt2_;
   f_ela = alpha_em/pi*ela1*ela2/Q2_ela;
   //f_ela = alpha_em/pi*((1.-x_)*ela1*ela2*ela3+pow(x_, 2)/2.*pow(G_M, 2))/kt2_;
@@ -519,5 +517,21 @@ InelasticFlux(double x_, double kt2_, double mx_)
   f_ine = alpha_em/pi*(1.-x_)*f_aux/kt2_;
 
   return f_ine;
+}
+
+void Lorenb(double u_, const Particle::Momentum& ps_, double pi_[4], double pf_[4])
+{
+  double fn;
+
+  if (ps_.E()!=u_) {
+    pf_[3] = (pi_[3]*ps_.E()+pi_[2]*ps_.Pz()+pi_[1]*ps_.Py()+pi_[0]*ps_.Px())/u_;
+    fn = (pf_[3]+pi_[3])/(ps_.E()+u_);
+    for (unsigned int i=0; i<3; i++) {
+      pf_[i] = pi_[i]+fn*ps_.P(i);
+    }
+  }
+  else {
+    std::copy(pi_, pi_+4, pf_);
+  }
 }
 
