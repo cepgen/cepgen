@@ -96,6 +96,10 @@ class Particle {
           double px = pt*cos(phi), py = pt*sin(phi), pz = pt*sinh(eta);
           return Momentum(px, py, pz);
         }
+        static inline Momentum FromPThetaPhi(double pt, double theta, double phi) {
+          double px = pt*sin(theta)*cos(phi), py = pt*sin(theta)*sin(phi), pz = pt*cos(theta);
+          return Momentum(px, py, pz);
+        }
         /// Build a 4-momentum from its four momentum and energy coordinates
         static inline Momentum FromPxPyPzE(double px, double py, double pz, double e) {
           return Momentum(px, py, pz, e);
@@ -119,6 +123,8 @@ class Particle {
         inline double operator*(const Momentum& mom_) { return *this *= mom_; }
         /// Multiply all components of a 4-momentum by a scalar
         inline Momentum& operator*(double c) { return *this *= c; }
+
+        void BetaGammaBoost(double gamma, double betagamma);
 
         // --- setters and getters
         

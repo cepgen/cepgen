@@ -60,39 +60,28 @@ double f(double*,size_t,void*);
  */
 class MCGen {
  public:
-  /**
-   * Sets the number of dimensions on which to perform the integration, according to the set of input parameters given as an argument and propagated to the whole object
-   * @brief Class constructor
-   */
+  /// Core of the Monte Carlo integrator and events generator
   MCGen();
-  /**
-   * Sets the number of dimensions on which to perform the integration, according to the set of input parameters given as an argument and propagated to the whole object
-   * @brief Class constructor
-   * @param[in] ip_ List of input parameters defining the phase space on which to perform the integration
-   */
+  /// Core of the Monte Carlo integrator and events generator
+  /// \param[in] ip_ List of input parameters defining the phase space on which to perform the integration
   MCGen(Parameters *ip_);
   ~MCGen();
-  /**
-   * @brief Dumps this program's header into the standard output stream
-   */
+  /// Dump this program's header into the standard output stream
   void PrintHeader();
   /**
-   * Computes the cross-section for the run defined by this object. This returns the cross-section as well as the absolute error computed along.
+   * Compute the cross section for the run parameters defined by this object.
+   * This returns the cross section as well as the absolute error computed along.
    * @brief Compute the cross-section for the given process
    * @param[out] xsec_ The computed cross-section, in pb
    * @param[out] err_ The absolute integration error on the computed cross-section, in pb
    */
   void ComputeXsection(double* xsec_,double* err_);
   /**
-   * Generates one single event given the phase space computed by Vegas in the integration step
+   * Generate one single event given the phase space computed by Vegas in the integration step
    * @return A pointer to the Event object generated in this run
    */
   Event* GenerateOneEvent();
-  /**
-   * Launches the full events generation 
-   * @deprecated This method is to be suppressed since the events generation can now be launched one event at a time using the @a GenerateOneEvent method
-   */
-  void LaunchGeneration();
+  /// Number of dimensions on which the integration is performed
   inline size_t GetNdim() {
     if (!parameters->process) return 0;
     return parameters->process->GetNdim(parameters->process_mode);
@@ -105,31 +94,21 @@ class MCGen {
     Debug(Form("Result for x[%zu] = ( %s):\n\t%10.6f", GetNdim(), os.str().c_str(), res));
     return res;
   }
-  /**
-   * @brief Physical Parameters used in the events generation and cross-section computation
-   */
+  /// Physical Parameters used in the events generation and cross-section computation
   Parameters* parameters;
-  /** @brief Last event generated in this run */
+  /// Last event generated in this run
   Event *last_event;
  private:
   void PrepareFunction();
-  /**
-   * @brief Calls the Vegas constructor (once, just before the first integration attempt)
-   */
+  /// Call the Vegas constructor (once, just before the first integration attempt)
   void BuildVegas();
-  /** @brief The Vegas integrator which will integrate the function */
+  /// Vegas instance which will integrate the function
   Vegas *fVegas;
-  /**
-   * @brief The cross-section computed at the last integration
-   */
+  /// Cross section value computed at the last integration
   double fCrossSection;
-  /**
-   * @brief The error on the cross-section as computed at the last integration
-   */
+  /// Error on the cross section as computed in the last integration
   double fCrossSectionError;
-  /**
-   * @brief Has a first integration beed already performed ?
-   */
+  /// Has a first integration beed already performed?
   bool fHasCrossSection;
 };
 

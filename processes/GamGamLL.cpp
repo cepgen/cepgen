@@ -60,7 +60,7 @@ GamGamLL::Pickin()
   
   DebugInsideLoop(Form("Optimised mode? %i", _nOpt));
   
-  _dj = 0.;
+  fJacobian = 0.;
 
   _w4 = std::pow(_mc4, 2);
 
@@ -122,12 +122,8 @@ GamGamLL::Pickin()
   _t1min = (_w31*_d3+(_d3-_w31)*(_d3*_w1-_w31*_w2)/fS)/_t1max; // definition from eq. (A.5) in [1]
 
   // FIXME dropped in CDF version
-  if (_t1max>-fCuts.q2min) {
-    Warning(Form("t1max = %f > -q2min = %f", _t1max, -fCuts.q2min)); return false;
-  }
-  if (_t1min<-fCuts.q2max and fCuts.q2max>=0.) {
-    Warning(Form("t1min = %f < -q2max = %f", _t1min, -fCuts.q2max)); return false;
-  }
+  if (_t1max>-fCuts.q2min) { Error(Form("t1max = %f > -q2min = %f", _t1max, -fCuts.q2min)); return false; }
+  if (_t1min<-fCuts.q2max and fCuts.q2max>=0.) { Error(Form("t1min = %f < -q2max = %f", _t1min, -fCuts.q2max)); return false; }
   if (_t1max<-fCuts.q2max and fCuts.q2max>=0.) _t1max = -fCuts.q2max;
   if (_t1min>-fCuts.q2min)                     _t1min = -fCuts.q2min;
   /////
@@ -276,9 +272,9 @@ GamGamLL::Pickin()
 
   if (ap>=0.) { Warning(Form("ap = %f >= 0", ap)); return false; }
 
-  _dj = ds2*dt1*dt2*std::pow(pi, 2)/(8.*_sl1*std::sqrt(-ap));
+  fJacobian = ds2*dt1*dt2*std::pow(pi, 2)/(8.*_sl1*std::sqrt(-ap));
 
-  DebugInsideLoop(Form("dj=%f", _dj));
+  DebugInsideLoop(Form("dj=%f", fJacobian));
 
   _gram = (1.-std::pow(yy4, 2))*dd/ap;
 
@@ -353,8 +349,8 @@ GamGamLL::Orient()
 {
   double re, rr, a1;
 
-  if (!Pickin() or _dj==0.) {
-    Warning(Form("Pickin failed! dj = %f", _dj));
+  if (!Pickin() or fJacobian==0.) {
+    Warning(Form("Pickin failed! dj = %f", fJacobian));
     return false;
   }
   
@@ -465,7 +461,7 @@ GamGamLL::Orient()
   _cp3 = -std::sqrt(1.-std::pow(_sp3, 2));
   _cp5 = -std::sqrt(1.-std::pow(_sp5, 2));
 
-  a1 = _p_p3*_cp3-_p_p5*_cp5; //OK!!!
+  a1 = _p_p3*_cp3-_p_p5*_cp5;
 
   DebugInsideLoop(Form("Kinematic quantities\n\t"
                        "cos(theta3) = %1.4f\tsin(theta3) = %1.4f\tcos( phi3 ) = %1.4f\tsin( phi3 ) = %1.4f\n\t"
@@ -519,17 +515,12 @@ GamGamLL::BeforeComputeWeight()
   _mp1 = p1->M();
   _w1 = p1->M2();
   _pp1 = p1->GetMomentum().P();
-  _pdg1 = p1->GetPDGId();
   setp1 = true;
 
   _ep2 = p2->E();
   _mp2 = p2->M();
   _w2 = p2->M2();
   _pp2 = p2->GetMomentum().P();
-  _pdg2 = p2->GetPDGId();
-
-  _etot = p1->E()+p2->E();
-  _ptot = (p1->GetMomentum()+p2->GetMomentum()).P();
 
   double thetamin = EtaToTheta(fCuts.etamax), thetamax = EtaToTheta(fCuts.etamin);
   _cotth1 = 1./tan(thetamax*pi/180.);
@@ -552,7 +543,7 @@ GamGamLL::BeforeComputeWeight()
   case GenericProcess::InelasticInelastic:
     m = ComputeMX(x(7), GetParticle(Particle::IncomingBeam2)->M(), GetParticle(Particle::CentralParticle1)->M(), &_dw31);
     GetParticle(Particle::OutgoingBeam1)->SetM(m);
-    m = ComputeMX(x(7), GetParticle(Particle::OutgoingBeam1)->M(), GetParticle(Particle::CentralParticle1)->M(), &_dw52);
+    m = ComputeMX(x(8), GetParticle(Particle::OutgoingBeam1)->M(), GetParticle(Particle::CentralParticle1)->M(), &_dw52);
     GetParticle(Particle::OutgoingBeam2)->SetM(m);
     break;
   }
@@ -560,8 +551,6 @@ GamGamLL::BeforeComputeWeight()
   _mp5 = GetParticle(Particle::OutgoingBeam2)->M();
   _w3 = std::pow(_mp3, 2);
   _w5 = std::pow(_mp5, 2);
-  _pdg3 = GetParticle(Particle::OutgoingBeam1)->GetPDGId();
-  _pdg5 = GetParticle(Particle::OutgoingBeam2)->GetPDGId();
   
   /*if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
     IsKinematicsDefined();
@@ -573,8 +562,6 @@ GamGamLL::BeforeComputeWeight()
 double
 GamGamLL::ComputeWeight()
 {
-  int nm_ = 1; //FIXME...
-
   // WARNING ====> PP5-->_p_p5
   //                P5-->_pp5
   double weight;
@@ -584,30 +571,16 @@ GamGamLL::ComputeWeight()
   double eg, pg;
   double pgx, pgy, pgz, pgp, pgg;
   double stg, cpg, spg, ctg;
-  double xx6;
-  double amap, bmap, ymap, beta;
-  double ddd;
-
-  double pp6, pp7;
-  double p6x, p6y, p6z;
-  double pz6, pz7;
 
   double qcx, qcz;
   double pc6x, pc6z;
-  double pcm6x, pcm6y, pcm6z, pcm6, ecm6;
-
-  double phicm6, spcm6, cpcm6;
 
   double b1, b2, b3;
   double c1, c2, c3;
   double h1, h2, hq;
   double r12, r13, r22, r23;
 
-  double cott6, cott7, cost6, cost7;
   bool lcut, lmu1, lmu2;
-
-  // COMMON /QVEC/   // 0 = E, 1-3 = p
-  double qve[4];
 
   weight = 0.;
 
@@ -626,7 +599,7 @@ GamGamLL::ComputeWeight()
   
   DebugInsideLoop(Form("wmin = %f\n\twmax = %f\n\twmax/wmin = %f", wmin, wmax, wmax/wmin));
   
-  Map(x(4),wmin,wmax,&_w4,&dw4, "w4");
+  Map(x(4), wmin, wmax, &_w4, &dw4, "w4");
   _mc4 = std::sqrt(_w4);
   
   DebugInsideLoop(Form("Computed value for w4 = %f -> mc4 = %f", _w4, _mc4));
@@ -635,12 +608,12 @@ GamGamLL::ComputeWeight()
 
   if (_t1>0.)  { Warning(Form("t1 = %f > 0", _t1)); return 0.; }
   if (_t2>0.)  { Warning(Form("t2 = %f > 0", _t2)); return 0.; }
-  if (_dj==0.) { Warning(Form("dj = %f", _dj)); return 0.; }
+  if (fJacobian==0.) { Warning(Form("dj = %f", fJacobian)); return 0.; }
   
-  ecm6 = (_w4+_w6-_w7)/(2.*_mc4);
-  pcm6 = std::sqrt(std::pow(ecm6, 2)-_w6);
+  const double ecm6 = (_w4+_w6-_w7)/(2.*_mc4);
+  const double pp6cm = std::sqrt(std::pow(ecm6, 2)-_w6);
   
-  _dj *= dw4*pcm6/(_mc4*sconstb*fS);
+  fJacobian *= dw4*pp6cm/(_mc4*sconstb*fS);
   
   // Let the most obscure part of this code begin...
 
@@ -677,76 +650,67 @@ GamGamLL::ComputeWeight()
     ctg = -ctg;
   }
   
-  xx6 = x(5);
+  double xx6 = x(5);
   
-  if (nm_!=0) {
-    amap = (_w4-_t1-_t2)/2.;
-    bmap = std::sqrt((std::pow(_w4-_t1-_t2, 2)-4.*_t1*_t2)*(1.-4.*_w6/_w4))/2.;
-    ymap = (amap+bmap)/(amap-bmap);
-    beta = std::pow(ymap, (double)(2.*xx6-1.));
-    xx6 = (amap/bmap*(beta-1.)/(beta+1.)+1.)/2.;
-    if (xx6>1.) {
-      xx6 = 1.;
-    }
-    if (xx6<0.) {
-      xx6 = 0.;
-    }
-    _ctcm6 = 1.-2.*xx6;
-    ddd = (amap+bmap*_ctcm6)*(amap-bmap*_ctcm6)/amap/bmap*log(ymap);
-    _dj *= ddd/2.;
-  }
-
+  const double amap = (_w4-_t1-_t2)/2.;
+  const double bmap = std::sqrt((std::pow(_w4-_t1-_t2, 2)-4.*_t1*_t2)*(1.-4.*_w6/_w4))/2.;
+  const double ymap = (amap+bmap)/(amap-bmap);
+  const double beta = std::pow(ymap, (double)(2.*xx6-1.));
+  xx6 = (amap/bmap*(beta-1.)/(beta+1.)+1.)/2.;
+  if (xx6>1.) xx6 = 1.;
+  if (xx6<0.) xx6 = 0.;
+  
   // 3D rotation of the first outgoing lepton wrt the CM system
-  _ctcm6 = 1.-2.*xx6; // cos(theta_cm,6) is between -1 and 1
-  _stcm6 = 2.*std::sqrt(xx6*(1.-xx6)); // definition is OK (according to _ctcm6 def)
+  const double theta6cm = acos(1.-2.*xx6);
   
-  DebugInsideLoop(Form("ctcm6 = %f\n\tstcm6 = %f", _ctcm6, _stcm6));
+  // match the Jacobian
+  fJacobian *= (((amap+bmap*cos(theta6cm))*(amap-bmap*cos(theta6cm))/amap/bmap*log(ymap))/2.);
   
-  phicm6 = 2.*pi*x(6);
-
-  cpcm6 = cos(phicm6);
-  spcm6 = sin(phicm6);
+  DebugInsideLoop(Form("ctcm6 = %f\n\tstcm6 = %f", cos(theta6cm), sin(theta6cm)));
+  
+  const double phi6cm = 2.*pi*x(6);
 
   // First outgoing lepton's 3-momentum in the centre of mass system
-  pcm6x = pcm6*_stcm6*cpcm6;
-  pcm6y = pcm6*_stcm6*spcm6;
-  pcm6z = pcm6*_ctcm6;
+  Particle::Momentum p6cm = Particle::Momentum::FromPThetaPhi(pp6cm, theta6cm, phi6cm);
   
-  DebugInsideLoop(Form("p3cm6 = (%f, %f, %f)", pcm6x, pcm6y, pcm6z));
+  DebugInsideLoop(Form("p3cm6 = (%f, %f, %f)", p6cm.Px(), p6cm.Py(), p6cm.Pz()));
 
-  h1 = stg*pcm6z+ctg*pcm6x;
+  h1 = stg*p6cm.Pz()+ctg*p6cm.Px();
 
-  pc6z = ctg*pcm6z-stg*pcm6x;
-  pc6x = cpg*h1-spg*pcm6y;
+  pc6z = ctg*p6cm.Pz()-stg*p6cm.Px();
+  pc6x = cpg*h1-spg*p6cm.Py();
   
   qcx = 2.*pc6x;
   qcz = 2.*pc6z;
   // qcy == QCY is never defined
   
-  // First outgoing lepton's 3-momentum
-  p6y = cpg*pcm6y+spg*h1;
-  _el6 = (_ec4*ecm6+_pc4*pc6z)/_mc4;
+  double p6x, p6y, p6z;
+  const double el6 = (_ec4*ecm6+_pc4*pc6z)/_mc4;
   h2 = (_ec4*pc6z+_pc4*ecm6)/_mc4;
+  // First outgoing lepton's 3-momentum
   p6x = _ct4*pc6x+_st4*h2;
+  p6y = cpg*p6cm.Py()+spg*h1;
   p6z = _ct4*h2-_st4*pc6x;
+  
+  // first outgoing lepton's kinematics
+  _p6cm = Particle::Momentum(p6x, p6y, p6z, el6);
   
   hq = _ec4*qcz/_mc4;
   
-  qve[0] = _pc4*qcz/_mc4; // E
-  qve[2] = 2.*p6y; // Py
-  qve[1] = _ct4*qcx+_st4*hq; // Px
-  qve[3] = _ct4*hq-_st4*qcx; // Pz
-
-  _pl6 = std::sqrt(std::pow(_el6, 2)-_w6); // first outgoing lepton's |p|
-
+  const Particle::Momentum qve(
+    _ct4*qcx+_st4*hq,
+    2.*p6y,
+    _ct4*hq-_st4*qcx,
+    _pc4*qcz/_mc4 // energy
+  );
+  
   // Available energy for the second lepton is the 2-photon system's energy with the first lepton's energy removed
-  _el7 = _ec4-_el6;
-  _pl7 = std::sqrt(std::pow(_el7, 2)-_w7); // second outgoing lepton's |p|
+  const double el7 = _ec4-el6;
 
   DebugInsideLoop(Form("Outgoing kinematics\n\t"
                        " first outgoing lepton: p = %f, E = %f\n\t"
                        "second outgoing lepton: p = %f, E = %f",
-                       _pl6, _el6, _pl7, _el7));
+                       _p6cm.P(), _p6cm.E(), _p7cm.P(), _p6cm.E()));
 
   double p7x, p7y, p7z;
   // Second outgoing lepton's 3-momentum
@@ -754,115 +718,92 @@ GamGamLL::ComputeWeight()
   p7y = -p6y;
   p7z = _pc4*_ct4-p6z;
   
-  pp6 = std::sqrt(std::pow(p6x, 2)+std::pow(p6y, 2)); // pT of first outgoing lepton
-  pp7 = std::sqrt(std::pow(p7x, 2)+std::pow(p7y, 2)); // pT of second outgoing lepton
+  // second outgoing lepton's kinematics
+  _p7cm = Particle::Momentum(p7x, p7y, p7z, el7);
 
-  // First outgoing lepton's kinematics (sin/cos theta/phi)
-  _ct6 = p6z/_pl6;
-  _st6 = pp6/_pl6;
-  _cp6 = p6x/pp6;
-  _sp6 = p6y/pp6;
+  //_p6cm = Particle::Momentum(pl6*st6*cp6, pl6*st6*sp6, pl6*ct6, el6);
+  //_p7cm = Particle::Momentum(pl7*st7*cp7, pl7*st7*sp7, pl7*ct7, el7);
 
-  // Second outgoing lepton's kinematics (sin/cos theta/phi)
-  _ct7 = p7z/_pl7;
-  _st7 = pp7/_pl7;
-  _cp7 = p7x/pp7;
-  _sp7 = p7y/pp7;
-
-  DebugInsideLoop(Form(" first outgoing lepton: cos(theta) = %f, sin(theta) = %f\n\t"
-                       " first outgoing lepton: cos( phi ) = %f, sin( phi ) = %f\n\t"
-                       "second outgoing lepton: cos(theta) = %f, sin(theta) = %f\n\t"
-                       "second outgoing lepton: cos( phi ) = %f, sin( phi ) = %f",
-                       _ct6, _st6, _cp6, _sp6, _ct7, _st7, _cp7, _sp7));
-
-  _q1dq = eg*(2.*ecm6-_mc4)-2.*pg*pcm6*_ctcm6;
+  _q1dq = eg*(2.*ecm6-_mc4)-2.*pg*p6cm.Pz();
   _q1dq2 = (_w4-_t1-_t2)/2.;
 
-  _bb = _t1*_t2+(_w4*std::pow(_stcm6, 2)+4.*_w6*std::pow(_ctcm6, 2))*std::pow(pg, 2);
+  _bb = _t1*_t2+(_w4*std::pow(sin(theta6cm), 2)+4.*_w6*std::pow(cos(theta6cm), 2))*std::pow(pg, 2);
   // Q0=QVE[0], QX=QVE[1], QY=QVE[2], QZ=QVE[3]
-  c1 = (qve[1]*_sp3-qve[2]*_cp3)*_p_p3;
-  c2 = (qve[3]*_ep1-qve[0]*_p)*_p_p3;
+  c1 = (qve.Px()*_sp3-qve.Py()*_cp3)*_p_p3;
+  c2 = (qve.Pz()*_ep1-qve.E()*_p)*_p_p3;
   c3 = (_w31*std::pow(_ep1, 2)+2.*_w1*_de3*_ep1-_w1*std::pow(_de3, 2)+std::pow(_p_p3, 2)*std::pow(_ep1, 2))/(_ep3*_p+_pp3*_ct3*_ep1);
   
-  b1 = (qve[1]*_sp5-qve[2]*_cp5)*_p_p5; //OK
-  b2 = (qve[3]*_ep2+qve[0]*_p)*_p_p5; //OK
+  b1 = (qve.Px()*_sp5-qve.Py()*_cp5)*_p_p5;
+  b2 = (qve.Pz()*_ep2+qve.E()*_p)*_p_p5;
   b3 = (_w52*std::pow(_ep2, 2)+2.*_w2*_de5*_ep2-_w2*std::pow(_de5, 2)+std::pow(_p_p5*_ep2, 2))/(_ep2*_pp5*_ct5-_ep5*_p); //OK
   
-  r12 = c2*_sp3+qve[2]*c3;
-  r13 = -c2*_cp3-qve[1]*c3;
+  r12 = c2*_sp3+qve.Py()*c3;
+  r13 = -c2*_cp3-qve.Px()*c3;
   
-  DebugInsideLoop(Form("qve = (%f, %f, %f, %f)", qve[0], qve[1], qve[2], qve[3]));
+  DebugInsideLoop(Form("qve = (%f, %f, %f, %f)", qve.E(), qve.Px(), qve.Py(), qve.Pz()));
   
-  r22 = b2*_sp5+qve[2]*b3;
-  r23 = -b2*_cp5-qve[1]*b3;
+  r22 = b2*_sp5+qve.Py()*b3;
+  r23 = -b2*_cp5-qve.Px()*b3;
   
   _epsi = _p12*c1*b1+r12*r22+r13*r23;
 
   _g5 = _w1*std::pow(c1, 2)+std::pow(r12, 2)+std::pow(r13, 2);
   _g6 = _w2*std::pow(b1, 2)+std::pow(r22, 2)+std::pow(r23, 2);
 
-  _a5 = -(qve[1]*_cp3+qve[2]*_sp3)*_p_p3*_p1k2-(_ep1*qve[0]-_p*qve[3])*(_cp3*_cp5+_sp3*_sp5)*_p_p3*_p_p5+(_de5*qve[3]+qve[0]*(_p+_pp5*_ct5))*c3; //OK
-  _a6 = -(qve[1]*_cp5+qve[2]*_sp5)*_p_p5*_p2k1-(_ep2*qve[0]+_p*qve[3])*(_cp3*_cp5+_sp3*_sp5)*_p_p3*_p_p5+(_de3*qve[3]-qve[0]*(_p-_pp3*_ct3))*b3; //OK
+  _a5 = -(qve.Px()*_cp3+qve.Py()*_sp3)*_p_p3*_p1k2-(_ep1*qve.E()-_p*qve.Pz())*(_cp3*_cp5+_sp3*_sp5)*_p_p3*_p_p5+(_de5*qve.Pz()+qve.E()*(_p+_pp5*_ct5))*c3;
+  _a6 = -(qve.Px()*_cp5+qve.Py()*_sp5)*_p_p5*_p2k1-(_ep2*qve.E()+_p*qve.Pz())*(_cp3*_cp5+_sp3*_sp5)*_p_p3*_p_p5+(_de3*qve.Pz()-qve.E()*(_p-_pp3*_ct3))*b3;
 
   ////////////////////////////////////////////////////////////////
   // END of GAMGAMLL subroutine in the FORTRAN version
   ////////////////////////////////////////////////////////////////
 
+  const Particle::Momentum cm = GetParticle(Particle::IncomingBeam1)->GetMomentum()
+                               +GetParticle(Particle::IncomingBeam2)->GetMomentum();
+
   ////////////////////////////////////////////////////////////////
   // INFO from f.f
   ////////////////////////////////////////////////////////////////
 
-  _gamma = _etot/fSqS;
-  _betgam = _ptot/fSqS;
+  const double gamma = cm.E()/fSqS, betgam = cm.Pz()/fSqS;
 
   if (fCuts.mode==0) {
     Debug(Form("No cuts applied on the outgoing leptons kinematics!"));
   }
   // Kinematics computation for both leptons
-  _pt_l6 = _pl6*_st6;
-  pz6 = _betgam*_el6+_gamma*_pl6*_ct6;
-  _e6lab = _gamma*_el6+_betgam*_pl6*_ct6;
 
-  _pt_l7 = _pl7*_st7;
-  pz7 = _betgam*_el7+_gamma*_pl7*_ct7;
-  _e7lab = _gamma*_el7+_betgam*_pl7*_ct7;
+  _p6cm.BetaGammaBoost(gamma, betgam);
+  _p7cm.BetaGammaBoost(gamma, betgam);
 
   lcut = false; // Event discarded by default
-  cott6 = pz6/_pt_l6;
-  cott7 = pz7/_pt_l7;
+  const double cott6 = _p6cm.Pz()/_p6cm.Pt(), cott7 = _p7cm.Pz()/_p7cm.Pt();
 
   // Cuts on outgoing leptons' kinematics
 
   lmu1 = cott6>=_cotth1
      and cott6<=_cotth2
-     and (_pt_l6>=fCuts.ptmin or fCuts.ptmin<=0.)
-     and (_pt_l6<=fCuts.ptmax or fCuts.ptmax<=0.)
-     and (_e6lab>=fCuts.emin  or fCuts.emin <=0.)
-     and (_e6lab<=fCuts.emax  or fCuts.emax <=0.);
+     and (_p6cm.Pt()>=fCuts.ptmin or fCuts.ptmin<=0.)
+     and (_p6cm.Pt()<=fCuts.ptmax or fCuts.ptmax<=0.)
+     and (_p6cm.E()>=fCuts.emin   or fCuts.emin <=0.)
+     and (_p6cm.E()<=fCuts.emax   or fCuts.emax <=0.);
   lmu2 = cott7>=_cotth1
      and cott7<=_cotth2
-     and (_pt_l7>=fCuts.ptmin or fCuts.ptmin<=0.)
-     and (_pt_l7<=fCuts.ptmax or fCuts.ptmax<=0.)
-     and (_e7lab>=fCuts.emin  or fCuts.emin <=0.)
-     and (_e7lab<=fCuts.emax  or fCuts.emax <=0.);
+     and (_p7cm.Pt()>=fCuts.ptmin or fCuts.ptmin<=0.)
+     and (_p7cm.Pt()<=fCuts.ptmax or fCuts.ptmax<=0.)
+     and (_p7cm.E()>=fCuts.emin   or fCuts.emin <=0.)
+     and (_p7cm.E()<=fCuts.emax   or fCuts.emax <=0.);
 
   switch (fCuts.mode) {
-    case 0:
-    default:
-      lcut = true;
-      break;
+    case 0: default:
+      lcut = true; break;
     case 1: // Vermaseren's hypothetical detector cuts
-      cost6 = pz6/std::sqrt(std::pow(pz6,2)+std::pow(_pt_l6,2));
-      cost7 = pz7/std::sqrt(std::pow(pz7,2)+std::pow(_pt_l7,2));
-      lcut = ((fabs(cost6)<=0.75 and _pt_l6>=1.) or (fabs(cost6)<=0.95 and fabs(cost6)>0.75 and fabs(pz6)>1.)) and
-             ((fabs(cost7)<=0.75 and _pt_l7>=1.) or (fabs(cost7)<=0.95 and fabs(cost7)>0.75 and fabs(pz7)>1.));
+      {
+        const double cost6 = _p6cm.Pz()/_p6cm.P(), cost7 = _p7cm.Pz()/_p7cm.P();
+        lcut = ((fabs(cost6)<=0.75 and _pt_l6>=1.) or (fabs(cost6)<=0.95 and fabs(cost6)>0.75 and fabs(_p6cm.Pz())>1.)) and
+               ((fabs(cost7)<=0.75 and _pt_l7>=1.) or (fabs(cost7)<=0.95 and fabs(cost7)>0.75 and fabs(_p7cm.Pz())>1.));
+      }
       break;
-    case 2:
-      lcut = lmu1 and lmu2;
-      break;
-    case 3:
-      lcut = lmu1 or lmu2;
-      break;
+    case 2: lcut = lmu1 and lmu2; break;
+    case 3: lcut = lmu1  or lmu2; break;
   }
 
   // Cut on mass of final hadronic system (MX)
@@ -874,41 +815,17 @@ GamGamLL::ComputeWeight()
   }
 
   // Cut on the proton's Q2 (first photon propagator T1)
-  if ((fCuts.q2max!=-1. and _t1<-fCuts.q2max) or _t1>-fCuts.q2min) {
-    lcut = false;
-  }
+  if ((fCuts.q2max!=-1. and _t1<-fCuts.q2max) or _t1>-fCuts.q2min) lcut = false;
 
   if (!lcut) { // Dismiss the cuts-failing events in the cross-section computation
     return 0.;
   }
 
-  int intgp, intge;
-
   switch (fCuts.kinematics) { // FIXME inherited from CDF version
-  default:
-  case 0: // ep case
-    intgp = intge = 1; // DESY
-    //intgp = intge = 0; // CDF
-    weight = sconst*_dj*PeriPP(intgp, intge);
-    break;
-  case 1: // elastic case
-    intgp = intge = 2; // DESY
-    //intgp = intge = 1; // CDF
-    weight = sconst*_dj*PeriPP(intgp, intge);
-    break;
-  case 2: // single-dissociative case
-  case 3:
-    intgp = 3; // DESY
-    intge = 2; // DESY
-    /*intgp = 2; // CDF
-      intge = 1; // CDF*/
-    weight = sconst*_dj*PeriPP(intgp, intge)*std::pow(_dw31,2);
-    break;
-  case 4: // double-dissociative case
-    intgp = intge = 3; // DESY
-    //intgp = intge = 2; // CDF
-    weight = sconst*_dj*PeriPP(intgp, intge)*std::pow(_dw31*_dw52,2);
-    break;
+  default: case 0: weight = sconst*fJacobian*PeriPP(1, 2); break; // ep case
+  case 1:          weight = sconst*fJacobian*PeriPP(2, 2); break; // elastic case
+  case 2:  case 3: weight = sconst*fJacobian*PeriPP(3, 2)*std::pow(_dw31,2); break; // single-dissociative case
+  case 4:          weight = sconst*fJacobian*PeriPP(3, 3)*std::pow(_dw31*_dw52,2); break; // double-dissociative case
   }
 
   return weight;
@@ -916,7 +833,11 @@ GamGamLL::ComputeWeight()
 
 void
 GamGamLL::FillKinematics(bool)
-{  
+{
+  const Particle::Momentum cm = GetParticle(Particle::IncomingBeam1)->GetMomentum()
+                               +GetParticle(Particle::IncomingBeam2)->GetMomentum();
+  const double gamma = cm.E()/fSqS, betgam = cm.Pz()/fSqS;
+
   double ranphi;
   int rany, ransign/*, ranz*/;
   
@@ -936,34 +857,31 @@ GamGamLL::FillKinematics(bool)
   
   // First incoming proton
   Particle* ip1 = GetParticle(Particle::IncomingBeam1);
-  ip1->SetPDGId(_pdg1);
-  Particle::Momentum plab_ip1(0., 0., _gamma*_p+_betgam*_ep1, _gamma*_ep1+_betgam*_p);
+  Particle::Momentum plab_ip1(0., 0., _p, _ep1);
+  plab_ip1.BetaGammaBoost(gamma, betgam);
   ip1->SetMomentum(plab_ip1);
   // Error("Invalid incoming proton 1");
   
   // Second incoming proton
   Particle* ip2 = GetParticle(Particle::IncomingBeam2);
-  ip2->SetPDGId(_pdg2);
-  Particle::Momentum plab_ip2(0., 0., -_gamma*_p+_betgam*_ep2, _gamma*_ep2-_betgam*_p);
+  Particle::Momentum plab_ip2(0., 0., -_p, _ep2);
+  plab_ip2.BetaGammaBoost(gamma, betgam);
   ip2->SetMomentum(plab_ip2);
   // Error("Invalid incoming proton 2");
   
   // First outgoing proton
   Particle* op1 = GetParticle(Particle::OutgoingBeam1);
-  op1->SetPDGId(_pdg3);
   Particle::Momentum plab_op1( _pp3*_st3*_cp3,
                                _pp3*_st3*_sp3,
-                               _gamma*_pp3*_ct3+_betgam*_ep3,
-                               _gamma*_ep3     +_betgam*_pp3*_ct3);
+                               _pp3*_ct3,
+                               _ep3);
+  plab_op1.BetaGammaBoost(gamma, betgam);
   plab_op1.RotatePhi(ranphi, rany);
   op1->SetMomentum(plab_op1);
   // Error("Invalid outgoing proton 1");
   if (fCuts.kinematics>1) { // fragmenting remnants
     op1->status = Particle::Undecayed;
-    //std::cout << "M before : " << op1.M() << std::endl;
     op1->SetM(_mp3);
-    //std::cout << "M as mp3 : " << _mp3 << std::endl;
-    //std::cout << "M  after : " << op1.M() << std::endl;
   }
   else { // stable proton
     op1->status = Particle::FinalState;
@@ -972,11 +890,11 @@ GamGamLL::FillKinematics(bool)
   
   // Second outgoing proton
   Particle* op2 = GetParticle(Particle::OutgoingBeam2);
-  op2->SetPDGId(_pdg5);
   Particle::Momentum plab_op2( _pp5*_st5*_cp5,
                                _pp5*_st5*_sp5,
-                               _gamma*_pp5*_ct5+_betgam*_ep5,
-                               _gamma*_ep5     +_betgam*_pp5*_ct5);
+                               _pp5*_ct5,
+                               _ep5);
+  plab_op2.BetaGammaBoost(gamma, betgam);
   plab_op2.RotatePhi(ranphi, rany);
   op2->SetMomentum(plab_op2);
   // Error("Invalid outgoing proton 2");
@@ -986,9 +904,6 @@ GamGamLL::FillKinematics(bool)
   }
   else { // stable proton
     op2->status = Particle::FinalState;
-    /*std::cout << "----> " << _pp5*_pp5-_ep5*_ep5 << ", " << _gamma << ", " << _betgam << std::endl;
-    std::cout << "second proton left undecayed : m = " << op2.M() << std::endl;
-    op2.Dump();*/
     op2->SetM(); //FIXME
   }
 
@@ -1005,8 +920,8 @@ GamGamLL::FillKinematics(bool)
   // Second incoming photon
   // Equivalent in LPAIR : PLAB(x, 4)
   Particle* ph2 = GetParticle(Particle::Parton2);
-  Particle::Momentum plab_ph2 = plab_ip1-plab_op2;
-  plab_ph2.RotatePhi(rany, rany);
+  Particle::Momentum plab_ph2 = plab_ip2-plab_op2;
+  plab_ph2.RotatePhi(ranphi, rany);
   ph2->SetMomentum(plab_ph2);
   ////Error("Invalid photon 2");
   ph2->charge = 0;
@@ -1023,12 +938,8 @@ GamGamLL::FillKinematics(bool)
   // First outgoing lepton
   Particle* ol1 = GetParticle(role_ol1);
   ol1->SetPDGId(ol1->GetPDGId(), ransign);
-  Particle::Momentum plab_ol1( _pl6*_st6*_cp6,
-                               _pl6*_st6*_sp6,
-                               _gamma*_pl6*_ct6+_betgam*_el6,
-                               _gamma*_el6     +_betgam*_pl6*_ct6);
-  plab_ol1.RotatePhi(ranphi, rany);
-  ol1->SetMomentum(plab_ol1);
+  _p6cm.RotatePhi(ranphi, rany);
+  ol1->SetMomentum(_p6cm);
   // Error("Invalid outgoing lepton 1");
   ol1->status = Particle::FinalState;
   ol1->SetM(); //FIXME
@@ -1036,13 +947,8 @@ GamGamLL::FillKinematics(bool)
   // Second outgoing lepton
   Particle* ol2 = GetParticle(role_ol2);
   ol2->SetPDGId(ol2->GetPDGId(), -ransign);
-  Particle::Momentum plab_ol2( _pl7*_st7*_cp7,
-                               _pl7*_st7*_sp7,
-                               _gamma*_pl7*_ct7+_betgam*_el7,
-                               _gamma*_el7     +_betgam*_pl7*_ct7);
-  plab_ol2.RotatePhi(ranphi, rany);
-  ol2->SetMomentum(plab_ol2);
-  // Error("Invalid outgoing lepton 2");
+  _p7cm.RotatePhi(ranphi, rany);
+  ol2->SetMomentum(_p7cm);
   ol2->status = Particle::FinalState;
   ol2->SetM(); //FIXME
 
@@ -1090,20 +996,17 @@ GamGamLL::PeriPP(int nup_, int ndown_)
   DebugInsideLoop(Form(" Nup  = %d\n\tNdown = %d", nup_, ndown_));
 
   switch(nup_) {
-  case 1: // DESY
-      //case 0: // CDF
+  case 1: // electron (trivial) form factor
     _u1 = 1.;
     _u2 = 1.;
     break;
-  case 2: // DESY
-    //case 1: // CDF
+  case 2: // proton elastic form factor
     xt = std::pow(1.-_t1/.71, 2);
     _tau = _t1/(4.*_w1);
     _u1 = std::pow(2.79/xt, 2);
     _u2 = (1./std::pow(xt, 2)-_u1*_tau)/(1.-_tau);
     break;
-  case 4: // DESY
-    // does not exist in CDF version
+  case 4: // does not exist in CDF version
     PSF(_t1, _w3, &dummy, &psfw1, &psfw2);
     _u1 = -psfw1*(2.*_mp1)/_t1;
     _u2 = psfw2/(2.*_mp1);
@@ -1119,13 +1022,11 @@ GamGamLL::PeriPP(int nup_, int ndown_)
   }
 
   switch(ndown_) {
-  case 1: // DESY
-    //case 0: // CDF
+  case 1: // electron (trivial) form factor
     _v1 = 1.;
     _v2 = 1.;
     break;
-  case 2: // DESY
-    //case 1: // CDF
+  case 2: // proton elastic form factor
     xt = std::pow(1.-_t2/.71, 2);
     _tau = _t2/(4.*_w2);
     _v1 = std::pow(2.79/xt, 2);

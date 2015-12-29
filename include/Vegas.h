@@ -71,7 +71,7 @@ class Vegas {
      * @return A boolean stating whether or not the event could be saved
      */
     bool StoreEvent(double* x_);
-    bool CorrectionCycle();
+    bool CorrectionCycle(double* x_);
     /**
      * Sets all the generation mode variables and align them to the integration 
      * grid set while computing the cross-section
@@ -94,8 +94,12 @@ class Vegas {
     bool fGridPrepared;
     /// Has the generation been prepared using @a SetGen call? (very time-consuming operation, thus needs to be called once)
     bool fGenerationPrepared;
+    bool fHasCorrection;
     /// Maximal value of the function at one given point
     double *fFmax;
+    double fFmax2;
+    double fFmaxDiff;
+    double fFmaxOld;
     /// Maximal value of the function in the considered integration range
     double fFGlobalMax;
     int *fN;

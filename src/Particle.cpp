@@ -344,3 +344,10 @@ Particle::Momentum::operator*=(double c)
   return *this;
 }
 
+void
+Particle::Momentum::BetaGammaBoost(double gamma, double betagamma)
+{
+  const double pz = fPz, e = fE;
+  fPz = gamma*pz+betagamma*e;
+  fE  = gamma*e +betagamma*pz;
+}

@@ -25,14 +25,11 @@ int
 PPtoLL::GetNdim(ProcessMode process_mode_) const
 {
   switch (process_mode_) {
-    case ElasticElastic:
     default:
-      return 8;
+    case ElasticElastic:     return 8;
     case ElasticInelastic:
-    case InelasticElastic:
-      return 9;
-    case InelasticInelastic:
-      return 10;
+    case InelasticElastic:   return 9;
+    case InelasticInelastic: return 10;
   }
 }
 
@@ -53,13 +50,12 @@ PPtoLL::ComputeWeight()
   _phiq2t = 2.*pi*x(3);
   
   // Outgoing leptons
-  double ymin, ymax;
-  //ymin = EtaToY(fCuts.etamin, fEvent->GetOneByRole(6)->M(), pt);
-  //ymax = EtaToY(fCuts.etamax);
-  ///////////////////////////////////
-  ymin = fCuts.etamin;             //
-  ymax = fCuts.etamax;             //
-  ///////////// FIXME ///////////////
+  //const double ymin = EtaToY(fCuts.etamin, GetParticle(Particle::CentralParticle1)->M(), pt),
+  //             ymax = EtaToY(fCuts.etamax);
+  ////////////////////////////////////
+  const double ymin = fCuts.etamin, //
+               ymax = fCuts.etamax; //
+  ///////////// FIXME ////////////////
   
   _y1 = ymin+(ymax-ymin)*x(4);
   _y2 = ymin+(ymax-ymin)*x(5);
@@ -165,22 +161,18 @@ PPtoLL::INCqqbar()
   //=================================================================
   //     matrix element computation
   //=================================================================
-  double stild;
   double q1tx, q1ty, q2tx, q2ty;
   double ptsumx, ptsumy, ptsum;
   double ptdiffx, ptdiffy;
   double pt1x, pt1y, pt1, pt2x, pt2y, pt2;
   double amt1, amt2;
-  double pcaptx, pcapty;
   double dely;
   double alpha1, alpha2, beta1, beta2;
   double q1t, q1t2, q2t, q2t2;
-  double delta_x1;
-  double x1, xi_x1, x2, xi_x2;
   double z1p, z1m, z2p, z2m;
   double f1, f2;
   
-  stild = fS/2.*(1+sqrt(1.-(4*pow(mp2, 2))/pow(fS, 2)));
+  //const double stild = fS/2.*(1+sqrt(1.-(4*pow(mp2, 2))/pow(fS, 2)));
   
   // Inner photons
   q1tx = _q1t*cos(_phiq1t);
@@ -219,8 +211,7 @@ PPtoLL::INCqqbar()
   //=================================================================
   if (idif==1 and fabs(pt1-pt2)>pdif) return 0.;
 
-  pcaptx = pt1x+pt2x;
-  pcapty = pt1y+pt2y;
+  //const double pcaptx = pt1x+pt2x, pcapty = pt1y+pt2y;
   dely = fabs(_y1-_y2);
   //=================================================================
   //     a window in rapidity distance
@@ -240,14 +231,14 @@ PPtoLL::INCqqbar()
   q2t2 = pow(q2tx, 2)+pow(q2ty, 2);
 
   //x2 = 0.; //FIXME figure out where this comes from
-  delta_x1 = (pow(_mx, 2)+q2t2)/((1.-x2)*fS);
+  //const double delta_x1 = (pow(_mx, 2)+q2t2)/((1.-x2)*fS);
 
   //x1 = alpha1+alpha2+delta_x1;
-  x1 = alpha1+alpha2;
-  x2 = beta1+beta2;
+  const double x1 = alpha1+alpha2;
+  const double x2 = beta1+beta2;
 
-  xi_x1 = log10(x1);
-  xi_x2 = log10(x2);
+  /*const double xi_x1 = log10(x1);
+  const double xi_x2 = log10(x2);*/
 
   z1p = alpha1/x1;
   z1m = alpha2/x1;
@@ -256,11 +247,9 @@ PPtoLL::INCqqbar()
   
   if (x1>1. or x2>1.) return 0.; // sanity check
 
-  double qcaptx, qcapty;
   double px_plus, px_minus;
   double py_plus, py_minus;
-  double q12, q22;
-  double p10, p1x, p1y, p1z, p12, p20, p2x, p2y, p2z, p22;
+  double p10, p1x, p1y, p1z, p20, p2x, p2y, p2z;
   
   // FIXME FIXME FIXME
   const double ak10 = GetParticle(Particle::IncomingBeam1)->E(),
@@ -285,8 +274,8 @@ PPtoLL::INCqqbar()
       if (sqrt(s2_eff)<=(_mx+invm)) return 0.;
   }
   
-  qcaptx = pcaptx;
-  qcapty = pcapty;
+  //const double qcaptx = pcaptx;
+  //const double qcapty = pcapty;
   
   //=================================================================
   //     four-momenta of the outgoing protons (or remnants)
@@ -344,24 +333,23 @@ PPtoLL::INCqqbar()
   const double q1z = ak1z, q2z = ak2z;
   ////////////////////////////////
   
-  q12 = pow(q10, 2)-pow(q1tx, 2)-pow(q1ty, 2)-pow(q1z, 2);
-  q22 = pow(q20, 2)-pow(q2tx, 2)-pow(q2ty, 2)-pow(q2z, 2);
+  /*const double q12 = pow(q10, 2)-pow(q1tx, 2)-pow(q1ty, 2)-pow(q1z, 2);
+  const double q22 = pow(q20, 2)-pow(q2tx, 2)-pow(q2ty, 2)-pow(q2z, 2);*/
 
   //=================================================================
   //     Mendelstam variables
   //=================================================================
-  double shat, mll;
   double that1, that2, that, uhat1, uhat2, uhat;
   
   //shat = fS*x1*x2; // ishat = 1 (approximation)
-  shat = pow(q10+q20, 2)-pow(q1tx+q2tx, 2)-pow(q1ty+q2ty, 2)-pow(q1z+q2z, 2); // ishat = 2 (exact formula)
+  //const double shat = pow(q10+q20, 2)-pow(q1tx+q2tx, 2)-pow(q1ty+q2ty, 2)-pow(q1z+q2z, 2); // ishat = 2 (exact formula)
 
   that1 = pow(q10-p10, 2)-pow(q1tx-p1x, 2)-pow(q1ty-p1y, 2)-pow(q1z-p1z, 2);
   uhat1 = pow(q10-p20, 2)-pow(q1tx-p2x, 2)-pow(q1ty-p2y, 2)-pow(q1z-p2z, 2);
   that2 = pow(q20-p20, 2)-pow(q2tx-p2x, 2)-pow(q2ty-p2y, 2)-pow(q2z-p2z, 2);
   uhat2 = pow(q20-p10, 2)-pow(q2tx-p1x, 2)-pow(q2ty-p1y, 2)-pow(q2z-p1z, 2);
 
-  mll = sqrt(shat);
+  //const double mll = sqrt(shat);
 
   that = (that1+that2)/2.;
   uhat = (uhat1+uhat2)/2.;
@@ -376,23 +364,19 @@ PPtoLL::INCqqbar()
     //     on-shell formula for M^2
     //=================================================================
     
-    double term1, term2, term3, term4, term5, term6, term7, term8, term9, term10;
-    double auxil_gamgam, g_em;
-    const double ml = GetParticle(Particle::CentralParticle1)->M();
-    
-    term1 = 6.*pow(ml, 8);
-    term2 = -3.*pow(ml, 4)*pow(that, 2);
-    term3 = -14.*pow(ml, 4)*that*uhat;
-    term4 = -3.*pow(ml, 4)*pow(uhat, 2);
-    term5 = pow(ml, 2)*pow(that, 3);
-    term6 = 7.*pow(ml, 2)*pow(that, 2)*uhat;
-    term7 = 7.*pow(ml, 2)*that*pow(uhat, 2);
-    term8 = pow(ml, 2)*pow(uhat, 3);
-    term9  = -pow(that, 3)*uhat;
-    term10 = -that*pow(uhat, 3);
+    const double term1 = 6.*pow(ml, 8),
+                 term2 = -3.*pow(ml, 4)*pow(that, 2),
+                 term3 = -14.*pow(ml, 4)*that*uhat,
+                 term4 = -3.*pow(ml, 4)*pow(uhat, 2),
+                 term5 = ml2*pow(that, 3),
+                 term6 = 7.*ml2*pow(that, 2)*uhat,
+                 term7 = 7.*ml2*that*pow(uhat, 2),
+                 term8 = ml2*pow(uhat, 3),
+                 term9  = -pow(that, 3)*uhat,
+                 term10 = -that*pow(uhat, 3);
 
-    auxil_gamgam = -2.*(term1+term2+term3+term4+term5+term6+term7+term8+term9+term10)/(pow(pow(ml, 2)-that, 2)*pow(pow(ml, 2)-uhat, 2));
-    g_em = sqrt(4.*pi*alpha_em);
+    const double auxil_gamgam = -2.*(term1+term2+term3+term4+term5+term6+term7+term8+term9+term10)/(pow(ml2-that, 2)*pow(ml2-uhat, 2));
+    const double g_em = sqrt(4.*pi*alpha_em);
     amat2 = pow(g_em, 4)*auxil_gamgam;
   }
   else if (imethod==1) {
@@ -401,8 +385,8 @@ PPtoLL::INCqqbar()
     //     Wolfgang's formulae
     //=================================================================
 
-    double Phi10, Phi11_x, Phi11_y, Phi102, Phi112, Phi11_dot_e, Phi11_cross_e;
-    double Phi20, Phi21_x, Phi21_y, Phi202, Phi212, Phi21_dot_e, Phi21_cross_e;
+    double Phi10, Phi11_x, Phi11_y, Phi102, Phi11_dot_e, Phi11_cross_e;
+    double Phi20, Phi21_x, Phi21_y, Phi202, Phi21_dot_e, Phi21_cross_e;
     double aux2_1, aux2_2;
 
     const double ak1_x = z1m*pt1x-z1p*pt2x, ak1_y = z1m*pt1y-z1p*pt2y;
@@ -411,8 +395,8 @@ PPtoLL::INCqqbar()
     const double t1abs = (q1t2+x1*(pow(_mx, 2)-mp2)+pow(x1, 2)*mp2)/(1.-x1);
     const double t2abs = (q2t2+x2*(pow(_my, 2)-mp2)+pow(x2, 2)*mp2)/(1.-x2);
 
-    const double eps12 = pow(ml, 2)+z1p*z1m*t1abs;
-    const double eps22 = pow(ml, 2)+z2p*z2m*t2abs;
+    const double eps12 = ml2+z1p*z1m*t1abs;
+    const double eps22 = ml2+z2p*z2m*t2abs;
 
     Phi10 = 1./(pow(ak1_x+z1p*q2tx, 2)+pow(ak1_y+z1p*q2ty, 2)+eps12)
            -1./(pow(ak1_x-z1m*q2tx, 2)+pow(ak1_y-z1m*q2ty, 2)+eps12);
@@ -422,7 +406,7 @@ PPtoLL::INCqqbar()
              -(ak1_y-z1m*q2ty)/(pow(ak1_x-z1m*q2tx, 2)+pow(ak1_y-z1m*q2ty, 2)+eps12);
 
     Phi102 = Phi10*Phi10;
-    Phi112 = pow(Phi11_x, 2)+pow(Phi11_y, 2);
+    //const double Phi112 = pow(Phi11_x, 2)+pow(Phi11_y, 2);
 
     Phi20 = 1./(pow(ak2_x+z2p*q1tx, 2)+pow(ak2_y+z2p*q1ty, 2)+eps22)
            -1./(pow(ak2_x-z2m*q1tx, 2)+pow(ak2_y-z2m*q1ty, 2)+eps22);
@@ -432,12 +416,12 @@ PPtoLL::INCqqbar()
              -(ak2_y-z2m*q1ty)/(pow(ak2_x-z2m*q1tx, 2)+pow(ak2_y-z2m*q1ty, 2)+eps22);
 
     Phi202 = Phi20*Phi20;
-    Phi212 = pow(Phi21_x, 2)+pow(Phi21_y, 2);
+    //const double Phi212 = pow(Phi21_x, 2)+pow(Phi21_y, 2);
 
-    /*aux2_1 = iterm11*(pow(ml, 2)+4.*z1p*z1m*t1abs)*Phi102
+    /*aux2_1 = iterm11*(ml2+4.*z1p*z1m*t1abs)*Phi102
             +iterm22*(pow(z1p, 2)+pow(z1m, 2))*Phi112
             -iterm12*4.*z1p*z1m*(z1p-z1m)*Phi10*(q1tx*Phi11_x+q1ty*Phi11_y);
-    aux2_2 = iterm11*(pow(ml, 2)+4.*z2p*z2m*t2abs)*Phi202
+    aux2_2 = iterm11*(ml2+4.*z2p*z2m*t2abs)*Phi202
             +iterm22*(pow(z2p, 2)+pow(z2m, 2))*Phi212
             -iterm12*4.*z2p*z2m*(z2p-z2m)*Phi20*(q2tx*Phi21_x+q2ty*Phi21_y);*/
 
@@ -447,12 +431,12 @@ PPtoLL::INCqqbar()
     Phi21_dot_e = (Phi21_x*q2tx +Phi21_y*q2ty)/sqrt(q2t2);
     Phi21_cross_e = (Phi21_x*q2ty -Phi21_y*q2tx)/sqrt(q2t2);
 
-    aux2_1 = iterm11*(pow(ml, 2)+4.*pow(z1p, 2)*pow(z1m, 2)*t1abs)*Phi102
+    aux2_1 = iterm11*(ml2+4.*pow(z1p, 2)*pow(z1m, 2)*t1abs)*Phi102
             +iterm22*((pow(z1p, 2)+pow(z1m, 2))*(pow(Phi11_dot_e, 2)+pow(Phi11_cross_e, 2)))
             +itermtt*(pow(Phi11_cross_e, 2)-pow(Phi11_dot_e, 2))
             -iterm12*4.*z1p*z1m*(z1p-z1m)*Phi10*(q1tx*Phi11_x+q1ty*Phi11_y);
 
-    aux2_2 = iterm11*(pow(ml, 2)+4.*pow(z2p, 2)*pow(z2m, 2)*t2abs)*Phi202
+    aux2_2 = iterm11*(ml2+4.*pow(z2p, 2)*pow(z2m, 2)*t2abs)*Phi202
             +iterm22*((pow(z2p, 2)+pow(z2m, 2))*(pow(Phi21_dot_e, 2)+pow(Phi21_cross_e, 2)))
             +itermtt*(pow(Phi21_cross_e, 2)-pow(Phi21_dot_e, 2))
             -iterm12*4.*z2p*z2m*(z2p-z2m)*Phi20*(q2tx*Phi21_x+q2ty*Phi21_y);
@@ -463,9 +447,6 @@ PPtoLL::INCqqbar()
     //     for heavy flavours
     //=================================================================
     double amat2_1, amat2_2;
-    double xx1, xx2;
-    double sudakov_1, sudakov_2;
-    double ratio1, ratio2;
     
     amat2_1 = pow(4.*pi*alpha_em, 2)*pow(x1*x2*fS, 2)*aux2_1*2.*z1p*z1m*t1abs/(q1t2*q2t2)*t2abs/q2t2;
     amat2_2 = pow(4.*pi*alpha_em, 2)*pow(x1*x2*fS, 2)*aux2_2*2.*z2p*z2m*t2abs/(q1t2*q2t2);
@@ -476,13 +457,12 @@ PPtoLL::INCqqbar()
 
     amat2 = (imat1*amat2_1+imat2*amat2_2)/2.;
 
-    xx1 = alpha1+alpha2;
-    xx2 = beta1+beta2;
+    /*const double xx1 = alpha1+alpha2, xx2 = beta1+beta2;
 
-    sudakov_2 = (pow(_mx, 2)-mp2+q2t2+xx2*mp2)/((1.-xx2)*fS);
-    sudakov_1 = (q1t2 + xx1*mp2)/((1.-xx1)*fS);
-    ratio1 = sudakov_1 / xx1;
-    ratio2 = sudakov_2 / xx2;
+    const double sudakov_2 = (pow(_mx, 2)-mp2+q2t2+xx2*mp2)/((1.-xx2)*fS);
+    const double sudakov_1 = (q1t2 + xx1*mp2)/((1.-xx1)*fS);
+    const double ratio1 = sudakov_1 / xx1,
+                 ratio2 = sudakov_2 / xx2;*/
 
     //if (ratio1>0.01) return 0.;
   }
@@ -521,10 +501,9 @@ PPtoLL::INCqqbar()
   //     over d^2 kappa_1 d^2 kappa_2 instead d kappa_1^2 d kappa_2^2
   //=================================================================
 
-  double aintegral;
-  aintegral = (2.*pi)*1./(16.*pow(pi, 2)*pow(x1*x2*fS, 2)) * amat2
-            * f1/pi*f2/pi*(1./4.)*units
-            * 0.5*4./(4.*pi);
+  const double aintegral = (2.*pi)*1./(16.*pow(pi, 2)*pow(x1*x2*fS, 2)) * amat2
+                         * f1/pi*f2/pi*(1./4.)*units
+                         * 0.5*4./(4.*pi);
 
   //=================================================================
   return aintegral*q1t*q2t*_ptdiff;
@@ -574,18 +553,14 @@ PPtoLL::FillKinematics(bool)
     Error(Form("Invalid outgoing proton 2: energy: %.2f", _py_0));
   }
 
-  // PDG id for the outgoing leptons
-
-  Particle::ParticleCode lepton1, lepton2;
+  // randomise the charge of the outgoing leptons
   int sign = (drand()>.5) ? +1 : -1;
-  lepton1 = GetParticle(Particle::CentralParticle1)->GetPDGId();
-  lepton2 = GetParticle(Particle::CentralParticle2)->GetPDGId();
 
   //=================================================================
   //     first outgoing lepton
   //=================================================================
   Particle* ol1 = GetParticle(Particle::CentralParticle1);
-  ol1->SetPDGId(lepton1, sign);
+  ol1->SetPDGId(ol1->GetPDGId(), sign);
   if (!ol1->SetMomentum(_pl1_x, _pl1_y, _pl1_z, _pl1_0)) {
     Error("Invalid outgoing lepton 1");
   }
@@ -594,7 +569,7 @@ PPtoLL::FillKinematics(bool)
   //     second outgoing lepton
   //=================================================================
   Particle* ol2 = GetParticle(Particle::CentralParticle2);
-  ol2->SetPDGId(lepton2, -sign);
+  ol2->SetPDGId(ol2->GetPDGId(), -sign);
   if (!ol2->SetMomentum(_pl2_x, _pl2_y, _pl2_z, _pl2_0)) {
     Error("Invalid outgoing lepton 2");
   }

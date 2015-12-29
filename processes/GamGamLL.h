@@ -32,7 +32,7 @@
  * - 5 = xx6 = \f$\frac{1}{2}\left(1-\cos\theta^\text{CM}_6\right)\f$ definition (3D rotation of the first outgoing lepton with respect to the two-photon centre-of-mass system). If the @a nm_ optimisation flag is set this angle coefficient value becomes 
  *   \f[\frac{1}{2}\left(\frac{a_\text{map}}{b_\text{map}}\frac{\beta-1}{\beta+1}+1\right)\f]
  *   with \f$a_\text{map}=\frac{1}{2}\left(w_4-t_1-t_2\right)\f$, \f$b_\text{map}=\frac{1}{2}\sqrt{\left(\left(w_4-t_1-t_2\right)^2-4t_1t_2\right)\left(1-4\frac{w_6}{w_4}\right)}\f$, and \f$\beta=\left(\frac{a_\text{map}+b_\text{map}}{a_\text{map}-b_\text{map}}\right)^{2x_5-1}\f$
- *   and the @a _dj element is scaled by a factor \f$\frac{1}{2}\frac{\left(a_\text{map}^2-b_\text{map}^2\cos^2\theta^\text{CM}_6\right)}{a_\text{map}b_\text{map}}\log\left(\frac{a_\text{map}+b_\text{map}}{a_\text{map}-b_\text{map}}\right)\f$
+ *   and the @a fJacobian element is scaled by a factor \f$\frac{1}{2}\frac{\left(a_\text{map}^2-b_\text{map}^2\cos^2\theta^\text{CM}_6\right)}{a_\text{map}b_\text{map}}\log\left(\frac{a_\text{map}+b_\text{map}}{a_\text{map}-b_\text{map}}\right)\f$
  * - 6 = _phicm6_, or \f$\phi_6^\text{CM}\f$ the rotation angle of the dilepton system in the centre-of-mass
  *   system
  * - 7 = \f$x_q\f$, \f$w_X\f$ mappings, as used in the single- and double-dissociative
@@ -170,8 +170,6 @@ class GamGamLL : public GenericProcess
   double _mp2;
   /// \f$m_2^2\f$, squared mass of the second proton-like incoming particle
   double _w2;
-  /// PDG identifier of the second proton-like incoming particle
-  Particle::ParticleCode _pdg2;
   /// \f$\left|\mathbf p_3\right|\f$, 3-momentum norm of the first proton-like outgoing particle
   double _pp3;
   /// \f$E_3\f$, energy of the first proton-like outgoing particle
@@ -180,8 +178,6 @@ class GamGamLL : public GenericProcess
   double _mp3;
   /// \f$m_3^2\f$, squared mass of the first proton-like outgoing particle
   double _w3;
-  /// PDG identifier of the first proton-like outgoing particle
-  Particle::ParticleCode _pdg3;
   /// \f$\left|\mathbf p_4\right|\f$, 3-momentum norm of the two-photon central system
   double _pc4;
   /// \f$E_4\f$, energy of the two-photon central system
@@ -198,22 +194,12 @@ class GamGamLL : public GenericProcess
   double _mp5;
   /// \f$m_5^2\f$, squared mass of the second proton-like outgoing particle
   double _w5;
-  /// PDG identifier of the second proton-like outgoing particle
-  Particle::ParticleCode _pdg5;
-  /// \f$\left|\mathbf p_6\right|\f$, 3-momentum norm of the first outgoing lepton
-  double _pl6;
-  /// \f$E_6\f$, energy of the first outgoing lepton
-  double _el6;
   /// \f$m_6^2\f$, squared mass of the first outgoing lepton
   double _w6;
   /// \f$p_{T,6}\f$, transverse momentum of the first outgoing lepton
   double _pt_l6;
   /// \f$E_6^\mathrm{lab}\f$, energy of the first outgoing lepton, computed in the lab frame
   double _e6lab;
-  /// \f$\left|\mathbf p_7\right|\f$, 3-momentum norm of the second outgoing lepton
-  double _pl7;
-  /// \f$E_7\f$, energy of the second outgoing lepton
-  double _el7;
   //// \f$m_7^2\f$, squared mass of the second outgoing lepton
   double _w7;
   /// \f$p_{T,7}\f$, transverse momentum of the second outgoing lepton
@@ -243,13 +229,6 @@ class GamGamLL : public GenericProcess
   
   double _acc3;
   double _acc4;
-  
-  // --- ANGU common block
-  
-  /// \f$\cos\theta_6^\mathrm{CM}\f$, production angle of the first outgoing lepton, computed in the centre-of-mass system.
-  double _ctcm6;
-  /// \f$\sin\theta_6^\mathrm{CM}\f$, production angle of the first outgoing lepton, computed in the centre-of-mass system.
-  double _stcm6;
   
   // --- CIVITA common block
   
@@ -289,13 +268,6 @@ class GamGamLL : public GenericProcess
   double _delta;
   double _g4;
   double _sa1, _sa2;
-  
-  // --- LTCOM common block
-  
-  /// \f$\gamma\f$ factor of the centre-of-mass system, used in the computation of the inverse boost for the outgoing leptons
-  double _gamma;
-  /// \f$\beta\gamma\f$ factor of the centre-of-mass system, used in the computation of the inverse boost for the outgoing leptons
-  double _betgam;
   
   // --- LEVI common block
   
@@ -364,23 +336,9 @@ class GamGamLL : public GenericProcess
   
   // --- VARIAD common block
   
-  /// \f$\cos\theta_6\f$ of the first outgoing lepton
-  double _ct6;
-  /// \f$\sin\theta_6\f$ of the first outgoing lepton
-  double _st6;
-  /// \f$\cos\theta_7\f$ of the second outgoing lepton
-  double _ct7;
-  /// \f$\sin\theta_7\f$ of the second outgoing lepton
-  double _st7;
-  /// \f$\cos\phi_6\f$ of the first outgoing lepton
-  double _cp6;
-  /// \f$\sin\phi_6\f$ of the first outgoing lepton
-  double _sp6;
-  /// \f$\cos\phi_7\f$ of the second outgoing lepton
-  double _cp7;
-  /// \f$\sin\phi_7\f$ of the second outgoing lepton
-  double _sp7;
-  double _dj;
+  Particle::Momentum _p6cm;
+  Particle::Momentum _p7cm;
+  double fJacobian;
   /// Is the first incoming proton-like particle's kinematic set ?
   bool setp1;
   /// Is the second incoming proton-like particle's kinematic set ?

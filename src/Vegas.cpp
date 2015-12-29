@@ -5,7 +5,8 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
   fJ(0), fCorrec(0.), fCorrec2(0.),
   fInputParameters(inParam_),
   fGridPrepared(false), fGenerationPrepared(false),
-  fFmax(0), fFGlobalMax(0.), fN(0)
+  fFmax(0), fFmax2(0.), fFmaxDiff(0.), fFmaxOld(0.), fFGlobalMax(0.), fN(0),
+  fFunction(0)
 {
   fXlow = new double[dim_];
   fXup = new double[dim_];
@@ -29,14 +30,12 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
 
 Vegas::~Vegas()
 {
-  Debug("Destructor called");
-  
-  delete[] fXlow;
-  delete[] fXup;
-  delete[] fNm;
+  if (fXlow) delete[] fXlow;
+  if (fXup) delete[] fXup;
+  if (fNm) delete[] fNm;
   if (fFmax) delete[] fFmax;
   if (fN) delete[] fN;
-  delete fFunction;
+  if (fFunction) delete fFunction;
 }
 
 int
@@ -105,25 +104,21 @@ Vegas::GenerateOneEvent()
   double y;
   int jj, jjj;
   double x[fFunction->dim];
-  double fmax_old, fmax_diff;
   
-  if (!fGenerationPrepared) {
-    this->SetGen();
-    fGenerationPrepared = true;
-  }
+  if (!fGenerationPrepared) SetGen();
 
   y = -1.;
   max = pow(fMbin, fFunction->dim);
 
   // Correction cycles are started
   if (fJ!=0) {
-    while (CorrectionCycle()) {;}
+    fHasCorrection = false;
+    while (!CorrectionCycle(x)) {;}
+    if (fHasCorrection) return StoreEvent(x);
   }
 
   // Normal generation cycle
   // Select a Vegas bin and reject if fmax is too little
-  //line1:
-  //double* Vegas::SelectBin() //FIXME need to implement it this way instead of these bloody goto...!
   do {
     do {
       // ...
@@ -156,41 +151,38 @@ Vegas::GenerateOneEvent()
   if (weight<=fFmax[fJ]) fJ = 0;
   // Init correction cycle if weight is higher than fmax or ffmax
   else if (weight<=fFGlobalMax) {
-    fmax_old = fFmax[fJ];
+    fFmaxOld = fFmax[fJ];
     fFmax[fJ] = weight;
-    fmax_diff = weight-fmax_old;
-    fCorrec = (fNm[fJ]-1.)*fmax_diff/fFGlobalMax-1.;
+    fFmaxDiff = weight-fFmaxOld;
+    fCorrec = (fNm[fJ]-1.)*fFmaxDiff/fFGlobalMax-1.;
   }
   else {
-    fmax_old = fFmax[fJ];
+    fFmaxOld = fFmax[fJ];
     fFmax[fJ] = weight;
-    fmax_diff = weight-fmax_old;
+    fFmaxDiff = weight-fFmaxOld;
     fFGlobalMax = weight;
-    fCorrec = (fNm[fJ]-1.)*fmax_diff/fFGlobalMax*weight/fFGlobalMax-1.;
+    fCorrec = (fNm[fJ]-1.)*fFmaxDiff/fFGlobalMax*weight/fFGlobalMax-1.;
   }
   
   Debug(Form("Correc.: %f, j = %d", fCorrec, fJ));
   
   // Return with an accepted event
-  if (weight>0.) return this->StoreEvent(x);
+  if (weight>0.) return StoreEvent(x);
   return false;
 }
 
 bool
-Vegas::CorrectionCycle()
+Vegas::CorrectionCycle(double* x_)
 {
   double x[fFunction->dim];
   double weight;
-  double fmax_old = 0., fmax_diff = 0., fmax2 = 0.;
   
   Debug(Form("Correction cycles are started.\n\t"
                   "j = %f"
                   "correc = %f"
                   "corre2 = %f", fJ, fCorrec2));
   
-  if (fCorrec>=1.) {
-    fCorrec -= 1.;
-  }
+  if (fCorrec>=1.) fCorrec -= 1.;
   if ((double)rand()/RAND_MAX<fCorrec) {
     fCorrec = -1.;
     // Select x values in Vegas bin
@@ -201,33 +193,38 @@ Vegas::CorrectionCycle()
     weight = F(x);
     // Parameter for correction of correction
     if (weight>fFmax[fJ]) {
-      if (weight>fmax2) fmax2 = weight;
+      if (weight>fFmax2) fFmax2 = weight;
       fCorrec2 -= 1.;
       fCorrec += 1.;
     }
     // Accept event
-    if (weight>=fmax_diff*(double)rand()/RAND_MAX+fmax_old) { // FIXME!!!!
-      return this->StoreEvent(x);
+    if (weight>=fFmaxDiff*(double)rand()/RAND_MAX+fFmaxOld) { // FIXME!!!!
+      //Error("Accepting event!!!");
+      //return StoreEvent(x);
+      std::copy(x, x+fFunction->dim, x_);
+      fHasCorrection = true;
+      return true;
     }
     return false;
   }
   // Correction if too big weight is found while correction
   // (All your bases are belong to us...)
-  if (fmax2>fFmax[fJ]) {
-    fmax_old = fFmax[fJ];
-    fFmax[fJ] = fmax2;
-    fmax_diff = fmax2-fmax_old;
-    if (fmax2<fFGlobalMax) {
-      fCorrec = (fNm[fJ]-1.)*fmax_diff/fFGlobalMax-fCorrec2;
+  if (fFmax2>fFmax[fJ]) {
+    fFmaxOld = fFmax[fJ];
+    fFmax[fJ] = fFmax2;
+    fFmaxDiff = fFmax2-fFmaxOld;
+    if (fFmax2<fFGlobalMax) {
+      fCorrec = (fNm[fJ]-1.)*fFmaxDiff/fFGlobalMax-fCorrec2;
     }
     else {
-      fFGlobalMax = fmax2;
-      fCorrec = (fNm[fJ]-1.)*fmax_diff/fFGlobalMax*fmax2/fFGlobalMax-fCorrec2;
+      fFGlobalMax = fFmax2;
+      fCorrec = (fNm[fJ]-1.)*fFmaxDiff/fFGlobalMax*fFmax2/fFGlobalMax-fCorrec2;
     }
     fCorrec2 = 0.;
-    fmax2 = 0.;
+    fFmax2 = 0.;
+    return false;
   }
-  return false;
+  return true;
 }
 
 bool
@@ -348,5 +345,6 @@ Vegas::SetGen()
                "eff = %f",
                sum, sum2, sig, sigp, fFGlobalMax, eff1, eff2, eff));
   }
+  fGenerationPrepared = true;
 }
 

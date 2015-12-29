@@ -41,8 +41,10 @@ int main(int argc, char* argv[]) {
   float gen_time, tot_time;
   int nremn_ch[2], nremn_nt[2];
   int hadr_trials, litigious_events;
-  
-  file = new TFile("events.root", "RECREATE");
+ 
+  TString filename = "events.root";
+  if (argc>3) filename = TString(argv[2]);
+  file = new TFile(filename, "recreate");
   if (!file) {
     cout << "ERROR while trying to create the output file!" << endl;
   }

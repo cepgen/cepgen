@@ -269,11 +269,11 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
         emsqr = (std::pow(y*elpr, 2)+(*q2_)*pr_->M2())/(std::pow(elpr, 2)+el_->M2()*pr_->M2());
         
         if (emsqr<0.) {
-          std::cerr << "[EPA] WARNING: problem with sqrt(emsqr)= " << emsqr << ": y, Q2 pair rejected" << std::endl;
+          Warning(Form("problem with sqrt(emsqr)=%.4f: y, Q2 pair rejected", emsqr));
           //CALL ERRLOG (280, 'S: GEPHOT: EMSQR<0!')
           ierr1++;
           if (ierr1>10) {
-            std::cerr << "[EPA] ERROR: too many sqrt problems: try WWA" << std::endl;
+            Error("too many sqrt problems: try WWA");
             //CALL ERRLOG (281, 'F: GEPHOT: EMSQR<0 too often!')
             exit(0);
           }
@@ -311,11 +311,11 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
       
       // Update upper EPA bound
       if (epa>epamax) {
-        if (epa>1.1*epamax) std::cout << __PRETTY_FUNCTION__ << " INFO: EPA > 1.1*EPAMAX !" << std::endl;
-        else if (epa>1.01*epamax) std::cout << __PRETTY_FUNCTION__ << " INFO: EPA > 1.01*EPAMAX !" << std::endl;
-        else std::cout << __PRETTY_FUNCTION__ << " INFO: EPA > EPAMAX !" << std::endl;
+        if (epa>1.1*epamax)       { Info("EPA > 1.1*EPAMAX!"); }
+        else if (epa>1.01*epamax) { Info("EPA > 1.01*EPAMAX!"); }
+        else                      { Info("EPA > EPAMAX!"); }
         epamax = epa;
-        std::cout << __PRETTY_FUNCTION__ << " INFO: update of maximal weight : " << epamax << std::endl;
+        Info(Form("update of maximal weight: %f", epamax));
       }
       
       // Global counter for overall integration
@@ -327,8 +327,8 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
       qsuml += std::pow(epal, 2);
       
       if (irnd>10000) { // Kin. loop failed
-        std::cerr << __PRETTY_FUNCTION__ << " ERROR: Kinematic loop failed after " << irnd << " trials." << std::endl
-		  << "  EPAMAX too high for efficient mc! EPAMAX=" << epamax << std::endl;
+        Error(Form("Kinematic loop failed after %d"" trials."
+                   "\n  EPAMAX too high for efficient mc! EPAMAX=%.4f", irnd, epamax));
         //CALL ERRLOG (285, 'F: GEPHOT: More than 10000 iterations!')
         exit(0);
       }
@@ -358,8 +358,8 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
     ierr2++;
 
     if (ierr2>100) {
-      std::cerr << __PRETTY_FUNCTION__ << " ERROR: too many problems for CTHE or STHE:" << std::endl
-		<< "  CTHE=" << cthe << ", STHE=" << sthe << std::endl;
+      Error(Form("too many problems for CTHE or STHE:"
+            		 "\n\tCTHE=%.4f, STHE=%.4f", cthe, sthe));
     }
   } while (fabs(cthe)>1. or fabs(sthe)>1.);
 
@@ -449,19 +449,17 @@ ElasticFlux(double x_, double kt2_)
   double f_ela;
   const double alpha_em = 1./137.035;
   
-  double Q2_ela, G_dip, G_E, G_M;
-  double ela1, ela2, ela3;
   const double mp2 = pow(Particle::GetMassFromPDGId(Particle::Proton), 2);
   
-  Q2_ela = (kt2_+pow(x_, 2)*mp2)/(1.-x_);
-  G_dip = 1./pow(1.+Q2_ela/0.71, 2);
-  G_E = G_dip;
-  G_M = 2.79*G_dip;
+  const double Q2_ela = (kt2_+pow(x_, 2)*mp2)/(1.-x_);
+  const double G_dip = 1./pow(1.+Q2_ela/0.71, 2);
+  const double G_E = G_dip;
+  const double G_M = 2.79*G_dip;
   
-  ela1 = pow(kt2_/(kt2_+pow(x_, 2)*mp2), 2);
-  ela2 = (4.*mp2*pow(G_E, 2)+Q2_ela*pow(G_M, 2))/(4.*mp2+Q2_ela);
-  ela3 = 1.-(Q2_ela-kt2_)/Q2_ela;
-  //ela3 = 1.-pow(x_, 2)*mp2/Q2_ela/(1.-x_);
+  const double ela1 = pow(kt2_/(kt2_+pow(x_, 2)*mp2), 2);
+  const double ela2 = (4.*mp2*pow(G_E, 2)+Q2_ela*pow(G_M, 2))/(4.*mp2+Q2_ela);
+  //const double ela3 = 1.-(Q2_ela-kt2_)/Q2_ela;
+  //const double ela3 = 1.-pow(x_, 2)*mp2/Q2_ela/(1.-x_);
   //f_ela = alpha_em/pi*(1.-x_+pow(x_, 2)/4.)*ela1*ela2*ela3/kt2_;
   f_ela = alpha_em/pi*ela1*ela2/Q2_ela;
   //f_ela = alpha_em/pi*((1.-x_)*ela1*ela2*ela3+pow(x_, 2)/2.*pow(G_M, 2))/kt2_;

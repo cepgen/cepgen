@@ -18,10 +18,8 @@ MCGen::MCGen(Parameters *ip_) :
 
 MCGen::~MCGen()
 {
-  Debug("Destructor called");
-  
   if (fVegas) delete fVegas;
-  delete parameters;
+  if (parameters) delete parameters;
 }
 
 void
@@ -82,28 +80,6 @@ MCGen::GenerateOneEvent()
 
   last_event = this->parameters->last_event;
   return static_cast<Event*>(last_event);
-}
-
-void
-MCGen::LaunchGeneration()
-{
-  // LHE file preparation
-  if (!this->parameters->file->is_open()) { Debug("Output file is not opened"); }
-  else                                    { Debug("Output file successfully opened"); }
-  
-  *(this->parameters->file) << "<LesHouchesEvents version=\"1.0\">" << std::endl;
-  *(this->parameters->file) << "<header>This file was created from the output of the CLPAIR generator</header>" << std::endl;
-  *(this->parameters->file) << "<init>" << std::endl
-	       << "2212 2212 "
-	       << std::setprecision(2) << this->parameters->in1p << " "
-	       << std::setprecision(2) << this->parameters->in2p << " "
-	       << "0 0 10042 10042 2 1" << std::endl
-	       << fCrossSection << " " << fCrossSectionError << " 0.26731120000E-03 0" << std::endl
-	       << "</init>" << std::endl;
-
-  fVegas->Generate();
-  
-  *(this->parameters->file) << "</LesHouchesEvents>" << std::endl;
 }
 
 void
@@ -205,11 +181,7 @@ double f(double* x_, size_t ndim_, void* params_)
     p->process->FillKinematics(false);
     p->process->GetEvent()->time_generation = tmr.elapsed();
 
-    if (!p->hadroniser) {
-      *(p->last_event) = *(p->process->GetEvent());
-      return ff;
-    }
-    if (p->process_mode!=GenericProcess::ElasticElastic) {
+    if (p->hadroniser and p->process_mode!=GenericProcess::ElasticElastic) {
       
       Debug(Form("Event before calling the hadroniser (%s)", p->hadroniser->GetName().c_str()));
       if (Logger::GetInstance()->Level>=Logger::Debug) p->process->GetEvent()->Dump();
