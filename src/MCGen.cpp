@@ -35,7 +35,7 @@ MCGen::PrintHeader()
     os << "\n " << tmp;
   }
   hf.close();
-  Info(os.str().c_str());
+  Information(os.str().c_str());
 }
 
 void
@@ -54,7 +54,7 @@ MCGen::ComputeXsection(double* xsec_, double *err_)
 {
   if (!fVegas) BuildVegas();
 
-  Info("Starting the computation of the process cross-section");
+  Information("Starting the computation of the process cross-section");
 
   try { PrepareFunction(); } catch (Exception& e) { e.Dump(); }
   fVegas->Integrate(xsec_, err_);
@@ -63,7 +63,7 @@ MCGen::ComputeXsection(double* xsec_, double *err_)
   fCrossSectionError = *err_;
   fHasCrossSection = true;
   
-  Info(Form("Total cross section: %f +/- %f pb", *xsec_, *err_));
+  Information(Form("Total cross section: %f +/- %f pb", *xsec_, *err_));
 }
 
 Event*

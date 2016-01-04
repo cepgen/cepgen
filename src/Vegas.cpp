@@ -88,11 +88,11 @@ Vegas::Generate()
 
   i = 0;
 
-  Info(Form("%d events will be generated", fInputParameters->maxgen));
+  Information(Form("%d events will be generated", fInputParameters->maxgen));
   while (i<fInputParameters->maxgen) {
     if (this->GenerateOneEvent()) i++;
   }
-  Info(Form("%d events generated", i));
+  Information(Form("%d events generated", i));
 }
 
 bool

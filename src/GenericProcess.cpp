@@ -39,13 +39,13 @@ GenericProcess::PrepareKinematics()
 }
 
 void
-GenericProcess::DumpPoint(const ExceptionType& et=Info)
+GenericProcess::DumpPoint(const ExceptionType& et=Information)
 {
   std::ostringstream os;
   for (unsigned int i=0; i<(unsigned int)fNumDimensions; i++) {
     os << Form("  x(%2d) = %8.6f\n\t", i, fX[i]);
   }
-  if (et<Debugging) { Info(Form("Number of integration parameters: %d\n\t"
+  if (et<Debugging) { Information(Form("Number of integration parameters: %d\n\t"
                                 "%s", fNumDimensions, os.str().c_str())); }
   else              { Debug(Form("Number of integration parameters: %d\n\t"
                                  "%s", fNumDimensions, os.str().c_str())); }

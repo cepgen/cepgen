@@ -58,11 +58,11 @@ double GenerT(double tmin_, double tmax_, double b_, double anexp_)
 
   bloc = b_;
   if (b_<.1) {
-    Info(Form("ERROR: B=%f < 1", b_));
+    Information(Form("ERROR: B=%f < 1", b_));
     bloc = .1;
   }
   if (tmin_>=tmax_) {
-    Info(Form("ERROR: TMIN=%f >= TMAX=%f => return TMIN=%f", tmin_, tmax_, tmin_))
+    Information(Form("ERROR: TMIN=%f >= TMAX=%f => return TMIN=%f", tmin_, tmax_, tmin_))
     return tmin_;
   }
 
@@ -94,7 +94,7 @@ double GenerT(double tmin_, double tmax_, double b_, double anexp_)
     iter++;
   } while ((t<tmin_ or t>tmax_) and iter<=100);
   if (iter>100) {
-    Info(Form("WARNING: more than 100 iterations!\n\t"
+    Information(Form("WARNING: more than 100 iterations!\n\t"
                    "TMIN: %f, TMAX: %f, BLOC: %f, T: %f", tmin_, tmax_, bloc, t));
   }
   return t;
@@ -106,7 +106,7 @@ double GenTDL(double tmin_, double tmax_, double b_, int n_)
   double t, w;
 
   if (tmin_>tmax_) {
-    Info(Form("ERROR: TMIN=%f, TMAX=%f => return TMIN=%f", tmin_, tmax_, tmin_));
+    Information(Form("ERROR: TMIN=%f, TMAX=%f => return TMIN=%f", tmin_, tmax_, tmin_));
     return tmin_;
   }
 
@@ -124,7 +124,7 @@ double GenTDL(double tmin_, double tmax_, double b_, int n_)
     iter += 1;
   } while ((t<tmin_ or t>tmax_ or w<drand()) and iter<=100);
   if (iter>100) {
-    Info(Form("WARNING: more than 100 iterations!\n\t"
+    Information(Form("WARNING: more than 100 iterations!\n\t"
                    "TMIN: %f, TMAX: %f, T: %f", tmin_, tmax_, t));
   }
   return t;

@@ -8,8 +8,8 @@
 
 #include "Logger.h"
 
-#define Info(m) \
-  if (Logger::GetInstance()->Level>Logger::Nothing) { Exception(__PRETTY_FUNCTION__, m, Info).Dump(Logger::GetInstance()->OutputStream); }
+#define Information(m) \
+  if (Logger::GetInstance()->Level>Logger::Nothing) { Exception(__PRETTY_FUNCTION__, m, Information).Dump(Logger::GetInstance()->OutputStream); }
 #define Debug(m) \
   if (Logger::GetInstance()->Level>=Logger::Debug)  { Exception(__PRETTY_FUNCTION__, m, Debugging).Dump(Logger::GetInstance()->OutputStream); }
 #define DebugInsideLoop(m) \
@@ -27,7 +27,7 @@
 typedef enum
 {
   Undefined=-1,
-  Info,
+  Information,
   Debugging,
   JustWarning,
   Error,
@@ -68,7 +68,7 @@ class Exception
     inline std::string TypeString() const {
       switch (Type()) {
         case JustWarning: return "\033[34;1mJustWarning\033[0m";
-        case Info: return "\033[33;1mInfo\033[0m";
+        case Information: return "\033[33;1mInfo\033[0m";
         case Debugging: return "\033[32;1mDebug\033[0m";
         case Error: return "\033[31;1mError\033[0m";
         case Fatal: return "\033[31;1mFatal\033[0m";
@@ -77,7 +77,7 @@ class Exception
     }
     
     inline void Dump(std::ostream& os=std::cerr) const {
-      if (Type()==Info) {
+      if (Type()==Information) {
         os << "================================= \033[33;1mInformation\033[0m =================================" << std::endl
            << " From:        " << From() << std::endl;
       }

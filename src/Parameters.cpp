@@ -110,7 +110,7 @@ void Parameters::Dump()
     os << "| " << std::setw(wt) << "Hadronisation algorithm" << std::setw(12) << hadroniser->GetName() << std::setw(wp-12) << "" << " |" << std::endl;
   os << "| " << std::setw(wt) << "Minimal mass (GeV/c^2)" << std::setw(wp) << minmx << " |" << std::endl
              << "| " << std::setw(wt) << "Maximal mass (GeV/c^2)" << std::setw(wp) << maxmx << " |";
-  Info(os.str());
+  Information(os.str());
 }
 
 bool Parameters::ReadConfigFile(const char* inFile_)
@@ -161,19 +161,25 @@ bool Parameters::ReadConfigFile(const char* inFile_)
       	os << " * Process: LPAIR\n\t";
       }
       else if (value=="pptoll") {
-	      this->process = new PPtoLL;
-	      os << " * Process: PPTOLL\n\t";
+        this->process = new PPtoLL;
+        os << " * Process: PPTOLL\n\t";
       }
     }
     else if (key=="HADR") {
       if (value=="pythia6") {
-	      this->hadroniser = new Pythia6Hadroniser;
-	      os << " * Hadroniser: Pythia6\n\t";
+        this->hadroniser = new Pythia6Hadroniser;
+        os << " * Hadroniser: Pythia6\n\t";
       }
       if (value=="jetset7") {
-	      this->hadroniser = new Jetset7Hadroniser;
-	      os << " * Hadroniser: Jetset7\n\t";
+        this->hadroniser = new Jetset7Hadroniser;
+        os << " * Hadroniser: Jetset7\n\t";
       }
+#ifdef PYTHIA8
+      if (value=="pythia8") {
+        this->hadroniser = new Pythia8Hadroniser;
+        os << " * Hadroniser: Pythia8\n\t";
+      }
+#endif
     }
     else if (key=="MODE") {
       this->process_mode = static_cast<GenericProcess::ProcessMode>(atoi(value.c_str()));
@@ -264,12 +270,12 @@ bool Parameters::ReadConfigFile(const char* inFile_)
       os << " * QPDF: " << this->qpdf << "\n\t";
     }
     else {
-      Info(Form("<WARNING> Unrecognized argument : [%s] = %s", key.c_str(), value.c_str()));
+      Information(Form("<WARNING> Unrecognized argument : [%s] = %s", key.c_str(), value.c_str()));
     }
   }
   f.close();
   
-  Info(os.str());
+  Information(os.str());
   
   return true;
 }

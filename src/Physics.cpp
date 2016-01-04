@@ -311,11 +311,11 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
       
       // Update upper EPA bound
       if (epa>epamax) {
-        if (epa>1.1*epamax)       { Info("EPA > 1.1*EPAMAX!"); }
-        else if (epa>1.01*epamax) { Info("EPA > 1.01*EPAMAX!"); }
-        else                      { Info("EPA > EPAMAX!"); }
+        if (epa>1.1*epamax)       { Information("EPA > 1.1*EPAMAX!"); }
+        else if (epa>1.01*epamax) { Information("EPA > 1.01*EPAMAX!"); }
+        else                      { Information("EPA > EPAMAX!"); }
         epamax = epa;
-        Info(Form("update of maximal weight: %f", epamax));
+        Information(Form("update of maximal weight: %f", epamax));
       }
       
       // Global counter for overall integration

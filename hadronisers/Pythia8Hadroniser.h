@@ -2,6 +2,7 @@
 #define Pythia8Hadroniser_h
 
 #include <algorithm>
+#include <Pythia.h>
 
 #include "../include/GenericHadroniser.h"
 
@@ -12,12 +13,13 @@
 class Pythia8Hadroniser : public GenericHadroniser
 {
  public:
-  inline Pythia8Hadroniser() {;}
-  inline ~Pythia8Hadroniser() {;}
+  Pythia8Hadroniser();
+  ~Pythia8Hadroniser();
   bool Hadronise(Particle* part_);
   bool Hadronise(Event* ev_);
  private:
   bool PrepareHadronisation(Event *ev_);
+  Pythia8::Pythia* fPy;
 };
 
 #endif

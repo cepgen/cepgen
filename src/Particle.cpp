@@ -158,7 +158,7 @@ Particle::Dump()
   daugh = GetDaughters();
   for (unsigned int i=0; i<NumDaughters(); i++) osd << "\n\t\t* Id = " << daugh[i];
   os << fPDGid;
-  Info(Form("Id:\t%3d\t"
+  Information(Form("Id:\t%3d\t"
             "role:\t%3d\t"
             "status:\t% 3d\n\t"
             "PDG Id:\t%4d (%s)\n\t"

@@ -67,8 +67,8 @@ class GenericProcess
    * @brief Fills the Event object with the particles' kinematics
    */
   inline virtual void FillKinematics(bool symmetrise_=false) {
-    Info("Virtual method called");
-    if (symmetrise_) Info("The kinematics is symmetrised");
+    Information("Virtual method called");
+    if (symmetrise_) Information("The kinematics is symmetrised");
   }
   /**
    * @brief Returns the number of dimensions on which the integration has to be performed
