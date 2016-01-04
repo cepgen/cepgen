@@ -122,8 +122,8 @@ GamGamLL::Pickin()
   _t1min = (_w31*_d3+(_d3-_w31)*(_d3*_w1-_w31*_w2)/fS)/_t1max; // definition from eq. (A.5) in [1]
 
   // FIXME dropped in CDF version
-  if (_t1max>-fCuts.q2min) { Error(Form("t1max = %f > -q2min = %f", _t1max, -fCuts.q2min)); return false; }
-  if (_t1min<-fCuts.q2max and fCuts.q2max>=0.) { Error(Form("t1min = %f < -q2max = %f", _t1min, -fCuts.q2max)); return false; }
+  if (_t1max>-fCuts.q2min) { Warning(Form("t1max = %f > -q2min = %f", _t1max, -fCuts.q2min)); return false; }
+  if (_t1min<-fCuts.q2max and fCuts.q2max>=0.) { Warning(Form("t1min = %f < -q2max = %f", _t1min, -fCuts.q2max)); return false; }
   if (_t1max<-fCuts.q2max and fCuts.q2max>=0.) _t1max = -fCuts.q2max;
   if (_t1min>-fCuts.q2min)                     _t1min = -fCuts.q2min;
   /////

@@ -234,7 +234,7 @@ Event::Dump(bool stable_)
   if (fabs(etot)<1.e-12) etot = 0.;
   //
   Info(Form("Events content:\n"
-  "Part.\tPDG id\t\tCharge\tRole\tStatus\tMother\t\t4-Momentum [GeV]\n"
+  "Part.\tPDG id\t\tCharge\tRole\tStatus\tMother\t\t4-Momentum (GeV)\n"
   "----\t------\t\t------\t----\t------\t------\t-------------------------------------"
   "%s\n"
   "---------------------------------------------------------------------------------------------\n"

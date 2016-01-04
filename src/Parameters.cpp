@@ -89,18 +89,18 @@ void Parameters::Dump()
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "| " << std::setw(wt) << "Subprocess' mode" << std::setw(20) << process_mode << std::setw(wp-20) << "" << " |" << std::endl
     << "| " << std::setw(wt) << "Incoming particles" << std::setw(7) << in1pdg << ", " << std::setw(7) << in2pdg << std::setw(wp-16) << "" << " |" << std::endl
-    << "| " << std::setw(wt) << "Momenta [GeV/c]" << std::setw(5) << in1p << ", " << std::setw(5) << in2p << std::setw(wp-12) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Momenta (GeV/c)" << std::setw(5) << in1p << ", " << std::setw(5) << in2p << std::setw(wp-12) << "" << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|-" << std::setfill('-') << std::setw(wb-2) << " Incoming photons " << std::setfill(' ') << "-|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "| " << std::setw(wt) << "Virtuality in range [GeV^2]" << "[" << std::setw(4) << minq2 << ", " << std::setw(6) << maxq2 << "]" << std::setw(wp-14) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Virtuality in range (GeV^2)" << "[" << std::setw(4) << minq2 << ", " << std::setw(6) << maxq2 << "]" << std::setw(wp-14) << "" << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|-" << std::setfill('-') << std::setw(wb-2) << " Outgoing leptons " << std::setfill(' ') << "-|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "| " << std::setw(wt) << "Pair" << std::setw(2) << (int)pair << " -> " << std::setw(wp-6) << pair << " |" << std::endl
     << "| " << std::setw(wt) << "Cuts mode" << std::setw(2) << mcut << " -> " << std::setw(wp-6) << cutsmode << " |" << std::endl
-    << "| " << std::setw(wt) << "Lepton(s)' pT in range [GeV/c]" << std::right << "[" << std::setw(5) << minpt << ", " << std::setw(5) << maxpt << "]" << std::left << std::setw(wp-14) << "" << " |" << std::endl
-    << "| " << std::setw(wt) << "Lepton(s)' energy in range [GeV]" << std::right << "[" << std::setw(5) << minenergy << ", " << std::setw(5) << maxenergy << "]" << std::left << std::setw(wp-14) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Lepton(s)' pT in range (GeV/c)" << std::right << "[" << std::setw(5) << minpt << ", " << std::setw(5) << maxpt << "]" << std::left << std::setw(wp-14) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Lepton(s)' energy in range (GeV)" << std::right << "[" << std::setw(5) << minenergy << ", " << std::setw(5) << maxenergy << "]" << std::left << std::setw(wp-14) << "" << " |" << std::endl
     << "| " << std::setw(wt) << "Pseudorapidity in range" << std::right << "[" << std::setw(5) << mineta << ", " << std::setw(5) << maxeta << "]" << std::left << std::setw(wp-14) << "" << " |" << std::endl
     //<< "| " << std::setw(wt) << "Polar angle theta in range [deg]" << "[" << std::setw(3) << mintheta << ", " << std::setw(3) << maxtheta << "]" << std::setw(wp-10) << "" << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
@@ -108,8 +108,8 @@ void Parameters::Dump()
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl;
   if (hadroniser)
     os << "| " << std::setw(wt) << "Hadronisation algorithm" << std::setw(12) << hadroniser->GetName() << std::setw(wp-12) << "" << " |" << std::endl;
-  os << "| " << std::setw(wt) << "Minimal mass [GeV/c^2]" << std::setw(wp) << minmx << " |" << std::endl
-             << "| " << std::setw(wt) << "Maximal mass [GeV/c^2]" << std::setw(wp) << maxmx << " |";
+  os << "| " << std::setw(wt) << "Minimal mass (GeV/c^2)" << std::setw(wp) << minmx << " |" << std::endl
+             << "| " << std::setw(wt) << "Maximal mass (GeV/c^2)" << std::setw(wp) << maxmx << " |";
   Info(os.str());
 }
 
