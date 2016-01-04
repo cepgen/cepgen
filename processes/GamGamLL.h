@@ -160,8 +160,6 @@ class GamGamLL : public GenericProcess
   double _mp1;
   /// \f$m_1^2\f$, squared mass of the first proton-like incoming particle
   double _w1;
-  /// PDG identifier of the first proton-like incoming particle
-  Particle::ParticleCode _pdg1;
   /// \f$\left|\mathbf p_2\right|\f$, 3-momentum norm of the second proton-like incoming particle
   double _pp2;
   /// \f$E_2\f$, energy of the second proton-like incoming particle
@@ -170,10 +168,6 @@ class GamGamLL : public GenericProcess
   double _mp2;
   /// \f$m_2^2\f$, squared mass of the second proton-like incoming particle
   double _w2;
-  /// \f$\left|\mathbf p_3\right|\f$, 3-momentum norm of the first proton-like outgoing particle
-  double _pp3;
-  /// \f$E_3\f$, energy of the first proton-like outgoing particle
-  double _ep3;
   /// \f$m_3\f$, mass of the first proton-like outgoing particle
   double _mp3;
   /// \f$m_3^2\f$, squared mass of the first proton-like outgoing particle
@@ -186,10 +180,6 @@ class GamGamLL : public GenericProcess
   double _mc4;
   /// \f$m_4^2\f$, squared mass of the two-photon central system
   double _w4;
-  /// \f$\left|\mathbf p_5\right|\f$, 3-momentum norm of the second proton-like outgoing particle
-  double _pp5;
-  /// \f$E_5\f$, energy of the second proton-like outgoing particle
-  double _ep5;
   /// \f$m_5\f$, mass of the second proton-like outgoing particle
   double _mp5;
   /// \f$m_5^2\f$, squared mass of the second proton-like outgoing particle
@@ -306,36 +296,22 @@ class GamGamLL : public GenericProcess
   // --- VARIAB common block
   
   double _p;
-  /// \f$\cos\theta_3\f$ of the first outgoing proton-like particle
-  double _ct3;
-  /// \f$\sin\theta_3\f$ of the first outgoing proton-like particle
-  double _st3;
   /// \f$\cos\theta_4\f$ of the two-photons centre-of-mass system
   double _ct4;
   /// \f$\sin\theta_4\f$ of the two-photons centre-of-mass system
   double _st4;
-  /// \f$\cos\theta_5\f$ of the second outgoing proton-like particle
-  double _ct5;
-  /// \f$\sin\theta_5\f$ of the second outgoing proton-like particle
-  double _st5;
-  /// \f$\cos\phi_3\f$ of the first outgoing proton-like particle
-  double _cp3;
-  /// \f$\sin\phi_3\f$ of the first outgoing proton-like particle
-  double _sp3;
-  /// \f$\cos\phi_5\f$ of the second outgoing proton-like particle
-  double _cp5;
-  /// \f$\sin\phi_5\f$ of the second outgoing proton-like particle
-  double _sp5;
   
   // --- VARIAC common block
   
   double _al3, _al4;
   double _be4, _be5;
   double _de3, _de5;
-  double _p_p3, _p_p4, _p_p5;
+  double _pt4;
   
   // --- VARIAD common block
   
+  Particle::Momentum _p3lab;
+  Particle::Momentum _p5lab;
   Particle::Momentum _p6cm;
   Particle::Momentum _p7cm;
   double fJacobian;

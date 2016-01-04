@@ -83,22 +83,23 @@ class Particle {
     class Momentum {
       public:
         /// Build a 4-momentum at rest with an invalid energy (no mass information known)
-        inline Momentum() : fPx(0.), fPy(0.), fPz(0.), fE(-1.) {;}
+        inline Momentum() : fPx(0.), fPy(0.), fPz(0.), fP(0.), fE(-1.) {;}
         /// Build a 4-momentum using its 3-momentum coordinates and its energy
         inline Momentum(double x_, double y_, double z_, double t_=-1.) :
-          fPx(x_), fPy(y_), fPz(z_), fE(t_) {;}
+          fPx(x_), fPy(y_), fPz(z_), fE(t_) { ComputeP(); }
         inline ~Momentum() {;}
         
         // --- static definitions
         
         /// Build a 3-momentum from its three pseudo-cylindric coordinates
-        static inline Momentum FromPtEtaPhi(double pt, double eta, double phi) {
+        static inline Momentum FromPtEtaPhi(double pt, double eta, double phi, double e=-1.) {
           double px = pt*cos(phi), py = pt*sin(phi), pz = pt*sinh(eta);
-          return Momentum(px, py, pz);
+          return Momentum(px, py, pz, e);
         }
-        static inline Momentum FromPThetaPhi(double pt, double theta, double phi) {
-          double px = pt*sin(theta)*cos(phi), py = pt*sin(theta)*sin(phi), pz = pt*cos(theta);
-          return Momentum(px, py, pz);
+        static inline Momentum FromPThetaPhi(double p, double theta, double phi, double e=-1.) {
+          double px = p*sin(theta)*cos(phi), py = p*sin(theta)*sin(phi), pz = p*cos(theta);
+          //std::cout << "sin(theta)=" << sin(theta) << ", sin(phi)=" << sin(phi) << std::endl;
+          return Momentum(px, py, pz, e);
         }
         /// Build a 4-momentum from its four momentum and energy coordinates
         static inline Momentum FromPxPyPzE(double px, double py, double pz, double e) {
@@ -138,6 +139,7 @@ class Particle {
           fPx = px_;
           fPy = py_;
           fPz = pz_;
+          ComputeP();
         }
         /// Set an individual component of the 4-momentum (in GeV)
         inline void SetP(unsigned int i, double p_) {
@@ -148,6 +150,7 @@ class Particle {
             case 3: fE = p_; break;
             default: return;
           }
+          ComputeP();
         }
         /// Set the energy (in GeV)
         inline void SetE(double e_) { fE = e_; }
@@ -170,9 +173,9 @@ class Particle {
         /// Get the transverse momentum (in GeV)
         inline double Pt() const { return sqrt(pow(Px(),2)+pow(Py(),2)); }
         /// Get the 3-momentum norm (in GeV)
-        inline double P() const { return sqrt(P2()); }
+        inline double P() const { return fP; }
         /// Get the squared 3-momentum norm (in \f$\text{GeV}^\text{2}\f$)
-        inline double P2() const { return pow(P(0),2)+pow(P(1),2)+pow(P(2),2); }
+        inline double P2() const { return pow(fP,2); }
         /// Get the energy (in GeV)
         inline double E() const { return fE; }
         /// Get the particle's mass (in GeV) as computed from its energy and momentum
@@ -196,9 +199,21 @@ class Particle {
           fPy = py;
         }
       private:
+        /// Compute the 3-momentum's norm
+        inline void ComputeP() {
+          fP = 0.;
+          for (unsigned int i=0; i<3; i++) { fP += pow(P(i),2); }
+          fP = sqrt(fP);
+        }
+        /// Momentum along the \f$x\f$-axis
         double fPx;
+        /// Momentum along the \f$y\f$-axis
         double fPy;
+        /// Momentum along the \f$z\f$-axis
         double fPz;
+        /// 3-momentum's norm (in GeV/c)
+        double fP;
+        /// Energy (in GeV)
         double fE;
     };
     friend std::ostream& operator<<(std::ostream& os, const Particle::ParticleCode& pc);

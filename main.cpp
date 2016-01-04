@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
   //Logger::GetInstance()->OutputStream = ofstream("log.txt");
   
   if (argc==1) {
-    Info("No config file provided. Setting the default parameters.");
+    Information("No config file provided. Setting the default parameters.");
     
     //mg.parameters->hadroniser = new Pythia6Hadroniser;
     mg.parameters->process = new GamGamLL;
@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
   else {
     Debug(Form("Reading config file stored in %s", argv[1]));
     if (!mg.parameters->ReadConfigFile(argv[1])) {
-      Info(Form("Error reading the configuration!\n\t"
+      Information(Form("Error reading the configuration!\n\t"
                 "Please check your input file (%s)", argv[1]));
       return -1;
     }

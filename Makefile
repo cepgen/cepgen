@@ -8,8 +8,8 @@ INCLUDEDIR = -Iprocesses/ -Iinclude/ -Iexternal/ -Ihadronisers/
 VPATH      = src:include:processes:hadronisers
 ifdef PYTHIA8
   $(info Using Pythia 8 as included from PYTHIA8=$(PYTHIA8))
+  #make -f $(PYTHIA8)/Makefile
   INCLUDEDIR += -I$(PYTHIA8)/include/ -L$(PYTHIA8)/lib/archive/ -lpythia8 -llhapdfdummy -DPYTHIA8=1
-  #VPATH += :$(PYTHIA8)/include
 else
   $(warning PYTHIA8 variable is not set... skipping its compilation)
 endif
@@ -17,7 +17,6 @@ endif
 CFLAGS     = -Wall -Wextra -fexceptions -Wpointer-arith \
 	     $(INCLUDEDIR) -lgsl -g
 LDFLAGS    = $(INCLUDEDIR) -lgfortran -lgsl -lgslcblas -Wl,-O2
-#LDFLAGS    = $(INCLUDEDIR) -lgfortran -Wl,-O2
 FFLAGS     = -w -g
 ############################################
 CPP_FILES  = $(wildcard src/*.cpp)
