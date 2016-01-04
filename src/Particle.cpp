@@ -205,7 +205,6 @@ Particle::LorentzBoost(const Particle::Momentum& mom_)
   gamma = 1./std::sqrt(1.-p2);
   bp = 0.;
   for (int i=0; i<3; i++) bp+= mom_.P(i)*fMomentum.P(i);
-  //bp = p_[0]*fP4[0]+p_[1]*fP4[1]+p_[2]*fP4[2];
 
   if (p2>0.) gamma2 = (gamma-1.)/p2;
   else gamma2 = 0.;
@@ -233,9 +232,6 @@ Particle::RotateThetaPhi(double theta_, double phi_)
   }
 
   fMomentum.SetP(mom[0], mom[1], mom[2]);
-  //fP4[0] *= sin(theta_)*cos(phi_);
-  //fP4[1] *= sin(theta_)*sin(phi_);
-  //fP4[2] *= cos(theta_);
 }
 
 double
@@ -316,6 +312,7 @@ Particle::Momentum::operator+=(const Particle::Momentum& mom_)
   fPy += mom_.fPy;
   fPz += mom_.fPz;
   fE += mom_.fE; //FIXME not supposed to be this way!
+  ComputeP();
   return *this;
 }
 
@@ -326,12 +323,18 @@ Particle::Momentum::operator-=(const Particle::Momentum& mom_)
   fPy -= mom_.fPy;
   fPz -= mom_.fPz;
   fE -= mom_.fE; //FIXME not supposed to be this way!
+  ComputeP();
   return *this;
 }
 
 double
 Particle::Momentum::operator*=(const Particle::Momentum& mom_)
 {
+  DebugInsideLoop(Form("  (%f, %f, %f, %f)\n\t* (%f, %f, %f, %f)\n\t= %f",
+    fPx, fPy, fPz, fE,
+    mom_.fPx, mom_.fPy, mom_.fPz, mom_.fE,
+    fPx*mom_.fPx+fPy*mom_.fPy+fPz*mom_.fPz
+  ));
   return fPx*mom_.fPx+fPy*mom_.fPy+fPz*mom_.fPz;
 }
 
@@ -341,6 +344,7 @@ Particle::Momentum::operator*=(double c)
   fPx *= c;
   fPy *= c;
   fPz *= c;
+  ComputeP();
   return *this;
 }
 
@@ -350,4 +354,5 @@ Particle::Momentum::BetaGammaBoost(double gamma, double betagamma)
   const double pz = fPz, e = fE;
   fPz = gamma*pz+betagamma*e;
   fE  = gamma*e +betagamma*pz;
+  ComputeP();
 }

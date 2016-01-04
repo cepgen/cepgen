@@ -1,6 +1,7 @@
 #include "Parameters.h"
 
 Parameters::Parameters() :
+  in1p(3500.), in2p(3500.),
   in1pdg(Particle::Proton), in2pdg(Particle::Proton),
   remnant_mode(GenericProcess::SuriYennie),
   pair(Particle::Muon),

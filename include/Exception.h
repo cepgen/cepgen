@@ -81,6 +81,10 @@ class Exception
         os << "================================= \033[33;1mInformation\033[0m =================================" << std::endl
            << " From:        " << From() << std::endl;
       }
+      else if (Type()==Debugging) {
+        os << "==================================== \033[32;1mDebug\033[0m ====================================" << std::endl
+           << " From:        " << From() << std::endl;
+      }
       else {
         os << "============================= Exception detected! =============================" << std::endl
            << " Class:       " << TypeString() << std::endl

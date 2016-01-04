@@ -23,8 +23,7 @@ GenericProcess::SetPoint(const unsigned int ndim_,double x_[])
 
   std::copy(x_, x_+ndim_, fX);  
   fIsPointSet = true;
-  if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop)
-    DumpPoint(Debugging);
+  if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) { DumpPoint(Debugging); }
 }
 
 void
