@@ -3,14 +3,10 @@
 Event::Event() :
   num_hadronisation_trials(0),
   time_generation(-1.), time_total(-1.)
-{
-  //fParticles = new ParticlesMap();
-}
+{}
 
 Event::~Event()
-{
-  //delete fParticles;
-}
+{}
 
 Event&
 Event::operator=(const Event &ev_)

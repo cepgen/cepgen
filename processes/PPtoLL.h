@@ -3,9 +3,7 @@
 
 #include "../include/GenericProcess.h"
 
-/**
- * @brief Computes the matrix element for a CE \f$\gamma\gamma\rightarrow \ell^+\ell^-\f$ process using \f$k_T\f$-factorization approach
- */
+/// Compute the matrix element for a CE \f$\gamma\gamma\rightarrow \ell^+\ell^-\f$ process using \f$k_T\f$-factorization approach
 class PPtoLL : public GenericProcess
 {
  public:
@@ -16,46 +14,28 @@ class PPtoLL : public GenericProcess
   void FillKinematics(bool symmetrise_=false);
   void AddEventContent();
  private:
-  /**
-   * \brief Matrix element to be integrated
-   */
+  /// Matrix element to be integrated
   double INCqqbar();
   
-  /**
-   * \brief Transverse virtuality of the first photon
-   */
+  /// Transverse virtuality of the first photon
   double _q1t;
-  /**
-   * \brief Transverse virtuality of the second photon
-   */
+  /// Transverse virtuality of the second photon
   double _q2t;
-  /**
-   * \brief Azimuthal rotation of the first photon transverse virtuality
-   */
+  /// Azimuthal rotation of the first photon transverse virtuality
   double _phiq1t;
-  /**
-   * \brief Azimuthal rotation of the first photon transverse virtuality
-   */
+  /// Azimuthal rotation of the first photon transverse virtuality
   double _phiq2t;
-  /**
-   * \brief Rapidity of the first outgoing lepton
-   */
+  /// Rapidity of the first outgoing lepton
   double _y1;
-  /**
-   * \brief Rapidity of the first outgoing lepton
-   */
+  /// Rapidity of the first outgoing lepton
   double _y2;
-  /**
-   * \brief Transverse momentum difference for the two outgoing leptons
-   */
-  double _ptdiff, _phiptdiff;
-  /**
-   * Invariant mass of the first outgoing proton (or remnant), in GeV
-   */
+  /// Transverse momentum difference for the two outgoing leptons
+  double _ptdiff;
+  /// Azimuthal angle difference for the two outgoing leptons
+  double _phiptdiff;
+  /// Invariant mass of the first outgoing proton (or remnant), in GeV
   double _mx;
-  /**
-   * Invariant mass of the second outgoing proton (or remnant), in GeV
-   */
+  /// Invariant mass of the second outgoing proton (or remnant), in GeV
   double _my;
   
   // first outgoing proton

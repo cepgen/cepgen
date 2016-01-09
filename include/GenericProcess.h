@@ -6,10 +6,9 @@
 #include "Physics.h"
 
 /**
- * Class template to define any process to compute using this MC
- * integrator/events generator
- * @author Laurent Forthomme <laurent.forthomme@uclouvain.be>
- * @date January 2014
+ * Class template to define any process to compute using this MC integrator/events generator
+ * \author Laurent Forthomme <laurent.forthomme@uclouvain.be>
+ * \date Jan 2014
  */
 class GenericProcess
 {
@@ -21,6 +20,7 @@ class GenericProcess
     InelasticElastic = 3,
     InelasticInelastic = 4
   };
+  /// Human-readable format of a process mode (elastic/dissociative parts)
   friend std::ostream& operator<<(std::ostream& os, const GenericProcess::ProcessMode& pm);
   
   /// Proton structure function to be used in the outgoing state description
@@ -34,13 +34,20 @@ class GenericProcess
     FioreSea = 102,
     Fiore = 103
   };
+  /// Human-readable format of a structure function object
   friend std::ostream& operator<<(std::ostream& os, const GenericProcess::StructureFunctions& sf);
 
+  /// Generic map of particles with their role in the process
   typedef std::map<Particle::Role,Particle::ParticleCode> ParticlesRoleMap;
+  /// Pair of particle with their associated role in the process
   typedef std::pair<Particle::Role,Particle::ParticleCode> ParticleWithRole;
+  /// Map of all incoming state particles in the process
   typedef ParticlesRoleMap IncomingState;
+  /// Map of all outgoing particles in the process
   typedef ParticlesRoleMap OutgoingState;
-  
+ 
+  /// Default constructor for an undefined process
+  /// \param[in] name_ Human-readable format of the process name
   GenericProcess(std::string name_="<invalid process>");
   virtual ~GenericProcess();
 
@@ -59,26 +66,15 @@ class GenericProcess
   inline virtual void BeforeComputeWeight() {;}
   /// Compute the weight for this point in the phase-space
   inline virtual double ComputeWeight() { throw Exception(__PRETTY_FUNCTION__, "Calling ComputeWeight on an invalid process!", Fatal); }
-  /**
-   * Fills the private Event object with all the Particle object contained
-   * in this event.
-   * @param[in] symmetrise_ Do we have to symmetrise the event (randomise the
-   * production of the positively- and negatively-charged lepton) ?
-   * @brief Fills the Event object with the particles' kinematics
-   */
+  /// Fill the Event object with the particles' kinematics
+  /// \param[in] symmetrise_ Symmetrise the event? (randomise the production of positively-
+  /// and negatively-charged outgoing central particles)
   inline virtual void FillKinematics(bool symmetrise_=false) {
     Information("Virtual method called");
     if (symmetrise_) Information("The kinematics is symmetrised");
   }
-  /**
-   * @brief Returns the number of dimensions on which the integration has to be performed
-   * @param[in] process_mode_ Type of subprocess to consider :
-   *  - 1: Elastic-elastic
-   *  - 2: Elastic-inelastic
-   *  - 3: Inelastic-elastic
-   *  - 4: Inelastic-inelastic
-   * @return Number of dimensions on which to integrate
-   */
+  /// Return the number of dimensions on which the integration has to be performed
+  /// \return Number of dimensions on which to integrate
   inline virtual int GetNdim(ProcessMode) const { return 10; }
   /**
    * Sets the phase space point to compute the weight associated to it.
@@ -90,18 +86,12 @@ class GenericProcess
   void SetPoint(const unsigned int ndim_,double x_[]);
   /// Dump the evaluated point's coordinates in the standard output stream
   void DumpPoint(const ExceptionType& et);
-  /**
-   * @brief Sets the list of kinematic cuts to apply on the outgoing particles'
-   * final state
-   * @param[in] cuts_ The Cuts object containing the kinematic parameters
-   */
+  /// Set the list of kinematic cuts to apply on the outgoing particles' final state
+  /// \param[in] cuts_ The Cuts object containing the kinematic parameters
   inline virtual void SetKinematics(Kinematics cuts_) { fCuts=cuts_; }
-  /**
-   * Returns the complete list of Particle with their role in the process for
-   * the point considered in the phase space as an Event object.
-   * @brief Get the event content (list of particles with an assigned role)
-   * @return The Event object containing all the generated Particle objects
-   */
+  /// \return Event object containing all the generated Particle objects
+  /// Complete list of Particle with their role in the process for the point considered
+  /// in the phase space, returned as an Event object.
   inline Event* GetEvent() { return fEvent; }
   ///Get the number of dimensions on which the integration is performed
   inline unsigned int ndim() const { return fNumDimensions; }
@@ -113,7 +103,10 @@ class GenericProcess
  protected:
   /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
   void SetEventContent(IncomingState is, OutgoingState os);
-  
+ 
+  /// Get a list of pointers to the particles with a given role in the process
+  /// \param[in] role role in the process for the particle to retrieve
+  /// \return A vector of pointers to Particle objects associated to the role
   inline ParticlesRef GetParticles(const Particle::Role& role) { return fEvent->GetByRole(role); }
   /// Get the pointer to one particle in the event (using its role)
   inline Particle* GetParticle(const Particle::Role& role, unsigned int id=0) {

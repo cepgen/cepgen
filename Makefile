@@ -15,7 +15,7 @@ else
 endif
 ############################################
 CFLAGS     = -Wall -Wextra -fexceptions -Wpointer-arith \
-	     $(INCLUDEDIR) -lgsl -g
+	     $(INCLUDEDIR) -g
 LDFLAGS    = $(INCLUDEDIR) -lgfortran -lgsl -lgslcblas -Wl,-O2
 FFLAGS     = -w -g
 ############################################

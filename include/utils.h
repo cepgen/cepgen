@@ -15,18 +15,15 @@
 
 static std::stringstream error;
 
-/**
- * @brief Provides a random number generated along a uniform distribution
- * between 0 and 1
- */
+/// Provide a random number generated along a uniform distribution between 0 and 1
 inline double drand() { srand (time(NULL)); return static_cast<double>(rand())/RAND_MAX; }
 
-/// Formats a string using a printf style format descriptor.
+/// Format a string using a printf style format descriptor.
 std::string Form(const std::string fmt, ...);
 
 /**
- * An object which enables to extract the processing time between two steps in
- * this software's flow
+ * A generic timer to extract the processing time between two steps in this software's flow
+ * \author Laurent Forthomme <laurent.forthomme@cern.ch>
  */
 class Timer
 {
@@ -34,28 +31,26 @@ class Timer
   inline Timer() { clock_gettime(CLOCK_REALTIME, &beg_); }
   /**
    * Get the time elapsed since the last @a reset call (or class construction)
-   * @return The elapsed time in seconds
+   * @return Elapsed time (since the last reset), in seconds
    */
   inline double elapsed() {
     clock_gettime(CLOCK_REALTIME, &end_);
-    return end_.tv_sec -beg_.tv_sec+(end_.tv_nsec - beg_.tv_nsec)/1000000000.;
+    return end_.tv_sec -beg_.tv_sec+(end_.tv_nsec - beg_.tv_nsec)/1.e9;
   }
-  /**
-   * @brief Resets the clock counter
-   */
+  /// Reset the clock counter
   inline void reset() {
     clock_gettime(CLOCK_REALTIME, &beg_);
   }
  private:
-  /** @brief Timestamp marking the beginning of the counter */
+  /// Timestamp marking the beginning of the counter
   timespec beg_;
-  /** @brief Timestamp marking the end of the counter */
+  /// Timestamp marking the end of the counter
   timespec end_;
 };
 
-/** @brief Electromagnetic coupling constant \f$\alpha_{em}=\frac{e^2}{4\pi\epsilon_0\hbar c}\f$ */
+/// Electromagnetic coupling constant \f$\alpha_{em}=\frac{e^2}{4\pi\epsilon_0\hbar c}\f$
 #define alphaF 1./137.04
-/** @brief \f$\frac{1}{(\hbar c)^2}~[\mathrm b^{-1}]\f$? */
+/// \f$\frac{1}{(\hbar c)^2}~[\mathrm b^{-1}]\f$?
 #define muBarn 1./389.39
 #define pi 3.1415926535897932384626434
 #define sconst 3.89351824E8
@@ -63,11 +58,11 @@ class Timer
 #define alphared 1.16140981417e-3
 
 /**
- * @brief Defines modified variables of integration to avoid peaks integrations (see @cite Vermaseren1983347 for details)
- * Returns a set of two modified variables of integration to maintain the stability of the integrant. These two new variables are :
+ * Define modified variables of integration to avoid peaks integrations (see @cite Vermaseren1983347 for details)
+ * Return a set of two modified variables of integration to maintain the stability of the integrant. These two new variables are :
  * - \f$y_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\f$ the new variable
  * - \f$\mathrm dy_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\log\frac{x_{min}}{x_{max}}\f$, the new variable's differential form
- * @brief Redefines the variables of integration in order to avoid the strong peaking of the integrant.
+ * @brief Redefine the variables of integration in order to avoid the strong peaking of the integrant.
  * @param[in] expo_ Exponant
  * @param[in] xmin_ Minimal value of the variable
  * @param[in] xmax_ Maximal value of the variable
@@ -83,7 +78,6 @@ class Timer
  */
 void Map(double expo_, double xmin_, double xmax_, double* out_, double* dout_, const std::string& var_name_="");
 void Mapla(double,double,int,double,double,double*,double*);
-//void Symmetrise(double, double, double*, double*);
 
 /**
  * Generate random number with Breit-Wigner distribution
@@ -129,8 +123,11 @@ double GenTDL(double tmin_, double tmax_, double b_, int n_);
  * @date 28 Apr 2014
  */
 int Heli(double longFr_);
+/// Convert a polar angle to a pseudo-rapidity
 double ThetaToEta(double theta_);
+/// Convert a pseudo-rapidity to a polar angle
 double EtaToTheta(double eta_);
+/// Convert a pseudo-rapidity to a rapidity
 double EtaToY(double eta_, double m_, double pt_);
 
 #endif

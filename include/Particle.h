@@ -54,6 +54,7 @@ class Particle {
       Pomeron = 990,
       Reggeon = 110
     };
+    /// Internal status code for a particle
     enum Status {
       PrimordialIncoming = -9,
       Incoming = -1,
@@ -80,6 +81,12 @@ class Particle {
       CentralParticle1 = 6,
       CentralParticle2 = 7
     };
+    /**
+     * Container for a particle's 4-momentum, along with useful methods to ease the development of any matrix element level generator
+     * \brief 4-momentum for a particle
+     * \date Dec 2015
+     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
+     */
     class Momentum {
       public:
         /// Build a 4-momentum at rest with an invalid energy (no mass information known)
@@ -96,9 +103,9 @@ class Particle {
           double px = pt*cos(phi), py = pt*sin(phi), pz = pt*sinh(eta);
           return Momentum(px, py, pz, e);
         }
+        /// Build a 4-momentum from its scalar momentum, and its polar and azimuthal angles
         static inline Momentum FromPThetaPhi(double p, double theta, double phi, double e=-1.) {
           double px = p*sin(theta)*cos(phi), py = p*sin(theta)*sin(phi), pz = p*cos(theta);
-          //std::cout << "sin(theta)=" << sin(theta) << ", sin(phi)=" << sin(phi) << std::endl;
           return Momentum(px, py, pz, e);
         }
         /// Build a 4-momentum from its four momentum and energy coordinates
@@ -180,6 +187,7 @@ class Particle {
         inline double E() const { return fE; }
         /// Get the particle's mass (in GeV) as computed from its energy and momentum
         inline double M() const { return sqrt(pow(E(),2)-P2()); }
+        /// Get the polar angle (angle with respect to the longitudinal direction)
         inline double Theta() const { return atan2(Pt(), Pz()); }
         /// Get the azimutal angle (angle in the transverse plane)
         inline double Phi() const { return atan2(Py(), Px()); }
@@ -216,6 +224,7 @@ class Particle {
         /// Energy (in GeV)
         double fE;
     };
+    /// Human-readable format for a particle's PDG code
     friend std::ostream& operator<<(std::ostream& os, const Particle::ParticleCode& pc);
     /**
      * Gets the mass in GeV/c**2 of a particle given its PDG identifier
@@ -226,13 +235,15 @@ class Particle {
     static double GetMassFromPDGId(Particle::ParticleCode pdgId_);
     /**
      * Gets the total decay width for one particle to be decayed
-     * @param[in] ParticleCode (PDG ID)
+     * @param[in] pdgId_ ParticleCode (PDG ID)
      * @return Decay width in GeV
      */
     static double GetWidthFromPDGId(Particle::ParticleCode pdgId_);
     
     Particle();
     /// Build using the role of the particle in the process and its PDG id
+    /// \param[in] pdgId_ ParticleCode (PDG ID)
+    /// \param[in] role_ Role of the particle in the process
     Particle(Role role_,ParticleCode pdgId_=Particle::invalidParticle);
     inline ~Particle() {;}
     /// Assignment operator
@@ -261,19 +272,24 @@ class Particle {
      */
     Status status;
 
+    /// Set the PDG identifier (along with the particle's electric charge)
+    /// \param[in] pdg ParticleCode (PDG ID)
+    /// \param[in] ch Electric charge (in units of \f$e\f$)
     inline void SetPDGId(ParticleCode pdg, float ch=-999.) {
       fPDGid = pdg;
-      if (ch==-999.) charge = pdg/abs(pdg);
+      if (ch==-999.) charge = 0.;
       else charge = ch;
     }
+    /// Retrieve the objectified PDG identifier
     inline ParticleCode GetPDGId() const { return fPDGid; }
+    /// Retrieve the integer value of the PDG identifier
     inline int GetIntPDGId() const {
       int pdg = static_cast<int>(fPDGid);
       if (pdg>10 and pdg<16 and pdg%2!=0) return static_cast<int>(-charge)*pdg;
       else return pdg;
     }
     /// Particle's helicity
-    /// @fixme Float??
+    /// \note FIXME Float??
     float helicity;
     /**
      * Gets the particle's mass in \f$\text{GeV}/c^{2}\f$.
@@ -290,7 +306,9 @@ class Particle {
     bool SetM(double m_=-1.);
     /// Get the particle's squared mass (in \f$\text{GeV}^\text{2}\f$)
     inline double M2() const { return std::pow(fMass,2); };
+    /// Retrieve the momentum object associated with this particle
     inline Momentum GetMomentum() const { return fMomentum; }
+    /// Associate a momentum object to this particle
     inline bool SetMomentum(const Momentum& mom) {
       fMomentum = mom;
       if (fMass<0.) { SetM(); }
@@ -358,6 +376,7 @@ class Particle {
     };
     /// Get the particle's squared energy (in \f$\text{GeV}^\text{2}\f$)
     inline double E2() const { return std::pow(E(), 2); };
+    /// Rotate the particle's momentum by a polar/azimuthal angle
     void RotateThetaPhi(double theta_, double phi_);
     /// Is this particle a valid particle which can be used for kinematic computations ?
     bool Valid();
@@ -412,6 +431,7 @@ class Particle {
      */
     bool Hadronise(std::string algo_);
   private:
+    /// Momentum properties handler
     Momentum fMomentum;
     /// Mass in \f$\text{GeV}/c^2\f$
     double fMass;
@@ -423,7 +443,7 @@ class Particle {
     ParticleCode fPDGid;
     /// Is the particle a primary particle ?
     bool fIsPrimary;
-    double __tmp3[3], __tmp4[4];
+    double __tmp3[3];
 };
 
 inline bool compareParticle(Particle a, Particle b) { return a.id<b.id; }

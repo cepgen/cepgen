@@ -32,26 +32,26 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = "LPAIR++"
+PROJECT_NAME           = "CepGen"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = "0.3"
+PROJECT_NUMBER         = "0.5"
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
 # quick idea about the purpose of the project. Keep the description short.
 
-PROJECT_BRIEF          = "Monte-Carlo generator for two-photon production of lepton pairs"
+PROJECT_BRIEF          = "A Monte-Carlo integrator and events generator for the simulation of central exclusive (two-photon/...) processes"
 
 # With the PROJECT_LOGO tag one can specify a logo or an icon that is included
 # in the documentation. The maximum height of the logo should not exceed 55
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-PROJECT_LOGO           = lpair_logo.pdf
+PROJECT_LOGO           = cepgen_logo.pdf
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is
@@ -1677,7 +1677,7 @@ LATEX_EXTRA_STYLESHEET =
 # This tag requires that the tag GENERATE_LATEX is set to YES.
 
 LATEX_EXTRA_FILES      = doc/lpair_kinematics.pdf \
-                         doc/lpair_logo.pdf
+                         doc/cepgen_logo.pdf
 
 # If the PDF_HYPERLINKS tag is set to YES, the LaTeX that is generated is
 # prepared for conversion to PDF (using ps2pdf or pdflatex). The PDF file will

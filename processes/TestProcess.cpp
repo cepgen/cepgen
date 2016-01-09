@@ -7,7 +7,7 @@ TestProcess::~TestProcess()
 {}
 
 int
-TestProcess::GetNdim(int) const
+TestProcess::GetNdim(GenericProcess::ProcessMode) const
 {
   return 3;
 }
@@ -21,7 +21,7 @@ TestProcess::ComputeWeight()
 }
 
 void
-TestProcess::FillKinematics()
+TestProcess::FillKinematics(bool)
 {
   return;
 }

@@ -42,6 +42,11 @@ typedef enum
 class Exception
 {
   public:
+    /// Initialize a new exception object
+    /// \param[in] from method invoking the exception
+    /// \param[in] desc brief description of the exception
+    /// \param[in] type exception type
+    /// \param[in] id exception code (useful for logging)
     inline Exception(const char* from, std::string desc, ExceptionType type=Undefined, const int id=0) {
       fFrom = from;
       fDescription = desc;
@@ -49,6 +54,11 @@ class Exception
       fErrorNumber = id;
     }
     
+    /// Initialize a new exception object
+    /// \param[in] from method invoking the exception
+    /// \param[in] desc brief description of the exception
+    /// \param[in] type exception type
+    /// \param[in] id exception code (useful for logging)
     inline Exception(const char* from, const char* desc, ExceptionType type=Undefined, const int id=0) {
       fFrom = from;
       fDescription = desc;
@@ -60,11 +70,16 @@ class Exception
       if (Type()==Fatal) exit(0);
       // we stop this process' execution on fatal exception
     }
-    
+   
+    /// Extract the origin of the exception 
     inline std::string From() const { return fFrom; }
+    /// Extract the exception code
     inline int ErrorNumber() const { return fErrorNumber; }
+    /// Extract the brief exception description
     inline std::string Description() const { return fDescription; }
+    /// Extract the exception type
     inline ExceptionType Type() const { return fType; }
+    /// Extract a human-readable (and colourified) version of the exception type
     inline std::string TypeString() const {
       switch (Type()) {
         case JustWarning: return "\033[34;1mJustWarning\033[0m";
@@ -76,6 +91,8 @@ class Exception
       }
     }
     
+    /// Dump the full exception information in a given output stream
+    /// \param[inout] os the output stream where the information is dumped
     inline void Dump(std::ostream& os=std::cerr) const {
       if (Type()==Information) {
         os << "================================= \033[33;1mInformation\033[0m =================================" << std::endl
@@ -97,6 +114,7 @@ class Exception
            << " Error #" << ErrorNumber() << std::endl;
       os << "===============================================================================" << std::endl;
     }
+    /// Extract a one-line summary of the exception
     inline std::string OneLine() const {
       std::ostringstream os;
       os << "[" << Type() << "] === " << From() << " === "
@@ -105,9 +123,13 @@ class Exception
     }
     
   private:
+    /// Origin of the exception
     std::string fFrom;
+    /// Small human-readable description
     std::string fDescription;
+    /// Exception type
     ExceptionType fType;
+    /// Integer exception number
     int fErrorNumber;
 };
 

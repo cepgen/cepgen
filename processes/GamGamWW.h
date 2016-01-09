@@ -3,9 +3,7 @@
 
 #include "../include/GenericProcess.h"
 
-/**
- * @brief Computes the matrix element for a CE \f$\gamma\gamma\rightarrow W^+W^-\f$ process
- */
+/// Compute the matrix element for a CE \f$\gamma\gamma\rightarrow W^+W^-\f$ process
 class GamGamWW : public GenericProcess
 {
  public:

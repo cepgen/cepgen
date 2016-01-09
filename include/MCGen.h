@@ -12,26 +12,30 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * @image latex lpair_logo.pdf
- * @mainpage Principles
- * This Monte Carlo generator, based on the LPAIR code developed in the
- * early 1990s by J. Vermaseren *et al*@cite Vermaseren1983347, allows to compute
- * the cross-section and to generate events for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
- * process in high energy physics.
+ * \image latex cepgen_logo.pdf
+ * \mainpage Foreword
+ * This Monte Carlo generator was developed as a modern version of the LPAIR code introduced
+ * in the early 1990s by J. Vermaseren *et al*\cite Vermaseren1983347. This latter allows to
+ * compute the cross-section and to generate events for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
+ * process in the scope of high energy physics.
  * 
- * The main operation is the integration of the matrix element (given as a 
- * subset of a Process object) performed by *Vegas*, an importance sampling
- * algorithm written in 1972 by G. P. Lepage@cite PeterLepage1978192. 
+ * Soon after the integration of its matrix element, it was extended as a tool to compute and
+ * generate events for any generic 2\f$\rightarrow\f$ 3 central exclusive process.
+ * To do so, the main operation performed here is the integration of the matrix element (given as a 
+ * subset of a GenericProcess object) by the GSL implementation of the *Vegas* algorithm, a
+ * numerical technique for importance sampling integration developed in 1972 by G. P. Lepage\cite PeterLepage1978192. 
  *
  */
 
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * The function to be integrated, which returns the value of the weight of an
- * event, including the matrix element of the process, all the kinematic
- * factors, and the cut restrictions. \f$x\f$ is an array of random numbers used
- * to select a random point inside the phase space.
+ * Function to be integrated. It returns the value of the weight for one point
+ * of the full phase space (or "event"). This weights includes the matrix element
+ * of the process considered, along with all the kinematic factors, and the cut
+ * restrictions imposed on this phase space. \f$x\f$ is therefore an array of random
+ * numbers defined inside its boundaries (as normalised so that \f$\forall i<\mathrm{ndim}\f$,
+ * \f$0<x_i<1\f$.
  */
 double f(double*,size_t,void*);
 
@@ -39,23 +43,23 @@ double f(double*,size_t,void*);
 
 /**
  * This object represents the core of this Monte Carlo generator, with its
- * allowance to generate the events (using the embedded Vegas object) and to
+ * capability to generate the events (using the embedded Vegas object) and to
  * study the phase space in term of the variation of resulting cross section
  * while scanning the various parameters (point \f$\textbf{x}\f$ in the
- * DIM-dimensional phase space).
+ * multi-dimensional phase space).
  *
  * The phase space is constrained using the Parameters object given as an
  * argument to the constructor, and the differential cross-sections for each
- * value of the array \f$\textbf{x}\f$ are computed in the f-function defined
+ * value of the array \f$\textbf{x}\f$ are computed in the \a f-function defined
  * outside (but populated inside) this object.
  *
- * This f-function embeds a Process object which defines all the methods to
- * obtain this differential cross-section as well as the in- and outgoing
+ * This f-function embeds a GenericProcess-inherited object which defines all the
+ * methods to compute this differential cross-section as well as the in- and outgoing
  * kinematics associated to each particle.
  *
- * @author Laurent Forthomme <laurent.forthomme@uclouvain.be>
- * @date February 2013
- * @brief Core of the Monte-Carlo generator
+ * \author Laurent Forthomme <laurent.forthomme@cern.ch>
+ * \date Feb 2013
+ * \brief Core of the Monte-Carlo generator
  *
  */
 class MCGen {
@@ -86,6 +90,9 @@ class MCGen {
     if (!parameters->process) return 0;
     return parameters->process->GetNdim(parameters->process_mode);
   }
+  /// Compute one single point from the total phase space
+  /// \param[in] x_ the n-dimensional point to compute
+  /// \return the function value for the given point
   inline double ComputePoint(double* x_) {
     PrepareFunction();
     double res = f(x_, GetNdim(), (void*)parameters);
@@ -99,6 +106,7 @@ class MCGen {
   /// Last event generated in this run
   Event *last_event;
  private:
+  /// Prepare the function before its integration (add particles/compute kinematics/...)
   void PrepareFunction();
   /// Call the Vegas constructor (once, just before the first integration attempt)
   void BuildVegas();

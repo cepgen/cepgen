@@ -7,7 +7,7 @@ Particle::Particle() :
 {}
 
 Particle::Particle(Role role_, ParticleCode pdgId_) :
-  id(-1), charge(999.), name(""), role(role_), status(Undefined),
+  id(-1), charge(999.), name(""), role(role_), status(Undefined), helicity(0.),
   fMomentum(Momentum()), fMass(-1.),
   fPDGid(pdgId_), fIsPrimary(true)
 {
@@ -19,9 +19,7 @@ Particle::operator=(const Particle &part_)
 {
   fPDGid = part_.fPDGid;
   this->role = part_.role;
-  if (this->id==-1) {
-    this->id = part_.id;
-  }
+  if (this->id==-1) this->id = part_.id;
   fMomentum = part_.fMomentum;
   this->SetM(part_.fMass);
 
@@ -158,19 +156,21 @@ Particle::Dump()
   daugh = GetDaughters();
   for (unsigned int i=0; i<NumDaughters(); i++) osd << "\n\t\t* Id = " << daugh[i];
   os << fPDGid;
-  Information(Form("Id:\t%3d\t"
-            "role:\t%3d\t"
-            "status:\t% 3d\n\t"
-            "PDG Id:\t%4d (%s)\n\t"
-            "(E,P) = (%4.2f, %4.2f, %4.2f, %4.2f) GeV\t"
-            "(|P| = p = %4.2f GeV)\n\t"
-            " Pt = %5.4f GeV\teta = %4.3f\n\t"
-            "  M = %5.4f GeV\n\t"
-            "Primary? %d%s\n\t"
-            "Daughters (%d)",
-            id, role, status, fPDGid, os.str().c_str(),
-            E(), fMomentum.Px(), fMomentum.Py(), fMomentum.Pz(), fMomentum.P(), fMomentum.Pt(), fMomentum.Eta(), M(),
-            Primary(), osm.str().c_str(), NumDaughters(), osd.str().c_str()));
+  Information(Form(
+    "Id:\t%3d\t"
+    "role:\t%3d\t"
+    "status:\t% 3d\n\t"
+    "PDG Id:\t%4d (%s)\n\t"
+    "(E,P) = (%4.2f, %4.2f, %4.2f, %4.2f) GeV\t"
+    "(|P| = p = %4.2f GeV)\n\t"
+    " Pt = %5.4f GeV\teta = %4.3f\n\t"
+    "  M = %5.4f GeV\n\t"
+    "Primary? %d%s\n\t"
+    "Daughters (%d)",
+    id, role, status, fPDGid, os.str().c_str(),
+    E(), fMomentum.Px(), fMomentum.Py(), fMomentum.Pz(), fMomentum.P(), fMomentum.Pt(), fMomentum.Eta(), M(),
+    Primary(), osm.str().c_str(), NumDaughters(), osd.str().c_str())
+  );
 }
 
 //double*
@@ -237,7 +237,7 @@ Particle::RotateThetaPhi(double theta_, double phi_)
 double
 Particle::GetMassFromPDGId(Particle::ParticleCode pdgId_)
 {
-  switch (abs(pdgId_)) {
+  switch (pdgId_) {
     case dQuark:       return 0.33;           // mass from PYTHIA6.4
     case uQuark:       return 0.33;           // mass from PYTHIA6.4
     case Electron:     return 0.510998928e-3;
@@ -264,7 +264,7 @@ Particle::GetMassFromPDGId(Particle::ParticleCode pdgId_)
 double
 Particle::GetWidthFromPDGId(Particle::ParticleCode pdgId_)
 {
-  switch (abs(pdgId_)) {
+  switch (pdgId_) {
     case JPsi:  return 5.; //FIXME
     default:    return -1.;
   }

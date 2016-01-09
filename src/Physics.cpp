@@ -399,7 +399,7 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
 double
 GetBRFromProcessId(Particle::ParticleCode vmId_)
 {
-  switch (abs((VMDecay)vmId_)) {
+  switch ((VMDecay)vmId_) {
   case RHO_TO_PIPI:         return 1.0;    // rho0->pi+ pi-
   case OMEGA_TO_PIPI:       return 0.0221; // omega->pi+ pi-
   case PHI_TO_KK:           return 0.491;  // phi->K+ K-
@@ -474,7 +474,7 @@ InelasticFlux(double x_, double kt2_, double mx_)
   
   const double alpha_em = 1./137.035;
   const double mp2 = pow(Particle::GetMassFromPDGId(Particle::Proton), 2);
-  const double mpi = pow(Particle::GetMassFromPDGId(Particle::PiZero), 2);
+  //const double mpi = pow(Particle::GetMassFromPDGId(Particle::PiZero), 2);
 
   double mx2 = pow(mx_, 2);
   double Q2min, Q2, mu2;

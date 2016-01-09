@@ -347,14 +347,12 @@ GamGamLL::Pickin()
 bool
 GamGamLL::Orient()
 {
-  double re;
-
   if (!Pickin() or fJacobian==0.) {
     Warning(Form("Pickin failed! dj = %f", fJacobian));
     return false;
   }
   
-  re = 1./(2.*fSqS);
+  const double re = 1./(2.*fSqS);
   _ep1 = re*(fS+_w12);
   _ep2 = re*(fS-_w12);
 
@@ -413,9 +411,6 @@ GamGamLL::Orient()
   if (_ep2*ep5>_p25) ct5 *= -1.;
 
   DebugInsideLoop(Form("ct3 = %f\n\tct5 = %f", ct3, ct5));
-
-  _al3 = std::pow(st3, 2)/(1.+ct3);
-  _be5 = std::pow(st5, 2)/(1.-ct5);
   
   if (_dd5<0.) { Warning(Form("dd5 = %f < 0", _dd5)); return false; }
 
@@ -431,7 +426,6 @@ GamGamLL::Orient()
   _al4 = 1.-_ct4;
   _be4 = 1.+_ct4;
 
-
   if (_ct4<0.) _be4 = std::pow(_st4, 2)/_al4;
   else         _al4 = std::pow(_st4, 2)/_be4;
 
@@ -446,12 +440,10 @@ GamGamLL::Orient()
 
   const double cp3 = -std::sqrt(1.-std::pow(sp3, 2)), cp5 = -std::sqrt(1.-std::pow(sp5, 2));
   
-  /*_p3lab = Particle::Momentum::FromPThetaPhi(pp3, asin(st3), asin(sp3), ep3);
-  _p5lab = Particle::Momentum::FromPThetaPhi(pp5, asin(st5), asin(sp5), ep5);*/
-  _p3lab = Particle::Momentum(pp3*st3*cp3, pp3*st3*sp3, pp3*ct3, ep3);
-  _p5lab = Particle::Momentum(pp5*st5*cp5, pp5*st5*sp5, pp5*ct5, ep5);
+  fP3lab = Particle::Momentum(pp3*st3*cp3, pp3*st3*sp3, pp3*ct3, ep3);
+  fP5lab = Particle::Momentum(pp5*st5*cp5, pp5*st5*sp5, pp5*ct5, ep5);
 
-  const double a1 = _p3lab.Px()-_p5lab.Px();
+  const double a1 = fP3lab.Px()-fP5lab.Px();
 
   DebugInsideLoop(Form("Kinematic quantities\n\t"
                        "cos(theta3) = %1.4f\tsin(theta3) = %1.4f\tcos( phi3 ) = %1.4f\tsin( phi3 ) = %1.4f\n\t"
@@ -462,7 +454,7 @@ GamGamLL::Orient()
                        _ct4, _st4,
                        ct5, st5, cp5, sp5, a1));
 
-  if (fabs(_pt4+_p3lab.Px()+_p5lab.Px())<fabs(fabs(a1)-_pt4)) {
+  if (fabs(_pt4+fP3lab.Px()+fP5lab.Px())<fabs(fabs(a1)-_pt4)) {
     DebugInsideLoop(Form("|pp4+pp3*cos(phi3)+pp5*cos(phi5)| < | |a1|-pp4 |\n\t"
                          "pp4 = %f\tpp5 = %f\n\t"
                          "cos(phi3) = %f\tcos(phi5) = %f"
@@ -472,19 +464,18 @@ GamGamLL::Orient()
   }
   /*if (a1<0.) _cp5 = -_cp5;
   else       _cp3 = -_cp3;*/
-  if (a1<0.) _p5lab.SetP(0, -_p5lab.Px());
-  else       _p3lab.SetP(0, -_p3lab.Px());
+  if (a1<0.) fP5lab.SetP(0, -fP5lab.Px());
+  else       fP3lab.SetP(0, -fP3lab.Px());
   return true;
 }
 
 double
 GamGamLL::ComputeMX(double x_, double outmass_, double lepmass_, double *dw_)
 {
-  double wx2min, wx2max;
   double mx2, dmx2;
 
-  wx2min = std::pow(std::max(Particle::GetMassFromPDGId(Particle::Proton)+Particle::GetMassFromPDGId(Particle::PiPlus), fCuts.mxmin), 2);
-  wx2max = std::pow(std::min(fSqS-outmass_-2.*lepmass_, fCuts.mxmax), 2);
+  const double wx2min = std::pow(std::max(Particle::GetMassFromPDGId(Particle::Proton)+Particle::GetMassFromPDGId(Particle::PiPlus), fCuts.mxmin), 2),
+               wx2max = std::pow(std::min(fSqS-outmass_-2.*lepmass_, fCuts.mxmax), 2);
   
   Map(x_, wx2min, wx2max, &mx2, &dmx2, "mx2");
 
@@ -515,7 +506,8 @@ GamGamLL::BeforeComputeWeight()
   _w2 = p2->M2();
   _pp2 = p2->GetMomentum().P();
 
-  double thetamin = EtaToTheta(fCuts.etamax), thetamax = EtaToTheta(fCuts.etamin);
+  const double thetamin = EtaToTheta(fCuts.etamax),
+               thetamax = EtaToTheta(fCuts.etamin);
   _cotth1 = 1./tan(thetamax*pi/180.);
   _cotth2 = 1./tan(thetamin*pi/180.);
   DebugInsideLoop(Form("cot(theta1) = %f\n\tcot(theta2) = %f", _cotth1, _cotth2));
@@ -560,9 +552,6 @@ GamGamLL::ComputeWeight()
   double weight;
   double dw4;
   double wmin, wmax;
-  double e1mp1, e3mp3;
-  double eg, pg;
-  double pgx, pgy, pgz, pgp, pgg;
   double stg, cpg, spg, ctg;
 
   double qcx, qcz;
@@ -610,15 +599,17 @@ GamGamLL::ComputeWeight()
   
   // Let the most obscure part of this code begin...
 
-  e1mp1 = _w1/(_ep1+_p);
-  e3mp3 = _w3/(_p3lab.E()+_p3lab.P());
+  const double e1mp1 = _w1/(_ep1+_p),
+               e3mp3 = _w3/(fP3lab.E()+fP3lab.P());
+
+  const double al3 = std::pow(sin(fP3lab.Theta()), 2)/(1.+(fP3lab.Theta()));
 
   // 2-photon system kinematics ?!
-  eg = (_w4+_t1-_t2)/(2.*_mc4);
-  pg = std::sqrt(std::pow(eg, 2)-_t1);
-  pgx = -_p3lab.Px()*_ct4-_st4*(_de3-e1mp1+e3mp3+_p3lab.P()*_al3);
-  pgy = -_p3lab.Py();
-  pgz = _mc4*_de3/(_ec4+_pc4)-_ec4*_de3*_al4/_mc4-_p3lab.Px()*_ec4*_st4/_mc4+_ec4*_ct4/_mc4*(_p3lab.P()*_al3+e3mp3-e1mp1);
+  const double eg = (_w4+_t1-_t2)/(2.*_mc4);
+  double pg = std::sqrt(std::pow(eg, 2)-_t1);
+  const double pgx = -fP3lab.Px()*_ct4-_st4*(_de3-e1mp1+e3mp3+fP3lab.P()*al3),
+               pgy = -fP3lab.Py(),
+               pgz = _mc4*_de3/(_ec4+_pc4)-_ec4*_de3*_al4/_mc4-fP3lab.Px()*_ec4*_st4/_mc4+_ec4*_ct4/_mc4*(fP3lab.P()*al3+e3mp3-e1mp1);
   
   DebugInsideLoop(Form("pg3 = (%f, %f, %f)\n\t"
                        "pg3^2 = %f",
@@ -626,11 +617,9 @@ GamGamLL::ComputeWeight()
                        std::sqrt(std::pow(pgx, 2)+std::pow(pgy, 2)+std::pow(pgz, 2))
                       ));
   
-  pgp = std::sqrt(std::pow(pgx, 2)+std::pow(pgy, 2)); // outgoing proton (3)'s transverse momentum
-  pgg = std::sqrt(std::pow(pgp, 2)+std::pow(pgz, 2)); // outgoing proton (3)'s momentum
-  if (pgg>pgp*.9 && pgg>pg) { //FIXME ???
-    pg = pgg;
-  }
+  const double pgp = std::sqrt(std::pow(pgx, 2)+std::pow(pgy, 2)), // outgoing proton (3)'s transverse momentum
+               pgg = std::sqrt(std::pow(pgp, 2)+std::pow(pgz, 2)); // outgoing proton (3)'s momentum
+  if (pgg>pgp*.9 && pgg>pg) { pg = pgg; } //FIXME ???
   
   // Phi angle for the 2-photon system ?!
   cpg = pgx/pgp;
@@ -639,9 +628,7 @@ GamGamLL::ComputeWeight()
   // Theta angle for the 2-photon system ?!
   stg = pgp/pg;
   ctg = std::sqrt(1.-std::pow(stg, 2));
-  if (pgz<0.) {
-    ctg = -ctg;
-  }
+  if (pgz<0.) ctg *= -1.;
   
   double xx6 = x(5);
   
@@ -691,7 +678,7 @@ GamGamLL::ComputeWeight()
   p6z = _ct4*h2-_st4*pc6x;
   
   // first outgoing lepton's kinematics
-  _p6cm = Particle::Momentum(p6x, p6y, p6z, el6);
+  fP6cm = Particle::Momentum(p6x, p6y, p6z, el6);
   DebugInsideLoop(Form("E6(cm) = %f\n\tP6(cm) = (%f, %f, %f)", el6, p6x, p6y, p6z));
   
   hq = _ec4*qcz/_mc4;
@@ -709,7 +696,7 @@ GamGamLL::ComputeWeight()
   DebugInsideLoop(Form("Outgoing kinematics\n\t"
                        " first outgoing lepton: p = %f, E = %f\n\t"
                        "second outgoing lepton: p = %f, E = %f",
-                       _p6cm.P(), _p6cm.E(), _p7cm.P(), _p6cm.E()));
+                       fP6cm.P(), fP6cm.E(), fP7cm.P(), fP6cm.E()));
 
   double p7x, p7y, p7z;
   // Second outgoing lepton's 3-momentum
@@ -718,27 +705,27 @@ GamGamLL::ComputeWeight()
   p7z = _pc4*_ct4-p6z;
   
   // second outgoing lepton's kinematics
-  _p7cm = Particle::Momentum(p7x, p7y, p7z, el7);
+  fP7cm = Particle::Momentum(p7x, p7y, p7z, el7);
 
-  //_p6cm = Particle::Momentum(pl6*st6*cp6, pl6*st6*sp6, pl6*ct6, el6);
-  //_p7cm = Particle::Momentum(pl7*st7*cp7, pl7*st7*sp7, pl7*ct7, el7);
+  //fP6cm = Particle::Momentum(pl6*st6*cp6, pl6*st6*sp6, pl6*ct6, el6);
+  //fP7cm = Particle::Momentum(pl7*st7*cp7, pl7*st7*sp7, pl7*ct7, el7);
 
   _q1dq = eg*(2.*ecm6-_mc4)-2.*pg*p6cm.Pz();
   _q1dq2 = (_w4-_t1-_t2)/2.;
 
-  const double phi3 = _p3lab.Phi(), cp3 = cos(phi3), sp3 = sin(phi3),
-               phi5 = _p5lab.Phi(), cp5 = cos(phi5), sp5 = sin(phi5);
-  //std::cout << ">>> " << _p3lab.Pt() << "/" << _p5lab.Pt() << std::endl;
+  const double phi3 = fP3lab.Phi(), cp3 = cos(phi3), sp3 = sin(phi3),
+               phi5 = fP5lab.Phi(), cp5 = cos(phi5), sp5 = sin(phi5);
+  //std::cout << ">>> " << fP3lab.Pt() << "/" << fP5lab.Pt() << std::endl;
 
   _bb = _t1*_t2+(_w4*std::pow(sin(theta6cm), 2)+4.*_w6*std::pow(cos(theta6cm), 2))*std::pow(pg, 2);
   
-  c1 = (qve.Px()*sp3-qve.Py()*cp3)*_p3lab.Pt();
-  c2 = (qve.Pz()*_ep1-qve.E()*_p)*_p3lab.Pt();
-  c3 = (_w31*std::pow(_ep1, 2)+2.*_w1*_de3*_ep1-_w1*std::pow(_de3, 2)+std::pow(_p3lab.Pt(), 2)*std::pow(_ep1, 2))/(_p3lab.E()*_p+_p3lab.Pz()*_ep1);
+  c1 = (qve.Px()*sp3-qve.Py()*cp3)*fP3lab.Pt();
+  c2 = (qve.Pz()*_ep1-qve.E()*_p)*fP3lab.Pt();
+  c3 = (_w31*std::pow(_ep1, 2)+2.*_w1*_de3*_ep1-_w1*std::pow(_de3, 2)+std::pow(fP3lab.Pt(), 2)*std::pow(_ep1, 2))/(fP3lab.E()*_p+fP3lab.Pz()*_ep1);
   
-  b1 = (qve.Px()*sp5-qve.Py()*cp5)*_p5lab.Pt();
-  b2 = (qve.Pz()*_ep2+qve.E()*_p)*_p5lab.Pt();
-  b3 = (_w52*std::pow(_ep2, 2)+2.*_w2*_de5*_ep2-_w2*std::pow(_de5, 2)+std::pow(_p5lab.Pt()*_ep2, 2))/(_ep2*_p5lab.Pz()-_p5lab.E()*_p); //OK
+  b1 = (qve.Px()*sp5-qve.Py()*cp5)*fP5lab.Pt();
+  b2 = (qve.Pz()*_ep2+qve.E()*_p)*fP5lab.Pt();
+  b3 = (_w52*std::pow(_ep2, 2)+2.*_w2*_de5*_ep2-_w2*std::pow(_de5, 2)+std::pow(fP5lab.Pt()*_ep2, 2))/(_ep2*fP5lab.Pz()-fP5lab.E()*_p); //OK
   
   r12 =  c2*sp3+qve.Py()*c3;
   r13 = -c2*cp3-qve.Px()*c3;
@@ -753,8 +740,8 @@ GamGamLL::ComputeWeight()
   _g5 = _w1*std::pow(c1, 2)+std::pow(r12, 2)+std::pow(r13, 2);
   _g6 = _w2*std::pow(b1, 2)+std::pow(r22, 2)+std::pow(r23, 2);
 
-  _a5 = -(qve.Px()*cp3+qve.Py()*sp3)*_p3lab.Pt()*_p1k2-(_ep1*qve.E()-_p*qve.Pz())*(cp3*cp5+sp3*sp5)*_p3lab.Pt()*_p5lab.Pt()+(_de5*qve.Pz()+qve.E()*(_p+_p5lab.Pz()))*c3;
-  _a6 = -(qve.Px()*cp5+qve.Py()*sp5)*_p5lab.Pt()*_p2k1-(_ep2*qve.E()+_p*qve.Pz())*(cp3*cp5+sp3*sp5)*_p3lab.Pt()*_p5lab.Pt()+(_de3*qve.Pz()-qve.E()*(_p-_p3lab.Pz()))*b3;
+  _a5 = -(qve.Px()*cp3+qve.Py()*sp3)*fP3lab.Pt()*_p1k2-(_ep1*qve.E()-_p*qve.Pz())*(cp3*cp5+sp3*sp5)*fP3lab.Pt()*fP5lab.Pt()+(_de5*qve.Pz()+qve.E()*(_p+fP5lab.Pz()))*c3;
+  _a6 = -(qve.Px()*cp5+qve.Py()*sp5)*fP5lab.Pt()*_p2k1-(_ep2*qve.E()+_p*qve.Pz())*(cp3*cp5+sp3*sp5)*fP3lab.Pt()*fP5lab.Pt()+(_de3*qve.Pz()-qve.E()*(_p-fP3lab.Pz()))*b3;
  
   DebugInsideLoop(Form("a5 = %f\n\ta6 = %f", _a5, _a6));
  
@@ -778,35 +765,35 @@ GamGamLL::ComputeWeight()
   }
   // Kinematics computation for both leptons
 
-  _p6cm.BetaGammaBoost(gamma, betgam);
-  _p7cm.BetaGammaBoost(gamma, betgam);
+  fP6cm.BetaGammaBoost(gamma, betgam);
+  fP7cm.BetaGammaBoost(gamma, betgam);
 
   lcut = false; // Event discarded by default
-  const double cott6 = _p6cm.Pz()/_p6cm.Pt(), cott7 = _p7cm.Pz()/_p7cm.Pt();
+  const double cott6 = fP6cm.Pz()/fP6cm.Pt(), cott7 = fP7cm.Pz()/fP7cm.Pt();
 
   // Cuts on outgoing leptons' kinematics
 
   lmu1 = cott6>=_cotth1
      and cott6<=_cotth2
-     and (_p6cm.Pt()>=fCuts.ptmin or fCuts.ptmin<=0.)
-     and (_p6cm.Pt()<=fCuts.ptmax or fCuts.ptmax<=0.)
-     and (_p6cm.E()>=fCuts.emin   or fCuts.emin <=0.)
-     and (_p6cm.E()<=fCuts.emax   or fCuts.emax <=0.);
+     and (fP6cm.Pt()>=fCuts.ptmin or fCuts.ptmin<=0.)
+     and (fP6cm.Pt()<=fCuts.ptmax or fCuts.ptmax<=0.)
+     and (fP6cm.E()>=fCuts.emin   or fCuts.emin <=0.)
+     and (fP6cm.E()<=fCuts.emax   or fCuts.emax <=0.);
   lmu2 = cott7>=_cotth1
      and cott7<=_cotth2
-     and (_p7cm.Pt()>=fCuts.ptmin or fCuts.ptmin<=0.)
-     and (_p7cm.Pt()<=fCuts.ptmax or fCuts.ptmax<=0.)
-     and (_p7cm.E()>=fCuts.emin   or fCuts.emin <=0.)
-     and (_p7cm.E()<=fCuts.emax   or fCuts.emax <=0.);
+     and (fP7cm.Pt()>=fCuts.ptmin or fCuts.ptmin<=0.)
+     and (fP7cm.Pt()<=fCuts.ptmax or fCuts.ptmax<=0.)
+     and (fP7cm.E()>=fCuts.emin   or fCuts.emin <=0.)
+     and (fP7cm.E()<=fCuts.emax   or fCuts.emax <=0.);
 
   switch (fCuts.mode) {
     case 0: default:
       lcut = true; break;
     case 1: // Vermaseren's hypothetical detector cuts
       {
-        const double cost6 = _p6cm.Pz()/_p6cm.P(), cost7 = _p7cm.Pz()/_p7cm.P();
-        lcut = ((fabs(cost6)<=0.75 and _pt_l6>=1.) or (fabs(cost6)<=0.95 and fabs(cost6)>0.75 and fabs(_p6cm.Pz())>1.)) and
-               ((fabs(cost7)<=0.75 and _pt_l7>=1.) or (fabs(cost7)<=0.95 and fabs(cost7)>0.75 and fabs(_p7cm.Pz())>1.));
+        const double cost6 = fP6cm.Pz()/fP6cm.P(), cost7 = fP7cm.Pz()/fP7cm.P();
+        lcut = ((fabs(cost6)<=0.75 and _pt_l6>=1.) or (fabs(cost6)<=0.95 and fabs(cost6)>0.75 and fabs(fP6cm.Pz())>1.)) and
+               ((fabs(cost7)<=0.75 and _pt_l7>=1.) or (fabs(cost7)<=0.95 and fabs(cost7)>0.75 and fabs(fP7cm.Pz())>1.));
       }
       break;
     case 2: lcut = lmu1 and lmu2; break;
@@ -878,9 +865,9 @@ GamGamLL::FillKinematics(bool)
   
   // First outgoing proton
   Particle* op1 = GetParticle(Particle::OutgoingBeam1);
-  _p3lab.BetaGammaBoost(gamma, betgam);
-  _p3lab.RotatePhi(ranphi, rany);
-  op1->SetMomentum(_p3lab);
+  fP3lab.BetaGammaBoost(gamma, betgam);
+  fP3lab.RotatePhi(ranphi, rany);
+  op1->SetMomentum(fP3lab);
   // Error("Invalid outgoing proton 1");
   if (fCuts.kinematics>1) { // fragmenting remnants
     op1->status = Particle::Undecayed;
@@ -893,9 +880,9 @@ GamGamLL::FillKinematics(bool)
   
   // Second outgoing proton
   Particle* op2 = GetParticle(Particle::OutgoingBeam2);
-  _p5lab.BetaGammaBoost(gamma, betgam);
-  _p5lab.RotatePhi(ranphi, rany);
-  op2->SetMomentum(_p5lab);
+  fP5lab.BetaGammaBoost(gamma, betgam);
+  fP5lab.RotatePhi(ranphi, rany);
+  op2->SetMomentum(fP5lab);
   // Error("Invalid outgoing proton 2");
   if (fCuts.kinematics==4) { // fragmenting remnants
     op2->status = Particle::Undecayed;
@@ -909,7 +896,7 @@ GamGamLL::FillKinematics(bool)
   // First incoming photon
   // Equivalent in LPAIR : PLAB(x, 3)
   Particle* ph1 = GetParticle(Particle::Parton1);
-  Particle::Momentum plab_ph1 = plab_ip1-_p3lab;
+  Particle::Momentum plab_ph1 = plab_ip1-fP3lab;
   plab_ph1.RotatePhi(ranphi, rany);
   ph1->SetMomentum(plab_ph1);
   ////Error("Invalid photon 1");
@@ -919,7 +906,7 @@ GamGamLL::FillKinematics(bool)
   // Second incoming photon
   // Equivalent in LPAIR : PLAB(x, 4)
   Particle* ph2 = GetParticle(Particle::Parton2);
-  Particle::Momentum plab_ph2 = plab_ip2-_p5lab;
+  Particle::Momentum plab_ph2 = plab_ip2-fP5lab;
   plab_ph2.RotatePhi(ranphi, rany);
   ph2->SetMomentum(plab_ph2);
   ////Error("Invalid photon 2");
@@ -937,8 +924,8 @@ GamGamLL::FillKinematics(bool)
   // First outgoing lepton
   Particle* ol1 = GetParticle(role_ol1);
   ol1->SetPDGId(ol1->GetPDGId(), ransign);
-  _p6cm.RotatePhi(ranphi, rany);
-  ol1->SetMomentum(_p6cm);
+  fP6cm.RotatePhi(ranphi, rany);
+  ol1->SetMomentum(fP6cm);
   // Error("Invalid outgoing lepton 1");
   ol1->status = Particle::FinalState;
   ol1->SetM(); //FIXME
@@ -946,8 +933,8 @@ GamGamLL::FillKinematics(bool)
   // Second outgoing lepton
   Particle* ol2 = GetParticle(role_ol2);
   ol2->SetPDGId(ol2->GetPDGId(), -ransign);
-  _p7cm.RotatePhi(ranphi, rany);
-  ol2->SetMomentum(_p7cm);
+  fP7cm.RotatePhi(ranphi, rany);
+  ol2->SetMomentum(fP7cm);
   ol2->status = Particle::FinalState;
   ol2->SetM(); //FIXME
 
