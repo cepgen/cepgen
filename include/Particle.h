@@ -171,6 +171,14 @@ class Particle {
             default: return -1.;
           }
         }
+        inline double& operator[](const unsigned int i) {
+          switch (i) {
+            case 0: return fPx;
+            case 1: return fPy;
+            case 2: return fPz;
+            case 3: return fE;
+          }
+        }
         /// Get the momentum along the \f$x\f$-axis (in GeV)
         inline double Px() const { return fPx; }
         /// Get the momentum along the \f$y\f$-axis (in GeV)
