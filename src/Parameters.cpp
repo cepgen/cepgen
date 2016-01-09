@@ -1,6 +1,7 @@
 #include "Parameters.h"
 
 Parameters::Parameters() :
+  in1p(3500.), in2p(3500.),
   in1pdg(Particle::Proton), in2pdg(Particle::Proton),
   remnant_mode(GenericProcess::SuriYennie),
   pair(Particle::Muon),
@@ -13,17 +14,17 @@ Parameters::Parameters() :
   minq2(0.), maxq2(1.e5),
   minmx(1.07), maxmx(320.),
   //ncvg(14000), itvg(10),
-  ncvg(100000), itvg(10),
-  ntreat(1), npoints(100),
+  ncvg(100000), itvg(10), npoints(100),
   generation(true), store(false),
   maxgen(1e5), ngen(0),
   gpdf(5), spdf(4), qpdf(12),
   hadroniser_max_trials(5),
-  symmetrise(true)
+  symmetrise(true),
+  first_run(true),
+  process(0), hadroniser(0)
 {
   this->last_event = new Event();
   this->file = (std::ofstream*)NULL;
-  this->hadroniser = (GenericHadroniser*)NULL;
   //this->output_format = "lhe";
 }
 
@@ -67,8 +68,10 @@ void Parameters::Dump()
     << std::left
     << std::endl
     << " _" << std::setfill('_') << std::setw(wb) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "_ " << std::endl
-    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "| " << std::setw(wt) << "Process to generate"  << std::setw(wp) << process->GetName() << std::endl
+    << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl;
+  if (process)
+    os << "| " << std::setw(wt) << "Process to generate"  << std::setw(wp) << process->GetName() << std::endl;
+  os
     << "| " << std::setw(wt) << "Events generation ? " << std::setw(wp) << generation << " |" << std::endl
     << "| " << std::setw(wt) << "Number of events to generate" << std::setw(wp) << maxgen << " |" << std::endl
     << "| " << std::setw(wt) << "Events storage ? " << std::setw(wp) << store << " |" << std::endl
@@ -80,7 +83,6 @@ void Parameters::Dump()
     << "| " << std::setw(wt) << "Maximum number of iterations" << std::setw(wp) << itvg << " |" << std::endl
     << "| " << std::setw(wt) << "Number of function calls" << std::setw(wp) << ncvg << " |" << std::endl
     << "| " << std::setw(wt) << "Number of points to try per bin" << std::setw(wp) << npoints << " |" << std::endl
-    << "| " << std::setw(wt) << "Integration smoothed (TREAT) ? " << std::setw(wp) << ntreat << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|_" << std::setfill('_') << std::setw(wb) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill(' ') << "_|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
@@ -88,40 +90,40 @@ void Parameters::Dump()
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "| " << std::setw(wt) << "Subprocess' mode" << std::setw(20) << process_mode << std::setw(wp-20) << "" << " |" << std::endl
     << "| " << std::setw(wt) << "Incoming particles" << std::setw(7) << in1pdg << ", " << std::setw(7) << in2pdg << std::setw(wp-16) << "" << " |" << std::endl
-    << "| " << std::setw(wt) << "Momenta [GeV/c]" << std::setw(5) << in1p << ", " << std::setw(5) << in2p << std::setw(wp-12) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Momenta (GeV/c)" << std::setw(5) << in1p << ", " << std::setw(5) << in2p << std::setw(wp-12) << "" << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|-" << std::setfill('-') << std::setw(wb-2) << " Incoming photons " << std::setfill(' ') << "-|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
-    << "| " << std::setw(wt) << "Virtuality in range [GeV^2]" << "[" << std::setw(4) << minq2 << ", " << std::setw(6) << maxq2 << "]" << std::setw(wp-14) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Virtuality in range (GeV^2)" << "[" << std::setw(4) << minq2 << ", " << std::setw(6) << maxq2 << "]" << std::setw(wp-14) << "" << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|-" << std::setfill('-') << std::setw(wb-2) << " Outgoing leptons " << std::setfill(' ') << "-|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "| " << std::setw(wt) << "Pair" << std::setw(2) << (int)pair << " -> " << std::setw(wp-6) << pair << " |" << std::endl
     << "| " << std::setw(wt) << "Cuts mode" << std::setw(2) << mcut << " -> " << std::setw(wp-6) << cutsmode << " |" << std::endl
-    << "| " << std::setw(wt) << "Lepton(s)' pT in range [GeV/c]" << std::right << "[" << std::setw(5) << minpt << ", " << std::setw(5) << maxpt << "]" << std::left << std::setw(wp-14) << "" << " |" << std::endl
-    << "| " << std::setw(wt) << "Lepton(s)' energy in range [GeV]" << std::right << "[" << std::setw(5) << minenergy << ", " << std::setw(5) << maxenergy << "]" << std::left << std::setw(wp-14) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Lepton(s)' pT in range (GeV/c)" << std::right << "[" << std::setw(5) << minpt << ", " << std::setw(5) << maxpt << "]" << std::left << std::setw(wp-14) << "" << " |" << std::endl
+    << "| " << std::setw(wt) << "Lepton(s)' energy in range (GeV)" << std::right << "[" << std::setw(5) << minenergy << ", " << std::setw(5) << maxenergy << "]" << std::left << std::setw(wp-14) << "" << " |" << std::endl
     << "| " << std::setw(wt) << "Pseudorapidity in range" << std::right << "[" << std::setw(5) << mineta << ", " << std::setw(5) << maxeta << "]" << std::left << std::setw(wp-14) << "" << " |" << std::endl
     //<< "| " << std::setw(wt) << "Polar angle theta in range [deg]" << "[" << std::setw(3) << mintheta << ", " << std::setw(3) << maxtheta << "]" << std::setw(wp-10) << "" << " |" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl
     << "|-" << std::setfill('-') << std::setw(wb-2) << " Outgoing remnants " << std::setfill(' ') << "-|" << std::endl
     << "| " << std::right << std::setw(wb) << " |" << std::left << std::endl;
-  if (this->hadroniser!=(GenericHadroniser*)NULL)
+  if (hadroniser)
     os << "| " << std::setw(wt) << "Hadronisation algorithm" << std::setw(12) << hadroniser->GetName() << std::setw(wp-12) << "" << " |" << std::endl;
-  os << "| " << std::setw(wt) << "Minimal mass [GeV/c^2]" << std::setw(wp) << minmx << " |" << std::endl
-             << "| " << std::setw(wt) << "Maximal mass [GeV/c^2]" << std::setw(wp) << maxmx << " |";
-  Info(os.str());
+  os << "| " << std::setw(wt) << "Minimal mass (GeV/c^2)" << std::setw(wp) << minmx << " |" << std::endl
+             << "| " << std::setw(wt) << "Maximal mass (GeV/c^2)" << std::setw(wp) << maxmx << " |";
+  Information(os.str());
 }
 
-bool Parameters::ReadConfigFile(std::string inFile_)
+bool Parameters::ReadConfigFile(const char* inFile_)
 {
   std::ifstream f;
   std::string key, value;
-  f.open(inFile_.c_str(), std::fstream::in);
+  f.open(inFile_, std::fstream::in);
   if (!f.is_open()) {
     return false;
   }
 
-  Debug(Form("File '%s' succesfully opened!", inFile_.c_str()));
+  Debug(Form("File '%s' succesfully opened!", inFile_));
   std::ostringstream os;
   os << "Configuration file content : " << "\n\t";
 
@@ -156,23 +158,29 @@ bool Parameters::ReadConfigFile(std::string inFile_)
     }
     else if (key=="PROC") {
       if (value=="lpair") {
-	this->process = new GamGamLL;
-	os << " * Process: LPAIR\n\t";
+      	this->process = new GamGamLL;
+      	os << " * Process: LPAIR\n\t";
       }
       else if (value=="pptoll") {
-	this->process = new PPtoLL;
-	os << " * Process: PPTOLL\n\t";
+        this->process = new PPtoLL;
+        os << " * Process: PPTOLL\n\t";
       }
     }
     else if (key=="HADR") {
       if (value=="pythia6") {
-	this->hadroniser = new Pythia6Hadroniser;
-	os << " * Hadroniser: Pythia6\n\t";
+        this->hadroniser = new Pythia6Hadroniser;
+        os << " * Hadroniser: Pythia6\n\t";
       }
       if (value=="jetset7") {
-	this->hadroniser = new Jetset7Hadroniser;
-	os << " * Hadroniser: Jetset7\n\t";
+        this->hadroniser = new Jetset7Hadroniser;
+        os << " * Hadroniser: Jetset7\n\t";
       }
+#ifdef PYTHIA8
+      if (value=="pythia8") {
+        this->hadroniser = new Pythia8Hadroniser;
+        os << " * Hadroniser: Pythia8\n\t";
+      }
+#endif
     }
     else if (key=="MODE") {
       this->process_mode = static_cast<GenericProcess::ProcessMode>(atoi(value.c_str()));
@@ -181,7 +189,7 @@ bool Parameters::ReadConfigFile(std::string inFile_)
     else if (key=="PMOD" or key=="EMOD") {
       this->remnant_mode = static_cast<GenericProcess::StructureFunctions>(atoi(value.c_str()));
       os << " * Outgoing primary particles' mode: " << (unsigned int)this->remnant_mode
-	 << "\n\t\t --> " << this->remnant_mode << "\n\t";
+      	 << " --> " << this->remnant_mode << "\n\t";
     }
     else if (key=="INPE") {
       this->in2p = (double)atof(value.c_str());
@@ -190,12 +198,12 @@ bool Parameters::ReadConfigFile(std::string inFile_)
     else if (key=="PAIR") {
       this->pair = (Particle::ParticleCode)atoi(value.c_str());
       os << " * Outgoing leptons' PDG id: " << (int)this->pair
-	 << "\n\t\t --> " << this->pair << "\n\t";
+         << " --> " << this->pair << "\n\t";
     }
     else if (key=="MCUT") {
       this->mcut = (int)atoi(value.c_str());
       os << " * Set of cuts to apply on the total generation  : " << this->mcut
-	 << "\n\t\t --> ";
+         << " --> ";
       switch (this->mcut) {
         case 0: default: os << "no cuts"; break;
         case 3:          os << "cuts on at least one outgoing lepton"; break;
@@ -211,10 +219,6 @@ bool Parameters::ReadConfigFile(std::string inFile_)
     else if (key=="ECUT") {
       this->minenergy = (double)atof(value.c_str());
       os << " * Single outgoing lepton's minimal energy: " << this->minenergy << " GeV\n\t";
-    }
-    else if (key=="NTRT") {
-      this->ntreat = (double)atoi(value.c_str());
-      os << " * Number of TREAT calls: " << this->ntreat << "\n\t";
     }
     else if (key=="NGEN") {
       this->maxgen = (double)atoi(value.c_str());
@@ -267,12 +271,12 @@ bool Parameters::ReadConfigFile(std::string inFile_)
       os << " * QPDF: " << this->qpdf << "\n\t";
     }
     else {
-      Info(Form("<WARNING> Unrecognized argument : [%s] = %s", key.c_str(), value.c_str()));
+      Information(Form("<WARNING> Unrecognized argument : [%s] = %s", key.c_str(), value.c_str()));
     }
   }
   f.close();
   
-  Info(os.str());
+  Information(os.str());
   
   return true;
 }
@@ -288,7 +292,6 @@ bool Parameters::StoreConfigFile(std::string outFile_)
   if (this->itvg!=-1) f << "ITVG  " << this->itvg << std::endl;
   if (this->minenergy!=-1) f << "ECUT  " << this->minenergy << std::endl;
   if (this->minenergy!=-1) f << "PTCT  " << this->minpt << std::endl;
-  if (this->ntreat!=-1) f << "NTRT  " << this->ntreat << std::endl;
   // ...
   f.close();
   return true;

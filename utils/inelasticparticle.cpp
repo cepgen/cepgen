@@ -1,7 +1,9 @@
-//#include "../include/pythia6hadroniser.h"
-#include "../include/jetset7hadroniser.h"
-//#include "../include/pythia8hadroniser.h"
-#include "../include/physics.h"
+#include "../hadronisers/Pythia6Hadroniser.h"
+#include "../hadronisers/Jetset7Hadroniser.h"
+//#include "../hadronisers/Pythia8Hadroniser.h"
+#include "../include/Physics.h"
+
+using namespace std;
 
 int main() {
 
@@ -41,9 +43,32 @@ int main() {
   delete p1;
   delete p2;*/
   
-  Particle vm(1, Particle::JPsi);
+  /*Particle vm(1, Particle::JPsi);
   vm.P(1., 1., 0.);
-  try { vm.Dump(); } catch (Exception& e) { e.Dump(); }
+  try { vm.Dump(); } catch (Exception& e) { e.Dump(); }*/
+
+  /*Logger::GetInstance()->Level = Logger::Debug;
+  Event ev;
+  Particle q(1, Particle::uQuark);
+  q.status = -2;
+  q.P(0.5, 0.8, 3000.);
+  ev.AddParticle(q);
+  ev.Dump();
+  Pythia6Hadroniser h;
+  //Jetset7Hadroniser h;
+  try { h.Hadronise(&ev); } catch (Exception &e) { e.Dump(); }
+  ev.Dump();*/
+  
+  Particle ele(1, Particle::Electron);
+  ele.SetMomentum(0., 0., 27.5);
+  //ele.SetM();
+  ele.Dump();
+  
+  Particle pro(2, Particle::Proton);
+  pro.SetMomentum(0., 0., -920.0);
+  pro.Dump();
+  
+  cout << CMEnergy(ele, pro) << endl;
   
   return 0;
 }

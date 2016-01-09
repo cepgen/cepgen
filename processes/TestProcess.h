@@ -3,15 +3,19 @@
 
 #include "../include/GenericProcess.h"
 
+/// Generic process to test the Vegas instance
 class TestProcess : public GenericProcess
 {
  public:
   TestProcess();
   ~TestProcess();
-  
-  int GetNdim(int) const;
+ 
+  /// Number of dimensions on which to perform the integration
+  int GetNdim(GenericProcess::ProcessMode) const;
+  /// Generic formula to compute a weight out of a point in the phase space
   double ComputeWeight();
-  void FillKinematics();
+  /// Dummy function to be called on events generation
+  void FillKinematics(bool);
   
  private:
 

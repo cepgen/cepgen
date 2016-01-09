@@ -11,10 +11,8 @@
 #include "../processes/processes.h"
 #include "../hadronisers/hadronisers.h"
 
-/**
- * @brief List of parameters used to start and run the simulation job.
- * @note The default parameters are derived from GMUINI in LPAIR
- */
+/// List of parameters used to start and run the simulation job
+/// \note The default parameters are derived from GMUINI in LPAIR
 class Parameters {
   public:
     Parameters();
@@ -30,36 +28,24 @@ class Parameters {
      * @brief Dumps the input parameters in the console
      */
     void Dump();
-    /**
-     * Reads the list of parameters to be used in this cross-section computation/events generation from an external input card.
-     * @brief Reads content from config file to load the variables
-     * @param[in] inFile_ Name of the configuration file to load
-     * @return A boolean stating whether this input configuration file is correct or not
-     */
-    bool ReadConfigFile(std::string inFile_);
-    /**
-     * @brief Stores the full run configuration to an external config file
-     * @param[in] outFile_ Name of the configuration file to create
-     * @return A boolean stating whether this output configuration file is correctly written or not
-     */
+    /// Read content from config file to load the variables
+    /// \param[in] inFile_ Name of the configuration file to load
+    /// \return A boolean stating whether this input configuration file is correct or not
+    bool ReadConfigFile(const char* inFile_);
+    /// Store the full run configuration to an external config file
+    /// \param[in] outFile_ Name of the configuration file to create
+    /// \return A boolean stating whether this output configuration file is correctly written or not
     bool StoreConfigFile(std::string outFile_);
-    /** @brief First incoming particle's momentum (in \f$\text{GeV}/c\f$) */
+    /// First incoming particle's momentum (in \f$\text{GeV}/c\f$)
     double in1p;
-    /** @brief Second incoming particle's momentum (in \f$\text{GeV}/c\f$) */
+    /// Second incoming particle's momentum (in \f$\text{GeV}/c\f$)
     double in2p;
-    /**
-     * @brief First beam/primary particle's PDG identifier
-     */
+    /// First beam/primary particle's PDG identifier
     Particle::ParticleCode in1pdg;
-    /**
-     * @brief Second beam/primary particle's PDG identifier
-     */
+    /// Second beam/primary particle's PDG identifier
     Particle::ParticleCode in2pdg;
-    /**
-     * The first incoming particle type and kind of interaction
-     * @brief Outgoing primary particles' behaviour
-     * @note Was named PMOD/EMOD in ILPAIR
-     */
+    /// Type of remnant fragmentation algorithm to use
+    /// \note Was named PMOD/EMOD in ILPAIR
     GenericProcess::StructureFunctions remnant_mode;
     /**
      * The particle code of produced leptons, as defined by the PDG convention :
@@ -69,6 +55,7 @@ class Parameters {
      * @brief PDG id of the outgoing leptons
      */
     Particle::ParticleCode pair;
+    /// Type of outgoing state to consider for the incoming primary particles
     GenericProcess::ProcessMode process_mode;
     /**
      * Set of cuts to apply on the outgoing leptons in order to restrain the available kinematic phase space :
@@ -82,114 +69,61 @@ class Parameters {
      * @brief Set of cuts to apply on the outgoing leptons
      */
     int mcut;
-    /**
-     * Minimal transverse momentum cut to apply on the outgoing lepton(s)
-     * @brief Minimal \f$p_T\f$ of the outgoing leptons
-     */
+    /// Minimal \f$p_T\f$ of the outgoing central particles
     double minpt;
-    /**
-     * Maximal transverse momentum cut to apply on the outgoing lepton(s)
-     * @brief Maximal \f$p_T\f$ of the outgoing leptons
-     */
+    /// Maximal \f$p_T\f$ of the outgoing central particles
     double maxpt;
-    /** @brief Minimal energy of the outgoing leptons */
+    /// Minimal energy of the outgoing central particles
     double minenergy;
-    /** @brief Maximal energy of the outgoing leptons */
+    /// Maximal energy of the outgoing central particles
     double maxenergy;
-    /** @brief Minimal pseudorapidity \f$\eta\f$ of the outgoing leptons */
+    /// Minimal pseudorapidity \f$\eta\f$ of the outgoing central particles
     double mineta;
-    /** @brief Maximal pseudorapidity \f$\eta\f$ of the outgoing leptons */
+    /// Maximal pseudorapidity \f$\eta\f$ of the outgoing central particles
     double maxeta;
-    /**
-     * @brief Minimal value of \f$Q^2\f$, the internal photons lines' virtuality
-     */
+    /// Minimal value of \f$Q^2\f$, the internal photons lines' virtuality
     double minq2;
-    /**
-     * @brief Maximal value of \f$Q^2\f$, the internal photons lines' virtuality
-     */
+    /// Maximal value of \f$Q^2\f$, the internal photons lines' virtuality
     double maxq2;
-    /**
-     * Minimal mass of the outgoing proton remnants, \f$M_X\f$, in \f$\text{GeV}/c^{2}\f$.
-     * @brief Minimal \f$M_X\f$ of the outgoing proton remnants
-     */
+    /// Minimal \f$M_X\f$ of the outgoing proton remnants
     double minmx;
-    /**
-     * Maximal mass of the outgoing proton remnants, \f$M_X\f$, in \f$\text{GeV}/c^{2}\f$.
-     * @brief Maximal \f$M_X\f$ of the outgoing proton remnants
-     */
+    /// Maximal \f$M_X\f$ of the outgoing proton remnants
     double maxmx;
     int ncvg; // ??
-    /**
-     * @brief Maximal number of iterations to perform by VEGAS
-     */
+    /// Maximal number of iterations to perform by VEGAS
     int itvg;
-    /**
-     * @brief Maximal number of TREAT calls
-     * @note Is it correctly implemented ?
-     */
-    int ntreat;
-    /**
-     * @brief Number of points to "shoot" in each integration bin by the algorithm
-     */
+    /// Number of points to "shoot" in each integration bin by the algorithm
     int npoints;
-    /**
-     * @brief Are we generating events ? (true) or are we only computing the
-     * cross-section ? (false)
-     */
+    /// Are we generating events ? (true) or are we only computing the cross-section ? (false)
     bool generation;
-    /**
-     * @brief Are the events generated in this run to be stored in the output
-     * file ?
-     */
+    /// Are the events generated in this run to be stored in the output file ?
     bool store;
-    /**
-     * @brief Maximal number of events to generate in this run
-     */
+    /// Maximal number of events to generate in this run
     int maxgen;
-    /**
-     * @brief Number of events already generated in this run
-     */
+    /// Number of events already generated in this run
     int ngen;
-    /**
-     * @brief PDFLIB group to use
-     */
+    /// PDFLIB group to use
     int gpdf;
-    /**
-     * @brief PDFLIB set to use
-     */
+    /// PDFLIB set to use
     int spdf;
-    /**
-     * @brief Number of quarks
-     */
+    /// Number of quarks to consider in the hadronisation part
     int qpdf;
-    /**
-     * @brief Maximal number of trials for the hadronisation of the proton(s) remnants
-     */
+    /// Maximal number of trials for the hadronisation of the proton(s) remnants
     int hadroniser_max_trials;
-    /**
-     * @brief The file in which to store the events generation's output
-     */
+    /// File in which to store the events generation's output
     std::ofstream* file;
-    /**
-     * @brief Type of format the event will be stored into
-     */
+    /// Type of format the event will be stored into
     std::string output_format;
-    /**
-     * @brief Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?
-     */
+    /// Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?
     bool symmetrise;
-    /**
-     * @brief The pointer to the last event produced in this run
-     */
+    /// Is it the first time the integrator is run?
+    bool first_run;
+    /// Pointer to the last event produced in this run
     Event* last_event;
-    /**
-     * @brief Hadronisation algorithm to use for the proton(s) remnants fragmentation
-     */
-    GenericHadroniser* hadroniser;
-    /**
-     * @brief The process for which the cross-section will be computed and the events will be generated
-     */
+    /// Process for which the cross-section will be computed and the events will be generated
     GenericProcess* process;
+    /// Hadronisation algorithm to use for the proton(s) fragmentation
+    GenericHadroniser* hadroniser;
 };
 
 #endif

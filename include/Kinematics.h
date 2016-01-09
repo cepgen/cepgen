@@ -9,19 +9,14 @@
 #include "utils.h"
 
 
-/**
- * @brief List of kinematic cuts to apply on the central and outgoing phase
- * space.
- */
+/// List of kinematic cuts to apply on the central and outgoing phase space.
 class Kinematics
 {
  public:
   Kinematics();
   ~Kinematics();
-  /**
-   * @brief Dumps all the parameters used in this process cross-section
-   * computation / events generation
-   */
+  /// Dump all the parameters used in this process cross-section computation
+  /// or events generation
   void Dump();
   /**
    * Type of kinematics to consider for the process. Can either be :
@@ -33,63 +28,37 @@ class Kinematics
    * @brief Type of kinematics to consider for the phase space
    */
   int kinematics;
-  /**
-   * @brief Sets of cuts to apply on the final phase space
-   */
+  /// Sets of cuts to apply on the final phase space
   int mode;
-  /**
-   * @brief Minimal transverse momentum of the single outgoing leptons
-   */
+  /// Minimal transverse momentum of the single outgoing leptons
   double ptmin;
-  /**
-   * @brief Maximal transverse momentum of the single outgoing leptons
-   */
+  /// Maximal transverse momentum of the single outgoing leptons
   double ptmax;
-  /**
-   * @brief Minimal energy of the central two-photons system
-   */
+  /// Minimal energy of the central two-photons system
   double emin;
-  /**
-   * @brief Maximal energy of the central two-photons system
-   */
+  /// Maximal energy of the central two-photons system
   double emax;
-  /**
-   * @brief Minimal rapidity (\f$\eta\f$) of the outgoing lepton
-   */
+  /// Minimal rapidity (\f$\eta\f$) of the outgoing lepton
   double etamin;
-  /**
-   * @brief Maximal rapidity (\f$\eta\f$) of the outgoing lepton
-   */
+  /// Maximal rapidity (\f$\eta\f$) of the outgoing lepton
   double etamax;
-  /**
-   * @brief Minimal mass (in GeV/c\f${}^\mathrm{2}\f$) of the outgoing proton
-   * remnant(s)
-   */
+  /// Minimal mass (in GeV/c\f${}^\mathrm{2}\f$) of the outgoing proton remnant(s)
   double mxmin;
-  /**
-   * @brief Maximal mass (in GeV/c\f${}^\mathrm{2}\f$) of the outgoing proton
-   * remnant(s)
-   */
+  /// Maximal mass (in GeV/c\f${}^\mathrm{2}\f$) of the outgoing proton remnant(s)
   double mxmax;
-  /**
-   * @brief The minimal value of \f$Q^2\f$
-   */
+  /// Minimal value of \f$Q^2\f$
   double q2min;
-  /**
-   * @brief The maximal value of \f$Q^2\f$
-   */
+  /// Maximal value of \f$Q^2\f$
   double q2max;
-  /**
-   * @brief The minimal \f$s\f$ on which the cross section is integrated
-   */
+  /// Minimal \f$s\f$ on which the cross section is integrated
   double wmin;
-  /**
-   * @brief The maximal \f$s\f$ on which the cross section is integrated. If
-   * negative, the maximal energy available to the system (hence,
-   * \f$s=(\sqrt{s})^{2}\f$) is provided.
-   */
+  /// Maximal \f$s\f$ on which the cross section is integrated. If negative,
+  /// the maximal energy available to the system (hence, \f$s=(\sqrt{s})^{2}\f$)
+  /// is provided.
   double wmax;
+  /// Minimal difference in outgoing particles' transverse momentum
   double ptdiffmin;
+  /// Maximal difference in outgoing particles' transverse momentum
   double ptdiffmax;
 };
 
