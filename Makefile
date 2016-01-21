@@ -50,10 +50,6 @@ $(EXEC): main.o $(LIB_FILES)
 	@echo "Linking $<..."
 	$(CC) -g -o $@ $^ $(LDFLAGS)
 
-diffvm: diffvm.o $(LIB_FILES)
-	@echo "Linking $<..."
-	$(CC) -g -o $@ $^ $(LDFLAGS)
-
 pptoll: cpptoll.o $(LIB_FILES)
 	@echo "Linking $<..."
 	$(CC) -g -o $@ $^ $(LDFLAGS)
