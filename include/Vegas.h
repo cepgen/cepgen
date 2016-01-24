@@ -106,6 +106,8 @@ class Vegas {
     int fNumConverg;
     /// Number of iterations for the integration
     unsigned int fNumIter;
+    /// Generic array of components to be used in all parts of the integration and generation code
+    double* fX;
 };
 
 #endif

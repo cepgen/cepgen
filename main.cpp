@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
     Information("No config file provided. Setting the default parameters.");
     
     //mg.parameters->hadroniser = new Pythia6Hadroniser;
-    mg.parameters->process = new GamGamLL;
+    mg.parameters->process = new PPtoLL;
     mg.parameters->process_mode = GenericProcess::InelasticElastic;
     mg.parameters->remnant_mode = GenericProcess::SuriYennie;
     

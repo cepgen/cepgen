@@ -195,5 +195,5 @@ void Gnuplot::operator <<(const std::string& command)
   fflush(_pipe);
   _isPlottable = true; //FIXME need to think about that...
   // flush is necessary, nothing gets plotted else
-};
+}
 

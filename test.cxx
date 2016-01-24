@@ -49,6 +49,7 @@ int main(int argc, char* argv[]) {
     cout << "ERROR while trying to create the output file!" << endl;
   }
   if (argc==1) {
+    mg.parameters->process = new PPtoLL;
     mg.parameters->in1p = 3500.;
     mg.parameters->in2p = 3500.;
     mg.parameters->pair = Particle::Muon;

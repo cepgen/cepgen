@@ -90,7 +90,7 @@ Particle::SetMother(Particle* part_)
                        part_->id+1, part_->GetPDGId(), id+1, fPDGid));
   
   part_->AddDaughter(this);
-};
+}
 
 bool
 Particle::AddDaughter(Particle* part_)
@@ -355,4 +355,11 @@ Particle::Momentum::BetaGammaBoost(double gamma, double betagamma)
   fPz = gamma*pz+betagamma*e;
   fE  = gamma*e +betagamma*pz;
   ComputeP();
+}
+
+std::ostream&
+operator<<(std::ostream& os, const Particle::Momentum& m)
+{
+  os << "(E,p) = (" << m.E() << ", " << m.Px() << ", " << m.Py() << ", " << m.Pz() << ")";
+  return os;
 }

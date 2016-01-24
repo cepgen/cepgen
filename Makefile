@@ -1,4 +1,4 @@
-EXEC=clpair
+EXEC=cpptoll
 ############################################
 PYTHIA6SRC = $(wildcard external/pythia-6.*.f)
 JETSET7SRC = $(wildcard external/jetset7*.f)
@@ -11,11 +11,11 @@ ifdef PYTHIA8
   #make -f $(PYTHIA8)/Makefile
   INCLUDEDIR += -I$(PYTHIA8)/include/ -L$(PYTHIA8)/lib/archive/ -lpythia8 -llhapdfdummy -DPYTHIA8=1
 else
-  $(warning PYTHIA8 variable is not set... skipping its compilation)
+  $(info PYTHIA8 variable is not set... skipping its compilation)
 endif
 ############################################
 CFLAGS     = -Wall -Wextra -fexceptions -Wpointer-arith \
-	     $(INCLUDEDIR) -g
+	     $(INCLUDEDIR) -g -pedantic-errors
 LDFLAGS    = $(INCLUDEDIR) -lgfortran -lgsl -lgslcblas -Wl,-O2
 FFLAGS     = -w -g
 ############################################
@@ -50,14 +50,6 @@ $(EXEC): main.o $(LIB_FILES)
 	@echo "Linking $<..."
 	$(CC) -g -o $@ $^ $(LDFLAGS)
 
-diffvm: diffvm.o $(LIB_FILES)
-	@echo "Linking $<..."
-	$(CC) -g -o $@ $^ $(LDFLAGS)
-
-pptoll: cpptoll.o $(LIB_FILES)
-	@echo "Linking $<..."
-	$(CC) -g -o $@ $^ $(LDFLAGS)
-
 obj/%.o: %.cpp %.h
 	@echo "Building $<..."
 	$(CC) -c $(CFLAGS) $< -o $@
@@ -75,7 +67,7 @@ plots/%.oxx: plots/%.cxx
 	$(CC) -c $(CFLAGS) -I$(RHEAD) $(RFLAGS) $< -o $@
 
 clean:
-	$(RM) obj/*.o $(EXEC) test
+	$(RM) obj/*.o *.o $(EXEC) test
 
 doc: $(CPP_FILES) $(HPP_FILES) Doxyfile
 	doxygen

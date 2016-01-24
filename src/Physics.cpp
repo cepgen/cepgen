@@ -477,9 +477,8 @@ InelasticFlux(double x_, double kt2_, double mx_)
   //const double mpi = pow(Particle::GetMassFromPDGId(Particle::PiZero), 2);
 
   double mx2 = pow(mx_, 2);
-  double Q2min, Q2, mu2;
+  double Q2min, Q2;
   const double Q02 = 0.8; // introduced to shift the Q2 scale
-  double x_Bjorken;
   double F2_aux, F2_corr;
   double term1, term2;
   double f_aux;
@@ -487,12 +486,18 @@ InelasticFlux(double x_, double kt2_, double mx_)
   // F2 structure function
   Q2min = 1./(1.-x_)*(x_*(mx2-mp2)+pow(x_, 2)*mp2);
   Q2 = kt2_/(1.-x_)+Q2min;
-  x_Bjorken = Q2/(Q2+mx2-mp2);
+  float x_Bjorken = Q2/(Q2+mx2-mp2);
 
-  mu2 = Q2+Q02; // scale is shifted
+  float mu2 = Q2+Q02; // scale is shifted
 
-  double xuv, xdv, xus, xds, xss, xg;
+  //double xuv, xdv, xus, xds, xss, xg;
+  float xuv, xdv, xus, xds, xss, xg;
   grv95lo_(x_Bjorken, mu2, xuv, xdv, xus, xds, xss, xg);
+  DebugInsideLoop(Form("Form factor content at xB = %e (scale = %f GeV^2):\n\t"
+                       "  valence quarks: u / d     = %e / %e\n\t"
+                       "  sea quarks:     u / d / s = %e / %e / %e\n\t"
+                       "  gluons:                   = %e",
+                       x_Bjorken, mu2, xuv, xdv, xus, xds, xss, xg));
 
   F2_aux = 4./9.*(xuv + 2.*xus)
          + 1./9.*(xdv + 2.*xds)
@@ -505,9 +510,9 @@ InelasticFlux(double x_, double kt2_, double mx_)
   // F2 corrected for low Q^2 behaviour
   F2_corr = Q2/(Q2+Q02)*F2_aux;
 
-  term1 = pow(1.- x_/2.*(mx2-mp2+Q2)/Q2, 2);
+  ///////term1 = pow(1.- x_/2.*(mx2-mp2+Q2)/Q2, 2);
   //term1 = (1.-x_*(mx2-mp2+Q2)/Q2);
-  //term1 = (1.-(Q2-kt2_)/Q2);
+  term1 = (1.-(Q2-kt2_)/Q2);
   //term1 = (1.-Q2min/Q2);
   //term1 = 1.;
   term2 = pow(kt2_/(kt2_+x_*(mx2-mp2)+pow(x_, 2)*mp2), 2);

@@ -73,6 +73,10 @@ class Parameters {
     double minpt;
     /// Maximal \f$p_T\f$ of the outgoing central particles
     double maxpt;
+    /// Minimal \f$\Delta p_T\f$ of the outgoing central particles
+    double minptdiff;
+    /// Maximal \f$\Delta p_T\f$ of the outgoing central particles
+    double maxptdiff;
     /// Minimal energy of the outgoing central particles
     double minenergy;
     /// Maximal energy of the outgoing central particles
@@ -81,6 +85,7 @@ class Parameters {
     double mineta;
     /// Maximal pseudorapidity \f$\eta\f$ of the outgoing central particles
     double maxeta;
+    double minqt, maxqt;
     /// Minimal value of \f$Q^2\f$, the internal photons lines' virtuality
     double minq2;
     /// Maximal value of \f$Q^2\f$, the internal photons lines' virtuality

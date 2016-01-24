@@ -6,7 +6,8 @@
 
 extern "C"
 {
-  extern void grv95lo_(double&,double&,double&,double&,double&,double&,double&,double&);
+  //extern void grv95lo_(double&,double&,double&,double&,double&,double&,double&,double&);
+  extern void grv95lo_(float&,float&,float&,float&,float&,float&,float&,float&);
 }
 
 class GenericHadroniser; // forward

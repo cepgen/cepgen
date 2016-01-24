@@ -6,11 +6,13 @@ Parameters::Parameters() :
   remnant_mode(GenericProcess::SuriYennie),
   pair(Particle::Muon),
   process_mode(GenericProcess::ElasticElastic),
-  mcut(0),
-  minpt(0.5), maxpt(-1.),
-  minenergy(1.), maxenergy(-1.),
+  mcut(2),
+  minpt(0.), maxpt(-1.),
+  minptdiff(0.), maxptdiff(-1.),
+  minenergy(0.), maxenergy(-1.),
   //minrapidity(-5.), maxrapidity(5.),
   mineta(-5.), maxeta(5.),
+  minqt(0.), maxqt(500.),
   minq2(0.), maxq2(1.e5),
   minmx(1.07), maxmx(320.),
   //ncvg(14000), itvg(10),
@@ -30,8 +32,6 @@ Parameters::Parameters() :
 
 Parameters::~Parameters()
 {
-  Debug("Destructor called");
-  
   delete last_event;
 }
 
@@ -41,8 +41,8 @@ void Parameters::SetThetaRange(double thetamin_, double thetamax_)
   this->maxeta = -log(tan(thetamin_/180.*pi/2.));
 
   Debug(Form("eta(min) = %5.2f => theta(min) = %5.2f"
-                  "eta(max) = %5.2f => theta(max) = %5.2f",
-                  mineta, thetamin_, maxeta, thetamax_));
+             "eta(max) = %5.2f => theta(max) = %5.2f",
+             mineta, thetamin_, maxeta, thetamax_));
 }
 
 void Parameters::Dump()
