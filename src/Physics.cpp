@@ -510,9 +510,9 @@ InelasticFlux(double x_, double kt2_, double mx_)
   // F2 corrected for low Q^2 behaviour
   F2_corr = Q2/(Q2+Q02)*F2_aux;
 
-  term1 = pow(1.- x_/2.*(mx2-mp2+Q2)/Q2, 2);
+  ///////term1 = pow(1.- x_/2.*(mx2-mp2+Q2)/Q2, 2);
   //term1 = (1.-x_*(mx2-mp2+Q2)/Q2);
-  //term1 = (1.-(Q2-kt2_)/Q2);
+  term1 = (1.-(Q2-kt2_)/Q2);
   //term1 = (1.-Q2min/Q2);
   //term1 = 1.;
   term2 = pow(kt2_/(kt2_+x_*(mx2-mp2)+pow(x_, 2)*mp2), 2);

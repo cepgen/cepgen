@@ -495,7 +495,6 @@ if (amat2_1<0.) {
       f2 = InelasticFlux(x2, q2t2, _my);
       break;
   }
-std::cout << _my << std::endl;
   DebugInsideLoop(Form("Form factors: %e / %e", f1, f2));
   if (f1<1.e-20) f1 = 0.;
   if (f2<1.e-20) f2 = 0.;
