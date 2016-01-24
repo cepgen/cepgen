@@ -1,4 +1,4 @@
-EXEC=cpptoll
+EXEC=cepgen
 ############################################
 PYTHIA6SRC = $(wildcard external/pythia-6.*.f)
 JETSET7SRC = $(wildcard external/jetset7*.f)
