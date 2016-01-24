@@ -39,9 +39,9 @@ class PPtoLL : public GenericProcess
   double _my;
   
   // first outgoing proton
-  Particle::Momentum fRemnX;
+  Particle::Momentum fPX;
   // second outgoing proton
-  Particle::Momentum fRemnY;
+  Particle::Momentum fPY;
   // first outgoing lepton
   Particle::Momentum fPl1;
   // second outgoing lepton

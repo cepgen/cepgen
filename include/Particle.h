@@ -178,15 +178,17 @@ class Particle {
         /// Get the longitudinal momentum (in GeV)
         inline double Pz() const { return fPz; }
         /// Get the transverse momentum (in GeV)
-        inline double Pt() const { return sqrt(pow(Px(),2)+pow(Py(),2)); }
+        inline double Pt() const { return sqrt(Px()*Px()+Py()*Py()); }
         /// Get the 3-momentum norm (in GeV)
         inline double P() const { return fP; }
         /// Get the squared 3-momentum norm (in \f$\text{GeV}^\text{2}\f$)
-        inline double P2() const { return pow(fP,2); }
+        inline double P2() const { return fP*fP; }
         /// Get the energy (in GeV)
         inline double E() const { return fE; }
+        /// Get the particle's squared mass (in GeV^2) as computed from its energy and momentum
+        inline double M2() const { return E()*E()-P2(); }
         /// Get the particle's mass (in GeV) as computed from its energy and momentum
-        inline double M() const { return sqrt(pow(E(),2)-P2()); }
+        inline double M() const { return sqrt(M2()); }
         /// Get the polar angle (angle with respect to the longitudinal direction)
         inline double Theta() const { return atan2(Pt(), Pz()); }
         /// Get the azimutal angle (angle in the transverse plane)
@@ -210,7 +212,7 @@ class Particle {
         /// Compute the 3-momentum's norm
         inline void ComputeP() {
           fP = 0.;
-          for (unsigned int i=0; i<3; i++) { fP += pow(P(i),2); }
+          for (unsigned int i=0; i<3; i++) { fP += P(i)*P(i); }
           fP = sqrt(fP);
         }
         /// Momentum along the \f$x\f$-axis
@@ -305,14 +307,14 @@ class Particle {
      */
     bool SetM(double m_=-1.);
     /// Get the particle's squared mass (in \f$\text{GeV}^\text{2}\f$)
-    inline double M2() const { return std::pow(fMass,2); };
+    inline double M2() const { return fMass*fMass; };
     /// Retrieve the momentum object associated with this particle
     inline Momentum GetMomentum() const { return fMomentum; }
     /// Associate a momentum object to this particle
     inline bool SetMomentum(const Momentum& mom) {
       fMomentum = mom;
       if (fMass<0.) { SetM(); }
-      double e = sqrt(fMomentum.P2()+pow(fMass,2));
+      double e = sqrt(fMomentum.P2()+M2());
       if (mom.E()<0.) {
         fMomentum.SetE(e);
         return true;
@@ -375,7 +377,7 @@ class Particle {
       return (fMomentum.E()<0.) ? std::sqrt(M2()+fMomentum.P2()) : fMomentum.E();
     };
     /// Get the particle's squared energy (in \f$\text{GeV}^\text{2}\f$)
-    inline double E2() const { return std::pow(E(), 2); };
+    inline double E2() const { return E()*E(); };
     /// Rotate the particle's momentum by a polar/azimuthal angle
     void RotateThetaPhi(double theta_, double phi_);
     /// Is this particle a valid particle which can be used for kinematic computations ?

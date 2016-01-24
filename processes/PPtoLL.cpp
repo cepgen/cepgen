@@ -1,4 +1,5 @@
 #include "PPtoLL.h"
+#include <assert.h>
 
 PPtoLL::PPtoLL() : GenericProcess("gamma,gamma->l+,l- (kT-factorization approach)")
 {}
@@ -222,6 +223,9 @@ PPtoLL::INCqqbar()
                alpha2 = amt2/fSqS*exp( _y2),
                beta1  = amt1/fSqS*exp(-_y1),
                beta2  = amt2/fSqS*exp(-_y2);
+  DebugInsideLoop(Form("Sudakov parameters:\n\t"
+                       "  alpha1/2 = %f / %f\n\t"
+                       "   beta1/2 = %f / %f", alpha1, alpha2, beta1, beta2));
 
   const double q1t2 = pow(q1tx, 2)+pow(q1ty, 2),
                q2t2 = pow(q2tx, 2)+pow(q2ty, 2);
@@ -238,18 +242,18 @@ PPtoLL::INCqqbar()
 
   const double z1p = alpha1/x1, z1m = alpha2/x1,
                z2p = beta1 /x2, z2m = beta2 /x2;
+  DebugInsideLoop(Form("z(1/2)p = %f / %f\n\t"
+                       "z(1/2)m = %f / %f", z1p, z2p, z1m, z2m));
   
   if (x1>1. or x2>1.) return 0.; // sanity check
 
-  double px_plus, px_minus;
-  double py_plus, py_minus;
-  double p10, p1x, p1y, p1z, p20, p2x, p2y, p2z;
-  
   // FIXME FIXME FIXME
   const double ak10 = GetParticle(Particle::IncomingBeam1)->E(),
-               ak1z = fabs(GetParticle(Particle::IncomingBeam1)->GetMomentum().Pz()),
+               ak1z = GetParticle(Particle::IncomingBeam1)->GetMomentum().Pz(),
                ak20 = GetParticle(Particle::IncomingBeam2)->E(),
-               ak2z = fabs(GetParticle(Particle::IncomingBeam2)->GetMomentum().Pz());
+               ak2z = GetParticle(Particle::IncomingBeam2)->GetMomentum().Pz();
+  DebugInsideLoop(Form("incoming particles: p1: %f / %f\n\t"
+                       "                    p2: %f / %f", ak1z, ak10, ak2z, ak20));
   
   //=================================================================
   //     additional conditions for energy-momentum conservation
@@ -257,7 +261,8 @@ PPtoLL::INCqqbar()
   
   const double s1_eff = x1*fS-pow(_q1t,2), s2_eff = x2*fS-pow(_q2t,2);
   const double invm = sqrt(pow(amt1,2)+pow(amt2,2)+2.*amt1*amt2*cosh(_y1-_y2)-pow(ptsum,2));
-  
+  DebugInsideLoop(Form("s(1/2)_eff = %f / %f GeV^2\n\tdilepton invariant mass = %f GeV", s1_eff, s2_eff, invm));
+
   switch (fCuts.kinematics) {
     case 2: if (sqrt(s1_eff)<=(_my+invm)) return 0.;
     case 3: if (sqrt(s2_eff)<=(_mx+invm)) return 0.;
@@ -271,21 +276,23 @@ PPtoLL::INCqqbar()
   //     four-momenta of the outgoing protons (or remnants)
   //=================================================================
 
-  px_plus = (1.-x1)*ak1z*sqrt(2.);
-  px_minus = (pow(_mx, 2)+pow(q1tx, 2)+pow(q1ty, 2))/2./px_plus;
+  const double px_plus  = (1.-x1)*ak1z*sqrt(2.),
+               px_minus = (pow(_mx, 2)+pow(q1tx, 2)+pow(q1ty, 2))/2./px_plus;
   
-  fRemnX = Particle::Momentum(-q1tx, -q1ty, (px_plus-px_minus)/sqrt(2.), (px_plus+px_minus)/sqrt(2.));
-   
-  py_minus = (1.-x2)*ak2z*sqrt(2.); // warning! sign of pz??
-  py_plus = (pow(_my, 2)+pow(q2tx, 2)+pow(q2ty, 2))/2./py_minus;
+  const double py_minus = (1.-x2)*ak2z*sqrt(2.), // warning! sign of pz??
+               py_plus  = (pow(_my, 2)+pow(q2tx, 2)+pow(q2ty, 2))/2./py_minus;
   
-  fRemnY = Particle::Momentum(-q2tx, -q2ty, (py_plus-py_minus)/sqrt(2.), (py_plus+py_minus)/sqrt(2.));
+  fPX = Particle::Momentum(-q1tx, -q1ty, (px_plus-px_minus)/sqrt(2.), (px_plus+px_minus)/sqrt(2.));
+  fPY = Particle::Momentum(-q2tx, -q2ty, (py_plus-py_minus)/sqrt(2.), (py_plus+py_minus)/sqrt(2.));
 
   DebugInsideLoop(Form("First remnant:  (E,p) = (%f, %f, %f, %f)\n\t"
                        "Second remnant: (E,p) = (%f, %f, %f, %f)",
-                       fRemnX.Px(), fRemnX.Py(), fRemnX.Pz(), fRemnX.E(),
-                       fRemnY.Px(), fRemnY.Py(), fRemnY.Pz(), fRemnY.E()));
+                       fPX.Px(), fPX.Py(), fPX.Pz(), fPX.E(),
+                       fPY.Px(), fPY.Py(), fPY.Pz(), fPY.E()));
   
+  assert(fabs(fPX.M()-_mx)<1.e-6);
+  assert(fabs(fPY.M()-_my)<1.e-6);
+
   _q1t = sqrt(q1t2);
   _q2t = sqrt(q2t2);
   
@@ -293,54 +300,54 @@ PPtoLL::INCqqbar()
   //     four-momenta of the outgoing l^+ and l^-
   //=================================================================
 
-  p10 = alpha1*ak10+beta1*ak20;
-  p1x = pt1x;
-  p1y = pt1y;
-  p1z = alpha1*ak1z+beta1*ak2z;
+  Particle::Momentum p1(pt1x, pt1y, alpha1*ak1z+beta1*ak2z, alpha1*ak10+beta1*ak20),
+                     p2(pt2x, pt2y, alpha2*ak1z+beta2*ak2z, alpha2*ak10+beta2*ak20);
+  DebugInsideLoop(Form("unboosted first lepton:  (E,p), m = (%f, %f, %f, %f), %f\n\t"
+                       "          second lepton: (E,p), m = (%f, %f, %f, %f), %f",
+                       p1.Px(), p1.Py(), p1.Pz(), p1.E(), p1.M(),
+                       p2.Px(), p2.Py(), p2.Pz(), p2.E(), p2.M()));
 
   fPl1 = Particle::Momentum(pt1x, pt1y, sqrt(pow(pt1, 2)+ml2)*sinh(_y1), sqrt(pow(pt1, 2)+ml2)*cosh(_y1));
-
-  p20 = alpha2*ak10+beta2*ak20;
-  p2x = pt2x;
-  p2y = pt2y;
-  p2z = alpha2*ak1z+beta2*ak2z;
-
   fPl2 = Particle::Momentum(pt2x, pt2y, sqrt(pow(pt2, 2)+ml2)*sinh(_y2), sqrt(pow(pt2, 2)+ml2)*cosh(_y2));
 
-  DebugInsideLoop(Form("First lepton:  (E,p) = (%f, %f, %f, %f)\n\t"
-                       "Second lepton: (E,p) = (%f, %f, %f, %f)",
-                       fPl1.Px(), fPl1.Py(), fPl1.Pz(), fPl1.E(),
-                       fPl2.Px(), fPl2.Py(), fPl2.Pz(), fPl2.E()));
+  DebugInsideLoop(Form("First lepton:  (E,p), m = (%f, %f, %f, %f), %f\n\t"
+                       "Second lepton: (E,p), m = (%f, %f, %f, %f), %f",
+                       fPl1.Px(), fPl1.Py(), fPl1.Pz(), fPl1.E(), fPl1.M(),
+                       fPl2.Px(), fPl2.Py(), fPl2.Pz(), fPl2.E(), fPl2.M()));
+
+  assert(fabs(fPl1.M()-GetParticle(Particle::CentralParticle1)->M())<1.e-6);
+  assert(fabs(fPl2.M()-GetParticle(Particle::CentralParticle2)->M())<1.e-6);
 
   //=================================================================
   //     four-momenta squared of the virtual photons
   //=================================================================
 
   //FIXME FIXME FIXME ////////////
-  const double q10 = ak10, q20 = ak20;
-  const double q1z = ak1z, q2z = ak2z;
+  Particle::Momentum q1(q1tx, q1ty, 0., 0.),
+                     q2(q2tx, q2ty, 0., 0.);
   ////////////////////////////////
   
-  /*const double q12 = pow(q10, 2)-pow(q1tx, 2)-pow(q1ty, 2)-pow(q1z, 2);
-  const double q22 = pow(q20, 2)-pow(q2tx, 2)-pow(q2ty, 2)-pow(q2z, 2);*/
+  DebugInsideLoop(Form("First photon*:  (E,p), m2 = (%f, %f, %f, %f), %e\n\t"
+                       "Second photon:  (E,p), m2 = (%f, %f, %f, %f), %e",
+                       q1.Px(), q1.Py(), q1.Pz(), q1.E(), q1.M2(),
+                       q2.Px(), q2.Py(), q2.Pz(), q2.E(), q2.M2()));
+  //const double q12 = q1.M2(), q22 = q2.M2();
 
   //=================================================================
   //     Mendelstam variables
   //=================================================================
-  double that1, that2, that, uhat1, uhat2, uhat;
   
-  //shat = fS*x1*x2; // ishat = 1 (approximation)
-  //const double shat = pow(q10+q20, 2)-pow(q1tx+q2tx, 2)-pow(q1ty+q2ty, 2)-pow(q1z+q2z, 2); // ishat = 2 (exact formula)
+  //const double shat = fS*x1*x2; // ishat = 1 (approximation)
+  //const double shat = (q1+q2).M2(); // ishat = 2 (exact formula)
 
-  that1 = pow(q10-p10, 2)-pow(q1tx-p1x, 2)-pow(q1ty-p1y, 2)-pow(q1z-p1z, 2);
-  uhat1 = pow(q10-p20, 2)-pow(q1tx-p2x, 2)-pow(q1ty-p2y, 2)-pow(q1z-p2z, 2);
-  that2 = pow(q20-p20, 2)-pow(q2tx-p2x, 2)-pow(q2ty-p2y, 2)-pow(q2z-p2z, 2);
-  uhat2 = pow(q20-p10, 2)-pow(q2tx-p1x, 2)-pow(q2ty-p1y, 2)-pow(q2z-p1z, 2);
+  const double that1 = (q1-p1).M2(), that2 = (q2-p2).M2(),
+               uhat1 = (q1-p2).M2(), uhat2 = (q2-p1).M2();
+  DebugInsideLoop(Form("that(1/2) = %f / %f\n\t"
+                       "uhat(1/2) = %f / %f", that1, that2, uhat1, uhat2));
 
   //const double mll = sqrt(shat);
 
-  that = (that1+that2)/2.;
-  uhat = (uhat1+uhat2)/2.;
+  const double that = (that1+that2)/2., uhat = (uhat1+uhat2)/2.;
 
   //=================================================================
   //     matrix elements
@@ -547,13 +554,8 @@ PPtoLL::FillKinematics(bool)
       break;    
   }
   
-  if (!op1->SetMomentum(fRemnX)) {
-    Error(Form("Invalid outgoing proton 1: energy: %.2f", fRemnX.E()));
-  }
-  
-  if (!op2->SetMomentum(fRemnY)) {
-    Error(Form("Invalid outgoing proton 2: energy: %.2f", fRemnY.E()));
-  }
+  if (!op1->SetMomentum(fPX)) { Error(Form("Invalid outgoing proton 1: energy: %.2f", fPX.E())); }
+  if (!op2->SetMomentum(fPY)) { Error(Form("Invalid outgoing proton 2: energy: %.2f", fPY.E())); }
 
   // randomise the charge of the outgoing leptons
   int sign = (drand()>.5) ? +1 : -1;
@@ -563,16 +565,12 @@ PPtoLL::FillKinematics(bool)
   //=================================================================
   Particle* ol1 = GetParticle(Particle::CentralParticle1);
   ol1->SetPDGId(ol1->GetPDGId(), sign);
-  if (!ol1->SetMomentum(fPl1)) {
-    Error("Invalid outgoing lepton 1");
-  }
+  if (!ol1->SetMomentum(fPl1)) { Error("Invalid outgoing lepton 1"); }
 
   //=================================================================
   //     second outgoing lepton
   //=================================================================
   Particle* ol2 = GetParticle(Particle::CentralParticle2);
   ol2->SetPDGId(ol2->GetPDGId(), -sign);
-  if (!ol2->SetMomentum(fPl2)) {
-    Error("Invalid outgoing lepton 2");
-  }
+  if (!ol2->SetMomentum(fPl2)) { Error("Invalid outgoing lepton 2"); }
 }
