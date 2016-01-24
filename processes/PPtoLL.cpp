@@ -179,6 +179,8 @@ PPtoLL::INCqqbar()
   // Inner photons
   const double q1tx = _q1t*cos(_phiq1t), q1ty = _q1t*sin(_phiq1t),
                q2tx = _q2t*cos(_phiq2t), q2ty = _q2t*sin(_phiq2t);
+  DebugInsideLoop(Form("q1t(x/y) = %e / %e\n\t"
+                       "q2t(x/y) = %e / %e", q1tx, q1ty, q2tx, q2ty));
   
   // Two-photon system
   const double ptsumx = q1tx+q2tx,
@@ -276,11 +278,14 @@ PPtoLL::INCqqbar()
   //     four-momenta of the outgoing protons (or remnants)
   //=================================================================
 
-  const double px_plus  = (1.-x1)*ak1z*sqrt(2.),
+  const double px_plus  = (1.-x1)*fabs(ak1z)*sqrt(2.),
                px_minus = (pow(_mx, 2)+pow(q1tx, 2)+pow(q1ty, 2))/2./px_plus;
   
-  const double py_minus = (1.-x2)*ak2z*sqrt(2.), // warning! sign of pz??
+  const double py_minus = (1.-x2)*fabs(ak2z)*sqrt(2.), // warning! sign of pz??
                py_plus  = (pow(_my, 2)+pow(q2tx, 2)+pow(q2ty, 2))/2./py_minus;
+
+  DebugInsideLoop(Form("px_(+/-) = %f / %f\n\t"
+                       "py_(+/-) = %f / %f", px_plus, px_minus, py_plus, py_minus));
   
   fPX = Particle::Momentum(-q1tx, -q1ty, (px_plus-px_minus)/sqrt(2.), (px_plus+px_minus)/sqrt(2.));
   fPY = Particle::Momentum(-q2tx, -q2ty, (py_plus-py_minus)/sqrt(2.), (py_plus+py_minus)/sqrt(2.));
@@ -293,9 +298,6 @@ PPtoLL::INCqqbar()
   assert(fabs(fPX.M()-_mx)<1.e-6);
   assert(fabs(fPY.M()-_my)<1.e-6);
 
-  _q1t = sqrt(q1t2);
-  _q2t = sqrt(q2t2);
-  
   //=================================================================
   //     four-momenta of the outgoing l^+ and l^-
   //=================================================================
@@ -322,13 +324,13 @@ PPtoLL::INCqqbar()
   //     four-momenta squared of the virtual photons
   //=================================================================
 
-  //FIXME FIXME FIXME ////////////
+  // FIXME FIXME FIXME /////////////////////
   Particle::Momentum q1(q1tx, q1ty, 0., 0.),
                      q2(q2tx, q2ty, 0., 0.);
-  ////////////////////////////////
+  //////////////////////////////////////////
   
   DebugInsideLoop(Form("First photon*:  (E,p), m2 = (%f, %f, %f, %f), %e\n\t"
-                       "Second photon:  (E,p), m2 = (%f, %f, %f, %f), %e",
+                       "Second photon*: (E,p), m2 = (%f, %f, %f, %f), %e",
                        q1.Px(), q1.Py(), q1.Pz(), q1.E(), q1.M2(),
                        q2.Px(), q2.Py(), q2.Pz(), q2.E(), q2.M2()));
   //const double q12 = q1.M2(), q22 = q2.M2();
@@ -343,7 +345,8 @@ PPtoLL::INCqqbar()
   const double that1 = (q1-p1).M2(), that2 = (q2-p2).M2(),
                uhat1 = (q1-p2).M2(), uhat2 = (q2-p1).M2();
   DebugInsideLoop(Form("that(1/2) = %f / %f\n\t"
-                       "uhat(1/2) = %f / %f", that1, that2, uhat1, uhat2));
+                       "uhat(1/2) = %f / %f",
+                       that1, that2, uhat1, uhat2));
 
   //const double mll = sqrt(shat);
 
@@ -358,18 +361,18 @@ PPtoLL::INCqqbar()
     //=================================================================
     //     on-shell formula for M^2
     //=================================================================
-    const double ml4 = pow(ml2, 2), ml8 = pow(ml4, 2);
+    const double ml4 = ml2*ml2, ml8 = ml4*ml4;
  
-    const double term1 =  6. *ml8,
-                 term2 = -3. *ml4*pow(that, 2),
-                 term3 = -14.*ml4*that*uhat,
-                 term4 = -3. *ml4*pow(uhat, 2),
-                 term5 =      ml2*pow(that, 3),
-                 term6 =  7.* ml2*pow(that, 2)*uhat,
-                 term7 =  7.* ml2*that*pow(uhat, 2),
-                 term8 =      ml2*pow(uhat, 3),
-                 term9  =        -pow(that, 3)*uhat,
-                 term10 =        -that*pow(uhat, 3);
+    const double term1  =  6. *ml8,
+                 term2  = -3. *ml4*pow(that, 2),
+                 term3  = -14.*ml4*that*uhat,
+                 term4  = -3. *ml4*pow(uhat, 2),
+                 term5  =      ml2*pow(that, 3),
+                 term6  =  7.* ml2*pow(that, 2)*uhat,
+                 term7  =  7.* ml2*that*pow(uhat, 2),
+                 term8  =      ml2*pow(uhat, 3),
+                 term9  =         -pow(that, 3)*uhat,
+                 term10 =         -that*pow(uhat, 3);
 
     const double auxil_gamgam = -2.*(term1+term2+term3+term4+term5+term6+term7+term8+term9+term10)/(pow(ml2-that, 2)*pow(ml2-uhat, 2));
     const double g_em = sqrt(4.*pi*alpha_em);
@@ -417,24 +420,19 @@ PPtoLL::INCqqbar()
             +iterm22*(pow(z2p, 2)+pow(z2m, 2))*Phi212
             -iterm12*4.*z2p*z2m*(z2p-z2m)*Phi20*(q2tx*Phi21_x+q2ty*Phi21_y);*/
 
-    const double Phi11_dot_e   = (Phi11_x*q1tx+Phi11_y*q1ty)/sqrt(q1t2),
-                 Phi11_cross_e = (Phi11_x*q1ty-Phi11_y*q1tx)/sqrt(q1t2);
-
-    const double Phi21_dot_e   = (Phi21_x*q2tx+Phi21_y*q2ty)/sqrt(q2t2),
-                 Phi21_cross_e = (Phi21_x*q2ty-Phi21_y*q2tx)/sqrt(q2t2);
-if (Phi21_dot_e<0. or Phi21_cross_e<0.) {
-  //std::cout << sqrt(q2t2) << "\t" << Phi21_x << "\t" << Phi21_y << "\t" << q2tx << "\t" << q2ty << std::endl;
-  //return 0.;
-}
+    const double Phi11_dot_e = (Phi11_x*q1tx+Phi11_y*q1ty)/_q1t, Phi11_cross_e = (Phi11_x*q1ty-Phi11_y*q1tx)/_q1t;
+    const double Phi21_dot_e = (Phi21_x*q2tx+Phi21_y*q2ty)/_q2t, Phi21_cross_e = (Phi21_x*q2ty-Phi21_y*q2tx)/_q2t;
+    DebugInsideLoop(Form("Phi1: E, px, py = %e, %e, %e\n\t"
+                         "Phi2: E, px, py = %e, %e, %e\n\t"
+                         "(dot):   %e / %e\n\t"
+                         "(cross): %e / %e",
+                         Phi10, Phi11_x, Phi11_y, Phi20, Phi21_x, Phi21_y,
+                         Phi11_dot_e, Phi21_dot_e, Phi11_cross_e, Phi21_cross_e));
 
     aux2_1 = iterm11*(ml2+4.*pow(z1p*z1m, 2)*t1abs)*Phi102
             +iterm22*((pow(z1p, 2)+pow(z1m, 2))*(pow(Phi11_dot_e, 2)+pow(Phi11_cross_e, 2)))
             +itermtt*(pow(Phi11_cross_e, 2)-pow(Phi11_dot_e, 2))
             -iterm12*4.*z1p*z1m*(z1p-z1m)*Phi10*(q1tx*Phi11_x+q1ty*Phi11_y);
-if (aux2_1<0.) {
-//  std::cout << ml2 << "\t" << z1p << "\t" << z1m << "\t" << Phi11_dot_e << "\t" << Phi11_cross_e << "\t" << Phi102 << "\t" << Phi10 << std::endl;
- // return 0.;
-}
 
     aux2_2 = iterm11*(ml2+4.*pow(z2p*z2m, 2)*t2abs)*Phi202
             +iterm22*((pow(z2p, 2)+pow(z2m, 2))*(pow(Phi21_dot_e, 2)+pow(Phi21_cross_e, 2)))
@@ -461,6 +459,8 @@ if (amat2_1<0.) {
 
     amat2 = (imat1*amat2_1+imat2*amat2_2)/2.;
 
+    DebugInsideLoop(Form("aux2(1/2) = %e / %e\n\t"
+                         "amat2(1/2), amat2 = %e / %e / %e", aux2_1, aux2_2, amat2_1, amat2_2, amat2));
     /*const double xx1 = alpha1+alpha2, xx2 = beta1+beta2;
 
     const double sudakov_2 = (pow(_mx, 2)-mp2+q2t2+xx2*mp2)/((1.-xx2)*fS);
@@ -495,8 +495,11 @@ if (amat2_1<0.) {
       f2 = InelasticFlux(x2, q2t2, _my);
       break;
   }
+std::cout << _my << std::endl;
+  DebugInsideLoop(Form("Form factors: %e / %e", f1, f2));
   if (f1<1.e-20) f1 = 0.;
   if (f2<1.e-20) f2 = 0.;
+
   
   //=================================================================
   //     factor 2.*pi below from integration over phi_sum

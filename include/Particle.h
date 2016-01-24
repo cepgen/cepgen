@@ -54,6 +54,8 @@ class Particle {
       Pomeron = 990,
       Reggeon = 110
     };
+    /// Human-readable format for a particle's PDG code
+    friend std::ostream& operator<<(std::ostream& os, const Particle::ParticleCode& pc);
     /// Internal status code for a particle
     enum Status {
       PrimordialIncoming = -9,
@@ -123,10 +125,6 @@ class Particle {
         double operator*=(const Momentum&);
         /// Multiply all 4-momentum coordinates by a scalar
         Momentum& operator*=(double c);
-        /// Compute the 4-vector sum of two 4-momenta
-        inline Momentum& operator+(const Momentum& mom_) { return *this += mom_; }
-        /// Compute the 4-vector difference of two 4-momenta
-        inline Momentum& operator-(const Momentum& mom_) { return *this -= mom_; }
         /// Scalar product of two 3-momenta
         inline double operator*(const Momentum& mom_) { return *this *= mom_; }
         /// Multiply all components of a 4-momentum by a scalar
@@ -226,8 +224,16 @@ class Particle {
         /// Energy (in GeV)
         double fE;
     };
-    /// Human-readable format for a particle's PDG code
-    friend std::ostream& operator<<(std::ostream& os, const Particle::ParticleCode& pc);
+    /// Compute the 4-vector sum of two 4-momenta
+    inline friend Momentum operator+(const Momentum& m1, const Momentum& m2) {
+      Momentum out = m1; out += m2; return out;
+    }
+    /// Compute the 4-vector difference of two 4-momenta
+    inline friend Momentum operator-(const Momentum& m1, const Momentum& m2) {
+      Momentum out = m1; out -= m2; return out;
+    }
+    // Human-readable format of the energy-momentum 4-vector
+    friend std::ostream& operator<<(std::ostream& os, const Particle::Momentum& m);
     /**
      * Gets the mass in GeV/c**2 of a particle given its PDG identifier
      * @brief Gets the mass of a particle

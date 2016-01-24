@@ -32,8 +32,6 @@ Parameters::Parameters() :
 
 Parameters::~Parameters()
 {
-  Debug("Destructor called");
-  
   delete last_event;
 }
 
