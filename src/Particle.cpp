@@ -90,7 +90,7 @@ Particle::SetMother(Particle* part_)
                        part_->id+1, part_->GetPDGId(), id+1, fPDGid));
   
   part_->AddDaughter(this);
-};
+}
 
 bool
 Particle::AddDaughter(Particle* part_)

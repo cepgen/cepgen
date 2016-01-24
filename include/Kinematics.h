@@ -8,7 +8,6 @@
 
 #include "utils.h"
 
-
 /// List of kinematic cuts to apply on the central and outgoing phase space.
 class Kinematics
 {
@@ -60,6 +59,8 @@ class Kinematics
   double ptdiffmin;
   /// Maximal difference in outgoing particles' transverse momentum
   double ptdiffmax;
+  double qtmin;
+  double qtmax;
 };
 
 #endif

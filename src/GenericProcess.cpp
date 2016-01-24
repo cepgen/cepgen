@@ -53,10 +53,12 @@ GenericProcess::DumpPoint(const ExceptionType& et=Information)
 void
 GenericProcess::SetEventContent(IncomingState is, OutgoingState os)
 {
+  for (IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++) { fEvent->AddParticle(Particle(ip->first, ip->second)); }
+  for (OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++) { fEvent->AddParticle(Particle(op->first, op->second)); }
+  
   bool has_cs = false;
   // Incoming particles (incl. eventual partons)
   for (IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++) {
-    fEvent->AddParticle(Particle(ip->first, ip->second));
     Particle* p = GetParticle(ip->first);
     p->status = Particle::Undefined;
     switch (ip->first) {
@@ -77,7 +79,6 @@ GenericProcess::SetEventContent(IncomingState is, OutgoingState os)
   }
   // Outgoing particles (central, and outgoing primary particles or remnants)
   for (OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++) {
-    fEvent->AddParticle(Particle(op->first, op->second));
     Particle* p = GetParticle(op->first);
     p->status = Particle::Undefined;
     switch (op->first) {

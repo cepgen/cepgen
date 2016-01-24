@@ -6,7 +6,7 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
   fInputParameters(inParam_),
   fGridPrepared(false), fGenerationPrepared(false),
   fFmax(0), fFmax2(0.), fFmaxDiff(0.), fFmaxOld(0.), fFGlobalMax(0.), fN(0),
-  fFunction(0)
+  fFunction(0), fX(0)
 {
   fXlow = new double[dim_];
   fXup = new double[dim_];
@@ -30,6 +30,7 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
 
 Vegas::~Vegas()
 {
+  if (fX) delete[] fX;
   if (fXlow) delete[] fXlow;
   if (fXup) delete[] fXup;
   if (fNm) delete[] fNm;
@@ -50,6 +51,10 @@ Vegas::Integrate(double *result_, double *abserr_)
   int veg_res;
   
   double res, err;
+
+  // Prepare the integration coordinates
+  if (fX) delete fX;
+  fX = new double[fFunction->dim];
 
   // Prepare Vegas
   rng = gsl_rng_alloc(rng_type);
@@ -103,7 +108,6 @@ Vegas::GenerateOneEvent()
   double max;
   double y;
   int jj, jjj;
-  double x[fFunction->dim];
   
   if (!fGenerationPrepared) SetGen();
 
@@ -113,8 +117,8 @@ Vegas::GenerateOneEvent()
   // Correction cycles are started
   if (fJ!=0) {
     fHasCorrection = false;
-    while (!CorrectionCycle(x)) {;}
-    if (fHasCorrection) return StoreEvent(x);
+    while (!CorrectionCycle(fX)) {;}
+    if (fHasCorrection) return StoreEvent(fX);
   }
 
   // Normal generation cycle
@@ -131,12 +135,12 @@ Vegas::GenerateOneEvent()
     for (unsigned int i=0; i<fFunction->dim; i++) {
       jjj = jj/fMbin;
       fN[i] = jj-jjj*fMbin;
-      x[i] = ((double)rand()/RAND_MAX+fN[i])/fMbin;
+      fX[i] = ((double)rand()/RAND_MAX+fN[i])/fMbin;
       jj = jjj;
     }
     
     // Get weight for selected x value
-    weight = F(x);
+    weight = F(fX);
     
     // Eject if weight is too low
     //if (y>weight) {
@@ -167,14 +171,13 @@ Vegas::GenerateOneEvent()
   Debug(Form("Correc.: %f, j = %d", fCorrec, fJ));
   
   // Return with an accepted event
-  if (weight>0.) return StoreEvent(x);
+  if (weight>0.) return StoreEvent(fX);
   return false;
 }
 
 bool
 Vegas::CorrectionCycle(double* x_)
 {
-  double x[fFunction->dim];
   double weight;
   
   Debug(Form("Correction cycles are started.\n\t"
@@ -187,10 +190,10 @@ Vegas::CorrectionCycle(double* x_)
     fCorrec = -1.;
     // Select x values in Vegas bin
     for (unsigned int k=0; k<fFunction->dim; k++) {
-      x[k] = ((double)rand()/RAND_MAX+fN[k])/fMbin;
+      fX[k] = ((double)rand()/RAND_MAX+fN[k])/fMbin;
     }
     // Compute weight for x value
-    weight = F(x);
+    weight = F(fX);
     // Parameter for correction of correction
     if (weight>fFmax[fJ]) {
       if (weight>fFmax2) fFmax2 = weight;
@@ -201,7 +204,7 @@ Vegas::CorrectionCycle(double* x_)
     if (weight>=fFmaxDiff*(double)rand()/RAND_MAX+fFmaxOld) { // FIXME!!!!
       //Error("Accepting event!!!");
       //return StoreEvent(x);
-      std::copy(x, x+fFunction->dim, x_);
+      std::copy(fX, fX+fFunction->dim, x_);
       fHasCorrection = true;
       return true;
     }
@@ -252,7 +255,6 @@ Vegas::SetGen()
   int npoin = fInputParameters->npoints;
   double fsum, fsum2;
   double z;
-  double x[fFunction->dim];
   double sig2;
   double av, av2;
 
@@ -291,9 +293,9 @@ Vegas::SetGen()
     fsum = fsum2 = 0.;
     for (int j=0; j<npoin; j++) {
       for (unsigned int k=0; k<fFunction->dim; k++) {
-        x[k] = ((double)rand()/RAND_MAX+n[k])/fMbin;
+        fX[k] = ((double)rand()/RAND_MAX+n[k])/fMbin;
       }
-      z = F(x);
+      z = F(fX);
       if (z>fFmax[i]) fFmax[i] = z;
       fsum += z;
       fsum2 += std::pow(z, 2);

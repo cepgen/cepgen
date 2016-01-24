@@ -90,11 +90,17 @@ MCGen::PrepareFunction()
   }
   Kinematics kin;
   kin.kinematics = static_cast<unsigned int>(parameters->process_mode);
+  /*kin.q1tmin = kin.q2tmin = 0.;
+  kin.q1tmax = kin.q2tmax = 50.;*/
   kin.q2min = parameters->minq2;
   kin.q2max = parameters->maxq2;
+  kin.qtmin = parameters->minqt;
+  kin.qtmax = parameters->maxqt;
   kin.mode = parameters->mcut;
   kin.ptmin = parameters->minpt;
   kin.ptmax = parameters->maxpt;
+  kin.ptdiffmin = parameters->minptdiff;
+  kin.ptdiffmax = parameters->maxptdiff;
   kin.etamin = parameters->mineta;
   kin.etamax = parameters->maxeta;
   kin.emin = parameters->minenergy;
