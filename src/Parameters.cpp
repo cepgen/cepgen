@@ -1,33 +1,28 @@
 #include "Parameters.h"
 
 Parameters::Parameters() :
+  process(0), process_mode(GenericProcess::ElasticElastic),
+  remnant_mode(GenericProcess::SuriYennie),
   in1p(3500.), in2p(3500.),
   in1pdg(Particle::Proton), in2pdg(Particle::Proton),
-  remnant_mode(GenericProcess::SuriYennie),
   pair(Particle::Muon),
-  process_mode(GenericProcess::ElasticElastic),
   mcut(2),
   minpt(0.), maxpt(-1.),
   minptdiff(0.), maxptdiff(-1.),
   minenergy(0.), maxenergy(-1.),
-  //minrapidity(-5.), maxrapidity(5.),
   mineta(-5.), maxeta(5.),
   minqt(0.), maxqt(500.),
   minq2(0.), maxq2(1.e5),
   minmx(1.07), maxmx(320.),
-  //ncvg(14000), itvg(10),
-  ncvg(100000), itvg(10), npoints(100),
-  generation(true), store(false),
-  maxgen(1e5), ngen(0),
+  ncvg(100000), itvg(10), npoints(100), first_run(true),
+  generation(true), store(false), maxgen(1e5),
+  symmetrise(true), ngen(0),
   gpdf(5), spdf(4), qpdf(12),
-  hadroniser_max_trials(5),
-  symmetrise(true),
-  first_run(true),
-  process(0), hadroniser(0)
+  hadroniser(0),
+  hadroniser_max_trials(5)
 {
   this->last_event = new Event();
   this->file = (std::ofstream*)NULL;
-  //this->output_format = "lhe";
 }
 
 Parameters::~Parameters()

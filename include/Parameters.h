@@ -36,6 +36,18 @@ class Parameters {
     /// \param[in] outFile_ Name of the configuration file to create
     /// \return A boolean stating whether this output configuration file is correctly written or not
     bool StoreConfigFile(std::string outFile_);
+
+    //----- process to compute
+    /// Process for which the cross-section will be computed and the events will be generated
+    GenericProcess* process;
+    /// Type of outgoing state to consider for the incoming primary particles
+    GenericProcess::ProcessMode process_mode;
+
+    /// Type of remnant fragmentation algorithm to use
+    /// \note Was named PMOD/EMOD in ILPAIR
+    GenericProcess::StructureFunctions remnant_mode;
+
+    //----- events kinematics
     /// First incoming particle's momentum (in \f$\text{GeV}/c\f$)
     double in1p;
     /// Second incoming particle's momentum (in \f$\text{GeV}/c\f$)
@@ -44,9 +56,6 @@ class Parameters {
     Particle::ParticleCode in1pdg;
     /// Second beam/primary particle's PDG identifier
     Particle::ParticleCode in2pdg;
-    /// Type of remnant fragmentation algorithm to use
-    /// \note Was named PMOD/EMOD in ILPAIR
-    GenericProcess::StructureFunctions remnant_mode;
     /**
      * The particle code of produced leptons, as defined by the PDG convention :
      * - 11 - for \f$e^+e^-\f$ pairs
@@ -55,8 +64,6 @@ class Parameters {
      * @brief PDG id of the outgoing leptons
      */
     Particle::ParticleCode pair;
-    /// Type of outgoing state to consider for the incoming primary particles
-    GenericProcess::ProcessMode process_mode;
     /**
      * Set of cuts to apply on the outgoing leptons in order to restrain the available kinematic phase space :
      * - 0 - No cuts at all (for the total cross section)
@@ -94,17 +101,31 @@ class Parameters {
     double minmx;
     /// Maximal \f$M_X\f$ of the outgoing proton remnants
     double maxmx;
+
+    //----- VEGAS
     int ncvg; // ??
     /// Maximal number of iterations to perform by VEGAS
     int itvg;
     /// Number of points to "shoot" in each integration bin by the algorithm
     int npoints;
+    /// Is it the first time the integrator is run?
+    bool first_run;
+
+    //----- events generation
     /// Are we generating events ? (true) or are we only computing the cross-section ? (false)
     bool generation;
     /// Are the events generated in this run to be stored in the output file ?
     bool store;
     /// Maximal number of events to generate in this run
     int maxgen;
+    /// Pointer to the last event produced in this run
+    Event* last_event;
+    /// File in which to store the events generation's output
+    std::ofstream* file;
+    /// Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?
+    bool symmetrise;
+
+    //----- PDFLIB information
     /// Number of events already generated in this run
     int ngen;
     /// PDFLIB group to use
@@ -113,22 +134,12 @@ class Parameters {
     int spdf;
     /// Number of quarks to consider in the hadronisation part
     int qpdf;
-    /// Maximal number of trials for the hadronisation of the proton(s) remnants
-    int hadroniser_max_trials;
-    /// File in which to store the events generation's output
-    std::ofstream* file;
-    /// Type of format the event will be stored into
-    std::string output_format;
-    /// Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?
-    bool symmetrise;
-    /// Is it the first time the integrator is run?
-    bool first_run;
-    /// Pointer to the last event produced in this run
-    Event* last_event;
-    /// Process for which the cross-section will be computed and the events will be generated
-    GenericProcess* process;
+
+    //----- hadronisation
     /// Hadronisation algorithm to use for the proton(s) fragmentation
     GenericHadroniser* hadroniser;
+    /// Maximal number of trials for the hadronisation of the proton(s) remnants
+    int hadroniser_max_trials;
 };
 
 #endif
