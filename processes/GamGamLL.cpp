@@ -961,88 +961,46 @@ GamGamLL::FillKinematics(bool)
 double
 GamGamLL::PeriPP(int nup_, int ndown_)
 {
-  double rho = .585; // 1.05
-  double cc1 = .86926; // .6303
-  double cc2 = 2.23422; // 2.2049
-  double dd1 = .12549; // .0468
-  double cp = .96; // 1.23
-  double bp = .63; // .61
-
-  double dummy, psfw1, psfw2;
-  double en, x, xt;
-  double rhot, qqq, qdq;
-  double t11, t12, t21, t22;
-  double peripp;
-
-  // Implicitely needed : full event kinematics, such as :
-  // * _t1, _t2
-  // * _mp1, _mp2 (--> _w1, _w2)
-  // * _mp3, _mp5 (--> _w3, _w5)
-
   DebugInsideLoop(Form(" Nup  = %d\n\tNdown = %d", nup_, ndown_));
 
+  FormFactors fp1, fp2;
+
   switch(nup_) {
-  case 1: // electron (trivial) form factor
-    _u1 = 1.;
-    _u2 = 1.;
-    break;
-  case 2: // proton elastic form factor
-    xt = std::pow(1.-_t1/.71, 2);
-    _tau = _t1/(4.*_w1);
-    _u1 = std::pow(2.79/xt, 2);
-    _u2 = (1./std::pow(xt, 2)-_u1*_tau)/(1.-_tau);
-    break;
-  case 4: // does not exist in CDF version
-    PSF(_t1, _w3, &dummy, &psfw1, &psfw2);
-    _u1 = -psfw1*(2.*_mp1)/_t1;
-    _u2 = psfw2/(2.*_mp1);
-    break;
-  default:
-    x = _t1/(_t1-_w3);
-    en = _w31-_t1;
-    _tau = _t1/(4.*_w1);
-    rhot = rho-_t1;
-    _u1 = (-cc1*std::pow(rho/rhot, 2)*_w31-cc2*_w1*std::pow(1.-x, 4)/(x*(x*cp-2*bp)+1.))/_t1;
-    _u2 = (-_tau*_u1-dd1*_w31*_t1*(rho/rhot)*std::pow(_w31/en, 2)/(rhot*_w1))/(1.-std::pow(en, 2)/(4.*_w1*_t1));
-    break;
+    case 1:  fp1 = TrivialFormFactors(); break; // electron (trivial) form factor
+    case 2:  fp1 = ElasticFormFactors(-_t1, _w1); break; // proton elastic form factor
+    case 4: { // does not exist in CDF version
+      double dummy, psfw1, psfw2;
+      PSF(_t1, _w3, &dummy, &psfw1, &psfw2);
+      fp1.FM = -psfw1*(2.*_mp1)/_t1;
+      fp1.FE =  psfw2/(2.*_mp1);
+      break;
+    }
+    default: fp1 = SuriYennieFormFactors(-_t1, _w1, _w3); break;
   }
 
   switch(ndown_) {
-  case 1: // electron (trivial) form factor
-    _v1 = 1.;
-    _v2 = 1.;
-    break;
-  case 2: // proton elastic form factor
-    xt = std::pow(1.-_t2/.71, 2);
-    _tau = _t2/(4.*_w2);
-    _v1 = std::pow(2.79/xt, 2);
-    _v2 = (1./std::pow(xt, 2)-_v1*_tau)/(1.-_tau);
-    break;
-  default:
-    x = _t2/(_t2-_w5);
-    en = _w52-_t2;
-    _tau = _t2/(4.*_w2);
-    rhot = rho-_t2;
-    _v1 = (-cc1*std::pow(rho/rhot, 2)*_w52-cc2*_w2*std::pow(1.-x, 4)/(x*(x*cp-2.*bp)+1))/_t2;
-    _v2 = (-_tau*_v1-dd1*_w52*_t2*(rho/rhot)*std::pow(_w52/en, 2)/(rhot*_w2))/(1.-std::pow(en, 2)/(4.*_w2*_t2));
-    break;
+    case 1:  fp2 = TrivialFormFactors(); break; // electron (trivial) form factor
+    case 2:  fp2 = ElasticFormFactors(-_t2, _w2); break; // proton elastic form factor
+    default: fp2 = SuriYennieFormFactors(-_t2, _w2, _w5); break;
   }
   
-  DebugInsideLoop(Form("u1 = %f\n\tu2 = %f\n\tv1 = %f\n\tv2 = %f", _u1, _u2, _v1, _v2));
+  DebugInsideLoop(Form("u1 = %f\n\tu2 = %f\n\tv1 = %f\n\tv2 = %f", fp1.FM, fp1.FE, fp2.FM, fp2.FE));
 
-  qqq = std::pow(_q1dq, 2);
-  qdq = 4.*_w6-_w4;
-  t11 = 64. *( _bb*(qqq-_g4-qdq*(_t1+_t2+2.*_w6))-2.*(_t1+2.*_w6)*(_t2+2.*_w6)*qqq)*_t1*_t2;
-  t12 = 128.*(-_bb*(_dd2+_g6)-2.*(_t1+2.*_w6)*(_sa2*qqq+std::pow(_a6, 2)))*_t1;
-  t21 = 128.*(-_bb*(_dd4+_g5)-2.*(_t2+2.*_w6)*(_sa1*qqq+std::pow(_a5, 2)))*_t2;
-  t22 = 512.*( _bb*(std::pow(_delta, 2)-_gram)-std::pow(_epsi-_delta*(qdq+_q1dq2), 2)-_sa1*std::pow(_a6, 2)-_sa2*std::pow(_a5, 2)-_sa1*_sa2*qqq);
+  const double qqq = std::pow(_q1dq, 2),
+               qdq = 4.*_w6-_w4;
+  const double t11 = 64. *( _bb*(qqq-_g4-qdq*(_t1+_t2+2.*_w6))-2.*(_t1+2.*_w6)*(_t2+2.*_w6)*qqq)*_t1*_t2,
+               t12 = 128.*(-_bb*(_dd2+_g6)-2.*(_t1+2.*_w6)*(_sa2*qqq+std::pow(_a6, 2)))*_t1,
+               t21 = 128.*(-_bb*(_dd4+_g5)-2.*(_t2+2.*_w6)*(_sa1*qqq+std::pow(_a5, 2)))*_t2,
+               t22 = 512.*( _bb*(std::pow(_delta, 2)-_gram)-std::pow(_epsi-_delta*(qdq+_q1dq2), 2)-_sa1*std::pow(_a6, 2)-_sa2*std::pow(_a5, 2)-_sa1*_sa2*qqq);
 
-  peripp = (((_u1*_v1*t11+_u2*_v1*t21+_u1*_v2*t12+_u2*_v2*t22)/(_t1*_t2*_bb))/(_t1*_t2*_bb))/4.;
+  const double peripp = ( fp1.FM*fp2.FM*t11
+                         +fp1.FE*fp2.FM*t21
+                         +fp1.FM*fp2.FE*t12
+                         +fp1.FE*fp2.FE*t22) / pow(2.*_t1*_t2*_bb, 2);
 
   DebugInsideLoop(Form("t11 = %5.2f\tt12 = %5.2f\n\t"
                        "t21 = %5.2f\tt22 = %5.2f\n\t"
-                       "tau = %f\n\t"
-                       "=> PeriPP = %f", t11, t12, t21, t22, _tau, peripp));
+                       "=> PeriPP = %f", t11, t12, t21, t22, peripp));
   
   return peripp;
 }

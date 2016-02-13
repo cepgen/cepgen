@@ -75,6 +75,14 @@ double GetBRFromProcessId(Particle::ParticleCode vmId_);
 double ElasticFlux(double x_, double kt2_);
 double InelasticFlux(double x_, double kt2_, double mx_);
 
+struct FormFactors {
+  double FE;
+  double FM;
+};
+FormFactors TrivialFormFactors();
+FormFactors ElasticFormFactors(double q2, double mi2);
+FormFactors SuriYennieFormFactors(double q2, double mi2, double mf2);
+
 /**
  * Lorentz boost of a 4-vector (from CERNLIB)
  * @param pi_ Input 4-vector to boost

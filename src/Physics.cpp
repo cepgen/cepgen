@@ -524,7 +524,48 @@ InelasticFlux(double x_, double kt2_, double mx_)
   return f_ine;
 }
 
-void Lorenb(double u_, const Particle::Momentum& ps_, double pi_[4], double pf_[4])
+FormFactors
+TrivialFormFactors()
+{
+  FormFactors ff;
+  ff.FE = 1.;
+  ff.FM = 1.;
+  return ff;
+}
+
+FormFactors
+ElasticFormFactors(double q2, double mi2)
+{
+  const double GE = pow(1.+q2/0.71, -2.), GM = 2.79*GE;
+  FormFactors ff;
+  ff.FE = (4.*mi2*GE*GE+q2*GM*GM)/(4.*mi2+q2);
+  ff.FM = GM*GM;
+  return ff;
+}
+
+FormFactors
+SuriYennieFormFactors(double q2, double mi2, double mf2)
+{
+  // fitted values
+  const double cc1 = 0.86926, // 0.6303
+               cc2 = 2.23422, // 2.2049
+               dd1 = 0.12549, // 0.0468
+               cp = 0.96, // 1.23
+               bp = 0.63, // 0.61
+               rho = 0.585; // 1.05
+  const double x = q2/(q2+mf2),
+               dm2 = mf2-mi2,
+               en = dm2+q2,
+               tau = -q2/4./mi2,
+               rhot = rho+q2;
+  FormFactors ff;
+  ff.FM = -(-cc1*std::pow(rho/rhot, 2)*dm2-cc2*mi2*std::pow(1.-x, 4)/(x*(x*cp-2*bp)+1.))/q2;
+  ff.FE = (-tau*ff.FM+dd1*dm2*q2*(rho/rhot)*std::pow(dm2/en, 2)/(rhot*mi2))/(1.+en*en/(4.*mi2*q2));
+  return ff;
+}
+
+void
+Lorenb(double u_, const Particle::Momentum& ps_, double pi_[4], double pf_[4])
 {
   double fn;
 
