@@ -73,25 +73,21 @@ class GamGamLL : public GenericProcess
   double ComputeMX(double x_, double outmass_, double lepmass_, double* dw_);
   /// Return the value of the first inner photon's virtuality
   /// \return \f$t_1\f$, the first photon virtuality
-  inline double GetT1() { return this->_t1; };
+  inline double GetT1() const { return this->_t1; };
   /// Return the two limit values for the first photon's virtuality
   /// \param[out] t1min_ The minimal value for \f$t_1\f$
   /// \param[out] t1max_ The maximal value for \f$t_1\f$
-  inline void GetT1extrema(double& t1min_, double& t1max_) { t1min_=this->_t1min; t1max_=this->_t1max; };
+  inline void GetT1extrema(double& t1min_, double& t1max_) const { t1min_=this->_t1min; t1max_=this->_t1max; };
   /// Return the value of the second inner photon's virtuality
   /// \return \f$t_2\f$, the second photon virtuality
-  inline double GetT2() { return this->_t2; };
+  inline double GetT2() const { return this->_t2; };
   /// Return the two limit values for the second photon's virtuality
   /// \param[out] t2min_ The minimal value for \f$t_2\f$
   /// \param[out] t2max_ The maximal value for \f$t_2\f$
-  inline void GetT2extrema(double& t2min_, double& t2max_) { t2min_=this->_t2min; t2max_=this->_t2max; };
-  inline double GetS1() { return this->_s1; };
-  inline double GetS2() { return this->_s2; };
-  inline double GetD3() { return this->_d3; };
-  inline double GetU1() { return this->_u1; };
-  inline double GetU2() { return this->_u2; };
-  inline double GetV1() { return this->_v1; };
-  inline double GetV2() { return this->_v2; };
+  inline void GetT2extrema(double& t2min_, double& t2max_) const { t2min_=this->_t2min; t2max_=this->_t2max; };
+  inline double GetS1() const { return this->_s1; };
+  inline double GetS2() const { return this->_s2; };
+  inline double GetD3() const { return this->_d3; };
   /// Set all the kinematic variables for the outgoing proton remnants, and prepare the hadronisation
   /// \param[in] part_ Particle to "prepare" for the hadronisation to be performed
   void PrepareHadronisation(Particle *part_);
@@ -301,8 +297,6 @@ class GamGamLL : public GenericProcess
   bool setp5;
   /// Is the outgoing leptons' state set?
   bool setll;
-
-  double _u1, _u2, _v1, _v2;
 
   double _cotth1, _cotth2;
 };
