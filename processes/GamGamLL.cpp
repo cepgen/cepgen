@@ -968,19 +968,14 @@ GamGamLL::PeriPP(int nup_, int ndown_)
   switch(nup_) {
     case 1:  fp1 = TrivialFormFactors(); break; // electron (trivial) form factor
     case 2:  fp1 = ElasticFormFactors(-_t1, _w1); break; // proton elastic form factor
-    case 4: { // does not exist in CDF version
-      double dummy, psfw1, psfw2;
-      PSF(_t1, _w3, &dummy, &psfw1, &psfw2);
-      fp1.FM = -psfw1*(2.*_mp1)/_t1;
-      fp1.FE =  psfw2/(2.*_mp1);
-      break;
-    }
+    case 4:  fp1 = FioreBrasseFormFactors(-_t1, _w1, _w3); break; // does not exist in CDF version
     default: fp1 = SuriYennieFormFactors(-_t1, _w1, _w3); break;
   }
 
   switch(ndown_) {
     case 1:  fp2 = TrivialFormFactors(); break; // electron (trivial) form factor
     case 2:  fp2 = ElasticFormFactors(-_t2, _w2); break; // proton elastic form factor
+    case 4:  fp2 = FioreBrasseFormFactors(-_t2, _w2, _w5); break; // low-Q2 inelastic form factor
     default: fp2 = SuriYennieFormFactors(-_t2, _w2, _w5); break;
   }
   

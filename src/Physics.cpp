@@ -564,6 +564,17 @@ SuriYennieFormFactors(double q2, double mi2, double mf2)
   return ff;
 }
 
+FormFactors
+FioreBrasseFormFactors(double q2, double mi2, double mf2)
+{
+  const double k = 2.*sqrt(mi2);
+  double dummy, psfw1, psfw2; PSF(-q2, mf2, &dummy, &psfw1, &psfw2);
+  FormFactors ff;
+  ff.FM = psfw1*k/q2;
+  ff.FE = psfw2/k;
+  return ff;
+}
+
 void
 Lorenb(double u_, const Particle::Momentum& ps_, double pi_[4], double pf_[4])
 {

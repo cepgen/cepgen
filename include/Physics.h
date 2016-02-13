@@ -82,6 +82,7 @@ struct FormFactors {
 FormFactors TrivialFormFactors();
 FormFactors ElasticFormFactors(double q2, double mi2);
 FormFactors SuriYennieFormFactors(double q2, double mi2, double mf2);
+FormFactors FioreBrasseFormFactors(double q2, double mi2, double mf2);
 
 /**
  * Lorentz boost of a 4-vector (from CERNLIB)
