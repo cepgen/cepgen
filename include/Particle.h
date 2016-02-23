@@ -54,8 +54,6 @@ class Particle {
       Pomeron = 990,
       Reggeon = 110
     };
-    /// Human-readable format for a particle's PDG code
-    friend std::ostream& operator<<(std::ostream& os, const Particle::ParticleCode& pc);
     /// Internal status code for a particle
     enum Status {
       PrimordialIncoming = -9,
@@ -98,6 +96,10 @@ class Particle {
           fPx(x_), fPy(y_), fPz(z_), fE(t_) { ComputeP(); }
         inline ~Momentum() {;}
         
+        inline void SetMomentum(const Momentum& p) {
+          fPx = p.fPx; fPy = p.fPy; fPz = p.fPz, fE = p.fE; fP = p.fP;
+        }
+        
         // --- static definitions
         
         /// Build a 3-momentum from its three pseudo-cylindric coordinates
@@ -117,6 +119,11 @@ class Particle {
         
         // --- vector and scalar operators
 
+        void operator=(const Momentum&);
+        /// Scalar product of the 3-momentum with another 3-momentum
+        double ThreeProduct(const Momentum&);
+        /// Scalar product of the 4-momentum with another 4-momentum
+        double FourProduct(const Momentum&);
         /// Add a 4-momentum through a 4-vector sum
         Momentum& operator+=(const Momentum&);
         /// Subtract a 4-momentum through a 4-vector sum
@@ -125,12 +132,12 @@ class Particle {
         double operator*=(const Momentum&);
         /// Multiply all 4-momentum coordinates by a scalar
         Momentum& operator*=(double c);
-        /// Scalar product of two 3-momenta
-        inline double operator*(const Momentum& mom_) { return *this *= mom_; }
-        /// Multiply all components of a 4-momentum by a scalar
-        inline Momentum& operator*(double c) { return *this *= c; }
+        /// Human-readable format for a particle's momentum
+        friend std::ostream& operator<<(std::ostream& os, const Particle::Momentum& mom);
 
         void BetaGammaBoost(double gamma, double betagamma);
+        /// Forward Lorentz boost
+        void LorentzBoost(const Particle::Momentum& p);
 
         // --- setters and getters
         
@@ -159,6 +166,8 @@ class Particle {
         }
         /// Set the energy (in GeV)
         inline void SetE(double e_) { fE = e_; }
+        /// Compute the energy from the mass
+        inline void SetM(double m_) { fE = sqrt(P2()+m_*m_); }
         /// Get one component of the 4-momentum (in GeV)
         inline double P(unsigned int i) const {
           switch (i) {
@@ -169,6 +178,7 @@ class Particle {
             default: return -1.;
           }
         }
+        /// Get one component of the 4-momentum (in GeV)
         inline double& operator[](const unsigned int i) {
           switch (i) {
             case 0: return fPx;
@@ -191,8 +201,10 @@ class Particle {
         inline double P2() const { return fP*fP; }
         /// Get the energy (in GeV)
         inline double E() const { return fE; }
+        /// Get the squared energy (in GeV^2)
+        inline double E2() const { return fE*fE; }
         /// Get the particle's squared mass (in GeV^2) as computed from its energy and momentum
-        inline double M2() const { return E()*E()-P2(); }
+        inline double M2() const { return E2()-P2(); }
         /// Get the particle's mass (in GeV) as computed from its energy and momentum
         inline double M() const { return sqrt(M2()); }
         /// Get the polar angle (angle with respect to the longitudinal direction)
@@ -232,16 +244,18 @@ class Particle {
         /// Energy (in GeV)
         double fE;
     };
+    /// Human-readable format for a particle's PDG code
+    friend std::ostream& operator<<(std::ostream& os, const Particle::ParticleCode& pc);
     /// Compute the 4-vector sum of two 4-momenta
-    inline friend Momentum operator+(const Momentum& m1, const Momentum& m2) {
-      Momentum out = m1; out += m2; return out;
-    }
+    friend Particle::Momentum operator+(const Particle::Momentum& mom1, const Particle::Momentum& mom2);
     /// Compute the 4-vector difference of two 4-momenta
-    inline friend Momentum operator-(const Momentum& m1, const Momentum& m2) {
-      Momentum out = m1; out -= m2; return out;
-    }
-    // Human-readable format of the energy-momentum 4-vector
-    friend std::ostream& operator<<(std::ostream& os, const Particle::Momentum& m);
+    friend Particle::Momentum operator-(const Particle::Momentum& mom1, const Particle::Momentum& mom2);
+    /// Scalar product of two 3-momenta
+    friend double operator*(const Particle::Momentum& mom1, const Particle::Momentum& mom2);
+    /// Multiply all components of a 4-momentum by a scalar
+    friend Particle::Momentum operator*(const Particle::Momentum& mom, double c);
+    /// Multiply all components of a 4-momentum by a scalar
+    friend Particle::Momentum operator*(double c, const Particle::Momentum& mom);
     /**
      * Gets the mass in GeV/c**2 of a particle given its PDG identifier
      * @brief Gets the mass of a particle
@@ -325,24 +339,18 @@ class Particle {
     /// Retrieve the momentum object associated with this particle
     inline Momentum GetMomentum() const { return fMomentum; }
     /// Associate a momentum object to this particle
-    inline bool SetMomentum(const Momentum& mom) {
+    inline bool SetMomentum(const Momentum& mom, bool offshell=false) {
       fMomentum = mom;
+      if (offshell) { fMass = fMomentum.M(); return true; }
       if (fMass<0.) { SetM(); }
       double e = sqrt(fMomentum.P2()+M2());
-      if (mom.E()<0.) {
-        fMomentum.SetE(e);
-        return true;
-      }
-      if (fabs(e-fMomentum.E())<1.e-6) { // less than 1 eV difference
-        return true;
-      }
-      if (fabs(e-mom.E())<1.e-6) { // less than 1 eV difference
-        return true;
-      }
+      if (mom.E()<0.) { fMomentum.SetE(e); return true; }
+      if (fabs(e-fMomentum.E())<1.e-6) { return true; } // less than 1 eV difference
+      if (fabs(e-mom.E())<1.e-6) { return true; } // less than 1 eV difference
       if (role!=Parton1 and role!=Parton2) {
         Error(Form("Energy difference for particle %d (computed-set): %.5f", (int)role, e-fMomentum.E()));
       }
-      fMomentum.SetE(e);
+      fMomentum.SetE(e);//FIXME need to ensure nothing relies on this
       return false;
     }
     /**
@@ -470,6 +478,13 @@ inline static double CMEnergy(const Particle& p1, const Particle& p2) {
   if (p1.M()*p2.M()<0.) return 0.;
   if (p1.E()*p2.E()<0.) return 0.;
   return sqrt(p1.M2()+p2.M2()+2.*p1.E()*p2.E()-2.*(p1.GetMomentum()*p2.GetMomentum()));
+}
+
+/// Compute the centre of mass energy of two particles (incoming or outgoing states)
+inline static double CMEnergy(const Particle::Momentum& m1, const Particle::Momentum& m2) {
+  if (m1.M()*m2.M()<0.) return 0.;
+  if (m1.E()*m2.E()<0.) return 0.;
+  return sqrt(m1.M2()+m2.M2()+2.*m1.E()*m2.E()-2.*(m1*m2));
 }
 
 // --- particle containers

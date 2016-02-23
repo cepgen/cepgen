@@ -47,8 +47,8 @@ PPtoLL::ComputeWeight()
   // Incoming photons
   _q1t = std::exp(lqmin+(lqmax-lqmin)*x(0));
   _q2t = std::exp(lqmin+(lqmax-lqmin)*x(1));
-  _phiq1t = 2.*pi*x(2);
-  _phiq2t = 2.*pi*x(3);
+  _phiq1t = 2.*Constants::Pi*x(2);
+  _phiq2t = 2.*Constants::Pi*x(3);
   DebugInsideLoop(Form("photons transverse virtualities:\n\t  mag = %f / %f (%.2f < log(qt) < %.2f)\n\t  phi = %f / %f", _q1t, _q2t, lqmin, lqmax, _phiq1t, _phiq2t));
   
   // Outgoing leptons
@@ -65,7 +65,7 @@ PPtoLL::ComputeWeight()
  
   if (fCuts.ptdiffmax<0.) fCuts.ptdiffmax = 400.; //FIXME
   _ptdiff = fCuts.ptdiffmin+(fCuts.ptdiffmax-fCuts.ptdiffmin)*x(6);
-  _phiptdiff = 2.*pi*x(7);
+  _phiptdiff = 2.*Constants::Pi*x(7);
   DebugInsideLoop(Form("leptons pt difference:\n\t  mag = %f (%.2f < Dpt < %.2f)\n\t  phi = %f", _ptdiff, fCuts.ptdiffmin, fCuts.ptdiffmax, _phiptdiff));
 
   // Outgoing protons (or remnants)
@@ -94,8 +94,8 @@ PPtoLL::ComputeWeight()
   jac = 1.;
   jac *= (lqmax-lqmin)*_q1t; // d(q1t) . q1t
   jac *= (lqmax-lqmin)*_q2t; // d(q2t) . q2t
-  jac *= 2.*pi; // d(phi1)
-  jac *= 2.*pi; // d(phi2)
+  jac *= 2.*Constants::Pi; // d(phi1)
+  jac *= 2.*Constants::Pi; // d(phi2)
   jac *= (ymax-ymin); // d(y1)
   jac *= (ymax-ymin); // d(y2)
   switch (fCuts.kinematics) {
@@ -106,7 +106,7 @@ PPtoLL::ComputeWeight()
             jac *= (fCuts.mxmax-fCuts.mxmin)*2.*_my; break;
   } // d(mx/y**2)
   jac *= (fCuts.ptdiffmax-fCuts.ptdiffmin); // d(Dpt)
-  jac *= 2.*pi; // d(phiDpt)
+  jac *= 2.*Constants::Pi; // d(phiDpt)
  
   const double integrand = INCqqbar();
 
@@ -123,10 +123,8 @@ PPtoLL::INCqqbar()
   int imethod, imat1, imat2;
   int idif, idely;
   double pdif, dely_min, dely_max;
-  const double alpha_em = 1./137.035;
   const double mp = Particle::GetMassFromPDGId(Particle::Proton), mp2 = pow(mp, 2);
   const double ml = GetParticle(Particle::CentralParticle1)->M(), ml2 = pow(ml, 2);
-  double units;
 
   iterm11 = 1; // Long-long
   iterm22 = 1; // Trans-trans
@@ -162,13 +160,7 @@ PPtoLL::INCqqbar()
   idely = 0; // 0 or 1 
   dely_min = 4.0;
   dely_max = 5.0;
-  
-  //=================================================================
-  //     conversion factor
-  //     1/GeV^2 --> pb
-  //=================================================================
-  units = 1.e4*pow(197.3271, 2);
-  
+    
   //=================================================================
   //     matrix element computation
   //=================================================================
@@ -375,7 +367,7 @@ PPtoLL::INCqqbar()
                  term10 =         -that*pow(uhat, 3);
 
     const double auxil_gamgam = -2.*(term1+term2+term3+term4+term5+term6+term7+term8+term9+term10)/(pow(ml2-that, 2)*pow(ml2-uhat, 2));
-    const double g_em = sqrt(4.*pi*alpha_em);
+    const double g_em = sqrt(4.*Constants::Pi*Constants::AlphaEM);
     amat2 = pow(g_em, 4)*auxil_gamgam;
   }
   else if (imethod==1) {
@@ -446,12 +438,8 @@ PPtoLL::INCqqbar()
     //=================================================================
     double amat2_1, amat2_2;
     
-    amat2_1 = pow(4.*pi*alpha_em, 2)*pow(x1*x2*fS, 2)*aux2_1*2.*z1p*z1m*t1abs/(q1t2*q2t2)*t2abs/q2t2;
-if (amat2_1<0.) {
-//  std::cout << "amat21=" << amat2_1 << "\t" << x1 << "\t" << x2 << "\t" << z1p << "\t" << z1m << "\t" << t1abs << "\t" << t2abs << "\t" << q1t2 << "\t" << q2t2 << "\t" << aux2_1 << std::endl;
-//return 0.;
-}
-    amat2_2 = pow(4.*pi*alpha_em, 2)*pow(x1*x2*fS, 2)*aux2_2*2.*z2p*z2m*t2abs/(q1t2*q2t2);
+    amat2_1 = pow(4.*Constants::Pi*Constants::AlphaEM, 2)*pow(x1*x2*fS, 2)*aux2_1*2.*z1p*z1m*t1abs/(q1t2*q2t2)*t2abs/q2t2;
+    amat2_2 = pow(4.*Constants::Pi*Constants::AlphaEM, 2)*pow(x1*x2*fS, 2)*aux2_2*2.*z2p*z2m*t2abs/(q1t2*q2t2);
 
     //=================================================================
     //     symmetrization
@@ -507,9 +495,9 @@ if (amat2_1<0.) {
   //     over d^2 kappa_1 d^2 kappa_2 instead d kappa_1^2 d kappa_2^2
   //=================================================================
 
-  const double aintegral = (2.*pi)*1./(16.*pow(pi, 2)*pow(x1*x2*fS, 2)) * amat2
-                         * f1/pi*f2/pi*(1./4.)*units
-                         * 0.5*4./(4.*pi);
+  const double aintegral = (2.*Constants::Pi)*1./(16.*pow(Constants::Pi, 2)*pow(x1*x2*fS, 2)) * amat2
+                         * f1/Constants::Pi*f2/Constants::Pi*(1./4.)*Constants::GeV2toBarn
+                         * 0.5*4./(4.*Constants::Pi);
   if (aintegral*_q1t*_q2t*_ptdiff!=0.) {
 //std::cout << amat2 << "\t" << f1 << "\t" << f2 << "\t" << aintegral << "\t" << _ptdiff << std::endl;
     //GenericProcess::DumpPoint(Information);

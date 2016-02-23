@@ -218,7 +218,7 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
     ulmq = pymass(singlet_id);
     
     // Choose random direction in MX frame
-    ranmxp = 2.*pi*drand();       // phi angle
+    ranmxp = 2.*Constants::Pi*drand();       // phi angle
     ranmxt = acos(2.*drand()-1.); // theta angle
     
     // Compute momentum of decay particles from MX

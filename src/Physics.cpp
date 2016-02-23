@@ -110,8 +110,8 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
     if (q2max>b_.q2max) q2max = b_.q2max;
 
     if (mode_==1) { // WWA - approximation
-      epamax = alphared*(4.*(1.-dymin)+std::pow(dymin, 2));
-      //std::cout << "alphared = " << alphared << ", dymin = " << dymin << " -> epamax = " << epamax << std::endl;
+      epamax = Constants::AlphaRed*(4.*(1.-dymin)+std::pow(dymin, 2));
+      //std::cout << "Constants::AlphaRed = " << Constants::AlphaRed << ", dymin = " << dymin << " -> epamax = " << epamax << std::endl;
     }
     else { // Full transversal spectrum (2) or full longitudinal and transversal (3) spectrum
 
@@ -126,10 +126,10 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
 
       if (mode_==2) {
         // Transversal spectrum
-        epamax = alphared*dymin*std::sqrt(emsqr)*(2.*(1.-dymin)+emqe2+eqe)/(emqe2+eqe);
+        epamax = Constants::AlphaRed*dymin*std::sqrt(emsqr)*(2.*(1.-dymin)+emqe2+eqe)/(emqe2+eqe);
       }
       else { // Longitudinal & transversal spectrum
-        epamax = alphared*dymin*std::sqrt(emsqr)/(emqe2+eqe)*(4.*(1.-dymin)+emqe2+eqe);
+        epamax = Constants::AlphaRed*dymin*std::sqrt(emsqr)/(emqe2+eqe)*(4.*(1.-dymin)+emqe2+eqe);
       }
     }
     //std::cout << "dymax = " << dymax << ", dymin = " << dymin << ", q2max = " << q2max << ", q2min = " << q2min << std::endl;
@@ -177,7 +177,7 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
 
       // Calc. photon weight
       if (mode_==1) { // WWA - approximation
-        r = alphared/(y*(*q2_));
+        r = Constants::AlphaRed/(y*(*q2_));
         epat = r*(2.*(1.-y)*(1.-el_->M2()*ysqr/(1.-y)*(*q2_)))+ysqr;
         epal = r*2.*(1.-y);
 	//std::cout << r << ", " << *q2_ << ", " << epat << ", " << epal << std::endl;
@@ -209,11 +209,11 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
         }
         
         if (mode_==2) { // Transversal spectrum
-          epat = alphared/(*q2_)*std::sqrt(emsqr)*(2.*(1.-y)+emqe2+eqe)/(emqe2+eqe);
+          epat = Constants::AlphaRed/(*q2_)*std::sqrt(emsqr)*(2.*(1.-y)+emqe2+eqe)/(emqe2+eqe);
           epal = 0.;
         }
         else { // Longitudinal & transversal spectrum
-          r = alphared/(*q2_)*std::sqrt(emsqr)/(emqe2+eqe);
+          r = Constants::AlphaRed/(*q2_)*std::sqrt(emsqr)/(emqe2+eqe);
           epat = r*(2.*(1.-y)+emqe2+eqe);
           epat = r*2.*(1.-y);
         }
@@ -292,7 +292,7 @@ EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
     }
   } while (fabs(cthe)>1. or fabs(sthe)>1.);
 
-  phi = 2.*pi*drand();
+  phi = 2.*Constants::Pi*drand();
 
   //std::cout << "=> " << eesc << ", " << el_->M2() << std::endl;
   pesc = -sqrt(std::pow(eesc, 2)-el_->M2());
@@ -421,7 +421,6 @@ PSF(double q2_, double mX2_, double* sigT_, double* w1_, double* w2_)
   double mX = std::sqrt(mX2_);
   //const double m_min = Particle::GetMassFromPDGId(Particle::Proton)+0.135;
   const double m_min = 1.07, mP = 0.938;
-  const double pi = acos(-1.), alphaF = 1./137.04, muBarn = 1./389.39;
 
   if (mX>=m_min && mX<1.99) {
     if (mX<1.11) {
@@ -457,7 +456,7 @@ PSF(double q2_, double mX2_, double* sigT_, double* w1_, double* w2_)
     exp(abrass[nBin]  +bbrass[nBin]  *logqq0+cbrass[nBin]  *std::pow(fabs(logqq0), 3))*gd2;
 
   *sigT_ = sigLow+xBin*(sigHigh-sigLow)/dx;
-  *w1_ = (mX2_-std::pow(mP, 2))/(8.*std::pow(pi, 2)*mP*alphaF)*muBarn*(*sigT_);
+  *w1_ = (mX2_-std::pow(mP, 2))/(8.*std::pow(Constants::Pi, 2)*mP*Constants::AlphaEM)/Constants::GeV2toBarn*1.e6*(*sigT_);
   *w2_ = (*w1_)*q2_/(q2_-nu2);
 
   return true;
@@ -467,7 +466,6 @@ double
 ElasticFlux(double x_, double kt2_)
 {
   double f_ela;
-  const double alpha_em = 1./137.035;
   
   const double mp2 = pow(Particle::GetMassFromPDGId(Particle::Proton), 2);
   
@@ -480,9 +478,9 @@ ElasticFlux(double x_, double kt2_)
   const double ela2 = (4.*mp2*pow(G_E, 2)+Q2_ela*pow(G_M, 2))/(4.*mp2+Q2_ela);
   //const double ela3 = 1.-(Q2_ela-kt2_)/Q2_ela;
   //const double ela3 = 1.-pow(x_, 2)*mp2/Q2_ela/(1.-x_);
-  //f_ela = alpha_em/pi*(1.-x_+pow(x_, 2)/4.)*ela1*ela2*ela3/kt2_;
-  f_ela = alpha_em/pi*ela1*ela2/Q2_ela;
-  //f_ela = alpha_em/pi*((1.-x_)*ela1*ela2*ela3+pow(x_, 2)/2.*pow(G_M, 2))/kt2_;
+  //f_ela = alpha_em/Constants::Pi*(1.-x_+pow(x_, 2)/4.)*ela1*ela2*ela3/kt2_;
+  f_ela = Constants::AlphaEM/Constants::Pi*ela1*ela2/Q2_ela;
+  //f_ela = Constants::AlphaEM/Constants::Pi*((1.-x_)*ela1*ela2*ela3+pow(x_, 2)/2.*pow(G_M, 2))/kt2_;
 
   return f_ela;
 }
@@ -492,7 +490,6 @@ InelasticFlux(double x_, double kt2_, double mx_)
 {
   double f_ine;
   
-  const double alpha_em = 1./137.035;
   const double mp2 = pow(Particle::GetMassFromPDGId(Particle::Proton), 2);
   //const double mpi = pow(Particle::GetMassFromPDGId(Particle::PiZero), 2);
 
@@ -539,7 +536,7 @@ InelasticFlux(double x_, double kt2_, double mx_)
 
   f_aux = F2_corr/(mx2+Q2-mp2)*term1*term2;
 
-  f_ine = alpha_em/pi*(1.-x_)*f_aux/kt2_;
+  f_ine = Constants::AlphaEM/Constants::Pi*(1.-x_)*f_aux/kt2_;
 
   return f_ine;
 }
@@ -566,7 +563,7 @@ ElasticFormFactors(double q2, double mi2)
 FormFactors
 SuriYennieFormFactors(double q2, double mi2, double mf2)
 {
-  // fitted values
+  // values extracted from experimental fits
   const double cc1 = 0.86926, // 0.6303
                cc2 = 2.23422, // 2.2049
                dd1 = 0.12549, // 0.0468

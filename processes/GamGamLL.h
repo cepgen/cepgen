@@ -73,20 +73,20 @@ class GamGamLL : public GenericProcess
   double ComputeMX(double x_, double outmass_, double lepmass_, double* dw_);
   /// Return the value of the first inner photon's virtuality
   /// \return \f$t_1\f$, the first photon virtuality
-  inline double GetT1() const { return this->_t1; };
+  inline double GetT1() const { return this->fT1; };
   /// Return the two limit values for the first photon's virtuality
   /// \param[out] t1min_ The minimal value for \f$t_1\f$
   /// \param[out] t1max_ The maximal value for \f$t_1\f$
-  inline void GetT1extrema(double& t1min_, double& t1max_) const { t1min_=this->_t1min; t1max_=this->_t1max; };
+  inline void GetT1extrema(double& t1min_, double& t1max_) const { t1min_=this->fT1min; t1max_=this->fT1max; };
   /// Return the value of the second inner photon's virtuality
   /// \return \f$t_2\f$, the second photon virtuality
-  inline double GetT2() const { return this->_t2; };
+  inline double GetT2() const { return this->fT2; };
   /// Return the two limit values for the second photon's virtuality
   /// \param[out] t2min_ The minimal value for \f$t_2\f$
   /// \param[out] t2max_ The maximal value for \f$t_2\f$
-  inline void GetT2extrema(double& t2min_, double& t2max_) const { t2min_=this->_t2min; t2max_=this->_t2max; };
-  inline double GetS1() const { return this->_s1; };
-  inline double GetS2() const { return this->_s2; };
+  inline void GetT2extrema(double& t2min_, double& t2max_) const { t2min_=this->fT2min; t2max_=this->fT2max; };
+  inline double GetS1() const { return this->fS1; };
+  inline double GetS2() const { return this->fS2; };
   inline double GetD3() const { return this->_d3; };
   /// Set all the kinematic variables for the outgoing proton remnants, and prepare the hadronisation
   /// \param[in] part_ Particle to "prepare" for the hadronisation to be performed
@@ -150,9 +150,9 @@ class GamGamLL : public GenericProcess
   /// \f$m_2^2\f$, squared mass of the second proton-like incoming particle
   double _w2;
   /// \f$m_3\f$, mass of the first proton-like outgoing particle
-  double _mp3;
+  double fMX;
   /// \f$m_3^2\f$, squared mass of the first proton-like outgoing particle
-  double _w3;
+  double fMX2;
   /// \f$\left|\mathbf p_4\right|\f$, 3-momentum norm of the two-photon central system
   double _pc4;
   /// \f$E_4\f$, energy of the two-photon central system
@@ -162,17 +162,17 @@ class GamGamLL : public GenericProcess
   /// \f$m_4^2\f$, squared mass of the two-photon central system
   double _w4;
   /// \f$m_5\f$, mass of the second proton-like outgoing particle
-  double _mp5;
+  double fMY;
   /// \f$m_5^2\f$, squared mass of the second proton-like outgoing particle
-  double _w5;
+  double fMY2;
   /// \f$m_6^2\f$, squared mass of the first outgoing lepton
-  double _w6;
+  double fMl12;
   /// \f$p_{T,6}\f$, transverse momentum of the first outgoing lepton
   double _pt_l6;
   /// \f$E_6^\mathrm{lab}\f$, energy of the first outgoing lepton, computed in the lab frame
   double _e6lab;
   //// \f$m_7^2\f$, squared mass of the second outgoing lepton
-  double _w7;
+  double fMl22;
   /// \f$p_{T,7}\f$, transverse momentum of the second outgoing lepton
   double _pt_l7;
   /// \f$E_7^\mathrm{lab}\f$, energy of the second outgoing lepton, computed in the lab frame
@@ -223,9 +223,9 @@ class GamGamLL : public GenericProcess
   
   // --- EXTRA common block
   
-  double _s1, _s2;
-  double _t1, _t1min, _t1max;
-  double _t2, _t2min, _t2max;
+  double fS1, fS2;
+  double fT1, fT1min, fT1max;
+  double fT2, fT2min, fT2max;
   
   // --- LEVI common block
   
@@ -256,9 +256,6 @@ class GamGamLL : public GenericProcess
   /// \f$\delta_2=m_1^2-m_2^2\f$ as defined in Vermaseren's paper
   /// \cite Vermaseren1983347 for the full definition of this quantity
   double _w12;
-  /// \f$\delta_6=m_4^2-m_5^2\f$ as defined in Vermaseren's paper
-  /// \cite Vermaseren1983347 for the full definition of this quantity
-  double _tau;
   
   // --- PICKZZ common block
   
@@ -281,22 +278,18 @@ class GamGamLL : public GenericProcess
   
   // --- VARIAD common block
   
+  /// Kinematics of the first incoming proton
+  Particle::Momentum fP1lab;
+  /// Kinematics of the second incoming proton
+  Particle::Momentum fP2lab;
+  /// Kinematics of the first outgoing proton
   Particle::Momentum fP3lab;
   Particle::Momentum fP4lab;
+  /// Kinematics of the second outgoing proton
   Particle::Momentum fP5lab;
   Particle::Momentum fP6cm;
   Particle::Momentum fP7cm;
   double fJacobian;
-  /// Is the first incoming proton-like particle's kinematic set?
-  bool setp1;
-  /// Is the second incoming proton-like particle's kinematic set?
-  bool setp2;
-  /// Is the first outgoing proton-like particle's kinematic set?
-  bool setp3;
-  /// Is the second outgoing proton-like particle's kinematic set?
-  bool setp5;
-  /// Is the outgoing leptons' state set?
-  bool setll;
 
   double _cotth1, _cotth2;
 };
