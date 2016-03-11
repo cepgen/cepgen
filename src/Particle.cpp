@@ -1,17 +1,20 @@
 #include "Particle.h"
 
 Particle::Particle() :
-  id(-1), charge(999.), name(""), role(UnknownRole), status(Undefined), helicity(0.),
+  id(-1), charge(1.), name(""), role(UnknownRole), status(Undefined), helicity(0.),
   fMomentum(Momentum()), fMass(-1.),
   fPDGid(invalidParticle), fIsPrimary(true)
 {}
 
 Particle::Particle(Role role_, ParticleCode pdgId_) :
-  id(-1), charge(999.), name(""), role(role_), status(Undefined), helicity(0.),
+  id(-1), charge(1.), name(""), role(role_), status(Undefined), helicity(0.),
   fMomentum(Momentum()), fMass(-1.),
   fPDGid(pdgId_), fIsPrimary(true)
 {
-  if (fPDGid!=invalidParticle) SetM();
+  if (fPDGid!=invalidParticle) {
+    std::ostringstream o; o << fPDGid; name = o.str();
+    SetM();
+  }
 }
 
 Particle&
@@ -68,8 +71,7 @@ Particle::SetM(double m_)
       fMomentum.SetE(fMomentum.P2()+M2());
       return true;
     }
-    if (std::pow(E(), 2)-fMomentum.P2()!=std::pow(mass, 2))
-      mass = std::sqrt(std::pow(E(), 2)-fMomentum.P2());
+    if (E2()-fMomentum.P2()!=mass*mass) mass = std::sqrt(E2()-fMomentum.P2());
     fMass = mass;
     return true;
   }
@@ -327,8 +329,15 @@ Particle::Momentum::operator-=(const Particle::Momentum& mom_)
   return *this;
 }
 
+void
+Particle::Momentum::operator=(const Particle::Momentum& mom_)
+{
+  fPx = mom_.fPx; fPy = mom_.fPy; fPz = mom_.fPz; fP = mom_.fP;
+  fE = mom_.fE;
+}
+
 double
-Particle::Momentum::operator*=(const Particle::Momentum& mom_)
+Particle::Momentum::ThreeProduct(const Particle::Momentum& mom_)
 {
   DebugInsideLoop(Form("  (%f, %f, %f, %f)\n\t* (%f, %f, %f, %f)\n\t= %f",
     fPx, fPy, fPz, fE,
@@ -336,6 +345,23 @@ Particle::Momentum::operator*=(const Particle::Momentum& mom_)
     fPx*mom_.fPx+fPy*mom_.fPy+fPz*mom_.fPz
   ));
   return fPx*mom_.fPx+fPy*mom_.fPy+fPz*mom_.fPz;
+}
+
+double
+Particle::Momentum::FourProduct(const Particle::Momentum& mom_)
+{
+  DebugInsideLoop(Form("  (%f, %f, %f, %f)\n\t* (%f, %f, %f, %f)\n\t= %f",
+    fPx, fPy, fPz, fE,
+    mom_.fPx, mom_.fPy, mom_.fPz, mom_.fE,
+    fPx*mom_.fPx+fPy*mom_.fPy+fPz*mom_.fPz
+  ));
+  return fE*mom_.fE-ThreeProduct(mom_);
+}
+
+double
+Particle::Momentum::operator*=(const Particle::Momentum& mom_)
+{
+  return ThreeProduct(mom_);
 }
 
 Particle::Momentum&
@@ -348,6 +374,52 @@ Particle::Momentum::operator*=(double c)
   return *this;
 }
 
+Particle::Momentum
+operator*(const Particle::Momentum& mom, double c)
+{
+  Particle::Momentum out = mom;
+  out *= c;
+  return out;
+}
+
+Particle::Momentum
+operator*(double c, const Particle::Momentum& mom)
+{
+  Particle::Momentum out = mom;
+  out *= c;
+  return out;
+}
+
+Particle::Momentum
+operator+(const Particle::Momentum& mom1, const Particle::Momentum& mom2)
+{
+  Particle::Momentum out = mom1;
+  out += mom2;
+  return out;
+}
+
+Particle::Momentum
+operator-(const Particle::Momentum& mom1, const Particle::Momentum& mom2)
+{
+  Particle::Momentum out = mom1;
+  out -= mom2;
+  return out;
+}
+
+double
+operator*(const Particle::Momentum& mom1, const Particle::Momentum& mom2)
+{
+  Particle::Momentum tmp = mom1;
+  return tmp.ThreeProduct(mom2);
+}
+
+std::ostream&
+operator<<(std::ostream& os, const Particle::Momentum& mom)
+{
+  os << "(E, p) = (" << mom.fE << ", " << mom.fPx << ", " << mom.fPy << ", " << mom.fPz << ")";
+  return os;
+}
+
 void
 Particle::Momentum::BetaGammaBoost(double gamma, double betagamma)
 {
@@ -357,9 +429,16 @@ Particle::Momentum::BetaGammaBoost(double gamma, double betagamma)
   ComputeP();
 }
 
-std::ostream&
-operator<<(std::ostream& os, const Particle::Momentum& m)
+void
+Particle::Momentum::LorentzBoost(const Particle::Momentum& p)
 {
-  os << "(E,p) = (" << m.E() << ", " << m.Px() << ", " << m.Py() << ", " << m.Pz() << ")";
-  return os;
+  const double m = p.M();
+  if (m==p.E()) return;
+  
+  Particle::Momentum mom_old = *this;
+  const double pf4 = mom_old*p/m,
+               fn = (pf4+mom_old.E())/(p.E()+m);
+  Particle::Momentum mom_new = mom_old-p*fn; mom_new.SetE(pf4);
+  SetMomentum(mom_new);
 }
+

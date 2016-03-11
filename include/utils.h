@@ -48,14 +48,19 @@ class Timer
   timespec end_;
 };
 
-/// Electromagnetic coupling constant \f$\alpha_{em}=\frac{e^2}{4\pi\epsilon_0\hbar c}\f$
-#define alphaF 1./137.04
-/// \f$\frac{1}{(\hbar c)^2}~[\mathrm b^{-1}]\f$?
-#define muBarn 1./389.39
-#define pi 3.1415926535897932384626434
-#define sconst 3.89351824E8
-#define sconstb 2.1868465E10
-#define alphared 1.16140981417e-3
+class Constants
+{
+ public:
+  /// Electromagnetic coupling constant \f$\alpha_{em}=\frac{e^2}{4\pi\epsilon_0\hbar c}\f$
+  static double AlphaEM;
+  /// \f$\frac{1}{(\hbar c)^2}~[\mathrm b^{-1}]\f$?
+  static double muBarn;
+  static double Pi;
+  /// Conversion factor between GeV^2 and barn
+  static double GeV2toBarn;
+  static double sconstb;
+  static double AlphaRed;
+};
 
 /**
  * Define modified variables of integration to avoid peaks integrations (see @cite Vermaseren1983347 for details)

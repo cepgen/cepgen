@@ -32,8 +32,8 @@ Parameters::~Parameters()
 
 void Parameters::SetThetaRange(double thetamin_, double thetamax_)
 {
-  this->mineta = -log(tan(thetamax_/180.*pi/2.));
-  this->maxeta = -log(tan(thetamin_/180.*pi/2.));
+  this->mineta = -log(tan(thetamax_/180.*Constants::Pi/2.));
+  this->maxeta = -log(tan(thetamin_/180.*Constants::Pi/2.));
 
   Debug(Form("eta(min) = %5.2f => theta(min) = %5.2f"
              "eta(max) = %5.2f => theta(max) = %5.2f",

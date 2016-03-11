@@ -1,5 +1,13 @@
 #include "utils.h"
 
+double Constants::AlphaEM = 1./137.04;
+double Constants::Pi = acos(-1.);
+double Constants::GeV2toBarn = 3.89351824e8;
+//double Constants::GeV2toBarn = 1.e4*pow(197.3271, 2);
+//double Constants::sconstb = 1.1868465e10;
+double Constants::sconstb = 2.1868465e10;
+double Constants::AlphaRed = 1.16140981417e-3;
+
 void Map(double expo_, double xmin_, double xmax_, double* out_, double* dout_, const std::string& var_name_)
 {
   double y, out;
@@ -139,12 +147,12 @@ int Heli(double longFr_)
 
 double ThetaToEta(double theta_)
 {
-  return -log(tan(theta_/180.*pi/2.));
+  return -log(tan(theta_/180.*Constants::Pi/2.));
 }
 
 double EtaToTheta(double eta_)
 {
-  return 2.*atan(exp(-eta_))*180./pi;
+  return 2.*atan(exp(-eta_))*180./Constants::Pi;
 }
 
 double EtaToY(double eta_, double m_, double pt_)

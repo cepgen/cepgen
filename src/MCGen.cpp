@@ -225,7 +225,7 @@ double f(double* x_, size_t ndim_, void* params_)
 
   if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
     os.str(""); for (unsigned int i=0; i<ndim_; i++) { os << Form("%10.8f ", x_[i]); }
-    Debug(Form("f value for  dim-%d point ( %s): %4.4f", ndim_, os.str().c_str(), ff));
+    Debug(Form("f value for  dim-%d point ( %s): %4.4e", ndim_, os.str().c_str(), ff));
   }
   
   return ff;

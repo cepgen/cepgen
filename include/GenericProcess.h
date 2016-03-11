@@ -89,9 +89,9 @@ class GenericProcess
   /// Set the list of kinematic cuts to apply on the outgoing particles' final state
   /// \param[in] cuts_ The Cuts object containing the kinematic parameters
   inline virtual void SetKinematics(Kinematics cuts_) { fCuts=cuts_; }
-  /// \return Event object containing all the generated Particle objects
   /// Complete list of Particle with their role in the process for the point considered
   /// in the phase space, returned as an Event object.
+  /// \return Event object containing all the generated Particle objects
   inline Event* GetEvent() { return fEvent; }
   ///Get the number of dimensions on which the integration is performed
   inline unsigned int ndim() const { return fNumDimensions; }

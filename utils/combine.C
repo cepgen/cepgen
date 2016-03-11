@@ -206,7 +206,7 @@ void combine()
   while(in >> e >> px >> py >> pz >> pt >> m >> eta >> pdg >> weight) {
     if (maxEvts>0 && i/2>maxEvts) break;
     if (i%2==0 && (i/2)%10000==0) {
-      cout << "[LPAIR++] Event #" << i/2 << endl;
+      cout << "[CepGen] Event #" << i/2 << endl;
     }
     if (i<5) cout << i << "\t" << pdg << "\t" << m << "\t" << eta << "\t" << px << "\t" << py << "\t" << pz << "\t" << pt << "\t" << e << endl;
     if (pdg>0) {
@@ -379,7 +379,7 @@ void combine()
   //text = new TPaveText(.65, 1.04, .9, 1.09, "NDC");
   text = new TPaveText(.1, .925, 1.015, .98, "NDC");
   text->SetTextAlign(33);
-  ss.str(""); ss << "LPAIR/LPAIR++ with " << maxEvts << " events";
+  ss.str(""); ss << "LPAIR/CepGen with " << maxEvts << " events";
   text->AddText(ss.str().c_str());
   text->SetFillColor(kWhite);
   text->SetLineColor(kWhite);
@@ -452,7 +452,7 @@ void combine()
     max = TMath::Max(h_lpairor[i]->GetBinContent(h_lpairor[i]->GetMaximumBin()), h_lpairpp[i]->GetBinContent(h_lpairpp[i]->GetMaximumBin()));
     h_lpairor[i]->GetYaxis()->SetRangeUser(.01, max*1.2);
     if (n==0) {
-      leg->AddEntry(h_lpairpp[i], "LPAIR++", "F");
+      leg->AddEntry(h_lpairpp[i], "CepGen", "F");
       leg->AddEntry(h_lpairor[i], "LPAIR", "F");
     }
     leg->Draw("SAME");
