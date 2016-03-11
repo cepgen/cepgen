@@ -40,7 +40,10 @@ class Particle {
       PiPlus = 211,
       PiZero = 111,
       Rho770_0 = 113,
+      Rho1450_0 = 100113,
+      Rho1700_0 = 30113,
       Omega782 = 223,
+      h1380_1 = 10333,
       JPsi= 443,
       Phi1680 = 100333,
       Upsilon1S = 553,
@@ -168,6 +171,8 @@ class Particle {
         inline void SetE(double e_) { fE = e_; }
         /// Compute the energy from the mass
         inline void SetM(double m_) { fE = sqrt(P2()+m_*m_); }
+        /// Compute the energy from the mass
+        inline void SetM2(double m2) { fE = sqrt(P2()+m2); }
         /// Get one component of the 4-momentum (in GeV)
         inline double P(unsigned int i) const {
           switch (i) {

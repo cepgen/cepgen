@@ -252,12 +252,19 @@ Particle::GetMassFromPDGId(Particle::ParticleCode pdgId_)
     case Photon:       return 0.;
     case PiPlus:       return 0.13957018;
     case PiZero:       return 0.1349766;
-    case JPsi:         return 20.;            // J/psi //FIXME FIXME FIXME
+    case JPsi:         return 20.;            //FIXME FIXME FIXME
     case ud0Diquark:   return 0.57933;
     case ud1Diquark:   return 0.77133;
     case uu1Diquark:   return 0.77133;
     case Proton:       return 0.938272046;
     case Neutron:      return 0.939565346;
+    case Upsilon1S:    return 9.46030;
+    case Upsilon2S:    return 10.02326;
+    case Upsilon3S:    return 10.3552;
+    case Rho770_0:     return 0.77526;
+    case Rho1450_0:    return 1.465;
+    case Rho1700_0:    return 1.720;
+    case h1380_1:      return 1.38619;
     case invalidParticle:
     default:           return -1.;
   }
@@ -268,6 +275,12 @@ Particle::GetWidthFromPDGId(Particle::ParticleCode pdgId_)
 {
   switch (pdgId_) {
     case JPsi:  return 5.; //FIXME
+    case Upsilon1S: return 54.02e-6;
+    case Upsilon2S: return 31.98e-6;
+    case Upsilon3S: return 20.32e-6;
+    case Rho770_0:  return 0.150; // PDG
+    case Rho1450_0: return 0.400; // PDG
+    case Rho1700_0: return 0.250; // PDG
     default:    return -1.;
   }
 }
@@ -289,6 +302,9 @@ operator<<(std::ostream& os, const Particle::ParticleCode& pc)
     case Particle::PiPlus:       os << "pi+"; break;
     case Particle::PiZero:       os << "pi0"; break;
     case Particle::Rho770_0:     os << "rho(770)0"; break;
+    case Particle::Rho1450_0:    os << "rho(1450)0"; break;
+    case Particle::Rho1700_0:    os << "rho(1700)0"; break;
+    case Particle::h1380_1:      os << "h(1380)1"; break;
     case Particle::Omega782:     os << "omega(782)"; break;
     case Particle::JPsi:         os << "J/Psi"; break;
     case Particle::Phi1680:      os << "phi(1680)"; break;

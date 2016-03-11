@@ -34,8 +34,6 @@ class PhysicsBoundaries
   double zmax;
 };
 
-Particles EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_);
-
 /// Vector meson particles and their decay mode
 typedef enum
 {
@@ -89,8 +87,11 @@ bool PSF(double,double,double*,double*,double*);
 double ElasticFlux(double x_, double kt2_);
 double InelasticFlux(double x_, double kt2_, double mx_);
 
+/// Form factors collection (electric and magnetic parts)
 struct FormFactors {
+  /// Electric form factor
   double FE;
+  /// Magnetic form factor
   double FM;
 };
 FormFactors TrivialFormFactors();

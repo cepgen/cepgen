@@ -10,321 +10,6 @@ PhysicsBoundaries::PhysicsBoundaries() :
 PhysicsBoundaries::~PhysicsBoundaries()
 {}
 
-Particles
-EPA(Particle* el_, Particle* pr_, int mode_, PhysicsBoundaries b_, double* q2_)
-{
-  static bool GEPHOT_FIRST = true;
-  static double dymin = 0., dymax = 0.;
-  static double q2min = 0., q2max = 0.;
-  static double epamax;
-  static double emqe2, elpr, s;
-  static int isum;
-  static double dsum, qsum, dsumt, qsumt, dsuml, qsuml;
-  static double eel;
-
-  Particles op;
-  el_->id = 0;
-  el_->role = Particle::IncomingBeam1;
-  //el_->Dump();
-  op.push_back(*el_);
-  //op[0].Dump();
-
-  int irnd;
-  int ierr1, ierr2;
-  double emsqr, eqe;
-  double emy, exy;
-  double sthe, cthe, phi;
-  double pesc, eesc;
-  double lf;
-  double ftrans, epsil; // defined but unused
-  double epa, epat, epal, eparho;
-  double ysqr;
-
-  double r;
-  double w;
-  double y;
-
-  ierr1 = ierr2 = 0;
-
-  //std::cout << "==> Entered EPA..." << std::endl;
-
-  //bool _gephot_first = true; // FIXME static
-
-  //if (_gephot_first) {
-  if (GEPHOT_FIRST) {
-    double wmin2;
-    double w12;
-    double psum;
-    double esmp2;
-
-    isum = 0;
-    dsum = qsum = dsumt = qsumt = dsuml = qsuml = 0.;
-    w12 = dymin = 0.;
-    dymax = 1.;
-
-    // Calculate CMS s=(P+K)**2
-
-    psum = 0.;
-    for (int i=0; i<3; i++) psum+= pr_->GetMomentum().P(i)*el_->GetMomentum().P(i);
-    elpr = pr_->E()*el_->E()-psum; // 4-vector product
-
-    esmp2 = std::pow(2.*elpr+el_->M2(), 2);
-    Particle::Momentum ptot = el_->GetMomentum()+pr_->GetMomentum();
-    /*Particle tot = *el_;
-    tot += *pr_;
-    s = tot.E2();*/ ///FIXME FIXME FIXME
-    //std::cout << "-> s = " << std::sqrt(s) << std::endl;
-
-    // Evaluate photon flux in proton rest frame: set EEL to approx. 50TeV
-
-    if (mode_>3) eel = elpr/pr_->M();
-    else eel = el_->E();
-
-    wmin2 = std::pow(b_.wmin, 2);
-    w12 = wmin2-pr_->M2();
-
-    // Calculate Y - bounds from
-    // ALI, A. et al. (1987): Heavy quark physics at HERA. -
-    //   Proc. HERA workshop, Hamburg 1987 (ed. R.D. PECCEI), 395-494.
-
-    ysqr = std::sqrt(std::pow(s-w12, 2)-4.*w12*el_->M2());
-    dymax = (s+w12+ysqr)/(2.*(s+el_->M2()));
-
-    // Use trick for quadratic equations. See
-    // W.H. PRESS et al. (1988): Numerical Recipes in C. Cambridge (Cambridge
-    // Univ. Press), p. 156.
-
-    dymin = std::max(w12/(dymax*(s+el_->M2())), b_.zmin);
-
-    // Calculate absolute maximum of y, irrespective of final state
-
-    dymax = std::min(s/(s+el_->M2()), b_.zmax);
-    dymax = std::min((std::pow(b_.wmax, 2)-pr_->M2()+b_.q2max)/(2.*elpr), dymax);
-
-
-    // Set max. photon weight for efficient rejection plane
-    q2min = std::pow(el_->M()+dymin, 2)/(1.-dymin);
-    if (q2min<b_.q2min) q2min = b_.q2min;
-    q2max = dymax*s;
-    //std::cout << "q2max = " << q2max << ", boundary = " << b_.q2max << std::endl;
-    if (q2max>b_.q2max) q2max = b_.q2max;
-
-    if (mode_==1) { // WWA - approximation
-      epamax = Constants::AlphaRed*(4.*(1.-dymin)+std::pow(dymin, 2));
-      //std::cout << "Constants::AlphaRed = " << Constants::AlphaRed << ", dymin = " << dymin << " -> epamax = " << epamax << std::endl;
-    }
-    else { // Full transversal spectrum (2) or full longitudinal and transversal (3) spectrum
-
-      eqe = q2min/std::pow(eel, 2);
-      emqe2 = std::pow(dymin-eqe/4., 2);
-      emsqr = (std::pow(dymin*elpr, 2)+q2min*pr_->M2())/(std::pow(elpr, 2)+el_->M2()*pr_->M2());
-
-      if (emsqr<0.) {
-        std::cerr << "[EPA] ERROR: problem with sqrt(emsqr)=" << emsqr << " at EPAMAX determination." << std::endl;
-        exit(0);
-      }
-
-      if (mode_==2) {
-        // Transversal spectrum
-        epamax = Constants::AlphaRed*dymin*std::sqrt(emsqr)*(2.*(1.-dymin)+emqe2+eqe)/(emqe2+eqe);
-      }
-      else { // Longitudinal & transversal spectrum
-        epamax = Constants::AlphaRed*dymin*std::sqrt(emsqr)/(emqe2+eqe)*(4.*(1.-dymin)+emqe2+eqe);
-      }
-    }
-    //std::cout << "dymax = " << dymax << ", dymin = " << dymin << ", q2max = " << q2max << ", q2min = " << q2min << std::endl;
-    epamax *= log(dymax/dymin)*log(q2max/q2min);
-    //std::cout << "mode = " << mode_ << ", epamax = " << epamax << std::endl;
-
-    //_gephot_first = false;
-    GEPHOT_FIRST = false;
-  }
-
-  // Reset rndloop counter every new event
-  irnd = 0;
-
-  // Begin main loop over Y,Q2 random production
-  do {
-    do {
-      do {
-        isum++; irnd++;
-        // Produce Y spect. ( 1/y weighted shape )
-        y = dymin*(std::pow(dymax/dymin, drand()));
-        ysqr = std::pow(y, 2);
-        //std::cout << "y=" << y << ", " << dymin << ", " << dymax << ", " << drand() << std::endl;
-        
-        // Calculate actual Q2_min, Q2_max from Y
-        q2min = el_->M2()*ysqr/(1.-y);
-        q2max = y*s;
-
-	//std::cout << "q2min=" << q2min << ", q2max=" << q2max << std::endl;
-        
-        // Take Q2_cut from steering, if it is kinematicly reachable.
-        if (q2min<b_.q2min) q2min = b_.q2min;
-        if (q2max>b_.q2max) q2max = b_.q2max;
-        //isum++;
-      } while (q2min>q2max);
-      
-      // Produce Q2 spect. (1/x weighted shape )
-      *q2_ = q2min*std::pow(q2max/q2min, drand());
-      //std::cout << "q2=" << *q2_ << ", " << q2max << ", " << q2min << std::endl;
-      
-      //---------------------------------------------------------------
-      // EPA - WWA spectrum
-      //---------------------------------------------------------------
-      
-      //std::cout << "mode=" << mode_ << std::endl;
-
-      // Calc. photon weight
-      if (mode_==1) { // WWA - approximation
-        r = Constants::AlphaRed/(y*(*q2_));
-        epat = r*(2.*(1.-y)*(1.-el_->M2()*ysqr/(1.-y)*(*q2_)))+ysqr;
-        epal = r*2.*(1.-y);
-	//std::cout << r << ", " << *q2_ << ", " << epat << ", " << epal << std::endl;
-      }
-      else {
-        // Full transversal spectrum (2) or full longitudinal and transversal (3)
-        // spectrum from:
-        // ABT, I. & J.R. SMITH (1992): MC Upgrades to Study Untagged Events. -
-        //    H1-10/92-249.
-        // See also:
-        // SMITH, J.R. (1992): An Experimentalist's Guide to Photon Flux
-        //    Calculations. - H1-12/92-259.
-        // SMITH, J.R. (1993): Polarization Decomposition of Fluxes and
-        //    Kinematics in ep Reactions. - H1-04/93-282.
-        
-        eqe = (*q2_)/std::pow(eel, 2);
-        emqe2 = std::pow(y-eqe/4., 2);
-        emsqr = (std::pow(y*elpr, 2)+(*q2_)*pr_->M2())/(std::pow(elpr, 2)+el_->M2()*pr_->M2());
-        
-        if (emsqr<0.) {
-          Warning(Form("problem with sqrt(emsqr)=%.4f: y, Q2 pair rejected", emsqr));
-          //CALL ERRLOG (280, 'S: GEPHOT: EMSQR<0!')
-          ierr1++;
-          if (ierr1>10) {
-            Error("too many sqrt problems: try WWA");
-            //CALL ERRLOG (281, 'F: GEPHOT: EMSQR<0 too often!')
-            exit(0);
-          }
-        }
-        
-        if (mode_==2) { // Transversal spectrum
-          epat = Constants::AlphaRed/(*q2_)*std::sqrt(emsqr)*(2.*(1.-y)+emqe2+eqe)/(emqe2+eqe);
-          epal = 0.;
-        }
-        else { // Longitudinal & transversal spectrum
-          r = Constants::AlphaRed/(*q2_)*std::sqrt(emsqr)/(emqe2+eqe);
-          epat = r*(2.*(1.-y)+emqe2+eqe);
-          epat = r*2.*(1.-y);
-        }
-      }
-      
-      epa = epat+epal;
-      lf = epat/epa;
-      //std::cout << "epa=" << epa << ", " << epat << ", " << epal << std::endl;
-      
-      // Unweight MC
-      r = y*(*q2_)*log(dymax/dymin)*log(q2max/q2min);
-      w = std::sqrt(y*2.*elpr-(*q2_)+pr_->M2());
-      // Check if W > W_min, else reject photon
-      //std::cout << "w=" << w << ", " << b_.wmin << ", " << b_.wmax << std::endl;
-      if (w<b_.wmin) r = 0.;
-      // Check if W < W_max, else reject photon
-      if (w>b_.wmax) r = 0.;
-      //std::cout << "r=" << r << std::endl;
-      epa *= r;
-      epat *= r;
-      epal *= r;
-
-      //std::cout << "epa -> " << epa << std::endl;
-      
-      // Update upper EPA bound
-      if (epa>epamax) {
-        if (epa>1.1*epamax)       { Information("EPA > 1.1*EPAMAX!"); }
-        else if (epa>1.01*epamax) { Information("EPA > 1.01*EPAMAX!"); }
-        else                      { Information("EPA > EPAMAX!"); }
-        epamax = epa;
-        Information(Form("update of maximal weight: %f", epamax));
-      }
-      
-      // Global counter for overall integration
-      dsum += epa;
-      qsum += std::pow(epa, 2);
-      dsumt += epat;
-      qsumt += std::pow(epat, 2);
-      dsuml += epal;
-      qsuml += std::pow(epal, 2);
-      
-      if (irnd>10000) { // Kin. loop failed
-        Error(Form("Kinematic loop failed after %d"" trials."
-                   "\n  EPAMAX too high for efficient mc! EPAMAX=%.4f", irnd, epamax));
-        //CALL ERRLOG (285, 'F: GEPHOT: More than 10000 iterations!')
-        exit(0);
-      }
-      
-      // End rnd loop: rejection method
-      eparho = drand()*epamax;
-      
-    } while (eparho>epa);
-    
-    // Continue with unweighted kinematics
-    
-    // Scattering angle of electron in LAB.: E.Lohrmann DESY HERA 83/08
-    // x = Q2 / (y s)
-    // E_sc = E_e(1-y) + E_p x y
-    // cos t = [E_e(1-y) - E_p x y] / E_sc
-    
-    //std::cout << "//-- " << y << ", " << (*q2_) << std::endl;
-    emy = el_->E()*(1.-y);
-    exy = pr_->E()*(*q2_)/s;
-    
-    //std::cout << "--> " << emy << ", " << exy << std::endl;
-    eesc = emy+exy;
-    cthe = (emy-exy)/eesc;
-    sthe = 2.*std::sqrt(emy*exy)/eesc;
-    
-    // Control scattering angle 
-    ierr2++;
-
-    if (ierr2>100) {
-      Error(Form("too many problems for CTHE or STHE:"
-            		 "\n\tCTHE=%.4f, STHE=%.4f", cthe, sthe));
-    }
-  } while (fabs(cthe)>1. or fabs(sthe)>1.);
-
-  phi = 2.*Constants::Pi*drand();
-
-  //std::cout << "=> " << eesc << ", " << el_->M2() << std::endl;
-  pesc = -sqrt(std::pow(eesc, 2)-el_->M2());
-  Particle outele(Particle::OutgoingBeam1, op[0].GetPDGId());
-  outele.SetMomentum(Particle::Momentum(
-    pesc*sthe*cos(phi),
-    pesc*sthe*sin(phi),
-    pesc*cthe,
-    eesc
-  ));
-  //std::cout << "-> " << pesc << ", " << sthe << ", " << cthe << std::endl;
-  //outele.Dump();
-  outele.id = op.size();
-  outele.role = Particle::OutgoingBeam1;
-  outele.SetMother(&(op[0]));
-  op.push_back(outele);
-
-  Particle outgam;
-  outgam.role = Particle::Parton1;
-  outgam.SetMomentum(op[0].GetMomentum()-op[1].GetMomentum());
-  outgam.SetPDGId(Particle::Photon);
-  outgam.helicity = Heli(lf);
-  outgam.id = op.size();
-  outgam.SetMother(&(op[0]));
-  op.push_back(outgam);
-
-  ftrans = epat;
-  epsil = epal/epat;
-
-  return op;
-}
-
 /*double
 GetBRFromProcessId(Particle::ParticleCode vmId_)
 {
@@ -368,7 +53,7 @@ VMDecayer(Particle part_, GenericHadroniser *had_)
   }
   //if (iret<=-2)...
   if (!had_->Hadronise(&part_)) {
-    
+
   }
 }*/
 
@@ -466,14 +151,14 @@ double
 ElasticFlux(double x_, double kt2_)
 {
   double f_ela;
-  
+
   const double mp2 = pow(Particle::GetMassFromPDGId(Particle::Proton), 2);
-  
+
   const double Q2_ela = (kt2_+pow(x_, 2)*mp2)/(1.-x_);
   const double G_dip = 1./pow(1.+Q2_ela/0.71, 2);
   const double G_E = G_dip;
   const double G_M = 2.79*G_dip;
-  
+
   const double ela1 = pow(kt2_/(kt2_+pow(x_, 2)*mp2), 2);
   const double ela2 = (4.*mp2*pow(G_E, 2)+Q2_ela*pow(G_M, 2))/(4.*mp2+Q2_ela);
   //const double ela3 = 1.-(Q2_ela-kt2_)/Q2_ela;
@@ -489,25 +174,21 @@ double
 InelasticFlux(double x_, double kt2_, double mx_)
 {
   double f_ine;
-  
-  const double mp2 = pow(Particle::GetMassFromPDGId(Particle::Proton), 2);
+
+  const double mx2 = mx_*mx_,
+               mp2 = pow(Particle::GetMassFromPDGId(Particle::Proton), 2);
   //const double mpi = pow(Particle::GetMassFromPDGId(Particle::PiZero), 2);
 
-  double mx2 = pow(mx_, 2);
-  double Q2min, Q2;
   const double Q02 = 0.8; // introduced to shift the Q2 scale
-  double F2_aux, F2_corr;
   double term1, term2;
   double f_aux;
 
   // F2 structure function
-  Q2min = 1./(1.-x_)*(x_*(mx2-mp2)+pow(x_, 2)*mp2);
-  Q2 = kt2_/(1.-x_)+Q2min;
+  const double Q2min = 1./(1.-x_)*(x_*(mx2-mp2)+pow(x_, 2)*mp2), Q2 = kt2_/(1.-x_)+Q2min;
   float x_Bjorken = Q2/(Q2+mx2-mp2);
 
   float mu2 = Q2+Q02; // scale is shifted
 
-  //double xuv, xdv, xus, xds, xss, xg;
   float xuv, xdv, xus, xds, xss, xg;
   grv95lo_(x_Bjorken, mu2, xuv, xdv, xus, xds, xss, xg);
   DebugInsideLoop(Form("Form factor content at xB = %e (scale = %f GeV^2):\n\t"
@@ -516,16 +197,16 @@ InelasticFlux(double x_, double kt2_, double mx_)
                        "  gluons:                   = %e",
                        x_Bjorken, mu2, xuv, xdv, xus, xds, xss, xg));
 
-  F2_aux = 4./9.*(xuv + 2.*xus)
-         + 1./9.*(xdv + 2.*xds)
-         + 1./9.*2.*xss;
+  const double F2_aux = 4./9.*(xuv + 2.*xus)
+                      + 1./9.*(xdv + 2.*xds)
+                      + 1./9.*2.*xss;
 
   /*F2_aux = 4./9.*(xuv + 2.*xus)
          + 1./9.*(0. + 2.*xds)
          + 1./9.*2.*xss;*/
 
   // F2 corrected for low Q^2 behaviour
-  F2_corr = Q2/(Q2+Q02)*F2_aux;
+  const double F2_corr = Q2/(Q2+Q02)*F2_aux;
 
   ///////term1 = pow(1.- x_/2.*(mx2-mp2+Q2)/Q2, 2);
   //term1 = (1.-x_*(mx2-mp2+Q2)/Q2);
