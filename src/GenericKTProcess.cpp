@@ -1,14 +1,11 @@
 #include "GenericKTProcess.h"
 
-GenericKTProcess::GenericKTProcess(std::string name_="<generic kT fact. process>",
+GenericKTProcess::GenericKTProcess(std::string name_="<generic process>",
                                    Particle::ParticleCode p1_=Particle::Photon,
                                    Particle::ParticleCode p2_=Particle::Photon) :
   GenericProcess(name_+" (kT-factorization approach)"),
   kIntermediatePart1(p1_), kIntermediatePart2(p2_)
-{
-  fLogQmin = -2.; // FIXME //lqmin = std::log(std::sqrt(fCuts.q2min));
-  fLogQmax = std::log(fCuts.qtmax);
-}
+{}
 
 GenericKTProcess::~GenericKTProcess()
 {}
@@ -57,7 +54,6 @@ GenericKTProcess::ComputeWeight()
 void
 GenericKTProcess::ComputeOutgoingPrimaryParticlesMasses()
 {
-  // Outgoing protons (or remnants)
   switch (fCuts.kinematics) {
     case 0: default: { Error("This kT factorisation process is intended for p-on-p collisions! Aborting!"); exit(0); break; }
     case 1: 

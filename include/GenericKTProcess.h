@@ -16,16 +16,25 @@ class GenericKTProcess : public GenericProcess
   double ComputeWeight();
   
  protected:
+  inline void SetKinematics(const Kinematics& kin_) {
+    fCuts = kin_;
+    fLogQmin = -10.; // FIXME //lqmin = std::log(std::sqrt(fCuts.q2min));
+    fLogQmax = std::log(fCuts.qtmax);
+  std::cout << fLogQmin << " /// " << fLogQmax << " /// " << fCuts.qtmax  << std::endl;
+  }
+  /// Set the kinematics of the central system before any point computation
   inline virtual void PrepareKTKinematics() { DebugInsideLoop("Dummy kinematics prepared!"); }
+  /// Jacobian weight of the point in the phase space for integration
   inline virtual double ComputeJacobian() {
-    DebugInsideLoop("Dummy Jacobian returned!");
-    return 0.;
+    DebugInsideLoop("Dummy Jacobian returned!"); return 0.;
   }
+  /// kT-factorised matrix element (event weight)
   inline virtual double ComputeKTFactorisedMatrixElement() {
-    DebugInsideLoop("Dummy matrix element returned!");
-    return 0.;
+    DebugInsideLoop("Dummy matrix element returned!"); return 0.;
   }
+  /// Compute the invariant masses of the outgoing protons (or remnants)
   void ComputeOutgoingPrimaryParticlesMasses();
+  /// Set the kinematics of the incoming and outgoing protons (or remnants)
   void FillPrimaryParticlesKinematics();
  
   /// Get the elastic flux to be expected at a given x_bjorken / kT
@@ -40,12 +49,8 @@ class GenericKTProcess : public GenericProcess
   
   /// First outgoing proton
   Particle::Momentum fPX;
-  /// Invariant mass of the first outgoing proton (or remnant), in GeV
-  double fMX;
   /// Second outgoing proton
   Particle::Momentum fPY;
-  /// Invariant mass of the second outgoing proton (or remnant), in GeV
-  double fMY;
   
  private:
   /// First intermediate parton (photon, pomeron, ...)

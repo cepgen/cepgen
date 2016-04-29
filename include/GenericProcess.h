@@ -88,7 +88,7 @@ class GenericProcess
   void DumpPoint(const ExceptionType& et);
   /// Set the list of kinematic cuts to apply on the outgoing particles' final state
   /// \param[in] cuts_ The Cuts object containing the kinematic parameters
-  inline virtual void SetKinematics(Kinematics cuts_) { fCuts=cuts_; }
+  inline virtual void SetKinematics(const Kinematics& cuts_) { fCuts=cuts_; }
   /// Complete list of Particle with their role in the process for the point considered
   /// in the phase space, returned as an Event object.
   /// \return Event object containing all the generated Particle objects
@@ -130,6 +130,11 @@ class GenericProcess
   double fS;
   /// \f$\sqrt s\f$, centre of mass energy of the incoming particles' system (in GeV)
   double fSqS;
+  /// Invariant mass of the first proton-like outgoing particle (or remnant)
+  double fMX;
+  /// Invariant mass of the second proton-like outgoing particle (or remnant)
+  double fMY;
+
   /// Number of dimensions on which the integration has to be performed.
   unsigned int fNumDimensions;
   /// Set of cuts to apply on the final phase space

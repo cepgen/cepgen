@@ -397,7 +397,7 @@ GamGamLL::Orient()
 }
 
 double
-GamGamLL::ComputeMX(double x_, double outmass_, double lepmass_, double *dw_)
+GamGamLL::ComputeOutgoingPrimaryParticlesMasses(double x_, double outmass_, double lepmass_, double *dw_)
 {
   double mx2, dmx2;
 
@@ -447,14 +447,14 @@ GamGamLL::BeforeComputeWeight()
   case GenericProcess::ElasticElastic:
     _dw31 = _dw52 = 0.; break;
   case GenericProcess::ElasticInelastic: case GenericProcess::InelasticElastic:
-    m = ComputeMX(x(7), GetParticle(Particle::IncomingBeam1)->M(), GetParticle(Particle::CentralParticle1)->M(), &_dw31);
+    m = ComputeOutgoingPrimaryParticlesMasses(x(7), GetParticle(Particle::IncomingBeam1)->M(), GetParticle(Particle::CentralParticle1)->M(), &_dw31);
     GetParticle(Particle::OutgoingBeam1)->SetM(m);
     GetParticle(Particle::OutgoingBeam2)->SetM(Particle::GetMassFromPDGId(GetParticle(Particle::OutgoingBeam2)->GetPDGId())); //FIXME
     break;
   case GenericProcess::InelasticInelastic:
-    m = ComputeMX(x(7), GetParticle(Particle::IncomingBeam2)->M(), GetParticle(Particle::CentralParticle1)->M(), &_dw31);
+    m = ComputeOutgoingPrimaryParticlesMasses(x(7), GetParticle(Particle::IncomingBeam2)->M(), GetParticle(Particle::CentralParticle1)->M(), &_dw31);
     GetParticle(Particle::OutgoingBeam1)->SetM(m);
-    m = ComputeMX(x(8), GetParticle(Particle::OutgoingBeam1)->M(), GetParticle(Particle::CentralParticle1)->M(), &_dw52);
+    m = ComputeOutgoingPrimaryParticlesMasses(x(8), GetParticle(Particle::OutgoingBeam1)->M(), GetParticle(Particle::CentralParticle1)->M(), &_dw52);
     GetParticle(Particle::OutgoingBeam2)->SetM(m);
     break;
   }

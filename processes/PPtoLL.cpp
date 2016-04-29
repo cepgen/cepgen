@@ -23,14 +23,14 @@ PPtoLL::PrepareKTKinematics()
   _q2t = std::exp(fLogQmin+(fLogQmax-fLogQmin)*x(1));
   _phiq1t = 2.*Constants::Pi*x(2);
   _phiq2t = 2.*Constants::Pi*x(3);
-  DebugInsideLoop(Form("photons transverse virtualities:\n\t"
+  DebugInsideLoop(Form("photons transverse virtualities (qt):\n\t"
                        "  mag = %f / %f (%.2f < log(qt) < %.2f)\n\t"
                        "  phi = %f / %f",
                        _q1t, _q2t, fLogQmin, fLogQmax, _phiq1t, _phiq2t));
   
   // Outgoing leptons  
   fY1 = fYmin+(fYmax-fYmin)*x(4);
-  fY2 = fYmax+(fYmax-fYmin)*x(5);
+  fY2 = fYmin+(fYmax-fYmin)*x(5);
   DebugInsideLoop(Form("leptons rapidities (%.2f < y < %.2f): %f / %f", fYmin, fYmax, fY1, fY2));
  
   if (fCuts.ptdiffmax<0.) fCuts.ptdiffmax = 400.; //FIXME
@@ -80,7 +80,7 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
   //=================================================================
   //     How matrix element is calculated
   //=================================================================
-  const bool off_shell = false;
+  const bool off_shell = true;
   
   //=================================================================
   //     two terms in Wolfgang's formula for 
@@ -125,12 +125,8 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
   const double pt1x = (ptsumx+ptdiffx)/2., pt1y = (ptsumy+ptdiffy)/2., pt1 = sqrt(pow(pt1x, 2)+pow(pt1y, 2)),
                pt2x = (ptsumx-ptdiffx)/2., pt2y = (ptsumy-ptdiffy)/2., pt2 = sqrt(pow(pt2x, 2)+pow(pt2y, 2));
   
-  if (pt1<fCuts.ptmin or pt2<fCuts.ptmin) {
-    return 0.;
-  }
-  /*if (pt1>fCuts.ptmax or pt2>fCuts.ptmax) {
-    return 0.;
-  }*/
+  if (pt1<fCuts.ptmin or pt2<fCuts.ptmin) return 0.;
+  //if (pt1>fCuts.ptmax or pt2>fCuts.ptmax) return 0.;
   // transverse mass for the two leptons
   const double amt1 = sqrt(pow(pt1, 2)+ml2),
                amt2 = sqrt(pow(pt2, 2)+ml2);

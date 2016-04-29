@@ -70,7 +70,7 @@ class GamGamLL : public GenericProcess
   /// \param[in] lepmass_ The outgoing leptons' mass
   /// \param[out] dw_ The size of the integration bin
   /// \return Mass of the outgoing proton remnant
-  double ComputeMX(double x_, double outmass_, double lepmass_, double* dw_);
+  double ComputeOutgoingPrimaryParticlesMasses(double x_, double outmass_, double lepmass_, double* dw_);
   /// Return the value of the first inner photon's virtuality
   /// \return \f$t_1\f$, the first photon virtuality
   inline double GetT1() const { return this->fT1; };
@@ -149,8 +149,6 @@ class GamGamLL : public GenericProcess
   double _mp2;
   /// \f$m_2^2\f$, squared mass of the second proton-like incoming particle
   double _w2;
-  /// \f$m_3\f$, mass of the first proton-like outgoing particle
-  double fMX;
   /// \f$m_3^2\f$, squared mass of the first proton-like outgoing particle
   double fMX2;
   /// \f$\left|\mathbf p_4\right|\f$, 3-momentum norm of the two-photon central system
@@ -162,8 +160,6 @@ class GamGamLL : public GenericProcess
   /// \f$m_4^2\f$, squared mass of the two-photon central system
   double _w4;
   /// \f$m_5\f$, mass of the second proton-like outgoing particle
-  double fMY;
-  /// \f$m_5^2\f$, squared mass of the second proton-like outgoing particle
   double fMY2;
   /// \f$m_6^2\f$, squared mass of the first outgoing lepton
   double fMl12;

@@ -6,7 +6,8 @@ int main()
 {
   MCGen g;
   Parameters* p = g.parameters;
-  p->process = new GamGamLL;
+  //p->process = new GamGamLL;
+  p->process = new PPtoLL;
   p->process_mode = GenericProcess::ElasticElastic;
   //p->process_mode = GenericProcess::InelasticElastic;
   //p->process_mode = GenericProcess::ElasticInelastic;
