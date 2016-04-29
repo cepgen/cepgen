@@ -84,9 +84,6 @@ void Lorenb(double u_, const Particle::Momentum& ps_, double pi_[], double pf_[]
  */
 bool PSF(double,double,double*,double*,double*);
 
-double ElasticFlux(double x_, double kt2_);
-double InelasticFlux(double x_, double kt2_, double mx_);
-
 /// Form factors collection (electric and magnetic parts)
 struct FormFactors {
   /// Electric form factor

@@ -1,171 +1,110 @@
 #include "PPtoLL.h"
 #include <assert.h>
 
-PPtoLL::PPtoLL() : GenericProcess("gamma,gamma->l+,l- (kT-factorization approach)")
+PPtoLL::PPtoLL() : GenericKTProcess("gamma,gamma->l+,l-", Particle::Photon, Particle::Photon)
 {}
 
 PPtoLL::~PPtoLL()
 {}
 
 void
-PPtoLL::AddEventContent()
+PPtoLL::PrepareKTKinematics()
 {
-  IncomingState is; OutgoingState os;
-  is.insert(ParticleWithRole(Particle::IncomingBeam1,    Particle::Proton));
-  is.insert(ParticleWithRole(Particle::IncomingBeam2,    Particle::Proton));
-  is.insert(ParticleWithRole(Particle::Parton1,          Particle::Photon));
-  is.insert(ParticleWithRole(Particle::Parton2,          Particle::Photon));
-  os.insert(ParticleWithRole(Particle::OutgoingBeam1,    Particle::Proton));
-  os.insert(ParticleWithRole(Particle::OutgoingBeam2,    Particle::Proton));
-  os.insert(ParticleWithRole(Particle::CentralParticle1, Particle::Muon));
-  os.insert(ParticleWithRole(Particle::CentralParticle2, Particle::Muon));
-  GenericProcess::SetEventContent(is, os);
-}
-
-int
-PPtoLL::GetNdim(ProcessMode process_mode_) const
-{
-  switch (process_mode_) {
-    default:
-    case ElasticElastic:     return 8;
-    case ElasticInelastic:
-    case InelasticElastic:   return 9;
-    case InelasticInelastic: return 10;
-  }
-}
-
-double
-PPtoLL::ComputeWeight()
-{
-  double lqmin, lqmax;
-  double jac, weight;
+  ////////////////////////////////////
+  fYmin = fCuts.etamin;             //
+  fYmax = fCuts.etamax;             //
+  ///////////// FIXME ////////////////
+  //fYmin = EtaToY(fCuts.etamin, GetParticle(Particle::CentralParticle1)->M(), pt);
+  //fYmax = EtaToY(fCuts.etamax);
+  //std::cout << fLogQmin << " / " << fLogQmax << " >>>> " << exp(fLogQmin+(fLogQmax-fLogQmin)*x(0)) << std::endl;
   
-  //lqmin = std::log(std::sqrt(fCuts.q2min));
-  lqmin = -10.; //FIXME
-  lqmax = std::log(fCuts.qtmax);
-
   // Incoming photons
-  _q1t = std::exp(lqmin+(lqmax-lqmin)*x(0));
-  _q2t = std::exp(lqmin+(lqmax-lqmin)*x(1));
+  _q1t = std::exp(fLogQmin+(fLogQmax-fLogQmin)*x(0));
+  _q2t = std::exp(fLogQmin+(fLogQmax-fLogQmin)*x(1));
   _phiq1t = 2.*Constants::Pi*x(2);
   _phiq2t = 2.*Constants::Pi*x(3);
-  DebugInsideLoop(Form("photons transverse virtualities:\n\t  mag = %f / %f (%.2f < log(qt) < %.2f)\n\t  phi = %f / %f", _q1t, _q2t, lqmin, lqmax, _phiq1t, _phiq2t));
+  DebugInsideLoop(Form("photons transverse virtualities:\n\t"
+                       "  mag = %f / %f (%.2f < log(qt) < %.2f)\n\t"
+                       "  phi = %f / %f",
+                       _q1t, _q2t, fLogQmin, fLogQmax, _phiq1t, _phiq2t));
   
-  // Outgoing leptons
-  //const double ymin = EtaToY(fCuts.etamin, GetParticle(Particle::CentralParticle1)->M(), pt),
-  //             ymax = EtaToY(fCuts.etamax);
-  ////////////////////////////////////
-  const double ymin = fCuts.etamin, //
-               ymax = fCuts.etamax; //
-  ///////////// FIXME ////////////////
-  
-  _y1 = ymin+(ymax-ymin)*x(4);
-  _y2 = ymin+(ymax-ymin)*x(5);
-  DebugInsideLoop(Form("leptons rapidities (%.2f < y < %.2f): %f / %f", ymin, ymax, _y1, _y2));
+  // Outgoing leptons  
+  fY1 = fYmin+(fYmax-fYmin)*x(4);
+  fY2 = fYmax+(fYmax-fYmin)*x(5);
+  DebugInsideLoop(Form("leptons rapidities (%.2f < y < %.2f): %f / %f", fYmin, fYmax, fY1, fY2));
  
   if (fCuts.ptdiffmax<0.) fCuts.ptdiffmax = 400.; //FIXME
   _ptdiff = fCuts.ptdiffmin+(fCuts.ptdiffmax-fCuts.ptdiffmin)*x(6);
   _phiptdiff = 2.*Constants::Pi*x(7);
-  DebugInsideLoop(Form("leptons pt difference:\n\t  mag = %f (%.2f < Dpt < %.2f)\n\t  phi = %f", _ptdiff, fCuts.ptdiffmin, fCuts.ptdiffmax, _phiptdiff));
-
-  // Outgoing protons (or remnants)
-  switch (fCuts.kinematics) {
-    case 0: default: { Error("PPtoLL is intended for p-on-p collisions! Aborting!"); exit(0); break; }
-    case 1: 
-      _mx = GetParticle(Particle::IncomingBeam1)->M();
-      _my = GetParticle(Particle::IncomingBeam2)->M();
-      break;
-    case 2:
-      _mx = GetParticle(Particle::IncomingBeam1)->M();
-      _my = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(8);
-      break;
-    case 3:
-      _mx = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(8);
-      _my = GetParticle(Particle::IncomingBeam2)->M();
-      break;
-    case 4:
-      _mx = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(8);
-      _my = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(9);
-      break;
-  }
-  DebugInsideLoop(Form("outgoing remnants invariant mass: %f / %f (%.2f < M(X/Y) < %.2f)", _mx, _my, fCuts.mxmin, fCuts.mxmax));
-  
-  // Jacobian computation
-  jac = 1.;
-  jac *= (lqmax-lqmin)*_q1t; // d(q1t) . q1t
-  jac *= (lqmax-lqmin)*_q2t; // d(q2t) . q2t
-  jac *= 2.*Constants::Pi; // d(phi1)
-  jac *= 2.*Constants::Pi; // d(phi2)
-  jac *= (ymax-ymin); // d(y1)
-  jac *= (ymax-ymin); // d(y2)
-  switch (fCuts.kinematics) {
-    case 1: default: break;
-    case 2: jac *= (fCuts.mxmax-fCuts.mxmin)*2.*_my; break;
-    case 3: jac *= (fCuts.mxmax-fCuts.mxmin)*2.*_mx; break;
-    case 4: jac *= (fCuts.mxmax-fCuts.mxmin)*2.*_mx;
-            jac *= (fCuts.mxmax-fCuts.mxmin)*2.*_my; break;
-  } // d(mx/y**2)
-  jac *= (fCuts.ptdiffmax-fCuts.ptdiffmin); // d(Dpt)
-  jac *= 2.*Constants::Pi; // d(phiDpt)
- 
-  const double integrand = INCqqbar();
-
-  weight = jac*integrand;
-  DebugInsideLoop(Form("Jacobian = %f\n\tIntegrand = %f\n\tdW = %f", jac, integrand, weight));
-  
-  return weight;
+  DebugInsideLoop(Form("leptons pt difference:\n\t"
+                       "  mag = %f (%.2f < Dpt < %.2f)\n\t"
+                       "  phi = %f",
+                       _ptdiff, fCuts.ptdiffmin, fCuts.ptdiffmax, _phiptdiff));
+  //std::cout << _q1t << " >>>> " << _q2t << std::endl;
 }
 
 double
-PPtoLL::INCqqbar()
+PPtoLL::ComputeJacobian()
 {
-  int iterm11, iterm12, itermtt, iterm22;
-  int imethod, imat1, imat2;
-  int idif, idely;
-  double pdif, dely_min, dely_max;
+  double jac = 1.;
+  jac *= (fLogQmax-fLogQmin)*_q1t; // d(q1t) . q1t
+  jac *= (fLogQmax-fLogQmin)*_q2t; // d(q2t) . q2t
+  jac *= 2.*Constants::Pi; // d(phi1)
+  jac *= 2.*Constants::Pi; // d(phi2)
+  jac *= (fYmax-fYmin); // d(y1)
+  jac *= (fYmax-fYmin); // d(y2)
+  switch (fCuts.kinematics) {
+    case 1: default: break;
+    case 2: jac *= (fCuts.mxmax-fCuts.mxmin)*2.*fMY; break;
+    case 3: jac *= (fCuts.mxmax-fCuts.mxmin)*2.*fMX; break;
+    case 4: jac *= (fCuts.mxmax-fCuts.mxmin)*2.*fMX;
+            jac *= (fCuts.mxmax-fCuts.mxmin)*2.*fMY; break;
+  } // d(mx/y**2)
+  jac *= (fCuts.ptdiffmax-fCuts.ptdiffmin); // d(Dpt)
+  jac *= 2.*Constants::Pi; // d(phiDpt)
+  
+  return jac;
+}
+
+double
+PPtoLL::ComputeKTFactorisedMatrixElement()
+{
   const double mp = Particle::GetMassFromPDGId(Particle::Proton), mp2 = pow(mp, 2);
   const double ml = GetParticle(Particle::CentralParticle1)->M(), ml2 = pow(ml, 2);
 
-  iterm11 = 1; // Long-long
-  iterm22 = 1; // Trans-trans
-  iterm12 = 1; // Long-trans
-  itermtt = 1; // Trans-trans(')
+  const unsigned int iterm11 = 1, // Long-long
+                     iterm22 = 1, // Trans-trans
+                     iterm12 = 1, // Long-trans
+                     itermtt = 1; // Trans-trans(')
 
   //=================================================================
   //     How matrix element is calculated
-  //         imethod = 0: on-shell formula
-  //         imethod = 1: off-shell formula
   //=================================================================
-  imethod = 1;
-  //imethod = 0;
+  const bool off_shell = false;
   
   //=================================================================
   //     two terms in Wolfgang's formula for 
   //     off-shell gamma gamma --> l^+ l^-
   //=================================================================
-  imat1 = 2;
-  imat2 = 0;
+  const unsigned int imat1 = 2,
+                     imat2 = 0;
 
   //=================================================================
   //     extra cuts on the p1t(l) and p2t(l) plane
-  //         idif = 0: no extra cut
-  //         idif = 1: extra cut
   //=================================================================
-  idif = 0; // 0 is a standard
-  pdif = 2.5;
+  const bool pt_window = false;
+  const double pdif = 2.5;
   
   //=================================================================
   //     the distance in rapidity between l^+ and l^-
   //=================================================================
-  idely = 0; // 0 or 1 
-  dely_min = 4.0;
-  dely_max = 5.0;
+  const bool delta_y_window = false;
+  const double dely_min = 4.0,
+               dely_max = 5.0;
     
   //=================================================================
   //     matrix element computation
   //=================================================================
-  double f1, f2;
-  
   //const double stild = fS/2.*(1+sqrt(1.-(4*pow(mp2, 2))/pow(fS, 2)));
   
   // Inner photons
@@ -199,33 +138,34 @@ PPtoLL::INCqqbar()
   //=================================================================
   //     a window in transverse momentum difference
   //=================================================================
-  if (idif==1 and fabs(pt1-pt2)>pdif) return 0.;
+  if (pt_window and fabs(pt1-pt2)>pdif) return 0.;
 
   //const double pcaptx = pt1x+pt2x, pcapty = pt1y+pt2y;
   // rapidity difference
-  const double dely = fabs(_y1-_y2);
+  const double dely = fabs(fY1-fY2);
   //=================================================================
   //     a window in rapidity distance
   //=================================================================
-  if (idely==1 and (dely<dely_min or dely>dely_max)) return 0.;
+  if (delta_y_window and (dely<dely_min or dely>dely_max)) return 0.;
   
   //=================================================================
   //     auxiliary quantities
   //=================================================================
 
-  const double alpha1 = amt1/fSqS*exp( _y1),
-               alpha2 = amt2/fSqS*exp( _y2),
-               beta1  = amt1/fSqS*exp(-_y1),
-               beta2  = amt2/fSqS*exp(-_y2);
+  const double alpha1 = amt1/fSqS*exp( fY1),
+               alpha2 = amt2/fSqS*exp( fY2),
+               beta1  = amt1/fSqS*exp(-fY1),
+               beta2  = amt2/fSqS*exp(-fY2);
   DebugInsideLoop(Form("Sudakov parameters:\n\t"
                        "  alpha1/2 = %f / %f\n\t"
                        "   beta1/2 = %f / %f", alpha1, alpha2, beta1, beta2));
 
   const double q1t2 = pow(q1tx, 2)+pow(q1ty, 2),
                q2t2 = pow(q2tx, 2)+pow(q2ty, 2);
+  //std::cout << q1t2 << " --- " << q2t2 << std::endl;
 
   //const double old_x2 = 0.; //FIXME figure out where this comes from
-  //const double delta_x1 = (pow(_mx, 2)+q2t2)/((1.-old_x2)*fS);
+  //const double delta_x1 = (pow(fMX, 2)+q2t2)/((1.-old_x2)*fS);
 
   //x1 = alpha1+alpha2+delta_x1;
   const double x1 = alpha1+alpha2,
@@ -254,14 +194,14 @@ PPtoLL::INCqqbar()
   //=================================================================
   
   const double s1_eff = x1*fS-pow(_q1t,2), s2_eff = x2*fS-pow(_q2t,2);
-  const double invm = sqrt(pow(amt1,2)+pow(amt2,2)+2.*amt1*amt2*cosh(_y1-_y2)-pow(ptsum,2));
+  const double invm = sqrt(pow(amt1,2)+pow(amt2,2)+2.*amt1*amt2*cosh(fY1-fY2)-pow(ptsum,2));
   DebugInsideLoop(Form("s(1/2)_eff = %f / %f GeV^2\n\tdilepton invariant mass = %f GeV", s1_eff, s2_eff, invm));
 
   switch (fCuts.kinematics) {
-    case 2: if (sqrt(s1_eff)<=(_my+invm)) return 0.;
-    case 3: if (sqrt(s2_eff)<=(_mx+invm)) return 0.;
-    case 4: if (sqrt(s1_eff)<=(_my+invm)) return 0.;
-            if (sqrt(s2_eff)<=(_mx+invm)) return 0.;
+    case 2: if (sqrt(s1_eff)<=(fMY+invm)) return 0.;
+    case 3: if (sqrt(s2_eff)<=(fMX+invm)) return 0.;
+    case 4: if (sqrt(s1_eff)<=(fMY+invm)) return 0.;
+            if (sqrt(s2_eff)<=(fMX+invm)) return 0.;
   }
   
   //const double qcaptx = pcaptx, qcapty = pcapty;
@@ -271,10 +211,10 @@ PPtoLL::INCqqbar()
   //=================================================================
 
   const double px_plus  = (1.-x1)*fabs(ak1z)*sqrt(2.),
-               px_minus = (pow(_mx, 2)+pow(q1tx, 2)+pow(q1ty, 2))/2./px_plus;
+               px_minus = (pow(fMX, 2)+pow(q1tx, 2)+pow(q1ty, 2))/2./px_plus;
   
   const double py_minus = (1.-x2)*fabs(ak2z)*sqrt(2.), // warning! sign of pz??
-               py_plus  = (pow(_my, 2)+pow(q2tx, 2)+pow(q2ty, 2))/2./py_minus;
+               py_plus  = (pow(fMY, 2)+pow(q2tx, 2)+pow(q2ty, 2))/2./py_minus;
 
   DebugInsideLoop(Form("px_(+/-) = %f / %f\n\t"
                        "py_(+/-) = %f / %f", px_plus, px_minus, py_plus, py_minus));
@@ -287,8 +227,8 @@ PPtoLL::INCqqbar()
                        fPX.Px(), fPX.Py(), fPX.Pz(), fPX.E(),
                        fPY.Px(), fPY.Py(), fPY.Pz(), fPY.E()));
   
-  assert(fabs(fPX.M()-_mx)<1.e-6);
-  assert(fabs(fPY.M()-_my)<1.e-6);
+  assert(fabs(fPX.M()-fMX)<1.e-6);
+  assert(fabs(fPY.M()-fMY)<1.e-6);
 
   //=================================================================
   //     four-momenta of the outgoing l^+ and l^-
@@ -301,8 +241,8 @@ PPtoLL::INCqqbar()
                        p1.Px(), p1.Py(), p1.Pz(), p1.E(), p1.M(),
                        p2.Px(), p2.Py(), p2.Pz(), p2.E(), p2.M()));
 
-  fPl1 = Particle::Momentum(pt1x, pt1y, sqrt(pow(pt1, 2)+ml2)*sinh(_y1), sqrt(pow(pt1, 2)+ml2)*cosh(_y1));
-  fPl2 = Particle::Momentum(pt2x, pt2y, sqrt(pow(pt2, 2)+ml2)*sinh(_y2), sqrt(pow(pt2, 2)+ml2)*cosh(_y2));
+  fPl1 = Particle::Momentum(pt1x, pt1y, sqrt(pow(pt1, 2)+ml2)*sinh(fY1), sqrt(pow(pt1, 2)+ml2)*cosh(fY1));
+  fPl2 = Particle::Momentum(pt2x, pt2y, sqrt(pow(pt2, 2)+ml2)*sinh(fY2), sqrt(pow(pt2, 2)+ml2)*cosh(fY2));
 
   DebugInsideLoop(Form("First lepton:  (E,p), m = (%f, %f, %f, %f), %f\n\t"
                        "Second lepton: (E,p), m = (%f, %f, %f, %f), %f",
@@ -348,7 +288,7 @@ PPtoLL::INCqqbar()
   //     matrix elements
   //=================================================================
   double amat2 = 0.;
-  if (imethod==0) {
+  if (!off_shell) {
   
     //=================================================================
     //     on-shell formula for M^2
@@ -370,7 +310,7 @@ PPtoLL::INCqqbar()
     const double g_em = sqrt(4.*Constants::Pi*Constants::AlphaEM);
     amat2 = pow(g_em, 4)*auxil_gamgam;
   }
-  else if (imethod==1) {
+  else if (off_shell) {
   
     //=================================================================
     //     Wolfgang's formulae
@@ -381,8 +321,8 @@ PPtoLL::INCqqbar()
     const double ak1_x = z1m*pt1x-z1p*pt2x, ak1_y = z1m*pt1y-z1p*pt2y,
                  ak2_x = z2m*pt1x-z2p*pt2x, ak2_y = z2m*pt1y-z2p*pt2y;
 
-    const double t1abs = (q1t2+x1*(pow(_mx, 2)-mp2)+pow(x1, 2)*mp2)/(1.-x1),
-                 t2abs = (q2t2+x2*(pow(_my, 2)-mp2)+pow(x2, 2)*mp2)/(1.-x2);
+    const double t1abs = (q1t2+x1*(pow(fMX, 2)-mp2)+pow(x1, 2)*mp2)/(1.-x1),
+                 t2abs = (q2t2+x2*(pow(fMY, 2)-mp2)+pow(x2, 2)*mp2)/(1.-x2);
 
     const double eps12 = ml2+z1p*z1m*t1abs,
                  eps22 = ml2+z2p*z2m*t2abs;
@@ -451,7 +391,7 @@ PPtoLL::INCqqbar()
                          "amat2(1/2), amat2 = %e / %e / %e", aux2_1, aux2_2, amat2_1, amat2_2, amat2));
     /*const double xx1 = alpha1+alpha2, xx2 = beta1+beta2;
 
-    const double sudakov_2 = (pow(_mx, 2)-mp2+q2t2+xx2*mp2)/((1.-xx2)*fS);
+    const double sudakov_2 = (pow(fMX, 2)-mp2+q2t2+xx2*mp2)/((1.-xx2)*fS);
     const double sudakov_1 = (q1t2 + xx1*mp2)/((1.-xx1)*fS);
     const double ratio1 = sudakov_1 / xx1,
                  ratio2 = sudakov_2 / xx2;*/
@@ -465,29 +405,29 @@ PPtoLL::INCqqbar()
   //     of inelastic distributions
   //============================================
   
+  double f1, f2;
   switch (fCuts.kinematics) {
     case 1: // elastic-elastic
-      f1 = ElasticFlux(x1, q1t2);
-      f2 = ElasticFlux(x2, q2t2);
+      f1 = GenericKTProcess::ElasticFlux(x1, q1t2);
+      f2 = GenericKTProcess::ElasticFlux(x2, q2t2);
       break;
     case 2: // elastic-inelastic
-      f1 = ElasticFlux(x1, q1t2);
-      f2 = InelasticFlux(x2, q2t2, _my);
+      f1 = GenericKTProcess::ElasticFlux(x1, q1t2);
+      f2 = GenericKTProcess::InelasticFlux(x2, q2t2, fMY);
       break;
     case 3: // inelastic-elastic
-      f1 = InelasticFlux(x1, q1t2, _mx);
-      f2 = ElasticFlux(x2, q2t2);
+      f1 = GenericKTProcess::InelasticFlux(x1, q1t2, fMX);
+      f2 = GenericKTProcess::ElasticFlux(x2, q2t2);
       break;
     case 4: // inelastic-inelastic
-      f1 = InelasticFlux(x1, q1t2, _mx);
-      f2 = InelasticFlux(x2, q2t2, _my);
+      f1 = GenericKTProcess::InelasticFlux(x1, q1t2, fMX);
+      f2 = GenericKTProcess::InelasticFlux(x2, q2t2, fMY);
       break;
   }
   DebugInsideLoop(Form("Form factors: %e / %e", f1, f2));
   if (f1<1.e-20) f1 = 0.;
   if (f2<1.e-20) f2 = 0.;
 
-  
   //=================================================================
   //     factor 2.*pi below from integration over phi_sum
   //     factor 1/4 below from jacobian of transformations
@@ -520,32 +460,7 @@ PPtoLL::INCqqbar()
 void
 PPtoLL::FillKinematics(bool)
 {
-  //=================================================================
-  //     outgoing protons
-  //=================================================================
-  Particle *op1 = GetParticle(Particle::OutgoingBeam1),
-           *op2 = GetParticle(Particle::OutgoingBeam2);
-  switch (fCuts.kinematics) {
-    case 1:
-      op1->status = Particle::FinalState;
-      op2->status = Particle::FinalState;
-      break;
-    case 2:
-      op1->status = Particle::Undecayed; op1->SetM();
-      op2->status = Particle::FinalState;
-      break;
-    case 3:
-      op1->status = Particle::FinalState;
-      op2->status = Particle::Undecayed; op2->SetM();
-      break;
-    case 4:
-      op1->status = Particle::Undecayed; op1->SetM();
-      op2->status = Particle::Undecayed; op2->SetM();
-      break;    
-  }
-  
-  if (!op1->SetMomentum(fPX)) { Error(Form("Invalid outgoing proton 1: energy: %.2f", fPX.E())); }
-  if (!op2->SetMomentum(fPY)) { Error(Form("Invalid outgoing proton 2: energy: %.2f", fPY.E())); }
+  GenericKTProcess::FillPrimaryParticlesKinematics();
 
   // randomise the charge of the outgoing leptons
   int sign = (drand()>.5) ? +1 : -1;
