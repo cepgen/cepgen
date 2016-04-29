@@ -160,6 +160,10 @@ bool Parameters::ReadConfigFile(const char* inFile_)
         this->process = new PPtoLL;
         os << " * Process: PPTOLL\n\t";
       }
+      else if (value=="pptoww") {
+        this->process = new PPtoWW;
+        os << " * Process: PPTOWW\n\t";
+      }
     }
     else if (key=="HADR") {
       if (value=="pythia6") {

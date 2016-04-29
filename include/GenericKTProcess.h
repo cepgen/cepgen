@@ -1,3 +1,6 @@
+#ifndef GenericKTProcess_h
+#define GenericKTProcess_h
+
 #include "GenericProcess.h"
 
 /**
@@ -8,7 +11,10 @@
 class GenericKTProcess : public GenericProcess
 {
  public:
-  GenericKTProcess(std::string, Particle::ParticleCode, Particle::ParticleCode);
+  GenericKTProcess(std::string,
+                   Particle::ParticleCode ip1_=Particle::Photon,
+                   Particle::ParticleCode op_=Particle::Muon,
+                   Particle::ParticleCode ip2_=Particle::invalidParticle);
   ~GenericKTProcess();
   
   void AddEventContent();
@@ -57,5 +63,9 @@ class GenericKTProcess : public GenericProcess
   Particle::ParticleCode kIntermediatePart1;
   /// Second intermediate parton (photon, pomeron, ...)
   Particle::ParticleCode kIntermediatePart2;
+  /// Type of particle produced in the final state
+  Particle::ParticleCode kProducedPart;
   
 };
+
+#endif

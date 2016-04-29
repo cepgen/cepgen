@@ -1,7 +1,7 @@
 #include "PPtoLL.h"
 #include <assert.h>
 
-PPtoLL::PPtoLL() : GenericKTProcess("gamma,gamma->l+,l-", Particle::Photon, Particle::Photon)
+PPtoLL::PPtoLL() : GenericKTProcess("gamma,gamma->l+,l-", Particle::Photon, Particle::Muon)
 {}
 
 PPtoLL::~PPtoLL()

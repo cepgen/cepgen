@@ -37,6 +37,8 @@ class Particle {
       TauNeutrino = 16,
       Gluon = 21,
       Photon = 22,
+      Z = 23,
+      WPlus = 24,
       PiPlus = 211,
       PiZero = 111,
       Rho770_0 = 113,
