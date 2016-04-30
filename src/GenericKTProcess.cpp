@@ -2,12 +2,14 @@
 
 GenericKTProcess::GenericKTProcess(std::string name_="<generic process>",
                                    Particle::ParticleCode ip1_,
-                                   Particle::ParticleCode op_,
-                                   Particle::ParticleCode ip2_) :
+                                   Particle::ParticleCode op1_,
+                                   Particle::ParticleCode ip2_,
+                                   Particle::ParticleCode op2_) :
   GenericProcess(name_+" (kT-factorisation approach)"),
-  kIntermediatePart1(ip1_), kProducedPart(op_)
+  kIntermediatePart1(ip1_), kProducedPart1(op1_)
 {
   if (ip2_==Particle::invalidParticle) kIntermediatePart2 = kIntermediatePart1;
+  if (op2_==Particle::invalidParticle) kProducedPart2 = kProducedPart1;
 }
 
 GenericKTProcess::~GenericKTProcess()
@@ -23,8 +25,8 @@ GenericKTProcess::AddEventContent()
   is.insert(ParticleWithRole(Particle::Parton2,          kIntermediatePart2));
   os.insert(ParticleWithRole(Particle::OutgoingBeam1,    Particle::Proton));
   os.insert(ParticleWithRole(Particle::OutgoingBeam2,    Particle::Proton));
-  os.insert(ParticleWithRole(Particle::CentralParticle1, kProducedPart));
-  os.insert(ParticleWithRole(Particle::CentralParticle2, kProducedPart));
+  os.insert(ParticleWithRole(Particle::CentralParticle1, kProducedPart1));
+  os.insert(ParticleWithRole(Particle::CentralParticle2, kProducedPart2));
   GenericProcess::SetEventContent(is, os);
 }
 

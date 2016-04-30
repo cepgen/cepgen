@@ -249,6 +249,8 @@ Particle::GetMassFromPDGId(Particle::ParticleCode pdgId_)
     case Tau:          return 1.77682;
     case TauNeutrino:  return 0.;
     case Gluon:        return 0.;
+    case Z:            return 91.1876;
+    case WPlus:        return 80.385;
     case Photon:       return 0.;
     case PiPlus:       return 0.13957018;
     case PiZero:       return 0.1349766;
@@ -274,7 +276,9 @@ double
 Particle::GetWidthFromPDGId(Particle::ParticleCode pdgId_)
 {
   switch (pdgId_) {
-    case JPsi:  return 5.; //FIXME
+    case JPsi:      return 5.; //FIXME
+    case Z:         return 2.4952;
+    case WPlus:     return 2.085;
     case Upsilon1S: return 54.02e-6;
     case Upsilon2S: return 31.98e-6;
     case Upsilon3S: return 20.32e-6;
@@ -299,6 +303,8 @@ operator<<(std::ostream& os, const Particle::ParticleCode& pc)
     case Particle::TauNeutrino:  os << "tau neutrino"; break;
     case Particle::Gluon:        os << "gluon"; break;
     case Particle::Photon:       os << "photon"; break;
+    case Particle::Z:            os << "Z"; break;
+    case Particle::WPlus:        os << "W+"; break;
     case Particle::PiPlus:       os << "pi+"; break;
     case Particle::PiZero:       os << "pi0"; break;
     case Particle::Rho770_0:     os << "rho(770)0"; break;

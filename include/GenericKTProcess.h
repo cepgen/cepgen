@@ -11,10 +11,19 @@
 class GenericKTProcess : public GenericProcess
 {
  public:
-  GenericKTProcess(std::string,
+  /**
+   * \brief Class constructor
+   * \param[in] name_ Human-readable kT-factorised process name
+   * \param[in] ip1_ First incoming parton
+   * \param[in] ip2_ Second incoming parton (if undefined, same as the first)
+   * \param[in] op1_ First produced final state particle
+   * \param[in] op2_ Second produced final state particle (if undefined, same as the first)
+   */
+  GenericKTProcess(std::string name_,
                    Particle::ParticleCode ip1_=Particle::Photon,
-                   Particle::ParticleCode op_=Particle::Muon,
-                   Particle::ParticleCode ip2_=Particle::invalidParticle);
+                   Particle::ParticleCode op1_=Particle::Muon,
+                   Particle::ParticleCode ip2_=Particle::invalidParticle,
+                   Particle::ParticleCode op2_=Particle::invalidParticle);
   ~GenericKTProcess();
   
   void AddEventContent();
@@ -64,7 +73,9 @@ class GenericKTProcess : public GenericProcess
   /// Second intermediate parton (photon, pomeron, ...)
   Particle::ParticleCode kIntermediatePart2;
   /// Type of particle produced in the final state
-  Particle::ParticleCode kProducedPart;
+  Particle::ParticleCode kProducedPart1;
+  /// Type of particle produced in the final state
+  Particle::ParticleCode kProducedPart2;
   
 };
 
