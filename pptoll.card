@@ -1,6 +1,6 @@
 PROC pptoll
-DEBG 4
-MODE 1
+DEBG 3
+MODE 2
 #HADR pythia6
 #IEND 1
 #NCVG 100000

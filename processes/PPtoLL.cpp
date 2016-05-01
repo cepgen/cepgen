@@ -16,7 +16,6 @@ PPtoLL::PrepareKTKinematics()
   ///////////// FIXME ////////////////
   //fYmin = EtaToY(fCuts.etamin, GetParticle(Particle::CentralParticle1)->M(), pt);
   //fYmax = EtaToY(fCuts.etamax);
-  //std::cout << fLogQmin << " / " << fLogQmax << " >>>> " << exp(fLogQmin+(fLogQmax-fLogQmin)*x(0)) << std::endl;
   
   // Incoming photons
   _q1t = std::exp(fLogQmin+(fLogQmax-fLogQmin)*x(0));
@@ -40,7 +39,6 @@ PPtoLL::PrepareKTKinematics()
                        "  mag = %f (%.2f < Dpt < %.2f)\n\t"
                        "  phi = %f",
                        _ptdiff, fCuts.ptdiffmin, fCuts.ptdiffmax, _phiptdiff));
-  //std::cout << _q1t << " >>>> " << _q2t << std::endl;
 }
 
 double
@@ -158,7 +156,6 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
 
   const double q1t2 = pow(q1tx, 2)+pow(q1ty, 2),
                q2t2 = pow(q2tx, 2)+pow(q2ty, 2);
-  //std::cout << q1t2 << " --- " << q2t2 << std::endl;
 
   //const double old_x2 = 0.; //FIXME figure out where this comes from
   //const double delta_x1 = (pow(fMX, 2)+q2t2)/((1.-old_x2)*fS);
@@ -435,7 +432,6 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
                          * f1/Constants::Pi*f2/Constants::Pi*(1./4.)*Constants::GeV2toBarn
                          * 0.5*4./(4.*Constants::Pi);
   if (aintegral*_q1t*_q2t*_ptdiff!=0.) {
-//std::cout << amat2 << "\t" << f1 << "\t" << f2 << "\t" << aintegral << "\t" << _ptdiff << std::endl;
     //GenericProcess::DumpPoint(Information);
     //Information(Form("matrix element: %E", aintegral*_q1t*_q2t*_ptdiff));
   }

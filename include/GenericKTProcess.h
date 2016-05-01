@@ -35,7 +35,6 @@ class GenericKTProcess : public GenericProcess
     fCuts = kin_;
     fLogQmin = -10.; // FIXME //lqmin = std::log(std::sqrt(fCuts.q2min));
     fLogQmax = std::log(fCuts.qtmax);
-  std::cout << fLogQmin << " /// " << fLogQmax << " /// " << fCuts.qtmax  << std::endl;
   }
   /// Set the kinematics of the central system before any point computation
   inline virtual void PrepareKTKinematics() { DebugInsideLoop("Dummy kinematics prepared!"); }
