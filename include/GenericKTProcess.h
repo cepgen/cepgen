@@ -43,6 +43,7 @@ class GenericKTProcess : public GenericProcess
     DebugInsideLoop("Dummy Jacobian returned!"); return 0.;
   }
   /// kT-factorised matrix element (event weight)
+  /// \return Weight of the point in the phase space to the integral
   inline virtual double ComputeKTFactorisedMatrixElement() {
     DebugInsideLoop("Dummy matrix element returned!"); return 0.;
   }
