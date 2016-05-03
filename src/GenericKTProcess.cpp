@@ -113,6 +113,8 @@ GenericKTProcess::FillPrimaryParticlesKinematics()
   //=================================================================
   Particle *op1 = GetParticle(Particle::OutgoingBeam1),
            *op2 = GetParticle(Particle::OutgoingBeam2);
+  // off-shell particles (remnants?)
+  bool os1 = false, os2 = false;
   switch (fCuts.kinematics) {
     case Kinematics::ElectronProton: default: { Error("This kT factorisation process is intended for p-on-p collisions! Aborting!"); exit(0); break; }
     case Kinematics::ElasticElastic:
@@ -121,20 +123,20 @@ GenericKTProcess::FillPrimaryParticlesKinematics()
       break;
     case Kinematics::ElasticInelastic:
       op1->status = Particle::FinalState;
-      op2->status = Particle::Undecayed; op2->SetM();
+      op2->status = Particle::Undecayed; op2->SetM(); os2 = true;
       break;
     case Kinematics::InelasticElastic:
-      op1->status = Particle::Undecayed; op1->SetM();
+      op1->status = Particle::Undecayed; op1->SetM(); os1 = true;
       op2->status = Particle::FinalState;
       break;
     case Kinematics::InelasticInelastic:
-      op1->status = Particle::Undecayed; op1->SetM();
-      op2->status = Particle::Undecayed; op2->SetM();
+      op1->status = Particle::Undecayed; op1->SetM(); os1 = true;
+      op2->status = Particle::Undecayed; op2->SetM(); os2 = true;
       break;    
   }
   
-  if (!op1->SetMomentum(fPX)) { Error(Form("Invalid outgoing proton 1: energy: %.2f", fPX.E())); }
-  if (!op2->SetMomentum(fPY)) { Error(Form("Invalid outgoing proton 2: energy: %.2f", fPY.E())); }
+  if (!op1->SetMomentum(fPX, os1)) { Error(Form("Invalid outgoing proton 1: energy: %.2f", fPX.E())); }
+  if (!op2->SetMomentum(fPY, os2)) { Error(Form("Invalid outgoing proton 2: energy: %.2f", fPY.E())); }
   
   //=================================================================
   //     incoming partons (photons, pomerons, ...)
@@ -142,9 +144,9 @@ GenericKTProcess::FillPrimaryParticlesKinematics()
   //FIXME ensure the validity of this approach
   Particle *g1 = GetParticle(Particle::Parton1),
            *g2 = GetParticle(Particle::Parton2);
-  g1->SetMomentum(GetParticle(Particle::IncomingBeam1)->GetMomentum()-fPX);
+  g1->SetMomentum(GetParticle(Particle::IncomingBeam1)->GetMomentum()-fPX, true);
   g1->status = Particle::Incoming;
-  g2->SetMomentum(GetParticle(Particle::IncomingBeam2)->GetMomentum()-fPY);
+  g2->SetMomentum(GetParticle(Particle::IncomingBeam2)->GetMomentum()-fPY, true);
   g2->status = Particle::Incoming;
 }
 
