@@ -179,10 +179,11 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
                        "dilepton invariant mass = %f GeV", s1_eff, s2_eff, invm));
 
   switch (fCuts.kinematics) {
-    case 2: if (sqrt(s1_eff)<=(fMY+invm)) return 0.;
-    case 3: if (sqrt(s2_eff)<=(fMX+invm)) return 0.;
-    case 4: if (sqrt(s1_eff)<=(fMY+invm)) return 0.;
-            if (sqrt(s2_eff)<=(fMX+invm)) return 0.;
+    case Kinematics::ElasticInelastic:   if (sqrt(s1_eff)<=(fMY+invm)) return 0.;
+    case Kinematics::InelasticElastic:   if (sqrt(s2_eff)<=(fMX+invm)) return 0.;
+    case Kinematics::InelasticInelastic: if (sqrt(s1_eff)<=(fMY+invm)) return 0.;
+                                         if (sqrt(s2_eff)<=(fMX+invm)) return 0.;
+    default: break;
   }
   
   //const double qcaptx = pcaptx, qcapty = pcapty;
@@ -388,22 +389,23 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
   
   double f1, f2;
   switch (fCuts.kinematics) {
-    case 1: // elastic-elastic
+    case Kinematics::ElasticElastic:
       f1 = GenericKTProcess::ElasticFlux(x1, q1t2);
       f2 = GenericKTProcess::ElasticFlux(x2, q2t2);
       break;
-    case 2: // elastic-inelastic
+    case Kinematics::ElasticInelastic:
       f1 = GenericKTProcess::ElasticFlux(x1, q1t2);
       f2 = GenericKTProcess::InelasticFlux(x2, q2t2, fMY);
       break;
-    case 3: // inelastic-elastic
+    case Kinematics::InelasticElastic:
       f1 = GenericKTProcess::InelasticFlux(x1, q1t2, fMX);
       f2 = GenericKTProcess::ElasticFlux(x2, q2t2);
       break;
-    case 4: // inelastic-inelastic
+    case Kinematics::InelasticInelastic:
       f1 = GenericKTProcess::InelasticFlux(x1, q1t2, fMX);
       f2 = GenericKTProcess::InelasticFlux(x2, q2t2, fMY);
       break;
+    default: return 0.;
   }
   DebugInsideLoop(Form("Form factors: %e / %e", f1, f2));
   if (f1<1.e-20) f1 = 0.;

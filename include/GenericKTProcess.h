@@ -85,6 +85,7 @@ class GenericKTProcess : public GenericProcess
   
  private:
   void AddPartonContent();
+  const unsigned int kNumRequiredDimensions;
   /// Number of additional dimensions required for the user process
   /// (in addition to the 4 required for the two partons' transverse momenta)
   unsigned int kNumUserDimensions;

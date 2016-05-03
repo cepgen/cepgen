@@ -7,7 +7,7 @@ GenericKTProcess::GenericKTProcess(std::string name_,
                                    Particle::ParticleCode ip2_,
                                    Particle::ParticleCode op2_) :
   GenericProcess(name_+" (kT-factorisation approach)"),
-  kNumUserDimensions(num_user_dimensions_),
+  kNumRequiredDimensions(4), kNumUserDimensions(num_user_dimensions_),
   kIntermediatePart1(ip1_), kProducedPart1(op1_)
 {
   if (ip2_==Particle::invalidParticle) kIntermediatePart2 = kIntermediatePart1;
@@ -37,10 +37,10 @@ GenericKTProcess::GetNdim(Kinematics::ProcessMode process_mode_) const
 {
   switch (process_mode_) {
     default:
-    case Kinematics::ElasticElastic:     return 4+kNumUserDimensions;
+    case Kinematics::ElasticElastic:     return kNumRequiredDimensions+kNumUserDimensions;
     case Kinematics::ElasticInelastic:
-    case Kinematics::InelasticElastic:   return 4+kNumUserDimensions+1;
-    case Kinematics::InelasticInelastic: return 4+kNumUserDimensions+2;
+    case Kinematics::InelasticElastic:   return kNumRequiredDimensions+kNumUserDimensions+1;
+    case Kinematics::InelasticInelastic: return kNumRequiredDimensions+kNumUserDimensions+2;
   }
 }
 
@@ -76,6 +76,7 @@ GenericKTProcess::ComputeWeight()
 void
 GenericKTProcess::ComputeOutgoingPrimaryParticlesMasses()
 {
+  const unsigned int op_index = kNumRequiredDimensions+kNumUserDimensions;
   switch (fCuts.kinematics) {
     case Kinematics::ElectronProton: default: { Error("This kT factorisation process is intended for p-on-p collisions! Aborting!"); exit(0); break; }
     case Kinematics::ElasticElastic: 
@@ -84,15 +85,15 @@ GenericKTProcess::ComputeOutgoingPrimaryParticlesMasses()
       break;
     case Kinematics::ElasticInelastic:
       fMX = GetParticle(Particle::IncomingBeam1)->M();
-      fMY = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(8);
+      fMY = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(op_index);
       break;
     case Kinematics::InelasticElastic:
-      fMX = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(8);
+      fMX = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(op_index);
       fMY = GetParticle(Particle::IncomingBeam2)->M();
       break;
     case Kinematics::InelasticInelastic:
-      fMX = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(8);
-      fMY = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(9);
+      fMX = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(op_index);
+      fMY = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(op_index+1);
       break;
   }
   DebugInsideLoop(Form("outgoing remnants invariant mass: %f / %f (%.2f < M(X/Y) < %.2f)", fMX, fMY, fCuts.mxmin, fCuts.mxmax));
