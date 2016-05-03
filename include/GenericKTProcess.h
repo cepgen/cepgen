@@ -44,6 +44,8 @@ class GenericKTProcess : public GenericProcess
   }
   /// Set the kinematics of the central system before any point computation
   inline virtual void PrepareKTKinematics() { DebugInsideLoop("Dummy kinematics prepared!"); }
+  /// Minimal Jacobian weight of the point considering a kT factorisation
+  double MinimalJacobian() const;
   /// Jacobian weight of the point in the phase space for integration
   inline virtual double ComputeJacobian() {
     DebugInsideLoop("Dummy Jacobian returned!"); return 0.;
