@@ -1,11 +1,13 @@
 #include "GenericKTProcess.h"
 
-GenericKTProcess::GenericKTProcess(std::string name_="<generic process>",
+GenericKTProcess::GenericKTProcess(std::string name_,
+                                   unsigned int num_user_dimensions_,
                                    Particle::ParticleCode ip1_,
                                    Particle::ParticleCode op1_,
                                    Particle::ParticleCode ip2_,
                                    Particle::ParticleCode op2_) :
   GenericProcess(name_+" (kT-factorisation approach)"),
+  kNumUserDimensions(num_user_dimensions_),
   kIntermediatePart1(ip1_), kProducedPart1(op1_)
 {
   if (ip2_==Particle::invalidParticle) kIntermediatePart2 = kIntermediatePart1;
@@ -35,10 +37,10 @@ GenericKTProcess::GetNdim(ProcessMode process_mode_) const
 {
   switch (process_mode_) {
     default:
-    case ElasticElastic:     return 8;
+    case ElasticElastic:     return 4+kNumUserDimensions;
     case ElasticInelastic:
-    case InelasticElastic:   return 9;
-    case InelasticInelastic: return 10;
+    case InelasticElastic:   return 4+kNumUserDimensions+1;
+    case InelasticInelastic: return 4+kNumUserDimensions+2;
   }
 }
 
@@ -97,6 +99,13 @@ GenericKTProcess::ComputeOutgoingPrimaryParticlesMasses()
 }
 
 void
+GenericKTProcess::FillKinematics(bool)
+{
+  FillPrimaryParticlesKinematics();
+  FillCentralParticlesKinematics();
+}
+
+void
 GenericKTProcess::FillPrimaryParticlesKinematics()
 {
   //=================================================================
@@ -125,6 +134,17 @@ GenericKTProcess::FillPrimaryParticlesKinematics()
   
   if (!op1->SetMomentum(fPX)) { Error(Form("Invalid outgoing proton 1: energy: %.2f", fPX.E())); }
   if (!op2->SetMomentum(fPY)) { Error(Form("Invalid outgoing proton 2: energy: %.2f", fPY.E())); }
+  
+  //=================================================================
+  //     incoming partons (photons, pomerons, ...)
+  //=================================================================
+  //FIXME ensure the validity of this approach
+  Particle *g1 = GetParticle(Particle::Parton1),
+           *g2 = GetParticle(Particle::Parton2);
+  g1->SetMomentum(GetParticle(Particle::IncomingBeam1)->GetMomentum()-fPX);
+  g1->status = Particle::Incoming;
+  g2->SetMomentum(GetParticle(Particle::IncomingBeam2)->GetMomentum()-fPY);
+  g2->status = Particle::Incoming;
 }
 
 double

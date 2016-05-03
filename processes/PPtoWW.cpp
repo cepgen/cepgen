@@ -1,9 +1,6 @@
 #include "PPtoWW.h"
 
-PPtoWW::PPtoWW() : GenericKTProcess("gamma,gamma->W+,W-", Particle::Photon, Particle::WPlus)
-{}
-
-PPtoWW::~PPtoWW()
+PPtoWW::PPtoWW() : GenericKTProcess("gamma,gamma->W+,W-", 0 /*FIXME*/, Particle::Photon, Particle::WPlus)
 {}
 
 void
@@ -14,8 +11,8 @@ double
 PPtoWW::ComputeJacobian()
 {
   double jac = 1.;
-  jac *= (fLogQmax-fLogQmin)*_q1t; // d(q1t) . q1t
-  jac *= (fLogQmax-fLogQmin)*_q2t; // d(q2t) . q2t
+  jac *= (fLogQmax-fLogQmin)*fQT1; // d(q1t) . q1t
+  jac *= (fLogQmax-fLogQmin)*fQT2; // d(q2t) . q2t
   jac *= 2.*Constants::Pi; // d(phi1)
   jac *= 2.*Constants::Pi; // d(phi2)
   jac *= (fYmax-fYmin); // d(y1)
@@ -43,10 +40,8 @@ PPtoWW::ComputeKTFactorisedMatrixElement()
 }
 
 void
-PPtoWW::FillKinematics(bool)
+PPtoWW::FillCentralParticlesKinematics()
 {
-  GenericKTProcess::FillPrimaryParticlesKinematics();
-
   // randomise the charge of the outgoing W boson
   int sign = (drand()>.5) ? +1 : -1;
 
@@ -55,6 +50,7 @@ PPtoWW::FillKinematics(bool)
   //=================================================================
   Particle* w1 = GetParticle(Particle::CentralParticle1);
   w1->SetPDGId(w1->GetPDGId(), sign);
+  w1->status = Particle::Undecayed;
   if (!w1->SetMomentum(fPw1)) { Error("Invalid outgoing W1"); }
 
   //=================================================================
@@ -62,5 +58,6 @@ PPtoWW::FillKinematics(bool)
   //=================================================================
   Particle* w2 = GetParticle(Particle::CentralParticle2);
   w2->SetPDGId(w2->GetPDGId(), -sign);
+  w2->status = Particle::Undecayed;
   if (!w2->SetMomentum(fPw2)) { Error("Invalid outgoing W2"); }
 }

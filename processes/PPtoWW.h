@@ -8,27 +8,20 @@ class PPtoWW : public GenericKTProcess
 {
  public:
   PPtoWW();
-  ~PPtoWW();
-  
-  void PrepareKTKinematics();
-  void FillKinematics(bool symmetrise_=false);
+  inline ~PPtoWW() {;}
   
  private:
+  void PrepareKTKinematics();
   double ComputeJacobian();
   /// Matrix element to be integrated
   /// \note IncQQbar in pptoll
   double ComputeKTFactorisedMatrixElement();
+  void FillCentralParticlesKinematics();
   
+  /// Minimal rapidity of the first outgoing W boson
   double fYmin;
+  /// Maximal rapidity of the first outgoing W boson
   double fYmax;
-  /// Transverse virtuality of the first photon
-  double _q1t;
-  /// Transverse virtuality of the second photon
-  double _q2t;
-  /// Azimuthal rotation of the first photon transverse virtuality
-  double _phiq1t;
-  /// Azimuthal rotation of the first photon transverse virtuality
-  double _phiq2t;
   /// Rapidity of the first outgoing W boson
   double fY1;
   /// Rapidity of the first outgoing W boson

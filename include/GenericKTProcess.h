@@ -4,7 +4,10 @@
 #include "GenericProcess.h"
 
 /**
- * Class template to define any kT-factorisation process
+ * A generic kT-factorisation process.
+ * First 4 dimensions of the phase space are required for the incoming partons'
+ * virtualities (radial and azimuthal coordinates)
+ * \brief Class template to define any kT-factorisation process
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
  * \date Apr 2016
  */
@@ -14,12 +17,14 @@ class GenericKTProcess : public GenericProcess
   /**
    * \brief Class constructor
    * \param[in] name_ Human-readable kT-factorised process name
+   * \param[in] num_user_dimensions_ Number of additional dimensions required for the user process
    * \param[in] ip1_ First incoming parton
    * \param[in] ip2_ Second incoming parton (if undefined, same as the first)
    * \param[in] op1_ First produced final state particle
    * \param[in] op2_ Second produced final state particle (if undefined, same as the first)
    */
-  GenericKTProcess(std::string name_,
+  GenericKTProcess(std::string name_="<generic process>",
+                   unsigned int num_user_dimensions_=0,
                    Particle::ParticleCode ip1_=Particle::Photon,
                    Particle::ParticleCode op1_=Particle::Muon,
                    Particle::ParticleCode ip2_=Particle::invalidParticle,
@@ -29,6 +34,7 @@ class GenericKTProcess : public GenericProcess
   void AddEventContent();
   int GetNdim(ProcessMode) const;
   double ComputeWeight();
+  void FillKinematics(bool);
   
  protected:
   inline void SetKinematics(const Kinematics& kin_) {
@@ -51,6 +57,7 @@ class GenericKTProcess : public GenericProcess
   void ComputeOutgoingPrimaryParticlesMasses();
   /// Set the kinematics of the incoming and outgoing protons (or remnants)
   void FillPrimaryParticlesKinematics();
+  inline virtual void FillCentralParticlesKinematics() { DebugInsideLoop("Dummy central particles list filled!"); }
  
   /// Get the elastic flux to be expected at a given x_bjorken / kT
   double ElasticFlux(double x_, double kt2_) const;
@@ -77,6 +84,9 @@ class GenericKTProcess : public GenericProcess
   
  private:
   void AddPartonContent();
+  /// Number of additional dimensions required for the user process
+  /// (in addition to the 4 required for the two partons' transverse momenta)
+  unsigned int kNumUserDimensions;
   /// First intermediate parton (photon, pomeron, ...)
   Particle::ParticleCode kIntermediatePart1;
   /// Second intermediate parton (photon, pomeron, ...)

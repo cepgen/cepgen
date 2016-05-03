@@ -1,10 +1,7 @@
 #include "PPtoLL.h"
 #include <assert.h>
 
-PPtoLL::PPtoLL() : GenericKTProcess("gamma,gamma->l+,l-", Particle::Photon, Particle::Muon)
-{}
-
-PPtoLL::~PPtoLL()
+PPtoLL::PPtoLL() : GenericKTProcess("gamma,gamma->l+,l-", 4, Particle::Photon, Particle::Muon)
 {}
 
 void
@@ -430,21 +427,11 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
   //=================================================================
   return aintegral*fQT1*fQT2*_ptdiff;
   //=================================================================
-
-  /*
-  //=================================================================
-  //     four-momenta squared of virtual photons
-  //=================================================================
-  q12 = pow(q10, 2)-pow(q1tx, 2)-pow(q1ty, 2)-pow(q1z, 2);
-  q22 = pow(q20, 2)-pow(q2tx, 2)-pow(q2ty, 2)-pow(q2z, 2);
-  */
 }
 
 void
-PPtoLL::FillKinematics(bool)
+PPtoLL::FillCentralParticlesKinematics()
 {
-  GenericKTProcess::FillPrimaryParticlesKinematics();
-
   // randomise the charge of the outgoing leptons
   int sign = (drand()>.5) ? +1 : -1;
 
@@ -453,6 +440,7 @@ PPtoLL::FillKinematics(bool)
   //=================================================================
   Particle* ol1 = GetParticle(Particle::CentralParticle1);
   ol1->SetPDGId(ol1->GetPDGId(), sign);
+  ol1->status = Particle::FinalState;
   if (!ol1->SetMomentum(fPl1)) { Error("Invalid outgoing lepton 1"); }
 
   //=================================================================
@@ -460,5 +448,6 @@ PPtoLL::FillKinematics(bool)
   //=================================================================
   Particle* ol2 = GetParticle(Particle::CentralParticle2);
   ol2->SetPDGId(ol2->GetPDGId(), -sign);
+  ol2->status = Particle::FinalState;
   if (!ol2->SetMomentum(fPl2)) { Error("Invalid outgoing lepton 2"); }
 }

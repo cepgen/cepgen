@@ -8,16 +8,15 @@ class PPtoLL : public GenericKTProcess
 {
  public:
   PPtoLL();
-  ~PPtoLL();
-  
-  void PrepareKTKinematics();
-  void FillKinematics(bool symmetrise_=false);
+  inline ~PPtoLL() {;}
   
  private:
+  void PrepareKTKinematics();
   double ComputeJacobian();
   /// Matrix element to be integrated
   /// \note IncQQbar in pptoll
   double ComputeKTFactorisedMatrixElement();
+  void FillCentralParticlesKinematics();
   
   /// Minimal rapidity of the first outgoing lepton
   double fYmin;
