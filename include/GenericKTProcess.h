@@ -61,6 +61,14 @@ class GenericKTProcess : public GenericProcess
   double fLogQmin;
   /// Maximal log-virtuality of the intermediate parton
   double fLogQmax;
+  /// Virtuality of the first intermediate parton (photon, pomeron, ...)
+  double fQT1;
+  /// Azimuthal rotation of the first intermediate parton's transverse virtuality
+  double fPhiQT1;
+  /// Virtuality of the second intermediate parton (photon, pomeron, ...)
+  double fQT2;
+  /// Azimuthal rotation of the second intermediate parton's transverse virtuality
+  double fPhiQT2;
   
   /// First outgoing proton
   Particle::Momentum fPX;
@@ -68,6 +76,7 @@ class GenericKTProcess : public GenericProcess
   Particle::Momentum fPY;
   
  private:
+  void AddPartonContent();
   /// First intermediate parton (photon, pomeron, ...)
   Particle::ParticleCode kIntermediatePart1;
   /// Second intermediate parton (photon, pomeron, ...)

@@ -42,9 +42,24 @@ GenericKTProcess::GetNdim(ProcessMode process_mode_) const
   }
 }
 
+void
+GenericKTProcess::AddPartonContent()
+{
+  // Incoming partons
+  fQT1 = std::exp(fLogQmin+(fLogQmax-fLogQmin)*x(0));
+  fQT2 = std::exp(fLogQmin+(fLogQmax-fLogQmin)*x(1));
+  fPhiQT1 = 2.*Constants::Pi*x(2);
+  fPhiQT2 = 2.*Constants::Pi*x(3);
+  DebugInsideLoop(Form("photons transverse virtualities (qt):\n\t"
+                       "  mag = %f / %f (%.2f < log(qt) < %.2f)\n\t"
+                       "  phi = %f / %f",
+                       fQT1, fQT2, fLogQmin, fLogQmax, fPhiQT1, fPhiQT2));
+}
+
 double
 GenericKTProcess::ComputeWeight()
 {
+  AddPartonContent();
   PrepareKTKinematics();
   ComputeOutgoingPrimaryParticlesMasses();
   

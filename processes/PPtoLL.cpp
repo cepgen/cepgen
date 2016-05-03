@@ -12,20 +12,10 @@ PPtoLL::PrepareKTKinematics()
 {
   ////////////////////////////////////
   fYmin = fCuts.etamin;             //
-  fYmax = fCuts.etamax;             //
-  ///////////// FIXME ////////////////
   //fYmin = EtaToY(fCuts.etamin, GetParticle(Particle::CentralParticle1)->M(), pt);
+  fYmax = fCuts.etamax;             //
   //fYmax = EtaToY(fCuts.etamax);
-  
-  // Incoming photons
-  _q1t = std::exp(fLogQmin+(fLogQmax-fLogQmin)*x(0));
-  _q2t = std::exp(fLogQmin+(fLogQmax-fLogQmin)*x(1));
-  _phiq1t = 2.*Constants::Pi*x(2);
-  _phiq2t = 2.*Constants::Pi*x(3);
-  DebugInsideLoop(Form("photons transverse virtualities (qt):\n\t"
-                       "  mag = %f / %f (%.2f < log(qt) < %.2f)\n\t"
-                       "  phi = %f / %f",
-                       _q1t, _q2t, fLogQmin, fLogQmax, _phiq1t, _phiq2t));
+  ///////////// FIXME ////////////////
   
   // Outgoing leptons  
   fY1 = fYmin+(fYmax-fYmin)*x(4);
@@ -45,8 +35,8 @@ double
 PPtoLL::ComputeJacobian()
 {
   double jac = 1.;
-  jac *= (fLogQmax-fLogQmin)*_q1t; // d(q1t) . q1t
-  jac *= (fLogQmax-fLogQmin)*_q2t; // d(q2t) . q2t
+  jac *= (fLogQmax-fLogQmin)*fQT1; // d(q1t) . q1t
+  jac *= (fLogQmax-fLogQmin)*fQT2; // d(q2t) . q2t
   jac *= 2.*Constants::Pi; // d(phi1)
   jac *= 2.*Constants::Pi; // d(phi2)
   jac *= (fYmax-fYmin); // d(y1)
@@ -106,8 +96,8 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
   //const double stild = fS/2.*(1+sqrt(1.-(4*pow(mp2, 2))/pow(fS, 2)));
   
   // Inner photons
-  const double q1tx = _q1t*cos(_phiq1t), q1ty = _q1t*sin(_phiq1t),
-               q2tx = _q2t*cos(_phiq2t), q2ty = _q2t*sin(_phiq2t);
+  const double q1tx = fQT1*cos(fPhiQT1), q1ty = fQT1*sin(fPhiQT1),
+               q2tx = fQT2*cos(fPhiQT2), q2ty = fQT2*sin(fPhiQT2);
   DebugInsideLoop(Form("q1t(x/y) = %e / %e\n\t"
                        "q2t(x/y) = %e / %e", q1tx, q1ty, q2tx, q2ty));
   
@@ -186,9 +176,10 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
   //     additional conditions for energy-momentum conservation
   //=================================================================
   
-  const double s1_eff = x1*fS-pow(_q1t,2), s2_eff = x2*fS-pow(_q2t,2);
+  const double s1_eff = x1*fS-pow(fQT1,2), s2_eff = x2*fS-pow(fQT2,2);
   const double invm = sqrt(pow(amt1,2)+pow(amt2,2)+2.*amt1*amt2*cosh(fY1-fY2)-pow(ptsum,2));
-  DebugInsideLoop(Form("s(1/2)_eff = %f / %f GeV^2\n\tdilepton invariant mass = %f GeV", s1_eff, s2_eff, invm));
+  DebugInsideLoop(Form("s(1/2)_eff = %f / %f GeV^2\n\t"
+                       "dilepton invariant mass = %f GeV", s1_eff, s2_eff, invm));
 
   switch (fCuts.kinematics) {
     case 2: if (sqrt(s1_eff)<=(fMY+invm)) return 0.;
@@ -345,8 +336,8 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
             +iterm22*(pow(z2p, 2)+pow(z2m, 2))*Phi212
             -iterm12*4.*z2p*z2m*(z2p-z2m)*Phi20*(q2tx*Phi21_x+q2ty*Phi21_y);*/
 
-    const double Phi11_dot_e = (Phi11_x*q1tx+Phi11_y*q1ty)/_q1t, Phi11_cross_e = (Phi11_x*q1ty-Phi11_y*q1tx)/_q1t;
-    const double Phi21_dot_e = (Phi21_x*q2tx+Phi21_y*q2ty)/_q2t, Phi21_cross_e = (Phi21_x*q2ty-Phi21_y*q2tx)/_q2t;
+    const double Phi11_dot_e = (Phi11_x*q1tx+Phi11_y*q1ty)/fQT1, Phi11_cross_e = (Phi11_x*q1ty-Phi11_y*q1tx)/fQT1;
+    const double Phi21_dot_e = (Phi21_x*q2tx+Phi21_y*q2ty)/fQT2, Phi21_cross_e = (Phi21_x*q2ty-Phi21_y*q2tx)/fQT2;
     DebugInsideLoop(Form("Phi1: E, px, py = %e, %e, %e\n\t"
                          "Phi2: E, px, py = %e, %e, %e\n\t"
                          "(dot):   %e / %e\n\t"
@@ -431,13 +422,13 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
   const double aintegral = (2.*Constants::Pi)*1./(16.*pow(Constants::Pi, 2)*pow(x1*x2*fS, 2)) * amat2
                          * f1/Constants::Pi*f2/Constants::Pi*(1./4.)*Constants::GeV2toBarn
                          * 0.5*4./(4.*Constants::Pi);
-  if (aintegral*_q1t*_q2t*_ptdiff!=0.) {
+  if (aintegral*fQT1*fQT2*_ptdiff!=0.) {
     //GenericProcess::DumpPoint(Information);
-    //Information(Form("matrix element: %E", aintegral*_q1t*_q2t*_ptdiff));
+    //Information(Form("matrix element: %E", aintegral*fQT1*fQT2*_ptdiff));
   }
 
   //=================================================================
-  return aintegral*_q1t*_q2t*_ptdiff;
+  return aintegral*fQT1*fQT2*_ptdiff;
   //=================================================================
 
   /*

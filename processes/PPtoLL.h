@@ -19,16 +19,10 @@ class PPtoLL : public GenericKTProcess
   /// \note IncQQbar in pptoll
   double ComputeKTFactorisedMatrixElement();
   
+  /// Minimal rapidity of the first outgoing lepton
   double fYmin;
+  /// Maximal rapidity of the first outgoing lepton
   double fYmax;
-  /// Transverse virtuality of the first photon
-  double _q1t;
-  /// Transverse virtuality of the second photon
-  double _q2t;
-  /// Azimuthal rotation of the first photon transverse virtuality
-  double _phiq1t;
-  /// Azimuthal rotation of the first photon transverse virtuality
-  double _phiq2t;
   /// Rapidity of the first outgoing lepton
   double fY1;
   /// Rapidity of the first outgoing lepton
