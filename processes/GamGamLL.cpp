@@ -25,12 +25,15 @@ GamGamLL::AddEventContent()
 }
 
 int
-GamGamLL::GetNdim(ProcessMode process_mode_) const
+GamGamLL::GetNdim(Kinematics::ProcessMode process_mode_) const
 {
   switch (process_mode_) {
-    case ElasticElastic: default:                 return 7;
-    case ElasticInelastic: case InelasticElastic: return 8;
-    case InelasticInelastic:                      return 9;
+    case Kinematics::ElectronProton:     { Error("Not supported yet!"); }
+    case Kinematics::ElasticElastic:
+    default:                             return 7;
+    case Kinematics::ElasticInelastic:
+    case Kinematics::InelasticElastic:   return 8;
+    case Kinematics::InelasticInelastic: return 9;
   }
 }
 
@@ -444,14 +447,17 @@ GamGamLL::BeforeComputeWeight()
   
   double m;
   switch (fCuts.kinematics) {
-  case GenericProcess::ElasticElastic:
+  case Kinematics::ElectronProton:
+    { Error("Electron/Proton case not supported yet!"); }
+  case Kinematics::ElasticElastic:
     _dw31 = _dw52 = 0.; break;
-  case GenericProcess::ElasticInelastic: case GenericProcess::InelasticElastic:
+  case Kinematics::ElasticInelastic:
+  case Kinematics::InelasticElastic:
     m = ComputeOutgoingPrimaryParticlesMasses(x(7), GetParticle(Particle::IncomingBeam1)->M(), GetParticle(Particle::CentralParticle1)->M(), &_dw31);
     GetParticle(Particle::OutgoingBeam1)->SetM(m);
     GetParticle(Particle::OutgoingBeam2)->SetM(Particle::GetMassFromPDGId(GetParticle(Particle::OutgoingBeam2)->GetPDGId())); //FIXME
     break;
-  case GenericProcess::InelasticInelastic:
+  case Kinematics::InelasticInelastic:
     m = ComputeOutgoingPrimaryParticlesMasses(x(7), GetParticle(Particle::IncomingBeam2)->M(), GetParticle(Particle::CentralParticle1)->M(), &_dw31);
     GetParticle(Particle::OutgoingBeam1)->SetM(m);
     m = ComputeOutgoingPrimaryParticlesMasses(x(8), GetParticle(Particle::OutgoingBeam1)->M(), GetParticle(Particle::CentralParticle1)->M(), &_dw52);
@@ -682,7 +688,7 @@ GamGamLL::ComputeWeight()
 
   const double gamma = cm.E()/fSqS, betgam = cm.Pz()/fSqS;
 
-  if (fCuts.mode==0) {
+  if (fCuts.mode==Kinematics::NoCuts) {
     Debug(Form("No cuts applied on the outgoing leptons kinematics!"));
   }
   // Kinematics computation for both leptons
@@ -709,17 +715,17 @@ GamGamLL::ComputeWeight()
      and (fP7cm.E()<=fCuts.emax   or fCuts.emax <=0.);
 
   switch (fCuts.mode) {
-    case 0: default:
+    case Kinematics::NoCuts: default:
       lcut = true; break;
-    case 1: // Vermaseren's hypothetical detector cuts
+    case Kinematics::VermaserenCuts: // Vermaseren's hypothetical detector cuts
       {
         const double cost6 = fP6cm.Pz()/fP6cm.P(), cost7 = fP7cm.Pz()/fP7cm.P();
         lcut = ((fabs(cost6)<=0.75 and _pt_l6>=1.) or (fabs(cost6)<=0.95 and fabs(cost6)>0.75 and fabs(fP6cm.Pz())>1.)) and
                ((fabs(cost7)<=0.75 and _pt_l7>=1.) or (fabs(cost7)<=0.95 and fabs(cost7)>0.75 and fabs(fP7cm.Pz())>1.));
       }
       break;
-    case 2: lcut = lmu1 and lmu2; break;
-    case 3: lcut = lmu1  or lmu2; break;
+    case Kinematics::BothLeptons: lcut = lmu1 and lmu2; break;
+    case Kinematics::OneLepton:   lcut = lmu1  or lmu2; break;
   }
   if (!lcut) { return 0.; } // Dismiss the cuts-failing events in the cross-section computation
 

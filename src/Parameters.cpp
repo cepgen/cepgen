@@ -1,12 +1,12 @@
 #include "Parameters.h"
 
 Parameters::Parameters() :
-  process(0), process_mode(GenericProcess::ElasticElastic),
+  process(0), process_mode(Kinematics::ElasticElastic),
   remnant_mode(GenericProcess::SuriYennie),
   in1p(3500.), in2p(3500.),
   in1pdg(Particle::Proton), in2pdg(Particle::Proton),
   pair(Particle::Muon),
-  mcut(2),
+  mcut(Kinematics::BothLeptons),
   minpt(0.), maxpt(-1.),
   minptdiff(0.), maxptdiff(-1.),
   minenergy(0.), maxenergy(-1.),
@@ -182,7 +182,7 @@ bool Parameters::ReadConfigFile(const char* inFile_)
 #endif
     }
     else if (key=="MODE") {
-      this->process_mode = static_cast<GenericProcess::ProcessMode>(atoi(value.c_str()));
+      this->process_mode = static_cast<Kinematics::ProcessMode>(atoi(value.c_str()));
       os << " * Subprocess' mode: " << (unsigned int)this->process_mode << " --> " << this->process_mode << "\n\t";
     }
     else if (key=="PMOD" or key=="EMOD") {
@@ -200,7 +200,7 @@ bool Parameters::ReadConfigFile(const char* inFile_)
          << " --> " << this->pair << "\n\t";
     }
     else if (key=="MCUT") {
-      this->mcut = (int)atoi(value.c_str());
+      this->mcut = (Kinematics::Cuts)atoi(value.c_str());
       os << " * Set of cuts to apply on the total generation  : " << this->mcut
          << " --> ";
       switch (this->mcut) {

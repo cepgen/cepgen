@@ -13,15 +13,6 @@
 class GenericProcess
 {
  public:
-  /// Type of outgoing process kinematics to be considered (elastic/dissociative final states)
-  enum ProcessMode {
-    ElasticElastic = 1,
-    ElasticInelastic = 2,
-    InelasticElastic = 3,
-    InelasticInelastic = 4
-  };
-  /// Human-readable format of a process mode (elastic/dissociative parts)
-  friend std::ostream& operator<<(std::ostream& os, const GenericProcess::ProcessMode& pm);
   
   /// Proton structure function to be used in the outgoing state description
   enum StructureFunctions {
@@ -75,7 +66,7 @@ class GenericProcess
   }
   /// Return the number of dimensions on which the integration has to be performed
   /// \return Number of dimensions on which to integrate
-  inline virtual int GetNdim(ProcessMode) const { return 10; }
+  inline virtual int GetNdim(Kinematics::ProcessMode) const { return 10; }
   /**
    * Sets the phase space point to compute the weight associated to it.
    * @brief Sets the phase space point to compute

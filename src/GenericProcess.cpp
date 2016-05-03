@@ -100,18 +100,6 @@ GenericProcess::SetIncomingKinematics(Particle::Momentum p1, Particle::Momentum 
 }
 
 std::ostream&
-operator<<(std::ostream& os, const GenericProcess::ProcessMode& pm)
-{
-  switch (pm) {
-    case GenericProcess::ElasticElastic:      os << "Elastic/Elastic"; break;
-    case GenericProcess::InelasticElastic:    os << "Inelastic/Elastic"; break;
-    case GenericProcess::ElasticInelastic:    os << "Elastic/Inelastic"; break;
-    case GenericProcess::InelasticInelastic:  os << "Inelastic/Inelastic"; break;    
-  }
-  return os;
-}
-
-std::ostream&
 operator<<(std::ostream& os, const GenericProcess::StructureFunctions& sf)
 {
   switch (sf) {

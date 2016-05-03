@@ -41,7 +41,7 @@ class Parameters {
     /// Process for which the cross-section will be computed and the events will be generated
     GenericProcess* process;
     /// Type of outgoing state to consider for the incoming primary particles
-    GenericProcess::ProcessMode process_mode;
+    Kinematics::ProcessMode process_mode;
 
     /// Type of remnant fragmentation algorithm to use
     /// \note Was named PMOD/EMOD in ILPAIR
@@ -56,26 +56,10 @@ class Parameters {
     Particle::ParticleCode in1pdg;
     /// Second beam/primary particle's PDG identifier
     Particle::ParticleCode in2pdg;
-    /**
-     * The particle code of produced leptons, as defined by the PDG convention :
-     * - 11 - for \f$e^+e^-\f$ pairs
-     * - 13 - for \f$\mu^+\mu^-\f$ pairs
-     * - 15 - for \f$\tau^+\tau^-\f$ pairs
-     * @brief PDG id of the outgoing leptons
-     */
+    /// PDG id of the outgoing central particles
     Particle::ParticleCode pair;
-    /**
-     * Set of cuts to apply on the outgoing leptons in order to restrain the available kinematic phase space :
-     * - 0 - No cuts at all (for the total cross section)
-     * - 1 - Vermaserens' hypothetical detector cuts : for both leptons,
-     *   + \f$\frac{|p_z|}{|\mathbf p|}\leq\f$ 0.75 and \f$p_T\geq 1~\text{GeV}/c\f$,
-     *   or
-     *   + 0.75 \f$<\frac{|p_z|}{|\mathbf p|}\leq\f$ 0.95 and \f$p_z> 1~\text{GeV}/c\f$,
-     * - 2 - Cuts on both the outgoing leptons, according to the provided cuts parameters
-     * - 3 - Cuts on at least one outgoing lepton, according to the provided cut parameters
-     * @brief Set of cuts to apply on the outgoing leptons
-     */
-    int mcut;
+    /// Set of cuts to apply on the outgoing central system
+    Kinematics::Cuts mcut;
     /// Minimal \f$p_T\f$ of the outgoing central particles
     double minpt;
     /// Maximal \f$p_T\f$ of the outgoing central particles

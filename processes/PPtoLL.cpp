@@ -416,8 +416,11 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
   //     over d^2 kappa_1 d^2 kappa_2 instead d kappa_1^2 d kappa_2^2
   //=================================================================
 
-  const double aintegral = (2.*Constants::Pi)*1./(16.*pow(Constants::Pi, 2)*pow(x1*x2*fS, 2)) * amat2
-                         * f1/Constants::Pi*f2/Constants::Pi*(1./4.)*Constants::GeV2toBarn
+  const double aintegral = (2.*Constants::Pi)
+                         *1./(16.*pow(Constants::Pi, 2)
+                         *pow(x1*x2*fS, 2)) * amat2
+                         * f1/Constants::Pi*f2/Constants::Pi
+                         *(1./4.)*Constants::GeV2toBarn
                          * 0.5*4./(4.*Constants::Pi);
   if (aintegral*fQT1*fQT2*_ptdiff!=0.) {
     //GenericProcess::DumpPoint(Information);

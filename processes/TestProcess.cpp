@@ -7,7 +7,7 @@ TestProcess::~TestProcess()
 {}
 
 int
-TestProcess::GetNdim(GenericProcess::ProcessMode) const
+TestProcess::GetNdim(Kinematics::ProcessMode) const
 {
   return 3;
 }

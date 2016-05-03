@@ -51,6 +51,7 @@ class GamGamLL : public GenericProcess
    * \param[in] nOpt_ Optimisation (legacy from LPAIR)
    */
   GamGamLL(int nOpt_=0);
+  
   //~GamGamLL();
   void AddEventContent();
   void BeforeComputeWeight();
@@ -62,7 +63,7 @@ class GamGamLL : public GenericProcess
    * the differential cross-section for the given point in the phase space.
    */
   double ComputeWeight();
-  int GetNdim(ProcessMode) const;
+  int GetNdim(Kinematics::ProcessMode) const;
   void FillKinematics(bool);
   /// Compute the ougoing proton remnant mass
   /// \param[in] x_ A random number (between 0 and 1)

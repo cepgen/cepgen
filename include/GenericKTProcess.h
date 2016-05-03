@@ -32,7 +32,7 @@ class GenericKTProcess : public GenericProcess
   ~GenericKTProcess();
   
   void AddEventContent();
-  int GetNdim(ProcessMode) const;
+  int GetNdim(Kinematics::ProcessMode) const;
   double ComputeWeight();
   void FillKinematics(bool);
   
@@ -57,6 +57,7 @@ class GenericKTProcess : public GenericProcess
   void ComputeOutgoingPrimaryParticlesMasses();
   /// Set the kinematics of the incoming and outgoing protons (or remnants)
   void FillPrimaryParticlesKinematics();
+  /// Set the kinematics of the outgoing central system
   inline virtual void FillCentralParticlesKinematics() { DebugInsideLoop("Dummy central particles list filled!"); }
  
   /// Get the elastic flux to be expected at a given x_bjorken / kT

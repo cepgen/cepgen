@@ -11,7 +11,7 @@ class TestProcess : public GenericProcess
   ~TestProcess();
  
   /// Number of dimensions on which to perform the integration
-  int GetNdim(GenericProcess::ProcessMode) const;
+  int GetNdim(Kinematics::ProcessMode) const;
   /// Generic formula to compute a weight out of a point in the phase space
   double ComputeWeight();
   /// Dummy function to be called on events generation

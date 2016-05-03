@@ -23,13 +23,13 @@ int main(int argc, char* argv[]) {
     
     //mg.parameters->hadroniser = new Pythia6Hadroniser;
     mg.parameters->process = new GamGamLL;
-    mg.parameters->process_mode = GenericProcess::InelasticElastic;
+    mg.parameters->process_mode = Kinematics::InelasticElastic;
     mg.parameters->remnant_mode = GenericProcess::SuriYennie;
     
     mg.parameters->in1p = 4000.;
     mg.parameters->in2p = 4000.;
     mg.parameters->pair = Particle::Muon;
-    mg.parameters->mcut = 2;
+    mg.parameters->mcut = Kinematics::BothLeptons;
     mg.parameters->minenergy = 0.; //FIXME
     mg.parameters->minpt = 5.;
     mg.parameters->mineta = -2.5;

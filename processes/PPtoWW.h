@@ -13,8 +13,6 @@ class PPtoWW : public GenericKTProcess
  private:
   void PrepareKTKinematics();
   double ComputeJacobian();
-  /// Matrix element to be integrated
-  /// \note IncQQbar in pptoll
   double ComputeKTFactorisedMatrixElement();
   void FillCentralParticlesKinematics();
   

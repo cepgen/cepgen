@@ -33,14 +33,14 @@ GenericKTProcess::AddEventContent()
 }
 
 int
-GenericKTProcess::GetNdim(ProcessMode process_mode_) const
+GenericKTProcess::GetNdim(Kinematics::ProcessMode process_mode_) const
 {
   switch (process_mode_) {
     default:
-    case ElasticElastic:     return 4+kNumUserDimensions;
-    case ElasticInelastic:
-    case InelasticElastic:   return 4+kNumUserDimensions+1;
-    case InelasticInelastic: return 4+kNumUserDimensions+2;
+    case Kinematics::ElasticElastic:     return 4+kNumUserDimensions;
+    case Kinematics::ElasticInelastic:
+    case Kinematics::InelasticElastic:   return 4+kNumUserDimensions+1;
+    case Kinematics::InelasticInelastic: return 4+kNumUserDimensions+2;
   }
 }
 
@@ -77,20 +77,20 @@ void
 GenericKTProcess::ComputeOutgoingPrimaryParticlesMasses()
 {
   switch (fCuts.kinematics) {
-    case 0: default: { Error("This kT factorisation process is intended for p-on-p collisions! Aborting!"); exit(0); break; }
-    case 1: 
+    case Kinematics::ElectronProton: default: { Error("This kT factorisation process is intended for p-on-p collisions! Aborting!"); exit(0); break; }
+    case Kinematics::ElasticElastic: 
       fMX = GetParticle(Particle::IncomingBeam1)->M();
       fMY = GetParticle(Particle::IncomingBeam2)->M();
       break;
-    case 2:
+    case Kinematics::ElasticInelastic:
       fMX = GetParticle(Particle::IncomingBeam1)->M();
       fMY = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(8);
       break;
-    case 3:
+    case Kinematics::InelasticElastic:
       fMX = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(8);
       fMY = GetParticle(Particle::IncomingBeam2)->M();
       break;
-    case 4:
+    case Kinematics::InelasticInelastic:
       fMX = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(8);
       fMY = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(9);
       break;
@@ -114,19 +114,20 @@ GenericKTProcess::FillPrimaryParticlesKinematics()
   Particle *op1 = GetParticle(Particle::OutgoingBeam1),
            *op2 = GetParticle(Particle::OutgoingBeam2);
   switch (fCuts.kinematics) {
-    case 1:
+    case Kinematics::ElectronProton: default: { Error("This kT factorisation process is intended for p-on-p collisions! Aborting!"); exit(0); break; }
+    case Kinematics::ElasticElastic:
       op1->status = Particle::FinalState;
       op2->status = Particle::FinalState;
       break;
-    case 2:
-      op1->status = Particle::Undecayed; op1->SetM();
-      op2->status = Particle::FinalState;
-      break;
-    case 3:
+    case Kinematics::ElasticInelastic:
       op1->status = Particle::FinalState;
       op2->status = Particle::Undecayed; op2->SetM();
       break;
-    case 4:
+    case Kinematics::InelasticElastic:
+      op1->status = Particle::Undecayed; op1->SetM();
+      op2->status = Particle::FinalState;
+      break;
+    case Kinematics::InelasticInelastic:
       op1->status = Particle::Undecayed; op1->SetM();
       op2->status = Particle::Undecayed; op2->SetM();
       break;    

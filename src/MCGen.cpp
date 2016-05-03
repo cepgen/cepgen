@@ -89,7 +89,7 @@ MCGen::PrepareFunction()
     throw Exception(__PRETTY_FUNCTION__, "No process defined!", Fatal);
   }
   Kinematics kin;
-  kin.kinematics = static_cast<unsigned int>(parameters->process_mode);
+  kin.kinematics = static_cast<Kinematics::ProcessMode>(parameters->process_mode);
   /*kin.q1tmin = kin.q2tmin = 0.;
   kin.q1tmax = kin.q2tmax = 50.;*/
   kin.q2min = parameters->minq2;
@@ -160,11 +160,12 @@ double f(double* x_, size_t ndim_, void* params_)
     //std::cout << "3: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
     // Then add outgoing protons or remnants
     switch (p->process_mode) {
-      case GenericProcess::ElasticElastic: break; // nothing to change in the event
-      case GenericProcess::ElasticInelastic:
-      case GenericProcess::InelasticElastic: // set one of the outgoing protons to be fragmented
+      case Kinematics::ElectronProton: { Error("Not handled yet!"); }
+      case Kinematics::ElasticElastic: break; // nothing to change in the event
+      case Kinematics::ElasticInelastic:
+      case Kinematics::InelasticElastic: // set one of the outgoing protons to be fragmented
         ev->GetOneByRole(Particle::OutgoingBeam1)->SetPDGId(Particle::uQuark); break;
-      case GenericProcess::InelasticInelastic: // set both the outgoing protons to be fragmented
+      case Kinematics::InelasticInelastic: // set both the outgoing protons to be fragmented
         ev->GetOneByRole(Particle::OutgoingBeam1)->SetPDGId(Particle::uQuark);
         ev->GetOneByRole(Particle::OutgoingBeam2)->SetPDGId(Particle::uQuark);
         break;
@@ -187,7 +188,7 @@ double f(double* x_, size_t ndim_, void* params_)
     p->process->FillKinematics(false);
     p->process->GetEvent()->time_generation = tmr.elapsed();
 
-    if (p->hadroniser and p->process_mode!=GenericProcess::ElasticElastic) {
+    if (p->hadroniser and p->process_mode!=Kinematics::ElasticElastic) {
       
       Debug(Form("Event before calling the hadroniser (%s)", p->hadroniser->GetName().c_str()));
       if (Logger::GetInstance()->Level>=Logger::Debug) p->process->GetEvent()->Dump();

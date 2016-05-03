@@ -40,3 +40,16 @@ Kinematics::Dump()
     << std::setw(25) << "Maximal W :" << std::setw(8) << this->wmax << std::endl;
 }
 
+std::ostream&
+operator<<(std::ostream& os, const Kinematics::ProcessMode& pm)
+{
+  switch (pm) {
+    case Kinematics::ElectronProton:      os << "Electron/Proton"; break;
+    case Kinematics::ElasticElastic:      os << "Elastic/Elastic"; break;
+    case Kinematics::InelasticElastic:    os << "Inelastic/Elastic"; break;
+    case Kinematics::ElasticInelastic:    os << "Elastic/Inelastic"; break;
+    case Kinematics::InelasticInelastic:  os << "Inelastic/Inelastic"; break;    
+  }
+  return os;
+}
+
