@@ -177,12 +177,14 @@ GenericKTProcess::ElasticFlux(double x_, double kt2_) const
   const double mp2 = pow(Particle::GetMassFromPDGId(Particle::Proton), 2);
 
   const double Q2_ela = (kt2_+pow(x_, 2)*mp2)/(1.-x_);
-  const double G_dip = 1./pow(1.+Q2_ela/0.71, 2);
+  const FormFactors ela = ElasticFormFactors(Q2_ela, mp2);
+  
+  /*const double G_dip = 1./pow(1.+Q2_ela/0.71, 2);
   const double G_E = G_dip;
-  const double G_M = 2.79*G_dip;
+  const double G_M = 2.79*G_dip;*/
 
   const double ela1 = pow(kt2_/(kt2_+pow(x_, 2)*mp2), 2);
-  const double ela2 = (4.*mp2*pow(G_E, 2)+Q2_ela*pow(G_M, 2))/(4.*mp2+Q2_ela);
+  const double ela2 = ela.FE;
   //const double ela3 = 1.-(Q2_ela-kt2_)/Q2_ela;
   //const double ela3 = 1.-pow(x_, 2)*mp2/Q2_ela/(1.-x_);
   //f_ela = alpha_em/Constants::Pi*(1.-x_+pow(x_, 2)/4.)*ela1*ela2*ela3/kt2_;
