@@ -26,9 +26,9 @@ class PPtoLL : public GenericKTProcess
   /// Rapidity of the first outgoing lepton
   double fY2;
   /// Transverse momentum difference for the two outgoing leptons
-  double _ptdiff;
+  double fPtDiff;
   /// Azimuthal angle difference for the two outgoing leptons
-  double _phiptdiff;
+  double fPhiPtDiff;
   
   // first outgoing lepton
   Particle::Momentum fPl1;

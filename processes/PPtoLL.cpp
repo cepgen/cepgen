@@ -20,12 +20,12 @@ PPtoLL::PrepareKTKinematics()
   DebugInsideLoop(Form("leptons rapidities (%.2f < y < %.2f): %f / %f", fYmin, fYmax, fY1, fY2));
  
   if (fCuts.ptdiffmax<0.) fCuts.ptdiffmax = 400.; //FIXME
-  _ptdiff = fCuts.ptdiffmin+(fCuts.ptdiffmax-fCuts.ptdiffmin)*x(6);
-  _phiptdiff = 2.*Constants::Pi*x(7);
+  fPtDiff = fCuts.ptdiffmin+(fCuts.ptdiffmax-fCuts.ptdiffmin)*x(6);
+  fPhiPtDiff = 2.*Constants::Pi*x(7);
   DebugInsideLoop(Form("leptons pt difference:\n\t"
                        "  mag = %f (%.2f < Dpt < %.2f)\n\t"
                        "  phi = %f",
-                       _ptdiff, fCuts.ptdiffmin, fCuts.ptdiffmax, _phiptdiff));
+                       fPtDiff, fCuts.ptdiffmin, fCuts.ptdiffmax, fPhiPtDiff));
 }
 
 double
@@ -92,8 +92,8 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
                ptsumy = q1ty+q2ty,
                ptsum = sqrt(pow(ptsumx, 2)+pow(ptsumy, 2));
   
-  const double ptdiffx = _ptdiff*cos(_phiptdiff),
-               ptdiffy = _ptdiff*sin(_phiptdiff);
+  const double ptdiffx = fPtDiff*cos(fPhiPtDiff),
+               ptdiffy = fPtDiff*sin(fPhiPtDiff);
   
   // Outgoing leptons
   const double pt1x = (ptsumx+ptdiffx)/2., pt1y = (ptsumy+ptdiffy)/2., pt1 = sqrt(pow(pt1x, 2)+pow(pt1y, 2)),
@@ -410,16 +410,17 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
   const double aintegral = (2.*Constants::Pi)
                          *1./(16.*pow(Constants::Pi, 2)
                          *pow(x1*x2*fS, 2)) * amat2
-                         * f1/Constants::Pi*f2/Constants::Pi
+                         * f1/Constants::Pi
+                         * f2/Constants::Pi
                          *(1./4.)*Constants::GeV2toBarn
                          * 0.5*4./(4.*Constants::Pi);
-  if (aintegral*fQT1*fQT2*_ptdiff!=0.) {
+  if (aintegral*fQT1*fQT2*fPtDiff!=0.) {
     //GenericProcess::DumpPoint(Information);
-    //Information(Form("matrix element: %E", aintegral*fQT1*fQT2*_ptdiff));
+    //Information(Form("matrix element: %E", aintegral*fQT1*fQT2*fPtDiff));
   }
 
   //=================================================================
-  return aintegral*fQT1*fQT2*_ptdiff;
+  return aintegral*fQT1*fQT2*fPtDiff;
   //=================================================================
 }
 
