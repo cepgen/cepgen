@@ -160,7 +160,7 @@ double f(double* x_, size_t ndim_, void* params_)
     //std::cout << "3: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
     // Then add outgoing protons or remnants
     switch (p->process_mode) {
-      case Kinematics::ElectronProton: { Error("Not handled yet!"); }
+      case Kinematics::ElectronProton: { InError("Not handled yet!"); }
       case Kinematics::ElasticElastic: break; // nothing to change in the event
       case Kinematics::ElasticInelastic:
       case Kinematics::InelasticElastic: // set one of the outgoing protons to be fragmented

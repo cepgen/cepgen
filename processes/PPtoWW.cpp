@@ -40,7 +40,7 @@ PPtoWW::FillCentralParticlesKinematics()
   Particle* w1 = GetParticle(Particle::CentralParticle1);
   w1->SetPDGId(w1->GetPDGId(), sign);
   w1->status = Particle::Undecayed;
-  if (!w1->SetMomentum(fPw1)) { Error("Invalid outgoing W1"); }
+  if (!w1->SetMomentum(fPw1)) { InError("Invalid outgoing W1"); }
 
   //=================================================================
   //     second outgoing W
@@ -48,5 +48,5 @@ PPtoWW::FillCentralParticlesKinematics()
   Particle* w2 = GetParticle(Particle::CentralParticle2);
   w2->SetPDGId(w2->GetPDGId(), -sign);
   w2->status = Particle::Undecayed;
-  if (!w2->SetMomentum(fPw2)) { Error("Invalid outgoing W2"); }
+  if (!w2->SetMomentum(fPw2)) { InError("Invalid outgoing W2"); }
 }

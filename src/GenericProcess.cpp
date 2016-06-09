@@ -95,8 +95,8 @@ GenericProcess::SetEventContent(IncomingState is, OutgoingState os)
 void
 GenericProcess::SetIncomingKinematics(Particle::Momentum p1, Particle::Momentum p2)
 {
-  if (!GetParticle(Particle::IncomingBeam1)->SetMomentum(p1)) { Error("Invalid incoming beam 1"); }
-  if (!GetParticle(Particle::IncomingBeam2)->SetMomentum(p2)) { Error("Invalid incoming beam 2"); }
+  if (!GetParticle(Particle::IncomingBeam1)->SetMomentum(p1)) { InError("Invalid incoming beam 1"); }
+  if (!GetParticle(Particle::IncomingBeam2)->SetMomentum(p2)) { InError("Invalid incoming beam 2"); }
 }
 
 std::ostream&

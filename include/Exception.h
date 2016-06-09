@@ -14,10 +14,10 @@
   if (Logger::GetInstance()->Level>=Logger::Debug)  { Exception(__PRETTY_FUNCTION__, m, DebugMessage).Dump(Logger::GetInstance()->OutputStream); }
 #define DebuggingInsideLoop(m) \
   if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) { Exception(__PRETTY_FUNCTION__, m, DebugMessage).Dump(Logger::GetInstance()->OutputStream); }
-#define Warning(m) \
+#define InWarning(m) \
   if (Logger::GetInstance()->Level>=Logger::Warning)  { Exception(__PRETTY_FUNCTION__, m, JustWarning).Dump(Logger::GetInstance()->OutputStream); }
-#define Error(m) \
-  if (Logger::GetInstance()->Level>=Logger::Error)  { Exception(__PRETTY_FUNCTION__, m, Error).Dump(Logger::GetInstance()->OutputStream); }
+#define InError(m) \
+  if (Logger::GetInstance()->Level>=Logger::Error)  { Exception(__PRETTY_FUNCTION__, m, ErrorMessage).Dump(Logger::GetInstance()->OutputStream); }
 
 /**
  * \brief Enumeration of exception severities
@@ -30,8 +30,8 @@ typedef enum
   Information,
   DebugMessage,
   JustWarning,
-  Error,
-  Fatal
+  ErrorMessage,
+  FatalError
 } ExceptionType;
 
 /**
@@ -67,7 +67,7 @@ class Exception
     }
 
     inline ~Exception() {
-      if (Type()==Fatal) exit(0);
+      if (Type()==FatalError) exit(0);
       // we stop this process' execution on fatal exception
     }
    
@@ -85,8 +85,8 @@ class Exception
         case JustWarning: return "\033[34;1mJustWarning\033[0m";
         case Information: return "\033[33;1mInfo\033[0m";
         case DebugMessage: return "\033[32;1mDebug\033[0m";
-        case Error: return "\033[31;1mError\033[0m";
-        case Fatal: return "\033[31;1mFatal\033[0m";
+        case ErrorMessage: return "\033[31;1mError\033[0m";
+        case FatalError: return "\033[31;1mFatal\033[0m";
         case Undefined: default: return "\33[7;1mUndefined\033[0m";
       }
     }

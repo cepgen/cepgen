@@ -1,9 +1,9 @@
 #include <iostream>
 
-
 // ROOT includes
 #include "TFile.h"
 #include "TTree.h"
+#include "TLorentzVector.h"
 
 #include "include/MCGen.h"
 
@@ -38,6 +38,7 @@ int main(int argc, char* argv[]) {
   double eta[maxpart], phi[maxpart], rapidity[maxpart];
   double px[maxpart], py[maxpart], pz[maxpart], pt[maxpart], E[maxpart], M[maxpart], charge[maxpart];
   int PID[maxpart], parentid[maxpart], isstable[maxpart], role[maxpart], status[maxpart];
+  TLorentzVector kinematics[maxpart];
   float gen_time, tot_time;
   int nremn_ch[2], nremn_nt[2];
   int hadr_trials, litigious_events;
@@ -50,8 +51,8 @@ int main(int argc, char* argv[]) {
   }
   if (argc==1) {
     mg.parameters->process = new PPtoLL;
-    mg.parameters->in1p = 3500.;
-    mg.parameters->in2p = 3500.;
+    mg.parameters->in1p = 6500.;
+    mg.parameters->in2p = 6500.;
     mg.parameters->pair = Particle::Muon;
     mg.parameters->mcut = Kinematics::BothLeptons;
     mg.parameters->minenergy = 0.; //FIXME
@@ -86,6 +87,7 @@ int main(int argc, char* argv[]) {
   tree->Branch("ip", &np, "npart/I");
   tree->Branch("nremn_charged", nremn_ch, "nremn_charged[2]/I");
   tree->Branch("nremn_neutral", nremn_nt, "nremn_neutral[2]/I");
+  tree->Branch("kinematics", kinematics, "TLorentzVector[npart]");
   tree->Branch("Eta", eta, "eta[npart]/D");
   tree->Branch("phi", phi, "phi[npart]/D");
   tree->Branch("rapidity", rapidity, "rapidity[npart]/D");
@@ -104,6 +106,7 @@ int main(int argc, char* argv[]) {
   tree->Branch("generation_time", &gen_time, "gen_time/F");
   tree->Branch("total_time", &tot_time, "gen_time/F");
   tree->Branch("hadronisation_trials", &hadr_trials, "hadronisation_trials/I");
+  
   //tree->Branch("event", &ev);
 
   xsect = xsec;
@@ -163,6 +166,7 @@ int main(int argc, char* argv[]) {
     tot_time = ev.time_total;
     for (p=particles.begin(), np=0; p!=particles.end(); p++) {
       const Particle::Momentum m = (*p)->GetMomentum();
+      kinematics[np].SetXYZM(m.Px(), m.Py(), m.Pz(), m.M());
       eta[np] = m.Eta();
       phi[np] = m.Phi();
       rapidity[np] = m.Rapidity();

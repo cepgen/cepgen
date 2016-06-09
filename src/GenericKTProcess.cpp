@@ -78,7 +78,7 @@ GenericKTProcess::ComputeOutgoingPrimaryParticlesMasses()
 {
   const unsigned int op_index = kNumRequiredDimensions+kNumUserDimensions;
   switch (fCuts.kinematics) {
-    case Kinematics::ElectronProton: default: { Error("This kT factorisation process is intended for p-on-p collisions! Aborting!"); exit(0); break; }
+    case Kinematics::ElectronProton: default: { InError("This kT factorisation process is intended for p-on-p collisions! Aborting!"); exit(0); break; }
     case Kinematics::ElasticElastic: 
       fMX = GetParticle(Particle::IncomingBeam1)->M();
       fMY = GetParticle(Particle::IncomingBeam2)->M();
@@ -117,7 +117,7 @@ GenericKTProcess::FillPrimaryParticlesKinematics()
   // off-shell particles (remnants?)
   bool os1 = false, os2 = false;
   switch (fCuts.kinematics) {
-    case Kinematics::ElectronProton: default: { Error("This kT factorisation process is intended for p-on-p collisions! Aborting!"); exit(0); break; }
+    case Kinematics::ElectronProton: default: { InError("This kT factorisation process is intended for p-on-p collisions! Aborting!"); exit(0); break; }
     case Kinematics::ElasticElastic:
       op1->status = Particle::FinalState;
       op2->status = Particle::FinalState;
@@ -136,8 +136,8 @@ GenericKTProcess::FillPrimaryParticlesKinematics()
       break;    
   }
   
-  if (!op1->SetMomentum(fPX, os1)) { Error(Form("Invalid outgoing proton 1: energy: %.2f", fPX.E())); }
-  if (!op2->SetMomentum(fPY, os2)) { Error(Form("Invalid outgoing proton 2: energy: %.2f", fPY.E())); }
+  if (!op1->SetMomentum(fPX, os1)) { InError(Form("Invalid outgoing proton 1: energy: %.2f", fPX.E())); }
+  if (!op2->SetMomentum(fPY, os2)) { InError(Form("Invalid outgoing proton 2: energy: %.2f", fPY.E())); }
   
   //=================================================================
   //     incoming partons (photons, pomerons, ...)

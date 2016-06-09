@@ -48,7 +48,7 @@ namespace EPA
       const double eqe = gq2min_init/fElectron.E2(),
                    emqe2 = pow(fYmin-eqe/4.,2),
                    emsqr = (pow(fYmin*fElDotPr,2)+gq2min_init*fMP2)/(fElDotPr*fElDotPr+fME2*fMP2);
-      if (emsqr<0.) { Error(Form("Problem with sqrt(emsqr), %f, at epamax determination", emsqr)); return; }
+      if (emsqr<0.) { InError(Form("Problem with sqrt(emsqr), %f, at epamax determination", emsqr)); return; }
 
       fEPAmax = Constants::AlphaReduced*fYmin*sqrt(emsqr);
       if (fMode==Transversal) { fEPAmax *= (2.*(1.-fYmin)+emqe2+eqe)/(emqe2+eqe); } // Transversal spectrum
@@ -88,7 +88,7 @@ namespace EPA
       const double eqe = (*q2)/fEEl,
                    emqe2 = pow(y-eqe/4.,2),
                    emsqr = (pow(y*fElDotPr,2)+(*q2)*fMP2)/(fElDotPr*fElDotPr+fME2*fMP2);
-      if (emsqr<0.) { Error(Form("Problem with sqrt(emsqr), %f, y/Q2 pair rejected", emsqr)); return false; }
+      if (emsqr<0.) { InError(Form("Problem with sqrt(emsqr), %f, y/Q2 pair rejected", emsqr)); return false; }
 
       const double r = Constants::AlphaReduced/(*q2)*sqrt(emsqr)/(emqe2+eqe);
       epat = r*(2.*(1.-y)+emqe2+eqe);

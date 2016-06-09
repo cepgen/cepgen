@@ -56,7 +56,7 @@ class GenericProcess
   /// Prepare the process for its integration over the whole phase space
   inline virtual void BeforeComputeWeight() {;}
   /// Compute the weight for this point in the phase-space
-  inline virtual double ComputeWeight() { throw Exception(__PRETTY_FUNCTION__, "Calling ComputeWeight on an invalid process!", Fatal); }
+  inline virtual double ComputeWeight() { throw Exception(__PRETTY_FUNCTION__, "Calling ComputeWeight on an invalid process!", FatalError); }
   /// Fill the Event object with the particles' kinematics
   /// \param[in] symmetrise_ Symmetrise the event? (randomise the production of positively-
   /// and negatively-charged outgoing central particles)

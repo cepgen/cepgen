@@ -436,7 +436,7 @@ PPtoLL::FillCentralParticlesKinematics()
   Particle* ol1 = GetParticle(Particle::CentralParticle1);
   ol1->SetPDGId(ol1->GetPDGId(), sign);
   ol1->status = Particle::FinalState;
-  if (!ol1->SetMomentum(fPl1)) { Error("Invalid outgoing lepton 1"); }
+  if (!ol1->SetMomentum(fPl1)) { InError("Invalid outgoing lepton 1"); }
 
   //=================================================================
   //     second outgoing lepton
@@ -444,5 +444,5 @@ PPtoLL::FillCentralParticlesKinematics()
   Particle* ol2 = GetParticle(Particle::CentralParticle2);
   ol2->SetPDGId(ol2->GetPDGId(), -sign);
   ol2->status = Particle::FinalState;
-  if (!ol2->SetMomentum(fPl2)) { Error("Invalid outgoing lepton 2"); }
+  if (!ol2->SetMomentum(fPl2)) { InError("Invalid outgoing lepton 2"); }
 }

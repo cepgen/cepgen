@@ -355,7 +355,7 @@ class Particle {
       if (fabs(e-fMomentum.E())<1.e-6) { return true; } // less than 1 eV difference
       if (fabs(e-mom.E())<1.e-6) { return true; } // less than 1 eV difference
       if (role!=Parton1 and role!=Parton2) {
-        Error(Form("Energy difference for particle %d (computed-set): %.5f", (int)role, e-fMomentum.E()));
+        InError(Form("Energy difference for particle %d (computed-set): %.5f", (int)role, e-fMomentum.E()));
       }
       fMomentum.SetE(e);//FIXME need to ensure nothing relies on this
       return false;
@@ -382,7 +382,7 @@ class Particle {
     inline bool SetMomentum(double px_,double py_,double pz_,double e_) {
       SetMomentum(px_, py_, pz_);
       if (fabs(e_-fMomentum.E())>1.e-6) { // more than 1 eV difference
-        Error(Form("Energy difference: %.5f", e_-fMomentum.E()));
+        InError(Form("Energy difference: %.5f", e_-fMomentum.E()));
         return false;
       }
       return true;

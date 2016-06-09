@@ -28,7 +28,7 @@ int
 GamGamLL::GetNdim(Kinematics::ProcessMode process_mode_) const
 {
   switch (process_mode_) {
-    case Kinematics::ElectronProton:     { Error("Not supported yet!"); }
+    case Kinematics::ElectronProton:     { InError("Not supported yet!"); }
     case Kinematics::ElasticElastic:
     default:                             return 7;
     case Kinematics::ElasticInelastic:
@@ -89,7 +89,7 @@ GamGamLL::Pickin()
   const double ss = fS+_w12;
   
   const double rl1 = std::pow(ss, 2)-4.*_w1*fS; // lambda(s, m1**2, m2**2)
-  if (rl1<=0.) { Warning(Form("rl1 = %f <= 0", rl1)); return false; }
+  if (rl1<=0.) { InWarning(Form("rl1 = %f <= 0", rl1)); return false; }
   _sl1 = std::sqrt(rl1);
 
   fS2 = ds2 = 0.;
@@ -107,7 +107,7 @@ GamGamLL::Pickin()
   _d3 = sig1-_w2;
 
   const double rl2 = std::pow(sp, 2)-4.*fS*fMX2; // lambda(s, m3**2, sigma)
-  if (rl2<=0.) { Warning(Form("rl2 = %f <= 0", rl2)); return false; }
+  if (rl2<=0.) { InWarning(Form("rl2 = %f <= 0", rl2)); return false; }
   sl2 = std::sqrt(rl2);
 
   //std::cout << "ss=" << ss << ", sp=" << sp << ", sl1=" << _sl1 << ", sl2=" << sl2 << std::endl;
@@ -115,8 +115,8 @@ GamGamLL::Pickin()
   fT1min = (_w31*_d3+(_d3-_w31)*(_d3*_w1-_w31*_w2)/fS)/fT1max; // definition from eq. (A.5) in [1]
 
   // FIXME dropped in CDF version
-  if (fT1max>-fCuts.q2min) { Warning(Form("t1max = %f > -q2min = %f", fT1max, -fCuts.q2min)); return false; }
-  if (fT1min<-fCuts.q2max and fCuts.q2max>=0.) { Warning(Form("t1min = %f < -q2max = %f", fT1min, -fCuts.q2max)); return false; }
+  if (fT1max>-fCuts.q2min) { InWarning(Form("t1max = %f > -q2min = %f", fT1max, -fCuts.q2min)); return false; }
+  if (fT1min<-fCuts.q2max and fCuts.q2max>=0.) { InWarning(Form("t1min = %f < -q2max = %f", fT1min, -fCuts.q2max)); return false; }
   if (fT1max<-fCuts.q2max and fCuts.q2max>=0.) fT1max = -fCuts.q2max;
   if (fT1min>-fCuts.q2min)                     fT1min = -fCuts.q2min;
   /////
@@ -135,7 +135,7 @@ GamGamLL::Pickin()
   t13 = fT1-_w1-fMX2;
 
   _sa1 =-std::pow(fT1-_w31, 2)/4.+_w1*fT1;
-  if (_sa1>=0.) { Warning(Form("_sa1 = %f >= 0", _sa1)); return false; }
+  if (_sa1>=0.) { InWarning(Form("_sa1 = %f >= 0", _sa1)); return false; }
 
   sl3 = std::sqrt(-_sa1);
 
@@ -174,7 +174,7 @@ GamGamLL::Pickin()
                r2 = s2x-d6;
   
   const double rl4 = (std::pow(r1, 2)-4.*_w2*s2x)*(std::pow(r2, 2)-4.*fMY2*s2x);
-  if (rl4<=0.) { Warning(Form("rl4 = %f <= 0", rl4)); return false; }
+  if (rl4<=0.) { InWarning(Form("rl4 = %f <= 0", rl4)); return false; }
   sl4 = std::sqrt(rl4);
   
   // t2max, t2min definitions from eq. (A.12) and (A.13) in [1]
@@ -199,12 +199,12 @@ GamGamLL::Pickin()
   t25 = fT2-_w2-fMY2;
 
   _sa2 = -std::pow(r4, 2)/4.+_w2*fT2;
-  if (_sa2>=0.) { Warning(Form("_sa2 = %f >= 0", _sa2)); return false; }
+  if (_sa2>=0.) { InWarning(Form("_sa2 = %f >= 0", _sa2)); return false; }
   
   sl6 = 2.*std::sqrt(-_sa2);
   
   _g4 = -std::pow(r3, 2)/4.+fT1*fT2;
-  if (_g4>=0.)  { Warning(Form("_g4 = %f >= 0", _g4));   return false; }
+  if (_g4>=0.)  { InWarning(Form("_g4 = %f >= 0", _g4));   return false; }
   
   sl7 = std::sqrt(-_g4)*2.;
   sl5 = sl6*sl7;
@@ -234,12 +234,12 @@ GamGamLL::Pickin()
   const double st = fS2-fT1-_w2;
   const double delb = (2.*_w2*r3+r4*st)*(4.*_p12*fT1-(fT1-_w31)*st)/(16.*ap);
 
-  if (dd<=0.) { Warning(Form("dd = %f <= 0\n\tdd1 = %f\tdd2 = %f", dd, _dd1, _dd2)); return false; }
+  if (dd<=0.) { InWarning(Form("dd = %f <= 0\n\tdd1 = %f\tdd2 = %f", dd, _dd1, _dd2)); return false; }
 
   _delta = delb-yy4*st*std::sqrt(dd)/(2.*ap);
   fS1 = fT2+_w1+(2.*_p12*r3-4.*_delta)/st;
 
-  if (ap>=0.) { Warning(Form("ap = %f >= 0", ap)); return false; }
+  if (ap>=0.) { InWarning(Form("ap = %f >= 0", ap)); return false; }
 
   fJacobian = ds2*dt1*dt2*Constants::Pi*Constants::Pi/(8.*_sl1*std::sqrt(-ap));
 
@@ -292,7 +292,7 @@ GamGamLL::Pickin()
 bool
 GamGamLL::Orient()
 {
-  if (!Pickin() or fJacobian==0.) { Warning(Form("Pickin failed! dj = %f", fJacobian)); return false; }
+  if (!Pickin() or fJacobian==0.) { InWarning(Form("Pickin failed! dj = %f", fJacobian)); return false; }
   
   const double re = 1./(2.*fSqS);
   _ep1 = re*(fS+_w12);
@@ -310,13 +310,13 @@ GamGamLL::Orient()
   const double ep3 = _ep1-_de3, ep5 = _ep2-_de5;
   _ec4 = _de3+_de5;
 
-  if (_ec4<_mc4) { Warning(Form("_ec4 = %f < _mc4 = %f\n\t==> de3 = %f, de5 = %f", _ec4, _mc4, _de3, _de5)); return false; }
+  if (_ec4<_mc4) { InWarning(Form("_ec4 = %f < _mc4 = %f\n\t==> de3 = %f, de5 = %f", _ec4, _mc4, _de3, _de5)); return false; }
   
   // What if the protons' momenta are not along the z-axis?
   _pc4 = std::sqrt((std::pow(_ec4, 2)-std::pow(_mc4, 2)));
 
   if (_pc4==0.) {
-    Warning("_pzc4==0");
+    InWarning("_pzc4==0");
     return false;
   }
   const double pp3 = std::sqrt(std::pow(ep3, 2)-fMX2), pt3 = std::sqrt(_dd1/fS)/_p,
@@ -334,8 +334,8 @@ GamGamLL::Orient()
 
   DebuggingInsideLoop(Form("st3 = %e\n\tst5 = %e", st3, st5));
 
-  if (st3>1.) { Warning(Form("st3 = %e > 1", st3)); return false; }
-  if (st5>1.) { Warning(Form("st5 = %e > 1", st5)); return false; }
+  if (st3>1.) { InWarning(Form("st3 = %e > 1", st3)); return false; }
+  if (st5>1.) { InWarning(Form("st5 = %e > 1", st5)); return false; }
 
   double ct3 = std::sqrt(1.-std::pow(st3, 2)),
          ct5 = std::sqrt(1.-std::pow(st5, 2));
@@ -345,13 +345,13 @@ GamGamLL::Orient()
 
   DebuggingInsideLoop(Form("ct3 = %e\n\tct5 = %e", ct3, ct5));
   
-  if (_dd5<0.) { Warning(Form("dd5 = %f < 0", _dd5)); return false; }
+  if (_dd5<0.) { InWarning(Form("dd5 = %f < 0", _dd5)); return false; }
 
   // Centre of mass system kinematics (theta4 and phi4)
   _pt4 = std::sqrt(_dd5/fS)/_p;
   _st4 = _pt4/_pc4;
 
-  if (_st4>1.) { Warning(Form("st4 = %f > 1", _st4)); return false; }
+  if (_st4>1.) { InWarning(Form("st4 = %f > 1", _st4)); return false; }
   
   _ct4 = std::sqrt(1.-std::pow(_st4, 2));
   if (_ep1*_ec4<_p14) _ct4 *= -1.;
@@ -367,8 +367,8 @@ GamGamLL::Orient()
   const double rr  = std::sqrt(-_gram/fS)/(_p*_pt4);
   const double sp3 = rr/pt3, sp5 = -rr/pt5;
 
-  if (fabs(sp3)>1.) { Warning(Form("sp3 = %e > 1", sp3)); return false; }
-  if (fabs(sp5)>1.) { Warning(Form("sp5 = %e > 1", sp5)); return false; }
+  if (fabs(sp3)>1.) { InWarning(Form("sp3 = %e > 1", sp3)); return false; }
+  if (fabs(sp5)>1.) { InWarning(Form("sp5 = %e > 1", sp5)); return false; }
 
   const double cp3 = -std::sqrt(1.-std::pow(sp3, 2)), cp5 = -std::sqrt(1.-std::pow(sp5, 2));
   
@@ -448,7 +448,7 @@ GamGamLL::BeforeComputeWeight()
   double m;
   switch (fCuts.kinematics) {
   case Kinematics::ElectronProton:
-    { Error("Electron/Proton case not supported yet!"); }
+    { InError("Electron/Proton case not supported yet!"); }
   case Kinematics::ElasticElastic:
     _dw31 = _dw52 = 0.; break;
   case Kinematics::ElasticInelastic:
@@ -492,7 +492,7 @@ GamGamLL::ComputeWeight()
 
   weight = 0.;
 
-  if (!fIsOutStateSet) { Warning("Output state not set!"); return 0.; }
+  if (!fIsOutStateSet) { InWarning("Output state not set!"); return 0.; }
 
   if (fCuts.wmax<0) fCuts.wmax = fS;
 
@@ -514,9 +514,9 @@ GamGamLL::ComputeWeight()
   
   if (!Orient()) return 0.;
 
-  if (fT1>0.)  { Warning(Form("t1 = %f > 0", fT1)); return 0.; }
-  if (fT2>0.)  { Warning(Form("t2 = %f > 0", fT2)); return 0.; }
-  if (fJacobian==0.) { Warning(Form("dj = %f", fJacobian)); return 0.; }
+  if (fT1>0.)  { InWarning(Form("t1 = %f > 0", fT1)); return 0.; }
+  if (fT2>0.)  { InWarning(Form("t2 = %f > 0", fT2)); return 0.; }
+  if (fJacobian==0.) { InWarning(Form("dj = %f", fJacobian)); return 0.; }
   
   const double ecm6 = (_w4+fMl12-fMl22)/(2.*_mc4);
   const double pp6cm = std::sqrt(std::pow(ecm6, 2)-fMl12);
@@ -780,21 +780,21 @@ GamGamLL::FillKinematics(bool)
   Particle::Momentum plab_ip1(0., 0., _p, _ep1);
   plab_ip1.BetaGammaBoost(gamma, betgam);
   ip1->SetMomentum(plab_ip1);
-  // Error("Invalid incoming proton 1");
+  // InError("Invalid incoming proton 1");
   
   // Second incoming proton
   Particle* ip2 = GetParticle(Particle::IncomingBeam2);
   Particle::Momentum plab_ip2(0., 0., -_p, _ep2);
   plab_ip2.BetaGammaBoost(gamma, betgam);
   ip2->SetMomentum(plab_ip2);
-  // Error("Invalid incoming proton 2");
+  // InError("Invalid incoming proton 2");
   
   // First outgoing proton
   Particle* op1 = GetParticle(Particle::OutgoingBeam1);
   fP3lab.BetaGammaBoost(gamma, betgam);
   fP3lab.RotatePhi(ranphi, rany);
   op1->SetMomentum(fP3lab);
-  // Error("Invalid outgoing proton 1");
+  // InError("Invalid outgoing proton 1");
   if (fCuts.kinematics>1) { op1->status = Particle::Undecayed;  op1->SetM(fMX); } // fragmenting remnants
   else                    { op1->status = Particle::FinalState; op1->SetM();    } // stable proton
   
@@ -803,7 +803,7 @@ GamGamLL::FillKinematics(bool)
   fP5lab.BetaGammaBoost(gamma, betgam);
   fP5lab.RotatePhi(ranphi, rany);
   op2->SetMomentum(fP5lab);
-  // Error("Invalid outgoing proton 2");
+  // InError("Invalid outgoing proton 2");
   if (fCuts.kinematics==4) { op2->status = Particle::Undecayed;  op2->SetM(fMY); } // fragmenting remnants
   else                     { op2->status = Particle::FinalState; op2->SetM();    } // stable proton
 
@@ -813,7 +813,7 @@ GamGamLL::FillKinematics(bool)
   Particle::Momentum plab_ph1 = plab_ip1-fP3lab;
   plab_ph1.RotatePhi(ranphi, rany);
   ph1->SetMomentum(plab_ph1);
-  ////Error("Invalid photon 1");
+  ////InError("Invalid photon 1");
   ph1->charge = 0;
   ph1->status = Particle::Incoming; // "incoming beam"
   
@@ -823,7 +823,7 @@ GamGamLL::FillKinematics(bool)
   Particle::Momentum plab_ph2 = plab_ip2-fP5lab;
   plab_ph2.RotatePhi(ranphi, rany);
   ph2->SetMomentum(plab_ph2);
-  ////Error("Invalid photon 2");
+  ////InError("Invalid photon 2");
   ph2->charge = 0;
   ph2->status = Particle::Incoming; // "incoming beam"
 
@@ -840,7 +840,7 @@ GamGamLL::FillKinematics(bool)
   ol1->SetPDGId(ol1->GetPDGId(), ransign);
   fP6cm.RotatePhi(ranphi, rany);
   ol1->SetMomentum(fP6cm);
-  // Error("Invalid outgoing lepton 1");
+  // InError("Invalid outgoing lepton 1");
   ol1->status = Particle::FinalState;
   ol1->SetM(); //FIXME
   
