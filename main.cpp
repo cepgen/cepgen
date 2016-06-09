@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
     //mg.parameters->maxgen = 1e5;
   }
   else {
-    Debug(Form("Reading config file stored in %s", argv[1]));
+    Debugging(Form("Reading config file stored in %s", argv[1]));
     if (!mg.parameters->ReadConfigFile(argv[1])) {
       Information(Form("Error reading the configuration!\n\t"
                        "Please check your input file (%s)", argv[1]));

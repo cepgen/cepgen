@@ -15,11 +15,11 @@ void Map(double expo_, double xmin_, double xmax_, double* out_, double* dout_, 
   out = xmin_*std::pow(y, expo_);
   *out_ = out;
   *dout_ = out*log(y);
-  DebugInsideLoop(Form("Mapping variable \"%s\"\n\t"
-                       "min = %f\n\tmax = %f\n\tmax/min = %f\n\t"
-                       "exponent = %f\n\t"
-                       "output = %f\n\td(output) = %f",
-                       var_name_.c_str(), xmin_, xmax_, y, expo_, *out_, *dout_));
+  DebuggingInsideLoop(Form("Mapping variable \"%s\"\n\t"
+                           "min = %f\n\tmax = %f\n\tmax/min = %f\n\t"
+                           "exponent = %f\n\t"
+                           "output = %f\n\td(output) = %f",
+                           var_name_.c_str(), xmin_, xmax_, y, expo_, *out_, *dout_));
 }
 
 void Mapla(double y_, double z_, int u_, double xm_, double xp_, double* x_, double* d_)

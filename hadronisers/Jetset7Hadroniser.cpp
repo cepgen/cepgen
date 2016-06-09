@@ -8,7 +8,7 @@ Jetset7Hadroniser::Jetset7Hadroniser() : GenericHadroniser("Jetset7")
 
 Jetset7Hadroniser::~Jetset7Hadroniser()
 {
-  //Debug("Destructor called");
+  //Debugging("Destructor called");
 }
 
 bool
@@ -61,7 +61,7 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
   }
   
   if (Logger::GetInstance()->Level>=Logger::Debug) {
-    Debug("Dump of the event before the hadronisation");
+    Debugging("Dump of the event before the hadronisation");
     ev_->Dump();
   }
   
@@ -179,8 +179,8 @@ Jetset7Hadroniser::Hadronise(Event *ev_)
 
     ev_->AddParticle(pa);
   }
-  Debug(Form("Passed the string construction stage.\n\t %d string objects were identified and constructed",
-             "%s", max_str_in_evt, dbg.str().c_str()));
+  Debugging(Form("Passed the string construction stage.\n\t %d string objects were identified and constructed",
+                 "%s", max_str_in_evt, dbg.str().c_str()));
 
   return true;
 }
@@ -195,7 +195,7 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
   double pmxda[4];
   double partpb[4];
 
-  Debug("Hadronisation preparation called!");
+  Debugging("Hadronisation preparation called!");
 
   ParticlesRef pp;
   ParticlesRef::iterator p;
@@ -275,13 +275,13 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
       ev_->AddParticle(singlet);
       ev_->AddParticle(doublet);
         
-      Debug("Quark/diquark content succesfully added to the event!");
+      Debugging("Quark/diquark content succesfully added to the event!");
     }
     else { // Quark/diquark content already present in the event
       std::vector<int> daugh;
       std::vector<int>::iterator did;
       
-      Debug(Form("Quark/diquark content already present in the event!\n\tRole of these particles: %d", (*p)->role));
+      Debugging(Form("Quark/diquark content already present in the event!\n\tRole of these particles: %d", (*p)->role));
       
       daugh = (*p)->GetDaughters();
       for (did=daugh.begin(); did!=daugh.end(); did++) {
@@ -289,12 +289,12 @@ Jetset7Hadroniser::PrepareHadronisation(Event *ev_)
          or ev_->GetById(*did)->GetPDGId()==Particle::dQuark) { // Quark
           singlet.SetMother(ev_->GetById((*p)->id));
           *(ev_->GetById(*did)) = singlet;
-          Debug("Singlet replaced");
+          Debugging("Singlet replaced");
         }
         else { // Diquark
           doublet.SetMother(ev_->GetById((*p)->id));
           *(ev_->GetById(*did)) = doublet;
-          Debug("Doublet replaced");
+          Debugging("Doublet replaced");
         }
       }
     }

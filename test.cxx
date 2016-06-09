@@ -53,21 +53,21 @@ int main(int argc, char* argv[]) {
     mg.parameters->in1p = 3500.;
     mg.parameters->in2p = 3500.;
     mg.parameters->pair = Particle::Muon;
-    mg.parameters->mcut = 2;
+    mg.parameters->mcut = Kinematics::BothLeptons;
     mg.parameters->minenergy = 0.; //FIXME
     mg.parameters->minpt = 5.;
     mg.parameters->maxgen = ngen;
     mg.parameters->hadroniser = new Pythia6Hadroniser;
     mg.parameters->remnant_mode = GenericProcess::SuriYennie;
-    mg.parameters->process_mode = GenericProcess::ElasticElastic;
+    mg.parameters->process_mode = Kinematics::ElasticElastic;
     //mg.parameters->ncvg = 5e3; //FIXME
     //mg.parameters->SetEtaRange(-2.5, 2.5);
     //mg.parameters->SetEtaRange(-999., 999.);
   }
   else {
-    Debug(Form("Reading config file stored in %s", argv[1]));
+    Debugging(Form("Reading config file stored in %s", argv[1]));
     if (!mg.parameters->ReadConfigFile(argv[1])) {
-      Info(Form("Error reading the configuration!\n\t"
+      Information(Form("Error reading the configuration!\n\t"
                 "Please check your input file (%s)", argv[1]));
       return -1;
     }

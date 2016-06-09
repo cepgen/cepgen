@@ -16,9 +16,9 @@ Vegas::Vegas(const int dim_, double f_(double*,size_t,void*), Parameters* inPara
     fXup[i] = 1.;
   }
   
-  Debug(Form("Number of integration dimensions: %d\n\t"
-             "Number of iterations:             %d\n\t"
-             "Number of function calls:         %d", dim_, inParam_->itvg, inParam_->ncvg));
+  Debugging(Form("Number of integration dimensions: %d\n\t"
+                 "Number of iterations:             %d\n\t"
+                 "Number of function calls:         %d", dim_, inParam_->itvg, inParam_->ncvg));
 
   fFunction = new gsl_monte_function;
   fFunction->f = f_;
@@ -168,7 +168,7 @@ Vegas::GenerateOneEvent()
     fCorrec = (fNm[fJ]-1.)*fFmaxDiff/fFGlobalMax*weight/fFGlobalMax-1.;
   }
   
-  Debug(Form("Correc.: %f, j = %d", fCorrec, fJ));
+  Debugging(Form("Correc.: %f, j = %d", fCorrec, fJ));
   
   // Return with an accepted event
   if (weight>0.) return StoreEvent(fX);
@@ -180,7 +180,7 @@ Vegas::CorrectionCycle(double* x_)
 {
   double weight;
   
-  Debug(Form("Correction cycles are started.\n\t"
+  Debugging(Form("Correction cycles are started.\n\t"
                   "j = %f"
                   "correc = %f"
                   "corre2 = %f", fJ, fCorrec2));
@@ -239,7 +239,7 @@ Vegas::StoreEvent(double *x_)
   fInputParameters->store = false;
   
   if (fInputParameters->ngen%1000==0) {
-    Debug(Form("Generated events: %d", fInputParameters->ngen));
+    Debugging(Form("Generated events: %d", fInputParameters->ngen));
   }
   
   return true;
@@ -263,7 +263,7 @@ Vegas::SetGen()
   double sig, sigp;
   std::ostringstream os;
   if (Logger::GetInstance()->Level>=Logger::Debug) {
-    Debug(Form("MaxGen = %d", fInputParameters->maxgen));
+    Debugging(Form("MaxGen = %d", fInputParameters->maxgen));
   }
 
   fNm = new int[20000];
@@ -314,13 +314,13 @@ Vegas::SetGen()
       if (fFmax[i]!=0.) eff = fFmax[i]/av;
       os.str("");
       for (unsigned int j=0; j<fFunction->dim; j++) { os << n[j]; if (j!=fFunction->dim-1) os << ", "; }
-      DebugInsideLoop(Form("In iteration #%d:\n\t"
-	                              "av   = %f\n\t"
-	                              "sig  = %f\n\t"
-                                "fmax = %f\n\t"
-                                "eff  = %f\n\t"
-                                "n = (%s)",
-                                i, av, sig, fFmax[i], eff, os.str().c_str()));
+      DebuggingInsideLoop(Form("In iteration #%d:\n\t"
+                               "av   = %f\n\t"
+                               "sig  = %f\n\t"
+                               "fmax = %f\n\t"
+                               "eff  = %f\n\t"
+                               "n = (%s)",
+                               i, av, sig, fFmax[i], eff, os.str().c_str()));
     }
   }
 
@@ -336,16 +336,16 @@ Vegas::SetGen()
     for (int i=0; i<max; i++) eff1 += (fFmax[i]/(max*sum));
     eff2 = fFGlobalMax/sum;
     
-    Debug(Form("Average function value     =  sum   = %f\n\t"
-               "Average function value     =  sum   = %f\n\t"
-               "Average function value**2  =  sum2  = %f\n\t"
-               "Overall standard deviation =  sig   = %f\n\t"
-               "Average standard deviation =  sigp  = %f\n\t"
-               "Maximum function value     = ffmax  = %f\n\t"
-               "Average inefficiency       =  eff1  = %f\n\t"
-               "Overall inefficiency       =  eff2  = %f\n\t"
-               "eff = %f",
-               sum, sum2, sig, sigp, fFGlobalMax, eff1, eff2, eff));
+    Debugging(Form("Average function value     =  sum   = %f\n\t"
+                   "Average function value     =  sum   = %f\n\t"
+                   "Average function value**2  =  sum2  = %f\n\t"
+                   "Overall standard deviation =  sig   = %f\n\t"
+                   "Average standard deviation =  sigp  = %f\n\t"
+                   "Maximum function value     = ffmax  = %f\n\t"
+                   "Average inefficiency       =  eff1  = %f\n\t"
+                   "Overall inefficiency       =  eff2  = %f\n\t"
+                   "eff = %f",
+                   sum, sum2, sig, sigp, fFGlobalMax, eff1, eff2, eff));
   }
   fGenerationPrepared = true;
 }

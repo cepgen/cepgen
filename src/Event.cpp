@@ -90,7 +90,7 @@ Event::GetRoles() const
 int
 Event::AddParticle(Particle part_, bool replace_)
 {
-  DebugInsideLoop(Form("Particle with PDGid = %d has role %d", part_.GetPDGId(), part_.role));
+  DebuggingInsideLoop(Form("Particle with PDGid = %d has role %d", part_.GetPDGId(), part_.role));
   
   if (part_.role<=0) {
     return -1;

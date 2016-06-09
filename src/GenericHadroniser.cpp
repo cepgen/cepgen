@@ -6,7 +6,7 @@ GenericHadroniser::GenericHadroniser(std::string name_) :
 
 GenericHadroniser::~GenericHadroniser()
 {
-  Debug(Form("Destructor called"));
+  Debugging(Form("Destructor called"));
   
   delete fHadrons;
 }

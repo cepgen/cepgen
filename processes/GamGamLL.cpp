@@ -51,7 +51,7 @@ GamGamLL::Pickin()
   double t13, t25;
   double b, c;
   
-  DebugInsideLoop(Form("Optimised mode? %i", _nOpt));
+  DebuggingInsideLoop(Form("Optimised mode? %i", _nOpt));
   
   fJacobian = 0.;
 
@@ -61,9 +61,9 @@ GamGamLL::Pickin()
   sig1 = std::pow(sig, 2);
   sig2 = std::pow(sig, 2);
 
-  DebugInsideLoop(Form("mc4 = %f\n\t"
-                       "sig1 = %f\n\t"
-                       "sig2 = %f", _mc4, sig1, sig2));
+  DebuggingInsideLoop(Form("mc4 = %f\n\t"
+                           "sig1 = %f\n\t"
+                           "sig2 = %f", _mc4, sig1, sig2));
 
   // Mass difference between the first outgoing particle and the first incoming
   // particle
@@ -77,12 +77,12 @@ GamGamLL::Pickin()
   // outgoing particle
   const double d6 = _w4-fMY2;
 
-  DebugInsideLoop(Form("w1 = %f\n\t"
-                       "w2 = %f\n\t"
-                       "w3 = %f\n\t"
-                       "w4 = %f\n\t"
-                       "w5 = %f",
-                       _w1, _w2, fMX2, _w4, fMY2));
+  DebuggingInsideLoop(Form("w1 = %f\n\t"
+                           "w2 = %f\n\t"
+                           "w3 = %f\n\t"
+                           "w4 = %f\n\t"
+                           "w5 = %f",
+                           _w1, _w2, fMX2, _w4, fMY2));
 
   //Info(Form("w31 = %f\n\tw52 = %f\n\tw12 = %f", _w31, _w52, _w12));
   
@@ -99,7 +99,7 @@ GamGamLL::Pickin()
     sig1 = fS2; //FIXME!!!!!!!!!!!!!!!!!!!!
   }
   
-  DebugInsideLoop(Form("s2 = %f", fS2));
+  DebuggingInsideLoop(Form("s2 = %f", fS2));
 
   //std::cout << "s=" << _s << ", w3=" << fMX2 << ", sig1=" << sig1 << std::endl;
   const double sp = fS+fMX2-sig1;
@@ -126,7 +126,7 @@ GamGamLL::Pickin()
   // changes wrt mapt1 : dx->-dx
   dt1 = -dt1;
   
-  DebugInsideLoop(Form("Definition of t1 = %f according to\n\t"
+  DebuggingInsideLoop(Form("Definition of t1 = %f according to\n\t"
                        "(t1min, t1max) = (%f, %f)", fT1, fT1min, fT1max));
 
   _dd4 = _w4-fT1;
@@ -154,12 +154,12 @@ GamGamLL::Pickin()
   // 4
   s2x = s2max;
   
-  DebugInsideLoop(Form("s2x = s2max = %f", s2x));
+  DebuggingInsideLoop(Form("s2x = s2max = %f", s2x));
   
   if (_nOpt<0) { // 5
     if (splus>sig2) {
       sig2 = splus;
-      DebugInsideLoop(Form("sig2 truncated to splus = %f", splus));
+      DebuggingInsideLoop(Form("sig2 truncated to splus = %f", splus));
     }
     if (_nOpt<-1) { Map(x(2), sig2, s2max, &fS2, &ds2, "s2"); }
     else          { Mapla(fT1, _w2, x(2), sig2, s2max, &fS2, &ds2); } // _nOpt==-1
@@ -167,7 +167,7 @@ GamGamLL::Pickin()
   }
   else if (_nOpt==0) { s2x = fS2; } // 6
 
-  DebugInsideLoop(Form("s2x = %f", s2x));
+  DebuggingInsideLoop(Form("s2x = %f", s2x));
   
   // 7
   const double r1 = s2x-d8,
@@ -192,7 +192,7 @@ GamGamLL::Pickin()
                r3 = _dd4-fT2,
                r4 = _w52-fT2;
 
-  DebugInsideLoop(Form("r1 = %f\n\tr2 = %f\n\tr3 = %f\n\tr4 = %f", r1, r2, r3, r4));
+  DebuggingInsideLoop(Form("r1 = %f\n\tr2 = %f\n\tr3 = %f\n\tr4 = %f", r1, r2, r3, r4));
 
   b = r3*r4-2.*(fT1+_w2)*fT2;
   c = fT2*d6*d8+(d6-d8)*(d6*_w2-d8*fMY2);
@@ -226,7 +226,7 @@ GamGamLL::Pickin()
   else         _dd1 = ss*t13*(fS2-s2max)/4.;
   // 11
   _dd2 = -fT2*(fS2-s2p)*(fS2-s2min)/4.;
-  DebugInsideLoop(Form("t2 =%f\n\ts2 =%f\n\ts2p=%f\n\ts2min=%f\n\tdd2=%f",fT2, fS2, s2p, s2min, _dd2));
+  DebuggingInsideLoop(Form("t2 =%f\n\ts2 =%f\n\ts2p=%f\n\ts2min=%f\n\tdd2=%f",fT2, fS2, s2p, s2min, _dd2));
   
   const double yy4 = cos(Constants::Pi*x(3));
   const double dd = _dd1*_dd2;
@@ -243,7 +243,7 @@ GamGamLL::Pickin()
 
   fJacobian = ds2*dt1*dt2*Constants::Pi*Constants::Pi/(8.*_sl1*std::sqrt(-ap));
 
-  DebugInsideLoop(Form("Jacobian = %e", fJacobian));
+  DebuggingInsideLoop(Form("Jacobian = %e", fJacobian));
 
   _gram = (1.-std::pow(yy4, 2))*dd/ap;
 
@@ -298,8 +298,8 @@ GamGamLL::Orient()
   _ep1 = re*(fS+_w12);
   _ep2 = re*(fS-_w12);
 
-  DebugInsideLoop(Form(" re = %e\n\t_w12 = %e", re, _w12));
-  DebugInsideLoop(Form("Incoming particles' energy = %f, %f", _ep1, _ep2));
+  DebuggingInsideLoop(Form(" re = %e\n\t_w12 = %e", re, _w12));
+  DebuggingInsideLoop(Form("Incoming particles' energy = %f, %f", _ep1, _ep2));
 
   _p = re*_sl1;
 
@@ -322,17 +322,17 @@ GamGamLL::Orient()
   const double pp3 = std::sqrt(std::pow(ep3, 2)-fMX2), pt3 = std::sqrt(_dd1/fS)/_p,
                pp5 = std::sqrt(std::pow(ep5, 2)-fMY2), pt5 = std::sqrt(_dd3/fS)/_p;
 
-  DebugInsideLoop(Form("Central system's energy: E4 = %f\n\t"
-                       "                 momentum: p4 = %f\n\t"
-                       "                 invariant mass: m4 = %f\n\t"
-                       "Outgoing particles' energy: E3 = %f\n\t"
-                       "                            E5 = %f",
-                       _ec4, _pc4, _mc4, ep3, ep5));
+  DebuggingInsideLoop(Form("Central system's energy: E4 = %f\n\t"
+                           "                 momentum: p4 = %f\n\t"
+                           "                 invariant mass: m4 = %f\n\t"
+                           "Outgoing particles' energy: E3 = %f\n\t"
+                           "                            E5 = %f",
+                           _ec4, _pc4, _mc4, ep3, ep5));
 
   const double st3 = pt3/pp3,
                st5 = pt5/pp5;
 
-  DebugInsideLoop(Form("st3 = %e\n\tst5 = %e", st3, st5));
+  DebuggingInsideLoop(Form("st3 = %e\n\tst5 = %e", st3, st5));
 
   if (st3>1.) { Warning(Form("st3 = %e > 1", st3)); return false; }
   if (st5>1.) { Warning(Form("st5 = %e > 1", st5)); return false; }
@@ -343,7 +343,7 @@ GamGamLL::Orient()
   if (_ep1*ep3<_p13) ct3 *= -1.;
   if (_ep2*ep5>_p25) ct5 *= -1.;
 
-  DebugInsideLoop(Form("ct3 = %e\n\tct5 = %e", ct3, ct5));
+  DebuggingInsideLoop(Form("ct3 = %e\n\tct5 = %e", ct3, ct5));
   
   if (_dd5<0.) { Warning(Form("dd5 = %f < 0", _dd5)); return false; }
 
@@ -362,7 +362,7 @@ GamGamLL::Orient()
   if (_ct4<0.) _be4 = std::pow(_st4, 2)/_al4;
   else         _al4 = std::pow(_st4, 2)/_be4;
 
-  DebugInsideLoop(Form("ct4 = %f\n\tal4 = %f, be4 = %f", _ct4, _al4, _be4));
+  DebuggingInsideLoop(Form("ct4 = %f\n\tal4 = %f, be4 = %f", _ct4, _al4, _be4));
 
   const double rr  = std::sqrt(-_gram/fS)/(_p*_pt4);
   const double sp3 = rr/pt3, sp5 = -rr/pt5;
@@ -377,21 +377,21 @@ GamGamLL::Orient()
 
   const double a1 = fP3lab.Px()-fP5lab.Px();
 
-  DebugInsideLoop(Form("Kinematic quantities\n\t"
-                       "cos(theta3) = %1.4f\tsin(theta3) = %1.4f\tcos( phi3 ) = %1.4f\tsin( phi3 ) = %1.4f\n\t"
-                       "cos(theta4) = %1.4f\tsin(theta4) = %1.4f\n\t"
-                       "cos(theta5) = %1.4f\tsin(theta5) = %1.4f\tcos( phi5 ) = %1.4f\tsin( phi5 ) = %1.4f\n\t"
-                       "a1 = %f",
-                       ct3, st3, cp3, sp3,
-                       _ct4, _st4,
-                       ct5, st5, cp5, sp5, a1));
+  DebuggingInsideLoop(Form("Kinematic quantities\n\t"
+                           "cos(theta3) = %1.4f\tsin(theta3) = %1.4f\tcos( phi3 ) = %1.4f\tsin( phi3 ) = %1.4f\n\t"
+                           "cos(theta4) = %1.4f\tsin(theta4) = %1.4f\n\t"
+                           "cos(theta5) = %1.4f\tsin(theta5) = %1.4f\tcos( phi5 ) = %1.4f\tsin( phi5 ) = %1.4f\n\t"
+                           "a1 = %f",
+                           ct3, st3, cp3, sp3,
+                           _ct4, _st4,
+                           ct5, st5, cp5, sp5, a1));
 
   if (fabs(_pt4+fP3lab.Px()+fP5lab.Px())<fabs(fabs(a1)-_pt4)) {
-    DebugInsideLoop(Form("|pp4+pp3*cos(phi3)+pp5*cos(phi5)| < | |a1|-pp4 |\n\t"
-                         "pp4 = %f\tpp5 = %f\n\t"
-                         "cos(phi3) = %f\tcos(phi5) = %f"
-                         "a1 = %f",
-                         _pt4, pt5, cp3, cp5, a1));
+    DebuggingInsideLoop(Form("|pp4+pp3*cos(phi3)+pp5*cos(phi5)| < | |a1|-pp4 |\n\t"
+                             "pp4 = %f\tpp5 = %f\n\t"
+                             "cos(phi3) = %f\tcos(phi5) = %f"
+                             "a1 = %f",
+                             _pt4, pt5, cp3, cp5, a1));
     return true;
   }
   if (a1<0.) fP5lab.SetP(0, -fP5lab.Px());
@@ -410,9 +410,9 @@ GamGamLL::ComputeOutgoingPrimaryParticlesMasses(double x_, double outmass_, doub
   
   Map(x_, wx2min, wx2max, &mx2, &dmx2, "mx2");
 
-  DebugInsideLoop(Form("mX^2 in range (%f, %f), x = %f\n\t"
-                       "mX^2 = %f, d(mX^2) = %f\n\t"
-                       "mX = %f, d(mX) = %f", wx2min, wx2max, x_, mx2, dmx2, sqrt(mx2), sqrt(dmx2)));
+  DebuggingInsideLoop(Form("mX^2 in range (%f, %f), x = %f\n\t"
+                           "mX^2 = %f, d(mX^2) = %f\n\t"
+                           "mX = %f, d(mX) = %f", wx2min, wx2max, x_, mx2, dmx2, sqrt(mx2), sqrt(dmx2)));
 
   *dw_ = sqrt(dmx2);
   return sqrt(mx2);
@@ -440,7 +440,7 @@ GamGamLL::BeforeComputeWeight()
                thetamax = EtaToTheta(fCuts.etamin);
   _cotth1 = 1./tan(thetamax*Constants::Pi/180.);
   _cotth2 = 1./tan(thetamin*Constants::Pi/180.);
-  DebugInsideLoop(Form("cot(theta1) = %f\n\tcot(theta2) = %f", _cotth1, _cotth2));
+  DebuggingInsideLoop(Form("cot(theta1) = %f\n\tcot(theta2) = %f", _cotth1, _cotth2));
 
   fMl12 = GetParticle(Particle::CentralParticle1)->M2();
   fMl22 = GetParticle(Particle::CentralParticle2)->M2();
@@ -502,15 +502,15 @@ GamGamLL::ComputeWeight()
 
   // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or _wmax if specified)
   wmax = std::pow(fSqS-fMX-fMY,2);
-  DebugInsideLoop(Form("sqrt(s)=%f\n\tm(X1)=%f\tm(X2)=%f", fSqS, fMX, fMY));
+  DebuggingInsideLoop(Form("sqrt(s)=%f\n\tm(X1)=%f\tm(X2)=%f", fSqS, fMX, fMY));
   if (fabs(wmax)>fabs(fCuts.wmax)) wmax = fCuts.wmax;
   
-  DebugInsideLoop(Form("wmin = %f\n\twmax = %f\n\twmax/wmin = %f", wmin, wmax, wmax/wmin));
+  DebuggingInsideLoop(Form("wmin = %f\n\twmax = %f\n\twmax/wmin = %f", wmin, wmax, wmax/wmin));
   
   Map(x(4), wmin, wmax, &_w4, &dw4, "w4");
   _mc4 = std::sqrt(_w4);
   
-  DebugInsideLoop(Form("Computed value for w4 = %f -> mc4 = %f", _w4, _mc4));
+  DebuggingInsideLoop(Form("Computed value for w4 = %f -> mc4 = %f", _w4, _mc4));
   
   if (!Orient()) return 0.;
 
@@ -537,11 +537,11 @@ GamGamLL::ComputeWeight()
                pgy = -fP3lab.Py(),
                pgz = _mc4*_de3/(_ec4+_pc4)-_ec4*_de3*_al4/_mc4-fP3lab.Px()*_ec4*_st4/_mc4+_ec4*_ct4/_mc4*(fP3lab.P()*al3+e3mp3-e1mp1);
   
-  DebugInsideLoop(Form("pg3 = (%f, %f, %f)\n\t"
-                       "pg3^2 = %f",
-                       pgx, pgy, pgz,
-                       std::sqrt(std::pow(pgx, 2)+std::pow(pgy, 2)+std::pow(pgz, 2))
-                      ));
+  DebuggingInsideLoop(Form("pg3 = (%f, %f, %f)\n\t"
+                           "pg3^2 = %f",
+                           pgx, pgy, pgz,
+                           std::sqrt(std::pow(pgx, 2)+std::pow(pgy, 2)+std::pow(pgz, 2))
+                          ));
   
   const double pgp = std::sqrt(std::pow(pgx, 2)+std::pow(pgy, 2)), // outgoing proton (3)'s transverse momentum
                pgg = std::sqrt(std::pow(pgp, 2)+std::pow(pgz, 2)); // outgoing proton (3)'s momentum
@@ -566,7 +566,7 @@ GamGamLL::ComputeWeight()
   if (xx6>1.) xx6 = 1.;
   if (xx6<0.) xx6 = 0.;
   
-  DebugInsideLoop(Form("amap = %f\n\tbmap = %f\n\tymap = %f\n\tbeta = %f", amap, bmap, ymap, beta));
+  DebuggingInsideLoop(Form("amap = %f\n\tbmap = %f\n\tymap = %f\n\tbeta = %f", amap, bmap, ymap, beta));
   
   // 3D rotation of the first outgoing lepton wrt the CM system
   const double theta6cm = acos(1.-2.*xx6);
@@ -574,16 +574,16 @@ GamGamLL::ComputeWeight()
   // match the Jacobian
   fJacobian *= (((amap+bmap*cos(theta6cm))*(amap-bmap*cos(theta6cm))/amap/bmap*log(ymap))/2.);
   
-  DebugInsideLoop(Form("Jacobian = %e", fJacobian));
+  DebuggingInsideLoop(Form("Jacobian = %e", fJacobian));
   
-  DebugInsideLoop(Form("ctcm6 = %f\n\tstcm6 = %f", cos(theta6cm), sin(theta6cm)));
+  DebuggingInsideLoop(Form("ctcm6 = %f\n\tstcm6 = %f", cos(theta6cm), sin(theta6cm)));
   
   const double phi6cm = 2.*Constants::Pi*x(6);
 
   // First outgoing lepton's 3-momentum in the centre of mass system
   Particle::Momentum p6cm = Particle::Momentum::FromPThetaPhi(pp6cm, theta6cm, phi6cm);
   
-  DebugInsideLoop(Form("p3cm6 = (%f, %f, %f)", p6cm.Px(), p6cm.Py(), p6cm.Pz()));
+  DebuggingInsideLoop(Form("p3cm6 = (%f, %f, %f)", p6cm.Px(), p6cm.Py(), p6cm.Pz()));
 
   h1 = stg*p6cm.Pz()+ctg*p6cm.Px();
 
@@ -598,7 +598,7 @@ GamGamLL::ComputeWeight()
   const double el6 = (_ec4*ecm6+_pc4*pc6z)/_mc4;
   h2 = (_ec4*pc6z+_pc4*ecm6)/_mc4;
 
-  DebugInsideLoop(Form("h1 = %f\n\th2 = %f", h1, h2));
+  DebuggingInsideLoop(Form("h1 = %f\n\th2 = %f", h1, h2));
 
   // First outgoing lepton's 3-momentum
   p6x = _ct4*pc6x+_st4*h2;
@@ -607,7 +607,7 @@ GamGamLL::ComputeWeight()
   
   // first outgoing lepton's kinematics
   fP6cm = Particle::Momentum(p6x, p6y, p6z, el6);
-  DebugInsideLoop(Form("E6(cm) = %f\n\tP6(cm) = (%f, %f, %f)", el6, p6x, p6y, p6z));
+  DebuggingInsideLoop(Form("E6(cm) = %f\n\tP6(cm) = (%f, %f, %f)", el6, p6x, p6y, p6z));
   
   hq = _ec4*qcz/_mc4;
   
@@ -621,10 +621,10 @@ GamGamLL::ComputeWeight()
   // Available energy for the second lepton is the 2-photon system's energy with the first lepton's energy removed
   const double el7 = _ec4-el6;
 
-  DebugInsideLoop(Form("Outgoing kinematics\n\t"
-                       " first outgoing lepton: p = %f, E = %f\n\t"
-                       "second outgoing lepton: p = %f, E = %f",
-                       fP6cm.P(), fP6cm.E(), fP7cm.P(), fP6cm.E()));
+  DebuggingInsideLoop(Form("Outgoing kinematics\n\t"
+                           " first outgoing lepton: p = %f, E = %f\n\t"
+                           "second outgoing lepton: p = %f, E = %f",
+                           fP6cm.P(), fP6cm.E(), fP7cm.P(), fP6cm.E()));
 
   double p7x, p7y, p7z;
   // Second outgoing lepton's 3-momentum
@@ -658,7 +658,7 @@ GamGamLL::ComputeWeight()
   r12 =  c2*sp3+qve.Py()*c3;
   r13 = -c2*cp3-qve.Px()*c3;
   
-  DebugInsideLoop(Form("qve = (%f, %f, %f, %f)", qve.E(), qve.Px(), qve.Py(), qve.Pz()));
+  DebuggingInsideLoop(Form("qve = (%f, %f, %f, %f)", qve.E(), qve.Px(), qve.Py(), qve.Pz()));
   
   r22 =  b2*sp5+qve.Py()*b3;
   r23 = -b2*cp5-qve.Px()*b3;
@@ -671,7 +671,7 @@ GamGamLL::ComputeWeight()
   _a5 = -(qve.Px()*cp3+qve.Py()*sp3)*fP3lab.Pt()*_p1k2-(_ep1*qve.E()-_p*qve.Pz())*(cp3*cp5+sp3*sp5)*fP3lab.Pt()*fP5lab.Pt()+(_de5*qve.Pz()+qve.E()*(_p+fP5lab.Pz()))*c3;
   _a6 = -(qve.Px()*cp5+qve.Py()*sp5)*fP5lab.Pt()*_p2k1-(_ep2*qve.E()+_p*qve.Pz())*(cp3*cp5+sp3*sp5)*fP3lab.Pt()*fP5lab.Pt()+(_de3*qve.Pz()-qve.E()*(_p-fP3lab.Pz()))*b3;
  
-  DebugInsideLoop(Form("a5 = %f\n\ta6 = %f", _a5, _a6));
+  DebuggingInsideLoop(Form("a5 = %f\n\ta6 = %f", _a5, _a6));
  
   //std::cout << _a5 << ">>>" << _a6 << std::endl;
 
@@ -689,7 +689,7 @@ GamGamLL::ComputeWeight()
   const double gamma = cm.E()/fSqS, betgam = cm.Pz()/fSqS;
 
   if (fCuts.mode==Kinematics::NoCuts) {
-    Debug(Form("No cuts applied on the outgoing leptons kinematics!"));
+    Debugging(Form("No cuts applied on the outgoing leptons kinematics!"));
   }
   // Kinematics computation for both leptons
 
@@ -857,10 +857,10 @@ GamGamLL::FillKinematics(bool)
     gmuy = plab_ip1.FourProduct(plab_ph2)/plab_ip2.FourProduct(plab_ph2);
     gmuw = (plab_ip1+plab_ph2).M();
     gmunu = gmuy*2.*Particle::GetMassFromPDGId(Particle::Proton)/_ep1/_ep2;
-    DebugInsideLoop(Form(" gmux = %f\n\t"
-                         " gmux = %f\n\t"
-                         " gmuw = %f\n\t"
-                         "gmunu = %f", gmux, gmuy, gmuw, gmunu));
+    DebuggingInsideLoop(Form(" gmux = %f\n\t"
+                             " gmux = %f\n\t"
+                             " gmuw = %f\n\t"
+                             "gmunu = %f", gmux, gmuy, gmuw, gmunu));
   }
   //fEvent->Dump();
 }
@@ -868,7 +868,7 @@ GamGamLL::FillKinematics(bool)
 double
 GamGamLL::PeriPP(int nup_, int ndown_)
 {
-  DebugInsideLoop(Form(" Nup  = %d\n\tNdown = %d", nup_, ndown_));
+  DebuggingInsideLoop(Form(" Nup  = %d\n\tNdown = %d", nup_, ndown_));
 
   FormFactors fp1, fp2;
 
@@ -886,7 +886,7 @@ GamGamLL::PeriPP(int nup_, int ndown_)
     default: fp2 = SuriYennieFormFactors(-fT2, _w2, fMY2); break;
   }
   
-  DebugInsideLoop(Form("u1 = %f\n\tu2 = %f\n\tv1 = %f\n\tv2 = %f", fp1.FM, fp1.FE, fp2.FM, fp2.FE));
+  DebuggingInsideLoop(Form("u1 = %f\n\tu2 = %f\n\tv1 = %f\n\tv2 = %f", fp1.FM, fp1.FE, fp2.FM, fp2.FE));
 
   const double qqq = std::pow(_q1dq, 2),
                qdq = 4.*fMl12-_w4;
@@ -900,9 +900,9 @@ GamGamLL::PeriPP(int nup_, int ndown_)
                          +fp1.FM*fp2.FE*t12
                          +fp1.FE*fp2.FE*t22) / pow(2.*fT1*fT2*_bb, 2);
 
-  DebugInsideLoop(Form("t11 = %5.2f\tt12 = %5.2f\n\t"
-                       "t21 = %5.2f\tt22 = %5.2f\n\t"
-                       "=> PeriPP = %e", t11, t12, t21, t22, peripp));
+  DebuggingInsideLoop(Form("t11 = %5.2f\tt12 = %5.2f\n\t"
+                           "t21 = %5.2f\tt22 = %5.2f\n\t"
+                           "=> PeriPP = %e", t11, t12, t21, t22, peripp));
   
   return peripp;
 }

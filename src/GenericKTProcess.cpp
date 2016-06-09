@@ -52,10 +52,10 @@ GenericKTProcess::AddPartonContent()
   fQT2 = std::exp(fLogQmin+(fLogQmax-fLogQmin)*x(1));
   fPhiQT1 = 2.*Constants::Pi*x(2);
   fPhiQT2 = 2.*Constants::Pi*x(3);
-  DebugInsideLoop(Form("photons transverse virtualities (qt):\n\t"
-                       "  mag = %f / %f (%.2f < log(qt) < %.2f)\n\t"
-                       "  phi = %f / %f",
-                       fQT1, fQT2, fLogQmin, fLogQmax, fPhiQT1, fPhiQT2));
+  DebuggingInsideLoop(Form("photons transverse virtualities (qt):\n\t"
+                           "  mag = %f / %f (%.2f < log(qt) < %.2f)\n\t"
+                           "  phi = %f / %f",
+                           fQT1, fQT2, fLogQmin, fLogQmax, fPhiQT1, fPhiQT2));
 }
 
 double
@@ -68,7 +68,7 @@ GenericKTProcess::ComputeWeight()
   const double jac = ComputeJacobian(),
                integrand = ComputeKTFactorisedMatrixElement(),
                weight = jac*integrand;
-  DebugInsideLoop(Form("Jacobian = %f\n\tIntegrand = %f\n\tdW = %f", jac, integrand, weight));
+  DebuggingInsideLoop(Form("Jacobian = %f\n\tIntegrand = %f\n\tdW = %f", jac, integrand, weight));
   
   return weight;
 }
@@ -96,7 +96,7 @@ GenericKTProcess::ComputeOutgoingPrimaryParticlesMasses()
       fMY = fCuts.mxmin+(fCuts.mxmax-fCuts.mxmin)*x(op_index+1);
       break;
   }
-  DebugInsideLoop(Form("outgoing remnants invariant mass: %f / %f (%.2f < M(X/Y) < %.2f)", fMX, fMY, fCuts.mxmin, fCuts.mxmax));
+  DebuggingInsideLoop(Form("outgoing remnants invariant mass: %f / %f (%.2f < M(X/Y) < %.2f)", fMX, fMY, fCuts.mxmin, fCuts.mxmax));
 }
 
 void
@@ -215,11 +215,11 @@ GenericKTProcess::InelasticFlux(double x_, double kt2_, double mx_) const
 
   float xuv, xdv, xus, xds, xss, xg;
   grv95lo_(x_Bjorken, mu2, xuv, xdv, xus, xds, xss, xg);
-  DebugInsideLoop(Form("Form factor content at xB = %e (scale = %f GeV^2):\n\t"
-                       "  valence quarks: u / d     = %e / %e\n\t"
-                       "  sea quarks:     u / d / s = %e / %e / %e\n\t"
-                       "  gluons:                   = %e",
-                       x_Bjorken, mu2, xuv, xdv, xus, xds, xss, xg));
+  DebuggingInsideLoop(Form("Form factor content at xB = %e (scale = %f GeV^2):\n\t"
+                           "  valence quarks: u / d     = %e / %e\n\t"
+                           "  sea quarks:     u / d / s = %e / %e / %e\n\t"
+                           "  gluons:                   = %e",
+                           x_Bjorken, mu2, xuv, xdv, xus, xds, xss, xg));
 
   const double F2_aux = 4./9.*(xuv + 2.*xus)
                       + 1./9.*(xdv + 2.*xds)

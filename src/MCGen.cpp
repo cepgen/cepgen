@@ -3,7 +3,7 @@
 MCGen::MCGen() :
   fVegas(0), fCrossSection(-1.), fCrossSectionError(-1.)
 {
-  Debug("Generator initialized");
+  Debugging("Generator initialized");
   
   try { this->PrintHeader(); }  catch (Exception& e) { e.Dump(); }
   
@@ -43,7 +43,7 @@ MCGen::BuildVegas()
 {
   if (Logger::GetInstance()->Level>=Logger::Debug) {
     std::ostringstream topo; topo << parameters->process_mode;
-    Debug(Form("Considered topology: %s case", topo.str().c_str()));
+    Debugging(Form("Considered topology: %s case", topo.str().c_str()));
   }
   
   fVegas = new Vegas(GetNdim(), f, parameters);
@@ -109,7 +109,7 @@ MCGen::PrepareFunction()
   kin.mxmax = parameters->maxmx;
   parameters->process->AddEventContent();
   parameters->process->SetKinematics(kin);
-  Debug("Function prepared to be integrated!");
+  Debugging("Function prepared to be integrated!");
 }
 
 double f(double* x_, size_t ndim_, void* params_)
@@ -129,7 +129,7 @@ double f(double* x_, size_t ndim_, void* params_)
 
   if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
     os.str(""); for (unsigned int i=0; i<ndim_; i++) { os << x_[i] << " "; }
-    DebugInsideLoop(Form("Computing dim-%d point ( %s)", ndim_, os.str().c_str()));
+    DebuggingInsideLoop(Form("Computing dim-%d point ( %s)", ndim_, os.str().c_str()));
   }
 
   tmr.reset();
@@ -138,10 +138,10 @@ double f(double* x_, size_t ndim_, void* params_)
 
   ff = 0.;
 
-  DebugInsideLoop(Form("Function f called -- some parameters:\n\t"
-                       "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
-                       "  remnant mode: %d",
-                       p->in1p, p->in2p, p->remnant_mode));
+  DebuggingInsideLoop(Form("Function f called -- some parameters:\n\t"
+                           "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
+                           "  remnant mode: %d",
+                           p->in1p, p->in2p, p->remnant_mode));
     
   //float now = tmr.elapsed();
   //std::cout << "0: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
@@ -190,14 +190,14 @@ double f(double* x_, size_t ndim_, void* params_)
 
     if (p->hadroniser and p->process_mode!=Kinematics::ElasticElastic) {
       
-      Debug(Form("Event before calling the hadroniser (%s)", p->hadroniser->GetName().c_str()));
+      Debugging(Form("Event before calling the hadroniser (%s)", p->hadroniser->GetName().c_str()));
       if (Logger::GetInstance()->Level>=Logger::Debug) p->process->GetEvent()->Dump();
       
       num_hadr_trials = 0;
       do {
         try { hadronised = p->hadroniser->Hadronise(p->process->GetEvent()); } catch (Exception& e) { e.Dump(); }
 
-        if (num_hadr_trials>0) { Debug(Form("Hadronisation failed. Trying for the %dth time", num_hadr_trials+1)); }
+        if (num_hadr_trials>0) { Debugging(Form("Hadronisation failed. Trying for the %dth time", num_hadr_trials+1)); }
         
         num_hadr_trials++;
       } while (!hadronised and num_hadr_trials<=p->hadroniser_max_trials);
@@ -205,19 +205,19 @@ double f(double* x_, size_t ndim_, void* params_)
       
       p->process->GetEvent()->num_hadronisation_trials = num_hadr_trials;
 
-      Debug(Form("Event hadronisation succeeded after %d trial(s)", p->process->GetEvent()->num_hadronisation_trials));
+      Debugging(Form("Event hadronisation succeeded after %d trial(s)", p->process->GetEvent()->num_hadronisation_trials));
 
       if (num_hadr_trials>p->hadroniser_max_trials) return 0.; //FIXME
       
-      Debug(Form("Event after calling the hadroniser (%s)", p->hadroniser->GetName().c_str()));
+      Debugging(Form("Event after calling the hadroniser (%s)", p->hadroniser->GetName().c_str()));
       if (Logger::GetInstance()->Level>=Logger::Debug) p->process->GetEvent()->Dump();
     }
     p->process->GetEvent()->time_total = tmr.elapsed();
     
-    Debug(Form("Generation time:       %5.6f sec\n\t"
-               "Total time (gen+hadr): %5.6f sec",
-               p->process->GetEvent()->time_generation,
-               p->process->GetEvent()->time_total));
+    Debugging(Form("Generation time:       %5.6f sec\n\t"
+                   "Total time (gen+hadr): %5.6f sec",
+                   p->process->GetEvent()->time_generation,
+                   p->process->GetEvent()->time_total));
 
     *(p->last_event) = *(p->process->GetEvent());
     //p->process->GetEvent()->Store(p->file);
@@ -226,7 +226,7 @@ double f(double* x_, size_t ndim_, void* params_)
 
   if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) {
     os.str(""); for (unsigned int i=0; i<ndim_; i++) { os << Form("%10.8f ", x_[i]); }
-    Debug(Form("f value for  dim-%d point ( %s): %4.4e", ndim_, os.str().c_str(), ff));
+    Debugging(Form("f value for  dim-%d point ( %s): %4.4e", ndim_, os.str().c_str(), ff));
   }
   
   return ff;

@@ -35,9 +35,9 @@ void Parameters::SetThetaRange(double thetamin_, double thetamax_)
   this->mineta = -log(tan(thetamax_/180.*Constants::Pi/2.));
   this->maxeta = -log(tan(thetamin_/180.*Constants::Pi/2.));
 
-  Debug(Form("eta(min) = %5.2f => theta(min) = %5.2f"
-             "eta(max) = %5.2f => theta(max) = %5.2f",
-             mineta, thetamin_, maxeta, thetamax_));
+  Debugging(Form("eta(min) = %5.2f => theta(min) = %5.2f"
+                 "eta(max) = %5.2f => theta(max) = %5.2f",
+                 mineta, thetamin_, maxeta, thetamax_));
 }
 
 void Parameters::Dump()
@@ -118,7 +118,7 @@ bool Parameters::ReadConfigFile(const char* inFile_)
     return false;
   }
 
-  Debug(Form("File '%s' succesfully opened!", inFile_));
+  Debugging(Form("File '%s' succesfully opened!", inFile_));
   std::ostringstream os;
   os << "Configuration file content : " << "\n\t";
 

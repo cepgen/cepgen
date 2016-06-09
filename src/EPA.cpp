@@ -56,8 +56,8 @@ namespace EPA
     }
     fEPAmax *= log(fYmax/fYmin)*log(gq2max_init/gq2min_init);
 
-    Debug(Form("Y min/max = %f / %f\n\t"
-               "Maximal EPA: %e", fYmin, fYmax, fEPAmax));
+    Debugging(Form("Y min/max = %f / %f\n\t"
+                   "Maximal EPA: %e", fYmin, fYmax, fEPAmax));
 
   }
 
@@ -69,7 +69,7 @@ namespace EPA
 
     if (fEPAmax<=0.) PrepareEPA();
 
-    DebugInsideLoop(Form("EPA max = %f", fEPAmax));
+    DebuggingInsideLoop(Form("EPA max = %f", fEPAmax));
 
     const double y = fYmin*pow(fYmax/fYmin, x1);
     const double gq2min = std::max(pow(fElectron.M()*y,2)/(1.-y), fBoundaries.q2min),

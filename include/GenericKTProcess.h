@@ -43,24 +43,24 @@ class GenericKTProcess : public GenericProcess
     fLogQmax = std::log(fCuts.qtmax);
   }
   /// Set the kinematics of the central system before any point computation
-  inline virtual void PrepareKTKinematics() { DebugInsideLoop("Dummy kinematics prepared!"); }
+  inline virtual void PrepareKTKinematics() { DebuggingInsideLoop("Dummy kinematics prepared!"); }
   /// Minimal Jacobian weight of the point considering a kT factorisation
   double MinimalJacobian() const;
   /// Jacobian weight of the point in the phase space for integration
   inline virtual double ComputeJacobian() {
-    DebugInsideLoop("Dummy Jacobian returned!"); return 0.;
+    DebuggingInsideLoop("Dummy Jacobian returned!"); return 0.;
   }
   /// kT-factorised matrix element (event weight)
   /// \return Weight of the point in the phase space to the integral
   inline virtual double ComputeKTFactorisedMatrixElement() {
-    DebugInsideLoop("Dummy matrix element returned!"); return 0.;
+    DebuggingInsideLoop("Dummy matrix element returned!"); return 0.;
   }
   /// Compute the invariant masses of the outgoing protons (or remnants)
   void ComputeOutgoingPrimaryParticlesMasses();
   /// Set the kinematics of the incoming and outgoing protons (or remnants)
   void FillPrimaryParticlesKinematics();
   /// Set the kinematics of the outgoing central system
-  inline virtual void FillCentralParticlesKinematics() { DebugInsideLoop("Dummy central particles list filled!"); }
+  inline virtual void FillCentralParticlesKinematics() { DebuggingInsideLoop("Dummy central particles list filled!"); }
  
   /// Get the elastic flux to be expected at a given x_bjorken / kT
   double ElasticFlux(double x_, double kt2_) const;

@@ -35,7 +35,7 @@ RM = rm -f
 ############################################
 
 ############# FIXME : ROOT #################
-RFLAGS = $(shell root-config --cflags)
+RFLAGS = $(shell root-config --cflags) -std=c++11
 RLIBS = $(shell root-config --libs)
 RHEAD = $(shell root-config --incdir)
 ############################################

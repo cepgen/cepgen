@@ -23,7 +23,7 @@ GenericProcess::SetPoint(const unsigned int ndim_,double x_[])
 
   std::copy(x_, x_+ndim_, fX);  
   fIsPointSet = true;
-  if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) { DumpPoint(Debugging); }
+  if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) { DumpPoint(DebugMessage); }
 }
 
 void
@@ -34,7 +34,7 @@ GenericProcess::PrepareKinematics()
                   *GetParticle(Particle::IncomingBeam2));
   fS = pow(fSqS, 2);
   
-  Debug(Form("Kinematics successfully prepared! sqrt(s) = %.2f", fSqS));
+  Debugging(Form("Kinematics successfully prepared! sqrt(s) = %.2f", fSqS));
 }
 
 void
@@ -44,10 +44,10 @@ GenericProcess::DumpPoint(const ExceptionType& et=Information)
   for (unsigned int i=0; i<(unsigned int)fNumDimensions; i++) {
     os << Form("  x(%2d) = %8.6f\n\t", i, fX[i]);
   }
-  if (et<Debugging) { Information(Form("Number of integration parameters: %d\n\t"
-                                "%s", fNumDimensions, os.str().c_str())); }
-  else              { Debug(Form("Number of integration parameters: %d\n\t"
-                                 "%s", fNumDimensions, os.str().c_str())); }
+  if (et<DebugMessage) { Information(Form("Number of integration parameters: %d\n\t"
+                                          "%s", fNumDimensions, os.str().c_str())); }
+  else              { Debugging(Form("Number of integration parameters: %d\n\t"
+                                     "%s", fNumDimensions, os.str().c_str())); }
 }
 
 void

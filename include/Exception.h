@@ -10,10 +10,10 @@
 
 #define Information(m) \
   if (Logger::GetInstance()->Level>Logger::Nothing) { Exception(__PRETTY_FUNCTION__, m, Information).Dump(Logger::GetInstance()->OutputStream); }
-#define Debug(m) \
-  if (Logger::GetInstance()->Level>=Logger::Debug)  { Exception(__PRETTY_FUNCTION__, m, Debugging).Dump(Logger::GetInstance()->OutputStream); }
-#define DebugInsideLoop(m) \
-  if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) { Exception(__PRETTY_FUNCTION__, m, Debugging).Dump(Logger::GetInstance()->OutputStream); }
+#define Debugging(m) \
+  if (Logger::GetInstance()->Level>=Logger::Debug)  { Exception(__PRETTY_FUNCTION__, m, DebugMessage).Dump(Logger::GetInstance()->OutputStream); }
+#define DebuggingInsideLoop(m) \
+  if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) { Exception(__PRETTY_FUNCTION__, m, DebugMessage).Dump(Logger::GetInstance()->OutputStream); }
 #define Warning(m) \
   if (Logger::GetInstance()->Level>=Logger::Warning)  { Exception(__PRETTY_FUNCTION__, m, JustWarning).Dump(Logger::GetInstance()->OutputStream); }
 #define Error(m) \
@@ -28,7 +28,7 @@ typedef enum
 {
   Undefined=-1,
   Information,
-  Debugging,
+  DebugMessage,
   JustWarning,
   Error,
   Fatal
@@ -84,7 +84,7 @@ class Exception
       switch (Type()) {
         case JustWarning: return "\033[34;1mJustWarning\033[0m";
         case Information: return "\033[33;1mInfo\033[0m";
-        case Debugging: return "\033[32;1mDebug\033[0m";
+        case DebugMessage: return "\033[32;1mDebug\033[0m";
         case Error: return "\033[31;1mError\033[0m";
         case Fatal: return "\033[31;1mFatal\033[0m";
         case Undefined: default: return "\33[7;1mUndefined\033[0m";
@@ -98,7 +98,7 @@ class Exception
         os << "================================= \033[33;1mInformation\033[0m =================================" << std::endl
            << " From:        " << From() << std::endl;
       }
-      else if (Type()==Debugging) {
+      else if (Type()==DebugMessage) {
         os << "==================================== \033[32;1mDebug\033[0m ====================================" << std::endl
            << " From:        " << From() << std::endl;
       }

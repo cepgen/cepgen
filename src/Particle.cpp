@@ -88,8 +88,8 @@ Particle::SetMother(Particle* part_)
   fMothers.insert(part_->id);
   fIsPrimary = false;
   
-  DebugInsideLoop(Form("Particle %2d (pdgId=%4d) is the new mother of %2d (pdgId=%4d)",
-                       part_->id+1, part_->GetPDGId(), id+1, fPDGid));
+  DebuggingInsideLoop(Form("Particle %2d (pdgId=%4d) is the new mother of %2d (pdgId=%4d)",
+                           part_->id+1, part_->GetPDGId(), id+1, fPDGid));
   
   part_->AddDaughter(this);
 }
@@ -104,13 +104,13 @@ Particle::AddDaughter(Particle* part_)
     std::ostringstream os;
     ParticlesIds::iterator it;
     for (it=fDaughters.begin(); it!=fDaughters.end(); it++) os << Form("\n\t * id=%d", *it);
-    DebugInsideLoop(Form("Particle %2d (pdgId=%4d) has now %2d daughter(s):"
-                         "%s", role, fPDGid, NumDaughters(), os.str().c_str()));
+    DebuggingInsideLoop(Form("Particle %2d (pdgId=%4d) has now %2d daughter(s):"
+                             "%s", role, fPDGid, NumDaughters(), os.str().c_str()));
   }
   
   if (ret.second) {
-    DebugInsideLoop(Form("Particle %2d (pdgId=%4d) is a new daughter of %2d (pdgId=%4d)",
-                         part_->role, part_->GetPDGId(), role, fPDGid));
+    DebuggingInsideLoop(Form("Particle %2d (pdgId=%4d) is a new daughter of %2d (pdgId=%4d)",
+                             part_->role, part_->GetPDGId(), role, fPDGid));
     
     if (!part_->Primary() && part_->GetMothersIds().size()<1) {
       part_->SetMother(this);
@@ -130,7 +130,7 @@ Particle::GetDaughters()
   
   out.reserve(fDaughters.size());
   
-  //DebugInsideLoop(Form("Reserved %d slot(s) for the daughter particle(s)", fDaughters.size()));
+  //DebuggingInsideLoop(Form("Reserved %d slot(s) for the daughter particle(s)", fDaughters.size()));
   
   for (it=fDaughters.begin(); it!=fDaughters.end(); it++) {
     if (*it==-1) continue;
@@ -138,7 +138,7 @@ Particle::GetDaughters()
   }
   std::sort(out.begin(), out.end());
   
-  //DebugInsideLoop(Form("Returning a vector containing %d particle(s)", out.size()))
+  //DebuggingInsideLoop(Form("Returning a vector containing %d particle(s)", out.size()))
   
   return out;
 }
@@ -361,7 +361,7 @@ Particle::Momentum::operator=(const Particle::Momentum& mom_)
 double
 Particle::Momentum::ThreeProduct(const Particle::Momentum& mom_)
 {
-  DebugInsideLoop(Form("  (%f, %f, %f, %f)\n\t* (%f, %f, %f, %f)\n\t= %f",
+  DebuggingInsideLoop(Form("  (%f, %f, %f, %f)\n\t* (%f, %f, %f, %f)\n\t= %f",
     fPx, fPy, fPz, fE,
     mom_.fPx, mom_.fPy, mom_.fPz, mom_.fE,
     fPx*mom_.fPx+fPy*mom_.fPy+fPz*mom_.fPz
@@ -372,7 +372,7 @@ Particle::Momentum::ThreeProduct(const Particle::Momentum& mom_)
 double
 Particle::Momentum::FourProduct(const Particle::Momentum& mom_)
 {
-  DebugInsideLoop(Form("  (%f, %f, %f, %f)\n\t* (%f, %f, %f, %f)\n\t= %f",
+  DebuggingInsideLoop(Form("  (%f, %f, %f, %f)\n\t* (%f, %f, %f, %f)\n\t= %f",
     fPx, fPy, fPz, fE,
     mom_.fPx, mom_.fPy, mom_.fPz, mom_.fE,
     fPx*mom_.fPx+fPy*mom_.fPy+fPz*mom_.fPz
