@@ -5,13 +5,14 @@ JETSET7SRC = $(wildcard external/jetset7*.f)
 HERWIG6SRC = $(wildcard external/herwig6*.f)
 EXTERNALSRC= $(wildcard external/*.f)
 INCLUDEDIR = -Iprocesses/ -Iinclude/ -Iexternal/ -Ihadronisers/ -Iexport/
+OBJDIR     = obj/
 VPATH      = src:include:processes:hadronisers:export
 ifdef PYTHIA8
   $(info Using Pythia 8 as included from PYTHIA8=$(PYTHIA8))
   #make -f $(PYTHIA8)/Makefile
   INCLUDEDIR += -I$(PYTHIA8)/include/ -L$(PYTHIA8)/lib/archive/ -lpythia8 -llhapdfdummy -DPYTHIA8=1
 else
-  $(info PYTHIA8 variable is not set... skipping its compilation)
+  #$(info PYTHIA8 variable is not set... skipping its compilation)
 endif
 ############################################
 CFLAGS     = -Wall -Wextra -fexceptions -Wpointer-arith \
@@ -23,12 +24,12 @@ CPP_FILES  = $(wildcard src/*.cpp)
 PRO_FILES  = $(wildcard processes/*.cpp)
 HAD_FILES  = $(wildcard hadronisers/Pythia6Hadroniser.cpp)
 HPP_FILES  = $(wildcard include/*.h,external/*.h)
-LIB_FILES  = $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES)) \
-	     $(patsubst processes/%.cpp,obj/%.o,$(PRO_FILES)) \
-	     $(patsubst hadronisers/%.cpp,obj/%.o,$(HAD_FILES)) \
-	     $(patsubst external/%.f,obj/%.fo,$(EXTERNALSRC))
+LIB_FILES  = $(patsubst src/%.cpp,$(OBJDIR)%.o,$(CPP_FILES)) \
+	     $(patsubst processes/%.cpp,$(OBJDIR)%.o,$(PRO_FILES)) \
+	     $(patsubst hadronisers/%.cpp,$(OBJDIR)%.o,$(HAD_FILES)) \
+	     $(patsubst external/%.f,$(OBJDIR)%.fo,$(EXTERNALSRC))
 EXP_FILES  = $(wildcard export/*.cpp)
-EXP_LIB_FILES = $(patsubst export/%.cpp,obj/%.o,$(EXP_FILES))
+EXP_LIB_FILES = $(patsubst export/%.cpp,$(OBJDIR)%.o,$(EXP_FILES))
 ############################################
 CC = @g++
 #CC = @clang++
@@ -48,23 +49,28 @@ RHEAD = $(shell root-config --incdir)
 
 all: $(EXEC)
 
-$(EXEC): main.o $(LIB_FILES)
+$(EXEC): $(OBJDIR)main.opp $(LIB_FILES)
 	@echo "Linking $<..."
 	$(CC) -g -o $@ $^ $(LDFLAGS)
 
-cepgen-lhe: cepgen-lhe.o $(LIB_FILES) $(EXP_LIB_FILES)
+cepgen-lhe: $(OBJDIR)cepgen-lhe.opp $(LIB_FILES) $(EXP_LIB_FILES)
 	@echo "Linking $<..."
 	$(CC) -g -o $@ $^ $(LDFLAGS) -lHepMC
 
-obj/%.o: %.cpp %.h
+$(OBJDIR)%.o: %.cpp %.h | $(OBJDIR)
 	@echo "Building $<..."
 	$(CC) -c $(CFLAGS) $< -o $@
 
-obj/%.fo: external/%.f
+$(OBJDIR)%.fo: external/%.f | $(OBJDIR)
 	@echo "Building (F77) $<..."
 	$(CF) -c $(FFLAGS) $< -o $@
 
-obj/%.oxx: %.cxx
+$(OBJDIR)%.opp: %.cpp | $(OBJDIR)
+	@echo $(LIB_FILES)
+	@echo "Building $<..."
+	$(CC) -c $(CFLAGS) $< -o $@
+
+$(OBJDIR)%.oxx: %.cxx | $(OBJDIR)
 	@echo "Building (ROOT) $<..."
 	$(CC) -c $(CFLAGS) -I$(RHEAD) $(RFLAGS) $< -o $@
 
@@ -73,7 +79,8 @@ plots/%.oxx: plots/%.cxx
 	$(CC) -c $(CFLAGS) -I$(RHEAD) $(RFLAGS) $< -o $@
 
 clean:
-	$(RM) obj/*.o *.o $(EXEC) test
+	@$(RM) -r $(OBJDIR)
+	@$(RM) $(EXEC) test
 
 doc: $(CPP_FILES) $(HPP_FILES) Doxyfile
 	doxygen
@@ -94,5 +101,8 @@ intest: utils/inelasticparticle.o $(LIB_FILES)
 plotter: plots/main.oxx $(LIB_FILES)
 	$(CC) -o $@ $^ $(LDFLAGS) $(RLIBS)
 
-test: obj/test.oxx $(LIB_FILES)
+test: $(OBJDIR)/test.oxx $(LIB_FILES)
 	$(CC) -g -o $@ $^ $(LDFLAGS) $(RLIBS)
+
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
