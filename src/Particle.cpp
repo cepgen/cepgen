@@ -121,7 +121,7 @@ Particle::AddDaughter(Particle* part_)
 }
 
 std::vector<int>
-Particle::GetDaughters()
+Particle::GetDaughters() const
 {
   std::vector<int> out;
   ParticlesIds::iterator it;
@@ -144,7 +144,7 @@ Particle::GetDaughters()
 }
  
 void
-Particle::Dump()
+Particle::Dump() const
 {  
   //if (!Valid()) throw Exception(__PRETTY_FUNCTION__, Form("Particle with role \"%d\" is invalid", role), Fatal);
   

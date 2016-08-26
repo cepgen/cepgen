@@ -170,10 +170,10 @@ bool Parameters::ReadConfigFile(const char* inFile_)
         this->hadroniser = new Pythia6Hadroniser;
         os << " * Hadroniser: Pythia6\n\t";
       }
-      if (value=="jetset7") {
+      /*if (value=="jetset7") {
         this->hadroniser = new Jetset7Hadroniser;
         os << " * Hadroniser: Jetset7\n\t";
-      }
+      }*/
 #ifdef PYTHIA8
       if (value=="pythia8") {
         this->hadroniser = new Pythia8Hadroniser;

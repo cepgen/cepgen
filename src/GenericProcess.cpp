@@ -52,11 +52,20 @@ GenericProcess::DumpPoint(const ExceptionType& et=Information)
 
 void
 GenericProcess::SetEventContent(IncomingState is, OutgoingState os)
-{
+{  
   for (IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++) { fEvent->AddParticle(Particle(ip->first, ip->second)); }
+
+  // Prepare the central system if not already there
+  IncomingState::const_iterator central_system = is.find(Particle::CentralSystem);
+  if (central_system==is.end()) {
+    Particle* moth = GetParticle(Particle::Parton1);
+    Particle cs(Particle::CentralSystem, moth->GetPDGId());
+    cs.SetMother(moth);
+    fEvent->AddParticle(cs);
+  }
+
   for (OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++) { fEvent->AddParticle(Particle(op->first, op->second)); }
   
-  bool has_cs = false;
   // Incoming particles (incl. eventual partons)
   for (IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++) {
     Particle* p = GetParticle(ip->first);
@@ -66,16 +75,9 @@ GenericProcess::SetEventContent(IncomingState is, OutgoingState os)
       case Particle::IncomingBeam2: break;
       case Particle::Parton1:       p->SetMother(GetParticle(Particle::IncomingBeam1)); break;
       case Particle::Parton2:       p->SetMother(GetParticle(Particle::IncomingBeam2)); break;
-      case Particle::CentralSystem: p->SetMother(GetParticle(Particle::Parton1)); has_cs = true; break;
+      case Particle::CentralSystem: p->SetMother(GetParticle(Particle::Parton1)); break;
       default: break;
     }
-  }
-  // Prepare the central system if not already there
-  if (!has_cs) {
-    Particle* moth = GetParticle(Particle::Parton1);
-    Particle cs(Particle::CentralSystem, moth->GetPDGId());
-    cs.SetMother(moth);
-    fEvent->AddParticle(cs);
   }
   // Outgoing particles (central, and outgoing primary particles or remnants)
   for (OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++) {

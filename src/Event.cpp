@@ -172,6 +172,18 @@ Event::GetConstParticles() const
   return out;
 }
 
+ConstParticlesRef
+Event::GetConstParticlesRef() const
+{
+  ConstParticlesRef out;
+  ParticlesMap::const_iterator it;
+  for (it=fParticles.begin(); it!=fParticles.end(); it++) {
+    out.push_back(&it->second);
+  }
+  std::sort(out.begin(), out.end(), compareParticlePtrs);
+  return out;
+}
+
 ParticlesRef
 Event::GetStableParticles()
 {
@@ -188,16 +200,16 @@ Event::GetStableParticles()
 }
 
 void
-Event::Dump(bool stable_)
+Event::Dump(bool stable_) const
 {
-  ParticlesRef particles;
-  ParticlesRef::iterator p;
+  ConstParticlesRef particles;
+  ConstParticlesRef::iterator p;
   double pxtot, pytot, pztot, etot;
   int sign;
   std::ostringstream os;
 
   pxtot = pytot = pztot = etot = 0.;
-  particles = GetParticles();
+  particles = GetConstParticlesRef();
   for (p=particles.begin(); p!=particles.end(); p++) {
     if (stable_ and (*p)->status!=Particle::FinalState) continue;
     os << Form("\n %2d\t%+6d", (*p)->id, (*p)->GetIntPDGId());
@@ -209,7 +221,7 @@ Event::Dump(bool stable_)
     else                    os << "\t";
     os << Form("%4d\t%6d\t", (*p)->role, (*p)->status);
     if ((*p)->GetMothersIds().size()>0) 
-      os << Form("%2d(%2d)", *((*p)->GetMothersIds().begin()), GetById(*((*p)->GetMothersIds().begin()))->role);
+      os << Form("%2d(%2d)", *((*p)->GetMothersIds().begin()), GetConstById(*((*p)->GetMothersIds().begin())).role);
     else
       os << "      ";
     os << Form("% 9.3f % 9.3f % 9.3f % 9.3f", (*p)->GetMomentum().Px(), (*p)->GetMomentum().Py(), (*p)->GetMomentum().Pz(), (*p)->E());
