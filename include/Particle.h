@@ -433,12 +433,12 @@ class Particle {
      */
     bool AddDaughter(Particle* part_);
     /// Gets the number of daughter particles
-    inline unsigned int NumDaughters() { return fDaughters.size(); };
+    inline unsigned int NumDaughters() const { return fDaughters.size(); };
     /**
      * @brief Get an identifiers list all daughter particles
      * @return An integer vector containing all the daughters' unique identifier in the event
      */
-    std::vector<int> GetDaughters();
+    std::vector<int> GetDaughters() const;
     
     // --- global particle information extraction
     
@@ -449,7 +449,7 @@ class Particle {
      */
     std::string GetLHEline(bool revert_=false);
     /// Dump all the information on this particle into the standard output stream
-    void Dump();    
+    void Dump() const;    
     void PDF2PDG();
     
     // --- other methods
@@ -477,8 +477,8 @@ class Particle {
     double __tmp3[3];
 };
 
-inline bool compareParticle(Particle a, Particle b) { return a.id<b.id; }
-inline bool compareParticlePtrs(Particle* a, Particle* b) { return a->id<b->id; }
+inline bool compareParticle(const Particle a, const Particle b) { return a.id<b.id; }
+inline bool compareParticlePtrs(const Particle* a, const Particle* b) { return a->id<b->id; }
 
 /// Compute the centre of mass energy of two particles (incoming or outgoing states)
 inline static double CMEnergy(const Particle& p1, const Particle& p2) {
@@ -498,6 +498,7 @@ inline static double CMEnergy(const Particle::Momentum& m1, const Particle::Mome
 
 typedef std::vector<Particle> Particles;
 typedef std::vector<Particle*> ParticlesRef;
+typedef std::vector<const Particle*> ConstParticlesRef;
 typedef std::vector<Particle::Role> ParticleRoles;
 typedef std::multimap<Particle::Role,Particle> ParticlesMap;
 

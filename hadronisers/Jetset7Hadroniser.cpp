@@ -1,15 +1,11 @@
 #include "Jetset7Hadroniser.h"
 
-Jetset7Hadroniser::Jetset7Hadroniser() : GenericHadroniser("Jetset7")
-{
-  //this->lugive("MSTU(21)=1");
-  //this->lugive("MSTJ(1)=1");
-}
+Jetset7Hadroniser::Jetset7Hadroniser() :
+  GenericHadroniser("Jetset7")
+{;}
 
 Jetset7Hadroniser::~Jetset7Hadroniser()
-{
-  //Debugging("Destructor called");
-}
+{;}
 
 bool
 Jetset7Hadroniser::Hadronise(Particle *part_)

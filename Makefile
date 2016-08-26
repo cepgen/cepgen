@@ -4,8 +4,8 @@ PYTHIA6SRC = $(wildcard external/pythia-6.*.f)
 JETSET7SRC = $(wildcard external/jetset7*.f)
 HERWIG6SRC = $(wildcard external/herwig6*.f)
 EXTERNALSRC= $(wildcard external/*.f)
-INCLUDEDIR = -Iprocesses/ -Iinclude/ -Iexternal/ -Ihadronisers/
-VPATH      = src:include:processes:hadronisers
+INCLUDEDIR = -Iprocesses/ -Iinclude/ -Iexternal/ -Ihadronisers/ -Iexport/
+VPATH      = src:include:processes:hadronisers:export
 ifdef PYTHIA8
   $(info Using Pythia 8 as included from PYTHIA8=$(PYTHIA8))
   #make -f $(PYTHIA8)/Makefile
@@ -21,12 +21,14 @@ FFLAGS     = -w -g
 ############################################
 CPP_FILES  = $(wildcard src/*.cpp)
 PRO_FILES  = $(wildcard processes/*.cpp)
-HAD_FILES  = $(wildcard hadronisers/*.cpp)
+HAD_FILES  = $(wildcard hadronisers/Pythia6Hadroniser.cpp)
 HPP_FILES  = $(wildcard include/*.h,external/*.h)
 LIB_FILES  = $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES)) \
 	     $(patsubst processes/%.cpp,obj/%.o,$(PRO_FILES)) \
 	     $(patsubst hadronisers/%.cpp,obj/%.o,$(HAD_FILES)) \
-	     $(patsubst external/%.f,obj/%.fo,$(EXTERNALSRC)) 
+	     $(patsubst external/%.f,obj/%.fo,$(EXTERNALSRC))
+EXP_FILES  = $(wildcard export/*.cpp)
+EXP_LIB_FILES = $(patsubst export/%.cpp,obj/%.o,$(EXP_FILES))
 ############################################
 CC = @g++
 #CC = @clang++
@@ -49,6 +51,10 @@ all: $(EXEC)
 $(EXEC): main.o $(LIB_FILES)
 	@echo "Linking $<..."
 	$(CC) -g -o $@ $^ $(LDFLAGS)
+
+cepgen-lhe: cepgen-lhe.o $(LIB_FILES) $(EXP_LIB_FILES)
+	@echo "Linking $<..."
+	$(CC) -g -o $@ $^ $(LDFLAGS) -lHepMC
 
 obj/%.o: %.cpp %.h
 	@echo "Building $<..."

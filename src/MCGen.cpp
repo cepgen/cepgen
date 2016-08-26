@@ -86,7 +86,7 @@ void
 MCGen::PrepareFunction()
 {
   if (!parameters->process) {
-    throw Exception(__PRETTY_FUNCTION__, "No process defined!", Fatal);
+    throw Exception(__PRETTY_FUNCTION__, "No process defined!", FatalError);
   }
   Kinematics kin;
   kin.kinematics = static_cast<Kinematics::ProcessMode>(parameters->process_mode);

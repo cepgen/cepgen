@@ -129,13 +129,14 @@ class Event {
     //void Hadronise(std::string algo_="");
     /// Dump all the known information on every Particle object contained in this Event container in the output stream
     /// \param[in] stable_ Do we only show the stable particles in this event?
-    void Dump(bool stable_=false);
+    void Dump(bool stable_=false) const;
     /// Get a vector of all particles in the event
     /// \return Vector containing all the pointers to the Particle objects contained in the event
     ParticlesRef GetParticles();
     /// Get a vector of all particles in the event as const objects
     /// \return Vector containing all the const pointers to the Particle objects contained in the event
     Particles GetConstParticles() const;
+    ConstParticlesRef GetConstParticlesRef() const;
     /// Get a vector of all stable particles in the event
     /// \return Vector containing all the pointers to the stable Particle objects contained in the event
     ParticlesRef GetStableParticles();
