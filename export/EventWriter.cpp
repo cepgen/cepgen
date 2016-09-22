@@ -25,9 +25,7 @@ EventWriter::operator<<(const Event* evt)
   switch (fType) {
     case HepMC: {
       const HepMC::GenEvent* ev = getHepMCEvent(evt);
-      ev->print();
       (*fHepMCOutput) << ev;
-std::cout<<"done"<<std::endl;
     } break;
     default: return;
   }
@@ -51,9 +49,14 @@ EventWriter::getHepMCEvent(const Event* evt) const
   ConstParticlesRef part_vec = evt->GetConstParticlesRef();
 
   int cm_id = 0, idx = 1;
-  bool has_cm = false;
 
-  HepMC::GenVertex v1(origin), v2(origin), vcm(origin);
+  HepMC::GenVertex *v1 = new HepMC::GenVertex(origin), 
+                   *v2 = new HepMC::GenVertex(origin),
+                   *vcm = new HepMC::GenVertex(origin);
+
+  out->add_vertex(v1);
+  out->add_vertex(v2);
+  out->add_vertex(vcm);
 
   for (unsigned int j=0; j<part_vec.size(); j++) {
 
@@ -63,36 +66,34 @@ EventWriter::getHepMCEvent(const Event* evt) const
     switch (part_vec[j]->role) {
       case Particle::IncomingBeam1: {
         part->suggest_barcode(idx++);
-        v1.add_particle_in(part);
+        v1->add_particle_in(part);
       } break;
       case Particle::IncomingBeam2: {
         part->suggest_barcode(idx++);
-        v2.add_particle_in(part);
+        v2->add_particle_in(part);
       } break;
       case Particle::OutgoingBeam1: {
         part->suggest_barcode(idx++);
-        v1.add_particle_out(part);
+        v1->add_particle_out(part);
       } break;
       case Particle::OutgoingBeam2: {
         part->suggest_barcode(idx++);
-        v2.add_particle_out(part);
+        v2->add_particle_out(part);
       } break;
       case Particle::Parton1: {
         part->suggest_barcode(idx++);
-        v1.add_particle_out(part);
-        vcm.add_particle_in(part);
-        has_cm = true;
+        v1->add_particle_out(part);
+        vcm->add_particle_in(part);
       } break;
       case Particle::Parton2: {
         part->suggest_barcode(idx++);
-        v2.add_particle_out(part);
-        vcm.add_particle_in(part);
-        has_cm = true;
+        v2->add_particle_out(part);
+        vcm->add_particle_in(part);
       } break;
       case Particle::Parton3: {
         part->suggest_barcode(idx++);
-        v2.add_particle_out(part);
-        vcm.add_particle_in(part);
+        v2->add_particle_out(part);
+        vcm->add_particle_in(part);
       } break;
       case Particle::CentralSystem: {
         cm_id = j; continue;
@@ -102,7 +103,7 @@ EventWriter::getHepMCEvent(const Event* evt) const
       default: {
         part->suggest_barcode(idx++);
         if (moth.size()==0) { continue; }
-        if (*moth.begin()==cm_id) { vcm.add_particle_out(part); }
+        if (*moth.begin()==cm_id) { vcm->add_particle_out(part); }
         else {
           std::cout << "other particle!!" << std::endl;
           continue;
@@ -112,12 +113,9 @@ EventWriter::getHepMCEvent(const Event* evt) const
     }
   }
 
-  out->add_vertex(&v1);
-  out->add_vertex(&v2);
-  if (has_cm) out->add_vertex(&vcm);
 
-  out->set_beam_particles(*v1.particles_in_const_begin(), *v2.particles_in_const_begin());
-  out->set_signal_process_vertex(*(v1.vertices_begin()));
+  out->set_beam_particles(*v1->particles_in_const_begin(), *v2->particles_in_const_begin());
+  out->set_signal_process_vertex(*(v1->vertices_begin()));
 
   HepMC::GenCrossSection xs;
   xs.set_cross_section(fCrossSect, fCrossSectErr);
