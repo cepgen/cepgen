@@ -29,8 +29,8 @@ class EventWriter
   void operator<<(const Event*);
 
  private:
-  HepMC::GenParticle getHepMCParticle(const Particle*) const;
-  HepMC::GenEvent getHepMCEvent(const Event*) const;
+  HepMC::GenParticle* getHepMCParticle(const Particle*) const;
+  HepMC::GenEvent* getHepMCEvent(const Event*) const;
 
   OutputType fType;
 
