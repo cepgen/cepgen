@@ -36,18 +36,15 @@ int main(int argc, char* argv[]) {
 
   if (!mg.parameters->generation) return 0;
 
-  EventWriter::HepMC::output output("example.dat", std::ios::out);
+  EventWriter writer(EventWriter::HepMC, "example.dat");
+  writer.SetCrossSection(xsec, err);
 
   // The events generation starts here !
   for (int i=0; i<mg.parameters->maxgen; i++) {
     if (i%10000==0)
       cout << "Generating event #" << i+1 << endl;
-    const Event ev = *mg.GenerateOneEvent();
-    HepMC::GenEvent* hev = EventWriter::HepMC::Event(ev);
-    hev->set_cross_section(xs);                                                                                                                                                                                                                                      
-    hev->set_event_number(i); 
-
-    output << (hev);
+    const Event* ev = mg.GenerateOneEvent();
+    writer << ev;
   }
 
   //mg.parameters->StoreConfigFile("lastrun.card");

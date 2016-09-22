@@ -46,6 +46,11 @@ class Event {
       if (it!=fParticles.end()) return &(it->second);
       return 0;
     };
+    inline const Particle* GetOneByRole(Particle::Role role_) const {
+      ParticlesMap::const_iterator it = fParticles.find(role_);
+      if (it!=fParticles.end()) return const_cast<const Particle*>(&(it->second));
+      return 0;
+    };
     /**
      * Returns the pointer to the Particle object corresponding to a unique identifier in the event
      * @brief Gets one particle by its unique identifier in the event
