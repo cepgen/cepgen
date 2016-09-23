@@ -94,9 +94,10 @@ probe: utils/probe.o $(LIB_FILES)
 	@echo "Linking $<..."
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-intest: utils/inelasticparticle.o $(LIB_FILES)
+intest: utils/inelasticparticle.o $(LIB_FILES) $(EXP_LIB_FILES)
 	@echo "Linking $<..."
-	$(CC) -o $@ $^ $(LDFLAGS) -I$(PYTHIA8SRC)/include/
+	#$(CC) -o $@ $^ $(LDFLAGS) -I$(PYTHIA8SRC)/include/
+	$(CC) -o $@ $^ $(LDFLAGS) -lHepMC
 
 plotter: plots/main.oxx $(LIB_FILES)
 	$(CC) -o $@ $^ $(LDFLAGS) $(RLIBS)
