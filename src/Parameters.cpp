@@ -28,6 +28,7 @@ Parameters::Parameters() :
 Parameters::~Parameters()
 {
   delete last_event;
+  if (hadroniser) delete hadroniser;
 }
 
 void Parameters::SetThetaRange(double thetamin_, double thetamax_)

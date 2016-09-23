@@ -26,6 +26,7 @@ EventWriter::operator<<(const Event* evt)
     case HepMC: {
       const HepMC::GenEvent* ev = getHepMCEvent(evt);
       (*fHepMCOutput) << ev;
+      delete ev;
     } break;
     default: return;
   }
