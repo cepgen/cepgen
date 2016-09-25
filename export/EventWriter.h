@@ -4,32 +4,32 @@
 #include "../include/Event.h"
 
 #include "HepMCHandler.h"
-
-/*#include "LHE/..."*/
+#include "LHEFHandler.h"
 
 class EventWriter
 {
  public:
   enum OutputType {
-    HepMC=0/*, LHE*/
+    HepMC, LHE
   };
 
-  EventWriter(const OutputType&, const char*);
+  EventWriter( const OutputType&, const char* );
   ~EventWriter();
 
-  void SetCrossSection(const float& xsec, const float& err_xsec) {
-    if (fHepMCHandler) fHepMCHandler->SetCrossSection(xsec, err_xsec);
+  void SetCrossSection( const float& xsec, const float& err_xsec ) {
+    if ( fHepMCHandler ) fHepMCHandler->SetCrossSection( xsec, err_xsec );
   }
-  void SetEventNumber(const unsigned int& ev_id) {
-    if (fHepMCHandler) fHepMCHandler->SetEventNumber(ev_id);
+  void SetEventNumber( const unsigned int& ev_id ) {
+    if ( fHepMCHandler ) fHepMCHandler->SetEventNumber( ev_id );
   }
 
-  void operator<<(const Event*);
+  void operator<<( const Event* );
 
  private:
 
   OutputType fType;
   OutputHandler::HepMCHandler* fHepMCHandler;
+  OutputHandler::LHEFHandler* fLHEFHandler;
 
 };
 

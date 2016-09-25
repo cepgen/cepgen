@@ -18,6 +18,11 @@
 
 namespace OutputHandler
 {
+  /**
+   * \brief Handler for the HepMC file output
+   * \author Laurent Forthomme <laurent.forthomme@cern.ch>
+   * \date Sep 2016
+   */
   class HepMCHandler
   {
    public:
@@ -25,17 +30,17 @@ namespace OutputHandler
     HepMCHandler(const char*);
     ~HepMCHandler();
 
-    void SetCrossSection(const float& xsec, const float& err_xsec) {
+    void SetCrossSection( const float& xsec, const float& err_xsec ) {
       fCrossSect = xsec;
       fCrossSectErr = err_xsec;
     }
-    void SetEventNumber(const unsigned int& ev_id) { fEventNum = ev_id; }
-    void operator<<(const Event*);
+    void SetEventNumber( const unsigned int& ev_id ) { fEventNum = ev_id; }
+    void operator<<( const Event* );
 
    private:
 
     inline void clearEvent();
-    void fillEvent(const Event*);
+    void fillEvent( const Event* );
 
     float fCrossSect, fCrossSectErr;
     unsigned int fEventNum;
