@@ -2,6 +2,7 @@
 
 #include "include/MCGen.h"
 #include "export/EventWriter.h"
+#include "HepMC/Version.h"
 
 using namespace std;
 
@@ -38,6 +39,15 @@ int main(int argc, char* argv[]) {
 
   EventWriter writer(EventWriter::HepMC, "example.dat");
   writer.SetCrossSection(xsec, err);
+
+
+#ifndef HEPMC_VERSION_CODE
+#error "Hahaha"
+cout << HepMC::versionName() << endl;
+#else
+cout << HepMC::version() << endl;
+//cout << HEPMC_VERSION << endl;
+#endif
 
   // The events generation starts here !
   for (int i=0; i<mg.parameters->maxgen; i++) {

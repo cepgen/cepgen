@@ -19,6 +19,9 @@ CFLAGS     = -Wall -Wextra -fexceptions -Wpointer-arith \
 	     $(INCLUDEDIR) -g -pedantic-errors
 LDFLAGS    = $(INCLUDEDIR) -lgfortran -lgsl -lgslcblas -Wl,-O2
 FFLAGS     = -w -g
+HEPMCFLAGS = -I/usr/local/include/HepMC/ -L/usr/local/lib64/ -lHepMC
+#HEPMCFLAGS = -lHepMC
+#INCLUDEDIR += -I/usr/local/include/HepMC/
 ############################################
 CPP_FILES  = $(wildcard src/*.cpp)
 PRO_FILES  = $(wildcard processes/*.cpp)
@@ -31,9 +34,9 @@ LIB_FILES  = $(patsubst src/%.cpp,$(OBJDIR)%.o,$(CPP_FILES)) \
 EXP_FILES  = $(wildcard export/*.cpp)
 EXP_LIB_FILES = $(patsubst export/%.cpp,$(OBJDIR)%.o,$(EXP_FILES))
 ############################################
-CC = @g++
-#CC = @clang++
-CF = @gfortran
+CC = g++
+#CC = clang++
+CF = gfortran
 RM = rm -f
 ############################################
 
@@ -51,32 +54,31 @@ all: $(EXEC)
 
 $(EXEC): $(OBJDIR)main.opp $(LIB_FILES)
 	@echo "Linking $<..."
-	$(CC) -g -o $@ $^ $(LDFLAGS)
+	@$(CC) -g -o $@ $^ $(LDFLAGS)
 
 cepgen-lhe: $(OBJDIR)cepgen-lhe.opp $(LIB_FILES) $(EXP_LIB_FILES)
 	@echo "Linking $<..."
-	$(CC) -g -o $@ $^ $(LDFLAGS) -lHepMC
+	@$(CC) -g -o $@ $^ $(LDFLAGS) $(HEPMCFLAGS)
 
 $(OBJDIR)%.o: %.cpp %.h | $(OBJDIR)
 	@echo "Building $<..."
-	$(CC) -c $(CFLAGS) $< -o $@
+	@$(CC) -c $(CFLAGS) $< -o $@
 
 $(OBJDIR)%.fo: external/%.f | $(OBJDIR)
 	@echo "Building (F77) $<..."
-	$(CF) -c $(FFLAGS) $< -o $@
-
+	@$(CF) -c $(FFLAGS) $< -o $@
 $(OBJDIR)%.opp: %.cpp | $(OBJDIR)
-	@echo $(LIB_FILES)
+	#@echo $(LIB_FILES)
 	@echo "Building $<..."
-	$(CC) -c $(CFLAGS) $< -o $@
+	@$(CC) -c $(CFLAGS) $< -o $@
 
 $(OBJDIR)%.oxx: %.cxx | $(OBJDIR)
 	@echo "Building (ROOT) $<..."
-	$(CC) -c $(CFLAGS) -I$(RHEAD) $(RFLAGS) $< -o $@
+	@$(CC) -c $(CFLAGS) -I$(RHEAD) $(RFLAGS) $< -o $@
 
 plots/%.oxx: plots/%.cxx
 	@echo "Building (ROOT) $<..."
-	$(CC) -c $(CFLAGS) -I$(RHEAD) $(RFLAGS) $< -o $@
+	@$(CC) -c $(CFLAGS) -I$(RHEAD) $(RFLAGS) $< -o $@
 
 clean:
 	@$(RM) -r $(OBJDIR)
@@ -88,22 +90,22 @@ doc: $(CPP_FILES) $(HPP_FILES) Doxyfile
 
 xsect: utils/xsect.o $(LIB_FILES)
 	@echo "Linking $<..."
-	$(CC) -o $@ $^ $(LDFLAGS)
+	@$(CC) -o $@ $^ $(LDFLAGS)
 
 probe: utils/probe.o $(LIB_FILES)
 	@echo "Linking $<..."
-	$(CC) -o $@ $^ $(LDFLAGS)
+	@$(CC) -o $@ $^ $(LDFLAGS)
 
 intest: utils/inelasticparticle.o $(LIB_FILES) $(EXP_LIB_FILES)
 	@echo "Linking $<..."
-	#$(CC) -o $@ $^ $(LDFLAGS) -I$(PYTHIA8SRC)/include/
-	$(CC) -o $@ $^ $(LDFLAGS) -lHepMC
+	#@$(CC) -o $@ $^ $(LDFLAGS) -I$(PYTHIA8SRC)/include/
+	@$(CC) -o $@ $^ $(LDFLAGS) $(HEPMCFLAGS)
 
 plotter: plots/main.oxx $(LIB_FILES)
-	$(CC) -o $@ $^ $(LDFLAGS) $(RLIBS)
+	@$(CC) -o $@ $^ $(LDFLAGS) $(RLIBS)
 
 test: $(OBJDIR)/test.oxx $(LIB_FILES)
-	$(CC) -g -o $@ $^ $(LDFLAGS) $(RLIBS)
+	@$(CC) -g -o $@ $^ $(LDFLAGS) $(RLIBS)
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
