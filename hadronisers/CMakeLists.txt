@@ -32,11 +32,10 @@ endif()
 file(GLOB has_jetset ${PROJECT_SOURCE_DIR}/external/jetset*.f)
 if(NOT ${has_jetset})
   message(STATUS "Jetset7 found in ${has_jetset}!")
-  add_definitions(-DJETSET7)
+  add_definitions(-DJETSET)
   add_library(jetset_shared SHARED ${has_jetset})
   target_link_libraries(Hadronisers jetset_shared)
 else()
   message(STATUS "Jetset7 not found. Will proceed without it")
 endif()
 
-#target_link_libraries(Hadronisers 

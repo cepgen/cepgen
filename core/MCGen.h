@@ -6,7 +6,8 @@
 #include <string>
 #include <ctime>
 
-#include "Vegas.h"
+#include "core/Vegas.h"
+#include "core/Timer.h"
 
 #include "physics/Physics.h"
 

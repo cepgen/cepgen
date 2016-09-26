@@ -28,7 +28,7 @@ class Parameters {
      * @param[in] thetamin_ The minimal value of \f$\theta\f$ for the outgoing leptons
      * @param[in] thetamax_ The maximal value of \f$\theta\f$ for the outgoing leptons
      */
-    void SetThetaRange(double thetamin_, double thetamax_);
+    void SetThetaRange( float thetamin_, float thetamax_ );
     /**
      * @brief Dumps the input parameters in the console
      */
@@ -36,11 +36,11 @@ class Parameters {
     /// Read content from config file to load the variables
     /// \param[in] inFile_ Name of the configuration file to load
     /// \return A boolean stating whether this input configuration file is correct or not
-    bool ReadConfigFile(const char* inFile_);
+    bool ReadConfigFile( const char* inFile_ );
     /// Store the full run configuration to an external config file
     /// \param[in] outFile_ Name of the configuration file to create
     /// \return A boolean stating whether this output configuration file is correctly written or not
-    bool StoreConfigFile(std::string outFile_);
+    bool StoreConfigFile( const char* outFile_ );
 
     //----- process to compute
     /// Process for which the cross-section will be computed and the events will be generated
@@ -54,9 +54,9 @@ class Parameters {
 
     //----- events kinematics
     /// First incoming particle's momentum (in \f$\text{GeV}/c\f$)
-    double in1p;
+    float in1p;
     /// Second incoming particle's momentum (in \f$\text{GeV}/c\f$)
-    double in2p;
+    float in2p;
     /// First beam/primary particle's PDG identifier
     Particle::ParticleCode in1pdg;
     /// Second beam/primary particle's PDG identifier
@@ -66,30 +66,30 @@ class Parameters {
     /// Set of cuts to apply on the outgoing central system
     Kinematics::Cuts mcut;
     /// Minimal \f$p_T\f$ of the outgoing central particles
-    double minpt;
+    float minpt;
     /// Maximal \f$p_T\f$ of the outgoing central particles
-    double maxpt;
+    float maxpt;
     /// Minimal \f$\Delta p_T\f$ of the outgoing central particles
-    double minptdiff;
+    float minptdiff;
     /// Maximal \f$\Delta p_T\f$ of the outgoing central particles
-    double maxptdiff;
+    float maxptdiff;
     /// Minimal energy of the outgoing central particles
-    double minenergy;
+    float minenergy;
     /// Maximal energy of the outgoing central particles
-    double maxenergy;
+    float maxenergy;
     /// Minimal pseudorapidity \f$\eta\f$ of the outgoing central particles
-    double mineta;
+    float mineta;
     /// Maximal pseudorapidity \f$\eta\f$ of the outgoing central particles
-    double maxeta;
-    double minqt, maxqt;
+    float maxeta;
+    float minqt, maxqt;
     /// Minimal value of \f$Q^2\f$, the internal photons lines' virtuality
-    double minq2;
+    float minq2;
     /// Maximal value of \f$Q^2\f$, the internal photons lines' virtuality
-    double maxq2;
+    float maxq2;
     /// Minimal \f$M_X\f$ of the outgoing proton remnants
-    double minmx;
+    float minmx;
     /// Maximal \f$M_X\f$ of the outgoing proton remnants
-    double maxmx;
+    float maxmx;
 
     //----- VEGAS
     int ncvg; // ??
@@ -116,13 +116,13 @@ class Parameters {
 
     //----- PDFLIB information
     /// Number of events already generated in this run
-    int ngen;
+    unsigned int ngen;
     /// PDFLIB group to use
-    int gpdf;
+    unsigned int gpdf;
     /// PDFLIB set to use
-    int spdf;
+    unsigned int spdf;
     /// Number of quarks to consider in the hadronisation part
-    int qpdf;
+    unsigned int qpdf;
 
     //----- hadronisation
     /// Hadronisation algorithm to use for the proton(s) fragmentation

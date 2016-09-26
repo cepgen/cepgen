@@ -21,12 +21,10 @@ endforeach()
 #----- link everything into the executables
 
 add_executable(cepgen main.cpp)
-target_link_libraries(cepgen ${GSL_LIBRARIES} Core Physics Hadronisers Processes)
-
-find_package(HepMC REQUIRED)
+target_link_libraries(cepgen Core Physics Hadronisers Processes)
 
 add_executable(cepgen-lhe cepgen-lhe.cpp)
-target_link_libraries(cepgen-lhe ${GSL_LIBRARIES} ${HEPMC_LIBRARIES} Core Physics Hadronisers Processes Exporter)
+target_link_libraries(cepgen-lhe Core Physics Hadronisers Processes Exporter)
 
 #----- copy the input cards and other files
 

@@ -1,9 +1,9 @@
 #ifndef GenericProcess_h
 #define GenericProcess_h
 
-#include "Event.h"
-#include "Kinematics.h"
+#include "core/Event.h"
 
+#include "physics/Kinematics.h"
 #include "physics/Physics.h"
 
 /**

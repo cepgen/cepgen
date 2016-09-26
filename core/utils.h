@@ -1,14 +1,6 @@
 #ifndef utils_h
 #define utils_h
 
-#include <iostream>
-#include <iomanip>
-#include <cstdlib>
-#include <cmath>
-#include <fstream>
-#include <sstream>
-#include <ctime>
-#include <stdexcept>
 #include <stdarg.h>  // For va_start, etc.
 
 #include "core/Exception.h"
@@ -21,33 +13,6 @@ inline double drand() { srand (time(NULL)); return static_cast<double>(rand())/R
 
 /// Format a string using a printf style format descriptor.
 std::string Form(const std::string fmt, ...);
-
-/**
- * A generic timer to extract the processing time between two steps in this software's flow
- * \author Laurent Forthomme <laurent.forthomme@cern.ch>
- */
-class Timer
-{
- public:
-  inline Timer() { clock_gettime(CLOCK_REALTIME, &beg_); }
-  /**
-   * Get the time elapsed since the last @a reset call (or class construction)
-   * @return Elapsed time (since the last reset), in seconds
-   */
-  inline double elapsed() {
-    clock_gettime(CLOCK_REALTIME, &end_);
-    return end_.tv_sec -beg_.tv_sec+(end_.tv_nsec - beg_.tv_nsec)/1.e9;
-  }
-  /// Reset the clock counter
-  inline void reset() {
-    clock_gettime(CLOCK_REALTIME, &beg_);
-  }
- private:
-  /// Timestamp marking the beginning of the counter
-  timespec beg_;
-  /// Timestamp marking the end of the counter
-  timespec end_;
-};
 
 /**
  * Define modified variables of integration to avoid peaks integrations (see @cite Vermaseren1983347 for details)
