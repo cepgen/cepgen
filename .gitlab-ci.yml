@@ -1,6 +1,6 @@
 cepgen:
   script:
-    - yum install -y gsl gsl-devel
+    - yum install -y gsl gsl-devel gcc-gfortran
     - mkdir build
     - cd build
     - wget https://raw.githubusercontent.com/opencog/opencog/master/lib/FindGSL.cmake
