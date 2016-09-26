@@ -27,3 +27,4 @@ EventWriter::operator<<( const Event* evt )
     default: return;
   }
 }
+
