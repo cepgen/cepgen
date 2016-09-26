@@ -6,9 +6,9 @@ set(PROJECT_VERSION 1)
 
 set(MODULES core processes hadronisers physics export)
 
-enable_language(Fortran)
+#----- enable fortran (for Pythia/Herwig/...)
 
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+enable_language(Fortran OPTIONAL)
 
 #----- build all the intermediate objects
 
@@ -20,11 +20,24 @@ endforeach()
 
 #----- link everything into the executables
 
-#add_executable(cepgen main.cpp $<TARGET_OBJECTS:Core> $<TARGET_OBJECTS:Physics> $<TARGET_OBJECTS:Processes> $<TARGET_OBJECTS:Hadronisers>)
-#target_link_libraries(cepgen ${GSL_LIBRARIES})
+add_executable(cepgen main.cpp)
+target_link_libraries(cepgen ${GSL_LIBRARIES} Core Physics Hadronisers Processes)
 
 find_package(HepMC REQUIRED)
 
-add_executable(cepgen-lhe cepgen-lhe.cpp $<TARGET_OBJECTS:Exporter>)
-target_link_libraries(cepgen-lhe ${GSL_LIBRARIES} ${HEPMC_LIBRARIES} Core Physics Hadronisers Processes)
+add_executable(cepgen-lhe cepgen-lhe.cpp)
+target_link_libraries(cepgen-lhe ${GSL_LIBRARIES} ${HEPMC_LIBRARIES} Core Physics Hadronisers Processes Exporter)
 
+#----- copy the input cards and other files
+
+file(GLOB input_cards RELATIVE ${PROJECT_SOURCE_DIR} cards/*)
+file(GLOB readme RELATIVE ${PROJECT_SOURCE_DIR} README)
+
+foreach(_files ${input_cards})
+  configure_file(
+    ${_files}
+    ${_files}
+    COPYONLY
+)
+endforeach()
+configure_file(${readme} ${readme} COPYONLY)

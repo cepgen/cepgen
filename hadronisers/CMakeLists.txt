@@ -3,11 +3,6 @@ file(GLOB headers *.h)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
-#----- enable fortran (for Pythia/Herwig/...)
-if(NOT CMAKE_GENERATOR STREQUAL Xcode)
-  enable_language(Fortran OPTIONAL)
-endif()
-
 #----- build the object
 
 add_library(Hadronisers SHARED ${sources})
