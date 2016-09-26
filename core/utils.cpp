@@ -4,7 +4,7 @@ void Map(double expo_, double xmin_, double xmax_, double* out_, double* dout_, 
 {
   double y, out;
   y = xmax_/xmin_;
-  out = xmin_*std::pow(y, expo_);
+  out = xmin_*pow(y, expo_);
   *out_ = out;
   *dout_ = out*log(y);
   DebuggingInsideLoop(Form("Mapping variable \"%s\"\n\t"
@@ -21,15 +21,15 @@ void Mapla(double y_, double z_, int u_, double xm_, double xp_, double* x_, dou
   xmb = xm_-y_-z_;
   xpb = xp_-y_-z_;
   c = -4.*y_*z_;
-  alp = std::sqrt(std::pow(xpb, 2)+c);
-  alm = std::sqrt(std::pow(xmb, 2)+c);
+  alp = sqrt( xpb*xpb + c );
+  alm = sqrt( xmb*xmb + c );
   am = xmb+alm;
   ap = xpb+alp;
   yy = ap/am;
-  zz = std::pow(yy, u_);
+  zz = pow(yy, u_);
 
   *x_ = y_+z_+(am*zz-c/(am*zz))/2.;
-  ax = std::sqrt(std::pow(*x_-y_-z_, 2)+c);
+  ax = sqrt( pow( *x_-y_-z_, 2 ) + c );
   *d_ = ax*log(yy);
 }
 

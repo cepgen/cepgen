@@ -1,7 +1,9 @@
 #ifndef utils_h
 #define utils_h
 
+#include <stdlib.h>
 #include <stdarg.h>  // For va_start, etc.
+#include <stdio.h>
 
 #include "core/Exception.h"
 #include "physics/Constants.h"

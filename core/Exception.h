@@ -2,6 +2,7 @@
 #define Exception_h
 
 #include <iomanip>
+#include <sstream>
 
 #include "Logger.h"
 

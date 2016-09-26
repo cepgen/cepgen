@@ -3,5 +3,7 @@ cepgen:
     - yum install -y gsl gsl-devel
     - mkdir build
     - cd build
-    - cmake ..
+    - wget https://raw.githubusercontent.com/opencog/opencog/master/lib/FindGSL.cmake
+    - wget https://raw.githubusercontent.com/cbernet/pythiafcc/master/cmake/FindHepMC.cmake
+    - cmake -D CMAKE_MODULE_PATH=$PWD ..
     - make

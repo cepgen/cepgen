@@ -23,8 +23,10 @@ endforeach()
 add_executable(cepgen main.cpp)
 target_link_libraries(cepgen Core Physics Hadronisers Processes)
 
-add_executable(cepgen-lhe cepgen-lhe.cpp)
-target_link_libraries(cepgen-lhe Core Physics Hadronisers Processes Exporter)
+if(${HEPMC_FOUND})
+  add_executable(cepgen-lhe cepgen-lhe.cpp)
+  target_link_libraries(cepgen-lhe Core Physics Hadronisers Processes Exporter)
+endif()
 
 #----- copy the input cards and other files
 

@@ -28,7 +28,7 @@ PSF(double q2_, double mX2_, double* sigT_, double* w1_, double* w2_)
   int nBin;
   double xBin, dx, nu2, logqq0, gd2;
   double sigLow, sigHigh;
-  double mX = std::sqrt(mX2_);
+  double mX = sqrt(mX2_);
   //const double m_min = Particle::GetMassFromPDGId(Particle::Proton)+0.135;
   const double m_min = 1.07, mP = 0.938;
 
@@ -55,15 +55,15 @@ PSF(double q2_, double mX2_, double* sigT_, double* w1_, double* w2_)
     *w2_ = 0.;
     return false;
   }
-  nu2 = std::pow((mX2_-q2_-std::pow(mP, 2))/(2.*mP), 2);
-  logqq0 = log((nu2-q2_)/std::pow((mX2_-std::pow(mP, 2))/(2.*mP), 2))/2.;
-  gd2 = std::pow(1./(1-q2_/.71), 4); // dipole form factor of the proton
+  nu2 = pow( ( mX2_-q2_-mP*mP ) / ( 2.*mP ), 2 );
+  logqq0 = log( ( nu2-q2_ ) / pow( ( mX2_-mP*mP ) / ( 2.*mP ), 2 ) ) / 2.;
+  gd2 = pow( 1. / ( 1-q2_ / .71 ), 4 ); // dipole form factor of the proton
 
   sigLow = (nBin!=0) ?
-    exp(abrass[nBin-1]+bbrass[nBin-1]*logqq0+cbrass[nBin-1]*std::pow(fabs(logqq0), 3))*gd2 :
+    exp( abrass[nBin-1]+bbrass[nBin-1]*logqq0+cbrass[nBin-1]*pow( fabs( logqq0 ), 3 ) )*gd2 :
     0.;
   sigHigh =
-    exp(abrass[nBin]  +bbrass[nBin]  *logqq0+cbrass[nBin]  *std::pow(fabs(logqq0), 3))*gd2;
+    exp( abrass[nBin]  +bbrass[nBin]  *logqq0+cbrass[nBin]  *pow( fabs( logqq0 ), 3 ) )*gd2;
 
   *sigT_ = sigLow+xBin*(sigHigh-sigLow)/dx;
   *w1_ = ( mX2_-mP*mP )/( 8.*Constants::Pi*Constants::Pi*mP*Constants::AlphaEM )/Constants::GeV2toBarn*1.e6*(*sigT_);
@@ -107,8 +107,8 @@ SuriYennieFormFactors(double q2, double mi2, double mf2)
                tau = -q2/4./mi2,
                rhot = rho+q2;
   FormFactors ff;
-  ff.FM = -(-cc1*std::pow(rho/rhot, 2)*dm2-cc2*mi2*std::pow(1.-x, 4)/(x*(x*cp-2*bp)+1.))/q2;
-  ff.FE = (-tau*ff.FM+dd1*dm2*q2*(rho/rhot)*std::pow(dm2/en, 2)/(rhot*mi2))/(1.+en*en/(4.*mi2*q2));
+  ff.FM = -(-cc1*pow(rho/rhot, 2)*dm2-cc2*mi2*pow(1.-x, 4)/(x*(x*cp-2*bp)+1.))/q2;
+  ff.FE = (-tau*ff.FM+dd1*dm2*q2*(rho/rhot)*pow(dm2/en, 2)/(rhot*mi2))/(1.+en*en/(4.*mi2*q2));
   return ff;
 }
 
