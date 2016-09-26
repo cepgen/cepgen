@@ -194,6 +194,8 @@ GenericKTProcess::ElasticFlux(double x_, double kt2_) const
   return f_ela;
 }
 
+#ifdef GRVPDF
+
 double
 GenericKTProcess::InelasticFlux(double x_, double kt2_, double mx_) const
 {
@@ -245,3 +247,5 @@ GenericKTProcess::InelasticFlux(double x_, double kt2_, double mx_) const
 
   return f_ine;
 }
+
+#endif

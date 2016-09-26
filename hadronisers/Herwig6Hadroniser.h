@@ -1,9 +1,11 @@
 #ifndef _HERWIG6HADRONISER_H
 #define _HERWIG6HADRONISER_H
 
+#ifdef HERWIG6
+
 #include <algorithm>
 
-#include "core/GenericHadroniser.h"
+#include "hadronisers/GenericHadroniser.h"
 
 #define NMXHEP 4000
 //#define NAME_CHR 16
@@ -36,20 +38,19 @@ class Herwig6Hadroniser : public GenericHadroniser
  public:
   Herwig6Hadroniser();
   ~Herwig6Hadroniser();
-  bool Hadronise(Event* ev_);
+  bool Hadronise( Event* ev_ );
  private:
   inline static void hwdhad() { hwdhad_(); };
-  /*inline static double ulmass(int pdgid_) { return (double)ulmass_(pdgid_); };
+  /*inline static double ulmass( int pdgid_ ) { return (double)ulmass_( pdgid_ ); };
   inline static void luexec() { luexec_(); };
-  inline static void lugive(const std::string &line_) { lugive_(line_.c_str(),line_.length()); };
-  inline static float luchge(int pdgid_) { return luchge_(pdgid_)/3.; };
-  inline static void lulist(int mlist_) { lulist_(mlist_); };
-  inline static std::string luname(int pdgid_) {
+  inline static void lugive( const std::string &line_ ) { lugive_( line_.c_str(), line_.length() ); };
+  inline static float luchge( int pdgid_ ) { return luchge_( pdgid_ )/3.; };
+  inline static void lulist( int mlist_ ) { lulist_( mlist_ ); };
+  inline static std::string luname( int pdgid_ ) {
     char out[NAME_CHR];
-    std::string s;
-    luname_(pdgid_, out, NAME_CHR);
-    s = std::string(out, NAME_CHR);
-    s.erase(remove(s.begin(), s.end(), ' '), s.end());
+    luname_( pdgid_, out, NAME_CHR );
+    std::string s = std::string( out, NAME_CHR );
+    s.erase( remove( s.begin(), s.end(), ' ' ), s.end() );
     return s;
   };*/
   /**
@@ -57,7 +58,8 @@ class Herwig6Hadroniser : public GenericHadroniser
    * @param njoin_ Number of particles to join in the colour flow
    * @param ijoin_ List of particles to join in the colour flow
    */
-  //inline static void lujoin(int njoin_, int ijoin_[2]) { return lujoin_(njoin_,*ijoin_); };
+  //inline static void lujoin( int njoin_, int ijoin_[2] ) { return lujoin_( njoin_,*ijoin_ ); };
 };
 
+#endif
 #endif

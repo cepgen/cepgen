@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "include/MCGen.h"
+#include "core/MCGen.h"
 #include "export/EventWriter.h"
 #include "HepMC/Version.h"
 

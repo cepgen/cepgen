@@ -8,22 +8,34 @@ if(NOT CMAKE_GENERATOR STREQUAL Xcode)
   enable_language(Fortran OPTIONAL)
 endif()
 
+#----- build the object
+
+add_library(Hadronisers SHARED ${sources})
+
 #----- check the external dependencies
 
-if(EXISTS "${PROJECT_SOURCE_DIR}/external/pythia6*.f")
-  message(STATUS "Pythia6 found!")
+file(GLOB has_pythia6 ${PROJECT_SOURCE_DIR}/external/pythia6*.f)
+if(NOT ${has_pythia})
+  message(STATUS "Pythia6 found in ${has_pythia}!")
   add_definitions(-DPYTHIA6)
 else()
   message(STATUS "Pythia6 not found. Will proceed without it")
 endif()
 
-if(EXISTS "${PROJECT_SOURCE_DIR}/external/jetset7*.f")
-  message(STATUS "Jetset7 found!")
+file(GLOB has_herwig ${PROJECT_SOURCE_DIR}/external/herwig_*.f)
+if(NOT ${has_herwig})
+  message(STATUS "Herwig6 found in ${has_herwig}!")
+  add_definitions(-DHERWIG6)
+else()
+  message(STATUS "Herwig6 not found. Will proceed without it")
+endif()
+
+file(GLOB has_jetset ${PROJECT_SOURCE_DIR}/external/jetset*.f)
+if(NOT ${has_jetset})
+  message(STATUS "Jetset7 found in ${has_jetset}!")
   add_definitions(-DJETSET7)
 else()
   message(STATUS "Jetset7 not found. Will proceed without it")
 endif()
 
-#----- build the object
-
-add_library(Hadronisers OBJECT ${sources})
+#target_link_libraries(Hadronisers 

@@ -12,7 +12,8 @@
 #include <cstdlib>
 #include <map>
 
-#include "core/GenericProcess.h"
+#include "processes/GenericProcess.h"
+#include "physics/FormFactors.h"
 
 /**
  * Full class of methods and objects to compute the full analytic matrix element

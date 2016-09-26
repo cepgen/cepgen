@@ -3,4 +3,6 @@ file(GLOB headers *.h)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
-add_library(Export OBJECT ${sources})
+find_package(HepMC REQUIRED)
+
+add_library(Exporter OBJECT ${sources})

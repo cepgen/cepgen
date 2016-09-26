@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <Pythia.h>
 
-#include "core/GenericHadroniser.h"
+#include "hadronisers/GenericHadroniser.h"
 
 /**
  * Full interface to the Pythia8 hadronisation algorithm. It can be used in a single particle decay mode as well as a full event hadronisation using the string model, as in Jetset.
