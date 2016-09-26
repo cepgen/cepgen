@@ -1,5 +1,6 @@
 cepgen:
   script:
+    - yum install gsl gsl-devel
     - mkdir build
     - cd build
     - cmake ..
