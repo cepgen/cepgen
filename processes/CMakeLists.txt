@@ -3,4 +3,4 @@ file(GLOB headers *.h)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
-add_library(Core OBJECT ${sources})
+add_library(Processes OBJECT ${sources})

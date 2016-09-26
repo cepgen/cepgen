@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "include/MCGen.h"
+#include "core/MCGen.h"
 
 using namespace std;
 
