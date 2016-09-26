@@ -15,7 +15,7 @@ add_library(Hadronisers SHARED ${sources})
 #----- check the external dependencies
 
 file(GLOB has_pythia6 ${PROJECT_SOURCE_DIR}/external/pythia6*.f)
-if(NOT ${has_pythia})
+if(NOT ${has_pythia6})
   message(STATUS "Pythia6 found in ${has_pythia6}!")
   add_definitions(-DPYTHIA6)
   add_library(pythia6_shared SHARED ${has_pythia6})
