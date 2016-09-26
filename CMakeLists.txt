@@ -8,7 +8,7 @@ set(MODULES core processes hadronisers physics export)
 
 enable_language(Fortran)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 #----- build all the intermediate objects
 
