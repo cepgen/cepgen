@@ -3,29 +3,34 @@
 
 #include "core/Event.h"
 
-#include "HepMC/IO_GenEvent.h"
-#include "HepMC/GenEvent.h"
-#include "HepMC/GenCrossSection.h"
-#include "HepMC/GenParticle.h"
+#include "HepMCHandler.h"
+#include "LHEFHandler.h"
 
-namespace EventWriter
+class EventWriter
 {
-  namespace HepMC
-  {
-    typedef ::HepMC::IO_GenEvent output;
-    ::HepMC::GenEvent* Event(const Event&);
+ public:
+  enum OutputType {
+    HepMC, LHE
+  };
 
-    static ::HepMC::GenEvent* last_event = 0;
+  EventWriter( const OutputType&, const char* );
+  ~EventWriter();
+
+  void SetCrossSection( const float& xsec, const float& err_xsec ) {
+    if ( fHepMCHandler ) fHepMCHandler->SetCrossSection( xsec, err_xsec );
   }
-}
-
-/*#include "LHE/..."
-
-namespace EventWriter
-{
-  namespace LHE
-  {
+  void SetEventNumber( const unsigned int& ev_id ) {
+    if ( fHepMCHandler ) fHepMCHandler->SetEventNumber( ev_id );
   }
-  }*/
+
+  void operator<<( const Event* );
+
+ private:
+
+  OutputType fType;
+  OutputHandler::HepMCHandler* fHepMCHandler;
+  OutputHandler::LHEFHandler* fLHEFHandler;
+
+};
 
 #endif
