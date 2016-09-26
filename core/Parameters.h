@@ -8,8 +8,8 @@
 #include <fstream>
 #include <string>
 
-#include "../processes/processes.h"
-#include "../hadronisers/hadronisers.h"
+#include "processes/processes.h"
+#include "hadronisers/hadronisers.h"
 
 /// List of parameters used to start and run the simulation job
 /// \note The default parameters are derived from GMUINI in LPAIR

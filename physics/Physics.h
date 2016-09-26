@@ -3,8 +3,7 @@
 
 #ifndef __CINT__
 
-#include "Event.h"
-//#include "GenericHadroniser.h"
+#include "core/Event.h"
 
 extern "C"
 {

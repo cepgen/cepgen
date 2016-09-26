@@ -1,7 +1,7 @@
 #ifndef Test_h
 #define Test_h
 
-#include "../include/GenericProcess.h"
+#include "core/GenericProcess.h"
 
 /// Generic process to test the Vegas instance
 class TestProcess : public GenericProcess

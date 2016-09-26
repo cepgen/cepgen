@@ -5,7 +5,8 @@
 #include <vector>
 
 #include "Event.h"
-#include "Physics.h"
+
+#include "physics/Physics.h"
 
 /**
  * Class template to define any hadroniser as a general object with defined methods

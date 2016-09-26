@@ -166,10 +166,12 @@ bool Parameters::ReadConfigFile(const char* inFile_)
       }
     }
     else if (key=="HADR") {
+#ifdef PYTHIA6
       if (value=="pythia6") {
         this->hadroniser = new Pythia6Hadroniser;
         os << " * Hadroniser: Pythia6\n\t";
       }
+#endif
       /*if (value=="jetset7") {
         this->hadroniser = new Jetset7Hadroniser;
         os << " * Hadroniser: Jetset7\n\t";

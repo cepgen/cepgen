@@ -1,7 +1,7 @@
 #ifndef EventWriter_h
 #define EventWriter_h
 
-#include "../include/Event.h"
+#include "core/Event.h"
 
 #include "HepMC/IO_GenEvent.h"
 #include "HepMC/GenEvent.h"

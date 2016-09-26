@@ -1,9 +1,11 @@
 #ifndef Pythia6Hadroniser_h
 #define Pythia6Hadroniser_h
 
+#ifdef PYTHIA6
+
 #include <algorithm>
 
-#include "../include/GenericHadroniser.h"
+#include "core/GenericHadroniser.h"
 
 /** @brief Maximal number of characters to fetch for the particle's name */
 #define NAME_CHR 16
@@ -84,4 +86,5 @@ class Pythia6Hadroniser : public GenericHadroniser
   bool PrepareHadronisation(Event *ev_);
 };
 
+#endif
 #endif

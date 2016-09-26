@@ -1,5 +1,7 @@
 #include "Pythia6Hadroniser.h"
 
+#ifdef PYTHIA6
+
 Pythia6Hadroniser::Pythia6Hadroniser() : GenericHadroniser("Pythia6")
 {
   //this->pygive("MSTU(21)=1");
@@ -293,3 +295,4 @@ Pythia6Hadroniser::PrepareHadronisation(Event *ev_)
   return true;
 }
 
+#endif

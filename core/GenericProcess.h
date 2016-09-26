@@ -2,8 +2,9 @@
 #define GenericProcess_h
 
 #include "Event.h"
-#include "Physics.h"
 #include "Kinematics.h"
+
+#include "physics/Physics.h"
 
 /**
  * Class template to define any process to compute using this MC integrator/events generator
