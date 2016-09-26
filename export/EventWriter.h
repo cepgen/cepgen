@@ -1,10 +1,10 @@
 #ifndef EventWriter_h
 #define EventWriter_h
 
-#include "core/Event.h"
+#include "physics/Event.h"
 
-#include "HepMCHandler.h"
-#include "LHEFHandler.h"
+#include "export/HepMCHandler.h"
+#include "export/LHEFHandler.h"
 
 class EventWriter
 {

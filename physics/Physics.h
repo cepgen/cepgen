@@ -3,12 +3,12 @@
 
 #ifndef __CINT__
 
-#include "core/Event.h"
+#include "physics/Event.h"
 
 extern "C"
 {
   //extern void grv95lo_(double&,double&,double&,double&,double&,double&,double&,double&);
-  extern void grv95lo_(float&,float&,float&,float&,float&,float&,float&,float&);
+  extern void grv95lo_( float&, float&, float&, float&, float&, float&, float&, float& );
 }
 
 class GenericHadroniser; // forward
@@ -72,7 +72,7 @@ typedef enum
  * @author Ian McLaren (mclareni), CERN/CN
  * @date 14 Feb 1996
  */
-void Lorenb(double u_, const Particle::Momentum& ps_, double pi_[], double pf_[]);
+void Lorenb( double u_, const Particle::Momentum& ps_, double pi_[], double pf_[] );
 
 #endif
 

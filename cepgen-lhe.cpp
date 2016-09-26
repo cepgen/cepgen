@@ -13,10 +13,10 @@ using namespace std;
  * the events generation.
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
  */
-int main(int argc, char* argv[]) {
+int main( int argc, char* argv[] ) {
   MCGen mg;
   
-  if (argc==1) InError( "No config file provided." );
+  if ( argc==1 ) InError( "No config file provided." );
 
   Debugging( Form( "Reading config file stored in %s", argv[1] ) );
   if ( !mg.parameters->ReadConfigFile( argv[1] ) ) {
@@ -42,10 +42,10 @@ int main(int argc, char* argv[]) {
 
 
 #ifndef HEPMC_VERSION_CODE
-#error "Hahaha"
-cout << HepMC::versionName() << endl;
+//#error "Hahaha"
+cout << "HepMC version: " << HepMC::versionName() << endl;
 #else
-cout << HepMC::version() << endl;
+cout << "HepMC version: " << HepMC::version() << endl;
 //cout << HEPMC_VERSION << endl;
 #endif
 

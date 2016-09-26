@@ -1,12 +1,13 @@
 #ifndef OutputHandler_LHEFHandler_h
 #define OutputHandler_LHEFHandler_h
 
+#include "physics/Event.h"
+
 #include "HepMC/Version.h"
 
 #if HEPMC_VERSION_CODE>=3000000
 
 #include "HepMC/LHEF.h"
-#include "core/Event.h"
 
 namespace OutputHandler
 {

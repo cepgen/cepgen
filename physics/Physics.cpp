@@ -2,9 +2,9 @@
 #include "Physics.h"
 
 PhysicsBoundaries::PhysicsBoundaries() :
-  wmin(20.), wmax(0.),
-  q2min(4.), q2max(100.),
-  zmin(0.), zmax(1.)
+  wmin( 20. ), wmax( 0. ),
+  q2min( 4. ), q2max( 100. ),
+  zmin( 0. ), zmax( 1. )
 {}
 
 PhysicsBoundaries::~PhysicsBoundaries()
@@ -58,19 +58,16 @@ VMDecayer(Particle part_, GenericHadroniser *had_)
 }*/
 
 void
-Lorenb(double u_, const Particle::Momentum& ps_, double pi_[4], double pf_[4])
+Lorenb( double u_, const Particle::Momentum& ps_, double pi_[4], double pf_[4] )
 {
   double fn;
 
-  if (ps_.E()!=u_) {
-    pf_[3] = (pi_[3]*ps_.E()+pi_[2]*ps_.Pz()+pi_[1]*ps_.Py()+pi_[0]*ps_.Px())/u_;
-    fn = (pf_[3]+pi_[3])/(ps_.E()+u_);
-    for (unsigned int i=0; i<3; i++) {
-      pf_[i] = pi_[i]+fn*ps_.P(i);
-    }
+  if ( ps_.E()!=u_ ) {
+    pf_[3] = ( pi_[3]*ps_.E() + pi_[2]*ps_.Pz() + pi_[1]*ps_.Py() + pi_[0]*ps_.Px() ) / u_;
+    fn = ( pf_[3] + pi_[3] ) / ( ps_.E() + u_ );
+    for ( unsigned int i=0; i<3; i++ ) { pf_[i] = pi_[i]+fn*ps_.P(i); }
   }
-  else {
-    std::copy(pi_, pi_+4, pf_);
-  }
+  else { std::copy( pi_, pi_+4, pf_ ); }
 }
+
 #endif

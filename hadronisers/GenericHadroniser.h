@@ -1,11 +1,7 @@
 #ifndef GenericHadroniser_h
 #define GenericHadroniser_h
 
-#include <string>
-#include <vector>
-
-#include "Event.h"
-
+#include "physics/Event.h"
 #include "physics/Physics.h"
 
 /**
