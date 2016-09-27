@@ -58,7 +58,7 @@ int main( int argc, char* argv[] ) {
   if ( mg.parameters->generation ) {
     // The events generation starts here !
     Event ev;
-    for ( int i=0; i<mg.parameters->maxgen; i++ ) {
+    for ( unsigned int i=0; i<mg.parameters->maxgen; i++ ) {
       if ( i%10000==0 )
         cout << "Generating event #" << i+1 << endl;
       ev = *mg.GenerateOneEvent();

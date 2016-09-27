@@ -6,16 +6,16 @@
 
 #include "Logger.h"
 
-#define Information(m) \
-  if (Logger::GetInstance()->Level>Logger::Nothing) { Exception(__PRETTY_FUNCTION__, m, Information).Dump(Logger::GetInstance()->OutputStream); }
-#define Debugging(m) \
-  if (Logger::GetInstance()->Level>=Logger::Debug)  { Exception(__PRETTY_FUNCTION__, m, DebugMessage).Dump(Logger::GetInstance()->OutputStream); }
-#define DebuggingInsideLoop(m) \
-  if (Logger::GetInstance()->Level>=Logger::DebugInsideLoop) { Exception(__PRETTY_FUNCTION__, m, DebugMessage).Dump(Logger::GetInstance()->OutputStream); }
-#define InWarning(m) \
-  if (Logger::GetInstance()->Level>=Logger::Warning)  { Exception(__PRETTY_FUNCTION__, m, JustWarning).Dump(Logger::GetInstance()->OutputStream); }
-#define InError(m) \
-  if (Logger::GetInstance()->Level>=Logger::Error)  { Exception(__PRETTY_FUNCTION__, m, ErrorMessage).Dump(Logger::GetInstance()->OutputStream); }
+#define Information( m ) \
+  if ( Logger::GetInstance()->Level>Logger::Nothing ) { Exception( __PRETTY_FUNCTION__, m, Information ).Dump( Logger::GetInstance()->OutputStream ); }
+#define Debugging( m ) \
+  if ( Logger::GetInstance()->Level>=Logger::Debug )  { Exception( __PRETTY_FUNCTION__, m, DebugMessage ).Dump( Logger::GetInstance()->OutputStream ); }
+#define DebuggingInsideLoop( m ) \
+  if ( Logger::GetInstance()->Level>=Logger::DebugInsideLoop ) { Exception( __PRETTY_FUNCTION__, m, DebugMessage ).Dump( Logger::GetInstance()->OutputStream ); }
+#define InWarning( m ) \
+  if ( Logger::GetInstance()->Level>=Logger::Warning )  { Exception( __PRETTY_FUNCTION__, m, JustWarning ).Dump( Logger::GetInstance()->OutputStream ); }
+#define InError( m ) \
+  if ( Logger::GetInstance()->Level>=Logger::Error )  { Exception( __PRETTY_FUNCTION__, m, ErrorMessage ).Dump( Logger::GetInstance()->OutputStream ); }
 
 /**
  * \brief Enumeration of exception severities
@@ -45,7 +45,7 @@ class Exception
     /// \param[in] desc brief description of the exception
     /// \param[in] type exception type
     /// \param[in] id exception code (useful for logging)
-    inline Exception(const char* from, std::string desc, ExceptionType type=Undefined, const int id=0) {
+    inline Exception( const char* from, std::string desc, ExceptionType type=Undefined, const int id=0 ) {
       fFrom = from;
       fDescription = desc;
       fType = type;
@@ -57,7 +57,7 @@ class Exception
     /// \param[in] desc brief description of the exception
     /// \param[in] type exception type
     /// \param[in] id exception code (useful for logging)
-    inline Exception(const char* from, const char* desc, ExceptionType type=Undefined, const int id=0) {
+    inline Exception( const char* from, const char* desc, ExceptionType type=Undefined, const int id=0 ) {
       fFrom = from;
       fDescription = desc;
       fType = type;
@@ -79,7 +79,7 @@ class Exception
     inline ExceptionType Type() const { return fType; }
     /// Extract a human-readable (and colourified) version of the exception type
     inline std::string TypeString() const {
-      switch (Type()) {
+      switch ( Type() ) {
         case JustWarning: return "\033[34;1mJustWarning\033[0m";
         case Information: return "\033[33;1mInfo\033[0m";
         case DebugMessage: return "\033[32;1mDebug\033[0m";
@@ -92,11 +92,11 @@ class Exception
     /// Dump the full exception information in a given output stream
     /// \param[inout] os the output stream where the information is dumped
     inline void Dump(std::ostream& os=std::cerr) const {
-      if (Type()==Information) {
+      if ( Type()==Information ) {
         os << "================================= \033[33;1mInformation\033[0m =================================" << std::endl
            << " From:        " << From() << std::endl;
       }
-      else if (Type()==DebugMessage) {
+      else if ( Type()==DebugMessage ) {
         os << "==================================== \033[32;1mDebug\033[0m ====================================" << std::endl
            << " From:        " << From() << std::endl;
       }
@@ -107,7 +107,7 @@ class Exception
       }
       os << " Description: " << std::endl
          << "\t" << Description() << std::endl;
-      if (ErrorNumber()!=0)
+      if ( ErrorNumber()!=0 )
         os << "-------------------------------------------------------------------------------" << std::endl
            << " Error #" << ErrorNumber() << std::endl;
       os << "===============================================================================" << std::endl;

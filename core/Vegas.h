@@ -23,7 +23,7 @@ class Vegas {
      * \param[in] f_ Function to be integrated
      * \param[inout] inParam_ Run parameters to define the phase space on which this integration is performed (embedded in an Parameters object)
      */
-    Vegas(const int dim_,double f_(double*,size_t,void*),Parameters* inParam_);
+    Vegas( const unsigned int dim_, double f_(double*,size_t,void*), Parameters* inParam_ );
     /// Class destructor
     ~Vegas();
     /**
@@ -34,7 +34,7 @@ class Vegas {
      * \param[out] abserr_ The error associated to the computed cross section
      * \return 0 if the integration was performed successfully
      */
-    int Integrate(double* result_,double* abserr_);
+    int Integrate( double* result_,double* abserr_ );
     /// Launch the generation of events
     void Generate();
     /**
@@ -49,14 +49,14 @@ class Vegas {
      * \param[in] x_ The point at which the function is to be evaluated
      * \return Function value at this point @a x_
      */
-    inline double F(double* x_) { return fFunction->f(x_, fFunction->dim, (void*)fInputParameters); }
+    inline double F( double* x_ ) { return fFunction->f( x_, fFunction->dim, (void*)fInputParameters ); }
     /**
      * Evaluate the function to be integrated at a point @a x_, given a set of Parameters @a ip_
      * \param[in] x_ The point at which the function is to be evaluated
      * \param[in] ip_ A set of parameters to fully define the function
      * \return Function value at this point @a x_
      */
-    inline double F(double* x_,Parameters* ip_) { return fFunction->f(x_, fFunction->dim, (void*)ip_); }
+    inline double F( double* x_,Parameters* ip_ ) { return fFunction->f( x_, fFunction->dim, (void*)ip_ ); }
     /**
      * Store the event characterized by its _ndim-dimensional point in the phase
      * space to the output file
@@ -65,10 +65,10 @@ class Vegas {
      * event to store
      * @return A boolean stating whether or not the event could be saved
      */
-    bool StoreEvent(double* x_);
+    bool StoreEvent( double* x_ );
     /// Start the correction cycle on the grid
     /// \param x_ Point in the phase space considered
-    bool CorrectionCycle(double* x_);
+    bool CorrectionCycle( double* x_ );
     /**
      * Set all the generation mode variables and align them to the integration grid set while computing the cross-section
      * @brief Prepare the class for events generation

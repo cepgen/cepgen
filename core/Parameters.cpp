@@ -290,7 +290,7 @@ bool Parameters::StoreConfigFile( const char* outFile_ )
   f.open( outFile_, std::fstream::out | std::fstream::trunc );
   if ( !f.is_open() ) { return false; }
   // ...
-  if ( this->itvg!=-1 ) f << "ITVG  " << this->itvg << std::endl;
+  if ( this->itvg>=0 ) f << "ITVG  " << this->itvg << std::endl;
   if ( this->minenergy!=-1 ) f << "ECUT  " << this->minenergy << std::endl;
   if ( this->minenergy!=-1 ) f << "PTCT  " << this->minpt << std::endl;
   // ...

@@ -6,8 +6,8 @@ TestProcess::TestProcess() : GenericProcess("<test process>")
 TestProcess::~TestProcess()
 {}
 
-int
-TestProcess::GetNdim(Kinematics::ProcessMode) const
+unsigned int
+TestProcess::GetNdim( const Kinematics::ProcessMode& ) const
 {
   return 3;
 }

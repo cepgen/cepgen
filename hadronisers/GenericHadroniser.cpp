@@ -1,13 +1,14 @@
 #include "GenericHadroniser.h"
 
-GenericHadroniser::GenericHadroniser(std::string name_) :
-  fName(name_), fHadrons(new std::vector<Particle>())
+GenericHadroniser::GenericHadroniser( const std::string& name_ ) :
+  fName( name_ ), fHadrons( new std::vector<Particle>() )
 {}
 
 GenericHadroniser::~GenericHadroniser()
 {
-  Debugging(Form("Destructor called"));
+  Debugging( Form("Destructor called" ) );
   
-  delete fHadrons;
+  if ( fHadrons ) delete fHadrons;
+
 }
 

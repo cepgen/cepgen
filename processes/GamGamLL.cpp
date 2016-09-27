@@ -2,33 +2,34 @@
 
 GamGamLL::GamGamLL(int nOpt_) : GenericProcess("pp -> p(*) (gamma gamma -> l+ l-) p(*)"),
   _nOpt(nOpt_),
-  _ep1(-1), _w1(-1), _ep2(-1), _w2(-1.),
-  fMX2(-1.), _w4(-1.), fMY2(-1.), fMl12(-1.), fMl22(-1.),
-  _p12(0.), _p13(0.), _p14(0.), _p15(0.), _p23(0.), _p24(0.), _p25(0.), _p34(0.), _p35(0.), _p45(0.),
-  _p1k2(0.), _p2k1(0.),
-  _cotth1(-99999.), _cotth2(99999.)
+  _ep1( -1. ), _w1( -1. ), _ep2( -1. ), _w2( -1. ),
+  fMX2( -1. ), _w4( -1. ), fMY2( -1. ), fMl12( -1. ), fMl22( -1. ),
+  _p12( 0. ), _p13( 0. ), _p14( 0. ), _p15( 0. ),
+  _p23( 0. ), _p24( 0. ), _p25( 0. ), _p34( 0. ), _p35( 0. ), _p45( 0. ),
+  _p1k2( 0. ), _p2k1( 0. ),
+  _cotth1( -99999. ), _cotth2( 99999. )
 {}
 
 void
 GamGamLL::AddEventContent()
 {
   IncomingState is; OutgoingState os;
-  is.insert(ParticleWithRole(Particle::IncomingBeam1,    Particle::Proton));
-  is.insert(ParticleWithRole(Particle::IncomingBeam2,    Particle::Proton));
-  is.insert(ParticleWithRole(Particle::Parton1,          Particle::Photon));
-  is.insert(ParticleWithRole(Particle::Parton2,          Particle::Photon));
-  os.insert(ParticleWithRole(Particle::OutgoingBeam1,    Particle::Proton));
-  os.insert(ParticleWithRole(Particle::OutgoingBeam2,    Particle::Proton));
-  os.insert(ParticleWithRole(Particle::CentralParticle1, Particle::Muon));
-  os.insert(ParticleWithRole(Particle::CentralParticle2, Particle::Muon));
-  GenericProcess::SetEventContent(is, os);
+  is.insert( ParticleWithRole(Particle::IncomingBeam1,    Particle::Proton ) );
+  is.insert( ParticleWithRole(Particle::IncomingBeam2,    Particle::Proton ) );
+  is.insert( ParticleWithRole(Particle::Parton1,          Particle::Photon ) );
+  is.insert( ParticleWithRole(Particle::Parton2,          Particle::Photon ) );
+  os.insert( ParticleWithRole(Particle::OutgoingBeam1,    Particle::Proton ) );
+  os.insert( ParticleWithRole(Particle::OutgoingBeam2,    Particle::Proton ) );
+  os.insert( ParticleWithRole(Particle::CentralParticle1, Particle::Muon ) );
+  os.insert( ParticleWithRole(Particle::CentralParticle2, Particle::Muon ) );
+  GenericProcess::SetEventContent( is, os );
 }
 
-int
-GamGamLL::GetNdim(Kinematics::ProcessMode process_mode_) const
+unsigned int
+GamGamLL::GetNdim( const Kinematics::ProcessMode& process_mode_ ) const
 {
-  switch (process_mode_) {
-    case Kinematics::ElectronProton:     { InError("Not supported yet!"); }
+  switch ( process_mode_ ) {
+    case Kinematics::ElectronProton:     { InError( "Not supported yet!" ); }
     case Kinematics::ElasticElastic:
     default:                             return 7;
     case Kinematics::ElasticInelastic:
@@ -234,7 +235,7 @@ GamGamLL::Pickin()
   const double st = fS2-fT1-_w2;
   const double delb = (2.*_w2*r3+r4*st)*(4.*_p12*fT1-(fT1-_w31)*st)/(16.*ap);
 
-  if (dd<=0.) { InWarning(Form("dd = %f <= 0\n\tdd1 = %f\tdd2 = %f", dd, _dd1, _dd2)); return false; }
+  if (dd<=0.) { InWarning(Form("dd = %e <= 0\n\tdd1 = %e\tdd2 = %e", dd, _dd1, _dd2)); return false; }
 
   _delta = delb-yy4*st*std::sqrt(dd)/(2.*ap);
   fS1 = fT2+_w1+(2.*_p12*r3-4.*_delta)/st;

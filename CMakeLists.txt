@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 project(CepGen)
 set(PROJECT_VERSION 1)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic -g")
+
 #----- define all individual modules to be built beforehand
 
 set(MODULES core processes hadronisers physics export)
@@ -23,6 +25,8 @@ endforeach()
 add_executable(cepgen main.cpp)
 target_link_libraries(cepgen Core Physics Hadronisers Processes)
 
+find_package(HepMC REQUIRED)
+message(STATUS ${HEPMC_FOUND})
 if(${HEPMC_FOUND})
   add_executable(cepgen-lhe cepgen-lhe.cpp)
   target_link_libraries(cepgen-lhe Core Physics Hadronisers Processes Exporter)
@@ -31,8 +35,6 @@ endif()
 #----- copy the input cards and other files
 
 file(GLOB input_cards RELATIVE ${PROJECT_SOURCE_DIR} cards/*)
-file(GLOB readme RELATIVE ${PROJECT_SOURCE_DIR} README)
-
 foreach(_files ${input_cards})
   configure_file(
     ${_files}
@@ -40,4 +42,6 @@ foreach(_files ${input_cards})
     COPYONLY
 )
 endforeach()
+
+file(GLOB readme RELATIVE ${PROJECT_SOURCE_DIR} README)
 configure_file(${readme} ${readme} COPYONLY)

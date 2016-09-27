@@ -24,21 +24,21 @@ class GenericKTProcess : public GenericProcess
    * \param[in] op1_ First produced final state particle
    * \param[in] op2_ Second produced final state particle (if undefined, same as the first)
    */
-  GenericKTProcess(std::string name_="<generic process>",
-                   unsigned int num_user_dimensions_=0,
-                   Particle::ParticleCode ip1_=Particle::Photon,
-                   Particle::ParticleCode op1_=Particle::Muon,
-                   Particle::ParticleCode ip2_=Particle::invalidParticle,
-                   Particle::ParticleCode op2_=Particle::invalidParticle);
+  GenericKTProcess( const std::string& name_="<generic process>",
+                    const unsigned int& num_user_dimensions_=0,
+                    const Particle::ParticleCode& ip1_=Particle::Photon,
+                    const Particle::ParticleCode& op1_=Particle::Muon,
+                    const Particle::ParticleCode& ip2_=Particle::invalidParticle,
+                    const Particle::ParticleCode& op2_=Particle::invalidParticle);
   ~GenericKTProcess();
   
   void AddEventContent();
-  int GetNdim(Kinematics::ProcessMode) const;
+  unsigned int GetNdim( Kinematics::ProcessMode ) const;
   double ComputeWeight();
-  void FillKinematics(bool);
+  void FillKinematics( bool );
   
  protected:
-  inline void SetKinematics(const Kinematics& kin_) {
+  inline void SetKinematics( const Kinematics& kin_ ) {
     fCuts = kin_;
     fLogQmin = -10.; // FIXME //lqmin = std::log(std::sqrt(fCuts.q2min));
     fLogQmax = std::log(fCuts.qtmax);

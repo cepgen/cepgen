@@ -92,11 +92,11 @@ class Parameters {
     float maxmx;
 
     //----- VEGAS
-    int ncvg; // ??
+    unsigned int ncvg; // ??
     /// Maximal number of iterations to perform by VEGAS
-    int itvg;
+    unsigned int itvg;
     /// Number of points to "shoot" in each integration bin by the algorithm
-    int npoints;
+    unsigned int npoints;
     /// Is it the first time the integrator is run?
     bool first_run;
 
@@ -106,7 +106,7 @@ class Parameters {
     /// Are the events generated in this run to be stored in the output file ?
     bool store;
     /// Maximal number of events to generate in this run
-    int maxgen;
+    unsigned int maxgen;
     /// Pointer to the last event produced in this run
     Event* last_event;
     /// File in which to store the events generation's output
@@ -128,7 +128,7 @@ class Parameters {
     /// Hadronisation algorithm to use for the proton(s) fragmentation
     GenericHadroniser* hadroniser;
     /// Maximal number of trials for the hadronisation of the proton(s) remnants
-    int hadroniser_max_trials;
+    unsigned int hadroniser_max_trials;
 };
 
 #endif

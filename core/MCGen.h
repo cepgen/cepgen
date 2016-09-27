@@ -39,7 +39,7 @@
  * numbers defined inside its boundaries (as normalised so that \f$\forall i<\mathrm{ndim}\f$,
  * \f$0<x_i<1\f$.
  */
-double f(double*,size_t,void*);
+double f( double*, size_t, void* );
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -70,7 +70,7 @@ class MCGen {
   MCGen();
   /// Core of the Monte Carlo integrator and events generator
   /// \param[in] ip_ List of input parameters defining the phase space on which to perform the integration
-  MCGen(Parameters *ip_);
+  MCGen( Parameters *ip_ );
   ~MCGen();
   /// Dump this program's header into the standard output stream
   void PrintHeader();
@@ -81,7 +81,7 @@ class MCGen {
    * @param[out] xsec_ The computed cross-section, in pb
    * @param[out] err_ The absolute integration error on the computed cross-section, in pb
    */
-  void ComputeXsection(double* xsec_,double* err_);
+  void ComputeXsection( double* xsec_, double* err_ );
   /**
    * Generate one single event given the phase space computed by Vegas in the integration step
    * @return A pointer to the Event object generated in this run
@@ -89,24 +89,25 @@ class MCGen {
   Event* GenerateOneEvent();
   /// Number of dimensions on which the integration is performed
   inline size_t GetNdim() {
-    if (!parameters->process) return 0;
-    return parameters->process->GetNdim(parameters->process_mode);
+    if ( !parameters->process ) return 0;
+    return parameters->process->GetNdim( parameters->process_mode );
   }
   /// Compute one single point from the total phase space
   /// \param[in] x_ the n-dimensional point to compute
   /// \return the function value for the given point
-  inline double ComputePoint(double* x_) {
+  inline double ComputePoint( double* x_ ) {
     PrepareFunction();
-    double res = f(x_, GetNdim(), (void*)parameters);
+    double res = f( x_, GetNdim(), (void*)parameters );
     std::ostringstream os;
-    for (unsigned int i=0; i<GetNdim(); i++) { os << x_[i] << " "; }
-    Debugging(Form("Result for x[%zu] = ( %s):\n\t%10.6f", GetNdim(), os.str().c_str(), res));
+    for ( unsigned int i=0; i<GetNdim(); i++ ) { os << x_[i] << " "; }
+    Debugging( Form( "Result for x[%zu] = ( %s):\n\t%10.6f", GetNdim(), os.str().c_str(), res ) );
     return res;
   }
   /// Physical Parameters used in the events generation and cross-section computation
   Parameters* parameters;
   /// Last event generated in this run
   Event *last_event;
+
  private:
   /// Prepare the function before its integration (add particles/compute kinematics/...)
   void PrepareFunction();

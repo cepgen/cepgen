@@ -12,7 +12,7 @@ class Logger
 {
   private:
     /// Initialize a logging object
-    Logger() : Level(Warning), OutputStream(std::cout) {;}
+    Logger() : Level( Warning ), OutputStream( std::cout ) {;}
     /// The static object present everywhere at runtime.
     static Logger* fLogger;
     /// A boolean stating whether or not the static object is already
@@ -27,7 +27,7 @@ class Logger
     /// Logging threshold for the output stream
     enum LoggingLevel { Nothing=0, Error, Warning, Information, Debug, DebugInsideLoop };
     /// Redirect the logger to a given output stream
-    friend std::ostream& operator<<(std::ostream& os, const Logger::LoggingLevel& lvl);
+    friend std::ostream& operator<<( std::ostream& os, const Logger::LoggingLevel& lvl );
     /// Logging threshold for the output stream
     LoggingLevel Level;
     /// Output stream to use for all logging operations

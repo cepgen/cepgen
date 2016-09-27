@@ -39,34 +39,50 @@ class GenericProcess
  
   /// Default constructor for an undefined process
   /// \param[in] name_ Human-readable format of the process name
-  GenericProcess(std::string name_="<invalid process>");
+  GenericProcess( const std::string& name_="<invalid process>" );
   virtual ~GenericProcess();
 
   /// Restore the Event object to its initial state
   inline void ClearEvent() { fEvent->Restore(); }
   /// Set the kinematics of the incoming state particles
-  void SetIncomingKinematics(Particle::Momentum p1, Particle::Momentum p2);
+  void SetIncomingKinematics( const Particle::Momentum& p1, const Particle::Momentum& p2);
   /// Compute the incoming state kinematics
   void PrepareKinematics();
   
   // --- virtual (process-defined) methods
 
+ public:
   /// Set the incoming and outgoing state to be expected in the process
-  inline virtual void AddEventContent() {;}
+  inline virtual void AddEventContent() {
+    InWarning( "Virtual method called" );
+  }
   /// Prepare the process for its integration over the whole phase space
-  inline virtual void BeforeComputeWeight() {;}
+  inline virtual void BeforeComputeWeight() {
+    Debugging( "Virtual method called" );  
+  }
   /// Compute the weight for this point in the phase-space
   inline virtual double ComputeWeight() { throw Exception(__PRETTY_FUNCTION__, "Calling ComputeWeight on an invalid process!", FatalError); }
   /// Fill the Event object with the particles' kinematics
   /// \param[in] symmetrise_ Symmetrise the event? (randomise the production of positively-
   /// and negatively-charged outgoing central particles)
-  inline virtual void FillKinematics(bool symmetrise_=false) {
-    Information("Virtual method called");
-    if (symmetrise_) Information("The kinematics is symmetrised");
+  inline virtual void FillKinematics( bool symmetrise_=false ) {
+    InWarning( "Virtual method called" );
+    if ( symmetrise_ ) Information( "The kinematics is symmetrised" );
   }
   /// Return the number of dimensions on which the integration has to be performed
   /// \return Number of dimensions on which to integrate
-  inline virtual int GetNdim(Kinematics::ProcessMode) const { return 10; }
+  inline virtual unsigned int GetNdim( const Kinematics::ProcessMode& ) const {
+    InWarning( "Virtual method called" );
+    return 0;
+  }
+  /// Set the list of kinematic cuts to apply on the outgoing particles' final state
+  /// \param[in] cuts_ The Cuts object containing the kinematic parameters
+  inline virtual void SetKinematics( const Kinematics& cuts_ ) {
+    Debugging( "Virtual method called" );
+    fCuts = cuts_;
+  }
+
+ public:
   /**
    * Sets the phase space point to compute the weight associated to it.
    * @brief Sets the phase space point to compute
@@ -74,12 +90,9 @@ class GenericProcess
    * @param[in] x_[] The (@a ndim_)-dimensional point in the phase space on
    * which the kinematics and the cross-section are computed
    */
-  void SetPoint(const unsigned int ndim_,double x_[]);
+  void SetPoint( const unsigned int ndim_, double x_[] );
   /// Dump the evaluated point's coordinates in the standard output stream
-  void DumpPoint(const ExceptionType& et);
-  /// Set the list of kinematic cuts to apply on the outgoing particles' final state
-  /// \param[in] cuts_ The Cuts object containing the kinematic parameters
-  inline virtual void SetKinematics(const Kinematics& cuts_) { fCuts=cuts_; }
+  void DumpPoint( const ExceptionType& et );
   /// Complete list of Particle with their role in the process for the point considered
   /// in the phase space, returned as an Event object.
   /// \return Event object containing all the generated Particle objects
@@ -87,24 +100,24 @@ class GenericProcess
   ///Get the number of dimensions on which the integration is performed
   inline unsigned int ndim() const { return fNumDimensions; }
   /// Get the value of a component of the @a fNumDimensions -dimensional point considered
-  inline double x(const unsigned int idx_) { return (idx_>=fNumDimensions)?-1.:fX[idx_]; }
+  inline double x( const unsigned int idx_ ) { return ( idx_>=fNumDimensions ) ? -1. : fX[idx_]; }
   /// Get a human-readable name of the process considered
-  inline std::string GetName() { return fName; }
+  inline std::string GetName() const { return fName; }
   
  protected:
   /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
-  void SetEventContent(IncomingState is, OutgoingState os);
+  void SetEventContent( const IncomingState& is, const OutgoingState& os );
  
   /// Get a list of pointers to the particles with a given role in the process
   /// \param[in] role role in the process for the particle to retrieve
   /// \return A vector of pointers to Particle objects associated to the role
-  inline ParticlesRef GetParticles(const Particle::Role& role) { return fEvent->GetByRole(role); }
+  inline ParticlesRef GetParticles( const Particle::Role& role ) { return fEvent->GetByRole( role ); }
   /// Get the pointer to one particle in the event (using its role)
-  inline Particle* GetParticle(const Particle::Role& role, unsigned int id=0) {
-    if (id==0) return fEvent->GetOneByRole(role);
-    ParticlesRef pp = fEvent->GetByRole(role);
-    if (!pp.size() or id>pp.size()) return 0;
-    return pp.at(id);
+  inline Particle* GetParticle( const Particle::Role& role, unsigned int id=0 ) {
+    if ( id==0 ) return fEvent->GetOneByRole( role );
+    ParticlesRef pp = fEvent->GetByRole( role );
+    if ( !pp.size() or id>pp.size() ) return 0;
+    return pp.at( id );
   }
   /// Get the pointer to one particle in the event (using its identifier)
   inline Particle* GetParticle(unsigned int id) { return fEvent->GetById(id); }

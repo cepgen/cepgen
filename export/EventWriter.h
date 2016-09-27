@@ -3,8 +3,10 @@
 
 #include "physics/Event.h"
 
+#ifdef HEPMC_LINKED
 #include "export/HepMCHandler.h"
 #include "export/LHEFHandler.h"
+#endif
 
 class EventWriter
 {
@@ -17,10 +19,16 @@ class EventWriter
   ~EventWriter();
 
   void SetCrossSection( const float& xsec, const float& err_xsec ) {
+#ifdef HEPMC_LINKED
     if ( fHepMCHandler ) fHepMCHandler->SetCrossSection( xsec, err_xsec );
+    if ( fLHEFHandler ) fLHEFHandler->SetCrossSection( xsec, err_xsec );
+#endif
   }
   void SetEventNumber( const unsigned int& ev_id ) {
+#ifdef HEPMC_LINKED
     if ( fHepMCHandler ) fHepMCHandler->SetEventNumber( ev_id );
+    if ( fLHEFHandler ) fLHEFHandler->SetEventNumber( ev_id );
+#endif
   }
 
   void operator<<( const Event* );
@@ -28,8 +36,10 @@ class EventWriter
  private:
 
   OutputType fType;
+#ifdef HEPMC_LINKED
   OutputHandler::HepMCHandler* fHepMCHandler;
   OutputHandler::LHEFHandler* fLHEFHandler;
+#endif
 
 };
 
