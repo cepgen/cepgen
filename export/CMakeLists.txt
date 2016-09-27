@@ -3,7 +3,7 @@ file(GLOB headers *.h)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
-find_package(HepMC REQUIRED)
+find_package(HepMC)
 
 if(HEPMC_LIBRARIES)
   add_library(Exporter SHARED ${sources})
