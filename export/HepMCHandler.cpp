@@ -1,6 +1,7 @@
 #include "HepMCHandler.h"
 
-OutputHandler::HepMCHandler::HepMCHandler( const char* filename ):
+OutputHandler::HepMCHandler::HepMCHandler( const char* filename ) :
+  ExportHandler( ExportHandler::HepMC ),
   event( 0 )
 {
 #ifndef HEPMC_VERSION_CODE

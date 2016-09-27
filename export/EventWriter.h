@@ -2,6 +2,7 @@
 #define EventWriter_h
 
 #include "physics/Event.h"
+#include "export/ExportHandler.h"
 
 #ifdef HEPMC_LINKED
 #include "export/HepMCHandler.h"
@@ -11,23 +12,18 @@
 class EventWriter
 {
  public:
-  enum OutputType {
-    HepMC, LHE
-  };
 
-  EventWriter( const OutputType&, const char* );
+  EventWriter( const OutputHandler::ExportHandler::OutputType&, const char* );
   ~EventWriter();
 
   void SetCrossSection( const float& xsec, const float& err_xsec ) {
 #ifdef HEPMC_LINKED
-    if ( fHepMCHandler ) fHepMCHandler->SetCrossSection( xsec, err_xsec );
-    if ( fLHEFHandler ) fLHEFHandler->SetCrossSection( xsec, err_xsec );
+    if ( fFileHandler ) fFileHandler->SetCrossSection( xsec, err_xsec );
 #endif
   }
   void SetEventNumber( const unsigned int& ev_id ) {
 #ifdef HEPMC_LINKED
-    if ( fHepMCHandler ) fHepMCHandler->SetEventNumber( ev_id );
-    if ( fLHEFHandler ) fLHEFHandler->SetEventNumber( ev_id );
+    if ( fFileHandler ) fFileHandler->SetEventNumber( ev_id );
 #endif
   }
 
@@ -35,11 +31,8 @@ class EventWriter
 
  private:
 
-  OutputType fType;
-#ifdef HEPMC_LINKED
-  OutputHandler::HepMCHandler* fHepMCHandler;
-  OutputHandler::LHEFHandler* fLHEFHandler;
-#endif
+  OutputHandler::ExportHandler* fFileHandler;
+  OutputHandler::ExportHandler::OutputType fType;
 
 };
 

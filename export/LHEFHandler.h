@@ -1,6 +1,7 @@
 #ifndef OutputHandler_LHEFHandler_h
 #define OutputHandler_LHEFHandler_h
 
+#include "export/ExportHandler.h"
 #include "physics/Event.h"
 
 #include "HepMC/Version.h"
@@ -16,7 +17,7 @@ namespace OutputHandler
    * \author Laurent Forthomme <laurent.forthomme@cern.ch>
    * \date Sep 2016
    */
-  class LHEFHandler
+  class LHEFHandler : public ExportHandler
   {
    public:
 

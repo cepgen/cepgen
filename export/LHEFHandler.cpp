@@ -1,6 +1,7 @@
 #include "LHEFHandler.h"
 
-OutputHandler::LHEFHandler::LHEFHandler( const char* filename )
+OutputHandler::LHEFHandler::LHEFHandler( const char* filename ) :
+  ExportHandler( ExportHandler::LHE )
 {
   output = new LHEF::Writer(filename);
 }

@@ -32,14 +32,10 @@ int main( int argc, char* argv[] ) {
   double xsec, err;
   mg.ComputeXsection( &xsec, &err );
 
-  HepMC::GenCrossSection xs;
-  xs.set_cross_section( xsec, err );
-
   if ( !mg.parameters->generation ) return 0;
 
-  EventWriter writer( EventWriter::HepMC, "example.dat" );
+  EventWriter writer( OutputHandler::ExportHandler::HepMC, "example.dat" );
   writer.SetCrossSection( xsec, err );
-
 
 #ifndef HEPMC_VERSION_CODE
 //#error "Hahaha"
@@ -50,7 +46,7 @@ cout << "HepMC version: " << HepMC::version() << endl;
 #endif
 
   // The events generation starts here !
-  for ( int i=0; i<mg.parameters->maxgen; i++ ) {
+  for ( unsigned int i=0; i<mg.parameters->maxgen; i++ ) {
     if ( i%10000==0 )
       cout << "Generating event #" << i+1 << endl;
     const Event* ev = mg.GenerateOneEvent();
