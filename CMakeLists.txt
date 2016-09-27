@@ -26,7 +26,7 @@ add_executable(cepgen main.cpp)
 target_link_libraries(cepgen Core Physics Hadronisers Processes)
 
 find_package(HepMC REQUIRED)
-if(NOT ${HEPMC_LIB})
+if(NOT DEFINED ${HEPMC_LIB})
   add_executable(cepgen-lhe cepgen-lhe.cpp)
   target_link_libraries(cepgen-lhe Core Physics Hadronisers Processes Exporter)
 endif()
