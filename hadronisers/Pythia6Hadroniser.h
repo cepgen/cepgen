@@ -7,42 +7,43 @@
 
 #include "hadronisers/GenericHadroniser.h"
 
-/** @brief Maximal number of characters to fetch for the particle's name */
+/// Maximal number of characters to fetch for the particle's name
 #define NAME_CHR 16
 
 extern "C"
 {
-  /** @brief Get the particle's mass in GeV from the Pythia6 module */
+  /// Get the particle's mass in GeV from the Pythia6 module
   extern double pymass_( int& );
-  /** @brief Get the resonant particle's width in GeV from the Pythia6 module */
+  /// Get the resonant particle's width in GeV from the Pythia6 module
   //extern double pywidt_( int& );
-  /** @brief Launch the Pythia6 fragmentation */
+  /// Launch the fragmentation
   extern void pyexec_();
-  /** @brief Set a parameter value to the Pythia6 module */
+  /// Set a parameter value to the Pythia6 module
   extern void pygive_( const char*, int );
   extern void pyckbd_();
-  /** @brief Lists all the particles in the event in a human-readable format */
+  /// List all the particles in the event in a human-readable format
   extern void pylist_( int& );
-  /** @brief Joins two coloured particles in a colour singlet */
+  /// Join two coloured particles in a colour singlet string
   extern void pyjoin_( int&, int& );
-  /** @brief Get a particle's human-readable name from the Pythia6 module */
+  /// Get a particle's human-readable name
   extern void pyname_( int&, char*, int );
-  /** @brief Get information on a particle from the Pythia6 module */
+  /// Get information on a particle
   extern double pyp_( int&,int& );
-  /** @brief Stores one parton/particle in the PYJETS common block */
+  /// Store one parton/particle in the PYJETS common block
   extern void py1ent_( int&, int&, double&, double&, double& );
 
-  /** @brief Particles content of the event */
+  /// Particles content of the event
   extern struct
   {
-    /** @brief Number of particles in the event */
+    /// Number of particles in the event
     int n;
+    /// Extra padding (unused)
     int npad;
-    /** @brief Particles' general information (status, PDG id, mother, daughter 1, daughter 2) */
+    /// Particles' general information (status, PDG id, mother, daughter 1, daughter 2)
     int k[5][4000];
-    /** @brief Particles' kinematics, in GeV (px, py, pz, E, M) */
+    /// Particles' kinematics, in GeV (px, py, pz, E, M)
     double p[5][4000];
-    /** @brief Primary vertex for the particles */
+    /// Primary vertex for the particles
     double v[5][4000];
   } pyjets_;
 }
@@ -76,11 +77,9 @@ class Pythia6Hadroniser : public GenericHadroniser
     s.erase( remove( s.begin(), s.end(), ' ' ), s.end() );
     return s;
   };
-  /**
-   * @brief Connect entries with colour flow information
-   * @param[in] njoin_ Number of particles to join in the colour flow
-   * @param[in] ijoin_ List of particles unique identifier to join in the colour flow
-   */
+  /// Connect entries with colour flow information
+  /// \param[in] njoin_ Number of particles to join in the colour flow
+  /// \param[in] ijoin_ List of particles unique identifier to join in the colour flow
   inline static void pyjoin( int njoin_, int ijoin_[2] ) { return pyjoin_( njoin_, *ijoin_ ); };
   bool PrepareHadronisation( Event *ev_ );
 };

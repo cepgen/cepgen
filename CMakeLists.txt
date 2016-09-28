@@ -12,6 +12,20 @@ set(MODULES core processes hadronisers physics export)
 
 enable_language(Fortran OPTIONAL)
 
+add_subdirectory(external)
+
+if(EXISTS $ENV{has_pythia6})
+  add_definitions(-DPYTHIA6)
+endif()
+
+if(EXISTS $ENV{has_herwig})
+  add_definitions(-DHERWIG)
+endif()
+
+if(EXISTS $ENV{has_jetset})
+  add_definitions(-DJETSET)
+endif()
+
 #----- build all the intermediate objects
 
 include_directories(${PROJECT_SOURCE_DIR})

@@ -22,16 +22,11 @@ class Parameters {
   public:
     Parameters();
     ~Parameters();
-    /**
-     * Defines the range to cover in polar angle for the outgoing leptons produced in this process. This method converts this range into a range in rapidity.
-     * @brief Sets the polar angle range for the produced leptons
-     * @param[in] thetamin_ The minimal value of \f$\theta\f$ for the outgoing leptons
-     * @param[in] thetamax_ The maximal value of \f$\theta\f$ for the outgoing leptons
-     */
+    /// Set the polar angle range for the produced leptons
+    /// \param[in] thetamin_ The minimal value of \f$\theta\f$ for the outgoing leptons
+    /// \param[in] thetamax_ The maximal value of \f$\theta\f$ for the outgoing leptons
     void SetThetaRange( float thetamin_, float thetamax_ );
-    /**
-     * @brief Dumps the input parameters in the console
-     */
+    /// Dump the input parameters in the console
     void Dump();
     /// Read content from config file to load the variables
     /// \param[in] inFile_ Name of the configuration file to load

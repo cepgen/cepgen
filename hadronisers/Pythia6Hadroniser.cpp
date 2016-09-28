@@ -42,9 +42,9 @@ Pythia6Hadroniser::Hadronise( Event *ev_ )
   const unsigned int max_part_in_str = 3,
                      max_str_in_evt = 2;
 
-  int str_in_evt, part_in_str, num_part_in_str[max_str_in_evt];
+  unsigned int num_part_in_str[max_str_in_evt];
   int jlrole[max_str_in_evt], jlpsf[max_str_in_evt][max_part_in_str];
-  int oldnpart, criteria; //FIXME find an other name...
+  int criteria; //FIXME find an other name...
   
   try { PrepareHadronisation( ev_ ); } catch ( Exception& e ) { e.Dump(); throw e; }
 
@@ -64,11 +64,11 @@ Pythia6Hadroniser::Hadronise( Event *ev_ )
   
   // Filling the common block to propagate to PYTHIA6
   pyjets_.n = 0;
-  str_in_evt = 0;
+  unsigned int str_in_evt = 0;
 
   for ( ParticleRoles::iterator r=rl.begin(); r!=rl.end(); r++ ) {
     ParticlesRef pr = ev_->GetByRole( *r );
-    part_in_str = 0;
+    unsigned int part_in_str = 0;
     for ( ParticlesRef::iterator part=pr.begin(); part!=pr.end(); part++ ) {
       Particle* p = *part;
       
@@ -91,7 +91,7 @@ Pythia6Hadroniser::Hadronise( Event *ev_ )
       if ( p->GetMothersIds().size()>0 ) pyjets_.k[2][np] = *( p->GetMothersIds().begin() )+1; // mother
       else pyjets_.k[2][np] = 0; // mother
       
-      daug = ev_->GetDaughters( *p );
+      daug = ev_->GetDaughters( p );
       if ( daug.size()!=0 ) {
         pyjets_.k[3][np] = p->GetDaughters().front()+1; // daughter 1
         pyjets_.k[4][np] = p->GetDaughters().back()+1; // daughter 2
@@ -118,7 +118,7 @@ Pythia6Hadroniser::Hadronise( Event *ev_ )
       str_in_evt++;
     }
   }
-  oldnpart = pyjets_.n;
+  unsigned int oldnpart = pyjets_.n;
   
   std::ostringstream dbg;  
   
@@ -133,7 +133,7 @@ Pythia6Hadroniser::Hadronise( Event *ev_ )
                  "%s", num_part_in_str[i], i, jlrole[i], os.str().c_str() );
     
     this->pyjoin( num_part_in_str[i], jlpsf[i] );
-    //this->pyexec();//FIXME FIXME FIXME
+    this->pyexec();//FIXME FIXME FIXME
   }
   //this->pyexec();//FIXME FIXME FIXME
   this->pylist( 2 );
@@ -146,7 +146,7 @@ Pythia6Hadroniser::Hadronise( Event *ev_ )
     throw Exception( __PRETTY_FUNCTION__, "System is non-inelastic", JustWarning );
   }
 
-  for ( unsigned int p=0; p<pyjets_.n; p++ ) {
+  for ( unsigned int p=0; p<(unsigned int)pyjets_.n; p++ ) {
 
     //FIXME FIXME FIXME FIXME need to reimplement this first filter under this philosophy
     // First we filter the particles with status <= 0 :
@@ -271,7 +271,7 @@ Pythia6Hadroniser::PrepareHadronisation( Event *ev_ )
     }
     else { // Quark/diquark content already present in the event
       
-      Debugging(Form("Quark/diquark content already present in the event!\n\tRole of these particles: %d", (*p)->role));
+      Debugging(Form("Quark/diquark content already present in the event!\n\tRole of these particles: %d", p->role));
       
       std::vector<int> daugh = p->GetDaughters();
       for ( std::vector<int>::iterator did=daugh.begin(); did!=daugh.end(); did++ ) {
