@@ -35,7 +35,8 @@ class Kinematics
     InelasticInelastic = 4
   };
   /// Human-readable format of a process mode (elastic/dissociative parts)
-  friend std::ostream& operator<<(std::ostream& os, const Kinematics::ProcessMode& pm);
+  friend std::ostream& operator<<( std::ostream&, const Kinematics::ProcessMode& );
+  friend std::ostream& operator<<( std::ostream&, const Kinematics::Cuts& );
   
   /// Dump all the parameters used in this process cross-section computation
   /// or events generation

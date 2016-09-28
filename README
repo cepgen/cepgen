@@ -1,21 +1,12 @@
-                #####                 #####                
-               #     # ###### #####  #     # ###### #    # 
-               #       #      #    # #       #      ##   # 
-               #       #####  #    # #  #### #####  # #  # 
-               #       #      #####  #     # #      #  # # 
-               #     # #      #      #     # #      #   ## 
-                #####  ###### #       #####  ###### #    # 
-
-
- Copyright (C)
-        2014-2015  Laurent Forthomme <laurent.forthomme@cern.ch>
-             2005  Nicolas Schul
-             XXXX  Bryan (f.f in CDF version)
-        1991-1992  Olaf Duenger
-             199X  Dariusz Bocian
-             1996  MGVH (gmubeg.f in DESY version)
-             1994  ZEUS offline group
-             197X  Jos Vermaseren
+          _|_|_|                        _|_|_|
+        _|          _|_|    _|_|_|    _|          _|_|    _|_|_|
+        _|        _|_|_|_|  _|    _|  _|  _|_|  _|_|_|_|  _|    _|
+        _|        _|        _|    _|  _|    _|  _|        _|    _|
+          _|_|_|    _|_|_|  _|_|_|      _|_|_|    _|_|_|  _|    _|
+                            _|                                      
+ Copyright (c)              _|
+             1976  J. Vermaseren (LPAIR matrix element) (*)
+        2014-2016  L. Forthomme <laurent.forthomme@cern.ch>
 
  This program is free software: you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the
@@ -29,3 +20,6 @@
 
  You should have received a copy of the GNU General Public License along
  with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
+ (*) with contributions from the ZEUS offline group, M. GVH, D. Bocian,
+   O. Duenger, N. Schul, and others.

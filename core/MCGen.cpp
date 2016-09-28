@@ -26,7 +26,7 @@ void
 MCGen::PrintHeader()
 {
   std::string tmp;
-  std::ostringstream os;
+  std::ostringstream os; os << std::endl;
   std::ifstream hf( "README" );
   if ( !hf.good() ) throw Exception( __PRETTY_FUNCTION__, "Failed to open README file", JustWarning );
   while ( true ) {

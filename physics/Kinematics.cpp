@@ -1,13 +1,13 @@
 #include "Kinematics.h"
 
 Kinematics::Kinematics() :
-  ptmin(3.), ptmax(-1.),
-  emin(0.), emax(-1.),
-  etamin(-999.), etamax(999.),
-  mxmin(1.07), mxmax(320.),
-  q2min(0.), q2max(1.e5),
-  wmin(0.), wmax(-1.),
-  ptdiffmin(0.), ptdiffmax(300.) //FIXME need to load this from somewhere else
+  ptmin( 3. ), ptmax( -1. ),
+  emin( 0. ), emax( -1. ),
+  etamin( -999. ), etamax( 999. ),
+  mxmin( 1.07 ), mxmax( 320. ),
+  q2min( 0. ), q2max( 1.e5 ),
+  wmin( 0. ), wmax( -1. ),
+  ptdiffmin( 0. ), ptdiffmax( 300. ) //FIXME need to load this from somewhere else
 {}
 
 Kinematics::~Kinematics() {}
@@ -15,17 +15,10 @@ Kinematics::~Kinematics() {}
 void
 Kinematics::Dump()
 {
-  std::string s_mode;
-  switch (this->mode) {
-    case 0: s_mode = "none"; break;      
-    case 1: s_mode = "single"; break;      
-    case 2: s_mode = "both"; break;
-    default: s_mode = "unknown"; break;
-  }
   std::cout
     << std::setfill(' ')
     << __PRETTY_FUNCTION__ << " Dump" << std::endl
-    << std::setw(25) << "Cuts mode :" << std::setw(2) << this->mode << "->" << std::setw(4) << s_mode << std::endl    
+    << std::setw(25) << "Cuts mode :" << std::setw(2) << this->mode << "->" << std::setw(4) << mode << std::endl    
     << "===== Single leptons" << std::endl
     << std::setw(25) << "Minimal pT :" << std::setw(8) << this->ptmin << std::endl
     << std::setw(25) << "Maximal pT :" << std::setw(8) << this->ptmax << std::endl
@@ -41,14 +34,26 @@ Kinematics::Dump()
 }
 
 std::ostream&
-operator<<(std::ostream& os, const Kinematics::ProcessMode& pm)
+operator<<( std::ostream& os, const Kinematics::ProcessMode& pm )
 {
-  switch (pm) {
-    case Kinematics::ElectronProton:      os << "Electron/Proton"; break;
-    case Kinematics::ElasticElastic:      os << "Elastic/Elastic"; break;
-    case Kinematics::InelasticElastic:    os << "Inelastic/Elastic"; break;
-    case Kinematics::ElasticInelastic:    os << "Elastic/Inelastic"; break;
-    case Kinematics::InelasticInelastic:  os << "Inelastic/Inelastic"; break;    
+  switch ( pm ) {
+    case Kinematics::ElectronProton:      os << "electron/proton"; break;
+    case Kinematics::ElasticElastic:      os << "elastic/elastic"; break;
+    case Kinematics::InelasticElastic:    os << "inelastic/elastic"; break;
+    case Kinematics::ElasticInelastic:    os << "elastic/inelastic"; break;
+    case Kinematics::InelasticInelastic:  os << "inelastic/inelastic"; break;    
+  }
+  return os;
+}
+
+std::ostream&
+operator<<( std::ostream& os, const Kinematics::Cuts& cut )
+{
+  switch ( cut ) {
+    case Kinematics::NoCuts:         os << "no cuts"; break;
+    case Kinematics::VermaserenCuts: os << "\"Vermaseren\""; break;
+    case Kinematics::BothLeptons:    os << "both outgoing particles"; break;
+    case Kinematics::OneLepton:      os << "single outgoing particle"; break;
   }
   return os;
 }

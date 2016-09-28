@@ -146,32 +146,37 @@ Particle::GetDaughters() const
 void
 Particle::Dump() const
 {  
-  //if (!Valid()) throw Exception(__PRETTY_FUNCTION__, Form("Particle with role \"%d\" is invalid", role), Fatal);
-  
   std::vector<int> daugh;
   std::ostringstream osm, osd, os;
-  if (!Primary()) {
-    ParticlesIds::iterator m;
-    osm << "\n\t\tMothers = ";
-    for (m=fMothers.begin(); m!=fMothers.end(); m++) osm << (*m) << " ";
+  if ( !Primary() ) {
+    osm << ": mother(s): ";
+    for ( ParticlesIds::const_iterator m=fMothers.begin(); m!=fMothers.end(); m++ ) {
+      if ( m!=fMothers.begin() ) osm << ", ";
+      osm << (*m);
+    }
   }
   daugh = GetDaughters();
-  for (unsigned int i=0; i<NumDaughters(); i++) osd << "\n\t\t* Id = " << daugh[i];
-  os << fPDGid;
-  Information(Form(
-    "Id:\t%3d\t"
-    "role:\t%3d\t"
-    "status:\t% 3d\n\t"
-    "PDG Id:\t%4d (%s)\n\t"
+  if ( daugh.size()!=0 ) {
+    osd << ": id = ";
+    for ( unsigned int i=0; i<NumDaughters(); i++) {
+      if ( i!=0 ) osd << ", ";
+      osd << daugh[i];
+    }
+  }
+  os << " (" << fPDGid << ")";
+  if ( os.str()==" ()" ) os.str("");
+  Information( Form(
+    "Dumping a particle with id=%3d, role=%3d, status=% 3d\n\t"
+    "PDG Id:%4d%s, mass = %5.4f GeV\n\t"
     "(E,P) = (%4.2f, %4.2f, %4.2f, %4.2f) GeV\t"
     "(|P| = p = %4.2f GeV)\n\t"
-    " Pt = %5.4f GeV\teta = %4.3f\n\t"
-    "  M = %5.4f GeV\n\t"
-    "Primary? %d%s\n\t"
-    "Daughters (%d)",
+    " Pt = %5.4f GeV, eta = %4.3f, phi = % 4.3f\n\t"
+    "Primary? %s%s\n\t"
+    "%d daughter(s)%s",
     id, role, status, fPDGid, os.str().c_str(),
-    E(), fMomentum.Px(), fMomentum.Py(), fMomentum.Pz(), fMomentum.P(), fMomentum.Pt(), fMomentum.Eta(), M(),
-    Primary(), osm.str().c_str(), NumDaughters(), osd.str().c_str())
+    M(), E(), fMomentum.Px(), fMomentum.Py(), fMomentum.Pz(),
+    fMomentum.P(), fMomentum.Pt(), fMomentum.Eta(), fMomentum.Phi(),
+    yesno( Primary() ), osm.str().c_str(), NumDaughters(), osd.str().c_str() )
   );
 }
 

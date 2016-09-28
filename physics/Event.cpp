@@ -241,7 +241,7 @@ Event::Dump(bool stable_) const
   if (fabs(pztot)<1.e-12) pztot = 0.;
   if (fabs(etot)<1.e-12) etot = 0.;
   //
-  Information(Form("Events content:\n"
+  Information(Form("Dump of event content:\n"
   "Part.\tPDG id\t\tCharge\tRole\tStatus\tMother\t\t4-Momentum (GeV)\n"
   "----\t------\t\t------\t----\t------\t------\t-------------------------------------"
   "%s\n"

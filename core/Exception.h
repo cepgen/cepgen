@@ -93,8 +93,7 @@ class Exception
     /// \param[inout] os the output stream where the information is dumped
     inline void Dump(std::ostream& os=std::cerr) const {
       if ( Type()==Information ) {
-        os << "================================= \033[33;1mInformation\033[0m =================================" << std::endl
-           << " From:        " << From() << std::endl;
+        os << "[\033[33;1mInformation\033[0m]";
       }
       else if ( Type()==DebugMessage ) {
         os << "==================================== \033[32;1mDebug\033[0m ====================================" << std::endl
@@ -105,12 +104,12 @@ class Exception
            << " Class:       " << TypeString() << std::endl
            << " Raised by:   " << From() << std::endl;
       }
-      os << " Description: " << std::endl
-         << "\t" << Description() << std::endl;
+      if ( Type()!=Information ) os << " Description: " << std::endl;
+      os << "\t" << Description() << std::endl;
       if ( ErrorNumber()!=0 )
         os << "-------------------------------------------------------------------------------" << std::endl
            << " Error #" << ErrorNumber() << std::endl;
-      os << "===============================================================================" << std::endl;
+      if ( Type()!=Information ) os << "===============================================================================" << std::endl;
     }
     /// Extract a one-line summary of the exception
     inline std::string OneLine() const {

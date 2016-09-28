@@ -24,8 +24,11 @@ int main( int argc, char* argv[] ) {
     mg.parameters->process = new GamGamLL;
     mg.parameters->process_mode = Kinematics::InelasticElastic;
     mg.parameters->remnant_mode = GenericProcess::SuriYennie;
+
 #ifdef PYTHIA6
     mg.parameters->hadroniser = new Pythia6Hadroniser;
+#elif def JETSET
+    mg.parameters->hadroniser = new Jetset7Hadroniser;
 #endif
     
     mg.parameters->in1p = 4000.;
