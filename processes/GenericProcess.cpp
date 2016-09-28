@@ -3,7 +3,8 @@
 GenericProcess::GenericProcess( const std::string& name_ ) :
   fX( 0 ), fNumDimensions( 0 ), fEvent( new Event ),
   fIsPointSet( false ), fIsInStateSet( false ), fIsOutStateSet( false ), fIsKinematicSet( false ),
-  fName( name_ )
+  fName( name_ ),
+  fTotalGenTime( 0. ), fNumGenEvents( 0 )
 {}
 
 GenericProcess::~GenericProcess()

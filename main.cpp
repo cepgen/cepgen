@@ -27,7 +27,7 @@ int main( int argc, char* argv[] ) {
 
 #ifdef PYTHIA6
     mg.parameters->hadroniser = new Pythia6Hadroniser;
-#elif def JETSET
+#elifdef JETSET
     mg.parameters->hadroniser = new Jetset7Hadroniser;
 #endif
     
@@ -41,8 +41,8 @@ int main( int argc, char* argv[] ) {
     mg.parameters->maxeta = 2.5;
     mg.parameters->ncvg = 5e4; //FIXME
     mg.parameters->generation = true;
-    mg.parameters->maxgen = 2;
-    //mg.parameters->maxgen = 1e5;
+    //mg.parameters->maxgen = 2;
+    mg.parameters->maxgen = 2e4;
   }
   else {
     Debugging( Form( "Reading config file stored in %s", argv[1] ) );
@@ -64,10 +64,9 @@ int main( int argc, char* argv[] ) {
     // The events generation starts here !
     Event ev;
     for ( unsigned int i=0; i<mg.parameters->maxgen; i++ ) {
-      if ( i%10000==0 )
-        cout << "Generating event #" << i+1 << endl;
+      if ( i%1000==0 ) Information( Form( "Generating event #%d", i ) );
       ev = *mg.GenerateOneEvent();
-      ev.Dump();
+      //ev.Dump();
     }
   }
 

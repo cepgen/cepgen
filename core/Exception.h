@@ -81,8 +81,8 @@ class Exception
     inline std::string TypeString() const {
       switch ( Type() ) {
         case JustWarning: return "\033[34;1mJustWarning\033[0m";
-        case Information: return "\033[33;1mInfo\033[0m";
-        case DebugMessage: return "\033[32;1mDebug\033[0m";
+        case Information: return "\033[32;1mInfo\033[0m";
+        case DebugMessage: return "\033[33;1mDebug\033[0m";
         case ErrorMessage: return "\033[31;1mError\033[0m";
         case FatalError: return "\033[31;1mFatal\033[0m";
         case Undefined: default: return "\33[7;1mUndefined\033[0m";
@@ -93,10 +93,10 @@ class Exception
     /// \param[inout] os the output stream where the information is dumped
     inline void Dump(std::ostream& os=std::cerr) const {
       if ( Type()==Information ) {
-        os << "[\033[33;1mInformation\033[0m]";
+        os << "[\033[32;1mInformation\033[0m]";
       }
       else if ( Type()==DebugMessage ) {
-        os << "==================================== \033[32;1mDebug\033[0m ====================================" << std::endl
+        os << "==================================== \033[33;1mDebug\033[0m ====================================" << std::endl
            << " From:        " << From() << std::endl;
       }
       else {

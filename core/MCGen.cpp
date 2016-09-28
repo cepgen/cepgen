@@ -18,6 +18,10 @@ MCGen::MCGen( Parameters *ip_ ) :
 
 MCGen::~MCGen()
 {
+  if ( parameters->generation and parameters->process and parameters->process->NumGeneratedEvents()>0 ) {
+    Information( Form( "Mean generation time / event: %.3f ms", parameters->process->TotalGenerationTime()*1.e3/parameters->process->NumGeneratedEvents() ) );
+  }
+
   if ( fVegas ) delete fVegas;
   if ( parameters ) delete parameters;
 }
@@ -119,7 +123,6 @@ double f( double* x_, size_t ndim_, void* params_ )
   bool hadronised;
   double num_hadr_trials;
   std::ostringstream os;
-  Event* ev;
 
   p = static_cast<Parameters*>( params_ );
   const Particle::Momentum p1( 0., 0.,  p->in1p ),
@@ -148,7 +151,7 @@ double f( double* x_, size_t ndim_, void* params_ )
   p->process->ClearEvent();
   //std::cout << "1: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
   
-  ev = p->process->GetEvent();
+  Event* ev = p->process->GetEvent();
   
   //std::cout << "2: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();*/
 
@@ -174,6 +177,7 @@ double f( double* x_, size_t ndim_, void* params_ )
     //std::cout << "4: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
     // Prepare the function to be integrated
     p->process->PrepareKinematics();
+    p->process->ClearRun();
     p->first_run = false;
   }
    
@@ -186,16 +190,17 @@ double f( double* x_, size_t ndim_, void* params_ )
   
   if (p->store) { // MC events generation
     p->process->FillKinematics( false );
-    p->process->GetEvent()->time_generation = tmr.elapsed();
+    
+    ev->time_generation = tmr.elapsed();
 
     if ( p->hadroniser and p->process_mode!=Kinematics::ElasticElastic ) {
       
       Debugging( Form( "Event before calling the hadroniser (%s)", p->hadroniser->GetName().c_str() ) );
-      if ( Logger::GetInstance()->Level>=Logger::Debug ) p->process->GetEvent()->Dump();
+      if ( Logger::GetInstance()->Level>=Logger::Debug ) ev->Dump();
       
       num_hadr_trials = 0;
       do {
-        try { hadronised = p->hadroniser->Hadronise( p->process->GetEvent() ); } catch ( Exception& e ) { e.Dump(); }
+        try { hadronised = p->hadroniser->Hadronise( ev ); } catch ( Exception& e ) { e.Dump(); }
 
         if ( num_hadr_trials>0 ) { Debugging( Form( "Hadronisation failed. Trying for the %dth time", num_hadr_trials+1 ) ); }
         
@@ -203,24 +208,25 @@ double f( double* x_, size_t ndim_, void* params_ )
       } while ( !hadronised and num_hadr_trials<=p->hadroniser_max_trials );
       if ( !hadronised ) return 0.; //FIXME
       
-      p->process->GetEvent()->num_hadronisation_trials = num_hadr_trials;
+      ev->num_hadronisation_trials = num_hadr_trials;
 
-      Debugging( Form( "Event hadronisation succeeded after %d trial(s)", p->process->GetEvent()->num_hadronisation_trials ) );
+      Debugging( Form( "Event hadronisation succeeded after %d trial(s)", ev->num_hadronisation_trials ) );
 
       if ( num_hadr_trials>p->hadroniser_max_trials ) return 0.; //FIXME
       
       Debugging( Form( "Event after calling the hadroniser (%s)", p->hadroniser->GetName().c_str() ) );
-      if ( Logger::GetInstance()->Level>=Logger::Debug ) p->process->GetEvent()->Dump();
+      if ( Logger::GetInstance()->Level>=Logger::Debug ) ev->Dump();
     }
-    p->process->GetEvent()->time_total = tmr.elapsed();
+    ev->time_total = tmr.elapsed();
+    p->process->AddGenerationTime( ev->time_total );
     
     Debugging( Form( "Generation time:       %5.6f sec\n\t"
                      "Total time (gen+hadr): %5.6f sec",
-                     p->process->GetEvent()->time_generation,
-                     p->process->GetEvent()->time_total ) );
+                     ev->time_generation,
+                     ev->time_total ) );
 
-    *(p->last_event) = *( p->process->GetEvent() );
-    //p->process->GetEvent()->Store(p->file);
+    *(p->last_event) = *( ev );
+    //ev->Store(p->file);
 
   }
 

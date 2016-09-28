@@ -104,6 +104,21 @@ class GenericProcess
   /// Get a human-readable name of the process considered
   inline std::string GetName() const { return fName; }
   
+  /// Reset the total generation time and the number of events generated for this run
+  inline void ClearRun() {
+    fTotalGenTime = 0.;
+    fNumGenEvents = 0;
+  }
+  /// Add a new timing into the total generation time
+  /// \param[in] gen_time Time to add (in seconds)
+  inline void AddGenerationTime( const float& gen_time ) {
+    fTotalGenTime += gen_time;
+    fNumGenEvents++;
+  }
+  /// Return the total generation time for this run (in seconds)
+  inline float TotalGenerationTime() const { return fTotalGenTime; }
+  inline unsigned int NumGeneratedEvents() const { return fNumGenEvents; }
+  
  protected:
   /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
   void SetEventContent( const IncomingState& is, const OutgoingState& os );
@@ -155,6 +170,9 @@ class GenericProcess
   bool fIsKinematicSet;
   /// Name of the process (useful for logging and debugging)
   std::string fName;
+  /// Total generation time (in seconds)
+  float fTotalGenTime;
+  unsigned int fNumGenEvents;
   
  private:
   /**
