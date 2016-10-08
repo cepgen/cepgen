@@ -7,7 +7,7 @@
 
 /**
  * Class template to define any process to compute using this MC integrator/events generator
- * \author Laurent Forthomme <laurent.forthomme@uclouvain.be>
+ * \author Laurent Forthomme <laurent.forthomme@cern.ch>
  * \date Jan 2014
  */
 class GenericProcess
@@ -117,6 +117,7 @@ class GenericProcess
   }
   /// Return the total generation time for this run (in seconds)
   inline float TotalGenerationTime() const { return fTotalGenTime; }
+  /// Total number of events already generated in this run
   inline unsigned int NumGeneratedEvents() const { return fNumGenEvents; }
   
  protected:
@@ -172,6 +173,7 @@ class GenericProcess
   std::string fName;
   /// Total generation time (in seconds)
   float fTotalGenTime;
+  /// Number of events already generated
   unsigned int fNumGenEvents;
   
  private:

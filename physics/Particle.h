@@ -10,7 +10,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "utils.h"
+#include "core/utils.h"
 //#include "LHEutils.h"
 
 typedef std::set<int> ParticlesIds;

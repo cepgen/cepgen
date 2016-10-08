@@ -3,4 +3,4 @@ file(GLOB headers *.h)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
-add_library(Physics SHARED ${sources})
+add_library(CepGenPhysics SHARED ${sources})

@@ -20,10 +20,11 @@ std::string Form(const std::string fmt, ...);
 
 inline const char* yesno( const bool& test ) { return ( test ) ? "\033[32;1myes\033[0m" : "\033[31;1mno\033[0m"; }
 //inline const char* boldify( const char* str ) { const std::string out = std::string( "\033[33;1m" ) + std::string( str ) + std::string( "\033[0m" ); return out.c_str(); }
-inline std::string boldify( const char* str ) { return Form( "\033[1m%s\033[0m", str ); }
-inline std::string boldify( const double& dbl ) { return boldify( Form("%.2f", dbl ).c_str() ); }
-inline std::string boldify( const int& i ) { return boldify( Form("% d", i ).c_str() ); }
-inline std::string boldify( const unsigned int& ui ) { return boldify( Form("%d", ui ).c_str() ); }
+inline std::string boldify( const std::string& str ) { return Form( "\033[1m%s\033[0m", str.c_str() ); }
+inline std::string boldify( const char* str ) { return boldify( std::string( str ) ); }
+inline std::string boldify( const double& dbl ) { return boldify( Form("%.2f", dbl ) ); }
+inline std::string boldify( const int& i ) { return boldify( Form("% d", i ) ); }
+inline std::string boldify( const unsigned int& ui ) { return boldify( Form("%d", ui ) ); }
 
 /**
  * Define modified variables of integration to avoid peaks integrations (see @cite Vermaseren1983347 for details)

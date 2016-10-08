@@ -83,7 +83,9 @@ class Kinematics
   double ptdiffmin;
   /// Maximal difference in outgoing particles' transverse momentum
   double ptdiffmax;
+  /// Minimal transverse component of the energy transfer
   double qtmin;
+  /// Maximal transverse component of the energy transfer
   double qtmax;
 };
 

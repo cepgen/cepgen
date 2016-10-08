@@ -30,9 +30,9 @@ class PPtoLL : public GenericKTProcess
   /// Azimuthal angle difference for the two outgoing leptons
   double fPhiPtDiff;
   
-  // first outgoing lepton
+  /// First outgoing lepton's momentum
   Particle::Momentum fPl1;
-  // second outgoing lepton
+  /// Second outgoing lepton's momentum
   Particle::Momentum fPl2;
 };
 
