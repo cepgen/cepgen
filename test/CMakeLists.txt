@@ -15,7 +15,7 @@ endforeach()
 
 #----- specify the tests requiring ROOT
 
-find_package(ROOT REQUIRED)
+find_package(ROOT QUIET)
 if(${ROOT_FOUND})
     message(STATUS "ROOT found in ${ROOT_INCLUDE_DIRS}")
     include_directories(${ROOT_INCLUDE_DIRS})
