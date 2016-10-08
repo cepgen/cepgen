@@ -1,31 +1,39 @@
 #ifndef EventWriter_h
 #define EventWriter_h
 
-#include "../include/Event.h"
+#include "physics/Event.h"
+#include "export/ExportHandler.h"
 
-#include "HepMC/IO_GenEvent.h"
-#include "HepMC/GenEvent.h"
-#include "HepMC/GenCrossSection.h"
-#include "HepMC/GenParticle.h"
+#ifdef HEPMC_LINKED
+#include "export/HepMCHandler.h"
+#include "export/LHEFHandler.h"
+#endif
 
-namespace EventWriter
+class EventWriter
 {
-  namespace HepMC
-  {
-    typedef ::HepMC::IO_GenEvent output;
-    ::HepMC::GenEvent* Event(const Event&);
+ public:
 
-    static ::HepMC::GenEvent* last_event = 0;
+  EventWriter( const OutputHandler::ExportHandler::OutputType&, const char* );
+  ~EventWriter();
+
+  void SetCrossSection( const float& xsec, const float& err_xsec ) {
+#ifdef HEPMC_LINKED
+    if ( fFileHandler ) fFileHandler->SetCrossSection( xsec, err_xsec );
+#endif
   }
-}
-
-/*#include "LHE/..."
-
-namespace EventWriter
-{
-  namespace LHE
-  {
+  void SetEventNumber( const unsigned int& ev_id ) {
+#ifdef HEPMC_LINKED
+    if ( fFileHandler ) fFileHandler->SetEventNumber( ev_id );
+#endif
   }
-  }*/
+
+  void operator<<( const Event* );
+
+ private:
+
+  OutputHandler::ExportHandler* fFileHandler;
+  OutputHandler::ExportHandler::OutputType fType;
+
+};
 
 #endif

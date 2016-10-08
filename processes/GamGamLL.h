@@ -12,7 +12,8 @@
 #include <cstdlib>
 #include <map>
 
-#include "../include/GenericProcess.h"
+#include "processes/GenericProcess.h"
+#include "physics/FormFactors.h"
 
 /**
  * Full class of methods and objects to compute the full analytic matrix element
@@ -43,55 +44,29 @@
 class GamGamLL : public GenericProcess
 {
  public:
-  /**
-   * Set the mandatory parameters used in the methods computing the kinematics
-   * and the cross-section for the \f$\gamma\gamma\rightarrow\ell^{+}\ell^{-}\f$
-   * process
-   * \brief Class constructor
-   * \param[in] nOpt_ Optimisation (legacy from LPAIR)
-   */
-  GamGamLL(int nOpt_=0);
+  /// Class constructor ; set the mandatory parameters before integration and events generation
+  /// \param[in] nOpt_ Optimisation (legacy from LPAIR)
+  GamGamLL( int nOpt_=0 );
   
-  //~GamGamLL();
   void AddEventContent();
   void BeforeComputeWeight();
-  /**
-   * Compute the cross-section for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
-   * process with the given kinematics
-   * \brief Computes the process' weight for the given point
-   * \return \f$\mathrm d\sigma(\mathbf x)(\gamma\gamma\to\ell^{+}\ell^{-})\f$,
-   * the differential cross-section for the given point in the phase space.
-   */
+  /// Compute the process' weight for the given point
+  /// \return \f$\mathrm d\sigma(\mathbf x)(\gamma\gamma\to\ell^{+}\ell^{-})\f$,
+  ///   the differential cross-section for the given point in the phase space.
   double ComputeWeight();
-  int GetNdim(Kinematics::ProcessMode) const;
-  void FillKinematics(bool);
+  unsigned int GetNdim( const Kinematics::ProcessMode& ) const;
+  void FillKinematics( bool );
   /// Compute the ougoing proton remnant mass
   /// \param[in] x_ A random number (between 0 and 1)
   /// \param[in] outmass_ The maximal outgoing particles' invariant mass
   /// \param[in] lepmass_ The outgoing leptons' mass
   /// \param[out] dw_ The size of the integration bin
   /// \return Mass of the outgoing proton remnant
-  double ComputeOutgoingPrimaryParticlesMasses(double x_, double outmass_, double lepmass_, double* dw_);
-  /// Return the value of the first inner photon's virtuality
-  /// \return \f$t_1\f$, the first photon virtuality
-  inline double GetT1() const { return this->fT1; };
-  /// Return the two limit values for the first photon's virtuality
-  /// \param[out] t1min_ The minimal value for \f$t_1\f$
-  /// \param[out] t1max_ The maximal value for \f$t_1\f$
-  inline void GetT1extrema(double& t1min_, double& t1max_) const { t1min_=this->fT1min; t1max_=this->fT1max; };
-  /// Return the value of the second inner photon's virtuality
-  /// \return \f$t_2\f$, the second photon virtuality
-  inline double GetT2() const { return this->fT2; };
-  /// Return the two limit values for the second photon's virtuality
-  /// \param[out] t2min_ The minimal value for \f$t_2\f$
-  /// \param[out] t2max_ The maximal value for \f$t_2\f$
-  inline void GetT2extrema(double& t2min_, double& t2max_) const { t2min_=this->fT2min; t2max_=this->fT2max; };
-  inline double GetS1() const { return this->fS1; };
-  inline double GetS2() const { return this->fS2; };
-  inline double GetD3() const { return this->_d3; };
+  double ComputeOutgoingPrimaryParticlesMasses( double x_, double outmass_, double lepmass_, double* dw_ );
   /// Set all the kinematic variables for the outgoing proton remnants, and prepare the hadronisation
   /// \param[in] part_ Particle to "prepare" for the hadronisation to be performed
-  void PrepareHadronisation(Particle *part_);
+  void PrepareHadronisation( Particle *part_ );
+
  private:
   /**
    * Calculate energies and momenta of the 1st, 2nd (resp. the "proton-like"

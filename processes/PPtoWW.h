@@ -1,7 +1,7 @@
 #ifndef PPtoWW_h
 #define PPtoWW_h
 
-#include "../include/GenericKTProcess.h"
+#include "processes/GenericKTProcess.h"
 
 /// Compute the matrix element for a CE \f$\gamma\gamma\rightarrow W^+W^-\f$ process using \f$k_T\f$-factorization approach
 class PPtoWW : public GenericKTProcess

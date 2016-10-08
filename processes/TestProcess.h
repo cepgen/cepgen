@@ -1,7 +1,7 @@
 #ifndef Test_h
 #define Test_h
 
-#include "../include/GenericProcess.h"
+#include "processes/GenericProcess.h"
 
 /// Generic process to test the Vegas instance
 class TestProcess : public GenericProcess
@@ -11,7 +11,7 @@ class TestProcess : public GenericProcess
   ~TestProcess();
  
   /// Number of dimensions on which to perform the integration
-  int GetNdim(Kinematics::ProcessMode) const;
+  unsigned int GetNdim( const Kinematics::ProcessMode& ) const;
   /// Generic formula to compute a weight out of a point in the phase space
   double ComputeWeight();
   /// Dummy function to be called on events generation

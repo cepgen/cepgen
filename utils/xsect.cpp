@@ -3,7 +3,7 @@
 
 #include "../include/MCGen.h"
 /**
- * @author Laurent Forthomme <laurent.forthomme@uclouvain.be>
+ * \author Laurent Forthomme <laurent.forthomme@cern.ch>
  */
 int main(int argc, char* argv[]) {
   Parameters ip;

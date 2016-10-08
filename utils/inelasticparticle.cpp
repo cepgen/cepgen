@@ -1,23 +1,29 @@
-#include "../hadronisers/Pythia6Hadroniser.h"
-#include "../hadronisers/Jetset7Hadroniser.h"
-//#include "../hadronisers/Pythia8Hadroniser.h"
-#include "../include/Physics.h"
+#include "../export/EventWriter.h"
 
 using namespace std;
 
 int main() {
 
-  /*Event ev;
-  
-  Particle p1(5, 1);
-  p1.P(1., -15., 100.);
-  p1.status = 3;
-  ev.AddParticle(&p1);
+  EventWriter writer(EventWriter::HepMC, "example.dat");
+  writer.SetCrossSection(1., 2.);
 
-  Particle p2(5, 2203);
-  p2.P(10., 5., 3200.);
-  p2.status = 3;
-  ev.AddParticle(&p2);*/
+  Event ev;
+  
+  Particle p1(Particle::IncomingBeam1, Particle::Proton);
+  p1.SetMomentum(1., -15., 100.);
+  p1.status = Particle::Incoming;
+  ev.AddParticle(p1);
+
+  Particle p2(Particle::IncomingBeam2, Particle::Electron);
+  p2.SetMomentum(10., 5., 3200.);
+  p2.status = Particle::Incoming;
+  ev.AddParticle(p2);
+
+  ev.Dump();
+  
+  writer << &ev;
+
+  return 0;
 
   //Jetset7Hadroniser js;
   //js.Hadronise(&ev);
@@ -59,7 +65,7 @@ int main() {
   try { h.Hadronise(&ev); } catch (Exception &e) { e.Dump(); }
   ev.Dump();*/
   
-  Particle ele(1, Particle::Electron);
+  /*Particle ele(1, Particle::Electron);
   ele.SetMomentum(0., 0., 27.5);
   //ele.SetM();
   ele.Dump();
@@ -68,7 +74,7 @@ int main() {
   pro.SetMomentum(0., 0., -920.0);
   pro.Dump();
   
-  cout << CMEnergy(ele, pro) << endl;
+  cout << CMEnergy(ele, pro) << endl;*/
   
   return 0;
 }
