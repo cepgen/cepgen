@@ -19,9 +19,15 @@ struct FormFactors {
   /// Magnetic form factor
   double FM;
 };
+/// Trivial, spin-0 form factors (e.g. pion)
 FormFactors TrivialFormFactors();
+
 FormFactors ElasticFormFactors(double q2, double mi2);
+
 FormFactors SuriYennieFormFactors(double q2, double mi2, double mf2);
+
+/// Brasse et al. structure functions
+/// \cite Brasse1976413
 FormFactors FioreBrasseFormFactors(double q2, double mi2, double mf2);
 
 #endif

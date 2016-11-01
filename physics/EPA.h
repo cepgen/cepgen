@@ -23,14 +23,17 @@ namespace EPA
   extern PhotonMode fMode;
   extern PhysicsBoundaries fBoundaries;
   /// Define the incoming state and physics parameters before computation
-  void InitialiseEPA(Particle* el, Particle* pr, PhotonMode mode, PhysicsBoundaries b);
+  void InitialiseEPA( const Particle& el, const Particle& pr, const PhotonMode& mode, const PhysicsBoundaries& b );
   /// Prepare the limit values and constants before computation
   void PrepareEPA();
   /// Compute the outgoing electron and photon's kinematics
   /// \param[in] x1 First integration variable: y
   /// \param[in] x2 Second integration variable: Q2
   /// \param[in] x3 Third integration variable: theta/eta for the outgoing electron
-  bool EPA(double x1, double x2, double x3, double* q2, Particle::Momentum* out_ele, Particle::Momentum* out_gam, double* lf);
+  /// \param[out] out_ele Electron-like 4-momentum
+  /// \param[out] out_gam Photon 4-momentum
+  /// \param[out] lf Longitudinal fraction of the momentum
+  bool EPA( double x1, double x2, double x3, double* q2, Particle::Momentum* out_ele, Particle::Momentum* out_gam, double* lf );
 }
 
 #endif
