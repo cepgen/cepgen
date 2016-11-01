@@ -25,6 +25,10 @@ inline std::string boldify( const char* str ) { return boldify( std::string( str
 inline std::string boldify( const double& dbl ) { return boldify( Form("%.2f", dbl ) ); }
 inline std::string boldify( const int& i ) { return boldify( Form("% d", i ) ); }
 inline std::string boldify( const unsigned int& ui ) { return boldify( Form("%d", ui ) ); }
+namespace Colour{
+  enum TextColour { Gray=30, Red=31, Green=32, Yellow=33, Blue=34, Purple=35 };
+}
+inline std::string colourise( const std::string& str, const Colour::TextColour& col ) { return Form( "\033[%d%s\033[0m", col, str.c_str() ); }
 
 /**
  * Define modified variables of integration to avoid peaks integrations (see @cite Vermaseren1983347 for details)

@@ -1,5 +1,5 @@
-#ifndef Jetset7Hadroniser_h
-#define Jetset7Hadroniser_h
+#ifndef Hadronisers_Jetset7Hadroniser_h
+#define Hadronisers_Jetset7Hadroniser_h
 
 #include <algorithm>
 

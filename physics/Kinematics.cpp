@@ -10,7 +10,8 @@ Kinematics::Kinematics() :
   ptdiffmin( 0. ), ptdiffmax( 300. ) //FIXME need to load this from somewhere else
 {}
 
-Kinematics::~Kinematics() {}
+Kinematics::~Kinematics()
+{}
 
 void
 Kinematics::Dump()

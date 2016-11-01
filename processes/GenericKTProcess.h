@@ -3,6 +3,7 @@
 
 #include "processes/GenericProcess.h"
 #include "physics/FormFactors.h"
+#include "physics/PhotonFluxes.h"
 
 /**
  * A generic kT-factorisation process.

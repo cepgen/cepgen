@@ -26,8 +26,9 @@ class GenericProcess
     Fiore = 103
   };
   /// Human-readable format of a structure function object
-  friend std::ostream& operator<<(std::ostream& os, const GenericProcess::StructureFunctions& sf);
-  friend std::ostream& operator<<(std::ostream& os, const GenericProcess& proc);
+  friend std::ostream& operator<<( std::ostream& os, const GenericProcess::StructureFunctions& sf );
+  friend std::ostream& operator<<( std::ostream& os, const GenericProcess& proc );
+  friend std::ostream& operator<<( std::ostream& os, const GenericProcess* proc );
 
   /// Generic map of particles with their role in the process
   typedef std::map<Particle::Role,Particle::ParticleCode> ParticlesRoleMap;
@@ -46,7 +47,7 @@ class GenericProcess
   /// Restore the Event object to its initial state
   inline void ClearEvent() { fEvent->Restore(); }
   /// Set the kinematics of the incoming state particles
-  void SetIncomingKinematics( const Particle::Momentum& p1, const Particle::Momentum& p2);
+  void SetIncomingKinematics( const Particle::Momentum& p1, const Particle::Momentum& p2 );
   /// Compute the incoming state kinematics
   void PrepareKinematics();
   

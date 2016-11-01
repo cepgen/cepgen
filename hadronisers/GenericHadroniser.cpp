@@ -1,7 +1,7 @@
 #include "GenericHadroniser.h"
 
-GenericHadroniser::GenericHadroniser( const std::string& name_ ) :
-  fName( name_ ), fHadrons( new std::vector<Particle>() )
+GenericHadroniser::GenericHadroniser( const char* name_ ) :
+  fName( name_ ), fHadrons( new Particles() )
 {}
 
 GenericHadroniser::~GenericHadroniser()

@@ -11,14 +11,10 @@
 #include <algorithm>
 
 #include "core/utils.h"
-//#include "LHEutils.h"
 
 typedef std::set<int> ParticlesIds;
 
-/**
- * Kinematic information for one particle
- * @brief Kinematics of one particle
- */
+/// Kinematic information for one particle
 class Particle {
   public:
     /** Unique identifier for a particle type. From @cite Beringer:1900zz :
@@ -95,64 +91,68 @@ class Particle {
     class Momentum {
       public:
         /// Build a 4-momentum at rest with an invalid energy (no mass information known)
-        inline Momentum() : fPx(0.), fPy(0.), fPz(0.), fP(0.), fE(-1.) {;}
+        inline Momentum() : fPx( 0. ), fPy( 0. ), fPz( 0. ), fP( 0. ), fE( -1. ) {;}
         /// Build a 4-momentum using its 3-momentum coordinates and its energy
-        inline Momentum(double x_, double y_, double z_, double t_=-1.) :
-          fPx(x_), fPy(y_), fPz(z_), fE(t_) { ComputeP(); }
+        inline Momentum( double x_, double y_, double z_, double t_=-1. ) :
+          fPx( x_ ), fPy( y_ ), fPz( z_ ), fE( t_ ) { ComputeP(); }
         inline ~Momentum() {;}
         
-        inline void SetMomentum(const Momentum& p) {
+        inline void SetMomentum( const Momentum& p ) {
           fPx = p.fPx; fPy = p.fPy; fPz = p.fPz, fE = p.fE; fP = p.fP;
         }
         
         // --- static definitions
         
         /// Build a 3-momentum from its three pseudo-cylindric coordinates
-        static inline Momentum FromPtEtaPhi(double pt, double eta, double phi, double e=-1.) {
-          double px = pt*cos(phi), py = pt*sin(phi), pz = pt*sinh(eta);
-          return Momentum(px, py, pz, e);
+        static inline Momentum FromPtEtaPhi( double pt, double eta, double phi, double e=-1. ) {
+          const double px = pt*cos( phi ),
+                       py = pt*sin( phi ),
+                       pz = pt*sinh( eta );
+          return Momentum( px, py, pz, e );
         }
         /// Build a 4-momentum from its scalar momentum, and its polar and azimuthal angles
-        static inline Momentum FromPThetaPhi(double p, double theta, double phi, double e=-1.) {
-          double px = p*sin(theta)*cos(phi), py = p*sin(theta)*sin(phi), pz = p*cos(theta);
-          return Momentum(px, py, pz, e);
+        static inline Momentum FromPThetaPhi( double p, double theta, double phi, double e=-1. ) {
+          const double px = p*sin( theta )*cos( phi ),
+                       py = p*sin( theta )*sin( phi ),
+                       pz = p*cos( theta );
+          return Momentum( px, py, pz, e );
         }
         /// Build a 4-momentum from its four momentum and energy coordinates
-        static inline Momentum FromPxPyPzE(double px, double py, double pz, double e) {
-          return Momentum(px, py, pz, e);
+        static inline Momentum FromPxPyPzE( double px, double py, double pz, double e ) {
+          return Momentum( px, py, pz, e );
         }
         
         // --- vector and scalar operators
 
-        void operator=(const Momentum&);
+        void operator=( const Momentum& );
         /// Scalar product of the 3-momentum with another 3-momentum
-        double ThreeProduct(const Momentum&);
+        double ThreeProduct( const Momentum& ) const;
         /// Scalar product of the 4-momentum with another 4-momentum
-        double FourProduct(const Momentum&);
+        double FourProduct( const Momentum& ) const;
         /// Add a 4-momentum through a 4-vector sum
-        Momentum& operator+=(const Momentum&);
+        Momentum& operator+=( const Momentum& );
         /// Subtract a 4-momentum through a 4-vector sum
-        Momentum& operator-=(const Momentum&);
+        Momentum& operator-=( const Momentum& );
         /// Scalar product of the 3-momentum with another 3-momentum
-        double operator*=(const Momentum&);
+        double operator*=( const Momentum& );
         /// Multiply all 4-momentum coordinates by a scalar
-        Momentum& operator*=(double c);
+        Momentum& operator*=( double c );
         /// Human-readable format for a particle's momentum
-        friend std::ostream& operator<<(std::ostream& os, const Particle::Momentum& mom);
+        friend std::ostream& operator<<( std::ostream& os, const Particle::Momentum& mom );
 
-        void BetaGammaBoost(double gamma, double betagamma);
+        void BetaGammaBoost( double gamma, double betagamma );
         /// Forward Lorentz boost
-        void LorentzBoost(const Particle::Momentum& p);
+        void LorentzBoost( const Particle::Momentum& p );
 
         // --- setters and getters
         
         /// Set all the components of the 4-momentum (in GeV)
-        inline bool SetP(double px_,double py_,double pz_, double e_) {
-          SetP(px_, py_, pz_); SetE(e_);
+        inline bool SetP( double px_,double py_,double pz_, double e_ ) {
+          SetP( px_, py_, pz_ ); SetE( e_ );
           return true;
         }
         /// Set all the components of the 3-momentum (in GeV)
-        inline void SetP(double px_,double py_,double pz_) {
+        inline void SetP( double px_,double py_,double pz_ ) {
           fPx = px_;
           fPy = py_;
           fPz = pz_;
@@ -160,7 +160,7 @@ class Particle {
         }
         /// Set an individual component of the 4-momentum (in GeV)
         inline void SetP(unsigned int i, double p_) {
-          switch (i) {
+          switch ( i ) {
             case 0: fPx = p_; break;
             case 1: fPy = p_; break;
             case 2: fPz = p_; break;
@@ -170,14 +170,14 @@ class Particle {
           ComputeP();
         }
         /// Set the energy (in GeV)
-        inline void SetE(double e_) { fE = e_; }
+        inline void SetE( double e_ ) { fE = e_; }
         /// Compute the energy from the mass
-        inline void SetM(double m_) { fE = sqrt(P2()+m_*m_); }
+        inline void SetM( double m_ ) { fE = sqrt( P2()+m_*m_ ); }
         /// Compute the energy from the mass
-        inline void SetM2(double m2) { fE = sqrt(P2()+m2); }
+        inline void SetM2(double m2) { fE = sqrt( P2()+m2 ); }
         /// Get one component of the 4-momentum (in GeV)
-        inline double P(unsigned int i) const {
-          switch (i) {
+        inline double P( unsigned int i ) const {
+          switch ( i ) {
             case 0: return fPx;
             case 1: return fPy;
             case 2: return fPz;
@@ -186,12 +186,12 @@ class Particle {
           }
         }
         /// Get one component of the 4-momentum (in GeV)
-        inline double& operator[](const unsigned int i) {
-          switch (i) {
-            case 0: return fPx;
-            case 1: return fPy;
-            case 2: return fPz;
-            case 3: return fE;
+        inline double& operator[]( const unsigned int i ) {
+          switch ( i ) {
+            case 0: return fPx; break;
+            case 1: return fPy; break;
+            case 2: return fPz; break;
+            case 3: return fE; break;
           }
         }
         /// Get the momentum along the \f$x\f$-axis (in GeV)
@@ -201,7 +201,7 @@ class Particle {
         /// Get the longitudinal momentum (in GeV)
         inline double Pz() const { return fPz; }
         /// Get the transverse momentum (in GeV)
-        inline double Pt() const { return sqrt(Px()*Px()+Py()*Py()); }
+        inline double Pt() const { return sqrt( Px()*Px()+Py()*Py() ); }
         /// Get the 3-momentum norm (in GeV)
         inline double P() const { return fP; }
         /// Get the squared 3-momentum norm (in \f$\text{GeV}^\text{2}\f$)
@@ -213,32 +213,35 @@ class Particle {
         /// Get the particle's squared mass (in GeV^2) as computed from its energy and momentum
         inline double M2() const { return E2()-P2(); }
         /// Get the particle's mass (in GeV) as computed from its energy and momentum
-        inline double M() const { return sqrt(M2()); }
+        inline double M() const { return sqrt( M2() ); }
         /// Get the polar angle (angle with respect to the longitudinal direction)
-        inline double Theta() const { return atan2(Pt(), Pz()); }
+        inline double Theta() const { return atan2( Pt(), Pz() ); }
         /// Get the azimutal angle (angle in the transverse plane)
-        inline double Phi() const { return atan2(Py(), Px()); }
+        inline double Phi() const { return atan2( Py(), Px() ); }
         /// Get the pseudo-rapidity
         inline double Eta() const {
-          return (Pt()!=0.)
-            ? log((P()+fabs(Pz()))/Pt())*(Pz()/fabs(Pz()))
-            : 9999.*(Pz()/fabs(Pz()));
+          const int sign = ( Pz()/fabs( Pz() ) );
+          return ( Pt()!=0. )
+            ? log( ( P()+fabs( Pz() ) )/Pt() )*sign
+            : 9999.*sign;
         };
         /// Get the rapidity
-        inline double Rapidity() const { return (E()<0.) ? 999. : log((E()+Pz())/(E()-Pz()))/2.; };
-        /// Rotate the transverse components by an angle phi (and reflect the y coordinate)
-        inline void RotatePhi(double phi, double rany) {
-          double px = fPx*cos(phi)+fPy*sin(phi)*rany,
-                 py =-fPx*sin(phi)+fPy*cos(phi)*rany;
-          fPx = px;
-          fPy = py;
+        inline double Rapidity() const {
+          const int sign = ( Pz()/fabs( Pz() ) );
+          return ( E()>=0. )
+            ? log( ( E()+Pz() )/( E()-Pz() ) )/2.
+            : 999.*sign;
         }
+        /// Rotate the transverse components by an angle phi (and reflect the y coordinate)
+        void RotatePhi( double phi, double sign );
+        /// Rotate the particle's momentum by a polar/azimuthal angle
+        void RotateThetaPhi( double theta_, double phi_ );
       private:
         /// Compute the 3-momentum's norm
         inline void ComputeP() {
           fP = 0.;
-          for (unsigned int i=0; i<3; i++) { fP += P(i)*P(i); }
-          fP = sqrt(fP);
+          for ( unsigned int i=0; i<3; i++ ) fP += P(i)*P(i);
+          fP = sqrt( fP );
         }
         /// Momentum along the \f$x\f$-axis
         double fPx;
@@ -252,46 +255,46 @@ class Particle {
         double fE;
     };
     /// Human-readable format for a particle's PDG code
-    friend std::ostream& operator<<(std::ostream& os, const Particle::ParticleCode& pc);
+    friend std::ostream& operator<<( std::ostream& os, const Particle::ParticleCode& pc );
     /// Compute the 4-vector sum of two 4-momenta
-    friend Particle::Momentum operator+(const Particle::Momentum& mom1, const Particle::Momentum& mom2);
+    friend Particle::Momentum operator+( const Particle::Momentum& mom1, const Particle::Momentum& mom2 );
     /// Compute the 4-vector difference of two 4-momenta
-    friend Particle::Momentum operator-(const Particle::Momentum& mom1, const Particle::Momentum& mom2);
+    friend Particle::Momentum operator-( const Particle::Momentum& mom1, const Particle::Momentum& mom2 );
     /// Scalar product of two 3-momenta
-    friend double operator*(const Particle::Momentum& mom1, const Particle::Momentum& mom2);
+    friend double operator*( const Particle::Momentum& mom1, const Particle::Momentum& mom2 );
     /// Multiply all components of a 4-momentum by a scalar
-    friend Particle::Momentum operator*(const Particle::Momentum& mom, double c);
+    friend Particle::Momentum operator*( const Particle::Momentum& mom, double c );
     /// Multiply all components of a 4-momentum by a scalar
-    friend Particle::Momentum operator*(double c, const Particle::Momentum& mom);
+    friend Particle::Momentum operator*( double c, const Particle::Momentum& mom );
     /**
      * Gets the mass in GeV/c**2 of a particle given its PDG identifier
      * @brief Gets the mass of a particle
      * @param pdgId_ ParticleCode (PDG ID)
      * @return Mass of the particle in \f$\text{GeV}/c^2\f$
      */
-    static double GetMassFromPDGId(Particle::ParticleCode pdgId_);
+    static double GetMassFromPDGId( const Particle::ParticleCode& pdgId_ );
     /**
      * Gets the total decay width for one particle to be decayed
      * @param[in] pdgId_ ParticleCode (PDG ID)
      * @return Decay width in GeV
      */
-    static double GetWidthFromPDGId(Particle::ParticleCode pdgId_);
+    static double GetWidthFromPDGId( const Particle::ParticleCode& pdgId_ );
     
     Particle();
     /// Build using the role of the particle in the process and its PDG id
     /// \param[in] pdgId_ ParticleCode (PDG ID)
     /// \param[in] role_ Role of the particle in the process
-    Particle(Role role_,ParticleCode pdgId_=Particle::invalidParticle);
+    Particle( Role role_, ParticleCode pdgId_=Particle::invalidParticle );
     inline ~Particle() {;}
     /// Assignment operator
-    Particle& operator=(const Particle&);
+    Particle& operator=( const Particle& );
     /// Comparison operator (from unique identifier)
-    inline bool operator<(const Particle& rhs) { return id<rhs.id; };
+    inline bool operator<( const Particle& rhs ) { return id<rhs.id; }
     /// Comparison operator (from their reference's unique identifier)
-    inline bool operator<(const Particle *rhs) { std::cout << id << "\t" << rhs->id << "\t" << (id<rhs->id) << std::endl; return id<rhs->id; };
-    void LorentzBoost(double m_, const Momentum& mom_);
-    /// Lorentz boost (from ROOT)
-    double* LorentzBoost(const Momentum& mom_);
+    inline bool operator<( const Particle *rhs ) { return id<rhs->id; }
+    void LorentzBoost( double m_, const Momentum& mom_ );
+    /// Lorentz boost (shamelessly stolen from ROOT)
+    double* LorentzBoost( const Momentum& mom_ );
     
     // --- general particle properties
     
@@ -312,7 +315,7 @@ class Particle {
     /// Set the PDG identifier (along with the particle's electric charge)
     /// \param[in] pdg ParticleCode (PDG ID)
     /// \param[in] ch Electric charge (in units of \f$e\f$)
-    inline void SetPDGId(ParticleCode pdg, float ch=-999.) {
+    inline void SetPDGId( const ParticleCode& pdg, float ch=-999. ) {
       fPDGid = pdg;
       if (ch==-999.) charge = 0.;
       else charge = ch;
@@ -321,8 +324,8 @@ class Particle {
     inline ParticleCode GetPDGId() const { return fPDGid; }
     /// Retrieve the integer value of the PDG identifier
     inline int GetIntPDGId() const {
-      int pdg = static_cast<int>(fPDGid);
-      if (pdg>10 and pdg<16 and pdg%2!=0) return static_cast<int>(-charge)*pdg;
+      const int pdg = static_cast<int>( fPDGid );
+      if ( pdg>10 and pdg<16 and pdg%2!=0 ) return static_cast<int>( -charge )*pdg;
       else return pdg;
     }
     /// Particle's helicity
@@ -340,24 +343,33 @@ class Particle {
      * @brief Set the particle's mass in \f$\text{GeV}/c^{2}\f$
      * @return A boolean stating whether or not the mass was correctly set
      */
-    bool SetM(double m_=-1.);
+    bool SetM( double m_=-1. );
     /// Get the particle's squared mass (in \f$\text{GeV}^\text{2}\f$)
     inline double M2() const { return fMass*fMass; };
     /// Retrieve the momentum object associated with this particle
     inline Momentum GetMomentum() const { return fMomentum; }
     /// Associate a momentum object to this particle
-    inline bool SetMomentum(const Momentum& mom, bool offshell=false) {
+    inline bool SetMomentum( const Momentum& mom, bool offshell=false ) {
       fMomentum = mom;
-      if (offshell) { fMass = fMomentum.M(); return true; }
-      if (fMass<0.) { SetM(); }
-      double e = sqrt(fMomentum.P2()+M2());
-      if (mom.E()<0.) { fMomentum.SetE(e); return true; }
-      if (fabs(e-fMomentum.E())<1.e-6) { return true; } // less than 1 eV difference
-      if (fabs(e-mom.E())<1.e-6) { return true; } // less than 1 eV difference
-      if (role!=Parton1 and role!=Parton2) {
-        InError(Form("Energy difference for particle %d (computed-set): %.5f", (int)role, e-fMomentum.E()));
+      if ( offshell ) {
+        fMass = fMomentum.M();
+        return true;
       }
-      fMomentum.SetE(e);//FIXME need to ensure nothing relies on this
+
+      if ( fMass<0. ) SetM();
+      const double e = sqrt( fMomentum.P2()+M2() );
+      if ( mom.E()<0. ) {
+        fMomentum.SetE(e);
+        return true;
+      }
+
+      if ( fabs(e-fMomentum.E() )<1.e-6 or fabs(e-mom.E())<1.e-6 ) { // less than 1 eV difference
+        return true;
+      }
+      if ( role!=Parton1 and role!=Parton2 ) {
+        InError( Form( "Energy difference for particle %d (computed-set): %.5f", (int)role, e-fMomentum.E() ) );
+      }
+      fMomentum.SetE( e );//FIXME need to ensure nothing relies on this
       return false;
     }
     /**
@@ -367,8 +379,8 @@ class Particle {
      * @param[in] pz_ Momentum along the \f$z\f$-axis, in \f$\text{GeV}/c\f$
      * @return A boolean stating the validity of this particle (according to its 4-momentum norm)
      */
-    inline bool SetMomentum(double px_,double py_,double pz_) {
-      fMomentum.SetP(px_, py_, pz_); SetE();
+    inline bool SetMomentum( double px_,double py_,double pz_ ) {
+      fMomentum.SetP( px_, py_, pz_ ); SetE();
       return true;
     };
     /**
@@ -379,10 +391,10 @@ class Particle {
      * @param[in] e_ Energy, in GeV
      * @return A boolean stating the validity of the particle's kinematics
      */
-    inline bool SetMomentum(double px_,double py_,double pz_,double e_) {
-      SetMomentum(px_, py_, pz_);
-      if (fabs(e_-fMomentum.E())>1.e-6) { // more than 1 eV difference
-        InError(Form("Energy difference: %.5f", e_-fMomentum.E()));
+    inline bool SetMomentum( double px_,double py_,double pz_,double e_ ) {
+      SetMomentum( px_, py_, pz_ );
+      if ( fabs( e_-fMomentum.E() )>1.e-6 ) { // more than 1 eV difference
+        InError( Form( "Energy difference: %.5f", e_-fMomentum.E() ) );
         return false;
       }
       return true;
@@ -392,23 +404,21 @@ class Particle {
      * @param[in] p_ 4-momentum
      * @return A boolean stating the validity of the particle's kinematics
      */
-    inline bool SetMomentum(double p_[4]) { return SetMomentum(p_[0], p_[1], p_[2], p_[3]); };
+    inline bool SetMomentum( double p_[4] ) { return SetMomentum( p_[0], p_[1], p_[2], p_[3] ); }
     /**
      * @brief Set the particle's energy
      * @param[in] e_ Energy, in GeV
      */
     inline void SetE(double e_=-1.) {
-      if (e_<0. and fMass>=0.) e_ = sqrt(M2()+fMomentum.P2());
+      if ( e_<0. and fMass>=0. ) e_ = sqrt( M2()+fMomentum.P2() );
       fMomentum.SetE(e_);
     }
     /// Get the particle's energy (in GeV)
     inline double E() const {
-      return (fMomentum.E()<0.) ? std::sqrt(M2()+fMomentum.P2()) : fMomentum.E();
+      return ( fMomentum.E()<0. ) ? std::sqrt( M2()+fMomentum.P2() ) : fMomentum.E();
     };
     /// Get the particle's squared energy (in \f$\text{GeV}^\text{2}\f$)
     inline double E2() const { return E()*E(); };
-    /// Rotate the particle's momentum by a polar/azimuthal angle
-    void RotateThetaPhi(double theta_, double phi_);
     /// Is this particle a valid particle which can be used for kinematic computations ?
     bool Valid();
     
@@ -420,7 +430,7 @@ class Particle {
      * @brief Set the mother particle
      * @param[in] part_ A Particle object containing all the information on the mother particle
      */
-    void SetMother(Particle* part_);
+    void SetMother( Particle* part_ );
     /**
      * @brief Gets the unique identifier to the mother particle from which this particle arises
      * @return An integer representing the unique identifier to the mother of this particle in the event
@@ -431,14 +441,14 @@ class Particle {
      * @param[in] part_ The Particle object in which this particle will desintegrate or convert
      * @return A boolean stating if the particle has been added to the daughters list or if it was already present before
      */
-    bool AddDaughter(Particle* part_);
+    bool AddDaughter( Particle* part_ );
     /// Gets the number of daughter particles
     inline unsigned int NumDaughters() const { return fDaughters.size(); };
     /**
      * @brief Get an identifiers list all daughter particles
      * @return An integer vector containing all the daughters' unique identifier in the event
      */
-    std::vector<int> GetDaughters() const;
+    ParticlesIds GetDaughters() const { return fDaughters; }
     
     // --- global particle information extraction
     
@@ -447,7 +457,7 @@ class Particle {
      * @param[in] revert_ Is the event symmetric ? If set to true, the third component of the momentum is reverted.
      * @return The LHE line associated to the particle, and containing the particle's history (mother/daughters), its kinematics, and its status
      */
-    std::string GetLHEline(bool revert_=false);
+    std::string GetLHEline( bool revert_=false );
     /// Dump all the information on this particle into the standard output stream
     void Dump() const;    
     void PDF2PDG();
@@ -460,7 +470,7 @@ class Particle {
      * @brief Hadronises the particle using Pythia
      * @return A boolean stating whether or not the particle has been hadronised
      */
-    bool Hadronise(std::string algo_);
+    bool Hadronise( std::string algo_ );
   private:
     /// Momentum properties handler
     Momentum fMomentum;
@@ -477,18 +487,18 @@ class Particle {
     double __tmp3[3];
 };
 
-inline bool compareParticle(const Particle a, const Particle b) { return a.id<b.id; }
-inline bool compareParticlePtrs(const Particle* a, const Particle* b) { return a->id<b->id; }
+inline bool compareParticle( const Particle a, const Particle b ) { return a.id<b.id; }
+inline bool compareParticlePtrs( const Particle* a, const Particle* b ) { return a->id<b->id; }
 
 /// Compute the centre of mass energy of two particles (incoming or outgoing states)
-inline static double CMEnergy(const Particle& p1, const Particle& p2) {
+inline static double CMEnergy( const Particle& p1, const Particle& p2 ) {
   if (p1.M()*p2.M()<0.) return 0.;
   if (p1.E()*p2.E()<0.) return 0.;
   return sqrt(p1.M2()+p2.M2()+2.*p1.E()*p2.E()-2.*(p1.GetMomentum()*p2.GetMomentum()));
 }
 
 /// Compute the centre of mass energy of two particles (incoming or outgoing states)
-inline static double CMEnergy(const Particle::Momentum& m1, const Particle::Momentum& m2) {
+inline static double CMEnergy( const Particle::Momentum& m1, const Particle::Momentum& m2 ) {
   if (m1.M()*m2.M()<0.) return 0.;
   if (m1.E()*m2.E()<0.) return 0.;
   return sqrt(m1.M2()+m2.M2()+2.*m1.E()*m2.E()-2.*(m1*m2));

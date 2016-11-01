@@ -5,7 +5,7 @@ MCGen::MCGen() :
 {
   Debugging( "Generator initialized" );
   
-  try { this->PrintHeader(); }  catch ( Exception& e ) { e.Dump(); }
+  try { PrintHeader(); } catch ( Exception& e ) { e.Dump(); }
   
   srand( time( 0 ) ); // Random number initialization
   

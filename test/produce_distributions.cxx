@@ -3,6 +3,8 @@
 #include "Canvas.h"
 #include "TH1.h"
 
+#include <sstream>
+
 void produce_plot( const char* name, TH1* hist )
 {
   Canvas c( name, "CepGen Simulation" );
@@ -28,8 +30,13 @@ int main( int argc, char* argv[] )
   TH1D h_mass( "invm", "Dilepton invariant mass\\Events\\GeV?.2f", 1000, 0., 100. ),
        h_ptpair( "ptpair", "Dilepton p_{T}\\Events\\GeV?.2f", 500, 0., 50. );
 
+  std::ostringstream gen_name;
+  gen_name << mg.parameters->process;
+  Information( Form( "Process name: %s", gen_name.str().c_str() ) );
+
   for ( unsigned int i=0; i<1e5; i++ ) {
     Event* ev = mg.GenerateOneEvent();
+    if ( i%100==0 ) Information( Form( "Produced event #%d", i ) );
     const Particle::Momentum pl1 = ev->GetOneByRole( Particle::CentralParticle1 )->GetMomentum(),
                              pl2 = ev->GetOneByRole( Particle::CentralParticle2 )->GetMomentum();
     h_mass.Fill( ( pl1+pl2 ).M() );

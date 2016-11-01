@@ -164,7 +164,7 @@ bool Parameters::ReadConfigFile(const char* inFile_)
       if ( value=="lpair" )       this->process = new GamGamLL;
       else if ( value=="pptoll" ) this->process = new PPtoLL;
       else if ( value=="pptoww" ) this->process = new PPtoWW;
-      std::ostringstream proc_name; proc_name << *( this->process );
+      std::ostringstream proc_name; proc_name << this->process;
       os << std::setw( wdth ) << " * Process:" << boldify( proc_name.str() ) << "\n";
     }
     else if ( key=="HADR" ) {
@@ -177,7 +177,7 @@ bool Parameters::ReadConfigFile(const char* inFile_)
 #ifdef PYTHIA8
       if ( value=="pythia8" ) this->hadroniser = new Pythia8Hadroniser;
 #endif
-      os << std::setw( wdth ) << " * Hadroniser:" << *( this->hadroniser ) << "\n";
+      os << std::setw( wdth ) << " * Hadroniser:" << ( ( this->hadroniser!=0 ) ? this->hadroniser->GetName() : colourise( "*** no hadroniser ***", Colour::Red ) ) << "\n";
     }
     else if ( key=="MODE" ) {
       this->process_mode = static_cast<Kinematics::ProcessMode>( atoi( value.c_str() ) );
@@ -259,6 +259,7 @@ bool Parameters::ReadConfigFile(const char* inFile_)
       InWarning( Form( "Unrecognized argument : [%s] = %s", key.c_str(), value.c_str() ) );
     }
   }
+  if ( !this->process ) this->process = new GenericProcess;
   f.close();
   
   Information( os.str() );

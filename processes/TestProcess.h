@@ -1,5 +1,5 @@
-#ifndef Test_h
-#define Test_h
+#ifndef Processes_Test_h
+#define Processes_Test_h
 
 #include "processes/GenericProcess.h"
 

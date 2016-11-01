@@ -110,6 +110,13 @@ operator<<( std::ostream& os, const GenericProcess& proc )
 }
 
 std::ostream&
+operator<<( std::ostream& os, const GenericProcess* proc )
+{
+  os << proc->GetName().c_str();
+  return os;
+}
+
+std::ostream&
 operator<<( std::ostream& os, const GenericProcess::StructureFunctions& sf )
 {
   switch (sf) {
