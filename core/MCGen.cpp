@@ -125,6 +125,9 @@ double f( double* x_, size_t ndim_, void* params_ )
   std::ostringstream os;
 
   p = static_cast<Parameters*>( params_ );
+
+  //FIXME at some point introduce non head-on colliding beams ?
+
   const Particle::Momentum p1( 0., 0.,  p->in1p ),
                            p2( 0., 0., -p->in2p );
   p->process->SetIncomingKinematics( p1, p2 );
@@ -136,8 +139,6 @@ double f( double* x_, size_t ndim_, void* params_ )
   }
 
   tmr.reset();
-
-  //FIXME at some point introduce non head-on colliding beams ?
 
   ff = 0.;
 
@@ -232,7 +233,7 @@ double f( double* x_, size_t ndim_, void* params_ )
 
   if ( Logger::GetInstance()->Level>=Logger::DebugInsideLoop ) {
     os.str( "" ); for ( unsigned int i=0; i<ndim_; i++ ) { os << Form( "%10.8f ", x_[i] ); }
-    Debugging( Form( "f value for  dim-%d point ( %s): %4.4e", ndim_, os.str().c_str(), ff ) );
+    Debugging( Form( "f value for dim-%d point ( %s): %4.4e", ndim_, os.str().c_str(), ff ) );
   }
   
   return ff;

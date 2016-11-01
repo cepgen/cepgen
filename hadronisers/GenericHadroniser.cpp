@@ -9,6 +9,4 @@ GenericHadroniser::~GenericHadroniser()
   Debugging( Form("Destructor called" ) );
   
   if ( fHadrons ) delete fHadrons;
-
 }
-

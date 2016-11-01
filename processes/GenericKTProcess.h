@@ -36,7 +36,7 @@ class GenericKTProcess : public GenericProcess
   void AddEventContent();
   /// Retrieve the total number of dimensions on which the integration is being performet
   /// \param[in] proc_mode_ Kinematics case considered
-  unsigned int GetNdim( Kinematics::ProcessMode proc_mode_ ) const;
+  unsigned int GetNdim( const Kinematics::ProcessMode& proc_mode_ ) const;
   /// Retrieve the event weight in the phase space
   double ComputeWeight();
   /// Populate the event content with the generated process' kinematics  

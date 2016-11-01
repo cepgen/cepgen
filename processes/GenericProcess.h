@@ -27,6 +27,7 @@ class GenericProcess
   };
   /// Human-readable format of a structure function object
   friend std::ostream& operator<<(std::ostream& os, const GenericProcess::StructureFunctions& sf);
+  friend std::ostream& operator<<(std::ostream& os, const GenericProcess& proc);
 
   /// Generic map of particles with their role in the process
   typedef std::map<Particle::Role,Particle::ParticleCode> ParticlesRoleMap;

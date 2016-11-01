@@ -33,7 +33,7 @@ GenericKTProcess::AddEventContent()
 }
 
 unsigned int
-GenericKTProcess::GetNdim( Kinematics::ProcessMode process_mode_ ) const
+GenericKTProcess::GetNdim( const Kinematics::ProcessMode& process_mode_ ) const
 {
   switch ( process_mode_ ) {
     default:
@@ -48,8 +48,8 @@ void
 GenericKTProcess::AddPartonContent()
 {
   // Incoming partons
-  fQT1 = exp( fLogQmin+(fLogQmax-fLogQmin)*x( 0 ) );
-  fQT2 = exp( fLogQmin+(fLogQmax-fLogQmin)*x( 1 ) );
+  fQT1 = exp( fLogQmin+( fLogQmax-fLogQmin )*x( 0 ) );
+  fQT2 = exp( fLogQmin+( fLogQmax-fLogQmin )*x( 1 ) );
   fPhiQT1 = 2.*Constants::Pi*x( 2 );
   fPhiQT2 = 2.*Constants::Pi*x( 3 );
   DebuggingInsideLoop( Form( "photons transverse virtualities (qt):\n\t"

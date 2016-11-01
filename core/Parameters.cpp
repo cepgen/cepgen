@@ -121,12 +121,14 @@ bool Parameters::ReadConfigFile(const char* inFile_)
     return false;
   }
 
+  const unsigned int wdth = 50;
   Debugging( Form( "File '%s' succesfully opened!", inFile_ ) );
   std::ostringstream os;
-  os << "Configuration file content : " << "\n\t";
+  os << "Configuration file content :" << "\n";
 
+  os << std::left;
   while (f >> key >> value) {
-    //std::cout << std::setw(60) << "[" << key << "] = " << value << std::endl;
+    //std::cout << std::setw( wdth ) << "[" << key << "] = " << value << std::endl;
     //if ( strncmp( key.c_str(), "#" )==0 ) continue; // FIXME need to ensure there is no extra space before !
     if ( key[0]=='#' ) continue;
     if ( key=="IEND" ) {
@@ -140,141 +142,118 @@ bool Parameters::ReadConfigFile(const char* inFile_)
     }
     else if ( key=="NCVG" ) {
       this->ncvg = (int)atoi( value.c_str() );
-      os << " * Number of function calls: " << this->ncvg << "\n\t";
+      os << std::setw( wdth ) << " * Number of function calls:" << this->ncvg << "\n";
     }
     else if ( key=="NCSG" ) {
       this->npoints = (int)atoi( value.c_str() );
-      os << " * Number of points to probe: " << this->npoints << "\n\t";
+      os << std::setw( wdth ) << " * Number of points to probe:" << this->npoints << "\n";
     }
     else if ( key=="ITVG" ) {
       this->itvg = (int)atoi( value.c_str() );
-      os << " * Number of Vegas iterations: " << this->itvg << "\n\t";
+      os << std::setw( wdth ) << " * Number of Vegas iterations:" << this->itvg << "\n";
     }
     else if ( key=="INPP" ) {
       this->in1p = (double)atof( value.c_str() );
-      os << " * First incoming particles' momentum: " << this->in1p << " GeV/c\n\t";
-    }
-    else if ( key=="PROC" ) {
-      if ( value=="lpair" ) {
-      	this->process = new GamGamLL;
-      	os << " * Process: LPAIR\n\t";
-      }
-      else if ( value=="pptoll" ) {
-        this->process = new PPtoLL;
-        os << " * Process: PPTOLL\n\t";
-      }
-      else if ( value=="pptoww" ) {
-        this->process = new PPtoWW;
-        os << " * Process: PPTOWW\n\t";
-      }
-    }
-    else if ( key=="HADR" ) {
-#ifdef PYTHIA6
-      if ( value=="pythia6" ) {
-        this->hadroniser = new Pythia6Hadroniser;
-        os << " * Hadroniser: Pythia6\n\t";
-      }
-#endif
-#ifdef JETSET
-      if (value=="jetset7") {
-        this->hadroniser = new Jetset7Hadroniser;
-        os << " * Hadroniser: Jetset7\n\t";
-      }
-#endif
-#ifdef PYTHIA8
-      if ( value=="pythia8" ) {
-        this->hadroniser = new Pythia8Hadroniser;
-        os << " * Hadroniser: Pythia8\n\t";
-      }
-#endif
-    }
-    else if ( key=="MODE" ) {
-      this->process_mode = static_cast<Kinematics::ProcessMode>( atoi( value.c_str() ) );
-      os << " * Subprocess' mode: " << static_cast<unsigned int>( this->process_mode ) << " --> " << this->process_mode << "\n\t";
-    }
-    else if ( key=="PMOD" or key=="EMOD" ) {
-      this->remnant_mode = static_cast<GenericProcess::StructureFunctions>( atoi( value.c_str() ) );
-      os << " * Outgoing primary particles' mode: " << static_cast<unsigned int>( this->remnant_mode )
-      	 << " --> " << this->remnant_mode << "\n\t";
+      os << std::setw( wdth ) << " * Momentum (1st primary particle):" << this->in1p << " GeV/c\n";
     }
     else if ( key=="INPE" ) {
       this->in2p = static_cast<float>( atof( value.c_str() ) );
-      os << " * Second incoming particles' momentum: " << this->in1p << " GeV/c\n\t";
+      os << std::setw( wdth ) << " * Momentum (2nd primary particle):" << this->in1p << " GeV/c\n";
+    }
+    else if ( key=="PROC" ) {
+      if ( value=="lpair" )       this->process = new GamGamLL;
+      else if ( value=="pptoll" ) this->process = new PPtoLL;
+      else if ( value=="pptoww" ) this->process = new PPtoWW;
+      std::ostringstream proc_name; proc_name << *( this->process );
+      os << std::setw( wdth ) << " * Process:" << boldify( proc_name.str() ) << "\n";
+    }
+    else if ( key=="HADR" ) {
+#ifdef PYTHIA6
+      if ( value=="pythia6" ) this->hadroniser = new Pythia6Hadroniser;
+#endif
+#ifdef JETSET
+      if ( value=="jetset7" ) this->hadroniser = new Jetset7Hadroniser;
+#endif
+#ifdef PYTHIA8
+      if ( value=="pythia8" ) this->hadroniser = new Pythia8Hadroniser;
+#endif
+      os << std::setw( wdth ) << " * Hadroniser:" << *( this->hadroniser ) << "\n";
+    }
+    else if ( key=="MODE" ) {
+      this->process_mode = static_cast<Kinematics::ProcessMode>( atoi( value.c_str() ) );
+      os << std::setw( wdth ) << " * Subprocess' mode:" << static_cast<unsigned int>( this->process_mode ) << " --> " << this->process_mode << "\n";
+    }
+    else if ( key=="PMOD" or key=="EMOD" ) {
+      this->remnant_mode = static_cast<GenericProcess::StructureFunctions>( atoi( value.c_str() ) );
+      os << std::setw( wdth ) << " * Outgoing primary particles' mode:" << static_cast<unsigned int>( this->remnant_mode )
+      	 << " --> " << this->remnant_mode << "\n";
     }
     else if ( key=="PAIR" ) {
       this->pair = static_cast<Particle::ParticleCode>( atoi( value.c_str() ) );
-      os << " * Outgoing leptons' PDG id: " << static_cast<unsigned int>( this->pair )
-         << " --> " << this->pair << "\n\t";
+      os << std::setw( wdth ) << " * Outgoing leptons' PDG id:" << static_cast<unsigned int>( this->pair )
+         << " --> " << this->pair << "\n";
     }
     else if ( key=="MCUT" ) {
       this->mcut = static_cast<Kinematics::Cuts>( atoi( value.c_str() ) );
-      os << " * Set of cuts to apply on the total generation  : " << this->mcut
-         << " --> ";
-      switch ( this->mcut ) {
-        case 0: default: os << "no cuts"; break;
-        case 3:          os << "cuts on at least one outgoing lepton"; break;
-        case 2:          os << "cuts on both the outgoing leptons"; break;
-        case 1:          os << "Vermaseren's hypothetical detector cuts"; break;
-      }
-      os << "\n\t";
+      os << std::setw( wdth ) << " * Set of cuts to apply on final products:" << this->mcut << "\n";
     }
     else if (key=="PTCT") {
       this->minpt = static_cast<float>( atof( value.c_str() ) );
-      os << " * Single outgoing lepton's minimal transverse momentum: " << this->minpt << " GeV/c\n\t";
+      os << std::setw( wdth ) << " * Minimal transverse momentum (single central outgoing particle):" << this->minpt << " GeV/c\n";
     }
     else if (key=="ECUT") {
       this->minenergy = static_cast<float>( atof( value.c_str() ) );
-      os << " * Single outgoing lepton's minimal energy: " << this->minenergy << " GeV\n\t";
+      os << std::setw( wdth ) << " * Minimal energy (single central outgoing particle):" << this->minenergy << " GeV\n";
     }
     else if (key=="NGEN") {
       this->maxgen = static_cast<unsigned int>( atoi( value.c_str() ) );
-      os << " * Number of events to generate: " << this->maxgen << "\n\t";
+      os << std::setw( wdth ) << " * Number of events to generate:" << boldify( this->maxgen ) << "\n";
     }
     else if (key=="THMN") {
       //this->mintheta = (double)atof( value.c_str() );
       //this->SetThetaRange((double)atof( value.c_str() ), 0.); // FIXME FIXME
-      os << " * Minimal polar production angle for the leptons" << EtaToTheta(mineta) << "\n\t";
+      os << std::setw( wdth ) << " * Minimal polar production angle for the leptons" << EtaToTheta(mineta) << "\n";
     }
     else if (key=="THMX") {
       //this->maxtheta = (double)atof( value.c_str() );
       //this->SetThetaRange(0., (double)atof( value.c_str() ) ); //FIXME FIXME
-      os << " * Maximal polar production angle for the leptons" << EtaToTheta(maxeta) << "\n\t";
+      os << std::setw( wdth ) << " * Maximal polar production angle for the leptons" << EtaToTheta(maxeta) << "\n";
     }
     else if (key=="ETMN") {
       this->mineta = static_cast<float>( atof( value.c_str() ) );
-      os << " * Minimal pseudo-rapidity for the leptons: " << this->mineta << "\n\t";
+      os << std::setw( wdth ) << " * Minimal pseudo-rapidity (central outgoing particles):" << this->mineta << "\n";
     }
     else if (key=="ETMX") {
       this->maxeta = static_cast<float>( atof( value.c_str() ) );
-      os << " * Maximal pseudo-rapidity for the leptons: " << this->maxeta << "\n\t";
+      os << std::setw( wdth ) << " * Maximal pseudo-rapidity (central outgoing particles):" << this->maxeta << "\n";
     }
     else if (key=="Q2MN") {
       this->minq2 = static_cast<float>( atof( value.c_str() ) );
-      os << " * Minimal Q^2 for the incoming photons: " << this->minq2 << " GeV^2\n\t";
+      os << std::setw( wdth ) << " * Minimal Q^2 (exchanged parton):" << this->minq2 << " GeV^2\n";
     }
     else if (key=="Q2MX") {
       this->maxq2 = static_cast<float>( atof( value.c_str() ) );
-      os << " * Maximal Q^2 for the incoming photons: " << this->maxq2 << " GeV^2\n\t";
+      os << std::setw( wdth ) << " * Maximal Q^2 (exchanged parton):" << this->maxq2 << " GeV^2\n";
     }
     else if (key=="MXMN") {
       this->minmx = static_cast<float>( atof( value.c_str() ) );
-      os << " * Minimal invariant mass of proton remnants: " << this->minmx << " GeV/c^2\n\t";
+      os << std::setw( wdth ) << " * Minimal invariant mass of proton remnants:" << this->minmx << " GeV/c^2\n";
     }
     else if (key=="MXMX") {
       this->maxmx = static_cast<float>( atof( value.c_str() ) );
-      os << " * Maximal invariant mass of proton remnants: " << this->maxmx << " GeV/c^2\n\t";
+      os << std::setw( wdth ) << " * Maximal invariant mass of proton remnants:" << this->maxmx << " GeV/c^2\n";
     }
     else if (key=="GPDF") {
       this->gpdf = static_cast<unsigned int>( atoi( value.c_str() ) );
-      os << " * GPDF: " << this->gpdf << "\n\t";
+      os << std::setw( wdth ) << " * GPDF:" << this->gpdf << "\n";
     }
     else if (key=="SPDF") {
       this->spdf = static_cast<unsigned int>( atoi( value.c_str() ) );
-      os << " * SPDF: " << this->spdf << "\n\t";
+      os << std::setw( wdth ) << " * SPDF:" << this->spdf << "\n";
     }
     else if (key=="QPDF") {
       this->qpdf = static_cast<unsigned int>( atoi( value.c_str() ) );
-      os << " * QPDF: " << this->qpdf << "\n\t";
+      os << std::setw( wdth ) << " * QPDF:" << this->qpdf << "\n";
     }
     else {
       InWarning( Form( "Unrecognized argument : [%s] = %s", key.c_str(), value.c_str() ) );

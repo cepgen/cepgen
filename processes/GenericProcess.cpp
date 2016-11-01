@@ -103,7 +103,14 @@ GenericProcess::SetIncomingKinematics( const Particle::Momentum& p1, const Parti
 }
 
 std::ostream&
-operator<<(std::ostream& os, const GenericProcess::StructureFunctions& sf)
+operator<<( std::ostream& os, const GenericProcess& proc )
+{
+  os << proc.GetName().c_str();
+  return os;
+}
+
+std::ostream&
+operator<<( std::ostream& os, const GenericProcess::StructureFunctions& sf )
 {
   switch (sf) {
     case GenericProcess::Electron:            os << "electron"; break;

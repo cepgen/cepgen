@@ -39,12 +39,12 @@ endforeach()
 #----- link everything into the executables
 
 add_executable(cepgen main.cpp)
-target_link_libraries(cepgen CepGenCore CepGenPhysics Hadronisers CepGenProcesses)
+target_link_libraries(cepgen CepGenCore CepGenPhysics CepGenExternalHadronisers CepGenProcesses)
 
 find_package(HepMC)
 if(HEPMC_LIBRARIES)
   add_executable(cepgen-lhe cepgen-lhe.cpp)
-  target_link_libraries(cepgen-lhe CepGenCore CepGenPhysics Hadronisers CepGenProcesses CepGenExporter)
+  target_link_libraries(cepgen-lhe CepGenCore CepGenPhysics CepGenExternalHadronisers CepGenProcesses CepGenExporter)
 endif()
 
 #----- copy the input cards and other files

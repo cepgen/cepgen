@@ -21,7 +21,8 @@ int main( int argc, char* argv[] ) {
   if ( argc==1 ) {
     Information( "No config file provided. Setting the default parameters." );
     
-    mg.parameters->process = new GamGamLL;
+    //mg.parameters->process = new GamGamLL;
+    mg.parameters->process = new PPtoLL;
     mg.parameters->process_mode = Kinematics::InelasticElastic;
     mg.parameters->remnant_mode = GenericProcess::SuriYennie;
 
