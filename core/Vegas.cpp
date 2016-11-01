@@ -5,8 +5,8 @@ Vegas::Vegas( const unsigned int dim_, double f_( double*, size_t, void* ), Para
   fJ( 0 ), fCorrec( 0. ), fCorrec2( 0. ),
   fInputParameters( inParam_ ),
   fGridPrepared( false ), fGenerationPrepared( false ),
-  fFmax( 0 ), fFmax2( 0. ), fFmaxDiff( 0. ), fFmaxOld( 0. ), fFGlobalMax( 0. ), fN( 0 ),
-  fFunction( 0 ), fX( 0 )
+  fFmax( 0 ), fFmax2( 0. ), fFmaxDiff( 0. ), fFmaxOld( 0. ), fFGlobalMax( 0. ),
+  fN( 0 ), fNm( NULL ), fFunction( 0 ), fX( 0 )
 {
   fXlow = new double[dim_];
   fXup = new double[dim_];
@@ -30,13 +30,13 @@ Vegas::Vegas( const unsigned int dim_, double f_( double*, size_t, void* ), Para
 
 Vegas::~Vegas()
 {
-  if (fX) delete[] fX;
-  if (fXlow) delete[] fXlow;
-  if (fXup) delete[] fXup;
-  if (fNm) delete[] fNm;
-  if (fFmax) delete[] fFmax;
-  if (fN) delete[] fN;
-  if (fFunction) delete fFunction;
+  if ( fXlow ) delete[] fXlow;
+  if ( fXup ) delete[] fXup;
+  if ( fFmax ) delete[] fFmax;
+  if ( fNm ) delete[] fNm;
+  if ( fN ) delete[] fN;
+  if ( fFunction ) delete fFunction;
+  if ( fX ) delete[] fX;
 }
 
 int

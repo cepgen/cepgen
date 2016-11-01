@@ -15,7 +15,7 @@ Parameters::Parameters() :
   minq2( 0. ), maxq2( 1.e5 ),
   minmx( 1.07 ), maxmx( 320. ),
   ncvg( 100000 ), itvg( 10 ), npoints( 100 ), first_run( true ),
-  generation( true ), store( false ), maxgen( 1e5 ),
+  generation( false ), store( false ), maxgen( 0 ),
   symmetrise( true ), ngen( 0 ),
   gpdf( 5 ), spdf( 4 ), qpdf( 12 ),
   hadroniser( 0 ),
@@ -210,13 +210,13 @@ bool Parameters::ReadConfigFile(const char* inFile_)
       os << std::setw( wdth ) << " * Number of events to generate:" << boldify( this->maxgen ) << "\n";
     }
     else if (key=="THMN") {
-      //this->mintheta = (double)atof( value.c_str() );
-      //this->SetThetaRange((double)atof( value.c_str() ), 0.); // FIXME FIXME
+      //this->mintheta = atof( value.c_str() );
+      //this->SetThetaRange( atof( value.c_str() ), 0. ); // FIXME FIXME
       os << std::setw( wdth ) << " * Minimal polar production angle for the leptons" << EtaToTheta(mineta) << "\n";
     }
     else if (key=="THMX") {
-      //this->maxtheta = (double)atof( value.c_str() );
-      //this->SetThetaRange(0., (double)atof( value.c_str() ) ); //FIXME FIXME
+      //this->maxtheta = atof( value.c_str() );
+      //this->SetThetaRange( 0., atof( value.c_str() ) ); //FIXME FIXME
       os << std::setw( wdth ) << " * Maximal polar production angle for the leptons" << EtaToTheta(maxeta) << "\n";
     }
     else if (key=="ETMN") {
