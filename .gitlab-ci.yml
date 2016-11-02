@@ -2,7 +2,7 @@ stages:
   - compile
   - test
 
-build-cepgen:
+compile:
   stage: compile
   before_script:
     - yum install -y gsl gsl-devel libgfortran gcc-gfortran
@@ -14,6 +14,6 @@ build-cepgen:
     - cmake -D CMAKE_MODULE_PATH=$PWD ..
     - make -j 4
 
-test-xsection:
+test:
   stage: test
   script: test/probe_physics_processes lpair elastic
