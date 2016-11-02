@@ -1,12 +1,10 @@
 #include "Kinematics.h"
 
 Kinematics::Kinematics() :
-  ptmin( 3. ), ptmax( -1. ),
-  emin( 0. ), emax( -1. ),
-  etamin( -999. ), etamax( 999. ),
+  kinematics( ElasticElastic ), mode( NoCuts ),
+  ptmin( 3. ), ptmax( -1. ), emin( 0. ), emax( -1. ), etamin( -999. ), etamax( 999. ),
   mxmin( 1.07 ), mxmax( 320. ),
-  q2min( 0. ), q2max( 1.e5 ),
-  wmin( 0. ), wmax( -1. ),
+  q2min( 0. ), q2max( 1.e5 ), wmin( 0. ), wmax( -1. ),
   ptdiffmin( 0. ), ptdiffmax( 300. ) //FIXME need to load this from somewhere else
 {}
 
@@ -53,8 +51,8 @@ operator<<( std::ostream& os, const Kinematics::Cuts& cut )
   switch ( cut ) {
     case Kinematics::NoCuts:         os << "no cuts"; break;
     case Kinematics::VermaserenCuts: os << "\"Vermaseren\""; break;
-    case Kinematics::BothLeptons:    os << "both outgoing particles"; break;
-    case Kinematics::OneLepton:      os << "single outgoing particle"; break;
+    case Kinematics::BothParticles:  os << "both outgoing particles"; break;
+    case Kinematics::OneParticle:    os << "single outgoing particle"; break;
   }
   return os;
 }

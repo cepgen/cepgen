@@ -28,14 +28,16 @@ int main( int argc, char* argv[] ) {
 
 #ifdef PYTHIA6
     mg.parameters->hadroniser = new Pythia6Hadroniser;
-#elifdef JETSET
+#else
+#ifdef JETSET
     mg.parameters->hadroniser = new Jetset7Hadroniser;
+#endif
 #endif
     
     mg.parameters->in1p = 4000.;
     mg.parameters->in2p = 4000.;
     mg.parameters->pair = Particle::Muon;
-    mg.parameters->mcut = Kinematics::BothLeptons;
+    mg.parameters->mcut = Kinematics::BothParticles;
     mg.parameters->minenergy = 0.; //FIXME
     mg.parameters->minpt = 5.;
     mg.parameters->mineta = -2.5;

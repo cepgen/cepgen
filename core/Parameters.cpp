@@ -6,7 +6,7 @@ Parameters::Parameters() :
   in1p( 6500. ), in2p( 6500. ),
   in1pdg( Particle::Proton ), in2pdg( Particle::Proton ),
   pair( Particle::Muon ),
-  mcut( Kinematics::BothLeptons ),
+  mcut( Kinematics::BothParticles ),
   minpt( 0. ), maxpt( -1. ),
   minptdiff( 0. ), maxptdiff( -1. ),
   minenergy( 0. ), maxenergy( -1. ),
@@ -190,7 +190,7 @@ bool Parameters::ReadConfigFile(const char* inFile_)
     }
     else if ( key=="PAIR" ) {
       this->pair = static_cast<Particle::ParticleCode>( atoi( value.c_str() ) );
-      os << std::setw( wdth ) << " * Outgoing leptons' PDG id:" << static_cast<unsigned int>( this->pair )
+      os << std::setw( wdth ) << " * Outgoing particles' PDG id:" << static_cast<unsigned int>( this->pair )
          << " --> " << this->pair << "\n";
     }
     else if ( key=="MCUT" ) {
@@ -212,12 +212,12 @@ bool Parameters::ReadConfigFile(const char* inFile_)
     else if (key=="THMN") {
       //this->mintheta = atof( value.c_str() );
       //this->SetThetaRange( atof( value.c_str() ), 0. ); // FIXME FIXME
-      os << std::setw( wdth ) << " * Minimal polar production angle for the leptons" << EtaToTheta(mineta) << "\n";
+      os << std::setw( wdth ) << " * Minimal polar production angle for the central particles" << EtaToTheta(mineta) << "\n";
     }
     else if (key=="THMX") {
       //this->maxtheta = atof( value.c_str() );
       //this->SetThetaRange( 0., atof( value.c_str() ) ); //FIXME FIXME
-      os << std::setw( wdth ) << " * Maximal polar production angle for the leptons" << EtaToTheta(maxeta) << "\n";
+      os << std::setw( wdth ) << " * Maximal polar production angle for the central particles" << EtaToTheta(maxeta) << "\n";
     }
     else if (key=="ETMN") {
       this->mineta = static_cast<float>( atof( value.c_str() ) );

@@ -18,14 +18,14 @@ class Kinematics
   /**
    * @brief Set of cuts to apply on the central system
    * - 0 - No cuts at all (for the total cross section)
-   * - 1 - Vermaserens' hypothetical detector cuts : for both leptons,
+   * - 1 - Vermaserens' hypothetical detector cuts : for full central particles system,
    *   + \f$\frac{|p_z|}{|\mathbf p|}\leq\f$ 0.75 and \f$p_T\geq 1~\text{GeV}/c\f$,
    *   or
    *   + 0.75 \f$<\frac{|p_z|}{|\mathbf p|}\leq\f$ 0.95 and \f$p_z> 1~\text{GeV}/c\f$,
-   * - 2 - Cuts on both the outgoing leptons, according to the provided cuts parameters
-   * - 3 - Cuts on at least one outgoing lepton, according to the provided cut parameters
+   * - 2 - Cuts on both the outgoing central particles, according to the provided cuts parameters
+   * - 3 - Cuts on at least one outgoing central particle, according to the provided cut parameters
    */
-  enum Cuts { NoCuts = 0, VermaserenCuts = 1, BothLeptons = 2, OneLepton = 3 };
+  enum Cuts { NoCuts = 0, VermaserenCuts = 1, BothParticles = 2, OneParticle = 3 };
   /// Type of outgoing process kinematics to be considered (elastic/dissociative final states)
   enum ProcessMode {
     ElectronProton = 0,

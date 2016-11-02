@@ -1,7 +1,7 @@
 #include "PhotonFluxes.h"
 
 double
-ElasticFlux( double x_, double kt2_ )
+PhotonFluxes::ProtonElastic( double x_, double kt2_ )
 {
   double f_ela;
 
@@ -29,7 +29,7 @@ ElasticFlux( double x_, double kt2_ )
 #ifdef GRVPDF
 
 double
-InelasticFlux( double x_, double kt2_, double mx_ )
+PhotonFluxes::ProtonInelastic( double x_, double kt2_, double mx_ )
 {
   double f_ine;
 

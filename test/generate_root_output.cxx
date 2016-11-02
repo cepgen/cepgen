@@ -50,7 +50,7 @@ int main( int argc, char* argv[] ) {
     mg.parameters->in1p = 6500.;
     mg.parameters->in2p = 6500.;
     mg.parameters->pair = Particle::Muon;
-    mg.parameters->mcut = Kinematics::BothLeptons;
+    mg.parameters->mcut = Kinematics::BothParticles;
     mg.parameters->minenergy = 0.; //FIXME
     mg.parameters->minpt = 15.;
     mg.parameters->maxgen = ngen;

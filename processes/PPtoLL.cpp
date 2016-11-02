@@ -376,29 +376,7 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
   //     of inelastic distributions
   //============================================
   
-  double f1, f2;
-  switch (fCuts.kinematics) {
-    case Kinematics::ElasticElastic:
-      f1 = GenericKTProcess::ElasticFlux(x1, q1t2);
-      f2 = GenericKTProcess::ElasticFlux(x2, q2t2);
-      break;
-    case Kinematics::ElasticInelastic:
-      f1 = GenericKTProcess::ElasticFlux(x1, q1t2);
-      f2 = GenericKTProcess::InelasticFlux(x2, q2t2, fMY);
-      break;
-    case Kinematics::InelasticElastic:
-      f1 = GenericKTProcess::InelasticFlux(x1, q1t2, fMX);
-      f2 = GenericKTProcess::ElasticFlux(x2, q2t2);
-      break;
-    case Kinematics::InelasticInelastic:
-      f1 = GenericKTProcess::InelasticFlux(x1, q1t2, fMX);
-      f2 = GenericKTProcess::InelasticFlux(x2, q2t2, fMY);
-      break;
-    default: return 0.;
-  }
-  DebuggingInsideLoop(Form("Form factors: %e / %e", f1, f2));
-  if (f1<1.e-20) f1 = 0.;
-  if (f2<1.e-20) f2 = 0.;
+  GenericKTProcess::ComputeIncomingFluxes( x1, q1t2, x2, q2t2 );
 
   //=================================================================
   //     factor 2.*pi below from integration over phi_sum
@@ -410,8 +388,8 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
   const double aintegral = (2.*Constants::Pi)
                          *1./(16.*pow(Constants::Pi, 2)
                          *pow(x1*x2*fS, 2)) * amat2
-                         * f1/Constants::Pi
-                         * f2/Constants::Pi
+                         * fFlux1/Constants::Pi
+                         * fFlux2/Constants::Pi
                          *(1./4.)*Constants::GeV2toBarn
                          * 0.5*4./(4.*Constants::Pi);
   if (aintegral*fQT1*fQT2*fPtDiff!=0.) {

@@ -64,22 +64,11 @@ class GenericKTProcess : public GenericProcess
   }
   /// Compute the invariant masses of the outgoing protons (or remnants)
   void ComputeOutgoingPrimaryParticlesMasses();
+  void ComputeIncomingFluxes( double, double, double, double );
   /// Set the kinematics of the incoming and outgoing protons (or remnants)
   void FillPrimaryParticlesKinematics();
   /// Set the kinematics of the outgoing central system
   inline virtual void FillCentralParticlesKinematics() { DebuggingInsideLoop("Dummy central particles list filled!"); }
- 
-  /// Get the elastic flux to be expected at a given x_bjorken / kT
-  double ElasticFlux(double x_, double kt2_) const;
-#ifdef GRVPDF
-  /// Get the inelastic flux to be expected at a given x_bjorken / kT
-  double InelasticFlux(double x_, double kt2_, double mx_) const;
-#else
-  inline double InelasticFlux(double x_, double kt2_, double mx_) const {
-    InError( "Inelastic flux cannot be computed as GRV PDF set is not linked to this instance!" );
-    exit(0);
-  }
-#endif
   
   /// Minimal log-virtuality of the intermediate parton
   double fLogQmin;
@@ -98,6 +87,10 @@ class GenericKTProcess : public GenericProcess
   Particle::Momentum fPX;
   /// Second outgoing proton
   Particle::Momentum fPY;
+  /// First incoming parton's flux
+  double fFlux1;
+  /// Second incoming parton's flux
+  double fFlux2;
   
  private:
   void AddPartonContent();
@@ -113,7 +106,7 @@ class GenericKTProcess : public GenericProcess
   Particle::ParticleCode kProducedPart1;
   /// Type of particle produced in the final state
   Particle::ParticleCode kProducedPart2;
-  
+
 };
 
 #endif

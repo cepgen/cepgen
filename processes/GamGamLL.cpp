@@ -725,8 +725,8 @@ GamGamLL::ComputeWeight()
                ((fabs(cost7)<=0.75 and _pt_l7>=1.) or (fabs(cost7)<=0.95 and fabs(cost7)>0.75 and fabs(fP7cm.Pz())>1.));
       }
       break;
-    case Kinematics::BothLeptons: lcut = lmu1 and lmu2; break;
-    case Kinematics::OneLepton:   lcut = lmu1  or lmu2; break;
+    case Kinematics::BothParticles: lcut = lmu1 and lmu2; break;
+    case Kinematics::OneParticle:   lcut = lmu1  or lmu2; break;
   }
   if (!lcut) { return 0.; } // Dismiss the cuts-failing events in the cross-section computation
 

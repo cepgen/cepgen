@@ -93,8 +93,8 @@ Pythia6Hadroniser::Hadronise( Event *ev_ )
       
       daug = ev_->GetDaughters( p );
       if ( daug.size()!=0 ) {
-        pyjets_.k[3][np] = p->GetDaughters().front()+1; // daughter 1
-        pyjets_.k[4][np] = p->GetDaughters().back()+1; // daughter 2
+        pyjets_.k[3][np] = *p->GetDaughters().begin()+1; // daughter 1
+        pyjets_.k[4][np] = *p->GetDaughters().end()+1; // daughter 2
       }
       else {
         pyjets_.k[3][np] = 0; // daughter 1
@@ -273,8 +273,8 @@ Pythia6Hadroniser::PrepareHadronisation( Event *ev_ )
       
       Debugging(Form("Quark/diquark content already present in the event!\n\tRole of these particles: %d", p->role));
       
-      std::vector<int> daugh = p->GetDaughters();
-      for ( std::vector<int>::iterator did=daugh.begin(); did!=daugh.end(); did++ ) {
+      ParticlesIds daugh = p->GetDaughters();
+      for ( ParticlesIds::const_iterator did=daugh.begin(); did!=daugh.end(); did++ ) {
         if ( ev_->GetById( *did )->GetPDGId()==Particle::uQuark
           or ev_->GetById( *did )->GetPDGId()==Particle::dQuark ) { // Quark
           singlet.SetMother( ev_->GetById( p->id ) );
