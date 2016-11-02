@@ -6,14 +6,16 @@ compile:
   stage: compile
   before_script:
     - yum install -y gsl gsl-devel libgfortran gcc-gfortran
-  script:
     - mkdir build
     - cd build
     - wget https://raw.githubusercontent.com/opencog/opencog/master/lib/FindGSL.cmake
     - wget https://raw.githubusercontent.com/ibab/lhcb-software/master/LbScripts/LbUtils/cmake/modules/FindHepMC.cmake
+  script:
     - cmake -D CMAKE_MODULE_PATH=$PWD ..
     - make -j 4
 
 test:
   stage: test
-  script: test/probe_physics_processes lpair elastic
+  script:
+    - make test/probe_physics_processes
+    - test/probe_physics_processes lpair elastic
