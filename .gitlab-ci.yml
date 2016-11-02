@@ -1,19 +1,18 @@
-before_script:
-  - yum install -y gsl gsl-devel libgfortran gcc-gfortran
-
 stages:
   - compile
   - test
 
 build-cepgen:
   stage: compile
+  before_script:
+    - yum install -y gsl gsl-devel libgfortran gcc-gfortran
   script:
     - mkdir build
     - cd build
     - wget https://raw.githubusercontent.com/opencog/opencog/master/lib/FindGSL.cmake
     - wget https://raw.githubusercontent.com/ibab/lhcb-software/master/LbScripts/LbUtils/cmake/modules/FindHepMC.cmake
     - cmake -D CMAKE_MODULE_PATH=$PWD ..
-    - make
+    - make -j 4
 
 test-xsection:
   stage: test
