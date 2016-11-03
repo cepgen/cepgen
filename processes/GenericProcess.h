@@ -102,7 +102,7 @@ class GenericProcess
   ///Get the number of dimensions on which the integration is performed
   inline unsigned int ndim() const { return fNumDimensions; }
   /// Get the value of a component of the @a fNumDimensions -dimensional point considered
-  inline double x( const unsigned int idx_ ) { return ( idx_>=fNumDimensions ) ? -1. : fX[idx_]; }
+  inline double x( const unsigned int idx_ ) const { return ( idx_>=fNumDimensions ) ? -1. : fX[idx_]; }
   /// Get a human-readable name of the process considered
   inline std::string GetName() const { return fName; }
   
@@ -138,7 +138,7 @@ class GenericProcess
     return pp.at( id );
   }
   /// Get the pointer to one particle in the event (using its identifier)
-  inline Particle* GetParticle(unsigned int id) { return fEvent->GetById(id); }
+  inline Particle* GetParticle( unsigned int id ) { return fEvent->GetById( id ); }
   
   // --- 
   
