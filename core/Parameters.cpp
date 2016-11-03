@@ -163,7 +163,6 @@ bool Parameters::ReadConfigFile(const char* inFile_)
     else if ( key=="PROC" ) {
       if ( value=="lpair" )       this->process = new GamGamLL;
       else if ( value=="pptoll" ) this->process = new PPtoLL;
-      else if ( value=="pptoww" ) this->process = new PPtoWW;
       std::ostringstream proc_name; proc_name << this->process;
       os << std::setw( wdth ) << " * Process:" << boldify( proc_name.str() ) << "\n";
     }

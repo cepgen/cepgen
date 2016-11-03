@@ -10,7 +10,6 @@
 
 #include "processes/GamGamLL.h"
 #include "processes/PPtoLL.h"
-#include "processes/PPtoWW.h"
 
 #include "hadronisers/Pythia6Hadroniser.h"
 #include "hadronisers/Jetset7Hadroniser.h"
