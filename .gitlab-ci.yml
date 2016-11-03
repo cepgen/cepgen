@@ -1,6 +1,6 @@
 stages:
   - compile
-  - test
+#  - test
 
 compile:
   stage: compile
@@ -14,8 +14,8 @@ compile:
     - cmake -D CMAKE_MODULE_PATH=$PWD ..
     - make -j 4
 
-test:
-  stage: test
-  script:
-    - make test/probe_physics_processes
-    - test/probe_physics_processes lpair elastic
+#test:
+#  stage: test
+#  script:
+#    - make test/probe_physics_processes
+#    - test/probe_physics_processes lpair elastic
