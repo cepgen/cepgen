@@ -45,7 +45,8 @@ int main( int argc, char* argv[] ) {
     return -1;
   }
 
-  if ( atoi( argv[1] )<=4 ) {
+  if ( atoi( argv[1] )<=4 and atoi( argv[1] )>0 ) {
+    // do not provide an input card
     mg.parameters->process = new GamGamLL;
     mg.parameters->in1p = 6500.;
     mg.parameters->in2p = 6500.;
@@ -55,7 +56,9 @@ int main( int argc, char* argv[] ) {
     mg.parameters->minpt = 15.;
     mg.parameters->maxgen = ngen;
     mg.parameters->remnant_mode = GenericProcess::SuriYennie;
-    mg.parameters->process_mode = ( argc>1 ) ? static_cast<Kinematics::ProcessMode>( atoi( argv[1] ) ) : Kinematics::ElasticElastic;
+    mg.parameters->process_mode = ( argc>1 )
+      ? static_cast<Kinematics::ProcessMode>( atoi( argv[1] ) )
+      : Kinematics::ElasticElastic;
     //mg.parameters->ncvg = 5e3; //FIXME
     mg.parameters->mineta = -2.5;
     mg.parameters->maxeta = 2.5;
