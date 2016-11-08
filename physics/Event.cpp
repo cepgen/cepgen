@@ -101,13 +101,7 @@ int
 Event::AddParticle( const Particle::Role& role_, bool replace_ )
 {
   if ( role_<=0 ) return -1;
-
-  np = new Particle();
-  np->role = role_;
-  int out = AddParticle( *np, replace_ );
-
-  delete np;
-  return out;
+  return AddParticle( Particle( role_ ), replace_ );
 }
 
 ParticlesRef

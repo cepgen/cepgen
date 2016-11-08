@@ -25,7 +25,7 @@ OutputHandler::EventWriter::operator<<( const Event* evt )
 #ifdef HEPMC_LINKED
     case OutputHandler::ExportHandler::HepMC:
     case OutputHandler::ExportHandler::LHE: {
-      (*fFileHandler) << evt; 
+      ( *fFileHandler ) << evt;
     } break;
 #endif
     default: return;

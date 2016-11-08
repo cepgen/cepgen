@@ -31,10 +31,10 @@ void
 GenericProcess::PrepareKinematics()
 {
   if ( !IsKinematicsDefined() ) return; // FIXME dump some information...
-  fSqS = CMEnergy( *GetParticle(Particle::IncomingBeam1 ),
-                   *GetParticle(Particle::IncomingBeam2 ) );
+  fSqS = CMEnergy( *GetParticle( Particle::IncomingBeam1 ),
+                   *GetParticle( Particle::IncomingBeam2 ) );
   fS = fSqS*fSqS;
-  
+
   Debugging( Form( "Kinematics successfully prepared! sqrt(s) = %.2f", fSqS ) );
 }
 

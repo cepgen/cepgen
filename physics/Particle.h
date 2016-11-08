@@ -203,6 +203,7 @@ class Particle {
         inline double Pz() const { return fPz; }
         /// Get the transverse momentum (in GeV)
         inline double Pt() const { return sqrt( Px()*Px()+Py()*Py() ); }
+        inline double* PRef() { return &fP; }
         /// Get the 3-momentum norm (in GeV)
         inline double P() const { return fP; }
         /// Get the squared 3-momentum norm (in \f$\text{GeV}^\text{2}\f$)

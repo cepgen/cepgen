@@ -176,11 +176,6 @@ class GenericProcess
   /// Number of events already generated
   unsigned int fNumGenEvents;
   
-  double* w1_;
-  double* w2_;
-  double* w3_;
-  double* w5_;
-  
  private:
   /**
    * Is the system's kinematics well defined and compatible with the process ?

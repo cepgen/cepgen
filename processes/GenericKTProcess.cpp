@@ -7,7 +7,7 @@ GenericKTProcess::GenericKTProcess( const std::string& name_,
                                     const Particle::ParticleCode& ip2_,
                                     const Particle::ParticleCode& op2_) :
   GenericProcess( name_+" (kT-factorisation approach)" ),
-  kNumRequiredDimensions( 4 ), kNumUserDimensions( num_user_dimensions_ ),
+  kNumUserDimensions( num_user_dimensions_ ),
   kIntermediatePart1( ip1_ ), kProducedPart1( op1_ )
 {
   if ( ip2_==Particle::invalidParticle ) kIntermediatePart2 = kIntermediatePart1;
