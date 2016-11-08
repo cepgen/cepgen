@@ -121,11 +121,6 @@ class Event {
      *  * -1 if the requested role to edit is undefined or incorrect
      */
     int AddParticle( const Particle::Role& role_, bool replace_=false );
-    //HEPEUP GetHEPEUP() const;
-    /// Store in a file (raw format) all the kinematics on the outgoing leptons
-    /// \param[in] weight_ Weight of the event
-    void Store( std::ofstream*, double weight_=1. );
-    //void Hadronise(std::string algo_="");
     /// Dump all the known information on every Particle object contained in this Event container in the output stream
     /// \param[in] stable_ Do we only show the stable particles in this event?
     void Dump( bool stable_=false ) const;
@@ -135,6 +130,7 @@ class Event {
     /// Get a vector of all particles in the event as const objects
     /// \return Vector containing all the const pointers to the Particle objects contained in the event
     Particles GetConstParticles() const;
+    /// Get the list of references to const particles contained in the event
     ConstParticlesRef GetConstParticlesRef() const;
     /// Get a vector of all stable particles in the event
     /// \return Vector containing all the pointers to the stable Particle objects contained in the event

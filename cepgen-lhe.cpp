@@ -34,7 +34,7 @@ int main( int argc, char* argv[] ) {
 
   if ( !mg.parameters->generation ) return 0;
 
-  EventWriter writer( OutputHandler::ExportHandler::HepMC, "example.dat" );
+  OutputHandler::EventWriter writer( OutputHandler::ExportHandler::HepMC, "example.dat" );
   writer.SetCrossSection( xsec, err );
 
 #ifndef HEPMC_VERSION_CODE

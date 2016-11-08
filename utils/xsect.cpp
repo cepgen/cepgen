@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "../include/MCGen.h"
+#include "core/MCGen.h"
 /**
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
  */
@@ -29,9 +29,9 @@ int main(int argc, char* argv[]) {
   ip.in2p = 3500.;
   ip.process = new GamGamLL;
   //ip.hadroniser = new Pythia6Hadroniser;
-  //ip.process_mode = GenericProcess::ElasticElastic;
-  //ip.process_mode = GenericProcess::InelasticElastic;
-  ip.process_mode = GenericProcess::InelasticInelastic;
+  //ip.process_mode = Kinematics::ElasticElastic;
+  //ip.process_mode = Kinematics::InelasticElastic;
+  ip.process_mode = Kinematics::InelasticInelastic;
   ip.pair = Particle::Muon;
   ip.remnant_mode = GenericProcess::SuriYennie;
   //ip.SetThetaRange(5., 175.);
@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
   ip.mineta =-2.5;
   ip.maxeta = 2.5;
   ip.maxmx = 1000.;
-  ip.mcut = 2;
+  ip.mcut = Kinematics::BothParticles;
   ip.minenergy = 0.;
   // DEBUG
   //ip.itvg = 5;

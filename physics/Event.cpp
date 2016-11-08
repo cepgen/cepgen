@@ -110,34 +110,6 @@ Event::AddParticle( const Particle::Role& role_, bool replace_ )
   return out;
 }
 
-void
-Event::Store( std::ofstream *of_, double weight_ )
-{
-  Particle* l1 = GetOneByRole( Particle::CentralParticle1 ),
-           *l2 = GetOneByRole( Particle::CentralParticle2 );
-  
-  *of_ << std::setw( 8 ) << l1->E() << "\t"
-       << std::setw( 8 ) << l1->GetMomentum().Px() << "\t"
-       << std::setw( 8 ) << l1->GetMomentum().Py() << "\t"
-       << std::setw( 8 ) << l1->GetMomentum().Pz() << "\t"
-       << std::setw( 8 ) << l1->GetMomentum().Pt() << "\t"
-       << std::setw( 8 ) << l1->M() << "\t"
-       << std::setw( 8 ) << l1->GetMomentum().Eta() << "\t"
-       << std::setw( 8 ) << l1->GetPDGId() << "\t"
-       << std::setw( 8 ) << weight_
-       << std::endl;
-  *of_ << std::setw( 8 ) << l2->E() << "\t"
-       << std::setw( 8 ) << l2->GetMomentum().Px() << "\t"
-       << std::setw( 8 ) << l2->GetMomentum().Py() << "\t"
-       << std::setw( 8 ) << l2->GetMomentum().Pz() << "\t"
-       << std::setw( 8 ) << l2->GetMomentum().Pt() << "\t"
-       << std::setw( 8 ) << l2->M() << "\t"
-       << std::setw( 8 ) << l2->GetMomentum().Eta() << "\t"
-       << std::setw( 8 ) << l2->GetPDGId() << "\t"
-       << std::setw( 8 ) << weight_
-       << std::endl;
-}
-
 ParticlesRef
 Event::GetParticles()
 {

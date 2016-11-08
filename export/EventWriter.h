@@ -9,31 +9,46 @@
 #include "export/LHEFHandler.h"
 #endif
 
-class EventWriter
+namespace OutputHandler
 {
- public:
+  /**
+   * \brief Generic events dumper
+   * \author Laurent Forthomme <laurent.forthomme@cern.ch>
+   * \date Sep 2016
+   */
+  class EventWriter
+  {
+   public:
 
-  EventWriter( const OutputHandler::ExportHandler::OutputType&, const char* );
-  ~EventWriter();
+    /// Class constructor
+    /// \param[in] type Requested output type
+    /// \param[in] filename Output file path
+    EventWriter( const OutputHandler::ExportHandler::OutputType& type, const char* filename );
+    ~EventWriter();
 
-  void SetCrossSection( const float& xsec, const float& err_xsec ) {
-#ifdef HEPMC_LINKED
-    if ( fFileHandler ) fFileHandler->SetCrossSection( xsec, err_xsec );
-#endif
-  }
-  void SetEventNumber( const unsigned int& ev_id ) {
-#ifdef HEPMC_LINKED
-    if ( fFileHandler ) fFileHandler->SetEventNumber( ev_id );
-#endif
-  }
+    /// Specify the process cross section and its associated error
+    void SetCrossSection( const float& xsec, const float& err_xsec ) {
+  #ifdef HEPMC_LINKED
+      if ( fFileHandler ) fFileHandler->SetCrossSection( xsec, err_xsec );
+  #endif
+    }
+    /// Specify the event number
+    void SetEventNumber( const unsigned int& ev_id ) {
+  #ifdef HEPMC_LINKED
+      if ( fFileHandler ) fFileHandler->SetEventNumber( ev_id );
+  #endif
+    }
+    /// Writer operator
+    void operator<<( const Event* );
 
-  void operator<<( const Event* );
+   private:
 
- private:
+    /// Inherited file handler
+    OutputHandler::ExportHandler* fFileHandler;
+    /// Type of output requested
+    OutputHandler::ExportHandler::OutputType fType;
 
-  OutputHandler::ExportHandler* fFileHandler;
-  OutputHandler::ExportHandler::OutputType fType;
-
-};
+  };
+}
 
 #endif

@@ -12,6 +12,7 @@
 
 #include "core/utils.h"
 
+/// A set of integer-type particle identifiers
 typedef std::set<int> ParticlesIds;
 
 /// Kinematic information for one particle
@@ -506,10 +507,15 @@ inline static double CMEnergy( const Particle::Momentum& m1, const Particle::Mom
 
 // --- particle containers
 
+/// List of Particle objects
 typedef std::vector<Particle> Particles;
+/// List of references to Particle objects
 typedef std::vector<Particle*> ParticlesRef;
+/// List of references to constant Particle objects
 typedef std::vector<const Particle*> ConstParticlesRef;
+/// List of particles' roles
 typedef std::vector<Particle::Role> ParticleRoles;
+/// Map between a particle's role and its associated Particle object
 typedef std::multimap<Particle::Role,Particle> ParticlesMap;
 
 #endif

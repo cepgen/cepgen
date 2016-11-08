@@ -1,6 +1,6 @@
 #include "EventWriter.h"
 
-EventWriter::EventWriter( const OutputHandler::ExportHandler::OutputType& type, const char* filename ) :
+OutputHandler::EventWriter::EventWriter( const OutputHandler::ExportHandler::OutputType& type, const char* filename ) :
   fFileHandler( 0 ), fType( type )
 {
   switch ( fType ) {
@@ -12,14 +12,14 @@ EventWriter::EventWriter( const OutputHandler::ExportHandler::OutputType& type, 
   }
 }
 
-EventWriter::~EventWriter()
+OutputHandler::EventWriter::~EventWriter()
 {
   // HepMC persistent objects
   if ( fFileHandler ) delete fFileHandler;
 }
 
 void
-EventWriter::operator<<( const Event* evt )
+OutputHandler::EventWriter::operator<<( const Event* evt )
 {
   switch ( fType ) {
 #ifdef HEPMC_LINKED

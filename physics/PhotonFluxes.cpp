@@ -11,17 +11,13 @@ PhotonFluxes::ProtonElastic( double x_, double kt2_ )
   const double Q2_ela = ( kt2_+x_*x_*mp2 )/( 1.-x_ );
   const FormFactors ela = ElasticFormFactors( Q2_ela, mp2 );
   
-  /*const double G_dip = 1./pow(1.+Q2_ela/0.71, 2);
-  const double G_E = G_dip;
-  const double G_M = 2.79*G_dip;*/
-
   const double ela1 = pow( kt2_/( kt2_+x_*x_*mp2 ), 2 );
   const double ela2 = ela.FE;
   //const double ela3 = 1.-(Q2_ela-kt2_)/Q2_ela;
   //const double ela3 = 1.-pow(x_, 2)*mp2/Q2_ela/(1.-x_);
   //f_ela = alpha_em/Constants::Pi*(1.-x_+pow(x_, 2)/4.)*ela1*ela2*ela3/kt2_;
   f_ela = Constants::AlphaEM/Constants::Pi*ela1*ela2/Q2_ela;
-  //f_ela = Constants::AlphaEM/Constants::Pi*((1.-x_)*ela1*ela2*ela3+pow(x_, 2)/2.*pow(G_M, 2))/kt2_;
+  //f_ela = Constants::AlphaEM/Constants::Pi*( ( 1.-x_ )*ela1*ela2*ela3 + x_*x_/2.*G_M*G_M )/kt2_;
 
   return f_ela;
 }

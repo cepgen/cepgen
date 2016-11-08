@@ -20,15 +20,18 @@ namespace OutputHandler
   class LHEFHandler : public ExportHandler
   {
    public:
-
+    /// Class constructor
+    /// \param[in] filename Output file path
     LHEFHandler( const char* filename );
+    /// Writer operator
     void operator<<( const Event* );
     
    private:
-
+    /// Fill the handler with the original Event object
     void fillEvent( const Event* );
+    /// Remove all references to the original Event object
     void clearEvent();
-
+    /// Writer object (from HepMC)
     LHEF::Writer* output;
 
   };

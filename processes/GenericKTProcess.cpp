@@ -107,20 +107,20 @@ GenericKTProcess::ComputeIncomingFluxes( double x1, double q1t2, double x2, doub
   fFlux1 = fFlux2 = 0.;
   switch ( fCuts.kinematics ) {
     case Kinematics::ElasticElastic:
-      fFlux1 = PhotonFluxes::ProtonElastic(x1, q1t2);
-      fFlux2 = PhotonFluxes::ProtonElastic(x2, q2t2);
+      fFlux1 = PhotonFluxes::ProtonElastic( x1, q1t2 );
+      fFlux2 = PhotonFluxes::ProtonElastic( x2, q2t2 );
       break;
     case Kinematics::ElasticInelastic:
-      fFlux1 = PhotonFluxes::ProtonElastic(x1, q1t2);
-      fFlux2 = PhotonFluxes::ProtonInelastic(x2, q2t2, fMY);
+      fFlux1 = PhotonFluxes::ProtonElastic( x1, q1t2 );
+      fFlux2 = PhotonFluxes::ProtonInelastic( x2, q2t2, fMY );
       break;
     case Kinematics::InelasticElastic:
-      fFlux1 = PhotonFluxes::ProtonInelastic(x1, q1t2, fMX);
-      fFlux2 = PhotonFluxes::ProtonElastic(x2, q2t2);
+      fFlux1 = PhotonFluxes::ProtonInelastic( x1, q1t2, fMX );
+      fFlux2 = PhotonFluxes::ProtonElastic( x2, q2t2 );
       break;
     case Kinematics::InelasticInelastic:
-      fFlux1 = PhotonFluxes::ProtonInelastic(x1, q1t2, fMX);
-      fFlux2 = PhotonFluxes::ProtonInelastic(x2, q2t2, fMY);
+      fFlux1 = PhotonFluxes::ProtonInelastic( x1, q1t2, fMX );
+      fFlux2 = PhotonFluxes::ProtonInelastic( x2, q2t2, fMY );
       break;
     default: return;
   }

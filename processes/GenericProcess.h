@@ -27,7 +27,9 @@ class GenericProcess
   };
   /// Human-readable format of a structure function object
   friend std::ostream& operator<<( std::ostream& os, const GenericProcess::StructureFunctions& sf );
+  /// Human-readable format dump of a GenericProcess object
   friend std::ostream& operator<<( std::ostream& os, const GenericProcess& proc );
+  /// Human-readable format dump of a pointer to a GenericProcess object
   friend std::ostream& operator<<( std::ostream& os, const GenericProcess* proc );
 
   /// Generic map of particles with their role in the process
@@ -55,13 +57,9 @@ class GenericProcess
 
  public:
   /// Set the incoming and outgoing state to be expected in the process
-  inline virtual void AddEventContent() {
-    InWarning( "Virtual method called" );
-  }
+  inline virtual void AddEventContent() { InWarning( "Virtual method called" ); }
   /// Prepare the process for its integration over the whole phase space
-  inline virtual void BeforeComputeWeight() {
-    Debugging( "Virtual method called" );  
-  }
+  inline virtual void BeforeComputeWeight() { Debugging( "Virtual method called" ); }
   /// Compute the weight for this point in the phase-space
   inline virtual double ComputeWeight() { throw Exception(__PRETTY_FUNCTION__, "Calling ComputeWeight on an invalid process!", FatalError); }
   /// Fill the Event object with the particles' kinematics
@@ -177,6 +175,11 @@ class GenericProcess
   float fTotalGenTime;
   /// Number of events already generated
   unsigned int fNumGenEvents;
+  
+  double* w1_;
+  double* w2_;
+  double* w3_;
+  double* w5_;
   
  private:
   /**

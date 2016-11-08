@@ -73,7 +73,7 @@ class GenericCanvas : public TCanvas
     }
    
     inline void Prettify( TH1* o ) {
-      Prettify( dynamic_cast<TGraph*>( o ) );
+      Prettify( o->GetXaxis(), o->GetYaxis() );
       o->SetTitle("");
     }
     inline void Prettify( TF1* o ) {

@@ -5,11 +5,6 @@
 #include "FormFactors.h"
 #include "core/Exception.h"
 
-extern "C"
-{
-  extern void grv95lo_( float&, float&, float&, float&, float&, float&, float&, float& ); // xpart,q2part,uv,dv,us,ds,ss,wg
-}
-
 namespace PhotonFluxes
 {
   /// Get the elastic flux to be expected at a given x_bjorken / kT

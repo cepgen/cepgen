@@ -16,7 +16,7 @@ class Kinematics
   ~Kinematics();
 
   /**
-   * @brief Set of cuts to apply on the central system
+   * \brief Set of cuts to apply on the central system
    * - 0 - No cuts at all (for the total cross section)
    * - 1 - Vermaserens' hypothetical detector cuts : for full central particles system,
    *   + \f$\frac{|p_z|}{|\mathbf p|}\leq\f$ 0.75 and \f$p_T\geq 1~\text{GeV}/c\f$,
@@ -26,6 +26,8 @@ class Kinematics
    * - 3 - Cuts on at least one outgoing central particle, according to the provided cut parameters
    */
   enum Cuts { NoCuts = 0, VermaserenCuts = 1, BothParticles = 2, OneParticle = 3 };
+  /// Human-readable format of a cuts mode
+  friend std::ostream& operator<<( std::ostream&, const Kinematics::Cuts& );
   /// Type of outgoing process kinematics to be considered (elastic/dissociative final states)
   enum ProcessMode {
     ElectronProton = 0,
@@ -36,7 +38,6 @@ class Kinematics
   };
   /// Human-readable format of a process mode (elastic/dissociative parts)
   friend std::ostream& operator<<( std::ostream&, const Kinematics::ProcessMode& );
-  friend std::ostream& operator<<( std::ostream&, const Kinematics::Cuts& );
   
   /// Dump all the parameters used in this process cross-section computation
   /// or events generation
@@ -48,7 +49,7 @@ class Kinematics
    *  * 2 for the proton-proton single-dissociative (or inelastic-elastic) case
    *  * 3 for the proton-proton single-dissociative (or elastic-inelastic) case
    *  * 4 for the proton-proton double-dissociative case
-   * @brief Type of kinematics to consider for the phase space
+   * \brief Type of kinematics to consider for the phase space
    */
   ProcessMode kinematics;
   /// Sets of cuts to apply on the final phase space

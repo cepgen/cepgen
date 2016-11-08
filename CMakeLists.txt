@@ -44,8 +44,9 @@ target_link_libraries(cepgen CepGenCore CepGenExternalHadronisers CepGenPhysics 
 
 find_package(HepMC)
 if(HEPMC_LIBRARIES)
+  message(STATUS "HepMC found in " ${HEPMC_INCLUDE_DIR})
   add_executable(cepgen-lhe cepgen-lhe.cpp)
-  target_link_libraries(cepgen-lhe CepGenCore CepGenExternalHadronisers CepGenPhysics CepGenProcesses CepGenExporter)
+  target_link_libraries(cepgen-lhe ${HEPMC_LIBRARIES} CepGenCore CepGenExternalHadronisers CepGenPhysics CepGenProcesses CepGenExporter)
 endif()
 
 #----- copy the input cards and other files
@@ -64,4 +65,5 @@ configure_file(${readme} ${readme} COPYONLY)
 
 #----- set the tests directory
 
-add_subdirectory("test")
+add_subdirectory(test)
+add_subdirectory(utils)

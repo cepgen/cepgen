@@ -424,8 +424,8 @@ GamGamLL::BeforeComputeWeight()
 {
   if (!GenericProcess::fIsPointSet) return;
   
-  Particle *p1 = GetParticle(Particle::IncomingBeam1),
-           *p2 = GetParticle(Particle::IncomingBeam2);
+  Particle *p1 = GetParticle( Particle::IncomingBeam1 ),
+           *p2 = GetParticle( Particle::IncomingBeam2 );
 
   _ep1 = p1->E();
   _mp1 = p1->M();
@@ -437,10 +437,10 @@ GamGamLL::BeforeComputeWeight()
   _w2 = p2->M2();
   _pp2 = p2->GetMomentum().P();
 
-  const double thetamin = EtaToTheta(fCuts.etamax),
-               thetamax = EtaToTheta(fCuts.etamin);
-  _cotth1 = 1./tan(thetamax*Constants::Pi/180.);
-  _cotth2 = 1./tan(thetamin*Constants::Pi/180.);
+  const double thetamin = EtaToTheta( fCuts.etamax ),
+               thetamax = EtaToTheta( fCuts.etamin );
+  _cotth1 = 1./tan( thetamax*Constants::Pi/180. );
+  _cotth2 = 1./tan( thetamin*Constants::Pi/180. );
   DebuggingInsideLoop(Form("cot(theta1) = %f\n\tcot(theta2) = %f", _cotth1, _cotth2));
 
   fMl12 = GetParticle(Particle::CentralParticle1)->M2();
@@ -467,8 +467,8 @@ GamGamLL::BeforeComputeWeight()
   }
   fMX = GetParticle(Particle::OutgoingBeam1)->M();
   fMY = GetParticle(Particle::OutgoingBeam2)->M();
-  fMX2 = std::pow(fMX, 2);
-  fMY2 = std::pow(fMY, 2);
+  fMX2 = fMX*fMX;
+  fMY2 = fMY*fMY;
 }
 
 double
@@ -873,33 +873,35 @@ GamGamLL::PeriPP(int nup_, int ndown_)
 
   FormFactors fp1, fp2;
 
-  switch(nup_) {
+  switch( nup_ ) {
     case 1:  fp1 = TrivialFormFactors(); break; // electron (trivial) form factor
-    case 2:  fp1 = ElasticFormFactors(-fT1, _w1); break; // proton elastic form factor
-    case 4:  fp1 = FioreBrasseFormFactors(-fT1, _w1, fMX2); break; // does not exist in CDF version
-    default: fp1 = SuriYennieFormFactors(-fT1, _w1, fMX2); break;
+    case 2:  fp1 = ElasticFormFactors( -fT1, _w1 ); break; // proton elastic form factor
+    case 4:  fp1 = FioreBrasseFormFactors( -fT1, _w1, fMX2 ); break; // does not exist in CDF version
+    //case 5:  fp1 = SzczurekUleschenkoFormFactors( -fT1, _w1, fMX2 ); break;
+    default: fp1 = SuriYennieFormFactors( -fT1, _w1, fMX2 ); break;
   }
 
-  switch(ndown_) {
+  switch( ndown_ ) {
     case 1:  fp2 = TrivialFormFactors(); break; // electron (trivial) form factor
-    case 2:  fp2 = ElasticFormFactors(-fT2, _w2); break; // proton elastic form factor
-    case 4:  fp2 = FioreBrasseFormFactors(-fT2, _w2, fMY2); break; // low-Q2 inelastic form factor
-    default: fp2 = SuriYennieFormFactors(-fT2, _w2, fMY2); break;
+    case 2:  fp2 = ElasticFormFactors( -fT2, _w2 ); break; // proton elastic form factor
+    case 4:  fp2 = FioreBrasseFormFactors( -fT2, _w2, fMY2 ); break; // low-Q2 inelastic form factor
+    //case 5:  fp2 = SzczurekUleschenkoFormFactors( -fT2, _w2, fMY2 ); break;
+    default: fp2 = SuriYennieFormFactors( -fT2, _w2, fMY2 ); break;
   }
   
-  DebuggingInsideLoop(Form("u1 = %f\n\tu2 = %f\n\tv1 = %f\n\tv2 = %f", fp1.FM, fp1.FE, fp2.FM, fp2.FE));
+  DebuggingInsideLoop( Form( "u1 = %f\n\tu2 = %f\n\tv1 = %f\n\tv2 = %f", fp1.FM, fp1.FE, fp2.FM, fp2.FE ) );
 
-  const double qqq = std::pow(_q1dq, 2),
+  const double qqq = _q1dq*_q1dq,
                qdq = 4.*fMl12-_w4;
-  const double t11 = 64. *( _bb*(qqq-_g4-qdq*(fT1+fT2+2.*fMl12))-2.*(fT1+2.*fMl12)*(fT2+2.*fMl12)*qqq)*fT1*fT2,
-               t12 = 128.*(-_bb*(_dd2+_g6)-2.*(fT1+2.*fMl12)*(_sa2*qqq+std::pow(_a6, 2)))*fT1,
-               t21 = 128.*(-_bb*(_dd4+_g5)-2.*(fT2+2.*fMl12)*(_sa1*qqq+std::pow(_a5, 2)))*fT2,
-               t22 = 512.*( _bb*(std::pow(_delta, 2)-_gram)-std::pow(_epsi-_delta*(qdq+_q1dq2), 2)-_sa1*std::pow(_a6, 2)-_sa2*std::pow(_a5, 2)-_sa1*_sa2*qqq);
+  const double t11 = 64. *(  _bb*( qqq-_g4-qdq*( fT1+fT2+2.*fMl12 ) )-2.*( fT1+2.*fMl12 )*( fT2+2.*fMl12 )*qqq ) * fT1*fT2,
+               t12 = 128.*( -_bb*( _dd2+_g6 )-2.*( fT1+2.*fMl12 )*( _sa2*qqq+_a6*_a6 ) ) * fT1,
+               t21 = 128.*( -_bb*( _dd4+_g5 )-2.*( fT2+2.*fMl12 )*( _sa1*qqq+_a5*_a5 ) ) * fT2,
+               t22 = 512.*(  _bb*( _delta*_delta-_gram )-std::pow(_epsi-_delta*(qdq+_q1dq2), 2)-_sa1*_a6*_a6-_sa2*_a5*_a5-_sa1*_sa2*qqq );
 
   const double peripp = ( fp1.FM*fp2.FM*t11
                          +fp1.FE*fp2.FM*t21
                          +fp1.FM*fp2.FE*t12
-                         +fp1.FE*fp2.FE*t22) / pow(2.*fT1*fT2*_bb, 2);
+                         +fp1.FE*fp2.FE*t22 ) / pow( 2.*fT1*fT2*_bb, 2 );
 
   DebuggingInsideLoop(Form("t11 = %5.2f\tt12 = %5.2f\n\t"
                            "t21 = %5.2f\tt22 = %5.2f\n\t"
