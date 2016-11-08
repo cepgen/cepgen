@@ -1,3 +1,5 @@
+[![build status](https://gitlab.cern.ch/lforthom/cepgen/badges/master/build.svg)](https://gitlab.cern.ch/lforthom/cepgen/commits/master)
+
 Release notes:
 --------------
 
