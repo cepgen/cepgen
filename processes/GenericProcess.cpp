@@ -34,6 +34,9 @@ GenericProcess::PrepareKinematics()
   fSqS = CMEnergy( *GetParticle( Particle::IncomingBeam1 ),
                    *GetParticle( Particle::IncomingBeam2 ) );
   fS = fSqS*fSqS;
+  
+  fW1 = GetParticle( Particle::IncomingBeam1 )->M2();
+  fW2 = GetParticle( Particle::IncomingBeam2 )->M2();
 
   Debugging( Form( "Kinematics successfully prepared! sqrt(s) = %.2f", fSqS ) );
 }
@@ -102,6 +105,62 @@ GenericProcess::SetIncomingKinematics( const Particle::Momentum& p1, const Parti
   if ( !GetParticle( Particle::IncomingBeam2 )->SetMomentum( p2 ) ) { InError( "Invalid incoming beam 2" ); }
 }
 
+void
+GenericProcess::GetFormFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const
+{
+  const double mx2 = fMX*fMX, my2 = fMY*fMY;
+
+  bool inel_p1 = false,
+       inel_p2 = false;
+
+  switch ( fCuts.kinematics ) {
+    case Kinematics::ElectronElectron: {
+      fp1 = TrivialFormFactors(); // electron (trivial) form factor
+      fp2 = TrivialFormFactors(); // electron (trivial) form factor
+    } break;
+    case Kinematics::ProtonElectron: {
+      fp1 = ElasticFormFactors( -fT1, fW1 ); // proton elastic form factor
+      fp2 = TrivialFormFactors(); // electron (trivial) form factor
+    } break;
+    case Kinematics::ElectronProton: {
+      fp1 = TrivialFormFactors(); // electron (trivial) form factor
+      fp2 = ElasticFormFactors( -fT2, fW2 ); // proton elastic form factor
+    } break;
+    case Kinematics::ElasticElastic: {
+      fp1 = ElasticFormFactors( -fT1, fW1 ); // proton elastic form factor
+      fp2 = ElasticFormFactors( -fT2, fW2 ); // proton elastic form factor
+    } break;
+    case Kinematics::ElasticInelastic: {
+      fp1 = ElasticFormFactors( -fT1, fW1 );
+      inel_p2 = true;
+    } break;
+    case Kinematics::InelasticElastic: {
+      inel_p1 = true;
+      fp2 = ElasticFormFactors( -fT2, fW2 );
+    } break;
+    case Kinematics::InelasticInelastic: {
+      inel_p1 = inel_p2 = true;
+    } break;
+  }
+  switch ( fCuts.remnant_mode ) {
+    case StructureFunctions::SuriYennie:
+    default: {
+      if ( inel_p1 ) fp1 = SuriYennieFormFactors( -fT1, fW1, mx2 );
+      if ( inel_p2 ) fp2 = SuriYennieFormFactors( -fT2, fW2, my2 );
+    } break;
+    case StructureFunctions::Fiore:
+    case StructureFunctions::FioreSea:
+    case StructureFunctions::FioreVal: { // low-Q2 inelastic form factor
+      if ( inel_p1 ) fp1 = FioreBrasseFormFactors( -fT1, fW1, mx2 );
+      if ( inel_p2 ) fp2 = FioreBrasseFormFactors( -fT2, fW2, my2 );
+    } break;
+    case StructureFunctions::SzczurekUleshchenko: {
+      if ( inel_p1 ) fp1 = SzczurekUleschenkoFormFactors( -fT1, fW1, mx2 );
+      if ( inel_p2 ) fp2 = SzczurekUleschenkoFormFactors( -fT2, fW2, my2 );
+    } break;
+  }
+}
+
 std::ostream&
 operator<<( std::ostream& os, const GenericProcess& proc )
 {
@@ -113,21 +172,5 @@ std::ostream&
 operator<<( std::ostream& os, const GenericProcess* proc )
 {
   os << proc->GetName().c_str();
-  return os;
-}
-
-std::ostream&
-operator<<( std::ostream& os, const GenericProcess::StructureFunctions& sf )
-{
-  switch (sf) {
-    case GenericProcess::Electron:            os << "electron"; break;
-    case GenericProcess::ElasticProton:       os << "elastic proton"; break;
-    case GenericProcess::SuriYennie:          os << "dissociating proton [SY structure functions]"; break;
-    case GenericProcess::SuriYennieLowQ2:     os << "dissociating proton [SY structure functions, for MX < 2 GeV, Q^2 < 5 GeV^2]"; break;
-    case GenericProcess::SzczurekUleshchenko: os << "dissociating proton [SU structure functions]"; break;
-    case GenericProcess::FioreVal:            os << "dissociating proton [parton model, only valence quarks]"; break;
-    case GenericProcess::FioreSea:            os << "dissociating proton [parton model, only sea quarks]"; break;
-    case GenericProcess::Fiore:               os << "dissociating proton [parton model, valence and sea quarks]"; break;
-  }
   return os;
 }

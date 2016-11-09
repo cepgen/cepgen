@@ -138,13 +138,33 @@ SzczurekUleschenkoFormFactors( double q2, double mi2, double mf2 )
 
   grv95lo_( x, amu2, xuv, xdv, xus, xds, xss, xg );
 
-  const double F2_aux = 4./9.*(xuv+2.*xus)
-                      + 1./9.*(xdv+2.*xds)
+  DebuggingInsideLoop( Form( "Form factor content at xB = %e (scale = %f GeV^2):\n\t"
+                             "  valence quarks: u / d     = %e / %e\n\t"
+                             "  sea quarks:     u / d / s = %e / %e / %e\n\t"
+                             "  gluons:                   = %e",
+                             x, amu2, xuv, xdv, xus, xds, xss, xg ) );
+
+  const double F2_aux = 4./9.*( xuv+2.*xus )
+                      + 1./9.*( xdv+2.*xds )
                       + 1./9.*2.*xss;
+  /*const double F2_aux = 4./9.*( xuv + 2.*xus )
+                      + 1./9.*( 0. + 2.*xds )
+                      + 1./9.*2.*xss;*/
 
   // F2 corrected for low Q^2 behaviour
   const double F2_corr = q2/amu2*F2_aux,
-               F1 = F2_corr/(2.*x); // Callan-Gross relation
+               F1 = F2_corr/( 2.*x ); // Callan-Gross relation
+
+  /*const double F2_corr = Q2 / ( Q2+Q02 ) * F2_aux;
+  ///////term1 = pow(1.- x_/2.*(mx2-mp2+Q2)/Q2, 2);
+  //term1 = (1.-x_*(mx2-mp2+Q2)/Q2);
+  term1 = ( 1. - ( Q2-kt2_ ) / Q2 );
+  //term1 = (1.-Q2min/Q2);
+  //term1 = 1.;
+  term2 = pow( kt2_ / ( kt2_+x_*(mx2-mp2)+x_*x_*mp2 ), 2 );
+  f_aux = F2_corr/( mx2+Q2-mp2 )*term1*term2;
+  f_ine = Constants::AlphaEM/Constants::Pi*( 1.-x_ )*f_aux/kt2_;
+  return f_ine;*/
 
   const double w2 = k*x/q2*F2_corr,
                w1 = 2.*F1/k;

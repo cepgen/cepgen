@@ -6,7 +6,8 @@
 #include <algorithm>
 #include <string>
 
-#include "utils.h"
+#include "core/utils.h"
+#include "physics/StructureFunctions.h"
 
 /// List of kinematic cuts to apply on the central and outgoing phase space.
 class Kinematics
@@ -34,7 +35,9 @@ class Kinematics
     ElasticElastic = 1,
     ElasticInelastic = 2,
     InelasticElastic = 3,
-    InelasticInelastic = 4
+    InelasticInelastic = 4,
+    ProtonElectron,
+    ElectronElectron
   };
   /// Human-readable format of a process mode (elastic/dissociative parts)
   friend std::ostream& operator<<( std::ostream&, const Kinematics::ProcessMode& );
@@ -52,6 +55,7 @@ class Kinematics
    * \brief Type of kinematics to consider for the phase space
    */
   ProcessMode kinematics;
+  StructureFunctions remnant_mode;
   /// Sets of cuts to apply on the final phase space
   Cuts mode;
   /// Minimal transverse momentum of the single outgoing leptons

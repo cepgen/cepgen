@@ -115,16 +115,12 @@ class GamGamLL : public GenericProcess
   double _ep1;
   /// \f$m_1\f$, mass of the first proton-like incoming particle
   double _mp1;
-  /// \f$m_1^2\f$, squared mass of the first proton-like incoming particle
-  double _w1;
   /// \f$\left|\mathbf p_2\right|\f$, 3-momentum norm of the second proton-like incoming particle
   double _pp2;
   /// \f$E_2\f$, energy of the second proton-like incoming particle
   double _ep2;
   /// \f$m_2\f$, mass of the second proton-like incoming particle
   double _mp2;
-  /// \f$m_2^2\f$, squared mass of the second proton-like incoming particle
-  double _w2;
   /// \f$m_3^2\f$, squared mass of the first proton-like outgoing particle
   double fMX2;
   /// \f$\left|\mathbf p_4\right|\f$, 3-momentum norm of the two-photon central system
@@ -196,14 +192,10 @@ class GamGamLL : public GenericProcess
   // --- EXTRA common block
   
   double fS1, fS2;
-  /// Virtuality of the first incoming photon
-  double fT1;
   /// Minimal virtuality of the first incoming photon allowed by the kinematics constraints
   double fT1min;
   /// Maximal virtuality of the first incoming photon allowed by the kinematics constraints
   double fT1max;
-  /// Virtuality of the second incoming photon
-  double fT2;
   /// Minimal virtuality of the second incoming photon allowed by the kinematics constraints
   double fT2min;
   /// Maximal virtuality of the second incoming photon allowed by the kinematics constraints

@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
   //ip.process_mode = Kinematics::InelasticElastic;
   ip.process_mode = Kinematics::InelasticInelastic;
   ip.pair = Particle::Muon;
-  ip.remnant_mode = GenericProcess::SuriYennie;
+  ip.remnant_mode = SuriYennie;
   //ip.SetThetaRange(5., 175.);
   //ip.SetThetaRange(0., 180.);
   ip.mineta =-2.5;

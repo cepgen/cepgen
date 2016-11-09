@@ -1,7 +1,7 @@
 #include "Kinematics.h"
 
 Kinematics::Kinematics() :
-  kinematics( ElasticElastic ), mode( NoCuts ),
+  kinematics( ElasticElastic ), remnant_mode( SuriYennie ), mode( NoCuts ),
   ptmin( 3. ), ptmax( -1. ), emin( 0. ), emax( -1. ), etamin( -999. ), etamax( 999. ),
   mxmin( 1.07 ), mxmax( 320. ),
   q2min( 0. ), q2max( 1.e5 ), wmin( 0. ), wmax( -1. ),
@@ -36,7 +36,9 @@ std::ostream&
 operator<<( std::ostream& os, const Kinematics::ProcessMode& pm )
 {
   switch ( pm ) {
+    case Kinematics::ElectronElectron:    os << "electron/electron"; break;
     case Kinematics::ElectronProton:      os << "electron/proton"; break;
+    case Kinematics::ProtonElectron:      os << "proton/electron"; break;
     case Kinematics::ElasticElastic:      os << "elastic/elastic"; break;
     case Kinematics::InelasticElastic:    os << "inelastic/elastic"; break;
     case Kinematics::ElasticInelastic:    os << "elastic/inelastic"; break;

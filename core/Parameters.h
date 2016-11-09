@@ -44,7 +44,7 @@ class Parameters {
 
     /// Type of remnant fragmentation algorithm to use
     /// \note Was named PMOD/EMOD in ILPAIR
-    GenericProcess::StructureFunctions remnant_mode;
+    StructureFunctions remnant_mode;
 
     //----- events kinematics
     /// First incoming particle's momentum (in \f$\text{GeV}/c\f$)

@@ -2,7 +2,7 @@
 
 GamGamLL::GamGamLL(int nOpt_) : GenericProcess("pp -> p(*) (gamma gamma -> l+ l-) p(*)"),
   _nOpt(nOpt_),
-  _ep1( -1. ), _w1( -1. ), _ep2( -1. ), _w2( -1. ),
+  _ep1( -1. ), _ep2( -1. ),
   fMX2( -1. ), _w4( -1. ), fMY2( -1. ), fMl12( -1. ), fMl22( -1. ),
   _p12( 0. ), _p13( 0. ), _p14( 0. ), _p15( 0. ),
   _p23( 0. ), _p24( 0. ), _p25( 0. ), _p34( 0. ), _p35( 0. ), _p45( 0. ),
@@ -68,12 +68,12 @@ GamGamLL::Pickin()
 
   // Mass difference between the first outgoing particle and the first incoming
   // particle
-  _w31 = fMX2-_w1;
+  _w31 = fMX2-fW1;
   // Mass difference between the second outgoing particle and the second
   // incoming particle
-  _w52 = fMY2-_w2;
+  _w52 = fMY2-fW2;
   // Mass difference between the two incoming particles
-  _w12 = _w1-_w2;
+  _w12 = fW1-fW2;
   // Mass difference between the central two-photons system and the second
   // outgoing particle
   const double d6 = _w4-fMY2;
@@ -83,13 +83,13 @@ GamGamLL::Pickin()
                            "w3 = %f\n\t"
                            "w4 = %f\n\t"
                            "w5 = %f",
-                           _w1, _w2, fMX2, _w4, fMY2));
+                           fW1, fW2, fMX2, _w4, fMY2));
 
   //Info(Form("w31 = %f\n\tw52 = %f\n\tw12 = %f", _w31, _w52, _w12));
   
   const double ss = fS+_w12;
   
-  const double rl1 = std::pow(ss, 2)-4.*_w1*fS; // lambda(s, m1**2, m2**2)
+  const double rl1 = std::pow(ss, 2)-4.*fW1*fS; // lambda(s, m1**2, m2**2)
   if (rl1<=0.) { InWarning(Form("rl1 = %f <= 0", rl1)); return false; }
   _sl1 = std::sqrt(rl1);
 
@@ -105,21 +105,21 @@ GamGamLL::Pickin()
   //std::cout << "s=" << _s << ", w3=" << fMX2 << ", sig1=" << sig1 << std::endl;
   const double sp = fS+fMX2-sig1;
 
-  _d3 = sig1-_w2;
+  _d3 = sig1-fW2;
 
   const double rl2 = std::pow(sp, 2)-4.*fS*fMX2; // lambda(s, m3**2, sigma)
   if (rl2<=0.) { InWarning(Form("rl2 = %f <= 0", rl2)); return false; }
   sl2 = std::sqrt(rl2);
 
   //std::cout << "ss=" << ss << ", sp=" << sp << ", sl1=" << _sl1 << ", sl2=" << sl2 << std::endl;
-  fT1max = _w1+fMX2-(ss*sp+_sl1*sl2)/(2.*fS); // definition from eq. (A.4) in [1]
-  fT1min = (_w31*_d3+(_d3-_w31)*(_d3*_w1-_w31*_w2)/fS)/fT1max; // definition from eq. (A.5) in [1]
+  fT1max = fW1+fMX2-(ss*sp+_sl1*sl2)/(2.*fS); // definition from eq. (A.4) in [1]
+  fT1min = (_w31*_d3+(_d3-_w31)*(_d3*fW1-_w31*fW2)/fS)/fT1max; // definition from eq. (A.5) in [1]
 
   // FIXME dropped in CDF version
-  if (fT1max>-fCuts.q2min) { InWarning(Form("t1max = %f > -q2min = %f", fT1max, -fCuts.q2min)); return false; }
-  if (fT1min<-fCuts.q2max and fCuts.q2max>=0.) { InWarning(Form("t1min = %f < -q2max = %f", fT1min, -fCuts.q2max)); return false; }
-  if (fT1max<-fCuts.q2max and fCuts.q2max>=0.) fT1max = -fCuts.q2max;
-  if (fT1min>-fCuts.q2min)                     fT1min = -fCuts.q2min;
+  if ( fT1max>-fCuts.q2min ) { InWarning( Form( "t1max = %f > -q2min = %f", fT1max, -fCuts.q2min ) ); return false; }
+  if ( fT1min<-fCuts.q2max and fCuts.q2max>=0. ) { InWarning(Form("t1min = %f < -q2max = %f", fT1min, -fCuts.q2max ) ); return false; }
+  if ( fT1max<-fCuts.q2max and fCuts.q2max>=0. ) fT1max = -fCuts.q2max;
+  if ( fT1min>-fCuts.q2min )                     fT1min = -fCuts.q2min;
   /////
 
   // t1, the first photon propagator, is defined here
@@ -131,25 +131,25 @@ GamGamLL::Pickin()
                        "(t1min, t1max) = (%f, %f)", fT1, fT1min, fT1max));
 
   _dd4 = _w4-fT1;
-  const double d8 = fT1-_w2;
+  const double d8 = fT1-fW2;
 
-  t13 = fT1-_w1-fMX2;
+  t13 = fT1-fW1-fMX2;
 
-  _sa1 =-std::pow(fT1-_w31, 2)/4.+_w1*fT1;
+  _sa1 =-std::pow(fT1-_w31, 2)/4.+fW1*fT1;
   if (_sa1>=0.) { InWarning(Form("_sa1 = %f >= 0", _sa1)); return false; }
 
   sl3 = std::sqrt(-_sa1);
 
   // one computes splus and (s2x=s2max)
-  if (_w1!=0.) {
-    sb =(fS*(fT1-_w31)+_w12*t13)/(2.*_w1)+fMX2;
-    sd = _sl1*sl3/_w1;
-    se =(fS*(fT1*(fS+t13-_w2)-_w2*_w31)+fMX2*(_w12*d8+_w2*fMX2))/_w1;
+  if (fW1!=0.) {
+    sb =(fS*(fT1-_w31)+_w12*t13)/(2.*fW1)+fMX2;
+    sd = _sl1*sl3/fW1;
+    se =(fS*(fT1*(fS+t13-fW2)-fW2*_w31)+fMX2*(_w12*d8+fW2*fMX2))/fW1;
     if (fabs((sb-sd)/sd)>=1.) { splus = sb-sd; s2max = se/splus; }
     else                      { s2max = sb+sd; splus = se/s2max; }
   }
   else { // 3
-    s2max = (fS*(fT1*(fS+d8-fMX2)-_w2*fMX2)+_w2*fMX2*(_w2+fMX2-fT1))/(ss*t13);
+    s2max = (fS*(fT1*(fS+d8-fMX2)-fW2*fMX2)+fW2*fMX2*(fW2+fMX2-fT1))/(ss*t13);
     splus = sig2;
   }
   // 4
@@ -163,7 +163,7 @@ GamGamLL::Pickin()
       DebuggingInsideLoop(Form("sig2 truncated to splus = %f", splus));
     }
     if (_nOpt<-1) { Map(x(2), sig2, s2max, &fS2, &ds2, "s2"); }
-    else          { Mapla(fT1, _w2, x(2), sig2, s2max, &fS2, &ds2); } // _nOpt==-1
+    else          { Mapla(fT1, fW2, x(2), sig2, s2max, &fS2, &ds2); } // _nOpt==-1
     s2x = fS2;
   }
   else if (_nOpt==0) { s2x = fS2; } // 6
@@ -174,13 +174,13 @@ GamGamLL::Pickin()
   const double r1 = s2x-d8,
                r2 = s2x-d6;
   
-  const double rl4 = (std::pow(r1, 2)-4.*_w2*s2x)*(std::pow(r2, 2)-4.*fMY2*s2x);
+  const double rl4 = (std::pow(r1, 2)-4.*fW2*s2x)*(std::pow(r2, 2)-4.*fMY2*s2x);
   if (rl4<=0.) { InWarning(Form("rl4 = %f <= 0", rl4)); return false; }
   sl4 = std::sqrt(rl4);
   
   // t2max, t2min definitions from eq. (A.12) and (A.13) in [1]
-  fT2max = _w2+fMY2-(r1*r2+sl4)/(2.*s2x);
-  fT2min = (_w52*_dd4+(_dd4-_w52)*(_dd4*_w2-_w52*fT1)/s2x)/fT2max;
+  fT2max = fW2+fMY2-(r1*r2+sl4)/(2.*s2x);
+  fT2min = (_w52*_dd4+(_dd4-_w52)*(_dd4*fW2-_w52*fT1)/s2x)/fT2max;
 
   // t2, the second photon propagator, is defined here
   Map(x(1), fT2min, fT2max, &fT2, &dt2, "t2");
@@ -195,11 +195,11 @@ GamGamLL::Pickin()
 
   DebuggingInsideLoop(Form("r1 = %f\n\tr2 = %f\n\tr3 = %f\n\tr4 = %f", r1, r2, r3, r4));
 
-  b = r3*r4-2.*(fT1+_w2)*fT2;
-  c = fT2*d6*d8+(d6-d8)*(d6*_w2-d8*fMY2);
-  t25 = fT2-_w2-fMY2;
+  b = r3*r4-2.*(fT1+fW2)*fT2;
+  c = fT2*d6*d8+(d6-d8)*(d6*fW2-d8*fMY2);
+  t25 = fT2-fW2-fMY2;
 
-  _sa2 = -std::pow(r4, 2)/4.+_w2*fT2;
+  _sa2 = -std::pow(r4, 2)/4.+fW2*fT2;
   if (_sa2>=0.) { InWarning(Form("_sa2 = %f >= 0", _sa2)); return false; }
   
   sl6 = 2.*std::sqrt(-_sa2);
@@ -219,11 +219,11 @@ GamGamLL::Pickin()
   }
   // 9
   if (_nOpt>1)       Map(x(2), s2min, s2max, &fS2, &ds2, "s2");
-  else if (_nOpt==1) Mapla(fT1, _w2, x(2), s2min, s2max, &fS2, &ds2);
+  else if (_nOpt==1) Mapla(fT1, fW2, x(2), s2min, s2max, &fS2, &ds2);
 
   const double ap = -std::pow(fS2+d8, 2)/4.+fS2*fT1;
   //Info(Form("s2 = %f, s2max = %f, splus = %f", fS2, s2max, splus));
-  if (_w1!=0.) _dd1 = -_w1*(fS2-s2max)*(fS2-splus)/4.; // 10
+  if (fW1!=0.) _dd1 = -fW1*(fS2-s2max)*(fS2-splus)/4.; // 10
   else         _dd1 = ss*t13*(fS2-s2max)/4.;
   // 11
   _dd2 = -fT2*(fS2-s2p)*(fS2-s2min)/4.;
@@ -231,14 +231,14 @@ GamGamLL::Pickin()
   
   const double yy4 = cos(Constants::Pi*x(3));
   const double dd = _dd1*_dd2;
-  _p12 = (fS-_w1-_w2)/2.;
-  const double st = fS2-fT1-_w2;
-  const double delb = (2.*_w2*r3+r4*st)*(4.*_p12*fT1-(fT1-_w31)*st)/(16.*ap);
+  _p12 = (fS-fW1-fW2)/2.;
+  const double st = fS2-fT1-fW2;
+  const double delb = (2.*fW2*r3+r4*st)*(4.*_p12*fT1-(fT1-_w31)*st)/(16.*ap);
 
   if (dd<=0.) { InWarning(Form("dd = %e <= 0\n\tdd1 = %e\tdd2 = %e", dd, _dd1, _dd2)); return false; }
 
   _delta = delb-yy4*st*std::sqrt(dd)/(2.*ap);
-  fS1 = fT2+_w1+(2.*_p12*r3-4.*_delta)/st;
+  fS1 = fT2+fW1+(2.*_p12*r3-4.*_delta)/st;
 
   if (ap>=0.) { InWarning(Form("ap = %f >= 0", ap)); return false; }
 
@@ -250,42 +250,42 @@ GamGamLL::Pickin()
 
   _p13 = -t13/2.;
   _p14 = (tau+fS1-fMX2)/2.;
-  _p15 = (fS+fT2-fS1-_w2)/2.;
-  _p23 = (fS+fT1-fS2-_w1)/2.;
+  _p15 = (fS+fT2-fS1-fW2)/2.;
+  _p23 = (fS+fT1-fS2-fW1)/2.;
   _p24 = (fS2-tau-fMY2)/2.;
   _p25 = -t25/2.;
   _p34 = (fS1-fMX2-_w4)/2.;
   _p35 = (fS+_w4-fS1-fS2)/2.;
   _p45 = (fS2-_w4-fMY2)/2.;
 
-  _p1k2 = (fS1-fT2-_w1)/2.;
+  _p1k2 = (fS1-fT2-fW1)/2.;
   _p2k1 = st/2.;
 
-  if (_w2!=0.) {
-    const double sbb = (fS*(fT2-_w52)-_w12*t25)/(2.*_w2)+fMY2,
-                 sdd = _sl1*sl6/(2.*_w2),
-                 see = (fS*(fT2*(fS+t25-_w1)-_w1*_w52)+fMY2*(_w1*fMY2-_w12*(fT2-_w1)))/_w2;
+  if (fW2!=0.) {
+    const double sbb = (fS*(fT2-_w52)-_w12*t25)/(2.*fW2)+fMY2,
+                 sdd = _sl1*sl6/(2.*fW2),
+                 see = (fS*(fT2*(fS+t25-fW1)-fW1*_w52)+fMY2*(fW1*fMY2-_w12*(fT2-fW1)))/fW2;
     if (sbb/sdd>=0.) { s1p = sbb+sdd; s1m = see/s1p; }
     else             { s1m = sbb-sdd; s1p = see/s1m; } // 12
-    _dd3 = -_w2*(s1p-fS1)*(s1m-fS1)/4.; // 13
+    _dd3 = -fW2*(s1p-fS1)*(s1m-fS1)/4.; // 13
   }
   else { // 14
-    s1p = (fS*(fT2*(fS-fMY2+fT2-_w1)-_w1*fMY2)+_w1*fMY2*(_w1+fMY2-fT2))/(t25*(fS-_w12));
+    s1p = (fS*(fT2*(fS-fMY2+fT2-fW1)-fW1*fMY2)+fW1*fMY2*(fW1+fMY2-fT2))/(t25*(fS-_w12));
     _dd3 = -t25*(fS-_w12)*(s1p-fS1)/4.;
   }
   // 15
   _acc3 = (s1p-fS1)/(s1p+fS1);
 
-  const double ssb = fT2+_w1-r3*(_w31-fT1)/(2.*fT1),
+  const double ssb = fT2+fW1-r3*(_w31-fT1)/(2.*fT1),
                ssd = sl3*sl7/fT1,
-               sse = (fT2-_w1)*(_w4-fMX2)+(fT2-_w4+_w31)*((fT2-_w1)*fMX2-(_w4-fMX2)*_w1)/fT1;
+               sse = (fT2-fW1)*(_w4-fMX2)+(fT2-_w4+_w31)*((fT2-fW1)*fMX2-(_w4-fMX2)*fW1)/fT1;
 
   if (ssb/ssd>=0.) { s1pp = ssb+ssd; s1pm = sse/s1pp; }
   else             { s1pm = ssb-ssd; s1pp = sse/s1pm; } // 16
   // 17
   _dd4 = -fT1*(fS1-s1pp)*(fS1-s1pm)/4.;
   _acc4 = (fS1-s1pm)/(fS1+s1pm);
-  _dd5 = _dd1+_dd3+((_p12*(fT1-_w31)/2.-_w1*_p2k1)*(_p2k1*(fT2-_w52)-_w2*r3)-_delta*(2.*_p12*_p2k1-_w2*(fT1-_w31)))/_p2k1;
+  _dd5 = _dd1+_dd3+((_p12*(fT1-_w31)/2.-fW1*_p2k1)*(_p2k1*(fT2-_w52)-fW2*r3)-_delta*(2.*_p12*_p2k1-fW2*(fT1-_w31)))/_p2k1;
 
   return true;
 }
@@ -429,44 +429,41 @@ GamGamLL::BeforeComputeWeight()
 
   _ep1 = p1->E();
   _mp1 = p1->M();
-  _w1 = p1->M2();
   _pp1 = p1->GetMomentum().P();
 
   _ep2 = p2->E();
   _mp2 = p2->M();
-  _w2 = p2->M2();
   _pp2 = p2->GetMomentum().P();
 
   const double thetamin = EtaToTheta( fCuts.etamax ),
                thetamax = EtaToTheta( fCuts.etamin );
   _cotth1 = 1./tan( thetamax*Constants::Pi/180. );
   _cotth2 = 1./tan( thetamin*Constants::Pi/180. );
-  DebuggingInsideLoop(Form("cot(theta1) = %f\n\tcot(theta2) = %f", _cotth1, _cotth2));
+  DebuggingInsideLoop( Form( "cot(theta1) = %f\n\tcot(theta2) = %f", _cotth1, _cotth2 ) );
 
-  fMl12 = GetParticle(Particle::CentralParticle1)->M2();
-  fMl22 = GetParticle(Particle::CentralParticle2)->M2();
+  fMl12 = GetParticle( Particle::CentralParticle1 )->M2();
+  fMl22 = GetParticle( Particle::CentralParticle2 )->M2();
   
-  double m;
   switch (fCuts.kinematics) {
-  case Kinematics::ElectronProton:
-    { InError("Electron/Proton case not supported yet!"); }
-  case Kinematics::ElasticElastic:
-    _dw31 = _dw52 = 0.; break;
-  case Kinematics::ElasticInelastic:
-  case Kinematics::InelasticElastic:
-    m = ComputeOutgoingPrimaryParticlesMasses(x(7), GetParticle(Particle::IncomingBeam1)->M(), GetParticle(Particle::CentralParticle1)->M(), &_dw31);
-    GetParticle(Particle::OutgoingBeam1)->SetM(m);
-    GetParticle(Particle::OutgoingBeam2)->SetM(Particle::GetMassFromPDGId(GetParticle(Particle::OutgoingBeam2)->GetPDGId())); //FIXME
-    break;
-  case Kinematics::InelasticInelastic:
-    m = ComputeOutgoingPrimaryParticlesMasses(x(7), GetParticle(Particle::IncomingBeam2)->M(), GetParticle(Particle::CentralParticle1)->M(), &_dw31);
-    GetParticle(Particle::OutgoingBeam1)->SetM(m);
-    m = ComputeOutgoingPrimaryParticlesMasses(x(8), GetParticle(Particle::OutgoingBeam1)->M(), GetParticle(Particle::CentralParticle1)->M(), &_dw52);
-    GetParticle(Particle::OutgoingBeam2)->SetM(m);
-    break;
+    case Kinematics::ElectronProton: default:
+      { InError("Case not supported yet!"); } break;
+    case Kinematics::ElasticElastic:
+      _dw31 = _dw52 = 0.; break;
+    case Kinematics::ElasticInelastic:
+    case Kinematics::InelasticElastic: {
+      const double m = ComputeOutgoingPrimaryParticlesMasses( x(7), GetParticle( Particle::IncomingBeam1 )->M(), GetParticle( Particle::CentralParticle1 )->M(), &_dw31 );
+      GetParticle( Particle::OutgoingBeam1 )->SetM( m );
+      GetParticle( Particle::OutgoingBeam2 )->SetM( Particle::GetMassFromPDGId( GetParticle( Particle::OutgoingBeam2 )->GetPDGId() ) ); //FIXME
+    } break;
+    case Kinematics::InelasticInelastic: {
+      const double mx = ComputeOutgoingPrimaryParticlesMasses( x(7), GetParticle( Particle::IncomingBeam2 )->M(), GetParticle( Particle::CentralParticle1 )->M(), &_dw31 );
+      GetParticle(Particle::OutgoingBeam1)->SetM( mx );
+      const double my = ComputeOutgoingPrimaryParticlesMasses( x(8), GetParticle( Particle::OutgoingBeam1 )->M(), GetParticle( Particle::CentralParticle1 )->M(), &_dw52 );
+      GetParticle(Particle::OutgoingBeam2)->SetM( my );
+    } break;
   }
-  fMX = GetParticle(Particle::OutgoingBeam1)->M();
-  fMY = GetParticle(Particle::OutgoingBeam2)->M();
+  fMX = GetParticle( Particle::OutgoingBeam1 )->M();
+  fMY = GetParticle( Particle::OutgoingBeam2 )->M();
   fMX2 = fMX*fMX;
   fMY2 = fMY*fMY;
 }
@@ -478,7 +475,6 @@ GamGamLL::ComputeWeight()
   //                P5-->_pp5
   double weight;
   double dw4;
-  double wmin, wmax;
   double stg, cpg, spg, ctg;
 
   double qcx, qcz;
@@ -493,60 +489,60 @@ GamGamLL::ComputeWeight()
 
   weight = 0.;
 
-  if (!fIsOutStateSet) { InWarning("Output state not set!"); return 0.; }
+  if ( !fIsOutStateSet ) { InWarning( "Output state not set!" ); return 0.; }
 
-  if (fCuts.wmax<0) fCuts.wmax = fS;
+  if ( fCuts.wmax<0 ) fCuts.wmax = fS;
 
   // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
-  wmin = std::pow(GetParticle(Particle::CentralParticle1)->M()+GetParticle(Particle::CentralParticle2)->M(),2);
-  if (fabs(wmin)<fabs(fCuts.wmin)) wmin = fCuts.wmin;
+  double wmin = std::pow( GetParticle( Particle::CentralParticle1 )->M()+GetParticle( Particle::CentralParticle2 )->M(), 2 );
+  if ( fabs( wmin )<fabs( fCuts.wmin ) ) wmin = fCuts.wmin;
 
   // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or _wmax if specified)
-  wmax = std::pow(fSqS-fMX-fMY,2);
-  DebuggingInsideLoop(Form("sqrt(s)=%f\n\tm(X1)=%f\tm(X2)=%f", fSqS, fMX, fMY));
-  if (fabs(wmax)>fabs(fCuts.wmax)) wmax = fCuts.wmax;
+  double wmax = std::pow( fSqS-fMX-fMY, 2 );
+  DebuggingInsideLoop( Form("sqrt(s)=%f\n\tm(X1)=%f\tm(X2)=%f", fSqS, fMX, fMY ) );
+  if ( fabs( wmax )>fabs( fCuts.wmax ) ) wmax = fCuts.wmax;
   
-  DebuggingInsideLoop(Form("wmin = %f\n\twmax = %f\n\twmax/wmin = %f", wmin, wmax, wmax/wmin));
+  DebuggingInsideLoop( Form( "wmin = %f\n\twmax = %f\n\twmax/wmin = %f", wmin, wmax, wmax/wmin ) );
   
-  Map(x(4), wmin, wmax, &_w4, &dw4, "w4");
-  _mc4 = std::sqrt(_w4);
+  Map( x(4), wmin, wmax, &_w4, &dw4, "w4" );
+  _mc4 = std::sqrt( _w4 );
   
-  DebuggingInsideLoop(Form("Computed value for w4 = %f -> mc4 = %f", _w4, _mc4));
+  DebuggingInsideLoop( Form( "Computed value for w4 = %f -> mc4 = %f", _w4, _mc4 ) );
   
-  if (!Orient()) return 0.;
+  if ( !Orient() ) return 0.;
 
-  if (fT1>0.)  { InWarning(Form("t1 = %f > 0", fT1)); return 0.; }
-  if (fT2>0.)  { InWarning(Form("t2 = %f > 0", fT2)); return 0.; }
-  if (fJacobian==0.) { InWarning(Form("dj = %f", fJacobian)); return 0.; }
+  if ( fT1>0. )  { InWarning( Form( "t1 = %f > 0", fT1 ) ); return 0.; }
+  if ( fT2>0. )  { InWarning( Form( "t2 = %f > 0", fT2 ) ); return 0.; }
+  if ( fJacobian==0. ) { InWarning( Form( "dj = %f", fJacobian ) ); return 0.; }
   
-  const double ecm6 = (_w4+fMl12-fMl22)/(2.*_mc4);
-  const double pp6cm = std::sqrt(std::pow(ecm6, 2)-fMl12);
+  const double ecm6 = ( _w4+fMl12-fMl22 ) / ( 2.*_mc4 ),
+               pp6cm = std::sqrt( ecm6*ecm6-fMl12 );
   
   fJacobian *= dw4*pp6cm/(_mc4*Constants::sconstb*fS);
   
   // Let the most obscure part of this code begin...
 
-  const double e1mp1 = _w1/(_ep1+_p),
-               e3mp3 = fMX2/(fP3lab.E()+fP3lab.P());
+  const double e1mp1 = fW1 / ( _ep1+_p ),
+               e3mp3 = fMX2 / ( fP3lab.E()+fP3lab.P() );
 
-  const double al3 = std::pow(sin(fP3lab.Theta()), 2)/(1.+(fP3lab.Theta()));
+  const double al3 = std::pow( sin( fP3lab.Theta() ), 2 )/( 1.+( fP3lab.Theta() ) );
 
   // 2-photon system kinematics ?!
-  const double eg = (_w4+fT1-fT2)/(2.*_mc4);
-  double pg = std::sqrt(std::pow(eg, 2)-fT1);
-  const double pgx = -fP3lab.Px()*_ct4-_st4*(_de3-e1mp1+e3mp3+fP3lab.P()*al3),
+  const double eg = ( _w4+fT1-fT2 )/( 2.*_mc4 );
+  double pg = std::sqrt( eg*eg-fT1 );
+  const double pgx = -fP3lab.Px()*_ct4-_st4*( _de3-e1mp1 + e3mp3 + fP3lab.P()*al3 ),
                pgy = -fP3lab.Py(),
-               pgz = _mc4*_de3/(_ec4+_pc4)-_ec4*_de3*_al4/_mc4-fP3lab.Px()*_ec4*_st4/_mc4+_ec4*_ct4/_mc4*(fP3lab.P()*al3+e3mp3-e1mp1);
+               pgz = _mc4*_de3/( _ec4+_pc4 )-_ec4*_de3*_al4/_mc4-fP3lab.Px()*_ec4*_st4/_mc4+_ec4*_ct4/_mc4*( fP3lab.P()*al3+e3mp3-e1mp1 );
   
-  DebuggingInsideLoop(Form("pg3 = (%f, %f, %f)\n\t"
-                           "pg3^2 = %f",
-                           pgx, pgy, pgz,
-                           std::sqrt(std::pow(pgx, 2)+std::pow(pgy, 2)+std::pow(pgz, 2))
+  DebuggingInsideLoop( Form( "pg3 = (%f, %f, %f)\n\t"
+                             "pg3^2 = %f",
+                             pgx, pgy, pgz,
+                             std::sqrt( pgx*pgx+pgy*pgy+pgz*pgz )
                           ));
   
-  const double pgp = std::sqrt(std::pow(pgx, 2)+std::pow(pgy, 2)), // outgoing proton (3)'s transverse momentum
-               pgg = std::sqrt(std::pow(pgp, 2)+std::pow(pgz, 2)); // outgoing proton (3)'s momentum
-  if (pgg>pgp*.9 && pgg>pg) { pg = pgg; } //FIXME ???
+  const double pgp = std::sqrt( pgx*pgx + pgy*pgy ), // outgoing proton (3)'s transverse momentum
+               pgg = std::sqrt( pgp*pgp + pgz*pgz ); // outgoing proton (3)'s momentum
+  if ( pgg>pgp*.9 and pgg>pg ) { pg = pgg; } //FIXME ???
   
   // Phi angle for the 2-photon system ?!
   cpg = pgx/pgp;
@@ -554,37 +550,37 @@ GamGamLL::ComputeWeight()
   
   // Theta angle for the 2-photon system ?!
   stg = pgp/pg;
-  ctg = std::sqrt(1.-std::pow(stg, 2));
-  if (pgz<0.) ctg *= -1.;
+  ctg = std::sqrt( 1.-stg*stg );
+  if ( pgz<0. ) ctg *= -1.;
   
   double xx6 = x(5);
   
   const double amap = (_w4-fT1-fT2)/2.,
                bmap = std::sqrt((std::pow(_w4-fT1-fT2, 2)-4.*fT1*fT2)*(1.-4.*fMl12/_w4))/2.,
-               ymap = (amap+bmap)/(amap-bmap),
-               beta = std::pow(ymap, (double)(2.*xx6-1.));
-  xx6 = (amap/bmap*(beta-1.)/(beta+1.)+1.)/2.;
-  if (xx6>1.) xx6 = 1.;
-  if (xx6<0.) xx6 = 0.;
+               ymap = ( amap+bmap )/( amap-bmap ),
+               beta = std::pow( ymap, static_cast<double>( 2.*xx6-1.) );
+  xx6 = ( amap/bmap*( beta-1. )/( beta+1. )+1. )/2.;
+  if ( xx6>1. ) xx6 = 1.;
+  if ( xx6<0. ) xx6 = 0.;
   
-  DebuggingInsideLoop(Form("amap = %f\n\tbmap = %f\n\tymap = %f\n\tbeta = %f", amap, bmap, ymap, beta));
+  DebuggingInsideLoop( Form( "amap = %f\n\tbmap = %f\n\tymap = %f\n\tbeta = %f", amap, bmap, ymap, beta ) );
   
   // 3D rotation of the first outgoing lepton wrt the CM system
-  const double theta6cm = acos(1.-2.*xx6);
+  const double theta6cm = acos( 1.-2.*xx6 );
   
   // match the Jacobian
-  fJacobian *= (((amap+bmap*cos(theta6cm))*(amap-bmap*cos(theta6cm))/amap/bmap*log(ymap))/2.);
+  fJacobian *= ( ( ( amap+bmap*cos( theta6cm ) )*( amap-bmap*cos( theta6cm ) ) / amap / bmap * log( ymap ) ) / 2. );
   
-  DebuggingInsideLoop(Form("Jacobian = %e", fJacobian));
+  DebuggingInsideLoop( Form( "Jacobian = %e", fJacobian ) );
   
-  DebuggingInsideLoop(Form("ctcm6 = %f\n\tstcm6 = %f", cos(theta6cm), sin(theta6cm)));
+  DebuggingInsideLoop( Form( "ctcm6 = %f\n\tstcm6 = %f", cos( theta6cm ), sin( theta6cm ) ) );
   
   const double phi6cm = 2.*Constants::Pi*x(6);
 
   // First outgoing lepton's 3-momentum in the centre of mass system
-  Particle::Momentum p6cm = Particle::Momentum::FromPThetaPhi(pp6cm, theta6cm, phi6cm);
+  Particle::Momentum p6cm = Particle::Momentum::FromPThetaPhi( pp6cm, theta6cm, phi6cm );
   
-  DebuggingInsideLoop(Form("p3cm6 = (%f, %f, %f)", p6cm.Px(), p6cm.Py(), p6cm.Pz()));
+  DebuggingInsideLoop( Form( "p3cm6 = (%f, %f, %f)", p6cm.Px(), p6cm.Py(), p6cm.Pz() ) );
 
   h1 = stg*p6cm.Pz()+ctg*p6cm.Px();
 
@@ -595,20 +591,19 @@ GamGamLL::ComputeWeight()
   qcz = 2.*pc6z;
   // qcy == QCY is never defined
   
-  double p6x, p6y, p6z;
   const double el6 = (_ec4*ecm6+_pc4*pc6z)/_mc4;
   h2 = (_ec4*pc6z+_pc4*ecm6)/_mc4;
 
-  DebuggingInsideLoop(Form("h1 = %f\n\th2 = %f", h1, h2));
+  DebuggingInsideLoop( Form( "h1 = %f\n\th2 = %f", h1, h2 ) );
 
   // First outgoing lepton's 3-momentum
-  p6x = _ct4*pc6x+_st4*h2;
-  p6y = cpg*p6cm.Py()+spg*h1;
-  p6z = _ct4*h2-_st4*pc6x;
+  const double p6x = _ct4*pc6x+_st4*h2,
+               p6y = cpg*p6cm.Py()+spg*h1,
+               p6z = _ct4*h2-_st4*pc6x;
   
   // first outgoing lepton's kinematics
-  fP6cm = Particle::Momentum(p6x, p6y, p6z, el6);
-  DebuggingInsideLoop(Form("E6(cm) = %f\n\tP6(cm) = (%f, %f, %f)", el6, p6x, p6y, p6z));
+  fP6cm = Particle::Momentum( p6x, p6y, p6z, el6 );
+  DebuggingInsideLoop( Form( "E6(cm) = %f\n\tP6(cm) = (%f, %f, %f)", el6, p6x, p6y, p6z ) );
   
   hq = _ec4*qcz/_mc4;
   
@@ -627,126 +622,124 @@ GamGamLL::ComputeWeight()
                            "second outgoing lepton: p = %f, E = %f",
                            fP6cm.P(), fP6cm.E(), fP7cm.P(), fP6cm.E()));
 
-  double p7x, p7y, p7z;
   // Second outgoing lepton's 3-momentum
-  p7x = _pt4-p6x;
-  p7y = -p6y;
-  p7z = _pc4*_ct4-p6z;
+  const double p7x = _pt4-p6x,
+               p7y = -p6y,
+               p7z = _pc4*_ct4-p6z;
   
   // second outgoing lepton's kinematics
-  fP7cm = Particle::Momentum(p7x, p7y, p7z, el7);
+  fP7cm = Particle::Momentum( p7x, p7y, p7z, el7 );
 
   //fP6cm = Particle::Momentum(pl6*st6*cp6, pl6*st6*sp6, pl6*ct6, el6);
   //fP7cm = Particle::Momentum(pl7*st7*cp7, pl7*st7*sp7, pl7*ct7, el7);
 
-  _q1dq = eg*(2.*ecm6-_mc4)-2.*pg*p6cm.Pz();
-  _q1dq2 = (_w4-fT1-fT2)/2.;
+  _q1dq = eg*( 2.*ecm6-_mc4 )-2.*pg*p6cm.Pz();
+  _q1dq2 = ( _w4-fT1-fT2 )/2.;
 
-  const double phi3 = fP3lab.Phi(), cp3 = cos(phi3), sp3 = sin(phi3),
-               phi5 = fP5lab.Phi(), cp5 = cos(phi5), sp5 = sin(phi5);
+  const double phi3 = fP3lab.Phi(), cp3 = cos( phi3 ), sp3 = sin( phi3 ),
+               phi5 = fP5lab.Phi(), cp5 = cos( phi5 ), sp5 = sin( phi5 );
   //std::cout << ">>> " << fP3lab.Pt() << "/" << fP5lab.Pt() << std::endl;
 
-  _bb = fT1*fT2+(_w4*std::pow(sin(theta6cm), 2)+4.*fMl12*std::pow(cos(theta6cm), 2))*std::pow(pg, 2);
+  _bb = fT1*fT2+( _w4*std::pow( sin( theta6cm ), 2 )+4.*fMl12*std::pow( cos( theta6cm ), 2 ) )*pg*pg;
   
-  c1 = (qve.Px()*sp3-qve.Py()*cp3)*fP3lab.Pt();
-  c2 = (qve.Pz()*_ep1-qve.E()*_p)*fP3lab.Pt();
-  c3 = (_w31*std::pow(_ep1, 2)+2.*_w1*_de3*_ep1-_w1*std::pow(_de3, 2)+std::pow(fP3lab.Pt(), 2)*std::pow(_ep1, 2))/(fP3lab.E()*_p+fP3lab.Pz()*_ep1);
+  c1 = ( qve.Px()*sp3  - qve.Py()*cp3 ) * fP3lab.Pt();
+  c2 = ( qve.Pz()*_ep1 - qve.E() *_p  ) * fP3lab.Pt();
+  c3 = ( _w31*_ep1*_ep1+2.*fW1*_de3*_ep1-fW1*_de3*_de3+fP3lab.Pt2()*_ep1*_ep1 ) / ( fP3lab.E()*_p + fP3lab.Pz()*_ep1 );
   
-  b1 = (qve.Px()*sp5-qve.Py()*cp5)*fP5lab.Pt();
-  b2 = (qve.Pz()*_ep2+qve.E()*_p)*fP5lab.Pt();
-  b3 = (_w52*std::pow(_ep2, 2)+2.*_w2*_de5*_ep2-_w2*std::pow(_de5, 2)+std::pow(fP5lab.Pt()*_ep2, 2))/(_ep2*fP5lab.Pz()-fP5lab.E()*_p); //OK
+  b1 = ( qve.Px()*sp5  - qve.Py()*cp5 ) * fP5lab.Pt();
+  b2 = ( qve.Pz()*_ep2 + qve.E() *_p  ) * fP5lab.Pt();
+  b3 = ( _w52*_ep2*_ep2+2.*fW2*_de5*_ep2-fW2*_de5*_de5+fP5lab.Pt2()*_ep2*_ep2 ) / ( _ep2*fP5lab.Pz()-fP5lab.E()*_p );
   
   r12 =  c2*sp3+qve.Py()*c3;
   r13 = -c2*cp3-qve.Px()*c3;
   
-  DebuggingInsideLoop(Form("qve = (%f, %f, %f, %f)", qve.E(), qve.Px(), qve.Py(), qve.Pz()));
+  DebuggingInsideLoop( Form( "qve = (%f, %f, %f, %f)", qve.E(), qve.Px(), qve.Py(), qve.Pz() ) );
   
   r22 =  b2*sp5+qve.Py()*b3;
   r23 = -b2*cp5-qve.Px()*b3;
   
-  _epsi = _p12*c1*b1+r12*r22+r13*r23;
+  _epsi = _p12*c1*b1 + r12*r22 + r13*r23;
 
-  _g5 = _w1*std::pow(c1, 2)+std::pow(r12, 2)+std::pow(r13, 2);
-  _g6 = _w2*std::pow(b1, 2)+std::pow(r22, 2)+std::pow(r23, 2);
+  _g5 = fW1*c1*c1 + r12*r12 + r13*r13;
+  _g6 = fW2*b1*b1 + r22*r22 + r23*r23;
 
-  _a5 = -(qve.Px()*cp3+qve.Py()*sp3)*fP3lab.Pt()*_p1k2-(_ep1*qve.E()-_p*qve.Pz())*(cp3*cp5+sp3*sp5)*fP3lab.Pt()*fP5lab.Pt()+(_de5*qve.Pz()+qve.E()*(_p+fP5lab.Pz()))*c3;
-  _a6 = -(qve.Px()*cp5+qve.Py()*sp5)*fP5lab.Pt()*_p2k1-(_ep2*qve.E()+_p*qve.Pz())*(cp3*cp5+sp3*sp5)*fP3lab.Pt()*fP5lab.Pt()+(_de3*qve.Pz()-qve.E()*(_p-fP3lab.Pz()))*b3;
+  _a5 = -( qve.Px()*cp3 + qve.Py()*sp3 )*fP3lab.Pt()*_p1k2-( _ep1*qve.E()-_p*qve.Pz() )*( cp3*cp5 + sp3*sp5 )*fP3lab.Pt()*fP5lab.Pt() + ( _de5*qve.Pz()+qve.E()*( _p+fP5lab.Pz() ) )*c3;
+  _a6 = -( qve.Px()*cp5 + qve.Py()*sp5 )*fP5lab.Pt()*_p2k1-( _ep2*qve.E()+_p*qve.Pz() )*( cp3*cp5 + sp3*sp5 )*fP3lab.Pt()*fP5lab.Pt() + ( _de3*qve.Pz()-qve.E()*( _p-fP3lab.Pz() ) )*b3;
  
-  DebuggingInsideLoop(Form("a5 = %f\n\ta6 = %f", _a5, _a6));
+  DebuggingInsideLoop( Form( "a5 = %f\n\ta6 = %f", _a5, _a6 ) );
  
-  //std::cout << _a5 << ">>>" << _a6 << std::endl;
-
   ////////////////////////////////////////////////////////////////
   // END of GAMGAMLL subroutine in the FORTRAN version
   ////////////////////////////////////////////////////////////////
 
-  const Particle::Momentum cm = GetParticle(Particle::IncomingBeam1)->GetMomentum()
-                               +GetParticle(Particle::IncomingBeam2)->GetMomentum();
+  const Particle::Momentum cm = GetParticle( Particle::IncomingBeam1 )->GetMomentum()
+                               +GetParticle( Particle::IncomingBeam2 )->GetMomentum();
 
   ////////////////////////////////////////////////////////////////
   // INFO from f.f
   ////////////////////////////////////////////////////////////////
 
-  const double gamma = cm.E()/fSqS, betgam = cm.Pz()/fSqS;
+  const double gamma = cm.E()/fSqS,
+               betgam = cm.Pz()/fSqS;
 
-  if (fCuts.mode==Kinematics::NoCuts) {
-    Debugging(Form("No cuts applied on the outgoing leptons kinematics!"));
+  if ( fCuts.mode==Kinematics::NoCuts ) {
+    DebuggingInsideLoop( Form( "No cuts applied on the outgoing leptons kinematics!" ) );
   }
   // Kinematics computation for both leptons
 
-  fP6cm.BetaGammaBoost(gamma, betgam);
-  fP7cm.BetaGammaBoost(gamma, betgam);
+  fP6cm.BetaGammaBoost( gamma, betgam );
+  fP7cm.BetaGammaBoost( gamma, betgam );
 
   lcut = false; // Event discarded by default
-  const double cott6 = fP6cm.Pz()/fP6cm.Pt(), cott7 = fP7cm.Pz()/fP7cm.Pt();
+  const double cott6 = fP6cm.Pz()/fP6cm.Pt(),
+               cott7 = fP7cm.Pz()/fP7cm.Pt();
 
   // Cuts on outgoing leptons' kinematics
 
   lmu1 = cott6>=_cotth1
      and cott6<=_cotth2
-     and (fP6cm.Pt()>=fCuts.ptmin or fCuts.ptmin<=0.)
-     and (fP6cm.Pt()<=fCuts.ptmax or fCuts.ptmax<=0.)
-     and (fP6cm.E()>=fCuts.emin   or fCuts.emin <=0.)
-     and (fP6cm.E()<=fCuts.emax   or fCuts.emax <=0.);
+     and ( fP6cm.Pt()>=fCuts.ptmin or fCuts.ptmin<=0. )
+     and ( fP6cm.Pt()<=fCuts.ptmax or fCuts.ptmax<=0. )
+     and ( fP6cm.E()>=fCuts.emin   or fCuts.emin <=0. )
+     and ( fP6cm.E()<=fCuts.emax   or fCuts.emax <=0. );
   lmu2 = cott7>=_cotth1
      and cott7<=_cotth2
-     and (fP7cm.Pt()>=fCuts.ptmin or fCuts.ptmin<=0.)
-     and (fP7cm.Pt()<=fCuts.ptmax or fCuts.ptmax<=0.)
-     and (fP7cm.E()>=fCuts.emin   or fCuts.emin <=0.)
-     and (fP7cm.E()<=fCuts.emax   or fCuts.emax <=0.);
+     and ( fP7cm.Pt()>=fCuts.ptmin or fCuts.ptmin<=0. )
+     and ( fP7cm.Pt()<=fCuts.ptmax or fCuts.ptmax<=0. )
+     and ( fP7cm.E()>=fCuts.emin   or fCuts.emin <=0. )
+     and ( fP7cm.E()<=fCuts.emax   or fCuts.emax <=0. );
 
-  switch (fCuts.mode) {
-    case Kinematics::NoCuts: default:
-      lcut = true; break;
-    case Kinematics::VermaserenCuts: // Vermaseren's hypothetical detector cuts
-      {
-        const double cost6 = fP6cm.Pz()/fP6cm.P(), cost7 = fP7cm.Pz()/fP7cm.P();
-        lcut = ((fabs(cost6)<=0.75 and _pt_l6>=1.) or (fabs(cost6)<=0.95 and fabs(cost6)>0.75 and fabs(fP6cm.Pz())>1.)) and
-               ((fabs(cost7)<=0.75 and _pt_l7>=1.) or (fabs(cost7)<=0.95 and fabs(cost7)>0.75 and fabs(fP7cm.Pz())>1.));
-      }
-      break;
-    case Kinematics::BothParticles: lcut = lmu1 and lmu2; break;
-    case Kinematics::OneParticle:   lcut = lmu1  or lmu2; break;
+  switch ( fCuts.mode ) {
+    case Kinematics::NoCuts: default: { lcut = true; } break;
+    case Kinematics::VermaserenCuts: { // Vermaseren's hypothetical detector cuts
+      const double cost6 = fP6cm.Pz()/fP6cm.P(),
+                   cost7 = fP7cm.Pz()/fP7cm.P();
+      lcut = ( ( fabs( cost6 )<=0.75 and _pt_l6>=1. ) or ( fabs( cost6 )<=0.95 and fabs( cost6 )>0.75 and fabs( fP6cm.Pz() )>1. ) ) and
+             ( ( fabs( cost7 )<=0.75 and _pt_l7>=1. ) or ( fabs( cost7 )<=0.95 and fabs( cost7 )>0.75 and fabs( fP7cm.Pz() )>1. ) );
+    } break;
+    case Kinematics::BothParticles: { lcut = lmu1 and lmu2; } break;
+    case Kinematics::OneParticle:   { lcut = lmu1  or lmu2; } break;
   }
-  if (!lcut) { return 0.; } // Dismiss the cuts-failing events in the cross-section computation
+  if ( !lcut ) { return 0.; } // Dismiss the cuts-failing events in the cross-section computation
 
   // Cut on mass of final hadronic system (MX)
-  if (fCuts.kinematics>1) {
-    if (fMX<fCuts.mxmin or fMX>fCuts.mxmax) return 0.;
-    if (fCuts.kinematics==4) {
-      if (fMY<fCuts.mxmin or fMY>fCuts.mxmax) return 0.;
+  if ( fCuts.kinematics>Kinematics::ElasticElastic ) {
+    if ( fMX<fCuts.mxmin or fMX>fCuts.mxmax ) return 0.;
+    if ( fCuts.kinematics==Kinematics::InelasticInelastic ) {
+      if ( fMY<fCuts.mxmin or fMY>fCuts.mxmax ) return 0.;
     }
   }
 
   // Cut on the proton's Q2 (first photon propagator T1)
-  if ((fCuts.q2max!=-1. and fT1<-fCuts.q2max) or fT1>-fCuts.q2min) { return 0.;  }
+  if ( ( fCuts.q2max!=-1. and fT1<-fCuts.q2max ) or fT1>-fCuts.q2min ) { return 0.;  }
 
   weight = Constants::GeV2toBarn*fJacobian;
-  switch (fCuts.kinematics) { // FIXME inherited from CDF version
-    default: case 0: weight *= PeriPP(1, 2); break; // ep case
-    case 1:          weight *= PeriPP(2, 2); break; // elastic case
-    case 2:  case 3: weight *= PeriPP(3, 2)*std::pow(_dw31,2); break; // single-dissociative case
-    case 4:          weight *= PeriPP(3, 3)*std::pow(_dw31*_dw52,2); break; // double-dissociative case
+  switch ( fCuts.kinematics ) { // FIXME inherited from CDF version
+    case Kinematics::ElectronProton: default: weight *= PeriPP( 1, 2 ); break; // ep case
+    case Kinematics::ElasticElastic:          weight *= PeriPP( 2, 2 ); break; // elastic case
+    case Kinematics::InelasticElastic:
+    case Kinematics::ElasticInelastic:        weight *= PeriPP( 3, 2 )*std::pow(_dw31,2); break; // single-dissociative case
+    case Kinematics::InelasticInelastic:      weight *= PeriPP( 3, 3 )*std::pow(_dw31*_dw52,2); break; // double-dissociative case
   }
 
   return weight;
@@ -867,27 +860,12 @@ GamGamLL::FillKinematics(bool)
 }
 
 double
-GamGamLL::PeriPP(int nup_, int ndown_)
+GamGamLL::PeriPP( int nup_, int ndown_ )
 {
-  DebuggingInsideLoop(Form(" Nup  = %d\n\tNdown = %d", nup_, ndown_));
+  DebuggingInsideLoop( Form( " Nup  = %d\n\tNdown = %d", nup_, ndown_ ) );
 
   FormFactors fp1, fp2;
-
-  switch( nup_ ) {
-    case 1:  fp1 = TrivialFormFactors(); break; // electron (trivial) form factor
-    case 2:  fp1 = ElasticFormFactors( -fT1, _w1 ); break; // proton elastic form factor
-    case 4:  fp1 = FioreBrasseFormFactors( -fT1, _w1, fMX2 ); break; // does not exist in CDF version
-    //case 5:  fp1 = SzczurekUleschenkoFormFactors( -fT1, _w1, fMX2 ); break;
-    default: fp1 = SuriYennieFormFactors( -fT1, _w1, fMX2 ); break;
-  }
-
-  switch( ndown_ ) {
-    case 1:  fp2 = TrivialFormFactors(); break; // electron (trivial) form factor
-    case 2:  fp2 = ElasticFormFactors( -fT2, _w2 ); break; // proton elastic form factor
-    case 4:  fp2 = FioreBrasseFormFactors( -fT2, _w2, fMY2 ); break; // low-Q2 inelastic form factor
-    //case 5:  fp2 = SzczurekUleschenkoFormFactors( -fT2, _w2, fMY2 ); break;
-    default: fp2 = SuriYennieFormFactors( -fT2, _w2, fMY2 ); break;
-  }
+  GenericProcess::GetFormFactors( -fT1, -fT2, fp1, fp2 );
   
   DebuggingInsideLoop( Form( "u1 = %f\n\tu2 = %f\n\tv1 = %f\n\tv2 = %f", fp1.FM, fp1.FE, fp2.FM, fp2.FE ) );
 

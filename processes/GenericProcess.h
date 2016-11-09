@@ -4,6 +4,8 @@
 #include "physics/Event.h"
 #include "physics/Kinematics.h"
 #include "physics/Physics.h"
+#include "physics/StructureFunctions.h"
+#include "physics/FormFactors.h"
 
 /**
  * Class template to define any process to compute using this MC integrator/events generator
@@ -13,20 +15,6 @@
 class GenericProcess
 {
  public:
-  
-  /// Proton structure function to be used in the outgoing state description
-  enum StructureFunctions {
-    Electron = 1,
-    ElasticProton = 2,
-    SuriYennie = 11,
-    SuriYennieLowQ2 = 12,
-    SzczurekUleshchenko = 15,
-    FioreVal = 101,
-    FioreSea = 102,
-    Fiore = 103
-  };
-  /// Human-readable format of a structure function object
-  friend std::ostream& operator<<( std::ostream& os, const GenericProcess::StructureFunctions& sf );
   /// Human-readable format dump of a GenericProcess object
   friend std::ostream& operator<<( std::ostream& os, const GenericProcess& proc );
   /// Human-readable format dump of a pointer to a GenericProcess object
@@ -123,6 +111,7 @@ class GenericProcess
  protected:
   /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
   void SetEventContent( const IncomingState& is, const OutgoingState& os );
+  void GetFormFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const;
  
   /// Get a list of pointers to the particles with a given role in the process
   /// \param[in] role role in the process for the particle to retrieve
@@ -150,6 +139,14 @@ class GenericProcess
   double fS;
   /// \f$\sqrt s\f$, centre of mass energy of the incoming particles' system (in GeV)
   double fSqS;
+  /// \f$m_1^2\f$, squared mass of the first proton-like incoming particle
+  double fW1;
+  /// \f$m_2^2\f$, squared mass of the second proton-like incoming particle
+  double fW2;
+  /// Virtuality of the first incoming photon
+  double fT1;
+  /// Virtuality of the second incoming photon
+  double fT2;
   /// Invariant mass of the first proton-like outgoing particle (or remnant)
   double fMX;
   /// Invariant mass of the second proton-like outgoing particle (or remnant)

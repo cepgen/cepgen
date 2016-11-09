@@ -55,7 +55,7 @@ int main( int argc, char* argv[] ) {
     mg.parameters->minenergy = 0.; //FIXME
     mg.parameters->minpt = 15.;
     mg.parameters->maxgen = ngen;
-    mg.parameters->remnant_mode = GenericProcess::SuriYennie;
+    mg.parameters->remnant_mode = SuriYennie;
     mg.parameters->process_mode = ( argc>1 )
       ? static_cast<Kinematics::ProcessMode>( atoi( argv[1] ) )
       : Kinematics::ElasticElastic;

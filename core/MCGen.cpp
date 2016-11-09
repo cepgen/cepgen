@@ -110,6 +110,7 @@ MCGen::PrepareFunction()
   kin.emax = parameters->maxenergy;
   kin.mxmin = parameters->minmx;
   kin.mxmax = parameters->maxmx;
+  kin.remnant_mode = parameters->remnant_mode;
   parameters->process->AddEventContent();
   parameters->process->SetKinematics( kin );
   Debugging( "Function prepared to be integrated!" );
@@ -117,14 +118,12 @@ MCGen::PrepareFunction()
 
 double f( double* x_, size_t ndim_, void* params_ )
 {
-  double ff;
-  Parameters *p;
   Timer tmr;
   bool hadronised;
   double num_hadr_trials;
   std::ostringstream os;
 
-  p = static_cast<Parameters*>( params_ );
+  Parameters* p = static_cast<Parameters*>( params_ );
 
   //FIXME at some point introduce non head-on colliding beams ?
 
@@ -140,7 +139,7 @@ double f( double* x_, size_t ndim_, void* params_ )
 
   tmr.reset();
 
-  ff = 0.;
+  double ff = 0.;
 
   DebuggingInsideLoop( Form( "Function f called -- some parameters:\n\t"
                              "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
@@ -164,7 +163,7 @@ double f( double* x_, size_t ndim_, void* params_ )
     //std::cout << "3: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
     // Then add outgoing protons or remnants
     switch ( p->process_mode ) {
-      case Kinematics::ElectronProton: { InError( "Not handled yet!" ); }
+      case Kinematics::ElectronProton: default: { InError( "Not handled yet!" ); }
       case Kinematics::ElasticElastic: break; // nothing to change in the event
       case Kinematics::ElasticInelastic:
       case Kinematics::InelasticElastic: // set one of the outgoing protons to be fragmented

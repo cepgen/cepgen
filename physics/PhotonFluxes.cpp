@@ -32,7 +32,6 @@ PhotonFluxes::ProtonInelastic( double x_, double kt2_, double mx_ )
   const double mx2 = mx_*mx_,
                mp = Particle::GetMassFromPDGId( Particle::Proton ),
                mp2 = mp*mp;
-  //const double mpi = pow(Particle::GetMassFromPDGId(Particle::PiZero), 2);
 
   const double Q02 = 0.8; // introduced to shift the Q2 scale
   double term1, term2;
@@ -47,19 +46,10 @@ PhotonFluxes::ProtonInelastic( double x_, double kt2_, double mx_ )
 
   float xuv, xdv, xus, xds, xss, xg;
   grv95lo_( x_Bjorken, mu2, xuv, xdv, xus, xds, xss, xg );
-  DebuggingInsideLoop( Form( "Form factor content at xB = %e (scale = %f GeV^2):\n\t"
-                             "  valence quarks: u / d     = %e / %e\n\t"
-                             "  sea quarks:     u / d / s = %e / %e / %e\n\t"
-                             "  gluons:                   = %e",
-                             x_Bjorken, mu2, xuv, xdv, xus, xds, xss, xg ) );
 
   const double F2_aux = 4./9.*( xuv + 2.*xus )
                       + 1./9.*( xdv + 2.*xds )
                       + 1./9.*2.*xss;
-
-  /*F2_aux = 4./9.*(xuv + 2.*xus)
-         + 1./9.*(0. + 2.*xds)
-         + 1./9.*2.*xss;*/
 
   // F2 corrected for low Q^2 behaviour
   const double F2_corr = Q2 / ( Q2+Q02 ) * F2_aux;

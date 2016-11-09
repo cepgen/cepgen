@@ -2,7 +2,7 @@
 
 Parameters::Parameters() :
   process( 0 ), process_mode( Kinematics::ElasticElastic ),
-  remnant_mode( GenericProcess::SuriYennie ),
+  remnant_mode( SuriYennie ),
   in1p( 6500. ), in2p( 6500. ),
   in1pdg( Particle::Proton ), in2pdg( Particle::Proton ),
   pair( Particle::Muon ),
@@ -84,9 +84,10 @@ void Parameters::Dump()
   std::ostringstream proc_mode, cut_mode; proc_mode << process_mode; cut_mode << cutsmode;
   std::ostringstream ip1, ip2, op; ip1 << in1pdg; ip2 << in2pdg; op << pair;
   os
-    << std::setw( wt ) << "Subprocess' mode" << boldify( proc_mode.str().c_str() ) << std::endl
+    << std::setw( wt ) << "Subprocess mode" << boldify( proc_mode.str().c_str() ) << std::endl
     << std::setw( wt ) << "Incoming particles" << boldify( ip1.str().c_str() ) << ", " << boldify( ip2.str().c_str() ) << std::endl
     << std::setw( wt ) << "Momenta (GeV/c)" << in1p << ", " << in2p << std::endl
+    << std::setw( wt ) << "Structure functions mode" << remnant_mode << std::endl
     << std::endl
     << std::setfill( '-' ) << std::setw( wb-2 ) << boldify( " Incoming partons " ) << std::setfill( ' ' ) << std::endl
     << std::endl
@@ -183,7 +184,7 @@ bool Parameters::ReadConfigFile(const char* inFile_)
       os << std::setw( wdth ) << " * Subprocess' mode:" << static_cast<unsigned int>( this->process_mode ) << " --> " << this->process_mode << "\n";
     }
     else if ( key=="PMOD" or key=="EMOD" ) {
-      this->remnant_mode = static_cast<GenericProcess::StructureFunctions>( atoi( value.c_str() ) );
+      this->remnant_mode = static_cast<StructureFunctions>( atoi( value.c_str() ) );
       os << std::setw( wdth ) << " * Outgoing primary particles' mode:" << static_cast<unsigned int>( this->remnant_mode )
       	 << " --> " << this->remnant_mode << "\n";
     }

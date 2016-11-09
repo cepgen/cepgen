@@ -195,39 +195,40 @@ class Particle {
             case 3: return fE; break;
           }
         }
-        /// Get the momentum along the \f$x\f$-axis (in GeV)
+        /// Momentum along the \f$x\f$-axis (in GeV)
         inline double Px() const { return fPx; }
-        /// Get the momentum along the \f$y\f$-axis (in GeV)
+        /// Momentum along the \f$y\f$-axis (in GeV)
         inline double Py() const { return fPy; }
-        /// Get the longitudinal momentum (in GeV)
+        /// Longitudinal momentum (in GeV)
         inline double Pz() const { return fPz; }
-        /// Get the transverse momentum (in GeV)
-        inline double Pt() const { return sqrt( Px()*Px()+Py()*Py() ); }
+        /// Transverse momentum (in GeV)
+        inline double Pt() const { return sqrt( Pt2() ); }
+        inline double Pt2() const { return ( Px()*Px()+Py()*Py() ); }
         inline double* PRef() { return &fP; }
-        /// Get the 3-momentum norm (in GeV)
+        /// 3-momentum norm (in GeV)
         inline double P() const { return fP; }
-        /// Get the squared 3-momentum norm (in \f$\text{GeV}^\text{2}\f$)
+        /// Squared 3-momentum norm (in \f$\text{GeV}^\text{2}\f$)
         inline double P2() const { return fP*fP; }
-        /// Get the energy (in GeV)
+        /// Energy (in GeV)
         inline double E() const { return fE; }
-        /// Get the squared energy (in GeV^2)
+        /// Squared energy (in GeV^2)
         inline double E2() const { return fE*fE; }
-        /// Get the particle's squared mass (in GeV^2) as computed from its energy and momentum
+        /// Squared mass (in GeV^2) as computed from its energy and momentum
         inline double M2() const { return E2()-P2(); }
-        /// Get the particle's mass (in GeV) as computed from its energy and momentum
+        /// Mass (in GeV) as computed from its energy and momentum
         inline double M() const { return sqrt( M2() ); }
-        /// Get the polar angle (angle with respect to the longitudinal direction)
+        /// Polar angle (angle with respect to the longitudinal direction)
         inline double Theta() const { return atan2( Pt(), Pz() ); }
-        /// Get the azimutal angle (angle in the transverse plane)
+        /// Azimutal angle (angle in the transverse plane)
         inline double Phi() const { return atan2( Py(), Px() ); }
-        /// Get the pseudo-rapidity
+        /// Pseudo-rapidity
         inline double Eta() const {
           const int sign = ( Pz()/fabs( Pz() ) );
           return ( Pt()!=0. )
             ? log( ( P()+fabs( Pz() ) )/Pt() )*sign
             : 9999.*sign;
         };
-        /// Get the rapidity
+        /// Rapidity
         inline double Rapidity() const {
           const int sign = ( Pz()/fabs( Pz() ) );
           return ( E()>=0. )
