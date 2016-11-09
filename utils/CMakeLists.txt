@@ -1,20 +1,20 @@
-#----- list all test executables
+#----- list all utils
 
-file(GLOB executables_noroot RELATIVE ${PROJECT_SOURCE_DIR}/test *.cpp)
-file(GLOB executables_root RELATIVE ${PROJECT_SOURCE_DIR}/test *.cxx)
+file(GLOB executables_noroot RELATIVE ${PROJECT_SOURCE_DIR}/utils *.cpp)
+file(GLOB executables_root RELATIVE ${PROJECT_SOURCE_DIR}/utils *.cxx)
 
-#----- build all tests and link them to the core library
+#----- build all utilitaries and link them to the core library
+
+#----- start by the utils with no ROOT dependencies
 
 foreach(exec_src ${executables_noroot})
     string(REPLACE ".cpp" "" exec_bin ${exec_src})
     add_executable(${exec_bin} ${exec_src})
     set_target_properties(${exec_bin} PROPERTIES EXCLUDE_FROM_ALL true)
-    target_link_libraries(${exec_bin} CepGenCore CepGenPhysics CepGenProcesses)
-    add_test(${exec_bin} ${exec_bin})
-    set_tests_properties(${exec_bin} PROPERTIES PASS_REGULAR_EXPRESSION "Passed")
+    target_link_libraries(${exec_bin} CepGenCore CepGenPhysics CepGenProcesses CepGenExporter)
 endforeach()
 
-#----- specify the tests requiring ROOT
+#----- specify the utilitaries requiring ROOT
 
 find_package(ROOT QUIET)
 if(${ROOT_FOUND})
