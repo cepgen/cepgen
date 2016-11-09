@@ -155,8 +155,8 @@ GenericProcess::GetFormFactors( double q1, double q2, FormFactors& fp1, FormFact
       if ( inel_p2 ) fp2 = FioreBrasseFormFactors( -fT2, fW2, my2 );
     } break;
     case StructureFunctions::SzczurekUleshchenko: {
-      if ( inel_p1 ) fp1 = SzczurekUleschenkoFormFactors( -fT1, fW1, mx2 );
-      if ( inel_p2 ) fp2 = SzczurekUleschenkoFormFactors( -fT2, fW2, my2 );
+      if ( inel_p1 ) fp1 = SzczurekUleshchenkoFormFactors( -fT1, fW1, mx2 );
+      if ( inel_p2 ) fp2 = SzczurekUleshchenkoFormFactors( -fT2, fW2, my2 );
     } break;
   }
 }

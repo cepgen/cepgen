@@ -125,7 +125,7 @@ FioreBrasseFormFactors( double q2, double mi2, double mf2 )
 }
 
 FormFactors
-SzczurekUleschenkoFormFactors( double q2, double mi2, double mf2 )
+SzczurekUleshchenkoFormFactors( double q2, double mi2, double mf2 )
 {
   const double k = 2.*sqrt( mi2 ),
                q2_0 = 0.8;

@@ -43,6 +43,6 @@ FormFactors SuriYennieFormFactors( double q2, double mi2, double mf2 );
 /// \cite Brasse1976413
 FormFactors FioreBrasseFormFactors( double q2, double mi2, double mf2 );
 /// Szczurek-Uleschenko inelastic form factors
-FormFactors SzczurekUleschenkoFormFactors( double q2, double mi2, double mf2 );
+FormFactors SzczurekUleshchenkoFormFactors( double q2, double mi2, double mf2 );
 
 #endif
