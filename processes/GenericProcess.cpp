@@ -143,18 +143,18 @@ GenericProcess::GetFormFactors( double q1, double q2, FormFactors& fp1, FormFact
     } break;
   }
   switch ( fCuts.remnant_mode ) {
-    case StructureFunctions::SuriYennie:
+    case SuriYennie:
     default: {
       if ( inel_p1 ) fp1 = SuriYennieFormFactors( -fT1, fW1, mx2 );
       if ( inel_p2 ) fp2 = SuriYennieFormFactors( -fT2, fW2, my2 );
     } break;
-    case StructureFunctions::Fiore:
-    case StructureFunctions::FioreSea:
-    case StructureFunctions::FioreVal: { // low-Q2 inelastic form factor
+    case Fiore:
+    case FioreSea:
+    case FioreVal: { // low-Q2 inelastic form factor
       if ( inel_p1 ) fp1 = FioreBrasseFormFactors( -fT1, fW1, mx2 );
       if ( inel_p2 ) fp2 = FioreBrasseFormFactors( -fT2, fW2, my2 );
     } break;
-    case StructureFunctions::SzczurekUleshchenko: {
+    case SzczurekUleshchenko: {
       if ( inel_p1 ) fp1 = SzczurekUleshchenkoFormFactors( -fT1, fW1, mx2 );
       if ( inel_p2 ) fp2 = SzczurekUleshchenkoFormFactors( -fT2, fW2, my2 );
     } break;
