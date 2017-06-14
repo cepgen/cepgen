@@ -13,19 +13,19 @@ Pythia8Hadroniser::~Pythia8Hadroniser()
 }
 
 bool
-Pythia8Hadroniser::Hadronise( Particle* part_ )
+Pythia8Hadroniser::Hadronise( const Particle* part )
 {
   return true;
 }
 
 bool
-Pythia8Hadroniser::Hadronise( Event* ev_ )
+Pythia8Hadroniser::Hadronise( Event* ev )
 {
   return true;
 }
 
 bool
-Pythia8Hadroniser::PrepareHadronisation( Event *ev_ )
+Pythia8Hadroniser::PrepareHadronisation( Event *ev )
 {
   fPy->init();
   return true;

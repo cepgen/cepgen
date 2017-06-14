@@ -18,82 +18,78 @@ class GenericKTProcess : public GenericProcess
  public:
   /**
    * \brief Class constructor
-   * \param[in] name_ Human-readable kT-factorised process name
-   * \param[in] num_user_dimensions_ Number of additional dimensions required for the user process
-   * \param[in] ip1_ First incoming parton
-   * \param[in] ip2_ Second incoming parton (if undefined, same as the first)
-   * \param[in] op1_ First produced final state particle
-   * \param[in] op2_ Second produced final state particle (if undefined, same as the first)
+   * \param[in] name Human-readable kT-factorised process name
+   * \param[in] numuser_dimensions_ Number of additional dimensions required for the user process
+   * \param[in] ip1 First incoming parton
+   * \param[in] ip2 Second incoming parton (if undefined, same as the first)
+   * \param[in] op1 First produced final state particle
+   * \param[in] op2 Second produced final state particle (if undefined, same as the first)
    */
-  GenericKTProcess( const std::string& name_="<generic process>",
-                    const unsigned int& num_user_dimensions_=0,
-                    const Particle::ParticleCode& ip1_=Particle::Photon,
-                    const Particle::ParticleCode& op1_=Particle::Muon,
-                    const Particle::ParticleCode& ip2_=Particle::invalidParticle,
-                    const Particle::ParticleCode& op2_=Particle::invalidParticle);
+  GenericKTProcess( const std::string& name="<generic process>",
+                    const unsigned int& num_user_dimensions=0,
+                    const Particle::ParticleCode& ip1=Particle::Photon,
+                    const Particle::ParticleCode& op1=Particle::Muon,
+                    const Particle::ParticleCode& ip2=Particle::invalidParticle,
+                    const Particle::ParticleCode& op2=Particle::invalidParticle);
   ~GenericKTProcess();
 
   /// Populate the event content with the generated process' topology
-  void AddEventContent();
+  void addEventContent();
   /// Retrieve the total number of dimensions on which the integration is being performet
   /// \param[in] proc_mode_ Kinematics case considered
-  unsigned int GetNdim( const Kinematics::ProcessMode& proc_mode_ ) const;
+  unsigned int numDimensions( const Kinematics::ProcessMode& proc_mode_ ) const;
   /// Retrieve the event weight in the phase space
-  double ComputeWeight();
+  double computeWeight();
   /// Populate the event content with the generated process' kinematics  
-  void FillKinematics( bool );
+  void fillKinematics( bool );
   
  protected:
-  inline void SetKinematics( const Kinematics& kin_ ) {
-    fCuts = kin_;
-    fLogQmin = -10.; // FIXME //lqmin = std::log(std::sqrt(fCuts.q2min));
-    fLogQmax = std::log(fCuts.qtmax);
+  inline void setKinematics( const Kinematics& kin ) {
+    cuts_ = kin;
+    log_qmin_ = -10.; // FIXME //log_qmin_ = std::log( std::sqrt( cuts_.q2min ) );
+    log_qmax_ = std::log( cuts_.qtmax );
   }
   /// Set the kinematics of the central system before any point computation
-  inline virtual void PrepareKTKinematics() { DebuggingInsideLoop("Dummy kinematics prepared!"); }
+  inline virtual void prepareKTKinematics() { DebuggingInsideLoop("Dummy kinematics prepared!"); }
   /// Minimal Jacobian weight of the point considering a kT factorisation
-  double MinimalJacobian() const;
+  double minimalJacobian() const;
   /// Jacobian weight of the point in the phase space for integration
-  inline virtual double ComputeJacobian() {
-    DebuggingInsideLoop("Dummy Jacobian returned!"); return 0.;
-  }
+  virtual double computeJacobian() = 0;
   /// kT-factorised matrix element (event weight)
   /// \return Weight of the point in the phase space to the integral
-  inline virtual double ComputeKTFactorisedMatrixElement() {
-    DebuggingInsideLoop("Dummy matrix element returned!"); return 0.;
-  }
+  virtual double computeKTFactorisedMatrixElement() = 0;
   /// Compute the invariant masses of the outgoing protons (or remnants)
-  void ComputeOutgoingPrimaryParticlesMasses();
-  void ComputeIncomingFluxes( double, double, double, double );
+  void computeOutgoingPrimaryParticlesMasses();
+  void computeIncomingFluxes( double, double, double, double );
   /// Set the kinematics of the incoming and outgoing protons (or remnants)
-  void FillPrimaryParticlesKinematics();
+  void fillPrimaryParticlesKinematics();
   /// Set the kinematics of the outgoing central system
-  inline virtual void FillCentralParticlesKinematics() { DebuggingInsideLoop("Dummy central particles list filled!"); }
+  virtual void fillCentralParticlesKinematics() = 0;
   
   /// Minimal log-virtuality of the intermediate parton
-  double fLogQmin;
+  double log_qmin_;
   /// Maximal log-virtuality of the intermediate parton
-  double fLogQmax;
+  double log_qmax_;
   /// Virtuality of the first intermediate parton (photon, pomeron, ...)
-  double fQT1;
+  double qt1_;
   /// Azimuthal rotation of the first intermediate parton's transverse virtuality
-  double fPhiQT1;
+  double phi_qt1_;
   /// Virtuality of the second intermediate parton (photon, pomeron, ...)
-  double fQT2;
+  double qt2_;
   /// Azimuthal rotation of the second intermediate parton's transverse virtuality
-  double fPhiQT2;
+  double phi_qt2_;
   
   /// First outgoing proton
-  Particle::Momentum fPX;
+  Particle::Momentum PX_;
   /// Second outgoing proton
-  Particle::Momentum fPY;
+  Particle::Momentum PY_;
   /// First incoming parton's flux
-  double fFlux1;
+  double flux1_;
   /// Second incoming parton's flux
-  double fFlux2;
+  double flux2_;
   
  private:
-  void AddPartonContent();
+  void addPartonContent();
   static const unsigned int kNumRequiredDimensions = 4;
   /// Number of additional dimensions required for the user process
   /// (in addition to the 4 required for the two partons' transverse momenta)

@@ -22,7 +22,8 @@ int main( int argc, char* argv[] ) {
     Information( "No config file provided. Setting the default parameters." );
     
     mg.parameters->process = new GamGamLL;
-    mg.parameters->process_mode = Kinematics::InelasticElastic;
+    //mg.parameters->process_mode = Kinematics::InelasticElastic;
+    mg.parameters->process_mode = Kinematics::ElasticElastic;
     mg.parameters->remnant_mode = SuriYennie;
 
 #ifdef PYTHIA6
@@ -33,8 +34,8 @@ int main( int argc, char* argv[] ) {
 #endif
 #endif
     
-    mg.parameters->in1p = 4000.;
-    mg.parameters->in2p = 4000.;
+    mg.parameters->in1p = 6500.;
+    mg.parameters->in2p = 6500.;
     mg.parameters->pair = Particle::Muon;
     mg.parameters->mcut = Kinematics::BothParticles;
     mg.parameters->minenergy = 0.; //FIXME
@@ -48,7 +49,7 @@ int main( int argc, char* argv[] ) {
   }
   else {
     Debugging( Form( "Reading config file stored in %s", argv[1] ) );
-    if ( !mg.parameters->ReadConfigFile( argv[1] ) ) {
+    if ( !mg.parameters->readConfigFile( argv[1] ) ) {
       Information( Form( "Error reading the configuration!\n\t"
                          "Please check your input file (%s)", argv[1] ) );
       return -1;
@@ -56,23 +57,25 @@ int main( int argc, char* argv[] ) {
   }
 
   // We might want to cross-check visually the validity of our run
-  mg.parameters->Dump();
+  mg.parameters->dump();
 
   // Let there be cross-section...
   double xsec, err;
-  mg.ComputeXsection( &xsec, &err );
+  mg.computeXsection( xsec, err );
 
   if ( mg.parameters->generation ) {
     // The events generation starts here !
     Event ev;
     for ( unsigned int i=0; i<mg.parameters->maxgen; i++ ) {
-      if ( i%1000==0 ) Information( Form( "Generating event #%d", i ) );
-      ev = *mg.GenerateOneEvent();
-      //ev.Dump();
+      ev = *mg.generateOneEvent();
+      if ( i%1000==0 ) {
+        Information( Form( "Generating event #%d", i ) );
+        ev.dump();
+      }
     }
   }
 
-  //mg.parameters->StoreConfigFile( "lastrun.card" );
+  //mg.parameters->storeConfigFile( "lastrun.card" );
 
   return 0;
 }

@@ -5,7 +5,7 @@ using namespace std;
 int main() {
 
   OutputHandler::HepMCHandler writer( "example.dat" );
-  writer.SetCrossSection(1., 2.);
+  writer.setCrossSection(1., 2.);
 
   Event ev;
   

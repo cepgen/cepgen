@@ -1,18 +1,18 @@
 #include "Logger.h"
   
-bool Logger::fBuilt = false;
-Logger* Logger::fLogger = 0;
+bool Logger::built_ = false;
+Logger* Logger::logger_ = 0;
 
 Logger*
 Logger::GetInstance()
 {
-  if ( fBuilt ) return fLogger;
+  if ( built_ ) return logger_;
 
-  fLogger = new Logger;
-  fLogger->Level = Error;
-  fBuilt = true;
+  logger_ = new Logger;
+  logger_->Level = Error;
+  built_ = true;
 
-  return fLogger;
+  return logger_;
 }
 
 std::ostream&

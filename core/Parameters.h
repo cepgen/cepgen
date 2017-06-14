@@ -22,19 +22,19 @@ class Parameters {
     Parameters();
     ~Parameters();
     /// Set the polar angle range for the produced leptons
-    /// \param[in] thetamin_ The minimal value of \f$\theta\f$ for the outgoing leptons
-    /// \param[in] thetamax_ The maximal value of \f$\theta\f$ for the outgoing leptons
-    void SetThetaRange( float thetamin_, float thetamax_ );
+    /// \param[in] thetamin The minimal value of \f$\theta\f$ for the outgoing leptons
+    /// \param[in] thetamax The maximal value of \f$\theta\f$ for the outgoing leptons
+    void setThetaRange( float thetamin, float thetamax );
     /// Dump the input parameters in the console
-    void Dump();
+    void dump();
     /// Read content from config file to load the variables
-    /// \param[in] inFile_ Name of the configuration file to load
+    /// \param[in] inFile Name of the configuration file to load
     /// \return A boolean stating whether this input configuration file is correct or not
-    bool ReadConfigFile( const char* inFile_ );
+    bool readConfigFile( const char* inFile );
     /// Store the full run configuration to an external config file
-    /// \param[in] outFile_ Name of the configuration file to create
+    /// \param[in] outFile Name of the configuration file to create
     /// \return A boolean stating whether this output configuration file is correctly written or not
-    bool StoreConfigFile( const char* outFile_ );
+    bool storeConfigFile( const char* outFile );
 
     //----- process to compute
     /// Process for which the cross-section will be computed and the events will be generated

@@ -1,46 +1,46 @@
 #include "Vegas.h"
 
 Vegas::Vegas( const unsigned int dim_, double f_( double*, size_t, void* ), Parameters* inParam_ ) :
-  fMbin( 3 ),
-  fJ( 0 ), fCorrec( 0. ), fCorrec2( 0. ),
-  fInputParameters( inParam_ ),
-  fGridPrepared( false ), fGenerationPrepared( false ),
-  fFmax( 0 ), fFmax2( 0. ), fFmaxDiff( 0. ), fFmaxOld( 0. ), fFGlobalMax( 0. ),
-  fN( 0 ), fNm( NULL ), fFunction( 0 ), fX( 0 )
+  mbin_( 3 ),
+  j_( 0 ), correc_( 0. ), correc2_( 0. ),
+  input_params_( inParam_ ),
+  grid_prepared_( false ), gen_prepared_( false ),
+  f_max_( 0 ), f_max2_( 0. ), f_max_diff_( 0. ), f_max_old_( 0. ), f_max_global_( 0. ),
+  n_( 0 ), nm_( NULL ), function_( 0 ), x_( 0 )
 {
-  fXlow = new double[dim_];
-  fXup = new double[dim_];
+  x_low_ = new double[dim_];
+  x_up_ = new double[dim_];
   
   for ( unsigned int i=0; i<dim_; i++ ) {
-    fXlow[i] = 0.;
-    fXup[i] = 1.;
+    x_low_[i] = 0.;
+    x_up_[i] = 1.;
   }
   
   Debugging( Form( "Number of integration dimensions: %d\n\t"
                    "Number of iterations:             %d\n\t"
                    "Number of function calls:         %d", dim_, inParam_->itvg, inParam_->ncvg ) );
 
-  fFunction = new gsl_monte_function;
-  fFunction->f = f_;
-  fFunction->dim = dim_;
-  fFunction->params = (void*)inParam_;
-  fNumConverg = inParam_->ncvg;
-  fNumIter = inParam_->itvg; 
+  function_ = new gsl_monte_function;
+  function_->f = f_;
+  function_->dim = dim_;
+  function_->params = (void*)inParam_;
+  num_converg_ = inParam_->ncvg;
+  num_iter_ = inParam_->itvg;
 }
 
 Vegas::~Vegas()
 {
-  if ( fXlow ) delete[] fXlow;
-  if ( fXup ) delete[] fXup;
-  if ( fFmax ) delete[] fFmax;
-  if ( fNm ) delete[] fNm;
-  if ( fN ) delete[] fN;
-  if ( fFunction ) delete fFunction;
-  if ( fX ) delete[] fX;
+  if ( x_low_ ) delete[] x_low_;
+  if ( x_up_ ) delete[] x_up_;
+  if ( f_max_ ) delete[] f_max_;
+  if ( nm_ ) delete[] nm_;
+  if ( n_ ) delete[] n_;
+  if ( function_ ) delete function_;
+  if ( x_ ) delete[] x_;
 }
 
 int
-Vegas::Integrate( double *result_, double *abserr_ )
+Vegas::integrate( double& result, double& abserr )
 {
   // Initialise the random number generator
   const gsl_rng_type* rng_type;
@@ -50,71 +50,66 @@ Vegas::Integrate( double *result_, double *abserr_ )
   rng_type = gsl_rng_default;
   int veg_res;
   
-  double res, err;
-
   // Prepare the integration coordinates
-  if ( fX ) delete fX;
-  fX = new double[fFunction->dim];
+  if ( x_ ) delete x_;
+  x_ = new double[function_->dim];
 
   // Prepare Vegas
   rng = gsl_rng_alloc( rng_type );
-  state = gsl_monte_vegas_alloc( fFunction->dim );
+  state = gsl_monte_vegas_alloc( function_->dim );
   
   // Launch Vegas
   /// Warmup (prepare the grid)
-  if ( !fGridPrepared ) {
-    veg_res = gsl_monte_vegas_integrate( fFunction, fXlow, fXup, fFunction->dim, 10000, rng, state, &res, &err );
-    fGridPrepared = true;
+  if ( !grid_prepared_ ) {
+    veg_res = gsl_monte_vegas_integrate( function_, x_low_, x_up_, function_->dim, 10000, rng, state, &result, &abserr );
+    grid_prepared_ = true;
   }
   /// Integration
-  for ( unsigned int i=0; i<fNumIter; i++ ) {
-    veg_res = gsl_monte_vegas_integrate( fFunction, fXlow, fXup, fFunction->dim, fNumConverg/5, rng, state, &res, &err );
-    std::cout << Form( ">> Iteration %2d: average = %8.4f   sigma = %8.4f   chi2 = %4.3f", i+1, res, err, gsl_monte_vegas_chisq( state ) ) << std::endl;
+  for ( unsigned int i=0; i<num_iter_; i++ ) {
+    veg_res = gsl_monte_vegas_integrate( function_, x_low_, x_up_, function_->dim, 0.2*num_converg_, rng, state, &result, &abserr );
+    std::cout << Form( ">> Iteration %2d: average = %8.4f   sigma = %8.4f   chi2 = %4.3f", i+1, result, abserr, gsl_monte_vegas_chisq( state ) ) << std::endl;
   }
   
   // Clean Vegas
   gsl_monte_vegas_free( state );
   gsl_rng_free( rng );
   
-  *result_ = res;
-  *abserr_ = err;
-  
   return veg_res;
 }
 
 void
-Vegas::Generate()
+Vegas::generate()
 {
   std::ofstream of;
   std::string fn;
   
-  this->SetGen();
+  this->setGen();
 
-  Information( Form( "%d events will be generated", fInputParameters->maxgen ) );
+  Information( Form( "%d events will be generated", input_params_->maxgen ) );
 
   unsigned int i = 0;
-  while ( i<fInputParameters->maxgen ) {
-    if ( this->GenerateOneEvent() ) i++;
+  while ( i<input_params_->maxgen ) {
+    if ( this->generateOneEvent() ) i++;
   }
   Information( Form( "%d events generated", i ) );
 }
 
 bool
-Vegas::GenerateOneEvent()
+Vegas::generateOneEvent()
 {
   // Inherited from GMUGNA
   int jj, jjj;
   
-  if ( !fGenerationPrepared ) SetGen();
+  if ( !gen_prepared_ ) setGen();
 
-  const unsigned int ndim = fFunction->dim,
-                     max = pow( fMbin, ndim );
+  const unsigned int ndim = function_->dim,
+                     max = pow( mbin_, ndim );
 
   // Correction cycles are started
-  if ( fJ!=0 ) {
-    fHasCorrection = false;
-    while ( !CorrectionCycle(fX) ) {;}
-    if ( fHasCorrection ) return StoreEvent( fX );
+  if ( j_!=0 ) {
+    bool has_correction = false;
+    while ( !correctionCycle( x_, has_correction ) ) {}
+    if ( has_correction ) return storeEvent( x_ );
   }
 
   double weight;
@@ -125,128 +120,128 @@ Vegas::GenerateOneEvent()
   do {
     do {
       // ...
-      fJ = (double)rand()/RAND_MAX * max;
-      y = (double)rand()/RAND_MAX * fFGlobalMax;
-      fNm[fJ] += 1;
-    } while ( y>fFmax[fJ] );
+      j_ = (double)rand()/RAND_MAX * max;
+      y = (double)rand()/RAND_MAX * f_max_global_;
+      nm_[j_] += 1;
+    } while ( y>f_max_[j_] );
     // Select x values in this Vegas bin
-    jj = fJ;
+    jj = j_;
     for (unsigned int i=0; i<ndim; i++) {
-      jjj = jj / fMbin;
-      fN[i] = jj - jjj * fMbin;
-      fX[i] = ( (double)rand()/RAND_MAX + fN[i] ) / fMbin;
+      jjj = jj / mbin_;
+      n_[i] = jj - jjj * mbin_;
+      x_[i] = ( (double)rand()/RAND_MAX + n_[i] ) / mbin_;
       jj = jjj;
     }
     
     // Get weight for selected x value
-    weight = F( fX );
+    weight = F( x_ );
     
     // Eject if weight is too low
     //if (y>weight) {
-      //std::cout << "ERROR : y>weight => " << y << ">" << weight << ", " << fJ << std::endl;
+      //std::cout << "ERROR: y>weight => " << y << ">" << weight << ", " << j_ << std::endl;
       //_force_correction = false;
       //_force_returnto1 = true;
-      //return this->GenerateOneEvent();
+      //return this->generateOneEvent();
       //goto line1;
     //}
   } while ( y>weight );
 
-  if ( weight<=fFmax[fJ] ) fJ = 0;
+  if ( weight<=f_max_[j_] ) j_ = 0;
   // Init correction cycle if weight is higher than fmax or ffmax
-  else if ( weight<=fFGlobalMax ) {
-    fFmaxOld = fFmax[fJ];
-    fFmax[fJ] = weight;
-    fFmaxDiff = weight-fFmaxOld;
-    fCorrec = ( fNm[fJ] - 1. ) * fFmaxDiff / fFGlobalMax - 1.;
+  else if ( weight<=f_max_global_ ) {
+    f_max_old_ = f_max_[j_];
+    f_max_[j_] = weight;
+    f_max_diff_ = weight-f_max_old_;
+    correc_ = ( nm_[j_] - 1. ) * f_max_diff_ / f_max_global_ - 1.;
   }
   else {
-    fFmaxOld = fFmax[fJ];
-    fFmax[fJ] = weight;
-    fFmaxDiff = weight-fFmaxOld;
-    fFGlobalMax = weight;
-    fCorrec = ( fNm[fJ] - 1. ) * fFmaxDiff / fFGlobalMax * weight / fFGlobalMax - 1.;
+    f_max_old_ = f_max_[j_];
+    f_max_[j_] = weight;
+    f_max_diff_ = weight-f_max_old_;
+    f_max_global_ = weight;
+    correc_ = ( nm_[j_] - 1. ) * f_max_diff_ / f_max_global_ * weight / f_max_global_ - 1.;
   }
   
-  Debugging( Form( "Correc.: %f, j = %d", fCorrec, fJ ) );
+  Debugging( Form( "Correc.: %f, j = %d", correc_, j_ ) );
   
   // Return with an accepted event
-  if ( weight>0. ) return StoreEvent( fX );
+  if ( weight>0. ) return storeEvent( x_ );
   return false;
 }
 
 bool
-Vegas::CorrectionCycle( double* x_ )
+Vegas::correctionCycle( double* x_, bool& has_correction )
 {
   double weight;
-  const unsigned int ndim = fFunction->dim;
+  const unsigned int ndim = function_->dim;
   
   Debugging( Form( "Correction cycles are started.\n\t"
                    "j = %f"
                    "correc = %f"
-                   "corre2 = %f", fJ, fCorrec2 ) );
+                   "corre2 = %f", j_, correc2_ ) );
   
-  if ( fCorrec>=1. ) fCorrec -= 1.;
-  if ( (double)rand()/RAND_MAX<fCorrec ) {
-    fCorrec = -1.;
+  if ( correc_>=1. ) correc_ -= 1.;
+  if ( (double)rand()/RAND_MAX<correc_ ) {
+    correc_ = -1.;
     // Select x values in Vegas bin
     for ( unsigned int k=0; k<ndim; k++ ) {
-      fX[k] = ( (double)rand()/RAND_MAX + fN[k] ) / fMbin;
+      x_[k] = ( (double)rand()/RAND_MAX + n_[k] ) / mbin_;
     }
     // Compute weight for x value
-    weight = F( fX );
+    weight = F( x_ );
     // Parameter for correction of correction
-    if ( weight>fFmax[fJ] ) {
-      if ( weight>fFmax2 ) fFmax2 = weight;
-      fCorrec2 -= 1.;
-      fCorrec += 1.;
+    if ( weight>f_max_[j_] ) {
+      if ( weight>f_max2_ ) f_max2_ = weight;
+      correc2_ -= 1.;
+      correc_ += 1.;
     }
     // Accept event
-    if ( weight>=fFmaxDiff*(double)rand()/RAND_MAX + fFmaxOld ) { // FIXME!!!!
+    if ( weight>=f_max_diff_*(double)rand()/RAND_MAX + f_max_old_ ) { // FIXME!!!!
       //Error("Accepting event!!!");
-      //return StoreEvent(x);
-      std::copy( fX, fX+ndim, x_ );
-      fHasCorrection = true;
+      //return storeEvent(x);
+      std::copy( x_, x_+ndim, x_ );
+      has_correction = true;
       return true;
     }
     return false;
   }
   // Correction if too big weight is found while correction
   // (All your bases are belong to us...)
-  if ( fFmax2>fFmax[fJ] ) {
-    fFmaxOld = fFmax[fJ];
-    fFmax[fJ] = fFmax2;
-    fFmaxDiff = fFmax2-fFmaxOld;
-    if ( fFmax2<fFGlobalMax ) {
-      fCorrec = ( fNm[fJ] - 1. ) * fFmaxDiff / fFGlobalMax - fCorrec2;
+  if ( f_max2_>f_max_[j_] ) {
+    f_max_old_ = f_max_[j_];
+    f_max_[j_] = f_max2_;
+    f_max_diff_ = f_max2_-f_max_old_;
+    if ( f_max2_<f_max_global_ ) {
+      correc_ = ( nm_[j_] - 1. ) * f_max_diff_ / f_max_global_ - correc2_;
     }
     else {
-      fFGlobalMax = fFmax2;
-      fCorrec = ( fNm[fJ] - 1. ) * fFmaxDiff / fFGlobalMax * fFmax2 / fFGlobalMax - fCorrec2;
+      f_max_global_ = f_max2_;
+      correc_ = ( nm_[j_] - 1. ) * f_max_diff_ / f_max_global_ * f_max2_ / f_max_global_ - correc2_;
     }
-    fCorrec2 = 0.;
-    fFmax2 = 0.;
+    correc2_ = 0.;
+    f_max2_ = 0.;
     return false;
   }
   return true;
 }
 
 bool
-Vegas::StoreEvent( double *x_ )
+Vegas::storeEvent( double *x_ )
 {
-  fInputParameters->store = true;
+  input_params_->store = true;
   F( x_ );
-  fInputParameters->ngen += 1;
-  fInputParameters->store = false;
+  input_params_->ngen += 1;
+  input_params_->store = false;
   
-  if ( fInputParameters->ngen%1000==0 ) {
-    Debugging( Form( "Generated events: %d", fInputParameters->ngen ) );
+  if ( input_params_->ngen%1000==0 ) {
+    Debugging( Form( "Generated events: %d", input_params_->ngen ) );
   }
   
   return true;
 }
 
 void
-Vegas::SetGen()
+Vegas::setGen()
 {
   int jj, jjj;
   double sum, sum2, sum2p;
@@ -261,18 +256,18 @@ Vegas::SetGen()
   double sig, sigp;
   std::ostringstream os;
   if ( Logger::GetInstance()->Level>=Logger::Debug ) {
-    Debugging( Form( "MaxGen = %d", fInputParameters->maxgen ) );
+    Debugging( Form( "MaxGen = %d", input_params_->maxgen ) );
   }
   
-  const unsigned int ndim = fFunction->dim,
-                     max = pow( fMbin, ndim ),
-                     npoin = fInputParameters->npoints;
+  const unsigned int ndim = function_->dim,
+                     max = pow( mbin_, ndim ),
+                     npoin = input_params_->npoints;
 
-  fNm = new int[max];
-  fFmax = new double[max];
-  fN = new int[ndim];
+  nm_ = new int[max];
+  f_max_ = new double[max];
+  n_ = new int[ndim];
 
-  fInputParameters->ngen = 0;
+  input_params_->ngen = 0;
 
   // ...
   sum = 0.;
@@ -280,24 +275,24 @@ Vegas::SetGen()
   sum2p = 0.;
 
   for ( unsigned int i=0; i<max; i++ ) {
-    fNm[i] = 0;
-    fFmax[i] = 0.;
+    nm_[i] = 0;
+    f_max_[i] = 0.;
   }
 
   for ( unsigned int i=0; i<max; i++ ) {
     jj = i;
     for ( unsigned int j=0; j<ndim; j++ ) {
-      jjj = jj/fMbin;
-      n[j] = jj-jjj*fMbin;
+      jjj = jj/mbin_;
+      n[j] = jj-jjj*mbin_;
       jj = jjj;
     }
     fsum = fsum2 = 0.;
     for ( unsigned int j=0; j<npoin; j++ ) {
       for ( unsigned int k=0; k<ndim; k++ ) {
-        fX[k] = ( (double)rand()/RAND_MAX + n[k] ) / fMbin;
+        x_[k] = ( (double)rand()/RAND_MAX + n[k] ) / mbin_;
       }
-      z = F( fX );
-      if ( z>fFmax[i] ) fFmax[i] = z;
+      z = F( x_ );
+      if ( z>f_max_[i] ) f_max_[i] = z;
       fsum += z;
       fsum2 += z*z;
     }
@@ -307,12 +302,12 @@ Vegas::SetGen()
     sum += av;
     sum2 += av2;
     sum2p += sig2;
-    if ( fFmax[i]>fFGlobalMax ) fFGlobalMax = fFmax[i];
+    if ( f_max_[i]>f_max_global_ ) f_max_global_ = f_max_[i];
 
     if ( Logger::GetInstance()->Level>=Logger::Debug ) {
       sig = sqrt( sig2 );
       eff = 1.e4;
-      if ( fFmax[i]!=0. ) eff = fFmax[i]/av;
+      if ( f_max_[i]!=0. ) eff = f_max_[i]/av;
       os.str(""); for ( unsigned int j=0; j<ndim; j++ ) { os << n[j]; if ( j!=ndim-1 ) os << ", "; }
       DebuggingInsideLoop( Form( "In iteration #%d:\n\t"
                                  "av   = %f\n\t"
@@ -320,7 +315,7 @@ Vegas::SetGen()
                                  "fmax = %f\n\t"
                                  "eff  = %f\n\t"
                                  "n = (%s)",
-                                 i, av, sig, fFmax[i], eff, os.str().c_str() ) );
+                                 i, av, sig, f_max_[i], eff, os.str().c_str() ) );
     }
   }
 
@@ -333,8 +328,8 @@ Vegas::SetGen()
     sigp = sqrt( sum2p );
     
     eff1 = 0.;
-    for ( unsigned int i=0; i<max; i++ ) eff1 += ( fFmax[i] / ( max*sum ) );
-    eff2 = fFGlobalMax/sum;
+    for ( unsigned int i=0; i<max; i++ ) eff1 += ( f_max_[i] / ( max*sum ) );
+    eff2 = f_max_global_/sum;
     
     Debugging( Form( "Average function value     =  sum   = %f\n\t"
                      "Average function value     =  sum   = %f\n\t"
@@ -345,8 +340,8 @@ Vegas::SetGen()
                      "Average inefficiency       =  eff1  = %f\n\t"
                      "Overall inefficiency       =  eff2  = %f\n\t"
                      "eff = %f",
-                     sum, sum2, sig, sigp, fFGlobalMax, eff1, eff2, eff ) );
+                     sum, sum2, sig, sigp, f_max_global_, eff1, eff2, eff ) );
   }
-  fGenerationPrepared = true;
+  gen_prepared_ = true;
 }
 

@@ -5,10 +5,10 @@ PSF( double q2, double mx2, double* sigma_t, double* w1, double* w2 )
 {
   *sigma_t = *w1 = *w2 = 0.;
 
-  //const double m_min = Particle::GetMassFromPDGId(Particle::Proton)+0.135;
-  const double m_proton = Particle::GetMassFromPDGId( Particle::Proton ),
+  //const double m_min = Particle::massFromPDGId(Particle::Proton)+0.135;
+  const double m_proton = Particle::massFromPDGId( Particle::Proton ),
                m2_proton = m_proton*m_proton,
-               m_min = m_proton+Particle::GetMassFromPDGId( Particle::PiZero );
+               m_min = m_proton+Particle::massFromPDGId( Particle::PiZero );
 
   const double mx = sqrt( mx2 );
 
@@ -63,7 +63,7 @@ PSF( double q2, double mx2, double* sigma_t, double* w1, double* w2 )
     exp( abrass[n_bin]  +bbrass[n_bin]  *logqq0+cbrass[n_bin]  *pow( fabs( logqq0 ), 3 ) )*gd2;
 
   *sigma_t = sigLow + x_bin*( sigHigh-sigLow )/dx;
-  *w1 = ( mx2-m2_proton )/( 8.*Constants::Pi*Constants::Pi*m_proton*Constants::AlphaEM )/Constants::GeV2toBarn*1.e6*(*sigma_t);
+  *w1 = ( mx2-m2_proton )/( 8.*M_PI*M_PI*m_proton*Constants::AlphaEM )/Constants::GeV2toBarn*1.e6*(*sigma_t);
   *w2 = ( *w1 ) * q2/( q2-nu2 );
 
   return true;
@@ -161,7 +161,7 @@ SzczurekUleshchenkoFormFactors( double q2, double mi2, double mf2 )
   //term1 = 1.;
   term2 = pow( kt2_ / ( kt2_+x_*(mx2-mp2)+x_*x_*mp2 ), 2 );
   f_aux = F2_corr/( mx2+Q2-mp2 )*term1*term2;
-  f_ine = Constants::AlphaEM/Constants::Pi*( 1.-x_ )*f_aux/kt2_;
+  f_ine = Constants::AlphaEM/M_PI*( 1.-x_ )*f_aux/kt2_;
   return f_ine;*/
 
   const double w2 = k*x/q2*F2_corr,

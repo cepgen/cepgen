@@ -12,7 +12,7 @@ namespace EPA
   void
   InitialiseEPA( const Particle& el, const Particle& pr, const PhotonMode& mode, const PhysicsBoundaries& b )
   {
-    fProton = pr.GetMomentum(), fElectron = el.GetMomentum();
+    fProton = pr.momentum(), fElectron = el.momentum();
     fMode = mode;
     fBoundaries = b;
   }
@@ -22,14 +22,14 @@ namespace EPA
   {
     const double sqs = CMEnergy( fElectron, fProton );
     fS = sqs*sqs;
-    fME2 = fElectron.M2(); fMP2 = fProton.M2();
+    fME2 = fElectron.mass2(); fMP2 = fProton.mass2();
 
-    fElDotPr = fElectron.FourProduct( fProton );
-    if ( fMode>TransversalLongitudinal ) { fEEl = fElDotPr/fProton.M(); } // Evaluate photon flux in proton rest frame: set EEL to approx. 50TeV
-    else                                 { fEEl = fElectron.E(); }
+    fElDotPr = fElectron.fourProduct( fProton );
+    if ( fMode>TransversalLongitudinal ) { fEEl = fElDotPr/fProton.mass(); } // Evaluate photon flux in proton rest frame: set EEL to approx. 50TeV
+    else                                 { fEEl = fElectron.energy(); }
 
     // Calculate Y bounds from [ALI, A. et al. (1987) Heavy quark physics at HERA. Proc. HERA workshop, Hamburg 1987 (ed. R.D. PECCEI), 395-494].
-    const double w12 = pow( fBoundaries.wmin,2 )-fProton.M2();
+    const double w12 = pow( fBoundaries.wmin,2 )-fProton.mass2();
     // Use trick for quadratic equations for dymin. See [W.H. PRESS et al. (1988): Numerical Recipes in C. Cambridge (Cambridge Univ. Press), p. 156].
     const double ysqr = sqrt( pow( fS-w12, 2 )-4.*w12*fME2 ),
                  dymax_tmp = ( fS+w12+ysqr ) / (2.*( fS+fME2 ) );
@@ -39,7 +39,7 @@ namespace EPA
                                 ( pow( fBoundaries.wmax, 2 )-fMP2+fBoundaries.q2max ) / ( 2*fElDotPr ) ) );
 
     // Set maximal photon weight for efficient rejection plane
-    const double gq2min_init = std::max( pow( fElectron.M()*fYmin, 2 ) / ( 1.-fYmin ), fBoundaries.q2min ),
+    const double gq2min_init = std::max( pow( fElectron.mass()*fYmin, 2 ) / ( 1.-fYmin ), fBoundaries.q2min ),
                  gq2max_init = std::min( fYmax*fS, fBoundaries.q2max );
 
     if ( fMode==WeizsackerWilliams ) { fEPAmax = Constants::AlphaReduced*pow( fYmin-2., 2 ); } // WWA approximation
@@ -72,7 +72,7 @@ namespace EPA
     DebuggingInsideLoop( Form( "EPA max = %f", fEPAmax ) );
 
     const double y = fYmin*pow( fYmax/fYmin, x1 );
-    const double gq2min = std::max( pow( fElectron.M()*y,2 )/( 1.-y ), fBoundaries.q2min ),
+    const double gq2min = std::max( pow( fElectron.mass()*y,2 )/( 1.-y ), fBoundaries.q2min ),
                  gq2max = std::min( y*fS, fBoundaries.q2max ); // calculate actual Q2_min, Q2_max from Y
     // produce Q2 spect. (1/x weighted shape)
     *q2 = gq2min*pow( gq2max/gq2min, x2 );
@@ -107,17 +107,17 @@ namespace EPA
 
     if ( epa>fEPAmax ) fEPAmax = epa;
 
-    const double emy = fElectron.E()*( 1.-y ),
-                 exy = fProton.E()*( *q2 )/fS,
+    const double emy = fElectron.energy()*( 1.-y ),
+                 exy = fProton.energy()*( *q2 )/fS,
                  eesc = emy+exy;
     const double cthe = ( emy-exy )/eesc;
 
     if ( fabs(cthe)>1. ) return false;
 
-    const double theta = acos( cthe ), phi = 2.*Constants::Pi*x3;
-    *out_ele = Particle::Momentum::FromPThetaPhi( -sqrt( eesc*eesc-fME2 ), theta, phi ); out_ele->SetM( fElectron.M() );
+    const double theta = acos( cthe ), phi = 2.*M_PI*x3;
+    *out_ele = Particle::Momentum::fromPThetaPhi( -sqrt( eesc*eesc-fME2 ), theta, phi ); out_ele->setMass( fElectron.mass() );
     *out_gam = fElectron-( *out_ele );
-    out_gam->SetM2( -( *q2 ) );
+    out_gam->setMass2( -( *q2 ) );
 
     return true;
   }

@@ -1,162 +1,163 @@
 #include "GenericProcess.h"
 
 GenericProcess::GenericProcess( const std::string& name_ ) :
-  fX( 0 ), fNumDimensions( 0 ), fEvent( new Event ),
-  fIsPointSet( false ), fIsInStateSet( false ), fIsOutStateSet( false ), fIsKinematicSet( false ),
-  fName( name_ ),
-  fTotalGenTime( 0. ), fNumGenEvents( 0 )
+  x_( 0 ), num_dimensions_( 0 ), event_( new Event ),
+  is_point_set_( false ), is_incoming_state_set_( false ), is_outgoing_state_set_( false ), is_kinematics_set_( false ),
+  name_( name_ ),
+  total_gen_time_( 0. ), num_gen_events_( 0 )
 {}
 
 GenericProcess::~GenericProcess()
 {
-  if ( fIsPointSet ) delete[] fX;
-  delete fEvent;
+  if ( is_point_set_ ) delete[] x_;
+  if ( event_ ) delete event_;
 }
 
 void
-GenericProcess::SetPoint( const unsigned int ndim_, double x_[] )
+GenericProcess::setPoint( const unsigned int ndim, double* x )
 {
   // Number of dimensions on which the integration will be performed
-  fNumDimensions = ndim_;
-
+  num_dimensions_ = ndim;
   // Phase space coordinate becomes a protected attribute
-  if ( !fX ) fX = new double[ndim_];
+  if ( !x_ ) x_ = new double[ndim];
 
-  std::copy( x_, x_+ndim_, fX );  
-  fIsPointSet = true;
-  if ( Logger::GetInstance()->Level>=Logger::DebugInsideLoop ) { DumpPoint( DebugMessage ); }
+  std::copy( x, x+ndim, x_ );
+  is_point_set_ = true;
+  if ( Logger::GetInstance()->Level>=Logger::DebugInsideLoop ) { dumpPoint( DebugMessage ); }
 }
 
 void
-GenericProcess::PrepareKinematics()
+GenericProcess::prepareKinematics()
 {
-  if ( !IsKinematicsDefined() ) return; // FIXME dump some information...
-  fSqS = CMEnergy( *GetParticle( Particle::IncomingBeam1 ),
-                   *GetParticle( Particle::IncomingBeam2 ) );
-  fS = fSqS*fSqS;
-  
-  fW1 = GetParticle( Particle::IncomingBeam1 )->M2();
-  fW2 = GetParticle( Particle::IncomingBeam2 )->M2();
+  if ( !isKinematicsDefined() ) return; // FIXME dump some information...
+  const Particle* ib1 = particlePtr( Particle::IncomingBeam1 ),
+	         *ib2 = particlePtr( Particle::IncomingBeam2 );
 
-  Debugging( Form( "Kinematics successfully prepared! sqrt(s) = %.2f", fSqS ) );
+  sqs_ = CMEnergy( *ib1, *ib2 );
+  s_ = sqs_*sqs_;
+  
+  w1_ = ib1->mass2();
+  w2_ = ib2->mass2();
+
+  Debugging( Form( "Kinematics successfully prepared! sqrt(s) = %.2f", sqs_ ) );
 }
 
 void
-GenericProcess::DumpPoint( const ExceptionType& et=Information )
+GenericProcess::dumpPoint( const ExceptionType& et=Information )
 {
   std::ostringstream os;
-  for ( unsigned int i=0; i<fNumDimensions; i++ ) {
-    os << Form( "  x(%2d) = %8.6f\n\t", i, fX[i] );
+  for ( unsigned int i=0; i<num_dimensions_; i++ ) {
+    os << Form( "  x(%2d) = %8.6f\n\t", i, x_[i] );
   }
   if ( et<DebugMessage ) { Information( Form( "Number of integration parameters: %d\n\t"
-                                              "%s", fNumDimensions, os.str().c_str() ) ); }
+                                              "%s", num_dimensions_, os.str().c_str() ) ); }
   else                   { Debugging( Form( "Number of integration parameters: %d\n\t"
-                                            "%s", fNumDimensions, os.str().c_str() ) ); }
+                                            "%s", num_dimensions_, os.str().c_str() ) ); }
 }
 
 void
-GenericProcess::SetEventContent( const IncomingState& is, const OutgoingState& os )
+GenericProcess::setEventContent( const IncomingState& is, const OutgoingState& os )
 {  
-  for ( IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++ ) { fEvent->AddParticle( Particle( ip->first, ip->second ) ); }
+  for ( IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++ ) { event_->addParticle( Particle( ip->first, ip->second ) ); }
 
   // Prepare the central system if not already there
   IncomingState::const_iterator central_system = is.find( Particle::CentralSystem );
   if ( central_system==is.end() ) {
-    Particle* moth = GetParticle( Particle::Parton1 );
-    Particle cs( Particle::CentralSystem, moth->GetPDGId() );
-    cs.SetMother( moth );
-    fEvent->AddParticle( cs );
+    Particle* moth = particlePtr( Particle::Parton1 );
+    Particle cs( Particle::CentralSystem, moth->pdgId() );
+    cs.setMother( moth );
+    event_->addParticle( cs );
   }
 
-  for ( OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++ ) { fEvent->AddParticle( Particle( op->first, op->second ) ); }
+  for ( OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++ ) { event_->addParticle( Particle( op->first, op->second ) ); }
   
   // Incoming particles (incl. eventual partons)
   for ( IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++ ) {
-    Particle* p = GetParticle( ip->first );
+    Particle* p = particlePtr( ip->first );
     p->status = Particle::Undefined;
     switch ( ip->first ) {
       case Particle::IncomingBeam1:
       case Particle::IncomingBeam2: break;
-      case Particle::Parton1:       p->SetMother( GetParticle( Particle::IncomingBeam1 ) ); break;
-      case Particle::Parton2:       p->SetMother( GetParticle( Particle::IncomingBeam2 ) ); break;
-      case Particle::CentralSystem: p->SetMother( GetParticle( Particle::Parton1 ) ); break;
+      case Particle::Parton1:       p->setMother( particlePtr( Particle::IncomingBeam1 ) ); break;
+      case Particle::Parton2:       p->setMother( particlePtr( Particle::IncomingBeam2 ) ); break;
+      case Particle::CentralSystem: p->setMother( particlePtr( Particle::Parton1 ) ); break;
       default: break;
     }
   }
   // Outgoing particles (central, and outgoing primary particles or remnants)
   for ( OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++ ) {
-    Particle* p = GetParticle( op->first );
+    Particle* p = particlePtr( op->first );
     p->status = Particle::Undefined;
     switch ( op->first ) {
-      case Particle::OutgoingBeam1:    p->SetMother( GetParticle( Particle::IncomingBeam1 ) ); break;
-      case Particle::OutgoingBeam2:    p->SetMother( GetParticle( Particle::IncomingBeam2 ) ); break;
-      case Particle::CentralParticle1: p->SetMother( GetParticle( Particle::CentralSystem ) ); break;
-      case Particle::CentralParticle2: p->SetMother( GetParticle( Particle::CentralSystem ) ); break;
+      case Particle::OutgoingBeam1:    p->setMother( particlePtr( Particle::IncomingBeam1 ) ); break;
+      case Particle::OutgoingBeam2:    p->setMother( particlePtr( Particle::IncomingBeam2 ) ); break;
+      case Particle::CentralParticle1: p->setMother( particlePtr( Particle::CentralSystem ) ); break;
+      case Particle::CentralParticle2: p->setMother( particlePtr( Particle::CentralSystem ) ); break;
       default: break;
     }
   }
-  fEvent->Init();
+  event_->init();
 }
 
 void
-GenericProcess::SetIncomingKinematics( const Particle::Momentum& p1, const Particle::Momentum& p2 )
+GenericProcess::setIncomingKinematics( const Particle::Momentum& p1, const Particle::Momentum& p2 )
 {
-  if ( !GetParticle( Particle::IncomingBeam1 )->SetMomentum( p1 ) ) { InError( "Invalid incoming beam 1" ); }
-  if ( !GetParticle( Particle::IncomingBeam2 )->SetMomentum( p2 ) ) { InError( "Invalid incoming beam 2" ); }
+  if ( !particlePtr( Particle::IncomingBeam1 )->setMomentum( p1 ) ) { InError( "Invalid incoming beam 1" ); }
+  if ( !particlePtr( Particle::IncomingBeam2 )->setMomentum( p2 ) ) { InError( "Invalid incoming beam 2" ); }
 }
 
 void
-GenericProcess::GetFormFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const
+GenericProcess::formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const
 {
-  const double mx2 = fMX*fMX, my2 = fMY*fMY;
+  const double mx2 = MX_*MX_, my2 = MY_*MY_;
 
   bool inel_p1 = false,
        inel_p2 = false;
 
-  switch ( fCuts.kinematics ) {
+  switch ( cuts_.kinematics ) {
     case Kinematics::ElectronElectron: {
       fp1 = TrivialFormFactors(); // electron (trivial) form factor
       fp2 = TrivialFormFactors(); // electron (trivial) form factor
     } break;
     case Kinematics::ProtonElectron: {
-      fp1 = ElasticFormFactors( -fT1, fW1 ); // proton elastic form factor
+      fp1 = ElasticFormFactors( -t1_, w1_ ); // proton elastic form factor
       fp2 = TrivialFormFactors(); // electron (trivial) form factor
     } break;
     case Kinematics::ElectronProton: {
       fp1 = TrivialFormFactors(); // electron (trivial) form factor
-      fp2 = ElasticFormFactors( -fT2, fW2 ); // proton elastic form factor
+      fp2 = ElasticFormFactors( -t2_, w2_ ); // proton elastic form factor
     } break;
     case Kinematics::ElasticElastic: {
-      fp1 = ElasticFormFactors( -fT1, fW1 ); // proton elastic form factor
-      fp2 = ElasticFormFactors( -fT2, fW2 ); // proton elastic form factor
+      fp1 = ElasticFormFactors( -t1_, w1_ ); // proton elastic form factor
+      fp2 = ElasticFormFactors( -t2_, w2_ ); // proton elastic form factor
     } break;
     case Kinematics::ElasticInelastic: {
-      fp1 = ElasticFormFactors( -fT1, fW1 );
+      fp1 = ElasticFormFactors( -t1_, w1_ );
       inel_p2 = true;
     } break;
     case Kinematics::InelasticElastic: {
       inel_p1 = true;
-      fp2 = ElasticFormFactors( -fT2, fW2 );
+      fp2 = ElasticFormFactors( -t2_, w2_ );
     } break;
     case Kinematics::InelasticInelastic: {
       inel_p1 = inel_p2 = true;
     } break;
   }
-  switch ( fCuts.remnant_mode ) {
+  switch ( cuts_.remnant_mode ) {
     case SuriYennie:
     default: {
-      if ( inel_p1 ) fp1 = SuriYennieFormFactors( -fT1, fW1, mx2 );
-      if ( inel_p2 ) fp2 = SuriYennieFormFactors( -fT2, fW2, my2 );
+      if ( inel_p1 ) fp1 = SuriYennieFormFactors( -t1_, w1_, mx2 );
+      if ( inel_p2 ) fp2 = SuriYennieFormFactors( -t2_, w2_, my2 );
     } break;
     case Fiore:
     case FioreSea:
     case FioreVal: { // low-Q2 inelastic form factor
-      if ( inel_p1 ) fp1 = FioreBrasseFormFactors( -fT1, fW1, mx2 );
-      if ( inel_p2 ) fp2 = FioreBrasseFormFactors( -fT2, fW2, my2 );
+      if ( inel_p1 ) fp1 = FioreBrasseFormFactors( -t1_, w1_, mx2 );
+      if ( inel_p2 ) fp2 = FioreBrasseFormFactors( -t2_, w2_, my2 );
     } break;
     case SzczurekUleshchenko: {
-      if ( inel_p1 ) fp1 = SzczurekUleshchenkoFormFactors( -fT1, fW1, mx2 );
-      if ( inel_p2 ) fp2 = SzczurekUleshchenkoFormFactors( -fT2, fW2, my2 );
+      if ( inel_p1 ) fp1 = SzczurekUleshchenkoFormFactors( -t1_, w1_, mx2 );
+      if ( inel_p2 ) fp2 = SzczurekUleshchenkoFormFactors( -t2_, w2_, my2 );
     } break;
   }
 }
@@ -164,13 +165,13 @@ GenericProcess::GetFormFactors( double q1, double q2, FormFactors& fp1, FormFact
 std::ostream&
 operator<<( std::ostream& os, const GenericProcess& proc )
 {
-  os << proc.GetName().c_str();
+  os << proc.name().c_str();
   return os;
 }
 
 std::ostream&
 operator<<( std::ostream& os, const GenericProcess* proc )
 {
-  os << proc->GetName().c_str();
+  os << proc->name().c_str();
   return os;
 }

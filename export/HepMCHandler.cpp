@@ -41,18 +41,18 @@ OutputHandler::HepMCHandler::fillEvent( const Event* evt )
 
   // general information
   HepMC::GenCrossSection xs;
-  xs.set_cross_section( fCrossSect, fCrossSectErr );
+  xs.set_cross_section( cross_sect_, cross_sect_err_ );
 #ifndef HEPMC_VERSION_CODE
   event->set_cross_section( xs );
 #else
   event->set_cross_section( HepMC::GenCrossSectionPtr( &xs ) );
 #endif
 
-  event->set_event_number( fEventNum );
+  event->set_event_number( event_num_ );
 
   // filling the particles content
   const HepMC::FourVector origin( 0., 0., 0., 0. );
-  ConstParticlesRef part_vec = evt->GetConstParticlesRef();
+  ConstParticlesRef part_vec = evt->constParticlesRef();
 
   int cm_id = 0, idx = 1;
 
@@ -73,18 +73,18 @@ OutputHandler::HepMCHandler::fillEvent( const Event* evt )
   for ( unsigned int i=0; i<part_vec.size(); i++ ) {
 
     const Particle* part_orig = part_vec.at( i );
-    HepMC::FourVector pmom( part_orig->GetMomentum().Px(),
-                            part_orig->GetMomentum().Py(),
-                            part_orig->GetMomentum().Pz(),
-                            part_orig->E() );
+    HepMC::FourVector pmom( part_orig->momentum().px(),
+                            part_orig->momentum().py(),
+                            part_orig->momentum().pz(),
+                            part_orig->energy() );
 #ifndef HEPMC_VERSION_CODE
-    HepMC::GenParticle* part = new HepMC::GenParticle( pmom, part_orig->GetIntPDGId(), part_orig->status );
+    HepMC::GenParticle* part = new HepMC::GenParticle( pmom, part_orig->integerPdgId(), part_orig->status );
     part->suggest_barcode( idx++ );
 #else
-    HepMC::GenParticlePtr part( new HepMC::GenParticle( pmom, part_orig->GetIntPDGId(), part_orig->status ) );
+    HepMC::GenParticlePtr part( new HepMC::GenParticle( pmom, part_orig->integerPdgId(), part_orig->status ) );
 #endif
 
-    const ParticlesIds moth = part_orig->GetMothersIds();
+    const ParticlesIds moth = part_orig->mothersIds();
 
     switch ( part_orig->role ) {
       case Particle::IncomingBeam1: { v1->add_particle_in( part ); } break;

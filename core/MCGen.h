@@ -73,34 +73,34 @@ class MCGen {
   MCGen( Parameters *ip_ );
   ~MCGen();
   /// Dump this program's header into the standard output stream
-  void PrintHeader();
+  void printHeader();
   /**
    * Compute the cross section for the run parameters defined by this object.
    * This returns the cross section as well as the absolute error computed along.
    * @brief Compute the cross-section for the given process
-   * @param[out] xsec_ The computed cross-section, in pb
-   * @param[out] err_ The absolute integration error on the computed cross-section, in pb
+   * @param[out] xsec The computed cross-section, in pb
+   * @param[out] err The absolute integration error on the computed cross-section, in pb
    */
-  void ComputeXsection( double* xsec_, double* err_ );
+  void computeXsection( double& xsec, double& err );
   /**
    * Generate one single event given the phase space computed by Vegas in the integration step
    * @return A pointer to the Event object generated in this run
    */
-  Event* GenerateOneEvent();
+  Event* generateOneEvent();
   /// Number of dimensions on which the integration is performed
-  inline size_t GetNdim() {
+  inline size_t numDimensions() {
     if ( !parameters->process ) return 0;
-    return parameters->process->GetNdim( parameters->process_mode );
+    return parameters->process->numDimensions( parameters->process_mode );
   }
   /// Compute one single point from the total phase space
   /// \param[in] x_ the n-dimensional point to compute
   /// \return the function value for the given point
-  inline double ComputePoint( double* x_ ) {
-    PrepareFunction();
-    double res = f( x_, GetNdim(), (void*)parameters );
+  inline double computePoint( double* x_ ) {
+    prepareFunction();
+    double res = f( x_, numDimensions(), (void*)parameters );
     std::ostringstream os;
-    for ( unsigned int i=0; i<GetNdim(); i++ ) { os << x_[i] << " "; }
-    Debugging( Form( "Result for x[%zu] = ( %s):\n\t%10.6f", GetNdim(), os.str().c_str(), res ) );
+    for ( unsigned int i=0; i<numDimensions(); i++ ) { os << x_[i] << " "; }
+    Debugging( Form( "Result for x[%zu] = ( %s):\n\t%10.6f", numDimensions(), os.str().c_str(), res ) );
     return res;
   }
   /// Physical Parameters used in the events generation and cross-section computation
@@ -110,17 +110,17 @@ class MCGen {
 
  private:
   /// Prepare the function before its integration (add particles/compute kinematics/...)
-  void PrepareFunction();
+  void prepareFunction();
   /// Call the Vegas constructor (once, just before the first integration attempt)
-  void BuildVegas();
+  void buildVegas();
   /// Vegas instance which will integrate the function
-  Vegas *fVegas;
+  Vegas *vegas_;
   /// Cross section value computed at the last integration
-  double fCrossSection;
+  double cross_section_;
   /// Error on the cross section as computed in the last integration
-  double fCrossSectionError;
+  double cross_section_error_;
   /// Has a first integration beed already performed?
-  bool fHasCrossSection;
+  bool has_cross_section_;
 };
 
 #endif

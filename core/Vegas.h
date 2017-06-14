@@ -34,29 +34,29 @@ class Vegas {
      * \param[out] abserr_ The error associated to the computed cross section
      * \return 0 if the integration was performed successfully
      */
-    int Integrate( double* result_,double* abserr_ );
+    int integrate( double& result_,double& abserr_ );
     /// Launch the generation of events
-    void Generate();
+    void generate();
     /**
      * Generate one event according to the grid parameters set in Vegas::SetGen
      * \brief Generate one single event according to the method defined in the Fortran 77 version of LPAIR
      * \return A boolean stating if the generation was successful (in term of the computed weight for the phase space point)
      */
-    bool GenerateOneEvent();
+    bool generateOneEvent();
   private:
     /**
      * Evaluate the function to be integrated at a point @a x_, using the default Parameters object @a fInputParameters
      * \param[in] x_ The point at which the function is to be evaluated
      * \return Function value at this point @a x_
      */
-    inline double F( double* x_ ) { return fFunction->f( x_, fFunction->dim, (void*)fInputParameters ); }
+    inline double F( double* x_ ) { return function_->f( x_, function_->dim, (void*)input_params_ ); }
     /**
      * Evaluate the function to be integrated at a point @a x_, given a set of Parameters @a ip_
      * \param[in] x_ The point at which the function is to be evaluated
      * \param[in] ip_ A set of parameters to fully define the function
      * \return Function value at this point @a x_
      */
-    inline double F( double* x_,Parameters* ip_ ) { return fFunction->f( x_, fFunction->dim, (void*)ip_ ); }
+    inline double F( double* x_,Parameters* ip_ ) { return function_->f( x_, function_->dim, (void*)ip_ ); }
     /**
      * Store the event characterized by its _ndim-dimensional point in the phase
      * space to the output file
@@ -65,49 +65,50 @@ class Vegas {
      * event to store
      * @return A boolean stating whether or not the event could be saved
      */
-    bool StoreEvent( double* x_ );
+    bool storeEvent( double* x_ );
     /// Start the correction cycle on the grid
-    /// \param x_ Point in the phase space considered
-    bool CorrectionCycle( double* x_ );
+    /// \param x Point in the phase space considered
+    /// \param has_correction Correction cycle started?
+    bool correctionCycle( double* x, bool& has_correction );
     /**
      * Set all the generation mode variables and align them to the integration grid set while computing the cross-section
      * @brief Prepare the class for events generation
      */
-    void SetGen();
+    void setGen();
+
     /// Integration grid size parameter
-    double fMbin;
+    double mbin_;
     /// Lower bounds for the points to generate
-    double *fXlow;
+    double *x_low_;
     /// Upper bounds for the points to generate
-    double *fXup;
+    double *x_up_;
     /// Selected bin at which the function will be evaluated
-    int fJ;
-    double fCorrec;
-    double fCorrec2;
+    int j_;
+    double correc_;
+    double correc2_;
     /// List of parameters to specify the integration range and the physics determining the phase space
-    Parameters *fInputParameters;
+    Parameters *input_params_;
     /// Has the grid been prepared for integration?
-    bool fGridPrepared;
+    bool grid_prepared_;
     /// Has the generation been prepared using @a SetGen call? (very time-consuming operation, thus needs to be called once)
-    bool fGenerationPrepared;
-    bool fHasCorrection;
+    bool gen_prepared_;
     /// Maximal value of the function at one given point
-    double *fFmax;
-    double fFmax2;
-    double fFmaxDiff;
-    double fFmaxOld;
+    double *f_max_;
+    double f_max2_;
+    double f_max_diff_;
+    double f_max_old_;
     /// Maximal value of the function in the considered integration range
-    double fFGlobalMax;
-    int *fN;
-    int *fNm;
+    double f_max_global_;
+    int *n_;
+    int *nm_;
     /// GSL structure storing the function to be integrated by this Vegas instance (along with its parameters)
-    gsl_monte_function *fFunction;
+    gsl_monte_function *function_;
     /// Number of function calls to be computed for each point
-    int fNumConverg;
+    int num_converg_;
     /// Number of iterations for the integration
-    unsigned int fNumIter;
+    unsigned int num_iter_;
     /// Generic array of components to be used in all parts of the integration and generation code
-    double* fX;
+    double* x_;
 };
 
 #endif

@@ -5,46 +5,46 @@ PPtoLL::PPtoLL() : GenericKTProcess("gamma,gamma->l+,l-", 4, Particle::Photon, P
 {}
 
 void
-PPtoLL::PrepareKTKinematics()
+PPtoLL::prepareKTKinematics()
 {
   ////////////////////////////////////
-  fYmin = fCuts.etamin;             //
-  //fYmin = EtaToY(fCuts.etamin, GetParticle(Particle::CentralParticle1)->M(), pt);
-  fYmax = fCuts.etamax;             //
-  //fYmax = EtaToY(fCuts.etamax);
+  y_min_ = cuts_.etamin;             //
+  //y_min_ = EtaToY(cuts_.etamin, particlePtr(Particle::CentralParticle1)->mass(), pt);
+  y_max_ = cuts_.etamax;             //
+  //y_max_ = EtaToY(cuts_.etamax);
   ///////////// FIXME ////////////////
   
   // Outgoing leptons  
-  fY1 = fYmin+(fYmax-fYmin)*x(4);
-  fY2 = fYmin+(fYmax-fYmin)*x(5);
-  DebuggingInsideLoop(Form("leptons rapidities (%.2f < y < %.2f): %f / %f", fYmin, fYmax, fY1, fY2));
+  y1_ = y_min_+(y_max_-y_min_)*x(4);
+  y2_ = y_min_+(y_max_-y_min_)*x(5);
+  DebuggingInsideLoop(Form("leptons rapidities (%.2f < y < %.2f): %f / %f", y_min_, y_max_, y1_, y2_));
  
-  if (fCuts.ptdiffmax<0.) fCuts.ptdiffmax = 400.; //FIXME
-  fPtDiff = fCuts.ptdiffmin+(fCuts.ptdiffmax-fCuts.ptdiffmin)*x(6);
-  fPhiPtDiff = 2.*Constants::Pi*x(7);
+  if (cuts_.ptdiffmax<0.) cuts_.ptdiffmax = 400.; //FIXME
+  pt_diff_ = cuts_.ptdiffmin+(cuts_.ptdiffmax-cuts_.ptdiffmin)*x(6);
+  phi_pt_diff_ = 2.*M_PI*x(7);
   DebuggingInsideLoop(Form("leptons pt difference:\n\t"
                            "  mag = %f (%.2f < Dpt < %.2f)\n\t"
                            "  phi = %f",
-                           fPtDiff, fCuts.ptdiffmin, fCuts.ptdiffmax, fPhiPtDiff));
+                           pt_diff_, cuts_.ptdiffmin, cuts_.ptdiffmax, phi_pt_diff_));
 }
 
 double
-PPtoLL::ComputeJacobian()
+PPtoLL::computeJacobian()
 {
-  double jac = GenericKTProcess::MinimalJacobian();
-  jac *= (fYmax-fYmin); // d(y1)
-  jac *= (fYmax-fYmin); // d(y2)
-  jac *= (fCuts.ptdiffmax-fCuts.ptdiffmin); // d(Dpt)
-  jac *= 2.*Constants::Pi; // d(phiDpt)
+  double jac = GenericKTProcess::minimalJacobian();
+  jac *= ( y_max_-y_min_ ); // d(y1)
+  jac *= ( y_max_-y_min_ ); // d(y2)
+  jac *= ( cuts_.ptdiffmax-cuts_.ptdiffmin ); // d(Dpt)
+  jac *= 2.*M_PI; // d(phiDpt)
   
   return jac;
 }
 
 double
-PPtoLL::ComputeKTFactorisedMatrixElement()
+PPtoLL::computeKTFactorisedMatrixElement()
 {
-  const double mp = Particle::GetMassFromPDGId(Particle::Proton), mp2 = pow(mp, 2);
-  const double ml = GetParticle(Particle::CentralParticle1)->M(), ml2 = pow(ml, 2);
+  const double mp = Particle::massFromPDGId(Particle::Proton), mp2 = mp*mp;
+  const double ml = particlePtr( Particle::CentralParticle1 )->mass(), ml2 = ml*ml;
 
   const unsigned int iterm11 = 1, // Long-long
                      iterm22 = 1, // Trans-trans
@@ -79,31 +79,31 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
   //=================================================================
   //     matrix element computation
   //=================================================================
-  //const double stild = fS/2.*(1+sqrt(1.-(4*pow(mp2, 2))/pow(fS, 2)));
+  //const double stild = s_/2.*(1+sqrt(1.-(4*pow(mp2, 2))/s_*s_));
   
   // Inner photons
-  const double q1tx = fQT1*cos(fPhiQT1), q1ty = fQT1*sin(fPhiQT1),
-               q2tx = fQT2*cos(fPhiQT2), q2ty = fQT2*sin(fPhiQT2);
+  const double q1tx = qt1_*cos(phi_qt1_), q1ty = qt1_*sin(phi_qt1_),
+               q2tx = qt2_*cos(phi_qt2_), q2ty = qt2_*sin(phi_qt2_);
   DebuggingInsideLoop(Form("q1t(x/y) = %e / %e\n\t"
                            "q2t(x/y) = %e / %e", q1tx, q1ty, q2tx, q2ty));
   
   // Two-photon system
   const double ptsumx = q1tx+q2tx,
                ptsumy = q1ty+q2ty,
-               ptsum = sqrt(pow(ptsumx, 2)+pow(ptsumy, 2));
+               ptsum = sqrt(ptsumx*ptsumx+ptsumy*ptsumy);
   
-  const double ptdiffx = fPtDiff*cos(fPhiPtDiff),
-               ptdiffy = fPtDiff*sin(fPhiPtDiff);
+  const double ptdiffx = pt_diff_*cos(phi_pt_diff_),
+               ptdiffy = pt_diff_*sin(phi_pt_diff_);
   
   // Outgoing leptons
-  const double pt1x = (ptsumx+ptdiffx)/2., pt1y = (ptsumy+ptdiffy)/2., pt1 = sqrt(pow(pt1x, 2)+pow(pt1y, 2)),
-               pt2x = (ptsumx-ptdiffx)/2., pt2y = (ptsumy-ptdiffy)/2., pt2 = sqrt(pow(pt2x, 2)+pow(pt2y, 2));
+  const double pt1x = (ptsumx+ptdiffx)/2., pt1y = (ptsumy+ptdiffy)/2., pt1 = sqrt(pt1x*pt1x+pt1y*pt1y),
+               pt2x = (ptsumx-ptdiffx)/2., pt2y = (ptsumy-ptdiffy)/2., pt2 = sqrt(pt2x*pt2x+pt2y*pt2y);
   
-  if (pt1<fCuts.ptmin or pt2<fCuts.ptmin) return 0.;
-  //if (pt1>fCuts.ptmax or pt2>fCuts.ptmax) return 0.;
+  if (pt1<cuts_.ptmin or pt2<cuts_.ptmin) return 0.;
+  //if (pt1>cuts_.ptmax or pt2>cuts_.ptmax) return 0.;
   // transverse mass for the two leptons
-  const double amt1 = sqrt(pow(pt1, 2)+ml2),
-               amt2 = sqrt(pow(pt2, 2)+ml2);
+  const double amt1 = sqrt(pt1*pt1+ml2),
+               amt2 = sqrt(pt2*pt2+ml2);
   
   //=================================================================
   //     a window in transverse momentum difference
@@ -112,7 +112,7 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
 
   //const double pcaptx = pt1x+pt2x, pcapty = pt1y+pt2y;
   // rapidity difference
-  const double dely = fabs(fY1-fY2);
+  const double dely = fabs(y1_-y2_);
   //=================================================================
   //     a window in rapidity distance
   //=================================================================
@@ -122,19 +122,19 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
   //     auxiliary quantities
   //=================================================================
 
-  const double alpha1 = amt1/fSqS*exp( fY1),
-               alpha2 = amt2/fSqS*exp( fY2),
-               beta1  = amt1/fSqS*exp(-fY1),
-               beta2  = amt2/fSqS*exp(-fY2);
+  const double alpha1 = amt1/sqs_*exp( y1_),
+               alpha2 = amt2/sqs_*exp( y2_),
+               beta1  = amt1/sqs_*exp(-y1_),
+               beta2  = amt2/sqs_*exp(-y2_);
   DebuggingInsideLoop(Form("Sudakov parameters:\n\t"
                            "  alpha1/2 = %f / %f\n\t"
                            "   beta1/2 = %f / %f", alpha1, alpha2, beta1, beta2));
 
-  const double q1t2 = pow(q1tx, 2)+pow(q1ty, 2),
-               q2t2 = pow(q2tx, 2)+pow(q2ty, 2);
+  const double q1t2 = q1tx*q1tx+q1ty*q1ty,
+               q2t2 = q2tx*q2tx+q2ty*q2ty;
 
   //const double old_x2 = 0.; //FIXME figure out where this comes from
-  //const double delta_x1 = (pow(fMX, 2)+q2t2)/((1.-old_x2)*fS);
+  //const double delta_x1 = (MX_*MX_+q2t2)/((1.-old_x2)*s_);
 
   //x1 = alpha1+alpha2+delta_x1;
   const double x1 = alpha1+alpha2,
@@ -151,10 +151,10 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
   if (x1>1. or x2>1.) return 0.; // sanity check
 
   // FIXME FIXME FIXME
-  const double ak10 = GetParticle(Particle::IncomingBeam1)->E(),
-               ak1z = GetParticle(Particle::IncomingBeam1)->GetMomentum().Pz(),
-               ak20 = GetParticle(Particle::IncomingBeam2)->E(),
-               ak2z = GetParticle(Particle::IncomingBeam2)->GetMomentum().Pz();
+  const double ak10 = particlePtr(Particle::IncomingBeam1)->energy(),
+               ak1z = particlePtr(Particle::IncomingBeam1)->momentum().pz(),
+               ak20 = particlePtr(Particle::IncomingBeam2)->energy(),
+               ak2z = particlePtr(Particle::IncomingBeam2)->momentum().pz();
   DebuggingInsideLoop(Form("incoming particles: p1: %f / %f\n\t"
                            "                    p2: %f / %f", ak1z, ak10, ak2z, ak20));
   
@@ -162,16 +162,16 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
   //     additional conditions for energy-momentum conservation
   //=================================================================
   
-  const double s1_eff = x1*fS-pow(fQT1,2), s2_eff = x2*fS-pow(fQT2,2);
-  const double invm = sqrt(pow(amt1,2)+pow(amt2,2)+2.*amt1*amt2*cosh(fY1-fY2)-pow(ptsum,2));
+  const double s1_eff = x1*s_-qt1_*qt1_, s2_eff = x2*s_-qt2_*qt2_;
+  const double invm = sqrt(amt1*amt1+amt2*amt2+2.*amt1*amt2*cosh(y1_-y2_)-ptsum*ptsum);
   DebuggingInsideLoop(Form("s(1/2)_eff = %f / %f GeV^2\n\t"
                            "dilepton invariant mass = %f GeV", s1_eff, s2_eff, invm));
 
-  switch (fCuts.kinematics) {
-    case Kinematics::ElasticInelastic:   if (sqrt(s1_eff)<=(fMY+invm)) return 0.;
-    case Kinematics::InelasticElastic:   if (sqrt(s2_eff)<=(fMX+invm)) return 0.;
-    case Kinematics::InelasticInelastic: if (sqrt(s1_eff)<=(fMY+invm)) return 0.;
-                                         if (sqrt(s2_eff)<=(fMX+invm)) return 0.;
+  switch (cuts_.kinematics) {
+    case Kinematics::ElasticInelastic:   if (sqrt(s1_eff)<=(MY_+invm)) return 0.;
+    case Kinematics::InelasticElastic:   if (sqrt(s2_eff)<=(MX_+invm)) return 0.;
+    case Kinematics::InelasticInelastic: if (sqrt(s1_eff)<=(MY_+invm)) return 0.;
+                                         if (sqrt(s2_eff)<=(MX_+invm)) return 0.;
     default: break;
   }
   
@@ -182,24 +182,24 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
   //=================================================================
 
   const double px_plus  = (1.-x1)*fabs(ak1z)*sqrt(2.),
-               px_minus = (pow(fMX, 2)+pow(q1tx, 2)+pow(q1ty, 2))/2./px_plus;
+               px_minus = (MX_*MX_+q1tx*q1tx+q1ty*q1ty)/2./px_plus;
   
   const double py_minus = (1.-x2)*fabs(ak2z)*sqrt(2.), // warning! sign of pz??
-               py_plus  = (pow(fMY, 2)+pow(q2tx, 2)+pow(q2ty, 2))/2./py_minus;
+               py_plus  = (MY_*MY_+q2tx*q2tx+q2ty*q2ty)/2./py_minus;
 
   DebuggingInsideLoop(Form("px_(+/-) = %f / %f\n\t"
                            "py_(+/-) = %f / %f", px_plus, px_minus, py_plus, py_minus));
   
-  fPX = Particle::Momentum(-q1tx, -q1ty, (px_plus-px_minus)/sqrt(2.), (px_plus+px_minus)/sqrt(2.));
-  fPY = Particle::Momentum(-q2tx, -q2ty, (py_plus-py_minus)/sqrt(2.), (py_plus+py_minus)/sqrt(2.));
+  PX_ = Particle::Momentum(-q1tx, -q1ty, (px_plus-px_minus)/sqrt(2.), (px_plus+px_minus)/sqrt(2.));
+  PY_ = Particle::Momentum(-q2tx, -q2ty, (py_plus-py_minus)/sqrt(2.), (py_plus+py_minus)/sqrt(2.));
 
   DebuggingInsideLoop(Form("First remnant:  (E,p) = (%f, %f, %f, %f)\n\t"
                            "Second remnant: (E,p) = (%f, %f, %f, %f)",
-                           fPX.Px(), fPX.Py(), fPX.Pz(), fPX.E(),
-                           fPY.Px(), fPY.Py(), fPY.Pz(), fPY.E()));
+                           PX_.px(), PX_.py(), PX_.pz(), PX_.energy(),
+                           PY_.px(), PY_.py(), PY_.pz(), PY_.energy()));
   
-  assert(fabs(fPX.M()-fMX)<1.e-6);
-  assert(fabs(fPY.M()-fMY)<1.e-6);
+  assert(fabs(PX_.mass()-MX_)<1.e-6);
+  assert(fabs(PY_.mass()-MY_)<1.e-6);
 
   //=================================================================
   //     four-momenta of the outgoing l^+ and l^-
@@ -209,19 +209,19 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
                      p2(pt2x, pt2y, alpha2*ak1z+beta2*ak2z, alpha2*ak10+beta2*ak20);
   DebuggingInsideLoop(Form("unboosted first lepton:  (E,p), m = (%f, %f, %f, %f), %f\n\t"
                            "          second lepton: (E,p), m = (%f, %f, %f, %f), %f",
-                           p1.Px(), p1.Py(), p1.Pz(), p1.E(), p1.M(),
-                           p2.Px(), p2.Py(), p2.Pz(), p2.E(), p2.M()));
+                           p1.px(), p1.py(), p1.pz(), p1.energy(), p1.mass(),
+                           p2.px(), p2.py(), p2.pz(), p2.energy(), p2.mass()));
 
-  fPl1 = Particle::Momentum(pt1x, pt1y, sqrt(pow(pt1, 2)+ml2)*sinh(fY1), sqrt(pow(pt1, 2)+ml2)*cosh(fY1));
-  fPl2 = Particle::Momentum(pt2x, pt2y, sqrt(pow(pt2, 2)+ml2)*sinh(fY2), sqrt(pow(pt2, 2)+ml2)*cosh(fY2));
+  Pl1_ = Particle::Momentum(pt1x, pt1y, sqrt(pt1*pt1+ml2)*sinh(y1_), sqrt(pt1*pt1+ml2)*cosh(y1_));
+  Pl2_ = Particle::Momentum(pt2x, pt2y, sqrt(pt2*pt2+ml2)*sinh(y2_), sqrt(pt2*pt2+ml2)*cosh(y2_));
 
   DebuggingInsideLoop(Form("First lepton:  (E,p), m = (%f, %f, %f, %f), %f\n\t"
                            "Second lepton: (E,p), m = (%f, %f, %f, %f), %f",
-                           fPl1.Px(), fPl1.Py(), fPl1.Pz(), fPl1.E(), fPl1.M(),
-                           fPl2.Px(), fPl2.Py(), fPl2.Pz(), fPl2.E(), fPl2.M()));
+                           Pl1_.px(), Pl1_.py(), Pl1_.pz(), Pl1_.energy(), Pl1_.mass(),
+                           Pl2_.px(), Pl2_.py(), Pl2_.pz(), Pl2_.energy(), Pl2_.mass()));
 
-  assert(fabs(fPl1.M()-GetParticle(Particle::CentralParticle1)->M())<1.e-6);
-  assert(fabs(fPl2.M()-GetParticle(Particle::CentralParticle2)->M())<1.e-6);
+  assert(fabs(Pl1_.mass()-particlePtr(Particle::CentralParticle1)->mass())<1.e-6);
+  assert(fabs(Pl2_.mass()-particlePtr(Particle::CentralParticle2)->mass())<1.e-6);
 
   //=================================================================
   //     four-momenta squared of the virtual photons
@@ -234,19 +234,19 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
   
   DebuggingInsideLoop(Form("First photon*:  (E,p), m2 = (%f, %f, %f, %f), %e\n\t"
                            "Second photon*: (E,p), m2 = (%f, %f, %f, %f), %e",
-                           q1.Px(), q1.Py(), q1.Pz(), q1.E(), q1.M2(),
-                           q2.Px(), q2.Py(), q2.Pz(), q2.E(), q2.M2()));
-  //const double q12 = q1.M2(), q22 = q2.M2();
+                           q1.px(), q1.py(), q1.pz(), q1.energy(), q1.mass2(),
+                           q2.px(), q2.py(), q2.pz(), q2.energy(), q2.mass2()));
+  //const double q12 = q1.mass2(), q22 = q2.mass2();
 
   //=================================================================
   //     Mendelstam variables
   //=================================================================
   
-  //const double shat = fS*x1*x2; // ishat = 1 (approximation)
-  //const double shat = (q1+q2).M2(); // ishat = 2 (exact formula)
+  //const double shat = s_*x1*x2; // ishat = 1 (approximation)
+  //const double shat = (q1+q2).mass2(); // ishat = 2 (exact formula)
 
-  const double that1 = (q1-p1).M2(), that2 = (q2-p2).M2(),
-               uhat1 = (q1-p2).M2(), uhat2 = (q2-p1).M2();
+  const double that1 = (q1-p1).mass2(), that2 = (q2-p2).mass2(),
+               uhat1 = (q1-p2).mass2(), uhat2 = (q2-p1).mass2();
   DebuggingInsideLoop(Form("that(1/2) = %f / %f\n\t"
                            "uhat(1/2) = %f / %f",
                            that1, that2, uhat1, uhat2));
@@ -278,7 +278,7 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
                  term10 =         -that*pow(uhat, 3);
 
     const double auxil_gamgam = -2.*(term1+term2+term3+term4+term5+term6+term7+term8+term9+term10)/(pow(ml2-that, 2)*pow(ml2-uhat, 2));
-    const double g_em = sqrt(4.*Constants::Pi*Constants::AlphaEM);
+    const double g_em = sqrt(4.*M_PI*Constants::AlphaEM);
     amat2 = pow(g_em, 4)*auxil_gamgam;
   }
   else if (off_shell) {
@@ -292,8 +292,8 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
     const double ak1_x = z1m*pt1x-z1p*pt2x, ak1_y = z1m*pt1y-z1p*pt2y,
                  ak2_x = z2m*pt1x-z2p*pt2x, ak2_y = z2m*pt1y-z2p*pt2y;
 
-    const double t1abs = (q1t2+x1*(pow(fMX, 2)-mp2)+pow(x1, 2)*mp2)/(1.-x1),
-                 t2abs = (q2t2+x2*(pow(fMY, 2)-mp2)+pow(x2, 2)*mp2)/(1.-x2);
+    const double t1abs = (q1t2+x1*(MX_*MX_-mp2)+x1*x1*mp2)/(1.-x1),
+                 t2abs = (q2t2+x2*(MY_*MY_-mp2)+x2*x2*mp2)/(1.-x2);
 
     const double eps12 = ml2+z1p*z1m*t1abs,
                  eps22 = ml2+z2p*z2m*t2abs;
@@ -304,7 +304,7 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
                           -(ak1_x-z1m*q2tx)/(pow(ak1_x-z1m*q2tx, 2)+pow(ak1_y-z1m*q2ty, 2)+eps12),
                  Phi11_y = (ak1_y+z1p*q2ty)/(pow(ak1_x+z1p*q2tx, 2)+pow(ak1_y+z1p*q2ty, 2)+eps12)
                           -(ak1_y-z1m*q2ty)/(pow(ak1_x-z1m*q2tx, 2)+pow(ak1_y-z1m*q2ty, 2)+eps12),
-                 Phi102 = pow(Phi10, 2);
+                 Phi102 = Phi10*Phi10;
     //const double Phi112 = pow(Phi11_x, 2)+pow(Phi11_y, 2);
 
     const double Phi20 = 1./(pow(ak2_x+z2p*q1tx, 2)+pow(ak2_y+z2p*q1ty, 2)+eps22)
@@ -313,7 +313,7 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
                           -(ak2_x-z2m*q1tx)/(pow(ak2_x-z2m*q1tx ,2)+pow(ak2_y-z2m*q1ty, 2)+eps22),
                  Phi21_y = (ak2_y+z2p*q1ty)/(pow(ak2_x+z2p*q1tx, 2)+pow(ak2_y+z2p*q1ty, 2)+eps22)
                           -(ak2_y-z2m*q1ty)/(pow(ak2_x-z2m*q1tx, 2)+pow(ak2_y-z2m*q1ty, 2)+eps22),
-                 Phi202 = pow(Phi20, 2);
+                 Phi202 = Phi20*Phi20;
     //const double Phi212 = pow(Phi21_x, 2)+pow(Phi21_y, 2);
 
     /*aux2_1 = iterm11*(ml2+4.*z1p*z1m*t1abs)*Phi102
@@ -323,8 +323,8 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
             +iterm22*(pow(z2p, 2)+pow(z2m, 2))*Phi212
             -iterm12*4.*z2p*z2m*(z2p-z2m)*Phi20*(q2tx*Phi21_x+q2ty*Phi21_y);*/
 
-    const double Phi11_dot_e = (Phi11_x*q1tx+Phi11_y*q1ty)/fQT1, Phi11_cross_e = (Phi11_x*q1ty-Phi11_y*q1tx)/fQT1;
-    const double Phi21_dot_e = (Phi21_x*q2tx+Phi21_y*q2ty)/fQT2, Phi21_cross_e = (Phi21_x*q2ty-Phi21_y*q2tx)/fQT2;
+    const double Phi11_dot_e = (Phi11_x*q1tx+Phi11_y*q1ty)/qt1_, Phi11_cross_e = (Phi11_x*q1ty-Phi11_y*q1tx)/qt1_;
+    const double Phi21_dot_e = (Phi21_x*q2tx+Phi21_y*q2ty)/qt2_, Phi21_cross_e = (Phi21_x*q2ty-Phi21_y*q2tx)/qt2_;
     DebuggingInsideLoop(Form("Phi1: E, px, py = %e, %e, %e\n\t"
                              "Phi2: E, px, py = %e, %e, %e\n\t"
                              "(dot):   %e / %e\n\t"
@@ -333,12 +333,12 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
                              Phi11_dot_e, Phi21_dot_e, Phi11_cross_e, Phi21_cross_e));
 
     aux2_1 = iterm11*(ml2+4.*pow(z1p*z1m, 2)*t1abs)*Phi102
-            +iterm22*((pow(z1p, 2)+pow(z1m, 2))*(pow(Phi11_dot_e, 2)+pow(Phi11_cross_e, 2)))
+            +iterm22*((z1p*z1p+z1m*z1m)*(pow(Phi11_dot_e, 2)+pow(Phi11_cross_e, 2)))
             +itermtt*(pow(Phi11_cross_e, 2)-pow(Phi11_dot_e, 2))
             -iterm12*4.*z1p*z1m*(z1p-z1m)*Phi10*(q1tx*Phi11_x+q1ty*Phi11_y);
 
     aux2_2 = iterm11*(ml2+4.*pow(z2p*z2m, 2)*t2abs)*Phi202
-            +iterm22*((pow(z2p, 2)+pow(z2m, 2))*(pow(Phi21_dot_e, 2)+pow(Phi21_cross_e, 2)))
+            +iterm22*((z2p*z2p+z2m*z2m)*(pow(Phi21_dot_e, 2)+pow(Phi21_cross_e, 2)))
             +itermtt*(pow(Phi21_cross_e, 2)-pow(Phi21_dot_e, 2))
             -iterm12*4.*z2p*z2m*(z2p-z2m)*Phi20*(q2tx*Phi21_x+q2ty*Phi21_y);
 
@@ -349,8 +349,8 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
     //=================================================================
     double amat2_1, amat2_2;
     
-    amat2_1 = pow(4.*Constants::Pi*Constants::AlphaEM, 2)*pow(x1*x2*fS, 2)*aux2_1*2.*z1p*z1m*t1abs/(q1t2*q2t2)*t2abs/q2t2;
-    amat2_2 = pow(4.*Constants::Pi*Constants::AlphaEM, 2)*pow(x1*x2*fS, 2)*aux2_2*2.*z2p*z2m*t2abs/(q1t2*q2t2);
+    amat2_1 = pow(4.*M_PI*Constants::AlphaEM, 2)*pow(x1*x2*s_, 2)*aux2_1*2.*z1p*z1m*t1abs/(q1t2*q2t2)*t2abs/q2t2;
+    amat2_2 = pow(4.*M_PI*Constants::AlphaEM, 2)*pow(x1*x2*s_, 2)*aux2_2*2.*z2p*z2m*t2abs/(q1t2*q2t2);
 
     //=================================================================
     //     symmetrization
@@ -362,8 +362,8 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
                              "amat2(1/2), amat2 = %e / %e / %e", aux2_1, aux2_2, amat2_1, amat2_2, amat2));
     /*const double xx1 = alpha1+alpha2, xx2 = beta1+beta2;
 
-    const double sudakov_2 = (pow(fMX, 2)-mp2+q2t2+xx2*mp2)/((1.-xx2)*fS);
-    const double sudakov_1 = (q1t2 + xx1*mp2)/((1.-xx1)*fS);
+    const double sudakov_2 = (MX_*MX_-mp2+q2t2+xx2*mp2)/((1.-xx2)*s_);
+    const double sudakov_1 = (q1t2 + xx1*mp2)/((1.-xx1)*s_);
     const double ratio1 = sudakov_1 / xx1,
                  ratio2 = sudakov_2 / xx2;*/
 
@@ -376,7 +376,7 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
   //     of inelastic distributions
   //============================================
   
-  GenericKTProcess::ComputeIncomingFluxes( x1, q1t2, x2, q2t2 );
+  GenericKTProcess::computeIncomingFluxes( x1, q1t2, x2, q2t2 );
 
   //=================================================================
   //     factor 2.*pi below from integration over phi_sum
@@ -385,42 +385,42 @@ PPtoLL::ComputeKTFactorisedMatrixElement()
   //     over d^2 kappa_1 d^2 kappa_2 instead d kappa_1^2 d kappa_2^2
   //=================================================================
 
-  const double aintegral = (2.*Constants::Pi)
-                         *1./(16.*pow(Constants::Pi, 2)
-                         *pow(x1*x2*fS, 2)) * amat2
-                         * fFlux1/Constants::Pi
-                         * fFlux2/Constants::Pi
+  const double aintegral = (2.*M_PI)
+                         *1./(16.*M_PI*M_PI
+                         *pow(x1*x2*s_, 2)) * amat2
+                         * flux1_/M_PI
+                         * flux2_/M_PI
                          *(1./4.)*Constants::GeV2toBarn
-                         * 0.5*4./(4.*Constants::Pi);
-  if (aintegral*fQT1*fQT2*fPtDiff!=0.) {
+                         * 0.5*4./(4.*M_PI);
+  if (aintegral*qt1_*qt2_*pt_diff_!=0.) {
     //GenericProcess::DumpPoint(Information);
-    //Information(Form("matrix element: %E", aintegral*fQT1*fQT2*fPtDiff));
+    //Information(Form("matrix element: %E", aintegral*qt1_*qt2_*pt_diff_));
   }
 
   //=================================================================
-  return aintegral*fQT1*fQT2*fPtDiff;
+  return aintegral*qt1_*qt2_*pt_diff_;
   //=================================================================
 }
 
 void
-PPtoLL::FillCentralParticlesKinematics()
+PPtoLL::fillCentralParticlesKinematics()
 {
   // randomise the charge of the outgoing leptons
-  int sign = (drand()>.5) ? +1 : -1;
+  int sign = ( drand()>.5 ) ? +1 : -1;
 
   //=================================================================
   //     first outgoing lepton
   //=================================================================
-  Particle* ol1 = GetParticle(Particle::CentralParticle1);
-  ol1->SetPDGId(ol1->GetPDGId(), sign);
+  Particle* ol1 = particlePtr( Particle::CentralParticle1 );
+  ol1->setPdgId( ol1->pdgId(), sign );
   ol1->status = Particle::FinalState;
-  if (!ol1->SetMomentum(fPl1)) { InError("Invalid outgoing lepton 1"); }
+  if ( !ol1->setMomentum( Pl1_ ) ) { InError( "Invalid outgoing lepton 1" ); }
 
   //=================================================================
   //     second outgoing lepton
   //=================================================================
-  Particle* ol2 = GetParticle(Particle::CentralParticle2);
-  ol2->SetPDGId(ol2->GetPDGId(), -sign);
+  Particle* ol2 = particlePtr( Particle::CentralParticle2 );
+  ol2->setPdgId( ol2->pdgId(), -sign );
   ol2->status = Particle::FinalState;
-  if (!ol2->SetMomentum(fPl2)) { InError("Invalid outgoing lepton 2"); }
+  if ( !ol2->setMomentum( Pl2_ ) ) { InError( "Invalid outgoing lepton 2" ); }
 }

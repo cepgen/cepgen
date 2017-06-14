@@ -62,10 +62,10 @@ Lorenb( double u_, const Particle::Momentum& ps_, double pi_[4], double pf_[4] )
 {
   double fn;
 
-  if ( ps_.E()!=u_ ) {
-    pf_[3] = ( pi_[3]*ps_.E() + pi_[2]*ps_.Pz() + pi_[1]*ps_.Py() + pi_[0]*ps_.Px() ) / u_;
-    fn = ( pf_[3] + pi_[3] ) / ( ps_.E() + u_ );
-    for ( unsigned int i=0; i<3; i++ ) { pf_[i] = pi_[i]+fn*ps_.P(i); }
+  if ( ps_.energy()!=u_ ) {
+    pf_[3] = ( pi_[3]*ps_.energy() + pi_[2]*ps_.pz() + pi_[1]*ps_.py() + pi_[0]*ps_.px() ) / u_;
+    fn = ( pf_[3] + pi_[3] ) / ( ps_.energy() + u_ );
+    for ( unsigned int i=0; i<3; i++ ) { pf_[i] = pi_[i]+fn*ps_.p( i ); }
   }
   else { std::copy( pi_, pi_+4, pf_ ); }
 }

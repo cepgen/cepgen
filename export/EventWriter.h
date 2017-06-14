@@ -27,15 +27,15 @@ namespace OutputHandler
     ~EventWriter();
 
     /// Specify the process cross section and its associated error
-    void SetCrossSection( const float& xsec, const float& err_xsec ) {
+    void setCrossSection( const float& xsec, const float& err_xsec ) {
 #ifdef HEPMC_LINKED
-      if ( fFileHandler ) fFileHandler->SetCrossSection( xsec, err_xsec );
+      if ( file_handler_ ) file_handler_->setCrossSection( xsec, err_xsec );
 #endif
     }
     /// Specify the event number
-    void SetEventNumber( const unsigned int& ev_id ) {
+    void setEventNumber( const unsigned int& ev_id ) {
 #ifdef HEPMC_LINKED
-      if ( fFileHandler ) fFileHandler->SetEventNumber( ev_id );
+      if ( file_handler_ ) file_handler_->setEventNumber( ev_id );
 #endif
     }
     /// Writer operator
@@ -44,9 +44,9 @@ namespace OutputHandler
    private:
 
     /// Inherited file handler
-    OutputHandler::ExportHandler* fFileHandler;
+    OutputHandler::ExportHandler* file_handler_;
     /// Type of output requested
-    OutputHandler::ExportHandler::OutputType fType;
+    OutputHandler::ExportHandler::OutputType type_;
 
   };
 }

@@ -55,23 +55,23 @@ class Pythia6Hadroniser : public GenericHadroniser
   Pythia6Hadroniser();
   ~Pythia6Hadroniser();
 
-  bool Hadronise( Particle* part_ );
-  bool Hadronise( Event* ev_ );
+  bool hadronise( const Particle* );
+  bool hadronise( Event* );
 
  private:
   inline static double pymass(int pdgid_) { return pymass_(pdgid_); }
   //inline static double pywidt(int pdgid_) { return pywidt_(pdgid_); }
   inline static void pyexec() { pyexec_(); }
   inline static void pyckbd() { pyckbd_(); }
-  inline static void pygive( const std::string &line_ ) { pygive_( line_.c_str(), line_.length() ); }
-  inline static void pylist( int mlist_ ) { pylist_( mlist_ ); }
-  inline static double pyp( int role_, int qty_ ) { return pyp_( role_, qty_ ); }
-  //inline static void py1ent( int* kf_, double* pe_, double theta_, double phi_ ) { int one=1; py1ent_( &one, kf_, pe_, theta_, phi_ ); }
-  //inline static void py1ent( int* kf_, double* pe_, double theta_, double phi_ ) { py1ent_( 1, kf_, pe_, theta_, phi_ ); }
-  inline static std::string pyname( int pdgid_ ) {
+  inline static void pygive( const std::string& line ) { pygive_( line.c_str(), line.length() ); }
+  inline static void pylist( int mlist ) { pylist_( mlist ); }
+  inline static double pyp( int role, int qty ) { return pyp_( role, qty ); }
+  //inline static void py1ent( int* kf, double* pe, double theta, double phi ) { int one=1; py1ent_( &one, kf, pe, theta, phi ); }
+  //inline static void py1ent( int* kf, double* pe, double theta, double phi ) { py1ent_( 1, kf, pe, theta, phi ); }
+  inline static std::string pyname( int pdgid ) {
     char out[NAME_CHR];
     std::string s;
-    pyname_( pdgid_, out, NAME_CHR );
+    pyname_( pdgid, out, NAME_CHR );
     s = std::string( out, NAME_CHR );
     //s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
     s.erase( remove( s.begin(), s.end(), ' ' ), s.end() );
@@ -82,8 +82,8 @@ class Pythia6Hadroniser : public GenericHadroniser
    * @param[in] njoin_ Number of particles to join in the colour flow
    * @param[in] ijoin_ List of particles unique identifier to join in the colour flow
    */
-  inline static void pyjoin( int njoin_, int ijoin_[2] ) { return pyjoin_( njoin_, *ijoin_ ); }
-  bool PrepareHadronisation(Event *ev_);
+  inline static void pyjoin( int njoin, int ijoin[2] ) { return pyjoin_( njoin, *ijoin ); }
+  bool PrepareHadronisation( Event* );
 };
 
 #endif

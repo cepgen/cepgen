@@ -65,14 +65,14 @@ int main( int argc, char* argv[] ) {
     mg.parameters->maxmx = 1.e3;
     Debugging( Form( "Reading config file stored in %s", argv[1] ) );
   }
-  else if ( !mg.parameters->ReadConfigFile( argv[1] ) ) {
+  else if ( !mg.parameters->readConfigFile( argv[1] ) ) {
     Information( Form( "Error reading the configuration!\n\t"
                        "Please check your input file (%s)", argv[1] ) );
     return -1;
   }
     
   mg.parameters->generation = true;
-  mg.parameters->Dump();
+  mg.parameters->dump();
 
   //----- open the output root file
 
@@ -83,7 +83,7 @@ int main( int argc, char* argv[] ) {
   }
 
   //----- start by computing the cross section for the list of parameters applied
-  mg.ComputeXsection( &xsec, &err );
+  mg.computeXsection( xsec, err );
 
   tree = new TTree( "h4444", "A TTree containing information from the events produced from CepGen" );
   tree->Branch( "xsect", &xsect, "xsect/D" );
@@ -114,14 +114,14 @@ int main( int argc, char* argv[] ) {
   errxsect = err;
   litigious_events = 0;
   for ( unsigned int i=0; i<mg.parameters->maxgen; i++ ) {
-    ev = *mg.GenerateOneEvent();
+    ev = *mg.generateOneEvent();
     if ( i%10000==0 ) {
       cout << ">> event " << i << " generated" << endl;
-      ev.Dump();
+      ev.dump();
     }
-    ParticlesRef particles = ev.GetParticles();
-    mx_p1 = ev.GetOneByRole( Particle::OutgoingBeam1 )->M();
-    mx_p2 = ev.GetOneByRole( Particle::OutgoingBeam2 )->M();
+    ParticlesRef particles = ev.particles();
+    mx_p1 = ev.getOneByRole( Particle::OutgoingBeam1 )->mass();
+    mx_p2 = ev.getOneByRole( Particle::OutgoingBeam2 )->mass();
     hadr_trials = ev.num_hadronisation_trials;
 
     gen_time = ev.time_generation;
@@ -129,17 +129,17 @@ int main( int argc, char* argv[] ) {
     np = 0;
     for ( ParticlesRef::const_iterator part=particles.begin(); part!=particles.end(); part++ ) {
       const Particle* p = *part;
-      const Particle::Momentum m = p->GetMomentum();
+      const Particle::Momentum m = p->momentum();
 
-      kinematics[np].SetXYZM(m.Px(), m.Py(), m.Pz(), m.M());
-      rapidity[np] = m.Rapidity();
-      pt[np] = m.Pt();
-      eta[np] = m.Eta();
-      phi[np] = m.Phi();
-      E[np] = p->E();
-      M[np] = p->M();
-      PID[np] = p->GetIntPDGId();
-      parentid[np] = *p->GetMothersIds().begin();
+      kinematics[np].SetXYZM( m.px(), m.py(), m.pz(), m.mass() );
+      rapidity[np] = m.rapidity();
+      pt[np] = m.pt();
+      eta[np] = m.eta();
+      phi[np] = m.phi();
+      E[np] = p->energy();
+      M[np] = p->mass();
+      PID[np] = p->integerPdgId();
+      parentid[np] = *p->mothersIds().begin();
       status[np] = p->status;
       isstable[np] = ( p->status==Particle::Undefined or p->status==Particle::FinalState );
       charge[np] = p->charge;

@@ -8,32 +8,32 @@ class PPtoLL : public GenericKTProcess
 {
  public:
   PPtoLL();
-  inline ~PPtoLL() {;}
+  inline ~PPtoLL() {}
   
  private:
-  void PrepareKTKinematics();
-  double ComputeJacobian();
+  void prepareKTKinematics();
+  double computeJacobian();
   /// \note IncQQbar in pptoll
-  double ComputeKTFactorisedMatrixElement();
-  void FillCentralParticlesKinematics();
+  double computeKTFactorisedMatrixElement();
+  void fillCentralParticlesKinematics();
   
   /// Minimal rapidity of the first outgoing lepton
-  double fYmin;
+  double y_min_;
   /// Maximal rapidity of the first outgoing lepton
-  double fYmax;
+  double y_max_;
   /// Rapidity of the first outgoing lepton
-  double fY1;
+  double y1_;
   /// Rapidity of the first outgoing lepton
-  double fY2;
+  double y2_;
   /// Transverse momentum difference for the two outgoing leptons
-  double fPtDiff;
+  double pt_diff_;
   /// Azimuthal angle difference for the two outgoing leptons
-  double fPhiPtDiff;
+  double phi_pt_diff_;
   
   /// First outgoing lepton's momentum
-  Particle::Momentum fPl1;
+  Particle::Momentum Pl1_;
   /// Second outgoing lepton's momentum
-  Particle::Momentum fPl2;
+  Particle::Momentum Pl2_;
 };
 
 #endif

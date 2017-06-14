@@ -20,7 +20,7 @@ class GenericCanvas : public TCanvas
     inline GenericCanvas() :
       TCanvas( "null" ), fBuilt( false ),
       fLegend( 0 ), fLegendX(.55), fLegendY( .74 ), fLegendNumEntries( 0 ),
-      fUpperLabel( 0 ), fLabelsDrawn(false) {;}
+      fUpperLabel( 0 ), fLabelsDrawn(false) {}
     inline GenericCanvas( TString name, unsigned int width=500, unsigned int height=500, TString upper_label="" ) :
       TCanvas( name, "", width, height ), fBuilt( false ), fWidth( width ), fHeight( height ),
       fLegend( 0 ), fLegendX( .55 ), fLegendY( .74 ), fLegendNumEntries( 0 ),

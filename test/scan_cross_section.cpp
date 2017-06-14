@@ -24,7 +24,7 @@ int main( int argc, char* argv[] )
   par->maxmx = 1000.0;
   par->process = new GamGamLL;
   par->process_mode = static_cast<Kinematics::ProcessMode>( proc_mode );
-  par->Dump();
+  par->dump();
 
   double xsect, err_xsect;
 
@@ -36,7 +36,7 @@ int main( int argc, char* argv[] )
 
   for ( unsigned int i=0; i<npoints; i++ ) {
     par->minpt = min_value + (max_value-min_value)*i/npoints;
-    mg.ComputeXsection( &xsect, &err_xsect );
+    mg.computeXsection( xsect, err_xsect );
     xsect_file << Form( "%.2f\t%.5f\t%.5f\n", par->minpt, xsect, err_xsect );
     xsect_file.flush();
   }

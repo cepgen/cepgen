@@ -13,15 +13,11 @@
 extern "C"
 {
   void hwdhad_();
-  void hwaend_();
   extern struct {
     int nevhep, nhep, isthep[NMXHEP], idhep[NMXHEP];
     int jmohep[NMXHEP][2], jdahep[NMXHEP][2];
     double phep[NMXHEP][5], vhep[NMXHEP][4];
   } hepevt_;
-  
-  /* COMMON/FFS/TB,BT
-     COMMON/SFF/IT1,IB1,IT2,IB2 */
   /*struct {
     double tb, bt;
   } ffs_;
@@ -38,7 +34,8 @@ class Herwig6Hadroniser : public GenericHadroniser
  public:
   Herwig6Hadroniser();
   ~Herwig6Hadroniser();
-  bool Hadronise( Event* ev_ );
+  bool hadronise( Event* );
+
  private:
   inline static void hwdhad() { hwdhad_(); };
   /*inline static double ulmass( int pdgid_ ) { return (double)ulmass_( pdgid_ ); };

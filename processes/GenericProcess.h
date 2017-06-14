@@ -30,164 +30,169 @@ class GenericProcess
   typedef ParticlesRoleMap OutgoingState;
  
   /// Default constructor for an undefined process
-  /// \param[in] name_ Human-readable format of the process name
-  GenericProcess( const std::string& name_="<invalid process>" );
+  /// \param[in] name Human-readable format of the process name
+  GenericProcess( const std::string& name="<invalid process>" );
   virtual ~GenericProcess();
 
   /// Restore the Event object to its initial state
-  inline void ClearEvent() { fEvent->Restore(); }
+  inline void clearEvent() { event_->restore(); }
   /// Set the kinematics of the incoming state particles
-  void SetIncomingKinematics( const Particle::Momentum& p1, const Particle::Momentum& p2 );
+  void setIncomingKinematics( const Particle::Momentum& p1, const Particle::Momentum& p2 );
   /// Compute the incoming state kinematics
-  void PrepareKinematics();
+  void prepareKinematics();
   
   // --- virtual (process-defined) methods
 
  public:
   /// Set the incoming and outgoing state to be expected in the process
-  inline virtual void AddEventContent() { InWarning( "Virtual method called" ); }
+  inline virtual void addEventContent() { InWarning( "Virtual method called" ); }
   /// Prepare the process for its integration over the whole phase space
-  inline virtual void BeforeComputeWeight() { Debugging( "Virtual method called" ); }
+  inline virtual void beforeComputeWeight() { Debugging( "Virtual method called" ); }
   /// Compute the weight for this point in the phase-space
-  inline virtual double ComputeWeight() { throw Exception(__PRETTY_FUNCTION__, "Calling ComputeWeight on an invalid process!", FatalError); }
+  virtual double computeWeight() = 0;
   /// Fill the Event object with the particles' kinematics
-  /// \param[in] symmetrise_ Symmetrise the event? (randomise the production of positively-
-  /// and negatively-charged outgoing central particles)
-  inline virtual void FillKinematics( bool symmetrise_=false ) {
-    InWarning( "Virtual method called" );
-    if ( symmetrise_ ) Information( "The kinematics is symmetrised" );
-  }
+  /// \param[in] symmetrise Symmetrise the event? (randomise the production of positively-
+  ///  and negatively-charged outgoing central particles)
+  virtual void fillKinematics( bool symmetrise=false ) = 0;
   /// Return the number of dimensions on which the integration has to be performed
   /// \return Number of dimensions on which to integrate
-  inline virtual unsigned int GetNdim( const Kinematics::ProcessMode& ) const {
-    InWarning( "Virtual method called" );
-    return 0;
-  }
+  virtual unsigned int numDimensions( const Kinematics::ProcessMode& ) const = 0;
   /// Set the list of kinematic cuts to apply on the outgoing particles' final state
   /// \param[in] cuts_ The Cuts object containing the kinematic parameters
-  inline virtual void SetKinematics( const Kinematics& cuts_ ) {
-    Debugging( "Virtual method called" );
-    fCuts = cuts_;
-  }
+  inline virtual void setKinematics( const Kinematics& cuts ) { cuts_ = cuts; }
 
  public:
   /**
    * Sets the phase space point to compute the weight associated to it.
    * @brief Sets the phase space point to compute
-   * @param[in] ndim_ The number of dimensions of the point in the phase space
-   * @param[in] x_[] The (@a ndim_)-dimensional point in the phase space on
+   * @param[in] ndim The number of dimensions of the point in the phase space
+   * @param[in] x[] The (@a ndim_)-dimensional point in the phase space on
    * which the kinematics and the cross-section are computed
    */
-  void SetPoint( const unsigned int ndim_, double x_[] );
+  void setPoint( const unsigned int ndim, double* x );
   /// Dump the evaluated point's coordinates in the standard output stream
-  void DumpPoint( const ExceptionType& et );
+  void dumpPoint( const ExceptionType& et );
   /// Complete list of Particle with their role in the process for the point considered
   /// in the phase space, returned as an Event object.
   /// \return Event object containing all the generated Particle objects
-  inline Event* GetEvent() { return fEvent; }
+  inline Event* event() { return event_; }
+
   ///Get the number of dimensions on which the integration is performed
-  inline unsigned int ndim() const { return fNumDimensions; }
+  inline const unsigned int ndim() const { return num_dimensions_; }
   /// Get the value of a component of the @a fNumDimensions -dimensional point considered
-  inline double x( const unsigned int idx_ ) const { return ( idx_>=fNumDimensions ) ? -1. : fX[idx_]; }
+  inline const double x( const unsigned int idx ) const {
+    return ( idx>=num_dimensions_ ) ? -1. : x_[idx];
+  }
   /// Get a human-readable name of the process considered
-  inline std::string GetName() const { return fName; }
+  inline const std::string& name() const { return name_; }
   
   /// Reset the total generation time and the number of events generated for this run
-  inline void ClearRun() {
-    fTotalGenTime = 0.;
-    fNumGenEvents = 0;
+  inline void clearRun() {
+    total_gen_time_ = 0.;
+    num_gen_events_ = 0;
   }
   /// Add a new timing into the total generation time
   /// \param[in] gen_time Time to add (in seconds)
-  inline void AddGenerationTime( const float& gen_time ) {
-    fTotalGenTime += gen_time;
-    fNumGenEvents++;
+  inline void addGenerationTime( const float& gen_time ) {
+    total_gen_time_ += gen_time;
+    num_gen_events_++;
   }
   /// Return the total generation time for this run (in seconds)
-  inline float TotalGenerationTime() const { return fTotalGenTime; }
+  inline float totalGenerationTime() const { return total_gen_time_; }
   /// Total number of events already generated in this run
-  inline unsigned int NumGeneratedEvents() const { return fNumGenEvents; }
+  inline unsigned int numGeneratedEvents() const { return num_gen_events_; }
   
  protected:
   /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
-  void SetEventContent( const IncomingState& is, const OutgoingState& os );
-  void GetFormFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const;
+  void setEventContent( const IncomingState& is, const OutgoingState& os );
+  void formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const;
  
   /// Get a list of pointers to the particles with a given role in the process
   /// \param[in] role role in the process for the particle to retrieve
   /// \return A vector of pointers to Particle objects associated to the role
-  inline ParticlesRef GetParticles( const Particle::Role& role ) { return fEvent->GetByRole( role ); }
+  inline ParticlesRef particles( const Particle::Role& role ) { return event_->getByRole( role ); }
   /// Get the pointer to one particle in the event (using its role)
-  inline Particle* GetParticle( const Particle::Role& role, unsigned int id=0 ) {
-    if ( id==0 ) return fEvent->GetOneByRole( role );
-    ParticlesRef pp = fEvent->GetByRole( role );
+  inline Particle* particlePtr( const Particle::Role& role, unsigned int id=0 ) {
+    if ( id==0 ) return event_->getOneByRole( role );
+    ParticlesRef pp = event_->getByRole( role );
     if ( !pp.size() or id>pp.size() ) return 0;
     return pp.at( id );
   }
   /// Get the pointer to one particle in the event (using its identifier)
-  inline Particle* GetParticle( unsigned int id ) { return fEvent->GetById( id ); }
+  inline Particle* particlePtr( unsigned int id ) { return event_->getById( id ); }
   
   // --- 
   
   /// Array of @a fNumDimensions components representing the point on which the weight in the cross-section is computed
-  double* fX;
+  double* x_;
   /// List of incoming state particles (including intermediate partons)
-  IncomingState fIncomingState;
+  IncomingState incoming_state_;
   /// List of outgoing state particles
-  OutgoingState fOutgoingState;
+  OutgoingState outgoing_state_;
   /// \f$s\f$, squared centre of mass energy of the incoming particles' system, in \f$\mathrm{GeV}^2\f$
-  double fS;
+  double s_;
   /// \f$\sqrt s\f$, centre of mass energy of the incoming particles' system (in GeV)
-  double fSqS;
+  double sqs_;
   /// \f$m_1^2\f$, squared mass of the first proton-like incoming particle
-  double fW1;
+  double w1_;
   /// \f$m_2^2\f$, squared mass of the second proton-like incoming particle
-  double fW2;
+  double w2_;
   /// Virtuality of the first incoming photon
-  double fT1;
+  double t1_;
   /// Virtuality of the second incoming photon
-  double fT2;
+  double t2_;
   /// Invariant mass of the first proton-like outgoing particle (or remnant)
-  double fMX;
+  double MX_;
   /// Invariant mass of the second proton-like outgoing particle (or remnant)
-  double fMY;
+  double MY_;
 
   /// Number of dimensions on which the integration has to be performed.
-  unsigned int fNumDimensions;
+  unsigned int num_dimensions_;
   /// Set of cuts to apply on the final phase space
-  Kinematics fCuts;
+  Kinematics cuts_;
   /// Event object containing all the information on the in- and outgoing particles
-  Event* fEvent;
+  Event* event_;
   /// Is the phase space point set?
-  bool fIsPointSet;
+  bool is_point_set_;
   /// Are the event's incoming particles set?
-  bool fIsInStateSet;
+  bool is_incoming_state_set_;
   /// Are the event's outgoing particles set?
-  bool fIsOutStateSet;
+  bool is_outgoing_state_set_;
   /// Is the full event's kinematic set?
-  bool fIsKinematicSet;
+  bool is_kinematics_set_;
   /// Name of the process (useful for logging and debugging)
-  std::string fName;
+  std::string name_;
   /// Total generation time (in seconds)
-  float fTotalGenTime;
+  float total_gen_time_;
   /// Number of events already generated
-  unsigned int fNumGenEvents;
+  unsigned int num_gen_events_;
   
  private:
   /**
    * Is the system's kinematics well defined and compatible with the process ?
    * This check is mandatory to perform the (@a fNumDimensions)-dimensional point's
    * cross-section computation.
-   * @brief Is the system's kinematics well defined?
-   * @return A boolean stating if the input kinematics and the final states are
-   * well defined
+   * \brief Is the system's kinematics well defined?
+   * \return A boolean stating if the input kinematics and the final states are
+   *  well-defined
    */
-  inline bool IsKinematicsDefined() {
-    if (GetParticles(Particle::IncomingBeam1).size()!=0 and GetParticles(Particle::IncomingBeam2).size()!=0) fIsInStateSet = true;
-    if  ((GetParticles(Particle::OutgoingBeam1).size()!=0   and GetParticles(Particle::OutgoingBeam2).size()!=0)
-     and (GetParticles(Particle::CentralParticle1).size()!=0 or GetParticles(Particle::CentralParticle2).size()!=0)) fIsOutStateSet = true;
-    fIsKinematicSet = fIsInStateSet and fIsOutStateSet;
-    return fIsKinematicSet;
+  inline bool isKinematicsDefined() {
+
+    // check the incoming state
+    if ( particles( Particle::IncomingBeam1 ).size()!=0 and particles( Particle::IncomingBeam2 ).size()!=0 ) {
+      is_incoming_state_set_ = true;
+    }
+
+    // check the outgoing state
+    if ( ( particles( Particle::OutgoingBeam1 ).size()!=0   and particles( Particle::OutgoingBeam2 ).size()!=0 )
+     and ( particles( Particle::CentralParticle1 ).size()!=0 or particles( Particle::CentralParticle2 ).size()!=0) ) {
+      is_outgoing_state_set_ = true;
+    }
+
+    // combine both states
+    is_kinematics_set_ = is_incoming_state_set_ and is_outgoing_state_set_;
+
+    return is_kinematics_set_;
   }
 
 };

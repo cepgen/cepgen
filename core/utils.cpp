@@ -1,36 +1,34 @@
 #include "utils.h"
 
-void Map( double expo_, double xmin_, double xmax_, double* out_, double* dout_, const std::string& var_name_ )
+void Map( double expo, double xmin, double xmax, double& out, double& dout, const std::string& var_name_ )
 {
-  double y, out;
-  y = xmax_/xmin_;
-  out = xmin_*pow( y, expo_ );
-  *out_ = out;
-  *dout_ = out*log( y );
+  double y = xmax/xmin;
+  out = xmin*pow( y, expo );
+  dout = out*log( y );
   DebuggingInsideLoop( Form( "Mapping variable \"%s\"\n\t"
                              "min = %f\n\tmax = %f\n\tmax/min = %f\n\t"
                              "exponent = %f\n\t"
                              "output = %f\n\td(output) = %f",
-                             var_name_.c_str(), xmin_, xmax_, y, expo_, *out_, *dout_ ) );
+                             var_name_.c_str(), xmin, xmax, y, expo, out, dout ) );
 }
 
-void Mapla( double y_, double z_, int u_, double xm_, double xp_, double* x_, double* d_ )
+void Mapla( double y, double z, int u, double xm, double xp, double& x, double& d )
 {
   double xmb, xpb, c, yy, zz, alp, alm, am, ap, ax;
 
-  xmb = xm_-y_-z_;
-  xpb = xp_-y_-z_;
-  c = -4.*y_*z_;
+  xmb = xm-y-z;
+  xpb = xp-y-z;
+  c = -4.*y*z;
   alp = sqrt( xpb*xpb + c );
   alm = sqrt( xmb*xmb + c );
   am = xmb+alm;
   ap = xpb+alp;
   yy = ap/am;
-  zz = pow( yy, u_ );
+  zz = pow( yy, u );
 
-  *x_ = y_ + z_ + ( am*zz - c / ( am*zz ) ) / 2.;
-  ax = sqrt( pow( *x_-y_-z_, 2 ) + c );
-  *d_ = ax*log( yy );
+  x = y + z + ( am*zz - c / ( am*zz ) ) / 2.;
+  ax = sqrt( pow( x-y-z, 2 ) + c );
+  d = ax*log( yy );
 }
 
 double BreitWigner( double er, double gamma, double emin, double emax, double x )

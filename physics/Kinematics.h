@@ -19,7 +19,7 @@ class Kinematics
   /**
    * \brief Set of cuts to apply on the central system
    * - 0 - No cuts at all (for the total cross section)
-   * - 1 - Vermaserens' hypothetical detector cuts : for full central particles system,
+   * - 1 - Vermaserens' hypothetical detector cuts: for full central particles system,
    *   + \f$\frac{|p_z|}{|\mathbf p|}\leq\f$ 0.75 and \f$p_T\geq 1~\text{GeV}/c\f$,
    *   or
    *   + 0.75 \f$<\frac{|p_z|}{|\mathbf p|}\leq\f$ 0.95 and \f$p_z> 1~\text{GeV}/c\f$,

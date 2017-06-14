@@ -11,8 +11,6 @@ class Constants
   static double AlphaEM;
   /// \f$\frac{1}{(\hbar c)^2}~[\mathrm b^{-1}]\f$?
   static double muBarn;
-  /// Good ole' pi!
-  static double Pi;
   /// Conversion factor between GeV^2 and barn
   static double GeV2toBarn;
   static double sconstb;

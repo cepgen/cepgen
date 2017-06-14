@@ -7,13 +7,13 @@ namespace OutputHandler
   LHEFHandler::LHEFHandler( const char* filename ) :
     ExportHandler( ExportHandler::LHE )
   {
-    output = new LHEF::Writer(filename);
+    output = new LHEF::Writer( filename );
   }
 
   void
   LHEFHandler::operator<<( const Event* ev )
   {
-    fillEvent(ev);
+    fillEvent( ev );
     output->writeEvent();
     clearEvent();
   }
@@ -22,7 +22,7 @@ namespace OutputHandler
   LHEFHandler::fillEvent( const Event* ev )
   {
     // ... do whatever is needed for output->hepeup
-    ConstParticlesRef part_vec = ev->GetConstParticlesRef();
+    ConstParticlesRef part_vec = ev->constParticlesRef();
     //HEPEUT*
     for ( unsigned int i=0; i<part_vec.size(); i++ ) {
 

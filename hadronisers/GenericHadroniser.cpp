@@ -1,12 +1,12 @@
 #include "GenericHadroniser.h"
 
-GenericHadroniser::GenericHadroniser( const char* name_ ) :
-  fName( name_ ), fHadrons( new Particles() )
+GenericHadroniser::GenericHadroniser( const char* name ) :
+  name_( name ), hadrons_( 0 )
 {}
 
 GenericHadroniser::~GenericHadroniser()
 {
   Debugging( Form("Destructor called" ) );
   
-  if ( fHadrons ) delete fHadrons;
+  if ( hadrons_ ) delete hadrons_;
 }

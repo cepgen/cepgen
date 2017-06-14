@@ -12,15 +12,15 @@ class Logger
 {
   private:
     /// Initialize a logging object
-    Logger() : Level( Warning ), OutputStream( std::cout ) {;}
+    Logger() : Level( Warning ), OutputStream( std::cout ) {}
     /// The static object present everywhere at runtime.
-    static Logger* fLogger;
+    static Logger* logger_;
     /// A boolean stating whether or not the static object is already
     /// built.
-    static bool fBuilt;
+    static bool built_;
 
   public:
-    ~Logger() { fBuilt=false; }
+    ~Logger() { built_=false; }
     /// Retrieve the running instance of the logger
     static Logger* GetInstance();
     

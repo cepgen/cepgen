@@ -30,26 +30,26 @@ Parameters::~Parameters()
   delete last_event;
 }
 
-void Parameters::SetThetaRange( float thetamin_, float thetamax_ )
+void Parameters::setThetaRange( float thetamin, float thetamax )
 {
-  this->mineta = -log( tan( thetamax_/180.*Constants::Pi/2. ) );
-  this->maxeta = -log( tan( thetamin_/180.*Constants::Pi/2. ) );
+  this->mineta = thetaToEta( thetamax );
+  this->maxeta = thetaToEta( thetamin );
 
   Debugging( Form( "eta(min) = %5.2f => theta(min) = %5.2f"
                    "eta(max) = %5.2f => theta(max) = %5.2f",
-                   mineta, thetamin_, maxeta, thetamax_ ) );
+                   mineta, thetamin, maxeta, thetamax ) );
 }
 
-void Parameters::Dump()
+void Parameters::dump()
 {
   std::string cutsmode, particles;
   std::ostringstream os;
 
   switch (mcut) {
     case 1:           cutsmode = "Vermaseren"; break;
-    case 2:           cutsmode = "both leptons"; break;
-    case 3:           cutsmode = "single lepton"; break;
-    case 0:  default: cutsmode = "none"; break;
+    case 2:           cutsmode = "on both leptons"; break;
+    case 3:           cutsmode = "on single lepton"; break;
+    case 0:  default: cutsmode = "no cut"; break;
   }
   switch (pair) {
     case Particle::Electron:      particles = "electrons"; break;
@@ -63,15 +63,15 @@ void Parameters::Dump()
     << std::setfill('_') << std::setw( wb ) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill( ' ' ) << std::endl
     << std::right << std::setw( wb ) << std::left << std::endl;
   if (process)
-    os << std::setw( wt ) << "Process to generate" << boldify( process->GetName().c_str() ) << std::endl;
+    os << std::setw( wt ) << "Process to generate" << boldify( process->name().c_str() ) << std::endl;
   os
     << std::setw( wt ) << "Events generation? " << yesno( generation ) << std::endl
     << std::setw( wt ) << "Number of events to generate" << boldify( maxgen ) << std::endl
     << std::setw( wt ) << "Events storage? " << yesno( store ) << std::endl
-    << std::setw( wt ) << "Debugging mode? " << Logger::GetInstance()->Level << std::endl
+    << std::setw( wt ) << "Verbosity level " << Logger::GetInstance()->Level << std::endl
     << std::setw( wt ) << "Output file opened? " << yesno( file!=(std::ofstream*)NULL && file->is_open() ) << std::endl
     << std::endl
-    << std::setfill( '-' ) << std::setw( wb-2 ) << boldify( " Vegas integration parameters " ) << std::setfill( ' ' ) << std::endl
+    << std::setfill( '-' ) << std::setw( wb+6 ) << boldify( " Vegas integration parameters " ) << std::setfill( ' ' ) << std::endl
     << std::endl
     << std::setw( wt ) << "Maximum number of iterations" << boldify( itvg ) << std::endl
     << std::setw( wt ) << "Number of function calls" << ncvg << std::endl
@@ -79,7 +79,7 @@ void Parameters::Dump()
     << std::endl
     << std::setfill('_') << std::setw( wb ) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill( ' ' ) << std::endl
     << std::endl
-    << std::setfill( '-' ) << std::setw( wb-2 ) << boldify( " Incoming particles " ) << std::setfill( ' ' ) << std::endl
+    << std::setfill( '-' ) << std::setw( wb+6 ) << boldify( " Incoming particles " ) << std::setfill( ' ' ) << std::endl
     << std::endl;
   std::ostringstream proc_mode, cut_mode; proc_mode << process_mode; cut_mode << cutsmode;
   std::ostringstream ip1, ip2, op; ip1 << in1pdg; ip2 << in2pdg; op << pair;
@@ -89,31 +89,31 @@ void Parameters::Dump()
     << std::setw( wt ) << "Momenta (GeV/c)" << in1p << ", " << in2p << std::endl
     << std::setw( wt ) << "Structure functions mode" << remnant_mode << std::endl
     << std::endl
-    << std::setfill( '-' ) << std::setw( wb-2 ) << boldify( " Incoming partons " ) << std::setfill( ' ' ) << std::endl
+    << std::setfill( '-' ) << std::setw( wb+6 ) << boldify( " Incoming partons " ) << std::setfill( ' ' ) << std::endl
     << std::endl
     << std::setw( wt ) << "Virtuality in range" << boldify( Form( "%.1f < -t < %.1e", minq2, maxq2 ).c_str() ) << " GeV**2" << std::endl
     << std::endl
-    << std::setfill( '-' ) << std::setw( wb-2 ) << boldify( " Outgoing leptons " ) << std::setfill( ' ' ) << std::endl
+    << std::setfill( '-' ) << std::setw( wb+6 ) << boldify( " Outgoing leptons " ) << std::setfill( ' ' ) << std::endl
     << std::endl
     << std::setw( wt ) << "Pair" << boldify( op.str().c_str() ) << " (" << (int)pair << ")" << std::endl
     << std::setw( wt ) << "Cuts mode" << boldify( cut_mode.str().c_str() ) << std::endl;
   const std::string ptrange = ( maxpt<=0. ) ? Form( ">= %.1f", minpt ) : Form( "%.1f < pT < %.1f", minpt, maxpt ),
                     erange = ( maxenergy<=0. ) ? Form( ">= %.1f", minenergy ) : Form( "%.1f < E < %.1f", minenergy, maxenergy );
   os
-    << std::setw( wt ) << "Lepton(s)' pT in range" << boldify( ptrange.c_str() ) << " GeV/c" << std::endl
-    << std::setw( wt ) << "Lepton(s)' energy in range" << boldify( erange.c_str() ) << " GeV" << std::endl
-    << std::setw( wt ) << "Pseudorapidity in range" << boldify( Form( "%.1f < eta < %.1f", mineta, maxeta ).c_str() ) << std::endl
+    << std::setw( wt ) << "Lepton(s)' pT range" << boldify( ptrange.c_str() ) << " GeV/c" << std::endl
+    << std::setw( wt ) << "Lepton(s)' energy range" << boldify( erange.c_str() ) << " GeV" << std::endl
+    << std::setw( wt ) << "Pseudorapidity range" << boldify( Form( "%.1f < eta < %.1f", mineta, maxeta ).c_str() ) << std::endl
     //<< std::setw( wt ) << "Polar angle theta in range [deg]" << "[" << std::setw(3) << mintheta << ", " << std::setw( 3 ) << maxtheta << "]" << std::endl
     << std::endl
-    << std::setfill( '-' ) << std::setw( wb-2 ) << boldify( " Outgoing remnants" ) << std::endl
+    << std::setfill( '-' ) << std::setw( wb+6 ) << boldify( " Outgoing remnants" ) << std::endl
     << std::endl << std::setfill( ' ' );
   if (hadroniser)
-    os << std::setw( wt ) << "Hadronisation algorithm" << boldify( hadroniser->GetName().c_str() ) << std::endl;
+    os << std::setw( wt ) << "Hadronisation algorithm" << boldify( hadroniser->name().c_str() ) << std::endl;
   os << std::setw( wt ) << "Mass range" << boldify( Form( "%.2f < M(x/y) < %.2f", minmx, maxmx ).c_str() ) << " GeV/c**2" << std::endl;
   Information( os.str() );
 }
 
-bool Parameters::ReadConfigFile(const char* inFile_)
+bool Parameters::readConfigFile(const char* inFile_)
 {
   std::ifstream f;
   std::string key, value;
@@ -177,7 +177,7 @@ bool Parameters::ReadConfigFile(const char* inFile_)
 #ifdef PYTHIA8
       if ( value=="pythia8" ) this->hadroniser = new Pythia8Hadroniser;
 #endif
-      os << std::setw( wdth ) << " * Hadroniser:" << ( ( this->hadroniser!=0 ) ? this->hadroniser->GetName() : colourise( "*** no hadroniser ***", Colour::Red ) ) << "\n";
+      os << std::setw( wdth ) << " * Hadroniser:" << ( ( this->hadroniser!=0 ) ? this->hadroniser->name() : colourise( "*** no hadroniser ***", Colour::Red ) ) << "\n";
     }
     else if ( key=="MODE" ) {
       this->process_mode = static_cast<Kinematics::ProcessMode>( atoi( value.c_str() ) );
@@ -211,13 +211,13 @@ bool Parameters::ReadConfigFile(const char* inFile_)
     }
     else if (key=="THMN") {
       //this->mintheta = atof( value.c_str() );
-      //this->SetThetaRange( atof( value.c_str() ), 0. ); // FIXME FIXME
-      os << std::setw( wdth ) << " * Minimal polar production angle for the central particles" << EtaToTheta(mineta) << "\n";
+      //this->setThetaRange( atof( value.c_str() ), 0. ); // FIXME FIXME
+      os << std::setw( wdth ) << " * Minimal polar production angle for the central particles" << etaToTheta( mineta ) << "\n";
     }
     else if (key=="THMX") {
       //this->maxtheta = atof( value.c_str() );
-      //this->SetThetaRange( 0., atof( value.c_str() ) ); //FIXME FIXME
-      os << std::setw( wdth ) << " * Maximal polar production angle for the central particles" << EtaToTheta(maxeta) << "\n";
+      //this->setThetaRange( 0., atof( value.c_str() ) ); //FIXME FIXME
+      os << std::setw( wdth ) << " * Maximal polar production angle for the central particles" << etaToTheta( maxeta ) << "\n";
     }
     else if (key=="ETMN") {
       this->mineta = static_cast<float>( atof( value.c_str() ) );
@@ -256,10 +256,9 @@ bool Parameters::ReadConfigFile(const char* inFile_)
       os << std::setw( wdth ) << " * QPDF:" << this->qpdf << "\n";
     }
     else {
-      InWarning( Form( "Unrecognized argument : [%s] = %s", key.c_str(), value.c_str() ) );
+      InWarning( Form( "Unrecognized argument: [%s] = %s", key.c_str(), value.c_str() ) );
     }
   }
-  if ( !this->process ) this->process = new GenericProcess;
   f.close();
   
   Information( os.str() );
@@ -267,7 +266,7 @@ bool Parameters::ReadConfigFile(const char* inFile_)
   return true;
 }
 
-bool Parameters::StoreConfigFile( const char* outFile_ )
+bool Parameters::storeConfigFile( const char* outFile_ )
 {
   std::ofstream f;
   f.open( outFile_, std::fstream::out | std::fstream::trunc );

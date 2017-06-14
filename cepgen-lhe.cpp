@@ -19,23 +19,23 @@ int main( int argc, char* argv[] ) {
   if ( argc==1 ) InError( "No config file provided." );
 
   Debugging( Form( "Reading config file stored in %s", argv[1] ) );
-  if ( !mg.parameters->ReadConfigFile( argv[1] ) ) {
+  if ( !mg.parameters->readConfigFile( argv[1] ) ) {
     Information( Form( "Error reading the configuration!\n\t"
                        "Please check your input file (%s)", argv[1] ) );
     return -1;
   }
 
   // We might want to cross-check visually the validity of our run
-  mg.parameters->Dump();
+  mg.parameters->dump();
 
   // Let there be cross-section...
   double xsec, err;
-  mg.ComputeXsection( &xsec, &err );
+  mg.computeXsection( xsec, err );
 
   if ( !mg.parameters->generation ) return 0;
 
   OutputHandler::EventWriter writer( OutputHandler::ExportHandler::HepMC, "example.dat" );
-  writer.SetCrossSection( xsec, err );
+  writer.setCrossSection( xsec, err );
 
 #ifndef HEPMC_VERSION_CODE
 //#error "Hahaha"
@@ -49,7 +49,7 @@ cout << "HepMC version: " << HepMC::version() << endl;
   for ( unsigned int i=0; i<mg.parameters->maxgen; i++ ) {
     if ( i%10000==0 )
       cout << "Generating event #" << i+1 << endl;
-    const Event* ev = mg.GenerateOneEvent();
+    const Event* ev = mg.generateOneEvent();
     writer << ev;
   }
 

@@ -36,12 +36,12 @@ inline std::string colourise( const std::string& str, const Colour::TextColour& 
  * - \f$y_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\f$ the new variable
  * - \f$\mathrm dy_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\log\frac{x_{min}}{x_{max}}\f$, the new variable's differential form
  * @brief Redefine the variables of integration in order to avoid the strong peaking of the integrant.
- * @param[in] expo_ Exponant
- * @param[in] xmin_ Minimal value of the variable
- * @param[in] xmax_ Maximal value of the variable
- * @param[out] out_ The new variable definition
- * @param[out] dout_ The differential variant of the new variable definition
- * @param[in] var_name_ The variable name
+ * @param[in] expo Exponant
+ * @param[in] xmin Minimal value of the variable
+ * @param[in] xmax Maximal value of the variable
+ * @param[out] out The new variable definition
+ * @param[out] dout The differential variant of the new variable definition
+ * @param[in] var_name The variable name
  * @note This method overrides the set of `mapxx` subroutines in ILPAIR, with a slight difference according to the sign of the
  *  \f$\mathrm dy_{out}\f$ parameter :
  *  - left unchanged :
@@ -49,8 +49,8 @@ inline std::string colourise( const std::string& str, const Colour::TextColour& 
  *  - opposite sign :
  * > `mapt1`, `mapt2`
  */
-void Map(double expo_, double xmin_, double xmax_, double* out_, double* dout_, const std::string& var_name_="");
-void Mapla(double,double,int,double,double,double*,double*);
+void Map( double expo, double xmin, double xmax, double& out, double& dout, const std::string& var_name="" );
+void Mapla( double y, double z, int u, double xm, double xp, double& x, double& d );
 
 /**
  * Generate random number with Breit-Wigner distribution
@@ -62,12 +62,12 @@ void Mapla(double,double,int,double,double,double*,double*);
  * @param emax_ Maximal value of RanBW
  * @date 11 Apr 2014
  */
-double BreitWigner( double er, double gamma, double emin, double emax, double e=-1. );
+double breitWigner( double er, double gamma, double emin, double emax, double e=-1. );
 /// Convert a polar angle to a pseudo-rapidity
-inline double ThetaToEta( double theta_ ) { return -log( tan( theta_/180.*Constants::Pi/2. ) ); }
+inline double thetaToEta( double theta_ ) { return -log( tan( theta_/180.*M_PI/2. ) ); }
 /// Convert a pseudo-rapidity to a polar angle
-inline double EtaToTheta( double eta_ ) { return 2.*atan( exp( -eta_ ) )*180. / Constants::Pi; }
+inline double etaToTheta( double eta_ ) { return 2.*atan( exp( -eta_ ) )*180. / M_PI; }
 /// Convert a pseudo-rapidity to a rapidity
-double EtaToY( double eta_, double m_, double pt_ );
+double etaToY( double eta_, double m_, double pt_ );
 
 #endif

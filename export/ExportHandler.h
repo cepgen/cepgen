@@ -21,27 +21,27 @@ namespace OutputHandler
    public:
     /// Class constructor
     /// \param[in] type Requested output type
-    ExportHandler( const OutputType& type ) : fType( type ) {;}
-    virtual ~ExportHandler() {;}
+    ExportHandler( const OutputType& type ) : type_( type ) {}
+    virtual ~ExportHandler() {}
     /// Set the process cross section and its associated error
-    void SetCrossSection( const float& xsec, const float& err_xsec ) {
-      fCrossSect = xsec;
-      fCrossSectErr = err_xsec;
+    void setCrossSection( const float& xsec, const float& err_xsec ) {
+      cross_sect_ = xsec;
+      cross_sect_err_ = err_xsec;
     }
     /// Set the event number
-    void SetEventNumber( const unsigned int& ev_id ) { fEventNum = ev_id; }
+    void setEventNumber( const unsigned int& ev_id ) { event_num_ = ev_id; }
     /// Writer operator
-    virtual void operator<<( const Event* ) {;}
+    virtual void operator<<( const Event* ) = 0;
 
    protected:
     /// Type of output requested
-    OutputType fType;
+    OutputType type_;
     /// Process cross section
-    float fCrossSect;
+    float cross_sect_;
     /// Error on process cross section
-    float fCrossSectErr;
+    float cross_sect_err_;
     /// Event number in generation
-    unsigned int fEventNum;
+    unsigned int event_num_;
     
   };
 }
