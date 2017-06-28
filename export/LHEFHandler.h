@@ -2,12 +2,11 @@
 #define OutputHandler_LHEFHandler_h
 
 #include "export/HepMCHandler.h"
-#include "physics/Event.h"
 
 #ifdef HEPMC_VERSION3
 
 #include "HepMC/LHEF.h"
-#include "HepMC/HEPEVT_Wrapper.h"
+#include "physics/Event.h"
 
 namespace OutputHandler
 {
@@ -16,7 +15,7 @@ namespace OutputHandler
    * \author Laurent Forthomme <laurent.forthomme@cern.ch>
    * \date Sep 2016
    */
-  class LHEFHandler : public HepMCHandler
+  class LHEFHandler : public ExportHandler
   {
    public:
     /// Class constructor
@@ -26,10 +25,9 @@ namespace OutputHandler
     void operator<<( const Event* );
     
    private:
-    HEPEVT hepevt_buf_;
     /// Writer object (from HepMC)
     std::unique_ptr<LHEF::Writer> lhe_output_;
-
+    LHEF::HEPRUP run_;
   };
 }
 

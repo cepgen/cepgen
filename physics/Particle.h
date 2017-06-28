@@ -205,6 +205,7 @@ class Particle {
         inline double pt() const { return sqrt( pt2() ); }
         inline double pt2() const { return ( px()*px()+py()*py() ); }
         inline double* pRef() { return &p_; }
+        inline const std::vector<double> pVector() const { return std::vector<double>( { px(), py(), pz(), energy(), mass() } ); }
         /// 3-momentum norm (in GeV)
         inline double p() const { return p_; }
         /// Squared 3-momentum norm (in \f$\text{GeV}^\text{2}\f$)

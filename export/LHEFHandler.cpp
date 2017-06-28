@@ -5,50 +5,41 @@
 namespace OutputHandler
 {
   LHEFHandler::LHEFHandler( const char* filename ) :
-    HepMCHandler( filename, ExportHandler::LHE ),
+    ExportHandler( ExportHandler::LHE ),
     lhe_output_( std::make_unique<LHEF::Writer>( filename ) )
   {
-    lhe_output_->init();
-    HepMC::HEPEVT_Wrapper::set_hepevt_address( (char*)&hepevt_buf_ );
-    HepMC::HEPEVT_Wrapper::zero_everything();
     lhe_output_->initComments() << "Sample created using CepGen.";
     lhe_output_->heprup.NPRUP = 1;
     lhe_output_->heprup.resize();
-    lhe_output_->heprup.LPRUP[0] = -1;
+    //lhe_output_->heprup.LPRUP[0] = -1;
+    //
     lhe_output_->init();
   }
 
   void
   LHEFHandler::operator<<( const Event* ev )
   {
-    fillEvent( ev );
-    if ( !event.get() or !HepMC::HEPEVT_Wrapper::GenEvent_to_HEPEVT( event.get() ) ) {
-      throw Exception( __PRETTY_FUNCTION__, "Failed to retrieve the HepMC event to be stored!", FatalError );
-    }
     LHEF::HEPEUP out;
+    out.heprup = &lhe_output_->heprup;
     out.XWGTUP = 1.;
     out.XPDWUP = std::pair<double,double>( 0., 0. );
     out.SCALUP = 0.;
     out.AQEDUP = 0.;
     out.AQCDUP = 0.;
-    out.NUP = hepevt_buf_.nhep;
+    out.NUP = ev->numParticles();
     out.resize();
-    for ( unsigned short ip=0; ip<hepevt_buf_.nhep; ip++ ) {
-      out.IDUP[ip] = hepevt_buf_.idhep[ip]; // PDG id
-      out.ISTUP[ip] = hepevt_buf_.isthep[ip]; // status code
-      out.MOTHUP[ip] = std::pair<int,int>( hepevt_buf_.jmohep[ip][0], hepevt_buf_.jmohep[ip][1] ); // mothers
+    for ( unsigned short ip=0; ip<ev->numParticles(); ip++ ) {
+      const Particle part = ev->getConstById( ip );
+      out.IDUP[ip] = part.integerPdgId(); // PDG id
+      out.ISTUP[ip] = part.status; // status code
+      out.MOTHUP[ip] = std::pair<int,int>( *part.mothersIds().begin(), ( part.mothersIds().size()>0 ) ? *( part.mothersIds().end()-- ) : 0 ); // mothers
       out.ICOLUP[ip] = std::pair<int,int>( 0, 0 );
-      out.PUP[ip] = std::vector<double>( hepevt_buf_.phep[ip][0], hepevt_buf_.phep[ip][4] ); // momentum
-      std::cout << "before dumping!" << std::endl;
-      for ( unsigned int i=0; i<5; i++ ) { std::cout << "pup[" << i << "]=" << out.PUP[ip][i] << std::endl;}
-      std::cout << "finished dumping!" << std::endl;
-      //out.VTIMUP.emplace_back( 5 ); // invariant lifetime
-      //out.SPINUP.push_back( 0. );
+      out.PUP[ip] = std::vector<double>( { part.momentum().px(), part.momentum().py(), part.momentum().pz(), part.energy(), part.mass() } ); // momentum
+      out.VTIMUP[ip] = 0.; // invariant lifetime
+      out.SPINUP[ip] = 0.;
     }
-    out.print( std::cout );
     lhe_output_->hepeup = out;
     lhe_output_->writeEvent();
-    event->clear();
   }
 }
 
