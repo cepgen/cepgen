@@ -21,6 +21,7 @@ namespace OutputHandler
     /// Class constructor
     /// \param[in] filename Output file path
     LHEFHandler( const char* filename );
+    void initialise( const Parameters& params );
     /// Writer operator
     void operator<<( const Event* );
     

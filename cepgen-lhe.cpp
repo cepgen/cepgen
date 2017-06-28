@@ -36,6 +36,7 @@ int main( int argc, char* argv[] ) {
 
   OutputHandler::EventWriter writer( OutputHandler::ExportHandler::LHE, "example.dat" );
   writer.setCrossSection( xsec, err );
+  writer.initialise( *mg.parameters );
 
 #ifdef HEPMC_VERSION3
   Information( Form( "HepMC version: %s", HepMC::versionName().c_str() ) );

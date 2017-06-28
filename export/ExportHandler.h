@@ -1,6 +1,7 @@
 #ifndef OutputHandler_ExportHandler_h
 #define OutputHandler_ExportHandler_h
 
+#include "core/Parameters.h"
 #include "physics/Event.h"
 
 namespace OutputHandler
@@ -24,6 +25,7 @@ namespace OutputHandler
     ExportHandler( const OutputType& type ) :
       type_( type ), cross_sect_( 0. ), cross_sect_err_( 0. ), event_num_( 0. ) {}
     virtual ~ExportHandler() {}
+    virtual void initialise( const Parameters& ) = 0;
     /// Set the process cross section and its associated error
     void setCrossSection( const float& xsec, const float& err_xsec ) {
       cross_sect_ = xsec;

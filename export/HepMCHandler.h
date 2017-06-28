@@ -33,6 +33,7 @@ namespace OutputHandler
       /// \param[in] filename Output file path
       HepMCHandler( const char* filename, const ExportHandler::OutputType& type=ExportHandler::HepMC );
       ~HepMCHandler();
+      void initialise( const Parameters& params ) {}
       /// Writer operator
       void operator<<( const Event* );
 

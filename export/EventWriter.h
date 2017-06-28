@@ -1,6 +1,7 @@
 #ifndef EventWriter_h
 #define EventWriter_h
 
+#include "core/Parameters.h"
 #include "physics/Event.h"
 #include "export/ExportHandler.h"
 
@@ -26,6 +27,8 @@ namespace OutputHandler
     EventWriter( const OutputHandler::ExportHandler::OutputType& type, const char* filename );
     ~EventWriter();
 
+    void initialise( const Parameters& params ) { file_handler_->initialise( params ); }
+
     /// Specify the process cross section and its associated error
     void setCrossSection( const float& xsec, const float& err_xsec ) {
 #ifdef HEPMC_LINKED
@@ -44,7 +47,7 @@ namespace OutputHandler
    private:
 
     /// Inherited file handler
-    OutputHandler::ExportHandler* file_handler_;
+    std::unique_ptr<OutputHandler::ExportHandler> file_handler_;
     /// Type of output requested
     OutputHandler::ExportHandler::OutputType type_;
 

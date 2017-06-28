@@ -42,7 +42,7 @@ namespace EPA
     const double gq2min_init = std::max( pow( fElectron.mass()*fYmin, 2 ) / ( 1.-fYmin ), fBoundaries.q2min ),
                  gq2max_init = std::min( fYmax*fS, fBoundaries.q2max );
 
-    if ( fMode==WeizsackerWilliams ) { fEPAmax = Constants::AlphaReduced*pow( fYmin-2., 2 ); } // WWA approximation
+    if ( fMode==WeizsackerWilliams ) { fEPAmax = Constants::alphaReduced*pow( fYmin-2., 2 ); } // WWA approximation
     else {
       // full transversal spectrum (2) or full longitudinal and transversal (3) spectrum
       const double eqe = gq2min_init/fElectron.E2(),
@@ -50,7 +50,7 @@ namespace EPA
                    emsqr = ( pow( fYmin*fElDotPr, 2 )+gq2min_init*fMP2 ) / ( fElDotPr*fElDotPr+fME2*fMP2 );
       if ( emsqr<0. ) { InError( Form( "Problem with sqrt(emsqr), %f, at epamax determination", emsqr ) ); return; }
 
-      fEPAmax = Constants::AlphaReduced*fYmin*sqrt( emsqr );
+      fEPAmax = Constants::alphaReduced*fYmin*sqrt( emsqr );
       if ( fMode==Transversal ) { fEPAmax *= ( 2.*( 1.-fYmin )+emqe2+eqe ) / ( emqe2+eqe ); } // Transversal spectrum
       else                      { fEPAmax *= ( 4.*( 1.-fYmin )+emqe2+eqe ) / ( emqe2+eqe ); } // Longitudinal & transversal spectrum
     }
@@ -80,7 +80,7 @@ namespace EPA
     /// EPA - WWA spectrum
     double epat, epal;
     if ( fMode==WeizsackerWilliams ) { // WWA approximation
-      const double r = Constants::AlphaReduced/( y*( *q2 ) );
+      const double r = Constants::alphaReduced/( y*( *q2 ) );
       epat = r*( 2.*( 1.-y )*( 1.-fME2*y*y/( ( 1.-y )*( *q2 ) ) )+y*y );
       epal = r*  2.*( 1.-y );
     }
@@ -90,7 +90,7 @@ namespace EPA
                    emsqr = ( pow( y*fElDotPr, 2 )+( *q2 )*fMP2 ) / ( fElDotPr*fElDotPr+fME2*fMP2 );
       if ( emsqr<0. ) { InError( Form( "Problem with sqrt(emsqr), %f, y/Q2 pair rejected", emsqr ) ); return false; }
 
-      const double r = Constants::AlphaReduced/( *q2 )*sqrt( emsqr )/( emqe2+eqe );
+      const double r = Constants::alphaReduced/( *q2 )*sqrt( emsqr )/( emqe2+eqe );
       epat = r*( 2.*( 1.-y )+emqe2+eqe );
       if ( fMode==Transversal ) { epal = 0.;            } // Transversal spectrum
       else                      { epal = r*2.*( 1.-y ); } // Longitudinal & transversal spectrum

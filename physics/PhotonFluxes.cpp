@@ -16,8 +16,8 @@ PhotonFluxes::ProtonElastic( double x_, double kt2_ )
   //const double ela3 = 1.-(Q2_ela-kt2_)/Q2_ela;
   //const double ela3 = 1.-pow(x_, 2)*mp2/Q2_ela/(1.-x_);
   //f_ela = alpha_em/M_PI*(1.-x_+pow(x_, 2)/4.)*ela1*ela2*ela3/kt2_;
-  f_ela = Constants::AlphaEM/M_PI*ela1*ela2/Q2_ela;
-  //f_ela = Constants::AlphaEM/M_PI*( ( 1.-x_ )*ela1*ela2*ela3 + x_*x_/2.*G_M*G_M )/kt2_;
+  f_ela = Constants::alphaEM/M_PI*ela1*ela2/Q2_ela;
+  //f_ela = Constants::alphaEM/M_PI*( ( 1.-x_ )*ela1*ela2*ela3 + x_*x_/2.*G_M*G_M )/kt2_;
 
   return f_ela;
 }
@@ -63,7 +63,7 @@ PhotonFluxes::ProtonInelastic( double x_, double kt2_, double mx_ )
 
   f_aux = F2_corr/( mx2+Q2-mp2 )*term1*term2;
 
-  f_ine = Constants::AlphaEM/M_PI*( 1.-x_ )*f_aux/kt2_;
+  f_ine = Constants::alphaEM/M_PI*( 1.-x_ )*f_aux/kt2_;
 
   return f_ine;
 }

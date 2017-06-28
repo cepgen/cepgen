@@ -8,11 +8,25 @@ namespace OutputHandler
     ExportHandler( ExportHandler::LHE ),
     lhe_output_( std::make_unique<LHEF::Writer>( filename ) )
   {
-    lhe_output_->initComments() << "Sample created using CepGen.";
-    lhe_output_->heprup.NPRUP = 1;
-    lhe_output_->heprup.resize();
-    //lhe_output_->heprup.LPRUP[0] = -1;
-    //
+    //lhe_output_->headerBlock() << "";
+    lhe_output_->initComments() << "Sample created using CepGen.\n";
+  }
+
+  void
+  LHEFHandler::initialise( const Parameters& params )
+  {
+    lhe_output_->initComments() << " Input parameters:\n";
+    params.dump( lhe_output_->initComments(), false );
+    LHEF::HEPRUP run = lhe_output_->heprup;
+    run.IDBMUP = std::pair<int,int>( params.in1pdg, params.in2pdg );
+    run.EBMUP = std::pair<double,double>( params.in1p, params.in2p );
+    run.NPRUP = 1;
+    run.resize();
+    run.XSECUP[0] = cross_sect_;
+    run.XERRUP[0] = cross_sect_err_;
+    run.XMAXUP[0] = 1.;
+    run.LPRUP[0] = 1;
+    lhe_output_->heprup = run;
     lhe_output_->init();
   }
 
@@ -24,8 +38,8 @@ namespace OutputHandler
     out.XWGTUP = 1.;
     out.XPDWUP = std::pair<double,double>( 0., 0. );
     out.SCALUP = 0.;
-    out.AQEDUP = 0.;
-    out.AQCDUP = 0.;
+    out.AQEDUP = Constants::alphaEM;
+    out.AQCDUP = Constants::alphaQCD;
     out.NUP = ev->numParticles();
     out.resize();
     for ( unsigned short ip=0; ip<ev->numParticles(); ip++ ) {
@@ -38,6 +52,7 @@ namespace OutputHandler
       out.VTIMUP[ip] = 0.; // invariant lifetime
       out.SPINUP[ip] = 0.;
     }
+    lhe_output_->eventComments() << "haha";
     lhe_output_->hepeup = out;
     lhe_output_->writeEvent();
   }

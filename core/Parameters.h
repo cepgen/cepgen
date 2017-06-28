@@ -26,7 +26,7 @@ class Parameters {
     /// \param[in] thetamax The maximal value of \f$\theta\f$ for the outgoing leptons
     void setThetaRange( float thetamin, float thetamax );
     /// Dump the input parameters in the console
-    void dump();
+    void dump( std::ostream& os=std::cout, bool pretty=true ) const;
     /// Read content from config file to load the variables
     /// \param[in] inFile Name of the configuration file to load
     /// \return A boolean stating whether this input configuration file is correct or not

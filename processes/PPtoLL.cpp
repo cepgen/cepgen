@@ -278,7 +278,7 @@ PPtoLL::computeKTFactorisedMatrixElement()
                  term10 =         -that*pow(uhat, 3);
 
     const double auxil_gamgam = -2.*(term1+term2+term3+term4+term5+term6+term7+term8+term9+term10)/(pow(ml2-that, 2)*pow(ml2-uhat, 2));
-    const double g_em = sqrt(4.*M_PI*Constants::AlphaEM);
+    const double g_em = sqrt(4.*M_PI*Constants::alphaEM);
     amat2 = pow(g_em, 4)*auxil_gamgam;
   }
   else if (off_shell) {
@@ -349,8 +349,8 @@ PPtoLL::computeKTFactorisedMatrixElement()
     //=================================================================
     double amat2_1, amat2_2;
     
-    amat2_1 = pow(4.*M_PI*Constants::AlphaEM, 2)*pow(x1*x2*s_, 2)*aux2_1*2.*z1p*z1m*t1abs/(q1t2*q2t2)*t2abs/q2t2;
-    amat2_2 = pow(4.*M_PI*Constants::AlphaEM, 2)*pow(x1*x2*s_, 2)*aux2_2*2.*z2p*z2m*t2abs/(q1t2*q2t2);
+    amat2_1 = pow(4.*M_PI*Constants::alphaEM, 2)*pow(x1*x2*s_, 2)*aux2_1*2.*z1p*z1m*t1abs/(q1t2*q2t2)*t2abs/q2t2;
+    amat2_2 = pow(4.*M_PI*Constants::alphaEM, 2)*pow(x1*x2*s_, 2)*aux2_2*2.*z2p*z2m*t2abs/(q1t2*q2t2);
 
     //=================================================================
     //     symmetrization
