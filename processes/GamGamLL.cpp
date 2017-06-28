@@ -849,10 +849,10 @@ GamGamLL::fillKinematics( bool )
   ol1->setMass(); //FIXME
   
   // Second outgoing lepton
-  Particle* ol2 = particlePtr(role_ol2);
-  ol2->setPdgId(ol2->pdgId(), -ransign);
-  p7_cm_.rotatePhi(ranphi, rany);
-  ol2->setMomentum(p7_cm_);
+  Particle* ol2 = particlePtr( role_ol2 );
+  ol2->setPdgId( ol2->pdgId(), -ransign );
+  p7_cm_.rotatePhi( ranphi, rany );
+  ol2->setMomentum( p7_cm_ );
   ol2->status = Particle::FinalState;
   ol2->setMass(); //FIXME
 

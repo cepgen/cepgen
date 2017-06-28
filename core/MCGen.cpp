@@ -159,10 +159,6 @@ double f( double* x, size_t ndim, void* params )
   //std::cout << "2: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();*/
 
   if ( p->first_run ) {
-    // Then add outgoing leptons
-    ev->getOneByRole( Particle::CentralParticle1 )->setPdgId( p->pair );
-    ev->getOneByRole( Particle::CentralParticle2 )->setPdgId( p->pair );
-
     //std::cout << "3: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
     // Then add outgoing protons or remnants
     switch ( p->process_mode ) {
@@ -180,6 +176,13 @@ double f( double* x, size_t ndim, void* params )
     //std::cout << "4: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
     // Prepare the function to be integrated
     p->process->prepareKinematics();
+
+    // Then add outgoing leptons
+    Particle* out1 = ev->getOneByRole( Particle::CentralParticle1 ),
+             *out2 = ev->getOneByRole( Particle::CentralParticle2 );
+    out1->setPdgId( p->pair ); out1->setMass( Particle::massFromPDGId( p->pair ) );
+    out2->setPdgId( p->pair ); out2->setMass( Particle::massFromPDGId( p->pair ) );
+
     p->process->clearRun();
     p->first_run = false;
   }

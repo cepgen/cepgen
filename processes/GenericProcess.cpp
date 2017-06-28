@@ -31,7 +31,7 @@ GenericProcess::prepareKinematics()
 {
   if ( !isKinematicsDefined() ) return; // FIXME dump some information...
   const Particle* ib1 = particlePtr( Particle::IncomingBeam1 ),
-	         *ib2 = particlePtr( Particle::IncomingBeam2 );
+                 *ib2 = particlePtr( Particle::IncomingBeam2 );
 
   sqs_ = CMEnergy( *ib1, *ib2 );
   s_ = sqs_*sqs_;
