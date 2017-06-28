@@ -1,44 +1,38 @@
 #include "HepMCHandler.h"
 
 OutputHandler::HepMCHandler::HepMCHandler( const char* filename, const ExportHandler::OutputType& type ) :
-  ExportHandler( type )//, event( 0 )
+  ExportHandler( type ),
+  event( std::make_shared<HepMC::GenEvent>() )
 {
 #ifdef HEPMC_VERSION3
-  output = new HepMC::WriterAscii( filename );
+  output = std::make_unique<HepMC::WriterAscii>( filename );
 #else
-  output = new HepMC::IO_GenEvent( filename );
+  output = std::make_unique<HepMC::IO_GenEvent>( filename );
 #endif
 }
 
 OutputHandler::HepMCHandler::~HepMCHandler()
-{
-  //if ( event ) delete event;
-  delete output;
-}
+{}
 
 void
 OutputHandler::HepMCHandler::operator<<( const Event* evt )
 {
   fillEvent( evt );
-  //event->print();
+  if ( !event.get() ) {
+    throw Exception( __PRETTY_FUNCTION__, "Failed to retrieve the HepMC event to be stored!", FatalError );
+  }
 #ifdef HEPMC_VERSION3
   output->write_event( *event );
 #else
   *output << event;
 #endif
-  clearEvent();
-}
-
-void
-OutputHandler::HepMCHandler::clearEvent()
-{
-  //if ( event ) delete event;
+  event->clear();
 }
 
 void
 OutputHandler::HepMCHandler::fillEvent( const Event* evt )
 {
-  event = std::make_shared<HepMC::GenEvent>();
+  event->clear();
 evt->dump();
 
   // general information

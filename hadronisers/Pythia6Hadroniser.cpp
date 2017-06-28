@@ -46,7 +46,7 @@ Pythia6Hadroniser::hadronise( Event* ev )
   int jlrole[max_str_in_evt], jlpsf[max_str_in_evt][max_part_in_str];
   int criteria; //FIXME find an other name...
   
-  try { PrepareHadronisation( ev ); } catch ( Exception& e ) { e.Dump(); throw e; }
+  try { PrepareHadronisation( ev ); } catch ( Exception& e ) { e.dump(); throw e; }
 
   ParticleRoles rl = ev->roles();
 

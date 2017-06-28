@@ -47,8 +47,10 @@ int main( int argc, char* argv[] ) {
   for ( unsigned int i=0; i<mg.parameters->maxgen; i++ ) {
     if ( i%10000==0 )
       cout << "Generating event #" << i+1 << endl;
-    const Event* ev = mg.generateOneEvent();
-    writer << ev;
+    try {
+      const Event* ev = mg.generateOneEvent();
+      writer << ev;
+    } catch ( Exception& e ) { e.dump(); }
   }
 
   //mg.parameters->StoreConfigFile( "lastrun.card" );

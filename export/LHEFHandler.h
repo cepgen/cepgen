@@ -7,6 +7,7 @@
 #ifdef HEPMC_VERSION3
 
 #include "HepMC/LHEF.h"
+#include "HepMC/HEPEVT_Wrapper.h"
 
 namespace OutputHandler
 {
@@ -25,8 +26,9 @@ namespace OutputHandler
     void operator<<( const Event* );
     
    private:
+    HEPEVT hepevt_buf_;
     /// Writer object (from HepMC)
-    LHEF::Writer* output;
+    std::unique_ptr<LHEF::Writer> lhe_output_;
 
   };
 }

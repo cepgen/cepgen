@@ -63,7 +63,9 @@ class Parameters {
     float minpt;
     /// Maximal \f$p_T\f$ of the outgoing central particles
     float maxpt;
+    /// Minimal mass of the central system
     float minmass;
+    /// Maximal mass of the central system
     float maxmass;
     /// Minimal \f$\Delta p_T\f$ of the outgoing central particles
     float minptdiff;

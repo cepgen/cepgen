@@ -17,6 +17,8 @@
 #include "HepMC/GenCrossSection.h"
 #include "HepMC/GenParticle.h"
 
+#include <algorithm>
+
 namespace OutputHandler
 {
   /**
@@ -46,10 +48,10 @@ namespace OutputHandler
     private:
 #ifdef HEPMC_VERSION3
       /// Writer object (from HepMC v3+)
-      HepMC::WriterAscii* output;
+      std::unique_ptr<HepMC::WriterAscii> output;
 #else
       /// Writer object (from HepMC v<3)
-      HepMC::IO_GenEvent* output;
+      std::unique_ptr<HepMC::IO_GenEvent> output;
 #endif
   };
 }

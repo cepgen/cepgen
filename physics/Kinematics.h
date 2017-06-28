@@ -58,19 +58,21 @@ class Kinematics
   StructureFunctions remnant_mode;
   /// Sets of cuts to apply on the final phase space
   Cuts mode;
-  /// Minimal transverse momentum of the single outgoing leptons
+  /// Minimal transverse momentum of the single outgoing particles
   double ptmin;
-  /// Maximal transverse momentum of the single outgoing leptons
+  /// Maximal transverse momentum of the single outgoing particles
   double ptmax;
   /// Minimal energy of the central two-photons system
   double emin;
   /// Maximal energy of the central two-photons system
   double emax;
-  /// Minimal rapidity (\f$\eta\f$) of the outgoing lepton
+  /// Minimal rapidity (\f$\eta\f$) of the outgoing particles
   double etamin;
-  /// Maximal rapidity (\f$\eta\f$) of the outgoing lepton
+  /// Maximal rapidity (\f$\eta\f$) of the outgoing particles
   double etamax;
+  /// Minimal mass of the central system
   double massmin;
+  /// Minimal mass of the central system
   double massmax;
   /// Minimal mass (in GeV/c\f${}^\mathrm{2}\f$) of the outgoing proton remnant(s)
   double mxmin;

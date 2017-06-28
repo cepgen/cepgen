@@ -5,7 +5,7 @@ MCGen::MCGen() :
 {
   Debugging( "Generator initialized" );
   
-  try { printHeader(); } catch ( Exception& e ) { e.Dump(); }
+  try { printHeader(); } catch ( Exception& e ) { e.dump(); }
   
   srand( time( 0 ) ); // Random number initialization
   
@@ -62,7 +62,7 @@ MCGen::computeXsection( double& xsec, double& err )
 
   Information( "Starting the computation of the process cross-section" );
 
-  try { prepareFunction(); } catch ( Exception& e ) { e.Dump(); }
+  try { prepareFunction(); } catch ( Exception& e ) { e.dump(); }
   vegas_->integrate( xsec, err );
   
   cross_section_ = xsec;
@@ -203,7 +203,7 @@ double f( double* x, size_t ndim, void* params )
       
       num_hadr_trials = 0;
       do {
-        try { hadronised = p->hadroniser->hadronise( ev ); } catch ( Exception& e ) { e.Dump(); }
+        try { hadronised = p->hadroniser->hadronise( ev ); } catch ( Exception& e ) { e.dump(); }
 
         if ( num_hadr_trials>0 ) { Debugging( Form( "Hadronisation failed. Trying for the %dth time", num_hadr_trials+1 ) ); }
         
