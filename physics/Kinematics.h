@@ -70,6 +70,8 @@ class Kinematics
   double etamin;
   /// Maximal rapidity (\f$\eta\f$) of the outgoing lepton
   double etamax;
+  double massmin;
+  double massmax;
   /// Minimal mass (in GeV/c\f${}^\mathrm{2}\f$) of the outgoing proton remnant(s)
   double mxmin;
   /// Maximal mass (in GeV/c\f${}^\mathrm{2}\f$) of the outgoing proton remnant(s)

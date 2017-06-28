@@ -5,9 +5,10 @@
 
 #include "HepMC/Version.h"
 
-#ifndef HEPMC_VERSION_CODE
+#ifndef HEPMC_VERSION_CODE // HepMC v2
 #include "HepMC/IO_GenEvent.h"
-#else
+#else // HepMC v3+
+#define HEPMC_VERSION3
 #include "HepMC/WriterAscii.h"
 #endif
 
@@ -25,36 +26,32 @@ namespace OutputHandler
    */
   class HepMCHandler : public ExportHandler
   {
-   public:
-    /// Class constructor
-    /// \param[in] filename Output file path
-    HepMCHandler( const char* filename );
-    ~HepMCHandler();
-    /// Writer operator
-    void operator<<( const Event* );
+    public:
+      /// Class constructor
+      /// \param[in] filename Output file path
+      HepMCHandler( const char* filename, const ExportHandler::OutputType& type=ExportHandler::HepMC );
+      ~HepMCHandler();
+      /// Writer operator
+      void operator<<( const Event* );
 
-   private:
-    /// Clear the associated HepMC event content
-    inline void clearEvent();
-    /// Populate the associated HepMC event with a Event object
-    void fillEvent( const Event* );
+    protected:
+      /// Clear the associated HepMC event content
+      void clearEvent();
+      /// Populate the associated HepMC event with a Event object
+      void fillEvent( const Event* );
 
-#ifndef HEPMC_VERSION_CODE
-    /// Writer object (from HepMC v>=3)
-    HepMC::IO_GenEvent* output;
+      /// Associated HepMC event
+      std::shared_ptr<HepMC::GenEvent> event;
+
+    private:
+#ifdef HEPMC_VERSION3
+      /// Writer object (from HepMC v3+)
+      HepMC::WriterAscii* output;
 #else
-    /// Writer object (from HepMC v<3)
-    HepMC::WriterAscii* output;
+      /// Writer object (from HepMC v<3)
+      HepMC::IO_GenEvent* output;
 #endif
-    /// Associated HepMC event
-    HepMC::GenEvent* event;
-    /// List of particles in the event
-    std::vector<HepMC::GenParticle*> particles;
-    /// List of vertices in the event
-    std::vector<HepMC::GenVertex*> vertices;
-
   };
-
 }
 
 #endif

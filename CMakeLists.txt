@@ -43,10 +43,15 @@ add_executable(cepgen main.cpp)
 target_link_libraries(cepgen CepGenCore CepGenExternalHadronisers CepGenPhysics CepGenProcesses)
 
 find_package(HepMC)
+find_package(ROOT)
 if(HEPMC_LIBRARIES)
   message(STATUS "HepMC found in " ${HEPMC_INCLUDE_DIR})
   add_executable(cepgen-lhe cepgen-lhe.cpp)
-  target_link_libraries(cepgen-lhe ${HEPMC_LIBRARIES} CepGenCore CepGenExternalHadronisers CepGenPhysics CepGenProcesses CepGenExporter)
+  if(ROOT_LIBRARIES)
+    target_link_libraries(cepgen-lhe ${HEPMC_LIBRARIES} ${ROOT_LIBRARIES} CepGenCore CepGenExternalHadronisers CepGenPhysics CepGenProcesses CepGenExporter)
+  else()
+    target_link_libraries(cepgen-lhe ${HEPMC_LIBRARIES} CepGenCore CepGenExternalHadronisers CepGenPhysics CepGenProcesses CepGenExporter)
+  endif()
 endif()
 
 #----- copy the input cards and other files

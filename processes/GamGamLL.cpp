@@ -27,7 +27,6 @@ GamGamLL::GamGamLL( int nopt ) : GenericProcess( "pp -> p(*) (gamma gamma -> l+ 
 void
 GamGamLL::addEventContent()
 {
-std::cout << __PRETTY_FUNCTION__ << std::endl;
   IncomingState is; OutgoingState os;
   is.insert( ParticleWithRole( Particle::IncomingBeam1,    Particle::Proton ) );
   is.insert( ParticleWithRole( Particle::IncomingBeam2,    Particle::Proton ) );
@@ -38,7 +37,6 @@ std::cout << __PRETTY_FUNCTION__ << std::endl;
   os.insert( ParticleWithRole( Particle::CentralParticle1, Particle::Muon ) );
   os.insert( ParticleWithRole( Particle::CentralParticle2, Particle::Muon ) );
   GenericProcess::setEventContent( is, os );
-event_->dump();
 }
 
 unsigned int
@@ -428,7 +426,6 @@ GamGamLL::orient()
 double
 GamGamLL::computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double *dw )
 {
-std::cout << __PRETTY_FUNCTION__ << std::endl;
   const double mx0 = Particle::massFromPDGId( Particle::Proton )+Particle::massFromPDGId( Particle::PiPlus ); // 1.07
   const double wx2min = std::pow( std::max( mx0, cuts_.mxmin), 2 ),
                wx2max = std::pow( std::min(sqs_-outmass-2.*lepmass, cuts_.mxmax), 2 );
@@ -702,6 +699,9 @@ GamGamLL::computeWeight()
                cott7 = p7_cm_.pz()/p7_cm_.pt();
 
   // Cuts on outgoing leptons' kinematics
+
+  if ( cuts_.massmin>0. and ( p6_cm_+p7_cm_ ).mass()<cuts_.massmin ) return 0.;
+  if ( cuts_.massmax>0. and ( p6_cm_+p7_cm_ ).mass()>cuts_.massmax ) return 0.;
 
   bool lmu1 = cott6>=cot_theta1_
           and cott6<=cot_theta2_

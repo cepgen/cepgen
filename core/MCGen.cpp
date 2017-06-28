@@ -107,6 +107,8 @@ MCGen::prepareFunction()
   kin.ptdiffmax = parameters->maxptdiff;
   kin.etamin = parameters->mineta;
   kin.etamax = parameters->maxeta;
+  kin.massmin = parameters->minmass;
+  kin.massmax = parameters->maxmass;
   kin.emin = parameters->minenergy;
   kin.emax = parameters->maxenergy;
   kin.mxmin = parameters->minmx;

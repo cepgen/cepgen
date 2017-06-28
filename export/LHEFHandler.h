@@ -1,12 +1,10 @@
 #ifndef OutputHandler_LHEFHandler_h
 #define OutputHandler_LHEFHandler_h
 
-#include "export/ExportHandler.h"
+#include "export/HepMCHandler.h"
 #include "physics/Event.h"
 
-#include "HepMC/Version.h"
-
-#if HEPMC_VERSION_CODE>=3000000
+#ifdef HEPMC_VERSION3
 
 #include "HepMC/LHEF.h"
 
@@ -17,7 +15,7 @@ namespace OutputHandler
    * \author Laurent Forthomme <laurent.forthomme@cern.ch>
    * \date Sep 2016
    */
-  class LHEFHandler : public ExportHandler
+  class LHEFHandler : public HepMCHandler
   {
    public:
     /// Class constructor
@@ -27,10 +25,6 @@ namespace OutputHandler
     void operator<<( const Event* );
     
    private:
-    /// Fill the handler with the original Event object
-    void fillEvent( const Event* );
-    /// Remove all references to the original Event object
-    void clearEvent();
     /// Writer object (from HepMC)
     LHEF::Writer* output;
 

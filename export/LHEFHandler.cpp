@@ -1,11 +1,11 @@
 #include "LHEFHandler.h"
 
-#if HEPMC_VERSION_CODE>=3000000
+#ifdef HEPMC_VERSION3
 
 namespace OutputHandler
 {
   LHEFHandler::LHEFHandler( const char* filename ) :
-    ExportHandler( ExportHandler::LHE )
+    HepMCHandler( filename, ExportHandler::LHE )
   {
     output = new LHEF::Writer( filename );
   }
@@ -16,24 +16,6 @@ namespace OutputHandler
     fillEvent( ev );
     output->writeEvent();
     clearEvent();
-  }
-
-  void
-  LHEFHandler::fillEvent( const Event* ev )
-  {
-    // ... do whatever is needed for output->hepeup
-    ConstParticlesRef part_vec = ev->constParticlesRef();
-    //HEPEUT*
-    for ( unsigned int i=0; i<part_vec.size(); i++ ) {
-
-    }
-  }
-
-  void
-  LHEFHandler::clearEvent()
-  {
-    // ...
-    output->hepeup.clear();
   }
 }
 

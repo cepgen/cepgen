@@ -21,7 +21,8 @@ namespace OutputHandler
    public:
     /// Class constructor
     /// \param[in] type Requested output type
-    ExportHandler( const OutputType& type ) : type_( type ) {}
+    ExportHandler( const OutputType& type ) :
+      type_( type ), cross_sect_( 0. ), cross_sect_err_( 0. ), event_num_( 0. ) {}
     virtual ~ExportHandler() {}
     /// Set the process cross section and its associated error
     void setCrossSection( const float& xsec, const float& err_xsec ) {

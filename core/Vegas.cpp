@@ -67,7 +67,7 @@ Vegas::integrate( double& result, double& abserr )
   /// Integration
   for ( unsigned int i=0; i<num_iter_; i++ ) {
     veg_res = gsl_monte_vegas_integrate( function_, x_low_, x_up_, function_->dim, 0.2*num_converg_, rng, state, &result, &abserr );
-    std::cout << Form( ">> Iteration %2d: average = %8.4f   sigma = %8.4f   chi2 = %4.3f", i+1, result, abserr, gsl_monte_vegas_chisq( state ) ) << std::endl;
+    std::cout << Form( ">> Iteration %2d: average = %10.6f   sigma = %10.6f   chi2 = %4.3f", i+1, result, abserr, gsl_monte_vegas_chisq( state ) ) << std::endl;
   }
   
   // Clean Vegas

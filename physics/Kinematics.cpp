@@ -3,6 +3,7 @@
 Kinematics::Kinematics() :
   kinematics( ElasticElastic ), remnant_mode( SuriYennie ), mode( NoCuts ),
   ptmin( 3. ), ptmax( -1. ), emin( 0. ), emax( -1. ), etamin( -999. ), etamax( 999. ),
+  massmin( 0. ), massmax( -1. ),
   mxmin( 1.07 ), mxmax( 320. ),
   q2min( 0. ), q2max( 1.e5 ), wmin( 0. ), wmax( -1. ),
   ptdiffmin( 0. ), ptdiffmax( 300. ) //FIXME need to load this from somewhere else

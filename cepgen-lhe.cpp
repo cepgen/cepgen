@@ -32,17 +32,15 @@ int main( int argc, char* argv[] ) {
   double xsec, err;
   mg.computeXsection( xsec, err );
 
-  if ( !mg.parameters->generation ) return 0;
+  //if ( !mg.parameters->generation ) return 0;
 
-  OutputHandler::EventWriter writer( OutputHandler::ExportHandler::HepMC, "example.dat" );
+  OutputHandler::EventWriter writer( OutputHandler::ExportHandler::LHE, "example.dat" );
   writer.setCrossSection( xsec, err );
 
-#ifndef HEPMC_VERSION_CODE
-//#error "Hahaha"
-cout << "HepMC version: " << HepMC::versionName() << endl;
+#ifdef HEPMC_VERSION3
+  Information( Form( "HepMC version: %s", HepMC::versionName().c_str() ) );
 #else
-cout << "HepMC version: " << HepMC::version() << endl;
-//cout << HEPMC_VERSION << endl;
+  Information( Form( "HepMC version: %s", HepMC::version().c_str() ) );
 #endif
 
   // The events generation starts here !

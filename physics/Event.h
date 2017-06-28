@@ -144,14 +144,11 @@ class Event {
     float time_generation;
     /// Time needed to generate the hadronised (if needed) event (in seconds)
     float time_total;
-    //HEPEUP event_info;
   private:
     /// List of particles in the event, mapped to their role in the process
     ParticlesMap particles_;
     /// Last particle in an "empty" event
     ParticlesMap::iterator last_particle_;
-    /// Empty particle returned to the get-ers if no particle matches the requirements
-    Particle* np;
 };
 
 #endif

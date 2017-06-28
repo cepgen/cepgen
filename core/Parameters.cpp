@@ -8,6 +8,7 @@ Parameters::Parameters() :
   pair( Particle::Muon ),
   mcut( Kinematics::BothParticles ),
   minpt( 0. ), maxpt( -1. ),
+  minmass( 0. ), maxmass( -1. ),
   minptdiff( 0. ), maxptdiff( -1. ),
   minenergy( 0. ), maxenergy( -1. ),
   mineta( -5. ), maxeta( 5. ),
@@ -200,6 +201,10 @@ bool Parameters::readConfigFile(const char* inFile_)
     else if (key=="PTCT") {
       this->minpt = static_cast<float>( atof( value.c_str() ) );
       os << std::setw( wdth ) << " * Minimal transverse momentum (single central outgoing particle):" << this->minpt << " GeV/c\n";
+    }
+    else if (key=="MSCT") {
+      this->minmass = static_cast<float>( atof( value.c_str() ) );
+      os << std::setw( wdth ) << " * Minimal central system mass:" << this->minmass << " GeV/c**2\n";
     }
     else if (key=="ECUT") {
       this->minenergy = static_cast<float>( atof( value.c_str() ) );
