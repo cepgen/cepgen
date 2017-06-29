@@ -8,8 +8,6 @@ compile:
     - yum install -y -q gsl gsl-devel libgfortran gcc-gfortran
     - mkdir build
     - cd build
-    - wget https://raw.githubusercontent.com/opencog/opencog/master/lib/FindGSL.cmake
-    - wget https://raw.githubusercontent.com/ibab/lhcb-software/master/LbScripts/LbUtils/cmake/modules/FindHepMC.cmake
   script:
     - cmake -D CMAKE_MODULE_PATH=$PWD ..
     - make -j 4
