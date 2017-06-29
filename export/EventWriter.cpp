@@ -5,9 +5,9 @@ OutputHandler::EventWriter::EventWriter( const OutputHandler::ExportHandler::Out
 {
   switch ( type_ ) {
 #ifdef HEPMC_LINKED
-    case OutputHandler::ExportHandler::HepMC: { file_handler_ = std::make_unique<OutputHandler::HepMCHandler>( filename ); } break;
+    case OutputHandler::ExportHandler::HepMC: { file_handler_ = std::unique_ptr<OutputHandler::HepMCHandler>( new OutputHandler::HepMCHandler( filename ) ); } break;
 #ifdef HEPMC_VERSION3
-    case OutputHandler::ExportHandler::LHE:   { file_handler_ = std::make_unique<OutputHandler::LHEFHandler>( filename ); } break;
+    case OutputHandler::ExportHandler::LHE:   { file_handler_ = std::unique_ptr<OutputHandler::LHEFHandler>( new OutputHandler::LHEFHandler( filename ) ); } break;
 #endif
 #endif
     default: {

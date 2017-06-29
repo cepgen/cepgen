@@ -2,12 +2,12 @@
 
 OutputHandler::HepMCHandler::HepMCHandler( const char* filename, const ExportHandler::OutputType& type ) :
   ExportHandler( type ),
-  event( std::make_shared<HepMC::GenEvent>() )
+  event( new HepMC::GenEvent() )
 {
 #ifdef HEPMC_VERSION3
-  output = std::make_unique<HepMC::WriterAscii>( filename );
+  output = std::unique_ptr<HepMC::WriterAscii>( new HepMC::WriterAscii( filename ) );
 #else
-  output = std::make_unique<HepMC::IO_GenEvent>( filename );
+  output = std::unique_ptr<HepMC::IO_GenEvent>( new HepMC::IO_GenEvent( filename ) );
 #endif
 }
 
@@ -36,10 +36,10 @@ OutputHandler::HepMCHandler::fillEvent( const Event* evt )
 
   // general information
 #ifdef HEPMC_VERSION3
-  HepMC::GenCrossSectionPtr xs = std::make_shared<HepMC::GenCrossSection>();
+  HepMC::GenCrossSectionPtr xs = HepMC::make_shared<HepMC::GenCrossSection>();
   xs->set_cross_section( cross_sect_, cross_sect_err_ );
-  event->add_attribute( "AlphaQCD", std::make_shared<HepMC::DoubleAttribute>( Constants::alphaQCD ) );
-  event->add_attribute( "AlphaEM", std::make_shared<HepMC::DoubleAttribute>( Constants::alphaEM ) );
+  event->add_attribute( "AlphaQCD", HepMC::make_shared<HepMC::DoubleAttribute>( Constants::alphaQCD ) );
+  event->add_attribute( "AlphaEM", HepMC::make_shared<HepMC::DoubleAttribute>( Constants::alphaEM ) );
 #else
   HepMC::GenCrossSection xs;
   xs.set_cross_section( cross_sect_, cross_sect_err_ );
@@ -58,9 +58,9 @@ OutputHandler::HepMCHandler::fillEvent( const Event* evt )
   int cm_id = 0, idx = 1;
 
 #ifdef HEPMC_VERSION3
-  HepMC::GenVertexPtr v1 = std::make_shared<HepMC::GenVertex>( origin ),
-                      v2 = std::make_shared<HepMC::GenVertex>( origin ),
-                      vcm = std::make_shared<HepMC::GenVertex>( origin );
+  HepMC::GenVertexPtr v1 = HepMC::make_shared<HepMC::GenVertex>( origin ),
+                      v2 = HepMC::make_shared<HepMC::GenVertex>( origin ),
+                      vcm = HepMC::make_shared<HepMC::GenVertex>( origin );
 #else
   HepMC::GenVertex* v1 = new HepMC::GenVertex( origin ),
                    *v2 = new HepMC::GenVertex( origin ),
@@ -75,7 +75,7 @@ OutputHandler::HepMCHandler::fillEvent( const Event* evt )
                             part_orig->momentum().pz(),
                             part_orig->energy() );
 #ifdef HEPMC_VERSION3
-    HepMC::GenParticlePtr part = std::make_shared<HepMC::GenParticle>( pmom, part_orig->integerPdgId(), part_orig->status );
+    HepMC::GenParticlePtr part = HepMC::make_shared<HepMC::GenParticle>( pmom, part_orig->integerPdgId(), part_orig->status );
 #else
     HepMC::GenParticle* part = new HepMC::GenParticle( pmom, part_orig->integerPdgId(), part_orig->status );
     part->suggest_barcode( idx++ );
