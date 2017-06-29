@@ -24,7 +24,7 @@ OutputHandler::HepMCHandler::operator<<( const Event* evt )
 #ifdef HEPMC_VERSION3
   output->write_event( *event );
 #else
-  *output << event;
+  output->write_event( event.get() );
 #endif
   event->clear();
 }
@@ -38,14 +38,15 @@ OutputHandler::HepMCHandler::fillEvent( const Event* evt )
 #ifdef HEPMC_VERSION3
   HepMC::GenCrossSectionPtr xs = std::make_shared<HepMC::GenCrossSection>();
   xs->set_cross_section( cross_sect_, cross_sect_err_ );
-  event->set_cross_section( xs );
   event->add_attribute( "AlphaQCD", std::make_shared<HepMC::DoubleAttribute>( Constants::alphaQCD ) );
   event->add_attribute( "AlphaEM", std::make_shared<HepMC::DoubleAttribute>( Constants::alphaEM ) );
 #else
-  event->set_cross_section( cross_sect_, cross_sect_err_ );
+  HepMC::GenCrossSection xs;
+  xs.set_cross_section( cross_sect_, cross_sect_err_ );
   event->set_alphaQCD( Constants::alphaQCD );
   event->set_alphaQED( Constants::alphaEM );
 #endif
+  event->set_cross_section( xs );
 
   event->set_event_number( event_num_ );
   event->weights().push_back( 1. ); //FIXME we generate unweighted events
@@ -112,7 +113,7 @@ OutputHandler::HepMCHandler::fillEvent( const Event* evt )
 #ifndef HEPMC_VERSION3
   event->set_beam_particles( *v1->particles_in_const_begin(), *v2->particles_in_const_begin() );
   event->set_signal_process_vertex( *v1->vertices_begin() );
-  event->set_beam_particles( *v1->particles_in()_const_begin(), *v2->particles_in_const_end() );
+  event->set_beam_particles( *v1->particles_in_const_begin(), *v2->particles_in_const_end() );
 #endif
 
   event_num_++;

@@ -10,6 +10,8 @@
 #include "export/LHEFHandler.h"
 #endif
 
+#include <memory>
+
 namespace OutputHandler
 {
   /**

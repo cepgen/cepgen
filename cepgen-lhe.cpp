@@ -34,16 +34,12 @@ int main( int argc, char* argv[] ) {
 
   //if ( !mg.parameters->generation ) return 0;
 
-  //OutputHandler::EventWriter writer( OutputHandler::ExportHandler::LHE, "example.dat" );
-  OutputHandler::EventWriter writer( OutputHandler::ExportHandler::HepMC, "example.dat" );
+  OutputHandler::EventWriter writer( OutputHandler::ExportHandler::LHE, "example.dat" );
+  //OutputHandler::EventWriter writer( OutputHandler::ExportHandler::HepMC, "example.dat" );
   writer.setCrossSection( xsec, err );
   writer.initialise( *mg.parameters );
 
-#ifdef HEPMC_VERSION3
   Information( Form( "HepMC version: %s", HepMC::versionName().c_str() ) );
-#else
-  Information( Form( "HepMC version: %s", HepMC::version().c_str() ) );
-#endif
 
   // The events generation starts here !
   for ( unsigned int i=0; i<mg.parameters->maxgen; i++ ) {

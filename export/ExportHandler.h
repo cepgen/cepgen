@@ -18,6 +18,13 @@ namespace OutputHandler
     enum OutputType {
       HepMC, LHE
     };
+    friend std::ostream& operator<<( std::ostream& os, const OutputType& type ) {
+      switch ( type ) {
+        case HepMC: return os << "HepMC ASCII";
+        case LHE: return os << "LHEF";
+      }
+      return os;
+    }
 
    public:
     /// Class constructor

@@ -6,9 +6,14 @@ OutputHandler::EventWriter::EventWriter( const OutputHandler::ExportHandler::Out
   switch ( type_ ) {
 #ifdef HEPMC_LINKED
     case OutputHandler::ExportHandler::HepMC: { file_handler_ = std::make_unique<OutputHandler::HepMCHandler>( filename ); } break;
+#ifdef HEPMC_VERSION3
     case OutputHandler::ExportHandler::LHE:   { file_handler_ = std::make_unique<OutputHandler::LHEFHandler>( filename ); } break;
 #endif
-    default: return;
+#endif
+    default: {
+      std::ostringstream os; os << type_;
+      Exception( __PRETTY_FUNCTION__, Form( "Unsupported output mode: %s", os.str().c_str() ), FatalError ).dump();
+    }
   }
 }
 

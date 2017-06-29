@@ -21,7 +21,7 @@
 #include "HepMC/GenCrossSection.h"
 #include "HepMC/GenParticle.h"
 
-#include <algorithm>
+#include <memory>
 
 namespace OutputHandler
 {
