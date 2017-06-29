@@ -33,15 +33,18 @@ void
 OutputHandler::HepMCHandler::fillEvent( const Event* evt )
 {
   event->clear();
-evt->dump();
 
   // general information
 #ifdef HEPMC_VERSION3
   HepMC::GenCrossSectionPtr xs = std::make_shared<HepMC::GenCrossSection>();
   xs->set_cross_section( cross_sect_, cross_sect_err_ );
   event->set_cross_section( xs );
+  event->add_attribute( "AlphaQCD", std::make_shared<HepMC::DoubleAttribute>( Constants::alphaQCD ) );
+  event->add_attribute( "AlphaEM", std::make_shared<HepMC::DoubleAttribute>( Constants::alphaEM ) );
 #else
   event->set_cross_section( cross_sect_, cross_sect_err_ );
+  event->set_alphaQCD( Constants::alphaQCD );
+  event->set_alphaQED( Constants::alphaEM );
 #endif
 
   event->set_event_number( event_num_ );
@@ -54,14 +57,14 @@ evt->dump();
   int cm_id = 0, idx = 1;
 
 #ifdef HEPMC_VERSION3
-  HepMC::GenVertexPtr v1( new HepMC::GenVertex( origin ) ), v2( new HepMC::GenVertex( origin ) ), vcm( new HepMC::GenVertex( origin ) );
+  HepMC::GenVertexPtr v1 = std::make_shared<HepMC::GenVertex>( origin ),
+                      v2 = std::make_shared<HepMC::GenVertex>( origin ),
+                      vcm = std::make_shared<HepMC::GenVertex>( origin );
 #else
-  HepMC::GenVertex *v1 = new HepMC::GenVertex( origin ), *v2 = new HepMC::GenVertex( origin ), *vcm = new HepMC::GenVertex( origin );
+  HepMC::GenVertex* v1 = new HepMC::GenVertex( origin ),
+                   *v2 = new HepMC::GenVertex( origin ),
+                   *vcm = new HepMC::GenVertex( origin );
 #endif
-  
-  event->add_vertex( v1 );
-  event->add_vertex( v2 );
-  event->add_vertex( vcm );
 
   for ( unsigned int i=0; i<part_vec.size(); i++ ) {
 
@@ -71,7 +74,7 @@ evt->dump();
                             part_orig->momentum().pz(),
                             part_orig->energy() );
 #ifdef HEPMC_VERSION3
-    HepMC::GenParticlePtr part( new HepMC::GenParticle( pmom, part_orig->integerPdgId(), part_orig->status ) );
+    HepMC::GenParticlePtr part = std::make_shared<HepMC::GenParticle>( pmom, part_orig->integerPdgId(), part_orig->status );
 #else
     HepMC::GenParticle* part = new HepMC::GenParticle( pmom, part_orig->integerPdgId(), part_orig->status );
     part->suggest_barcode( idx++ );
@@ -102,6 +105,10 @@ evt->dump();
     }
     idx++;
   }
+  event->add_vertex( v1 );
+  event->add_vertex( v2 );
+  event->add_vertex( vcm );
+
 #ifndef HEPMC_VERSION3
   event->set_beam_particles( *v1->particles_in_const_begin(), *v2->particles_in_const_begin() );
   event->set_signal_process_vertex( *v1->vertices_begin() );

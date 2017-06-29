@@ -31,15 +31,11 @@ namespace OutputHandler
 
     /// Specify the process cross section and its associated error
     void setCrossSection( const float& xsec, const float& err_xsec ) {
-#ifdef HEPMC_LINKED
       if ( file_handler_ ) file_handler_->setCrossSection( xsec, err_xsec );
-#endif
     }
     /// Specify the event number
     void setEventNumber( const unsigned int& ev_id ) {
-#ifdef HEPMC_LINKED
       if ( file_handler_ ) file_handler_->setEventNumber( ev_id );
-#endif
     }
     /// Writer operator
     void operator<<( const Event* );

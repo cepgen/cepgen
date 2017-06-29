@@ -34,7 +34,8 @@ int main( int argc, char* argv[] ) {
 
   //if ( !mg.parameters->generation ) return 0;
 
-  OutputHandler::EventWriter writer( OutputHandler::ExportHandler::LHE, "example.dat" );
+  //OutputHandler::EventWriter writer( OutputHandler::ExportHandler::LHE, "example.dat" );
+  OutputHandler::EventWriter writer( OutputHandler::ExportHandler::HepMC, "example.dat" );
   writer.setCrossSection( xsec, err );
   writer.initialise( *mg.parameters );
 

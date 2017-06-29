@@ -7,13 +7,17 @@
 
 #ifndef HEPMC_VERSION_CODE // HepMC v2
 #include "HepMC/IO_GenEvent.h"
+#include "HepMC/SimpleVector.h"
+
 #else // HepMC v3+
 #define HEPMC_VERSION3
 #include "HepMC/WriterAscii.h"
+#include "HepMC/FourVector.h"
+
 #endif
 
-#include "HepMC/GenVertex.h"
 #include "HepMC/GenEvent.h"
+#include "HepMC/GenVertex.h"
 #include "HepMC/GenCrossSection.h"
 #include "HepMC/GenParticle.h"
 
