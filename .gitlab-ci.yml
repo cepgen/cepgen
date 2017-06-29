@@ -5,7 +5,7 @@ stages:
 compile:
   stage: compile
   before_script:
-    - yum install -y gsl gsl-devel libgfortran gcc-gfortran
+    - yum install -y -q gsl gsl-devel libgfortran gcc-gfortran
     - mkdir build
     - cd build
     - wget https://raw.githubusercontent.com/opencog/opencog/master/lib/FindGSL.cmake
