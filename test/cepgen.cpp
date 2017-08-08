@@ -21,16 +21,16 @@ int main( int argc, char* argv[] ) {
   if ( argc==1 ) {
     Information( "No config file provided. Setting the default parameters." );
     
-    mg.parameters->process = new CepGen::Process::GamGamLL;
+    mg.parameters->process = std::unique_ptr<CepGen::Process::GamGamLL>( new CepGen::Process::GamGamLL );
     //mg.parameters->process_mode = Kinematics::InelasticElastic;
     mg.parameters->process_mode = CepGen::Kinematics::ElasticElastic;
     mg.parameters->remnant_mode = CepGen::SuriYennie;
 
 #ifdef PYTHIA6
-    mg.parameters->hadroniser = new CepGen::Process::Pythia6Hadroniser;
+    mg.parameters->hadroniser = std::unique_ptr<CepGen::Process::Pythia6Hadroniser>( new CepGen::Process::Pythia6Hadroniser );
 #else
 #ifdef JETSET
-    mg.parameters->hadroniser = new CepGen::Jetset7Hadroniser;
+    mg.parameters->hadroniser = std::unique_ptr<CepGen::Process::Jetset7Hadroniser>( new CepGen::Jetset7Hadroniser );
 #endif
 #endif
     

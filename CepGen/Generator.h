@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <ctime>
+#include <memory>
 
 #include "CepGen/Core/Vegas.h"
 #include "CepGen/Core/Timer.h"
@@ -99,14 +100,14 @@ namespace CepGen
       /// \return the function value for the given point
       inline double computePoint( double* x_ ) {
         prepareFunction();
-        double res = f( x_, numDimensions(), (void*)parameters );
+        double res = f( x_, numDimensions(), (void*)parameters.get() );
         std::ostringstream os;
         for ( unsigned int i=0; i<numDimensions(); i++ ) { os << x_[i] << " "; }
         Debugging( Form( "Result for x[%zu] = ( %s):\n\t%10.6f", numDimensions(), os.str().c_str(), res ) );
         return res;
       }
       /// Physical Parameters used in the events generation and cross-section computation
-      Parameters* parameters;
+      std::unique_ptr<Parameters> parameters;
       /// Last event generated in this run
       Event *last_event;
 
@@ -116,7 +117,7 @@ namespace CepGen
       /// Call the Vegas constructor (once, just before the first integration attempt)
       void buildVegas();
       /// Vegas instance which will integrate the function
-      Vegas* vegas_;
+      std::unique_ptr<Vegas> vegas_;
       /// Cross section value computed at the last integration
       double cross_section_;
       /// Error on the cross section as computed in the last integration

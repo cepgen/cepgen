@@ -3,7 +3,7 @@
 using namespace CepGen;
 
 Parameters::Parameters() :
-  process( 0 ), process_mode( Kinematics::ElasticElastic ),
+  process_mode( Kinematics::ElasticElastic ),
   remnant_mode( SuriYennie ),
   in1p( 6500. ), in2p( 6500. ),
   in1pdg( Particle::Proton ), in2pdg( Particle::Proton ),
@@ -21,7 +21,6 @@ Parameters::Parameters() :
   generation( false ), store( false ), maxgen( 0 ),
   symmetrise( true ), ngen( 0 ),
   gpdf( 5 ), spdf( 4 ), qpdf( 12 ),
-  hadroniser( 0 ),
   hadroniser_max_trials( 5 )
 {
   this->last_event = new Event();
@@ -65,7 +64,7 @@ void Parameters::dump( std::ostream& out, bool pretty ) const
     << std::endl << std::endl
     << std::setfill('_') << std::setw( wb ) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill( ' ' ) << std::endl
     << std::right << std::setw( wb ) << std::left << std::endl;
-  if (process)
+  if ( process )
     os << std::setw( wt ) << "Process to generate" << ( pretty ? boldify( process->name().c_str() ) : process->name() ) << std::endl;
   os
     << std::setw( wt ) << "Events generation? " << ( pretty ? yesno( generation ) : std::to_string( generation ) ) << std::endl
@@ -110,7 +109,7 @@ void Parameters::dump( std::ostream& out, bool pretty ) const
     << std::endl
     << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Outgoing remnants" ) : "Outgoing remnants" ) << std::endl
     << std::endl << std::setfill( ' ' );
-  if (hadroniser)
+  if ( hadroniser )
     os << std::setw( wt ) << "Hadronisation algorithm" << ( pretty ? boldify( hadroniser->name().c_str() ) : hadroniser->name() ) << std::endl;
   os << std::setw( wt ) << "Mass range" << ( pretty ? boldify( Form( "%.2f < M(x/y) < %.2f", minmx, maxmx ).c_str() ) : Form( "%.2f < M(x/y) < %.2f", minmx, maxmx ) ) << " GeV/c**2" << std::endl;
   if ( pretty ) { Information( os.str() ); }
@@ -166,9 +165,9 @@ bool Parameters::readConfigFile(const char* inFile_)
       os << std::setw( wdth ) << " * Momentum (2nd primary particle):" << this->in1p << " GeV/c\n";
     }
     else if ( key=="PROC" ) {
-      if ( value=="lpair" )       this->process = new Process::GamGamLL;
-      else if ( value=="pptoll" ) this->process = new Process::PPtoLL;
-      std::ostringstream proc_name; proc_name << this->process;
+      if ( value=="lpair" )       this->process = std::unique_ptr<Process::GamGamLL>( new Process::GamGamLL() );
+      else if ( value=="pptoll" ) this->process = std::unique_ptr<Process::PPtoLL>( new Process::PPtoLL() );
+      std::ostringstream proc_name; proc_name << this->process.get();
       os << std::setw( wdth ) << " * Process:" << boldify( proc_name.str() ) << "\n";
     }
     else if ( key=="HADR" ) {

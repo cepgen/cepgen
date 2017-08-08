@@ -3,16 +3,16 @@
 namespace CepGen
 {
   Generator::Generator() :
-    vegas_( 0 ), cross_section_( -1. ), cross_section_error_( -1. ), has_cross_section_( false )
+    cross_section_( -1. ), cross_section_error_( -1. ), has_cross_section_( false )
   {
     Debugging( "Generator initialized" );
     try { printHeader(); } catch ( Exception& e ) { e.dump(); }
     srand( time( 0 ) ); // Random number initialization
-    this->parameters = new Parameters;
+    this->parameters = std::unique_ptr<Parameters>( new Parameters );
   }
 
   Generator::Generator( Parameters *ip_ ) :
-    parameters( ip_ ), vegas_( 0 )
+    parameters( ip_ )
   {}
 
   Generator::~Generator()
@@ -20,8 +20,6 @@ namespace CepGen
     if ( parameters->generation and parameters->process and parameters->process->numGeneratedEvents()>0 ) {
       Information( Form( "Mean generation time / event: %.3f ms", parameters->process->totalGenerationTime()*1.e3/parameters->process->numGeneratedEvents() ) );
     }
-    if ( vegas_ ) delete vegas_;
-    if ( parameters ) delete parameters;
   }
 
   void
@@ -49,8 +47,7 @@ namespace CepGen
                        "Will proceed with %d-dimensional integration", topo.str().c_str(), numDimensions() ) );
     }
   
-    if ( vegas_ ) delete vegas_;
-    vegas_ = new Vegas( numDimensions(), f, parameters );
+    vegas_ = std::unique_ptr<Vegas>( new Vegas( numDimensions(), f, parameters.get() ) );
   }
 
   void

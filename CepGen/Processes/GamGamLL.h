@@ -3,7 +3,6 @@
 
 #define PROCESS_DESCRIPTION "Two-photon production of lepton pairs"
 
-#include <iostream>
 #include <iomanip>
 #include <algorithm>
 #include <string>
