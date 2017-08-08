@@ -1,5 +1,5 @@
-file(GLOB sources *.cpp)
-file(GLOB headers *.h)
+file(GLOB sources *.cpp ../*.cpp)
+file(GLOB headers *.h ../*.h)
 
 include_directories(${PROJECT_SOURCE_DIR})
 

@@ -3,7 +3,7 @@
 
 #ifndef __CINT__
 
-#include "physics/Event.h"
+#include "Event.h"
 
 extern "C"
 {

@@ -1,7 +1,7 @@
-#ifndef Processes_Test_h
-#define Processes_Test_h
+#ifndef CepGen_Processes_Test_h
+#define CepGen_Processes_Test_h
 
-#include "processes/GenericProcess.h"
+#include "GenericProcess.h"
 
 /// Generic process to test the Vegas instance
 class TestProcess : public GenericProcess

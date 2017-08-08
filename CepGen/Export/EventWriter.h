@@ -1,13 +1,13 @@
-#ifndef EventWriter_h
-#define EventWriter_h
+#ifndef CepGen_Export_EventWriter_h
+#define CepGen_Export_EventWriter_h
 
-#include "core/Parameters.h"
-#include "physics/Event.h"
-#include "export/ExportHandler.h"
+#include "CepGen/Core/Parameters.h"
+#include "CepGen/Physics/Event.h"
+#include "CepGen/Export/ExportHandler.h"
 
 #ifdef HEPMC_LINKED
-#include "export/HepMCHandler.h"
-#include "export/LHEFHandler.h"
+#include "CepGen/Export/HepMCHandler.h"
+#include "CepGen/Export/LHEFHandler.h"
 #endif
 
 #include <memory>

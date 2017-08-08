@@ -1,12 +1,12 @@
 #ifndef OutputHandler_LHEFHandler_h
 #define OutputHandler_LHEFHandler_h
 
-#include "export/HepMCHandler.h"
+#include "HepMCHandler.h"
 
 #ifdef HEPMC_VERSION3
 
 #include "HepMC/LHEF.h"
-#include "physics/Event.h"
+#include "CepGen/Physics/Event.h"
 
 namespace OutputHandler
 {

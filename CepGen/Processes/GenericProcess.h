@@ -1,11 +1,11 @@
 #ifndef GenericProcess_h
 #define GenericProcess_h
 
-#include "physics/Event.h"
-#include "physics/Kinematics.h"
-#include "physics/Physics.h"
-#include "physics/StructureFunctions.h"
-#include "physics/FormFactors.h"
+#include "CepGen/Physics/Event.h"
+#include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Physics/Physics.h"
+#include "CepGen/Physics/StructureFunctions.h"
+#include "CepGen/Physics/FormFactors.h"
 
 /**
  * Class template to define any process to compute using this MC integrator/events generator

@@ -1,7 +1,7 @@
-#ifndef PPtoLL_h
-#define PPtoLL_h
+#ifndef CepGen_Processes_PPtoLL_h
+#define CepGen_Processes_PPtoLL_h
 
-#include "processes/GenericKTProcess.h"
+#include "GenericKTProcess.h"
 
 /// Compute the matrix element for a CE \f$\gamma\gamma\rightarrow \ell^+\ell^-\f$ process using \f$k_T\f$-factorization approach
 class PPtoLL : public GenericKTProcess

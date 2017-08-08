@@ -3,7 +3,7 @@
 
 #include "Particle.h"
 #include "FormFactors.h"
-#include "core/Exception.h"
+#include "CepGen/Core/Exception.h"
 
 namespace PhotonFluxes
 {

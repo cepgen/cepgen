@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "core/Exception.h"
-#include "physics/Constants.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Physics/Constants.h"
 
 static std::stringstream error;
 

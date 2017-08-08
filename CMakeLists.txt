@@ -3,10 +3,11 @@ project(CepGen)
 set(PROJECT_VERSION 1)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic -std=c++11 -g")
+set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/CepGen)
 
 #----- define all individual modules to be built beforehand
 
-set(MODULES core processes hadronisers physics export)
+set(MODULES Core Processes Hadronisers Physics Export)
 
 #----- enable fortran (for Pythia/Herwig/...)
 
@@ -33,8 +34,8 @@ endif()
 
 include_directories(${PROJECT_SOURCE_DIR})
 foreach(_module ${MODULES})
-  include_directories(${PROJECT_SOURCE_DIR}/${_module})
-  add_subdirectory(${_module})
+  include_directories(${CEPGEN_SOURCE_DIR}/${_module})
+  add_subdirectory(${CEPGEN_SOURCE_DIR}/${_module})
 endforeach()
 
 #----- link everything into the executables
@@ -86,8 +87,7 @@ foreach(_files ${input_cards})
 )
 endforeach()
 
-file(GLOB readme RELATIVE ${PROJECT_SOURCE_DIR} README)
-configure_file(${readme} ${readme} COPYONLY)
+configure_file(${CEPGEN_SOURCE_DIR}/README README COPYONLY)
 
 #----- set the tests directory
 

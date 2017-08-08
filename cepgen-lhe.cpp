@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "core/MCGen.h"
-#include "export/EventWriter.h"
+#include "CepGen/MCGen.h"
+#include "CepGen/Export/EventWriter.h"
 #include "HepMC/Version.h"
 
 using namespace std;

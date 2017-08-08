@@ -1,11 +1,11 @@
 #ifndef FormFactors_h
 #define FormFactors_h
 
-#include "core/utils.h"
 #include <math.h>
 
-#include "physics/Constants.h"
-#include "physics/Particle.h"
+#include "CepGen/Core/utils.h"
+#include "Constants.h"
+#include "Particle.h"
 
 /**
  * Compute the proton structure function (F.W Brasse et al., DESY 76/11 (1976),

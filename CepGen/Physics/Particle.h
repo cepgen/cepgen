@@ -10,7 +10,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "core/utils.h"
+#include "CepGen/Core/utils.h"
 
 /// A set of integer-type particle identifiers
 typedef std::set<int> ParticlesIds;

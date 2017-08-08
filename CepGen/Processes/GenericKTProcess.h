@@ -1,9 +1,9 @@
 #ifndef GenericKTProcess_h
 #define GenericKTProcess_h
 
-#include "processes/GenericProcess.h"
-#include "physics/FormFactors.h"
-#include "physics/PhotonFluxes.h"
+#include "GenericProcess.h"
+#include "CepGen/Physics/FormFactors.h"
+#include "CepGen/Physics/PhotonFluxes.h"
 
 /**
  * A generic kT-factorisation process.

@@ -1,5 +1,5 @@
-#ifndef GamGamLL_h
-#define GamGamLL_h
+#ifndef CepGen_Processes_GamGamLL_h
+#define CepGen_Processes_GamGamLL_h
 
 #define PROCESS_DESCRIPTION "Two-photon production of lepton pairs"
 
@@ -12,8 +12,8 @@
 #include <cstdlib>
 #include <map>
 
-#include "processes/GenericProcess.h"
-#include "physics/FormFactors.h"
+#include "GenericProcess.h"
+#include "CepGen/Physics/FormFactors.h"
 
 /**
  * Full class of methods and objects to compute the full analytic matrix element

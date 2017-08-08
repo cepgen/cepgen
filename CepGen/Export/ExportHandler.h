@@ -1,8 +1,8 @@
-#ifndef OutputHandler_ExportHandler_h
-#define OutputHandler_ExportHandler_h
+#ifndef CepGen_Export_ExportHandler_h
+#define CepGen_Export_ExportHandler_h
 
-#include "core/Parameters.h"
-#include "physics/Event.h"
+#include "CepGen/Core/Parameters.h"
+#include "CepGen/Physics/Event.h"
 
 namespace OutputHandler
 {

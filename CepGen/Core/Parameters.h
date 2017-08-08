@@ -8,12 +8,12 @@
 #include <fstream>
 #include <string>
 
-#include "processes/GamGamLL.h"
-#include "processes/PPtoLL.h"
+#include "CepGen/Processes/GamGamLL.h"
+#include "CepGen/Processes/PPtoLL.h"
 
-#include "hadronisers/Pythia6Hadroniser.h"
-#include "hadronisers/Jetset7Hadroniser.h"
-#include "hadronisers/Herwig6Hadroniser.h"
+#include "CepGen/Hadronisers/Pythia6Hadroniser.h"
+#include "CepGen/Hadronisers/Jetset7Hadroniser.h"
+#include "CepGen/Hadronisers/Herwig6Hadroniser.h"
 
 /// List of parameters used to start and run the simulation job
 /// \note The default parameters are derived from GMUINI in LPAIR

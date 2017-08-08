@@ -6,10 +6,10 @@
 #include <string>
 #include <ctime>
 
-#include "core/Vegas.h"
-#include "core/Timer.h"
+#include "Vegas.h"
+#include "Timer.h"
 
-#include "physics/Physics.h"
+#include "CepGen/Physics/Physics.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 

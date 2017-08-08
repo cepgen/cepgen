@@ -1,7 +1,7 @@
 #ifndef OutputHandler_HepMCHandler_h
 #define OutputHandler_HepMCHandler_h
 
-#include "export/ExportHandler.h"
+#include "ExportHandler.h"
 
 #include "HepMC/Version.h"
 

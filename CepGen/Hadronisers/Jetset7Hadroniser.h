@@ -3,7 +3,7 @@
 
 #include <algorithm>
 
-#include "hadronisers/GenericHadroniser.h"
+#include "GenericHadroniser.h"
 
 #define NAME_CHR 16
 

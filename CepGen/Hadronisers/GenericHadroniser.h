@@ -1,8 +1,8 @@
 #ifndef GenericHadroniser_h
 #define GenericHadroniser_h
 
-#include "physics/Event.h"
-#include "physics/Physics.h"
+#include "CepGen/Physics/Event.h"
+#include "CepGen/Physics/Physics.h"
 
 /**
  * Class template to define any hadroniser as a general object with defined methods

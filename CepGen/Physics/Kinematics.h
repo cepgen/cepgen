@@ -6,8 +6,8 @@
 #include <algorithm>
 #include <string>
 
-#include "core/utils.h"
-#include "physics/StructureFunctions.h"
+#include "CepGen/Core/utils.h"
+#include "StructureFunctions.h"
 
 /// List of kinematic cuts to apply on the central and outgoing phase space.
 class Kinematics

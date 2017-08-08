@@ -5,7 +5,7 @@
 
 #include <algorithm>
 
-#include "hadronisers/GenericHadroniser.h"
+#include "GenericHadroniser.h"
 
 #define NMXHEP 4000
 //#define NAME_CHR 16
