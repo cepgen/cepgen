@@ -3,6 +3,10 @@
 file(GLOB executables_noroot RELATIVE ${PROJECT_SOURCE_DIR}/test *.cpp)
 file(GLOB executables_root RELATIVE ${PROJECT_SOURCE_DIR}/test *.cxx)
 
+#----- include the utilitaries
+
+add_subdirectory(utils)
+
 #----- build all tests and link them to the core library
 
 foreach(exec_src ${executables_noroot})

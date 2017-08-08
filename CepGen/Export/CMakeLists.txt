@@ -9,3 +9,6 @@ if(HEPMC_LIB)
   target_link_libraries(CepGenExporter ${HEPMC_LIB})
   add_definitions(-DHEPMC_LINKED)
 endif()
+
+install(TARGETS CepGenExporter DESTINATION lib)
+

@@ -13,3 +13,7 @@ if(EXISTS $ENV{has_grv})
   add_library(GRV_PDF SHARED $ENV{has_grv})
   target_link_libraries(CepGenPhysics GRV_PDF)
 endif()
+
+install(TARGETS CepGenPhysics DESTINATION lib)
+install(TARGETS GRV_PDF DESTINATION lib)
+

@@ -1,7 +1,7 @@
-#----- list all utils
+#----- list all utilitaries
 
-file(GLOB executables_noroot RELATIVE ${PROJECT_SOURCE_DIR}/utils *.cpp)
-file(GLOB executables_root RELATIVE ${PROJECT_SOURCE_DIR}/utils *.cxx)
+file(GLOB executables_noroot RELATIVE ${PROJECT_SOURCE_DIR}/test/utils *.cpp)
+file(GLOB executables_root RELATIVE ${PROJECT_SOURCE_DIR}/test/utils *.cxx)
 
 #----- build all utilitaries and link them to the core library
 

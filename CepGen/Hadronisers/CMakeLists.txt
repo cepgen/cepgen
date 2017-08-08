@@ -23,3 +23,5 @@ if(EXISTS $ENV{has_jetset})
   add_library(jetset_shared SHARED $ENV{has_jetset})
   target_link_libraries(CepGenExternalHadronisers jetset_shared)
 endif()
+
+install(TARGETS CepGenExternalHadronisers DESTINATION lib)
