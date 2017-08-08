@@ -1,7 +1,6 @@
-#ifndef Particle_h
-#define Particle_h
+#ifndef CepGen_Physics_Particle_h
+#define CepGen_Physics_Particle_h
 
-#include <iostream>
 #include <sstream>
 #include <cmath>
 #include <string>
@@ -9,6 +8,7 @@
 #include <map>
 #include <vector>
 #include <algorithm>
+#include <initializer_list>
 
 #include "CepGen/Core/utils.h"
 
