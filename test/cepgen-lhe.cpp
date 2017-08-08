@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "CepGen/MCGen.h"
+#include "CepGen/Generator.h"
 #include "CepGen/Export/EventWriter.h"
 #include "HepMC/Version.h"
 
@@ -14,7 +14,7 @@ using namespace std;
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
  */
 int main( int argc, char* argv[] ) {
-  MCGen mg;
+  CepGen::Generator mg;
   
   if ( argc==1 ) InError( "No config file provided." );
 
@@ -34,8 +34,8 @@ int main( int argc, char* argv[] ) {
 
   //if ( !mg.parameters->generation ) return 0;
 
-  OutputHandler::EventWriter writer( OutputHandler::ExportHandler::LHE, "example.dat" );
-  //OutputHandler::EventWriter writer( OutputHandler::ExportHandler::HepMC, "example.dat" );
+  CepGen::OutputHandler::EventWriter writer( CepGen::OutputHandler::ExportHandler::LHE, "example.dat" );
+  //OutputHandler::EventWriter writer( CepGen::OutputHandler::ExportHandler::HepMC, "example.dat" );
   writer.setCrossSection( xsec, err );
   writer.initialise( *mg.parameters );
 
@@ -46,9 +46,9 @@ int main( int argc, char* argv[] ) {
     if ( i%10000==0 )
       cout << "Generating event #" << i+1 << endl;
     try {
-      const Event* ev = mg.generateOneEvent();
+      const CepGen::Event* ev = mg.generateOneEvent();
       writer << ev;
-    } catch ( Exception& e ) { e.dump(); }
+    } catch ( CepGen::Exception& e ) { e.dump(); }
   }
 
   //mg.parameters->StoreConfigFile( "lastrun.card" );

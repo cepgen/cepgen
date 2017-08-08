@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "CepGen/MCGen.h"
+#include "CepGen/Generator.h"
 
 using namespace std;
 
@@ -12,7 +12,7 @@ using namespace std;
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
  */
 int main( int argc, char* argv[] ) {
-  MCGen mg;
+  CepGen::Generator mg;
   
   //Logger::GetInstance()->Level = Logger::Debug;
   //Logger::GetInstance()->Level = Logger::DebugInsideLoop;
@@ -21,23 +21,23 @@ int main( int argc, char* argv[] ) {
   if ( argc==1 ) {
     Information( "No config file provided. Setting the default parameters." );
     
-    mg.parameters->process = new GamGamLL;
+    mg.parameters->process = new CepGen::Process::GamGamLL;
     //mg.parameters->process_mode = Kinematics::InelasticElastic;
-    mg.parameters->process_mode = Kinematics::ElasticElastic;
-    mg.parameters->remnant_mode = SuriYennie;
+    mg.parameters->process_mode = CepGen::Kinematics::ElasticElastic;
+    mg.parameters->remnant_mode = CepGen::SuriYennie;
 
 #ifdef PYTHIA6
-    mg.parameters->hadroniser = new Pythia6Hadroniser;
+    mg.parameters->hadroniser = new CepGen::Process::Pythia6Hadroniser;
 #else
 #ifdef JETSET
-    mg.parameters->hadroniser = new Jetset7Hadroniser;
+    mg.parameters->hadroniser = new CepGen::Jetset7Hadroniser;
 #endif
 #endif
     
     mg.parameters->in1p = 6500.;
     mg.parameters->in2p = 6500.;
-    mg.parameters->pair = Particle::Muon;
-    mg.parameters->mcut = Kinematics::BothParticles;
+    mg.parameters->pair = CepGen::Particle::Muon;
+    mg.parameters->mcut = CepGen::Kinematics::BothParticles;
     mg.parameters->minenergy = 0.; //FIXME
     mg.parameters->minpt = 5.;
     mg.parameters->mineta = -2.5;
@@ -65,7 +65,7 @@ int main( int argc, char* argv[] ) {
 
   if ( mg.parameters->generation ) {
     // The events generation starts here !
-    Event ev;
+    CepGen::Event ev;
     for ( unsigned int i=0; i<mg.parameters->maxgen; i++ ) {
       ev = *mg.generateOneEvent();
       if ( i%1000==0 ) {

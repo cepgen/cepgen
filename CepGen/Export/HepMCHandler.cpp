@@ -1,6 +1,8 @@
 #include "HepMCHandler.h"
 
-OutputHandler::HepMCHandler::HepMCHandler( const char* filename, const ExportHandler::OutputType& type ) :
+using namespace CepGen::OutputHandler;
+
+HepMCHandler::HepMCHandler( const char* filename, const ExportHandler::OutputType& type ) :
   ExportHandler( type ),
   event( new HepMC::GenEvent() )
 {
@@ -11,11 +13,11 @@ OutputHandler::HepMCHandler::HepMCHandler( const char* filename, const ExportHan
 #endif
 }
 
-OutputHandler::HepMCHandler::~HepMCHandler()
+HepMCHandler::~HepMCHandler()
 {}
 
 void
-OutputHandler::HepMCHandler::operator<<( const Event* evt )
+HepMCHandler::operator<<( const Event* evt )
 {
   fillEvent( evt );
   if ( !event.get() ) {
@@ -30,7 +32,7 @@ OutputHandler::HepMCHandler::operator<<( const Event* evt )
 }
 
 void
-OutputHandler::HepMCHandler::fillEvent( const Event* evt )
+HepMCHandler::fillEvent( const Event* evt )
 {
   event->clear();
 

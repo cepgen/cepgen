@@ -1,4 +1,6 @@
-#include "Parameters.h"
+#include "CepGen/Parameters.h"
+
+using namespace CepGen;
 
 Parameters::Parameters() :
   process( 0 ), process_mode( Kinematics::ElasticElastic ),
@@ -164,20 +166,20 @@ bool Parameters::readConfigFile(const char* inFile_)
       os << std::setw( wdth ) << " * Momentum (2nd primary particle):" << this->in1p << " GeV/c\n";
     }
     else if ( key=="PROC" ) {
-      if ( value=="lpair" )       this->process = new GamGamLL;
-      else if ( value=="pptoll" ) this->process = new PPtoLL;
+      if ( value=="lpair" )       this->process = new Process::GamGamLL;
+      else if ( value=="pptoll" ) this->process = new Process::PPtoLL;
       std::ostringstream proc_name; proc_name << this->process;
       os << std::setw( wdth ) << " * Process:" << boldify( proc_name.str() ) << "\n";
     }
     else if ( key=="HADR" ) {
 #ifdef PYTHIA6
-      if ( value=="pythia6" ) this->hadroniser = new Pythia6Hadroniser;
+      if ( value=="pythia6" ) this->hadroniser = new Hadroniser::Pythia6Hadroniser;
 #endif
 #ifdef JETSET
-      if ( value=="jetset7" ) this->hadroniser = new Jetset7Hadroniser;
+      if ( value=="jetset7" ) this->hadroniser = new Hadroniser::Jetset7Hadroniser;
 #endif
 #ifdef PYTHIA8
-      if ( value=="pythia8" ) this->hadroniser = new Pythia8Hadroniser;
+      if ( value=="pythia8" ) this->hadroniser = new Hadroniser::Pythia8Hadroniser;
 #endif
       os << std::setw( wdth ) << " * Hadroniser:" << ( ( this->hadroniser!=0 ) ? this->hadroniser->name() : colourise( "*** no hadroniser ***", Colour::Red ) ) << "\n";
     }

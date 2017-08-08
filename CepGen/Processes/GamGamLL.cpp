@@ -1,5 +1,7 @@
 #include "GamGamLL.h"
 
+using namespace CepGen::Process;
+
 GamGamLL::GamGamLL( int nopt ) : GenericProcess( "pp -> p(*) (gamma gamma -> l+ l-) p(*)" ),
   n_opt_( nopt ),
   MX2_( 0. ), MY2_( 0. ), Ml12_( 0. ), Ml22_( 0. ),
@@ -868,7 +870,7 @@ GamGamLL::fillKinematics( bool )
                                " gmuw = %f\n\t"
                                "gmunu = %f", gmux, gmuy, gmuw, gmunu ) );
   }*/
-  //fEvent->Dump();
+  //event_->Dump();
 }
 
 double

@@ -38,13 +38,12 @@ endif()
 
 #----- copy the input cards and other files
 
-file(GLOB input_cards RELATIVE ${PROJECT_SOURCE_DIR} cards/*)
+file(GLOB input_cards RELATIVE ${PROJECT_SOURCE_DIR} Cards/*)
 foreach(_files ${input_cards})
   configure_file(${_files} ${_files} COPYONLY)
 endforeach()
 configure_file(${CEPGEN_SOURCE_DIR}/README README COPYONLY)
 
-#----- set the tests directory
+#----- set the tests/utils directory
 
 add_subdirectory(test)
-add_subdirectory(utils)

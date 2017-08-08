@@ -1,4 +1,4 @@
-#include "core/MCGen.h"
+#include "CepGen/Generator.h"
 
 #include "Canvas.h"
 #include "TH1.h"
@@ -7,7 +7,7 @@
 
 void produce_plot( const char* name, TH1* hist )
 {
-  Canvas c( name, "CepGen Simulation" );
+  CepGen::Canvas c( name, "CepGen Simulation" );
   hist->Draw();
   c.Prettify( hist );
   c.Save( "pdf" );
@@ -15,13 +15,13 @@ void produce_plot( const char* name, TH1* hist )
 
 int main( int argc, char* argv[] )
 {
-  MCGen mg;
+  CepGen::Generator mg;
 
   if ( argc<2 ) {
     InError( Form( "Usage: %s [input card]", argv[0] ) );
     return -1;
   }
-  if ( !mg.parameters->ReadConfigFile( argv[1] ) ) {
+  if ( !mg.parameters->readConfigFile( argv[1] ) ) {
     InError( Form( "Error reading the configuration!\n\t"
                    "Please check your input file (%s)", argv[1] ) );
     return -1;
@@ -34,13 +34,13 @@ int main( int argc, char* argv[] )
   gen_name << mg.parameters->process;
   Information( Form( "Process name: %s", gen_name.str().c_str() ) );
 
-  for ( unsigned int i=0; i<1e5; i++ ) {
-    Event* ev = mg.GenerateOneEvent();
+  for ( unsigned int i=0; i<1e4; i++ ) {
+    CepGen::Event* ev = mg.generateOneEvent();
     if ( i%100==0 ) Information( Form( "Produced event #%d", i ) );
-    const Particle::Momentum pl1 = ev->GetOneByRole( Particle::CentralParticle1 )->GetMomentum(),
-                             pl2 = ev->GetOneByRole( Particle::CentralParticle2 )->GetMomentum();
-    h_mass.Fill( ( pl1+pl2 ).M() );
-    h_ptpair.Fill( ( pl1+pl2 ).Pt() );
+    const CepGen::Particle::Momentum pl1 = ev->getOneByRole( CepGen::Particle::CentralParticle1 )->momentum(),
+                                     pl2 = ev->getOneByRole( CepGen::Particle::CentralParticle2 )->momentum();
+    h_mass.Fill( ( pl1+pl2 ).mass() );
+    h_ptpair.Fill( ( pl1+pl2 ).pt() );
   }
 
   produce_plot( "dilepton_invm", &h_mass );

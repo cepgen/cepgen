@@ -1,6 +1,8 @@
 #include "TestProcess.h"
 
-TestProcess::TestProcess() : GenericProcess("<test process>")
+using namespace CepGen::Process;
+
+TestProcess::TestProcess() : GenericProcess( "<test process>" )
 {}
 
 TestProcess::~TestProcess()
@@ -16,12 +18,12 @@ double
 TestProcess::ComputeWeight()
 {
   
-  double A = 1./(M_PI*M_PI*M_PI);
-  return A/(1.-cos(x(0)*M_PI)*cos(x(1)*M_PI)*cos(x(2)*M_PI));
+  double A = 1./( M_PI*M_PI*M_PI );
+  return A/( 1.-cos( x( 0 )*M_PI )*cos( x( 1 )*M_PI )*cos( x( 2 )*M_PI ) );
 }
 
 void
-TestProcess::FillKinematics(bool)
+TestProcess::FillKinematics( bool )
 {
   return;
 }

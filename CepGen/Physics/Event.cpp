@@ -1,5 +1,7 @@
 #include "Event.h"
 
+using namespace CepGen;
+
 Event::Event() :
   num_hadronisation_trials( 0 ),
   time_generation( -1. ), time_total( -1. )

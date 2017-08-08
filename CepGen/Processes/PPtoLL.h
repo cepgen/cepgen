@@ -3,38 +3,44 @@
 
 #include "GenericKTProcess.h"
 
-/// Compute the matrix element for a CE \f$\gamma\gamma\rightarrow \ell^+\ell^-\f$ process using \f$k_T\f$-factorization approach
-class PPtoLL : public GenericKTProcess
+namespace CepGen
 {
- public:
-  PPtoLL();
-  inline ~PPtoLL() {}
+  namespace Process
+  {
+    /// Compute the matrix element for a CE \f$\gamma\gamma\rightarrow \ell^+\ell^-\f$ process using \f$k_T\f$-factorization approach
+    class PPtoLL : public GenericKTProcess
+    {
+      public:
+        PPtoLL();
+        inline ~PPtoLL() {}
+
+      private:
+        void prepareKTKinematics();
+        double computeJacobian();
+        /// \note IncQQbar in pptoll
+        double computeKTFactorisedMatrixElement();
+        void fillCentralParticlesKinematics();
+
+        /// Minimal rapidity of the first outgoing lepton
+        double y_min_;
+        /// Maximal rapidity of the first outgoing lepton
+        double y_max_;
+        /// Rapidity of the first outgoing lepton
+        double y1_;
+        /// Rapidity of the first outgoing lepton
+        double y2_;
+        /// Transverse momentum difference for the two outgoing leptons
+        double pt_diff_;
+        /// Azimuthal angle difference for the two outgoing leptons
+        double phi_pt_diff_;
   
- private:
-  void prepareKTKinematics();
-  double computeJacobian();
-  /// \note IncQQbar in pptoll
-  double computeKTFactorisedMatrixElement();
-  void fillCentralParticlesKinematics();
-  
-  /// Minimal rapidity of the first outgoing lepton
-  double y_min_;
-  /// Maximal rapidity of the first outgoing lepton
-  double y_max_;
-  /// Rapidity of the first outgoing lepton
-  double y1_;
-  /// Rapidity of the first outgoing lepton
-  double y2_;
-  /// Transverse momentum difference for the two outgoing leptons
-  double pt_diff_;
-  /// Azimuthal angle difference for the two outgoing leptons
-  double phi_pt_diff_;
-  
-  /// First outgoing lepton's momentum
-  Particle::Momentum Pl1_;
-  /// Second outgoing lepton's momentum
-  Particle::Momentum Pl2_;
-};
+        /// First outgoing lepton's momentum
+        Particle::Momentum Pl1_;
+        /// Second outgoing lepton's momentum
+        Particle::Momentum Pl2_;
+    };
+  }
+}
 
 #endif
 

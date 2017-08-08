@@ -1,6 +1,8 @@
 #include "EventWriter.h"
 
-OutputHandler::EventWriter::EventWriter( const OutputHandler::ExportHandler::OutputType& type, const char* filename ) :
+using namespace CepGen::OutputHandler;
+
+EventWriter::EventWriter( const OutputHandler::ExportHandler::OutputType& type, const char* filename ) :
   type_( type )
 {
   switch ( type_ ) {
@@ -17,11 +19,11 @@ OutputHandler::EventWriter::EventWriter( const OutputHandler::ExportHandler::Out
   }
 }
 
-OutputHandler::EventWriter::~EventWriter()
+EventWriter::~EventWriter()
 {}
 
 void
-OutputHandler::EventWriter::operator<<( const Event* evt )
+EventWriter::operator<<( const Event* evt )
 {
   switch ( type_ ) {
 #ifdef HEPMC_LINKED

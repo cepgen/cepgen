@@ -1,6 +1,8 @@
 #include "PPtoLL.h"
 #include <assert.h>
 
+using namespace CepGen::Process;
+
 PPtoLL::PPtoLL() : GenericKTProcess("gamma,gamma->l+,l-", 4, Particle::Photon, Particle::Muon)
 {}
 

@@ -2,6 +2,8 @@
 
 #ifdef JETSET7
 
+using namespace CepGen::Hadroniser;
+
 Jetset7Hadroniser::Jetset7Hadroniser() :
   GenericHadroniser( "Jetset7" )
 {}

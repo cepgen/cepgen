@@ -1,5 +1,7 @@
 #include "Vegas.h"
 
+using namespace CepGen;
+
 Vegas::Vegas( const unsigned int dim_, double f_( double*, size_t, void* ), Parameters* inParam_ ) :
   mbin_( 3 ),
   j_( 0 ), correc_( 0. ), correc2_( 0. ),

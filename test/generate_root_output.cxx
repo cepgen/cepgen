@@ -5,7 +5,7 @@
 #include "TTree.h"
 #include "TLorentzVector.h"
 
-#include "core/MCGen.h"
+#include "CepGen/Generator.h"
 
 using namespace std;
 
@@ -20,8 +20,8 @@ int main( int argc, char* argv[] ) {
   const int ngen = 1e5;
   //const int ngen = 1e4;
 
-  MCGen mg;
-  Event ev;
+  CepGen::Generator mg;
+  CepGen::Event ev;
 
   double xsec, err;
   
@@ -47,18 +47,18 @@ int main( int argc, char* argv[] ) {
 
   if ( atoi( argv[1] )<=4 and atoi( argv[1] )>0 ) {
     // do not provide an input card
-    mg.parameters->process = new GamGamLL;
+    mg.parameters->process = new CepGen::Process::GamGamLL;
     mg.parameters->in1p = 6500.;
     mg.parameters->in2p = 6500.;
-    mg.parameters->pair = Particle::Muon;
-    mg.parameters->mcut = Kinematics::BothParticles;
+    mg.parameters->pair = CepGen::Particle::Muon;
+    mg.parameters->mcut = CepGen::Kinematics::BothParticles;
     mg.parameters->minenergy = 0.; //FIXME
     mg.parameters->minpt = 15.;
     mg.parameters->maxgen = ngen;
-    mg.parameters->remnant_mode = SuriYennie;
+    mg.parameters->remnant_mode = CepGen::SuriYennie;
     mg.parameters->process_mode = ( argc>1 )
-      ? static_cast<Kinematics::ProcessMode>( atoi( argv[1] ) )
-      : Kinematics::ElasticElastic;
+      ? static_cast<CepGen::Kinematics::ProcessMode>( atoi( argv[1] ) )
+      : CepGen::Kinematics::ElasticElastic;
     //mg.parameters->ncvg = 5e3; //FIXME
     mg.parameters->mineta = -2.5;
     mg.parameters->maxeta = 2.5;
@@ -119,17 +119,16 @@ int main( int argc, char* argv[] ) {
       cout << ">> event " << i << " generated" << endl;
       ev.dump();
     }
-    ParticlesRef particles = ev.particles();
-    mx_p1 = ev.getOneByRole( Particle::OutgoingBeam1 )->mass();
-    mx_p2 = ev.getOneByRole( Particle::OutgoingBeam2 )->mass();
+    CepGen::ParticlesRef particles = ev.particles();
+    mx_p1 = ev.getOneByRole( CepGen::Particle::OutgoingBeam1 )->mass();
+    mx_p2 = ev.getOneByRole( CepGen::Particle::OutgoingBeam2 )->mass();
     hadr_trials = ev.num_hadronisation_trials;
 
     gen_time = ev.time_generation;
     tot_time = ev.time_total;
     np = 0;
-    for ( ParticlesRef::const_iterator part=particles.begin(); part!=particles.end(); part++ ) {
-      const Particle* p = *part;
-      const Particle::Momentum m = p->momentum();
+    for ( const auto& p : particles ) {
+      const CepGen::Particle::Momentum m = p->momentum();
 
       kinematics[np].SetXYZM( m.px(), m.py(), m.pz(), m.mass() );
       rapidity[np] = m.rapidity();
@@ -141,7 +140,7 @@ int main( int argc, char* argv[] ) {
       PID[np] = p->integerPdgId();
       parentid[np] = *p->mothersIds().begin();
       status[np] = p->status;
-      isstable[np] = ( p->status==Particle::Undefined or p->status==Particle::FinalState );
+      isstable[np] = ( p->status==CepGen::Particle::Undefined or p->status==CepGen::Particle::FinalState );
       charge[np] = p->charge;
       role[np] = p->role;
       

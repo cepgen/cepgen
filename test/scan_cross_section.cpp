@@ -1,4 +1,4 @@
-#include "core/MCGen.h"
+#include "CepGen/Generator.h"
 
 using namespace std;
 
@@ -14,16 +14,16 @@ int main( int argc, char* argv[] )
               max_value = atof( argv[4] );
   const char* output_file = ( argc>5 ) ? argv[5] : "xsect.dat";
 
-  MCGen mg;
+  CepGen::Generator mg;
 
   Logger::GetInstance()->Level = Logger::Error;
 
-  Parameters* par = mg.parameters;
+  CepGen::Parameters* par = mg.parameters;
   par->mineta = -2.5; par->maxeta = 2.5;
   par->in1p = par->in2p = 6.5e3;
   par->maxmx = 1000.0;
-  par->process = new GamGamLL;
-  par->process_mode = static_cast<Kinematics::ProcessMode>( proc_mode );
+  par->process = new CepGen::Process::GamGamLL;
+  par->process_mode = static_cast<CepGen::Kinematics::ProcessMode>( proc_mode );
   par->dump();
 
   double xsect, err_xsect;

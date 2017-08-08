@@ -11,43 +11,45 @@ extern "C"
   extern void grv95lo_( float&, float&, float&, float&, float&, float&, float&, float& );
 }
 
-class GenericHadroniser; // forward
+namespace CepGen {
+  //class GenericHadroniser; // forward
 
-/// List of physical constraints to apply on the phase space
-class PhysicsBoundaries
-{
- public:
-  PhysicsBoundaries();
-  ~PhysicsBoundaries();
-  /// Minimal centre-of-mass energy for a \f$\gamma p\f$ system, in GeV.
-  double wmin;
-  /// Maximal centre-of-mass energy for a \f$\gamma p\f$ system, in GeV.
-  double wmax;
-  /// Minimal virtuality \f$Q^2\f$ of a photon in GeV\f${}^2\f$
-  double q2min;
-  /// Maximal virtuality \f$Q^2\f$ of a photon in GeV\f${}^2\f$
-  double q2max;
-  /// Minimal value of a generic scaling variable \f$\zeta\f$
-  double zmin;
-  /// Maximal value of a generic scaling variable \f$\zeta\f$
-  double zmax;
-};
+  /// List of physical constraints to apply on the phase space
+  class PhysicsBoundaries
+  {
+  public:
+    PhysicsBoundaries();
+    ~PhysicsBoundaries();
+    /// Minimal centre-of-mass energy for a \f$\gamma p\f$ system, in GeV.
+    double wmin;
+    /// Maximal centre-of-mass energy for a \f$\gamma p\f$ system, in GeV.
+    double wmax;
+    /// Minimal virtuality \f$Q^2\f$ of a photon in GeV\f${}^2\f$
+    double q2min;
+    /// Maximal virtuality \f$Q^2\f$ of a photon in GeV\f${}^2\f$
+    double q2max;
+    /// Minimal value of a generic scaling variable \f$\zeta\f$
+    double zmin;
+    /// Maximal value of a generic scaling variable \f$\zeta\f$
+    double zmax;
+  };
 
-/// Vector meson particles and their decay mode
-typedef enum
-{
-  RHO_TO_PIPI = 113,
-  OMEGA_TO_PIPI = 223,
-  PHI_TO_KK = 333,
-  PHI_TO_KLKS = 3332,
-  JPSI_TO_LL = 444,
-  PSIP_TO_LLX = 20443,
-  UPS1S_TO_LL = 553,
-  UPS2S_TO_LLX = 20553,
-  UPS3S_TO_LLX = 30553,
-  RHO1450_TO_PIPIRHO0 = 40113,
-  PHI1680_TO_KKBAR = 10333
-} VMDecay;
+  /// Vector meson particles and their decay mode
+  typedef enum
+  {
+    RHO_TO_PIPI = 113,
+    OMEGA_TO_PIPI = 223,
+    PHI_TO_KK = 333,
+    PHI_TO_KLKS = 3332,
+    JPSI_TO_LL = 444,
+    PSIP_TO_LLX = 20443,
+    UPS1S_TO_LL = 553,
+    UPS2S_TO_LLX = 20553,
+    UPS3S_TO_LLX = 30553,
+    RHO1450_TO_PIPIRHO0 = 40113,
+    PHI1680_TO_KKBAR = 10333
+  } VMDecay;
+}
 
 /**
  * Get the branching ratio for a decay process, given its VMDecay identifier
@@ -72,7 +74,7 @@ typedef enum
  * @author Ian McLaren (mclareni), CERN/CN
  * @date 14 Feb 1996
  */
-void Lorenb( double u_, const Particle::Momentum& ps_, double pi_[], double pf_[] );
+void Lorenb( double u_, const CepGen::Particle::Momentum& ps_, double pi_[], double pf_[] );
 
 #endif
 

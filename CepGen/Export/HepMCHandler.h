@@ -23,42 +23,45 @@
 
 #include <memory>
 
-namespace OutputHandler
+namespace CepGen
 {
-  /**
-   * \brief Handler for the HepMC file output
-   * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-   * \date Sep 2016
-   */
-  class HepMCHandler : public ExportHandler
+  namespace OutputHandler
   {
-    public:
-      /// Class constructor
-      /// \param[in] filename Output file path
-      HepMCHandler( const char* filename, const ExportHandler::OutputType& type=ExportHandler::HepMC );
-      ~HepMCHandler();
-      void initialise( const Parameters& params ) {}
-      /// Writer operator
-      void operator<<( const Event* );
+    /**
+     * \brief Handler for the HepMC file output
+     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
+     * \date Sep 2016
+     */
+    class HepMCHandler : public ExportHandler
+    {
+      public:
+        /// Class constructor
+        /// \param[in] filename Output file path
+        HepMCHandler( const char* filename, const ExportHandler::OutputType& type=ExportHandler::HepMC );
+        ~HepMCHandler();
+        void initialise( const Parameters& params ) {}
+        /// Writer operator
+        void operator<<( const Event* );
 
-    protected:
-      /// Clear the associated HepMC event content
-      void clearEvent();
-      /// Populate the associated HepMC event with a Event object
-      void fillEvent( const Event* );
+      protected:
+        /// Clear the associated HepMC event content
+        void clearEvent();
+        /// Populate the associated HepMC event with a Event object
+        void fillEvent( const Event* );
 
-      /// Associated HepMC event
-      std::shared_ptr<HepMC::GenEvent> event;
+        /// Associated HepMC event
+        std::shared_ptr<HepMC::GenEvent> event;
 
-    private:
+      private:
 #ifdef HEPMC_VERSION3
-      /// Writer object (from HepMC v3+)
-      std::unique_ptr<HepMC::WriterAscii> output;
+        /// Writer object (from HepMC v3+)
+        std::unique_ptr<HepMC::WriterAscii> output;
 #else
-      /// Writer object (from HepMC v<3)
-      std::unique_ptr<HepMC::IO_GenEvent> output;
+        /// Writer object (from HepMC v<3)
+        std::unique_ptr<HepMC::IO_GenEvent> output;
 #endif
-  };
+    };
+  }
 }
 
 #endif

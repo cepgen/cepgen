@@ -1,14 +1,17 @@
 #ifndef __CINT__
 #include "Physics.h"
 
-PhysicsBoundaries::PhysicsBoundaries() :
-  wmin( 20. ), wmax( 0. ),
-  q2min( 4. ), q2max( 100. ),
-  zmin( 0. ), zmax( 1. )
-{}
+namespace CepGen
+{
+  PhysicsBoundaries::PhysicsBoundaries() :
+    wmin( 20. ), wmax( 0. ),
+    q2min( 4. ), q2max( 100. ),
+    zmin( 0. ), zmax( 1. )
+  {}
 
-PhysicsBoundaries::~PhysicsBoundaries()
-{}
+  PhysicsBoundaries::~PhysicsBoundaries()
+  {}
+}
 
 /*double
 GetBRFromProcessId(Particle::ParticleCode vmId_)
@@ -58,7 +61,7 @@ VMDecayer(Particle part_, GenericHadroniser *had_)
 }*/
 
 void
-Lorenb( double u_, const Particle::Momentum& ps_, double pi_[4], double pf_[4] )
+Lorenb( double u_, const CepGen::Particle::Momentum& ps_, double pi_[4], double pf_[4] )
 {
   double fn;
 
