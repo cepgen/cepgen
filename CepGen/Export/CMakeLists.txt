@@ -8,7 +8,7 @@ if(HEPMC_LIB)
   add_library(CepGenExporter SHARED ${sources})
   target_link_libraries(CepGenExporter ${HEPMC_LIB})
   add_definitions(-DHEPMC_LINKED)
-endif()
 
-install(TARGETS CepGenExporter DESTINATION lib)
+  install(TARGETS CepGenExporter DESTINATION lib)
+endif()
 
