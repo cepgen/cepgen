@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 project(CepGen)
 set(PROJECT_VERSION 1)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic -std=c++11 -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic -std=c++14 -g")
 set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/CepGen)
+set(CEPGEN_LIBRARIES CepGenCore CepGenExternalHadronisers CepGenPhysics CepGenProcesses)
 
 #----- define all individual modules to be built beforehand
 
@@ -40,10 +41,6 @@ endforeach()
 
 #----- link everything into the executables
 
-add_executable(cepgen main.cpp)
-target_link_libraries(cepgen CepGenCore CepGenExternalHadronisers CepGenPhysics CepGenProcesses)
-
-
 if($ENV{HOSTNAME} MATCHES "^lxplus[0-9]+.cern.ch")
   set(BASE_DIR "/cvmfs/sft.cern.ch/lcg/external")
   set(GSL_DIR "${BASE_DIR}/GSL/1.14/x86_64-slc5-gcc44-opt")
@@ -66,27 +63,16 @@ endif()
 
 if(HEPMC_LIB)
   message(STATUS "HepMC found in " ${HEPMC_INCLUDE})
-  find_package(ROOT)
   include_directories(${HEPMC_INCLUDE})
-  add_executable(cepgen-lhe cepgen-lhe.cpp)
-  if(ROOT_LIBRARIES)
-    target_link_libraries(cepgen-lhe ${HEPMC_LIB} ${ROOT_LIBRARIES} CepGenCore CepGenExternalHadronisers CepGenPhysics CepGenProcesses CepGenExporter)
-  else()
-    target_link_libraries(cepgen-lhe ${HEPMC_LIB} CepGenCore CepGenExternalHadronisers CepGenPhysics CepGenProcesses CepGenExporter)
-  endif()
+  list(APPEND CEPGEN_LIBRARIES CepGenExporter)
 endif()
 
 #----- copy the input cards and other files
 
 file(GLOB input_cards RELATIVE ${PROJECT_SOURCE_DIR} cards/*)
 foreach(_files ${input_cards})
-  configure_file(
-    ${_files}
-    ${_files}
-    COPYONLY
-)
+  configure_file(${_files} ${_files} COPYONLY)
 endforeach()
-
 configure_file(${CEPGEN_SOURCE_DIR}/README README COPYONLY)
 
 #----- set the tests directory
