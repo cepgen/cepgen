@@ -40,6 +40,7 @@ namespace CepGen
 
       //----- process to compute
 
+      void setProcess( Process::GenericProcess* proc ) { process = std::unique_ptr<Process::GenericProcess>( proc ); }
       /// Process for which the cross-section will be computed and the events will be generated
       std::unique_ptr<Process::GenericProcess> process;
       /// Type of outgoing state to consider for the incoming primary particles
@@ -51,6 +52,7 @@ namespace CepGen
 
       //----- events kinematics
 
+      void setSqrtS( double sqrts ) { in1p = in2p = sqrts/2; }
       /// First incoming particle's momentum (in \f$\text{GeV}/c\f$)
       float in1p;
       /// Second incoming particle's momentum (in \f$\text{GeV}/c\f$)
