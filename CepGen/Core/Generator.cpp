@@ -39,21 +39,15 @@ namespace CepGen
   }
 
   void
-  Generator::buildVegas()
-  {
-    if ( Logger::GetInstance()->Level>=Logger::Debug ) {
-      std::ostringstream topo; topo << parameters->process_mode;
-      Debugging( Form( "Considered topology: %s case\n\t"
-                       "Will proceed with %d-dimensional integration", topo.str().c_str(), numDimensions() ) );
-    }
-  
-    vegas_ = std::unique_ptr<Vegas>( new Vegas( numDimensions(), f, parameters.get() ) );
-  }
-
-  void
   Generator::computeXsection( double& xsec, double& err )
   {
-    if ( !vegas_ ) buildVegas();
+    vegas_.reset( new Vegas( numDimensions(), f, parameters.get() ) );
+    if ( Logger::GetInstance()->Level>=Logger::Debug ) {
+      std::ostringstream topo; topo << parameters->process_mode;
+      Debugging( Form( "New Vegas instance created\n\t"
+                       "Considered topology: %s case\n\t"
+                       "Will proceed with %d-dimensional integration", topo.str().c_str(), numDimensions() ) );
+    }
 
     Information( "Starting the computation of the process cross-section" );
 

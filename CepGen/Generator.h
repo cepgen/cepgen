@@ -114,8 +114,6 @@ namespace CepGen
    private:
       /// Prepare the function before its integration (add particles/compute kinematics/...)
       void prepareFunction();
-      /// Call the Vegas constructor (once, just before the first integration attempt)
-      void buildVegas();
       /// Vegas instance which will integrate the function
       std::unique_ptr<Vegas> vegas_;
       /// Cross section value computed at the last integration

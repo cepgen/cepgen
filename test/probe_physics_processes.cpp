@@ -32,6 +32,8 @@ main( int argc, char* argv[] )
   {
     CepGen::Generator mg;
 
+    //Logger::GetInstance()->Level = Logger::Debug;
+
     mg.parameters->setSqrtS( 13.e3 );
     mg.parameters->mineta = -2.5;
     mg.parameters->maxeta = 2.5;
