@@ -1,20 +1,20 @@
 stages:
   - compile
-#  - test
+  - test
 
 compile:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
   stage: compile
   before_script:
-    - yum install -y -q gsl gsl-devel libgfortran gcc-gfortran
+    #- yum install -y -q gsl gsl-devel libgfortran gcc-gfortran
     - mkdir build
     - cd build
   script:
     - cmake -D CMAKE_MODULE_PATH=$PWD ..
     - make -j 4
 
-#test:
-#  stage: test
-#  script:
-#    - make test/probe_physics_processes
-#    - test/probe_physics_processes lpair elastic
+test:
+  stage: test
+  script:
+    - make probe_physics_processes
+    - test/probe_physics_processes lpair elastic
