@@ -53,6 +53,7 @@ Vegas::integrate( double& result, double& abserr )
 
   //--- prepare Vegas
   gsl_rng* rng = gsl_rng_alloc( gsl_rng_default );
+  gsl_rng_set( rng, time( NULL ) ); // seed with time
   gsl_monte_vegas_state* state = gsl_monte_vegas_alloc( function_->dim );
   
   //--- launch Vegas

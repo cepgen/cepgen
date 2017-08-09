@@ -10,11 +10,14 @@ compile:
     - mkdir build
     - cd build
   script:
-    - cmake -D CMAKE_MODULE_PATH=$PWD ..
+    - cmake ..
     - make -j 4
 
 test:
   stage: test
+  before_script:
+    - cd build
   script:
     - make probe_physics_processes
     - test/probe_physics_processes
+  when: on_success
