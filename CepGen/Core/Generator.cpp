@@ -41,6 +41,7 @@ namespace CepGen
   void
   Generator::computeXsection( double& xsec, double& err )
   {
+    // first destroy and recreate the Vegas instance
     vegas_.reset( new Vegas( numDimensions(), f, parameters.get() ) );
     if ( Logger::GetInstance()->Level>=Logger::Debug ) {
       std::ostringstream topo; topo << parameters->process_mode;
@@ -52,11 +53,11 @@ namespace CepGen
     Information( "Starting the computation of the process cross-section" );
 
     try { prepareFunction(); } catch ( Exception& e ) { e.dump(); }
-    vegas_->integrate( xsec, err );
 
-    cross_section_ = xsec;
-    cross_section_error_ = err;
-    has_cross_section_ = true;
+    has_cross_section_ = ( vegas_->integrate( cross_section_, cross_section_error_ ) == 0 );
+
+    xsec = cross_section_;
+    err = cross_section_error_;
 
     Information( Form( "Total cross section: %f +/- %f pb", xsec, err ) );
   }
@@ -66,8 +67,7 @@ namespace CepGen
   {
     bool good = false;
     if ( !has_cross_section_ ) {
-      double xsec, err;
-      computeXsection( xsec, err );
+      computeXsection( cross_section_, cross_section_error_ );
     }
     while ( !good ) { good = vegas_->generateOneEvent(); }
 

@@ -40,9 +40,9 @@ namespace CepGen
 
       //----- process to compute
 
-      void setProcess( Process::GenericProcess* proc ) { process = std::unique_ptr<Process::GenericProcess>( proc ); }
       /// Process for which the cross-section will be computed and the events will be generated
       std::unique_ptr<Process::GenericProcess> process;
+      void setProcess( Process::GenericProcess* proc ) { process.reset( proc ); }
       /// Type of outgoing state to consider for the incoming primary particles
       Kinematics::ProcessMode process_mode;
 
@@ -134,6 +134,7 @@ namespace CepGen
 
       /// Hadronisation algorithm to use for the proton(s) fragmentation
       std::unique_ptr<Hadroniser::GenericHadroniser> hadroniser;
+      void setHadroniser( Hadroniser::GenericHadroniser* hadr ) { hadroniser.reset( hadr ); }
       /// Maximal number of trials for the hadronisation of the proton(s) remnants
       unsigned int hadroniser_max_trials;
   };

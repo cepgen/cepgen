@@ -2,32 +2,33 @@
 
 using namespace CepGen;
 
-Vegas::Vegas( const unsigned int dim_, double f_( double*, size_t, void* ), Parameters* inParam_ ) :
+Vegas::Vegas( const unsigned int dim, double f_( double*, size_t, void* ), Parameters* param ) :
   mbin_( 3 ),
   j_( 0 ), correc_( 0. ), correc2_( 0. ),
-  input_params_( inParam_ ),
+  input_params_( param ),
   grid_prepared_( false ), gen_prepared_( false ),
   f_max_( 0 ), f_max2_( 0. ), f_max_diff_( 0. ), f_max_old_( 0. ), f_max_global_( 0. ),
   n_( 0 ), nm_( NULL ), function_( 0 ), x_( 0 )
 {
-  x_low_ = new double[dim_];
-  x_up_ = new double[dim_];
+  x_low_ = new double[dim];
+  x_up_ = new double[dim];
   
-  for ( unsigned int i=0; i<dim_; i++ ) {
+  for ( unsigned int i=0; i<dim; i++ ) {
     x_low_[i] = 0.;
     x_up_[i] = 1.;
   }
   
   Debugging( Form( "Number of integration dimensions: %d\n\t"
                    "Number of iterations:             %d\n\t"
-                   "Number of function calls:         %d", dim_, inParam_->itvg, inParam_->ncvg ) );
+                   "Number of function calls:         %d", dim, param->itvg, param->ncvg ) );
 
   function_ = new gsl_monte_function;
   function_->f = f_;
-  function_->dim = dim_;
-  function_->params = (void*)inParam_;
-  num_converg_ = inParam_->ncvg;
-  num_iter_ = inParam_->itvg;
+  function_->dim = dim;
+  function_->params = (void*)param;
+  num_converg_ = param->ncvg;
+  num_iter_ = param->itvg;
+std::cout << __PRETTY_FUNCTION__ << ": " << function_->dim << std::endl;
 }
 
 Vegas::~Vegas()
@@ -39,6 +40,7 @@ Vegas::~Vegas()
   if ( n_ ) delete[] n_;
   if ( function_ ) delete function_;
   if ( x_ ) delete[] x_;
+std::cout << __PRETTY_FUNCTION__ << ": " << function_->dim << std::endl;
 }
 
 int
@@ -69,7 +71,7 @@ Vegas::integrate( double& result, double& abserr )
   /// Integration
   for ( unsigned int i=0; i<num_iter_; i++ ) {
     veg_res = gsl_monte_vegas_integrate( function_, x_low_, x_up_, function_->dim, 0.2*num_converg_, rng, state, &result, &abserr );
-    std::cout << Form( ">> Iteration %2d: average = %10.6f   sigma = %10.6f   chi2 = %4.3f", i+1, result, abserr, gsl_monte_vegas_chisq( state ) ) << std::endl;
+    Print( Form( ">> Iteration %2d: average = %10.6f   sigma = %10.6f   chi2 = %4.3f", i+1, result, abserr, gsl_monte_vegas_chisq( state ) ) );
   }
   
   // Clean Vegas

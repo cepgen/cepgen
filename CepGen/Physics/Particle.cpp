@@ -23,7 +23,7 @@ namespace CepGen
   {
     pdg_id_ = part.pdg_id_;
     this->role = part.role;
-    if ( this->id==-1 ) this->id = part.id;
+    if ( this->id == -1 ) this->id = part.id;
     momentum_ = part.momentum_;
     this->setMass( part.mass_ );
 
@@ -33,8 +33,8 @@ namespace CepGen
   bool
   Particle::valid()
   {
-    if ( pdg_id_==invalidParticle ) return false;
-    if ( momentum_.p()==0. and mass()==0. ) return false;
+    if ( pdg_id_ == invalidParticle ) return false;
+    if ( momentum_.p() == 0. and mass() == 0. ) return false;
     return true;
   }
 
@@ -125,7 +125,7 @@ Particle::dump() const
     }
   }
   os << " (" << pdg_id_ << ")";
-  if ( os.str()==" ()" ) os.str("");
+  if ( os.str() == " ()" ) os.str("");
   Information( Form(
     "Dumping a particle with id=%3d, role=%3d, status=% 3d\n\t"
     "PDG Id:%4d%s, mass = %5.4f GeV\n\t"
@@ -392,7 +392,7 @@ Particle::lorentzBoost( double m, const Particle::Momentum& mom )
   Particle::Momentum::lorentzBoost( const Particle::Momentum& p )
   {
     const double m = p.mass();
-    if ( m==p.energy() ) return;
+    if ( m == p.energy() ) return;
   
     Particle::Momentum mom_old = *this;
     const double pf4 = mom_old*p/m,

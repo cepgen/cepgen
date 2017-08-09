@@ -61,12 +61,12 @@ namespace CepGen
         unsigned int numDimensions( const Kinematics::ProcessMode& ) const;
         void fillKinematics( bool );
         /// Compute the ougoing proton remnant mass
-        /// \param[in] x_ A random number (between 0 and 1)
-        /// \param[in] outmass_ The maximal outgoing particles' invariant mass
-        /// \param[in] lepmass_ The outgoing leptons' mass
-        /// \param[out] dw_ The size of the integration bin
+        /// \param[in] x A random number (between 0 and 1)
+        /// \param[in] outmass The maximal outgoing particles' invariant mass
+        /// \param[in] lepmass The outgoing leptons' mass
+        /// \param[out] dw The size of the integration bin
         /// \return Mass of the outgoing proton remnant
-        double computeOutgoingPrimaryParticlesMasses( double x_, double outmass_, double lepmass_, double* dw_ );
+        double computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dw );
         /// Set all the kinematic variables for the outgoing proton remnants, and prepare the hadronisation
         /// \param[in] part_ Particle to "prepare" for the hadronisation to be performed
         void prepareHadronisation( Particle *part_ );

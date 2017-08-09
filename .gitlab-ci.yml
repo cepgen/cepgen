@@ -17,4 +17,4 @@ test:
   stage: test
   script:
     - make probe_physics_processes
-    - test/probe_physics_processes lpair elastic
+    - test/probe_physics_processes

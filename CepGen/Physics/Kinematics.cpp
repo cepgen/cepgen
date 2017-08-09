@@ -55,7 +55,6 @@ namespace CepGen
   {
     switch ( cut ) {
       case Kinematics::NoCuts:         os << "no cuts"; break;
-      case Kinematics::VermaserenCuts: os << "\"Vermaseren\""; break;
       case Kinematics::BothParticles:  os << "both outgoing particles"; break;
       case Kinematics::OneParticle:    os << "single outgoing particle"; break;
     }

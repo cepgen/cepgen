@@ -97,8 +97,8 @@ HepMCHandler::fillEvent( const Event* evt )
       case Particle::CentralParticle1:
       case Particle::CentralParticle2:
       default: {
-        if ( moth.size()==0 ) { continue; }
-        if ( *moth.begin()==cm_id ) { vcm->add_particle_out( part ); }
+        if ( moth.size() == 0 ) { continue; }
+        if ( *moth.begin() == cm_id ) { vcm->add_particle_out( part ); }
         else {
           std::cout << "other particle!!" << std::endl;
           continue;

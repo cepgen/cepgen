@@ -44,21 +44,12 @@ void Parameters::setThetaRange( float thetamin, float thetamax )
 
 void Parameters::dump( std::ostream& out, bool pretty ) const
 {
-  std::string cutsmode, particles;
-
-  switch (mcut) {
-    case 1:           cutsmode = "Vermaseren"; break;
-    case 2:           cutsmode = "on both leptons"; break;
-    case 3:           cutsmode = "on single lepton"; break;
-    case 0:  default: cutsmode = "no cut"; break;
-  }
-  switch (pair) {
-    case Particle::Electron:      particles = "electrons"; break;
-    case Particle::Muon: default: particles = "muons"; break;
-    case Particle::Tau:           particles = "taus"; break;
-  }
-  const int wb = 75, wt = 32;
   std::ostringstream os;
+  os.clear(); os << pair; const std::string particles = os.str();
+  os.clear(); os << mcut; const std::string cutsmode = os.str();
+
+  const int wb = 75, wt = 32;
+  os.clear();
   os 
     << "Parameters dump" << std::left
     << std::endl << std::endl
@@ -133,132 +124,132 @@ bool Parameters::readConfigFile(const char* inFile_)
   os << std::left;
   while (f >> key >> value) {
     //os << std::setw( wdth ) << "[" << key << "] = " << value << std::endl;
-    //if ( strncmp( key.c_str(), "#" )==0 ) continue; // FIXME need to ensure there is no extra space before !
-    if ( key[0]=='#' ) continue;
-    if ( key=="IEND" ) {
+    //if ( strncmp( key.c_str(), "#" ) == 0 ) continue; // FIXME need to ensure there is no extra space before !
+    if ( key[0] == '#' ) continue;
+    if ( key == "IEND" ) {
       int iend = (int)atoi( value.c_str() );
       if (iend>1) {
         this->generation = true;
       }
     }
-    else if ( key=="DEBG" ) {
+    else if ( key == "DEBG" ) {
       Logger::GetInstance()->Level = static_cast<Logger::LoggingLevel>( atoi( value.c_str() ) );
     }
-    else if ( key=="NCVG" ) {
+    else if ( key == "NCVG" ) {
       this->ncvg = (int)atoi( value.c_str() );
       os << std::setw( wdth ) << " * Number of function calls:" << this->ncvg << "\n";
     }
-    else if ( key=="NCSG" ) {
+    else if ( key == "NCSG" ) {
       this->npoints = (int)atoi( value.c_str() );
       os << std::setw( wdth ) << " * Number of points to probe:" << this->npoints << "\n";
     }
-    else if ( key=="ITVG" ) {
+    else if ( key == "ITVG" ) {
       this->itvg = (int)atoi( value.c_str() );
       os << std::setw( wdth ) << " * Number of Vegas iterations:" << this->itvg << "\n";
     }
-    else if ( key=="INPP" ) {
+    else if ( key == "INPP" ) {
       this->in1p = (double)atof( value.c_str() );
       os << std::setw( wdth ) << " * Momentum (1st primary particle):" << this->in1p << " GeV/c\n";
     }
-    else if ( key=="INPE" ) {
+    else if ( key == "INPE" ) {
       this->in2p = static_cast<float>( atof( value.c_str() ) );
       os << std::setw( wdth ) << " * Momentum (2nd primary particle):" << this->in1p << " GeV/c\n";
     }
-    else if ( key=="PROC" ) {
-      if ( value=="lpair" )       this->process = std::unique_ptr<Process::GamGamLL>( new Process::GamGamLL() );
-      else if ( value=="pptoll" ) this->process = std::unique_ptr<Process::PPtoLL>( new Process::PPtoLL() );
+    else if ( key == "PROC" ) {
+      if ( value == "lpair" )       this->setProcess( new Process::GamGamLL() );
+      else if ( value == "pptoll" ) this->setProcess( new Process::PPtoLL() );
       std::ostringstream proc_name; proc_name << this->process.get();
       os << std::setw( wdth ) << " * Process:" << boldify( proc_name.str() ) << "\n";
     }
-    else if ( key=="HADR" ) {
+    else if ( key == "HADR" ) {
 #ifdef PYTHIA6
-      if ( value=="pythia6" ) this->hadroniser = new Hadroniser::Pythia6Hadroniser;
+      if ( value == "pythia6" ) this->setHadroniser( new Hadroniser::Pythia6Hadroniser );
 #endif
 #ifdef JETSET
-      if ( value=="jetset7" ) this->hadroniser = new Hadroniser::Jetset7Hadroniser;
+      if ( value == "jetset7" ) this->setHadroniser( new Hadroniser::Jetset7Hadroniser );
 #endif
 #ifdef PYTHIA8
-      if ( value=="pythia8" ) this->hadroniser = new Hadroniser::Pythia8Hadroniser;
+      if ( value == "pythia8" ) this->setHadroniser( new Hadroniser::Pythia8Hadroniser );
 #endif
       os << std::setw( wdth ) << " * Hadroniser:" << ( ( this->hadroniser!=0 ) ? this->hadroniser->name() : colourise( "*** no hadroniser ***", Colour::Red ) ) << "\n";
     }
-    else if ( key=="MODE" ) {
+    else if ( key == "MODE" ) {
       this->process_mode = static_cast<Kinematics::ProcessMode>( atoi( value.c_str() ) );
       os << std::setw( wdth ) << " * Subprocess' mode:" << static_cast<unsigned int>( this->process_mode ) << " --> " << this->process_mode << "\n";
     }
-    else if ( key=="PMOD" or key=="EMOD" ) {
+    else if ( key == "PMOD" or key == "EMOD" ) {
       this->remnant_mode = static_cast<StructureFunctions>( atoi( value.c_str() ) );
       os << std::setw( wdth ) << " * Outgoing primary particles' mode:" << static_cast<unsigned int>( this->remnant_mode )
       	 << " --> " << this->remnant_mode << "\n";
     }
-    else if ( key=="PAIR" ) {
+    else if ( key == "PAIR" ) {
       this->pair = static_cast<Particle::ParticleCode>( atoi( value.c_str() ) );
       os << std::setw( wdth ) << " * Outgoing particles' PDG id:" << static_cast<unsigned int>( this->pair )
          << " --> " << this->pair << "\n";
     }
-    else if ( key=="MCUT" ) {
+    else if ( key == "MCUT" ) {
       this->mcut = static_cast<Kinematics::Cuts>( atoi( value.c_str() ) );
       os << std::setw( wdth ) << " * Set of cuts to apply on final products:" << this->mcut << "\n";
     }
-    else if (key=="PTCT") {
+    else if (key == "PTCT") {
       this->minpt = static_cast<float>( atof( value.c_str() ) );
       os << std::setw( wdth ) << " * Minimal transverse momentum (single central outgoing particle):" << this->minpt << " GeV/c\n";
     }
-    else if (key=="MSCT") {
+    else if (key == "MSCT") {
       this->minmass = static_cast<float>( atof( value.c_str() ) );
       os << std::setw( wdth ) << " * Minimal central system mass:" << this->minmass << " GeV/c**2\n";
     }
-    else if (key=="ECUT") {
+    else if (key == "ECUT") {
       this->minenergy = static_cast<float>( atof( value.c_str() ) );
       os << std::setw( wdth ) << " * Minimal energy (single central outgoing particle):" << this->minenergy << " GeV\n";
     }
-    else if (key=="NGEN") {
+    else if (key == "NGEN") {
       this->maxgen = static_cast<unsigned int>( atoi( value.c_str() ) );
       os << std::setw( wdth ) << " * Number of events to generate:" << boldify( this->maxgen ) << "\n";
     }
-    else if (key=="THMN") {
+    else if (key == "THMN") {
       //this->mintheta = atof( value.c_str() );
       //this->setThetaRange( atof( value.c_str() ), 0. ); // FIXME FIXME
       os << std::setw( wdth ) << " * Minimal polar production angle for the central particles" << etaToTheta( mineta ) << "\n";
     }
-    else if (key=="THMX") {
+    else if (key == "THMX") {
       //this->maxtheta = atof( value.c_str() );
       //this->setThetaRange( 0., atof( value.c_str() ) ); //FIXME FIXME
       os << std::setw( wdth ) << " * Maximal polar production angle for the central particles" << etaToTheta( maxeta ) << "\n";
     }
-    else if (key=="ETMN") {
+    else if (key == "ETMN") {
       this->mineta = static_cast<float>( atof( value.c_str() ) );
       os << std::setw( wdth ) << " * Minimal pseudo-rapidity (central outgoing particles):" << this->mineta << "\n";
     }
-    else if (key=="ETMX") {
+    else if (key == "ETMX") {
       this->maxeta = static_cast<float>( atof( value.c_str() ) );
       os << std::setw( wdth ) << " * Maximal pseudo-rapidity (central outgoing particles):" << this->maxeta << "\n";
     }
-    else if (key=="Q2MN") {
+    else if (key == "Q2MN") {
       this->minq2 = static_cast<float>( atof( value.c_str() ) );
       os << std::setw( wdth ) << " * Minimal Q^2 (exchanged parton):" << this->minq2 << " GeV^2\n";
     }
-    else if (key=="Q2MX") {
+    else if (key == "Q2MX") {
       this->maxq2 = static_cast<float>( atof( value.c_str() ) );
       os << std::setw( wdth ) << " * Maximal Q^2 (exchanged parton):" << this->maxq2 << " GeV^2\n";
     }
-    else if (key=="MXMN") {
+    else if (key == "MXMN") {
       this->minmx = static_cast<float>( atof( value.c_str() ) );
       os << std::setw( wdth ) << " * Minimal invariant mass of proton remnants:" << this->minmx << " GeV/c^2\n";
     }
-    else if (key=="MXMX") {
+    else if (key == "MXMX") {
       this->maxmx = static_cast<float>( atof( value.c_str() ) );
       os << std::setw( wdth ) << " * Maximal invariant mass of proton remnants:" << this->maxmx << " GeV/c^2\n";
     }
-    else if (key=="GPDF") {
+    else if (key == "GPDF") {
       this->gpdf = static_cast<unsigned int>( atoi( value.c_str() ) );
       os << std::setw( wdth ) << " * GPDF:" << this->gpdf << "\n";
     }
-    else if (key=="SPDF") {
+    else if (key == "SPDF") {
       this->spdf = static_cast<unsigned int>( atoi( value.c_str() ) );
       os << std::setw( wdth ) << " * SPDF:" << this->spdf << "\n";
     }
-    else if (key=="QPDF") {
+    else if (key == "QPDF") {
       this->qpdf = static_cast<unsigned int>( atoi( value.c_str() ) );
       os << std::setw( wdth ) << " * QPDF:" << this->qpdf << "\n";
     }

@@ -6,6 +6,8 @@
 
 #include "Logger.h"
 
+#define Print( m ) \
+  if ( Logger::GetInstance()->Level>Logger::Nothing ) { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::Verbatim ).dump( Logger::GetInstance()->OutputStream ); }
 #define Information( m ) \
   if ( Logger::GetInstance()->Level>Logger::Nothing ) { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::Information ).dump( Logger::GetInstance()->OutputStream ); }
 #define Debugging( m ) \
@@ -24,7 +26,7 @@ namespace CepGen
    * \author Laurent Forthomme <laurent.forthomme@cern.ch>
    * \date 27 Mar 2015
    */
-  enum ExceptionType { Undefined=-1, Information, DebugMessage, JustWarning, ErrorMessage, FatalError };
+  enum ExceptionType { Undefined=-1, Verbatim, Information, DebugMessage, JustWarning, ErrorMessage, FatalError };
 
   /**
    * \brief A simple exception handler
@@ -51,7 +53,7 @@ namespace CepGen
         from_( from ), description_( desc ), type_( type ), error_num_( id ) {}
 
       inline ~Exception() {
-        if ( type()==FatalError ) exit(0);
+        if ( type() == FatalError ) exit(0);
         // we stop this process' execution on fatal exception
       }
 
@@ -78,10 +80,15 @@ namespace CepGen
       /// Dump the full exception information in a given output stream
       /// \param[inout] os the output stream where the information is dumped
       inline void dump(std::ostream& os=std::cerr) const {
-        if ( type()==Information ) {
-          os << "[\033[32;1mInformation\033[0m]";
+        if ( type() == Verbatim ) {
+          os << description() << std::endl;
+          return;
         }
-        else if ( type()==DebugMessage ) {
+        if ( type() == Information ) {
+          os << "[\033[32;1mInfo.\033[0m]\t" << description() << std::endl;
+          return;
+        }
+        if ( type() == DebugMessage ) {
           os << "==================================== \033[33;1mDebug\033[0m ====================================" << std::endl
              << " From:        " << from() << std::endl;
         }
@@ -90,12 +97,11 @@ namespace CepGen
              << " Class:       " << typeString() << std::endl
              << " Raised by:   " << from() << std::endl;
         }
-        if ( type()!=Information ) os << " Description: " << std::endl;
-        os << "\t" << description() << std::endl;
-        if ( errorNumber()!=0 )
+        os << " Description: \t" << description() << std::endl;
+        if ( errorNumber() != 0 )
           os << "-------------------------------------------------------------------------------" << std::endl
              << " Error #" << errorNumber() << std::endl;
-        if ( type()!=Information ) os << "===============================================================================" << std::endl;
+        os << "===============================================================================" << std::endl;
       }
       /// Extract a one-line summary of the exception
       inline std::string OneLine() const {
