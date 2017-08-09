@@ -2,8 +2,9 @@ stages:
   - compile
   - test
 
+image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
+
 compile:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
   stage: compile
   before_script:
     #- yum install -y -q gsl gsl-devel libgfortran gcc-gfortran
