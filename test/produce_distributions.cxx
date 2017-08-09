@@ -31,7 +31,7 @@ int main( int argc, char* argv[] )
        h_ptpair( "ptpair", "Dilepton p_{T}\\Events\\GeV?.2f", 500, 0., 50. );
 
   std::ostringstream gen_name;
-  gen_name << mg.parameters->process;
+  gen_name << mg.parameters->process->name();
   Information( Form( "Process name: %s", gen_name.str().c_str() ) );
 
   for ( unsigned int i=0; i<1e4; i++ ) {

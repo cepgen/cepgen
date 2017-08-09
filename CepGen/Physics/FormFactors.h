@@ -1,5 +1,5 @@
-#ifndef FormFactors_h
-#define FormFactors_h
+#ifndef CepGen_Physics_FormFactors_h
+#define CepGen_Physics_FormFactors_h
 
 #include <math.h>
 
@@ -24,7 +24,7 @@ namespace CepGen
    * \param[out] w2 Second proton structure function: \f$\mathcal W_2\f$
    * \cite Brasse1976413
    */
-  bool PSF( double q2, double mx2, double* sigma_t, double* w1, double* w2 );
+  bool PSF( double q2, double mx2, double& sigma_t, double& w1, double& w2 );
 
   /// Form factors collection (electric and magnetic parts)
   struct FormFactors {

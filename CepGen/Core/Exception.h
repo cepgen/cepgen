@@ -6,18 +6,20 @@
 
 #include "Logger.h"
 
-#define Print( m ) \
-  if ( Logger::GetInstance()->Level>Logger::Nothing ) { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::Verbatim ).dump( Logger::GetInstance()->OutputStream ); }
+#define PrintMessage( m ) \
+  if ( CepGen::Logger::get().level > CepGen::Logger::Nothing ) { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::Verbatim ).dump( CepGen::Logger::get().outputStream ); }
 #define Information( m ) \
-  if ( Logger::GetInstance()->Level>Logger::Nothing ) { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::Information ).dump( Logger::GetInstance()->OutputStream ); }
+  if ( CepGen::Logger::get().level > CepGen::Logger::Nothing ) { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::Information ).dump( CepGen::Logger::get().outputStream ); }
 #define Debugging( m ) \
-  if ( Logger::GetInstance()->Level>=Logger::Debug )  { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::DebugMessage ).dump( Logger::GetInstance()->OutputStream ); }
+  if ( CepGen::Logger::get().level >= CepGen::Logger::Debug )  { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::DebugMessage ).dump( CepGen::Logger::get().outputStream ); }
 #define DebuggingInsideLoop( m ) \
-  if ( Logger::GetInstance()->Level>=Logger::DebugInsideLoop ) { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::DebugMessage ).dump( Logger::GetInstance()->OutputStream ); }
+  if ( CepGen::Logger::get().level >= CepGen::Logger::DebugInsideLoop ) { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::DebugMessage ).dump( CepGen::Logger::get().outputStream ); }
 #define InWarning( m ) \
-  if ( Logger::GetInstance()->Level>=Logger::Warning )  { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::JustWarning ).dump( Logger::GetInstance()->OutputStream ); }
+  if ( CepGen::Logger::get().level >= CepGen::Logger::Warning )  { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::JustWarning ).dump( CepGen::Logger::get().outputStream ); }
 #define InError( m ) \
-  if ( Logger::GetInstance()->Level>=Logger::Error )  { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::ErrorMessage ).dump( Logger::GetInstance()->OutputStream ); }
+  if ( CepGen::Logger::get().level >= CepGen::Logger::Error )  { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::ErrorMessage ).dump( CepGen::Logger::get().outputStream ); }
+#define FatalError( m ) \
+  CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::FatalError ).dump( CepGen::Logger::get().outputStream );
 
 namespace CepGen
 {

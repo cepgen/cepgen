@@ -47,7 +47,7 @@ int main( int argc, char* argv[] ) {
 
   if ( atoi( argv[1] )<=4 and atoi( argv[1] )>0 ) {
     // do not provide an input card
-    mg.parameters->process = new CepGen::Process::GamGamLL;
+    mg.parameters->setProcess( new CepGen::Process::GamGamLL );
     mg.parameters->in1p = 6500.;
     mg.parameters->in2p = 6500.;
     mg.parameters->pair = CepGen::Particle::Muon;

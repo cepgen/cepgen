@@ -84,7 +84,7 @@ Particle::addDaughter( Particle* part )
 {
   std::pair<ParticlesIds::iterator,bool> ret = daughters_.insert( part->id );
 
-  if ( Logger::GetInstance()->Level>=Logger::DebugInsideLoop ) {
+  if ( Logger::get().level>=Logger::DebugInsideLoop ) {
     std::ostringstream os;
     for ( ParticlesIds::const_iterator it=daughters_.begin(); it!=daughters_.end(); it++) {
       os << Form("\n\t * id=%d", *it);

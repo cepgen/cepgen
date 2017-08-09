@@ -1,8 +1,10 @@
-#ifndef GenericHadroniser_h
-#define GenericHadroniser_h
+#ifndef CepGen_Hadronisers_GenericHadroniser_h
+#define CepGen_Hadronisers_GenericHadroniser_h
 
 #include "CepGen/Physics/Event.h"
 #include "CepGen/Physics/Physics.h"
+
+#include <memory>
 
 namespace CepGen
 {
@@ -20,8 +22,8 @@ namespace CepGen
         friend std::ostream& operator<<( std::ostream& os, const GenericHadroniser* hadr ) { os << hadr->name().c_str(); return os; }
 
         /// Default constructor for an undefined hadroniser
-        GenericHadroniser( const char* name="unnamed_hadroniser" );
-        virtual ~GenericHadroniser();
+        GenericHadroniser( const char* name="unnamed_hadroniser" ) : name_( name ) {}
+        virtual ~GenericHadroniser() {}
 
         /// Main caller to hadronise a single particle
         /// \param[in] part_ The Particle object which will be hadronised
@@ -34,7 +36,7 @@ namespace CepGen
 
         /// Get the full list of hadrons produced in the hadronisation
         /// \return Vector of Particle containing all the hadrons produced
-        inline Particles GetHadrons() { return *hadrons_; }
+        inline Particles hadrons() { return *hadrons_; }
         /// Return a human-readable name for this hadroniser
         inline std::string name() const { return name_; }
 
@@ -42,7 +44,7 @@ namespace CepGen
         /// Name of the hadroniser
         std::string name_;
         /// List of hadrons produced by this hadronisation process
-        Particles *hadrons_;
+        std::unique_ptr<Particles> hadrons_;
     };
   }
 }

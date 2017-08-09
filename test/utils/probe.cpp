@@ -5,9 +5,9 @@ using namespace std;
 int main()
 {
   CepGen::Generator g;
-  CepGen::Parameters* p = g.parameters;
-  //p->process = new GamGamLL;
-  p->process = new CepGen::Process::PPtoLL;
+  CepGen::Parameters* p = g.parameters.get();
+  //p->setProcess( new GamGamLL );
+  p->setProcess( new CepGen::Process::PPtoLL );
   p->process_mode = CepGen::Kinematics::ElasticElastic;
   //p->process_mode = CepGen::Kinematics::InelasticElastic;
   //p->process_mode = CepGen::Kinematics::ElasticInelastic;
@@ -17,9 +17,9 @@ int main()
   p->maxmx = 320.;
   
   p->dump();
-  Logger::GetInstance()->Level = Logger::DebugInsideLoop;
+  CepGen::Logger::get().level = CepGen::Logger::DebugInsideLoop;
 
-  const unsigned int ndim = g.numDimensions();
+  const unsigned short ndim = g.numDimensions();
   double x[ndim];
   for (unsigned int i=0; i<ndim; i++) { x[i] = 0.3;}
   

@@ -27,7 +27,7 @@ namespace CepGen
 
       std::copy( x, x+ndim, x_ );
       is_point_set_ = true;
-      if ( Logger::GetInstance()->Level>=Logger::DebugInsideLoop ) { dumpPoint( DebugMessage ); }
+      if ( Logger::get().level>=Logger::DebugInsideLoop ) { dumpPoint( DebugMessage ); }
     }
 
     void

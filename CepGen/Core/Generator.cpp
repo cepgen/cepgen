@@ -43,7 +43,7 @@ namespace CepGen
   {
     // first destroy and recreate the Vegas instance
     vegas_.reset( new Vegas( numDimensions(), f, parameters.get() ) );
-    if ( Logger::GetInstance()->Level>=Logger::Debug ) {
+    if ( Logger::get().level>=Logger::Debug ) {
       std::ostringstream topo; topo << parameters->process_mode;
       Debugging( Form( "New Vegas instance created\n\t"
                        "Considered topology: %s case\n\t"
@@ -125,7 +125,7 @@ namespace CepGen
     p->process->setIncomingKinematics( p1, p2 );
     p->process->setPoint( ndim, x );
 
-    if ( Logger::GetInstance()->Level>=Logger::DebugInsideLoop ) {
+    if ( Logger::get().level>=Logger::DebugInsideLoop ) {
       os.str(""); for ( unsigned int i=0; i<ndim; i++ ) { os << x[i] << " "; }
       DebuggingInsideLoop( Form( "Computing dim-%d point ( %s)", ndim, os.str().c_str() ) );
     }
@@ -192,7 +192,7 @@ namespace CepGen
       if ( p->hadroniser and p->process_mode!=Kinematics::ElasticElastic ) {
 
         Debugging( Form( "Event before calling the hadroniser (%s)", p->hadroniser->name().c_str() ) );
-        if ( Logger::GetInstance()->Level>=Logger::Debug ) ev->dump();
+        if ( Logger::get().level>=Logger::Debug ) ev->dump();
 
         num_hadr_trials = 0;
         do {
@@ -211,7 +211,7 @@ namespace CepGen
         if ( num_hadr_trials>p->hadroniser_max_trials ) return 0.; //FIXME
 
         Debugging( Form( "Event after calling the hadroniser (%s)", p->hadroniser->name().c_str() ) );
-        if ( Logger::GetInstance()->Level>=Logger::Debug ) ev->dump();
+        if ( Logger::get().level>=Logger::Debug ) ev->dump();
       }
       ev->time_total = tmr.elapsed();
       p->process->addGenerationTime( ev->time_total );
@@ -225,7 +225,7 @@ namespace CepGen
       //ev->Store(p->file);
     }
 
-    if ( Logger::GetInstance()->Level>=Logger::DebugInsideLoop ) {
+    if ( Logger::get().level>=Logger::DebugInsideLoop ) {
       os.str( "" ); for ( unsigned int i=0; i<ndim; i++ ) { os << Form( "%10.8f ", x[i] ); }
       Debugging( Form( "f value for dim-%d point ( %s): %4.4e", ndim, os.str().c_str(), ff ) );
     }

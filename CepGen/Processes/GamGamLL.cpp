@@ -123,7 +123,7 @@ GamGamLL::pickin()
 
   // FIXME dropped in CDF version
   if ( t1_max > -cuts_.q2min ) { InWarning( Form( "t1max = %f > -q2min = %f", t1_max, -cuts_.q2min ) ); return false; }
-  if ( t1_min < -cuts_.q2max and cuts_.q2max>=0. ) { InWarning( Form( "t1min = %f < -q2max = %f", t1_min, -cuts_.q2max ) ); return false; }
+  if ( t1_min < -cuts_.q2max and cuts_.q2max>=0. ) { Debugging( Form( "t1min = %f < -q2max = %f", t1_min, -cuts_.q2max ) ); return false; }
   if ( t1_max < -cuts_.q2max and cuts_.q2max>=0. ) t1_max = -cuts_.q2max;
   if ( t1_min > -cuts_.q2min )                     t1_min = -cuts_.q2min;
   /////
@@ -317,7 +317,7 @@ GamGamLL::pickin()
 bool
 GamGamLL::orient()
 {
-  if ( !pickin() or jacobian_ == 0. ) { InWarning( Form( "Pickin failed! dj = %f", jacobian_ ) ); return false; }
+  if ( !pickin() or jacobian_ == 0. ) { Debugging( Form( "Pickin failed! dj = %f", jacobian_ ) ); return false; }
   
   const double re = 0.5 / sqs_;
   ep1_ = re*( s_+w12_ );

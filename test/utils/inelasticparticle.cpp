@@ -1,6 +1,7 @@
-#include "export/HepMCHandler.h"
+#include "CepGen/Export/HepMCHandler.h"
 
 using namespace std;
+using namespace CepGen;
 
 int main() {
 
@@ -10,16 +11,16 @@ int main() {
   Event ev;
   
   Particle p1( Particle::IncomingBeam1, Particle::Proton );
-  p1.SetMomentum( 1., -15., 100. );
+  p1.setMomentum( 1., -15., 100. );
   p1.status = Particle::Incoming;
-  ev.AddParticle(p1);
+  ev.addParticle(p1);
 
   Particle p2( Particle::IncomingBeam2, Particle::Electron );
-  p2.SetMomentum( 10., 5., 3200. );
+  p2.setMomentum( 10., 5., 3200. );
   p2.status = Particle::Incoming;
-  ev.AddParticle(p2);
+  ev.addParticle(p2);
 
-  ev.Dump();
+  ev.dump();
   
   writer << &ev;
 

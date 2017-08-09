@@ -61,7 +61,7 @@ void Parameters::dump( std::ostream& out, bool pretty ) const
     << std::setw( wt ) << "Events generation? " << ( pretty ? yesno( generation ) : std::to_string( generation ) ) << std::endl
     << std::setw( wt ) << "Number of events to generate" << ( pretty ? boldify( maxgen ) : std::to_string( maxgen ) ) << std::endl
     << std::setw( wt ) << "Events storage? " << yesno( store ) << std::endl
-    << std::setw( wt ) << "Verbosity level " << Logger::GetInstance()->Level << std::endl
+    << std::setw( wt ) << "Verbosity level " << Logger::get().level << std::endl
     << std::setw( wt ) << "Output file opened? " << ( pretty ? yesno( file!=(std::ofstream*)NULL && file->is_open() ) : std::to_string( file!=NULL ) ) << std::endl
     << std::endl
     << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Vegas integration parameters " ) : "Vegas integration parameters" ) << std::setfill( ' ' ) << std::endl
@@ -133,7 +133,7 @@ bool Parameters::readConfigFile(const char* inFile_)
       }
     }
     else if ( key == "DEBG" ) {
-      Logger::GetInstance()->Level = static_cast<Logger::LoggingLevel>( atoi( value.c_str() ) );
+      Logger::get().level = static_cast<Logger::LoggingLevel>( atoi( value.c_str() ) );
     }
     else if ( key == "NCVG" ) {
       this->ncvg = (int)atoi( value.c_str() );

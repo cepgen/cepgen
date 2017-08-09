@@ -2,7 +2,7 @@
 
 void Map( double expo, double xmin, double xmax, double& out, double& dout, const std::string& var_name_ )
 {
-  double y = xmax/xmin;
+  const double y = xmax/xmin;
   out = xmin*pow( y, expo );
   dout = out*log( y );
   DebuggingInsideLoop( Form( "Mapping variable \"%s\"\n\t"

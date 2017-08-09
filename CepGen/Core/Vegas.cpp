@@ -28,7 +28,6 @@ Vegas::Vegas( const unsigned int dim, double f_( double*, size_t, void* ), Param
   function_->params = (void*)param;
   num_converg_ = param->ncvg;
   num_iter_ = param->itvg;
-std::cout << __PRETTY_FUNCTION__ << ": " << function_->dim << std::endl;
 }
 
 Vegas::~Vegas()
@@ -40,43 +39,39 @@ Vegas::~Vegas()
   if ( n_ ) delete[] n_;
   if ( function_ ) delete function_;
   if ( x_ ) delete[] x_;
-std::cout << __PRETTY_FUNCTION__ << ": " << function_->dim << std::endl;
 }
 
 int
 Vegas::integrate( double& result, double& abserr )
 {
-  // Initialise the random number generator
-  const gsl_rng_type* rng_type;
-  gsl_rng* rng;
-  gsl_monte_vegas_state* state;
+  //--- initialise the random number generator
   gsl_rng_env_setup();
-  rng_type = gsl_rng_default;
-  int veg_res;
   
-  // Prepare the integration coordinates
-  if ( x_ ) delete x_;
+  //--- prepare the integration coordinates
+  if ( x_ ) delete[] x_;
   x_ = new double[function_->dim];
 
-  // Prepare Vegas
-  rng = gsl_rng_alloc( rng_type );
-  state = gsl_monte_vegas_alloc( function_->dim );
+  //--- prepare Vegas
+  gsl_rng* rng = gsl_rng_alloc( gsl_rng_default );
+  gsl_monte_vegas_state* state = gsl_monte_vegas_alloc( function_->dim );
   
-  // Launch Vegas
-  /// Warmup (prepare the grid)
+  //--- launch Vegas
+  int veg_res;
+
+  //----- warmup (prepare the grid)
   if ( !grid_prepared_ ) {
     veg_res = gsl_monte_vegas_integrate( function_, x_low_, x_up_, function_->dim, 10000, rng, state, &result, &abserr );
     grid_prepared_ = true;
   }
-  /// Integration
+  //----- integration
   for ( unsigned int i=0; i<num_iter_; i++ ) {
     veg_res = gsl_monte_vegas_integrate( function_, x_low_, x_up_, function_->dim, 0.2*num_converg_, rng, state, &result, &abserr );
-    Print( Form( ">> Iteration %2d: average = %10.6f   sigma = %10.6f   chi2 = %4.3f", i+1, result, abserr, gsl_monte_vegas_chisq( state ) ) );
+    PrintMessage( Form( ">> Iteration %2d: average = %10.6f   sigma = %10.6f   chi2 = %4.3f", i+1, result, abserr, gsl_monte_vegas_chisq( state ) ) );
   }
   
-  // Clean Vegas
-  gsl_monte_vegas_free( state );
-  gsl_rng_free( rng );
+  //--- clean Vegas
+  if ( state ) gsl_monte_vegas_free( state );
+  if ( rng ) gsl_rng_free( rng );
   
   return veg_res;
 }
@@ -101,9 +96,6 @@ Vegas::generate()
 bool
 Vegas::generateOneEvent()
 {
-  // Inherited from GMUGNA
-  int jj, jjj;
-  
   if ( !gen_prepared_ ) setGen();
 
   const unsigned int ndim = function_->dim,
@@ -129,9 +121,9 @@ Vegas::generateOneEvent()
       nm_[j_] += 1;
     } while ( y>f_max_[j_] );
     // Select x values in this Vegas bin
-    jj = j_;
+    int jj = j_;
     for (unsigned int i=0; i<ndim; i++) {
-      jjj = jj / mbin_;
+      int jjj = jj / mbin_;
       n_[i] = jj - jjj * mbin_;
       x_[i] = ( (double)rand()/RAND_MAX + n_[i] ) / mbin_;
       jj = jjj;
@@ -247,25 +239,21 @@ Vegas::storeEvent( double *x_ )
 void
 Vegas::setGen()
 {
-  int jj, jjj;
-  double sum, sum2, sum2p;
-  int n[15];
-  double fsum, fsum2;
-  double z;
-  double sig2;
-  double av, av2;
-
   // Variables for debugging
-  double eff, eff1, eff2;
-  double sig, sigp;
   std::ostringstream os;
-  if ( Logger::GetInstance()->Level>=Logger::Debug ) {
+  if ( Logger::get().level>=Logger::Debug ) {
     Debugging( Form( "MaxGen = %d", input_params_->maxgen ) );
   }
   
   const unsigned int ndim = function_->dim,
                      max = pow( mbin_, ndim ),
                      npoin = input_params_->npoints;
+
+  const unsigned short max_dim = 15;
+  if ( ndim > max_dim ) {
+    FatalError( Form( "Number of dimensions to integrate exceed the maximum number, %d", max_dim ) );
+  }
+  int n[max_dim];
 
   nm_ = new int[max];
   f_max_ = new double[max];
@@ -274,9 +262,7 @@ Vegas::setGen()
   input_params_->ngen = 0;
 
   // ...
-  sum = 0.;
-  sum2 = 0.;
-  sum2p = 0.;
+  double sum = 0., sum2 = 0., sum2p = 0.;
 
   for ( unsigned int i=0; i<max; i++ ) {
     nm_[i] = 0;
@@ -284,33 +270,31 @@ Vegas::setGen()
   }
 
   for ( unsigned int i=0; i<max; i++ ) {
-    jj = i;
+    int jj = i;
     for ( unsigned int j=0; j<ndim; j++ ) {
-      jjj = jj/mbin_;
+      int jjj = jj/mbin_;
       n[j] = jj-jjj*mbin_;
       jj = jjj;
     }
-    fsum = fsum2 = 0.;
+    double fsum = 0., fsum2 = 0.;
     for ( unsigned int j=0; j<npoin; j++ ) {
       for ( unsigned int k=0; k<ndim; k++ ) {
         x_[k] = ( (double)rand()/RAND_MAX + n[k] ) / mbin_;
       }
-      z = F( x_ );
+      const double z = F( x_ );
       if ( z>f_max_[i] ) f_max_[i] = z;
       fsum += z;
       fsum2 += z*z;
     }
-    av = fsum/npoin;
-    av2 = fsum2/npoin;
-    sig2 = av2 - av*av;
+    const double av = fsum/npoin, av2 = fsum2/npoin, sig2 = av2 - av*av;
     sum += av;
     sum2 += av2;
     sum2p += sig2;
     if ( f_max_[i]>f_max_global_ ) f_max_global_ = f_max_[i];
 
-    if ( Logger::GetInstance()->Level>=Logger::Debug ) {
-      sig = sqrt( sig2 );
-      eff = 1.e4;
+    if ( Logger::get().level>=Logger::Debug ) {
+      const double sig = sqrt( sig2 );
+      double eff = 1.e4;
       if ( f_max_[i]!=0. ) eff = f_max_[i]/av;
       os.str(""); for ( unsigned int j=0; j<ndim; j++ ) { os << n[j]; if ( j!=ndim-1 ) os << ", "; }
       DebuggingInsideLoop( Form( "In iteration #%d:\n\t"
@@ -327,24 +311,21 @@ Vegas::setGen()
   sum2 = sum2/max;
   sum2p = sum2p/max;
 
-  if ( Logger::GetInstance()->Level>=Logger::Debug ) {
-    sig = sqrt( sum2-sum*sum );
-    sigp = sqrt( sum2p );
+  if ( Logger::get().level>=Logger::Debug ) {
+    const double sig = sqrt( sum2-sum*sum ), sigp = sqrt( sum2p );
     
-    eff1 = 0.;
+    double eff1 = 0.;
     for ( unsigned int i=0; i<max; i++ ) eff1 += ( f_max_[i] / ( max*sum ) );
-    eff2 = f_max_global_/sum;
+    const double eff2 = f_max_global_/sum;
     
     Debugging( Form( "Average function value     =  sum   = %f\n\t"
-                     "Average function value     =  sum   = %f\n\t"
                      "Average function value**2  =  sum2  = %f\n\t"
                      "Overall standard deviation =  sig   = %f\n\t"
                      "Average standard deviation =  sigp  = %f\n\t"
                      "Maximum function value     = ffmax  = %f\n\t"
                      "Average inefficiency       =  eff1  = %f\n\t"
-                     "Overall inefficiency       =  eff2  = %f\n\t"
-                     "eff = %f",
-                     sum, sum2, sig, sigp, f_max_global_, eff1, eff2, eff ) );
+                     "Overall inefficiency       =  eff2  = %f\n\t",
+                     sum, sum2, sig, sigp, f_max_global_, eff1, eff2 ) );
   }
   gen_prepared_ = true;
 }

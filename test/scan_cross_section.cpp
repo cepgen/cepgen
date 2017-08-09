@@ -22,7 +22,7 @@ int main( int argc, char* argv[] )
   par->mineta = -2.5; par->maxeta = 2.5;
   par->in1p = par->in2p = 6.5e3;
   par->maxmx = 1000.0;
-  par->process = new CepGen::Process::GamGamLL;
+  par->setProcess( new CepGen::Process::GamGamLL );
   par->process_mode = static_cast<CepGen::Kinematics::ProcessMode>( proc_mode );
   par->dump();
 

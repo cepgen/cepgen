@@ -22,6 +22,7 @@ endforeach()
 
 find_package(ROOT QUIET)
 if(${ROOT_FOUND})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic -std=c++14 -g")
     message(STATUS "ROOT found in ${ROOT_INCLUDE_DIRS}")
     include_directories(${ROOT_INCLUDE_DIRS})
     link_directories(${ROOT_LIBRARY_DIR})

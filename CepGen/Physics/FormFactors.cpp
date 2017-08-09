@@ -3,9 +3,9 @@
 namespace CepGen
 {
   bool
-  PSF( double q2, double mx2, double* sigma_t, double* w1, double* w2 )
+  PSF( double q2, double mx2, double& sigma_t, double& w1, double& w2 )
   {
-    *sigma_t = *w1 = *w2 = 0.;
+    sigma_t = w1 = w2 = 0.;
 
     //const double m_min = Particle::massFromPDGId(Particle::Proton)+0.135;
     const double m_proton = Particle::massFromPDGId( Particle::Proton ),
@@ -14,7 +14,9 @@ namespace CepGen
 
     const double mx = sqrt( mx2 );
 
-    if ( mx<m_min or mx>1.99 ) return false;
+    if ( mx<m_min or mx>1.99 ) {
+      return false;
+    }
 
     int n_bin;
     double x_bin, dx;
@@ -64,9 +66,9 @@ namespace CepGen
     const double sigHigh =
       exp( abrass[n_bin]  +bbrass[n_bin]  *logqq0+cbrass[n_bin]  *pow( fabs( logqq0 ), 3 ) )*gd2;
 
-    *sigma_t = sigLow + x_bin*( sigHigh-sigLow )/dx;
-    *w1 = ( mx2-m2_proton )/( 8.*M_PI*M_PI*m_proton*Constants::alphaEM )/Constants::GeV2toBarn*1.e6*(*sigma_t);
-    *w2 = ( *w1 ) * q2/( q2-nu2 );
+    sigma_t = sigLow + x_bin*( sigHigh-sigLow )/dx;
+    w1 = ( mx2-m2_proton )/( 8.*M_PI*M_PI*m_proton*Constants::alphaEM )/Constants::GeV2toBarn*1.e6 * sigma_t;
+    w2 = w1 * q2/( q2-nu2 );
 
     return true;
   }
@@ -112,7 +114,12 @@ namespace CepGen
   {
     const double k = 2.*sqrt( mi2 );
     // start by computing the proton structure function for this Q**2/mX couple
-    double dummy, psfw1, psfw2; PSF( -q2, mf2, &dummy, &psfw1, &psfw2 );
+    double dummy, psfw1, psfw2;
+    if ( !PSF( -q2, mf2, dummy, psfw1, psfw2 ) ) {
+      InWarning( Form( "Fiore-Brasse form factors to be retrieved for an invalid MX value:\n\t"
+                       "%.2e GeV, while allowed range is [1.07, 1.99] GeV", sqrt( mf2 ) ) );
+      return FormFactors( 0.0, 0.0 );
+    }
 
     return FormFactors( psfw2 / k, -psfw1*k / q2 );
   }
