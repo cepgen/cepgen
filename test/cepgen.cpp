@@ -53,7 +53,7 @@ int main( int argc, char* argv[] ) {
     Information( Form( "Reading config file stored in %s", argv[1] ) );
     //CepGen::Cards::LpairReader card( argv[1] );
     CepGen::Cards::Handler<CepGen::Cards::Lpair> card( argv[1] );
-    mg.setParameters( &card.parameters() );
+    mg.setParameters( card.parameters() );
   }
 
   // We might want to cross-check visually the validity of our run

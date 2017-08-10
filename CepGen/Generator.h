@@ -77,7 +77,7 @@ namespace CepGen
       ~Generator();
       /// Dump this program's header into the standard output stream
       void printHeader();
-      void setParameters( Parameters* ip );
+      void setParameters( Parameters& ip );
       /**
        * Compute the cross section for the run parameters defined by this object.
        * This returns the cross section as well as the absolute error computed along.
@@ -110,7 +110,7 @@ namespace CepGen
       /// Physical Parameters used in the events generation and cross-section computation
       std::unique_ptr<Parameters> parameters;
       /// Last event generated in this run
-      Event *last_event;
+      std::shared_ptr<Event> last_event;
 
    private:
       /// Prepare the function before its integration (add particles/compute kinematics/...)

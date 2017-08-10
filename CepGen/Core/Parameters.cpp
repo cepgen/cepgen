@@ -3,36 +3,39 @@
 using namespace CepGen;
 
 Parameters::Parameters() :
-  process_mode( Kinematics::ElasticElastic ),
-  remnant_mode( SuriYennie ),
-  in1p( 6500. ), in2p( 6500. ),
-  in1pdg( Particle::Proton ), in2pdg( Particle::Proton ),
-  pair( Particle::Muon ),
-  mcut( Kinematics::BothParticles ),
-  minpt( 0. ), maxpt( -1. ),
-  minmass( 0. ), maxmass( -1. ),
-  minptdiff( 0. ), maxptdiff( -1. ),
-  minenergy( 0. ), maxenergy( -1. ),
-  mineta( -5. ), maxeta( 5. ),
-  minqt( 0. ), maxqt( 500. ),
-  minq2( 0. ), maxq2( 1.e5 ),
+  process_mode( Kinematics::ElasticElastic ), remnant_mode( SuriYennie ),
+  in1p( 6500. ), in2p( 6500. ), in1pdg( Particle::Proton ), in2pdg( Particle::Proton ),
+  pair( Particle::Muon ), mcut( Kinematics::BothParticles ),
+  minpt( 0. ), maxpt( -1. ), minmass( 0. ), maxmass( -1. ), minptdiff( 0. ), maxptdiff( -1. ), minenergy( 0. ), maxenergy( -1. ), mineta( -5. ), maxeta( 5. ),
+  minqt( 0. ), maxqt( 500. ), minq2( 0. ), maxq2( 1.e5 ),
   minmx( 1.07 ), maxmx( 320. ),
-  ncvg( 100000 ), itvg( 10 ), npoints( 100 ), first_run( true ),
-  generation( false ), store( false ), maxgen( 0 ),
+  ncvg( 100000 ), itvg( 10 ), npoints( 100 ), first_run( true ), generation( false ), store( false ), maxgen( 0 ),
+  last_event( new Event() ),
   symmetrise( true ), ngen( 0 ),
   gpdf( 5 ), spdf( 4 ), qpdf( 12 ),
   hadroniser_max_trials( 5 )
-{
-  this->last_event = new Event();
-  this->file = (std::ofstream*)NULL;
-}
+{}
+
+Parameters::Parameters( const Parameters& param ) :
+  process( std::move( param.process ) ),
+  process_mode( param.process_mode ), remnant_mode( param.remnant_mode ),
+  in1p( param.in1p ), in2p( param.in2p ), in1pdg( param.in1pdg ), in2pdg( param.in2pdg ),
+  pair( param.pair ), mcut( param.mcut ),
+  minpt( param.minpt ), maxpt( param.maxpt ), minmass( param.minmass ), maxmass( param.maxmass ), minptdiff( param.minptdiff ), maxptdiff( param.maxptdiff ), minenergy( param.minenergy ), maxenergy( param.maxenergy ), mineta( param.mineta ), maxeta( param.maxeta ),
+  minqt( param.minqt ), maxqt( param.maxqt ), minq2( param.minq2 ), maxq2( param.maxq2 ),
+  minmx( param.minmx ), maxmx( param.maxmx ),
+  ncvg( param.ncvg ), itvg( param.itvg ), npoints( param.npoints ), first_run( param.first_run ), generation( param.generation ), store( param.store ), maxgen( param.maxgen ),
+  last_event( std::move( param.last_event ) ),
+  symmetrise( param.symmetrise ), ngen( param.ngen ),
+  gpdf( param.gpdf ), spdf( param.spdf ), qpdf( param.qpdf ),
+  hadroniser_max_trials( param.hadroniser_max_trials )
+{}
 
 Parameters::~Parameters()
-{
-  delete last_event;
-}
+{}
 
-void Parameters::setThetaRange( float thetamin, float thetamax )
+void
+Parameters::setThetaRange( float thetamin, float thetamax )
 {
   this->mineta = thetaToEta( thetamax );
   this->maxeta = thetaToEta( thetamin );
@@ -42,7 +45,8 @@ void Parameters::setThetaRange( float thetamin, float thetamax )
                    mineta, thetamin, maxeta, thetamax ) );
 }
 
-void Parameters::dump( std::ostream& out, bool pretty ) const
+void
+Parameters::dump( std::ostream& out, bool pretty ) const
 {
   std::ostringstream os;
   os.str( "" ); os << pair; const std::string particles = os.str();
@@ -54,15 +58,18 @@ void Parameters::dump( std::ostream& out, bool pretty ) const
     << "Parameters dump" << std::left
     << std::endl << std::endl
     << std::setfill('_') << std::setw( wb ) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill( ' ' ) << std::endl
-    << std::right << std::setw( wb ) << std::left << std::endl;
+    << std::right << std::setw( wb ) << std::left << std::endl
+    << std::setw( wt ) << "Process to generate";
   if ( process )
-    os << std::setw( wt ) << "Process to generate" << ( pretty ? boldify( process->name().c_str() ) : process->name() ) << std::endl;
+    os << ( pretty ? boldify( process->name().c_str() ) : process->name() );
+  else
+    os << ( pretty ? boldify( "no process!" ) : "no process!" );
   os
+    << std::endl
     << std::setw( wt ) << "Events generation? " << ( pretty ? yesno( generation ) : std::to_string( generation ) ) << std::endl
     << std::setw( wt ) << "Number of events to generate" << ( pretty ? boldify( maxgen ) : std::to_string( maxgen ) ) << std::endl
     << std::setw( wt ) << "Events storage? " << yesno( store ) << std::endl
     << std::setw( wt ) << "Verbosity level " << Logger::get().level << std::endl
-    << std::setw( wt ) << "Output file opened? " << ( pretty ? yesno( file!=(std::ofstream*)NULL && file->is_open() ) : std::to_string( file!=NULL ) ) << std::endl
     << std::endl
     << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Vegas integration parameters " ) : "Vegas integration parameters" ) << std::setfill( ' ' ) << std::endl
     << std::endl

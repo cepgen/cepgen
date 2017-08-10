@@ -4,7 +4,6 @@
 #include <iomanip>
 #include <cstdlib>
 #include <cmath>
-#include <fstream>
 #include <string>
 #include <memory>
 
@@ -22,18 +21,20 @@ namespace CepGen
   class Parameters {
     public:
       Parameters();
+      /// Copy constructor (transfers ownership to the process!)
+      Parameters( const Parameters& );
       ~Parameters();
       /// Set the polar angle range for the produced leptons
       /// \param[in] thetamin The minimal value of \f$\theta\f$ for the outgoing leptons
       /// \param[in] thetamax The maximal value of \f$\theta\f$ for the outgoing leptons
       void setThetaRange( float thetamin, float thetamax );
       /// Dump the input parameters in the console
-      void dump( std::ostream& os=std::cout, bool pretty=true ) const;
+      void dump( std::ostream& os=Logger::get().outputStream, bool pretty=true ) const;
 
       //----- process to compute
 
       /// Process for which the cross-section will be computed and the events will be generated
-      std::unique_ptr<Process::GenericProcess> process;
+      std::shared_ptr<Process::GenericProcess> process;
       void setProcess( Process::GenericProcess* proc ) { process.reset( proc ); }
       /// Type of outgoing state to consider for the incoming primary particles
       Kinematics::ProcessMode process_mode;
@@ -106,9 +107,7 @@ namespace CepGen
       /// Maximal number of events to generate in this run
       unsigned int maxgen;
       /// Pointer to the last event produced in this run
-      Event* last_event;
-      /// File in which to store the events generation's output
-      std::ofstream* file;
+      std::shared_ptr<Event> last_event;
       /// Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?
       bool symmetrise;
 
@@ -125,7 +124,7 @@ namespace CepGen
       //----- hadronisation
 
       /// Hadronisation algorithm to use for the proton(s) fragmentation
-      std::unique_ptr<Hadroniser::GenericHadroniser> hadroniser;
+      std::shared_ptr<Hadroniser::GenericHadroniser> hadroniser;
       void setHadroniser( Hadroniser::GenericHadroniser* hadr ) { hadroniser.reset( hadr ); }
       /// Maximal number of trials for the hadronisation of the proton(s) remnants
       unsigned int hadroniser_max_trials;

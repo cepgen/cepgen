@@ -23,9 +23,9 @@ namespace CepGen
   }
 
   void
-  Generator::setParameters( Parameters* ip )
+  Generator::setParameters( Parameters& ip )
   {
-    parameters = std::unique_ptr<Parameters>( ip );
+    parameters = std::unique_ptr<Parameters>( new Parameters( ip ) ); // copy constructor
   }
 
   void
@@ -78,7 +78,7 @@ namespace CepGen
     while ( !good ) { good = vegas_->generateOneEvent(); }
 
     last_event = this->parameters->last_event;
-    return static_cast<Event*>( last_event );
+    return last_event.get();
   }
 
   void
