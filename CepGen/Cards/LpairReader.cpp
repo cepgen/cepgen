@@ -7,8 +7,7 @@ namespace CepGen
     //----- specialization for LPAIR input cards
 
     template<>
-    void
-    Handler<LPAIR>::parse( const char* file )
+    LpairReader::Handler( const char* file )
     {
       std::ifstream f( file, std::fstream::in );
       if ( !f.is_open() ) {
@@ -163,9 +162,8 @@ namespace CepGen
       Information( os.str() );
     }
 
-    template<>
-    void
-    Handler<LPAIR>::store( const char* file )
+    template<> void
+    LpairReader::store( const char* file )
     {
       std::ofstream f( file, std::fstream::out | std::fstream::trunc );
       if ( !f.is_open() ) {

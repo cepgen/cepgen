@@ -2,6 +2,7 @@
 
 #include "CepGen/Generator.h"
 #include "CepGen/Cards/Handler.h"
+#include "CepGen/Core/Logger.h"
 
 using namespace std;
 
@@ -15,9 +16,9 @@ using namespace std;
 int main( int argc, char* argv[] ) {
   CepGen::Generator mg;
   
-  //Logger::GetInstance()->Level = Logger::Debug;
-  //Logger::GetInstance()->Level = Logger::DebugInsideLoop;
-  //Logger::GetInstance()->OutputStream = ofstream( "log.txt" );
+  //CepGen::Logger::get().level = CepGen::Logger::Debug;
+  //CepGen::Logger::get().level = CepGen::Logger::DebugInsideLoop;
+  //CepGen::Logger::get().outputStream( ofstream( "log.txt" ) );
   
   if ( argc==1 ) {
     Information( "No config file provided. Setting the default parameters." );
@@ -49,8 +50,9 @@ int main( int argc, char* argv[] ) {
     mg.parameters->maxgen = 2e4;
   }
   else {
-    Debugging( Form( "Reading config file stored in %s", argv[1] ) );
-    CepGen::Cards::LpairReader card( argv[1] );
+    Information( Form( "Reading config file stored in %s", argv[1] ) );
+    //CepGen::Cards::LpairReader card( argv[1] );
+    CepGen::Cards::Handler<CepGen::Cards::Lpair> card( argv[1] );
     mg.setParameters( &card.parameters() );
   }
 

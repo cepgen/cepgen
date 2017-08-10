@@ -45,11 +45,11 @@ void Parameters::setThetaRange( float thetamin, float thetamax )
 void Parameters::dump( std::ostream& out, bool pretty ) const
 {
   std::ostringstream os;
-  os.clear(); os << pair; const std::string particles = os.str();
-  os.clear(); os << mcut; const std::string cutsmode = os.str();
+  os.str( "" ); os << pair; const std::string particles = os.str();
+  os.str( "" ); os << mcut; const std::string cutsmode = os.str();
 
   const int wb = 75, wt = 32;
-  os.clear();
+  os.str( "" );
   os 
     << "Parameters dump" << std::left
     << std::endl << std::endl
