@@ -73,10 +73,11 @@ namespace CepGen
       Generator();
       /// Core of the Monte Carlo integrator and events generator
       /// \param[in] ip_ List of input parameters defining the phase space on which to perform the integration
-      Generator( Parameters *ip_ );
+      Generator( Parameters *ip );
       ~Generator();
       /// Dump this program's header into the standard output stream
       void printHeader();
+      void setParameters( Parameters* ip );
       /**
        * Compute the cross section for the run parameters defined by this object.
        * This returns the cross section as well as the absolute error computed along.

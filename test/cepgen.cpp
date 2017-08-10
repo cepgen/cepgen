@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "CepGen/Generator.h"
+#include "CepGen/Cards/Handler.h"
 
 using namespace std;
 
@@ -49,11 +50,8 @@ int main( int argc, char* argv[] ) {
   }
   else {
     Debugging( Form( "Reading config file stored in %s", argv[1] ) );
-    if ( !mg.parameters->readConfigFile( argv[1] ) ) {
-      Information( Form( "Error reading the configuration!\n\t"
-                         "Please check your input file (%s)", argv[1] ) );
-      return -1;
-    }
+    CepGen::Cards::LpairReader card( argv[1] );
+    mg.setParameters( &card.parameters() );
   }
 
   // We might want to cross-check visually the validity of our run

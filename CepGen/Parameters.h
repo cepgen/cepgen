@@ -29,14 +29,6 @@ namespace CepGen
       void setThetaRange( float thetamin, float thetamax );
       /// Dump the input parameters in the console
       void dump( std::ostream& os=std::cout, bool pretty=true ) const;
-      /// Read content from config file to load the variables
-      /// \param[in] inFile Name of the configuration file to load
-      /// \return A boolean stating whether this input configuration file is correct or not
-      bool readConfigFile( const char* inFile );
-      /// Store the full run configuration to an external config file
-      /// \param[in] outFile Name of the configuration file to create
-      /// \return A boolean stating whether this output configuration file is correctly written or not
-      bool storeConfigFile( const char* outFile );
 
       //----- process to compute
 

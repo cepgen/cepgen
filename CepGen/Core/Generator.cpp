@@ -11,8 +11,8 @@ namespace CepGen
     this->parameters = std::unique_ptr<Parameters>( new Parameters );
   }
 
-  Generator::Generator( Parameters *ip_ ) :
-    parameters( ip_ )
+  Generator::Generator( Parameters* ip ) :
+    parameters( ip )
   {}
 
   Generator::~Generator()
@@ -20,6 +20,12 @@ namespace CepGen
     if ( parameters->generation and parameters->process and parameters->process->numGeneratedEvents()>0 ) {
       Information( Form( "Mean generation time / event: %.3f ms", parameters->process->totalGenerationTime()*1.e3/parameters->process->numGeneratedEvents() ) );
     }
+  }
+
+  void
+  Generator::setParameters( Parameters* ip )
+  {
+    parameters = std::unique_ptr<Parameters>( ip );
   }
 
   void
