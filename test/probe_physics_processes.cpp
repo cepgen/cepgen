@@ -15,7 +15,7 @@ main( int argc, char* argv[] )
       { 15.0, { // pt cut
           { "1_elastic",    { 4.1994803e-1, 8.328e-4 } },
           { "2_singlediss", { 4.8504819e-1, 1.171e-3 } },
-          //{ "3_doublediss", { 6.35650e-1, 1.93968e-3 } }
+          { "3_doublediss", { 6.35650e-1, 1.93968e-3 } }
       } }
     } },
     //--- PPTOLL values
@@ -72,6 +72,8 @@ main( int argc, char* argv[] )
       }
     }
   }
+
+  Information( "ALL TESTS PASSED!" );
 
   return 0;
 }

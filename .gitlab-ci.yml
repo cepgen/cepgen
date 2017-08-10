@@ -17,14 +17,14 @@ compile:
     paths:
       - build/
 
-test:
+test_cross_sections:
   stage: test
   dependencies:
     - compile
   before_script:
     - cd build
   script:
-    - make probe_physics_processes
+    - make -j 4 probe_physics_processes
     - test/probe_physics_processes
   when: on_success
   allow_failure: true

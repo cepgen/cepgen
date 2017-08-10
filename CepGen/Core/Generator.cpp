@@ -25,6 +25,7 @@ namespace CepGen
   void
   Generator::clearRun()
   {
+    parameters->first_run = true;
     has_cross_section_ = false; // force the recreation of the Vegas instance
     cross_section_ = cross_section_error_ = -1.;
   }
@@ -136,14 +137,6 @@ namespace CepGen
     const Particle::Momentum p1( 0., 0.,  p->in1p ),
                              p2( 0., 0., -p->in2p );
     p->process->setIncomingKinematics( p1, p2 );
-    p->process->setPoint( ndim, x );
-
-    if ( Logger::get().level>=Logger::DebugInsideLoop ) {
-      os.str(""); for ( unsigned int i=0; i<ndim; i++ ) { os << x[i] << " "; }
-      DebuggingInsideLoop( Form( "Computing dim-%d point ( %s)", ndim, os.str().c_str() ) );
-    }
-
-    tmr.reset();
 
     double ff = 0.;
 
@@ -192,9 +185,18 @@ namespace CepGen
 
     p->process->beforeComputeWeight();
 
+    p->process->setPoint( ndim, x );
+
+    if ( Logger::get().level>=Logger::DebugInsideLoop ) {
+      os.str(""); for ( unsigned int i=0; i<ndim; i++ ) { os << x[i] << " "; }
+      DebuggingInsideLoop( Form( "Computing dim-%d point ( %s)", ndim, os.str().c_str() ) );
+    }
+
+    tmr.reset();
     //std::cout << "5: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
     ff = p->process->computeWeight();
     //std::cout << "6: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
+
     if (ff<0.) return 0.;
 
     if ( p->store ) { // MC events generation
