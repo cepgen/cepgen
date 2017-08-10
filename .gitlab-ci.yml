@@ -22,3 +22,4 @@ test:
     - make probe_physics_processes
     - test/probe_physics_processes
   when: on_success
+  allow_failure: true
