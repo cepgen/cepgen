@@ -16,9 +16,9 @@ int main( int argc, char* argv[] )
 
   CepGen::Generator mg;
 
-  Logger::GetInstance()->Level = Logger::Error;
+  CepGen::Logger::get().level = CepGen::Logger::Error;
 
-  CepGen::Parameters* par = mg.parameters;
+  CepGen::Parameters* par = mg.parameters.get();
   par->mineta = -2.5; par->maxeta = 2.5;
   par->in1p = par->in2p = 6.5e3;
   par->maxmx = 1000.0;

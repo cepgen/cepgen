@@ -2,6 +2,8 @@
 
 #include "CepGen/Generator.h"
 #include "CepGen/Export/EventWriter.h"
+#include "CepGen/Cards/Handler.h"
+
 #include "HepMC/Version.h"
 
 using namespace std;
@@ -19,11 +21,8 @@ int main( int argc, char* argv[] ) {
   if ( argc==1 ) InError( "No config file provided." );
 
   Debugging( Form( "Reading config file stored in %s", argv[1] ) );
-  if ( !mg.parameters->readConfigFile( argv[1] ) ) {
-    Information( Form( "Error reading the configuration!\n\t"
-                       "Please check your input file (%s)", argv[1] ) );
-    return -1;
-  }
+  CepGen::Cards::LpairReader card( argv[1] );
+  mg.setParameters( card.parameters() );
 
   // We might want to cross-check visually the validity of our run
   mg.parameters->dump();
@@ -34,8 +33,8 @@ int main( int argc, char* argv[] ) {
 
   //if ( !mg.parameters->generation ) return 0;
 
-  CepGen::OutputHandler::EventWriter writer( CepGen::OutputHandler::ExportHandler::LHE, "example.dat" );
-  //OutputHandler::EventWriter writer( CepGen::OutputHandler::ExportHandler::HepMC, "example.dat" );
+  //CepGen::OutputHandler::EventWriter writer( CepGen::OutputHandler::ExportHandler::LHE, "example.dat" );
+  CepGen::OutputHandler::EventWriter writer( CepGen::OutputHandler::ExportHandler::HepMC, "example.dat" );
   writer.setCrossSection( xsec, err );
   writer.initialise( *mg.parameters );
 
@@ -43,7 +42,7 @@ int main( int argc, char* argv[] ) {
 
   // The events generation starts here !
   for ( unsigned int i=0; i<mg.parameters->maxgen; i++ ) {
-    if ( i%10000==0 )
+    if ( i%1000==0 )
       cout << "Generating event #" << i+1 << endl;
     try {
       const CepGen::Event* ev = mg.generateOneEvent();

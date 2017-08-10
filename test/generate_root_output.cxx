@@ -6,6 +6,7 @@
 #include "TLorentzVector.h"
 
 #include "CepGen/Generator.h"
+#include "CepGen/Cards/Handler.h"
 
 using namespace std;
 
@@ -63,12 +64,9 @@ int main( int argc, char* argv[] ) {
     mg.parameters->mineta = -2.5;
     mg.parameters->maxeta = 2.5;
     mg.parameters->maxmx = 1.e3;
-    Debugging( Form( "Reading config file stored in %s", argv[1] ) );
   }
-  else if ( !mg.parameters->readConfigFile( argv[1] ) ) {
-    Information( Form( "Error reading the configuration!\n\t"
-                       "Please check your input file (%s)", argv[1] ) );
-    return -1;
+  else {
+    mg.setParameters( CepGen::Cards::LpairReader( argv[1] ).parameters() );
   }
     
   mg.parameters->generation = true;
