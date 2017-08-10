@@ -23,6 +23,13 @@ namespace CepGen
   }
 
   void
+  Generator::clearRun()
+  {
+    has_cross_section_ = false; // force the recreation of the Vegas instance
+    cross_section_ = cross_section_error_ = -1.;
+  }
+
+  void
   Generator::setParameters( Parameters& ip )
   {
     parameters = std::unique_ptr<Parameters>( new Parameters( ip ) ); // copy constructor

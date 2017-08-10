@@ -15,7 +15,7 @@ main( int argc, char* argv[] )
       { 15.0, { // pt cut
           { "1_elastic",    { 4.1994803e-1, 8.328e-4 } },
           { "2_singlediss", { 4.8504819e-1, 1.171e-3 } },
-          { "3_doublediss", { 6.35650e-1, 1.93968e-3 } }
+          //{ "3_doublediss", { 6.35650e-1, 1.93968e-3 } }
       } }
     } },
     //--- PPTOLL values
@@ -55,11 +55,12 @@ main( int argc, char* argv[] )
         Information( Form( "Process: %s/%s\n\tConfiguration time: %.3f ms", values_vs_generator.first.c_str(), values_vs_kin.first.c_str(), tmr.elapsed()*1.e3 ) );
         tmr.reset();
 
+        mg.clearRun();
         const double xsec_ref = values_vs_kin.second.first, err_xsec_ref = values_vs_kin.second.second;
         double xsec_cepgen, err_xsec_cepgen;
         mg.computeXsection( xsec_cepgen, err_xsec_cepgen );
 
-        /*const double sigma = ( fabs( xsec_ref-xsec_cepgen ) ) / sqrt( err_xsec_cepgen*err_xsec_cepgen + err_xsec_ref*err_xsec_ref );
+        const double sigma = ( fabs( xsec_ref-xsec_cepgen ) ) / sqrt( err_xsec_cepgen*err_xsec_cepgen + err_xsec_ref*err_xsec_ref );
         std::cout << sigma << ":::" << ( xsec_ref-xsec_cepgen ) << std::endl;
 
         Information( Form( "Computed cross section:\n\tRef.   = %.3e +/- %.3e\n\tCepGen = %.3e +/- %.3e", xsec_ref, err_xsec_ref, xsec_cepgen, err_xsec_cepgen ) );
@@ -67,7 +68,7 @@ main( int argc, char* argv[] )
         Information( Form( "Computation time: %.3f ms", tmr.elapsed()*1.e3 ) );
         tmr.reset();
 
-        assert( fabs( sigma )<num_sigma );*/
+        assert( fabs( sigma )<num_sigma );
       }
     }
   }

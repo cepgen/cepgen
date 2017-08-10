@@ -78,6 +78,7 @@ namespace CepGen
       /// Dump this program's header into the standard output stream
       void printHeader();
       void setParameters( Parameters& ip );
+      void clearRun();
       /**
        * Compute the cross section for the run parameters defined by this object.
        * This returns the cross section as well as the absolute error computed along.
