@@ -13,9 +13,14 @@ compile:
   script:
     - cmake ..
     - make -j 4
+  artifacts:
+    paths:
+      - build/
 
 test:
   stage: test
+  dependencies:
+    - compile
   before_script:
     - cd build
   script:
