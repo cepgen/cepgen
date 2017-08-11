@@ -181,6 +181,7 @@ namespace CepGen
               case 2: return pz_; break;
               case 3: return energy_; break;
             }
+            exit( 0 );
           }
           /// Momentum along the \f$x\f$-axis (in GeV)
           inline double px() const { return px_; }

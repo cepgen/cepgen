@@ -27,7 +27,7 @@ main( int argc, char* argv[] )
   Timer tmr;
   CepGen::Generator mg;
 
-  //Logger::get().level = Logger::Debug;
+  //CepGen::Logger::get().level = CepGen::Logger::Debug;
 
   mg.parameters->setSqrtS( 13.e3 );
   mg.parameters->mineta = -2.5;
@@ -55,15 +55,14 @@ main( int argc, char* argv[] )
         Information( Form( "Process: %s/%s\n\tConfiguration time: %.3f ms", values_vs_generator.first.c_str(), values_vs_kin.first.c_str(), tmr.elapsed()*1.e3 ) );
         tmr.reset();
 
-        //mg.clearRun();
+        mg.clearRun();
         const double xsec_ref = values_vs_kin.second.first, err_xsec_ref = values_vs_kin.second.second;
         double xsec_cepgen, err_xsec_cepgen;
         mg.computeXsection( xsec_cepgen, err_xsec_cepgen );
 
         const double sigma = ( fabs( xsec_ref-xsec_cepgen ) ) / sqrt( err_xsec_cepgen*err_xsec_cepgen + err_xsec_ref*err_xsec_ref );
-        std::cout << sigma << ":::" << ( xsec_ref-xsec_cepgen ) << std::endl;
 
-        Information( Form( "Computed cross section:\n\tRef.   = %.3e +/- %.3e\n\tCepGen = %.3e +/- %.3e", xsec_ref, err_xsec_ref, xsec_cepgen, err_xsec_cepgen ) );
+        Information( Form( "Computed cross section:\n\tRef.   = %.3e +/- %.3e\n\tCepGen = %.3e +/- %.3e\n\tPull: %.6f", xsec_ref, err_xsec_ref, xsec_cepgen, err_xsec_cepgen, sigma ) );
 
         Information( Form( "Computation time: %.3f ms", tmr.elapsed()*1.e3 ) );
         tmr.reset();

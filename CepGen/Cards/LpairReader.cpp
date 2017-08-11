@@ -171,9 +171,9 @@ namespace CepGen
         return;
       }
       // ...
-      if ( params_.itvg>=0 ) f << "ITVG  " << params_.itvg << std::endl;
-      if ( params_.minenergy!=-1 ) f << "ECUT  " << params_.minenergy << std::endl;
-      if ( params_.minenergy!=-1 ) f << "PTCT  " << params_.minpt << std::endl;
+      if ( params_.itvg > 0 ) f << "ITVG  " << params_.itvg << std::endl;
+      if ( params_.minenergy !=- 1 ) f << "ECUT  " << params_.minenergy << std::endl;
+      if ( params_.minenergy !=- 1 ) f << "PTCT  " << params_.minpt << std::endl;
       // ...
       f.close();
     }

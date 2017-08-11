@@ -17,7 +17,7 @@ namespace CepGen
 
   Generator::~Generator()
   {
-    if ( parameters->generation and parameters->process and parameters->process->numGeneratedEvents()>0 ) {
+    if ( parameters->generation && parameters->process && parameters->process->numGeneratedEvents()>0 ) {
       Information( Form( "Mean generation time / event: %.3f ms", parameters->process->totalGenerationTime()*1.e3/parameters->process->numGeneratedEvents() ) );
     }
   }
@@ -56,7 +56,13 @@ namespace CepGen
   Generator::computeXsection( double& xsec, double& err )
   {
     // first destroy and recreate the Vegas instance
-    vegas_.reset( new Vegas( numDimensions(), f, parameters.get() ) );
+    if ( !vegas_ ) {
+      vegas_ = std::unique_ptr<Vegas>( new Vegas( numDimensions(), f, parameters.get() ) );
+    }
+    else if ( vegas_->dimensions() != numDimensions() ) {
+      vegas_.reset( new Vegas( numDimensions(), f, parameters.get() ) );
+    }
+
     if ( Logger::get().level>=Logger::Debug ) {
       std::ostringstream topo; topo << parameters->process_mode;
       Debugging( Form( "New Vegas instance created\n\t"
@@ -132,29 +138,33 @@ namespace CepGen
 
     Parameters* p = static_cast<Parameters*>( params );
 
-    //FIXME at some point introduce non head-on colliding beams ?
-
+    //float now = tmr.elapsed();
     const Particle::Momentum p1( 0., 0.,  p->in1p ),
                              p2( 0., 0., -p->in2p );
-    p->process->setIncomingKinematics( p1, p2 );
+    p->process->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
+    //PrintMessage( Form( "0 - after setting the kinematics: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
     DebuggingInsideLoop( Form( "Function f called -- some parameters:\n\t"
                                "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
                                "  remnant mode: %d",
                                p->in1p, p->in2p, p->remnant_mode ) );
 
-    //float now = tmr.elapsed();
-    //std::cout << "0: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
     p->process->clearEvent();
-    //std::cout << "1: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
+    //PrintMessage( Form( "1 - after clearing the event: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
   
     Event* ev = p->process->event();
 
-    //std::cout << "2: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();*/
+    //PrintMessage( Form( "2: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
     if ( p->first_run ) {
-      //std::cout << "3: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
-      // Then add outgoing protons or remnants
+      //PrintMessage( Form(  "3: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
+
+      if ( Logger::get().level >= Logger::Debug ) {
+        std::ostringstream oss; oss << p->process_mode;
+        Debugging( Form( "Process mode considered: %s", oss.str().c_str() ) );
+      }
+
+      //--- add outgoing protons or remnants
       switch ( p->process_mode ) {
         case Kinematics::ElectronProton: default: { InError( "Not handled yet!" ); }
         case Kinematics::ElasticElastic: break; // nothing to change in the event
@@ -166,12 +176,12 @@ namespace CepGen
           ev->getOneByRole( Particle::OutgoingBeam2 )->setPdgId( Particle::uQuark );
           break;
       }
+      //PrintMessage( Form( "4 - after preparing the event kinematics: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
-      //std::cout << "4: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
-      // Prepare the function to be integrated
+      //--- prepare the function to be integrated
       p->process->prepareKinematics();
 
-      // Then add outgoing leptons
+      //--- add outgoing leptons
       Particle* out1 = ev->getOneByRole( Particle::CentralParticle1 ),
                *out2 = ev->getOneByRole( Particle::CentralParticle2 );
       out1->setPdgId( p->pair ); out1->setMass( Particle::massFromPDGId( p->pair ) );
@@ -182,18 +192,19 @@ namespace CepGen
     }
 
     p->process->setPoint( ndim, x );
+    if ( Logger::get().level >= Logger::DebugInsideLoop ) {
+      std::ostringstream oss; for ( unsigned int i=0; i<ndim; i++ ) { oss << x[i] << " "; }
+      DebuggingInsideLoop( Form( "Computing dim-%d point ( %s)", ndim, oss.str().c_str() ) );
+    }
+
+    //--- from this step on, the phase space point is supposed to be set by 'GenericProcess::setPoint()'
 
     p->process->beforeComputeWeight();
 
-    if ( Logger::get().level>=Logger::DebugInsideLoop ) {
-      os.str(""); for ( unsigned int i=0; i<ndim; i++ ) { os << x[i] << " "; }
-      DebuggingInsideLoop( Form( "Computing dim-%d point ( %s)", ndim, os.str().c_str() ) );
-    }
-
     tmr.reset();
-    //std::cout << "5: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
+    //PrintMessage( Form( "5: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
     double ff = p->process->computeWeight();
-    //std::cout << "6: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
+    //PrintMessage( Form( "6: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
     if ( ff<0. ) return 0.;
 
@@ -202,7 +213,7 @@ namespace CepGen
 
       ev->time_generation = tmr.elapsed();
 
-      if ( p->hadroniser and p->process_mode!=Kinematics::ElasticElastic ) {
+      if ( p->hadroniser && p->process_mode!=Kinematics::ElasticElastic ) {
 
         Debugging( Form( "Event before calling the hadroniser (%s)", p->hadroniser->name().c_str() ) );
         if ( Logger::get().level>=Logger::Debug ) ev->dump();
@@ -214,7 +225,7 @@ namespace CepGen
           if ( num_hadr_trials>0 ) { Debugging( Form( "Hadronisation failed. Trying for the %dth time", num_hadr_trials+1 ) ); }
 
           num_hadr_trials++;
-        } while ( !hadronised and num_hadr_trials<=p->hadroniser_max_trials );
+        } while ( !hadronised && num_hadr_trials<=p->hadroniser_max_trials );
         if ( !hadronised ) return 0.; //FIXME
 
         ev->num_hadronisation_trials = num_hadr_trials;

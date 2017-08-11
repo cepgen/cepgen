@@ -45,6 +45,7 @@ namespace CepGen
        * \return A boolean stating if the generation was successful (in term of the computed weight for the phase space point)
        */
       bool generateOneEvent();
+      const unsigned short dimensions() const { return ( !function_ ) ? 0 : function_->dim; }
     private:
       /**
        * Evaluate the function to be integrated at a point @a x_, using the default Parameters object @a fInputParameters
@@ -58,7 +59,7 @@ namespace CepGen
        * \param[in] ip_ A set of parameters to fully define the function
        * \return Function value at this point @a x_
        */
-      inline double F( double* x_,Parameters* ip_ ) { return function_->f( x_, function_->dim, (void*)ip_ ); }
+      inline double F( double* x_, Parameters* ip_ ) { return function_->f( x_, function_->dim, (void*)ip_ ); }
       /**
        * Store the event characterized by its _ndim-dimensional point in the phase
        * space to the output file
