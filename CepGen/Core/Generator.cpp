@@ -138,8 +138,6 @@ namespace CepGen
                              p2( 0., 0., -p->in2p );
     p->process->setIncomingKinematics( p1, p2 );
 
-    double ff = 0.;
-
     DebuggingInsideLoop( Form( "Function f called -- some parameters:\n\t"
                                "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
                                "  remnant mode: %d",
@@ -183,9 +181,9 @@ namespace CepGen
       p->first_run = false;
     }
 
-    p->process->beforeComputeWeight();
-
     p->process->setPoint( ndim, x );
+
+    p->process->beforeComputeWeight();
 
     if ( Logger::get().level>=Logger::DebugInsideLoop ) {
       os.str(""); for ( unsigned int i=0; i<ndim; i++ ) { os << x[i] << " "; }
@@ -194,10 +192,10 @@ namespace CepGen
 
     tmr.reset();
     //std::cout << "5: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
-    ff = p->process->computeWeight();
+    double ff = p->process->computeWeight();
     //std::cout << "6: " << (tmr.elapsed()-now) << std::endl; now = tmr.elapsed();
 
-    if (ff<0.) return 0.;
+    if ( ff<0. ) return 0.;
 
     if ( p->store ) { // MC events generation
       p->process->fillKinematics( false );

@@ -55,7 +55,7 @@ main( int argc, char* argv[] )
         Information( Form( "Process: %s/%s\n\tConfiguration time: %.3f ms", values_vs_generator.first.c_str(), values_vs_kin.first.c_str(), tmr.elapsed()*1.e3 ) );
         tmr.reset();
 
-        mg.clearRun();
+        //mg.clearRun();
         const double xsec_ref = values_vs_kin.second.first, err_xsec_ref = values_vs_kin.second.second;
         double xsec_cepgen, err_xsec_cepgen;
         mg.computeXsection( xsec_cepgen, err_xsec_cepgen );
