@@ -21,7 +21,6 @@ if(${ROOT_FOUND})
   if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
   endif()
-  message(STATUS "ROOT found in ${ROOT_INCLUDE_DIRS}")
   include_directories(${ROOT_INCLUDE_DIRS})
   link_directories(${ROOT_LIBRARY_DIR})
 

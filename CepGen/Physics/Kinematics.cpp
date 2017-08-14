@@ -3,12 +3,15 @@
 namespace CepGen
 {
   Kinematics::Kinematics() :
-    kinematics( ElasticElastic ), remnant_mode( SuriYennie ), mode( NoCuts ),
-    ptmin( 3. ), ptmax( -1. ), emin( 0. ), emax( -1. ), etamin( -999. ), etamax( 999. ),
-    massmin( 0. ), massmax( -1. ),
-    mxmin( 1.07 ), mxmax( 320. ),
-    q2min( 0. ), q2max( 1.e5 ), wmin( 0. ), wmax( -1. ),
-    ptdiffmin( 0. ), ptdiffmax( 300. ) //FIXME need to load this from somewhere else
+    in1p( 6500. ), in2p( 6500. ), in1pdg( Particle::Proton ), in2pdg( Particle::Proton ),
+    pair( Particle::Muon ),
+    kinematics( ElasticElastic ), remnant_mode( SuriYennie ), cuts_mode( BothParticles ),
+    pt_min( 3. ), pt_max( -1. ), e_min( 0. ), e_max( -1. ), eta_min( -999. ), eta_max( 999. ),
+    mass_min( 0. ), mass_max( -1. ),
+    mx_min( 1.07 ), mx_max( 320. ),
+    q2_min( 0. ), q2_max( 1.e5 ), w_min( 0. ), w_max( -1. ),
+    ptdiff_min( 0. ), ptdiff_max( 300. ),
+    qt_min( 0. ), qt_max( 500. )
   {}
 
   Kinematics::~Kinematics()
@@ -20,19 +23,19 @@ namespace CepGen
     os
       << std::setfill(' ')
       << __PRETTY_FUNCTION__ << " Dump" << std::endl
-      << std::setw(25) << "Cuts mode :" << std::setw(2) << this->mode << "->" << std::setw(4) << mode << std::endl    
+      << std::setw(25) << "Cuts mode :" << std::setw(2) << cuts_mode << "->" << std::setw(4) << cuts_mode << std::endl    
       << "===== Single leptons" << std::endl
-      << std::setw(25) << "Minimal pT :" << std::setw(8) << this->ptmin << std::endl
-      << std::setw(25) << "Maximal pT :" << std::setw(8) << this->ptmax << std::endl
-      << std::setw(25) << "Minimal energy :" << std::setw(8) << this->emin << std::endl
-      << std::setw(25) << "Maximal energy :" << std::setw(8) << this->emax << std::endl
-      << std::setw(25) << "Minimal pseudorapidity :" << std::setw(8) << this->etamin << std::endl
-      << std::setw(25) << "Maximal pseudorapidity :" << std::setw(8) << this->etamax << std::endl
+      << std::setw(25) << "Minimal pT :" << std::setw(8) << pt_min << std::endl
+      << std::setw(25) << "Maximal pT :" << std::setw(8) << pt_max << std::endl
+      << std::setw(25) << "Minimal energy :" << std::setw(8) << e_min << std::endl
+      << std::setw(25) << "Maximal energy :" << std::setw(8) << e_max << std::endl
+      << std::setw(25) << "Minimal pseudorapidity :" << std::setw(8) << eta_min << std::endl
+      << std::setw(25) << "Maximal pseudorapidity :" << std::setw(8) << eta_max << std::endl
       << "===== Central kinematics" << std::endl
-      << std::setw(25) << "Minimal Q**2 :" << std::setw(8) << this->q2min << std::endl
-      << std::setw(25) << "Maximal Q**2 :" << std::setw(8) << this->q2max << std::endl
-      << std::setw(25) << "Minimal W :" << std::setw(8) << this->wmin << std::endl
-      << std::setw(25) << "Maximal W :" << std::setw(8) << this->wmax << std::endl;
+      << std::setw(25) << "Minimal Q**2 :" << std::setw(8) << q2_min << std::endl
+      << std::setw(25) << "Maximal Q**2 :" << std::setw(8) << q2_max << std::endl
+      << std::setw(25) << "Minimal W :" << std::setw(8) << w_min << std::endl
+      << std::setw(25) << "Maximal W :" << std::setw(8) << w_max << std::endl;
   }
 
   std::ostream&

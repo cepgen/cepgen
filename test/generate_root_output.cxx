@@ -39,21 +39,21 @@ int main( int argc, char* argv[] ) {
   if ( atoi( argv[1] )<=4 and atoi( argv[1] )>0 ) {
     // do not provide an input card
     mg.parameters->setProcess( new CepGen::Process::GamGamLL );
-    mg.parameters->in1p = 6500.;
-    mg.parameters->in2p = 6500.;
-    mg.parameters->pair = CepGen::Particle::Muon;
-    mg.parameters->mcut = CepGen::Kinematics::BothParticles;
-    mg.parameters->minenergy = 0.; //FIXME
-    mg.parameters->minpt = 15.;
+    mg.parameters->kinematics.in1p = 6500.;
+    mg.parameters->kinematics.in2p = 6500.;
+    mg.parameters->kinematics.pair = CepGen::Particle::Muon;
+    mg.parameters->kinematics.cuts_mode = CepGen::Kinematics::BothParticles;
+    mg.parameters->kinematics.e_min = 0.; //FIXME
+    mg.parameters->kinematics.pt_min = 15.;
     mg.parameters->maxgen = ngen;
     mg.parameters->remnant_mode = CepGen::SuriYennie;
     mg.parameters->process_mode = ( argc>1 )
       ? static_cast<CepGen::Kinematics::ProcessMode>( atoi( argv[1] ) )
       : CepGen::Kinematics::ElasticElastic;
     //mg.parameters->ncvg = 5e3; //FIXME
-    mg.parameters->mineta = -2.5;
-    mg.parameters->maxeta = 2.5;
-    mg.parameters->maxmx = 1.e3;
+    mg.parameters->kinematics.eta_min = -2.5;
+    mg.parameters->kinematics.eta_max = 2.5;
+    mg.parameters->kinematics.mx_max = 1.e3;
   }
   else {
     mg.setParameters( CepGen::Cards::LpairReader( argv[1] ).parameters() );

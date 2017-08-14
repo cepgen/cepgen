@@ -122,10 +122,10 @@ GamGamLL::pickin()
          t1_min = ( w31_*d3+( d3-w31_ )*( d3*w1_-w31_*w2_ )/s_ )/t1_max; // definition from eq. (A.5) in [1]
 
   // FIXME dropped in CDF version
-  if ( t1_max > -cuts_.q2min ) { InWarning( Form( "t1max = %f > -q2min = %f", t1_max, -cuts_.q2min ) ); return false; }
-  if ( t1_min < -cuts_.q2max and cuts_.q2max>=0. ) { Debugging( Form( "t1min = %f < -q2max = %f", t1_min, -cuts_.q2max ) ); return false; }
-  if ( t1_max < -cuts_.q2max and cuts_.q2max>=0. ) t1_max = -cuts_.q2max;
-  if ( t1_min > -cuts_.q2min )                     t1_min = -cuts_.q2min;
+  if ( t1_max > -cuts_.q2_min ) { InWarning( Form( "t1max = %f > -q2min = %f", t1_max, -cuts_.q2_min ) ); return false; }
+  if ( t1_min < -cuts_.q2_max && cuts_.q2_max>=0. ) { Debugging( Form( "t1min = %f < -q2max = %f", t1_min, -cuts_.q2_max ) ); return false; }
+  if ( t1_max < -cuts_.q2_max && cuts_.q2_max>=0. ) t1_max = -cuts_.q2_max;
+  if ( t1_min > -cuts_.q2_min )                     t1_min = -cuts_.q2_min;
   /////
 
   // t1, the first photon propagator, is defined here
@@ -432,8 +432,8 @@ double
 GamGamLL::computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dw )
 {
   const double mx0 = Particle::massFromPDGId( Particle::Proton )+Particle::massFromPDGId( Particle::PiPlus ); // 1.07
-  const double wx2min = std::pow( std::max( mx0, cuts_.mxmin), 2 ),
-               wx2max = std::pow( std::min( sqs_-outmass-2.*lepmass, cuts_.mxmax ), 2 );
+  const double wx2min = std::pow( std::max( mx0, cuts_.mx_min), 2 ),
+               wx2max = std::pow( std::min( sqs_-outmass-2.*lepmass, cuts_.mx_max ), 2 );
 
   double mx2 = 0., dmx2 = 0.;
   Map( x, wx2min, wx2max, mx2, dmx2, "mx2" );
@@ -457,8 +457,8 @@ GamGamLL::beforeComputeWeight()
   ep1_ = p1->energy();
   ep2_ = p2->energy();
 
-  const double thetamin = etaToTheta( cuts_.etamax ),
-               thetamax = etaToTheta( cuts_.etamin );
+  const double thetamin = etaToTheta( cuts_.eta_max ),
+               thetamax = etaToTheta( cuts_.eta_min );
   cot_theta1_ = 1./tan( thetamax*M_PI/180. );
   cot_theta2_ = 1./tan( thetamin*M_PI/180. );
   DebuggingInsideLoop( Form( "cot(theta1) = %f\n\tcot(theta2) = %f", cot_theta1_, cot_theta2_ ) );
@@ -501,16 +501,16 @@ GamGamLL::computeWeight()
 
   if ( !is_outgoing_state_set_ ) { InWarning( "Output state not set!" ); return 0.; }
 
-  if ( cuts_.wmax<0 ) cuts_.wmax = s_;
+  if ( cuts_.w_max<0 ) cuts_.w_max = s_;
 
   // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
   double wmin = std::pow( particlePtr( Particle::CentralParticle1 )->mass()+particlePtr( Particle::CentralParticle2 )->mass(), 2 );
-  if ( fabs( wmin ) < fabs( cuts_.wmin ) ) wmin = cuts_.wmin;
+  if ( fabs( wmin ) < fabs( cuts_.w_min ) ) wmin = cuts_.w_min;
 
   // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or _wmax if specified)
   double wmax = std::pow( sqs_-MX_-MY_, 2 );
   DebuggingInsideLoop( Form( "sqrt(s)=%f\n\tm(X1)=%f\tm(X2)=%f", sqs_, MX_, MY_ ) );
-  if ( fabs( wmax ) > fabs( cuts_.wmax ) ) wmax = cuts_.wmax;
+  if ( fabs( wmax ) > fabs( cuts_.w_max ) ) wmax = cuts_.w_max;
   
   DebuggingInsideLoop( Form( "wmin = %f\n\twmax = %f\n\twmax/wmin = %f", wmin, wmax, wmax/wmin ) );
 
@@ -691,7 +691,7 @@ GamGamLL::computeWeight()
   const double gamma = cm.energy()/sqs_,
                betgam = cm.pz()/sqs_;
 
-  if ( cuts_.mode==Kinematics::NoCuts ) {
+  if ( cuts_.cuts_mode == Kinematics::NoCuts ) {
     DebuggingInsideLoop( Form( "No cuts applied on the outgoing leptons kinematics!" ) );
   }
   // Kinematics computation for both leptons
@@ -705,23 +705,23 @@ GamGamLL::computeWeight()
 
   // Cuts on outgoing leptons' kinematics
 
-  if ( cuts_.massmin>0. and ( p6_cm_+p7_cm_ ).mass()<cuts_.massmin ) return 0.;
-  if ( cuts_.massmax>0. and ( p6_cm_+p7_cm_ ).mass()>cuts_.massmax ) return 0.;
+  if ( cuts_.mass_min>0. && ( p6_cm_+p7_cm_ ).mass()<cuts_.mass_min ) return 0.;
+  if ( cuts_.mass_max>0. && ( p6_cm_+p7_cm_ ).mass()>cuts_.mass_max ) return 0.;
 
   bool lmu1 = cott6>=cot_theta1_
-          and cott6<=cot_theta2_
-          and ( p6_cm_.pt()>=cuts_.ptmin or cuts_.ptmin<=0. )
-          and ( p6_cm_.pt()<=cuts_.ptmax or cuts_.ptmax<=0. )
-          and ( p6_cm_.energy()>=cuts_.emin   or cuts_.emin <=0. )
-          and ( p6_cm_.energy()<=cuts_.emax   or cuts_.emax <=0. );
+           && cott6<=cot_theta2_
+           && ( p6_cm_.pt()>=cuts_.pt_min || cuts_.pt_min<=0. )
+           && ( p6_cm_.pt()<=cuts_.pt_max || cuts_.pt_max<=0. )
+           && ( p6_cm_.energy()>=cuts_.e_min || cuts_.e_min <=0. )
+           && ( p6_cm_.energy()<=cuts_.e_max || cuts_.e_max <=0. );
   bool lmu2 = cott7>=cot_theta1_
-          and cott7<=cot_theta2_
-          and ( p7_cm_.pt()>=cuts_.ptmin or cuts_.ptmin<=0. )
-          and ( p7_cm_.pt()<=cuts_.ptmax or cuts_.ptmax<=0. )
-          and ( p7_cm_.energy()>=cuts_.emin   or cuts_.emin <=0. )
-          and ( p7_cm_.energy()<=cuts_.emax   or cuts_.emax <=0. );
+           && cott7<=cot_theta2_
+           && ( p7_cm_.pt()>=cuts_.pt_min || cuts_.pt_min<=0. )
+           && ( p7_cm_.pt()<=cuts_.pt_max || cuts_.pt_max<=0. )
+           && ( p7_cm_.energy()>=cuts_.e_min || cuts_.e_min <=0. )
+           && ( p7_cm_.energy()<=cuts_.e_max || cuts_.e_max <=0. );
 
-  switch ( cuts_.mode ) {
+  switch ( cuts_.cuts_mode ) {
     case Kinematics::BothParticles: { lcut = lmu1 && lmu2; } break;
     case Kinematics::OneParticle:   { lcut = lmu1 || lmu2; } break;
     case Kinematics::NoCuts: default: lcut = true; break;
@@ -730,14 +730,14 @@ GamGamLL::computeWeight()
 
   // Cut on mass of final hadronic system (MX/Y)
   if ( cuts_.kinematics == Kinematics::InelasticElastic || cuts_.kinematics == Kinematics::InelasticInelastic ) {
-    if ( MX_<cuts_.mxmin or MX_>cuts_.mxmax ) return 0.;
+    if ( MX_<cuts_.mx_min || MX_>cuts_.mx_max ) return 0.;
   }
   if ( cuts_.kinematics == Kinematics::ElasticInelastic || cuts_.kinematics == Kinematics::InelasticInelastic ) {
-    if ( MY_<cuts_.mxmin or MY_>cuts_.mxmax ) return 0.;
+    if ( MY_<cuts_.mx_min || MY_>cuts_.mx_max ) return 0.;
   }
 
   // Cut on the proton's Q2 (first photon propagator T1)
-  if ( ( cuts_.q2max!=-1. and t1_<-cuts_.q2max ) or t1_>-cuts_.q2min ) { return 0.;  }
+  if ( ( cuts_.q2_max!=-1. && t1_<-cuts_.q2_max ) || t1_>-cuts_.q2_min ) { return 0.;  }
 
   weight = Constants::GeV2toBarn*jacobian_;
   switch ( cuts_.kinematics ) { // FIXME inherited from CDF version

@@ -4,12 +4,7 @@ using namespace CepGen;
 
 Parameters::Parameters() :
   process_mode( Kinematics::ElasticElastic ), remnant_mode( SuriYennie ),
-  in1p( 6500. ), in2p( 6500. ), in1pdg( Particle::Proton ), in2pdg( Particle::Proton ),
-  pair( Particle::Muon ), mcut( Kinematics::BothParticles ),
-  minpt( 0. ), maxpt( -1. ), minmass( 0. ), maxmass( -1. ), minptdiff( 0. ), maxptdiff( -1. ), minenergy( 0. ), maxenergy( -1. ), mineta( -5. ), maxeta( 5. ),
-  minqt( 0. ), maxqt( 500. ), minq2( 0. ), maxq2( 1.e5 ),
-  minmx( 1.07 ), maxmx( 320. ),
-  ncvg( 100000 ), itvg( 10 ), npoints( 100 ), first_run( true ), generation( false ), store( false ), maxgen( 0 ),
+  generation( false ), store( false ), maxgen( 0 ),
   last_event( new Event() ),
   symmetrise( true ), ngen( 0 ),
   gpdf( 5 ), spdf( 4 ), qpdf( 12 ),
@@ -19,12 +14,8 @@ Parameters::Parameters() :
 Parameters::Parameters( const Parameters& param ) :
   process( std::move( param.process ) ),
   process_mode( param.process_mode ), remnant_mode( param.remnant_mode ),
-  in1p( param.in1p ), in2p( param.in2p ), in1pdg( param.in1pdg ), in2pdg( param.in2pdg ),
-  pair( param.pair ), mcut( param.mcut ),
-  minpt( param.minpt ), maxpt( param.maxpt ), minmass( param.minmass ), maxmass( param.maxmass ), minptdiff( param.minptdiff ), maxptdiff( param.maxptdiff ), minenergy( param.minenergy ), maxenergy( param.maxenergy ), mineta( param.mineta ), maxeta( param.maxeta ),
-  minqt( param.minqt ), maxqt( param.maxqt ), minq2( param.minq2 ), maxq2( param.maxq2 ),
-  minmx( param.minmx ), maxmx( param.maxmx ),
-  ncvg( param.ncvg ), itvg( param.itvg ), npoints( param.npoints ), first_run( param.first_run ), generation( param.generation ), store( param.store ), maxgen( param.maxgen ),
+  kinematics( param.kinematics ), vegas( param.vegas ),
+  generation( param.generation ), store( param.store ), maxgen( param.maxgen ),
   last_event( std::move( param.last_event ) ),
   symmetrise( param.symmetrise ), ngen( param.ngen ),
   gpdf( param.gpdf ), spdf( param.spdf ), qpdf( param.qpdf ),
@@ -37,20 +28,20 @@ Parameters::~Parameters()
 void
 Parameters::setThetaRange( float thetamin, float thetamax )
 {
-  this->mineta = thetaToEta( thetamax );
-  this->maxeta = thetaToEta( thetamin );
+  kinematics.eta_min = thetaToEta( thetamax );
+  kinematics.eta_max = thetaToEta( thetamin );
 
   Debugging( Form( "eta(min) = %5.2f => theta(min) = %5.2f"
                    "eta(max) = %5.2f => theta(max) = %5.2f",
-                   mineta, thetamin, maxeta, thetamax ) );
+                   kinematics.eta_min, thetamin, kinematics.eta_max, thetamax ) );
 }
 
 void
 Parameters::dump( std::ostream& out, bool pretty ) const
 {
   std::ostringstream os;
-  os.str( "" ); os << pair; const std::string particles = os.str();
-  os.str( "" ); os << mcut; const std::string cutsmode = os.str();
+  os.str( "" ); os << kinematics.pair; const std::string particles = os.str();
+  os.str( "" ); os << kinematics.cuts_mode; const std::string cutsmode = os.str();
 
   const int wb = 75, wt = 32;
   os.str( "" );
@@ -73,43 +64,43 @@ Parameters::dump( std::ostream& out, bool pretty ) const
     << std::endl
     << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Vegas integration parameters " ) : "Vegas integration parameters" ) << std::setfill( ' ' ) << std::endl
     << std::endl
-    << std::setw( wt ) << "Maximum number of iterations" << ( pretty ? boldify( itvg ) : std::to_string( itvg ) ) << std::endl
-    << std::setw( wt ) << "Number of function calls" << ncvg << std::endl
-    << std::setw( wt ) << "Number of points to try per bin" << npoints << std::endl
+    << std::setw( wt ) << "Maximum number of iterations" << ( pretty ? boldify( vegas.itvg ) : std::to_string( vegas.itvg ) ) << std::endl
+    << std::setw( wt ) << "Number of function calls" << vegas.ncvg << std::endl
+    << std::setw( wt ) << "Number of points to try per bin" << vegas.npoints << std::endl
     << std::endl
     << std::setfill('_') << std::setw( wb ) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill( ' ' ) << std::endl
     << std::endl
     << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming particles " ) : "Incoming particles" ) << std::setfill( ' ' ) << std::endl
     << std::endl;
   std::ostringstream proc_mode, cut_mode; proc_mode << process_mode; cut_mode << cutsmode;
-  std::ostringstream ip1, ip2, op; ip1 << in1pdg; ip2 << in2pdg; op << pair;
+  std::ostringstream ip1, ip2, op; ip1 << kinematics.in1pdg; ip2 << kinematics.in2pdg; op << kinematics.pair;
   os
     << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << std::endl
     << std::setw( wt ) << "Incoming particles" << ( pretty ? boldify( ip1.str().c_str() ) : ip1.str() ) << ", " << ( pretty ? boldify( ip2.str().c_str() ) : ip2.str() ) << std::endl
-    << std::setw( wt ) << "Momenta (GeV/c)" << in1p << ", " << in2p << std::endl
+    << std::setw( wt ) << "Momenta (GeV/c)" << kinematics.in1p << ", " << kinematics.in2p << std::endl
     << std::setw( wt ) << "Structure functions mode" << remnant_mode << std::endl
     << std::endl
     << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << std::endl
     << std::endl
-    << std::setw( wt ) << "Virtuality in range" << ( pretty ? boldify( Form( "%.1f < -t < %.1e", minq2, maxq2 ).c_str() ) : Form( "%.1f < -t < %.1e", minq2, maxq2 ) )<< " GeV**2" << std::endl
+    << std::setw( wt ) << "Virtuality in range" << ( pretty ? boldify( Form( "%.1f < -t < %.1e", kinematics.q2_min, kinematics.q2_max ).c_str() ) : Form( "%.1f < -t < %.1e", kinematics.q2_min, kinematics.q2_max ) )<< " GeV**2" << std::endl
     << std::endl
     << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Outgoing leptons " ) : "Outgoing leptons" ) << std::setfill( ' ' ) << std::endl
     << std::endl
-    << std::setw( wt ) << "Pair" << ( pretty ? boldify( op.str().c_str() ) : op.str() ) << " (" << (int)pair << ")" << std::endl
+    << std::setw( wt ) << "Pair" << ( pretty ? boldify( op.str().c_str() ) : op.str() ) << " (" << (int)kinematics.pair << ")" << std::endl
     << std::setw( wt ) << "Cuts mode" << ( pretty ? boldify( cut_mode.str().c_str() ) : cut_mode.str() ) << std::endl;
-  const std::string ptrange = ( maxpt<=0. ) ? Form( ">= %.1f", minpt ) : Form( "%.1f < pT < %.1f", minpt, maxpt ),
-                    erange = ( maxenergy<=0. ) ? Form( ">= %.1f", minenergy ) : Form( "%.1f < E < %.1f", minenergy, maxenergy );
+  const std::string ptrange = ( kinematics.pt_max<=0. ) ? Form( ">= %.1f", kinematics.pt_min ) : Form( "%.1f < pT < %.1f", kinematics.pt_min, kinematics.pt_max ),
+                    erange = ( kinematics.e_max<=0. ) ? Form( ">= %.1f", kinematics.e_min ) : Form( "%.1f < E < %.1f", kinematics.e_min, kinematics.e_max );
   os
     << std::setw( wt ) << "Lepton(s)' pT range" << ( pretty ? boldify( ptrange.c_str() ) : ptrange ) << " GeV/c" << std::endl
     << std::setw( wt ) << "Lepton(s)' energy range" << ( pretty ? boldify( erange.c_str() ) : erange ) << " GeV" << std::endl
-    << std::setw( wt ) << "Pseudorapidity range" << ( pretty ? boldify( Form( "%.1f < eta < %.1f", mineta, maxeta ).c_str() ) : Form( "%.1f < eta < %.1f", mineta, maxeta ) ) << std::endl
+    << std::setw( wt ) << "Pseudorapidity range" << ( pretty ? boldify( Form( "%.1f < eta < %.1f", kinematics.eta_min, kinematics.eta_max ).c_str() ) : Form( "%.1f < eta < %.1f", kinematics.eta_min, kinematics.eta_max ) ) << std::endl
     //<< std::setw( wt ) << "Polar angle theta in range [deg]" << "[" << std::setw(3) << mintheta << ", " << std::setw( 3 ) << maxtheta << "]" << std::endl
     << std::endl
     << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Outgoing remnants" ) : "Outgoing remnants" ) << std::endl
     << std::endl << std::setfill( ' ' );
   if ( hadroniser )
     os << std::setw( wt ) << "Hadronisation algorithm" << ( pretty ? boldify( hadroniser->name().c_str() ) : hadroniser->name() ) << std::endl;
-  os << std::setw( wt ) << "Mass range" << ( pretty ? boldify( Form( "%.2f < M(x/y) < %.2f", minmx, maxmx ).c_str() ) : Form( "%.2f < M(x/y) < %.2f", minmx, maxmx ) ) << " GeV/c**2" << std::endl;
+  os << std::setw( wt ) << "Mass range" << ( pretty ? boldify( Form( "%.2f < M(x/y) < %.2f", kinematics.mx_min, kinematics.mx_max ).c_str() ) : Form( "%.2f < M(x/y) < %.2f", kinematics.mx_min, kinematics.mx_max ) ) << " GeV/c**2" << std::endl;
   if ( pretty ) { Information( os.str() ); }
   else out << os.str();
 }

@@ -18,16 +18,17 @@ Vegas::Vegas( const unsigned int dim, double f_( double*, size_t, void* ), Param
     x_up_[i] = 1.;
   }
   
-  Debugging( Form( "Number of integration dimensions: %d\n\t"
-                   "Number of iterations:             %d\n\t"
-                   "Number of function calls:         %d", dim, param->itvg, param->ncvg ) );
-
   function_ = new gsl_monte_function;
   function_->f = f_;
   function_->dim = dim;
   function_->params = (void*)param;
-  num_converg_ = param->ncvg;
-  num_iter_ = param->itvg;
+  num_converg_ = param->vegas.ncvg;
+  num_iter_ = param->vegas.itvg;
+
+  Debugging( Form( "Number of integration dimensions: %d\n\t"
+                   "Number of iterations:             %d\n\t"
+                   "Number of function calls:         %d", dim, num_iter_, num_converg_ ) );
+
 }
 
 Vegas::~Vegas()
@@ -248,7 +249,7 @@ Vegas::setGen()
   
   const unsigned int ndim = function_->dim,
                      max = pow( mbin_, ndim ),
-                     npoin = input_params_->npoints;
+                     npoin = input_params_->vegas.npoints;
 
   const unsigned short max_dim = 15;
   if ( ndim > max_dim ) {

@@ -11,10 +11,10 @@ int main()
   p->process_mode = CepGen::Kinematics::ElasticElastic;
   //p->process_mode = CepGen::Kinematics::InelasticElastic;
   //p->process_mode = CepGen::Kinematics::ElasticInelastic;
-  p->minpt = 5.;
-  p->mineta = -2.5; p->maxeta = 2.5;
-  p->minmx = 1.07;
-  p->maxmx = 320.;
+  p->kinematics.pt_min = 5.;
+  p->kinematics.eta_min = -2.5; p->kinematics.eta_max = 2.5;
+  p->kinematics.mx_min = 1.07;
+  p->kinematics.mx_max = 320.;
   
   p->dump();
   CepGen::Logger::get().level = CepGen::Logger::DebugInsideLoop;

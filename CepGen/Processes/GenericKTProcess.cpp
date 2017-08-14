@@ -91,18 +91,18 @@ namespace CepGen
         break;
         case Kinematics::ElasticInelastic:
           MX_ = particlePtr( Particle::IncomingBeam1 )->mass();
-          MY_ = cuts_.mxmin+( cuts_.mxmax-cuts_.mxmin )*x( op_index );
+          MY_ = cuts_.mx_min+( cuts_.mx_max-cuts_.mx_min )*x( op_index );
           break;
         case Kinematics::InelasticElastic:
-          MX_ = cuts_.mxmin+( cuts_.mxmax-cuts_.mxmin )*x( op_index );
+          MX_ = cuts_.mx_min+( cuts_.mx_max-cuts_.mx_min )*x( op_index );
           MY_ = particlePtr( Particle::IncomingBeam2 )->mass();
           break;
         case Kinematics::InelasticInelastic:
-          MX_ = cuts_.mxmin+( cuts_.mxmax-cuts_.mxmin )*x( op_index );
-          MY_ = cuts_.mxmin+( cuts_.mxmax-cuts_.mxmin )*x( op_index+1 );
+          MX_ = cuts_.mx_min+( cuts_.mx_max-cuts_.mx_min )*x( op_index );
+          MY_ = cuts_.mx_min+( cuts_.mx_max-cuts_.mx_min )*x( op_index+1 );
           break;
       }
-      DebuggingInsideLoop( Form( "outgoing remnants invariant mass: %f / %f (%.2f < M(X/Y) < %.2f)", MX_, MY_, cuts_.mxmin, cuts_.mxmax ) );
+      DebuggingInsideLoop( Form( "outgoing remnants invariant mass: %f / %f (%.2f < M(X/Y) < %.2f)", MX_, MY_, cuts_.mx_min, cuts_.mx_max ) );
     }
 
     void
@@ -197,10 +197,10 @@ namespace CepGen
       jac *= 2.*M_PI; // d(phi2)
       switch ( cuts_.kinematics ) {
         case Kinematics::ElasticElastic: default: break;
-        case Kinematics::ElasticInelastic:   jac *= ( cuts_.mxmax-cuts_.mxmin )*2.*MY_; break;
-        case Kinematics::InelasticElastic:   jac *= ( cuts_.mxmax-cuts_.mxmin )*2.*MX_; break;
-        case Kinematics::InelasticInelastic: jac *= ( cuts_.mxmax-cuts_.mxmin )*2.*MX_;
-                                             jac *= ( cuts_.mxmax-cuts_.mxmin )*2.*MY_; break;
+        case Kinematics::ElasticInelastic:   jac *= ( cuts_.mx_max-cuts_.mx_min )*2.*MY_; break;
+        case Kinematics::InelasticElastic:   jac *= ( cuts_.mx_max-cuts_.mx_min )*2.*MX_; break;
+        case Kinematics::InelasticInelastic: jac *= ( cuts_.mx_max-cuts_.mx_min )*2.*MX_;
+                                             jac *= ( cuts_.mx_max-cuts_.mx_min )*2.*MY_; break;
       } // d(mx/y**2)
       return jac;
     }

@@ -7,6 +7,7 @@
 #include <string>
 #include <memory>
 
+#include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Processes/PPtoLL.h"
 
@@ -43,58 +44,22 @@ namespace CepGen
 
       //----- events kinematics
 
-      void setSqrtS( double sqrts ) { in1p = in2p = sqrts/2; }
-      /// First incoming particle's momentum (in \f$\text{GeV}/c\f$)
-      float in1p;
-      /// Second incoming particle's momentum (in \f$\text{GeV}/c\f$)
-      float in2p;
-      /// First beam/primary particle's PDG identifier
-      Particle::ParticleCode in1pdg;
-      /// Second beam/primary particle's PDG identifier
-      Particle::ParticleCode in2pdg;
-      /// PDG id of the outgoing central particles
-      Particle::ParticleCode pair;
-      /// Set of cuts to apply on the outgoing central system
-      Kinematics::Cuts mcut;
-      /// Minimal \f$p_T\f$ of the outgoing central particles
-      float minpt;
-      /// Maximal \f$p_T\f$ of the outgoing central particles
-      float maxpt;
-      /// Minimal mass of the central system
-      float minmass;
-      /// Maximal mass of the central system
-      float maxmass;
-      /// Minimal \f$\Delta p_T\f$ of the outgoing central particles
-      float minptdiff;
-      /// Maximal \f$\Delta p_T\f$ of the outgoing central particles
-      float maxptdiff;
-      /// Minimal energy of the outgoing central particles
-      float minenergy;
-      /// Maximal energy of the outgoing central particles
-      float maxenergy;
-      /// Minimal pseudorapidity \f$\eta\f$ of the outgoing central particles
-      float mineta;
-      /// Maximal pseudorapidity \f$\eta\f$ of the outgoing central particles
-      float maxeta;
-      float minqt, maxqt;
-      /// Minimal value of \f$Q^2\f$, the internal photons lines' virtuality
-      float minq2;
-      /// Maximal value of \f$Q^2\f$, the internal photons lines' virtuality
-      float maxq2;
-      /// Minimal \f$M_X\f$ of the outgoing proton remnants
-      float minmx;
-      /// Maximal \f$M_X\f$ of the outgoing proton remnants
-      float maxmx;
+      Kinematics kinematics;
 
       //----- VEGAS
 
-      unsigned int ncvg; // ??
-      /// Maximal number of iterations to perform by VEGAS
-      unsigned int itvg;
-      /// Number of points to "shoot" in each integration bin by the algorithm
-      unsigned int npoints;
-      /// Is it the first time the integrator is run?
-      bool first_run;
+      struct Vegas
+      {
+        Vegas() : ncvg( 100000 ), itvg( 10 ), npoints( 5000 ), first_run( true ) {}
+        unsigned int ncvg; // ??
+        /// Maximal number of iterations to perform by VEGAS
+        unsigned int itvg;
+        /// Number of points to "shoot" in each integration bin by the algorithm
+        unsigned int npoints;
+        /// Is it the first time the integrator is run?
+        bool first_run;
+      };
+      Vegas vegas;
 
       //----- events generation
 

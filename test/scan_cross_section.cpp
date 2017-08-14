@@ -19,9 +19,9 @@ int main( int argc, char* argv[] )
   CepGen::Logger::get().level = CepGen::Logger::Error;
 
   CepGen::Parameters* par = mg.parameters.get();
-  par->mineta = -2.5; par->maxeta = 2.5;
-  par->in1p = par->in2p = 6.5e3;
-  par->maxmx = 1000.0;
+  par->kinematics.eta_min = -2.5; par->kinematics.eta_max = 2.5;
+  par->kinematics.in1p = par->kinematics.in2p = 6.5e3;
+  par->kinematics.mx_max = 1000.0;
   par->setProcess( new CepGen::Process::GamGamLL );
   par->process_mode = static_cast<CepGen::Kinematics::ProcessMode>( proc_mode );
   par->dump();
@@ -35,9 +35,9 @@ int main( int argc, char* argv[] )
   }
 
   for ( unsigned int i=0; i<npoints; i++ ) {
-    par->minpt = min_value + (max_value-min_value)*i/npoints;
+    par->kinematics.pt_min = min_value + (max_value-min_value)*i/npoints;
     mg.computeXsection( xsect, err_xsect );
-    xsect_file << Form( "%.2f\t%.5f\t%.5f\n", par->minpt, xsect, err_xsect );
+    xsect_file << Form( "%.2f\t%.5f\t%.5f\n", par->kinematics.pt_min, xsect, err_xsect );
     xsect_file.flush();
   }
 

@@ -7,6 +7,7 @@
 
 #include "CepGen/Core/utils.h"
 #include "StructureFunctions.h"
+#include "Particle.h"
 
 using std::cout;
 
@@ -44,6 +45,19 @@ namespace CepGen
       /// Dump all the parameters used in this process cross-section computation
       /// or events generation
       void dump( std::ostream& os=std::cout );
+
+      inline void setSqrtS( double sqrts ) { in1p = in2p = sqrts/2; }
+      /// First incoming particle's momentum (in \f$\text{GeV}/c\f$)
+      float in1p;
+      /// Second incoming particle's momentum (in \f$\text{GeV}/c\f$)
+      float in2p;
+      /// First beam/primary particle's PDG identifier
+      Particle::ParticleCode in1pdg;
+      /// Second beam/primary particle's PDG identifier
+      Particle::ParticleCode in2pdg;
+      /// PDG id of the outgoing central particles
+      Particle::ParticleCode pair;
+
       /**
        * Type of kinematics to consider for the process. Can either be :
        *  * 0 for the electron-proton elastic case
@@ -56,45 +70,45 @@ namespace CepGen
       ProcessMode kinematics;
       StructureFunctions remnant_mode;
       /// Sets of cuts to apply on the final phase space
-      Cuts mode;
+      Cuts cuts_mode;
       /// Minimal transverse momentum of the single outgoing particles
-      double ptmin;
+      double pt_min;
       /// Maximal transverse momentum of the single outgoing particles
-      double ptmax;
+      double pt_max;
       /// Minimal energy of the central two-photons system
-      double emin;
+      double e_min;
       /// Maximal energy of the central two-photons system
-      double emax;
+      double e_max;
       /// Minimal rapidity (\f$\eta\f$) of the outgoing particles
-      double etamin;
+      double eta_min;
       /// Maximal rapidity (\f$\eta\f$) of the outgoing particles
-      double etamax;
+      double eta_max;
       /// Minimal mass of the central system
-      double massmin;
+      double mass_min;
       /// Minimal mass of the central system
-      double massmax;
+      double mass_max;
       /// Minimal mass (in GeV/c\f${}^\mathrm{2}\f$) of the outgoing proton remnant(s)
-      double mxmin;
+      double mx_min;
       /// Maximal mass (in GeV/c\f${}^\mathrm{2}\f$) of the outgoing proton remnant(s)
-      double mxmax;
+      double mx_max;
       /// Minimal value of \f$Q^2\f$
-      double q2min;
+      double q2_min;
       /// Maximal value of \f$Q^2\f$
-      double q2max;
+      double q2_max;
       /// Minimal \f$s\f$ on which the cross section is integrated
-      double wmin;
+      double w_min;
       /// Maximal \f$s\f$ on which the cross section is integrated. If negative,
       /// the maximal energy available to the system (hence, \f$s=(\sqrt{s})^{2}\f$)
       /// is provided.
-      double wmax;
+      double w_max;
       /// Minimal difference in outgoing particles' transverse momentum
-      double ptdiffmin;
+      double ptdiff_min;
       /// Maximal difference in outgoing particles' transverse momentum
-      double ptdiffmax;
+      double ptdiff_max;
       /// Minimal transverse component of the energy transfer
-      double qtmin;
+      double qt_min;
       /// Maximal transverse component of the energy transfer
-      double qtmax;
+      double qt_max;
   };
 }
 

@@ -25,7 +25,7 @@ namespace CepGen
   void
   Generator::clearRun()
   {
-    parameters->first_run = true;
+    parameters->vegas.first_run = true;
     has_cross_section_ = false; // force the recreation of the Vegas instance
     cross_section_ = cross_section_error_ = -1.;
   }
@@ -101,28 +101,7 @@ namespace CepGen
     if ( !parameters->process ) {
       throw Exception( __PRETTY_FUNCTION__, "No process defined!", FatalError );
     }
-    Kinematics kin;
-    kin.kinematics = static_cast<Kinematics::ProcessMode>( parameters->process_mode );
-    /*kin.q1tmin = kin.q2tmin = 0.;
-    kin.q1tmax = kin.q2tmax = 50.;*/
-    kin.q2min = parameters->minq2;
-    kin.q2max = parameters->maxq2;
-    kin.qtmin = parameters->minqt;
-    kin.qtmax = parameters->maxqt;
-    kin.mode = parameters->mcut;
-    kin.ptmin = parameters->minpt;
-    kin.ptmax = parameters->maxpt;
-    kin.ptdiffmin = parameters->minptdiff;
-    kin.ptdiffmax = parameters->maxptdiff;
-    kin.etamin = parameters->mineta;
-    kin.etamax = parameters->maxeta;
-    kin.massmin = parameters->minmass;
-    kin.massmax = parameters->maxmass;
-    kin.emin = parameters->minenergy;
-    kin.emax = parameters->maxenergy;
-    kin.mxmin = parameters->minmx;
-    kin.mxmax = parameters->maxmx;
-    kin.remnant_mode = parameters->remnant_mode;
+    Kinematics kin = parameters->kinematics;
     parameters->process->addEventContent();
     parameters->process->setKinematics( kin );
     Debugging( "Function prepared to be integrated!" );
@@ -139,15 +118,15 @@ namespace CepGen
     Parameters* p = static_cast<Parameters*>( params );
 
     //float now = tmr.elapsed();
-    const Particle::Momentum p1( 0., 0.,  p->in1p ),
-                             p2( 0., 0., -p->in2p );
+    const Particle::Momentum p1( 0., 0.,  p->kinematics.in1p ),
+                             p2( 0., 0., -p->kinematics.in2p );
     p->process->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
     //PrintMessage( Form( "0 - after setting the kinematics: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
     DebuggingInsideLoop( Form( "Function f called -- some parameters:\n\t"
                                "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
                                "  remnant mode: %d",
-                               p->in1p, p->in2p, p->remnant_mode ) );
+                               p->kinematics.in1p, p->kinematics.in2p, p->remnant_mode ) );
 
     p->process->clearEvent();
     //PrintMessage( Form( "1 - after clearing the event: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
@@ -156,7 +135,7 @@ namespace CepGen
 
     //PrintMessage( Form( "2: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
-    if ( p->first_run ) {
+    if ( p->vegas.first_run ) {
       //PrintMessage( Form(  "3: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
       if ( Logger::get().level >= Logger::Debug ) {
@@ -184,11 +163,11 @@ namespace CepGen
       //--- add outgoing leptons
       Particle* out1 = ev->getOneByRole( Particle::CentralParticle1 ),
                *out2 = ev->getOneByRole( Particle::CentralParticle2 );
-      out1->setPdgId( p->pair ); out1->setMass( Particle::massFromPDGId( p->pair ) );
-      out2->setPdgId( p->pair ); out2->setMass( Particle::massFromPDGId( p->pair ) );
+      out1->setPdgId( p->kinematics.pair ); out1->setMass( Particle::massFromPDGId( p->kinematics.pair ) );
+      out2->setPdgId( p->kinematics.pair ); out2->setMass( Particle::massFromPDGId( p->kinematics.pair ) );
 
       p->process->clearRun();
-      p->first_run = false;
+      p->vegas.first_run = false;
     }
 
     p->process->setPoint( ndim, x );

@@ -36,15 +36,15 @@ int main( int argc, char* argv[] ) {
 #endif
 #endif
     
-    mg.parameters->in1p = 6500.;
-    mg.parameters->in2p = 6500.;
-    mg.parameters->pair = CepGen::Particle::Muon;
-    mg.parameters->mcut = CepGen::Kinematics::BothParticles;
-    mg.parameters->minenergy = 0.; //FIXME
-    mg.parameters->minpt = 5.;
-    mg.parameters->mineta = -2.5;
-    mg.parameters->maxeta = 2.5;
-    mg.parameters->ncvg = 5e4; //FIXME
+    mg.parameters->kinematics.in1p = 6500.;
+    mg.parameters->kinematics.in2p = 6500.;
+    mg.parameters->kinematics.pair = CepGen::Particle::Muon;
+    mg.parameters->kinematics.cuts_mode = CepGen::Kinematics::BothParticles;
+    mg.parameters->kinematics.e_min = 0.; //FIXME
+    mg.parameters->kinematics.pt_min = 5.;
+    mg.parameters->kinematics.eta_min = -2.5;
+    mg.parameters->kinematics.eta_max = 2.5;
+    mg.parameters->vegas.ncvg = 5e4; //FIXME
     mg.parameters->generation = true;
     //mg.parameters->maxgen = 2;
     mg.parameters->maxgen = 2e4;

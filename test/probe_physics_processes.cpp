@@ -29,12 +29,12 @@ main( int argc, char* argv[] )
 
   //CepGen::Logger::get().level = CepGen::Logger::Debug;
 
-  mg.parameters->setSqrtS( 13.e3 );
-  mg.parameters->mineta = -2.5;
-  mg.parameters->maxeta = 2.5;
-  mg.parameters->maxmx = 1000.;
-  mg.parameters->ncvg = 50000;
-  mg.parameters->itvg = 5;
+  mg.parameters->kinematics.setSqrtS( 13.e3 );
+  mg.parameters->kinematics.eta_min = -2.5;
+  mg.parameters->kinematics.eta_max = 2.5;
+  mg.parameters->kinematics.mx_max = 1000.;
+  mg.parameters->vegas.ncvg = 50000;
+  mg.parameters->vegas.itvg = 5;
 
   Information( Form( "Initial configuration time: %.3f ms", tmr.elapsed()*1.e3 ) );
   tmr.reset();
@@ -45,7 +45,7 @@ main( int argc, char* argv[] )
     else { InError( Form( "Unrecognized generator mode: %s", values_vs_generator.first.c_str() ) ); break; }
 
     for ( const auto& values_vs_cut : values_vs_generator.second ) { // loop over the single lepton pT cut
-      mg.parameters->minpt = values_vs_cut.first;
+      mg.parameters->kinematics.pt_min = values_vs_cut.first;
       for ( const auto& values_vs_kin : values_vs_cut.second ) { // loop over all possible kinematics
         if      ( values_vs_kin.first.compare( "1_elastic"    ) == 0 ) mg.parameters->process_mode = CepGen::Kinematics::ElasticElastic;
         else if ( values_vs_kin.first.compare( "2_singlediss" ) == 0 ) mg.parameters->process_mode = CepGen::Kinematics::InelasticElastic;
