@@ -55,7 +55,6 @@ void distributions()
   TPad *c_1, *c_2;
 
   stringstream ss;
-  Int_t i, j;
 
   TLine *line;
   TH1D *h_lpairpp[NHIST], *h_lpairor[NHIST];
@@ -81,13 +80,7 @@ void distributions()
   Int_t pdgId_lp[n], npart_lp, stable_lp[n], mother_lp[n];
   Double_t charge_lp[n];
 
-  Double_t xsect_clp, errxsect_clp, mx_clp;
-  Double_t txsect_clp, terrxsect_clp;
-  Double_t px_clp[n], py_clp[n], pz_clp[n], pt_clp[n], e_clp[n], m_clp[n], eta_clp[n];
-  Int_t pdgId_clp[n], npart_clp, role_clp[n], stable_clp[n], mother_clp[n];
-  Double_t charge_clp[n];
-
-  Int_t n_clp, n_lp;
+  Int_t n_lp;
   TFile *lp, *clp;
   TTree *t_lp, *t_clp;
   bool lep1set, lep2set, pset;
@@ -118,22 +111,8 @@ void distributions()
   clp = new TFile("events_lpairpp_jetset.root");
   //clp = new TFile("events_lpairpp_pythia.root");
   t_clp = (TTree*)(clp->Get("h4444"));
-  t_clp->SetBranchAddress("npart", &npart_clp);
-  t_clp->SetBranchAddress("xsect", &txsect_clp);
-  t_clp->SetBranchAddress("errxsect", &terrxsect_clp);
-  t_clp->SetBranchAddress("MX1", &mx_clp);
-  t_clp->SetBranchAddress("Eta", eta_clp);
-  t_clp->SetBranchAddress("px", px_clp);
-  t_clp->SetBranchAddress("py", py_clp);
-  t_clp->SetBranchAddress("pz", pz_clp);
-  t_clp->SetBranchAddress("pt", pt_clp);
-  t_clp->SetBranchAddress("icode", pdgId_clp);
-  t_clp->SetBranchAddress("role", role_clp);
-  t_clp->SetBranchAddress("stable", stable_clp);
-  t_clp->SetBranchAddress("E", e_clp);
-  t_clp->SetBranchAddress("m", m_clp);
-  t_clp->SetBranchAddress("charge", charge_clp);
-  t_clp->SetBranchAddress("parent", mother_clp);
+  CepGen::TreeEvent ev;
+  ev.attach( t_lp );
 
   gStyle->SetOptStat(0);
 
@@ -184,48 +163,47 @@ void distributions()
   h_lpairpp[REMN_E] = new TH1D("rm_e", "E^{remnants}", 175, 0., 3500.);
   h_lpairor[REMN_E] = new TH1D("rm_e_2", "E^{remnants}", 175, 0., 3500.);
 
-  // First fetch the LPAIR++ output
-  n_clp = t_clp->GetEntries();
-  n_lp = t_lp->GetEntries();
+  const unsigned long long n_clp = t_clp->GetEntries(), n_lp = t_lp->GetEntries();
 
-  for (i=0; i<n_clp; i++) {
-    if (maxEvts>0 && i>maxEvts) break;
+  // First fetch the LPAIR++ output
+  for ( unsigned long long i=0; i<n_clp; i++) {
+    if ( maxEvts > 0 && i > maxEvts ) break;
 
     tot_remn.SetXYZM(0., 0., 0., 0.);
     lep1set = lep2set = false;
     nremn = nremn_ch = nremn_nt = 0;
 
-    t_clp->GetEntry(i);
+    t_clp->GetEntry( i );
 
-    if (i==0) {
-      xsect_clp = txsect_clp;
-      errxsect_clp = terrxsect_clp;
+    if ( i == 0 ) {
+      xsect_clp = ev.xsect;
+      errxsect_clp = ev.errxsect;
       cout << "[LPAIR++] Sigma = " << xsect_clp << " +/- " << errxsect_clp << endl;
     }
     else if (i%20000==0) {
       cout << "[LPAIR++] Event #" << i << endl;
     }
 
-    for (j=0; j<npart_clp; j++) {
-      if (pdgId_clp[j]==-lepPdg) {
-	lep1.SetXYZM(px_clp[j], py_clp[j], pz_clp[j], m_clp[j]);
-	lep1set = true;
+    for ( unsigned short j=0; j<ev.np; j++ ) {
+      if ( ev.PID[j] == -lepPdg ) {
+        lep1.SetPtEtaPhiM( ev.pt[j], ev.eta[j], ev.phi[j], ev.M[j] );
+        lep1set = true;
       }
-      else if (pdgId_clp[j]==lepPdg) {
-	lep2.SetXYZM(px_clp[j], py_clp[j], pz_clp[j], m_clp[j]);
-	lep2set = true;
+      else if ( ev.PID[j] == lepPdg ) {
+        lep2.SetPtEtaPhiM( ev.pt[j], ev.eta[j], ev.phi[j], ev.M[j] );
+        lep2set = true;
       }
-      //else if ((stable_clp[j]==1) && (mother_clp[j]!=-1) && (mother_clp[j]!=0) && (mother_clp[j]!=1)) {
-      else if (role_clp[j]==3 && stable_clp[j]) {
-	// Stable proton remnants
-	remn.SetXYZM(px_clp[j], py_clp[j], pz_clp[j], m_clp[j]);
-	h_lpairpp[REMN_P]->Fill(remn.P());
-	h_lpairpp[REMN_PT]->Fill(remn.Pt());
-	h_lpairpp[REMN_E]->Fill(remn.E());
-	tot_remn += remn;
-	if (charge_clp[j]==0.) nremn_nt++;
-	else nremn_ch++;
-	nremn++;
+      //else if (( ev.stable[j] == 1 ) && ( ev.mother[j]!=-1) && (mother_clp[j]!=0) && (mother_clp[j]!=1)) {
+      else if ( ev.role[j] == 3 && ev.stable[j] ) {
+        // Stable proton remnants
+        remn.SetPtEtaPhiM( ev.px[j], ev.eta[j], ev.phi[j], ev.M[j] );
+        h_lpairpp[REMN_P]->Fill( remn.P() );
+        h_lpairpp[REMN_PT]->Fill( remn.Pt() );
+        h_lpairpp[REMN_E]->Fill( remn.E() );
+        tot_remn += remn;
+        if ( ev.charge[j] == 0. ) nremn_nt++;
+        else nremn_ch++;
+        nremn++;
       }
     }
     if (lep1set && lep2set) {

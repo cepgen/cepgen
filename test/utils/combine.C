@@ -23,24 +23,8 @@
 #define S1 20
 #define S2 21
 #define D3 22
-#define WTREAT 23
-#define ZTREAT 24
-#define XIN0TREAT 25
-#define XIN1TREAT 26
-#define XIN2TREAT 27
-#define XIN3TREAT 28
-#define XIN4TREAT 29
-#define XIN5TREAT 30
-#define XIN6TREAT 31
-#define XOUT0TREAT 32
-#define XOUT1TREAT 33
-#define XOUT2TREAT 34
-#define XOUT3TREAT 35
-#define XOUT4TREAT 36
-#define XOUT5TREAT 37
-#define XOUT6TREAT 38
 
-#define NHIST 39
+#define NHIST 23
 
 void combine()
 {
@@ -85,16 +69,16 @@ void combine()
   Double_t t1_, t1min_, t1max_, t2_, t2min_, t2max_, s1_, s2_, d3_;
   Double_t wtreat_, valtreat_, xtreat_[10], ztreat_[10];
   TFile *lp;
-  TTree *tree;
   bool lep1set, lep2set, pset;
 
+  lp = new TFile( "events.root" );
   //lp = new TFile("samples/lpair-pt5-mumu-elastic.root");
   //lp = new TFile("samples/lpair-7tev-elastic-pt5.root");
-  lp = new TFile("samples/clpair-7tev-elastic-pt5.root");
+  //lp = new TFile("samples/clpair-7tev-elastic-pt5.root");
   //lp = new TFile("samples/lpair-mumu-pt15-8tev-elastic.root");
   //lp = new TFile("samples/lpair-7tev-elastic-nocuts.root");
   //lp = new TFile("samples/lpair-7tev-elastic-pt10-theta0to180.root");
-  tree = (TTree*)(lp->Get("h4444"));
+  auto tree = (TTree*)lp->Get("h4444");
   tree->SetBranchAddress("px", px_);
   tree->SetBranchAddress("py", py_);
   tree->SetBranchAddress("pz", pz_);
@@ -116,7 +100,6 @@ void combine()
   tree->SetBranchAddress("valtreat", &valtreat_);
   tree->SetBranchAddress("xtreat", xtreat_);
   tree->SetBranchAddress("ztreat", ztreat_);
-  tree->SetBranchAddress("insetgen", insg_);
 
   gStyle->SetOptStat(0);
 
@@ -166,38 +149,6 @@ void combine()
   h_lpairor[S2] = new TH1D("s2_2", "s_{2}", 250, 0., .5e6);
   h_lpairpp[D3] = new TH1D("d3", "#delta_{3}", 200, 0., 1.e6);
   h_lpairor[D3] = new TH1D("d3_2", "#delta_{3}", 200, 0., 1.e6);
-  h_lpairpp[WTREAT] = new TH1D("wtrt", "w_{treat}", 100, 0., 4);
-  h_lpairor[WTREAT] = new TH1D("wtrt_2", "w_{treat}", 100, 0., 4);
-  h_lpairpp[ZTREAT] = new TH1D("ztrt", "z_{treat}", 100, 0., 200);
-  h_lpairor[ZTREAT] = new TH1D("ztrt_2", "z_{treat}", 100, 0., 200);
-  h_lpairpp[XIN0TREAT] = new TH1D("xintrt0", "x^{in}_{treat}[0]", 100, 0., 1.);
-  h_lpairor[XIN0TREAT] = new TH1D("xintrt0_2", "x^{in}_{treat}[0]", 100, 0., 1.);
-  h_lpairpp[XIN1TREAT] = new TH1D("xintrt1", "x^{in}_{treat}[1]", 100, 0., 1.);
-  h_lpairor[XIN1TREAT] = new TH1D("xintrt1_2", "x^{in}_{treat}[1]", 100, 0., 1.);
-  h_lpairpp[XIN2TREAT] = new TH1D("xintrt2", "x^{in}_{treat}[2]", 100, 0., 1.);
-  h_lpairor[XIN2TREAT] = new TH1D("xintrt2_2", "x^{in}_{treat}[2]", 100, 0., 1.);
-  h_lpairpp[XIN3TREAT] = new TH1D("xintrt3", "x^{in}_{treat}[3]", 100, 0., 1.);
-  h_lpairor[XIN3TREAT] = new TH1D("xintrt3_2", "x^{in}_{treat}[3]", 100, 0., 1.);
-  h_lpairpp[XIN4TREAT] = new TH1D("xintrt4", "x^{in}_{treat}[4]", 100, 0., 1.);
-  h_lpairor[XIN4TREAT] = new TH1D("xintrt4_2", "x^{in}_{treat}[4]", 100, 0., 1.);
-  h_lpairpp[XIN5TREAT] = new TH1D("xintrt5", "x^{in}_{treat}[5]", 100, 0., 1.);
-  h_lpairor[XIN5TREAT] = new TH1D("xintrt5_2", "x^{in}_{treat}[5]", 100, 0., 1.);
-  h_lpairpp[XIN6TREAT] = new TH1D("xintrt6", "x^{in}_{treat}[6]", 100, 0., 1.);
-  h_lpairor[XIN6TREAT] = new TH1D("xintrt6_2", "x^{in}_{treat}[6]", 100, 0., 1.);
-  h_lpairpp[XOUT0TREAT] = new TH1D("xoutrt0", "x^{out}_{treat}[0]", 100, 0., 1.);
-  h_lpairor[XOUT0TREAT] = new TH1D("xoutrt0_2", "x^{out}_{treat}[0]", 100, 0., 1.);
-  h_lpairpp[XOUT1TREAT] = new TH1D("xoutrt1", "x^{out}_{treat}[1]", 100, 0., 1.);
-  h_lpairor[XOUT1TREAT] = new TH1D("xoutrt1_2", "x^{out}_{treat}[1]", 100, 0., 1.);
-  h_lpairpp[XOUT2TREAT] = new TH1D("xoutrt2", "x^{out}_{treat}[2]", 100, 0., 1.);
-  h_lpairor[XOUT2TREAT] = new TH1D("xoutrt2_2", "x^{out}_{treat}[2]", 100, 0., 1.);
-  h_lpairpp[XOUT3TREAT] = new TH1D("xoutrt3", "x^{out}_{treat}[3]", 100, 0., 1.);
-  h_lpairor[XOUT3TREAT] = new TH1D("xoutrt3_2", "x^{out}_{treat}[3]", 100, 0., 1.);
-  h_lpairpp[XOUT4TREAT] = new TH1D("xoutrt4", "x^{out}_{treat}[4]", 100, 0., 1.);
-  h_lpairor[XOUT4TREAT] = new TH1D("xoutrt4_2", "x^{out}_{treat}[4]", 100, 0., 1.);
-  h_lpairpp[XOUT5TREAT] = new TH1D("xoutrt5", "x^{out}_{treat}[5]", 100, 0., 1.);
-  h_lpairor[XOUT5TREAT] = new TH1D("xoutrt5_2", "x^{out}_{treat}[5]", 100, 0., 1.);
-  h_lpairpp[XOUT6TREAT] = new TH1D("xoutrt6", "x^{out}_{treat}[6]", 100, 0., 1.);
-  h_lpairor[XOUT6TREAT] = new TH1D("xoutrt6_2", "x^{out}_{treat}[6]", 100, 0., 1.);
 
   // First fetch the LPAIR++ output
   in.open("test_1Mevts");
@@ -276,22 +227,6 @@ void combine()
 	 >> xintreat[0] >> xintreat[1] >> xintreat[2] >> xintreat[3] >> xintreat[4] >> xintreat[5] >> xintreat[6]
 	 ) {
     if (maxEvts>0 && i>maxEvts) break;
-    h_lpairpp[WTREAT]->Fill(wtreat);
-    h_lpairpp[ZTREAT]->Fill(ztreat);
-    h_lpairpp[XIN0TREAT]->Fill(xintreat[0]);
-    h_lpairpp[XIN1TREAT]->Fill(xintreat[1]);
-    h_lpairpp[XIN2TREAT]->Fill(xintreat[2]);
-    h_lpairpp[XIN3TREAT]->Fill(xintreat[3]);
-    h_lpairpp[XIN4TREAT]->Fill(xintreat[4]);
-    h_lpairpp[XIN5TREAT]->Fill(xintreat[5]);
-    h_lpairpp[XIN6TREAT]->Fill(xintreat[6]);
-    h_lpairpp[XOUT0TREAT]->Fill(xoutreat[0]);
-    h_lpairpp[XOUT1TREAT]->Fill(xoutreat[1]);
-    h_lpairpp[XOUT2TREAT]->Fill(xoutreat[2]);
-    h_lpairpp[XOUT3TREAT]->Fill(xoutreat[3]);
-    h_lpairpp[XOUT4TREAT]->Fill(xoutreat[4]);
-    h_lpairpp[XOUT5TREAT]->Fill(xoutreat[5]);
-    h_lpairpp[XOUT6TREAT]->Fill(xoutreat[6]);
     i++;
   }
   in.close();
@@ -309,22 +244,6 @@ void combine()
     h_lpairor[S1]->Fill(s1_);
     h_lpairor[S2]->Fill(s2_);
     h_lpairor[D3]->Fill(d3_);
-    h_lpairor[WTREAT]->Fill(wtreat_);
-    h_lpairor[ZTREAT]->Fill(valtreat_);
-    h_lpairor[XIN0TREAT]->Fill(xtreat_[0]);
-    h_lpairor[XIN1TREAT]->Fill(xtreat_[1]);
-    h_lpairor[XIN2TREAT]->Fill(xtreat_[2]);
-    h_lpairor[XIN3TREAT]->Fill(xtreat_[3]);
-    h_lpairor[XIN4TREAT]->Fill(xtreat_[4]);
-    h_lpairor[XIN5TREAT]->Fill(xtreat_[5]);
-    h_lpairor[XIN6TREAT]->Fill(xtreat_[6]);
-    h_lpairor[XOUT0TREAT]->Fill(ztreat_[0]);
-    h_lpairor[XOUT1TREAT]->Fill(ztreat_[1]);
-    h_lpairor[XOUT2TREAT]->Fill(ztreat_[2]);
-    h_lpairor[XOUT3TREAT]->Fill(ztreat_[3]);
-    h_lpairor[XOUT4TREAT]->Fill(ztreat_[4]);
-    h_lpairor[XOUT5TREAT]->Fill(ztreat_[5]);
-    h_lpairor[XOUT6TREAT]->Fill(ztreat_[6]);
     
     lep1set = lep2set = false;
     pset = false;
