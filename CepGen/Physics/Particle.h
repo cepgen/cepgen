@@ -195,7 +195,7 @@ namespace CepGen
           inline const std::vector<double> pVector() const { return std::vector<double>( { px(), py(), pz(), energy(), mass() } ); }
           /// 3-momentum norm (in GeV)
           inline double p() const { return p_; }
-          /// Squared 3-momentum norm (in \f$\text{GeV}^\text{2}\f$)
+          /// Squared 3-momentum norm (in \f$\textrm{GeV}^\textrm{2}\f$)
           inline double p2() const { return p_*p_; }
           /// Energy (in GeV)
           inline double energy() const { return energy_; }
@@ -261,7 +261,7 @@ namespace CepGen
        * Gets the mass in GeV/c**2 of a particle given its PDG identifier
        * \brief Gets the mass of a particle
        * \param pdgId ParticleCode (PDG ID)
-       * \return Mass of the particle in \f$\text{GeV}/c^2\f$
+       * \return Mass of the particle in \f$\textrm{GeV}/c^2\f$
        */
       static double massFromPDGId( const Particle::ParticleCode& pdgId );
       /**
@@ -323,19 +323,19 @@ namespace CepGen
       /// \note FIXME Float??
       float helicity;
       /**
-       * Gets the particle's mass in \f$\text{GeV}/c^{2}\f$.
+       * Gets the particle's mass in \f$\textrm{GeV}/c^{2}\f$.
        * \brief Gets the particle's mass
        * \return The particle's mass
        */
       inline double mass() const { return mass_; };
       /**
-       * Set the mass of the particle in \f$\text{GeV}/c^{2}\f$ according to a value given as an argument. This method ensures that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
-       * \param m The mass in \f$\text{GeV}/c^{2}\f$ to set
-       * \brief Set the particle's mass in \f$\text{GeV}/c^{2}\f$
+       * Set the mass of the particle in \f$\textrm{GeV}/c^{2}\f$ according to a value given as an argument. This method ensures that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
+       * \param m The mass in \f$\textrm{GeV}/c^{2}\f$ to set
+       * \brief Set the particle's mass in \f$\textrm{GeV}/c^{2}\f$
        * \return A boolean stating whether or not the mass was correctly set
        */
       bool setMass( double m=-1. );
-      /// Get the particle's squared mass (in \f$\text{GeV}^\text{2}\f$)
+      /// Get the particle's squared mass (in \f$\textrm{GeV}^\textrm{2}\f$)
       inline double mass2() const { return mass_*mass_; };
       /// Retrieve the momentum object associated with this particle
       inline Momentum momentum() const { return momentum_; }
@@ -364,9 +364,9 @@ namespace CepGen
       }
       /**
        * \brief Set the 3-momentum associated to the particle
-       * \param[in] px Momentum along the \f$x\f$-axis, in \f$\text{GeV}/c\f$
-       * \param[in] py Momentum along the \f$y\f$-axis, in \f$\text{GeV}/c\f$
-       * \param[in] pz Momentum along the \f$z\f$-axis, in \f$\text{GeV}/c\f$
+       * \param[in] px Momentum along the \f$x\f$-axis, in \f$\textrm{GeV}/c\f$
+       * \param[in] py Momentum along the \f$y\f$-axis, in \f$\textrm{GeV}/c\f$
+       * \param[in] pz Momentum along the \f$z\f$-axis, in \f$\textrm{GeV}/c\f$
        * \return A boolean stating the validity of this particle (according to its 4-momentum norm)
        */
       inline bool setMomentum( double px, double py, double pz ) {
@@ -375,9 +375,9 @@ namespace CepGen
       };
       /**
        * \brief Set the 4-momentum associated to the particle
-       * \param[in] px Momentum along the \f$x\f$-axis, in \f$\text{GeV}/c\f$
-       * \param[in] py Momentum along the \f$y\f$-axis, in \f$\text{GeV}/c\f$
-       * \param[in] pz Momentum along the \f$z\f$-axis, in \f$\text{GeV}/c\f$
+       * \param[in] px Momentum along the \f$x\f$-axis, in \f$\textrm{GeV}/c\f$
+       * \param[in] py Momentum along the \f$y\f$-axis, in \f$\textrm{GeV}/c\f$
+       * \param[in] pz Momentum along the \f$z\f$-axis, in \f$\textrm{GeV}/c\f$
        * \param[in] e Energy, in GeV
        * \return A boolean stating the validity of the particle's kinematics
        */
@@ -407,7 +407,7 @@ namespace CepGen
       inline double energy() const {
         return ( momentum_.energy()<0. ) ? std::sqrt( mass2()+momentum_.p2() ) : momentum_.energy();
       };
-      /// Get the particle's squared energy (in \f$\text{GeV}^\text{2}\f$)
+      /// Get the particle's squared energy (in \f$\textrm{GeV}^\textrm{2}\f$)
       inline double energy2() const { return energy()*energy(); };
       /// Is this particle a valid particle which can be used for kinematic computations ?
       bool valid();
@@ -458,7 +458,7 @@ namespace CepGen
     private:
       /// Momentum properties handler
       Momentum momentum_;
-      /// Mass in \f$\text{GeV}/c^2\f$
+      /// Mass in \f$\textrm{GeV}/c^2\f$
       double mass_;
       /// List of mother particles
       ParticlesIds mothers_;

@@ -73,16 +73,22 @@ namespace CepGen
       std::shared_ptr<Event> last_event;
       /// Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?
       bool symmetrise;
-
-      //----- PDFLIB information
       /// Number of events already generated in this run
       unsigned int ngen;
-      /// PDFLIB group to use
-      unsigned int gpdf;
-      /// PDFLIB set to use
-      unsigned int spdf;
-      /// Number of quarks to consider in the hadronisation part
-      unsigned int qpdf;
+
+      //----- PDFLIB information
+
+      struct PDFLIB
+      {
+        PDFLIB() : gpdf( 5 ), spdf( 4 ), qpdf( 12 ) {}
+        /// PDFLIB group to use
+        unsigned int gpdf;
+        /// PDFLIB set to use
+        unsigned int spdf;
+        /// Number of quarks to consider in the hadronisation part
+        unsigned int qpdf;
+      };
+      PDFLIB pdflib;
 
       //----- hadronisation
 

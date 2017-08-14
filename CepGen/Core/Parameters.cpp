@@ -7,7 +7,6 @@ Parameters::Parameters() :
   generation( false ), store( false ), maxgen( 0 ),
   last_event( new Event() ),
   symmetrise( true ), ngen( 0 ),
-  gpdf( 5 ), spdf( 4 ), qpdf( 12 ),
   hadroniser_max_trials( 5 )
 {}
 
@@ -17,8 +16,7 @@ Parameters::Parameters( const Parameters& param ) :
   kinematics( param.kinematics ), vegas( param.vegas ),
   generation( param.generation ), store( param.store ), maxgen( param.maxgen ),
   last_event( std::move( param.last_event ) ),
-  symmetrise( param.symmetrise ), ngen( param.ngen ),
-  gpdf( param.gpdf ), spdf( param.spdf ), qpdf( param.qpdf ),
+  symmetrise( param.symmetrise ), ngen( param.ngen ), pdflib( param.pdflib ),
   hadroniser_max_trials( param.hadroniser_max_trials )
 {}
 

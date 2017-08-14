@@ -88,67 +88,67 @@ namespace CepGen
           params_.kinematics.cuts_mode = static_cast<Kinematics::Cuts>( atoi( value.c_str() ) );
           os << std::setw( wdth ) << " * Set of cuts to apply on final products:" << params_.kinematics.cuts_mode << "\n";
         }
-        else if (key == "PTCT") {
+        else if ( key == "PTCT" ) {
           params_.kinematics.pt_min = static_cast<float>( atof( value.c_str() ) );
           os << std::setw( wdth ) << " * Minimal transverse momentum (single central outgoing particle):" << params_.kinematics.pt_min << " GeV/c\n";
         }
-        else if (key == "MSCT") {
+        else if ( key == "MSCT" ) {
           params_.kinematics.mass_min = static_cast<float>( atof( value.c_str() ) );
           os << std::setw( wdth ) << " * Minimal central system mass:" << params_.kinematics.mass_min << " GeV/c**2\n";
         }
-        else if (key == "ECUT") {
+        else if ( key == "ECUT" ) {
           params_.kinematics.e_min = static_cast<float>( atof( value.c_str() ) );
           os << std::setw( wdth ) << " * Minimal energy (single central outgoing particle):" << params_.kinematics.e_min << " GeV\n";
         }
-        else if (key == "NGEN") {
+        else if ( key == "NGEN" ) {
           params_.maxgen = static_cast<unsigned int>( atoi( value.c_str() ) );
           os << std::setw( wdth ) << " * Number of events to generate:" << boldify( params_.maxgen ) << "\n";
         }
-        else if (key == "THMN") {
+        else if ( key == "THMN" ) {
           //params_.mintheta = atof( value.c_str() );
           //params_.setThetaRange( atof( value.c_str() ), 0. ); // FIXME FIXME
           os << std::setw( wdth ) << " * Minimal polar production angle for the central particles" << etaToTheta( params_.kinematics.eta_min ) << "\n";
         }
-        else if (key == "THMX") {
+        else if ( key == "THMX" ) {
           //params_.maxtheta = atof( value.c_str() );
           //params_.setThetaRange( 0., atof( value.c_str() ) ); //FIXME FIXME
           os << std::setw( wdth ) << " * Maximal polar production angle for the central particles" << etaToTheta( params_.kinematics.eta_max ) << "\n";
         }
-        else if (key == "ETMN") {
+        else if ( key == "ETMN" ) {
           params_.kinematics.eta_min = static_cast<float>( atof( value.c_str() ) );
           os << std::setw( wdth ) << " * Minimal pseudo-rapidity (central outgoing particles):" << params_.kinematics.eta_min << "\n";
         }
-        else if (key == "ETMX") {
+        else if ( key == "ETMX" ) {
           params_.kinematics.eta_max = static_cast<float>( atof( value.c_str() ) );
           os << std::setw( wdth ) << " * Maximal pseudo-rapidity (central outgoing particles):" << params_.kinematics.eta_max << "\n";
         }
-        else if (key == "Q2MN") {
+        else if ( key == "Q2MN" ) {
           params_.kinematics.q2_min = static_cast<float>( atof( value.c_str() ) );
           os << std::setw( wdth ) << " * Minimal Q^2 (exchanged parton):" << params_.kinematics.q2_min << " GeV^2\n";
         }
-        else if (key == "Q2MX") {
+        else if ( key == "Q2MX" ) {
           params_.kinematics.q2_max = static_cast<float>( atof( value.c_str() ) );
           os << std::setw( wdth ) << " * Maximal Q^2 (exchanged parton):" << params_.kinematics.q2_max << " GeV^2\n";
         }
-        else if (key == "MXMN") {
+        else if ( key == "MXMN" ) {
           params_.kinematics.mx_min = static_cast<float>( atof( value.c_str() ) );
           os << std::setw( wdth ) << " * Minimal invariant mass of proton remnants:" << params_.kinematics.mx_min << " GeV/c^2\n";
         }
-        else if (key == "MXMX") {
+        else if ( key == "MXMX" ) {
           params_.kinematics.mx_max = static_cast<float>( atof( value.c_str() ) );
           os << std::setw( wdth ) << " * Maximal invariant mass of proton remnants:" << params_.kinematics.mx_max << " GeV/c^2\n";
         }
-        else if (key == "GPDF") {
-          params_.gpdf = static_cast<unsigned int>( atoi( value.c_str() ) );
-          os << std::setw( wdth ) << " * GPDF:" << params_.gpdf << "\n";
+        else if ( key == "GPDF" ) {
+          params_.pdflib.gpdf = static_cast<unsigned int>( atoi( value.c_str() ) );
+          os << std::setw( wdth ) << " * GPDF:" << params_.pdflib.gpdf << "\n";
         }
-        else if (key == "SPDF") {
-          params_.spdf = static_cast<unsigned int>( atoi( value.c_str() ) );
-          os << std::setw( wdth ) << " * SPDF:" << params_.spdf << "\n";
+        else if ( key == "SPDF" ) {
+          params_.pdflib.spdf = static_cast<unsigned int>( atoi( value.c_str() ) );
+          os << std::setw( wdth ) << " * SPDF:" << params_.pdflib.spdf << "\n";
         }
-        else if (key == "QPDF") {
-          params_.qpdf = static_cast<unsigned int>( atoi( value.c_str() ) );
-          os << std::setw( wdth ) << " * QPDF:" << params_.qpdf << "\n";
+        else if ( key == "QPDF" ) {
+          params_.pdflib.qpdf = static_cast<unsigned int>( atoi( value.c_str() ) );
+          os << std::setw( wdth ) << " * QPDF:" << params_.pdflib.qpdf << "\n";
         }
         else {
           InWarning( Form( "Unrecognized argument: [%s] = %s", key.c_str(), value.c_str() ) );
