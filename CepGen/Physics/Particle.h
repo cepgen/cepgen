@@ -53,8 +53,7 @@ namespace CepGen
         FinalState = 1,
         Resonance = 2,
         DebugResonance = 3,
-        PythiaHIncoming = 21,
-        HerwigFragment = 193 //FIXME
+        PythiaHIncoming = 21
       };
       /// Role of the particle in the process
       enum Role {

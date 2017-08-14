@@ -10,8 +10,6 @@
 #include "CepGen/Processes/PPtoLL.h"
 
 #include "CepGen/Hadronisers/Pythia6Hadroniser.h"
-#include "CepGen/Hadronisers/Jetset7Hadroniser.h"
-#include "CepGen/Hadronisers/Herwig6Hadroniser.h"
 
 namespace CepGen
 {

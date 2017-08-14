@@ -65,9 +65,6 @@ namespace CepGen
 #ifdef PYTHIA6
           if ( value == "pythia6" ) params_.setHadroniser( new Hadroniser::Pythia6Hadroniser );
 #endif
-#ifdef JETSET
-          if ( value == "jetset7" ) params_.setHadroniser( new Hadroniser::Jetset7Hadroniser );
-#endif
 #ifdef PYTHIA8
           if ( value == "pythia8" ) params_.setHadroniser( new Hadroniser::Pythia8Hadroniser );
 #endif
