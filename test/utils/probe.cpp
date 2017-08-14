@@ -1,4 +1,5 @@
 #include "CepGen/Generator.h"
+#include "CepGen/Processes/PPtoLL.h"
 
 using namespace std;
 

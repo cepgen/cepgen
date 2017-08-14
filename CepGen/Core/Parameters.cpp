@@ -11,13 +11,13 @@ Parameters::Parameters() :
 {}
 
 Parameters::Parameters( const Parameters& param ) :
-  process( std::move( param.process ) ),
   process_mode( param.process_mode ), remnant_mode( param.remnant_mode ),
   kinematics( param.kinematics ), vegas( param.vegas ),
   generation( param.generation ), store( param.store ), maxgen( param.maxgen ),
   last_event( std::move( param.last_event ) ),
   symmetrise( param.symmetrise ), ngen( param.ngen ), pdflib( param.pdflib ),
-  hadroniser_max_trials( param.hadroniser_max_trials )
+  hadroniser_max_trials( param.hadroniser_max_trials ),
+  process_( std::move( param.process_ ) )
 {}
 
 Parameters::~Parameters()
@@ -49,8 +49,8 @@ Parameters::dump( std::ostream& out, bool pretty ) const
     << std::setfill('_') << std::setw( wb ) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill( ' ' ) << std::endl
     << std::right << std::setw( wb ) << std::left << std::endl
     << std::setw( wt ) << "Process to generate";
-  if ( process )
-    os << ( pretty ? boldify( process->name().c_str() ) : process->name() );
+  if ( process_ )
+    os << ( pretty ? boldify( process_->name().c_str() ) : process_->name() );
   else
     os << ( pretty ? boldify( "no process!" ) : "no process!" );
   os
@@ -96,8 +96,8 @@ Parameters::dump( std::ostream& out, bool pretty ) const
     << std::endl
     << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Outgoing remnants" ) : "Outgoing remnants" ) << std::endl
     << std::endl << std::setfill( ' ' );
-  if ( hadroniser )
-    os << std::setw( wt ) << "Hadronisation algorithm" << ( pretty ? boldify( hadroniser->name().c_str() ) : hadroniser->name() ) << std::endl;
+  if ( hadroniser_ )
+    os << std::setw( wt ) << "Hadronisation algorithm" << ( pretty ? boldify( hadroniser_->name().c_str() ) : hadroniser_->name() ) << std::endl;
   os << std::setw( wt ) << "Mass range" << ( pretty ? boldify( Form( "%.2f < M(x/y) < %.2f", kinematics.mx_min, kinematics.mx_max ).c_str() ) : Form( "%.2f < M(x/y) < %.2f", kinematics.mx_min, kinematics.mx_max ) ) << " GeV/c**2" << std::endl;
   if ( pretty ) { Information( os.str() ); }
   else out << os.str();

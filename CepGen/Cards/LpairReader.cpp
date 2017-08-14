@@ -58,7 +58,7 @@ namespace CepGen
         else if ( key == "PROC" ) {
           if ( value == "lpair" )       params_.setProcess( new Process::GamGamLL() );
           else if ( value == "pptoll" ) params_.setProcess( new Process::PPtoLL() );
-          std::ostringstream proc_name; proc_name << params_.process.get();
+          std::ostringstream proc_name; proc_name << params_.process();
           os << std::setw( wdth ) << " * Process:" << boldify( proc_name.str() ) << "\n";
         }
         else if ( key == "HADR" ) {
@@ -68,7 +68,7 @@ namespace CepGen
 #ifdef PYTHIA8
           if ( value == "pythia8" ) params_.setHadroniser( new Hadroniser::Pythia8Hadroniser );
 #endif
-          os << std::setw( wdth ) << " * Hadroniser:" << ( ( params_.hadroniser!=0 ) ? params_.hadroniser->name() : colourise( "*** no hadroniser ***", Colour::Red ) ) << "\n";
+          os << std::setw( wdth ) << " * Hadroniser:" << ( ( params_.hadroniser() != 0 ) ? params_.hadroniser()->name() : colourise( "*** no hadroniser ***", Colour::Red ) ) << "\n";
         }
         else if ( key == "MODE" ) {
           params_.process_mode = static_cast<Kinematics::ProcessMode>( atoi( value.c_str() ) );

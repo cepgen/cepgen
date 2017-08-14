@@ -1,17 +1,11 @@
 #ifndef Parameters_h
 #define Parameters_h
 
-#include <iomanip>
-#include <cstdlib>
-#include <cmath>
-#include <string>
-#include <memory>
-
+#include "CepGen/Processes/GenericProcess.h"
+#include "CepGen/Hadronisers/GenericHadroniser.h"
 #include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Processes/GamGamLL.h"
-#include "CepGen/Processes/PPtoLL.h"
 
-#include "CepGen/Hadronisers/Pythia6Hadroniser.h"
+#include <memory>
 
 namespace CepGen
 {
@@ -33,8 +27,9 @@ namespace CepGen
       //----- process to compute
 
       /// Process for which the cross-section will be computed and the events will be generated
-      std::shared_ptr<Process::GenericProcess> process;
-      void setProcess( Process::GenericProcess* proc ) { process.reset( proc ); }
+      Process::GenericProcess* process() { return process_.get(); }
+      /// Set the process to study
+      void setProcess( Process::GenericProcess* proc ) { process_.reset( proc ); }
       /// Type of outgoing state to consider for the incoming primary particles
       Kinematics::ProcessMode process_mode;
 
@@ -93,10 +88,16 @@ namespace CepGen
       //----- hadronisation
 
       /// Hadronisation algorithm to use for the proton(s) fragmentation
-      std::shared_ptr<Hadroniser::GenericHadroniser> hadroniser;
-      void setHadroniser( Hadroniser::GenericHadroniser* hadr ) { hadroniser.reset( hadr ); }
+      Hadroniser::GenericHadroniser* hadroniser() { return hadroniser_.get(); }
+      /// Set the hadronisation algorithm
+      void setHadroniser( Hadroniser::GenericHadroniser* hadr ) { hadroniser_.reset( hadr ); }
       /// Maximal number of trials for the hadronisation of the proton(s) remnants
       unsigned int hadroniser_max_trials;
+
+    private:
+      std::shared_ptr<Process::GenericProcess> process_;
+      std::shared_ptr<Hadroniser::GenericHadroniser> hadroniser_;
+
   };
 }
 

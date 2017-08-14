@@ -94,8 +94,8 @@ namespace CepGen
       Event* generateOneEvent();
       /// Number of dimensions on which the integration is performed
       inline size_t numDimensions() {
-        if ( !parameters->process ) return 0;
-        return parameters->process->numDimensions( parameters->process_mode );
+        if ( !parameters->process() ) return 0;
+        return parameters->process()->numDimensions( parameters->process_mode );
       }
       /// Compute one single point from the total phase space
       /// \param[in] x_ the n-dimensional point to compute
