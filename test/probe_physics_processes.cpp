@@ -1,4 +1,8 @@
 #include "CepGen/Generator.h"
+
+#include "CepGen/Processes/GamGamLL.h"
+#include "CepGen/Processes/PPtoLL.h"
+
 #include <assert.h>
 
 int
