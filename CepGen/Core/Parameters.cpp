@@ -10,7 +10,7 @@ Parameters::Parameters() :
   hadroniser_max_trials( 5 )
 {}
 
-Parameters::Parameters( const Parameters& param ) :
+Parameters::Parameters( Parameters& param ) :
   process_mode( param.process_mode ), remnant_mode( param.remnant_mode ),
   kinematics( param.kinematics ), vegas( param.vegas ),
   generation( param.generation ), store( param.store ), maxgen( param.maxgen ),

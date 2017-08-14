@@ -1,5 +1,5 @@
-#ifndef Parameters_h
-#define Parameters_h
+#ifndef CepGen_Parameters_h
+#define CepGen_Parameters_h
 
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
@@ -15,7 +15,7 @@ namespace CepGen
     public:
       Parameters();
       /// Copy constructor (transfers ownership to the process!)
-      Parameters( const Parameters& );
+      Parameters( Parameters& );
       ~Parameters();
       /// Set the polar angle range for the produced leptons
       /// \param[in] thetamin The minimal value of \f$\theta\f$ for the outgoing leptons
@@ -95,8 +95,8 @@ namespace CepGen
       unsigned int hadroniser_max_trials;
 
     private:
-      std::shared_ptr<Process::GenericProcess> process_;
-      std::shared_ptr<Hadroniser::GenericHadroniser> hadroniser_;
+      std::unique_ptr<Process::GenericProcess> process_;
+      std::unique_ptr<Hadroniser::GenericHadroniser> hadroniser_;
 
   };
 }
