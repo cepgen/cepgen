@@ -19,7 +19,7 @@ set(CEPGEN_MODULES Core Processes Hadronisers Physics Export)
 #----- enable fortran (for Pythia/Herwig/...)
 
 enable_language(Fortran OPTIONAL)
-add_subdirectory(external)
+add_subdirectory(External)
 
 #----- include external paths
 

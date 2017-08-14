@@ -20,10 +20,10 @@ int main()
   CepGen::Logger::get().level = CepGen::Logger::DebugInsideLoop;
 
   const unsigned short ndim = g.numDimensions();
-  double x[ndim];
-  for (unsigned int i=0; i<ndim; i++) { x[i] = 0.3;}
+  double x[12];
+  for ( unsigned int i=0; i<ndim; i++ ) { x[i] = 0.3; }
   
-  cout << g.computePoint(x) << endl;
+  cout << g.computePoint( x ) << endl;
   
   return 0;
 }

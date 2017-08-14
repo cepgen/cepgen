@@ -1,5 +1,5 @@
-#ifndef Pythia6Hadroniser_h
-#define Pythia6Hadroniser_h
+#ifndef CepGen_Hadronisers_Pythia6Hadroniser_h
+#define CepGen_Hadronisers_Pythia6Hadroniser_h
 
 #include <algorithm>
 

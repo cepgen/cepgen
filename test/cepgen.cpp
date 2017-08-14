@@ -29,10 +29,10 @@ int main( int argc, char* argv[] ) {
     mg.parameters->remnant_mode = CepGen::SuriYennie;
 
 #ifdef PYTHIA6
-    mg.parameters->setHadroniser( new CepGen::Process::Pythia6Hadroniser );
+    mg.parameters->setHadroniser( new CepGen::Hadroniser::Pythia6Hadroniser );
 #else
 #ifdef JETSET
-    mg.parameters->setHadroniser( new CepGen::Jetset7Hadroniser );
+    mg.parameters->setHadroniser( new CepGen::Hadroniser::Jetset7Hadroniser );
 #endif
 #endif
     
