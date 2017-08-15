@@ -43,6 +43,7 @@ namespace CepGen
 
       //----- VEGAS
 
+      /// Collection of Vegas integrator parameters
       struct Vegas
       {
         Vegas() : ncvg( 100000 ), itvg( 10 ), npoints( 5000 ), first_run( true ) {}
@@ -73,6 +74,7 @@ namespace CepGen
 
       //----- PDFLIB information
 
+      /// Collection of PDFLIB steering parameters
       struct PDFLIB
       {
         PDFLIB() : gpdf( 5 ), spdf( 4 ), qpdf( 12 ) {}

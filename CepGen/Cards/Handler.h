@@ -13,24 +13,35 @@
 
 namespace CepGen
 {
+  /// Location for all steering card parsers/writers
   namespace Cards
   {
-    enum Type { Lpair, Tcl };
+    /// List of all steering card types handled
+    enum Type {
+      Lpair, ///< LPAIR steering card
+      Tcl
+    };
 
+    /// Generic steering card handler
     template<Type T>
     class Handler
     {
       public:
+        /// Build a configuration from an external steering card
+        /// \param[in] file Input file to parse
         Handler( const char* file );
         ~Handler() {}
 
+        /// Store a configuration into an external steering card
         void store( const char* file ) {}
+        /// Retrieve a configuration from a parsed steering cart
         Parameters& parameters() { return params_; }
 
       private:
         Parameters params_;
     };
 
+    /// LPAIR steering cards handler
     typedef Handler<Lpair> LpairReader;
   }
 }

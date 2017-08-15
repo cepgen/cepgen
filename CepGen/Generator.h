@@ -32,6 +32,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+/// Common namespace for this Monte Carlo generator
 namespace CepGen
 {
   /**
@@ -72,12 +73,14 @@ namespace CepGen
       /// Core of the Monte Carlo integrator and events generator
       Generator();
       /// Core of the Monte Carlo integrator and events generator
-      /// \param[in] ip_ List of input parameters defining the phase space on which to perform the integration
+      /// \param[in] ip List of input parameters defining the phase space on which to perform the integration
       Generator( Parameters *ip );
       ~Generator();
       /// Dump this program's header into the standard output stream
       void printHeader();
+      /// Feed the generator with a Parameters object
       void setParameters( Parameters& ip );
+      /// Remove all references to a previous generation/run
       void clearRun();
       /**
        * Compute the cross section for the run parameters defined by this object.

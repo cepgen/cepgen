@@ -1,6 +1,6 @@
 PROC lpair
 MODE 1
-#HADR pythia8
+#HADR pythia6
 IEND 1
 NCVG 100000
 ITVG 10

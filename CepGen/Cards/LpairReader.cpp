@@ -65,9 +65,6 @@ namespace CepGen
 #ifdef PYTHIA6
           if ( value == "pythia6" ) params_.setHadroniser( new Hadroniser::Pythia6Hadroniser );
 #endif
-#ifdef PYTHIA8
-          if ( value == "pythia8" ) params_.setHadroniser( new Hadroniser::Pythia8Hadroniser );
-#endif
           os << std::setw( wdth ) << " * Hadroniser:" << ( ( params_.hadroniser() != 0 ) ? params_.hadroniser()->name() : colourise( "*** no hadroniser ***", Colour::Red ) ) << "\n";
         }
         else if ( key == "MODE" ) {

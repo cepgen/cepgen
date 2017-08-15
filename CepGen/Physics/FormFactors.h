@@ -28,6 +28,7 @@ namespace CepGen
 
   /// Form factors collection (electric and magnetic parts)
   struct FormFactors {
+    /// Initialise a collection of electric/magnetic form factors
     FormFactors( double fe=0.0, double fm=0.0 ) : FE( fe ), FM( fm ) {}
     /// Electric form factor
     double FE;

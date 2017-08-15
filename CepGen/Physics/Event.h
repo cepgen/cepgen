@@ -13,18 +13,18 @@ namespace CepGen
 {
   /**
    * Class containing all the information on the in- and outgoing particles' kinematics
-   * @brief Kinematic information on the particles in the event
+   * \brief Kinematic information on the particles in the event
    */
   class Event {
     public:
       Event();
       ~Event();
       /**
-       * @brief Copies all the relevant quantities from one Event object to another
+       * \brief Copies all the relevant quantities from one Event object to another
        */
       Event& operator=( const Event& );
       /**
-       * @brief Empties the whole event content
+       * \brief Empties the whole event content
        */
       void clear();
       /// Initialize an "empty" event collection
@@ -33,15 +33,15 @@ namespace CepGen
       void restore();
       /**
        * Returns the list of pointers to the Particle objects corresponding to a certain role in the process kinematics
-       * @brief Gets a list of particles by their role in the event
-       * @param[in] role_ The role the particles have to play in the process
-       * @return A vector of pointers to the requested Particle objects
+       * \brief Gets a list of particles by their role in the event
+       * \param[in] role_ The role the particles have to play in the process
+       * \return A vector of pointers to the requested Particle objects
        */
       ParticlesRef getByRole( const Particle::Role& role_);
       /**
        * Returns the first Particle object in the particles list whose role corresponds to the given argument
-       * @param[in] role_ The role the particle has to play in the event
-       * @return A Particle object corresponding to the first particle found in this event
+       * \param[in] role_ The role the particle has to play in the event
+       * \return A Particle object corresponding to the first particle found in this event
        */
       inline Particle* getOneByRole( const Particle::Role& role_ ) {
         ParticlesMap::iterator it = particles_.find( role_ );
@@ -50,9 +50,9 @@ namespace CepGen
       };
       /**
        * Returns the pointer to the Particle object corresponding to a unique identifier in the event
-       * @brief Gets one particle by its unique identifier in the event
-       * @param[in] id_ The unique identifier to this particle in the event
-       * @return A pointer to the requested Particle object
+       * \brief Gets one particle by its unique identifier in the event
+       * \param[in] id_ The unique identifier to this particle in the event
+       * \return A pointer to the requested Particle object
        */
       Particle* getById( int id_ );
       /// Get a const Particle object using its unique identifier
@@ -61,9 +61,9 @@ namespace CepGen
       const Particle getConstById( int id_ ) const;
       /**
        * Returns the pointers to the Particle objects corresponding to the unique identifiers in the event
-       * @brief Gets a vector of particles by their unique identifier in the event
-       * @param[in] ids_ The unique identifiers to the particles to be selected in the event
-       * @return A vector of pointers to the requested Particle objects
+       * \brief Gets a vector of particles by their unique identifier in the event
+       * \param[in] ids_ The unique identifiers to the particles to be selected in the event
+       * \return A vector of pointers to the requested Particle objects
        */
       inline ParticlesRef getByIds( const ParticlesIds& ids_ ) {
         ParticlesRef out;
@@ -74,8 +74,8 @@ namespace CepGen
       }
       /**
        * Returns the pointer to the mother particle of any given Particle object in this event
-       * @param[in] part_ The pointer to the Particle object from which we want to extract the mother particle
-       * @return A pointer to the mother Particle object
+       * \param[in] part_ The pointer to the Particle object from which we want to extract the mother particle
+       * \return A pointer to the mother Particle object
        */
       inline ParticlesRef mothers( Particle* part_ ) {
         ParticlesRef out;

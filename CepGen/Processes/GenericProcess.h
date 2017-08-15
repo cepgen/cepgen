@@ -9,6 +9,7 @@
 
 namespace CepGen
 {
+  /// Location for all physics processes to be generated
   namespace Process
   {
     /**
@@ -59,7 +60,7 @@ namespace CepGen
         /// \return Number of dimensions on which to integrate
         virtual unsigned int numDimensions( const Kinematics::ProcessMode& ) const = 0;
         /// Set the list of kinematic cuts to apply on the outgoing particles' final state
-        /// \param[in] cuts_ The Cuts object containing the kinematic parameters
+        /// \param[in] cuts The Cuts object containing the kinematic parameters
         inline virtual void setKinematics( const Kinematics& cuts ) { cuts_ = cuts; }
 
       public:
@@ -67,7 +68,7 @@ namespace CepGen
          * Sets the phase space point to compute the weight associated to it.
          * \brief Sets the phase space point to compute
          * \param[in] ndim The number of dimensions of the point in the phase space
-         * \param[in] x[] The (@a ndim_)-dimensional point in the phase space on which the kinematics and the cross-section are computed
+         * \param[in] x[] The (\a ndim_)-dimensional point in the phase space on which the kinematics and the cross-section are computed
          */
         void setPoint( const unsigned int ndim, double* x );
         /// Dump the evaluated point's coordinates in the standard output stream
@@ -78,7 +79,7 @@ namespace CepGen
 
         ///Get the number of dimensions on which the integration is performed
         inline const unsigned int ndim() const { return num_dimensions_; }
-        /// Get the value of a component of the @a fNumDimensions -dimensional point considered
+        /// Get the value of a component of the \a num_dimensions_ -dimensional point considered
         inline const double x( const unsigned int idx ) const {
           return ( idx>=num_dimensions_ ) ? -1. : x_[idx];
         }
@@ -104,6 +105,7 @@ namespace CepGen
       protected:
         /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
         void setEventContent( const IncomingState& is, const OutgoingState& os );
+        /// Compute the electric/magnetic form factors for the two considered \f$Q^{2}\f$ momenta transfers
         void formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const;
  
         /// Get a list of pointers to the particles with a given role in the process
@@ -112,9 +114,9 @@ namespace CepGen
         inline ParticlesRef particles( const Particle::Role& role ) { return event_->getByRole( role ); }
         /// Get the pointer to one particle in the event (using its role)
         inline Particle* particlePtr( const Particle::Role& role, unsigned int id=0 ) {
-          if ( id==0 ) return event_->getOneByRole( role );
+          if ( id == 0 ) return event_->getOneByRole( role );
           ParticlesRef pp = event_->getByRole( role );
-          if ( !pp.size() or id>pp.size() ) return 0;
+          if ( pp.empty() || id>pp.size() ) return 0;
           return pp.at( id );
         }
         /// Get the pointer to one particle in the event (using its identifier)
@@ -122,7 +124,7 @@ namespace CepGen
 
         // --- 
   
-        /// Array of @a fNumDimensions components representing the point on which the weight in the cross-section is computed
+        /// Array of \a num_dimensions_ components representing the point on which the weight in the cross-section is computed
         double* x_;
         /// List of incoming state particles (including intermediate partons)
         IncomingState incoming_state_;
@@ -169,22 +171,22 @@ namespace CepGen
       private:
         /**
          * Is the system's kinematics well defined and compatible with the process ?
-         * This check is mandatory to perform the (@a fNumDimensions)-dimensional point's cross-section computation.
+         * This check is mandatory to perform the (\a num_dimensions_)-dimensional point's cross-section computation.
          * \brief Is the system's kinematics well defined?
          * \return A boolean stating if the input kinematics and the final states are well-defined
          */
         inline bool isKinematicsDefined() {
           // check the incoming state
-          if ( particles( Particle::IncomingBeam1 ).size()!=0 and particles( Particle::IncomingBeam2 ).size()!=0 ) {
+          if ( !particles( Particle::IncomingBeam1 ).empty() && !particles( Particle::IncomingBeam2 ).empty() ) {
             is_incoming_state_set_ = true;
           }
           // check the outgoing state
-          if ( ( particles( Particle::OutgoingBeam1 ).size()!=0   and particles( Particle::OutgoingBeam2 ).size()!=0 )
-           and ( particles( Particle::CentralParticle1 ).size()!=0 or particles( Particle::CentralParticle2 ).size()!=0) ) {
+          if ( ( !particles( Particle::OutgoingBeam1 ).empty()    && !particles( Particle::OutgoingBeam2 ).empty() )
+            && ( !particles( Particle::CentralParticle1 ).empty() || !particles( Particle::CentralParticle2 ).empty() ) ) {
             is_outgoing_state_set_ = true;
           }
           // combine both states
-          is_kinematics_set_ = is_incoming_state_set_ and is_outgoing_state_set_;
+          is_kinematics_set_ = is_incoming_state_set_ && is_outgoing_state_set_;
           return is_kinematics_set_;
         }
     };

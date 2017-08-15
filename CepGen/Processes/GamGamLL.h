@@ -49,7 +49,7 @@ namespace CepGen
     {
       public:
         /// Class constructor ; set the mandatory parameters before integration and events generation
-        /// \param[in] nOpt_ Optimisation (legacy from LPAIR)
+        /// \param[in] nopt Optimisation (legacy from LPAIR)
         GamGamLL( int nopt=0 );
   
         void addEventContent();

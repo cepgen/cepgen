@@ -22,7 +22,7 @@ namespace CepGen
         /**
          * \brief Class constructor
          * \param[in] name Human-readable kT-factorised process name
-         * \param[in] numuser_dimensions_ Number of additional dimensions required for the user process
+         * \param[in] num_user_dimensions_ Number of additional dimensions required for the user process
          * \param[in] ip1 First incoming parton
          * \param[in] ip2 Second incoming parton (if undefined, same as the first)
          * \param[in] op1 First produced final state particle
@@ -47,6 +47,7 @@ namespace CepGen
         void fillKinematics( bool );
 
       protected:
+        /// Set the kinematics associated to the phase space definition
         inline void setKinematics( const Kinematics& kin ) {
           cuts_ = kin;
           log_qmin_ = -10.; // FIXME //log_qmin_ = std::log( std::sqrt( cuts_.q2min ) );

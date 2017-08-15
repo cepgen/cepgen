@@ -8,6 +8,7 @@
 
 namespace CepGen
 {
+  /// Location for all hadronisers to be run downstream to the events generation
   namespace Hadroniser
   {
     /**
@@ -26,11 +27,11 @@ namespace CepGen
         virtual ~GenericHadroniser() {}
 
         /// Main caller to hadronise a single particle
-        /// \param[in] part_ The Particle object which will be hadronised
+        /// \param[in] part The Particle object which will be hadronised
         /// \return A boolean stating whether or not the hadronisation occured successfully
         virtual bool hadronise( const Particle* part ) = 0;
         /// Hadronise a full event
-        /// \param[inout] ev_ Event to hadronise
+        /// \param[inout] ev Event to hadronise
         /// \return Boolean stating whether or not the hadronisation occured successfully
         virtual bool hadronise( Event* ev ) = 0;
 

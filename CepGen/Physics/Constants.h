@@ -7,8 +7,9 @@
 class Constants
 {
  public:
-  /// Electromagnetic coupling constant \f$\alpha_{em}=\frac{e^2}{4\pi\epsilon_0\hbar c}\f$
+  /// Electromagnetic coupling constant \f$\alpha_\textrm{em}=\frac{e^2}{4\pi\epsilon_0\hbar c}\f$
   static double alphaEM;
+  /// Strong coupling constant \f$\alpha_\textrm{QCD}\f$
   static double alphaQCD;
   /// \f$\frac{1}{(\hbar c)^2}~[\mathrm b^{-1}]\f$?
   static double muBarn;

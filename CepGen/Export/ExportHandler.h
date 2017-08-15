@@ -6,6 +6,7 @@
 
 namespace CepGen
 {
+  /// Location for all output generators
   namespace OutputHandler
   {
     /**

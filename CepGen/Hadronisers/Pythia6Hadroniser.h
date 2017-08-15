@@ -87,7 +87,7 @@ namespace CepGen
          * \param[in] ijoin_ List of particles unique identifier to join in the colour flow
          */
         inline static void pyjoin( int njoin, int ijoin[2] ) { return pyjoin_( njoin, *ijoin ); }
-        bool PrepareHadronisation( Event* );
+        bool prepareHadronisation( Event* );
     };
   }
 }

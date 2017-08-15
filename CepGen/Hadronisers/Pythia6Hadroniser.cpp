@@ -50,7 +50,7 @@ namespace CepGen
       int jlrole[max_str_in_evt], jlpsf[max_str_in_evt][max_part_in_str];
       int criteria; //FIXME find an other name...
 
-      try { PrepareHadronisation( ev ); } catch ( Exception& e ) { e.dump(); throw e; }
+      try { prepareHadronisation( ev ); } catch ( Exception& e ) { e.dump(); throw e; }
 
       ParticleRoles rl = ev->roles();
 
@@ -188,7 +188,7 @@ namespace CepGen
     }
 
     bool
-    Pythia6Hadroniser::PrepareHadronisation( Event* ev )
+    Pythia6Hadroniser::prepareHadronisation( Event* ev )
     {
       Particle::ParticleCode singlet_id, doublet_id;
       double ranudq, ulmdq, ulmq;

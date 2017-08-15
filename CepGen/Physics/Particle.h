@@ -135,12 +135,12 @@ namespace CepGen
           inline double pz() const { return pz_; }
           /// Transverse momentum (in GeV)
           inline double pt() const { return sqrt( pt2() ); }
+          /// Squared transverse momentum (in GeV\f$^\textrm{2}\f$)
           inline double pt2() const { return ( px()*px()+py()*py() ); }
-          inline double* pRef() { return &p_; }
           const std::vector<double> pVector() const;
           /// 3-momentum norm (in GeV)
           inline double p() const { return p_; }
-          /// Squared 3-momentum norm (in \f$\textrm{GeV}^\textrm{2}\f$)
+          /// Squared 3-momentum norm (in GeV\f$^\textrm{2}\f$)
           inline double p2() const { return p_*p_; }
           /// Energy (in GeV)
           inline double energy() const { return energy_; }
