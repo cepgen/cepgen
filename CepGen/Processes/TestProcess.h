@@ -12,14 +12,15 @@ namespace CepGen
     {
       public:
         TestProcess();
-        ~TestProcess();
+        ~TestProcess() {}
 
+        void addEventContent() {}
         /// Number of dimensions on which to perform the integration
-        unsigned int GetNdim( const Kinematics::ProcessMode& ) const;
+        unsigned int numDimensions( const Kinematics::ProcessMode& ) const { return 3; }
         /// Generic formula to compute a weight out of a point in the phase space
-        double ComputeWeight();
+        double computeWeight();
         /// Dummy function to be called on events generation
-        void FillKinematics(bool);
+        void fillKinematics( bool ) { return; }
 
       private:
     };

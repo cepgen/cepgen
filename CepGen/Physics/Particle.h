@@ -78,15 +78,12 @@ namespace CepGen
       class Momentum {
         public:
           /// Build a 4-momentum at rest with an invalid energy (no mass information known)
-          inline Momentum() : px_( 0. ), py_( 0. ), pz_( 0. ), p_( 0. ), energy_( -1. ) {}
+          Momentum();
           /// Build a 4-momentum using its 3-momentum coordinates and its energy
-          inline Momentum( double x_, double y_, double z_, double t_=-1. ) :
-            px_( x_ ), py_( y_ ), pz_( z_ ), energy_( t_ ) { computeP(); }
+          Momentum( double x_, double y_, double z_, double t_=-1. );
           inline ~Momentum() {}
 
-          inline void setMomentum( const Momentum& p ) {
-            px_ = p.px_; py_ = p.py_; pz_ = p.pz_, energy_ = p.energy_; p_ = p.p_;
-          }
+          void operator=( const Momentum& );
 
           // --- static definitions
 
@@ -111,7 +108,6 @@ namespace CepGen
 
           // --- vector and scalar operators
 
-          void operator=( const Momentum& );
           /// Scalar product of the 3-momentum with another 3-momentum
           double threeProduct( const Momentum& ) const;
           /// Scalar product of the 4-momentum with another 4-momentum
@@ -340,28 +336,7 @@ namespace CepGen
       /// Retrieve the momentum object associated with this particle
       inline Momentum momentum() const { return momentum_; }
       /// Associate a momentum object to this particle
-      inline bool setMomentum( const Momentum& mom, bool offshell=false ) {
-        momentum_ = mom;
-        if ( offshell ) {
-          mass_ = momentum_.mass();
-          return true;
-        }
-
-        if ( mass_<0. ) setMass();
-        const double e = sqrt( momentum_.p2()+mass2() );
-        if ( mom.energy()<0. ) {
-          momentum_.setEnergy( e );
-          return true;
-        }
-        if ( fabs( e-momentum_.energy() )<1.e-6 or fabs( e-mom.energy() )<1.e-6 ) { // less than 1 eV difference
-          return true;
-        }
-        if ( role!=Parton1 and role!=Parton2 ) {
-          InError( Form( "Energy difference for particle %d (computed-set): %.5f", (int)role, e-momentum_.energy() ) );
-        }
-        momentum_.setEnergy( e );//FIXME need to ensure nothing relies on this
-        return false;
-      }
+      bool setMomentum( const Momentum& mom, bool offshell=false );
       /**
        * \brief Set the 3-momentum associated to the particle
        * \param[in] px Momentum along the \f$x\f$-axis, in \f$\textrm{GeV}/c\f$
@@ -369,10 +344,7 @@ namespace CepGen
        * \param[in] pz Momentum along the \f$z\f$-axis, in \f$\textrm{GeV}/c\f$
        * \return A boolean stating the validity of this particle (according to its 4-momentum norm)
        */
-      inline bool setMomentum( double px, double py, double pz ) {
-        momentum_.setP( px, py, pz ); setEnergy();
-        return true;
-      };
+      bool setMomentum( double px, double py, double pz );
       /**
        * \brief Set the 4-momentum associated to the particle
        * \param[in] px Momentum along the \f$x\f$-axis, in \f$\textrm{GeV}/c\f$
@@ -381,14 +353,7 @@ namespace CepGen
        * \param[in] e Energy, in GeV
        * \return A boolean stating the validity of the particle's kinematics
        */
-      inline bool setMomentum( double px, double py, double pz, double e ) {
-        setMomentum( px, py, pz );
-        if ( fabs( e-momentum_.energy() )>1.e-6 ) { // more than 1 eV difference
-          InError( Form( "Energy difference: %.5f", e-momentum_.energy() ) );
-          return false;
-        }
-        return true;
-      };
+      bool setMomentum( double px, double py, double pz, double e );
       /**
        * \brief Set the 4-momentum associated to the particle
        * \param[in] p 4-momentum

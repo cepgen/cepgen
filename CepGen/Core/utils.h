@@ -12,7 +12,7 @@
 static std::stringstream error;
 
 /// Provide a random number generated along a uniform distribution between 0 and 1
-//inline double drand() { srand (time(NULL)); return static_cast<double>(rand())/RAND_MAX; }
+//inline double drand() { srand (time(nullptr)); return static_cast<double>(rand())/RAND_MAX; }
 #define drand() static_cast<double>( rand()/RAND_MAX )
 
 /// Format a string using a printf style format descriptor.

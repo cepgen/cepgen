@@ -165,7 +165,7 @@ namespace CepGen
         Particle pa;
         pa.id = p;
         pa.setPdgId( static_cast<Particle::ParticleCode>( pyjets_.k[1][p] ) );
-        if ( ev->getById( pyjets_.k[2][p]-1 ) != (Particle*)NULL ) {
+        if ( ev->getById( pyjets_.k[2][p]-1 ) != (Particle*)nullptr ) {
           pa.role = ev->getById( pyjets_.k[2][p]-1 )->role; // Child particle inherits its mother's role
         }
         pa.status = static_cast<Particle::Status>( pyjets_.k[0][p] );

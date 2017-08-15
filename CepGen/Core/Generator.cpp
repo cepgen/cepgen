@@ -111,15 +111,13 @@ namespace CepGen
   f( double* x, size_t ndim, void* params )
   {
     Timer tmr;
-    bool hadronised;
-    double num_hadr_trials;
     std::ostringstream os;
 
     Parameters* p = static_cast<Parameters*>( params );
 
     //float now = tmr.elapsed();
-    const Particle::Momentum p1( 0., 0.,  p->kinematics.in1p ),
-                             p2( 0., 0., -p->kinematics.in2p );
+    const Particle::Momentum p1( 0., 0.,  p->kinematics.in1p ), p2( 0., 0., -p->kinematics.in2p );
+std::cout << p1 << "\t" << p2 << std::endl;
     p->process()->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
     //PrintMessage( Form( "0 - after setting the kinematics: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
@@ -131,7 +129,7 @@ namespace CepGen
     p->process()->clearEvent();
     //PrintMessage( Form( "1 - after clearing the event: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
   
-    Event* ev = p->process()->event();
+    std::shared_ptr<Event> ev = p->process()->event();
 
     //PrintMessage( Form( "2: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
@@ -197,14 +195,16 @@ namespace CepGen
         Debugging( Form( "Event before calling the hadroniser (%s)", p->hadroniser()->name().c_str() ) );
         if ( Logger::get().level>=Logger::Debug ) ev->dump();
 
-        num_hadr_trials = 0;
-        do {
-          try { hadronised = p->hadroniser()->hadronise( ev ); } catch ( Exception& e ) { e.dump(); }
+        unsigned int num_hadr_trials = 0;
+        bool hadronised = false;
+        while ( !hadronised && num_hadr_trials <= p->hadroniser_max_trials ) {
+          try {
+            hadronised = p->hadroniser()->hadronise( ev.get() );
+          } catch ( Exception& e ) { e.dump(); }
 
           if ( num_hadr_trials>0 ) { Debugging( Form( "Hadronisation failed. Trying for the %dth time", num_hadr_trials+1 ) ); }
-
           num_hadr_trials++;
-        } while ( !hadronised && num_hadr_trials<=p->hadroniser_max_trials );
+        }
         if ( !hadronised ) return 0.; //FIXME
 
         ev->num_hadronisation_trials = num_hadr_trials;
@@ -224,7 +224,7 @@ namespace CepGen
                        ev->time_generation,
                        ev->time_total ) );
 
-      *(p->last_event) = *( ev );
+      *( p->last_event ) = *( ev );
       //ev->Store(p->file);
     }
 

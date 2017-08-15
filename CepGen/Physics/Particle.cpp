@@ -79,85 +79,128 @@ namespace CepGen
     part->addDaughter( this );
   }
 
-bool
-Particle::addDaughter( Particle* part )
-{
-  std::pair<ParticlesIds::iterator,bool> ret = daughters_.insert( part->id );
+  bool
+  Particle::addDaughter( Particle* part )
+  {
+    std::pair<ParticlesIds::iterator,bool> ret = daughters_.insert( part->id );
 
-  if ( Logger::get().level>=Logger::DebugInsideLoop ) {
-    std::ostringstream os;
-    for ( ParticlesIds::const_iterator it=daughters_.begin(); it!=daughters_.end(); it++) {
-      os << Form("\n\t * id=%d", *it);
+    if ( Logger::get().level>=Logger::DebugInsideLoop ) {
+      std::ostringstream os;
+      for ( ParticlesIds::const_iterator it=daughters_.begin(); it!=daughters_.end(); it++) {
+        os << Form("\n\t * id=%d", *it);
+      }
+      DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) has now %2d daughter(s):"
+                                 "%s", role, pdg_id_, numDaughters(), os.str().c_str() ) );
     }
-    DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) has now %2d daughter(s):"
-                               "%s", role, pdg_id_, numDaughters(), os.str().c_str() ) );
-  }
-  
-  if ( ret.second ) {
-    DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) is a new daughter of %2d (pdgId=%4d)",
-                               part->role, part->pdgId(), role, pdg_id_ ) );
-    
-    if ( !part->primary() and part->mothersIds().size()<1 ) {
-      part->setMother( this );
+
+    if ( ret.second ) {
+      DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) is a new daughter of %2d (pdgId=%4d)",
+                                 part->role, part->pdgId(), role, pdg_id_ ) );
+
+      if ( !part->primary() and part->mothersIds().size()<1 ) {
+        part->setMother( this );
+      }
     }
+
+    return ret.second;
   }
 
-  return ret.second;
-}
+  bool
+  Particle::setMomentum( const Momentum& mom, bool offshell )
+  {
+    momentum_ = mom;
+    if ( offshell ) {
+      mass_ = momentum_.mass();
+      return true;
+    }
 
-void
-Particle::dump() const
-{  
-  std::ostringstream osm, osd, os;
-  if ( !primary() ) {
-    osm << ": mother(s): ";
-    for ( ParticlesIds::const_iterator m=mothers_.begin(); m!=mothers_.end(); m++ ) {
-      if ( m!=mothers_.begin() ) osm << ", ";
-      osm << ( *m );
+    if ( mass_<0. ) setMass();
+    const double e = sqrt( momentum_.p2()+mass2() );
+    if ( mom.energy()<0. ) {
+      momentum_.setEnergy( e );
+      return true;
+    }
+    if ( fabs( e-momentum_.energy() )<1.e-6 or fabs( e-mom.energy() )<1.e-6 ) { // less than 1 eV difference
+      return true;
+    }
+    if ( role!=Parton1 and role!=Parton2 ) {
+      InError( Form( "Energy difference for particle %d (computed-set): %.5f", (int)role, e-momentum_.energy() ) );
+    }
+    momentum_.setEnergy( e );//FIXME need to ensure nothing relies on this
+    return false;
+  }
+
+  bool
+  Particle::setMomentum( double px, double py, double pz )
+  {
+    momentum_.setP( px, py, pz ); setEnergy();
+    return true;
+  }
+
+  bool
+  Particle::setMomentum( double px, double py, double pz, double e )
+  {
+    setMomentum( px, py, pz );
+    if ( fabs( e-momentum_.energy() )>1.e-6 ) { // more than 1 eV difference
+      InError( Form( "Energy difference: %.5f", e-momentum_.energy() ) );
+      return false;
+    }
+    return true;
+  }
+
+  void
+  Particle::dump() const
+  {
+    std::ostringstream osm, osd, os;
+    if ( !primary() ) {
+      osm << ": mother(s): ";
+      for ( ParticlesIds::const_iterator m=mothers_.begin(); m!=mothers_.end(); m++ ) {
+        if ( m!=mothers_.begin() ) osm << ", ";
+        osm << ( *m );
+      }
+    }
+    const ParticlesIds daugh = daughters();
+    if ( daugh.size()!=0 ) {
+      osd << ": id = ";
+      for ( ParticlesIds::const_iterator it=daugh.begin(); it!=daugh.end(); it++ ) {
+        if ( it!=daugh.begin() ) osd << ", ";
+        osd << ( *it );
+      }
+    }
+    os << " (" << pdg_id_ << ")";
+    if ( os.str() == " ()" ) os.str("");
+    Information( Form(
+      "Dumping a particle with id=%3d, role=%3d, status=% 3d\n\t"
+      "PDG Id:%4d%s, mass = %5.4f GeV\n\t"
+      "(E,P) = (%4.2f, %4.2f, %4.2f, %4.2f) GeV\t"
+      "(|P| = p = %4.2f GeV)\n\t"
+      " Pt = %5.4f GeV, eta = %4.3f, phi = % 4.3f\n\t"
+      "Primary? %s%s\n\t"
+      "%d daughter(s)%s",
+      id, role, status, pdg_id_, os.str().c_str(),
+      mass(), energy(), momentum_.px(), momentum_.py(), momentum_.pz(),
+      momentum_.p(), momentum_.pt(), momentum_.eta(), momentum_.phi(),
+      yesno( primary() ), osm.str().c_str(), numDaughters(), osd.str().c_str() )
+    );
+  }
+
+  void
+  Particle::lorentzBoost( double m, const Particle::Momentum& mom )
+  {
+    double pf4, fn;
+
+    if ( mom.p( 3 )!=m ) {
+      pf4 = 0.;
+      for ( unsigned int i=0; i<4; i++ ) {
+        pf4 += momentum_.p( i )*mom.p( i );
+      }
+      pf4 /= m;
+      fn = ( pf4+energy() )/( momentum_.p( 3 )+m );
+      for ( unsigned int i=0; i<3; i++ ) {
+        momentum_.setP( i, momentum_.p( i )+fn*mom.p( i ) );
+      }
     }
   }
-  const ParticlesIds daugh = daughters();
-  if ( daugh.size()!=0 ) {
-    osd << ": id = ";
-    for ( ParticlesIds::const_iterator it=daugh.begin(); it!=daugh.end(); it++ ) {
-      if ( it!=daugh.begin() ) osd << ", ";
-      osd << ( *it );
-    }
-  }
-  os << " (" << pdg_id_ << ")";
-  if ( os.str() == " ()" ) os.str("");
-  Information( Form(
-    "Dumping a particle with id=%3d, role=%3d, status=% 3d\n\t"
-    "PDG Id:%4d%s, mass = %5.4f GeV\n\t"
-    "(E,P) = (%4.2f, %4.2f, %4.2f, %4.2f) GeV\t"
-    "(|P| = p = %4.2f GeV)\n\t"
-    " Pt = %5.4f GeV, eta = %4.3f, phi = % 4.3f\n\t"
-    "Primary? %s%s\n\t"
-    "%d daughter(s)%s",
-    id, role, status, pdg_id_, os.str().c_str(),
-    mass(), energy(), momentum_.px(), momentum_.py(), momentum_.pz(),
-    momentum_.p(), momentum_.pt(), momentum_.eta(), momentum_.phi(),
-    yesno( primary() ), osm.str().c_str(), numDaughters(), osd.str().c_str() )
-  );
-}
-
-void
-Particle::lorentzBoost( double m, const Particle::Momentum& mom )
-{
-  double pf4, fn;
-
-  if ( mom.p( 3 )!=m ) {
-    pf4 = 0.;
-    for ( unsigned int i=0; i<4; i++ ) {
-      pf4 += momentum_.p( i )*mom.p( i );
-    }
-    pf4 /= m;
-    fn = ( pf4+energy() )/( momentum_.p( 3 )+m );
-    for ( unsigned int i=0; i<3; i++ ) {
-      momentum_.setP( i, momentum_.p( i )+fn*mom.p( i ) );
-    }
-  }
-}
 
   double*
   Particle::lorentzBoost( const Particle::Momentum& mom )
@@ -268,169 +311,6 @@ Particle::lorentzBoost( double m, const Particle::Momentum& mom )
       case Particle::Reggeon:      os << "reggeon"; break;
       case Particle::invalidParticle: os << "<invalid>"; break;
     }
-    return os;
-  }
-
-  //----- Particle momentum methods
-
-  Particle::Momentum&
-  Particle::Momentum::operator+=( const Particle::Momentum& mom )
-  {
-    px_ += mom.px_;
-    py_ += mom.py_;
-    pz_ += mom.pz_;
-    energy_ += mom.energy_; //FIXME not supposed to be this way!
-    computeP();
-    return *this;
-  }
-
-  Particle::Momentum&
-  Particle::Momentum::operator-=( const Particle::Momentum& mom )
-  {
-    px_ -= mom.px_;
-    py_ -= mom.py_;
-    pz_ -= mom.pz_;
-    energy_ -= mom.energy_; //FIXME not supposed to be this way!
-    computeP();
-    return *this;
-  }
-
-  void
-  Particle::Momentum::operator=( const Particle::Momentum& mom )
-  {
-    px_ = mom.px_; py_ = mom.py_; pz_ = mom.pz_; p_ = mom.p_;
-    energy_ = mom.energy_;
-  }
-
-  double
-  Particle::Momentum::threeProduct( const Particle::Momentum& mom ) const
-  {
-    DebuggingInsideLoop( Form( "  (%f, %f, %f, %f)\n\t* (%f, %f, %f, %f)\n\t= %f",
-      px_, py_, pz_, energy_,
-      mom.px_, mom.py_, mom.pz_, mom.energy_,
-      px_*mom.px_+py_*mom.py_+pz_*mom.pz_
-    ) );
-    return px_*mom.px_+py_*mom.py_+pz_*mom.pz_;
-  }
-
-  double
-  Particle::Momentum::fourProduct( const Particle::Momentum& mom ) const
-  {
-    DebuggingInsideLoop( Form( "  (%f, %f, %f, %f)\n\t* (%f, %f, %f, %f)\n\t= %f",
-      px_, py_, pz_, energy_,
-      mom.px_, mom.py_, mom.pz_, mom.energy_,
-      px_*mom.px_+py_*mom.py_+pz_*mom.pz_
-    ) );
-    return energy_*mom.energy_-threeProduct(mom);
-  }
-
-  double
-  Particle::Momentum::operator*=( const Particle::Momentum& mom )
-  {
-    return threeProduct( mom );
-  }
-
-  Particle::Momentum&
-  Particle::Momentum::operator*=( double c )
-  {
-    px_ *= c;
-    py_ *= c;
-    pz_ *= c;
-    computeP();
-    return *this;
-  }
-
-  Particle::Momentum
-  operator*( const Particle::Momentum& mom, double c )
-  {
-    Particle::Momentum out = mom;
-    out *= c;
-    return out;
-  }
-
-  Particle::Momentum
-  operator*( double c, const Particle::Momentum& mom )
-  {
-    Particle::Momentum out = mom;
-    out *= c;
-    return out;
-  }
-
-  Particle::Momentum
-  operator+( const Particle::Momentum& mom1, const Particle::Momentum& mom2 )
-  {
-    Particle::Momentum out = mom1;
-    out += mom2;
-    return out;
-  }
-
-  Particle::Momentum
-  operator-( const Particle::Momentum& mom1, const Particle::Momentum& mom2 )
-  {
-    Particle::Momentum out = mom1;
-    out -= mom2;
-    return out;
-  }
-
-  double
-  operator*( const Particle::Momentum& mom1, const Particle::Momentum& mom2 )
-  {
-    Particle::Momentum tmp = mom1;
-    return tmp.threeProduct( mom2 );
-  }
-
-  void
-  Particle::Momentum::betaGammaBoost( double gamma, double betagamma )
-  {
-    const double pz = pz_, e = energy_;
-    pz_ = gamma*pz+betagamma*e;
-    energy_  = gamma*e +betagamma*pz;
-    computeP();
-  }
-
-  void
-  Particle::Momentum::lorentzBoost( const Particle::Momentum& p )
-  {
-    const double m = p.mass();
-    if ( m == p.energy() ) return;
-  
-    Particle::Momentum mom_old = *this;
-    const double pf4 = mom_old*p/m,
-                 fn = ( pf4+mom_old.energy() )/( p.energy()+m );
-    Particle::Momentum mom_new = mom_old-p*fn; mom_new.setEnergy( pf4 );
-    setMomentum( mom_new );
-  }
-
-  void
-  Particle::Momentum::rotatePhi( double phi, double sign )
-  {
-    const double px = px_*cos( phi )+py_*sin( phi )*sign,
-                 py =-px_*sin( phi )+py_*cos( phi )*sign;
-    px_ = px;
-    py_ = py;
-  }
-
-  void
-  Particle::Momentum::rotateThetaPhi( double theta, double phi )
-  {
-    double rotmtx[3][3], mom[3]; //FIXME check this! cos(phi)->-sin(phi) & sin(phi)->cos(phi) --> phi->phi+pi/2 ?
-    rotmtx[0][0] = -sin( phi ); rotmtx[0][1] = -cos( theta )*cos( phi ); rotmtx[0][2] =  sin( theta )*cos( phi );
-    rotmtx[1][0] =  cos( phi ); rotmtx[1][1] = -cos( theta )*sin( phi ); rotmtx[1][2] =  sin( theta )*sin( phi );
-    rotmtx[2][0] =  0.;         rotmtx[2][1] =  sin( theta );            rotmtx[2][2] =  cos( theta );
-
-    for (int i=0; i<3; i++) {
-      mom[i] = 0.;
-      for (int j=0; j<3; j++) {
-        mom[i] += rotmtx[i][j]*p( j );
-      }
-    }
-    setP( mom[0], mom[1], mom[2] );
-  }
-
-  std::ostream&
-  operator<<( std::ostream& os, const Particle::Momentum& mom )
-  {
-    os << "(E, p) = (" << mom.energy_ << ", " << mom.px_ << ", " << mom.py_ << ", " << mom.pz_ << ")";
     return os;
   }
 }

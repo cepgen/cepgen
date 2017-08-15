@@ -8,7 +8,9 @@ Vegas::Vegas( const unsigned int dim, double f_( double*, size_t, void* ), Param
   input_params_( param ),
   grid_prepared_( false ), gen_prepared_( false ),
   f_max_( 0 ), f_max2_( 0. ), f_max_diff_( 0. ), f_max_old_( 0. ), f_max_global_( 0. ),
-  n_( 0 ), nm_( NULL ), function_( 0 ), x_( 0 )
+  n_( 0 ), nm_( nullptr ),
+  function_( std::unique_ptr<gsl_monte_function>( new gsl_monte_function ) ),
+  x_( 0 )
 {
   x_low_ = new double[dim];
   x_up_ = new double[dim];
@@ -17,13 +19,18 @@ Vegas::Vegas( const unsigned int dim, double f_( double*, size_t, void* ), Param
     x_low_[i] = 0.;
     x_up_[i] = 1.;
   }
-  
-  function_ = new gsl_monte_function;
+
+  //--- function to be integrated
   function_->f = f_;
   function_->dim = dim;
   function_->params = (void*)param;
   num_converg_ = param->vegas.ncvg;
   num_iter_ = param->vegas.itvg;
+
+  //--- initialise the random number generator
+  gsl_rng_env_setup();
+  rng_ = gsl_rng_alloc( gsl_rng_default );
+  gsl_rng_set( rng_, time( nullptr ) ); // seed with time
 
   Debugging( Form( "Number of integration dimensions: %d\n\t"
                    "Number of iterations:             %d\n\t"
@@ -38,23 +45,18 @@ Vegas::~Vegas()
   if ( f_max_ ) delete[] f_max_;
   if ( nm_ ) delete[] nm_;
   if ( n_ ) delete[] n_;
-  if ( function_ ) delete function_;
   if ( x_ ) delete[] x_;
+  if ( rng_ ) gsl_rng_free( rng_ );
 }
 
 int
 Vegas::integrate( double& result, double& abserr )
 {
-  //--- initialise the random number generator
-  gsl_rng_env_setup();
-  
   //--- prepare the integration coordinates
   if ( x_ ) delete[] x_;
   x_ = new double[function_->dim];
 
   //--- prepare Vegas
-  gsl_rng* rng = gsl_rng_alloc( gsl_rng_default );
-  gsl_rng_set( rng, time( NULL ) ); // seed with time
   gsl_monte_vegas_state* state = gsl_monte_vegas_alloc( function_->dim );
   
   //--- launch Vegas
@@ -62,18 +64,17 @@ Vegas::integrate( double& result, double& abserr )
 
   //----- warmup (prepare the grid)
   if ( !grid_prepared_ ) {
-    veg_res = gsl_monte_vegas_integrate( function_, x_low_, x_up_, function_->dim, 10000, rng, state, &result, &abserr );
+    veg_res = gsl_monte_vegas_integrate( function_.get(), x_low_, x_up_, function_->dim, 10000, rng_, state, &result, &abserr );
     grid_prepared_ = true;
   }
   //----- integration
   for ( unsigned int i=0; i<num_iter_; i++ ) {
-    veg_res = gsl_monte_vegas_integrate( function_, x_low_, x_up_, function_->dim, 0.2*num_converg_, rng, state, &result, &abserr );
+    veg_res = gsl_monte_vegas_integrate( function_.get(), x_low_, x_up_, function_->dim, 0.2*num_converg_, rng_, state, &result, &abserr );
     PrintMessage( Form( ">> Iteration %2d: average = %10.6f   sigma = %10.6f   chi2 = %4.3f", i+1, result, abserr, gsl_monte_vegas_chisq( state ) ) );
   }
   
   //--- clean Vegas
   if ( state ) gsl_monte_vegas_free( state );
-  if ( rng ) gsl_rng_free( rng );
   
   return veg_res;
 }

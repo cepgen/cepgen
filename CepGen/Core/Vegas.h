@@ -104,7 +104,8 @@ namespace CepGen
       int* n_;
       int* nm_;
       /// GSL structure storing the function to be integrated by this Vegas instance (along with its parameters)
-      gsl_monte_function* function_;
+      std::unique_ptr<gsl_monte_function> function_;
+      gsl_rng* rng_;
       /// Number of function calls to be computed for each point
       int num_converg_;
       /// Number of iterations for the integration

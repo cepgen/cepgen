@@ -74,7 +74,7 @@ namespace CepGen
         void dumpPoint( const ExceptionType& et );
         /// Complete list of Particle with their role in the process for the point considered in the phase space, returned as an Event object.
         /// \return Event object containing all the generated Particle objects
-        inline Event* event() { return event_; }
+        inline std::shared_ptr<Event> event() { return event_; }
 
         ///Get the number of dimensions on which the integration is performed
         inline const unsigned int ndim() const { return num_dimensions_; }
@@ -150,7 +150,7 @@ namespace CepGen
         /// Set of cuts to apply on the final phase space
         Kinematics cuts_;
         /// Event object containing all the information on the in- and outgoing particles
-        Event* event_;
+        std::shared_ptr<Event> event_;
         /// Is the phase space point set?
         bool is_point_set_;
         /// Are the event's incoming particles set?

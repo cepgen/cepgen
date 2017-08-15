@@ -5,7 +5,8 @@ namespace CepGen
   Kinematics::Kinematics() :
     in1p( 6500. ), in2p( 6500. ), in1pdg( Particle::Proton ), in2pdg( Particle::Proton ),
     pair( Particle::Muon ),
-    kinematics( ElasticElastic ), remnant_mode( SuriYennie ), cuts_mode( BothParticles ),
+    kinematics( ElasticElastic ), remnant_mode( SuriYennie ),
+    cuts_mode( BothParticles ),
     pt_min( 3. ), pt_max( -1. ), e_min( 0. ), e_max( -1. ), eta_min( -999. ), eta_max( 999. ),
     mass_min( 0. ), mass_max( -1. ),
     mx_min( 1.07 ), mx_max( 320. ),

@@ -4,17 +4,16 @@ namespace CepGen
 {
   namespace Process
   {
-    GenericProcess::GenericProcess( const std::string& name_ ) :
-      x_( 0 ), num_dimensions_( 0 ), event_( new Event ),
+    GenericProcess::GenericProcess( const std::string& name ) :
+      x_( 0 ), num_dimensions_( 0 ), event_( std::shared_ptr<Event>( new Event ) ),
       is_point_set_( false ), is_incoming_state_set_( false ), is_outgoing_state_set_( false ), is_kinematics_set_( false ),
-      name_( name_ ),
+      name_( name ),
       total_gen_time_( 0. ), num_gen_events_( 0 )
     {}
 
     GenericProcess::~GenericProcess()
     {
       if ( is_point_set_ ) delete[] x_;
-      if ( event_ ) delete event_;
     }
 
     void
