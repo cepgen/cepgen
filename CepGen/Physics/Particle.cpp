@@ -108,25 +108,27 @@ namespace CepGen
   bool
   Particle::setMomentum( const Momentum& mom, bool offshell )
   {
+std::cout << mom << std::endl;
     momentum_ = mom;
     if ( offshell ) {
       mass_ = momentum_.mass();
       return true;
     }
 
-    if ( mass_<0. ) setMass();
-    const double e = sqrt( momentum_.p2()+mass2() );
-    if ( mom.energy()<0. ) {
-      momentum_.setEnergy( e );
+    if ( mass_ < 0. ) setMass();
+    const double ene = sqrt( momentum_.p2()+mass2() );
+    if ( mom.energy() < 0. ) {
+      momentum_.setEnergy( ene );
       return true;
     }
-    if ( fabs( e-momentum_.energy() )<1.e-6 or fabs( e-mom.energy() )<1.e-6 ) { // less than 1 eV difference
+    if ( fabs( ene-momentum_.energy() ) < 1.e-6
+      || fabs( ene-mom.energy() ) < 1.e-6 ) { // less than 1 eV difference
       return true;
     }
-    if ( role!=Parton1 and role!=Parton2 ) {
-      InError( Form( "Energy difference for particle %d (computed-set): %.5f", (int)role, e-momentum_.energy() ) );
+    if ( role != Parton1 && role != Parton2 ) {
+      InError( Form( "Energy difference for particle %d (computed-set): %.5f", (int)role, ene-momentum_.energy() ) );
     }
-    momentum_.setEnergy( e );//FIXME need to ensure nothing relies on this
+    momentum_.setEnergy( ene );//FIXME need to ensure nothing relies on this
     return false;
   }
 
@@ -189,15 +191,15 @@ namespace CepGen
   {
     double pf4, fn;
 
-    if ( mom.p( 3 )!=m ) {
+    if ( mom.energy() != m ) {
       pf4 = 0.;
       for ( unsigned int i=0; i<4; i++ ) {
-        pf4 += momentum_.p( i )*mom.p( i );
+        pf4 += momentum_[i]*mom[i];
       }
       pf4 /= m;
-      fn = ( pf4+energy() )/( momentum_.p( 3 )+m );
+      fn = ( pf4+energy() )/( momentum_.energy()+m );
       for ( unsigned int i=0; i<3; i++ ) {
-        momentum_.setP( i, momentum_.p( i )+fn*mom.p( i ) );
+        momentum_.setP( i, momentum_[i]+fn*mom[i] );
       }
     }
   }
@@ -210,13 +212,13 @@ namespace CepGen
     p2 = mom.p2();
     gamma = 1./sqrt( 1.-p2 );
     bp = 0.;
-    for ( unsigned int i=0; i<3; i++ ) bp+= mom.p(i)*momentum_.p(i);
+    for ( unsigned int i=0; i<3; i++ ) bp+= mom[i]*momentum_[i];
 
     if ( p2>0. ) gamma2 = (gamma-1.)/p2;
     else gamma2 = 0.;
 
     for ( unsigned int i=0; i<3; i++ ) {
-      __tmp3[i] = momentum_.p(i) + gamma2*bp*mom.p(i)+gamma*mom.p(i)*energy();
+      __tmp3[i] = momentum_[i] + gamma2*bp*mom[i]+gamma*mom[i]*energy();
     }
     return __tmp3;
   }

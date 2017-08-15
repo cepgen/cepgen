@@ -105,6 +105,7 @@ namespace CepGen
     void
     GenericProcess::setIncomingKinematics( const Particle::Momentum& p1, const Particle::Momentum& p2 )
     {
+std::cout << p1 << "-----" << p2 << std::endl;
       if ( !particlePtr( Particle::IncomingBeam1 )->setMomentum( p1 ) ) { InError( "Invalid incoming beam 1" ); }
       if ( !particlePtr( Particle::IncomingBeam2 )->setMomentum( p2 ) ) { InError( "Invalid incoming beam 2" ); }
     }

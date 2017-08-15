@@ -17,7 +17,7 @@ Parameters::Parameters( Parameters& param ) :
   last_event( std::move( param.last_event ) ),
   symmetrise( param.symmetrise ), ngen( param.ngen ), pdflib( param.pdflib ),
   hadroniser_max_trials( param.hadroniser_max_trials ),
-  process_( std::move( param.process_ ) )
+  process_( std::move( param.process_ ) ), hadroniser_( std::move( param.hadroniser_ ) )
 {}
 
 Parameters::~Parameters()
@@ -57,7 +57,6 @@ Parameters::dump( std::ostream& out, bool pretty ) const
     << std::endl
     << std::setw( wt ) << "Events generation? " << ( pretty ? yesno( generation ) : std::to_string( generation ) ) << std::endl
     << std::setw( wt ) << "Number of events to generate" << ( pretty ? boldify( maxgen ) : std::to_string( maxgen ) ) << std::endl
-    << std::setw( wt ) << "Events storage? " << yesno( store ) << std::endl
     << std::setw( wt ) << "Verbosity level " << Logger::get().level << std::endl
     << std::endl
     << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Vegas integration parameters " ) : "Vegas integration parameters" ) << std::setfill( ' ' ) << std::endl

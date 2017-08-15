@@ -16,16 +16,30 @@ namespace CepGen
     computeP();
   }
 
-  //--- copy constructor
+  //--- static constructors
 
-  void
-  Momentum::operator=( const Momentum& mom )
+  Momentum
+  Momentum::fromPtEtaPhi( double pt, double eta, double phi, double e )
   {
-    px_ = mom.px_;
-    py_ = mom.py_;
-    pz_ = mom.pz_,
-    energy_ = mom.energy_;
-    computeP();
+    const double px = pt*cos( phi ),
+                 py = pt*sin( phi ),
+                 pz = pt*sinh( eta );
+    return Momentum( px, py, pz, e );
+  }
+
+  Momentum
+  Momentum::fromPThetaPhi( double p, double theta, double phi, double e )
+  {
+    const double px = p*sin( theta )*cos( phi ),
+                 py = p*sin( theta )*sin( phi ),
+                 pz = p*cos( theta );
+    return Momentum( px, py, pz, e );
+  }
+
+  Momentum
+  Momentum::fromPxPyPzE( double px, double py, double pz, double e )
+  {
+    return Momentum( px, py, pz, e );
   }
 
   //--- arithmetic operators
@@ -129,6 +143,67 @@ namespace CepGen
     return tmp.threeProduct( mom2 );
   }
 
+  //--- various setters
+
+  void
+  Momentum::setP( double px, double py, double pz )
+  {
+    px_ = px;
+    py_ = py;
+    pz_ = pz;
+    computeP();
+  }
+
+  void
+  Momentum::setP( unsigned int i, double p )
+  {
+    switch ( i ) {
+      case 0: px_ = p; break;
+      case 1: py_ = p; break;
+      case 2: pz_ = p; break;
+      case 3: energy_ = p; break;
+      default: return;
+    }
+    computeP();
+  }
+
+  //--- various getters
+
+  double
+  Momentum::operator[]( const unsigned int i ) const {
+    switch ( i ) {
+      case 0: return px_;
+      case 1: return py_;
+      case 2: return pz_;
+      case 3: return energy_;
+      default: return -1.;
+    }
+  }
+
+  const std::vector<double>
+  Momentum::pVector() const
+  {
+    return std::vector<double>( { px(), py(), pz(), energy(), mass() } );
+  }
+
+  double
+  Momentum::eta() const
+  {
+    const int sign = ( pz()/fabs( pz() ) );
+    return ( pt() != 0. )
+      ? log( ( p()+fabs( pz() ) )/pt() )*sign
+      : 9999.*sign;
+  }
+
+  double
+  Momentum::rapidity() const
+  {
+    const int sign = ( pz()/fabs( pz() ) );
+    return ( energy() >= 0. )
+      ? log( ( energy()+pz() )/( energy()-pz() ) )*0.5
+      : 999.*sign;
+  }
+
   //--- boosts/rotations
 
   void
@@ -173,7 +248,7 @@ namespace CepGen
     for (int i=0; i<3; i++) {
       mom[i] = 0.;
       for (int j=0; j<3; j++) {
-        mom[i] += rotmtx[i][j]*p( j );
+        mom[i] += rotmtx[i][j]*operator[]( j );
       }
     }
     setP( mom[0], mom[1], mom[2] );

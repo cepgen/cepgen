@@ -185,7 +185,7 @@ std::cout << p1 << "\t" << p2 << std::endl;
 
     if ( ff<0. ) return 0.;
 
-    if ( p->store ) { // MC events generation
+    if ( p->generation ) { // MC events generation
       p->process()->fillKinematics( false );
 
       ev->time_generation = tmr.elapsed();
@@ -225,7 +225,6 @@ std::cout << p1 << "\t" << p2 << std::endl;
                        ev->time_total ) );
 
       *( p->last_event ) = *( ev );
-      //ev->Store(p->file);
     }
 
     if ( Logger::get().level>=Logger::DebugInsideLoop ) {

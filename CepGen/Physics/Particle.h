@@ -58,16 +58,11 @@ namespace CepGen
       /// Role of the particle in the process
       enum Role {
         UnknownRole = -1,
-        IncomingBeam1 = 1,
-        IncomingBeam2 = 2,
-        Parton1 = 41,
-        Parton2 = 42,
-        Parton3 = 43,
+        IncomingBeam1 = 1, IncomingBeam2 = 2,
+        Parton1 = 41, Parton2 = 42, Parton3 = 43,
         CentralSystem = 4,
-        OutgoingBeam1 = 3,
-        OutgoingBeam2 = 5,
-        CentralParticle1 = 6,
-        CentralParticle2 = 7
+        OutgoingBeam1 = 3, OutgoingBeam2 = 5,
+        CentralParticle1 = 6, CentralParticle2 = 7
       };
       /**
        * Container for a particle's 4-momentum, along with useful methods to ease the development of any matrix element level generator
@@ -83,28 +78,14 @@ namespace CepGen
           Momentum( double x_, double y_, double z_, double t_=-1. );
           inline ~Momentum() {}
 
-          void operator=( const Momentum& );
-
           // --- static definitions
 
           /// Build a 3-momentum from its three pseudo-cylindric coordinates
-          static inline Momentum fromPtEtaPhi( double pt, double eta, double phi, double e=-1. ) {
-            const double px = pt*cos( phi ),
-                         py = pt*sin( phi ),
-                         pz = pt*sinh( eta );
-            return Momentum( px, py, pz, e );
-          }
+          static Momentum fromPtEtaPhi( double pt, double eta, double phi, double e=-1. );
           /// Build a 4-momentum from its scalar momentum, and its polar and azimuthal angles
-          static inline Momentum fromPThetaPhi( double p, double theta, double phi, double e=-1. ) {
-            const double px = p*sin( theta )*cos( phi ),
-                         py = p*sin( theta )*sin( phi ),
-                         pz = p*cos( theta );
-            return Momentum( px, py, pz, e );
-          }
+          static Momentum fromPThetaPhi( double p, double theta, double phi, double e=-1. );
           /// Build a 4-momentum from its four momentum and energy coordinates
-          static inline Momentum fromPxPyPzE( double px, double py, double pz, double e ) {
-            return Momentum( px, py, pz, e );
-          }
+          static Momentum fromPxPyPzE( double px, double py, double pz, double e );
 
           // --- vector and scalar operators
 
@@ -135,23 +116,9 @@ namespace CepGen
             return true;
           }
           /// Set all the components of the 3-momentum (in GeV)
-          inline void setP( double px, double py, double pz ) {
-            px_ = px;
-            py_ = py;
-            pz_ = pz;
-            computeP();
-          }
+          void setP( double px, double py, double pz );
           /// Set an individual component of the 4-momentum (in GeV)
-          inline void setP(unsigned int i, double p) {
-            switch ( i ) {
-              case 0: px_ = p; break;
-              case 1: py_ = p; break;
-              case 2: pz_ = p; break;
-              case 3: energy_ = p; break;
-              default: return;
-            }
-            computeP();
-          }
+          inline void setP( unsigned int i, double p );
           /// Set the energy (in GeV)
           inline void setEnergy( double e ) { energy_ = e; }
           /// Compute the energy from the mass
@@ -159,25 +126,7 @@ namespace CepGen
           /// Compute the energy from the mass
           inline void setMass2( double m2 ) { energy_ = sqrt( p2()+m2 ); }
           /// Get one component of the 4-momentum (in GeV)
-          inline double p( unsigned int i ) const {
-            switch ( i ) {
-              case 0: return px_;
-              case 1: return py_;
-              case 2: return pz_;
-              case 3: return energy_;
-              default: return -1.;
-            }
-          }
-          /// Get one component of the 4-momentum (in GeV)
-          inline double& operator[]( const unsigned int i ) {
-            switch ( i ) {
-              case 0: return px_; break;
-              case 1: return py_; break;
-              case 2: return pz_; break;
-              case 3: return energy_; break;
-            }
-            exit( 0 );
-          }
+          double operator[]( const unsigned int i ) const;
           /// Momentum along the \f$x\f$-axis (in GeV)
           inline double px() const { return px_; }
           /// Momentum along the \f$y\f$-axis (in GeV)
@@ -188,7 +137,7 @@ namespace CepGen
           inline double pt() const { return sqrt( pt2() ); }
           inline double pt2() const { return ( px()*px()+py()*py() ); }
           inline double* pRef() { return &p_; }
-          inline const std::vector<double> pVector() const { return std::vector<double>( { px(), py(), pz(), energy(), mass() } ); }
+          const std::vector<double> pVector() const;
           /// 3-momentum norm (in GeV)
           inline double p() const { return p_; }
           /// Squared 3-momentum norm (in \f$\textrm{GeV}^\textrm{2}\f$)
@@ -206,30 +155,16 @@ namespace CepGen
           /// Azimutal angle (angle in the transverse plane)
           inline double phi() const { return atan2( py(), px() ); }
           /// Pseudo-rapidity
-          inline double eta() const {
-            const int sign = ( pz()/fabs( pz() ) );
-            return ( pt()!=0. )
-              ? log( ( p()+fabs( pz() ) )/pt() )*sign
-              : 9999.*sign;
-          };
+          double eta() const;
           /// Rapidity
-          inline double rapidity() const {
-            const int sign = ( pz()/fabs( pz() ) );
-            return ( energy()>=0. )
-              ? log( ( energy()+pz() )/( energy()-pz() ) )/2.
-              : 999.*sign;
-          }
+          double rapidity() const;
           /// Rotate the transverse components by an angle phi (and reflect the y coordinate)
           void rotatePhi( double phi, double sign );
           /// Rotate the particle's momentum by a polar/azimuthal angle
           void rotateThetaPhi( double theta_, double phi_ );
         private:
           /// Compute the 3-momentum's norm
-          inline void computeP() {
-            p_ = 0.;
-            for ( unsigned int i=0; i<3; i++ ) p_ += p(i)*p(i);
-            p_ = sqrt( p_ );
-          }
+          inline void computeP() { p_ = sqrt( px_*px_ + py_*py_ + pz_*pz_ ); }
           /// Momentum along the \f$x\f$-axis
           double px_;
           /// Momentum along the \f$y\f$-axis

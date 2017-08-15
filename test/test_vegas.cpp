@@ -13,6 +13,7 @@ main( int argc, char* argv[] )
 
   //CepGen::Logger::get().level = CepGen::Logger::Debug;
 
+  mg.parameters->setProcess( new CepGen::Process::TestProcess );
   mg.parameters->kinematics.setSqrtS( 13.e3 );
   mg.parameters->kinematics.eta_min = -2.5;
   mg.parameters->kinematics.eta_max = 2.5;
@@ -23,7 +24,7 @@ main( int argc, char* argv[] )
   Information( Form( "Initial configuration time: %.3f ms", tmr.elapsed()*1.e3 ) );
   tmr.reset();
 
-  mg.parameters->setProcess( new CepGen::Process::TestProcess );
+  mg.parameters->dump();
 
   mg.clearRun();
   double xsec_cepgen, err_xsec_cepgen;
