@@ -118,7 +118,7 @@ namespace CepGen
           /// Set all the components of the 3-momentum (in GeV)
           void setP( double px, double py, double pz );
           /// Set an individual component of the 4-momentum (in GeV)
-          inline void setP( unsigned int i, double p );
+          void setP( unsigned int i, double p );
           /// Set the energy (in GeV)
           inline void setEnergy( double e ) { energy_ = e; }
           /// Compute the energy from the mass
