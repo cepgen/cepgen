@@ -118,8 +118,8 @@ namespace CepGen
     do {
       do {
         // ...
-        j_ = (double)rand()/RAND_MAX * max;
-        y = (double)rand()/RAND_MAX * f_max_global_;
+        j_ = gsl_rng_uniform( rng_ ) * max;
+        y = gsl_rng_uniform( rng_ ) * f_max_global_;
         nm_[j_] += 1;
       } while ( y > f_max_[j_] );
       // Select x values in this Vegas bin
@@ -127,7 +127,7 @@ namespace CepGen
       for ( unsigned int i=0; i<ndim; i++ ) {
       int jjj = jj / mbin_;
         n_[i] = jj - jjj * mbin_;
-        x_[i] = ( (double)rand()/RAND_MAX + n_[i] ) / mbin_;
+        x_[i] = ( gsl_rng_uniform( rng_ ) + n_[i] ) / mbin_;
         jj = jjj;
       }
 
@@ -170,11 +170,11 @@ namespace CepGen
                      "corre2 = %f", j_, correc2_ ) );
 
     if ( correc_ >= 1. ) correc_ -= 1.;
-    if ( (double)rand()/RAND_MAX < correc_ ) {
+    if ( gsl_rng_uniform( rng_ ) < correc_ ) {
       correc_ = -1.;
       // Select x values in Vegas bin
       for ( unsigned int k=0; k<ndim; k++ ) {
-        x_[k] = ( (double)rand()/RAND_MAX + n_[k] ) / mbin_;
+        x_[k] = ( gsl_rng_uniform( rng_ ) + n_[k] ) / mbin_;
       }
       // Compute weight for x value
       weight = F( x_ );
@@ -185,7 +185,7 @@ namespace CepGen
         correc_ += 1.;
       }
       // Accept event
-      if ( weight >= f_max_diff_*(double)rand()/RAND_MAX + f_max_old_ ) { // FIXME!!!!
+      if ( weight >= f_max_diff_*gsl_rng_uniform( rng_ ) + f_max_old_ ) { // FIXME!!!!
         //Error("Accepting event!!!");
         //return storeEvent(x);
         std::copy( x_, x_+ndim, x_ );
@@ -269,7 +269,7 @@ namespace CepGen
       double fsum = 0., fsum2 = 0.;
       for ( unsigned int j=0; j<npoin; j++ ) {
         for ( unsigned int k=0; k<ndim; k++ ) {
-          x_[k] = ( (double)rand()/RAND_MAX + n[k] ) / mbin_;
+          x_[k] = ( gsl_rng_uniform( rng_ ) + n[k] ) / mbin_;
         }
         const double z = F( x_ );
         f_max_[i] = std::max( f_max_[i], z );
