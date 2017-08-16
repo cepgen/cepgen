@@ -77,6 +77,8 @@ namespace CepGen
        * \brief Prepare the class for events generation
        */
       void setGen();
+      //bool uniform() const { return gsl_rnd_uniform( rnd_ ); }
+      bool uniform() const { return rand()/RAND_MAX; }
 
       /// Integration grid size parameter
       double mbin_;

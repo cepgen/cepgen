@@ -17,6 +17,7 @@ void produce_plot( const char* name, TH1* hist )
 int main( int argc, char* argv[] )
 {
   CepGen::Generator mg;
+  //CepGen::Logger::get().level = CepGen::Logger::Debug;
 
   if ( argc<2 ) {
     InError( Form( "Usage: %s [input card]", argv[0] ) );
@@ -34,8 +35,8 @@ int main( int argc, char* argv[] )
   for ( unsigned int i=0; i<1e4; i++ ) {
     CepGen::Event* ev = mg.generateOneEvent();
     if ( i%100==0 ) Information( Form( "Produced event #%d", i ) );
-    const CepGen::Particle::Momentum pl1 = ev->getOneByRole( CepGen::Particle::CentralParticle1 )->momentum(),
-                                     pl2 = ev->getOneByRole( CepGen::Particle::CentralParticle2 )->momentum();
+    const auto pl1 = ev->getOneByRole( CepGen::Particle::CentralParticle1 )->momentum(),
+               pl2 = ev->getOneByRole( CepGen::Particle::CentralParticle2 )->momentum();
     h_mass.Fill( ( pl1+pl2 ).mass() );
     h_ptpair.Fill( ( pl1+pl2 ).pt() );
   }

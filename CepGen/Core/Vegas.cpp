@@ -118,8 +118,8 @@ namespace CepGen
     do {
       do {
         // ...
-        j_ = gsl_rng_uniform( rng_ ) * max;
-        y = gsl_rng_uniform( rng_ ) * f_max_global_;
+        j_ = uniform() * max;
+        y = uniform() * f_max_global_;
         nm_[j_] += 1;
       } while ( y > f_max_[j_] );
       // Select x values in this Vegas bin
@@ -127,7 +127,7 @@ namespace CepGen
       for ( unsigned int i=0; i<ndim; i++ ) {
       int jjj = jj / mbin_;
         n_[i] = jj - jjj * mbin_;
-        x_[i] = ( gsl_rng_uniform( rng_ ) + n_[i] ) / mbin_;
+        x_[i] = ( uniform() + n_[i] ) / mbin_;
         jj = jjj;
       }
 
@@ -170,11 +170,11 @@ namespace CepGen
                      "corre2 = %f", j_, correc2_ ) );
 
     if ( correc_ >= 1. ) correc_ -= 1.;
-    if ( gsl_rng_uniform( rng_ ) < correc_ ) {
+    if ( uniform() < correc_ ) {
       correc_ = -1.;
       // Select x values in Vegas bin
       for ( unsigned int k=0; k<ndim; k++ ) {
-        x_[k] = ( gsl_rng_uniform( rng_ ) + n_[k] ) / mbin_;
+        x_[k] = ( uniform() + n_[k] ) / mbin_;
       }
       // Compute weight for x value
       weight = F( x_ );
@@ -185,7 +185,7 @@ namespace CepGen
         correc_ += 1.;
       }
       // Accept event
-      if ( weight >= f_max_diff_*gsl_rng_uniform( rng_ ) + f_max_old_ ) { // FIXME!!!!
+      if ( weight >= f_max_diff_*uniform() + f_max_old_ ) { // FIXME!!!!
         //Error("Accepting event!!!");
         //return storeEvent(x);
         std::copy( x_, x_+ndim, x_ );
@@ -269,7 +269,7 @@ namespace CepGen
       double fsum = 0., fsum2 = 0.;
       for ( unsigned int j=0; j<npoin; j++ ) {
         for ( unsigned int k=0; k<ndim; k++ ) {
-          x_[k] = ( gsl_rng_uniform( rng_ ) + n[k] ) / mbin_;
+          x_[k] = ( uniform() + n[k] ) / mbin_;
         }
         const double z = F( x_ );
         f_max_[i] = std::max( f_max_[i], z );
@@ -286,7 +286,8 @@ namespace CepGen
         const double sig = sqrt( sig2 );
         const double eff = ( f_max_[i] != 0. ) ? f_max_[i]/av : 1.e4;
         os.str(""); for ( unsigned int j=0; j<ndim; j++ ) { os << n[j]; if ( j != ndim-1 ) os << ", "; }
-        DebuggingInsideLoop( Form( "In iteration #%d:\n\t"
+        //DebuggingInsideLoop( Form( "In iteration #%d:\n\t"
+        Debugging( Form( "In iteration #%d:\n\t"
                                    "av   = %f\n\t"
                                    "sig  = %f\n\t"
                                    "fmax = %f\n\t"
