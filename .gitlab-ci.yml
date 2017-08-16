@@ -17,6 +17,18 @@ compile:
     paths:
       - build/
 
+test_vegas:
+  stage: test
+  dependencies:
+    - compile
+  before_script:
+    - cd build
+  script:
+    - make -j 4 test_vegas
+    - test/test_vegas
+  when: on_success
+  allow_failure: true
+
 test_cross_sections:
   stage: test
   dependencies:
