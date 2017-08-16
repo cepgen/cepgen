@@ -11,7 +11,7 @@ namespace CepGen
     Parameters* p = static_cast<Parameters*>( params );
     std::shared_ptr<Event> ev = p->process()->event();
 
-    if ( !ev->particles().empty() ) {
+    if ( p->process()->hasEvent() ) {
       //float now = tmr.elapsed();
       const Particle::Momentum p1( 0., 0.,  p->kinematics.in1p ), p2( 0., 0., -p->kinematics.in2p );
       p->process()->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
@@ -42,10 +42,10 @@ namespace CepGen
           case Kinematics::ElasticElastic: break; // nothing to change in the event
           case Kinematics::ElasticInelastic:
           case Kinematics::InelasticElastic: // set one of the outgoing protons to be fragmented
-            ev->getOneByRole( Particle::OutgoingBeam1 )->setPdgId( Particle::uQuark ); break;
+            ev->getOneByRole( Particle::OutgoingBeam1 ).setPdgId( Particle::uQuark ); break;
           case Kinematics::InelasticInelastic: // set both the outgoing protons to be fragmented
-            ev->getOneByRole( Particle::OutgoingBeam1 )->setPdgId( Particle::uQuark );
-            ev->getOneByRole( Particle::OutgoingBeam2 )->setPdgId( Particle::uQuark );
+            ev->getOneByRole( Particle::OutgoingBeam1 ).setPdgId( Particle::uQuark );
+            ev->getOneByRole( Particle::OutgoingBeam2 ).setPdgId( Particle::uQuark );
             break;
         }
         //PrintMessage( Form( "4 - after preparing the event kinematics: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
@@ -54,10 +54,10 @@ namespace CepGen
         p->process()->prepareKinematics();
 
         //--- add outgoing leptons
-        Particle* out1 = ev->getOneByRole( Particle::CentralParticle1 ),
-                 *out2 = ev->getOneByRole( Particle::CentralParticle2 );
-        out1->setPdgId( p->kinematics.pair ); out1->setMass( Particle::massFromPDGId( p->kinematics.pair ) );
-        out2->setPdgId( p->kinematics.pair ); out2->setMass( Particle::massFromPDGId( p->kinematics.pair ) );
+        Particle& out1 = ev->getOneByRole( Particle::CentralParticle1 ),
+                 &out2 = ev->getOneByRole( Particle::CentralParticle2 );
+        out1.setPdgId( p->kinematics.pair ); out1.computeMass();
+        out2.setPdgId( p->kinematics.pair ); out2.computeMass();
 
         p->process()->clearRun();
         p->vegas.first_run = false;

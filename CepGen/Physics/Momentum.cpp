@@ -187,6 +187,13 @@ namespace CepGen
   }
 
   double
+  Momentum::mass() const
+  {
+    if ( mass2() >= 0. ) return sqrt( mass2() );
+    return -sqrt( -mass2() );
+  }
+
+  double
   Momentum::eta() const
   {
     const int sign = ( pz()/fabs( pz() ) );

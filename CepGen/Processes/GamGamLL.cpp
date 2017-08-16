@@ -451,11 +451,11 @@ GamGamLL::beforeComputeWeight()
 {
   if ( !GenericProcess::is_point_set_ ) return;
   
-  Particle *p1 = particlePtr( Particle::IncomingBeam1 ),
-           *p2 = particlePtr( Particle::IncomingBeam2 );
+  const Particle& p1 = event_->getOneByRole( Particle::IncomingBeam1 ),
+                 &p2 = event_->getOneByRole( Particle::IncomingBeam2 );
 
-  ep1_ = p1->energy();
-  ep2_ = p2->energy();
+  ep1_ = p1.energy();
+  ep2_ = p2.energy();
 
   const double thetamin = etaToTheta( cuts_.eta_max ),
                thetamax = etaToTheta( cuts_.eta_min );
@@ -463,8 +463,8 @@ GamGamLL::beforeComputeWeight()
   cot_theta2_ = 1./tan( thetamin*M_PI/180. );
   DebuggingInsideLoop( Form( "cot(theta1) = %f\n\tcot(theta2) = %f", cot_theta1_, cot_theta2_ ) );
 
-  Ml12_ = particlePtr( Particle::CentralParticle1 )->mass2();
-  Ml22_ = particlePtr( Particle::CentralParticle2 )->mass2();
+  Ml12_ = event_->getOneByRole( Particle::CentralParticle1 ).mass2();
+  Ml22_ = event_->getOneByRole( Particle::CentralParticle2 ).mass2();
   
   switch ( cuts_.kinematics ) {
     case Kinematics::ElectronProton: default:
@@ -472,24 +472,24 @@ GamGamLL::beforeComputeWeight()
     case Kinematics::ElasticElastic:
       dw31_ = dw52_ = 0.; break;
     case Kinematics::InelasticElastic: {
-      const double m = computeOutgoingPrimaryParticlesMasses( x(7), particlePtr( Particle::IncomingBeam1 )->mass(), particlePtr( Particle::CentralParticle1 )->mass(), dw31_ );
-      particlePtr( Particle::OutgoingBeam1 )->setMass( m );
-      particlePtr( Particle::OutgoingBeam2 )->setMass( Particle::massFromPDGId( p2->pdgId() ) );
+      const double m = computeOutgoingPrimaryParticlesMasses( x(7), p1.mass(), sqrt( Ml12_ ), dw31_ );
+      event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( m );
+      event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( Particle::massFromPDGId( p2.pdgId() ) );
     } break;
     case Kinematics::ElasticInelastic: {
-      const double m = computeOutgoingPrimaryParticlesMasses( x(7), particlePtr( Particle::IncomingBeam2 )->mass(), particlePtr( Particle::CentralParticle1 )->mass(), dw52_ );
-      particlePtr( Particle::OutgoingBeam1 )->setMass( Particle::massFromPDGId( p1->pdgId() ) );
-      particlePtr( Particle::OutgoingBeam2 )->setMass( m );
+      const double m = computeOutgoingPrimaryParticlesMasses( x(7), p2.mass(), sqrt( Ml22_ ), dw52_ );
+      event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( Particle::massFromPDGId( p1.pdgId() ) );
+      event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( m );
     } break;
     case Kinematics::InelasticInelastic: {
-      const double mx = computeOutgoingPrimaryParticlesMasses( x(7), particlePtr( Particle::IncomingBeam2 )->mass(), particlePtr( Particle::CentralParticle1 )->mass(), dw31_ );
-      particlePtr( Particle::OutgoingBeam1 )->setMass( mx );
-      const double my = computeOutgoingPrimaryParticlesMasses( x(8), particlePtr( Particle::OutgoingBeam1 )->mass(), particlePtr( Particle::CentralParticle1 )->mass(), dw52_ );
-      particlePtr( Particle::OutgoingBeam2 )->setMass( my );
+      const double mx = computeOutgoingPrimaryParticlesMasses( x(7), p2.mass(), sqrt( Ml12_ ), dw31_ );
+      event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( mx );
+      const double my = computeOutgoingPrimaryParticlesMasses( x(8), p1.mass(), sqrt( Ml22_ ), dw52_ );
+      event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( my );
     } break;
   }
-  MX_ = particlePtr( Particle::OutgoingBeam1 )->mass();
-  MY_ = particlePtr( Particle::OutgoingBeam2 )->mass();
+  MX_ = event_->getOneByRole( Particle::OutgoingBeam1 ).mass();
+  MY_ = event_->getOneByRole( Particle::OutgoingBeam2 ).mass();
   MX2_ = MX_*MX_;
   MY2_ = MY_*MY_;
 }
@@ -504,7 +504,7 @@ GamGamLL::computeWeight()
   if ( cuts_.w_max<0 ) cuts_.w_max = s_;
 
   // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
-  double wmin = std::pow( particlePtr( Particle::CentralParticle1 )->mass()+particlePtr( Particle::CentralParticle2 )->mass(), 2 );
+  double wmin = std::pow( sqrt( Ml12_ ) + sqrt( Ml22_ ), 2 );
   if ( fabs( wmin ) < fabs( cuts_.w_min ) ) wmin = cuts_.w_min;
 
   // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or _wmax if specified)
@@ -681,8 +681,7 @@ GamGamLL::computeWeight()
   // END of GAMGAMLL subroutine in the FORTRAN version
   ////////////////////////////////////////////////////////////////
 
-  const Particle::Momentum cm = particlePtr( Particle::IncomingBeam1 )->momentum()
-                               +particlePtr( Particle::IncomingBeam2 )->momentum();
+  const Particle::Momentum cm = event_->getOneByRole( Particle::IncomingBeam1 ).momentum() + event_->getOneByRole( Particle::IncomingBeam2 ).momentum();
 
   ////////////////////////////////////////////////////////////////
   // INFO from f.f
@@ -754,8 +753,7 @@ GamGamLL::computeWeight()
 void
 GamGamLL::fillKinematics( bool )
 {
-  const Particle::Momentum cm = particlePtr( Particle::IncomingBeam1 )->momentum()
-                               +particlePtr( Particle::IncomingBeam2 )->momentum();
+  const Particle::Momentum cm = event_->getOneByRole( Particle::IncomingBeam1 ).momentum() + event_->getOneByRole( Particle::IncomingBeam2 ).momentum();
 
   const double gamma  = cm.energy()/sqs_,
                betgam = cm.pz()/sqs_;
@@ -773,57 +771,57 @@ GamGamLL::fillKinematics( bool )
   }*/
   
   // First incoming proton
-  Particle* ip1 = particlePtr(Particle::IncomingBeam1);
-  Particle::Momentum plab_ip1(0., 0., p_cm_, ep1_);
-  plab_ip1.betaGammaBoost(gamma, betgam);
-  ip1->setMomentum(plab_ip1);
+  Particle& ip1 = event_->getOneByRole( Particle::IncomingBeam1 );
+  Particle::Momentum plab_ip1( 0., 0., p_cm_, ep1_ );
+  plab_ip1.betaGammaBoost( gamma, betgam );
+  ip1.setMomentum( plab_ip1 );
   
   // Second incoming proton
-  Particle* ip2 = particlePtr( Particle::IncomingBeam2 );
+  Particle& ip2 = event_->getOneByRole( Particle::IncomingBeam2 );
   Particle::Momentum plab_ip2( 0., 0., -p_cm_, ep2_ );
   plab_ip2.betaGammaBoost( gamma, betgam );
-  ip2->setMomentum( plab_ip2 );
+  ip2.setMomentum( plab_ip2 );
   
   // First outgoing proton
-  Particle* op1 = particlePtr( Particle::OutgoingBeam1 );
+  Particle& op1 = event_->getOneByRole( Particle::OutgoingBeam1 );
   p3_lab_.betaGammaBoost( gamma, betgam );
   p3_lab_.rotatePhi( ranphi, rany );
-  op1->setMomentum( p3_lab_ );
-  if ( cuts_.kinematics == Kinematics::ElasticElastic ) { op1->status = Particle::FinalState; op1->setMass();      } // stable proton
-  else                                                  { op1->status = Particle::Undecayed;  op1->setMass( MX_ ); } // fragmenting remnants
+  op1.setMomentum( p3_lab_ );
+  if ( cuts_.kinematics == Kinematics::ElasticElastic ) { op1.status = Particle::FinalState; op1.setMass();      } // stable proton
+  else                                                  { op1.status = Particle::Undecayed;  op1.setMass( MX_ ); } // fragmenting remnants
   
   // Second outgoing proton
-  Particle* op2 = particlePtr( Particle::OutgoingBeam2 );
+  Particle& op2 = event_->getOneByRole( Particle::OutgoingBeam2 );
   p5_lab_.betaGammaBoost( gamma, betgam );
   p5_lab_.rotatePhi( ranphi, rany );
-  op2->setMomentum( p5_lab_ );
-  if ( cuts_.kinematics == Kinematics::InelasticInelastic ) { op2->status = Particle::Undecayed;  op2->setMass( MY_ ); } // fragmenting remnants
-  else                                                      { op2->status = Particle::FinalState; op2->setMass();      } // stable proton
+  op2.setMomentum( p5_lab_ );
+  if ( cuts_.kinematics == Kinematics::InelasticInelastic ) { op2.status = Particle::Undecayed;  op2.setMass( MY_ ); } // fragmenting remnants
+  else                                                      { op2.status = Particle::FinalState; op2.setMass();      } // stable proton
 
   // First incoming photon
   // Equivalent in LPAIR : PLAB(x, 3)
-  Particle* ph1 = particlePtr( Particle::Parton1 );
+  Particle& ph1 = event_->getOneByRole( Particle::Parton1 );
   Particle::Momentum plab_ph1 = plab_ip1-p3_lab_;
   plab_ph1.rotatePhi( ranphi, rany );
-  ph1->setMomentum( plab_ph1 );
-  ph1->charge = 0;
-  ph1->status = Particle::Incoming; // "incoming beam"
+  ph1.setMomentum( plab_ph1 );
+  ph1.charge = 0;
+  ph1.status = Particle::Incoming; // "incoming beam"
   
   // Second incoming photon
   // Equivalent in LPAIR : PLAB(x, 4)
-  Particle* ph2 = particlePtr( Particle::Parton2 );
+  Particle& ph2 = event_->getOneByRole( Particle::Parton2 );
   Particle::Momentum plab_ph2 = plab_ip2-p5_lab_;
   plab_ph2.rotatePhi( ranphi, rany );
-  ph2->setMomentum( plab_ph2 );
-  ph2->charge = 0;
-  ph2->status = Particle::Incoming; // "incoming beam"
+  ph2.setMomentum( plab_ph2 );
+  ph2.charge = 0;
+  ph2.status = Particle::Incoming; // "incoming beam"
 
   // Central (two-photon) system
-  Particle* cs = particlePtr( Particle::CentralSystem );
-  cs->status = Particle::Incoming;
+  Particle& cs = event_->getOneByRole( Particle::CentralSystem );
+  cs.status = Particle::Incoming;
 
   Particle::Role role_ol1, role_ol2;
-  if (ransign<0) {
+  if ( ransign < 0 ) {
     role_ol1 = Particle::CentralParticle1;
     role_ol2 = Particle::CentralParticle2;
   }
@@ -833,20 +831,20 @@ GamGamLL::fillKinematics( bool )
   }
   
   // First outgoing lepton
-  Particle* ol1 = particlePtr( role_ol1 );
-  ol1->setPdgId( ol1->pdgId(), ransign );
+  Particle& ol1 = event_->getOneByRole( role_ol1 );
+  ol1.setPdgId( ol1.pdgId(), ransign );
   p6_cm_.rotatePhi( ranphi, rany );
-  ol1->setMomentum( p6_cm_ );
-  ol1->status = Particle::FinalState;
-  ol1->setMass(); //FIXME
+  ol1.setMomentum( p6_cm_ );
+  ol1.status = Particle::FinalState;
+  ol1.setMass(); //FIXME
   
   // Second outgoing lepton
-  Particle* ol2 = particlePtr( role_ol2 );
-  ol2->setPdgId( ol2->pdgId(), -ransign );
+  Particle& ol2 = event_->getOneByRole( role_ol2 );
+  ol2.setPdgId( ol2.pdgId(), -ransign );
   p7_cm_.rotatePhi( ranphi, rany );
-  ol2->setMomentum( p7_cm_ );
-  ol2->status = Particle::FinalState;
-  ol2->setMass(); //FIXME
+  ol2.setMomentum( p7_cm_ );
+  ol2.status = Particle::FinalState;
+  ol2.setMass(); //FIXME
 
   //event_->Dump();
 }

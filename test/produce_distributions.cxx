@@ -35,8 +35,9 @@ int main( int argc, char* argv[] )
   for ( unsigned int i=0; i<1e4; i++ ) {
     CepGen::Event* ev = mg.generateOneEvent();
     if ( i%100==0 ) Information( Form( "Produced event #%d", i ) );
-    const auto pl1 = ev->getOneByRole( CepGen::Particle::CentralParticle1 )->momentum(),
-               pl2 = ev->getOneByRole( CepGen::Particle::CentralParticle2 )->momentum();
+ev->dump();
+    const auto pl1 = ev->getOneByRole( CepGen::Particle::CentralParticle1 ).momentum(),
+               pl2 = ev->getOneByRole( CepGen::Particle::CentralParticle2 ).momentum();
     h_mass.Fill( ( pl1+pl2 ).mass() );
     h_ptpair.Fill( ( pl1+pl2 ).pt() );
   }

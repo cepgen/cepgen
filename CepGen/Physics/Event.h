@@ -34,72 +34,46 @@ namespace CepGen
       /**
        * Returns the list of pointers to the Particle objects corresponding to a certain role in the process kinematics
        * \brief Gets a list of particles by their role in the event
-       * \param[in] role_ The role the particles have to play in the process
-       * \return A vector of pointers to the requested Particle objects
+       * \param[in] role The role the particles have to play in the process
+       * \return A vector of references to the requested Particle objects
        */
-      ParticlesRef getByRole( const Particle::Role& role_);
+      Particles& getByRole( const Particle::Role& role );
       /**
        * Returns the first Particle object in the particles list whose role corresponds to the given argument
-       * \param[in] role_ The role the particle has to play in the event
-       * \return A Particle object corresponding to the first particle found in this event
+       * \param[in] role The role the particle has to play in the event
+       * \return A Particle object corresponding to the first particle with the role
        */
-      inline Particle* getOneByRole( const Particle::Role& role_ ) {
-        ParticlesMap::iterator it = particles_.find( role_ );
-        if ( it!=particles_.end() ) return &( it->second );
-        return 0;
-      };
+      inline Particle& getOneByRole( const Particle::Role& role ) {
+        return *getByRole( role ).begin();
+      }
       /**
        * Returns the pointer to the Particle object corresponding to a unique identifier in the event
        * \brief Gets one particle by its unique identifier in the event
        * \param[in] id_ The unique identifier to this particle in the event
-       * \return A pointer to the requested Particle object
+       * \return A reference to the requested Particle object
        */
-      Particle* getById( int id_ );
+      Particle& getById( int id_ );
       /// Get a const Particle object using its unique identifier
       /// \param[in] id_ Unique identifier of the particle in the event
       /// \return Constant object to be retrieved
-      const Particle getConstById( int id_ ) const;
+      const Particle& getConstById( int id_ ) const;
       /**
-       * Returns the pointers to the Particle objects corresponding to the unique identifiers in the event
+       * Returns the references to the Particle objects corresponding to the unique identifiers in the event
        * \brief Gets a vector of particles by their unique identifier in the event
        * \param[in] ids_ The unique identifiers to the particles to be selected in the event
-       * \return A vector of pointers to the requested Particle objects
+       * \return A vector of references to the requested Particle objects
        */
-      inline ParticlesRef getByIds( const ParticlesIds& ids_ ) {
-        ParticlesRef out;
-        for ( ParticlesIds::const_iterator id=ids_.begin(); id!=ids_.end(); id++ ) {
-          out.push_back( getById( *id ) );
-        }
-        return out;
-      }
+      Particles getByIds( const ParticlesIds& ids_ ) const;
       /**
        * Returns the pointer to the mother particle of any given Particle object in this event
-       * \param[in] part_ The pointer to the Particle object from which we want to extract the mother particle
+       * \param[in] part The pointer to the Particle object from which we want to extract the mother particle
        * \return A pointer to the mother Particle object
        */
-      inline ParticlesRef mothers( Particle* part_ ) {
-        ParticlesRef out;
-        const ParticlesIds moth = part_->mothersIds();
-        for ( ParticlesIds::const_iterator m=moth.begin(); m!=moth.end(); m++ ) {
-          out.push_back( getById( *m ) );
-        }
-        return out;
-      }
-      /// Return all const objects representing the mother particles of a given particle
-      /// \param[in] part_ Particle object for which the mothers are retrieved
-      /// \return Vector of Particle mother objects
-      inline Particles constMothers( const Particle* part_ ) const {
-        Particles out;
-        const ParticlesIds moth = part_->mothersIds();
-        for ( ParticlesIds::const_iterator m=moth.begin(); m!=moth.end(); m++ ) {
-          out.push_back( getConstById( *m ) );
-        }
-        return out;
-      }
+      Particles mothers( const Particle& part );
       /// Get a vector containing all the daughters from a particle
-      /// \param[in] part_ The particle for which the daughter particles have to be retrieved
+      /// \param[in] part The particle for which the daughter particles have to be retrieved
       /// \return Vector of Particle objects containing all the daughters' kinematic information
-      inline ParticlesRef daughters( const Particle* part_ ) { return getByIds( part_->daughters() ); };
+      Particles daughters( const Particle& part );
       /// Get a list of roles for the given event (really process-dependant for the central system)
       /// \return Vector of integers corresponding to all the roles the particles can play in the event
       ParticleRoles roles() const;
@@ -127,16 +101,11 @@ namespace CepGen
       /// \param[in] stable_ Do we only show the stable particles in this event?
       void dump( bool stable_=false ) const;
       /// Get a vector of all particles in the event
-      /// \return Vector containing all the pointers to the Particle objects contained in the event
-      ParticlesRef particles();
-      /// Get a vector of all particles in the event as const objects
-      /// \return Vector containing all the const pointers to the Particle objects contained in the event
-      Particles constParticles() const;
-      /// Get the list of references to const particles contained in the event
-      ConstParticlesRef constParticlesRef() const;
+      /// \return Vector containing all the references to the Particle objects contained in the event
+      Particles particles() const;
       /// Get a vector of all stable particles in the event
       /// \return Vector containing all the pointers to the stable Particle objects contained in the event
-      ParticlesRef stableParticles();
+      Particles stableParticles() const;
       /// Number of particles in the event
       /// \return Integer number of particles in the event
       inline unsigned int numParticles() const { return particles_.size(); };

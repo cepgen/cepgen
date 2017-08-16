@@ -149,7 +149,7 @@ namespace CepGen
           /// Squared mass (in GeV^2) as computed from its energy and momentum
           inline double mass2() const { return E2()-p2(); }
           /// Mass (in GeV) as computed from its energy and momentum
-          inline double mass() const { return sqrt( mass2() ); }
+          double mass() const;
           /// Polar angle (angle with respect to the longitudinal direction)
           inline double theta() const { return atan2( pt(), pz() ); }
           /// Azimutal angle (angle in the transverse plane)
@@ -260,12 +260,16 @@ namespace CepGen
        */
       inline double mass() const { return mass_; };
       /**
+       * Set the mass of the particle in \f$\textrm{GeV}/c^{2}\f$ while ensuring that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
+       * \brief Compute the particle's mass in \f$\textrm{GeV}/c^{2}\f$
+       */
+      void computeMass( bool off_shell=false );
+      /**
        * Set the mass of the particle in \f$\textrm{GeV}/c^{2}\f$ according to a value given as an argument. This method ensures that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
        * \param m The mass in \f$\textrm{GeV}/c^{2}\f$ to set
        * \brief Set the particle's mass in \f$\textrm{GeV}/c^{2}\f$
-       * \return A boolean stating whether or not the mass was correctly set
        */
-      bool setMass( double m=-1. );
+      void setMass( double m=-1. );
       /// Get the particle's squared mass (in \f$\textrm{GeV}^\textrm{2}\f$)
       inline double mass2() const { return mass_*mass_; };
       /// Retrieve the momentum object associated with this particle
@@ -273,38 +277,32 @@ namespace CepGen
       /// Retrieve the momentum object associated with this particle
       inline Momentum momentum() const { return momentum_; }
       /// Associate a momentum object to this particle
-      bool setMomentum( const Momentum& mom, bool offshell=false );
+      void setMomentum( const Momentum& mom, bool offshell=false );
       /**
        * \brief Set the 3-momentum associated to the particle
        * \param[in] px Momentum along the \f$x\f$-axis, in \f$\textrm{GeV}/c\f$
        * \param[in] py Momentum along the \f$y\f$-axis, in \f$\textrm{GeV}/c\f$
        * \param[in] pz Momentum along the \f$z\f$-axis, in \f$\textrm{GeV}/c\f$
-       * \return A boolean stating the validity of this particle (according to its 4-momentum norm)
        */
-      bool setMomentum( double px, double py, double pz );
+      void setMomentum( double px, double py, double pz );
       /**
        * \brief Set the 4-momentum associated to the particle
        * \param[in] px Momentum along the \f$x\f$-axis, in \f$\textrm{GeV}/c\f$
        * \param[in] py Momentum along the \f$y\f$-axis, in \f$\textrm{GeV}/c\f$
        * \param[in] pz Momentum along the \f$z\f$-axis, in \f$\textrm{GeV}/c\f$
        * \param[in] e Energy, in GeV
-       * \return A boolean stating the validity of the particle's kinematics
        */
-      bool setMomentum( double px, double py, double pz, double e );
+      void setMomentum( double px, double py, double pz, double e );
       /**
        * \brief Set the 4-momentum associated to the particle
        * \param[in] p 4-momentum
-       * \return A boolean stating the validity of the particle's kinematics
        */
-      inline bool setMomentum( double p[4] ) { return setMomentum( p[0], p[1], p[2], p[3] ); }
+      inline void setMomentum( double p[4] ) { setMomentum( p[0], p[1], p[2], p[3] ); }
       /**
        * \brief Set the particle's energy
        * \param[in] e Energy, in GeV
        */
-      inline void setEnergy( double e=-1. ) {
-        if ( e<0. and mass_>=0. ) e = sqrt( mass2()+momentum_.p2() );
-        momentum_.setEnergy( e );
-      }
+      void setEnergy( double e=-1. );
       /// Get the particle's energy (in GeV)
       inline double energy() const {
         return ( momentum_.energy()<0. ) ? std::sqrt( mass2()+momentum_.p2() ) : momentum_.energy();
@@ -322,7 +320,7 @@ namespace CepGen
        * \brief Set the mother particle
        * \param[in] part A Particle object containing all the information on the mother particle
        */
-      void setMother( Particle* part );
+      void setMother( Particle& part );
       /**
        * \brief Gets the unique identifier to the mother particle from which this particle arises
        * \return An integer representing the unique identifier to the mother of this particle in the event
@@ -333,7 +331,7 @@ namespace CepGen
        * \param[in] part The Particle object in which this particle will desintegrate or convert
        * \return A boolean stating if the particle has been added to the daughters list or if it was already present before
        */
-      bool addDaughter( Particle* part );
+      bool addDaughter( Particle& part );
       /// Gets the number of daughter particles
       inline unsigned int numDaughters() const { return daughters_.size(); };
       /**
@@ -394,14 +392,10 @@ namespace CepGen
 
   /// List of Particle objects
   typedef std::vector<Particle> Particles;
-  /// List of references to Particle objects
-  typedef std::vector<Particle*> ParticlesRef;
-  /// List of references to constant Particle objects
-  typedef std::vector<const Particle*> ConstParticlesRef;
   /// List of particles' roles
   typedef std::vector<Particle::Role> ParticleRoles;
   /// Map between a particle's role and its associated Particle object
-  typedef std::multimap<Particle::Role,Particle> ParticlesMap;
+  typedef std::map<Particle::Role,Particles> ParticlesMap;
 }
 
 #endif

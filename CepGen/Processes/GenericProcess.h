@@ -36,7 +36,7 @@ namespace CepGen
 
         /// Default constructor for an undefined process
         /// \param[in] name Human-readable format of the process name
-        GenericProcess( const std::string& name="<invalid process>" );
+        GenericProcess( const std::string& name="<invalid process>", bool has_event=true );
         virtual ~GenericProcess();
 
         /// Restore the Event object to its initial state
@@ -85,7 +85,9 @@ namespace CepGen
         }
         /// Get a human-readable name of the process considered
         inline const std::string& name() const { return name_; }
-  
+
+        bool hasEvent() const { return has_event_; }
+
         /// Reset the total generation time and the number of events generated for this run
         inline void clearRun() {
           total_gen_time_ = 0.;
@@ -108,19 +110,10 @@ namespace CepGen
         /// Compute the electric/magnetic form factors for the two considered \f$Q^{2}\f$ momenta transfers
         void formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const;
  
-        /// Get a list of pointers to the particles with a given role in the process
+        /// Get a list of references to the particles with a given role in the process
         /// \param[in] role role in the process for the particle to retrieve
-        /// \return A vector of pointers to Particle objects associated to the role
-        inline ParticlesRef particles( const Particle::Role& role ) { return event_->getByRole( role ); }
-        /// Get the pointer to one particle in the event (using its role)
-        inline Particle* particlePtr( const Particle::Role& role, unsigned int id=0 ) {
-          if ( id == 0 ) return event_->getOneByRole( role );
-          ParticlesRef pp = event_->getByRole( role );
-          if ( pp.empty() || id>pp.size() ) return 0;
-          return pp.at( id );
-        }
-        /// Get the pointer to one particle in the event (using its identifier)
-        inline Particle* particlePtr( unsigned int id ) { return event_->getById( id ); }
+        /// \return A vector of references to Particle objects associated to the role
+        inline Particles particles( const Particle::Role& role ) { return event_->getByRole( role ); }
 
         // --- 
   
@@ -167,6 +160,8 @@ namespace CepGen
         float total_gen_time_;
         /// Number of events already generated
         unsigned int num_gen_events_;
+        /// Does the process contain (and hold) an event?
+        bool has_event_;
 
       private:
         /**
