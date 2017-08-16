@@ -1,5 +1,5 @@
-#ifndef CepGen_Processes_Test_h
-#define CepGen_Processes_Test_h
+#ifndef CepGen_Processes_TestProcess_h
+#define CepGen_Processes_TestProcess_h
 
 #include "GenericProcess.h"
 

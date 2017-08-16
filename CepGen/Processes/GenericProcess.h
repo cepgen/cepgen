@@ -1,5 +1,5 @@
-#ifndef GenericProcess_h
-#define GenericProcess_h
+#ifndef CepGen_Processes_GenericProcess_h
+#define CepGen_Processes_GenericProcess_h
 
 #include "CepGen/Physics/Event.h"
 #include "CepGen/Physics/Kinematics.h"

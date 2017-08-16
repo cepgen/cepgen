@@ -1,5 +1,5 @@
-#ifndef GenericKTProcess_h
-#define GenericKTProcess_h
+#ifndef CepGen_Processes_GenericKTProcess_h
+#define CepGen_Processes_GenericKTProcess_h
 
 #include "GenericProcess.h"
 #include "CepGen/Physics/FormFactors.h"
