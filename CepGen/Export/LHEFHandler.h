@@ -1,5 +1,5 @@
-#ifndef OutputHandler_LHEFHandler_h
-#define OutputHandler_LHEFHandler_h
+#ifndef CepGen_Export_LHEFHandler_h
+#define CepGen_Export_LHEFHandler_h
 
 #include "HepMCHandler.h"
 

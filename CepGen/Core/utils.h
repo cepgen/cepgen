@@ -1,5 +1,5 @@
-#ifndef utils_h
-#define utils_h
+#ifndef CepGen_Core_utils_h
+#define CepGen_Core_utils_h
 
 #include <stdlib.h>
 #include <stdarg.h>  // For va_start, etc.
@@ -52,17 +52,6 @@ inline std::string colourise( const std::string& str, const Colour::TextColour& 
 void Map( double expo, double xmin, double xmax, double& out, double& dout, const std::string& var_name="" );
 void Mapla( double y, double z, int u, double xm, double xp, double& x, double& d );
 
-/**
- * Generate random number with Breit-Wigner distribution
- * @return Random number between emin_ and emax_ with Breit-Wigner distribution:
- *  \f$\frac{1}{(E-E_r)^2+\Gamma^2/4}\f$
- * @param er_ Maximum of distribution
- * @param gamma_ Width of distribution
- * @param emin_ Minimal value of RanBW
- * @param emax_ Maximal value of RanBW
- * @date 11 Apr 2014
- */
-double breitWigner( double er, double gamma, double emin, double emax, double e=-1. );
 /// Convert a polar angle to a pseudo-rapidity
 inline double thetaToEta( double theta_ ) { return -log( tan( theta_/180.*M_PI/2. ) ); }
 /// Convert a pseudo-rapidity to a polar angle

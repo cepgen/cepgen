@@ -1,5 +1,5 @@
-#ifndef Exception_h
-#define Exception_h
+#ifndef CepGen_Core_Exception_h
+#define CepGen_Core_Exception_h
 
 #include <iomanip>
 #include <sstream>

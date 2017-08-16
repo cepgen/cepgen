@@ -1,5 +1,5 @@
-#ifndef Timer_h
-#define Timer_h
+#ifndef CepGen_Core_Timer_h
+#define CepGen_Core_Timer_h
 
 #include <time.h>
 
