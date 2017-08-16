@@ -7,6 +7,7 @@ int
 main( int argc, char* argv[] )
 {
   const double num_sigma = 3.0;
+  const double exact = 1.3932039296856768591842462603255;
 
   Timer tmr;
   CepGen::Generator mg;
@@ -14,21 +15,14 @@ main( int argc, char* argv[] )
   //CepGen::Logger::get().level = CepGen::Logger::Debug;
 
   mg.parameters->setProcess( new CepGen::Process::TestProcess );
-  mg.parameters->kinematics.setSqrtS( 13.e3 );
-  mg.parameters->kinematics.eta_min = -2.5;
-  mg.parameters->kinematics.eta_max = 2.5;
-  mg.parameters->kinematics.mx_max = 1000.;
-  mg.parameters->vegas.ncvg = 50000;
-  mg.parameters->vegas.itvg = 5;
+  //mg.parameters->vegas.ncvg = 50000;
+  //mg.parameters->vegas.itvg = 5;
 
   Information( Form( "Initial configuration time: %.3f ms", tmr.elapsed()*1.e3 ) );
   tmr.reset();
 
-  mg.parameters->dump();
-
-  mg.clearRun();
-  double xsec_cepgen, err_xsec_cepgen;
-  mg.computeXsection( xsec_cepgen, err_xsec_cepgen );
+  double result, error;
+  mg.computeXsection( result, error );
 
   //const double sigma = ( fabs( xsec_ref-xsec_cepgen ) ) / sqrt( err_xsec_cepgen*err_xsec_cepgen + err_xsec_ref*err_xsec_ref );
 
@@ -37,7 +31,7 @@ main( int argc, char* argv[] )
   //Information( Form( "Computation time: %.3f ms", tmr.elapsed()*1.e3 ) );
   tmr.reset();
 
-  //assert( fabs( sigma )<num_sigma );
+  assert( fabs( exact - result ) < num_sigma * error );
 
   Information( "ALL TESTS PASSED!" );
 

@@ -269,6 +269,8 @@ namespace CepGen
       /// Get the particle's squared mass (in \f$\textrm{GeV}^\textrm{2}\f$)
       inline double mass2() const { return mass_*mass_; };
       /// Retrieve the momentum object associated with this particle
+      inline Momentum& momentum() { return momentum_; }
+      /// Retrieve the momentum object associated with this particle
       inline Momentum momentum() const { return momentum_; }
       /// Associate a momentum object to this particle
       bool setMomentum( const Momentum& mom, bool offshell=false );
@@ -376,16 +378,16 @@ namespace CepGen
 
   /// Compute the centre of mass energy of two particles (incoming or outgoing states)
   inline static double CMEnergy( const Particle& p1, const Particle& p2 ) {
-    if ( p1.mass()*p2.mass()<0. ) return 0.;
-    if ( p1.energy()*p2.energy()<0. ) return 0.;
-    return sqrt( p1.mass2()+p2.mass2()+2.*p1.energy()*p2.energy()-2.*( p1.momentum()*p2.momentum() ) );
+    if ( p1.mass()*p2.mass() < 0. ) return 0.;
+    if ( p1.energy()*p2.energy() < 0. ) return 0.;
+    return sqrt( p1.mass2()+p2.mass2() + 2.*p1.energy()*p2.energy() - 2.*( p1.momentum()*p2.momentum() ) );
   }
 
   /// Compute the centre of mass energy of two particles (incoming or outgoing states)
   inline static double CMEnergy( const Particle::Momentum& m1, const Particle::Momentum& m2 ) {
-    if (m1.mass()*m2.mass()<0.) return 0.;
-    if (m1.energy()*m2.energy()<0.) return 0.;
-    return sqrt( m1.mass2()+m2.mass2()+2.*m1.energy()*m2.energy()-2.*( m1*m2 ) );
+    if ( m1.mass()*m2.mass() < 0. ) return 0.;
+    if ( m1.energy()*m2.energy() < 0. ) return 0.;
+    return sqrt( m1.mass2()+m2.mass2() + 2.*m1.energy()*m2.energy() - 2.*( m1*m2 ) );
   }
 
   // --- particle containers

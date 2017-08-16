@@ -22,10 +22,10 @@ namespace CepGen
   Particle::operator=( const Particle& part )
   {
     pdg_id_ = part.pdg_id_;
-    this->role = part.role;
-    if ( this->id == -1 ) this->id = part.id;
+    role = part.role;
+    if ( id == -1 ) id = part.id;
     momentum_ = part.momentum_;
-    this->setMass( part.mass_ );
+    setMass( part.mass_ );
 
     return *this;
   }
@@ -34,7 +34,7 @@ namespace CepGen
   Particle::valid()
   {
     if ( pdg_id_ == invalidParticle ) return false;
-    if ( momentum_.p() == 0. and mass() == 0. ) return false;
+    if ( momentum_.p() == 0. && mass() == 0. ) return false;
     return true;
   }
 
@@ -48,19 +48,19 @@ namespace CepGen
     }
     if ( pdg_id_!=invalidParticle ) {
       mass = massFromPDGId( pdg_id_ );
-      if ( mass<0. ) return false;
-      if ( momentum_.energy()<0. ) { // invalid energy
+      if ( mass < 0. ) return false;
+      if ( momentum_.energy() < 0. ) { // invalid energy
         mass_ = mass;
         momentum_.setEnergy( momentum_.p2()+mass2() );
         return true;
       }
       if ( energy2()-momentum_.p2()!=mass*mass ) {
-        mass = std::sqrt( energy2()-momentum_.p2() );
+        mass = sqrt( energy2()-momentum_.p2() );
       }
       mass_ = mass;
       return true;
     }
-    if ( energy()>=0. and momentum_.p()>=0. ) {
+    if ( energy() >= 0. && momentum_.p() >= 0. ) {
       mass_ = sqrt( energy2()-momentum_.p2() );
       return true;
     }
@@ -108,7 +108,6 @@ namespace CepGen
   bool
   Particle::setMomentum( const Momentum& mom, bool offshell )
   {
-std::cout << mom << std::endl;
     momentum_ = mom;
     if ( offshell ) {
       mass_ = momentum_.mass();

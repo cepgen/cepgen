@@ -9,59 +9,60 @@ namespace CepGen
     std::ostringstream os;
 
     Parameters* p = static_cast<Parameters*>( params );
-
-    //float now = tmr.elapsed();
-    const Particle::Momentum p1( 0., 0.,  p->kinematics.in1p ), p2( 0., 0., -p->kinematics.in2p );
-std::cout << p1 << "\t" << p2 << std::endl;
-    p->process()->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
-    //PrintMessage( Form( "0 - after setting the kinematics: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
-
-    DebuggingInsideLoop( Form( "Function f called -- some parameters:\n\t"
-                               "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
-                               "  remnant mode: %d",
-                               p->kinematics.in1p, p->kinematics.in2p, p->remnant_mode ) );
-
-    p->process()->clearEvent();
-    //PrintMessage( Form( "1 - after clearing the event: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
-  
     std::shared_ptr<Event> ev = p->process()->event();
 
-    //PrintMessage( Form( "2: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
+    if ( !ev->particles().empty() ) {
+      //float now = tmr.elapsed();
+      const Particle::Momentum p1( 0., 0.,  p->kinematics.in1p ), p2( 0., 0., -p->kinematics.in2p );
+      p->process()->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
+      //PrintMessage( Form( "0 - after setting the kinematics: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
-    if ( p->vegas.first_run ) {
-      //PrintMessage( Form(  "3: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
+      DebuggingInsideLoop( Form( "Function f called -- some parameters:\n\t"
+                                 "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
+                                 "  remnant mode: %d",
+                                 p->kinematics.in1p, p->kinematics.in2p, p->remnant_mode ) );
 
-      if ( Logger::get().level >= Logger::Debug ) {
-        std::ostringstream oss; oss << p->process_mode;
-        Debugging( Form( "Process mode considered: %s", oss.str().c_str() ) );
+      p->process()->clearEvent();
+
+      //PrintMessage( Form( "1 - after clearing the event: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
+
+      //PrintMessage( Form( "2: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
+
+      if ( p->vegas.first_run ) {
+        //PrintMessage( Form(  "3: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
+
+        if ( Logger::get().level >= Logger::Debug ) {
+          std::ostringstream oss; oss << p->process_mode;
+          Debugging( Form( "Process mode considered: %s", oss.str().c_str() ) );
+        }
+
+        //--- add outgoing protons or remnants
+        switch ( p->process_mode ) {
+          case Kinematics::ElectronProton: default: { InError( "Not handled yet!" ); }
+          case Kinematics::ElasticElastic: break; // nothing to change in the event
+          case Kinematics::ElasticInelastic:
+          case Kinematics::InelasticElastic: // set one of the outgoing protons to be fragmented
+            ev->getOneByRole( Particle::OutgoingBeam1 )->setPdgId( Particle::uQuark ); break;
+          case Kinematics::InelasticInelastic: // set both the outgoing protons to be fragmented
+            ev->getOneByRole( Particle::OutgoingBeam1 )->setPdgId( Particle::uQuark );
+            ev->getOneByRole( Particle::OutgoingBeam2 )->setPdgId( Particle::uQuark );
+            break;
+        }
+        //PrintMessage( Form( "4 - after preparing the event kinematics: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
+
+        //--- prepare the function to be integrated
+        p->process()->prepareKinematics();
+
+        //--- add outgoing leptons
+        Particle* out1 = ev->getOneByRole( Particle::CentralParticle1 ),
+                 *out2 = ev->getOneByRole( Particle::CentralParticle2 );
+        out1->setPdgId( p->kinematics.pair ); out1->setMass( Particle::massFromPDGId( p->kinematics.pair ) );
+        out2->setPdgId( p->kinematics.pair ); out2->setMass( Particle::massFromPDGId( p->kinematics.pair ) );
+
+        p->process()->clearRun();
+        p->vegas.first_run = false;
       }
-
-      //--- add outgoing protons or remnants
-      switch ( p->process_mode ) {
-        case Kinematics::ElectronProton: default: { InError( "Not handled yet!" ); }
-        case Kinematics::ElasticElastic: break; // nothing to change in the event
-        case Kinematics::ElasticInelastic:
-        case Kinematics::InelasticElastic: // set one of the outgoing protons to be fragmented
-          ev->getOneByRole( Particle::OutgoingBeam1 )->setPdgId( Particle::uQuark ); break;
-        case Kinematics::InelasticInelastic: // set both the outgoing protons to be fragmented
-          ev->getOneByRole( Particle::OutgoingBeam1 )->setPdgId( Particle::uQuark );
-          ev->getOneByRole( Particle::OutgoingBeam2 )->setPdgId( Particle::uQuark );
-          break;
-      }
-      //PrintMessage( Form( "4 - after preparing the event kinematics: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
-
-      //--- prepare the function to be integrated
-      p->process()->prepareKinematics();
-
-      //--- add outgoing leptons
-      Particle* out1 = ev->getOneByRole( Particle::CentralParticle1 ),
-               *out2 = ev->getOneByRole( Particle::CentralParticle2 );
-      out1->setPdgId( p->kinematics.pair ); out1->setMass( Particle::massFromPDGId( p->kinematics.pair ) );
-      out2->setPdgId( p->kinematics.pair ); out2->setMass( Particle::massFromPDGId( p->kinematics.pair ) );
-
-      p->process()->clearRun();
-      p->vegas.first_run = false;
-    }
+    } // event is not empty
 
     p->process()->setPoint( ndim, x );
     if ( Logger::get().level >= Logger::DebugInsideLoop ) {
@@ -75,7 +76,7 @@ std::cout << p1 << "\t" << p2 << std::endl;
 
     tmr.reset();
     //PrintMessage( Form( "5: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
-    double ff = p->process()->computeWeight();
+    const double ff = p->process()->computeWeight();
     //PrintMessage( Form( "6: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
     if ( ff<0. ) return 0.;
@@ -120,7 +121,7 @@ std::cout << p1 << "\t" << p2 << std::endl;
                        ev->time_total ) );
 
       *( p->last_event ) = *( ev );
-    }
+    } // generating events
 
     if ( Logger::get().level>=Logger::DebugInsideLoop ) {
       os.str( "" ); for ( unsigned int i=0; i<ndim; i++ ) { os << Form( "%10.8f ", x[i] ); }

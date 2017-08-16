@@ -259,7 +259,6 @@ namespace CepGen
   std::ostream&
   operator<<( std::ostream& os, const Momentum& mom )
   {
-    os << "(E, p) = (" << mom.energy_ << ", " << mom.px_ << ", " << mom.py_ << ", " << mom.pz_ << ")";
-    return os;
+    return os << "(E, p) = (" << mom.energy_ << ", " << mom.px_ << ", " << mom.py_ << ", " << mom.pz_ << ")";
   }
 }
