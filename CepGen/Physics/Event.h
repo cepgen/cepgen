@@ -1,5 +1,5 @@
-#ifndef Event_h
-#define Event_h
+#ifndef CepGen_Physics_Event_h
+#define CepGen_Physics_Event_h
 
 #include <vector>
 #include <string>

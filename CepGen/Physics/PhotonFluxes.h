@@ -1,5 +1,5 @@
-#ifndef Physics_PhotonFluxes_h
-#define Physics_PhotonFluxes_h
+#ifndef CepGen_Physics_PhotonFluxes_h
+#define CepGen_Physics_PhotonFluxes_h
 
 #include "Particle.h"
 #include "FormFactors.h"

@@ -1,5 +1,5 @@
-#ifndef Kinematics_h
-#define Kinematics_h
+#ifndef CepGen_Physics_Kinematics_h
+#define CepGen_Physics_Kinematics_h
 
 #include <iomanip>
 #include <algorithm>

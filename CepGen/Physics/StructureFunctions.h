@@ -1,5 +1,5 @@
-#ifndef Physics_StructureFunctions_h
-#define Physics_StructureFunctions_h
+#ifndef CepGen_Physics_StructureFunctions_h
+#define CepGen_Physics_StructureFunctions_h
 
 #include <iostream>
 
