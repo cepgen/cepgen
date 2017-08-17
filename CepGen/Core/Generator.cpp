@@ -74,7 +74,6 @@ namespace CepGen
 
     try { prepareFunction(); } catch ( Exception& e ) { e.dump(); }
 
-std::cout << __PRETTY_FUNCTION__ << std::endl;
     has_cross_section_ = ( vegas_->integrate( cross_section_, cross_section_error_ ) == 0 );
 
     xsec = cross_section_;

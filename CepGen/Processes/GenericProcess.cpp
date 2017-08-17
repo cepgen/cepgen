@@ -5,27 +5,21 @@ namespace CepGen
   namespace Process
   {
     GenericProcess::GenericProcess( const std::string& name, bool has_event ) :
-      x_( 0 ), num_dimensions_( 0 ), event_( std::shared_ptr<Event>( new Event ) ),
+      event_( std::shared_ptr<Event>( new Event ) ),
       is_point_set_( false ), is_incoming_state_set_( false ), is_outgoing_state_set_( false ), is_kinematics_set_( false ),
       name_( name ),
       total_gen_time_( 0. ), num_gen_events_( 0 ), has_event_( has_event )
     {}
 
     GenericProcess::~GenericProcess()
-    {
-      if ( is_point_set_ ) delete[] x_;
-    }
+    {}
 
     void
     GenericProcess::setPoint( const unsigned int ndim, double* x )
     {
-      // Number of dimensions on which the integration will be performed
-      num_dimensions_ = ndim;
-      // Phase space coordinate becomes a protected attribute
-      if ( x_ && ( sizeof( x_ ) / sizeof( x_[0] ) != ndim ) ) delete[] x_;
-      if ( !x_ ) x_ = new double[ndim];
+      if ( ndim != x_.size() ) x_.resize( ndim );
 
-      std::copy( x, x+ndim, x_ );
+      x_ = std::vector<double>( x, x+ndim );
       is_point_set_ = true;
       if ( Logger::get().level>=Logger::DebugInsideLoop ) { dumpPoint( DebugMessage ); }
     }
@@ -50,13 +44,13 @@ namespace CepGen
     GenericProcess::dumpPoint( const ExceptionType& et )
     {
     std::ostringstream os;
-    for ( unsigned int i=0; i<num_dimensions_; i++ ) {
+    for ( unsigned int i=0; i<x_.size(); i++ ) {
       os << Form( "  x(%2d) = %8.6f\n\t", i, x_[i] );
     }
     if ( et < DebugMessage ) { Information( Form( "Number of integration parameters: %d\n\t"
-                                                  "%s", num_dimensions_, os.str().c_str() ) ); }
+                                                  "%s", x_.size(), os.str().c_str() ) ); }
     else                     { Debugging( Form( "Number of integration parameters: %d\n\t"
-                                                "%s", num_dimensions_, os.str().c_str() ) ); }
+                                                "%s", x_.size(), os.str().c_str() ) ); }
     }
 
     void

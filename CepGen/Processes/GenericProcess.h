@@ -7,6 +7,8 @@
 #include "CepGen/Physics/StructureFunctions.h"
 #include "CepGen/Physics/FormFactors.h"
 
+#include <vector>
+
 namespace CepGen
 {
   /// Location for all physics processes to be generated
@@ -78,10 +80,10 @@ namespace CepGen
         inline std::shared_ptr<Event> event() { return event_; }
 
         ///Get the number of dimensions on which the integration is performed
-        inline const unsigned int ndim() const { return num_dimensions_; }
-        /// Get the value of a component of the \a num_dimensions_ -dimensional point considered
+        inline const unsigned int ndim() const { return x_.size(); }
+        /// Get the value of a component of the d-dimensional point considered
         inline const double x( const unsigned int idx ) const {
-          return ( idx >= num_dimensions_ ) ? -1. : x_[idx];
+          return ( idx >= x_.size() ) ? -1. : x_[idx];
         }
         /// Get a human-readable name of the process considered
         inline const std::string& name() const { return name_; }
@@ -117,8 +119,8 @@ namespace CepGen
 
         // --- 
   
-        /// Array of \a num_dimensions_ components representing the point on which the weight in the cross-section is computed
-        double* x_;
+        /// Array of double precision floats representing the point on which the weight in the cross-section is computed
+        std::vector<double> x_;
         /// List of incoming state particles (including intermediate partons)
         IncomingState incoming_state_;
         /// List of outgoing state particles
@@ -140,8 +142,6 @@ namespace CepGen
         /// Invariant mass of the second proton-like outgoing particle (or remnant)
         double MY_;
 
-        /// Number of dimensions on which the integration has to be performed.
-        unsigned int num_dimensions_;
         /// Set of cuts to apply on the final phase space
         Kinematics cuts_;
         /// Event object containing all the information on the in- and outgoing particles
@@ -166,7 +166,7 @@ namespace CepGen
       private:
         /**
          * Is the system's kinematics well defined and compatible with the process ?
-         * This check is mandatory to perform the (\a num_dimensions_)-dimensional point's cross-section computation.
+         * This check is mandatory to perform the d-dimensional point's cross-section computation.
          * \brief Is the system's kinematics well defined?
          * \return A boolean stating if the input kinematics and the final states are well-defined
          */
