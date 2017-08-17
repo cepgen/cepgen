@@ -170,7 +170,7 @@ PPtoLL::computeKTFactorisedMatrixElement()
   DebuggingInsideLoop( Form( "s(1/2)_eff = %f / %f GeV^2\n\t"
                              "dilepton invariant mass = %f GeV", s1_eff, s2_eff, invm ) );
 
-  switch ( cuts_.kinematics ) {
+  switch ( cuts_.mode ) {
     case Kinematics::ElasticInelastic:   if ( sqrt( s1_eff ) <= ( MY_+invm ) ) return 0.;
     case Kinematics::InelasticElastic:   if ( sqrt( s2_eff ) <= ( MX_+invm ) ) return 0.;
     case Kinematics::InelasticInelastic: if ( sqrt( s1_eff ) <= ( MY_+invm ) ) return 0.;

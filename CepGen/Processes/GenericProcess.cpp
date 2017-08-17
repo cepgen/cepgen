@@ -61,7 +61,7 @@ namespace CepGen
     void
     GenericProcess::setEventContent( const IncomingState& is, const OutgoingState& os )
     {  
-      for ( IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++ ) { event_->addParticle( Particle( ip->first, ip->second ) ); }
+      for ( IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++ ) { event_->addParticle( Particle( ip->first, ip->second ), true ); }
 
       // Prepare the central system if not already there
       IncomingState::const_iterator central_system = is.find( Particle::CentralSystem );
@@ -69,10 +69,10 @@ namespace CepGen
         Particle& moth = event_->getOneByRole( Particle::Parton1 );
         Particle cs( Particle::CentralSystem, moth.pdgId() );
         cs.setMother( moth );
-        event_->addParticle( cs );
+        event_->addParticle( cs, true );
       }
 
-      for ( OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++ ) { event_->addParticle( Particle( op->first, op->second ) ); }
+      for ( OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++ ) { event_->addParticle( Particle( op->first, op->second ), true ); }
   
       // Incoming particles (incl. eventual partons)
       for ( IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++ ) {
@@ -117,7 +117,7 @@ namespace CepGen
       bool inel_p1 = false,
            inel_p2 = false;
 
-      switch ( cuts_.kinematics ) {
+      switch ( cuts_.mode ) {
         case Kinematics::ElectronElectron: {
           fp1 = TrivialFormFactors(); // electron (trivial) form factor
           fp2 = TrivialFormFactors(); // electron (trivial) form factor

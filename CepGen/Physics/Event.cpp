@@ -114,24 +114,29 @@ namespace CepGen
     return out;
   }
 
-  int
+  void
   Event::addParticle( Particle part, bool replace )
   {
     DebuggingInsideLoop( Form( "Particle with PDGid = %d has role %d", part.pdgId(), part.role ) );
-    if ( part.role <= 0 ) return -1;
+    if ( part.role <= 0 ) FatalError( Form( "Trying to add a particle with role=%d", (int)part.role ) );
 
+    //--- retrieve the list of particles with the same role
     Particles& part_with_same_role = getByRole( part.role );
-    part.id = particles().size(); //FIXME is there any better way of introducing this id ?
-    if ( !replace ) part_with_same_role.emplace_back( part );
-    else part_with_same_role = Particles( 1, part );
-    return 1;
+
+    //--- specify the id
+    if ( part_with_same_role.empty() && part.id < 0 ) part.id = particles().size(); //FIXME is there any better way of introducing this id ?
+    if ( replace && !part_with_same_role.empty() ) part.id = part_with_same_role[0].id;
+
+    //--- add the particle to the collection
+    if ( replace ) part_with_same_role = Particles( 1, part ); // generate a vector containing only this particle
+    else part_with_same_role.emplace_back( part );
+
   }
 
-  int
+  void
   Event::addParticle( const Particle::Role& role, bool replace )
   {
-    if ( role <= 0 ) return -1;
-    return addParticle( Particle( role ), replace );
+    addParticle( Particle( role ), replace );
   }
 
   Particles
@@ -175,9 +180,8 @@ namespace CepGen
       const Particle& p = *part_ref;
       if ( stable && p.status != Particle::FinalState ) continue;
 
-      os << Form( "\n %2d\t%+6d", p.id, p.integerPdgId() );
-      if ( p.name!="" ) os << Form( "%8s", p.name.c_str() );
-      else              os << "\t";
+      std::ostringstream oss; oss << p.pdgId();
+      os << Form( "\n %2d\t%+6d%8s", p.id, p.integerPdgId(), oss.str().c_str() );
       os << "\t";
       if ( p.charge!=999. ) os << Form( "%6.2f\t", p.charge );
       else                  os << "\t";

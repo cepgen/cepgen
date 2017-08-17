@@ -68,8 +68,8 @@ namespace CepGen
           os << std::setw( wdth ) << " * Hadroniser:" << ( ( params_.hadroniser() != 0 ) ? params_.hadroniser()->name() : colourise( "*** no hadroniser ***", Colour::Red ) ) << "\n";
         }
         else if ( key == "MODE" ) {
-          params_.process_mode = static_cast<Kinematics::ProcessMode>( atoi( value.c_str() ) );
-          os << std::setw( wdth ) << " * Subprocess' mode:" << static_cast<unsigned int>( params_.process_mode ) << " --> " << params_.process_mode << "\n";
+          params_.kinematics.mode = static_cast<Kinematics::ProcessMode>( atoi( value.c_str() ) );
+          os << std::setw( wdth ) << " * Subprocess' mode:" << static_cast<unsigned int>( params_.kinematics.mode ) << " --> " << params_.kinematics.mode << "\n";
         }
         else if ( key == "PMOD" or key == "EMOD" ) {
           params_.remnant_mode = static_cast<StructureFunctions>( atoi( value.c_str() ) );

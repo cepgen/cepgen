@@ -223,8 +223,6 @@ namespace CepGen
       int id;
       /// Electric charge (given as a float number, for the quarks and bound states)
       float charge;
-      /// Human-readable name
-      std::string name;
       /// Role in the considered process
       Role role;
       /**
@@ -238,17 +236,13 @@ namespace CepGen
       /// \param[in] ch Electric charge (in units of \f$e\f$)
       inline void setPdgId( const ParticleCode& pdg, float ch=-999. ) {
         pdg_id_ = pdg;
-        if ( ch==-999. ) charge = 0.;
+        if ( ch == -999. ) charge = 0.;
         else charge = ch;
       }
       /// Retrieve the objectified PDG identifier
       inline ParticleCode pdgId() const { return pdg_id_; }
       /// Retrieve the integer value of the PDG identifier
-      inline int integerPdgId() const {
-        const int pdg = static_cast<int>( pdg_id_ );
-        if ( pdg>10 and pdg<16 and pdg%2!=0 ) return static_cast<int>( -charge )*pdg;
-        else return pdg;
-      }
+      int integerPdgId() const;
       /// Particle's helicity
       /// \note FIXME Float??
       float helicity;

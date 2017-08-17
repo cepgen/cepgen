@@ -170,7 +170,6 @@ namespace CepGen
         pa.status = static_cast<Particle::Status>( pyjets_.k[0][p] );
         pa.setMomentum( Particle::Momentum( pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p] ) );
         pa.setMass( pyjets_.p[4][p] );
-        pa.name = this->pyname( pa.pdgId() );
         pa.charge = (float)this->pyp( p+1, 6 );
 
         if ( pyjets_.k[2][p] != 0 ) {

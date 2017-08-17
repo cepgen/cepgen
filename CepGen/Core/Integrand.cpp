@@ -32,7 +32,7 @@ namespace CepGen
         //PrintMessage( Form(  "3: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
         if ( Logger::get().level >= Logger::Debug ) {
-          std::ostringstream oss; oss << p->process_mode;
+          std::ostringstream oss; oss << p->kinematics.mode;
           Debugging( Form( "Process mode considered: %s", oss.str().c_str() ) );
         }
 
@@ -42,8 +42,8 @@ namespace CepGen
                  &cs2 = ev->getOneByRole( Particle::CentralParticle2 );
 
         //--- add outgoing protons or remnants
-        switch ( p->process_mode ) {
-          case Kinematics::ElectronProton: default: { InError( Form( "Process mode %d not yet handled!", (int)p->process_mode ) ); }
+        switch ( p->kinematics.mode ) {
+          case Kinematics::ElectronProton: default: { InError( Form( "Process mode %d not yet handled!", (int)p->kinematics.mode ) ); }
           case Kinematics::ElasticElastic: break; // nothing to change in the event
           case Kinematics::ElasticInelastic:
             op2.setPdgId( Particle::uQuark ); break;
@@ -65,7 +65,6 @@ namespace CepGen
 
         p->process()->clearRun();
         p->vegas.first_run = false;
-        p->process()->event()->dump();
       }
     } // event is not empty
 
@@ -87,13 +86,11 @@ namespace CepGen
     if ( ff<0. ) return 0.;
 
     if ( p->generation ) { // MC events generation
-std::cout << __PRETTY_FUNCTION__ << std::endl;
       p->process()->fillKinematics( false );
 
       ev->time_generation = tmr.elapsed();
-    p->process()->event()->dump();
 
-      if ( p->hadroniser() && p->process_mode!=Kinematics::ElasticElastic ) {
+      if ( p->hadroniser() && p->kinematics.mode!=Kinematics::ElasticElastic ) {
 
         Debugging( Form( "Event before calling the hadroniser (%s)", p->hadroniser()->name().c_str() ) );
         if ( Logger::get().level>=Logger::Debug ) ev->dump();

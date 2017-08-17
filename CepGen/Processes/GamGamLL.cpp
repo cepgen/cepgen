@@ -29,22 +29,23 @@ GamGamLL::GamGamLL( int nopt ) : GenericProcess( "pp -> p(*) (gamma gamma -> l+ 
 void
 GamGamLL::addEventContent()
 {
-  IncomingState is; OutgoingState os;
-  is.insert( ParticleWithRole( Particle::IncomingBeam1,    Particle::Proton ) );
-  is.insert( ParticleWithRole( Particle::IncomingBeam2,    Particle::Proton ) );
-  is.insert( ParticleWithRole( Particle::Parton1,          Particle::Photon ) );
-  is.insert( ParticleWithRole( Particle::Parton2,          Particle::Photon ) );
-  os.insert( ParticleWithRole( Particle::OutgoingBeam1,    Particle::Proton ) );
-  os.insert( ParticleWithRole( Particle::OutgoingBeam2,    Particle::Proton ) );
-  os.insert( ParticleWithRole( Particle::CentralParticle1, Particle::Muon ) );
-  os.insert( ParticleWithRole( Particle::CentralParticle2, Particle::Muon ) );
-  GenericProcess::setEventContent( is, os );
+  GenericProcess::setEventContent( {
+    { Particle::IncomingBeam1, Particle::Proton },
+    { Particle::IncomingBeam2, Particle::Proton },
+    { Particle::Parton1, Particle::Photon },
+    { Particle::Parton2, Particle::Photon }
+  }, {
+    { Particle::OutgoingBeam1, Particle::Proton },
+    { Particle::OutgoingBeam2, Particle::Proton },
+    { Particle::CentralParticle1, Particle::Muon },
+    { Particle::CentralParticle2, Particle::Muon }
+  } );
 }
 
 unsigned int
-GamGamLL::numDimensions( const Kinematics::ProcessMode& process_mode_ ) const
+GamGamLL::numDimensions( const Kinematics::ProcessMode& process_mode ) const
 {
-  switch ( process_mode_ ) {
+  switch ( process_mode ) {
     case Kinematics::ElectronProton:     { InError( "Not supported yet!" ); }
     case Kinematics::ElasticElastic:
     default:                             return 7;
@@ -466,7 +467,7 @@ GamGamLL::beforeComputeWeight()
   Ml12_ = event_->getOneByRole( Particle::CentralParticle1 ).mass2();
   Ml22_ = event_->getOneByRole( Particle::CentralParticle2 ).mass2();
 
-  switch ( cuts_.kinematics ) {
+  switch ( cuts_.mode ) {
     case Kinematics::ElectronProton: default:
       { InError( "Case not yet supported!" ); } break;
     case Kinematics::ElasticElastic:
@@ -702,10 +703,10 @@ GamGamLL::computeWeight()
 
   //--- cut on mass of final hadronic system (MX/Y)
 
-  if ( cuts_.kinematics == Kinematics::InelasticElastic || cuts_.kinematics == Kinematics::InelasticInelastic ) {
+  if ( cuts_.mode == Kinematics::InelasticElastic || cuts_.mode == Kinematics::InelasticInelastic ) {
     if ( MX_<cuts_.mx_min || MX_>cuts_.mx_max ) return 0.;
   }
-  if ( cuts_.kinematics == Kinematics::ElasticInelastic || cuts_.kinematics == Kinematics::InelasticInelastic ) {
+  if ( cuts_.mode == Kinematics::ElasticInelastic || cuts_.mode == Kinematics::InelasticInelastic ) {
     if ( MY_<cuts_.mx_min || MY_>cuts_.mx_max ) return 0.;
   }
 
@@ -746,7 +747,7 @@ GamGamLL::computeWeight()
   //--- compute the event weight using the Jacobian
 
   weight = Constants::GeV2toBarn*jacobian_;
-  switch ( cuts_.kinematics ) { // inherited from CDF version
+  switch ( cuts_.mode ) { // inherited from CDF version
     case Kinematics::ElectronProton: default: weight *= periPP( 1, 2 ); break; // ep case
     case Kinematics::ElasticElastic:          weight *= periPP( 2, 2 ); break; // elastic case
     case Kinematics::InelasticElastic:        weight *= periPP( 3, 2 )*( dw31_*dw31_ ); break;
@@ -793,17 +794,38 @@ GamGamLL::fillKinematics( bool )
   Particle& op1 = event_->getOneByRole( Particle::OutgoingBeam1 );
   p3_lab_.betaGammaBoost( gamma, betgam );
   p3_lab_.rotatePhi( ranphi, rany );
+  
   op1.setMomentum( p3_lab_ );
-  if ( cuts_.kinematics == Kinematics::ElasticElastic ) { op1.status = Particle::FinalState; op1.setMass();      } // stable proton
-  else                                                  { op1.status = Particle::Undecayed;  op1.setMass( MX_ ); } // fragmenting remnants
+  switch ( cuts_.mode ) {
+    case Kinematics::ElasticElastic:
+    case Kinematics::ElasticInelastic:
+    default:
+      op1.status = Particle::FinalState; // stable proton
+      break;
+    case Kinematics::InelasticElastic:
+    case Kinematics::InelasticInelastic:
+      op1.status = Particle::Undecayed; // fragmenting remnants
+      op1.setMass( MX_ );
+      break;
+  }
 
   // Second outgoing proton
   Particle& op2 = event_->getOneByRole( Particle::OutgoingBeam2 );
   p5_lab_.betaGammaBoost( gamma, betgam );
   p5_lab_.rotatePhi( ranphi, rany );
   op2.setMomentum( p5_lab_ );
-  if ( cuts_.kinematics == Kinematics::InelasticInelastic ) { op2.status = Particle::Undecayed;  op2.setMass( MY_ ); } // fragmenting remnants
-  else                                                      { op2.status = Particle::FinalState; op2.setMass();      } // stable proton
+  switch ( cuts_.mode ) {
+    case Kinematics::ElasticElastic:
+    case Kinematics::InelasticElastic:
+    default:
+      op2.status = Particle::FinalState; // stable proton
+      break;
+    case Kinematics::ElasticInelastic:
+    case Kinematics::InelasticInelastic:
+      op2.status = Particle::Undecayed; // fragmenting remnants
+      op2.setMass( MY_ );
+      break;
+  }
 
   // First incoming photon
   // Equivalent in LPAIR : PLAB(x, 3)
@@ -853,7 +875,7 @@ GamGamLL::fillKinematics( bool )
   ol2.status = Particle::FinalState;
   ol2.setMass(); //FIXME
 
-  //event_->Dump();
+  event_->dump();
 }
 
 double

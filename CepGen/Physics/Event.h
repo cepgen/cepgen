@@ -77,24 +77,16 @@ namespace CepGen
       ParticleRoles roles() const;
       /// Set the information on one particle in the process
       /**
-       * \param[in] part_ The Particle object to insert or modify in the event
-       * \param[in] replace_ Do we replace the particle if already present in the event or do we append another particle with the same role ?
-       * \return
-       *  * 1 if a new Particle object has been inserted in the event
-       *  * 0 if an existing Particle object has been modified
-       *  * -1 if the requested role to edit is undefined or incorrect
+       * \param[in] part The Particle object to insert or modify in the event
+       * \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
        */
-      int addParticle( Particle part_, bool replace_=false );
+      void addParticle( Particle part, bool replace=false );
       /// Create a new particle in the event, with no kinematic information but the role it has to play in the process
       /**
-       * \param[in] role_ The role the particle will play in the process
-       * \param[in] replace_ Do we replace the particle if already present in the event or do we append another particle with the same role ?
-       * \return
-       *  * 1 if a new Particle object has been inserted in the event
-       *  * 0 if an existing Particle object has been modified
-       *  * -1 if the requested role to edit is undefined or incorrect
+       * \param[in] role The role the particle will play in the process
+       * \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
        */
-      int addParticle( const Particle::Role& role_, bool replace_=false );
+      void addParticle( const Particle::Role& role, bool replace=false );
       /// Dump all the known information on every Particle object contained in this Event container in the output stream
       /// \param[in] stable_ Do we only show the stable particles in this event?
       void dump( bool stable_=false ) const;

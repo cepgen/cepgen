@@ -3,7 +3,7 @@
 using namespace CepGen;
 
 Parameters::Parameters() :
-  process_mode( Kinematics::ElasticElastic ), remnant_mode( SuriYennie ),
+  remnant_mode( SuriYennie ),
   generation( false ), store( false ), maxgen( 0 ),
   last_event( new Event() ),
   symmetrise( true ), ngen( 0 ),
@@ -11,7 +11,7 @@ Parameters::Parameters() :
 {}
 
 Parameters::Parameters( Parameters& param ) :
-  process_mode( param.process_mode ), remnant_mode( param.remnant_mode ),
+  remnant_mode( param.remnant_mode ),
   kinematics( param.kinematics ), vegas( param.vegas ),
   generation( param.generation ), store( param.store ), maxgen( param.maxgen ),
   last_event( std::move( param.last_event ) ),
@@ -69,7 +69,7 @@ Parameters::dump( std::ostream& out, bool pretty ) const
     << std::endl
     << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming particles " ) : "Incoming particles" ) << std::setfill( ' ' ) << std::endl
     << std::endl;
-  std::ostringstream proc_mode, cut_mode; proc_mode << process_mode; cut_mode << cutsmode;
+  std::ostringstream proc_mode, cut_mode; proc_mode << kinematics.mode; cut_mode << cutsmode;
   std::ostringstream ip1, ip2, op; ip1 << kinematics.in1pdg; ip2 << kinematics.in2pdg; op << kinematics.pair;
   os
     << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << std::endl

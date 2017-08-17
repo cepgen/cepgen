@@ -1,5 +1,5 @@
-#ifndef Vegas_h
-#define Vegas_h
+#ifndef CepGen_Core_Vegas_h
+#define CepGen_Core_Vegas_h
 
 #include <fstream>
 #include <cstdio> // remove (DEBUG)

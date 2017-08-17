@@ -31,7 +31,7 @@ main( int argc, char* argv[] )
   Timer tmr;
   CepGen::Generator mg;
 
-  CepGen::Logger::get().level = CepGen::Logger::Debug;
+  //CepGen::Logger::get().level = CepGen::Logger::Debug;
 
   mg.parameters->kinematics.setSqrtS( 13.e3 );
   mg.parameters->kinematics.eta_min = -2.5;
@@ -44,16 +44,16 @@ main( int argc, char* argv[] )
   tmr.reset();
 
   for ( const auto& values_vs_generator : values_map ) { // loop over all generators
-    if      ( values_vs_generator.first.compare( "1_lpair"  ) == 0 ) mg.parameters->setProcess( new CepGen::Process::GamGamLL );
-    else if ( values_vs_generator.first.compare( "2_pptoll" ) == 0 ) mg.parameters->setProcess( new CepGen::Process::PPtoLL );
+    if      ( values_vs_generator.first == "1_lpair"  ) mg.parameters->setProcess( new CepGen::Process::GamGamLL );
+    else if ( values_vs_generator.first == "2_pptoll" ) mg.parameters->setProcess( new CepGen::Process::PPtoLL );
     else { InError( Form( "Unrecognized generator mode: %s", values_vs_generator.first.c_str() ) ); break; }
 
     for ( const auto& values_vs_cut : values_vs_generator.second ) { // loop over the single lepton pT cut
       mg.parameters->kinematics.pt_min = values_vs_cut.first;
       for ( const auto& values_vs_kin : values_vs_cut.second ) { // loop over all possible kinematics
-        if      ( values_vs_kin.first.compare( "1_elastic"    ) == 0 ) mg.parameters->process_mode = CepGen::Kinematics::ElasticElastic;
-        else if ( values_vs_kin.first.compare( "2_singlediss" ) == 0 ) mg.parameters->process_mode = CepGen::Kinematics::InelasticElastic;
-        else if ( values_vs_kin.first.compare( "3_doublediss" ) == 0 ) mg.parameters->process_mode = CepGen::Kinematics::InelasticInelastic;
+        if      ( values_vs_kin.first == "1_elastic"    ) mg.parameters->kinematics.mode = CepGen::Kinematics::ElasticElastic;
+        else if ( values_vs_kin.first == "2_singlediss" ) mg.parameters->kinematics.mode = CepGen::Kinematics::InelasticElastic;
+        else if ( values_vs_kin.first == "3_doublediss" ) mg.parameters->kinematics.mode = CepGen::Kinematics::InelasticInelastic;
         else { InError( Form( "Unrecognized kinematics mode: %s", values_vs_kin.first.c_str() ) ); break; }
 
         Information( Form( "Process: %s/%s\n\tConfiguration time: %.3f ms", values_vs_generator.first.c_str(), values_vs_kin.first.c_str(), tmr.elapsed()*1.e3 ) );

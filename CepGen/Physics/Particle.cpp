@@ -3,16 +3,15 @@
 namespace CepGen
 {
   Particle::Particle() :
-    id( -1 ), charge( 1. ), name( "" ), role( UnknownRole ), status( Undefined ), helicity( 0. ),
+    id( -1 ), charge( 1. ), role( UnknownRole ), status( Undefined ), helicity( 0. ),
     mass_( -1. ), pdg_id_( invalidParticle ), is_primary_( true )
   {}
 
   Particle::Particle( Role role, ParticleCode pdgId ) :
-    id( -1 ), charge( 1. ), name( "" ), role( role ), status( Undefined ), helicity( 0. ),
+    id( -1 ), charge( 1. ), role( role ), status( Undefined ), helicity( 0. ),
     mass_( -1. ), pdg_id_( pdgId ), is_primary_( true )
   {
     if ( pdg_id_!=invalidParticle ) {
-      std::ostringstream o; o << pdg_id_; name = o.str();
       computeMass();
     }
   }
@@ -51,7 +50,6 @@ namespace CepGen
     if ( momentum_.energy() < 0. ) { // invalid energy
       momentum_.setEnergy( sqrt( momentum_.p2() + mass2() ) );
     }
-//std::cout << role << "\t" << pdg_id_ << "\t" << mass_ << "\t" << energy() << std::endl;
   }
 
   void
@@ -129,6 +127,15 @@ namespace CepGen
   {
     if ( e < 0. && mass_ >= 0. ) e = sqrt( mass2()+momentum_.p2() );
     momentum_.setEnergy( e );
+  }
+
+  int
+  Particle::integerPdgId() const
+  {
+    const int pdg = static_cast<int>( pdg_id_ );
+    //--- leptons
+    if ( charge != 0 && pdg > 10 && pdg < 16 && pdg%2 != 0 ) return -charge*pdg;
+    return pdg;
   }
 
   void
