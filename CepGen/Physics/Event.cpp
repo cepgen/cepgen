@@ -54,7 +54,7 @@ namespace CepGen
     //--- retrieve the first particle a the given role
     Particles& parts_by_role = getByRole( role );
     if ( parts_by_role.size() > 1 ) {
-      InWarning( Form( "More than one particle with role %d: %d particles", (int)role, parts_by_role.size() ) );
+      FatalError( Form( "More than one particle with role %d: %d particles", (int)role, parts_by_role.size() ) );
     }
     return *parts_by_role.begin();
   }
@@ -176,17 +176,17 @@ namespace CepGen
       if ( stable && p.status != Particle::FinalState ) continue;
 
       os << Form( "\n %2d\t%+6d", p.id, p.integerPdgId() );
-      if ( p.name!="" ) os << Form( "%6s", p.name.c_str() );
+      if ( p.name!="" ) os << Form( "%8s", p.name.c_str() );
       else              os << "\t";
       os << "\t";
       if ( p.charge!=999. ) os << Form( "%6.2f\t", p.charge );
       else                  os << "\t";
       os << Form( "%4d\t%6d\t", p.role, p.status );
       if ( !p.mothersIds().empty() )
-        os << Form( "%2d(%2d)", *( p.mothersIds().begin() ), getConstById( *( p.mothersIds().begin() ) ).role );
+        os << Form( "%2d (%2d)", *( p.mothersIds().begin() ), getConstById( *( p.mothersIds().begin() ) ).role );
       else
-        os << "      ";
-      os << Form( "% 9.3e % 9.3e % 9.3e % 9.3e", p.momentum().px(), p.momentum().py(), p.momentum().pz(), p.energy() );
+        os << "       ";
+      os << Form( "% 9.6e % 9.6e % 9.6e % 9.6e % 9.5e", p.momentum().px(), p.momentum().py(), p.momentum().pz(), p.energy(), p.mass() );
       if ( p.status == Particle::Undefined
         || p.status == Particle::FinalState
         || p.status == Particle::Undecayed ) {
@@ -204,10 +204,10 @@ namespace CepGen
     if ( fabs(  etot ) < 1.e-12 ) etot = 0.;
     //
     Information( Form( "Dump of event content:\n"
-    "Part.\tPDG id\t\tCharge\tRole\tStatus\tMother\t\t4-Momentum (GeV)\n"
-    "----\t------\t\t------\t----\t------\t------\t-------------------------------------"
+    "Part.\tPDG id\t\tCharge\tRole\tStatus\tMother\t\t\t\t4-Momentum (GeV)\t\tMass (GeV)\n"
+    "----\t------\t\t------\t----\t------\t------\t------------------------------------------------------  -----------"
     "%s\n"
-    "---------------------------------------------------------------------------------------------\n"
-    "Total:\t\t\t\t\t\t      % 9.4f % 9.4f % 9.4f % 9.4f", os.str().c_str(), pxtot, pytot, pztot, etot ) );
+    "---------------------------------------------------------------------------------------------------------------------------\n"
+    "\t\t\t\t\t\tTotal: % 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), pxtot, pytot, pztot, etot ) );
   }
 }

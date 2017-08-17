@@ -49,9 +49,9 @@ namespace CepGen
 
     //--- finish by setting the energy accordingly
     if ( momentum_.energy() < 0. ) { // invalid energy
-      momentum_.setEnergy( momentum_.p2() + mass2() );
+      momentum_.setEnergy( sqrt( momentum_.p2() + mass2() ) );
     }
-//std::cout << role << "\t" << pdg_id_ << "\t" << mass_ << std::endl;
+//std::cout << role << "\t" << pdg_id_ << "\t" << mass_ << "\t" << energy() << std::endl;
   }
 
   void

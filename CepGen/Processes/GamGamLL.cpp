@@ -472,19 +472,19 @@ GamGamLL::beforeComputeWeight()
     case Kinematics::ElasticElastic:
       dw31_ = dw52_ = 0.; break;
     case Kinematics::InelasticElastic: {
-      const double m = computeOutgoingPrimaryParticlesMasses( x(7), p1.mass(), sqrt( Ml12_ ), dw31_ );
+      const double m = computeOutgoingPrimaryParticlesMasses( x( 7 ), p1.mass(), sqrt( Ml12_ ), dw31_ );
       event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( m );
       event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( Particle::massFromPDGId( p2.pdgId() ) );
     } break;
     case Kinematics::ElasticInelastic: {
-      const double m = computeOutgoingPrimaryParticlesMasses( x(7), p2.mass(), sqrt( Ml22_ ), dw52_ );
+      const double m = computeOutgoingPrimaryParticlesMasses( x( 7 ), p2.mass(), sqrt( Ml22_ ), dw52_ );
       event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( Particle::massFromPDGId( p1.pdgId() ) );
       event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( m );
     } break;
     case Kinematics::InelasticInelastic: {
-      const double mx = computeOutgoingPrimaryParticlesMasses( x(7), p2.mass(), sqrt( Ml12_ ), dw31_ );
+      const double mx = computeOutgoingPrimaryParticlesMasses( x( 7 ), p2.mass(), sqrt( Ml12_ ), dw31_ );
       event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( mx );
-      const double my = computeOutgoingPrimaryParticlesMasses( x(8), p1.mass(), sqrt( Ml22_ ), dw52_ );
+      const double my = computeOutgoingPrimaryParticlesMasses( x( 8 ), p1.mass(), sqrt( Ml22_ ), dw52_ );
       event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( my );
     } break;
   }
@@ -516,7 +516,8 @@ GamGamLL::computeWeight()
   // compute the two-photon energy for this point
   w4_ = 0.;
   double dw4 = 0.;
-  Map( x(4), wmin, wmax, w4_, dw4, "w4" );
+  Map( x( 4 ), wmin, wmax, w4_, dw4, "w4" );
+  Map( x( 4 ), wmin, wmax, w4_, dw4, "w4" );
   mc4_ = sqrt( w4_ );
 
   DebuggingInsideLoop( Form( "Computed value for w4 = %f -> mc4 = %f", w4_, mc4_ ) );
@@ -566,15 +567,14 @@ GamGamLL::computeWeight()
   const int theta_sign = ( pgz>0. ) ? 1 : -1;
   const double ctg = theta_sign*sqrt( 1.-stg*stg );
 
-  double xx6 = x(5);
+  double xx6 = x( 5 );
 
-  const double amap = (w4_-t1_-t2_)/2.,
-               bmap = sqrt( ( std::pow( w4_-t1_-t2_, 2 )-4.*t1_*t2_ )*( 1.-4.*Ml12_/w4_ ) )/2.,
+  const double amap = 0.5 * (w4_-t1_-t2_),
+               bmap = 0.5 * sqrt( ( std::pow( w4_-t1_-t2_, 2 )-4.*t1_*t2_ )*( 1.-4.*Ml12_/w4_ ) ),
                ymap = ( amap+bmap )/( amap-bmap ),
-               beta = std::pow( ymap, static_cast<double>( 2.*xx6-1. ) );
-  xx6 = ( amap/bmap*( beta-1. )/( beta+1. )+1. )/2.;
-  if ( xx6>1. ) xx6 = 1.;
-  if ( xx6<0. ) xx6 = 0.;
+               beta = std::pow( ymap, 2.*xx6-1. );
+  xx6 = 0.5 * ( 1. + amap/bmap*( beta-1. )/( beta+1. ) );
+  xx6 = std::max( 0., std::min( xx6, 1. ) ); // xx6 in [0., 1.]
 
   DebuggingInsideLoop( Form( "amap = %f\n\tbmap = %f\n\tymap = %f\n\tbeta = %f", amap, bmap, ymap, beta ) );
 

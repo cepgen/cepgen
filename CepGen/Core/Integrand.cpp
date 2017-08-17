@@ -12,7 +12,9 @@ namespace CepGen
     std::shared_ptr<Event> ev = p->process()->event();
 
     if ( p->process()->hasEvent() ) {
+      p->process()->clearEvent();
       //float now = tmr.elapsed();
+
       const Particle::Momentum p1( 0., 0.,  p->kinematics.in1p ), p2( 0., 0., -p->kinematics.in2p );
       p->process()->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
       //PrintMessage( Form( "0 - after setting the kinematics: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
@@ -21,8 +23,6 @@ namespace CepGen
                                  "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
                                  "  remnant mode: %d",
                                  p->kinematics.in1p, p->kinematics.in2p, p->remnant_mode ) );
-
-      p->process()->clearEvent();
 
       //PrintMessage( Form( "1 - after clearing the event: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
@@ -87,6 +87,7 @@ namespace CepGen
     if ( ff<0. ) return 0.;
 
     if ( p->generation ) { // MC events generation
+std::cout << __PRETTY_FUNCTION__ << std::endl;
       p->process()->fillKinematics( false );
 
       ev->time_generation = tmr.elapsed();

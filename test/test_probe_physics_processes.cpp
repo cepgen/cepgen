@@ -31,7 +31,7 @@ main( int argc, char* argv[] )
   Timer tmr;
   CepGen::Generator mg;
 
-  //CepGen::Logger::get().level = CepGen::Logger::Debug;
+  CepGen::Logger::get().level = CepGen::Logger::Debug;
 
   mg.parameters->kinematics.setSqrtS( 13.e3 );
   mg.parameters->kinematics.eta_min = -2.5;
