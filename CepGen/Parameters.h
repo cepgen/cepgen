@@ -30,8 +30,6 @@ namespace CepGen
       Process::GenericProcess* process() { return process_.get(); }
       /// Set the process to study
       void setProcess( Process::GenericProcess* proc ) { process_.reset( proc ); }
-      /// Type of outgoing state to consider for the incoming primary particles
-      Kinematics::ProcessMode process_mode;
 
       /// Type of remnant fragmentation algorithm to use
       /// \note Was named PMOD/EMOD in ILPAIR

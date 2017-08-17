@@ -64,7 +64,7 @@ namespace CepGen
     }
 
     if ( Logger::get().level>=Logger::Debug ) {
-      std::ostringstream topo; topo << parameters->process_mode;
+      std::ostringstream topo; topo << parameters->kinematics.mode;
       Debugging( Form( "New Vegas instance created\n\t"
                        "Considered topology: %s case\n\t"
                        "Will proceed with %d-dimensional integration", topo.str().c_str(), numDimensions() ) );

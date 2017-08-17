@@ -55,7 +55,7 @@ HepMCHandler::fillEvent( const Event* evt )
 
   // filling the particles content
   const HepMC::FourVector origin( 0., 0., 0., 0. );
-  ConstParticlesRef part_vec = evt->constParticlesRef();
+  Particles part_vec = evt->particles();
 
   int cm_id = 0, idx = 1;
 
@@ -71,21 +71,21 @@ HepMCHandler::fillEvent( const Event* evt )
 
   for ( unsigned int i=0; i<part_vec.size(); i++ ) {
 
-    const Particle* part_orig = part_vec.at( i );
-    HepMC::FourVector pmom( part_orig->momentum().px(),
-                            part_orig->momentum().py(),
-                            part_orig->momentum().pz(),
-                            part_orig->energy() );
+    const Particle part_orig = part_vec.at( i );
+    HepMC::FourVector pmom( part_orig.momentum().px(),
+                            part_orig.momentum().py(),
+                            part_orig.momentum().pz(),
+                            part_orig.energy() );
 #ifdef HEPMC_VERSION3
-    HepMC::GenParticlePtr part = HepMC::make_shared<HepMC::GenParticle>( pmom, part_orig->integerPdgId(), part_orig->status );
+    HepMC::GenParticlePtr part = HepMC::make_shared<HepMC::GenParticle>( pmom, part_orig.integerPdgId(), part_orig.status );
 #else
-    HepMC::GenParticle* part = new HepMC::GenParticle( pmom, part_orig->integerPdgId(), part_orig->status );
+    HepMC::GenParticle* part = new HepMC::GenParticle( pmom, part_orig.integerPdgId(), part_orig.status );
     part->suggest_barcode( idx++ );
 #endif
 
-    const ParticlesIds moth = part_orig->mothersIds();
+    const ParticlesIds moth = part_orig.mothersIds();
 
-    switch ( part_orig->role ) {
+    switch ( part_orig.role ) {
       case Particle::IncomingBeam1: { v1->add_particle_in( part ); } break;
       case Particle::IncomingBeam2: { v2->add_particle_in( part ); } break;
       case Particle::OutgoingBeam1: { v1->add_particle_out( part ); } break;

@@ -2,19 +2,17 @@
 
 namespace CepGen
 {
-
   Particle::Particle() :
-    id( -1 ), charge( 1. ), name( "" ), role( UnknownRole ), status( Undefined ), helicity( 0. ),
+    id( -1 ), charge( 1. ), role( UnknownRole ), status( Undefined ), helicity( 0. ),
     mass_( -1. ), pdg_id_( invalidParticle ), is_primary_( true )
   {}
 
   Particle::Particle( Role role, ParticleCode pdgId ) :
-    id( -1 ), charge( 1. ), name( "" ), role( role ), status( Undefined ), helicity( 0. ),
+    id( -1 ), charge( 1. ), role( role ), status( Undefined ), helicity( 0. ),
     mass_( -1. ), pdg_id_( pdgId ), is_primary_( true )
   {
     if ( pdg_id_!=invalidParticle ) {
-      std::ostringstream o; o << pdg_id_; name = o.str();
-      setMass();
+      computeMass();
     }
   }
 
@@ -38,51 +36,45 @@ namespace CepGen
     return true;
   }
 
-  bool
-  Particle::setMass( double m )
+  void
+  Particle::computeMass( bool off_shell )
   {
-    double mass;
-    if ( m>=0. ) {
-      mass_ = m;
-      return true;
+    if ( !off_shell && pdg_id_ != invalidParticle ) { // retrieve the mass from the on-shell particle's properties
+      mass_ = massFromPDGId( pdg_id_ );
     }
-    if ( pdg_id_!=invalidParticle ) {
-      mass = massFromPDGId( pdg_id_ );
-      if ( mass < 0. ) return false;
-      if ( momentum_.energy() < 0. ) { // invalid energy
-        mass_ = mass;
-        momentum_.setEnergy( momentum_.p2()+mass2() );
-        return true;
-      }
-      if ( energy2()-momentum_.p2()!=mass*mass ) {
-        mass = sqrt( energy2()-momentum_.p2() );
-      }
-      mass_ = mass;
-      return true;
+    else if ( momentum_.energy() >= 0. ) {
+      mass_ = sqrt( energy2() - momentum_.p2() );
     }
-    if ( energy() >= 0. && momentum_.p() >= 0. ) {
-      mass_ = sqrt( energy2()-momentum_.p2() );
-      return true;
+
+    //--- finish by setting the energy accordingly
+    if ( momentum_.energy() < 0. ) { // invalid energy
+      momentum_.setEnergy( sqrt( momentum_.p2() + mass2() ) );
     }
-    return false;
   }
 
   void
-  Particle::setMother( Particle* part )
+  Particle::setMass( double m )
   {
-    mothers_.insert( part->id );
+    if ( m >= 0. ) mass_ = m;
+    else computeMass();
+  }
+
+  void
+  Particle::setMother( Particle& part )
+  {
+    mothers_.insert( part.id );
     is_primary_ = false;
 
     DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) is the new mother of %2d (pdgId=%4d)",
-                               part->id+1, part->pdgId(), id+1, pdg_id_ ) );
+                               part.id+1, part.pdgId(), id+1, pdg_id_ ) );
 
-    part->addDaughter( this );
+    part.addDaughter( *this );
   }
 
   bool
-  Particle::addDaughter( Particle* part )
+  Particle::addDaughter( Particle& part )
   {
-    std::pair<ParticlesIds::iterator,bool> ret = daughters_.insert( part->id );
+    std::pair<ParticlesIds::iterator,bool> ret = daughters_.insert( part.id );
 
     if ( Logger::get().level>=Logger::DebugInsideLoop ) {
       std::ostringstream os;
@@ -95,58 +87,55 @@ namespace CepGen
 
     if ( ret.second ) {
       DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) is a new daughter of %2d (pdgId=%4d)",
-                                 part->role, part->pdgId(), role, pdg_id_ ) );
+                                 part.role, part.pdgId(), role, pdg_id_ ) );
 
-      if ( !part->primary() and part->mothersIds().size()<1 ) {
-        part->setMother( this );
+      if ( !part.primary() && part.mothersIds().size() < 1 ) {
+        part.setMother( *this );
       }
     }
 
     return ret.second;
   }
 
-  bool
+  void
   Particle::setMomentum( const Momentum& mom, bool offshell )
   {
     momentum_ = mom;
-    if ( offshell ) {
-      mass_ = momentum_.mass();
-      return true;
-    }
-
-    if ( mass_ < 0. ) setMass();
-    const double ene = sqrt( momentum_.p2()+mass2() );
-    if ( mom.energy() < 0. ) {
-      momentum_.setEnergy( ene );
-      return true;
-    }
-    if ( fabs( ene-momentum_.energy() ) < 1.e-6
-      || fabs( ene-mom.energy() ) < 1.e-6 ) { // less than 1 eV difference
-      return true;
-    }
-    if ( role != Parton1 && role != Parton2 ) {
-      InError( Form( "Energy difference for particle %d (computed-set): %.5f", (int)role, ene-momentum_.energy() ) );
-    }
-    momentum_.setEnergy( ene );//FIXME need to ensure nothing relies on this
-    return false;
+    if ( !offshell && mom.mass() > 0. ) mass_ = momentum_.mass();
+    else computeMass();
   }
 
-  bool
+  void
   Particle::setMomentum( double px, double py, double pz )
   {
-    momentum_.setP( px, py, pz ); setEnergy();
-    return true;
+    momentum_.setP( px, py, pz );
+    setEnergy();
   }
 
-  bool
+  void
   Particle::setMomentum( double px, double py, double pz, double e )
   {
     setMomentum( px, py, pz );
     if ( fabs( e-momentum_.energy() )>1.e-6 ) { // more than 1 eV difference
-      InError( Form( "Energy difference: %.5f", e-momentum_.energy() ) );
-      return false;
+      InError( Form( "Energy difference: %.5e", e-momentum_.energy() ) );
+      return;
     }
-    return true;
+  }
+
+  void
+  Particle::setEnergy( double e )
+  {
+    if ( e < 0. && mass_ >= 0. ) e = sqrt( mass2()+momentum_.p2() );
+    momentum_.setEnergy( e );
+  }
+
+  int
+  Particle::integerPdgId() const
+  {
+    const int pdg = static_cast<int>( pdg_id_ );
+    //--- leptons
+    if ( charge != 0 && pdg > 10 && pdg < 16 && pdg%2 != 0 ) return -charge*pdg;
+    return pdg;
   }
 
   void

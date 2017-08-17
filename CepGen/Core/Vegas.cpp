@@ -73,7 +73,7 @@ namespace CepGen
     }
 
     //--- clean Vegas
-    if ( state ) gsl_monte_vegas_free( state );
+    gsl_monte_vegas_free( state );
 
     return veg_res;
   }

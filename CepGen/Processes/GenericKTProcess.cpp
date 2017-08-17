@@ -6,16 +6,17 @@ namespace CepGen
   {
     GenericKTProcess::GenericKTProcess( const std::string& name_,
                                         const unsigned int& num_user_dimensions_,
-                                        const Particle::ParticleCode& ip1,
-                                        const Particle::ParticleCode& op1,
-                                        const Particle::ParticleCode& ip2,
-                                        const Particle::ParticleCode& op2) :
+                                        const Particle::ParticleCode& parton1,
+                                        const Particle::ParticleCode& central1,
+                                        const Particle::ParticleCode& parton2,
+                                        const Particle::ParticleCode& central2 ) :
       GenericProcess( name_+" (kT-factorisation approach)" ),
       kNumUserDimensions( num_user_dimensions_ ),
-      kIntermediatePart1( ip1 ), kProducedPart1( op1 )
+      kIntermediatePart1( parton1 ), kIntermediatePart2( parton2 ),
+      kProducedPart1( central1 ), kProducedPart2( central2 )
     {
-      if ( ip2==Particle::invalidParticle ) kIntermediatePart2 = kIntermediatePart1;
-      if ( op2==Particle::invalidParticle ) kProducedPart2 = kProducedPart1;
+      if ( parton2 == Particle::invalidParticle ) kIntermediatePart2 = kIntermediatePart1;
+      if ( central2 == Particle::invalidParticle ) kProducedPart2 = kProducedPart1;
     }
 
     GenericKTProcess::~GenericKTProcess()
@@ -24,16 +25,20 @@ namespace CepGen
     void
     GenericKTProcess::addEventContent()
     {
-      IncomingState is; OutgoingState os;
-      is.insert( ParticleWithRole( Particle::IncomingBeam1,    Particle::Proton ) );
-      is.insert( ParticleWithRole( Particle::IncomingBeam2,    Particle::Proton ) );
-      is.insert( ParticleWithRole( Particle::Parton1,          kIntermediatePart1 ) );
-      is.insert( ParticleWithRole( Particle::Parton2,          kIntermediatePart2 ) );
-      os.insert( ParticleWithRole( Particle::OutgoingBeam1,    Particle::Proton ) );
-      os.insert( ParticleWithRole( Particle::OutgoingBeam2,    Particle::Proton ) );
-      os.insert( ParticleWithRole( Particle::CentralParticle1, kProducedPart1 ) );
-      os.insert( ParticleWithRole( Particle::CentralParticle2, kProducedPart2 ) );
-      GenericProcess::setEventContent( is, os );
+      GenericProcess::setEventContent(
+        { // incoming state
+          { Particle::IncomingBeam1, Particle::Proton },
+          { Particle::IncomingBeam2, Particle::Proton },
+          { Particle::Parton1, kIntermediatePart1 },
+          { Particle::Parton2, kIntermediatePart2 }
+        },
+        { // outgoing state
+          { Particle::OutgoingBeam1, Particle::Proton },
+          { Particle::OutgoingBeam2, Particle::Proton },
+          { Particle::CentralParticle1, kProducedPart1 },
+          { Particle::CentralParticle2, kProducedPart2 }
+        }
+      );
     }
 
     unsigned int
@@ -81,21 +86,21 @@ namespace CepGen
     GenericKTProcess::computeOutgoingPrimaryParticlesMasses()
     {
       const unsigned int op_index = kNumRequiredDimensions+kNumUserDimensions;
-      switch ( cuts_.kinematics ) {
+      switch ( cuts_.mode ) {
         case Kinematics::ElectronProton: default: {
           InError( "This kT factorisation process is intended for p-on-p collisions! Aborting!" );
           exit( 0 ); } break;
         case Kinematics::ElasticElastic: 
-          MX_ = particlePtr( Particle::IncomingBeam1 )->mass();
-          MY_ = particlePtr( Particle::IncomingBeam2 )->mass();
+          MX_ = event_->getOneByRole( Particle::IncomingBeam1 ).mass();
+          MY_ = event_->getOneByRole( Particle::IncomingBeam2 ).mass();
         break;
         case Kinematics::ElasticInelastic:
-          MX_ = particlePtr( Particle::IncomingBeam1 )->mass();
+          MX_ = event_->getOneByRole( Particle::IncomingBeam1 ).mass();
           MY_ = cuts_.mx_min+( cuts_.mx_max-cuts_.mx_min )*x( op_index );
           break;
         case Kinematics::InelasticElastic:
           MX_ = cuts_.mx_min+( cuts_.mx_max-cuts_.mx_min )*x( op_index );
-          MY_ = particlePtr( Particle::IncomingBeam2 )->mass();
+          MY_ = event_->getOneByRole( Particle::IncomingBeam2 ).mass();
           break;
         case Kinematics::InelasticInelastic:
           MX_ = cuts_.mx_min+( cuts_.mx_max-cuts_.mx_min )*x( op_index );
@@ -109,7 +114,7 @@ namespace CepGen
     GenericKTProcess::computeIncomingFluxes( double x1, double q1t2, double x2, double q2t2 )
     {
       flux1_ = flux2_ = 0.;
-      switch ( cuts_.kinematics ) {
+      switch ( cuts_.mode ) {
         case Kinematics::ElasticElastic:
           flux1_ = PhotonFluxes::ProtonElastic( x1, q1t2 );
           flux2_ = PhotonFluxes::ProtonElastic( x2, q2t2 );
@@ -146,45 +151,45 @@ namespace CepGen
       //=================================================================
       //     outgoing protons
       //=================================================================
-      Particle *op1 = particlePtr( Particle::OutgoingBeam1 ),
-               *op2 = particlePtr( Particle::OutgoingBeam2 );
+      Particle& op1 = event_->getOneByRole( Particle::OutgoingBeam1 ),
+               &op2 = event_->getOneByRole( Particle::OutgoingBeam2 );
       // off-shell particles (remnants?)
       bool os1 = false, os2 = false;
-      switch ( cuts_.kinematics ) {
+      switch ( cuts_.mode ) {
         case Kinematics::ElectronProton: default: {
           InError( "This kT factorisation process is intended for p-on-p collisions! Aborting!" );
           exit(0); } break;
         case Kinematics::ElasticElastic:
-          op1->status = Particle::FinalState;
-          op2->status = Particle::FinalState;
+          op1.status = Particle::FinalState;
+          op2.status = Particle::FinalState;
           break;
         case Kinematics::ElasticInelastic:
-          op1->status = Particle::FinalState;
-          op2->status = Particle::Undecayed; op2->setMass(); os2 = true;
+          op1.status = Particle::FinalState;
+          op2.status = Particle::Undecayed; op2.setMass(); os2 = true;
           break;
         case Kinematics::InelasticElastic:
-          op1->status = Particle::Undecayed; op1->setMass(); os1 = true;
-          op2->status = Particle::FinalState;
+          op1.status = Particle::Undecayed; op1.setMass(); os1 = true;
+          op2.status = Particle::FinalState;
           break;
         case Kinematics::InelasticInelastic:
-          op1->status = Particle::Undecayed; op1->setMass(); os1 = true;
-          op2->status = Particle::Undecayed; op2->setMass(); os2 = true;
+          op1.status = Particle::Undecayed; op1.setMass(); os1 = true;
+          op2.status = Particle::Undecayed; op2.setMass(); os2 = true;
           break;    
       }
 
-      if ( !op1->setMomentum( PX_, os1 ) ) { InError( Form( "Invalid outgoing proton 1: energy: %.2f", PX_.energy() ) ); }
-      if ( !op2->setMomentum( PY_, os2 ) ) { InError( Form( "Invalid outgoing proton 2: energy: %.2f", PY_.energy() ) ); }
+      op1.setMomentum( PX_, os1 );
+      op2.setMomentum( PY_, os2 );
   
       //=================================================================
       //     incoming partons (photons, pomerons, ...)
       //=================================================================
       //FIXME ensure the validity of this approach
-      Particle *g1 = particlePtr( Particle::Parton1 ),
-               *g2 = particlePtr( Particle::Parton2 );
-      g1->setMomentum( particlePtr( Particle::IncomingBeam1 )->momentum()-PX_, true);
-      g1->status = Particle::Incoming;
-      g2->setMomentum( particlePtr( Particle::IncomingBeam2 )->momentum()-PY_, true);
-      g2->status = Particle::Incoming;
+      Particle& g1 = event_->getOneByRole( Particle::Parton1 ),
+               &g2 = event_->getOneByRole( Particle::Parton2 );
+      g1.setMomentum( event_->getOneByRole( Particle::IncomingBeam1 ).momentum()-PX_, true);
+      g1.status = Particle::Incoming;
+      g2.setMomentum( event_->getOneByRole( Particle::IncomingBeam2 ).momentum()-PY_, true);
+      g2.status = Particle::Incoming;
     }
 
     double
@@ -195,7 +200,7 @@ namespace CepGen
       jac *= ( log_qmax_-log_qmin_ )*qt2_; // d(q2t) . q2t
       jac *= 2.*M_PI; // d(phi1)
       jac *= 2.*M_PI; // d(phi2)
-      switch ( cuts_.kinematics ) {
+      switch ( cuts_.mode ) {
         case Kinematics::ElasticElastic: default: break;
         case Kinematics::ElasticInelastic:   jac *= ( cuts_.mx_max-cuts_.mx_min )*2.*MY_; break;
         case Kinematics::InelasticElastic:   jac *= ( cuts_.mx_max-cuts_.mx_min )*2.*MX_; break;

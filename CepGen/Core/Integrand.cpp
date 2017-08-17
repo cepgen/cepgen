@@ -11,8 +11,10 @@ namespace CepGen
     Parameters* p = static_cast<Parameters*>( params );
     std::shared_ptr<Event> ev = p->process()->event();
 
-    if ( !ev->particles().empty() ) {
+    if ( p->process()->hasEvent() ) {
+      p->process()->clearEvent();
       //float now = tmr.elapsed();
+
       const Particle::Momentum p1( 0., 0.,  p->kinematics.in1p ), p2( 0., 0., -p->kinematics.in2p );
       p->process()->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
       //PrintMessage( Form( "0 - after setting the kinematics: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
@@ -22,8 +24,6 @@ namespace CepGen
                                  "  remnant mode: %d",
                                  p->kinematics.in1p, p->kinematics.in2p, p->remnant_mode ) );
 
-      p->process()->clearEvent();
-
       //PrintMessage( Form( "1 - after clearing the event: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
       //PrintMessage( Form( "2: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
@@ -32,20 +32,26 @@ namespace CepGen
         //PrintMessage( Form(  "3: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
         if ( Logger::get().level >= Logger::Debug ) {
-          std::ostringstream oss; oss << p->process_mode;
+          std::ostringstream oss; oss << p->kinematics.mode;
           Debugging( Form( "Process mode considered: %s", oss.str().c_str() ) );
         }
 
+        Particle& op1 = ev->getOneByRole( Particle::OutgoingBeam1 ),
+                 &op2 = ev->getOneByRole( Particle::OutgoingBeam2 ),
+                 &cs1 = ev->getOneByRole( Particle::CentralParticle1 ),
+                 &cs2 = ev->getOneByRole( Particle::CentralParticle2 );
+
         //--- add outgoing protons or remnants
-        switch ( p->process_mode ) {
-          case Kinematics::ElectronProton: default: { InError( "Not handled yet!" ); }
+        switch ( p->kinematics.mode ) {
+          case Kinematics::ElectronProton: default: { InError( Form( "Process mode %d not yet handled!", (int)p->kinematics.mode ) ); }
           case Kinematics::ElasticElastic: break; // nothing to change in the event
           case Kinematics::ElasticInelastic:
+            op2.setPdgId( Particle::uQuark ); break;
           case Kinematics::InelasticElastic: // set one of the outgoing protons to be fragmented
-            ev->getOneByRole( Particle::OutgoingBeam1 )->setPdgId( Particle::uQuark ); break;
+            op1.setPdgId( Particle::uQuark ); break;
           case Kinematics::InelasticInelastic: // set both the outgoing protons to be fragmented
-            ev->getOneByRole( Particle::OutgoingBeam1 )->setPdgId( Particle::uQuark );
-            ev->getOneByRole( Particle::OutgoingBeam2 )->setPdgId( Particle::uQuark );
+            op1.setPdgId( Particle::uQuark );
+            op2.setPdgId( Particle::uQuark );
             break;
         }
         //PrintMessage( Form( "4 - after preparing the event kinematics: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
@@ -53,11 +59,9 @@ namespace CepGen
         //--- prepare the function to be integrated
         p->process()->prepareKinematics();
 
-        //--- add outgoing leptons
-        Particle* out1 = ev->getOneByRole( Particle::CentralParticle1 ),
-                 *out2 = ev->getOneByRole( Particle::CentralParticle2 );
-        out1->setPdgId( p->kinematics.pair ); out1->setMass( Particle::massFromPDGId( p->kinematics.pair ) );
-        out2->setPdgId( p->kinematics.pair ); out2->setMass( Particle::massFromPDGId( p->kinematics.pair ) );
+        //--- add central system
+        cs1.setPdgId( p->kinematics.pair ); cs1.computeMass();
+        cs2.setPdgId( p->kinematics.pair ); cs2.computeMass();
 
         p->process()->clearRun();
         p->vegas.first_run = false;
@@ -86,7 +90,7 @@ namespace CepGen
 
       ev->time_generation = tmr.elapsed();
 
-      if ( p->hadroniser() && p->process_mode!=Kinematics::ElasticElastic ) {
+      if ( p->hadroniser() && p->kinematics.mode!=Kinematics::ElasticElastic ) {
 
         Debugging( Form( "Event before calling the hadroniser (%s)", p->hadroniser()->name().c_str() ) );
         if ( Logger::get().level>=Logger::Debug ) ev->dump();

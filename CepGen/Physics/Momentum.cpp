@@ -72,8 +72,7 @@ namespace CepGen
     DebuggingInsideLoop( Form( "  (%f, %f, %f, %f)\n\t* (%f, %f, %f, %f)\n\t= %f",
       px_, py_, pz_, energy_,
       mom.px_, mom.py_, mom.pz_, mom.energy_,
-      px_*mom.px_+py_*mom.py_+pz_*mom.pz_
-    ) );
+      px_*mom.px_+py_*mom.py_+pz_*mom.pz_ ) );
     return px_*mom.px_+py_*mom.py_+pz_*mom.pz_;
   }
 
@@ -83,8 +82,7 @@ namespace CepGen
     DebuggingInsideLoop( Form( "  (%f, %f, %f, %f)\n\t* (%f, %f, %f, %f)\n\t= %f",
       px_, py_, pz_, energy_,
       mom.px_, mom.py_, mom.pz_, mom.energy_,
-      px_*mom.px_+py_*mom.py_+pz_*mom.pz_
-    ) );
+      px_*mom.px_+py_*mom.py_+pz_*mom.pz_ ) );
     return energy_*mom.energy_-threeProduct(mom);
   }
 
@@ -146,6 +144,13 @@ namespace CepGen
   //--- various setters
 
   void
+  Momentum::setP( double px, double py, double pz, double e )
+  {
+    setP( px, py, pz );
+    setEnergy( e );
+  }
+
+  void
   Momentum::setP( double px, double py, double pz )
   {
     px_ = px;
@@ -167,6 +172,12 @@ namespace CepGen
     computeP();
   }
 
+  void
+  Momentum::computeP()
+  {
+    p_ = sqrt( px_*px_ + py_*py_ + pz_*pz_ );
+  }
+
   //--- various getters
 
   double
@@ -184,6 +195,13 @@ namespace CepGen
   Momentum::pVector() const
   {
     return std::vector<double>( { px(), py(), pz(), energy(), mass() } );
+  }
+
+  double
+  Momentum::mass() const
+  {
+    if ( mass2() >= 0. ) return sqrt( mass2() );
+    return -sqrt( -mass2() );
   }
 
   double
@@ -220,7 +238,7 @@ namespace CepGen
   {
     const double m = p.mass();
     if ( m == p.energy() ) return;
-  
+
     Momentum mom_old = *this;
     const double pf4 = mom_old*p/m,
                  fn = ( pf4+mom_old.energy() )/( p.energy()+m );

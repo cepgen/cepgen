@@ -67,7 +67,7 @@ namespace CepGen
        *  * 4 for the proton-proton double-dissociative case
        * \brief Type of kinematics to consider for the phase space
        */
-      ProcessMode kinematics;
+      ProcessMode mode;
       StructureFunctions remnant_mode;
       /// Sets of cuts to apply on the final phase space
       Cuts cuts_mode;

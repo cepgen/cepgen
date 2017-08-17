@@ -11,7 +11,7 @@ PPtoLL::prepareKTKinematics()
 {
   ////////////////////////////////////
   y_min_ = cuts_.eta_min;           //
-  //y_min_ = EtaToY(cuts_.eta_min, particlePtr(Particle::CentralParticle1)->mass(), pt);
+  //y_min_ = EtaToY(cuts_.eta_min, event_->getOneByRole(Particle::CentralParticle1).mass(), pt);
   y_max_ = cuts_.eta_max;           //
   //y_max_ = EtaToY(cuts_.eta_max);
   ///////////// FIXME ////////////////
@@ -46,7 +46,7 @@ double
 PPtoLL::computeKTFactorisedMatrixElement()
 {
   const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
-  const double ml = particlePtr( Particle::CentralParticle1 )->mass(), ml2 = ml*ml;
+  const double ml = event_->getOneByRole( Particle::CentralParticle1 ).mass(), ml2 = ml*ml;
 
   const unsigned int iterm11 = 1, // Long-long
                      iterm22 = 1, // Trans-trans
@@ -154,10 +154,10 @@ PPtoLL::computeKTFactorisedMatrixElement()
   if ( x1 > 1. || x2 > 1. ) return 0.; // sanity check
 
   // FIXME FIXME FIXME
-  const double ak10 = particlePtr( Particle::IncomingBeam1 )->energy(),
-               ak1z = particlePtr( Particle::IncomingBeam1 )->momentum().pz(),
-               ak20 = particlePtr( Particle::IncomingBeam2 )->energy(),
-               ak2z = particlePtr( Particle::IncomingBeam2 )->momentum().pz();
+  const double ak10 = event_->getOneByRole( Particle::IncomingBeam1 ).energy(),
+               ak1z = event_->getOneByRole( Particle::IncomingBeam1 ).momentum().pz(),
+               ak20 = event_->getOneByRole( Particle::IncomingBeam2 ).energy(),
+               ak2z = event_->getOneByRole( Particle::IncomingBeam2 ).momentum().pz();
   DebuggingInsideLoop( Form( "incoming particles: p1: %f / %f\n\t"
                              "                    p2: %f / %f", ak1z, ak10, ak2z, ak20 ) );
 
@@ -170,7 +170,7 @@ PPtoLL::computeKTFactorisedMatrixElement()
   DebuggingInsideLoop( Form( "s(1/2)_eff = %f / %f GeV^2\n\t"
                              "dilepton invariant mass = %f GeV", s1_eff, s2_eff, invm ) );
 
-  switch ( cuts_.kinematics ) {
+  switch ( cuts_.mode ) {
     case Kinematics::ElasticInelastic:   if ( sqrt( s1_eff ) <= ( MY_+invm ) ) return 0.;
     case Kinematics::InelasticElastic:   if ( sqrt( s2_eff ) <= ( MX_+invm ) ) return 0.;
     case Kinematics::InelasticInelastic: if ( sqrt( s1_eff ) <= ( MY_+invm ) ) return 0.;
@@ -223,8 +223,8 @@ PPtoLL::computeKTFactorisedMatrixElement()
                              Pl1_.px(), Pl1_.py(), Pl1_.pz(), Pl1_.energy(), Pl1_.mass(),
                              Pl2_.px(), Pl2_.py(), Pl2_.pz(), Pl2_.energy(), Pl2_.mass() ) );
 
-  assert( fabs( Pl1_.mass()-particlePtr( Particle::CentralParticle1 )->mass() ) < 1.e-6 );
-  assert( fabs( Pl2_.mass()-particlePtr( Particle::CentralParticle2 )->mass() ) < 1.e-6 );
+  assert( fabs( Pl1_.mass()-event_->getOneByRole( Particle::CentralParticle1 ).mass() ) < 1.e-6 );
+  assert( fabs( Pl2_.mass()-event_->getOneByRole( Particle::CentralParticle2 ).mass() ) < 1.e-6 );
 
   //=================================================================
   //     four-momenta squared of the virtual photons
@@ -414,16 +414,16 @@ PPtoLL::fillCentralParticlesKinematics()
   //=================================================================
   //     first outgoing lepton
   //=================================================================
-  Particle* ol1 = particlePtr( Particle::CentralParticle1 );
-  ol1->setPdgId( ol1->pdgId(), sign );
-  ol1->status = Particle::FinalState;
-  if ( !ol1->setMomentum( Pl1_ ) ) { InError( "Invalid outgoing lepton 1" ); }
+  Particle& ol1 = event_->getOneByRole( Particle::CentralParticle1 );
+  ol1.setPdgId( ol1.pdgId(), sign );
+  ol1.status = Particle::FinalState;
+  ol1.setMomentum( Pl1_ );
 
   //=================================================================
   //     second outgoing lepton
   //=================================================================
-  Particle* ol2 = particlePtr( Particle::CentralParticle2 );
-  ol2->setPdgId( ol2->pdgId(), -sign );
-  ol2->status = Particle::FinalState;
-  if ( !ol2->setMomentum( Pl2_ ) ) { InError( "Invalid outgoing lepton 2" ); }
+  Particle& ol2 = event_->getOneByRole( Particle::CentralParticle2 );
+  ol2.setPdgId( ol2.pdgId(), -sign );
+  ol2.status = Particle::FinalState;
+  ol2.setMomentum( Pl2_ );
 }

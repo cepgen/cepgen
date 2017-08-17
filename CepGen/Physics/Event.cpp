@@ -1,203 +1,217 @@
 #include "Event.h"
 
-using namespace CepGen;
-
-Event::Event() :
-  num_hadronisation_trials( 0 ),
-  time_generation( -1. ), time_total( -1. )
-{}
-
-Event::~Event()
-{}
-
-Event&
-Event::operator=( const Event &ev_ )
+namespace CepGen
 {
-  particles_ = ev_.particles_;
-  time_generation = ev_.time_generation;
-  time_total = ev_.time_total;
-  num_hadronisation_trials = ev_.num_hadronisation_trials;
-  return *this;
-}
+  Event::Event() :
+    num_hadronisation_trials( 0 ),
+    time_generation( -1. ), time_total( -1. )
+  {}
 
-void
-Event::clear()
-{
-  particles_.clear();
-  time_generation = -1.;
-  time_total = -1.;
-}
+  Event::~Event()
+  {}
 
-void
-Event::init()
-{
-  last_particle_ = particles_.end();
-}
-
-void
-Event::restore()
-{
-  particles_.erase( last_particle_, particles_.end() );
-}
-
-ParticlesRef
-Event::getByRole( const Particle::Role& role_ )
-{
-  ParticlesRef out;
-  std::pair<ParticlesMap::iterator,ParticlesMap::iterator> ret = particles_.equal_range( role_ );
-
-  unsigned int i = 0;
-  for ( ParticlesMap::iterator it=ret.first; it!=ret.second && i<100; it++ ) {
-    out.push_back( &( it->second ) );
-    i++;
+  Event&
+  Event::operator=( const Event &ev_ )
+  {
+    particles_ = ev_.particles_;
+    time_generation = ev_.time_generation;
+    time_total = ev_.time_total;
+    num_hadronisation_trials = ev_.num_hadronisation_trials;
+    return *this;
   }
-  return out;
-}
 
-Particle*
-Event::getById( int id_ )
-{
-  for ( ParticlesMap::iterator out=particles_.begin(); out!=particles_.end(); out++ ) {
-    if ( out->second.id==id_ ) return &out->second;
+  void
+  Event::clear()
+  {
+    particles_.clear();
+    time_generation = -1.;
+    time_total = -1.;
   }
-  return 0;
-}
 
-const Particle
-Event::getConstById( int id_ ) const
-{
-  for ( ParticlesMap::const_iterator out=particles_.begin(); out!=particles_.end(); out++ ) {
-    if ( out->second.id==id_ ) return static_cast<Particle>( out->second );
+  void
+  Event::init()
+  {
+    last_particle_ = particles_.end();
   }
-  return Particle();
-}
 
-ParticleRoles
-Event::roles() const
-{
-  ParticleRoles out;
-  ParticlesMap::const_iterator it, end;
-  for ( it=particles_.begin(), end=particles_.end(); it!=end; it=particles_.upper_bound( it->first ) ) {
-    out.push_back( it->first );
+  void
+  Event::restore()
+  {
+    //--- remove all particles after the primordial event block
+    particles_.erase( last_particle_, particles_.end() );
   }
-  return out;
-}
 
-int
-Event::addParticle( Particle part_, bool replace_ )
-{
-  DebuggingInsideLoop( Form( "Particle with PDGid = %d has role %d", part_.pdgId(), part_.role ) );
-  if ( part_.role<=0 ) return -1;
-
-  ParticlesRef part_with_same_role = getByRole( part_.role );
-  part_.id = particles_.size(); //FIXME is there any better way of introducing this id ?
-  if ( replace_ and part_with_same_role.size()!=0 ) {
-    part_with_same_role.at( 0 ) = &part_;
-    return 0;
+  Particles&
+  Event::getByRole( const Particle::Role& role )
+  {
+    //--- retrieve all particles with a given role
+    return particles_[role];
   }
-  particles_.insert( std::pair<Particle::Role,Particle>( part_.role, part_ ) );
-  return 1;
-}
 
-int
-Event::addParticle( const Particle::Role& role_, bool replace_ )
-{
-  if ( role_<=0 ) return -1;
-  return addParticle( Particle( role_ ), replace_ );
-}
-
-ParticlesRef
-Event::particles()
-{
-  ParticlesRef out;
-  for ( ParticlesMap::iterator it=particles_.begin(); it!=particles_.end(); it++ ) {
-    out.push_back( &it->second );
-  }
-  std::sort( out.begin(), out.end(), compareParticlePtrs );
-  return out;
-}
-
-Particles
-Event::constParticles() const
-{
-  Particles out;
-  for ( ParticlesMap::const_iterator it=particles_.begin(); it!=particles_.end(); it++ ) {
-    out.push_back( static_cast<Particle>( it->second ) );
-  }
-  std::sort( out.begin(), out.end(), compareParticle );
-  return out;
-}
-
-ConstParticlesRef
-Event::constParticlesRef() const
-{
-  ConstParticlesRef out;
-  for ( ParticlesMap::const_iterator it=particles_.begin(); it!=particles_.end(); it++ ) {
-    out.push_back( &it->second );
-  }
-  std::sort( out.begin(), out.end(), compareParticlePtrs );
-  return out;
-}
-
-ParticlesRef
-Event::stableParticles()
-{
-  ParticlesRef out;
-  for ( ParticlesMap::iterator it=particles_.begin(); it!=particles_.end(); it++ ) {
-    if ( it->second.status==Particle::Undefined
-      or it->second.status==Particle::FinalState ) {
-      out.push_back( &it->second );
+  Particle&
+  Event::getOneByRole( const Particle::Role& role )
+  {
+    //--- retrieve the first particle a the given role
+    Particles& parts_by_role = getByRole( role );
+    if ( parts_by_role.size() > 1 ) {
+      FatalError( Form( "More than one particle with role %d: %d particles", (int)role, parts_by_role.size() ) );
     }
+    return *parts_by_role.begin();
   }
-  std::sort( out.begin(), out.end() );
-  return out;  
-}
 
-void
-Event::dump( bool stable ) const
-{
-  double pxtot, pytot, pztot, etot;
-  std::ostringstream os;
-
-  pxtot = pytot = pztot = etot = 0.;
-  const ConstParticlesRef particles = constParticlesRef();
-  for ( ConstParticlesRef::const_iterator part_ref=particles.begin(); part_ref!=particles.end(); part_ref++ ) {
-    const Particle* p = ( *part_ref );
-    if ( stable and p->status!=Particle::FinalState ) continue;
-
-    os << Form( "\n %2d\t%+6d", p->id, p->integerPdgId() );
-    if ( p->name!="" ) os << Form( "%6s", p->name.c_str() );
-    //else               os << std::setw(6) << Particle::ParticleCode( abs( p->pdgId() ) );
-    else               os << "\t";
-    os << "\t";
-    if ( p->charge!=999. ) os << Form( "%6.2f\t", p->charge );
-    else                   os << "\t";
-    os << Form( "%4d\t%6d\t", p->role, p->status );
-    if ( p->mothersIds().size()>0 ) 
-      os << Form( "%2d(%2d)", *( p->mothersIds().begin() ), getConstById( *( p->mothersIds().begin() ) ).role );
-    else
-      os << "      ";
-    os << Form( "% 9.3f % 9.3f % 9.3f % 9.3f", p->momentum().px(), p->momentum().py(), p->momentum().pz(), p->energy() );
-    if ( p->status==Particle::Undefined
-      or p->status==Particle::FinalState
-      or p->status==Particle::Undecayed ) {
-      const int sign = ( p->status==Particle::Undefined ) ? -1 : 1;
-      pxtot += sign*p->momentum().px();
-      pytot += sign*p->momentum().py();
-      pztot += sign*p->momentum().pz();
-      etot += sign*p->energy();
+  Particle&
+  Event::getById( int id )
+  {
+    for ( ParticlesMap::iterator out=particles_.begin(); out!=particles_.end(); out++ ) {
+      for ( Particles::iterator part=out->second.begin(); part!=out->second.end(); part++ ) {
+        if ( part->id == id ) return *part;
+      }
     }
+    throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve the particle with id=%d", id ), FatalError );
   }
-  // We set a threshold to the computation precision
-  if ( fabs( pxtot )<1.e-12 ) pxtot = 0.;
-  if ( fabs( pytot )<1.e-12 ) pytot = 0.;
-  if ( fabs( pztot )<1.e-12 ) pztot = 0.;
-  if ( fabs(  etot )<1.e-12 ) etot = 0.;
-  //
-  Information( Form( "Dump of event content:\n"
-  "Part.\tPDG id\t\tCharge\tRole\tStatus\tMother\t\t4-Momentum (GeV)\n"
-  "----\t------\t\t------\t----\t------\t------\t-------------------------------------"
-  "%s\n"
-  "---------------------------------------------------------------------------------------------\n"
-  "Total:\t\t\t\t\t\t      % 9.4f % 9.4f % 9.4f % 9.4f", os.str().c_str(), pxtot, pytot, pztot, etot ) );
+
+  const Particle&
+  Event::getConstById( int id ) const
+  {
+    for ( ParticlesMap::const_iterator out=particles_.begin(); out!=particles_.end(); out++ ) {
+      for ( Particles::const_iterator part=out->second.begin(); part!=out->second.end(); part++ ) {
+        if ( part->id == id ) return *part;
+      }
+    }
+    throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve the particle with id=%d", id ), FatalError );
+  }
+
+  Particles
+  Event::getByIds( const ParticlesIds& ids ) const
+  {
+    Particles out;
+    for ( ParticlesIds::const_iterator id=ids.begin(); id!=ids.end(); id++ ) {
+      out.emplace_back( getConstById( *id ) );
+    }
+    return out;
+  }
+
+  Particles
+  Event::mothers( const Particle& part )
+  {
+    return getByIds( part.mothersIds() );
+  }
+
+  Particles
+  Event::daughters( const Particle& part )
+  {
+    return getByIds( part.daughters() );
+  }
+
+  ParticleRoles
+  Event::roles() const
+  {
+    ParticleRoles out;
+    ParticlesMap::const_iterator it, end;
+    for ( it=particles_.begin(), end=particles_.end(); it!=end; it=particles_.upper_bound( it->first ) ) {
+      out.emplace_back( it->first );
+    }
+    return out;
+  }
+
+  void
+  Event::addParticle( Particle part, bool replace )
+  {
+    DebuggingInsideLoop( Form( "Particle with PDGid = %d has role %d", part.pdgId(), part.role ) );
+    if ( part.role <= 0 ) FatalError( Form( "Trying to add a particle with role=%d", (int)part.role ) );
+
+    //--- retrieve the list of particles with the same role
+    Particles& part_with_same_role = getByRole( part.role );
+
+    //--- specify the id
+    if ( part_with_same_role.empty() && part.id < 0 ) part.id = particles().size(); //FIXME is there any better way of introducing this id ?
+    if ( replace && !part_with_same_role.empty() ) part.id = part_with_same_role[0].id;
+
+    //--- add the particle to the collection
+    if ( replace ) part_with_same_role = Particles( 1, part ); // generate a vector containing only this particle
+    else part_with_same_role.emplace_back( part );
+
+  }
+
+  void
+  Event::addParticle( const Particle::Role& role, bool replace )
+  {
+    addParticle( Particle( role ), replace );
+  }
+
+  Particles
+  Event::particles() const
+  {
+    Particles out;
+    for ( ParticlesMap::const_iterator it=particles_.begin(); it!=particles_.end(); it++ ) {
+      for ( Particles::const_iterator part=it->second.begin(); part!=it->second.end(); part++ ) {
+        out.emplace_back( *part );
+      }
+    }
+    std::sort( out.begin(), out.end(), compareParticle );
+    return out;
+  }
+
+  Particles
+  Event::stableParticles() const
+  {
+    Particles out;
+    for ( ParticlesMap::const_iterator it=particles_.begin(); it!=particles_.end(); it++ ) {
+      for ( Particles::const_iterator part=it->second.begin(); part!=it->second.end(); part++ ) {
+        if ( part->status==Particle::Undefined
+          || part->status==Particle::FinalState ) {
+          out.emplace_back( *part );
+        }
+      }
+    }
+    std::sort( out.begin(), out.end(), compareParticle );
+    return out;
+  }
+
+  void
+  Event::dump( bool stable ) const
+  {
+    double pxtot, pytot, pztot, etot;
+    std::ostringstream os;
+
+    pxtot = pytot = pztot = etot = 0.;
+    const Particles parts = particles();
+    for ( Particles::const_iterator part_ref=parts.begin(); part_ref!=parts.end(); part_ref++ ) {
+      const Particle& p = *part_ref;
+      if ( stable && p.status != Particle::FinalState ) continue;
+
+      std::ostringstream oss; oss << p.pdgId();
+      os << Form( "\n %2d\t%+6d%8s", p.id, p.integerPdgId(), oss.str().c_str() );
+      os << "\t";
+      if ( p.charge!=999. ) os << Form( "%6.2f\t", p.charge );
+      else                  os << "\t";
+      os << Form( "%4d\t%6d\t", p.role, p.status );
+      if ( !p.mothersIds().empty() )
+        os << Form( "%2d (%2d)", *( p.mothersIds().begin() ), getConstById( *( p.mothersIds().begin() ) ).role );
+      else
+        os << "       ";
+      os << Form( "% 9.6e % 9.6e % 9.6e % 9.6e % 9.5e", p.momentum().px(), p.momentum().py(), p.momentum().pz(), p.energy(), p.mass() );
+      if ( p.status == Particle::Undefined
+        || p.status == Particle::FinalState
+        || p.status == Particle::Undecayed ) {
+        const int sign = ( p.status == Particle::Undefined ) ? -1 : 1;
+        pxtot += sign*p.momentum().px();
+        pytot += sign*p.momentum().py();
+        pztot += sign*p.momentum().pz();
+        etot += sign*p.energy();
+      }
+    }
+    //--- set a threshold to the computation precision
+    if ( fabs( pxtot ) < 1.e-12 ) pxtot = 0.;
+    if ( fabs( pytot ) < 1.e-12 ) pytot = 0.;
+    if ( fabs( pztot ) < 1.e-12 ) pztot = 0.;
+    if ( fabs(  etot ) < 1.e-12 ) etot = 0.;
+    //
+    Information( Form( "Dump of event content:\n"
+    "Part.\tPDG id\t\tCharge\tRole\tStatus\tMother\t\t\t\t4-Momentum (GeV)\t\tMass (GeV)\n"
+    "----\t------\t\t------\t----\t------\t------\t------------------------------------------------------  -----------"
+    "%s\n"
+    "---------------------------------------------------------------------------------------------------------------------------\n"
+    "\t\t\t\t\t\tTotal: % 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), pxtot, pytot, pztot, etot ) );
+  }
 }

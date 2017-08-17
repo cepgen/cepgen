@@ -7,6 +7,8 @@
 #include "CepGen/Physics/StructureFunctions.h"
 #include "CepGen/Physics/FormFactors.h"
 
+#include <vector>
+
 namespace CepGen
 {
   /// Location for all physics processes to be generated
@@ -36,7 +38,7 @@ namespace CepGen
 
         /// Default constructor for an undefined process
         /// \param[in] name Human-readable format of the process name
-        GenericProcess( const std::string& name="<invalid process>" );
+        GenericProcess( const std::string& name="<invalid process>", bool has_event=true );
         virtual ~GenericProcess();
 
         /// Restore the Event object to its initial state
@@ -78,14 +80,16 @@ namespace CepGen
         inline std::shared_ptr<Event> event() { return event_; }
 
         ///Get the number of dimensions on which the integration is performed
-        inline const unsigned int ndim() const { return num_dimensions_; }
-        /// Get the value of a component of the \a num_dimensions_ -dimensional point considered
+        inline const unsigned int ndim() const { return x_.size(); }
+        /// Get the value of a component of the d-dimensional point considered
         inline const double x( const unsigned int idx ) const {
-          return ( idx>=num_dimensions_ ) ? -1. : x_[idx];
+          return ( idx >= x_.size() ) ? -1. : x_[idx];
         }
         /// Get a human-readable name of the process considered
         inline const std::string& name() const { return name_; }
-  
+
+        bool hasEvent() const { return has_event_; }
+
         /// Reset the total generation time and the number of events generated for this run
         inline void clearRun() {
           total_gen_time_ = 0.;
@@ -108,24 +112,15 @@ namespace CepGen
         /// Compute the electric/magnetic form factors for the two considered \f$Q^{2}\f$ momenta transfers
         void formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const;
  
-        /// Get a list of pointers to the particles with a given role in the process
+        /// Get a list of references to the particles with a given role in the process
         /// \param[in] role role in the process for the particle to retrieve
-        /// \return A vector of pointers to Particle objects associated to the role
-        inline ParticlesRef particles( const Particle::Role& role ) { return event_->getByRole( role ); }
-        /// Get the pointer to one particle in the event (using its role)
-        inline Particle* particlePtr( const Particle::Role& role, unsigned int id=0 ) {
-          if ( id == 0 ) return event_->getOneByRole( role );
-          ParticlesRef pp = event_->getByRole( role );
-          if ( pp.empty() || id>pp.size() ) return 0;
-          return pp.at( id );
-        }
-        /// Get the pointer to one particle in the event (using its identifier)
-        inline Particle* particlePtr( unsigned int id ) { return event_->getById( id ); }
+        /// \return A vector of references to Particle objects associated to the role
+        inline Particles particles( const Particle::Role& role ) { return event_->getByRole( role ); }
 
         // --- 
   
-        /// Array of \a num_dimensions_ components representing the point on which the weight in the cross-section is computed
-        double* x_;
+        /// Array of double precision floats representing the point on which the weight in the cross-section is computed
+        std::vector<double> x_;
         /// List of incoming state particles (including intermediate partons)
         IncomingState incoming_state_;
         /// List of outgoing state particles
@@ -147,8 +142,6 @@ namespace CepGen
         /// Invariant mass of the second proton-like outgoing particle (or remnant)
         double MY_;
 
-        /// Number of dimensions on which the integration has to be performed.
-        unsigned int num_dimensions_;
         /// Set of cuts to apply on the final phase space
         Kinematics cuts_;
         /// Event object containing all the information on the in- and outgoing particles
@@ -167,11 +160,13 @@ namespace CepGen
         float total_gen_time_;
         /// Number of events already generated
         unsigned int num_gen_events_;
+        /// Does the process contain (and hold) an event?
+        bool has_event_;
 
       private:
         /**
          * Is the system's kinematics well defined and compatible with the process ?
-         * This check is mandatory to perform the (\a num_dimensions_)-dimensional point's cross-section computation.
+         * This check is mandatory to perform the d-dimensional point's cross-section computation.
          * \brief Is the system's kinematics well defined?
          * \return A boolean stating if the input kinematics and the final states are well-defined
          */
