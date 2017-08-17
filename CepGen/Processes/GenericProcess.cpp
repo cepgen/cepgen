@@ -22,6 +22,7 @@ namespace CepGen
       // Number of dimensions on which the integration will be performed
       num_dimensions_ = ndim;
       // Phase space coordinate becomes a protected attribute
+      if ( x_ && ( sizeof( x_ ) / sizeof( x_[0] ) != ndim ) ) delete[] x_;
       if ( !x_ ) x_ = new double[ndim];
 
       std::copy( x, x+ndim, x_ );

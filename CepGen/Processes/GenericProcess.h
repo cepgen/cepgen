@@ -81,7 +81,7 @@ namespace CepGen
         inline const unsigned int ndim() const { return num_dimensions_; }
         /// Get the value of a component of the \a num_dimensions_ -dimensional point considered
         inline const double x( const unsigned int idx ) const {
-          return ( idx>=num_dimensions_ ) ? -1. : x_[idx];
+          return ( idx >= num_dimensions_ ) ? -1. : x_[idx];
         }
         /// Get a human-readable name of the process considered
         inline const std::string& name() const { return name_; }
