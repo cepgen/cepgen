@@ -2,7 +2,6 @@
 
 namespace CepGen
 {
-
   Particle::Particle() :
     id( -1 ), charge( 1. ), name( "" ), role( UnknownRole ), status( Undefined ), helicity( 0. ),
     mass_( -1. ), pdg_id_( invalidParticle ), is_primary_( true )
@@ -47,12 +46,12 @@ namespace CepGen
     else if ( momentum_.energy() >= 0. ) {
       mass_ = sqrt( energy2() - momentum_.p2() );
     }
-    //std::cout << role << "\t" << pdg_id_ << "\t" << mass_ << std::endl;
 
     //--- finish by setting the energy accordingly
     if ( momentum_.energy() < 0. ) { // invalid energy
       momentum_.setEnergy( momentum_.p2() + mass2() );
     }
+//std::cout << role << "\t" << pdg_id_ << "\t" << mass_ << std::endl;
   }
 
   void
@@ -104,7 +103,7 @@ namespace CepGen
   Particle::setMomentum( const Momentum& mom, bool offshell )
   {
     momentum_ = mom;
-    if ( mom.mass() > 0. ) mass_ = momentum_.mass();
+    if ( !offshell && mom.mass() > 0. ) mass_ = momentum_.mass();
     else computeMass();
   }
 

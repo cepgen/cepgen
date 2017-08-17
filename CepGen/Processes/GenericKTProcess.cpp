@@ -14,8 +14,8 @@ namespace CepGen
       kNumUserDimensions( num_user_dimensions_ ),
       kIntermediatePart1( ip1 ), kProducedPart1( op1 )
     {
-      if ( ip2==Particle::invalidParticle ) kIntermediatePart2 = kIntermediatePart1;
-      if ( op2==Particle::invalidParticle ) kProducedPart2 = kProducedPart1;
+      if ( ip2 == Particle::invalidParticle ) kIntermediatePart2 = kIntermediatePart1;
+      if ( op2 == Particle::invalidParticle ) kProducedPart2 = kProducedPart1;
     }
 
     GenericKTProcess::~GenericKTProcess()

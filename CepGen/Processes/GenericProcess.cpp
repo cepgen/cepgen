@@ -33,8 +33,8 @@ namespace CepGen
     GenericProcess::prepareKinematics()
     {
       if ( !isKinematicsDefined() ) return; // FIXME dump some information...
-      const Particle& ib1 = event_->getOneByRole( Particle::IncomingBeam1 ),
-                     &ib2 = event_->getOneByRole( Particle::IncomingBeam2 );
+      const Particle ib1 = event_->getOneByRole( Particle::IncomingBeam1 ),
+                     ib2 = event_->getOneByRole( Particle::IncomingBeam2 );
 
       sqs_ = CMEnergy( ib1, ib2 );
       s_ = sqs_*sqs_;
@@ -46,16 +46,16 @@ namespace CepGen
     }
 
     void
-    GenericProcess::dumpPoint( const ExceptionType& et=Information )
+    GenericProcess::dumpPoint( const ExceptionType& et )
     {
     std::ostringstream os;
     for ( unsigned int i=0; i<num_dimensions_; i++ ) {
       os << Form( "  x(%2d) = %8.6f\n\t", i, x_[i] );
     }
-    if ( et<DebugMessage ) { Information( Form( "Number of integration parameters: %d\n\t"
+    if ( et < DebugMessage ) { Information( Form( "Number of integration parameters: %d\n\t"
+                                                  "%s", num_dimensions_, os.str().c_str() ) ); }
+    else                     { Debugging( Form( "Number of integration parameters: %d\n\t"
                                                 "%s", num_dimensions_, os.str().c_str() ) ); }
-    else                   { Debugging( Form( "Number of integration parameters: %d\n\t"
-                                              "%s", num_dimensions_, os.str().c_str() ) ); }
     }
 
     void

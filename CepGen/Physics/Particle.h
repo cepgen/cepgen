@@ -111,10 +111,7 @@ namespace CepGen
           // --- setters and getters
 
           /// Set all the components of the 4-momentum (in GeV)
-          inline bool setP( double px, double py, double pz, double e ) {
-            setP( px, py, pz ); setEnergy( e );
-            return true;
-          }
+          void setP( double px, double py, double pz, double e );
           /// Set all the components of the 3-momentum (in GeV)
           void setP( double px, double py, double pz );
           /// Set an individual component of the 4-momentum (in GeV)
@@ -137,6 +134,7 @@ namespace CepGen
           inline double pt() const { return sqrt( pt2() ); }
           /// Squared transverse momentum (in GeV\f$^\textrm{2}\f$)
           inline double pt2() const { return ( px()*px()+py()*py() ); }
+          /// 4-vector of double precision floats (in GeV)
           const std::vector<double> pVector() const;
           /// 3-momentum norm (in GeV)
           inline double p() const { return p_; }
@@ -145,10 +143,11 @@ namespace CepGen
           /// Energy (in GeV)
           inline double energy() const { return energy_; }
           /// Squared energy (in GeV^2)
-          inline double E2() const { return energy_*energy_; }
+          inline double energy2() const { return energy_*energy_; }
           /// Squared mass (in GeV^2) as computed from its energy and momentum
-          inline double mass2() const { return E2()-p2(); }
+          inline double mass2() const { return energy2()-p2(); }
           /// Mass (in GeV) as computed from its energy and momentum
+          /// \note Returns \f$-\sqrt{|E^2-\mathbf{p}^2|}<0\f$ if \f$\mathbf{p}^2>E^2\f$
           double mass() const;
           /// Polar angle (angle with respect to the longitudinal direction)
           inline double theta() const { return atan2( pt(), pz() ); }
@@ -164,7 +163,7 @@ namespace CepGen
           void rotateThetaPhi( double theta_, double phi_ );
         private:
           /// Compute the 3-momentum's norm
-          inline void computeP() { p_ = sqrt( px_*px_ + py_*py_ + pz_*pz_ ); }
+          void computeP();
           /// Momentum along the \f$x\f$-axis
           double px_;
           /// Momentum along the \f$y\f$-axis
@@ -371,8 +370,8 @@ namespace CepGen
       double __tmp3[3];
   };
 
-  inline bool compareParticle( const Particle a, const Particle b ) { return a.id<b.id; }
-  inline bool compareParticlePtrs( const Particle* a, const Particle* b ) { return a->id<b->id; }
+  inline bool compareParticle( const Particle a, const Particle b ) { return a.id < b.id; }
+  inline bool compareParticlePtrs( const Particle* a, const Particle* b ) { return a->id < b->id; }
 
   /// Compute the centre of mass energy of two particles (incoming or outgoing states)
   inline static double CMEnergy( const Particle& p1, const Particle& p2 ) {

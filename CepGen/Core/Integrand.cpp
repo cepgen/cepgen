@@ -36,16 +36,22 @@ namespace CepGen
           Debugging( Form( "Process mode considered: %s", oss.str().c_str() ) );
         }
 
+        Particle& op1 = ev->getOneByRole( Particle::OutgoingBeam1 ),
+                 &op2 = ev->getOneByRole( Particle::OutgoingBeam2 ),
+                 &cs1 = ev->getOneByRole( Particle::CentralParticle1 ),
+                 &cs2 = ev->getOneByRole( Particle::CentralParticle2 );
+
         //--- add outgoing protons or remnants
         switch ( p->process_mode ) {
-          case Kinematics::ElectronProton: default: { InError( "Not handled yet!" ); }
+          case Kinematics::ElectronProton: default: { InError( Form( "Process mode %d not yet handled!", (int)p->process_mode ) ); }
           case Kinematics::ElasticElastic: break; // nothing to change in the event
           case Kinematics::ElasticInelastic:
+            op2.setPdgId( Particle::uQuark ); break;
           case Kinematics::InelasticElastic: // set one of the outgoing protons to be fragmented
-            ev->getOneByRole( Particle::OutgoingBeam1 ).setPdgId( Particle::uQuark ); break;
+            op1.setPdgId( Particle::uQuark ); break;
           case Kinematics::InelasticInelastic: // set both the outgoing protons to be fragmented
-            ev->getOneByRole( Particle::OutgoingBeam1 ).setPdgId( Particle::uQuark );
-            ev->getOneByRole( Particle::OutgoingBeam2 ).setPdgId( Particle::uQuark );
+            op1.setPdgId( Particle::uQuark );
+            op2.setPdgId( Particle::uQuark );
             break;
         }
         //PrintMessage( Form( "4 - after preparing the event kinematics: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
@@ -53,14 +59,13 @@ namespace CepGen
         //--- prepare the function to be integrated
         p->process()->prepareKinematics();
 
-        //--- add outgoing leptons
-        Particle& out1 = ev->getOneByRole( Particle::CentralParticle1 ),
-                 &out2 = ev->getOneByRole( Particle::CentralParticle2 );
-        out1.setPdgId( p->kinematics.pair ); out1.computeMass();
-        out2.setPdgId( p->kinematics.pair ); out2.computeMass();
+        //--- add central system
+        cs1.setPdgId( p->kinematics.pair ); cs1.computeMass();
+        cs2.setPdgId( p->kinematics.pair ); cs2.computeMass();
 
         p->process()->clearRun();
         p->vegas.first_run = false;
+        p->process()->event()->dump();
       }
     } // event is not empty
 
@@ -85,6 +90,7 @@ namespace CepGen
       p->process()->fillKinematics( false );
 
       ev->time_generation = tmr.elapsed();
+    p->process()->event()->dump();
 
       if ( p->hadroniser() && p->process_mode!=Kinematics::ElasticElastic ) {
 

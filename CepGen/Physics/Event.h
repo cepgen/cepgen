@@ -43,9 +43,7 @@ namespace CepGen
        * \param[in] role The role the particle has to play in the event
        * \return A Particle object corresponding to the first particle with the role
        */
-      inline Particle& getOneByRole( const Particle::Role& role ) {
-        return *getByRole( role ).begin();
-      }
+      Particle& getOneByRole( const Particle::Role& role );
       /**
        * Returns the pointer to the Particle object corresponding to a unique identifier in the event
        * \brief Gets one particle by its unique identifier in the event
