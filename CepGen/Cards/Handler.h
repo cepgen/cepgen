@@ -1,9 +1,6 @@
 #ifndef CepGen_Cards_Handler_h
 #define CepGen_Cards_Handler_h
 
-#include <fstream>
-#include <string>
-
 #include "CepGen/Parameters.h"
 
 #include "CepGen/Processes/GamGamLL.h"
@@ -16,33 +13,22 @@ namespace CepGen
   /// Location for all steering card parsers/writers
   namespace Cards
   {
-    /// List of all steering card types handled
-    enum Type {
-      Lpair, ///< LPAIR steering card
-      Tcl
-    };
-
     /// Generic steering card handler
-    template<Type T>
     class Handler
     {
       public:
         /// Build a configuration from an external steering card
-        /// \param[in] file Input file to parse
-        Handler( const char* file );
+        Handler() {}
         ~Handler() {}
 
         /// Store a configuration into an external steering card
-        void store( const char* file ) {}
+        virtual void store( const char* file ) const = 0;
         /// Retrieve a configuration from a parsed steering cart
         Parameters& parameters() { return params_; }
 
-      private:
+      protected:
         Parameters params_;
     };
-
-    /// LPAIR steering cards handler
-    typedef Handler<Lpair> LpairReader;
   }
 }
 

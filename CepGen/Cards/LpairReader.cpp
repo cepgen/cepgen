@@ -1,4 +1,4 @@
-#include "CepGen/Cards/Handler.h"
+#include "LpairReader.h"
 
 namespace CepGen
 {
@@ -6,8 +6,7 @@ namespace CepGen
   {
     //----- specialization for LPAIR input cards
 
-    template<>
-    LpairReader::Handler( const char* file )
+    LpairReader::LpairReader( const char* file )
     {
       std::ifstream f( file, std::fstream::in );
       if ( !f.is_open() ) {
@@ -156,8 +155,8 @@ namespace CepGen
       Information( os.str() );
     }
 
-    template<> void
-    LpairReader::store( const char* file )
+    void
+    LpairReader::store( const char* file ) const
     {
       std::ofstream f( file, std::fstream::out | std::fstream::trunc );
       if ( !f.is_open() ) {

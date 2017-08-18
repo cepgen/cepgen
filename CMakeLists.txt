@@ -24,6 +24,10 @@ add_subdirectory(External)
 #----- include external paths
 
 include(UseEnvironment)
+set(CEPGEN_EXTERNAL_REQS ${GSL_LIB} ${GSL_CBLAS_LIB} ${CEPGEN_LIBRARIES})
+if(LIBCONFIG)
+  list(APPEND CEPGEN_EXTERNAL_REQS ${LIBCONFIG})
+endif()
 
 #----- build all the intermediate objects
 

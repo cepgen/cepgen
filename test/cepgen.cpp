@@ -1,7 +1,8 @@
 #include <iostream>
 
 #include "CepGen/Generator.h"
-#include "CepGen/Cards/Handler.h"
+#include "CepGen/Cards/LpairReader.h"
+#include "CepGen/Cards/ConfigReader.h"
 #include "CepGen/Core/Logger.h"
 
 using namespace std;
@@ -20,7 +21,7 @@ int main( int argc, char* argv[] ) {
   //CepGen::Logger::get().level = CepGen::Logger::DebugInsideLoop;
   //CepGen::Logger::get().outputStream( ofstream( "log.txt" ) );
   
-  if ( argc==1 ) {
+  if ( argc == 1 ) {
     Information( "No config file provided. Setting the default parameters." );
     
     mg.parameters->setProcess( new CepGen::Process::GamGamLL );
@@ -51,8 +52,9 @@ int main( int argc, char* argv[] ) {
   else {
     Information( Form( "Reading config file stored in %s", argv[1] ) );
     //CepGen::Cards::LpairReader card( argv[1] );
-    CepGen::Cards::Handler<CepGen::Cards::Lpair> card( argv[1] );
-    mg.setParameters( card.parameters() );
+    const std::string file( argv[1] ), extension = file.substr( file.find_last_of( "." )+1 );
+    if ( extension == "card" ) mg.setParameters( CepGen::Cards::LpairReader( argv[1] ).parameters() );
+    else if ( extension == "cfg" ) mg.setParameters( CepGen::Cards::ConfigReader( argv[1] ).parameters() );
   }
 
   // We might want to cross-check visually the validity of our run

@@ -14,7 +14,7 @@ foreach(exec_src ${executables_noroot})
   string(REPLACE ".cpp" "" exec_bin ${exec_src})
   add_executable(${exec_bin} ${exec_src})
   set_target_properties(${exec_bin} PROPERTIES EXCLUDE_FROM_ALL true)
-  target_link_libraries(${exec_bin} ${GSL_LIB} ${GSL_CBLAS_LIB} ${CEPGEN_LIBRARIES})
+  target_link_libraries(${exec_bin} ${CEPGEN_EXTERNAL_REQS} ${CEPGEN_LIBRARIES})
   list(APPEND tests ${exec_bin})
 endforeach()
 

@@ -1,0 +1,4 @@
+vegas = {
+  num_integration_calls = 10000;
+  num_integration_iterations = 10;
+};
