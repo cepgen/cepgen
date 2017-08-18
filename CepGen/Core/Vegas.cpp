@@ -68,10 +68,10 @@ namespace CepGen
 
     if ( !gen_prepared_ ) setGen();
 
-    Information( Form( "%d events will be generated", input_params_->maxgen ) );
+    Information( Form( "%d events will be generated", input_params_->generation.maxgen ) );
 
     unsigned int i = 0;
-    while ( i < input_params_->maxgen ) {
+    while ( i < input_params_->generation.maxgen ) {
       if ( generateOneEvent() ) i++;
     }
     Information( Form( "%d events generated", i ) );
@@ -87,6 +87,7 @@ namespace CepGen
     std::vector<double> x( ndim, 0. );
 
     //--- correction cycles
+    
     if ( vegas_bin_ != 0 ) {
       bool has_correction = false;
       while ( !correctionCycle( x, has_correction ) ) {}
@@ -98,7 +99,7 @@ namespace CepGen
 
     //--- normal generation cycle
 
-    //----- select a Vegas bin and reject if fmax is too little
+    //----- select a Vegas bin and reject if fmax is too small
     do {
       do {
         // ...
@@ -204,10 +205,12 @@ namespace CepGen
   {
     input_params_->setStorage( true );
     F( x );
-    input_params_->ngen += 1;
+    input_params_->generation.ngen += 1;
     input_params_->setStorage( false );
-
-    if ( input_params_->ngen%1000 == 0 ) { Debugging( Form( "Generated events: %d", input_params_->ngen ) ); }
+    if ( input_params_->generation.ngen % input_params_->generation.gen_print_every == 0 ) {
+      Debugging( Form( "Generated events: %d", input_params_->generation.ngen ) );
+      input_params_->generation.last_event->dump();
+    }
     return true;
   }
 
@@ -218,7 +221,7 @@ namespace CepGen
     // Variables for debugging
     std::ostringstream os;
     if ( Logger::get().level >= Logger::Debug ) {
-      Debugging( Form( "MaxGen = %d", input_params_->maxgen ) );
+      Debugging( Form( "MaxGen = %d", input_params_->generation.maxgen ) );
     }
 
     const unsigned int ndim = function_->dim,
@@ -236,7 +239,7 @@ namespace CepGen
 
     std::vector<double> x( ndim, 0. );
 
-    input_params_->ngen = 0;
+    input_params_->generation.ngen = 0;
 
     // ...
     double sum = 0., sum2 = 0., sum2p = 0.;

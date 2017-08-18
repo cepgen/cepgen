@@ -45,9 +45,9 @@ int main( int argc, char* argv[] ) {
     mg.parameters->kinematics.eta_min = -2.5;
     mg.parameters->kinematics.eta_max = 2.5;
     mg.parameters->vegas.ncvg = 5e4; //FIXME
-    mg.parameters->generation = true;
+    mg.parameters->generation.enabled = true;
     //mg.parameters->maxgen = 2;
-    mg.parameters->maxgen = 2e4;
+    mg.parameters->generation.maxgen = 2e4;
   }
   else {
     Information( Form( "Reading config file stored in %s", argv[1] ) );
@@ -64,10 +64,10 @@ int main( int argc, char* argv[] ) {
   double xsec, err;
   mg.computeXsection( xsec, err );
 
-  if ( mg.parameters->generation ) {
+  if ( mg.parameters->generation.enabled ) {
     // The events generation starts here !
     CepGen::Event ev;
-    for ( unsigned int i=0; i<mg.parameters->maxgen; i++ ) {
+    for ( unsigned int i=0; i<mg.parameters->generation.maxgen; i++ ) {
       ev = *mg.generateOneEvent();
       if ( i%1000==0 ) {
         Information( Form( "Generating event #%d", i ) );

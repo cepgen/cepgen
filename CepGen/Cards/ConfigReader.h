@@ -20,6 +20,7 @@ namespace CepGen
         void parseIncomingKinematics( const libconfig::Setting& );
         void parseOutgoingKinematics( const libconfig::Setting& );
         void parseVegas( const libconfig::Setting& );
+        void parseGenerator( const libconfig::Setting& );
     };
   }
 }

@@ -4,20 +4,14 @@ namespace CepGen
 {
   Parameters::Parameters() :
     remnant_mode( SuriYennie ),
-    generation( false ), maxgen( 0 ),
-    last_event( new Event() ),
-    symmetrise( true ), ngen( 0 ),
     hadroniser_max_trials( 5 ),
     store_( false )
   {}
 
   Parameters::Parameters( Parameters& param ) :
     remnant_mode( param.remnant_mode ),
-    kinematics( param.kinematics ), vegas( param.vegas ),
-    generation( param.generation ), maxgen( param.maxgen ),
-    last_event( std::move( param.last_event ) ),
-    symmetrise( param.symmetrise ), ngen( param.ngen ), pdflib( param.pdflib ),
-    hadroniser_max_trials( param.hadroniser_max_trials ),
+    kinematics( param.kinematics ), vegas( param.vegas ), generation( param.generation ),
+    pdflib( param.pdflib ), hadroniser_max_trials( param.hadroniser_max_trials ),
     process_( std::move( param.process_ ) ), hadroniser_( std::move( param.hadroniser_ ) ),
     store_( param.store_ )
   {}
@@ -57,8 +51,8 @@ namespace CepGen
       os << ( pretty ? boldify( "no process!" ) : "no process!" );
     os
       << std::endl
-      << std::setw( wt ) << "Events generation? " << ( pretty ? yesno( generation ) : std::to_string( generation ) ) << std::endl
-      << std::setw( wt ) << "Number of events to generate" << ( pretty ? boldify( maxgen ) : std::to_string( maxgen ) ) << std::endl
+      << std::setw( wt ) << "Events generation? " << ( pretty ? yesno( generation.enabled ) : std::to_string( generation.enabled ) ) << std::endl
+      << std::setw( wt ) << "Number of events to generate" << ( pretty ? boldify( generation.maxgen ) : std::to_string( generation.maxgen ) ) << std::endl
       << std::setw( wt ) << "Verbosity level " << Logger::get().level << std::endl
       << std::endl
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Vegas integration parameters " ) : "Vegas integration parameters" ) << std::setfill( ' ' ) << std::endl

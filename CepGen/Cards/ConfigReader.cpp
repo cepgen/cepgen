@@ -19,7 +19,21 @@ namespace CepGen
         //--- type of process to consider
         const std::string proc_name = proc["name"];
         if ( proc_name == "lpair" ) params_.setProcess( new Process::GamGamLL );
-        if ( proc_name == "pptoll" ) params_.setProcess( new Process::PPtoLL );
+        else if ( proc_name == "pptoll" ) params_.setProcess( new Process::PPtoLL );
+        else FatalError( Form( "Unrecognised process: %s", proc_name.c_str() ) );
+
+        //--- process mode
+        int int_mode; std::string str_mode;
+        if ( proc.lookupValue( "mode", int_mode ) ) {
+          params_.kinematics.mode = (Kinematics::ProcessMode)int_mode;
+        }
+        else if ( proc.lookupValue( "mode", str_mode ) ) {
+          if ( str_mode == "elastic/elastic" ) params_.kinematics.mode = Kinematics::ProcessMode::ElasticElastic;
+          else if ( str_mode == "elastic/inelastic" ) params_.kinematics.mode = Kinematics::ProcessMode::ElasticInelastic;
+          else if ( str_mode == "inelastic/elastic" ) params_.kinematics.mode = Kinematics::ProcessMode::InelasticElastic;
+          else if ( str_mode == "inelastic/inelastic" ) params_.kinematics.mode = Kinematics::ProcessMode::InelasticInelastic;
+          else FatalError( Form( "Unrecognised interaction mode: %s", str_mode.c_str() ) );
+        }
 
         //--- process kinematics
         if ( proc.exists( "in_kinematics" ) ) parseIncomingKinematics( proc["in_kinematics"] );
@@ -27,8 +41,11 @@ namespace CepGen
 
         //--- generation parameters
         if ( root.exists( "vegas" ) ) parseVegas( root["vegas"] );
+        if ( root.exists( "generator" ) ) parseGenerator( root["generator"] );
       } catch ( const libconfig::SettingNotFoundException& nfe ) {
         FatalError( Form( "Failed to retrieve the field \"%s\".", nfe.getPath() ) );
+      } catch ( const libconfig::SettingTypeException& te ) {
+        FatalError( Form( "Field \"%s\" has wrong type.", te.getPath() ) );
       }
     }
 
@@ -85,6 +102,18 @@ namespace CepGen
         if ( veg.exists( "num_points" ) ) params_.vegas.npoints = (int)veg["num_points"];
         if ( veg.exists( "num_integration_calls" ) ) params_.vegas.ncvg = (int)veg["num_integration_calls"];
         if ( veg.exists( "num_integration_iterations" ) ) params_.vegas.itvg = (int)veg["num_integration_iterations"];
+      } catch ( const libconfig::SettingNotFoundException& nfe ) {
+        FatalError( Form( "Failed to retrieve the field \"%s\".", nfe.getPath() ) );
+      }
+    }
+
+    void
+    ConfigReader::parseGenerator( const libconfig::Setting& gen )
+    {
+      params_.generation.enabled = true;
+      try {
+        if ( gen.exists( "num_events" ) ) params_.generation.maxgen = (int)gen["num_events"];
+        if ( gen.exists( "print_every" ) ) params_.generation.gen_print_every = (int)gen["print_every"];
       } catch ( const libconfig::SettingNotFoundException& nfe ) {
         FatalError( Form( "Failed to retrieve the field \"%s\".", nfe.getPath() ) );
       }

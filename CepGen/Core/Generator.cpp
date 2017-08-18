@@ -17,7 +17,7 @@ namespace CepGen
 
   Generator::~Generator()
   {
-    if ( parameters->generation && parameters->process() && parameters->process()->numGeneratedEvents()>0 ) {
+    if ( parameters->generation.enabled && parameters->process() && parameters->process()->numGeneratedEvents()>0 ) {
       Information( Form( "Mean generation time / event: %.3f ms", parameters->process()->totalGenerationTime()*1.e3/parameters->process()->numGeneratedEvents() ) );
     }
   }
@@ -91,7 +91,7 @@ namespace CepGen
     }
     while ( !good ) { good = vegas_->generateOneEvent(); }
 
-    last_event = this->parameters->last_event;
+    last_event = this->parameters->generation.last_event;
     return last_event.get();
   }
 

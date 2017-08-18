@@ -57,20 +57,27 @@ namespace CepGen
 
       //----- events generation
 
-      /// Are we generating events ? (true) or are we only computing the cross-section ? (false)
-      bool generation;
+      struct Generation
+      {
+        Generation() : enabled( false ), maxgen( 0 ), symmetrise( false ), ngen( 0 ), gen_print_every( 1 ) {}
+        /// Are we generating events ? (true) or are we only computing the cross-section ? (false)
+        bool enabled;
+        /// Maximal number of events to generate in this run
+        unsigned int maxgen;
+        /// Pointer to the last event produced in this run
+        std::shared_ptr<Event> last_event;
+        /// Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?
+        bool symmetrise;
+        /// Number of events already generated in this run
+        unsigned int ngen;
+        /// Frequency at which the events are displayed to the end-user
+        unsigned int gen_print_every;
+      };
+      Generation generation;
+
       void setStorage( bool store ) { store_ = store; }
       /// Are the events generated in this run to be stored in the output file ?
       bool storage() const { return store_; }
-
-      /// Maximal number of events to generate in this run
-      unsigned int maxgen;
-      /// Pointer to the last event produced in this run
-      std::shared_ptr<Event> last_event;
-      /// Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?
-      bool symmetrise;
-      /// Number of events already generated in this run
-      unsigned int ngen;
 
       //----- PDFLIB information
 

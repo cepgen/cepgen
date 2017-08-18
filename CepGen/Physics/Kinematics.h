@@ -48,9 +48,9 @@ namespace CepGen
 
       inline void setSqrtS( double sqrts ) { in1p = in2p = sqrts/2; }
       /// First incoming particle's momentum (in \f$\text{GeV}/c\f$)
-      float in1p;
+      double in1p;
       /// Second incoming particle's momentum (in \f$\text{GeV}/c\f$)
-      float in2p;
+      double in2p;
       /// First beam/primary particle's PDG identifier
       Particle::ParticleCode in1pdg;
       /// Second beam/primary particle's PDG identifier

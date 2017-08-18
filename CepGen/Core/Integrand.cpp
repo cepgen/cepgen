@@ -124,7 +124,7 @@ namespace CepGen
                        ev->time_generation,
                        ev->time_total ) );
 
-      *( p->last_event ) = *( ev );
+      p->generation.last_event = ev;
     } // generating events
 
     if ( Logger::get().level>=Logger::DebugInsideLoop ) {

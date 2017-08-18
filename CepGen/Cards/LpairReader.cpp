@@ -14,145 +14,59 @@ namespace CepGen
         return;
       }
 
-      std::string key, value;
-      const unsigned int wdth = 50;
-      Debugging( Form( "File '%s' succesfully opened!", file ) );
-      std::ostringstream os;
-      os << "Configuration file content :" << "\n";
+      std::string proc_name, hadr_name;
 
-      os << std::left;
+      registerParameter<std::string>( "PROC", "Process name to simulate", &proc_name );
+      registerParameter<std::string>( "HADR", "Hadronisation algorithm to use", &hadr_name );
+      registerParameter<bool>( "IEND", "Generation type", &params_.generation.enabled );
+      registerParameter<unsigned int>( "DEBG", "Debugging verbosity", (unsigned int*)&Logger::get().level );
+      registerParameter<unsigned int>( "NCVG", "Number of function calls", &params_.vegas.ncvg );
+      registerParameter<unsigned int>( "NCSG", "Number of points to probe", &params_.vegas.npoints );
+      registerParameter<unsigned int>( "ITVG", "Number of Vegas iterations", &params_.vegas.itvg );
+      registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params_.kinematics.in1p );
+      registerParameter<double>( "INPE", "Momentum (2nd primary particle)", &params_.kinematics.in2p );
+      registerParameter<unsigned int>( "MODE", "Subprocess' mode", (unsigned int*)&params_.kinematics.mode );
+      registerParameter<unsigned int>( "PMOD", "Outgoing primary particles' mode", (unsigned int*)&params_.remnant_mode );
+      registerParameter<unsigned int>( "EMOD", "Outgoing primary particles' mode", (unsigned int*)&params_.remnant_mode );
+      registerParameter<unsigned int>( "PAIR", "Outgoing particles' PDG id", (unsigned int*)&params_.kinematics.pair );
+      registerParameter<unsigned int>( "MCUT", "Set of cuts to apply on final products", (unsigned int*)&params_.kinematics.cuts_mode );
+      registerParameter<double>( "PTCT", "Minimal transverse momentum (single central outgoing particle)", &params_.kinematics.pt_min );
+      registerParameter<double>( "MSCT", "Minimal central system mass", &params_.kinematics.mass_min );
+      registerParameter<double>( "ECUT", "Minimal energy (single central outgoing particle)", &params_.kinematics.e_min );
+      registerParameter<unsigned int>( "NGEN", "Number of events to generate", &params_.generation.maxgen );
+      //registerParameter<double>( "THMN", "Minimal polar production angle for the central particles", &params_.kinematics.eta_min );
+      //registerParameter<double>( "THMX", "Maximal polar production angle for the central particles", &params_.kinematics.eta_max );
+      registerParameter<double>( "ETMN", "Minimal pseudo-rapidity (central outgoing particles)", &params_.kinematics.eta_min );
+      registerParameter<double>( "ETMX", "Maximal pseudo-rapidity (central outgoing particles)", &params_.kinematics.eta_max );
+      registerParameter<double>( "Q2MN", "Minimal Q^2 (exchanged parton)", &params_.kinematics.q2_min );
+      registerParameter<double>( "Q2MX", "Maximal Q^2 (exchanged parton)", &params_.kinematics.q2_max );
+      registerParameter<double>( "MXMN", "Minimal invariant mass of proton remnants", &params_.kinematics.mx_min );
+      registerParameter<double>( "MXMX", "Maximal invariant mass of proton remnants", &params_.kinematics.mx_max );
+      registerParameter<unsigned int>( "GPDF", "GPDF", &params_.pdflib.gpdf );
+      registerParameter<unsigned int>( "SPDF", "SPDF", &params_.pdflib.spdf );
+      registerParameter<unsigned int>( "QPDF", "QPDF", &params_.pdflib.qpdf );
+
+      Debugging( Form( "File '%s' succesfully opened!", file ) );
+
+      std::map<std::string, std::string> m_params;
+      std::string key, value;
       while ( f >> key >> value ) {
-        //os << std::setw( wdth ) << "[" << key << "] = " << value << std::endl;
-        //if ( strncmp( key.c_str(), "#" ) == 0 ) continue; // FIXME need to ensure there is no extra space before !
-        if ( key[0] == '#' ) continue;
-        if ( key == "IEND" ) {
-          int iend = (int)atoi( value.c_str() );
-          if (iend>1) {
-            params_.generation = true;
-          }
-        }
-        else if ( key == "DEBG" ) {
-          Logger::get().level = static_cast<Logger::LoggingLevel>( atoi( value.c_str() ) );
-        }
-        else if ( key == "NCVG" ) {
-          params_.vegas.ncvg = (int)atoi( value.c_str() );
-          os << std::setw( wdth ) << " * Number of function calls:" << params_.vegas.ncvg << "\n";
-        }
-        else if ( key == "NCSG" ) {
-          params_.vegas.npoints = (int)atoi( value.c_str() );
-          os << std::setw( wdth ) << " * Number of points to probe:" << params_.vegas.npoints << "\n";
-        }
-        else if ( key == "ITVG" ) {
-          params_.vegas.itvg = (int)atoi( value.c_str() );
-          os << std::setw( wdth ) << " * Number of Vegas iterations:" << params_.vegas.itvg << "\n";
-        }
-        else if ( key == "INPP" ) {
-          params_.kinematics.in1p = (double)atof( value.c_str() );
-          os << std::setw( wdth ) << " * Momentum (1st primary particle):" << params_.kinematics.in1p << " GeV/c\n";
-        }
-        else if ( key == "INPE" ) {
-          params_.kinematics.in2p = static_cast<float>( atof( value.c_str() ) );
-          os << std::setw( wdth ) << " * Momentum (2nd primary particle):" << params_.kinematics.in1p << " GeV/c\n";
-        }
-        else if ( key == "PROC" ) {
-          if ( value == "lpair" )       params_.setProcess( new Process::GamGamLL() );
-          else if ( value == "pptoll" ) params_.setProcess( new Process::PPtoLL() );
-          std::ostringstream proc_name; proc_name << params_.process();
-          os << std::setw( wdth ) << " * Process:" << boldify( proc_name.str() ) << "\n";
-        }
-        else if ( key == "HADR" ) {
-#ifdef PYTHIA6
-          if ( value == "pythia6" ) params_.setHadroniser( new Hadroniser::Pythia6Hadroniser );
-#endif
-          os << std::setw( wdth ) << " * Hadroniser:" << ( ( params_.hadroniser() != 0 ) ? params_.hadroniser()->name() : colourise( "*** no hadroniser ***", Colour::Red ) ) << "\n";
-        }
-        else if ( key == "MODE" ) {
-          params_.kinematics.mode = static_cast<Kinematics::ProcessMode>( atoi( value.c_str() ) );
-          os << std::setw( wdth ) << " * Subprocess' mode:" << static_cast<unsigned int>( params_.kinematics.mode ) << " --> " << params_.kinematics.mode << "\n";
-        }
-        else if ( key == "PMOD" or key == "EMOD" ) {
-          params_.remnant_mode = static_cast<StructureFunctions>( atoi( value.c_str() ) );
-          os << std::setw( wdth ) << " * Outgoing primary particles' mode:" << static_cast<unsigned int>( params_.remnant_mode )
-          	 << " --> " << params_.remnant_mode << "\n";
-        }
-        else if ( key == "PAIR" ) {
-          params_.kinematics.pair = static_cast<Particle::ParticleCode>( atoi( value.c_str() ) );
-          os << std::setw( wdth ) << " * Outgoing particles' PDG id:" << static_cast<unsigned int>( params_.kinematics.pair )
-             << " --> " << params_.kinematics.pair << "\n";
-        }
-        else if ( key == "MCUT" ) {
-          params_.kinematics.cuts_mode = static_cast<Kinematics::Cuts>( atoi( value.c_str() ) );
-          os << std::setw( wdth ) << " * Set of cuts to apply on final products:" << params_.kinematics.cuts_mode << "\n";
-        }
-        else if ( key == "PTCT" ) {
-          params_.kinematics.pt_min = static_cast<float>( atof( value.c_str() ) );
-          os << std::setw( wdth ) << " * Minimal transverse momentum (single central outgoing particle):" << params_.kinematics.pt_min << " GeV/c\n";
-        }
-        else if ( key == "MSCT" ) {
-          params_.kinematics.mass_min = static_cast<float>( atof( value.c_str() ) );
-          os << std::setw( wdth ) << " * Minimal central system mass:" << params_.kinematics.mass_min << " GeV/c**2\n";
-        }
-        else if ( key == "ECUT" ) {
-          params_.kinematics.e_min = static_cast<float>( atof( value.c_str() ) );
-          os << std::setw( wdth ) << " * Minimal energy (single central outgoing particle):" << params_.kinematics.e_min << " GeV\n";
-        }
-        else if ( key == "NGEN" ) {
-          params_.maxgen = static_cast<unsigned int>( atoi( value.c_str() ) );
-          os << std::setw( wdth ) << " * Number of events to generate:" << boldify( params_.maxgen ) << "\n";
-        }
-        else if ( key == "THMN" ) {
-          //params_.mintheta = atof( value.c_str() );
-          //params_.setThetaRange( atof( value.c_str() ), 0. ); // FIXME FIXME
-          os << std::setw( wdth ) << " * Minimal polar production angle for the central particles" << etaToTheta( params_.kinematics.eta_min ) << "\n";
-        }
-        else if ( key == "THMX" ) {
-          //params_.maxtheta = atof( value.c_str() );
-          //params_.setThetaRange( 0., atof( value.c_str() ) ); //FIXME FIXME
-          os << std::setw( wdth ) << " * Maximal polar production angle for the central particles" << etaToTheta( params_.kinematics.eta_max ) << "\n";
-        }
-        else if ( key == "ETMN" ) {
-          params_.kinematics.eta_min = static_cast<float>( atof( value.c_str() ) );
-          os << std::setw( wdth ) << " * Minimal pseudo-rapidity (central outgoing particles):" << params_.kinematics.eta_min << "\n";
-        }
-        else if ( key == "ETMX" ) {
-          params_.kinematics.eta_max = static_cast<float>( atof( value.c_str() ) );
-          os << std::setw( wdth ) << " * Maximal pseudo-rapidity (central outgoing particles):" << params_.kinematics.eta_max << "\n";
-        }
-        else if ( key == "Q2MN" ) {
-          params_.kinematics.q2_min = static_cast<float>( atof( value.c_str() ) );
-          os << std::setw( wdth ) << " * Minimal Q^2 (exchanged parton):" << params_.kinematics.q2_min << " GeV^2\n";
-        }
-        else if ( key == "Q2MX" ) {
-          params_.kinematics.q2_max = static_cast<float>( atof( value.c_str() ) );
-          os << std::setw( wdth ) << " * Maximal Q^2 (exchanged parton):" << params_.kinematics.q2_max << " GeV^2\n";
-        }
-        else if ( key == "MXMN" ) {
-          params_.kinematics.mx_min = static_cast<float>( atof( value.c_str() ) );
-          os << std::setw( wdth ) << " * Minimal invariant mass of proton remnants:" << params_.kinematics.mx_min << " GeV/c^2\n";
-        }
-        else if ( key == "MXMX" ) {
-          params_.kinematics.mx_max = static_cast<float>( atof( value.c_str() ) );
-          os << std::setw( wdth ) << " * Maximal invariant mass of proton remnants:" << params_.kinematics.mx_max << " GeV/c^2\n";
-        }
-        else if ( key == "GPDF" ) {
-          params_.pdflib.gpdf = static_cast<unsigned int>( atoi( value.c_str() ) );
-          os << std::setw( wdth ) << " * GPDF:" << params_.pdflib.gpdf << "\n";
-        }
-        else if ( key == "SPDF" ) {
-          params_.pdflib.spdf = static_cast<unsigned int>( atoi( value.c_str() ) );
-          os << std::setw( wdth ) << " * SPDF:" << params_.pdflib.spdf << "\n";
-        }
-        else if ( key == "QPDF" ) {
-          params_.pdflib.qpdf = static_cast<unsigned int>( atoi( value.c_str() ) );
-          os << std::setw( wdth ) << " * QPDF:" << params_.pdflib.qpdf << "\n";
-        }
-        else {
-          InWarning( Form( "Unrecognized argument: [%s] = %s", key.c_str(), value.c_str() ) );
-        }
+        if ( key[0] == '#' ) continue; // FIXME need to ensure there is no extra space before!
+        setParameter( key, value );
+        m_params.insert( std::pair<std::string,std::string>( key, value ) );
+        if ( getDescription( key ) != "null" ) std::cout << "---> " << getDescription( key ) << " = " << getParameter( key ) << std::endl;
       }
       f.close();
 
-      Information( os.str() );
+      if      ( proc_name == "lpair" )  params_.setProcess( new Process::GamGamLL() );
+      else if ( proc_name == "pptoll" ) params_.setProcess( new Process::PPtoLL() );
+      else FatalError( Form( "Unrecognised process name: %s", proc_name.c_str() ) );
+
+#ifdef PYTHIA6
+      if ( hadr_name == "pythia6" ) params_.setHadroniser( new Hadroniser::Pythia6Hadroniser );
+#endif
+
+      if ( m_params.count( "IEND" ) ) setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
     }
 
     void
@@ -163,12 +77,48 @@ namespace CepGen
         InError( Form( "Failed to open file \"%s\" for writing", file ) );
         return;
       }
-      // ...
-      if ( params_.vegas.itvg > 0 ) f << "ITVG  " << params_.vegas.itvg << std::endl;
-      if ( params_.kinematics.e_min !=- 1 ) f << "ECUT  " << params_.kinematics.e_min << std::endl;
-      if ( params_.kinematics.pt_min !=- 1 ) f << "PTCT  " << params_.kinematics.pt_min << std::endl;
-      // ...
+      for ( std::vector<Parameter<std::string> >::const_iterator it = p_strings_.begin(); it != p_strings_.end(); ++it ) {
+        if ( it->value && !it->value->empty() ) f << it->key << " = " << *it->value << "\n";
+      }
+      for ( std::vector<Parameter<unsigned int> >::const_iterator it = p_ints_.begin(); it != p_ints_.end(); ++it ) {
+        if ( it->value ) f << it->key << " = " << *it->value << "\n";
+      }
+      for ( std::vector<Parameter<double> >::const_iterator it = p_doubles_.begin(); it != p_doubles_.end(); ++it ) {
+        if ( it->value ) f << it->key << " = " << *it->value << "\n";
+      }
       f.close();
+    }
+
+    void
+    LpairReader::setParameter( std::string key, std::string value )
+    {
+      try { setValue<double>( key.c_str(), std::stod( value ) ); } catch ( std::invalid_argument& ) {}
+      try { setValue<unsigned int>( key.c_str(), std::stoi( value ) ); } catch ( std::invalid_argument& ) {}
+      //setValue<bool>( key.c_str(), std::stoi( value ) );
+      setValue<std::string>( key.c_str(), value );
+    }
+
+    std::string
+    LpairReader::getParameter( std::string key ) const
+    {
+      double dd = getValue<double>( key.c_str() );
+      if ( dd != -999. ) return std::to_string( dd );
+
+      unsigned int ui = getValue<unsigned int>( key.c_str() );
+      if ( ui != 999 ) return std::to_string( ui );
+
+      //if ( out = getValue<bool>( key.c_str() )  );
+
+      return getValue<std::string>( key.c_str() );
+    }
+
+    std::string
+    LpairReader::getDescription( std::string key ) const
+    {
+      for ( std::vector<Parameter<std::string> >::const_iterator it = p_strings_.begin(); it != p_strings_.end(); ++it ) { if ( it->key == key ) return it->description; }
+      for ( std::vector<Parameter<unsigned int> >::const_iterator it = p_ints_.begin(); it != p_ints_.end(); ++it ) { if ( it->key == key ) return it->description; }
+      for ( std::vector<Parameter<double> >::const_iterator it = p_doubles_.begin(); it != p_doubles_.end(); ++it ) { if ( it->key == key ) return it->description; }
+      return "null";
     }
   }
 }
