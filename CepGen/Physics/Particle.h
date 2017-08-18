@@ -46,9 +46,9 @@ namespace CepGen
       /// Internal status code for a particle
       enum Status {
         PrimordialIncoming = -9,
-        Incoming = -1,
         Undecayed = -3,
         sPropagator = -2,
+        Incoming = -1,
         Undefined = 0,
         FinalState = 1,
         Resonance = 2,
@@ -106,7 +106,7 @@ namespace CepGen
 
           Momentum& betaGammaBoost( double gamma, double betagamma );
           /// Forward Lorentz boost
-          void lorentzBoost( const Particle::Momentum& p );
+          Momentum& lorentzBoost( const Particle::Momentum& p );
 
           // --- setters and getters
 
@@ -162,7 +162,7 @@ namespace CepGen
           /// Rotate the particle's momentum by a polar/azimuthal angle
           Momentum& rotateThetaPhi( double theta_, double phi_ );
           /// Apply a \f$ z\rightarrow -z\f$ transformation
-          inline Momentum& mirrorZ() { pz_ = -pz_; }
+          inline Momentum& mirrorZ() { pz_ = -pz_; return *this; }
         private:
           /// Compute the 3-momentum's norm
           void computeP();
@@ -208,14 +208,14 @@ namespace CepGen
       /// \param[in] pdgId ParticleCode (PDG ID)
       /// \param[in] role Role of the particle in the process
       Particle( Role role, ParticleCode pdgId=Particle::invalidParticle );
+      /// Copy constructor
+      Particle( const Particle& );
       inline ~Particle() {}
-      /// Assignment operator
-      Particle& operator=( const Particle& );
       /// Comparison operator (from unique identifier)
       bool operator<( Particle& rhs ) const;
       /// Comparison operator (from their reference's unique identifier)
       //bool operator<( Particle *rhs ) const { return ( id < rhs->id ); }
-      void lorentzBoost( double m_, const Momentum& mom_ );
+      Particle& lorentzBoost( double m_, const Momentum& mom_ );
       /// Lorentz boost (shamelessly stolen from ROOT)
       std::vector<double> lorentzBoost( const Momentum& mom_ );
 
@@ -223,6 +223,7 @@ namespace CepGen
 
       /// Unique identifier (in a Event object context)
       int id() const { return id_; }
+      //void setId( int id ) { id_ = id; }
       void setId( int id ) { id_ = id; }
       /// Electric charge (given as a float number, for the quarks and bound states)
       float charge() const { return charge_; }
@@ -339,17 +340,7 @@ namespace CepGen
 
       /// Dump all the information on this particle into the standard output stream
       void dump() const;    
-      void pdf2pdg();
 
-      // --- other methods
-
-      /**
-       * Hadronise the particle with a generic hadroniser, and builds the shower (list of Particle objects) embedded in this object
-       * \param[in] algo_ Algorithm in use to hadronise the particle
-       * \brief Hadronises the particle using Pythia
-       * \return A boolean stating whether or not the particle has been hadronised
-       */
-      bool hadronise( std::string algo_ );
     private:
       /// Unique identifier in an event
       int id_;

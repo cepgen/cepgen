@@ -89,9 +89,11 @@ namespace CepGen
       static constexpr unsigned short max_dimensions_ = 15;
       /// Integration grid size parameter
       static constexpr unsigned short mbin_ = 3;
+      static constexpr double inv_mbin_ = 1./mbin_;
+      double inv_npoin_;
 
       /// Selected bin at which the function will be evaluated
-      int j_;
+      int vegas_bin_;
       double correc_;
       double correc2_;
       /// List of parameters to specify the integration range and the physics determining the phase space

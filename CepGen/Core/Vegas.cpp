@@ -3,7 +3,7 @@
 namespace CepGen
 {
   Vegas::Vegas( const unsigned int dim, double f_( double*, size_t, void* ), Parameters* param ) :
-    j_( 0 ), correc_( 0. ), correc2_( 0. ),
+    vegas_bin_( 0 ), correc_( 0. ), correc2_( 0. ),
     input_params_( param ),
     grid_prepared_( false ), gen_prepared_( false ),
     f_max2_( 0. ), f_max_diff_( 0. ), f_max_old_( 0. ), f_max_global_( 0. ),
@@ -67,7 +67,6 @@ namespace CepGen
     std::string fn;
 
     if ( !gen_prepared_ ) setGen();
-    std::cout << "setgen finished!!!" << std::endl;
 
     Information( Form( "%d events will be generated", input_params_->maxgen ) );
 
@@ -83,13 +82,12 @@ namespace CepGen
   {
     if ( !gen_prepared_ ) setGen();
 
-    const unsigned int ndim = function_->dim,
-                       max = pow( mbin_, ndim );
+    const unsigned int ndim = function_->dim, max = pow( mbin_, ndim );
 
     std::vector<double> x( ndim, 0. );
 
-    // Correction cycles are started
-    if ( j_ != 0 ) {
+    //--- correction cycles
+    if ( vegas_bin_ != 0 ) {
       bool has_correction = false;
       while ( !correctionCycle( x, has_correction ) ) {}
       if ( has_correction ) return storeEvent( x );
@@ -98,19 +96,20 @@ namespace CepGen
     double weight;
     double y = -1.;
 
-    // Normal generation cycle
-    // Select a Vegas bin and reject if fmax is too little
+    //--- normal generation cycle
+
+    //----- select a Vegas bin and reject if fmax is too little
     do {
       do {
         // ...
-        j_ = uniform() * max;
+        vegas_bin_ = uniform() * max;
         y = uniform() * f_max_global_;
-        nm_[j_] += 1;
-      } while ( y > f_max_[j_] );
+        nm_[vegas_bin_] += 1;
+      } while ( y > f_max_[vegas_bin_] );
       // Select x values in this Vegas bin
-      int jj = j_;
+      int jj = vegas_bin_;
       for ( unsigned int i=0; i<ndim; i++ ) {
-      int jjj = jj / mbin_;
+        int jjj = jj / mbin_;
         n_[i] = jj - jjj * mbin_;
         x[i] = ( uniform() + n_[i] ) / mbin_;
         jj = jjj;
@@ -118,25 +117,25 @@ namespace CepGen
 
       // Get weight for selected x value
       weight = F( x );
-    } while ( y>weight );
+    } while ( y > weight );
 
-    if ( weight <= f_max_[j_] ) j_ = 0;
+    if ( weight <= f_max_[vegas_bin_] ) vegas_bin_ = 0;
     // Init correction cycle if weight is higher than fmax or ffmax
     else if ( weight <= f_max_global_ ) {
-      f_max_old_ = f_max_[j_];
-      f_max_[j_] = weight;
+      f_max_old_ = f_max_[vegas_bin_];
+      f_max_[vegas_bin_] = weight;
       f_max_diff_ = weight-f_max_old_;
-      correc_ = ( nm_[j_] - 1. ) * f_max_diff_ / f_max_global_ - 1.;
+      correc_ = ( nm_[vegas_bin_] - 1. ) * f_max_diff_ / f_max_global_ - 1.;
     }
     else {
-      f_max_old_ = f_max_[j_];
-      f_max_[j_] = weight;
+      f_max_old_ = f_max_[vegas_bin_];
+      f_max_[vegas_bin_] = weight;
       f_max_diff_ = weight-f_max_old_;
       f_max_global_ = weight;
-      correc_ = ( nm_[j_] - 1. ) * f_max_diff_ / f_max_global_ * weight / f_max_global_ - 1.;
+      correc_ = ( nm_[vegas_bin_] - 1. ) * f_max_diff_ / f_max_global_ * weight / f_max_global_ - 1.;
     }
 
-    Debugging( Form( "Correc.: %f, j = %d", correc_, j_ ) );
+    Debugging( Form( "Correction applied: %f, Vegas bin = %d", correc_, vegas_bin_ ) );
 
     // Return with an accepted event
     if ( weight > 0. ) return storeEvent( x );
@@ -152,7 +151,7 @@ namespace CepGen
     Debugging( Form( "Correction cycles are started.\n\t"
                      "j = %f"
                      "correc = %f"
-                     "corre2 = %f", j_, correc2_ ) );
+                     "corre2 = %f", vegas_bin_, correc2_ ) );
 
     if ( correc_ >= 1. ) correc_ -= 1.;
     if ( uniform() < correc_ ) {
@@ -160,12 +159,12 @@ namespace CepGen
       std::vector<double> xtmp( ndim, 0. );
       // Select x values in Vegas bin
       for ( unsigned int k=0; k<ndim; k++ ) {
-        xtmp[k] = ( uniform() + n_[k] ) / mbin_;
+        xtmp[k] = ( uniform() + n_[k] ) * inv_mbin_;
       }
       // Compute weight for x value
       weight = F( xtmp );
       // Parameter for correction of correction
-      if ( weight > f_max_[j_] ) {
+      if ( weight > f_max_[vegas_bin_] ) {
         if ( weight > f_max2_ ) f_max2_ = weight;
         correc2_ -= 1.;
         correc_ += 1.;
@@ -182,16 +181,16 @@ namespace CepGen
     }
     // Correction if too big weight is found while correction
     // (All your bases are belong to us...)
-    if ( f_max2_ > f_max_[j_] ) {
-      f_max_old_ = f_max_[j_];
-      f_max_[j_] = f_max2_;
+    if ( f_max2_ > f_max_[vegas_bin_] ) {
+      f_max_old_ = f_max_[vegas_bin_];
+      f_max_[vegas_bin_] = f_max2_;
       f_max_diff_ = f_max2_-f_max_old_;
       if ( f_max2_ < f_max_global_ ) {
-        correc_ = ( nm_[j_] - 1. ) * f_max_diff_ / f_max_global_ - correc2_;
+        correc_ = ( nm_[vegas_bin_] - 1. ) * f_max_diff_ / f_max_global_ - correc2_;
       }
       else {
         f_max_global_ = f_max2_;
-        correc_ = ( nm_[j_] - 1. ) * f_max_diff_ / f_max_global_ * f_max2_ / f_max_global_ - correc2_;
+        correc_ = ( nm_[vegas_bin_] - 1. ) * f_max_diff_ / f_max_global_ * f_max2_ / f_max_global_ - correc2_;
       }
       correc2_ = 0.;
       f_max2_ = 0.;
@@ -215,6 +214,7 @@ namespace CepGen
   void
   Vegas::setGen()
   {
+    Information( Form( "Preparing the grid for the generation of unweighted events: %d points", input_params_->vegas.npoints ) );
     // Variables for debugging
     std::ostringstream os;
     if ( Logger::get().level >= Logger::Debug ) {
@@ -223,14 +223,13 @@ namespace CepGen
 
     const unsigned int ndim = function_->dim,
                        max = pow( mbin_, ndim ),
-                       npoin = input_params_->vegas.npoints,
-                       inv_mbin = 1./mbin_, inv_npoin = 1./npoin;
+                       npoin = input_params_->vegas.npoints;
+    const double inv_npoin = 1./npoin;
 
     if ( ndim > max_dimensions_ ) {
       FatalError( Form( "Number of dimensions to integrate exceed the maximum number, %d", max_dimensions_ ) );
     }
 
-    std::vector<int> n( max_dimensions_, 0 );
     nm_ = std::vector<int>( max, 0 );
     f_max_ = std::vector<double>( max, 0. );
     n_ = std::vector<int>( ndim, 0 );
@@ -246,14 +245,14 @@ namespace CepGen
     for ( unsigned int i=0; i<max; i++ ) {
       int jj = i;
       for ( unsigned int j=0; j<ndim; j++ ) {
-        int jjj = jj*inv_mbin;
-        n[j] = jj-jjj*mbin_;
+        int jjj = jj*inv_mbin_;
+        n_[j] = jj-jjj*mbin_;
         jj = jjj;
       }
       double fsum = 0., fsum2 = 0.;
       for ( unsigned int j=0; j<npoin; j++ ) {
         for ( unsigned int k=0; k<ndim; k++ ) {
-          x[k] = ( uniform() + n[k] ) * inv_mbin;
+          x[k] = ( uniform() + n_[k] ) * inv_mbin_;
         }
         const double z = F( x );
         f_max_[i] = std::max( f_max_[i], z );
@@ -269,7 +268,7 @@ namespace CepGen
       if ( Logger::get().level >= Logger::DebugInsideLoop ) {
         const double sig = sqrt( sig2 );
         const double eff = ( f_max_[i] != 0. ) ? f_max_[i]/av : 1.e4;
-        os.str(""); for ( unsigned int j=0; j<ndim; j++ ) { os << n[j]; if ( j != ndim-1 ) os << ", "; }
+        os.str(""); for ( unsigned int j=0; j<ndim; j++ ) { os << n_[j]; if ( j != ndim-1 ) os << ", "; }
         DebuggingInsideLoop( Form( "In iteration #%d:\n\t"
                                    "av   = %f\n\t"
                                    "sig  = %f\n\t"
@@ -301,6 +300,7 @@ namespace CepGen
                        sum, sum2, sig, sigp, f_max_global_, eff1, eff2 ) );
     }
     gen_prepared_ = true;
+    Information( "Grid prepared! Now launching the production." );
   }
 }
 

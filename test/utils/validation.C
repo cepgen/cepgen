@@ -1,13 +1,13 @@
 #include "../TreeEvent.h"
 #include "../Canvas.h"
+#include "CepGen/Physics/Particle.h"
 
 void
 validation( const string& cepgen_file="events.root", const string& orig_file="" )
 {
   CepGen::TreeEvent ev;
-  auto file = TFile::Open( cepgen_file.c_str() );
-  auto tree = dynamic_cast<TTree*>( file->Get( "h4444" ) );
-  if ( !tree ) return;
+  auto tree_val = dynamic_cast<TTree*>( TFile::Open( cepgen_file.c_str() )->Get( "h4444" ) );
+  if ( !tree_val ) return;
 
   string plots[] = { "invm", "ptpair", "singlept", "singleeta" };
   const unsigned short num_plots = sizeof( plots ) / sizeof( plots[0] );
@@ -20,17 +20,20 @@ validation( const string& cepgen_file="events.root", const string& orig_file="" 
     m_plt[i].insert( make_pair( "singleeta", new TH1D( Form( "singleeta_%i", i ), "Single lepton p_{T}\\Events\\GeV", 60, -3., 3. ) ) );
   }
 
-  ev.attach( tree );
-  for ( unsigned long long i = 0; i < tree->GetEntries(); ++i ) {
-    tree->GetEntry( i );
+  ev.attach( tree_val );
+  for ( unsigned long long i = 0; i < tree_val->GetEntries(); ++i ) {
+    tree_val->GetEntry( i );
     TLorentzVector lep1, lep2, ip1, ip2, op1, op2;
     for ( unsigned short j = 0; j < ev.np ; ++j ) {
-      if ( ev.role[j] == 1 ) ip1.SetPtEtaPhiM( ev.pt[j], ev.eta[j], ev.phi[j], ev.M[j] );
-      if ( ev.role[j] == 2 ) ip2.SetPtEtaPhiM( ev.pt[j], ev.eta[j], ev.phi[j], ev.M[j] );
-      if ( ev.role[j] == 3 ) op1.SetPtEtaPhiM( ev.pt[j], ev.eta[j], ev.phi[j], ev.M[j] );
-      if ( ev.role[j] == 5 ) op2.SetPtEtaPhiM( ev.pt[j], ev.eta[j], ev.phi[j], ev.M[j] );
-      if ( ev.role[j] == 6 ) lep1.SetPtEtaPhiM( ev.pt[j], ev.eta[j], ev.phi[j], ev.M[j] );
-      if ( ev.role[j] == 7 ) lep2.SetPtEtaPhiM( ev.pt[j], ev.eta[j], ev.phi[j], ev.M[j] );
+      switch ( ev.role[j] ) {
+        case CepGen::Particle::IncomingBeam1: ip1.SetPtEtaPhiM( ev.pt[j], ev.eta[j], ev.phi[j], ev.M[j] ); break;
+        case CepGen::Particle::IncomingBeam2: ip2.SetPtEtaPhiM( ev.pt[j], ev.eta[j], ev.phi[j], ev.M[j] ); break;
+        case CepGen::Particle::OutgoingBeam1: op1.SetPtEtaPhiM( ev.pt[j], ev.eta[j], ev.phi[j], ev.M[j] ); break;
+        case CepGen::Particle::OutgoingBeam2: op2.SetPtEtaPhiM( ev.pt[j], ev.eta[j], ev.phi[j], ev.M[j] ); break;
+        case CepGen::Particle::CentralParticle1: lep1.SetPtEtaPhiM( ev.pt[j], ev.eta[j], ev.phi[j], ev.M[j] ); break;
+        case CepGen::Particle::CentralParticle2: lep2.SetPtEtaPhiM( ev.pt[j], ev.eta[j], ev.phi[j], ev.M[j] ); break;
+        default: break;
+      }
     }
     m_plt[0]["invm"]->Fill( ( lep1+lep2 ).M() );
     m_plt[0]["ptpair"]->Fill( ( lep1+lep2 ).Pt() );

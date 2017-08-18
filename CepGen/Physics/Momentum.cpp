@@ -234,17 +234,17 @@ namespace CepGen
     return *this;
   }
 
-  void
+  Momentum&
   Momentum::lorentzBoost( const Momentum& p )
   {
     const double m = p.mass();
-    if ( m == p.energy() ) return;
+    if ( m == p.energy() ) return *this;
 
-    Momentum mom_old = *this;
-    const double pf4 = mom_old*p/m,
-                 fn = ( pf4+mom_old.energy() )/( p.energy()+m );
-    Momentum mom_new = mom_old-p*fn; mom_new.setEnergy( pf4 );
-    *this = mom_new;
+    const double pf4 = ( ( *this )*p ) / m,
+                 fn = ( pf4+energy() )/( p.energy()+m );
+    *this -= p*fn;
+    setEnergy( pf4 );
+    return *this;
   }
 
   Momentum&
@@ -280,6 +280,6 @@ namespace CepGen
   std::ostream&
   operator<<( std::ostream& os, const Momentum& mom )
   {
-    return os << "(E, p) = (" << mom.energy_ << ", " << mom.px_ << ", " << mom.py_ << ", " << mom.pz_ << ")";
+    return os << "(E ; p) = (" << mom.energy_ << " ; " << mom.px_ << ", " << mom.py_ << ", " << mom.pz_ << ")";
   }
 }

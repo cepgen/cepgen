@@ -66,7 +66,6 @@ namespace CepGen
         p->process()->clearRun();
         p->vegas.first_run = false;
       }
-      ev->dump();
     } // event is not empty
 
     p->process()->setPoint( ndim, x );

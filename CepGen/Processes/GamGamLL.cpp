@@ -405,8 +405,8 @@ GamGamLL::orient()
   const double sin_phi3 =  rr / pt3,
                sin_phi5 = -rr / pt5;
 
-  if ( fabs( sin_phi3 ) > 1. ) { InWarning( Form( "sin_phi3 = %e > 1", sin_phi3 ) ); return false; }
-  if ( fabs( sin_phi5 ) > 1. ) { InWarning( Form( "sin_phi5 = %e > 1", sin_phi5 ) ); return false; }
+  if ( fabs( sin_phi3 ) > 1. ) { InWarning( Form( "sin(phi_3) = %e while it must be in [-1 ; 1]", sin_phi3 ) ); return false; }
+  if ( fabs( sin_phi5 ) > 1. ) { InWarning( Form( "sin(phi_5) = %e while it must be in [-1 ; 1]", sin_phi5 ) ); return false; }
 
   const double cos_phi3 = -sqrt( 1.-sin_phi3*sin_phi3 ),
                cos_phi5 = -sqrt( 1.-sin_phi5*sin_phi5 );
@@ -877,7 +877,6 @@ GamGamLL::fillKinematics( bool )
   ol2.setPdgId( ol2.pdgId(), -ransign );
   ol2.setMomentum( p7_cm_ );
   ol2.setStatus( Particle::FinalState );
-  std::cout << ol1.status() << " -- " << ol2.status() << std::endl;
 }
 
 double

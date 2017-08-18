@@ -3,28 +3,26 @@
 namespace CepGen
 {
   Particle::Particle() :
-    id_( -1 ), charge_( 1. ), mass_( -1. ), helicity_( 0. ), role_( UnknownRole ), status_( Undefined ), pdg_id_( invalidParticle ), is_primary_( true )
+    id_( -1 ), charge_( 1. ),
+    mass_( -1. ), helicity_( 0. ),
+    role_( UnknownRole ), status_( Undefined ), pdg_id_( invalidParticle ), is_primary_( true )
   {}
 
   Particle::Particle( Role role, ParticleCode pdgId ) :
-    id_( -1 ), charge_( 1. ), mass_( -1. ), helicity_( 0. ), role_( role ), status_( Undefined ), pdg_id_( pdgId ), is_primary_( true )
+    id_( -1 ), charge_( 1. ),
+    mass_( -1. ), helicity_( 0. ),
+    role_( role ), status_( Undefined ), pdg_id_( pdgId ), is_primary_( true )
   {
     if ( pdg_id_!=invalidParticle ) {
       computeMass();
     }
   }
 
-  Particle&
-  Particle::operator=( const Particle& part )
-  {
-    pdg_id_ = part.pdg_id_;
-    role_ = part.role_;
-    if ( id_ == -1 ) id_ = part.id_;
-    momentum_ = part.momentum_;
-    setMass( part.mass_ );
-
-    return *this;
-  }
+  Particle::Particle( const Particle& part ) :
+    id_( part.id_ ), charge_( part.charge_ ),
+    momentum_( part.momentum_ ), mass_( part.mass_ ), helicity_( part.helicity_ ),
+    role_( part.role_ ), status_( part.status_ ), pdg_id_( part.pdg_id_ ), is_primary_( part.is_primary_ )
+  {}
 
   bool
   Particle::operator<( Particle& rhs ) const
@@ -81,7 +79,7 @@ namespace CepGen
   {
     std::pair<ParticlesIds::iterator,bool> ret = daughters_.insert( part.id() );
 
-    if ( Logger::get().level>=Logger::DebugInsideLoop ) {
+    if ( Logger::get().level >= Logger::DebugInsideLoop ) {
       std::ostringstream os;
       for ( ParticlesIds::const_iterator it=daughters_.begin(); it!=daughters_.end(); it++) {
         os << Form("\n\t * id=%d", *it);
@@ -94,7 +92,7 @@ namespace CepGen
       DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) is a new daughter of %2d (pdgId=%4d)",
                                  part.role(), part.pdgId(), role_, pdg_id_ ) );
 
-      if ( !part.primary() && part.mothersIds().size() < 1 ) {
+      if ( !part.primary() && part.mothersIds().empty() ) {
         part.setMother( *this );
       }
     }
@@ -187,7 +185,7 @@ namespace CepGen
     );
   }
 
-  void
+  Particle&
   Particle::lorentzBoost( double m, const Particle::Momentum& mom )
   {
     double pf4, fn;
@@ -203,6 +201,7 @@ namespace CepGen
         momentum_.setP( i, momentum_[i]+fn*mom[i] );
       }
     }
+    return *this;
   }
 
   std::vector<double>

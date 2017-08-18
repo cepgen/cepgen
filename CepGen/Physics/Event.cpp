@@ -124,8 +124,8 @@ namespace CepGen
     Particles& part_with_same_role = getByRole( part.role() );
 
     //--- specify the id
-    if ( part_with_same_role.empty() && part.id() < 0 ) part.setId( particles().size() ); // set the id if previously invalid/inexistent
-    if ( replace && part_with_same_role.size() == 1 ) part.setId( part_with_same_role[0].id() ); // set the previous id if replacing a particle
+    if ( part_with_same_role.empty() && part.id() < 0 ) part.setId( numParticles() ); // set the id if previously invalid/inexistent
+    if ( part_with_same_role.size() == 1 && replace ) part.setId( part_with_same_role[0].id() ); // set the previous id if replacing a particle
 
     //--- add the particle to the collection
     if ( replace ) part_with_same_role = Particles( 1, part ); // generate a vector containing only this particle
@@ -138,6 +138,16 @@ namespace CepGen
     addParticle( Particle( role ), replace );
   }
 
+  size_t
+  Event::numParticles() const
+  {
+    size_t out = 0;
+    for ( ParticlesMap::const_iterator it=particles_.begin(); it!=particles_.end(); it++ ) {
+      out += it->second.size();
+    }
+    return out;
+  }
+
   const Particles
   Event::particles() const
   {
@@ -145,10 +155,7 @@ namespace CepGen
     for ( ParticlesMap::const_iterator it=particles_.begin(); it!=particles_.end(); it++ ) {
       out.insert( out.end(), it->second.begin(), it->second.end() );
     }
-    std::cout<<"before:"<<std::endl;for (const auto& p:out) std::cout<<p.id()<<" "; std::cout<<std::endl;
     std::sort( out.begin(), out.end() );
-    std::cout<<"after:"<<std::endl;for (const auto& p:out) std::cout<<p.id()<<" "; std::cout<<std::endl;
-    std::cout<<"sorted? "<< std::boolalpha << std::is_sorted(out.begin(),out.end())<<std::endl;
     return out;
   }
 

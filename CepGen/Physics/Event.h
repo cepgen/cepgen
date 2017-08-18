@@ -87,15 +87,14 @@ namespace CepGen
       /// Dump all the known information on every Particle object contained in this Event container in the output stream
       /// \param[in] stable_ Do we only show the stable particles in this event?
       void dump( std::ostream& os=Logger::get().outputStream, bool stable_=false ) const;
+      /// Number of particles in the event
+      size_t numParticles() const;
       /// Get a vector of all particles in the event
       /// \return Vector containing all the Particle objects contained in the event
       const Particles particles() const;
       /// Get a vector of all stable particles in the event
       /// \return Vector containing all the stable Particle objects contained in the event
       const Particles stableParticles() const;
-      /// Number of particles in the event
-      /// \return Integer number of particles in the event
-      inline unsigned int numParticles() const { return particles_.size(); };
       /// Number of trials before the event was "correctly" hadronised
       int num_hadronisation_trials;
       /// Time needed to generate the event at parton level (in seconds)
