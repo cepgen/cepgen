@@ -3,7 +3,9 @@
 
 #include "Handler.h"
 
+#ifdef LIBCONFIG
 #include <libconfig.h++>
+#endif
 
 namespace CepGen
 {
@@ -11,6 +13,7 @@ namespace CepGen
   {
     class ConfigReader : public Handler
     {
+#ifdef LIBCONFIG
       public:
         ConfigReader( const char* file );
 
@@ -21,6 +24,10 @@ namespace CepGen
         void parseOutgoingKinematics( const libconfig::Setting& );
         void parseVegas( const libconfig::Setting& );
         void parseGenerator( const libconfig::Setting& );
+#else
+      public:
+        inline ConfigReader( const char* ) { InWarning( "libconfig++ is not present on this machine" ); }
+#endif
     };
   }
 }

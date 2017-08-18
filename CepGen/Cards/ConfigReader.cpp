@@ -1,5 +1,7 @@
 #include "ConfigReader.h"
 
+#ifdef LIBCONFIG
+
 namespace CepGen
 {
   namespace Cards
@@ -125,3 +127,5 @@ namespace CepGen
     }
   }
 }
+
+#endif
