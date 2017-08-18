@@ -17,7 +17,8 @@ namespace CepGen
         void store( const char* file ) const;
 
       private:
-        void parseKinematics( const libconfig::Setting& );
+        void parseIncomingKinematics( const libconfig::Setting& );
+        void parseOutgoingKinematics( const libconfig::Setting& );
         void parseVegas( const libconfig::Setting& );
     };
   }

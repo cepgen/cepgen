@@ -9,8 +9,8 @@ namespace CepGen
     ConfigReader::ConfigReader( const char* file )
     {
       libconfig::Config cfg;
-      try { cfg.readFile( file ); } catch ( const libconfig::ParseException ) {
-        FatalError( Form( "Failed to parse the configuration card \"%s\".", file ) );
+      try { cfg.readFile( file ); } catch ( const libconfig::ParseException& pe ) {
+        FatalError( Form( "Failed to parse the configuration card \"%s\".\n\tParser error: %s (L:%d)", file, pe.getError(), pe.getLine() ) );
       }
       try {
         const libconfig::Setting& root = cfg.getRoot();
@@ -22,14 +22,43 @@ namespace CepGen
         if ( proc_name == "pptoll" ) params_.setProcess( new Process::PPtoLL );
 
         //--- process kinematics
-        parseKinematics( proc["kinematics"] );
+        if ( proc.exists( "in_kinematics" ) ) parseIncomingKinematics( proc["in_kinematics"] );
+        if ( proc.exists( "out_kinematics" ) ) parseOutgoingKinematics( proc["out_kinematics"] );
+
+        //--- generation parameters
+        if ( root.exists( "vegas" ) ) parseVegas( root["vegas"] );
       } catch ( const libconfig::SettingNotFoundException& nfe ) {
         FatalError( Form( "Failed to retrieve the field \"%s\".", nfe.getPath() ) );
       }
     }
 
     void
-    ConfigReader::parseKinematics( const libconfig::Setting& kin )
+    ConfigReader::parseIncomingKinematics( const libconfig::Setting& kin )
+    {
+      try {
+        if ( kin.exists( "beam1_pz" ) ) params_.kinematics.in1p = (double)kin["beam1_pz"];
+        if ( kin.exists( "beam2_pz" ) ) params_.kinematics.in2p = (double)kin["beam2_pz"];
+        if ( kin.exists( "structure_functions" ) ) {
+          std::string sf = kin["structure_functions" ];
+          if ( sf == "electron" ) params_.remnant_mode = Electron;
+          else if ( sf == "elastic-proton" ) params_.remnant_mode = ElasticProton;
+          else if ( sf == "suri-yennie" ) params_.remnant_mode = SuriYennie;
+          else if ( sf == "suri-yennie-lowQ2" ) params_.remnant_mode = SuriYennieLowQ2;
+          else if ( sf == "szczurek-uleshchenko" ) params_.remnant_mode = SzczurekUleshchenko;
+          else if ( sf == "fiore-valence" ) params_.remnant_mode = FioreVal;
+          else if ( sf == "fiore-sea" ) params_.remnant_mode = FioreSea;
+          else if ( sf == "fiore" ) params_.remnant_mode = Fiore;
+          else FatalError( Form( "Invalid structure functions mode: %s", sf.c_str() ) );
+        }
+      } catch ( const libconfig::SettingNotFoundException& nfe ) {
+        FatalError( Form( "Failed to retrieve the field \"%s\".", nfe.getPath() ) );
+      } catch ( const libconfig::SettingTypeException& te ) {
+        FatalError( Form( "Field \"%s\" has wrong type.", te.getPath() ) );
+      }
+    }
+
+    void
+    ConfigReader::parseOutgoingKinematics( const libconfig::Setting& kin )
     {
       try {
         if ( kin.exists( "pair" ) ) params_.kinematics.pair = (Particle::ParticleCode)(int)kin["pair"];
@@ -53,6 +82,9 @@ namespace CepGen
     ConfigReader::parseVegas( const libconfig::Setting& veg )
     {
       try {
+        if ( veg.exists( "num_points" ) ) params_.vegas.npoints = (int)veg["num_points"];
+        if ( veg.exists( "num_integration_calls" ) ) params_.vegas.ncvg = (int)veg["num_integration_calls"];
+        if ( veg.exists( "num_integration_iterations" ) ) params_.vegas.itvg = (int)veg["num_integration_iterations"];
       } catch ( const libconfig::SettingNotFoundException& nfe ) {
         FatalError( Form( "Failed to retrieve the field \"%s\".", nfe.getPath() ) );
       }
