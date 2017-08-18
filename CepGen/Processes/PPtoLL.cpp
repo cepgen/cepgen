@@ -416,7 +416,7 @@ PPtoLL::fillCentralParticlesKinematics()
   //=================================================================
   Particle& ol1 = event_->getOneByRole( Particle::CentralParticle1 );
   ol1.setPdgId( ol1.pdgId(), sign );
-  ol1.status = Particle::FinalState;
+  ol1.setStatus( Particle::FinalState );
   ol1.setMomentum( Pl1_ );
 
   //=================================================================
@@ -424,6 +424,6 @@ PPtoLL::fillCentralParticlesKinematics()
   //=================================================================
   Particle& ol2 = event_->getOneByRole( Particle::CentralParticle2 );
   ol2.setPdgId( ol2.pdgId(), -sign );
-  ol2.status = Particle::FinalState;
+  ol2.setStatus( Particle::FinalState );
   ol2.setMomentum( Pl2_ );
 }

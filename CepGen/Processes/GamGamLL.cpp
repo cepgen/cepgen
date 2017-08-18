@@ -809,11 +809,11 @@ GamGamLL::fillKinematics( bool )
     case Kinematics::ElasticElastic:
     case Kinematics::ElasticInelastic:
     default:
-      op1.status = Particle::FinalState; // stable proton
+      op1.setStatus( Particle::FinalState ); // stable proton
       break;
     case Kinematics::InelasticElastic:
     case Kinematics::InelasticInelastic:
-      op1.status = Particle::Undecayed; // fragmenting remnants
+      op1.setStatus( Particle::Undecayed ); // fragmenting remnants
       op1.setMass( MX_ );
       break;
   }
@@ -827,11 +827,11 @@ GamGamLL::fillKinematics( bool )
     case Kinematics::ElasticElastic:
     case Kinematics::InelasticElastic:
     default:
-      op2.status = Particle::FinalState; // stable proton
+      op2.setStatus( Particle::FinalState ); // stable proton
       break;
     case Kinematics::ElasticInelastic:
     case Kinematics::InelasticInelastic:
-      op2.status = Particle::Undecayed; // fragmenting remnants
+      op2.setStatus( Particle::Undecayed ); // fragmenting remnants
       op2.setMass( MY_ );
       break;
   }
@@ -842,8 +842,8 @@ GamGamLL::fillKinematics( bool )
   Particle::Momentum plab_ph1 = plab_ip1-p3_lab_;
   plab_ph1.rotatePhi( ranphi, rany );
   ph1.setMomentum( plab_ph1 );
-  ph1.charge = 0;
-  ph1.status = Particle::Incoming; // "incoming beam"
+  ph1.setCharge( 0. );
+  ph1.setStatus( Particle::Incoming ); // "incoming beam"
 
   // Second incoming photon
   // Equivalent in LPAIR : PLAB(x, 4)
@@ -851,12 +851,12 @@ GamGamLL::fillKinematics( bool )
   Particle::Momentum plab_ph2 = plab_ip2-p5_lab_;
   plab_ph2.rotatePhi( ranphi, rany );
   ph2.setMomentum( plab_ph2 );
-  ph2.charge = 0;
-  ph2.status = Particle::Incoming; // "incoming beam"
+  ph2.setCharge( 0. );
+  ph2.setStatus( Particle::Incoming ); // "incoming beam"
 
   // Central (two-photon) system
   Particle& cs = event_->getOneByRole( Particle::CentralSystem );
-  cs.status = Particle::Incoming;
+  cs.setStatus( Particle::Incoming );
 
   Particle::Role role_ol1, role_ol2;
   if ( ransign < 0 ) {
@@ -873,7 +873,7 @@ GamGamLL::fillKinematics( bool )
   ol1.setPdgId( ol1.pdgId(), ransign );
   p6_cm_.rotatePhi( ranphi, rany );
   ol1.setMomentum( p6_cm_ );
-  ol1.status = Particle::FinalState;
+  ol1.setStatus( Particle::FinalState );
   ol1.setMass(); //FIXME
 
   // Second outgoing lepton
@@ -881,9 +881,9 @@ GamGamLL::fillKinematics( bool )
   ol2.setPdgId( ol2.pdgId(), -ransign );
   p7_cm_.rotatePhi( ranphi, rany );
   ol2.setMomentum( p7_cm_ );
-  ol2.status = Particle::FinalState;
+  ol2.setStatus( Particle::FinalState );
   ol2.setMass(); //FIXME
-  std::cout << ol1.status << " -- " << ol2.status << std::endl;
+  std::cout << ol1.status() << " -- " << ol2.status() << std::endl;
 }
 
 double

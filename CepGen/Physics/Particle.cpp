@@ -3,13 +3,11 @@
 namespace CepGen
 {
   Particle::Particle() :
-    id( -1 ), charge( 1. ), role( UnknownRole ), status( Undefined ), helicity( 0. ),
-    mass_( -1. ), pdg_id_( invalidParticle ), is_primary_( true )
+    id_( -1 ), charge_( 1. ), mass_( -1. ), helicity_( 0. ), role_( UnknownRole ), status_( Undefined ), pdg_id_( invalidParticle ), is_primary_( true )
   {}
 
   Particle::Particle( Role role, ParticleCode pdgId ) :
-    id( -1 ), charge( 1. ), role( role ), status( Undefined ), helicity( 0. ),
-    mass_( -1. ), pdg_id_( pdgId ), is_primary_( true )
+    id_( -1 ), charge_( 1. ), mass_( -1. ), helicity_( 0. ), role_( role ), status_( Undefined ), pdg_id_( pdgId ), is_primary_( true )
   {
     if ( pdg_id_!=invalidParticle ) {
       computeMass();
@@ -20,12 +18,19 @@ namespace CepGen
   Particle::operator=( const Particle& part )
   {
     pdg_id_ = part.pdg_id_;
-    role = part.role;
-    if ( id == -1 ) id = part.id;
+    role_ = part.role_;
+    if ( id_ == -1 ) id_ = part.id_;
     momentum_ = part.momentum_;
     setMass( part.mass_ );
 
     return *this;
+  }
+
+  bool
+  Particle::operator<( Particle& rhs ) const
+  {
+    return ( id_ < rhs.id_ );
+    //return ( role < rhs.role );
   }
 
   bool
@@ -62,11 +67,11 @@ namespace CepGen
   void
   Particle::setMother( Particle& part )
   {
-    mothers_.insert( part.id );
+    mothers_.insert( part.id() );
     is_primary_ = false;
 
     DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) is the new mother of %2d (pdgId=%4d)",
-                               part.id+1, part.pdgId(), id+1, pdg_id_ ) );
+                               part.id()+1, part.pdgId(), id_+1, pdg_id_ ) );
 
     part.addDaughter( *this );
   }
@@ -74,7 +79,7 @@ namespace CepGen
   bool
   Particle::addDaughter( Particle& part )
   {
-    std::pair<ParticlesIds::iterator,bool> ret = daughters_.insert( part.id );
+    std::pair<ParticlesIds::iterator,bool> ret = daughters_.insert( part.id() );
 
     if ( Logger::get().level>=Logger::DebugInsideLoop ) {
       std::ostringstream os;
@@ -82,12 +87,12 @@ namespace CepGen
         os << Form("\n\t * id=%d", *it);
       }
       DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) has now %2d daughter(s):"
-                                 "%s", role, pdg_id_, numDaughters(), os.str().c_str() ) );
+                                 "%s", role_, pdg_id_, numDaughters(), os.str().c_str() ) );
     }
 
     if ( ret.second ) {
       DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) is a new daughter of %2d (pdgId=%4d)",
-                                 part.role, part.pdgId(), role, pdg_id_ ) );
+                                 part.role(), part.pdgId(), role_, pdg_id_ ) );
 
       if ( !part.primary() && part.mothersIds().size() < 1 ) {
         part.setMother( *this );
@@ -129,12 +134,20 @@ namespace CepGen
     momentum_.setEnergy( e );
   }
 
+  void
+  Particle::setPdgId( const ParticleCode& pdg, float ch )
+  {
+    pdg_id_ = pdg;
+    if ( ch == -999. ) charge_ = 0.;
+    else charge_ = ch;
+  }
+
   int
   Particle::integerPdgId() const
   {
     const int pdg = static_cast<int>( pdg_id_ );
     //--- leptons
-    if ( charge != 0 && pdg > 10 && pdg < 16 && pdg%2 != 0 ) return -charge*pdg;
+    if ( charge_ != 0 && pdg > 10 && pdg < 16 && pdg%2 != 0 ) return -charge_*pdg;
     return pdg;
   }
 
@@ -167,7 +180,7 @@ namespace CepGen
       " Pt = %5.4f GeV, eta = %4.3f, phi = % 4.3f\n\t"
       "Primary? %s%s\n\t"
       "%d daughter(s)%s",
-      id, role, status, pdg_id_, os.str().c_str(),
+      id_, role_, status_, pdg_id_, os.str().c_str(),
       mass(), energy(), momentum_.px(), momentum_.py(), momentum_.pz(),
       momentum_.p(), momentum_.pt(), momentum_.eta(), momentum_.phi(),
       yesno( primary() ), osm.str().c_str(), numDaughters(), osd.str().c_str() )
@@ -192,10 +205,11 @@ namespace CepGen
     }
   }
 
-  double*
+  std::vector<double>
   Particle::lorentzBoost( const Particle::Momentum& mom )
   {
     double p2, gamma, bp, gamma2;
+    std::vector<double> out( 3, 0. );
 
     p2 = mom.p2();
     gamma = 1./sqrt( 1.-p2 );
@@ -206,9 +220,9 @@ namespace CepGen
     else gamma2 = 0.;
 
     for ( unsigned int i=0; i<3; i++ ) {
-      __tmp3[i] = momentum_[i] + gamma2*bp*mom[i]+gamma*mom[i]*energy();
+      out[i] = momentum_[i] + gamma2*bp*mom[i]+gamma*mom[i]*energy();
     }
-    return __tmp3;
+    return out;
   }
 
   double

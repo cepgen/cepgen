@@ -64,7 +64,7 @@ namespace CepGen
   {
     for ( ParticlesMap::iterator out=particles_.begin(); out!=particles_.end(); out++ ) {
       for ( Particles::iterator part=out->second.begin(); part!=out->second.end(); part++ ) {
-        if ( part->id == id ) return *part;
+        if ( part->id() == id ) return *part;
       }
     }
     throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve the particle with id=%d", id ), FatalError );
@@ -75,7 +75,7 @@ namespace CepGen
   {
     for ( ParticlesMap::const_iterator out=particles_.begin(); out!=particles_.end(); out++ ) {
       for ( Particles::const_iterator part=out->second.begin(); part!=out->second.end(); part++ ) {
-        if ( part->id == id ) return *part;
+        if ( part->id() == id ) return *part;
       }
     }
     throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve the particle with id=%d", id ), FatalError );
@@ -117,20 +117,19 @@ namespace CepGen
   void
   Event::addParticle( Particle part, bool replace )
   {
-    DebuggingInsideLoop( Form( "Particle with PDGid = %d has role %d", part.pdgId(), part.role ) );
-    if ( part.role <= 0 ) FatalError( Form( "Trying to add a particle with role=%d", (int)part.role ) );
+    DebuggingInsideLoop( Form( "Particle with PDGid = %d has role %d", part.pdgId(), part.role() ) );
+    if ( part.role() <= 0 ) FatalError( Form( "Trying to add a particle with role=%d", (int)part.role() ) );
 
     //--- retrieve the list of particles with the same role
-    Particles& part_with_same_role = getByRole( part.role );
+    Particles& part_with_same_role = getByRole( part.role() );
 
     //--- specify the id
-    if ( part_with_same_role.empty() && part.id < 0 ) part.id = particles().size(); //FIXME is there any better way of introducing this id ?
-    if ( replace && !part_with_same_role.empty() ) part.id = part_with_same_role[0].id;
+    if ( part_with_same_role.empty() && part.id() < 0 ) part.setId( particles().size() ); // set the id if previously invalid/inexistent
+    if ( replace && part_with_same_role.size() == 1 ) part.setId( part_with_same_role[0].id() ); // set the previous id if replacing a particle
 
     //--- add the particle to the collection
     if ( replace ) part_with_same_role = Particles( 1, part ); // generate a vector containing only this particle
     else part_with_same_role.emplace_back( part );
-
   }
 
   void
@@ -146,9 +145,9 @@ namespace CepGen
     for ( ParticlesMap::const_iterator it=particles_.begin(); it!=particles_.end(); it++ ) {
       out.insert( out.end(), it->second.begin(), it->second.end() );
     }
-    std::cout<<"before:"<<std::endl;for (const auto& p:out) std::cout<<p.id<<" "; std::cout<<std::endl;
+    std::cout<<"before:"<<std::endl;for (const auto& p:out) std::cout<<p.id()<<" "; std::cout<<std::endl;
     std::sort( out.begin(), out.end() );
-    std::cout<<"after:"<<std::endl;for (const auto& p:out) std::cout<<p.id <<" "; std::cout<<std::endl;
+    std::cout<<"after:"<<std::endl;for (const auto& p:out) std::cout<<p.id()<<" "; std::cout<<std::endl;
     std::cout<<"sorted? "<< std::boolalpha << std::is_sorted(out.begin(),out.end())<<std::endl;
     return out;
   }
@@ -159,7 +158,7 @@ namespace CepGen
     Particles out;
     for ( ParticlesMap::const_iterator it=particles_.begin(); it!=particles_.end(); it++ ) {
       for ( Particles::const_iterator part=it->second.begin(); part!=it->second.end(); part++ ) {
-        if ( part->status == Particle::Undefined || part->status == Particle::FinalState ) {
+        if ( part->status() == Particle::Undefined || part->status() == Particle::FinalState ) {
           out.emplace_back( *part );
         }
       }
@@ -171,34 +170,34 @@ namespace CepGen
   void
   Event::dump( std::ostream& out, bool stable ) const
   {
-    Particles parts = particles();
+    Particles parts = ( stable ) ? stableParticles() : particles();
 
     std::ostringstream os;
 
     double pxtot = 0., pytot = 0., pztot = 0., etot = 0.;
     for ( Particles::const_iterator part_ref=parts.begin(); part_ref!=parts.end(); part_ref++ ) {
-      const Particle& p = *part_ref;
-      if ( stable && p.status != Particle::FinalState ) continue;
+      const Particle& part = *part_ref;
 
-      std::ostringstream oss; oss << p.pdgId();
-      os << Form( "\n %2d\t%+6d%8s", p.id, p.integerPdgId(), oss.str().c_str() );
+      std::ostringstream oss; oss << part.pdgId();
+      os << Form( "\n %2d\t%+6d%8s", part.id(), part.integerPdgId(), oss.str().c_str() );
       os << "\t";
-      if ( p.charge!=999. ) os << Form( "%6.2f\t", p.charge );
-      else                  os << "\t";
-      os << Form( "%4d\t%6d\t", p.role, p.status );
-      if ( !p.mothersIds().empty() )
-        os << Form( "%2d (%2d)", *( p.mothersIds().begin() ), getConstById( *( p.mothersIds().begin() ) ).role );
+      if ( part.charge() != 999. ) os << Form( "%6.2f\t", part.charge() );
+      else                         os << "\t";
+      os << Form( "%4d\t%6d\t", part.role(), part.status() );
+      if ( !part.mothersIds().empty() )
+        os << Form( "%2d (%2d)", *( part.mothersIds().begin() ), getConstById( *( part.mothersIds().begin() ) ).role() );
       else
         os << "       ";
-      os << Form( "% 9.6e % 9.6e % 9.6e % 9.6e % 9.5e", p.momentum().px(), p.momentum().py(), p.momentum().pz(), p.energy(), p.mass() );
-      if ( p.status == Particle::Undefined
-        || p.status == Particle::FinalState
-        || p.status == Particle::Undecayed ) {
-        const int sign = ( p.status == Particle::Undefined ) ? -1 : 1;
-        pxtot += sign*p.momentum().px();
-        pytot += sign*p.momentum().py();
-        pztot += sign*p.momentum().pz();
-        etot += sign*p.energy();
+      const Particle::Momentum mom = part.momentum();
+      os << Form( "% 9.6e % 9.6e % 9.6e % 9.6e % 9.5e", mom.px(), mom.py(), mom.pz(), part.energy(), part.mass() );
+      if ( part.status() == Particle::Undefined
+        || part.status() == Particle::FinalState
+        || part.status() == Particle::Undecayed ) {
+        const int sign = ( part.status() == Particle::Undefined ) ? -1 : 1;
+        pxtot += sign*mom.px();
+        pytot += sign*mom.py();
+        pztot += sign*mom.pz();
+        etot += sign*part.energy();
       }
     }
     //--- set a threshold to the computation precision

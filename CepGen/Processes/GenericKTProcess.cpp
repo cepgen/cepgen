@@ -160,20 +160,20 @@ namespace CepGen
           InError( "This kT factorisation process is intended for p-on-p collisions! Aborting!" );
           exit(0); } break;
         case Kinematics::ElasticElastic:
-          op1.status = Particle::FinalState;
-          op2.status = Particle::FinalState;
+          op1.setStatus( Particle::FinalState );
+          op2.setStatus( Particle::FinalState );
           break;
         case Kinematics::ElasticInelastic:
-          op1.status = Particle::FinalState;
-          op2.status = Particle::Undecayed; op2.setMass(); os2 = true;
+          op1.setStatus( Particle::FinalState );
+          op2.setStatus( Particle::Undecayed ); op2.setMass(); os2 = true;
           break;
         case Kinematics::InelasticElastic:
-          op1.status = Particle::Undecayed; op1.setMass(); os1 = true;
-          op2.status = Particle::FinalState;
+          op1.setStatus( Particle::Undecayed ); op1.setMass(); os1 = true;
+          op2.setStatus( Particle::FinalState );
           break;
         case Kinematics::InelasticInelastic:
-          op1.status = Particle::Undecayed; op1.setMass(); os1 = true;
-          op2.status = Particle::Undecayed; op2.setMass(); os2 = true;
+          op1.setStatus( Particle::Undecayed ); op1.setMass(); os1 = true;
+          op2.setStatus( Particle::Undecayed ); op2.setMass(); os2 = true;
           break;    
       }
 
@@ -187,9 +187,9 @@ namespace CepGen
       Particle& g1 = event_->getOneByRole( Particle::Parton1 ),
                &g2 = event_->getOneByRole( Particle::Parton2 );
       g1.setMomentum( event_->getOneByRole( Particle::IncomingBeam1 ).momentum()-PX_, true);
-      g1.status = Particle::Incoming;
+      g1.setStatus( Particle::Incoming );
       g2.setMomentum( event_->getOneByRole( Particle::IncomingBeam2 ).momentum()-PY_, true);
-      g2.status = Particle::Incoming;
+      g2.setStatus( Particle::Incoming );
     }
 
     double

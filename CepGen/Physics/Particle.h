@@ -210,42 +210,42 @@ namespace CepGen
       /// Assignment operator
       Particle& operator=( const Particle& );
       /// Comparison operator (from unique identifier)
-      bool operator<( Particle& rhs ) const { return ( id < rhs.id ); }
+      bool operator<( Particle& rhs ) const;
       /// Comparison operator (from their reference's unique identifier)
       //bool operator<( Particle *rhs ) const { return ( id < rhs->id ); }
       void lorentzBoost( double m_, const Momentum& mom_ );
       /// Lorentz boost (shamelessly stolen from ROOT)
-      double* lorentzBoost( const Momentum& mom_ );
+      std::vector<double> lorentzBoost( const Momentum& mom_ );
 
       // --- general particle properties
 
       /// Unique identifier (in a Event object context)
-      int id;
+      int id() const { return id_; }
+      void setId( int id ) { id_ = id; }
       /// Electric charge (given as a float number, for the quarks and bound states)
-      float charge;
+      float charge() const { return charge_; }
+      void setCharge( float charge ) { charge_ = charge; }
       /// Role in the considered process
-      Role role;
+      Role role() const { return role_; }
+      void setRole( const Role& role ) { role_ = role; }
       /**
        * Codes 1-10 correspond to currently existing partons/particles, and larger codes contain partons/particles which no longer exist, or other kinds of event information
        * \brief Particle status
        */
-      Status status;
+      Status status() const { return status_; }
+      void setStatus( const Status& status ) { status_ = status; }
 
       /// Set the PDG identifier (along with the particle's electric charge)
       /// \param[in] pdg ParticleCode (PDG ID)
       /// \param[in] ch Electric charge (in units of \f$e\f$)
-      inline void setPdgId( const ParticleCode& pdg, float ch=-999. ) {
-        pdg_id_ = pdg;
-        if ( ch == -999. ) charge = 0.;
-        else charge = ch;
-      }
+      void setPdgId( const ParticleCode& pdg, float ch=-999. );
       /// Retrieve the objectified PDG identifier
       inline ParticleCode pdgId() const { return pdg_id_; }
       /// Retrieve the integer value of the PDG identifier
       int integerPdgId() const;
       /// Particle's helicity
-      /// \note FIXME Float??
-      float helicity;
+      float helicity() const { return helicity_; }
+      void setHelicity( float heli ) { helicity_ = heli; }
       /**
        * Gets the particle's mass in \f$\textrm{GeV}/c^{2}\f$.
        * \brief Gets the particle's mass
@@ -349,10 +349,20 @@ namespace CepGen
        */
       bool hadronise( std::string algo_ );
     private:
+      /// Unique identifier in an event
+      int id_;
+      /// Electric charge
+      float charge_;
       /// Momentum properties handler
       Momentum momentum_;
       /// Mass in \f$\textrm{GeV}/c^2\f$
       double mass_;
+      /// Helicity
+      float helicity_;
+      /// Role in the process
+      Role role_;
+      /// Decay/stability status
+      Status status_;
       /// List of mother particles
       ParticlesIds mothers_;
       /// List of daughter particles
@@ -361,7 +371,6 @@ namespace CepGen
       ParticleCode pdg_id_;
       /// Is the particle a primary particle ?
       bool is_primary_;
-      double __tmp3[3];
   };
 
   /// Compute the centre of mass energy of two particles (incoming or outgoing states)

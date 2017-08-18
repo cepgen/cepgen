@@ -72,7 +72,7 @@ namespace CepGen
       // Incoming particles (incl. eventual partons)
       for ( IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++ ) {
         Particle& p = event_->getOneByRole( ip->first );
-        p.status = Particle::Undefined;
+        p.setStatus( Particle::Undefined );
         switch ( ip->first ) {
           case Particle::IncomingBeam1:
           case Particle::IncomingBeam2: break;
@@ -85,7 +85,7 @@ namespace CepGen
       // Outgoing particles (central, and outgoing primary particles or remnants)
       for ( OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++ ) {
         Particle& p = event_->getOneByRole( op->first );
-        p.status = Particle::Undefined;
+        p.setStatus( Particle::Undefined );
         switch ( op->first ) {
           case Particle::OutgoingBeam1:    p.setMother( event_->getOneByRole( Particle::IncomingBeam1 ) ); break;
           case Particle::OutgoingBeam2:    p.setMother( event_->getOneByRole( Particle::IncomingBeam2 ) ); break;

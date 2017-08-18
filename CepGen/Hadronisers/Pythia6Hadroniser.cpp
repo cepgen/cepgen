@@ -75,7 +75,7 @@ namespace CepGen
         for ( Particles::iterator part_it=pr.begin(); part_it!=pr.end(); ++part_it ) {
           Particle& part = *part_it;
 
-          unsigned int np = part.id;
+          unsigned int np = part.id();
 
           pyjets_.p[0][np] = (double)part.momentum().px();
           pyjets_.p[1][np] = (double)part.momentum().py();
@@ -84,8 +84,8 @@ namespace CepGen
           pyjets_.p[4][np] = (double)part.mass();
           part.dump();
 
-          if ( part.status<=0 ) status = Particle::PythiaHIncoming;
-          else status = part.status;
+          if ( part.status() <= 0 ) status = Particle::PythiaHIncoming;
+          else status = part.status();
           pylist(2);
           pyjets_.k[0][np] = status;
           pyjets_.k[1][np] = (int)part.pdgId();
@@ -108,10 +108,10 @@ namespace CepGen
             pyjets_.v[i][np] = 0.;
           }
 
-          if ( part.status==Particle::DebugResonance ) {
+          if ( part.status() == Particle::DebugResonance ) {
             pyjets_.k[0][np] = 1; //FIXME PYTHIA/JETSET workaround
-            jlrole[str_in_evt] = part.role;
-            jlpsf[str_in_evt][part_in_str] = part.id+1;
+            jlrole[str_in_evt] = part.role();
+            jlpsf[str_in_evt][part_in_str] = part.id()+1;
             num_part_in_str[str_in_evt]++;
             part_in_str++;
           }
@@ -162,18 +162,18 @@ namespace CepGen
         if ( p < oldnpart ) continue;
 
         Particle pa;
-        pa.id = p;
+        pa.setId( p );
         pa.setPdgId( static_cast<Particle::ParticleCode>( pyjets_.k[1][p] ) );
         if ( ev->getById( pyjets_.k[2][p]-1 ).valid() ) {
-          pa.role = ev->getById( pyjets_.k[2][p]-1 ).role; // Child particle inherits its mother's role
+          pa.setRole( ev->getById( pyjets_.k[2][p]-1 ).role() ); // Child particle inherits its mother's role
         }
-        pa.status = static_cast<Particle::Status>( pyjets_.k[0][p] );
+        pa.setStatus( static_cast<Particle::Status>( pyjets_.k[0][p] ) );
         pa.setMomentum( Particle::Momentum( pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p] ) );
         pa.setMass( pyjets_.p[4][p] );
-        pa.charge = (float)this->pyp( p+1, 6 );
+        pa.setCharge( (float)this->pyp( p+1, 6 ) );
 
         if ( pyjets_.k[2][p] != 0 ) {
-          dbg << Form( "\n\t%2d (pdgId=%4d) has mother %2d (pdgId=%4d)", pa.id, pa.pdgId(), pyjets_.k[2][p], pyjets_.k[1][pyjets_.k[2][p]-1] );
+          dbg << Form( "\n\t%2d (pdgId=%4d) has mother %2d (pdgId=%4d)", pa.id(), pa.pdgId(), pyjets_.k[2][p], pyjets_.k[1][pyjets_.k[2][p]-1] );
           pa.setMother( ev->getById( pyjets_.k[2][p]-1 ) );
         }
 
@@ -202,7 +202,7 @@ namespace CepGen
 
         Particle& part = *part_it;
 
-        if ( part.status != Particle::Undecayed ) continue;
+        if ( part.status() != Particle::Undecayed ) continue;
         // One proton to be fragmented
         ranudq = drand();
         if ( ranudq < 1./9. ) {
@@ -239,8 +239,8 @@ namespace CepGen
 
         if ( !( partpb[0] < 0 ) && !( partpb[0] > 0 ) ) return false;
 
-        Particle singlet( part.role, singlet_id );
-        singlet.status = Particle::DebugResonance;
+        Particle singlet( part.role(), singlet_id );
+        singlet.setStatus( Particle::DebugResonance );
         singlet.setMomentum( partpb );
         //singlet.setMass(); //FIXME
 
@@ -252,15 +252,15 @@ namespace CepGen
 
         Lorenb( part.mass(), part.momentum(), pmxda, partpb );
 
-        Particle doublet( part.role, doublet_id );
-        doublet.status = Particle::DebugResonance;
+        Particle doublet( part.role(), doublet_id );
+        doublet.setStatus( Particle::DebugResonance );
         doublet.setMomentum( partpb );
         //std::cout << "doublet, mass = " << doublet.mass() << std::endl;
         //doublet.setMass(); //FIXME
 
         if ( part.numDaughters() == 0 ) {
-          singlet.setMother( ev->getById( part.id ) );
-          doublet.setMother( ev->getById( part.id ) );
+          singlet.setMother( ev->getById( part.id() ) );
+          doublet.setMother( ev->getById( part.id() ) );
 
           ev->addParticle( singlet );
           ev->addParticle( doublet );
@@ -269,18 +269,18 @@ namespace CepGen
         }
         else { // Quark/diquark content already present in the event
 
-          Debugging(Form("Quark/diquark content already present in the event!\n\tRole of these particles: %d", part.role));
+          Debugging( Form( "Quark/diquark content already present in the event!\n\tRole of these particles: %d", part.role() ) );
 
           ParticlesIds daugh = part.daughters();
           for ( ParticlesIds::const_iterator did=daugh.begin(); did!=daugh.end(); did++ ) {
             if ( ev->getById( *did ).pdgId() == Particle::uQuark
               || ev->getById( *did ).pdgId() == Particle::dQuark ) { // Quark
-              singlet.setMother( ev->getById( part.id ) );
+              singlet.setMother( ev->getById( part.id() ) );
               ev->getById( *did ) = singlet;
               Debugging( "Singlet replaced" );
             }
             else { // Diquark
-              doublet.setMother( ev->getById( part.id ) );
+              doublet.setMother( ev->getById( part.id() ) );
               ev->getById( *did ) = doublet;
               Debugging( "Doublet replaced" );
             }
