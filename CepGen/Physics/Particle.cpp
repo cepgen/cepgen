@@ -25,10 +25,9 @@ namespace CepGen
   {}
 
   bool
-  Particle::operator<( Particle& rhs ) const
+  Particle::operator<( const Particle& rhs ) const
   {
     return ( id_ < rhs.id_ );
-    //return ( role < rhs.role );
   }
 
   bool

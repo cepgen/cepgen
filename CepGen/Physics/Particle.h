@@ -212,7 +212,7 @@ namespace CepGen
       Particle( const Particle& );
       inline ~Particle() {}
       /// Comparison operator (from unique identifier)
-      bool operator<( Particle& rhs ) const;
+      bool operator<( const Particle& rhs ) const;
       /// Comparison operator (from their reference's unique identifier)
       //bool operator<( Particle *rhs ) const { return ( id < rhs->id ); }
       Particle& lorentzBoost( double m_, const Momentum& mom_ );
