@@ -66,6 +66,7 @@ namespace CepGen
         p->process()->clearRun();
         p->vegas.first_run = false;
       }
+      ev->dump();
     } // event is not empty
 
     p->process()->setPoint( ndim, x );
@@ -85,7 +86,7 @@ namespace CepGen
 
     if ( ff<0. ) return 0.;
 
-    if ( p->generation ) { // MC events generation
+    if ( p->storage() ) { // MC events generation
       p->process()->fillKinematics( false );
 
       ev->time_generation = tmr.elapsed();

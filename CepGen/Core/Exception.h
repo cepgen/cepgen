@@ -123,6 +123,15 @@ namespace CepGen
       /// Integer exception number
       int error_num_;
   };
+
+  class Printer
+  {
+    public:
+      inline static Exception LogInfo( const char* name ) { return Exception( "", name, Information ); }
+      void operator<<( const char* text ) {
+        LogInfo( text ).dump( Logger::get().outputStream );
+      }
+  };
 }
 
 #endif

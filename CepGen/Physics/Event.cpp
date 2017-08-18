@@ -139,43 +139,43 @@ namespace CepGen
     addParticle( Particle( role ), replace );
   }
 
-  Particles
+  const Particles
   Event::particles() const
   {
     Particles out;
     for ( ParticlesMap::const_iterator it=particles_.begin(); it!=particles_.end(); it++ ) {
-      for ( Particles::const_iterator part=it->second.begin(); part!=it->second.end(); part++ ) {
-        out.emplace_back( *part );
-      }
+      out.insert( out.end(), it->second.begin(), it->second.end() );
     }
-    std::sort( out.begin(), out.end(), compareParticle );
+    std::cout<<"before:"<<std::endl;for (const auto& p:out) std::cout<<p.id<<" "; std::cout<<std::endl;
+    std::sort( out.begin(), out.end() );
+    std::cout<<"after:"<<std::endl;for (const auto& p:out) std::cout<<p.id <<" "; std::cout<<std::endl;
+    std::cout<<"sorted? "<< std::boolalpha << std::is_sorted(out.begin(),out.end())<<std::endl;
     return out;
   }
 
-  Particles
+  const Particles
   Event::stableParticles() const
   {
     Particles out;
     for ( ParticlesMap::const_iterator it=particles_.begin(); it!=particles_.end(); it++ ) {
       for ( Particles::const_iterator part=it->second.begin(); part!=it->second.end(); part++ ) {
-        if ( part->status==Particle::Undefined
-          || part->status==Particle::FinalState ) {
+        if ( part->status == Particle::Undefined || part->status == Particle::FinalState ) {
           out.emplace_back( *part );
         }
       }
     }
-    std::sort( out.begin(), out.end(), compareParticle );
+    std::sort( out.begin(), out.end() );
     return out;
   }
 
   void
-  Event::dump( bool stable ) const
+  Event::dump( std::ostream& out, bool stable ) const
   {
-    double pxtot, pytot, pztot, etot;
+    Particles parts = particles();
+
     std::ostringstream os;
 
-    pxtot = pytot = pztot = etot = 0.;
-    const Particles parts = particles();
+    double pxtot = 0., pytot = 0., pztot = 0., etot = 0.;
     for ( Particles::const_iterator part_ref=parts.begin(); part_ref!=parts.end(); part_ref++ ) {
       const Particle& p = *part_ref;
       if ( stable && p.status != Particle::FinalState ) continue;

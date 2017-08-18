@@ -210,9 +210,9 @@ namespace CepGen
       /// Assignment operator
       Particle& operator=( const Particle& );
       /// Comparison operator (from unique identifier)
-      inline bool operator<( const Particle& rhs ) { return id<rhs.id; }
+      bool operator<( Particle& rhs ) const { return ( id < rhs.id ); }
       /// Comparison operator (from their reference's unique identifier)
-      inline bool operator<( const Particle *rhs ) { return id<rhs->id; }
+      //bool operator<( Particle *rhs ) const { return ( id < rhs->id ); }
       void lorentzBoost( double m_, const Momentum& mom_ );
       /// Lorentz boost (shamelessly stolen from ROOT)
       double* lorentzBoost( const Momentum& mom_ );
@@ -364,9 +364,6 @@ namespace CepGen
       double __tmp3[3];
   };
 
-  inline bool compareParticle( const Particle a, const Particle b ) { return a.id < b.id; }
-  inline bool compareParticlePtrs( const Particle* a, const Particle* b ) { return a->id < b->id; }
-
   /// Compute the centre of mass energy of two particles (incoming or outgoing states)
   inline static double CMEnergy( const Particle& p1, const Particle& p2 ) {
     if ( p1.mass()*p2.mass() < 0. ) return 0.;
@@ -380,6 +377,8 @@ namespace CepGen
     if ( m1.energy()*m2.energy() < 0. ) return 0.;
     return sqrt( m1.mass2()+m2.mass2() + 2.*m1.energy()*m2.energy() - 2.*( m1*m2 ) );
   }
+
+  //bool operator<( const Particle& a, const Particle& b ) { return a.id<b.id; }
 
   // --- particle containers
 

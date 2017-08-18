@@ -2,9 +2,6 @@
 #define CepGen_Physics_Event_h
 
 #include <vector>
-#include <string>
-#include <fstream>
-#include <iomanip>
 #include <algorithm>
 
 #include "Particle.h"
@@ -32,7 +29,7 @@ namespace CepGen
       /// Restore the event to its "empty" state
       void restore();
       /**
-       * Returns the list of pointers to the Particle objects corresponding to a certain role in the process kinematics
+       * Returns the list of Particle objects corresponding to a certain role in the process kinematics
        * \brief Gets a list of particles by their role in the event
        * \param[in] role The role the particles have to play in the process
        * \return A vector of references to the requested Particle objects
@@ -45,7 +42,7 @@ namespace CepGen
        */
       Particle& getOneByRole( const Particle::Role& role );
       /**
-       * Returns the pointer to the Particle object corresponding to a unique identifier in the event
+       * Returns the reference to the Particle object corresponding to a unique identifier in the event
        * \brief Gets one particle by its unique identifier in the event
        * \param[in] id_ The unique identifier to this particle in the event
        * \return A reference to the requested Particle object
@@ -63,9 +60,9 @@ namespace CepGen
        */
       Particles getByIds( const ParticlesIds& ids_ ) const;
       /**
-       * Returns the pointer to the mother particle of any given Particle object in this event
-       * \param[in] part The pointer to the Particle object from which we want to extract the mother particle
-       * \return A pointer to the mother Particle object
+       * Returns the list of mother particles of any given Particle object in this event
+       * \param[in] part The reference to the Particle object from which we want to extract the mother particles
+       * \return A list of parenting Particle object
        */
       Particles mothers( const Particle& part );
       /// Get a vector containing all the daughters from a particle
@@ -89,13 +86,13 @@ namespace CepGen
       void addParticle( const Particle::Role& role, bool replace=false );
       /// Dump all the known information on every Particle object contained in this Event container in the output stream
       /// \param[in] stable_ Do we only show the stable particles in this event?
-      void dump( bool stable_=false ) const;
+      void dump( std::ostream& os=Logger::get().outputStream, bool stable_=false ) const;
       /// Get a vector of all particles in the event
-      /// \return Vector containing all the references to the Particle objects contained in the event
-      Particles particles() const;
+      /// \return Vector containing all the Particle objects contained in the event
+      const Particles particles() const;
       /// Get a vector of all stable particles in the event
-      /// \return Vector containing all the pointers to the stable Particle objects contained in the event
-      Particles stableParticles() const;
+      /// \return Vector containing all the stable Particle objects contained in the event
+      const Particles stableParticles() const;
       /// Number of particles in the event
       /// \return Integer number of particles in the event
       inline unsigned int numParticles() const { return particles_.size(); };

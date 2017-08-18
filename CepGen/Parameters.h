@@ -59,8 +59,10 @@ namespace CepGen
 
       /// Are we generating events ? (true) or are we only computing the cross-section ? (false)
       bool generation;
+      void setStorage( bool store ) { store_ = store; }
       /// Are the events generated in this run to be stored in the output file ?
-      bool store;
+      bool storage() const { return store_; }
+
       /// Maximal number of events to generate in this run
       unsigned int maxgen;
       /// Pointer to the last event produced in this run
@@ -97,7 +99,7 @@ namespace CepGen
     private:
       std::unique_ptr<Process::GenericProcess> process_;
       std::unique_ptr<Hadroniser::GenericHadroniser> hadroniser_;
-
+      bool store_;
   };
 }
 

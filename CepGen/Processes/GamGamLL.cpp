@@ -186,7 +186,10 @@ GamGamLL::pickin()
                r2 = s2x-d6;
 
   const double rl4 = ( r1*r1-4.*w2_*s2x )*( r2*r2-4.*MY2_*s2x );
-  if (rl4<=0.) { InWarning( Form( "rl4 = %f <= 0", rl4 ) ); return false; }
+  if ( rl4 <= 0. ) {
+    DebuggingInsideLoop( Form( "rl4 = %f <= 0", rl4 ) );
+    return false;
+  }
   const double sl4 = sqrt( rl4 );
 
   // t2max, t2min definitions from eq. (A.12) and (A.13) in [1]
@@ -254,12 +257,18 @@ GamGamLL::pickin()
   const double st = s2_-t1_-w2_;
   const double delb = ( 2.*w2_*r3+r4*st )*( 4.*p12_*t1_-( t1_-w31_ )*st )/( 16.*ap );
 
-  if ( dd <= 0. ) { InWarning( Form( "dd = %e <= 0\n\tdd1 = %e\tdd2 = %e", dd, dd1_, dd2_ ) ); return false; }
+  if ( dd <= 0. ) {
+    DebuggingInsideLoop( Form( "dd = %e <= 0\n\tdd1 = %e\tdd2 = %e", dd, dd1_, dd2_ ) );
+    return false;
+  }
 
   delta_ = delb - yy4*st*sqrt( dd )/ ap * 0.5;
   s1_ = t2_+w1_+( 2.*p12_*r3-4.*delta_ )/st;
 
-  if ( ap >= 0. ) { InWarning( Form( "ap = %f >= 0", ap ) ); return false; }
+  if ( ap >= 0. ) {
+    DebuggingInsideLoop( Form( "ap = %f >= 0", ap ) );
+    return false;
+  }
 
   jacobian_ = ds2
             * dt1
@@ -318,7 +327,7 @@ GamGamLL::pickin()
 bool
 GamGamLL::orient()
 {
-  if ( !pickin() or jacobian_ == 0. ) { Debugging( Form( "Pickin failed! dj = %f", jacobian_ ) ); return false; }
+  if ( !pickin() or jacobian_ == 0. ) { DebuggingInsideLoop( Form( "Pickin failed! Jacobian = %f", jacobian_ ) ); return false; }
 
   const double re = 0.5 / sqs_;
   ep1_ = re*( s_+w12_ );
@@ -655,21 +664,21 @@ GamGamLL::computeWeight()
   const double phi3 = p3_lab_.phi(), cos_phi3 = cos( phi3 ), sin_phi3 = sin( phi3 ),
                phi5 = p5_lab_.phi(), cos_phi5 = cos( phi5 ), sin_phi5 = sin( phi5 );
 
-  bb_ = t1_*t2_+( w4_*std::pow( sin( theta6cm ), 2 )+4.*Ml12_*std::pow( cos( theta6cm ), 2 ) )*pg*pg;
+  bb_ = t1_*t2_+( w4_*std::pow( sin( theta6cm ), 2 ) + 4.*Ml12_*std::pow( cos( theta6cm ), 2 ) )*pg*pg;
 
   const double c1 = p3_lab_.pt() * ( qve.px()*sin_phi3  - qve.py()*cos_phi3   ),
                c2 = p3_lab_.pt() * ( qve.pz()*ep1_ - qve.energy() *p_cm_ ),
-               c3 = ( w31_*ep1_*ep1_+2.*w1_*de3_*ep1_-w1_*de3_*de3_+p3_lab_.pt2()*ep1_*ep1_ ) / ( p3_lab_.energy()*p_cm_ + p3_lab_.pz()*ep1_ );
+               c3 = ( w31_*ep1_*ep1_ + 2.*w1_*de3_*ep1_ - w1_*de3_*de3_ + p3_lab_.pt2()*ep1_*ep1_ ) / ( p3_lab_.energy()*p_cm_ + p3_lab_.pz()*ep1_ );
 
   const double b1 = p5_lab_.pt() * ( qve.px()*sin_phi5  - qve.py()*cos_phi5   ),
                b2 = p5_lab_.pt() * ( qve.pz()*ep2_ + qve.energy() *p_cm_ ),
-               b3 = ( w52_*ep2_*ep2_+2.*w2_*de5_*ep2_-w2_*de5_*de5_+p5_lab_.pt2()*ep2_*ep2_ ) / ( ep2_*p5_lab_.pz()-p5_lab_.energy()*p_cm_ );
+               b3 = ( w52_*ep2_*ep2_ + 2.*w2_*de5_*ep2_ - w2_*de5_*de5_ + p5_lab_.pt2()*ep2_*ep2_ ) / ( ep2_*p5_lab_.pz() - p5_lab_.energy()*p_cm_ );
 
-  const double r12 =  c2*sin_phi3+qve.py()*c3,
-               r13 = -c2*cos_phi3-qve.px()*c3;
+  const double r12 =  c2*sin_phi3 + qve.py()*c3,
+               r13 = -c2*cos_phi3 - qve.px()*c3;
 
-  const double r22 =  b2*sin_phi5+qve.py()*b3,
-               r23 = -b2*cos_phi5-qve.px()*b3;
+  const double r22 =  b2*sin_phi5 + qve.py()*b3,
+               r23 = -b2*cos_phi5 - qve.px()*b3;
 
   epsi_ = p12_*c1*b1 + r12*r22 + r13*r23;
 
@@ -794,7 +803,7 @@ GamGamLL::fillKinematics( bool )
   Particle& op1 = event_->getOneByRole( Particle::OutgoingBeam1 );
   p3_lab_.betaGammaBoost( gamma, betgam );
   p3_lab_.rotatePhi( ranphi, rany );
-  
+
   op1.setMomentum( p3_lab_ );
   switch ( cuts_.mode ) {
     case Kinematics::ElasticElastic:
@@ -874,8 +883,7 @@ GamGamLL::fillKinematics( bool )
   ol2.setMomentum( p7_cm_ );
   ol2.status = Particle::FinalState;
   ol2.setMass(); //FIXME
-
-  event_->dump();
+  std::cout << ol1.status << " -- " << ol2.status << std::endl;
 }
 
 double

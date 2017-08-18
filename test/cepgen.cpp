@@ -25,7 +25,7 @@ int main( int argc, char* argv[] ) {
     
     mg.parameters->setProcess( new CepGen::Process::GamGamLL );
     //mg.parameters->process_mode = Kinematics::InelasticElastic;
-    mg.parameters->process_mode = CepGen::Kinematics::ElasticElastic;
+    mg.parameters->kinematics.mode = CepGen::Kinematics::ElasticElastic;
     mg.parameters->remnant_mode = CepGen::SuriYennie;
 
 #ifdef PYTHIA6

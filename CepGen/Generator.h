@@ -96,7 +96,7 @@ namespace CepGen
        */
       Event* generateOneEvent();
       /// Number of dimensions on which the integration is performed
-      inline size_t numDimensions() {
+      inline size_t numDimensions() const {
         if ( !parameters->process() ) return 0;
         return parameters->process()->numDimensions( parameters->kinematics.mode );
       }

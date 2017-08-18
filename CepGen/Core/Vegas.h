@@ -4,8 +4,11 @@
 #include <fstream>
 #include <cstdio> // remove (DEBUG)
 #include <gsl/gsl_monte_vegas.h>
+#include <gsl/gsl_rng.h>
 
 #include "CepGen/Parameters.h"
+
+#include <vector>
 
 #define fMaxNbins 50
 #define ONE 1.
@@ -52,40 +55,41 @@ namespace CepGen
        * \param[in] x_ The point at which the function is to be evaluated
        * \return Function value at this point @a x_
        */
-      inline double F( double* x_ ) { return function_->f( x_, function_->dim, (void*)input_params_ ); }
+      inline double F( const std::vector<double>& x ) { return F( x, input_params_ ); }
       /**
        * Evaluate the function to be integrated at a point @a x_, given a set of Parameters @a ip_
        * \param[in] x_ The point at which the function is to be evaluated
        * \param[in] ip_ A set of parameters to fully define the function
-       * \return Function value at this point @a x_
+       * \return Function value at this point \a x
        */
-      inline double F( double* x_, Parameters* ip_ ) { return function_->f( x_, function_->dim, (void*)ip_ ); }
+      inline double F( const std::vector<double>& x, Parameters* ip ) {
+        return function_->f( (double*)&x[0], function_->dim, (void*)ip );
+      }
       /**
        * Store the event characterized by its _ndim-dimensional point in the phase
        * space to the output file
        * \brief Store the event in the output file
-       * \param[in] x_ The @a _ndim-dimensional point in the phase space defining the unique event to store
+       * \param[in] x The d-dimensional point in the phase space defining the unique event to store
        * \return A boolean stating whether or not the event could be saved
        */
-      bool storeEvent( double* x_ );
+      bool storeEvent( const std::vector<double>& x );
       /// Start the correction cycle on the grid
       /// \param x Point in the phase space considered
       /// \param has_correction Correction cycle started?
-      bool correctionCycle( double* x, bool& has_correction );
+      bool correctionCycle( std::vector<double>& x, bool& has_correction );
       /**
        * Set all the generation mode variables and align them to the integration grid set while computing the cross-section
        * \brief Prepare the class for events generation
        */
       void setGen();
-      //bool uniform() const { return gsl_rnd_uniform( rnd_ ); }
-      bool uniform() const { return rand()/RAND_MAX; }
+      double uniform() const { return gsl_rng_uniform( rng_ ); }
+      //double uniform() const { return rand()/RAND_MAX; }
 
+      /// Maximal number of dimensions handled by this Vegas instance
+      static constexpr unsigned short max_dimensions_ = 15;
       /// Integration grid size parameter
-      double mbin_;
-      /// Lower bounds for the points to generate
-      double* x_low_;
-      /// Upper bounds for the points to generate
-      double* x_up_;
+      static constexpr unsigned short mbin_ = 3;
+
       /// Selected bin at which the function will be evaluated
       int j_;
       double correc_;
@@ -97,14 +101,14 @@ namespace CepGen
       /// Has the generation been prepared using @a SetGen call? (very time-consuming operation, thus needs to be called once)
       bool gen_prepared_;
       /// Maximal value of the function at one given point
-      double* f_max_;
+      std::vector<double> f_max_;
       double f_max2_;
       double f_max_diff_;
       double f_max_old_;
       /// Maximal value of the function in the considered integration range
       double f_max_global_;
-      int* n_;
-      int* nm_;
+      std::vector<int> n_;
+      std::vector<int> nm_;
       /// GSL structure storing the function to be integrated by this Vegas instance (along with its parameters)
       std::unique_ptr<gsl_monte_function> function_;
       gsl_rng* rng_;
@@ -112,8 +116,6 @@ namespace CepGen
       int num_converg_;
       /// Number of iterations for the integration
       unsigned int num_iter_;
-      /// Generic array of components to be used in all parts of the integration and generation code
-      double* x_;
   };
 }
 
