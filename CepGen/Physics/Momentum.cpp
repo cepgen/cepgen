@@ -224,13 +224,14 @@ namespace CepGen
 
   //--- boosts/rotations
 
-  void
+  Momentum&
   Momentum::betaGammaBoost( double gamma, double betagamma )
   {
     const double pz = pz_, e = energy_;
     pz_ = gamma*pz+betagamma*e;
     energy_  = gamma*e +betagamma*pz;
     computeP();
+    return *this;
   }
 
   void
@@ -246,16 +247,17 @@ namespace CepGen
     *this = mom_new;
   }
 
-  void
+  Momentum&
   Momentum::rotatePhi( double phi, double sign )
   {
     const double px = px_*cos( phi )+py_*sin( phi )*sign,
                  py =-px_*sin( phi )+py_*cos( phi )*sign;
     px_ = px;
     py_ = py;
+    return *this;
   }
 
-  void
+  Momentum&
   Momentum::rotateThetaPhi( double theta, double phi )
   {
     double rotmtx[3][3], mom[3]; //FIXME check this! cos(phi)->-sin(phi) & sin(phi)->cos(phi) --> phi->phi+pi/2 ?
@@ -270,6 +272,7 @@ namespace CepGen
       }
     }
     setP( mom[0], mom[1], mom[2] );
+    return *this;
   }
 
   //--- printout

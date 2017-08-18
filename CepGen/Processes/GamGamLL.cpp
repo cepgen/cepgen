@@ -772,37 +772,41 @@ GamGamLL::fillKinematics( bool )
 {
   const Particle::Momentum cm = event_->getOneByRole( Particle::IncomingBeam1 ).momentum() + event_->getOneByRole( Particle::IncomingBeam2 ).momentum();
 
-  const double gamma  = cm.energy()/sqs_,
-               betgam = cm.pz()/sqs_;
+  const double gamma  = cm.energy()/sqs_, betgam = cm.pz()/sqs_;
+
+  Particle::Momentum plab_ip1 = Particle::Momentum( 0., 0.,  p_cm_, ep1_ ).betaGammaBoost( gamma, betgam );
+  Particle::Momentum plab_ip2 = Particle::Momentum( 0., 0., -p_cm_, ep2_ ).betaGammaBoost( gamma, betgam );
+  p3_lab_.betaGammaBoost( gamma, betgam );
+  p5_lab_.betaGammaBoost( gamma, betgam );
 
   // Needed to parametrise a random rotation around z-axis
   const int rany = ((double)rand()>=.5*RAND_MAX) ? 1 : -1,
             ransign = ((double)rand()>=.5*RAND_MAX) ? 1 : -1;
   const double ranphi = ((double)rand()/RAND_MAX)*2.*M_PI;
 
-  /*const int ranz = 1;
-  if (symmetrise_) {
-    ranz = ((double)rand()>=.5*RAND_MAX) ? 1 : -1;
-    //_pp3 *= ranz;
-    //_pp5 *= ranz;
+  Particle::Momentum plab_ph1 = ( plab_ip1-p3_lab_ ).rotatePhi( ranphi, rany );
+  Particle::Momentum plab_ph2 = ( plab_ip2-p5_lab_ ).rotatePhi( ranphi, rany );
+
+  p3_lab_.rotatePhi( ranphi, rany );
+  p5_lab_.rotatePhi( ranphi, rany );
+  p6_cm_.rotatePhi( ranphi, rany );
+  p7_cm_.rotatePhi( ranphi, rany );
+
+  /*if ( symmetrise_ && (double)rand()>=.5*RAND_MAX ) {
+    p6_cm_.mirrorZ();
+    p7_cm_.mirrorZ();
   }*/
 
   // First incoming proton
   Particle& ip1 = event_->getOneByRole( Particle::IncomingBeam1 );
-  Particle::Momentum plab_ip1( 0., 0., p_cm_, ep1_ );
-  plab_ip1.betaGammaBoost( gamma, betgam );
   ip1.setMomentum( plab_ip1 );
 
   // Second incoming proton
   Particle& ip2 = event_->getOneByRole( Particle::IncomingBeam2 );
-  Particle::Momentum plab_ip2( 0., 0., -p_cm_, ep2_ );
-  plab_ip2.betaGammaBoost( gamma, betgam );
   ip2.setMomentum( plab_ip2 );
 
   // First outgoing proton
   Particle& op1 = event_->getOneByRole( Particle::OutgoingBeam1 );
-  p3_lab_.betaGammaBoost( gamma, betgam );
-  p3_lab_.rotatePhi( ranphi, rany );
 
   op1.setMomentum( p3_lab_ );
   switch ( cuts_.mode ) {
@@ -820,8 +824,6 @@ GamGamLL::fillKinematics( bool )
 
   // Second outgoing proton
   Particle& op2 = event_->getOneByRole( Particle::OutgoingBeam2 );
-  p5_lab_.betaGammaBoost( gamma, betgam );
-  p5_lab_.rotatePhi( ranphi, rany );
   op2.setMomentum( p5_lab_ );
   switch ( cuts_.mode ) {
     case Kinematics::ElasticElastic:
@@ -839,8 +841,6 @@ GamGamLL::fillKinematics( bool )
   // First incoming photon
   // Equivalent in LPAIR : PLAB(x, 3)
   Particle& ph1 = event_->getOneByRole( Particle::Parton1 );
-  Particle::Momentum plab_ph1 = plab_ip1-p3_lab_;
-  plab_ph1.rotatePhi( ranphi, rany );
   ph1.setMomentum( plab_ph1 );
   ph1.setCharge( 0. );
   ph1.setStatus( Particle::Incoming ); // "incoming beam"
@@ -848,8 +848,6 @@ GamGamLL::fillKinematics( bool )
   // Second incoming photon
   // Equivalent in LPAIR : PLAB(x, 4)
   Particle& ph2 = event_->getOneByRole( Particle::Parton2 );
-  Particle::Momentum plab_ph2 = plab_ip2-p5_lab_;
-  plab_ph2.rotatePhi( ranphi, rany );
   ph2.setMomentum( plab_ph2 );
   ph2.setCharge( 0. );
   ph2.setStatus( Particle::Incoming ); // "incoming beam"
@@ -871,18 +869,14 @@ GamGamLL::fillKinematics( bool )
   // First outgoing lepton
   Particle& ol1 = event_->getOneByRole( role_ol1 );
   ol1.setPdgId( ol1.pdgId(), ransign );
-  p6_cm_.rotatePhi( ranphi, rany );
   ol1.setMomentum( p6_cm_ );
   ol1.setStatus( Particle::FinalState );
-  ol1.setMass(); //FIXME
 
   // Second outgoing lepton
   Particle& ol2 = event_->getOneByRole( role_ol2 );
   ol2.setPdgId( ol2.pdgId(), -ransign );
-  p7_cm_.rotatePhi( ranphi, rany );
   ol2.setMomentum( p7_cm_ );
   ol2.setStatus( Particle::FinalState );
-  ol2.setMass(); //FIXME
   std::cout << ol1.status() << " -- " << ol2.status() << std::endl;
 }
 

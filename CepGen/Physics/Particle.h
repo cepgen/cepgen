@@ -104,7 +104,7 @@ namespace CepGen
           /// Human-readable format for a particle's momentum
           friend std::ostream& operator<<( std::ostream& os, const Particle::Momentum& mom );
 
-          void betaGammaBoost( double gamma, double betagamma );
+          Momentum& betaGammaBoost( double gamma, double betagamma );
           /// Forward Lorentz boost
           void lorentzBoost( const Particle::Momentum& p );
 
@@ -158,9 +158,11 @@ namespace CepGen
           /// Rapidity
           double rapidity() const;
           /// Rotate the transverse components by an angle phi (and reflect the y coordinate)
-          void rotatePhi( double phi, double sign );
+          Momentum& rotatePhi( double phi, double sign );
           /// Rotate the particle's momentum by a polar/azimuthal angle
-          void rotateThetaPhi( double theta_, double phi_ );
+          Momentum& rotateThetaPhi( double theta_, double phi_ );
+          /// Apply a \f$ z\rightarrow -z\f$ transformation
+          inline Momentum& mirrorZ() { pz_ = -pz_; }
         private:
           /// Compute the 3-momentum's norm
           void computeP();
