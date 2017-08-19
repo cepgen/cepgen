@@ -14,26 +14,30 @@ namespace CepGen
         return;
       }
 
-      std::string proc_name, hadr_name;
+      registerParameter<std::string>( "PROC", "Process name to simulate", &proc_name_ );
+      registerParameter<std::string>( "HADR", "Hadronisation algorithm to use", &hadr_name_ );
 
-      registerParameter<std::string>( "PROC", "Process name to simulate", &proc_name );
-      registerParameter<std::string>( "HADR", "Hadronisation algorithm to use", &hadr_name );
       registerParameter<bool>( "IEND", "Generation type", &params_.generation.enabled );
+
       registerParameter<unsigned int>( "DEBG", "Debugging verbosity", (unsigned int*)&Logger::get().level );
       registerParameter<unsigned int>( "NCVG", "Number of function calls", &params_.vegas.ncvg );
       registerParameter<unsigned int>( "NCSG", "Number of points to probe", &params_.vegas.npoints );
       registerParameter<unsigned int>( "ITVG", "Number of Vegas iterations", &params_.vegas.itvg );
-      registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params_.kinematics.in1p );
-      registerParameter<double>( "INPE", "Momentum (2nd primary particle)", &params_.kinematics.in2p );
       registerParameter<unsigned int>( "MODE", "Subprocess' mode", (unsigned int*)&params_.kinematics.mode );
       registerParameter<unsigned int>( "PMOD", "Outgoing primary particles' mode", (unsigned int*)&params_.remnant_mode );
       registerParameter<unsigned int>( "EMOD", "Outgoing primary particles' mode", (unsigned int*)&params_.remnant_mode );
       registerParameter<unsigned int>( "PAIR", "Outgoing particles' PDG id", (unsigned int*)&params_.kinematics.pair );
       registerParameter<unsigned int>( "MCUT", "Set of cuts to apply on final products", (unsigned int*)&params_.kinematics.cuts_mode );
+      registerParameter<unsigned int>( "NGEN", "Number of events to generate", &params_.generation.maxgen );
+      registerParameter<unsigned int>( "GPDF", "GPDF", &params_.pdflib.gpdf );
+      registerParameter<unsigned int>( "SPDF", "SPDF", &params_.pdflib.spdf );
+      registerParameter<unsigned int>( "QPDF", "QPDF", &params_.pdflib.qpdf );
+
+      registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params_.kinematics.in1p );
+      registerParameter<double>( "INPE", "Momentum (2nd primary particle)", &params_.kinematics.in2p );
       registerParameter<double>( "PTCT", "Minimal transverse momentum (single central outgoing particle)", &params_.kinematics.pt_min );
       registerParameter<double>( "MSCT", "Minimal central system mass", &params_.kinematics.mass_min );
       registerParameter<double>( "ECUT", "Minimal energy (single central outgoing particle)", &params_.kinematics.e_min );
-      registerParameter<unsigned int>( "NGEN", "Number of events to generate", &params_.generation.maxgen );
       //registerParameter<double>( "THMN", "Minimal polar production angle for the central particles", &params_.kinematics.eta_min );
       //registerParameter<double>( "THMX", "Maximal polar production angle for the central particles", &params_.kinematics.eta_max );
       registerParameter<double>( "ETMN", "Minimal pseudo-rapidity (central outgoing particles)", &params_.kinematics.eta_min );
@@ -42,11 +46,9 @@ namespace CepGen
       registerParameter<double>( "Q2MX", "Maximal Q^2 (exchanged parton)", &params_.kinematics.q2_max );
       registerParameter<double>( "MXMN", "Minimal invariant mass of proton remnants", &params_.kinematics.mx_min );
       registerParameter<double>( "MXMX", "Maximal invariant mass of proton remnants", &params_.kinematics.mx_max );
-      registerParameter<unsigned int>( "GPDF", "GPDF", &params_.pdflib.gpdf );
-      registerParameter<unsigned int>( "SPDF", "SPDF", &params_.pdflib.spdf );
-      registerParameter<unsigned int>( "QPDF", "QPDF", &params_.pdflib.qpdf );
 
-      Debugging( Form( "File '%s' succesfully opened!", file ) );
+      std::ostringstream os;
+      os << Form( "File '%s' succesfully opened! The following parameters are set:\n", file );
 
       std::map<std::string, std::string> m_params;
       std::string key, value;
@@ -54,19 +56,20 @@ namespace CepGen
         if ( key[0] == '#' ) continue; // FIXME need to ensure there is no extra space before!
         setParameter( key, value );
         m_params.insert( std::pair<std::string,std::string>( key, value ) );
-        if ( getDescription( key ) != "null" ) std::cout << "---> " << getDescription( key ) << " = " << getParameter( key ) << std::endl;
+        if ( getDescription( key ) != "null" ) os << ">> " << key << " = " << std::setw( 15 ) << getParameter( key ) << " (" << getDescription( key ) << ")" << std::endl;
       }
       f.close();
 
-      if      ( proc_name == "lpair" )  params_.setProcess( new Process::GamGamLL() );
-      else if ( proc_name == "pptoll" ) params_.setProcess( new Process::PPtoLL() );
-      else FatalError( Form( "Unrecognised process name: %s", proc_name.c_str() ) );
+      if      ( proc_name_ == "lpair" )  params_.setProcess( new Process::GamGamLL() );
+      else if ( proc_name_ == "pptoll" ) params_.setProcess( new Process::PPtoLL() );
+      else FatalError( Form( "Unrecognised process name: %s", proc_name_.c_str() ) );
 
 #ifdef PYTHIA6
-      if ( hadr_name == "pythia6" ) params_.setHadroniser( new Hadroniser::Pythia6Hadroniser );
+      if ( hadr_name_ == "pythia6" ) params_.setHadroniser( new Hadroniser::Pythia6Hadroniser );
 #endif
 
       if ( m_params.count( "IEND" ) ) setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
+      Information( os.str() );
     }
 
     void
@@ -77,15 +80,10 @@ namespace CepGen
         InError( Form( "Failed to open file \"%s\" for writing", file ) );
         return;
       }
-      for ( std::vector<Parameter<std::string> >::const_iterator it = p_strings_.begin(); it != p_strings_.end(); ++it ) {
-        if ( it->value && !it->value->empty() ) f << it->key << " = " << *it->value << "\n";
-      }
-      for ( std::vector<Parameter<unsigned int> >::const_iterator it = p_ints_.begin(); it != p_ints_.end(); ++it ) {
-        if ( it->value ) f << it->key << " = " << *it->value << "\n";
-      }
-      for ( std::vector<Parameter<double> >::const_iterator it = p_doubles_.begin(); it != p_doubles_.end(); ++it ) {
-        if ( it->value ) f << it->key << " = " << *it->value << "\n";
-      }
+      for ( const auto& it : p_strings_ ) { if ( it.second.value ) f << it.first << " = " << *it.second.value << "\n"; }
+      for ( const auto& it : p_ints_ ) { if ( it.second.value ) f << it.first << " = " << *it.second.value << "\n"; }
+      for ( const auto& it : p_doubles_ ) { if ( it.second.value ) f << it.first << " = " << *it.second.value << "\n"; }
+      for ( const auto& it : p_bools_ ) { if ( it.second.value ) f << it.first << " = " << *it.second.value << "\n"; }
       f.close();
     }
 
@@ -115,9 +113,10 @@ namespace CepGen
     std::string
     LpairReader::getDescription( std::string key ) const
     {
-      for ( std::vector<Parameter<std::string> >::const_iterator it = p_strings_.begin(); it != p_strings_.end(); ++it ) { if ( it->key == key ) return it->description; }
-      for ( std::vector<Parameter<unsigned int> >::const_iterator it = p_ints_.begin(); it != p_ints_.end(); ++it ) { if ( it->key == key ) return it->description; }
-      for ( std::vector<Parameter<double> >::const_iterator it = p_doubles_.begin(); it != p_doubles_.end(); ++it ) { if ( it->key == key ) return it->description; }
+      if ( p_strings_.count( key ) ) return p_strings_.find( key )->second.description;
+      if ( p_ints_.count( key ) ) return p_ints_.find( key )->second.description;
+      if ( p_doubles_.count( key ) ) return p_doubles_.find( key )->second.description;
+      if ( p_bools_.count( key ) ) return p_bools_.find( key )->second.description;
       return "null";
     }
   }

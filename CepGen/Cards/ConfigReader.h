@@ -27,6 +27,7 @@ namespace CepGen
 #else
       public:
         inline ConfigReader( const char* ) { InWarning( "libconfig++ is not present on this machine" ); }
+        void store( const char* file ) const {}
 #endif
     };
   }

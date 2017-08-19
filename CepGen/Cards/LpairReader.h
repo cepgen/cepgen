@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include <string>
+#include <map>
 
 namespace CepGen
 {
@@ -31,55 +32,61 @@ namespace CepGen
         std::string getParameter( std::string key ) const;
         std::string getDescription( std::string key ) const;
 
-        std::vector<Parameter<std::string> > p_strings_;
-        std::vector<Parameter<double> > p_doubles_;
-        std::vector<Parameter<unsigned int> > p_ints_;
-        std::vector<Parameter<bool> > p_bools_;
+        std::map<std::string, Parameter<std::string> > p_strings_;
+        std::map<std::string, Parameter<double> > p_doubles_;
+        std::map<std::string, Parameter<unsigned int> > p_ints_;
+        std::map<std::string, Parameter<bool> > p_bools_;
 
-        //void parseKinematics( const libconfig::Setting& );
-        std::map<std::string,std::string> params_map_;
+        std::string proc_name_, hadr_name_;
     };
-    template<> inline void LpairReader::registerParameter<std::string>( const char* key, const char* description, std::string* def ) { p_strings_.emplace_back( key, description, def ); }
-    template<> inline void LpairReader::registerParameter<double>( const char* key, const char* description, double* def ) { p_doubles_.emplace_back( key, description, def ); }
-    template<> inline void LpairReader::registerParameter<unsigned int>( const char* key, const char* description, unsigned int* def ) { p_ints_.emplace_back( key, description, def ); }
-    template<> inline void LpairReader::registerParameter<bool>( const char* key, const char* description, bool* def ) { p_bools_.emplace_back( key, description, def ); }
+
+    //----- specialised registerers
+
+    template<> inline void LpairReader::registerParameter<std::string>( const char* key, const char* description, std::string* def ) { p_strings_.insert( std::make_pair( key, Parameter<std::string>( key, description, def ) ) ); }
+    template<> inline void LpairReader::registerParameter<double>( const char* key, const char* description, double* def ) { p_doubles_.insert( std::make_pair( key, Parameter<double>( key, description, def ) ) ); }
+    template<> inline void LpairReader::registerParameter<unsigned int>( const char* key, const char* description, unsigned int* def ) { p_ints_.insert( std::make_pair( key, Parameter<unsigned int>( key, description, def ) ) ); }
+    template<> inline void LpairReader::registerParameter<bool>( const char* key, const char* description, bool* def ) { p_bools_.insert( std::make_pair( key, Parameter<bool>( key, description, def ) ) ); }
+
+    //----- specialised setters
+
     template<> inline void LpairReader::setValue<std::string>( const char* key, std::string value ) {
-      for ( std::vector<Parameter<std::string> >::iterator it = p_strings_.begin(); it != p_strings_.end(); ++it ) {
-        if ( it->key == key ) *it->value = value;
-      }
+      auto it = p_strings_.find( key );
+      if ( it != p_strings_.end() ) *it->second.value = value;
     }
     template<> inline void LpairReader::setValue<double>( const char* key, double value ) {
-      for ( std::vector<Parameter<double> >::iterator it = p_doubles_.begin(); it != p_doubles_.end(); ++it ) {
-        if ( it->key == key ) *it->value = value;
-      }
+      auto it = p_doubles_.find( key );
+      if ( it != p_doubles_.end() ) *it->second.value = value;
     }
     template<> inline void LpairReader::setValue<unsigned int>( const char* key, unsigned int value ) {
-      for ( std::vector<Parameter<unsigned int> >::iterator it = p_ints_.begin(); it != p_ints_.end(); ++it ) {
-        if ( it->key == key ) *it->value = value;
-      }
+      auto it = p_ints_.find( key );
+      if ( it != p_ints_.end() ) *it->second.value = value;
     }
     template<> inline void LpairReader::setValue<bool>( const char* key, bool value ) {
-      for ( std::vector<Parameter<bool> >::iterator it = p_bools_.begin(); it != p_bools_.end(); ++it ) {
-        if ( it->key == key ) *it->value = value;
-      }
+      auto it = p_bools_.find( key );
+      if ( it != p_bools_.end() ) *it->second.value = value;
     }
+
+    //----- specialised getters
+
     template<> inline std::string LpairReader::getValue( const char* key ) const {
-      for ( std::vector<Parameter<std::string> >::const_iterator it = p_strings_.begin(); it != p_strings_.end(); ++it ) {
-        if ( it->key == key ) return *it->value;
-      }
+      const auto& it = p_strings_.find( key );
+      if ( it != p_strings_.end() ) return *it->second.value;
       return "null";
     }
     template<> inline double LpairReader::getValue( const char* key ) const {
-      for ( std::vector<Parameter<double> >::const_iterator it = p_doubles_.begin(); it != p_doubles_.end(); ++it ) {
-        if ( it->key == key ) return *it->value;
-      }
+      const auto& it = p_doubles_.find( key );
+      if ( it != p_doubles_.end() ) return *it->second.value;
       return -999.;
     }
     template<> inline unsigned int LpairReader::getValue( const char* key ) const {
-      for ( std::vector<Parameter<unsigned int> >::const_iterator it = p_ints_.begin(); it != p_ints_.end(); ++it ) {
-        if ( it->key == key ) return *it->value;
-      }
+      const auto& it = p_ints_.find( key );
+      if ( it != p_ints_.end() ) return *it->second.value;
       return 999;
+    }
+    template<> inline bool LpairReader::getValue( const char* key ) const {
+      const auto& it = p_bools_.find( key );
+      if ( it != p_bools_.end() ) return *it->second.value;
+      return true;
     }
   }
 }
