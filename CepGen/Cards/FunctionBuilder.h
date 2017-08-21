@@ -31,7 +31,7 @@ namespace CepGen
         values_[0] = x;
         double ret = 1.0;
         try { ret = parser_.eval(); } catch ( const smlib::mathex::error& e ) {
-          InWarning( Form( "Failed to evaluate the function: %s", e.what() ) );
+          throw Exception( __PRETTY_FUNCTION__, Form( "Failed to evaluate the function: %s", e.what() ), JustWarning );
         }
         return ret;
       }
@@ -39,7 +39,7 @@ namespace CepGen
         values_ = x;
         double ret = 1.0;
         try { ret = parser_.eval(); } catch ( const smlib::mathex::error& e ) {
-          InWarning( Form( "Failed to evaluate the function: %s", e.what() ) );
+          throw Exception( __PRETTY_FUNCTION__, Form( "Failed to evaluate the function: %s", e.what() ), JustWarning );
         }
         return ret;
       }
