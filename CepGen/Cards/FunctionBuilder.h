@@ -2,10 +2,14 @@
 #define CepGen_Cards_FunctionBuilder_h
 
 #include <vector>
+#include <array>
+#include "CepGen/Core/utils.h"
 
 #ifdef MATHEX
 #include <mathex.h>
 #endif
+
+using std::string;
 
 namespace CepGen
 {
@@ -23,6 +27,7 @@ namespace CepGen
         }
       }
       double eval( double x ) {
+        static_assert( N==1, "This function only works with single-dimensional functions" );
         values_[0] = x;
         double ret = 1.0;
         try { ret = parser_.eval(); } catch ( const smlib::mathex::error& e ) {
@@ -30,14 +35,15 @@ namespace CepGen
         }
         return ret;
       }
-      std::array<double,N> eval( const std::array<double,N>& x ) {
+      double eval( const std::array<double,N>& x ) {
         values_ = x;
-        std::array<double,N> ret( 0. );
+        double ret = 1.0;
         try { ret = parser_.eval(); } catch ( const smlib::mathex::error& e ) {
           InWarning( Form( "Failed to evaluate the function: %s", e.what() ) );
         }
         return ret;
       }
+      std::string& expression() { return parser_.expression(); }
 
     private:
       smlib::mathex parser_;
