@@ -2,7 +2,7 @@
 
 using namespace CepGen::Process;
 
-TestProcess::TestProcess() : GenericProcess( ".oO TEST PROCESS Oo.", false )
+TestProcess::TestProcess() : GenericProcess( "test", ".oO TEST PROCESS Oo.", false )
 {}
 
 double

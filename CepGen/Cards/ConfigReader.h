@@ -5,6 +5,8 @@
 
 #ifdef LIBCONFIG
 #include <libconfig.h++>
+#else
+#pragma message "libconfig++ is not found on your system!"
 #endif
 
 namespace CepGen
@@ -17,17 +19,23 @@ namespace CepGen
       public:
         ConfigReader( const char* file );
 
-        void store( const char* file ) const;
+        static void store( const Parameters*, const char* file );
 
       private:
         void parseIncomingKinematics( const libconfig::Setting& );
         void parseOutgoingKinematics( const libconfig::Setting& );
         void parseVegas( const libconfig::Setting& );
         void parseGenerator( const libconfig::Setting& );
+
+        static void writeProcess( const Parameters*, libconfig::Setting& );
+        static void writeIncomingKinematics( const Parameters*, libconfig::Setting& );
+        static void writeOutgoingKinematics( const Parameters*, libconfig::Setting& );
+        static void writeVegas( const Parameters*, libconfig::Setting& );
+        static void writeGenerator( const Parameters*, libconfig::Setting& );
 #else
       public:
         inline ConfigReader( const char* ) { InWarning( "libconfig++ is not present on this machine" ); }
-        void store( const char* file ) const {}
+        static void store( const Parameters*, const char* file ) {}
 #endif
     };
   }

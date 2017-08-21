@@ -21,14 +21,16 @@ namespace CepGen
       public:
         /**
          * \brief Class constructor
-         * \param[in] name Human-readable kT-factorised process name
+         * \param[in] name Generic process name
+         * \param[in] description Human-readable kT-factorised process name
          * \param[in] num_user_dimensions_ Number of additional dimensions required for the user process
          * \param[in] ip1 First incoming parton
          * \param[in] ip2 Second incoming parton (if undefined, same as the first)
          * \param[in] op1 First produced final state particle
          * \param[in] op2 Second produced final state particle (if undefined, same as the first)
          */
-        GenericKTProcess( const std::string& name="<generic process>",
+        GenericKTProcess( const std::string& name,
+                          const std::string& description="<generic process>",
                           const unsigned int& num_user_dimensions=0,
                           const Particle::ParticleCode& ip1=Particle::Photon,
                           const Particle::ParticleCode& op1=Particle::Muon,

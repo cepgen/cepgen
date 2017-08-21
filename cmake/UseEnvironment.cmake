@@ -27,6 +27,6 @@ else()
   find_library(LIBCONFIG config++)
 endif()
 
-if(${LIBCONFIG})
+if(EXISTS ${LIBCONFIG})
   add_definitions(-DLIBCONFIG)
 endif()

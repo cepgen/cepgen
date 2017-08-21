@@ -21,8 +21,6 @@ namespace CepGen
         Handler() {}
         ~Handler() {}
 
-        /// Store a configuration into an external steering card
-        virtual void store( const char* file ) const = 0;
         /// Retrieve a configuration from a parsed steering cart
         Parameters& parameters() { return params_; }
 

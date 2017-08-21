@@ -60,13 +60,13 @@ namespace CepGen
         if ( kin.exists( "structure_functions" ) ) {
           std::string sf = kin["structure_functions" ];
           if ( sf == "electron" ) params_.remnant_mode = Electron;
-          else if ( sf == "elastic-proton" ) params_.remnant_mode = ElasticProton;
-          else if ( sf == "suri-yennie" ) params_.remnant_mode = SuriYennie;
-          else if ( sf == "suri-yennie-lowQ2" ) params_.remnant_mode = SuriYennieLowQ2;
-          else if ( sf == "szczurek-uleshchenko" ) params_.remnant_mode = SzczurekUleshchenko;
-          else if ( sf == "fiore-valence" ) params_.remnant_mode = FioreVal;
-          else if ( sf == "fiore-sea" ) params_.remnant_mode = FioreSea;
-          else if ( sf == "fiore" ) params_.remnant_mode = Fiore;
+          else if ( sf == "elastic proton" ) params_.remnant_mode = ElasticProton;
+          else if ( sf == "Suri-Yennie" ) params_.remnant_mode = SuriYennie;
+          else if ( sf == "Suri-Yennie;lowQ2" ) params_.remnant_mode = SuriYennieLowQ2;
+          else if ( sf == "Szczurek-Uleshchenko" ) params_.remnant_mode = SzczurekUleshchenko;
+          else if ( sf == "Fiore;valence" ) params_.remnant_mode = FioreVal;
+          else if ( sf == "Fiore;sea" ) params_.remnant_mode = FioreSea;
+          else if ( sf == "Fiore" ) params_.remnant_mode = Fiore;
           else FatalError( Form( "Invalid structure functions mode: %s", sf.c_str() ) );
         }
       } catch ( const libconfig::SettingNotFoundException& nfe ) {
@@ -122,8 +122,69 @@ namespace CepGen
     }
 
     void
-    ConfigReader::store( const char* file ) const
+    ConfigReader::writeProcess( const Parameters* params, libconfig::Setting& root )
     {
+      libconfig::Setting& proc = root.add( "process", libconfig::Setting::TypeGroup );
+      proc.add( "name", libconfig::Setting::TypeString ) = params->processName();
+      std::ostringstream os; os << params->kinematics.mode;
+      proc.add( "mode", libconfig::Setting::TypeString ) = os.str();
+    }
+
+    void
+    ConfigReader::writeIncomingKinematics( const Parameters* params, libconfig::Setting& root )
+    {
+      libconfig::Setting& kin = root.add( "in_kinematics", libconfig::Setting::TypeGroup );
+      kin.add( "beam1_pz", libconfig::Setting::TypeFloat ) = params->kinematics.in1p;
+      kin.add( "beam2_pz", libconfig::Setting::TypeFloat ) = params->kinematics.in2p;
+      std::ostringstream os; os << params->remnant_mode;
+      kin.add( "structure_function", libconfig::Setting::TypeString ) = os.str();
+    }
+
+    void
+    ConfigReader::writeOutgoingKinematics( const Parameters* params, libconfig::Setting& root )
+    {
+      libconfig::Setting& kin = root.add( "out_kinematics", libconfig::Setting::TypeGroup );
+      kin.add( "pair", libconfig::Setting::TypeInt ) = (int)params->kinematics.pair;
+      kin.add( "cuts_mode", libconfig::Setting::TypeInt ) = (int)params->kinematics.cuts_mode;
+      kin.add( "min_pt", libconfig::Setting::TypeFloat ) = params->kinematics.pt_min;
+      kin.add( "max_pt", libconfig::Setting::TypeFloat ) = params->kinematics.pt_max;
+      kin.add( "min_energy", libconfig::Setting::TypeFloat ) = params->kinematics.e_min;
+      kin.add( "max_energy", libconfig::Setting::TypeFloat ) = params->kinematics.e_max;
+      kin.add( "min_eta", libconfig::Setting::TypeFloat ) = params->kinematics.eta_min;
+      kin.add( "max_eta", libconfig::Setting::TypeFloat ) = params->kinematics.eta_max;
+      kin.add( "min_mx", libconfig::Setting::TypeFloat ) = params->kinematics.mx_min;
+      kin.add( "max_mx", libconfig::Setting::TypeFloat ) = params->kinematics.mx_max;
+    }
+
+    void
+    ConfigReader::writeVegas( const Parameters* params, libconfig::Setting& root )
+    {
+      libconfig::Setting& veg = root.add( "vegas", libconfig::Setting::TypeGroup );
+      veg.add( "num_points", libconfig::Setting::TypeInt ) = (int)params->vegas.npoints;
+      veg.add( "num_integration_calls", libconfig::Setting::TypeInt ) = (int)params->vegas.ncvg;
+      veg.add( "num_integration_iterations", libconfig::Setting::TypeInt ) = (int)params->vegas.itvg;
+    }
+
+    void
+    ConfigReader::writeGenerator( const Parameters* params, libconfig::Setting& root )
+    {
+      if ( !params->generation.enabled ) return;
+      libconfig::Setting& gen = root.add( "generator", libconfig::Setting::TypeGroup );
+      gen.add( "num_events", libconfig::Setting::TypeInt ) = (int)params->generation.maxgen;
+      gen.add( "print_every", libconfig::Setting::TypeInt ) = (int)params->generation.gen_print_every;
+    }
+
+    void
+    ConfigReader::store( const Parameters* params, const char* file )
+    {
+      libconfig::Config cfg;
+      libconfig::Setting& root = cfg.getRoot();
+      writeProcess( params, root );
+      writeIncomingKinematics( params, root["process"] );
+      writeOutgoingKinematics( params, root["process"] );
+      writeVegas( params, root );
+      writeGenerator( params, root );
+      cfg.writeFile( file );
     }
   }
 }

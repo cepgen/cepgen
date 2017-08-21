@@ -76,7 +76,8 @@ int main( int argc, char* argv[] ) {
     }
   }
 
-  //mg.parameters->storeConfigFile( "lastrun.card" );
+  // store the current configuration
+  CepGen::Cards::ConfigReader::store( mg.parameters.get(), "last_run.cfg" );
 
   return 0;
 }

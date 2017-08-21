@@ -38,7 +38,7 @@ namespace CepGen
 
         /// Default constructor for an undefined process
         /// \param[in] name Human-readable format of the process name
-        GenericProcess( const std::string& name="<invalid process>", bool has_event=true );
+        GenericProcess( const std::string& name, const std::string& description="<invalid process>", bool has_event=true );
         virtual ~GenericProcess();
 
         /// Restore the Event object to its initial state
@@ -85,8 +85,10 @@ namespace CepGen
         inline const double x( const unsigned int idx ) const {
           return ( idx >= x_.size() ) ? -1. : x_[idx];
         }
-        /// Get a human-readable name of the process considered
+        /// Name of the process considered
         inline const std::string& name() const { return name_; }
+        /// Human-readable description of the process
+        inline const std::string& description() const { return description_; }
 
         bool hasEvent() const { return has_event_; }
 
@@ -154,8 +156,10 @@ namespace CepGen
         bool is_outgoing_state_set_;
         /// Is the full event's kinematic set?
         bool is_kinematics_set_;
-        /// Name of the process (useful for logging and debugging)
+        /// Name of the process
         std::string name_;
+        /// Process human-readable description
+        std::string description_;
         /// Total generation time (in seconds)
         float total_gen_time_;
         /// Number of events already generated
@@ -170,20 +174,7 @@ namespace CepGen
          * \brief Is the system's kinematics well defined?
          * \return A boolean stating if the input kinematics and the final states are well-defined
          */
-        inline bool isKinematicsDefined() {
-          // check the incoming state
-          if ( !particles( Particle::IncomingBeam1 ).empty() && !particles( Particle::IncomingBeam2 ).empty() ) {
-            is_incoming_state_set_ = true;
-          }
-          // check the outgoing state
-          if ( ( !particles( Particle::OutgoingBeam1 ).empty()    && !particles( Particle::OutgoingBeam2 ).empty() )
-            && ( !particles( Particle::CentralParticle1 ).empty() || !particles( Particle::CentralParticle2 ).empty() ) ) {
-            is_outgoing_state_set_ = true;
-          }
-          // combine both states
-          is_kinematics_set_ = is_incoming_state_set_ && is_outgoing_state_set_;
-          return is_kinematics_set_;
-        }
+        bool isKinematicsDefined();
     };
   }
 }

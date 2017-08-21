@@ -16,6 +16,13 @@ namespace CepGen
     store_( param.store_ )
   {}
 
+  Parameters::Parameters( const Parameters& param ) :
+    remnant_mode( param.remnant_mode ),
+    kinematics( param.kinematics ), vegas( param.vegas ), generation( param.generation ),
+    pdflib( param.pdflib ), hadroniser_max_trials( param.hadroniser_max_trials ),
+    store_( param.store_ )
+  {}
+
   Parameters::~Parameters()
   {}
 
@@ -46,7 +53,7 @@ namespace CepGen
       << std::right << std::setw( wb ) << std::left << std::endl
       << std::setw( wt ) << "Process to generate";
     if ( process_ )
-      os << ( pretty ? boldify( process_->name().c_str() ) : process_->name() );
+      os << ( pretty ? boldify( process_->description().c_str() ) : process_->description() );
     else
       os << ( pretty ? boldify( "no process!" ) : "no process!" );
     os

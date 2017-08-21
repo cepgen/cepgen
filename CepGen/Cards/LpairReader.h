@@ -16,7 +16,7 @@ namespace CepGen
       public:
         LpairReader( const char* file );
 
-        void store( const char* file ) const;
+        void store( const char* file );
 
       private:
         template<class T> struct Parameter {
@@ -37,6 +37,7 @@ namespace CepGen
         std::map<std::string, Parameter<unsigned int> > p_ints_;
         std::map<std::string, Parameter<bool> > p_bools_;
 
+        void init( Parameters* );
         std::string proc_name_, hadr_name_;
     };
 

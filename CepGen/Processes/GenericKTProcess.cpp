@@ -4,14 +4,15 @@ namespace CepGen
 {
   namespace Process
   {
-    GenericKTProcess::GenericKTProcess( const std::string& name_,
-                                        const unsigned int& num_user_dimensions_,
+    GenericKTProcess::GenericKTProcess( const std::string& name,
+                                        const std::string& description,
+                                        const unsigned int& num_user_dimensions,
                                         const Particle::ParticleCode& parton1,
                                         const Particle::ParticleCode& central1,
                                         const Particle::ParticleCode& parton2,
                                         const Particle::ParticleCode& central2 ) :
-      GenericProcess( name_+" (kT-factorisation approach)" ),
-      kNumUserDimensions( num_user_dimensions_ ),
+      GenericProcess( name, description+" (kT-factorisation approach)" ),
+      kNumUserDimensions( num_user_dimensions ),
       kIntermediatePart1( parton1 ), kIntermediatePart2( parton2 ),
       kProducedPart1( central1 ), kProducedPart2( central2 )
     {

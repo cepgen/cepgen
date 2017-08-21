@@ -13,39 +13,7 @@ namespace CepGen
         FatalError( Form( "Failed to parse file \"%s\"", file ) );
         return;
       }
-
-      registerParameter<std::string>( "PROC", "Process name to simulate", &proc_name_ );
-      registerParameter<std::string>( "HADR", "Hadronisation algorithm to use", &hadr_name_ );
-
-      registerParameter<bool>( "IEND", "Generation type", &params_.generation.enabled );
-
-      registerParameter<unsigned int>( "DEBG", "Debugging verbosity", (unsigned int*)&Logger::get().level );
-      registerParameter<unsigned int>( "NCVG", "Number of function calls", &params_.vegas.ncvg );
-      registerParameter<unsigned int>( "NCSG", "Number of points to probe", &params_.vegas.npoints );
-      registerParameter<unsigned int>( "ITVG", "Number of Vegas iterations", &params_.vegas.itvg );
-      registerParameter<unsigned int>( "MODE", "Subprocess' mode", (unsigned int*)&params_.kinematics.mode );
-      registerParameter<unsigned int>( "PMOD", "Outgoing primary particles' mode", (unsigned int*)&params_.remnant_mode );
-      registerParameter<unsigned int>( "EMOD", "Outgoing primary particles' mode", (unsigned int*)&params_.remnant_mode );
-      registerParameter<unsigned int>( "PAIR", "Outgoing particles' PDG id", (unsigned int*)&params_.kinematics.pair );
-      registerParameter<unsigned int>( "MCUT", "Set of cuts to apply on final products", (unsigned int*)&params_.kinematics.cuts_mode );
-      registerParameter<unsigned int>( "NGEN", "Number of events to generate", &params_.generation.maxgen );
-      registerParameter<unsigned int>( "GPDF", "GPDF", &params_.pdflib.gpdf );
-      registerParameter<unsigned int>( "SPDF", "SPDF", &params_.pdflib.spdf );
-      registerParameter<unsigned int>( "QPDF", "QPDF", &params_.pdflib.qpdf );
-
-      registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params_.kinematics.in1p );
-      registerParameter<double>( "INPE", "Momentum (2nd primary particle)", &params_.kinematics.in2p );
-      registerParameter<double>( "PTCT", "Minimal transverse momentum (single central outgoing particle)", &params_.kinematics.pt_min );
-      registerParameter<double>( "MSCT", "Minimal central system mass", &params_.kinematics.mass_min );
-      registerParameter<double>( "ECUT", "Minimal energy (single central outgoing particle)", &params_.kinematics.e_min );
-      //registerParameter<double>( "THMN", "Minimal polar production angle for the central particles", &params_.kinematics.eta_min );
-      //registerParameter<double>( "THMX", "Maximal polar production angle for the central particles", &params_.kinematics.eta_max );
-      registerParameter<double>( "ETMN", "Minimal pseudo-rapidity (central outgoing particles)", &params_.kinematics.eta_min );
-      registerParameter<double>( "ETMX", "Maximal pseudo-rapidity (central outgoing particles)", &params_.kinematics.eta_max );
-      registerParameter<double>( "Q2MN", "Minimal Q^2 (exchanged parton)", &params_.kinematics.q2_min );
-      registerParameter<double>( "Q2MX", "Maximal Q^2 (exchanged parton)", &params_.kinematics.q2_max );
-      registerParameter<double>( "MXMN", "Minimal invariant mass of proton remnants", &params_.kinematics.mx_min );
-      registerParameter<double>( "MXMX", "Maximal invariant mass of proton remnants", &params_.kinematics.mx_max );
+      init( &params_ );
 
       std::ostringstream os;
       os << Form( "File '%s' succesfully opened! The following parameters are set:\n", file );
@@ -73,7 +41,44 @@ namespace CepGen
     }
 
     void
-    LpairReader::store( const char* file ) const
+    LpairReader::init( Parameters* params )
+    {
+      registerParameter<std::string>( "PROC", "Process name to simulate", &proc_name_ );
+      registerParameter<std::string>( "HADR", "Hadronisation algorithm to use", &hadr_name_ );
+
+      registerParameter<bool>( "IEND", "Generation type", &params->generation.enabled );
+
+      registerParameter<unsigned int>( "DEBG", "Debugging verbosity", (unsigned int*)&Logger::get().level );
+      registerParameter<unsigned int>( "NCVG", "Number of function calls", &params->vegas.ncvg );
+      registerParameter<unsigned int>( "NCSG", "Number of points to probe", &params->vegas.npoints );
+      registerParameter<unsigned int>( "ITVG", "Number of Vegas iterations", &params->vegas.itvg );
+      registerParameter<unsigned int>( "MODE", "Subprocess' mode", (unsigned int*)&params->kinematics.mode );
+      registerParameter<unsigned int>( "PMOD", "Outgoing primary particles' mode", (unsigned int*)&params->remnant_mode );
+      registerParameter<unsigned int>( "EMOD", "Outgoing primary particles' mode", (unsigned int*)&params->remnant_mode );
+      registerParameter<unsigned int>( "PAIR", "Outgoing particles' PDG id", (unsigned int*)&params->kinematics.pair );
+      registerParameter<unsigned int>( "MCUT", "Set of cuts to apply on final products", (unsigned int*)&params->kinematics.cuts_mode );
+      registerParameter<unsigned int>( "NGEN", "Number of events to generate", &params->generation.maxgen );
+      registerParameter<unsigned int>( "GPDF", "GPDF", &params->pdflib.gpdf );
+      registerParameter<unsigned int>( "SPDF", "SPDF", &params->pdflib.spdf );
+      registerParameter<unsigned int>( "QPDF", "QPDF", &params->pdflib.qpdf );
+
+      registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params->kinematics.in1p );
+      registerParameter<double>( "INPE", "Momentum (2nd primary particle)", &params->kinematics.in2p );
+      registerParameter<double>( "PTCT", "Minimal transverse momentum (single central outgoing particle)", &params->kinematics.pt_min );
+      registerParameter<double>( "MSCT", "Minimal central system mass", &params->kinematics.mass_min );
+      registerParameter<double>( "ECUT", "Minimal energy (single central outgoing particle)", &params->kinematics.e_min );
+      //registerParameter<double>( "THMN", "Minimal polar production angle for the central particles", &params->kinematics.eta_min );
+      //registerParameter<double>( "THMX", "Maximal polar production angle for the central particles", &params->kinematics.eta_max );
+      registerParameter<double>( "ETMN", "Minimal pseudo-rapidity (central outgoing particles)", &params->kinematics.eta_min );
+      registerParameter<double>( "ETMX", "Maximal pseudo-rapidity (central outgoing particles)", &params->kinematics.eta_max );
+      registerParameter<double>( "Q2MN", "Minimal Q^2 (exchanged parton)", &params->kinematics.q2_min );
+      registerParameter<double>( "Q2MX", "Maximal Q^2 (exchanged parton)", &params->kinematics.q2_max );
+      registerParameter<double>( "MXMN", "Minimal invariant mass of proton remnants", &params->kinematics.mx_min );
+      registerParameter<double>( "MXMX", "Maximal invariant mass of proton remnants", &params->kinematics.mx_max );
+    }
+
+    void
+    LpairReader::store( const char* file )
     {
       std::ofstream f( file, std::fstream::out | std::fstream::trunc );
       if ( !f.is_open() ) {

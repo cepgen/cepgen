@@ -26,6 +26,7 @@ add_subdirectory(External)
 include(UseEnvironment)
 set(CEPGEN_EXTERNAL_REQS ${GSL_LIB} ${GSL_CBLAS_LIB} ${CEPGEN_LIBRARIES})
 if(LIBCONFIG)
+  message(STATUS "libconfig++ found in ${LIBCONFIG}")
   list(APPEND CEPGEN_EXTERNAL_REQS ${LIBCONFIG})
 endif()
 
@@ -40,7 +41,7 @@ endforeach()
 #----- optionally include the exports utils if HepMC is found
 
 if(HEPMC_LIB)
-  message(STATUS "HepMC found in " ${HEPMC_INCLUDE})
+  message(STATUS "HepMC found in ${HEPMC_INCLUDE}")
   include_directories(${HEPMC_INCLUDE})
   list(APPEND CEPGEN_LIBRARIES CepGenExporter)
 endif()

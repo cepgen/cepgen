@@ -3,7 +3,7 @@
 
 using namespace CepGen::Process;
 
-PPtoLL::PPtoLL() : GenericKTProcess( "gamma,gamma->l+,l-", 4, Particle::Photon, Particle::Muon )
+PPtoLL::PPtoLL() : GenericKTProcess( "pptoll", "gamma,gamma->l+,l-", 4, Particle::Photon, Particle::Muon )
 {}
 
 void

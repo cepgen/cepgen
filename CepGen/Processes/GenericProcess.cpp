@@ -4,10 +4,10 @@ namespace CepGen
 {
   namespace Process
   {
-    GenericProcess::GenericProcess( const std::string& name, bool has_event ) :
+    GenericProcess::GenericProcess( const std::string& name, const std::string& description, bool has_event ) :
       event_( std::shared_ptr<Event>( new Event ) ),
       is_point_set_( false ), is_incoming_state_set_( false ), is_outgoing_state_set_( false ), is_kinematics_set_( false ),
-      name_( name ),
+      name_( name ), description_( description ),
       total_gen_time_( 0. ), num_gen_events_( 0 ), has_event_( has_event )
     {}
 
@@ -158,6 +158,23 @@ namespace CepGen
           if ( inel_p2 ) fp2 = SzczurekUleshchenkoFormFactors( -t2_, w2_, my2 );
         } break;
       }
+    }
+
+    inline bool
+    GenericProcess::isKinematicsDefined()
+    {
+      // check the incoming state
+      if ( !particles( Particle::IncomingBeam1 ).empty() && !particles( Particle::IncomingBeam2 ).empty() ) {
+        is_incoming_state_set_ = true;
+      }
+      // check the outgoing state
+      if ( ( !particles( Particle::OutgoingBeam1 ).empty()    && !particles( Particle::OutgoingBeam2 ).empty() )
+        && ( !particles( Particle::CentralParticle1 ).empty() || !particles( Particle::CentralParticle2 ).empty() ) ) {
+        is_outgoing_state_set_ = true;
+      }
+      // combine both states
+      is_kinematics_set_ = is_incoming_state_set_ && is_outgoing_state_set_;
+      return is_kinematics_set_;
     }
 
     std::ostream&

@@ -16,6 +16,8 @@ namespace CepGen
       Parameters();
       /// Copy constructor (transfers ownership to the process!)
       Parameters( Parameters& );
+      /// Const copy constructor (all but the process and the hadroniser)
+      Parameters( const Parameters& );
       ~Parameters();
       /// Set the polar angle range for the produced leptons
       /// \param[in] thetamin The minimal value of \f$\theta\f$ for the outgoing leptons
@@ -28,6 +30,7 @@ namespace CepGen
 
       /// Process for which the cross-section will be computed and the events will be generated
       Process::GenericProcess* process() { return process_.get(); }
+      std::string processName() const { return process_->name(); }
       /// Set the process to study
       void setProcess( Process::GenericProcess* proc ) { process_.reset( proc ); }
 
