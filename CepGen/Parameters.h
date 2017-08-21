@@ -4,6 +4,7 @@
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
 #include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Cards/FunctionBuilder.h"
 
 #include <memory>
 
@@ -105,6 +106,8 @@ namespace CepGen
       void setHadroniser( Hadroniser::GenericHadroniser* hadr ) { hadroniser_.reset( hadr ); }
       /// Maximal number of trials for the hadronisation of the proton(s) remnants
       unsigned int hadroniser_max_trials;
+
+      FunctionBuilder<1> rescattering_effects;
 
     private:
       std::unique_ptr<Process::GenericProcess> process_;

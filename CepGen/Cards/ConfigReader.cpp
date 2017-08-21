@@ -44,6 +44,13 @@ namespace CepGen
         //--- generation parameters
         if ( root.exists( "vegas" ) ) parseVegas( root["vegas"] );
         if ( root.exists( "generator" ) ) parseGenerator( root["generator"] );
+
+        //--- rescattering corrections
+        if ( proc.exists( "rescattering_corr" ) ) {
+          std::array<std::string,1> vars{ { "x" } };
+          params_.rescattering_effects = FunctionBuilder<1>( proc["rescattering_corr"], vars );
+        }
+
       } catch ( const libconfig::SettingNotFoundException& nfe ) {
         FatalError( Form( "Failed to retrieve the field \"%s\".", nfe.getPath() ) );
       } catch ( const libconfig::SettingTypeException& te ) {
