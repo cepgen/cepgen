@@ -47,8 +47,7 @@ namespace CepGen
 
         //--- rescattering corrections
         if ( proc.exists( "rescattering_corr" ) ) {
-          std::array<std::string,1> vars{ { "x" } };
-          params_.rescattering_effects = FunctionBuilder<1>( proc["rescattering_corr"], vars );
+          params_.taming_function = FunctionBuilder<1>( proc["rescattering_corr"], { "x" } );
         }
 
       } catch ( const libconfig::SettingNotFoundException& nfe ) {

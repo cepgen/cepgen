@@ -107,7 +107,9 @@ namespace CepGen
       /// Maximal number of trials for the hadronisation of the proton(s) remnants
       unsigned int hadroniser_max_trials;
 
-      FunctionBuilder<1> rescattering_effects;
+      //----- rescattering corrections
+      /// Functional to be used to account for rescattering corrections (implemented within the process)
+      FunctionBuilder<1> taming_function;
 
     private:
       std::unique_ptr<Process::GenericProcess> process_;
