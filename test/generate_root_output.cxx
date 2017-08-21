@@ -8,7 +8,8 @@
 #include "TreeEvent.h"
 
 #include "CepGen/Generator.h"
-#include "CepGen/Cards/Handler.h"
+#include "CepGen/Cards/LpairReader.h"
+#include "CepGen/Cards/ConfigReader.h"
 
 using namespace std;
 
@@ -24,35 +25,14 @@ int main( int argc, char* argv[] ) {
   CepGen::Generator mg;
 
   if ( argc<2 ) {
-    InError( Form( "Usage: %s <input card> [output .root filename]\n\t"
-                   "   or: %s <process type 1..4> [output .root filename]", argv[0], argv[0] ) );
+    InError( Form( "Usage: %s <input card> [output .root filename]", argv[0] ) );
     return -1;
   }
+  const std::string incard( argv[1] ), extension = incard.substr( incard.find_last_of( "." )+1 );
+  if ( extension == "card" ) mg.setParameters( CepGen::Cards::LpairReader( argv[1] ).parameters() );
+  else if ( extension == "cfg" ) mg.setParameters( CepGen::Cards::ConfigReader( argv[1] ).parameters() );
 
-  if ( atoi( argv[1] )<=4 and atoi( argv[1] )>0 ) {
-    // do not provide an input card
-    mg.parameters->setProcess( new CepGen::Process::GamGamLL );
-    mg.parameters->kinematics.in1p = 6500.;
-    mg.parameters->kinematics.in2p = 6500.;
-    mg.parameters->kinematics.pair = CepGen::Particle::Muon;
-    mg.parameters->kinematics.cuts_mode = CepGen::Kinematics::BothParticles;
-    mg.parameters->kinematics.e_min = 0.; //FIXME
-    mg.parameters->kinematics.pt_min = 15.;
-    mg.parameters->maxgen = ngen;
-    mg.parameters->remnant_mode = CepGen::SuriYennie;
-    mg.parameters->kinematics.mode = ( argc>1 )
-      ? static_cast<CepGen::Kinematics::ProcessMode>( atoi( argv[1] ) )
-      : CepGen::Kinematics::ElasticElastic;
-    //mg.parameters->ncvg = 5e3; //FIXME
-    mg.parameters->kinematics.eta_min = -2.5;
-    mg.parameters->kinematics.eta_max = 2.5;
-    mg.parameters->kinematics.mx_max = 1.e3;
-  }
-  else {
-    mg.setParameters( CepGen::Cards::LpairReader( argv[1] ).parameters() );
-  }
-
-  mg.parameters->generation = true;
+  mg.parameters->generation.enabled = true;
   mg.parameters->dump();
 
   //----- open the output root file
@@ -77,7 +57,7 @@ int main( int argc, char* argv[] ) {
   ev.xsect = xsec;
   ev.errxsect = err;
   ev.litigious_events = 0;
-  for ( unsigned int i=0; i<mg.parameters->maxgen; i++ ) {
+  for ( unsigned int i=0; i<mg.parameters->generation.maxgen; i++ ) {
     auto event = *mg.generateOneEvent();
     if ( i%10000==0 ) {
       cout << ">> event " << i << " generated" << endl;
