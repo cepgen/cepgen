@@ -7,20 +7,23 @@
 
 namespace CepGen
 {
-  namespace PhotonFluxes
+  /// Incoming parton fluxes
+  namespace Fluxes
   {
-    /// Get the elastic flux to be expected at a given x_bjorken / kT
-    double ProtonElastic(double x_, double kt2_);
+    /// List of fluxes for incoming photons
+    namespace Photon
+    {
+      /// Get the elastic flux to be expected at a given x_bjorken / kT
+      /// \param[in] x Bjorken x
+      /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming photon
+      double ProtonElastic( double x, double kt2 );
 
-#ifdef GRVPDF
-    /// Get the inelastic flux to be expected at a given x_bjorken / kT
-    double ProtonInelastic(double x_, double kt2_, double mx_);
-#else
-    inline double ProtonInelastic(double x_, double kt2_, double mx_) {
-      InError( "Inelastic flux cannot be computed as GRV PDF set is not linked to this instance!" );
-      exit(0);
+      /// Get the inelastic flux to be expected at a given x_bjorken / kT
+      /// \param[in] x Bjorken x
+      /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming photon
+      /// \param[in] mx Outgoing diffractive proton mass
+      double ProtonInelastic( double x, double kt2, double mx );
     }
-#endif
   }
 }
 

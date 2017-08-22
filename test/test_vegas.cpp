@@ -2,6 +2,7 @@
 #include "CepGen/Processes/TestProcess.h"
 
 #include <iostream>
+#include <assert.h>
 
 using namespace std;
 
@@ -15,13 +16,13 @@ main( int argc, char* argv[] )
   //CepGen::Logger::get().level = CepGen::Logger::Debug;
 
   mg.parameters->setProcess( new CepGen::Process::TestProcess );
-  //mg.parameters->vegas.ncvg = 50000;
+  mg.parameters->vegas.ncvg = 500000;
   //mg.parameters->vegas.itvg = 5;
 
   double result, error;
   mg.computeXsection( result, error );
 
-  if ( fabs( exact - result ) > 1.0 * error ) return -1;
+  assert( fabs( exact - result ) < 2.0 * error );
 
   cout << "Test 1 passed!" << endl;
 

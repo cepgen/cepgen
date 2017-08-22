@@ -19,7 +19,8 @@ namespace CepGen
       public:
         /// All types of output available for export
         enum OutputType {
-          HepMC, LHE
+          HepMC, ///< HepMC ASCII format
+          LHE ///< LHEF format
         };
         friend std::ostream& operator<<( std::ostream& os, const OutputType& type ) {
           switch ( type ) {
@@ -49,11 +50,11 @@ namespace CepGen
       protected:
         /// Type of output requested
         OutputType type_;
-        /// Process cross section
+        /// Generation cross section
         float cross_sect_;
-        /// Error on process cross section
+        /// Error on generation cross section
         float cross_sect_err_;
-        /// Event number in generation
+        /// Event index
         unsigned int event_num_;
     };
   }

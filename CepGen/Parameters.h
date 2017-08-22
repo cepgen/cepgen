@@ -4,7 +4,7 @@
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
 #include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Cards/FunctionBuilder.h"
+#include "CepGen/Core/Functional.h"
 
 #include <memory>
 
@@ -109,7 +109,7 @@ namespace CepGen
 
       //----- rescattering corrections
       /// Functional to be used to account for rescattering corrections (implemented within the process)
-      FunctionBuilder<1> taming_function;
+      Functional<1> taming_function;
 
     private:
       std::unique_ptr<Process::GenericProcess> process_;

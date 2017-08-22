@@ -192,8 +192,6 @@ namespace CepGen
       double ranudq, ulmdq, ulmq;
       double ranmxp, ranmxt;
       double pmxp;
-      double pmxda[4];
-      double partpb[4];
 
       Debugging("Hadronisation preparation called!");
 
@@ -230,31 +228,25 @@ namespace CepGen
         // Build 4-vectors and boost decay particles
 
         // Start with the singlet
-        pmxda[0] = pmxp*sin( ranmxt )*cos( ranmxp );
-        pmxda[1] = pmxp*sin( ranmxt )*sin( ranmxp );
-        pmxda[2] = pmxp*cos( ranmxt );
-        pmxda[3] = std::sqrt( pmxp*pmxp + ulmq*ulmq );
+        Particle::Momentum pmxda( pmxp*sin( ranmxt )*cos( ranmxp ), pmxp*sin( ranmxt )*sin( ranmxp ), pmxp*cos( ranmxt ), sqrt( pmxp*pmxp + ulmq*ulmq ) );
+        Particle::Momentum part_mom = part.momentum();
+        part_mom.lorentzBoost( pmxda );
 
-        Lorenb( part.mass(), part.momentum(), pmxda, partpb );
-
-        if ( !( partpb[0] < 0 ) && !( partpb[0] > 0 ) ) return false;
+        if ( !( part_mom.px() < 0 ) && !( part_mom.px() > 0 ) ) return false;
 
         Particle singlet( part.role(), singlet_id );
         singlet.setStatus( Particle::DebugResonance );
-        singlet.setMomentum( partpb );
+        singlet.setMomentum( part_mom );
         //singlet.setMass(); //FIXME
 
         // Continue with the doublet
-        pmxda[0] = -pmxda[0];
-        pmxda[1] = -pmxda[1];
-        pmxda[2] = -pmxda[2];
-        pmxda[3] = std::sqrt( pmxp*pmxp + ulmdq*ulmdq );
-
-        Lorenb( part.mass(), part.momentum(), pmxda, partpb );
+        pmxda = Particle::Momentum( -pmxp*sin( ranmxt )*cos( ranmxp ), -pmxp*sin( ranmxt )*sin( ranmxp ), -pmxp*cos( ranmxt ), sqrt( pmxp*pmxp + ulmq*ulmq ) );
+        part_mom = part.momentum();
+        part_mom.lorentzBoost( pmxda );
 
         Particle doublet( part.role(), doublet_id );
         doublet.setStatus( Particle::DebugResonance );
-        doublet.setMomentum( partpb );
+        doublet.setMomentum( part_mom );
         //std::cout << "doublet, mass = " << doublet.mass() << std::endl;
         //doublet.setMass(); //FIXME
 

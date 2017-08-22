@@ -5,7 +5,8 @@
 
 #include <iostream>
 
-#include "CepGen/Cards/FunctionBuilder.h"
+#include "CepGen/Core/Functional.h"
+#include <assert.h>
 
 using namespace std;
 
@@ -16,7 +17,7 @@ int main()
   TGraph gr_fb, gr_rt;
   TF1 f_rt( "f_rt", "TMath::Min(1.,TMath::Exp(-x/10))", min_x, max_x );
 
-  CepGen::FunctionBuilder<1> test1( "min(1,exp(-x/10))", { "x" } );
+  CepGen::Functional<1> test1( "min(1,exp(-x/10))", { "x" } );
   for ( unsigned short i = 0; i < num_points; ++i ) {
     const double x = min_x + ( max_x-min_x )/( num_points-1 )*i;
     gr_rt.SetPoint( i, x, f_rt.Eval( x ) );
@@ -31,7 +32,7 @@ int main()
     chi2 += pow( gr_fb.GetY()[i]-gr_rt.GetY()[i], 2 );
   }
   chi2 = sqrt( chi2 );
-  if ( chi2>1.e-9 ) return -1;
+  assert( chi2<1.e-9 );
   cout << "Test passed!" << endl;
 
   /*CepGen::Canvas c( "test_graph" );

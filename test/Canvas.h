@@ -34,6 +34,7 @@ namespace CepGen
         TPaveText::SetFillColor( 0 );
         TPaveText::SetFillStyle( 0 );
         TPaveText::SetLineColor( 0 );
+        TPaveText::SetLineWidth( 0 );
         TPaveText::SetShadowColor( 0 );
         TPaveText::SetTextFont( font_type( 2 ) );
         TPaveText::SetTextSize( 0.058 );

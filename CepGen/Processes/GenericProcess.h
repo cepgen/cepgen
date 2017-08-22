@@ -37,7 +37,9 @@ namespace CepGen
         typedef ParticlesRoleMap OutgoingState;
 
         /// Default constructor for an undefined process
-        /// \param[in] name Human-readable format of the process name
+        /// \param[in] name Process name
+        /// \param[in] description Human-readable description of the process
+        /// \param[in] has_event Do we generate the associated event structure?
         GenericProcess( const std::string& name, const std::string& description="<invalid process>", bool has_event=true );
         virtual ~GenericProcess();
 

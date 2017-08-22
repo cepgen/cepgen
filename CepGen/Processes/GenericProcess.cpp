@@ -47,10 +47,12 @@ namespace CepGen
     for ( unsigned int i=0; i<x_.size(); i++ ) {
       os << Form( "  x(%2d) = %8.6f\n\t", i, x_[i] );
     }
-    if ( et < DebugMessage ) { Information( Form( "Number of integration parameters: %d\n\t"
-                                                  "%s", x_.size(), os.str().c_str() ) ); }
-    else                     { Debugging( Form( "Number of integration parameters: %d\n\t"
-                                                "%s", x_.size(), os.str().c_str() ) ); }
+    if ( et < DebugMessage ) {
+      Information( Form( "Number of integration parameters: %d\n\t"
+                         "%s", x_.size(), os.str().c_str() ) ); }
+    else {
+      Debugging( Form( "Number of integration parameters: %d\n\t"
+                       "%s", x_.size(), os.str().c_str() ) ); }
     }
 
     void
@@ -180,15 +182,13 @@ namespace CepGen
     std::ostream&
     operator<<( std::ostream& os, const GenericProcess& proc )
     {
-      os << proc.name().c_str();
-      return os;
+      return os << proc.name().c_str();
     }
 
     std::ostream&
     operator<<( std::ostream& os, const GenericProcess* proc )
     {
-      os << proc->name().c_str();
-      return os;
+      return os << proc->name().c_str();
     }
   }
 }

@@ -16,7 +16,7 @@ namespace CepGen
       kIntermediatePart1( parton1 ), kIntermediatePart2( parton2 ),
       kProducedPart1( central1 ), kProducedPart2( central2 )
     {
-      if ( parton2 == Particle::invalidParticle ) kIntermediatePart2 = kIntermediatePart1;
+      if ( parton2  == Particle::invalidParticle ) kIntermediatePart2 = kIntermediatePart1;
       if ( central2 == Particle::invalidParticle ) kProducedPart2 = kProducedPart1;
     }
 
@@ -117,20 +117,20 @@ namespace CepGen
       flux1_ = flux2_ = 0.;
       switch ( cuts_.mode ) {
         case Kinematics::ElasticElastic:
-          flux1_ = PhotonFluxes::ProtonElastic( x1, q1t2 );
-          flux2_ = PhotonFluxes::ProtonElastic( x2, q2t2 );
+          flux1_ = Fluxes::Photon::ProtonElastic( x1, q1t2 );
+          flux2_ = Fluxes::Photon::ProtonElastic( x2, q2t2 );
           break;
         case Kinematics::ElasticInelastic:
-          flux1_ = PhotonFluxes::ProtonElastic( x1, q1t2 );
-          flux2_ = PhotonFluxes::ProtonInelastic( x2, q2t2, MY_ );
+          flux1_ = Fluxes::Photon::ProtonElastic( x1, q1t2 );
+          flux2_ = Fluxes::Photon::ProtonInelastic( x2, q2t2, MY_ );
           break;
         case Kinematics::InelasticElastic:
-          flux1_ = PhotonFluxes::ProtonInelastic( x1, q1t2, MX_ );
-          flux2_ = PhotonFluxes::ProtonElastic( x2, q2t2 );
+          flux1_ = Fluxes::Photon::ProtonInelastic( x1, q1t2, MX_ );
+          flux2_ = Fluxes::Photon::ProtonElastic( x2, q2t2 );
           break;
         case Kinematics::InelasticInelastic:
-          flux1_ = PhotonFluxes::ProtonInelastic( x1, q1t2, MX_ );
-          flux2_ = PhotonFluxes::ProtonInelastic( x2, q2t2, MY_ );
+          flux1_ = Fluxes::Photon::ProtonInelastic( x1, q1t2, MX_ );
+          flux2_ = Fluxes::Photon::ProtonInelastic( x2, q2t2, MY_ );
           break;
         default: return;
       }

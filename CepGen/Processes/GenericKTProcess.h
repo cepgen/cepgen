@@ -23,7 +23,7 @@ namespace CepGen
          * \brief Class constructor
          * \param[in] name Generic process name
          * \param[in] description Human-readable kT-factorised process name
-         * \param[in] num_user_dimensions_ Number of additional dimensions required for the user process
+         * \param[in] num_user_dimensions Number of additional dimensions required for the user process
          * \param[in] ip1 First incoming parton
          * \param[in] ip2 Second incoming parton (if undefined, same as the first)
          * \param[in] op1 First produced final state particle

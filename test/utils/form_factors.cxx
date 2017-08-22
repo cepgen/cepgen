@@ -12,11 +12,12 @@ using namespace std;
 int
 main( int argc, char* argv[] )
 {
-  const float min_q2 = 1., max_q2 = 1.e5, mx2 = ( argc>1 ) ? atof( argv[1] ) : 1.e4;
+  const float min_q2 = 0.5, max_q2 = 1.e5, mx2 = ( argc>1 ) ? atof( argv[1] ) : 1.e4;
+  const char* mx2_str = ( argc>2 ) ? argv[2] : "10^{4}";
   const unsigned int npoints = 1000;
 
   TGraph g_sy_fe_100, g_sy_fm_100;
-  TGraph g_fb_fe_100, g_fb_fm_100;
+  //TGraph g_fb_fe_100, g_fb_fm_100;
   TGraph g_su_fe_100, g_su_fm_100;
 
   const float mp2 = pow( CepGen::Particle::massFromPDGId( CepGen::Particle::Proton ), 2 );
@@ -28,16 +29,17 @@ main( int argc, char* argv[] )
     g_sy_fe_100.SetPoint( i, q2, ff_sy.FE );
     g_sy_fm_100.SetPoint( i, q2, ff_sy.FM );
 
-    CepGen::FormFactors ff_fb = CepGen::FioreBrasseFormFactors( q2, mp2, mx2 );
+    /*CepGen::FormFactors ff_fb = CepGen::FioreBrasseFormFactors( q2, mp2, mx2 );
     g_fb_fe_100.SetPoint( i, q2, ff_fb.FE );
-    g_fb_fm_100.SetPoint( i, q2, ff_fb.FM );
+    g_fb_fm_100.SetPoint( i, q2, ff_fb.FM );*/
 
     CepGen::FormFactors ff_su = CepGen::SzczurekUleshchenkoFormFactors( q2, mp2, mx2 );
     g_su_fe_100.SetPoint( i, q2, ff_su.FE );
     g_su_fm_100.SetPoint( i, q2, ff_su.FM );
+    cout << q2 << "\t" << ff_su.FM << endl;
   }
 
-  CepGen::Canvas c( "test", Form( "CepGen proton form factors, M_{X}^{2} = %d GeV^{2}", int( mx2 ) ) );
+  CepGen::Canvas c( "test", Form( "CepGen proton form factors, M_{X}^{2} = %s GeV^{2}", mx2_str ) );
   c.SetLegendX1( 0.4 );
 
   TMultiGraph mg;
@@ -51,7 +53,7 @@ main( int argc, char* argv[] )
   mg.Add( &g_sy_fm_100, "l" );
   c.AddLegendEntry( &g_sy_fm_100, "Suri-Yennie, F_{M}", "l" );
 
-  g_fb_fe_100.SetLineColor( kRed+1 );
+  /*g_fb_fe_100.SetLineColor( kRed+1 );
   g_fb_fe_100.SetLineWidth( 3 );
   mg.Add( &g_fb_fe_100, "l" );
   c.AddLegendEntry( &g_fb_fe_100, "Fiore-Brasse, F_{E}", "l" );
@@ -60,15 +62,15 @@ main( int argc, char* argv[] )
   g_fb_fm_100.SetLineColor( kRed+1 );
   g_fb_fm_100.SetLineWidth( 3 );
   mg.Add( &g_fb_fm_100, "l" );
-  c.AddLegendEntry( &g_fb_fm_100, "Fiore-Brasse, F_{M}", "l" );
+  c.AddLegendEntry( &g_fb_fm_100, "Fiore-Brasse, F_{M}", "l" );*/
 
-  g_su_fe_100.SetLineColor( kGreen-1 );
+  g_su_fe_100.SetLineColor( kGreen+2 );
   g_su_fe_100.SetLineWidth( 3 );
   mg.Add( &g_su_fe_100, "l" );
   c.AddLegendEntry( &g_su_fe_100, "Szczurek-Uleshchenko, F_{E}", "l" );
 
   g_su_fm_100.SetLineStyle( 2 );
-  g_su_fm_100.SetLineColor( kGreen-1 );
+  g_su_fm_100.SetLineColor( kGreen+2 );
   g_su_fm_100.SetLineWidth( 3 );
   mg.Add( &g_su_fm_100, "l" );
   c.AddLegendEntry( &g_su_fm_100, "Szczurek-Uleshchenko, F_{M}", "l" );
@@ -79,6 +81,7 @@ main( int argc, char* argv[] )
   c.Prettify( mg.GetHistogram() );
   mg.GetYaxis()->SetRangeUser( 1.e-10, 10. );
   mg.GetXaxis()->SetLimits( min_q2, max_q2 );
+  c.SetLogx();
   c.SetLogy();
 
   c.Save( "pdf" );
