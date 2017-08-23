@@ -12,6 +12,7 @@ namespace CepGen
     remnant_mode( param.remnant_mode ),
     kinematics( param.kinematics ), vegas( param.vegas ), generation( param.generation ),
     pdflib( param.pdflib ), hadroniser_max_trials( param.hadroniser_max_trials ),
+    taming_functions( param.taming_functions ),
     process_( std::move( param.process_ ) ), hadroniser_( std::move( param.hadroniser_ ) ),
     store_( param.store_ )
   {}
@@ -20,6 +21,7 @@ namespace CepGen
     remnant_mode( param.remnant_mode ),
     kinematics( param.kinematics ), vegas( param.vegas ), generation( param.generation ),
     pdflib( param.pdflib ), hadroniser_max_trials( param.hadroniser_max_trials ),
+    taming_functions( param.taming_functions ),
     store_( param.store_ )
   {}
 

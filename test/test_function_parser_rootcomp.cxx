@@ -10,7 +10,7 @@
 
 using namespace std;
 
-int main()
+int main( int argc, char* argv[] )
 {
   const unsigned short num_points = 100;
   const double min_x = -1., max_x = 10.;
@@ -35,18 +35,21 @@ int main()
   assert( chi2<1.e-9 );
   cout << "Test passed!" << endl;
 
-  /*CepGen::Canvas c( "test_graph" );
-  TMultiGraph mg;
-  //mg.Add( &gr_fb );
-  //mg.Add( &gr_rt );
-  mg.Add( &gr_diff );
-  mg.Draw( "al" );
-  //c.AddLegendEntry( &gr_fb, "FunctionBuilder", "l" );
-  //c.AddLegendEntry( &gr_rt, "ROOT", "l" );
-  gr_fb.SetLineWidth( 3 );
-  gr_fb.SetLineStyle( 2 );
-  c.Prettify( mg.GetHistogram() );
-  c.Save( "pdf" );*/
-
+  if ( argc > 1 && !strcmp( argv[1], "draw" ) ) {
+    CepGen::Canvas c( "test_graph", "CepGen validation" );
+    TMultiGraph mg;
+    mg.Add( &gr_fb );
+    mg.Add( &gr_rt );
+    mg.Add( &gr_diff );
+    mg.Draw( "al" );
+    c.AddLegendEntry( &gr_fb, "Functional", "l" );
+    c.AddLegendEntry( &gr_rt, "ROOT", "l" );
+    c.AddLegendEntry( &gr_diff, "Difference", "l" );
+    gr_fb.SetLineWidth( 3 );
+    gr_fb.SetLineStyle( 2 );
+    gr_diff.SetLineColor( kRed );
+    c.Prettify( mg.GetHistogram() );
+    c.Save( "pdf" );
+  }
   return 0;
 }

@@ -31,6 +31,7 @@ namespace CepGen
         static void writeProcess( const Parameters*, libconfig::Setting& );
         static void writeIncomingKinematics( const Parameters*, libconfig::Setting& );
         static void writeOutgoingKinematics( const Parameters*, libconfig::Setting& );
+        static void writeTamingFunctions( const Parameters*, libconfig::Setting& );
         static void writeVegas( const Parameters*, libconfig::Setting& );
         static void writeGenerator( const Parameters*, libconfig::Setting& );
 #else

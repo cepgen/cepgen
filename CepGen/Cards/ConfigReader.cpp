@@ -131,10 +131,7 @@ namespace CepGen
       if ( !tf.isList() ) FatalError( "The taming functions definition must be wrapped within a list!" );
       for ( unsigned short i = 0; i < tf.getLength(); ++i ) {
         const std::string variable = tf[i]["variable"], expression = tf[i]["expression"];
-        std::cout << "new expression with variable " << variable << " and expression " << expression << std::endl;
-        params_.taming_functions[variable] = Functional<1>( expression, std::array<std::string,1>{ variable } );
-        try {std::cout << variable << "\t" << params_.taming_functions[variable].expression() << "\t" << params_.taming_functions[variable].eval( 10.5 ) << std::endl; }
-        catch ( Exception& e ) { e.dump(); }
+        params_.taming_functions.emplace_back( variable, expression );
       }
     }
 
@@ -174,6 +171,17 @@ namespace CepGen
     }
 
     void
+    ConfigReader::writeTamingFunctions( const Parameters* params, libconfig::Setting& root )
+    {
+      libconfig::Setting& tf = root.add( "taming_functions", libconfig::Setting::TypeList );
+      for ( std::vector<Parameters::TamingFunction>::const_iterator it = params->taming_functions.begin(); it != params->taming_functions.end(); ++it ) {
+        libconfig::Setting& fun = tf.add( libconfig::Setting::TypeGroup );
+        fun.add( "variable", libconfig::Setting::TypeString ) = it->variable;
+        fun.add( "expression", libconfig::Setting::TypeString ) = it->expression;
+      }
+    }
+
+    void
     ConfigReader::writeVegas( const Parameters* params, libconfig::Setting& root )
     {
       libconfig::Setting& veg = root.add( "vegas", libconfig::Setting::TypeGroup );
@@ -199,6 +207,7 @@ namespace CepGen
       writeProcess( params, root );
       writeIncomingKinematics( params, root["process"] );
       writeOutgoingKinematics( params, root["process"] );
+      writeTamingFunctions( params, root["process"] );
       writeVegas( params, root );
       writeGenerator( params, root );
       cfg.writeFile( file );
