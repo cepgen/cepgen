@@ -10,11 +10,11 @@ else()
 endif()
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake)
 set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/CepGen)
-set(CEPGEN_LIBRARIES CepGenCore CepGenExternalHadronisers CepGenPhysics CepGenProcesses)
+set(CEPGEN_LIBRARIES CepGenCore CepGenPhysics CepGenProcesses)
 
 #----- define all individual modules to be built beforehand
 
-set(CEPGEN_MODULES Core Processes Hadronisers Physics Export)
+set(CEPGEN_MODULES Core Processes Physics Export)
 
 #----- enable fortran (for Pythia/Herwig/...)
 

@@ -2,7 +2,6 @@
 #define CepGen_Parameters_h
 
 #include "CepGen/Processes/GenericProcess.h"
-#include "CepGen/Hadronisers/GenericHadroniser.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Core/TamingFunction.h"
 
@@ -17,7 +16,7 @@ namespace CepGen
       Parameters();
       /// Copy constructor (transfers ownership to the process!)
       Parameters( Parameters& );
-      /// Const copy constructor (all but the process and the hadroniser)
+      /// Const copy constructor (all but the process)
       Parameters( const Parameters& );
       ~Parameters();
       /// Set the polar angle range for the produced leptons
@@ -83,15 +82,6 @@ namespace CepGen
       /// Are the events generated in this run to be stored in the output file ?
       bool storage() const { return store_; }
 
-      //----- hadronisation
-
-      /// Hadronisation algorithm to use for the proton(s) fragmentation
-      Hadroniser::GenericHadroniser* hadroniser() { return hadroniser_.get(); }
-      /// Set the hadronisation algorithm
-      void setHadroniser( Hadroniser::GenericHadroniser* hadr ) { hadroniser_.reset( hadr ); }
-      /// Maximal number of trials for the hadronisation of the proton(s) remnants
-      unsigned int hadroniser_max_trials;
-
       //----- taming functions
 
       /// Functionals to be used to account for rescattering corrections (implemented within the process)
@@ -99,7 +89,6 @@ namespace CepGen
 
     private:
       std::unique_ptr<Process::GenericProcess> process_;
-      std::unique_ptr<Hadroniser::GenericHadroniser> hadroniser_;
       bool store_;
   };
 }

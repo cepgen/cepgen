@@ -4,23 +4,20 @@ namespace CepGen
 {
   Parameters::Parameters() :
     remnant_mode( SuriYennie ),
-    hadroniser_max_trials( 5 ),
     store_( false )
   {}
 
   Parameters::Parameters( Parameters& param ) :
     remnant_mode( param.remnant_mode ),
     kinematics( param.kinematics ), vegas( param.vegas ), generation( param.generation ),
-    hadroniser_max_trials( param.hadroniser_max_trials ),
     taming_functions( param.taming_functions ),
-    process_( std::move( param.process_ ) ), hadroniser_( std::move( param.hadroniser_ ) ),
+    process_( std::move( param.process_ ) ),
     store_( param.store_ )
   {}
 
   Parameters::Parameters( const Parameters& param ) :
     remnant_mode( param.remnant_mode ),
     kinematics( param.kinematics ), vegas( param.vegas ), generation( param.generation ),
-    hadroniser_max_trials( param.hadroniser_max_trials ),
     taming_functions( param.taming_functions ),
     store_( param.store_ )
   {}
@@ -102,8 +99,6 @@ namespace CepGen
       << std::endl
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Outgoing remnants" ) : "Outgoing remnants" ) << std::endl
       << std::endl << std::setfill( ' ' );
-    if ( hadroniser_ )
-      os << std::setw( wt ) << "Hadronisation algorithm" << ( pretty ? boldify( hadroniser_->name().c_str() ) : hadroniser_->name() ) << std::endl;
     os << std::setw( wt ) << "Mass range" << ( pretty ? boldify( Form( "%.2f < M(x/y) < %.2f", kinematics.mx_min, kinematics.mx_max ).c_str() ) : Form( "%.2f < M(x/y) < %.2f", kinematics.mx_min, kinematics.mx_max ) ) << " GeV/c**2" << std::endl;
     if ( pretty ) { Information( os.str() ); }
     else out << os.str();

@@ -102,34 +102,6 @@ namespace CepGen
 
       ev->time_generation = tmr.elapsed();
 
-      //--- if an hadronisation algorithm is specified, run it
-
-      if ( p->hadroniser() && p->kinematics.mode!=Kinematics::ElasticElastic ) {
-
-        Debugging( Form( "Event before calling the hadroniser (%s)", p->hadroniser()->name().c_str() ) );
-        if ( Logger::get().level>=Logger::Debug ) ev->dump();
-
-        unsigned int num_hadr_trials = 0;
-        bool hadronised = false;
-        while ( !hadronised && num_hadr_trials <= p->hadroniser_max_trials ) {
-          try {
-            hadronised = p->hadroniser()->hadronise( ev.get() );
-          } catch ( Exception& e ) { e.dump(); }
-
-          if ( num_hadr_trials>0 ) { Debugging( Form( "Hadronisation failed. Trying for the %dth time", num_hadr_trials+1 ) ); }
-          num_hadr_trials++;
-        }
-        if ( !hadronised ) return 0.; //FIXME
-
-        ev->num_hadronisation_trials = num_hadr_trials;
-
-        Debugging( Form( "Event hadronisation succeeded after %d trial(s)", ev->num_hadronisation_trials ) );
-
-        if ( num_hadr_trials>p->hadroniser_max_trials ) return 0.; //FIXME
-
-        Debugging( Form( "Event after calling the hadroniser (%s)", p->hadroniser()->name().c_str() ) );
-        if ( Logger::get().level>=Logger::Debug ) ev->dump();
-      }
       ev->time_total = tmr.elapsed();
       p->process()->addGenerationTime( ev->time_total );
 

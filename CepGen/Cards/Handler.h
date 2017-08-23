@@ -6,8 +6,6 @@
 #include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Processes/PPtoLL.h"
 
-#include "CepGen/Hadronisers/Pythia6Hadroniser.h"
-
 namespace CepGen
 {
   /// Location for all steering card parsers/writers
