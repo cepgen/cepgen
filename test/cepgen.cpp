@@ -29,14 +29,6 @@ int main( int argc, char* argv[] ) {
     mg.parameters->kinematics.mode = CepGen::Kinematics::ElasticElastic;
     mg.parameters->remnant_mode = CepGen::SuriYennie;
 
-#ifdef PYTHIA6
-    mg.parameters->setHadroniser( new CepGen::Hadroniser::Pythia6Hadroniser );
-#else
-#ifdef JETSET
-    mg.parameters->setHadroniser( new CepGen::Hadroniser::Jetset7Hadroniser );
-#endif
-#endif
-    
     mg.parameters->kinematics.in1p = 6500.;
     mg.parameters->kinematics.in2p = 6500.;
     mg.parameters->kinematics.pair = CepGen::Particle::Muon;
