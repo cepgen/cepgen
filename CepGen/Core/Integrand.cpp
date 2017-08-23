@@ -80,13 +80,25 @@ namespace CepGen
 
     tmr.reset();
     //PrintMessage( Form( "5: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
-    const double ff = p->process()->computeWeight();
+    double integrand = p->process()->computeWeight();
     //PrintMessage( Form( "6: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
-    if ( ff<0. ) return 0.;
+    if ( integrand < 0. ) return 0.;
+
+    if ( !p->taming_functions.empty() || p->storage() ) p->process()->fillKinematics( false );
+
+    double taming = 1.0;
+    if ( p->taming_functions.has( "mcep" ) ) {
+      const double mcep = ( ev->getOneByRole( Particle::CentralParticle1 ).momentum() + ev->getOneByRole( Particle::CentralParticle2 ).momentum() ).mass();
+      taming *= p->taming_functions.eval( "mcep", mcep );
+    }
+    if ( p->taming_functions.has( "q2" ) ) {
+      taming *= p->taming_functions.eval( "q2", ev->getOneByRole( Particle::Parton1 ).momentum().mass() );
+      taming *= p->taming_functions.eval( "q2", ev->getOneByRole( Particle::Parton2 ).momentum().mass() );
+    }
+    integrand *= taming;
 
     if ( p->storage() ) { // MC events generation
-      p->process()->fillKinematics( false );
 
       ev->time_generation = tmr.elapsed();
 
@@ -129,10 +141,10 @@ namespace CepGen
 
     if ( Logger::get().level>=Logger::DebugInsideLoop ) {
       os.str( "" ); for ( unsigned int i=0; i<ndim; i++ ) { os << Form( "%10.8f ", x[i] ); }
-      Debugging( Form( "f value for dim-%d point ( %s): %4.4e", ndim, os.str().c_str(), ff ) );
+      Debugging( Form( "f value for dim-%d point ( %s): %4.4e", ndim, os.str().c_str(), integrand ) );
     }
 
-    return ff;
+    return integrand;
   }
 }
 

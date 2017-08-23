@@ -507,8 +507,6 @@ GamGamLL::beforeComputeWeight()
 double
 GamGamLL::computeWeight()
 {
-  double weight = 0.;
-
   if ( !is_outgoing_state_set_ ) { InWarning( "Output state not set!" ); return 0.; }
 
   DebuggingInsideLoop( Form( "sqrt(s)=%f\n\tm(X1)=%f\tm(X2)=%f", sqs_, MX_, MY_ ) );
@@ -534,9 +532,10 @@ GamGamLL::computeWeight()
 
   if ( !orient() ) return 0.;
 
+  if ( jacobian_ == 0. ) { InWarning( Form( "dj = %f", jacobian_ ) ); return 0.; }
+
   if ( t1_>0. )  { InWarning( Form( "t1 = %f > 0", t1_ ) ); return 0.; }
   if ( t2_>0. )  { InWarning( Form( "t2 = %f > 0", t2_ ) ); return 0.; }
-  if ( jacobian_==0. ) { InWarning( Form( "dj = %f", jacobian_ ) ); return 0.; }
 
   const double ecm6 = ( w4_+Ml12_-Ml22_ ) / ( 2.*mc4_ ),
                pp6cm = sqrt( ecm6*ecm6-Ml12_ );
@@ -753,18 +752,17 @@ GamGamLL::computeWeight()
   }
   if ( !lcut ) return 0.; // dismiss the cuts-failing events in the cross-section computation
 
-  //--- compute the event weight using the Jacobian
-
-  weight = Constants::GeV2toBarn*jacobian_;
   switch ( cuts_.mode ) { // inherited from CDF version
-    case Kinematics::ElectronProton: default: weight *= periPP( 1, 2 ); break; // ep case
-    case Kinematics::ElasticElastic:          weight *= periPP( 2, 2 ); break; // elastic case
-    case Kinematics::InelasticElastic:        weight *= periPP( 3, 2 )*( dw31_*dw31_ ); break;
-    case Kinematics::ElasticInelastic:        weight *= periPP( 3, 2 )*( dw52_*dw52_ ); break; // single-dissociative case
-    case Kinematics::InelasticInelastic:      weight *= periPP( 3, 3 )*( dw31_*dw31_ )*( dw52_*dw52_ ); break; // double-dissociative case
+    case Kinematics::ElectronProton: default: jacobian_ *= periPP( 1, 2 ); break; // ep case
+    case Kinematics::ElasticElastic:          jacobian_ *= periPP( 2, 2 ); break; // elastic case
+    case Kinematics::InelasticElastic:        jacobian_ *= periPP( 3, 2 )*( dw31_*dw31_ ); break;
+    case Kinematics::ElasticInelastic:        jacobian_ *= periPP( 3, 2 )*( dw52_*dw52_ ); break; // single-dissociative case
+    case Kinematics::InelasticInelastic:      jacobian_ *= periPP( 3, 3 )*( dw31_*dw31_ )*( dw52_*dw52_ ); break; // double-dissociative case
   }
 
-  return weight;
+  //--- compute the event weight using the Jacobian
+
+  return Constants::GeV2toBarn*jacobian_;
 }
 
 void

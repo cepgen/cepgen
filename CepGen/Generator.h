@@ -90,6 +90,8 @@ namespace CepGen
        * \param[out] err The absolute integration error on the computed cross-section, in pb
        */
       void computeXsection( double& xsec, double& err );
+      double crossSection() const { return cross_section_; }
+      double crossSectionError() const { return cross_section_error_; }
       /**
        * Generate one single event given the phase space computed by Vegas in the integration step
        * \return A pointer to the Event object generated in this run

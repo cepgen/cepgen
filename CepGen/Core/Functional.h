@@ -24,22 +24,28 @@ namespace CepGen
       /// Default constructor
       Functional() {}
       /// Copy constructor
-      Functional( const Functional<N>& rhs ) : vars_( rhs.vars_ )
+      Functional( const Functional& rhs )
 #ifdef MUPARSER
-        , parser_( rhs.parser_ ), values_( rhs.values_ )
-#endif
+        : values_( rhs.values_ ), vars_( rhs.vars_ ), expression_( rhs.expression_ ) {
+          for ( unsigned short i = 0; i < vars_.size(); ++i ) {
+          parser_.DefineVar( vars_[i], &values_[i] );
+        }
+        parser_.SetExpr( expression_ );
+      }
+#else
       {}
+#endif
       /// Build a parser from an expression and a variables list
       /// \param[in] expr Expression to parse
       /// \param[in] vars List of variables to parse
-      Functional( const std::string& expr, const std::array<std::string,N>& vars ) : vars_( vars ) {
-#ifndef MUPARSER
-        InError( "muParser is not linked to this program! the math evaluator is hence disabled!" );
-#else
+      Functional( const std::string& expr, const std::array<std::string,N>& vars ) : vars_( vars ), expression_( expr ) {
+#ifdef MUPARSER
         for ( unsigned short i = 0; i < vars_.size(); ++i ) {
           parser_.DefineVar( vars_[i], &values_[i] );
         }
         parser_.SetExpr( expr );
+#else
+        InError( "muParser is not linked to this program! the math evaluator is hence disabled!" );
 #endif
       }
       /// Compute the functional for a given value of the variable (N=1 case)
@@ -64,11 +70,12 @@ namespace CepGen
       //const std::string& expression() { return parser_.expression(); }
 
     private:
-      std::array<std::string,N> vars_;
 #ifdef MUPARSER
       mu::Parser parser_;
       mutable std::array<double,N> values_;
 #endif
+      std::array<std::string,N> vars_;
+      std::string expression_;
   };
 }
 

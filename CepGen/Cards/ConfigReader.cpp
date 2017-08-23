@@ -130,8 +130,7 @@ namespace CepGen
     {
       if ( !tf.isList() ) FatalError( "The taming functions definition must be wrapped within a list!" );
       for ( unsigned short i = 0; i < tf.getLength(); ++i ) {
-        const std::string variable = tf[i]["variable"], expression = tf[i]["expression"];
-        params_.taming_functions.emplace_back( variable, expression );
+        params_.taming_functions.add( tf[i]["variable"], tf[i]["expression"] );
       }
     }
 
@@ -174,10 +173,10 @@ namespace CepGen
     ConfigReader::writeTamingFunctions( const Parameters* params, libconfig::Setting& root )
     {
       libconfig::Setting& tf = root.add( "taming_functions", libconfig::Setting::TypeList );
-      for ( std::vector<Parameters::TamingFunction>::const_iterator it = params->taming_functions.begin(); it != params->taming_functions.end(); ++it ) {
+      for ( std::map<std::string,TamingFunction>::const_iterator it = params->taming_functions.begin(); it != params->taming_functions.end(); ++it ) {
         libconfig::Setting& fun = tf.add( libconfig::Setting::TypeGroup );
-        fun.add( "variable", libconfig::Setting::TypeString ) = it->variable;
-        fun.add( "expression", libconfig::Setting::TypeString ) = it->expression;
+        fun.add( "variable", libconfig::Setting::TypeString ) = it->first;
+        fun.add( "expression", libconfig::Setting::TypeString ) = it->second.expression;
       }
     }
 

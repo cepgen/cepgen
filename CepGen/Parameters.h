@@ -4,7 +4,7 @@
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
 #include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Core/Functional.h"
+#include "CepGen/Core/TamingFunction.h"
 
 #include <memory>
 
@@ -107,15 +107,10 @@ namespace CepGen
       /// Maximal number of trials for the hadronisation of the proton(s) remnants
       unsigned int hadroniser_max_trials;
 
-      //----- rescattering corrections
-      struct TamingFunction
-      {
-        TamingFunction( const std::string& var, const std::string& expr ) : variable( var ), expression( expr ), function( expr, { variable } ) {}
-        std::string variable, expression;
-        Functional<1> function;
-      };
+      //----- taming functions
+
       /// Functionals to be used to account for rescattering corrections (implemented within the process)
-      std::vector<TamingFunction> taming_functions;
+      TamingFunctionsCollection taming_functions;
 
     private:
       std::unique_ptr<Process::GenericProcess> process_;

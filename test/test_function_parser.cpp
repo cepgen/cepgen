@@ -19,9 +19,8 @@ main()
     cout << "Test 1 passed!" << endl;
   }
   { // test with a 2-variables function
-    const double exp_result_test2 = 5.0;
     CepGen::Functional<2> test2( "sqrt(a^2+b^2)", { "a", "b" } );
-    assert( fabs( test2.eval( { 3, 4 } ) - exp_result_test2 ) < epsilon );
+    assert( fabs( test2.eval( { 3, 4 } ) - 5.0 ) < epsilon );
     cout << "Test 2 passed!" << endl;
   }
   { // test with an invalid function
@@ -29,7 +28,7 @@ main()
     bool passed = true;
     try { test3.eval( 10 ); passed = false; } catch ( CepGen::Exception& e ) {}
     try { test3.eval( { 10 } ); passed = false; } catch ( CepGen::Exception& e ) {}
-    assert( passed==true );
+    assert( passed == true );
     cout << "Test 3 passed!" << endl;
   }
 
