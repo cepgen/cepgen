@@ -5,7 +5,6 @@ namespace CepGen
   double
   f( double* x, size_t ndim, void* params )
   {
-    Timer tmr;
     std::ostringstream os;
 
     Parameters* p = static_cast<Parameters*>( params );
@@ -13,23 +12,16 @@ namespace CepGen
 
     if ( p->process()->hasEvent() ) {
       p->process()->clearEvent();
-      //float now = tmr.elapsed();
 
       const Particle::Momentum p1( 0., 0.,  p->kinematics.in1p ), p2( 0., 0., -p->kinematics.in2p );
       p->process()->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
-      //PrintMessage( Form( "0 - after setting the kinematics: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
       DebuggingInsideLoop( Form( "Function f called -- some parameters:\n\t"
                                  "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
                                  "  remnant mode: %d",
                                  p->kinematics.in1p, p->kinematics.in2p, p->remnant_mode ) );
 
-      //PrintMessage( Form( "1 - after clearing the event: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
-
-      //PrintMessage( Form( "2: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
-
       if ( p->vegas.first_run ) {
-        //PrintMessage( Form(  "3: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
         if ( Logger::get().level >= Logger::Debug ) {
           std::ostringstream oss; oss << p->kinematics.mode;
@@ -78,19 +70,25 @@ namespace CepGen
 
     p->process()->beforeComputeWeight();
 
-    tmr.reset();
-    //PrintMessage( Form( "5: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
+    Timer tmr; // start the timer
+
     double integrand = p->process()->computeWeight();
-    //PrintMessage( Form( "6: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
     if ( integrand < 0. ) return 0.;
 
-    if ( !p->taming_functions.empty() || p->storage() ) p->process()->fillKinematics( false );
+    //--- only fill in the process' Event object if storage is requested
+    //    or if taming functions are to be applied
+
+    if ( !p->taming_functions.empty() || p->storage() ) p->process()->fillKinematics();
+
+    //--- once the kinematics variables have been populated,
+    //    can apply the collection of taming functions
 
     double taming = 1.0;
-    if ( p->taming_functions.has( "mcep" ) ) {
-      const double mcep = ( ev->getOneByRole( Particle::CentralParticle1 ).momentum() + ev->getOneByRole( Particle::CentralParticle2 ).momentum() ).mass();
-      taming *= p->taming_functions.eval( "mcep", mcep );
+    if ( p->taming_functions.has( "m_central" ) || p->taming_functions.has( "pt_central" ) ) {
+      const Particle::Momentum central_system( ev->getOneByRole( Particle::CentralParticle1 ).momentum() + ev->getOneByRole( Particle::CentralParticle2 ).momentum() );
+      taming *= p->taming_functions.eval( "m_central", central_system.mass() );
+      taming *= p->taming_functions.eval( "pt_central", central_system.pt() );
     }
     if ( p->taming_functions.has( "q2" ) ) {
       taming *= p->taming_functions.eval( "q2", ev->getOneByRole( Particle::Parton1 ).momentum().mass() );
@@ -98,9 +96,13 @@ namespace CepGen
     }
     integrand *= taming;
 
-    if ( p->storage() ) { // MC events generation
+    //--- full event content (+ hadronisation) if generating events
+
+    if ( p->storage() ) {
 
       ev->time_generation = tmr.elapsed();
+
+      //--- if an hadronisation algorithm is specified, run it
 
       if ( p->hadroniser() && p->kinematics.mode!=Kinematics::ElasticElastic ) {
 

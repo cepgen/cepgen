@@ -58,9 +58,6 @@ namespace CepGen
       registerParameter<unsigned int>( "PAIR", "Outgoing particles' PDG id", (unsigned int*)&params->kinematics.pair );
       registerParameter<unsigned int>( "MCUT", "Set of cuts to apply on final products", (unsigned int*)&params->kinematics.cuts_mode );
       registerParameter<unsigned int>( "NGEN", "Number of events to generate", &params->generation.maxgen );
-      registerParameter<unsigned int>( "GPDF", "GPDF", &params->pdflib.gpdf );
-      registerParameter<unsigned int>( "SPDF", "SPDF", &params->pdflib.spdf );
-      registerParameter<unsigned int>( "QPDF", "QPDF", &params->pdflib.qpdf );
 
       registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params->kinematics.in1p );
       registerParameter<double>( "INPE", "Momentum (2nd primary particle)", &params->kinematics.in2p );

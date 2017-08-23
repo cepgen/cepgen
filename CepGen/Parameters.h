@@ -83,21 +83,6 @@ namespace CepGen
       /// Are the events generated in this run to be stored in the output file ?
       bool storage() const { return store_; }
 
-      //----- PDFLIB information
-
-      /// Collection of PDFLIB steering parameters
-      struct PDFLIB
-      {
-        PDFLIB() : gpdf( 5 ), spdf( 4 ), qpdf( 12 ) {}
-        /// PDFLIB group to use
-        unsigned int gpdf;
-        /// PDFLIB set to use
-        unsigned int spdf;
-        /// Number of quarks to consider in the hadronisation part
-        unsigned int qpdf;
-      };
-      PDFLIB pdflib;
-
       //----- hadronisation
 
       /// Hadronisation algorithm to use for the proton(s) fragmentation
