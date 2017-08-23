@@ -108,8 +108,8 @@ namespace CepGen
       unsigned int hadroniser_max_trials;
 
       //----- rescattering corrections
-      /// Functional to be used to account for rescattering corrections (implemented within the process)
-      Functional<1> taming_function;
+      /// Functionals to be used to account for rescattering corrections (implemented within the process)
+      std::map<std::string,Functional<1> > taming_functions;
 
     private:
       std::unique_ptr<Process::GenericProcess> process_;

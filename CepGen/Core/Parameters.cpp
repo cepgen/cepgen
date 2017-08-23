@@ -52,8 +52,10 @@ namespace CepGen
       << std::setfill('_') << std::setw( wb ) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill( ' ' ) << std::endl
       << std::right << std::setw( wb ) << std::left << std::endl
       << std::setw( wt ) << "Process to generate";
-    if ( process_ )
-      os << ( pretty ? boldify( process_->description().c_str() ) : process_->description() );
+    if ( process_ ) {
+      os << ( pretty ? boldify( process_->name().c_str() ) : process_->name() ) << std::endl
+         << std::setw( wt ) << "" << process_->description();
+    }
     else
       os << ( pretty ? boldify( "no process!" ) : "no process!" );
     os

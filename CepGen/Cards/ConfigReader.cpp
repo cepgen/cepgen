@@ -45,10 +45,8 @@ namespace CepGen
         if ( root.exists( "vegas" ) ) parseVegas( root["vegas"] );
         if ( root.exists( "generator" ) ) parseGenerator( root["generator"] );
 
-        //--- rescattering corrections
-        if ( proc.exists( "rescattering_corr" ) ) {
-          params_.taming_function = Functional<1>( proc["rescattering_corr"], { "x" } );
-        }
+        //--- taming functions
+        if ( proc.exists( "taming_functions" ) ) parseTamingFunctions( proc["taming_functions"] );
 
       } catch ( const libconfig::SettingNotFoundException& nfe ) {
         FatalError( Form( "Failed to retrieve the field \"%s\".", nfe.getPath() ) );
@@ -124,6 +122,19 @@ namespace CepGen
         if ( gen.exists( "print_every" ) ) params_.generation.gen_print_every = (int)gen["print_every"];
       } catch ( const libconfig::SettingNotFoundException& nfe ) {
         FatalError( Form( "Failed to retrieve the field \"%s\".", nfe.getPath() ) );
+      }
+    }
+
+    void
+    ConfigReader::parseTamingFunctions( const libconfig::Setting& tf )
+    {
+      if ( !tf.isList() ) FatalError( "The taming functions definition must be wrapped within a list!" );
+      for ( unsigned short i = 0; i < tf.getLength(); ++i ) {
+        const std::string variable = tf[i]["variable"], expression = tf[i]["expression"];
+        std::cout << "new expression with variable " << variable << " and expression " << expression << std::endl;
+        params_.taming_functions[variable] = Functional<1>( expression, std::array<std::string,1>{ variable } );
+        try {std::cout << variable << "\t" << params_.taming_functions[variable].expression() << "\t" << params_.taming_functions[variable].eval( 10.5 ) << std::endl; }
+        catch ( Exception& e ) { e.dump(); }
       }
     }
 

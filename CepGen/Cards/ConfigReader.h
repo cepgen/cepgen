@@ -26,6 +26,7 @@ namespace CepGen
         void parseOutgoingKinematics( const libconfig::Setting& );
         void parseVegas( const libconfig::Setting& );
         void parseGenerator( const libconfig::Setting& );
+        void parseTamingFunctions( const libconfig::Setting& );
 
         static void writeProcess( const Parameters*, libconfig::Setting& );
         static void writeIncomingKinematics( const Parameters*, libconfig::Setting& );
