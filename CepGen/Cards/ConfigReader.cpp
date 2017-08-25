@@ -12,7 +12,7 @@ namespace CepGen
     {
       libconfig::Config cfg;
       try { cfg.readFile( file ); } catch ( const libconfig::ParseException& pe ) {
-        FatalError( Form( "Failed to parse the configuration card \"%s\".\n\tParser error: %s (L:%d)", file, pe.getError(), pe.getLine() ) );
+        FatalError( Form( "Failed to parse the configuration card \"%s\".\n\tParser error: %s (at line %d)", file, pe.getError(), pe.getLine() ) );
       }
       try {
         const libconfig::Setting& root = cfg.getRoot();

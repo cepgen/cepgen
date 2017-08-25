@@ -3,12 +3,14 @@
 namespace CepGen
 {
   Generator::Generator() :
+    parameters( std::unique_ptr<Parameters>( new Parameters ) ),
     cross_section_( -1. ), cross_section_error_( -1. ), has_cross_section_( false )
   {
-    Debugging( "Generator initialized" );
-    try { printHeader(); } catch ( Exception& e ) { e.dump(); }
+    if ( Logger::get().level > Logger::Nothing ) {
+      Debugging( "Generator initialized" );
+      try { printHeader(); } catch ( Exception& e ) { e.dump(); }
+    }
     srand( time( 0 ) ); // Random number initialization
-    this->parameters = std::unique_ptr<Parameters>( new Parameters );
   }
 
   Generator::Generator( Parameters* ip ) :

@@ -28,6 +28,8 @@ main( int argc, char* argv[] )
 
   const double num_sigma = 3.0;
 
+  CepGen::Logger::get().level = CepGen::Logger::Nothing;
+
   Timer tmr;
   CepGen::Generator mg;
 
@@ -42,6 +44,8 @@ main( int argc, char* argv[] )
 
   Information( Form( "Initial configuration time: %.3f ms", tmr.elapsed()*1.e3 ) );
   tmr.reset();
+
+  unsigned short num_tests = 0, num_tests_passed = 0;
 
   for ( const auto& values_vs_generator : values_map ) { // loop over all generators
     if      ( values_vs_generator.first == "1_lpair"  ) mg.parameters->setProcess( new CepGen::Process::GamGamLL );
@@ -71,7 +75,9 @@ main( int argc, char* argv[] )
         Information( Form( "Computation time: %.3f ms", tmr.elapsed()*1.e3 ) );
         tmr.reset();
 
-        assert( fabs( sigma )<num_sigma );
+        if ( fabs( sigma )<num_sigma ) num_tests_passed++;
+        num_tests++;
+        std::cout << "Test " << num_tests_passed << "/" << num_tests << " passed!" << std::endl;
       }
     }
   }
