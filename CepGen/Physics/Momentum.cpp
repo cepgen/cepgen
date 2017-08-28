@@ -227,6 +227,7 @@ namespace CepGen
   Momentum&
   Momentum::betaGammaBoost( double gamma, double betagamma )
   {
+    if ( gamma == 1. && betagamma == 0. ) return *this; // trivial case
     const double pz = pz_, e = energy_;
     pz_ = gamma*pz+betagamma*e;
     energy_  = gamma*e +betagamma*pz;

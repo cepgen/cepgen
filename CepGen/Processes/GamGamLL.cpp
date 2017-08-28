@@ -96,7 +96,7 @@ GamGamLL::pickin()
 
   const double ss = s_+w12_;
 
-  const double rl1 = std::pow(ss, 2)-4.*w1_*s_; // lambda(s, m1**2, m2**2)
+  const double rl1 = ss*ss-4.*w1_*s_; // lambda(s, m1**2, m2**2)
   if ( rl1 <= 0. ) { InWarning( Form( "rl1 = %f <= 0", rl1 ) ); return false; }
   sl1_ = sqrt( rl1 );
 
@@ -144,7 +144,7 @@ GamGamLL::pickin()
   const double d8 = t1_-w2_,
 	       t13 = t1_-w1_-MX2_;
 
-  sa1_ = -std::pow( t1_-w31_, 2 )/4.+w1_*t1_;
+  sa1_ = -pow( t1_-w31_, 2 )/4.+w1_*t1_;
   if ( sa1_ >= 0. ) { InWarning( Form( "sa1_ = %f >= 0", sa1_ ) ); return false; }
 
   const double sl3 = sqrt( -sa1_ );
@@ -240,7 +240,7 @@ GamGamLL::pickin()
   if ( n_opt_ > 1 )       Map( x( 2 ), s2min, s2max, s2_, ds2, "s2" );
   else if ( n_opt_ == 1 ) Mapla( t1_, w2_, x( 2 ), s2min, s2max, s2_, ds2 );
 
-  const double ap = -0.25*std::pow( s2_+d8, 2 )+s2_*t1_;
+  const double ap = -0.25*pow( s2_+d8, 2 )+s2_*t1_;
 
   DebuggingInsideLoop( Form( "s2 = %f, s2max = %f, splus = %f", s2_, s2max, splus ) );
 
@@ -442,8 +442,8 @@ double
 GamGamLL::computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dw )
 {
   const double mx0 = Particle::massFromPDGId( Particle::Proton )+Particle::massFromPDGId( Particle::PiPlus ); // 1.07
-  const double wx2min = std::pow( std::max( mx0, cuts_.mx_min), 2 ),
-               wx2max = std::pow( std::min( sqs_-outmass-2.*lepmass, cuts_.mx_max ), 2 );
+  const double wx2min = pow( std::max( mx0, cuts_.mx_min), 2 ),
+               wx2max = pow( std::min( sqs_-outmass-2.*lepmass, cuts_.mx_max ), 2 );
 
   double mx2 = 0., dmx2 = 0.;
   Map( x, wx2min, wx2max, mx2, dmx2, "mx2" );
@@ -514,10 +514,10 @@ GamGamLL::computeWeight()
   if ( cuts_.w_max < 0 ) cuts_.w_max = s_;
 
   // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
-  const double wmin = std::max( std::pow( sqrt( Ml12_ ) + sqrt( Ml22_ ), 2 ), cuts_.w_min );
+  const double wmin = std::max( pow( sqrt( Ml12_ ) + sqrt( Ml22_ ), 2 ), cuts_.w_min );
 
   // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or _wmax if specified)
-  const double wmax = std::min( std::pow( sqs_-MX_-MY_, 2 ), cuts_.w_max );
+  const double wmax = std::min( pow( sqs_-MX_-MY_, 2 ), cuts_.w_max );
 
   DebuggingInsideLoop( Form( "wmin = %f\n\twmax = %f\n\twmax/wmin = %f", wmin, wmax, wmax/wmin ) );
 
@@ -547,7 +547,7 @@ GamGamLL::computeWeight()
   const double e1mp1 = w1_ / ( ep1_+p_cm_ ),
                e3mp3 = MX2_ / ( p3_lab_.energy()+p3_lab_.p() );
 
-  const double al3 = std::pow( sin( p3_lab_.theta() ), 2 )/( 1.+( p3_lab_.theta() ) );
+  const double al3 = pow( sin( p3_lab_.theta() ), 2 )/( 1.+( p3_lab_.theta() ) );
 
   // 2-photon system kinematics ?!
   const double eg = ( w4_+t1_-t2_ )/( 2.*mc4_ );
@@ -579,9 +579,9 @@ GamGamLL::computeWeight()
   double xx6 = x( 5 );
 
   const double amap = 0.5 * (w4_-t1_-t2_),
-               bmap = 0.5 * sqrt( ( std::pow( w4_-t1_-t2_, 2 )-4.*t1_*t2_ )*( 1.-4.*Ml12_/w4_ ) ),
+               bmap = 0.5 * sqrt( ( pow( w4_-t1_-t2_, 2 )-4.*t1_*t2_ )*( 1.-4.*Ml12_/w4_ ) ),
                ymap = ( amap+bmap )/( amap-bmap ),
-               beta = std::pow( ymap, 2.*xx6-1. );
+               beta = pow( ymap, 2.*xx6-1. );
   xx6 = 0.5 * ( 1. + amap/bmap*( beta-1. )/( beta+1. ) );
   xx6 = std::max( 0., std::min( xx6, 1. ) ); // xx6 in [0., 1.]
 
@@ -663,7 +663,7 @@ GamGamLL::computeWeight()
   const double phi3 = p3_lab_.phi(), cos_phi3 = cos( phi3 ), sin_phi3 = sin( phi3 ),
                phi5 = p5_lab_.phi(), cos_phi5 = cos( phi5 ), sin_phi5 = sin( phi5 );
 
-  bb_ = t1_*t2_+( w4_*std::pow( sin( theta6cm ), 2 ) + 4.*Ml12_*std::pow( cos( theta6cm ), 2 ) )*pg*pg;
+  bb_ = t1_*t2_+( w4_*pow( sin( theta6cm ), 2 ) + 4.*Ml12_*pow( cos( theta6cm ), 2 ) )*pg*pg;
 
   const double c1 = p3_lab_.pt() * ( qve.px()*sin_phi3  - qve.py()*cos_phi3   ),
                c2 = p3_lab_.pt() * ( qve.pz()*ep1_ - qve.energy() *p_cm_ ),
@@ -777,10 +777,10 @@ GamGamLL::fillKinematics( bool )
   p3_lab_.betaGammaBoost( gamma, betgam );
   p5_lab_.betaGammaBoost( gamma, betgam );
 
-  // Needed to parametrise a random rotation around z-axis
-  const int rany = ((double)rand()>=.5*RAND_MAX) ? 1 : -1,
-            ransign = ((double)rand()>=.5*RAND_MAX) ? 1 : -1;
-  const double ranphi = ((double)rand()/RAND_MAX)*2.*M_PI;
+  //----- needed to parametrise a random rotation around z-axis
+  const int rany = ( rand() >= RAND_MAX*0.5 ) ? 1 : -1,
+            ransign = ( rand() >= RAND_MAX*0.5 ) ? 1 : -1;
+  const double ranphi = ( rand()/RAND_MAX*0.5 )*2.*M_PI;
 
   Particle::Momentum plab_ph1 = ( plab_ip1-p3_lab_ ).rotatePhi( ranphi, rany );
   Particle::Momentum plab_ph2 = ( plab_ip2-p5_lab_ ).rotatePhi( ranphi, rany );
@@ -790,20 +790,16 @@ GamGamLL::fillKinematics( bool )
   p6_cm_.rotatePhi( ranphi, rany );
   p7_cm_.rotatePhi( ranphi, rany );
 
-  /*if ( symmetrise_ && (double)rand()>=.5*RAND_MAX ) {
+  /*if ( symmetrise_ && rand() >= .5*RAND_MAX ) {
     p6_cm_.mirrorZ();
     p7_cm_.mirrorZ();
   }*/
 
-  // First incoming proton
-  Particle& ip1 = event_->getOneByRole( Particle::IncomingBeam1 );
-  ip1.setMomentum( plab_ip1 );
+  //----- incoming protons
+  event_->getOneByRole( Particle::IncomingBeam1 ).setMomentum( plab_ip1 );
+  event_->getOneByRole( Particle::IncomingBeam2 ).setMomentum( plab_ip2 );
 
-  // Second incoming proton
-  Particle& ip2 = event_->getOneByRole( Particle::IncomingBeam2 );
-  ip2.setMomentum( plab_ip2 );
-
-  // First outgoing proton
+  //----- first outgoing proton
   Particle& op1 = event_->getOneByRole( Particle::OutgoingBeam1 );
 
   op1.setMomentum( p3_lab_ );
@@ -820,7 +816,7 @@ GamGamLL::fillKinematics( bool )
       break;
   }
 
-  // Second outgoing proton
+  //----- second outgoing proton
   Particle& op2 = event_->getOneByRole( Particle::OutgoingBeam2 );
   op2.setMomentum( p5_lab_ );
   switch ( cuts_.mode ) {
@@ -836,21 +832,19 @@ GamGamLL::fillKinematics( bool )
       break;
   }
 
-  // First incoming photon
-  // Equivalent in LPAIR : PLAB(x, 3)
+  //----- first incoming photon
   Particle& ph1 = event_->getOneByRole( Particle::Parton1 );
   ph1.setMomentum( plab_ph1 );
   ph1.setCharge( 0. );
   ph1.setStatus( Particle::Incoming ); // "incoming beam"
 
-  // Second incoming photon
-  // Equivalent in LPAIR : PLAB(x, 4)
+  //----- second incoming photon
   Particle& ph2 = event_->getOneByRole( Particle::Parton2 );
   ph2.setMomentum( plab_ph2 );
   ph2.setCharge( 0. );
   ph2.setStatus( Particle::Incoming ); // "incoming beam"
 
-  // Central (two-photon) system
+  //----- central (two-photon) system
   Particle& cs = event_->getOneByRole( Particle::CentralSystem );
   cs.setStatus( Particle::Incoming );
 
@@ -864,13 +858,13 @@ GamGamLL::fillKinematics( bool )
     role_ol2 = Particle::CentralParticle1;
   }
 
-  // First outgoing lepton
+  //----- first outgoing lepton
   Particle& ol1 = event_->getOneByRole( role_ol1 );
   ol1.setPdgId( ol1.pdgId(), ransign );
   ol1.setMomentum( p6_cm_ );
   ol1.setStatus( Particle::FinalState );
 
-  // Second outgoing lepton
+  //----- second outgoing lepton
   Particle& ol2 = event_->getOneByRole( role_ol2 );
   ol2.setPdgId( ol2.pdgId(), -ransign );
   ol2.setMomentum( p7_cm_ );
@@ -889,15 +883,12 @@ GamGamLL::periPP( int nup_, int ndown_ )
 
   const double qqq = q1dq_*q1dq_,
                qdq = 4.*Ml12_-w4_;
-  const double t11 = 64. *(  bb_*( qqq-g4_-qdq*( t1_+t2_+2.*Ml12_ ) )-2.*( t1_+2.*Ml12_ )*( t2_+2.*Ml12_ )*qqq ) * t1_*t2_,
-               t12 = 128.*( -bb_*( dd2_+g6_ )-2.*( t1_+2.*Ml12_ )*( sa2_*qqq+a6_*a6_ ) ) * t1_,
-               t21 = 128.*( -bb_*( dd4_+g5_ )-2.*( t2_+2.*Ml12_ )*( sa1_*qqq+a5_*a5_ ) ) * t2_,
-               t22 = 512.*(  bb_*( delta_*delta_-gram_ )-std::pow(epsi_-delta_*(qdq+q1dq2_), 2)-sa1_*a6_*a6_-sa2_*a5_*a5_-sa1_*sa2_*qqq );
+  const double t11 = 64. *(  bb_*( qqq-g4_-qdq*( t1_+t2_+2.*Ml12_ ) )-2.*( t1_+2.*Ml12_ )*( t2_+2.*Ml12_ )*qqq ) * t1_*t2_, // magnetic-magnetic
+               t12 = 128.*( -bb_*( dd2_+g6_ )-2.*( t1_+2.*Ml12_ )*( sa2_*qqq+a6_*a6_ ) ) * t1_, // electric-magnetic
+               t21 = 128.*( -bb_*( dd4_+g5_ )-2.*( t2_+2.*Ml12_ )*( sa1_*qqq+a5_*a5_ ) ) * t2_, // magnetic-electric
+               t22 = 512.*(  bb_*( delta_*delta_-gram_ )-pow(epsi_-delta_*(qdq+q1dq2_), 2)-sa1_*a6_*a6_-sa2_*a5_*a5_-sa1_*sa2_*qqq ); // electric-electric
 
-  const double peripp = ( fp1.FM*fp2.FM*t11
-                         +fp1.FE*fp2.FM*t21
-                         +fp1.FM*fp2.FE*t12
-                         +fp1.FE*fp2.FE*t22 ) / pow( 2.*t1_*t2_*bb_, 2 );
+  const double peripp = ( fp1.FM*fp2.FM*t11 + fp1.FE*fp2.FM*t21 + fp1.FM*fp2.FE*t12 + fp1.FE*fp2.FE*t22 ) / pow( 2.*t1_*t2_*bb_, 2 );
 
   DebuggingInsideLoop( Form( "t11 = %5.2f\tt12 = %5.2f\n\t"
                              "t21 = %5.2f\tt22 = %5.2f\n\t"
