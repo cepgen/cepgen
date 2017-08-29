@@ -3,7 +3,8 @@
 
 using namespace CepGen::Process;
 
-PPtoLL::PPtoLL() : GenericKTProcess( "pptoll", "gamma,gamma->l+,l-", 4, Particle::Photon, Particle::Muon )
+PPtoLL::PPtoLL() :
+  GenericKTProcess( "pptoll", "gamma,gamma->l+,l-", 4, Particle::Photon, Particle::Muon )
 {}
 
 void
@@ -380,17 +381,9 @@ PPtoLL::computeKTFactorisedMatrixElement()
   //     over d^2 kappa_1 d^2 kappa_2 instead d kappa_1^2 d kappa_2^2
   //=================================================================
 
-  const double aintegral = (2.*M_PI)
-                         *1./(16.*M_PI*M_PI
-                         *pow(x1*x2*s_, 2)) * amat2
-                         * flux1_/M_PI
-                         * flux2_/M_PI
-                         *(1./4.)*Constants::GeV2toBarn
-                         * 0.5*4./(4.*M_PI);
-  if ( aintegral*qt1_*qt2_*pt_diff_ != 0. ) {
-    //GenericProcess::DumpPoint( Information );
-    //Information( Form( "matrix element: %E", aintegral*qt1_*qt2_*pt_diff_ ) );
-  }
+  const double aintegral = amat2 / ( 16.*M_PI*M_PI*x1*x1*x2*x2*s_ )
+                         * flux1_/M_PI * flux2_/M_PI
+                         * Constants::GeV2toBarn * 0.25;
 
   //=================================================================
   return aintegral*qt1_*qt2_*pt_diff_;
