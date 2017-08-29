@@ -125,7 +125,10 @@ namespace CepGen
 
     //--- specify the id
     if ( part_with_same_role.empty() && part.id() < 0 ) part.setId( numParticles() ); // set the id if previously invalid/inexistent
-    if ( part_with_same_role.size() == 1 && replace ) part.setId( part_with_same_role[0].id() ); // set the previous id if replacing a particle
+    if ( part_with_same_role.size() == 1 ) {
+      if ( replace ) part.setId( part_with_same_role[0].id() ); // set the previous id if replacing a particle
+      else part.setId( numParticles() );
+    }
 
     //--- add the particle to the collection
     if ( replace ) part_with_same_role = Particles( 1, part ); // generate a vector containing only this particle
@@ -184,22 +187,32 @@ namespace CepGen
     double pxtot = 0., pytot = 0., pztot = 0., etot = 0.;
     for ( Particles::const_iterator part_ref=parts.begin(); part_ref!=parts.end(); part_ref++ ) {
       const Particle& part = *part_ref;
-
-      std::ostringstream oss; oss << part.pdgId();
-      os << Form( "\n %2d\t%+6d%8s", part.id(), part.integerPdgId(), oss.str().c_str() );
+      {
+        std::ostringstream oss; oss << part.pdgId();
+        os << Form( "\n %2d\t%+6d%8s", part.id(), part.integerPdgId(), oss.str().c_str() );
+      }
       os << "\t";
-      if ( part.charge() != 999. ) os << Form( "%6.2f\t", part.charge() );
+      if ( part.charge() != 999. ) os << Form( "%6.2f ", part.charge() );
       else                         os << "\t";
-      os << Form( "%4d\t%6d\t", part.role(), part.status() );
-      if ( !part.mothersIds().empty() )
-        os << Form( "%2d (%2d)", *( part.mothersIds().begin() ), getConstById( *( part.mothersIds().begin() ) ).role() );
+      {
+        std::ostringstream oss; oss << part.role();
+        os << Form( "%8s\t%6d\t", oss.str().c_str(), part.status() );
+      }
+      const ParticlesIds mothers = part.mothersIds();
+      if ( !mothers.empty() ) {
+        std::ostringstream oss;
+        for ( ParticlesIds::const_iterator moth = mothers.begin(); moth != mothers.end(); ++moth ) {
+          if ( moth != mothers.begin() ) oss << "+";
+          oss << Form( "%2d", *moth );
+        }
+        os << Form( "%6s ", oss.str().c_str() );
+      }
       else
         os << "       ";
       const Particle::Momentum mom = part.momentum();
       os << Form( "% 9.6e % 9.6e % 9.6e % 9.6e % 9.5e", mom.px(), mom.py(), mom.pz(), part.energy(), part.mass() );
       if ( part.status() == Particle::Undefined
-        || part.status() == Particle::FinalState
-        || part.status() == Particle::Undecayed ) {
+        || part.status() == Particle::FinalState ) {
         const int sign = ( part.status() == Particle::Undefined ) ? -1 : 1;
         pxtot += sign*mom.px();
         pytot += sign*mom.py();
@@ -214,8 +227,8 @@ namespace CepGen
     if ( fabs(  etot ) < 1.e-12 ) etot = 0.;
     //
     Information( Form( "Dump of event content:\n"
-    "Part.\tPDG id\t\tCharge\tRole\tStatus\tMother\t\t\t\t4-Momentum (GeV)\t\tMass (GeV)\n"
-    "----\t------\t\t------\t----\t------\t------\t------------------------------------------------------  -----------"
+    "Part.\tPDG id\t\tCharge\t   Role\tStatus\tMother\t\t\t\t4-Momentum (GeV)\t\tMass (GeV)\n"
+    "----\t------\t\t------\t   ----\t------\t------\t------------------------------------------------------  -----------"
     "%s\n"
     "---------------------------------------------------------------------------------------------------------------------------\n"
     "\t\t\t\t\t\tTotal: % 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), pxtot, pytot, pztot, etot ) );

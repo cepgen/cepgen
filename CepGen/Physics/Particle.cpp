@@ -21,7 +21,9 @@ namespace CepGen
   Particle::Particle( const Particle& part ) :
     id_( part.id_ ), charge_( part.charge_ ),
     momentum_( part.momentum_ ), mass_( part.mass_ ), helicity_( part.helicity_ ),
-    role_( part.role_ ), status_( part.status_ ), pdg_id_( part.pdg_id_ ), is_primary_( part.is_primary_ )
+    role_( part.role_ ), status_( part.status_ ),
+    mothers_( part.mothers_ ), daughters_( part.daughters_ ),
+    pdg_id_( part.pdg_id_ ), is_primary_( part.is_primary_ )
   {}
 
   bool
@@ -62,7 +64,7 @@ namespace CepGen
   }
 
   void
-  Particle::setMother( Particle& part )
+  Particle::addMother( Particle& part )
   {
     mothers_.insert( part.id() );
     is_primary_ = false;
@@ -92,7 +94,7 @@ namespace CepGen
                                  part.role(), part.pdgId(), role_, pdg_id_ ) );
 
       if ( !part.primary() && part.mothersIds().empty() ) {
-        part.setMother( *this );
+        part.addMother( *this );
       }
     }
 
@@ -280,38 +282,56 @@ namespace CepGen
   operator<<( std::ostream& os, const Particle::ParticleCode& pc )
   {
     switch (pc) {
-      case Particle::dQuark:       os << "d quark"; break;
-      case Particle::uQuark:       os << "u quark"; break;
-      case Particle::Electron:     os << "electron"; break;
-      case Particle::ElectronNeutrino: os << "electron neutrino"; break;
-      case Particle::Muon:         os << "muon"; break;
-      case Particle::MuonNeutrino: os << "muon neutrino"; break;
-      case Particle::Tau:          os << "tau"; break;
-      case Particle::TauNeutrino:  os << "tau neutrino"; break;
-      case Particle::Gluon:        os << "gluon"; break;
-      case Particle::Photon:       os << "photon"; break;
-      case Particle::Z:            os << "Z"; break;
-      case Particle::WPlus:        os << "W+"; break;
-      case Particle::PiPlus:       os << "pi+"; break;
-      case Particle::PiZero:       os << "pi0"; break;
-      case Particle::Rho770_0:     os << "rho(770)0"; break;
-      case Particle::Rho1450_0:    os << "rho(1450)0"; break;
-      case Particle::Rho1700_0:    os << "rho(1700)0"; break;
-      case Particle::h1380_1:      os << "h(1380)1"; break;
-      case Particle::Omega782:     os << "omega(782)"; break;
-      case Particle::JPsi:         os << "J/Psi"; break;
-      case Particle::Phi1680:      os << "phi(1680)"; break;
-      case Particle::Upsilon1S:    os << "Upsilon(1S)"; break;
-      case Particle::Upsilon2S:    os << "Upsilon(2S)"; break;
-      case Particle::Upsilon3S:    os << "Upsilon(3S)"; break;
-      case Particle::ud0Diquark:   os << "(ud)0 di-quark"; break;
-      case Particle::ud1Diquark:   os << "(ud)1 di-quark"; break;
-      case Particle::uu1Diquark:   os << "(uu)1 di-quark"; break;
-      case Particle::Proton:       os << "proton"; break;
-      case Particle::Neutron:      os << "neutron"; break;
-      case Particle::Pomeron:      os << "pomeron"; break;
-      case Particle::Reggeon:      os << "reggeon"; break;
-      case Particle::invalidParticle: os << "<invalid>"; break;
+      case Particle::dQuark:          return os << "d quark";
+      case Particle::uQuark:          return os << "u quark";
+      case Particle::Electron:        return os << "electron";
+      case Particle::ElectronNeutrino: return os << "electron neutrino";
+      case Particle::Muon:            return os << "muon";
+      case Particle::MuonNeutrino:    return os << "muon neutrino";
+      case Particle::Tau:             return os << "tau";
+      case Particle::TauNeutrino:     return os << "tau neutrino";
+      case Particle::Gluon:           return os << "gluon";
+      case Particle::Photon:          return os << "photon";
+      case Particle::Z:               return os << "Z";
+      case Particle::WPlus:           return os << "W+";
+      case Particle::PiPlus:          return os << "pi+";
+      case Particle::PiZero:          return os << "pi0";
+      case Particle::Rho770_0:        return os << "rho(770)0";
+      case Particle::Rho1450_0:       return os << "rho(1450)0";
+      case Particle::Rho1700_0:       return os << "rho(1700)0";
+      case Particle::h1380_1:         return os << "h(1380)1";
+      case Particle::Omega782:        return os << "omega(782)";
+      case Particle::JPsi:            return os << "J/Psi";
+      case Particle::Phi1680:         return os << "phi(1680)";
+      case Particle::Upsilon1S:       return os << "Upsilon(1S)";
+      case Particle::Upsilon2S:       return os << "Upsilon(2S)";
+      case Particle::Upsilon3S:       return os << "Upsilon(3S)";;
+      case Particle::ud0Diquark:      return os << "(ud)0 di-quark";
+      case Particle::ud1Diquark:      return os << "(ud)1 di-quark";
+      case Particle::uu1Diquark:      return os << "(uu)1 di-quark";
+      case Particle::Proton:          return os << "proton";
+      case Particle::Neutron:         return os << "neutron";
+      case Particle::Pomeron:         return os << "pomeron";
+      case Particle::Reggeon:         return os << "reggeon";
+      case Particle::invalidParticle: return os << "[...]";
+    }
+    return os;
+  }
+
+  std::ostream&
+  operator<<( std::ostream& os, const Particle::Role& rl )
+  {
+    switch ( rl ) {
+      case Particle::UnknownRole:   return os << "unknown";
+      case Particle::IncomingBeam1: return os << "in.b.1";
+      case Particle::IncomingBeam2: return os << "in.b.2";
+      case Particle::OutgoingBeam1: return os << "out.b.1";
+      case Particle::OutgoingBeam2: return os << "out.b.2";
+      case Particle::Parton1:       return os << "parton1";
+      case Particle::Parton2:       return os << "parton2";
+      case Particle::Parton3:       return os << "parton3";
+      case Particle::Intermediate:  return os << "partons";
+      case Particle::CentralSystem: return os << "central";
     }
     return os;
   }

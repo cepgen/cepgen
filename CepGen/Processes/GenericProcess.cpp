@@ -63,13 +63,17 @@ namespace CepGen
       // Prepare the central system if not already there
       IncomingState::const_iterator central_system = is.find( Particle::CentralSystem );
       if ( central_system==is.end() ) {
-        Particle& moth = event_->getOneByRole( Particle::Parton1 );
-        Particle cs( Particle::CentralSystem, moth.pdgId() );
-        cs.setMother( moth );
+        Particle cs( Particle::Intermediate, Particle::invalidParticle );
+        cs.addMother( event_->getOneByRole( Particle::Parton1 ) );
+        cs.setStatus( Particle::Undecayed );
         event_->addParticle( cs, true );
       }
 
-      for ( OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++ ) { event_->addParticle( Particle( op->first, op->second ), true ); }
+      for ( OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++ ) {
+        for ( std::vector<Particle::ParticleCode>::const_iterator it=op->second.begin(); it!=op->second.end(); ++it ) {
+          event_->addParticle( Particle( op->first, *it ), false );
+        }
+      }
   
       // Incoming particles (incl. eventual partons)
       for ( IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++ ) {
@@ -78,22 +82,23 @@ namespace CepGen
         switch ( ip->first ) {
           case Particle::IncomingBeam1:
           case Particle::IncomingBeam2: break;
-          case Particle::Parton1:       p.setMother( event_->getOneByRole( Particle::IncomingBeam1 ) ); break;
-          case Particle::Parton2:       p.setMother( event_->getOneByRole( Particle::IncomingBeam2 ) ); break;
-          case Particle::CentralSystem: p.setMother( event_->getOneByRole( Particle::Parton1 ) ); break;
+          case Particle::Parton1:      p.addMother( event_->getOneByRole( Particle::IncomingBeam1 ) ); break;
+          case Particle::Parton2:      p.addMother( event_->getOneByRole( Particle::IncomingBeam2 ) ); break;
+          case Particle::Intermediate: p.addMother( event_->getOneByRole( Particle::Parton1 ) ); break;
           default: break;
         }
       }
       // Outgoing particles (central, and outgoing primary particles or remnants)
       for ( OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++ ) {
-        Particle& p = event_->getOneByRole( op->first );
-        p.setStatus( Particle::Undefined );
-        switch ( op->first ) {
-          case Particle::OutgoingBeam1:    p.setMother( event_->getOneByRole( Particle::IncomingBeam1 ) ); break;
-          case Particle::OutgoingBeam2:    p.setMother( event_->getOneByRole( Particle::IncomingBeam2 ) ); break;
-          case Particle::CentralParticle1: p.setMother( event_->getOneByRole( Particle::CentralSystem ) ); break;
-          case Particle::CentralParticle2: p.setMother( event_->getOneByRole( Particle::CentralSystem ) ); break;
-          default: break;
+        Particles& parts = event_->getByRole( op->first );
+        for ( Particles::iterator p = parts.begin(); p != parts.end(); ++p ) {
+          p->setStatus( Particle::Undefined );
+          switch ( op->first ) {
+            case Particle::OutgoingBeam1: p->addMother( event_->getOneByRole( Particle::IncomingBeam1 ) ); break;
+            case Particle::OutgoingBeam2: p->addMother( event_->getOneByRole( Particle::IncomingBeam2 ) ); break;
+            case Particle::CentralSystem: p->addMother( event_->getOneByRole( Particle::Intermediate ) ); break;
+            default: break;
+          }
         }
       }
       event_->init();
@@ -170,8 +175,9 @@ namespace CepGen
         is_incoming_state_set_ = true;
       }
       // check the outgoing state
-      if ( ( !particles( Particle::OutgoingBeam1 ).empty()    && !particles( Particle::OutgoingBeam2 ).empty() )
-        && ( !particles( Particle::CentralParticle1 ).empty() || !particles( Particle::CentralParticle2 ).empty() ) ) {
+      if ( !particles( Particle::OutgoingBeam1 ).empty()
+        && !particles( Particle::OutgoingBeam2 ).empty()
+        && !particles( Particle::CentralSystem ).empty() ) {
         is_outgoing_state_set_ = true;
       }
       // combine both states

@@ -29,9 +29,8 @@ namespace CepGen
         }
 
         Particle& op1 = ev->getOneByRole( Particle::OutgoingBeam1 ),
-                 &op2 = ev->getOneByRole( Particle::OutgoingBeam2 ),
-                 &cs1 = ev->getOneByRole( Particle::CentralParticle1 ),
-                 &cs2 = ev->getOneByRole( Particle::CentralParticle2 );
+                 &op2 = ev->getOneByRole( Particle::OutgoingBeam2 );
+        Particles& central_system = ev->getByRole( Particle::CentralSystem );
 
         //--- add outgoing protons or remnants
         switch ( p->kinematics.mode ) {
@@ -46,14 +45,15 @@ namespace CepGen
             op2.setPdgId( Particle::uQuark );
             break;
         }
-        //PrintMessage( Form( "4 - after preparing the event kinematics: %.3e", tmr.elapsed()-now ) ); now = tmr.elapsed();
 
         //--- prepare the function to be integrated
         p->process()->prepareKinematics();
 
         //--- add central system
-        cs1.setPdgId( p->kinematics.pair ); cs1.computeMass();
-        cs2.setPdgId( p->kinematics.pair ); cs2.computeMass();
+        for ( Particles::iterator part = central_system.begin(); part != central_system.end(); ++part ) {
+          part->setPdgId( p->kinematics.pair );
+          part->computeMass();
+        }
 
         p->process()->clearRun();
         p->vegas.first_run = false;
@@ -86,7 +86,7 @@ namespace CepGen
 
     double taming = 1.0;
     if ( p->taming_functions.has( "m_central" ) || p->taming_functions.has( "pt_central" ) ) {
-      const Particle::Momentum central_system( ev->getOneByRole( Particle::CentralParticle1 ).momentum() + ev->getOneByRole( Particle::CentralParticle2 ).momentum() );
+      const Particle::Momentum central_system( ev->getByRole( Particle::CentralSystem )[0].momentum() + ev->getByRole( Particle::CentralSystem )[1].momentum() );
       taming *= p->taming_functions.eval( "m_central", central_system.mass() );
       taming *= p->taming_functions.eval( "pt_central", central_system.pt() );
     }

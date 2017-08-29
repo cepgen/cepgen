@@ -59,10 +59,10 @@ namespace CepGen
       enum Role {
         UnknownRole = -1,
         IncomingBeam1 = 1, IncomingBeam2 = 2,
-        Parton1 = 41, Parton2 = 42, Parton3 = 43,
-        CentralSystem = 4,
         OutgoingBeam1 = 3, OutgoingBeam2 = 5,
-        CentralParticle1 = 6, CentralParticle2 = 7
+        CentralSystem = 6,
+        Intermediate = 4,
+        Parton1 = 41, Parton2 = 42, Parton3 = 43
       };
       /**
        * Container for a particle's 4-momentum, along with useful methods to ease the development of any matrix element level generator
@@ -179,6 +179,8 @@ namespace CepGen
       };
       /// Human-readable format for a particle's PDG code
       friend std::ostream& operator<<( std::ostream& os, const Particle::ParticleCode& pc );
+      /// Human-readable format for a particle's role in the event
+      friend std::ostream& operator<<( std::ostream& os, const Particle::Role& rl );
       /// Compute the 4-vector sum of two 4-momenta
       friend Particle::Momentum operator+( const Particle::Momentum& mom1, const Particle::Momentum& mom2 );
       /// Compute the 4-vector difference of two 4-momenta
@@ -316,7 +318,7 @@ namespace CepGen
        * \brief Set the mother particle
        * \param[in] part A Particle object containing all the information on the mother particle
        */
-      void setMother( Particle& part );
+      void addMother( Particle& part );
       /**
        * \brief Gets the unique identifier to the mother particle from which this particle arises
        * \return An integer representing the unique identifier to the mother of this particle in the event
