@@ -68,7 +68,7 @@ namespace CepGen
         Particle cs( Particle::Intermediate, Particle::invalidParticle );
         cs.addMother( event_->getOneByRole( Particle::Parton1 ) );
         cs.addMother( event_->getOneByRole( Particle::Parton2 ) );
-        cs.setStatus( Particle::Undecayed );
+        cs.setStatus( Particle::Propagator );
         event_->addParticle( cs, true );
       }
 

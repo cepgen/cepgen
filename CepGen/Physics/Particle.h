@@ -47,7 +47,7 @@ namespace CepGen
       enum Status {
         PrimordialIncoming = -9,
         Undecayed = -3,
-        sPropagator = -2,
+        Propagator = -2,
         Incoming = -1,
         Undefined = 0,
         FinalState = 1,

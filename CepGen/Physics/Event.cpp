@@ -212,6 +212,7 @@ namespace CepGen
       const Particle::Momentum mom = part.momentum();
       os << Form( "% 9.6e % 9.6e % 9.6e % 9.6e % 9.5e", mom.px(), mom.py(), mom.pz(), part.energy(), part.mass() );
       if ( part.status() == Particle::Undefined
+        || part.status() == Particle::Undecayed
         || part.status() == Particle::FinalState ) {
         const int sign = ( part.status() == Particle::Undefined ) ? -1 : 1;
         pxtot += sign*mom.px();
