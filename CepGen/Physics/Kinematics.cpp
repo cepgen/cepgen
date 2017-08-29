@@ -20,15 +20,15 @@ namespace CepGen
   {
     os
       << std::setfill(' ')
-      << __PRETTY_FUNCTION__ << " Dump" << std::endl
-      << std::setw(25) << "Cuts mode :" << std::setw(2) << cuts_mode << "->" << std::setw(4) << cuts_mode << std::endl    
-      << "===== Single leptons" << std::endl
-      << std::setw(25) << "pT range: " << pt_single_central << std::endl
-      << std::setw(25) << "Energy range: " << e_single_central << std::endl
-      << std::setw(25) << "Pseudorapidity range:" << eta_single_central << std::endl
-      << "===== Central kinematics" << std::endl
-      << std::setw(25) << "Q**2 range:" << q2 << std::endl
-      << std::setw(25) << "W range:" << w << std::endl;
+      << __PRETTY_FUNCTION__ << " Dump\n"
+      << std::setw(30) << "Cuts mode: " << std::setw(2) << cuts_mode << "->" << std::setw(4) << cuts_mode << "\n"
+      << "===== Single leptons\n"
+      << std::setw(30) << "pT range: " << pt_single_central << "\n"
+      << std::setw(30) << "Energy range: " << e_single_central << "\n"
+      << std::setw(30) << "Pseudorapidity range: " << eta_single_central << "\n"
+      << "===== Central kinematics\n"
+      << std::setw(30) << "Q**2 range: " << q2 << "\n"
+      << std::setw(30) << "W range: " << w << std::endl;
   }
 
   std::ostream&
@@ -60,7 +60,10 @@ namespace CepGen
   std::ostream&
   operator<<( std::ostream& os, const Kinematics::Limits& lim )
   {
-    return os << ( ( !lim.hasUpper() ) ? Form( ">= %.3f", lim.lower() ) : Form( "%.3f → %.3f", lim.lower(), lim.upper() ) );
+    if ( !lim.hasLower() && !lim.hasUpper() ) return os << "no cuts";
+    if ( !lim.hasLower() ) return os << Form( "<= %.3f", lim.upper() );
+    if ( !lim.hasUpper() ) return os << Form( ">= %.3f", lim.lower() );
+    return os << Form( "%.3f → %.3f", lim.lower(), lim.upper() );
   }
 }
 
