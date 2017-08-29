@@ -34,10 +34,9 @@ namespace CepGen
           { Particle::Parton2, kIntermediatePart2 }
         },
         { // outgoing state
-          { Particle::OutgoingBeam1, Particle::Proton },
-          { Particle::OutgoingBeam2, Particle::Proton },
-          { Particle::CentralParticle1, kProducedPart1 },
-          { Particle::CentralParticle2, kProducedPart2 }
+          { Particle::OutgoingBeam1, { Particle::Proton } },
+          { Particle::OutgoingBeam2, { Particle::Proton } },
+          { Particle::CentralSystem, { kProducedPart1, kProducedPart2 } }
         }
       );
     }

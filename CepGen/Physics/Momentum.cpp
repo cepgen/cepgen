@@ -7,7 +7,7 @@ namespace CepGen
   //----- Particle momentum methods
 
   Momentum::Momentum() :
-    px_( 0. ), py_( 0. ), pz_( 0. ), p_( 0. ), energy_( -1. )
+    px_( 0. ), py_( 0. ), pz_( 0. ), p_( 0. ), energy_( 0. )
   {}
 
   Momentum::Momentum( double x, double y, double z, double t ) :

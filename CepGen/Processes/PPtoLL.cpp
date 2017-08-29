@@ -11,7 +11,7 @@ PPtoLL::prepareKTKinematics()
 {
   ////////////////////////////////////
   y_min_ = cuts_.eta_min;           //
-  //y_min_ = EtaToY(cuts_.eta_min, event_->getOneByRole(Particle::CentralParticle1).mass(), pt);
+  //y_min_ = EtaToY(cuts_.eta_min, event_->getByRole(Particle::CentralSystem)[0].mass(), pt);
   y_max_ = cuts_.eta_max;           //
   //y_max_ = EtaToY(cuts_.eta_max);
   ///////////// FIXME ////////////////
@@ -46,7 +46,7 @@ double
 PPtoLL::computeKTFactorisedMatrixElement()
 {
   const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
-  const double ml = event_->getOneByRole( Particle::CentralParticle1 ).mass(), ml2 = ml*ml;
+  const double ml = event_->getByRole( Particle::CentralSystem )[0].mass(), ml2 = ml*ml;
 
   const unsigned int iterm11 = 1, // Long-long
                      iterm22 = 1, // Trans-trans
@@ -223,8 +223,8 @@ PPtoLL::computeKTFactorisedMatrixElement()
                              Pl1_.px(), Pl1_.py(), Pl1_.pz(), Pl1_.energy(), Pl1_.mass(),
                              Pl2_.px(), Pl2_.py(), Pl2_.pz(), Pl2_.energy(), Pl2_.mass() ) );
 
-  assert( fabs( Pl1_.mass()-event_->getOneByRole( Particle::CentralParticle1 ).mass() ) < 1.e-6 );
-  assert( fabs( Pl2_.mass()-event_->getOneByRole( Particle::CentralParticle2 ).mass() ) < 1.e-6 );
+  assert( fabs( Pl1_.mass()-event_->getByRole( Particle::CentralSystem )[0].mass() ) < 1.e-6 );
+  assert( fabs( Pl2_.mass()-event_->getByRole( Particle::CentralSystem )[1].mass() ) < 1.e-6 );
 
   //=================================================================
   //     four-momenta squared of the virtual photons
@@ -414,7 +414,7 @@ PPtoLL::fillCentralParticlesKinematics()
   //=================================================================
   //     first outgoing lepton
   //=================================================================
-  Particle& ol1 = event_->getOneByRole( Particle::CentralParticle1 );
+  Particle& ol1 = event_->getByRole( Particle::CentralSystem )[0];
   ol1.setPdgId( ol1.pdgId(), sign );
   ol1.setStatus( Particle::FinalState );
   ol1.setMomentum( Pl1_ );
@@ -422,7 +422,7 @@ PPtoLL::fillCentralParticlesKinematics()
   //=================================================================
   //     second outgoing lepton
   //=================================================================
-  Particle& ol2 = event_->getOneByRole( Particle::CentralParticle2 );
+  Particle& ol2 = event_->getByRole( Particle::CentralSystem )[1];
   ol2.setPdgId( ol2.pdgId(), -sign );
   ol2.setStatus( Particle::FinalState );
   ol2.setMomentum( Pl2_ );

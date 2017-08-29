@@ -2,7 +2,7 @@
 
 #include "CepGen/Generator.h"
 #include "CepGen/Export/EventWriter.h"
-#include "CepGen/Cards/Handler.h"
+#include "CepGen/Cards/LpairReader.h"
 
 #include "HepMC/Version.h"
 
@@ -41,7 +41,7 @@ int main( int argc, char* argv[] ) {
   Information( Form( "HepMC version: %s", HepMC::versionName().c_str() ) );
 
   // The events generation starts here !
-  for ( unsigned int i=0; i<mg.parameters->maxgen; i++ ) {
+  for ( unsigned int i=0; i<mg.parameters->generation.maxgen; i++ ) {
     if ( i%1000==0 )
       cout << "Generating event #" << i+1 << endl;
     try {

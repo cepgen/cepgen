@@ -57,45 +57,53 @@ namespace CepGen
 
     void
     GenericProcess::setEventContent( const IncomingState& is, const OutgoingState& os )
-    {  
-      for ( IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++ ) { event_->addParticle( Particle( ip->first, ip->second ), true ); }
+    {
+      event_->clear();
+      //----- add the particles in the event
 
-      // Prepare the central system if not already there
-      IncomingState::const_iterator central_system = is.find( Particle::CentralSystem );
-      if ( central_system==is.end() ) {
-        Particle& moth = event_->getOneByRole( Particle::Parton1 );
-        Particle cs( Particle::CentralSystem, moth.pdgId() );
-        cs.setMother( moth );
-        event_->addParticle( cs, true );
-      }
-
-      for ( OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++ ) { event_->addParticle( Particle( op->first, op->second ), true ); }
-  
-      // Incoming particles (incl. eventual partons)
+      //--- incoming state
       for ( IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++ ) {
-        Particle& p = event_->getOneByRole( ip->first );
-        p.setStatus( Particle::Undefined );
-        switch ( ip->first ) {
-          case Particle::IncomingBeam1:
-          case Particle::IncomingBeam2: break;
-          case Particle::Parton1:       p.setMother( event_->getOneByRole( Particle::IncomingBeam1 ) ); break;
-          case Particle::Parton2:       p.setMother( event_->getOneByRole( Particle::IncomingBeam2 ) ); break;
-          case Particle::CentralSystem: p.setMother( event_->getOneByRole( Particle::Parton1 ) ); break;
+        event_->addParticle( Particle( ip->first, ip->second ) );
+      }
+      //--- central system (if not already there)
+      IncomingState::const_iterator central_system = is.find( Particle::CentralSystem );
+      if ( central_system == is.end() ) {
+        event_->addParticle( Particle( Particle::Intermediate, Particle::invalidParticle, Particle::Propagator ) );
+      }
+      //--- outgoing state
+      for ( OutgoingState::const_iterator op = os.begin(); op != os.end(); ++op ) {
+        for ( std::vector<Particle::ParticleCode>::const_iterator it = op->second.begin(); it != op->second.end(); ++it ) {
+          event_->addParticle( Particle( op->first, *it ) );
+        }
+      }
+
+      //----- define the particles parentage
+
+      const Particles parts = event_->particles();
+      for ( Particles::const_iterator p = parts.begin(); p != parts.end(); ++p ) {
+        Particle& part = event_->getById( p->id() );
+        switch ( part.role() ) {
+          case Particle::OutgoingBeam1:
+          case Particle::Parton1:
+            part.addMother( event_->getOneByRole( Particle::IncomingBeam1 ) );
+            break;
+          case Particle::OutgoingBeam2:
+          case Particle::Parton2:
+            part.addMother( event_->getOneByRole( Particle::IncomingBeam2 ) );
+            break;
+          case Particle::Intermediate:
+            part.addMother( event_->getOneByRole( Particle::Parton1 ) );
+            part.addMother( event_->getOneByRole( Particle::Parton2 ) );
+            break;
+          case Particle::CentralSystem:
+            part.addMother( event_->getOneByRole( Particle::Intermediate ) );
+            break;
           default: break;
         }
       }
-      // Outgoing particles (central, and outgoing primary particles or remnants)
-      for ( OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++ ) {
-        Particle& p = event_->getOneByRole( op->first );
-        p.setStatus( Particle::Undefined );
-        switch ( op->first ) {
-          case Particle::OutgoingBeam1:    p.setMother( event_->getOneByRole( Particle::IncomingBeam1 ) ); break;
-          case Particle::OutgoingBeam2:    p.setMother( event_->getOneByRole( Particle::IncomingBeam2 ) ); break;
-          case Particle::CentralParticle1: p.setMother( event_->getOneByRole( Particle::CentralSystem ) ); break;
-          case Particle::CentralParticle2: p.setMother( event_->getOneByRole( Particle::CentralSystem ) ); break;
-          default: break;
-        }
-      }
+
+      //----- freeze the event as it is
+
       event_->init();
     }
 
@@ -170,8 +178,9 @@ namespace CepGen
         is_incoming_state_set_ = true;
       }
       // check the outgoing state
-      if ( ( !particles( Particle::OutgoingBeam1 ).empty()    && !particles( Particle::OutgoingBeam2 ).empty() )
-        && ( !particles( Particle::CentralParticle1 ).empty() || !particles( Particle::CentralParticle2 ).empty() ) ) {
+      if ( !particles( Particle::OutgoingBeam1 ).empty()
+        && !particles( Particle::OutgoingBeam2 ).empty()
+        && !particles( Particle::CentralSystem ).empty() ) {
         is_outgoing_state_set_ = true;
       }
       // combine both states

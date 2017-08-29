@@ -34,7 +34,7 @@ namespace CepGen
         /// Map of all incoming state particles in the process
         typedef ParticlesRoleMap IncomingState;
         /// Map of all outgoing particles in the process
-        typedef ParticlesRoleMap OutgoingState;
+        typedef std::map<Particle::Role,std::vector<Particle::ParticleCode> > OutgoingState;
 
         /// Default constructor for an undefined process
         /// \param[in] name Process name

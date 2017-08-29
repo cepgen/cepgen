@@ -27,6 +27,7 @@ namespace CepGen
   void
   Generator::clearRun()
   {
+    vegas_.reset();
     parameters->vegas.first_run = true;
     has_cross_section_ = false; // force the recreation of the Vegas instance
     cross_section_ = cross_section_error_ = -1.;

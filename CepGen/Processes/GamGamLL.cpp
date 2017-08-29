@@ -35,10 +35,9 @@ GamGamLL::addEventContent()
     { Particle::Parton1, Particle::Photon },
     { Particle::Parton2, Particle::Photon }
   }, {
-    { Particle::OutgoingBeam1, Particle::Proton },
-    { Particle::OutgoingBeam2, Particle::Proton },
-    { Particle::CentralParticle1, Particle::Muon },
-    { Particle::CentralParticle2, Particle::Muon }
+    { Particle::OutgoingBeam1, { Particle::Proton } },
+    { Particle::OutgoingBeam2, { Particle::Proton } },
+    { Particle::CentralSystem, { Particle::Muon, Particle::Muon } }
   } );
 }
 
@@ -473,8 +472,8 @@ GamGamLL::beforeComputeWeight()
   cot_theta2_ = 1./tan( thetamin*M_PI/180. );
   DebuggingInsideLoop( Form( "cot(theta1) = %f\n\tcot(theta2) = %f", cot_theta1_, cot_theta2_ ) );
 
-  Ml12_ = event_->getOneByRole( Particle::CentralParticle1 ).mass2();
-  Ml22_ = event_->getOneByRole( Particle::CentralParticle2 ).mass2();
+  Ml12_ = event_->getByRole( Particle::CentralSystem )[0].mass2();
+  Ml22_ = event_->getByRole( Particle::CentralSystem )[1].mass2();
 
   switch ( cuts_.mode ) {
     case Kinematics::ElectronProton: default:
@@ -835,40 +834,29 @@ GamGamLL::fillKinematics( bool )
   //----- first incoming photon
   Particle& ph1 = event_->getOneByRole( Particle::Parton1 );
   ph1.setMomentum( plab_ph1 );
-  ph1.setCharge( 0. );
-  ph1.setStatus( Particle::Incoming ); // "incoming beam"
+  ph1.setStatus( Particle::Incoming );
 
   //----- second incoming photon
   Particle& ph2 = event_->getOneByRole( Particle::Parton2 );
   ph2.setMomentum( plab_ph2 );
-  ph2.setCharge( 0. );
-  ph2.setStatus( Particle::Incoming ); // "incoming beam"
+  ph2.setStatus( Particle::Incoming );
 
-  //----- central (two-photon) system
-  Particle& cs = event_->getOneByRole( Particle::CentralSystem );
-  cs.setStatus( Particle::Incoming );
-
-  Particle::Role role_ol1, role_ol2;
-  if ( ransign < 0 ) {
-    role_ol1 = Particle::CentralParticle1;
-    role_ol2 = Particle::CentralParticle2;
-  }
-  else {
-    role_ol1 = Particle::CentralParticle2;
-    role_ol2 = Particle::CentralParticle1;
-  }
+  Particles& central_system = event_->getByRole( Particle::CentralSystem );
 
   //----- first outgoing lepton
-  Particle& ol1 = event_->getOneByRole( role_ol1 );
+  Particle& ol1 = central_system[0];
   ol1.setPdgId( ol1.pdgId(), ransign );
   ol1.setMomentum( p6_cm_ );
   ol1.setStatus( Particle::FinalState );
 
   //----- second outgoing lepton
-  Particle& ol2 = event_->getOneByRole( role_ol2 );
+  Particle& ol2 = central_system[1];
   ol2.setPdgId( ol2.pdgId(), -ransign );
   ol2.setMomentum( p7_cm_ );
   ol2.setStatus( Particle::FinalState );
+
+  //----- intermediate two-lepton system
+  event_->getOneByRole( Particle::Intermediate ).setMomentum( p6_cm_+p7_cm_ );
 }
 
 double

@@ -2,7 +2,6 @@
 #include "CepGen/Processes/TestProcess.h"
 
 #include <iostream>
-#include <assert.h>
 
 using namespace std;
 
@@ -21,7 +20,7 @@ main( int argc, char* argv[] )
   double result, error;
   mg.computeXsection( result, error );
 
-  assert( fabs( exact - result ) < 2.0 * error );
+  if ( fabs( exact - result ) > 2.0 * error ) throw CepGen::Exception( __PRETTY_FUNCTION__, Form( "pull = %.5e", fabs( exact-result )/error ), CepGen::FatalError );
 
   cout << "Test 1 passed!" << endl;
 

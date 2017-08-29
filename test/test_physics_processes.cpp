@@ -33,8 +33,6 @@ main( int argc, char* argv[] )
   Timer tmr;
   CepGen::Generator mg;
 
-  //CepGen::Logger::get().level = CepGen::Logger::Debug;
-
   mg.parameters->kinematics.setSqrtS( 13.e3 );
   mg.parameters->kinematics.eta_min = -2.5;
   mg.parameters->kinematics.eta_max = 2.5;
@@ -76,6 +74,7 @@ main( int argc, char* argv[] )
         tmr.reset();
 
         if ( fabs( sigma )<num_sigma ) num_tests_passed++;
+        else throw CepGen::Exception( __PRETTY_FUNCTION__, Form( "Test %s/%s failed!", values_vs_generator.first.c_str(), values_vs_kin.first.c_str() ), CepGen::FatalError );
         num_tests++;
         std::cout << "Test " << num_tests_passed << "/" << num_tests << " passed!" << std::endl;
       }

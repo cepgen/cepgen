@@ -47,7 +47,7 @@ namespace CepGen
       enum Status {
         PrimordialIncoming = -9,
         Undecayed = -3,
-        sPropagator = -2,
+        Propagator = -2,
         Incoming = -1,
         Undefined = 0,
         FinalState = 1,
@@ -59,10 +59,10 @@ namespace CepGen
       enum Role {
         UnknownRole = -1,
         IncomingBeam1 = 1, IncomingBeam2 = 2,
-        Parton1 = 41, Parton2 = 42, Parton3 = 43,
-        CentralSystem = 4,
         OutgoingBeam1 = 3, OutgoingBeam2 = 5,
-        CentralParticle1 = 6, CentralParticle2 = 7
+        CentralSystem = 6,
+        Intermediate = 4,
+        Parton1 = 41, Parton2 = 42, Parton3 = 43
       };
       /**
        * Container for a particle's 4-momentum, along with useful methods to ease the development of any matrix element level generator
@@ -179,6 +179,8 @@ namespace CepGen
       };
       /// Human-readable format for a particle's PDG code
       friend std::ostream& operator<<( std::ostream& os, const Particle::ParticleCode& pc );
+      /// Human-readable format for a particle's role in the event
+      friend std::ostream& operator<<( std::ostream& os, const Particle::Role& rl );
       /// Compute the 4-vector sum of two 4-momenta
       friend Particle::Momentum operator+( const Particle::Momentum& mom1, const Particle::Momentum& mom2 );
       /// Compute the 4-vector difference of two 4-momenta
@@ -190,14 +192,19 @@ namespace CepGen
       /// Multiply all components of a 4-momentum by a scalar
       friend Particle::Momentum operator*( double c, const Particle::Momentum& mom );
       /**
-       * Gets the mass in GeV/c**2 of a particle given its PDG identifier
        * \brief Gets the mass of a particle
        * \param pdgId ParticleCode (PDG ID)
        * \return Mass of the particle in \f$\textrm{GeV}/c^2\f$
        */
       static double massFromPDGId( const Particle::ParticleCode& pdgId );
       /**
-       * Gets the total decay width for one particle to be decayed
+       * \brief Gets the electric charge of a particle
+       * \param pdgId ParticleCode (PDG ID)
+       * \return Charge of the particle in \f$e\f$
+       */
+      static double chargeFromPDGId( const Particle::ParticleCode& pdgId );
+      /**
+       * \brief Total decay width of one unstable particle
        * \param[in] pdgId ParticleCode (PDG ID)
        * \return Decay width in GeV
        */
@@ -207,7 +214,7 @@ namespace CepGen
       /// Build using the role of the particle in the process and its PDG id
       /// \param[in] pdgId ParticleCode (PDG ID)
       /// \param[in] role Role of the particle in the process
-      Particle( Role role, ParticleCode pdgId=Particle::invalidParticle );
+      Particle( Role role, ParticleCode pdgId=invalidParticle, Status st=Undefined );
       /// Copy constructor
       Particle( const Particle& );
       inline ~Particle() {}
@@ -226,8 +233,8 @@ namespace CepGen
       //void setId( int id ) { id_ = id; }
       void setId( int id ) { id_ = id; }
       /// Electric charge (given as a float number, for the quarks and bound states)
-      float charge() const { return charge_; }
-      void setCharge( float charge ) { charge_ = charge; }
+      float charge() const { return charge_sign_ * chargeFromPDGId( pdg_id_ ); }
+      void setChargeSign( int sign ) { charge_sign_ = sign; }
       /// Role in the considered process
       Role role() const { return role_; }
       void setRole( const Role& role ) { role_ = role; }
@@ -240,8 +247,8 @@ namespace CepGen
 
       /// Set the PDG identifier (along with the particle's electric charge)
       /// \param[in] pdg ParticleCode (PDG ID)
-      /// \param[in] ch Electric charge (in units of \f$e\f$)
-      void setPdgId( const ParticleCode& pdg, float ch=-999. );
+      /// \param[in] ch Electric charge (0, 1, or -1)
+      void setPdgId( const ParticleCode& pdg, short ch=0 );
       /// Retrieve the objectified PDG identifier
       inline ParticleCode pdgId() const { return pdg_id_; }
       /// Retrieve the integer value of the PDG identifier
@@ -311,30 +318,30 @@ namespace CepGen
       // --- particle relations
 
       /// Is this particle a primary particle ?
-      inline bool primary() const { return is_primary_; }
+      inline bool primary() const { return mothers_.empty(); }
       /**
        * \brief Set the mother particle
        * \param[in] part A Particle object containing all the information on the mother particle
        */
-      void setMother( Particle& part );
+      void addMother( Particle& part );
       /**
        * \brief Gets the unique identifier to the mother particle from which this particle arises
        * \return An integer representing the unique identifier to the mother of this particle in the event
        */
-      inline ParticlesIds mothersIds() const { return mothers_; }
+      inline ParticlesIds mothers() const { return mothers_; }
       /**
        * \brief Add a decay product
        * \param[in] part The Particle object in which this particle will desintegrate or convert
        * \return A boolean stating if the particle has been added to the daughters list or if it was already present before
        */
-      bool addDaughter( Particle& part );
+      void addDaughter( Particle& part );
       /// Gets the number of daughter particles
       inline unsigned int numDaughters() const { return daughters_.size(); };
       /**
        * \brief Get an identifiers list all daughter particles
        * \return An integer vector containing all the daughters' unique identifier in the event
        */
-      ParticlesIds daughters() const { return daughters_; }
+      inline ParticlesIds daughters() const { return daughters_; }
 
       // --- global particle information extraction
 
@@ -344,8 +351,8 @@ namespace CepGen
     private:
       /// Unique identifier in an event
       int id_;
-      /// Electric charge
-      float charge_;
+      /// Electric charge (+-1 or 0)
+      short charge_sign_;
       /// Momentum properties handler
       Momentum momentum_;
       /// Mass in \f$\textrm{GeV}/c^2\f$
@@ -362,8 +369,6 @@ namespace CepGen
       ParticlesIds daughters_;
       /// PDG id
       ParticleCode pdg_id_;
-      /// Is the particle a primary particle ?
-      bool is_primary_;
   };
 
   /// Compute the centre of mass energy of two particles (incoming or outgoing states)
