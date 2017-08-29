@@ -192,14 +192,19 @@ namespace CepGen
       /// Multiply all components of a 4-momentum by a scalar
       friend Particle::Momentum operator*( double c, const Particle::Momentum& mom );
       /**
-       * Gets the mass in GeV/c**2 of a particle given its PDG identifier
        * \brief Gets the mass of a particle
        * \param pdgId ParticleCode (PDG ID)
        * \return Mass of the particle in \f$\textrm{GeV}/c^2\f$
        */
       static double massFromPDGId( const Particle::ParticleCode& pdgId );
       /**
-       * Gets the total decay width for one particle to be decayed
+       * \brief Gets the electric charge of a particle
+       * \param pdgId ParticleCode (PDG ID)
+       * \return Charge of the particle in \f$e\f$
+       */
+      static double chargeFromPDGId( const Particle::ParticleCode& pdgId );
+      /**
+       * \brief Total decay width of one unstable particle
        * \param[in] pdgId ParticleCode (PDG ID)
        * \return Decay width in GeV
        */

@@ -834,14 +834,12 @@ GamGamLL::fillKinematics( bool )
   //----- first incoming photon
   Particle& ph1 = event_->getOneByRole( Particle::Parton1 );
   ph1.setMomentum( plab_ph1 );
-  ph1.setCharge( 0. );
-  ph1.setStatus( Particle::Incoming ); // "incoming beam"
+  ph1.setStatus( Particle::Incoming );
 
   //----- second incoming photon
   Particle& ph2 = event_->getOneByRole( Particle::Parton2 );
   ph2.setMomentum( plab_ph2 );
-  ph2.setCharge( 0. );
-  ph2.setStatus( Particle::Incoming ); // "incoming beam"
+  ph2.setStatus( Particle::Incoming );
 
   Particles& central_system = event_->getByRole( Particle::CentralSystem );
 
@@ -856,6 +854,9 @@ GamGamLL::fillKinematics( bool )
   ol2.setPdgId( ol2.pdgId(), -ransign );
   ol2.setMomentum( p7_cm_ );
   ol2.setStatus( Particle::FinalState );
+
+  //----- intermediate two-lepton system
+  event_->getOneByRole( Particle::Intermediate ).setMomentum( p6_cm_+p7_cm_ );
 }
 
 double

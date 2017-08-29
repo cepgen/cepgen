@@ -9,7 +9,7 @@ namespace CepGen
   {}
 
   Particle::Particle( Role role, ParticleCode pdgId ) :
-    id_( -1 ), charge_( 1. ),
+    id_( -1 ), charge_( chargeFromPDGId( pdgId ) ),
     mass_( -1. ), helicity_( 0. ),
     role_( role ), status_( Undefined ), pdg_id_( pdgId ), is_primary_( true )
   {
@@ -226,9 +226,9 @@ namespace CepGen
   }
 
   double
-  Particle::massFromPDGId( const Particle::ParticleCode& pdgId_ )
+  Particle::massFromPDGId( const Particle::ParticleCode& pdg )
   {
-    switch ( pdgId_ ) {
+    switch ( pdg ) {
       case dQuark:       return 0.33;           // mass from PYTHIA6.4
       case uQuark:       return 0.33;           // mass from PYTHIA6.4
       case Electron:     return 0.510998928e-3;
@@ -262,9 +262,27 @@ namespace CepGen
   }
 
   double
-  Particle::widthFromPDGId( const Particle::ParticleCode& pdgId_ )
+  Particle::chargeFromPDGId( const Particle::ParticleCode& pdg )
   {
-    switch (pdgId_) {
+    switch ( pdg ) {
+      case Proton: return +1.;
+      case dQuark: return -1./3;
+      case uQuark: return +2./3;
+      case Electron: case Muon: case Tau: return -1.;
+      case ElectronNeutrino: case MuonNeutrino: case TauNeutrino: return 0.;
+      case Gluon: case Z: case Photon: return 0.;
+      case WPlus: return +1.;
+      case PiPlus: return +1.;
+      case PiZero: return 0.;
+      case Neutron: return 0.;
+      default: return 0.;
+    }
+  }
+
+  double
+  Particle::widthFromPDGId( const Particle::ParticleCode& pdg )
+  {
+    switch ( pdg ) {
       case JPsi:      return 5.; //FIXME
       case Z:         return 2.4952;
       case WPlus:     return 2.085;
@@ -281,7 +299,7 @@ namespace CepGen
   std::ostream&
   operator<<( std::ostream& os, const Particle::ParticleCode& pc )
   {
-    switch (pc) {
+    switch ( pc ) {
       case Particle::dQuark:          return os << "d quark";
       case Particle::uQuark:          return os << "u quark";
       case Particle::Electron:        return os << "electron";

@@ -203,7 +203,7 @@ namespace CepGen
         std::ostringstream oss;
         for ( ParticlesIds::const_iterator moth = mothers.begin(); moth != mothers.end(); ++moth ) {
           if ( moth != mothers.begin() ) oss << "+";
-          oss << Form( "%2d", *moth );
+          oss << *moth;
         }
         os << Form( "%6s ", oss.str().c_str() );
       }
