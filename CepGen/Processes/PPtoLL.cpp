@@ -69,7 +69,7 @@ PPtoLL::computeKTFactorisedMatrixElement()
   //     extra cuts on the p1t(l) and p2t(l) plane
   //=================================================================
   const bool pt_window = false;
-  const double pdif = 2.5;
+  const double max_pt_diff = 2.5;
 
   //=================================================================
   //     the distance in rapidity between l^+ and l^-
@@ -111,14 +111,14 @@ PPtoLL::computeKTFactorisedMatrixElement()
   //=================================================================
   //     a window in transverse momentum difference
   //=================================================================
-  if ( pt_window && fabs( pt1-pt2 ) > pdif ) return 0.;
 
-  //const double pcaptx = pt1x+pt2x, pcapty = pt1y+pt2y;
-  // rapidity difference
-  const double dely = fabs( y1_-y2_ );
+  if ( pt_window && fabs( pt1-pt2 ) > max_pt_diff ) return 0.;
+
   //=================================================================
   //     a window in rapidity distance
   //=================================================================
+
+  const double dely = fabs( y1_-y2_ );
   if ( delta_y_window && ( dely < dely_min || dely > dely_max ) ) return 0.;
 
   //=================================================================
@@ -281,8 +281,8 @@ PPtoLL::computeKTFactorisedMatrixElement()
                  term10 =         -that*uhat*uhat*uhat;
 
     const double auxil_gamgam = -2.*( term1+term2+term3+term4+term5+term6+term7+term8+term9+term10 )/( pow( ( ml2-that )*( ml2-uhat ), 2) );
-    const double g_em = sqrt( 4.*M_PI*Constants::alphaEM );
-    amat2 = pow( g_em, 4 )*auxil_gamgam;
+    const double g_em_sq = 4.*M_PI*Constants::alphaEM;
+    amat2 = g_em_sq*g_em_sq*auxil_gamgam;
   }
   else if ( off_shell ) {
 
