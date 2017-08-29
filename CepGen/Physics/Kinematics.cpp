@@ -3,8 +3,9 @@
 namespace CepGen
 {
   Kinematics::Kinematics() :
-    in1p( 6500. ), in2p( 6500. ), in1pdg( Particle::Proton ), in2pdg( Particle::Proton ),
-    pair( Particle::Muon ), mode( ElasticElastic ), remnant_mode( SuriYennie ), cuts_mode( BothParticles ),
+    inp( { 6500., 6500. } ), inpdg( { Particle::Proton, Particle::Proton } ),
+    central_system( { Particle::Muon, Particle::Muon } ),
+    mode( ElasticElastic ), remnant_mode( SuriYennie ), cuts_mode( AllParticles ),
     central_cuts( { { Cuts::pt_single, 3.0 }, { Cuts::pt_diff, { 0., 300.0 } } } ),
     remnant_cuts( { { Cuts::mass, { 1.07, 320.0 } } } ),
     initial_cuts( { { Cuts::q2, { 0.0, 1.0e5 } }, { Cuts::qt, { 0.0, 500.0 } } } )
@@ -53,9 +54,9 @@ namespace CepGen
   operator<<( std::ostream& os, const Kinematics::CutsMode& cut )
   {
     switch ( cut ) {
-      case Kinematics::NoCuts:         return os << "no cuts";
-      case Kinematics::BothParticles:  return os << "both outgoing particles";
-      case Kinematics::OneParticle:    return os << "single outgoing particle";
+      case Kinematics::NoCuts:       return os << "no cuts";
+      case Kinematics::AllParticles: return os << "all outgoing particles";
+      case Kinematics::OneParticle:  return os << "single outgoing particle";
     }
     return os;
   }

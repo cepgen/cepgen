@@ -41,7 +41,6 @@ namespace CepGen
   Parameters::dump( std::ostream& out, bool pretty ) const
   {
     std::ostringstream os;
-    os.str( "" ); os << kinematics.pair; const std::string particles = os.str();
     os.str( "" ); os << kinematics.cuts_mode; const std::string cutsmode = os.str();
 
     const int wb = 75, wt = 32;
@@ -75,21 +74,23 @@ namespace CepGen
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming particles " ) : "Incoming particles" ) << std::setfill( ' ' ) << std::endl
       << std::endl;
     std::ostringstream proc_mode, cut_mode; proc_mode << kinematics.mode; cut_mode << cutsmode;
-    std::ostringstream ip1, ip2, op; ip1 << kinematics.in1pdg; ip2 << kinematics.in2pdg; op << kinematics.pair;
+    std::ostringstream ip1, ip2, op; ip1 << kinematics.inpdg.first; ip2 << kinematics.inpdg.second;
+    for ( std::vector<Particle::ParticleCode>::const_iterator cp = kinematics.central_system.begin(); cp != kinematics.central_system.end(); ++cp )
+      op << ( cp != kinematics.central_system.begin() ? ", " : "" ) << *cp;
     std::ostringstream q2range; q2range << kinematics.initial_cuts.at( Cuts::q2 );
     os
       << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << std::endl
       << std::setw( wt ) << "Incoming particles" << ( pretty ? boldify( ip1.str().c_str() ) : ip1.str() ) << ", " << ( pretty ? boldify( ip2.str().c_str() ) : ip2.str() ) << std::endl
-      << std::setw( wt ) << "Momenta (GeV/c)" << kinematics.in1p << ", " << kinematics.in2p << std::endl
+      << std::setw( wt ) << "Momenta (GeV/c)" << kinematics.inp.first << ", " << kinematics.inp.second << std::endl
       << std::setw( wt ) << "Structure functions mode" << remnant_mode << std::endl
       << std::endl
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << std::endl
       << std::endl
       << std::setw( wt ) << "Virtuality range" << ( pretty ? boldify( q2range.str().c_str() ) : q2range.str().c_str() ) << " GeV**2" << std::endl
       << std::endl
-      << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Outgoing leptons " ) : "Outgoing leptons" ) << std::setfill( ' ' ) << std::endl
+      << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Outgoing central system " ) : "Outgoing central system" ) << std::setfill( ' ' ) << std::endl
       << std::endl
-      << std::setw( wt ) << "Pair" << ( pretty ? boldify( op.str().c_str() ) : op.str() ) << " (" << (int)kinematics.pair << ")" << std::endl
+      << std::setw( wt ) << "Central particles" << ( pretty ? boldify( op.str().c_str() ) : op.str() ) << std::endl
       << std::setw( wt ) << "Cuts mode" << ( pretty ? boldify( cut_mode.str().c_str() ) : cut_mode.str() ) << std::endl;
     for ( std::map<Cuts::Central, Kinematics::Limits>::const_iterator lim = kinematics.central_cuts.begin(); lim != kinematics.central_cuts.end(); ++lim ) {
       os << std::setw( wt ) << lim->first << lim->second << std::endl;

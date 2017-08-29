@@ -33,6 +33,7 @@ namespace CepGen
       else FatalError( Form( "Unrecognised process name: %s", proc_name_.c_str() ) );
 
       if ( m_params.count( "IEND" ) ) setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
+      params_.kinematics.central_system = { pair_, pair_ };
       Information( os.str() );
     }
 
@@ -50,12 +51,12 @@ namespace CepGen
       registerParameter<unsigned int>( "MODE", "Subprocess' mode", (unsigned int*)&params->kinematics.mode );
       registerParameter<unsigned int>( "PMOD", "Outgoing primary particles' mode", (unsigned int*)&params->remnant_mode );
       registerParameter<unsigned int>( "EMOD", "Outgoing primary particles' mode", (unsigned int*)&params->remnant_mode );
-      registerParameter<unsigned int>( "PAIR", "Outgoing particles' PDG id", (unsigned int*)&params->kinematics.pair );
+      registerParameter<unsigned int>( "PAIR", "Outgoing particles' PDG id", (unsigned int*)&pair_ );
       registerParameter<unsigned int>( "MCUT", "Set of cuts to apply on final products", (unsigned int*)&params->kinematics.cuts_mode );
       registerParameter<unsigned int>( "NGEN", "Number of events to generate", &params->generation.maxgen );
 
-      registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params->kinematics.in1p );
-      registerParameter<double>( "INPE", "Momentum (2nd primary particle)", &params->kinematics.in2p );
+      registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params->kinematics.inp.first );
+      registerParameter<double>( "INPE", "Momentum (2nd primary particle)", &params->kinematics.inp.second );
       registerParameter<double>( "PTCT", "Minimal transverse momentum (single central outgoing particle)", &params->kinematics.central_cuts[Cuts::pt_single].min() );
       registerParameter<double>( "MSCT", "Minimal central system mass", &params->kinematics.central_cuts[Cuts::mass_sum].min() );
       registerParameter<double>( "ECUT", "Minimal energy (single central outgoing particle)", &params->kinematics.central_cuts[Cuts::energy_single].min() );

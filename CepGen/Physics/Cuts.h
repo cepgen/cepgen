@@ -3,13 +3,21 @@
 
 namespace CepGen
 {
+  /// Constraints to be applied on the events kinematics
   namespace Cuts
   {
+    /// Cuts on the central particles (e.g. dilepton system for LPAIR)
     enum Central
     {
-      pt_single, eta_single, energy_single,
-      mass_sum, pt_sum, eta_sum, energy_sum,
-      pt_diff, dely
+      pt_single,     ///< single particle transverse momentum
+      eta_single,    ///< single particle pseudo-rapidity
+      energy_single, ///< single particle energy
+      mass_sum,      ///< central system invariant mass
+      pt_sum,        ///< central system transverse momentum
+      eta_sum,       ///< central system pseudo-rapidity
+      energy_sum,    ///< central system energy
+      pt_diff,       ///< transverse momentum balance between the central particles
+      dely           ///< rapidity balance between the central particles
     };
     inline std::ostream& operator<<( std::ostream& os, const Central& is ) {
       switch ( is ) {
@@ -26,10 +34,10 @@ namespace CepGen
       return os;
     }
 
-
+    /// Cuts on the beam particles remnants
     enum Remnants
     {
-      mass
+      mass ///< outgoing beam particles remnants mass
     };
     inline std::ostream& operator<<( std::ostream& os, const Remnants& is ) {
       switch ( is ) {
@@ -38,9 +46,12 @@ namespace CepGen
       return os;
     }
 
+    /// Cuts on the initial state dynamics
     enum InitialState
     {
-      q2, qt, w
+      q2, ///< parton virtuality
+      qt, ///< parton transverse virtuality
+      w   ///< two-parton squared momentum
     };
     inline std::ostream& operator<<( std::ostream& os, const InitialState& is ) {
       switch ( is ) {

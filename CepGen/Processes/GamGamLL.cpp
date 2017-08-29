@@ -757,7 +757,7 @@ GamGamLL::computeWeight()
            && ( !energy_limits.hasMax() || p7_cm_.energy() <= energy_limits.max() );
 
   switch ( cuts_.cuts_mode ) {
-    case Kinematics::BothParticles: { lcut = lmu1 && lmu2; } break;
+    case Kinematics::AllParticles:  { lcut = lmu1 && lmu2; } break;
     case Kinematics::OneParticle:   { lcut = lmu1 || lmu2; } break;
     case Kinematics::NoCuts: default: lcut = true; break;
   }

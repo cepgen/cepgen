@@ -38,6 +38,7 @@ namespace CepGen
         std::map<std::string, Parameter<bool> > p_bools_;
 
         void init( Parameters* );
+        Particle::ParticleCode pair_;
         std::string proc_name_, hadr_name_;
     };
 

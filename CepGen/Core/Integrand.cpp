@@ -13,13 +13,13 @@ namespace CepGen
     if ( p->process()->hasEvent() ) {
       p->process()->clearEvent();
 
-      const Particle::Momentum p1( 0., 0.,  p->kinematics.in1p ), p2( 0., 0., -p->kinematics.in2p );
+      const Particle::Momentum p1( 0., 0.,  p->kinematics.inp.first ), p2( 0., 0., -p->kinematics.inp.second );
       p->process()->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
 
       DebuggingInsideLoop( Form( "Function f called -- some parameters:\n\t"
                                  "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
                                  "  remnant mode: %d",
-                                 p->kinematics.in1p, p->kinematics.in2p, p->remnant_mode ) );
+                                 p->kinematics.inp.first, p->kinematics.inp.second, p->remnant_mode ) );
 
       if ( p->vegas.first_run ) {
 
@@ -50,9 +50,12 @@ namespace CepGen
         p->process()->prepareKinematics();
 
         //--- add central system
+        if ( central_system.size() != p->kinematics.central_system.size() ) throw Exception( __PRETTY_FUNCTION__, "Invalid central system size specified!", FatalError );
+        unsigned short i = 0;
         for ( Particles::iterator part = central_system.begin(); part != central_system.end(); ++part ) {
-          part->setPdgId( p->kinematics.pair );
+          part->setPdgId( p->kinematics.central_system[i] );
           part->computeMass();
+          i++;
         }
 
         p->process()->clearRun();

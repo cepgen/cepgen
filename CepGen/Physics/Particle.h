@@ -21,8 +21,8 @@ namespace CepGen
   /// Kinematic information for one particle
   class Particle {
     public:
-      /** Unique identifier for a particle type. From @cite Beringer:1900zz :
-       * _The Monte Carlo particle numbering scheme [...] is intended to facilitate interfacing between event generators, detector simulators, and analysis packages used in particle physics._
+      /** Unique identifier for a particle type. From \cite Beringer:1900zz :
+       * `The Monte Carlo particle numbering scheme [...] is intended to facilitate interfacing between event generators, detector simulators, and analysis packages used in particle physics.`
        * \brief PDG ids of all known particles
        */
       enum ParticleCode {
@@ -214,6 +214,7 @@ namespace CepGen
       /// Build using the role of the particle in the process and its PDG id
       /// \param[in] pdgId ParticleCode (PDG ID)
       /// \param[in] role Role of the particle in the process
+      /// \param[in] st Current status
       Particle( Role role, ParticleCode pdgId=invalidParticle, Status st=Undefined );
       /// Copy constructor
       Particle( const Particle& );

@@ -14,7 +14,7 @@ using std::cout;
 
 namespace CepGen
 {
-  /// List of kinematic cuts to apply on the central and outgoing phase space.
+  /// List of kinematic constraints to apply on the process phase space.
   class Kinematics
   {
     public:
@@ -49,22 +49,21 @@ namespace CepGen
       Kinematics();
       ~Kinematics();
 
-      /**
-       * \brief Set of cuts to apply on the central system
-       * - 0 - No cuts at all (for the total cross section)
-       * - 2 - Cuts on both the outgoing central particles, according to the provided cuts parameters
-       * - 3 - Cuts on at least one outgoing central particle, according to the provided cut parameters
-       */
-      enum CutsMode { NoCuts = 0, BothParticles = 2, OneParticle = 3 };
+      /// Set of cuts to apply on the central system
+      enum CutsMode {
+        NoCuts = 0,       ///< No cuts at all (for the total cross section)
+        AllParticles = 2, ///< Cuts on all the outgoing central particles
+        OneParticle = 3   ///< Cuts on at least one outgoing central particle
+      };
       /// Human-readable format of a cuts mode
       friend std::ostream& operator<<( std::ostream&, const CutsMode& );
-      /// Type of outgoing process kinematics to be considered (elastic/dissociative final states)
+      /// Type of kinematics to consider for the process
       enum ProcessMode {
-        ElectronProton = 0,
-        ElasticElastic = 1,
-        ElasticInelastic = 2,
-        InelasticElastic = 3,
-        InelasticInelastic = 4,
+        ElectronProton = 0,     ///< electron-proton elastic case
+        ElasticElastic = 1,     ///< proton-proton elastic case
+        ElasticInelastic = 2,   ///< proton-proton single-dissociative (or inelastic-elastic) case
+        InelasticElastic = 3,   ///< proton-proton single-dissociative (or elastic-inelastic) case
+        InelasticInelastic = 4, ///< proton-proton double-dissociative case
         ProtonElectron,
         ElectronElectron
       };
@@ -75,27 +74,15 @@ namespace CepGen
       /// or events generation
       void dump( std::ostream& os=std::cout ) const;
 
-      inline void setSqrtS( double sqrts ) { in1p = in2p = sqrts/2; }
-      /// First incoming particle's momentum (in \f$\text{GeV}/c\f$)
-      double in1p;
-      /// Second incoming particle's momentum (in \f$\text{GeV}/c\f$)
-      double in2p;
-      /// First beam/primary particle's PDG identifier
-      Particle::ParticleCode in1pdg;
-      /// Second beam/primary particle's PDG identifier
-      Particle::ParticleCode in2pdg;
+      /// Incoming particles' momentum (in \f$\text{GeV}/c\f$)
+      std::pair<double,double> inp;
+      inline void setSqrtS( double sqrts ) { inp = { sqrts*0.5, sqrts*0.5 }; }
+      /// Beam/primary particle's PDG identifier
+      std::pair<Particle::ParticleCode,Particle::ParticleCode> inpdg;
       /// PDG id of the outgoing central particles
-      Particle::ParticleCode pair;
+      std::vector<Particle::ParticleCode> central_system;
 
-      /**
-       * Type of kinematics to consider for the process. Can either be :
-       *  * 0 for the electron-proton elastic case
-       *  * 1 for the proton-proton elastic case
-       *  * 2 for the proton-proton single-dissociative (or inelastic-elastic) case
-       *  * 3 for the proton-proton single-dissociative (or elastic-inelastic) case
-       *  * 4 for the proton-proton double-dissociative case
-       * \brief Type of kinematics to consider for the phase space
-       */
+      /// Type of kinematics to consider for the phase space
       ProcessMode mode;
       StructureFunctions remnant_mode;
       /// Sets of cuts to apply on the final phase space

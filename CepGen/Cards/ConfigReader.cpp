@@ -59,8 +59,8 @@ namespace CepGen
     ConfigReader::parseIncomingKinematics( const libconfig::Setting& kin )
     {
       try {
-        if ( kin.exists( "beam1_pz" ) ) params_.kinematics.in1p = (double)kin["beam1_pz"];
-        if ( kin.exists( "beam2_pz" ) ) params_.kinematics.in2p = (double)kin["beam2_pz"];
+        if ( kin.exists( "beam1_pz" ) ) params_.kinematics.inp.first = (double)kin["beam1_pz"];
+        if ( kin.exists( "beam2_pz" ) ) params_.kinematics.inp.second = (double)kin["beam2_pz"];
         if ( kin.exists( "structure_functions" ) ) {
           std::string sf = kin["structure_functions" ];
           if ( sf == "electron" ) params_.remnant_mode = Electron;
@@ -84,7 +84,10 @@ namespace CepGen
     ConfigReader::parseOutgoingKinematics( const libconfig::Setting& kin )
     {
       try {
-        if ( kin.exists( "pair" ) ) params_.kinematics.pair = (Particle::ParticleCode)(int)kin["pair"];
+        if ( kin.exists( "pair" ) ) {
+          Particle::ParticleCode pair = (Particle::ParticleCode)(int)kin["pair"];
+          params_.kinematics.central_system = { pair, pair };
+        }
         if ( kin.exists( "cuts_mode" ) ) params_.kinematics.cuts_mode = (Kinematics::CutsMode)(int)kin["cuts_mode"];
         if ( kin.exists( "min_pt" ) ) params_.kinematics.central_cuts[Cuts::pt_single].min() = (double)kin["min_pt"];
         if ( kin.exists( "max_pt" ) ) params_.kinematics.central_cuts[Cuts::pt_single].max() = (double)kin["max_pt"];
@@ -151,8 +154,8 @@ namespace CepGen
     ConfigReader::writeIncomingKinematics( const Parameters* params, libconfig::Setting& root )
     {
       libconfig::Setting& kin = root.add( "in_kinematics", libconfig::Setting::TypeGroup );
-      kin.add( "beam1_pz", libconfig::Setting::TypeFloat ) = params->kinematics.in1p;
-      kin.add( "beam2_pz", libconfig::Setting::TypeFloat ) = params->kinematics.in2p;
+      kin.add( "beam1_pz", libconfig::Setting::TypeFloat ) = params->kinematics.inp.first;
+      kin.add( "beam2_pz", libconfig::Setting::TypeFloat ) = params->kinematics.inp.second;
       std::ostringstream os; os << params->remnant_mode;
       kin.add( "structure_function", libconfig::Setting::TypeString ) = os.str();
     }
@@ -161,7 +164,7 @@ namespace CepGen
     ConfigReader::writeOutgoingKinematics( const Parameters* params, libconfig::Setting& root )
     {
       libconfig::Setting& kin = root.add( "out_kinematics", libconfig::Setting::TypeGroup );
-      kin.add( "pair", libconfig::Setting::TypeInt ) = (int)params->kinematics.pair;
+      kin.add( "pair", libconfig::Setting::TypeInt ) = (int)params->kinematics.central_system[0];
       kin.add( "cuts_mode", libconfig::Setting::TypeInt ) = (int)params->kinematics.cuts_mode;
       kin.add( "min_pt", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::pt_single ).min();
       kin.add( "max_pt", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::pt_single ).max();
