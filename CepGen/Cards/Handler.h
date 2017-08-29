@@ -5,6 +5,7 @@
 
 #include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Processes/PPtoLL.h"
+#include "CepGen/Processes/PPtoWW.h"
 
 namespace CepGen
 {

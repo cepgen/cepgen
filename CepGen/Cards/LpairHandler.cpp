@@ -30,6 +30,7 @@ namespace CepGen
 
       if      ( proc_name_ == "lpair" )  params_.setProcess( new Process::GamGamLL() );
       else if ( proc_name_ == "pptoll" ) params_.setProcess( new Process::PPtoLL() );
+      else if ( proc_name_ == "pptoww" ) params_.setProcess( new Process::PPtoWW() );
       else FatalError( Form( "Unrecognised process name: %s", proc_name_.c_str() ) );
 
       if ( m_params.count( "IEND" ) ) setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
