@@ -94,7 +94,7 @@ namespace CepGen
   Particles
   Event::mothers( const Particle& part )
   {
-    return getByIds( part.mothersIds() );
+    return getByIds( part.mothers() );
   }
 
   Particles
@@ -178,6 +178,36 @@ namespace CepGen
   }
 
   void
+  Event::checkKinematics() const
+  {
+    try {
+      const Particles& parts = particles();
+      // check the kinematics through parentage
+      for ( Particles::const_iterator p = parts.begin(); p != parts.end(); ++p ) {
+        ParticlesIds daughters = p->daughters();
+        if ( daughters.empty() ) continue;
+        Particle::Momentum ptot;
+        for ( ParticlesIds::const_iterator daugh = daughters.begin(); daugh != daughters.end(); ++daugh ) {
+          const Particle& d = getConstById( *daugh );
+          const ParticlesIds mothers = d.mothers();
+          if ( mothers.size() > 1 ) {
+            for ( ParticlesIds::const_iterator moth = mothers.begin(); moth != mothers.end(); ++moth ) {
+              if ( *moth == p->id() ) continue;
+              ptot -= getConstById( *moth ).momentum();
+            }
+          }
+          ptot += d.momentum();
+        }
+        const double mass_diff = ( ptot-p->momentum() ).mass();
+        if ( fabs( mass_diff ) > 1.e-10 ) {
+          dump();
+          throw Exception( __PRETTY_FUNCTION__, Form( "Error in momentum balance for particle %d: mdiff = %.5e", p->id(), mass_diff ), FatalError );
+        }
+      }
+    } catch ( const Exception& e ) { throw Exception( __PRETTY_FUNCTION__, Form( "Event kinematics check failed:\n\t%s", e.what() ), FatalError ); }
+  }
+
+  void
   Event::dump( std::ostream& out, bool stable ) const
   {
     Particles parts = ( stable ) ? stableParticles() : particles();
@@ -187,28 +217,20 @@ namespace CepGen
     double pxtot = 0., pytot = 0., pztot = 0., etot = 0.;
     for ( Particles::const_iterator part_ref=parts.begin(); part_ref!=parts.end(); part_ref++ ) {
       const Particle& part = *part_ref;
-      {
-        std::ostringstream oss; oss << part.pdgId();
-        os << Form( "\n %2d\t%+6d%8s", part.id(), part.integerPdgId(), oss.str().c_str() );
-      }
+      { std::ostringstream oss; oss << part.pdgId(); os << Form( "\n %2d\t%+6d%8s", part.id(), part.integerPdgId(), oss.str().c_str() ); }
       os << "\t";
       if ( part.charge() != 999. ) os << Form( "%6.2f ", part.charge() );
       else                         os << "\t";
-      {
-        std::ostringstream oss; oss << part.role();
-        os << Form( "%8s\t%6d\t", oss.str().c_str(), part.status() );
-      }
-      const ParticlesIds mothers = part.mothersIds();
+      { std::ostringstream oss; oss << part.role(); os << Form( "%8s\t%6d\t", oss.str().c_str(), part.status() ); }
+      const ParticlesIds mothers = part.mothers();
       if ( !mothers.empty() ) {
         std::ostringstream oss;
         for ( ParticlesIds::const_iterator moth = mothers.begin(); moth != mothers.end(); ++moth ) {
-          if ( moth != mothers.begin() ) oss << "+";
-          oss << *moth;
+          oss << ( ( moth != mothers.begin() ) ? "+" : "" ) << *moth;
         }
         os << Form( "%6s ", oss.str().c_str() );
       }
-      else
-        os << "       ";
+      else os << "       ";
       const Particle::Momentum mom = part.momentum();
       os << Form( "% 9.6e % 9.6e % 9.6e % 9.6e % 9.5e", mom.px(), mom.py(), mom.pz(), part.energy(), part.mass() );
       if ( part.status() == Particle::Undefined

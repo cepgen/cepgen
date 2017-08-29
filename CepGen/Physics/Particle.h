@@ -214,7 +214,7 @@ namespace CepGen
       /// Build using the role of the particle in the process and its PDG id
       /// \param[in] pdgId ParticleCode (PDG ID)
       /// \param[in] role Role of the particle in the process
-      Particle( Role role, ParticleCode pdgId=Particle::invalidParticle );
+      Particle( Role role, ParticleCode pdgId=invalidParticle, Status st=Undefined );
       /// Copy constructor
       Particle( const Particle& );
       inline ~Particle() {}
@@ -318,7 +318,7 @@ namespace CepGen
       // --- particle relations
 
       /// Is this particle a primary particle ?
-      inline bool primary() const { return is_primary_; }
+      inline bool primary() const { return mothers_.empty(); }
       /**
        * \brief Set the mother particle
        * \param[in] part A Particle object containing all the information on the mother particle
@@ -328,20 +328,20 @@ namespace CepGen
        * \brief Gets the unique identifier to the mother particle from which this particle arises
        * \return An integer representing the unique identifier to the mother of this particle in the event
        */
-      inline ParticlesIds mothersIds() const { return mothers_; }
+      inline ParticlesIds mothers() const { return mothers_; }
       /**
        * \brief Add a decay product
        * \param[in] part The Particle object in which this particle will desintegrate or convert
        * \return A boolean stating if the particle has been added to the daughters list or if it was already present before
        */
-      bool addDaughter( Particle& part );
+      void addDaughter( Particle& part );
       /// Gets the number of daughter particles
       inline unsigned int numDaughters() const { return daughters_.size(); };
       /**
        * \brief Get an identifiers list all daughter particles
        * \return An integer vector containing all the daughters' unique identifier in the event
        */
-      ParticlesIds daughters() const { return daughters_; }
+      inline ParticlesIds daughters() const { return daughters_; }
 
       // --- global particle information extraction
 
@@ -369,8 +369,6 @@ namespace CepGen
       ParticlesIds daughters_;
       /// PDG id
       ParticleCode pdg_id_;
-      /// Is the particle a primary particle ?
-      bool is_primary_;
   };
 
   /// Compute the centre of mass energy of two particles (incoming or outgoing states)

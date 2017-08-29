@@ -5,13 +5,13 @@ namespace CepGen
   Particle::Particle() :
     id_( -1 ), charge_( 1. ),
     mass_( -1. ), helicity_( 0. ),
-    role_( UnknownRole ), status_( Undefined ), pdg_id_( invalidParticle ), is_primary_( true )
+    role_( UnknownRole ), status_( Undefined ), pdg_id_( invalidParticle )
   {}
 
-  Particle::Particle( Role role, ParticleCode pdgId ) :
+  Particle::Particle( Role role, ParticleCode pdgId, Status st ) :
     id_( -1 ), charge_( chargeFromPDGId( pdgId ) ),
     mass_( -1. ), helicity_( 0. ),
-    role_( role ), status_( Undefined ), pdg_id_( pdgId ), is_primary_( true )
+    role_( role ), status_( st ), pdg_id_( pdgId )
   {
     if ( pdg_id_!=invalidParticle ) {
       computeMass();
@@ -23,7 +23,7 @@ namespace CepGen
     momentum_( part.momentum_ ), mass_( part.mass_ ), helicity_( part.helicity_ ),
     role_( part.role_ ), status_( part.status_ ),
     mothers_( part.mothers_ ), daughters_( part.daughters_ ),
-    pdg_id_( part.pdg_id_ ), is_primary_( part.is_primary_ )
+    pdg_id_( part.pdg_id_ )
   {}
 
   bool
@@ -67,15 +67,14 @@ namespace CepGen
   Particle::addMother( Particle& part )
   {
     mothers_.insert( part.id() );
-    is_primary_ = false;
 
     DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) is the new mother of %2d (pdgId=%4d)",
-                               part.id()+1, part.pdgId(), id_+1, pdg_id_ ) );
+                               part.id(), part.pdgId(), id_, pdg_id_ ) );
 
     part.addDaughter( *this );
   }
 
-  bool
+  void
   Particle::addDaughter( Particle& part )
   {
     std::pair<ParticlesIds::iterator,bool> ret = daughters_.insert( part.id() );
@@ -83,7 +82,7 @@ namespace CepGen
     if ( Logger::get().level >= Logger::DebugInsideLoop ) {
       std::ostringstream os;
       for ( ParticlesIds::const_iterator it=daughters_.begin(); it!=daughters_.end(); it++) {
-        os << Form("\n\t * id=%d", *it);
+        os << Form( "\n\t * id=%d", *it );
       }
       DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) has now %2d daughter(s):"
                                  "%s", role_, pdg_id_, numDaughters(), os.str().c_str() ) );
@@ -93,12 +92,8 @@ namespace CepGen
       DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) is a new daughter of %2d (pdgId=%4d)",
                                  part.role(), part.pdgId(), role_, pdg_id_ ) );
 
-      if ( !part.primary() && part.mothersIds().empty() ) {
-        part.addMother( *this );
-      }
+      if ( part.mothers().find( id_ ) == part.mothers().end() ) part.addMother( *this );
     }
-
-    return ret.second;
   }
 
   void

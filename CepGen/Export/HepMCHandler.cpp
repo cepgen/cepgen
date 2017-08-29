@@ -83,7 +83,7 @@ HepMCHandler::fillEvent( const Event* evt )
     part->suggest_barcode( idx++ );
 #endif
 
-    const ParticlesIds moth = part_orig.mothersIds();
+    const ParticlesIds moth = part_orig.mothers();
 
     switch ( part_orig.role() ) {
       case Particle::IncomingBeam1: { v1->add_particle_in( part ); } break;

@@ -57,53 +57,52 @@ namespace CepGen
 
     void
     GenericProcess::setEventContent( const IncomingState& is, const OutgoingState& os )
-    {  
+    {
+      //----- add the particles in the event
+
+      //--- incoming state
       for ( IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++ ) {
         event_->addParticle( Particle( ip->first, ip->second ), true );
       }
-
-      // Prepare the central system if not already there
+      //--- central system (if not already there)
       IncomingState::const_iterator central_system = is.find( Particle::CentralSystem );
-      if ( central_system==is.end() ) {
-        Particle cs( Particle::Intermediate, Particle::invalidParticle );
-        cs.addMother( event_->getOneByRole( Particle::Parton1 ) );
-        cs.addMother( event_->getOneByRole( Particle::Parton2 ) );
-        cs.setStatus( Particle::Propagator );
-        event_->addParticle( cs, true );
+      if ( central_system == is.end() ) {
+        event_->addParticle( Particle( Particle::Intermediate, Particle::invalidParticle, Particle::Propagator ), true );
       }
-
-      for ( OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++ ) {
-        for ( std::vector<Particle::ParticleCode>::const_iterator it=op->second.begin(); it!=op->second.end(); ++it ) {
+      //--- outgoing state
+      for ( OutgoingState::const_iterator op = os.begin(); op != os.end(); ++op ) {
+        for ( std::vector<Particle::ParticleCode>::const_iterator it = op->second.begin(); it != op->second.end(); ++it ) {
           event_->addParticle( Particle( op->first, *it ), false );
         }
       }
-  
-      // Incoming particles (incl. eventual partons)
-      for ( IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++ ) {
-        Particle& p = event_->getOneByRole( ip->first );
-        p.setStatus( Particle::Undefined );
-        switch ( ip->first ) {
-          case Particle::IncomingBeam1:
-          case Particle::IncomingBeam2: break;
-          case Particle::Parton1:      p.addMother( event_->getOneByRole( Particle::IncomingBeam1 ) ); break;
-          case Particle::Parton2:      p.addMother( event_->getOneByRole( Particle::IncomingBeam2 ) ); break;
-          case Particle::Intermediate: p.addMother( event_->getOneByRole( Particle::Parton1 ) ); break;
+
+      //----- define the particles parentage
+
+      const Particles parts = event_->particles();
+      for ( Particles::const_iterator p = parts.begin(); p != parts.end(); ++p ) {
+        Particle& part = event_->getById( p->id() );
+        switch ( part.role() ) {
+          case Particle::OutgoingBeam1:
+          case Particle::Parton1:
+            part.addMother( event_->getOneByRole( Particle::IncomingBeam1 ) );
+            break;
+          case Particle::OutgoingBeam2:
+          case Particle::Parton2:
+            part.addMother( event_->getOneByRole( Particle::IncomingBeam2 ) );
+            break;
+          case Particle::Intermediate:
+            part.addMother( event_->getOneByRole( Particle::Parton1 ) );
+            part.addMother( event_->getOneByRole( Particle::Parton2 ) );
+            break;
+          case Particle::CentralSystem:
+            part.addMother( event_->getOneByRole( Particle::Intermediate ) );
+            break;
           default: break;
         }
       }
-      // Outgoing particles (central, and outgoing primary particles or remnants)
-      for ( OutgoingState::const_iterator op=os.begin(); op!=os.end(); op++ ) {
-        Particles& parts = event_->getByRole( op->first );
-        for ( Particles::iterator p = parts.begin(); p != parts.end(); ++p ) {
-          p->setStatus( Particle::Undefined );
-          switch ( op->first ) {
-            case Particle::OutgoingBeam1: p->addMother( event_->getOneByRole( Particle::IncomingBeam1 ) ); break;
-            case Particle::OutgoingBeam2: p->addMother( event_->getOneByRole( Particle::IncomingBeam2 ) ); break;
-            case Particle::CentralSystem: p->addMother( event_->getOneByRole( Particle::Intermediate ) ); break;
-            default: break;
-          }
-        }
-      }
+
+      //----- freeze the event as it is
+
       event_->init();
     }
 
