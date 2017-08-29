@@ -233,8 +233,8 @@ namespace CepGen
       //void setId( int id ) { id_ = id; }
       void setId( int id ) { id_ = id; }
       /// Electric charge (given as a float number, for the quarks and bound states)
-      float charge() const { return charge_; }
-      void setCharge( float charge ) { charge_ = charge; }
+      float charge() const { return charge_sign_ * chargeFromPDGId( pdg_id_ ); }
+      void setChargeSign( int sign ) { charge_sign_ = sign; }
       /// Role in the considered process
       Role role() const { return role_; }
       void setRole( const Role& role ) { role_ = role; }
@@ -247,8 +247,8 @@ namespace CepGen
 
       /// Set the PDG identifier (along with the particle's electric charge)
       /// \param[in] pdg ParticleCode (PDG ID)
-      /// \param[in] ch Electric charge (in units of \f$e\f$)
-      void setPdgId( const ParticleCode& pdg, float ch=-999. );
+      /// \param[in] ch Electric charge (0, 1, or -1)
+      void setPdgId( const ParticleCode& pdg, short ch=0 );
       /// Retrieve the objectified PDG identifier
       inline ParticleCode pdgId() const { return pdg_id_; }
       /// Retrieve the integer value of the PDG identifier
@@ -351,8 +351,8 @@ namespace CepGen
     private:
       /// Unique identifier in an event
       int id_;
-      /// Electric charge
-      float charge_;
+      /// Electric charge (+-1 or 0)
+      short charge_sign_;
       /// Momentum properties handler
       Momentum momentum_;
       /// Mass in \f$\textrm{GeV}/c^2\f$

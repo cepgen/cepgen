@@ -3,13 +3,13 @@
 namespace CepGen
 {
   Particle::Particle() :
-    id_( -1 ), charge_( 1. ),
+    id_( -1 ), charge_sign_( 1 ),
     mass_( -1. ), helicity_( 0. ),
     role_( UnknownRole ), status_( Undefined ), pdg_id_( invalidParticle )
   {}
 
   Particle::Particle( Role role, ParticleCode pdgId, Status st ) :
-    id_( -1 ), charge_( chargeFromPDGId( pdgId ) ),
+    id_( -1 ), charge_sign_( 1 ),
     mass_( -1. ), helicity_( 0. ),
     role_( role ), status_( st ), pdg_id_( pdgId )
   {
@@ -19,7 +19,7 @@ namespace CepGen
   }
 
   Particle::Particle( const Particle& part ) :
-    id_( part.id_ ), charge_( part.charge_ ),
+    id_( part.id_ ), charge_sign_( part.charge_sign_ ),
     momentum_( part.momentum_ ), mass_( part.mass_ ), helicity_( part.helicity_ ),
     role_( part.role_ ), status_( part.status_ ),
     mothers_( part.mothers_ ), daughters_( part.daughters_ ),
@@ -129,20 +129,18 @@ namespace CepGen
   }
 
   void
-  Particle::setPdgId( const ParticleCode& pdg, float ch )
+  Particle::setPdgId( const ParticleCode& pdg, short ch )
   {
     pdg_id_ = pdg;
-    if ( ch == -999. ) charge_ = 0.;
-    else charge_ = ch;
+    charge_sign_ = ch;
   }
 
   int
   Particle::integerPdgId() const
   {
-    const int pdg = static_cast<int>( pdg_id_ );
-    //--- leptons
-    if ( charge_ != 0 && pdg > 10 && pdg < 16 && pdg%2 != 0 ) return -charge_*pdg;
-    return pdg;
+    const float ch = chargeFromPDGId( pdg_id_ );
+    if ( ch == 0 ) return static_cast<int>( pdg_id_ );
+    return static_cast<int>( pdg_id_ ) * charge_sign_ * ( ch/fabs( ch ) );
   }
 
   void

@@ -58,21 +58,22 @@ namespace CepGen
     void
     GenericProcess::setEventContent( const IncomingState& is, const OutgoingState& os )
     {
+      event_->clear();
       //----- add the particles in the event
 
       //--- incoming state
       for ( IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++ ) {
-        event_->addParticle( Particle( ip->first, ip->second ), true );
+        event_->addParticle( Particle( ip->first, ip->second ) );
       }
       //--- central system (if not already there)
       IncomingState::const_iterator central_system = is.find( Particle::CentralSystem );
       if ( central_system == is.end() ) {
-        event_->addParticle( Particle( Particle::Intermediate, Particle::invalidParticle, Particle::Propagator ), true );
+        event_->addParticle( Particle( Particle::Intermediate, Particle::invalidParticle, Particle::Propagator ) );
       }
       //--- outgoing state
       for ( OutgoingState::const_iterator op = os.begin(); op != os.end(); ++op ) {
         for ( std::vector<Particle::ParticleCode>::const_iterator it = op->second.begin(); it != op->second.end(); ++it ) {
-          event_->addParticle( Particle( op->first, *it ), false );
+          event_->addParticle( Particle( op->first, *it ) );
         }
       }
 

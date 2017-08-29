@@ -81,7 +81,7 @@ int main( int argc, char* argv[] ) {
       ev.E[ev.np] = p.energy();
       ev.M[ev.np] = p.mass();
       ev.PID[ev.np] = p.integerPdgId();
-      ev.parentid[ev.np] = *p.mothersIds().begin();
+      ev.parentid[ev.np] = *p.mothers().begin();
       ev.status[ev.np] = p.status();
       ev.isstable[ev.np] = ( p.status() == CepGen::Particle::Undefined || p.status() == CepGen::Particle::FinalState );
       ev.charge[ev.np] = p.charge();
