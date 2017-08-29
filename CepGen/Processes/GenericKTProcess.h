@@ -53,7 +53,7 @@ namespace CepGen
         inline void setKinematics( const Kinematics& kin ) {
           cuts_ = kin;
           log_qmin_ = -10.; // FIXME //log_qmin_ = std::log( std::sqrt( cuts_.q2min ) );
-          log_qmax_ = log( cuts_.qt_max );
+          log_qmax_ = log( cuts_.qt.upper() );
         }
         /// Set the kinematics of the central system before any point computation
         inline virtual void prepareKTKinematics() { DebuggingInsideLoop("Dummy kinematics prepared!"); }

@@ -7,12 +7,9 @@ namespace CepGen
     pair( Particle::Muon ),
     mode( ElasticElastic ), remnant_mode( SuriYennie ),
     cuts_mode( BothParticles ),
-    pt_min( 3. ), pt_max( -1. ), e_min( 0. ), e_max( -1. ), eta_min( -999. ), eta_max( 999. ),
-    mass_min( 0. ), mass_max( -1. ),
-    mx_min( 1.07 ), mx_max( 320. ),
-    q2_min( 0. ), q2_max( 1.e5 ), w_min( 0. ), w_max( -1. ),
-    ptdiff_min( 0. ), ptdiff_max( 300. ),
-    qt_min( 0. ), qt_max( 500. )
+    pt_single_central( 3. ), mass_remnants( 1.07, 320. ),
+    q2( 0., 1.e5 ),
+    pt_diff_central( 0., 300. ), qt( 0., 500 )
   {}
 
   Kinematics::~Kinematics()
@@ -26,30 +23,25 @@ namespace CepGen
       << __PRETTY_FUNCTION__ << " Dump" << std::endl
       << std::setw(25) << "Cuts mode :" << std::setw(2) << cuts_mode << "->" << std::setw(4) << cuts_mode << std::endl    
       << "===== Single leptons" << std::endl
-      << std::setw(25) << "Minimal pT :" << std::setw(8) << pt_min << std::endl
-      << std::setw(25) << "Maximal pT :" << std::setw(8) << pt_max << std::endl
-      << std::setw(25) << "Minimal energy :" << std::setw(8) << e_min << std::endl
-      << std::setw(25) << "Maximal energy :" << std::setw(8) << e_max << std::endl
-      << std::setw(25) << "Minimal pseudorapidity :" << std::setw(8) << eta_min << std::endl
-      << std::setw(25) << "Maximal pseudorapidity :" << std::setw(8) << eta_max << std::endl
+      << std::setw(25) << "pT range: " << pt_single_central << std::endl
+      << std::setw(25) << "Energy range: " << e_single_central << std::endl
+      << std::setw(25) << "Pseudorapidity range:" << eta_single_central << std::endl
       << "===== Central kinematics" << std::endl
-      << std::setw(25) << "Minimal Q**2 :" << std::setw(8) << q2_min << std::endl
-      << std::setw(25) << "Maximal Q**2 :" << std::setw(8) << q2_max << std::endl
-      << std::setw(25) << "Minimal W :" << std::setw(8) << w_min << std::endl
-      << std::setw(25) << "Maximal W :" << std::setw(8) << w_max << std::endl;
+      << std::setw(25) << "Q**2 range:" << q2 << std::endl
+      << std::setw(25) << "W range:" << w << std::endl;
   }
 
   std::ostream&
   operator<<( std::ostream& os, const Kinematics::ProcessMode& pm )
   {
     switch ( pm ) {
-      case Kinematics::ElectronElectron:    os << "electron/electron"; break;
-      case Kinematics::ElectronProton:      os << "electron/proton"; break;
-      case Kinematics::ProtonElectron:      os << "proton/electron"; break;
-      case Kinematics::ElasticElastic:      os << "elastic/elastic"; break;
-      case Kinematics::InelasticElastic:    os << "inelastic/elastic"; break;
-      case Kinematics::ElasticInelastic:    os << "elastic/inelastic"; break;
-      case Kinematics::InelasticInelastic:  os << "inelastic/inelastic"; break;    
+      case Kinematics::ElectronElectron:   return os << "electron/electron";
+      case Kinematics::ElectronProton:     return os << "electron/proton";
+      case Kinematics::ProtonElectron:     return os << "proton/electron";
+      case Kinematics::ElasticElastic:     return os << "elastic/elastic";
+      case Kinematics::InelasticElastic:   return os << "inelastic/elastic";
+      case Kinematics::ElasticInelastic:   return os << "elastic/inelastic";
+      case Kinematics::InelasticInelastic: return os << "inelastic/inelastic";
     }
     return os;
   }
@@ -58,11 +50,17 @@ namespace CepGen
   operator<<( std::ostream& os, const Kinematics::Cuts& cut )
   {
     switch ( cut ) {
-      case Kinematics::NoCuts:         os << "no cuts"; break;
-      case Kinematics::BothParticles:  os << "both outgoing particles"; break;
-      case Kinematics::OneParticle:    os << "single outgoing particle"; break;
+      case Kinematics::NoCuts:         return os << "no cuts";
+      case Kinematics::BothParticles:  return os << "both outgoing particles";
+      case Kinematics::OneParticle:    return os << "single outgoing particle";
     }
     return os;
+  }
+
+  std::ostream&
+  operator<<( std::ostream& os, const Kinematics::Limits& lim )
+  {
+    return os << ( ( !lim.hasUpper() ) ? Form( ">= %.3f", lim.lower() ) : Form( "%.3f → %.3f", lim.lower(), lim.upper() ) );
   }
 }
 

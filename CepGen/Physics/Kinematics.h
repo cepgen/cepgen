@@ -17,6 +17,24 @@ namespace CepGen
   class Kinematics
   {
     public:
+      class Limits : private std::pair<double,double>
+      {
+        public:
+          Limits( double min=invalid_, double max=invalid_ ) : std::pair<double,double>( min, max ) {}
+          double lower() const { return first; }
+          double upper() const { return second; }
+          void in( double low, double up ) { first = low; second = up; }
+          double range() const { return second-first; }
+          double& lower() { return first; }
+          double& upper() { return second; }
+          bool hasLower() const { return first != invalid_; }
+          bool hasUpper() const { return second != invalid_; }
+
+          friend std::ostream& operator<<( std::ostream&, const Limits& );
+        private:
+          static constexpr double invalid_ = -999.999;
+      };
+    public:
       Kinematics();
       ~Kinematics();
 
@@ -28,7 +46,7 @@ namespace CepGen
        */
       enum Cuts { NoCuts = 0, BothParticles = 2, OneParticle = 3 };
       /// Human-readable format of a cuts mode
-      friend std::ostream& operator<<( std::ostream&, const Kinematics::Cuts& );
+      friend std::ostream& operator<<( std::ostream&, const Cuts& );
       /// Type of outgoing process kinematics to be considered (elastic/dissociative final states)
       enum ProcessMode {
         ElectronProton = 0,
@@ -40,7 +58,7 @@ namespace CepGen
         ElectronElectron
       };
       /// Human-readable format of a process mode (elastic/dissociative parts)
-      friend std::ostream& operator<<( std::ostream&, const Kinematics::ProcessMode& );
+      friend std::ostream& operator<<( std::ostream&, const ProcessMode& );
   
       /// Dump all the parameters used in this process cross-section computation
       /// or events generation
@@ -71,44 +89,24 @@ namespace CepGen
       StructureFunctions remnant_mode;
       /// Sets of cuts to apply on the final phase space
       Cuts cuts_mode;
-      /// Minimal transverse momentum of the single outgoing particles
-      double pt_min;
-      /// Maximal transverse momentum of the single outgoing particles
-      double pt_max;
-      /// Minimal energy of the central two-photons system
-      double e_min;
-      /// Maximal energy of the central two-photons system
-      double e_max;
-      /// Minimal rapidity (\f$\eta\f$) of the outgoing particles
-      double eta_min;
-      /// Maximal rapidity (\f$\eta\f$) of the outgoing particles
-      double eta_max;
-      /// Minimal mass of the central system
-      double mass_min;
-      /// Minimal mass of the central system
-      double mass_max;
-      /// Minimal mass (in GeV/c\f${}^\mathrm{2}\f$) of the outgoing proton remnant(s)
-      double mx_min;
-      /// Maximal mass (in GeV/c\f${}^\mathrm{2}\f$) of the outgoing proton remnant(s)
-      double mx_max;
-      /// Minimal value of \f$Q^2\f$
-      double q2_min;
-      /// Maximal value of \f$Q^2\f$
-      double q2_max;
-      /// Minimal \f$s\f$ on which the cross section is integrated
-      double w_min;
-      /// Maximal \f$s\f$ on which the cross section is integrated. If negative,
-      /// the maximal energy available to the system (hence, \f$s=(\sqrt{s})^{2}\f$)
-      /// is provided.
-      double w_max;
-      /// Minimal difference in outgoing particles' transverse momentum
-      double ptdiff_min;
-      /// Maximal difference in outgoing particles' transverse momentum
-      double ptdiff_max;
-      /// Minimal transverse component of the energy transfer
-      double qt_min;
-      /// Maximal transverse component of the energy transfer
-      double qt_max;
+      /// Limits on the transverse momentum of the single outgoing particles
+      Limits pt_single_central;
+      /// Limits on the energy of the central two-photons system
+      Limits e_single_central;
+      /// Limits on the pseudo-rapidity (\f$\eta\f$) of the outgoing particles
+      Limits eta_single_central;
+      /// Limits on the mass of the central system
+      Limits mass_central;
+      /// Limits on the mass (in GeV/c\f${}^\mathrm{2}\f$) of the outgoing proton remnant(s)
+      Limits mass_remnants;
+      /// Limits on the value of \f$Q^2\f$
+      Limits q2;
+      /// Limits on \f$s\f$ on which the cross section is integrated
+      Limits w;
+      /// Limits on the difference in outgoing particles' transverse momentum
+      Limits pt_diff_central;
+      /// Limits on the transverse component of the energy transfer
+      Limits qt;
   };
 }
 

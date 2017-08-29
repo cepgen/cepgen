@@ -10,9 +10,9 @@ void
 PPtoLL::prepareKTKinematics()
 {
   ////////////////////////////////////
-  y_min_ = cuts_.eta_min;           //
+  y_min_ = cuts_.eta_single_central.lower();
   //y_min_ = EtaToY(cuts_.eta_min, event_->getByRole(Particle::CentralSystem)[0].mass(), pt);
-  y_max_ = cuts_.eta_max;           //
+  y_max_ = cuts_.eta_single_central.upper();
   //y_max_ = EtaToY(cuts_.eta_max);
   ///////////// FIXME ////////////////
 
@@ -21,13 +21,13 @@ PPtoLL::prepareKTKinematics()
   y2_ = y_min_+( y_max_-y_min_ )*x( 5 );
   DebuggingInsideLoop( Form( "leptons rapidities (%.2f < y < %.2f): %f / %f", y_min_, y_max_, y1_, y2_ ) );
 
-  if ( cuts_.ptdiff_max<0. ) cuts_.ptdiff_max = 400.; //FIXME
-  pt_diff_ = cuts_.ptdiff_min+( cuts_.ptdiff_max-cuts_.ptdiff_min )*x( 6 );
+  if ( !cuts_.pt_diff_central.hasUpper() ) cuts_.pt_diff_central.upper() = 400.; //FIXME
+  pt_diff_ = cuts_.pt_diff_central.lower()+( cuts_.pt_diff_central.range() )*x( 6 );
   phi_pt_diff_ = 2.*M_PI*x( 7 );
   DebuggingInsideLoop( Form( "leptons pt difference:\n\t"
                              "  mag = %f (%.2f < Dpt < %.2f)\n\t"
                              "  phi = %f",
-                             pt_diff_, cuts_.ptdiff_min, cuts_.ptdiff_max, phi_pt_diff_ ) );
+                             pt_diff_, cuts_.pt_diff_central.lower(), cuts_.pt_diff_central.upper(), phi_pt_diff_ ) );
 }
 
 double
@@ -36,7 +36,7 @@ PPtoLL::computeJacobian()
   double jac = GenericKTProcess::minimalJacobian();
   jac *= ( y_max_-y_min_ ); // d(y1)
   jac *= ( y_max_-y_min_ ); // d(y2)
-  jac *= ( cuts_.ptdiff_max-cuts_.ptdiff_min ); // d(Dpt)
+  jac *= cuts_.pt_diff_central.range(); // d(Dpt)
   jac *= 2.*M_PI; // d(phiDpt)
 
   return jac;
@@ -101,8 +101,8 @@ PPtoLL::computeKTFactorisedMatrixElement()
   const double pt1x = ( ptsumx+ptdiffx )*0.5, pt1y = ( ptsumy+ptdiffy )*0.5, pt1 = sqrt( pt1x*pt1x+pt1y*pt1y ),
                pt2x = ( ptsumx-ptdiffx )*0.5, pt2y = ( ptsumy-ptdiffy )*0.5, pt2 = sqrt( pt2x*pt2x+pt2y*pt2y );
 
-  if ( cuts_.pt_min > 0. && ( pt1 < cuts_.pt_min || pt2 < cuts_.pt_min ) ) return 0.;
-  if ( cuts_.pt_max > 0. && ( pt1 > cuts_.pt_max || pt2 > cuts_.pt_max ) ) return 0.;
+  if ( cuts_.pt_single_central.hasLower() && ( pt1 < cuts_.pt_single_central.lower() || pt2 < cuts_.pt_single_central.lower() ) ) return 0.;
+  if ( cuts_.pt_single_central.hasUpper() && ( pt1 > cuts_.pt_single_central.upper() || pt2 > cuts_.pt_single_central.upper() ) ) return 0.;
 
   // transverse mass for the two leptons
   const double amt1 = sqrt( pt1*pt1+ml2 ),

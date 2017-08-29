@@ -56,17 +56,17 @@ namespace CepGen
 
       registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params->kinematics.in1p );
       registerParameter<double>( "INPE", "Momentum (2nd primary particle)", &params->kinematics.in2p );
-      registerParameter<double>( "PTCT", "Minimal transverse momentum (single central outgoing particle)", &params->kinematics.pt_min );
-      registerParameter<double>( "MSCT", "Minimal central system mass", &params->kinematics.mass_min );
-      registerParameter<double>( "ECUT", "Minimal energy (single central outgoing particle)", &params->kinematics.e_min );
+      registerParameter<double>( "PTCT", "Minimal transverse momentum (single central outgoing particle)", &params->kinematics.pt_single_central.lower() );
+      registerParameter<double>( "MSCT", "Minimal central system mass", &params->kinematics.mass_central.lower() );
+      registerParameter<double>( "ECUT", "Minimal energy (single central outgoing particle)", &params->kinematics.e_single_central.lower() );
       //registerParameter<double>( "THMN", "Minimal polar production angle for the central particles", &params->kinematics.eta_min );
       //registerParameter<double>( "THMX", "Maximal polar production angle for the central particles", &params->kinematics.eta_max );
-      registerParameter<double>( "ETMN", "Minimal pseudo-rapidity (central outgoing particles)", &params->kinematics.eta_min );
-      registerParameter<double>( "ETMX", "Maximal pseudo-rapidity (central outgoing particles)", &params->kinematics.eta_max );
-      registerParameter<double>( "Q2MN", "Minimal Q^2 (exchanged parton)", &params->kinematics.q2_min );
-      registerParameter<double>( "Q2MX", "Maximal Q^2 (exchanged parton)", &params->kinematics.q2_max );
-      registerParameter<double>( "MXMN", "Minimal invariant mass of proton remnants", &params->kinematics.mx_min );
-      registerParameter<double>( "MXMX", "Maximal invariant mass of proton remnants", &params->kinematics.mx_max );
+      registerParameter<double>( "ETMN", "Minimal pseudo-rapidity (central outgoing particles)", &params->kinematics.eta_single_central.lower() );
+      registerParameter<double>( "ETMX", "Maximal pseudo-rapidity (central outgoing particles)", &params->kinematics.eta_single_central.upper() );
+      registerParameter<double>( "Q2MN", "Minimal Q^2 (exchanged parton)", &params->kinematics.q2.lower() );
+      registerParameter<double>( "Q2MX", "Maximal Q^2 (exchanged parton)", &params->kinematics.q2.upper() );
+      registerParameter<double>( "MXMN", "Minimal invariant mass of proton remnants", &params->kinematics.mass_remnants.lower() );
+      registerParameter<double>( "MXMX", "Maximal invariant mass of proton remnants", &params->kinematics.mass_remnants.upper() );
     }
 
     void

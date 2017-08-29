@@ -244,10 +244,10 @@ namespace CepGen
       }
     }
     //--- set a threshold to the computation precision
-    if ( fabs( pxtot ) < 1.e-12 ) pxtot = 0.;
-    if ( fabs( pytot ) < 1.e-12 ) pytot = 0.;
-    if ( fabs( pztot ) < 1.e-12 ) pztot = 0.;
-    if ( fabs(  etot ) < 1.e-12 ) etot = 0.;
+    if ( fabs( pxtot ) < 1.e-10 ) pxtot = 0.;
+    if ( fabs( pytot ) < 1.e-10 ) pytot = 0.;
+    if ( fabs( pztot ) < 1.e-10 ) pztot = 0.;
+    if ( fabs(  etot ) < 1.e-10 ) etot = 0.;
     //
     Information( Form( "Dump of event content:\n"
     "Part.\tPDG id\t\tCharge\t   Role\tStatus\tMother\t\t\t\t4-Momentum (GeV)\t\tMass (GeV)\n"

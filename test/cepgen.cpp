@@ -33,9 +33,8 @@ int main( int argc, char* argv[] ) {
     mg.parameters->kinematics.in2p = 6500.;
     mg.parameters->kinematics.pair = CepGen::Particle::Muon;
     mg.parameters->kinematics.cuts_mode = CepGen::Kinematics::BothParticles;
-    mg.parameters->kinematics.pt_min = 15.;
-    mg.parameters->kinematics.eta_min = -2.5;
-    mg.parameters->kinematics.eta_max = 2.5;
+    mg.parameters->kinematics.pt_single_central.lower() = 15.;
+    mg.parameters->kinematics.eta_single_central.in( -2.5, 2.5 );
     mg.parameters->vegas.ncvg = 5e4; //FIXME
     mg.parameters->generation.enabled = true;
     //mg.parameters->maxgen = 2;

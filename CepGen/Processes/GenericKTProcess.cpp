@@ -90,24 +90,27 @@ namespace CepGen
         case Kinematics::ElectronProton: default: {
           InError( "This kT factorisation process is intended for p-on-p collisions! Aborting!" );
           exit( 0 ); } break;
-        case Kinematics::ElasticElastic: 
+        case Kinematics::ElasticElastic: {
           MX_ = event_->getOneByRole( Particle::IncomingBeam1 ).mass();
           MY_ = event_->getOneByRole( Particle::IncomingBeam2 ).mass();
-        break;
-        case Kinematics::ElasticInelastic:
+        } break;
+        case Kinematics::ElasticInelastic: {
+          const double mx_min = cuts_.mass_remnants.lower(), mx_range = cuts_.mass_remnants.range();
           MX_ = event_->getOneByRole( Particle::IncomingBeam1 ).mass();
-          MY_ = cuts_.mx_min+( cuts_.mx_max-cuts_.mx_min )*x( op_index );
-          break;
-        case Kinematics::InelasticElastic:
-          MX_ = cuts_.mx_min+( cuts_.mx_max-cuts_.mx_min )*x( op_index );
+          MY_ = mx_min + mx_range*x( op_index );
+        } break;
+        case Kinematics::InelasticElastic: {
+          const double mx_min = cuts_.mass_remnants.lower(), mx_range = cuts_.mass_remnants.range();
+          MX_ = mx_min + mx_range*x( op_index );
           MY_ = event_->getOneByRole( Particle::IncomingBeam2 ).mass();
-          break;
-        case Kinematics::InelasticInelastic:
-          MX_ = cuts_.mx_min+( cuts_.mx_max-cuts_.mx_min )*x( op_index );
-          MY_ = cuts_.mx_min+( cuts_.mx_max-cuts_.mx_min )*x( op_index+1 );
-          break;
+        } break;
+        case Kinematics::InelasticInelastic: {
+          const double mx_min = cuts_.mass_remnants.lower(), mx_range = cuts_.mass_remnants.range();
+          MX_ = mx_min + mx_range*x( op_index );
+          MY_ = mx_min + mx_range*x( op_index+1 );
+        } break;
       }
-      DebuggingInsideLoop( Form( "outgoing remnants invariant mass: %f / %f (%.2f < M(X/Y) < %.2f)", MX_, MY_, cuts_.mx_min, cuts_.mx_max ) );
+      DebuggingInsideLoop( Form( "outgoing remnants invariant mass: %f / %f (%.2f < M(X/Y) < %.2f)", MX_, MY_, cuts_.mass_remnants.lower(), cuts_.mass_remnants.upper() ) );
     }
 
     void
@@ -200,12 +203,14 @@ namespace CepGen
       jac *= ( log_qmax_-log_qmin_ )*qt2_; // d(q2t) . q2t
       jac *= 2.*M_PI; // d(phi1)
       jac *= 2.*M_PI; // d(phi2)
+
+      const double mx_range = cuts_.mass_remnants.range();
       switch ( cuts_.mode ) {
         case Kinematics::ElasticElastic: default: break;
-        case Kinematics::ElasticInelastic:   jac *= ( cuts_.mx_max-cuts_.mx_min )*2.*MY_; break;
-        case Kinematics::InelasticElastic:   jac *= ( cuts_.mx_max-cuts_.mx_min )*2.*MX_; break;
-        case Kinematics::InelasticInelastic: jac *= ( cuts_.mx_max-cuts_.mx_min )*2.*MX_;
-                                             jac *= ( cuts_.mx_max-cuts_.mx_min )*2.*MY_; break;
+        case Kinematics::ElasticInelastic:   jac *= 2.* mx_range * MY_; break;
+        case Kinematics::InelasticElastic:   jac *= 2.* mx_range * MX_; break;
+        case Kinematics::InelasticInelastic: jac *= 2.* mx_range * MX_;
+                                             jac *= 2.* mx_range * MY_; break;
       } // d(mx/y**2)
       return jac;
     }
