@@ -22,6 +22,7 @@ namespace CepGen
         const char* proc_name = proc["name"]; const std::string str_proc_name = proc_name;
         if ( str_proc_name == "lpair" ) params_.setProcess( new Process::GamGamLL );
         else if ( str_proc_name == "pptoll" ) params_.setProcess( new Process::PPtoLL );
+        else if ( str_proc_name == "pptoww" ) params_.setProcess( new Process::PPtoWW );
         else FatalError( Form( "Unrecognised process: %s", proc_name ) );
 
         //--- process mode
