@@ -20,9 +20,9 @@ int main( int argc, char* argv[] )
   CepGen::Logger::get().level = CepGen::Logger::Error;
 
   CepGen::Parameters* par = mg.parameters.get();
-  par->kinematics.eta_single_central.in( -2.5, 2.5 );
+  par->kinematics.central_cuts[CepGen::Cuts::eta_single] = { -2.5, 2.5 };
   par->kinematics.in1p = par->kinematics.in2p = 6.5e3;
-  par->kinematics.mass_remnants.upper() = 1000.0;
+  par->kinematics.remnant_cuts[CepGen::Cuts::mass].max() = 1000.0;
   par->setProcess( new CepGen::Process::GamGamLL );
   par->kinematics.mode = static_cast<CepGen::Kinematics::ProcessMode>( proc_mode );
   par->dump();
@@ -36,10 +36,10 @@ int main( int argc, char* argv[] )
   }
 
   for ( unsigned int i=0; i<npoints; i++ ) {
-    par->kinematics.pt_single_central.lower() = min_value + (max_value-min_value)*i/npoints;
+    par->kinematics.central_cuts[CepGen::Cuts::pt_single].min() = min_value + (max_value-min_value)*i/npoints;
     par->kinematics.dump();
     mg.computeXsection( xsect, err_xsect );
-    xsect_file << Form( "%.2f\t%.5f\t%.5f\n", par->kinematics.pt_single_central.lower(), xsect, err_xsect );
+    xsect_file << Form( "%.2f\t%.5f\t%.5f\n", par->kinematics.central_cuts[CepGen::Cuts::pt_single].min(), xsect, err_xsect );
     xsect_file.flush();
   }
 

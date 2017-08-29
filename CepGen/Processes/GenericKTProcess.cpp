@@ -67,6 +67,14 @@ namespace CepGen
                                  qt1_, qt2_, log_qmin_, log_qmax_, phi_qt1_, phi_qt2_ ) );
     }
 
+    void
+    GenericKTProcess::setKinematics( const Kinematics& kin )
+    {
+      cuts_ = kin;
+      log_qmin_ = -10.; // FIXME //log_qmin_ = std::log( std::sqrt( cuts_.q2min ) );
+      log_qmax_ = log( cuts_.initial_cuts[Cuts::qt].max() );
+    }
+
     double
     GenericKTProcess::computeWeight()
     {
@@ -86,6 +94,7 @@ namespace CepGen
     GenericKTProcess::computeOutgoingPrimaryParticlesMasses()
     {
       const unsigned int op_index = kNumRequiredDimensions+kNumUserDimensions;
+      const Kinematics::Limits remn_mx_cuts = cuts_.remnant_cuts[Cuts::mass];
       switch ( cuts_.mode ) {
         case Kinematics::ElectronProton: default: {
           InError( "This kT factorisation process is intended for p-on-p collisions! Aborting!" );
@@ -95,22 +104,22 @@ namespace CepGen
           MY_ = event_->getOneByRole( Particle::IncomingBeam2 ).mass();
         } break;
         case Kinematics::ElasticInelastic: {
-          const double mx_min = cuts_.mass_remnants.lower(), mx_range = cuts_.mass_remnants.range();
+          const double mx_min = remn_mx_cuts.min(), mx_range = remn_mx_cuts.range();
           MX_ = event_->getOneByRole( Particle::IncomingBeam1 ).mass();
           MY_ = mx_min + mx_range*x( op_index );
         } break;
         case Kinematics::InelasticElastic: {
-          const double mx_min = cuts_.mass_remnants.lower(), mx_range = cuts_.mass_remnants.range();
+          const double mx_min = remn_mx_cuts.min(), mx_range = remn_mx_cuts.range();
           MX_ = mx_min + mx_range*x( op_index );
           MY_ = event_->getOneByRole( Particle::IncomingBeam2 ).mass();
         } break;
         case Kinematics::InelasticInelastic: {
-          const double mx_min = cuts_.mass_remnants.lower(), mx_range = cuts_.mass_remnants.range();
+          const double mx_min = remn_mx_cuts.min(), mx_range = remn_mx_cuts.range();
           MX_ = mx_min + mx_range*x( op_index );
           MY_ = mx_min + mx_range*x( op_index+1 );
         } break;
       }
-      DebuggingInsideLoop( Form( "outgoing remnants invariant mass: %f / %f (%.2f < M(X/Y) < %.2f)", MX_, MY_, cuts_.mass_remnants.lower(), cuts_.mass_remnants.upper() ) );
+      DebuggingInsideLoop( Form( "outgoing remnants invariant mass: %f / %f (%.2f < M(X/Y) < %.2f)", MX_, MY_, remn_mx_cuts.min(), remn_mx_cuts.max() ) );
     }
 
     void
@@ -204,7 +213,7 @@ namespace CepGen
       jac *= 2.*M_PI; // d(phi1)
       jac *= 2.*M_PI; // d(phi2)
 
-      const double mx_range = cuts_.mass_remnants.range();
+      const double mx_range = cuts_.remnant_cuts.at( Cuts::mass ).range();
       switch ( cuts_.mode ) {
         case Kinematics::ElasticElastic: default: break;
         case Kinematics::ElasticInelastic:   jac *= 2.* mx_range * MY_; break;

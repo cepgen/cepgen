@@ -10,9 +10,9 @@ void
 PPtoLL::prepareKTKinematics()
 {
   ////////////////////////////////////
-  y_min_ = cuts_.eta_single_central.lower();
+  y_min_ = cuts_.central_cuts[Cuts::eta_single].min();
   //y_min_ = EtaToY(cuts_.eta_min, event_->getByRole(Particle::CentralSystem)[0].mass(), pt);
-  y_max_ = cuts_.eta_single_central.upper();
+  y_max_ = cuts_.central_cuts[Cuts::eta_single].max();
   //y_max_ = EtaToY(cuts_.eta_max);
   ///////////// FIXME ////////////////
 
@@ -21,13 +21,14 @@ PPtoLL::prepareKTKinematics()
   y2_ = y_min_+( y_max_-y_min_ )*x( 5 );
   DebuggingInsideLoop( Form( "leptons rapidities (%.2f < y < %.2f): %f / %f", y_min_, y_max_, y1_, y2_ ) );
 
-  if ( !cuts_.pt_diff_central.hasUpper() ) cuts_.pt_diff_central.upper() = 400.; //FIXME
-  pt_diff_ = cuts_.pt_diff_central.lower()+( cuts_.pt_diff_central.range() )*x( 6 );
+  Kinematics::Limits ptdiff_limits = cuts_.central_cuts[Cuts::pt_diff];
+  if ( !ptdiff_limits.hasMax() ) ptdiff_limits.max() = 400.; //FIXME
+  pt_diff_ = ptdiff_limits.min()+( ptdiff_limits.range() )*x( 6 );
   phi_pt_diff_ = 2.*M_PI*x( 7 );
   DebuggingInsideLoop( Form( "leptons pt difference:\n\t"
                              "  mag = %f (%.2f < Dpt < %.2f)\n\t"
                              "  phi = %f",
-                             pt_diff_, cuts_.pt_diff_central.lower(), cuts_.pt_diff_central.upper(), phi_pt_diff_ ) );
+                             pt_diff_, ptdiff_limits.min(), ptdiff_limits.max(), phi_pt_diff_ ) );
 }
 
 double
@@ -36,7 +37,7 @@ PPtoLL::computeJacobian()
   double jac = GenericKTProcess::minimalJacobian();
   jac *= ( y_max_-y_min_ ); // d(y1)
   jac *= ( y_max_-y_min_ ); // d(y2)
-  jac *= cuts_.pt_diff_central.range(); // d(Dpt)
+  jac *= cuts_.central_cuts[Cuts::pt_diff].range(); // d(Dpt)
   jac *= 2.*M_PI; // d(phiDpt)
 
   return jac;
@@ -66,19 +67,6 @@ PPtoLL::computeKTFactorisedMatrixElement()
                      imat2 = 0;
 
   //=================================================================
-  //     extra cuts on the p1t(l) and p2t(l) plane
-  //=================================================================
-  const bool pt_window = false;
-  const double max_pt_diff = 2.5;
-
-  //=================================================================
-  //     the distance in rapidity between l^+ and l^-
-  //=================================================================
-  const bool delta_y_window = false;
-  const double dely_min = 4.0,
-               dely_max = 5.0;
-
-  //=================================================================
   //     matrix element computation
   //=================================================================
   //const double stild = s_/2.*(1+sqrt(1.-(4*pow(mp2, 2))/s_*s_));
@@ -101,8 +89,9 @@ PPtoLL::computeKTFactorisedMatrixElement()
   const double pt1x = ( ptsumx+ptdiffx )*0.5, pt1y = ( ptsumy+ptdiffy )*0.5, pt1 = sqrt( pt1x*pt1x+pt1y*pt1y ),
                pt2x = ( ptsumx-ptdiffx )*0.5, pt2y = ( ptsumy-ptdiffy )*0.5, pt2 = sqrt( pt2x*pt2x+pt2y*pt2y );
 
-  if ( cuts_.pt_single_central.hasLower() && ( pt1 < cuts_.pt_single_central.lower() || pt2 < cuts_.pt_single_central.lower() ) ) return 0.;
-  if ( cuts_.pt_single_central.hasUpper() && ( pt1 > cuts_.pt_single_central.upper() || pt2 > cuts_.pt_single_central.upper() ) ) return 0.;
+  const Kinematics::Limits pt_limits = cuts_.central_cuts[Cuts::pt_single];
+  if ( pt_limits.hasMin() && ( pt1 < pt_limits.min() || pt2 < pt_limits.min() ) ) return 0.;
+  if ( pt_limits.hasMax() && ( pt1 > pt_limits.max() || pt2 > pt_limits.max() ) ) return 0.;
 
   // transverse mass for the two leptons
   const double amt1 = sqrt( pt1*pt1+ml2 ),
@@ -112,14 +101,17 @@ PPtoLL::computeKTFactorisedMatrixElement()
   //     a window in transverse momentum difference
   //=================================================================
 
-  if ( pt_window && fabs( pt1-pt2 ) > max_pt_diff ) return 0.;
+  const Kinematics::Limits ptdiff_limits = cuts_.central_cuts[Cuts::pt_diff];
+  if ( ptdiff_limits.hasMax() && fabs( pt1-pt2 ) > ptdiff_limits.max() ) return 0.;
 
   //=================================================================
   //     a window in rapidity distance
   //=================================================================
 
   const double dely = fabs( y1_-y2_ );
-  if ( delta_y_window && ( dely < dely_min || dely > dely_max ) ) return 0.;
+  const Kinematics::Limits dely_limits = cuts_.central_cuts[Cuts::dely];
+  if ( dely_limits.hasMin() && dely < dely_limits.min() ) return 0.;
+  if ( dely_limits.hasMax() && dely > dely_limits.max() ) return 0.;
 
   //=================================================================
   //     auxiliary quantities

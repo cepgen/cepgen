@@ -34,8 +34,8 @@ main( int argc, char* argv[] )
   CepGen::Generator mg;
 
   mg.parameters->kinematics.setSqrtS( 13.e3 );
-  mg.parameters->kinematics.eta_single_central.in( -2.5, 2.5 );
-  mg.parameters->kinematics.mass_remnants.upper() = 1000.;
+  mg.parameters->kinematics.central_cuts[CepGen::Cuts::eta_single].in( -2.5, 2.5 );
+  mg.parameters->kinematics.remnant_cuts[CepGen::Cuts::mass].max() = 1000.;
   mg.parameters->vegas.ncvg = 50000;
   mg.parameters->vegas.itvg = 5;
 
@@ -50,7 +50,7 @@ main( int argc, char* argv[] )
     else { InError( Form( "Unrecognized generator mode: %s", values_vs_generator.first.c_str() ) ); break; }
 
     for ( const auto& values_vs_cut : values_vs_generator.second ) { // loop over the single lepton pT cut
-      mg.parameters->kinematics.pt_single_central.lower() = values_vs_cut.first;
+      mg.parameters->kinematics.central_cuts[CepGen::Cuts::pt_single].min() = values_vs_cut.first;
       for ( const auto& values_vs_kin : values_vs_cut.second ) { // loop over all possible kinematics
         if      ( values_vs_kin.first == "1_elastic"    ) mg.parameters->kinematics.mode = CepGen::Kinematics::ElasticElastic;
         else if ( values_vs_kin.first == "2_singlediss" ) mg.parameters->kinematics.mode = CepGen::Kinematics::InelasticElastic;

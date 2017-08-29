@@ -4,31 +4,34 @@ namespace CepGen
 {
   Kinematics::Kinematics() :
     in1p( 6500. ), in2p( 6500. ), in1pdg( Particle::Proton ), in2pdg( Particle::Proton ),
-    pair( Particle::Muon ),
-    mode( ElasticElastic ), remnant_mode( SuriYennie ),
-    cuts_mode( BothParticles ),
-    pt_single_central( 3. ), mass_remnants( 1.07, 320. ),
-    q2( 0., 1.e5 ),
-    pt_diff_central( 0., 300. ), qt( 0., 500 )
+    pair( Particle::Muon ), mode( ElasticElastic ), remnant_mode( SuriYennie ), cuts_mode( BothParticles ),
+    central_cuts( { { Cuts::pt_single, 3.0 }, { Cuts::pt_diff, { 0., 300.0 } } } ),
+    remnant_cuts( { { Cuts::mass, { 1.07, 320.0 } } } ),
+    initial_cuts( { { Cuts::q2, { 0.0, 1.0e5 } }, { Cuts::qt, { 0.0, 500.0 } } } )
   {}
 
   Kinematics::~Kinematics()
   {}
 
   void
-  Kinematics::dump( std::ostream& os )
+  Kinematics::dump( std::ostream& os ) const
   {
     os
       << std::setfill(' ')
       << __PRETTY_FUNCTION__ << " Dump\n"
-      << std::setw(30) << "Cuts mode: " << std::setw(2) << cuts_mode << "->" << std::setw(4) << cuts_mode << "\n"
-      << "===== Single leptons\n"
-      << std::setw(30) << "pT range: " << pt_single_central << "\n"
-      << std::setw(30) << "Energy range: " << e_single_central << "\n"
-      << std::setw(30) << "Pseudorapidity range: " << eta_single_central << "\n"
-      << "===== Central kinematics\n"
-      << std::setw(30) << "Q**2 range: " << q2 << "\n"
-      << std::setw(30) << "W range: " << w << std::endl;
+      << std::setw(30) << "Cuts mode: " << std::setw(2) << cuts_mode << "->" << std::setw(4) << cuts_mode << "\n";
+    os << "===== Central system\n";
+    for ( std::map<Cuts::Central,Limits>::const_iterator lim = central_cuts.begin(); lim != central_cuts.end(); ++lim ) {
+      os << std::setw(30) << lim->first << ": " << lim->second;
+    }
+    os << "===== Initial state\n";
+    for ( std::map<Cuts::InitialState,Limits>::const_iterator lim = initial_cuts.begin(); lim != initial_cuts.end(); ++lim ) {
+      os << std::setw(30) << lim->first << ": " << lim->second;
+    }
+    os << "===== Remnants\n";
+    for ( std::map<Cuts::Remnants,Limits>::const_iterator lim = remnant_cuts.begin(); lim != remnant_cuts.end(); ++lim ) {
+      os << std::setw(30) << lim->first << ": " << lim->second;
+    }
   }
 
   std::ostream&
@@ -47,7 +50,7 @@ namespace CepGen
   }
 
   std::ostream&
-  operator<<( std::ostream& os, const Kinematics::Cuts& cut )
+  operator<<( std::ostream& os, const Kinematics::CutsMode& cut )
   {
     switch ( cut ) {
       case Kinematics::NoCuts:         return os << "no cuts";
@@ -60,10 +63,10 @@ namespace CepGen
   std::ostream&
   operator<<( std::ostream& os, const Kinematics::Limits& lim )
   {
-    if ( !lim.hasLower() && !lim.hasUpper() ) return os << "no cuts";
-    if ( !lim.hasLower() ) return os << Form( "<= %.3f", lim.upper() );
-    if ( !lim.hasUpper() ) return os << Form( ">= %.3f", lim.lower() );
-    return os << Form( "%.3f → %.3f", lim.lower(), lim.upper() );
+    if ( !lim.hasMin() && !lim.hasMax() ) return os << "no cuts";
+    if ( !lim.hasMin() ) return os << Form( "≤ %.3f", lim.max() );
+    if ( !lim.hasMax() ) return os << Form( "≥ %.3f", lim.min() );
+    return os << Form( "%.3f → %.3f", lim.min(), lim.max() );
   }
 }
 

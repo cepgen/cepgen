@@ -8,6 +8,7 @@
 #include "CepGen/Core/utils.h"
 #include "StructureFunctions.h"
 #include "Particle.h"
+#include "Cuts.h"
 
 using std::cout;
 
@@ -17,18 +18,28 @@ namespace CepGen
   class Kinematics
   {
     public:
+      /// Validity interval for a variable
       class Limits : private std::pair<double,double>
       {
         public:
           Limits( double min=invalid_, double max=invalid_ ) : std::pair<double,double>( min, max ) {}
-          double lower() const { return first; }
-          double upper() const { return second; }
+
+          /// Lower limit to apply on the variable
+          double min() const { return first; }
+          /// Lower limit to apply on the variable
+          double& min() { return first; }
+          /// Upper limit to apply on the variable
+          double max() const { return second; }
+          /// Upper limit to apply on the variable
+          double& max() { return second; }
+          /// Specify the lower and upper limits on the variable
           void in( double low, double up ) { first = low; second = up; }
-          double range() const { return second-first; }
-          double& lower() { return first; }
-          double& upper() { return second; }
-          bool hasLower() const { return first != invalid_; }
-          bool hasUpper() const { return second != invalid_; }
+          /// Full variable range allowed
+          double range() const { return ( !hasMin() || !hasMax() ) ? 0. : second-first; }
+          /// Have a lower limit?
+          bool hasMin() const { return first != invalid_; }
+          /// Have an upper limit?
+          bool hasMax() const { return second != invalid_; }
 
           friend std::ostream& operator<<( std::ostream&, const Limits& );
         private:
@@ -44,9 +55,9 @@ namespace CepGen
        * - 2 - Cuts on both the outgoing central particles, according to the provided cuts parameters
        * - 3 - Cuts on at least one outgoing central particle, according to the provided cut parameters
        */
-      enum Cuts { NoCuts = 0, BothParticles = 2, OneParticle = 3 };
+      enum CutsMode { NoCuts = 0, BothParticles = 2, OneParticle = 3 };
       /// Human-readable format of a cuts mode
-      friend std::ostream& operator<<( std::ostream&, const Cuts& );
+      friend std::ostream& operator<<( std::ostream&, const CutsMode& );
       /// Type of outgoing process kinematics to be considered (elastic/dissociative final states)
       enum ProcessMode {
         ElectronProton = 0,
@@ -62,7 +73,7 @@ namespace CepGen
   
       /// Dump all the parameters used in this process cross-section computation
       /// or events generation
-      void dump( std::ostream& os=std::cout );
+      void dump( std::ostream& os=std::cout ) const;
 
       inline void setSqrtS( double sqrts ) { in1p = in2p = sqrts/2; }
       /// First incoming particle's momentum (in \f$\text{GeV}/c\f$)
@@ -88,25 +99,10 @@ namespace CepGen
       ProcessMode mode;
       StructureFunctions remnant_mode;
       /// Sets of cuts to apply on the final phase space
-      Cuts cuts_mode;
-      /// Limits on the transverse momentum of the single outgoing particles
-      Limits pt_single_central;
-      /// Limits on the energy of the central two-photons system
-      Limits e_single_central;
-      /// Limits on the pseudo-rapidity (\f$\eta\f$) of the outgoing particles
-      Limits eta_single_central;
-      /// Limits on the mass of the central system
-      Limits mass_central;
-      /// Limits on the mass (in GeV/c\f${}^\mathrm{2}\f$) of the outgoing proton remnant(s)
-      Limits mass_remnants;
-      /// Limits on the value of \f$Q^2\f$
-      Limits q2;
-      /// Limits on \f$s\f$ on which the cross section is integrated
-      Limits w;
-      /// Limits on the difference in outgoing particles' transverse momentum
-      Limits pt_diff_central;
-      /// Limits on the transverse component of the energy transfer
-      Limits qt;
+      CutsMode cuts_mode;
+      std::map<Cuts::Central, Limits> central_cuts;
+      std::map<Cuts::Remnants, Limits> remnant_cuts;
+      std::map<Cuts::InitialState, Limits> initial_cuts;
   };
 }
 

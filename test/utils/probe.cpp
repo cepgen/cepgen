@@ -9,13 +9,12 @@ int main()
   CepGen::Parameters* p = g.parameters.get();
   //p->setProcess( new GamGamLL );
   p->setProcess( new CepGen::Process::PPtoLL );
-  p->process_mode = CepGen::Kinematics::ElasticElastic;
-  //p->process_mode = CepGen::Kinematics::InelasticElastic;
-  //p->process_mode = CepGen::Kinematics::ElasticInelastic;
-  p->kinematics.pt_min = 5.;
-  p->kinematics.eta_min = -2.5; p->kinematics.eta_max = 2.5;
-  p->kinematics.mx_min = 1.07;
-  p->kinematics.mx_max = 320.;
+  p->kinematics.mode = CepGen::Kinematics::ElasticElastic;
+  //p->kinematics.mode = CepGen::Kinematics::InelasticElastic;
+  //p->kinematics.mode = CepGen::Kinematics::ElasticInelastic;
+  p->kinematics.central_cuts[CepGen::Cuts::pt_single] = 5.;
+  p->kinematics.central_cuts[CepGen::Cuts::eta_single] = { -2.5, 2.5 };
+  p->kinematics.remnant_cuts[CepGen::Cuts::mass] = { 1.07, 320. };
   
   p->dump();
   CepGen::Logger::get().level = CepGen::Logger::DebugInsideLoop;
