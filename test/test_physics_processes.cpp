@@ -16,19 +16,31 @@ main( int argc, char* argv[] )
   std::map<std::string,ValuesAtCutMap> values_map = {
     //--- LPAIR values at sqrt(s) = 13 TeV
     { "1_lpair", {
+      { 3.0, { // pt cut
+        { "1_elastic",    { 2.0871703e1, 3.542e-2 } },
+        { "2_singlediss", { 1.5042536e1, 3.256e-2 } },
+        { "3_doublediss", { 1.38835e1, 4.03018e-2 } }
+      } },
       { 15.0, { // pt cut
         { "1_elastic",    { 4.1994803e-1, 8.328e-4 } },
         { "2_singlediss", { 4.8504819e-1, 1.171e-3 } },
         { "3_doublediss", { 6.35650e-1, 1.93968e-3 } }
-      } }
+      } },
     } },
     //--- PPTOLL values
     { "2_pptoll", {
+      { 3.0, { // pt cut
+        { "1_elastic",    { 2.0936541e1, 1.4096e-2 } },
+        { "2_singlediss", { 1.4844881e1, 2.0723e-2 } }, // SU, qt<50
+        { "3_doublediss", { 1.3580637e1, 2.2497e-2 } }, // SU, qt<50
+      } },
       { 15.0, { // pt cut
         { "1_elastic",    { 4.2515888e-1, 3.0351e-4 } },
-        { "2_singlediss", { 4.6710287e-1, 6.4842e-4 } }, // SU
-        { "3_doublediss", { 5.6316353e-1, 1.1829e-3 } }, // SU
-      } }
+        { "2_singlediss", { 4.4903253e-1, 5.8970e-4 } }, // SU, qt<50
+        { "3_doublediss", { 5.1923819e-1, 9.6549e-4 } }, // SU, qt<50
+      /*{ "2_singlediss", { 4.6710287e-1, 6.4842e-4 } }, // SU, qt<500
+        { "3_doublediss", { 5.6316353e-1, 1.1829e-3 } }, // SU, qt<500*/
+      } },
     } },
   };
 
@@ -42,19 +54,21 @@ main( int argc, char* argv[] )
   mg.parameters->kinematics.setSqrtS( 13.e3 );
   mg.parameters->kinematics.central_cuts[CepGen::Cuts::eta_single].in( -2.5, 2.5 );
   mg.parameters->kinematics.remnant_cuts[CepGen::Cuts::mass].max() = 1000.;
-  mg.parameters->vegas.ncvg = 50000;
+  //mg.parameters->vegas.ncvg = 50000;
   mg.parameters->vegas.itvg = 5;
 
   Information( Form( "Initial configuration time: %.3f ms", tmr.elapsed()*1.e3 ) );
   tmr.reset();
 
   unsigned short num_tests = 0, num_tests_passed = 0;
+  std::vector<std::string> failed_tests;
 
   for ( const auto& values_vs_generator : values_map ) { // loop over all generators
     if      ( values_vs_generator.first == "1_lpair"  ) mg.parameters->setProcess( new CepGen::Process::GamGamLL );
     else if ( values_vs_generator.first == "2_pptoll" ) {
       mg.parameters->setProcess( new CepGen::Process::PPtoLL );
       mg.parameters->kinematics.structure_functions = CepGen::SzczurekUleshchenko; //FIXME move to a dedicated class
+      mg.parameters->kinematics.initial_cuts[CepGen::Cuts::qt].max() = 50.0;
     }
     else { InError( Form( "Unrecognized generator mode: %s", values_vs_generator.first.c_str() ) ); break; }
 
@@ -83,13 +97,22 @@ main( int argc, char* argv[] )
 
         if ( fabs( sigma )<num_sigma ) num_tests_passed++;
         else {
-          CepGen::Exception( __PRETTY_FUNCTION__, Form( "Computed cross section:\n\tRef.   = %.3e +/- %.3e\n\tCepGen = %.3e +/- %.3e\n\tPull: %.6f", xsec_ref, err_xsec_ref, xsec_cepgen, err_xsec_cepgen, sigma ), CepGen::ErrorMessage ).dump();
-          throw CepGen::Exception( __PRETTY_FUNCTION__, Form( "Test %s/%s failed!", values_vs_generator.first.c_str(), values_vs_kin.first.c_str() ), CepGen::FatalError );
+          failed_tests.emplace_back( values_vs_generator.first+":"+
+                                     Form( "pt-gt-%.1f", values_vs_cut.first )+":"+
+                                     values_vs_kin.first+":"
+                                     "ref="+Form( "%.3e", xsec_ref )+":"
+                                     "got="+Form( "%.3e", xsec_cepgen )+":"
+                                     "pull="+Form( "%.3f", sigma ) );
         }
         num_tests++;
         std::cout << "Test " << num_tests_passed << "/" << num_tests << " passed!" << std::endl;
       }
     }
+  }
+  if ( failed_tests.size() != 0 ) {
+    std::ostringstream os;
+    for ( const auto& fail : failed_tests ) os << " (*) " << fail << std::endl;
+    throw CepGen::Exception( __PRETTY_FUNCTION__, Form( "Some tests failed!\n%s", os.str().c_str() ), CepGen::FatalError );
   }
 
   Information( "ALL TESTS PASSED!" );

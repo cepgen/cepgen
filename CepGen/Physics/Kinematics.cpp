@@ -8,7 +8,7 @@ namespace CepGen
     mode( ElasticElastic ), structure_functions( SuriYennie ), cuts_mode( AllParticles ),
     central_cuts( { { Cuts::pt_single, 3.0 }, { Cuts::pt_diff, { 0., 400.0 } } } ),
     remnant_cuts( { { Cuts::mass, { 1.07, 320.0 } } } ),
-    initial_cuts( { { Cuts::q2, { 0.0, 1.0e5 } }, { Cuts::qt, { 0.0, 50.0 } } } )
+    initial_cuts( { { Cuts::q2, { 0.0, 1.0e5 } }, { Cuts::qt, { 0.0, 500.0 } } } )
   {}
 
   Kinematics::~Kinematics()
