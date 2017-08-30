@@ -1,8 +1,8 @@
 #include <iostream>
 
 #include "CepGen/Generator.h"
-#include "CepGen/Cards/LpairReader.h"
-#include "CepGen/Cards/ConfigReader.h"
+#include "CepGen/Cards/LpairHandler.h"
+#include "CepGen/Cards/ConfigHandler.h"
 #include "CepGen/Core/Logger.h"
 
 using namespace std;
@@ -43,8 +43,8 @@ int main( int argc, char* argv[] ) {
     Information( Form( "Reading config file stored in %s", argv[1] ) );
     //CepGen::Cards::LpairReader card( argv[1] );
     const std::string file( argv[1] ), extension = file.substr( file.find_last_of( "." )+1 );
-    if ( extension == "card" ) mg.setParameters( CepGen::Cards::LpairReader( argv[1] ).parameters() );
-    else if ( extension == "cfg" ) mg.setParameters( CepGen::Cards::ConfigReader( argv[1] ).parameters() );
+    if ( extension == "card" ) mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
+    else if ( extension == "cfg" ) mg.setParameters( CepGen::Cards::ConfigHandler( argv[1] ).parameters() );
   }
 
   // We might want to cross-check visually the validity of our run
@@ -67,7 +67,7 @@ int main( int argc, char* argv[] ) {
   }
 
   // store the current configuration
-  CepGen::Cards::ConfigReader::store( mg.parameters.get(), "last_run.cfg" );
+  CepGen::Cards::ConfigHandler::store( mg.parameters.get(), "last_run.cfg" );
 
   return 0;
 }

@@ -8,8 +8,8 @@
 #include "TreeEvent.h"
 
 #include "CepGen/Generator.h"
-#include "CepGen/Cards/LpairReader.h"
-#include "CepGen/Cards/ConfigReader.h"
+#include "CepGen/Cards/LpairHandler.h"
+#include "CepGen/Cards/ConfigHandler.h"
 
 using namespace std;
 
@@ -29,8 +29,8 @@ int main( int argc, char* argv[] ) {
     return -1;
   }
   const std::string incard( argv[1] ), extension = incard.substr( incard.find_last_of( "." )+1 );
-  if ( extension == "card" ) mg.setParameters( CepGen::Cards::LpairReader( argv[1] ).parameters() );
-  else if ( extension == "cfg" ) mg.setParameters( CepGen::Cards::ConfigReader( argv[1] ).parameters() );
+  if ( extension == "card" ) mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
+  else if ( extension == "cfg" ) mg.setParameters( CepGen::Cards::ConfigHandler( argv[1] ).parameters() );
 
   mg.parameters->generation.enabled = true;
   mg.parameters->dump();

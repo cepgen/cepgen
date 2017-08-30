@@ -17,13 +17,19 @@ main( int argc, char* argv[] )
     //--- LPAIR values at sqrt(s) = 13 TeV
     { "1_lpair", {
       { 15.0, { // pt cut
-          { "1_elastic",    { 4.1994803e-1, 8.328e-4 } },
-          { "2_singlediss", { 4.8504819e-1, 1.171e-3 } },
-          { "3_doublediss", { 6.35650e-1, 1.93968e-3 } }
+        { "1_elastic",    { 4.1994803e-1, 8.328e-4 } },
+        { "2_singlediss", { 4.8504819e-1, 1.171e-3 } },
+        { "3_doublediss", { 6.35650e-1, 1.93968e-3 } }
       } }
     } },
     //--- PPTOLL values
-    { "2_pptoll", { {} } },
+    { "2_pptoll", {
+      { 15.0, { // pt cut
+        { "1_elastic",    { 4.2515888e-1, 3.0351e-4 } },
+        { "2_singlediss", { 4.6710287e-1, 6.4842e-4 } }, // SU
+        { "3_doublediss", { 5.6316353e-1, 1.1829e-3 } }, // SU
+      } }
+    } },
   };
 
   const double num_sigma = 3.0;
@@ -46,7 +52,10 @@ main( int argc, char* argv[] )
 
   for ( const auto& values_vs_generator : values_map ) { // loop over all generators
     if      ( values_vs_generator.first == "1_lpair"  ) mg.parameters->setProcess( new CepGen::Process::GamGamLL );
-    else if ( values_vs_generator.first == "2_pptoll" ) mg.parameters->setProcess( new CepGen::Process::PPtoLL );
+    else if ( values_vs_generator.first == "2_pptoll" ) {
+      mg.parameters->setProcess( new CepGen::Process::PPtoLL );
+      mg.parameters->remnant_mode = CepGen::SzczurekUleshchenko; //FIXME move to a dedicated class
+    }
     else { InError( Form( "Unrecognized generator mode: %s", values_vs_generator.first.c_str() ) ); break; }
 
     for ( const auto& values_vs_cut : values_vs_generator.second ) { // loop over the single lepton pT cut
@@ -73,7 +82,10 @@ main( int argc, char* argv[] )
         tmr.reset();
 
         if ( fabs( sigma )<num_sigma ) num_tests_passed++;
-        else throw CepGen::Exception( __PRETTY_FUNCTION__, Form( "Test %s/%s failed!", values_vs_generator.first.c_str(), values_vs_kin.first.c_str() ), CepGen::FatalError );
+        else {
+          CepGen::Exception( __PRETTY_FUNCTION__, Form( "Computed cross section:\n\tRef.   = %.3e +/- %.3e\n\tCepGen = %.3e +/- %.3e\n\tPull: %.6f", xsec_ref, err_xsec_ref, xsec_cepgen, err_xsec_cepgen, sigma ), CepGen::ErrorMessage ).dump();
+          throw CepGen::Exception( __PRETTY_FUNCTION__, Form( "Test %s/%s failed!", values_vs_generator.first.c_str(), values_vs_kin.first.c_str() ), CepGen::FatalError );
+        }
         num_tests++;
         std::cout << "Test " << num_tests_passed << "/" << num_tests << " passed!" << std::endl;
       }

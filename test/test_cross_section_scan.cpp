@@ -21,7 +21,7 @@ int main( int argc, char* argv[] )
 
   CepGen::Parameters* par = mg.parameters.get();
   par->kinematics.central_cuts[CepGen::Cuts::eta_single] = { -2.5, 2.5 };
-  par->kinematics.in1p = par->kinematics.in2p = 6.5e3;
+  par->kinematics.inp = { 6500., 6500. };
   par->kinematics.remnant_cuts[CepGen::Cuts::mass].max() = 1000.0;
   par->setProcess( new CepGen::Process::GamGamLL );
   par->kinematics.mode = static_cast<CepGen::Kinematics::ProcessMode>( proc_mode );

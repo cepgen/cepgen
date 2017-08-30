@@ -2,7 +2,7 @@
 
 #include "CepGen/Generator.h"
 #include "CepGen/Export/EventWriter.h"
-#include "CepGen/Cards/LpairReader.h"
+#include "CepGen/Cards/LpairHandler.h"
 
 #include "HepMC/Version.h"
 
@@ -21,7 +21,7 @@ int main( int argc, char* argv[] ) {
   if ( argc==1 ) InError( "No config file provided." );
 
   Debugging( Form( "Reading config file stored in %s", argv[1] ) );
-  CepGen::Cards::LpairReader card( argv[1] );
+  CepGen::Cards::LpairHandler card( argv[1] );
   mg.setParameters( card.parameters() );
 
   // We might want to cross-check visually the validity of our run

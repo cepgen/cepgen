@@ -119,8 +119,7 @@ namespace CepGen
     {
       const double mx2 = MX_*MX_, my2 = MY_*MY_;
 
-      bool inel_p1 = false,
-           inel_p2 = false;
+      bool inel_p1 = false, inel_p2 = false;
 
       switch ( cuts_.mode ) {
         case Kinematics::ElectronElectron: {

@@ -1,4 +1,4 @@
-#include "LpairReader.h"
+#include "LpairHandler.h"
 
 namespace CepGen
 {
@@ -6,7 +6,7 @@ namespace CepGen
   {
     //----- specialization for LPAIR input cards
 
-    LpairReader::LpairReader( const char* file )
+    LpairHandler::LpairHandler( const char* file )
     {
       std::ifstream f( file, std::fstream::in );
       if ( !f.is_open() ) {
@@ -38,7 +38,7 @@ namespace CepGen
     }
 
     void
-    LpairReader::init( Parameters* params )
+    LpairHandler::init( Parameters* params )
     {
       registerParameter<std::string>( "PROC", "Process name to simulate", &proc_name_ );
 
@@ -71,7 +71,7 @@ namespace CepGen
     }
 
     void
-    LpairReader::store( const char* file )
+    LpairHandler::store( const char* file )
     {
       std::ofstream f( file, std::fstream::out | std::fstream::trunc );
       if ( !f.is_open() ) {
@@ -86,7 +86,7 @@ namespace CepGen
     }
 
     void
-    LpairReader::setParameter( std::string key, std::string value )
+    LpairHandler::setParameter( std::string key, std::string value )
     {
       try { setValue<double>( key.c_str(), std::stod( value ) ); } catch ( std::invalid_argument& ) {}
       try { setValue<unsigned int>( key.c_str(), std::stoi( value ) ); } catch ( std::invalid_argument& ) {}
@@ -95,7 +95,7 @@ namespace CepGen
     }
 
     std::string
-    LpairReader::getParameter( std::string key ) const
+    LpairHandler::getParameter( std::string key ) const
     {
       double dd = getValue<double>( key.c_str() );
       if ( dd != -999. ) return std::to_string( dd );
@@ -109,7 +109,7 @@ namespace CepGen
     }
 
     std::string
-    LpairReader::getDescription( std::string key ) const
+    LpairHandler::getDescription( std::string key ) const
     {
       if ( p_strings_.count( key ) ) return p_strings_.find( key )->second.description;
       if ( p_ints_.count( key ) ) return p_ints_.find( key )->second.description;

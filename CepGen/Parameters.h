@@ -10,7 +10,6 @@
 namespace CepGen
 {
   /// List of parameters used to start and run the simulation job
-  /// \note The default parameters are derived from GMUINI in LPAIR
   class Parameters {
     public:
       Parameters();

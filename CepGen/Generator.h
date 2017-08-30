@@ -10,8 +10,6 @@
 #include "CepGen/Core/Vegas.h"
 #include "CepGen/Core/Timer.h"
 
-#include "CepGen/Physics/Physics.h"
-
 ////////////////////////////////////////////////////////////////////////////////
 
 /**

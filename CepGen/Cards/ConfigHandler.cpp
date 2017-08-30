@@ -1,4 +1,4 @@
-#include "ConfigReader.h"
+#include "ConfigHandler.h"
 
 #ifdef LIBCONFIG
 
@@ -7,9 +7,9 @@ namespace CepGen
   namespace Cards
   {
     //----- specialization for CepGen input cards
-
-    ConfigReader::ConfigReader( const char* file )
+    ConfigHandler::ConfigHandler( const char* file )
     {
+#ifdef LIBCONFIG
       libconfig::Config cfg;
       try { cfg.readFile( file ); } catch ( const libconfig::ParseException& pe ) {
         FatalError( Form( "Failed to parse the configuration card \"%s\".\n\tParser error: %s (at line %d)", file, pe.getError(), pe.getLine() ) );
@@ -53,10 +53,14 @@ namespace CepGen
       } catch ( const libconfig::SettingTypeException& te ) {
         FatalError( Form( "Field \"%s\" has wrong type.", te.getPath() ) );
       }
+#else
+      InWarning( "libconfig++ is not present on this machine" );
+#endif
     }
 
+#ifdef LIBCONFIG
     void
-    ConfigReader::parseIncomingKinematics( const libconfig::Setting& kin )
+    ConfigHandler::parseIncomingKinematics( const libconfig::Setting& kin )
     {
       try {
         if ( kin.exists( "beam1_pz" ) ) params_.kinematics.inp.first = (double)kin["beam1_pz"];
@@ -81,7 +85,7 @@ namespace CepGen
     }
 
     void
-    ConfigReader::parseOutgoingKinematics( const libconfig::Setting& kin )
+    ConfigHandler::parseOutgoingKinematics( const libconfig::Setting& kin )
     {
       try {
         if ( kin.exists( "pair" ) ) {
@@ -109,7 +113,7 @@ namespace CepGen
     }
 
     void
-    ConfigReader::parseVegas( const libconfig::Setting& veg )
+    ConfigHandler::parseVegas( const libconfig::Setting& veg )
     {
       try {
         if ( veg.exists( "num_points" ) ) params_.vegas.npoints = (int)veg["num_points"];
@@ -121,7 +125,7 @@ namespace CepGen
     }
 
     void
-    ConfigReader::parseGenerator( const libconfig::Setting& gen )
+    ConfigHandler::parseGenerator( const libconfig::Setting& gen )
     {
       params_.generation.enabled = true;
       try {
@@ -133,7 +137,7 @@ namespace CepGen
     }
 
     void
-    ConfigReader::parseTamingFunctions( const libconfig::Setting& tf )
+    ConfigHandler::parseTamingFunctions( const libconfig::Setting& tf )
     {
       if ( !tf.isList() ) FatalError( "The taming functions definition must be wrapped within a list!" );
       for ( unsigned short i = 0; i < tf.getLength(); ++i ) {
@@ -142,7 +146,7 @@ namespace CepGen
     }
 
     void
-    ConfigReader::writeProcess( const Parameters* params, libconfig::Setting& root )
+    ConfigHandler::writeProcess( const Parameters* params, libconfig::Setting& root )
     {
       libconfig::Setting& proc = root.add( "process", libconfig::Setting::TypeGroup );
       proc.add( "name", libconfig::Setting::TypeString ) = params->processName();
@@ -151,7 +155,7 @@ namespace CepGen
     }
 
     void
-    ConfigReader::writeIncomingKinematics( const Parameters* params, libconfig::Setting& root )
+    ConfigHandler::writeIncomingKinematics( const Parameters* params, libconfig::Setting& root )
     {
       libconfig::Setting& kin = root.add( "in_kinematics", libconfig::Setting::TypeGroup );
       kin.add( "beam1_pz", libconfig::Setting::TypeFloat ) = params->kinematics.inp.first;
@@ -161,7 +165,7 @@ namespace CepGen
     }
 
     void
-    ConfigReader::writeOutgoingKinematics( const Parameters* params, libconfig::Setting& root )
+    ConfigHandler::writeOutgoingKinematics( const Parameters* params, libconfig::Setting& root )
     {
       libconfig::Setting& kin = root.add( "out_kinematics", libconfig::Setting::TypeGroup );
       kin.add( "pair", libconfig::Setting::TypeInt ) = (int)params->kinematics.central_system[0];
@@ -181,7 +185,7 @@ namespace CepGen
     }
 
     void
-    ConfigReader::writeTamingFunctions( const Parameters* params, libconfig::Setting& root )
+    ConfigHandler::writeTamingFunctions( const Parameters* params, libconfig::Setting& root )
     {
       libconfig::Setting& tf = root.add( "taming_functions", libconfig::Setting::TypeList );
       for ( std::map<std::string,TamingFunction>::const_iterator it = params->taming_functions.begin(); it != params->taming_functions.end(); ++it ) {
@@ -192,7 +196,7 @@ namespace CepGen
     }
 
     void
-    ConfigReader::writeVegas( const Parameters* params, libconfig::Setting& root )
+    ConfigHandler::writeVegas( const Parameters* params, libconfig::Setting& root )
     {
       libconfig::Setting& veg = root.add( "vegas", libconfig::Setting::TypeGroup );
       veg.add( "num_points", libconfig::Setting::TypeInt ) = (int)params->vegas.npoints;
@@ -201,17 +205,19 @@ namespace CepGen
     }
 
     void
-    ConfigReader::writeGenerator( const Parameters* params, libconfig::Setting& root )
+    ConfigHandler::writeGenerator( const Parameters* params, libconfig::Setting& root )
     {
       if ( !params->generation.enabled ) return;
       libconfig::Setting& gen = root.add( "generator", libconfig::Setting::TypeGroup );
       gen.add( "num_events", libconfig::Setting::TypeInt ) = (int)params->generation.maxgen;
       gen.add( "print_every", libconfig::Setting::TypeInt ) = (int)params->generation.gen_print_every;
     }
+#endif
 
     void
-    ConfigReader::store( const Parameters* params, const char* file )
+    ConfigHandler::store( const Parameters* params, const char* file )
     {
+#ifdef LIBCONFIG
       libconfig::Config cfg;
       libconfig::Setting& root = cfg.getRoot();
       writeProcess( params, root );
@@ -221,6 +227,7 @@ namespace CepGen
       writeVegas( params, root );
       writeGenerator( params, root );
       cfg.writeFile( file );
+#endif
     }
   }
 }

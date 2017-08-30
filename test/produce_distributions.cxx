@@ -1,5 +1,5 @@
 #include "CepGen/Generator.h"
-#include "CepGen/Cards/ConfigReader.h"
+#include "CepGen/Cards/ConfigHandler.h"
 
 #include "Canvas.h"
 #include "TH1.h"
@@ -25,7 +25,7 @@ int main( int argc, char* argv[] )
     InError( Form( "Usage: %s [input card]", argv[0] ) );
     return -1;
   }
-  mg.setParameters( CepGen::Cards::ConfigReader( argv[1] ).parameters() );
+  mg.setParameters( CepGen::Cards::ConfigHandler( argv[1] ).parameters() );
 
   TH1D h_mass( "invm", "Dilepton invariant mass\\d#sigma/dm\\GeV?.2f", 1000, 0., 500. ),
        h_ptpair( "ptpair", "Dilepton p_{T}\\d#sigma/dp_{T}\\GeV?.2f", 500, 0., 50. );

@@ -3,7 +3,6 @@
 
 #include "CepGen/Physics/Event.h"
 #include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Physics/Physics.h"
 #include "CepGen/Physics/StructureFunctions.h"
 #include "CepGen/Physics/FormFactors.h"
 

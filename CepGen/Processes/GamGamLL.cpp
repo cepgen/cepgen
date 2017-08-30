@@ -887,7 +887,7 @@ GamGamLL::periPP( int nup_, int ndown_ )
   const double t11 = 64. *(  bb_*( qqq-g4_-qdq*( t1_+t2_+2.*Ml12_ ) )-2.*( t1_+2.*Ml12_ )*( t2_+2.*Ml12_ )*qqq ) * t1_*t2_, // magnetic-magnetic
                t12 = 128.*( -bb_*( dd2_+g6_ )-2.*( t1_+2.*Ml12_ )*( sa2_*qqq+a6_*a6_ ) ) * t1_, // electric-magnetic
                t21 = 128.*( -bb_*( dd4_+g5_ )-2.*( t2_+2.*Ml12_ )*( sa1_*qqq+a5_*a5_ ) ) * t2_, // magnetic-electric
-               t22 = 512.*(  bb_*( delta_*delta_-gram_ )-pow(epsi_-delta_*(qdq+q1dq2_), 2)-sa1_*a6_*a6_-sa2_*a5_*a5_-sa1_*sa2_*qqq ); // electric-electric
+               t22 = 512.*(  bb_*( delta_*delta_-gram_ )-pow( epsi_-delta_*( qdq+q1dq2_ ), 2 )-sa1_*a6_*a6_-sa2_*a5_*a5_-sa1_*sa2_*qqq ); // electric-electric
 
   const double peripp = ( fp1.FM*fp2.FM*t11 + fp1.FE*fp2.FM*t21 + fp1.FM*fp2.FE*t12 + fp1.FE*fp2.FE*t22 ) / pow( 2.*t1_*t2_*bb_, 2 );
 

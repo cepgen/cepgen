@@ -1,5 +1,5 @@
-#ifndef CepGen_Cards_ConfigReader_h
-#define CepGen_Cards_ConfigReader_h
+#ifndef CepGen_Cards_ConfigHandler_h
+#define CepGen_Cards_ConfigHandler_h
 
 #include "Handler.h"
 
@@ -13,14 +13,17 @@ namespace CepGen
 {
   namespace Cards
   {
-    class ConfigReader : public Handler
+    /// CepGen configuration cards reader/writer
+    class ConfigHandler : public Handler
     {
-#ifdef LIBCONFIG
       public:
-        ConfigReader( const char* file );
+        /// Read a standard configuration card
+        ConfigHandler( const char* file );
 
+        /// Store a configuration into a steering card
         static void store( const Parameters*, const char* file );
 
+#ifdef LIBCONFIG
       private:
         void parseIncomingKinematics( const libconfig::Setting& );
         void parseOutgoingKinematics( const libconfig::Setting& );
@@ -34,10 +37,6 @@ namespace CepGen
         static void writeTamingFunctions( const Parameters*, libconfig::Setting& );
         static void writeVegas( const Parameters*, libconfig::Setting& );
         static void writeGenerator( const Parameters*, libconfig::Setting& );
-#else
-      public:
-        inline ConfigReader( const char* ) { InWarning( "libconfig++ is not present on this machine" ); }
-        static void store( const Parameters*, const char* file ) {}
 #endif
     };
   }
