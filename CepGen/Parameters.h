@@ -29,7 +29,8 @@ namespace CepGen
 
       /// Process for which the cross-section will be computed and the events will be generated
       Process::GenericProcess* process() { return process_.get(); }
-      std::string processName() const { return process_->name(); }
+      /// Name of the process considered
+      std::string processName() const { return ( process_ ) ? process_->name() : "no process"; }
       /// Set the process to study
       void setProcess( Process::GenericProcess* proc ) { process_.reset( proc ); }
 
@@ -39,6 +40,7 @@ namespace CepGen
 
       //----- events kinematics
 
+      /// Events kinematics for phase space definition
       Kinematics kinematics;
 
       //----- VEGAS
@@ -55,10 +57,12 @@ namespace CepGen
         /// Is it the first time the integrator is run?
         bool first_run;
       };
+      /// Vegas integrator parameters
       Vegas vegas;
 
       //----- events generation
 
+      /// Collection of events generation parameters
       struct Generation
       {
         Generation() : enabled( false ), maxgen( 0 ), symmetrise( false ), ngen( 0 ), gen_print_every( 1 ) {}
@@ -75,8 +79,10 @@ namespace CepGen
         /// Frequency at which the events are displayed to the end-user
         unsigned int gen_print_every;
       };
+      /// Events generation parameters
       Generation generation;
 
+      /// Specify if the generated events are to be stored
       void setStorage( bool store ) { store_ = store; }
       /// Are the events generated in this run to be stored in the output file ?
       bool storage() const { return store_; }

@@ -232,18 +232,22 @@ namespace CepGen
       /// Unique identifier (in a Event object context)
       int id() const { return id_; }
       //void setId( int id ) { id_ = id; }
+      /// Set the particle unique identifier in an event
       void setId( int id ) { id_ = id; }
       /// Electric charge (given as a float number, for the quarks and bound states)
       float charge() const { return charge_sign_ * chargeFromPDGId( pdg_id_ ); }
+      /// Set the electric charge sign (+-1 for charged or 0 for neutral particles)
       void setChargeSign( int sign ) { charge_sign_ = sign; }
       /// Role in the considered process
       Role role() const { return role_; }
+      /// Set the particle role in the process
       void setRole( const Role& role ) { role_ = role; }
       /**
        * Codes 1-10 correspond to currently existing partons/particles, and larger codes contain partons/particles which no longer exist, or other kinds of event information
        * \brief Particle status
        */
       Status status() const { return status_; }
+      /// Set the particle decay/stability status
       void setStatus( const Status& status ) { status_ = status; }
 
       /// Set the PDG identifier (along with the particle's electric charge)
@@ -256,6 +260,7 @@ namespace CepGen
       int integerPdgId() const;
       /// Particle's helicity
       float helicity() const { return helicity_; }
+      /// Set the helicity of the particle
       void setHelicity( float heli ) { helicity_ = heli; }
       /**
        * Gets the particle's mass in \f$\textrm{GeV}/c^{2}\f$.

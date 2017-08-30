@@ -89,6 +89,7 @@ namespace CepGen
         /// Human-readable description of the process
         inline const std::string& description() const { return description_; }
 
+        /// Does the process contain (and hold) an event?
         bool hasEvent() const { return has_event_; }
 
         /// Reset the total generation time and the number of events generated for this run

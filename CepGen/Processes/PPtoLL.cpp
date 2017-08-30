@@ -18,14 +18,14 @@ PPtoLL::prepareKTKinematics()
   ///////////// FIXME ////////////////
 
   // Outgoing leptons  
-  y1_ = y_min_+( y_max_-y_min_ )*x( 4 );
-  y2_ = y_min_+( y_max_-y_min_ )*x( 5 );
+  y1_ = y_min_+( y_max_-y_min_ )*xkt( 0 );
+  y2_ = y_min_+( y_max_-y_min_ )*xkt( 1 );
   DebuggingInsideLoop( Form( "leptons rapidities (%.2f < y < %.2f): %f / %f", y_min_, y_max_, y1_, y2_ ) );
 
   Kinematics::Limits ptdiff_limits = cuts_.central_cuts[Cuts::pt_diff];
   if ( !ptdiff_limits.hasMax() ) ptdiff_limits.max() = 400.; //FIXME
-  pt_diff_ = ptdiff_limits.min()+( ptdiff_limits.range() )*x( 6 );
-  phi_pt_diff_ = 2.*M_PI*x( 7 );
+  pt_diff_ = ptdiff_limits.min()+( ptdiff_limits.range() )*xkt( 2 );
+  phi_pt_diff_ = 2.*M_PI*xkt( 3 );
   DebuggingInsideLoop( Form( "leptons pt difference:\n\t"
                              "  mag = %f (%.2f < Dpt < %.2f)\n\t"
                              "  phi = %f",

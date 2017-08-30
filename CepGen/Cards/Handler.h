@@ -23,6 +23,7 @@ namespace CepGen
         Parameters& parameters() { return params_; }
 
       protected:
+        /// List of parameters parsed from a card handler
         Parameters params_;
     };
   }

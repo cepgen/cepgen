@@ -76,6 +76,7 @@ namespace CepGen
 
       /// Incoming particles' momentum (in \f$\text{GeV}/c\f$)
       std::pair<double,double> inp;
+      /// Set the incoming particles' momenta (if the collision is symmetric)
       inline void setSqrtS( double sqrts ) { inp = { sqrts*0.5, sqrts*0.5 }; }
       /// Beam/primary particle's PDG identifier
       std::pair<Particle::ParticleCode,Particle::ParticleCode> inpdg;
@@ -87,8 +88,11 @@ namespace CepGen
       StructureFunctions remnant_mode;
       /// Sets of cuts to apply on the final phase space
       CutsMode cuts_mode;
+      /// Cuts on the central system produced
       std::map<Cuts::Central, Limits> central_cuts;
+      /// Cuts on the beam remnants system
       std::map<Cuts::Remnants, Limits> remnant_cuts;
+      /// Cuts on the initial particles kinematics
       std::map<Cuts::InitialState, Limits> initial_cuts;
   };
 }

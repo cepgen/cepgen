@@ -67,6 +67,9 @@ namespace CepGen
         void fillPrimaryParticlesKinematics();
         /// Set the kinematics of the outgoing central system
         virtual void fillCentralParticlesKinematics() = 0;
+
+        /// Retrieve a component of the phase space point for the kT-factorised process
+        inline double xkt( const unsigned int i ) const { return x( kNumRequiredDimensions + i ); }
   
         /// Minimal log-virtuality of the intermediate parton
         double log_qmin_;
