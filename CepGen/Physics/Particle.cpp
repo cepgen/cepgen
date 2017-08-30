@@ -289,6 +289,13 @@ namespace CepGen
     }
   }
 
+  double
+  Particle::etaToY( double eta_, double m_, double pt_ )
+  {
+    const double mt = m_*m_ + pt_*pt_;
+    return asinh( sqrt( ( ( ( mt*mt-m_*m_ )*cosh( 2.*eta_ ) + m_*m_ )/ mt*mt - 1. ) / 2. ) );
+  }
+
   std::ostream&
   operator<<( std::ostream& os, const Particle::ParticleCode& pc )
   {

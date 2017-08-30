@@ -368,8 +368,6 @@ PPtoLL::computeKTFactorisedMatrixElement()
 
   //============================================
   //     unintegrated photon distributions
-  //     interpolation on double logarithmic grid
-  //     of inelastic distributions
   //============================================
 
   GenericKTProcess::computeIncomingFluxes( x1, q1t2, x2, q2t2 );

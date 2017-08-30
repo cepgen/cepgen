@@ -5,7 +5,7 @@ using namespace CepGen::Process;
 GamGamLL::GamGamLL( int nopt ) :
   GenericProcess( "lpair", "pp -> p(*) (gamma gamma -> l+ l-) p(*)" ),
   n_opt_( nopt ),
-  MX2_( 0. ), MY2_( 0. ), Ml12_( 0. ), Ml22_( 0. ),
+  MX2_( 0. ), MY2_( 0. ), Ml2_( 0. ),
   ep1_( 0. ), ep2_( 0. ), p_cm_( 0. ),
   w12_( 0. ), w31_( 0. ), dw31_( 0. ), w52_( 0. ), dw52_( 0. ),
   ec4_( 0. ), pc4_( 0. ), mc4_( 0. ), w4_( 0. ),
@@ -469,15 +469,7 @@ GamGamLL::beforeComputeWeight()
   ep1_ = p1.energy();
   ep2_ = p2.energy();
 
-  const Kinematics::Limits eta_limits = cuts_.central_cuts[Cuts::eta_single];
-  const double thetamin = etaToTheta( eta_limits.max() ),
-               thetamax = etaToTheta( eta_limits.min() );
-  cot_theta1_ = 1./tan( thetamax*M_PI/180. );
-  cot_theta2_ = 1./tan( thetamin*M_PI/180. );
-  DebuggingInsideLoop( Form( "cot(theta1) = %f\n\tcot(theta2) = %f", cot_theta1_, cot_theta2_ ) );
-
-  Ml12_ = event_->getByRole( Particle::CentralSystem )[0].mass2();
-  Ml22_ = event_->getByRole( Particle::CentralSystem )[1].mass2();
+  Ml2_ = event_->getByRole( Particle::CentralSystem )[0].mass2();
 
   switch ( cuts_.mode ) {
     case Kinematics::ElectronProton: default:
@@ -485,19 +477,19 @@ GamGamLL::beforeComputeWeight()
     case Kinematics::ElasticElastic:
       dw31_ = dw52_ = 0.; break;
     case Kinematics::InelasticElastic: {
-      const double m = computeOutgoingPrimaryParticlesMasses( x( 7 ), p1.mass(), sqrt( Ml12_ ), dw31_ );
+      const double m = computeOutgoingPrimaryParticlesMasses( x( 7 ), p1.mass(), sqrt( Ml2_ ), dw31_ );
       event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( m );
       event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( Particle::massFromPDGId( p2.pdgId() ) );
     } break;
     case Kinematics::ElasticInelastic: {
-      const double m = computeOutgoingPrimaryParticlesMasses( x( 7 ), p2.mass(), sqrt( Ml22_ ), dw52_ );
+      const double m = computeOutgoingPrimaryParticlesMasses( x( 7 ), p2.mass(), sqrt( Ml2_ ), dw52_ );
       event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( Particle::massFromPDGId( p1.pdgId() ) );
       event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( m );
     } break;
     case Kinematics::InelasticInelastic: {
-      const double mx = computeOutgoingPrimaryParticlesMasses( x( 7 ), p2.mass(), sqrt( Ml12_ ), dw31_ );
+      const double mx = computeOutgoingPrimaryParticlesMasses( x( 7 ), p2.mass(), sqrt( Ml2_ ), dw31_ );
       event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( mx );
-      const double my = computeOutgoingPrimaryParticlesMasses( x( 8 ), p1.mass(), sqrt( Ml22_ ), dw52_ );
+      const double my = computeOutgoingPrimaryParticlesMasses( x( 8 ), p1.mass(), sqrt( Ml2_ ), dw52_ );
       event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( my );
     } break;
   }
@@ -518,7 +510,7 @@ GamGamLL::computeWeight()
   if ( !w_limits.hasMax() ) w_limits.max() = s_;
 
   // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
-  const double wmin = std::max( pow( sqrt( Ml12_ ) + sqrt( Ml22_ ), 2 ), w_limits.min() );
+  const double wmin = std::max( 4.*Ml2_, w_limits.min() );
 
   // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or _wmax if specified)
   const double wmax = std::min( pow( sqs_-MX_-MY_, 2 ), w_limits.max() );
@@ -541,8 +533,8 @@ GamGamLL::computeWeight()
   if ( t1_>0. )  { InWarning( Form( "t1 = %f > 0", t1_ ) ); return 0.; }
   if ( t2_>0. )  { InWarning( Form( "t2 = %f > 0", t2_ ) ); return 0.; }
 
-  const double ecm6 = ( w4_+Ml12_-Ml22_ ) / ( 2.*mc4_ ),
-               pp6cm = sqrt( ecm6*ecm6-Ml12_ );
+  const double ecm6 = w4_ / ( 2.*mc4_ ),
+               pp6cm = sqrt( ecm6*ecm6-Ml2_ );
 
   jacobian_ *= dw4*pp6cm/( mc4_*Constants::sconstb*s_ );
 
@@ -583,7 +575,7 @@ GamGamLL::computeWeight()
   double xx6 = x( 5 );
 
   const double amap = 0.5 * (w4_-t1_-t2_),
-               bmap = 0.5 * sqrt( ( pow( w4_-t1_-t2_, 2 )-4.*t1_*t2_ )*( 1.-4.*Ml12_/w4_ ) ),
+               bmap = 0.5 * sqrt( ( pow( w4_-t1_-t2_, 2 )-4.*t1_*t2_ )*( 1.-4.*Ml2_/w4_ ) ),
                ymap = ( amap+bmap )/( amap-bmap ),
                beta = pow( ymap, 2.*xx6-1. );
   xx6 = 0.5 * ( 1. + amap/bmap*( beta-1. )/( beta+1. ) );
@@ -624,7 +616,7 @@ GamGamLL::computeWeight()
 
   DebuggingInsideLoop( Form( "h1 = %f\n\th2 = %f", h1, h2 ) );
 
-  // First outgoing lepton's 3-momentum
+  // first outgoing lepton's 3-momentum
   const double p6x = cos_theta4_*pc6x+sin_theta4_*h2,
                p6y = cpg*p6cm.py()+spg*h1,
                p6z = cos_theta4_*h2-sin_theta4_*pc6x;
@@ -667,7 +659,7 @@ GamGamLL::computeWeight()
   const double phi3 = p3_lab_.phi(), cos_phi3 = cos( phi3 ), sin_phi3 = sin( phi3 ),
                phi5 = p5_lab_.phi(), cos_phi5 = cos( phi5 ), sin_phi5 = sin( phi5 );
 
-  bb_ = t1_*t2_+( w4_*pow( sin( theta6cm ), 2 ) + 4.*Ml12_*pow( cos( theta6cm ), 2 ) )*pg*pg;
+  bb_ = t1_*t2_+( w4_*pow( sin( theta6cm ), 2 ) + 4.*Ml2_*pow( cos( theta6cm ), 2 ) )*pg*pg;
 
   const double c1 = p3_lab_.pt() * ( qve.px()*sin_phi3  - qve.py()*cos_phi3   ),
                c2 = p3_lab_.pt() * ( qve.pz()*ep1_ - qve.energy() *p_cm_ ),
@@ -705,9 +697,6 @@ GamGamLL::computeWeight()
 
   const double gamma = cm.energy() / sqs_, betgam = cm.pz() / sqs_;
 
-  if ( cuts_.cuts_mode == Kinematics::NoCuts ) {
-    DebuggingInsideLoop( Form( "No cuts applied on the outgoing leptons kinematics!" ) );
-  }
   //--- kinematics computation for both leptons
 
   p6_cm_.betaGammaBoost( gamma, betgam );
@@ -733,36 +722,25 @@ GamGamLL::computeWeight()
 
   //--- cuts on outgoing leptons' kinematics
 
-  bool lcut = false; // event discarded by default
-
-  const double cott6 = p6_cm_.pz()/p6_cm_.pt(),
-               cott7 = p7_cm_.pz()/p7_cm_.pt();
-
   const Kinematics::Limits m_limits = cuts_.central_cuts[Cuts::mass_sum];
   if ( m_limits.hasMin() && ( p6_cm_+p7_cm_ ).mass() < m_limits.min() ) return 0.;
   if ( m_limits.hasMax() && ( p6_cm_+p7_cm_ ).mass() > m_limits.max() ) return 0.;
 
-  const Kinematics::Limits pt_limits = cuts_.central_cuts[Cuts::pt_single],
-                           energy_limits = cuts_.central_cuts[Cuts::energy_single];
-  bool lmu1 = cott6 >= cot_theta1_
-           && cott6 <= cot_theta2_
-           && ( !pt_limits.hasMin() || p6_cm_.pt() >= pt_limits.min() )
-           && ( !pt_limits.hasMax() || p6_cm_.pt() <= pt_limits.max() )
-           && ( !energy_limits.hasMin() || p6_cm_.energy() >= energy_limits.min() )
-           && ( !energy_limits.hasMax() || p6_cm_.energy() <= energy_limits.max() );
-  bool lmu2 = cott7>=cot_theta1_
-           && cott7<=cot_theta2_
-           && ( !pt_limits.hasMin() || p7_cm_.pt() >= pt_limits.min() )
-           && ( !pt_limits.hasMax() || p7_cm_.pt() <= pt_limits.max() )
-           && ( !energy_limits.hasMin() || p7_cm_.energy() >= energy_limits.min() )
-           && ( !energy_limits.hasMax() || p7_cm_.energy() <= energy_limits.max() );
+  //----- cuts on the individual leptons
 
-  switch ( cuts_.cuts_mode ) {
-    case Kinematics::AllParticles:  { lcut = lmu1 && lmu2; } break;
-    case Kinematics::OneParticle:   { lcut = lmu1 || lmu2; } break;
-    case Kinematics::NoCuts: default: lcut = true; break;
-  }
-  if ( !lcut ) return 0.; // dismiss the cuts-failing events in the cross-section computation
+  const Kinematics::Limits pt_limits = cuts_.central_cuts[Cuts::pt_single];
+  if ( pt_limits.hasMin() && ( p6_cm_.pt() < pt_limits.min() || p7_cm_.pt() < pt_limits.min() ) ) return 0.;
+  if ( pt_limits.hasMax() && ( p6_cm_.pt() > pt_limits.max() || p7_cm_.pt() > pt_limits.max() ) ) return 0.;
+
+  const Kinematics::Limits energy_limits = cuts_.central_cuts[Cuts::energy_single];
+  if ( energy_limits.hasMin() && ( p6_cm_.energy() < energy_limits.min() || p7_cm_.energy() < energy_limits.min() ) ) return 0.;
+  if ( energy_limits.hasMax() && ( p6_cm_.energy() > energy_limits.max() || p7_cm_.energy() > energy_limits.max() ) ) return 0.;
+
+  const Kinematics::Limits eta_limits = cuts_.central_cuts[Cuts::eta_single];
+  if ( eta_limits.hasMin() && ( p6_cm_.eta() < eta_limits.min() || p7_cm_.eta() < eta_limits.min() ) ) return 0.;
+  if ( eta_limits.hasMax() && ( p6_cm_.eta() > eta_limits.max() || p7_cm_.eta() > eta_limits.max() ) ) return 0.;
+
+  //--- compute the structure functions factors
 
   switch ( cuts_.mode ) { // inherited from CDF version
     case Kinematics::ElectronProton: default: jacobian_ *= periPP( 1, 2 ); break; // ep case
@@ -883,10 +861,10 @@ GamGamLL::periPP( int nup_, int ndown_ )
   DebuggingInsideLoop( Form( "u1 = %f\n\tu2 = %f\n\tv1 = %f\n\tv2 = %f", fp1.FM, fp1.FE, fp2.FM, fp2.FE ) );
 
   const double qqq = q1dq_*q1dq_,
-               qdq = 4.*Ml12_-w4_;
-  const double t11 = 64. *(  bb_*( qqq-g4_-qdq*( t1_+t2_+2.*Ml12_ ) )-2.*( t1_+2.*Ml12_ )*( t2_+2.*Ml12_ )*qqq ) * t1_*t2_, // magnetic-magnetic
-               t12 = 128.*( -bb_*( dd2_+g6_ )-2.*( t1_+2.*Ml12_ )*( sa2_*qqq+a6_*a6_ ) ) * t1_, // electric-magnetic
-               t21 = 128.*( -bb_*( dd4_+g5_ )-2.*( t2_+2.*Ml12_ )*( sa1_*qqq+a5_*a5_ ) ) * t2_, // magnetic-electric
+               qdq = 4.*Ml2_-w4_;
+  const double t11 = 64. *(  bb_*( qqq-g4_-qdq*( t1_+t2_+2.*Ml2_ ) )-2.*( t1_+2.*Ml2_ )*( t2_+2.*Ml2_ )*qqq ) * t1_*t2_, // magnetic-magnetic
+               t12 = 128.*( -bb_*( dd2_+g6_ )-2.*( t1_+2.*Ml2_ )*( sa2_*qqq+a6_*a6_ ) ) * t1_, // electric-magnetic
+               t21 = 128.*( -bb_*( dd4_+g5_ )-2.*( t2_+2.*Ml2_ )*( sa1_*qqq+a5_*a5_ ) ) * t2_, // magnetic-electric
                t22 = 512.*(  bb_*( delta_*delta_-gram_ )-pow( epsi_-delta_*( qdq+q1dq2_ ), 2 )-sa1_*a6_*a6_-sa2_*a5_*a5_-sa1_*sa2_*qqq ); // electric-electric
 
   const double peripp = ( fp1.FM*fp2.FM*t11 + fp1.FE*fp2.FM*t21 + fp1.FM*fp2.FE*t12 + fp1.FE*fp2.FE*t22 ) / pow( 2.*t1_*t2_*bb_, 2 );

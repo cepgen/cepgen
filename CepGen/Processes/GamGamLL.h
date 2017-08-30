@@ -108,10 +108,8 @@ namespace CepGen
         double MX2_;
         /// squared mass of the second proton-like outgoing particle
         double MY2_;
-        /// squared mass of the first outgoing lepton
-        double Ml12_;
-        /// squared mass of the second outgoing lepton
-        double Ml22_;
+        /// squared mass of the outgoing leptons
+        double Ml2_;
 
         /// energy of the first proton-like incoming particle
         double ep1_;

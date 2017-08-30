@@ -52,7 +52,6 @@ namespace CepGen
       registerParameter<unsigned int>( "PMOD", "Outgoing primary particles' mode", (unsigned int*)&params->kinematics.structure_functions );
       registerParameter<unsigned int>( "EMOD", "Outgoing primary particles' mode", (unsigned int*)&params->kinematics.structure_functions );
       registerParameter<unsigned int>( "PAIR", "Outgoing particles' PDG id", (unsigned int*)&pair_ );
-      registerParameter<unsigned int>( "MCUT", "Set of cuts to apply on final products", (unsigned int*)&params->kinematics.cuts_mode );
       registerParameter<unsigned int>( "NGEN", "Number of events to generate", &params->generation.maxgen );
 
       registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params->kinematics.inp.first );

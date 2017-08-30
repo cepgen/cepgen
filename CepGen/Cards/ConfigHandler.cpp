@@ -92,7 +92,6 @@ namespace CepGen
           Particle::ParticleCode pair = (Particle::ParticleCode)(int)kin["pair"];
           params_.kinematics.central_system = { pair, pair };
         }
-        if ( kin.exists( "cuts_mode" ) ) params_.kinematics.cuts_mode = (Kinematics::CutsMode)(int)kin["cuts_mode"];
         if ( kin.exists( "min_pt" ) ) params_.kinematics.central_cuts[Cuts::pt_single].min() = (double)kin["min_pt"];
         if ( kin.exists( "max_pt" ) ) params_.kinematics.central_cuts[Cuts::pt_single].max() = (double)kin["max_pt"];
         if ( kin.exists( "min_ptdiff" ) ) params_.kinematics.central_cuts[Cuts::pt_diff].min() = (double)kin["min_ptdiff"];
@@ -169,7 +168,6 @@ namespace CepGen
     {
       libconfig::Setting& kin = root.add( "out_kinematics", libconfig::Setting::TypeGroup );
       kin.add( "pair", libconfig::Setting::TypeInt ) = (int)params->kinematics.central_system[0];
-      kin.add( "cuts_mode", libconfig::Setting::TypeInt ) = (int)params->kinematics.cuts_mode;
       kin.add( "min_pt", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::pt_single ).min();
       kin.add( "max_pt", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::pt_single ).max();
       kin.add( "min_ptdiff", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::pt_diff ).min();

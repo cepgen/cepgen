@@ -191,6 +191,9 @@ namespace CepGen
       friend Particle::Momentum operator*( const Particle::Momentum& mom, double c );
       /// Multiply all components of a 4-momentum by a scalar
       friend Particle::Momentum operator*( double c, const Particle::Momentum& mom );
+
+      //----- static getters
+
       /**
        * \brief Gets the mass of a particle
        * \param pdgId ParticleCode (PDG ID)
@@ -209,6 +212,15 @@ namespace CepGen
        * \return Decay width in GeV
        */
       static double widthFromPDGId( const Particle::ParticleCode& pdgId );
+
+      /// Convert a polar angle to a pseudo-rapidity
+      static inline double thetaToEta( double theta_ ) { return -log( tan( theta_/180.*M_PI/2. ) ); }
+      /// Convert a pseudo-rapidity to a polar angle
+      static inline double etaToTheta( double eta_ ) { return 2.*atan( exp( -eta_ ) )*180. / M_PI; }
+      /// Convert a pseudo-rapidity to a rapidity
+      static double etaToY( double eta_, double m_, double pt_ );
+
+
 
       Particle();
       /// Build using the role of the particle in the process and its PDG id

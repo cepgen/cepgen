@@ -51,14 +51,6 @@ namespace CepGen
       Kinematics();
       ~Kinematics();
 
-      /// Set of cuts to apply on the central system
-      enum CutsMode {
-        NoCuts = 0,       ///< No cuts at all (for the total cross section)
-        AllParticles = 2, ///< Cuts on all the outgoing central particles
-        OneParticle = 3   ///< Cuts on at least one outgoing central particle
-      };
-      /// Human-readable format of a cuts mode
-      friend std::ostream& operator<<( std::ostream&, const CutsMode& );
       /// Type of kinematics to consider for the process
       enum ProcessMode {
         ElectronProton = 0,     ///< electron-proton elastic case
@@ -89,8 +81,6 @@ namespace CepGen
       ProcessMode mode;
       /// Type of structure functions to consider
       StructureFunctions structure_functions;
-      /// Sets of cuts to apply on the final phase space
-      CutsMode cuts_mode;
       /// Cuts on the central system produced
       std::map<Cuts::Central, Limits> central_cuts;
       /// Cuts on the beam remnants system
