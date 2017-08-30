@@ -11,10 +11,9 @@ void
 PPtoLL::prepareKTKinematics()
 {
   ////////////////////////////////////
-  y_min_ = cuts_.central_cuts[Cuts::eta_single].min();
-  //y_min_ = EtaToY(cuts_.eta_min, event_->getByRole(Particle::CentralSystem)[0].mass(), pt);
-  y_max_ = cuts_.central_cuts[Cuts::eta_single].max();
-  //y_max_ = EtaToY(cuts_.eta_max);
+  const Kinematics::Limits eta_limits = cuts_.central_cuts[Cuts::eta_single];
+  y_min_ = eta_limits.min();
+  y_max_ = eta_limits.max();
   ///////////// FIXME ////////////////
 
   // Outgoing leptons  
@@ -23,7 +22,7 @@ PPtoLL::prepareKTKinematics()
   DebuggingInsideLoop( Form( "leptons rapidities (%.2f < y < %.2f): %f / %f", y_min_, y_max_, y1_, y2_ ) );
 
   Kinematics::Limits ptdiff_limits = cuts_.central_cuts[Cuts::pt_diff];
-  if ( !ptdiff_limits.hasMax() ) ptdiff_limits.max() = 400.; //FIXME
+  if ( !ptdiff_limits.hasMax() ) ptdiff_limits.max() = 500.; //FIXME
   pt_diff_ = ptdiff_limits.min()+( ptdiff_limits.range() )*xkt( 2 );
   phi_pt_diff_ = 2.*M_PI*xkt( 3 );
   DebuggingInsideLoop( Form( "leptons pt difference:\n\t"
@@ -58,14 +57,15 @@ PPtoLL::computeKTFactorisedMatrixElement()
   //=================================================================
   //     How matrix element is calculated
   //=================================================================
+
   const bool off_shell = true;
 
   //=================================================================
   //     two terms in Wolfgang's formula for 
   //     off-shell gamma gamma --> l^+ l^-
   //=================================================================
-  const unsigned int imat1 = 2,
-                     imat2 = 0;
+
+  const unsigned int imat1 = 2, imat2 = 0;
 
   //=================================================================
   //     matrix element computation
@@ -249,7 +249,7 @@ PPtoLL::computeKTFactorisedMatrixElement()
 
   //const double mll = sqrt( shat );
 
-  const double that = ( that1+that2 )*0.5, uhat = ( uhat1+uhat2 )*0.5;
+  const double that = 0.5*( that1+that2 ), uhat = 0.5*( uhat1+uhat2 );
 
   //=================================================================
   //     matrix elements
@@ -288,8 +288,8 @@ PPtoLL::computeKTFactorisedMatrixElement()
     const double ak1_x = z1m*pt1x - z1p*pt2x, ak1_y = z1m*pt1y - z1p*pt2y,
                  ak2_x = z2m*pt1x - z2p*pt2x, ak2_y = z2m*pt1y - z2p*pt2y;
 
-    const double t1abs = (q1t2 + x1*( MX_*MX_-mp2 )+x1*x1*mp2 )/( 1.-x1 ),
-                 t2abs = (q2t2 + x2*( MY_*MY_-mp2 )+x2*x2*mp2 )/( 1.-x2 );
+    const double t1abs = ( q1t2 + x1*( MX_*MX_-mp2 )+x1*x1*mp2 )/( 1.-x1 ),
+                 t2abs = ( q2t2 + x2*( MY_*MY_-mp2 )+x2*x2*mp2 )/( 1.-x2 );
 
     const double eps12 = ml2 + z1p*z1m*t1abs,
                  eps22 = ml2 + z2p*z2m*t2abs;
@@ -352,7 +352,7 @@ PPtoLL::computeKTFactorisedMatrixElement()
     //     symmetrization
     //=================================================================
 
-    amat2 = ( imat1*amat2_1 + imat2*amat2_2 )*0.5;
+    amat2 = 0.5*( imat1*amat2_1 + imat2*amat2_2 );
 
     DebuggingInsideLoop( Form( "aux2(1/2) = %e / %e\n\t"
                                "amat2(1/2), amat2 = %e / %e / %e", aux2_1, aux2_2, amat2_1, amat2_2, amat2 ) );
@@ -375,10 +375,10 @@ PPtoLL::computeKTFactorisedMatrixElement()
   GenericKTProcess::computeIncomingFluxes( x1, q1t2, x2, q2t2 );
 
   //=================================================================
-  //     factor 2.*pi below from integration over phi_sum
-  //     factor 1/4 below from jacobian of transformations
-  //     factors 1/pi and 1/pi due to integration
-  //     over d^2 kappa_1 d^2 kappa_2 instead d kappa_1^2 d kappa_2^2
+  //     factor 2.*pi from integration over phi_sum
+  //     factor 1/4 from jacobian of transformations
+  //     factors 1/pi and 1/pi due to integration over
+  //       d^2 kappa_1 d^2 kappa_2 instead d kappa_1^2 d kappa_2^2
   //=================================================================
 
   const double aintegral = amat2 / ( 16.*M_PI*M_PI*x1*x1*x2*x2*s_*s_ )

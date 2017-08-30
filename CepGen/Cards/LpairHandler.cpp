@@ -49,8 +49,8 @@ namespace CepGen
       registerParameter<unsigned int>( "NCSG", "Number of points to probe", &params->vegas.npoints );
       registerParameter<unsigned int>( "ITVG", "Number of Vegas iterations", &params->vegas.itvg );
       registerParameter<unsigned int>( "MODE", "Subprocess' mode", (unsigned int*)&params->kinematics.mode );
-      registerParameter<unsigned int>( "PMOD", "Outgoing primary particles' mode", (unsigned int*)&params->remnant_mode );
-      registerParameter<unsigned int>( "EMOD", "Outgoing primary particles' mode", (unsigned int*)&params->remnant_mode );
+      registerParameter<unsigned int>( "PMOD", "Outgoing primary particles' mode", (unsigned int*)&params->kinematics.structure_functions );
+      registerParameter<unsigned int>( "EMOD", "Outgoing primary particles' mode", (unsigned int*)&params->kinematics.structure_functions );
       registerParameter<unsigned int>( "PAIR", "Outgoing particles' PDG id", (unsigned int*)&pair_ );
       registerParameter<unsigned int>( "MCUT", "Set of cuts to apply on final products", (unsigned int*)&params->kinematics.cuts_mode );
       registerParameter<unsigned int>( "NGEN", "Number of events to generate", &params->generation.maxgen );

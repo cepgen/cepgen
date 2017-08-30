@@ -22,6 +22,7 @@ namespace CepGen
       class Limits : private std::pair<double,double>
       {
         public:
+          /// Define lower and upper limits on a quantity
           Limits( double min=invalid_, double max=invalid_ ) : std::pair<double,double>( min, max ) {}
 
           /// Lower limit to apply on the variable
@@ -41,6 +42,7 @@ namespace CepGen
           /// Have an upper limit?
           bool hasMax() const { return second != invalid_; }
 
+          /// Human-readable expression of the limits
           friend std::ostream& operator<<( std::ostream&, const Limits& );
         private:
           static constexpr double invalid_ = -999.999;
@@ -85,7 +87,8 @@ namespace CepGen
 
       /// Type of kinematics to consider for the phase space
       ProcessMode mode;
-      StructureFunctions remnant_mode;
+      /// Type of structure functions to consider
+      StructureFunctions structure_functions;
       /// Sets of cuts to apply on the final phase space
       CutsMode cuts_mode;
       /// Cuts on the central system produced

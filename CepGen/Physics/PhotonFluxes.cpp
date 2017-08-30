@@ -9,8 +9,7 @@ namespace CepGen
       double
       ProtonElastic( double x, double kt2 )
       {
-        const double mp = Particle::massFromPDGId( Particle::Proton ),
-                     mp2 = mp*mp;
+        const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
 
         const double Q2_ela = ( kt2+x*x*mp2 )/( 1.-x );
         const FormFactors ela = ElasticFormFactors( Q2_ela, mp2 );

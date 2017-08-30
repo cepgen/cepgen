@@ -19,7 +19,7 @@ namespace CepGen
       DebuggingInsideLoop( Form( "Function f called -- some parameters:\n\t"
                                  "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
                                  "  remnant mode: %d",
-                                 p->kinematics.inp.first, p->kinematics.inp.second, p->remnant_mode ) );
+                                 p->kinematics.inp.first, p->kinematics.inp.second, p->kinematics.structure_functions ) );
 
       if ( p->vegas.first_run ) {
 

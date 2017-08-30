@@ -27,7 +27,7 @@ int main( int argc, char* argv[] ) {
     mg.parameters->setProcess( new CepGen::Process::GamGamLL );
     //mg.parameters->process_mode = Kinematics::InelasticElastic;
     mg.parameters->kinematics.mode = CepGen::Kinematics::ElasticElastic;
-    mg.parameters->remnant_mode = CepGen::SuriYennie;
+    mg.parameters->kinematics.structure_functions = CepGen::SuriYennie;
 
     mg.parameters->kinematics.inp = { 6500., 6500. };
     mg.parameters->kinematics.central_system = { CepGen::Particle::Muon, CepGen::Particle::Muon };

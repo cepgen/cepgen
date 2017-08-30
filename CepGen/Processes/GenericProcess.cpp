@@ -150,7 +150,7 @@ namespace CepGen
           inel_p1 = inel_p2 = true;
         } break;
       }
-      switch ( cuts_.remnant_mode ) {
+      switch ( cuts_.structure_functions ) {
         case SuriYennie:
         default: {
           if ( inel_p1 ) fp1 = SuriYennieFormFactors( -t1_, w1_, mx2 );

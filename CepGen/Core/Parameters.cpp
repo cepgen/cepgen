@@ -3,12 +3,10 @@
 namespace CepGen
 {
   Parameters::Parameters() :
-    remnant_mode( SuriYennie ),
     store_( false )
   {}
 
   Parameters::Parameters( Parameters& param ) :
-    remnant_mode( param.remnant_mode ),
     kinematics( param.kinematics ), vegas( param.vegas ), generation( param.generation ),
     taming_functions( param.taming_functions ),
     process_( std::move( param.process_ ) ),
@@ -16,7 +14,6 @@ namespace CepGen
   {}
 
   Parameters::Parameters( const Parameters& param ) :
-    remnant_mode( param.remnant_mode ),
     kinematics( param.kinematics ), vegas( param.vegas ), generation( param.generation ),
     taming_functions( param.taming_functions ),
     store_( param.store_ )
@@ -82,7 +79,7 @@ namespace CepGen
       << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << std::endl
       << std::setw( wt ) << "Incoming particles" << ( pretty ? boldify( ip1.str().c_str() ) : ip1.str() ) << ", " << ( pretty ? boldify( ip2.str().c_str() ) : ip2.str() ) << std::endl
       << std::setw( wt ) << "Momenta (GeV/c)" << kinematics.inp.first << ", " << kinematics.inp.second << std::endl
-      << std::setw( wt ) << "Structure functions mode" << remnant_mode << std::endl
+      << std::setw( wt ) << "Structure functions used" << kinematics.structure_functions << std::endl
       << std::endl
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << std::endl
       << std::endl

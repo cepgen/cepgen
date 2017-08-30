@@ -34,10 +34,6 @@ namespace CepGen
       /// Set the process to study
       void setProcess( Process::GenericProcess* proc ) { process_.reset( proc ); }
 
-      /// Type of remnant fragmentation algorithm to use
-      /// \note Was named PMOD/EMOD in ILPAIR
-      StructureFunctions remnant_mode;
-
       //----- events kinematics
 
       /// Events kinematics for phase space definition

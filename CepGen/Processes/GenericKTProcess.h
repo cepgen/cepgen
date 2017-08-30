@@ -62,6 +62,7 @@ namespace CepGen
         virtual double computeKTFactorisedMatrixElement() = 0;
         /// Compute the invariant masses of the outgoing protons (or remnants)
         void computeOutgoingPrimaryParticlesMasses();
+        /// Compute the unintegrated photon fluxes (for inelastic distributions, interpolation on double logarithmic grid)
         void computeIncomingFluxes( double, double, double, double );
         /// Set the kinematics of the incoming and outgoing protons (or remnants)
         void fillPrimaryParticlesKinematics();

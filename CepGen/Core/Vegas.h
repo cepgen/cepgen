@@ -48,6 +48,7 @@ namespace CepGen
        * \return A boolean stating if the generation was successful (in term of the computed weight for the phase space point)
        */
       bool generateOneEvent();
+      /// Dimensional size of the phase space
       const unsigned short dimensions() const { return ( !function_ ) ? 0 : function_->dim; }
     private:
       /**

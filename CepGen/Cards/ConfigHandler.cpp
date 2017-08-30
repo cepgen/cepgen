@@ -67,14 +67,14 @@ namespace CepGen
         if ( kin.exists( "beam2_pz" ) ) params_.kinematics.inp.second = (double)kin["beam2_pz"];
         if ( kin.exists( "structure_functions" ) ) {
           std::string sf = kin["structure_functions" ];
-          if ( sf == "electron" ) params_.remnant_mode = Electron;
-          else if ( sf == "elastic proton" ) params_.remnant_mode = ElasticProton;
-          else if ( sf == "Suri-Yennie" ) params_.remnant_mode = SuriYennie;
-          else if ( sf == "Suri-Yennie;lowQ2" ) params_.remnant_mode = SuriYennieLowQ2;
-          else if ( sf == "Szczurek-Uleshchenko" ) params_.remnant_mode = SzczurekUleshchenko;
-          else if ( sf == "Fiore;valence" ) params_.remnant_mode = FioreVal;
-          else if ( sf == "Fiore;sea" ) params_.remnant_mode = FioreSea;
-          else if ( sf == "Fiore" ) params_.remnant_mode = Fiore;
+          if ( sf == "electron" ) params_.kinematics.structure_functions = Electron;
+          else if ( sf == "elastic proton" ) params_.kinematics.structure_functions = ElasticProton;
+          else if ( sf == "Suri-Yennie" ) params_.kinematics.structure_functions = SuriYennie;
+          else if ( sf == "Suri-Yennie;lowQ2" ) params_.kinematics.structure_functions = SuriYennieLowQ2;
+          else if ( sf == "Szczurek-Uleshchenko" ) params_.kinematics.structure_functions = SzczurekUleshchenko;
+          else if ( sf == "Fiore;valence" ) params_.kinematics.structure_functions = FioreVal;
+          else if ( sf == "Fiore;sea" ) params_.kinematics.structure_functions = FioreSea;
+          else if ( sf == "Fiore" ) params_.kinematics.structure_functions = Fiore;
           else FatalError( Form( "Invalid structure functions mode: %s", sf.c_str() ) );
         }
       } catch ( const libconfig::SettingNotFoundException& nfe ) {
@@ -160,7 +160,7 @@ namespace CepGen
       libconfig::Setting& kin = root.add( "in_kinematics", libconfig::Setting::TypeGroup );
       kin.add( "beam1_pz", libconfig::Setting::TypeFloat ) = params->kinematics.inp.first;
       kin.add( "beam2_pz", libconfig::Setting::TypeFloat ) = params->kinematics.inp.second;
-      std::ostringstream os; os << params->remnant_mode;
+      std::ostringstream os; os << params->kinematics.structure_functions;
       kin.add( "structure_function", libconfig::Setting::TypeString ) = os.str();
     }
 
