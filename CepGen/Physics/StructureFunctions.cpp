@@ -19,8 +19,8 @@ namespace CepGen
   }
 
   /// Fiore-Brasse proton structure function
-  bool
-  PSF( double q2, double mx2, double& sigma_t, double& w1, double& w2 )
+  StructureFunctions
+  StructureFunctions::FioreBrasse( double q2, double mx2 )
   {
     sigma_t = w1 = w2 = 0.;
 
@@ -31,18 +31,16 @@ namespace CepGen
 
     const double mx = sqrt( mx2 );
 
-    if ( mx<m_min or mx>1.99 ) {
-      return false;
-    }
+    if ( mx < m_min || mx > 1.99 ) return StructureFunctions();
 
     int n_bin;
     double x_bin, dx;
-    if ( mx<1.11 ) {
+    if ( mx < 1.11 ) {
       n_bin = 0;
       x_bin = mx-m_min;
       dx = 1.11-m_min; // Delta w bin sizes
     }
-    else if ( mx<1.77 ) { // w in [1.11, 1.77[
+    else if ( mx < 1.77 ) { // w in [1.11, 1.77[
       dx = 0.015; // Delta w bin sizes
       n_bin = ( mx-1.11 )/dx + 1;
       x_bin = fmod( mx-1.11, dx );
@@ -78,7 +76,7 @@ namespace CepGen
                  logqq0 = log( ( nu2-q2 ) / pow( ( mx2-m2_proton ) / ( 2.*m_proton ), 2 ) ) / 2.,
                  gd2 = pow( 1. / ( 1-q2 / .71 ), 4 ); // dipole form factor of the proton
 
-    const double sigLow = (n_bin==0) ? 0. :
+    const double sigLow = (n_bin == 0) ? 0. :
       exp( abrass[n_bin-1]+bbrass[n_bin-1]*logqq0+cbrass[n_bin-1]*pow( fabs( logqq0 ), 3 ) )*gd2;
     const double sigHigh =
       exp( abrass[n_bin]  +bbrass[n_bin]  *logqq0+cbrass[n_bin]  *pow( fabs( logqq0 ), 3 ) )*gd2;
@@ -87,6 +85,6 @@ namespace CepGen
     w1 = ( mx2-m2_proton )/( 8.*M_PI*M_PI*m_proton*Constants::alphaEM )/Constants::GeV2toBarn*1.e6 * sigma_t;
     w2 = w1 * q2/( q2-nu2 );
 
-    return true;
+    return StructureFunctions( w1, w2 );
   }
 }
