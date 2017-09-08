@@ -128,20 +128,20 @@ namespace CepGen
       flux1_ = flux2_ = 0.;
       switch ( cuts_.mode ) {
         case Kinematics::ElasticElastic:
-          flux1_ = Fluxes::Photon::ProtonElastic( x1, q1t2 );
-          flux2_ = Fluxes::Photon::ProtonElastic( x2, q2t2 );
+          flux1_ = elasticFlux( x1, q1t2 );
+          flux2_ = elasticFlux( x2, q2t2 );
           break;
         case Kinematics::ElasticInelastic:
-          flux1_ = Fluxes::Photon::ProtonElastic( x1, q1t2 );
-          flux2_ = Fluxes::Photon::ProtonInelastic( x2, q2t2, MY_ );
+          flux1_ = elasticFlux( x1, q1t2 );
+          flux2_ = inelasticFlux( x2, q2t2, MY_ );
           break;
         case Kinematics::InelasticElastic:
-          flux1_ = Fluxes::Photon::ProtonInelastic( x1, q1t2, MX_ );
-          flux2_ = Fluxes::Photon::ProtonElastic( x2, q2t2 );
+          flux1_ = inelasticFlux( x1, q1t2, MX_ );
+          flux2_ = elasticFlux( x2, q2t2 );
           break;
         case Kinematics::InelasticInelastic:
-          flux1_ = Fluxes::Photon::ProtonInelastic( x1, q1t2, MX_ );
-          flux2_ = Fluxes::Photon::ProtonInelastic( x2, q2t2, MY_ );
+          flux1_ = inelasticFlux( x1, q1t2, MX_ );
+          flux2_ = inelasticFlux( x2, q2t2, MY_ );
           break;
         default: return;
       }
@@ -222,6 +222,45 @@ namespace CepGen
                                              jac *= 2.* mx_range * MY_; break;
       } // d(mx/y**2)
       return jac;
+    }
+
+    double
+    GenericKTProcess::elasticFlux( double x, double kt2 )
+    {
+      const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
+
+      const double Q2_ela = ( kt2+x*x*mp2 )/( 1.-x );
+      const FormFactors ela = FormFactors::ProtonElastic( Q2_ela );
+
+      const double ela1 = pow( kt2/( kt2+x*x*mp2 ), 2 );
+      const double ela2 = ela.FE;
+      //const double ela3 = 1.-(Q2_ela-kt2)/Q2_ela;
+      //const double ela3 = 1.-x*x*mp2/Q2_ela/(1.-x);
+      //return Constants::alpha_em/M_PI*(1.-x+x*x/4.)*ela1*ela2*ela3/kt2;
+      return Constants::alphaEM/M_PI*ela1*ela2/Q2_ela;
+      //return Constants::alphaEM/M_PI*( ( 1.-x )*ela1*ela2*ela3 + x*x/2.*G_M*G_M )/kt2;
+    }
+
+
+    double
+    GenericKTProcess::inelasticFlux( double x, double kt2, double mx )
+    {
+      const double mx2 = mx*mx,
+                   mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
+
+      // F2 structure function
+      const double Q2min = 1. / ( 1.-x )*( x*( mx2-mp2 ) + x*x*mp2 ),
+                   Q2 = kt2 / ( 1.-x ) + Q2min;
+      float x_Bjorken = Q2 / ( Q2+mx2-mp2 );
+
+      StructureFunctions sf = StructureFunctions::SzczurekUleshchenko( Q2, x_Bjorken );
+
+      const double term1 = ( 1. - ( Q2-kt2 ) / Q2 ),
+                   term2 = pow( kt2 / ( kt2+x*(mx2-mp2)+x*x*mp2 ), 2 );
+
+      const double f_aux = sf.F2/( mx2+Q2-mp2 )*term1*term2;
+
+      return Constants::alphaEM/M_PI*( 1.-x )*f_aux/kt2;
     }
   }
 }

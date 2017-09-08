@@ -69,6 +69,18 @@ namespace CepGen
         /// Set the kinematics of the outgoing central system
         virtual void fillCentralParticlesKinematics() = 0;
 
+
+        /// Get the elastic flux to be expected at a given x_bjorken / kT
+        /// \param[in] x Bjorken x
+        /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming photon
+        double elasticFlux( double x, double kt2 );
+
+        /// Get the inelastic flux to be expected at a given x_bjorken / kT
+        /// \param[in] x Bjorken x
+        /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming photon
+        /// \param[in] mx Outgoing diffractive proton mass
+        double inelasticFlux( double x, double kt2, double mx );
+
         /// Retrieve a component of the phase space point for the kT-factorised process
         inline double xkt( const unsigned int i ) const { return x( kNumRequiredDimensions + i ); }
   

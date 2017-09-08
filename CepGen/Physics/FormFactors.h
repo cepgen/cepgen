@@ -2,6 +2,7 @@
 #define CepGen_Physics_FormFactors_h
 
 #include <math.h>
+#include <array>
 
 #include "CepGen/Core/utils.h"
 
@@ -11,28 +12,37 @@
 namespace CepGen
 {
   /// Form factors collection (electric and magnetic parts)
-  struct FormFactors {
-    /// Initialise a collection of electric/magnetic form factors
-    FormFactors( double fe=0.0, double fm=0.0 ) : FE( fe ), FM( fm ) {}
-    /// Electric form factor
-    double FE;
-    /// Magnetic form factor
-    double FM;
-    /// Dumping operator for standard output streams
-    friend std::ostream& operator<<( std::ostream&, const FormFactors& );
-  };
+  class FormFactors
+  {
+    public:
+      /// Initialise a collection of electric/magnetic form factors
+      FormFactors( double fe=0.0, double fm=0.0 ) : FE( fe ), FM( fm ) {}
+      // compute x from w2/m2
+      double x( double q2, double w2, double m2=0.0 ) const {
+        const double mp = Particle::massFromPDGId( Particle::Proton );
+        return 1./( 1.+( w2-mp*mp ) / q2+m2 );
+      }
+      /// Trivial, spin-0 form factors (e.g. pion)
+      static FormFactors Trivial();
+      /// Elastic proton form factors
+      static FormFactors ProtonElastic( double q2 );
+      /// Suri-Yennie inelastic form factors
+      static FormFactors SuriYennie( double q2, double mi2, double mf2 );
+      /// Brasse et al. inelastic form factors
+      /// \cite Brasse1976413
+      static FormFactors FioreBrasse( double q2, double mi2, double mf2 );
+      /// Szczurek-Uleschenko inelastic form factors
+      static FormFactors SzczurekUleshchenko( double q2, double mi2, double mf2 );
+      /// Generate the form factors according to the proton structure functions set
+      static FormFactors ProtonInelastic( const StructureFunctions::Type& sf, double q2, double mi2, double mf2 );
 
-  /// Trivial, spin-0 form factors (e.g. pion)
-  FormFactors TrivialFormFactors();
-  /// Elastic form factors
-  FormFactors ElasticFormFactors( double q2, double mi2 );
-  /// Suri-Yennie inelastic form factors
-  FormFactors SuriYennieFormFactors( double q2, double mi2, double mf2 );
-  /// Brasse et al. inelastic form factors
-  /// \cite Brasse1976413
-  FormFactors FioreBrasseFormFactors( double q2, double mi2, double mf2 );
-  /// Szczurek-Uleschenko inelastic form factors
-  FormFactors SzczurekUleshchenkoFormFactors( double q2, double mi2, double mf2 );
+      /// Electric form factor
+      double FE;
+      /// Magnetic form factor
+      double FM;
+      /// Dumping operator for standard output streams
+      friend std::ostream& operator<<( std::ostream&, const FormFactors& );
+  };
 }
 
 #endif

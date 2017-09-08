@@ -25,7 +25,7 @@ main( int argc, char* argv[] )
   for ( unsigned int i=0; i<npoints; i++ ) {
     const float q2 = min_q2 + i*( max_q2-min_q2 )/(npoints-1);
 
-    CepGen::FormFactors ff_sy = CepGen::SuriYennieFormFactors( q2, mp2, mx2 );
+    CepGen::FormFactors ff_sy = CepGen::FormFactors::SuriYennie( q2, mp2, mx2 );
     g_sy_fe_100.SetPoint( i, q2, ff_sy.FE );
     g_sy_fm_100.SetPoint( i, q2, ff_sy.FM );
 
@@ -33,7 +33,7 @@ main( int argc, char* argv[] )
     g_fb_fe_100.SetPoint( i, q2, ff_fb.FE );
     g_fb_fm_100.SetPoint( i, q2, ff_fb.FM );*/
 
-    CepGen::FormFactors ff_su = CepGen::SzczurekUleshchenkoFormFactors( q2, mp2, mx2 );
+    CepGen::FormFactors ff_su = CepGen::FormFactors::SzczurekUleshchenko( q2, mp2, mx2 );
     g_su_fe_100.SetPoint( i, q2, ff_su.FE );
     g_su_fm_100.SetPoint( i, q2, ff_su.FM );
     cout << q2 << "\t" << ff_su.FM << endl;

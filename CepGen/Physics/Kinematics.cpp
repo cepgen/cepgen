@@ -5,7 +5,7 @@ namespace CepGen
   Kinematics::Kinematics() :
     inp( { 6500., 6500. } ), inpdg( { Particle::Proton, Particle::Proton } ),
     central_system( { Particle::Muon, Particle::Muon } ),
-    mode( ElasticElastic ), structure_functions( SuriYennie ),
+    mode( ElasticElastic ), structure_functions( StructureFunctions::SuriYennie ),
     central_cuts( { { Cuts::pt_single, 3.0 }, { Cuts::pt_diff, { 0., 400.0 } } } ),
     remnant_cuts( { { Cuts::mass, { 1.07, 320.0 } } } ),
     initial_cuts( { { Cuts::q2, { 0.0, 1.0e5 } }, { Cuts::qt, { 0.0, 500.0 } } } )
@@ -17,9 +17,7 @@ namespace CepGen
   void
   Kinematics::dump( std::ostream& os ) const
   {
-    os
-      << std::setfill(' ')
-      << __PRETTY_FUNCTION__ << " Dump\n";
+    os << std::setfill(' ');
     os << "===== Central system\n";
     for ( std::map<Cuts::Central,Limits>::const_iterator lim = central_cuts.begin(); lim != central_cuts.end(); ++lim ) {
       os << std::setw(30) << lim->first << ": " << lim->second;

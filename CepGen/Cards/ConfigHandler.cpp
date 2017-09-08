@@ -67,14 +67,14 @@ namespace CepGen
         if ( kin.exists( "beam2_pz" ) ) params_.kinematics.inp.second = (double)kin["beam2_pz"];
         if ( kin.exists( "structure_functions" ) ) {
           std::string sf = kin["structure_functions" ];
-          if ( sf == "electron" ) params_.kinematics.structure_functions = Electron;
-          else if ( sf == "elastic proton" ) params_.kinematics.structure_functions = ElasticProton;
-          else if ( sf == "Suri-Yennie" ) params_.kinematics.structure_functions = SuriYennie;
-          else if ( sf == "Suri-Yennie;lowQ2" ) params_.kinematics.structure_functions = SuriYennieLowQ2;
-          else if ( sf == "Szczurek-Uleshchenko" ) params_.kinematics.structure_functions = SzczurekUleshchenko;
-          else if ( sf == "Fiore;valence" ) params_.kinematics.structure_functions = FioreVal;
-          else if ( sf == "Fiore;sea" ) params_.kinematics.structure_functions = FioreSea;
-          else if ( sf == "Fiore" ) params_.kinematics.structure_functions = Fiore;
+          if ( sf == "electron" ) params_.kinematics.structure_functions = StructureFunctions::Electron;
+          else if ( sf == "elastic proton" ) params_.kinematics.structure_functions = StructureFunctions::ElasticProton;
+          else if ( sf == "Suri-Yennie" ) params_.kinematics.structure_functions = StructureFunctions::SuriYennie;
+          else if ( sf == "Suri-Yennie;lowQ2" ) params_.kinematics.structure_functions = StructureFunctions::SuriYennieLowQ2;
+          else if ( sf == "Szczurek-Uleshchenko" ) params_.kinematics.structure_functions = StructureFunctions::sfSzczurekUleshchenko;
+          else if ( sf == "Fiore;valence" ) params_.kinematics.structure_functions = StructureFunctions::FioreVal;
+          else if ( sf == "Fiore;sea" ) params_.kinematics.structure_functions = StructureFunctions::FioreSea;
+          else if ( sf == "Fiore" ) params_.kinematics.structure_functions = StructureFunctions::Fiore;
           else FatalError( Form( "Invalid structure functions mode: %s", sf.c_str() ) );
         }
       } catch ( const libconfig::SettingNotFoundException& nfe ) {
