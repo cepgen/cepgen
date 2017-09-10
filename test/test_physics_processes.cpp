@@ -69,7 +69,7 @@ main( int argc, char* argv[] )
     if      ( values_vs_generator.first == "1_lpair"  ) mg.parameters->setProcess( new CepGen::Process::GamGamLL );
     else if ( values_vs_generator.first == "2_pptoll" ) {
       mg.parameters->setProcess( new CepGen::Process::PPtoLL );
-      mg.parameters->kinematics.structure_functions = CepGen::SzczurekUleshchenko; //FIXME move to a dedicated class
+      mg.parameters->kinematics.structure_functions = CepGen::StructureFunctionsType::SzczurekUleshchenko; //FIXME move to a dedicated class
       mg.parameters->kinematics.initial_cuts[CepGen::Cuts::qt].max() = 50.0;
     }
     else { InError( Form( "Unrecognized generator mode: %s", values_vs_generator.first.c_str() ) ); break; }
