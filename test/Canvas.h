@@ -71,7 +71,7 @@ namespace CepGen
         y->SetLabelFont( font_type( 3 ) ); y->SetLabelSize( 20 );
         y->SetTitleFont( font_type( 3 ) ); y->SetTitleSize( 29 );
         if ( fRatio ) {
-          x->SetTitleOffset( 4.4 );
+          x->SetTitleOffset( 3. );
           x->SetLabelOffset( 0.02 );
         }
         y->SetTitleOffset( 1.3 );
