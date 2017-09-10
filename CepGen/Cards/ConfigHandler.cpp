@@ -102,6 +102,8 @@ namespace CepGen
         if ( kin.exists( "max_energy" ) ) params_.kinematics.central_cuts[Cuts::energy_single].max() = (double)kin["max_energy"];
         if ( kin.exists( "min_eta" ) ) params_.kinematics.central_cuts[Cuts::eta_single].min() = (double)kin["min_eta"];
         if ( kin.exists( "max_eta" ) ) params_.kinematics.central_cuts[Cuts::eta_single].max() = (double)kin["max_eta"];
+        if ( kin.exists( "min_rapidity" ) ) params_.kinematics.central_cuts[Cuts::rapidity_single].min() = (double)kin["min_rapidity"];
+        if ( kin.exists( "max_rapidity" ) ) params_.kinematics.central_cuts[Cuts::rapidity_single].max() = (double)kin["max_rapidity"];
         if ( kin.exists( "min_mx" ) ) params_.kinematics.remnant_cuts[Cuts::mass].min() = (double)kin["min_mx"];
         if ( kin.exists( "max_mx" ) ) params_.kinematics.remnant_cuts[Cuts::mass].max() = (double)kin["max_mx"];
       } catch ( const libconfig::SettingNotFoundException& nfe ) {

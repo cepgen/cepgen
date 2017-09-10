@@ -197,8 +197,6 @@ namespace CepGen
         /// Kinematics of the second outgoing lepton (in the two-proton CM)
         Particle::Momentum p7_cm_;
         double jacobian_;
-
-        double cot_theta1_, cot_theta2_;
     };
   }
 }

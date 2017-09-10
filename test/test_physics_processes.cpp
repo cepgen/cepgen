@@ -71,6 +71,7 @@ main( int argc, char* argv[] )
       mg.parameters->setProcess( new CepGen::Process::PPtoLL );
       mg.parameters->kinematics.structure_functions = CepGen::StructureFunctionsType::SzczurekUleshchenko; //FIXME move to a dedicated class
       mg.parameters->kinematics.initial_cuts[CepGen::Cuts::qt].max() = 50.0;
+      mg.parameters->kinematics.central_cuts[CepGen::Cuts::rapidity_single].in( -2.5, 2.5 );
     }
     else { InError( Form( "Unrecognized generator mode: %s", values_vs_generator.first.c_str() ) ); break; }
 

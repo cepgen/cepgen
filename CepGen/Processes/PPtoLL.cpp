@@ -11,9 +11,9 @@ void
 PPtoLL::prepareKTKinematics()
 {
   ////////////////////////////////////
-  const Kinematics::Limits eta_limits = cuts_.central_cuts[Cuts::eta_single];
-  y_min_ = eta_limits.min();
-  y_max_ = eta_limits.max();
+  const Kinematics::Limits rap_limits = cuts_.central_cuts[Cuts::rapidity_single];
+  y_min_ = rap_limits.min();
+  y_max_ = rap_limits.max();
   ///////////// FIXME ////////////////
 
   // Outgoing leptons  

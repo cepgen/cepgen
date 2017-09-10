@@ -23,8 +23,7 @@ GamGamLL::GamGamLL( int nopt ) :
   cos_theta4_( 0. ), sin_theta4_( 0. ),
   al4_( 0. ), be4_( 0. ), de3_( 0. ), de5_( 0. ),
   pt4_( 0. ),
-  jacobian_( 0. ),
-  cot_theta1_( -99999. ), cot_theta2_( 99999. )
+  jacobian_( 0. )
 {}
 
 void

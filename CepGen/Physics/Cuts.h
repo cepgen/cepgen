@@ -9,20 +9,22 @@ namespace CepGen
     /// Cuts on the central particles (e.g. dilepton system for LPAIR)
     enum Central
     {
-      pt_single,     ///< single particle transverse momentum
-      eta_single,    ///< single particle pseudo-rapidity
-      energy_single, ///< single particle energy
-      mass_sum,      ///< central system invariant mass
-      pt_sum,        ///< central system transverse momentum
-      eta_sum,       ///< central system pseudo-rapidity
-      energy_sum,    ///< central system energy
-      pt_diff,       ///< transverse momentum balance between the central particles
-      dely           ///< rapidity balance between the central particles
+      pt_single,       ///< single particle transverse momentum
+      eta_single,      ///< single particle pseudo-rapidity
+      rapidity_single, ///< single particle rapidity
+      energy_single,   ///< single particle energy
+      mass_sum,        ///< central system invariant mass
+      pt_sum,          ///< central system transverse momentum
+      eta_sum,         ///< central system pseudo-rapidity
+      energy_sum,      ///< central system energy
+      pt_diff,         ///< transverse momentum balance between the central particles
+      dely             ///< rapidity balance between the central particles
     };
     inline std::ostream& operator<<( std::ostream& os, const Central& is ) {
       switch ( is ) {
         case pt_single: return os << "Single central particle pT";
         case eta_single: return os << "Single central particle eta";
+        case rapidity_single: return os << "Single central particle rapidity";
         case energy_single: return os << "Single central particle energy";
         case mass_sum: return os << "Central system mass";
         case pt_sum: return os << "Central system pT";
