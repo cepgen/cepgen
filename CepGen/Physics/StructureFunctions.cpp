@@ -3,17 +3,17 @@
 namespace CepGen
 {
   std::ostream&
-  operator<<( std::ostream& os, const StructureFunctions::Type& sf )
+  operator<<( std::ostream& os, const StructureFunctionsType& sf )
   {
     switch ( sf ) {
-      case StructureFunctions::Electron:            return os << "electron";
-      case StructureFunctions::ElasticProton:       return os << "elastic proton";
-      case StructureFunctions::SuriYennie:          return os << "Suri-Yennie";
-      case StructureFunctions::SuriYennieLowQ2:     return os << "Suri-Yennie;lowQ2";
-      case StructureFunctions::sfSzczurekUleshchenko: return os << "Szczurek-Uleshchenko";
-      case StructureFunctions::FioreVal:            return os << "Fiore;valence";
-      case StructureFunctions::FioreSea:            return os << "Fiore;sea";
-      case StructureFunctions::Fiore:               return os << "Fiore";
+      case Electron:            return os << "electron";
+      case ElasticProton:       return os << "elastic proton";
+      case SuriYennie:          return os << "Suri-Yennie";
+      case SuriYennieLowQ2:     return os << "Suri-Yennie;lowQ2";
+      case SzczurekUleshchenko: return os << "Szczurek-Uleshchenko";
+      case FioreVal:            return os << "Fiore;valence";
+      case FioreSea:            return os << "Fiore;sea";
+      case Fiore:               return os << "Fiore";
       default: return os;
     }
   }

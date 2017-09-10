@@ -10,23 +10,23 @@ extern "C"
 
 namespace CepGen
 {
+  /// Proton structure function to be used in the outgoing state description
+  /// \note Values correspond to the LPAIR legacy steering card values
+  enum StructureFunctionsType {
+    Electron = 1,
+    ElasticProton = 2,
+    SuriYennie = 11,
+    SuriYennieLowQ2 = 12,
+    SzczurekUleshchenko = 15,
+    FioreVal = 101,
+    FioreSea = 102,
+    Fiore = 103
+  };
+  /// Human-readable format of a structure function type
+  std::ostream& operator<<( std::ostream& os, const StructureFunctionsType& sf );
+
   class StructureFunctions
   {
-    public:
-      /// Proton structure function to be used in the outgoing state description
-      enum Type {
-        Electron = 1,
-        ElasticProton = 2,
-        SuriYennie = 11,
-        SuriYennieLowQ2 = 12,
-        sfSzczurekUleshchenko = 15,
-        FioreVal = 101,
-        FioreSea = 102,
-        Fiore = 103
-      };
-      /// Human-readable format of a structure function type
-      friend std::ostream& operator<<( std::ostream& os, const Type& sf );
-
     public:
       StructureFunctions( double f1=0.0, double f2=0.0 ) : F1( f1 ), F2( f2 ) {}
       /// Fiore-Brasse proton structure functions (F.W Brasse et al., DESY 76/11 (1976),
