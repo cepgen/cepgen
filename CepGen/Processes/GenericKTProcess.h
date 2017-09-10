@@ -3,7 +3,6 @@
 
 #include "GenericProcess.h"
 #include "CepGen/Physics/FormFactors.h"
-#include "CepGen/Physics/PhotonFluxes.h"
 
 namespace CepGen
 {
