@@ -11,7 +11,8 @@ extern "C"
 namespace CepGen
 {
   /// Proton structure function to be used in the outgoing state description
-  enum StructureFunctions {
+  /// \note Values correspond to the LPAIR legacy steering card values
+  enum StructureFunctionsType {
     Electron = 1,
     ElasticProton = 2,
     SuriYennie = 11,
@@ -21,21 +22,24 @@ namespace CepGen
     FioreSea = 102,
     Fiore = 103
   };
+  /// Human-readable format of a structure function type
+  std::ostream& operator<<( std::ostream& os, const StructureFunctionsType& sf );
+
+  class StructureFunctions
+  {
+    public:
+      StructureFunctions( double f1=0.0, double f2=0.0 ) : F1( f1 ), F2( f2 ) {}
+      /// Fiore-Brasse proton structure functions (F.W Brasse et al., DESY 76/11 (1976),
+      /// http://dx.doi.org/10.1016/0550-3213(76)90231-5)
+      /// \param[in] q2 Squared 4-momentum transfer
+      /// \param[in] xbj Bjorken's x
+      /// \cite Brasse1976413
+      static StructureFunctions FioreBrasse( double q2, double xbj );
+      static StructureFunctions SzczurekUleshchenko( double q2, double xbj );
+      double F1, F2;
+  };
   /// Human-readable format of a structure function object
   std::ostream& operator<<( std::ostream& os, const StructureFunctions& sf );
-
-  /**
-   * Compute the proton structure function (F.W Brasse et al., DESY 76/11 (1976),
-   *   http://dx.doi.org/10.1016/0550-3213(76)90231-5)
-   * \param[in] q2 Squared 4-momentum transfer
-   * \param[in] mx2 Squared mass of the proton remnant
-   * \param[out] sigma_t ...
-   * \param[out] w1 First proton structure function: \f$\mathcal W_1\f$
-   * \param[out] w2 Second proton structure function: \f$\mathcal W_2\f$
-   * \cite Brasse1976413
-   */
-  bool PSF( double q2, double mx2, double& sigma_t, double& w1, double& w2 );
-
 }
 
 #endif

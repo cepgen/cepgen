@@ -17,9 +17,7 @@ namespace CepGen
   void
   Kinematics::dump( std::ostream& os ) const
   {
-    os
-      << std::setfill(' ')
-      << __PRETTY_FUNCTION__ << " Dump\n";
+    os << std::setfill(' ');
     os << "===== Central system\n";
     for ( std::map<Cuts::Central,Limits>::const_iterator lim = central_cuts.begin(); lim != central_cuts.end(); ++lim ) {
       os << std::setw(30) << lim->first << ": " << lim->second;

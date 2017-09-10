@@ -119,52 +119,34 @@ namespace CepGen
     {
       const double mx2 = MX_*MX_, my2 = MY_*MY_;
 
-      bool inel_p1 = false, inel_p2 = false;
-
       switch ( cuts_.mode ) {
         case Kinematics::ElectronElectron: {
-          fp1 = TrivialFormFactors(); // electron (trivial) form factor
-          fp2 = TrivialFormFactors(); // electron (trivial) form factor
+          fp1 = FormFactors::Trivial(); // electron (trivial) form factor
+          fp2 = FormFactors::Trivial(); // electron (trivial) form factor
         } break;
         case Kinematics::ProtonElectron: {
-          fp1 = ElasticFormFactors( -t1_, w1_ ); // proton elastic form factor
-          fp2 = TrivialFormFactors(); // electron (trivial) form factor
+          fp1 = FormFactors::ProtonElastic( -t1_ ); // proton elastic form factor
+          fp2 = FormFactors::Trivial(); // electron (trivial) form factor
         } break;
         case Kinematics::ElectronProton: {
-          fp1 = TrivialFormFactors(); // electron (trivial) form factor
-          fp2 = ElasticFormFactors( -t2_, w2_ ); // proton elastic form factor
+          fp1 = FormFactors::Trivial(); // electron (trivial) form factor
+          fp2 = FormFactors::ProtonElastic( -t2_ ); // proton elastic form factor
         } break;
         case Kinematics::ElasticElastic: {
-          fp1 = ElasticFormFactors( -t1_, w1_ ); // proton elastic form factor
-          fp2 = ElasticFormFactors( -t2_, w2_ ); // proton elastic form factor
+          fp1 = FormFactors::ProtonElastic( -t1_ ); // proton elastic form factor
+          fp2 = FormFactors::ProtonElastic( -t2_ ); // proton elastic form factor
         } break;
         case Kinematics::ElasticInelastic: {
-          fp1 = ElasticFormFactors( -t1_, w1_ );
-          inel_p2 = true;
+          fp1 = FormFactors::ProtonElastic( -t1_ );
+          fp2 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t2_, w2_, my2 );
         } break;
         case Kinematics::InelasticElastic: {
-          inel_p1 = true;
-          fp2 = ElasticFormFactors( -t2_, w2_ );
+          fp1 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t1_, w1_, mx2 );
+          fp2 = FormFactors::ProtonElastic( -t2_ );
         } break;
         case Kinematics::InelasticInelastic: {
-          inel_p1 = inel_p2 = true;
-        } break;
-      }
-      switch ( cuts_.structure_functions ) {
-        case SuriYennie:
-        default: {
-          if ( inel_p1 ) fp1 = SuriYennieFormFactors( -t1_, w1_, mx2 );
-          if ( inel_p2 ) fp2 = SuriYennieFormFactors( -t2_, w2_, my2 );
-        } break;
-        case Fiore:
-        case FioreSea:
-        case FioreVal: { // low-Q2 inelastic form factor
-          if ( inel_p1 ) fp1 = FioreBrasseFormFactors( -t1_, w1_, mx2 );
-          if ( inel_p2 ) fp2 = FioreBrasseFormFactors( -t2_, w2_, my2 );
-        } break;
-        case SzczurekUleshchenko: {
-          if ( inel_p1 ) fp1 = SzczurekUleshchenkoFormFactors( -t1_, w1_, mx2 );
-          if ( inel_p2 ) fp2 = SzczurekUleshchenkoFormFactors( -t2_, w2_, my2 );
+          fp1 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t1_, w1_, mx2 );
+          fp2 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t2_, w2_, my2 );
         } break;
       }
     }
