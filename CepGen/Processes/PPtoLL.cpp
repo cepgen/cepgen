@@ -12,18 +12,16 @@ PPtoLL::prepareKTKinematics()
 {
   ////////////////////////////////////
   const Kinematics::Limits rap_limits = cuts_.central_cuts[Cuts::rapidity_single];
-  y_min_ = rap_limits.min();
-  y_max_ = rap_limits.max();
   ///////////// FIXME ////////////////
 
   // Outgoing leptons  
-  y1_ = y_min_+( y_max_-y_min_ )*xkt( 0 );
-  y2_ = y_min_+( y_max_-y_min_ )*xkt( 1 );
-  DebuggingInsideLoop( Form( "leptons rapidities (%.2f < y < %.2f): %f / %f", y_min_, y_max_, y1_, y2_ ) );
+  y1_ = rap_limits.x( xkt( 0 ) );
+  y2_ = rap_limits.x( xkt( 1 ) );
+  DebuggingInsideLoop( Form( "leptons rapidities (%.2f < y < %.2f): %f / %f", rap_limits.min(), rap_limits.max(), y1_, y2_ ) );
 
   Kinematics::Limits ptdiff_limits = cuts_.central_cuts[Cuts::pt_diff];
   if ( !ptdiff_limits.hasMax() ) ptdiff_limits.max() = 500.; //FIXME
-  pt_diff_ = ptdiff_limits.min()+( ptdiff_limits.range() )*xkt( 2 );
+  pt_diff_ = ptdiff_limits.x( xkt( 2 ) );
   phi_pt_diff_ = 2.*M_PI*xkt( 3 );
   DebuggingInsideLoop( Form( "leptons pt difference:\n\t"
                              "  mag = %f (%.2f < Dpt < %.2f)\n\t"
@@ -35,8 +33,8 @@ double
 PPtoLL::computeJacobian()
 {
   double jac = GenericKTProcess::minimalJacobian();
-  jac *= ( y_max_-y_min_ ); // d(y1)
-  jac *= ( y_max_-y_min_ ); // d(y2)
+  jac *= cuts_.central_cuts[Cuts::rapidity_single].range(); // d(y1)
+  jac *= cuts_.central_cuts[Cuts::rapidity_single].range(); // d(y2)
   jac *= cuts_.central_cuts[Cuts::pt_diff].range(); // d(Dpt)
   jac *= 2.*M_PI; // d(phiDpt)
 

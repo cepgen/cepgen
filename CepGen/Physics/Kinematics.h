@@ -33,6 +33,11 @@ namespace CepGen
           double max() const { return second; }
           /// Upper limit to apply on the variable
           double& max() { return second; }
+          double x( double v ) const {
+            if ( v < 0. || v > 1. ) { InError( Form( "x must be comprised between 0 and 1 ; x value = %.5e", v ) ); }
+            if ( !hasMin() || !hasMax() ) return invalid_;
+            return first + ( second-first ) * v;
+          }
           /// Specify the lower and upper limits on the variable
           void in( double low, double up ) { first = low; second = up; }
           /// Full variable range allowed
