@@ -20,10 +20,6 @@ namespace CepGen
         double computeKTFactorisedMatrixElement();
         void fillCentralParticlesKinematics();
 
-        /// Minimal rapidity of the first outgoing W boson
-        double y_min_;
-        /// Maximal rapidity of the first outgoing W boson
-        double y_max_;
         /// Rapidity of the first outgoing W boson
         double y1_;
         /// Rapidity of the first outgoing W boson

@@ -13,9 +13,9 @@ double
 PPtoWW::computeJacobian()
 {
   double jac = GenericKTProcess::minimalJacobian();
-  jac *= ( y_max_-y_min_ ); // d(y1)
-  jac *= ( y_max_-y_min_ ); // d(y2)
-  jac *= ( cuts_.ptdiff_max-cuts_.ptdiff_min ); // d(Dpt)
+  jac *= cuts_.central_cuts[Cuts::rapidity_single].range(); // d(y1)
+  jac *= cuts_.central_cuts[Cuts::rapidity_single].range(); // d(y2)
+  jac *= cuts_.central_cuts[Cuts::pt_diff].range(); // d(Dpt)
   jac *= 2.*M_PI; // d(phiDpt)
 
   return jac;
@@ -37,18 +37,16 @@ PPtoWW::fillCentralParticlesKinematics()
   int sign = ( drand()>.5 ) ? +1 : -1;
 
   //=================================================================
-  //     first outgoing W
+  //     outgoing Ws
   //=================================================================
-  Particle& w1 = event_->getOneByRole( Particle::CentralParticle1 );
-  w1.setPdgId( w1.pdgId(), sign );
-  w1.setStatus( Particle::Undecayed );
-  w1.setMomentum( p_w1_ );
 
-  //=================================================================
-  //     second outgoing W
-  //=================================================================
-  Particle& w2 = event_->getOneByRole( Particle::CentralParticle2 );
-  w2.setPdgId( w2.pdgId(), -sign);
-  w2.setStatus( Particle::Undecayed );
-  w2.setMomentum( p_w2_ );
+  Particles& wbosons = event_->getByRole( Particle::CentralSystem );
+
+  wbosons[0].setPdgId( wbosons[0].pdgId(), sign );
+  wbosons[0].setStatus( Particle::Undecayed );
+  wbosons[0].setMomentum( p_w1_ );
+
+  wbosons[1].setPdgId( wbosons[1].pdgId(), -sign);
+  wbosons[1].setStatus( Particle::Undecayed );
+  wbosons[1].setMomentum( p_w2_ );
 }

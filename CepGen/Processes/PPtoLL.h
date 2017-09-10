@@ -21,10 +21,6 @@ namespace CepGen
         double computeKTFactorisedMatrixElement();
         void fillCentralParticlesKinematics();
 
-        /// Minimal rapidity of the first outgoing lepton
-        double y_min_;
-        /// Maximal rapidity of the first outgoing lepton
-        double y_max_;
         /// Rapidity of the first outgoing lepton
         double y1_;
         /// Rapidity of the first outgoing lepton
