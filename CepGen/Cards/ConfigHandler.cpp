@@ -67,16 +67,16 @@ namespace CepGen
         if ( kin.exists( "beam1_pz" ) ) params_.kinematics.inp.first = (double)kin["beam1_pz"];
         if ( kin.exists( "beam2_pz" ) ) params_.kinematics.inp.second = (double)kin["beam2_pz"];
         if ( kin.exists( "structure_functions" ) ) {
-          std::string sf = kin["structure_functions" ];
-          if ( sf == "electron" ) params_.kinematics.structure_functions = Electron;
-          else if ( sf == "elastic proton" ) params_.kinematics.structure_functions = ElasticProton;
-          else if ( sf == "Suri-Yennie" ) params_.kinematics.structure_functions = SuriYennie;
-          else if ( sf == "Suri-Yennie;lowQ2" ) params_.kinematics.structure_functions = SuriYennieLowQ2;
-          else if ( sf == "Szczurek-Uleshchenko" ) params_.kinematics.structure_functions = SzczurekUleshchenko;
-          else if ( sf == "Fiore;valence" ) params_.kinematics.structure_functions = FioreVal;
-          else if ( sf == "Fiore;sea" ) params_.kinematics.structure_functions = FioreSea;
-          else if ( sf == "Fiore" ) params_.kinematics.structure_functions = Fiore;
-          else FatalError( Form( "Invalid structure functions mode: %s", sf.c_str() ) );
+          const char* sf = kin["structure_functions" ]; const std::string sf_str = sf;
+          if ( sf_str == "electron" ) params_.kinematics.structure_functions = Electron;
+          else if ( sf_str == "elastic proton" ) params_.kinematics.structure_functions = ElasticProton;
+          else if ( sf_str == "Suri-Yennie" ) params_.kinematics.structure_functions = SuriYennie;
+          else if ( sf_str == "Suri-Yennie;lowQ2" ) params_.kinematics.structure_functions = SuriYennieLowQ2;
+          else if ( sf_str == "Szczurek-Uleshchenko" ) params_.kinematics.structure_functions = SzczurekUleshchenko;
+          else if ( sf_str == "Fiore;valence" ) params_.kinematics.structure_functions = FioreVal;
+          else if ( sf_str == "Fiore;sea" ) params_.kinematics.structure_functions = FioreSea;
+          else if ( sf_str == "Fiore" ) params_.kinematics.structure_functions = Fiore;
+          else FatalError( Form( "Invalid structure functions mode: %s", sf ) );
         }
       } catch ( const libconfig::SettingNotFoundException& nfe ) {
         FatalError( Form( "Failed to retrieve the field \"%s\".", nfe.getPath() ) );
