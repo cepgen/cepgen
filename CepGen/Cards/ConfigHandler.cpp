@@ -19,17 +19,18 @@ namespace CepGen
         const libconfig::Setting& proc = root["process"];
 
         //--- type of process to consider
-        const std::string proc_name = proc["name"];
-        if ( proc_name == "lpair" ) params_.setProcess( new Process::GamGamLL );
-        else if ( proc_name == "pptoll" ) params_.setProcess( new Process::PPtoLL );
-        else FatalError( Form( "Unrecognised process: %s", proc_name.c_str() ) );
+        const char* proc_name = proc["name"]; const std::string str_proc_name = proc_name;
+        if ( str_proc_name == "lpair" ) params_.setProcess( new Process::GamGamLL );
+        else if ( str_proc_name == "pptoll" ) params_.setProcess( new Process::PPtoLL );
+        else FatalError( Form( "Unrecognised process: %s", proc_name ) );
 
         //--- process mode
-        int int_mode; std::string str_mode;
+        int int_mode; const char* mode;
         if ( proc.lookupValue( "mode", int_mode ) ) {
           params_.kinematics.mode = (Kinematics::ProcessMode)int_mode;
         }
-        else if ( proc.lookupValue( "mode", str_mode ) ) {
+        else if ( proc.lookupValue( "mode", mode ) ) {
+          const std::string str_mode = mode;
           if ( str_mode == "elastic/elastic" ) params_.kinematics.mode = Kinematics::ProcessMode::ElasticElastic;
           else if ( str_mode == "elastic/inelastic" ) params_.kinematics.mode = Kinematics::ProcessMode::ElasticInelastic;
           else if ( str_mode == "inelastic/elastic" ) params_.kinematics.mode = Kinematics::ProcessMode::InelasticElastic;
