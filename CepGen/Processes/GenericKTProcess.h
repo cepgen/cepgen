@@ -23,18 +23,14 @@ namespace CepGen
          * \param[in] name Generic process name
          * \param[in] description Human-readable kT-factorised process name
          * \param[in] num_user_dimensions Number of additional dimensions required for the user process
-         * \param[in] ip1 First incoming parton
-         * \param[in] ip2 Second incoming parton (if undefined, same as the first)
-         * \param[in] op1 First produced final state particle
-         * \param[in] op2 Second produced final state particle (if undefined, same as the first)
+         * \param[in] partons First and second incoming parton
+         * \param[in] output Produced final state particles
          */
         GenericKTProcess( const std::string& name,
-                          const std::string& description="<generic process>",
-                          const unsigned int& num_user_dimensions=0,
-                          const Particle::ParticleCode& ip1=Particle::Photon,
-                          const Particle::ParticleCode& op1=Particle::Muon,
-                          const Particle::ParticleCode& ip2=Particle::invalidParticle,
-                          const Particle::ParticleCode& op2=Particle::invalidParticle);
+                          const std::string& description,
+                          const unsigned int& num_user_dimensions,
+                          const std::array<Particle::ParticleCode,2>& partons,
+                          const std::vector<Particle::ParticleCode>& output );
         ~GenericKTProcess();
 
         /// Populate the event content with the generated process' topology
@@ -111,14 +107,10 @@ namespace CepGen
         /// Number of additional dimensions required for the user process
         /// (in addition to the 4 required for the two partons' transverse momenta)
         unsigned int kNumUserDimensions;
-        /// First intermediate parton (photon, pomeron, ...)
-        Particle::ParticleCode kIntermediatePart1;
-        /// Second intermediate parton (photon, pomeron, ...)
-        Particle::ParticleCode kIntermediatePart2;
-        /// Type of particle produced in the final state
-        Particle::ParticleCode kProducedPart1;
-        /// Type of particle produced in the final state
-        Particle::ParticleCode kProducedPart2;
+        /// First and second intermediate parton (photon, pomeron, ...)
+        std::array<Particle::ParticleCode,2> kIntermediateParts;
+        /// Type of particles produced in the final state
+        std::vector<Particle::ParticleCode> kProducedParts;
     };
   }
 }

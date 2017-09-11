@@ -30,7 +30,6 @@ namespace CepGen
 
         Particle& op1 = ev->getOneByRole( Particle::OutgoingBeam1 ),
                  &op2 = ev->getOneByRole( Particle::OutgoingBeam2 );
-        Particles& central_system = ev->getByRole( Particle::CentralSystem );
 
         //--- add outgoing protons or remnants
         switch ( p->kinematics.mode ) {
@@ -50,7 +49,8 @@ namespace CepGen
         p->process()->prepareKinematics();
 
         //--- add central system
-        if ( central_system.size() != p->kinematics.central_system.size() ) throw Exception( __PRETTY_FUNCTION__, "Invalid central system size specified!", FatalError );
+        Particles& central_system = ev->getByRole( Particle::CentralSystem );
+        //FIXME if ( central_system.size() != p->kinematics.central_system.size() ) throw Exception( __PRETTY_FUNCTION__, "Invalid central system size specified!", FatalError );
         unsigned short i = 0;
         for ( Particles::iterator part = central_system.begin(); part != central_system.end(); ++part ) {
           part->setPdgId( p->kinematics.central_system[i] );

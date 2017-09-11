@@ -7,18 +7,12 @@ namespace CepGen
     GenericKTProcess::GenericKTProcess( const std::string& name,
                                         const std::string& description,
                                         const unsigned int& num_user_dimensions,
-                                        const Particle::ParticleCode& parton1,
-                                        const Particle::ParticleCode& central1,
-                                        const Particle::ParticleCode& parton2,
-                                        const Particle::ParticleCode& central2 ) :
+                                        const std::array<Particle::ParticleCode,2>& partons,
+                                        const std::vector<Particle::ParticleCode>& central ) :
       GenericProcess( name, description+" (kT-factorisation approach)" ),
       kNumUserDimensions( num_user_dimensions ),
-      kIntermediatePart1( parton1 ), kIntermediatePart2( parton2 ),
-      kProducedPart1( central1 ), kProducedPart2( central2 )
-    {
-      if ( parton2  == Particle::invalidParticle ) kIntermediatePart2 = kIntermediatePart1;
-      if ( central2 == Particle::invalidParticle ) kProducedPart2 = kProducedPart1;
-    }
+      kIntermediateParts( partons ), kProducedParts( central )
+    {}
 
     GenericKTProcess::~GenericKTProcess()
     {}
@@ -30,13 +24,13 @@ namespace CepGen
         { // incoming state
           { Particle::IncomingBeam1, Particle::Proton },
           { Particle::IncomingBeam2, Particle::Proton },
-          { Particle::Parton1, kIntermediatePart1 },
-          { Particle::Parton2, kIntermediatePart2 }
+          { Particle::Parton1, kIntermediateParts[0] },
+          { Particle::Parton2, kIntermediateParts[1] }
         },
         { // outgoing state
           { Particle::OutgoingBeam1, { Particle::Proton } },
           { Particle::OutgoingBeam2, { Particle::Proton } },
-          { Particle::CentralSystem, { kProducedPart1, kProducedPart2 } }
+          { Particle::CentralSystem, kProducedParts }
         }
       );
     }
