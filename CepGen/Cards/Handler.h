@@ -3,12 +3,9 @@
 
 #include "CepGen/Parameters.h"
 
-#include "CepGen/Processes/GamGamLL.h"
-#include "CepGen/Processes/PPtoLL.h"
-#include "CepGen/Processes/PPtoWW.h"
-
 namespace CepGen
 {
+  class Parameters;
   /// Location for all steering card parsers/writers
   namespace Cards
   {

@@ -1,6 +1,12 @@
 #include "LpairHandler.h"
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Processes/GamGamLL.h"
+#include "CepGen/Processes/PPtoLL.h"
+#include "CepGen/Processes/PPtoWW.h"
+
+#include "CepGen/Hadronisers/Pythia8Hadroniser.h"
+
 #include <fstream>
 
 namespace CepGen
@@ -40,6 +46,10 @@ namespace CepGen
       if      ( integr_type_ == "Vegas" ) params_.integrator.type = Integrator::Vegas;
       else if ( integr_type_ == "MISER" ) params_.integrator.type = Integrator::MISER;
 
+#ifdef PYTHIA8
+      if ( hadr_name_ == "pythia8" ) params_.setHadroniser( new Hadroniser::Pythia8Hadroniser );
+#endif
+
       if ( m_params.count( "IEND" ) ) setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
 
       //--- for LPAIR: specify the lepton pair to be produced
@@ -54,6 +64,7 @@ namespace CepGen
     {
       registerParameter<std::string>( "PROC", "Process name to simulate", &proc_name_ );
       registerParameter<std::string>( "ITYP", "Integration algorithm", &integr_type_ );
+      registerParameter<std::string>( "HADR", "Hadronisation algorithm", &hadr_name_ );
 
       registerParameter<bool>( "IEND", "Generation type", &params->generation.enabled );
 
