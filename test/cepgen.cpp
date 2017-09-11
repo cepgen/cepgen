@@ -31,7 +31,6 @@ int main( int argc, char* argv[] ) {
 
     mg.parameters->kinematics.inp = { 6500., 6500. };
     mg.parameters->kinematics.central_system = { CepGen::Particle::Muon, CepGen::Particle::Muon };
-    mg.parameters->kinematics.cuts_mode = CepGen::Kinematics::AllParticles;
     mg.parameters->kinematics.central_cuts[CepGen::Cuts::pt_single].min() = 15.;
     mg.parameters->kinematics.central_cuts[CepGen::Cuts::eta_single] = { -2.5, 2.5 };
     mg.parameters->vegas.ncvg = 5e4; //FIXME
