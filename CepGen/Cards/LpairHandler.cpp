@@ -69,6 +69,8 @@ namespace CepGen
       //registerParameter<double>( "THMX", "Maximal polar production angle for the central particles", &params->kinematics.eta_max );
       registerParameter<double>( "ETMN", "Minimal pseudo-rapidity (central outgoing particles)", &params->kinematics.central_cuts[Cuts::eta_single].min() );
       registerParameter<double>( "ETMX", "Maximal pseudo-rapidity (central outgoing particles)", &params->kinematics.central_cuts[Cuts::eta_single].max() );
+      registerParameter<double>( "YMIN", "Minimal rapidity (central outgoing particles)", &params->kinematics.central_cuts[Cuts::rapidity_single].min() );
+      registerParameter<double>( "YMAX", "Maximal rapidity (central outgoing particles)", &params->kinematics.central_cuts[Cuts::rapidity_single].max() );
       registerParameter<double>( "Q2MN", "Minimal Q^2 (exchanged parton)", &params->kinematics.initial_cuts[Cuts::q2].min() );
       registerParameter<double>( "Q2MX", "Maximal Q^2 (exchanged parton)", &params->kinematics.initial_cuts[Cuts::q2].max() );
       registerParameter<double>( "MXMN", "Minimal invariant mass of proton remnants", &params->kinematics.remnant_cuts[Cuts::mass].min() );
