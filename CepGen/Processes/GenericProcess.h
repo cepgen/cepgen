@@ -49,9 +49,9 @@ namespace CepGen
 
       public:
         /// Set the incoming and outgoing state to be expected in the process
-        inline virtual void addEventContent() { InWarning( "Virtual method called" ); }
+        inline virtual void addEventContent() {}
         /// Prepare the process for its integration over the whole phase space
-        inline virtual void beforeComputeWeight() { Debugging( "Virtual method called" ); }
+        inline virtual void beforeComputeWeight() {}
         /// Compute the weight for this point in the phase-space
         virtual double computeWeight() = 0;
         /// Fill the Event object with the particles' kinematics
