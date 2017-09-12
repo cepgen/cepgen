@@ -4,7 +4,7 @@ namespace CepGen
 {
   Kinematics::Kinematics() :
     inp( { 6500., 6500. } ), inpdg( { Particle::Proton, Particle::Proton } ),
-    central_system( { Particle::Muon, Particle::Muon } ),
+    central_system( {} ),
     mode( ElasticElastic ), structure_functions( SuriYennie ),
     central_cuts( { { Cuts::pt_single, 3.0 }, { Cuts::pt_diff, { 0., 400.0 } } } ),
     remnant_cuts( { { Cuts::mass, { 1.07, 320.0 } } } ),

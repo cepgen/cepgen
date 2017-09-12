@@ -50,12 +50,14 @@ namespace CepGen
 
         //--- add central system
         Particles& central_system = ev->getByRole( Particle::CentralSystem );
-        //FIXME if ( central_system.size() != p->kinematics.central_system.size() ) throw Exception( __PRETTY_FUNCTION__, "Invalid central system size specified!", FatalError );
-        unsigned short i = 0;
-        for ( Particles::iterator part = central_system.begin(); part != central_system.end(); ++part ) {
-          part->setPdgId( p->kinematics.central_system[i] );
-          part->computeMass();
-          i++;
+        if ( central_system.size() == p->kinematics.central_system.size() ) {
+          unsigned short i = 0;
+          for ( Particles::iterator part = central_system.begin(); part != central_system.end(); ++part ) {
+            if ( p->kinematics.central_system[i] == Particle::invalidParticle ) continue;
+            part->setPdgId( p->kinematics.central_system[i] );
+            part->computeMass();
+            i++;
+          }
         }
 
         p->process()->clearRun();

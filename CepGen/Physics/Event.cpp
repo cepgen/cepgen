@@ -125,7 +125,7 @@ namespace CepGen
 
     //--- specify the id
     if ( part_with_same_role.empty() && part.id() < 0 ) part.setId( numParticles() ); // set the id if previously invalid/inexistent
-    if ( part_with_same_role.size() == 1 ) {
+    if ( !part_with_same_role.empty() ) {
       if ( replace ) part.setId( part_with_same_role[0].id() ); // set the previous id if replacing a particle
       else part.setId( numParticles() );
     }

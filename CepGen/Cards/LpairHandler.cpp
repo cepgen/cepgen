@@ -6,7 +6,8 @@ namespace CepGen
   {
     //----- specialization for LPAIR input cards
 
-    LpairHandler::LpairHandler( const char* file )
+    LpairHandler::LpairHandler( const char* file ) :
+      pair_( Particle::invalidParticle )
     {
       std::ifstream f( file, std::fstream::in );
       if ( !f.is_open() ) {
@@ -34,7 +35,11 @@ namespace CepGen
       else FatalError( Form( "Unrecognised process name: %s", proc_name_.c_str() ) );
 
       if ( m_params.count( "IEND" ) ) setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
-      params_.kinematics.central_system = { pair_, pair_ };
+
+      //--- for LPAIR: specify the lepton pair to be produced
+      if ( pair_ != Particle::invalidParticle ) {
+        params_.kinematics.central_system = { pair_, pair_ };
+      }
       Information( os.str() );
     }
 

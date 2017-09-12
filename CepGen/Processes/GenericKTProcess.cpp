@@ -33,6 +33,7 @@ namespace CepGen
           { Particle::CentralSystem, kProducedParts }
         }
       );
+      setExtraContent();
     }
 
     unsigned int

@@ -31,7 +31,7 @@ namespace CepGen
         Electron = 11, ElectronNeutrino = 12,
         Muon = 13, MuonNeutrino = 14,
         Tau = 15, TauNeutrino = 16,
-        Gluon = 21, Photon = 22, Z = 23, WPlus = 24,
+        Gluon = 21, Photon = 22, Z = 23, W = 24,
         PiPlus = 211, PiZero = 111,
         Rho770_0 = 113, Rho1450_0 = 100113, Rho1700_0 = 30113,
         Omega782 = 223,
