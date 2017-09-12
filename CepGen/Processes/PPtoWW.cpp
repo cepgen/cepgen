@@ -292,9 +292,9 @@ PPtoWW::computeKTFactorisedMatrixElement()
   //       d^2 kappa_1 d^2 kappa_2 instead d kappa_1^2 d kappa_2^2
   //=================================================================
 
-  const double aintegral = amat2 / ( 16.*M_PI*M_PI*x1*x1*x2*x2*s_*s_ )
+  const double aintegral = amat2 * ( 2.*M_PI )/ ( 16.*M_PI*M_PI*x1*x1*x2*x2*s_*s_ )
                          * flux1_/M_PI * flux2_/M_PI
-                         * Constants::GeV2toBarn * 0.25;
+                         * Constants::GeV2toBarn * 0.5 / M_PI;
 
   //=================================================================
   return aintegral*qt1_*qt2_*pt_diff_;
