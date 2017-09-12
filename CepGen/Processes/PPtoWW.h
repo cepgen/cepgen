@@ -15,10 +15,10 @@ namespace CepGen
         inline ~PPtoWW() {}
 
       private:
-        void prepareKTKinematics();
-        double computeJacobian();
-        double computeKTFactorisedMatrixElement();
-        void fillCentralParticlesKinematics();
+        void prepareKTKinematics() override;
+        double computeJacobian() override;
+        double computeKTFactorisedMatrixElement() override;
+        void fillCentralParticlesKinematics() override;
         void setExtraContent() override;
 
         /// Rapidity of the first outgoing W boson
