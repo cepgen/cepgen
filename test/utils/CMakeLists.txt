@@ -17,7 +17,7 @@ endforeach()
 #----- specify the utilitaries requiring ROOT
 
 find_package(ROOT QUIET)
-if(${ROOT_FOUND})
+if(ROOT_FOUND)
   if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
   endif()
