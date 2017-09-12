@@ -232,7 +232,7 @@ namespace CepGen
       case TauNeutrino:  return 0.;
       case Gluon:        return 0.;
       case Z:            return 91.1876;
-      case WPlus:        return 80.385;
+      case W:            return 80.385;
       case Photon:       return 0.;
       case PiPlus:       return 0.13957018;
       case PiZero:       return 0.1349766;
@@ -264,7 +264,7 @@ namespace CepGen
       case Electron: case Muon: case Tau: return -1.;
       case ElectronNeutrino: case MuonNeutrino: case TauNeutrino: return 0.;
       case Gluon: case Z: case Photon: return 0.;
-      case WPlus: return +1.;
+      case W: return +1.;
       case PiPlus: return +1.;
       case PiZero: return 0.;
       case Neutron: return 0.;
@@ -278,7 +278,7 @@ namespace CepGen
     switch ( pdg ) {
       case JPsi:      return 5.; //FIXME
       case Z:         return 2.4952;
-      case WPlus:     return 2.085;
+      case W:         return 2.085;
       case Upsilon1S: return 54.02e-6;
       case Upsilon2S: return 31.98e-6;
       case Upsilon3S: return 20.32e-6;
@@ -303,15 +303,15 @@ namespace CepGen
       case Particle::dQuark:          return os << "d quark";
       case Particle::uQuark:          return os << "u quark";
       case Particle::Electron:        return os << "electron";
-      case Particle::ElectronNeutrino: return os << "electron neutrino";
+      case Particle::ElectronNeutrino: return os << "nu_e";
       case Particle::Muon:            return os << "muon";
-      case Particle::MuonNeutrino:    return os << "muon neutrino";
+      case Particle::MuonNeutrino:    return os << "nu_mu";
       case Particle::Tau:             return os << "tau";
-      case Particle::TauNeutrino:     return os << "tau neutrino";
+      case Particle::TauNeutrino:     return os << "nu_tau";
       case Particle::Gluon:           return os << "gluon";
       case Particle::Photon:          return os << "photon";
       case Particle::Z:               return os << "Z";
-      case Particle::WPlus:           return os << "W+";
+      case Particle::W:               return os << "W+-";
       case Particle::PiPlus:          return os << "pi+";
       case Particle::PiZero:          return os << "pi0";
       case Particle::Rho770_0:        return os << "rho(770)0";

@@ -47,6 +47,7 @@ namespace CepGen
         /// Set the kinematics associated to the phase space definition
         void setKinematics( const Kinematics& kin );
         /// Set the kinematics of the central system before any point computation
+        virtual void setExtraContent() {}
         inline virtual void prepareKTKinematics() { DebuggingInsideLoop("Dummy kinematics prepared!"); }
         /// Minimal Jacobian weight of the point considering a kT factorisation
         double minimalJacobian() const;

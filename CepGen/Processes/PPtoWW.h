@@ -19,6 +19,7 @@ namespace CepGen
         double computeJacobian();
         double computeKTFactorisedMatrixElement();
         void fillCentralParticlesKinematics();
+        void setExtraContent() override;
 
         /// Rapidity of the first outgoing W boson
         double y1_;
