@@ -1,5 +1,5 @@
-file(GLOB core_sources *.cpp ../*.cpp)
-file(GLOB cards_sources ${CEPGEN_SOURCE_DIR}/Cards/*.cpp)
+file(GLOB core_sources Core/*.cpp *.cpp)
+file(GLOB cards_sources Cards/*.cpp)
 
 include_directories(${PROJECT_SOURCE_DIR})
 

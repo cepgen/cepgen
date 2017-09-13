@@ -14,7 +14,7 @@ set(CEPGEN_LIBRARIES CepGenCore CepGenPhysics CepGenProcesses)
 
 #----- define all individual modules to be built beforehand
 
-set(CEPGEN_MODULES Core Processes Physics Export)
+set(CEPGEN_MODULES Processes Physics Export)
 
 #----- enable fortran (for Pythia/Herwig/...)
 
@@ -37,6 +37,7 @@ endif()
 #----- build all the intermediate objects
 
 include_directories(${PROJECT_SOURCE_DIR})
+add_subdirectory(${CEPGEN_SOURCE_DIR})
 foreach(_module ${CEPGEN_MODULES})
   include_directories(${CEPGEN_SOURCE_DIR}/${_module})
   add_subdirectory(${CEPGEN_SOURCE_DIR}/${_module})
