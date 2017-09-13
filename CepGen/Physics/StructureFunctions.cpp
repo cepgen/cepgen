@@ -18,13 +18,59 @@ namespace CepGen
     }
   }
 
-  /// Fiore-Brasse proton structure function
   StructureFunctions
   StructureFunctions::FioreBrasse( double q2, double xbj )
   {
+    const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
+    const double akin = 1. + 4.*mp2 * xbj*xbj/q2;
+    const double prefactor = q2*( 1.-xbj ) / ( 4.*M_PI*Constants::alphaEM*akin );
+    const double s = q2*( 1.-xbj )/xbj + mp2;
+
+    FioreBrasseParameterisation p = FioreBrasseParameterisation::standard();
+    double ampli_res = 0., ampli_tot = 0.;
+    for ( unsigned short i = 0; i < 3; ++i ) { //FIXME 4??
+      const FioreBrasseParameterisation::ResonanceParameters res = p.resonances[i];
+      if ( !res.enabled ) continue;
+      const double sqrts0 = sqrt( p.s0 );
+
+      std::complex<double> alpha;
+      if ( s > p.s0 )
+        alpha = std::complex<double>( res.alpha0 + res.alpha2*sqrts0 + res.alpha1*s, res.alpha2*sqrt( s-p.s0 ) );
+      else
+        alpha = std::complex<double>( res.alpha0 + res.alpha1*s + res.alpha2*( sqrts0 - sqrt( p.s0 - s ) ), 0. );
+
+      double formfactor = 1./pow( 1. + q2/res.q02, 2 );
+      double denom = pow( res.spin-std::real( alpha ), 2 ) + pow( std::imag( alpha ), 2 );
+      double ampli_imag = res.a*formfactor*formfactor*std::imag( alpha )/denom;
+      ampli_res += ampli_imag;
+    }
+    {
+      const FioreBrasseParameterisation::ResonanceParameters res = p.resonances[3];
+      double sE = res.alpha2, sqrtsE = sqrt( sE );
+      std::complex<double> alpha;
+      if ( s > sE )
+        alpha = std::complex<double>( res.alpha0 + res.alpha1*sqrtsE, res.alpha1*sqrt( s-sE ) );
+      else
+        alpha = std::complex<double>( res.alpha0 + res.alpha1*( sqrtsE - sqrt( sE-s ) ), 0. );
+      double formfactor = 1./pow( 1. + q2/res.q02, 2 );
+      double sp = 1.5*res.spin;
+      double denom = pow( sp-std::real( alpha ), 2 ) + pow( std::imag( alpha ), 2 );
+      double ampli_bg = res.a*formfactor*formfactor*std::imag( alpha )/denom;
+      ampli_res += ampli_bg;
+    }
+    ampli_tot = p.norm*ampli_res;
+
+    StructureFunctions fb;
+    fb.F2 = prefactor*ampli_tot;
+    return fb;
+  }
+
+  StructureFunctions
+  StructureFunctions::FioreBrasseOld( double q2, double xbj )
+  {
+    const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
     //const double m_min = Particle::massFromPDGId(Particle::Proton)+0.135;
-    const double mp = Particle::massFromPDGId( Particle::Proton ),mp2 = mp*mp,
-                 m_min = mp+Particle::massFromPDGId( Particle::PiZero );
+    const double m_min = mp+Particle::massFromPDGId( Particle::PiZero );
 
     const double mx2 = mp2 + q2*( 1.-xbj )/xbj, mx = sqrt( mx2 );
 
@@ -91,6 +137,25 @@ namespace CepGen
   }
 
   StructureFunctions
+  StructureFunctions::SuriYennie( double q2, double xbj, const SuriYennieParameterisation& param )
+  {
+    const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
+    const double mx2 = q2 * ( 1.-xbj )/xbj + mp2, // [GeV^2]
+                 nu = 0.5 * ( q2 + mx2 - mp2 ) / mp; // [GeV]
+    const double dm2 = mx2-mp2, Xpr = q2/( q2+mx2 ), En = dm2+q2, Tau = 0.25 * q2/mp2, MQ = param.rho2+q2;
+
+    StructureFunctions sy;
+    sy.FM = ( param.C1*dm2*pow( param.rho2/MQ, 2 ) + ( param.C2*mp2*pow( 1.-Xpr, 4 ) ) / ( 1.+Xpr*( Xpr*param.Cp-2.*param.Bp ) ) )/q2;
+    const double FE = ( Tau*sy.FM + param.D1*dm2*q2*param.rho2/mp2*pow( dm2/MQ/En, 2 ) ) / ( 1.+0.25*En*En/mp2/q2 );
+
+    const double w2 = 2.*mp*FE, w1 = 0.5 * sy.FM*q2/mp;
+
+    sy.F2 = nu/mp*w2;
+    sy.F1 = 0.5*sy.F2/xbj; // Callan-Gross relation FIXME
+    return sy;
+  }
+
+  StructureFunctions
   StructureFunctions::SzczurekUleshchenko( double q2, double xbj )
   {
 #ifndef GRVPDF
@@ -114,9 +179,6 @@ namespace CepGen
     const double F2_aux = 4./9.*( xuv + 2.*xus )
                         + 1./9.*( xdv + 2.*xds )
                         + 1./9.*(       2.*xss );
-    /*const double F2_aux = 4./9.*( xuv + 2.*xus )
-                        + 1./9.*( 0. + 2.*xds )
-                        + 1./9.*2.*xss;*/
 
     // F2 corrected for low Q^2 behaviour
     const double F2_corr = F2_aux * q2 / amu2,
