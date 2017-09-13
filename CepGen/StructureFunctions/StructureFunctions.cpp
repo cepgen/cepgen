@@ -16,6 +16,8 @@ namespace CepGen
       case Fiore:               return os << "Fiore";
       case ALLM91:              return os << "ALLM;91";
       case ALLM97:              return os << "ALLM;97";
+      case ALLM_HHT:            return os << "ALLM;HHT";
+      case ALLM_HHT_FT:         return os << "ALLM;HHT-FT";
       default: return os;
     }
   }

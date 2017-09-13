@@ -221,16 +221,15 @@ namespace CepGen
     {
       const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
 
-      const double Q2_ela = ( kt2+x*x*mp2 )/( 1.-x );
+      const double Q2_min = x*x*mp2/( 1.-x ), Q2_ela = Q2_min + kt2/( 1.-x );
       const FormFactors ela = FormFactors::ProtonElastic( Q2_ela );
 
-      const double ela1 = pow( kt2/( kt2+x*x*mp2 ), 2 );
+      const double ela1 = ( 1.-x )*( 1.-Q2_min/Q2_ela );
       const double ela2 = ela.FE;
-      //const double ela3 = 1.-(Q2_ela-kt2)/Q2_ela;
-      //const double ela3 = 1.-x*x*mp2/Q2_ela/(1.-x);
-      //return Constants::alpha_em/M_PI*(1.-x+x*x/4.)*ela1*ela2*ela3/kt2;
-      return Constants::alphaEM/M_PI*ela1*ela2/Q2_ela;
-      //return Constants::alphaEM/M_PI*( ( 1.-x )*ela1*ela2*ela3 + x*x/2.*G_M*G_M )/kt2;
+      //const double ela3 = 1.-( Q2_ela-kt2 )/Q2_ela;
+      const double f_ela = Constants::alphaEM/M_PI/kt2*( ela1*ela2 + 0.5*x*x*ela.FM );
+
+      return f_ela * ( 1.-x ) * kt2 / Q2_ela;
     }
 
 
@@ -264,10 +263,12 @@ namespace CepGen
       const double R = 0.014 * Q2 * ( exp( -0.07*Q2 ) + 41.*exp( -0.8*Q2 ) );
       const double F1 = sf.F2 * ( 1.+4*xbj*xbj*mp2/Q2 )/( 1.+R )/( 2.*xbj );
 
-      const double term1 = ( 1.-x )*( 1.-Q2min/Q2 );
-      const double f_D = sf.F2/( Q2 + mx2 - mp2 ) * term1, f_C= 2.*F1/Q2;
+      const double ine1 = ( 1.-x )*( 1.-Q2min / Q2 );
+      const double f_D = sf.F2/( Q2 + mx2 - mp2 ) * ine1, f_C= 2.*F1/Q2;
 
-      return Constants::alphaEM/M_PI*( 1.-x )*kt2/Q2*( f_D + 0.5*x*x*f_C )/kt2;
+      const double f_ine = Constants::alphaEM/M_PI/kt2*( f_D + 0.5*x*x*f_C );
+
+      return f_ine * ( 1.-x ) * kt2 / Q2;
     }
   }
 }

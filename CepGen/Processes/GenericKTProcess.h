@@ -104,7 +104,7 @@ namespace CepGen
 
       private:
         void addPartonContent();
-        static const unsigned int kNumRequiredDimensions = 4;
+        static constexpr unsigned int kNumRequiredDimensions = 4;
         /// Number of additional dimensions required for the user process
         /// (in addition to the 4 required for the two partons' transverse momenta)
         unsigned int kNumUserDimensions;

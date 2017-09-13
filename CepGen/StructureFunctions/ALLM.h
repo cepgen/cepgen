@@ -19,12 +19,23 @@ namespace CepGen
         };
 
       public:
+        /// Pre-HERA data fit (694 data points)
         static ALLMParameterisation allm91();
+        /// Fixed target and HERA photoproduction total cross sections (1356 points)
         static ALLMParameterisation allm97();
+        static ALLMParameterisation hht_allm();
+        static ALLMParameterisation hht_allm_ft();
 
         Parameters pomeron, reggeon;
-        double m02, mp2, mr2;
-        double q02, lam2;
+        /// Effective photon squared mass
+        double m02;
+        /// Effective pomeron squared mass
+        double mp2;
+        /// Effective reggeon squared mass
+        double mr2;
+        double q02;
+        /// Squared QCD scale
+        double lambda2;
     };
 
     StructureFunctions ALLM( double q2, double xbj, const ALLMParameterisation& param=ALLMParameterisation::allm97() );

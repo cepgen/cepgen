@@ -4,6 +4,32 @@ namespace CepGen
 {
   namespace SF
   {
+    SuriYennieParameterisation
+    SuriYennieParameterisation::standard()
+    {
+      SuriYennieParameterisation p;
+      p.C1 = 0.86926;
+      p.C2 = 2.23422;
+      p.D1 = 0.12549;
+      p.rho2 = 0.585;
+      p.Cp = 0.96;
+      p.Bp = 0.63;
+      return p;
+    }
+
+    SuriYennieParameterisation
+    SuriYennieParameterisation::alternative()
+    {
+      SuriYennieParameterisation p;
+      p.C1 = 0.6303;
+      p.C2 = 2.3049;
+      p.D1 = 0.04681;
+      p.rho2 = 1.05;
+      p.Cp = 1.23;
+      p.Bp = 0.61;
+      return p;
+    }
+
     StructureFunctions
     SuriYennie( double q2, double xbj, const SuriYennieParameterisation& param )
     {
@@ -19,7 +45,6 @@ namespace CepGen
       const double w2 = 2.*mp*FE, w1 = 0.5 * sy.FM*q2/mp;
 
       sy.F2 = nu/mp*w2;
-      sy.F1 = 0.5*sy.F2/xbj; // Callan-Gross relation FIXME
       return sy;
     }
   }

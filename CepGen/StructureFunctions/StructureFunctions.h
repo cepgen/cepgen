@@ -16,7 +16,7 @@ namespace CepGen
     FioreVal = 101,
     FioreSea = 102,
     Fiore = 103,
-    ALLM91, ALLM97
+    ALLM91, ALLM97, ALLM_HHT, ALLM_HHT_FT
   };
   /// Human-readable format of a structure function type
   std::ostream& operator<<( std::ostream& os, const StructureFunctionsType& sf );

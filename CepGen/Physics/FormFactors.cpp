@@ -50,7 +50,7 @@ namespace CepGen
   {
     const double x = q2 / ( q2 + mf2 - mi2 );
     StructureFunctions sf = SF::FioreBrasse( q2, x );
-    return FormFactors( sf.F2 / x / q2, -2.*sf.F1 / q2 );
+    return FormFactors( sf.F2 * x / q2, -2.*sf.F1 / q2 );
   }
 
   FormFactors
