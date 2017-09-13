@@ -19,6 +19,7 @@ main( int argc, char* argv[] )
   TGraph g_sy_f1, g_sy_f2;
   TGraph g_fb_f1, g_fb_f2;
   TGraph g_su_f1, g_su_f2;
+  TGraph g_allm97_f1, g_allm97_f2;
 
   const bool use_logarithmic_x = ( argc>3 ) ? atoi( argv[3] ) : false;
 
@@ -33,7 +34,8 @@ main( int argc, char* argv[] )
 
     auto sf_sy = CepGen::StructureFunctions::SuriYennie( q2, xbj ),
          sf_fb = CepGen::StructureFunctions::FioreBrasse( q2, xbj ),
-         sf_su = CepGen::StructureFunctions::SzczurekUleshchenko( q2, xbj );
+         sf_su = CepGen::StructureFunctions::SzczurekUleshchenko( q2, xbj ),
+         sf_allm97 = CepGen::StructureFunctions::ALLM( q2, xbj, CepGen::StructureFunctions::ALLMParameterisation::allm97() );
 
     g_sy_f1.SetPoint( i, xbj, sf_sy.F1 );
     g_sy_f2.SetPoint( i, xbj, sf_sy.F2 );
@@ -43,7 +45,8 @@ main( int argc, char* argv[] )
 
     g_su_f1.SetPoint( i, xbj, sf_su.F1 );
     g_su_f2.SetPoint( i, xbj, sf_su.F2 );
-    std::cout << sf_fb << std::endl;
+
+    g_allm97_f2.SetPoint( i, xbj, sf_allm97.F2 );
   }
 
   CepGen::Canvas c( "test", Form( "CepGen proton structure functions, Q^{2} = %s GeV^{2}", q2_str ) );
@@ -81,6 +84,11 @@ main( int argc, char* argv[] )
   g_su_f2.SetLineWidth( 3 );
   mg.Add( &g_su_f2, "l" );
   c.AddLegendEntry( &g_su_f2, "Szczurek-Uleshchenko, F_{2}", "l" );
+
+  g_allm97_f2.SetLineColor( kBlue+1 );
+  g_allm97_f2.SetLineWidth( 3 );
+  mg.Add( &g_allm97_f2, "l" );
+  c.AddLegendEntry( &g_allm97_f2, "Abramowicz et al. 97, F_{2}", "l" );
 
   mg.Draw( "alpr" );
   mg.SetTitle( "x_{Bj}\\Proton form factor" );

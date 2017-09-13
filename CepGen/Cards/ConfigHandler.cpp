@@ -77,7 +77,9 @@ namespace CepGen
           else if ( sf_str == "Fiore;valence" ) params_.kinematics.structure_functions = FioreVal;
           else if ( sf_str == "Fiore;sea" ) params_.kinematics.structure_functions = FioreSea;
           else if ( sf_str == "Fiore" ) params_.kinematics.structure_functions = Fiore;
-          else if ( sf_str == "ALLM" ) params_.kinematics.structure_functions = ALLM;
+          else if ( sf_str == "ALLM" ) params_.kinematics.structure_functions = ALLM97;
+          else if ( sf_str == "ALLM;91" ) params_.kinematics.structure_functions = ALLM91;
+          else if ( sf_str == "ALLM;97" ) params_.kinematics.structure_functions = ALLM97;
           else FatalError( Form( "Invalid structure functions mode: %s", sf ) );
         }
       } catch ( const libconfig::SettingNotFoundException& nfe ) {

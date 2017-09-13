@@ -23,7 +23,7 @@ namespace CepGen
     FioreVal = 101,
     FioreSea = 102,
     Fiore = 103,
-    ALLM
+    ALLM91, ALLM97
   };
   /// Human-readable format of a structure function type
   std::ostream& operator<<( std::ostream& os, const StructureFunctionsType& sf );
@@ -88,18 +88,29 @@ namespace CepGen
       struct ALLMParameterisation {
         struct Parameters {
           Parameters() :
-            a1( 0. ), a2( 0. ), a3( 0. ), b1( 0. ), b2( 0. ), b3( 0. ), c1( 0. ), c2( 0. ), c3( 0. ) {}
-          Parameters( double c1, double c2, double c3, double a1, double a2, double a3, double b1, double b2, double b3 ) :
-            a1( a1 ), a2( a2 ), a3( a3 ), b1( b1 ), b2( b2 ), b3( b3 ), c1( c1 ), c2( c2 ), c3( c3 ) {}
-          double a1, a2, a3, b1, b2, b3, c1, c2, c3;
+            a( { 0., 0., 0. } ), b( { 0., 0., 0. } ), c( { 0., 0., 0. } ) {}
+          Parameters( std::vector<double> c, std::vector<double> a, std::vector<double> b ) :
+            a( a ), b( b ), c( c ) {}
+          std::vector<double> a, b, c;
         };
         Parameters pomeron, reggeon;
         double m02, mp2, mr2;
         double q02, lam2;
-        static ALLMParameterisation standard() {
+        static ALLMParameterisation allm91() {
           ALLMParameterisation p;
-          p.pomeron = Parameters( 0.28067, 0.22291, 2.1979, -0.0808, -0.44812, 1.1709, 0.36292, 1.8917, 1.8439 );
-          p.reggeon = Parameters( 0.80107, 0.97307, 3.4924, 0.58400, 0.37888, 2.6063, 0.01147, 3.7582, 0.49338 );
+          p.pomeron = Parameters( { 0.26550, 0.04856, 1.04682 }, { -0.04503, -0.36407, 8.17091 }, { 0.49222, 0.52116, 3.5515  } );
+          p.reggeon = Parameters( { 0.67639, 0.49027, 2.66275 }, {  0.60408,  0.17353, 1.61812 }, { 1.26066, 1.83624, 0.81141 } );
+          p.m02 = 0.30508;
+          p.mp2 = 10.676;
+          p.mr2 = 0.20623;
+          p.q02 = 0.27799;
+          p.lam2 = 0.06527;
+          return p;
+        }
+        static ALLMParameterisation allm97() {
+          ALLMParameterisation p;
+          p.pomeron = Parameters( { 0.28067, 0.22291, 2.1979 }, { -0.0808,  -0.44812, 1.1709 }, { 0.36292, 1.8917, 1.8439  } );
+          p.reggeon = Parameters( { 0.80107, 0.97307, 3.4924 }, {  0.58400,  0.37888, 2.6063 }, { 0.01147, 3.7582, 0.49338 } );
           p.m02 = 0.31985;
           p.mp2 = 49.457;
           p.mr2 = 0.15052;
@@ -108,7 +119,7 @@ namespace CepGen
           return p;
         }
       };
-      static StructureFunctions ALLM( double q2, double xbj, const ALLMParameterisation& param=ALLMParameterisation::standard() );
+      static StructureFunctions ALLM( double q2, double xbj, const ALLMParameterisation& param=ALLMParameterisation::allm97() );
       double F1, F2;
       double FM;
   };
