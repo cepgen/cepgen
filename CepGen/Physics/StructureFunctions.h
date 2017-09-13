@@ -6,6 +6,7 @@
 extern "C"
 {
   extern void grv95lo_( float&, float&, float&, float&, float&, float&, float&, float& );
+  //extern void grv95lo_( double&, double&, double&, double&, double&, double&, double&, double& );
 }
 
 namespace CepGen
@@ -35,8 +36,20 @@ namespace CepGen
       /// \param[in] xbj Bjorken's x
       /// \cite Brasse1976413
       static StructureFunctions FioreBrasse( double q2, double xbj );
+      struct SuriYennieParameterisation {
+        double C1, C2, D1, rho2, Cp, Bp;
+        // values extracted from experimental fits
+        static SuriYennieParameterisation standard() {
+          SuriYennieParameterisation p; p.C1 = 0.86926; p.C2 = 2.23422; p.D1 = 0.12549; p.rho2 = 0.585; p.Cp = 0.96; p.Bp = 0.63; return p;
+        }
+        static SuriYennieParameterisation alternative() {
+          SuriYennieParameterisation p; p.C1 = 0.6303; p.C2 = 2.3049; p.D1 = 0.04681; p.rho2 = 1.05; p.Cp = 1.23; p.Bp = 0.61; return p;
+        }
+      };
+      static StructureFunctions SuriYennie( double q2, double xbj, const SuriYennieParameterisation& param=SuriYennieParameterisation::standard() );
       static StructureFunctions SzczurekUleshchenko( double q2, double xbj );
       double F1, F2;
+      double FM;
   };
   /// Human-readable format of a structure function object
   std::ostream& operator<<( std::ostream& os, const StructureFunctions& sf );

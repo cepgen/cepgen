@@ -12,7 +12,7 @@ using namespace std;
 int
 main( int argc, char* argv[] )
 {
-  const float min_xbj = 1.e-3, max_xbj = 0.99, q2 = ( argc>1 ) ? atof( argv[1] ) : 2.5;
+  const float min_xbj = 1.e-5, max_xbj = 0.99, q2 = ( argc>1 ) ? atof( argv[1] ) : 2.5;
   const char* q2_str = ( argc>2 ) ? argv[2] : std::to_string( q2 ).c_str();
   const unsigned int npoints = 5000;
 
@@ -20,7 +20,7 @@ main( int argc, char* argv[] )
   TGraph g_fb_f1, g_fb_f2;
   TGraph g_su_f1, g_su_f2;
 
-  const bool use_logarithmic_x = false;
+  const bool use_logarithmic_x = ( argc>3 ) ? atoi( argv[3] ) : false;
 
   for ( unsigned int i=0; i<npoints; i++ ) {
     float xbj;
@@ -31,17 +31,18 @@ main( int argc, char* argv[] )
     }
     else xbj = min_xbj + i*( max_xbj-min_xbj )/( npoints-1 );
 
-    /*CepGen::StructureFunctions sf_sy = CepGen::StructureFunctions::SuriYennie( q2, mp2, mx2 );
-    g_sy_f1.SetPoint( i, xbj, ff_sy.F1 );
-    g_sy_f2.SetPoint( i, xbj, ff_sy.F2 );*/
+    auto sf_sy = CepGen::StructureFunctions::SuriYennie( q2, xbj ),
+         sf_fb = CepGen::StructureFunctions::FioreBrasse( q2, xbj ),
+         sf_su = CepGen::StructureFunctions::SzczurekUleshchenko( q2, xbj );
 
-    CepGen::StructureFunctions sf_fb = CepGen::StructureFunctions::FioreBrasse( q2, xbj );
+    g_sy_f1.SetPoint( i, xbj, sf_sy.F1 );
+    g_sy_f2.SetPoint( i, xbj, sf_sy.F2 );
+
     g_fb_f1.SetPoint( i, xbj, sf_fb.F1 );
-    g_fb_f2.SetPoint( i, xbj, sf_fb.F2*xbj );
+    g_fb_f2.SetPoint( i, xbj, sf_fb.F2 );
 
-    CepGen::StructureFunctions sf_su = CepGen::StructureFunctions::SzczurekUleshchenko( q2, xbj );
     g_su_f1.SetPoint( i, xbj, sf_su.F1 );
-    g_su_f2.SetPoint( i, xbj, sf_su.F2*xbj );
+    g_su_f2.SetPoint( i, xbj, sf_su.F2 );
     std::cout << sf_fb << std::endl;
   }
 
@@ -52,12 +53,12 @@ main( int argc, char* argv[] )
 
   /*g_sy_f1.SetLineWidth( 3 );
   mg.Add( &g_sy_f1, "l" );
-  c.AddLegendEntry( &g_sy_f1, "Suri-Yennie, F_{E}", "l" );
+  c.AddLegendEntry( &g_sy_f1, "Suri-Yennie, F_{1}", "l" );*/
 
   g_sy_f2.SetLineStyle( 2 );
   g_sy_f2.SetLineWidth( 3 );
   mg.Add( &g_sy_f2, "l" );
-  c.AddLegendEntry( &g_sy_f2, "Suri-Yennie, F_{M}", "l" );*/
+  c.AddLegendEntry( &g_sy_f2, "Suri-Yennie, F_{2}", "l" );
 
   /*g_fb_f1.SetLineColor( kRed+1 );
   g_fb_f1.SetLineWidth( 3 );

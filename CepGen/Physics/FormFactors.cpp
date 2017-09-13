@@ -39,27 +39,10 @@ namespace CepGen
   FormFactors
   FormFactors::SuriYennie( double q2, double mi2, double mf2 )
   {
-    struct SuriYennieParameters {
-      SuriYennieParameters( double rho, double bp, double cp, double cc1, double cc2, double dd1 ) :
-        rho( rho ), Bp( bp ), Cp( cp ), cc1( cc1 ), cc2( cc2 ), dd1( dd1 ) {}
-      double rho; // in GeV**2
-      double Bp, Cp;
-      double cc1, cc2, dd1;
-    };
-    // values extracted from experimental fits
-    SuriYennieParameters sy( 0.585, 0.63, 0.96, 0.86926, 2.23422, 0.12549 );
-    //SuriYennieParameters sy( 1.05, 0.61, 1.23, 0.6303, 2.2049, 0.0468 );
-    const double x = q2 / ( q2 + mf2 ),
-                 dm2 = mf2-mi2,
-                 en = q2 + dm2,
-                 tau = q2 / mi2 / 4.,
-                 rhot = sy.rho+q2;
-    const double rho_norm = sy.rho/rhot;
-
-    FormFactors ff;
-    ff.FM = ( -1./q2 ) * ( -sy.cc1*rho_norm*rho_norm*dm2 - sy.cc2*mi2*pow( 1.-x, 4 )/( x*( x*sy.Cp-2*sy.Bp )+1. ) );
-    ff.FE = ( tau*ff.FM + sy.dd1*dm2*q2*rho_norm*pow( dm2/en, 2 )/( rhot*mi2 ) )/( 1. + en*en/( 4.*mi2*q2 ) );
-    return ff;
+    const double x = q2 / ( q2 + mf2 - mi2 );
+    const StructureFunctions sy = StructureFunctions::SuriYennie( q2, x );
+//std::cout << "---> " << sy.FM << "\t" << sy.F2*x/q2 << "\t" << sy.F2*x*sqrt(mi2)/q2 << std::endl;
+    return FormFactors( sy.F2 * x * sqrt( mi2 ) / q2, sy.FM ); //FIXME
   }
 
   FormFactors
