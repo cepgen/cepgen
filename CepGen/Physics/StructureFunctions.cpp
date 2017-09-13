@@ -14,6 +14,7 @@ namespace CepGen
       case FioreVal:            return os << "Fiore;valence";
       case FioreSea:            return os << "Fiore;sea";
       case Fiore:               return os << "Fiore";
+      case ALLM:                return os << "ALLM";
       default: return os;
     }
   }
@@ -186,6 +187,32 @@ namespace CepGen
 
     return StructureFunctions( F1, F2_corr );
 #endif
+  }
+
+  StructureFunctions
+  StructureFunctions::ALLM( double q2, double xbj, const ALLMParameterisation& param )
+  {
+    const double factor = q2/( q2+param.m02 );
+    const double W2_eff = q2*( 1.-xbj )/xbj;
+    const double xp = ( q2+param.mp2 )/( q2+W2_eff+param.mp2 ),
+                 xr = ( q2+param.mr2 )/( q2+W2_eff+param.mr2 );
+
+    const double xlog1 = log( ( q2+param.q02 )/ param.lam2 ), xlog2 = log( param.q02/param.lam2 );
+    const double t = log( xlog1/xlog2 );
+
+    const double cpom = param.pomeron.c1 + ( param.pomeron.c1-param.pomeron.c2 )*( 1./( 1.+pow( t, param.pomeron.c3 ) ) - 1. );
+    const double apom = param.pomeron.a1 + ( param.pomeron.a1-param.pomeron.a2 )*( 1./( 1.+pow( t, param.pomeron.a3 ) ) - 1. );
+    const double creg = param.reggeon.c1 + param.reggeon.c2*pow( t, param.reggeon.c3 );
+    const double areg = param.reggeon.a1 + param.reggeon.a2*pow( t, param.reggeon.a3 );
+    const double bpom = param.pomeron.b1 + param.pomeron.b2*pow( t, param.pomeron.b3 );
+    const double breg = param.reggeon.b1 + param.reggeon.b2*pow( t, param.reggeon.b3 );
+
+    const double F2_Pom = factor*cpom*pow( xp, apom )*pow( 1.-xbj, bpom ),
+                 F2_Reg = factor*creg*pow( xr, areg )*pow( 1.-xbj, breg );
+
+    StructureFunctions allm;
+    allm.F2 = F2_Pom + F2_Reg;
+    return allm;
   }
 
   std::ostream&

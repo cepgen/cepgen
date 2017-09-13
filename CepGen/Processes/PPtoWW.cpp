@@ -188,8 +188,8 @@ PPtoWW::computeKTFactorisedMatrixElement()
                              PX_.px(), PX_.py(), PX_.pz(), PX_.energy(),
                              PY_.px(), PY_.py(), PY_.pz(), PY_.energy() ) );
 
-  assert( fabs( PX_.mass()-MX_ ) < 1.e-6 );
-  assert( fabs( PY_.mass()-MY_ ) < 1.e-6 );
+  /*assert( fabs( PX_.mass()-MX_ ) < 1.e-6 );
+  assert( fabs( PY_.mass()-MY_ ) < 1.e-6 );*/
 
   //=================================================================
   //     four-momenta squared of the virtual photons
@@ -251,6 +251,7 @@ PPtoWW::computeKTFactorisedMatrixElement()
     //     (Denner+Dittmaier+Schuster)
     //     (work in collaboration with C. Royon)
     //=================================================================
+
     const double mw4 = mw2*mw2;
 
     const double term1  = 2.*shat * ( 2.*shat+3.*mw2 ) / ( 3.*( mw2-that )*( mw2-uhat ) );
@@ -296,9 +297,9 @@ PPtoWW::computeKTFactorisedMatrixElement()
   //       d^2 kappa_1 d^2 kappa_2 instead d kappa_1^2 d kappa_2^2
   //=================================================================
 
-  const double aintegral = amat2 * ( 2.*M_PI )/ ( 16.*M_PI*M_PI*x1*x1*x2*x2*s_*s_ )
-                         * flux1_/M_PI * flux2_/M_PI
-                         * Constants::GeV2toBarn * 0.125 / M_PI;
+  const double aintegral = amat2 * ( 2.*M_PI )/ ( 16.*M_PI*M_PI*( x1*x2*s_ )*( x1*x2*s_ ) )
+                         * flux1_/M_PI * flux2_/M_PI * 0.25
+                         * Constants::GeV2toBarn * 0.5 / M_PI;
 
   //=================================================================
   return aintegral*qt1_*qt2_*pt_diff_;

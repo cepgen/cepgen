@@ -140,8 +140,8 @@ namespace CepGen
           break;
         default: return;
       }
-      if ( flux1_<1.e-20 ) flux1_ = 0.;
-      if ( flux2_<1.e-20 ) flux2_ = 0.;
+      flux1_ = std::max( flux1_, 1.e-20 );
+      flux2_ = std::max( flux2_, 1.e-20 );
       DebuggingInsideLoop( Form( "Form factors: %e / %e", flux1_, flux2_ ) );
     }
 
@@ -179,7 +179,7 @@ namespace CepGen
           break;
         case Kinematics::InelasticInelastic:
           op1.setStatus( Particle::Undecayed ); op1.setMass( MX_ );
-          op2.setStatus( Particle::Undecayed ); op2.setMass( MX_ );
+          op2.setStatus( Particle::Undecayed ); op2.setMass( MY_ );
           break;    
         default: { FatalError( "This kT factorisation process is intended for p-on-p collisions! Aborting!" ); } break;
       }
@@ -237,22 +237,35 @@ namespace CepGen
     double
     GenericKTProcess::inelasticFlux( double x, double kt2, double mx )
     {
-      const double mx2 = mx*mx,
-                   mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
+      const double mx2 = mx*mx, mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
 
       // F2 structure function
       const double Q2min = 1. / ( 1.-x )*( x*( mx2-mp2 ) + x*x*mp2 ),
-                   Q2 = kt2 / ( 1.-x ) + Q2min;
-      float x_Bjorken = Q2 / ( Q2+mx2-mp2 );
+                   Q2 = Q2min + kt2 / ( 1.-x );
+      float xbj = Q2 / ( Q2 + mx2 - mp2 );
 
-      StructureFunctions sf = StructureFunctions::SzczurekUleshchenko( Q2, x_Bjorken );
+      StructureFunctions sf;
+      switch ( cuts_.structure_functions ) {
+        case StructureFunctionsType::SzczurekUleshchenko:
+          sf = StructureFunctions::SzczurekUleshchenko( Q2, xbj ); break;
+        case StructureFunctionsType::SuriYennie:
+          sf = StructureFunctions::SuriYennie( Q2, xbj ); break;
+        case StructureFunctionsType::Fiore:
+          sf = StructureFunctions::FioreBrasse( Q2, xbj ); break;
+        case StructureFunctionsType::ALLM:
+          sf = StructureFunctions::ALLM( Q2, xbj ); break;
+        default: break; //FIXME
+      }
 
-      const double term1 = ( 1. - ( Q2-kt2 ) / Q2 ),
-                   term2 = pow( kt2 / ( kt2+x*(mx2-mp2)+x*x*mp2 ), 2 );
+      // Longitudinal/transverse virtual photon cross section R
+      // from Sibirtsev and Blunden (Phys Rev C 88,065202 (2013))
+      const double R = 0.014 * Q2 * ( exp( -0.07*Q2 ) + 41.*exp( -0.8*Q2 ) );
+      const double F1 = sf.F2 * ( 1.+4*xbj*xbj*mp2/Q2 )/( 1.+R )/( 2.*xbj );
 
-      const double f_aux = sf.F2/( mx2+Q2-mp2 )*term1*term2;
+      const double term1 = ( 1.-x )*( 1.-Q2min/Q2 );
+      const double f_D = sf.F2/( Q2 + mx2 - mp2 ) * term1, f_C= 2.*F1/Q2;
 
-      return Constants::alphaEM/M_PI*( 1.-x )*f_aux/kt2;
+      return Constants::alphaEM/M_PI*( 1.-x )*kt2/Q2*( f_D + 0.5*x*x*f_C )/kt2;
     }
   }
 }

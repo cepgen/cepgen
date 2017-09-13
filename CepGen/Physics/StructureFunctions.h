@@ -22,7 +22,8 @@ namespace CepGen
     SzczurekUleshchenko = 15,
     FioreVal = 101,
     FioreSea = 102,
-    Fiore = 103
+    Fiore = 103,
+    ALLM
   };
   /// Human-readable format of a structure function type
   std::ostream& operator<<( std::ostream& os, const StructureFunctionsType& sf );
@@ -34,7 +35,8 @@ namespace CepGen
 
       struct FioreBrasseParameterisation {
         struct ResonanceParameters {
-          ResonanceParameters( double a0, double a1, double a2, double a, double q02, float spin, bool on=true ) : alpha0( a0 ), alpha1( a1 ), alpha2( a2 ), a( a ), q02( q02 ), spin( spin ), enabled( on ) {}
+          ResonanceParameters( double a0, double a1, double a2, double a, double q02, float spin, bool on=true ) :
+            alpha0( a0 ), alpha1( a1 ), alpha2( a2 ), a( a ), q02( q02 ), spin( spin ), enabled( on ) {}
           double alpha0, alpha1, alpha2, a, q02;
           float spin;
           bool enabled;
@@ -82,6 +84,31 @@ namespace CepGen
       };
       static StructureFunctions SuriYennie( double q2, double xbj, const SuriYennieParameterisation& param=SuriYennieParameterisation::standard() );
       static StructureFunctions SzczurekUleshchenko( double q2, double xbj );
+
+      struct ALLMParameterisation {
+        struct Parameters {
+          Parameters() :
+            a1( 0. ), a2( 0. ), a3( 0. ), b1( 0. ), b2( 0. ), b3( 0. ), c1( 0. ), c2( 0. ), c3( 0. ) {}
+          Parameters( double c1, double c2, double c3, double a1, double a2, double a3, double b1, double b2, double b3 ) :
+            a1( a1 ), a2( a2 ), a3( a3 ), b1( b1 ), b2( b2 ), b3( b3 ), c1( c1 ), c2( c2 ), c3( c3 ) {}
+          double a1, a2, a3, b1, b2, b3, c1, c2, c3;
+        };
+        Parameters pomeron, reggeon;
+        double m02, mp2, mr2;
+        double q02, lam2;
+        static ALLMParameterisation standard() {
+          ALLMParameterisation p;
+          p.pomeron = Parameters( 0.28067, 0.22291, 2.1979, -0.0808, -0.44812, 1.1709, 0.36292, 1.8917, 1.8439 );
+          p.reggeon = Parameters( 0.80107, 0.97307, 3.4924, 0.58400, 0.37888, 2.6063, 0.01147, 3.7582, 0.49338 );
+          p.m02 = 0.31985;
+          p.mp2 = 49.457;
+          p.mr2 = 0.15052;
+          p.q02 = 0.52544;
+          p.lam2 = 0.06526;
+          return p;
+        }
+      };
+      static StructureFunctions ALLM( double q2, double xbj, const ALLMParameterisation& param=ALLMParameterisation::standard() );
       double F1, F2;
       double FM;
   };

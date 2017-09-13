@@ -48,9 +48,9 @@ namespace CepGen
   FormFactors
   FormFactors::FioreBrasse( double q2, double mi2, double mf2 )
   {
-    const double x = q2 / ( q2 + mf2 - mi2 ), k = 2.*sqrt( mi2 );
+    const double x = q2 / ( q2 + mf2 - mi2 );
     StructureFunctions sf = StructureFunctions::FioreBrasse( q2, x );
-    return FormFactors( sf.F2 / k, -sf.F1*k / q2 );
+    return FormFactors( sf.F2 / x / q2, -2.*sf.F1 / q2 );
   }
 
   FormFactors
