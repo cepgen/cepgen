@@ -5,9 +5,13 @@
 #include <array>
 
 #include "CepGen/Core/utils.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/ALLM.h"
+#include "CepGen/StructureFunctions/FioreBrasse.h"
+#include "CepGen/StructureFunctions/SuriYennie.h"
+#include "CepGen/StructureFunctions/SzczurekUleshchenko.h"
 
 #include "Constants.h"
-#include "StructureFunctions.h"
 
 namespace CepGen
 {

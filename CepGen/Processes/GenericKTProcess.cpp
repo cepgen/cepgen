@@ -247,15 +247,15 @@ namespace CepGen
       StructureFunctions sf;
       switch ( cuts_.structure_functions ) {
         case StructureFunctionsType::SzczurekUleshchenko:
-          sf = StructureFunctions::SzczurekUleshchenko( Q2, xbj ); break;
+          sf = SF::SzczurekUleshchenko( Q2, xbj ); break;
         case StructureFunctionsType::SuriYennie:
-          sf = StructureFunctions::SuriYennie( Q2, xbj ); break;
+          sf = SF::SuriYennie( Q2, xbj ); break;
         case StructureFunctionsType::Fiore:
-          sf = StructureFunctions::FioreBrasse( Q2, xbj ); break;
+          sf = SF::FioreBrasse( Q2, xbj ); break;
         case StructureFunctionsType::ALLM91:
-          sf = StructureFunctions::ALLM( Q2, xbj, StructureFunctions::ALLMParameterisation::allm91() ); break;
+          sf = SF::ALLM( Q2, xbj, SF::ALLMParameterisation::allm91() ); break;
         case StructureFunctionsType::ALLM97:
-          sf = StructureFunctions::ALLM( Q2, xbj, StructureFunctions::ALLMParameterisation::allm97() ); break;
+          sf = SF::ALLM( Q2, xbj, SF::ALLMParameterisation::allm97() ); break;
         default: break; //FIXME
       }
 

@@ -6,7 +6,7 @@
 #include <string>
 
 #include "CepGen/Core/utils.h"
-#include "StructureFunctions.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "Particle.h"
 #include "Cuts.h"
 
