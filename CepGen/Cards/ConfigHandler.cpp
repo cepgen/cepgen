@@ -171,19 +171,32 @@ namespace CepGen
     ConfigHandler::writeOutgoingKinematics( const Parameters* params, libconfig::Setting& root )
     {
       libconfig::Setting& kin = root.add( "out_kinematics", libconfig::Setting::TypeGroup );
-      kin.add( "pair", libconfig::Setting::TypeInt ) = (int)params->kinematics.central_system[0];
-      kin.add( "min_pt", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::pt_single ).min();
-      kin.add( "max_pt", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::pt_single ).max();
-      kin.add( "min_ptdiff", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::pt_diff ).min();
-      kin.add( "max_ptdiff", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::pt_diff ).max();
-      kin.add( "min_dely", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::dely ).min();
-      kin.add( "max_dely", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::dely ).max();
-      kin.add( "min_energy", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::energy_single ).min();
-      kin.add( "max_energy", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::energy_single ).max();
-      kin.add( "min_eta", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::eta_single ).min();
-      kin.add( "max_eta", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::eta_single ).max();
-      kin.add( "min_mx", libconfig::Setting::TypeFloat ) = params->kinematics.remnant_cuts.at( Cuts::mass ).min();
-      kin.add( "max_mx", libconfig::Setting::TypeFloat ) = params->kinematics.remnant_cuts.at( Cuts::mass ).max();
+      if ( params->kinematics.central_system.size() > 0 )
+        kin.add( "pair", libconfig::Setting::TypeInt ) = (int)params->kinematics.central_system[0];
+      if ( params->kinematics.central_cuts.count( Cuts::pt_single ) ) {
+        kin.add( "min_pt", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::pt_single ).min();
+        kin.add( "max_pt", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::pt_single ).max();
+      }
+      if ( params->kinematics.central_cuts.count( Cuts::pt_diff ) ) {
+        kin.add( "min_ptdiff", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::pt_diff ).min();
+        kin.add( "max_ptdiff", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::pt_diff ).max();
+      }
+      if ( params->kinematics.central_cuts.count( Cuts::dely ) ) {
+        kin.add( "min_dely", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::dely ).min();
+        kin.add( "max_dely", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::dely ).max();
+      }
+      if ( params->kinematics.central_cuts.count( Cuts::energy_single ) ) {
+        kin.add( "min_energy", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::energy_single ).min();
+        kin.add( "max_energy", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::energy_single ).max();
+      }
+      if ( params->kinematics.central_cuts.count( Cuts::eta_single ) ) {
+        kin.add( "min_eta", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::eta_single ).min();
+        kin.add( "max_eta", libconfig::Setting::TypeFloat ) = params->kinematics.central_cuts.at( Cuts::eta_single ).max();
+      }
+      if ( params->kinematics.remnant_cuts.count( Cuts::mass ) ) {
+        kin.add( "min_mx", libconfig::Setting::TypeFloat ) = params->kinematics.remnant_cuts.at( Cuts::mass ).min();
+        kin.add( "max_mx", libconfig::Setting::TypeFloat ) = params->kinematics.remnant_cuts.at( Cuts::mass ).max();
+      }
     }
 
     void

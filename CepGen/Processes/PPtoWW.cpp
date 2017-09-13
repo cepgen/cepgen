@@ -20,7 +20,9 @@ PPtoWW::prepareKTKinematics()
   Kinematics::Limits ptdiff_limits = cuts_.central_cuts[Cuts::pt_diff];
   if ( !ptdiff_limits.hasMax() ) ptdiff_limits.max() = 500.; //FIXME
   pt_diff_ = ptdiff_limits.x( xkt( 2 ) );
+
   phi_pt_diff_ = 2.*M_PI*xkt( 3 );
+
   DebuggingInsideLoop( Form( "W bosons pt difference:\n\t"
                              "  mag = %f (%.2f < Dpt < %.2f)\n\t"
                              "  phi = %f",
@@ -71,8 +73,8 @@ PPtoWW::computeKTFactorisedMatrixElement()
                ptdiffy = pt_diff_*sin( phi_pt_diff_ );
 
   // Outgoing leptons
-  const double pt1x = ( ptsumx+ptdiffx )*0.5, pt1y = ( ptsumy+ptdiffy )*0.5, pt1 = sqrt( pt1x*pt1x+pt1y*pt1y ),
-               pt2x = ( ptsumx-ptdiffx )*0.5, pt2y = ( ptsumy-ptdiffy )*0.5, pt2 = sqrt( pt2x*pt2x+pt2y*pt2y );
+  const double pt1x = 0.5 * ( ptsumx+ptdiffx ), pt1y = 0.5 * ( ptsumy+ptdiffy ), pt1 = sqrt( pt1x*pt1x+pt1y*pt1y ),
+               pt2x = 0.5 * ( ptsumx-ptdiffx ), pt2y = 0.5 * ( ptsumy-ptdiffy ), pt2 = sqrt( pt2x*pt2x+pt2y*pt2y );
 
   const Kinematics::Limits pt_limits = cuts_.central_cuts[Cuts::pt_single];
   if ( pt_limits.hasMin() && ( pt1 < pt_limits.min() || pt2 < pt_limits.min() ) ) return 0.;
@@ -81,6 +83,15 @@ PPtoWW::computeKTFactorisedMatrixElement()
   // transverse mass for the two leptons
   const double amt1 = sqrt( pt1*pt1+mw2 ),
                amt2 = sqrt( pt2*pt2+mw2 );
+
+  //=================================================================
+  //     a window in two-boson invariant mass
+  //=================================================================
+
+  const double invm = sqrt( amt1*amt1 + amt2*amt2 + 2.*amt1*amt2*cosh( y1_-y2_ ) - ptsum*ptsum );
+  const Kinematics::Limits invm_limits = cuts_.central_cuts[Cuts::mass_sum];
+  if ( invm_limits.hasMin() && invm < invm_limits.min() ) return 0.;
+  if ( invm_limits.hasMax() && invm > invm_limits.max() ) return 0.;
 
   //=================================================================
   //     a window in transverse momentum difference
@@ -143,7 +154,6 @@ PPtoWW::computeKTFactorisedMatrixElement()
   //=================================================================
 
   const double s1_eff = x1*s_-qt1_*qt1_, s2_eff = x2*s_-qt2_*qt2_;
-  const double invm = sqrt( amt1*amt1 + amt2*amt2 + 2.*amt1*amt2*cosh(y1_-y2_) - ptsum*ptsum );
   DebuggingInsideLoop( Form( "s(1/2)_eff = %f / %f GeV^2\n\t"
                              "dilepton invariant mass = %f GeV", s1_eff, s2_eff, invm ) );
 
@@ -170,8 +180,8 @@ PPtoWW::computeKTFactorisedMatrixElement()
   DebuggingInsideLoop( Form( "px_(+/-) = %f / %f\n\t"
                              "py_(+/-) = %f / %f", px_plus, px_minus, py_plus, py_minus ) );
 
-  PX_ = Particle::Momentum( -q1tx, -q1ty, ( px_plus-px_minus )*0.5*sqrt( 2. ), ( px_plus+px_minus )*0.5*sqrt( 2. ) );
-  PY_ = Particle::Momentum( -q2tx, -q2ty, ( py_plus-py_minus )*0.5*sqrt( 2. ), ( py_plus+py_minus )*0.5*sqrt( 2. ) );
+  PX_ = Particle::Momentum( -q1tx, -q1ty, ( px_plus-px_minus )/sqrt( 2. ), ( px_plus+px_minus )/sqrt( 2. ) );
+  PY_ = Particle::Momentum( -q2tx, -q2ty, ( py_plus-py_minus )/sqrt( 2. ), ( py_plus+py_minus )/sqrt( 2. ) );
 
   DebuggingInsideLoop( Form( "First remnant:  (E,p) = (%f, %f, %f, %f)\n\t"
                              "Second remnant: (E,p) = (%f, %f, %f, %f)",
@@ -182,36 +192,14 @@ PPtoWW::computeKTFactorisedMatrixElement()
   assert( fabs( PY_.mass()-MY_ ) < 1.e-6 );
 
   //=================================================================
-  //     four-momenta of the outgoing l^+ and l^-
-  //=================================================================
-
-  Particle::Momentum p1( pt1x, pt1y, alpha1*ak1z + beta1*ak2z, alpha1*ak10 + beta1*ak20 ),
-                     p2( pt2x, pt2y, alpha2*ak1z + beta2*ak2z, alpha2*ak10 + beta2*ak20 );
-  DebuggingInsideLoop( Form( "unboosted first lepton:  (E,p), m = (%f, %f, %f, %f), %f\n\t"
-                             "          second lepton: (E,p), m = (%f, %f, %f, %f), %f",
-                             p1.px(), p1.py(), p1.pz(), p1.energy(), p1.mass(),
-                             p2.px(), p2.py(), p2.pz(), p2.energy(), p2.mass() ) );
-
-  p_w1_ = Particle::Momentum( pt1x, pt1y, sqrt( pt1*pt1 + mw2 )*sinh( y1_ ), sqrt( pt1*pt1 + mw2 )*cosh( y1_ ) );
-  p_w2_ = Particle::Momentum( pt2x, pt2y, sqrt( pt2*pt2 + mw2 )*sinh( y2_ ), sqrt( pt2*pt2 + mw2 )*cosh( y2_ ) );
-
-  DebuggingInsideLoop( Form( "First lepton:  (E,p), m = (%f, %f, %f, %f), %f\n\t"
-                             "Second lepton: (E,p), m = (%f, %f, %f, %f), %f",
-                             p_w1_.px(), p_w2_.py(), p_w1_.pz(), p_w1_.energy(), p_w1_.mass(),
-                             p_w2_.px(), p_w2_.py(), p_w2_.pz(), p_w2_.energy(), p_w2_.mass() ) );
-
-  assert( fabs( p_w1_.mass()-event_->getByRole( Particle::CentralSystem )[0].mass() ) < 1.e-6 );
-  assert( fabs( p_w2_.mass()-event_->getByRole( Particle::CentralSystem )[1].mass() ) < 1.e-6 );
-
-  //=================================================================
   //     four-momenta squared of the virtual photons
   //=================================================================
 
   const double ww = 0.5 * ( 1.+sqrt( 1.-4.*mp2/s_ ) );
 
   // FIXME FIXME FIXME /////////////////////
-  Particle::Momentum q1( q1tx, q1ty, +x1*ww*( 0.5*sqs_ )*( 1.-q1t2/pow( x1*ww, 2 )/s_ ), x1*ww*( 0.5*sqs_ )*( 1.+q1t2/pow( x1*ww, 2 )/s_ ) ),
-                     q2( q2tx, q2ty, -x2*ww*( 0.5*sqs_ )*( 1.-q2t2/pow( x2*ww, 2 )/s_ ), x2*ww*( 0.5*sqs_ )*( 1.+q2t2/pow( x2*ww, 2 )/s_ ) );
+  Particle::Momentum q1( q1tx, q1ty, +0.5 * x1*ww*sqs_*( 1.-q1t2/x1/x1/ww/ww/s_ ), 0.5 * x1*ww*sqs_*( 1.+q1t2/x1/x1/ww/ww/s_ ) ),
+                     q2( q2tx, q2ty, -0.5 * x2*ww*sqs_*( 1.-q2t2/x2/x2/ww/ww/s_ ), 0.5 * x2*ww*sqs_*( 1.+q2t2/x2/x2/ww/ww/s_ ) );
   //////////////////////////////////////////
 
   DebuggingInsideLoop( Form( "First photon*:  (E,p), m2 = (%f, %f, %f, %f), %e\n\t"
@@ -221,14 +209,29 @@ PPtoWW::computeKTFactorisedMatrixElement()
   //const double q12 = q1.mass2(), q22 = q2.mass2();
 
   //=================================================================
+  //     four-momenta of the outgoing W^+ and W^-
+  //=================================================================
+
+  p_w1_ = Particle::Momentum( pt1x, pt1y, alpha1*ak1z + beta1*ak2z, alpha1*ak10 + beta1*ak20 );
+  p_w2_ = Particle::Momentum( pt2x, pt2y, alpha2*ak1z + beta2*ak2z, alpha2*ak10 + beta2*ak20 );
+
+  DebuggingInsideLoop( Form( "First W:  (E,p), m = (%f, %f, %f, %f), %f\n\t"
+                             "Second W: (E,p), m = (%f, %f, %f, %f), %f",
+                             p_w1_.px(), p_w2_.py(), p_w1_.pz(), p_w1_.energy(), p_w1_.mass(),
+                             p_w2_.px(), p_w2_.py(), p_w2_.pz(), p_w2_.energy(), p_w2_.mass() ) );
+
+  //assert( fabs( p_w1_.mass()-event_->getByRole( Particle::CentralSystem )[0].mass() ) < 1.e-6 );
+  //assert( fabs( p_w2_.mass()-event_->getByRole( Particle::CentralSystem )[1].mass() ) < 1.e-6 );
+
+  //=================================================================
   //     Mendelstam variables
   //=================================================================
 
   //const double shat = s_*x1*x2; // ishat = 1 (approximation)
   const double shat = ( q1+q2 ).mass2(); // ishat = 2 (exact formula)
 
-  const double that1 = ( q1-p1 ).mass2(), that2 = ( q2-p2 ).mass2(),
-               uhat1 = ( q1-p2 ).mass2(), uhat2 = ( q2-p1 ).mass2();
+  const double that1 = ( q1-p_w1_ ).mass2(), that2 = ( q2-p_w2_ ).mass2(),
+               uhat1 = ( q1-p_w2_ ).mass2(), uhat2 = ( q2-p_w1_ ).mass2();
   DebuggingInsideLoop( Form( "that(1/2) = %f / %f\n\t"
                              "uhat(1/2) = %f / %f",
                              that1, that2, uhat1, uhat2 ) );
@@ -246,6 +249,7 @@ PPtoWW::computeKTFactorisedMatrixElement()
     //=================================================================
     //     matrix element for gamma gamma --> W^+ W^-
     //     (Denner+Dittmaier+Schuster)
+    //     (work in collaboration with C. Royon)
     //=================================================================
     const double mw4 = mw2*mw2;
 
@@ -294,7 +298,7 @@ PPtoWW::computeKTFactorisedMatrixElement()
 
   const double aintegral = amat2 * ( 2.*M_PI )/ ( 16.*M_PI*M_PI*x1*x1*x2*x2*s_*s_ )
                          * flux1_/M_PI * flux2_/M_PI
-                         * Constants::GeV2toBarn * 0.5 / M_PI;
+                         * Constants::GeV2toBarn * 0.125 / M_PI;
 
   //=================================================================
   return aintegral*qt1_*qt2_*pt_diff_;
