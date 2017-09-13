@@ -165,42 +165,39 @@ namespace CepGen
       //=================================================================
       Particle& op1 = event_->getOneByRole( Particle::OutgoingBeam1 ),
                &op2 = event_->getOneByRole( Particle::OutgoingBeam2 );
-      // off-shell particles (remnants?)
-      bool os1 = false, os2 = false;
+
+      op1.setMomentum( PX_ );
+      op2.setMomentum( PY_ );
+
       switch ( cuts_.mode ) {
-        case Kinematics::ElectronProton: default: {
-          InError( "This kT factorisation process is intended for p-on-p collisions! Aborting!" );
-          exit(0); } break;
         case Kinematics::ElasticElastic:
           op1.setStatus( Particle::FinalState );
           op2.setStatus( Particle::FinalState );
           break;
         case Kinematics::ElasticInelastic:
           op1.setStatus( Particle::FinalState );
-          op2.setStatus( Particle::Undecayed ); op2.setMass(); os2 = true;
+          op2.setStatus( Particle::Undecayed ); op2.setMass( MY_ );
           break;
         case Kinematics::InelasticElastic:
-          op1.setStatus( Particle::Undecayed ); op1.setMass(); os1 = true;
+          op1.setStatus( Particle::Undecayed ); op1.setMass( MX_ );
           op2.setStatus( Particle::FinalState );
           break;
         case Kinematics::InelasticInelastic:
-          op1.setStatus( Particle::Undecayed ); op1.setMass(); os1 = true;
-          op2.setStatus( Particle::Undecayed ); op2.setMass(); os2 = true;
+          op1.setStatus( Particle::Undecayed ); op1.setMass( MX_ );
+          op2.setStatus( Particle::Undecayed ); op2.setMass( MX_ );
           break;    
+        default: { FatalError( "This kT factorisation process is intended for p-on-p collisions! Aborting!" ); } break;
       }
 
-      op1.setMomentum( PX_, os1 );
-      op2.setMomentum( PY_, os2 );
-  
       //=================================================================
       //     incoming partons (photons, pomerons, ...)
       //=================================================================
       //FIXME ensure the validity of this approach
       Particle& g1 = event_->getOneByRole( Particle::Parton1 ),
                &g2 = event_->getOneByRole( Particle::Parton2 );
-      g1.setMomentum( event_->getOneByRole( Particle::IncomingBeam1 ).momentum()-PX_, true);
+      g1.setMomentum( event_->getOneByRole( Particle::IncomingBeam1 ).momentum()-PX_, true );
       g1.setStatus( Particle::Incoming );
-      g2.setMomentum( event_->getOneByRole( Particle::IncomingBeam2 ).momentum()-PY_, true);
+      g2.setMomentum( event_->getOneByRole( Particle::IncomingBeam2 ).momentum()-PY_, true );
       g2.setStatus( Particle::Incoming );
     }
 
