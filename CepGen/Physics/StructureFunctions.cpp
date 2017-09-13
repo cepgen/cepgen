@@ -18,9 +18,55 @@ namespace CepGen
     }
   }
 
-  /// Fiore-Brasse proton structure function
   StructureFunctions
   StructureFunctions::FioreBrasse( double q2, double xbj )
+  {
+    const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
+    const double akin = 1. + 4.*mp2 * xbj*xbj/q2;
+    const double prefactor = q2*( 1.-xbj ) / ( 4.*M_PI*Constants::alphaEM*akin );
+    const double s = q2*( 1.-xbj )/xbj + mp2;
+
+    FioreBrasseParameterisation p = FioreBrasseParameterisation::standard();
+    double ampli_res = 0., ampli_tot = 0.;
+    for ( unsigned short i = 0; i < 3; ++i ) { //FIXME 4??
+      const FioreBrasseParameterisation::ResonanceParameters res = p.resonances[i];
+      if ( !res.enabled ) continue;
+      const double sqrts0 = sqrt( p.s0 );
+
+      std::complex<double> alpha;
+      if ( s > p.s0 )
+        alpha = std::complex<double>( res.alpha0 + res.alpha2*sqrts0 + res.alpha1*s, res.alpha2*sqrt( s-p.s0 ) );
+      else
+        alpha = std::complex<double>( res.alpha0 + res.alpha1*s + res.alpha2*( sqrts0 - sqrt( p.s0 - s ) ), 0. );
+
+      double formfactor = 1./pow( 1. + q2/res.q02, 2 );
+      double denom = pow( res.spin-std::real( alpha ), 2 ) + pow( std::imag( alpha ), 2 );
+      double ampli_imag = res.a*formfactor*formfactor*std::imag( alpha )/denom;
+      ampli_res += ampli_imag;
+    }
+    {
+      const FioreBrasseParameterisation::ResonanceParameters res = p.resonances[3];
+      double sE = res.alpha2, sqrtsE = sqrt( sE );
+      std::complex<double> alpha;
+      if ( s > sE )
+        alpha = std::complex<double>( res.alpha0 + res.alpha1*sqrtsE, res.alpha1*sqrt( s-sE ) );
+      else
+        alpha = std::complex<double>( res.alpha0 + res.alpha1*( sqrtsE - sqrt( sE-s ) ), 0. );
+      double formfactor = 1./pow( 1. + q2/res.q02, 2 );
+      double sp = 1.5*res.spin;
+      double denom = pow( sp-std::real( alpha ), 2 ) + pow( std::imag( alpha ), 2 );
+      double ampli_bg = res.a*formfactor*formfactor*std::imag( alpha )/denom;
+      ampli_res += ampli_bg;
+    }
+    ampli_tot = p.norm*ampli_res;
+
+    StructureFunctions fb;
+    fb.F2 = prefactor*ampli_tot;
+    return fb;
+  }
+
+  StructureFunctions
+  StructureFunctions::FioreBrasseOld( double q2, double xbj )
   {
     const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
     //const double m_min = Particle::massFromPDGId(Particle::Proton)+0.135;
