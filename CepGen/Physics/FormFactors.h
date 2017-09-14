@@ -10,6 +10,7 @@
 #include "CepGen/StructureFunctions/ALLM.h"
 #include "CepGen/StructureFunctions/BlockDurandHa.h"
 #include "CepGen/StructureFunctions/FioreBrasse.h"
+#include "CepGen/StructureFunctions/GenericLHAPDF.h"
 #include "CepGen/StructureFunctions/SuriYennie.h"
 #include "CepGen/StructureFunctions/SzczurekUleshchenko.h"
 

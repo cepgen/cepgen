@@ -33,6 +33,10 @@ if(LIBCONFIG)
   message(STATUS "libconfig++ found in ${LIBCONFIG}")
   list(APPEND CEPGEN_EXTERNAL_REQS ${LIBCONFIG})
 endif()
+if(LHAPDF)
+  message(STATUS "LHAPDF found in ${LHAPDF}")
+  list(APPEND CEPGEN_EXTERNAL_REQS ${LHAPDF})
+endif()
 
 #----- build all the intermediate objects
 
