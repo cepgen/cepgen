@@ -19,7 +19,10 @@ namespace CepGen
     //--- initialise the random number generator
     gsl_rng_env_setup();
     rng_ = gsl_rng_alloc( gsl_rng_default );
-    gsl_rng_set( rng_, time( nullptr ) ); // seed with time
+    unsigned long seed = ( param->vegas.seed > 0 )
+      ? param->vegas.seed
+      : time( nullptr ); // seed with time
+    gsl_rng_set( rng_, seed );
 
     Debugging( Form( "Number of integration dimensions: %d\n\t"
                      "Number of iterations:             %d\n\t"

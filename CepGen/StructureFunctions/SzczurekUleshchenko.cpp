@@ -29,11 +29,10 @@ namespace CepGen
                           + 1./9.*( xdv + 2.*xds )
                           + 1./9.*(       2.*xss );
 
-      // F2 corrected for low Q^2 behaviour
-      const double F2_corr = F2_aux * q2 / amu2,
-                   F1 = 0.5*F2_corr/xbj; // Callan-Gross relation
+      StructureFunctions su;
+      su.F2 = F2_aux * q2 / amu2; // F2 corrected for low Q^2 behaviour
 
-      return StructureFunctions( F1, F2_corr );
+      return su;
 #endif
     }
   }

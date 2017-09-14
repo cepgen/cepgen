@@ -64,6 +64,7 @@ namespace CepGen
       << std::setw( wt ) << "Maximum number of iterations" << ( pretty ? boldify( vegas.itvg ) : std::to_string( vegas.itvg ) ) << std::endl
       << std::setw( wt ) << "Number of function calls" << vegas.ncvg << std::endl
       << std::setw( wt ) << "Number of points to try per bin" << vegas.npoints << std::endl
+      << std::setw( wt ) << "Random number generator seed" << vegas.seed << std::endl
       << std::endl
       << std::setfill('_') << std::setw( wb ) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill( ' ' ) << std::endl
       << std::endl
@@ -78,7 +79,7 @@ namespace CepGen
       << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << std::endl
       << std::setw( wt ) << "Incoming particles" << ( pretty ? boldify( ip1.str().c_str() ) : ip1.str() ) << ", " << ( pretty ? boldify( ip2.str().c_str() ) : ip2.str() ) << std::endl
       << std::setw( wt ) << "Momenta (GeV/c)" << kinematics.inp.first << ", " << kinematics.inp.second << std::endl
-      << std::setw( wt ) << "Structure functions used" << kinematics.structure_functions << std::endl
+      << std::setw( wt ) << "Structure functions" << kinematics.structure_functions << std::endl
       << std::endl
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << std::endl
       << std::endl

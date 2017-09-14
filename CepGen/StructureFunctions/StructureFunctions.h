@@ -24,9 +24,10 @@ namespace CepGen
   class StructureFunctions
   {
     public:
-      StructureFunctions( double f1=0.0, double f2=0.0 ) : F1( f1 ), F2( f2 ) {}
+      StructureFunctions( double f2=0.0 ) : F2( f2 ), FM( 0.0 ) {}
 
-      double F1, F2;
+      double F2;
+      double F1;
       double FM;
   };
   /// Human-readable format of a structure function object

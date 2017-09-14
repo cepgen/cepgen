@@ -127,6 +127,7 @@ namespace CepGen
         if ( veg.exists( "num_points" ) ) params_.vegas.npoints = (int)veg["num_points"];
         if ( veg.exists( "num_integration_calls" ) ) params_.vegas.ncvg = (int)veg["num_integration_calls"];
         if ( veg.exists( "num_integration_iterations" ) ) params_.vegas.itvg = (int)veg["num_integration_iterations"];
+        if ( veg.exists( "seed" ) ) params_.vegas.seed = (unsigned long)veg["seed"];
       } catch ( const libconfig::SettingNotFoundException& nfe ) {
         FatalError( Form( "Failed to retrieve the field \"%s\".", nfe.getPath() ) );
       }
@@ -222,6 +223,7 @@ namespace CepGen
       veg.add( "num_points", libconfig::Setting::TypeInt ) = (int)params->vegas.npoints;
       veg.add( "num_integration_calls", libconfig::Setting::TypeInt ) = (int)params->vegas.ncvg;
       veg.add( "num_integration_iterations", libconfig::Setting::TypeInt ) = (int)params->vegas.itvg;
+      veg.add( "seed", libconfig::Setting::TypeInt64 ) = (long)params->vegas.seed;
     }
 
     void

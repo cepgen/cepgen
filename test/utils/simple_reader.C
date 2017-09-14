@@ -11,12 +11,12 @@ void
 simple_reader( const char* file="output.root" )
 {
   map<string,TH1D*> m_plt = {
-    { "invm", new TH1D( "invm", "Dilepton invariant mass\\d#sigma/dm\\GeV", 50, 0., 500. ) },
-    { "ptpair", new TH1D( "ptpair", "Dilepton p_{T}\\d#sigma/dp_{T}\\GeV?.1f", 64, 0., 160. ) },
-    { "singlept", new TH1D( "singlept", "Single lepton p_{T}\\d#sigma/dp_{T}\\GeV", 25, 25., 150. ) },
-    { "singleeta", new TH1D( "singleeta", "Single lepton #eta\\d#sigma/d#eta\\?.2f", 20, -2.5, 2.5 ) },
-    { "acopl", new TH1D( "acopl", "Dilepton |#Delta#phi/#pi|\\d#sigma/d#phi\\?.2f", 50, 0., 1. ) },
-    { "mx", new TH1D( "mx", "Dissociated proton mass\\d#sigma/dM_{X}\\GeV", 50, 0., 1000. ) },
+    { "invm", new TH1D( "invm", "Pair invariant mass\\d#sigma/dm\\GeV", 100, 0., 1000. ) },
+    { "ptpair", new TH1D( "ptpair", "Pair p_{T}\\d#sigma/dp_{T}\\GeV?.1f", 100, 0., 1000. ) },
+    { "singlept", new TH1D( "singlept", "Single p_{T}\\d#sigma/dp_{T}\\GeV", 125, 25., 150. ) },
+    { "singleeta", new TH1D( "singleeta", "Single #eta\\d#sigma/d#eta\\?.2f", 5, -2.5, 2.5 ) },
+    { "acopl", new TH1D( "acopl", "Acoplanarity |#Delta#phi/#pi|\\d#sigma/d#phi\\?.2f", 100, 0., 1. ) },
+    { "mx", new TH1D( "mx", "Dissociated proton mass\\d#sigma/dM_{X}\\GeV", 100, 0., 1000. ) },
   };
 
   CepGen::TreeEvent ev;
@@ -66,6 +66,7 @@ simple_reader( const char* file="output.root" )
     //label.SetTextSize( 0.04 );
     //label.Draw();
     c.Prettify( plot );
+    c.SetGrid();
     c.SetLogy();
     c.Save( "pdf" );
   }

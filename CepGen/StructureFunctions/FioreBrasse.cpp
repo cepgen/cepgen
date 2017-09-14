@@ -144,7 +144,10 @@ namespace CepGen
       const double w1 = ( mx2-mp2 )/( 8.*M_PI*M_PI*mp*Constants::alphaEM )/Constants::GeV2toBarn*1.e6 * sigma_t;
       const double w2 = w1 * q2 / ( q2+nu2 );
 
-      return StructureFunctions( w1, w2 );
+      StructureFunctions fb_old;
+      fb_old.F1 = w1; //FIXME
+      fb_old.F2 = w2; //FIXME
+      return fb_old;
     }
   }
 }

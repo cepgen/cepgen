@@ -44,7 +44,7 @@ namespace CepGen
       /// Collection of Vegas integrator parameters
       struct Vegas
       {
-        Vegas() : ncvg( 100000 ), itvg( 10 ), npoints( 100 ), first_run( true ) {}
+        Vegas() : ncvg( 100000 ), itvg( 10 ), npoints( 100 ), first_run( true ), seed( 0 ) {}
         unsigned int ncvg; // ??
         /// Maximal number of iterations to perform by VEGAS
         unsigned int itvg;
@@ -52,6 +52,8 @@ namespace CepGen
         unsigned int npoints;
         /// Is it the first time the integrator is run?
         bool first_run;
+        /// Random number generator seed
+        unsigned long seed;
       };
       /// Vegas integrator parameters
       Vegas vegas;

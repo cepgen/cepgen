@@ -25,6 +25,6 @@ namespace CepGen
   std::ostream&
   operator<<( std::ostream& os, const StructureFunctions& sf )
   {
-    return os << "F1 = " << sf.F1 << ", F2 = " << sf.F2;
+    return os << ", F2 = " << sf.F2;
   }
 }
