@@ -1,5 +1,5 @@
-#ifndef CepGen_Physics_Particle_h
-#define CepGen_Physics_Particle_h
+#ifndef CepGen_Event_Particle_h
+#define CepGen_Event_Particle_h
 
 #include <sstream>
 #include <cmath>

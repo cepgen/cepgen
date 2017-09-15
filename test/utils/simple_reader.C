@@ -5,7 +5,7 @@
 #include "../TreeEvent.h"
 #include "../Canvas.h"
 
-#include "CepGen/Physics/Particle.h"
+#include "CepGen/Event/Particle.h"
 
 void
 simple_reader( const char* file="output.root" )

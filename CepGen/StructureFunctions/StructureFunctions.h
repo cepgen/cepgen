@@ -1,7 +1,10 @@
 #ifndef CepGen_StructureFunctions_StructureFunctions_h
 #define CepGen_StructureFunctions_StructureFunctions_h
 
-#include "CepGen/Physics/Particle.h"
+#include "CepGen/Event/Particle.h"
+#include <ostream>
+#include <vector>
+#include <cmath>
 
 namespace CepGen
 {

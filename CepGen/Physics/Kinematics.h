@@ -7,7 +7,8 @@
 
 #include "CepGen/Core/utils.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
-#include "Particle.h"
+#include "CepGen/Event/Particle.h"
+
 #include "Cuts.h"
 
 using std::cout;

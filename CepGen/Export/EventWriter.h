@@ -2,7 +2,7 @@
 #define CepGen_Export_EventWriter_h
 
 #include "CepGen/Parameters.h"
-#include "CepGen/Physics/Event.h"
+#include "CepGen/Event/Event.h"
 #include "CepGen/Export/ExportHandler.h"
 
 #ifdef HEPMC_LINKED

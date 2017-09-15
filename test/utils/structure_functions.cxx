@@ -1,5 +1,5 @@
 #include "CepGen/Physics/FormFactors.h"
-#include "CepGen/Physics/Particle.h"
+#include "CepGen/Event/Particle.h"
 #include "test/Canvas.h"
 
 #include "TGraph.h"

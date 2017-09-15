@@ -6,7 +6,7 @@
 #ifdef HEPMC_VERSION3
 
 #include "HepMC/LHEF.h"
-#include "CepGen/Physics/Event.h"
+#include "CepGen/Event/Event.h"
 
 namespace OutputHandler
 {

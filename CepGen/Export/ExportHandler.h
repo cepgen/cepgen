@@ -2,7 +2,7 @@
 #define CepGen_Export_ExportHandler_h
 
 #include "CepGen/Parameters.h"
-#include "CepGen/Physics/Event.h"
+#include "CepGen/Event/Event.h"
 
 namespace CepGen
 {

@@ -1,7 +1,7 @@
 #ifndef CepGen_Processes_GenericProcess_h
 #define CepGen_Processes_GenericProcess_h
 
-#include "CepGen/Physics/Event.h"
+#include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
