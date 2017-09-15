@@ -30,12 +30,15 @@ namespace CepGen
         void parseIntegrator( const libconfig::Setting& );
         void parseGenerator( const libconfig::Setting& );
         void parseTamingFunctions( const libconfig::Setting& );
+        void parseHadroniser( const libconfig::Setting& );
 
         static void writeProcess( const Parameters*, libconfig::Setting& );
         static void writeIncomingKinematics( const Parameters*, libconfig::Setting& );
         static void writeOutgoingKinematics( const Parameters*, libconfig::Setting& );
         static void writeTamingFunctions( const Parameters*, libconfig::Setting& );
         static void writeIntegrator( const Parameters*, libconfig::Setting& );
+        static void writeHadroniser( const Parameters*, libconfig::Setting& );
+        static void writeVegas( const Parameters*, libconfig::Setting& );
         static void writeGenerator( const Parameters*, libconfig::Setting& );
 #endif
     };

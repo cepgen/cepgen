@@ -1,0 +1,4 @@
+hadroniser = {
+  name = "pythia8";
+  decayWto = ( 11, 13 );
+};

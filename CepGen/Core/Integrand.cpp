@@ -92,7 +92,7 @@ namespace CepGen
     //--- only fill in the process' Event object if storage is requested
     //    or if taming functions are to be applied
 
-    if ( !p->taming_functions.empty() || p->storage() ) p->process()->fillKinematics();
+    p->process()->fillKinematics();
 
     //--- once the kinematics variables have been populated,
     //    can apply the collection of taming functions
@@ -110,6 +110,10 @@ namespace CepGen
     integrand *= taming;
 
     //--- full event content (+ hadronisation) if generating events
+
+    if ( p->hadroniser() ) {
+      p->hadroniser()->hadronise( ev.get() );
+    }
 
     if ( p->storage() ) {
 

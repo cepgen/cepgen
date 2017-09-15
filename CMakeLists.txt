@@ -51,6 +51,9 @@ if(HEPMC_LIB)
   include_directories(${HEPMC_INCLUDE})
   list(APPEND CEPGEN_EXTERNAL_REQS ${HEPMC_LIB} ${HEPMC_FIO_LIB})
   add_definitions(-DLIBHEPMC)
+if(PYTHIA8)
+  message(STATUS "Pythia8 found in ${PYTHIA8}")
+  list(APPEND CEPGEN_EXTERNAL_REQS ${PYTHIA8})
 endif()
 
 #----- build all the intermediate objects

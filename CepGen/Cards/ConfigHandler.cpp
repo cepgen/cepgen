@@ -50,6 +50,9 @@ namespace CepGen
         if ( proc.exists( "in_kinematics" ) ) parseIncomingKinematics( proc["in_kinematics"] );
         if ( proc.exists( "out_kinematics" ) ) parseOutgoingKinematics( proc["out_kinematics"] );
 
+        //--- hadroniser parameters
+        if ( root.exists( "hadroniser" ) ) parseHadroniser( root["hadroniser"] );
+
         //--- generation parameters
         if ( root.exists( "integrator" ) ) parseIntegrator( root["integrator"] );
         if ( root.exists( "vegas" ) ) parseIntegrator( root["vegas"] ); //FIXME for backward compatibility
@@ -163,6 +166,51 @@ namespace CepGen
       if ( !tf.isList() ) FatalError( "The taming functions definition must be wrapped within a list!" );
       for ( unsigned short i = 0; i < tf.getLength(); ++i ) {
         params_.taming_functions.add( tf[i]["variable"], tf[i]["expression"] );
+      }
+    }
+
+    void
+    ConfigHandler::parseHadroniser( const libconfig::Setting& hadr )
+    {
+      try {
+        std::string hadr_name = hadr["name"];
+        if ( hadr_name == "pythia8" ) {
+#ifdef PYTHIA8
+          Hadroniser::Pythia8Hadroniser* pythia8 = new Hadroniser::Pythia8Hadroniser;
+          pythia8->readString( Form( "Beams:eCM = %.2f", params_.kinematics.sqrtS() ) );
+          if ( hadr.exists( "decayWto" ) ) {
+            libconfig::Setting& pdg_ids = hadr["decayWto"];
+            if ( !pdg_ids.isList() || pdg_ids.getLength() != 2 ) throw libconfig::SettingTypeException( pdg_ids );
+            std::ostringstream os;
+            pythia8->readString( "24:onMode = off" ); // disable all W decays, but...
+            for ( unsigned short i = 0; i < pdg_ids.getLength(); ++i ) {
+              int pdg_id = pdg_ids[i];
+              switch ( abs( pdg_id ) ) {
+                case 1: case 2: // u/d quark
+                  os << " 1 2"; break;
+                case 3: case 4: // c/s quark
+                  os << " 3 4"; break;
+                case 5: case 6: // t/b quark
+                  os << " 5 6"; break;
+                case 11: // e/nu_e
+                  os << " 11 12"; break;
+                case 13: // mu/nu_mu
+                  os << " 13 14"; break;
+                case 15: // tau/nu_tau
+                  os << " 15 16"; break;
+                default: { FatalError( Form( "Unsupported W decay mode: %d", pdg_id ) ); } break;
+              }
+            }
+            pythia8->readString( Form( "24:onIfAny = %s", os.str().c_str() ) );
+          }
+          pythia8->init();
+          params_.setHadroniser( pythia8 );
+#endif
+        }
+      } catch ( const libconfig::SettingTypeException& nfe ) {
+        FatalError( Form( "Wrong type to the field \"%s\".", nfe.getPath() ) );
+      } catch ( const libconfig::SettingNotFoundException& nfe ) {
+        FatalError( Form( "Failed to retrieve the field \"%s\".", nfe.getPath() ) );
       }
     }
 

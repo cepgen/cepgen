@@ -11,7 +11,7 @@ namespace CepGen
   Parameters::Parameters( Parameters& param ) :
     kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
     taming_functions( param.taming_functions ),
-    process_( std::move( param.process_ ) ),
+    process_( std::move( param.process_ ) ), hadroniser_( std::move( param.hadroniser_ ) ),
     store_( param.store_ )
   {}
 
@@ -66,7 +66,15 @@ namespace CepGen
       << std::endl
       << std::setw( wt ) << "Events generation? " << ( pretty ? yesno( generation.enabled ) : std::to_string( generation.enabled ) ) << std::endl
       << std::setw( wt ) << "Number of events to generate" << ( pretty ? boldify( generation.maxgen ) : std::to_string( generation.maxgen ) ) << std::endl
-      << std::setw( wt ) << "Verbosity level " << Logger::get().level << std::endl
+      << std::setw( wt ) << "Verbosity level " << Logger::get().level << std::endl;
+    if ( hadroniser_ ) {
+      os
+        << std::endl
+        << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Hadronisation algorithm " ) : "Hadronisation algorithm" ) << std::setfill( ' ' ) << std::endl
+        << std::endl
+        << std::setw( wt ) << "Name" << hadroniser_->name() << std::endl;
+    }
+    os
       << std::endl
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Integration parameters " ) : "Integration parameters" ) << std::setfill( ' ' ) << std::endl
       << std::endl;

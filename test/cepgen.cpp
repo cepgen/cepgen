@@ -35,8 +35,8 @@ int main( int argc, char* argv[] ) {
     //mg.parameters->process_mode = Kinematics::InelasticElastic;
     mg.parameters->kinematics.mode = CepGen::Kinematics::ElasticElastic;
     mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SuriYennie;
-#ifdef PYTHIA6
-    mg.parameters->setHadroniser( new CepGen::Hadroniser::Pythia6Hadroniser );
+#ifdef PYTHIA8
+    mg.parameters->setHadroniser( new CepGen::Hadroniser::Pythia8Hadroniser );
 #endif
 
     mg.parameters->kinematics.inp = { 6500., 6500. };

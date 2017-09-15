@@ -323,7 +323,7 @@ PPtoWW::fillCentralParticlesKinematics()
   //=================================================================
   Particle& ow1 = event_->getByRole( Particle::CentralSystem )[0];
   ow1.setPdgId( ow1.pdgId(), sign );
-  ow1.setStatus( Particle::FinalState );
+  ow1.setStatus( Particle::Undecayed );
   ow1.setMomentum( p_w1_ );
 
   //=================================================================
@@ -331,7 +331,7 @@ PPtoWW::fillCentralParticlesKinematics()
   //=================================================================
   Particle& ow2 = event_->getByRole( Particle::CentralSystem )[1];
   ow2.setPdgId( ow2.pdgId(), -sign );
-  ow2.setStatus( Particle::FinalState );
+  ow2.setStatus( Particle::Undecayed );
   ow2.setMomentum( p_w2_ );
 }
 
