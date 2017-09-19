@@ -1,6 +1,10 @@
 hadroniser = {
   name = "pythia8";
   seed = 0L;
+  pythiaPreConfiguration = (
+    "ProcessLevel:all = off",
+    "ProcessLevel:resonanceDecays = on"
+  );
   pythiaConfiguration = (
     "Random:setSeed = on", // random engine
     "Tune:preferLHAPDF = 2",
@@ -14,14 +18,11 @@ hadroniser = {
     "ParticleDecays:allowPhotonRadiation = on",
     //"ParticleDecays:allowPhotonRadiation = off", //FIXME
     // CUEP8M1 tuning
-    "Tune:pp 14",
-    "Tune:ee 7",
+    "Tune:pp 14", // Monash 2013 tune by Peter Skands (January 2014)
     "MultipartonInteractions:pT0Ref = 2.4024",
     "MultipartonInteractions:ecmPow = 0.25208",
     "MultipartonInteractions:expPow = 1.6",
     // process-specific
-    "ProcessLevel:all = off",
-    "ProcessLevel:resonanceDecays = on",
     "24:onMode = off", // disable all W decays, but...
     "24:onIfAny = 11 13" // enable e-nue + mu-numu final states
   );

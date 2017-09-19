@@ -91,6 +91,17 @@ namespace CepGen
     return *parts_by_role.begin();
   }
 
+  const Particle&
+  Event::getOneByRole( const Particle::Role& role ) const
+  {
+    //--- retrieve the first particle a the given role
+    const Particles& parts_by_role = particles_.at( role );
+    if ( parts_by_role.size() > 1 ) {
+      FatalError( Form( "More than one particle with role %d: %d particles", (int)role, parts_by_role.size() ) );
+    }
+    return *parts_by_role.begin();
+  }
+
   Particle&
   Event::getById( int id )
   {

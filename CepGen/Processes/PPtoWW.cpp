@@ -114,23 +114,23 @@ PPtoWW::computeKTFactorisedMatrixElement()
   //     auxiliary quantities
   //=================================================================
 
-  const double alpha1 = amt1/sqs_*exp(  y1_ ),
-               alpha2 = amt2/sqs_*exp(  y2_ ),
+  const double alpha1 = amt1/sqs_*exp( +y1_ ),
+               alpha2 = amt2/sqs_*exp( +y2_ ),
                beta1  = amt1/sqs_*exp( -y1_ ),
                beta2  = amt2/sqs_*exp( -y2_ );
   DebuggingInsideLoop( Form( "Sudakov parameters:\n\t"
                              "  alpha1/2 = %f / %f\n\t"
                              "   beta1/2 = %f / %f", alpha1, alpha2, beta1, beta2 ) );
 
-  const double q1t2 = q1tx*q1tx+q1ty*q1ty,
-               q2t2 = q2tx*q2tx+q2ty*q2ty;
+  const double q1t2 = q1tx*q1tx + q1ty*q1ty,
+               q2t2 = q2tx*q2tx + q2ty*q2ty;
 
   //const double old_x2 = 0.; //FIXME figure out where this comes from
   //const double delta_x1 = (MX_*MX_+q2t2)/((1.-old_x2)*s_);
 
   //x1 = alpha1+alpha2+delta_x1;
-  const double x1 = alpha1+alpha2,
-               x2 = beta1 +beta2;
+  const double x1 = alpha1 + alpha2,
+               x2 = beta1  + beta2;
 
   /*const double xi_x1 = log10(x1);
   const double xi_x2 = log10(x2);*/
@@ -338,6 +338,7 @@ PPtoWW::fillCentralParticlesKinematics()
 double
 PPtoWW::WWamplitude( double shat, double that, short lam1, short lam2, short lam3, short lam4 ) const
 {
+  // start by defining some constants
   const double mw = Particle::massFromPDGId( Particle::W ), mw2 = mw*mw;
   const double sqrt2 = sqrt( 2. );
 

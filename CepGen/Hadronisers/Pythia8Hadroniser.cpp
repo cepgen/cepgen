@@ -1,5 +1,9 @@
 #ifdef PYTHIA8
 #include "Pythia8Hadroniser.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/utils.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Event/Particle.h"
 
 namespace CepGen
 {
@@ -44,7 +48,8 @@ namespace CepGen
       pythia_->event.append( py8part );
 
       const unsigned short num_before = pythia_->event.size(); // number of particles before the decay
-      pythia_->next(); // launch the decay
+      if ( !pythia_->next() ) return false; // launch the decay
+//      std::cout << pythia_->info.sigmaGen() << std::endl;
 
       // map { "pythia id" -> "cepgen id" }
       std::map<unsigned short, unsigned short> py_cg_corresp = { { 1, part.id() } };
@@ -83,10 +88,10 @@ namespace CepGen
 
       Particles& op1 = ev.getByRole( Particle::OutgoingBeam1 ), &op2 = ev.getByRole( Particle::OutgoingBeam2 );
       for ( Particles::const_iterator p_it = op1.begin(); p_it != op1.end(); ++p_it ) {
-        //... excited proton fragmentation
+        // excited proton fragmentation
       }
       for ( Particles::const_iterator p_it = op2.begin(); p_it != op2.end(); ++p_it ) {
-        //... excited proton fragmentation
+        // excited proton fragmentation
       }
 
       //--- central system hadronisation/decay/...
@@ -98,13 +103,6 @@ namespace CepGen
         ev.getById( *p_it ).setStatus( Particle::Resonance );
       }
 
-      return true;
-    }
-
-    bool
-    Pythia8Hadroniser::prepareHadronisation( Event& ev )
-    {
-      init();
       return true;
     }
   }

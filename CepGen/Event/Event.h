@@ -65,6 +65,7 @@ namespace CepGen
        * \return A Particle object corresponding to the first particle with the role
        */
       Particle& getOneByRole( const Particle::Role& role );
+      const Particle& getOneByRole( const Particle::Role& role ) const;
       /**
        * Returns the reference to the Particle object corresponding to a unique identifier in the event
        * \brief Gets one particle by its unique identifier in the event

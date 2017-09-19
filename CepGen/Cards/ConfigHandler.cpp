@@ -180,6 +180,15 @@ namespace CepGen
           long long seed = ( hadr.exists( "seed" ) ) ? hadr["seed"] : -1ll;
           pythia8->setSeed( seed );
           pythia8->readString( Form( "Beams:eCM = %.2f", params_.kinematics.sqrtS() ) );
+          if ( hadr.exists( "pythiaPreConfiguration" ) ) {
+            libconfig::Setting& configs = hadr["pythiaPreConfiguration"];
+            if ( !configs.isList() ) throw libconfig::SettingTypeException( configs );
+            for ( unsigned short i = 0; i < configs.getLength(); ++i ) {
+              std::string config = configs[i];
+              pythia8->readString( config );
+            }
+          }
+          pythia8->init();
           if ( hadr.exists( "pythiaConfiguration" ) ) {
             libconfig::Setting& configs = hadr["pythiaConfiguration"];
             if ( !configs.isList() ) throw libconfig::SettingTypeException( configs );
@@ -188,7 +197,6 @@ namespace CepGen
               pythia8->readString( config );
             }
           }
-          pythia8->init();
           params_.setHadroniser( pythia8 );
 #endif
         }
@@ -233,8 +241,8 @@ namespace CepGen
         kin.add( "max_ptdiff", libconfig::Setting::TypeFloat ) = params->kinematics.cuts.central.at( Cuts::pt_diff ).max();
       }
       if ( params->kinematics.cuts.central.count( Cuts::rapidity_diff ) ) {
-        kin.add( "min_dely", libconfig::Setting::TypeFloat ) = params->kinematics.cuts.central.at( Cuts::rapidity_diff ).min();
-        kin.add( "max_dely", libconfig::Setting::TypeFloat ) = params->kinematics.cuts.central.at( Cuts::rapidity_diff ).max();
+        kin.add( "min_rapiditydiff", libconfig::Setting::TypeFloat ) = params->kinematics.cuts.central.at( Cuts::rapidity_diff ).min();
+        kin.add( "max_rapiditydiff", libconfig::Setting::TypeFloat ) = params->kinematics.cuts.central.at( Cuts::rapidity_diff ).max();
       }
       if ( params->kinematics.cuts.central.count( Cuts::energy_single ) ) {
         kin.add( "min_energy", libconfig::Setting::TypeFloat ) = params->kinematics.cuts.central.at( Cuts::energy_single ).min();

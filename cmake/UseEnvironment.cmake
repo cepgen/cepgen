@@ -1,7 +1,3 @@
-if(EXISTS $ENV{has_pythia6})
-  add_definitions(-DPYTHIA6)
-endif()
-
 if($ENV{HOSTNAME} MATCHES "^lxplus[0-9]+.cern.ch")
   set(BASE_DIR "/cvmfs/sft.cern.ch/lcg/external")
   set(GSL_DIR "${BASE_DIR}/GSL/1.14/x86_64-slc5-gcc44-opt")

@@ -9,9 +9,4 @@ add_library(CepGenExternalHadronisers SHARED ${sources})
 
 #----- check the external dependencies
 
-if(EXISTS $ENV{has_pythia6})
-  add_library(pythia6_shared SHARED $ENV{has_pythia6})
-  target_link_libraries(CepGenExternalHadronisers pythia6_shared)
-endif()
-
 install(TARGETS CepGenExternalHadronisers DESTINATION lib)

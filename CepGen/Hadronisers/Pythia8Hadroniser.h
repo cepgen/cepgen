@@ -25,10 +25,9 @@ namespace CepGen
         void setSeed( long long seed );
         void readString( const char* param ) { pythia_->readString( param ); }
         void readString( const std::string& param ) { pythia_->readString( param ); }
-        void init() { pythia_->init(); }
+        bool init() { return pythia_->init(); }
 
       private:
-        bool prepareHadronisation( Event& ev );
         std::unique_ptr<Pythia8::Pythia> pythia_;
     };
   }
