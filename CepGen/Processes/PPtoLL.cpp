@@ -109,7 +109,7 @@ PPtoLL::computeKTFactorisedMatrixElement()
   //=================================================================
 
   const double dely = fabs( y1_-y2_ );
-  const Kinematics::Limits dely_limits = cuts_.cuts.central[Cuts::dely];
+  const Kinematics::Limits dely_limits = cuts_.cuts.central[Cuts::rapidity_diff];
   if ( dely_limits.hasMin() && dely < dely_limits.min() ) return 0.;
   if ( dely_limits.hasMax() && dely > dely_limits.max() ) return 0.;
 

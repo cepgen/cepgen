@@ -54,9 +54,7 @@ namespace CepGen
       };
     public:
       Kinematics();
-      Kinematics( const Kinematics& kin ) :
-        inp( kin.inp ), inpdg( kin.inpdg ), central_system( kin.central_system ), mode( kin.mode ),
-        structure_functions( kin.structure_functions ), cuts( kin.cuts ) {}
+      Kinematics( const Kinematics& kin );
       ~Kinematics();
 
       /// Type of kinematics to consider for the process
@@ -91,17 +89,14 @@ namespace CepGen
       StructureFunctions::Type structure_functions;
 
       struct CutsList {
-        CutsList() :
-          central( { { Cuts::pt_single, 3.0 }, { Cuts::pt_diff, { 0., 400.0 } } } ),
-          remnants( { { Cuts::mass, { 1.07, 320.0 } } } ),
-          initial( { { Cuts::q2, { 0.0, 1.0e5 } }, { Cuts::qt, { 0.0, 500.0 } } } ) {}
-        CutsList( const CutsList& cuts ) : central( cuts.central ), remnants( cuts.remnants ), initial( cuts.initial ) {}
+        CutsList();
+        CutsList( const CutsList& cuts );
+        /// Cuts on the initial particles kinematics
+        std::map<Cuts::InitialState, Limits> initial;
         /// Cuts on the central system produced
         std::map<Cuts::Central, Limits> central;
         /// Cuts on the beam remnants system
         std::map<Cuts::Remnants, Limits> remnants;
-        /// Cuts on the initial particles kinematics
-        std::map<Cuts::InitialState, Limits> initial;
       };
       CutsList cuts;
   };

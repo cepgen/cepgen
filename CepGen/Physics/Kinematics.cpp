@@ -10,6 +10,13 @@ namespace CepGen
     mode( ElasticElastic ), structure_functions( StructureFunctions::SuriYennie )
   {}
 
+  Kinematics::Kinematics( const Kinematics& kin ) :
+    inp( kin.inp ), inpdg( kin.inpdg ),
+    central_system( kin.central_system ),
+    mode( kin.mode ), structure_functions( kin.structure_functions ),
+    cuts( kin.cuts )
+  {}
+
   Kinematics::~Kinematics()
   {}
 
@@ -62,5 +69,15 @@ namespace CepGen
     if ( !hasMin() || !hasMax() ) return invalid_;
     return first + ( second-first ) * v;
   }
+
+  Kinematics::CutsList::CutsList() :
+    initial( { { Cuts::q2, { 0.0, 1.0e5 } }, { Cuts::qt, { 0.0, 500.0 } } } ),
+    central( { { Cuts::pt_single, 3.0 }, { Cuts::pt_diff, { 0., 400.0 } } } ),
+    remnants( { { Cuts::mass, { 1.07, 320.0 } } } )
+  {}
+
+  Kinematics::CutsList::CutsList( const CutsList& cuts ) :
+    initial( cuts.initial ), central( cuts.central ), remnants( cuts.remnants )
+  {}
 }
 

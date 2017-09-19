@@ -106,7 +106,7 @@ PPtoWW::computeKTFactorisedMatrixElement()
   //=================================================================
 
   const double dely = fabs( y1_-y2_ );
-  const Kinematics::Limits dely_limits = cuts_.cuts.central[Cuts::dely];
+  const Kinematics::Limits dely_limits = cuts_.cuts.central[Cuts::rapidity_diff];
   if ( dely_limits.hasMin() && dely < dely_limits.min() ) return 0.;
   if ( dely_limits.hasMax() && dely > dely_limits.max() ) return 0.;
 
@@ -269,6 +269,8 @@ PPtoWW::computeKTFactorisedMatrixElement()
     //     off-shell Nachtmann formulae
     //=================================================================
 
+    const double e2 = 4.*M_PI*Constants::alphaEM;
+
     const double phi_diff = phi_qt1_-phi_qt2_, phi_sum = phi_qt1_+phi_qt2_;
     double amat2_0 = 0., amat2_1 = 0., amat2_interf = 0.;
     for ( const auto lam3 : { -1, 0, 1 } ) {
@@ -282,7 +284,7 @@ PPtoWW::computeKTFactorisedMatrixElement()
         amat2_interf += -2.*( cos( phi_sum+phi_diff )*( ampli_pp*ampli_pm+ampli_mm*ampli_mp ) + cos( phi_sum-phi_diff )*( ampli_pp*ampli_mp+ampli_mm*ampli_pm ) );
       }
     }
-    amat2 = amat2_0 + amat2_1 + amat2_interf;
+    amat2 = e2*e2 * ( amat2_0 + amat2_1 + amat2_interf );
   }
 
   //============================================
@@ -314,7 +316,7 @@ void
 PPtoWW::fillCentralParticlesKinematics()
 {
   // randomise the charge of the outgoing leptons
-  int sign = ( drand()>.5 ) ? +1 : -1;
+  short sign = ( drand()>.5 ) ? +1 : -1;
 
   //=================================================================
   //     first outgoing lepton
@@ -337,21 +339,23 @@ double
 PPtoWW::WWamplitude( double shat, double that, short lam1, short lam2, short lam3, short lam4 ) const
 {
   const double mw = Particle::massFromPDGId( Particle::W ), mw2 = mw*mw;
-  const double cos_theta = ( 1.+2.*( that-mw2 )/shat ) / sqrt( 1. + 1.e-10 - 4.*mw2/shat );
-  const double sin_theta = sqrt( 1.-cos_theta*cos_theta );
-  const double beta = sqrt( 1.-4.*mw2/shat );
-  const double gam = 1./sqrt( 1.-beta*beta );
-  const double A = ( 1.-beta*beta*cos_theta*cos_theta );
-  const double e2 = 4.*M_PI*Constants::alphaEM;
+  const double sqrt2 = sqrt( 2. );
 
-  const double term1 = 1./( gam*gam*A )*( ( gam*gam+1. )*( 1.-lam1*lam2 )* sin_theta*sin_theta - ( 1.+lam1*lam2 ) );
-  const double term2 = -sqrt( 2. )/( gam*A )*( lam1-lam2 ) * ( 1.+lam1*lam3*cos_theta )*sin_theta;
-  const double term3 = -0.5/A*( 2.*beta*( lam1+lam2 )*( lam3+lam4 ) - ( 1./gam/gam )*( 1.+lam3*lam4 )*( 2.*lam1*lam2+( 1.-lam1*lam2 ) * cos_theta*cos_theta ) +( 1.+lam1*lam2*lam3*lam4 )*( 3.+lam1*lam2 ) + 2.*( lam1-lam2 )*( lam3-lam4 )*cos_theta + ( 1.-lam1*lam2 )*( 1.-lam3*lam4 )*cos_theta*cos_theta );
-  const double term4 = -sqrt( 2. )/( gam*A )*( lam2-lam1 ) *( 1.+lam2*lam4*cos_theta )*sin_theta;
+  // then compute some kinematic variables
+  const double cos_theta = ( 1.+2.*( that-mw2 )/shat ) / sqrt( 1. + 1.e-10 - 4.*mw2/shat ), cos_theta2 = cos_theta*cos_theta;
+  const double sin_theta2 = 1.-cos_theta2, sin_theta = sqrt( sin_theta2 );
+  const double beta = sqrt( 1.-4.*mw2/shat ), beta2 = beta*beta;
+  const double gamma = 0.5*sqrt( shat )/mw, gamma2 = gamma*gamma;
+  const double invA = 1./( 1.-beta2*cos_theta2 );
 
-  if ( lam3 == 0 && lam4 == 0 ) return e2*term1;
-  if ( lam4 == 0 ) return e2*term2;
-  if ( lam3 == 0 ) return e2*term4;
-  if ( lam3 != 0 && lam4 != 0 ) return e2*term3;
+  const double term1 = 1./gamma2*( ( gamma2+1. )*( 1.-lam1*lam2 )* sin_theta2 - ( 1.+lam1*lam2 ) );
+  const double term2 = -sqrt2/gamma*( lam1-lam2 ) * ( 1.+lam1*lam3*cos_theta )*sin_theta;
+  const double term3 = -0.5*( 2.*beta*( lam1+lam2 )*( lam3+lam4 ) - ( 1./gamma2 )*( 1.+lam3*lam4 )*( 2.*lam1*lam2+( 1.-lam1*lam2 ) * cos_theta2 ) +( 1.+lam1*lam2*lam3*lam4 )*( 3.+lam1*lam2 ) + 2.*( lam1-lam2 )*( lam3-lam4 )*cos_theta + ( 1.-lam1*lam2 )*( 1.-lam3*lam4 )*cos_theta2 );
+  const double term4 = -sqrt2/gamma*( lam2-lam1 ) *( 1.+lam2*lam4*cos_theta )*sin_theta;
+
+  if ( lam3 == 0 && lam4 == 0 ) return invA*term1;
+  if ( lam4 == 0 )              return invA*term2;
+  if ( lam3 == 0 )              return invA*term4;
+  if ( lam3 != 0 && lam4 != 0 ) return invA*term3;
   return 0.;
 }
