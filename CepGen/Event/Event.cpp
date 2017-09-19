@@ -9,8 +9,7 @@ namespace CepGen
 {
   Event::Event() :
     num_hadronisation_trials( 0 ),
-    time_generation( -1. ), time_total( -1. ),
-    num_cs_particle_( 0 ), num_op1_particle_( 0 ), num_op2_particle_( 0 )
+    time_generation( -1. ), time_total( -1. )
   {}
 
   Event::~Event()
@@ -23,9 +22,7 @@ namespace CepGen
     time_generation = ev_.time_generation;
     time_total = ev_.time_total;
     num_hadronisation_trials = ev_.num_hadronisation_trials;
-    num_cs_particle_ = ev_.num_cs_particle_;
-    num_op1_particle_ = ev_.num_op1_particle_;
-    num_op2_particle_ = ev_.num_op2_particle_;
+    evtcontent_ = ev_.evtcontent_;
     return *this;
   }
 
@@ -42,11 +39,11 @@ namespace CepGen
   {
     //--- store a snapshot of the primordial event block
     if ( particles_.count( Particle::CentralSystem ) > 0 )
-      num_cs_particle_ = particles_[Particle::CentralSystem].size();
+      evtcontent_.cs = particles_[Particle::CentralSystem].size();
     if ( particles_.count( Particle::OutgoingBeam1 ) > 0 )
-      num_op1_particle_ = particles_[Particle::OutgoingBeam1].size();
+      evtcontent_.op1 = particles_[Particle::OutgoingBeam1].size();
     if ( particles_.count( Particle::OutgoingBeam2 ) > 0 )
-      num_op2_particle_ = particles_[Particle::OutgoingBeam2].size();
+      evtcontent_.op2 = particles_[Particle::OutgoingBeam2].size();
   }
 
   void
@@ -54,11 +51,11 @@ namespace CepGen
   {
     //--- remove all particles after the primordial event block
     if ( particles_.count( Particle::CentralSystem ) > 0 )
-      particles_[Particle::CentralSystem].resize( num_cs_particle_ );
+      particles_[Particle::CentralSystem].resize( evtcontent_.cs );
     if ( particles_.count( Particle::OutgoingBeam1 ) > 0 )
-      particles_[Particle::OutgoingBeam1].resize( num_op1_particle_ );
+      particles_[Particle::OutgoingBeam1].resize( evtcontent_.op1 );
     if ( particles_.count( Particle::OutgoingBeam2 ) > 0 )
-      particles_[Particle::OutgoingBeam2].resize( num_op2_particle_ );
+      particles_[Particle::OutgoingBeam2].resize( evtcontent_.op2 );
   }
 
   Particles&

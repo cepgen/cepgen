@@ -113,7 +113,12 @@ namespace CepGen
       /// List of particles in the event, mapped to their role in the process
       ParticlesMap particles_;
       /// Last particle in an "empty" event
-      unsigned short num_cs_particle_, num_op1_particle_, num_op2_particle_;
+      struct num_particles {
+        num_particles() : cs( 0 ), op1( 0 ), op2( 0 ) {}
+        num_particles( const num_particles& np ) : cs( np.cs ), op1( np.op1 ), op2( np.op2 ) {}
+        unsigned short cs, op1, op2;
+      };
+      num_particles evtcontent_;
   };
 }
 
