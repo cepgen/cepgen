@@ -74,8 +74,8 @@ namespace CepGen
     GenericKTProcess::setKinematics( const Kinematics& kin )
     {
       cuts_ = kin;
-      log_qmin_ = -10.; // FIXME //log_qmin_ = log( sqrt( cuts_.q2min ) );
-      log_qmax_ = log( cuts_.initial_cuts[Cuts::qt].max() );
+      log_qmin_ = -10.; // FIXME //log_qmin_ = std::log( std::sqrt( cuts_.q2min ) );
+      log_qmax_ = log( cuts_.cuts.initial[Cuts::qt].max() );
     }
 
     double
@@ -97,7 +97,7 @@ namespace CepGen
     GenericKTProcess::computeOutgoingPrimaryParticlesMasses()
     {
       const unsigned int op_index = kNumRequiredDimensions+kNumUserDimensions;
-      const Kinematics::Limits remn_mx_cuts = cuts_.remnant_cuts[Cuts::mass];
+      const Kinematics::Limits remn_mx_cuts = cuts_.cuts.remnants[Cuts::mass];
       switch ( cuts_.mode ) {
         case Kinematics::ElectronProton: default: {
           InError( "This kT factorisation process is intended for p-on-p collisions! Aborting!" );
@@ -213,7 +213,7 @@ namespace CepGen
       jac *= 2.*M_PI; // d(phi1)
       jac *= 2.*M_PI; // d(phi2)
 
-      const double mx_range = cuts_.remnant_cuts.at( Cuts::mass ).range();
+      const double mx_range = cuts_.cuts.remnants.at( Cuts::mass ).range();
       switch ( cuts_.mode ) {
         case Kinematics::ElasticElastic: default: break;
         case Kinematics::ElasticInelastic:   jac *= 2.* mx_range * MY_; break;

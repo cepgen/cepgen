@@ -11,14 +11,14 @@ PPtoWW::PPtoWW() :
 void
 PPtoWW::prepareKTKinematics()
 {
-  const Kinematics::Limits rap_limits = cuts_.central_cuts[Cuts::rapidity_single];
+  const Kinematics::Limits rap_limits = cuts_.cuts.central[Cuts::rapidity_single];
 
   // outgoing Ws
   y1_ = rap_limits.x( xkt( 0 ) );
   y2_ = rap_limits.x( xkt( 1 ) );
   DebuggingInsideLoop( Form( "W bosons rapidities (%.2f < y < %.2f): %f / %f", rap_limits.min(), rap_limits.max(), y1_, y2_ ) );
 
-  Kinematics::Limits ptdiff_limits = cuts_.central_cuts[Cuts::pt_diff];
+  Kinematics::Limits ptdiff_limits = cuts_.cuts.central[Cuts::pt_diff];
   if ( !ptdiff_limits.hasMax() ) ptdiff_limits.max() = 500.; //FIXME
   pt_diff_ = ptdiff_limits.x( xkt( 2 ) );
 
@@ -34,9 +34,9 @@ double
 PPtoWW::computeJacobian()
 {
   double jac = GenericKTProcess::minimalJacobian();
-  jac *= cuts_.central_cuts[Cuts::rapidity_single].range(); // d(y1)
-  jac *= cuts_.central_cuts[Cuts::rapidity_single].range(); // d(y2)
-  jac *= cuts_.central_cuts[Cuts::pt_diff].range(); // d(Dpt)
+  jac *= cuts_.cuts.central[Cuts::rapidity_single].range(); // d(y1)
+  jac *= cuts_.cuts.central[Cuts::rapidity_single].range(); // d(y2)
+  jac *= cuts_.cuts.central[Cuts::pt_diff].range(); // d(Dpt)
   jac *= 2.*M_PI; // d(phiDpt)
 
   return jac;
@@ -77,7 +77,7 @@ PPtoWW::computeKTFactorisedMatrixElement()
   const double pt1x = 0.5 * ( ptsumx+ptdiffx ), pt1y = 0.5 * ( ptsumy+ptdiffy ), pt1 = sqrt( pt1x*pt1x+pt1y*pt1y ),
                pt2x = 0.5 * ( ptsumx-ptdiffx ), pt2y = 0.5 * ( ptsumy-ptdiffy ), pt2 = sqrt( pt2x*pt2x+pt2y*pt2y );
 
-  const Kinematics::Limits pt_limits = cuts_.central_cuts[Cuts::pt_single];
+  const Kinematics::Limits pt_limits = cuts_.cuts.central[Cuts::pt_single];
   if ( pt_limits.hasMin() && ( pt1 < pt_limits.min() || pt2 < pt_limits.min() ) ) return 0.;
   if ( pt_limits.hasMax() && ( pt1 > pt_limits.max() || pt2 > pt_limits.max() ) ) return 0.;
 
@@ -90,7 +90,7 @@ PPtoWW::computeKTFactorisedMatrixElement()
   //=================================================================
 
   const double invm = sqrt( amt1*amt1 + amt2*amt2 + 2.*amt1*amt2*cosh( y1_-y2_ ) - ptsum*ptsum );
-  const Kinematics::Limits invm_limits = cuts_.central_cuts[Cuts::mass_sum];
+  const Kinematics::Limits invm_limits = cuts_.cuts.central[Cuts::mass_sum];
   if ( invm_limits.hasMin() && invm < invm_limits.min() ) return 0.;
   if ( invm_limits.hasMax() && invm > invm_limits.max() ) return 0.;
 
@@ -98,7 +98,7 @@ PPtoWW::computeKTFactorisedMatrixElement()
   //     a window in transverse momentum difference
   //=================================================================
 
-  const Kinematics::Limits ptdiff_limits = cuts_.central_cuts[Cuts::pt_diff];
+  const Kinematics::Limits ptdiff_limits = cuts_.cuts.central[Cuts::pt_diff];
   if ( ptdiff_limits.hasMax() && fabs( pt1-pt2 ) > ptdiff_limits.max() ) return 0.;
 
   //=================================================================
@@ -106,7 +106,7 @@ PPtoWW::computeKTFactorisedMatrixElement()
   //=================================================================
 
   const double dely = fabs( y1_-y2_ );
-  const Kinematics::Limits dely_limits = cuts_.central_cuts[Cuts::dely];
+  const Kinematics::Limits dely_limits = cuts_.cuts.central[Cuts::dely];
   if ( dely_limits.hasMin() && dely < dely_limits.min() ) return 0.;
   if ( dely_limits.hasMax() && dely > dely_limits.max() ) return 0.;
 
@@ -256,7 +256,7 @@ PPtoWW::computeKTFactorisedMatrixElement()
     const double mw4 = mw2*mw2;
 
     const double term1  = 2.*shat * ( 2.*shat+3.*mw2 ) / ( 3.*( mw2-that )*( mw2-uhat ) );
-    const double term2  = 2.*shat*shat * ( shat*shat + 3.*mw4 ) / ( 3.*( mw2-that )*( mw2-that )*( mw2-uhat )*( mw2-uhat ) );
+    const double term2  = 2.*shat*shat * ( shat*shat + 3.*mw4 ) / ( 3.*pow( mw2-that, 2 )*pow( mw2-uhat, 2 ) );
 
     const double auxil_gamgam = 1. - term1 + term2;
     const double beta = sqrt( 1.-4.*mw2/shat );

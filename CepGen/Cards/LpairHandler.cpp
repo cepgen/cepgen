@@ -69,19 +69,19 @@ namespace CepGen
 
       registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params->kinematics.inp.first );
       registerParameter<double>( "INPE", "Momentum (2nd primary particle)", &params->kinematics.inp.second );
-      registerParameter<double>( "PTCT", "Minimal transverse momentum (single central outgoing particle)", &params->kinematics.central_cuts[Cuts::pt_single].min() );
-      registerParameter<double>( "MSCT", "Minimal central system mass", &params->kinematics.central_cuts[Cuts::mass_sum].min() );
-      registerParameter<double>( "ECUT", "Minimal energy (single central outgoing particle)", &params->kinematics.central_cuts[Cuts::energy_single].min() );
+      registerParameter<double>( "PTCT", "Minimal transverse momentum (single central outgoing particle)", &params->kinematics.cuts.central[Cuts::pt_single].min() );
+      registerParameter<double>( "MSCT", "Minimal central system mass", &params->kinematics.cuts.central[Cuts::mass_sum].min() );
+      registerParameter<double>( "ECUT", "Minimal energy (single central outgoing particle)", &params->kinematics.cuts.central[Cuts::energy_single].min() );
       //registerParameter<double>( "THMN", "Minimal polar production angle for the central particles", &params->kinematics.eta_min );
       //registerParameter<double>( "THMX", "Maximal polar production angle for the central particles", &params->kinematics.eta_max );
-      registerParameter<double>( "ETMN", "Minimal pseudo-rapidity (central outgoing particles)", &params->kinematics.central_cuts[Cuts::eta_single].min() );
-      registerParameter<double>( "ETMX", "Maximal pseudo-rapidity (central outgoing particles)", &params->kinematics.central_cuts[Cuts::eta_single].max() );
-      registerParameter<double>( "YMIN", "Minimal rapidity (central outgoing particles)", &params->kinematics.central_cuts[Cuts::rapidity_single].min() );
-      registerParameter<double>( "YMAX", "Maximal rapidity (central outgoing particles)", &params->kinematics.central_cuts[Cuts::rapidity_single].max() );
-      registerParameter<double>( "Q2MN", "Minimal Q^2 (exchanged parton)", &params->kinematics.initial_cuts[Cuts::q2].min() );
-      registerParameter<double>( "Q2MX", "Maximal Q^2 (exchanged parton)", &params->kinematics.initial_cuts[Cuts::q2].max() );
-      registerParameter<double>( "MXMN", "Minimal invariant mass of proton remnants", &params->kinematics.remnant_cuts[Cuts::mass].min() );
-      registerParameter<double>( "MXMX", "Maximal invariant mass of proton remnants", &params->kinematics.remnant_cuts[Cuts::mass].max() );
+      registerParameter<double>( "ETMN", "Minimal pseudo-rapidity (central outgoing particles)", &params->kinematics.cuts.central[Cuts::eta_single].min() );
+      registerParameter<double>( "ETMX", "Maximal pseudo-rapidity (central outgoing particles)", &params->kinematics.cuts.central[Cuts::eta_single].max() );
+      registerParameter<double>( "YMIN", "Minimal rapidity (central outgoing particles)", &params->kinematics.cuts.central[Cuts::rapidity_single].min() );
+      registerParameter<double>( "YMAX", "Maximal rapidity (central outgoing particles)", &params->kinematics.cuts.central[Cuts::rapidity_single].max() );
+      registerParameter<double>( "Q2MN", "Minimal Q^2 (exchanged parton)", &params->kinematics.cuts.initial[Cuts::q2].min() );
+      registerParameter<double>( "Q2MX", "Maximal Q^2 (exchanged parton)", &params->kinematics.cuts.initial[Cuts::q2].max() );
+      registerParameter<double>( "MXMN", "Minimal invariant mass of proton remnants", &params->kinematics.cuts.remnants[Cuts::mass].min() );
+      registerParameter<double>( "MXMX", "Maximal invariant mass of proton remnants", &params->kinematics.cuts.remnants[Cuts::mass].max() );
     }
 
     void
