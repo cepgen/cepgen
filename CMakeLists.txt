@@ -57,6 +57,9 @@ if(PYTHIA8)
   list(APPEND CEPGEN_EXTERNAL_REQS ${PYTHIA8})
 endif()
 
+include_directories(${LHAPDF_INCLUDE})
+include_directories(${PYTHIA8_INCLUDE})
+
 #----- build all the intermediate objects
 
 include_directories(${PROJECT_SOURCE_DIR})
