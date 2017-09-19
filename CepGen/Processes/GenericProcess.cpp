@@ -60,10 +60,8 @@ namespace CepGen
 
       //--- incoming state
       for ( IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++ ) {
-        std::cout << ip->first << "\t" << ip->second << std::endl;
         Particle& p = event_->addParticle( ip->first );
         p.setPdgId( ip->second );
-        p.dump();
       }
       //--- central system (if not already there)
       IncomingState::const_iterator central_system = is.find( Particle::CentralSystem );

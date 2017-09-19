@@ -29,11 +29,11 @@ namespace CepGen
         /// Main caller to hadronise a single particle
         /// \param[in] part The Particle object which will be hadronised
         /// \return A boolean stating whether or not the hadronisation occured successfully
-        virtual bool hadronise( const Particle* part ) = 0;
+        virtual bool hadronise( const Particle& part, Event& ev ) = 0;
         /// Hadronise a full event
         /// \param[inout] ev Event to hadronise
         /// \return Boolean stating whether or not the hadronisation occured successfully
-        virtual bool hadronise( Event* ev ) = 0;
+        virtual bool hadronise( Event& ev ) = 0;
 
         /// Return a human-readable name for this hadroniser
         inline std::string name() const { return name_; }

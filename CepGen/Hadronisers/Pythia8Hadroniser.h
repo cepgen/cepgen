@@ -19,8 +19,8 @@ namespace CepGen
       public:
         Pythia8Hadroniser();
         ~Pythia8Hadroniser();
-        bool hadronise( const Particle* part ) override;
-        bool hadronise( Event* ev ) override;
+        bool hadronise( const Particle& part, Event& ev ) override;
+        bool hadronise( Event& ev ) override;
 
         void setSeed( long long seed );
         void readString( const char* param ) { pythia_->readString( param ); }
@@ -28,7 +28,7 @@ namespace CepGen
         void init() { pythia_->init(); }
 
       private:
-        bool prepareHadronisation( Event *ev );
+        bool prepareHadronisation( Event& ev );
         std::unique_ptr<Pythia8::Pythia> pythia_;
     };
   }

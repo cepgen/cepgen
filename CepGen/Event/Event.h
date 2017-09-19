@@ -113,7 +113,7 @@ namespace CepGen
       /// List of particles in the event, mapped to their role in the process
       ParticlesMap particles_;
       /// Last particle in an "empty" event
-      Particles::iterator last_cs_particle_, last_op1_particle_, last_op2_particle_;
+      unsigned short num_cs_particle_, num_op1_particle_, num_op2_particle_;
   };
 }
 

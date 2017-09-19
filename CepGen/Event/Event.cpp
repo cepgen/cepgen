@@ -9,7 +9,8 @@ namespace CepGen
 {
   Event::Event() :
     num_hadronisation_trials( 0 ),
-    time_generation( -1. ), time_total( -1. )
+    time_generation( -1. ), time_total( -1. ),
+    num_cs_particle_( 0 ), num_op1_particle_( 0 ), num_op2_particle_( 0 )
   {}
 
   Event::~Event()
@@ -22,6 +23,9 @@ namespace CepGen
     time_generation = ev_.time_generation;
     time_total = ev_.time_total;
     num_hadronisation_trials = ev_.num_hadronisation_trials;
+    num_cs_particle_ = ev_.num_cs_particle_;
+    num_op1_particle_ = ev_.num_op1_particle_;
+    num_op2_particle_ = ev_.num_op2_particle_;
     return *this;
   }
 
@@ -37,24 +41,24 @@ namespace CepGen
   Event::freeze()
   {
     //--- store a snapshot of the primordial event block
-    if ( particles_.count( Particle::CentralSystem ) != 0 )
-      last_cs_particle_ = particles_[Particle::CentralSystem].end();
-    if ( particles_.count( Particle::OutgoingBeam1 ) != 0 )
-      last_op1_particle_ = particles_[Particle::OutgoingBeam1].end();
-    if ( particles_.count( Particle::OutgoingBeam2 ) != 0 )
-      last_op2_particle_ = particles_[Particle::OutgoingBeam2].end();
+    if ( particles_.count( Particle::CentralSystem ) > 0 )
+      num_cs_particle_ = particles_[Particle::CentralSystem].size();
+    if ( particles_.count( Particle::OutgoingBeam1 ) > 0 )
+      num_op1_particle_ = particles_[Particle::OutgoingBeam1].size();
+    if ( particles_.count( Particle::OutgoingBeam2 ) > 0 )
+      num_op2_particle_ = particles_[Particle::OutgoingBeam2].size();
   }
 
   void
   Event::restore()
   {
     //--- remove all particles after the primordial event block
-    if ( particles_.count( Particle::CentralSystem ) != 0 )
-      particles_[Particle::CentralSystem].erase( last_cs_particle_, particles_[Particle::CentralSystem].end() );
-    if ( particles_.count( Particle::OutgoingBeam1 ) != 0 )
-      particles_[Particle::OutgoingBeam1].erase( last_op1_particle_, particles_[Particle::OutgoingBeam1].end() );
-    if ( particles_.count( Particle::OutgoingBeam2 ) != 0 )
-      particles_[Particle::OutgoingBeam2].erase( last_op2_particle_, particles_[Particle::OutgoingBeam2].end() );
+    if ( particles_.count( Particle::CentralSystem ) > 0 )
+      particles_[Particle::CentralSystem].resize( num_cs_particle_ );
+    if ( particles_.count( Particle::OutgoingBeam1 ) > 0 )
+      particles_[Particle::OutgoingBeam1].resize( num_op1_particle_ );
+    if ( particles_.count( Particle::OutgoingBeam2 ) > 0 )
+      particles_[Particle::OutgoingBeam2].resize( num_op2_particle_ );
   }
 
   Particles&
