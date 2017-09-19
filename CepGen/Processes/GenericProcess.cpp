@@ -60,17 +60,23 @@ namespace CepGen
 
       //--- incoming state
       for ( IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++ ) {
-        event_->addParticle( Particle( ip->first, ip->second ) );
+        std::cout << ip->first << "\t" << ip->second << std::endl;
+        Particle& p = event_->addParticle( ip->first );
+        p.setPdgId( ip->second );
+        p.dump();
       }
       //--- central system (if not already there)
       IncomingState::const_iterator central_system = is.find( Particle::CentralSystem );
       if ( central_system == is.end() ) {
-        event_->addParticle( Particle( Particle::Intermediate, Particle::invalidParticle, Particle::Propagator ) );
+        Particle& p = event_->addParticle( Particle::Intermediate );
+        p.setPdgId( Particle::invalidParticle );
+        p.setStatus( Particle::Propagator );
       }
       //--- outgoing state
       for ( OutgoingState::const_iterator op = os.begin(); op != os.end(); ++op ) {
         for ( std::vector<Particle::ParticleCode>::const_iterator it = op->second.begin(); it != op->second.end(); ++it ) {
-          event_->addParticle( Particle( op->first, *it ) );
+          Particle& p = event_->addParticle( op->first );
+          p.setPdgId( *it );
         }
       }
 
@@ -101,7 +107,7 @@ namespace CepGen
 
       //----- freeze the event as it is
 
-      event_->init();
+      event_->freeze();
     }
 
     void

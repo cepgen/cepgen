@@ -23,7 +23,7 @@ namespace CepGen
        */
       void clear();
       /// Initialize an "empty" event collection
-      void init();
+      void freeze();
       /// Restore the event to its "empty" state
       void restore();
 
@@ -37,11 +37,11 @@ namespace CepGen
       /// Set the information on one particle in the process
       /// \param[in] part The Particle object to insert or modify in the event
       /// \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
-      void addParticle( Particle part, bool replace=false );
+      Particle& addParticle( Particle& part, bool replace=false );
       /// \brief Create a new particle in the event, with no kinematic information but the role it has to play in the process
       /// \param[in] role The role the particle will play in the process
       /// \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
-      void addParticle( const Particle::Role& role, bool replace=false );
+      Particle& addParticle( const Particle::Role& role, bool replace=false );
 
       //----- particles retrievers
 
@@ -58,6 +58,7 @@ namespace CepGen
        * \return A vector of references to the requested Particle objects
        */
       Particles& getByRole( const Particle::Role& role );
+      ParticlesIds getIdsByRole( const Particle::Role& role ) const;
       /**
        * Returns the first Particle object in the particles list whose role corresponds to the given argument
        * \param[in] role The role the particle has to play in the event
@@ -112,7 +113,7 @@ namespace CepGen
       /// List of particles in the event, mapped to their role in the process
       ParticlesMap particles_;
       /// Last particle in an "empty" event
-      ParticlesMap::iterator last_particle_;
+      Particles::iterator last_cs_particle_, last_op1_particle_, last_op2_particle_;
   };
 }
 

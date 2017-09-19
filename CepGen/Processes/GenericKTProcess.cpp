@@ -179,15 +179,15 @@ namespace CepGen
           break;
         case Kinematics::ElasticInelastic:
           op1.setStatus( Particle::FinalState );
-          op2.setStatus( Particle::Undecayed ); op2.setMass( MY_ );
+          op2.setStatus( Particle::Unfragmented ); op2.setMass( MY_ );
           break;
         case Kinematics::InelasticElastic:
-          op1.setStatus( Particle::Undecayed ); op1.setMass( MX_ );
+          op1.setStatus( Particle::Unfragmented ); op1.setMass( MX_ );
           op2.setStatus( Particle::FinalState );
           break;
         case Kinematics::InelasticInelastic:
-          op1.setStatus( Particle::Undecayed ); op1.setMass( MX_ );
-          op2.setStatus( Particle::Undecayed ); op2.setMass( MY_ );
+          op1.setStatus( Particle::Unfragmented ); op1.setMass( MX_ );
+          op2.setStatus( Particle::Unfragmented ); op2.setMass( MY_ );
           break;    
         default: { FatalError( "This kT factorisation process is intended for p-on-p collisions! Aborting!" ); } break;
       }

@@ -177,31 +177,16 @@ namespace CepGen
         if ( hadr_name == "pythia8" ) {
 #ifdef PYTHIA8
           Hadroniser::Pythia8Hadroniser* pythia8 = new Hadroniser::Pythia8Hadroniser;
+          long long seed = ( hadr.exists( "seed" ) ) ? hadr["seed"] : -1ll;
+          pythia8->setSeed( seed );
           pythia8->readString( Form( "Beams:eCM = %.2f", params_.kinematics.sqrtS() ) );
-          if ( hadr.exists( "decayWto" ) ) {
-            libconfig::Setting& pdg_ids = hadr["decayWto"];
-            if ( !pdg_ids.isList() || pdg_ids.getLength() != 2 ) throw libconfig::SettingTypeException( pdg_ids );
-            std::ostringstream os;
-            pythia8->readString( "24:onMode = off" ); // disable all W decays, but...
-            for ( unsigned short i = 0; i < pdg_ids.getLength(); ++i ) {
-              int pdg_id = pdg_ids[i];
-              switch ( abs( pdg_id ) ) {
-                case 1: case 2: // u/d quark
-                  os << " 1 2"; break;
-                case 3: case 4: // c/s quark
-                  os << " 3 4"; break;
-                case 5: case 6: // t/b quark
-                  os << " 5 6"; break;
-                case 11: // e/nu_e
-                  os << " 11 12"; break;
-                case 13: // mu/nu_mu
-                  os << " 13 14"; break;
-                case 15: // tau/nu_tau
-                  os << " 15 16"; break;
-                default: { FatalError( Form( "Unsupported W decay mode: %d", pdg_id ) ); } break;
-              }
+          if ( hadr.exists( "pythiaConfiguration" ) ) {
+            libconfig::Setting& configs = hadr["pythiaConfiguration"];
+            if ( !configs.isList() ) throw libconfig::SettingTypeException( configs );
+            for ( unsigned short i = 0; i < configs.getLength(); ++i ) {
+              std::string config = configs[i];
+              pythia8->readString( config );
             }
-            pythia8->readString( Form( "24:onIfAny = %s", os.str().c_str() ) );
           }
           pythia8->init();
           params_.setHadroniser( pythia8 );

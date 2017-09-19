@@ -34,16 +34,27 @@ namespace CepGen
   }
 
   void
-  Event::init()
+  Event::freeze()
   {
-    last_particle_ = particles_.end();
+    //--- store a snapshot of the primordial event block
+    if ( particles_.count( Particle::CentralSystem ) != 0 )
+      last_cs_particle_ = particles_[Particle::CentralSystem].end();
+    if ( particles_.count( Particle::OutgoingBeam1 ) != 0 )
+      last_op1_particle_ = particles_[Particle::OutgoingBeam1].end();
+    if ( particles_.count( Particle::OutgoingBeam2 ) != 0 )
+      last_op2_particle_ = particles_[Particle::OutgoingBeam2].end();
   }
 
   void
   Event::restore()
   {
     //--- remove all particles after the primordial event block
-    particles_.erase( last_particle_, particles_.end() );
+    if ( particles_.count( Particle::CentralSystem ) != 0 )
+      particles_[Particle::CentralSystem].erase( last_cs_particle_, particles_[Particle::CentralSystem].end() );
+    if ( particles_.count( Particle::OutgoingBeam1 ) != 0 )
+      particles_[Particle::OutgoingBeam1].erase( last_op1_particle_, particles_[Particle::OutgoingBeam1].end() );
+    if ( particles_.count( Particle::OutgoingBeam2 ) != 0 )
+      particles_[Particle::OutgoingBeam2].erase( last_op2_particle_, particles_[Particle::OutgoingBeam2].end() );
   }
 
   Particles&
@@ -51,6 +62,21 @@ namespace CepGen
   {
     //--- retrieve all particles with a given role
     return particles_[role];
+  }
+
+  ParticlesIds
+  Event::getIdsByRole( const Particle::Role& role ) const
+  {
+    //--- retrieve all particles ids with a given role
+    ParticlesIds out;
+    Particles parts;
+    try {
+      parts = particles_.at( role );
+    } catch ( std::out_of_range ) { return out; }
+    for ( Particles::const_iterator it = parts.begin(); it != parts.end(); ++it ) {
+      out.insert( it->id() );
+    }
+    return out;
   }
 
   Particle&
@@ -119,8 +145,8 @@ namespace CepGen
     return out;
   }
 
-  void
-  Event::addParticle( Particle part, bool replace )
+  Particle&
+  Event::addParticle( Particle& part, bool replace )
   {
     DebuggingInsideLoop( Form( "Particle with PDGid = %d has role %d", part.pdgId(), part.role() ) );
     if ( part.role() <= 0 ) FatalError( Form( "Trying to add a particle with role=%d", (int)part.role() ) );
@@ -138,12 +164,15 @@ namespace CepGen
     //--- add the particle to the collection
     if ( replace ) part_with_same_role = Particles( 1, part ); // generate a vector containing only this particle
     else part_with_same_role.emplace_back( part );
+
+    return part_with_same_role.back();
   }
 
-  void
+  Particle&
   Event::addParticle( const Particle::Role& role, bool replace )
   {
-    addParticle( Particle( role ), replace );
+    Particle np( role );
+    return addParticle( np, replace );
   }
 
   size_t
@@ -237,9 +266,10 @@ namespace CepGen
       }
       else os << "       ";
       const Particle::Momentum mom = part.momentum();
-      os << Form( "% 9.6e % 9.6e % 9.6e % 9.6e % 9.5e", mom.px(), mom.py(), mom.pz(), part.energy(), part.mass() );
+      os << Form( "% 9.6e % 9.6e % 9.6e % 9.6e % 12.7f", mom.px(), mom.py(), mom.pz(), part.energy(), part.mass() );
       if ( part.status() == Particle::Undefined
         || part.status() == Particle::Undecayed
+        || part.status() == Particle::Unfragmented
         || part.status() == Particle::FinalState ) {
         const int sign = ( part.status() == Particle::Undefined ) ? -1 : 1;
         pxtot += sign*mom.px();

@@ -71,6 +71,12 @@ namespace CepGen
     return *this;
   }
 
+  bool
+  Momentum::operator==( const Momentum& mom ) const
+  {
+    return ( px_ == mom.px_ && py_ == mom.py_ && pz_ == mom.pz_ && energy_ == mom.energy_ );
+  }
+
   double
   Momentum::threeProduct( const Momentum& mom ) const
   {

@@ -21,6 +21,8 @@ namespace CepGen
     if ( p->process()->hasEvent() ) {
       p->process()->clearEvent();
 
+      std::cout << "event cleared!!! " << ev->getByRole( Particle::CentralSystem ).size() << std::endl;
+
       const Particle::Momentum p1( 0., 0.,  p->kinematics.inp.first ), p2( 0., 0., -p->kinematics.inp.second );
       p->process()->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
 

@@ -801,7 +801,7 @@ GamGamLL::fillKinematics( bool )
       break;
     case Kinematics::InelasticElastic:
     case Kinematics::InelasticInelastic:
-      op1.setStatus( Particle::Undecayed ); // fragmenting remnants
+      op1.setStatus( Particle::Unfragmented ); // fragmenting remnants
       op1.setMass( MX_ );
       break;
   }
@@ -817,7 +817,7 @@ GamGamLL::fillKinematics( bool )
       break;
     case Kinematics::ElasticInelastic:
     case Kinematics::InelasticInelastic:
-      op2.setStatus( Particle::Undecayed ); // fragmenting remnants
+      op2.setStatus( Particle::Unfragmented ); // fragmenting remnants
       op2.setMass( MY_ );
       break;
   }
