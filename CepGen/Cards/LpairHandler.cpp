@@ -77,6 +77,7 @@ namespace CepGen
       registerParameter<unsigned int>( "EMOD", "Outgoing primary particles' mode", (unsigned int*)&params->kinematics.structure_functions );
       registerParameter<unsigned int>( "PAIR", "Outgoing particles' PDG id", (unsigned int*)&pair_ );
       registerParameter<unsigned int>( "NGEN", "Number of events to generate", &params->generation.maxgen );
+      registerParameter<unsigned int>( "SEED", "Random generator seed", (unsigned int*)&params->vegas.seed );
 
       registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params->kinematics.inp.first );
       registerParameter<double>( "INPE", "Momentum (2nd primary particle)", &params->kinematics.inp.second );
