@@ -5,6 +5,9 @@
 #include "TGraph.h"
 #include "TMultiGraph.h"
 
+#include "CepGen/StructureFunctions/Schaefer.h"
+#include "CepGen/StructureFunctions/GenericLHAPDF.h"
+
 #include <iostream>
 
 using namespace std;
@@ -19,6 +22,7 @@ main( int argc, char* argv[] )
   TGraph g_sy_f2, g_fb_f2, g_su_f2, g_bdh_f2, g_cteq_f2, g_mrst_f2;
   TGraph g_allm97_f2, g_allm_hht_f2, g_allm_hht_ft_f2;
   TGraph g_lux_f2;
+  TGraph g_luxlike_f2;
 
   const bool use_logarithmic_x = ( argc>3 ) ? atoi( argv[3] ) : false;
 
@@ -41,6 +45,7 @@ main( int argc, char* argv[] )
          sf_allm_hht = CepGen::SF::ALLM( q2, xbj, CepGen::SF::ALLMParameterisation::hht_allm() ),
          sf_allm_hht_ft = CepGen::SF::ALLM( q2, xbj, CepGen::SF::ALLMParameterisation::hht_allm_ft() ),
          sf_bdh = CepGen::SF::BlockDurandHa( q2, xbj ),
+         sf_luxlike = CepGen::SF::Schaefer( q2, xbj ),
          sf_cteq = cteq( q2, xbj ),
          sf_mrst = mrst( q2, xbj ),
          sf_lux = lux( q2, xbj );
@@ -52,6 +57,7 @@ main( int argc, char* argv[] )
     g_cteq_f2.SetPoint( i, xbj, sf_cteq.F2 );
     g_mrst_f2.SetPoint( i, xbj, sf_mrst.F2 );
     g_lux_f2.SetPoint( i, xbj, sf_lux.F2 );
+    g_luxlike_f2.SetPoint( i, xbj, sf_luxlike.F2 );
 
     g_allm97_f2.SetPoint( i, xbj, sf_allm97.F2 );
     g_allm_hht_f2.SetPoint( i, xbj, sf_allm_hht.F2 );
@@ -116,6 +122,11 @@ main( int argc, char* argv[] )
   g_lux_f2.SetLineWidth( 3 );
   mg.Add( &g_lux_f2, "l" );
   c.AddLegendEntry( &g_lux_f2, "LUXqed", "l" );
+
+  g_luxlike_f2.SetLineColor( kOrange+2 );
+  g_luxlike_f2.SetLineWidth( 3 );
+  mg.Add( &g_luxlike_f2, "l" );
+  c.AddLegendEntry( &g_luxlike_f2, "Schäfer", "l" );
 
   mg.Draw( "alpr" );
   mg.SetTitle( "x_{Bj}\\Proton form factor F_{2}" );

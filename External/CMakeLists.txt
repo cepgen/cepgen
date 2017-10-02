@@ -29,3 +29,6 @@ if(EXISTS ${has_grv})
 else()
   message(STATUS "GRV PDFset not found. Will proceed without it")
 endif()
+
+add_subdirectory(F2_Luxlike_fit)
+

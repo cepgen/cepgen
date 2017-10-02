@@ -37,6 +37,12 @@ if(LHAPDF)
   message(STATUS "LHAPDF found in ${LHAPDF}")
   list(APPEND CEPGEN_EXTERNAL_REQS ${LHAPDF})
 endif()
+if(SCHAEFER_F2)
+#ENV{has_Schaefer_F2})
+  add_definitions(-DSchaeferF2)
+  message(STATUS "Schaefer's F2 found!")
+  list(APPEND CEPGEN_EXTERNAL_REQS SchaeferF2)
+endif()
 
 #----- build all the intermediate objects
 
