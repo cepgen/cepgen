@@ -9,7 +9,6 @@ namespace CepGen
     {
       StructureFunctions luxlike;
 #ifndef SchaeferF2
-#error Blablabla //FIXME
       FatalError( "LUXlike structure functions cannot be computed "
                   "as the Fortran subroutine is not linked to this instance!" );
 #else
