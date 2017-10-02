@@ -72,7 +72,7 @@ main( int argc, char* argv[] )
   /*g_sy_f2.SetLineStyle( 2 );
   g_sy_f2.SetLineWidth( 3 );
   mg.Add( &g_sy_f2, "l" );
-  c.AddLegendEntry( &g_sy_f2, "Suri-Yennie", "l" );
+  c.AddLegendEntry( &g_sy_f2, "Suri-Yennie", "l" );*/
 
   //g_fb_f2.SetLineStyle( 2 );
   g_fb_f2.SetLineColor( kRed+1 );
@@ -84,14 +84,14 @@ main( int argc, char* argv[] )
   g_su_f2.SetLineColor( kGreen+2 );
   g_su_f2.SetLineWidth( 3 );
   mg.Add( &g_su_f2, "l" );
-  c.AddLegendEntry( &g_su_f2, "Szczurek-Uleshchenko", "l" );*/
+  c.AddLegendEntry( &g_su_f2, "Szczurek-Uleshchenko", "l" );
 
   g_allm97_f2.SetLineColor( kBlue+1 );
   g_allm97_f2.SetLineWidth( 3 );
   mg.Add( &g_allm97_f2, "l" );
   c.AddLegendEntry( &g_allm97_f2, "Abramowicz et al. 97", "l" );
 
-  g_allm_hht_f2.SetLineColor( kBlue+1 );
+  /*g_allm_hht_f2.SetLineColor( kBlue+1 );
   g_allm_hht_f2.SetLineWidth( 3 );
   g_allm_hht_f2.SetLineStyle( 2 );
   mg.Add( &g_allm_hht_f2, "l" );
@@ -101,7 +101,7 @@ main( int argc, char* argv[] )
   g_allm_hht_ft_f2.SetLineWidth( 3 );
   g_allm_hht_ft_f2.SetLineStyle( 3 );
   mg.Add( &g_allm_hht_ft_f2, "l" );
-  c.AddLegendEntry( &g_allm_hht_ft_f2, "Abramowicz et al. HHT-FT", "l" );
+  c.AddLegendEntry( &g_allm_hht_ft_f2, "Abramowicz et al. HHT-FT", "l" );*/
 
   /*g_bdh_f2.SetLineColor( kOrange );
   g_bdh_f2.SetLineWidth( 3 );
@@ -118,15 +118,15 @@ main( int argc, char* argv[] )
   mg.Add( &g_mrst_f2, "l" );
   c.AddLegendEntry( &g_mrst_f2, "MRST2004 (QED/proton)", "l" );*/
 
-  g_lux_f2.SetLineColor( kOrange );
+  /*g_lux_f2.SetLineColor( kOrange );
   g_lux_f2.SetLineWidth( 3 );
   mg.Add( &g_lux_f2, "l" );
-  c.AddLegendEntry( &g_lux_f2, "LUXqed", "l" );
+  c.AddLegendEntry( &g_lux_f2, "LUXqed", "l" );*/
 
   g_luxlike_f2.SetLineColor( kOrange+2 );
   g_luxlike_f2.SetLineWidth( 3 );
   mg.Add( &g_luxlike_f2, "l" );
-  c.AddLegendEntry( &g_luxlike_f2, "Schäfer", "l" );
+  c.AddLegendEntry( &g_luxlike_f2, "Sch#ddot{a}fer et al.", "l" );
 
   mg.Draw( "alpr" );
   mg.SetTitle( "x_{Bj}\\Proton form factor F_{2}" );

@@ -24,7 +24,9 @@ add_subdirectory(External)
 #----- include external paths
 
 include(UseEnvironment)
+
 set(CEPGEN_EXTERNAL_REQS ${GSL_LIB} ${GSL_CBLAS_LIB} ${CEPGEN_LIBRARIES})
+
 if(MUPARSER)
   message(STATUS "muParser found in ${MUPARSER}")
   list(APPEND CEPGEN_EXTERNAL_REQS ${MUPARSER})
@@ -37,9 +39,7 @@ if(LHAPDF)
   message(STATUS "LHAPDF found in ${LHAPDF}")
   list(APPEND CEPGEN_EXTERNAL_REQS ${LHAPDF})
 endif()
-if(SCHAEFER_F2)
-#ENV{has_Schaefer_F2})
-  add_definitions(-DSchaeferF2)
+if(EXISTS $ENV{has_schaefer})
   message(STATUS "Schaefer's F2 found!")
   list(APPEND CEPGEN_EXTERNAL_REQS SchaeferF2)
 endif()

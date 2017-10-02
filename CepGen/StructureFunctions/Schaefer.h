@@ -5,7 +5,7 @@
 
 extern "C"
 {
-  extern void F2_fit_luxlike_( double& xbj, double& q2, double& F2, double& FL );
+  extern void f2_fit_luxlike_( double& xbj, double& q2, double& F2, double& FL );
 }
 
 namespace CepGen
