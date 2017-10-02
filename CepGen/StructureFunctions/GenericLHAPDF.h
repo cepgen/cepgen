@@ -17,8 +17,10 @@ namespace CepGen
       private:
         void initialise( const char* set );
 
+#if LHAPDF_MAJOR_VERSION==6
         LHAPDF::PDFSet pdf_set_;
         std::vector<LHAPDF::PDF*> pdfs_;
+#endif
     };
   }
 }

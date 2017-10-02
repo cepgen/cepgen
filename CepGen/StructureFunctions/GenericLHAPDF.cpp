@@ -12,8 +12,12 @@ namespace CepGen
     void
     GenericLHAPDF::initialise( const char* set )
     {
+#if LHAPDF_MAJOR_VERSION==6
       pdf_set_ = LHAPDF::PDFSet( set );
-      pdfs_ = pdf_set_.mkPDFs();      
+      pdfs_ = pdf_set_.mkPDFs();
+#else
+      LHAPDF::initPDFSet( set, LHAPDF::LHGRID, 0 );
+#endif
     }
 
     StructureFunctions
@@ -28,7 +32,15 @@ namespace CepGen
       //if ( q2 < 1.69 ) return pdf;
 
       for ( int i = 0; i < 4; ++i ) {
-        sf += qtimes3[i]*qtimes3[i]/9. * ( pdfs_[0]->xfxQ2( i, xbj, q2 ) + pdfs_[0]->xfxQ2( -i, xbj, q2 ) );
+        double xq = 0., xqbar = 0.;
+#if LHAPDF_MAJOR_VERSION==6
+        xq = pdfs_[0]->xfxQ2( i, xbj, q2 );
+        xqbar = pdfs_[0]->xfxQ2( -i, xbj, q2 );
+#else
+        xq = LHAPDF::xfx( xbj, q2, i+1 );
+        xqbar = LHAPDF::xfx( xbj, q2, -i-1 );
+#endif
+        sf += qtimes3[i]*qtimes3[i]/9. * ( xq + xqbar );
       }
 
       pdf.F2 = sf;
