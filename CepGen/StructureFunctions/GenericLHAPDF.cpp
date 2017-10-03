@@ -4,6 +4,7 @@ namespace CepGen
 {
   namespace SF
   {
+    constexpr std::array<double,6> GenericLHAPDF::qtimes3_;
     GenericLHAPDF::GenericLHAPDF( const char* set )
     {
       initialise( set );
@@ -21,17 +22,15 @@ namespace CepGen
     }
 
     StructureFunctions
-    GenericLHAPDF::operator()( double q2, double xbj ) const
+    GenericLHAPDF::operator()( double q2, double xbj, unsigned short num_flavours ) const
     {
       StructureFunctions pdf;
 
-      //const LHAPDF::PDFSet set( "MRST2004qed_proton" );
-      std::array<double,6> qtimes3 = { -1.0 /*d*/, 2.0 /*u*/, -1.0 /*s*/, 2.0 /*c*/, -1.0 /*b*/, 2.0 /*t*/ };
+      if ( num_flavours == 0 || num_flavours > 6 ) return pdf;
 
-      double sf = 0.;
       //if ( q2 < 1.69 ) return pdf;
 
-      for ( int i = 0; i < 4; ++i ) {
+      for ( int i = 0; i < num_flavours; ++i ) {
         double xq = 0., xqbar = 0.;
 #if LHAPDF_MAJOR_VERSION==6
         xq = pdfs_[0]->xfxQ2( i, xbj, q2 );
@@ -40,10 +39,9 @@ namespace CepGen
         xq = LHAPDF::xfx( xbj, q2, i+1 );
         xqbar = LHAPDF::xfx( xbj, q2, -i-1 );
 #endif
-        sf += qtimes3[i]*qtimes3[i]/9. * ( xq + xqbar );
+        pdf.F2 += qtimes3_[i]*qtimes3_[i]/9. * ( xq + xqbar );
       }
 
-      pdf.F2 = sf;
       return pdf;
     }
   }
