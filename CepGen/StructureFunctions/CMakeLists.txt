@@ -1,18 +1,25 @@
 file(GLOB sf_sources *.cpp)
+set(sources ${sf_sources})
 
 include_directories(${PROJECT_SOURCE_DIR})
 
-#----- build the object
-
-add_library(CepGenStructureFunctions SHARED ${sf_sources})
-
 #----- check the external dependencies
 
-if(EXISTS $ENV{has_grv})
-  add_library(GRV_PDF SHARED $ENV{has_grv})
-  target_link_libraries(CepGenStructureFunctions GRV_PDF)
+set(GRV_PATH ${PROJECT_SOURCE_DIR}/External)
+file(GLOB grv_sources ${GRV_PATH}/grv_*.f)
+if(grv_sources)
+  message(STATUS "GRV PDFset found in ${grv_sources}!")
+  list(APPEND sources ${grv_sources})
+else()
+  message(STATUS "GRV PDFset not found. Will proceed without it")
 endif()
 
+#----- build the object
+
+add_library(CepGenStructureFunctions SHARED ${sources})
+target_link_libraries(CepGenStructureFunctions ${external_deps})
+
+#----- installation rules
+
 install(TARGETS CepGenStructureFunctions DESTINATION lib)
-install(TARGETS GRV_PDF DESTINATION lib)
 
