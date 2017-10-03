@@ -13,6 +13,7 @@
 #include "CepGen/StructureFunctions/GenericLHAPDF.h"
 #include "CepGen/StructureFunctions/SuriYennie.h"
 #include "CepGen/StructureFunctions/SzczurekUleshchenko.h"
+#include "CepGen/StructureFunctions/Schaefer.h"
 
 #include "Constants.h"
 

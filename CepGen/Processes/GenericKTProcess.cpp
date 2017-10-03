@@ -255,6 +255,8 @@ namespace CepGen
           sf = SF::ALLM( Q2, xbj, SF::ALLMParameterisation::allm91() ); break;
         case StructureFunctionsType::ALLM97:
           sf = SF::ALLM( Q2, xbj, SF::ALLMParameterisation::allm97() ); break;
+        case StructureFunctionsType::Schaefer:
+          sf = SF::Schaefer( Q2, xbj ); break;
         default: break; //FIXME
       }
 

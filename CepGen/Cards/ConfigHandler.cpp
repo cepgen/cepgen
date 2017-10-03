@@ -82,6 +82,7 @@ namespace CepGen
           else if ( sf_str == "ALLM;97" ) params_.kinematics.structure_functions = ALLM97;
           else if ( sf_str == "ALLM;HHT" ) params_.kinematics.structure_functions = ALLM_HHT;
           else if ( sf_str == "ALLM;HHT-FT" ) params_.kinematics.structure_functions = ALLM_HHT_FT;
+          else if ( sf_str == "Schaefer" ) params_.kinematics.structure_functions = Schaefer;
           else FatalError( Form( "Invalid structure functions mode: %s", sf ) );
         }
       } catch ( const libconfig::SettingNotFoundException& nfe ) {
