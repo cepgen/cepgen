@@ -23,7 +23,11 @@ c       -----------------------------
                         call F2_perturbative(xbj,q2,F2p,FLp)
                         F2 = F2p
                         FL = FLp        
-           elseif(q2.lt.q2_cut.and.w2.lt.w2_lo) then
+        elseif(q2.gt.q2_cut.and.w2.lt.w2_hi) then
+                        call F2_cont(xbj,q2,F2c,FLc)
+                        F2 = F2c
+                        FL = FLc
+            elseif(q2.lt.q2_cut.and.w2.lt.w2_lo) then
                         call F2_res(xbj,q2,F2r,FLr)
                         F2 = F2r
                         FL = FLr
@@ -61,8 +65,6 @@ c       -----------------------------
                 FL=0.d0
                 return
         endif
-        tau = 4.d0*xbj**2*amp**2/q2
-        prefac = 1.d0/(4.d0*pi**2*alpha_em)*q2*(1.d0-xbj)/(1+tau)
 c       -----------------------------
 c       modification of Christy-Bosted at large q2 as described in
 c       the LUXqed paper
@@ -76,10 +78,17 @@ c       -----------------------------
 c       ------------------------------
 
         if(q2.lt.q2_0) then
+                tau = 4.d0*xbj**2*amp**2/q2
+                prefac = 1.d0/(4.d0*pi**2*alpha_em)
+     >                          *q2*(1.d0-xbj)/(1+tau)
                 call christy507(w2,q2,f1,R,sigt,sigl)
                 F2 = prefac*(sigt+sigl)/0.3894e3
                 FL = F2*(1+tau)*R/(1.d0+R)
         else
+                w2 = amp**2 + q2_mod*(1.d0-xbj)/xbj
+                tau = 4.d0*xbj**2*amp**2/q2_mod
+                prefac = 1.d0/(4.d0*pi**2*alpha_em)
+     >                          *q2_mod*(1.d0-xbj)/(1+tau)
                 call christy507(w2,q2_mod,f1,R,sigt,sigl)
                 F2 = prefac*(sigt+sigl)/0.3894e3*factor_mod
                 FL = F2*(1+tau)*R/(1.d0+R)*factor_mod
