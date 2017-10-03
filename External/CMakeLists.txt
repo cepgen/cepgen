@@ -22,13 +22,3 @@ else()
   message(STATUS "Jetset7 not found. Will proceed without it")
 endif()
 
-file(GLOB has_grv grv_*.f)
-if(EXISTS ${has_grv})
-  set(ENV{has_grv} ${has_grv})
-  message(STATUS "GRV PDFset found in ${has_grv}!")
-else()
-  message(STATUS "GRV PDFset not found. Will proceed without it")
-endif()
-
-add_subdirectory(F2_Luxlike_fit)
-
