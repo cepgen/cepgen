@@ -102,6 +102,7 @@ c       ---------------------------------------------------------
         amp = 0.938d0
 
         call F2_GD11P(xbj,Q2,F2)
+c        call CepGen_F2_GD11P(xbj,Q2,F2)
         F2c = F2
         R = R_1998(xbj,Q2)
         tau = 4.d0*xbj**2*amp**2/q2
@@ -209,11 +210,11 @@ c        breg = br1**2 + br2**2 * t**br3
         breg = br1 + br2 * t**br3
 
 c       -----------------------------
-        F2_Pom = factor*cpom*xp**apom *(1.d0-x)**(1.+bpom)
-        F2_Reg = factor*creg*xr**areg *(1.d0-x)**(1.+breg)
+c        F2_Pom = factor*cpom*xp**apom *(1.d0-x)**(1.+bpom)
+c        F2_Reg = factor*creg*xr**areg *(1.d0-x)**(1.+breg)
 
-c        F2_Pom = factor*cpom*xp**apom *(1.d0-x)**bpom
-c        F2_Reg = factor*creg*xr**areg *(1.d0-x)**breg
+        F2_Pom = factor*cpom*xp**apom *(1.d0-x)**bpom
+        F2_Reg = factor*creg*xr**areg *(1.d0-x)**breg
 
 cc        F2 = F2_Pom
         F2 = F2_Pom + F2_Reg
@@ -229,7 +230,7 @@ c       -------------------------------------------------
 c       Refit of ALLM by the HERMES collaboration
 c       --------------------------
         data cp1,cp2,cp3/0.3638d0,0.1211d0,1.166d0/
-        data ap1,ap2,ap3/-0.11859,-0.4783d0,1.353d0/
+        data ap1,ap2,ap3/-0.11895,-0.4783d0,1.353d0/
         data bp1,bp2,bp3/1.0833d0,2.656d0,1.771d0/
 c       --------------------------
         data cr1,cr2,cr3/1.3633d0,2.256d0,2.209d0/
@@ -244,7 +245,7 @@ c       --------------------------
         xp = (Q2+amp2)/(Q2+W2_eff+amp2)
         xr = (Q2+amr2)/(Q2+W2_eff+amr2)
 c       ---------------------------
-        xlog1 = dlog((Q2+q02/alam2))
+        xlog1 = dlog((Q2+q02)/alam2)
         xlog2 = dlog(q02/alam2)
         t = dlog(xlog1/xlog2)
 c       ----------------------------
@@ -258,11 +259,11 @@ c        breg = br1**2 + br2**2 * t**br3
         breg = br1 + br2 * t**br3
 
 c       -----------------------------
-        F2_Pom = factor*cpom*xp**apom *(1.d0-x)**(1.+bpom)
-        F2_Reg = factor*creg*xr**areg *(1.d0-x)**(1.+breg)
+c        F2_Pom = factor*cpom*xp**apom *(1.d0-x)**(1.+bpom)
+c        F2_Reg = factor*creg*xr**areg *(1.d0-x)**(1.+breg)
 
-c        F2_Pom = factor*cpom*xp**apom *(1.d0-x)**bpom
-c        F2_Reg = factor*creg*xr**areg *(1.d0-x)**breg
+        F2_Pom = factor*cpom*xp**apom *(1.d0-x)**bpom
+        F2_Reg = factor*creg*xr**areg *(1.d0-x)**breg
 
 cc        F2 = F2_Pom
         F2 = F2_Pom + F2_Reg

@@ -231,7 +231,7 @@ namespace CepGen
         fLeg->AddEntry(obj, title, option);
         const unsigned int num_entries = fLeg->GetNRows();
         if ( num_entries>3 ) {
-          fLeg->SetY1( fLeg->GetY1()-( num_entries-3 )*0.025 );
+          fLeg->SetY1( fLeg->GetY1()-( num_entries-3 )*0.015 );
         }
       }
 
