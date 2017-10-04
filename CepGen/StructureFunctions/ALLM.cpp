@@ -85,19 +85,37 @@ namespace CepGen
     }
 
     ALLMParameterisation
+    ALLMParameterisation::gd07p()
+    {
+      ALLMParameterisation p;
+      p.pomeron = Parameters(
+        {  0.339,  0.127, 1.16  },
+        { -0.105, -0.495, 1.29  },
+        { -1.42,   4.51,  0.551 } );
+      p.reggeon = Parameters(
+        { 0.838, 2.36,  1.77  },
+        { 0.374, 0.998, 0.775 },
+        { 2.71,  1.83,  1.26  } );
+      p.m02 = 0.454;
+      p.mp2 = 30.7;
+      p.mr2 = 0.117;
+      p.q02 = 1.15;
+      p.lambda2 = 0.06527;
+      return p;
+    }
+
+    ALLMParameterisation
     ALLMParameterisation::gd11p()
     {
       ALLMParameterisation p;
       p.pomeron = Parameters(
         {  0.3638,   0.1211, 1.166 }, // c
         { -0.11895, -0.4783, 1.353 }, // a
-        {  1.0833,    2.656, 1.771 }  // b
-      );
+        {  1.0833,   2.656,  1.771 } ); // b
       p.reggeon = Parameters(
-        {  1.3633,  2.256,  2.209   },
-        {  0.3425,  1.0603, 0.5164  },
-        { -10.408, 14.857,  0.07739 }
-      );
+        {   1.3633,  2.256,  2.209   },
+        {   0.3425,  1.0603, 0.5164  },
+        { -10.408,  14.857,  0.07739 } );
       p.m02 = 0.5063;
       p.mp2 = 34.75;
       p.mr2 = 0.03190;
