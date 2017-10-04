@@ -25,6 +25,7 @@ namespace CepGen
         static ALLMParameterisation allm97();
         static ALLMParameterisation hht_allm();
         static ALLMParameterisation hht_allm_ft();
+        static ALLMParameterisation gd11p();
 
         Parameters pomeron, reggeon;
         /// Effective photon squared mass

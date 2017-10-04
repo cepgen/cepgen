@@ -227,7 +227,7 @@ namespace CepGen
       inline void SetLegendX1(double x) { fLegX1 = x; }
       inline void SetLegendY1(double y) { fLegY1 = y; }
       inline void AddLegendEntry(const TObject* obj, const char* title, Option_t* option="lpf") {
-        if (!fLeg) BuildLegend();
+        if (!fLeg) BuildLeg();
         fLeg->AddEntry(obj, title, option);
         const unsigned int num_entries = fLeg->GetNRows();
         if ( num_entries>3 ) {
@@ -289,7 +289,7 @@ namespace CepGen
         fTopLabel->SetTextAlign(kHAlignRight+kVAlignBottom);
       }
 
-      inline void BuildLegend() {
+      inline void BuildLeg() {
         if ( fLeg ) return;
         if ( fRatio ) TCanvas::cd(1);
         fLeg = new TLegend(fLegX1, fLegY1, fLegX1+0.3, fLegY1+0.15);
