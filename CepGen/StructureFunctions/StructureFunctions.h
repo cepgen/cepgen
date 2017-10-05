@@ -27,11 +27,11 @@ namespace CepGen
   class StructureFunctions
   {
     public:
-      StructureFunctions( double f2=0.0 ) : F2( f2 ), FM( 0.0 ) {}
+      StructureFunctions( double f2=0.0 ) : F2( f2 ), FL( 0.0 ), FM( 0.0 ) {}
 
       double F2;
       double F1;
-      double FM;
+      double FL, FM;
   };
   /// Human-readable format of a structure function object
   std::ostream& operator<<( std::ostream& os, const StructureFunctions& sf );
