@@ -235,12 +235,12 @@ namespace CepGen
       case W:            return 80.385;
       case Photon:       return 0.;
       case PiPlus:       return 0.13957018;
-      case PiZero:       return 0.1349766;
+      case PiZero:       return Constants::mpi;
       case JPsi:         return 20.;            //FIXME FIXME FIXME
       case ud0Diquark:   return 0.57933;
       case ud1Diquark:   return 0.77133;
       case uu1Diquark:   return 0.77133;
-      case Proton:       return 0.938272046;
+      case Proton:       return Constants::mp;
       case Neutron:      return 0.939565346;
       case Upsilon1S:    return 9.46030;
       case Upsilon2S:    return 10.02326;
@@ -249,6 +249,7 @@ namespace CepGen
       case Rho1450_0:    return 1.465;
       case Rho1700_0:    return 1.720;
       case h1380_1:      return 1.38619;
+      case Eta:          return 0.547862;
       case invalidParticle:
       default:           return -1.;
     }
@@ -268,6 +269,7 @@ namespace CepGen
       case PiPlus: return +1.;
       case PiZero: return 0.;
       case Neutron: return 0.;
+      case Eta: return 0.;
       default: return 0.;
     }
   }
@@ -318,6 +320,7 @@ namespace CepGen
       case Particle::Rho1450_0:       return os << "rho(1450)0";
       case Particle::Rho1700_0:       return os << "rho(1700)0";
       case Particle::h1380_1:         return os << "h(1380)1";
+      case Particle::Eta:             return os << "eta meson";
       case Particle::Omega782:        return os << "omega(782)";
       case Particle::JPsi:            return os << "J/Psi";
       case Particle::Phi1680:         return os << "phi(1680)";

@@ -27,14 +27,16 @@ namespace CepGen
        */
       enum ParticleCode {
         invalidParticle = 0,
+        //--- fundamental particles
         dQuark = 1, uQuark = 2,
         Electron = 11, ElectronNeutrino = 12,
         Muon = 13, MuonNeutrino = 14,
         Tau = 15, TauNeutrino = 16,
         Gluon = 21, Photon = 22, Z = 23, W = 24,
+        //--- composite particles
         PiPlus = 211, PiZero = 111,
         Rho770_0 = 113, Rho1450_0 = 100113, Rho1700_0 = 30113,
-        Omega782 = 223,
+        Eta = 221, Omega782 = 223,
         h1380_1 = 10333,
         JPsi= 443,
         Phi1680 = 100333,
