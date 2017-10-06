@@ -4,10 +4,6 @@ namespace CepGen
 {
   namespace SF
   {
-    ChristyBosted::ChristyBosted( const ChristyBostedParameterisation& params ) :
-      params_( params )
-    {}
-
     double
     ChristyBosted::resmod507( char sf, double w2, double q2 ) const
     {
@@ -46,7 +42,7 @@ namespace CepGen
 
       std::array<double,7> width, height, pgam;
       for ( unsigned short i = 0; i < 7; ++i ) {
-        const ChristyBostedParameterisation::ResonanceParameters& res = params_.resonances[i];
+        const Parameterisation::ResonanceParameters& res = params_.resonances[i];
         width[i] = res.width;
 
         //--- calculate partial widths
@@ -83,7 +79,7 @@ namespace CepGen
 
       double sig_res = 0.;
       for ( unsigned short i = 0; i < 7; ++i ) {
-        const ChristyBostedParameterisation::ResonanceParameters res = params_.resonances[i];
+        const Parameterisation::ResonanceParameters res = params_.resonances[i];
         const double mass2 = res.mass*res.mass, width2 = width[i]*width[i];
         const double sigr = height[i]*res.kr()/k*res.kcmr()/kcm/res.width * ( width[i]*pgam[i] / ( pow( w2-mass2, 2 ) + mass2*width2 ) );
         sig_res += sigr;
@@ -118,10 +114,10 @@ namespace CepGen
       return sig_res + sig_nr;
     }
 
-    ChristyBosted::ChristyBostedParameterisation
-    ChristyBosted::ChristyBostedParameterisation::standard()
+    ChristyBosted::Parameterisation
+    ChristyBosted::Parameterisation::standard()
     {
-      ChristyBostedParameterisation params;
+      Parameterisation params;
 
       params.m0 = 4.2802;
       params.continuum.transverse = {

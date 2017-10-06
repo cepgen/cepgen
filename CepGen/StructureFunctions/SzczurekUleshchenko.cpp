@@ -5,7 +5,7 @@ namespace CepGen
   namespace SF
   {
     StructureFunctions
-    SzczurekUleshchenko( double q2, double xbj )
+    SzczurekUleshchenko::operator()( double q2, double xbj ) const
     {
 #ifndef GRVPDF
       FatalError( "Szczurek-Uleshchenko structure functions cannot be computed"
