@@ -31,7 +31,6 @@ namespace CepGen
         InError( "Invalid direction retrieved! Aborting." )
         return 0.;
       }
-      const double xpr = 1./( 1.+( w2-pow( mp+mpi, 2 ) )/( q2+q20 ) );
 
       const double norm_q2 = 1./0.330/0.330;
       const double t = log( log( ( q2+m0 )*norm_q2 )/log( m0*norm_q2 ) );
@@ -78,10 +77,7 @@ namespace CepGen
         else if ( sf == 'L' ) height[i] = res.A0_L/( 1.+res.fit_parameters[3]*q2 )*q2*exp( -q2*res.fit_parameters[4] );
         std::cout << sf << "//////" << height[i] << "\t" << res.fit_parameters[4] << std::endl;
         height[i] = height[i]*height[i];
-        //std::cout << height[i] << std::endl;
       }
-
-      //--- end resonance Q^2 dependence calculations
 
       //--- calculate Breit-Wigners for all resonances
 
@@ -90,19 +86,17 @@ namespace CepGen
         const ChristyBostedParameterisation::ResonanceParameters res = params_.resonances[i];
         const double mass2 = res.mass*res.mass, width2 = width[i]*width[i];
         const double sigr = height[i]*res.kr()/k*res.kcmr()/kcm/res.width * ( width[i]*pgam[i] / ( pow( w2-mass2, 2 ) + mass2*width2 ) );
-//        std::cout << sigr << "......." << height[i] << "\t" << width[i] << "\t" << width[i]*pgam[i] << std::endl;
-std::cout << sf << ":::::" << i << ":::::" << sigr << "\t" << 1./k*res.kcmr()/kcm << std::endl;
         sig_res += sigr;
       }
       sig_res *= w;
-      std::cout << ">>>>>>>\t"<< sig_res << std::endl;
 
       //--- finish resonances / start non-res background calculation
- 
+      const double xpr = 1./( 1.+( w2-pow( mp+mpi, 2 ) )/( q2+q20 ) );
+
       double sig_nr = 0.;
       if ( sf == 'T' ) { // transverse
+        const double wdif = w - ( mp + mpi );
         for ( unsigned short i = 0; i < 2; ++i ) {
-          const double wdif = w - ( mp + mpi );
           const double expo = params_.continuum.transverse[i].fit_parameters[1]
                             + params_.continuum.transverse[i].fit_parameters[2]*q2
                             + params_.continuum.transverse[i].fit_parameters[3]*q2*q2;
@@ -139,7 +133,8 @@ std::cout << sf << ":::::" << i << ":::::" << sigr << "\t" << 1./k*res.kcmr()/kc
         ContinuumParameters::DirectionParameters( 86.746, { 0., 4.0294, 3.1285, 0.33403, 4.9623 } )
       };
 
-      ResonanceParameters p33; // P33(1232)
+      //--- P33(1232)
+      ResonanceParameters p33;
       p33.br = ResonanceParameters::BranchingRatios( 1., 0., 0. );
       p33.angular_momentum = 1.;
       //p33.x0 = 0.15;
@@ -151,7 +146,8 @@ std::cout << sf << ":::::" << i << ":::::" << sigr << "\t" << 1./k*res.kcmr()/kc
       p33.A0_L = 29.414;
       params.resonances.emplace_back( p33 );
 
-      ResonanceParameters s11_1535; // S11(1535)
+      //--- S11(1535)
+      ResonanceParameters s11_1535;
       s11_1535.br = ResonanceParameters::BranchingRatios( 0.45, 0.1, 0.45 );
       s11_1535.angular_momentum = 0.;
       s11_1535.x0 = 0.215;
@@ -162,7 +158,8 @@ std::cout << sf << ":::::" << i << ":::::" << sigr << "\t" << 1./k*res.kcmr()/kc
       s11_1535.A0_L = 0.;
       params.resonances.emplace_back( s11_1535 );
 
-      ResonanceParameters d13; // D13(1520)
+      //--- D13(1520)
+      ResonanceParameters d13;
       d13.br = ResonanceParameters::BranchingRatios( 0.65, 0.35, 0. );
       d13.angular_momentum = 2.;
       d13.x0 = 0.215;
@@ -173,7 +170,8 @@ std::cout << sf << ":::::" << i << ":::::" << sigr << "\t" << 1./k*res.kcmr()/kc
       d13.A0_L = 157.92;
       params.resonances.emplace_back( d13 );
 
-      ResonanceParameters f15; // F15(1680)
+      //--- F15(1680)
+      ResonanceParameters f15;
       f15.br = ResonanceParameters::BranchingRatios( 0.65, 0.35, 0. );
       f15.angular_momentum = 3.;
       f15.x0 = 0.215;
@@ -184,7 +182,8 @@ std::cout << sf << ":::::" << i << ":::::" << sigr << "\t" << 1./k*res.kcmr()/kc
       f15.A0_L = 4.2160;
       params.resonances.emplace_back( f15 );
 
-      ResonanceParameters s11_1650; // S11(1650)
+      //--- S11(1650)
+      ResonanceParameters s11_1650;
       s11_1650.br = ResonanceParameters::BranchingRatios( 0.4, 0.5, 0.1 );
       s11_1650.angular_momentum = 0.;
       s11_1650.x0 = 0.215;
@@ -195,7 +194,8 @@ std::cout << sf << ":::::" << i << ":::::" << sigr << "\t" << 1./k*res.kcmr()/kc
       s11_1650.A0_L = 13.764;
       params.resonances.emplace_back( s11_1650 );
 
-      ResonanceParameters p11; // P11(1440) roper
+      //--- P11(1440) roper
+      ResonanceParameters p11;
       p11.br = ResonanceParameters::BranchingRatios( 0.65, 0.35, 0. );
       p11.angular_momentum = 1.;
       p11.x0 = 0.215;
@@ -206,7 +206,8 @@ std::cout << sf << ":::::" << i << ":::::" << sigr << "\t" << 1./k*res.kcmr()/kc
       p11.A0_L = 5.5124;
       params.resonances.emplace_back( p11 );
 
-      ResonanceParameters f37; // F37(1950)
+      //--- F37(1950)
+      ResonanceParameters f37;
       f37.br = ResonanceParameters::BranchingRatios( 0.5, 0.5, 0. );
       f37.angular_momentum = 3.;
       f37.x0 = 0.215;
@@ -236,26 +237,25 @@ std::cout << sf << ":::::" << i << ":::::" << sigr << "\t" << 1./k*res.kcmr()/kc
       const double q21 = 30., q20 = 8.;
       const double delq2 = q2 - q20;
       const double qq = q21 - q20;
-      const double factor_mod = q21/( q21 + delq2 );
-      const double q2_mod = q20 + delq2/( 1.+delq2/qq );
+      const double prefac = 1./( 4.*M_PI*M_PI*Constants::alphaEM ) * ( 1.-xbj );
       //------------------------------
 
       if ( q2 < q20 ) {
-        const double tau = 4.*xbj*xbj*mp2/q2,
-                     prefac = 1./( 4.*M_PI*M_PI*Constants::alphaEM ) * q2 * ( 1.-xbj )/( 1+tau );
+        const double tau = 4.*xbj*xbj*mp2/q2;
         const double sigT = resmod507( 'T', w2, q2 );
         const double sigL = resmod507( 'L', w2, q2 );
 std::cout << sigT << "\t" << sigL << std::endl;
-        cb.F2 = prefac*( sigT+sigL ) / 0.3894e3;
+        cb.F2 = prefac * q2 / ( 1+tau ) * ( sigT+sigL ) / Constants::GeV2toBarn*1.e6;
         //cb.FL = cb.F2*( 1+tau )*R/( 1.d0+R );
       }
       else {
+        const double factor_mod = q21/( q21 + delq2 );
+        const double q2_mod = q20 + delq2/( 1.+delq2/qq );
         const double w2mod = mp2 + q2_mod*( 1.-xbj )/xbj;
         const double tau = 4.*xbj*xbj*mp2/q2_mod;
-        const double prefac = 1./( 4.*M_PI*M_PI*Constants::alphaEM ) * q2_mod * ( 1.-xbj )/( 1+tau );
         const double sigT = resmod507( 'T', w2mod, q2_mod );
         const double sigL = resmod507( 'L', w2mod, q2_mod );
-        cb.F2 = prefac*( sigT+sigL )/0.3894e3 * factor_mod;
+        cb.F2 = prefac * q2_mod / ( 1+tau ) * ( sigT+sigL ) / Constants::GeV2toBarn * 1.e6 * factor_mod;
         //cb.FL = cb.F2*( 1.+tau )*R/( 1.+R ) * factor_mod;
       }
       return cb;
