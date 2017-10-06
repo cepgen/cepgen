@@ -19,8 +19,8 @@ namespace CepGen
       case ALLM_HHT:            return os << "ALLM;HHT";
       case ALLM_HHT_FT:         return os << "ALLM;HHT-FT";
       case Schaefer:            return os << "Schaefer";
-      default: return os;
     }
+    return os;
   }
 
   std::ostream&

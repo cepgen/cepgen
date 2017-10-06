@@ -3,10 +3,18 @@
 
 #include "StructureFunctions.h"
 
+#ifdef SchaeferF2
 extern "C"
 {
   extern void f2_fit_luxlike_( double& xbj, double& q2, double& F2, double& FL );
+  extern struct
+  {
+    double amp, am_pi, alpha_em;
+    double q2_cut, w2_hi, w2_lo;
+    int res_model, cont_model;
+  } luxlike_params_;
 }
+#endif
 
 namespace CepGen
 {
@@ -15,8 +23,12 @@ namespace CepGen
     class Schaefer
     {
       public:
-        Schaefer() {}
+        Schaefer();
         StructureFunctions operator()( double q2, double xbj ) const;
+
+      private:
+        enum ResonancesModel { ChristyBosted = 1, FioreBrasse = 2 };
+        enum ContinuumModel { GD11p = 1, ALLM91 = 2, ALLM97 = 3 };
     };
   }
 }

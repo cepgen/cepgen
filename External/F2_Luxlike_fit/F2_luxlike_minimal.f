@@ -2,44 +2,49 @@
 c       input: x,q2
 c       output: F2,F1
         implicit real*8 (a-h,o-z)
-c       -----------------------------        
-        amp = 0.9382727
-        am_pi = 0.135
-        alpha_em = 1.d0/137.d0
+        common/luxlike_params/amp,am_pi,alpha_em,
+     &     q2_cut,w2_lo,w2_hi,
+     &     ires_model,icont_model
 c       -----------------------------
         w_thr = amp+am_pi
-        q2_cut = 9.d0
-        W2_hi = 4.d0
-        W2_lo = 3.d0
-
         w2 = amp**2 + q2*(1.d0-xbj)/xbj
         w = dsqrt(w2)
+c       -----------------------------
+        print *,amp,am_pi,alpha_em,q2_cut,w2_lo,w2_hi,ires_model,
+     &   icont_model
 
         omega = (w2-w2_lo)/(w2_hi-w2_lo)
         rho = 2.d0*omega**2 - omega**4 
 
-
         if(q2.gt.q2_cut.and.w2.gt.w2_hi) then
-                        call F2_perturbative(xbj,q2,F2p,FLp)
-                        F2 = F2p
-                        FL = FLp        
+           call F2_perturbative(xbj,q2,F2p,FLp)
+           F2 = F2p
+           FL = FLp
         elseif(q2.gt.q2_cut.and.w2.lt.w2_hi) then
-                        call F2_cont(xbj,q2,F2c,FLc)
-                        F2 = F2c
-                        FL = FLc
+           call F2_cont(xbj,q2,F2c,FLc)
+           F2 = F2c
+           FL = FLc
         elseif(q2.lt.q2_cut.and.w2.lt.w2_lo) then
-                        call CepGen_F2_ChristyBosted(xbj,Q2,F2r,FLr)
-                        F2 = F2r
-                        FL = FLr
+           if(ires_model.eq.1) then
+              call CepGen_F2_ChristyBosted(xbj,Q2,F2r,FLr)
+           elseif(ires_model.eq.2) then
+              call CepGen_F2_FioreBrasse(xbj,Q2,F2r,FLr)
+           endif
+           F2 = F2r
+           FL = FLr
         elseif(q2.lt.q2_cut.and.w2.gt.w2_lo.and.w2.lt.w2_hi) then
-                        call CepGen_F2_ChristyBosted(xbj,Q2,F2r,FLr)
-                        call F2_cont(xbj,q2,F2c,FLc)
-                        F2 = (1.d0-rho)*F2r + rho*F2c
-                        FL=  (1.d0-rho)*FLr + rho*FLc        
+           if(ires_model.eq.1) then
+              call CepGen_F2_ChristyBosted(xbj,Q2,F2r,FLr)
+           elseif(ires_model.eq.2) then
+              call CepGen_F2_FioreBrasse(xbj,Q2,F2r,FLr)
+           endif
+           call F2_cont(xbj,q2,F2c,FLc)
+           F2 = (1.d0-rho)*F2r + rho*F2c
+           FL=  (1.d0-rho)*FLr + rho*FLc
         elseif(q2.lt.q2_cut.and.w2.gt.w2_hi) then
-                        call F2_cont(xbj,q2,F2c,FLc)
-                        F2 = F2c
-                        FL = FLc
+           call F2_cont(xbj,q2,F2c,FLc)
+            F2 = F2c
+            FL = FLc
         endif
                
         return
@@ -47,17 +52,25 @@ c       -----------------------------
 c       ---------------------------------------------------------
         subroutine F2_CONT(xbj,q2,F2c,FLc)
         implicit real*8 (a-h,o-z)
-        amp = 0.938d0
-
-        call CepGen_F2_GD11P(xbj,Q2,F2)
+        common/luxlike_params/amp,am_pi,alpha_em,
+     &     q2_cut,w2_lo,w2_hi,
+     &     ires_model,icont_model
+        print *,icont_model
+        if(icont_model.eq.1) then
+           call CepGen_F2_GD11P(xbj,Q2,F2)
+        elseif(icont_model.eq.2) then
+           call CepGen_F2_ALLM91(xbj,Q2,F2)
+        elseif(icont_model.eq.3) then
+           call CepGen_F2_ALLM97(xbj,Q2,F2)
+        endif
         F2c = F2
         R = R_1998(xbj,Q2)
         tau = 4.d0*xbj**2*amp**2/q2
         FLc = F2c*(1+tau)*R/(1.d0+R)
 
         return
-        end        
-c       ---------------------------------------------------------       
+        end
+c       ---------------------------------------------------------
         subroutine F2_perturbative(xbj,q2,F2pert,FLpert)
       IMPLICIT NONE
       INTEGER iord,ipn,ieigen,neigen,ix,iq
@@ -121,102 +134,7 @@ c       in the Lux-paper a "higher-twist" correction is applied to F2
         FLpert = FL
         return
         end
-c       --------------------------------------------------------                
-        subroutine F2_ALLM(x,Q2,F2)
-        implicit real*8 (a-h,o-z)
-        real*8 q2
-c       From  Abramowicz, Levy et al.
-c       --------------------------
-        data cp1,cp2,cp3/0.28076d0,0.22291d0,2.1979d0/
-        data ap1,ap2,ap3/-0.0808d0,-0.44812d0,1.1709d0/
-        data bp1,bp2,bp3/0.36292d0,1.8917d0,1.8439d0/
-c       --------------------------
-        data cr1,cr2,cr3/0.80107d0,0.97307d0,3.4924d0/
-        data ar1,ar2,ar3/0.58400d0,0.37888d0,2.6063d0/
-        data br1,br2,br3/0.01147d0,3.7582d0,0.49338d0/
-c       --------------------------
-        data am02,amp2,amr2/0.31985d0,49.457d0,0.15052d0/
-        data q02,alam2/0.52544d0,0.06526d0/
-c       --------------------------
-        factor = Q2/(Q2+am02)
-        W2_eff = Q2*(1.d0-x)/x
-        xp = (Q2+amp2)/(Q2+W2_eff+amp2)
-        xr = (Q2+amr2)/(Q2+W2_eff+amr2)
-c       ---------------------------
-        xlog1 = dlog((Q2+q02/alam2))
-        xlog2 = dlog(q02/alam2)
-        t = dlog(xlog1/xlog2)
-c       ----------------------------
-        cpom = cp1 + (cp1-cp2)*(1.d0/(1.d0 + t**cp3) - 1.d0)
-        apom = ap1 + (ap1-ap2)*(1.d0/(1.d0 + t**ap3) - 1.d0)
-        creg = cr1 + cr2*t**cr3        
-        areg = ar1 + ar2*t**ar3        
-c        bpom = bp1**2 + bp2**2 * t**bp3
-c        breg = br1**2 + br2**2 * t**br3
-        bpom = bp1 + bp2 * t**bp3
-        breg = br1 + br2 * t**br3
 
-c       -----------------------------
-c        F2_Pom = factor*cpom*xp**apom *(1.d0-x)**(1.+bpom)
-c        F2_Reg = factor*creg*xr**areg *(1.d0-x)**(1.+breg)
-
-        F2_Pom = factor*cpom*xp**apom *(1.d0-x)**bpom
-        F2_Reg = factor*creg*xr**areg *(1.d0-x)**breg
-
-cc        F2 = F2_Pom
-        F2 = F2_Pom + F2_Reg
-
-        return
-        end
-
-c       -------------------------------------------------
-
-        subroutine F2_GD11P(x,Q2,F2)
-        implicit real*8 (a-h,o-z)
-        real*8 q2
-c       Refit of ALLM by the HERMES collaboration
-c       --------------------------
-        data cp1,cp2,cp3/0.3638d0,0.1211d0,1.166d0/
-        data ap1,ap2,ap3/-0.11895,-0.4783d0,1.353d0/
-        data bp1,bp2,bp3/1.0833d0,2.656d0,1.771d0/
-c       --------------------------
-        data cr1,cr2,cr3/1.3633d0,2.256d0,2.209d0/
-        data ar1,ar2,ar3/0.3425d0,1.0603d0,0.5164d0/
-        data br1,br2,br3/-10.408d0,14.857d0,0.07739d0/
-c       --------------------------
-        data am02,amp2,amr2/0.5063d0,34.75d0,0.03190/
-        data q02,alam2/1.374d0,0.06527d0/
-c       --------------------------
-        factor = Q2/(Q2+am02)
-        W2_eff = Q2*(1.d0-x)/x
-        xp = (Q2+amp2)/(Q2+W2_eff+amp2)
-        xr = (Q2+amr2)/(Q2+W2_eff+amr2)
-c       ---------------------------
-        xlog1 = dlog((Q2+q02)/alam2)
-        xlog2 = dlog(q02/alam2)
-        t = dlog(xlog1/xlog2)
-c       ----------------------------
-        cpom = cp1 + (cp1-cp2)*(1.d0/(1.d0 + t**cp3) - 1.d0)
-        apom = ap1 + (ap1-ap2)*(1.d0/(1.d0 + t**ap3) - 1.d0)
-        creg = cr1 + cr2*t**cr3        
-        areg = ar1 + ar2*t**ar3        
-c        bpom = bp1**2 + bp2**2 * t**bp3
-c        breg = br1**2 + br2**2 * t**br3
-        bpom = bp1 + bp2 * t**bp3
-        breg = br1 + br2 * t**br3
-
-c       -----------------------------
-c        F2_Pom = factor*cpom*xp**apom *(1.d0-x)**(1.+bpom)
-c        F2_Reg = factor*creg*xr**areg *(1.d0-x)**(1.+breg)
-
-        F2_Pom = factor*cpom*xp**apom *(1.d0-x)**bpom
-        F2_Reg = factor*creg*xr**areg *(1.d0-x)**breg
-
-cc        F2 = F2_Pom
-        F2 = F2_Pom + F2_Reg
-
-        return
-        end
 c       -------------------------------------------------
         double precision function R_1998(x,q2)
         implicit real*8 (a-h,o-z)
