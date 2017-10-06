@@ -4,30 +4,34 @@ namespace CepGen
 {
   namespace SF
   {
-    double resmod507( int sf, double w2, double q2 )
-    {
-      const ChristyBostedParameterisation params = ChristyBostedParameterisation::standard();
-      //struct tst2 { std::array<double,7> sigrsv; double sig_nrsv, sig_mec; };
+    ChristyBosted::ChristyBosted( const ChristyBostedParameterisation& params ) :
+      params_( params )
+    {}
 
+    double
+    ChristyBosted::resmod507( char sf, double w2, double q2 ) const
+    {
       const double mp = Constants::mp, mp2 = mp*mp,
                    mpi = Constants::mpi, mpi2 = mpi*mpi,
                    meta = Particle::massFromPDGId( Particle::Eta ), meta2 = meta*meta;
       const double w = sqrt( w2 );
 
-      const double mon = 1./( 1.+q2/0.71 ),
-                   dip = mon*mon; // dipole parameterization
-
       const double xb = q2/( q2+w2-mp2 );
-      double m0 = 0., q20 = 0., xpr = 0.;
+      double m0 = 0., q20 = 0.;
 
-      if ( sf == 1 ) { // transverse
-        m0 = 0.125, q20 = 0.05;
-        xpr = 1./( 1.+( w2-pow( mp+mpi, 2 ) )/( q2+q20 ) );
+      if ( sf == 'T' ) { // transverse
+        m0 = 0.125;
+        q20 = 0.05;
       }
-      else if ( sf == 2 ) {
-        m0 = params.m0, q20 = 0.125;
-        xpr = 1./( 1.+( w2-pow( mp+mpi+mpi, 2 ) )/( q2+q20 ) );
+      else if ( sf == 'L' ) {
+        m0 = params_.m0;
+        q20 = 0.125;
       }
+      else {
+        InError( "Invalid direction retrieved! Aborting." )
+        return 0.;
+      }
+      const double xpr = 1./( 1.+( w2-pow( mp+mpi, 2 ) )/( q2+q20 ) );
 
       const double norm_q2 = 1./0.330/0.330;
       const double t = log( log( ( q2+m0 )*norm_q2 )/log( m0*norm_q2 ) );
@@ -41,43 +45,40 @@ namespace CepGen
       const double epi2cm = 0.5 * ( w2 + 4.*mpi2 - mp2 )/w, ppi2cm = sqrt( std::max( 0., epi2cm*epi2cm-4*mpi2 ) );
       const double eetacm = 0.5 * ( w2 + meta2 - mp2 )/w, petacm = sqrt( std::max( 0., eetacm*eetacm-meta2 ) );
 
-      std::array<double,7> width;
-      std::array<double,7> pgam;
-      std::array<double,7> pwid[3];
+      std::array<double,7> width, height, pgam;
       for ( unsigned short i = 0; i < 7; ++i ) {
-        const ChristyBostedParameterisation::ResonanceParameters& res = params.resonances[i];
+        const ChristyBostedParameterisation::ResonanceParameters& res = params_.resonances[i];
+        width[i] = res.width;
 
         //--- calculate partial widths
         //----- 1-pion decay mode
         const double x02 = res.x0*res.x0;
-        pwid[i][0] = res.width*pow( ppicm/res.ppicmr(), 2.*res.angular_momentum+1. ) * pow( ( res.ppicmr()*res.ppicmr()+x02 )/( ppicm*ppicm+x02 ), res.angular_momentum );
+        const double partial_width_singlepi = pow( ppicm /res.pcmr(    mpi2 ), 2.*res.angular_momentum+1. )
+                                            * pow( ( res.pcmr(    mpi2 )*res.pcmr(    mpi2 )+x02 )/( ppicm *ppicm +x02 ), res.angular_momentum );
         //----- 2-pion decay mode
-        pwid[i][1] = res.width*pow( ppi2cm/res.ppi2cmr(), 2.*res.angular_momentum+4. ) * pow( ( res.ppi2cmr()*res.ppi2cmr()+x02 )/( ppi2cm*ppi2cm+x02 ), res.angular_momentum+2 ) * w / res.mass;
-        //----- eta decay mode
-        pwid[i][2] = 0.;
-
-        //--- eta decay only for S11's
-        if ( i == 1 || i == 4 ) {
-          pwid[2][i] = res.width*pow( petacm/res.petacmr(), 2.*res.angular_momentum+1. ) * pow( ( res.petacmr()*res.petacmr()+x02 )/( petacm*petacm+x02 ), res.angular_momentum );
-        }
+        const double partial_width_doublepi = pow( ppi2cm/res.pcmr( 4.*mpi2 ), 2.*( res.angular_momentum+2. ) )
+                                            * pow( ( res.pcmr( 4.*mpi2 )*res.pcmr( 4.*mpi2 )+x02 )/( ppi2cm*ppi2cm+x02 ), res.angular_momentum+2 )
+                                            * w / res.mass;
+        //----- eta decay mode (only for S11's)
+        const double partial_width_eta = ( res.br.eta == 0. ) ? 0. :
+                                              pow( petacm/res.pcmr(   meta2 ), 2.*res.angular_momentum+1. )
+                                            * pow( ( res.pcmr(   meta2 )*res.pcmr(   meta2 )+x02 )/( petacm*petacm+x02 ), res.angular_momentum );
 
         // virtual photon width
         pgam[i] = res.width * pow( kcm/res.kcmr(), 2 ) * ( res.kcmr()*res.kcmr()+x02 )/( kcm*kcm+x02 );
 
-        width[i] = res.br.singlepi*pwid[i][0] + res.br.doublepi*pwid[i][1] + res.br.eta*pwid[i][2];
-      }
+        width[i] = ( partial_width_singlepi * res.br.singlepi
+                   + partial_width_doublepi * res.br.doublepi
+                   + partial_width_eta * res.br.eta ) * res.width;
+//std::cout << i << "\t" << width[i] << "\t" << partial_width_doublepi << "\t" << pow( ppi2cm/res.pcmr( 4.*mpi2 ), 2.*( res.angular_momentum+2. ) ) << std::endl;
 
-      //--- end resonance kinematics and widths calculations
+        //--- resonance Q^2 dependence calculations
 
-      std::array<double,7> height;
-      //--- begin resonance Q^2 dependence calculations
-      for ( unsigned short i = 0; i < 7; ++i ) {
-        const ChristyBostedParameterisation::ResonanceParameters& res = params.resonances[i];
-
-        if ( sf == 1 ) height[i] = res.A0_T*( 1.+res.fit_parameters[0]*q2/( 1.+res.fit_parameters[1]*q2 ) )/pow( 1.+q2/0.91, res.fit_parameters[2] );
-        else           height[i] = res.A0_L*q2/( 1.+res.fit_parameters[3]*q2 )*exp( -q2*res.fit_parameters[4] );
- 
+        if ( sf == 'T' )      height[i] = res.A0_T*( 1.+res.fit_parameters[0]*q2/( 1.+res.fit_parameters[1]*q2 ) )/pow( 1.+q2/0.91, res.fit_parameters[2] );
+        else if ( sf == 'L' ) height[i] = res.A0_L/( 1.+res.fit_parameters[3]*q2 )*q2*exp( -q2*res.fit_parameters[4] );
+        std::cout << sf << "//////" << height[i] << "\t" << res.fit_parameters[4] << std::endl;
         height[i] = height[i]*height[i];
+        //std::cout << height[i] << std::endl;
       }
 
       //--- end resonance Q^2 dependence calculations
@@ -85,46 +86,47 @@ namespace CepGen
       //--- calculate Breit-Wigners for all resonances
 
       double sig_res = 0.;
-      std::array<double,7> sigr;
       for ( unsigned short i = 0; i < 7; ++i ) {
-        const ChristyBostedParameterisation::ResonanceParameters res = params.resonances[i];
-        const double mass2 = res.mass*res.mass, width2 = res.width*res.width;
-        sigr[i] = height[i]*res.kr()/k*res.kcmr()/kcm/res.width * ( res.width*pgam[i] / ( pow( w2 - mass2, 2 ) + mass2*width2 ) );
-        //if ( sf == 1 ) sigrsv[i] = sigr[i];
-        sig_res += sigr[i];
+        const ChristyBostedParameterisation::ResonanceParameters res = params_.resonances[i];
+        const double mass2 = res.mass*res.mass, width2 = width[i]*width[i];
+        const double sigr = height[i]*res.kr()/k*res.kcmr()/kcm/res.width * ( width[i]*pgam[i] / ( pow( w2-mass2, 2 ) + mass2*width2 ) );
+//        std::cout << sigr << "......." << height[i] << "\t" << width[i] << "\t" << width[i]*pgam[i] << std::endl;
+std::cout << sf << ":::::" << i << ":::::" << sigr << "\t" << 1./k*res.kcmr()/kcm << std::endl;
+        sig_res += sigr;
       }
       sig_res *= w;
+      std::cout << ">>>>>>>\t"<< sig_res << std::endl;
 
       //--- finish resonances / start non-res background calculation
  
       double sig_nr = 0.;
-      if ( sf == 1 ) { // transverse
+      if ( sf == 'T' ) { // transverse
         for ( unsigned short i = 0; i < 2; ++i ) {
           const double wdif = w - ( mp + mpi );
-          const double expo = params.continuum.transverse[i].fit_parameters[1]
-                            + params.continuum.transverse[i].fit_parameters[2]*q2
-                            + params.continuum.transverse[i].fit_parameters[3]*q2*q2;
-          sig_nr += params.continuum.transverse[i].sig0 / pow( q2+params.continuum.transverse[i].fit_parameters[0], expo ) * pow( wdif, i+0.5 );
+          const double expo = params_.continuum.transverse[i].fit_parameters[1]
+                            + params_.continuum.transverse[i].fit_parameters[2]*q2
+                            + params_.continuum.transverse[i].fit_parameters[3]*q2*q2;
+          sig_nr += params_.continuum.transverse[i].sig0 / pow( q2+params_.continuum.transverse[i].fit_parameters[0], expo ) * pow( wdif, i+0.5 );
         }
 
-        sig_nr = sig_nr*xpr;
-        //sig_nrsv = sig_nr;
+        sig_nr *= xpr;
       }
-      else if ( sf == 2 ) { // longitudinal
+      else if ( sf == 'L' ) { // longitudinal
         for ( unsigned short i = 0; i < 1; ++i ) {
-          const double expo = params.continuum.longitudinal[i].fit_parameters[0]
-                            + params.continuum.longitudinal[i].fit_parameters[1];
-          sig_nr += params.continuum.longitudinal[i].sig0 * pow( 1.-xpr, expo )/( 1.-xb )
-                  * pow( q2/( q2+q20 ), params.continuum.longitudinal[i].fit_parameters[2] )/( q2+q20 )
-                  * pow( xpr, params.continuum.longitudinal[i].fit_parameters[3]+params.continuum.longitudinal[i].fit_parameters[4]*t );
+          const double expo = params_.continuum.longitudinal[i].fit_parameters[0]
+                            + params_.continuum.longitudinal[i].fit_parameters[1];
+          sig_nr += params_.continuum.longitudinal[i].sig0
+                    * pow( 1.-xpr, expo )/( 1.-xb )
+                    * pow( q2/( q2+q20 ), params_.continuum.longitudinal[i].fit_parameters[2] )/( q2+q20 )
+                    * pow( xpr, params_.continuum.longitudinal[i].fit_parameters[3]+params_.continuum.longitudinal[i].fit_parameters[4]*t );
         }
       }
-
+      std::cout << sf << "\t" << sig_res << "\t" << sig_nr << std::endl;
       return sig_res + sig_nr;
     }
 
-    ChristyBostedParameterisation
-    ChristyBostedParameterisation::standard()
+    ChristyBosted::ChristyBostedParameterisation
+    ChristyBosted::ChristyBostedParameterisation::standard()
     {
       ChristyBostedParameterisation params;
 
@@ -138,7 +140,7 @@ namespace CepGen
       };
 
       ResonanceParameters p33; // P33(1232)
-      p33.br = ResonanceParameters::BranchingRatios( 1., 0., 1. );
+      p33.br = ResonanceParameters::BranchingRatios( 1., 0., 0. );
       p33.angular_momentum = 1.;
       //p33.x0 = 0.15;
       p33.x0 = 0.14462;
@@ -155,7 +157,7 @@ namespace CepGen
       s11_1535.x0 = 0.215;
       s11_1535.mass = 1.5304;
       s11_1535.width = 0.220;
-      s11_1535.fit_parameters = { 6823.2, 33521., 2.5686, -999., -999. };
+      s11_1535.fit_parameters = { 6823.2, 33521., 2.5686, 0., 0. };
       s11_1535.A0_T = 6.3351;
       s11_1535.A0_L = 0.;
       params.resonances.emplace_back( s11_1535 );
@@ -219,21 +221,43 @@ namespace CepGen
     }
 
     StructureFunctions
-    ChristyBosted( double q2, double xbj )
+    ChristyBosted::operator()( double q2, double xbj ) const
     {
-      const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
+      const double mp2 = Constants::mp*Constants::mp;
       const double w2 = mp2 + q2*( 1.-xbj )/xbj;
- 
-      const double xb = q2/( w2+q2-mp2 );
-
-      const double sigT = resmod507( 1, w2, q2 );
-      const double sigL = resmod507( 2, w2, q2 );
-
-      //const double R = sigL/sigT;
+      const double w_min = Constants::mp+Constants::mpi;
 
       StructureFunctions cb;
-      cb.F1 = sigT*(w2-mp2)/8./M_PI/M_PI/Constants::alphaEM/0.3894e3;
-      cb.FL = sigL*2.*xb*(w2-mp2)/8./M_PI/M_PI/Constants::alphaEM/0.3894e3;
+      if ( sqrt( w2 ) < w_min ) return cb;
+
+      //-----------------------------
+      // modification of Christy-Bosted at large q2 as described in the LUXqed paper
+      //-----------------------------
+      const double q21 = 30., q20 = 8.;
+      const double delq2 = q2 - q20;
+      const double qq = q21 - q20;
+      const double factor_mod = q21/( q21 + delq2 );
+      const double q2_mod = q20 + delq2/( 1.+delq2/qq );
+      //------------------------------
+
+      if ( q2 < q20 ) {
+        const double tau = 4.*xbj*xbj*mp2/q2,
+                     prefac = 1./( 4.*M_PI*M_PI*Constants::alphaEM ) * q2 * ( 1.-xbj )/( 1+tau );
+        const double sigT = resmod507( 'T', w2, q2 );
+        const double sigL = resmod507( 'L', w2, q2 );
+std::cout << sigT << "\t" << sigL << std::endl;
+        cb.F2 = prefac*( sigT+sigL ) / 0.3894e3;
+        //cb.FL = cb.F2*( 1+tau )*R/( 1.d0+R );
+      }
+      else {
+        const double w2mod = mp2 + q2_mod*( 1.-xbj )/xbj;
+        const double tau = 4.*xbj*xbj*mp2/q2_mod;
+        const double prefac = 1./( 4.*M_PI*M_PI*Constants::alphaEM ) * q2_mod * ( 1.-xbj )/( 1+tau );
+        const double sigT = resmod507( 'T', w2mod, q2_mod );
+        const double sigL = resmod507( 'L', w2mod, q2_mod );
+        cb.F2 = prefac*( sigT+sigL )/0.3894e3 * factor_mod;
+        //cb.FL = cb.F2*( 1.+tau )*R/( 1.+R ) * factor_mod;
+      }
       return cb;
     }
   }
