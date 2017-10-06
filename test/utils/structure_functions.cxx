@@ -35,6 +35,8 @@ main( int argc, char* argv[] )
   CepGen::SF::ChristyBosted cb;
   CepGen::SF::ALLM allm97( CepGen::SF::ALLM::Parameterisation::allm97() );
   CepGen::SF::FioreBrasse fb;
+  CepGen::SF::BlockDurandHa bdh;
+  CepGen::SF::Schaefer luxlike;
 
   for ( unsigned int i=0; i<npoints; i++ ) {
     float xbj;
@@ -50,8 +52,8 @@ main( int argc, char* argv[] )
          sf_allm97 = allm97( q2, xbj ),
          //sf_allm_hht = CepGen::SF::ALLM( q2, xbj, CepGen::SF::ALLMParameterisation::hht_allm() ),
          //sf_allm_hht_ft = CepGen::SF::ALLM( q2, xbj, CepGen::SF::ALLMParameterisation::hht_allm_ft() ),
-         sf_bdh = CepGen::SF::BlockDurandHa( q2, xbj ),
-         sf_luxlike = CepGen::SF::Schaefer( q2, xbj ),
+         sf_bdh = bdh( q2, xbj ),
+         sf_luxlike = luxlike( q2, xbj ),
          //sf_cteq = cteq( q2, xbj ),
          //sf_mrst = mrst( q2, xbj ),
          //sf_lux = lux( q2, xbj ),
@@ -99,7 +101,7 @@ main( int argc, char* argv[] )
   mg.Add( &g_allm97_f2, "l" );
   c.AddLegendEntry( &g_allm97_f2, "Abramowicz et al. 97", "l" );
 
-  /*g_allm_hht_f2.SetLineColor( kBlue+1 );
+  g_allm_hht_f2.SetLineColor( kBlue+1 );
   g_allm_hht_f2.SetLineWidth( 3 );
   g_allm_hht_f2.SetLineStyle( 2 );
   mg.Add( &g_allm_hht_f2, "l" );

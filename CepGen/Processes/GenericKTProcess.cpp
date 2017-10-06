@@ -260,8 +260,9 @@ namespace CepGen
         case StructureFunctionsType::ALLM97: {
           SF::ALLM allm97( SF::ALLM::Parameterisation::allm97() );
           sf = allm97( Q2, xbj ); } break;
-        case StructureFunctionsType::Schaefer:
-          sf = SF::Schaefer( Q2, xbj ); break;
+        case StructureFunctionsType::Schaefer: {
+          SF::Schaefer luxlike;
+          sf = luxlike( Q2, xbj ); } break;
         default: break; //FIXME
       }
 

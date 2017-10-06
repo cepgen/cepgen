@@ -12,7 +12,12 @@ namespace CepGen
 {
   namespace SF
   {
-    StructureFunctions Schaefer( double q2, double xbj );
+    class Schaefer
+    {
+      public:
+        Schaefer() {}
+        StructureFunctions operator()( double q2, double xbj ) const;
+    };
   }
 }
 

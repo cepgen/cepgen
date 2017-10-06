@@ -5,7 +5,7 @@ namespace CepGen
   namespace SF
   {
     StructureFunctions
-    Schaefer( double q2, double xbj )
+    Schaefer::operator()( double q2, double xbj ) const
     {
       StructureFunctions luxlike;
 #ifndef SchaeferF2
