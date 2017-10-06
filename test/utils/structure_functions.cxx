@@ -44,22 +44,22 @@ main( int argc, char* argv[] )
          sf_fb = CepGen::SF::FioreBrasse( q2, xbj ),
          sf_su = CepGen::SF::SzczurekUleshchenko( q2, xbj ),
          sf_allm97 = CepGen::SF::ALLM( q2, xbj, CepGen::SF::ALLMParameterisation::allm97() ),
-         sf_allm_hht = CepGen::SF::ALLM( q2, xbj, CepGen::SF::ALLMParameterisation::hht_allm() ),
-         sf_allm_hht_ft = CepGen::SF::ALLM( q2, xbj, CepGen::SF::ALLMParameterisation::hht_allm_ft() ),
+         //sf_allm_hht = CepGen::SF::ALLM( q2, xbj, CepGen::SF::ALLMParameterisation::hht_allm() ),
+         //sf_allm_hht_ft = CepGen::SF::ALLM( q2, xbj, CepGen::SF::ALLMParameterisation::hht_allm_ft() ),
          sf_bdh = CepGen::SF::BlockDurandHa( q2, xbj ),
          sf_luxlike = CepGen::SF::Schaefer( q2, xbj ),
-         sf_cteq = cteq( q2, xbj ),
-         sf_mrst = mrst( q2, xbj ),
-         sf_lux = lux( q2, xbj ),
+         //sf_cteq = cteq( q2, xbj ),
+         //sf_mrst = mrst( q2, xbj ),
+         //sf_lux = lux( q2, xbj ),
          sf_cb = cb( q2, xbj );
 
     g_sy_f2.SetPoint( i, xbj, sf_sy.F2 );
     g_fb_f2.SetPoint( i, xbj, sf_fb.F2 );
     g_su_f2.SetPoint( i, xbj, sf_su.F2 );
     g_bdh_f2.SetPoint( i, xbj, sf_bdh.F2 );
-    g_cteq_f2.SetPoint( i, xbj, sf_cteq.F2 );
-    g_mrst_f2.SetPoint( i, xbj, sf_mrst.F2 );
-    g_lux_f2.SetPoint( i, xbj, sf_lux.F2 );
+    //g_cteq_f2.SetPoint( i, xbj, sf_cteq.F2 );
+    //g_mrst_f2.SetPoint( i, xbj, sf_mrst.F2 );
+    //g_lux_f2.SetPoint( i, xbj, sf_lux.F2 );
     g_luxlike_f2.SetPoint( i, xbj, sf_luxlike.F2 );
     g_cb_f2.SetPoint( i, xbj, sf_cb.F2 );
 

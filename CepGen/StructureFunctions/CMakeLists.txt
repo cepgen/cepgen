@@ -16,7 +16,7 @@ else()
 endif()
 
 set(SCH_PATH ${PROJECT_SOURCE_DIR}/External/F2_Luxlike_fit)
-file(GLOB sch_sources ${SCH_PATH}/F2_luxlike.f ${SCH_PATH}/alphaS.f ${SCH_PATH}/mstw*.f ${SCH_PATH}/cepgen_f2.cpp)
+file(GLOB sch_sources ${SCH_PATH}/F2_luxlike_minimal.f ${SCH_PATH}/alphaS.f ${SCH_PATH}/mstw*.f ${SCH_PATH}/cepgen_f2.cpp)
 if(sch_sources)
   message(STATUS "LUXlike structure functions found!")
   add_definitions(-DSchaeferF2)
