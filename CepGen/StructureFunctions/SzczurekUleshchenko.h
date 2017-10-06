@@ -13,7 +13,12 @@ namespace CepGen
 {
   namespace SF
   {
-    StructureFunctions SzczurekUleshchenko( double q2, double xbj );
+    class SzczurekUleshchenko
+    {
+      public:
+        SzczurekUleshchenko() {}
+        StructureFunctions operator()( double q2, double xbj ) const;
+    };
   }
 }
 

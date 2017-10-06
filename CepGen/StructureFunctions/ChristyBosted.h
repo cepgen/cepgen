@@ -12,9 +12,9 @@ namespace CepGen
     class ChristyBosted
     {
       public:
-        struct ChristyBostedParameterisation
+        struct Parameterisation
         {
-          static ChristyBostedParameterisation standard();
+          static Parameterisation standard();
 
           struct ResonanceParameters
           {
@@ -65,13 +65,13 @@ namespace CepGen
           ContinuumParameters continuum;
         };
 
-        ChristyBosted( const ChristyBostedParameterisation& params = ChristyBostedParameterisation::standard() );
+        ChristyBosted( const ChristyBosted::Parameterisation& params = ChristyBosted::Parameterisation::standard() ) : params_( params ) {}
 
         StructureFunctions operator()( double q2, double xbj ) const;
 
       private:
         double resmod507( char sf, double w2, double q2 ) const;
-        ChristyBostedParameterisation params_;
+        Parameterisation params_;
     };
   }
 }

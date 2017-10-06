@@ -245,16 +245,21 @@ namespace CepGen
 
       StructureFunctions sf;
       switch ( cuts_.structure_functions ) {
-        case StructureFunctionsType::SzczurekUleshchenko:
-          sf = SF::SzczurekUleshchenko( Q2, xbj ); break;
-        case StructureFunctionsType::SuriYennie:
-          sf = SF::SuriYennie( Q2, xbj ); break;
-        case StructureFunctionsType::Fiore:
-          sf = SF::FioreBrasse( Q2, xbj ); break;
-        case StructureFunctionsType::ALLM91:
-          sf = SF::ALLM( Q2, xbj, SF::ALLMParameterisation::allm91() ); break;
-        case StructureFunctionsType::ALLM97:
-          sf = SF::ALLM( Q2, xbj, SF::ALLMParameterisation::allm97() ); break;
+        case StructureFunctionsType::SzczurekUleshchenko: {
+          SF::SzczurekUleshchenko su;
+          sf = su( Q2, xbj ); } break;
+        case StructureFunctionsType::SuriYennie: {
+          SF::SuriYennie sy;
+          sf = sy( Q2, xbj ); } break;
+        case StructureFunctionsType::Fiore: {
+          SF::FioreBrasse fb;
+          sf = fb( Q2, xbj ); } break;
+        case StructureFunctionsType::ALLM91: {
+          SF::ALLM allm91( SF::ALLM::Parameterisation::allm91() );
+          sf = allm91( Q2, xbj ); } break;
+        case StructureFunctionsType::ALLM97: {
+          SF::ALLM allm97( SF::ALLM::Parameterisation::allm97() );
+          sf = allm97( Q2, xbj ); } break;
         default: break; //FIXME
       }
 

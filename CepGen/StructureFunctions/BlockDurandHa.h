@@ -8,20 +8,28 @@ namespace CepGen
 {
   namespace SF
   {
-    struct BlockDurandHaParameters
+    class BlockDurandHa
     {
-      std::array<double,3> a, b;
-      std::array<double,2> c;
-      double n;
-      /// Effective mass spread parameter
-      double lambda;
-      /// Asymptotic log-behaviour transition scale factor
-      double mu2;
-      /// Squared effective mass (~VM mass)
-      double m2;
-      static BlockDurandHaParameters standard();
+      public:
+        struct Parameterisation
+        {
+          std::array<double,3> a, b;
+          std::array<double,2> c;
+          double n;
+          /// Effective mass spread parameter
+          double lambda;
+          /// Asymptotic log-behaviour transition scale factor
+          double mu2;
+          /// Squared effective mass (~VM mass)
+          double m2;
+          static Parameterisation standard();
+        };
+        BlockDurandHa( const BlockDurandHa::Parameterisation params = BlockDurandHa::Parameterisation::standard() ) : params_( params ) {}
+        StructureFunctions operator()( double q2, double xbj ) const;
+
+      private:
+        Parameterisation params_;
     };
-    StructureFunctions BlockDurandHa( double q2, double xbj, const BlockDurandHaParameters& params=BlockDurandHaParameters::standard() );
   }
 }
 

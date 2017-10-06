@@ -4,10 +4,10 @@ namespace CepGen
 {
   namespace SF
   {
-    FioreBrasseParameterisation
-    FioreBrasseParameterisation::standard()
+    FioreBrasse::Parameterisation
+    FioreBrasse::Parameterisation::standard()
     {
-      FioreBrasseParameterisation p;
+      Parameterisation p;
       p.s0 = 1.14;
       p.norm = 0.021;
       p.resonances.emplace_back( -0.8377, 0.95, 0.1473, 1.0, 2.4617, 3./2. );
@@ -16,10 +16,10 @@ namespace CepGen
       p.resonances.emplace_back( 0.5645, 0.1126, 1.3086, 19.2694, 4.5259, 1. );
       return p;
     }
-    FioreBrasseParameterisation
-    FioreBrasseParameterisation::alternative()
+    FioreBrasse::Parameterisation
+    FioreBrasse::Parameterisation::alternative()
     {
-      FioreBrasseParameterisation p;
+      Parameterisation p;
       p.s0 = 1.2871;
       p.norm = 0.0207;
       p.resonances.emplace_back( -0.8070, 0.9632, 0.1387, 1.0, 2.6066, 3./2. );
@@ -30,25 +30,24 @@ namespace CepGen
     }
 
     StructureFunctions
-    FioreBrasse( double q2, double xbj )
+    FioreBrasse::operator()( double q2, double xbj ) const
     {
       const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
       const double akin = 1. + 4.*mp2 * xbj*xbj/q2;
       const double prefactor = q2*( 1.-xbj ) / ( 4.*M_PI*Constants::alphaEM*akin );
       const double s = q2*( 1.-xbj )/xbj + mp2;
 
-      FioreBrasseParameterisation p = FioreBrasseParameterisation::standard();
       double ampli_res = 0., ampli_tot = 0.;
       for ( unsigned short i = 0; i < 3; ++i ) { //FIXME 4??
-        const FioreBrasseParameterisation::ResonanceParameters res = p.resonances[i];
+        const Parameterisation::ResonanceParameters res = params_.resonances[i];
         if ( !res.enabled ) continue;
-        const double sqrts0 = sqrt( p.s0 );
+        const double sqrts0 = sqrt( params_.s0 );
 
         std::complex<double> alpha;
-        if ( s > p.s0 )
-          alpha = std::complex<double>( res.alpha0 + res.alpha2*sqrts0 + res.alpha1*s, res.alpha2*sqrt( s-p.s0 ) );
+        if ( s > params_.s0 )
+          alpha = std::complex<double>( res.alpha0 + res.alpha2*sqrts0 + res.alpha1*s, res.alpha2*sqrt( s-params_.s0 ) );
         else
-          alpha = std::complex<double>( res.alpha0 + res.alpha1*s + res.alpha2*( sqrts0 - sqrt( p.s0 - s ) ), 0. );
+          alpha = std::complex<double>( res.alpha0 + res.alpha1*s + res.alpha2*( sqrts0 - sqrt( params_.s0 - s ) ), 0. );
 
         double formfactor = 1./pow( 1. + q2/res.q02, 2 );
         double denom = pow( res.spin-std::real( alpha ), 2 ) + pow( std::imag( alpha ), 2 );
@@ -56,7 +55,7 @@ namespace CepGen
         ampli_res += ampli_imag;
       }
       {
-        const FioreBrasseParameterisation::ResonanceParameters res = p.resonances[3];
+        const Parameterisation::ResonanceParameters res = params_.resonances[3];
         double sE = res.alpha2, sqrtsE = sqrt( sE );
         std::complex<double> alpha;
         if ( s > sE )
@@ -69,7 +68,7 @@ namespace CepGen
         double ampli_bg = res.a*formfactor*formfactor*std::imag( alpha )/denom;
         ampli_res += ampli_bg;
       }
-      ampli_tot = p.norm*ampli_res;
+      ampli_tot = params_.norm*ampli_res;
 
       StructureFunctions fb;
       fb.F2 = prefactor*ampli_tot;
@@ -77,7 +76,7 @@ namespace CepGen
     }
 
     StructureFunctions
-    FioreBrasseOld( double q2, double xbj )
+    FioreBrasse::operator()( double q2, double xbj, bool ) const
     {
       const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
       //const double m_min = Particle::massFromPDGId(Particle::Proton)+0.135;

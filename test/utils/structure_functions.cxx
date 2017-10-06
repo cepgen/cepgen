@@ -27,7 +27,11 @@ main( int argc, char* argv[] )
   /*CepGen::SF::GenericLHAPDF cteq( "cteq6l1" );
   CepGen::SF::GenericLHAPDF mrst( "MRST2004qed_proton" );
   CepGen::SF::GenericLHAPDF lux( "LUXqed17_plus_PDF4LHC15_nnlo_100" );*/
+  CepGen::SF::SuriYennie sy;
+  CepGen::SF::SzczurekUleshchenko su;
   CepGen::SF::ChristyBosted cb;
+  CepGen::SF::ALLM allm97( CepGen::SF::ALLM::Parameterisation::allm97() );
+  CepGen::SF::FioreBrasse fb;
 
   for ( unsigned int i=0; i<npoints; i++ ) {
     float xbj;
@@ -37,10 +41,10 @@ main( int argc, char* argv[] )
     }
     else xbj = min_xbj + i*( max_xbj-min_xbj )/( npoints-1 );
 
-    auto sf_sy = CepGen::SF::SuriYennie( q2, xbj ),
-         sf_fb = CepGen::SF::FioreBrasse( q2, xbj ),
-         sf_su = CepGen::SF::SzczurekUleshchenko( q2, xbj ),
-         sf_allm97 = CepGen::SF::ALLM( q2, xbj, CepGen::SF::ALLMParameterisation::allm97() ),
+    auto sf_sy = sy( q2, xbj ),
+         sf_fb = fb( q2, xbj ),
+         sf_su = su( q2, xbj ),
+         sf_allm97 = allm97( q2, xbj ),
          //sf_allm_hht = CepGen::SF::ALLM( q2, xbj, CepGen::SF::ALLMParameterisation::hht_allm() ),
          //sf_allm_hht_ft = CepGen::SF::ALLM( q2, xbj, CepGen::SF::ALLMParameterisation::hht_allm_ft() ),
          //sf_bdh = CepGen::SF::BlockDurandHa( q2, xbj ),
@@ -71,7 +75,7 @@ main( int argc, char* argv[] )
   /*g_sy_f2.SetLineStyle( 2 );
   g_sy_f2.SetLineWidth( 3 );
   mg.Add( &g_sy_f2, "l" );
-  c.AddLegendEntry( &g_sy_f2, "Suri-Yennie", "l" );
+  c.AddLegendEntry( &g_sy_f2, "Suri-Yennie", "l" );*/
 
   //g_fb_f2.SetLineStyle( 2 );
   g_fb_f2.SetLineColor( kRed+1 );
@@ -80,7 +84,7 @@ main( int argc, char* argv[] )
   c.AddLegendEntry( &g_fb_f2, "Fiore-Brasse", "l" );
 
   //g_su_f2.SetLineStyle( 2 );
-  g_su_f2.SetLineColor( kGreen+2 );
+  /*g_su_f2.SetLineColor( kGreen+2 );
   g_su_f2.SetLineWidth( 3 );
   mg.Add( &g_su_f2, "l" );
   c.AddLegendEntry( &g_su_f2, "Szczurek-Uleshchenko", "l" );*/
