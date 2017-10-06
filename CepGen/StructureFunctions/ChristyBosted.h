@@ -9,7 +9,7 @@ namespace CepGen
 {
   namespace SF
   {
-    class ChristyBosted// : public StructureFunctions
+    class ChristyBosted
     {
       public:
         struct ChristyBostedParameterisation

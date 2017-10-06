@@ -75,7 +75,7 @@ namespace CepGen
 
         if ( sf == 'T' )      height[i] = res.A0_T*( 1.+res.fit_parameters[0]*q2/( 1.+res.fit_parameters[1]*q2 ) )/pow( 1.+q2/0.91, res.fit_parameters[2] );
         else if ( sf == 'L' ) height[i] = res.A0_L/( 1.+res.fit_parameters[3]*q2 )*q2*exp( -q2*res.fit_parameters[4] );
-        std::cout << sf << "//////" << height[i] << "\t" << res.fit_parameters[4] << std::endl;
+        //std::cout << sf << "//////" << height[i] << "\t" << res.fit_parameters[4] << std::endl;
         height[i] = height[i]*height[i];
       }
 
@@ -100,7 +100,7 @@ namespace CepGen
           const double expo = params_.continuum.transverse[i].fit_parameters[1]
                             + params_.continuum.transverse[i].fit_parameters[2]*q2
                             + params_.continuum.transverse[i].fit_parameters[3]*q2*q2;
-          sig_nr += params_.continuum.transverse[i].sig0 / pow( q2+params_.continuum.transverse[i].fit_parameters[0], expo ) * pow( wdif, i+0.5 );
+          sig_nr += params_.continuum.transverse[i].sig0 / pow( q2+params_.continuum.transverse[i].fit_parameters[0], expo ) * pow( wdif, i+1.5 );
         }
 
         sig_nr *= xpr;
@@ -115,7 +115,6 @@ namespace CepGen
                     * pow( xpr, params_.continuum.longitudinal[i].fit_parameters[3]+params_.continuum.longitudinal[i].fit_parameters[4]*t );
         }
       }
-      std::cout << sf << "\t" << sig_res << "\t" << sig_nr << std::endl;
       return sig_res + sig_nr;
     }
 
@@ -240,24 +239,20 @@ namespace CepGen
       const double prefac = 1./( 4.*M_PI*M_PI*Constants::alphaEM ) * ( 1.-xbj );
       //------------------------------
 
-      if ( q2 < q20 ) {
-        const double tau = 4.*xbj*xbj*mp2/q2;
-        const double sigT = resmod507( 'T', w2, q2 );
-        const double sigL = resmod507( 'L', w2, q2 );
-std::cout << sigT << "\t" << sigL << std::endl;
-        cb.F2 = prefac * q2 / ( 1+tau ) * ( sigT+sigL ) / Constants::GeV2toBarn*1.e6;
-        //cb.FL = cb.F2*( 1+tau )*R/( 1.d0+R );
+      double q2_eff = q2, w2_eff = w2;
+      if ( q2 > q20 ) {
+        q2_eff = q20 + delq2/( 1.+delq2/qq );
+        w2_eff = mp2 + q2_eff*( 1.-xbj )/xbj;
       }
-      else {
-        const double factor_mod = q21/( q21 + delq2 );
-        const double q2_mod = q20 + delq2/( 1.+delq2/qq );
-        const double w2mod = mp2 + q2_mod*( 1.-xbj )/xbj;
-        const double tau = 4.*xbj*xbj*mp2/q2_mod;
-        const double sigT = resmod507( 'T', w2mod, q2_mod );
-        const double sigL = resmod507( 'L', w2mod, q2_mod );
-        cb.F2 = prefac * q2_mod / ( 1+tau ) * ( sigT+sigL ) / Constants::GeV2toBarn * 1.e6 * factor_mod;
-        //cb.FL = cb.F2*( 1.+tau )*R/( 1.+R ) * factor_mod;
-      }
+      const double tau = 4.*xbj*xbj*mp2/q2_eff;
+      const double sigT = resmod507( 'T', w2_eff, q2_eff ), sigL = resmod507( 'L', w2_eff, q2_eff );
+
+      cb.F2 = prefac * q2_eff / ( 1+tau ) * ( sigT+sigL ) / Constants::GeV2toBarn * 1.e6;
+      if ( q2 > q20 ) cb.F2 *= q21/( q21 + delq2 );
+
+      const double R = sigL/sigT;
+      cb.FL = cb.F2*( 1+tau )*R/( 1.+R );
+
       return cb;
     }
   }
