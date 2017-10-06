@@ -10,7 +10,7 @@ extern "C"
   extern struct
   {
     double amp, am_pi, alpha_em;
-    double q2_cut, w2_hi, w2_lo;
+    double q2_cut, w2_lo, w2_hi;
     int res_model, cont_model;
   } luxlike_params_;
 }

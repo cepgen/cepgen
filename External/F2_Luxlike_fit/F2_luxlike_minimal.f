@@ -10,9 +10,6 @@ c       -----------------------------
         w2 = amp**2 + q2*(1.d0-xbj)/xbj
         w = dsqrt(w2)
 c       -----------------------------
-        print *,amp,am_pi,alpha_em,q2_cut,w2_lo,w2_hi,ires_model,
-     &   icont_model
-
         omega = (w2-w2_lo)/(w2_hi-w2_lo)
         rho = 2.d0*omega**2 - omega**4 
 
@@ -55,7 +52,6 @@ c       ---------------------------------------------------------
         common/luxlike_params/amp,am_pi,alpha_em,
      &     q2_cut,w2_lo,w2_hi,
      &     ires_model,icont_model
-        print *,icont_model
         if(icont_model.eq.1) then
            call CepGen_F2_GD11P(xbj,Q2,F2)
         elseif(icont_model.eq.2) then
