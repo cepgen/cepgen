@@ -39,8 +39,7 @@ extern "C"
   }
   void cepgen_f2_mstw_( double& xbj, double& q2, double& f2, double& fl )
   {
-    if ( !mstw_gh ) mstw_gh = new MSTW::GridHandler( "External/F2_Luxlike_fit/mstw_f2_scan_nnlo.txt" ); // FIXME destructor!!!!
-    CepGen::StructureFunctions sf = mstw_gh->eval( q2, xbj );
+    CepGen::StructureFunctions sf = MSTW::GridHandler::get( "External/F2_Luxlike_fit/mstw_f2_scan_nnlo.txt" ).eval( q2, xbj );
     f2 = sf.F2;
     fl = sf.FL;
   }

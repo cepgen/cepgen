@@ -2,9 +2,17 @@
 
 namespace MSTW
 {
+  GridHandler&
+  GridHandler::get( const char* filename )
+  {
+    static GridHandler instance( filename );
+    return instance;
+  }
+
   GridHandler::GridHandler( const char* filename ) :
     xacc_( 0 ), yacc_( 0 ), values_( { 0, 0 } )
   {
+    gsl_set_error_handler_off();
     const gsl_interp2d_type* T = gsl_interp2d_bilinear;
     std::ifstream file( filename );
     if ( !file.is_open() ) {
@@ -23,7 +31,10 @@ namespace MSTW
     if ( q2_vals.size() < 2 || xbj_vals.size() < 2 ) {
       FatalError( "Invalid grid retrieved!" );
     }
-    Information( Form( "Q2 in range [%.3e:%.3e]\n\txBj in range [%.3e:%.3e]", *q2_vals.begin(), *q2_vals.rbegin(), *xbj_vals.begin(), *xbj_vals.rbegin() ) );
+    Information( Form( "MSTW structure functions grid evaluator built\n\t"
+                       " Q² in range [%.3e:%.3e]\n\t"
+                       "xBj in range [%.3e:%.3e]",
+                       *q2_vals.begin(), *q2_vals.rbegin(), *xbj_vals.begin(), *xbj_vals.rbegin() ) );
 
     for ( unsigned short i = 0; i < 2; ++i ) {
       values_[i] = new double[q2_vals.size()*xbj_vals.size()];
@@ -62,9 +73,12 @@ namespace MSTW
   CepGen::StructureFunctions
   GridHandler::eval( double q2, double xbj ) const
   {
+//std::cout << q2 << "\t" << xbj << std::endl;
     CepGen::StructureFunctions ev;
-    ev.F2 = gsl_spline2d_eval( splines_[0], q2, xbj, xacc_, yacc_ );
-    ev.FL = gsl_spline2d_eval( splines_[1], q2, xbj, xacc_, yacc_ );
+    if ( gsl_spline2d_eval_e( splines_[0], q2, xbj, xacc_, yacc_, &ev.F2 ) == GSL_EDOM
+      || gsl_spline2d_eval_e( splines_[1], q2, xbj, xacc_, yacc_, &ev.FL ) == GSL_EDOM ) {
+      FatalError( Form( "Failed to evaluate the structure functions for Q2 = %.5e GeV² / xbj = %.5e!", q2, xbj ) );
+    }
     return ev;
   }
 }

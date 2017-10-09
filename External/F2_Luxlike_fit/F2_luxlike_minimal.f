@@ -28,7 +28,6 @@ c              call F2_perturbative(xbj,q2,F2p,FLp)
            if(w2.le.w2_lo) then
               if(ires_model.eq.1) then
                  call CepGen_F2_ChristyBosted(xbj,Q2,F2r,FLr)
-              print *,xbj,q2,f2r,flr
               elseif(ires_model.eq.2) then
                  call CepGen_F2_FioreBrasse(xbj,Q2,F2r,FLr)
               endif
@@ -49,8 +48,7 @@ c              call F2_perturbative(xbj,q2,F2p,FLp)
               FL = FLc
            endif
         endif
-c        print *,q2,w2,f2,fl
-               
+
         return
         end
 c       ---------------------------------------------------------
