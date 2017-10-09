@@ -1,7 +1,7 @@
 #include "CepGen/StructureFunctions/ALLM.h"
 #include "CepGen/StructureFunctions/ChristyBosted.h"
 #include "CepGen/StructureFunctions/FioreBrasse.h"
-#include "mstw_grid_handler.h"
+#include "CepGen/IO/MSTWGridHandler.h"
 
 extern "C"
 {
