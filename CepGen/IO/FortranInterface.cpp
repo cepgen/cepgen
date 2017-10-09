@@ -1,4 +1,4 @@
-#include "CepGen/interface/FortranInterface.h"
+#include "CepGen/IO/FortranInterface.h"
 
 #include "CepGen/StructureFunctions/SuriYennie.h"
 #include "CepGen/StructureFunctions/SzczurekUleshchenko.h"
