@@ -13,37 +13,43 @@ c       -----------------------------
         omega = (w2-w2_lo)/(w2_hi-w2_lo)
         rho = 2.d0*omega**2 - omega**4 
 
-        if(q2.gt.q2_cut.and.w2.gt.w2_hi) then
-c           call F2_perturbative(xbj,q2,F2p,FLp)
-           call CepGen_F2_MSTW(xbj,q2,F2p,FLp)
-           F2 = F2p
-           FL = FLp
-        elseif(q2.gt.q2_cut.and.w2.lt.w2_hi) then
-           call F2_cont(xbj,q2,F2c,FLc)
-           F2 = F2c
-           FL = FLc
-        elseif(q2.lt.q2_cut.and.w2.lt.w2_lo) then
-           if(ires_model.eq.1) then
-              call CepGen_F2_ChristyBosted(xbj,Q2,F2r,FLr)
-           elseif(ires_model.eq.2) then
-              call CepGen_F2_FioreBrasse(xbj,Q2,F2r,FLr)
+        if(q2.ge.q2_cut) then
+           if(w2.gt.w2_hi) then
+c              call F2_perturbative(xbj,q2,F2p,FLp)
+              call CepGen_F2_MSTW(xbj,q2,F2p,FLp)
+              F2 = F2p
+              FL = FLp
+           elseif(w2.lt.w2_hi) then
+              call F2_cont(xbj,q2,F2c,FLc)
+              F2 = F2c
+              FL = FLc
            endif
-           F2 = F2r
-           FL = FLr
-        elseif(q2.lt.q2_cut.and.w2.gt.w2_lo.and.w2.lt.w2_hi) then
-           if(ires_model.eq.1) then
-              call CepGen_F2_ChristyBosted(xbj,Q2,F2r,FLr)
-           elseif(ires_model.eq.2) then
-              call CepGen_F2_FioreBrasse(xbj,Q2,F2r,FLr)
+        else ! Q2 < Q2cut
+           if(w2.le.w2_lo) then
+              if(ires_model.eq.1) then
+                 call CepGen_F2_ChristyBosted(xbj,Q2,F2r,FLr)
+              print *,xbj,q2,f2r,flr
+              elseif(ires_model.eq.2) then
+                 call CepGen_F2_FioreBrasse(xbj,Q2,F2r,FLr)
+              endif
+              F2 = F2r
+              FL = FLr
+           elseif(w2.gt.w2_lo.and.w2.lt.w2_hi) then
+              if(ires_model.eq.1) then
+                 call CepGen_F2_ChristyBosted(xbj,Q2,F2r,FLr)
+              elseif(ires_model.eq.2) then
+                 call CepGen_F2_FioreBrasse(xbj,Q2,F2r,FLr)
+              endif
+              call F2_cont(xbj,q2,F2c,FLc)
+              F2 = (1.d0-rho)*F2r + rho*F2c
+              FL = (1.d0-rho)*FLr + rho*FLc
+           elseif(w2.ge.w2_hi) then
+              call F2_cont(xbj,q2,F2c,FLc)
+              F2 = F2c
+              FL = FLc
            endif
-           call F2_cont(xbj,q2,F2c,FLc)
-           F2 = (1.d0-rho)*F2r + rho*F2c
-           FL=  (1.d0-rho)*FLr + rho*FLc
-        elseif(q2.lt.q2_cut.and.w2.gt.w2_hi) then
-           call F2_cont(xbj,q2,F2c,FLc)
-            F2 = F2c
-            FL = FLc
         endif
+c        print *,q2,w2,f2,fl
                
         return
         end
