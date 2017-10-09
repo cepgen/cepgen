@@ -5,6 +5,7 @@
 #include "CepGen/StructureFunctions/FioreBrasse.h"
 #include "CepGen/StructureFunctions/ChristyBosted.h"
 #include "CepGen/StructureFunctions/BlockDurandHa.h"
+#include "CepGen/StructureFunctions/ALLM.h"
 
 void
 cepgen_structure_functions_( int& sfmode, double& q2, double& xbj, double& f2, double& fl )
@@ -24,6 +25,37 @@ cepgen_structure_functions_( int& sfmode, double& q2, double& xbj, double& f2, d
       f2 = sf.F2;
       fl = 0.;
     } break;
+    case BlockDurandHa: {
+      const CepGen::SF::BlockDurandHa bdh;
+      const CepGen::StructureFunctions sf = bdh( q2arg, xbjarg );
+      f2 = sf.F2;
+      fl = 0.;
+    } break;
+    case ALLM91: {
+      const CepGen::SF::ALLM allm( CepGen::SF::ALLM::Parameterisation::allm91() );
+      const CepGen::StructureFunctions sf = allm( q2arg, xbjarg );
+      f2 = sf.F2;
+      fl = 0.;
+    } break;
+    case ALLM97: {
+      const CepGen::SF::ALLM allm( CepGen::SF::ALLM::Parameterisation::allm97() );
+      const CepGen::StructureFunctions sf = allm( q2arg, xbjarg );
+      f2 = sf.F2;
+      fl = 0.;
+    } break;
+    case GD07p: {
+      const CepGen::SF::ALLM allm( CepGen::SF::ALLM::Parameterisation::gd07p() );
+      const CepGen::StructureFunctions sf = allm( q2arg, xbjarg );
+      f2 = sf.F2;
+      fl = 0.;
+    } break;
+    case GD11p: {
+      const CepGen::SF::ALLM allm( CepGen::SF::ALLM::Parameterisation::gd11p() );
+      const CepGen::StructureFunctions sf = allm( q2arg, xbjarg );
+      f2 = sf.F2;
+      fl = 0.;
+    } break;
+    //--- resonances
     case FioreBrasse: {
       const CepGen::SF::FioreBrasse fb;
       const CepGen::StructureFunctions sf = fb( q2arg, xbjarg );
@@ -33,12 +65,6 @@ cepgen_structure_functions_( int& sfmode, double& q2, double& xbj, double& f2, d
     case ChristyBosted: {
       const CepGen::SF::ChristyBosted cb;
       const CepGen::StructureFunctions sf = cb( q2arg, xbjarg );
-      f2 = sf.F2;
-      fl = 0.;
-    } break;
-    case BlockDurandHa: {
-      const CepGen::SF::BlockDurandHa bdh;
-      const CepGen::StructureFunctions sf = bdh( q2arg, xbjarg );
       f2 = sf.F2;
       fl = 0.;
     } break;
