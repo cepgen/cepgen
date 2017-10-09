@@ -14,7 +14,8 @@ c       -----------------------------
         rho = 2.d0*omega**2 - omega**4 
 
         if(q2.gt.q2_cut.and.w2.gt.w2_hi) then
-           call F2_perturbative(xbj,q2,F2p,FLp)
+c           call F2_perturbative(xbj,q2,F2p,FLp)
+           call CepGen_F2_MSTW(xbj,q2,F2p,FLp)
            F2 = F2p
            FL = FLp
         elseif(q2.gt.q2_cut.and.w2.lt.w2_hi) then
