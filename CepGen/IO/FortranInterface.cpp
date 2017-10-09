@@ -6,6 +6,7 @@
 #include "CepGen/StructureFunctions/ChristyBosted.h"
 #include "CepGen/StructureFunctions/BlockDurandHa.h"
 #include "CepGen/StructureFunctions/ALLM.h"
+#include "CepGen/StructureFunctions/Schaefer.h"
 
 void
 cepgen_structure_functions_( int& sfmode, double& q2, double& xbj, double& f2, double& fl )
@@ -54,6 +55,12 @@ cepgen_structure_functions_( int& sfmode, double& q2, double& xbj, double& f2, d
       const CepGen::StructureFunctions sf = allm( q2arg, xbjarg );
       f2 = sf.F2;
       fl = 0.;
+    } break;
+    case Schaefer: {
+      const CepGen::SF::Schaefer luxlike;
+      const CepGen::StructureFunctions sf = luxlike( q2arg, xbjarg );
+      f2 = sf.F2;
+      fl = sf.FL;
     } break;
     //--- resonances
     case FioreBrasse: {

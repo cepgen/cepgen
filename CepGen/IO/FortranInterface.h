@@ -11,6 +11,7 @@ extern "C"
     ALLM97              = 102,
     GD07p               = 103,
     GD11p               = 104,
+    Schaefer            = 105,
     FioreBrasse         = 201,
     ChristyBosted       = 202
   };
