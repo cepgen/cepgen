@@ -94,14 +94,14 @@ main( int argc, char* argv[] )
   /*g_su_f2.SetLineColor( kGreen+2 );
   g_su_f2.SetLineWidth( 3 );
   mg.Add( &g_su_f2, "l" );
-  c.AddLegendEntry( &g_su_f2, "Szczurek-Uleshchenko", "l" );
+  c.AddLegendEntry( &g_su_f2, "Szczurek-Uleshchenko", "l" );*/
 
   g_allm97_f2.SetLineColor( kBlue+1 );
   g_allm97_f2.SetLineWidth( 3 );
   mg.Add( &g_allm97_f2, "l" );
   c.AddLegendEntry( &g_allm97_f2, "Abramowicz et al. 97", "l" );
 
-  g_allm_hht_f2.SetLineColor( kBlue+1 );
+  /*g_allm_hht_f2.SetLineColor( kBlue+1 );
   g_allm_hht_f2.SetLineWidth( 3 );
   g_allm_hht_f2.SetLineStyle( 2 );
   mg.Add( &g_allm_hht_f2, "l" );
@@ -113,10 +113,10 @@ main( int argc, char* argv[] )
   mg.Add( &g_allm_hht_ft_f2, "l" );
   c.AddLegendEntry( &g_allm_hht_ft_f2, "Abramowicz et al. HHT-FT", "l" );*/
 
-  g_cb_f2.SetLineColor( kMagenta );
+  /*g_cb_f2.SetLineColor( kMagenta );
   g_cb_f2.SetLineWidth( 3 );
   mg.Add( &g_cb_f2, "l" );
-  c.AddLegendEntry( &g_cb_f2, "Christy-Bosted", "l" );
+  c.AddLegendEntry( &g_cb_f2, "Christy-Bosted", "l" );*/
 
   /*g_bdh_f2.SetLineColor( kOrange );
   g_bdh_f2.SetLineWidth( 3 );

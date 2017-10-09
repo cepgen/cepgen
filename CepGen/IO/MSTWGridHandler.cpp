@@ -65,7 +65,6 @@ namespace MSTW
     CepGen::StructureFunctions ev;
     ev.F2 = gsl_spline2d_eval( splines_[0], q2, xbj, xacc_, yacc_ );
     ev.FL = gsl_spline2d_eval( splines_[1], q2, xbj, xacc_, yacc_ );
-std::cout << q2 << "\t" << xbj << "\t" << ev << std::endl;
     return ev;
   }
 }
