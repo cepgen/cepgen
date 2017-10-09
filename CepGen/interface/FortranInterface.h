@@ -10,7 +10,7 @@ extern "C"
     ChristyBosted       = 4,
     BlockDurandHa       = 5
   };
-  void cepgen_structure_functions_( int sfmode, double q2, double xbj, double& f2, double& fl );
+  void cepgen_structure_functions_( int& sfmode, double& q2, double& xbj, double& f2, double& fl );
 }
 
 #endif

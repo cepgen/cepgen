@@ -7,7 +7,7 @@
 #include "CepGen/StructureFunctions/BlockDurandHa.h"
 
 void
-cepgen_structure_functions_( int sfmode, double q2, double xbj, double& f2, double& fl )
+cepgen_structure_functions_( int& sfmode, double& q2, double& xbj, double& f2, double& fl )
 {
   const double q2arg = q2, xbjarg = xbj;
   switch ( ( SFmode )sfmode )
