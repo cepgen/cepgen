@@ -7,6 +7,7 @@ extern "C"
     SuriYennie          = 1,
     SzczurekUleshchenko = 2,
     BlockDurandHa       = 3,
+    MSTWgrid            = 4,
     ALLM91              = 101,
     ALLM97              = 102,
     GD07p               = 103,
