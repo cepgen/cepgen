@@ -9,10 +9,13 @@ namespace MSTW
     return instance;
   }
 
-  GridHandler::GridHandler( const char* filename ) :
-    xacc_( 0 ), yacc_( 0 ), values_( { 0, 0 } )
+  GridHandler::GridHandler( const char* filename )
+#ifdef GOOD_GSL
+    : xacc_( 0 ), yacc_( 0 ), values_( { 0, 0 } )
+#endif
   {
     gsl_set_error_handler_off();
+#ifdef GOOD_GSL
     const gsl_interp2d_type* T = gsl_interp2d_bilinear;
     std::ifstream file( filename );
     if ( !file.is_open() ) {
@@ -58,27 +61,35 @@ namespace MSTW
     for ( unsigned short i = 0; i < 2; ++i ) {
       gsl_spline2d_init( splines_[i], xa, ya, values_[i], q2_vals.size(), xbj_vals.size() );
     }
+#else
+    FatalError( Form( "GSL version >= 2.1 is required for bilinear interpolation.\n\tVersion %s is installed on this system!", GSL_VERSION ) );
+#endif
   }
 
   GridHandler::~GridHandler()
   {
+#ifdef GOOD_GSL
     for ( unsigned short i = 0; i < 2; ++i ) {
       gsl_spline2d_free( splines_[i] );
       if ( values_[i] ) delete[] values_[i];
     }
     if ( xacc_ ) gsl_interp_accel_free( xacc_ );
     if ( yacc_ ) gsl_interp_accel_free( yacc_ );
+#endif
   }
 
   CepGen::StructureFunctions
   GridHandler::eval( double q2, double xbj ) const
   {
-//std::cout << q2 << "\t" << xbj << std::endl;
     CepGen::StructureFunctions ev;
+#ifdef GOOD_GSL
     if ( gsl_spline2d_eval_e( splines_[0], q2, xbj, xacc_, yacc_, &ev.F2 ) == GSL_EDOM
       || gsl_spline2d_eval_e( splines_[1], q2, xbj, xacc_, yacc_, &ev.FL ) == GSL_EDOM ) {
       FatalError( Form( "Failed to evaluate the structure functions for Q2 = %.5e GeV² / xbj = %.5e!", q2, xbj ) );
     }
+#else
+    FatalError( Form( "GSL version >= 2.1 is required for bilinear interpolation.\n\tVersion %s is installed on this system!", GSL_VERSION ) );
+#endif
     return ev;
   }
 }
