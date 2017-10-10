@@ -17,7 +17,6 @@ endif()
 
 set(SCH_PATH ${PROJECT_SOURCE_DIR}/External/F2_Luxlike_fit)
 file(GLOB sch_sources ${SCH_PATH}/F2_luxlike_minimal.f
-                      ${SCH_PATH}/F2_perturbative.f ${SCH_PATH}/alphaS.f ${SCH_PATH}/mstw*.f
                       ${SCH_PATH}/cepgen_f2.cpp
                       ${PROJECT_SOURCE_DIR}/CepGen/IO/MSTWGridHandler.cpp)
 if(sch_sources)
