@@ -1,4 +1,6 @@
 #include "FioreBrasse.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/utils.h"
 
 namespace CepGen
 {
@@ -32,7 +34,7 @@ namespace CepGen
     StructureFunctions
     FioreBrasse::operator()( double q2, double xbj ) const
     {
-      const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
+      const double mp2 = Constants::mp*Constants::mp;
       const double akin = 1. + 4.*mp2 * xbj*xbj/q2;
       const double prefactor = q2*( 1.-xbj ) / ( 4.*M_PI*Constants::alphaEM*akin );
       const double s = q2*( 1.-xbj )/xbj + mp2;
@@ -78,9 +80,9 @@ namespace CepGen
     StructureFunctions
     FioreBrasse::operator()( double q2, double xbj, bool ) const
     {
-      const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
+      const double mp2 = Constants::mp*Constants::mp;
       //const double m_min = Particle::massFromPDGId(Particle::Proton)+0.135;
-      const double m_min = mp+Particle::massFromPDGId( Particle::PiZero );
+      const double m_min = Constants::mp+Constants::mpi;
 
       const double mx2 = mp2 + q2*( 1.-xbj )/xbj, mx = sqrt( mx2 );
 
@@ -130,8 +132,8 @@ namespace CepGen
                             -1.021,-1.092,-1.313,-1.341,-1.266,-1.473 };
 
       const double d = 3.0;
-      const double nu = 0.5 * ( q2 + mx2 - mp2 ) / mp, nu2 = nu*nu,
-                   logqq0 = 0.5 * log( ( nu2+q2 ) / pow( ( mx2-mp2 ) / ( 2.*mp ), 2 ) );
+      const double nu = 0.5 * ( q2 + mx2 - mp2 ) / Constants::mp, nu2 = nu*nu,
+                   logqq0 = 0.5 * log( ( nu2+q2 ) / pow( ( mx2-mp2 ) / ( 2.*Constants::mp ), 2 ) );
       const double gd2 = pow( 1. / ( 1+q2 / .71 ), 4 ); // dipole form factor of the proton
 
       const double sigLow = ( n_bin == 0 ) ? 0. :
@@ -140,7 +142,7 @@ namespace CepGen
         gd2 * exp( a[n_bin]   + b[n_bin]  *logqq0 + c[n_bin]  *pow( fabs( logqq0 ), d ) );
 
       const double sigma_t = sigLow + x_bin*( sigHigh-sigLow )/dx;
-      const double w1 = ( mx2-mp2 )/( 8.*M_PI*M_PI*mp*Constants::alphaEM )/Constants::GeV2toBarn*1.e6 * sigma_t;
+      const double w1 = ( mx2-mp2 )/( 8.*M_PI*M_PI*Constants::mp*Constants::alphaEM )/Constants::GeV2toBarn*1.e6 * sigma_t;
       const double w2 = w1 * q2 / ( q2+nu2 );
 
       StructureFunctions fb_old;

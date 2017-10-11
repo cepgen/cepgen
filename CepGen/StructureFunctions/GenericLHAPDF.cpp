@@ -13,11 +13,15 @@ namespace CepGen
     void
     GenericLHAPDF::initialise( const char* set )
     {
+#ifdef LIBLHAPDF
 #if LHAPDF_MAJOR_VERSION==6
       pdf_set_ = LHAPDF::PDFSet( set );
       pdfs_ = pdf_set_.mkPDFs();
 #else
       LHAPDF::initPDFSet( set, LHAPDF::LHGRID, 0 );
+#endif
+#else
+      FatalError( "LHAPDF is not liked to this instance!" );
 #endif
     }
 
@@ -29,7 +33,7 @@ namespace CepGen
       if ( num_flavours == 0 || num_flavours > 6 ) return pdf;
 
       //if ( q2 < 1.69 ) return pdf;
-
+#ifdef LIBLHAPDF
       for ( int i = 0; i < num_flavours; ++i ) {
         double xq = 0., xqbar = 0.;
 #if LHAPDF_MAJOR_VERSION==6
@@ -41,6 +45,9 @@ namespace CepGen
 #endif
         pdf.F2 += qtimes3_[i]*qtimes3_[i]/9. * ( xq + xqbar );
       }
+#else
+      FatalError( "LHAPDF is not liked to this instance!" );
+#endif
 
       return pdf;
     }

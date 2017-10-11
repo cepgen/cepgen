@@ -2,6 +2,7 @@
 #define CepGen_StructureFunctions_ALLM_h
 
 #include "StructureFunctions.h"
+#include <vector>
 
 namespace CepGen
 {

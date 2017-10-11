@@ -2,6 +2,7 @@
 #define CepGen_Processes_GenericKTProcess_h
 
 #include "GenericProcess.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Physics/FormFactors.h"
 
 namespace CepGen
@@ -34,14 +35,14 @@ namespace CepGen
         ~GenericKTProcess();
 
         /// Populate the event content with the generated process' topology
-        void addEventContent();
+        void addEventContent() override;
         /// Retrieve the total number of dimensions on which the integration is being performet
         /// \param[in] proc_mode_ Kinematics case considered
-        unsigned int numDimensions( const Kinematics::ProcessMode& proc_mode_ ) const;
+        unsigned int numDimensions( const Kinematics::ProcessMode& proc_mode_ ) const override;
         /// Retrieve the event weight in the phase space
-        double computeWeight();
+        double computeWeight() override;
         /// Populate the event content with the generated process' kinematics  
-        void fillKinematics( bool );
+        void fillKinematics( bool ) override;
 
       protected:
         /// Set the kinematics associated to the phase space definition

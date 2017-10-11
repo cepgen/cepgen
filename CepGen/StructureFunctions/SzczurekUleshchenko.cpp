@@ -1,4 +1,6 @@
 #include "SzczurekUleshchenko.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/utils.h"
 
 namespace CepGen
 {

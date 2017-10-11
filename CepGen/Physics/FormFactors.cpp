@@ -1,5 +1,12 @@
 #include "FormFactors.h"
 
+#include "CepGen/StructureFunctions/ALLM.h"
+#include "CepGen/StructureFunctions/BlockDurandHa.h"
+#include "CepGen/StructureFunctions/FioreBrasse.h"
+#include "CepGen/StructureFunctions/GenericLHAPDF.h"
+#include "CepGen/StructureFunctions/SuriYennie.h"
+#include "CepGen/StructureFunctions/SzczurekUleshchenko.h"
+
 namespace CepGen
 {
   FormFactors
@@ -11,26 +18,24 @@ namespace CepGen
   FormFactors
   FormFactors::ProtonElastic( double q2 )
   {
-    const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
+    const double mp2 = Constants::mp*Constants::mp;
     const double GE = pow( 1.+q2/0.71, -2. ), GE2 = GE*GE;
     const double GM = 2.79*GE, GM2 = GM*GM;
     return FormFactors( ( 4.*mp2*GE2 + q2*GM2 ) / ( 4.*mp2 + q2 ), GM2 );
   }
 
   FormFactors
-  FormFactors::ProtonInelastic( const StructureFunctionsType& sf, double q2, double mi2, double mf2 )
+  FormFactors::ProtonInelastic( const StructureFunctions::Type& sf, double q2, double mi2, double mf2 )
   {
     switch ( sf ) {
-      case StructureFunctionsType::ElasticProton:
+      case StructureFunctions::ElasticProton:
         InWarning( "Elastic proton form factors requested! Check your process definition!" );
         return FormFactors::ProtonElastic( q2 );
-      case StructureFunctionsType::SuriYennie:
+      case StructureFunctions::SuriYennie:
         return FormFactors::SuriYennie( q2, mi2, mf2 );
-      case StructureFunctionsType::SzczurekUleshchenko:
+      case StructureFunctions::SzczurekUleshchenko:
         return FormFactors::SzczurekUleshchenko( q2, mi2, mf2 );
-      case StructureFunctionsType::Fiore:
-      case StructureFunctionsType::FioreSea:
-      case StructureFunctionsType::FioreVal:
+      case StructureFunctions::FioreBrasse:
         return FormFactors::FioreBrasse( q2, mi2, mf2 );
       default: throw Exception( __PRETTY_FUNCTION__, "Invalid structure functions required!", FatalError );
     }

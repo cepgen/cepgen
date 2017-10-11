@@ -15,7 +15,7 @@ c       -----------------------------
 
         if(q2.ge.q2_cut) then
            if(w2.gt.w2_hi) then ! MSTW grid
-              call CepGen_Structure_Functions(4,Q2,xbj,F2p,FLp)
+              call CepGen_Structure_Functions(205,Q2,xbj,F2p,FLp)
               F2 = F2p
               FL = FLp
            elseif(w2.lt.w2_hi) then
@@ -26,17 +26,17 @@ c       -----------------------------
         else ! Q2 < Q2cut
            if(w2.le.w2_lo) then
               if(ires_model.eq.1) then     ! Christy-Bosted
-                 call CepGen_Structure_Functions(202,Q2,xbj,F2r,FLr)
+                 call CepGen_Structure_Functions(102,Q2,xbj,F2r,FLr)
               elseif(ires_model.eq.2) then ! Fiore-Brasse
-                 call CepGen_Structure_Functions(201,Q2,xbj,F2r,FLr)
+                 call CepGen_Structure_Functions(101,Q2,xbj,F2r,FLr)
               endif
               F2 = F2r
               FL = FLr
            elseif(w2.gt.w2_lo.and.w2.lt.w2_hi) then
               if(ires_model.eq.1) then     ! Christy-Bosted
-                 call CepGen_Structure_Functions(202,Q2,xbj,F2r,FLr)
+                 call CepGen_Structure_Functions(102,Q2,xbj,F2r,FLr)
               elseif(ires_model.eq.2) then ! Fiore-Brasse
-                 call CepGen_Structure_Functions(201,Q2,xbj,F2r,FLr)
+                 call CepGen_Structure_Functions(101,Q2,xbj,F2r,FLr)
               endif
               call F2_cont(xbj,q2,F2c,FLc)
               F2 = (1.d0-rho)*F2r + rho*F2c
@@ -57,11 +57,11 @@ c       ---------------------------------------------------------
      &     q2_cut,w2_lo,w2_hi,
      &     ires_model,icont_model
         if(icont_model.eq.1) then     ! GD11p
-           call CepGen_Structure_Functions(104,Q2,xbj,F2,FL)
+           call CepGen_Structure_Functions(204,Q2,xbj,F2,FL)
         elseif(icont_model.eq.2) then ! ALLM91
-           call CepGen_Structure_Functions(101,Q2,xbj,F2,FL)
+           call CepGen_Structure_Functions(201,Q2,xbj,F2,FL)
         elseif(icont_model.eq.3) then ! ALLM97
-           call CepGen_Structure_Functions(102,Q2,xbj,F2,FL)
+           call CepGen_Structure_Functions(202,Q2,xbj,F2,FL)
         endif
         F2c = F2
         R = R_1998(xbj,Q2)

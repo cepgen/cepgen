@@ -6,12 +6,12 @@
       double precision xbj,min_xbj,max_xbj
       double precision q2
 
-c      nsf=104 ! GD11p
-      nsf=105 ! LUXlike
+c      nsf=204 ! GD11p
+      nsf=301 ! LUXlike
       q2=10.225
       min_xbj=1.0d-3
       max_xbj=1.0
-      niter=100
+      niter=101
 
       do i=1,niter
          xbj=min_xbj+(max_xbj-min_xbj)*(i-1)/(niter-1)
