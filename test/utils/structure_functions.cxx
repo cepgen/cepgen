@@ -1,6 +1,5 @@
-#include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Event/Particle.h"
-#include "CepGen/StructureFunctions/ChristyBosted.h"
+#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 #include "test/Canvas.h"
 
 #include "TGraph.h"
@@ -27,11 +26,6 @@ main( int argc, char* argv[] )
   /*CepGen::SF::GenericLHAPDF cteq( "cteq6l1" );
   CepGen::SF::GenericLHAPDF mrst( "MRST2004qed_proton" );
   CepGen::SF::GenericLHAPDF lux( "LUXqed17_plus_PDF4LHC15_nnlo_100" );*/
-  CepGen::SF::SuriYennie sy;
-  CepGen::SF::SzczurekUleshchenko su;
-  CepGen::SF::ChristyBosted cb;
-  CepGen::SF::ALLM allm97( CepGen::SF::ALLM::Parameterisation::allm97() );
-  CepGen::SF::FioreBrasse fb;
 
   for ( unsigned int i=0; i<npoints; i++ ) {
     float xbj;
@@ -41,17 +35,17 @@ main( int argc, char* argv[] )
     }
     else xbj = min_xbj + i*( max_xbj-min_xbj )/( npoints-1 );
 
-    auto sf_sy = sy( q2, xbj ),
-         sf_fb = fb( q2, xbj ),
-         sf_su = su( q2, xbj ),
-         sf_allm97 = allm97( q2, xbj ),
+    auto sf_sy = CepGen::StructureFunctionsBuilder::get( CepGen::SuriYennie, q2, xbj ),
+         sf_fb = CepGen::StructureFunctionsBuilder::get( CepGen::FioreBrasse, q2, xbj ),
+         sf_su = CepGen::StructureFunctionsBuilder::get( CepGen::SzczurekUleshchenko, q2, xbj ),
+         sf_allm97 = CepGen::StructureFunctionsBuilder::get( CepGen::ALLM97, q2, xbj ),
          //sf_allm_hht = CepGen::SF::ALLM( q2, xbj, CepGen::SF::ALLMParameterisation::hht_allm() ),
          //sf_allm_hht_ft = CepGen::SF::ALLM( q2, xbj, CepGen::SF::ALLMParameterisation::hht_allm_ft() ),
          //sf_bdh = CepGen::SF::BlockDurandHa( q2, xbj ),
          //sf_cteq = cteq( q2, xbj ),
          //sf_mrst = mrst( q2, xbj ),
          //sf_lux = lux( q2, xbj ),
-         sf_cb = cb( q2, xbj );
+         sf_cb = CepGen::StructureFunctionsBuilder::get( CepGen::ChristyBosted, q2, xbj );
 
     g_sy_f2.SetPoint( i, xbj, sf_sy.F2 );
     g_fb_f2.SetPoint( i, xbj, sf_fb.F2 );

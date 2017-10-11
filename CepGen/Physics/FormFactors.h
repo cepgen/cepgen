@@ -5,16 +5,8 @@
 #include <array>
 
 #include "CepGen/Core/utils.h"
-
-#include "CepGen/StructureFunctions/StructureFunctions.h"
-#include "CepGen/StructureFunctions/ALLM.h"
-#include "CepGen/StructureFunctions/BlockDurandHa.h"
-#include "CepGen/StructureFunctions/FioreBrasse.h"
-#include "CepGen/StructureFunctions/GenericLHAPDF.h"
-#include "CepGen/StructureFunctions/SuriYennie.h"
-#include "CepGen/StructureFunctions/SzczurekUleshchenko.h"
-
-#include "Constants.h"
+#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
+#include "CepGen/Physics/Constants.h"
 
 namespace CepGen
 {
@@ -26,8 +18,8 @@ namespace CepGen
       FormFactors( double fe=0.0, double fm=0.0 ) : FE( fe ), FM( fm ) {}
       // compute x from w2/m2
       double x( double q2, double w2, double m2=0.0 ) const {
-        const double mp = Particle::massFromPDGId( Particle::Proton );
-        return 1./( 1.+( w2-mp*mp ) / q2+m2 );
+        const double mp2 = Constants::mp*Constants::mp;
+        return 1./( 1.+( w2-mp2 ) / q2+m2 );
       }
       /// Trivial, spin-0 form factors (e.g. pion)
       static FormFactors Trivial();

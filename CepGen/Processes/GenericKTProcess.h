@@ -2,6 +2,7 @@
 #define CepGen_Processes_GenericKTProcess_h
 
 #include "GenericProcess.h"
+#include "CepGen/StructureFunctions/StructureFunctionsType.h"
 #include "CepGen/Physics/FormFactors.h"
 
 namespace CepGen

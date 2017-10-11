@@ -1,5 +1,12 @@
 #include "FormFactors.h"
 
+#include "CepGen/StructureFunctions/ALLM.h"
+#include "CepGen/StructureFunctions/BlockDurandHa.h"
+#include "CepGen/StructureFunctions/FioreBrasse.h"
+#include "CepGen/StructureFunctions/GenericLHAPDF.h"
+#include "CepGen/StructureFunctions/SuriYennie.h"
+#include "CepGen/StructureFunctions/SzczurekUleshchenko.h"
+
 namespace CepGen
 {
   FormFactors
@@ -11,7 +18,7 @@ namespace CepGen
   FormFactors
   FormFactors::ProtonElastic( double q2 )
   {
-    const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
+    const double mp2 = Constants::mp*Constants::mp;
     const double GE = pow( 1.+q2/0.71, -2. ), GE2 = GE*GE;
     const double GM = 2.79*GE, GM2 = GM*GM;
     return FormFactors( ( 4.*mp2*GE2 + q2*GM2 ) / ( 4.*mp2 + q2 ), GM2 );

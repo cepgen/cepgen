@@ -72,16 +72,15 @@ namespace CepGen
           if ( sf_str == "electron" ) params_.kinematics.structure_functions = Electron;
           else if ( sf_str == "elastic proton" ) params_.kinematics.structure_functions = ElasticProton;
           else if ( sf_str == "Suri-Yennie" ) params_.kinematics.structure_functions = SuriYennie;
-          else if ( sf_str == "Suri-Yennie;lowQ2" ) params_.kinematics.structure_functions = SuriYennieLowQ2;
           else if ( sf_str == "Szczurek-Uleshchenko" ) params_.kinematics.structure_functions = SzczurekUleshchenko;
           else if ( sf_str == "Fiore" ) params_.kinematics.structure_functions = FioreBrasse;
           else if ( sf_str == "ALLM" ) params_.kinematics.structure_functions = ALLM97;
           else if ( sf_str == "ALLM;91" ) params_.kinematics.structure_functions = ALLM91;
           else if ( sf_str == "ALLM;97" ) params_.kinematics.structure_functions = ALLM97;
-          else if ( sf_str == "ALLM;HHT" ) params_.kinematics.structure_functions = ALLM_HHT;
-          else if ( sf_str == "ALLM;HHT-FT" ) params_.kinematics.structure_functions = ALLM_HHT_FT;
-          else if ( sf_str == "ALLM;GD07p" ) params_.kinematics.structure_functions = ALLM_GD07p;
-          else if ( sf_str == "ALLM;GD11p" ) params_.kinematics.structure_functions = ALLM_GD11p;
+          //else if ( sf_str == "ALLM;HHT" ) params_.kinematics.structure_functions = ALLM_HHT;
+          //else if ( sf_str == "ALLM;HHT-FT" ) params_.kinematics.structure_functions = ALLM_HHT_FT;
+          else if ( sf_str == "ALLM;GD07p" ) params_.kinematics.structure_functions = GD07p;
+          else if ( sf_str == "ALLM;GD11p" ) params_.kinematics.structure_functions = GD11p;
           else FatalError( Form( "Invalid structure functions mode: %s", sf ) );
         }
       } catch ( const libconfig::SettingNotFoundException& nfe ) {
