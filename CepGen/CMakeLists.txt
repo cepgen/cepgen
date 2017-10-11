@@ -1,6 +1,6 @@
 file(GLOB core_sources Core/*.cpp *.cpp)
 file(GLOB cards_sources Cards/*.cpp)
-file(GLOB io_sources IO/*.cpp)
+file(GLOB io_sources IO/FortranInterface.cpp)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
