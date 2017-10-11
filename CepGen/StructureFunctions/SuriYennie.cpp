@@ -42,7 +42,7 @@ namespace CepGen
       sy.FM = ( params_.C1*dm2*pow( params_.rho2/MQ, 2 ) + ( params_.C2*mp2*pow( 1.-Xpr, 4 ) ) / ( 1.+Xpr*( Xpr*params_.Cp-2.*params_.Bp ) ) )/q2;
       const double FE = ( Tau*sy.FM + params_.D1*dm2*q2*params_.rho2/mp2*pow( dm2/MQ/En, 2 ) ) / ( 1.+0.25*En*En/mp2/q2 );
 
-      const double w2 = 2.*mp*FE, w1 = 0.5 * sy.FM*q2/mp;
+      const double w2 = 2.*mp*FE/*, w1 = 0.5 * sy.FM*q2/mp*/;
 
       sy.F2 = nu/mp*w2;
       return sy;

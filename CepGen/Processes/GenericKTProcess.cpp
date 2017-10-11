@@ -251,7 +251,7 @@ namespace CepGen
         case StructureFunctionsType::SuriYennie: {
           SF::SuriYennie sy;
           sf = sy( Q2, xbj ); } break;
-        case StructureFunctionsType::Fiore: {
+        case StructureFunctionsType::FioreBrasse: {
           SF::FioreBrasse fb;
           sf = fb( Q2, xbj ); } break;
         case StructureFunctionsType::ALLM91: {
@@ -260,6 +260,12 @@ namespace CepGen
         case StructureFunctionsType::ALLM97: {
           SF::ALLM allm97( SF::ALLM::Parameterisation::allm97() );
           sf = allm97( Q2, xbj ); } break;
+        case StructureFunctionsType::ALLM_GD07p: {
+          SF::ALLM gd07p( SF::ALLM::Parameterisation::gd07p() );
+          sf = gd07p( Q2, xbj ); } break;
+        case StructureFunctionsType::ALLM_GD11p: {
+          SF::ALLM gd11p( SF::ALLM::Parameterisation::gd11p() );
+          sf = gd11p( Q2, xbj ); } break;
         default: break; //FIXME
       }
 

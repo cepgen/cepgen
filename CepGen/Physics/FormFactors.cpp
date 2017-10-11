@@ -28,9 +28,7 @@ namespace CepGen
         return FormFactors::SuriYennie( q2, mi2, mf2 );
       case StructureFunctionsType::SzczurekUleshchenko:
         return FormFactors::SzczurekUleshchenko( q2, mi2, mf2 );
-      case StructureFunctionsType::Fiore:
-      case StructureFunctionsType::FioreSea:
-      case StructureFunctionsType::FioreVal:
+      case StructureFunctionsType::FioreBrasse:
         return FormFactors::FioreBrasse( q2, mi2, mf2 );
       default: throw Exception( __PRETTY_FUNCTION__, "Invalid structure functions required!", FatalError );
     }

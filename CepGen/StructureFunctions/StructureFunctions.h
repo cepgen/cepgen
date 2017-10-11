@@ -16,10 +16,8 @@ namespace CepGen
     SuriYennie = 11,
     SuriYennieLowQ2 = 12,
     SzczurekUleshchenko = 15,
-    FioreVal = 101,
-    FioreSea = 102,
-    Fiore = 103,
-    ALLM91, ALLM97, ALLM_HHT, ALLM_HHT_FT
+    FioreBrasse = 101,
+    ALLM91, ALLM97, ALLM_HHT, ALLM_HHT_FT, ALLM_GD07p, ALLM_GD11p
   };
   /// Human-readable format of a structure function type
   std::ostream& operator<<( std::ostream& os, const StructureFunctionsType& sf );

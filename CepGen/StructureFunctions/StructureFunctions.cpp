@@ -11,9 +11,7 @@ namespace CepGen
       case SuriYennie:          return os << "Suri-Yennie";
       case SuriYennieLowQ2:     return os << "Suri-Yennie;lowQ2";
       case SzczurekUleshchenko: return os << "Szczurek-Uleshchenko";
-      case FioreVal:            return os << "Fiore;valence";
-      case FioreSea:            return os << "Fiore;sea";
-      case Fiore:               return os << "Fiore";
+      case FioreBrasse:         return os << "Fiore-Brasse";
       case ALLM91:              return os << "ALLM;91";
       case ALLM97:              return os << "ALLM;97";
       case ALLM_HHT:            return os << "ALLM;HHT";
