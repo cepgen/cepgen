@@ -1,31 +1,32 @@
 #include "StructureFunctions.h"
+#include <iostream>
 
 namespace CepGen
 {
-  std::ostream&
-  operator<<( std::ostream& os, const StructureFunctionsType& sf )
-  {
-    switch ( sf ) {
-      case Electron:            return os << "electron";
-      case ElasticProton:       return os << "elastic proton";
-      case SuriYennie:          return os << "Suri-Yennie";
-      case SuriYennieLowQ2:     return os << "Suri-Yennie;lowQ2";
-      case SzczurekUleshchenko: return os << "Szczurek-Uleshchenko";
-      case FioreVal:            return os << "Fiore;valence";
-      case FioreSea:            return os << "Fiore;sea";
-      case Fiore:               return os << "Fiore";
-      case ALLM91:              return os << "ALLM;91";
-      case ALLM97:              return os << "ALLM;97";
-      case ALLM_HHT:            return os << "ALLM;HHT";
-      case ALLM_HHT_FT:         return os << "ALLM;HHT-FT";
-      case Schaefer:            return os << "Schaefer";
-    }
-    return os;
-  }
-
+  /// Human-readable format of a structure function object
   std::ostream&
   operator<<( std::ostream& os, const StructureFunctions& sf )
   {
     return os << "F2 = " << sf.F2 << ", FL = " << sf.FL;
+  }
+  /// Human-readable format of a structure function type
+  std::ostream&
+  operator<<( std::ostream& os, const StructureFunctions::Type& sf )
+  {
+    switch ( sf ) {
+      case StructureFunctions::Electron:            return os << "electron";
+      case StructureFunctions::ElasticProton:       return os << "elastic proton";
+      case StructureFunctions::SuriYennie:          return os << "Suri-Yennie";
+      case StructureFunctions::SzczurekUleshchenko: return os << "Szczurek-Uleshchenko";
+      case StructureFunctions::FioreBrasse:         return os << "Fiore-Brasse";
+      case StructureFunctions::ChristyBosted:       return os << "Christy-Bosted";
+      case StructureFunctions::BlockDurandHa:       return os << "BDH";
+      case StructureFunctions::ALLM91:              return os << "ALLM;91";
+      case StructureFunctions::ALLM97:              return os << "ALLM;97";
+      case StructureFunctions::GD07p:               return os << "ALLM;GD07p";
+      case StructureFunctions::GD11p:               return os << "ALLM;GD11p";
+      case StructureFunctions::Schaefer:            return os << "Schaefer";
+    }
+    return os;
   }
 }

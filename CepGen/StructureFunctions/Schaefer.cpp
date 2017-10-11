@@ -1,4 +1,5 @@
 #include "Schaefer.h"
+#include "CepGen/Physics/Constants.h"
 
 namespace CepGen
 {

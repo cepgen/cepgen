@@ -1,8 +1,11 @@
 #ifndef CepGen_StructureFunctions_FioreBrasse_h
 #define CepGen_StructureFunctions_FioreBrasse_h
 
-#include "StructureFunctions.h"
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
+
 #include <complex>
+#include <vector>
 
 namespace CepGen
 {

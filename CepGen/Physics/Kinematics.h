@@ -86,7 +86,7 @@ namespace CepGen
       /// Type of kinematics to consider for the phase space
       ProcessMode mode;
       /// Type of structure functions to consider
-      StructureFunctionsType structure_functions;
+      StructureFunctions::Type structure_functions;
       /// Cuts on the central system produced
       std::map<Cuts::Central, Limits> central_cuts;
       /// Cuts on the beam remnants system

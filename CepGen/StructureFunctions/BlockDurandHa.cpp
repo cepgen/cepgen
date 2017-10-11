@@ -1,4 +1,5 @@
 #include "BlockDurandHa.h"
+#include <cmath>
 
 namespace CepGen
 {

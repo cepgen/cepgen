@@ -2,6 +2,7 @@
 #define CepGen_StructureFunctions_ChristyBosted_h
 
 #include "StructureFunctions.h"
+#include "CepGen/Physics/Constants.h"
 #include <array>
 #include <vector>
 
