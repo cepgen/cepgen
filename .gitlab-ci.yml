@@ -26,7 +26,7 @@ test_vegas:
   before_script:
     - cd build
   script:
-    - make -j 4 test_vegas
+    - make test_vegas
     - test/test_vegas
   when: on_success
   allow_failure: true
@@ -38,7 +38,7 @@ test_cross_sections:
   before_script:
     - cd build
   script:
-    - make -j 4 test_physics_processes
+    - make test_physics_processes
     - test/test_physics_processes
   when: on_success
   allow_failure: true
@@ -50,7 +50,7 @@ test_function_parser:
   before_script:
     - cd build
   script:
-    - make -j 4 test_function_parser test_function_parser_rootcomp
+    - make test_function_parser test_function_parser_rootcomp
     - test/test_function_parser && test/test_function_parser_rootcomp
   when: on_success
   allow_failure: false
