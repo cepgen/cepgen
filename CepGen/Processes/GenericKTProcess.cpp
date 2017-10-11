@@ -1,4 +1,5 @@
 #include "GenericKTProcess.h"
+#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 
 namespace CepGen
 {

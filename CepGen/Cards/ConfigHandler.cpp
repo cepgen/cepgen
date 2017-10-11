@@ -69,18 +69,18 @@ namespace CepGen
         if ( kin.exists( "beam2_pz" ) ) params_.kinematics.inp.second = (double)kin["beam2_pz"];
         if ( kin.exists( "structure_functions" ) ) {
           const char* sf = kin["structure_functions" ]; const std::string sf_str = sf;
-          if ( sf_str == "electron" ) params_.kinematics.structure_functions = Electron;
-          else if ( sf_str == "elastic proton" ) params_.kinematics.structure_functions = ElasticProton;
-          else if ( sf_str == "Suri-Yennie" ) params_.kinematics.structure_functions = SuriYennie;
-          else if ( sf_str == "Szczurek-Uleshchenko" ) params_.kinematics.structure_functions = SzczurekUleshchenko;
-          else if ( sf_str == "Fiore" ) params_.kinematics.structure_functions = FioreBrasse;
-          else if ( sf_str == "ALLM" ) params_.kinematics.structure_functions = ALLM97;
-          else if ( sf_str == "ALLM;91" ) params_.kinematics.structure_functions = ALLM91;
-          else if ( sf_str == "ALLM;97" ) params_.kinematics.structure_functions = ALLM97;
-          //else if ( sf_str == "ALLM;HHT" ) params_.kinematics.structure_functions = ALLM_HHT;
-          //else if ( sf_str == "ALLM;HHT-FT" ) params_.kinematics.structure_functions = ALLM_HHT_FT;
-          else if ( sf_str == "ALLM;GD07p" ) params_.kinematics.structure_functions = GD07p;
-          else if ( sf_str == "ALLM;GD11p" ) params_.kinematics.structure_functions = GD11p;
+          if ( sf_str == "electron" ) params_.kinematics.structure_functions = StructureFunctions::Electron;
+          else if ( sf_str == "elastic proton" ) params_.kinematics.structure_functions = StructureFunctions::ElasticProton;
+          else if ( sf_str == "Suri-Yennie" ) params_.kinematics.structure_functions = StructureFunctions::SuriYennie;
+          else if ( sf_str == "Szczurek-Uleshchenko" ) params_.kinematics.structure_functions = StructureFunctions::SzczurekUleshchenko;
+          else if ( sf_str == "Fiore" ) params_.kinematics.structure_functions = StructureFunctions::FioreBrasse;
+          else if ( sf_str == "ALLM" ) params_.kinematics.structure_functions = StructureFunctions::ALLM97;
+          else if ( sf_str == "ALLM;91" ) params_.kinematics.structure_functions = StructureFunctions::ALLM91;
+          else if ( sf_str == "ALLM;97" ) params_.kinematics.structure_functions = StructureFunctions::ALLM97;
+          //else if ( sf_str == "ALLM;HHT" ) params_.kinematics.structure_functions = StructureFunctions::ALLM_HHT;
+          //else if ( sf_str == "ALLM;HHT-FT" ) params_.kinematics.structure_functions = StructureFunctions::ALLM_HHT_FT;
+          else if ( sf_str == "ALLM;GD07p" ) params_.kinematics.structure_functions = StructureFunctions::GD07p;
+          else if ( sf_str == "ALLM;GD11p" ) params_.kinematics.structure_functions = StructureFunctions::GD11p;
           else FatalError( Form( "Invalid structure functions mode: %s", sf ) );
         }
       } catch ( const libconfig::SettingNotFoundException& nfe ) {

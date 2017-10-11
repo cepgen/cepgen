@@ -6,7 +6,7 @@
 #include <string>
 
 #include "CepGen/Core/utils.h"
-#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Event/Particle.h"
 
 #include "Cuts.h"
@@ -86,7 +86,7 @@ namespace CepGen
       /// Type of kinematics to consider for the phase space
       ProcessMode mode;
       /// Type of structure functions to consider
-      StructureFunctionsType structure_functions;
+      StructureFunctions::Type structure_functions;
       /// Cuts on the central system produced
       std::map<Cuts::Central, Limits> central_cuts;
       /// Cuts on the beam remnants system

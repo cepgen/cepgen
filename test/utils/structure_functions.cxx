@@ -35,17 +35,17 @@ main( int argc, char* argv[] )
     }
     else xbj = min_xbj + i*( max_xbj-min_xbj )/( npoints-1 );
 
-    auto sf_sy = CepGen::StructureFunctionsBuilder::get( CepGen::SuriYennie, q2, xbj ),
-         sf_fb = CepGen::StructureFunctionsBuilder::get( CepGen::FioreBrasse, q2, xbj ),
-         sf_su = CepGen::StructureFunctionsBuilder::get( CepGen::SzczurekUleshchenko, q2, xbj ),
-         sf_allm97 = CepGen::StructureFunctionsBuilder::get( CepGen::ALLM97, q2, xbj ),
+    auto sf_sy = CepGen::StructureFunctionsBuilder::get( CepGen::StructureFunctions::SuriYennie, q2, xbj ),
+         sf_fb = CepGen::StructureFunctionsBuilder::get( CepGen::StructureFunctions::FioreBrasse, q2, xbj ),
+         sf_su = CepGen::StructureFunctionsBuilder::get( CepGen::StructureFunctions::SzczurekUleshchenko, q2, xbj ),
+         sf_allm97 = CepGen::StructureFunctionsBuilder::get( CepGen::StructureFunctions::ALLM97, q2, xbj ),
          //sf_allm_hht = CepGen::SF::ALLM( q2, xbj, CepGen::SF::ALLMParameterisation::hht_allm() ),
          //sf_allm_hht_ft = CepGen::SF::ALLM( q2, xbj, CepGen::SF::ALLMParameterisation::hht_allm_ft() ),
          //sf_bdh = CepGen::SF::BlockDurandHa( q2, xbj ),
          //sf_cteq = cteq( q2, xbj ),
          //sf_mrst = mrst( q2, xbj ),
          //sf_lux = lux( q2, xbj ),
-         sf_cb = CepGen::StructureFunctionsBuilder::get( CepGen::ChristyBosted, q2, xbj );
+         sf_cb = CepGen::StructureFunctionsBuilder::get( CepGen::StructureFunctions::ChristyBosted, q2, xbj );
 
     g_sy_f2.SetPoint( i, xbj, sf_sy.F2 );
     g_fb_f2.SetPoint( i, xbj, sf_fb.F2 );

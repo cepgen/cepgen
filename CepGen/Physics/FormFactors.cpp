@@ -25,17 +25,17 @@ namespace CepGen
   }
 
   FormFactors
-  FormFactors::ProtonInelastic( const StructureFunctionsType& sf, double q2, double mi2, double mf2 )
+  FormFactors::ProtonInelastic( const StructureFunctions::Type& sf, double q2, double mi2, double mf2 )
   {
     switch ( sf ) {
-      case StructureFunctionsType::ElasticProton:
+      case StructureFunctions::ElasticProton:
         InWarning( "Elastic proton form factors requested! Check your process definition!" );
         return FormFactors::ProtonElastic( q2 );
-      case StructureFunctionsType::SuriYennie:
+      case StructureFunctions::SuriYennie:
         return FormFactors::SuriYennie( q2, mi2, mf2 );
-      case StructureFunctionsType::SzczurekUleshchenko:
+      case StructureFunctions::SzczurekUleshchenko:
         return FormFactors::SzczurekUleshchenko( q2, mi2, mf2 );
-      case StructureFunctionsType::FioreBrasse:
+      case StructureFunctions::FioreBrasse:
         return FormFactors::FioreBrasse( q2, mi2, mf2 );
       default: throw Exception( __PRETTY_FUNCTION__, "Invalid structure functions required!", FatalError );
     }
