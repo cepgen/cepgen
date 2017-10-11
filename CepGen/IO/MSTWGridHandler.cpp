@@ -85,7 +85,8 @@ namespace MSTW
 #ifdef GOOD_GSL
     if ( gsl_spline2d_eval_e( splines_[0], q2, xbj, xacc_, yacc_, &ev.F2 ) == GSL_EDOM
       || gsl_spline2d_eval_e( splines_[1], q2, xbj, xacc_, yacc_, &ev.FL ) == GSL_EDOM ) {
-      FatalError( Form( "Failed to evaluate the structure functions for Q² = %.5e GeV² / xbj = %.5e!", q2, xbj ) );
+      InWarning( Form( "Failed to evaluate the structure functions for Q² = %.5e GeV² / xbj = %.5e", q2, xbj ) );
+      return ev;
     }
 #else
     FatalError( Form( "GSL version ≥ 2.1 is required for bilinear interpolation.\n\tVersion %s is installed on this system!", GSL_VERSION ) );
