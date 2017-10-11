@@ -2,6 +2,7 @@
 
 file(GLOB executables_noroot RELATIVE ${PROJECT_SOURCE_DIR}/test *.cpp)
 file(GLOB executables_root RELATIVE ${PROJECT_SOURCE_DIR}/test *.cxx)
+file(GLOB executables_fortran RELATIVE ${PROJECT_SOURCE_DIR}/test *.f)
 
 #----- include the utilitaries
 
@@ -12,6 +13,14 @@ set(tests "")
 
 foreach(exec_src ${executables_noroot})
   string(REPLACE ".cpp" "" exec_bin ${exec_src})
+  add_executable(${exec_bin} ${exec_src})
+  set_target_properties(${exec_bin} PROPERTIES EXCLUDE_FROM_ALL true)
+  target_link_libraries(${exec_bin} ${CEPGEN_EXTERNAL_REQS} ${CEPGEN_LIBRARIES})
+  list(APPEND tests ${exec_bin})
+endforeach()
+
+foreach(exec_src ${executables_fortran})
+  string(REPLACE ".f" "" exec_bin ${exec_src})
   add_executable(${exec_bin} ${exec_src})
   set_target_properties(${exec_bin} PROPERTIES EXCLUDE_FROM_ALL true)
   target_link_libraries(${exec_bin} ${CEPGEN_EXTERNAL_REQS} ${CEPGEN_LIBRARIES})
