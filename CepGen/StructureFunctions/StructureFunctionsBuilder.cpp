@@ -28,7 +28,7 @@ namespace CepGen
       case StructureFunctions::GD07p:               { const SF::ALLM gd07p( SF::ALLM::Parameterisation::gd07p() ); return gd07p( q2, xbj ); } break;
       case StructureFunctions::GD11p:               { const SF::ALLM gd11p( SF::ALLM::Parameterisation::gd11p() ); return gd11p( q2, xbj ); } break;
       case StructureFunctions::Schaefer:            { const SF::Schaefer luxlike; return luxlike( q2, xbj ); } break;
-      case StructureFunctions::MSTWgrid:            { return MSTW::GridHandler::get( "External/F2_Luxlike_fit/mstw_f2_scan_nnlo.txt" ).eval( q2, xbj ); } break;
+      case StructureFunctions::MSTWgrid:            { return MSTW::GridHandler::get( "External/F2_Luxlike_fit/mstw_f2_scan_nnlo.dat" ).eval( q2, xbj ); } break;
     }
     return StructureFunctions(); //FIXME
   }

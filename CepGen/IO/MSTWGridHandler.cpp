@@ -17,18 +17,18 @@ namespace MSTW
     gsl_set_error_handler_off();
 #ifdef GOOD_GSL
     const gsl_interp2d_type* T = gsl_interp2d_bilinear;
-    std::ifstream file( filename );
+    std::ifstream file( filename, std::ios::binary | std::ios::in );
     if ( !file.is_open() ) {
       FatalError( Form( "Impossible to load grid file \"%s\"!", filename ) );
     }
 
-    double q2, xbj, f2, fl;
+    sfval_t val;
 
     // first loop to evaluate the limits
     std::set<double> q2_vals, xbj_vals;
-    while ( file >> q2 >> xbj >> f2 >> fl ) {
-      q2_vals.insert( q2 );
-      xbj_vals.insert( xbj );
+    while ( file.read( reinterpret_cast<char*>( &val ), sizeof( sfval_t ) ) ) {
+      q2_vals.insert( val.q2 );
+      xbj_vals.insert( val.xbj );
     }
 
     if ( q2_vals.size() < 2 || xbj_vals.size() < 2 ) {
@@ -48,11 +48,11 @@ namespace MSTW
 
     // second loop to populate the grid
     file.clear(); file.seekg( 0, std::ios::beg );
-    while ( file >> q2 >> xbj >> f2 >> fl ) {
-      unsigned short id_q2 = std::distance( q2_vals.begin(), q2_vals.lower_bound( q2 ) ),
-                     id_xbj = std::distance( xbj_vals.begin(), xbj_vals.lower_bound( xbj ) );
-      gsl_spline2d_set( splines_[0], values_[0], id_q2, id_xbj, f2 );
-      gsl_spline2d_set( splines_[1], values_[1], id_q2, id_xbj, fl );
+    while ( file.read( reinterpret_cast<char*>( &val ), sizeof( sfval_t ) ) ) {
+      unsigned short id_q2 = std::distance( q2_vals.begin(), q2_vals.lower_bound( val.q2 ) ),
+                     id_xbj = std::distance( xbj_vals.begin(), xbj_vals.lower_bound( val.xbj ) );
+      gsl_spline2d_set( splines_[0], values_[0], id_q2, id_xbj, val.f2 );
+      gsl_spline2d_set( splines_[1], values_[1], id_q2, id_xbj, val.fl );
     }
 
     // initialise the splines object
@@ -62,7 +62,7 @@ namespace MSTW
       gsl_spline2d_init( splines_[i], xa, ya, values_[i], q2_vals.size(), xbj_vals.size() );
     }
 #else
-    FatalError( Form( "GSL version >= 2.1 is required for bilinear interpolation.\n\tVersion %s is installed on this system!", GSL_VERSION ) );
+    FatalError( Form( "GSL version ≥ 2.1 is required for bilinear interpolation.\n\tVersion %s is installed on this system!", GSL_VERSION ) );
 #endif
   }
 
@@ -85,10 +85,10 @@ namespace MSTW
 #ifdef GOOD_GSL
     if ( gsl_spline2d_eval_e( splines_[0], q2, xbj, xacc_, yacc_, &ev.F2 ) == GSL_EDOM
       || gsl_spline2d_eval_e( splines_[1], q2, xbj, xacc_, yacc_, &ev.FL ) == GSL_EDOM ) {
-      FatalError( Form( "Failed to evaluate the structure functions for Q2 = %.5e GeV² / xbj = %.5e!", q2, xbj ) );
+      FatalError( Form( "Failed to evaluate the structure functions for Q² = %.5e GeV² / xbj = %.5e!", q2, xbj ) );
     }
 #else
-    FatalError( Form( "GSL version >= 2.1 is required for bilinear interpolation.\n\tVersion %s is installed on this system!", GSL_VERSION ) );
+    FatalError( Form( "GSL version ≥ 2.1 is required for bilinear interpolation.\n\tVersion %s is installed on this system!", GSL_VERSION ) );
 #endif
     return ev;
   }

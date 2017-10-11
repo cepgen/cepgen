@@ -36,6 +36,8 @@ namespace MSTW
     private:
       GridHandler( const char* );
 
+      struct sfval_t { double q2, xbj, f2, fl; };
+
 #ifdef GOOD_GSL
       std::array<gsl_spline2d*,2> splines_;
       gsl_interp_accel* xacc_, *yacc_;
