@@ -35,6 +35,7 @@ if(LIBCONFIG)
 endif()
 if(LHAPDF)
   message(STATUS "LHAPDF found in ${LHAPDF}")
+  add_definitions(-DLIBLHAPDF)
   list(APPEND CEPGEN_EXTERNAL_REQS ${LHAPDF})
 endif()
 
