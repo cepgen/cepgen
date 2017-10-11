@@ -52,14 +52,14 @@ namespace CepGen
         /// \param[in] nopt Optimisation (legacy from LPAIR)
         GamGamLL( int nopt=0 );
   
-        void addEventContent();
-        void beforeComputeWeight();
+        void addEventContent() override;
+        void beforeComputeWeight() override;
         /// Compute the process' weight for the given point
         /// \return \f$\mathrm d\sigma(\mathbf x)(\gamma\gamma\to\ell^{+}\ell^{-})\f$,
         ///   the differential cross-section for the given point in the phase space.
-        double computeWeight();
-        unsigned int numDimensions( const Kinematics::ProcessMode& ) const;
-        void fillKinematics( bool );
+        double computeWeight() override;
+        unsigned int numDimensions( const Kinematics::ProcessMode& ) const override;
+        void fillKinematics( bool ) override;
         /// Compute the ougoing proton remnant mass
         /// \param[in] x A random number (between 0 and 1)
         /// \param[in] outmass The maximal outgoing particles' invariant mass
