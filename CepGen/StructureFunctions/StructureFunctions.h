@@ -1,6 +1,8 @@
 #ifndef CepGen_StructureFunctions_StructureFunctions_h
 #define CepGen_StructureFunctions_StructureFunctions_h
 
+#include <iostream>
+
 namespace CepGen
 {
   class StructureFunctions
@@ -23,10 +25,11 @@ namespace CepGen
         GD11p               = 204
       };
 
-      double F2;
-      double F1;
+      double F2, F1;
       double FL, FM;
   };
+  std::ostream& operator<<( std::ostream&, const StructureFunctions& );
+  std::ostream& operator<<( std::ostream&, const StructureFunctions::Type& );
 }
 
 #endif
