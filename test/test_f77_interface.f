@@ -15,6 +15,6 @@
       do i=1,niter
          xbj=min_xbj+(max_xbj-min_xbj)*(i-1)/(niter-1)
          call CepGen_Structure_Functions(nsf,q2,xbj,f2,fl)
-         print *,xbj,f2
+         print *,xbj,f2,fl
       enddo
       end

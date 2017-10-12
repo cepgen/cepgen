@@ -32,7 +32,7 @@ namespace CepGen
           }
         };
         E143Ratio( const Parameterisation& param = Parameterisation::standard() ) : params_( param ) {}
-        double operator()( double q2, double xbj ) const
+        double operator()( double q2, double xbj ) const override
         {
           const double u = q2/params_.q2_b;
           const double xl = log( 25.*q2 );
