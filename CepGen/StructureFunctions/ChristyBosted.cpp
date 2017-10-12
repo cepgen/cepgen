@@ -85,18 +85,20 @@ namespace CepGen
       }
       sig_res *= w;
 
-      //--- finish resonances / start non-res background calculation
+      //--- non-resonant background calculation
       const double xpr = 1./( 1.+( w2-pow( mp+mpi, 2 ) )/( q2+q20 ) );
       if ( xpr > 1. ) return 0.; // FIXME
 
       double sig_nr = 0.;
       if ( sf == 'T' ) { // transverse
         const double wdif = w - ( mp + mpi );
-        for ( unsigned short i = 0; i < 2; ++i ) {
-          const double expo = params_.continuum.transverse[i].fit_parameters[1]
-                            + params_.continuum.transverse[i].fit_parameters[2]*q2
-                            + params_.continuum.transverse[i].fit_parameters[3]*q2*q2;
-          sig_nr += params_.continuum.transverse[i].sig0 / pow( q2+params_.continuum.transverse[i].fit_parameters[0], expo ) * pow( wdif, i+1.5 );
+        if ( wdif >= 0. ) {
+          for ( unsigned short i = 0; i < 2; ++i ) {
+            const double expo = params_.continuum.transverse[i].fit_parameters[1]
+                              + params_.continuum.transverse[i].fit_parameters[2]*q2
+                              + params_.continuum.transverse[i].fit_parameters[3]*q2*q2;
+            sig_nr += params_.continuum.transverse[i].sig0 / pow( q2+params_.continuum.transverse[i].fit_parameters[0], expo ) * pow( wdif, i+1.5 );
+          }
         }
 
         sig_nr *= xpr;
