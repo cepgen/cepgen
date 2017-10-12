@@ -18,7 +18,7 @@ c       -----------------------------
               call CepGen_Structure_Functions(205,Q2,xbj,F2p,FLp)
               F2 = F2p
               FL = FLp
-           elseif(w2.lt.w2_hi) then
+           elseif(w2.le.w2_hi) then
               call F2_cont(xbj,q2,F2c,FLc)
               F2 = F2c
               FL = FLc
@@ -32,7 +32,7 @@ c       -----------------------------
               endif
               F2 = F2r
               FL = FLr
-           elseif(w2.gt.w2_lo.and.w2.lt.w2_hi) then
+           elseif(w2.gt.w2_lo.and.w2.le.w2_hi) then
               if(ires_model.eq.1) then     ! Christy-Bosted
                  call CepGen_Structure_Functions(102,Q2,xbj,F2r,FLr)
               elseif(ires_model.eq.2) then ! Fiore-Brasse
@@ -41,7 +41,7 @@ c       -----------------------------
               call F2_cont(xbj,q2,F2c,FLc)
               F2 = (1.d0-rho)*F2r + rho*F2c
               FL = (1.d0-rho)*FLr + rho*FLc
-           elseif(w2.ge.w2_hi) then
+           elseif(w2.gt.w2_hi) then
               call F2_cont(xbj,q2,F2c,FLc)
               F2 = F2c
               FL = FLc
