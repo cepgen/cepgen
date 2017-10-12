@@ -2,6 +2,7 @@
 #define CepGen_StructureFunctions_ALLM_h
 
 #include "StructureFunctions.h"
+#include "SigmaRatio.h"
 #include <vector>
 
 namespace CepGen
@@ -23,6 +24,7 @@ namespace CepGen
             };
 
           public:
+            Parameterisation();
             /// Pre-HERA data fit (694 data points)
             static Parameterisation allm91();
             /// Fixed target and HERA photoproduction total cross sections (1356 points)
@@ -42,6 +44,7 @@ namespace CepGen
             double q02;
             /// Squared QCD scale
             double lambda2;
+            SigmaRatio ratio_comp;
         };
 
         ALLM( const ALLM::Parameterisation& param = ALLM::Parameterisation::allm97() ) : params_( param ) {}

@@ -1,10 +1,16 @@
 #include "ALLM.h"
+#include "CepGen/Physics/Constants.h"
 #include <cmath>
 
 namespace CepGen
 {
   namespace SF
   {
+    ALLM::Parameterisation::Parameterisation()
+    {
+      ratio_comp = E143Ratio();
+    }
+
     ALLM::Parameterisation
     ALLM::Parameterisation::allm91()
     {
@@ -149,6 +155,11 @@ namespace CepGen
 
       StructureFunctions allm;
       allm.F2 = factor * ( F2_Pom + F2_Reg );
+
+      const double R = params_.ratio_comp( q2, xbj );
+      const double tau = 4.*xbj*xbj+Constants::mp*Constants::mp/q2;
+      allm.FL = allm.F2 * ( 1.+tau ) * ( R/( 1.+R ) );
+
       return allm;
     }
   }
