@@ -3,6 +3,8 @@
 
 #include "ExportHandler.h"
 
+#ifdef LIBHEPMC
+
 #include "HepMC/Version.h"
 
 #ifndef HEPMC_VERSION_CODE // HepMC v2
@@ -17,9 +19,6 @@
 #endif
 
 #include "HepMC/GenEvent.h"
-#include "HepMC/GenVertex.h"
-#include "HepMC/GenCrossSection.h"
-#include "HepMC/GenParticle.h"
 
 #include <memory>
 
@@ -65,4 +64,5 @@ namespace CepGen
   }
 }
 
+#endif
 #endif

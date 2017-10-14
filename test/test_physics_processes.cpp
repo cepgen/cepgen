@@ -1,4 +1,5 @@
 #include "CepGen/Generator.h"
+#include "CepGen/Core/Timer.h"
 
 #include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Processes/PPtoLL.h"

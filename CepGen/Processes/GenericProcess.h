@@ -4,9 +4,9 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/FormFactors.h"
-#include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include <vector>
+#include <memory>
 
 namespace CepGen
 {

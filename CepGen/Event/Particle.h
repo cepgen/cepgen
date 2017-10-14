@@ -1,14 +1,9 @@
 #ifndef CepGen_Event_Particle_h
 #define CepGen_Event_Particle_h
 
-#include <sstream>
-#include <cmath>
-#include <string>
 #include <set>
 #include <map>
 #include <vector>
-#include <algorithm>
-#include <initializer_list>
 
 #include "CepGen/Core/utils.h"
 

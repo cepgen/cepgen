@@ -1,8 +1,9 @@
 #include <iostream>
 
 #include "CepGen/Generator.h"
-#include "CepGen/Export/EventWriter.h"
 #include "CepGen/Cards/LpairHandler.h"
+//#include "CepGen/Export/LHEFHandler.h"
+#include "CepGen/Export/HepMCHandler.h"
 
 #include "HepMC/Version.h"
 
@@ -33,8 +34,7 @@ int main( int argc, char* argv[] ) {
 
   //if ( !mg.parameters->generation ) return 0;
 
-  //CepGen::OutputHandler::EventWriter writer( CepGen::OutputHandler::ExportHandler::LHE, "example.dat" );
-  CepGen::OutputHandler::EventWriter writer( CepGen::OutputHandler::ExportHandler::HepMC, "example.dat" );
+  CepGen::OutputHandler::HepMCHandler writer( "example.dat" );
   writer.setCrossSection( xsec, err );
   writer.initialise( *mg.parameters );
 
