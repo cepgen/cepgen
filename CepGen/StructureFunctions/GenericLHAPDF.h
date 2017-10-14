@@ -14,11 +14,12 @@ namespace CepGen
   namespace SF
   {
     /// Generic, tree-level import of structure functions from an external PDFs grid
-    class GenericLHAPDF
+    class GenericLHAPDF : public StructureFunctions
     {
       public:
+        GenericLHAPDF() : StructureFunctions() {}
         GenericLHAPDF( const char* set );
-        StructureFunctions operator()( double q2, double xbj, unsigned short num_flavours = 4 ) const;
+        GenericLHAPDF operator()( double q2, double xbj, unsigned short num_flavours = 4 ) const;
 
       private:
         void initialise( const char* set );

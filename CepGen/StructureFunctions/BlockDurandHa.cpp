@@ -19,10 +19,10 @@ namespace CepGen
       return p;
     }
 
-    StructureFunctions
+    BlockDurandHa
     BlockDurandHa::operator()( double q2, double xbj ) const
     {
-      StructureFunctions bdh;
+      BlockDurandHa bdh;
       if ( q2 <= 0. ) return bdh;
 
       const double tau = q2 / ( q2 + params_.mu2 );

@@ -1,6 +1,9 @@
 #include "FioreBrasse.h"
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
+
+#include <complex>
 
 namespace CepGen
 {
@@ -31,7 +34,7 @@ namespace CepGen
       return p;
     }
 
-    StructureFunctions
+    FioreBrasse
     FioreBrasse::operator()( double q2, double xbj ) const
     {
       const double mp2 = Constants::mp*Constants::mp;
@@ -72,12 +75,12 @@ namespace CepGen
       }
       ampli_tot = params_.norm*ampli_res;
 
-      StructureFunctions fb;
+      FioreBrasse fb;
       fb.F2 = prefactor*ampli_tot;
       return fb;
     }
 
-    StructureFunctions
+    FioreBrasse
     FioreBrasse::operator()( double q2, double xbj, bool ) const
     {
       const double mp2 = Constants::mp*Constants::mp;
@@ -86,10 +89,11 @@ namespace CepGen
 
       const double mx2 = mp2 + q2*( 1.-xbj )/xbj, mx = sqrt( mx2 );
 
+      FioreBrasse fb;
       if ( mx < m_min || mx > 1.99 ) {
         InWarning( Form( "Fiore-Brasse form factors to be retrieved for an invalid MX value:\n\t"
                          "%.2e GeV, while allowed range is [1.07, 1.99] GeV", mx ) );
-        return StructureFunctions();
+        return fb;
       }
 
       int n_bin;
@@ -145,10 +149,9 @@ namespace CepGen
       const double w1 = ( mx2-mp2 )/( 8.*M_PI*M_PI*Constants::mp*Constants::alphaEM )/Constants::GeV2toBarn*1.e6 * sigma_t;
       const double w2 = w1 * q2 / ( q2+nu2 );
 
-      StructureFunctions fb_old;
-      fb_old.F1 = w1; //FIXME
-      fb_old.F2 = w2; //FIXME
-      return fb_old;
+      fb.W1 = w1; //FIXME
+      fb.W2 = w2; //FIXME
+      return fb;
     }
   }
 }

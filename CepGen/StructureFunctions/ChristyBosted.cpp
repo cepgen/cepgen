@@ -34,12 +34,12 @@ namespace CepGen
 
       //--- calculate kinematics needed for threshold relativistic B-W
       // equivalent photon energies
-      const double k = 0.5 * ( w2-mp2 )/mp;
-      const double kcm = 0.5 * ( w2-mp2 )/w;
+      const double k   = 0.5 * ( w2 - mp2 )/mp;
+      const double kcm = 0.5 * ( w2 - mp2 )/w;
 
-      const double epicm = 0.5 * ( w2+mpi2-mp2 )/w, ppicm = sqrt( std::max( 0., epicm*epicm-mpi2 ) );
-      const double epi2cm = 0.5 * ( w2 + 4.*mpi2 - mp2 )/w, ppi2cm = sqrt( std::max( 0., epi2cm*epi2cm-4*mpi2 ) );
-      const double eetacm = 0.5 * ( w2 + meta2 - mp2 )/w, petacm = sqrt( std::max( 0., eetacm*eetacm-meta2 ) );
+      const double epicm  = 0.5 * ( w2 +    mpi2 - mp2 )/w, ppicm  = sqrt( std::max( 0.,  epicm* epicm -   mpi2 ) );
+      const double epi2cm = 0.5 * ( w2 + 4.*mpi2 - mp2 )/w, ppi2cm = sqrt( std::max( 0., epi2cm*epi2cm - 4*mpi2 ) );
+      const double eetacm = 0.5 * ( w2 +   meta2 - mp2 )/w, petacm = sqrt( std::max( 0., eetacm*eetacm -  meta2 ) );
 
       std::array<double,7> width, height, pgam;
       for ( unsigned short i = 0; i < 7; ++i ) {
@@ -66,13 +66,11 @@ namespace CepGen
         width[i] = ( partial_width_singlepi * res.br.singlepi
                    + partial_width_doublepi * res.br.doublepi
                    + partial_width_eta * res.br.eta ) * res.width;
-//std::cout << i << "\t" << width[i] << "\t" << partial_width_doublepi << "\t" << pow( ppi2cm/res.pcmr( 4.*mpi2 ), 2.*( res.angular_momentum+2. ) ) << std::endl;
 
         //--- resonance Q^2 dependence calculations
 
         if ( sf == 'T' )      height[i] = res.A0_T*( 1.+res.fit_parameters[0]*q2/( 1.+res.fit_parameters[1]*q2 ) )/pow( 1.+q2/0.91, res.fit_parameters[2] );
         else if ( sf == 'L' ) height[i] = res.A0_L/( 1.+res.fit_parameters[3]*q2 )*q2*exp( -q2*res.fit_parameters[4] );
-        //std::cout << sf << "//////" << height[i] << "\t" << res.fit_parameters[4] << std::endl;
         height[i] = height[i]*height[i];
       }
 
@@ -87,17 +85,20 @@ namespace CepGen
       }
       sig_res *= w;
 
-      //--- finish resonances / start non-res background calculation
+      //--- non-resonant background calculation
       const double xpr = 1./( 1.+( w2-pow( mp+mpi, 2 ) )/( q2+q20 ) );
+      if ( xpr > 1. ) return 0.; // FIXME
 
       double sig_nr = 0.;
       if ( sf == 'T' ) { // transverse
         const double wdif = w - ( mp + mpi );
-        for ( unsigned short i = 0; i < 2; ++i ) {
-          const double expo = params_.continuum.transverse[i].fit_parameters[1]
-                            + params_.continuum.transverse[i].fit_parameters[2]*q2
-                            + params_.continuum.transverse[i].fit_parameters[3]*q2*q2;
-          sig_nr += params_.continuum.transverse[i].sig0 / pow( q2+params_.continuum.transverse[i].fit_parameters[0], expo ) * pow( wdif, i+1.5 );
+        if ( wdif >= 0. ) {
+          for ( unsigned short i = 0; i < 2; ++i ) {
+            const double expo = params_.continuum.transverse[i].fit_parameters[1]
+                              + params_.continuum.transverse[i].fit_parameters[2]*q2
+                              + params_.continuum.transverse[i].fit_parameters[3]*q2*q2;
+            sig_nr += params_.continuum.transverse[i].sig0 / pow( q2+params_.continuum.transverse[i].fit_parameters[0], expo ) * pow( wdif, i+1.5 );
+          }
         }
 
         sig_nr *= xpr;
@@ -217,14 +218,14 @@ namespace CepGen
       return params;
     }
 
-    StructureFunctions
+    ChristyBosted
     ChristyBosted::operator()( double q2, double xbj ) const
     {
       const double mp2 = Constants::mp*Constants::mp;
       const double w2 = mp2 + q2*( 1.-xbj )/xbj;
       const double w_min = Constants::mp+Constants::mpi;
 
-      StructureFunctions cb;
+      ChristyBosted cb;
       if ( sqrt( w2 ) < w_min ) return cb;
 
       //-----------------------------
@@ -247,9 +248,10 @@ namespace CepGen
       cb.F2 = prefac * q2_eff / ( 1+tau ) * ( sigT+sigL ) / Constants::GeV2toBarn * 1.e6;
       if ( q2 > q20 ) cb.F2 *= q21/( q21 + delq2 );
 
-      const double R = sigL/sigT;
-      cb.FL = cb.F2*( 1+tau )*R/( 1.+R );
-
+      if ( sigT != 0. ) {
+        const double R = sigL/sigT;
+        cb.FL = cb.F2*( 1+tau )*R/( 1.+R );
+      }
       return cb;
     }
   }

@@ -1,12 +1,14 @@
 #ifndef CepGen_StructureFunctions_StructureFunctions_h
 #define CepGen_StructureFunctions_StructureFunctions_h
 
+#include <iostream>
+
 namespace CepGen
 {
   class StructureFunctions
   {
     public:
-      StructureFunctions( double f2=0.0 ) : F2( f2 ), FM( 0.0 ), FL( 0.0 ) {}
+      StructureFunctions( double f2=0.0 ) : F2( f2 ), FL( 0.0 ) {}
       /// Proton structure function to be used in the outgoing state description
       /// \note Values correspond to the LPAIR legacy steering card values
       enum Type {
@@ -24,11 +26,10 @@ namespace CepGen
         Schaefer            = 301
       };
 
-      double F2;
-      double F1;
-      double FM;
-      double FL;
+      double F2, FL;
   };
+  std::ostream& operator<<( std::ostream&, const StructureFunctions& );
+  std::ostream& operator<<( std::ostream&, const StructureFunctions::Type& );
 }
 
 #endif

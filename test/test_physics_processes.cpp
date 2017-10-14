@@ -3,6 +3,8 @@
 #include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Processes/PPtoLL.h"
 
+#include "CepGen/StructureFunctions/StructureFunctions.h"
+
 #include "abort.h"
 
 #include <unordered_map>
@@ -87,8 +89,8 @@ main( int argc, char* argv[] )
           else if ( values_vs_kin.first.find( "doublediss" ) != std::string::npos ) mg.parameters->kinematics.mode = CepGen::Kinematics::InelasticInelastic;
           else { InError( Form( "Unrecognized kinematics mode: %s", values_vs_kin.first.c_str() ) ); break; }
 
-          if ( values_vs_kin.first.find( "_su" ) != std::string::npos ) mg.parameters->kinematics.structure_functions = CepGen::SzczurekUleshchenko;
-          else mg.parameters->kinematics.structure_functions = CepGen::SuriYennie;
+          if ( values_vs_kin.first.find( "_su" ) != std::string::npos ) mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SzczurekUleshchenko;
+          else mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SuriYennie;
 
           Information( Form( "Process: %s/%s\n\tConfiguration time: %.3f ms", values_vs_generator.first.c_str(), values_vs_kin.first.c_str(), tmr.elapsed()*1.e3 ) );
           tmr.reset();
