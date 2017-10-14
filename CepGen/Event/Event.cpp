@@ -1,4 +1,5 @@
 #include "Event.h"
+#include "CepGen/Core/Exception.h"
 
 #include <algorithm>
 

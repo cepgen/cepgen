@@ -4,8 +4,6 @@
 #include <sstream>
 #include <memory>
 
-#include "CepGen/Core/Vegas.h"
-
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -38,6 +36,10 @@ namespace CepGen
    * \f$0<x_i<1\f$.
    */
   double f( double*, size_t, void* );
+
+  class Event;
+  class Vegas;
+  class Parameters;
 
   ////////////////////////////////////////////////////////////////////////////////
 
@@ -94,21 +96,11 @@ namespace CepGen
        */
       Event* generateOneEvent();
       /// Number of dimensions on which the integration is performed
-      inline size_t numDimensions() const {
-        if ( !parameters->process() ) return 0;
-        return parameters->process()->numDimensions( parameters->kinematics.mode );
-      }
+      size_t numDimensions() const;
       /// Compute one single point from the total phase space
-      /// \param[in] x_ the n-dimensional point to compute
+      /// \param[in] x the n-dimensional point to compute
       /// \return the function value for the given point
-      inline double computePoint( double* x_ ) {
-        prepareFunction();
-        double res = f( x_, numDimensions(), (void*)parameters.get() );
-        std::ostringstream os;
-        for ( unsigned int i=0; i<numDimensions(); i++ ) { os << x_[i] << " "; }
-        Debugging( Form( "Result for x[%zu] = ( %s):\n\t%10.6f", numDimensions(), os.str().c_str(), res ) );
-        return res;
-      }
+      double computePoint( double* x );
       /// Physical Parameters used in the events generation and cross-section computation
       std::unique_ptr<Parameters> parameters;
       /// Last event generated in this run

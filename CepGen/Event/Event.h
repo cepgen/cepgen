@@ -2,6 +2,7 @@
 #define CepGen_Event_Event_h
 
 #include "Particle.h"
+#include "CepGen/Core/Logger.h"
 
 namespace CepGen
 {
@@ -29,7 +30,7 @@ namespace CepGen
       /// Dump all the known information on every Particle object contained in this Event container in the output stream
       /// \param[out] os Output stream where to dump the information
       /// \param[in] stable_ Do we only show the stable particles in this event?
-      void dump( std::ostream& os=Logger::get().outputStream, bool stable_=false ) const;
+      void dump( std::ostream& os = Logger::get().outputStream, bool stable_=false ) const;
 
       //----- particles adders
 

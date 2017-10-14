@@ -1,4 +1,6 @@
 #include "Particle.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Physics/Constants.h"
 
 namespace CepGen
 {

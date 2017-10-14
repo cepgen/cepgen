@@ -1,18 +1,17 @@
 #ifndef CepGen_Core_Vegas_h
 #define CepGen_Core_Vegas_h
 
+//#include "CepGen/Parameters.h"
+
 #include <gsl/gsl_monte_vegas.h>
 #include <gsl/gsl_rng.h>
 
-#include "CepGen/Parameters.h"
-
 #include <vector>
-
-#define fMaxNbins 50
-#define ONE 1.
+#include <memory>
 
 namespace CepGen
 {
+  class Parameters;
   /**
    * Main occurence of the Monte-Carlo integrator @cite PeterLepage1978192 developed by G.P. Lepage in 1978
    * \brief Vegas Monte-Carlo integrator instance
@@ -82,7 +81,6 @@ namespace CepGen
        */
       void setGen();
       double uniform() const { return gsl_rng_uniform( rng_ ); }
-      //double uniform() const { return rand()/RAND_MAX; }
 
       /// Maximal number of dimensions handled by this Vegas instance
       static constexpr unsigned short max_dimensions_ = 15;

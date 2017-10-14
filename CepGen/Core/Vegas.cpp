@@ -1,4 +1,5 @@
 #include "Vegas.h"
+#include "CepGen/Parameters.h"
 
 #include <fstream>
 

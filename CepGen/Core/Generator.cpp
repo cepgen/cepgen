@@ -1,4 +1,9 @@
 #include "CepGen/Generator.h"
+#include "CepGen/Parameters.h"
+
+#include "CepGen/Core/Vegas.h"
+
+#include "CepGen/Event/Event.h"
 
 #include <fstream>
 
@@ -24,6 +29,13 @@ namespace CepGen
     if ( parameters->generation.enabled && parameters->process() && parameters->process()->numGeneratedEvents()>0 ) {
       Information( Form( "Mean generation time / event: %.3f ms", parameters->process()->totalGenerationTime()*1.e3/parameters->process()->numGeneratedEvents() ) );
     }
+  }
+
+  size_t
+  Generator::numDimensions() const
+  {
+    if ( !parameters->process() ) return 0;
+    return parameters->process()->numDimensions( parameters->kinematics.mode );
   }
 
   void
@@ -55,6 +67,17 @@ namespace CepGen
     }
     hf.close();
     Information( os.str().c_str() );
+  }
+
+  double
+  Generator::computePoint( double* x )
+  {
+    prepareFunction();
+    double res = f( x, numDimensions(), (void*)parameters.get() );
+    std::ostringstream os;
+    for ( unsigned int i=0; i<numDimensions(); i++ ) { os << x[i] << " "; }
+    Debugging( Form( "Result for x[%zu] = ( %s):\n\t%10.6f", numDimensions(), os.str().c_str(), res ) );
+    return res;
   }
 
   void

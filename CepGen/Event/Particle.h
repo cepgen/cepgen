@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "CepGen/Core/utils.h"
+#include <cmath>
 
 namespace CepGen
 {

@@ -4,7 +4,7 @@
 using namespace CepGen::Process;
 
 PPtoWW::PPtoWW() :
-  GenericKTProcess( "pptoww", "gamma,gamma->W+,W-", 4, { Particle::Photon, Particle::Photon }, { Particle::W, Particle::W } )
+  GenericKTProcess( "pptoww", "gamma,gamma->W+,W-", 4, { { Particle::Photon, Particle::Photon } }, { Particle::W, Particle::W } )
 {}
 
 void

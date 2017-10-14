@@ -1,5 +1,7 @@
 #include "FormFactors.h"
 
+#include "CepGen/Core/Exception.h"
+
 #include "CepGen/StructureFunctions/ALLM.h"
 #include "CepGen/StructureFunctions/BlockDurandHa.h"
 #include "CepGen/StructureFunctions/FioreBrasse.h"

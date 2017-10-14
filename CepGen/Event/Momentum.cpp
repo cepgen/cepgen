@@ -1,4 +1,5 @@
 #include "Particle.h"
+#include "CepGen/Core/Exception.h"
 
 namespace CepGen
 {

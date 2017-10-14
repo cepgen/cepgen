@@ -1,8 +1,8 @@
 #ifndef CepGen_Core_Exception_h
 #define CepGen_Core_Exception_h
 
-#include <iomanip>
 #include <sstream>
+#include <stdexcept>
 
 #include "Logger.h"
 
@@ -79,7 +79,7 @@ namespace CepGen
 
       /// Dump the full exception information in a given output stream
       /// \param[inout] os the output stream where the information is dumped
-      inline void dump(std::ostream& os=std::cerr) const {
+      inline void dump( std::ostream& os = Logger::get().outputStream ) const {
         if ( type() == Verbatim ) {
           os << what() << std::endl;
           return;

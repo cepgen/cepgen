@@ -1,5 +1,6 @@
 #include "ChristyBosted.h"
 #include "CepGen/Event/Particle.h"
+#include "CepGen/Core/Exception.h"
 
 namespace CepGen
 {

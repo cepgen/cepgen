@@ -6,6 +6,7 @@
 #include <string>
 
 #include "CepGen/Core/utils.h"
+#include "CepGen/Core/Exception.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Event/Particle.h"
 
@@ -72,7 +73,7 @@ namespace CepGen
   
       /// Dump all the parameters used in this process cross-section computation
       /// or events generation
-      void dump( std::ostream& os=std::cout ) const;
+      void dump( std::ostream& os = Logger::get().outputStream ) const;
 
       /// Incoming particles' momentum (in \f$\text{GeV}/c\f$)
       std::pair<double,double> inp;
