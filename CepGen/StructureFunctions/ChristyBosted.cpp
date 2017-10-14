@@ -218,14 +218,14 @@ namespace CepGen
       return params;
     }
 
-    StructureFunctions
+    ChristyBosted
     ChristyBosted::operator()( double q2, double xbj ) const
     {
       const double mp2 = Constants::mp*Constants::mp;
       const double w2 = mp2 + q2*( 1.-xbj )/xbj;
       const double w_min = Constants::mp+Constants::mpi;
 
-      StructureFunctions cb;
+      ChristyBosted cb;
       if ( sqrt( w2 ) < w_min ) return cb;
 
       //-----------------------------

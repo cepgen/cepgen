@@ -8,7 +8,7 @@ namespace CepGen
 {
   namespace SF
   {
-    class BlockDurandHa
+    class BlockDurandHa : public StructureFunctions
     {
       public:
         struct Parameterisation
@@ -25,7 +25,7 @@ namespace CepGen
           static Parameterisation standard();
         };
         BlockDurandHa( const BlockDurandHa::Parameterisation params = BlockDurandHa::Parameterisation::standard() ) : params_( params ) {}
-        StructureFunctions operator()( double q2, double xbj ) const;
+        BlockDurandHa operator()( double q2, double xbj ) const;
 
       private:
         Parameterisation params_;

@@ -10,7 +10,7 @@ namespace CepGen
 {
   namespace SF
   {
-    class ChristyBosted
+    class ChristyBosted : public StructureFunctions
     {
       public:
         struct Parameterisation
@@ -68,7 +68,7 @@ namespace CepGen
 
         ChristyBosted( const ChristyBosted::Parameterisation& params = ChristyBosted::Parameterisation::standard() ) : params_( params ) {}
 
-        StructureFunctions operator()( double q2, double xbj ) const;
+        ChristyBosted operator()( double q2, double xbj ) const;
 
       private:
         double resmod507( char sf, double w2, double q2 ) const;

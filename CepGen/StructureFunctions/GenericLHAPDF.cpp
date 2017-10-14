@@ -25,10 +25,10 @@ namespace CepGen
 #endif
     }
 
-    StructureFunctions
+    GenericLHAPDF
     GenericLHAPDF::operator()( double q2, double xbj, unsigned short num_flavours ) const
     {
-      StructureFunctions pdf;
+      GenericLHAPDF pdf;
 
       if ( num_flavours == 0 || num_flavours > 6 ) return pdf;
 

@@ -5,13 +5,12 @@
 #include "SigmaRatio.h"
 
 #include <vector>
-#include <memory>
 
 namespace CepGen
 {
   namespace SF
   {
-    class ALLM
+    class ALLM : public StructureFunctions
     {
       public:
         class Parameterisation
@@ -51,7 +50,7 @@ namespace CepGen
 
         ALLM( const ALLM::Parameterisation& param = ALLM::Parameterisation::allm97(), const SigmaRatio& sr = E143Ratio() ) :
           params_( param ), ratio_comp_( sr ) {}
-        StructureFunctions operator()( double q2, double xbj ) const;
+        ALLM operator()( double q2, double xbj ) const;
 
       private:
         Parameterisation params_;

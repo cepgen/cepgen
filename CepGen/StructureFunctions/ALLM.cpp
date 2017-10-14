@@ -126,7 +126,7 @@ namespace CepGen
       return p;
     }
 
-    StructureFunctions
+    ALLM
     ALLM::operator()( double q2, double xbj ) const
     {
       const double factor = q2/( q2+params_.m02 );
@@ -148,7 +148,7 @@ namespace CepGen
       const double F2_Pom = cpom*pow( xp, apom )*pow( 1.-xbj, bpom ),
                    F2_Reg = creg*pow( xr, areg )*pow( 1.-xbj, breg );
 
-      StructureFunctions allm;
+      ALLM allm;
       allm.F2 = factor * ( F2_Pom + F2_Reg );
 
       const double R = ratio_comp_( q2, xbj );
