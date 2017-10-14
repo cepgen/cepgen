@@ -29,7 +29,7 @@ test_vegas:
     - make test_vegas
     - test/test_vegas
   when: on_success
-  allow_failure: true
+  allow_failure: false
 
 test_cross_sections:
   stage: test
