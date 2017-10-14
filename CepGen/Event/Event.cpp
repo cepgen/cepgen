@@ -1,5 +1,7 @@
 #include "Event.h"
 
+#include <algorithm>
+
 namespace CepGen
 {
   Event::Event() :

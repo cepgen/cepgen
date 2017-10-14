@@ -1,4 +1,5 @@
 #include "HepMCHandler.h"
+#include "CepGen/Parameters.h"
 
 using namespace CepGen::OutputHandler;
 

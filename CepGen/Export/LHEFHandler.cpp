@@ -1,5 +1,7 @@
 #include "LHEFHandler.h"
 
+#include "CepGen/Parameters.h"
+
 #ifdef HEPMC_VERSION3
 
 namespace OutputHandler

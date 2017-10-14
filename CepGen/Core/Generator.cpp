@@ -1,5 +1,7 @@
 #include "CepGen/Generator.h"
 
+#include <fstream>
+
 namespace CepGen
 {
   Generator::Generator() :

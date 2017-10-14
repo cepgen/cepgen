@@ -1,9 +1,6 @@
 #ifndef CepGen_Event_Event_h
 #define CepGen_Event_Event_h
 
-#include <vector>
-#include <algorithm>
-
 #include "Particle.h"
 
 namespace CepGen

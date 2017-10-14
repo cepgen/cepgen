@@ -17,9 +17,6 @@
 #endif
 
 #include "HepMC/GenEvent.h"
-#include "HepMC/GenVertex.h"
-#include "HepMC/GenCrossSection.h"
-#include "HepMC/GenParticle.h"
 
 #include <memory>
 

@@ -1,14 +1,10 @@
 #ifndef CepGen_Generator_h
 #define CepGen_Generator_h
 
-#include <fstream>
 #include <sstream>
-#include <string>
-#include <ctime>
 #include <memory>
 
 #include "CepGen/Core/Vegas.h"
-#include "CepGen/Core/Timer.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 

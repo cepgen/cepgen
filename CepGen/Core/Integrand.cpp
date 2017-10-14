@@ -1,4 +1,10 @@
-#include "CepGen/Generator.h"
+#include "CepGen/Core/Timer.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Event/Particle.h"
+#include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Parameters.h"
+
+#include <sstream>
 
 namespace CepGen
 {

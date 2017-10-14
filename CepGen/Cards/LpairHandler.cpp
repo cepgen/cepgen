@@ -1,5 +1,7 @@
 #include "LpairHandler.h"
 
+#include <fstream>
+
 namespace CepGen
 {
   namespace Cards

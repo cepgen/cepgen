@@ -1,18 +1,7 @@
 #ifndef CepGen_Processes_GamGamLL_h
 #define CepGen_Processes_GamGamLL_h
 
-#define PROCESS_DESCRIPTION "Two-photon production of lepton pairs"
-
-#include <iomanip>
-#include <algorithm>
-#include <string>
-#include <cmath>
-#include <ctime>
-#include <cstdlib>
-#include <map>
-
 #include "GenericProcess.h"
-#include "CepGen/Physics/FormFactors.h"
 
 namespace CepGen
 {

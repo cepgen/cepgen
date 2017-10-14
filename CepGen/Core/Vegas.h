@@ -1,8 +1,6 @@
 #ifndef CepGen_Core_Vegas_h
 #define CepGen_Core_Vegas_h
 
-#include <fstream>
-#include <cstdio> // remove (DEBUG)
 #include <gsl/gsl_monte_vegas.h>
 #include <gsl/gsl_rng.h>
 
