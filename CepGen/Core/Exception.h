@@ -54,7 +54,7 @@ namespace CepGen
       inline Exception( const char* from, const char* desc, ExceptionType type=Undefined, const int id=0 ) :
         std::runtime_error( desc ), from_( from ), type_( type ), error_num_( id ) {}
 
-      inline ~Exception() {
+      inline ~Exception() throw() {
         if ( type() == FatalError ) exit(0);
         // we stop this process' execution on fatal exception
       }

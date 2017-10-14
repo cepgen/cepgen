@@ -122,13 +122,13 @@ namespace CepGen
       Parameterisation params;
 
       params.m0 = 4.2802;
-      params.continuum.transverse = {
-        ContinuumParameters::DirectionParameters( 246.06, { 0.067469, 1.3501, 0.12054, -0.0038495 } ),
-        ContinuumParameters::DirectionParameters( -89.360, { 0.20977, 1.5715, 0.090736, 0.010362 } )
-      };
-      params.continuum.longitudinal = {
-        ContinuumParameters::DirectionParameters( 86.746, { 0., 4.0294, 3.1285, 0.33403, 4.9623 } )
-      };
+      params.continuum.transverse = { {
+        ContinuumParameters::DirectionParameters( 246.06, { { 0.067469, 1.3501, 0.12054, -0.0038495 } } ),
+        ContinuumParameters::DirectionParameters( -89.360, { { 0.20977, 1.5715, 0.090736, 0.010362 } } )
+      } };
+      params.continuum.longitudinal = { {
+        ContinuumParameters::DirectionParameters( 86.746, { { 0., 4.0294, 3.1285, 0.33403, 4.9623 } } )
+      } };
 
       //--- P33(1232)
       ResonanceParameters p33;
@@ -138,7 +138,7 @@ namespace CepGen
       p33.x0 = 0.14462;
       p33.mass = 1.2298;
       p33.width = 0.13573;
-      p33.fit_parameters = { 4.2291, 1.2598, 2.1242, 19.910, 0.22587 };
+      p33.fit_parameters = { { 4.2291, 1.2598, 2.1242, 19.910, 0.22587 } };
       p33.A0_T = 7.7805;
       p33.A0_L = 29.414;
       params.resonances.emplace_back( p33 );
@@ -150,7 +150,7 @@ namespace CepGen
       s11_1535.x0 = 0.215;
       s11_1535.mass = 1.5304;
       s11_1535.width = 0.220;
-      s11_1535.fit_parameters = { 6823.2, 33521., 2.5686, 0., 0. };
+      s11_1535.fit_parameters = { { 6823.2, 33521., 2.5686, 0., 0. } };
       s11_1535.A0_T = 6.3351;
       s11_1535.A0_L = 0.;
       params.resonances.emplace_back( s11_1535 );
@@ -162,7 +162,7 @@ namespace CepGen
       d13.x0 = 0.215;
       d13.mass = 1.5057;
       d13.width = 0.082956;
-      d13.fit_parameters = { 21.240, 0.055746, 2.4886, 97.046, 0.31042 };
+      d13.fit_parameters = { { 21.240, 0.055746, 2.4886, 97.046, 0.31042 } };
       d13.A0_T = 0.60347;
       d13.A0_L = 157.92;
       params.resonances.emplace_back( d13 );
@@ -174,7 +174,7 @@ namespace CepGen
       f15.x0 = 0.215;
       f15.mass = 1.6980;
       f15.width = 0.095782;
-      f15.fit_parameters = { -0.28789, 0.18607, 0.063534, 0.038200, 1.2182 };
+      f15.fit_parameters = { { -0.28789, 0.18607, 0.063534, 0.038200, 1.2182 } };
       f15.A0_T = 2.3305;
       f15.A0_L = 4.2160;
       params.resonances.emplace_back( f15 );
@@ -186,7 +186,7 @@ namespace CepGen
       s11_1650.x0 = 0.215;
       s11_1650.mass = 1.6650;
       s11_1650.width = 0.10936;
-      s11_1650.fit_parameters = { -0.56175, 0.38964, 0.54883, 0.31393, 2.9997 };
+      s11_1650.fit_parameters = { { -0.56175, 0.38964, 0.54883, 0.31393, 2.9997 } };
       s11_1650.A0_T = 1.9790;
       s11_1650.A0_L = 13.764;
       params.resonances.emplace_back( s11_1650 );
@@ -198,7 +198,7 @@ namespace CepGen
       p11.x0 = 0.215;
       p11.mass = 1.4333;
       p11.width = 0.37944;
-      p11.fit_parameters = { 46.213, 0.19221, 1.9141, 0.053743, 1.3091 };
+      p11.fit_parameters = { { 46.213, 0.19221, 1.9141, 0.053743, 1.3091 } };
       p11.A0_T = 0.022506;
       p11.A0_L = 5.5124;
       params.resonances.emplace_back( p11 );
@@ -210,7 +210,7 @@ namespace CepGen
       f37.x0 = 0.215;
       f37.mass = 1.9341;
       f37.width = 0.380;
-      f37.fit_parameters = { 0., 0., 1., 1.8951, 0.51376 };
+      f37.fit_parameters = { { 0., 0., 1., 1.8951, 0.51376 } };
       f37.A0_T = 3.4187;
       f37.A0_L = 1.8951;
       params.resonances.emplace_back( f37 );

@@ -8,7 +8,7 @@ namespace CepGen
   /// A collection of expression/variable with the associated functional
   struct TamingFunction
   {
-    TamingFunction( const std::string& var, const std::string& expr ) : variable( var ), expression( expr ), function( expr, { variable } ) {}
+    TamingFunction( const std::string& var, const std::string& expr ) : variable( var ), expression( expr ), function( expr, { { variable } } ) {}
     std::string variable, expression;
     Functional<1> function;
   };

@@ -52,7 +52,7 @@ namespace CepGen
       /// \param[in] x Variable value
       double eval( double x ) const {
         static_assert( N==1, "This function only works with single-dimensional functions" );
-        return eval( std::array<double,1>{ x } );
+        return eval( std::array<double,1>{ { x } } );
       }
       /// Compute the functional for a given value of the variables
       /// \param[in] x Variables values

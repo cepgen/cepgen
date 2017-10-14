@@ -67,7 +67,7 @@ namespace CepGen
     GenericKTProcess::setKinematics( const Kinematics& kin )
     {
       cuts_ = kin;
-      log_qmin_ = -10.; // FIXME //log_qmin_ = std::log( std::sqrt( cuts_.q2min ) );
+      log_qmin_ = -10.; // FIXME //log_qmin_ = log( sqrt( cuts_.q2min ) );
       log_qmax_ = log( cuts_.initial_cuts[Cuts::qt].max() );
     }
 

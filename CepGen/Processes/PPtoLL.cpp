@@ -4,7 +4,7 @@
 using namespace CepGen::Process;
 
 PPtoLL::PPtoLL() :
-  GenericKTProcess( "pptoll", "gamma,gamma->l+,l-", 4, { Particle::Photon, Particle::Proton }, { Particle::Muon, Particle::Muon } )
+  GenericKTProcess( "pptoll", "gamma,gamma->l+,l-", 4, { { Particle::Photon, Particle::Proton } }, { Particle::Muon, Particle::Muon } )
 {}
 
 void

@@ -89,7 +89,6 @@ namespace CepGen
       /// Integration grid size parameter
       static constexpr unsigned short mbin_ = 3;
       static constexpr double inv_mbin_ = 1./mbin_;
-      double inv_npoin_;
 
       /// Selected bin at which the function will be evaluated
       int vegas_bin_;

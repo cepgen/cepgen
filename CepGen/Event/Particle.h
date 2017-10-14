@@ -323,16 +323,16 @@ namespace CepGen
       void setEnergy( double e=-1. );
       /// Get the particle's energy (in GeV)
       inline double energy() const {
-        return ( momentum_.energy()<0. ) ? std::sqrt( mass2()+momentum_.p2() ) : momentum_.energy();
+        return ( momentum_.energy() < 0. ) ? sqrt( mass2()+momentum_.p2() ) : momentum_.energy();
       };
       /// Get the particle's squared energy (in \f$\textrm{GeV}^\textrm{2}\f$)
       inline double energy2() const { return energy()*energy(); };
-      /// Is this particle a valid particle which can be used for kinematic computations ?
+      /// Is this particle a valid particle which can be used for kinematic computations?
       bool valid();
 
       // --- particle relations
 
-      /// Is this particle a primary particle ?
+      /// Is this particle a primary particle?
       inline bool primary() const { return mothers_.empty(); }
       /**
        * \brief Set the mother particle
