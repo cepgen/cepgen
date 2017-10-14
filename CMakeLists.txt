@@ -46,10 +46,6 @@ if(HEPMC_LIB)
   list(APPEND CEPGEN_EXTERNAL_REQS ${HEPMC_LIB})
   add_definitions(-DLIBHEPMC)
 endif()
-if(EXISTS $ENV{has_schaefer})
-  message(STATUS "Schaefer's F2 found!")
-  list(APPEND CEPGEN_EXTERNAL_REQS SchaeferF2)
-endif()
 
 #----- build all the intermediate objects
 
