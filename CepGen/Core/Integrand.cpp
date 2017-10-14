@@ -1,4 +1,5 @@
 #include "CepGen/Core/Timer.h"
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/Kinematics.h"

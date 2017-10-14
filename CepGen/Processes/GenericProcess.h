@@ -73,7 +73,7 @@ namespace CepGen
          */
         void setPoint( const unsigned int ndim, double* x );
         /// Dump the evaluated point's coordinates in the standard output stream
-        void dumpPoint( const ExceptionType& et );
+        void dumpPoint();
         /// Complete list of Particle with their role in the process for the point considered in the phase space, returned as an Event object.
         /// \return Event object containing all the generated Particle objects
         inline std::shared_ptr<Event> event() { return event_; }

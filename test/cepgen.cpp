@@ -1,9 +1,12 @@
 #include <iostream>
 
 #include "CepGen/Generator.h"
+
 #include "CepGen/Cards/LpairHandler.h"
 #include "CepGen/Cards/ConfigHandler.h"
 #include "CepGen/Core/Logger.h"
+#include "CepGen/Core/Exception.h"
+
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 using namespace std;

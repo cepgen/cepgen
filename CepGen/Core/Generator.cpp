@@ -2,6 +2,7 @@
 #include "CepGen/Parameters.h"
 
 #include "CepGen/Core/Vegas.h"
+#include "CepGen/Core/Exception.h"
 
 #include "CepGen/Event/Event.h"
 

@@ -1,4 +1,5 @@
 #include "LpairHandler.h"
+#include "CepGen/Core/Exception.h"
 
 #include <fstream>
 

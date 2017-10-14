@@ -1,4 +1,5 @@
 #include "CepGen/Core/Functional.h"
+#include "CepGen/Core/Exception.h"
 
 #include <string>
 #include <iostream>

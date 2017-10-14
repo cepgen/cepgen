@@ -1,4 +1,5 @@
 #include "PPtoLL.h"
+#include "CepGen/Core/Exception.h"
 #include <assert.h>
 
 using namespace CepGen::Process;

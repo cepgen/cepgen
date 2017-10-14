@@ -1,5 +1,6 @@
 #include "HepMCHandler.h"
 #include "CepGen/Parameters.h"
+#include "CepGen/Core/Exception.h"
 
 #ifdef LIBHEPMC
 

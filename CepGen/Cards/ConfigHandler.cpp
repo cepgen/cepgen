@@ -1,4 +1,5 @@
 #include "ConfigHandler.h"
+#include "CepGen/Core/Exception.h"
 
 #ifdef LIBCONFIG
 

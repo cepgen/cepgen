@@ -1,5 +1,6 @@
 #include "GenericKTProcess.h"
 #include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
+#include "CepGen/Core/Exception.h"
 
 namespace CepGen
 {
@@ -17,6 +18,12 @@ namespace CepGen
 
     GenericKTProcess::~GenericKTProcess()
     {}
+
+    void
+    GenericKTProcess::prepareKTKinematics()
+    {
+      DebuggingInsideLoop("Dummy kinematics prepared!");
+    }
 
     void
     GenericKTProcess::addEventContent()

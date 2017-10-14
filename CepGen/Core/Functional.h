@@ -4,6 +4,7 @@
 #include <vector>
 #include <array>
 #include "CepGen/Core/utils.h"
+#include "CepGen/Core/Exception.h"
 
 #ifdef MUPARSER
 #include <muParser.h>

@@ -3,8 +3,8 @@
 
 #include "Handler.h"
 
-#include <string>
-#include <map>
+using std::string;
+using std::map;
 
 namespace CepGen
 {
