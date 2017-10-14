@@ -9,21 +9,28 @@ using namespace std;
 int
 main( int argc, char* argv[] )
 {
-  const double exact = 1.3932039296856768591842462603255;
-  CepGen::Logger::get().level = CepGen::Logger::Nothing;
+  //CepGen::Logger::get().level = CepGen::Logger::Nothing;
 
   CepGen::Generator mg;
-
-  mg.parameters->setProcess( new CepGen::Process::TestProcess );
   mg.parameters->vegas.ncvg = 500000;
   //mg.parameters->vegas.itvg = 5;
 
   double result, error;
-  mg.computeXsection( result, error );
 
-  if ( fabs( exact - result ) > 2.0 * error ) throw CepGen::Exception( __PRETTY_FUNCTION__, Form( "pull = %.5e", fabs( exact-result )/error ), CepGen::FatalError );
-
-  cout << "Test 1 passed!" << endl;
+  { // test 1
+    const double exact = 1.3932039296856768591842462603255;
+    mg.parameters->setProcess( new CepGen::Process::TestProcess );
+    mg.computeXsection( result, error );
+    if ( fabs( exact - result ) > 2.0 * error ) throw CepGen::Exception( __PRETTY_FUNCTION__, Form( "pull = %.5e", fabs( exact-result )/error ), CepGen::FatalError );
+    cout << "Test 1 passed!" << endl;
+  }
+  /*{ // test 2 // functional bug to be solved!!
+    const double exact = 2./3.;
+    mg.parameters->setProcess( new CepGen::Process::TestProcess( "x^2+y^2", { "x", "y" } ) );
+    mg.computeXsection( result, error );
+    if ( fabs( exact - result ) > 2.0 * error ) throw CepGen::Exception( __PRETTY_FUNCTION__, Form( "pull = %.5e", fabs( exact-result )/error ), CepGen::FatalError );
+    cout << "Test 2 passed!" << endl;
+  }*/
 
   return 0;
 }
