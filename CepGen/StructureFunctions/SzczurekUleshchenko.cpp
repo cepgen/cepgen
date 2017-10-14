@@ -6,7 +6,7 @@ namespace CepGen
 {
   namespace SF
   {
-    StructureFunctions
+    SzczurekUleshchenko
     SzczurekUleshchenko::operator()( double q2, double xbj ) const
     {
 #ifndef GRVPDF
@@ -31,7 +31,7 @@ namespace CepGen
                           + 1./9.*( xdv + 2.*xds )
                           + 1./9.*(       2.*xss );
 
-      StructureFunctions su;
+      SzczurekUleshchenko su;
       su.F2 = F2_aux * q2 / amu2; // F2 corrected for low Q^2 behaviour
 
       return su;

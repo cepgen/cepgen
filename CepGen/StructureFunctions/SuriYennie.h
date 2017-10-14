@@ -7,7 +7,7 @@ namespace CepGen
 {
   namespace SF
   {
-    class SuriYennie
+    class SuriYennie : public StructureFunctions
     {
       public:
         struct Parameterisation {
@@ -19,8 +19,9 @@ namespace CepGen
         };
 
         SuriYennie( const SuriYennie::Parameterisation& param = SuriYennie::Parameterisation::standard() ) : params_( param ) {}
-        StructureFunctions operator()( double q2, double xbj ) const;
+        SuriYennie operator()( double q2, double xbj ) const;
 
+        double FE, FM;
       private:
         Parameterisation params_;
     };

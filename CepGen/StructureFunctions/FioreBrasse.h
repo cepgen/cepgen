@@ -4,14 +4,13 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
-#include <complex>
 #include <vector>
 
 namespace CepGen
 {
   namespace SF
   {
-    class FioreBrasse
+    class FioreBrasse : public StructureFunctions
     {
       public:
         struct Parameterisation
@@ -36,8 +35,10 @@ namespace CepGen
         /// \param[in] q2 Squared 4-momentum transfer
         /// \param[in] xbj Bjorken's x
         /// \cite Brasse1976413
-        StructureFunctions operator()( double q2, double xbj ) const;
-        StructureFunctions operator()( double q2, double xbj, bool old ) const;
+        FioreBrasse operator()( double q2, double xbj ) const;
+        FioreBrasse operator()( double q2, double xbj, bool old ) const;
+
+        double W1, W2;
 
       private:
         Parameterisation params_;

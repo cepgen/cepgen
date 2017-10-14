@@ -2,13 +2,15 @@
 #define CepGen_StructureFunctions_ALLM_h
 
 #include "StructureFunctions.h"
+#include "SigmaRatio.h"
+
 #include <vector>
 
 namespace CepGen
 {
   namespace SF
   {
-    class ALLM
+    class ALLM : public StructureFunctions
     {
       public:
         class Parameterisation
@@ -23,6 +25,8 @@ namespace CepGen
             };
 
           public:
+            Parameterisation() :
+              m02( 0. ), mp2( 0. ), mr2( 0. ), q02( 0. ), lambda2( 0. ) {}
             /// Pre-HERA data fit (694 data points)
             static Parameterisation allm91();
             /// Fixed target and HERA photoproduction total cross sections (1356 points)
@@ -44,11 +48,13 @@ namespace CepGen
             double lambda2;
         };
 
-        ALLM( const ALLM::Parameterisation& param = ALLM::Parameterisation::allm97() ) : params_( param ) {}
-        StructureFunctions operator()( double q2, double xbj ) const;
+        ALLM( const ALLM::Parameterisation& param = ALLM::Parameterisation::allm97(), const SigmaRatio& sr = E143Ratio() ) :
+          params_( param ), ratio_comp_( sr ) {}
+        ALLM operator()( double q2, double xbj ) const;
 
       private:
         Parameterisation params_;
+        const SigmaRatio& ratio_comp_;
     };
   }
 }
