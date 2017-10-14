@@ -22,7 +22,7 @@ namespace CepGen
     StructureFunctions
     Schaefer::operator()( double q2, double xbj ) const
     {
-      StructureFunctions luxlike;
+      Schaefer luxlike;
 #ifndef SchaeferF2
       FatalError( "LUXlike structure functions cannot be computed "
                   "as the Fortran subroutine is not linked to this instance!" );

@@ -20,7 +20,7 @@ namespace CepGen
 {
   namespace SF
   {
-    class Schaefer
+    class Schaefer : public StructureFunctions
     {
       public:
         Schaefer();
