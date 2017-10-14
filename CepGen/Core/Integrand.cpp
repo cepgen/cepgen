@@ -42,12 +42,12 @@ namespace CepGen
           case Kinematics::ElectronProton: default: { InError( Form( "Process mode %d not yet handled!", (int)p->kinematics.mode ) ); }
           case Kinematics::ElasticElastic: break; // nothing to change in the event
           case Kinematics::ElasticInelastic:
-            op2.setPdgId( Particle::uQuark ); break;
+            op2.setPdgId( Particle::uQuark, 1 ); break;
           case Kinematics::InelasticElastic: // set one of the outgoing protons to be fragmented
-            op1.setPdgId( Particle::uQuark ); break;
+            op1.setPdgId( Particle::uQuark, 1 ); break;
           case Kinematics::InelasticInelastic: // set both the outgoing protons to be fragmented
-            op1.setPdgId( Particle::uQuark );
-            op2.setPdgId( Particle::uQuark );
+            op1.setPdgId( Particle::uQuark, 1 );
+            op2.setPdgId( Particle::uQuark, 1 );
             break;
         }
 

@@ -3,6 +3,8 @@
 
 #include "ExportHandler.h"
 
+#ifdef LIBHEPMC
+
 #include "HepMC/Version.h"
 
 #ifndef HEPMC_VERSION_CODE // HepMC v2
@@ -62,4 +64,5 @@ namespace CepGen
   }
 }
 
+#endif
 #endif

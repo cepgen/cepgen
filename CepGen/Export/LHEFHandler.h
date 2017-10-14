@@ -1,9 +1,15 @@
 #ifndef CepGen_Export_LHEFHandler_h
 #define CepGen_Export_LHEFHandler_h
 
+#ifndef LIBHEPMC
+#error "HepMC is not linked to this instance!"
+#endif
+
 #include "HepMCHandler.h"
 
-#ifdef HEPMC_VERSION3
+#ifndef HEPMC_VERSION3
+#error "HepMC v3 is required for the LHEF export!"
+#else
 
 #include "HepMC/LHEF.h"
 #include "CepGen/Event/Event.h"
