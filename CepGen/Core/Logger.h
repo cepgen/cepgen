@@ -2,7 +2,6 @@
 #define CepGen_Core_Logger_h
 
 #include <iostream>
-#include <memory>
 
 namespace CepGen
 {

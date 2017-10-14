@@ -10,7 +10,7 @@ else()
 endif()
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake)
 set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/CepGen)
-set(CEPGEN_LIBRARIES CepGenCore CepGenEvent CepGenPhysics CepGenProcesses CepGenStructureFunctions)
+set(CEPGEN_LIBRARIES CepGenCore CepGenEvent CepGenPhysics CepGenProcesses CepGenStructureFunctions CepGenExporter)
 
 #----- define all individual modules to be built beforehand
 
@@ -40,6 +40,12 @@ if(LHAPDF)
   add_definitions(-DLIBLHAPDF)
   list(APPEND CEPGEN_EXTERNAL_REQS ${LHAPDF})
 endif()
+if(HEPMC_LIB)
+  message(STATUS "HepMC found in ${HEPMC_INCLUDE}")
+  include_directories(${HEPMC_INCLUDE})
+  list(APPEND CEPGEN_EXTERNAL_REQS ${HEPMC_LIB})
+  add_definitions(-DLIBHEPMC)
+endif()
 if(EXISTS $ENV{has_schaefer})
   message(STATUS "Schaefer's F2 found!")
   list(APPEND CEPGEN_EXTERNAL_REQS SchaeferF2)
@@ -53,14 +59,6 @@ foreach(_module ${CEPGEN_MODULES})
   include_directories(${CEPGEN_SOURCE_DIR}/${_module})
   add_subdirectory(${CEPGEN_SOURCE_DIR}/${_module})
 endforeach()
-
-#----- optionally include the exports utils if HepMC is found
-
-if(HEPMC_LIB)
-  message(STATUS "HepMC found in ${HEPMC_INCLUDE}")
-  include_directories(${HEPMC_INCLUDE})
-  list(APPEND CEPGEN_LIBRARIES CepGenExporter)
-endif()
 
 #----- copy the input cards and other files
 

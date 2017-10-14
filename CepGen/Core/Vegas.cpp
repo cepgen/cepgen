@@ -1,5 +1,7 @@
 #include "Vegas.h"
 
+#include <fstream>
+
 namespace CepGen
 {
   Vegas::Vegas( const unsigned int dim, double f_( double*, size_t, void* ), Parameters* param ) :

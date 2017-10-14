@@ -1,4 +1,7 @@
 #include "HepMCHandler.h"
+#include "CepGen/Parameters.h"
+
+#ifdef LIBHEPMC
 
 using namespace CepGen::OutputHandler;
 
@@ -119,3 +122,5 @@ HepMCHandler::fillEvent( const Event* evt )
 
   event_num_++;
 }
+
+#endif

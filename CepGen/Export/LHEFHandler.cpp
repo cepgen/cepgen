@@ -1,6 +1,12 @@
-#include "LHEFHandler.h"
+#ifdef LIBHEPMC
+
+#include "ExportHandler.h"
 
 #ifdef HEPMC_VERSION3
+
+#include "LHEFHandler.h"
+
+#include "CepGen/Parameters.h"
 
 namespace OutputHandler
 {
@@ -57,5 +63,7 @@ namespace OutputHandler
     lhe_output_->writeEvent();
   }
 }
+
+#endif
 
 #endif
