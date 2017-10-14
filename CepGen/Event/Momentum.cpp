@@ -1,5 +1,9 @@
 #include "Particle.h"
+
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/utils.h"
+
+#include <math.h>
 
 namespace CepGen
 {
@@ -145,6 +149,12 @@ namespace CepGen
   //--- various setters
 
   void
+  Momentum::setMass2( double m2 )
+  {
+    energy_ = sqrt( p2()+m2 );
+  }
+
+  void
   Momentum::setP( double px, double py, double pz, double e )
   {
     setP( px, py, pz );
@@ -203,6 +213,24 @@ namespace CepGen
   {
     if ( mass2() >= 0. ) return sqrt( mass2() );
     return -sqrt( -mass2() );
+  }
+
+  double
+  Momentum::theta() const
+  {
+    return atan2( pt(), pz() );
+  }
+
+  double
+  Momentum::phi() const
+  {
+    return atan2( py(), px() );
+  }
+
+  double
+  Momentum::pt() const
+  {
+    return sqrt( pt2() );
   }
 
   double
