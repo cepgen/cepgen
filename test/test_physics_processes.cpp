@@ -65,8 +65,8 @@ main( int argc, char* argv[] )
   mg.parameters->kinematics.setSqrtS( 13.e3 );
   mg.parameters->kinematics.central_cuts[CepGen::Cuts::eta_single].in( -2.5, 2.5 );
   mg.parameters->kinematics.remnant_cuts[CepGen::Cuts::mass].max() = 1000.;
-  //mg.parameters->vegas.ncvg = 50000;
-  mg.parameters->vegas.itvg = 5;
+  //mg.parameters->integrator.ncvg = 50000;
+  mg.parameters->integrator.itvg = 5;
 
   Information( Form( "Initial configuration time: %.3f ms", tmr.elapsed()*1.e3 ) );
   tmr.reset();

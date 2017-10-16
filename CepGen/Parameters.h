@@ -2,7 +2,6 @@
 #define CepGen_Parameters_h
 
 #include "CepGen/Processes/GenericProcess.h"
-#include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Core/TamingFunction.h"
 #include "CepGen/Core/Integrator.h"
 
@@ -10,6 +9,7 @@
 
 namespace CepGen
 {
+  class Kinematics;
   /// List of parameters used to start and run the simulation job
   class Parameters {
     public:

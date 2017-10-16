@@ -55,7 +55,7 @@ namespace CepGen
       }
       //----- integration
       for ( unsigned short i = 0; i < input_params_->integrator.itvg; i++ ) {
-        res = gsl_monte_vegas_integrate( function_.get(), &x_low[0], &x_up[0], function_->dim, input_params_->integrator.ncvg, rng_, veg_state, &result, &abserr );
+        res = gsl_monte_vegas_integrate( function_.get(), &x_low[0], &x_up[0], function_->dim, 0.2 * input_params_->integrator.ncvg, rng_, veg_state, &result, &abserr );
         PrintMessage( Form( ">> Iteration %2d: average = %10.6f   sigma = %10.6f   chi2 = %4.3f", i+1, result, abserr, gsl_monte_vegas_chisq( veg_state ) ) );
       }
     }
