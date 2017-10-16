@@ -4,6 +4,7 @@
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Core/TamingFunction.h"
+#include "CepGen/Core/Integrator.h"
 
 #include <memory>
 
@@ -42,9 +43,10 @@ namespace CepGen
       //----- VEGAS
 
       /// Collection of integrator parameters
-      struct Integrator
+      struct IntegratorParameters
       {
-        Integrator() : ncvg( 100000 ), itvg( 10 ), npoints( 100 ), first_run( true ), seed( 0 ) {}
+        IntegratorParameters() : type( Integrator::Vegas ), ncvg( 100000 ), itvg( 10 ), npoints( 100 ), first_run( true ), seed( 0 ) {}
+        Integrator::Type type;
         unsigned int ncvg; // ??
         /// Maximal number of iterations to perform by VEGAS
         unsigned int itvg;
@@ -56,7 +58,7 @@ namespace CepGen
         unsigned long seed;
       };
       /// Integrator parameters
-      Integrator integrator;
+      IntegratorParameters integrator;
 
       //----- events generation
 

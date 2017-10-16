@@ -26,7 +26,7 @@ namespace CepGen
        * \param[in] f_ Function to be integrated
        * \param[inout] inParam_ Run parameters to define the phase space on which this integration is performed (embedded in an Parameters object)
        */
-      Integrator( const unsigned int dim_, double f_(double*,size_t,void*), Parameters* inParam_, const Type& type = Vegas );
+      Integrator( const unsigned int dim_, double f_(double*,size_t,void*), Parameters* inParam_ );
       /// Class destructor
       ~Integrator();
       /**
@@ -117,6 +117,7 @@ namespace CepGen
       /// Number of iterations for the integration
       unsigned int num_iter_;
   };
+  std::ostream& operator<<( std::ostream&, const Integrator::Type& );
 }
 
 #endif

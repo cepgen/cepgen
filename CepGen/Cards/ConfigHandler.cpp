@@ -125,6 +125,11 @@ namespace CepGen
     ConfigHandler::parseIntegrator( const libconfig::Setting& integr )
     {
       try {
+        if ( integr.exists( "algorithm" ) ) {
+          const std::string algo = integr["algorithm"];
+          if ( algo == "Vegas" ) params_.integrator.type = Integrator::Vegas;
+          else if ( algo == "MISER" ) params_.integrator.type = Integrator::MISER;
+        }
         if ( integr.exists( "num_points" ) ) params_.integrator.npoints = (int)integr["num_points"];
         if ( integr.exists( "num_integration_calls" ) ) params_.integrator.ncvg = (int)integr["num_integration_calls"];
         if ( integr.exists( "num_integration_iterations" ) ) params_.integrator.itvg = (int)integr["num_integration_iterations"];
@@ -221,6 +226,8 @@ namespace CepGen
     ConfigHandler::writeIntegrator( const Parameters* params, libconfig::Setting& root )
     {
       libconfig::Setting& integr = root.add( "integrator", libconfig::Setting::TypeGroup );
+      std::ostringstream os; os << params->integrator.type;
+      integr.add( "algorithm", libconfig::Setting::TypeString ) = os.str();
       integr.add( "num_points", libconfig::Setting::TypeInt ) = (int)params->integrator.npoints;
       integr.add( "num_integration_calls", libconfig::Setting::TypeInt ) = (int)params->integrator.ncvg;
       integr.add( "num_integration_iterations", libconfig::Setting::TypeInt ) = (int)params->integrator.itvg;

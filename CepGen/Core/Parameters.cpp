@@ -61,7 +61,10 @@ namespace CepGen
       << std::setw( wt ) << "Verbosity level " << Logger::get().level << std::endl
       << std::endl
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Integration parameters " ) : "Integration parameters" ) << std::setfill( ' ' ) << std::endl
-      << std::endl
+      << std::endl;
+    std::ostringstream int_algo; int_algo << integrator.type;
+    os
+      << std::setw( wt ) << "Integration algorithm" << ( pretty ? boldify( int_algo.str().c_str() ) : int_algo.str() ) << std::endl
       << std::setw( wt ) << "Maximum number of iterations" << ( pretty ? boldify( integrator.itvg ) : std::to_string( integrator.itvg ) ) << std::endl
       << std::setw( wt ) << "Number of function calls" << integrator.ncvg << std::endl
       << std::setw( wt ) << "Number of points to try per bin" << integrator.npoints << std::endl

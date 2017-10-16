@@ -12,8 +12,10 @@ main( int argc, char* argv[] )
   CepGen::Logger::get().level = CepGen::Logger::Nothing;
 
   CepGen::Generator mg;
-  mg.parameters->vegas.ncvg = 500000;
-  //mg.parameters->vegas.itvg = 5;
+  mg.parameters->integrator.ncvg = 500000;
+  //mg.parameters->integrator.itvg = 5;
+  if ( argc > 1 && string( argv[1] ) == "vegas" ) mg.parameters->integrator.type = CepGen::Integrator::Vegas;
+  if ( argc > 1 && string( argv[1] ) == "miser" ) mg.parameters->integrator.type = CepGen::Integrator::MISER;
 
   double result, error;
 

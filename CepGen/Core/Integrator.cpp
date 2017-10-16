@@ -6,8 +6,8 @@
 
 namespace CepGen
 {
-  Integrator::Integrator( const unsigned int dim, double f_( double*, size_t, void* ), Parameters* param, const Type& type ) :
-    algorithm_( type ),
+  Integrator::Integrator( const unsigned int dim, double f_( double*, size_t, void* ), Parameters* param ) :
+    algorithm_( param->integrator.type ),
     ps_bin_( 0 ), correc_( 0. ), correc2_( 0. ),
     input_params_( param ),
     grid_prepared_( false ), gen_prepared_( false ),
@@ -320,6 +320,16 @@ namespace CepGen
     }
     gen_prepared_ = true;
     Information( "Grid prepared! Now launching the production." );
+  }
+
+  std::ostream&
+  operator<<( std::ostream& os, const Integrator::Type& type )
+  {
+    switch ( type ) {
+      case Integrator::Vegas: return os << "Vegas";
+      case Integrator::MISER: return os << "MISER";
+    }
+    return os;
   }
 }
 

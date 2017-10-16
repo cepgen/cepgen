@@ -37,6 +37,9 @@ namespace CepGen
       else if ( proc_name_ == "pptoww" ) params_.setProcess( new Process::PPtoWW() );
       else FatalError( Form( "Unrecognised process name: %s", proc_name_.c_str() ) );
 
+      if      ( integr_type_ == "Vegas" ) params_.integrator.type = Integrator::Vegas;
+      else if ( integr_type_ == "MISER" ) params_.integrator.type = Integrator::MISER;
+
       if ( m_params.count( "IEND" ) ) setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
 
       //--- for LPAIR: specify the lepton pair to be produced
@@ -50,6 +53,7 @@ namespace CepGen
     LpairHandler::init( Parameters* params )
     {
       registerParameter<std::string>( "PROC", "Process name to simulate", &proc_name_ );
+      registerParameter<std::string>( "ITYP", "Integration algorithm", &integr_type_ );
 
       registerParameter<bool>( "IEND", "Generation type", &params->generation.enabled );
 
