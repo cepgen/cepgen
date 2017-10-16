@@ -3,6 +3,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Parameters.h"
 
 #include <sstream>
@@ -28,7 +29,7 @@ namespace CepGen
                                  "  remnant mode: %d",
                                  p->kinematics.inp.first, p->kinematics.inp.second, p->kinematics.structure_functions ) );
 
-      if ( p->vegas.first_run ) {
+      if ( p->integrator.first_run ) {
 
         if ( Logger::get().level >= Logger::Debug ) {
           std::ostringstream oss; oss << p->kinematics.mode;
@@ -68,7 +69,7 @@ namespace CepGen
         }
 
         p->process()->clearRun();
-        p->vegas.first_run = false;
+        p->integrator.first_run = false;
       }
     } // event is not empty
 

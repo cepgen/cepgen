@@ -1,5 +1,6 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Processes/GenericProcess.h"
 
 namespace CepGen
 {
@@ -8,14 +9,14 @@ namespace CepGen
   {}
 
   Parameters::Parameters( Parameters& param ) :
-    kinematics( param.kinematics ), vegas( param.vegas ), generation( param.generation ),
+    kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
     taming_functions( param.taming_functions ),
     process_( std::move( param.process_ ) ),
     store_( param.store_ )
   {}
 
   Parameters::Parameters( const Parameters& param ) :
-    kinematics( param.kinematics ), vegas( param.vegas ), generation( param.generation ),
+    kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
     taming_functions( param.taming_functions ),
     store_( param.store_ )
   {}
@@ -33,6 +34,13 @@ namespace CepGen
       Debugging( Form( "eta in range: %s => theta(min) = %5.2f, theta(max) = %5.2f",
                        os.str().c_str(), thetamin, thetamax ) );
     }
+  }
+
+  std::string
+  Parameters::processName() const
+  {
+    if ( process_ ) return process_->name();
+    return "no process";
   }
 
   void
@@ -60,12 +68,15 @@ namespace CepGen
       << std::setw( wt ) << "Number of events to generate" << ( pretty ? boldify( generation.maxgen ) : std::to_string( generation.maxgen ) ) << std::endl
       << std::setw( wt ) << "Verbosity level " << Logger::get().level << std::endl
       << std::endl
-      << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Vegas integration parameters " ) : "Vegas integration parameters" ) << std::setfill( ' ' ) << std::endl
-      << std::endl
-      << std::setw( wt ) << "Maximum number of iterations" << ( pretty ? boldify( vegas.itvg ) : std::to_string( vegas.itvg ) ) << std::endl
-      << std::setw( wt ) << "Number of function calls" << vegas.ncvg << std::endl
-      << std::setw( wt ) << "Number of points to try per bin" << vegas.npoints << std::endl
-      << std::setw( wt ) << "Random number generator seed" << vegas.seed << std::endl
+      << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Integration parameters " ) : "Integration parameters" ) << std::setfill( ' ' ) << std::endl
+      << std::endl;
+    std::ostringstream int_algo; int_algo << integrator.type;
+    os
+      << std::setw( wt ) << "Integration algorithm" << ( pretty ? boldify( int_algo.str().c_str() ) : int_algo.str() ) << std::endl
+      << std::setw( wt ) << "Maximum number of iterations" << ( pretty ? boldify( integrator.itvg ) : std::to_string( integrator.itvg ) ) << std::endl
+      << std::setw( wt ) << "Number of function calls" << integrator.ncvg << std::endl
+      << std::setw( wt ) << "Number of points to try per bin" << integrator.npoints << std::endl
+      << std::setw( wt ) << "Random number generator seed" << integrator.seed << std::endl
       << std::endl
       << std::setfill('_') << std::setw( wb ) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill( ' ' ) << std::endl
       << std::endl

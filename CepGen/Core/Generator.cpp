@@ -1,9 +1,10 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Parameters.h"
 
-#include "CepGen/Core/Vegas.h"
+#include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Event/Event.h"
 
 #include <fstream>
@@ -42,9 +43,9 @@ namespace CepGen
   void
   Generator::clearRun()
   {
-    vegas_.reset();
-    parameters->vegas.first_run = true;
-    has_cross_section_ = false; // force the recreation of the Vegas instance
+    integrator_.reset();
+    parameters->integrator.first_run = true;
+    has_cross_section_ = false; // force the recreation of the integrator instance
     cross_section_ = cross_section_error_ = -1.;
   }
 
@@ -84,17 +85,17 @@ namespace CepGen
   void
   Generator::computeXsection( double& xsec, double& err )
   {
-    // first destroy and recreate the Vegas instance
-    if ( !vegas_ ) {
-      vegas_ = std::unique_ptr<Vegas>( new Vegas( numDimensions(), f, parameters.get() ) );
+    // first destroy and recreate the integrator instance
+    if ( !integrator_ ) {
+      integrator_ = std::unique_ptr<Integrator>( new Integrator( numDimensions(), f, parameters.get() ) );
     }
-    else if ( vegas_->dimensions() != numDimensions() ) {
-      vegas_.reset( new Vegas( numDimensions(), f, parameters.get() ) );
+    else if ( integrator_->dimensions() != numDimensions() ) {
+      integrator_.reset( new Integrator( numDimensions(), f, parameters.get() ) );
     }
 
     if ( Logger::get().level>=Logger::Debug ) {
       std::ostringstream topo; topo << parameters->kinematics.mode;
-      Debugging( Form( "New Vegas instance created\n\t"
+      Debugging( Form( "New integrator instance created\n\t"
                        "Considered topology: %s case\n\t"
                        "Will proceed with %d-dimensional integration", topo.str().c_str(), numDimensions() ) );
     }
@@ -103,7 +104,7 @@ namespace CepGen
 
     try { prepareFunction(); } catch ( Exception& e ) { e.dump(); }
 
-    has_cross_section_ = ( vegas_->integrate( cross_section_, cross_section_error_ ) == 0 );
+    has_cross_section_ = ( integrator_->integrate( cross_section_, cross_section_error_ ) == 0 );
 
     xsec = cross_section_;
     err = cross_section_error_;
@@ -118,7 +119,7 @@ namespace CepGen
     if ( !has_cross_section_ ) {
       computeXsection( cross_section_, cross_section_error_ );
     }
-    while ( !good ) { good = vegas_->generateOneEvent(); }
+    while ( !good ) { good = integrator_->generateOneEvent(); }
 
     last_event = this->parameters->generation.last_event;
     return last_event.get();

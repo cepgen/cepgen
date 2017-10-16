@@ -37,7 +37,7 @@ int main( int argc, char* argv[] ) {
     mg.parameters->kinematics.central_system = { CepGen::Particle::Muon, CepGen::Particle::Muon };
     mg.parameters->kinematics.central_cuts[CepGen::Cuts::pt_single].min() = 15.;
     mg.parameters->kinematics.central_cuts[CepGen::Cuts::eta_single] = { -2.5, 2.5 };
-    mg.parameters->vegas.ncvg = 5e4; //FIXME
+    mg.parameters->integrator.ncvg = 5e4; //FIXME
     mg.parameters->generation.enabled = true;
     //mg.parameters->maxgen = 2;
     mg.parameters->generation.maxgen = 2e4;
