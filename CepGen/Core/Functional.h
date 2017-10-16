@@ -18,7 +18,7 @@ namespace CepGen
   /// \tparam N Number of arguments
   /// \author L. Forthomme <laurent.forthomme@cern.ch>
   /// \date 21 Aug 2017
-  template<std::size_t N>
+  template<size_t N>
   class Functional
   {
     public:
@@ -52,7 +52,7 @@ namespace CepGen
       /// Compute the functional for a given value of the variable (N=1 case)
       /// \param[in] x Variable value
       double eval( double x ) const {
-        static_assert( N==1, "This function only works with single-dimensional functions" );
+        static_assert( N == 1, "This function only works with single-dimensional functions" );
         return eval( std::array<double,1>{ { x } } );
       }
       /// Compute the functional for a given value of the variables
@@ -62,7 +62,7 @@ namespace CepGen
 #ifdef MUPARSER
         values_ = x;
         try { ret = parser_.Eval(); } catch ( const mu::Parser::exception_type& e ) {
-          throw Exception( __PRETTY_FUNCTION__, Form( "Failed to evaluate the function:\n\t%s", e.GetMsg().c_str() ), JustWarning );
+          throw Exception( __PRETTY_FUNCTION__, Form( "Failed to evaluate the function \"%s\":\n\t%s\n\tError at position %d", expression_.c_str(), e.GetMsg().c_str(), e.GetPos() ), JustWarning );
         }
 #endif
         return ret;
