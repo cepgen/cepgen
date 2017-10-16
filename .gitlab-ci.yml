@@ -19,15 +19,15 @@ compile:
 
 # define all the tests
 
-test_vegas:
+test_integrator:
   stage: test
   dependencies:
     - compile
   before_script:
     - cd build
   script:
-    - make test_vegas
-    - test/test_vegas
+    - make test_integrator
+    - test/test_integrator vegas && test/test_integrator miser
   when: on_success
   allow_failure: false
 

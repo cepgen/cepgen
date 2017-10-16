@@ -21,7 +21,9 @@ namespace CepGen
       enum Type { Vegas = 1, MISER = 2 };
       /**
        * Book the memory slots and structures for the integrator
-       * \note This code is based on the Vegas Monte Carlo integration algorithm developed by P. Lepage, as documented in @cite PeterLepage1978192
+       * \note Two integration algorithms are currently supported:
+       *  * the Vegas algorithm developed by P. Lepage, as documented in @cite PeterLepage1978192,
+       *  * the MISER algorithm developed by W.H. Press and G.R. Farrar, as documented in @cite Press:1989vk.
        * \param[in] dim_ Number of dimensions on which the function will be integrated
        * \param[in] f_ Function to be integrated
        * \param[inout] inParam_ Run parameters to define the phase space on which this integration is performed (embedded in an Parameters object)
