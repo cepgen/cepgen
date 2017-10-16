@@ -5,8 +5,6 @@
 #include <map>
 #include <vector>
 
-#include "CepGen/Core/utils.h"
-
 namespace CepGen
 {
 
@@ -116,9 +114,9 @@ namespace CepGen
           /// Set the energy (in GeV)
           inline void setEnergy( double e ) { energy_ = e; }
           /// Compute the energy from the mass
-          inline void setMass( double m ) { energy_ = sqrt( p2()+m*m ); }
+          inline void setMass( double m ) { setMass2( m*m ); }
           /// Compute the energy from the mass
-          inline void setMass2( double m2 ) { energy_ = sqrt( p2()+m2 ); }
+          void setMass2( double m2 );
           /// Get one component of the 4-momentum (in GeV)
           double operator[]( const unsigned int i ) const;
           /// Momentum along the \f$x\f$-axis (in GeV)
@@ -128,7 +126,7 @@ namespace CepGen
           /// Longitudinal momentum (in GeV)
           inline double pz() const { return pz_; }
           /// Transverse momentum (in GeV)
-          inline double pt() const { return sqrt( pt2() ); }
+          double pt() const;
           /// Squared transverse momentum (in GeV\f$^\textrm{2}\f$)
           inline double pt2() const { return ( px()*px()+py()*py() ); }
           /// 4-vector of double precision floats (in GeV)
@@ -147,9 +145,9 @@ namespace CepGen
           /// \note Returns \f$-\sqrt{|E^2-\mathbf{p}^2|}<0\f$ if \f$\mathbf{p}^2>E^2\f$
           double mass() const;
           /// Polar angle (angle with respect to the longitudinal direction)
-          inline double theta() const { return atan2( pt(), pz() ); }
+          double theta() const;
           /// Azimutal angle (angle in the transverse plane)
-          inline double phi() const { return atan2( py(), px() ); }
+          double phi() const;
           /// Pseudo-rapidity
           double eta() const;
           /// Rapidity
@@ -211,9 +209,9 @@ namespace CepGen
       static double widthFromPDGId( const Particle::ParticleCode& pdgId );
 
       /// Convert a polar angle to a pseudo-rapidity
-      static inline double thetaToEta( double theta_ ) { return -log( tan( theta_/180.*M_PI/2. ) ); }
+      static double thetaToEta( double theta );
       /// Convert a pseudo-rapidity to a polar angle
-      static inline double etaToTheta( double eta_ ) { return 2.*atan( exp( -eta_ ) )*180. / M_PI; }
+      static double etaToTheta( double eta );
       /// Convert a pseudo-rapidity to a rapidity
       static double etaToY( double eta_, double m_, double pt_ );
 
@@ -322,17 +320,15 @@ namespace CepGen
        */
       void setEnergy( double e=-1. );
       /// Get the particle's energy (in GeV)
-      inline double energy() const {
-        return ( momentum_.energy()<0. ) ? std::sqrt( mass2()+momentum_.p2() ) : momentum_.energy();
-      };
+      double energy() const;
       /// Get the particle's squared energy (in \f$\textrm{GeV}^\textrm{2}\f$)
       inline double energy2() const { return energy()*energy(); };
-      /// Is this particle a valid particle which can be used for kinematic computations ?
+      /// Is this particle a valid particle which can be used for kinematic computations?
       bool valid();
 
       // --- particle relations
 
-      /// Is this particle a primary particle ?
+      /// Is this particle a primary particle?
       inline bool primary() const { return mothers_.empty(); }
       /**
        * \brief Set the mother particle
@@ -387,18 +383,9 @@ namespace CepGen
   };
 
   /// Compute the centre of mass energy of two particles (incoming or outgoing states)
-  inline static double CMEnergy( const Particle& p1, const Particle& p2 ) {
-    if ( p1.mass()*p2.mass() < 0. ) return 0.;
-    if ( p1.energy()*p2.energy() < 0. ) return 0.;
-    return sqrt( p1.mass2()+p2.mass2() + 2.*p1.energy()*p2.energy() - 2.*( p1.momentum()*p2.momentum() ) );
-  }
-
+  double CMEnergy( const Particle& p1, const Particle& p2 );
   /// Compute the centre of mass energy of two particles (incoming or outgoing states)
-  inline static double CMEnergy( const Particle::Momentum& m1, const Particle::Momentum& m2 ) {
-    if ( m1.mass()*m2.mass() < 0. ) return 0.;
-    if ( m1.energy()*m2.energy() < 0. ) return 0.;
-    return sqrt( m1.mass2()+m2.mass2() + 2.*m1.energy()*m2.energy() - 2.*( m1*m2 ) );
-  }
+  double CMEnergy( const Particle::Momentum& m1, const Particle::Momentum& m2 );
 
   //bool operator<( const Particle& a, const Particle& b ) { return a.id<b.id; }
 

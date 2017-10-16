@@ -1,4 +1,7 @@
 #include "Particle.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/utils.h"
+#include "CepGen/Physics/Constants.h"
 
 namespace CepGen
 {
@@ -30,6 +33,18 @@ namespace CepGen
   Particle::operator<( const Particle& rhs ) const
   {
     return ( id_ < rhs.id_ );
+  }
+
+  double
+  Particle::thetaToEta( double theta )
+  {
+    return -log( tan( 0.5 * theta * M_PI/180. ) );
+  }
+
+  double
+  Particle::etaToTheta( double eta )
+  {
+    return 2.*atan( exp( -eta ) )*180. / M_PI;
   }
 
   bool
@@ -119,6 +134,12 @@ namespace CepGen
       InError( Form( "Energy difference: %.5e", e-momentum_.energy() ) );
       return;
     }
+  }
+
+  double
+  Particle::energy() const
+  {
+    return ( momentum_.energy() < 0. ) ? sqrt( mass2()+momentum_.p2() ) : momentum_.energy();
   }
 
   void
@@ -355,5 +376,21 @@ namespace CepGen
       case Particle::CentralSystem: return os << "central";
     }
     return os;
+  }
+
+  double
+  CMEnergy( const Particle& p1, const Particle& p2 )
+  {
+    if ( p1.mass()*p2.mass() < 0. ) return 0.;
+    if ( p1.energy()*p2.energy() < 0. ) return 0.;
+    return sqrt( p1.mass2()+p2.mass2() + 2.*p1.energy()*p2.energy() - 2.*( p1.momentum()*p2.momentum() ) );
+  }
+
+  double
+  CMEnergy( const Particle::Momentum& m1, const Particle::Momentum& m2 )
+  {
+    if ( m1.mass()*m2.mass() < 0. ) return 0.;
+    if ( m1.energy()*m2.energy() < 0. ) return 0.;
+    return sqrt( m1.mass2()+m2.mass2() + 2.*m1.energy()*m2.energy() - 2.*( m1*m2 ) );
   }
 }

@@ -1,4 +1,10 @@
-#include "utils.h"
+#include "CepGen/Core/utils.h"
+#include "CepGen/Core/Exception.h"
+
+#include <stdlib.h>
+#include <stdarg.h>  // For va_start, etc.
+#include <stdio.h>
+#include <math.h>
 
 void Map( double expo, double xmin, double xmax, double& out, double& dout, const std::string& var_name_ )
 {

@@ -3,15 +3,18 @@
 
 #include <iomanip>
 #include <algorithm>
-#include <string>
 
-#include "CepGen/Core/utils.h"
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/Core/Logger.h"
 #include "CepGen/Event/Particle.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "Cuts.h"
 
+#include <vector>
+#include <map>
+
 using std::cout;
+using std::string;
 
 namespace CepGen
 {
@@ -34,11 +37,7 @@ namespace CepGen
           double max() const { return second; }
           /// Upper limit to apply on the variable
           double& max() { return second; }
-          double x( double v ) const {
-            if ( v < 0. || v > 1. ) { InError( Form( "x must be comprised between 0 and 1 ; x value = %.5e", v ) ); }
-            if ( !hasMin() || !hasMax() ) return invalid_;
-            return first + ( second-first ) * v;
-          }
+          double x( double v ) const;
           /// Specify the lower and upper limits on the variable
           void in( double low, double up ) { first = low; second = up; }
           /// Full variable range allowed
@@ -72,7 +71,7 @@ namespace CepGen
   
       /// Dump all the parameters used in this process cross-section computation
       /// or events generation
-      void dump( std::ostream& os=std::cout ) const;
+      void dump( std::ostream& os = Logger::get().outputStream ) const;
 
       /// Incoming particles' momentum (in \f$\text{GeV}/c\f$)
       std::pair<double,double> inp;

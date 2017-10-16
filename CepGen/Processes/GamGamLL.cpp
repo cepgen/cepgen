@@ -1,4 +1,5 @@
 #include "GamGamLL.h"
+#include "CepGen/Core/Exception.h"
 
 using namespace CepGen::Process;
 

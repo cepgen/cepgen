@@ -1,16 +1,19 @@
 #ifndef CepGen_Parameters_h
 #define CepGen_Parameters_h
 
-#include "CepGen/Processes/GenericProcess.h"
-#include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Core/TamingFunction.h"
+#include "CepGen/Core/Integrator.h"
+#include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Processes/GenericProcess.h"
 
 #include <memory>
 
 namespace CepGen
 {
+  class Event;
   /// List of parameters used to start and run the simulation job
-  class Parameters {
+  class Parameters
+  {
     public:
       Parameters();
       /// Copy constructor (transfers ownership to the process!)
@@ -30,7 +33,7 @@ namespace CepGen
       /// Process for which the cross-section will be computed and the events will be generated
       Process::GenericProcess* process() { return process_.get(); }
       /// Name of the process considered
-      std::string processName() const { return ( process_ ) ? process_->name() : "no process"; }
+      std::string processName() const;
       /// Set the process to study
       void setProcess( Process::GenericProcess* proc ) { process_.reset( proc ); }
 
@@ -41,12 +44,14 @@ namespace CepGen
 
       //----- VEGAS
 
-      /// Collection of Vegas integrator parameters
-      struct Vegas
+      /// Collection of integrator parameters
+      struct IntegratorParameters
       {
-        Vegas() : ncvg( 100000 ), itvg( 10 ), npoints( 100 ), first_run( true ), seed( 0 ) {}
+        IntegratorParameters() : type( Integrator::Vegas ), ncvg( 100000 ), itvg( 10 ), npoints( 100 ), first_run( true ), seed( 0 ) {}
+        Integrator::Type type;
+        /// Number of function calls to be computed for each point
         unsigned int ncvg; // ??
-        /// Maximal number of iterations to perform by VEGAS
+        /// Number of iterations for the integration
         unsigned int itvg;
         /// Number of points to "shoot" in each integration bin by the algorithm
         unsigned int npoints;
@@ -55,8 +60,8 @@ namespace CepGen
         /// Random number generator seed
         unsigned long seed;
       };
-      /// Vegas integrator parameters
-      Vegas vegas;
+      /// Integrator parameters
+      IntegratorParameters integrator;
 
       //----- events generation
 

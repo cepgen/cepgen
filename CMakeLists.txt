@@ -2,11 +2,14 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 project(CepGen)
 set(PROJECT_VERSION 1)
 
-#SET (CMAKE_CXX_COMPILER "/usr/bin/clang++")
-if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.7)
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic-errors -std=c++11 -g")
 else()
-  message(FATAL_ERROR "gcc version >= 4.7 is required")
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.7)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic-errors -std=c++11 -g")
+  else()
+    message(FATAL_ERROR "gcc version >= 4.7 is required")
+  endif()
 endif()
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake)
 set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/CepGen)
@@ -18,15 +21,19 @@ set(CEPGEN_MODULES Processes Event Physics StructureFunctions Export)
 
 #----- enable fortran (for Pythia/Herwig/...)
 
-enable_language(Fortran OPTIONAL)
+enable_language(Fortran)
 add_subdirectory(External)
 
 #----- include external paths
 
 include(UseEnvironment)
-
-set(CEPGEN_EXTERNAL_REQS ${GSL_LIB} ${GSL_CBLAS_LIB} ${CEPGEN_LIBRARIES})
-
+set(CEPGEN_EXTERNAL_REQS "")
+if(GSL_LIB)
+  message(STATUS "GSL found in ${GSL_LIB}")
+  list(APPEND CEPGEN_EXTERNAL_REQS ${GSL_LIB} ${GSL_CBLAS_LIB})
+else()
+  message(FATAL_ERROR "GSL not found on your system!")
+endif()
 if(MUPARSER)
   message(STATUS "muParser found in ${MUPARSER}")
   list(APPEND CEPGEN_EXTERNAL_REQS ${MUPARSER})

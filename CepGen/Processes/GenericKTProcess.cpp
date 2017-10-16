@@ -1,5 +1,6 @@
 #include "GenericKTProcess.h"
 #include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
+#include "CepGen/Core/Exception.h"
 
 namespace CepGen
 {
@@ -17,6 +18,12 @@ namespace CepGen
 
     GenericKTProcess::~GenericKTProcess()
     {}
+
+    void
+    GenericKTProcess::prepareKTKinematics()
+    {
+      DebuggingInsideLoop("Dummy kinematics prepared!");
+    }
 
     void
     GenericKTProcess::addEventContent()
@@ -67,7 +74,7 @@ namespace CepGen
     GenericKTProcess::setKinematics( const Kinematics& kin )
     {
       cuts_ = kin;
-      log_qmin_ = -10.; // FIXME //log_qmin_ = std::log( std::sqrt( cuts_.q2min ) );
+      log_qmin_ = -10.; // FIXME //log_qmin_ = log( sqrt( cuts_.q2min ) );
       log_qmax_ = log( cuts_.initial_cuts[Cuts::qt].max() );
     }
 

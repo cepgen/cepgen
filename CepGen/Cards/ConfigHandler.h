@@ -27,7 +27,7 @@ namespace CepGen
       private:
         void parseIncomingKinematics( const libconfig::Setting& );
         void parseOutgoingKinematics( const libconfig::Setting& );
-        void parseVegas( const libconfig::Setting& );
+        void parseIntegrator( const libconfig::Setting& );
         void parseGenerator( const libconfig::Setting& );
         void parseTamingFunctions( const libconfig::Setting& );
 
@@ -35,7 +35,7 @@ namespace CepGen
         static void writeIncomingKinematics( const Parameters*, libconfig::Setting& );
         static void writeOutgoingKinematics( const Parameters*, libconfig::Setting& );
         static void writeTamingFunctions( const Parameters*, libconfig::Setting& );
-        static void writeVegas( const Parameters*, libconfig::Setting& );
+        static void writeIntegrator( const Parameters*, libconfig::Setting& );
         static void writeGenerator( const Parameters*, libconfig::Setting& );
 #endif
     };

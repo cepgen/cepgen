@@ -1,4 +1,5 @@
 #include "GenericLHAPDF.h"
+#include "CepGen/Core/Exception.h"
 
 namespace CepGen
 {
