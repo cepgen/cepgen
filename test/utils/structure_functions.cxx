@@ -17,7 +17,7 @@ main( int argc, char* argv[] )
   const unsigned int npoints = 5000;
 
   TGraph g_sy_f2, g_fb_f2, g_su_f2, g_bdh_f2, g_cteq_f2, g_mrst_f2;
-  TGraph g_allm97_f2, g_allm_hht_f2, g_allm_hht_ft_f2;
+  TGraph g_allm97_f2, g_allm_hht_f2, g_allm_hht_ft_f2, g_gd11p_f2;
   TGraph g_lux_f2;
   TGraph g_cb_f2;
 
@@ -41,10 +41,7 @@ main( int argc, char* argv[] )
          sf_allm97 = CepGen::StructureFunctionsBuilder::get( CepGen::StructureFunctions::ALLM97, q2, xbj ),
          //sf_allm_hht = CepGen::SF::ALLM( q2, xbj, CepGen::SF::ALLMParameterisation::hht_allm() ),
          //sf_allm_hht_ft = CepGen::SF::ALLM( q2, xbj, CepGen::SF::ALLMParameterisation::hht_allm_ft() ),
-         //sf_bdh = CepGen::SF::BlockDurandHa( q2, xbj ),
-         //sf_cteq = cteq( q2, xbj ),
-         //sf_mrst = mrst( q2, xbj ),
-         //sf_lux = lux( q2, xbj ),
+         sf_gd11p = CepGen::StructureFunctionsBuilder::get( CepGen::StructureFunctions::GD11p, q2, xbj ),
          sf_cb = CepGen::StructureFunctionsBuilder::get( CepGen::StructureFunctions::ChristyBosted, q2, xbj );
 
     g_sy_f2.SetPoint( i, xbj, sf_sy.F2 );
@@ -54,6 +51,7 @@ main( int argc, char* argv[] )
     //g_cteq_f2.SetPoint( i, xbj, sf_cteq.F2 );
     //g_mrst_f2.SetPoint( i, xbj, sf_mrst.F2 );
     //g_lux_f2.SetPoint( i, xbj, sf_lux.F2 );
+    g_gd11p_f2.SetPoint( i, xbj, sf_gd11p.F2 );
     g_cb_f2.SetPoint( i, xbj, sf_cb.F2 );
 
     g_allm97_f2.SetPoint( i, xbj, sf_allm97.F2 );
@@ -87,6 +85,12 @@ main( int argc, char* argv[] )
   g_allm97_f2.SetLineWidth( 3 );
   mg.Add( &g_allm97_f2, "l" );
   c.AddLegendEntry( &g_allm97_f2, "Abramowicz et al. 97", "l" );
+
+  g_gd11p_f2.SetLineColor( kBlue+1 );
+  g_gd11p_f2.SetLineWidth( 3 );
+  g_gd11p_f2.SetLineStyle( 2 );
+  mg.Add( &g_gd11p_f2, "l" );
+  c.AddLegendEntry( &g_gd11p_f2, "GD11p", "l" );
 
   /*g_allm_hht_f2.SetLineColor( kBlue+1 );
   g_allm_hht_f2.SetLineWidth( 3 );

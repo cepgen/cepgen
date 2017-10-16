@@ -1,9 +1,6 @@
 if(EXISTS $ENV{has_pythia6})
   add_definitions(-DPYTHIA6)
 endif()
-if(EXISTS $ENV{has_grv})
-  add_definitions(-DGRVPDF)
-endif()
 
 if($ENV{HOSTNAME} MATCHES "^lxplus[0-9]+.cern.ch")
   set(BASE_DIR "/cvmfs/sft.cern.ch/lcg/external")
