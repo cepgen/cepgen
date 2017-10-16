@@ -1,6 +1,9 @@
 #include "Event.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/utils.h"
 
 #include <algorithm>
+#include <math.h>
 
 namespace CepGen
 {

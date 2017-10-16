@@ -1,4 +1,6 @@
 #include "Kinematics.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/utils.h"
 
 namespace CepGen
 {
@@ -54,6 +56,14 @@ namespace CepGen
     if ( !lim.hasMin() ) return os << Form( "≤ %.3f", lim.max() );
     if ( !lim.hasMax() ) return os << Form( "≥ %.3f", lim.min() );
     return os << Form( "%.3f → %.3f", lim.min(), lim.max() );
+  }
+
+  double
+  Kinematics::Limits::x( double v ) const
+  {
+    if ( v < 0. || v > 1. ) { InError( Form( "x must be comprised between 0 and 1 ; x value = %.5e", v ) ); }
+    if ( !hasMin() || !hasMax() ) return invalid_;
+    return first + ( second-first ) * v;
   }
 }
 

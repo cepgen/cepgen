@@ -4,6 +4,7 @@
 #include <vector>
 #include <array>
 #include "CepGen/Core/utils.h"
+#include "CepGen/Core/Exception.h"
 
 #ifdef MUPARSER
 #include <muParser.h>
@@ -17,7 +18,7 @@ namespace CepGen
   /// \tparam N Number of arguments
   /// \author L. Forthomme <laurent.forthomme@cern.ch>
   /// \date 21 Aug 2017
-  template<std::size_t N>
+  template<size_t N>
   class Functional
   {
     public:
@@ -40,10 +41,15 @@ namespace CepGen
       /// \param[in] vars List of variables to parse
       Functional( const std::string& expr, const std::array<std::string,N>& vars ) : vars_( vars ), expression_( expr ) {
 #ifdef MUPARSER
-        for ( unsigned short i = 0; i < vars_.size(); ++i ) {
-          parser_.DefineVar( vars_[i], &values_[i] );
+        try {
+          for ( unsigned short i = 0; i < vars_.size(); ++i ) {
+            parser_.DefineVar( vars_[i], &values_[i] );
+          }
+          parser_.SetExpr( expr );
+        } catch ( const mu::Parser::exception_type& e ) {
+          std::ostringstream os; for ( unsigned short i = 0; i < e.GetPos(); ++i ) os << "-"; os << "^";
+          throw Exception( __PRETTY_FUNCTION__, Form( "Failed to define the function\n\t%s\n\t%s\n\t%s", expression_.c_str(), os.str().c_str(), e.GetMsg().c_str() ), JustWarning );
         }
-        parser_.SetExpr( expr );
 #else
         InError( "muParser is not linked to this program! the math evaluator is hence disabled!" );
 #endif
@@ -51,8 +57,8 @@ namespace CepGen
       /// Compute the functional for a given value of the variable (N=1 case)
       /// \param[in] x Variable value
       double eval( double x ) const {
-        static_assert( N==1, "This function only works with single-dimensional functions" );
-        return eval( std::array<double,1>{ x } );
+        static_assert( N == 1, "This function only works with single-dimensional functions" );
+        return eval( std::array<double,1>{ { x } } );
       }
       /// Compute the functional for a given value of the variables
       /// \param[in] x Variables values
@@ -61,7 +67,8 @@ namespace CepGen
 #ifdef MUPARSER
         values_ = x;
         try { ret = parser_.Eval(); } catch ( const mu::Parser::exception_type& e ) {
-          throw Exception( __PRETTY_FUNCTION__, Form( "Failed to evaluate the function:\n\t%s", e.GetMsg().c_str() ), JustWarning );
+          std::ostringstream os; for ( unsigned short i = 0; i < e.GetPos(); ++i ) os << "-"; os << "^";
+          throw Exception( __PRETTY_FUNCTION__, Form( "Failed to evaluate the function\n\t%s\n\t%s\n\t%s", expression_.c_str(), os.str().c_str(), e.GetMsg().c_str() ), JustWarning );
         }
 #endif
         return ret;

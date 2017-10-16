@@ -1,4 +1,5 @@
 #include "GenericProcess.h"
+#include "CepGen/Core/Exception.h"
 
 namespace CepGen
 {
@@ -21,7 +22,7 @@ namespace CepGen
 
       x_ = std::vector<double>( x, x+ndim );
       is_point_set_ = true;
-      if ( Logger::get().level>=Logger::DebugInsideLoop ) { dumpPoint( DebugMessage ); }
+      if ( Logger::get().level>=Logger::DebugInsideLoop ) { dumpPoint(); }
     }
 
     void
@@ -41,18 +42,14 @@ namespace CepGen
     }
 
     void
-    GenericProcess::dumpPoint( const ExceptionType& et )
+    GenericProcess::dumpPoint()
     {
-    std::ostringstream os;
-    for ( unsigned int i=0; i<x_.size(); i++ ) {
-      os << Form( "  x(%2d) = %8.6f\n\t", i, x_[i] );
-    }
-    if ( et < DebugMessage ) {
+      std::ostringstream os;
+      for ( unsigned int i=0; i<x_.size(); i++ ) {
+        os << Form( "  x(%2d) = %8.6f\n\t", i, x_[i] );
+      }
       Information( Form( "Number of integration parameters: %d\n\t"
-                         "%s", x_.size(), os.str().c_str() ) ); }
-    else {
-      Debugging( Form( "Number of integration parameters: %d\n\t"
-                       "%s", x_.size(), os.str().c_str() ) ); }
+                         "%s", x_.size(), os.str().c_str() ) );
     }
 
     void

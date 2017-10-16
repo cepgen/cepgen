@@ -1,6 +1,5 @@
 integrator = {
-  algorithm = "Vegas";
+  algorithm = "MISER";
   num_integration_calls = 500000;
-  num_integration_iterations = 10;
   num_points = 100;
 };

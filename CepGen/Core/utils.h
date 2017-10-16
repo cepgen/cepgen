@@ -1,15 +1,7 @@
 #ifndef CepGen_Core_utils_h
 #define CepGen_Core_utils_h
 
-#include <stdlib.h>
-#include <stdarg.h>  // For va_start, etc.
-#include <stdio.h>
-#include <string.h>
-
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Physics/Constants.h"
-
-static std::stringstream error;
+#include <string>
 
 /// Provide a random number generated along a uniform distribution between 0 and 1
 //inline double drand() { srand (time(nullptr)); return static_cast<double>(rand())/RAND_MAX; }

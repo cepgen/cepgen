@@ -3,8 +3,8 @@
 
 #include "Handler.h"
 
-#include <string>
-#include <map>
+using std::string;
+using std::map;
 
 namespace CepGen
 {
@@ -44,7 +44,7 @@ namespace CepGen
 
         void init( Parameters* );
         Particle::ParticleCode pair_;
-        std::string proc_name_, hadr_name_;
+        std::string proc_name_, hadr_name_, integr_type_;
     };
 
     //----- specialised registerers

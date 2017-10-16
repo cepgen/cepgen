@@ -1,4 +1,5 @@
 #include "LpairHandler.h"
+#include "CepGen/Core/Exception.h"
 
 #include <fstream>
 
@@ -36,6 +37,9 @@ namespace CepGen
       else if ( proc_name_ == "pptoww" ) params_.setProcess( new Process::PPtoWW() );
       else FatalError( Form( "Unrecognised process name: %s", proc_name_.c_str() ) );
 
+      if      ( integr_type_ == "Vegas" ) params_.integrator.type = Integrator::Vegas;
+      else if ( integr_type_ == "MISER" ) params_.integrator.type = Integrator::MISER;
+
       if ( m_params.count( "IEND" ) ) setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
 
       //--- for LPAIR: specify the lepton pair to be produced
@@ -49,13 +53,14 @@ namespace CepGen
     LpairHandler::init( Parameters* params )
     {
       registerParameter<std::string>( "PROC", "Process name to simulate", &proc_name_ );
+      registerParameter<std::string>( "ITYP", "Integration algorithm", &integr_type_ );
 
       registerParameter<bool>( "IEND", "Generation type", &params->generation.enabled );
 
       registerParameter<unsigned int>( "DEBG", "Debugging verbosity", (unsigned int*)&Logger::get().level );
-      registerParameter<unsigned int>( "NCVG", "Number of function calls", &params->vegas.ncvg );
-      registerParameter<unsigned int>( "NCSG", "Number of points to probe", &params->vegas.npoints );
-      registerParameter<unsigned int>( "ITVG", "Number of Vegas iterations", &params->vegas.itvg );
+      registerParameter<unsigned int>( "NCVG", "Number of function calls", &params->integrator.ncvg );
+      registerParameter<unsigned int>( "NCSG", "Number of points to probe", &params->integrator.npoints );
+      registerParameter<unsigned int>( "ITVG", "Number of integration iterations", &params->integrator.itvg );
       registerParameter<unsigned int>( "MODE", "Subprocess' mode", (unsigned int*)&params->kinematics.mode );
       registerParameter<unsigned int>( "PMOD", "Outgoing primary particles' mode", (unsigned int*)&params->kinematics.structure_functions );
       registerParameter<unsigned int>( "EMOD", "Outgoing primary particles' mode", (unsigned int*)&params->kinematics.structure_functions );
