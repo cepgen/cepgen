@@ -91,33 +91,35 @@ namespace CepGen
       static constexpr unsigned short mbin_ = 3;
       static constexpr double inv_mbin_ = 1./mbin_;
 
-      Type algorithm_;
       /// Selected bin at which the function will be evaluated
       int ps_bin_;
-      double correc_;
-      double correc2_;
       /// List of parameters to specify the integration range and the physics determining the phase space
       Parameters* input_params_;
-      /// Has the grid been prepared for integration?
-      bool grid_prepared_;
-      /// Has the generation been prepared using @a SetGen call? (very time-consuming operation, thus needs to be called once)
-      bool gen_prepared_;
-      /// Maximal value of the function at one given point
-      std::vector<double> f_max_;
-      double f_max2_;
-      double f_max_diff_;
-      double f_max_old_;
-      /// Maximal value of the function in the considered integration range
-      double f_max_global_;
-      std::vector<int> n_;
-      std::vector<int> nm_;
+      struct GridParameters {
+        GridParameters() :
+          grid_prepared( false ), gen_prepared( false ),
+          correc( 0. ), correc2( 0. ),
+          f_max2( 0. ), f_max_diff( 0. ), f_max_old( 0. ), f_max_global( 0. ) {}
+        /// Has the grid been prepared for integration?
+        bool grid_prepared;
+        /// Has the generation been prepared using @a SetGen call? (very time-consuming operation, thus needs to be called once)
+        bool gen_prepared;
+        double correc;
+        double correc2;
+        /// Maximal value of the function at one given point
+        std::vector<double> f_max;
+        double f_max2;
+        double f_max_diff;
+        double f_max_old;
+        /// Maximal value of the function in the considered integration range
+        double f_max_global;
+        std::vector<int> n;
+        std::vector<int> nm;
+      };
+      GridParameters grid_;
       /// GSL structure storing the function to be integrated by this integrator instance (along with its parameters)
       std::unique_ptr<gsl_monte_function> function_;
       gsl_rng* rng_;
-      /// Number of function calls to be computed for each point
-      int num_converg_;
-      /// Number of iterations for the integration
-      unsigned int num_iter_;
   };
   std::ostream& operator<<( std::ostream&, const Integrator::Type& );
 }

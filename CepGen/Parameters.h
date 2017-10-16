@@ -47,8 +47,9 @@ namespace CepGen
       {
         IntegratorParameters() : type( Integrator::Vegas ), ncvg( 100000 ), itvg( 10 ), npoints( 100 ), first_run( true ), seed( 0 ) {}
         Integrator::Type type;
+        /// Number of function calls to be computed for each point
         unsigned int ncvg; // ??
-        /// Maximal number of iterations to perform by VEGAS
+        /// Number of iterations for the integration
         unsigned int itvg;
         /// Number of points to "shoot" in each integration bin by the algorithm
         unsigned int npoints;

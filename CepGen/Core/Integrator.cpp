@@ -7,19 +7,12 @@
 namespace CepGen
 {
   Integrator::Integrator( const unsigned int dim, double f_( double*, size_t, void* ), Parameters* param ) :
-    algorithm_( param->integrator.type ),
-    ps_bin_( 0 ), correc_( 0. ), correc2_( 0. ),
-    input_params_( param ),
-    grid_prepared_( false ), gen_prepared_( false ),
-    f_max2_( 0. ), f_max_diff_( 0. ), f_max_old_( 0. ), f_max_global_( 0. ),
-    function_( std::unique_ptr<gsl_monte_function>( new gsl_monte_function ) )
+    ps_bin_( 0 ), input_params_( param ), function_( std::unique_ptr<gsl_monte_function>( new gsl_monte_function ) )
   {
     //--- function to be integrated
     function_->f = f_;
     function_->dim = dim;
     function_->params = (void*)param;
-    num_converg_ = param->integrator.ncvg;
-    num_iter_ = param->integrator.itvg;
 
     //--- initialise the random number generator
     gsl_rng_env_setup();
@@ -31,7 +24,7 @@ namespace CepGen
 
     Debugging( Form( "Number of integration dimensions: %d\n\t"
                      "Number of iterations:             %d\n\t"
-                     "Number of function calls:         %d", dim, num_iter_, num_converg_ ) );
+                     "Number of function calls:         %d", dim, input_params_->integrator.itvg, input_params_->integrator.ncvg ) );
   }
 
   Integrator::~Integrator()
@@ -45,33 +38,34 @@ namespace CepGen
     int res = -1;
     gsl_monte_vegas_state* veg_state;
     gsl_monte_miser_state* mis_state;
+    const Integrator::Type algorithm = input_params_->integrator.type;
 
     //--- integration bounds
     std::vector<double> x_low( function_->dim, 0. ), x_up( function_->dim, 1. );
 
     //--- prepare integrator
-    if      ( algorithm_ == Vegas ) veg_state = gsl_monte_vegas_alloc( function_->dim );
-    else if ( algorithm_ == MISER ) mis_state = gsl_monte_miser_alloc( function_->dim );
+    if      ( algorithm == Vegas ) veg_state = gsl_monte_vegas_alloc( function_->dim );
+    else if ( algorithm == MISER ) mis_state = gsl_monte_miser_alloc( function_->dim );
 
-    if ( algorithm_ == Vegas ) {
+    if ( algorithm == Vegas ) {
       //----- Vegas warmup (prepare the grid)
-      if ( !grid_prepared_ ) {
+      if ( !grid_.grid_prepared ) {
         res = gsl_monte_vegas_integrate( function_.get(), &x_low[0], &x_up[0], function_->dim, 10000, rng_, veg_state, &result, &abserr );
-        grid_prepared_ = true;
+        grid_.grid_prepared = true;
       }
       //----- integration
-      for ( unsigned int i=0; i<num_iter_; i++ ) {
-        res = gsl_monte_vegas_integrate( function_.get(), &x_low[0], &x_up[0], function_->dim, 0.2*num_converg_, rng_, veg_state, &result, &abserr );
+      for ( unsigned short i = 0; i < input_params_->integrator.itvg; i++ ) {
+        res = gsl_monte_vegas_integrate( function_.get(), &x_low[0], &x_up[0], function_->dim, input_params_->integrator.ncvg, rng_, veg_state, &result, &abserr );
         PrintMessage( Form( ">> Iteration %2d: average = %10.6f   sigma = %10.6f   chi2 = %4.3f", i+1, result, abserr, gsl_monte_vegas_chisq( veg_state ) ) );
       }
     }
     //----- integration
-    else if ( algorithm_ == MISER )
-      res = gsl_monte_miser_integrate( function_.get(), &x_low[0], &x_up[0], function_->dim, 0.2*num_converg_, rng_, mis_state, &result, &abserr );
+    else if ( algorithm == MISER )
+      res = gsl_monte_miser_integrate( function_.get(), &x_low[0], &x_up[0], function_->dim, input_params_->integrator.ncvg, rng_, mis_state, &result, &abserr );
 
     //--- clean integrator
-    if      ( algorithm_ == Vegas ) gsl_monte_vegas_free( veg_state );
-    else if ( algorithm_ == MISER ) gsl_monte_miser_free( mis_state );
+    if      ( algorithm == Vegas ) gsl_monte_vegas_free( veg_state );
+    else if ( algorithm == MISER ) gsl_monte_miser_free( mis_state );
 
     return res;
   }
@@ -82,7 +76,7 @@ namespace CepGen
     std::ofstream of;
     std::string fn;
 
-    if ( !gen_prepared_ ) setGen();
+    if ( !grid_.gen_prepared ) setGen();
 
     Information( Form( "%d events will be generated", input_params_->generation.maxgen ) );
 
@@ -96,7 +90,7 @@ namespace CepGen
   bool
   Integrator::generateOneEvent()
   {
-    if ( !gen_prepared_ ) setGen();
+    if ( !grid_.gen_prepared ) setGen();
 
     const unsigned int ndim = function_->dim, max = pow( mbin_, ndim );
 
@@ -120,15 +114,15 @@ namespace CepGen
       do {
         // ...
         ps_bin_ = uniform() * max;
-        y = uniform() * f_max_global_;
-        nm_[ps_bin_] += 1;
-      } while ( y > f_max_[ps_bin_] );
+        y = uniform() * grid_.f_max_global;
+        grid_.nm[ps_bin_] += 1;
+      } while ( y > grid_.f_max[ps_bin_] );
       // Select x values in this Integrator bin
       int jj = ps_bin_;
       for ( unsigned int i=0; i<ndim; i++ ) {
         int jjj = jj / mbin_;
-        n_[i] = jj - jjj * mbin_;
-        x[i] = ( uniform() + n_[i] ) / mbin_;
+        grid_.n[i] = jj - jjj * mbin_;
+        x[i] = ( uniform() + grid_.n[i] ) / mbin_;
         jj = jjj;
       }
 
@@ -136,23 +130,23 @@ namespace CepGen
       weight = F( x );
     } while ( y > weight );
 
-    if ( weight <= f_max_[ps_bin_] ) ps_bin_ = 0;
+    if ( weight <= grid_.f_max[ps_bin_] ) ps_bin_ = 0;
     // Init correction cycle if weight is higher than fmax or ffmax
-    else if ( weight <= f_max_global_ ) {
-      f_max_old_ = f_max_[ps_bin_];
-      f_max_[ps_bin_] = weight;
-      f_max_diff_ = weight-f_max_old_;
-      correc_ = ( nm_[ps_bin_] - 1. ) * f_max_diff_ / f_max_global_ - 1.;
+    else if ( weight <= grid_.f_max_global ) {
+      grid_.f_max_old = grid_.f_max[ps_bin_];
+      grid_.f_max[ps_bin_] = weight;
+      grid_.f_max_diff = weight-grid_.f_max_old;
+      grid_.correc = ( grid_.nm[ps_bin_] - 1. ) * grid_.f_max_diff / grid_.f_max_global - 1.;
     }
     else {
-      f_max_old_ = f_max_[ps_bin_];
-      f_max_[ps_bin_] = weight;
-      f_max_diff_ = weight-f_max_old_;
-      f_max_global_ = weight;
-      correc_ = ( nm_[ps_bin_] - 1. ) * f_max_diff_ / f_max_global_ * weight / f_max_global_ - 1.;
+      grid_.f_max_old = grid_.f_max[ps_bin_];
+      grid_.f_max[ps_bin_] = weight;
+      grid_.f_max_diff = weight-grid_.f_max_old;
+      grid_.f_max_global = weight;
+      grid_.correc = ( grid_.nm[ps_bin_] - 1. ) * grid_.f_max_diff / grid_.f_max_global * weight / grid_.f_max_global - 1.;
     }
 
-    Debugging( Form( "Correction applied: %f, phase space bin = %d", correc_, ps_bin_ ) );
+    Debugging( Form( "Correction applied: %f, phase space bin = %d", grid_.correc, ps_bin_ ) );
 
     // Return with an accepted event
     if ( weight > 0. ) return storeEvent( x );
@@ -168,26 +162,26 @@ namespace CepGen
     Debugging( Form( "Correction cycles are started.\n\t"
                      "j = %f"
                      "correc = %f"
-                     "corre2 = %f", ps_bin_, correc2_ ) );
+                     "corre2 = %f", ps_bin_, grid_.correc2 ) );
 
-    if ( correc_ >= 1. ) correc_ -= 1.;
-    if ( uniform() < correc_ ) {
-      correc_ = -1.;
+    if ( grid_.correc >= 1. ) grid_.correc -= 1.;
+    if ( uniform() < grid_.correc ) {
+      grid_.correc = -1.;
       std::vector<double> xtmp( ndim, 0. );
       // Select x values in phase space bin
       for ( unsigned int k=0; k<ndim; k++ ) {
-        xtmp[k] = ( uniform() + n_[k] ) * inv_mbin_;
+        xtmp[k] = ( uniform() + grid_.n[k] ) * inv_mbin_;
       }
       // Compute weight for x value
       weight = F( xtmp );
       // Parameter for correction of correction
-      if ( weight > f_max_[ps_bin_] ) {
-        if ( weight > f_max2_ ) f_max2_ = weight;
-        correc2_ -= 1.;
-        correc_ += 1.;
+      if ( weight > grid_.f_max[ps_bin_] ) {
+        if ( weight > grid_.f_max2 ) grid_.f_max2 = weight;
+        grid_.correc2 -= 1.;
+        grid_.correc += 1.;
       }
       // Accept event
-      if ( weight >= f_max_diff_*uniform() + f_max_old_ ) { // FIXME!!!!
+      if ( weight >= grid_.f_max_diff*uniform() + grid_.f_max_old ) { // FIXME!!!!
         //Error("Accepting event!!!");
         //return storeEvent(x);
         x = xtmp;
@@ -198,19 +192,19 @@ namespace CepGen
     }
     // Correction if too big weight is found while correction
     // (All your bases are belong to us...)
-    if ( f_max2_ > f_max_[ps_bin_] ) {
-      f_max_old_ = f_max_[ps_bin_];
-      f_max_[ps_bin_] = f_max2_;
-      f_max_diff_ = f_max2_-f_max_old_;
-      if ( f_max2_ < f_max_global_ ) {
-        correc_ = ( nm_[ps_bin_] - 1. ) * f_max_diff_ / f_max_global_ - correc2_;
+    if ( grid_.f_max2 > grid_.f_max[ps_bin_] ) {
+      grid_.f_max_old = grid_.f_max[ps_bin_];
+      grid_.f_max[ps_bin_] = grid_.f_max2;
+      grid_.f_max_diff = grid_.f_max2-grid_.f_max_old;
+      if ( grid_.f_max2 < grid_.f_max_global ) {
+        grid_.correc = ( grid_.nm[ps_bin_] - 1. ) * grid_.f_max_diff / grid_.f_max_global - grid_.correc2;
       }
       else {
-        f_max_global_ = f_max2_;
-        correc_ = ( nm_[ps_bin_] - 1. ) * f_max_diff_ / f_max_global_ * f_max2_ / f_max_global_ - correc2_;
+        grid_.f_max_global = grid_.f_max2;
+        grid_.correc = ( grid_.nm[ps_bin_] - 1. ) * grid_.f_max_diff / grid_.f_max_global * grid_.f_max2 / grid_.f_max_global - grid_.correc2;
       }
-      correc2_ = 0.;
-      f_max2_ = 0.;
+      grid_.correc2 = 0.;
+      grid_.f_max2 = 0.;
       return false;
     }
     return true;
@@ -249,9 +243,9 @@ namespace CepGen
       FatalError( Form( "Number of dimensions to integrate exceed the maximum number, %d", max_dimensions_ ) );
     }
 
-    nm_ = std::vector<int>( max, 0 );
-    f_max_ = std::vector<double>( max, 0. );
-    n_ = std::vector<int>( ndim, 0 );
+    grid_.nm = std::vector<int>( max, 0 );
+    grid_.f_max = std::vector<double>( max, 0. );
+    grid_.n = std::vector<int>( ndim, 0 );
 
     std::vector<double> x( ndim, 0. );
 
@@ -265,16 +259,16 @@ namespace CepGen
       int jj = i;
       for ( unsigned int j=0; j<ndim; j++ ) {
         int jjj = jj*inv_mbin_;
-        n_[j] = jj-jjj*mbin_;
+        grid_.n[j] = jj-jjj*mbin_;
         jj = jjj;
       }
       double fsum = 0., fsum2 = 0.;
       for ( unsigned int j=0; j<npoin; j++ ) {
         for ( unsigned int k=0; k<ndim; k++ ) {
-          x[k] = ( uniform() + n_[k] ) * inv_mbin_;
+          x[k] = ( uniform() + grid_.n[k] ) * inv_mbin_;
         }
         const double z = F( x );
-        f_max_[i] = std::max( f_max_[i], z );
+        grid_.f_max[i] = std::max( grid_.f_max[i], z );
         fsum += z;
         fsum2 += z*z;
       }
@@ -282,19 +276,19 @@ namespace CepGen
       sum += av;
       sum2 += av2;
       sum2p += sig2;
-      f_max_global_ = std::max( f_max_global_, f_max_[i] );
+      grid_.f_max_global = std::max( grid_.f_max_global, grid_.f_max[i] );
 
       if ( Logger::get().level >= Logger::DebugInsideLoop ) {
         const double sig = sqrt( sig2 );
-        const double eff = ( f_max_[i] != 0. ) ? f_max_[i]/av : 1.e4;
-        os.str(""); for ( unsigned int j=0; j<ndim; j++ ) { os << n_[j]; if ( j != ndim-1 ) os << ", "; }
+        const double eff = ( grid_.f_max[i] != 0. ) ? grid_.f_max[i]/av : 1.e4;
+        os.str(""); for ( unsigned int j=0; j<ndim; j++ ) { os << grid_.n[j]; if ( j != ndim-1 ) os << ", "; }
         DebuggingInsideLoop( Form( "In iteration #%d:\n\t"
                                    "av   = %f\n\t"
                                    "sig  = %f\n\t"
                                    "fmax = %f\n\t"
                                    "eff  = %f\n\t"
                                    "n = (%s)",
-                                   i, av, sig, f_max_[i], eff, os.str().c_str() ) );
+                                   i, av, sig, grid_.f_max[i], eff, os.str().c_str() ) );
       }
     } // end of main loop
 
@@ -306,8 +300,8 @@ namespace CepGen
       const double sig = sqrt( sum2-sum*sum ), sigp = sqrt( sum2p );
 
       double eff1 = 0.;
-      for ( unsigned int i=0; i<max; i++ ) eff1 += ( f_max_[i] / ( max*sum ) );
-      const double eff2 = f_max_global_/sum;
+      for ( unsigned int i=0; i<max; i++ ) eff1 += ( grid_.f_max[i] / ( max*sum ) );
+      const double eff2 = grid_.f_max_global/sum;
 
       Debugging( Form( "Average function value     =  sum   = %f\n\t"
                        "Average function value**2  =  sum2  = %f\n\t"
@@ -316,9 +310,9 @@ namespace CepGen
                        "Maximum function value     = ffmax  = %f\n\t"
                        "Average inefficiency       =  eff1  = %f\n\t"
                        "Overall inefficiency       =  eff2  = %f\n\t",
-                       sum, sum2, sig, sigp, f_max_global_, eff1, eff2 ) );
+                       sum, sum2, sig, sigp, grid_.f_max_global, eff1, eff2 ) );
     }
-    gen_prepared_ = true;
+    grid_.gen_prepared = true;
     Information( "Grid prepared! Now launching the production." );
   }
 
