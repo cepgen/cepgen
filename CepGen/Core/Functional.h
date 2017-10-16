@@ -41,10 +41,15 @@ namespace CepGen
       /// \param[in] vars List of variables to parse
       Functional( const std::string& expr, const std::array<std::string,N>& vars ) : vars_( vars ), expression_( expr ) {
 #ifdef MUPARSER
-        for ( unsigned short i = 0; i < vars_.size(); ++i ) {
-          parser_.DefineVar( vars_[i], &values_[i] );
+        try {
+          for ( unsigned short i = 0; i < vars_.size(); ++i ) {
+            parser_.DefineVar( vars_[i], &values_[i] );
+          }
+          parser_.SetExpr( expr );
+        } catch ( const mu::Parser::exception_type& e ) {
+          std::ostringstream os; for ( unsigned short i = 0; i < e.GetPos(); ++i ) os << "-"; os << "^";
+          throw Exception( __PRETTY_FUNCTION__, Form( "Failed to define the function\n\t%s\n\t%s\n\t%s", expression_.c_str(), os.str().c_str(), e.GetMsg().c_str() ), JustWarning );
         }
-        parser_.SetExpr( expr );
 #else
         InError( "muParser is not linked to this program! the math evaluator is hence disabled!" );
 #endif
@@ -62,7 +67,8 @@ namespace CepGen
 #ifdef MUPARSER
         values_ = x;
         try { ret = parser_.Eval(); } catch ( const mu::Parser::exception_type& e ) {
-          throw Exception( __PRETTY_FUNCTION__, Form( "Failed to evaluate the function \"%s\":\n\t%s\n\tError at position %d", expression_.c_str(), e.GetMsg().c_str(), e.GetPos() ), JustWarning );
+          std::ostringstream os; for ( unsigned short i = 0; i < e.GetPos(); ++i ) os << "-"; os << "^";
+          throw Exception( __PRETTY_FUNCTION__, Form( "Failed to evaluate the function\n\t%s\n\t%s\n\t%s", expression_.c_str(), os.str().c_str(), e.GetMsg().c_str() ), JustWarning );
         }
 #endif
         return ret;
