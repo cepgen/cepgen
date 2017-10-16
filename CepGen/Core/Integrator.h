@@ -1,7 +1,5 @@
-#ifndef CepGen_Core_Vegas_h
-#define CepGen_Core_Vegas_h
-
-//#include "CepGen/Parameters.h"
+#ifndef CepGen_Core_Integrator_h
+#define CepGen_Core_Integrator_h
 
 #include <gsl/gsl_monte_vegas.h>
 #include <gsl/gsl_rng.h>
@@ -14,25 +12,26 @@ namespace CepGen
   class Parameters;
   /**
    * Main occurence of the Monte-Carlo integrator @cite PeterLepage1978192 developed by G.P. Lepage in 1978
-   * \brief Vegas Monte-Carlo integrator instance
+   * \brief Monte-Carlo integrator instance
    */
-  class Vegas {
+  class Integrator
+  {
     public:
       /**
-       * Book the memory slots and structures for the Vegas integrator
+       * Book the memory slots and structures for the integrator
        * \note This code is based on the Vegas Monte Carlo integration algorithm developed by P. Lepage, as documented in @cite PeterLepage1978192
        * \param[in] dim_ Number of dimensions on which the function will be integrated
        * \param[in] f_ Function to be integrated
        * \param[inout] inParam_ Run parameters to define the phase space on which this integration is performed (embedded in an Parameters object)
        */
-      Vegas( const unsigned int dim_, double f_(double*,size_t,void*), Parameters* inParam_ );
+      Integrator( const unsigned int dim_, double f_(double*,size_t,void*), Parameters* inParam_ );
       /// Class destructor
-      ~Vegas();
+      ~Integrator();
       /**
-       * Vegas algorithm to perform the n-dimensional Monte Carlo integration of a given function as described in @cite PeterLepage1978192
+       * Algorithm to perform the n-dimensional Monte Carlo integration of a given function as described in @cite PeterLepage1978192
        * \author Primary author: G.P. Lepage
        * \author This C++ implementation: GSL
-       * \param[out] result_ The cross section as integrated by Vegas for the given phase space restrictions
+       * \param[out] result_ The cross section as integrated for the given phase space restrictions
        * \param[out] abserr_ The error associated to the computed cross section
        * \return 0 if the integration was performed successfully
        */
@@ -40,7 +39,7 @@ namespace CepGen
       /// Launch the generation of events
       void generate();
       /**
-       * Generate one event according to the grid parameters set in Vegas::SetGen
+       * Generate one event according to the grid parameters set in \a SetGen
        * \brief Generate one single event according to the method defined in the Fortran 77 version of LPAIR
        * \return A boolean stating if the generation was successful (in term of the computed weight for the phase space point)
        */
@@ -82,14 +81,14 @@ namespace CepGen
       void setGen();
       double uniform() const { return gsl_rng_uniform( rng_ ); }
 
-      /// Maximal number of dimensions handled by this Vegas instance
+      /// Maximal number of dimensions handled by this integrator instance
       static constexpr unsigned short max_dimensions_ = 15;
       /// Integration grid size parameter
       static constexpr unsigned short mbin_ = 3;
       static constexpr double inv_mbin_ = 1./mbin_;
 
       /// Selected bin at which the function will be evaluated
-      int vegas_bin_;
+      int ps_bin_;
       double correc_;
       double correc2_;
       /// List of parameters to specify the integration range and the physics determining the phase space
@@ -107,7 +106,7 @@ namespace CepGen
       double f_max_global_;
       std::vector<int> n_;
       std::vector<int> nm_;
-      /// GSL structure storing the function to be integrated by this Vegas instance (along with its parameters)
+      /// GSL structure storing the function to be integrated by this integrator instance (along with its parameters)
       std::unique_ptr<gsl_monte_function> function_;
       gsl_rng* rng_;
       /// Number of function calls to be computed for each point

@@ -54,9 +54,9 @@ namespace CepGen
       registerParameter<bool>( "IEND", "Generation type", &params->generation.enabled );
 
       registerParameter<unsigned int>( "DEBG", "Debugging verbosity", (unsigned int*)&Logger::get().level );
-      registerParameter<unsigned int>( "NCVG", "Number of function calls", &params->vegas.ncvg );
-      registerParameter<unsigned int>( "NCSG", "Number of points to probe", &params->vegas.npoints );
-      registerParameter<unsigned int>( "ITVG", "Number of Vegas iterations", &params->vegas.itvg );
+      registerParameter<unsigned int>( "NCVG", "Number of function calls", &params->integrator.ncvg );
+      registerParameter<unsigned int>( "NCSG", "Number of points to probe", &params->integrator.npoints );
+      registerParameter<unsigned int>( "ITVG", "Number of integration iterations", &params->integrator.itvg );
       registerParameter<unsigned int>( "MODE", "Subprocess' mode", (unsigned int*)&params->kinematics.mode );
       registerParameter<unsigned int>( "PMOD", "Outgoing primary particles' mode", (unsigned int*)&params->kinematics.structure_functions );
       registerParameter<unsigned int>( "EMOD", "Outgoing primary particles' mode", (unsigned int*)&params->kinematics.structure_functions );

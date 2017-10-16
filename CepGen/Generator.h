@@ -38,7 +38,7 @@ namespace CepGen
   double f( double*, size_t, void* );
 
   class Event;
-  class Vegas;
+  class Integrator;
   class Parameters;
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -110,7 +110,7 @@ namespace CepGen
       /// Prepare the function before its integration (add particles/compute kinematics/...)
       void prepareFunction();
       /// Vegas instance which will integrate the function
-      std::unique_ptr<Vegas> vegas_;
+      std::unique_ptr<Integrator> integrator_;
       /// Cross section value computed at the last integration
       double cross_section_;
       /// Error on the cross section as computed in the last integration

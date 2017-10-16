@@ -45,7 +45,8 @@ namespace CepGen
         if ( proc.exists( "out_kinematics" ) ) parseOutgoingKinematics( proc["out_kinematics"] );
 
         //--- generation parameters
-        if ( root.exists( "vegas" ) ) parseVegas( root["vegas"] );
+        if ( root.exists( "integrator" ) ) parseIntegrator( root["integrator"] );
+        if ( root.exists( "vegas" ) ) parseIntegrator( root["vegas"] ); //FIXME for backward compatibility
         if ( root.exists( "generator" ) ) parseGenerator( root["generator"] );
 
         //--- taming functions
@@ -121,13 +122,13 @@ namespace CepGen
     }
 
     void
-    ConfigHandler::parseVegas( const libconfig::Setting& veg )
+    ConfigHandler::parseIntegrator( const libconfig::Setting& integr )
     {
       try {
-        if ( veg.exists( "num_points" ) ) params_.vegas.npoints = (int)veg["num_points"];
-        if ( veg.exists( "num_integration_calls" ) ) params_.vegas.ncvg = (int)veg["num_integration_calls"];
-        if ( veg.exists( "num_integration_iterations" ) ) params_.vegas.itvg = (int)veg["num_integration_iterations"];
-        if ( veg.exists( "seed" ) ) params_.vegas.seed = (unsigned long)veg["seed"];
+        if ( integr.exists( "num_points" ) ) params_.integrator.npoints = (int)integr["num_points"];
+        if ( integr.exists( "num_integration_calls" ) ) params_.integrator.ncvg = (int)integr["num_integration_calls"];
+        if ( integr.exists( "num_integration_iterations" ) ) params_.integrator.itvg = (int)integr["num_integration_iterations"];
+        if ( integr.exists( "seed" ) ) params_.integrator.seed = (unsigned long)integr["seed"];
       } catch ( const libconfig::SettingNotFoundException& nfe ) {
         FatalError( Form( "Failed to retrieve the field \"%s\".", nfe.getPath() ) );
       }
@@ -217,13 +218,13 @@ namespace CepGen
     }
 
     void
-    ConfigHandler::writeVegas( const Parameters* params, libconfig::Setting& root )
+    ConfigHandler::writeIntegrator( const Parameters* params, libconfig::Setting& root )
     {
-      libconfig::Setting& veg = root.add( "vegas", libconfig::Setting::TypeGroup );
-      veg.add( "num_points", libconfig::Setting::TypeInt ) = (int)params->vegas.npoints;
-      veg.add( "num_integration_calls", libconfig::Setting::TypeInt ) = (int)params->vegas.ncvg;
-      veg.add( "num_integration_iterations", libconfig::Setting::TypeInt ) = (int)params->vegas.itvg;
-      veg.add( "seed", libconfig::Setting::TypeInt64 ) = (long)params->vegas.seed;
+      libconfig::Setting& integr = root.add( "integrator", libconfig::Setting::TypeGroup );
+      integr.add( "num_points", libconfig::Setting::TypeInt ) = (int)params->integrator.npoints;
+      integr.add( "num_integration_calls", libconfig::Setting::TypeInt ) = (int)params->integrator.ncvg;
+      integr.add( "num_integration_iterations", libconfig::Setting::TypeInt ) = (int)params->integrator.itvg;
+      integr.add( "seed", libconfig::Setting::TypeInt64 ) = (long)params->integrator.seed;
     }
 
     void
@@ -246,7 +247,7 @@ namespace CepGen
       writeIncomingKinematics( params, root["process"] );
       writeOutgoingKinematics( params, root["process"] );
       writeTamingFunctions( params, root["process"] );
-      writeVegas( params, root );
+      writeIntegrator( params, root );
       writeGenerator( params, root );
       cfg.writeFile( file );
 #endif

@@ -1,4 +1,4 @@
-#include "Vegas.h"
+#include "Integrator.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Core/Exception.h"
 
@@ -6,8 +6,8 @@
 
 namespace CepGen
 {
-  Vegas::Vegas( const unsigned int dim, double f_( double*, size_t, void* ), Parameters* param ) :
-    vegas_bin_( 0 ), correc_( 0. ), correc2_( 0. ),
+  Integrator::Integrator( const unsigned int dim, double f_( double*, size_t, void* ), Parameters* param ) :
+    ps_bin_( 0 ), correc_( 0. ), correc2_( 0. ),
     input_params_( param ),
     grid_prepared_( false ), gen_prepared_( false ),
     f_max2_( 0. ), f_max_diff_( 0. ), f_max_old_( 0. ), f_max_global_( 0. ),
@@ -17,14 +17,14 @@ namespace CepGen
     function_->f = f_;
     function_->dim = dim;
     function_->params = (void*)param;
-    num_converg_ = param->vegas.ncvg;
-    num_iter_ = param->vegas.itvg;
+    num_converg_ = param->integrator.ncvg;
+    num_iter_ = param->integrator.itvg;
 
     //--- initialise the random number generator
     gsl_rng_env_setup();
     rng_ = gsl_rng_alloc( gsl_rng_default );
-    unsigned long seed = ( param->vegas.seed > 0 )
-      ? param->vegas.seed
+    unsigned long seed = ( param->integrator.seed > 0 )
+      ? param->integrator.seed
       : time( nullptr ); // seed with time
     gsl_rng_set( rng_, seed );
 
@@ -33,21 +33,21 @@ namespace CepGen
                      "Number of function calls:         %d", dim, num_iter_, num_converg_ ) );
   }
 
-  Vegas::~Vegas()
+  Integrator::~Integrator()
   {
     if ( rng_ ) gsl_rng_free( rng_ );
   }
 
   int
-  Vegas::integrate( double& result, double& abserr )
+  Integrator::integrate( double& result, double& abserr )
   {
-    //--- prepare Vegas
+    //--- prepare integrator
     gsl_monte_vegas_state* state = gsl_monte_vegas_alloc( function_->dim );
 
     //--- integration bounds
     std::vector<double> x_low( function_->dim, 0. ), x_up( function_->dim, 1. );
 
-    //--- launch Vegas
+    //--- launch integration
     int veg_res;
 
     //----- warmup (prepare the grid)
@@ -61,14 +61,14 @@ namespace CepGen
       PrintMessage( Form( ">> Iteration %2d: average = %10.6f   sigma = %10.6f   chi2 = %4.3f", i+1, result, abserr, gsl_monte_vegas_chisq( state ) ) );
     }
 
-    //--- clean Vegas
+    //--- clean integrator
     gsl_monte_vegas_free( state );
 
     return veg_res;
   }
 
   void
-  Vegas::generate()
+  Integrator::generate()
   {
     std::ofstream of;
     std::string fn;
@@ -85,7 +85,7 @@ namespace CepGen
   }
 
   bool
-  Vegas::generateOneEvent()
+  Integrator::generateOneEvent()
   {
     if ( !gen_prepared_ ) setGen();
 
@@ -95,7 +95,7 @@ namespace CepGen
 
     //--- correction cycles
     
-    if ( vegas_bin_ != 0 ) {
+    if ( ps_bin_ != 0 ) {
       bool has_correction = false;
       while ( !correctionCycle( x, has_correction ) ) {}
       if ( has_correction ) return storeEvent( x );
@@ -106,16 +106,16 @@ namespace CepGen
 
     //--- normal generation cycle
 
-    //----- select a Vegas bin and reject if fmax is too small
+    //----- select a Integrator bin and reject if fmax is too small
     do {
       do {
         // ...
-        vegas_bin_ = uniform() * max;
+        ps_bin_ = uniform() * max;
         y = uniform() * f_max_global_;
-        nm_[vegas_bin_] += 1;
-      } while ( y > f_max_[vegas_bin_] );
-      // Select x values in this Vegas bin
-      int jj = vegas_bin_;
+        nm_[ps_bin_] += 1;
+      } while ( y > f_max_[ps_bin_] );
+      // Select x values in this Integrator bin
+      int jj = ps_bin_;
       for ( unsigned int i=0; i<ndim; i++ ) {
         int jjj = jj / mbin_;
         n_[i] = jj - jjj * mbin_;
@@ -127,23 +127,23 @@ namespace CepGen
       weight = F( x );
     } while ( y > weight );
 
-    if ( weight <= f_max_[vegas_bin_] ) vegas_bin_ = 0;
+    if ( weight <= f_max_[ps_bin_] ) ps_bin_ = 0;
     // Init correction cycle if weight is higher than fmax or ffmax
     else if ( weight <= f_max_global_ ) {
-      f_max_old_ = f_max_[vegas_bin_];
-      f_max_[vegas_bin_] = weight;
+      f_max_old_ = f_max_[ps_bin_];
+      f_max_[ps_bin_] = weight;
       f_max_diff_ = weight-f_max_old_;
-      correc_ = ( nm_[vegas_bin_] - 1. ) * f_max_diff_ / f_max_global_ - 1.;
+      correc_ = ( nm_[ps_bin_] - 1. ) * f_max_diff_ / f_max_global_ - 1.;
     }
     else {
-      f_max_old_ = f_max_[vegas_bin_];
-      f_max_[vegas_bin_] = weight;
+      f_max_old_ = f_max_[ps_bin_];
+      f_max_[ps_bin_] = weight;
       f_max_diff_ = weight-f_max_old_;
       f_max_global_ = weight;
-      correc_ = ( nm_[vegas_bin_] - 1. ) * f_max_diff_ / f_max_global_ * weight / f_max_global_ - 1.;
+      correc_ = ( nm_[ps_bin_] - 1. ) * f_max_diff_ / f_max_global_ * weight / f_max_global_ - 1.;
     }
 
-    Debugging( Form( "Correction applied: %f, Vegas bin = %d", correc_, vegas_bin_ ) );
+    Debugging( Form( "Correction applied: %f, phase space bin = %d", correc_, ps_bin_ ) );
 
     // Return with an accepted event
     if ( weight > 0. ) return storeEvent( x );
@@ -151,7 +151,7 @@ namespace CepGen
   }
 
   bool
-  Vegas::correctionCycle( std::vector<double>& x, bool& has_correction )
+  Integrator::correctionCycle( std::vector<double>& x, bool& has_correction )
   {
     double weight;
     const unsigned int ndim = function_->dim;
@@ -159,20 +159,20 @@ namespace CepGen
     Debugging( Form( "Correction cycles are started.\n\t"
                      "j = %f"
                      "correc = %f"
-                     "corre2 = %f", vegas_bin_, correc2_ ) );
+                     "corre2 = %f", ps_bin_, correc2_ ) );
 
     if ( correc_ >= 1. ) correc_ -= 1.;
     if ( uniform() < correc_ ) {
       correc_ = -1.;
       std::vector<double> xtmp( ndim, 0. );
-      // Select x values in Vegas bin
+      // Select x values in phase space bin
       for ( unsigned int k=0; k<ndim; k++ ) {
         xtmp[k] = ( uniform() + n_[k] ) * inv_mbin_;
       }
       // Compute weight for x value
       weight = F( xtmp );
       // Parameter for correction of correction
-      if ( weight > f_max_[vegas_bin_] ) {
+      if ( weight > f_max_[ps_bin_] ) {
         if ( weight > f_max2_ ) f_max2_ = weight;
         correc2_ -= 1.;
         correc_ += 1.;
@@ -189,16 +189,16 @@ namespace CepGen
     }
     // Correction if too big weight is found while correction
     // (All your bases are belong to us...)
-    if ( f_max2_ > f_max_[vegas_bin_] ) {
-      f_max_old_ = f_max_[vegas_bin_];
-      f_max_[vegas_bin_] = f_max2_;
+    if ( f_max2_ > f_max_[ps_bin_] ) {
+      f_max_old_ = f_max_[ps_bin_];
+      f_max_[ps_bin_] = f_max2_;
       f_max_diff_ = f_max2_-f_max_old_;
       if ( f_max2_ < f_max_global_ ) {
-        correc_ = ( nm_[vegas_bin_] - 1. ) * f_max_diff_ / f_max_global_ - correc2_;
+        correc_ = ( nm_[ps_bin_] - 1. ) * f_max_diff_ / f_max_global_ - correc2_;
       }
       else {
         f_max_global_ = f_max2_;
-        correc_ = ( nm_[vegas_bin_] - 1. ) * f_max_diff_ / f_max_global_ * f_max2_ / f_max_global_ - correc2_;
+        correc_ = ( nm_[ps_bin_] - 1. ) * f_max_diff_ / f_max_global_ * f_max2_ / f_max_global_ - correc2_;
       }
       correc2_ = 0.;
       f_max2_ = 0.;
@@ -208,7 +208,7 @@ namespace CepGen
   }
 
   bool
-  Vegas::storeEvent( const std::vector<double>& x )
+  Integrator::storeEvent( const std::vector<double>& x )
   {
     input_params_->setStorage( true );
     F( x );
@@ -222,9 +222,9 @@ namespace CepGen
   }
 
   void
-  Vegas::setGen()
+  Integrator::setGen()
   {
-    Information( Form( "Preparing the grid for the generation of unweighted events: %d points", input_params_->vegas.npoints ) );
+    Information( Form( "Preparing the grid for the generation of unweighted events: %d points", input_params_->integrator.npoints ) );
     // Variables for debugging
     std::ostringstream os;
     if ( Logger::get().level >= Logger::Debug ) {
@@ -233,7 +233,7 @@ namespace CepGen
 
     const unsigned int ndim = function_->dim,
                        max = pow( mbin_, ndim ),
-                       npoin = input_params_->vegas.npoints;
+                       npoin = input_params_->integrator.npoints;
     const double inv_npoin = 1./npoin;
 
     if ( ndim > max_dimensions_ ) {
