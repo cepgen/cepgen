@@ -2,6 +2,7 @@
 #define CepGen_Core_Integrator_h
 
 #include <gsl/gsl_monte_vegas.h>
+#include <gsl/gsl_monte_miser.h>
 #include <gsl/gsl_rng.h>
 
 #include <vector>
@@ -17,6 +18,7 @@ namespace CepGen
   class Integrator
   {
     public:
+      enum Type { Vegas = 1, MISER = 2 };
       /**
        * Book the memory slots and structures for the integrator
        * \note This code is based on the Vegas Monte Carlo integration algorithm developed by P. Lepage, as documented in @cite PeterLepage1978192
@@ -24,7 +26,7 @@ namespace CepGen
        * \param[in] f_ Function to be integrated
        * \param[inout] inParam_ Run parameters to define the phase space on which this integration is performed (embedded in an Parameters object)
        */
-      Integrator( const unsigned int dim_, double f_(double*,size_t,void*), Parameters* inParam_ );
+      Integrator( const unsigned int dim_, double f_(double*,size_t,void*), Parameters* inParam_, const Type& type = Vegas );
       /// Class destructor
       ~Integrator();
       /**
@@ -87,6 +89,7 @@ namespace CepGen
       static constexpr unsigned short mbin_ = 3;
       static constexpr double inv_mbin_ = 1./mbin_;
 
+      Type algorithm_;
       /// Selected bin at which the function will be evaluated
       int ps_bin_;
       double correc_;

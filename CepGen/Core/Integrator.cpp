@@ -6,7 +6,8 @@
 
 namespace CepGen
 {
-  Integrator::Integrator( const unsigned int dim, double f_( double*, size_t, void* ), Parameters* param ) :
+  Integrator::Integrator( const unsigned int dim, double f_( double*, size_t, void* ), Parameters* param, const Type& type ) :
+    algorithm_( type ),
     ps_bin_( 0 ), correc_( 0. ), correc2_( 0. ),
     input_params_( param ),
     grid_prepared_( false ), gen_prepared_( false ),
@@ -41,30 +42,38 @@ namespace CepGen
   int
   Integrator::integrate( double& result, double& abserr )
   {
-    //--- prepare integrator
-    gsl_monte_vegas_state* state = gsl_monte_vegas_alloc( function_->dim );
+    int res = -1;
+    gsl_monte_vegas_state* veg_state;
+    gsl_monte_miser_state* mis_state;
 
     //--- integration bounds
     std::vector<double> x_low( function_->dim, 0. ), x_up( function_->dim, 1. );
 
-    //--- launch integration
-    int veg_res;
+    //--- prepare integrator
+    if      ( algorithm_ == Vegas ) veg_state = gsl_monte_vegas_alloc( function_->dim );
+    else if ( algorithm_ == MISER ) mis_state = gsl_monte_miser_alloc( function_->dim );
 
-    //----- warmup (prepare the grid)
-    if ( !grid_prepared_ ) {
-      veg_res = gsl_monte_vegas_integrate( function_.get(), &x_low[0], &x_up[0], function_->dim, 10000, rng_, state, &result, &abserr );
-      grid_prepared_ = true;
+    if ( algorithm_ == Vegas ) {
+      //----- Vegas warmup (prepare the grid)
+      if ( !grid_prepared_ ) {
+        res = gsl_monte_vegas_integrate( function_.get(), &x_low[0], &x_up[0], function_->dim, 10000, rng_, veg_state, &result, &abserr );
+        grid_prepared_ = true;
+      }
+      //----- integration
+      for ( unsigned int i=0; i<num_iter_; i++ ) {
+        res = gsl_monte_vegas_integrate( function_.get(), &x_low[0], &x_up[0], function_->dim, 0.2*num_converg_, rng_, veg_state, &result, &abserr );
+        PrintMessage( Form( ">> Iteration %2d: average = %10.6f   sigma = %10.6f   chi2 = %4.3f", i+1, result, abserr, gsl_monte_vegas_chisq( veg_state ) ) );
+      }
     }
     //----- integration
-    for ( unsigned int i=0; i<num_iter_; i++ ) {
-      veg_res = gsl_monte_vegas_integrate( function_.get(), &x_low[0], &x_up[0], function_->dim, 0.2*num_converg_, rng_, state, &result, &abserr );
-      PrintMessage( Form( ">> Iteration %2d: average = %10.6f   sigma = %10.6f   chi2 = %4.3f", i+1, result, abserr, gsl_monte_vegas_chisq( state ) ) );
-    }
+    else if ( algorithm_ == MISER )
+      res = gsl_monte_miser_integrate( function_.get(), &x_low[0], &x_up[0], function_->dim, 0.2*num_converg_, rng_, mis_state, &result, &abserr );
 
     //--- clean integrator
-    gsl_monte_vegas_free( state );
+    if      ( algorithm_ == Vegas ) gsl_monte_vegas_free( veg_state );
+    else if ( algorithm_ == MISER ) gsl_monte_miser_free( mis_state );
 
-    return veg_res;
+    return res;
   }
 
   void
