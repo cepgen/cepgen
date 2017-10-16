@@ -1,17 +1,19 @@
 #ifndef CepGen_Parameters_h
 #define CepGen_Parameters_h
 
-#include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Core/TamingFunction.h"
 #include "CepGen/Core/Integrator.h"
+#include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Processes/GenericProcess.h"
 
 #include <memory>
 
 namespace CepGen
 {
-  class Kinematics;
+  class Event;
   /// List of parameters used to start and run the simulation job
-  class Parameters {
+  class Parameters
+  {
     public:
       Parameters();
       /// Copy constructor (transfers ownership to the process!)
@@ -31,7 +33,7 @@ namespace CepGen
       /// Process for which the cross-section will be computed and the events will be generated
       Process::GenericProcess* process() { return process_.get(); }
       /// Name of the process considered
-      std::string processName() const { return ( process_ ) ? process_->name() : "no process"; }
+      std::string processName() const;
       /// Set the process to study
       void setProcess( Process::GenericProcess* proc ) { process_.reset( proc ); }
 

@@ -1,5 +1,6 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Processes/GenericProcess.h"
 
 namespace CepGen
 {
@@ -33,6 +34,13 @@ namespace CepGen
       Debugging( Form( "eta in range: %s => theta(min) = %5.2f, theta(max) = %5.2f",
                        os.str().c_str(), thetamin, thetamax ) );
     }
+  }
+
+  std::string
+  Parameters::processName() const
+  {
+    if ( process_ ) return process_->name();
+    return "no process";
   }
 
   void

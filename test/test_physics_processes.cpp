@@ -12,17 +12,19 @@
 #include <unordered_map>
 #include <assert.h>
 
+using namespace std;
+
 int
 main( int argc, char* argv[] )
 {
-  typedef std::vector<std::pair<std::string,std::pair<double,double> > > KinematicsMap;
-  typedef std::vector<std::pair<float, KinematicsMap> > ValuesAtCutMap;
+  typedef vector<pair<string,pair<double,double> > > KinematicsMap;
+  typedef vector<pair<float, KinematicsMap> > ValuesAtCutMap;
 
   AbortHandler ctrl_c;
 
   // values defined at pt(single lepton)>15 GeV, |eta(single lepton)|<2.5, mX<1000 GeV
   // process -> { pt cut -> { kinematics -> ( sigma, delta(sigma) ) } }
-  std::vector<std::pair<std::string,ValuesAtCutMap> > values_map = {
+  vector<pair<string,ValuesAtCutMap> > values_map = {
     //--- LPAIR values at sqrt(s) = 13 TeV
     { "lpair", {
       { 3.0, { // pt cut
@@ -55,12 +57,17 @@ main( int argc, char* argv[] )
 
   const double num_sigma = 3.0;
 
-  if ( argc == 1 || strcmp( argv[1], "debug" ) != 0 ) {
+  if ( argc < 3 || strcmp( argv[2], "debug" ) != 0 ) {
     CepGen::Logger::get().level = CepGen::Logger::Nothing;
   }
 
   Timer tmr;
   CepGen::Generator mg;
+
+  if ( argc > 1 && strcmp( argv[1], "vegas" ) == 0 ) mg.parameters->integrator.type = CepGen::Integrator::Vegas;
+  if ( argc > 1 && strcmp( argv[1], "miser" ) == 0 ) mg.parameters->integrator.type = CepGen::Integrator::MISER;
+  //{ ostringstream os; os << mg.parameters->integrator.type; Information( Form( "Testing with %s", os.str().c_str() ) ); }
+  { cout << "Testing with " << mg.parameters->integrator.type << endl; }
 
   mg.parameters->kinematics.setSqrtS( 13.e3 );
   mg.parameters->kinematics.central_cuts[CepGen::Cuts::eta_single].in( -2.5, 2.5 );
@@ -72,7 +79,7 @@ main( int argc, char* argv[] )
   tmr.reset();
 
   unsigned short num_tests = 0, num_tests_passed = 0;
-  std::vector<std::string> failed_tests, passed_tests;
+  vector<string> failed_tests, passed_tests;
 
   try {
     for ( const auto& values_vs_generator : values_map ) { // loop over all generators
@@ -86,12 +93,12 @@ main( int argc, char* argv[] )
       for ( const auto& values_vs_cut : values_vs_generator.second ) { // loop over the single lepton pT cut
         mg.parameters->kinematics.central_cuts[CepGen::Cuts::pt_single].min() = values_vs_cut.first;
         for ( const auto& values_vs_kin : values_vs_cut.second ) { // loop over all possible kinematics
-          if      ( values_vs_kin.first.find( "elastic"    ) != std::string::npos ) mg.parameters->kinematics.mode = CepGen::Kinematics::ElasticElastic;
-          else if ( values_vs_kin.first.find( "singlediss" ) != std::string::npos ) mg.parameters->kinematics.mode = CepGen::Kinematics::InelasticElastic;
-          else if ( values_vs_kin.first.find( "doublediss" ) != std::string::npos ) mg.parameters->kinematics.mode = CepGen::Kinematics::InelasticInelastic;
+          if      ( values_vs_kin.first.find( "elastic"    ) != string::npos ) mg.parameters->kinematics.mode = CepGen::Kinematics::ElasticElastic;
+          else if ( values_vs_kin.first.find( "singlediss" ) != string::npos ) mg.parameters->kinematics.mode = CepGen::Kinematics::InelasticElastic;
+          else if ( values_vs_kin.first.find( "doublediss" ) != string::npos ) mg.parameters->kinematics.mode = CepGen::Kinematics::InelasticInelastic;
           else { InError( Form( "Unrecognized kinematics mode: %s", values_vs_kin.first.c_str() ) ); break; }
 
-          if ( values_vs_kin.first.find( "_su" ) != std::string::npos ) mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SzczurekUleshchenko;
+          if ( values_vs_kin.first.find( "_su" ) != string::npos ) mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SzczurekUleshchenko;
           else mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SuriYennie;
 
           Information( Form( "Process: %s/%s\n\tConfiguration time: %.3f ms", values_vs_generator.first.c_str(), values_vs_kin.first.c_str(), tmr.elapsed()*1.e3 ) );
@@ -109,7 +116,7 @@ main( int argc, char* argv[] )
           Information( Form( "Computation time: %.3f ms", tmr.elapsed()*1.e3 ) );
           tmr.reset();
 
-          std::string test_res = values_vs_generator.first+":"+
+          string test_res = values_vs_generator.first+":"+
                                  Form( "pt-gt-%.1f", values_vs_cut.first )+":"+
                                  values_vs_kin.first+":"
                                  "ref="+Form( "%.3e", xsec_ref )+":"
@@ -123,15 +130,15 @@ main( int argc, char* argv[] )
             failed_tests.emplace_back( test_res );
           }
           num_tests++;
-          std::cout << "Test " << num_tests_passed << "/" << num_tests << " passed!" << std::endl;
+          cout << "Test " << num_tests_passed << "/" << num_tests << " passed!" << endl;
         }
       }
     }
   } catch ( CepGen::Exception& e ) {}
   if ( failed_tests.size() != 0 ) {
-    std::ostringstream os_failed, os_passed;
-    for ( const auto& fail : failed_tests ) os_failed << " (*) " << fail << std::endl;
-    for ( const auto& pass : passed_tests ) os_passed << " (*) " << pass << std::endl;
+    ostringstream os_failed, os_passed;
+    for ( const auto& fail : failed_tests ) os_failed << " (*) " << fail << endl;
+    for ( const auto& pass : passed_tests ) os_passed << " (*) " << pass << endl;
     throw CepGen::Exception( __PRETTY_FUNCTION__, Form( "Some tests failed!\n%s\nPassed tests:\n%s", os_failed.str().c_str(), os_passed.str().c_str() ), CepGen::FatalError );
   }
   else Information( "ALL TESTS PASSED!" );

@@ -3,6 +3,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Parameters.h"
 
 #include <sstream>

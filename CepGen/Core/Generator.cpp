@@ -4,6 +4,7 @@
 #include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Event/Event.h"
 
 #include <fstream>

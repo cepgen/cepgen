@@ -1,6 +1,7 @@
 #include "Integrator.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Event/Event.h"
 
 #include <fstream>
 
