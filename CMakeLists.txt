@@ -22,7 +22,6 @@ set(CEPGEN_MODULES Processes Event Physics StructureFunctions Export)
 #----- enable fortran (for Pythia/Herwig/...)
 
 enable_language(Fortran)
-add_subdirectory(External)
 
 #----- include external paths
 
