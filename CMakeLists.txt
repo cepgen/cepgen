@@ -49,7 +49,7 @@ endif()
 if(HEPMC_LIB)
   message(STATUS "HepMC found in ${HEPMC_INCLUDE}")
   include_directories(${HEPMC_INCLUDE})
-  list(APPEND CEPGEN_EXTERNAL_REQS ${HEPMC_LIB})
+  list(APPEND CEPGEN_EXTERNAL_REQS ${HEPMC_LIB} ${HEPMC_FIO_LIB})
   add_definitions(-DLIBHEPMC)
 endif()
 
