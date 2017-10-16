@@ -13,7 +13,7 @@ namespace CepGen
     class TestProcess : public GenericProcess
     {
       public:
-        TestProcess<3>() :
+        TestProcess() :
           GenericProcess( "test", ".oO TEST PROCESS Oo.", false ),
           funct_( "1./(1.-cos(x*_pi)*cos(y*_pi)*cos(z*_pi))", { { "x", "y", "z" } } ) {}
         TestProcess( const char* formula, std::array<std::string,N> args ) :
