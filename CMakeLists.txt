@@ -45,6 +45,7 @@ if(LHAPDF)
   message(STATUS "LHAPDF found in ${LHAPDF}")
   add_definitions(-DLIBLHAPDF)
   list(APPEND CEPGEN_EXTERNAL_REQS ${LHAPDF})
+  include_directories(${LHAPDF_INCLUDE})
 endif()
 if(HEPMC_LIB)
   message(STATUS "HepMC found in ${HEPMC_INCLUDE}")
@@ -56,10 +57,8 @@ endif()
 if(PYTHIA8)
   message(STATUS "Pythia8 found in ${PYTHIA8}")
   list(APPEND CEPGEN_EXTERNAL_REQS ${PYTHIA8})
+  include_directories(${PYTHIA8_INCLUDE})
 endif()
-
-include_directories(${LHAPDF_INCLUDE})
-include_directories(${PYTHIA8_INCLUDE})
 
 #----- build all the intermediate objects
 
