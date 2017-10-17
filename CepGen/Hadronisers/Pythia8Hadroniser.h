@@ -35,7 +35,13 @@ namespace CepGen
           pythia_->readString( param );
 #endif
         }
-        bool init() { return pythia_->init(); }
+        bool init() {
+#ifdef PYTHIA8
+          return pythia_->init();
+#else
+          return true;
+#endif
+        }
 
       private:
 #ifdef PYTHIA8
