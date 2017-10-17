@@ -72,12 +72,12 @@ namespace CepGen
       registerParameter<unsigned int>( "NCVG", "Number of function calls", &params->integrator.ncvg );
       registerParameter<unsigned int>( "NCSG", "Number of points to probe", &params->integrator.npoints );
       registerParameter<unsigned int>( "ITVG", "Number of integration iterations", &params->integrator.itvg );
+      registerParameter<unsigned int>( "SEED", "Random generator seed", (unsigned int*)&params->integrator.seed );
       registerParameter<unsigned int>( "MODE", "Subprocess' mode", (unsigned int*)&params->kinematics.mode );
       registerParameter<unsigned int>( "PMOD", "Outgoing primary particles' mode", (unsigned int*)&params->kinematics.structure_functions );
       registerParameter<unsigned int>( "EMOD", "Outgoing primary particles' mode", (unsigned int*)&params->kinematics.structure_functions );
       registerParameter<unsigned int>( "PAIR", "Outgoing particles' PDG id", (unsigned int*)&pair_ );
       registerParameter<unsigned int>( "NGEN", "Number of events to generate", &params->generation.maxgen );
-      registerParameter<unsigned int>( "SEED", "Random generator seed", (unsigned int*)&params->vegas.seed );
 
       registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params->kinematics.inp.first );
       registerParameter<double>( "INPE", "Momentum (2nd primary particle)", &params->kinematics.inp.second );

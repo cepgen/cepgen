@@ -8,7 +8,6 @@
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Processes/GamGamLL.h"
-#include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 

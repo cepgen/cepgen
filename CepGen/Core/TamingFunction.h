@@ -2,6 +2,7 @@
 #define CepGen_Core_TamingFunction_h
 
 #include "Functional.h"
+#include <map>
 
 namespace CepGen
 {
