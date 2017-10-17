@@ -78,6 +78,8 @@ namespace CepGen
       std::pair<double,double> inp;
       /// Set the incoming particles' momenta (if the collision is symmetric)
       inline void setSqrtS( double sqrts ) { inp = { sqrts*0.5, sqrts*0.5 }; }
+      /// Process centre of mass energy
+      inline double sqrtS() const { return ( inp.first+inp.second ); }
       /// Beam/primary particle's PDG identifier
       std::pair<Particle::ParticleCode,Particle::ParticleCode> inpdg;
       /// PDG id of the outgoing central particles

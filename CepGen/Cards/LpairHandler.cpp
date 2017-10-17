@@ -1,6 +1,10 @@
 #include "LpairHandler.h"
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Processes/GamGamLL.h"
+#include "CepGen/Processes/PPtoLL.h"
+#include "CepGen/Processes/PPtoWW.h"
+
 #include <fstream>
 
 namespace CepGen

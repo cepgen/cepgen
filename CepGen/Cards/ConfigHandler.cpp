@@ -1,6 +1,10 @@
 #include "ConfigHandler.h"
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Processes/GamGamLL.h"
+#include "CepGen/Processes/PPtoLL.h"
+#include "CepGen/Processes/PPtoWW.h"
+
 namespace CepGen
 {
   namespace Cards
