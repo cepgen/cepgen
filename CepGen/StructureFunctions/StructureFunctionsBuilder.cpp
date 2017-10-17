@@ -15,6 +15,8 @@ namespace CepGen
   StructureFunctionsBuilder::get( const StructureFunctions::Type& sf_type, double q2, double xbj )
   {
     switch ( sf_type ) {
+      case StructureFunctions::Electron: case StructureFunctions::ElasticProton:
+        return StructureFunctions(); break;
       case StructureFunctions::SzczurekUleshchenko: { const SF::SzczurekUleshchenko su; return su( q2, xbj ); } break;
       case StructureFunctions::SuriYennie:          { const SF::SuriYennie sy; return sy( q2, xbj ); } break;
       case StructureFunctions::FioreBrasse:         { const SF::FioreBrasse fb; return fb( q2, xbj ); } break;
@@ -25,7 +27,7 @@ namespace CepGen
       case StructureFunctions::GD07p:               { const SF::ALLM gd07p( SF::ALLM::Parameterisation::gd07p() ); return gd07p( q2, xbj ); } break;
       case StructureFunctions::GD11p:               { const SF::ALLM gd11p( SF::ALLM::Parameterisation::gd11p() ); return gd11p( q2, xbj ); } break;
       case StructureFunctions::Schaefer:            { const SF::Schaefer luxlike; return luxlike( q2, xbj ); } break;
-      default: return StructureFunctions(); //FIXME
     }
+    return StructureFunctions(); //FIXME
   }
 }

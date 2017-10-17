@@ -123,7 +123,7 @@ GamGamLL::pickin()
          t1_min = ( w31_*d3+( d3-w31_ )*( d3*w1_-w31_*w2_ )/s_ )/t1_max; // definition from eq. (A.5) in [1]
 
   // FIXME dropped in CDF version
-  const Kinematics::Limits q2_limits = cuts_.initial_cuts[Cuts::q2];
+  const Kinematics::Limits q2_limits = cuts_.cuts.initial[Cuts::q2];
   if ( t1_max > -q2_limits.min() ) { InWarning( Form( "t1max = %f > -q2min = %f", t1_max, -q2_limits.min() ) ); return false; }
   if ( t1_min < -q2_limits.max() && q2_limits.hasMax() ) { Debugging( Form( "t1min = %f < -q2max = %f", t1_min, -q2_limits.max() ) ); return false; }
   if ( t1_max < -q2_limits.max() && q2_limits.hasMax() ) t1_max = -q2_limits.max();
@@ -443,7 +443,7 @@ double
 GamGamLL::computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dw )
 {
   const double mx0 = Particle::massFromPDGId( Particle::Proton )+Particle::massFromPDGId( Particle::PiPlus ); // 1.07
-  const Kinematics::Limits mx_limits = cuts_.remnant_cuts[Cuts::mass];
+  const Kinematics::Limits mx_limits = cuts_.cuts.remnants[Cuts::mass];
   const double wx2min = pow( std::max( mx0, mx_limits.min() ), 2 ),
                wx2max = pow( std::min( sqs_-outmass-2.*lepmass, mx_limits.max() ), 2 );
 
@@ -506,7 +506,7 @@ GamGamLL::computeWeight()
 
   DebuggingInsideLoop( Form( "sqrt(s)=%f\n\tm(X1)=%f\tm(X2)=%f", sqs_, MX_, MY_ ) );
 
-  Kinematics::Limits& w_limits = cuts_.initial_cuts[Cuts::w];
+  Kinematics::Limits& w_limits = cuts_.cuts.initial[Cuts::w];
   if ( !w_limits.hasMax() ) w_limits.max() = s_;
 
   // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
@@ -704,7 +704,7 @@ GamGamLL::computeWeight()
 
   //--- cut on mass of final hadronic system (MX/Y)
 
-  const Kinematics::Limits mx_limits = cuts_.remnant_cuts[Cuts::mass];
+  const Kinematics::Limits mx_limits = cuts_.cuts.remnants[Cuts::mass];
   if ( cuts_.mode == Kinematics::InelasticElastic || cuts_.mode == Kinematics::InelasticInelastic ) {
     if ( mx_limits.hasMin() && MX_ < mx_limits.min() ) return 0.;
     if ( mx_limits.hasMax() && MX_ > mx_limits.max() ) return 0.;
@@ -716,27 +716,27 @@ GamGamLL::computeWeight()
 
   //--- cut on the proton's Q2 (first photon propagator T1)
 
-  const Kinematics::Limits q2_limits = cuts_.initial_cuts[Cuts::q2];
+  const Kinematics::Limits q2_limits = cuts_.cuts.initial[Cuts::q2];
   if ( q2_limits.hasMax() && t1_<-q2_limits.max() ) return 0;
   if ( q2_limits.hasMin() && t1_>-q2_limits.min() ) return 0.;
 
   //--- cuts on outgoing leptons' kinematics
 
-  const Kinematics::Limits m_limits = cuts_.central_cuts[Cuts::mass_sum];
+  const Kinematics::Limits m_limits = cuts_.cuts.central[Cuts::mass_sum];
   if ( m_limits.hasMin() && ( p6_cm_+p7_cm_ ).mass() < m_limits.min() ) return 0.;
   if ( m_limits.hasMax() && ( p6_cm_+p7_cm_ ).mass() > m_limits.max() ) return 0.;
 
   //----- cuts on the individual leptons
 
-  const Kinematics::Limits pt_limits = cuts_.central_cuts[Cuts::pt_single];
+  const Kinematics::Limits pt_limits = cuts_.cuts.central[Cuts::pt_single];
   if ( pt_limits.hasMin() && ( p6_cm_.pt() < pt_limits.min() || p7_cm_.pt() < pt_limits.min() ) ) return 0.;
   if ( pt_limits.hasMax() && ( p6_cm_.pt() > pt_limits.max() || p7_cm_.pt() > pt_limits.max() ) ) return 0.;
 
-  const Kinematics::Limits energy_limits = cuts_.central_cuts[Cuts::energy_single];
+  const Kinematics::Limits energy_limits = cuts_.cuts.central[Cuts::energy_single];
   if ( energy_limits.hasMin() && ( p6_cm_.energy() < energy_limits.min() || p7_cm_.energy() < energy_limits.min() ) ) return 0.;
   if ( energy_limits.hasMax() && ( p6_cm_.energy() > energy_limits.max() || p7_cm_.energy() > energy_limits.max() ) ) return 0.;
 
-  const Kinematics::Limits eta_limits = cuts_.central_cuts[Cuts::eta_single];
+  const Kinematics::Limits eta_limits = cuts_.cuts.central[Cuts::eta_single];
   if ( eta_limits.hasMin() && ( p6_cm_.eta() < eta_limits.min() || p7_cm_.eta() < eta_limits.min() ) ) return 0.;
   if ( eta_limits.hasMax() && ( p6_cm_.eta() > eta_limits.max() || p7_cm_.eta() > eta_limits.max() ) ) return 0.;
 

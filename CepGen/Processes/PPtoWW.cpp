@@ -11,14 +11,14 @@ PPtoWW::PPtoWW() :
 void
 PPtoWW::prepareKTKinematics()
 {
-  const Kinematics::Limits rap_limits = cuts_.central_cuts[Cuts::rapidity_single];
+  const Kinematics::Limits rap_limits = cuts_.cuts.central[Cuts::rapidity_single];
 
   // outgoing Ws
   y1_ = rap_limits.x( xkt( 0 ) );
   y2_ = rap_limits.x( xkt( 1 ) );
   DebuggingInsideLoop( Form( "W bosons rapidities (%.2f < y < %.2f): %f / %f", rap_limits.min(), rap_limits.max(), y1_, y2_ ) );
 
-  Kinematics::Limits ptdiff_limits = cuts_.central_cuts[Cuts::pt_diff];
+  Kinematics::Limits ptdiff_limits = cuts_.cuts.central[Cuts::pt_diff];
   if ( !ptdiff_limits.hasMax() ) ptdiff_limits.max() = 500.; //FIXME
   pt_diff_ = ptdiff_limits.x( xkt( 2 ) );
 
@@ -34,9 +34,9 @@ double
 PPtoWW::computeJacobian()
 {
   double jac = GenericKTProcess::minimalJacobian();
-  jac *= cuts_.central_cuts[Cuts::rapidity_single].range(); // d(y1)
-  jac *= cuts_.central_cuts[Cuts::rapidity_single].range(); // d(y2)
-  jac *= cuts_.central_cuts[Cuts::pt_diff].range(); // d(Dpt)
+  jac *= cuts_.cuts.central[Cuts::rapidity_single].range(); // d(y1)
+  jac *= cuts_.cuts.central[Cuts::rapidity_single].range(); // d(y2)
+  jac *= cuts_.cuts.central[Cuts::pt_diff].range(); // d(Dpt)
   jac *= 2.*M_PI; // d(phiDpt)
 
   return jac;
@@ -77,7 +77,7 @@ PPtoWW::computeKTFactorisedMatrixElement()
   const double pt1x = 0.5 * ( ptsumx+ptdiffx ), pt1y = 0.5 * ( ptsumy+ptdiffy ), pt1 = sqrt( pt1x*pt1x+pt1y*pt1y ),
                pt2x = 0.5 * ( ptsumx-ptdiffx ), pt2y = 0.5 * ( ptsumy-ptdiffy ), pt2 = sqrt( pt2x*pt2x+pt2y*pt2y );
 
-  const Kinematics::Limits pt_limits = cuts_.central_cuts[Cuts::pt_single];
+  const Kinematics::Limits pt_limits = cuts_.cuts.central[Cuts::pt_single];
   if ( pt_limits.hasMin() && ( pt1 < pt_limits.min() || pt2 < pt_limits.min() ) ) return 0.;
   if ( pt_limits.hasMax() && ( pt1 > pt_limits.max() || pt2 > pt_limits.max() ) ) return 0.;
 
@@ -90,7 +90,7 @@ PPtoWW::computeKTFactorisedMatrixElement()
   //=================================================================
 
   const double invm = sqrt( amt1*amt1 + amt2*amt2 + 2.*amt1*amt2*cosh( y1_-y2_ ) - ptsum*ptsum );
-  const Kinematics::Limits invm_limits = cuts_.central_cuts[Cuts::mass_sum];
+  const Kinematics::Limits invm_limits = cuts_.cuts.central[Cuts::mass_sum];
   if ( invm_limits.hasMin() && invm < invm_limits.min() ) return 0.;
   if ( invm_limits.hasMax() && invm > invm_limits.max() ) return 0.;
 
@@ -98,7 +98,7 @@ PPtoWW::computeKTFactorisedMatrixElement()
   //     a window in transverse momentum difference
   //=================================================================
 
-  const Kinematics::Limits ptdiff_limits = cuts_.central_cuts[Cuts::pt_diff];
+  const Kinematics::Limits ptdiff_limits = cuts_.cuts.central[Cuts::pt_diff];
   if ( ptdiff_limits.hasMax() && fabs( pt1-pt2 ) > ptdiff_limits.max() ) return 0.;
 
   //=================================================================
@@ -106,7 +106,7 @@ PPtoWW::computeKTFactorisedMatrixElement()
   //=================================================================
 
   const double dely = fabs( y1_-y2_ );
-  const Kinematics::Limits dely_limits = cuts_.central_cuts[Cuts::dely];
+  const Kinematics::Limits dely_limits = cuts_.cuts.central[Cuts::rapidity_diff];
   if ( dely_limits.hasMin() && dely < dely_limits.min() ) return 0.;
   if ( dely_limits.hasMax() && dely > dely_limits.max() ) return 0.;
 
@@ -256,7 +256,7 @@ PPtoWW::computeKTFactorisedMatrixElement()
     const double mw4 = mw2*mw2;
 
     const double term1  = 2.*shat * ( 2.*shat+3.*mw2 ) / ( 3.*( mw2-that )*( mw2-uhat ) );
-    const double term2  = 2.*shat*shat * ( shat*shat + 3.*mw4 ) / ( 3.*( mw2-that )*( mw2-that )*( mw2-uhat )*( mw2-uhat ) );
+    const double term2  = 2.*shat*shat * ( shat*shat + 3.*mw4 ) / ( 3.*pow( mw2-that, 2 )*pow( mw2-uhat, 2 ) );
 
     const double auxil_gamgam = 1. - term1 + term2;
     const double beta = sqrt( 1.-4.*mw2/shat );
@@ -268,6 +268,8 @@ PPtoWW::computeKTFactorisedMatrixElement()
     //=================================================================
     //     off-shell Nachtmann formulae
     //=================================================================
+
+    const double e2 = 4.*M_PI*Constants::alphaEM;
 
     const double phi_diff = phi_qt1_-phi_qt2_, phi_sum = phi_qt1_+phi_qt2_;
     double amat2_0 = 0., amat2_1 = 0., amat2_interf = 0.;
@@ -282,7 +284,7 @@ PPtoWW::computeKTFactorisedMatrixElement()
         amat2_interf += -2.*( cos( phi_sum+phi_diff )*( ampli_pp*ampli_pm+ampli_mm*ampli_mp ) + cos( phi_sum-phi_diff )*( ampli_pp*ampli_mp+ampli_mm*ampli_pm ) );
       }
     }
-    amat2 = amat2_0 + amat2_1 + amat2_interf;
+    amat2 = e2*e2 * ( amat2_0 + amat2_1 + amat2_interf );
   }
 
   //============================================
@@ -314,7 +316,7 @@ void
 PPtoWW::fillCentralParticlesKinematics()
 {
   // randomise the charge of the outgoing leptons
-  int sign = ( drand()>.5 ) ? +1 : -1;
+  short sign = ( drand()>.5 ) ? +1 : -1;
 
   //=================================================================
   //     first outgoing lepton
@@ -337,21 +339,23 @@ double
 PPtoWW::WWamplitude( double shat, double that, short lam1, short lam2, short lam3, short lam4 ) const
 {
   const double mw = Particle::massFromPDGId( Particle::W ), mw2 = mw*mw;
-  const double cos_theta = ( 1.+2.*( that-mw2 )/shat ) / sqrt( 1. + 1.e-10 - 4.*mw2/shat );
-  const double sin_theta = sqrt( 1.-cos_theta*cos_theta );
-  const double beta = sqrt( 1.-4.*mw2/shat );
-  const double gam = 1./sqrt( 1.-beta*beta );
-  const double A = ( 1.-beta*beta*cos_theta*cos_theta );
-  const double e2 = 4.*M_PI*Constants::alphaEM;
+  const double sqrt2 = sqrt( 2. );
 
-  const double term1 = 1./( gam*gam*A )*( ( gam*gam+1. )*( 1.-lam1*lam2 )* sin_theta*sin_theta - ( 1.+lam1*lam2 ) );
-  const double term2 = -sqrt( 2. )/( gam*A )*( lam1-lam2 ) * ( 1.+lam1*lam3*cos_theta )*sin_theta;
-  const double term3 = -0.5/A*( 2.*beta*( lam1+lam2 )*( lam3+lam4 ) - ( 1./gam/gam )*( 1.+lam3*lam4 )*( 2.*lam1*lam2+( 1.-lam1*lam2 ) * cos_theta*cos_theta ) +( 1.+lam1*lam2*lam3*lam4 )*( 3.+lam1*lam2 ) + 2.*( lam1-lam2 )*( lam3-lam4 )*cos_theta + ( 1.-lam1*lam2 )*( 1.-lam3*lam4 )*cos_theta*cos_theta );
-  const double term4 = -sqrt( 2. )/( gam*A )*( lam2-lam1 ) *( 1.+lam2*lam4*cos_theta )*sin_theta;
+  // then compute some kinematic variables
+  const double cos_theta = ( 1.+2.*( that-mw2 )/shat ) / sqrt( 1. + 1.e-10 - 4.*mw2/shat ), cos_theta2 = cos_theta*cos_theta;
+  const double sin_theta2 = 1.-cos_theta2, sin_theta = sqrt( sin_theta2 );
+  const double beta = sqrt( 1.-4.*mw2/shat ), beta2 = beta*beta;
+  const double gamma = 0.5*sqrt( shat )/mw, gamma2 = gamma*gamma;
+  const double invA = 1./( 1.-beta2*cos_theta2 );
 
-  if ( lam3 == 0 && lam4 == 0 ) return e2*term1;
-  if ( lam4 == 0 ) return e2*term2;
-  if ( lam3 == 0 ) return e2*term4;
-  if ( lam3 != 0 && lam4 != 0 ) return e2*term3;
+  const double term1 = 1./gamma2*( ( gamma2+1. )*( 1.-lam1*lam2 )* sin_theta2 - ( 1.+lam1*lam2 ) );
+  const double term2 = -sqrt2/gamma*( lam1-lam2 ) * ( 1.+lam1*lam3*cos_theta )*sin_theta;
+  const double term3 = -0.5*( 2.*beta*( lam1+lam2 )*( lam3+lam4 ) - ( 1./gamma2 )*( 1.+lam3*lam4 )*( 2.*lam1*lam2+( 1.-lam1*lam2 ) * cos_theta2 ) +( 1.+lam1*lam2*lam3*lam4 )*( 3.+lam1*lam2 ) + 2.*( lam1-lam2 )*( lam3-lam4 )*cos_theta + ( 1.-lam1*lam2 )*( 1.-lam3*lam4 )*cos_theta2 );
+  const double term4 = -sqrt2/gamma*( lam2-lam1 ) *( 1.+lam2*lam4*cos_theta )*sin_theta;
+
+  if ( lam3 == 0 && lam4 == 0 ) return invA*term1;
+  if ( lam4 == 0 )              return invA*term2;
+  if ( lam3 == 0 )              return invA*term4;
+  if ( lam3 != 0 && lam4 != 0 ) return invA*term3;
   return 0.;
 }

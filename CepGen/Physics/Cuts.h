@@ -18,20 +18,20 @@ namespace CepGen
       eta_sum,         ///< central system pseudo-rapidity
       energy_sum,      ///< central system energy
       pt_diff,         ///< transverse momentum balance between the central particles
-      dely             ///< rapidity balance between the central particles
+      rapidity_diff    ///< rapidity balance between the central particles
     };
     inline std::ostream& operator<<( std::ostream& os, const Central& is ) {
       switch ( is ) {
-        case pt_single: return os << "Single central particle pT";
-        case eta_single: return os << "Single central particle eta";
-        case rapidity_single: return os << "Single central particle rapidity";
-        case energy_single: return os << "Single central particle energy";
+        case pt_single: return os << "Single central pT";
+        case eta_single: return os << "Single central eta";
+        case rapidity_single: return os << "Single central rapidity";
+        case energy_single: return os << "Single central energy";
         case mass_sum: return os << "Central system mass";
         case pt_sum: return os << "Central system pT";
         case eta_sum: return os << "Central system eta";
         case energy_sum: return os << "Central system energy";
         case pt_diff: return os << "Central system d(pT)";
-        case dely: return os << "Central system d(Y)";
+        case rapidity_diff: return os << "Central system d(Y)";
       }
       return os;
     }

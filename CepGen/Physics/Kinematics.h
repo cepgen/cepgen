@@ -54,6 +54,7 @@ namespace CepGen
       };
     public:
       Kinematics();
+      Kinematics( const Kinematics& kin );
       ~Kinematics();
 
       /// Type of kinematics to consider for the process
@@ -77,6 +78,8 @@ namespace CepGen
       std::pair<double,double> inp;
       /// Set the incoming particles' momenta (if the collision is symmetric)
       inline void setSqrtS( double sqrts ) { inp = { sqrts*0.5, sqrts*0.5 }; }
+      /// Process centre of mass energy
+      inline double sqrtS() const { return ( inp.first+inp.second ); }
       /// Beam/primary particle's PDG identifier
       std::pair<Particle::ParticleCode,Particle::ParticleCode> inpdg;
       /// PDG id of the outgoing central particles
@@ -86,12 +89,18 @@ namespace CepGen
       ProcessMode mode;
       /// Type of structure functions to consider
       StructureFunctions::Type structure_functions;
-      /// Cuts on the central system produced
-      std::map<Cuts::Central, Limits> central_cuts;
-      /// Cuts on the beam remnants system
-      std::map<Cuts::Remnants, Limits> remnant_cuts;
-      /// Cuts on the initial particles kinematics
-      std::map<Cuts::InitialState, Limits> initial_cuts;
+
+      struct CutsList {
+        CutsList();
+        CutsList( const CutsList& cuts );
+        /// Cuts on the initial particles kinematics
+        std::map<Cuts::InitialState, Limits> initial;
+        /// Cuts on the central system produced
+        std::map<Cuts::Central, Limits> central;
+        /// Cuts on the beam remnants system
+        std::map<Cuts::Remnants, Limits> remnants;
+      };
+      CutsList cuts;
   };
 }
 

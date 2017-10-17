@@ -11,6 +11,7 @@
 
 #include <unordered_map>
 #include <assert.h>
+#include <string.h>
 
 using namespace std;
 
@@ -70,8 +71,8 @@ main( int argc, char* argv[] )
   { cout << "Testing with " << mg.parameters->integrator.type << endl; }
 
   mg.parameters->kinematics.setSqrtS( 13.e3 );
-  mg.parameters->kinematics.central_cuts[CepGen::Cuts::eta_single].in( -2.5, 2.5 );
-  mg.parameters->kinematics.remnant_cuts[CepGen::Cuts::mass].max() = 1000.;
+  mg.parameters->kinematics.cuts.central[CepGen::Cuts::eta_single].in( -2.5, 2.5 );
+  mg.parameters->kinematics.cuts.remnants[CepGen::Cuts::mass].max() = 1000.;
   //mg.parameters->integrator.ncvg = 50000;
   mg.parameters->integrator.itvg = 5;
 
@@ -86,12 +87,12 @@ main( int argc, char* argv[] )
       if      ( values_vs_generator.first == "lpair"  ) mg.parameters->setProcess( new CepGen::Process::GamGamLL );
       else if ( values_vs_generator.first == "pptoll" ) {
         mg.parameters->setProcess( new CepGen::Process::PPtoLL );
-        mg.parameters->kinematics.initial_cuts[CepGen::Cuts::qt].max() = 50.0;
+        mg.parameters->kinematics.cuts.initial[CepGen::Cuts::qt].max() = 50.0;
       }
       else { InError( Form( "Unrecognized generator mode: %s", values_vs_generator.first.c_str() ) ); break; }
 
       for ( const auto& values_vs_cut : values_vs_generator.second ) { // loop over the single lepton pT cut
-        mg.parameters->kinematics.central_cuts[CepGen::Cuts::pt_single].min() = values_vs_cut.first;
+        mg.parameters->kinematics.cuts.central[CepGen::Cuts::pt_single].min() = values_vs_cut.first;
         for ( const auto& values_vs_kin : values_vs_cut.second ) { // loop over all possible kinematics
           if      ( values_vs_kin.first.find( "elastic"    ) != string::npos ) mg.parameters->kinematics.mode = CepGen::Kinematics::ElasticElastic;
           else if ( values_vs_kin.first.find( "singlediss" ) != string::npos ) mg.parameters->kinematics.mode = CepGen::Kinematics::InelasticElastic;
