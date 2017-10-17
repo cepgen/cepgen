@@ -87,7 +87,7 @@ namespace CepGen
 
     double integrand = p->process()->computeWeight();
 
-    if ( integrand < 0. ) return 0.;
+    if ( integrand <= 0. ) return 0.;
 
     //--- only fill in the process' Event object if storage is requested
     //    or if taming functions are to be applied

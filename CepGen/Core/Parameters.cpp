@@ -27,10 +27,10 @@ namespace CepGen
   void
   Parameters::setThetaRange( float thetamin, float thetamax )
   {
-    kinematics.central_cuts[Cuts::eta_single].in( Particle::thetaToEta( thetamax ), Particle::thetaToEta( thetamin ) );
+    kinematics.cuts.central[Cuts::eta_single].in( Particle::thetaToEta( thetamax ), Particle::thetaToEta( thetamin ) );
 
     if ( Logger::get().level >= Logger::Debug ) {
-      std::ostringstream os; os << kinematics.central_cuts[Cuts::eta_single];
+      std::ostringstream os; os << kinematics.cuts.central[Cuts::eta_single];
       Debugging( Form( "eta in range: %s => theta(min) = %5.2f, theta(max) = %5.2f",
                        os.str().c_str(), thetamin, thetamax ) );
     }
@@ -86,7 +86,7 @@ namespace CepGen
     std::ostringstream ip1, ip2, op; ip1 << kinematics.inpdg.first; ip2 << kinematics.inpdg.second;
     for ( std::vector<Particle::ParticleCode>::const_iterator cp = kinematics.central_system.begin(); cp != kinematics.central_system.end(); ++cp )
       op << ( cp != kinematics.central_system.begin() ? ", " : "" ) << *cp;
-    std::ostringstream q2range; q2range << kinematics.initial_cuts.at( Cuts::q2 );
+    std::ostringstream q2range; q2range << kinematics.cuts.initial.at( Cuts::q2 );
     os
       << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << std::endl
       << std::setw( wt ) << "Incoming particles" << ( pretty ? boldify( ip1.str().c_str() ) : ip1.str() ) << ", " << ( pretty ? boldify( ip2.str().c_str() ) : ip2.str() ) << std::endl
@@ -100,22 +100,13 @@ namespace CepGen
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Outgoing central system " ) : "Outgoing central system" ) << std::setfill( ' ' ) << std::endl
       << std::endl
       << std::setw( wt ) << "Central particles" << ( pretty ? boldify( op.str().c_str() ) : op.str() ) << std::endl;
-    for ( std::map<Cuts::Central, Kinematics::Limits>::const_iterator lim = kinematics.central_cuts.begin(); lim != kinematics.central_cuts.end(); ++lim ) {
+    for ( std::map<Cuts::Central, Kinematics::Limits>::const_iterator lim = kinematics.cuts.central.begin(); lim != kinematics.cuts.central.end(); ++lim ) {
       os << std::setw( wt ) << lim->first << lim->second << std::endl;
     }
-    /*std::ostringstream ptrange; ptrange << kinematics.pt_single_central;
-    std::ostringstream erange; erange << kinematics.e_single_central;
-    std::ostringstream etarange; etarange << kinematics.eta_single_central;
-    std::ostringstream mxrange; mxrange << kinematics.mass_remnants;
-    os
-      << std::setw( wt ) << "Lepton(s)' pT range" << ( pretty ? boldify( ptrange.str().c_str() ) : ptrange.str().c_str() ) << " GeV/c" << std::endl
-      << std::setw( wt ) << "Lepton(s)' energy range" << ( pretty ? boldify( erange.str().c_str() ) : erange.str().c_str() ) << " GeV" << std::endl
-      << std::setw( wt ) << "Pseudorapidity range" << ( pretty ? boldify( etarange.str().c_str() )  : etarange.str().c_str() ) << std::endl
-      //<< std::setw( wt ) << "Polar angle theta in range [deg]" << "[" << std::setw(3) << mintheta << ", " << std::setw( 3 ) << maxtheta << "]" << std::endl
-      << std::endl
-      << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Outgoing remnants" ) : "Outgoing remnants" ) << std::endl
-      << std::endl << std::setfill( ' ' );
-    os << std::setw( wt ) << "Mass range" << ( pretty ? boldify( mxrange.str().c_str() ) : mxrange.str().c_str() ) << " GeV/c**2" << std::endl;*/
+    os << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Proton / remnants " ) : "Proton / remnants" ) << std::setfill( ' ' ) << std::endl;
+    for ( std::map<Cuts::Remnants, Kinematics::Limits>::const_iterator lim = kinematics.cuts.remnants.begin(); lim != kinematics.cuts.remnants.end(); ++lim ) {
+      os << std::setw( wt ) << lim->first << lim->second << std::endl;
+    }
     if ( pretty ) { Information( os.str() ); }
     else out << os.str();
   }

@@ -27,8 +27,10 @@ int main( int argc, char* argv[] )
   }
   mg.setParameters( CepGen::Cards::ConfigHandler( argv[1] ).parameters() );
 
-  TH1D h_mass( "invm", "Dilepton invariant mass\\d#sigma/dm\\GeV?.2f", 1000, 0., 500. ),
-       h_ptpair( "ptpair", "Dilepton p_{T}\\d#sigma/dp_{T}\\GeV?.2f", 500, 0., 50. );
+  TH1D h_mass( "invm", "Dilepton invariant mass\\d#sigma/dM\\GeV?.2f", 1000, 0., 500. ),
+       h_ptpair( "ptpair", "Dilepton p_{T}\\d#sigma/dp_{T}\\GeV?.2f", 500, 0., 50. ),
+       h_ptsingle( "pt_single", "Single lepton p_{T}\\d#sigma/dp_{T}\\?.2f", 100, 0., 100. ),
+       h_etasingle( "eta_single", "Single lepton #eta\\d#sigma/d#eta\\?.2f", 60, -3., 3. );
 
   std::ostringstream gen_name;
   gen_name << mg.parameters->process()->name();
@@ -42,6 +44,8 @@ int main( int argc, char* argv[] )
     const auto pl1 = central_system[0].momentum(), pl2 = central_system[1].momentum();
     h_mass.Fill( ( pl1+pl2 ).mass() );
     h_ptpair.Fill( ( pl1+pl2 ).pt() );
+    h_ptsingle.Fill( pl1.pt() );
+    h_etasingle.Fill( pl1.eta() );
   }
   const double weight = mg.crossSection()/num_gen_events;
   h_mass.Scale( weight );
@@ -49,6 +53,8 @@ int main( int argc, char* argv[] )
 
   produce_plot( "dilepton_invm", &h_mass );
   produce_plot( "dilepton_ptpair", &h_ptpair );
+  produce_plot( "singlelepton_pt", &h_ptsingle );
+  produce_plot( "singlelepton_eta", &h_etasingle );
 
   return 0;
 }

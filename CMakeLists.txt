@@ -22,37 +22,11 @@ set(CEPGEN_MODULES Processes Event Physics StructureFunctions Export)
 #----- enable fortran (for Pythia/Herwig/...)
 
 enable_language(Fortran)
-add_subdirectory(External)
 
 #----- include external paths
 
-include(UseEnvironment)
 set(CEPGEN_EXTERNAL_REQS "")
-if(GSL_LIB)
-  message(STATUS "GSL found in ${GSL_LIB}")
-  list(APPEND CEPGEN_EXTERNAL_REQS ${GSL_LIB} ${GSL_CBLAS_LIB})
-else()
-  message(FATAL_ERROR "GSL not found on your system!")
-endif()
-if(MUPARSER)
-  message(STATUS "muParser found in ${MUPARSER}")
-  list(APPEND CEPGEN_EXTERNAL_REQS ${MUPARSER})
-endif()
-if(LIBCONFIG)
-  message(STATUS "libconfig++ found in ${LIBCONFIG}")
-  list(APPEND CEPGEN_EXTERNAL_REQS ${LIBCONFIG})
-endif()
-if(LHAPDF)
-  message(STATUS "LHAPDF found in ${LHAPDF}")
-  add_definitions(-DLIBLHAPDF)
-  list(APPEND CEPGEN_EXTERNAL_REQS ${LHAPDF})
-endif()
-if(HEPMC_LIB)
-  message(STATUS "HepMC found in ${HEPMC_INCLUDE}")
-  include_directories(${HEPMC_INCLUDE})
-  list(APPEND CEPGEN_EXTERNAL_REQS ${HEPMC_LIB})
-  add_definitions(-DLIBHEPMC)
-endif()
+include(UseEnvironment)
 
 #----- build all the intermediate objects
 

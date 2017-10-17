@@ -12,7 +12,7 @@ void
 PPtoLL::prepareKTKinematics()
 {
   ////////////////////////////////////
-  const Kinematics::Limits rap_limits = cuts_.central_cuts[Cuts::rapidity_single];
+  const Kinematics::Limits rap_limits = cuts_.cuts.central[Cuts::rapidity_single];
   ///////////// FIXME ////////////////
 
   // Outgoing leptons  
@@ -20,7 +20,7 @@ PPtoLL::prepareKTKinematics()
   y2_ = rap_limits.x( xkt( 1 ) );
   DebuggingInsideLoop( Form( "leptons rapidities (%.2f < y < %.2f): %f / %f", rap_limits.min(), rap_limits.max(), y1_, y2_ ) );
 
-  Kinematics::Limits ptdiff_limits = cuts_.central_cuts[Cuts::pt_diff];
+  Kinematics::Limits ptdiff_limits = cuts_.cuts.central[Cuts::pt_diff];
   if ( !ptdiff_limits.hasMax() ) ptdiff_limits.max() = 500.; //FIXME
   pt_diff_ = ptdiff_limits.x( xkt( 2 ) );
   phi_pt_diff_ = 2.*M_PI*xkt( 3 );
@@ -34,9 +34,9 @@ double
 PPtoLL::computeJacobian()
 {
   double jac = GenericKTProcess::minimalJacobian();
-  jac *= cuts_.central_cuts[Cuts::rapidity_single].range(); // d(y1)
-  jac *= cuts_.central_cuts[Cuts::rapidity_single].range(); // d(y2)
-  jac *= cuts_.central_cuts[Cuts::pt_diff].range(); // d(Dpt)
+  jac *= cuts_.cuts.central[Cuts::rapidity_single].range(); // d(y1)
+  jac *= cuts_.cuts.central[Cuts::rapidity_single].range(); // d(y2)
+  jac *= cuts_.cuts.central[Cuts::pt_diff].range(); // d(Dpt)
   jac *= 2.*M_PI; // d(phiDpt)
 
   return jac;
@@ -89,7 +89,7 @@ PPtoLL::computeKTFactorisedMatrixElement()
   const double pt1x = ( ptsumx+ptdiffx )*0.5, pt1y = ( ptsumy+ptdiffy )*0.5, pt1 = sqrt( pt1x*pt1x+pt1y*pt1y ),
                pt2x = ( ptsumx-ptdiffx )*0.5, pt2y = ( ptsumy-ptdiffy )*0.5, pt2 = sqrt( pt2x*pt2x+pt2y*pt2y );
 
-  const Kinematics::Limits pt_limits = cuts_.central_cuts[Cuts::pt_single];
+  const Kinematics::Limits pt_limits = cuts_.cuts.central[Cuts::pt_single];
   if ( pt_limits.hasMin() && ( pt1 < pt_limits.min() || pt2 < pt_limits.min() ) ) return 0.;
   if ( pt_limits.hasMax() && ( pt1 > pt_limits.max() || pt2 > pt_limits.max() ) ) return 0.;
 
@@ -101,7 +101,7 @@ PPtoLL::computeKTFactorisedMatrixElement()
   //     a window in transverse momentum difference
   //=================================================================
 
-  const Kinematics::Limits ptdiff_limits = cuts_.central_cuts[Cuts::pt_diff];
+  const Kinematics::Limits ptdiff_limits = cuts_.cuts.central[Cuts::pt_diff];
   if ( ptdiff_limits.hasMax() && fabs( pt1-pt2 ) > ptdiff_limits.max() ) return 0.;
 
   //=================================================================
@@ -109,7 +109,7 @@ PPtoLL::computeKTFactorisedMatrixElement()
   //=================================================================
 
   const double dely = fabs( y1_-y2_ );
-  const Kinematics::Limits dely_limits = cuts_.central_cuts[Cuts::dely];
+  const Kinematics::Limits dely_limits = cuts_.cuts.central[Cuts::rapidity_diff];
   if ( dely_limits.hasMin() && dely < dely_limits.min() ) return 0.;
   if ( dely_limits.hasMax() && dely > dely_limits.max() ) return 0.;
 

@@ -57,9 +57,9 @@ int main( int argc, char* argv[] ) {
   ev.xsect = xsec;
   ev.errxsect = err;
   ev.litigious_events = 0;
-  for ( unsigned int i=0; i<mg.parameters->generation.maxgen; i++ ) {
-    auto event = *mg.generateOneEvent();
-    if ( i%10000==0 ) {
+  for ( unsigned int i = 0; i < mg.parameters->generation.maxgen; ++i ) {
+    const auto event = *mg.generateOneEvent();
+    if ( i % 10000 == 0 ) {
       cout << ">> event " << i << " generated" << endl;
       event.dump();
     }

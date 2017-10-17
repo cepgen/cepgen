@@ -16,7 +16,7 @@ main( int argc, char* argv[] )
   const char* q2_str = ( argc>2 ) ? argv[2] : std::to_string( q2 ).c_str();
   const unsigned int npoints = 5000;
 
-  TGraph g_sy_f2, g_fb_f2, g_su_f2, g_bdh_f2, g_cteq_f2, g_mrst_f2, g_cb_f2;
+  TGraph g_sy_f2, g_fb_f2, g_su_f2, g_bdh_f2, g_cteq_f2, g_mrst_f2;
   TGraph g_allm97_f2, g_allm_hht_f2, g_allm_hht_ft_f2, g_gd11p_f2;
   TGraph g_lux_f2;
   TGraph g_luxlike_f2;
@@ -43,6 +43,7 @@ main( int argc, char* argv[] )
          //sf_allm_hht_ft = CepGen::SF::ALLM( q2, xbj, CepGen::SF::ALLMParameterisation::hht_allm_ft() ),
          sf_gd11p = CepGen::StructureFunctionsBuilder::get( CepGen::StructureFunctions::GD11p, q2, xbj ),
          sf_luxlike = CepGen::StructureFunctionsBuilder::get( CepGen::StructureFunctions::Schaefer, q2, xbj ),
+         sf_gd11p = CepGen::StructureFunctionsBuilder::get( CepGen::StructureFunctions::GD11p, q2, xbj ),
          sf_cb = CepGen::StructureFunctionsBuilder::get( CepGen::StructureFunctions::ChristyBosted, q2, xbj );
 
     g_sy_f2.SetPoint( i, xbj, sf_sy.F2 );
@@ -54,6 +55,7 @@ main( int argc, char* argv[] )
     //g_lux_f2.SetPoint( i, xbj, sf_lux.F2 );
     g_gd11p_f2.SetPoint( i, xbj, sf_gd11p.F2 );
     g_luxlike_f2.SetPoint( i, xbj, sf_luxlike.F2 );
+    g_gd11p_f2.SetPoint( i, xbj, sf_gd11p.F2 );
     g_cb_f2.SetPoint( i, xbj, sf_cb.F2 );
 
     g_allm97_f2.SetPoint( i, xbj, sf_allm97.F2 );
