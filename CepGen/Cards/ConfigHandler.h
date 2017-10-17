@@ -38,7 +38,6 @@ namespace CepGen
         static void writeTamingFunctions( const Parameters*, libconfig::Setting& );
         static void writeIntegrator( const Parameters*, libconfig::Setting& );
         static void writeHadroniser( const Parameters*, libconfig::Setting& );
-        static void writeVegas( const Parameters*, libconfig::Setting& );
         static void writeGenerator( const Parameters*, libconfig::Setting& );
 #endif
     };

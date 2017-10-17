@@ -9,13 +9,17 @@ namespace CepGen
 {
   namespace Hadroniser
   {
-    Pythia8Hadroniser::Pythia8Hadroniser():
-      GenericHadroniser( "pythia8" ),
-      pythia_( std::unique_ptr<Pythia8::Pythia>( new Pythia8::Pythia ) )
+    Pythia8Hadroniser::Pythia8Hadroniser() :
+#ifdef PYTHIA8
+      GenericHadroniser( "pythia8" ), pythia_( std::unique_ptr<Pythia8::Pythia>( new Pythia8::Pythia ) )
     {
       //--- start by disabling some unnecessary output
       pythia_->readString( "Next:numberCount = 0" );
     }
+#else
+      GenericHadroniser( "pythia8" )
+    {}
+#endif
 
     Pythia8Hadroniser::~Pythia8Hadroniser()
     {}
@@ -23,17 +27,20 @@ namespace CepGen
     void
     Pythia8Hadroniser::setSeed( long long seed )
     {
+#ifdef PYTHIA8
       if ( seed == -1ll ) {
         pythia_->readString( "Random:setSeed = off" );
         return;
       }
       pythia_->readString( "Random:setSeed = on" );
       pythia_->readString( Form( "Random:seed = %llu", seed ) );
+#endif
     }
 
     bool
     Pythia8Hadroniser::hadronise( const Particle& part, Event& ev )
     {
+#ifdef PYTHIA8
       // check if the particle can be decayed
       if ( part.status() != Particle::Undecayed ) return false;
       if ( !pythia_->particleData.canDecay( part.pdgId() ) ) return false;
@@ -74,12 +81,16 @@ namespace CepGen
           op.addMother( ev.getById( py_cg_corresp[*moth] ) );
         }
       }
+#else
+      FatalError( "Pythia8 is not linked to this instance!" );
+#endif
       return true;
     }
 
     bool
     Pythia8Hadroniser::hadronise( Event& ev )
     {
+#ifdef PYTHIA8
       //--- first start by cleaning up the previous runs leftovers
 
       pythia_->event.reset();
@@ -102,7 +113,9 @@ namespace CepGen
         if ( !hadronise( part, ev ) ) continue;
         ev.getById( *p_it ).setStatus( Particle::Resonance );
       }
-
+#else
+      FatalError( "Pythia8 is not linked to this instance!" );
+#endif
       return true;
     }
   }
