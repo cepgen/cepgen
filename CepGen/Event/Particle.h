@@ -71,7 +71,6 @@ namespace CepGen
           Momentum();
           /// Build a 4-momentum using its 3-momentum coordinates and its energy
           Momentum( double x_, double y_, double z_, double t_=-1. );
-          inline ~Momentum() {}
 
           // --- static definitions
 
