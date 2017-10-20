@@ -1,5 +1,6 @@
 #include "Schaefer.h"
 #include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/ParticleProperties.h"
 
 namespace CepGen
 {
@@ -8,8 +9,8 @@ namespace CepGen
     Schaefer::Schaefer()
     {
 #ifdef SchaeferF2
-      luxlike_params_.amp = Constants::mp;
-      luxlike_params_.am_pi = Constants::mpi;
+      luxlike_params_.amp = ParticleProperties::mass( Proton );
+      luxlike_params_.am_pi = ParticleProperties::mass( PiZero );
       luxlike_params_.alpha_em = Constants::alphaEM;
       luxlike_params_.q2_cut = 9.;
       luxlike_params_.w2_hi = 4.;
