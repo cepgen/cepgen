@@ -19,7 +19,7 @@ namespace CepGen
 #endif
     }
 
-    StructureFunctions
+    Schaefer
     Schaefer::operator()( double q2, double xbj ) const
     {
       Schaefer luxlike;

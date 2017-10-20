@@ -24,7 +24,7 @@ namespace CepGen
     {
       public:
         Schaefer();
-        StructureFunctions operator()( double q2, double xbj ) const;
+        Schaefer operator()( double q2, double xbj ) const;
 
       private:
         enum ResonancesModel { ChristyBosted = 1, FioreBrasse = 2 };
