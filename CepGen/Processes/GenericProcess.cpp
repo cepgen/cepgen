@@ -65,11 +65,11 @@ namespace CepGen
       //--- central system (if not already there)
       IncomingState::const_iterator central_system = is.find( Particle::CentralSystem );
       if ( central_system == is.end() ) {
-        event_->addParticle( Particle( Particle::Intermediate, Particle::invalidParticle, Particle::Propagator ) );
+        event_->addParticle( Particle( Particle::Intermediate, invalidParticle, Particle::Propagator ) );
       }
       //--- outgoing state
       for ( OutgoingState::const_iterator op = os.begin(); op != os.end(); ++op ) {
-        for ( std::vector<Particle::ParticleCode>::const_iterator it = op->second.begin(); it != op->second.end(); ++it ) {
+        for ( std::vector<ParticleCode>::const_iterator it = op->second.begin(); it != op->second.end(); ++it ) {
           event_->addParticle( Particle( op->first, *it ) );
         }
       }

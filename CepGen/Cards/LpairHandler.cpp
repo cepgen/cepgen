@@ -14,7 +14,7 @@ namespace CepGen
     //----- specialization for LPAIR input cards
 
     LpairHandler::LpairHandler( const char* file ) :
-      pair_( Particle::invalidParticle )
+      pair_( invalidParticle )
     {
       std::ifstream f( file, std::fstream::in );
       if ( !f.is_open() ) {
@@ -47,7 +47,7 @@ namespace CepGen
       if ( m_params.count( "IEND" ) ) setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
 
       //--- for LPAIR: specify the lepton pair to be produced
-      if ( pair_ != Particle::invalidParticle ) {
+      if ( pair_ != invalidParticle ) {
         params_.kinematics.central_system = { pair_, pair_ };
       }
       Information( os.str() );

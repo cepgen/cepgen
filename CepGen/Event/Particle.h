@@ -1,6 +1,8 @@
 #ifndef CepGen_Event_Particle_h
 #define CepGen_Event_Particle_h
 
+#include "CepGen/Physics/ParticleProperties.h"
+
 #include <set>
 #include <map>
 #include <vector>
@@ -14,30 +16,6 @@ namespace CepGen
   /// Kinematic information for one particle
   class Particle {
     public:
-      /** Unique identifier for a particle type. From \cite Beringer:1900zz :
-       * `The Monte Carlo particle numbering scheme [...] is intended to facilitate interfacing between event generators, detector simulators, and analysis packages used in particle physics.`
-       * \brief PDG ids of all known particles
-       */
-      enum ParticleCode {
-        invalidParticle = 0,
-        //--- fundamental particles
-        dQuark = 1, uQuark = 2,
-        Electron = 11, ElectronNeutrino = 12,
-        Muon = 13, MuonNeutrino = 14,
-        Tau = 15, TauNeutrino = 16,
-        Gluon = 21, Photon = 22, Z = 23, W = 24,
-        //--- composite particles
-        PiPlus = 211, PiZero = 111,
-        Rho770_0 = 113, Rho1450_0 = 100113, Rho1700_0 = 30113,
-        Eta = 221, Omega782 = 223,
-        h1380_1 = 10333,
-        JPsi= 443,
-        Phi1680 = 100333,
-        Upsilon1S = 553, Upsilon2S = 100553, Upsilon3S = 200553,
-        ud0Diquark = 2101, ud1Diquark = 2103, uu1Diquark = 2203,
-        Proton = 2212, Neutron = 2112,
-        Pomeron = 990, Reggeon = 110
-      };
       /// Internal status code for a particle
       enum Status {
         PrimordialIncoming = -9,
@@ -172,7 +150,7 @@ namespace CepGen
           double energy_;
       };
       /// Human-readable format for a particle's PDG code
-      friend std::ostream& operator<<( std::ostream& os, const Particle::ParticleCode& pc );
+      friend std::ostream& operator<<( std::ostream& os, const ParticleCode& pc );
       /// Human-readable format for a particle's role in the event
       friend std::ostream& operator<<( std::ostream& os, const Particle::Role& rl );
       /// Compute the 4-vector sum of two 4-momenta
@@ -188,33 +166,12 @@ namespace CepGen
 
       //----- static getters
 
-      /**
-       * \brief Gets the mass of a particle
-       * \param pdgId ParticleCode (PDG ID)
-       * \return Mass of the particle in \f$\textrm{GeV}/c^2\f$
-       */
-      static double massFromPDGId( const Particle::ParticleCode& pdgId );
-      /**
-       * \brief Gets the electric charge of a particle
-       * \param pdgId ParticleCode (PDG ID)
-       * \return Charge of the particle in \f$e\f$
-       */
-      static double chargeFromPDGId( const Particle::ParticleCode& pdgId );
-      /**
-       * \brief Total decay width of one unstable particle
-       * \param[in] pdgId ParticleCode (PDG ID)
-       * \return Decay width in GeV
-       */
-      static double widthFromPDGId( const Particle::ParticleCode& pdgId );
-
       /// Convert a polar angle to a pseudo-rapidity
       static double thetaToEta( double theta );
       /// Convert a pseudo-rapidity to a polar angle
       static double etaToTheta( double eta );
       /// Convert a pseudo-rapidity to a rapidity
       static double etaToY( double eta_, double m_, double pt_ );
-
-
 
       Particle();
       /// Build using the role of the particle in the process and its PDG id
@@ -241,7 +198,7 @@ namespace CepGen
       /// Set the particle unique identifier in an event
       void setId( int id ) { id_ = id; }
       /// Electric charge (given as a float number, for the quarks and bound states)
-      float charge() const { return charge_sign_ * chargeFromPDGId( pdg_id_ ); }
+      float charge() const { return charge_sign_ * ParticleProperties::charge( pdg_id_ ); }
       /// Set the electric charge sign (+-1 for charged or 0 for neutral particles)
       void setChargeSign( int sign ) { charge_sign_ = sign; }
       /// Role in the considered process

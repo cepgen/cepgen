@@ -16,7 +16,6 @@ namespace CepGen
     const double GeV2toBarn = 3.89351824e8; // 1.e4*pow(197.3271, 2);
     const double sconstb = 2.1868465e10; // 1.1868465e10;
     const double alphaReduced = 0.5 * alphaEM / M_PI;
-    const double mp = 0.938272046, mpi = 0.1349766;
   }
 }
 

@@ -28,8 +28,8 @@ namespace CepGen
         GenericKTProcess( const std::string& name,
                           const std::string& description,
                           const unsigned int& num_user_dimensions,
-                          const std::array<Particle::ParticleCode,2>& partons,
-                          const std::vector<Particle::ParticleCode>& output );
+                          const std::array<ParticleCode,2>& partons,
+                          const std::vector<ParticleCode>& output );
         ~GenericKTProcess();
 
         /// Populate the event content with the generated process' topology
@@ -108,9 +108,9 @@ namespace CepGen
         /// (in addition to the 4 required for the two partons' transverse momenta)
         unsigned int kNumUserDimensions;
         /// First and second intermediate parton (photon, pomeron, ...)
-        std::array<Particle::ParticleCode,2> kIntermediateParts;
+        std::array<ParticleCode,2> kIntermediateParts;
         /// Type of particles produced in the final state
-        std::vector<Particle::ParticleCode> kProducedParts;
+        std::vector<ParticleCode> kProducedParts;
     };
   }
 }
