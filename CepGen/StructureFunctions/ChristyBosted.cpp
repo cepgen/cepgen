@@ -9,9 +9,9 @@ namespace CepGen
     double
     ChristyBosted::resmod507( char sf, double w2, double q2 ) const
     {
-      const double mp = Constants::mp, mp2 = mp*mp,
-                   mpi = Constants::mpi, mpi2 = mpi*mpi,
-                   meta = Particle::massFromPDGId( Particle::Eta ), meta2 = meta*meta;
+      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp,
+                   mpi = ParticleProperties::mass( PiZero ), mpi2 = mpi*mpi,
+                   meta = ParticleProperties::mass( Eta ), meta2 = meta*meta;
       const double w = sqrt( w2 );
 
       const double xb = q2/( q2+w2-mp2 );
@@ -219,12 +219,27 @@ namespace CepGen
       return params;
     }
 
+    double
+    ChristyBosted::Parameterisation::ResonanceParameters::kr() const
+    {
+      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
+      return 0.5 * ( mass*mass-mp2 ) / mp;
+    }
+
+    double
+    ChristyBosted::Parameterisation::ResonanceParameters::ecmr( double m2 ) const
+    {
+      if ( mass == 0. ) return 0.;
+      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
+      return 0.5 * ( mass*mass+m2-mp2 ) / mass;
+    }
+
     ChristyBosted
     ChristyBosted::operator()( double q2, double xbj ) const
     {
-      const double mp2 = Constants::mp*Constants::mp;
+      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
       const double w2 = mp2 + q2*( 1.-xbj )/xbj;
-      const double w_min = Constants::mp+Constants::mpi;
+      const double w_min = mp+ParticleProperties::mass( PiZero );
 
       ChristyBosted cb;
       if ( sqrt( w2 ) < w_min ) return cb;

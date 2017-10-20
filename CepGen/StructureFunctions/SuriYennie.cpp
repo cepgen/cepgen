@@ -1,5 +1,6 @@
 #include "SuriYennie.h"
-#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/ParticleProperties.h"
+#include <math.h>
 
 namespace CepGen
 {
@@ -34,18 +35,18 @@ namespace CepGen
     SuriYennie
     SuriYennie::operator()( double q2, double xbj ) const
     {
-      const double mp2 = Constants::mp*Constants::mp;
+      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
       const double mx2 = q2 * ( 1.-xbj )/xbj + mp2, // [GeV^2]
-                   nu = 0.5 * ( q2 + mx2 - mp2 ) / Constants::mp; // [GeV]
+                   nu = 0.5 * ( q2 + mx2 - mp2 ) / mp; // [GeV]
       const double dm2 = mx2-mp2, Xpr = q2/( q2+mx2 ), En = dm2+q2, Tau = 0.25 * q2/mp2, MQ = params_.rho2+q2;
 
       SuriYennie sy;
       sy.FM = ( params_.C1*dm2*pow( params_.rho2/MQ, 2 ) + ( params_.C2*mp2*pow( 1.-Xpr, 4 ) ) / ( 1.+Xpr*( Xpr*params_.Cp-2.*params_.Bp ) ) )/q2;
       sy.FE = ( Tau*sy.FM + params_.D1*dm2*q2*params_.rho2/mp2*pow( dm2/MQ/En, 2 ) ) / ( 1.+0.25*En*En/mp2/q2 );
 
-      const double w2 = 2.*Constants::mp*sy.FE/*, w1 = 0.5 * sy.FM*q2/Constants::mp*/;
+      const double w2 = 2.*mp*sy.FE/*, w1 = 0.5 * sy.FM*q2/mp*/;
 
-      sy.F2 = nu/Constants::mp*w2;
+      sy.F2 = nu/mp*w2;
       return sy;
     }
   }

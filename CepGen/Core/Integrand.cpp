@@ -44,12 +44,12 @@ namespace CepGen
           case Kinematics::ElectronProton: default: { InError( Form( "Process mode %d not yet handled!", (int)p->kinematics.mode ) ); }
           case Kinematics::ElasticElastic: break; // nothing to change in the event
           case Kinematics::ElasticInelastic:
-            op2.setPdgId( Particle::uQuark, 1 ); break;
+            op2.setPdgId( uQuark, 1 ); break;
           case Kinematics::InelasticElastic: // set one of the outgoing protons to be fragmented
-            op1.setPdgId( Particle::uQuark, 1 ); break;
+            op1.setPdgId( uQuark, 1 ); break;
           case Kinematics::InelasticInelastic: // set both the outgoing protons to be fragmented
-            op1.setPdgId( Particle::uQuark, 1 );
-            op2.setPdgId( Particle::uQuark, 1 );
+            op1.setPdgId( uQuark, 1 );
+            op2.setPdgId( uQuark, 1 );
             break;
         }
 
@@ -61,7 +61,7 @@ namespace CepGen
         if ( central_system.size() == p->kinematics.central_system.size() ) {
           unsigned short i = 0;
           for ( Particles::iterator part = central_system.begin(); part != central_system.end(); ++part ) {
-            if ( p->kinematics.central_system[i] == Particle::invalidParticle ) continue;
+            if ( p->kinematics.central_system[i] == invalidParticle ) continue;
             part->setPdgId( p->kinematics.central_system[i] );
             part->computeMass();
             i++;

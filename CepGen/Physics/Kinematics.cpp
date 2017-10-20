@@ -5,7 +5,7 @@
 namespace CepGen
 {
   Kinematics::Kinematics() :
-    inp( { 6500., 6500. } ), inpdg( { Particle::Proton, Particle::Proton } ),
+    inp( { 6500., 6500. } ), inpdg( { Proton, Proton } ),
     central_system( {} ),
     mode( ElasticElastic ), structure_functions( StructureFunctions::SuriYennie )
   {}

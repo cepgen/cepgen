@@ -81,9 +81,9 @@ namespace CepGen
       /// Process centre of mass energy
       inline double sqrtS() const { return ( inp.first+inp.second ); }
       /// Beam/primary particle's PDG identifier
-      std::pair<Particle::ParticleCode,Particle::ParticleCode> inpdg;
+      std::pair<ParticleCode,ParticleCode> inpdg;
       /// PDG id of the outgoing central particles
-      std::vector<Particle::ParticleCode> central_system;
+      std::vector<ParticleCode> central_system;
 
       /// Type of kinematics to consider for the phase space
       ProcessMode mode;

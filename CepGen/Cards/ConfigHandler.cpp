@@ -100,7 +100,7 @@ namespace CepGen
     {
       try {
         if ( kin.exists( "pair" ) ) {
-          Particle::ParticleCode pair = (Particle::ParticleCode)(int)kin["pair"];
+          ParticleCode pair = (ParticleCode)(int)kin["pair"];
           params_.kinematics.central_system = { pair, pair };
         }
         if ( kin.exists( "min_pt" ) ) params_.kinematics.cuts.central[Cuts::pt_single].min() = (double)kin["min_pt"];

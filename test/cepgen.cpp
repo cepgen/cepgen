@@ -36,7 +36,7 @@ int main( int argc, char* argv[] ) {
     mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SuriYennie;
 
     mg.parameters->kinematics.inp = { 6500., 6500. };
-    mg.parameters->kinematics.central_system = { CepGen::Particle::Muon, CepGen::Particle::Muon };
+    mg.parameters->kinematics.central_system = { CepGen::Muon, CepGen::Muon };
     mg.parameters->kinematics.cuts.central[CepGen::Cuts::pt_single].min() = 15.;
     mg.parameters->kinematics.cuts.central[CepGen::Cuts::eta_single] = { -2.5, 2.5 };
     mg.parameters->integrator.ncvg = 5e4; //FIXME
