@@ -22,6 +22,13 @@ namespace MSTW
       FatalError( Form( "Impossible to load grid file \"%s\"!", filename ) );
     }
 
+    header_t hdr;
+    file.read( reinterpret_cast<char*>( &hdr ), sizeof( header_t ) );
+    if ( hdr.magic != good_magic ) {
+      FatalError( Form( "Wrong magic number retrieved: %u, expecting %u!", hdr.magic, good_magic ) );
+    }
+    Information( Form( "Sample order: %u", hdr.order ) );
+
     sfval_t val;
 
     // first loop to evaluate the limits
@@ -48,6 +55,7 @@ namespace MSTW
 
     // second loop to populate the grid
     file.clear(); file.seekg( 0, std::ios::beg );
+    file.read( reinterpret_cast<char*>( &hdr ), sizeof( header_t ) );
     while ( file.read( reinterpret_cast<char*>( &val ), sizeof( sfval_t ) ) ) {
       unsigned short id_q2 = std::distance( q2_vals.begin(), q2_vals.lower_bound( val.q2 ) ),
                      id_xbj = std::distance( xbj_vals.begin(), xbj_vals.lower_bound( val.xbj ) );

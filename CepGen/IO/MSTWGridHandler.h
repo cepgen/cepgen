@@ -36,7 +36,15 @@ namespace MSTW
     private:
       GridHandler( const char* );
 
-      struct sfval_t { double q2, xbj, f2, fl; };
+      struct sfval_t {
+        float q2, xbj;
+        double f2, fl;
+      };
+      struct header_t {
+        unsigned int magic;
+        enum { lo = 0, nlo = 1, nnlo = 2 } order;
+      };
+      static constexpr unsigned int good_magic = 0x4d535457; // MSTW in ASCII
 
 #ifdef GOOD_GSL
       std::array<gsl_spline2d*,2> splines_;
