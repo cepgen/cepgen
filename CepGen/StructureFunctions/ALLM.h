@@ -54,7 +54,7 @@ namespace CepGen
 
       private:
         Parameterisation params_;
-        const SigmaRatio& ratio_comp_;
+        SigmaRatio ratio_comp_;
     };
   }
 }

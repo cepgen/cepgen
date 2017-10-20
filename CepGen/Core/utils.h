@@ -2,13 +2,33 @@
 #define CepGen_Core_utils_h
 
 #include <string>
+#include <stdarg.h>  // For va_start, etc.
 
 /// Provide a random number generated along a uniform distribution between 0 and 1
 //inline double drand() { srand (time(nullptr)); return static_cast<double>(rand())/RAND_MAX; }
 #define drand() static_cast<double>( rand()/RAND_MAX )
 
 /// Format a string using a printf style format descriptor.
-std::string Form(const std::string fmt, ...);
+inline std::string Form( const std::string fmt, ... ) {
+  int size = ( (int)fmt.size() ) * 2 + 50;   // Use a rubric appropriate for your code
+  std::string str;
+  va_list ap;
+  while ( true ) {     // Maximum two passes on a POSIX system...
+    str.resize( size );
+    va_start( ap, fmt );
+    int n = vsnprintf( (char*)str.data(), size, fmt.c_str(), ap );
+    va_end( ap );
+    if ( n>-1 and n<size ) {  // Everything worked
+      str.resize( n );
+      return str;
+    }
+    if ( n>-1 )  // Needed size returned
+      size = n + 1;   // For null char
+    else size *= 2;      // Guess at a larger size (OS specific)
+  }
+  return str;
+}
+
 
 inline const char* yesno( const bool& test ) { return ( test ) ? "\033[32;1myes\033[0m" : "\033[31;1mno\033[0m"; }
 //inline const char* boldify( const char* str ) { const std::string out = std::string( "\033[33;1m" ) + std::string( str ) + std::string( "\033[0m" ); return out.c_str(); }
