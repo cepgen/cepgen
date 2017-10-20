@@ -32,8 +32,8 @@ namespace CepGen
               double eta;
             };
             ResonanceParameters() : angular_momentum( 0. ), x0( 0. ), mass( 0. ), width( 0. ), A0_T( 0. ), A0_L( 0. ) {}
-            double kr() const { return 0.5 * ( mass*mass-Constants::mp*Constants::mp )/Constants::mp; }
-            double ecmr( double m2 ) const { return ( mass == 0. ) ? 0. : 0.5 * ( mass*mass+m2-Constants::mp*Constants::mp ) / mass; }
+            double kr() const;
+            double ecmr( double m2 ) const;
             double kcmr() const { return ecmr( 0. ); }
             double pcmr( double m2 ) const { return sqrt( std::max( 0., ecmr( m2 )*ecmr( m2 )-m2 ) ); }
             BranchingRatios br;

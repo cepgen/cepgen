@@ -84,7 +84,7 @@ namespace CepGen
       << std::endl;
     std::ostringstream proc_mode; proc_mode << kinematics.mode;
     std::ostringstream ip1, ip2, op; ip1 << kinematics.inpdg.first; ip2 << kinematics.inpdg.second;
-    for ( std::vector<Particle::ParticleCode>::const_iterator cp = kinematics.central_system.begin(); cp != kinematics.central_system.end(); ++cp )
+    for ( std::vector<ParticleCode>::const_iterator cp = kinematics.central_system.begin(); cp != kinematics.central_system.end(); ++cp )
       op << ( cp != kinematics.central_system.begin() ? ", " : "" ) << *cp;
     std::ostringstream q2range; q2range << kinematics.cuts.initial.at( Cuts::q2 );
     os

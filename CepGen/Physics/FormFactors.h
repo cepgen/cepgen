@@ -17,10 +17,7 @@ namespace CepGen
       /// Initialise a collection of electric/magnetic form factors
       FormFactors( double fe=0.0, double fm=0.0 ) : FE( fe ), FM( fm ) {}
       // compute x from w2/m2
-      double x( double q2, double w2, double m2=0.0 ) const {
-        const double mp2 = Constants::mp*Constants::mp;
-        return 1./( 1.+( w2-mp2 ) / q2+m2 );
-      }
+      double x( double q2, double w2, double m2=0.0 ) const;
       /// Trivial, spin-0 form factors (e.g. pion)
       static FormFactors Trivial();
       /// Elastic proton form factors

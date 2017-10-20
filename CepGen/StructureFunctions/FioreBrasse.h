@@ -1,7 +1,6 @@
 #ifndef CepGen_StructureFunctions_FioreBrasse_h
 #define CepGen_StructureFunctions_FioreBrasse_h
 
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include <vector>

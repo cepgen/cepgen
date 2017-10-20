@@ -23,10 +23,23 @@ namespace CepGen
 
     public:
       /// Retrieve the running instance of the logger
-      static Logger& get();
+      static Logger& get() {
+        static Logger log;
+        return log;
+      }
 
       /// Redirect the logger to a given output stream
-      friend std::ostream& operator<<( std::ostream& os, const Logger::LoggingLevel& lvl );
+      friend std::ostream& operator<<( std::ostream& os, const Logger::LoggingLevel& lvl ) {
+        switch ( lvl ) {
+          case Logger::Nothing:         os << "None"; break;
+          case Logger::Error:           os << "Errors"; break;
+          case Logger::Warning:         os << "Warnings"; break;
+          case Logger::Information:     os << "Infos"; break;
+          case Logger::Debug:           os << "Debug"; break;
+          case Logger::DebugInsideLoop: os << "Debug (in loops)"; break;
+        }
+        return os;
+      }
       /// Logging threshold for the output stream
       LoggingLevel level;
       /// Output stream to use for all logging operations
