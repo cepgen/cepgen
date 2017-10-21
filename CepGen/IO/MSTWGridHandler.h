@@ -44,6 +44,7 @@ namespace MSTW
         unsigned int magic;
         enum { lo = 0, nlo = 1, nnlo = 2 } order;
       };
+      enum spline_type { F2 = 0, FL = 1 };
       static constexpr unsigned int good_magic = 0x5754534d; // MSTW in ASCII
 
 #ifdef GOOD_GSL

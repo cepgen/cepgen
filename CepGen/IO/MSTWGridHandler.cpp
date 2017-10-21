@@ -59,8 +59,8 @@ namespace MSTW
     while ( file.read( reinterpret_cast<char*>( &val ), sizeof( sfval_t ) ) ) {
       unsigned short id_q2 = std::distance( q2_vals.begin(), q2_vals.lower_bound( val.q2 ) ),
                      id_xbj = std::distance( xbj_vals.begin(), xbj_vals.lower_bound( val.xbj ) );
-      gsl_spline2d_set( splines_[0], values_[0], id_q2, id_xbj, val.f2 );
-      gsl_spline2d_set( splines_[1], values_[1], id_q2, id_xbj, val.fl );
+      gsl_spline2d_set( splines_[F2], values_[F2], id_q2, id_xbj, val.f2 );
+      gsl_spline2d_set( splines_[FL], values_[FL], id_q2, id_xbj, val.fl );
     }
 
     // initialise the splines object
@@ -91,8 +91,8 @@ namespace MSTW
   {
     CepGen::StructureFunctions ev;
 #ifdef GOOD_GSL
-    if ( gsl_spline2d_eval_e( splines_[0], q2, xbj, xacc_, yacc_, &ev.F2 ) == GSL_EDOM
-      || gsl_spline2d_eval_e( splines_[1], q2, xbj, xacc_, yacc_, &ev.FL ) == GSL_EDOM ) {
+    if ( gsl_spline2d_eval_e( splines_[F2], q2, xbj, xacc_, yacc_, &ev.F2 ) != GSL_SUCCESS
+      || gsl_spline2d_eval_e( splines_[FL], q2, xbj, xacc_, yacc_, &ev.FL ) != GSL_SUCCESS ) {
       InWarning( Form( "Failed to evaluate the structure functions for Q² = %.5e GeV² / xbj = %.5e", q2, xbj ) );
       return ev;
     }
