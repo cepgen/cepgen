@@ -27,7 +27,6 @@ namespace MSTW
     if ( hdr.magic != good_magic ) {
       FatalError( Form( "Wrong magic number retrieved: %u, expecting %u!", hdr.magic, good_magic ) );
     }
-    Information( Form( "Sample order: %u", hdr.order ) );
 
     sfval_t val;
 
@@ -42,9 +41,10 @@ namespace MSTW
       FatalError( "Invalid grid retrieved!" );
     }
     Information( Form( "MSTW structure functions grid evaluator built\n\t"
+                       "order: %u\n\t"
                        " Q² in range [%.3e:%.3e]\n\t"
                        "xBj in range [%.3e:%.3e]",
-                       *q2_vals.begin(), *q2_vals.rbegin(), *xbj_vals.begin(), *xbj_vals.rbegin() ) );
+                       hdr.order, *q2_vals.begin(), *q2_vals.rbegin(), *xbj_vals.begin(), *xbj_vals.rbegin() ) );
 
     for ( unsigned short i = 0; i < 2; ++i ) {
       values_[i] = new double[q2_vals.size()*xbj_vals.size()];

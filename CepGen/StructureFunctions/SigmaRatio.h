@@ -11,7 +11,7 @@ namespace CepGen
     {
       public:
         SigmaRatio() {}
-        virtual double operator()( double q2, double xbj ) const { return 0.; }
+        virtual double operator()( double q2, double xbj ) const = 0;
     };
 
     class E143Ratio : public SigmaRatio

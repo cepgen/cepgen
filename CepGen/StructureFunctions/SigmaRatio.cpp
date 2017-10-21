@@ -1,5 +1,6 @@
 #include "SigmaRatio.h"
 #include <math.h>
+#include <iostream>
 
 namespace CepGen
 {

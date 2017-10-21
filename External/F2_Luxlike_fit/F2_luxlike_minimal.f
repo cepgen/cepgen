@@ -1,4 +1,6 @@
+c       --------------------------------------------------
         subroutine F2_fit_luxlike(xbj,q2,F2,FL)
+c       --------------------------------------------------
 c       input: x,q2
 c       output: F2,F1
         implicit real*8 (a-h,o-z)
@@ -18,7 +20,7 @@ c       -----------------------------
               call CepGen_Structure_Functions(205,Q2,xbj,F2p,FLp)
               F2 = F2p
               FL = FLp
-           elseif(w2.le.w2_hi) then
+           else
               call F2_cont(xbj,q2,F2c,FLc)
               F2 = F2c
               FL = FLc
@@ -64,58 +66,9 @@ c       ---------------------------------------------------------
            call CepGen_Structure_Functions(202,Q2,xbj,F2,FL)
         endif
         F2c = F2
-        R = R_1998(xbj,Q2)
-        tau = 4.d0*xbj**2*amp**2/q2
-        FLc = F2c*(1+tau)*R/(1.d0+R)
+        FLc = F2c
 
-        return
-        end
-c       -------------------------------------------------
-        double precision function R_1998(x,q2)
-        implicit real*8 (a-h,o-z)
-
-c       from hep-ex/9808028v1, K.Abe et al.(SLAC)
-
-        data a1,a2,a3/0.0485d0,0.5470d0,2.0621d0/
-        data a4,a5,a6/-0.3804d0,0.5090d0,-0.0285d0/
-        data b1,b2,b3/0.0481d0,0.6114d0,-0.3509d0/
-        data b4,b5,b6/-0.4611d0,0.7172d0,-0.0317d0/ 
-        data c1,c2,c3/0.0577d0,0.4644d0,1.8288d0/
-        data c4,c5,c6/12.3708d0,-43.1043d0,41.7415d0/
-
-        q2_b = 0.34
-        u = q2/q2_b
-        xl = dlog(q2/0.04d0)
-
-        pa = (1.d0 + a4*x +a5*x**2)*x**a6
-        pb = (1.d0 + b4*x +b5*x**2)*x**b6
-        tt = theta(x,q2)
-        q2_thr = c4*x +c5*x**2+c6*x**3
-
-        ra = a1/xl*tt+a2/(q2**4.d0+a3**4.d0)**.25d0*pa
-        rb = b1/xl*tt+(b2/q2+b3/(q2**2+.3d0**2))*pb
-        rc = c1/xl*tt+c2*((q2-q2_thr)**2 +c3**2)**(-.5d0)
-
-       
-        R =(ra+rb+rc)/3.d0
-
-        if(q2.gt.q2_b) then
-                R_1998 = R
-        else
-                R_1998 = R*(3.d0*u - u**3)/2.d0
-        endif
-
-        return
-        end
-
-c       -------------------------------------------------
-        double precision function theta(x,q2)
-c       
-c       function needed for the 1998 parametrisation of R=sigma_L/sigma_T
-c
-        implicit real*8(a-h,o-z)
-        theta = 1.d0 + 12.d0*q2/(q2+1.d0)
-     >                  *(0.125d0**2/(.125d0**2 +x**2))
         return
         end
 c       --------------------------------------------------
+

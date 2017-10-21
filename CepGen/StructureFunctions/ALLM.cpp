@@ -127,7 +127,7 @@ namespace CepGen
     }
 
     ALLM
-    ALLM::operator()( double q2, double xbj ) const
+    ALLM::operator()( double q2, double xbj, const SigmaRatio& rcomp ) const
     {
       const double factor = q2/( q2+params_.m02 );
       const double W2_eff = q2*( 1.-xbj )/xbj;
@@ -151,9 +151,9 @@ namespace CepGen
       ALLM allm;
       allm.F2 = factor * ( F2_Pom + F2_Reg );
 
-      const double R = ratio_comp_( q2, xbj );
+      const double R = rcomp( q2, xbj );
       const double mp2 = ParticleProperties::mass( Proton )*ParticleProperties::mass( Proton );
-      const double tau = 4.*xbj*xbj+mp2/q2;
+      const double tau = 4.*xbj*xbj*mp2/q2;
       allm.FL = allm.F2 * ( 1.+tau ) * ( R/( 1.+R ) );
 
       return allm;
