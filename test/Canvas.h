@@ -246,6 +246,7 @@ namespace CepGen
         if ( fTopLabel ) fTopLabel->Draw();
         TCanvas::SaveAs(Form("%s/%s.%s", out_dir, TCanvas::GetName(), ext));
       }
+      inline TLegend* GetLegend() { return fLeg; }
 
     private:
       inline void Build() {
