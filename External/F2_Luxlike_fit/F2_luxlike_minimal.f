@@ -1,6 +1,6 @@
-c       --------------------------------------------------
+c       ----------------------------------------------------------------
         subroutine F2_fit_luxlike(xbj,q2,F2,FL)
-c       --------------------------------------------------
+c       ----------------------------------------------------------------
 c       input: x,q2
 c       output: F2,F1
         implicit real*8 (a-h,o-z)
@@ -16,10 +16,9 @@ c       -----------------------------
         rho = 2.d0*omega**2 - omega**4 
 
         if(q2.ge.q2_cut) then
-           if(w2.gt.w2_hi) then ! MSTW grid
-              call CepGen_Structure_Functions(205,Q2,xbj,F2p,FLp)
-c in the Lux-paper a "higher-twist" correction is applied to F2
-              F2 = F2p*(1.d0+5.5d0/Q2)
+           if(w2.gt.w2_hi) then ! MSTW grid, perturbative
+              call F2_perturbative(xbj,q2,F2p,FLp)
+              F2 = F2p
               FL = FLp
            else
               call F2_cont(xbj,q2,icont_model,F2c,FLc)
@@ -45,7 +44,17 @@ c in the Lux-paper a "higher-twist" correction is applied to F2
 
         return
         end
-c       ---------------------------------------------------------
+c       ----------------------------------------------------------------
+        subroutine F2_PERTURBATIVE(xbj,q2,F2p,F2r)
+        implicit real*8 (a-h,o-z)
+        call CepGen_Structure_Functions(205,Q2,xbj,F2,FL)
+c       in the Lux-paper a "higher-twist" correction is applied to F2
+        F2p = F2*(1.d0+5.5d0/Q2)
+        FLp = FL
+
+        return
+        end
+c       ----------------------------------------------------------------
         subroutine F2_RES(xbj,q2,irm,F2r,FLr)
         implicit real*8 (a-h,o-z)
         if(irm.eq.1) then     ! Christy-Bosted
@@ -58,7 +67,7 @@ c       ---------------------------------------------------------
 
         return
         end
-c       ---------------------------------------------------------
+c       ----------------------------------------------------------------
         subroutine F2_CONT(xbj,q2,icm,F2c,FLc)
         implicit real*8 (a-h,o-z)
         if(icm.eq.1) then     ! GD11p
@@ -73,5 +82,4 @@ c       ---------------------------------------------------------
 
         return
         end
-c       --------------------------------------------------
-
+c       ----------------------------------------------------------------

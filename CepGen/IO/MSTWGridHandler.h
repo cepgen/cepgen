@@ -29,6 +29,8 @@ namespace MSTW
       struct header_t {
         unsigned int magic;
         enum { lo = 0, nlo = 1, nnlo = 2 } order;
+        enum { cl68 = 0, cl95 = 1 } cl;
+        enum { proton = 1, neutron = 2 } nucleon;
       };
 
     public:

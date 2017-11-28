@@ -85,13 +85,14 @@ namespace MSTW
 
     // second loop over all points to populate the grid
     for ( const auto& val : values_raw_ ) {
+      // retrieve the index of the Q2/xbj bin in the set
       const unsigned short id_q2  = std::distance(  q2_vals.begin(),  q2_vals.lower_bound( val.q2  ) ),
                            id_xbj = std::distance( xbj_vals.begin(), xbj_vals.lower_bound( val.xbj ) );
       gsl_spline2d_set( splines_[F2], values_[F2], id_q2, id_xbj, val.f2 );
       gsl_spline2d_set( splines_[FL], values_[FL], id_q2, id_xbj, val.fl );
     }
 
-    // initialise the splines objects
+    // initialise splines objects
     std::vector<double> q2_vec( q2_vals.begin(), q2_vals.end() ), xbj_vec( xbj_vals.begin(), xbj_vals.end() );
     double* xa = &q2_vec[0], *ya = &xbj_vec[0];
     for ( unsigned short i = 0; i < num_functions_; ++i ) {

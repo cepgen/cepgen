@@ -4,6 +4,9 @@
 
 #ifdef LIBHEPMC
 
+#include "HepMC/GenVertex.h"
+#include "HepMC/GenParticle.h"
+
 using namespace CepGen::OutputHandler;
 
 HepMCHandler::HepMCHandler( const char* filename, const ExportHandler::OutputType& type ) :
