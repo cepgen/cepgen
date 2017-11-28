@@ -18,7 +18,8 @@ c       -----------------------------
         if(q2.ge.q2_cut) then
            if(w2.gt.w2_hi) then ! MSTW grid
               call CepGen_Structure_Functions(205,Q2,xbj,F2p,FLp)
-              F2 = F2p
+c in the Lux-paper a "higher-twist" correction is applied to F2
+              F2 = F2p*(1.d0+5.5d0/Q2)
               FL = FLp
            else
               call F2_cont(xbj,q2,icont_model,F2c,FLc)

@@ -26,7 +26,7 @@ namespace CepGen
       /// \param[in] thetamax The maximal value of \f$\theta\f$ for the outgoing leptons
       void setThetaRange( float thetamin, float thetamax );
       /// Dump the input parameters in the console
-      void dump( std::ostream& os=Logger::get().outputStream, bool pretty=true ) const;
+      void dump( std::ostream& os = Logger::get().outputStream, bool pretty = true ) const;
 
       //----- process to compute
 
@@ -47,7 +47,9 @@ namespace CepGen
       /// Collection of integrator parameters
       struct IntegratorParameters
       {
-        IntegratorParameters() : type( Integrator::Vegas ), ncvg( 100000 ), itvg( 10 ), npoints( 100 ), first_run( true ), seed( 0 ) {}
+        IntegratorParameters() :
+          type( Integrator::Vegas ), ncvg( 100000 ), itvg( 10 ),
+          npoints( 100 ), first_run( true ), seed( 0 ) {}
         Integrator::Type type;
         /// Number of function calls to be computed for each point
         unsigned int ncvg; // ??
@@ -68,7 +70,9 @@ namespace CepGen
       /// Collection of events generation parameters
       struct Generation
       {
-        Generation() : enabled( false ), maxgen( 0 ), symmetrise( false ), ngen( 0 ), gen_print_every( 1 ) {}
+        Generation() :
+          enabled( false ), maxgen( 0 ),
+          symmetrise( false ), ngen( 0 ), gen_print_every( 1 ) {}
         /// Are we generating events ? (true) or are we only computing the cross-section ? (false)
         bool enabled;
         /// Maximal number of events to generate in this run

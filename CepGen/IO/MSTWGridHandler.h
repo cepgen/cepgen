@@ -7,35 +7,21 @@
 #define GOOD_GSL 1
 #endif
 
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
-#include "CepGen/StructureFunctions/StructureFunctions.h"
-
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_math.h>
 #ifdef GOOD_GSL
 #include <gsl/gsl_interp2d.h>
 #include <gsl/gsl_spline2d.h>
 #endif
 
-#include <fstream>
 #include <array>
 #include <vector>
 #include <set>
 
+namespace CepGen { class StructureFunctions; }
 namespace MSTW
 {
   class GridHandler
   {
     public:
-      static GridHandler& get( const char* filename );
-      ~GridHandler();
-
-      CepGen::StructureFunctions eval( double q2, double xbj ) const;
-
-    private:
-      GridHandler( const char* );
-
       struct sfval_t {
         float q2, xbj;
         double f2, fl;
@@ -44,9 +30,25 @@ namespace MSTW
         unsigned int magic;
         enum { lo = 0, nlo = 1, nnlo = 2 } order;
       };
-      enum spline_type { F2 = 0, FL = 1 };
+
+    public:
+      static GridHandler& get( const char* filename = "External/F2_Luxlike_fit/mstw_f2_scan_nnlo.dat" );
+      ~GridHandler();
+
+      CepGen::StructureFunctions eval( double q2, double xbj ) const;
+
+      header_t header() const { return header_; }
+      std::vector<sfval_t> values() const { return values_raw_; }
+
+    private:
+      GridHandler( const char* );
+      void initGSL( const std::set<double>& q2_vals, const std::set<double>& xbj_vals );
+
+      enum spline_type { F2 = 0, FL = 1, num_functions_ };
       static constexpr unsigned int good_magic = 0x5754534d; // MSTW in ASCII
 
+      header_t header_;
+      std::vector<sfval_t> values_raw_;
 #ifdef GOOD_GSL
       std::array<gsl_spline2d*,2> splines_;
       gsl_interp_accel* xacc_, *yacc_;
