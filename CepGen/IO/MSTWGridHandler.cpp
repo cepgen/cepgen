@@ -43,8 +43,8 @@ namespace MSTW
 
       sfval_t val;
       while ( file.read( reinterpret_cast<char*>( &val ), sizeof( sfval_t ) ) ) {
-        q2_vals.insert( val.q2 );
-        xbj_vals.insert( val.xbj );
+        q2_vals.insert( log10( val.q2 ) );
+        xbj_vals.insert( log10( val.xbj ) );
         /*val.f2 = std::max( val.f2, 0. );
         val.fl = std::max( val.fl, 0. );*/
         values_raw_.emplace_back( val );
@@ -66,8 +66,8 @@ namespace MSTW
                          " Q² in range [%.3e:%.3e]\n\t"
                          "xBj in range [%.3e:%.3e]",
                          ss_ord.str().c_str(), ss_nucl.str().c_str(), ss_cl.str().c_str(),
-                          *q2_vals.begin(),  *q2_vals.rbegin(),
-                         *xbj_vals.begin(), *xbj_vals.rbegin() ) );
+                         pow( 10.,  *q2_vals.begin() ), pow( 10.,  *q2_vals.rbegin() ),
+                         pow( 10., *xbj_vals.begin() ), pow( 10., *xbj_vals.rbegin() ) ) );
     }
   }
 
@@ -100,8 +100,8 @@ namespace MSTW
     // second loop over all points to populate the grid
     for ( const auto& val : values_raw_ ) {
       // retrieve the index of the Q2/xbj bin in the set
-      const unsigned short id_q2  = std::distance(  q2_vals.begin(),  q2_vals.lower_bound( val.q2  ) ),
-                           id_xbj = std::distance( xbj_vals.begin(), xbj_vals.lower_bound( val.xbj ) );
+      const unsigned short id_q2  = std::distance(  q2_vals.begin(),  q2_vals.lower_bound( log10( val.q2  ) ) ),
+                           id_xbj = std::distance( xbj_vals.begin(), xbj_vals.lower_bound( log10( val.xbj ) ) );
       gsl_spline2d_set( splines_[F2], values_[F2], id_q2, id_xbj, val.f2 );
       gsl_spline2d_set( splines_[FL], values_[FL], id_q2, id_xbj, val.fl );
     }
@@ -121,9 +121,9 @@ namespace MSTW
   {
     CepGen::StructureFunctions ev;
 #ifdef GOOD_GSL
-    if ( gsl_spline2d_eval_e( splines_[F2], q2, xbj, xacc_, yacc_, &ev.F2 ) != GSL_SUCCESS
-      || gsl_spline2d_eval_e( splines_[FL], q2, xbj, xacc_, yacc_, &ev.FL ) != GSL_SUCCESS ) {
-      //InWarning( Form( "Failed to evaluate the structure functions for Q² = %.5e GeV² / xbj = %.5e", q2, xbj ) );
+    if ( gsl_spline2d_eval_e( splines_[F2], log10( q2 ), log10( xbj ), xacc_, yacc_, &ev.F2 ) != GSL_SUCCESS
+      || gsl_spline2d_eval_e( splines_[FL], log10( q2 ), log10( xbj ), xacc_, yacc_, &ev.FL ) != GSL_SUCCESS ) {
+      InWarning( Form( "Failed to evaluate the structure functions for Q² = %.5e GeV² / xbj = %.5e", q2, xbj ) );
       return ev;
     }
 #else
