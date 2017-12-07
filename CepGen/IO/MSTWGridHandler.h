@@ -27,10 +27,13 @@ namespace MSTW
         double f2, fl;
       };
       struct header_t {
+        enum order_t : unsigned short { lo = 0, nlo = 1, nnlo = 2 };
+        enum cl_t : unsigned short { cl68 = 0, cl95 = 1 };
+        enum nucleon_t : unsigned short { proton = 1, neutron = 2 };
         unsigned int magic;
-        enum { lo = 0, nlo = 1, nnlo = 2 } order;
-        enum { cl68 = 0, cl95 = 1 } cl;
-        enum { proton = 1, neutron = 2 } nucleon;
+        order_t order;
+        cl_t cl;
+        nucleon_t nucleon;
       };
 
     public:
@@ -61,6 +64,10 @@ namespace MSTW
       GridHandler( const GridHandler& ) = delete;
       void operator=( const GridHandler& ) = delete;
   };
+  std::ostream& operator<<( std::ostream&, const GridHandler::sfval_t& );
+  std::ostream& operator<<( std::ostream&, const GridHandler::header_t::order_t& );
+  std::ostream& operator<<( std::ostream&, const GridHandler::header_t::cl_t& );
+  std::ostream& operator<<( std::ostream&, const GridHandler::header_t::nucleon_t& );
 }
 
 #endif

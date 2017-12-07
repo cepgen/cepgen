@@ -9,7 +9,7 @@ extern "C"
   extern void f2_fit_luxlike_( double& xbj, double& q2, double& F2, double& FL );
   extern struct
   {
-    double amp, am_pi, alpha_em;
+    double amp, alpha_em;
     double q2_cut, w2_lo, w2_hi;
     int res_model, cont_model;
   } luxlike_params_;

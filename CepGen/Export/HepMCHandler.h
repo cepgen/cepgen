@@ -37,7 +37,7 @@ namespace CepGen
         /// Class constructor
         /// \param[in] filename Output file path
         /// \param[in] type Output type
-        HepMCHandler( const char* filename, const ExportHandler::OutputType& type=ExportHandler::HepMC );
+        HepMCHandler( const char* filename, const ExportHandler::OutputType& type = ExportHandler::HepMC );
         ~HepMCHandler();
         void initialise( const Parameters& params ) {}
         /// Writer operator

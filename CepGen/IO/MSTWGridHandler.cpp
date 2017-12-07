@@ -30,14 +30,23 @@ namespace MSTW
         FatalError( Form( "Impossible to load grid file \"%s\"!", filename ) );
 
       file.read( reinterpret_cast<char*>( &header_ ), sizeof( header_t ) );
+
+      // first checks on the file header
+
       if ( header_.magic != good_magic )
         FatalError( Form( "Wrong magic number retrieved: %u, expecting %u!", header_.magic, good_magic ) );
 
-      sfval_t val;
+      if ( header_.nucleon != header_t::proton )
+        FatalError( "Only proton structure function grids can be retrieved for this purpose!" );
+
       // retrieve all points and evaluate grid boundaries
+
+      sfval_t val;
       while ( file.read( reinterpret_cast<char*>( &val ), sizeof( sfval_t ) ) ) {
         q2_vals.insert( val.q2 );
         xbj_vals.insert( val.xbj );
+        /*val.f2 = std::max( val.f2, 0. );
+        val.fl = std::max( val.fl, 0. );*/
         values_raw_.emplace_back( val );
       }
       file.close();
@@ -48,13 +57,18 @@ namespace MSTW
 
     initGSL( q2_vals, xbj_vals );
 
-    Information( Form( "MSTW structure functions grid evaluator built\n\t"
-                       "order: %u\n\t"
-                       " Q² in range [%.3e:%.3e]\n\t"
-                       "xBj in range [%.3e:%.3e]",
-                       header_.order,
-                        *q2_vals.begin(),  *q2_vals.rbegin(),
-                       *xbj_vals.begin(), *xbj_vals.rbegin() ) );
+    {
+      std::ostringstream ss_cl, ss_ord, ss_nucl;
+      ss_cl << header_.cl;
+      ss_ord << header_.order;
+      ss_nucl << header_.nucleon;
+      Information( Form( "MSTW@%s grid evaluator built for %s structure functions (%s)\n\t"
+                         " Q² in range [%.3e:%.3e]\n\t"
+                         "xBj in range [%.3e:%.3e]",
+                         ss_ord.str().c_str(), ss_nucl.str().c_str(), ss_cl.str().c_str(),
+                          *q2_vals.begin(),  *q2_vals.rbegin(),
+                         *xbj_vals.begin(), *xbj_vals.rbegin() ) );
+    }
   }
 
   GridHandler::~GridHandler()
@@ -94,9 +108,8 @@ namespace MSTW
 
     // initialise splines objects
     std::vector<double> q2_vec( q2_vals.begin(), q2_vals.end() ), xbj_vec( xbj_vals.begin(), xbj_vals.end() );
-    double* xa = &q2_vec[0], *ya = &xbj_vec[0];
     for ( unsigned short i = 0; i < num_functions_; ++i ) {
-      gsl_spline2d_init( splines_[i], xa, ya, values_[i], q2_vals.size(), xbj_vals.size() );
+      gsl_spline2d_init( splines_[i], &q2_vec[0], &xbj_vec[0], values_[i], q2_vals.size(), xbj_vals.size() );
     }
 #else
     FatalError( Form( "GSL version ≥ 2.1 is required for bilinear interpolation.\n\tVersion %s is installed on this system!", GSL_VERSION ) );
@@ -110,12 +123,49 @@ namespace MSTW
 #ifdef GOOD_GSL
     if ( gsl_spline2d_eval_e( splines_[F2], q2, xbj, xacc_, yacc_, &ev.F2 ) != GSL_SUCCESS
       || gsl_spline2d_eval_e( splines_[FL], q2, xbj, xacc_, yacc_, &ev.FL ) != GSL_SUCCESS ) {
-      InWarning( Form( "Failed to evaluate the structure functions for Q² = %.5e GeV² / xbj = %.5e", q2, xbj ) );
+      //InWarning( Form( "Failed to evaluate the structure functions for Q² = %.5e GeV² / xbj = %.5e", q2, xbj ) );
       return ev;
     }
 #else
     FatalError( Form( "GSL version ≥ 2.1 is required for bilinear interpolation.\n\tVersion %s is installed on this system!", GSL_VERSION ) );
 #endif
     return ev;
+  }
+
+  std::ostream&
+  operator<<( std::ostream& os, const GridHandler::sfval_t& val )
+  {
+    return os << Form( "Q² = %.5e GeV²\txbj = %.4f\tF₂ = % .6e\tFL = % .6e", val.q2, val.xbj, val.f2, val.fl );
+  }
+
+  std::ostream&
+  operator<<( std::ostream& os, const GridHandler::header_t::order_t& order )
+  {
+    switch ( order ) {
+      case GridHandler::header_t::lo: return os << "LO";
+      case GridHandler::header_t::nlo: return os << "nLO";
+      case GridHandler::header_t::nnlo: return os << "nnLO";
+    }
+    return os;
+  }
+
+  std::ostream&
+  operator<<( std::ostream& os, const GridHandler::header_t::cl_t& cl )
+  {
+    switch ( cl ) {
+      case GridHandler::header_t::cl68: return os << "68% C.L.";
+      case GridHandler::header_t::cl95: return os << "95% C.L.";
+    }
+    return os;
+  }
+
+  std::ostream&
+  operator<<( std::ostream& os, const GridHandler::header_t::nucleon_t& nucl )
+  {
+    switch ( nucl ) {
+      case GridHandler::header_t::proton: return os << "proton";
+      case GridHandler::header_t::neutron: return os << "neutron";
+    }
+    return os;
   }
 }
