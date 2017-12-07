@@ -25,6 +25,8 @@ namespace CepGen
       case StructureFunctions::ALLM97:              return os << "ALLM;97";
       case StructureFunctions::GD07p:               return os << "ALLM;GD07p";
       case StructureFunctions::GD11p:               return os << "ALLM;GD11p";
+      case StructureFunctions::Schaefer:            return os << "Schaefer";
+      case StructureFunctions::MSTWgrid:            return os << "MSTW (grid)";
     }
     return os;
   }

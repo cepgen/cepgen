@@ -1,5 +1,6 @@
 #include "GenericProcess.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Physics/ParticleProperties.h"
 
 namespace CepGen
 {
@@ -67,12 +68,12 @@ namespace CepGen
       IncomingState::const_iterator central_system = is.find( Particle::CentralSystem );
       if ( central_system == is.end() ) {
         Particle& p = event_->addParticle( Particle::Intermediate );
-        p.setPdgId( Particle::invalidParticle );
+        p.setPdgId( invalidParticle );
         p.setStatus( Particle::Propagator );
       }
       //--- outgoing state
       for ( OutgoingState::const_iterator op = os.begin(); op != os.end(); ++op ) {
-        for ( std::vector<Particle::ParticleCode>::const_iterator it = op->second.begin(); it != op->second.end(); ++it ) {
+        for ( std::vector<ParticleCode>::const_iterator it = op->second.begin(); it != op->second.end(); ++it ) {
           Particle& p = event_->addParticle( op->first );
           p.setPdgId( *it );
         }

@@ -9,8 +9,8 @@ namespace CepGen
     GenericKTProcess::GenericKTProcess( const std::string& name,
                                         const std::string& description,
                                         const unsigned int& num_user_dimensions,
-                                        const std::array<Particle::ParticleCode,2>& partons,
-                                        const std::vector<Particle::ParticleCode>& central ) :
+                                        const std::array<ParticleCode,2>& partons,
+                                        const std::vector<ParticleCode>& central ) :
       GenericProcess( name, description+" (kT-factorisation approach)" ),
       kNumUserDimensions( num_user_dimensions ),
       kIntermediateParts( partons ), kProducedParts( central )
@@ -30,14 +30,14 @@ namespace CepGen
     {
       GenericProcess::setEventContent(
         { // incoming state
-          { Particle::IncomingBeam1, Particle::Proton },
-          { Particle::IncomingBeam2, Particle::Proton },
+          { Particle::IncomingBeam1, Proton },
+          { Particle::IncomingBeam2, Proton },
           { Particle::Parton1, kIntermediateParts[0] },
           { Particle::Parton2, kIntermediateParts[1] }
         },
         { // outgoing state
-          { Particle::OutgoingBeam1, { Particle::Proton } },
-          { Particle::OutgoingBeam2, { Particle::Proton } },
+          { Particle::OutgoingBeam1, { Proton } },
+          { Particle::OutgoingBeam2, { Proton } },
           { Particle::CentralSystem, kProducedParts }
         }
       );
@@ -227,7 +227,7 @@ namespace CepGen
     double
     GenericKTProcess::elasticFlux( double x, double kt2 )
     {
-      const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
+      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
 
       const double Q2_min = x*x*mp2/( 1.-x ), Q2_ela = Q2_min + kt2/( 1.-x );
       const FormFactors ela = FormFactors::ProtonElastic( Q2_ela );
@@ -244,7 +244,7 @@ namespace CepGen
     double
     GenericKTProcess::inelasticFlux( double x, double kt2, double mx )
     {
-      const double mx2 = mx*mx, mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
+      const double mx2 = mx*mx, mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
 
       // F2 structure function
       const double Q2min = 1. / ( 1.-x )*( x*( mx2-mp2 ) + x*x*mp2 ),

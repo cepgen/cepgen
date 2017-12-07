@@ -8,7 +8,8 @@ namespace CepGen
   class StructureFunctions
   {
     public:
-      StructureFunctions( double f2=0.0 ) : F2( f2 ), FL( 0.0 ) {}
+      StructureFunctions( double f2 = 0., double fl = 0. ) :
+        F2( f2 ), FL( fl ) {}
       /// Proton structure function to be used in the outgoing state description
       /// \note Values correspond to the LPAIR legacy steering card values
       enum Type {
@@ -22,7 +23,9 @@ namespace CepGen
         ALLM91              = 201,
         ALLM97              = 202,
         GD07p               = 203,
-        GD11p               = 204
+        GD11p               = 204,
+        MSTWgrid            = 205,
+        Schaefer            = 301
       };
 
       double F2, FL;

@@ -2,6 +2,8 @@
 
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Physics/ParticleProperties.h"
+
 #include "CepGen/StructureFunctions/ALLM.h"
 #include "CepGen/StructureFunctions/BlockDurandHa.h"
 #include "CepGen/StructureFunctions/FioreBrasse.h"
@@ -20,7 +22,7 @@ namespace CepGen
   FormFactors
   FormFactors::ProtonElastic( double q2 )
   {
-    const double mp2 = Constants::mp*Constants::mp;
+    const double mp2 = ParticleProperties::mass( Proton )*ParticleProperties::mass( Proton );
     const double GE = pow( 1.+q2/0.71, -2. ), GE2 = GE*GE;
     const double GM = 2.79*GE, GM2 = GM*GM;
     return FormFactors( ( 4.*mp2*GE2 + q2*GM2 ) / ( 4.*mp2 + q2 ), GM2 );
@@ -66,6 +68,13 @@ namespace CepGen
     const double x = q2 / ( q2 + mf2 - mi2 );
     SF::SzczurekUleshchenko su, sf = su( q2, x );
     return FormFactors( sf.F2 * x / q2, -2.*sf.F1 / q2 );
+  }
+
+  double
+  FormFactors::x( double q2, double w2, double m2 ) const
+  {
+    const double mp2 = ParticleProperties::mass( Proton )*ParticleProperties::mass( Proton );
+    return 1./( 1.+( w2-mp2 ) / q2+m2 );
   }
 
   std::ostream&

@@ -65,11 +65,14 @@ namespace CepGen
 
       inline void Prettify( TH1* obj ) {
         TAxis* x = dynamic_cast<TAxis*>( obj->GetXaxis() ),
-              *y = dynamic_cast<TAxis*>( obj->GetYaxis() );
+              *y = dynamic_cast<TAxis*>( obj->GetYaxis() ),
+              *z = dynamic_cast<TAxis*>( obj->GetZaxis() );
         x->SetLabelFont( font_type( 3 ) ); x->SetLabelSize( 20 );
         x->SetTitleFont( font_type( 3 ) ); x->SetTitleSize( 29 );
         y->SetLabelFont( font_type( 3 ) ); y->SetLabelSize( 20 );
         y->SetTitleFont( font_type( 3 ) ); y->SetTitleSize( 29 );
+        z->SetLabelFont( font_type( 3 ) ); z->SetLabelSize( 16 );
+        z->SetTitleFont( font_type( 3 ) ); z->SetTitleSize( 29 );
         if ( fRatio ) {
           x->SetTitleOffset( 3. );
           x->SetLabelOffset( 0.02 );
@@ -238,7 +241,9 @@ namespace CepGen
       inline void Save(const char* ext, const char* out_dir=".") {
         if (strstr(ext, "pdf")==NULL) {
           if (strstr(ext, "png")==NULL) {
-            return;
+            if (strstr(ext, "root")==NULL) {
+              return;
+            }
           }
         }
         TCanvas::cd();
@@ -246,6 +251,7 @@ namespace CepGen
         if ( fTopLabel ) fTopLabel->Draw();
         TCanvas::SaveAs(Form("%s/%s.%s", out_dir, TCanvas::GetName(), ext));
       }
+      inline TLegend* GetLegend() { return fLeg; }
 
     private:
       inline void Build() {

@@ -13,10 +13,9 @@ namespace CepGen
     /// Strong coupling constant \f$\alpha_\textrm{QCD}\f$
     const double alphaQCD = 0.1184; // at the Z pole
     /// Conversion factor between GeV^2 and barn
-    const double GeV2toBarn = 3.89351824e8; // 1.e4*pow(197.3271, 2);
+    const double GeV2toBarn = 3.89351824e8; // 1.e4*(197.3271**2);
     const double sconstb = 2.1868465e10; // 1.1868465e10;
     const double alphaReduced = 0.5 * alphaEM / M_PI;
-    const double mp = 0.938272046, mpi = 0.1349766;
   }
 }
 

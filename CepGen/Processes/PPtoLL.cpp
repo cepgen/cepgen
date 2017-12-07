@@ -5,7 +5,7 @@
 using namespace CepGen::Process;
 
 PPtoLL::PPtoLL() :
-  GenericKTProcess( "pptoll", "gamma,gamma->l+,l-", 4, { { Particle::Photon, Particle::Proton } }, { Particle::Muon, Particle::Muon } )
+  GenericKTProcess( "pptoll", "gamma,gamma->l+,l-", 4, { { Photon, Photon } }, { Muon, Muon } )
 {}
 
 void
@@ -45,7 +45,7 @@ PPtoLL::computeJacobian()
 double
 PPtoLL::computeKTFactorisedMatrixElement()
 {
-  const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
+  const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
   const double ml = event_->getByRole( Particle::CentralSystem )[0].mass(), ml2 = ml*ml;
 
   const unsigned int iterm11 = 1, // Long-long

@@ -90,6 +90,7 @@ namespace CepGen
           //else if ( sf_str == "ALLM;HHT-FT" ) params_.kinematics.structure_functions = StructureFunctions::ALLM_HHT_FT;
           else if ( sf_str == "ALLM;GD07p" ) params_.kinematics.structure_functions = StructureFunctions::GD07p;
           else if ( sf_str == "ALLM;GD11p" ) params_.kinematics.structure_functions = StructureFunctions::GD11p;
+          else if ( sf_str == "Schaefer" ) params_.kinematics.structure_functions = StructureFunctions::Schaefer;
           else FatalError( Form( "Invalid structure functions mode: %s", sf ) );
         }
       } catch ( const libconfig::SettingNotFoundException& nfe ) {
@@ -104,7 +105,7 @@ namespace CepGen
     {
       try {
         if ( kin.exists( "pair" ) ) {
-          Particle::ParticleCode pair = (Particle::ParticleCode)(int)kin["pair"];
+          ParticleCode pair = (ParticleCode)(int)kin["pair"];
           params_.kinematics.central_system = { pair, pair };
         }
         if ( kin.exists( "min_pt" ) ) params_.kinematics.cuts.central[Cuts::pt_single].min() = (double)kin["min_pt"];

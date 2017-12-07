@@ -5,7 +5,7 @@
 using namespace CepGen::Process;
 
 PPtoWW::PPtoWW() :
-  GenericKTProcess( "pptoww", "gamma,gamma->W+,W-", 4, { { Particle::Photon, Particle::Photon } }, { Particle::W, Particle::W } )
+  GenericKTProcess( "pptoww", "gamma,gamma->W+,W-", 4, { { Photon, Photon } }, { W, W } )
 {}
 
 void
@@ -45,8 +45,8 @@ PPtoWW::computeJacobian()
 double
 PPtoWW::computeKTFactorisedMatrixElement()
 {
-  const double mp = Particle::massFromPDGId( Particle::Proton ), mp2 = mp*mp;
-  const double mw = Particle::massFromPDGId( Particle::W ), mw2 = mw*mw;
+  const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
+  const double mw = ParticleProperties::mass( W ), mw2 = mw*mw;
 
   //=================================================================
   //     How matrix element is calculated
@@ -338,8 +338,7 @@ PPtoWW::fillCentralParticlesKinematics()
 double
 PPtoWW::WWamplitude( double shat, double that, short lam1, short lam2, short lam3, short lam4 ) const
 {
-  // start by defining some constants
-  const double mw = Particle::massFromPDGId( Particle::W ), mw2 = mw*mw;
+  const double mw = ParticleProperties::mass( W ), mw2 = mw*mw;
   const double sqrt2 = sqrt( 2. );
 
   // then compute some kinematic variables

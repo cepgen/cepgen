@@ -71,7 +71,7 @@ namespace CepGen
         Particle& op = ev.addParticle( Particle::CentralSystem );
         py_cg_corresp[i] = op.id();
 
-        op.setPdgId( ( Particle::ParticleCode )abs( p.id() ), p.charge() );
+        op.setPdgId( ( ParticleCode )abs( p.id() ), p.charge() );
         if ( p.isFinal() ) op.setStatus( Particle::FinalState );
         else op.setStatus( Particle::Propagator );
 

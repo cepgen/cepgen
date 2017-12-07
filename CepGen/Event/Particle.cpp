@@ -59,7 +59,7 @@ namespace CepGen
   Particle::computeMass( bool off_shell )
   {
     if ( !off_shell && pdg_id_ != invalidParticle ) { // retrieve the mass from the on-shell particle's properties
-      mass_ = massFromPDGId( pdg_id_ );
+      mass_ = ParticleProperties::mass( pdg_id_ );
     }
     else if ( momentum_.energy() >= 0. ) {
       mass_ = sqrt( energy2() - momentum_.p2() );
@@ -159,7 +159,7 @@ namespace CepGen
   int
   Particle::integerPdgId() const
   {
-    const float ch = chargeFromPDGId( pdg_id_ );
+    const float ch = ParticleProperties::charge( pdg_id_ );
     if ( ch == 0 ) return static_cast<int>( pdg_id_ );
     return static_cast<int>( pdg_id_ ) * charge_sign_ * ( ch/fabs( ch ) );
   }
@@ -240,124 +240,10 @@ namespace CepGen
   }
 
   double
-  Particle::massFromPDGId( const Particle::ParticleCode& pdg )
-  {
-    switch ( pdg ) {
-      case dQuark:       return 0.33;           // mass from PYTHIA6.4
-      case uQuark:       return 0.33;           // mass from PYTHIA6.4
-      case Electron:     return 0.510998928e-3;
-      case ElectronNeutrino: return 0.;
-      case Muon:         return 0.1056583715;
-      case MuonNeutrino: return 0.;
-      case Tau:          return 1.77682;
-      case TauNeutrino:  return 0.;
-      case Gluon:        return 0.;
-      case Z:            return 91.1876;
-      case W:            return 80.385;
-      case Photon:       return 0.;
-      case PiPlus:       return 0.13957018;
-      case PiZero:       return Constants::mpi;
-      case JPsi:         return 20.;            //FIXME FIXME FIXME
-      case ud0Diquark:   return 0.57933;
-      case ud1Diquark:   return 0.77133;
-      case uu1Diquark:   return 0.77133;
-      case Proton:       return Constants::mp;
-      case Neutron:      return 0.939565346;
-      case Upsilon1S:    return 9.46030;
-      case Upsilon2S:    return 10.02326;
-      case Upsilon3S:    return 10.3552;
-      case Rho770_0:     return 0.77526;
-      case Rho1450_0:    return 1.465;
-      case Rho1700_0:    return 1.720;
-      case h1380_1:      return 1.38619;
-      case Eta:          return 0.547862;
-      case invalidParticle:
-      default:           return -1.;
-    }
-  }
-
-  double
-  Particle::chargeFromPDGId( const Particle::ParticleCode& pdg )
-  {
-    switch ( pdg ) {
-      case Proton: return +1.;
-      case dQuark: return -1./3;
-      case uQuark: return +2./3;
-      case Electron: case Muon: case Tau: return -1.;
-      case ElectronNeutrino: case MuonNeutrino: case TauNeutrino: return 0.;
-      case Gluon: case Z: case Photon: return 0.;
-      case W: return +1.;
-      case PiPlus: return +1.;
-      case PiZero: return 0.;
-      case Neutron: return 0.;
-      case Eta: return 0.;
-      default: return 0.;
-    }
-  }
-
-  double
-  Particle::widthFromPDGId( const Particle::ParticleCode& pdg )
-  {
-    switch ( pdg ) {
-      case JPsi:      return 5.; //FIXME
-      case Z:         return 2.4952;
-      case W:         return 2.085;
-      case Upsilon1S: return 54.02e-6;
-      case Upsilon2S: return 31.98e-6;
-      case Upsilon3S: return 20.32e-6;
-      case Rho770_0:  return 0.150; // PDG
-      case Rho1450_0: return 0.400; // PDG
-      case Rho1700_0: return 0.250; // PDG
-      default:        return -1.;
-    }
-  }
-
-  double
   Particle::etaToY( double eta_, double m_, double pt_ )
   {
     const double mt = m_*m_ + pt_*pt_;
     return asinh( sqrt( ( ( ( mt*mt-m_*m_ )*cosh( 2.*eta_ ) + m_*m_ )/ mt*mt - 1. ) / 2. ) );
-  }
-
-  std::ostream&
-  operator<<( std::ostream& os, const Particle::ParticleCode& pc )
-  {
-    switch ( pc ) {
-      case Particle::dQuark:          return os << "d quark";
-      case Particle::uQuark:          return os << "u quark";
-      case Particle::Electron:        return os << "electron";
-      case Particle::ElectronNeutrino: return os << "nu_e";
-      case Particle::Muon:            return os << "muon";
-      case Particle::MuonNeutrino:    return os << "nu_mu";
-      case Particle::Tau:             return os << "tau";
-      case Particle::TauNeutrino:     return os << "nu_tau";
-      case Particle::Gluon:           return os << "gluon";
-      case Particle::Photon:          return os << "photon";
-      case Particle::Z:               return os << "Z";
-      case Particle::W:               return os << "W+-";
-      case Particle::PiPlus:          return os << "pi+";
-      case Particle::PiZero:          return os << "pi0";
-      case Particle::Rho770_0:        return os << "rho(770)0";
-      case Particle::Rho1450_0:       return os << "rho(1450)0";
-      case Particle::Rho1700_0:       return os << "rho(1700)0";
-      case Particle::h1380_1:         return os << "h(1380)1";
-      case Particle::Eta:             return os << "eta meson";
-      case Particle::Omega782:        return os << "omega(782)";
-      case Particle::JPsi:            return os << "J/Psi";
-      case Particle::Phi1680:         return os << "phi(1680)";
-      case Particle::Upsilon1S:       return os << "Upsilon(1S)";
-      case Particle::Upsilon2S:       return os << "Upsilon(2S)";
-      case Particle::Upsilon3S:       return os << "Upsilon(3S)";;
-      case Particle::ud0Diquark:      return os << "(ud)0 di-quark";
-      case Particle::ud1Diquark:      return os << "(ud)1 di-quark";
-      case Particle::uu1Diquark:      return os << "(uu)1 di-quark";
-      case Particle::Proton:          return os << "proton";
-      case Particle::Neutron:         return os << "neutron";
-      case Particle::Pomeron:         return os << "pomeron";
-      case Particle::Reggeon:         return os << "reggeon";
-      case Particle::invalidParticle: return os << "[...]";
-    }
-    return os;
   }
 
   std::ostream&
