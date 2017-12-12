@@ -111,7 +111,9 @@ namespace CepGen
     //--- full event content (+ hadronisation) if generating events
 
     if ( p->hadroniser() ) {
-      if ( !p->hadroniser()->hadronise( *ev ) ) return 0.;
+      double wght = 0.;
+      if ( !p->hadroniser()->hadronise( *ev, wght ) ) return 0.;
+      integrand *= wght;
     }
 
     if ( p->storage() ) {

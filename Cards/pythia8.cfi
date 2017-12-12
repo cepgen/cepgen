@@ -3,10 +3,10 @@ hadroniser = {
   seed = 0L;
   pythiaPreConfiguration = (
     "ProcessLevel:all = off",
-    "ProcessLevel:resonanceDecays = on"
+    "ProcessLevel:resonanceDecays = on",
+    "PartonLevel:Remnants = on"
   );
   pythiaConfiguration = (
-    "Random:setSeed = on", // random engine
     "Tune:preferLHAPDF = 2",
     "Main:timesAllowErrors = 10000",
     "Check:epTolErr = 0.01",

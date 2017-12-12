@@ -21,27 +21,24 @@ namespace CepGen
       public:
         Pythia8Hadroniser();
         ~Pythia8Hadroniser();
-        bool hadronise( const Particle& part, Event& ev ) override;
-        bool hadronise( Event& ev ) override;
 
+        bool hadronise( Event& ev, double& weight ) override;
         void setSeed( long long seed );
-        void readString( const char* param ) {
+
 #ifdef PYTHIA8
+        double decay( const Particle& part, Event& ev );
+        bool fragment( const Particle& part, Event& ev );
+
+        void readString( const char* param ) {
           pythia_->readString( param );
-#endif
         }
         void readString( const std::string& param ) {
-#ifdef PYTHIA8
           pythia_->readString( param );
-#endif
         }
         bool init() {
-#ifdef PYTHIA8
           return pythia_->init();
-#else
-          return true;
-#endif
         }
+#endif
 
       private:
 #ifdef PYTHIA8
