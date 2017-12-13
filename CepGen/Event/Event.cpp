@@ -105,8 +105,8 @@ namespace CepGen
   Particle&
   Event::getById( int id )
   {
-    for ( ParticlesMap::iterator out=particles_.begin(); out!=particles_.end(); out++ ) {
-      for ( Particles::iterator part=out->second.begin(); part!=out->second.end(); part++ ) {
+    for ( ParticlesMap::iterator out = particles_.begin(); out != particles_.end(); ++out ) {
+      for ( Particles::iterator part = out->second.begin(); part != out->second.end(); ++part ) {
         if ( part->id() == id ) return *part;
       }
     }
@@ -116,8 +116,8 @@ namespace CepGen
   const Particle&
   Event::getConstById( int id ) const
   {
-    for ( ParticlesMap::const_iterator out=particles_.begin(); out!=particles_.end(); out++ ) {
-      for ( Particles::const_iterator part=out->second.begin(); part!=out->second.end(); part++ ) {
+    for ( ParticlesMap::const_iterator out = particles_.begin(); out != particles_.end(); ++out ) {
+      for ( Particles::const_iterator part = out->second.begin(); part != out->second.end(); ++part ) {
         if ( part->id() == id ) return *part;
       }
     }
@@ -128,7 +128,7 @@ namespace CepGen
   Event::getByIds( const ParticlesIds& ids ) const
   {
     Particles out;
-    for ( ParticlesIds::const_iterator id=ids.begin(); id!=ids.end(); id++ ) {
+    for ( ParticlesIds::const_iterator id = ids.begin(); id != ids.end(); ++id ) {
       out.emplace_back( getConstById( *id ) );
     }
     return out;
@@ -150,8 +150,8 @@ namespace CepGen
   Event::roles() const
   {
     ParticleRoles out;
-    ParticlesMap::const_iterator it, end;
-    for ( it=particles_.begin(), end=particles_.end(); it!=end; it=particles_.upper_bound( it->first ) ) {
+    ParticlesMap::const_iterator it, end = particles_.end();
+    for ( it = particles_.begin(); it != end; it = particles_.upper_bound( it->first ) ) {
       out.emplace_back( it->first );
     }
     return out;
@@ -191,7 +191,7 @@ namespace CepGen
   Event::numParticles() const
   {
     size_t out = 0;
-    for ( ParticlesMap::const_iterator it=particles_.begin(); it!=particles_.end(); it++ ) {
+    for ( ParticlesMap::const_iterator it = particles_.begin(); it != particles_.end(); it++ ) {
       out += it->second.size();
     }
     return out;
@@ -201,7 +201,7 @@ namespace CepGen
   Event::particles() const
   {
     Particles out;
-    for ( ParticlesMap::const_iterator it=particles_.begin(); it!=particles_.end(); it++ ) {
+    for ( ParticlesMap::const_iterator it = particles_.begin(); it != particles_.end(); it++ ) {
       out.insert( out.end(), it->second.begin(), it->second.end() );
     }
     std::sort( out.begin(), out.end() );
@@ -212,8 +212,8 @@ namespace CepGen
   Event::stableParticles() const
   {
     Particles out;
-    for ( ParticlesMap::const_iterator it=particles_.begin(); it!=particles_.end(); it++ ) {
-      for ( Particles::const_iterator part=it->second.begin(); part!=it->second.end(); part++ ) {
+    for ( ParticlesMap::const_iterator it = particles_.begin(); it != particles_.end(); ++it++ ) {
+      for ( Particles::const_iterator part = it->second.begin(); part != it->second.end(); ++part ) {
         if ( part->status() == Particle::Undefined || part->status() == Particle::FinalState ) {
           out.emplace_back( *part );
         }
@@ -261,7 +261,7 @@ namespace CepGen
     std::ostringstream os;
 
     double pxtot = 0., pytot = 0., pztot = 0., etot = 0.;
-    for ( Particles::const_iterator part_ref=parts.begin(); part_ref!=parts.end(); part_ref++ ) {
+    for ( Particles::const_iterator part_ref = parts.begin(); part_ref != parts.end(); ++part_ref ) {
       const Particle& part = *part_ref;
       { std::ostringstream oss; oss << part.pdgId(); os << Form( "\n %2d\t%+6d%8s", part.id(), part.integerPdgId(), oss.str().c_str() ); }
       os << "\t";

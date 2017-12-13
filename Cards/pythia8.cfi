@@ -5,6 +5,7 @@ hadroniser = {
     "ProcessLevel:all = off",
     "ProcessLevel:resonanceDecays = on",
     "PartonLevel:Remnants = on"
+    //"Diffraction:doHard = on"
   );
   pythiaConfiguration = (
     "Tune:preferLHAPDF = 2",
@@ -24,6 +25,7 @@ hadroniser = {
     "MultipartonInteractions:expPow = 1.6",
     // process-specific
     "24:onMode = off", // disable all W decays, but...
-    "24:onIfAny = 11 13" // enable e-nue + mu-numu final states
+    "24:onIfAny = 11 13", // enable e-nue + mu-numu final states
+    "9902210:onMode = on"
   );
 };

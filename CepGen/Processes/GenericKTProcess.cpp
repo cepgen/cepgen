@@ -163,9 +163,9 @@ namespace CepGen
     void
     GenericKTProcess::fillPrimaryParticlesKinematics()
     {
-      //=================================================================
+      //================================================================
       //     outgoing protons
-      //=================================================================
+      //================================================================
       Particle& op1 = event_->getOneByRole( Particle::OutgoingBeam1 ),
                &op2 = event_->getOneByRole( Particle::OutgoingBeam2 );
 
@@ -192,9 +192,9 @@ namespace CepGen
         default: { FatalError( "This kT factorisation process is intended for p-on-p collisions! Aborting!" ); } break;
       }
 
-      //=================================================================
+      //================================================================
       //     incoming partons (photons, pomerons, ...)
-      //=================================================================
+      //================================================================
       //FIXME ensure the validity of this approach
       Particle& g1 = event_->getOneByRole( Particle::Parton1 ),
                &g2 = event_->getOneByRole( Particle::Parton2 );
@@ -202,6 +202,11 @@ namespace CepGen
       g1.setStatus( Particle::Incoming );
       g2.setMomentum( event_->getOneByRole( Particle::IncomingBeam2 ).momentum()-PY_, true );
       g2.setStatus( Particle::Incoming );
+
+      //================================================================
+      //     two-parton system
+      //================================================================
+      event_->getOneByRole( Particle::Intermediate ).setMomentum( g1.momentum()+g2.momentum() );
     }
 
     double

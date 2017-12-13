@@ -27,7 +27,6 @@ namespace CepGen
 
 #ifdef PYTHIA8
         double decay( const Particle& part, Event& ev );
-        bool fragment( const Particle& part, Event& ev );
 
         void readString( const char* param ) {
           pythia_->readString( param );
@@ -42,8 +41,10 @@ namespace CepGen
 
       private:
 #ifdef PYTHIA8
+        void addParticle( const Particle& part, const Event& ev, bool recursive = true );
         std::unique_ptr<Pythia8::Pythia> pythia_;
 #endif
+        std::map<short,short> ids_corresp_;
     };
   }
 }

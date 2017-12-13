@@ -62,7 +62,7 @@ namespace CepGen
       //--- incoming state
       for ( IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++ ) {
         Particle& p = event_->addParticle( ip->first );
-        p.setPdgId( ip->second );
+        p.setPdgId( ip->second, +1 );
       }
       //--- central system (if not already there)
       IncomingState::const_iterator central_system = is.find( Particle::CentralSystem );

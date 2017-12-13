@@ -32,6 +32,8 @@ namespace CepGen
       /// \param[in] stable_ Do we only show the stable particles in this event?
       void dump( std::ostream& os = Logger::get().outputStream, bool stable_=false ) const;
 
+      double cmEnergy() const { return CMEnergy( getOneByRole( Particle::IncomingBeam1 ), getOneByRole( Particle::IncomingBeam2 ) ); }
+
       //----- particles adders
 
       /// Set the information on one particle in the process

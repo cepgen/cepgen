@@ -4,6 +4,7 @@
 #include "CepGen/Core/utils.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
+#include "CepGen/Version.h"
 
 namespace CepGen
 {
@@ -13,10 +14,15 @@ namespace CepGen
       GenericHadroniser( "pythia8" )
     {
 #ifdef PYTHIA8
-      pythia_ = std::unique_ptr<Pythia8::Pythia>( new Pythia8::Pythia );
+      pythia_.reset( new Pythia8::Pythia );
 
       //--- start by disabling some unnecessary output
       pythia_->readString( "Next:numberCount = 0" );
+
+      /*Pythia8::LHAgenerator gen_info;
+      gen_info.name = "CepGen";
+      gen_info.version = version();
+      pythia_->info.generators->emplace_back( gen_info );*/
 #endif
     }
 
@@ -41,37 +47,49 @@ namespace CepGen
     {
       weight = 1.;
 #ifdef PYTHIA8
-      //--- first start by cleaning up the previous runs leftovers
+      //--- start by cleaning up the previous runs leftovers
+
+      const double sqrt_s = ev.cmEnergy();
 
       pythia_->event.reset();
+      pythia_->event[0].e( sqrt_s );
+      pythia_->event[0].m( sqrt_s );
 
-      //--- then retrieve the collections
-      const ParticlesIds cs = ev.getIdsByRole( Particle::CentralSystem ), op1 = ev.getIdsByRole( Particle::OutgoingBeam1 ), op2 = ev.getIdsByRole( Particle::OutgoingBeam2 );
+      const unsigned short num_before = ev.numParticles();
+      ids_corresp_.clear();
 
-      //--- outgoing proton remnants fragmentation
+      //--- first loop to add the particles (and their childs)
 
-      for ( ParticlesIds::iterator p_it = op1.begin(); p_it != op1.end(); ++p_it ) {
-        // excited proton fragmentation
-        const Particle& part = ev.getById( *p_it );
-        if ( !fragment( part, ev ) ) continue;
-        ev.getById( *p_it ).setStatus( Particle::Undefined );
-      }
-      for ( ParticlesIds::iterator p_it = op2.begin(); p_it != op2.end(); ++p_it ) {
-        // excited proton fragmentation
-        const Particle& part = ev.getById( *p_it );
-        if ( !fragment( part, ev ) ) continue;
-        ev.getById( *p_it ).setStatus( Particle::Undefined );
+      for ( unsigned short i = 0; i < num_before; ++i ) {
+        const Particle& part = ev.getConstById( i );
+        addParticle( part, ev );
       }
 
-      //--- central system hadronisation/decay/...
+      //--- second loop to specify the particles' parentage
 
-      for ( ParticlesIds::iterator p_it = cs.begin(); p_it != cs.end(); ++p_it ) {
-        const Particle& part = ev.getById( *p_it );
-        const double br = decay( part, ev );
-        if ( br == 0. ) continue;
-        weight *= br;
-        ev.getById( *p_it ).setStatus( Particle::Resonance );
+      for ( unsigned short i = 0; i < num_before; ++i ) {
+        const Particle& part = ev.getConstById( i );
+        const short py_id = ids_corresp_.at( i ); // particle is already there ; retrieve its Pythia8 event id
+
+        Pythia8::Particle& pp = pythia_->event[py_id];
+        pp.mother1( ( part.mothers().size() > 0 ) ? ids_corresp_.at( *part.mothers().begin() ) : 0 ); // offset for central system
+        pp.mother2( ( part.mothers().size() > 1 ) ? ids_corresp_.at( *part.mothers().rbegin() ) : 0 ); // offset for central system
+        pp.daughter1( ( part.daughters().size() > 0 ) ? ids_corresp_.at( *part.daughters().begin() ) : 0 ); // offset for central system
+        pp.daughter2( ( part.daughters().size() > 1 ) ? ids_corresp_.at( *part.daughters().rbegin() ) : 0 ); // offset for central system
       }
+
+      ev.dump();
+      pythia_->event.list();
+      const unsigned short num_py_parts = pythia_->event.size();
+
+      if ( !pythia_->next() ) exit( 0 );//return 0.;
+
+      // check if something happened in the event processing by Pythia
+      // if not, return the event as it is...
+      if ( pythia_->event.size() == num_py_parts ) return weight;
+
+      pythia_->event.list();
+
 #else
       FatalError( "Pythia8 is not linked to this instance!" );
 #endif
@@ -79,6 +97,56 @@ namespace CepGen
     }
 
 #ifdef PYTHIA8
+    void
+    Pythia8Hadroniser::addParticle( const Particle& part, const Event& ev, bool recursive )
+    {
+      // check if the particle is already inserted
+      if ( ids_corresp_.find( part.id() ) != ids_corresp_.end() )
+        return;
+
+      const Particle::Momentum mom = part.momentum();
+      Pythia8::Particle py8part( part.integerPdgId(), 0, 0, 0, 0, 0, 0, 0, mom.px(), mom.py(), mom.pz(), mom.energy(), part.mass() );
+      switch ( part.role() ) {
+        case Particle::IncomingBeam1:
+        case Particle::IncomingBeam2: {
+          py8part.status( -12 );
+        } break;
+        case Particle::Parton1:
+        case Particle::Parton2:
+        case Particle::Parton3: {
+          //py8part.status( -13 );
+        } break;
+        case Particle::Intermediate: {
+          py8part.id( ev.getOneByRole( Particle::Parton1 ).integerPdgId() );
+          //py8part.status( -14 );
+        }
+        case Particle::CentralSystem: {
+          if ( pythia_->particleData.canDecay( py8part.id() ) ) {
+            py8part.status( 93 );
+            py8part.tau( pythia_->particleData.tau0( py8part.id() ) );
+            //part.setStatus( Particle::Resonance );
+          }
+        } break;
+        case Particle::OutgoingBeam1:
+        case Particle::OutgoingBeam2: {
+          if ( py8part.id() == 2 ) { // dissociative proton
+            py8part.id( 9902210 );
+            //py8part.status( 15 );
+            py8part.status( 63 );
+          }
+        } break;
+        default: break;
+      }
+      ids_corresp_.insert( std::pair<short,short>( part.id(), pythia_->event.append( py8part ) ) );
+
+      if ( recursive ) {
+        const ParticlesIds daughters = part.daughters();
+        for ( ParticlesIds::const_iterator it = daughters.begin(); it != daughters.end(); ++it ) {
+          addParticle( ev.getConstById( *it ), ev, false );
+        }
+      }
+    }
+
     double
     Pythia8Hadroniser::decay( const Particle& part, Event& ev )
     {
@@ -130,23 +198,6 @@ namespace CepGen
         }
       }
       return br_ratio;
-    }
-
-    bool
-    Pythia8Hadroniser::fragment( const Particle& part, Event& ev )
-    {
-      // check if the particle can be decayed
-      if ( part.status() != Particle::Unfragmented ) return false;
-      //if ( !pythia_->particleData.canDecay( part.pdgId() ) ) return false;
-
-      // check if the particle has a valid kinematics
-      const Particle::Momentum mom = part.momentum();
-      if ( mom == Particle::Momentum() ) return false; // FIXME probably during warm-up...
-
-      pythia_->event.reset();
-
-
-      return true;
     }
 #endif
 
