@@ -214,9 +214,7 @@ namespace CepGen
     Particles out;
     for ( ParticlesMap::const_iterator it = particles_.begin(); it != particles_.end(); ++it++ ) {
       for ( Particles::const_iterator part = it->second.begin(); part != it->second.end(); ++part ) {
-        if ( part->status() == Particle::Undefined || part->status() == Particle::FinalState ) {
-          out.emplace_back( *part );
-        }
+        if ( (short)part->status() > 0 ) out.emplace_back( *part );
       }
     }
     std::sort( out.begin(), out.end() );
@@ -256,7 +254,7 @@ namespace CepGen
   void
   Event::dump( std::ostream& out, bool stable ) const
   {
-    Particles parts = ( stable ) ? stableParticles() : particles();
+    const Particles parts = ( stable ) ? stableParticles() : particles();
 
     std::ostringstream os;
 
@@ -279,10 +277,9 @@ namespace CepGen
       else os << "       ";
       const Particle::Momentum mom = part.momentum();
       os << Form( "% 9.6e % 9.6e % 9.6e % 9.6e % 12.7f", mom.px(), mom.py(), mom.pz(), part.energy(), part.mass() );
-      if ( part.status() == Particle::Undefined
-        || part.status() == Particle::Undecayed
-        || part.status() == Particle::Unfragmented
-        || part.status() == Particle::FinalState ) {
+
+      // discard non-primary, decayed particles
+      if ( (short)part.status() >= 0. ) {
         const int sign = ( part.status() == Particle::Undefined ) ? -1 : 1;
         pxtot += sign*mom.px();
         pytot += sign*mom.py();

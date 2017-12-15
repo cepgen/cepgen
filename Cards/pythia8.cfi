@@ -2,17 +2,19 @@ hadroniser = {
   name = "pythia8";
   seed = 0L;
   pythiaPreConfiguration = (
-    "Init:showAllSettings = on",
-    "BeamRemnants:beamJunction = on",
-    //"BeamRemnants:unresolvedHadron = 3",
+    //"Init:showAllSettings = on",
     "ProcessLevel:all = off",
+    "BeamRemnants:beamJunction = on",
     "ProcessLevel:resonanceDecays = on",
-    "PartonLevel:ISR = on",
-    "PartonLevel:FSR = on",
     "PartonLevel:Remnants = on",
     "HadronLevel:all = on",
-    //"Diffraction:doHard = on",
-    //"HardQCD:all = on"
+    "Diffraction:doHard = on",
+    "HardQCD:all = on"
+    // disable all Bremsstrahlung/FSR photon production
+    "PartonLevel:ISR = off",
+    "PartonLevel:FSR = off",
+    "ParticleDecays:allowPhotonRadiation = off",
+    // printout properties
     "Next:numberCount = 0",
     "Next:numberShowInfo = 1",
     "Next:numberShowProcess = 1"
@@ -26,14 +28,16 @@ hadroniser = {
     "SLHA:minMassSM = 1000.",
     "ParticleDecays:limitTau0 = on",
     "ParticleDecays:tau0Max = 10",
-    "ParticleDecays:allowPhotonRadiation = on",
-    //"ParticleDecays:allowPhotonRadiation = off", //FIXME
     // CUEP8M1 tuning
     "Tune:pp 14", // Monash 2013 tune by Peter Skands (January 2014)
     "MultipartonInteractions:pT0Ref = 2.4024",
     "MultipartonInteractions:ecmPow = 0.25208",
-    "MultipartonInteractions:expPow = 1.6",
+    "MultipartonInteractions:expPow = 1.6"
+  );
+  pythiaProcessConfiguration = (
     // process-specific
+    "13:onMode = off", // disable muon decays
+    "9902210:onMode = on",
     "24:onMode = off", // disable all W decays, but...
     "24:onIfAny = 11 13" // enable e-nue + mu-numu final states
   );

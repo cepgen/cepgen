@@ -109,20 +109,35 @@ namespace CepGen
           ParticleCode pair = (ParticleCode)(int)kin["pair"];
           params_.kinematics.central_system = { pair, pair };
         }
-        if ( kin.exists( "min_pt" ) ) params_.kinematics.cuts.central[Cuts::pt_single].min() = (double)kin["min_pt"];
-        if ( kin.exists( "max_pt" ) ) params_.kinematics.cuts.central[Cuts::pt_single].max() = (double)kin["max_pt"];
+        if ( kin.exists( "cuts" ) ) {
+          const libconfig::Setting& cuts = kin["cuts"];
+          if ( cuts.isList() ) parseParticlesCuts( cuts );
+        }
         if ( kin.exists( "min_ptdiff" ) ) params_.kinematics.cuts.central[Cuts::pt_diff].min() = (double)kin["min_ptdiff"];
         if ( kin.exists( "max_ptdiff" ) ) params_.kinematics.cuts.central[Cuts::pt_diff].max() = (double)kin["max_ptdiff"];
         if ( kin.exists( "min_rapiditydiff" ) ) params_.kinematics.cuts.central[Cuts::rapidity_diff].min() = (double)kin["min_rapiditydiff"];
         if ( kin.exists( "max_rapiditydiff" ) ) params_.kinematics.cuts.central[Cuts::rapidity_diff].max() = (double)kin["max_rapiditydiff"];
-        if ( kin.exists( "min_energy" ) ) params_.kinematics.cuts.central[Cuts::energy_single].min() = (double)kin["min_energy"];
-        if ( kin.exists( "max_energy" ) ) params_.kinematics.cuts.central[Cuts::energy_single].max() = (double)kin["max_energy"];
-        if ( kin.exists( "min_eta" ) ) params_.kinematics.cuts.central[Cuts::eta_single].min() = (double)kin["min_eta"];
-        if ( kin.exists( "max_eta" ) ) params_.kinematics.cuts.central[Cuts::eta_single].max() = (double)kin["max_eta"];
-        if ( kin.exists( "min_rapidity" ) ) params_.kinematics.cuts.central[Cuts::rapidity_single].min() = (double)kin["min_rapidity"];
-        if ( kin.exists( "max_rapidity" ) ) params_.kinematics.cuts.central[Cuts::rapidity_single].max() = (double)kin["max_rapidity"];
         if ( kin.exists( "min_mx" ) ) params_.kinematics.cuts.remnants[Cuts::mass].min() = (double)kin["min_mx"];
         if ( kin.exists( "max_mx" ) ) params_.kinematics.cuts.remnants[Cuts::mass].max() = (double)kin["max_mx"];
+      } catch ( const libconfig::SettingNotFoundException& nfe ) {
+        FatalError( Form( "Failed to retrieve the field \"%s\".", nfe.getPath() ) );
+      } catch ( const libconfig::SettingTypeException& te ) {
+        FatalError( Form( "Field \"%s\" has wrong type.", te.getPath() ) );
+      }
+    }
+
+    void
+    ConfigHandler::parseParticlesCuts( const libconfig::Setting& cuts )
+    {
+      try {
+        if ( cuts.exists( "min_pt" ) ) params_.kinematics.cuts.central[Cuts::pt_single].min() = (double)cuts["min_pt"];
+        if ( cuts.exists( "max_pt" ) ) params_.kinematics.cuts.central[Cuts::pt_single].max() = (double)cuts["max_pt"];
+        if ( cuts.exists( "min_energy" ) ) params_.kinematics.cuts.central[Cuts::energy_single].min() = (double)cuts["min_energy"];
+        if ( cuts.exists( "max_energy" ) ) params_.kinematics.cuts.central[Cuts::energy_single].max() = (double)cuts["max_energy"];
+        if ( cuts.exists( "min_eta" ) ) params_.kinematics.cuts.central[Cuts::eta_single].min() = (double)cuts["min_eta"];
+        if ( cuts.exists( "max_eta" ) ) params_.kinematics.cuts.central[Cuts::eta_single].max() = (double)cuts["max_eta"];
+        if ( cuts.exists( "min_rapidity" ) ) params_.kinematics.cuts.central[Cuts::rapidity_single].min() = (double)cuts["min_rapidity"];
+        if ( cuts.exists( "max_rapidity" ) ) params_.kinematics.cuts.central[Cuts::rapidity_single].max() = (double)cuts["max_rapidity"];
       } catch ( const libconfig::SettingNotFoundException& nfe ) {
         FatalError( Form( "Failed to retrieve the field \"%s\".", nfe.getPath() ) );
       } catch ( const libconfig::SettingTypeException& te ) {
@@ -193,6 +208,14 @@ namespace CepGen
           pythia8->init();
           if ( hadr.exists( "pythiaConfiguration" ) ) {
             libconfig::Setting& configs = hadr["pythiaConfiguration"];
+            if ( !configs.isList() ) throw libconfig::SettingTypeException( configs );
+            for ( unsigned short i = 0; i < configs.getLength(); ++i ) {
+              std::string config = configs[i];
+              pythia8->readString( config );
+            }
+          }
+          if ( hadr.exists( "pythiaProcessConfiguration" ) ) {
+            libconfig::Setting& configs = hadr["pythiaProcessConfiguration"];
             if ( !configs.isList() ) throw libconfig::SettingTypeException( configs );
             for ( unsigned short i = 0; i < configs.getLength(); ++i ) {
               std::string config = configs[i];

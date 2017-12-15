@@ -29,6 +29,9 @@ namespace CepGen
       };
 
       double F2, FL;
+
+    private:
+      std::string name_;
   };
   std::ostream& operator<<( std::ostream&, const StructureFunctions& );
   std::ostream& operator<<( std::ostream&, const StructureFunctions::Type& );

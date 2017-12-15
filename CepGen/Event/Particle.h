@@ -19,14 +19,13 @@ namespace CepGen
       /// Internal status code for a particle
       enum Status {
         PrimordialIncoming = -9,
-        Unfragmented = -4, Undecayed = -3,
+        DebugResonance = -4,
+        Resonance = -3,
         Propagator = -2,
         Incoming = -1,
         Undefined = 0,
         FinalState = 1,
-        Resonance = 2,
-        DebugResonance = 3,
-        PythiaHIncoming = 21
+        Undecayed = 2, Unfragmented = 3
       };
       /// Role of the particle in the process
       enum Role {

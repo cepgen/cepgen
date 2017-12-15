@@ -27,6 +27,7 @@ namespace CepGen
       private:
         void parseIncomingKinematics( const libconfig::Setting& );
         void parseOutgoingKinematics( const libconfig::Setting& );
+        void parseParticlesCuts( const libconfig::Setting& );
         void parseIntegrator( const libconfig::Setting& );
         void parseGenerator( const libconfig::Setting& );
         void parseTamingFunctions( const libconfig::Setting& );
