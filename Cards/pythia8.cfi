@@ -3,7 +3,13 @@ hadroniser = {
   seed = 0L;
   pythiaPreConfiguration = (
     //"Init:showAllSettings = on",
+    // disable all generation processes
     "ProcessLevel:all = off",
+    // printout properties
+    "Next:numberCount = 0",
+    "Next:numberShowInfo = 0",
+    "Next:numberShowProcess = 0",
+    // parameterise the fragmentation part
     "BeamRemnants:beamJunction = on",
     "ProcessLevel:resonanceDecays = on",
     "PartonLevel:Remnants = on",
@@ -13,11 +19,7 @@ hadroniser = {
     // disable all Bremsstrahlung/FSR photon production
     "PartonLevel:ISR = off",
     "PartonLevel:FSR = off",
-    "ParticleDecays:allowPhotonRadiation = off",
-    // printout properties
-    "Next:numberCount = 0",
-    "Next:numberShowInfo = 1",
-    "Next:numberShowProcess = 1"
+    "ParticleDecays:allowPhotonRadiation = off"
   );
   pythiaConfiguration = (
     "Tune:preferLHAPDF = 2",

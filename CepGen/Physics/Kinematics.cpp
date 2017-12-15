@@ -77,7 +77,7 @@ namespace CepGen
   {}
 
   Kinematics::CutsList::CutsList( const CutsList& cuts ) :
-    initial( cuts.initial ), central( cuts.central ), remnants( cuts.remnants )
+    initial( cuts.initial ), central( cuts.central ), central_particles( cuts.central_particles ), remnants( cuts.remnants )
   {}
 }
 

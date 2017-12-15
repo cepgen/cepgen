@@ -117,7 +117,7 @@ namespace CepGen
 
       //pythia_->event.scale( ev.getOneByRole( Particle::Intermediate ).mass() );
       //pythia_->event.list(true,true);
-      pythia_->event.listJunctions();
+      //pythia_->event.listJunctions();
       const unsigned short num_py_parts = pythia_->event.size();
 
       if ( !pythia_->next() ) {
@@ -126,7 +126,7 @@ namespace CepGen
         return 0.;
       }
 
-pythia_->event.list(true,true);
+//pythia_->event.list(true,true);
 //exit(0);
 
       // check if something happened in the event processing by Pythia
@@ -162,7 +162,7 @@ pythia_->event.list(true,true);
           op.addMother( ev.getById( py_cg_corresp[*moth] ) );
         }
       }
-      ev.dump();
+      //ev.dump();
 #else
       FatalError( "Pythia8 is not linked to this instance!" );
 #endif

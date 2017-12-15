@@ -113,6 +113,10 @@ namespace CepGen
           const libconfig::Setting& cuts = kin["cuts"];
           if ( cuts.isList() ) parseParticlesCuts( cuts );
         }
+        if ( kin.exists( "min_pt" ) ) params_.kinematics.cuts.central[Cuts::pt_single].min() = (double)kin["min_pt"];
+        if ( kin.exists( "max_pt" ) ) params_.kinematics.cuts.central[Cuts::pt_single].max() = (double)kin["max_pt"];
+        if ( kin.exists( "min_rapidity" ) ) params_.kinematics.cuts.central[Cuts::rapidity_single].min() = (double)kin["min_rapidity"];
+        if ( kin.exists( "max_rapidity" ) ) params_.kinematics.cuts.central[Cuts::rapidity_single].max() = (double)kin["max_rapidity"];
         if ( kin.exists( "min_ptdiff" ) ) params_.kinematics.cuts.central[Cuts::pt_diff].min() = (double)kin["min_ptdiff"];
         if ( kin.exists( "max_ptdiff" ) ) params_.kinematics.cuts.central[Cuts::pt_diff].max() = (double)kin["max_ptdiff"];
         if ( kin.exists( "min_rapiditydiff" ) ) params_.kinematics.cuts.central[Cuts::rapidity_diff].min() = (double)kin["min_rapiditydiff"];
@@ -130,14 +134,24 @@ namespace CepGen
     ConfigHandler::parseParticlesCuts( const libconfig::Setting& cuts )
     {
       try {
-        if ( cuts.exists( "min_pt" ) ) params_.kinematics.cuts.central[Cuts::pt_single].min() = (double)cuts["min_pt"];
-        if ( cuts.exists( "max_pt" ) ) params_.kinematics.cuts.central[Cuts::pt_single].max() = (double)cuts["max_pt"];
-        if ( cuts.exists( "min_energy" ) ) params_.kinematics.cuts.central[Cuts::energy_single].min() = (double)cuts["min_energy"];
-        if ( cuts.exists( "max_energy" ) ) params_.kinematics.cuts.central[Cuts::energy_single].max() = (double)cuts["max_energy"];
-        if ( cuts.exists( "min_eta" ) ) params_.kinematics.cuts.central[Cuts::eta_single].min() = (double)cuts["min_eta"];
-        if ( cuts.exists( "max_eta" ) ) params_.kinematics.cuts.central[Cuts::eta_single].max() = (double)cuts["max_eta"];
-        if ( cuts.exists( "min_rapidity" ) ) params_.kinematics.cuts.central[Cuts::rapidity_single].min() = (double)cuts["min_rapidity"];
-        if ( cuts.exists( "max_rapidity" ) ) params_.kinematics.cuts.central[Cuts::rapidity_single].max() = (double)cuts["max_rapidity"];
+        for ( unsigned short i = 0; i < cuts.getLength(); ++i ) {
+          const libconfig::Setting& parts_cuts = cuts[i];
+          const libconfig::Setting& parts = parts_cuts["particles"];
+          if ( !parts.isArray() ) {
+            FatalError( "Impossible to parse the particles list for central cuts definition!" );
+          }
+          for ( unsigned short j = 0; j < parts.getLength(); ++j ) {
+            const ParticleCode part = (ParticleCode)(int)parts[j];
+            if ( parts_cuts.exists( "min_pt" ) ) params_.kinematics.cuts.central_particles[part][Cuts::pt_single].min() = (double)parts_cuts["min_pt"];
+            if ( parts_cuts.exists( "max_pt" ) ) params_.kinematics.cuts.central_particles[part][Cuts::pt_single].max() = (double)parts_cuts["max_pt"];
+            if ( parts_cuts.exists( "min_energy" ) ) params_.kinematics.cuts.central_particles[part][Cuts::energy_single].min() = (double)parts_cuts["min_energy"];
+            if ( parts_cuts.exists( "max_energy" ) ) params_.kinematics.cuts.central_particles[part][Cuts::energy_single].max() = (double)parts_cuts["max_energy"];
+            if ( parts_cuts.exists( "min_eta" ) ) params_.kinematics.cuts.central_particles[part][Cuts::eta_single].min() = (double)parts_cuts["min_eta"];
+            if ( parts_cuts.exists( "max_eta" ) ) params_.kinematics.cuts.central_particles[part][Cuts::eta_single].max() = (double)parts_cuts["max_eta"];
+            if ( parts_cuts.exists( "min_rapidity" ) ) params_.kinematics.cuts.central_particles[part][Cuts::rapidity_single].min() = (double)parts_cuts["min_rapidity"];
+            if ( parts_cuts.exists( "max_rapidity" ) ) params_.kinematics.cuts.central_particles[part][Cuts::rapidity_single].max() = (double)parts_cuts["max_rapidity"];
+          }
+        }
       } catch ( const libconfig::SettingNotFoundException& nfe ) {
         FatalError( Form( "Failed to retrieve the field \"%s\".", nfe.getPath() ) );
       } catch ( const libconfig::SettingTypeException& te ) {

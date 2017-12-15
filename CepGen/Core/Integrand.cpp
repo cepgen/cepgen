@@ -75,7 +75,7 @@ namespace CepGen
 
     p->process()->setPoint( ndim, x );
     if ( Logger::get().level >= Logger::DebugInsideLoop ) {
-      std::ostringstream oss; for ( unsigned int i=0; i<ndim; i++ ) { oss << x[i] << " "; }
+      std::ostringstream oss; for ( unsigned int i = 0; i < ndim; ++i ) { oss << x[i] << " "; }
       DebuggingInsideLoop( Form( "Computing dim-%d point ( %s)", ndim, oss.str().c_str() ) );
     }
 
@@ -111,9 +111,24 @@ namespace CepGen
     //--- full event content (+ hadronisation) if generating events
 
     if ( p->hadroniser() ) {
-      double wght = 0.;
-      if ( !p->hadroniser()->hadronise( *ev, wght ) ) return 0.;
-      integrand *= wght;
+      double br = 0.; // branching fraction for all decays
+      if ( !p->hadroniser()->hadronise( *ev, br ) ) return 0.;
+      integrand *= br;
+    }
+
+    //--- apply cuts on final state system (after hadronisation!)
+    //    (watch out your cuts, as this might be extremely time-consuming...)
+
+    const Particles cs = ev->getByRole( Particle::CentralSystem );
+    for ( Particles::const_iterator it_p = cs.begin(); it_p != cs.end(); ++it_p ) {
+      if ( p->kinematics.cuts.central_particles.count( it_p->pdgId() ) == 0 ) continue;
+      // retrieve all cuts associated to this final state particle
+      const std::map<Cuts::Central,Kinematics::Limits>& cm = p->kinematics.cuts.central_particles.at( it_p->pdgId() );
+      // apply these cuts on the given particle
+      if ( cm.count( Cuts::pt_single ) > 0 && !cm.at( Cuts::pt_single ).passes( it_p->momentum().pt() ) ) return 0.;
+      if ( cm.count( Cuts::energy_single ) > 0 && !cm.at( Cuts::energy_single ).passes( it_p->momentum().energy() ) ) return 0.;
+      if ( cm.count( Cuts::eta_single ) > 0 && !cm.at( Cuts::eta_single ).passes( it_p->momentum().eta() ) ) return 0.;
+      if ( cm.count( Cuts::rapidity_single ) > 0 && !cm.at( Cuts::rapidity_single ).passes( it_p->momentum().rapidity() ) ) return 0.;
     }
 
     if ( p->storage() ) {
@@ -131,8 +146,8 @@ namespace CepGen
       p->generation.last_event = ev;
     } // generating events
 
-    if ( Logger::get().level>=Logger::DebugInsideLoop ) {
-      os.str( "" ); for ( unsigned int i=0; i<ndim; i++ ) { os << Form( "%10.8f ", x[i] ); }
+    if ( Logger::get().level >= Logger::DebugInsideLoop ) {
+      os.str( "" ); for ( unsigned int i = 0; i < ndim; ++i ) { os << Form( "%10.8f ", x[i] ); }
       Debugging( Form( "f value for dim-%d point ( %s): %4.4e", ndim, os.str().c_str(), integrand ) );
     }
 
