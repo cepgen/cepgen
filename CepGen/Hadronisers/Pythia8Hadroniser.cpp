@@ -29,6 +29,25 @@ namespace CepGen
     Pythia8Hadroniser::~Pythia8Hadroniser()
     {}
 
+    bool
+    Pythia8Hadroniser::init()
+    {
+      bool res = pythia_->init();
+      if ( !res ) {
+        FatalError( "Failed to initialise the Pythia8 core!\n\t"
+                    "See the message above for more details." );
+      }
+      return res;
+    }
+
+    void
+    Pythia8Hadroniser::readString( const char* param )
+    {
+      if ( !pythia_->readString( param ) ) {
+        FatalError( Form( "The Pythia8 core failed to parse the following setting:\n\t%s", param ) );
+      }
+    }
+
     void
     Pythia8Hadroniser::setSeed( long long seed )
     {
@@ -78,11 +97,18 @@ namespace CepGen
         pp.daughter2( ( part.daughters().size() > 1 ) ? ids_corresp_.at( *part.daughters().rbegin() ) : 0 ); // offset for central system
       }
 
-      ev.dump();
-      pythia_->event.list();
+      pythia_->event.scale( ev.getOneByRole( Particle::Intermediate ).mass() );
+      //pythia_->event.list(true,true);
+      //pythia_->event.listJunctions();
       const unsigned short num_py_parts = pythia_->event.size();
 
-      if ( !pythia_->next() ) exit( 0 );//return 0.;
+      if ( !pythia_->next() ) ;//return 0.;
+
+      std::cout << "---> " << pythia_->info.isNonDiffractive() << "/" << pythia_->info.isResolved() << std::endl;
+
+      pythia_->event.list(true,true);
+
+      exit( 0 );
 
       // check if something happened in the event processing by Pythia
       // if not, return the event as it is...
@@ -100,29 +126,36 @@ namespace CepGen
     void
     Pythia8Hadroniser::addParticle( const Particle& part, const Event& ev, bool recursive )
     {
-      // check if the particle is already inserted
+      // check if the particle is already there
       if ( ids_corresp_.find( part.id() ) != ids_corresp_.end() )
         return;
 
       const Particle::Momentum mom = part.momentum();
       Pythia8::Particle py8part( part.integerPdgId(), 0, 0, 0, 0, 0, 0, 0, mom.px(), mom.py(), mom.pz(), mom.energy(), part.mass() );
+      if ( abs( py8part.m() ) < 0. )
+        py8part.m( py8part.mCalc() ); //FIXME
+
       switch ( part.role() ) {
         case Particle::IncomingBeam1:
         case Particle::IncomingBeam2: {
-          py8part.status( -12 );
+          py8part.status( -12 ); // beam particle
         } break;
         case Particle::Parton1:
         case Particle::Parton2:
         case Particle::Parton3: {
-          //py8part.status( -13 );
+          //py8part.status( -21 );
+          py8part.status( -13 );
+          if ( part.pdgId() == Photon ) py8part.m( py8part.mCalc() ); //FIXME
         } break;
         case Particle::Intermediate: {
-          py8part.id( ev.getOneByRole( Particle::Parton1 ).integerPdgId() );
-          //py8part.status( -14 );
+          if ( py8part.id() == 0 ) py8part.id( ev.getOneByRole( Particle::Parton1 ).integerPdgId() );
+          py8part.status( -14 );
         }
         case Particle::CentralSystem: {
+          py8part.id( py8part.id()/abs(py8part.id())*13 ); //FIXME
           if ( pythia_->particleData.canDecay( py8part.id() ) ) {
             py8part.status( 93 );
+            //py8part.status( 23 );
             py8part.tau( pythia_->particleData.tau0( py8part.id() ) );
             //part.setStatus( Particle::Resonance );
           }
@@ -130,12 +163,14 @@ namespace CepGen
         case Particle::OutgoingBeam1:
         case Particle::OutgoingBeam2: {
           if ( py8part.id() == 2 ) { // dissociative proton
-            py8part.id( 9902210 );
-            //py8part.status( 15 );
-            py8part.status( 63 );
+            //py8part.id( 9902210 );
+            //py8part.id( 2212 );
+            py8part.status( 15 );
+            //py8part.status( 23 );
+            //py8part.status( -63 );
           }
         } break;
-        default: break;
+        case Particle::UnknownRole: break;
       }
       ids_corresp_.insert( std::pair<short,short>( part.id(), pythia_->event.append( py8part ) ) );
 
@@ -200,7 +235,6 @@ namespace CepGen
       return br_ratio;
     }
 #endif
-
   }
 }
 

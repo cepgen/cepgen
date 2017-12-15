@@ -178,6 +178,8 @@ namespace CepGen
           Hadroniser::Pythia8Hadroniser* pythia8 = new Hadroniser::Pythia8Hadroniser;
           long long seed = ( hadr.exists( "seed" ) ) ? hadr["seed"] : -1ll;
           pythia8->setSeed( seed );
+          pythia8->readString( Form( "Beams:idA = %d", params_.kinematics.inpdg.first ) );
+          pythia8->readString( Form( "Beams:idB = %d", params_.kinematics.inpdg.second ) );
           pythia8->readString( Form( "Beams:eCM = %.2f", params_.kinematics.sqrtS() ) );
           if ( hadr.exists( "pythiaPreConfiguration" ) ) {
             libconfig::Setting& configs = hadr["pythiaPreConfiguration"];

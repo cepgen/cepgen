@@ -23,28 +23,25 @@ namespace CepGen
         ~Pythia8Hadroniser();
 
         bool hadronise( Event& ev, double& weight ) override;
-        void setSeed( long long seed );
+        void setSeed( long long seed ) override;
 
 #ifdef PYTHIA8
         double decay( const Particle& part, Event& ev );
 
-        void readString( const char* param ) {
-          pythia_->readString( param );
-        }
-        void readString( const std::string& param ) {
-          pythia_->readString( param );
-        }
-        bool init() {
-          return pythia_->init();
-        }
+        bool init();
+        void readString( const char* param );
+        void readString( const std::string& param ) { readString( param.c_str() ); }
 #endif
 
       private:
 #ifdef PYTHIA8
         void addParticle( const Particle& part, const Event& ev, bool recursive = true );
+
+        /// A Pythia8 core to be wrapped
         std::unique_ptr<Pythia8::Pythia> pythia_;
-#endif
+        /// Ids correspondence between Pythia8 and CepGen
         std::map<short,short> ids_corresp_;
+#endif
     };
   }
 }

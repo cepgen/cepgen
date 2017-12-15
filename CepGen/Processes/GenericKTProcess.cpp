@@ -202,6 +202,8 @@ namespace CepGen
       g1.setStatus( Particle::Incoming );
       g2.setMomentum( event_->getOneByRole( Particle::IncomingBeam2 ).momentum()-PY_, true );
       g2.setStatus( Particle::Incoming );
+      /*g1.setMass( fabs( PX_.mass() ) );
+      g2.setMass( fabs( PY_.mass() ) );*/
 
       //================================================================
       //     two-parton system

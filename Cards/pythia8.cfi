@@ -2,10 +2,20 @@ hadroniser = {
   name = "pythia8";
   seed = 0L;
   pythiaPreConfiguration = (
+    "Init:showAllSettings = on",
+    "BeamRemnants:beamJunction = on",
+    //"BeamRemnants:unresolvedHadron = 3",
     "ProcessLevel:all = off",
     "ProcessLevel:resonanceDecays = on",
-    "PartonLevel:Remnants = on"
-    //"Diffraction:doHard = on"
+    "PartonLevel:ISR = on",
+    "PartonLevel:FSR = on",
+    "PartonLevel:Remnants = on",
+    "HadronLevel:all = on",
+    //"Diffraction:doHard = on",
+    //"HardQCD:all = on"
+    "Next:numberCount = 1",
+    "Next:numberShowInfo = 1",
+    "Next:numberShowProcess = 1"
   );
   pythiaConfiguration = (
     "Tune:preferLHAPDF = 2",
@@ -25,7 +35,6 @@ hadroniser = {
     "MultipartonInteractions:expPow = 1.6",
     // process-specific
     "24:onMode = off", // disable all W decays, but...
-    "24:onIfAny = 11 13", // enable e-nue + mu-numu final states
-    "9902210:onMode = on"
+    "24:onIfAny = 11 13" // enable e-nue + mu-numu final states
   );
 };

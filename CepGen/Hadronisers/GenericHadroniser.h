@@ -31,6 +31,9 @@ namespace CepGen
         /// \param[inout] weight Event weight after hadronisation
         /// \return Boolean stating whether or not the hadronisation occured successfully
         virtual bool hadronise( Event& ev, double& weight ) = 0;
+        /// Specify a random numbers generator seed for the hadroniser
+        /// \param[in] seed A RNG seed
+        virtual void setSeed( long long seed ) = 0;
 
         /// Return a human-readable name for this hadroniser
         inline std::string name() const { return name_; }
