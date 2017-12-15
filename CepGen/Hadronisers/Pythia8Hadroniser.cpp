@@ -102,7 +102,10 @@ namespace CepGen
       //pythia_->event.listJunctions();
       const unsigned short num_py_parts = pythia_->event.size();
 
-      if ( !pythia_->next() ) ;//return 0.;
+      if ( !pythia_->next() ) {
+        Debugging( "Pythia8 failed to process the event." );
+        return 0.;
+      }
 
       std::cout << "---> " << pythia_->info.isNonDiffractive() << "/" << pythia_->info.isResolved() << std::endl;
 
@@ -220,7 +223,7 @@ namespace CepGen
         Particle& op = ev.addParticle( Particle::CentralSystem );
         py_cg_corresp[i] = op.id();
 
-        op.setPdgId( ( ParticleCode )abs( p.id() ), p.charge() );
+        op.setPdgId( static_cast<ParticleCode>( abs( p.id() ) ), p.charge() );
         if ( p.isFinal() ) op.setStatus( Particle::FinalState );
         else op.setStatus( Particle::Propagator );
 

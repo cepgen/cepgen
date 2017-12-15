@@ -13,7 +13,7 @@ hadroniser = {
     "HadronLevel:all = on",
     //"Diffraction:doHard = on",
     //"HardQCD:all = on"
-    "Next:numberCount = 1",
+    "Next:numberCount = 0",
     "Next:numberShowInfo = 1",
     "Next:numberShowProcess = 1"
   );

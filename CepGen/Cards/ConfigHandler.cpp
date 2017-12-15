@@ -76,6 +76,7 @@ namespace CepGen
       try {
         if ( kin.exists( "beam1_pz" ) ) params_.kinematics.inp.first = (double)kin["beam1_pz"];
         if ( kin.exists( "beam2_pz" ) ) params_.kinematics.inp.second = (double)kin["beam2_pz"];
+        if ( kin.exists( "cm_energy" ) ) params_.kinematics.setSqrtS( (double)kin["cm_energy"] );
         if ( kin.exists( "structure_functions" ) ) {
           const char* sf = kin["structure_functions" ]; const std::string sf_str = sf;
           if ( sf_str == "electron" ) params_.kinematics.structure_functions = StructureFunctions::Electron;
