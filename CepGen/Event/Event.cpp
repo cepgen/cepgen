@@ -59,14 +59,14 @@ namespace CepGen
   }
 
   Particles&
-  Event::getByRole( const Particle::Role& role )
+  Event::getByRole( Particle::Role role )
   {
     //--- retrieve all particles with a given role
     return particles_[role];
   }
 
   ParticlesIds
-  Event::getIdsByRole( const Particle::Role& role ) const
+  Event::getIdsByRole( Particle::Role role ) const
   {
     //--- retrieve all particles ids with a given role
     ParticlesIds out;
@@ -81,24 +81,26 @@ namespace CepGen
   }
 
   Particle&
-  Event::getOneByRole( const Particle::Role& role )
+  Event::getOneByRole( Particle::Role role )
   {
     //--- retrieve the first particle a the given role
     Particles& parts_by_role = getByRole( role );
-    if ( parts_by_role.size() > 1 ) {
+    if ( parts_by_role.size() == 0 )
+      FatalError( Form( "No particle retrieved with role %d", (int)role ) );
+    if ( parts_by_role.size() > 1 )
       FatalError( Form( "More than one particle with role %d: %d particles", (int)role, parts_by_role.size() ) );
-    }
     return *parts_by_role.begin();
   }
 
   const Particle&
-  Event::getOneByRole( const Particle::Role& role ) const
+  Event::getOneByRole( Particle::Role role ) const
   {
     //--- retrieve the first particle a the given role
     const Particles& parts_by_role = particles_.at( role );
-    if ( parts_by_role.size() > 1 ) {
+    if ( parts_by_role.size() == 0 )
+      FatalError( Form( "No particle retrieved with role %d", (int)role ) );
+    if ( parts_by_role.size() > 1 )
       FatalError( Form( "More than one particle with role %d: %d particles", (int)role, parts_by_role.size() ) );
-    }
     return *parts_by_role.begin();
   }
 
@@ -181,7 +183,7 @@ namespace CepGen
   }
 
   Particle&
-  Event::addParticle( const Particle::Role& role, bool replace )
+  Event::addParticle( Particle::Role role, bool replace )
   {
     Particle np( role );
     return addParticle( np, replace );

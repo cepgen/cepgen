@@ -14,7 +14,7 @@ namespace CepGen
 {
   Generator::Generator() :
     parameters( std::unique_ptr<Parameters>( new Parameters ) ),
-    cross_section_( -1. ), cross_section_error_( -1. ), has_cross_section_( false )
+    cross_section_( -1. ), cross_section_error_( -1. )
   {
     if ( Logger::get().level > Logger::Nothing ) {
       Debugging( "Generator initialized" );
@@ -24,7 +24,8 @@ namespace CepGen
   }
 
   Generator::Generator( Parameters* ip ) :
-    parameters( ip )
+    parameters( ip ),
+    cross_section_( -1. ), cross_section_error_( -1. )
   {}
 
   Generator::~Generator()
@@ -46,7 +47,6 @@ namespace CepGen
   {
     integrator_.reset();
     parameters->integrator.first_run = true;
-    has_cross_section_ = false; // force the recreation of the integrator instance
     cross_section_ = cross_section_error_ = -1.;
   }
 
@@ -86,6 +86,8 @@ namespace CepGen
   void
   Generator::computeXsection( double& xsec, double& err )
   {
+    Information( "Starting the computation of the process cross-section" );
+
     // first destroy and recreate the integrator instance
     if ( !integrator_ ) {
       integrator_ = std::unique_ptr<Integrator>( new Integrator( numDimensions(), f, parameters.get() ) );
@@ -94,18 +96,17 @@ namespace CepGen
       integrator_.reset( new Integrator( numDimensions(), f, parameters.get() ) );
     }
 
-    if ( Logger::get().level>=Logger::Debug ) {
+    if ( Logger::get().level >= Logger::Debug ) {
       std::ostringstream topo; topo << parameters->kinematics.mode;
       Debugging( Form( "New integrator instance created\n\t"
                        "Considered topology: %s case\n\t"
                        "Will proceed with %d-dimensional integration", topo.str().c_str(), numDimensions() ) );
     }
 
-    Information( "Starting the computation of the process cross-section" );
-
     try { prepareFunction(); } catch ( Exception& e ) { e.dump(); }
 
-    has_cross_section_ = ( integrator_->integrate( cross_section_, cross_section_error_ ) == 0 );
+    const int res = integrator_->integrate( cross_section_, cross_section_error_ );
+    if ( res != 0 ) throw Exception( __PRETTY_FUNCTION__, Form( "Error while computing the cross-section: return value = %d", res ), FatalError );
 
     xsec = cross_section_;
     err = cross_section_error_;
@@ -113,17 +114,16 @@ namespace CepGen
     Information( Form( "Total cross section: %f +/- %f pb", xsec, err ) );
   }
 
-  Event*
+  std::shared_ptr<Event>
   Generator::generateOneEvent()
   {
     bool good = false;
-    if ( !has_cross_section_ ) {
+    if ( cross_section_ < 0. ) {
       computeXsection( cross_section_, cross_section_error_ );
     }
     while ( !good ) { good = integrator_->generateOneEvent(); }
 
-    last_event = this->parameters->generation.last_event;
-    return last_event.get();
+    return parameters->generation.last_event;
   }
 
   void

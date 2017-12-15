@@ -32,7 +32,7 @@ namespace CepGen
   bool
   Particle::operator<( const Particle& rhs ) const
   {
-    return ( id_ < rhs.id_ );
+    return ( id_ >= 0 && rhs.id_ > 0 && id_ < rhs.id_ );
   }
 
   double

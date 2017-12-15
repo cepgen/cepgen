@@ -43,7 +43,7 @@ namespace CepGen
       /// \brief Create a new particle in the event, with no kinematic information but the role it has to play in the process
       /// \param[in] role The role the particle will play in the process
       /// \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
-      Particle& addParticle( const Particle::Role& role, bool replace=false );
+      Particle& addParticle( Particle::Role role, bool replace=false );
 
       //----- particles retrievers
 
@@ -59,15 +59,15 @@ namespace CepGen
        * \param[in] role The role the particles have to play in the process
        * \return A vector of references to the requested Particle objects
        */
-      Particles& getByRole( const Particle::Role& role );
-      ParticlesIds getIdsByRole( const Particle::Role& role ) const;
+      Particles& getByRole( Particle::Role role );
+      ParticlesIds getIdsByRole( Particle::Role role ) const;
       /**
        * Returns the first Particle object in the particles list whose role corresponds to the given argument
        * \param[in] role The role the particle has to play in the event
        * \return A Particle object corresponding to the first particle with the role
        */
-      Particle& getOneByRole( const Particle::Role& role );
-      const Particle& getOneByRole( const Particle::Role& role ) const;
+      Particle& getOneByRole( Particle::Role role );
+      const Particle& getOneByRole( Particle::Role role ) const;
       /**
        * Returns the reference to the Particle object corresponding to a unique identifier in the event
        * \brief Gets one particle by its unique identifier in the event

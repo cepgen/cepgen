@@ -105,8 +105,7 @@ namespace CepGen
       if ( has_correction ) return storeEvent( x );
     }
 
-    double weight;
-    double y = -1.;
+    double weight = 0., y = -1.;
 
     //--- normal generation cycle
 
@@ -129,6 +128,7 @@ namespace CepGen
 
       // Get weight for selected x value
       weight = F( x );
+      if ( weight <= 0. ) continue;
     } while ( y > weight );
 
     if ( weight <= grid_.f_max[ps_bin_] ) ps_bin_ = 0;

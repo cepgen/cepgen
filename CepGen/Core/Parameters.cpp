@@ -108,14 +108,18 @@ namespace CepGen
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Outgoing central system " ) : "Outgoing central system" ) << std::setfill( ' ' ) << std::endl
       << std::endl
       << std::setw( wt ) << "Central particles" << ( pretty ? boldify( op.str().c_str() ) : op.str() ) << std::endl;
-    for ( std::map<Cuts::Central,Kinematics::Limits>::const_iterator lim = kinematics.cuts.central.begin(); lim != kinematics.cuts.central.end(); ++lim ) {
-      os << std::setw( wt ) << lim->first << lim->second << std::endl;
+    if ( kinematics.cuts.central.size() > 0 ) {
+      for ( std::map<Cuts::Central,Kinematics::Limits>::const_iterator lim = kinematics.cuts.central.begin(); lim != kinematics.cuts.central.end(); ++lim ) {
+        os << std::setw( wt ) << lim->first << lim->second << std::endl;
+      }
     }
-    os << std::setw( wt ) << "> per-particle cuts:" << std::endl;
-    for ( std::map<ParticleCode,std::map<Cuts::Central,Kinematics::Limits> >::const_iterator part_lim = kinematics.cuts.central_particles.begin(); part_lim != kinematics.cuts.central_particles.end(); ++part_lim ) {
-      os << " * " << std::setw( wt-3 ) << part_lim->first << std::endl;
-      for ( std::map<Cuts::Central,Kinematics::Limits>::const_iterator lim = part_lim->second.begin(); lim != part_lim->second.end(); ++lim ) {
-        os << "   - " << std::setw( wt-5 ) << lim->first << lim->second << std::endl;
+    if ( kinematics.cuts.central_particles.size() > 0 ) {
+      os << std::setw( wt ) << "> per-particle cuts:" << std::endl;
+      for ( std::map<ParticleCode,std::map<Cuts::Central,Kinematics::Limits> >::const_iterator part_lim = kinematics.cuts.central_particles.begin(); part_lim != kinematics.cuts.central_particles.end(); ++part_lim ) {
+        os << " * " << std::setw( wt-3 ) << part_lim->first << std::endl;
+        for ( std::map<Cuts::Central,Kinematics::Limits>::const_iterator lim = part_lim->second.begin(); lim != part_lim->second.end(); ++lim ) {
+          os << "   - " << std::setw( wt-5 ) << lim->first << lim->second << std::endl;
+        }
       }
     }
     os << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Proton / remnants " ) : "Proton / remnants" ) << std::setfill( ' ' ) << std::endl;

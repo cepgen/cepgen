@@ -119,16 +119,21 @@ namespace CepGen
     //--- apply cuts on final state system (after hadronisation!)
     //    (watch out your cuts, as this might be extremely time-consuming...)
 
-    const Particles cs = ev->getByRole( Particle::CentralSystem );
-    for ( Particles::const_iterator it_p = cs.begin(); it_p != cs.end(); ++it_p ) {
-      if ( p->kinematics.cuts.central_particles.count( it_p->pdgId() ) == 0 ) continue;
-      // retrieve all cuts associated to this final state particle
-      const std::map<Cuts::Central,Kinematics::Limits>& cm = p->kinematics.cuts.central_particles.at( it_p->pdgId() );
-      // apply these cuts on the given particle
-      if ( cm.count( Cuts::pt_single ) > 0 && !cm.at( Cuts::pt_single ).passes( it_p->momentum().pt() ) ) return 0.;
-      if ( cm.count( Cuts::energy_single ) > 0 && !cm.at( Cuts::energy_single ).passes( it_p->momentum().energy() ) ) return 0.;
-      if ( cm.count( Cuts::eta_single ) > 0 && !cm.at( Cuts::eta_single ).passes( it_p->momentum().eta() ) ) return 0.;
-      if ( cm.count( Cuts::rapidity_single ) > 0 && !cm.at( Cuts::rapidity_single ).passes( it_p->momentum().rapidity() ) ) return 0.;
+    if ( p->kinematics.cuts.central_particles.size() > 0 ) {
+      std::map<ParticleCode,std::map<Cuts::Central,Kinematics::Limits> >::const_iterator it_c;
+      const Particles cs = ev->getByRole( Particle::CentralSystem );
+      for ( Particles::const_iterator it_p = cs.begin(); it_p != cs.end(); ++it_p ) {
+        it_c = p->kinematics.cuts.central_particles.find( it_p->pdgId() );
+        if ( it_c == p->kinematics.cuts.central_particles.end() ) continue;
+        // retrieve all cuts associated to this final state particle
+        const std::map<Cuts::Central,Kinematics::Limits>& cm = it_c->second;
+        // apply these cuts on the given particle
+        if ( cm.count( Cuts::pt_single ) > 0 && !cm.at( Cuts::pt_single ).passes( it_p->momentum().pt() ) ) return 0.;
+        //std::cout << it_c->first << "\t" << it_p->momentum().pt() << "\t" << cm.at( Cuts::pt_single ).passes( it_p->momentum().pt() ) << std::endl;
+        if ( cm.count( Cuts::energy_single ) > 0 && !cm.at( Cuts::energy_single ).passes( it_p->momentum().energy() ) ) return 0.;
+        if ( cm.count( Cuts::eta_single ) > 0 && !cm.at( Cuts::eta_single ).passes( it_p->momentum().eta() ) ) return 0.;
+        if ( cm.count( Cuts::rapidity_single ) > 0 && !cm.at( Cuts::rapidity_single ).passes( it_p->momentum().rapidity() ) ) return 0.;
+      }
     }
 
     if ( p->storage() ) {

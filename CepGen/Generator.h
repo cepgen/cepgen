@@ -94,7 +94,7 @@ namespace CepGen
        * Generate one single event given the phase space computed by Vegas in the integration step
        * \return A pointer to the Event object generated in this run
        */
-      Event* generateOneEvent();
+      std::shared_ptr<Event> generateOneEvent();
       /// Number of dimensions on which the integration is performed
       size_t numDimensions() const;
       /// Compute one single point from the total phase space
@@ -103,8 +103,6 @@ namespace CepGen
       double computePoint( double* x );
       /// Physical Parameters used in the events generation and cross-section computation
       std::unique_ptr<Parameters> parameters;
-      /// Last event generated in this run
-      std::shared_ptr<Event> last_event;
 
    private:
       /// Prepare the function before its integration (add particles/compute kinematics/...)
@@ -115,8 +113,6 @@ namespace CepGen
       double cross_section_;
       /// Error on the cross section as computed in the last integration
       double cross_section_error_;
-      /// Has a first integration beed already performed?
-      bool has_cross_section_;
   };
 }
 
