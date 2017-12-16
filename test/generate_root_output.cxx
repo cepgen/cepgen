@@ -75,7 +75,6 @@ int main( int argc, char* argv[] ) {
     for ( const auto& p : event->particles() ) {
       const CepGen::Particle::Momentum m = p.momentum();
 
-std::cout << p.id() << "\t" << p.role() << "\t" << p.pdgId() << "\t" << p.status() << "\t" << m.pt() << std::endl;
       //ev.kinematics[ev.np].SetXYZM( m.px(), m.py(), m.pz(), m.mass() );
       ev.rapidity[ev.np] = m.rapidity();
       ev.pt[ev.np] = m.pt();

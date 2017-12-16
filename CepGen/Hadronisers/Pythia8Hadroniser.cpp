@@ -121,9 +121,8 @@ namespace CepGen
       const unsigned short num_py_parts = pythia_->event.size();
 
       if ( !pythia_->next() ) {
-        //exit(0);
         InWarning( "Pythia8 failed to process the event." );
-        return 0.;
+        return false;
       }
 
 //pythia_->event.list(true,true);
@@ -131,7 +130,7 @@ namespace CepGen
 
       // check if something happened in the event processing by Pythia
       // if not, return the event as it is...
-      if ( pythia_->event.size() == num_py_parts ) return weight;
+      if ( pythia_->event.size() == num_py_parts ) return true;
 
       for ( unsigned short i = 1; i < pythia_->event.size(); ++i ) { // skip the central system
         const Pythia8::Particle p = pythia_->event[i];

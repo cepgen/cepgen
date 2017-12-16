@@ -215,7 +215,14 @@ namespace CepGen
   Integrator::storeEvent( const std::vector<double>& x )
   {
     input_params_->setStorage( true );
-    F( x );
+    double weight = 0.;
+    unsigned short i = 0;
+    do {
+      weight = F( x );
+      i++;
+    } while ( weight <= 0. && i < 10 );
+    if ( weight <= 0. ) return false;
+
     input_params_->generation.ngen += 1;
     input_params_->setStorage( false );
     if ( input_params_->generation.ngen % input_params_->generation.gen_print_every == 0 ) {
