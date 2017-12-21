@@ -2,6 +2,8 @@
 #define Test_TreeEvent_h
 
 #include "TTree.h"
+#include "../CepGen/Core/Exception.h"
+#include <string>
 
 namespace CepGen
 {
@@ -9,23 +11,34 @@ namespace CepGen
   {
     double xsect, errxsect;
     unsigned int litigious_events;
+    TTree* tree;
 
     TreeRun() { clear(); }
     void clear() {
       xsect = errxsect = -1.;
       litigious_events = 0;
     }
-    void create( TTree* tree ) {
+    void create() {
+      tree = new TTree( "run", "a tree containing information on the previous run" );
       if ( !tree ) return;
       tree->Branch( "xsect", &xsect, "xsect/D" );
       tree->Branch( "errxsect", &errxsect, "errxsect/D" );
       tree->Branch( "litigious_events", &litigious_events, "litigious_events/i" );
     }
-    void attach( TTree* tree ) {
+    void fill() {
+      tree->Fill();
+    }
+    void attach( const char* filename ) {
+      attach( TFile::Open( filename ) );
+    }
+    void attach( TFile* file ) {
+      tree = dynamic_cast<TTree*>( file->Get( "run" ) );
       if ( !tree ) return;
       tree->SetBranchAddress( "xsect", &xsect );
       tree->SetBranchAddress( "errxsect", &errxsect );
       tree->SetBranchAddress( "litigious_events", &litigious_events );
+      if ( tree->GetEntriesFast() > 1 ) InWarning( "The run tree has more than one entry." );
+      tree->GetEntry( 0 );
     }
   };
 

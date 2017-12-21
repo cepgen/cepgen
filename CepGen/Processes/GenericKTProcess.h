@@ -30,7 +30,6 @@ namespace CepGen
                           const unsigned int& num_user_dimensions,
                           const std::array<ParticleCode,2>& partons,
                           const std::vector<ParticleCode>& output );
-        ~GenericKTProcess();
 
         /// Populate the event content with the generated process' topology
         void addEventContent() override;

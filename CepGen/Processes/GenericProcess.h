@@ -38,7 +38,7 @@ namespace CepGen
         /// \param[in] description Human-readable description of the process
         /// \param[in] has_event Do we generate the associated event structure?
         GenericProcess( const std::string& name, const std::string& description="<invalid process>", bool has_event=true );
-        virtual ~GenericProcess();
+        virtual ~GenericProcess() {}
 
         /// Restore the Event object to its initial state
         inline void clearEvent() { event_->restore(); }

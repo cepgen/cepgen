@@ -13,9 +13,6 @@ namespace CepGen
       total_gen_time_( 0. ), num_gen_events_( 0 ), has_event_( has_event )
     {}
 
-    GenericProcess::~GenericProcess()
-    {}
-
     void
     GenericProcess::setPoint( const unsigned int ndim, double* x )
     {

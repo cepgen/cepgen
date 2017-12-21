@@ -16,9 +16,6 @@ namespace CepGen
       kIntermediateParts( partons ), kProducedParts( central )
     {}
 
-    GenericKTProcess::~GenericKTProcess()
-    {}
-
     void
     GenericKTProcess::prepareKTKinematics()
     {
