@@ -15,12 +15,14 @@ namespace CepGen
       public:
         struct Parameterisation
         {
-          static Parameterisation standard();
+          static Parameterisation standard_neutron();
+          static Parameterisation standard_proton();
+          static Parameterisation standard_deuteron();
 
           enum { neutron = 0, proton = 1, deuteron = 2 } mode;
           double mp, mpi0;
           // SLAC fit parameters
-          std::array<double,7> cn, cp, cd;
+          std::array<double,7> c_slac;
           // CLAS parameterisation
           double alpha, beta, dmu, dmup;
           std::array<double,3> x;
@@ -28,7 +30,7 @@ namespace CepGen
           std::array<unsigned short,4> lr;
         };
 
-        CLAS( const CLAS::Parameterisation& params = CLAS::Parameterisation::standard() ) : params_( params ) {}
+        CLAS( const CLAS::Parameterisation& params = CLAS::Parameterisation::standard_proton() ) : params_( params ) {}
 
         CLAS operator()( double q2, double xbj ) const;
 

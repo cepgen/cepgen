@@ -7,16 +7,14 @@ namespace CepGen
   namespace SF
   {
     CLAS::Parameterisation
-    CLAS::Parameterisation::standard()
+    CLAS::Parameterisation::standard_proton()
     {
       Parameterisation params;
       params.mode = Parameterisation::proton;
       params.mp = ParticleProperties::mass( Proton );
       params.mpi0 = ParticleProperties::mass( PiZero );
       // SLAC fit parameters
-      params.cn = { { 0.0640, 0.2250, 4.1060, -7.0790, 3.0550, 1.6421, 0.37636 } };
-      params.cp = { { 0.25615, 2.1785, 0.89784, -6.7162, 3.7557, 1.6421, 0.37636 } };
-      params.cd = { { 0.47709, 2.1602, 3.6274, -10.470, 4.9272, 1.5121, 0.35115 } };
+      params.c_slac = { { 0.25615, 2.1785, 0.89784, -6.7162, 3.7557, 1.6421, 0.37636 } };
       // CLAS parameterisation
       params.x = { { -0.599937, 4.76158, 0.411676 } };
       params.b = { { 0.755311, 3.35065, 3.51024, 1.74470 } };
@@ -28,6 +26,32 @@ namespace CepGen
       params.dmr = { { 1.22991, 1.51015, 1.71762, 1.95381 } };
       params.dgr = { { 0.106254, 0.0816620, 0.125520, 0.198915 } };
       params.lr = { { 1, 2, 3, 2 } };
+
+      return params;
+    }
+
+    CLAS::Parameterisation
+    CLAS::Parameterisation::standard_neutron()
+    {
+      Parameterisation params = standard_proton();
+      params.mode = Parameterisation::neutron;
+      params.c_slac = { { 0.0640, 0.2250, 4.1060, -7.0790, 3.0550, 1.6421, 0.37636 } };
+      return params;
+    }
+
+    CLAS::Parameterisation
+    CLAS::Parameterisation::standard_deuteron()
+    {
+      Parameterisation params = standard_proton();
+      params.mode = Parameterisation::deuteron;
+      params.c_slac = { { 0.47709, 2.1602, 3.6274, -10.470, 4.9272, 1.5121, 0.35115 } };
+      params.x = { { -0.21262, 6.9690, 0.40314 } };
+      params.b = { { 0.76111, 4.1470, 3.7119, 1.4218 } };
+      params.alpha = -0.24480;
+      params.beta = 0.014503;
+      params.ar = { { 0.74847, 0.011500, 0.12662, 0.747338 } };
+      params.dmr = { { 1.2400, 1.4772, 1.5233, 1.95381 } };
+      params.dgr = { { 0.12115, 0.0069580, 0.084095, 0.198915 } };
 
       return params;
     }
@@ -45,14 +69,8 @@ namespace CepGen
       cl.F2 = f2slac( q2, xbj );
 
       double bkg = 0., resn = 0.;
-      switch ( params_.mode ) {
-        case Parameterisation::proton:
-        case Parameterisation::neutron: {
-          resbkg( q2, sqrt( w2 ), bkg, resn );
-        } break;
-        case Parameterisation::deuteron: {
-        } break;
-      }
+      resbkg( q2, sqrt( w2 ), bkg, resn );
+
       cl.F2 *= ( bkg+resn );
       return cl;
     }
@@ -62,30 +80,13 @@ namespace CepGen
     {
       if ( xbj >= 1. ) return 0.;
       double f2 = 0., xsxb = 0., xs = 0.;
-      switch ( params_.mode ) {
-        case Parameterisation::neutron: {
-          xsxb = ( q2+params_.cn[6] )/( q2+params_.cn[5]*xbj );
-          xs = xbj*xsxb;
-          for ( unsigned short i = 0; i < 5; ++i ) {
-            f2 += params_.cn[i]*pow( 1.-xs, i );
-          }
-        } break;
-        case Parameterisation::proton: {
-          xsxb = ( q2+params_.cp[6] )/( q2+params_.cp[5]*xbj );
-          xs = xbj*xsxb;
-          for ( unsigned short i = 0; i < 5; ++i ) {
-            f2 += params_.cp[i]*pow( 1.-xs, i );
-          }
-        } break;
-        case Parameterisation::deuteron: {
-          xsxb = ( q2+params_.cd[6] )/( q2+params_.cd[5]*xbj );
-          xs = xbj*xsxb;
-          for ( unsigned short i = 0; i < 5; ++i ) {
-            f2 += params_.cd[i]*pow( 1.-xs, i );
-          }
-          if ( xbj > 0. ) f2 /= ( 1.-exp( -7.70*( 1./xbj-1.+params_.mp*params_.mp/q2 ) ) );
-        } break;
+      xsxb = ( q2+params_.c_slac[6] )/( q2+params_.c_slac[5]*xbj );
+      xs = xbj*xsxb;
+      for ( unsigned short i = 0; i < 5; ++i ) {
+        f2 += params_.c_slac[i]*pow( 1.-xs, i );
       }
+      if ( params_.mode == Parameterisation::deuteron && xbj > 0. )
+        f2 /= ( 1.-exp( -7.70*( 1./xbj-1.+params_.mp*params_.mp/q2 ) ) );
       return f2 *= pow( 1.-xs, 3 ) / xsxb;
     }
 
@@ -108,18 +109,28 @@ namespace CepGen
       qs = 0.5 * sqrt( qs )/w;
       double omega = 0.5*( w2+q2-mp2 )/mp;
       const double xn = 0.5*q2/( mp*omega );
-      const double bkg2 = ( w > params_.b[3] ) ? exp( -params_.b[2]*( w2-params_.b[3]*params_.b[3] ) ) : 1.;
+
+      const double bkg2 = ( w > params_.b[3] )
+        ? exp( -params_.b[2]*( w2-params_.b[3]*params_.b[3] ) )
+        : 1.;
+
+      f2bkg = params_.b[0]*( 1.-exp( -params_.b[1]*( w-wth ) ) )+( 1.-params_.b[0] )*( 1.-bkg2 );
+      f2bkg *= ( 1.+( 1.-f2bkg )*( params_.x[0]+params_.x[1]*pow( xn-params_.x[2], 2 ) ) );
+
       double etab = 1., etad = 1.;
-      if ( q2 <= 2. && w <= 2.5 ) {
+      if ( params_.mode != Parameterisation::deuteron && q2 <= 2. && w <= 2.5 ) {
         etab = 1.-2.5*q2*exp( -12.5*q2*q2-50.*( w-1.325 )*( w-1.325 ) );
         etad = 1.+2.5*q2*exp( -12.5*q2*q2 );
       }
-      f2bkg = params_.b[0]*( 1.-exp( -params_.b[1]*( w-wth ) ) )+( 1.-params_.b[0] )*( 1.-bkg2 );
-      f2bkg *= etab*( 1.+( 1.-f2bkg )*( params_.x[0]+params_.x[1]*( xn-params_.x[2] )*( xn-params_.x[2] ) ) );
+      f2bkg *= etab;
+
       double resn = 0.;
       for ( unsigned short i = 0; i < 4; ++i ) {
         double ai = params_.ar[i];
-        if ( i == 0 ) ai = etad*( ai+q2*std::min( 0., params_.alpha+params_.beta*q2 ) );
+        if ( i == 0 ) {
+          ai += q2*std::min( 0., params_.alpha+params_.beta*q2 );
+          ai *= etad;
+        }
         double dmi = params_.dmr[i];
         if ( i == 2 ) dmi *= ( 1.+params_.dmu/( 1.+params_.dmup*q2 ) );
         double qs0 = pow( dmi*dmi+mp2-mpi02, 2 )-4.*mp2*dmi*dmi;
