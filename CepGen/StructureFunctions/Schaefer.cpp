@@ -16,6 +16,7 @@ namespace CepGen
       luxlike_params_.w2_lo = 3.;
       luxlike_params_.res_model = ChristyBosted;
       luxlike_params_.cont_model = GD11p;
+      luxlike_params_.higher_twist = 0;
 #endif
     }
 

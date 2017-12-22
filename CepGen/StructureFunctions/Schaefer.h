@@ -11,7 +11,7 @@ extern "C"
   {
     double amp, alpha_em;
     double q2_cut, w2_lo, w2_hi;
-    int res_model, cont_model;
+    int res_model, cont_model, higher_twist;
   } luxlike_params_;
 }
 #endif

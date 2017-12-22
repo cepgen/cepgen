@@ -4,6 +4,7 @@
 #include "CepGen/StructureFunctions/BlockDurandHa.h"
 #include "CepGen/StructureFunctions/FioreBrasse.h"
 #include "CepGen/StructureFunctions/ChristyBosted.h"
+#include "CepGen/StructureFunctions/CLAS.h"
 #include "CepGen/StructureFunctions/GenericLHAPDF.h"
 #include "CepGen/StructureFunctions/SuriYennie.h"
 #include "CepGen/StructureFunctions/SzczurekUleshchenko.h"
@@ -35,6 +36,10 @@ namespace CepGen
       case StructureFunctions::ChristyBosted: {
         const SF::ChristyBosted cb;
         return cb( q2, xbj );
+      } break;
+      case StructureFunctions::CLAS: {
+        const SF::CLAS clas;
+        return clas( q2, xbj );
       } break;
       case StructureFunctions::BlockDurandHa: {
         const SF::BlockDurandHa bdh;

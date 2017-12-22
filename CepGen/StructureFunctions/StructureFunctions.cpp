@@ -20,6 +20,7 @@ namespace CepGen
       case StructureFunctions::SzczurekUleshchenko: return os << "Szczurek-Uleshchenko";
       case StructureFunctions::FioreBrasse:         return os << "Fiore-Brasse";
       case StructureFunctions::ChristyBosted:       return os << "Christy-Bosted";
+      case StructureFunctions::CLAS:                return os << "CLAS";
       case StructureFunctions::BlockDurandHa:       return os << "BDH";
       case StructureFunctions::ALLM91:              return os << "ALLM;91";
       case StructureFunctions::ALLM97:              return os << "ALLM;97";

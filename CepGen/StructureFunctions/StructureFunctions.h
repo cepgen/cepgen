@@ -20,6 +20,7 @@ namespace CepGen
         BlockDurandHa       = 13,
         FioreBrasse         = 101,
         ChristyBosted       = 102,
+        CLAS                = 103,
         ALLM91              = 201,
         ALLM97              = 202,
         GD07p               = 203,
