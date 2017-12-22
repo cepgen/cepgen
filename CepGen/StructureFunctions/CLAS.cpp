@@ -67,11 +67,9 @@ namespace CepGen
       if ( sqrt( w2 ) < w_min ) return cl;
 
       cl.F2 = f2slac( q2, xbj );
+      std::pair<double,double> rb = resbkg( q2, sqrt( w2 ) );
 
-      double bkg = 0., resn = 0.;
-      resbkg( q2, sqrt( w2 ), bkg, resn );
-
-      cl.F2 *= ( bkg+resn );
+      cl.F2 *= ( rb.first+rb.second );
       return cl;
     }
 
@@ -90,31 +88,30 @@ namespace CepGen
       return f2 *= pow( 1.-xs, 3 ) / xsxb;
     }
 
-    void
-    CLAS::resbkg( double q2, double w, double& f2bkg, double& f2resn ) const
+    std::pair<double,double>
+    CLAS::resbkg( double q2, double w ) const
     {
-      const double mp = params_.mp, mp2 = mp*mp;
-      const double mpi0 = params_.mpi0, mpi02 = mpi0*mpi0;
+      const double mp2 = params_.mp*params_.mp, mpi02 = params_.mpi0*params_.mpi0;
       const double coef = 6.08974;
-      // EVALUATE THE BACKGROUND AND RESONANCE TERMS OF THE
-      // MODULATING FUNCTION (SLAC PARAMETRIZATION) FOR THE NUCLEON
-      double wth = mp+mpi0;
-      f2bkg = f2resn = 0.;
-      if ( w < wth ) return;
-      f2bkg = 1.;
-      if ( w > 4. ) return;
+
+      double wth = params_.mp+params_.mpi0;
+      if ( w < wth ) return std::make_pair( 0., 0. );
+      if ( w > 4. ) return std::make_pair( 1., 0. );
+
       const double w2 = w*w;
+
       double qs = pow( w2+mp2-mpi02, 2 )-4.*mp2*w2;
-      if ( qs <= 0. ) return;
+      if ( qs <= 0. ) return std::make_pair( 1., 0. );
+
       qs = 0.5 * sqrt( qs )/w;
-      double omega = 0.5*( w2+q2-mp2 )/mp;
-      const double xn = 0.5*q2/( mp*omega );
+      double omega = 0.5*( w2+q2-mp2 )/params_.mp;
+      const double xn = 0.5*q2/( params_.mp*omega );
 
       const double bkg2 = ( w > params_.b[3] )
         ? exp( -params_.b[2]*( w2-params_.b[3]*params_.b[3] ) )
         : 1.;
 
-      f2bkg = params_.b[0]*( 1.-exp( -params_.b[1]*( w-wth ) ) )+( 1.-params_.b[0] )*( 1.-bkg2 );
+      double f2bkg = params_.b[0]*( 1.-exp( -params_.b[1]*( w-wth ) ) )+( 1.-params_.b[0] )*( 1.-bkg2 );
       f2bkg *= ( 1.+( 1.-f2bkg )*( params_.x[0]+params_.x[1]*pow( xn-params_.x[2], 2 ) ) );
 
       double etab = 1., etad = 1.;
@@ -124,23 +121,25 @@ namespace CepGen
       }
       f2bkg *= etab;
 
-      double resn = 0.;
+      double f2resn = 0.;
+
       for ( unsigned short i = 0; i < 4; ++i ) {
-        double ai = params_.ar[i];
-        if ( i == 0 ) {
-          ai += q2*std::min( 0., params_.alpha+params_.beta*q2 );
-          ai *= etad;
-        }
-        double dmi = params_.dmr[i];
-        if ( i == 2 ) dmi *= ( 1.+params_.dmu/( 1.+params_.dmup*q2 ) );
+        const double ai = ( i == 0 )
+          ? etad * ( params_.ar[i] + q2*std::min( 0., params_.alpha+params_.beta*q2 ) )
+          : params_.ar[i];
+        const double dmi = ( i == 2 )
+          ? params_.dmr[i] * ( 1.+params_.dmu/( 1.+params_.dmup*q2 ) )
+          : params_.dmr[i];
         double qs0 = pow( dmi*dmi+mp2-mpi02, 2 )-4.*mp2*dmi*dmi;
         if ( qs0 <= 0. ) break;
         qs0 = 0.5*sqrt( qs0 )/dmi;
         int ji = 2*params_.lr[i];
         const double dg = 0.5*params_.dgr[i]*pow( qs/qs0, ji+1 )*( 1.+pow( coef*qs0, ji ) )/( 1.+pow( coef*qs, ji ) );
-        resn += ai*dg/( ( w-dmi )*( w-dmi )+dg*dg );
+        f2resn += ai*dg/( ( w-dmi )*( w-dmi )+dg*dg );
       }
-      resn *= 0.5*( 1.-params_.b[0] )*bkg2/( mp*M_PI );
+      f2resn *= 0.5*( 1.-params_.b[0] )*bkg2/( params_.mp*M_PI );
+
+      return std::make_pair( f2bkg, f2resn );
     }
   }
 }
