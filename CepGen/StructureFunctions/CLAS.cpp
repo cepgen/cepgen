@@ -57,7 +57,7 @@ namespace CepGen
     }
 
     CLAS
-    CLAS::operator()( double q2, double xbj ) const
+    CLAS::operator()( double q2, double xbj, const SigmaRatio& rcomp ) const
     {
       const double mp2 = params_.mp*params_.mp;
       const double w2 = mp2 + q2*( 1.-xbj )/xbj;
@@ -70,6 +70,7 @@ namespace CepGen
       std::pair<double,double> rb = resbkg( q2, sqrt( w2 ) );
 
       cl.F2 *= ( rb.first+rb.second );
+      cl.computeFL( q2, xbj, rcomp( q2, xbj ) );
       return cl;
     }
 

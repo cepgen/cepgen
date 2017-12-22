@@ -150,11 +150,7 @@ namespace CepGen
 
       ALLM allm;
       allm.F2 = factor * ( F2_Pom + F2_Reg );
-
-      const double R = rcomp( q2, xbj );
-      const double mp2 = ParticleProperties::mass( Proton )*ParticleProperties::mass( Proton );
-      const double tau = 4.*xbj*xbj*mp2/q2;
-      allm.FL = allm.F2 * ( 1.+tau ) * ( R/( 1.+R ) );
+      allm.computeFL( q2, xbj, rcomp( q2, xbj ) );
 
       return allm;
     }

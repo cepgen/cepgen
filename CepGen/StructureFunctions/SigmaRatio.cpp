@@ -1,4 +1,5 @@
 #include "SigmaRatio.h"
+#include "CepGen/Physics/ParticleProperties.h"
 #include <math.h>
 #include <iostream>
 
@@ -24,7 +25,7 @@ namespace CepGen
       const double xl = log( 25.*q2 );
       const double pa = ( 1.+params_.a[3]*xbj+params_.a[4]*xbj*xbj )*pow( xbj, params_.a[5] );
       const double pb = ( 1.+params_.b[3]*xbj+params_.b[4]*xbj*xbj )*pow( xbj, params_.b[5] );
-      const double tt = theta( q2, xbj );
+      const double tt = xi( q2, xbj );
       const double q2_thr = params_.c[3]*xbj + params_.c[4]*xbj*xbj+params_.c[5]*xbj*xbj*xbj;
       const double ra = params_.a[0]/xl*tt + params_.a[1]/pow( pow( q2, 4 )+pow( params_.a[2], 4 ), 0.25 )*pa,
                    rb = params_.b[0]/xl*tt + ( params_.b[1]/q2+params_.b[2]/( q2*q2+0.3*0.3 ) )*pb,
@@ -36,7 +37,23 @@ namespace CepGen
     }
 
     double
-    E143Ratio::theta( double q2, double xbj ) const
+    CLASRatio::operator()( double q2, double xbj ) const
+    {
+      // 2 kinematic regions:
+      //  - resonances ( w < 2.5 )
+      //  - DIS ( w > 2.5 )
+      const double mp = ParticleProperties::mass( Proton );
+      const double w2 = mp*mp + q2*( 1.-xbj )/xbj, w = sqrt( w2 );
+      const double xth = q2/( q2+2.5*2.5-mp*mp ); // xth = x( W = 2.5 GeV )
+      const double zeta = log( 25.*q2 );
+      const double xitmp = ( w < 2.5 ) ? xi( q2, xth ) : xi( q2, xbj );
+      const double tmp = 0.041*xitmp/zeta + 0.592/q2 - 0.331/( 0.09+q2*q2 );
+      if ( w < 2.5 ) return tmp * pow( ( 1.-xbj )/( 1.-xth ), 3 );
+      return tmp;
+    }
+
+    double
+    SigmaRatio::xi( double q2, double xbj ) const
     {
       return 1.+12.*( q2/( q2+1. ) )*( 0.125*0.125/( 0.125*0.125+xbj*xbj ) );
     }

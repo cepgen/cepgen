@@ -3,8 +3,8 @@
 
 #include "StructureFunctions.h"
 #include "CepGen/Physics/Constants.h"
+#include "SigmaRatio.h"
 #include <array>
-#include <vector>
 
 namespace CepGen
 {
@@ -36,7 +36,7 @@ namespace CepGen
 
         CLAS( const CLAS::Parameterisation& params = CLAS::Parameterisation::standard_proton() ) : params_( params ) {}
 
-        CLAS operator()( double q2, double xbj ) const;
+        CLAS operator()( double q2, double xbj, const SigmaRatio& rcomp = E143Ratio() ) const;
 
       private:
         /// \brief Method to evaluate the background/resonance terms of

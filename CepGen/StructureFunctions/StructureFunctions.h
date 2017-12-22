@@ -30,6 +30,7 @@ namespace CepGen
       };
 
       double F2, FL;
+      void computeFL( double xbj, double q2, double r );
 
     private:
       std::string name_;

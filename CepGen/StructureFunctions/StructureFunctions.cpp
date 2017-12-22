@@ -1,8 +1,17 @@
 #include "StructureFunctions.h"
+#include "CepGen/Physics/ParticleProperties.h"
 #include <iostream>
 
 namespace CepGen
 {
+  void
+  StructureFunctions::computeFL( double xbj, double q2, double r )
+  {
+    const double mp2 = ParticleProperties::mass( Proton )*ParticleProperties::mass( Proton );
+    const double tau = 4.*xbj*xbj*mp2/q2;
+    FL = F2 * ( 1.+tau ) * ( r/( 1.+r ) );
+  }
+
   /// Human-readable format of a structure function object
   std::ostream&
   operator<<( std::ostream& os, const StructureFunctions& sf )

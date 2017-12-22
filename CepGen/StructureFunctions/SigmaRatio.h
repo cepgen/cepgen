@@ -12,6 +12,9 @@ namespace CepGen
       public:
         SigmaRatio() {}
         virtual double operator()( double q2, double xbj ) const = 0;
+
+      protected:
+        double xi( double q2, double xbj ) const;
     };
 
     class E143Ratio : public SigmaRatio
@@ -27,8 +30,14 @@ namespace CepGen
         double operator()( double q2, double xbj ) const override;
 
       private:
-        double theta( double q2, double xbj ) const;
         Parameterisation params_;
+    };
+
+    class CLASRatio : public SigmaRatio
+    {
+      public:
+        CLASRatio() {}
+        double operator()( double q2, double xbj ) const override;
     };
   }
 }

@@ -41,8 +41,7 @@ c       ----------------------------------------------------------------
 
         call CepGen_Structure_Functions(205,Q2,xbj,F2,FL)
 
-        if(iht.eq.1) then
-c          in the Lux-paper a "higher-twist" correction is applied to F2
+        if(iht.ne.0) then ! in the Lux-paper a "higher-twist" correction is applied to F2
            F2 = F2*(1.d0+5.5d0/Q2)
         endif
 
