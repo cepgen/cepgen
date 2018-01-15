@@ -264,10 +264,8 @@ namespace CepGen
       cb.F2 = prefac * q2_eff / ( 1+tau ) * ( sigT+sigL ) / Constants::GeV2toBarn * 1.e6;
       if ( q2 > q20 ) cb.F2 *= q21/( q21 + delq2 );
 
-      if ( sigT != 0. ) {
-        const double R = sigL/sigT;
-        cb.FL = cb.F2*( 1+tau )*R/( 1.+R );
-      }
+      if ( sigT != 0. ) cb.computeFL( xbj, q2_eff, sigL/sigT );
+
       return cb;
     }
   }

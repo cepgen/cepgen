@@ -32,6 +32,7 @@ namespace CepGen
                    rc = params_.c[0]/xl*tt + params_.c[1]*pow( pow( q2-q2_thr, 2 )+pow( params_.c[2], 2 ), -0.5 );
 
       const double r = ( ra+rb+rc ) / 3.;
+      // numerical safety for low-Q²
       if ( q2 > params_.q2_b ) return r;
       return r * 0.5 * ( 3.*u-u*u*u );
     }
