@@ -25,13 +25,25 @@ namespace CepGen
         << "***** Sample generated with CepGen v" << version() << " *****\n"
         << "* process: " << params.processName() << " (" << params.kinematics.mode << ")\n"
         << "* structure functions: " << params.kinematics.structure_functions << "\n"
-        << "*--- incoming state\n"
-        << "* Q² range (GeV²): " << params.kinematics.cuts.initial.at( Cuts::q2 ) << "\n"
-        << "* remnants mass range (GeV): " << params.kinematics.cuts.remnants.at( Cuts::mass ) << "\n"
-        << "*--- central system\n"
-        << "* single particle pT (GeV): " << params.kinematics.cuts.central.at( Cuts::pt_single ) << "\n"
-        << "* single particle energy (GeV): " << params.kinematics.cuts.central.at( Cuts::energy_single ) << "\n"
-        << "* single particle eta: " << params.kinematics.cuts.central.at( Cuts::eta_single ) << "\n"
+        << "*--- incoming state\n";
+      if ( params.kinematics.cuts.initial.count( Cuts::q2 ) )
+        lhe_output_->headerBlock()
+          << "* Q² range (GeV²): " << params.kinematics.cuts.initial.at( Cuts::q2 ) << "\n";
+      if ( params.kinematics.cuts.remnants.count( Cuts::mass ) )
+        lhe_output_->headerBlock()
+          << "* remnants mass range (GeV): " << params.kinematics.cuts.remnants.at( Cuts::mass ) << "\n";
+      lhe_output_->headerBlock()
+        << "*--- central system\n";
+      if ( params.kinematics.cuts.central.count( Cuts::pt_single ) )
+        lhe_output_->headerBlock()
+          << "* single particle pT (GeV): " << params.kinematics.cuts.central.at( Cuts::pt_single ) << "\n";
+      if ( params.kinematics.cuts.central.count( Cuts::energy_single ) )
+        lhe_output_->headerBlock()
+          << "* single particle energy (GeV): " << params.kinematics.cuts.central.at( Cuts::energy_single ) << "\n";
+      if ( params.kinematics.cuts.central.count( Cuts::eta_single ) )
+        lhe_output_->headerBlock()
+          << "* single particle eta: " << params.kinematics.cuts.central.at( Cuts::eta_single ) << "\n";
+      lhe_output_->headerBlock()
         << "**************************************************\n"
         << "-->";
       //params.dump( lhe_output_->initComments(), false );

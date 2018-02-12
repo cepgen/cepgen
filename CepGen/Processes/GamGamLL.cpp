@@ -294,17 +294,17 @@ GamGamLL::pickin()
   p1k2_ = ( s1_-t2_-w1_ ) * 0.5;
   p2k1_ = st * 0.5;
 
-  double s1p, s1m;
   if ( w2_ != 0. ) {
     const double sbb = ( s_*( t2_-w52_ )-w12_*t25 )/w2_ * 0.5 + MY2_,
                  sdd = sl1_*sl6/w2_ * 0.5,
                  see = ( s_*( t2_*( s_+t25-w1_ )-w1_*w52_ )+MY2_*( w1_*MY2_-w12_*( t2_-w1_ ) ) )/w2_;
+    double s1m = 0., s1p = 0.;
     if ( sbb/sdd >= 0. ) { s1p = sbb+sdd; s1m = see/s1p; }
     else                 { s1m = sbb-sdd; s1p = see/s1m; } // 12
     dd3_ = -w2_*( s1p-s1_ )*( s1m-s1_ ) * 0.25; // 13
   }
   else { // 14
-    s1p = ( s_*( t2_*( s_-MY2_+t2_-w1_ )-w1_*MY2_ )+w1_*MY2_*( w1_+MY2_-t2_ ) )/( t25*( s_-w12_ ) );
+    const double s1p = ( s_*( t2_*( s_-MY2_+t2_-w1_ )-w1_*MY2_ )+w1_*MY2_*( w1_+MY2_-t2_ ) )/( t25*( s_-w12_ ) );
     dd3_ = -t25*( s_-w12_ )*( s1p-s1_ ) * 0.25;
   }
   // 15

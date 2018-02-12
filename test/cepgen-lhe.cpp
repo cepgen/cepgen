@@ -40,7 +40,7 @@ int main( int argc, char* argv[] ) {
     if ( i%1000 == 0 )
       cout << "Generating event #" << i+1 << endl;
     try {
-      writer << mg.generateOneEvent();
+      writer << mg.generateOneEvent().get();
     } catch ( CepGen::Exception& e ) { e.dump(); }
   }
 

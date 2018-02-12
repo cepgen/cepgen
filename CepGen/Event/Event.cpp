@@ -193,7 +193,7 @@ namespace CepGen
   Event::numParticles() const
   {
     size_t out = 0;
-    for ( ParticlesMap::const_iterator it = particles_.begin(); it != particles_.end(); it++ ) {
+    for ( ParticlesMap::const_iterator it = particles_.begin(); it != particles_.end(); ++it ) {
       out += it->second.size();
     }
     return out;
@@ -203,7 +203,7 @@ namespace CepGen
   Event::particles() const
   {
     Particles out;
-    for ( ParticlesMap::const_iterator it = particles_.begin(); it != particles_.end(); it++ ) {
+    for ( ParticlesMap::const_iterator it = particles_.begin(); it != particles_.end(); ++it ) {
       out.insert( out.end(), it->second.begin(), it->second.end() );
     }
     std::sort( out.begin(), out.end() );
@@ -214,7 +214,7 @@ namespace CepGen
   Event::stableParticles() const
   {
     Particles out;
-    for ( ParticlesMap::const_iterator it = particles_.begin(); it != particles_.end(); ++it++ ) {
+    for ( ParticlesMap::const_iterator it = particles_.begin(); it != particles_.end(); ++it ) {
       for ( Particles::const_iterator part = it->second.begin(); part != it->second.end(); ++part ) {
         if ( (short)part->status() > 0 ) out.emplace_back( *part );
       }

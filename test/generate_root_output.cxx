@@ -46,15 +46,14 @@ int main( int argc, char* argv[] ) {
 
   //----- then generate the events and the container tree structure
 
-  auto run_tree = new TTree( "run", "A TTree containing information from the run produced with CepGen" );
   auto ev_tree = new TTree( "events", "A TTree containing information from the events produced from CepGen" );
 
   CepGen::TreeRun run;
-  run.create( run_tree );
+  run.create();
   run.xsect = xsec;
   run.errxsect = err;
   run.litigious_events = 0;
-  run_tree->Fill();
+  run.fill();
 
   CepGen::TreeEvent ev;
   ev.create( ev_tree );

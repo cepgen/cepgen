@@ -96,7 +96,7 @@ namespace CepGen
 
     if ( Logger::get().level >= Logger::DebugInsideLoop ) {
       std::ostringstream os;
-      for ( ParticlesIds::const_iterator it=daughters_.begin(); it!=daughters_.end(); it++) {
+      for ( ParticlesIds::const_iterator it = daughters_.begin(); it != daughters_.end(); ++it ) {
         os << Form( "\n\t * id=%d", *it );
       }
       DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) has now %2d daughter(s):"
@@ -170,7 +170,7 @@ namespace CepGen
     std::ostringstream osm, osd, os;
     if ( !primary() ) {
       osm << ": mother(s): ";
-      for ( ParticlesIds::const_iterator m=mothers_.begin(); m!=mothers_.end(); m++ ) {
+      for ( ParticlesIds::const_iterator m = mothers_.begin(); m != mothers_.end(); ++m ) {
         if ( m!=mothers_.begin() ) osm << ", ";
         osm << ( *m );
       }
@@ -178,7 +178,7 @@ namespace CepGen
     const ParticlesIds daugh = daughters();
     if ( daugh.size()!=0 ) {
       osd << ": id = ";
-      for ( ParticlesIds::const_iterator it=daugh.begin(); it!=daugh.end(); it++ ) {
+      for ( ParticlesIds::const_iterator it = daugh.begin(); it != daugh.end(); ++it ) {
         if ( it!=daugh.begin() ) osd << ", ";
         osd << ( *it );
       }

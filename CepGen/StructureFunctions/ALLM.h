@@ -19,7 +19,7 @@ namespace CepGen
             struct Parameters {
               Parameters() :
                 a( { 0., 0., 0. } ), b( { 0., 0., 0. } ), c( { 0., 0., 0. } ) {}
-              Parameters( std::vector<double> c, std::vector<double> a, std::vector<double> b ) :
+              Parameters( const std::vector<double>& c, const std::vector<double>& a, const std::vector<double>& b ) :
                 a( a ), b( b ), c( c ) {}
               std::vector<double> a, b, c;
             };

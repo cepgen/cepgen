@@ -7,6 +7,7 @@ namespace CepGen
   namespace Process
   {
     GenericProcess::GenericProcess( const std::string& name, const std::string& description, bool has_event ) :
+      s_( 0. ), sqs_( 0. ), w1_( 0. ), w2_( 0. ), t1_( 0. ), t2_( 0. ), MX_( 0. ), MY_( 0. ),
       event_( std::shared_ptr<Event>( new Event ) ),
       is_point_set_( false ), is_incoming_state_set_( false ), is_outgoing_state_set_( false ), is_kinematics_set_( false ),
       name_( name ), description_( description ),
@@ -57,7 +58,7 @@ namespace CepGen
       //----- add the particles in the event
 
       //--- incoming state
-      for ( IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++ ) {
+      for ( IncomingState::const_iterator ip = is.begin(); ip != is.end(); ++ip ) {
         Particle& p = event_->addParticle( ip->first );
         p.setPdgId( ip->second, ParticleProperties::charge( ip->second ) );
       }
