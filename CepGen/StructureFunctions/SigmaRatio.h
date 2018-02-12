@@ -11,23 +11,44 @@ namespace CepGen
     {
       public:
         SigmaRatio() {}
-        virtual double operator()( double q2, double xbj ) const = 0;
+        /// Extract the longitudinal/transverse cross section ratio and associated error for a given Q²/\f$x_{\textrm{Bj}}\f$ couple.
+        virtual double operator()( double q2, double xbj, double& err ) const = 0;
 
       protected:
-        double xi( double q2, double xbj ) const;
+        /// \f$x_{\textrm{Bj}}\f$ dependence for QCD-matching of R at high-Q²
+        double theta( double q2, double xbj ) const;
     };
 
+    // Reference: arXiv:hep-ex/9808028
     class E143Ratio : public SigmaRatio
     {
       public:
         struct Parameterisation
         {
-          double q2_b;
+          double q2_b, lambda2;
           std::array<double,6> a, b, c;
           static Parameterisation standard();
         };
         E143Ratio( const Parameterisation& param = Parameterisation::standard() ) : params_( param ) {}
-        double operator()( double q2, double xbj ) const override;
+        double operator()( double q2, double xbj, double& err ) const override;
+
+      private:
+        Parameterisation params_;
+    };
+
+    /// \warning valid for Q² > 0.3 GeV²
+    // Reference: Phys.Lett. B250 (1990) 193-198 (https://inspirehep.net/record/296980)
+    class R1990Ratio: public SigmaRatio
+    {
+      public:
+        struct Parameterisation
+        {
+          double lambda2;
+          std::array<double,3> b;
+          static Parameterisation standard();
+        };
+        R1990Ratio( const Parameterisation& param = Parameterisation::standard() ) : params_( param ) {}
+        double operator()( double q2, double xbj, double& err ) const override;
 
       private:
         Parameterisation params_;
@@ -37,7 +58,7 @@ namespace CepGen
     {
       public:
         CLASRatio() {}
-        double operator()( double q2, double xbj ) const override;
+        double operator()( double q2, double xbj, double& err ) const override;
     };
   }
 }

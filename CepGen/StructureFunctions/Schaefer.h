@@ -3,19 +3,6 @@
 
 #include "StructureFunctions.h"
 
-#ifdef SchaeferF2
-extern "C"
-{
-  extern void f2_fit_luxlike_( double& xbj, double& q2, double& F2, double& FL );
-  extern struct
-  {
-    double amp, alpha_em;
-    double q2_cut, w2_lo, w2_hi;
-    int res_model, cont_model, higher_twist;
-  } luxlike_params_;
-}
-#endif
-
 namespace CepGen
 {
   namespace SF
@@ -23,7 +10,14 @@ namespace CepGen
     class Schaefer : public StructureFunctions
     {
       public:
-        Schaefer();
+        struct Parameterisation
+        {
+          static Parameterisation standard();
+          double amp, alpha_em;
+          double q2_cut, w2_lo, w2_hi;
+          int res_model, cont_model, higher_twist;
+        };
+        Schaefer( const Parameterisation& param = Parameterisation::standard() );
         Schaefer operator()( double q2, double xbj ) const;
 
       private:
@@ -32,5 +26,13 @@ namespace CepGen
     };
   }
 }
+
+#ifdef SchaeferF2
+extern "C"
+{
+  extern void f2_fit_luxlike_( double& xbj, double& q2, double& F2, double& FL );
+  extern CepGen::SF::Schaefer::Parameterisation luxlike_params_;
+}
+#endif
 
 #endif

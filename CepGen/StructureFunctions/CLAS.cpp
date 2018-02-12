@@ -121,7 +121,8 @@ namespace CepGen
       std::pair<double,double> rb = resbkg( q2, sqrt( w2 ) );
 
       cl.F2 *= ( rb.first+rb.second );
-      cl.computeFL( q2, xbj, rcomp( q2, xbj ) );
+      double r_err = 0.;
+      cl.computeFL( q2, xbj, rcomp( q2, xbj, r_err ) );
       return cl;
     }
 

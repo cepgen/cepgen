@@ -150,7 +150,8 @@ namespace CepGen
 
       ALLM allm;
       allm.F2 = factor * ( F2_Pom + F2_Reg );
-      allm.computeFL( q2, xbj, rcomp( q2, xbj ) );
+      double r_err = 0.;
+      allm.computeFL( q2, xbj, rcomp( q2, xbj, r_err ) );
 
       return allm;
     }
