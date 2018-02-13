@@ -129,7 +129,6 @@ namespace CepGen
     ALLM
     ALLM::operator()( double q2, double xbj, const SigmaRatio& rcomp ) const
     {
-      const double factor = q2/( q2+params_.m02 );
       const double W2_eff = q2*( 1.-xbj )/xbj;
       const double xp = ( q2+params_.mp2 )/( q2+W2_eff+params_.mp2 ),
                    xr = ( q2+params_.mr2 )/( q2+W2_eff+params_.mr2 );
@@ -149,7 +148,7 @@ namespace CepGen
                    F2_Reg = creg*pow( xr, areg )*pow( 1.-xbj, breg );
 
       ALLM allm;
-      allm.F2 = factor * ( F2_Pom + F2_Reg );
+      allm.F2 = q2/( q2+params_.m02 ) * ( F2_Pom + F2_Reg );
       double r_err = 0.;
       allm.computeFL( q2, xbj, rcomp( q2, xbj, r_err ) );
 

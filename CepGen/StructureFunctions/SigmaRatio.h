@@ -37,7 +37,7 @@ namespace CepGen
     };
 
     /// \warning valid for Q² > 0.3 GeV²
-    // Reference: Phys.Lett. B250 (1990) 193-198 (https://inspirehep.net/record/296980)
+    // Reference: Phys.Lett. B 250 (1990) 193-198 (https://inspirehep.net/record/296980)
     class R1990Ratio: public SigmaRatio
     {
       public:
@@ -58,6 +58,15 @@ namespace CepGen
     {
       public:
         CLASRatio() {}
+        double operator()( double q2, double xbj, double& err ) const override;
+    };
+
+    /// Sibirtsev & Blunden parameterisation of the R ratio
+    // Reference: Phys.Rev. C 88,065202 (2013)
+    class SBRatio : public SigmaRatio
+    {
+      public:
+        SBRatio() {}
         double operator()( double q2, double xbj, double& err ) const override;
     };
   }

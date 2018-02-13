@@ -7,6 +7,12 @@ namespace CepGen
 {
   namespace SF
   {
+    double
+    SigmaRatio::theta( double q2, double xbj ) const
+    {
+      return 1.+12.*( q2/( q2+1. ) )*( 0.125*0.125/( 0.125*0.125+xbj*xbj ) );
+    }
+
     E143Ratio::Parameterisation
     E143Ratio::Parameterisation::standard()
     {
@@ -75,9 +81,10 @@ namespace CepGen
     }
 
     double
-    SigmaRatio::theta( double q2, double xbj ) const
+    SBRatio::operator()( double q2, double xbj, double& err ) const
     {
-      return 1.+12.*( q2/( q2+1. ) )*( 0.125*0.125/( 0.125*0.125+xbj*xbj ) );
+      err = 0.;
+      return 0.014*q2*( exp( -0.07*q2 )+41.*exp( -0.8*q2 ) );
     }
   }
 }
