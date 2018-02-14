@@ -242,7 +242,8 @@ namespace CepGen
       const double w_min = mp+ParticleProperties::mass( PiZero );
 
       ChristyBosted cb;
-      if ( sqrt( w2 ) < w_min ) return cb;
+      if ( sqrt( w2 ) < w_min )
+        return cb;
 
       //-----------------------------
       // modification of Christy-Bosted at large q2 as described in the LUXqed paper
@@ -259,12 +260,15 @@ namespace CepGen
         w2_eff = mp2 + q2_eff*( 1.-xbj )/xbj;
       }
       const double tau = 4.*xbj*xbj*mp2/q2_eff;
-      const double sigT = resmod507( 'T', w2_eff, q2_eff ), sigL = resmod507( 'L', w2_eff, q2_eff );
+      const double sigT = resmod507( 'T', w2_eff, q2_eff );
+      const double sigL = resmod507( 'L', w2_eff, q2_eff );
 
       cb.F2 = prefac * q2_eff / ( 1+tau ) * ( sigT+sigL ) / Constants::GeV2toBarn * 1.e6;
-      if ( q2 > q20 ) cb.F2 *= q21/( q21 + delq2 );
+      if ( q2 > q20 )
+        cb.F2 *= q21/( q21 + delq2 );
 
-      if ( sigT != 0. ) cb.computeFL( xbj, q2_eff, sigL/sigT );
+      if ( sigT != 0. )
+        cb.computeFL( q2_eff, xbj, sigL/sigT );
 
       return cb;
     }

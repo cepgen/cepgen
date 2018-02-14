@@ -5,7 +5,14 @@
 namespace CepGen
 {
   void
-  StructureFunctions::computeFL( double xbj, double q2, double r )
+  StructureFunctions::computeFL( double q2, double xbj, const SF::SigmaRatio& ratio )
+  {
+    double r_error = 0.;
+    computeFL( q2, xbj, ratio( q2, xbj, r_error ) );
+  }
+
+  void
+  StructureFunctions::computeFL( double q2, double xbj, double r )
   {
     const double mp2 = ParticleProperties::mass( Proton )*ParticleProperties::mass( Proton );
     const double tau = 4.*xbj*xbj*mp2/q2;

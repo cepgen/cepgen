@@ -2,6 +2,7 @@
 #define CepGen_StructureFunctions_SzczurekUleshchenko_h
 
 #include "StructureFunctions.h"
+#include "SigmaRatio.h"
 
 extern "C"
 {
@@ -17,7 +18,7 @@ namespace CepGen
     {
       public:
         SzczurekUleshchenko() {}
-        SzczurekUleshchenko operator()( double q2, double xbj ) const;
+        SzczurekUleshchenko operator()( double q2, double xbj, const SigmaRatio& ratio = E143Ratio() ) const;
 
         double F1;
     };

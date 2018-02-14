@@ -79,6 +79,7 @@ namespace CepGen
 
       FioreBrasse fb;
       fb.F2 = prefactor*ampli_tot;
+      fb.computeFL( q2, xbj );
       return fb;
     }
 

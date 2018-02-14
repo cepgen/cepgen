@@ -2,6 +2,7 @@
 #define CepGen_StructureFunctions_StructureFunctions_h
 
 #include <iostream>
+#include "SigmaRatio.h"
 
 namespace CepGen
 {
@@ -30,7 +31,8 @@ namespace CepGen
       };
 
       double F2, FL;
-      void computeFL( double xbj, double q2, double r );
+      void computeFL( double q2, double xbj, const SF::SigmaRatio& ratio = SF::E143Ratio() );
+      void computeFL( double q2, double xbj, double r );
 
     private:
       std::string name_;
