@@ -65,6 +65,13 @@ namespace CepGen
     return particles_[role];
   }
 
+  const Particles&
+  Event::getByRole( Particle::Role role ) const
+  {
+    //--- retrieve all particles with a given role
+    return particles_.at( role );
+  }
+
   ParticlesIds
   Event::getIdsByRole( Particle::Role role ) const
   {

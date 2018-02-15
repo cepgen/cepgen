@@ -19,7 +19,7 @@ set(CEPGEN_LIBRARIES CepGenCore CepGenEvent CepGenPhysics CepGenProcesses CepGen
 
 set(CEPGEN_MODULES Processes Event Physics StructureFunctions Export IO Hadronisers)
 
-#----- enable fortran (for Pythia/Herwig/...)
+#----- enable fortran for external libraries linking
 
 enable_language(Fortran)
 

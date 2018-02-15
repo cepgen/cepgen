@@ -60,6 +60,7 @@ namespace CepGen
        * \return A vector of references to the requested Particle objects
        */
       Particles& getByRole( Particle::Role role );
+      const Particles& getByRole( Particle::Role role ) const;
       ParticlesIds getIdsByRole( Particle::Role role ) const;
       /**
        * Returns the first Particle object in the particles list whose role corresponds to the given argument

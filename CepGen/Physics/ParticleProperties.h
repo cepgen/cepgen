@@ -25,7 +25,6 @@ namespace CepGen
     JPsi= 443,
     Phi1680 = 100333,
     Upsilon1S = 553, Upsilon2S = 100553, Upsilon3S = 200553,
-    ud0Diquark = 2101, ud1Diquark = 2103, uu1Diquark = 2203,
     Proton = 2212, Neutron = 2112,
     Pomeron = 990, Reggeon = 110
   };
@@ -50,9 +49,6 @@ namespace CepGen
         case PiPlus:       return 0.13957018;
         case PiZero:       return 0.1349766;
         case JPsi:         return 20.;            //FIXME FIXME FIXME
-        case ud0Diquark:   return 0.57933;
-        case ud1Diquark:   return 0.77133;
-        case uu1Diquark:   return 0.77133;
         case Proton:       return 0.938272046;
         case Neutron:      return 0.939565346;
         case Upsilon1S:    return 9.46030;
@@ -136,9 +132,6 @@ namespace CepGen
       case Upsilon1S:        return os << "Upsilon(1S)";
       case Upsilon2S:        return os << "Upsilon(2S)";
       case Upsilon3S:        return os << "Upsilon(3S)";;
-      case ud0Diquark:       return os << "(ud)0 di-quark";
-      case ud1Diquark:       return os << "(ud)1 di-quark";
-      case uu1Diquark:       return os << "(uu)1 di-quark";
       case Proton:           return os << "proton";
       case Neutron:          return os << "neutron";
       case Pomeron:          return os << "pomeron";

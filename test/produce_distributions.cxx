@@ -19,9 +19,8 @@ int main( int argc, char* argv[] )
 {
   CepGen::Generator mg;
   //CepGen::Logger::get().level = CepGen::Logger::Debug;
-  const unsigned long num_gen_events = 1e4;
 
-  if ( argc<2 ) {
+  if ( argc < 2 ) {
     InError( Form( "Usage: %s [input card]", argv[0] ) );
     return -1;
   }
@@ -37,17 +36,17 @@ int main( int argc, char* argv[] )
   Information( Form( "Process name: %s", gen_name.str().c_str() ) );
   //mg.parameters->taming_functions.dump();
 
-  for ( unsigned int i=0; i<num_gen_events; i++ ) {
-    CepGen::Event* ev = mg.generateOneEvent();
+  for ( unsigned int i = 0; i < mg.parameters->generation.maxgen; ++i ) {
+    const CepGen::Event& ev = *mg.generateOneEvent();
     if ( i%100==0 ) Information( Form( "Produced event #%d", i ) );
-    const auto central_system = ev->getByRole( CepGen::Particle::CentralSystem );
+    const auto central_system = ev.getByRole( CepGen::Particle::CentralSystem );
     const auto pl1 = central_system[0].momentum(), pl2 = central_system[1].momentum();
     h_mass.Fill( ( pl1+pl2 ).mass() );
     h_ptpair.Fill( ( pl1+pl2 ).pt() );
     h_ptsingle.Fill( pl1.pt() );
     h_etasingle.Fill( pl1.eta() );
   }
-  const double weight = mg.crossSection()/num_gen_events;
+  const double weight = mg.crossSection()/mg.parameters->generation.maxgen;
   h_mass.Scale( weight );
   h_ptpair.Scale( weight );
 

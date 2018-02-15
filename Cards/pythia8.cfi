@@ -5,6 +5,7 @@ hadroniser = {
     //"Init:showAllSettings = on",
     // disable all generation processes
     "ProcessLevel:all = off",
+    //"BeamRemnants:unresolvedHadron = 3",
     // printout properties
     "Next:numberCount = 0",
     "Next:numberShowInfo = 0",
@@ -37,6 +38,7 @@ hadroniser = {
     "MultipartonInteractions:expPow = 1.6"
   );
   pythiaProcessConfiguration = (
+    //"PartonLevel:Remnants = off",
     // process-specific
     "13:onMode = off", // disable muon decays
     "9902210:onMode = on",
