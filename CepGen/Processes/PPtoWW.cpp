@@ -52,7 +52,7 @@ PPtoWW::computeKTFactorisedMatrixElement()
   //     How matrix element is calculated
   //=================================================================
 
-  const unsigned short method = 1;
+  const unsigned short method = 0;
 
   //=================================================================
   //     matrix element computation
@@ -275,13 +275,13 @@ PPtoWW::computeKTFactorisedMatrixElement()
     double amat2_0 = 0., amat2_1 = 0., amat2_interf = 0.;
     for ( const auto lam3 : { -1, 0, 1 } ) {
       for ( const auto lam4 : { -1, 0, 1 } ) {
-        double ampli_pp = WWamplitude( shat, that, +1, +1, lam3, lam4 );
-        double ampli_mm = WWamplitude( shat, that, -1, -1, lam3, lam4 );
-        double ampli_pm = WWamplitude( shat, that, +1, -1, lam3, lam4 );
-        double ampli_mp = WWamplitude( shat, that, -1, +1, lam3, lam4 );
+        double ampli_pp = WWamplitude( shat, that, uhat, +1, +1, lam3, lam4 );
+        double ampli_mm = WWamplitude( shat, that, uhat, -1, -1, lam3, lam4 );
+        double ampli_pm = WWamplitude( shat, that, uhat, +1, -1, lam3, lam4 );
+        double ampli_mp = WWamplitude( shat, that, uhat, -1, +1, lam3, lam4 );
         amat2_0 += ampli_pp*ampli_pp + ampli_mm*ampli_mm + 2.*cos( 2.*phi_diff )*ampli_pp*ampli_mm;
         amat2_1 += ampli_pm*ampli_pm + ampli_mp*ampli_mp + 2.*cos( 2.*phi_sum  )*ampli_pm*ampli_mp;
-        amat2_interf += -2.*( cos( phi_sum+phi_diff )*( ampli_pp*ampli_pm+ampli_mm*ampli_mp ) + cos( phi_sum-phi_diff )*( ampli_pp*ampli_mp+ampli_mm*ampli_pm ) );
+        amat2_interf -= 2.*( cos( phi_sum+phi_diff )*( ampli_pp*ampli_pm+ampli_mm*ampli_mp ) + cos( phi_sum-phi_diff )*( ampli_pp*ampli_mp+ampli_mm*ampli_pm ) );
       }
     }
     amat2 = e2*e2 * ( amat2_0 + amat2_1 + amat2_interf );
@@ -336,22 +336,22 @@ PPtoWW::fillCentralParticlesKinematics()
 }
 
 double
-PPtoWW::WWamplitude( double shat, double that, short lam1, short lam2, short lam3, short lam4 ) const
+PPtoWW::WWamplitude( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 ) const
 {
   const double mw = ParticleProperties::mass( W ), mw2 = mw*mw;
   const double sqrt2 = sqrt( 2. );
 
   // then compute some kinematic variables
-  const double cos_theta = ( 1.+2.*( that-mw2 )/shat ) / sqrt( 1. + 1.e-10 - 4.*mw2/shat ), cos_theta2 = cos_theta*cos_theta;
+  const double cos_theta = ( that-uhat ) / shat / sqrt( 1.+1.e-10-4.*mw2/shat ), cos_theta2 = cos_theta*cos_theta;
   const double sin_theta2 = 1.-cos_theta2, sin_theta = sqrt( sin_theta2 );
   const double beta = sqrt( 1.-4.*mw2/shat ), beta2 = beta*beta;
-  const double gamma = 0.5*sqrt( shat )/mw, gamma2 = gamma*gamma;
+  const double gamma = 1./sqrt( 1.-beta2 ), gamma2 = gamma*gamma;
   const double invA = 1./( 1.-beta2*cos_theta2 );
 
-  const double term1 = 1./gamma2*( ( gamma2+1. )*( 1.-lam1*lam2 )* sin_theta2 - ( 1.+lam1*lam2 ) );
+  const double term1 = 1./gamma2*( ( gamma2+1. )*( 1.-lam1*lam2 )*sin_theta2 - ( 1.+lam1*lam2 ) );
   const double term2 = -sqrt2/gamma*( lam1-lam2 ) * ( 1.+lam1*lam3*cos_theta )*sin_theta;
-  const double term3 = -0.5*( 2.*beta*( lam1+lam2 )*( lam3+lam4 ) - ( 1./gamma2 )*( 1.+lam3*lam4 )*( 2.*lam1*lam2+( 1.-lam1*lam2 ) * cos_theta2 ) +( 1.+lam1*lam2*lam3*lam4 )*( 3.+lam1*lam2 ) + 2.*( lam1-lam2 )*( lam3-lam4 )*cos_theta + ( 1.-lam1*lam2 )*( 1.-lam3*lam4 )*cos_theta2 );
-  const double term4 = -sqrt2/gamma*( lam2-lam1 ) *( 1.+lam2*lam4*cos_theta )*sin_theta;
+  const double term3 = -0.5*( 2.*beta*( lam1+lam2 )*( lam3+lam4 ) - ( 1./gamma2 )*( 1.+lam3*lam4 )*( 2.*lam1*lam2+( 1.-lam1*lam2 ) * cos_theta2 )+( 1.+lam1*lam2*lam3*lam4 )*( 3.+lam1*lam2 ) + 2.*( lam1-lam2 )*( lam3-lam4 )*cos_theta + ( 1.-lam1*lam2 )*( 1.-lam3*lam4 )*cos_theta2 );
+  const double term4 = -sqrt2/gamma*( lam2-lam1 )*( 1.+lam2*lam4*cos_theta )*sin_theta;
 
   if ( lam3 == 0 && lam4 == 0 ) return invA*term1;
   if ( lam4 == 0 )              return invA*term2;

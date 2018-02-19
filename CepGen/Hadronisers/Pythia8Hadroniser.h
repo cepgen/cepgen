@@ -34,7 +34,7 @@ namespace CepGen
       private:
         static constexpr unsigned short invalid_idx_ = 999;
 #ifdef PYTHIA8
-        void fragmentState( unsigned short idx );
+        void fragmentState( unsigned short idx, double xbj = 0. );
         /// A Pythia8 core to be wrapped
         std::unique_ptr<Pythia8::Pythia> pythia_;
 #endif

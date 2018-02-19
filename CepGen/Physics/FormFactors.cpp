@@ -84,4 +84,3 @@ namespace CepGen
     return os;
   }
 }
-

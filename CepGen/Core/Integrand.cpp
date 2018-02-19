@@ -44,12 +44,12 @@ namespace CepGen
           case Kinematics::ElectronProton: default: { InError( Form( "Process mode %d not yet handled!", (int)p->kinematics.mode ) ); }
           case Kinematics::ElasticElastic: break; // nothing to change in the event
           case Kinematics::ElasticInelastic:
-            op2.setPdgId( uQuark, 1 ); break;
+            op2.setPdgId( DiffrProt, 1 ); break;
           case Kinematics::InelasticElastic: // set one of the outgoing protons to be fragmented
-            op1.setPdgId( uQuark, 1 ); break;
+            op1.setPdgId( DiffrProt, 1 ); break;
           case Kinematics::InelasticInelastic: // set both the outgoing protons to be fragmented
-            op1.setPdgId( uQuark, 1 );
-            op2.setPdgId( uQuark, 1 );
+            op1.setPdgId( DiffrProt, 1 );
+            op2.setPdgId( DiffrProt, 1 );
             break;
         }
 
@@ -117,7 +117,7 @@ namespace CepGen
       do {
         success = p->hadroniser()->hadronise( *ev, br );
         ev->num_hadronisation_trials++;
-      } while ( !success && ev->num_hadronisation_trials < 10 );
+      } while ( !success && ev->num_hadronisation_trials < p->hadroniser_max_trials );
       if ( !success ) return 0.;
       integrand *= br;
     }

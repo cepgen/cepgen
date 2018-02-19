@@ -15,9 +15,6 @@ namespace CepGen
     {
 #ifdef PYTHIA8
       pythia_.reset( new Pythia8::Pythia );
-
-      //--- start by disabling some unnecessary output
-      pythia_->readString( "Next:numberCount = 0" );
 #endif
     }
 
@@ -28,19 +25,17 @@ namespace CepGen
     Pythia8Hadroniser::init()
     {
       bool res = pythia_->init();
-      if ( !res ) {
+      if ( !res )
         FatalError( "Failed to initialise the Pythia8 core!\n\t"
                     "See the message above for more details." );
-      }
       return res;
     }
 
     void
     Pythia8Hadroniser::readString( const char* param )
     {
-      if ( !pythia_->readString( param ) ) {
+      if ( !pythia_->readString( param ) )
         FatalError( Form( "The Pythia8 core failed to parse the following setting:\n\t%s", param ) );
-      }
     }
 
     void
@@ -64,10 +59,19 @@ namespace CepGen
       //--- start by cleaning up the previous runs leftovers
 
       const double sqrt_s = ev.cmEnergy();
+      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
 
       pythia_->event.reset();
-      pythia_->event[0].e( sqrt_s );
-      pythia_->event[0].m( sqrt_s );
+      /*pythia_->event[0].e( sqrt_s );
+      pythia_->event[0].m( sqrt_s );*/
+      Particle::Momentum p_out = ev.getOneByRole( Particle::OutgoingBeam1 ).momentum()
+                                +ev.getOneByRole( Particle::OutgoingBeam2 ).momentum();
+      for ( const auto& p : ev.getByRole( Particle::CentralSystem ) )
+        p_out += p.momentum();
+      //std::cout << p_out.pz() << "|" << p_out.mass() << "|" << p_out.energy() << std::endl;
+      pythia_->event[0].e( p_out.energy() );
+      pythia_->event[0].pz( p_out.pz() );
+      pythia_->event[0].m( p_out.mass() );
 
       const unsigned short num_before = ev.numParticles();
       std::map<short,short> py_cg_corresp, cg_py_corresp;
@@ -119,22 +123,45 @@ namespace CepGen
           py_cg_corresp[py_id] = part.id();
         }
       }
-      if ( idx_remn1 != invalid_idx_ ) fragmentState( idx_remn1 );
-      if ( idx_remn2 != invalid_idx_ ) fragmentState( idx_remn2 );
+      if ( idx_remn1 != invalid_idx_ ) {
+        const Particle::Momentum& p0 = ev.getOneByRole( Particle::IncomingBeam1 ).momentum();
+        const Particle::Momentum& p = ev.getOneByRole( Particle::OutgoingBeam1 ).momentum();
+        const double q2 = -( p-p0 ).mass2();
+        const double mx2 = p.mass2();
+        const double xbj = q2/( q2+mx2-mp2 );
+        fragmentState( idx_remn1, xbj );
+      }
+      if ( idx_remn2 != invalid_idx_ ) {
+        const Particle::Momentum& p0 = ev.getOneByRole( Particle::IncomingBeam2 ).momentum();
+        const Particle::Momentum& p = ev.getOneByRole( Particle::OutgoingBeam2 ).momentum();
+        const double q2 = -( p-p0 ).mass2();
+        const double my2 = p.mass2();
+        const double xbj = q2/( q2+my2-mp2 );
+        fragmentState( idx_remn2, xbj );
+      }
 
       const unsigned short num_py_parts = pythia_->event.size();
+//pythia_->event.list(true,true);
+      //ev.dump();
+//      exit(0);
+
+      //std::cout << ":::::" << pythia_->settings.parm("Check:mTolErr") << std::endl;
+        for ( unsigned short i = 0; i < pythia_->event.size(); ++i ) {
+          std::cout << ">> " << pythia_->event[i].id() << "::" << (abs( pythia_->event[i].mCalc()-pythia_->event[i].m() )/std::max( 1.0, pythia_->event[i].e())>pythia_->settings.parm("Check:mTolErr")) << std::endl;
+        }
 
       if ( !pythia_->next() ) {
-        InWarning( "Pythia8 failed to process the event." );
+        //std::cout << "bad" << std::endl;
+        //InWarning( "Pythia8 failed to process the event." );
+        //pythia_->event.list( true, true );
+        exit(0);
         return false;
       }
 
-//pythia_->event.list(true,true);
-//exit(0);
-
       // check if something happened in the event processing by Pythia
       // if not, return the event as it is...
-      if ( pythia_->event.size() == num_py_parts ) return true;
+      if ( pythia_->event.size() == num_py_parts )
+        return true;
 
       for ( unsigned short i = 1; i < pythia_->event.size(); ++i ) { // skip the central system
         const Pythia8::Particle& p = pythia_->event[i];
@@ -176,7 +203,6 @@ namespace CepGen
           }
         }
       }
-      //ev.dump();
 #else
       FatalError( "Pythia8 is not linked to this instance!" );
 #endif
@@ -184,26 +210,38 @@ namespace CepGen
     }
 
     void
-    Pythia8Hadroniser::fragmentState( unsigned short idx )
+    Pythia8Hadroniser::fragmentState( unsigned short idx, double xbj )
     {
       const Pythia8::Particle& remn = pythia_->event[idx];
-      const Pythia8::Particle& system = pythia_->event[remn.mother1()];
-      const short sign = remn.pz()/fabs( remn.pz() );
-      const double px_dq = 0., py_dq = 0., pz_dq = sign * system.e()/2.;
+      // specify the quark/diquark flavours
+      //FIXME naive approach (weighted by e_q^2/1-e_dq^2); to be improved
       const double rnd = 1./RAND_MAX * rand();
       unsigned short pdg_q = 0, pdg_dq = 0;
       if      ( rnd < 1./9. ) { pdg_q = 1; pdg_dq = 2203; }
       else if ( rnd < 5./9. ) { pdg_q = 2; pdg_dq = 2101; }
       else                    { pdg_q = 2; pdg_dq = 2103; }
-      const double m_q = pythia_->particleData.m0( pdg_q ), m_dq = pythia_->particleData.m0( pdg_dq );
-      Pythia8::Particle diquark( pdg_dq, 21, idx, 0, 0, 0, 0, 100+idx, px_dq, py_dq, pz_dq, 0., m_dq );
-      Pythia8::Particle quark( pdg_q, 21, idx, 0, 0, 0, 100+idx, 0, remn.px()-px_dq, remn.py()-py_dq, remn.pz()-pz_dq, 0., m_q );
-      diquark.e( diquark.eCalc() );
-      quark.e( quark.eCalc() );
-      const unsigned short id_dq = pythia_->event.append( diquark ), id_q = pythia_->event.append( quark );
+      // then assign the quark/diquark a 4-momentum
+      const double px_x = remn.px(), px_y = remn.py(), px_z = remn.pz(), ex = remn.e();
+      const double xdq = 1.-xbj;
+      const double m_q = pythia_->particleData.m0( pdg_q );
+      const double m_dq = pythia_->particleData.m0( pdg_dq );
+      // fractional momenta of the two partons:
+      // -> x * p_X for the quark
+      // -> ( 1-x ) * p_X for the diquark
+      Pythia8::Particle diquark( pdg_dq, 63, idx, 0, 0, 0, 0, 100+idx, px_x*xdq, px_y*xdq, px_z*xdq, ex*xdq );
+      Pythia8::Particle   quark( pdg_q,  63, idx, 0, 0, 0, 100+idx, 0, px_x*xbj, px_y*xbj, px_z*xbj, ex*xbj );
+      //diquark.e( diquark.eCalc() );
+      //quark.e( quark.eCalc() );
+      diquark.m( diquark.mCalc() );
+      quark.m( quark.mCalc() );
+      std::cout << "> " << xdq << "|" << xbj << std::endl;
+      const unsigned short id_dq = pythia_->event.append( diquark );
+      const unsigned short id_q = pythia_->event.append( quark );
+      // keep up with the particles parentage
       pythia_->event[idx].daughter1( id_dq );
       pythia_->event[idx].daughter2( id_q );
-      //pythia_->event[idx].status( -pythia_->event[idx].status() );
+      //std::cout << "-->" << diquark.m() << "|" << quark.m() << std::endl;
+      // set the quark/diquark to be hadronised through a string
       pythia_->event[idx].status( -15 );
     }
   }

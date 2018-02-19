@@ -1,5 +1,6 @@
 #include "GenericKTProcess.h"
 #include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
 #include "CepGen/Core/Exception.h"
 
 namespace CepGen
@@ -65,8 +66,8 @@ namespace CepGen
       phi_qt1_ = 2.*M_PI*x( 2 );
       phi_qt2_ = 2.*M_PI*x( 3 );
       DebuggingInsideLoop( Form( "photons transverse virtualities (qt):\n\t"
-                                 "  mag = %f / %f (%.2f < log(qt) < %.2f)\n\t"
-                                 "  phi = %f / %f",
+                                 "  mag = %g / %f (%g < log(qt) < %g)\n\t"
+                                 "  phi = %g / %g",
                                  qt1_, qt2_, log_qmin_, log_qmax_, phi_qt1_, phi_qt2_ ) );
     }
 
@@ -88,7 +89,7 @@ namespace CepGen
       const double jac = computeJacobian(),
                    integrand = computeKTFactorisedMatrixElement(),
                    weight = jac*integrand;
-      DebuggingInsideLoop( Form( "Jacobian = %f\n\tIntegrand = %f\n\tdW = %f", jac, integrand, weight ) );
+      DebuggingInsideLoop( Form( "Jacobian = %g\n\tIntegrand = %g\n\tdW = %g", jac, integrand, weight ) );
 
       return weight;
     }
@@ -122,7 +123,7 @@ namespace CepGen
           MY_ = mx_min + mx_range*x( op_index+1 );
         } break;
       }
-      DebuggingInsideLoop( Form( "outgoing remnants invariant mass: %f / %f (%.2f < M(X/Y) < %.2f)", MX_, MY_, remn_mx_cuts.min(), remn_mx_cuts.max() ) );
+      DebuggingInsideLoop( Form( "outgoing remnants invariant mass: %g / %g (%g < M(X/Y) < %g)", MX_, MY_, remn_mx_cuts.min(), remn_mx_cuts.max() ) );
     }
 
     void
@@ -136,21 +137,21 @@ namespace CepGen
           break;
         case Kinematics::ElasticInelastic:
           flux1_ = elasticFlux( x1, q1t2 );
-          flux2_ = inelasticFlux( x2, q2t2, MY_ );
+          flux2_ = inelasticFlux( x2, q2t2, MY_, cuts_.structure_functions );
           break;
         case Kinematics::InelasticElastic:
-          flux1_ = inelasticFlux( x1, q1t2, MX_ );
+          flux1_ = inelasticFlux( x1, q1t2, MX_, cuts_.structure_functions );
           flux2_ = elasticFlux( x2, q2t2 );
           break;
         case Kinematics::InelasticInelastic:
-          flux1_ = inelasticFlux( x1, q1t2, MX_ );
-          flux2_ = inelasticFlux( x2, q2t2, MY_ );
+          flux1_ = inelasticFlux( x1, q1t2, MX_, cuts_.structure_functions );
+          flux2_ = inelasticFlux( x2, q2t2, MY_, cuts_.structure_functions );
           break;
         default: return;
       }
       flux1_ = std::max( flux1_, 1.e-20 );
       flux2_ = std::max( flux2_, 1.e-20 );
-      DebuggingInsideLoop( Form( "Form factors: %e / %e", flux1_, flux2_ ) );
+      DebuggingInsideLoop( Form( "Form factors: %g / %g", flux1_, flux2_ ) );
     }
 
     void
@@ -234,41 +235,37 @@ namespace CepGen
     {
       const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
 
-      const double Q2_min = x*x*mp2/( 1.-x ), Q2_ela = Q2_min + kt2/( 1.-x );
-      const FormFactors ela = FormFactors::ProtonElastic( Q2_ela );
-
+      const double Q2_min = x*x*mp2/( 1.-x ), Q2_ela = ( kt2+x*x*mp2 )/( 1.-x );
+      const FormFactors ff = FormFactors::ProtonElastic( Q2_ela );
       const double ela1 = ( 1.-x )*( 1.-Q2_min/Q2_ela );
-      const double ela2 = ela.FE;
       //const double ela3 = 1.-( Q2_ela-kt2 )/Q2_ela;
-      const double f_ela = Constants::alphaEM/M_PI/kt2*( ela1*ela2 + 0.5*x*x*ela.FM );
 
-      return f_ela * ( 1.-x ) * kt2 / Q2_ela;
+      const double f_ela = Constants::alphaEM/M_PI/kt2*( ela1*ff.FE + 0.5*x*x*ff.FM );
+
+      // last factor below the Jacobian from dQ^2/Q^2 --> dkT^2/kT^2*(kT^2/Q^2)
+      return f_ela*( 1.-x )*kt2 / Q2_ela;
     }
 
-
     double
-    GenericKTProcess::inelasticFlux( double x, double kt2, double mx )
+    GenericKTProcess::inelasticFlux( double x, double kt2, double mx, const StructureFunctions::Type& sf )
     {
       const double mx2 = mx*mx, mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
 
       // F2 structure function
       const double Q2min = 1. / ( 1.-x )*( x*( mx2-mp2 ) + x*x*mp2 ),
-                   Q2 = Q2min + kt2 / ( 1.-x );
+                   Q2 = Q2min + kt2/( 1.-x );
       float xbj = Q2 / ( Q2 + mx2 - mp2 );
 
-      const StructureFunctions sf = StructureFunctionsBuilder::get( cuts_.structure_functions, Q2, xbj );
+      const StructureFunctions str_fun = StructureFunctionsBuilder::get( sf, Q2, xbj );
 
-      // Longitudinal/transverse virtual photon cross section R
-      // from Sibirtsev and Blunden (Phys Rev C 88,065202 (2013))
-      const double R = 0.014 * Q2 * ( exp( -0.07*Q2 ) + 41.*exp( -0.8*Q2 ) );
-      const double F1 = sf.F2 * ( 1.+4*xbj*xbj*mp2/Q2 )/( 1.+R )/( 2.*xbj );
+      const double F1 = 0.5*( ( 1+4.*xbj*xbj*mp2/Q2 )*str_fun.F2 - str_fun.FL )/xbj;
 
-      const double ine1 = ( 1.-x )*( 1.-Q2min / Q2 );
-      const double f_D = sf.F2/( Q2 + mx2 - mp2 ) * ine1, f_C= 2.*F1/Q2;
+      const double term1 = ( 1.-x )*( 1.-Q2min/Q2 );
 
-      const double f_ine = Constants::alphaEM/M_PI/kt2*( f_D + 0.5*x*x*f_C );
+      const double f_D = str_fun.F2/( mx2 + Q2 - mp2 ) * term1;
+      const double f_C= 2.*F1/Q2;
 
-      return f_ine * ( 1.-x ) * kt2 / Q2;
+      return Constants::alphaEM/M_PI*( 1.-x )/Q2*( f_D+0.5*x*x*f_C );
     }
   }
 }

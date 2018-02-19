@@ -44,7 +44,9 @@ namespace CepGen
 
   struct TreeEvent
   {
-    static constexpr unsigned short maxpart = 20;
+    // book a sufficienly large number to allow the large multiplicity
+    // of excited proton fragmentation products
+    static constexpr unsigned short maxpart = 1000;
 
     float gen_time, tot_time;
     int nremn_ch[2], nremn_nt[2], np;

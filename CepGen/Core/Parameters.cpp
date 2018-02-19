@@ -10,6 +10,7 @@ namespace CepGen
 
   Parameters::Parameters( Parameters& param ) :
     kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
+    hadroniser_max_trials( 1 ),
     taming_functions( param.taming_functions ),
     process_( std::move( param.process_ ) ), hadroniser_( std::move( param.hadroniser_ ) ),
     store_( param.store_ )
@@ -17,6 +18,7 @@ namespace CepGen
 
   Parameters::Parameters( const Parameters& param ) :
     kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
+    hadroniser_max_trials( 1 ),
     taming_functions( param.taming_functions ),
     store_( param.store_ )
   {}

@@ -12,7 +12,6 @@ namespace CepGen
   enum ParticleCode {
     invalidParticle = 0,
     //--- fundamental particles
-    dQuark = 1, uQuark = 2,
     Electron = 11, ElectronNeutrino = 12,
     Muon = 13, MuonNeutrino = 14,
     Tau = 15, TauNeutrino = 16,
@@ -26,7 +25,8 @@ namespace CepGen
     Phi1680 = 100333,
     Upsilon1S = 553, Upsilon2S = 100553, Upsilon3S = 200553,
     Proton = 2212, Neutron = 2112,
-    Pomeron = 990, Reggeon = 110
+    Pomeron = 990, Reggeon = 110,
+    DiffrProt = 9902210
   };
   namespace ParticleProperties
   {
@@ -37,8 +37,6 @@ namespace CepGen
      */
     inline double mass( const ParticleCode& pdgId ) {
       switch ( pdgId ) {
-        case dQuark:       return 0.33;           // mass from PYTHIA6.4
-        case uQuark:       return 0.33;           // mass from PYTHIA6.4
         case Electron:     return 0.510998928e-3;
         case Muon:         return 0.1056583715;
         case Tau:          return 1.77682;
@@ -70,9 +68,7 @@ namespace CepGen
      */
     inline double charge( const ParticleCode& pdgId ) {
       switch ( pdgId ) {
-        case Proton: return +1.;
-        case dQuark: return -1./3;
-        case uQuark: return +2./3;
+        case Proton: case DiffrProt: return +1.;
         case Electron: case Muon: case Tau: return -1.;
         case ElectronNeutrino: case MuonNeutrino: case TauNeutrino: return 0.;
         case Gluon: case Z: case Photon: return 0.;
@@ -107,8 +103,6 @@ namespace CepGen
 
   inline std::ostream& operator<<( std::ostream& os, const ParticleCode& pc ) {
     switch ( pc ) {
-      case dQuark:           return os << "d quark";
-      case uQuark:           return os << "u quark";
       case Electron:         return os << "electron";
       case ElectronNeutrino: return os << "nu_e";
       case Muon:             return os << "muon";
@@ -129,10 +123,11 @@ namespace CepGen
       case Omega782:         return os << "omega(782)";
       case JPsi:             return os << "J/Psi";
       case Phi1680:          return os << "phi(1680)";
-      case Upsilon1S:        return os << "Upsilon(1S)";
-      case Upsilon2S:        return os << "Upsilon(2S)";
-      case Upsilon3S:        return os << "Upsilon(3S)";;
+      case Upsilon1S:        return os << "Ups(1S)";
+      case Upsilon2S:        return os << "Ups(2S)";
+      case Upsilon3S:        return os << "Ups(3S)";;
       case Proton:           return os << "proton";
+      case DiffrProt:        return os << "diff.prot.";
       case Neutron:          return os << "neutron";
       case Pomeron:          return os << "pomeron";
       case Reggeon:          return os << "reggeon";

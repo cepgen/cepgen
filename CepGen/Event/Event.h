@@ -105,7 +105,7 @@ namespace CepGen
       ParticleRoles roles() const;
 
       /// Number of trials before the event was "correctly" hadronised
-      int num_hadronisation_trials;
+      unsigned short num_hadronisation_trials;
       /// Time needed to generate the event at parton level (in seconds)
       float time_generation;
       /// Time needed to generate the hadronised (if needed) event (in seconds)
