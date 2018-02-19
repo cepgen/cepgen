@@ -25,11 +25,11 @@ process = cg.Parameters(
         #--- distance in rapidity between W+ and W-
         #rapiditydiff = (4., 5.),
         cuts = {
-            11: dict(
+            11: cg.Parameters(
                 pt = (20., -1),
                 eta = (-2.5, 2.5),
             ),
-            13: dict(
+            13: cg.Parameters(
                 pt = (20., -1),
                 eta = (-2.5, 2.5),
             )

@@ -57,9 +57,9 @@ namespace CepGen
   operator<<( std::ostream& os, const Kinematics::Limits& lim )
   {
     if ( !lim.hasMin() && !lim.hasMax() ) return os << "no cuts";
-    if ( !lim.hasMin() ) return os << Form( "≤ %.3f", lim.max() );
-    if ( !lim.hasMax() ) return os << Form( "≥ %.3f", lim.min() );
-    return os << Form( "%.3f → %.3f", lim.min(), lim.max() );
+    if ( !lim.hasMin() ) return os << Form( "≤ %g", lim.max() );
+    if ( !lim.hasMax() ) return os << Form( "≥ %g", lim.min() );
+    return os << Form( "%g → %g", lim.min(), lim.max() );
   }
 
   double
