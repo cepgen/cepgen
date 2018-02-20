@@ -12,7 +12,7 @@ class Module(Parameters):
     '''A named parameters set to steer a generic module'''
     def __init__(self, mname, *args, **kwargs):
         super(Module, self).__init__(*args, **kwargs)
-        self['mod_name'] = mname
+        self.mod_name = mname
 
 class StructureFunctions(tuple):
     '''A set of structure functions with a small granularity'''

@@ -48,6 +48,6 @@ from Cards.generator_cfi import generator
 
 integrator.numPoints = 10000
 
-print(process.outKinematics.cuts)
-#print integrator
-#print hadroniser
+#print(process)
+#print(integrator)
+#print(hadroniser)
