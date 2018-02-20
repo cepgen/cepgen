@@ -1,6 +1,6 @@
-import Cards.utils_cfi as cg
+import Cards.Core as cepgen
 
-generator = cg.Parameters(
+generator = cepgen.Parameters(
   numEvents = 100000,
   printEvery = 10000,
 )

@@ -14,15 +14,19 @@ namespace CepGen
       public:
         /// Read a standard configuration card
         PythonHandler( const char* file );
-        ~PythonHandler();
+        ~PythonHandler() {}
 
         /// Store a configuration into a steering card
-        //static void store( const Parameters*, const char* file );
+        static void store( const Parameters*, const char* file );
 
       private:
-        void throwPythonError( const char* message, const ExceptionType& type = FatalError ) const;
+        static constexpr const char* module_name_ = "mod_name";
+
+        static void throwPythonError( const char* message, const ExceptionType& type = FatalError );
         static const char* decode( PyObject* obj );
         static PyObject* encode( const char* str );
+        static std::string getPythonPath( const char* file );
+
         PyObject* getElement( PyObject* obj, const char* key );
         void getLimits( PyObject* obj, const char* key, Kinematics::Limits& lim );
 
@@ -41,8 +45,6 @@ namespace CepGen
         static void writeIntegrator( const Parameters*, PyObject* );
         static void writeHadroniser( const Parameters*, PyObject* );
         static void writeGenerator( const Parameters*, PyObject* );*/
-
-        PyObject* cfg_;
     };
   }
 }

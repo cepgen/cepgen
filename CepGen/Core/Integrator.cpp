@@ -161,9 +161,9 @@ namespace CepGen
     const unsigned int ndim = function_->dim;
 
     Debugging( Form( "Correction cycles are started.\n\t"
-                     "j = %f"
-                     "correc = %f"
-                     "corre2 = %f", ps_bin_, grid_.correc2 ) );
+                     "bin = %d"
+                     "correc = %g"
+                     "corre2 = %g", ps_bin_, grid_.correc, grid_.correc2 ) );
 
     if ( grid_.correc >= 1. ) grid_.correc -= 1.;
     if ( uniform() < grid_.correc ) {
@@ -239,7 +239,7 @@ namespace CepGen
     // Variables for debugging
     std::ostringstream os;
     if ( Logger::get().level >= Logger::Debug ) {
-      Debugging( Form( "MaxGen = %d", input_params_->generation.maxgen ) );
+      Debugging( Form( "Maximum weight = %d", input_params_->generation.maxgen ) );
     }
 
     const unsigned int ndim = function_->dim,

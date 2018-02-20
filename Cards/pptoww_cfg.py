@@ -1,21 +1,19 @@
-import Cards.utils_cfi as cg
+import Cards.Core as cepgen
 from Cards.integrators_cff import miser as integrator
-from Cards.pythia8_cff import pythia8 as hadroniser
+#from Cards.pythia8_cff import pythia8 as hadroniser
 
-process = cg.Parameters(
-    name = "pptoww",
-    mode = cg.ProcessMode.InelasticInelastic,
-    #'mode': "elastic/elastic",
-    inKinematics = cg.Parameters(
+process = cepgen.Module('pptoww',
+    mode = cepgen.ProcessMode.InelasticInelastic,
+    inKinematics = cepgen.Parameters(
         cmEnergy = 13000.,
-        #structureFunctions = cg.StructureFunctions('Szczurek-Uleshchenko'),
-        #structureFunctions = cg.StructureFunctions('ALLM', '91'),
-        #structureFunctions = cg.StructureFunctions('ALLM', '97'),
-        structureFunctions = cg.StructureFunctions('LUXlike'),
-        #structureFunctions = cg.StructureFunctions('Suri-Yennie'),
-        #structureFunctions = cg.StructureFunctions('Fiore'),
+        #structureFunctions = cepgen.StructureFunctions('Szczurek-Uleshchenko'),
+        #structureFunctions = cepgen.StructureFunctions('ALLM', '91'),
+        #structureFunctions = cepgen.StructureFunctions('ALLM', '97'),
+        structureFunctions = cepgen.StructureFunctions('LUXlike'),
+        #structureFunctions = cepgen.StructureFunctions('Suri-Yennie'),
+        #structureFunctions = cepgen.StructureFunctions('Fiore'),
     ),
-    outKinematics = cg.Parameters(
+    outKinematics = cepgen.Parameters(
         pt = (0., -1.),
         energy = (0., -1.),
         rapidity = (-6.0, 6.0),
@@ -25,11 +23,11 @@ process = cg.Parameters(
         #--- distance in rapidity between W+ and W-
         #rapiditydiff = (4., 5.),
         cuts = {
-            11: cg.Parameters(
+            11: cepgen.Parameters(
                 pt = (20., -1),
                 eta = (-2.5, 2.5),
             ),
-            13: cg.Parameters(
+            13: cepgen.Parameters(
                 pt = (20., -1),
                 eta = (-2.5, 2.5),
             )
@@ -41,12 +39,12 @@ process = cg.Parameters(
 from Cards.generator_cfi import generator
 
 #--- or let the user specify the run conditions
-#generator = cg.Parameters(
+#generator = cepgen.Parameters(
 #    numEvents = 1000,
 #    printEvery = 500,
 #)
 
-#integrator['numPoints'] = 1000
+integrator.numPoints = 10000
 
 #print integrator
 #print hadroniser

@@ -5,7 +5,7 @@
 using namespace CepGen::Process;
 
 PPtoLL::PPtoLL() :
-  GenericKTProcess( "pptoll", "gamma,gamma->l+,l-", 4, { { Photon, Photon } }, { Muon, Muon } )
+  GenericKTProcess( "pptoll", "ɣɣ → l⁺l¯", 4, { { Photon, Photon } }, { Muon, Muon } )
 {}
 
 void

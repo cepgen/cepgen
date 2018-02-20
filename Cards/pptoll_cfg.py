@@ -1,16 +1,15 @@
-import Cards.utils_cfi as cg
+import Cards.Core as cepgen
 from Cards.integrators_cff import miser as integrator
 #from Cards.pythia8_cff import pythia8 as hadroniser
 
-process = cg.Parameters(
-    name = 'pptoll',
-    mode = cg.ProcessMode.ElasticElastic,
-    inKinematics = cg.Parameters(
+process = cepgen.Module('pptoll',
+    mode = cepgen.ProcessMode.ElasticElastic,
+    inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),
-        structureFunctions = cg.StructureFunctions('Suri-Yennie'),
-        #structureFunctions = cg.StructureFunctions('Fiore'),
+        structureFunctions = cepgen.StructureFunctions('Suri-Yennie'),
+        #structureFunctions = cepgen.StructureFunctions('Fiore'),
     ),
-    outKinematics = cg.Parameters(
+    outKinematics = cepgen.Parameters(
         pair = 13,
         pt = (25.0, -1.),
         energy = (0., -1.),
@@ -27,7 +26,7 @@ process = cg.Parameters(
 #from Cards.generator_cff import generator
 
 #--- or let the user specify the run conditions
-generator = cg.Parameters(
+generator = cepgen.Parameters(
     numEvents = 100000,
     printEvery = 10000,
 )

@@ -5,7 +5,7 @@
 using namespace CepGen::Process;
 
 PPtoWW::PPtoWW() :
-  GenericKTProcess( "pptoww", "gamma,gamma->W+,W-", 4, { { Photon, Photon } }, { W, W } )
+  GenericKTProcess( "pptoww", "ɣɣ → W⁺W¯", 4, { { Photon, Photon } }, { W, W } )
 {}
 
 void
@@ -52,7 +52,7 @@ PPtoWW::computeKTFactorisedMatrixElement()
   //     How matrix element is calculated
   //=================================================================
 
-  const unsigned short method = 0;
+  const unsigned short method = 1;
 
   //=================================================================
   //     matrix element computation

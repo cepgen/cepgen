@@ -33,7 +33,7 @@ namespace CepGen
 
     if ( Logger::get().level >= Logger::Debug ) {
       std::ostringstream os; os << kinematics.cuts.central[Cuts::eta_single];
-      Debugging( Form( "eta in range: %s => theta(min) = %5.2f, theta(max) = %5.2f",
+      Debugging( Form( "eta in range: %s => theta(min) = %g, theta(max) = %g",
                        os.str().c_str(), thetamin, thetamax ) );
     }
   }
@@ -50,12 +50,12 @@ namespace CepGen
   {
     std::ostringstream os;
 
-    const int wb = 75, wt = 32;
+    const int wb = 90, wt = 40;
     os.str( "" );
     os
       << "Parameters dump" << std::left
       << std::endl << std::endl
-      << std::setfill('_') << std::setw( wb ) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill( ' ' ) << std::endl
+      << std::setfill('_') << std::setw( wb+3 ) << "_/¯¯RUN¯INFORMATION¯¯\\_" << std::setfill( ' ' ) << std::endl
       << std::right << std::setw( wb ) << std::left << std::endl
       << std::setw( wt ) << "Process to generate";
     if ( process_ ) {
@@ -74,7 +74,7 @@ namespace CepGen
         << std::endl
         << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Hadronisation algorithm " ) : "Hadronisation algorithm" ) << std::setfill( ' ' ) << std::endl
         << std::endl
-        << std::setw( wt ) << "Name" << hadroniser_->name() << std::endl;
+        << std::setw( wt ) << "Name" << ( pretty ? boldify( hadroniser_->name().c_str() ) : hadroniser_->name() ) << std::endl;
     }
     os
       << std::endl
@@ -88,7 +88,7 @@ namespace CepGen
       << std::setw( wt ) << "Number of points to try per bin" << integrator.npoints << std::endl
       << std::setw( wt ) << "Random number generator seed" << integrator.seed << std::endl
       << std::endl
-      << std::setfill('_') << std::setw( wb ) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill( ' ' ) << std::endl
+      << std::setfill('_') << std::setw( wb+3 ) << "_/¯¯EVENTS¯KINEMATICS¯¯\\_" << std::setfill( ' ' ) << std::endl
       << std::endl
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming particles " ) : "Incoming particles" ) << std::setfill( ' ' ) << std::endl
       << std::endl;
@@ -104,27 +104,37 @@ namespace CepGen
       << std::setw( wt ) << "Structure functions" << kinematics.structure_functions << std::endl
       << std::endl
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << std::endl
-      << std::endl
-      << std::setw( wt ) << "Virtuality range" << ( pretty ? boldify( q2range.str().c_str() ) : q2range.str().c_str() ) << " GeV**2" << std::endl
+      << std::endl;
+    if ( kinematics.cuts.central.size() > 0 ) {
+      for ( std::map<Cuts::InitialState,Kinematics::Limits>::const_iterator lim = kinematics.cuts.initial.begin(); lim != kinematics.cuts.initial.end(); ++lim ) {
+        if ( !lim->second.valid() ) continue;
+        os << std::setw( wt ) << lim->first << lim->second << std::endl;
+      }
+    }
+    os
       << std::endl
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Outgoing central system " ) : "Outgoing central system" ) << std::setfill( ' ' ) << std::endl
       << std::endl
       << std::setw( wt ) << "Central particles" << ( pretty ? boldify( op.str().c_str() ) : op.str() ) << std::endl;
     if ( kinematics.cuts.central.size() > 0 ) {
       for ( std::map<Cuts::Central,Kinematics::Limits>::const_iterator lim = kinematics.cuts.central.begin(); lim != kinematics.cuts.central.end(); ++lim ) {
+        if ( !lim->second.valid() ) continue;
         os << std::setw( wt ) << lim->first << lim->second << std::endl;
       }
     }
     if ( kinematics.cuts.central_particles.size() > 0 ) {
-      os << std::setw( wt ) << "> per-particle cuts:" << std::endl;
+      os << std::setw( wt ) << ( pretty ? boldify( ">>> per-particle cuts:" ) : ">>> per-particle cuts:" ) << std::endl;
       for ( std::map<ParticleCode,std::map<Cuts::Central,Kinematics::Limits> >::const_iterator part_lim = kinematics.cuts.central_particles.begin(); part_lim != kinematics.cuts.central_particles.end(); ++part_lim ) {
         os << " * " << std::setw( wt-3 ) << part_lim->first << std::endl;
         for ( std::map<Cuts::Central,Kinematics::Limits>::const_iterator lim = part_lim->second.begin(); lim != part_lim->second.end(); ++lim ) {
+          if ( !lim->second.valid() ) continue;
           os << "   - " << std::setw( wt-5 ) << lim->first << lim->second << std::endl;
         }
       }
+      os << std::endl;
     }
     os << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Proton / remnants " ) : "Proton / remnants" ) << std::setfill( ' ' ) << std::endl;
+    os << std::endl;
     for ( std::map<Cuts::Remnants,Kinematics::Limits>::const_iterator lim = kinematics.cuts.remnants.begin(); lim != kinematics.cuts.remnants.end(); ++lim ) {
       os << std::setw( wt ) << lim->first << lim->second << std::endl;
     }

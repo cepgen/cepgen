@@ -31,7 +31,7 @@ namespace CepGen
   Generator::~Generator()
   {
     if ( parameters->generation.enabled && parameters->process() && parameters->process()->numGeneratedEvents()>0 ) {
-      Information( Form( "Mean generation time / event: %.3f ms", parameters->process()->totalGenerationTime()*1.e3/parameters->process()->numGeneratedEvents() ) );
+      Information( Form( "Mean generation time / event: %g ms", parameters->process()->totalGenerationTime()*1.e3/parameters->process()->numGeneratedEvents() ) );
     }
   }
 
@@ -111,7 +111,7 @@ namespace CepGen
     xsec = cross_section_;
     err = cross_section_error_;
 
-    Information( Form( "Total cross section: %f +/- %f pb", xsec, err ) );
+    Information( Form( "Total cross section: %g +/- %g pb", xsec, err ) );
   }
 
   std::shared_ptr<Event>

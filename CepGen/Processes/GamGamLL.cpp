@@ -4,7 +4,7 @@
 using namespace CepGen::Process;
 
 GamGamLL::GamGamLL( int nopt ) :
-  GenericProcess( "lpair", "pp -> p(*) (gamma gamma -> l+ l-) p(*)" ),
+  GenericProcess( "lpair", "pp → p(*) ( ɣɣ → l⁺l¯ ) p(*)" ),
   n_opt_( nopt ),
   MX2_( 0. ), MY2_( 0. ), Ml2_( 0. ),
   ep1_( 0. ), ep2_( 0. ), p_cm_( 0. ),

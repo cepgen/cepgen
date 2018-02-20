@@ -1,7 +1,6 @@
-import Cards.utils_cfi as cg
+import Cards.Core as cepgen
 
-pythia8 = cg.Parameters(
-    name = 'pythia8',
+pythia8 = cepgen.Module('pythia8',
     seed = 0,
     pythiaPreConfiguration = (
         #"Init:showAllSettings = on",
