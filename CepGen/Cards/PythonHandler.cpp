@@ -33,8 +33,6 @@ namespace CepGen
                        "Python version: %s\n\t"
                        "Platform: %s", Py_GetVersion(), Py_GetPlatform() ) );
 
-//std::wcout << Py_GetPath();
-      std::cout << "-----" << std::endl;
       PyObject* fn = encode( filename.c_str() );
       if ( !fn )
         throwPythonError( Form( "Failed to encode the configuration filename %s", filename.c_str() ).c_str() );
@@ -122,8 +120,9 @@ namespace CepGen
         Py_DECREF( ppz );
       }
       PyObject* psqrts = getElement( kin, "cmEnergy" );
-      if ( psqrts && PyFloat_Check( psqrts ) ) {
-        params_.kinematics.setSqrtS( PyFloat_AsDouble( psqrts ) );
+      if ( psqrts ) {
+        if ( PyFloat_Check( psqrts ) )
+          params_.kinematics.setSqrtS( PyFloat_AsDouble( psqrts ) );
         Py_DECREF( psqrts );
       }
       PyObject* pstrfun = getElement( kin, "structureFunctions" );
@@ -341,106 +340,6 @@ namespace CepGen
 #endif
       }
     }
-
-    //------------------------------------------------------------------
-
-    void
-    PythonHandler::store( const Parameters* params, const char* file )
-    {
-      
-      /*libconfig::Config cfg;
-      PyObject* root = cfg.getRoot();
-      writeProcess( params, root );
-      writeIncomingKinematics( params, root["process"] );
-      writeOutgoingKinematics( params, root["process"] );
-      writeTamingFunctions( params, root["process"] );
-      writeIntegrator( params, root );
-      writeGenerator( params, root );
-      cfg.writeFile( file );*/
-    }
-
-    /*void
-    PythonHandler::writeProcess( const Parameters* params, PyObject* root )
-    {
-      PyObject* proc = root.add( "process", libconfig::Setting::TypeGroup );
-      proc.add( "name", libconfig::Setting::TypeString ) = params->processName();
-      std::ostringstream os; os << params->kinematics.mode;
-      proc.add( "mode", libconfig::Setting::TypeString ) = os.str();
-    }
-
-    void
-    PythonHandler::writeIncomingKinematics( const Parameters* params, PyObject* root )
-    {
-      PyObject* kin = root.add( "in_kinematics", libconfig::Setting::TypeGroup );
-      kin.add( "beam1_pz", libconfig::Setting::TypeFloat ) = params->kinematics.inp.first;
-      kin.add( "beam2_pz", libconfig::Setting::TypeFloat ) = params->kinematics.inp.second;
-      std::ostringstream os; os << params->kinematics.structure_functions;
-      kin.add( "structure_function", libconfig::Setting::TypeString ) = os.str();
-    }
-
-    void
-    PythonHandler::writeOutgoingKinematics( const Parameters* params, PyObject* root )
-    {
-      PyObject* kin = root.add( "out_kinematics", libconfig::Setting::TypeGroup );
-      if ( params->kinematics.central_system.size() > 0 )
-        kin.add( "pair", libconfig::Setting::TypeInt ) = (int)params->kinematics.central_system[0];
-      if ( params->kinematics.cuts.central.count( Cuts::pt_single ) ) {
-        kin.add( "min_pt", libconfig::Setting::TypeFloat ) = params->kinematics.cuts.central.at( Cuts::pt_single ).min();
-        kin.add( "max_pt", libconfig::Setting::TypeFloat ) = params->kinematics.cuts.central.at( Cuts::pt_single ).max();
-      }
-      if ( params->kinematics.cuts.central.count( Cuts::pt_diff ) ) {
-        kin.add( "min_ptdiff", libconfig::Setting::TypeFloat ) = params->kinematics.cuts.central.at( Cuts::pt_diff ).min();
-        kin.add( "max_ptdiff", libconfig::Setting::TypeFloat ) = params->kinematics.cuts.central.at( Cuts::pt_diff ).max();
-      }
-      if ( params->kinematics.cuts.central.count( Cuts::rapidity_diff ) ) {
-        kin.add( "min_rapiditydiff", libconfig::Setting::TypeFloat ) = params->kinematics.cuts.central.at( Cuts::rapidity_diff ).min();
-        kin.add( "max_rapiditydiff", libconfig::Setting::TypeFloat ) = params->kinematics.cuts.central.at( Cuts::rapidity_diff ).max();
-      }
-      if ( params->kinematics.cuts.central.count( Cuts::energy_single ) ) {
-        kin.add( "min_energy", libconfig::Setting::TypeFloat ) = params->kinematics.cuts.central.at( Cuts::energy_single ).min();
-        kin.add( "max_energy", libconfig::Setting::TypeFloat ) = params->kinematics.cuts.central.at( Cuts::energy_single ).max();
-      }
-      if ( params->kinematics.cuts.central.count( Cuts::eta_single ) ) {
-        kin.add( "min_eta", libconfig::Setting::TypeFloat ) = params->kinematics.cuts.central.at( Cuts::eta_single ).min();
-        kin.add( "max_eta", libconfig::Setting::TypeFloat ) = params->kinematics.cuts.central.at( Cuts::eta_single ).max();
-      }
-      if ( params->kinematics.cuts.remnants.count( Cuts::mass ) ) {
-        kin.add( "min_mx", libconfig::Setting::TypeFloat ) = params->kinematics.cuts.remnants.at( Cuts::mass ).min();
-        kin.add( "max_mx", libconfig::Setting::TypeFloat ) = params->kinematics.cuts.remnants.at( Cuts::mass ).max();
-      }
-    }
-
-    void
-    PythonHandler::writeTamingFunctions( const Parameters* params, PyObject* root )
-    {
-      PyObject* tf = root.add( "taming_functions", libconfig::Setting::TypeList );
-      for ( std::map<std::string,TamingFunction>::const_iterator it = params->taming_functions.begin(); it != params->taming_functions.end(); ++it ) {
-        PyObject* fun = tf.add( libconfig::Setting::TypeGroup );
-        fun.add( "variable", libconfig::Setting::TypeString ) = it->first;
-        fun.add( "expression", libconfig::Setting::TypeString ) = it->second.expression;
-      }
-    }
-
-    void
-    PythonHandler::writeIntegrator( const Parameters* params, PyObject* root )
-    {
-      PyObject* integr = root.add( "integrator", libconfig::Setting::TypeGroup );
-      std::ostringstream os; os << params->integrator.type;
-      integr.add( "algorithm", libconfig::Setting::TypeString ) = os.str();
-      integr.add( "num_points", libconfig::Setting::TypeInt ) = (int)params->integrator.npoints;
-      integr.add( "num_integration_calls", libconfig::Setting::TypeInt ) = (int)params->integrator.ncvg;
-      integr.add( "num_integration_iterations", libconfig::Setting::TypeInt ) = (int)params->integrator.itvg;
-      integr.add( "seed", libconfig::Setting::TypeInt64 ) = (long)params->integrator.seed;
-    }
-
-    void
-    PythonHandler::writeGenerator( const Parameters* params, PyObject* root )
-    {
-      if ( !params->generation.enabled ) return;
-      PyObject* gen = root.add( "generator", libconfig::Setting::TypeGroup );
-      gen.add( "num_events", libconfig::Setting::TypeInt ) = (int)params->generation.maxgen;
-      gen.add( "print_every", libconfig::Setting::TypeInt ) = (int)params->generation.gen_print_every;
-    }*/
 
     //------------------------------------------------------------------
 

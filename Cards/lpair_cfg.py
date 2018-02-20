@@ -6,9 +6,11 @@ process = cepgen.Module('lpair',
     mode = cepgen.ProcessMode.ElasticElastic,
     inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),
-        #structureFunctions = cepgen.StructureFunctions('Suri-Yennie'),
-        #structureFunctions = cepgen.StructureFunctions('Fiore'),
-        structureFunctions = cepgen.StructureFunctions('LUXlike'),
+        structureFunctions = cepgen.StructureFunctions(
+            #'Suri-Yennie'
+            #'Fiore'
+            'LUXlike'
+        ),
     ),
     outKinematics = cepgen.Parameters(
         pair = 13,
@@ -17,10 +19,13 @@ process = cepgen.Module('lpair',
         eta = (-2.5, 2.5),
         mx = (1.07, 1000.),
     ),
-    tamingFunctions = cepgen.Parameters(
-        #{ variable = "m_central", expression = "(m_central>80.) ? exp(-(m_central-80)/10) : 1.0" } // example of a complex taming function
-        #{ variable = "q2", expression = "exp(-q2)" }
-    ),
+    #tamingFunctions = cepgen.Parameters(
+    #    # example of a complex taming function
+    #    cepgen.Parameters(
+    #        variable = "m_central",
+    #        expression = "(m_central>80.) ? exp(-(m_central-80)/10) : 1.0",
+    #    ),
+    #),
 )
 
 #--- either use the default generation (100k events)

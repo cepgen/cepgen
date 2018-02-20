@@ -1,17 +1,19 @@
 import Cards.Core as cepgen
 from Cards.integrators_cff import miser as integrator
-#from Cards.pythia8_cff import pythia8 as hadroniser
+from Cards.pythia8_cff import pythia8 as hadroniser
 
 process = cepgen.Module('pptoww',
     mode = cepgen.ProcessMode.InelasticInelastic,
     inKinematics = cepgen.Parameters(
         cmEnergy = 13000.,
-        #structureFunctions = cepgen.StructureFunctions('Szczurek-Uleshchenko'),
-        #structureFunctions = cepgen.StructureFunctions('ALLM', '91'),
-        #structureFunctions = cepgen.StructureFunctions('ALLM', '97'),
-        structureFunctions = cepgen.StructureFunctions('LUXlike'),
-        #structureFunctions = cepgen.StructureFunctions('Suri-Yennie'),
-        #structureFunctions = cepgen.StructureFunctions('Fiore'),
+        structureFunctions = cepgen.StructureFunctions(
+            #'Suri-Yennie'
+            #'Fiore'
+            #'Szczurek-Uleshchenko'
+            #'ALLM', '91'
+            #'ALLM', '97'
+            'LUXlike'
+        ),
     ),
     outKinematics = cepgen.Parameters(
         pt = (0., -1.),
@@ -46,5 +48,6 @@ from Cards.generator_cfi import generator
 
 integrator.numPoints = 10000
 
+print(process.outKinematics.cuts)
 #print integrator
 #print hadroniser

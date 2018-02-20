@@ -16,9 +16,6 @@ namespace CepGen
         PythonHandler( const char* file );
         ~PythonHandler() {}
 
-        /// Store a configuration into a steering card
-        static void store( const Parameters*, const char* file );
-
       private:
         static constexpr const char* module_name_ = "mod_name";
 
@@ -37,14 +34,6 @@ namespace CepGen
         void parseGenerator( PyObject* );
         void parseTamingFunctions( PyObject* );
         void parseHadroniser( PyObject* );
-
-        /*static void writeProcess( const Parameters*, PyObject* );
-        static void writeIncomingKinematics( const Parameters*, PyObject* );
-        static void writeOutgoingKinematics( const Parameters*, PyObject* );
-        static void writeTamingFunctions( const Parameters*, PyObject* );
-        static void writeIntegrator( const Parameters*, PyObject* );
-        static void writeHadroniser( const Parameters*, PyObject* );
-        static void writeGenerator( const Parameters*, PyObject* );*/
     };
   }
 }

@@ -6,8 +6,10 @@ process = cepgen.Module('pptoll',
     mode = cepgen.ProcessMode.ElasticElastic,
     inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),
-        structureFunctions = cepgen.StructureFunctions('Suri-Yennie'),
-        #structureFunctions = cepgen.StructureFunctions('Fiore'),
+        structureFunctions = cepgen.StructureFunctions(
+            'Suri-Yennie'
+            #'Fiore'
+        ),
     ),
     outKinematics = cepgen.Parameters(
         pair = 13,
