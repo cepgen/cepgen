@@ -52,7 +52,7 @@ namespace CepGen
     }
 
     bool
-    Pythia8Hadroniser::hadronise( Event& ev, double& weight )
+    Pythia8Hadroniser::hadronise( Event& ev, double& weight, bool proton_fragment )
     {
       weight = 1.;
 #ifdef PYTHIA8
@@ -106,8 +106,8 @@ namespace CepGen
           case Particle::OutgoingBeam2: {
             py8part.id( 2212 );
             py8part.status( ( part.status() == Particle::Unfragmented )
-              ? 93
-              : 23 // final state proton
+              ? 15
+              : 14 // final state proton
             );
             py_id = pythia_->event.append( py8part );
 
@@ -123,21 +123,23 @@ namespace CepGen
           py_cg_corresp[py_id] = part.id();
         }
       }
-      if ( idx_remn1 != invalid_idx_ ) {
-        const Particle::Momentum& p0 = ev.getOneByRole( Particle::IncomingBeam1 ).momentum();
-        const Particle::Momentum& p = ev.getOneByRole( Particle::OutgoingBeam1 ).momentum();
-        const double q2 = -( p-p0 ).mass2();
-        const double mx2 = p.mass2();
-        const double xbj = q2/( q2+mx2-mp2 );
-        fragmentState( idx_remn1, xbj );
-      }
-      if ( idx_remn2 != invalid_idx_ ) {
-        const Particle::Momentum& p0 = ev.getOneByRole( Particle::IncomingBeam2 ).momentum();
-        const Particle::Momentum& p = ev.getOneByRole( Particle::OutgoingBeam2 ).momentum();
-        const double q2 = -( p-p0 ).mass2();
-        const double my2 = p.mass2();
-        const double xbj = q2/( q2+my2-mp2 );
-        fragmentState( idx_remn2, xbj );
+      if ( proton_fragment ) {
+        if ( idx_remn1 != invalid_idx_ ) {
+          const Particle::Momentum& p0 = ev.getOneByRole( Particle::IncomingBeam1 ).momentum();
+          const Particle::Momentum& p = ev.getOneByRole( Particle::OutgoingBeam1 ).momentum();
+          const double q2 = -( p-p0 ).mass2();
+          const double mx2 = p.mass2();
+          const double xbj = q2/( q2+mx2-mp2 );
+          fragmentState( idx_remn1, xbj );
+        }
+        if ( idx_remn2 != invalid_idx_ ) {
+          const Particle::Momentum& p0 = ev.getOneByRole( Particle::IncomingBeam2 ).momentum();
+          const Particle::Momentum& p = ev.getOneByRole( Particle::OutgoingBeam2 ).momentum();
+          const double q2 = -( p-p0 ).mass2();
+          const double my2 = p.mass2();
+          const double xbj = q2/( q2+my2-mp2 );
+          fragmentState( idx_remn2, xbj );
+        }
       }
 
       const unsigned short num_py_parts = pythia_->event.size();
@@ -146,17 +148,16 @@ namespace CepGen
 //      exit(0);
 
       //std::cout << ":::::" << pythia_->settings.parm("Check:mTolErr") << std::endl;
-        for ( unsigned short i = 0; i < pythia_->event.size(); ++i ) {
-          std::cout << ">> " << pythia_->event[i].id() << "::" << (abs( pythia_->event[i].mCalc()-pythia_->event[i].m() )/std::max( 1.0, pythia_->event[i].e())>pythia_->settings.parm("Check:mTolErr")) << std::endl;
-        }
 
-      if ( !pythia_->next() ) {
-        //std::cout << "bad" << std::endl;
-        //InWarning( "Pythia8 failed to process the event." );
-        //pythia_->event.list( true, true );
-        exit(0);
+      if ( !pythia_->next() )
         return false;
-      }
+      /*for ( unsigned short i = 0; i < pythia_->event.size(); ++i ) {
+        const double err = abs( pythia_->event[i].mCalc()-pythia_->event[i].m() )/std::max( 1.0, pythia_->event[i].e());
+        std::cout << ">> " << pythia_->event[i].id() << "::" << err << "::" << (err>pythia_->settings.parm("Check:mTolErr")) << std::endl;
+      }*/
+      //std::cout << "bad" << std::endl;
+      //InWarning( "Pythia8 failed to process the event." );
+      //pythia_->event.list( true, true );
 
       // check if something happened in the event processing by Pythia
       // if not, return the event as it is...
@@ -234,7 +235,7 @@ namespace CepGen
       //quark.e( quark.eCalc() );
       diquark.m( diquark.mCalc() );
       quark.m( quark.mCalc() );
-      std::cout << "> " << xdq << "|" << xbj << std::endl;
+      //std::cout << "> " << xdq << "|" << xbj << std::endl;
       const unsigned short id_dq = pythia_->event.append( diquark );
       const unsigned short id_q = pythia_->event.append( quark );
       // keep up with the particles parentage

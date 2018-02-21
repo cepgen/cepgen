@@ -6,11 +6,9 @@ process = cepgen.Module('lpair',
     mode = cepgen.ProcessMode.ElasticElastic,
     inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),
-        structureFunctions = cepgen.StructureFunctions(
-            #'Suri-Yennie'
-            #'Fiore'
-            'LUXlike'
-        ),
+        #structureFunctions = cepgen.StructureFunctions.SuriYennie,
+        #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
+        structureFunctions = cepgen.StructureFunctions.LUXlike,
     ),
     outKinematics = cepgen.Parameters(
         pair = 13,

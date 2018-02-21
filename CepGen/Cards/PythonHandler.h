@@ -25,6 +25,8 @@ namespace CepGen
         static const char* decode( PyObject* obj );
         static PyObject* encode( const char* str );
         static std::string getPythonPath( const char* file );
+        static bool isInteger( PyObject* obj );
+        static int asInteger( PyObject* obj );
 
         PyObject* getElement( PyObject* obj, const char* key );
         void getLimits( PyObject* obj, const char* key, Kinematics::Limits& lim );

@@ -277,7 +277,7 @@ namespace CepGen
           for ( std::set<int>::const_iterator it_moth = mothers.begin(); it_moth != mothers.end(); ++it_moth )
             oss << ( ( it_moth != mothers.begin() ) ? "/" : "" ) << getConstById( *it_moth ).pdgId();
         else oss << part.pdgId();
-        os << Form( "\n %2d\t%+6d%8s", part.id(), part.integerPdgId(), oss.str().c_str() );
+        os << Form( "\n %2d\t%+6d %-8s", part.id(), part.integerPdgId(), oss.str().c_str() );
       }
       os << "\t";
       if ( part.charge() != 999. ) os << Form( "%6.2f ", part.charge() );

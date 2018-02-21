@@ -26,12 +26,14 @@ namespace CepGen
         char* n_filename = new char[fn_len];
         sprintf( n_filename, "%s", filename.c_str() );
         Py_SetProgramName( n_filename );
+        delete [] n_filename;
       }
 #else
       {
         wchar_t* w_filename = new wchar_t[fn_len];
         swprintf( w_filename, fn_len, L"%s", filename.c_str() );
         Py_SetProgramName( w_filename );
+        delete [] w_filename;
       }
 #endif
 
@@ -65,10 +67,11 @@ namespace CepGen
       else FatalError( Form( "Unrecognised process: %s", proc_name ) );
 
       //--- process mode
-      PyObject* pproc_mode = PyDict_GetItem( process, encode( "mode" ) );
+      PyObject* pproc_mode = getElement( process, "mode" );
       if ( pproc_mode ) {
-        if ( PyLong_Check( pproc_mode ) ) {
-          int int_mode = PyLong_AsLong( pproc_mode );
+        std::cout << "---> peout" << std::endl;
+        if ( isInteger( pproc_mode ) ) {
+          int int_mode = asInteger( pproc_mode );
           params_.kinematics.mode = (Kinematics::ProcessMode)int_mode;
         }
         Py_DECREF( pproc_mode );
@@ -143,39 +146,8 @@ namespace CepGen
       }
       PyObject* pstrfun = getElement( kin, "structureFunctions" );
       if ( pstrfun ) {
-        if ( PyTuple_Check( pstrfun ) && PyTuple_Size( pstrfun ) > 0 ) {
-          const std::string sf_str = decode( PyTuple_GetItem( pstrfun, 0 ) );
-          std::string sf_var;
-          if ( PyTuple_Size( pstrfun ) > 1 ) sf_var = decode( PyTuple_GetItem( pstrfun, 1 ) );
-          if ( sf_str == "electron" )
-            params_.kinematics.structure_functions = StructureFunctions::Electron;
-          else if ( sf_str == "elastic proton" )
-            params_.kinematics.structure_functions = StructureFunctions::ElasticProton;
-          else if ( sf_str == "Suri-Yennie" )
-            params_.kinematics.structure_functions = StructureFunctions::SuriYennie;
-          else if ( sf_str == "Szczurek-Uleshchenko" )
-            params_.kinematics.structure_functions = StructureFunctions::SzczurekUleshchenko;
-          else if ( sf_str == "Fiore" )
-            params_.kinematics.structure_functions = StructureFunctions::FioreBrasse;
-          else if ( sf_str == "ALLM" ) {
-            params_.kinematics.structure_functions = StructureFunctions::ALLM97;
-            if ( sf_var == "91" )
-              params_.kinematics.structure_functions = StructureFunctions::ALLM91;
-            else if ( sf_var == "97" )
-              params_.kinematics.structure_functions = StructureFunctions::ALLM97;
-            /*else if ( sf_var == "HHT" )
-              params_.kinematics.structure_functions = StructureFunctions::ALLM_HHT;
-            else if ( sf_var == "HHT-FT" )
-              params_.kinematics.structure_functions = StructureFunctions::ALLM_HHT_FT;*/
-            else if ( sf_var == "GD07p" )
-              params_.kinematics.structure_functions = StructureFunctions::GD07p;
-            else if ( sf_var == "GD11p" )
-              params_.kinematics.structure_functions = StructureFunctions::GD11p;
-          }
-          else if ( sf_str == "LUXlike" )
-            params_.kinematics.structure_functions = StructureFunctions::Schaefer;
-          else FatalError( Form( "Invalid structure functions mode: %s", sf_str.c_str() ) );
-        }
+        if ( isInteger( pstrfun ) )
+          params_.kinematics.structure_functions = (StructureFunctions::Type)asInteger( pstrfun );
         Py_DECREF( pstrfun );
       }
     }
@@ -184,16 +156,18 @@ namespace CepGen
     PythonHandler::parseOutgoingKinematics( PyObject* kin )
     {
       PyObject* ppair = getElement( kin, "pair" );
-      if ( ppair && PyLong_Check( ppair ) ) {
-        ParticleCode pair = (ParticleCode)PyLong_AsLong( ppair );
-        params_.kinematics.central_system = { pair, pair };
+      if ( ppair ) {
+        if ( isInteger( ppair ) ) {
+          ParticleCode pair = (ParticleCode)asInteger( ppair );
+          params_.kinematics.central_system = { pair, pair };
+        }
         Py_DECREF( ppair );
       }
       else if ( ppair && PyTuple_Check( ppair ) ) {
         if ( PyTuple_Size( ppair ) != 2 )
           FatalError( "Invalid value for in_kinematics.pair!" );
-        ParticleCode pair1 = (ParticleCode)PyLong_AsLong( PyTuple_GetItem( ppair, 0 ) );
-        ParticleCode pair2 = (ParticleCode)PyLong_AsLong( PyTuple_GetItem( ppair, 1 ) );
+        ParticleCode pair1 = (ParticleCode)asInteger( PyTuple_GetItem( ppair, 0 ) );
+        ParticleCode pair2 = (ParticleCode)asInteger( PyTuple_GetItem( ppair, 1 ) );
         params_.kinematics.central_system = { pair1, pair2 };
         Py_DECREF( ppair );
       }
@@ -214,7 +188,7 @@ namespace CepGen
       PyObject* pkey = nullptr, *pvalue = nullptr;
       Py_ssize_t pos = 0;
       while ( PyDict_Next( cuts, &pos, &pkey, &pvalue ) ) {
-        ParticleCode pdg = (ParticleCode)PyLong_AsLong( pkey );
+        ParticleCode pdg = (ParticleCode)asInteger( pkey );
         getLimits( pvalue, "pt", params_.kinematics.cuts.central_particles[pdg][Cuts::pt_single] );
         getLimits( pvalue, "energy", params_.kinematics.cuts.central_particles[pdg][Cuts::energy_single] );
         getLimits( pvalue, "eta", params_.kinematics.cuts.central_particles[pdg][Cuts::eta_single] );
@@ -240,17 +214,29 @@ namespace CepGen
       Py_DECREF( palgo );
 
       PyObject* pnp = getElement( integr, "numPoints" );
-      if ( pnp && PyLong_Check( pnp ) )
-        params_.integrator.npoints = PyLong_AsLong( pnp );
+      if ( pnp ) {
+        if ( isInteger( pnp ) )
+          params_.integrator.npoints = asInteger( pnp );
+        Py_DECREF( pnp );
+      }
       PyObject* pnc = getElement( integr, "numIntegrationCalls" );
-      if ( pnc && PyLong_Check( pnc ) )
-        params_.integrator.ncvg = PyLong_AsLong( pnc );
+      if ( pnc ) {
+        if ( isInteger( pnc ) )
+          params_.integrator.ncvg = asInteger( pnc );
+        Py_DECREF( pnc );
+      }
       PyObject* pnit = getElement( integr, "numIntegrationIterations" );
-      if ( pnit && PyLong_Check( pnit ) )
-        params_.integrator.itvg = PyLong_AsLong( pnit );
+      if ( pnit ) {
+        if ( isInteger( pnit ) )
+          params_.integrator.itvg = asInteger( pnit );
+        Py_DECREF( pnit );
+      }
       PyObject* psd = getElement( integr, "seed" );
-      if ( psd && PyLong_Check( psd ) )
-        params_.integrator.seed = PyLong_AsUnsignedLong( psd );
+      if ( psd ) {
+        if ( isInteger( psd ) )
+          params_.integrator.seed = PyLong_AsUnsignedLong( psd );
+        Py_DECREF( psd );
+      }
     }
 
     void
@@ -261,12 +247,14 @@ namespace CepGen
       params_.generation.enabled = true;
       PyObject* pnev = getElement( gen, "numEvents" );
       if ( pnev ) {
-        if ( PyLong_AsLong( pnev ) )params_.generation.maxgen = PyLong_AsLong( pnev );
+        if ( isInteger( pnev ) )
+          params_.generation.maxgen = asInteger( pnev );
         Py_DECREF( pnev );
       }
       PyObject* ppev = getElement( gen, "printEvery" );
       if ( ppev ) {
-        if ( PyLong_AsLong( ppev ) )params_.generation.gen_print_every = PyLong_AsLong( ppev );
+        if ( isInteger( ppev ) )
+          params_.generation.gen_print_every = asInteger( ppev );
         Py_DECREF( ppev );
       }
     }
@@ -307,7 +295,7 @@ namespace CepGen
         PyObject* pseed = getElement( hadr, "seed" );
         long long seed = -1ll;
         if ( pseed ) {
-          if ( PyLong_Check( pseed ) ) seed = PyLong_AsLongLong( pseed );
+          if ( isInteger( pseed ) ) seed = PyLong_AsLongLong( pseed );
           Py_DECREF( pseed );
         }
         pythia8->setSeed( seed );
@@ -353,6 +341,9 @@ namespace CepGen
           Py_DECREF( ppc );
         }
         params_.setHadroniser( pythia8 );
+#else
+        InWarning( "Pythia8 is not linked to this instance... "
+                   "Ignoring this part of the configuration file." )
 #endif
       }
     }
@@ -416,9 +407,8 @@ namespace CepGen
     PyObject*
     PythonHandler::getElement( PyObject* obj, const char* key )
     {
-      PyObject* pout = nullptr;
       PyObject* nink = encode( key );
-      pout = PyDict_GetItem( obj, nink );
+      PyObject* pout = PyDict_GetItem( obj, nink );
       Py_DECREF( nink );
       return pout;
     }
@@ -441,6 +431,26 @@ namespace CepGen
         }
         Py_DECREF( pobj );
       }
+    }
+
+    bool
+    PythonHandler::isInteger( PyObject* obj )
+    {
+#ifdef PYTHON2
+      return PyInt_Check( obj );
+#else
+      return PyLong_Check( obj );
+#endif
+    }
+
+    int
+    PythonHandler::asInteger( PyObject* obj )
+    {
+#ifdef PYTHON2
+      return _PyInt_AsInt( obj );
+#else
+      return PyLong_AsLong( obj );
+#endif
     }
   }
 }

@@ -14,14 +14,22 @@ class Module(Parameters):
         super(Module, self).__init__(*args, **kwargs)
         self.mod_name = mname
 
-class StructureFunctions(tuple):
-    '''A set of structure functions with a small granularity'''
-    def __new__(self, name, variant=''):
-        return tuple.__new__(StructureFunctions, (name, variant))
-    def name(self):
-        return self.__getitem__(0)
-    def variant(self):
-        return self.__getitem__(1)
+class StructureFunctions:
+    '''Types of structure functions supported'''
+    Electron            = 1
+    ElasticProton       = 2
+    SuriYennie          = 11
+    SzczurekUleshchenko = 12
+    BlockDurandHa       = 13
+    FioreBrasse         = 101
+    ChristyBosted       = 102
+    CLAS                = 103
+    ALLM91              = 201
+    ALLM97              = 202
+    GD07p               = 203
+    GD11p               = 204
+    MSTWgrid            = 205
+    LUXlike             = 301
 
 class ProcessMode:
     '''Types of processes supported'''

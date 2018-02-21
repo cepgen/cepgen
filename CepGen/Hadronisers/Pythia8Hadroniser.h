@@ -22,7 +22,7 @@ namespace CepGen
         Pythia8Hadroniser();
         ~Pythia8Hadroniser();
 
-        bool hadronise( Event& ev, double& weight ) override;
+        bool hadronise( Event& ev, double& weight, bool proton_fragment ) override;
         void setSeed( long long seed ) override;
 
 #ifdef PYTHIA8
@@ -33,6 +33,7 @@ namespace CepGen
 
       private:
         static constexpr unsigned short invalid_idx_ = 999;
+        static constexpr unsigned short max_attempts_ = 5;
 #ifdef PYTHIA8
         void fragmentState( unsigned short idx, double xbj = 0. );
         /// A Pythia8 core to be wrapped

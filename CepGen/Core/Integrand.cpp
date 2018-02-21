@@ -7,6 +7,7 @@
 #include "CepGen/Parameters.h"
 
 #include <sstream>
+#include <fstream>
 
 namespace CepGen
 {
@@ -103,8 +104,8 @@ namespace CepGen
       taming *= p->taming_functions.eval( "pt_central", central_system.pt() );
     }
     if ( p->taming_functions.has( "q2" ) ) {
-      taming *= p->taming_functions.eval( "q2", ev->getOneByRole( Particle::Parton1 ).momentum().mass() );
-      taming *= p->taming_functions.eval( "q2", ev->getOneByRole( Particle::Parton2 ).momentum().mass() );
+      taming *= p->taming_functions.eval( "q2", -ev->getOneByRole( Particle::Parton1 ).momentum().mass() );
+      taming *= p->taming_functions.eval( "q2", -ev->getOneByRole( Particle::Parton2 ).momentum().mass() );
     }
     integrand *= taming;
 
@@ -115,7 +116,7 @@ namespace CepGen
       bool success = false;
       ev->num_hadronisation_trials = 0;
       do {
-        success = p->hadroniser()->hadronise( *ev, br );
+        success = p->hadroniser()->hadronise( *ev, br, p->storage() );
         ev->num_hadronisation_trials++;
       } while ( !success && ev->num_hadronisation_trials < p->hadroniser_max_trials );
       if ( !success ) return 0.;
@@ -143,6 +144,11 @@ namespace CepGen
     }
 
     if ( p->storage() ) {
+
+/*    std::ofstream dump( "dump.txt", std::ios_base::app );
+    for ( unsigned short i = 0; i < ndim; ++i )
+      dump << x[i] << "\t";
+    dump << "\n";*/
 
       ev->time_generation = tmr.elapsed();
 
