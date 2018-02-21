@@ -38,7 +38,7 @@ process = cepgen.Module('pptoww',
 )
 
 #--- either use the default generation (100k events)
-from Cards.generator_cfi import generator
+from Cards.generator_cff import generator
 
 #--- or let the user specify the run conditions
 #generator = cepgen.Parameters(

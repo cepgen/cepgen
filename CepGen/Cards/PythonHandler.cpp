@@ -21,17 +21,17 @@ namespace CepGen
       setenv( "PYTHONPATH", ".:..", 1 );
       std::string filename = getPythonPath( file );
       const size_t fn_len = filename.length()+1;
-#ifdef PYTHON3
-      {
-        wchar_t* w_filename = new wchar_t[fn_len];
-        swprintf( w_filename, fn_len, L"%s", filename.c_str() );
-        Py_SetProgramName( w_filename );
-      }
-#else
+#ifdef PYTHON2
       {
         char* n_filename = new char[fn_len];
         sprintf( n_filename, "%s", filename.c_str() );
         Py_SetProgramName( n_filename );
+      }
+#else
+      {
+        wchar_t* w_filename = new wchar_t[fn_len];
+        swprintf( w_filename, fn_len, L"%s", filename.c_str() );
+        Py_SetProgramName( w_filename );
       }
 #endif
 
@@ -113,12 +113,12 @@ namespace CepGen
       }
 
       Py_DECREF( cfg );
-#ifdef PYTHON3
-      if ( Py_FinalizeEx() != 0 )
-        throw Exception( __PRETTY_FUNCTION__, "Failed to unregister the python parser!", FatalError );
-#else
+#ifdef PYTHON2
       Py_Finalize();
+#else
       if ( Py_IsInitialized() )
+        throw Exception( __PRETTY_FUNCTION__, "Failed to unregister the python parser!", FatalError );
+      if ( Py_FinalizeEx() != 0 )
         throw Exception( __PRETTY_FUNCTION__, "Failed to unregister the python parser!", FatalError );
 #endif
     }
@@ -382,10 +382,10 @@ namespace CepGen
       }
 
       oss << "\n\tError: "
-#ifdef PYTHON3
-          << _PyUnicode_AsString( PyObject_Str( pvalue ) );
-#else
+#ifdef PYTHON2
           << PyString_AsString( PyObject_Str( pvalue ) ); // deprecated in python v3+
+#else
+          << _PyUnicode_AsString( PyObject_Str( pvalue ) );
 #endif
       Py_Finalize();
       throw Exception( __PRETTY_FUNCTION__, oss.str().c_str(), type );
@@ -394,10 +394,10 @@ namespace CepGen
     const char*
     PythonHandler::decode( PyObject* obj )
     {
-#ifdef PYTHON3
-      const char* str = _PyUnicode_AsString( obj );
-#else
+#ifdef PYTHON2
       const char* str = PyString_AsString( obj ); // deprecated in python v3+
+#else
+      const char* str = _PyUnicode_AsString( obj );
 #endif
       if ( !str )
         throwPythonError( "Failed to decode a Python object!" );

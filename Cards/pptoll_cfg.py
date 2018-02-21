@@ -24,11 +24,7 @@ process = cepgen.Module('pptoll',
     ),
 )
 
-#--- either use the default generation (100k events)
-#from Cards.generator_cff import generator
+#--- events generation
+from Cards.generator_cff import generator
+generator.numEvents = 1e4
 
-#--- or let the user specify the run conditions
-generator = cepgen.Parameters(
-    numEvents = 100000,
-    printEvery = 10000,
-)
