@@ -36,10 +36,6 @@ int main( int argc, char* argv[] ) {
     //mg.parameters->process_mode = Kinematics::InelasticElastic;
     mg.parameters->kinematics.mode = CepGen::Kinematics::ElasticElastic;
     mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SuriYennie;
-#ifdef PYTHIA8
-    mg.parameters->setHadroniser( new CepGen::Hadroniser::Pythia8Hadroniser );
-#endif
-
     mg.parameters->kinematics.inp = { 6500., 6500. };
     mg.parameters->kinematics.central_system = { CepGen::Muon, CepGen::Muon };
     mg.parameters->kinematics.cuts.central[CepGen::Cuts::pt_single].min() = 15.;

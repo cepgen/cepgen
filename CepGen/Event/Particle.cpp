@@ -258,7 +258,7 @@ namespace CepGen
       case Particle::Parton1:       return os << "parton1";
       case Particle::Parton2:       return os << "parton2";
       case Particle::Parton3:       return os << "parton3";
-      case Particle::Intermediate:  return os << "partons";
+      case Particle::Intermediate:  return os << "hard.pr.";
       case Particle::CentralSystem: return os << "central";
     }
     return os;

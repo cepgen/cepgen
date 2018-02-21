@@ -270,12 +270,19 @@ namespace CepGen
     double pxtot = 0., pytot = 0., pztot = 0., etot = 0.;
     for ( Particles::const_iterator part_ref = parts.begin(); part_ref != parts.end(); ++part_ref ) {
       const Particle& part = *part_ref;
-      { std::ostringstream oss; oss << part.pdgId(); os << Form( "\n %2d\t%+6d%8s", part.id(), part.integerPdgId(), oss.str().c_str() ); }
+      const ParticlesIds mothers = part.mothers();
+      {
+        std::ostringstream oss;
+        if ( part.pdgId() == invalidParticle && mothers.size() > 0 )
+          for ( std::set<int>::const_iterator it_moth = mothers.begin(); it_moth != mothers.end(); ++it_moth )
+            oss << ( ( it_moth != mothers.begin() ) ? "/" : "" ) << getConstById( *it_moth ).pdgId();
+        else oss << part.pdgId();
+        os << Form( "\n %2d\t%+6d%8s", part.id(), part.integerPdgId(), oss.str().c_str() );
+      }
       os << "\t";
       if ( part.charge() != 999. ) os << Form( "%6.2f ", part.charge() );
       else                         os << "\t";
       { std::ostringstream oss; oss << part.role(); os << Form( "%8s\t%6d\t", oss.str().c_str(), part.status() ); }
-      const ParticlesIds mothers = part.mothers();
       if ( !mothers.empty() ) {
         std::ostringstream oss;
         for ( ParticlesIds::const_iterator moth = mothers.begin(); moth != mothers.end(); ++moth ) {
