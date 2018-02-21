@@ -228,7 +228,7 @@ namespace CepGen
       if ( !PyDict_Check( integr ) )
         throwPythonError( "Integrator object should be a dictionary!" );
       PyObject* palgo = getElement( integr, module_name_ );
-      if ( !palgo || !PyUnicode_Check( palgo ) )
+      if ( !palgo )
         throwPythonError( "Invalid integration algorithm!" );
       std::string algo = decode( palgo );
       if ( algo == "Vegas" )
