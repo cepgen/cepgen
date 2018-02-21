@@ -9,7 +9,7 @@
 
 #include "CepGen/Generator.h"
 #include "CepGen/Cards/LpairHandler.h"
-#include "CepGen/Cards/ConfigHandler.h"
+#include "CepGen/Cards/PythiaHandler.h"
 
 using namespace std;
 
@@ -27,7 +27,7 @@ int main( int argc, char* argv[] ) {
   }
   const std::string incard( argv[1] ), extension = incard.substr( incard.find_last_of( "." )+1 );
   if ( extension == "card" ) mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
-  else if ( extension == "cfg" ) mg.setParameters( CepGen::Cards::ConfigHandler( argv[1] ).parameters() );
+  else if ( extension == "py" ) mg.setParameters( CepGen::Cards::PythiaHandler( argv[1] ).parameters() );
 
   mg.parameters->generation.enabled = true;
   mg.parameters->dump();

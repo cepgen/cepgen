@@ -1,6 +1,5 @@
 #include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Cards/LpairHandler.h"
-#include "CepGen/Cards/ConfigHandler.h"
 
 #include "CepGen/Generator.h"
 
@@ -55,7 +54,6 @@ int main( int argc, char* argv[] ) {
     //CepGen::Cards::LpairReader card( argv[1] );
     const std::string file( argv[1] ), extension = file.substr( file.find_last_of( "." )+1 );
     if ( extension == "card" ) mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
-    else if ( extension == "cfg" ) mg.setParameters( CepGen::Cards::ConfigHandler( argv[1] ).parameters() );
 #ifdef PYTHON
     else if ( extension == "py" ) mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
 #endif
@@ -79,9 +77,6 @@ int main( int argc, char* argv[] ) {
       }
     }
   }
-
-  // store the current configuration
-  CepGen::Cards::ConfigHandler::store( mg.parameters.get(), "last_run.cfg" );
 
   return 0;
 }

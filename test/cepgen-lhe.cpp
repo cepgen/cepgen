@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "CepGen/Generator.h"
-#include "CepGen/Cards/ConfigHandler.h"
+#include "CepGen/Cards/PythiaHandler.h"
 #include "CepGen/Export/LHEFHandler.h"
 
 #include "HepMC/Version.h"
@@ -21,7 +21,7 @@ int main( int argc, char* argv[] ) {
   if ( argc == 1 ) FatalError( "No config file provided." );
 
   Debugging( Form( "Reading config file stored in %s", argv[1] ) );
-  CepGen::Cards::ConfigHandler card( argv[1] );
+  CepGen::Cards::PythiaHandler card( argv[1] );
   mg.setParameters( card.parameters() );
 
   // We might want to cross-check visually the validity of our run
