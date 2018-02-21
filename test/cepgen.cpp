@@ -1,10 +1,9 @@
-#include <iostream>
+#include "CepGen/Cards/PythonHandler.h"
+#include "CepGen/Cards/LpairHandler.h"
+#include "CepGen/Cards/ConfigHandler.h"
 
 #include "CepGen/Generator.h"
 
-#include "CepGen/Cards/LpairHandler.h"
-#include "CepGen/Cards/ConfigHandler.h"
-#include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Core/Logger.h"
 #include "CepGen/Core/Exception.h"
 
@@ -12,6 +11,8 @@
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
+
+#include <iostream>
 
 using namespace std;
 
@@ -55,7 +56,9 @@ int main( int argc, char* argv[] ) {
     const std::string file( argv[1] ), extension = file.substr( file.find_last_of( "." )+1 );
     if ( extension == "card" ) mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
     else if ( extension == "cfg" ) mg.setParameters( CepGen::Cards::ConfigHandler( argv[1] ).parameters() );
+#ifdef PYTHON
     else if ( extension == "py" ) mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
+#endif
   }
 
   // We might want to cross-check visually the validity of our run

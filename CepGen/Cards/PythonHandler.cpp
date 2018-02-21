@@ -1,6 +1,8 @@
 #include "PythonHandler.h"
 #include "CepGen/Core/Exception.h"
 
+#ifdef PYTHON
+
 #include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Processes/PPtoLL.h"
 #include "CepGen/Processes/PPtoWW.h"
@@ -18,12 +20,20 @@ namespace CepGen
     {
       setenv( "PYTHONPATH", ".:..", 1 );
       std::string filename = getPythonPath( file );
+      const size_t fn_len = filename.length()+1;
+#ifdef PYTHON3
       {
-        const size_t fn_len = filename.length()+1;
         wchar_t* w_filename = new wchar_t[fn_len];
         swprintf( w_filename, fn_len, L"%s", filename.c_str() );
         Py_SetProgramName( w_filename );
       }
+#else
+      {
+        char* n_filename = new char[fn_len];
+        sprintf( n_filename, "%s", filename.c_str() );
+        Py_SetProgramName( n_filename );
+      }
+#endif
 
       Py_InitializeEx( 0 );
       if ( !Py_IsInitialized() )
@@ -103,8 +113,14 @@ namespace CepGen
       }
 
       Py_DECREF( cfg );
+#ifdef PYTHON3
       if ( Py_FinalizeEx() != 0 )
         throw Exception( __PRETTY_FUNCTION__, "Failed to unregister the python parser!", FatalError );
+#else
+      Py_Finalize();
+      if ( Py_IsInitialized() )
+        throw Exception( __PRETTY_FUNCTION__, "Failed to unregister the python parser!", FatalError );
+#endif
     }
 
     void
@@ -365,7 +381,12 @@ namespace CepGen
         throw Exception( __PRETTY_FUNCTION__, oss.str().c_str(), type );
       }
 
-      oss << "\n\tError: " << _PyUnicode_AsString( PyObject_Str( pvalue ) );
+      oss << "\n\tError: "
+#ifdef PYTHON3
+          << _PyUnicode_AsString( PyObject_Str( pvalue ) );
+#else
+          << PyString_AsString( PyObject_Str( pvalue ) ); // deprecated in python v3+
+#endif
       Py_Finalize();
       throw Exception( __PRETTY_FUNCTION__, oss.str().c_str(), type );
     }
@@ -373,7 +394,11 @@ namespace CepGen
     const char*
     PythonHandler::decode( PyObject* obj )
     {
+#ifdef PYTHON3
       const char* str = _PyUnicode_AsString( obj );
+#else
+      const char* str = PyString_AsString( obj ); // deprecated in python v3+
+#endif
       if ( !str )
         throwPythonError( "Failed to decode a Python object!" );
       return str;
@@ -419,3 +444,5 @@ namespace CepGen
     }
   }
 }
+
+#endif
