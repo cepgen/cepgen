@@ -23,9 +23,17 @@ namespace CepGen
       : time( nullptr ); // seed with time
     gsl_rng_set( rng_, seed );
 
+    /*gsl_monte_vegas_state* veg_state = gsl_monte_vegas_alloc( 1 );
+    gsl_monte_vegas_params_get( veg_state, &input_params_->integrator.vegas );
+    gsl_monte_vegas_free( veg_state );
+    gsl_monte_miser_state* mis_state = gsl_monte_miser_alloc( 1 );
+    gsl_monte_miser_params_get( mis_state, &input_params_->integrator.miser );
+    gsl_monte_miser_free( mis_state );*/
+
     Debugging( Form( "Number of integration dimensions: %d\n\t"
-                     "Number of iterations:             %d\n\t"
-                     "Number of function calls:         %d", dim, input_params_->integrator.itvg, input_params_->integrator.ncvg ) );
+                     "Number of iterations [VEGAS]:     %d\n\t"
+                     "Number of function calls:         %d",
+                     dim, input_params_->integrator.vegas.iterations, input_params_->integrator.ncvg ) );
   }
 
   Integrator::~Integrator()
@@ -37,6 +45,7 @@ namespace CepGen
   Integrator::integrate( double& result, double& abserr )
   {
     int res = -1;
+    gsl_monte_plain_state* pln_state;
     gsl_monte_vegas_state* veg_state;
     gsl_monte_miser_state* mis_state;
     const Integrator::Type algorithm = input_params_->integrator.type;
@@ -45,27 +54,37 @@ namespace CepGen
     std::vector<double> x_low( function_->dim, 0. ), x_up( function_->dim, 1. );
 
     //--- prepare integrator
-    if      ( algorithm == Vegas ) veg_state = gsl_monte_vegas_alloc( function_->dim );
+    if      ( algorithm == Plain ) pln_state = gsl_monte_plain_alloc( function_->dim );
+    else if ( algorithm == Vegas ) veg_state = gsl_monte_vegas_alloc( function_->dim );
     else if ( algorithm == MISER ) mis_state = gsl_monte_miser_alloc( function_->dim );
 
-    if ( algorithm == Vegas ) {
+    if ( algorithm == Plain )
+      res = gsl_monte_plain_integrate( function_.get(), &x_low[0], &x_up[0], function_->dim, input_params_->integrator.ncvg, rng_, pln_state, &result, &abserr );
+    else if ( algorithm == Vegas ) {
+      gsl_monte_vegas_params_set( veg_state, &input_params_->integrator.vegas );
       //----- Vegas warmup (prepare the grid)
       if ( !grid_.grid_prepared ) {
         res = gsl_monte_vegas_integrate( function_.get(), &x_low[0], &x_up[0], function_->dim, 10000, rng_, veg_state, &result, &abserr );
         grid_.grid_prepared = true;
       }
+      Information( "Finished the Vegas warm-up" );
       //----- integration
-      for ( unsigned short i = 0; i < input_params_->integrator.itvg; i++ ) {
+      unsigned short it_chisq = 0;
+      do {
         res = gsl_monte_vegas_integrate( function_.get(), &x_low[0], &x_up[0], function_->dim, 0.2 * input_params_->integrator.ncvg, rng_, veg_state, &result, &abserr );
-        PrintMessage( Form( ">> Iteration %2d: average = %10.6f   sigma = %10.6f   chi2 = %4.3f", i+1, result, abserr, gsl_monte_vegas_chisq( veg_state ) ) );
-      }
+        PrintMessage( Form( "\t>> at call %2d: average = %10.6f   sigma = %10.6f   chi2 = %4.3f", it_chisq+1, result, abserr, gsl_monte_vegas_chisq( veg_state ) ) );
+        it_chisq++;
+      } while ( fabs( gsl_monte_vegas_chisq( veg_state ) - 1. ) > 0.5 );
     }
     //----- integration
-    else if ( algorithm == MISER )
+    else if ( algorithm == MISER ) {
+      gsl_monte_miser_params_set( mis_state, &input_params_->integrator.miser );
       res = gsl_monte_miser_integrate( function_.get(), &x_low[0], &x_up[0], function_->dim, input_params_->integrator.ncvg, rng_, mis_state, &result, &abserr );
+    }
 
     //--- clean integrator
-    if      ( algorithm == Vegas ) gsl_monte_vegas_free( veg_state );
+    if      ( algorithm == Plain ) gsl_monte_plain_free( pln_state );
+    else if ( algorithm == Vegas ) gsl_monte_vegas_free( veg_state );
     else if ( algorithm == MISER ) gsl_monte_miser_free( mis_state );
 
     return res;
@@ -328,6 +347,7 @@ namespace CepGen
   operator<<( std::ostream& os, const Integrator::Type& type )
   {
     switch ( type ) {
+      case Integrator::Plain: return os << "Plain";
       case Integrator::Vegas: return os << "Vegas";
       case Integrator::MISER: return os << "MISER";
     }

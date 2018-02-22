@@ -208,10 +208,56 @@ namespace CepGen
       if ( !palgo )
         throwPythonError( "Invalid integration algorithm!" );
       std::string algo = decode( palgo );
-      if ( algo == "Vegas" )
+      if      ( algo == "Plain" ) params_.integrator.type = Integrator::Plain;
+      else if ( algo == "Vegas" ) {
         params_.integrator.type = Integrator::Vegas;
-      else if ( algo == "MISER" )
+        PyObject* palpha = getElement( integr, "alpha" );
+        if ( palpha ) {
+          if ( PyFloat_Check( palpha ) )
+            params_.integrator.vegas.alpha = PyFloat_AsDouble( palpha );
+          Py_DECREF( palpha );
+        }
+        PyObject* piter = getElement( integr, "numIterations" );
+        if ( piter ) {
+          if ( isInteger( piter ) ) {
+            params_.integrator.vegas.iterations = asInteger( piter );
+        }
+          Py_DECREF( piter );
+        }
+        PyObject* pmode = getElement( integr, "mode" );
+        if ( pmode ) {
+          if ( isInteger( pmode ) )
+            params_.integrator.vegas.mode = asInteger( pmode );
+          Py_DECREF( pmode );
+        }
+        PyObject* pverb = getElement( integr, "verbosity" );
+        if ( pverb ) {
+          if ( isInteger( pverb ) )
+            params_.integrator.vegas.verbose = asInteger( pverb );
+          Py_DECREF( pverb );
+        }
+      }
+      else if ( algo == "MISER" ) {
         params_.integrator.type = Integrator::MISER;
+        PyObject* pestfrac = getElement( integr, "estimateFraction" );
+        if ( pestfrac ) {
+          if ( PyFloat_Check( pestfrac ) )
+            params_.integrator.miser.estimate_frac = PyFloat_AsDouble( pestfrac );
+          Py_DECREF( pestfrac );
+        }
+        PyObject* palpha = getElement( integr, "alpha" );
+        if ( palpha ) {
+          if ( PyFloat_Check( palpha ) )
+            params_.integrator.miser.alpha = PyFloat_AsDouble( palpha );
+          Py_DECREF( palpha );
+        }
+        PyObject* pdither = getElement( integr, "dither" );
+        if ( pdither ) {
+          if ( PyFloat_Check( pdither ) )
+            params_.integrator.miser.dither = PyFloat_AsDouble( pdither );
+          Py_DECREF( pdither );
+        }
+      }
       else
         throwPythonError( Form( "Invalid integration algorithm: %s", algo.c_str() ).c_str() );
       Py_DECREF( palgo );
@@ -222,17 +268,11 @@ namespace CepGen
           params_.integrator.npoints = asInteger( pnp );
         Py_DECREF( pnp );
       }
-      PyObject* pnc = getElement( integr, "numIntegrationCalls" );
+      PyObject* pnc = getElement( integr, "numFuntionCalls" );
       if ( pnc ) {
         if ( isInteger( pnc ) )
           params_.integrator.ncvg = asInteger( pnc );
         Py_DECREF( pnc );
-      }
-      PyObject* pnit = getElement( integr, "numIntegrationIterations" );
-      if ( pnit ) {
-        if ( isInteger( pnit ) )
-          params_.integrator.itvg = asInteger( pnit );
-        Py_DECREF( pnit );
       }
       PyObject* psd = getElement( integr, "seed" );
       if ( psd ) {

@@ -1,5 +1,5 @@
 import Cards.Core as cepgen
-from Cards.integrators_cff import miser as integrator
+from Cards.integrators_cff import vegas as integrator
 from Cards.pythia8_cff import pythia8 as hadroniser
 
 process = cepgen.Module('pptoww',

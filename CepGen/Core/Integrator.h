@@ -18,10 +18,11 @@ namespace CepGen
   class Integrator
   {
     public:
-      enum Type { Vegas = 1, MISER = 2 };
+      enum Type { Plain = 0, Vegas = 1, MISER = 2 };
       /**
        * Book the memory slots and structures for the integrator
-       * \note Two integration algorithms are currently supported:
+       * \note Three integration algorithms are currently supported:
+       *  * the plain algorithm randomly sampling points in the phase space
        *  * the Vegas algorithm developed by P. Lepage, as documented in @cite PeterLepage1978192,
        *  * the MISER algorithm developed by W.H. Press and G.R. Farrar, as documented in @cite Press:1989vk.
        * \param[in] dim_ Number of dimensions on which the function will be integrated
@@ -32,8 +33,7 @@ namespace CepGen
       /// Class destructor
       ~Integrator();
       /**
-       * Algorithm to perform the n-dimensional Monte Carlo integration of a given function as described in @cite PeterLepage1978192
-       * \author Primary author: G.P. Lepage
+       * Algorithm to perform the n-dimensional Monte Carlo integration of a given function.
        * \author This C++ implementation: GSL
        * \param[out] result_ The cross section as integrated for the given phase space restrictions
        * \param[out] abserr_ The error associated to the computed cross section
@@ -50,6 +50,7 @@ namespace CepGen
       bool generateOneEvent();
       /// Dimensional size of the phase space
       const unsigned short dimensions() const { return ( !function_ ) ? 0 : function_->dim; }
+
     private:
       /**
        * Evaluate the function to be integrated at a point @a x_, using the default Parameters object @a fInputParameters

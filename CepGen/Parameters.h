@@ -7,6 +7,9 @@
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
 
+#include <gsl/gsl_monte_vegas.h>
+#include <gsl/gsl_monte_miser.h>
+
 #include <memory>
 
 namespace CepGen
@@ -48,20 +51,18 @@ namespace CepGen
       /// Collection of integrator parameters
       struct IntegratorParameters
       {
-        IntegratorParameters() :
-          type( Integrator::Vegas ), ncvg( 100000 ), itvg( 10 ),
-          npoints( 100 ), first_run( true ), seed( 0 ) {}
+        IntegratorParameters();
         Integrator::Type type;
         /// Number of function calls to be computed for each point
         unsigned int ncvg; // ??
-        /// Number of iterations for the integration
-        unsigned int itvg;
         /// Number of points to "shoot" in each integration bin by the algorithm
         unsigned int npoints;
         /// Is it the first time the integrator is run?
         bool first_run;
         /// Random number generator seed
         unsigned long seed;
+        gsl_monte_vegas_params vegas;
+        gsl_monte_miser_params miser;
       };
       /// Integrator parameters
       IntegratorParameters integrator;
@@ -71,9 +72,7 @@ namespace CepGen
       /// Collection of events generation parameters
       struct Generation
       {
-        Generation() :
-          enabled( false ), maxgen( 0 ),
-          symmetrise( false ), ngen( 0 ), gen_print_every( 1 ) {}
+        Generation();
         /// Are we generating events ? (true) or are we only computing the cross-section ? (false)
         bool enabled;
         /// Maximal number of events to generate in this run

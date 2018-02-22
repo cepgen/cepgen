@@ -83,7 +83,7 @@ namespace CepGen
     std::ostringstream int_algo; int_algo << integrator.type;
     os
       << std::setw( wt ) << "Integration algorithm" << ( pretty ? boldify( int_algo.str().c_str() ) : int_algo.str() ) << std::endl
-      << std::setw( wt ) << "Maximum number of iterations" << ( pretty ? boldify( integrator.itvg ) : std::to_string( integrator.itvg ) ) << std::endl
+      //<< std::setw( wt ) << "Maximum number of iterations" << ( pretty ? boldify( integrator.itvg ) : std::to_string( integrator.itvg ) ) << std::endl
       << std::setw( wt ) << "Number of function calls" << integrator.ncvg << std::endl
       << std::setw( wt ) << "Number of points to try per bin" << integrator.npoints << std::endl
       << std::setw( wt ) << "Random number generator seed" << integrator.seed << std::endl
@@ -141,4 +141,17 @@ namespace CepGen
     if ( pretty ) { Information( os.str() ); }
     else out << os.str();
   }
+
+  Parameters::IntegratorParameters::IntegratorParameters() :
+    type( Integrator::Vegas ), ncvg( 100000 ),
+    npoints( 100 ), first_run( true ), seed( 0 )
+  {
+    vegas.stage = 0; // start from a blank page
+    vegas.ostream = stderr; // redirect all debugging information to the error stream
+  }
+
+  Parameters::Generation::Generation() :
+    enabled( false ), maxgen( 0 ),
+    symmetrise( false ), ngen( 0 ), gen_print_every( 1 )
+  {}
 }
