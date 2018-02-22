@@ -40,19 +40,15 @@ namespace CepGen
           double& max() { return second; }
           double x( double v ) const;
           /// Specify the lower and upper limits on the variable
-          void in( double low, double up ) { first = low; second = up; }
+          void in( double low, double up );
           /// Full variable range allowed
-          double range() const { return ( !hasMin() || !hasMax() ) ? 0. : second-first; }
+          double range() const;
           /// Have a lower limit?
-          bool hasMin() const { return first != invalid_; }
+          bool hasMin() const;
           /// Have an upper limit?
-          bool hasMax() const { return second != invalid_; }
-          bool passes( double val ) const {
-            if ( hasMin() && val < min() ) return false;
-            if ( hasMax() && val > max() ) return false;
-            return true;
-          }
-          bool valid() const { return hasMin() || hasMax(); }
+          bool hasMax() const;
+          bool passes( double val ) const;
+          bool valid() const;
 
           /// Human-readable expression of the limits
           friend std::ostream& operator<<( std::ostream&, const Limits& );
@@ -84,9 +80,9 @@ namespace CepGen
       /// Incoming particles' momentum (in \f$\text{GeV}/c\f$)
       std::pair<double,double> inp;
       /// Set the incoming particles' momenta (if the collision is symmetric)
-      inline void setSqrtS( double sqrts ) { inp = { sqrts*0.5, sqrts*0.5 }; }
+      void setSqrtS( double sqrts );
       /// Process centre of mass energy
-      inline double sqrtS() const { return ( inp.first+inp.second ); }
+      double sqrtS() const;
       /// Beam/primary particle's PDG identifier
       std::pair<ParticleCode,ParticleCode> inpdg;
       /// PDG id of the outgoing central particles

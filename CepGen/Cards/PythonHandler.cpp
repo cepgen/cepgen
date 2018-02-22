@@ -69,7 +69,6 @@ namespace CepGen
       //--- process mode
       PyObject* pproc_mode = getElement( process, "mode" );
       if ( pproc_mode ) {
-        std::cout << "---> peout" << std::endl;
         if ( isInteger( pproc_mode ) ) {
           int int_mode = asInteger( pproc_mode );
           params_.kinematics.mode = (Kinematics::ProcessMode)int_mode;
@@ -175,10 +174,14 @@ namespace CepGen
       PyObject* pcuts = getElement( kin, "cuts" );
       if ( pcuts && PyDict_Check( pcuts ) ) parseParticlesCuts( pcuts );
 
-      getLimits( kin, "pt", params_.kinematics.cuts.central[Cuts::pt_single] );
-      getLimits( kin, "rapidity", params_.kinematics.cuts.central[Cuts::rapidity_single] );
+      // for LPAIR/collinear matrix elements
+      getLimits( kin, "q2", params_.kinematics.cuts.initial[Cuts::q2] );
+
+      // for the kT factorised matrix elements
+      getLimits( kin, "qt", params_.kinematics.cuts.initial[Cuts::qt] );
       getLimits( kin, "ptdiff", params_.kinematics.cuts.central[Cuts::pt_diff] );
       getLimits( kin, "rapiditydiff", params_.kinematics.cuts.central[Cuts::rapidity_diff] );
+
       getLimits( kin, "mx", params_.kinematics.cuts.remnants[Cuts::mass] );
     }
 
@@ -291,7 +294,7 @@ namespace CepGen
 
       if ( hadr_name == "pythia8" ) {
 #ifdef PYTHIA8
-        Hadroniser::Pythia8Hadroniser* pythia8 = new Hadroniser::Pythia8Hadroniser;
+        Hadroniser::Pythia8Hadroniser* pythia8 = new Hadroniser::Pythia8Hadroniser( params_ );
         PyObject* pseed = getElement( hadr, "seed" );
         long long seed = -1ll;
         if ( pseed ) {
@@ -299,9 +302,6 @@ namespace CepGen
           Py_DECREF( pseed );
         }
         pythia8->setSeed( seed );
-        pythia8->readString( Form( "Beams:idA = %d", params_.kinematics.inpdg.first ) );
-        pythia8->readString( Form( "Beams:idB = %d", params_.kinematics.inpdg.second ) );
-        pythia8->readString( Form( "Beams:eCM = %.2f", params_.kinematics.sqrtS() ) );
         PyObject* ppc = getElement( hadr, "pythiaPreConfiguration" );
         if ( ppc ) {
           if ( PyTuple_Check( ppc ) ) {

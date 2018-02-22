@@ -10,6 +10,7 @@
 
 namespace CepGen
 {
+  class Parameters;
   namespace Hadroniser
   {
     /**
@@ -19,7 +20,7 @@ namespace CepGen
     class Pythia8Hadroniser : public GenericHadroniser
     {
       public:
-        Pythia8Hadroniser();
+        Pythia8Hadroniser( const Parameters& );
         ~Pythia8Hadroniser();
 
         bool hadronise( Event& ev, double& weight, bool proton_fragment ) override;
@@ -33,7 +34,7 @@ namespace CepGen
 
       private:
         static constexpr unsigned short invalid_idx_ = 999;
-        static constexpr unsigned short max_attempts_ = 5;
+        unsigned short max_attempts_;
 #ifdef PYTHIA8
         void fragmentState( unsigned short idx, double xbj = 0. );
         /// A Pythia8 core to be wrapped

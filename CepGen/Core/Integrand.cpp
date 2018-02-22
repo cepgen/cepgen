@@ -113,13 +113,8 @@ namespace CepGen
 
     if ( p->hadroniser() ) {
       double br = 0.; // branching fraction for all decays
-      bool success = false;
-      ev->num_hadronisation_trials = 0;
-      do {
-        success = p->hadroniser()->hadronise( *ev, br, p->storage() );
-        ev->num_hadronisation_trials++;
-      } while ( !success && ev->num_hadronisation_trials < p->hadroniser_max_trials );
-      if ( !success ) return 0.;
+      if ( !p->hadroniser()->hadronise( *ev, br, p->storage() ) )
+        return 0.;
       integrand *= br;
     }
 

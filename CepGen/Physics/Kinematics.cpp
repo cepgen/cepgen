@@ -21,6 +21,19 @@ namespace CepGen
   {}
 
   void
+  Kinematics::setSqrtS( double sqrts )
+  {
+    const double pin = 0.5 * sqrts;
+    inp = { pin, pin };
+  }
+
+  double
+  Kinematics::sqrtS() const
+  {
+    return ( inp.first+inp.second );
+  }
+
+  void
   Kinematics::dump( std::ostream& os ) const
   {
     os << std::setfill(' ');
@@ -62,6 +75,49 @@ namespace CepGen
     return os << Form( "%g → %g", lim.min(), lim.max() );
   }
 
+  void
+  Kinematics::Limits::in( double low, double up )
+  {
+    first = low;
+    second = up;
+  }
+
+  double
+  Kinematics::Limits::range() const
+  {
+    return ( !hasMin() || !hasMax() )
+      ? 0.
+      : second-first;
+  }
+
+  bool
+  Kinematics::Limits::hasMin() const
+  {
+    return first != invalid_;
+  }
+
+  bool
+  Kinematics::Limits::hasMax() const
+  {
+    return second != invalid_;
+  }
+
+  bool
+  Kinematics::Limits::passes( double val ) const
+  {
+    if ( hasMin() && val < min() )
+      return false;
+    if ( hasMax() && val > max() )
+      return false;
+    return true;
+  }
+
+  bool
+  Kinematics::Limits::valid() const
+  {
+    return hasMin() || hasMax();
+  }
+
   double
   Kinematics::Limits::x( double v ) const
   {
@@ -71,9 +127,9 @@ namespace CepGen
   }
 
   Kinematics::CutsList::CutsList() :
-    initial( { { Cuts::q2, { 0.0, 1.0e5 } }, { Cuts::qt, { 0.0, 500.0 } } } ),
-    central( { { Cuts::pt_single, 3.0 }, { Cuts::pt_diff, { 0., 400.0 } } } ),
-    remnants( { { Cuts::mass, { 1.07, 320.0 } } } )
+    initial( { { Cuts::q2, { 0., 1.e5 } }, { Cuts::qt, { 0., 500. } } } ),
+    central( { { Cuts::pt_single, 0. }, { Cuts::pt_diff, { 0., 400. } } } ),
+    remnants( { { Cuts::mass, { 1.07, 320. } } } )
   {}
 
   Kinematics::CutsList::CutsList( const CutsList& cuts ) :

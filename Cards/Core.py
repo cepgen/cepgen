@@ -7,12 +7,15 @@ class Parameters(dict):
     __delattr__ = dict.__delitem__
     def __init__(self, *args, **kwargs):
         self.update(*args, **kwargs)
+    def copy(self):
+        from copy import deepcopy
+        return deepcopy(self)
 
 class Module(Parameters):
     '''A named parameters set to steer a generic module'''
-    def __init__(self, mname, *args, **kwargs):
+    def __init__(self, m_name, *args, **kwargs):
         super(Module, self).__init__(*args, **kwargs)
-        self.mod_name = mname
+        self.mod_name = m_name
 
 class StructureFunctions:
     '''Types of structure functions supported'''

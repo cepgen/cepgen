@@ -1,5 +1,7 @@
 #ifdef PYTHIA8
 #include "Pythia8Hadroniser.h"
+
+#include "CepGen/Parameters.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 #include "CepGen/Event/Event.h"
@@ -10,11 +12,14 @@ namespace CepGen
 {
   namespace Hadroniser
   {
-    Pythia8Hadroniser::Pythia8Hadroniser() :
-      GenericHadroniser( "pythia8" )
+    Pythia8Hadroniser::Pythia8Hadroniser( const Parameters& params ) :
+      GenericHadroniser( "pythia8" ), max_attempts_( params.hadroniser_max_trials )
     {
 #ifdef PYTHIA8
       pythia_.reset( new Pythia8::Pythia );
+      pythia_->readString( Form( "Beams:idA = %d", params.kinematics.inpdg.first ) );
+      pythia_->readString( Form( "Beams:idB = %d", params.kinematics.inpdg.second ) );
+      pythia_->readString( Form( "Beams:eCM = %.2f", params.kinematics.sqrtS() ) );
 #endif
     }
 
@@ -57,12 +62,11 @@ namespace CepGen
       weight = 1.;
 #ifdef PYTHIA8
       //--- start by cleaning up the previous runs leftovers
-
-      const double sqrt_s = ev.cmEnergy();
       const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
 
       pythia_->event.reset();
-      /*pythia_->event[0].e( sqrt_s );
+      /*const double sqrt_s = ev.cmEnergy();
+      pythia_->event[0].e( sqrt_s );
       pythia_->event[0].m( sqrt_s );*/
       Particle::Momentum p_out = ev.getOneByRole( Particle::OutgoingBeam1 ).momentum()
                                 +ev.getOneByRole( Particle::OutgoingBeam2 ).momentum();
@@ -70,6 +74,8 @@ namespace CepGen
         p_out += p.momentum();
       //std::cout << p_out.pz() << "|" << p_out.mass() << "|" << p_out.energy() << std::endl;
       pythia_->event[0].e( p_out.energy() );
+      pythia_->event[0].px( p_out.px() );
+      pythia_->event[0].py( p_out.py() );
       pythia_->event[0].pz( p_out.pz() );
       pythia_->event[0].m( p_out.mass() );
 
@@ -105,13 +111,13 @@ namespace CepGen
           case Particle::OutgoingBeam1:
           case Particle::OutgoingBeam2: {
             py8part.id( 2212 );
-            py8part.status( ( part.status() == Particle::Unfragmented )
+            py8part.status( ( proton_fragment && part.status() == Particle::Unfragmented )
               ? 15
               : 14 // final state proton
             );
             py_id = pythia_->event.append( py8part );
 
-            if ( part.status() == Particle::Unfragmented ) {
+            if ( proton_fragment && part.status() == Particle::Unfragmented ) {
               if ( part.role() == Particle::OutgoingBeam1 ) idx_remn1 = py_id;
               if ( part.role() == Particle::OutgoingBeam2 ) idx_remn2 = py_id;
             }
@@ -149,8 +155,15 @@ namespace CepGen
 
       //std::cout << ":::::" << pythia_->settings.parm("Check:mTolErr") << std::endl;
 
-      if ( !pythia_->next() )
-        return false;
+      bool success = false;
+      ev.num_hadronisation_trials = 0;
+      while ( !success ) {
+        if ( proton_fragment )std::cout << "attempt " << ev.num_hadronisation_trials << " / " << max_attempts_ << std::endl;
+        if ( ev.num_hadronisation_trials > max_attempts_ )
+          return false;
+        success = pythia_->next();
+        ev.num_hadronisation_trials++;
+      }
       /*for ( unsigned short i = 0; i < pythia_->event.size(); ++i ) {
         const double err = abs( pythia_->event[i].mCalc()-pythia_->event[i].m() )/std::max( 1.0, pythia_->event[i].e());
         std::cout << ">> " << pythia_->event[i].id() << "::" << err << "::" << (err>pythia_->settings.parm("Check:mTolErr")) << std::endl;
@@ -224,8 +237,8 @@ namespace CepGen
       // then assign the quark/diquark a 4-momentum
       const double px_x = remn.px(), px_y = remn.py(), px_z = remn.pz(), ex = remn.e();
       const double xdq = 1.-xbj;
-      const double m_q = pythia_->particleData.m0( pdg_q );
-      const double m_dq = pythia_->particleData.m0( pdg_dq );
+      //const double m_q = pythia_->particleData.m0( pdg_q );
+      //const double m_dq = pythia_->particleData.m0( pdg_dq );
       // fractional momenta of the two partons:
       // -> x * p_X for the quark
       // -> ( 1-x ) * p_X for the diquark

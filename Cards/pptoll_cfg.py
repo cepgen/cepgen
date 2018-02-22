@@ -11,8 +11,8 @@ process = cepgen.Module('pptoll',
     ),
     outKinematics = cepgen.Parameters(
         pair = 13,
-        pt = (25.0, -1.),
-        energy = (0., -1.),
+        pt = (25.,),
+        energy = (0.,),
         eta = (-2.5, 2.5),
         mx = (1.07, 1000.),
         #--- extra cuts on the p1t(l) and p2t(l) plane
