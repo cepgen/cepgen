@@ -5,12 +5,13 @@
 namespace CepGen
 {
   Parameters::Parameters() :
+    hadroniser_max_trials( 5 ),
     store_( false )
   {}
 
   Parameters::Parameters( Parameters& param ) :
     kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
-    hadroniser_max_trials( 1 ),
+    hadroniser_max_trials( param.hadroniser_max_trials ),
     taming_functions( param.taming_functions ),
     process_( std::move( param.process_ ) ), hadroniser_( std::move( param.hadroniser_ ) ),
     store_( param.store_ )
@@ -18,12 +19,9 @@ namespace CepGen
 
   Parameters::Parameters( const Parameters& param ) :
     kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
-    hadroniser_max_trials( 1 ),
+    hadroniser_max_trials( param.hadroniser_max_trials ),
     taming_functions( param.taming_functions ),
     store_( param.store_ )
-  {}
-
-  Parameters::~Parameters()
   {}
 
   void
@@ -146,12 +144,11 @@ namespace CepGen
     type( Integrator::Vegas ), ncvg( 100000 ),
     npoints( 100 ), first_run( true ), seed( 0 )
   {
-    vegas.stage = 0; // start from a blank page
     vegas.ostream = stderr; // redirect all debugging information to the error stream
   }
 
   Parameters::Generation::Generation() :
     enabled( false ), maxgen( 0 ),
-    symmetrise( false ), ngen( 0 ), gen_print_every( 1 )
+    symmetrise( false ), ngen( 0 ), gen_print_every( 10000 )
   {}
 }

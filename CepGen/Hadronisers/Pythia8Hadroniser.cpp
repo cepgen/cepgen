@@ -158,11 +158,13 @@ namespace CepGen
       bool success = false;
       ev.num_hadronisation_trials = 0;
       while ( !success ) {
-        if ( proton_fragment )std::cout << "attempt " << ev.num_hadronisation_trials << " / " << max_attempts_ << std::endl;
-        if ( ev.num_hadronisation_trials > max_attempts_ )
-          return false;
         success = pythia_->next();
-        ev.num_hadronisation_trials++;
+        if ( proton_fragment ){
+          std::cout << success << "attempt " << ev.num_hadronisation_trials << " / " << max_attempts_ << std::endl;
+          pythia_->event.list(true,true);
+      }
+        if ( ++ev.num_hadronisation_trials > max_attempts_ )
+          return false;
       }
       /*for ( unsigned short i = 0; i < pythia_->event.size(); ++i ) {
         const double err = abs( pythia_->event[i].mCalc()-pythia_->event[i].m() )/std::max( 1.0, pythia_->event[i].e());

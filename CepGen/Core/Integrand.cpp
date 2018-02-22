@@ -99,7 +99,10 @@ namespace CepGen
 
     double taming = 1.0;
     if ( p->taming_functions.has( "m_central" ) || p->taming_functions.has( "pt_central" ) ) {
-      const Particle::Momentum central_system( ev->getByRole( Particle::CentralSystem )[0].momentum() + ev->getByRole( Particle::CentralSystem )[1].momentum() );
+      Particle::Momentum central_system;
+      const Particles& cm_parts = ev->getByRole( Particle::CentralSystem );
+      for ( Particles::const_iterator it_p = cm_parts.begin(); it_p != cm_parts.end(); ++it_p )
+        central_system += it_p->momentum();
       taming *= p->taming_functions.eval( "m_central", central_system.mass() );
       taming *= p->taming_functions.eval( "pt_central", central_system.pt() );
     }
@@ -113,7 +116,8 @@ namespace CepGen
 
     if ( p->hadroniser() ) {
       double br = 0.; // branching fraction for all decays
-      if ( !p->hadroniser()->hadronise( *ev, br, p->storage() ) )
+      if ( !p->hadroniser()->hadronise( *ev, br, true ) )
+      //if ( !p->hadroniser()->hadronise( *ev, br, p->storage() ) )
         return 0.;
       integrand *= br;
     }

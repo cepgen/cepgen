@@ -14,7 +14,7 @@ vegas = cepgen.Module('Vegas',
     numFunctionCalls = 500000,
     numPoints = 100,
     # VEGAS-specific parameters
-    numIterations = 5,
+    iterations = 5,
     alpha = 1.5,
     mode = VegasIntegrationMode.Importance,
     verbosity = -1,

@@ -39,16 +39,10 @@ process = cepgen.Module('pptoww',
     )
 )
 
-#--- either use the default generation (100k events)
+#integrator.numPoints = 10000
+
+#--- import the default generation parameters
 from Cards.generator_cff import generator
-
-#--- or let the user specify the run conditions
-#generator = cepgen.Parameters(
-#    numEvents = 1000,
-#    printEvery = 500,
-#)
-
-integrator.numPoints = 10000
 generator.numEvents = 100000
 generator.printEvery = 1
 

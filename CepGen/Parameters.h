@@ -24,7 +24,7 @@ namespace CepGen
       Parameters( Parameters& );
       /// Const copy constructor (all but the process and the hadroniser)
       Parameters( const Parameters& );
-      ~Parameters();
+      ~Parameters() {}
       /// Set the polar angle range for the produced leptons
       /// \param[in] thetamin The minimal value of \f$\theta\f$ for the outgoing leptons
       /// \param[in] thetamax The maximal value of \f$\theta\f$ for the outgoing leptons

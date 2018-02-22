@@ -64,9 +64,5 @@ if __name__ == '__main__':
             self.assertEqual(params['second'], 'bar')
             self.assertTrue(int(params.third) == params.third)
             self.assertEqual(len(params.fourth), 2)
-        def testStructureFunctions(self):
-            sf = StructureFunctions('my_sf', 'nope')
-            self.assertEqual(sf.name(), 'my_sf')
-            self.assertEqual(sf.variant(), 'nope')
 
     unittest.main()

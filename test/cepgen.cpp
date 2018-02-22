@@ -15,6 +15,14 @@
 
 using namespace std;
 
+void printEvent( const CepGen::Event& ev, unsigned int& ev_id )
+{
+  if ( ev_id % 5000 == 0 ) {
+    Information( Form( "Generating event #%d", ev_id ) );
+    ev.dump();
+  }
+}
+
 /**
  * Main caller for this Monte Carlo generator. Loads the configuration files'
  * variables if set as an argument to this program, else loads a default
@@ -62,17 +70,9 @@ int main( int argc, char* argv[] ) {
   double xsec, err;
   mg.computeXsection( xsec, err );
 
-  if ( mg.parameters->generation.enabled ) {
+  if ( mg.parameters->generation.enabled )
     // The events generation starts here !
-    CepGen::Event ev;
-    for ( unsigned int i=0; i<mg.parameters->generation.maxgen; i++ ) {
-      ev = *mg.generateOneEvent();
-      if ( i%1000==0 ) {
-        Information( Form( "Generating event #%d", i ) );
-        ev.dump();
-      }
-    }
-  }
+    mg.generate( printEvent ); // use a callback function!
 
   return 0;
 }

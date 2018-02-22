@@ -40,8 +40,6 @@ namespace CepGen
        * \return 0 if the integration was performed successfully
        */
       int integrate( double& result_,double& abserr_ );
-      /// Launch the generation of events
-      void generate();
       /**
        * Generate one event according to the grid parameters set in \a SetGen
        * \brief Generate one single event according to the method defined in the Fortran 77 version of LPAIR

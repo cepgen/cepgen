@@ -116,13 +116,30 @@ namespace CepGen
   std::shared_ptr<Event>
   Generator::generateOneEvent()
   {
-    bool good = false;
-    if ( cross_section_ < 0. ) {
+    if ( cross_section_ < 0. )
       computeXsection( cross_section_, cross_section_error_ );
-    }
-    while ( !good ) { good = integrator_->generateOneEvent(); }
+
+    bool good = false;
+    while ( !good )
+      good = integrator_->generateOneEvent();
 
     return parameters->generation.last_event;
+  }
+
+  void
+  Generator::generate( std::function<void( const Event&, unsigned int& )> callback )
+  {
+    Information( Form( "%d events will be generated",
+                       parameters->generation.maxgen ) );
+
+    unsigned int i = 0;
+    while ( i < parameters->generation.maxgen )
+      if ( generateOneEvent() ) {
+        callback( *parameters->generation.last_event, i );
+        i++;
+      }
+
+    Information( Form( "%d events generated", i ) );
   }
 
   void

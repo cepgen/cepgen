@@ -11,6 +11,27 @@
 
 #include <algorithm>
 
+#ifdef PYTHIA8
+void
+feedPythia( CepGen::Hadroniser::Pythia8Hadroniser* py8, PyObject* hadr, const char* config )
+{
+  PyObject* ppc = CepGen::Cards::PythonHandler::getElement( hadr, config );
+  if ( !ppc )
+    return;
+  if ( !PyTuple_Check( ppc ) ) {
+    Py_DECREF( ppc );
+    return;
+  }
+  for ( Py_ssize_t i = 0; i < PyTuple_Size( ppc ); ++i ) {
+    PyObject* pln = PyTuple_GetItem( ppc, i );
+    std::string config = CepGen::Cards::PythonHandler::decode( pln );
+    Py_DECREF( pln );
+    py8->readString( config );
+  }
+  Py_DECREF( ppc );
+}
+#endif
+
 namespace CepGen
 {
   namespace Cards
@@ -61,7 +82,7 @@ namespace CepGen
       const char* proc_name = decode( pproc_name );
       Py_DECREF( pproc_name );
       const std::string str_proc_name = proc_name;
-      if ( str_proc_name == "lpair" ) params_.setProcess( new Process::GamGamLL );
+      if      ( str_proc_name == "lpair" )  params_.setProcess( new Process::GamGamLL );
       else if ( str_proc_name == "pptoll" ) params_.setProcess( new Process::PPtoLL );
       else if ( str_proc_name == "pptoww" ) params_.setProcess( new Process::PPtoWW );
       else FatalError( Form( "Unrecognised process: %s", proc_name ) );
@@ -217,7 +238,7 @@ namespace CepGen
             params_.integrator.vegas.alpha = PyFloat_AsDouble( palpha );
           Py_DECREF( palpha );
         }
-        PyObject* piter = getElement( integr, "numIterations" );
+        PyObject* piter = getElement( integr, "iterations" );
         if ( piter ) {
           if ( isInteger( piter ) ) {
             params_.integrator.vegas.iterations = asInteger( piter );
@@ -268,7 +289,7 @@ namespace CepGen
           params_.integrator.npoints = asInteger( pnp );
         Py_DECREF( pnp );
       }
-      PyObject* pnc = getElement( integr, "numFuntionCalls" );
+      PyObject* pnc = getElement( integr, "numFunctionCalls" );
       if ( pnc ) {
         if ( isInteger( pnc ) )
           params_.integrator.ncvg = asInteger( pnc );
@@ -325,7 +346,7 @@ namespace CepGen
       if ( !PyDict_Check( hadr ) )
         throwPythonError( "Hadroniser object should be a dictionary!" );
 
-      PyObject* pname = getElement( hadr, "mod_name" );
+      PyObject* pname = getElement( hadr, module_name_ );
       if ( !pname )
         throwPythonError( "Hadroniser name is required!" );
 
@@ -338,48 +359,15 @@ namespace CepGen
         PyObject* pseed = getElement( hadr, "seed" );
         long long seed = -1ll;
         if ( pseed ) {
-          if ( isInteger( pseed ) ) seed = PyLong_AsLongLong( pseed );
+          if ( isInteger( pseed ) )
+            seed = PyLong_AsLongLong( pseed );
           Py_DECREF( pseed );
         }
         pythia8->setSeed( seed );
-        PyObject* ppc = getElement( hadr, "pythiaPreConfiguration" );
-        if ( ppc ) {
-          if ( PyTuple_Check( ppc ) ) {
-            for ( Py_ssize_t i = 0; i < PyTuple_Size( ppc ); ++i ) {
-              PyObject* pln = PyTuple_GetItem( ppc, i );
-              std::string config = decode( pln );
-              Py_DECREF( pln );
-              pythia8->readString( config );
-            }
-          }
-          Py_DECREF( ppc );
-        }
-
+        feedPythia( pythia8, hadr, "pythiaPreConfiguration" );
         pythia8->init();
-        ppc = getElement( hadr, "pythiaConfiguration" );
-        if ( ppc ) {
-          if ( PyTuple_Check( ppc ) ) {
-            for ( Py_ssize_t i = 0; i < PyTuple_Size( ppc ); ++i ) {
-              PyObject* pln = PyTuple_GetItem( ppc, i );
-              std::string config = decode( pln );
-              Py_DECREF( pln );
-              pythia8->readString( config );
-            }
-          }
-          Py_DECREF( ppc );
-        }
-        ppc = getElement( hadr, "pythiaProcessConfiguration" );
-        if ( ppc ) {
-          if ( PyTuple_Check( ppc ) ) {
-            for ( Py_ssize_t i = 0; i < PyTuple_Size( ppc ); ++i ) {
-              PyObject* pln = PyTuple_GetItem( ppc, i );
-              std::string config = decode( pln );
-              Py_DECREF( pln );
-              pythia8->readString( config );
-            }
-          }
-          Py_DECREF( ppc );
-        }
+        feedPythia( pythia8, hadr, "pythiaConfiguration" );
+        feedPythia( pythia8, hadr, "pythiaProcessConfiguration" );
         params_.setHadroniser( pythia8 );
 #else
         InWarning( "Pythia8 is not linked to this instance... "
