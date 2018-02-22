@@ -6,8 +6,9 @@
       double precision xbj,min_xbj,max_xbj
       double precision q2
 
-      nsf=204 ! GD11p
-      q2=0.225
+c      nsf=204 ! GD11p
+      nsf=301 ! LUXlike
+      q2=10.225
       min_xbj=1.0d-3
       max_xbj=1.0
       niter=101

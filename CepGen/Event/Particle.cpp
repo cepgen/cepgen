@@ -32,7 +32,7 @@ namespace CepGen
   bool
   Particle::operator<( const Particle& rhs ) const
   {
-    return ( id_ < rhs.id_ );
+    return ( id_ >= 0 && rhs.id_ > 0 && id_ < rhs.id_ );
   }
 
   double
@@ -96,7 +96,7 @@ namespace CepGen
 
     if ( Logger::get().level >= Logger::DebugInsideLoop ) {
       std::ostringstream os;
-      for ( ParticlesIds::const_iterator it=daughters_.begin(); it!=daughters_.end(); it++) {
+      for ( ParticlesIds::const_iterator it = daughters_.begin(); it != daughters_.end(); ++it ) {
         os << Form( "\n\t * id=%d", *it );
       }
       DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) has now %2d daughter(s):"
@@ -170,7 +170,7 @@ namespace CepGen
     std::ostringstream osm, osd, os;
     if ( !primary() ) {
       osm << ": mother(s): ";
-      for ( ParticlesIds::const_iterator m=mothers_.begin(); m!=mothers_.end(); m++ ) {
+      for ( ParticlesIds::const_iterator m = mothers_.begin(); m != mothers_.end(); ++m ) {
         if ( m!=mothers_.begin() ) osm << ", ";
         osm << ( *m );
       }
@@ -178,7 +178,7 @@ namespace CepGen
     const ParticlesIds daugh = daughters();
     if ( daugh.size()!=0 ) {
       osd << ": id = ";
-      for ( ParticlesIds::const_iterator it=daugh.begin(); it!=daugh.end(); it++ ) {
+      for ( ParticlesIds::const_iterator it = daugh.begin(); it != daugh.end(); ++it ) {
         if ( it!=daugh.begin() ) osd << ", ";
         osd << ( *it );
       }
@@ -258,7 +258,7 @@ namespace CepGen
       case Particle::Parton1:       return os << "parton1";
       case Particle::Parton2:       return os << "parton2";
       case Particle::Parton3:       return os << "parton3";
-      case Particle::Intermediate:  return os << "partons";
+      case Particle::Intermediate:  return os << "hard.pr.";
       case Particle::CentralSystem: return os << "central";
     }
     return os;

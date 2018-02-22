@@ -4,7 +4,7 @@
 using namespace CepGen::Process;
 
 GamGamLL::GamGamLL( int nopt ) :
-  GenericProcess( "lpair", "pp -> p(*) (gamma gamma -> l+ l-) p(*)" ),
+  GenericProcess( "lpair", "pp → p(*) ( ɣɣ → l⁺l¯ ) p(*)" ),
   n_opt_( nopt ),
   MX2_( 0. ), MY2_( 0. ), Ml2_( 0. ),
   ep1_( 0. ), ep2_( 0. ), p_cm_( 0. ),
@@ -294,17 +294,17 @@ GamGamLL::pickin()
   p1k2_ = ( s1_-t2_-w1_ ) * 0.5;
   p2k1_ = st * 0.5;
 
-  double s1p, s1m;
   if ( w2_ != 0. ) {
     const double sbb = ( s_*( t2_-w52_ )-w12_*t25 )/w2_ * 0.5 + MY2_,
                  sdd = sl1_*sl6/w2_ * 0.5,
                  see = ( s_*( t2_*( s_+t25-w1_ )-w1_*w52_ )+MY2_*( w1_*MY2_-w12_*( t2_-w1_ ) ) )/w2_;
+    double s1m = 0., s1p = 0.;
     if ( sbb/sdd >= 0. ) { s1p = sbb+sdd; s1m = see/s1p; }
     else                 { s1m = sbb-sdd; s1p = see/s1m; } // 12
     dd3_ = -w2_*( s1p-s1_ )*( s1m-s1_ ) * 0.25; // 13
   }
   else { // 14
-    s1p = ( s_*( t2_*( s_-MY2_+t2_-w1_ )-w1_*MY2_ )+w1_*MY2_*( w1_+MY2_-t2_ ) )/( t25*( s_-w12_ ) );
+    const double s1p = ( s_*( t2_*( s_-MY2_+t2_-w1_ )-w1_*MY2_ )+w1_*MY2_*( w1_+MY2_-t2_ ) )/( t25*( s_-w12_ ) );
     dd3_ = -t25*( s_-w12_ )*( s1p-s1_ ) * 0.25;
   }
   // 15
@@ -801,7 +801,7 @@ GamGamLL::fillKinematics( bool )
       break;
     case Kinematics::InelasticElastic:
     case Kinematics::InelasticInelastic:
-      op1.setStatus( Particle::Undecayed ); // fragmenting remnants
+      op1.setStatus( Particle::Unfragmented ); // fragmenting remnants
       op1.setMass( MX_ );
       break;
   }
@@ -817,7 +817,7 @@ GamGamLL::fillKinematics( bool )
       break;
     case Kinematics::ElasticInelastic:
     case Kinematics::InelasticInelastic:
-      op2.setStatus( Particle::Undecayed ); // fragmenting remnants
+      op2.setStatus( Particle::Unfragmented ); // fragmenting remnants
       op2.setMass( MY_ );
       break;
   }

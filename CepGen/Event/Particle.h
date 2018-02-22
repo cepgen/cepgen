@@ -19,14 +19,13 @@ namespace CepGen
       /// Internal status code for a particle
       enum Status {
         PrimordialIncoming = -9,
-        Undecayed = -3,
+        DebugResonance = -4,
+        Resonance = -3,
         Propagator = -2,
         Incoming = -1,
         Undefined = 0,
         FinalState = 1,
-        Resonance = 2,
-        DebugResonance = 3,
-        PythiaHIncoming = 21
+        Undecayed = 2, Unfragmented = 3
       };
       /// Role of the particle in the process
       enum Role {
@@ -73,6 +72,8 @@ namespace CepGen
           double operator*=( const Momentum& );
           /// Multiply all 4-momentum coordinates by a scalar
           Momentum& operator*=( double c );
+          /// Equality operator
+          bool operator==( const Momentum& ) const;
           /// Human-readable format for a particle's momentum
           friend std::ostream& operator<<( std::ostream& os, const Particle::Momentum& mom );
 
@@ -211,7 +212,7 @@ namespace CepGen
        */
       Status status() const { return status_; }
       /// Set the particle decay/stability status
-      void setStatus( const Status& status ) { status_ = status; }
+      void setStatus( Status status ) { status_ = status; }
 
       /// Set the PDG identifier (along with the particle's electric charge)
       /// \param[in] pdg ParticleCode (PDG ID)

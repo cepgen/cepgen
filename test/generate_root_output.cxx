@@ -9,7 +9,7 @@
 
 #include "CepGen/Generator.h"
 #include "CepGen/Cards/LpairHandler.h"
-#include "CepGen/Cards/ConfigHandler.h"
+#include "CepGen/Cards/PythiaHandler.h"
 
 using namespace std;
 
@@ -19,25 +19,22 @@ using namespace std;
  * @date 27 jan 2014
  */
 int main( int argc, char* argv[] ) {
-  const int ngen = 1e5;
-  //const int ngen = 1e4;
-
   CepGen::Generator mg;
 
-  if ( argc<2 ) {
+  if ( argc < 2 ) {
     InError( Form( "Usage: %s <input card> [output .root filename]", argv[0] ) );
     return -1;
   }
   const std::string incard( argv[1] ), extension = incard.substr( incard.find_last_of( "." )+1 );
   if ( extension == "card" ) mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
-  else if ( extension == "cfg" ) mg.setParameters( CepGen::Cards::ConfigHandler( argv[1] ).parameters() );
+  else if ( extension == "py" ) mg.setParameters( CepGen::Cards::PythiaHandler( argv[1] ).parameters() );
 
   mg.parameters->generation.enabled = true;
   mg.parameters->dump();
 
   //----- open the output root file
 
-  const TString filename = ( argc>2 ) ? argv[2] : "events.root";
+  const TString filename = ( argc > 2 ) ? argv[2] : "events.root";
   auto file = TFile::Open( filename, "recreate" );
   if ( !file ) {
     cout << "ERROR while trying to create the output file!" << endl;
@@ -49,53 +46,58 @@ int main( int argc, char* argv[] ) {
 
   //----- then generate the events and the container tree structure
 
-  auto tree = new TTree( "h4444", "A TTree containing information from the events produced from CepGen" );
+  auto ev_tree = new TTree( "events", "A TTree containing information from the events produced from CepGen" );
+
+  CepGen::TreeRun run;
+  run.create();
+  run.xsect = xsec;
+  run.errxsect = err;
+  run.litigious_events = 0;
+  run.fill();
 
   CepGen::TreeEvent ev;
-  ev.create( tree );
+  ev.create( ev_tree );
 
-  ev.xsect = xsec;
-  ev.errxsect = err;
-  ev.litigious_events = 0;
   for ( unsigned int i = 0; i < mg.parameters->generation.maxgen; ++i ) {
-    const auto event = *mg.generateOneEvent();
+    const auto event = mg.generateOneEvent();
+    if ( !event ) FatalError( "Failed to generate the event!" );
+
+    ev.clear();
     if ( i % 10000 == 0 ) {
       cout << ">> event " << i << " generated" << endl;
-      event.dump();
+      //event->dump();
     }
-    ev.mx_p1 = event.getOneByRole( CepGen::Particle::OutgoingBeam1 ).mass();
-    ev.mx_p2 = event.getOneByRole( CepGen::Particle::OutgoingBeam2 ).mass();
-    ev.hadr_trials = event.num_hadronisation_trials;
 
-    ev.gen_time = event.time_generation;
-    ev.tot_time = event.time_total;
+    ev.gen_time = event->time_generation;
+    ev.tot_time = event->time_total;
     ev.np = 0;
-    for ( const auto& p : event.particles() ) {
+    for ( const auto& p : event->particles() ) {
       const CepGen::Particle::Momentum m = p.momentum();
 
-      ev.kinematics[ev.np].SetXYZM( m.px(), m.py(), m.pz(), m.mass() );
+      //ev.kinematics[ev.np].SetXYZM( m.px(), m.py(), m.pz(), m.mass() );
       ev.rapidity[ev.np] = m.rapidity();
       ev.pt[ev.np] = m.pt();
       ev.eta[ev.np] = m.eta();
       ev.phi[ev.np] = m.phi();
       ev.E[ev.np] = p.energy();
-      ev.M[ev.np] = p.mass();
-      ev.PID[ev.np] = p.integerPdgId();
-      ev.parentid[ev.np] = *p.mothers().begin();
+      ev.m[ev.np] = p.mass();
+      ev.pdg_id[ev.np] = p.integerPdgId();
+      ev.parent1[ev.np] = ( p.mothers().size() > 0 ) ? *p.mothers().begin() : -1;
+      ev.parent2[ev.np] = ( p.mothers().size() > 1 ) ? *p.mothers().rbegin() : -1;
       ev.status[ev.np] = p.status();
-      ev.isstable[ev.np] = ( p.status() == CepGen::Particle::Undefined || p.status() == CepGen::Particle::FinalState );
+      ev.stable[ev.np] = ( (short)p.status() > 0 );
       ev.charge[ev.np] = p.charge();
       ev.role[ev.np] = p.role();
 
       ev.np++;
     }
 
-    tree->Fill();
+    ev_tree->Fill();
   }
-  cout << "Number of litigious events = " << ev.litigious_events << " -> fraction = " << ( ev.litigious_events*100./ngen ) << "%" << endl;
+  //cout << "Number of litigious events = " << run.litigious_events << " -> fraction = " << ( run.litigious_events*100./ngen ) << "%" << endl;
 
   file->Write();
-  file->Close();
+  delete file;
 
   return 0;
 }

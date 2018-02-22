@@ -7,6 +7,7 @@
 #include "CepGen/Parameters.h"
 
 #include <sstream>
+#include <fstream>
 
 namespace CepGen
 {
@@ -44,12 +45,12 @@ namespace CepGen
           case Kinematics::ElectronProton: default: { InError( Form( "Process mode %d not yet handled!", (int)p->kinematics.mode ) ); }
           case Kinematics::ElasticElastic: break; // nothing to change in the event
           case Kinematics::ElasticInelastic:
-            op2.setPdgId( uQuark, 1 ); break;
+            op2.setPdgId( DiffrProt, 1 ); break;
           case Kinematics::InelasticElastic: // set one of the outgoing protons to be fragmented
-            op1.setPdgId( uQuark, 1 ); break;
+            op1.setPdgId( DiffrProt, 1 ); break;
           case Kinematics::InelasticInelastic: // set both the outgoing protons to be fragmented
-            op1.setPdgId( uQuark, 1 );
-            op2.setPdgId( uQuark, 1 );
+            op1.setPdgId( DiffrProt, 1 );
+            op2.setPdgId( DiffrProt, 1 );
             break;
         }
 
@@ -75,7 +76,7 @@ namespace CepGen
 
     p->process()->setPoint( ndim, x );
     if ( Logger::get().level >= Logger::DebugInsideLoop ) {
-      std::ostringstream oss; for ( unsigned int i=0; i<ndim; i++ ) { oss << x[i] << " "; }
+      std::ostringstream oss; for ( unsigned int i = 0; i < ndim; ++i ) { oss << x[i] << " "; }
       DebuggingInsideLoop( Form( "Computing dim-%d point ( %s)", ndim, oss.str().c_str() ) );
     }
 
@@ -89,29 +90,64 @@ namespace CepGen
 
     if ( integrand <= 0. ) return 0.;
 
-    //--- only fill in the process' Event object if storage is requested
-    //    or if taming functions are to be applied
+    //--- fill in the process' Event object
 
-    if ( !p->taming_functions.empty() || p->storage() ) p->process()->fillKinematics();
+    p->process()->fillKinematics();
 
     //--- once the kinematics variables have been populated,
     //    can apply the collection of taming functions
 
     double taming = 1.0;
     if ( p->taming_functions.has( "m_central" ) || p->taming_functions.has( "pt_central" ) ) {
-      const Particle::Momentum central_system( ev->getByRole( Particle::CentralSystem )[0].momentum() + ev->getByRole( Particle::CentralSystem )[1].momentum() );
+      Particle::Momentum central_system;
+      const Particles& cm_parts = ev->getByRole( Particle::CentralSystem );
+      for ( Particles::const_iterator it_p = cm_parts.begin(); it_p != cm_parts.end(); ++it_p )
+        central_system += it_p->momentum();
       taming *= p->taming_functions.eval( "m_central", central_system.mass() );
       taming *= p->taming_functions.eval( "pt_central", central_system.pt() );
     }
     if ( p->taming_functions.has( "q2" ) ) {
-      taming *= p->taming_functions.eval( "q2", ev->getOneByRole( Particle::Parton1 ).momentum().mass() );
-      taming *= p->taming_functions.eval( "q2", ev->getOneByRole( Particle::Parton2 ).momentum().mass() );
+      taming *= p->taming_functions.eval( "q2", -ev->getOneByRole( Particle::Parton1 ).momentum().mass() );
+      taming *= p->taming_functions.eval( "q2", -ev->getOneByRole( Particle::Parton2 ).momentum().mass() );
     }
     integrand *= taming;
 
     //--- full event content (+ hadronisation) if generating events
 
+    if ( p->hadroniser() ) {
+      double br = 0.; // branching fraction for all decays
+      if ( !p->hadroniser()->hadronise( *ev, br, true ) )
+      //if ( !p->hadroniser()->hadronise( *ev, br, p->storage() ) )
+        return 0.;
+      integrand *= br;
+    }
+
+    //--- apply cuts on final state system (after hadronisation!)
+    //    (watch out your cuts, as this might be extremely time-consuming...)
+
+    if ( p->kinematics.cuts.central_particles.size() > 0 ) {
+      std::map<ParticleCode,std::map<Cuts::Central,Kinematics::Limits> >::const_iterator it_c;
+      const Particles cs = ev->getByRole( Particle::CentralSystem );
+      for ( Particles::const_iterator it_p = cs.begin(); it_p != cs.end(); ++it_p ) {
+        it_c = p->kinematics.cuts.central_particles.find( it_p->pdgId() );
+        if ( it_c == p->kinematics.cuts.central_particles.end() ) continue;
+        // retrieve all cuts associated to this final state particle
+        const std::map<Cuts::Central,Kinematics::Limits>& cm = it_c->second;
+        // apply these cuts on the given particle
+        if ( cm.count( Cuts::pt_single ) > 0 && !cm.at( Cuts::pt_single ).passes( it_p->momentum().pt() ) ) return 0.;
+        //std::cout << it_c->first << "\t" << it_p->momentum().pt() << "\t" << cm.at( Cuts::pt_single ).passes( it_p->momentum().pt() ) << std::endl;
+        if ( cm.count( Cuts::energy_single ) > 0 && !cm.at( Cuts::energy_single ).passes( it_p->momentum().energy() ) ) return 0.;
+        if ( cm.count( Cuts::eta_single ) > 0 && !cm.at( Cuts::eta_single ).passes( it_p->momentum().eta() ) ) return 0.;
+        if ( cm.count( Cuts::rapidity_single ) > 0 && !cm.at( Cuts::rapidity_single ).passes( it_p->momentum().rapidity() ) ) return 0.;
+      }
+    }
+
     if ( p->storage() ) {
+
+/*    std::ofstream dump( "dump.txt", std::ios_base::app );
+    for ( unsigned short i = 0; i < ndim; ++i )
+      dump << x[i] << "\t";
+    dump << "\n";*/
 
       ev->time_generation = tmr.elapsed();
 
@@ -126,8 +162,8 @@ namespace CepGen
       p->generation.last_event = ev;
     } // generating events
 
-    if ( Logger::get().level>=Logger::DebugInsideLoop ) {
-      os.str( "" ); for ( unsigned int i=0; i<ndim; i++ ) { os << Form( "%10.8f ", x[i] ); }
+    if ( Logger::get().level >= Logger::DebugInsideLoop ) {
+      os.str( "" ); for ( unsigned int i = 0; i < ndim; ++i ) { os << Form( "%10.8f ", x[i] ); }
       Debugging( Form( "f value for dim-%d point ( %s): %4.4e", ndim, os.str().c_str(), integrand ) );
     }
 

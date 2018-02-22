@@ -1,32 +1,23 @@
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(CepGen)
 set(PROJECT_VERSION 1)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic-errors -std=c++11 -g")
-else()
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.7)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic-errors -std=c++11 -g")
-  else()
-    message(FATAL_ERROR "gcc version >= 4.7 is required")
-  endif()
-endif()
+#----- include external paths
+
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake)
+set(CEPGEN_EXTERNAL_REQS "")
+include(UseEnvironment)
+
 set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/CepGen)
-set(CEPGEN_LIBRARIES CepGenCore CepGenEvent CepGenPhysics CepGenProcesses CepGenStructureFunctions CepGenExporter CepGenIO)
+set(CEPGEN_LIBRARIES CepGenCore CepGenEvent CepGenPhysics CepGenProcesses CepGenStructureFunctions CepGenExporter CepGenIO CepGenExternalHadronisers)
 
 #----- define all individual modules to be built beforehand
 
-set(CEPGEN_MODULES Processes Event Physics StructureFunctions Export IO)
+set(CEPGEN_MODULES Processes Event Physics StructureFunctions Export IO Hadronisers)
 
-#----- enable fortran (for Pythia/Herwig/...)
+#----- enable fortran for external libraries linking
 
 enable_language(Fortran)
-
-#----- include external paths
-
-set(CEPGEN_EXTERNAL_REQS "")
-include(UseEnvironment)
 
 #----- build all the intermediate objects
 

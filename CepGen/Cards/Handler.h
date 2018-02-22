@@ -5,6 +5,7 @@
 
 namespace CepGen
 {
+  class Parameters;
   /// Location for all steering card parsers/writers
   namespace Cards
   {

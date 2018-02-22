@@ -1,4 +1,0 @@
-generator = {
-  num_events = 100000;
-  print_every = 10000;
-};

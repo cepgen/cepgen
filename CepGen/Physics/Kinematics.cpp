@@ -21,6 +21,19 @@ namespace CepGen
   {}
 
   void
+  Kinematics::setSqrtS( double sqrts )
+  {
+    const double pin = 0.5 * sqrts;
+    inp = { pin, pin };
+  }
+
+  double
+  Kinematics::sqrtS() const
+  {
+    return ( inp.first+inp.second );
+  }
+
+  void
   Kinematics::dump( std::ostream& os ) const
   {
     os << std::setfill(' ');
@@ -57,9 +70,52 @@ namespace CepGen
   operator<<( std::ostream& os, const Kinematics::Limits& lim )
   {
     if ( !lim.hasMin() && !lim.hasMax() ) return os << "no cuts";
-    if ( !lim.hasMin() ) return os << Form( "≤ %.3f", lim.max() );
-    if ( !lim.hasMax() ) return os << Form( "≥ %.3f", lim.min() );
-    return os << Form( "%.3f → %.3f", lim.min(), lim.max() );
+    if ( !lim.hasMin() ) return os << Form( "≤ %g", lim.max() );
+    if ( !lim.hasMax() ) return os << Form( "≥ %g", lim.min() );
+    return os << Form( "%g → %g", lim.min(), lim.max() );
+  }
+
+  void
+  Kinematics::Limits::in( double low, double up )
+  {
+    first = low;
+    second = up;
+  }
+
+  double
+  Kinematics::Limits::range() const
+  {
+    return ( !hasMin() || !hasMax() )
+      ? 0.
+      : second-first;
+  }
+
+  bool
+  Kinematics::Limits::hasMin() const
+  {
+    return first != invalid_;
+  }
+
+  bool
+  Kinematics::Limits::hasMax() const
+  {
+    return second != invalid_;
+  }
+
+  bool
+  Kinematics::Limits::passes( double val ) const
+  {
+    if ( hasMin() && val < min() )
+      return false;
+    if ( hasMax() && val > max() )
+      return false;
+    return true;
+  }
+
+  bool
+  Kinematics::Limits::valid() const
+  {
+    return hasMin() || hasMax();
   }
 
   double
@@ -71,13 +127,13 @@ namespace CepGen
   }
 
   Kinematics::CutsList::CutsList() :
-    initial( { { Cuts::q2, { 0.0, 1.0e5 } }, { Cuts::qt, { 0.0, 500.0 } } } ),
-    central( { { Cuts::pt_single, 3.0 }, { Cuts::pt_diff, { 0., 400.0 } } } ),
-    remnants( { { Cuts::mass, { 1.07, 320.0 } } } )
+    initial( { { Cuts::q2, { 0., 1.e5 } }, { Cuts::qt, { 0., 500. } } } ),
+    central( { { Cuts::pt_single, 0. }, { Cuts::pt_diff, { 0., 400. } } } ),
+    remnants( { { Cuts::mass, { 1.07, 320. } } } )
   {}
 
   Kinematics::CutsList::CutsList( const CutsList& cuts ) :
-    initial( cuts.initial ), central( cuts.central ), remnants( cuts.remnants )
+    initial( cuts.initial ), central( cuts.central ), central_particles( cuts.central_particles ), remnants( cuts.remnants )
   {}
 }
 

@@ -10,7 +10,7 @@ void handle_ctrl_c( int signal ) { throw CepGen::Exception( __PRETTY_FUNCTION__,
 class AbortHandler
 {
   public:
-    AbortHandler( int flags=0 ) {
+    AbortHandler( int flags = 0 ) {
       handler_.sa_handler = handle_ctrl_c;
       sigemptyset( &handler_.sa_mask );
       handler_.sa_flags = flags;

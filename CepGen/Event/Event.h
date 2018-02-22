@@ -23,7 +23,7 @@ namespace CepGen
        */
       void clear();
       /// Initialize an "empty" event collection
-      void init();
+      void freeze();
       /// Restore the event to its "empty" state
       void restore();
 
@@ -32,16 +32,18 @@ namespace CepGen
       /// \param[in] stable_ Do we only show the stable particles in this event?
       void dump( std::ostream& os = Logger::get().outputStream, bool stable_=false ) const;
 
+      double cmEnergy() const { return CMEnergy( getOneByRole( Particle::IncomingBeam1 ), getOneByRole( Particle::IncomingBeam2 ) ); }
+
       //----- particles adders
 
       /// Set the information on one particle in the process
       /// \param[in] part The Particle object to insert or modify in the event
       /// \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
-      void addParticle( Particle part, bool replace=false );
+      Particle& addParticle( Particle& part, bool replace=false );
       /// \brief Create a new particle in the event, with no kinematic information but the role it has to play in the process
       /// \param[in] role The role the particle will play in the process
       /// \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
-      void addParticle( const Particle::Role& role, bool replace=false );
+      Particle& addParticle( Particle::Role role, bool replace=false );
 
       //----- particles retrievers
 
@@ -57,13 +59,16 @@ namespace CepGen
        * \param[in] role The role the particles have to play in the process
        * \return A vector of references to the requested Particle objects
        */
-      Particles& getByRole( const Particle::Role& role );
+      Particles& getByRole( Particle::Role role );
+      const Particles& getByRole( Particle::Role role ) const;
+      ParticlesIds getIdsByRole( Particle::Role role ) const;
       /**
        * Returns the first Particle object in the particles list whose role corresponds to the given argument
        * \param[in] role The role the particle has to play in the event
        * \return A Particle object corresponding to the first particle with the role
        */
-      Particle& getOneByRole( const Particle::Role& role );
+      Particle& getOneByRole( Particle::Role role );
+      const Particle& getOneByRole( Particle::Role role ) const;
       /**
        * Returns the reference to the Particle object corresponding to a unique identifier in the event
        * \brief Gets one particle by its unique identifier in the event
@@ -100,7 +105,7 @@ namespace CepGen
       ParticleRoles roles() const;
 
       /// Number of trials before the event was "correctly" hadronised
-      int num_hadronisation_trials;
+      unsigned short num_hadronisation_trials;
       /// Time needed to generate the event at parton level (in seconds)
       float time_generation;
       /// Time needed to generate the hadronised (if needed) event (in seconds)
@@ -112,7 +117,12 @@ namespace CepGen
       /// List of particles in the event, mapped to their role in the process
       ParticlesMap particles_;
       /// Last particle in an "empty" event
-      ParticlesMap::iterator last_particle_;
+      struct num_particles {
+        num_particles() : cs( 0 ), op1( 0 ), op2( 0 ) {}
+        num_particles( const num_particles& np ) : cs( np.cs ), op1( np.op1 ), op2( np.op2 ) {}
+        unsigned short cs, op1, op2;
+      };
+      num_particles evtcontent_;
   };
 }
 

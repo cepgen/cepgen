@@ -1,18 +1,17 @@
 #include "GenericProcess.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Physics/ParticleProperties.h"
 
 namespace CepGen
 {
   namespace Process
   {
     GenericProcess::GenericProcess( const std::string& name, const std::string& description, bool has_event ) :
+      s_( 0. ), sqs_( 0. ), w1_( 0. ), w2_( 0. ), t1_( 0. ), t2_( 0. ), MX_( 0. ), MY_( 0. ),
       event_( std::shared_ptr<Event>( new Event ) ),
       is_point_set_( false ), is_incoming_state_set_( false ), is_outgoing_state_set_( false ), is_kinematics_set_( false ),
       name_( name ), description_( description ),
       total_gen_time_( 0. ), num_gen_events_( 0 ), has_event_( has_event )
-    {}
-
-    GenericProcess::~GenericProcess()
     {}
 
     void
@@ -59,18 +58,22 @@ namespace CepGen
       //----- add the particles in the event
 
       //--- incoming state
-      for ( IncomingState::const_iterator ip=is.begin(); ip!=is.end(); ip++ ) {
-        event_->addParticle( Particle( ip->first, ip->second ) );
+      for ( IncomingState::const_iterator ip = is.begin(); ip != is.end(); ++ip ) {
+        Particle& p = event_->addParticle( ip->first );
+        p.setPdgId( ip->second, ParticleProperties::charge( ip->second ) );
       }
       //--- central system (if not already there)
       IncomingState::const_iterator central_system = is.find( Particle::CentralSystem );
       if ( central_system == is.end() ) {
-        event_->addParticle( Particle( Particle::Intermediate, invalidParticle, Particle::Propagator ) );
+        Particle& p = event_->addParticle( Particle::Intermediate );
+        p.setPdgId( invalidParticle );
+        p.setStatus( Particle::Propagator );
       }
       //--- outgoing state
       for ( OutgoingState::const_iterator op = os.begin(); op != os.end(); ++op ) {
         for ( std::vector<ParticleCode>::const_iterator it = op->second.begin(); it != op->second.end(); ++it ) {
-          event_->addParticle( Particle( op->first, *it ) );
+          Particle& p = event_->addParticle( op->first );
+          p.setPdgId( *it, ParticleProperties::charge( *it ) );
         }
       }
 
@@ -101,7 +104,7 @@ namespace CepGen
 
       //----- freeze the event as it is
 
-      event_->init();
+      event_->freeze();
     }
 
     void

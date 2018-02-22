@@ -22,6 +22,7 @@ namespace CepGen
     time_generation = ev_.time_generation;
     time_total = ev_.time_total;
     num_hadronisation_trials = ev_.num_hadronisation_trials;
+    evtcontent_ = ev_.evtcontent_;
     return *this;
   }
 
@@ -34,41 +35,87 @@ namespace CepGen
   }
 
   void
-  Event::init()
+  Event::freeze()
   {
-    last_particle_ = particles_.end();
+    //--- store a snapshot of the primordial event block
+    if ( particles_.count( Particle::CentralSystem ) > 0 )
+      evtcontent_.cs = particles_[Particle::CentralSystem].size();
+    if ( particles_.count( Particle::OutgoingBeam1 ) > 0 )
+      evtcontent_.op1 = particles_[Particle::OutgoingBeam1].size();
+    if ( particles_.count( Particle::OutgoingBeam2 ) > 0 )
+      evtcontent_.op2 = particles_[Particle::OutgoingBeam2].size();
   }
 
   void
   Event::restore()
   {
     //--- remove all particles after the primordial event block
-    particles_.erase( last_particle_, particles_.end() );
+    if ( particles_.count( Particle::CentralSystem ) > 0 )
+      particles_[Particle::CentralSystem].resize( evtcontent_.cs );
+    if ( particles_.count( Particle::OutgoingBeam1 ) > 0 )
+      particles_[Particle::OutgoingBeam1].resize( evtcontent_.op1 );
+    if ( particles_.count( Particle::OutgoingBeam2 ) > 0 )
+      particles_[Particle::OutgoingBeam2].resize( evtcontent_.op2 );
   }
 
   Particles&
-  Event::getByRole( const Particle::Role& role )
+  Event::getByRole( Particle::Role role )
   {
     //--- retrieve all particles with a given role
     return particles_[role];
   }
 
+  const Particles&
+  Event::getByRole( Particle::Role role ) const
+  {
+    //--- retrieve all particles with a given role
+    return particles_.at( role );
+  }
+
+  ParticlesIds
+  Event::getIdsByRole( Particle::Role role ) const
+  {
+    //--- retrieve all particles ids with a given role
+    ParticlesIds out;
+    Particles parts;
+    try {
+      parts = particles_.at( role );
+    } catch ( std::out_of_range ) { return out; }
+    for ( Particles::const_iterator it = parts.begin(); it != parts.end(); ++it ) {
+      out.insert( it->id() );
+    }
+    return out;
+  }
+
   Particle&
-  Event::getOneByRole( const Particle::Role& role )
+  Event::getOneByRole( Particle::Role role )
   {
     //--- retrieve the first particle a the given role
     Particles& parts_by_role = getByRole( role );
-    if ( parts_by_role.size() > 1 ) {
+    if ( parts_by_role.size() == 0 )
+      FatalError( Form( "No particle retrieved with role %d", (int)role ) );
+    if ( parts_by_role.size() > 1 )
       FatalError( Form( "More than one particle with role %d: %d particles", (int)role, parts_by_role.size() ) );
-    }
+    return *parts_by_role.begin();
+  }
+
+  const Particle&
+  Event::getOneByRole( Particle::Role role ) const
+  {
+    //--- retrieve the first particle a the given role
+    const Particles& parts_by_role = particles_.at( role );
+    if ( parts_by_role.size() == 0 )
+      FatalError( Form( "No particle retrieved with role %d", (int)role ) );
+    if ( parts_by_role.size() > 1 )
+      FatalError( Form( "More than one particle with role %d: %d particles", (int)role, parts_by_role.size() ) );
     return *parts_by_role.begin();
   }
 
   Particle&
   Event::getById( int id )
   {
-    for ( ParticlesMap::iterator out=particles_.begin(); out!=particles_.end(); out++ ) {
-      for ( Particles::iterator part=out->second.begin(); part!=out->second.end(); part++ ) {
+    for ( ParticlesMap::iterator out = particles_.begin(); out != particles_.end(); ++out ) {
+      for ( Particles::iterator part = out->second.begin(); part != out->second.end(); ++part ) {
         if ( part->id() == id ) return *part;
       }
     }
@@ -78,8 +125,8 @@ namespace CepGen
   const Particle&
   Event::getConstById( int id ) const
   {
-    for ( ParticlesMap::const_iterator out=particles_.begin(); out!=particles_.end(); out++ ) {
-      for ( Particles::const_iterator part=out->second.begin(); part!=out->second.end(); part++ ) {
+    for ( ParticlesMap::const_iterator out = particles_.begin(); out != particles_.end(); ++out ) {
+      for ( Particles::const_iterator part = out->second.begin(); part != out->second.end(); ++part ) {
         if ( part->id() == id ) return *part;
       }
     }
@@ -90,7 +137,7 @@ namespace CepGen
   Event::getByIds( const ParticlesIds& ids ) const
   {
     Particles out;
-    for ( ParticlesIds::const_iterator id=ids.begin(); id!=ids.end(); id++ ) {
+    for ( ParticlesIds::const_iterator id = ids.begin(); id != ids.end(); ++id ) {
       out.emplace_back( getConstById( *id ) );
     }
     return out;
@@ -112,15 +159,15 @@ namespace CepGen
   Event::roles() const
   {
     ParticleRoles out;
-    ParticlesMap::const_iterator it, end;
-    for ( it=particles_.begin(), end=particles_.end(); it!=end; it=particles_.upper_bound( it->first ) ) {
+    ParticlesMap::const_iterator it, end = particles_.end();
+    for ( it = particles_.begin(); it != end; it = particles_.upper_bound( it->first ) ) {
       out.emplace_back( it->first );
     }
     return out;
   }
 
-  void
-  Event::addParticle( Particle part, bool replace )
+  Particle&
+  Event::addParticle( Particle& part, bool replace )
   {
     DebuggingInsideLoop( Form( "Particle with PDGid = %d has role %d", part.pdgId(), part.role() ) );
     if ( part.role() <= 0 ) FatalError( Form( "Trying to add a particle with role=%d", (int)part.role() ) );
@@ -138,19 +185,22 @@ namespace CepGen
     //--- add the particle to the collection
     if ( replace ) part_with_same_role = Particles( 1, part ); // generate a vector containing only this particle
     else part_with_same_role.emplace_back( part );
+
+    return part_with_same_role.back();
   }
 
-  void
-  Event::addParticle( const Particle::Role& role, bool replace )
+  Particle&
+  Event::addParticle( Particle::Role role, bool replace )
   {
-    addParticle( Particle( role ), replace );
+    Particle np( role );
+    return addParticle( np, replace );
   }
 
   size_t
   Event::numParticles() const
   {
     size_t out = 0;
-    for ( ParticlesMap::const_iterator it=particles_.begin(); it!=particles_.end(); it++ ) {
+    for ( ParticlesMap::const_iterator it = particles_.begin(); it != particles_.end(); ++it ) {
       out += it->second.size();
     }
     return out;
@@ -160,7 +210,7 @@ namespace CepGen
   Event::particles() const
   {
     Particles out;
-    for ( ParticlesMap::const_iterator it=particles_.begin(); it!=particles_.end(); it++ ) {
+    for ( ParticlesMap::const_iterator it = particles_.begin(); it != particles_.end(); ++it ) {
       out.insert( out.end(), it->second.begin(), it->second.end() );
     }
     std::sort( out.begin(), out.end() );
@@ -171,11 +221,9 @@ namespace CepGen
   Event::stableParticles() const
   {
     Particles out;
-    for ( ParticlesMap::const_iterator it=particles_.begin(); it!=particles_.end(); it++ ) {
-      for ( Particles::const_iterator part=it->second.begin(); part!=it->second.end(); part++ ) {
-        if ( part->status() == Particle::Undefined || part->status() == Particle::FinalState ) {
-          out.emplace_back( *part );
-        }
+    for ( ParticlesMap::const_iterator it = particles_.begin(); it != particles_.end(); ++it ) {
+      for ( Particles::const_iterator part = it->second.begin(); part != it->second.end(); ++part ) {
+        if ( (short)part->status() > 0 ) out.emplace_back( *part );
       }
     }
     std::sort( out.begin(), out.end() );
@@ -215,19 +263,26 @@ namespace CepGen
   void
   Event::dump( std::ostream& out, bool stable ) const
   {
-    Particles parts = ( stable ) ? stableParticles() : particles();
+    const Particles parts = ( stable ) ? stableParticles() : particles();
 
     std::ostringstream os;
 
     double pxtot = 0., pytot = 0., pztot = 0., etot = 0.;
-    for ( Particles::const_iterator part_ref=parts.begin(); part_ref!=parts.end(); part_ref++ ) {
+    for ( Particles::const_iterator part_ref = parts.begin(); part_ref != parts.end(); ++part_ref ) {
       const Particle& part = *part_ref;
-      { std::ostringstream oss; oss << part.pdgId(); os << Form( "\n %2d\t%+6d%8s", part.id(), part.integerPdgId(), oss.str().c_str() ); }
+      const ParticlesIds mothers = part.mothers();
+      {
+        std::ostringstream oss;
+        if ( part.pdgId() == invalidParticle && mothers.size() > 0 )
+          for ( std::set<int>::const_iterator it_moth = mothers.begin(); it_moth != mothers.end(); ++it_moth )
+            oss << ( ( it_moth != mothers.begin() ) ? "/" : "" ) << getConstById( *it_moth ).pdgId();
+        else oss << part.pdgId();
+        os << Form( "\n %2d\t%+6d %-8s", part.id(), part.integerPdgId(), oss.str().c_str() );
+      }
       os << "\t";
       if ( part.charge() != 999. ) os << Form( "%6.2f ", part.charge() );
       else                         os << "\t";
       { std::ostringstream oss; oss << part.role(); os << Form( "%8s\t%6d\t", oss.str().c_str(), part.status() ); }
-      const ParticlesIds mothers = part.mothers();
       if ( !mothers.empty() ) {
         std::ostringstream oss;
         for ( ParticlesIds::const_iterator moth = mothers.begin(); moth != mothers.end(); ++moth ) {
@@ -237,10 +292,10 @@ namespace CepGen
       }
       else os << "       ";
       const Particle::Momentum mom = part.momentum();
-      os << Form( "% 9.6e % 9.6e % 9.6e % 9.6e % 9.5e", mom.px(), mom.py(), mom.pz(), part.energy(), part.mass() );
-      if ( part.status() == Particle::Undefined
-        || part.status() == Particle::Undecayed
-        || part.status() == Particle::FinalState ) {
+      os << Form( "% 9.6e % 9.6e % 9.6e % 9.6e % 12.7f", mom.px(), mom.py(), mom.pz(), part.energy(), part.mass() );
+
+      // discard non-primary, decayed particles
+      if ( (short)part.status() >= 0. ) {
         const int sign = ( part.status() == Particle::Undefined ) ? -1 : 1;
         pxtot += sign*mom.px();
         pytot += sign*mom.py();

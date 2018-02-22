@@ -1,5 +1,0 @@
-integrator = {
-  algorithm = "MISER";
-  num_integration_calls = 500000;
-  num_points = 100;
-};

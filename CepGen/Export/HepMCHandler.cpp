@@ -4,6 +4,20 @@
 
 #ifdef LIBHEPMC
 
+#include "HepMC/GenVertex.h"
+#include "HepMC/GenParticle.h"
+
+#ifndef HEPMC_VERSION3
+extern "C"
+{
+  typedef struct {
+    int nevhep, nhep;
+    int isthep[4000], idhep[4000], jmohep[4000][2], jdahep[4000][2];
+    double phep[4000][5], vhep[4000][4];
+  } hepevt_;
+}
+#endif
+
 using namespace CepGen::OutputHandler;
 
 HepMCHandler::HepMCHandler( const char* filename, const ExportHandler::OutputType& type ) :
@@ -73,7 +87,7 @@ HepMCHandler::fillEvent( const Event* evt )
                    *vcm = new HepMC::GenVertex( origin );
 #endif
 
-  for ( unsigned int i=0; i<part_vec.size(); i++ ) {
+  for ( unsigned int i = 0; i < part_vec.size(); ++i ) {
 
     const Particle part_orig = part_vec.at( i );
     HepMC::FourVector pmom( part_orig.momentum().px(),

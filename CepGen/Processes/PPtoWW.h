@@ -19,7 +19,7 @@ namespace CepGen
         double computeJacobian() override;
         double computeKTFactorisedMatrixElement() override;
         void fillCentralParticlesKinematics() override;
-        double WWamplitude( double shat, double that, short lam1, short lam2, short lam3, short lam4 ) const;
+        double WWamplitude( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 ) const;
 
         /// Rapidity of the first outgoing W boson
         double y1_;

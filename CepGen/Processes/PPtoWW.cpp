@@ -5,13 +5,13 @@
 using namespace CepGen::Process;
 
 PPtoWW::PPtoWW() :
-  GenericKTProcess( "pptoww", "gamma,gamma->W+,W-", 4, { { Photon, Photon } }, { W, W } )
+  GenericKTProcess( "pptoww", "ɣɣ → W⁺W¯", 4, { { Photon, Photon } }, { W, W } )
 {}
 
 void
 PPtoWW::prepareKTKinematics()
 {
-  const Kinematics::Limits rap_limits = cuts_.cuts.central[Cuts::rapidity_single];
+  const Kinematics::Limits rap_limits = cuts_.cuts.central_particles[W][Cuts::rapidity_single];
 
   // outgoing Ws
   y1_ = rap_limits.x( xkt( 0 ) );
@@ -34,8 +34,8 @@ double
 PPtoWW::computeJacobian()
 {
   double jac = GenericKTProcess::minimalJacobian();
-  jac *= cuts_.cuts.central[Cuts::rapidity_single].range(); // d(y1)
-  jac *= cuts_.cuts.central[Cuts::rapidity_single].range(); // d(y2)
+  jac *= cuts_.cuts.central_particles[W][Cuts::rapidity_single].range(); // d(y1)
+  jac *= cuts_.cuts.central_particles[W][Cuts::rapidity_single].range(); // d(y2)
   jac *= cuts_.cuts.central[Cuts::pt_diff].range(); // d(Dpt)
   jac *= 2.*M_PI; // d(phiDpt)
 
@@ -77,7 +77,7 @@ PPtoWW::computeKTFactorisedMatrixElement()
   const double pt1x = 0.5 * ( ptsumx+ptdiffx ), pt1y = 0.5 * ( ptsumy+ptdiffy ), pt1 = sqrt( pt1x*pt1x+pt1y*pt1y ),
                pt2x = 0.5 * ( ptsumx-ptdiffx ), pt2y = 0.5 * ( ptsumy-ptdiffy ), pt2 = sqrt( pt2x*pt2x+pt2y*pt2y );
 
-  const Kinematics::Limits pt_limits = cuts_.cuts.central[Cuts::pt_single];
+  const Kinematics::Limits pt_limits = cuts_.cuts.central_particles[W][Cuts::pt_single];
   if ( pt_limits.hasMin() && ( pt1 < pt_limits.min() || pt2 < pt_limits.min() ) ) return 0.;
   if ( pt_limits.hasMax() && ( pt1 > pt_limits.max() || pt2 > pt_limits.max() ) ) return 0.;
 
@@ -114,23 +114,23 @@ PPtoWW::computeKTFactorisedMatrixElement()
   //     auxiliary quantities
   //=================================================================
 
-  const double alpha1 = amt1/sqs_*exp(  y1_ ),
-               alpha2 = amt2/sqs_*exp(  y2_ ),
+  const double alpha1 = amt1/sqs_*exp( +y1_ ),
+               alpha2 = amt2/sqs_*exp( +y2_ ),
                beta1  = amt1/sqs_*exp( -y1_ ),
                beta2  = amt2/sqs_*exp( -y2_ );
   DebuggingInsideLoop( Form( "Sudakov parameters:\n\t"
                              "  alpha1/2 = %f / %f\n\t"
                              "   beta1/2 = %f / %f", alpha1, alpha2, beta1, beta2 ) );
 
-  const double q1t2 = q1tx*q1tx+q1ty*q1ty,
-               q2t2 = q2tx*q2tx+q2ty*q2ty;
+  const double q1t2 = q1tx*q1tx + q1ty*q1ty,
+               q2t2 = q2tx*q2tx + q2ty*q2ty;
 
   //const double old_x2 = 0.; //FIXME figure out where this comes from
   //const double delta_x1 = (MX_*MX_+q2t2)/((1.-old_x2)*s_);
 
   //x1 = alpha1+alpha2+delta_x1;
-  const double x1 = alpha1+alpha2,
-               x2 = beta1 +beta2;
+  const double x1 = alpha1 + alpha2,
+               x2 = beta1  + beta2;
 
   /*const double xi_x1 = log10(x1);
   const double xi_x2 = log10(x2);*/
@@ -275,13 +275,13 @@ PPtoWW::computeKTFactorisedMatrixElement()
     double amat2_0 = 0., amat2_1 = 0., amat2_interf = 0.;
     for ( const auto lam3 : { -1, 0, 1 } ) {
       for ( const auto lam4 : { -1, 0, 1 } ) {
-        double ampli_pp = WWamplitude( shat, that, +1, +1, lam3, lam4 );
-        double ampli_mm = WWamplitude( shat, that, -1, -1, lam3, lam4 );
-        double ampli_pm = WWamplitude( shat, that, +1, -1, lam3, lam4 );
-        double ampli_mp = WWamplitude( shat, that, -1, +1, lam3, lam4 );
+        double ampli_pp = WWamplitude( shat, that, uhat, +1, +1, lam3, lam4 );
+        double ampli_mm = WWamplitude( shat, that, uhat, -1, -1, lam3, lam4 );
+        double ampli_pm = WWamplitude( shat, that, uhat, +1, -1, lam3, lam4 );
+        double ampli_mp = WWamplitude( shat, that, uhat, -1, +1, lam3, lam4 );
         amat2_0 += ampli_pp*ampli_pp + ampli_mm*ampli_mm + 2.*cos( 2.*phi_diff )*ampli_pp*ampli_mm;
         amat2_1 += ampli_pm*ampli_pm + ampli_mp*ampli_mp + 2.*cos( 2.*phi_sum  )*ampli_pm*ampli_mp;
-        amat2_interf += -2.*( cos( phi_sum+phi_diff )*( ampli_pp*ampli_pm+ampli_mm*ampli_mp ) + cos( phi_sum-phi_diff )*( ampli_pp*ampli_mp+ampli_mm*ampli_pm ) );
+        amat2_interf -= 2.*( cos( phi_sum+phi_diff )*( ampli_pp*ampli_pm+ampli_mm*ampli_mp ) + cos( phi_sum-phi_diff )*( ampli_pp*ampli_mp+ampli_mm*ampli_pm ) );
       }
     }
     amat2 = e2*e2 * ( amat2_0 + amat2_1 + amat2_interf );
@@ -323,7 +323,7 @@ PPtoWW::fillCentralParticlesKinematics()
   //=================================================================
   Particle& ow1 = event_->getByRole( Particle::CentralSystem )[0];
   ow1.setPdgId( ow1.pdgId(), sign );
-  ow1.setStatus( Particle::FinalState );
+  ow1.setStatus( Particle::Undecayed );
   ow1.setMomentum( p_w1_ );
 
   //=================================================================
@@ -331,27 +331,27 @@ PPtoWW::fillCentralParticlesKinematics()
   //=================================================================
   Particle& ow2 = event_->getByRole( Particle::CentralSystem )[1];
   ow2.setPdgId( ow2.pdgId(), -sign );
-  ow2.setStatus( Particle::FinalState );
+  ow2.setStatus( Particle::Undecayed );
   ow2.setMomentum( p_w2_ );
 }
 
 double
-PPtoWW::WWamplitude( double shat, double that, short lam1, short lam2, short lam3, short lam4 ) const
+PPtoWW::WWamplitude( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 ) const
 {
   const double mw = ParticleProperties::mass( W ), mw2 = mw*mw;
   const double sqrt2 = sqrt( 2. );
 
   // then compute some kinematic variables
-  const double cos_theta = ( 1.+2.*( that-mw2 )/shat ) / sqrt( 1. + 1.e-10 - 4.*mw2/shat ), cos_theta2 = cos_theta*cos_theta;
+  const double cos_theta = ( that-uhat ) / shat / sqrt( 1.+1.e-10-4.*mw2/shat ), cos_theta2 = cos_theta*cos_theta;
   const double sin_theta2 = 1.-cos_theta2, sin_theta = sqrt( sin_theta2 );
   const double beta = sqrt( 1.-4.*mw2/shat ), beta2 = beta*beta;
-  const double gamma = 0.5*sqrt( shat )/mw, gamma2 = gamma*gamma;
+  const double gamma = 1./sqrt( 1.-beta2 ), gamma2 = gamma*gamma;
   const double invA = 1./( 1.-beta2*cos_theta2 );
 
-  const double term1 = 1./gamma2*( ( gamma2+1. )*( 1.-lam1*lam2 )* sin_theta2 - ( 1.+lam1*lam2 ) );
+  const double term1 = 1./gamma2*( ( gamma2+1. )*( 1.-lam1*lam2 )*sin_theta2 - ( 1.+lam1*lam2 ) );
   const double term2 = -sqrt2/gamma*( lam1-lam2 ) * ( 1.+lam1*lam3*cos_theta )*sin_theta;
-  const double term3 = -0.5*( 2.*beta*( lam1+lam2 )*( lam3+lam4 ) - ( 1./gamma2 )*( 1.+lam3*lam4 )*( 2.*lam1*lam2+( 1.-lam1*lam2 ) * cos_theta2 ) +( 1.+lam1*lam2*lam3*lam4 )*( 3.+lam1*lam2 ) + 2.*( lam1-lam2 )*( lam3-lam4 )*cos_theta + ( 1.-lam1*lam2 )*( 1.-lam3*lam4 )*cos_theta2 );
-  const double term4 = -sqrt2/gamma*( lam2-lam1 ) *( 1.+lam2*lam4*cos_theta )*sin_theta;
+  const double term3 = -0.5*( 2.*beta*( lam1+lam2 )*( lam3+lam4 ) - ( 1./gamma2 )*( 1.+lam3*lam4 )*( 2.*lam1*lam2+( 1.-lam1*lam2 ) * cos_theta2 )+( 1.+lam1*lam2*lam3*lam4 )*( 3.+lam1*lam2 ) + 2.*( lam1-lam2 )*( lam3-lam4 )*cos_theta + ( 1.-lam1*lam2 )*( 1.-lam3*lam4 )*cos_theta2 );
+  const double term4 = -sqrt2/gamma*( lam2-lam1 )*( 1.+lam2*lam4*cos_theta )*sin_theta;
 
   if ( lam3 == 0 && lam4 == 0 ) return invA*term1;
   if ( lam4 == 0 )              return invA*term2;

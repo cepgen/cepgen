@@ -1,17 +1,27 @@
-#include <iostream>
+#include "CepGen/Cards/PythonHandler.h"
+#include "CepGen/Cards/LpairHandler.h"
 
 #include "CepGen/Generator.h"
 
-#include "CepGen/Cards/LpairHandler.h"
-#include "CepGen/Cards/ConfigHandler.h"
 #include "CepGen/Core/Logger.h"
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Processes/GamGamLL.h"
+#include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
+#include <iostream>
+
 using namespace std;
+
+void printEvent( const CepGen::Event& ev, unsigned int& ev_id )
+{
+  if ( ev_id % 5000 == 0 ) {
+    Information( Form( "Generating event #%d", ev_id ) );
+    ev.dump();
+  }
+}
 
 /**
  * Main caller for this Monte Carlo generator. Loads the configuration files'
@@ -34,7 +44,6 @@ int main( int argc, char* argv[] ) {
     //mg.parameters->process_mode = Kinematics::InelasticElastic;
     mg.parameters->kinematics.mode = CepGen::Kinematics::ElasticElastic;
     mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SuriYennie;
-
     mg.parameters->kinematics.inp = { 6500., 6500. };
     mg.parameters->kinematics.central_system = { CepGen::Muon, CepGen::Muon };
     mg.parameters->kinematics.cuts.central[CepGen::Cuts::pt_single].min() = 15.;
@@ -49,7 +58,9 @@ int main( int argc, char* argv[] ) {
     //CepGen::Cards::LpairReader card( argv[1] );
     const std::string file( argv[1] ), extension = file.substr( file.find_last_of( "." )+1 );
     if ( extension == "card" ) mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
-    else if ( extension == "cfg" ) mg.setParameters( CepGen::Cards::ConfigHandler( argv[1] ).parameters() );
+#ifdef PYTHON
+    else if ( extension == "py" ) mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
+#endif
   }
 
   // We might want to cross-check visually the validity of our run
@@ -59,20 +70,9 @@ int main( int argc, char* argv[] ) {
   double xsec, err;
   mg.computeXsection( xsec, err );
 
-  if ( mg.parameters->generation.enabled ) {
+  if ( mg.parameters->generation.enabled )
     // The events generation starts here !
-    CepGen::Event ev;
-    for ( unsigned int i=0; i<mg.parameters->generation.maxgen; i++ ) {
-      ev = *mg.generateOneEvent();
-      if ( i%1000==0 ) {
-        Information( Form( "Generating event #%d", i ) );
-        ev.dump();
-      }
-    }
-  }
-
-  // store the current configuration
-  CepGen::Cards::ConfigHandler::store( mg.parameters.get(), "last_run.cfg" );
+    mg.generate( printEvent ); // use a callback function!
 
   return 0;
 }

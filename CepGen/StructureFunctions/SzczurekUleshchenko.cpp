@@ -7,7 +7,7 @@ namespace CepGen
   namespace SF
   {
     SzczurekUleshchenko
-    SzczurekUleshchenko::operator()( double q2, double xbj ) const
+    SzczurekUleshchenko::operator()( double q2, double xbj, const SigmaRatio& ratio ) const
     {
 #ifndef GRVPDF
       FatalError( "Szczurek-Uleshchenko structure functions cannot be computed"
@@ -33,6 +33,8 @@ namespace CepGen
 
       SzczurekUleshchenko su;
       su.F2 = F2_aux * q2 / amu2; // F2 corrected for low Q^2 behaviour
+      double r_err = 0.;
+      su.computeFL( q2, xbj, ratio( q2, xbj, r_err ) );
 
       return su;
 #endif
