@@ -15,7 +15,7 @@ main( int argc, char* argv[] )
 
   CepGen::Generator mg;
   //mg.parameters->integrator.ncvg = 500000;
-  //mg.parameters->integrator.itvg = 15;
+  if ( argc > 1 && string( argv[1] ) == "plain" ) mg.parameters->integrator.type = CepGen::Integrator::Plain;
   if ( argc > 1 && string( argv[1] ) == "vegas" ) mg.parameters->integrator.type = CepGen::Integrator::Vegas;
   if ( argc > 1 && string( argv[1] ) == "miser" ) mg.parameters->integrator.type = CepGen::Integrator::MISER;
 

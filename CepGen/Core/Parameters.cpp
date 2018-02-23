@@ -141,10 +141,18 @@ namespace CepGen
   }
 
   Parameters::IntegratorParameters::IntegratorParameters() :
-    type( Integrator::Vegas ), ncvg( 100000 ),
+    type( Integrator::Vegas ), ncvg( 500000 ),
     npoints( 100 ), first_run( true ), seed( 0 )
   {
-    vegas.ostream = stderr; // redirect all debugging information to the error stream
+    const size_t ndof = 10;
+
+    gsl_monte_vegas_state* veg_state = gsl_monte_vegas_alloc( ndof );
+    gsl_monte_vegas_params_get( veg_state, &vegas );
+    gsl_monte_vegas_free( veg_state );
+
+    gsl_monte_miser_state* mis_state = gsl_monte_miser_alloc( ndof );
+    gsl_monte_miser_params_get( mis_state, &miser );
+    gsl_monte_miser_free( mis_state );
   }
 
   Parameters::Generation::Generation() :

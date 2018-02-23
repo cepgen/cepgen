@@ -74,7 +74,6 @@ main( int argc, char* argv[] )
   mg.parameters->kinematics.cuts.central[CepGen::Cuts::eta_single].in( -2.5, 2.5 );
   mg.parameters->kinematics.cuts.remnants[CepGen::Cuts::mass].max() = 1000.;
   //mg.parameters->integrator.ncvg = 50000;
-  mg.parameters->integrator.itvg = 5;
 
   Information( Form( "Initial configuration time: %.3f ms", tmr.elapsed()*1.e3 ) );
   tmr.reset();

@@ -88,7 +88,6 @@ namespace CepGen
   {
     Information( "Starting the computation of the process cross-section" );
 
-
     // first destroy and recreate the integrator instance
     if ( !integrator_ )
       integrator_ = std::unique_ptr<Integrator>( new Integrator( numDimensions(), f, parameters.get() ) );

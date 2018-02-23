@@ -24,12 +24,8 @@ namespace CepGen
       : time( nullptr ); // seed with time
     gsl_rng_set( rng_, seed );
 
-    gsl_monte_vegas_state* veg_state = gsl_monte_vegas_alloc( 10 );
-    gsl_monte_vegas_params_get( veg_state, &input_params_->integrator.vegas );
-    gsl_monte_vegas_free( veg_state );
-    gsl_monte_miser_state* mis_state = gsl_monte_miser_alloc( 10 );
-    gsl_monte_miser_params_get( mis_state, &input_params_->integrator.miser );
-    gsl_monte_miser_free( mis_state );
+    input_params_->integrator.vegas.ostream = stderr; // redirect all debugging information to the error stream
+    input_params_->integrator.vegas.iterations = 10;
 
     Debugging( Form( "Number of integration dimensions: %d\n\t"
                      "Number of iterations [VEGAS]:     %d\n\t"
@@ -73,7 +69,7 @@ namespace CepGen
       if ( !grid_.grid_prepared ) {
         res = gsl_monte_vegas_integrate( function_.get(),
           &x_low[0], &x_up[0],
-          function_->dim, 10000,
+          function_->dim, 25000,
           rng_, veg_state,
           &result, &abserr );
         grid_.grid_prepared = true;
