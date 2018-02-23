@@ -42,10 +42,4 @@ pythia8 = cepgen.Module('pythia8',
         #'Check:epTolErr = 10000.', #FIXME FIXME FIXME!!! BAD BAD BAD
         #'Check:epTolWarn = 10.', #FIXME FIXME FIXME!!! BAD BAD BAD
     ),
-    pythiaProcessConfiguration = (
-        # process-specific
-        '13:onMode = off', # disable muon decays
-        '24:onMode = off', # disable all W decays, but...
-        '24:onIfAny = 11 13' # enable e-nue + mu-numu final states
-    ),
 )

@@ -149,6 +149,7 @@ namespace CepGen
     gsl_monte_vegas_state* veg_state = gsl_monte_vegas_alloc( ndof );
     gsl_monte_vegas_params_get( veg_state, &vegas );
     gsl_monte_vegas_free( veg_state );
+    vegas.ostream = stderr; // redirect all debugging information to the error stream
 
     gsl_monte_miser_state* mis_state = gsl_monte_miser_alloc( ndof );
     gsl_monte_miser_params_get( mis_state, &miser );

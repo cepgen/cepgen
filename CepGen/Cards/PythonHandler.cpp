@@ -266,6 +266,18 @@ namespace CepGen
             params_.integrator.miser.estimate_frac = PyFloat_AsDouble( pestfrac );
           Py_DECREF( pestfrac );
         }
+        PyObject* pmc = getElement( integr, "minCalls" );
+        if ( pmc ) {
+          if ( isInteger( pmc ) )
+            params_.integrator.miser.min_calls = asInteger( pmc );
+          Py_DECREF( pmc );
+        }
+        PyObject* pmcpb = getElement( integr, "minCallsPerBisection" );
+        if ( pmcpb ) {
+          if ( isInteger( pmcpb ) )
+            params_.integrator.miser.min_calls_per_bisection = asInteger( pmcpb );
+          Py_DECREF( pmcpb );
+        }
         PyObject* palpha = getElement( integr, "alpha" );
         if ( palpha ) {
           if ( PyFloat_Check( palpha ) )

@@ -26,5 +26,5 @@ miser = cepgen.Module('MISER',
     # MISER-specific parameters
     estimateFraction = 0.1,
     alpha = 2.,
-    dither = 0.1,
+    dither = 0.,
 )
