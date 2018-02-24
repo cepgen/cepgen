@@ -107,6 +107,10 @@ namespace CepGen
       return params;
     }
 
+    CLAS::CLAS( const CLAS::Parameterisation& params ) :
+      params_( params )
+    {}
+
     CLAS
     CLAS::operator()( double q2, double xbj, const SigmaRatio& rcomp ) const
     {
@@ -128,15 +132,19 @@ namespace CepGen
     double
     CLAS::f2slac( double q2, double xbj ) const
     {
-      if ( xbj >= 1. ) return 0.;
-      double f2 = 0., xsxb = 0., xs = 0.;
-      xsxb = ( q2+params_.c_slac[6] )/( q2+params_.c_slac[5]*xbj );
-      xs = xbj*xsxb;
-      for ( unsigned short i = 0; i < 5; ++i ) {
+      if ( xbj >= 1. )
+        return 0.;
+
+      const double xsxb = ( q2+params_.c_slac[6] )/( q2+params_.c_slac[5]*xbj );
+      const double xs = xbj*xsxb;
+
+      double f2 = 0.;
+      for ( unsigned short i = 0; i < 5; ++i )
         f2 += params_.c_slac[i]*pow( 1.-xs, i );
-      }
+
       if ( params_.mode == Parameterisation::deuteron && xbj > 0. )
         f2 /= ( 1.-exp( -7.70*( 1./xbj-1.+params_.mp*params_.mp/q2 ) ) );
+
       return f2 *= pow( 1.-xs, 3 ) / xsxb;
     }
 

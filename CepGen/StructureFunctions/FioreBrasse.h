@@ -30,7 +30,7 @@ namespace CepGen
         };
         /// Fiore-Brasse proton structure functions (F.W Brasse et al., DESY 76/11 (1976),
         /// http://dx.doi.org/10.1016/0550-3213(76)90231-5)
-        FioreBrasse( const FioreBrasse::Parameterisation& params = FioreBrasse::Parameterisation::standard() ) : params_( params ) {}
+        explicit FioreBrasse( const FioreBrasse::Parameterisation& params = FioreBrasse::Parameterisation::standard() );
         /// \param[in] q2 Squared 4-momentum transfer
         /// \param[in] xbj Bjorken's x
         /// \cite Brasse1976413

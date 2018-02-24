@@ -43,7 +43,7 @@ namespace CepGen
       /// \param[in] desc brief description of the exception
       /// \param[in] type exception type
       /// \param[in] id exception code (useful for logging)
-      inline Exception( const char* from, std::string desc, ExceptionType type=Undefined, const int id=0 ) :
+      inline Exception( const char* from, std::string desc, ExceptionType type = Undefined, const int id = 0 ) :
         std::runtime_error( desc ), from_( from ), type_( type ), error_num_( id ) {}
 
       /// Initialize a new exception object
@@ -51,7 +51,7 @@ namespace CepGen
       /// \param[in] desc brief description of the exception
       /// \param[in] type exception type
       /// \param[in] id exception code (useful for logging)
-      inline Exception( const char* from, const char* desc, ExceptionType type=Undefined, const int id=0 ) :
+      inline Exception( const char* from, const char* desc, ExceptionType type = Undefined, const int id = 0 ) :
         std::runtime_error( desc ), from_( from ), type_( type ), error_num_( id ) {}
 
       inline ~Exception() throw() {

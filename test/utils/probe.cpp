@@ -1,4 +1,5 @@
 #include "CepGen/Generator.h"
+#include "CepGen/Parameters.h"
 #include "CepGen/Processes/PPtoLL.h"
 
 using namespace std;
@@ -12,9 +13,9 @@ int main()
   p->kinematics.mode = CepGen::Kinematics::ElasticElastic;
   //p->kinematics.mode = CepGen::Kinematics::InelasticElastic;
   //p->kinematics.mode = CepGen::Kinematics::ElasticInelastic;
-  p->kinematics.central_cuts[CepGen::Cuts::pt_single] = 5.;
-  p->kinematics.central_cuts[CepGen::Cuts::eta_single] = { -2.5, 2.5 };
-  p->kinematics.remnant_cuts[CepGen::Cuts::mass] = { 1.07, 320. };
+  p->kinematics.cuts.central[CepGen::Cuts::pt_single] = 5.;
+  p->kinematics.cuts.central[CepGen::Cuts::eta_single] = { -2.5, 2.5 };
+  p->kinematics.cuts.remnants[CepGen::Cuts::mass] = { 1.07, 320. };
   
   p->dump();
   CepGen::Logger::get().level = CepGen::Logger::DebugInsideLoop;

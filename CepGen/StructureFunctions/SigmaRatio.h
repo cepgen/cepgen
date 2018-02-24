@@ -29,7 +29,7 @@ namespace CepGen
           std::array<double,6> a, b, c;
           static Parameterisation standard();
         };
-        E143Ratio( const Parameterisation& param = Parameterisation::standard() ) : params_( param ) {}
+        explicit E143Ratio( const Parameterisation& param = Parameterisation::standard() );
         double operator()( double q2, double xbj, double& err ) const override;
 
       private:
@@ -47,7 +47,7 @@ namespace CepGen
           std::array<double,3> b;
           static Parameterisation standard();
         };
-        R1990Ratio( const Parameterisation& param = Parameterisation::standard() ) : params_( param ) {}
+        explicit R1990Ratio( const Parameterisation& param = Parameterisation::standard() );
         double operator()( double q2, double xbj, double& err ) const override;
 
       private:

@@ -23,7 +23,7 @@ namespace CepGen
         friend std::ostream& operator<<( std::ostream& os, const GenericHadroniser* hadr ) { os << hadr->name().c_str(); return os; }
 
         /// Default constructor for an undefined hadroniser
-        GenericHadroniser( const char* name="unnamed_hadroniser" ) : name_( name ) {}
+        explicit GenericHadroniser( const char* name="unnamed_hadroniser" ) : name_( name ) {}
         virtual ~GenericHadroniser() {}
 
         /// Hadronise a full event

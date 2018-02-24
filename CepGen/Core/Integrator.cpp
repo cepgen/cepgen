@@ -37,7 +37,8 @@ namespace CepGen
 
   Integrator::~Integrator()
   {
-    if ( rng_ ) gsl_rng_free( rng_ );
+    if ( rng_ )
+      gsl_rng_free( rng_ );
   }
 
   int
@@ -141,7 +142,7 @@ namespace CepGen
       } while ( y > grid_.f_max[ps_bin_] );
       // Select x values in this Integrator bin
       int jj = ps_bin_;
-      for ( unsigned int i=0; i<function_->dim; i++ ) {
+      for ( unsigned int i = 0; i < function_->dim; ++i ) {
         int jjj = jj / mbin_;
         grid_.n[i] = jj - jjj * mbin_;
         x[i] = ( uniform() + grid_.n[i] ) / mbin_;
@@ -181,8 +182,6 @@ namespace CepGen
   bool
   Integrator::correctionCycle( std::vector<double>& x, bool& has_correction )
   {
-    double weight = -1.;
-
     Debugging( Form( "Correction cycles are started.\n\t"
                      "bin = %d"
                      "correc = %g"
@@ -196,7 +195,7 @@ namespace CepGen
       for ( unsigned int k = 0; k < function_->dim; ++k )
         xtmp[k] = ( uniform() + grid_.n[k] ) * inv_mbin_;
       // Compute weight for x value
-      weight = F( xtmp );
+      const double weight = F( xtmp );
       // Parameter for correction of correction
       if ( weight > grid_.f_max[ps_bin_] ) {
         if ( weight > grid_.f_max2 ) grid_.f_max2 = weight;

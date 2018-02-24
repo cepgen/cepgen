@@ -66,7 +66,7 @@ namespace CepGen
           ContinuumParameters continuum;
         };
 
-        ChristyBosted( const ChristyBosted::Parameterisation& params = ChristyBosted::Parameterisation::standard() ) : params_( params ) {}
+        explicit ChristyBosted( const ChristyBosted::Parameterisation& params = ChristyBosted::Parameterisation::standard() );
 
         ChristyBosted operator()( double q2, double xbj ) const;
 

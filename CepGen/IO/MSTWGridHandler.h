@@ -46,7 +46,7 @@ namespace MSTW
       std::vector<sfval_t> values() const { return values_raw_; }
 
     private:
-      GridHandler( const char* );
+      explicit GridHandler( const char* );
       void initGSL( const std::set<double>& q2_vals, const std::set<double>& xbj_vals );
 
       enum spline_type { F2 = 0, FL = 1, num_functions_ };

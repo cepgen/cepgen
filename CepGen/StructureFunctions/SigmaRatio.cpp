@@ -25,6 +25,10 @@ namespace CepGen
       return out;
     }
 
+    E143Ratio::E143Ratio( const Parameterisation& param ) :
+      params_( param )
+    {}
+
     double
     E143Ratio::operator()( double q2, double xbj, double& err ) const
     {
@@ -54,6 +58,10 @@ namespace CepGen
       out.b = { { 0.0635, 0.5747, -0.3534 } };
       return out;
     }
+
+    R1990Ratio::R1990Ratio( const Parameterisation& param ) :
+      params_( param )
+    {}
 
     double
     R1990Ratio::operator()( double q2, double xbj, double& err ) const

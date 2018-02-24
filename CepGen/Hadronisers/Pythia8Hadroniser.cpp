@@ -17,9 +17,10 @@ namespace CepGen
     {
 #ifdef PYTHIA8
       pythia_.reset( new Pythia8::Pythia );
-      pythia_->readString( Form( "Beams:idA = %d", params.kinematics.inpdg.first ) );
-      pythia_->readString( Form( "Beams:idB = %d", params.kinematics.inpdg.second ) );
-      pythia_->readString( Form( "Beams:eCM = %.2f", params.kinematics.sqrtS() ) );
+      std::cout << params.kinematics.inpdg.first << "\t" << params.kinematics.inpdg.second << std::endl;
+      readString( Form( "Beams:idA = %d", params.kinematics.inpdg.first ) );
+      readString( Form( "Beams:idB = %d", params.kinematics.inpdg.second ) );
+      readString( Form( "Beams:eCM = %.2f", params.kinematics.sqrtS() ) );
 #endif
     }
 

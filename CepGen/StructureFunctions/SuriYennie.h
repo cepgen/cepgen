@@ -18,7 +18,7 @@ namespace CepGen
           double C1, C2, D1, rho2, Cp, Bp;
         };
 
-        SuriYennie( const SuriYennie::Parameterisation& param = SuriYennie::Parameterisation::standard() ) : params_( param ) {}
+        explicit SuriYennie( const SuriYennie::Parameterisation& param = SuriYennie::Parameterisation::standard() );
         SuriYennie operator()( double q2, double xbj ) const;
 
         double FE, FM;

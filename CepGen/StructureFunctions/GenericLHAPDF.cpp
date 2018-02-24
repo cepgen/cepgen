@@ -36,13 +36,12 @@ namespace CepGen
       //if ( q2 < 1.69 ) return pdf;
 #ifdef LIBLHAPDF
       for ( int i = 0; i < num_flavours; ++i ) {
-        double xq = 0., xqbar = 0.;
 #if LHAPDF_MAJOR_VERSION==6
-        xq = pdfs_[0]->xfxQ2( i, xbj, q2 );
-        xqbar = pdfs_[0]->xfxQ2( -i, xbj, q2 );
+        const double xq = pdfs_[0]->xfxQ2( i, xbj, q2 );
+        const double xqbar = pdfs_[0]->xfxQ2( -i, xbj, q2 );
 #else
-        xq = LHAPDF::xfx( xbj, q2, i+1 );
-        xqbar = LHAPDF::xfx( xbj, q2, -i-1 );
+        const double xq = LHAPDF::xfx( xbj, q2, i+1 );
+        const double xqbar = LHAPDF::xfx( xbj, q2, -i-1 );
 #endif
         pdf.F2 += qtimes3_[i]*qtimes3_[i]/9. * ( xq + xqbar );
       }

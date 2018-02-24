@@ -62,7 +62,8 @@ namespace CepGen
     std::string tmp;
     std::ostringstream os; os << "version " << version() << std::endl;
     std::ifstream hf( "README" );
-    if ( !hf.good() ) throw Exception( __PRETTY_FUNCTION__, "Failed to open README file", JustWarning );
+    if ( !hf.good() )
+      throw Exception( __PRETTY_FUNCTION__, "Failed to open README file", JustWarning );
     while ( true ) {
       if ( !hf.good() ) break;
       getline( hf, tmp );
@@ -78,7 +79,8 @@ namespace CepGen
     prepareFunction();
     double res = f( x, numDimensions(), (void*)parameters.get() );
     std::ostringstream os;
-    for ( unsigned int i=0; i<numDimensions(); i++ ) { os << x[i] << " "; }
+    for ( unsigned int i = 0; i < numDimensions(); ++i )
+      os << x[i] << " ";
     Debugging( Form( "Result for x[%zu] = ( %s):\n\t%10.6f", numDimensions(), os.str().c_str(), res ) );
     return res;
   }

@@ -72,7 +72,7 @@ namespace CepGen
       out.AQCDUP = Constants::alphaQCD;
       out.NUP = ev->numParticles();
       out.resize();
-      for ( unsigned short ip=0; ip<ev->numParticles(); ip++ ) {
+      for ( unsigned short ip = 0; ip < ev->numParticles(); ++ip ) {
         const Particle part = ev->getConstById( ip );
         out.IDUP[ip] = part.integerPdgId(); // PDG id
         out.ISTUP[ip] = part.status(); // status code

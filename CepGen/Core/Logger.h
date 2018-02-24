@@ -14,7 +14,7 @@ namespace CepGen
   {
     public:
       /// Logging threshold for the output stream
-      enum LoggingLevel { Nothing=0, Error, Warning, Information, Debug, DebugInsideLoop };
+      enum LoggingLevel { Nothing = 0, Error, Warning, Information, Debug, DebugInsideLoop };
 
     private:
       /// Initialize a logging object

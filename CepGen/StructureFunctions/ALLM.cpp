@@ -126,6 +126,10 @@ namespace CepGen
       return p;
     }
 
+    ALLM::ALLM( const ALLM::Parameterisation& param ) :
+      params_( param )
+    {}
+
     ALLM
     ALLM::operator()( double q2, double xbj, const SigmaRatio& rcomp ) const
     {

@@ -176,7 +176,7 @@ namespace CepGen
       }
     }
     const ParticlesIds daugh = daughters();
-    if ( daugh.size()!=0 ) {
+    if ( daugh.size() != 0 ) {
       osd << ": id = ";
       for ( ParticlesIds::const_iterator it = daugh.begin(); it != daugh.end(); ++it ) {
         if ( it!=daugh.begin() ) osd << ", ";
@@ -203,37 +203,34 @@ namespace CepGen
   Particle&
   Particle::lorentzBoost( double m, const Particle::Momentum& mom )
   {
-    double pf4, fn;
+    if ( mom.energy() == m )
+      return *this;
 
-    if ( mom.energy() != m ) {
-      pf4 = 0.;
-      for ( unsigned int i=0; i<4; i++ ) {
-        pf4 += momentum_[i]*mom[i];
-      }
-      pf4 /= m;
-      fn = ( pf4+energy() )/( momentum_.energy()+m );
-      for ( unsigned int i=0; i<3; i++ ) {
-        momentum_.setP( i, momentum_[i]+fn*mom[i] );
-      }
-    }
+    double pf4 = 0.;
+    for ( unsigned int i = 0; i < 4; ++i )
+      pf4 += momentum_[i]*mom[i];
+    pf4 /= m;
+    const double fn = ( pf4+energy() )/( momentum_.energy()+m );
+    for ( unsigned int i = 0; i < 3; ++i )
+      momentum_.setP( i, momentum_[i]+fn*mom[i] );
+
     return *this;
   }
 
   std::vector<double>
   Particle::lorentzBoost( const Particle::Momentum& mom )
   {
-    double p2, gamma, bp, gamma2;
     std::vector<double> out( 3, 0. );
 
-    p2 = mom.p2();
-    gamma = 1./sqrt( 1.-p2 );
-    bp = 0.;
-    for ( unsigned int i=0; i<3; i++ ) bp+= mom[i]*momentum_[i];
+    const double p2 = mom.p2();
+    const double gamma = 1./sqrt( 1.-p2 );
+    double bp = 0.;
+    for ( unsigned int i = 0; i < 3; ++i )
+      bp += mom[i]*momentum_[i];
 
-    if ( p2>0. ) gamma2 = (gamma-1.)/p2;
-    else gamma2 = 0.;
+    const double gamma2 = ( p2 > 0. ) ? ( gamma-1. )/p2 : 0.;
 
-    for ( unsigned int i=0; i<3; i++ ) {
+    for ( unsigned int i = 0; i < 3; ++i ) {
       out[i] = momentum_[i] + gamma2*bp*mom[i]+gamma*mom[i]*energy();
     }
     return out;

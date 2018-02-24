@@ -32,6 +32,10 @@ namespace CepGen
       return p;
     }
 
+    SuriYennie::SuriYennie( const SuriYennie::Parameterisation& param ) :
+      FE( 0. ), FM( 0. ), params_( param )
+    {}
+
     SuriYennie
     SuriYennie::operator()( double q2, double xbj ) const
     {

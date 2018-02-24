@@ -5,7 +5,8 @@
 using namespace CepGen::Process;
 
 PPtoWW::PPtoWW() :
-  GenericKTProcess( "pptoww", "ɣɣ → W⁺W¯", 4, { { Photon, Photon } }, { W, W } )
+  GenericKTProcess( "pptoww", "ɣɣ → W⁺W¯", 4, { { Photon, Photon } }, { W, W } ),
+  y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )
 {}
 
 void

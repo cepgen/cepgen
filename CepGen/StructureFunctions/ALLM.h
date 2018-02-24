@@ -48,8 +48,7 @@ namespace CepGen
             double lambda2;
         };
 
-        ALLM( const ALLM::Parameterisation& param = ALLM::Parameterisation::allm97() ) :
-          params_( param ) {}
+        explicit ALLM( const ALLM::Parameterisation& param = ALLM::Parameterisation::allm97() );
         ALLM operator()( double q2, double xbj, const SigmaRatio& rcomp = E143Ratio() ) const;
 
       private:

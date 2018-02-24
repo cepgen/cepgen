@@ -44,7 +44,7 @@ namespace CepGen
     GenericProcess::dumpPoint()
     {
       std::ostringstream os;
-      for ( unsigned int i=0; i<x_.size(); i++ ) {
+      for ( unsigned int i = 0; i < x_.size(); ++i ) {
         os << Form( "  x(%2d) = %8.6f\n\t", i, x_[i] );
       }
       Information( Form( "Number of integration parameters: %d\n\t"

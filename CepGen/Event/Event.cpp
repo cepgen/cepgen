@@ -12,6 +12,13 @@ namespace CepGen
     time_generation( -1. ), time_total( -1. )
   {}
 
+  Event::Event( const Event& rhs ) :
+    particles_( rhs.particles_ ),
+    num_hadronisation_trials( rhs.num_hadronisation_trials ),
+    time_generation( rhs.time_generation ), time_total( rhs.time_total ),
+    evtcontent_( rhs.evtcontent_ )
+  {}
+
   Event::~Event()
   {}
 

@@ -37,7 +37,7 @@ namespace CepGen
         /// \param[in] name Process name
         /// \param[in] description Human-readable description of the process
         /// \param[in] has_event Do we generate the associated event structure?
-        GenericProcess( const std::string& name, const std::string& description="<invalid process>", bool has_event=true );
+        GenericProcess( const std::string& name, const std::string& description = "<invalid process>", bool has_event = true );
         virtual ~GenericProcess() {}
 
         /// Restore the Event object to its initial state
@@ -56,7 +56,7 @@ namespace CepGen
         virtual double computeWeight() = 0;
         /// Fill the Event object with the particles' kinematics
         /// \param[in] symmetrise Symmetrise the event? (randomise the production of positively- and negatively-charged outgoing central particles)
-        virtual void fillKinematics( bool symmetrise=false ) = 0;
+        virtual void fillKinematics( bool symmetrise = false ) = 0;
         /// Return the number of dimensions on which the integration has to be performed
         /// \return Number of dimensions on which to integrate
         virtual unsigned int numDimensions( const Kinematics::ProcessMode& ) const = 0;

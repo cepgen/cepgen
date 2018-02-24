@@ -20,7 +20,7 @@ namespace CepGen
     class Pythia8Hadroniser : public GenericHadroniser
     {
       public:
-        Pythia8Hadroniser( const Parameters& );
+        explicit Pythia8Hadroniser( const Parameters& );
         ~Pythia8Hadroniser();
 
         bool hadronise( Event& ev, double& weight, bool proton_fragment ) override;

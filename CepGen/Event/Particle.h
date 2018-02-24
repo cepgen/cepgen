@@ -47,14 +47,14 @@ namespace CepGen
           /// Build a 4-momentum at rest with an invalid energy (no mass information known)
           Momentum();
           /// Build a 4-momentum using its 3-momentum coordinates and its energy
-          Momentum( double x_, double y_, double z_, double t_=-1. );
+          Momentum( double x, double y, double z, double t = -1. );
 
           // --- static definitions
 
           /// Build a 3-momentum from its three pseudo-cylindric coordinates
-          static Momentum fromPtEtaPhi( double pt, double eta, double phi, double e=-1. );
+          static Momentum fromPtEtaPhi( double pt, double eta, double phi, double e = -1. );
           /// Build a 4-momentum from its scalar momentum, and its polar and azimuthal angles
-          static Momentum fromPThetaPhi( double p, double theta, double phi, double e=-1. );
+          static Momentum fromPThetaPhi( double p, double theta, double phi, double e = -1. );
           /// Build a 4-momentum from its four momentum and energy coordinates
           static Momentum fromPxPyPzE( double px, double py, double pz, double e );
 
@@ -97,6 +97,8 @@ namespace CepGen
           void setMass2( double m2 );
           /// Get one component of the 4-momentum (in GeV)
           double operator[]( const unsigned int i ) const;
+          /// Get one component of the 4-momentum (in GeV)
+          double& operator[]( const unsigned int i );
           /// Momentum along the \f$x\f$-axis (in GeV)
           inline double px() const { return px_; }
           /// Momentum along the \f$y\f$-axis (in GeV)
@@ -179,7 +181,7 @@ namespace CepGen
       /// \param[in] pdgId ParticleCode (PDG ID)
       /// \param[in] role Role of the particle in the process
       /// \param[in] st Current status
-      Particle( Role role, ParticleCode pdgId=invalidParticle, Status st=Undefined );
+      Particle( Role role, ParticleCode pdgId = invalidParticle, Status st = Undefined );
       /// Copy constructor
       Particle( const Particle& );
       inline ~Particle() {}
@@ -217,7 +219,7 @@ namespace CepGen
       /// Set the PDG identifier (along with the particle's electric charge)
       /// \param[in] pdg ParticleCode (PDG ID)
       /// \param[in] ch Electric charge (0, 1, or -1)
-      void setPdgId( const ParticleCode& pdg, short ch=0 );
+      void setPdgId( const ParticleCode& pdg, short ch = 0 );
       /// Retrieve the objectified PDG identifier
       inline ParticleCode pdgId() const { return pdg_id_; }
       /// Retrieve the integer value of the PDG identifier
@@ -250,7 +252,7 @@ namespace CepGen
       /// Retrieve the momentum object associated with this particle
       inline Momentum momentum() const { return momentum_; }
       /// Associate a momentum object to this particle
-      void setMomentum( const Momentum& mom, bool offshell=false );
+      void setMomentum( const Momentum& mom, bool offshell = false );
       /**
        * \brief Set the 3-momentum associated to the particle
        * \param[in] px Momentum along the \f$x\f$-axis, in \f$\textrm{GeV}/c\f$

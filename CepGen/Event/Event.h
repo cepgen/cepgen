@@ -13,6 +13,7 @@ namespace CepGen
   class Event {
     public:
       Event();
+      Event( const Event& );
       ~Event();
       /**
        * \brief Copies all the relevant quantities from one Event object to another

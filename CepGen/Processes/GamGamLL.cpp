@@ -245,8 +245,8 @@ GamGamLL::pickin()
 
   DebuggingInsideLoop( Form( "s2 = %f, s2max = %f, splus = %f", s2_, s2max, splus ) );
 
-  if ( w1_!=0. ) dd1_ = -0.25 * ( s2_-s2max ) * ( s2_-splus ) * w1_; // 10
-  else           dd1_ =  0.25 * ( s2_-s2max ) * ss * t13;
+  if ( w1_ != 0. ) dd1_ = -0.25 * ( s2_-s2max ) * ( s2_-splus ) * w1_; // 10
+  else             dd1_ =  0.25 * ( s2_-s2max ) * ss * t13;
   // 11
   dd2_ = -t2_*( s2_-s2p )*( s2_-s2min ) * 0.25;
 
@@ -315,8 +315,8 @@ GamGamLL::pickin()
                sse = ( t2_-w1_ )*( w4_-MX2_ )+( t2_-w4_+w31_ )*( ( t2_-w1_)*MX2_-(w4_-MX2_)*w1_)/t1_;
 
   double s1pp, s1pm;
-  if (ssb/ssd>=0.) { s1pp = ssb+ssd; s1pm = sse/s1pp; }
-  else             { s1pm = ssb-ssd; s1pp = sse/s1pm; } // 16
+  if ( ssb/ssd >= 0. ) { s1pp = ssb+ssd; s1pm = sse/s1pp; }
+  else                 { s1pm = ssb-ssd; s1pp = sse/s1pm; } // 16
   // 17
   dd4_ = -t1_*( s1_-s1pp )*( s1_-s1pm ) * 0.25;
   //const double acc4 = ( s1_-s1pm )/( s1_+s1pm );
@@ -352,8 +352,8 @@ GamGamLL::orient()
   // What if the protons' momenta are not along the z-axis?
   pc4_ = sqrt( ec4_*ec4_-mc4_*mc4_ );
 
-  if ( pc4_==0. ) {
-    InWarning( "pzc4==0" );
+  if ( pc4_ == 0. ) {
+    InWarning( "pzc4 is null and should not be..." );
     return false;
   }
 

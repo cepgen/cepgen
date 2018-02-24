@@ -36,6 +36,10 @@ namespace CepGen
       return p;
     }
 
+    FioreBrasse::FioreBrasse( const FioreBrasse::Parameterisation& params ) :
+      W1( 0. ), W2( 0. ), params_( params )
+    {}
+
     FioreBrasse
     FioreBrasse::operator()( double q2, double xbj ) const
     {

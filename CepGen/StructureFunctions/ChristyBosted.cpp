@@ -6,6 +6,10 @@ namespace CepGen
 {
   namespace SF
   {
+    ChristyBosted::ChristyBosted( const ChristyBosted::Parameterisation& params ) :
+      params_( params )
+    {}
+
     double
     ChristyBosted::resmod507( char sf, double w2, double q2 ) const
     {

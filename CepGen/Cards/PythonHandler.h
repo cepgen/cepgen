@@ -15,7 +15,7 @@ namespace CepGen
     {
       public:
         /// Read a standard configuration card
-        PythonHandler( const char* file );
+        explicit PythonHandler( const char* file );
         ~PythonHandler() {}
         static PyObject* getElement( PyObject* obj, const char* key );
         static const char* decode( PyObject* obj );

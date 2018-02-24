@@ -43,7 +43,7 @@ namespace CepGen
           std::array<unsigned short,4> lr;
         };
 
-        CLAS( const CLAS::Parameterisation& params = CLAS::Parameterisation::standard_proton() ) : params_( params ) {}
+        explicit CLAS( const CLAS::Parameterisation& params = CLAS::Parameterisation::standard_proton() );
 
         CLAS operator()( double q2, double xbj, const SigmaRatio& rcomp = E143Ratio() ) const;
 

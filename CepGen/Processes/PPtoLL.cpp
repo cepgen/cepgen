@@ -5,7 +5,8 @@
 using namespace CepGen::Process;
 
 PPtoLL::PPtoLL() :
-  GenericKTProcess( "pptoll", "ɣɣ → l⁺l¯", 4, { { Photon, Photon } }, { Muon, Muon } )
+  GenericKTProcess( "pptoll", "ɣɣ → l⁺l¯", 4, { { Photon, Photon } }, { Muon, Muon } ),
+  y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )
 {}
 
 void

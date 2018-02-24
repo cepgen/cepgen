@@ -74,7 +74,10 @@ namespace CepGen
   bool
   Momentum::operator==( const Momentum& mom ) const
   {
-    return ( px_ == mom.px_ && py_ == mom.py_ && pz_ == mom.pz_ && energy_ == mom.energy_ );
+    return ( px_ == mom.px_
+          && py_ == mom.py_
+          && pz_ == mom.pz_
+          && energy_ == mom.energy_ );
   }
 
   double
@@ -198,13 +201,28 @@ namespace CepGen
   //--- various getters
 
   double
-  Momentum::operator[]( const unsigned int i ) const {
+  Momentum::operator[]( const unsigned int i ) const
+  {
     switch ( i ) {
       case 0: return px_;
       case 1: return py_;
       case 2: return pz_;
       case 3: return energy_;
-      default: return -1.;
+      default:
+        throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve the component %d", i ), FatalError );
+    }
+  }
+
+  double&
+  Momentum::operator[]( const unsigned int i )
+  {
+    switch ( i ) {
+      case 0: return px_;
+      case 1: return py_;
+      case 2: return pz_;
+      case 3: return energy_;
+      default:
+        throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve the component %d", i ), FatalError );
     }
   }
 
@@ -301,11 +319,10 @@ namespace CepGen
     rotmtx[1][0] =  cos( phi ); rotmtx[1][1] = -cos( theta )*sin( phi ); rotmtx[1][2] =  sin( theta )*sin( phi );
     rotmtx[2][0] =  0.;         rotmtx[2][1] =  sin( theta );            rotmtx[2][2] =  cos( theta );
 
-    for (int i=0; i<3; i++) {
+    for ( unsigned short i = 0; i < 3; ++i ) {
       mom[i] = 0.;
-      for (int j=0; j<3; j++) {
+      for ( unsigned short j = 0; j < 3; ++j )
         mom[i] += rotmtx[i][j]*operator[]( j );
-      }
     }
     setP( mom[0], mom[1], mom[2] );
     return *this;

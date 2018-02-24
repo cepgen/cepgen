@@ -15,7 +15,7 @@ namespace CepGen
     {
       public:
         /// Read a LPAIR steering card
-        LpairHandler( const char* file );
+        explicit LpairHandler( const char* file );
 
         /// Store a configuration into a LPAIR steering card
         void store( const char* file );
