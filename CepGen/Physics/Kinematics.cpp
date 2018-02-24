@@ -128,7 +128,7 @@ namespace CepGen
 
   Kinematics::CutsList::CutsList() :
     initial( { { Cuts::q2, { 0., 1.e5 } } } ),
-    central( { { Cuts::pt_single, 0. }, { Cuts::pt_diff, { 0., 400. } } } ),
+    central( { { Cuts::pt_single, 0. } } ),
     remnants( { { Cuts::mass, { 1.07, 320. } } } )
   {}
 

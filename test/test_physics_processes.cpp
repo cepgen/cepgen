@@ -150,22 +150,32 @@ main( int argc, char* argv[] )
             passed_tests.emplace_back( test_res );
             num_tests_passed++;
           }
-          else {
+          else
             failed_tests.emplace_back( test_res );
-          }
+
           num_tests++;
-          cout << "Test " << num_tests_passed << "/" << num_tests << " passed!" << endl;
+          cout << "Test " << num_tests_passed << "/"
+                          << num_tests << " passed!" << endl;
         }
       }
     }
   } catch ( CepGen::Exception& e ) {}
   if ( failed_tests.size() != 0 ) {
     ostringstream os_failed, os_passed;
-    for ( const auto& fail : failed_tests ) os_failed << " (*) " << fail << endl;
-    for ( const auto& pass : passed_tests ) os_passed << " (*) " << pass << endl;
-    throw CepGen::Exception( __PRETTY_FUNCTION__, Form( "Some tests failed!\n%s\nPassed tests:\n%s", os_failed.str().c_str(), os_passed.str().c_str() ), CepGen::FatalError );
+    for ( const auto& fail : failed_tests )
+      os_failed << " (*) " << fail << endl;
+    for ( const auto& pass : passed_tests )
+      os_passed << " (*) " << pass << endl;
+    throw CepGen::Exception( __PRETTY_FUNCTION__,
+      Form( "Some tests failed!\n"
+            "%s\n"
+            "Passed tests:\n"
+            "%s",
+            os_failed.str().c_str(),
+            os_passed.str().c_str() ), CepGen::FatalError );
   }
-  else Information( "ALL TESTS PASSED!" );
+
+  Information( "ALL TESTS PASSED!" );
 
   return 0;
 }

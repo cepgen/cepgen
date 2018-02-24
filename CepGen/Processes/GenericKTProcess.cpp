@@ -14,7 +14,8 @@ namespace CepGen
                                         const std::vector<ParticleCode>& central ) :
       GenericProcess( name, description+" (kT-factorisation approach)" ),
       log_qmin_( 0. ), log_qmax_( 0. ),
-      qt1_( 0. ), phi_qt1_( 0. ), qt2_( 0. ), phi_qt2_( 0. ),
+      qt1_( 0. ), phi_qt1_( 0. ),
+      qt2_( 0. ), phi_qt2_( 0. ),
       flux1_( 0. ), flux2_( 0. ),
       kNumUserDimensions( num_user_dimensions ),
       kIntermediateParts( partons ), kProducedParts( central )

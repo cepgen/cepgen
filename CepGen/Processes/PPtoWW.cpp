@@ -12,15 +12,23 @@ PPtoWW::PPtoWW() :
 void
 PPtoWW::prepareKTKinematics()
 {
-  const Kinematics::Limits rap_limits = cuts_.cuts.central_particles[W][Cuts::rapidity_single];
-
   // outgoing Ws
+  Kinematics::Limits rap_limits = cuts_.cuts.central_particles[W][Cuts::rapidity_single];
+  if ( !rap_limits.hasMin() )
+    rap_limits.min() = -6.;
+  if ( !rap_limits.hasMax() )
+    rap_limits.max() = 6.;
+
   y1_ = rap_limits.x( xkt( 0 ) );
   y2_ = rap_limits.x( xkt( 1 ) );
+
   DebuggingInsideLoop( Form( "W bosons rapidities (%.2f < y < %.2f): %f / %f", rap_limits.min(), rap_limits.max(), y1_, y2_ ) );
 
   Kinematics::Limits ptdiff_limits = cuts_.cuts.central[Cuts::pt_diff];
-  if ( !ptdiff_limits.hasMax() ) ptdiff_limits.max() = 500.; //FIXME
+  if ( !ptdiff_limits.hasMin() )
+    ptdiff_limits.min() = 0.;
+  if ( !ptdiff_limits.hasMax() )
+    ptdiff_limits.max() = 500.; //FIXME fine-tuning...
   pt_diff_ = ptdiff_limits.x( xkt( 2 ) );
 
   phi_pt_diff_ = 2.*M_PI*xkt( 3 );

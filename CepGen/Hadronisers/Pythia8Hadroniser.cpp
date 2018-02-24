@@ -70,7 +70,7 @@ namespace CepGen
       pythia_->event[0].e( sqrt_s );
       pythia_->event[0].m( sqrt_s );*/
       Particle::Momentum p_out = ev.getOneByRole( Particle::OutgoingBeam1 ).momentum()
-                                +ev.getOneByRole( Particle::OutgoingBeam2 ).momentum();
+                               + ev.getOneByRole( Particle::OutgoingBeam2 ).momentum();
       for ( const auto& p : ev.getByRole( Particle::CentralSystem ) )
         p_out += p.momentum();
       //std::cout << p_out.pz() << "|" << p_out.mass() << "|" << p_out.energy() << std::endl;
@@ -102,11 +102,11 @@ namespace CepGen
           case Particle::UnknownRole:
             continue;
           case Particle::CentralSystem: {
-            if ( !pythia_->particleData.canDecay( py8part.id() ) )
-              continue;
-            if ( !pythia_->particleData.mayDecay( py8part.id() ) )
-              continue;
-            py8part.status( 93 );
+            if ( pythia_->particleData.canDecay( py8part.id() )
+              || pythia_->particleData.mayDecay( py8part.id() ) )
+              py8part.status( 93 );
+            else
+              py8part.status( 23 ); // outgoing particles of the hardest subprocess
             py_id = pythia_->event.append( py8part );
           } break;
           case Particle::OutgoingBeam1:
