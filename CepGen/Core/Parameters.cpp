@@ -129,8 +129,8 @@ namespace CepGen
           os << "   - " << std::setw( wt-5 ) << lim->first << lim->second << std::endl;
         }
       }
-      os << std::endl;
     }
+    os << std::endl;
     os << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Proton / remnants " ) : "Proton / remnants" ) << std::setfill( ' ' ) << std::endl;
     os << std::endl;
     for ( std::map<Cuts::Remnants,Kinematics::Limits>::const_iterator lim = kinematics.cuts.remnants.begin(); lim != kinematics.cuts.remnants.end(); ++lim ) {

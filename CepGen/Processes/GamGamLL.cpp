@@ -73,16 +73,16 @@ GamGamLL::pickin()
                              "sig1 = %f\n\t"
                              "sig2 = %f", mc4_, sig1, sig2 ) );
 
-  // Mass difference between the first outgoing particle and the first incoming
-  // particle
+  // Mass difference between the first outgoing particle
+  // and the first incoming particle
   w31_ = MX2_-w1_;
-  // Mass difference between the second outgoing particle and the second
-  // incoming particle
+  // Mass difference between the second outgoing particle
+  // and the second incoming particle
   w52_ = MY2_-w2_;
   // Mass difference between the two incoming particles
   w12_ = w1_-w2_;
-  // Mass difference between the central two-photons system and the second
-  // outgoing particle
+  // Mass difference between the central two-photons system
+  // and the second outgoing particle
   const double d6 = w4_-MY2_;
 
   DebuggingInsideLoop( Form( "w1 = %f\n\t"
@@ -97,7 +97,10 @@ GamGamLL::pickin()
   const double ss = s_+w12_;
 
   const double rl1 = ss*ss-4.*w1_*s_; // lambda(s, m1**2, m2**2)
-  if ( rl1 <= 0. ) { InWarning( Form( "rl1 = %f <= 0", rl1 ) ); return false; }
+  if ( rl1 <= 0. ) {
+    InWarning( Form( "rl1 = %f <= 0", rl1 ) );
+    return false;
+  }
   sl1_ = sqrt( rl1 );
 
   s2_ = 0.;
@@ -135,15 +138,14 @@ GamGamLL::pickin()
   double dt1 = 0.;
   Map( x(0), t1_min, t1_max, t1_, dt1, "t1" );
   // changes wrt mapt1 : dx->-dx
-  dt1 = -dt1;
+  dt1 *= -1.;
 
   DebuggingInsideLoop( Form( "Definition of t1 = %f according to\n\t"
                              "(t1min, t1max) = (%f, %f)", t1_, t1_min, t1_max ) );
 
   dd4_ = w4_-t1_;
 
-  const double d8 = t1_-w2_,
-	       t13 = t1_-w1_-MX2_;
+  const double d8 = t1_-w2_, t13 = t1_-w1_-MX2_;
 
   sa1_ = -pow( t1_-w31_, 2 )/4.+w1_*t1_;
   if ( sa1_ >= 0. ) { InWarning( Form( "sa1_ = %f >= 0", sa1_ ) ); return false; }
@@ -178,13 +180,13 @@ GamGamLL::pickin()
     else               { Mapla( t1_, w2_, x(2), sig2, s2max, s2_, ds2 ); } // n_opt_==-1
     s2x = s2_;
   }
-  else if ( n_opt_ == 0 ) { s2x = s2_; } // 6
+  else if ( n_opt_ == 0 )
+    s2x = s2_; // 6
 
   DebuggingInsideLoop( Form( "s2x = %f", s2x ) );
 
   // 7
-  const double r1 = s2x-d8,
-               r2 = s2x-d6;
+  const double r1 = s2x-d8, r2 = s2x-d6;
 
   const double rl4 = ( r1*r1-4.*w2_*s2x )*( r2*r2-4.*MY2_*s2x );
   if ( rl4 <= 0. ) {
@@ -212,18 +214,24 @@ GamGamLL::pickin()
 
   DebuggingInsideLoop( Form( "r1 = %f\n\tr2 = %f\n\tr3 = %f\n\tr4 = %f", r1, r2, r3, r4 ) );
 
-  const double b = r3*r4-2.*( t1_+w2_ )*t2_,
-               c = t2_*d6*d8+( d6-d8 )*( d6*w2_-d8*MY2_ );
+  const double b = r3*r4-2.*( t1_+w2_ )*t2_;
+  const double c = t2_*d6*d8+( d6-d8 )*( d6*w2_-d8*MY2_ );
 
   const double t25 = t2_-w2_-MY2_;
 
   sa2_ = -r4*r4/4.+w2_*t2_;
-  if ( sa2_ >= 0. ) { InWarning( Form( "sa2_ = %f >= 0", sa2_ ) ); return false; }
+  if ( sa2_ >= 0. ) {
+    InWarning( Form( "sa2_ = %f >= 0", sa2_ ) );
+    return false;
+  }
 
   const double sl6 = 2.*sqrt( -sa2_ );
 
   g4_ = -r3*r3/4.+t1_*t2_;
-  if ( g4_ >= 0. )  { InWarning( Form( "g4_ = %f >= 0", g4_ ) );   return false; }
+  if ( g4_ >= 0. ) {
+    InWarning( Form( "g4_ = %f >= 0", g4_ ) );
+    return false;
+  }
 
   const double sl7 = 2.*sqrt( -g4_ ),
                sl5 = sl6*sl7;
@@ -238,7 +246,7 @@ GamGamLL::pickin()
     s2p = c/( t2_*s2min );
   }
   // 9
-  if ( n_opt_ > 1 )       Map( x( 2 ), s2min, s2max, s2_, ds2, "s2" );
+  if      ( n_opt_ > 1 )  Map( x( 2 ), s2min, s2max, s2_, ds2, "s2" );
   else if ( n_opt_ == 1 ) Mapla( t1_, w2_, x( 2 ), s2min, s2max, s2_, ds2 );
 
   const double ap = -0.25*pow( s2_+d8, 2 )+s2_*t1_;
@@ -271,25 +279,15 @@ GamGamLL::pickin()
     return false;
   }
 
-  jacobian_ = ds2
-            * dt1
-            * dt2
-            * M_PI*M_PI/( 8.*sl1_*sqrt( -ap ) );
+  jacobian_ = ds2 * dt1 * dt2 * M_PI*M_PI/( 8.*sl1_*sqrt( -ap ) );
 
   DebuggingInsideLoop( Form( "Jacobian = %e", jacobian_ ) );
 
   gram_ = ( 1.-yy4*yy4 )*dd/ap;
 
   p13_ = -t13 * 0.5;
-  p14_ = (tau+s1_-MX2_) * 0.5;
+  p14_ = ( tau+s1_-MX2_ ) * 0.5;
   p25_ = -t25 * 0.5;
-
-  /*const double //p15 = (s_+t2_-s1_-w2_)/2.,
-               //p23 = (s_+t1_-s2_-w1_)/2.,
-               //p24 = (s2_-tau-MY2_)/2.,
-               //p34 = (s1_-MX2_-w4_)/2.,
-               //p35 = (s_+w4_-s1_-s2_)/2.,
-               //p45 = (s2_-w4_-MY2_)/2.;*/
 
   p1k2_ = ( s1_-t2_-w1_ ) * 0.5;
   p2k1_ = st * 0.5;
@@ -320,7 +318,8 @@ GamGamLL::pickin()
   // 17
   dd4_ = -t1_*( s1_-s1pp )*( s1_-s1pm ) * 0.25;
   //const double acc4 = ( s1_-s1pm )/( s1_+s1pm );
-  dd5_ = dd1_+dd3_+( ( p12_*( t1_-w31_ )*0.5-w1_*p2k1_ )*( p2k1_*( t2_-w52_ )-w2_*r3 )-delta_*( 2.*p12_*p2k1_-w2_*( t1_-w31_ ) ) ) / p2k1_;
+  dd5_ = dd1_+dd3_+( ( p12_*( t1_-w31_ )*0.5-w1_*p2k1_ )*( p2k1_*( t2_-w52_ )-w2_*r3 )
+                    -delta_*( 2.*p12_*p2k1_-w2_*( t1_-w31_ ) ) ) / p2k1_;
 
   return true;
 }
@@ -328,7 +327,10 @@ GamGamLL::pickin()
 bool
 GamGamLL::orient()
 {
-  if ( !pickin() or jacobian_ == 0. ) { DebuggingInsideLoop( Form( "Pickin failed! Jacobian = %f", jacobian_ ) ); return false; }
+  if ( !pickin() || jacobian_ == 0. ) {
+    DebuggingInsideLoop( Form( "Pickin failed! Jacobian = %f", jacobian_ ) );
+    return false;
+  }
 
   const double re = 0.5 / sqs_;
   ep1_ = re*( s_+w12_ );
@@ -347,7 +349,10 @@ GamGamLL::orient()
                ep5 = ep2_-de5_;
   ec4_ = de3_+de5_;
 
-  if ( ec4_ < mc4_ ) { InWarning( Form( "ec4_ = %f < mc4_ = %f\n\t==> de3 = %f, de5 = %f", ec4_, mc4_, de3_, de5_ ) ); return false; }
+  if ( ec4_ < mc4_ ) {
+    InWarning( Form( "ec4_ = %f < mc4_ = %f\n\t==> de3 = %f, de5 = %f", ec4_, mc4_, de3_, de5_ ) );
+    return false;
+  }
 
   // What if the protons' momenta are not along the z-axis?
   pc4_ = sqrt( ec4_*ec4_-mc4_*mc4_ );
@@ -372,8 +377,14 @@ GamGamLL::orient()
 
   DebuggingInsideLoop( Form( "sin_theta3 = %e\n\tsin_theta5 = %e", sin_theta3, sin_theta5 ) );
 
-  if (sin_theta3>1.) { InWarning( Form( "sin_theta3 = %e > 1", sin_theta3 ) ); return false; }
-  if (sin_theta5>1.) { InWarning( Form( "sin_theta5 = %e > 1", sin_theta5 ) ); return false; }
+  if ( sin_theta3 > 1. ) {
+    InWarning( Form( "sin_theta3 = %e > 1", sin_theta3 ) );
+    return false;
+  }
+  if ( sin_theta5 > 1. ) {
+    InWarning( Form( "sin_theta5 = %e > 1", sin_theta5 ) );
+    return false;
+  }
 
   double ct3 = sqrt( 1.-sin_theta3*sin_theta3 ),
          ct5 = sqrt( 1.-sin_theta5*sin_theta5 );
@@ -383,22 +394,29 @@ GamGamLL::orient()
 
   DebuggingInsideLoop( Form( "ct3 = %e\n\tct5 = %e", ct3, ct5 ) );
 
-  if ( dd5_ < 0. ) { InWarning( Form( "dd5 = %f < 0", dd5_ ) ); return false; }
+  if ( dd5_ < 0. ) {
+    InWarning( Form( "dd5 = %f < 0", dd5_ ) );
+    return false;
+  }
 
   // Centre of mass system kinematics (theta4 and phi4)
   pt4_ = sqrt( dd5_/s_ )/p_cm_;
   sin_theta4_ = pt4_/pc4_;
 
-  if ( sin_theta4_ > 1. ) { InWarning( Form( "st4 = %f > 1", sin_theta4_ ) ); return false; }
+  if ( sin_theta4_ > 1. ) {
+    InWarning( Form( "st4 = %f > 1", sin_theta4_ ) );
+    return false;
+  }
 
   cos_theta4_ = sqrt( 1.-sin_theta4_*sin_theta4_ );
-  if ( ep1_*ec4_ < p14_ ) cos_theta4_ *= -1.;
+  if ( ep1_*ec4_ < p14_ )
+    cos_theta4_ *= -1.;
 
   al4_ = 1.-cos_theta4_;
   be4_ = 1.+cos_theta4_;
 
-  if (cos_theta4_<0.) be4_ = sin_theta4_*sin_theta4_/al4_;
-  else                al4_ = sin_theta4_*sin_theta4_/be4_;
+  if ( cos_theta4_ < 0. ) be4_ = sin_theta4_*sin_theta4_/al4_;
+  else                    al4_ = sin_theta4_*sin_theta4_/be4_;
 
   DebuggingInsideLoop( Form( "ct4 = %f\n\tal4 = %f, be4 = %f", cos_theta4_, al4_, be4_ ) );
 
@@ -406,8 +424,14 @@ GamGamLL::orient()
   const double sin_phi3 =  rr / pt3,
                sin_phi5 = -rr / pt5;
 
-  if ( fabs( sin_phi3 ) > 1. ) { InWarning( Form( "sin(phi_3) = %e while it must be in [-1 ; 1]", sin_phi3 ) ); return false; }
-  if ( fabs( sin_phi5 ) > 1. ) { InWarning( Form( "sin(phi_5) = %e while it must be in [-1 ; 1]", sin_phi5 ) ); return false; }
+  if ( fabs( sin_phi3 ) > 1. ) {
+    InWarning( Form( "sin(phi_3) = %e while it must be in [-1 ; 1]", sin_phi3 ) );
+    return false;
+  }
+  if ( fabs( sin_phi5 ) > 1. ) {
+    InWarning( Form( "sin(phi_5) = %e while it must be in [-1 ; 1]", sin_phi5 ) );
+    return false;
+  }
 
   const double cos_phi3 = -sqrt( 1.-sin_phi3*sin_phi3 ),
                cos_phi5 = -sqrt( 1.-sin_phi5*sin_phi5 );
@@ -442,7 +466,7 @@ GamGamLL::orient()
 double
 GamGamLL::computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dw )
 {
-  const double mx0 = ParticleProperties::mass( Proton )+ParticleProperties::mass( PiPlus ); // 1.07
+  const double mx0 = ParticleProperties::mass( Proton )+ParticleProperties::mass( PiZero ); // 1.07
   const Kinematics::Limits mx_limits = cuts_.cuts.remnants[Cuts::mass];
   const double wx2min = pow( std::max( mx0, mx_limits.min() ), 2 ),
                wx2max = pow( std::min( sqs_-outmass-2.*lepmass, mx_limits.max() ), 2 );
@@ -502,26 +526,30 @@ GamGamLL::beforeComputeWeight()
 double
 GamGamLL::computeWeight()
 {
-  if ( !is_outgoing_state_set_ ) { InWarning( "Output state not set!" ); return 0.; }
+  if ( !is_outgoing_state_set_ ) {
+    InWarning( "Output state not set!" );
+    return 0.;
+  }
 
   DebuggingInsideLoop( Form( "sqrt(s)=%f\n\tm(X1)=%f\tm(X2)=%f", sqs_, MX_, MY_ ) );
 
   Kinematics::Limits& w_limits = cuts_.cuts.initial[Cuts::w];
-  if ( !w_limits.hasMax() ) w_limits.max() = s_;
-
+  if ( !w_limits.hasMax() )
+    w_limits.max() = s_;
   // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
-  const double wmin = std::max( 4.*Ml2_, w_limits.min() );
+  if ( !w_limits.hasMin() )
+    w_limits.min() = 4.*Ml2_;
 
   // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or _wmax if specified)
   const double wmax = std::min( pow( sqs_-MX_-MY_, 2 ), w_limits.max() );
 
-  DebuggingInsideLoop( Form( "wmin = %f\n\twmax = %f\n\twmax/wmin = %f", wmin, wmax, wmax/wmin ) );
+  DebuggingInsideLoop( Form( "wmin = %f\n\twmax = %f\n\twmax/wmin = %f", w_limits.min(), wmax, wmax/w_limits.min() ) );
 
   // compute the two-photon energy for this point
   w4_ = 0.;
   double dw4 = 0.;
-  Map( x( 4 ), wmin, wmax, w4_, dw4, "w4" );
-  Map( x( 4 ), wmin, wmax, w4_, dw4, "w4" );
+  Map( x( 4 ), w_limits.min(), wmax, w4_, dw4, "w4" );
+  Map( x( 4 ), w_limits.min(), wmax, w4_, dw4, "w4" );
   mc4_ = sqrt( w4_ );
 
   DebuggingInsideLoop( Form( "Computed value for w4 = %f -> mc4 = %f", w4_, mc4_ ) );
@@ -560,7 +588,8 @@ GamGamLL::computeWeight()
 
   const double pgp = sqrt( pgx*pgx + pgy*pgy ), // outgoing proton (3)'s transverse momentum
                pgg = sqrt( pgp*pgp + pgz*pgz ); // outgoing proton (3)'s momentum
-  if ( pgg > pgp*0.9 && pgg > pg ) { pg = pgg; } //FIXME ???
+  if ( pgg > pgp*0.9 && pgg > pg )
+    pg = pgg; //FIXME ???
 
   // Phi angle for the 2-photon system ?!
   const double cpg = pgx/pgp,
@@ -680,8 +709,13 @@ GamGamLL::computeWeight()
   g5_ = w1_*c1*c1 + r12*r12 + r13*r13;
   g6_ = w2_*b1*b1 + r22*r22 + r23*r23;
 
-  a5_ = -( qve.px()*cos_phi3 + qve.py()*sin_phi3 )*p3_lab_.pt()*p1k2_-( ep1_*qve.energy()-p_cm_*qve.pz() )*( cos_phi3*cos_phi5 + sin_phi3*sin_phi5 )*p3_lab_.pt()*p5_lab_.pt() + ( de5_*qve.pz()+qve.energy()*( p_cm_+p5_lab_.pz() ) )*c3;
-  a6_ = -( qve.px()*cos_phi5 + qve.py()*sin_phi5 )*p5_lab_.pt()*p2k1_-( ep2_*qve.energy()+p_cm_*qve.pz() )*( cos_phi3*cos_phi5 + sin_phi3*sin_phi5 )*p3_lab_.pt()*p5_lab_.pt() + ( de3_*qve.pz()-qve.energy()*( p_cm_-p3_lab_.pz() ) )*b3;
+  const double pt3 = p3_lab_.pt(), pt5 = p5_lab_.pt();
+  a5_ = -( qve.px()*cos_phi3 + qve.py()*sin_phi3 )*pt3*p1k2_
+        -( ep1_*qve.energy()-p_cm_*qve.pz() )*( cos_phi3*cos_phi5 + sin_phi3*sin_phi5 )*pt3*pt5
+        +( de5_*qve.pz()+qve.energy()*( p_cm_+p5_lab_.pz() ) )*c3;
+  a6_ = -( qve.px()*cos_phi5 + qve.py()*sin_phi5 )*pt5*p2k1_
+        -( ep2_*qve.energy()+p_cm_*qve.pz() )*( cos_phi3*cos_phi5 + sin_phi3*sin_phi5 )*pt3*pt5
+        +( de3_*qve.pz()-qve.energy()*( p_cm_-p3_lab_.pz() ) )*b3;
 
   DebuggingInsideLoop( Form( "a5 = %f\n\ta6 = %f", a5_, a6_ ) );
 
@@ -689,7 +723,8 @@ GamGamLL::computeWeight()
   // END of GAMGAMLL subroutine in the FORTRAN version
   ////////////////////////////////////////////////////////////////
 
-  const Particle::Momentum cm = event_->getOneByRole( Particle::IncomingBeam1 ).momentum() + event_->getOneByRole( Particle::IncomingBeam2 ).momentum();
+  const Particle::Momentum cm = event_->getOneByRole( Particle::IncomingBeam1 ).momentum()
+                              + event_->getOneByRole( Particle::IncomingBeam2 ).momentum();
 
   ////////////////////////////////////////////////////////////////
   // INFO from f.f
@@ -717,8 +752,8 @@ GamGamLL::computeWeight()
   //--- cut on the proton's Q2 (first photon propagator T1)
 
   const Kinematics::Limits q2_limits = cuts_.cuts.initial[Cuts::q2];
-  if ( q2_limits.hasMax() && t1_<-q2_limits.max() ) return 0;
-  if ( q2_limits.hasMin() && t1_>-q2_limits.min() ) return 0.;
+  if ( q2_limits.hasMax() && t1_ < -q2_limits.max() ) return 0;
+  if ( q2_limits.hasMin() && t1_ > -q2_limits.min() ) return 0.;
 
   //--- cuts on outgoing leptons' kinematics
 

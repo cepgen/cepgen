@@ -75,8 +75,14 @@ namespace CepGen
     GenericKTProcess::setKinematics( const Kinematics& kin )
     {
       cuts_ = kin;
-      log_qmin_ = -10.; // FIXME //log_qmin_ = std::log( std::sqrt( cuts_.q2min ) );
-      log_qmax_ = log( cuts_.cuts.initial[Cuts::qt].max() );
+      Kinematics::Limits qt_limits = cuts_.cuts.initial[Cuts::qt];
+      if ( !qt_limits.hasMin() )
+        qt_limits.min() = 1.e-10; //FIXME fine-tuning needed!
+      if ( !qt_limits.hasMax() )
+        qt_limits.max() = 500.;
+
+      log_qmin_ = log( qt_limits.min() );
+      log_qmax_ = log( qt_limits.max() );
     }
 
     double

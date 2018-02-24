@@ -61,6 +61,7 @@ namespace CepGen
       for ( IncomingState::const_iterator ip = is.begin(); ip != is.end(); ++ip ) {
         Particle& p = event_->addParticle( ip->first );
         p.setPdgId( ip->second, ParticleProperties::charge( ip->second ) );
+        p.setMass( ParticleProperties::mass( ip->second ) );
       }
       //--- central system (if not already there)
       IncomingState::const_iterator central_system = is.find( Particle::CentralSystem );
@@ -74,6 +75,7 @@ namespace CepGen
         for ( std::vector<ParticleCode>::const_iterator it = op->second.begin(); it != op->second.end(); ++it ) {
           Particle& p = event_->addParticle( op->first );
           p.setPdgId( *it, ParticleProperties::charge( *it ) );
+          p.setMass( ParticleProperties::mass( *it ) );
         }
       }
 
