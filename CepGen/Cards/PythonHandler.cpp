@@ -43,20 +43,13 @@ namespace CepGen
       std::string filename = getPythonPath( file );
       const size_t fn_len = filename.length()+1;
 #ifdef PYTHON2
-      {
-        char* n_filename = new char[fn_len];
-        sprintf( n_filename, "%s", filename.c_str() );
-        Py_SetProgramName( n_filename );
-        delete [] n_filename;
-      }
+      char* sfilename = new char[fn_len];
+      sprintf( sfilename, "%s", filename.c_str() );
 #else
-      {
-        wchar_t* w_filename = new wchar_t[fn_len];
-        swprintf( w_filename, fn_len, L"%s", filename.c_str() );
-        Py_SetProgramName( w_filename );
-        delete [] w_filename;
-      }
+      wchar_t* sfilename = new wchar_t[fn_len];
+      swprintf( sfilename, fn_len, L"%s", filename.c_str() );
 #endif
+      Py_SetProgramName( sfilename );
 
       Py_InitializeEx( 0 );
       if ( !Py_IsInitialized() )
@@ -76,35 +69,39 @@ namespace CepGen
         throwPythonError( Form( "Failed to parse the configuration card %s", file ).c_str(), FatalError );
 
       PyObject* process = PyObject_GetAttrString( cfg, "process" );
+      if ( !process )
+        throwPythonError( Form( "Failed to extract a \"process\" keyword from the configuration card %s", file ).c_str(), FatalError );
 
       //--- type of process to consider
       PyObject* pproc_name = PyDict_GetItem( process, encode( module_name_ ) );
-      const char* proc_name = decode( pproc_name );
+      if ( !pproc_name )
+        throwPythonError( Form( "Failed to extract the process name from the configuration card %s", file ).c_str(), FatalError );
+
+      const std::string proc_name = decode( pproc_name );
       Py_DECREF( pproc_name );
-      const std::string str_proc_name = proc_name;
-      if      ( str_proc_name == "lpair" )  params_.setProcess( new Process::GamGamLL );
-      else if ( str_proc_name == "pptoll" ) params_.setProcess( new Process::PPtoLL );
-      else if ( str_proc_name == "pptoww" ) params_.setProcess( new Process::PPtoWW );
-      else FatalError( Form( "Unrecognised process: %s", proc_name ) );
+      if ( proc_name == "lpair" )
+        params_.setProcess( new Process::GamGamLL );
+      else if ( proc_name == "pptoll" )
+        params_.setProcess( new Process::PPtoLL );
+      else if ( proc_name == "pptoww" )
+        params_.setProcess( new Process::PPtoWW );
+      else FatalError( Form( "Unrecognised process: %s", proc_name.c_str() ) );
 
       //--- process mode
-      PyObject* pproc_mode = getElement( process, "mode" );
-      if ( pproc_mode ) {
-        if ( isInteger( pproc_mode ) ) {
-          int int_mode = asInteger( pproc_mode );
-          params_.kinematics.mode = (Kinematics::ProcessMode)int_mode;
-        }
-        Py_DECREF( pproc_mode );
-      }
+      getParameter( process, "mode", (int&)params_.kinematics.mode );
 
       //--- process kinematics
       PyObject* pin_kinematics = getElement( process, "inKinematics" );
-      if ( pin_kinematics ) parseIncomingKinematics( pin_kinematics );
-      Py_DECREF( pin_kinematics );
+      if ( pin_kinematics ) {
+        parseIncomingKinematics( pin_kinematics );
+        Py_DECREF( pin_kinematics );
+      }
 
       PyObject* pout_kinematics = getElement( process, "outKinematics" );
-      if ( pout_kinematics ) parseOutgoingKinematics( pout_kinematics );
-      Py_DECREF( pout_kinematics );
+      if ( pout_kinematics ) {
+        parseOutgoingKinematics( pout_kinematics );
+        Py_DECREF( pout_kinematics );
+      }
 
       Py_DECREF( process );
 
@@ -121,6 +118,7 @@ namespace CepGen
         parseIntegrator( pint );
         Py_DECREF( pint );
       }
+      std::cout << "tmp=" << params_.kinematics.mode << std::endl;
 
       PyObject* pgen = PyObject_GetAttrString( cfg, "generator" );
       if ( pgen ) {
@@ -144,6 +142,7 @@ namespace CepGen
       if ( Py_FinalizeEx() != 0 )
         throw Exception( __PRETTY_FUNCTION__, "Failed to unregister the python parser!", FatalError );
 #endif
+      if ( sfilename ) delete sfilename;
     }
 
     void
@@ -158,18 +157,11 @@ namespace CepGen
         }
         Py_DECREF( ppz );
       }
-      PyObject* psqrts = getElement( kin, "cmEnergy" );
-      if ( psqrts ) {
-        if ( PyFloat_Check( psqrts ) )
-          params_.kinematics.setSqrtS( PyFloat_AsDouble( psqrts ) );
-        Py_DECREF( psqrts );
-      }
-      PyObject* pstrfun = getElement( kin, "structureFunctions" );
-      if ( pstrfun ) {
-        if ( isInteger( pstrfun ) )
-          params_.kinematics.structure_functions = (StructureFunctions::Type)asInteger( pstrfun );
-        Py_DECREF( pstrfun );
-      }
+      double sqrt_s = -1.;
+      getParameter( kin, "cmEnergy", sqrt_s );
+      if ( sqrt_s != -1. )
+        params_.kinematics.setSqrtS( sqrt_s );
+      getParameter( kin, "structureFunctions", (int&)params_.kinematics.structure_functions );
     }
 
     void
@@ -227,92 +219,32 @@ namespace CepGen
         throwPythonError( "Integrator object should be a dictionary!" );
       PyObject* palgo = getElement( integr, module_name_ );
       if ( !palgo )
-        throwPythonError( "Invalid integration algorithm!" );
+        throwPythonError( "Failed to retrieve the integration algorithm name!" );
       std::string algo = decode( palgo );
-      if      ( algo == "Plain" ) params_.integrator.type = Integrator::Plain;
+      Py_DECREF( palgo );
+      if ( algo == "Plain" )
+        params_.integrator.type = Integrator::Plain;
       else if ( algo == "Vegas" ) {
         params_.integrator.type = Integrator::Vegas;
-        PyObject* palpha = getElement( integr, "alpha" );
-        if ( palpha ) {
-          if ( PyFloat_Check( palpha ) )
-            params_.integrator.vegas.alpha = PyFloat_AsDouble( palpha );
-          Py_DECREF( palpha );
-        }
-        PyObject* piter = getElement( integr, "iterations" );
-        if ( piter ) {
-          if ( isInteger( piter ) ) {
-            params_.integrator.vegas.iterations = asInteger( piter );
-        }
-          Py_DECREF( piter );
-        }
-        PyObject* pmode = getElement( integr, "mode" );
-        if ( pmode ) {
-          if ( isInteger( pmode ) )
-            params_.integrator.vegas.mode = asInteger( pmode );
-          Py_DECREF( pmode );
-        }
-        PyObject* pverb = getElement( integr, "verbosity" );
-        if ( pverb ) {
-          if ( isInteger( pverb ) )
-            params_.integrator.vegas.verbose = asInteger( pverb );
-          Py_DECREF( pverb );
-        }
+        getParameter( integr, "alpha", (double&)params_.integrator.vegas.alpha );
+        getParameter( integr, "iterations", (unsigned long&)params_.integrator.vegas.iterations );
+        getParameter( integr, "mode", (int&)params_.integrator.vegas.mode );
+        getParameter( integr, "verbosity", (int&)params_.integrator.vegas.verbose );
       }
       else if ( algo == "MISER" ) {
         params_.integrator.type = Integrator::MISER;
-        PyObject* pestfrac = getElement( integr, "estimateFraction" );
-        if ( pestfrac ) {
-          if ( PyFloat_Check( pestfrac ) )
-            params_.integrator.miser.estimate_frac = PyFloat_AsDouble( pestfrac );
-          Py_DECREF( pestfrac );
-        }
-        PyObject* pmc = getElement( integr, "minCalls" );
-        if ( pmc ) {
-          if ( isInteger( pmc ) )
-            params_.integrator.miser.min_calls = asInteger( pmc );
-          Py_DECREF( pmc );
-        }
-        PyObject* pmcpb = getElement( integr, "minCallsPerBisection" );
-        if ( pmcpb ) {
-          if ( isInteger( pmcpb ) )
-            params_.integrator.miser.min_calls_per_bisection = asInteger( pmcpb );
-          Py_DECREF( pmcpb );
-        }
-        PyObject* palpha = getElement( integr, "alpha" );
-        if ( palpha ) {
-          if ( PyFloat_Check( palpha ) )
-            params_.integrator.miser.alpha = PyFloat_AsDouble( palpha );
-          Py_DECREF( palpha );
-        }
-        PyObject* pdither = getElement( integr, "dither" );
-        if ( pdither ) {
-          if ( PyFloat_Check( pdither ) )
-            params_.integrator.miser.dither = PyFloat_AsDouble( pdither );
-          Py_DECREF( pdither );
-        }
+        getParameter( integr, "estimateFraction", (double&)params_.integrator.miser.estimate_frac );
+        getParameter( integr, "minCalls", (unsigned long&)params_.integrator.miser.min_calls );
+        getParameter( integr, "minCallsPerBisection", (unsigned long&)params_.integrator.miser.min_calls_per_bisection );
+        getParameter( integr, "alpha", (double&)params_.integrator.miser.alpha );
+        getParameter( integr, "dither", (double&)params_.integrator.miser.dither );
       }
       else
         throwPythonError( Form( "Invalid integration algorithm: %s", algo.c_str() ).c_str() );
-      Py_DECREF( palgo );
 
-      PyObject* pnp = getElement( integr, "numPoints" );
-      if ( pnp ) {
-        if ( isInteger( pnp ) )
-          params_.integrator.npoints = asInteger( pnp );
-        Py_DECREF( pnp );
-      }
-      PyObject* pnc = getElement( integr, "numFunctionCalls" );
-      if ( pnc ) {
-        if ( isInteger( pnc ) )
-          params_.integrator.ncvg = asInteger( pnc );
-        Py_DECREF( pnc );
-      }
-      PyObject* psd = getElement( integr, "seed" );
-      if ( psd ) {
-        if ( isInteger( psd ) )
-          params_.integrator.seed = PyLong_AsUnsignedLong( psd );
-        Py_DECREF( psd );
-      }
+      getParameter( integr, "numPoints", (int&)params_.integrator.npoints );
+      getParameter( integr, "numFunctionCalls", (int&)params_.integrator.ncvg );
+      getParameter( integr, "seed", (unsigned long&)params_.integrator.seed );
     }
 
     void
@@ -321,18 +253,8 @@ namespace CepGen
       if ( !PyDict_Check( gen ) )
         throwPythonError( "Generation information object should be a dictionary!" );
       params_.generation.enabled = true;
-      PyObject* pnev = getElement( gen, "numEvents" );
-      if ( pnev ) {
-        if ( isInteger( pnev ) )
-          params_.generation.maxgen = asInteger( pnev );
-        Py_DECREF( pnev );
-      }
-      PyObject* ppev = getElement( gen, "printEvery" );
-      if ( ppev ) {
-        if ( isInteger( ppev ) )
-          params_.generation.gen_print_every = asInteger( ppev );
-        Py_DECREF( ppev );
-      }
+      getParameter( gen, "numEvents", (int&)params_.generation.maxgen );
+      getParameter( gen, "printEvery", (int&)params_.generation.gen_print_every );
     }
 
     void
@@ -388,6 +310,8 @@ namespace CepGen
       }
     }
 
+    //------------------------------------------------------------------
+    // Python API helpers
     //------------------------------------------------------------------
 
     std::string
@@ -457,20 +381,62 @@ namespace CepGen
     PythonHandler::getLimits( PyObject* obj, const char* key, Kinematics::Limits& lim )
     {
       PyObject* pobj = getElement( obj, key );
-      if ( pobj ) {
-        if ( !PyTuple_Check( pobj ) )
-          FatalError( Form( "Invalid value retrieved for %s", key ) );
-        if ( PyTuple_Size( pobj ) < 1 )
-          FatalError( Form( "Invalid number of values unpacked for %s!", key ) );
-        double min = PyFloat_AsDouble( PyTuple_GetItem( pobj, 0 ) );
-        lim.min() = min;
-        if ( PyTuple_Size( pobj ) > 1 ) {
-          double max = PyFloat_AsDouble( PyTuple_GetItem( pobj, 1 ) );
-          if ( max != -1 )
-            lim.max() = max;
-        }
-        Py_DECREF( pobj );
+      if ( !pobj )
+        return;
+      if ( !PyTuple_Check( pobj ) )
+        FatalError( Form( "Invalid value retrieved for %s", key ) );
+      if ( PyTuple_Size( pobj ) < 1 )
+        FatalError( Form( "Invalid number of values unpacked for %s!", key ) );
+      double min = PyFloat_AsDouble( PyTuple_GetItem( pobj, 0 ) );
+      lim.min() = min;
+      if ( PyTuple_Size( pobj ) > 1 ) {
+        double max = PyFloat_AsDouble( PyTuple_GetItem( pobj, 1 ) );
+        if ( max != -1 )
+          lim.max() = max;
       }
+      Py_DECREF( pobj );
+    }
+
+    void
+    PythonHandler::getParameter( PyObject* parent, const char* key, int& out )
+    {
+      PyObject* pobj = getElement( parent, key );
+      if ( !pobj )
+        return;
+#ifdef PYTHON2
+      if ( !PyInt_Check( pobj ) )
+        throwPythonError( Form( "Object \"%s\" has invalid type", key ).c_str() );
+      out = _PyInt_AsInt( pobj );
+#else
+      if ( !PyLong_Check( pobj ) )
+        throwPythonError( Form( "Object \"%s\" has invalid type", key ).c_str() );
+      out = PyLong_AsLong( pobj );
+#endif
+      Py_DECREF( pobj );
+    }
+
+    void
+    PythonHandler::getParameter( PyObject* parent, const char* key, unsigned long& out )
+    {
+      PyObject* pobj = getElement( parent, key );
+      if ( !pobj )
+        return;
+      if ( !PyLong_Check( pobj ) )
+        throwPythonError( Form( "Object \"%s\" has invalid type", key ).c_str() );
+      out = PyLong_AsUnsignedLong( pobj );
+      Py_DECREF( pobj );
+    }
+
+    void
+    PythonHandler::getParameter( PyObject* parent, const char* key, double& out )
+    {
+      PyObject* pobj = getElement( parent, key );
+      if ( !pobj )
+        return;
+      if ( !PyFloat_Check( pobj ) )
+        throwPythonError( Form( "Object \"%s\" has invalid type", key ).c_str() );
+      out = PyFloat_AsDouble( pobj );
+      Py_DECREF( pobj );
     }
 
     bool

@@ -30,6 +30,9 @@ namespace CepGen
         static int asInteger( PyObject* obj );
 
         void getLimits( PyObject* obj, const char* key, Kinematics::Limits& lim );
+        void getParameter( PyObject* parent, const char* key, int& out );
+        void getParameter( PyObject* parent, const char* key, unsigned long& out );
+        void getParameter( PyObject* parent, const char* key, double& out );
 
         void parseIncomingKinematics( PyObject* );
         void parseOutgoingKinematics( PyObject* );

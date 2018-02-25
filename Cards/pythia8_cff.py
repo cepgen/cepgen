@@ -2,6 +2,7 @@ import Cards.Core as cepgen
 
 pythia8 = cepgen.Module('pythia8',
     seed = 0,
+    maxTrials = 1,
     pythiaPreConfiguration = (
         #'Init:showAllSettings = on',
         # disable all generation processes
