@@ -1,20 +1,17 @@
 #ifndef CepGen_Parameters_h
 #define CepGen_Parameters_h
 
-#include "CepGen/Core/TamingFunction.h"
 #include "CepGen/Core/Integrator.h"
 #include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Processes/GenericProcess.h"
-#include "CepGen/Hadronisers/GenericHadroniser.h"
-
-#include <gsl/gsl_monte_vegas.h>
-#include <gsl/gsl_monte_miser.h>
 
 #include <memory>
 
 namespace CepGen
 {
   class Event;
+  class TamingFunctionsCollection;
+  namespace Process { class GenericProcess; }
+  namespace Hadroniser { class GenericHadroniser; }
   /// List of parameters used to start and run the simulation job
   class Parameters
   {
@@ -24,7 +21,7 @@ namespace CepGen
       Parameters( Parameters& );
       /// Const copy constructor (all but the process and the hadroniser)
       Parameters( const Parameters& );
-      ~Parameters() {}
+      ~Parameters(); // required for unique_ptr initialisation!
       /// Set the polar angle range for the produced leptons
       /// \param[in] thetamin The minimal value of \f$\theta\f$ for the outgoing leptons
       /// \param[in] thetamax The maximal value of \f$\theta\f$ for the outgoing leptons
@@ -35,11 +32,11 @@ namespace CepGen
       //----- process to compute
 
       /// Process for which the cross-section will be computed and the events will be generated
-      Process::GenericProcess* process() { return process_.get(); }
+      Process::GenericProcess* process();
       /// Name of the process considered
       std::string processName() const;
       /// Set the process to study
-      void setProcess( Process::GenericProcess* proc ) { process_.reset( proc ); }
+      void setProcess( Process::GenericProcess* proc );
 
       //----- events kinematics
 
@@ -97,16 +94,16 @@ namespace CepGen
       //----- hadronisation algorithm
 
       /// Hadronisation algorithm to use for the proton(s) fragmentation
-      Hadroniser::GenericHadroniser* hadroniser() { return hadroniser_.get(); }
+      Hadroniser::GenericHadroniser* hadroniser();
       /// Set the hadronisation algorithm
-      void setHadroniser( Hadroniser::GenericHadroniser* hadr ) { hadroniser_.reset( hadr ); }
+      void setHadroniser( Hadroniser::GenericHadroniser* hadr );
       /// Maximal number of trials for the hadronisation of the proton(s) remnants
       unsigned int hadroniser_max_trials;
 
       //----- taming functions
 
       /// Functionals to be used to account for rescattering corrections (implemented within the process)
-      TamingFunctionsCollection taming_functions;
+      std::unique_ptr<TamingFunctionsCollection> taming_functions;
 
     private:
       std::unique_ptr<Process::GenericProcess> process_;

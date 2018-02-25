@@ -5,8 +5,8 @@
 #include <algorithm>
 
 #include "CepGen/Core/Logger.h"
-#include "CepGen/Event/Particle.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/Physics/ParticleProperties.h"
 
 #include "Cuts.h"
 

@@ -3,6 +3,8 @@
 
 #ifdef PYTHON
 
+#include "CepGen/Core/TamingFunction.h"
+
 #include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Processes/PPtoLL.h"
 #include "CepGen/Processes/PPtoWW.h"
@@ -61,21 +63,21 @@ namespace CepGen
 
       PyObject* fn = encode( filename.c_str() );
       if ( !fn )
-        throwPythonError( Form( "Failed to encode the configuration filename %s", filename.c_str() ).c_str() );
+        throwPythonError( Form( "Failed to encode the configuration filename %s", filename.c_str() ) );
 
       PyObject* cfg = PyImport_Import( fn );
       Py_DECREF( fn );
       if ( !cfg )
-        throwPythonError( Form( "Failed to parse the configuration card %s", file ).c_str(), FatalError );
+        throwPythonError( Form( "Failed to parse the configuration card %s", file ) );
 
       PyObject* process = PyObject_GetAttrString( cfg, "process" );
       if ( !process )
-        throwPythonError( Form( "Failed to extract a \"process\" keyword from the configuration card %s", file ).c_str(), FatalError );
+        throwPythonError( Form( "Failed to extract a \"process\" keyword from the configuration card %s", file ) );
 
       //--- type of process to consider
       PyObject* pproc_name = PyDict_GetItem( process, encode( module_name_ ) );
       if ( !pproc_name )
-        throwPythonError( Form( "Failed to extract the process name from the configuration card %s", file ).c_str(), FatalError );
+        throwPythonError( Form( "Failed to extract the process name from the configuration card %s", file ) );
 
       const std::string proc_name = decode( pproc_name );
       Py_DECREF( pproc_name );
@@ -240,7 +242,7 @@ namespace CepGen
         getParameter( integr, "dither", (double&)params_.integrator.miser.dither );
       }
       else
-        throwPythonError( Form( "Invalid integration algorithm: %s", algo.c_str() ).c_str() );
+        throwPythonError( Form( "Invalid integration algorithm: %s", algo.c_str() ) );
 
       getParameter( integr, "numPoints", (int&)params_.integrator.npoints );
       getParameter( integr, "numFunctionCalls", (int&)params_.integrator.ncvg );
@@ -266,9 +268,10 @@ namespace CepGen
       for ( Py_ssize_t i = 0; i < PyList_Size( tf ); ++i ) {
         PyObject* pit = PyList_GetItem( tf, i );
         if ( !PyDict_Check( pit ) )
-          throwPythonError( Form( "Item %d is invalid", i ).c_str() );
-        PyObject* pvar = getElement( pit, "variable" ), *pexpr = getElement( pit, "expression" );
-        params_.taming_functions.add( decode( pvar ), decode( pexpr ) );
+          throwPythonError( Form( "Item %d is invalid", i ) );
+        PyObject* pvar = getElement( pit, "variable" );
+        PyObject* pexpr = getElement( pit, "expression" );
+        params_.taming_functions->add( decode( pvar ), decode( pexpr ) );
         Py_DECREF( pvar );
         Py_DECREF( pexpr );
       }
@@ -324,7 +327,7 @@ namespace CepGen
     }
 
     void
-    PythonHandler::throwPythonError( const char* message, const ExceptionType& type )
+    PythonHandler::throwPythonError( const std::string& message, const ExceptionType& type )
     {
       PyObject* ptype = nullptr, *pvalue = nullptr, *ptraceback = nullptr;
       PyErr_Fetch( &ptype, &pvalue, &ptraceback );
@@ -364,7 +367,7 @@ namespace CepGen
     {
       PyObject* obj = PyUnicode_FromString( str );
       if ( !obj )
-        throwPythonError( Form( "Failed to encode the following string:\n\t%s", str ).c_str() );
+        throwPythonError( Form( "Failed to encode the following string:\n\t%s", str ) );
       return obj;
     }
 
@@ -405,11 +408,11 @@ namespace CepGen
         return;
 #ifdef PYTHON2
       if ( !PyInt_Check( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type", key ).c_str() );
+        throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       out = _PyInt_AsInt( pobj );
 #else
       if ( !PyLong_Check( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type", key ).c_str() );
+        throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       out = PyLong_AsLong( pobj );
 #endif
       Py_DECREF( pobj );
@@ -422,7 +425,7 @@ namespace CepGen
       if ( !pobj )
         return;
       if ( !PyLong_Check( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type", key ).c_str() );
+        throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       out = PyLong_AsUnsignedLong( pobj );
       Py_DECREF( pobj );
     }
@@ -434,7 +437,7 @@ namespace CepGen
       if ( !pobj )
         return;
       if ( !PyFloat_Check( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type", key ).c_str() );
+        throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       out = PyFloat_AsDouble( pobj );
       Py_DECREF( pobj );
     }

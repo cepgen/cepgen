@@ -1,9 +1,13 @@
 #include "CepGen/Core/Timer.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/TamingFunction.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/Kinematics.h"
+
 #include "CepGen/Processes/GenericProcess.h"
+#include "CepGen/Hadronisers/GenericHadroniser.h"
+
 #include "CepGen/Parameters.h"
 
 #include <sstream>
@@ -97,20 +101,23 @@ namespace CepGen
     //--- once the kinematics variables have been populated,
     //    can apply the collection of taming functions
 
-    double taming = 1.0;
-    if ( p->taming_functions.has( "m_central" ) || p->taming_functions.has( "pt_central" ) ) {
-      Particle::Momentum central_system;
-      const Particles& cm_parts = ev->getByRole( Particle::CentralSystem );
-      for ( Particles::const_iterator it_p = cm_parts.begin(); it_p != cm_parts.end(); ++it_p )
-        central_system += it_p->momentum();
-      taming *= p->taming_functions.eval( "m_central", central_system.mass() );
-      taming *= p->taming_functions.eval( "pt_central", central_system.pt() );
+    if ( p->taming_functions ) {
+      if ( p->taming_functions->has( "m_central" )
+        || p->taming_functions->has( "pt_central" ) ) {
+        Particle::Momentum central_system;
+        const Particles& cm_parts = ev->getByRole( Particle::CentralSystem );
+        for ( Particles::const_iterator it_p = cm_parts.begin(); it_p != cm_parts.end(); ++it_p )
+          central_system += it_p->momentum();
+        if ( p->taming_functions->has( "m_central" ) )
+          integrand *= p->taming_functions->eval( "m_central", central_system.mass() );
+        if ( p->taming_functions->has( "pt_central" ) )
+          integrand *= p->taming_functions->eval( "pt_central", central_system.pt() );
+      }
+      if ( p->taming_functions->has( "q2" ) ) {
+        integrand *= p->taming_functions->eval( "q2", -ev->getOneByRole( Particle::Parton1 ).momentum().mass() );
+        integrand *= p->taming_functions->eval( "q2", -ev->getOneByRole( Particle::Parton2 ).momentum().mass() );
+      }
     }
-    if ( p->taming_functions.has( "q2" ) ) {
-      taming *= p->taming_functions.eval( "q2", -ev->getOneByRole( Particle::Parton1 ).momentum().mass() );
-      taming *= p->taming_functions.eval( "q2", -ev->getOneByRole( Particle::Parton2 ).momentum().mass() );
-    }
-    integrand *= taming;
 
     //--- full event content (+ hadronisation) if generating events
 

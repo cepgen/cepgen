@@ -78,12 +78,14 @@ namespace CepGen
       cuts_ = kin;
       Kinematics::Limits qt_limits = cuts_.cuts.initial[Cuts::qt];
       if ( !qt_limits.hasMin() )
-        qt_limits.min() = 1.e-10; //FIXME fine-tuning needed!
+        qt_limits.min() = 1.e-10;
       if ( !qt_limits.hasMax() )
         qt_limits.max() = 500.;
 
-      log_qmin_ = log( qt_limits.min() );
+      log_qmin_ = std::max( log( qt_limits.min() ), -10. ); //FIXME fine-tuning needed!
       log_qmax_ = log( qt_limits.max() );
+      if ( log_qmax_ > 10. )
+        InWarning( Form( "qT range above \"reasonable\" range: maximal qT specified = 10^(%.1f)", log_qmax_ ) );
     }
 
     double

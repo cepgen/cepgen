@@ -1,6 +1,10 @@
 #include "CepGen/Parameters.h"
+
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/TamingFunction.h"
+
 #include "CepGen/Processes/GenericProcess.h"
+#include "CepGen/Hadronisers/GenericHadroniser.h"
 
 namespace CepGen
 {
@@ -12,7 +16,7 @@ namespace CepGen
   Parameters::Parameters( Parameters& param ) :
     kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
     hadroniser_max_trials( param.hadroniser_max_trials ),
-    taming_functions( param.taming_functions ),
+    taming_functions( std::move( param.taming_functions ) ),
     process_( std::move( param.process_ ) ), hadroniser_( std::move( param.hadroniser_ ) ),
     store_( param.store_ )
   {}
@@ -20,8 +24,10 @@ namespace CepGen
   Parameters::Parameters( const Parameters& param ) :
     kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
     hadroniser_max_trials( param.hadroniser_max_trials ),
-    taming_functions( param.taming_functions ),
     store_( param.store_ )
+  {}
+
+  Parameters::~Parameters()
   {}
 
   void
@@ -36,11 +42,35 @@ namespace CepGen
     }
   }
 
+  Process::GenericProcess*
+  Parameters::process()
+  {
+    return process_.get();
+  }
+
   std::string
   Parameters::processName() const
   {
     if ( process_ ) return process_->name();
     return "no process";
+  }
+
+  void
+  Parameters::setProcess( Process::GenericProcess* proc )
+  {
+    process_.reset( proc );
+  }
+
+  Hadroniser::GenericHadroniser*
+  Parameters::hadroniser()
+  {
+    return hadroniser_.get();
+  }
+
+  void
+  Parameters::setHadroniser( Hadroniser::GenericHadroniser* hadr )
+  {
+    hadroniser_.reset( hadr );
   }
 
   void
