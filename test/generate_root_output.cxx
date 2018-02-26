@@ -1,4 +1,7 @@
-#include <iostream>
+#include "CepGen/Cards/PythonHandler.h"
+#include "CepGen/Cards/LpairHandler.h"
+#include "CepGen/Generator.h"
+#include "CepGen/Event/Event.h"
 
 // ROOT includes
 #include "TFile.h"
@@ -7,9 +10,7 @@
 
 #include "TreeEvent.h"
 
-#include "CepGen/Generator.h"
-#include "CepGen/Cards/LpairHandler.h"
-#include "CepGen/Cards/PythiaHandler.h"
+#include <iostream>
 
 using namespace std;
 
@@ -25,9 +26,11 @@ int main( int argc, char* argv[] ) {
     InError( Form( "Usage: %s <input card> [output .root filename]", argv[0] ) );
     return -1;
   }
-  const std::string incard( argv[1] ), extension = incard.substr( incard.find_last_of( "." )+1 );
-  if ( extension == "card" ) mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
-  else if ( extension == "py" ) mg.setParameters( CepGen::Cards::PythiaHandler( argv[1] ).parameters() );
+  const std::string extension = CepGen::Cards::Handler::getExtension( argv[1] );
+  if ( extension == "card" )
+    mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
+  else if ( extension == "py" )
+    mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
 
   mg.parameters->generation.enabled = true;
   mg.parameters->dump();
@@ -37,7 +40,8 @@ int main( int argc, char* argv[] ) {
   const TString filename = ( argc > 2 ) ? argv[2] : "events.root";
   auto file = TFile::Open( filename, "recreate" );
   if ( !file ) {
-    cout << "ERROR while trying to create the output file!" << endl;
+    cerr << "ERROR while trying to create the output file!" << endl;
+    return -1;
   }
 
   //----- start by computing the cross section for the list of parameters applied

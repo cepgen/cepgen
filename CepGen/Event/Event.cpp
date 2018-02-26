@@ -13,9 +13,9 @@ namespace CepGen
   {}
 
   Event::Event( const Event& rhs ) :
-    particles_( rhs.particles_ ),
     num_hadronisation_trials( rhs.num_hadronisation_trials ),
     time_generation( rhs.time_generation ), time_total( rhs.time_total ),
+    particles_( rhs.particles_ ),
     evtcontent_( rhs.evtcontent_ )
   {}
 
@@ -284,7 +284,7 @@ namespace CepGen
           for ( std::set<int>::const_iterator it_moth = mothers.begin(); it_moth != mothers.end(); ++it_moth )
             oss << ( ( it_moth != mothers.begin() ) ? "/" : "" ) << getConstById( *it_moth ).pdgId();
         else oss << part.pdgId();
-        os << Form( "\n %2d\t%+6d %-8s", part.id(), part.integerPdgId(), oss.str().c_str() );
+        os << Form( "\n %2d\t%-+7d %-10s", part.id(), part.integerPdgId(), oss.str().c_str() );
       }
       os << "\t";
       if ( part.charge() != 999. ) os << Form( "%6.2f ", part.charge() );
@@ -299,7 +299,7 @@ namespace CepGen
       }
       else os << "       ";
       const Particle::Momentum mom = part.momentum();
-      os << Form( "% 9.6e % 9.6e % 9.6e % 9.6e % 12.7f", mom.px(), mom.py(), mom.pz(), part.energy(), part.mass() );
+      os << Form( "% 9.6e % 9.6e % 9.6e % 9.6e % 12.5f", mom.px(), mom.py(), mom.pz(), part.energy(), part.mass() );
 
       // discard non-primary, decayed particles
       if ( (short)part.status() >= 0. ) {
@@ -317,10 +317,10 @@ namespace CepGen
     if ( fabs(  etot ) < 1.e-10 ) etot = 0.;
     //
     Information( Form( "Dump of event content:\n"
-    "Part.\tPDG id\t\tCharge\t   Role\tStatus\tMother\t\t\t\t4-Momentum (GeV)\t\tMass (GeV)\n"
-    "----\t------\t\t------\t   ----\t------\t------\t------------------------------------------------------  -----------"
+    " Id\tPDG id\tName\t\tCharge\t   Role\tStatus\tMother\tpx (GeV/c)    py (GeV/c)    pz (GeV/c)    E (GeV)\t M (GeV/c²)\n"
+    " --\t------\t----\t\t------\t   ----\t------\t------\t------------  ------------  ------------  ------------\t ----------"
     "%s\n"
-    "---------------------------------------------------------------------------------------------------------------------------\n"
-    "\t\t\t\t\t\tTotal: % 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), pxtot, pytot, pztot, etot ) );
+    " ----------------------------------------------------------------------------------------------------------------------------------\n"
+    "\t\t\t\t\t\t\tOut-in:% 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), pxtot, pytot, pztot, etot ) );
   }
 }

@@ -120,7 +120,6 @@ namespace CepGen
         parseIntegrator( pint );
         Py_DECREF( pint );
       }
-      std::cout << "tmp=" << params_.kinematics.mode << std::endl;
 
       PyObject* pgen = PyObject_GetAttrString( cfg, "generator" );
       if ( pgen ) {

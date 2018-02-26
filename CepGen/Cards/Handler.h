@@ -19,6 +19,12 @@ namespace CepGen
 
         /// Retrieve a configuration from a parsed steering cart
         Parameters& parameters() { return params_; }
+        /// Small utility to retrieve the extension of a filename
+        ///  (naive approach)
+        static std::string getExtension( const char* filename ) {
+          const std::string file( filename );
+          return file.substr( file.find_last_of( "." )+1 );
+        }
 
       protected:
         /// List of parameters parsed from a card handler

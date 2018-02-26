@@ -1,5 +1,6 @@
+#include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Generator.h"
-#include "CepGen/Cards/PythiaHandler.h"
+#include "CepGen/Event/Event.h"
 
 #include "Canvas.h"
 #include "TH1.h"
@@ -24,16 +25,14 @@ int main( int argc, char* argv[] )
     InError( Form( "Usage: %s [input card]", argv[0] ) );
     return -1;
   }
-  mg.setParameters( CepGen::Cards::PythiaHandler( argv[1] ).parameters() );
+  mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
 
   TH1D h_mass( "invm", "Dilepton invariant mass\\d#sigma/dM\\GeV?.2f", 1000, 0., 500. ),
        h_ptpair( "ptpair", "Dilepton p_{T}\\d#sigma/dp_{T}\\GeV?.2f", 500, 0., 50. ),
        h_ptsingle( "pt_single", "Single lepton p_{T}\\d#sigma/dp_{T}\\?.2f", 100, 0., 100. ),
        h_etasingle( "eta_single", "Single lepton #eta\\d#sigma/d#eta\\?.2f", 60, -3., 3. );
 
-  std::ostringstream gen_name;
-  gen_name << mg.parameters->process()->name();
-  Information( Form( "Process name: %s", gen_name.str().c_str() ) );
+  Information( Form( "Process name: %s", mg.parameters->processName().c_str() ) );
   //mg.parameters->taming_functions.dump();
 
   for ( unsigned int i = 0; i < mg.parameters->generation.maxgen; ++i ) {

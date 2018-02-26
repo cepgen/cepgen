@@ -1,5 +1,9 @@
 #include "CepGen/Generator.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Processes/GamGamLL.h"
+
+#include <fstream>
 
 using namespace std;
 

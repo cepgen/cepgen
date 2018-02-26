@@ -111,7 +111,15 @@ namespace CepGen
     xsec = cross_section_;
     err = cross_section_error_;
 
-    Information( Form( "Total cross section: %g +/- %g pb", xsec, err ) );
+    if ( xsec < 1.e-2 ) {
+      Information( Form( "Total cross section: %g +/- %g fb", xsec*1.e3, err*1.e3 ) );
+    }
+    else if ( xsec > 5.e2 ) {
+      Information( Form( "Total cross section: %g +/- %g nb", xsec*1.e-3, err*1.e-3 ) );
+    }
+    else {
+      Information( Form( "Total cross section: %g +/- %g pb", xsec, err ) );
+    }
   }
 
   std::shared_ptr<Event>

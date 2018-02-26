@@ -17,7 +17,6 @@ namespace CepGen
     {
 #ifdef PYTHIA8
       pythia_.reset( new Pythia8::Pythia );
-      std::cout << params.kinematics.inpdg.first << "\t" << params.kinematics.inpdg.second << std::endl;
       readString( Form( "Beams:idA = %d", params.kinematics.inpdg.first ) );
       readString( Form( "Beams:idB = %d", params.kinematics.inpdg.second ) );
       readString( Form( "Beams:eCM = %.2f", params.kinematics.sqrtS() ) );
@@ -69,6 +68,7 @@ namespace CepGen
       /*const double sqrt_s = ev.cmEnergy();
       pythia_->event[0].e( sqrt_s );
       pythia_->event[0].m( sqrt_s );*/
+      // handle slight energy conservation violation from the process...
       Particle::Momentum p_out = ev.getOneByRole( Particle::OutgoingBeam1 ).momentum()
                                + ev.getOneByRole( Particle::OutgoingBeam2 ).momentum();
       for ( const auto& p : ev.getByRole( Particle::CentralSystem ) )
@@ -102,25 +102,23 @@ namespace CepGen
           case Particle::UnknownRole:
             continue;
           case Particle::CentralSystem: {
-            if ( pythia_->particleData.canDecay( py8part.id() )
-              || pythia_->particleData.mayDecay( py8part.id() ) )
-              py8part.status( 93 );
-            else
-              py8part.status( 23 ); // outgoing particles of the hardest subprocess
+            py8part.status( 23 ); // outgoing particles of the hardest subprocess
             py_id = pythia_->event.append( py8part );
           } break;
           case Particle::OutgoingBeam1:
           case Particle::OutgoingBeam2: {
-            py8part.id( 2212 );
-            py8part.status( ( proton_fragment && part.status() == Particle::Unfragmented )
-              ? 15
-              : 14 // final state proton
+            py8part.status(
+              ( proton_fragment && part.status() == Particle::Unfragmented )
+                ? 15
+                : 14 // final state proton
             );
             py_id = pythia_->event.append( py8part );
 
             if ( proton_fragment && part.status() == Particle::Unfragmented ) {
-              if ( part.role() == Particle::OutgoingBeam1 ) idx_remn1 = py_id;
-              if ( part.role() == Particle::OutgoingBeam2 ) idx_remn2 = py_id;
+              if ( part.role() == Particle::OutgoingBeam1 )
+                idx_remn1 = py_id;
+              if ( part.role() == Particle::OutgoingBeam2 )
+                idx_remn2 = py_id;
             }
           } break;
         }
@@ -159,11 +157,12 @@ namespace CepGen
       bool success = false;
       ev.num_hadronisation_trials = 0;
       while ( !success ) {
-        success = pythia_->next();
-        if ( proton_fragment ){
-          std::cout << success << "attempt " << ev.num_hadronisation_trials << " / " << max_attempts_ << std::endl;
+        //success = pythia_->next();
+        pythia_->next(); success = pythia_->event.size() != num_py_parts; //FIXME discards any pythia error!
+        /*if ( proton_fragment ) {
+          //std::cout << success << "attempt " << ev.num_hadronisation_trials << " / " << max_attempts_ << std::endl;
           pythia_->event.list(true,true);
-      }
+        }*/
         if ( ++ev.num_hadronisation_trials > max_attempts_ )
           return false;
       }
@@ -184,9 +183,13 @@ namespace CepGen
         const Pythia8::Particle& p = pythia_->event[i];
         std::map<short,short>::const_iterator it = py_cg_corresp.find( i );
         if ( it != py_cg_corresp.end() ) { // the particle is already in the event content
-          if ( p.daughterList().size() > 0 && i != idx_remn1 && i != idx_remn2 ) {
-            weight *= p.particleDataEntry().pickChannel().bRatio();
-            ev.getById( it->second ).setStatus( Particle::Resonance );
+          if ( p.daughterList().size() > 0 ) {
+            if ( i != idx_remn1 && i != idx_remn2 ) {
+              weight *= p.particleDataEntry().pickChannel().bRatio();
+              ev.getById( it->second ).setStatus( Particle::Resonance );
+            }
+            else
+              ev.getById( it->second ).setStatus( Particle::Fragmented );
           }
         }
         else { // the particle was not yet included in the CepGen event

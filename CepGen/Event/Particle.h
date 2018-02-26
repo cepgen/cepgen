@@ -19,8 +19,9 @@ namespace CepGen
       /// Internal status code for a particle
       enum Status {
         PrimordialIncoming = -9,
-        DebugResonance = -4,
-        Resonance = -3,
+        DebugResonance = -5,
+        Resonance = -4,
+        Fragmented = -3,
         Propagator = -2,
         Incoming = -1,
         Undefined = 0,

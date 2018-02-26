@@ -42,5 +42,7 @@ pythia8 = cepgen.Module('pythia8',
         'MultipartonInteractions:expPow = 1.6',
         #'Check:epTolErr = 10000.', #FIXME FIXME FIXME!!! BAD BAD BAD
         #'Check:epTolWarn = 10.', #FIXME FIXME FIXME!!! BAD BAD BAD
+        '24:onMode = off', # disable all W decays...
+        '13:onMode = off', # disable all muon decays...
     ),
 )
