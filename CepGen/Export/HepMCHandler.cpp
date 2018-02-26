@@ -1,6 +1,8 @@
 #include "HepMCHandler.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Physics/Constants.h"
 
 #ifdef LIBHEPMC
 
