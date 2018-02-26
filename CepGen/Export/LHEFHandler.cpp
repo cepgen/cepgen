@@ -5,6 +5,7 @@
 #ifdef HEPMC_VERSION3
 #include "LHEFHandler.h"
 
+#include "CepGen/Physics/Constants.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Version.h"
 

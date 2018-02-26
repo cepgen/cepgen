@@ -1,10 +1,11 @@
 #ifndef CepGen_Export_ExportHandler_h
 #define CepGen_Export_ExportHandler_h
 
-#include "CepGen/Event/Event.h"
+#include <iostream>
 
 namespace CepGen
 {
+  class Event;
   class Parameters;
   /// Location for all output generators
   namespace OutputHandler
