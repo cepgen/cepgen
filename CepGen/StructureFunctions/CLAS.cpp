@@ -145,7 +145,7 @@ namespace CepGen
       if ( params_.mode == Parameterisation::deuteron && xbj > 0. )
         f2 /= ( 1.-exp( -7.70*( 1./xbj-1.+params_.mp*params_.mp/q2 ) ) );
 
-      return f2 *= pow( 1.-xs, 3 ) / xsxb;
+      return f2 * pow( 1.-xs, 3 ) / xsxb;
     }
 
     std::pair<double,double>

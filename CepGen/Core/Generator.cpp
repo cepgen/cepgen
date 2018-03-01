@@ -31,7 +31,8 @@ namespace CepGen
   Generator::~Generator()
   {
     if ( parameters->generation.enabled && parameters->process() && parameters->process()->numGeneratedEvents()>0 ) {
-      Information( Form( "Mean generation time / event: %g ms", parameters->process()->totalGenerationTime()*1.e3/parameters->process()->numGeneratedEvents() ) );
+      Information( Form( "Mean generation time / event: %g ms",
+                         parameters->process()->totalGenerationTime()*1.e3/parameters->process()->numGeneratedEvents() ) );
     }
   }
 
@@ -106,7 +107,8 @@ namespace CepGen
     try { prepareFunction(); } catch ( Exception& e ) { e.dump(); }
 
     const int res = integrator_->integrate( cross_section_, cross_section_error_ );
-    if ( res != 0 ) throw Exception( __PRETTY_FUNCTION__, Form( "Error while computing the cross-section: return value = %d", res ), FatalError );
+    if ( res != 0 )
+      throw Exception( __PRETTY_FUNCTION__, Form( "Error while computing the cross-section: return value = %d", res ), FatalError );
 
     xsec = cross_section_;
     err = cross_section_error_;

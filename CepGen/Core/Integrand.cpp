@@ -18,9 +18,7 @@ namespace CepGen
   double
   f( double* x, size_t ndim, void* params )
   {
-    std::ostringstream os;
-
-    Parameters* p = static_cast<Parameters*>( params );
+    Parameters* p = (Parameters*)params;
     std::shared_ptr<Event> ev = p->process()->event();
 
     if ( p->process()->hasEvent() ) {
@@ -46,12 +44,17 @@ namespace CepGen
 
         //--- add outgoing protons or remnants
         switch ( p->kinematics.mode ) {
-          case Kinematics::ElectronProton: default: { InError( Form( "Process mode %d not yet handled!", (int)p->kinematics.mode ) ); }
-          case Kinematics::ElasticElastic: break; // nothing to change in the event
+          case Kinematics::ElectronProton: default: {
+            InError( Form( "Process mode %d not yet handled!", (int)p->kinematics.mode ) );
+          }
+          case Kinematics::ElasticElastic:
+          break; // nothing to change in the event
           case Kinematics::ElasticInelastic:
-            op2.setPdgId( DiffractiveProton, 1 ); break;
+            op2.setPdgId( DiffractiveProton, 1 );
+            break;
           case Kinematics::InelasticElastic: // set one of the outgoing protons to be fragmented
-            op1.setPdgId( DiffractiveProton, 1 ); break;
+            op1.setPdgId( DiffractiveProton, 1 );
+            break;
           case Kinematics::InelasticInelastic: // set both the outgoing protons to be fragmented
             op1.setPdgId( DiffractiveProton, 1 );
             op2.setPdgId( DiffractiveProton, 1 );
@@ -66,7 +69,8 @@ namespace CepGen
         if ( central_system.size() == p->kinematics.central_system.size() ) {
           unsigned short i = 0;
           for ( Particles::iterator part = central_system.begin(); part != central_system.end(); ++part ) {
-            if ( p->kinematics.central_system[i] == invalidParticle ) continue;
+            if ( p->kinematics.central_system[i] == invalidParticle )
+              continue;
             part->setPdgId( p->kinematics.central_system[i] );
             part->computeMass();
             i++;
@@ -80,7 +84,8 @@ namespace CepGen
 
     p->process()->setPoint( ndim, x );
     if ( Logger::get().level >= Logger::DebugInsideLoop ) {
-      std::ostringstream oss; for ( unsigned int i = 0; i < ndim; ++i ) { oss << x[i] << " "; }
+      std::ostringstream oss;
+      for ( unsigned int i = 0; i < ndim; ++i ) oss << x[i] << " ";
       DebuggingInsideLoop( Form( "Computing dim-%d point ( %s)", ndim, oss.str().c_str() ) );
     }
 
@@ -92,15 +97,22 @@ namespace CepGen
 
     double integrand = p->process()->computeWeight();
 
-    if ( integrand <= 0. ) return 0.;
+    //--- invalidate any unphysical behaviour
+    if ( integrand <= 0. )
+      return 0.;
 
+    //--- speed up the integration process if no event needs to be generated
+    if ( !p->storage()
+      && !p->taming_functions
+      && !p->hadroniser()
+      && p->kinematics.cuts.central_particles.size() == 0 )
+      return integrand;
+  
     //--- fill in the process' Event object
-
     p->process()->fillKinematics();
 
     //--- once the kinematics variables have been populated,
     //    can apply the collection of taming functions
-
     if ( p->taming_functions ) {
       if ( p->taming_functions->has( "m_central" )
         || p->taming_functions->has( "pt_central" ) ) {
@@ -119,12 +131,15 @@ namespace CepGen
       }
     }
 
-    //--- full event content (+ hadronisation) if generating events
+    //--- set the CepGen part of the event generation
+    if ( p->storage() )
+      ev->time_generation = tmr.elapsed();
 
+    //--- event hadronisation and resonances decay
     if ( p->hadroniser() ) {
       double br = 0.; // branching fraction for all decays
       //if ( !p->hadroniser()->hadronise( *ev, br, true ) )
-      if ( !p->hadroniser()->hadronise( *ev, br, p->storage() ) )
+      if ( !p->hadroniser()->hadronise( *ev, br, p->storage() ) || br == 0. )
         return 0.;
       integrand *= br;
     }
@@ -137,27 +152,28 @@ namespace CepGen
       const Particles cs = ev->getByRole( Particle::CentralSystem );
       for ( Particles::const_iterator it_p = cs.begin(); it_p != cs.end(); ++it_p ) {
         it_c = p->kinematics.cuts.central_particles.find( it_p->pdgId() );
-        if ( it_c == p->kinematics.cuts.central_particles.end() ) continue;
+        if ( it_c == p->kinematics.cuts.central_particles.end() )
+          continue;
         // retrieve all cuts associated to this final state particle
         const std::map<Cuts::Central,Kinematics::Limits>& cm = it_c->second;
         // apply these cuts on the given particle
-        if ( cm.count( Cuts::pt_single ) > 0 && !cm.at( Cuts::pt_single ).passes( it_p->momentum().pt() ) ) return 0.;
+        if ( cm.count( Cuts::pt_single ) > 0
+         && !cm.at( Cuts::pt_single ).passes( it_p->momentum().pt() ) )
+          return 0.;
         //std::cout << it_c->first << "\t" << it_p->momentum().pt() << "\t" << cm.at( Cuts::pt_single ).passes( it_p->momentum().pt() ) << std::endl;
-        if ( cm.count( Cuts::energy_single ) > 0 && !cm.at( Cuts::energy_single ).passes( it_p->momentum().energy() ) ) return 0.;
-        if ( cm.count( Cuts::eta_single ) > 0 && !cm.at( Cuts::eta_single ).passes( it_p->momentum().eta() ) ) return 0.;
-        if ( cm.count( Cuts::rapidity_single ) > 0 && !cm.at( Cuts::rapidity_single ).passes( it_p->momentum().rapidity() ) ) return 0.;
+        if ( cm.count( Cuts::energy_single ) > 0
+         && !cm.at( Cuts::energy_single ).passes( it_p->momentum().energy() ) )
+          return 0.;
+        if ( cm.count( Cuts::eta_single ) > 0
+         && !cm.at( Cuts::eta_single ).passes( it_p->momentum().eta() ) )
+          return 0.;
+        if ( cm.count( Cuts::rapidity_single ) > 0
+         && !cm.at( Cuts::rapidity_single ).passes( it_p->momentum().rapidity() ) )
+          return 0.;
       }
     }
 
     if ( p->storage() ) {
-
-/*    std::ofstream dump( "dump.txt", std::ios_base::app );
-    for ( unsigned short i = 0; i < ndim; ++i )
-      dump << x[i] << "\t";
-    dump << "\n";*/
-
-      ev->time_generation = tmr.elapsed();
-
       ev->time_total = tmr.elapsed();
       p->process()->addGenerationTime( ev->time_total );
 
@@ -170,8 +186,9 @@ namespace CepGen
     } // generating events
 
     if ( Logger::get().level >= Logger::DebugInsideLoop ) {
-      os.str( "" ); for ( unsigned int i = 0; i < ndim; ++i ) { os << Form( "%10.8f ", x[i] ); }
-      Debugging( Form( "f value for dim-%d point ( %s): %4.4e", ndim, os.str().c_str(), integrand ) );
+      std::ostringstream oss;
+      for ( unsigned int i = 0; i < ndim; ++i ) oss << Form( "%10.8f ", x[i] );
+      Debugging( Form( "f value for dim-%d point ( %s): %4.4e", ndim, oss.str().c_str(), integrand ) );
     }
 
     return integrand;

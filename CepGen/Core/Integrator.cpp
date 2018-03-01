@@ -246,12 +246,13 @@ namespace CepGen
     do {
       weight = F( x );
       i++;
-    } while ( weight <= 0. && i < 10 );
+    } while ( weight <= 0. && i < 5 );
+    input_params_->setStorage( false );
+
     if ( weight <= 0. )
       return false;
 
     input_params_->generation.ngen += 1;
-    input_params_->setStorage( false );
     if ( input_params_->generation.ngen % input_params_->generation.gen_print_every == 0 ) {
       Debugging( Form( "Generated events: %d", input_params_->generation.ngen ) );
       input_params_->generation.last_event->dump();
