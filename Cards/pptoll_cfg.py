@@ -1,15 +1,16 @@
 import Cards.Core as cepgen
 from Cards.integrators_cff import miser as integrator
 #from Cards.pythia8_cff import pythia8 as hadroniser
+from Cards.ktProcess_cfi import ktProcess
 
-process = cepgen.Module('pptoll',
+process = ktProcess.clone('pptoll',
     mode = cepgen.ProcessMode.ElasticElastic,
     inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),
         structureFunctions = cepgen.StructureFunctions.SuriYennie,
         #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
     ),
-    outKinematics = cepgen.Parameters(
+    outKinematics = ktProcess.outKinematics.clone(
         pair = 13,
         pt = (25.,),
         energy = (0.,),
@@ -24,5 +25,4 @@ process = cepgen.Module('pptoll',
 
 #--- events generation
 from Cards.generator_cff import generator
-generator.numEvents = 1e4
-
+generator.numEvents = 10000

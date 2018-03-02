@@ -10,9 +10,9 @@ class VegasIntegrationMode:
     ImportanceOnly = 0
     Importance = 1
 
-vegas = cepgen.Module('Vegas',
-    numFunctionCalls = 500000,
-    numPoints = 100,
+vegas = plain.clone('Vegas',
+    numFunctionCalls = 50000,
+    numPoints = 10,
     # VEGAS-specific parameters
     iterations = 5,
     alpha = 1.5,
@@ -20,9 +20,7 @@ vegas = cepgen.Module('Vegas',
     verbosity = -1,
 )
 
-miser = cepgen.Module('MISER',
-    numFunctionCalls = 1000000,
-    numPoints = 100,
+miser = plain.clone('MISER',
     # MISER-specific parameters
     estimateFraction = 0.1,
     alpha = 2.,

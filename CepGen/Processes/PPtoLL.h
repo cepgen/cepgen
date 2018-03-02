@@ -15,11 +15,13 @@ namespace CepGen
         inline ~PPtoLL() {}
 
       private:
+        void preparePhaseSpace() override;
         void prepareKTKinematics() override;
-        double computeJacobian() override;
         /// \note IncQQbar in pptoll
         double computeKTFactorisedMatrixElement() override;
         void fillCentralParticlesKinematics() override;
+
+        Kinematics::Limits rap_limits_, ptdiff_limits_, phi_pt_diff_limits_;
 
         /// Rapidity of the first outgoing lepton
         double y1_;

@@ -18,6 +18,7 @@ namespace CepGen
       eta_sum,         ///< central system pseudo-rapidity
       energy_sum,      ///< central system energy
       pt_diff,         ///< transverse momentum balance between the central particles
+      phi_pt_diff,     ///< azimuthal angles difference between the central particles
       rapidity_diff    ///< rapidity balance between the central particles
     };
     inline std::ostream& operator<<( std::ostream& os, const Central& is ) {
@@ -31,6 +32,7 @@ namespace CepGen
         case eta_sum: return os << "Central system eta";
         case energy_sum: return os << "Central system energy";
         case pt_diff: return os << "Central system Δpt (GeV/c)";
+        case phi_pt_diff: return os << "Central system Δɸ (GeV/c)";
         case rapidity_diff: return os << "Central system ΔY";
       }
       return os;

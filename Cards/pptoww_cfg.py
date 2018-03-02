@@ -1,5 +1,6 @@
 import Cards.Core as cepgen
 from Cards.integrators_cff import miser as integrator
+from Cards.ktProcess_cfi import ktProcess
 from Cards.pythia8_cff import pythia8 as hadroniser
 
 hadroniser.pythiaProcessConfiguration = (
@@ -9,7 +10,7 @@ hadroniser.pythiaProcessConfiguration = (
     '24:onIfAny = 11 13' # enable e-nue + mu-numu final states
 )
 
-process = cepgen.Module('pptoww',
+process = ktProcess.clone('pptoww',
     mode = cepgen.ProcessMode.InelasticElastic,
     inKinematics = cepgen.Parameters(
         cmEnergy = 13.e3,
@@ -20,7 +21,7 @@ process = cepgen.Module('pptoww',
         #structureFunctions = cepgen.StructureFunctions.ALLM97,
         structureFunctions = cepgen.StructureFunctions.LUXlike,
     ),
-    outKinematics = cepgen.Parameters(
+    outKinematics = ktProcess.outKinematics.clone(
         mx = (1.07, 1000.),
         qt = (0., 1000.),
         #--- extra cuts on the pt(W+) and pt(W-) plane
@@ -31,7 +32,6 @@ process = cepgen.Module('pptoww',
             # cuts on the single W level
             24: cepgen.Parameters(
                 pt = (0.,),
-                rapidity = (-6., 6.),
             ),
             # cuts on the W decay products
             11: cepgen.Parameters(
@@ -51,7 +51,7 @@ process = cepgen.Module('pptoww',
 #--- import the default generation parameters
 from Cards.generator_cff import generator
 generator.numEvents = 1000
-#generator.printEvery = 1
+generator.printEvery = 1
 
 #print(process)
 #print(integrator)

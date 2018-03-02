@@ -18,16 +18,16 @@ using namespace std;
 int
 main( int argc, char* argv[] )
 {
-  typedef vector<pair<string,pair<double,double> > > KinematicsMap;
+  typedef vector<pair<const char*,pair<double,double> > > KinematicsMap;
   typedef vector<pair<float, KinematicsMap> > ValuesAtCutMap;
 
   AbortHandler ctrl_c;
 
   // values defined at pt(single lepton)>15 GeV, |eta(single lepton)|<2.5, mX<1000 GeV
   // process -> { pt cut -> { kinematics -> ( sigma, delta(sigma) ) } }
-  vector<pair<string,ValuesAtCutMap> > values_map = {
+  vector<pair<const char*,ValuesAtCutMap> > values_map = {
     //--- LPAIR values at sqrt(s) = 13 TeV
-    { "lpair", {
+    /*{ "lpair", {
       { 3.0, { // pt cut
         { "elastic",    { 2.0871703e1, 3.542e-2 } },
         { "singlediss", { 1.5042536e1, 3.256e-2 } },
@@ -38,7 +38,7 @@ main( int argc, char* argv[] )
         { "singlediss", { 4.8504819e-1, 1.171e-3 } },
         { "doublediss", { 6.35650e-1, 1.93968e-3 } }
       } },
-    } },
+    } },*/
     //--- PPTOLL values
     { "pptoll", {
       { 3.0, { // pt cut
@@ -87,37 +87,41 @@ main( int argc, char* argv[] )
 
   try {
     for ( const auto& values_vs_generator : values_map ) { // loop over all generators
-      if ( values_vs_generator.first == "lpair"  )
+      const string generator = values_vs_generator.first;
+      if ( generator == "lpair"  )
         mg.parameters->setProcess( new CepGen::Process::GamGamLL );
-      else if ( values_vs_generator.first == "pptoll" ) {
+      else if ( generator == "pptoll" ) {
         mg.parameters->setProcess( new CepGen::Process::PPtoLL );
-        mg.parameters->kinematics.cuts.initial[CepGen::Cuts::qt].max() = 50.0;
+        mg.parameters->kinematics.cuts.initial[CepGen::Cuts::qt] = { 0., 50. };
       }
-      else { InError( Form( "Unrecognized generator mode: %s", values_vs_generator.first.c_str() ) ); break; }
+      else { InError( Form( "Unrecognized generator mode: %s", values_vs_generator.first ) ); break; }
 
       for ( const auto& values_vs_cut : values_vs_generator.second ) { // loop over the single lepton pT cut
         mg.parameters->kinematics.cuts.central[CepGen::Cuts::pt_single].min() = values_vs_cut.first;
         for ( const auto& values_vs_kin : values_vs_cut.second ) { // loop over all possible kinematics
-          if      ( values_vs_kin.first.find( "elastic"    ) != string::npos )
+          const string kin_mode = values_vs_kin.first;
+
+          if ( kin_mode.find( "elastic"    ) != string::npos )
             mg.parameters->kinematics.mode = CepGen::Kinematics::ElasticElastic;
-          else if ( values_vs_kin.first.find( "singlediss" ) != string::npos )
+          else if ( kin_mode.find( "singlediss" ) != string::npos )
             mg.parameters->kinematics.mode = CepGen::Kinematics::InelasticElastic;
-          else if ( values_vs_kin.first.find( "doublediss" ) != string::npos )
+          else if ( kin_mode.find( "doublediss" ) != string::npos )
             mg.parameters->kinematics.mode = CepGen::Kinematics::InelasticInelastic;
           else {
-            InError( Form( "Unrecognized kinematics mode: %s", values_vs_kin.first.c_str() ) );
+            InError( Form( "Unrecognized kinematics mode: %s", values_vs_kin.first ) );
             break;
           }
 
-          if ( values_vs_kin.first.find( "_su" ) != string::npos )
+          if ( kin_mode.find( "_su" ) != string::npos )
             mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SzczurekUleshchenko;
           else
             mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SuriYennie;
 
+          mg.parameters->dump();
           Information( Form( "Process: %s/%s\n\t"
                              "Configuration time: %.3f ms",
-                             values_vs_generator.first.c_str(),
-                             values_vs_kin.first.c_str(),
+                             values_vs_generator.first,
+                             values_vs_kin.first,
                              tmr.elapsed()*1.e3 ) );
           tmr.reset();
 
@@ -127,7 +131,7 @@ main( int argc, char* argv[] )
           double xsec_cepgen, err_xsec_cepgen;
           mg.computeXsection( xsec_cepgen, err_xsec_cepgen );
 
-          const double sigma = ( fabs( xsec_ref-xsec_cepgen ) ) / sqrt( err_xsec_cepgen*err_xsec_cepgen + err_xsec_ref*err_xsec_ref );
+          const double sigma = fabs( xsec_ref-xsec_cepgen ) / sqrt( err_xsec_cepgen*err_xsec_cepgen + err_xsec_ref*err_xsec_ref );
 
           Information( Form( "Computed cross section:\n\t"
                              "Ref.   = %.3e +/- %.3e\n\t"
@@ -140,13 +144,14 @@ main( int argc, char* argv[] )
           Information( Form( "Computation time: %.3f ms", tmr.elapsed()*1.e3 ) );
           tmr.reset();
 
-          string test_res = values_vs_generator.first+":"+
-                                 Form( "pt-gt-%.1f", values_vs_cut.first )+":"+
-                                 values_vs_kin.first+":"
-                                 "ref="+Form( "%.3e", xsec_ref )+":"
-                                 "got="+Form( "%.3e", xsec_cepgen )+":"
-                                 "pull="+Form( "%.3f", sigma );
-          if ( fabs( sigma )<num_sigma ) {
+          ostringstream oss; oss << values_vs_kin.first;
+          string test_res = Form( "%-10s", values_vs_generator.first )+"\t"+
+                            Form( "pt-gt-%.1f", values_vs_cut.first )+"\t"+
+                            Form( "%-16s", oss.str().c_str() )+"\t"
+                            "ref="+Form( "%g", xsec_ref )+"\t"
+                            "got="+Form( "%g", xsec_cepgen )+"\t"
+                            "pull="+Form( "%+g", sigma );
+          if ( fabs( sigma ) < num_sigma ) {
             passed_tests.emplace_back( test_res );
             num_tests_passed++;
           }

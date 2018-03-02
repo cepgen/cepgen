@@ -57,10 +57,9 @@ namespace CepGen
         /// Set the kinematics of the central system before any point computation
         virtual void setExtraContent() {}
         virtual void prepareKTKinematics();
+        virtual void preparePhaseSpace() = 0;
         /// Minimal Jacobian weight of the point considering a kT factorisation
         double minimalJacobian() const;
-        /// Jacobian weight of the point in the phase space for integration
-        virtual double computeJacobian() = 0;
         /// kT-factorised matrix element (event weight)
         /// \return Weight of the point in the phase space to the integral
         virtual double computeKTFactorisedMatrixElement() = 0;
@@ -76,6 +75,9 @@ namespace CepGen
         /// Retrieve a component of the phase space point for the kT-factorised process
         inline double xkt( const unsigned int i ) const { return x( kNumRequiredDimensions + i ); }
   
+        /// Jacobian weight of the point in the phase space for integration
+        double jacobian_;
+
         /// Minimal log-virtuality of the intermediate parton
         double log_qmin_;
         /// Maximal log-virtuality of the intermediate parton

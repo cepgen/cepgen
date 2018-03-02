@@ -37,6 +37,7 @@ inline std::string boldify( const char* str ) { return boldify( std::string( str
 inline std::string boldify( const double& dbl ) { return boldify( Form("%.2f", dbl ) ); }
 inline std::string boldify( const int& i ) { return boldify( Form("% d", i ) ); }
 inline std::string boldify( const unsigned int& ui ) { return boldify( Form("%d", ui ) ); }
+inline std::string boldify( const unsigned long& ui ) { return boldify( Form("%l", ui ) ); }
 namespace Colour{
   enum TextColour { Gray=30, Red=31, Green=32, Yellow=33, Blue=34, Purple=35 };
 }

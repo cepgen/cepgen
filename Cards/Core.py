@@ -7,15 +7,27 @@ class Parameters(dict):
     __delattr__ = dict.__delitem__
     def __init__(self, *args, **kwargs):
         self.update(*args, **kwargs)
-    def copy(self):
+        super(Parameters, self).__init__(*args, **kwargs)
+    def __deepcopy__(self, memo):
         from copy import deepcopy
-        return deepcopy(self)
+        return Parameters([(deepcopy(k, memo), deepcopy(v, memo)) for k, v in self.items()])
+    def clone(self, *args, **kwargs):
+        from copy import deepcopy
+        out = deepcopy(self)
+        for k in kwargs:
+            out[k] = kwargs.get(k)
+        return type(self)(out)
+
 
 class Module(Parameters):
     '''A named parameters set to steer a generic module'''
-    def __init__(self, m_name, *args, **kwargs):
+    def __init__(self, name, *args, **kwargs):
         super(Module, self).__init__(*args, **kwargs)
-        self.mod_name = m_name
+        self.mod_name = name
+    def clone(self, name, **kwargs):
+        out = Parameters(self).clone(**kwargs)
+        out.mod_name = name
+        return out
 
 class StructureFunctions:
     '''Types of structure functions supported'''
@@ -52,6 +64,12 @@ if __name__ == '__main__':
             self.assertEqual(len(mod), 1)
             mod.param1 = 'foo'
             self.assertEqual(len(mod), 2)
+            # playing with modules clones
+            mod_copy = mod.clone('notEmpty', param1 = 'boo', param2 = 'bar')
+            self.assertEqual(mod.param1, 'foo')
+            self.assertEqual(mod_copy.param1, 'boo')
+            self.assertEqual(mod_copy.param2, 'bar')
+            self.assertEqual(mod.param1+mod_copy.param2, 'foobar')
         def testParameters(self):
             params = Parameters(
                 first = 'foo',
@@ -59,10 +77,21 @@ if __name__ == '__main__':
                 third = 42,
                 fourth = (1, 2),
             )
+            params_copy = params.clone(
+                second = 'bak',
+            )
             self.assertEqual(len(params), 4)
             self.assertEqual(params.first, params['first'])
             self.assertEqual(params['second'], 'bar')
             self.assertTrue(int(params.third) == params.third)
             self.assertEqual(len(params.fourth), 2)
+            self.assertEqual(params.second, 'bar')
+            # playing with parameters clones
+            self.assertEqual(params_copy.second, 'bak')
+            # check that the clone does not change value if the origin does
+            # (i.e. we indeed have a deep copy and not a shallow one...)
+            params.third = 43
+            self.assertEqual(params.third, 43 )
+            self.assertEqual(params_copy.third, 42 )
 
     unittest.main()

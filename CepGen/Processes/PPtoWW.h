@@ -15,11 +15,13 @@ namespace CepGen
         inline ~PPtoWW() {}
 
       private:
+        void preparePhaseSpace() override;
         void prepareKTKinematics() override;
-        double computeJacobian() override;
         double computeKTFactorisedMatrixElement() override;
         void fillCentralParticlesKinematics() override;
         double WWamplitude( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 ) const;
+
+        Kinematics::Limits rap_limits_, ptdiff_limits_, phi_pt_diff_limits_;
 
         /// Rapidity of the first outgoing W boson
         double y1_;

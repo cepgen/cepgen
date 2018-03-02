@@ -12,7 +12,11 @@ main( int argc, char* argv[] )
   if ( argc < 2 )
     FatalError( "One argument required!" );
 
-  CepGen::Cards::PythonHandler py( argv[1] );
-  py.parameters().dump();
+  try {
+    CepGen::Cards::PythonHandler py( argv[1] );
+    py.parameters().dump();
+  } catch ( CepGen::Exception& e ) {
+    e.dump();
+  }
   return 0;
 }

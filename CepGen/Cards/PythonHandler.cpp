@@ -12,6 +12,7 @@
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 
 #include <algorithm>
+#include <frameobject.h>
 
 #ifdef PYTHIA8
 void
@@ -26,11 +27,12 @@ feedPythia( CepGen::Hadroniser::Pythia8Hadroniser* py8, PyObject* hadr, const ch
   }
   for ( Py_ssize_t i = 0; i < PyTuple_Size( ppc ); ++i ) {
     PyObject* pln = PyTuple_GetItem( ppc, i );
+    if ( !pln )
+      continue;
     std::string config = CepGen::Cards::PythonHandler::decode( pln );
-    Py_DECREF( pln );
+    //Py_DECREF( pln );
     py8->readString( config );
   }
-  Py_DECREF( ppc );
 }
 #endif
 
@@ -143,7 +145,7 @@ namespace CepGen
       if ( Py_FinalizeEx() != 0 )
         throw Exception( __PRETTY_FUNCTION__, "Failed to unregister the python parser!", FatalError );
 #endif
-      if ( sfilename ) delete sfilename;
+      if ( sfilename ) delete [] sfilename;
     }
 
     void
@@ -194,7 +196,13 @@ namespace CepGen
       // for the kT factorised matrix elements
       getLimits( kin, "qt", params_.kinematics.cuts.initial[Cuts::qt] );
       getLimits( kin, "ptdiff", params_.kinematics.cuts.central[Cuts::pt_diff] );
+      getLimits( kin, "phiptdiff", params_.kinematics.cuts.central[Cuts::phi_pt_diff] );
       getLimits( kin, "rapiditydiff", params_.kinematics.cuts.central[Cuts::rapidity_diff] );
+
+      // generic phase space limits
+      getLimits( kin, "rapidity", params_.kinematics.cuts.central[Cuts::rapidity_single] );
+      getLimits( kin, "eta", params_.kinematics.cuts.central[Cuts::eta_single] );
+      getLimits( kin, "pt", params_.kinematics.cuts.central[Cuts::pt_single] );
 
       getLimits( kin, "mx", params_.kinematics.cuts.remnants[Cuts::mass] );
     }
@@ -228,23 +236,23 @@ namespace CepGen
       else if ( algo == "Vegas" ) {
         params_.integrator.type = Integrator::Vegas;
         getParameter( integr, "alpha", (double&)params_.integrator.vegas.alpha );
-        getParameter( integr, "iterations", (unsigned long&)params_.integrator.vegas.iterations );
+        getParameter( integr, "iterations", params_.integrator.vegas.iterations );
         getParameter( integr, "mode", (int&)params_.integrator.vegas.mode );
         getParameter( integr, "verbosity", (int&)params_.integrator.vegas.verbose );
       }
       else if ( algo == "MISER" ) {
         params_.integrator.type = Integrator::MISER;
         getParameter( integr, "estimateFraction", (double&)params_.integrator.miser.estimate_frac );
-        getParameter( integr, "minCalls", (unsigned long&)params_.integrator.miser.min_calls );
-        getParameter( integr, "minCallsPerBisection", (unsigned long&)params_.integrator.miser.min_calls_per_bisection );
+        getParameter( integr, "minCalls", params_.integrator.miser.min_calls );
+        getParameter( integr, "minCallsPerBisection", params_.integrator.miser.min_calls_per_bisection );
         getParameter( integr, "alpha", (double&)params_.integrator.miser.alpha );
         getParameter( integr, "dither", (double&)params_.integrator.miser.dither );
       }
       else
         throwPythonError( Form( "Invalid integration algorithm: %s", algo.c_str() ) );
 
-      getParameter( integr, "numPoints", (int&)params_.integrator.npoints );
-      getParameter( integr, "numFunctionCalls", (int&)params_.integrator.ncvg );
+      getParameter( integr, "numPoints", params_.integrator.npoints );
+      getParameter( integr, "numFunctionCalls", params_.integrator.ncvg );
       getParameter( integr, "seed", (unsigned long&)params_.integrator.seed );
     }
 
@@ -254,8 +262,8 @@ namespace CepGen
       if ( !PyDict_Check( gen ) )
         throwPythonError( "Generation information object should be a dictionary!" );
       params_.generation.enabled = true;
-      getParameter( gen, "numEvents", (int&)params_.generation.maxgen );
-      getParameter( gen, "printEvery", (int&)params_.generation.gen_print_every );
+      getParameter( gen, "numEvents", params_.generation.maxgen );
+      getParameter( gen, "printEvery", params_.generation.gen_print_every );
     }
 
     void
@@ -304,6 +312,7 @@ namespace CepGen
         pythia8->init();
         feedPythia( pythia8, hadr, "pythiaConfiguration" );
         feedPythia( pythia8, hadr, "pythiaProcessConfiguration" );
+
         params_.setHadroniser( pythia8 );
 #else
         InWarning( "Pythia8 is not linked to this instance... "
@@ -328,10 +337,10 @@ namespace CepGen
     void
     PythonHandler::throwPythonError( const std::string& message, const ExceptionType& type )
     {
-      PyObject* ptype = nullptr, *pvalue = nullptr, *ptraceback = nullptr;
-      PyErr_Fetch( &ptype, &pvalue, &ptraceback );
+      PyObject* ptype = nullptr, *pvalue = nullptr, *ptraceback_obj = nullptr;
+      PyErr_Fetch( &ptype, &pvalue, &ptraceback_obj );
       PyErr_Clear();
-      PyErr_NormalizeException( &ptype, &pvalue, &ptraceback );
+      PyErr_NormalizeException( &ptype, &pvalue, &ptraceback_obj );
       std::ostringstream oss; oss << message;
       if ( ptype == nullptr ) {
         Py_Finalize();
@@ -344,6 +353,44 @@ namespace CepGen
 #else
           << _PyUnicode_AsString( PyObject_Str( pvalue ) );
 #endif
+      PyTracebackObject* ptraceback = (PyTracebackObject*)ptraceback_obj;
+      string tabul = "↪ ";
+      if ( ptraceback != nullptr ) {
+        while ( ptraceback->tb_next != nullptr ) {
+          PyFrameObject* pframe = ptraceback->tb_frame;
+          if ( pframe != nullptr ) {
+            int line = PyCode_Addr2Line( pframe->f_code, pframe->f_lasti );
+#ifdef PYTHON2
+            const char* filename = PyString_AsString( pframe->f_code->co_filename );
+            const char* funcname = PyString_AsString( pframe->f_code->co_name );
+#else
+            const char* filename = _PyUnicode_AsString( pframe->f_code->co_filename );
+            const char* funcname = _PyUnicode_AsString( pframe->f_code->co_name );
+#endif
+            oss << Form( "\n\t%s%s on %s (line %d)", tabul.c_str(), boldify( funcname ).c_str(), filename, line );
+            tabul = string( "  " )+tabul;
+          }
+          else
+            oss << Form( "\n\t\tissue in line %d", ptraceback->tb_lineno );
+          ptraceback = ptraceback->tb_next;
+        }
+      }
+      /*PyThreadState* ptstate = PyThreadState_GET();
+      if ( ptstate != nullptr && ptstate->frame != nullptr ) {
+        PyFrameObject* pframe = ptstate->frame;
+        while ( pframe != nullptr ) {
+          int line = PyCode_Addr2Line( pframe->f_code, pframe->f_lasti );
+#ifdef PYTHON2
+          const char* filename = PyString_AsString( pframe->f_code->co_filename );
+          const char* funcname = PyString_AsString( pframe->f_code->co_name );
+#else
+          const char* filename = _PyUnicode_AsString( pframe->f_code->co_filename );
+          const char* funcname = _PyUnicode_AsString( pframe->f_code->co_name );
+#endif
+          oss << Form( "Stack trace:\n\t\t%s(%d): %s\n", filename, line, funcname );
+          pframe = pframe->f_back;
+        }
+      }*/
       Py_Finalize();
       throw Exception( __PRETTY_FUNCTION__, oss.str().c_str(), type );
     }
@@ -373,8 +420,11 @@ namespace CepGen
     PyObject*
     PythonHandler::getElement( PyObject* obj, const char* key )
     {
+      PyObject* pout = nullptr;
       PyObject* nink = encode( key );
-      PyObject* pout = PyDict_GetItem( obj, nink );
+      if ( !nink )
+        return pout;
+      pout = PyDict_GetItem( obj, nink );
       Py_DECREF( nink );
       return pout;
     }
@@ -408,7 +458,7 @@ namespace CepGen
 #ifdef PYTHON2
       if ( !PyInt_Check( pobj ) )
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
-      out = _PyInt_AsInt( pobj );
+      out = PyInt_AsLong( pobj );
 #else
       if ( !PyLong_Check( pobj ) )
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
@@ -423,10 +473,38 @@ namespace CepGen
       PyObject* pobj = getElement( parent, key );
       if ( !pobj )
         return;
+      if ( !PyLong_Check( pobj )
+#ifdef PYTHON2
+        && !PyInt_Check( pobj )
+#endif
+      )
+        throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
+      if ( PyLong_Check( pobj ) )
+        out = PyLong_AsUnsignedLong( pobj );
+#ifdef PYTHON2
+      else if ( PyInt_Check( pobj ) )
+        out = PyInt_AsUnsignedLongMask( pobj );
+#endif
+      Py_DECREF( pobj );
+    }
+
+    void
+    PythonHandler::getParameter( PyObject* parent, const char* key, unsigned int& out )
+    {
+      PyObject* pobj = getElement( parent, key );
+      if ( !pobj )
+        return;
+#ifdef PYTHON2
+      if ( !PyInt_Check( pobj ) )
+        throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
+      out = PyInt_AsUnsignedLongMask( pobj );
+#else
       if ( !PyLong_Check( pobj ) )
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       out = PyLong_AsUnsignedLong( pobj );
+#endif
       Py_DECREF( pobj );
+std::cout << "haha::" << key << "|" << out << std::endl;
     }
 
     void

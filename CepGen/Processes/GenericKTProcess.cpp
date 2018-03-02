@@ -13,6 +13,7 @@ namespace CepGen
                                         const std::array<ParticleCode,2>& partons,
                                         const std::vector<ParticleCode>& central ) :
       GenericProcess( name, description+" (kT-factorisation approach)" ),
+      jacobian_( 0. ),
       log_qmin_( 0. ), log_qmax_( 0. ),
       qt1_( 0. ), phi_qt1_( 0. ),
       qt2_( 0. ), phi_qt2_( 0. ),
@@ -86,6 +87,8 @@ namespace CepGen
       log_qmax_ = log( qt_limits.max() );
       if ( log_qmax_ > 10. )
         InWarning( Form( "qT range above \"reasonable\" range: maximal qT specified = 10^(%.1f)", log_qmax_ ) );
+
+      preparePhaseSpace();
     }
 
     double
@@ -95,10 +98,18 @@ namespace CepGen
       prepareKTKinematics();
       computeOutgoingPrimaryParticlesMasses();
 
-      const double jac = computeJacobian(),
-                   integrand = computeKTFactorisedMatrixElement(),
-                   weight = jac*integrand;
-      DebuggingInsideLoop( Form( "Jacobian = %g\n\tIntegrand = %g\n\tdW = %g", jac, integrand, weight ) );
+      double mx_jacobian = 1.;
+      switch ( cuts_.mode ) {
+        case Kinematics::InelasticElastic:   mx_jacobian = MX_; break;
+        case Kinematics::ElasticInelastic:   mx_jacobian = MY_; break;
+        case Kinematics::InelasticInelastic: mx_jacobian = MX_*MY_; break;
+        default: break;
+      }
+
+      const double integrand = computeKTFactorisedMatrixElement();
+      const double weight = ( jacobian_*qt1_*qt2_*mx_jacobian ) * integrand;
+
+      DebuggingInsideLoop( Form( "Jacobian = %g\n\tIntegrand = %g\n\tdW = %g", jacobian_, integrand, weight ) );
 
       return weight;
     }
@@ -117,19 +128,16 @@ namespace CepGen
           MY_ = event_->getOneByRole( Particle::IncomingBeam2 ).mass();
         } break;
         case Kinematics::ElasticInelastic: {
-          const double mx_min = remn_mx_cuts.min(), mx_range = remn_mx_cuts.range();
           MX_ = event_->getOneByRole( Particle::IncomingBeam1 ).mass();
-          MY_ = mx_min + mx_range*x( op_index );
+          MY_ = remn_mx_cuts.x( x( op_index ) );
         } break;
         case Kinematics::InelasticElastic: {
-          const double mx_min = remn_mx_cuts.min(), mx_range = remn_mx_cuts.range();
-          MX_ = mx_min + mx_range*x( op_index );
+          MX_ = remn_mx_cuts.x( x( op_index ) );
           MY_ = event_->getOneByRole( Particle::IncomingBeam2 ).mass();
         } break;
         case Kinematics::InelasticInelastic: {
-          const double mx_min = remn_mx_cuts.min(), mx_range = remn_mx_cuts.range();
-          MX_ = mx_min + mx_range*x( op_index );
-          MY_ = mx_min + mx_range*x( op_index+1 );
+          MX_ = remn_mx_cuts.x( x( op_index ) );
+          MY_ = remn_mx_cuts.x( x( op_index+1 ) );
         } break;
       }
       DebuggingInsideLoop( Form( "outgoing remnants invariant mass: %g / %g (%g < M(X/Y) < %g)", MX_, MY_, remn_mx_cuts.min(), remn_mx_cuts.max() ) );
@@ -167,7 +175,7 @@ namespace CepGen
     GenericKTProcess::fillKinematics( bool )
     {
       fillPrimaryParticlesKinematics();
-      fillCentralParticlesKinematics();
+      fillCentralParticlesKinematics(); // process-dependent!
     }
 
     void
@@ -223,8 +231,8 @@ namespace CepGen
     GenericKTProcess::minimalJacobian() const
     {
       double jac = 1.;
-      jac *= ( log_qmax_-log_qmin_ )*qt1_; // d(q1t) . q1t
-      jac *= ( log_qmax_-log_qmin_ )*qt2_; // d(q2t) . q2t
+      jac *= ( log_qmax_-log_qmin_ ); // d(q1t)
+      jac *= ( log_qmax_-log_qmin_ ); // d(q2t)
       jac *= 2.*M_PI; // d(phi1)
       jac *= 2.*M_PI; // d(phi2)
 
@@ -233,10 +241,10 @@ namespace CepGen
       const double mx_range = cuts_.cuts.remnants.at( Cuts::mass ).range();
       switch ( cuts_.mode ) {
         case Kinematics::ElasticElastic: default: break;
-        case Kinematics::ElasticInelastic:   jac *= 2.* mx_range * MY_; break;
-        case Kinematics::InelasticElastic:   jac *= 2.* mx_range * MX_; break;
-        case Kinematics::InelasticInelastic: jac *= 2.* mx_range * MX_;
-                                             jac *= 2.* mx_range * MY_; break;
+        case Kinematics::ElasticInelastic:   jac *= 2.* mx_range; break;
+        case Kinematics::InelasticElastic:   jac *= 2.* mx_range; break;
+        case Kinematics::InelasticInelastic: jac *= 2.* mx_range;
+                                             jac *= 2.* mx_range; break;
       } // d(mx/y**2)
       return jac;
     }

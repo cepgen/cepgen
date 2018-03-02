@@ -86,9 +86,7 @@ namespace CepGen
   double
   Kinematics::Limits::range() const
   {
-    return ( !hasMin() || !hasMax() )
-      ? 0.
-      : second-first;
+    return ( !valid() ? 0. : second-first );
   }
 
   bool
@@ -122,8 +120,12 @@ namespace CepGen
   double
   Kinematics::Limits::x( double v ) const
   {
-    if ( v < 0. || v > 1. ) { InError( Form( "x must be comprised between 0 and 1 ; x value = %.5e", v ) ); }
-    if ( !hasMin() || !hasMax() ) return invalid_;
+    if ( v < 0. || v > 1. ) {
+      InError( Form( "x must be comprised between 0 and 1 ; x value = %g", v ) );
+    }
+    if ( !valid() )
+      return invalid_;
+
     return first + ( second-first ) * v;
   }
 
@@ -134,7 +136,9 @@ namespace CepGen
   {}
 
   Kinematics::CutsList::CutsList( const CutsList& cuts ) :
-    initial( cuts.initial ), central( cuts.central ), central_particles( cuts.central_particles ), remnants( cuts.remnants )
+    initial( cuts.initial ),
+    central( cuts.central ), central_particles( cuts.central_particles ),
+    remnants( cuts.remnants )
   {}
 }
 

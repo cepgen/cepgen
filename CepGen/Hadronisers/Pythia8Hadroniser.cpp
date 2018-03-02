@@ -157,6 +157,7 @@ namespace CepGen
       bool success = false;
       ev.num_hadronisation_trials = 0;
       while ( !success ) {
+        //pythia_->event.list(true,true);
         //success = pythia_->next();
         pythia_->next(); success = pythia_->event.size() != num_py_parts; //FIXME discards any pythia error!
         /*if ( proton_fragment ) {

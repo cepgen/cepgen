@@ -33,7 +33,7 @@ namespace CepGen
   void
   Parameters::setThetaRange( float thetamin, float thetamax )
   {
-    kinematics.cuts.central[Cuts::eta_single].in( Particle::thetaToEta( thetamax ), Particle::thetaToEta( thetamin ) );
+    kinematics.cuts.central[Cuts::eta_single] = { Particle::thetaToEta( thetamax ), Particle::thetaToEta( thetamin ) };
 
     if ( Logger::get().level >= Logger::Debug ) {
       std::ostringstream os; os << kinematics.cuts.central[Cuts::eta_single];
@@ -51,8 +51,9 @@ namespace CepGen
   std::string
   Parameters::processName() const
   {
-    if ( process_ ) return process_->name();
-    return "no process";
+    if ( !process_ )
+      return "no process";
+    return process_->name();
   }
 
   void
@@ -132,8 +133,10 @@ namespace CepGen
     os
       << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << std::endl
       << std::setw( wt ) << "Incoming particles" << ( pretty ? boldify( ip1.str().c_str() ) : ip1.str() ) << ", " << ( pretty ? boldify( ip2.str().c_str() ) : ip2.str() ) << std::endl
-      << std::setw( wt ) << "Momenta (GeV/c)" << kinematics.inp.first << ", " << kinematics.inp.second << std::endl
-      << std::setw( wt ) << "Structure functions" << kinematics.structure_functions << std::endl
+      << std::setw( wt ) << "Momenta (GeV/c)" << kinematics.inp.first << ", " << kinematics.inp.second << std::endl;
+    if ( kinematics.mode != Kinematics::ElasticElastic )
+      os << std::setw( wt ) << "Structure functions" << kinematics.structure_functions << std::endl;
+    os
       << std::endl
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << std::endl
       << std::endl;
@@ -141,7 +144,7 @@ namespace CepGen
       for ( const auto& lim : kinematics.cuts.initial ) { // map(particles class, limits)
         if ( !lim.second.valid() )
           continue;
-        os << std::setw( wt ) << lim.first << lim.first << std::endl;
+        os << std::setw( wt ) << lim.first << lim.second << std::endl;
       }
     }
     os
