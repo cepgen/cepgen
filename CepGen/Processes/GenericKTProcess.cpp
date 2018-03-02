@@ -13,7 +13,7 @@ namespace CepGen
                                         const std::array<ParticleCode,2>& partons,
                                         const std::vector<ParticleCode>& central ) :
       GenericProcess( name, description+" (kT-factorisation approach)" ),
-      jacobian_( 0. ),
+      kt_jacobian_( 0. ), central_jacobian_( 0. ),
       log_qmin_( 0. ), log_qmax_( 0. ),
       qt1_( 0. ), phi_qt1_( 0. ),
       qt2_( 0. ), phi_qt2_( 0. ),
@@ -63,30 +63,79 @@ namespace CepGen
     GenericKTProcess::addPartonContent()
     {
       // Incoming partons
-      qt1_ = exp( log_qmin_+( log_qmax_-log_qmin_ )*x( 0 ) );
-      qt2_ = exp( log_qmin_+( log_qmax_-log_qmin_ )*x( 1 ) );
-      phi_qt1_ = 2.*M_PI*x( 2 );
-      phi_qt2_ = 2.*M_PI*x( 3 );
+      qt1_ = exp( log_qt_limits_.x( x( 0 ) ) );
+      qt2_ = exp( log_qt_limits_.x( x( 1 ) ) );
+      phi_qt1_ = phi_qt_limits_.x( x( 2 ) );
+      phi_qt2_ = phi_qt_limits_.x( x( 3 ) );
       DebuggingInsideLoop( Form( "photons transverse virtualities (qt):\n\t"
-                                 "  mag = %g / %f (%g < log(qt) < %g)\n\t"
-                                 "  phi = %g / %g",
-                                 qt1_, qt2_, log_qmin_, log_qmax_, phi_qt1_, phi_qt2_ ) );
+                                 "  mag = %g / %g (%g < log(qt) < %g)\n\t"
+                                 "  phi = %g / %g (%g < Dphi < %g)",
+                                 qt1_, qt2_, log_qt_limits_.min(), log_qt_limits_.max(),
+                                 phi_qt1_, phi_qt2_, phi_qt_limits_.min(), phi_qt_limits_.max() ) );
     }
 
     void
     GenericKTProcess::setKinematics( const Kinematics& kin )
     {
       cuts_ = kin;
-      Kinematics::Limits qt_limits = cuts_.cuts.initial[Cuts::qt];
-      if ( !qt_limits.hasMin() )
-        qt_limits.min() = 1.e-10;
-      if ( !qt_limits.hasMax() )
-        qt_limits.max() = 500.;
 
-      log_qmin_ = std::max( log( qt_limits.min() ), -10. ); //FIXME fine-tuning needed!
-      log_qmax_ = log( qt_limits.max() );
-      if ( log_qmax_ > 10. )
-        InWarning( Form( "qT range above \"reasonable\" range: maximal qT specified = 10^(%.1f)", log_qmax_ ) );
+      //----------------------------------------------------------------
+
+      kt_jacobian_ = 1.;
+
+      //----------------------------------------------------------------
+
+      if ( cuts_.cuts.initial.count( Cuts::qt ) == 0
+        || !cuts_.cuts.initial.at( Cuts::qt ).valid() ) {
+        InWarning( "Failed to retrieve a transverse virtuality range for the incoming partons from the user configuration!\n\t"
+                   "Setting it to the default 10¯¹⁰ < qT < 500 GeV value." );
+        cuts_.cuts.initial[Cuts::qt] = { 1.e-10, 500. };
+      }
+      Kinematics::Limits qt_limits = cuts_.cuts.initial.at( Cuts::qt );
+      log_qt_limits_ = {
+        std::max( log( qt_limits.min() ), -10. ), //FIXME fine-tuning needed!
+        log( qt_limits.max() )
+      };
+
+      if ( log_qt_limits_.max() > 10. )
+        InWarning( Form( "qT range above \"reasonable\" range: maximal qT specified = 10^(%.1f)", log_qt_limits_.max() ) );
+
+      kt_jacobian_ *= pow( log_qt_limits_.range(), 2 ); // d(q1t) d(q2t)
+
+      //----------------------------------------------------------------
+
+      if ( cuts_.cuts.initial.count( Cuts::phi_qt ) == 0
+        || !cuts_.cuts.initial.at( Cuts::phi_qt ).valid() ) {
+        InWarning( "Failed to retrieve an incoming partons azimuthal angle difference from the user configuration!\n\t"
+                   "Setting it to the default 0 < Δɸ < 2π value." );
+        cuts_.cuts.initial[Cuts::phi_qt] = { 0., 2.*M_PI };
+      }
+      phi_qt_limits_ = cuts_.cuts.initial.at( Cuts::phi_qt );
+      kt_jacobian_ *= pow( phi_qt_limits_.range(), 2 ); // d(phi1) d(phi2)
+
+      //----------------------------------------------------------------
+
+      if ( cuts_.cuts.remnants.count( Cuts::mass ) == 0
+        || !cuts_.cuts.remnants.at( Cuts::mass ).valid() ) {
+        InWarning( "Failed to retrieve a diffractive system mass range from the user configuration!\n\t"
+                   "Setting it to the default 1.07 < Mx < 1000 GeV value." );
+        cuts_.cuts.remnants[Cuts::mass] = { 1.07, 1000. };
+      }
+      mx_limits_ = cuts_.cuts.remnants.at( Cuts::mass );
+      switch ( cuts_.mode ) {
+        case Kinematics::ElasticElastic: default:
+          break;
+        case Kinematics::ElasticInelastic:
+          kt_jacobian_ *= 2.* mx_limits_.range();
+          break;
+        case Kinematics::InelasticElastic:
+          kt_jacobian_ *= 2.* mx_limits_.range();
+          break;
+        case Kinematics::InelasticInelastic:
+          kt_jacobian_ *= 2.* mx_limits_.range();
+          kt_jacobian_ *= 2.* mx_limits_.range();
+          break;
+      } // d(mx/y**2)
 
       preparePhaseSpace();
     }
@@ -95,21 +144,21 @@ namespace CepGen
     GenericKTProcess::computeWeight()
     {
       addPartonContent();
-      prepareKTKinematics();
       computeOutgoingPrimaryParticlesMasses();
+      prepareKTKinematics();
 
-      double mx_jacobian = 1.;
+      double res_jacobian = qt1_*qt2_;
       switch ( cuts_.mode ) {
-        case Kinematics::InelasticElastic:   mx_jacobian = MX_; break;
-        case Kinematics::ElasticInelastic:   mx_jacobian = MY_; break;
-        case Kinematics::InelasticInelastic: mx_jacobian = MX_*MY_; break;
+        case Kinematics::InelasticElastic:   res_jacobian = MX_; break;
+        case Kinematics::ElasticInelastic:   res_jacobian = MY_; break;
+        case Kinematics::InelasticInelastic: res_jacobian = MX_*MY_; break;
         default: break;
       }
 
       const double integrand = computeKTFactorisedMatrixElement();
-      const double weight = ( jacobian_*qt1_*qt2_*mx_jacobian ) * integrand;
+      const double weight = ( kt_jacobian_*central_jacobian_*res_jacobian ) * integrand;
 
-      DebuggingInsideLoop( Form( "Jacobian = %g\n\tIntegrand = %g\n\tdW = %g", jacobian_, integrand, weight ) );
+      DebuggingInsideLoop( Form( "\n\tJacobian = %g * %g * %g\n\tIntegrand = %g\n\tdW = %g", kt_jacobian_, central_jacobian_, res_jacobian, integrand, weight ) );
 
       return weight;
     }
@@ -118,7 +167,6 @@ namespace CepGen
     GenericKTProcess::computeOutgoingPrimaryParticlesMasses()
     {
       const unsigned int op_index = kNumRequiredDimensions+kNumUserDimensions;
-      const Kinematics::Limits remn_mx_cuts = cuts_.cuts.remnants[Cuts::mass];
       switch ( cuts_.mode ) {
         case Kinematics::ElectronProton: default: {
           InError( "This kT factorisation process is intended for p-on-p collisions! Aborting!" );
@@ -129,18 +177,18 @@ namespace CepGen
         } break;
         case Kinematics::ElasticInelastic: {
           MX_ = event_->getOneByRole( Particle::IncomingBeam1 ).mass();
-          MY_ = remn_mx_cuts.x( x( op_index ) );
+          MY_ = mx_limits_.x( x( op_index ) );
         } break;
         case Kinematics::InelasticElastic: {
-          MX_ = remn_mx_cuts.x( x( op_index ) );
+          MX_ = mx_limits_.x( x( op_index ) );
           MY_ = event_->getOneByRole( Particle::IncomingBeam2 ).mass();
         } break;
         case Kinematics::InelasticInelastic: {
-          MX_ = remn_mx_cuts.x( x( op_index ) );
-          MY_ = remn_mx_cuts.x( x( op_index+1 ) );
+          MX_ = mx_limits_.x( x( op_index ) );
+          MY_ = mx_limits_.x( x( op_index+1 ) );
         } break;
       }
-      DebuggingInsideLoop( Form( "outgoing remnants invariant mass: %g / %g (%g < M(X/Y) < %g)", MX_, MY_, remn_mx_cuts.min(), remn_mx_cuts.max() ) );
+      DebuggingInsideLoop( Form( "outgoing remnants invariant mass: %g / %g (%g < M(X/Y) < %g)", MX_, MY_, mx_limits_.min(), mx_limits_.max() ) );
     }
 
     void
@@ -225,28 +273,6 @@ namespace CepGen
       //     two-parton system
       //================================================================
       event_->getOneByRole( Particle::Intermediate ).setMomentum( g1.momentum()+g2.momentum() );
-    }
-
-    double
-    GenericKTProcess::minimalJacobian() const
-    {
-      double jac = 1.;
-      jac *= ( log_qmax_-log_qmin_ ); // d(q1t)
-      jac *= ( log_qmax_-log_qmin_ ); // d(q2t)
-      jac *= 2.*M_PI; // d(phi1)
-      jac *= 2.*M_PI; // d(phi2)
-
-      if ( cuts_.cuts.remnants.count( Cuts::mass ) == 0 )
-        throw Exception( __PRETTY_FUNCTION__, "You did not specify any range for the proton remnants mass!", FatalError );
-      const double mx_range = cuts_.cuts.remnants.at( Cuts::mass ).range();
-      switch ( cuts_.mode ) {
-        case Kinematics::ElasticElastic: default: break;
-        case Kinematics::ElasticInelastic:   jac *= 2.* mx_range; break;
-        case Kinematics::InelasticElastic:   jac *= 2.* mx_range; break;
-        case Kinematics::InelasticInelastic: jac *= 2.* mx_range;
-                                             jac *= 2.* mx_range; break;
-      } // d(mx/y**2)
-      return jac;
     }
 
     double

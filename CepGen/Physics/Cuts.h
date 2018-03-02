@@ -53,14 +53,16 @@ namespace CepGen
     /// Cuts on the initial state dynamics
     enum InitialState
     {
-      q2, ///< parton virtuality
-      qt, ///< parton transverse virtuality
-      w   ///< two-parton squared momentum
+      q2,     ///< parton virtuality
+      qt,     ///< parton transverse virtuality
+      phi_qt, ///< parton azimuthal angle difference
+      w       ///< two-parton squared momentum
     };
     inline std::ostream& operator<<( std::ostream& os, const InitialState& is ) {
       switch ( is ) {
         case q2: return os << "Virtuality range (GeV²)";
         case qt: return os << "Transverse virtuality range (GeV)";
+        case phi_qt: return os << "Partons Δɸ range";
         case w: return os << "W (GeV²)";
       }
       return os;

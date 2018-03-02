@@ -57,6 +57,7 @@ namespace CepGen
         /// Set the kinematics of the central system before any point computation
         virtual void setExtraContent() {}
         virtual void prepareKTKinematics();
+        /// Prepare the central part of the Jacobian (only done once, as soon as the kinematics is set)
         virtual void preparePhaseSpace() = 0;
         /// Minimal Jacobian weight of the point considering a kT factorisation
         double minimalJacobian() const;
@@ -76,9 +77,14 @@ namespace CepGen
         inline double xkt( const unsigned int i ) const { return x( kNumRequiredDimensions + i ); }
   
         /// Jacobian weight of the point in the phase space for integration
-        double jacobian_;
+        double kt_jacobian_;
+        double central_jacobian_;
 
-        /// Minimal log-virtuality of the intermediate parton
+        /// Log-virtuality range of the intermediate parton
+        Kinematics::Limits log_qt_limits_;
+        Kinematics::Limits phi_qt_limits_;
+        Kinematics::Limits mx_limits_;
+
         double log_qmin_;
         /// Maximal log-virtuality of the intermediate parton
         double log_qmax_;

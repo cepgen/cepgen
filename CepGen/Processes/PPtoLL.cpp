@@ -14,17 +14,17 @@ namespace CepGen
     void
     PPtoLL::preparePhaseSpace()
     {
-      jacobian_ = GenericKTProcess::minimalJacobian();
+      central_jacobian_ = 1.;
 
       // Outgoing leptons
       if ( cuts_.cuts.central.count( Cuts::rapidity_single ) == 0
-        || !cuts_.cuts.central.at( Cuts::rapidity_single ).valid()) {
+        || !cuts_.cuts.central.at( Cuts::rapidity_single ).valid() ) {
         InWarning( "Failed to retrieve a rapidity range for the outgoing leptons from the user configuration!\n\t"
                    "Setting it to the default | y(l) | < 6 value." );
         cuts_.cuts.central[Cuts::rapidity_single] = { -6., 6. };
       }
       rap_limits_ = cuts_.cuts.central.at( Cuts::rapidity_single );
-      jacobian_ *= pow( rap_limits_.range(), 2 );
+      central_jacobian_ *= pow( rap_limits_.range(), 2 );
 
       if ( cuts_.cuts.central.count( Cuts::pt_diff ) == 0
         || !cuts_.cuts.central.at( Cuts::pt_diff ).valid() ) {
@@ -33,7 +33,7 @@ namespace CepGen
         cuts_.cuts.central[Cuts::pt_diff] = { 0., 50. };
       }
       ptdiff_limits_ = cuts_.cuts.central.at( Cuts::pt_diff );
-      jacobian_ *= ptdiff_limits_.range();
+      central_jacobian_ *= ptdiff_limits_.range();
 
       if ( cuts_.cuts.central.count( Cuts::phi_pt_diff ) == 0
         || !cuts_.cuts.central.at( Cuts::phi_pt_diff ).valid() ) {
@@ -42,7 +42,7 @@ namespace CepGen
         cuts_.cuts.central[Cuts::phi_pt_diff] = { 0., 2*M_PI };
       }
       phi_pt_diff_limits_ = cuts_.cuts.central.at( Cuts::phi_pt_diff );
-      jacobian_ *= phi_pt_diff_limits_.range();
+      central_jacobian_ *= phi_pt_diff_limits_.range();
     }
 
     void
