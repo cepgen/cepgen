@@ -113,6 +113,7 @@ namespace CepGen
       float time_total;
 
     private:
+      static constexpr double minimal_precision_ = 1.e-10;
       /// Check if the event kinematics is properly defined
       void checkKinematics() const;
       /// List of particles in the event, mapped to their role in the process

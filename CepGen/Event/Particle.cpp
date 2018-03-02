@@ -92,13 +92,12 @@ namespace CepGen
   void
   Particle::addDaughter( Particle& part )
   {
-    std::pair<ParticlesIds::iterator,bool> ret = daughters_.insert( part.id() );
+    const auto ret = daughters_.insert( part.id() );
 
     if ( Logger::get().level >= Logger::DebugInsideLoop ) {
       std::ostringstream os;
-      for ( ParticlesIds::const_iterator it = daughters_.begin(); it != daughters_.end(); ++it ) {
-        os << Form( "\n\t * id=%d", *it );
-      }
+      for ( const auto& daugh : daughters_ )
+        os << Form( "\n\t * id=%d", daugh );
       DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) has now %2d daughter(s):"
                                  "%s", role_, pdg_id_, numDaughters(), os.str().c_str() ) );
     }
@@ -107,7 +106,8 @@ namespace CepGen
       DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) is a new daughter of %2d (pdgId=%4d)",
                                  part.role(), part.pdgId(), role_, pdg_id_ ) );
 
-      if ( part.mothers().find( id_ ) == part.mothers().end() ) part.addMother( *this );
+      if ( part.mothers().find( id_ ) == part.mothers().end() )
+        part.addMother( *this );
     }
   }
 
@@ -170,17 +170,19 @@ namespace CepGen
     std::ostringstream osm, osd, os;
     if ( !primary() ) {
       osm << ": mother(s): ";
-      for ( ParticlesIds::const_iterator m = mothers_.begin(); m != mothers_.end(); ++m ) {
-        if ( m!=mothers_.begin() ) osm << ", ";
-        osm << ( *m );
+      unsigned short i = 0;
+      for ( const auto& moth : mothers_ ) {
+        osm << ( i > 0 ? ", " : "" ) << moth;
+        ++i;
       }
     }
-    const ParticlesIds daugh = daughters();
-    if ( daugh.size() != 0 ) {
+    const ParticlesIds daughters_list = daughters();
+    if ( daughters_list.size() > 0 ) {
       osd << ": id = ";
-      for ( ParticlesIds::const_iterator it = daugh.begin(); it != daugh.end(); ++it ) {
-        if ( it!=daugh.begin() ) osd << ", ";
-        osd << ( *it );
+      unsigned short i = 0;
+      for ( const auto& daugh : daughters_list ) {
+        osm << ( i > 0 ? ", " : "" ) << daugh;
+        ++i;
       }
     }
     os << " (" << pdg_id_ << ")";

@@ -40,17 +40,16 @@ namespace CepGen
   {
     os << std::setfill(' ');
     os << "===== Central system\n";
-    for ( std::map<Cuts::Central,Limits>::const_iterator lim = cuts.central.begin(); lim != cuts.central.end(); ++lim ) {
-      os << std::setw(30) << lim->first << ": " << lim->second;
-    }
+    for ( const auto& pdg_lim : cuts.central )
+      os << std::setw(30) << pdg_lim.first << ": " << pdg_lim.second;
+
     os << "===== Initial state\n";
-    for ( std::map<Cuts::InitialState,Limits>::const_iterator lim = cuts.initial.begin(); lim != cuts.initial.end(); ++lim ) {
-      os << std::setw(30) << lim->first << ": " << lim->second;
-    }
+    for ( const auto& pdg_lim : cuts.initial )
+      os << std::setw(30) << pdg_lim.first << ": " << pdg_lim.second;
+
     os << "===== Remnants\n";
-    for ( std::map<Cuts::Remnants,Limits>::const_iterator lim = cuts.remnants.begin(); lim != cuts.remnants.end(); ++lim ) {
-      os << std::setw(30) << lim->first << ": " << lim->second;
-    }
+    for ( const auto& pdg_lim : cuts.remnants )
+      os << std::setw(30) << pdg_lim.first << ": " << pdg_lim.second;
   }
 
   std::ostream&

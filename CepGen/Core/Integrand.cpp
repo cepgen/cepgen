@@ -68,11 +68,11 @@ namespace CepGen
         Particles& central_system = ev->getByRole( Particle::CentralSystem );
         if ( central_system.size() == p->kinematics.central_system.size() ) {
           unsigned short i = 0;
-          for ( Particles::iterator part = central_system.begin(); part != central_system.end(); ++part ) {
+          for ( auto& part : central_system ) {
             if ( p->kinematics.central_system[i] == invalidParticle )
               continue;
-            part->setPdgId( p->kinematics.central_system[i] );
-            part->computeMass();
+            part.setPdgId( p->kinematics.central_system[i] );
+            part.computeMass();
             i++;
           }
         }
@@ -116,10 +116,13 @@ namespace CepGen
     if ( p->taming_functions ) {
       if ( p->taming_functions->has( "m_central" )
         || p->taming_functions->has( "pt_central" ) ) {
+
+        // build the kinematics of the central system
         Particle::Momentum central_system;
-        const Particles& cm_parts = ev->getByRole( Particle::CentralSystem );
-        for ( Particles::const_iterator it_p = cm_parts.begin(); it_p != cm_parts.end(); ++it_p )
-          central_system += it_p->momentum();
+        for ( const auto& part : ev->getByRole( Particle::CentralSystem ) )
+          central_system += part.momentum();
+
+        // tame the cross-section by the reweighting function
         if ( p->taming_functions->has( "m_central" ) )
           integrand *= p->taming_functions->eval( "m_central", central_system.mass() );
         if ( p->taming_functions->has( "pt_central" ) )
@@ -148,27 +151,23 @@ namespace CepGen
     //    (watch out your cuts, as this might be extremely time-consuming...)
 
     if ( p->kinematics.cuts.central_particles.size() > 0 ) {
-      std::map<ParticleCode,std::map<Cuts::Central,Kinematics::Limits> >::const_iterator it_c;
-      const Particles cs = ev->getByRole( Particle::CentralSystem );
-      for ( Particles::const_iterator it_p = cs.begin(); it_p != cs.end(); ++it_p ) {
-        it_c = p->kinematics.cuts.central_particles.find( it_p->pdgId() );
-        if ( it_c == p->kinematics.cuts.central_particles.end() )
-          continue;
+      for ( const auto& part : ev->getByRole( Particle::CentralSystem ) ) {
         // retrieve all cuts associated to this final state particle
-        const std::map<Cuts::Central,Kinematics::Limits>& cm = it_c->second;
+        if ( p->kinematics.cuts.central_particles.count( part.pdgId() ) )
+          continue;
+        const auto& cuts_pdgid = p->kinematics.cuts.central_particles.at( part.pdgId() );
         // apply these cuts on the given particle
-        if ( cm.count( Cuts::pt_single ) > 0
-         && !cm.at( Cuts::pt_single ).passes( it_p->momentum().pt() ) )
+        if ( cuts_pdgid.count( Cuts::pt_single ) > 0
+         && !cuts_pdgid.at( Cuts::pt_single ).passes( part.momentum().pt() ) )
           return 0.;
-        //std::cout << it_c->first << "\t" << it_p->momentum().pt() << "\t" << cm.at( Cuts::pt_single ).passes( it_p->momentum().pt() ) << std::endl;
-        if ( cm.count( Cuts::energy_single ) > 0
-         && !cm.at( Cuts::energy_single ).passes( it_p->momentum().energy() ) )
+        if ( cuts_pdgid.count( Cuts::energy_single ) > 0
+         && !cuts_pdgid.at( Cuts::energy_single ).passes( part.momentum().energy() ) )
           return 0.;
-        if ( cm.count( Cuts::eta_single ) > 0
-         && !cm.at( Cuts::eta_single ).passes( it_p->momentum().eta() ) )
+        if ( cuts_pdgid.count( Cuts::eta_single ) > 0
+         && !cuts_pdgid.at( Cuts::eta_single ).passes( part.momentum().eta() ) )
           return 0.;
-        if ( cm.count( Cuts::rapidity_single ) > 0
-         && !cm.at( Cuts::rapidity_single ).passes( it_p->momentum().rapidity() ) )
+        if ( cuts_pdgid.count( Cuts::rapidity_single ) > 0
+         && !cuts_pdgid.at( Cuts::rapidity_single ).passes( part.momentum().rapidity() ) )
           return 0.;
       }
     }
@@ -187,8 +186,10 @@ namespace CepGen
 
     if ( Logger::get().level >= Logger::DebugInsideLoop ) {
       std::ostringstream oss;
-      for ( unsigned int i = 0; i < ndim; ++i ) oss << Form( "%10.8f ", x[i] );
-      Debugging( Form( "f value for dim-%d point ( %s): %4.4e", ndim, oss.str().c_str(), integrand ) );
+      for ( unsigned short i = 0; i < ndim; ++i )
+        oss << Form( "%10.8f ", x[i] );
+      Debugging( Form( "f value for dim-%d point ( %s): %4.4e",
+                       ndim, oss.str().c_str(), integrand ) );
     }
 
     return integrand;

@@ -82,15 +82,14 @@ namespace CepGen
   ParticlesIds
   Event::getIdsByRole( Particle::Role role ) const
   {
-    //--- retrieve all particles ids with a given role
     ParticlesIds out;
-    Particles parts;
-    try {
-      parts = particles_.at( role );
-    } catch ( std::out_of_range ) { return out; }
-    for ( Particles::const_iterator it = parts.begin(); it != parts.end(); ++it ) {
-      out.insert( it->id() );
-    }
+    //--- retrieve all particles ids with a given role
+    if ( particles_.count( role ) == 0 )
+      return out;
+
+    for ( const auto& part : particles_.at( role ) )
+      out.insert( part.id() );
+
     return out;
   }
 
@@ -121,22 +120,22 @@ namespace CepGen
   Particle&
   Event::getById( int id )
   {
-    for ( ParticlesMap::iterator out = particles_.begin(); out != particles_.end(); ++out ) {
-      for ( Particles::iterator part = out->second.begin(); part != out->second.end(); ++part ) {
-        if ( part->id() == id ) return *part;
-      }
-    }
+    for ( auto& role_part : particles_ )
+      for ( auto& part : role_part.second )
+        if ( part.id() == id )
+          return part;
+
     throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve the particle with id=%d", id ), FatalError );
   }
 
   const Particle&
   Event::getConstById( int id ) const
   {
-    for ( ParticlesMap::const_iterator out = particles_.begin(); out != particles_.end(); ++out ) {
-      for ( Particles::const_iterator part = out->second.begin(); part != out->second.end(); ++part ) {
-        if ( part->id() == id ) return *part;
-      }
-    }
+    for ( const auto& role_part : particles_ )
+      for ( const auto& part : role_part.second )
+        if ( part.id() == id )
+          return part;
+
     throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve the particle with id=%d", id ), FatalError );
   }
 
@@ -144,9 +143,9 @@ namespace CepGen
   Event::getByIds( const ParticlesIds& ids ) const
   {
     Particles out;
-    for ( ParticlesIds::const_iterator id = ids.begin(); id != ids.end(); ++id ) {
-      out.emplace_back( getConstById( *id ) );
-    }
+    for ( const auto& id : ids )
+      out.emplace_back( getConstById( id ) );
+
     return out;
   }
 
@@ -207,9 +206,8 @@ namespace CepGen
   Event::numParticles() const
   {
     size_t out = 0;
-    for ( ParticlesMap::const_iterator it = particles_.begin(); it != particles_.end(); ++it ) {
-      out += it->second.size();
-    }
+    for ( const auto& role_part : particles_ )
+      out += role_part.second.size();
     return out;
   }
 
@@ -217,9 +215,9 @@ namespace CepGen
   Event::particles() const
   {
     Particles out;
-    for ( ParticlesMap::const_iterator it = particles_.begin(); it != particles_.end(); ++it ) {
-      out.insert( out.end(), it->second.begin(), it->second.end() );
-    }
+    for ( const auto& role_part : particles_ )
+      out.insert( out.end(), role_part.second.begin(), role_part.second.end() );
+
     std::sort( out.begin(), out.end() );
     return out;
   }
@@ -228,11 +226,11 @@ namespace CepGen
   Event::stableParticles() const
   {
     Particles out;
-    for ( ParticlesMap::const_iterator it = particles_.begin(); it != particles_.end(); ++it ) {
-      for ( Particles::const_iterator part = it->second.begin(); part != it->second.end(); ++part ) {
-        if ( (short)part->status() > 0 ) out.emplace_back( *part );
-      }
-    }
+    for ( const auto& role_part : particles_ )
+      for ( const auto& part : role_part.second )
+        if ( (short)part.status() > 0 )
+          out.emplace_back( part );
+
     std::sort( out.begin(), out.end() );
     return out;
   }
@@ -240,31 +238,30 @@ namespace CepGen
   void
   Event::checkKinematics() const
   {
-    try {
-      const Particles& parts = particles();
-      // check the kinematics through parentage
-      for ( Particles::const_iterator p = parts.begin(); p != parts.end(); ++p ) {
-        ParticlesIds daughters = p->daughters();
-        if ( daughters.empty() ) continue;
-        Particle::Momentum ptot;
-        for ( ParticlesIds::const_iterator daugh = daughters.begin(); daugh != daughters.end(); ++daugh ) {
-          const Particle& d = getConstById( *daugh );
-          const ParticlesIds mothers = d.mothers();
-          if ( mothers.size() > 1 ) {
-            for ( ParticlesIds::const_iterator moth = mothers.begin(); moth != mothers.end(); ++moth ) {
-              if ( *moth == p->id() ) continue;
-              ptot -= getConstById( *moth ).momentum();
-            }
-          }
-          ptot += d.momentum();
-        }
-        const double mass_diff = ( ptot-p->momentum() ).mass();
-        if ( fabs( mass_diff ) > 1.e-10 ) {
-          dump();
-          throw Exception( __PRETTY_FUNCTION__, Form( "Error in momentum balance for particle %d: mdiff = %.5e", p->id(), mass_diff ), FatalError );
+    // check the kinematics through parentage
+    for ( const auto& part : particles() ) {
+      ParticlesIds daughters = part.daughters();
+      if ( daughters.empty() )
+        continue;
+      Particle::Momentum ptot;
+      for ( const auto& daugh : daughters ) {
+        const Particle& d = getConstById( daugh );
+        const ParticlesIds mothers = d.mothers();
+        ptot += d.momentum();
+        if ( mothers.size() < 2 )
+          continue;
+        for ( const auto& moth : mothers ) {
+          if ( moth == part.id() )
+            continue;
+          ptot -= getConstById( moth ).momentum();
         }
       }
-    } catch ( const Exception& e ) { throw Exception( __PRETTY_FUNCTION__, Form( "Event kinematics check failed:\n\t%s", e.what() ), FatalError ); }
+      const double mass_diff = ( ptot-part.momentum() ).mass();
+      if ( fabs( mass_diff ) > minimal_precision_ ) {
+        dump();
+        FatalError( Form( "Error in momentum balance for particle %d: mdiff = %.5e", part.id(), mass_diff ) );
+      }
+    }
   }
 
   void
@@ -275,14 +272,17 @@ namespace CepGen
     std::ostringstream os;
 
     double pxtot = 0., pytot = 0., pztot = 0., etot = 0.;
-    for ( Particles::const_iterator part_ref = parts.begin(); part_ref != parts.end(); ++part_ref ) {
-      const Particle& part = *part_ref;
+    for ( const auto& part : parts ) {
       const ParticlesIds mothers = part.mothers();
       {
         std::ostringstream oss;
-        if ( part.pdgId() == invalidParticle && mothers.size() > 0 )
-          for ( std::set<int>::const_iterator it_moth = mothers.begin(); it_moth != mothers.end(); ++it_moth )
-            oss << ( ( it_moth != mothers.begin() ) ? "/" : "" ) << getConstById( *it_moth ).pdgId();
+        if ( part.pdgId() == invalidParticle && mothers.size() > 0 ) {
+          unsigned short i = 0;
+          for ( const auto& moth : mothers ) {
+            oss << ( i > 0 ? "/" : "" ) << getConstById( moth ).pdgId();
+            ++i;
+          }
+        }
         else oss << part.pdgId();
         os << Form( "\n %2d\t%-+7d %-10s", part.id(), part.integerPdgId(), oss.str().c_str() );
       }
@@ -292,8 +292,10 @@ namespace CepGen
       { std::ostringstream oss; oss << part.role(); os << Form( "%8s\t%6d\t", oss.str().c_str(), part.status() ); }
       if ( !mothers.empty() ) {
         std::ostringstream oss;
-        for ( ParticlesIds::const_iterator moth = mothers.begin(); moth != mothers.end(); ++moth ) {
-          oss << ( ( moth != mothers.begin() ) ? "+" : "" ) << *moth;
+        unsigned short i = 0;
+        for ( const auto& moth : mothers ) {
+          oss << ( i > 0 ? "+" : "" ) << moth;
+          ++i;
         }
         os << Form( "%6s ", oss.str().c_str() );
       }
@@ -311,10 +313,10 @@ namespace CepGen
       }
     }
     //--- set a threshold to the computation precision
-    if ( fabs( pxtot ) < 1.e-10 ) pxtot = 0.;
-    if ( fabs( pytot ) < 1.e-10 ) pytot = 0.;
-    if ( fabs( pztot ) < 1.e-10 ) pztot = 0.;
-    if ( fabs(  etot ) < 1.e-10 ) etot = 0.;
+    if ( fabs( pxtot ) < minimal_precision_ ) pxtot = 0.;
+    if ( fabs( pytot ) < minimal_precision_ ) pytot = 0.;
+    if ( fabs( pztot ) < minimal_precision_ ) pztot = 0.;
+    if ( fabs(  etot ) < minimal_precision_ ) etot = 0.;
     //
     Information( Form( "Dump of event content:\n"
     " Id\tPDG id\tName\t\tCharge\t   Role\tStatus\tMother\tpx (GeV/c)    py (GeV/c)    pz (GeV/c)    E (GeV)\t M (GeV/c²)\n"

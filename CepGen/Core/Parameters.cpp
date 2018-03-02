@@ -122,8 +122,13 @@ namespace CepGen
       << std::endl;
     std::ostringstream proc_mode; proc_mode << kinematics.mode;
     std::ostringstream ip1, ip2, op; ip1 << kinematics.inpdg.first; ip2 << kinematics.inpdg.second;
-    for ( std::vector<ParticleCode>::const_iterator cp = kinematics.central_system.begin(); cp != kinematics.central_system.end(); ++cp )
-      op << ( cp != kinematics.central_system.begin() ? ", " : "" ) << *cp;
+    {
+      unsigned short i = 0;
+      for ( const auto& part : kinematics.central_system ) {
+        op << ( i > 0 ? ", " : "" ) << part;
+        ++i;
+      }
+    }
     std::ostringstream q2range; q2range << kinematics.cuts.initial.at( Cuts::q2 );
     os
       << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << std::endl
@@ -134,9 +139,10 @@ namespace CepGen
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << std::endl
       << std::endl;
     if ( kinematics.cuts.central.size() > 0 ) {
-      for ( std::map<Cuts::InitialState,Kinematics::Limits>::const_iterator lim = kinematics.cuts.initial.begin(); lim != kinematics.cuts.initial.end(); ++lim ) {
-        if ( !lim->second.valid() ) continue;
-        os << std::setw( wt ) << lim->first << lim->second << std::endl;
+      for ( const auto& lim : kinematics.cuts.initial ) { // map(particles class, limits)
+        if ( !lim.second.valid() )
+          continue;
+        os << std::setw( wt ) << lim.first << lim.first << std::endl;
       }
     }
     os
@@ -145,29 +151,34 @@ namespace CepGen
       << std::endl
       << std::setw( wt ) << "Central particles" << ( pretty ? boldify( op.str().c_str() ) : op.str() ) << std::endl;
     if ( kinematics.cuts.central.size() > 0 ) {
-      for ( std::map<Cuts::Central,Kinematics::Limits>::const_iterator lim = kinematics.cuts.central.begin(); lim != kinematics.cuts.central.end(); ++lim ) {
-        if ( !lim->second.valid() ) continue;
-        os << std::setw( wt ) << lim->first << lim->second << std::endl;
+      for ( const auto& lim : kinematics.cuts.central ) {
+        if ( !lim.second.valid() )
+          continue;
+        os << std::setw( wt ) << lim.first << lim.second << std::endl;
       }
     }
     if ( kinematics.cuts.central_particles.size() > 0 ) {
       os << std::setw( wt ) << ( pretty ? boldify( ">>> per-particle cuts:" ) : ">>> per-particle cuts:" ) << std::endl;
-      for ( std::map<ParticleCode,std::map<Cuts::Central,Kinematics::Limits> >::const_iterator part_lim = kinematics.cuts.central_particles.begin(); part_lim != kinematics.cuts.central_particles.end(); ++part_lim ) {
-        os << " * " << std::setw( wt-3 ) << part_lim->first << std::endl;
-        for ( std::map<Cuts::Central,Kinematics::Limits>::const_iterator lim = part_lim->second.begin(); lim != part_lim->second.end(); ++lim ) {
-          if ( !lim->second.valid() ) continue;
-          os << "   - " << std::setw( wt-5 ) << lim->first << lim->second << std::endl;
+      for ( const auto& part_per_lim : kinematics.cuts.central_particles ) {
+        os << " * " << std::setw( wt-3 ) << part_per_lim.first << std::endl;
+        for ( const auto& lim : part_per_lim.second ) {
+          if ( !lim.second.valid() )
+            continue;
+          os << "   - " << std::setw( wt-5 ) << lim.first << lim.second << std::endl;
         }
       }
     }
     os << std::endl;
     os << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Proton / remnants " ) : "Proton / remnants" ) << std::setfill( ' ' ) << std::endl;
     os << std::endl;
-    for ( std::map<Cuts::Remnants,Kinematics::Limits>::const_iterator lim = kinematics.cuts.remnants.begin(); lim != kinematics.cuts.remnants.end(); ++lim ) {
-      os << std::setw( wt ) << lim->first << lim->second << std::endl;
+    for ( const auto& lim : kinematics.cuts.remnants )
+      os << std::setw( wt ) << lim.first << lim.second << std::endl;
+
+    if ( pretty ) {
+      Information( os.str() );
     }
-    if ( pretty ) { Information( os.str() ); }
-    else out << os.str();
+    else
+      out << os.str();
   }
 
   Parameters::IntegratorParameters::IntegratorParameters() :

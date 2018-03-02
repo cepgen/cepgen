@@ -181,15 +181,15 @@ namespace CepGen
 
       for ( unsigned short i = 1; i < pythia_->event.size(); ++i ) { // skip the central system
         const Pythia8::Particle& p = pythia_->event[i];
-        std::map<short,short>::const_iterator it = py_cg_corresp.find( i );
-        if ( it != py_cg_corresp.end() ) { // the particle is already in the event content
+        if ( py_cg_corresp.count( i ) > 0 ) { // the particle is already in the event content
+          const auto& cg_id = py_cg_corresp.at( i );
           if ( p.daughterList().size() > 0 ) {
             if ( i != idx_remn1 && i != idx_remn2 ) {
               weight *= p.particleDataEntry().pickChannel().bRatio();
-              ev.getById( it->second ).setStatus( Particle::Resonance );
+              ev.getById( cg_id ).setStatus( Particle::Resonance );
             }
             else
-              ev.getById( it->second ).setStatus( Particle::Fragmented );
+              ev.getById( cg_id ).setStatus( Particle::Fragmented );
           }
         }
         else { // the particle was not yet included in the CepGen event
@@ -197,9 +197,8 @@ namespace CepGen
           if ( mothers.size() == 0 ) continue; // isolated particle
 
           Particle::Role role = Particle::CentralSystem;
-          std::map<short,short>::const_iterator it_m = py_cg_corresp.find( mothers[0] );
-          if ( it_m != py_cg_corresp.end() ) {
-            const Particle& moth = ev.getById( it_m->second );
+          if ( py_cg_corresp.count( mothers[0] ) > 0 ) {
+            const Particle& moth = ev.getById( py_cg_corresp.at( mothers[0] ) );
             if ( mothers[0] == idx_remn1 || moth.role() == Particle::OutgoingBeam1 )
               role = Particle::OutgoingBeam1;
             else if ( mothers[0] == idx_remn2 || moth.role() == Particle::OutgoingBeam2 )
@@ -216,10 +215,10 @@ namespace CepGen
             : Particle::Propagator
           );
           op.setMomentum( Particle::Momentum( p.px(), p.py(), p.pz(), p.e() ) );
-          for ( std::vector<int>::const_iterator moth = mothers.begin(); moth != mothers.end(); ++moth ) {
-            if ( *moth != 0 && py_cg_corresp.count( *moth ) == 0 )
-              FatalError( Form( "Particle with id=%d was not found in the event content!", *moth ) );
-            op.addMother( ev.getById( py_cg_corresp[*moth] ) );
+          for ( const auto& moth : mothers ) {
+            if ( moth != 0 && py_cg_corresp.count( moth ) == 0 )
+              FatalError( Form( "Particle with id=%d was not found in the event content!", moth ) );
+            op.addMother( ev.getById( py_cg_corresp.at( moth ) ) );
           }
         }
       }

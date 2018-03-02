@@ -66,7 +66,7 @@ namespace CepGen
     GenericProcess::dumpPoint()
     {
       std::ostringstream os;
-      for ( unsigned int i = 0; i < x_.size(); ++i ) {
+      for ( unsigned short i = 0; i < x_.size(); ++i ) {
         os << Form( "  x(%2d) = %8.6f\n\t", i, x_[i] );
       }
       Information( Form( "Number of integration parameters: %d\n\t"
@@ -80,32 +80,32 @@ namespace CepGen
       //----- add the particles in the event
 
       //--- incoming state
-      for ( IncomingState::const_iterator ip = ini.begin(); ip != ini.end(); ++ip ) {
-        Particle& p = event_->addParticle( ip->first );
-        p.setPdgId( ip->second, ParticleProperties::charge( ip->second ) );
-        p.setMass( ParticleProperties::mass( ip->second ) );
+      for ( const auto& ip : ini ) {
+        Particle& p = event_->addParticle( ip.first );
+        p.setPdgId( ip.second, ParticleProperties::charge( ip.second ) );
+        p.setMass( ParticleProperties::mass( ip.second ) );
       }
       //--- central system (if not already there)
-      IncomingState::const_iterator central_system = ini.find( Particle::CentralSystem );
+      const auto& central_system = ini.find( Particle::CentralSystem );
       if ( central_system == ini.end() ) {
         Particle& p = event_->addParticle( Particle::Intermediate );
         p.setPdgId( invalidParticle );
         p.setStatus( Particle::Propagator );
       }
       //--- outgoing state
-      for ( OutgoingState::const_iterator op = fin.begin(); op != fin.end(); ++op ) {
-        for ( std::vector<ParticleCode>::const_iterator it = op->second.begin(); it != op->second.end(); ++it ) {
-          Particle& p = event_->addParticle( op->first );
-          p.setPdgId( *it, ParticleProperties::charge( *it ) );
-          p.setMass( ParticleProperties::mass( *it ) );
+      for ( const auto& opl : fin ) { // pair(role, list of PDGids)
+        for ( const auto& pdg : opl.second ) {
+          Particle& p = event_->addParticle( opl.first );
+          p.setPdgId( pdg, ParticleProperties::charge( pdg ) );
+          p.setMass( ParticleProperties::mass( pdg ) );
         }
       }
 
       //----- define the particles parentage
 
       const Particles parts = event_->particles();
-      for ( Particles::const_iterator p = parts.begin(); p != parts.end(); ++p ) {
-        Particle& part = event_->getById( p->id() );
+      for ( const auto& p : parts ) {
+        Particle& part = event_->getById( p.id() );
         switch ( part.role() ) {
           case Particle::OutgoingBeam1:
           case Particle::Parton1:
@@ -185,15 +185,16 @@ namespace CepGen
     GenericProcess::isKinematicsDefined()
     {
       // check the incoming state
-      if ( !particles( Particle::IncomingBeam1 ).empty() && !particles( Particle::IncomingBeam2 ).empty() ) {
+      if ( !particles( Particle::IncomingBeam1 ).empty()
+        && !particles( Particle::IncomingBeam2 ).empty() )
         is_incoming_state_set_ = true;
-      }
+
       // check the outgoing state
       if ( !particles( Particle::OutgoingBeam1 ).empty()
         && !particles( Particle::OutgoingBeam2 ).empty()
-        && !particles( Particle::CentralSystem ).empty() ) {
+        && !particles( Particle::CentralSystem ).empty() )
         is_outgoing_state_set_ = true;
-      }
+
       // combine both states
       is_kinematics_set_ = is_incoming_state_set_ && is_outgoing_state_set_;
       return is_kinematics_set_;
