@@ -81,9 +81,7 @@ namespace CepGen
         ///Get the number of dimensions on which the integration is performed
         inline const unsigned int ndim() const { return x_.size(); }
         /// Get the value of a component of the d-dimensional point considered
-        inline const double x( const unsigned int idx ) const {
-          return ( idx >= x_.size() ) ? -1. : x_[idx];
-        }
+        double x( unsigned int idx ) const;
         /// Name of the process considered
         inline const std::string& name() const { return name_; }
         /// Human-readable description of the process
@@ -93,16 +91,10 @@ namespace CepGen
         bool hasEvent() const { return has_event_; }
 
         /// Reset the total generation time and the number of events generated for this run
-        inline void clearRun() {
-          total_gen_time_ = 0.;
-          num_gen_events_ = 0;
-        }
+        void clearRun();
         /// Add a new timing into the total generation time
         /// \param[in] gen_time Time to add (in seconds)
-        inline void addGenerationTime( const float& gen_time ) {
-          total_gen_time_ += gen_time;
-          num_gen_events_++;
-        }
+        void addGenerationTime( const float& gen_time );
         /// Return the total generation time for this run (in seconds)
         inline float totalGenerationTime() const { return total_gen_time_; }
         /// Total number of events already generated in this run
@@ -110,14 +102,14 @@ namespace CepGen
   
       protected:
         /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
-        void setEventContent( const IncomingState& is, const OutgoingState& os );
+        void setEventContent( const IncomingState& ini, const OutgoingState& fin );
         /// Compute the electric/magnetic form factors for the two considered \f$Q^{2}\f$ momenta transfers
         void formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const;
  
         /// Get a list of references to the particles with a given role in the process
         /// \param[in] role role in the process for the particle to retrieve
         /// \return A vector of references to Particle objects associated to the role
-        inline Particles particles( const Particle::Role& role ) { return event_->getByRole( role ); }
+        Particles& particles( const Particle::Role& role );
 
         // --- 
   

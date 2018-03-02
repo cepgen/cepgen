@@ -24,6 +24,28 @@ namespace CepGen
       if ( Logger::get().level>=Logger::DebugInsideLoop ) { dumpPoint(); }
     }
 
+    double
+    GenericProcess::x( unsigned int idx ) const
+    {
+      if ( idx >= x_.size() )
+        return -1.;
+      return x_[idx];
+    }
+
+    void
+    GenericProcess::clearRun()
+    {
+      total_gen_time_ = 0.;
+      num_gen_events_ = 0;
+    }
+
+    void
+    GenericProcess::addGenerationTime( const float& gen_time )
+    {
+      total_gen_time_ += gen_time;
+      num_gen_events_++;
+    }
+
     void
     GenericProcess::prepareKinematics()
     {
@@ -52,26 +74,26 @@ namespace CepGen
     }
 
     void
-    GenericProcess::setEventContent( const IncomingState& is, const OutgoingState& os )
+    GenericProcess::setEventContent( const IncomingState& ini, const OutgoingState& fin )
     {
       event_->clear();
       //----- add the particles in the event
 
       //--- incoming state
-      for ( IncomingState::const_iterator ip = is.begin(); ip != is.end(); ++ip ) {
+      for ( IncomingState::const_iterator ip = ini.begin(); ip != ini.end(); ++ip ) {
         Particle& p = event_->addParticle( ip->first );
         p.setPdgId( ip->second, ParticleProperties::charge( ip->second ) );
         p.setMass( ParticleProperties::mass( ip->second ) );
       }
       //--- central system (if not already there)
-      IncomingState::const_iterator central_system = is.find( Particle::CentralSystem );
-      if ( central_system == is.end() ) {
+      IncomingState::const_iterator central_system = ini.find( Particle::CentralSystem );
+      if ( central_system == ini.end() ) {
         Particle& p = event_->addParticle( Particle::Intermediate );
         p.setPdgId( invalidParticle );
         p.setStatus( Particle::Propagator );
       }
       //--- outgoing state
-      for ( OutgoingState::const_iterator op = os.begin(); op != os.end(); ++op ) {
+      for ( OutgoingState::const_iterator op = fin.begin(); op != fin.end(); ++op ) {
         for ( std::vector<ParticleCode>::const_iterator it = op->second.begin(); it != op->second.end(); ++it ) {
           Particle& p = event_->addParticle( op->first );
           p.setPdgId( *it, ParticleProperties::charge( *it ) );
@@ -153,7 +175,13 @@ namespace CepGen
       }
     }
 
-    inline bool
+    Particles&
+    GenericProcess::particles( const Particle::Role& role )
+    {
+      return event_->getByRole( role );
+    }
+
+    bool
     GenericProcess::isKinematicsDefined()
     {
       // check the incoming state

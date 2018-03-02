@@ -93,31 +93,35 @@ namespace CepGen
         /// Internal switch for the optimised code version (LPAIR legacy ; unimplemented here)
         int n_opt_;
 
-        /// squared mass of the first proton-like outgoing particle
-        double MX2_;
-        /// squared mass of the second proton-like outgoing particle
-        double MY2_;
-        /// squared mass of the outgoing leptons
-        double Ml2_;
+        struct Masses
+        {
+          Masses();
+          /// squared mass of the first proton-like outgoing particle
+          double MX2_;
+          /// squared mass of the second proton-like outgoing particle
+          double MY2_;
+          /// squared mass of the outgoing leptons
+          double Ml2_;
+          /// \f$\delta_2=m_1^2-m_2^2\f$ as defined in Vermaseren's paper
+          /// \cite Vermaseren1983347 for the full definition of this quantity
+          double w12_;
+
+          /// \f$\delta_1=m_3^2-m_1^2\f$ as defined in Vermaseren's paper
+          /// \cite Vermaseren1983347 for the full definition of this quantity
+          double w31_;
+          double dw31_;
+          /// \f$\delta_4=m_5^2-m_2^2\f$ as defined in Vermaseren's paper
+          /// \cite Vermaseren1983347 for the full definition of this quantity
+          double w52_;
+          double dw52_;
+        };
+        Masses masses_;
 
         /// energy of the first proton-like incoming particle
         double ep1_;
         /// energy of the second proton-like incoming particle
         double ep2_;
         double p_cm_;
-
-        /// \f$\delta_2=m_1^2-m_2^2\f$ as defined in Vermaseren's paper
-        /// \cite Vermaseren1983347 for the full definition of this quantity
-        double w12_;
-
-        /// \f$\delta_1=m_3^2-m_1^2\f$ as defined in Vermaseren's paper
-        /// \cite Vermaseren1983347 for the full definition of this quantity
-        double w31_;
-        double dw31_;
-        /// \f$\delta_4=m_5^2-m_2^2\f$ as defined in Vermaseren's paper
-        /// \cite Vermaseren1983347 for the full definition of this quantity
-        double w52_;
-        double dw52_;
 
         /// energy of the two-photon central system
         double ec4_;
