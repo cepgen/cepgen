@@ -75,6 +75,8 @@ namespace CepGen
   const Particles&
   Event::getByRole( Particle::Role role ) const
   {
+    if ( particles_.count( role ) == 0 )
+      throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve a particle with role %d", role ), FatalError );
     //--- retrieve all particles with a given role
     return particles_.at( role );
   }
@@ -108,6 +110,8 @@ namespace CepGen
   const Particle&
   Event::getOneByRole( Particle::Role role ) const
   {
+    if ( particles_.count( role ) == 0 )
+      throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve a particle with role %d", role ), FatalError );
     //--- retrieve the first particle a the given role
     const Particles& parts_by_role = particles_.at( role );
     if ( parts_by_role.size() == 0 )

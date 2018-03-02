@@ -153,7 +153,7 @@ namespace CepGen
     if ( p->kinematics.cuts.central_particles.size() > 0 ) {
       for ( const auto& part : ev->getByRole( Particle::CentralSystem ) ) {
         // retrieve all cuts associated to this final state particle
-        if ( p->kinematics.cuts.central_particles.count( part.pdgId() ) )
+        if ( p->kinematics.cuts.central_particles.count( part.pdgId() ) == 0 )
           continue;
         const auto& cuts_pdgid = p->kinematics.cuts.central_particles.at( part.pdgId() );
         // apply these cuts on the given particle

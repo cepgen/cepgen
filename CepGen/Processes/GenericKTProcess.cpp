@@ -228,6 +228,8 @@ namespace CepGen
       jac *= 2.*M_PI; // d(phi1)
       jac *= 2.*M_PI; // d(phi2)
 
+      if ( cuts_.cuts.remnants.count( Cuts::mass ) == 0 )
+        throw Exception( __PRETTY_FUNCTION__, "You did not specify any range for the proton remnants mass!", FatalError );
       const double mx_range = cuts_.cuts.remnants.at( Cuts::mass ).range();
       switch ( cuts_.mode ) {
         case Kinematics::ElasticElastic: default: break;
