@@ -14,52 +14,13 @@ namespace CepGen
     void
     PPtoLL::preparePhaseSpace()
     {
-      central_jacobian_ = 1.;
-
-      // Outgoing leptons
-      if ( cuts_.cuts.central.count( Cuts::rapidity_single ) == 0
-        || !cuts_.cuts.central.at( Cuts::rapidity_single ).valid() ) {
-        InWarning( "Failed to retrieve a rapidity range for the outgoing leptons from the user configuration!\n\t"
-                   "Setting it to the default | y(l) | < 6 value." );
-        cuts_.cuts.central[Cuts::rapidity_single] = { -6., 6. };
-      }
-      rap_limits_ = cuts_.cuts.central.at( Cuts::rapidity_single );
-      central_jacobian_ *= pow( rap_limits_.range(), 2 );
-
-      if ( cuts_.cuts.central.count( Cuts::pt_diff ) == 0
-        || !cuts_.cuts.central.at( Cuts::pt_diff ).valid() ) {
-        InWarning( "Failed to retrieve a leptons pT difference range from the user configuration!\n\t"
-                   "Setting it to the default ΔpT < 50 GeV value." );
-        cuts_.cuts.central[Cuts::pt_diff] = { 0., 50. };
-      }
-      ptdiff_limits_ = cuts_.cuts.central.at( Cuts::pt_diff );
-      central_jacobian_ *= ptdiff_limits_.range();
-
-      if ( cuts_.cuts.central.count( Cuts::phi_pt_diff ) == 0
-        || !cuts_.cuts.central.at( Cuts::phi_pt_diff ).valid() ) {
-        InWarning( "Failed to retrieve a leptons azimuthal angle difference range from the user configuration!\n\t"
-                   "Setting it to the default 0 < Δɸ < 2π value." );
-        cuts_.cuts.central[Cuts::phi_pt_diff] = { 0., 2*M_PI };
-      }
-      phi_pt_diff_limits_ = cuts_.cuts.central.at( Cuts::phi_pt_diff );
-      central_jacobian_ *= phi_pt_diff_limits_.range();
-    }
-
-    void
-    PPtoLL::prepareKTKinematics()
-    {
-      y1_ = rap_limits_.x( xkt( 0 ) );
-      y2_ = rap_limits_.x( xkt( 1 ) );
-
-      DebuggingInsideLoop( Form( "Leptons rapidities (%.2f < y < %.2f): %f / %f", rap_limits_.min(), rap_limits_.max(), y1_, y2_ ) );
-
-      pt_diff_ = ptdiff_limits_.x( xkt( 2 ) );
-      phi_pt_diff_ = phi_pt_diff_limits_.x( xkt( 3 ) );
-
-      DebuggingInsideLoop( Form( "leptons pt difference:\n\t"
-                                 "  mag = %f (%.2f < Dpt < %.2f)\n\t"
-                                 "  phi = %f",
-                                 pt_diff_, ptdiff_limits_.min(), ptdiff_limits_.max(), phi_pt_diff_ ) );
+      std::ostringstream oss1; oss1 << Cuts::rapidity_single;
+      std::ostringstream oss2; oss2 << Cuts::pt_diff;
+      std::ostringstream oss3; oss3 << Cuts::phi_pt_diff;
+      registerCut( oss1.str().c_str(), cuts_.cuts.central[Cuts::rapidity_single], y1_, { -6., 6. }, kNumRequiredDimensions, kLinear );
+      registerCut( oss1.str().c_str(), cuts_.cuts.central[Cuts::rapidity_single], y2_, { -6., 6. }, kNumRequiredDimensions+1, kLinear );
+      registerCut( oss2.str().c_str(), cuts_.cuts.central[Cuts::pt_diff], pt_diff_, { 0., 50. }, kNumRequiredDimensions+2, kLinear );
+      registerCut( oss3.str().c_str(), cuts_.cuts.central[Cuts::phi_pt_diff], phi_pt_diff_, { 0., 2.*M_PI }, kNumRequiredDimensions+3, kLinear );
     }
 
     double

@@ -52,20 +52,16 @@ namespace CepGen
         static double inelasticFlux( double x, double kt2, double mx, const StructureFunctions::Type& sf );
 
       protected:
+        static constexpr unsigned short kNumRequiredDimensions = 4;
         /// Set the kinematics associated to the phase space definition
         void setKinematics( const Kinematics& kin ) override;
         /// Set the kinematics of the central system before any point computation
         virtual void setExtraContent() {}
-        virtual void prepareKTKinematics();
         /// Prepare the central part of the Jacobian (only done once, as soon as the kinematics is set)
         virtual void preparePhaseSpace() = 0;
-        /// Minimal Jacobian weight of the point considering a kT factorisation
-        double minimalJacobian() const;
         /// kT-factorised matrix element (event weight)
         /// \return Weight of the point in the phase space to the integral
         virtual double computeKTFactorisedMatrixElement() = 0;
-        /// Compute the invariant masses of the outgoing protons (or remnants)
-        void computeOutgoingPrimaryParticlesMasses();
         /// Compute the unintegrated photon fluxes (for inelastic distributions, interpolation on double logarithmic grid)
         void computeIncomingFluxes( double, double, double, double );
         /// Set the kinematics of the incoming and outgoing protons (or remnants)
@@ -73,12 +69,21 @@ namespace CepGen
         /// Set the kinematics of the outgoing central system
         virtual void fillCentralParticlesKinematics() = 0;
 
+        enum MappingType
+        {
+          kLinear = 0,
+          kLogarithmic,
+          kSquare
+        };
+        void registerCut( const char*, const Kinematics::Limits&, double&, Kinematics::Limits, unsigned short, const MappingType& type );
+        void mapCuts();
+
         /// Retrieve a component of the phase space point for the kT-factorised process
         inline double xkt( const unsigned int i ) const { return x( kNumRequiredDimensions + i ); }
   
         /// Jacobian weight of the point in the phase space for integration
         double kt_jacobian_;
-        double central_jacobian_;
+        double aux_jacobian_;
 
         /// Log-virtuality range of the intermediate parton
         Kinematics::Limits log_qt_limits_;
@@ -106,9 +111,16 @@ namespace CepGen
         /// Second incoming parton's flux
         double flux2_;
 
+        struct MappingVariable
+        {
+          Kinematics::Limits limits;
+          double& variable;
+          MappingType type;
+          unsigned short index;
+        };
+        std::vector<MappingVariable> phase_space_cuts_;
+
       private:
-        void addPartonContent();
-        static constexpr unsigned int kNumRequiredDimensions = 4;
         /// Number of additional dimensions required for the user process
         /// (in addition to the 4 required for the two partons' transverse momenta)
         unsigned int kNumUserDimensions;
