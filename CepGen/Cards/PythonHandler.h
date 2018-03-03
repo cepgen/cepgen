@@ -39,6 +39,7 @@ namespace CepGen
         void parseIncomingKinematics( PyObject* );
         void parseOutgoingKinematics( PyObject* );
         void parseParticlesCuts( PyObject* );
+        void parseLogging( PyObject* );
         void parseIntegrator( PyObject* );
         void parseGenerator( PyObject* );
         void parseTamingFunctions( PyObject* );

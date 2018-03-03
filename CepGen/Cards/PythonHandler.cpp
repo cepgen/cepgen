@@ -109,6 +109,12 @@ namespace CepGen
 
       Py_DECREF( process );
 
+      PyObject* plog = PyObject_GetAttrString( cfg, "logger" );
+      if ( plog ) {
+        parseLogging( plog );
+        Py_DECREF( plog );
+      }
+
       //--- hadroniser parameters
       PyObject* phad = PyObject_GetAttrString( cfg, "hadroniser" );
       if ( phad ) {
@@ -220,6 +226,12 @@ namespace CepGen
         getLimits( pvalue, "eta", params_.kinematics.cuts.central_particles[pdg][Cuts::eta_single] );
         getLimits( pvalue, "rapidity", params_.kinematics.cuts.central_particles[pdg][Cuts::rapidity_single] );
       }
+    }
+
+    void
+    PythonHandler::parseLogging( PyObject* log )
+    {
+      getParameter( log, "level", (int&)Logger::get().level );
     }
 
     void
@@ -505,7 +517,6 @@ namespace CepGen
       out = PyLong_AsUnsignedLong( pobj );
 #endif
       Py_DECREF( pobj );
-std::cout << "haha::" << key << "|" << out << std::endl;
     }
 
     void

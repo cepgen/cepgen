@@ -55,16 +55,14 @@ namespace CepGen
        * \param[in] x_ The point at which the function is to be evaluated
        * \return Function value at this point @a x_
        */
-      inline double F( const std::vector<double>& x ) { return F( x, input_params_ ); }
+      double F( const std::vector<double>& x );
       /**
        * Evaluate the function to be integrated at a point @a x_, given a set of Parameters @a ip_
        * \param[in] x_ The point at which the function is to be evaluated
        * \param[in] ip_ A set of parameters to fully define the function
        * \return Function value at this point \a x
        */
-      inline double F( const std::vector<double>& x, Parameters* ip ) {
-        return function_->f( (double*)&x[0], function_->dim, (void*)ip );
-      }
+      double F( const std::vector<double>& x, Parameters* ip );
       /**
        * Store the event characterized by its _ndim-dimensional point in the phase
        * space to the output file

@@ -162,7 +162,7 @@ namespace CepGen
     if ( kinematics.cuts.central_particles.size() > 0 ) {
       os << std::setw( wt ) << ( pretty ? boldify( ">>> per-particle cuts:" ) : ">>> per-particle cuts:" ) << std::endl;
       for ( const auto& part_per_lim : kinematics.cuts.central_particles ) {
-        os << " * " << std::setw( wt-3 ) << part_per_lim.first << std::endl;
+        os << " * all single " << std::setw( wt-3 ) << part_per_lim.first << std::endl;
         for ( const auto& lim : part_per_lim.second ) {
           if ( !lim.second.valid() )
             continue;

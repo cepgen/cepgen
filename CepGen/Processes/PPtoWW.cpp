@@ -7,7 +7,7 @@ namespace CepGen
   namespace Process
   {
     PPtoWW::PPtoWW() :
-      GenericKTProcess( "pptoww", "ɣɣ → W⁺W¯", 4, { { Photon, Photon } }, { W, W } ),
+      GenericKTProcess( "pptoww", "ɣɣ → W⁺W¯", { { Photon, Photon } }, { W, W } ),
       y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )
     {}
 
@@ -17,14 +17,10 @@ namespace CepGen
       std::ostringstream oss1; oss1 << Cuts::rapidity_single;
       std::ostringstream oss2; oss2 << Cuts::pt_diff;
       std::ostringstream oss3; oss3 << Cuts::phi_pt_diff;
-      registerCut( oss1.str().c_str(), cuts_.cuts.central[Cuts::rapidity_single],
-                   y1_, { -6., 6. }, kNumRequiredDimensions, kLinear );
-      registerCut( oss1.str().c_str(), cuts_.cuts.central[Cuts::rapidity_single],
-                   y2_, { -6., 6. }, kNumRequiredDimensions+1, kLinear );
-      registerCut( oss2.str().c_str(), cuts_.cuts.central[Cuts::pt_diff],
-                   pt_diff_, { 0., 500. }, kNumRequiredDimensions+2, kLinear );
-      registerCut( oss3.str().c_str(), cuts_.cuts.central[Cuts::phi_pt_diff],
-                   phi_pt_diff_, { 0., 2.*M_PI }, kNumRequiredDimensions+3, kLinear );
+      registerVariable( y1_, kLinear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, oss1.str().c_str() );
+      registerVariable( y2_, kLinear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, oss1.str().c_str() );
+      registerVariable( pt_diff_, kLinear, cuts_.cuts.central[Cuts::pt_diff], { 0., 500. }, oss2.str().c_str() );
+      registerVariable( phi_pt_diff_, kLinear, cuts_.cuts.central[Cuts::phi_pt_diff], { 0., 2.*M_PI }, oss3.str().c_str() );
     }
 
     double

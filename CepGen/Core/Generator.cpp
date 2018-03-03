@@ -39,7 +39,9 @@ namespace CepGen
   size_t
   Generator::numDimensions() const
   {
-    if ( !parameters->process() ) return 0;
+    if ( !parameters->process() )
+      return 0;
+
     return parameters->process()->numDimensions( parameters->kinematics.mode );
   }
 
@@ -91,6 +93,12 @@ namespace CepGen
   {
     Information( "Starting the computation of the process cross-section" );
 
+    try {
+      prepareFunction();
+    } catch ( Exception& e ) {
+      e.dump();
+    }
+
     // first destroy and recreate the integrator instance
     if ( !integrator_ )
       integrator_ = std::unique_ptr<Integrator>( new Integrator( numDimensions(), f, parameters.get() ) );
@@ -103,8 +111,6 @@ namespace CepGen
                        "Considered topology: %s case\n\t"
                        "Will proceed with %d-dimensional integration", topo.str().c_str(), numDimensions() ) );
     }
-
-    try { prepareFunction(); } catch ( Exception& e ) { e.dump(); }
 
     const int res = integrator_->integrate( cross_section_, cross_section_error_ );
     if ( res != 0 )
@@ -156,9 +162,9 @@ namespace CepGen
   void
   Generator::prepareFunction()
   {
-    if ( !parameters->process() ) {
+    if ( !parameters->process() )
       throw Exception( __PRETTY_FUNCTION__, "No process defined!", FatalError );
-    }
+
     Kinematics kin = parameters->kinematics;
     parameters->process()->addEventContent();
     parameters->process()->setKinematics( kin );

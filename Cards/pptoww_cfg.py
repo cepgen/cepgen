@@ -1,17 +1,20 @@
 import Cards.Core as cepgen
 from Cards.integrators_cff import miser as integrator
 from Cards.ktProcess_cfi import ktProcess
-from Cards.pythia8_cff import pythia8 as hadroniser
+from Cards.logger_cfi import logger
+'''from Cards.pythia8_cff import pythia8 as hadroniser
 
 hadroniser.pythiaProcessConfiguration = (
     # process-specific
     '13:onMode = off', # disable muon decays
     '24:onMode = off', # disable all W decays, but...
     '24:onIfAny = 11 13' # enable e-nue + mu-numu final states
-)
+)'''
+
+#logger.level = cepgen.Logging.DebugInsideLoop
 
 process = ktProcess.clone('pptoww',
-    mode = cepgen.ProcessMode.InelasticElastic,
+    mode = cepgen.ProcessMode.ElasticInelastic,
     inKinematics = cepgen.Parameters(
         cmEnergy = 13.e3,
         #structureFunctions = cepgen.StructureFunctions.SuriYennie,

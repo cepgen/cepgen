@@ -29,6 +29,15 @@ class Module(Parameters):
         out.mod_name = name
         return out
 
+class Logging:
+    '''Logging verbosity'''
+    Nothing         = 0
+    Error           = 1
+    Warning         = 2
+    Information     = 3
+    Debug           = 4
+    DebugInsideLoop = 5
+
 class StructureFunctions:
     '''Types of structure functions supported'''
     Electron            = 1

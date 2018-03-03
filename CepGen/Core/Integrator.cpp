@@ -237,6 +237,18 @@ namespace CepGen
     return true;
   }
 
+  double
+  Integrator::F( const std::vector<double>& x, Parameters* ip )
+  {
+    return function_->f( (double*)&x[0], function_->dim, (void*)ip );
+  }
+
+  double
+  Integrator::F( const std::vector<double>& x )
+  {
+    return F( x, input_params_ );
+  }
+
   bool
   Integrator::storeEvent( const std::vector<double>& x )
   {

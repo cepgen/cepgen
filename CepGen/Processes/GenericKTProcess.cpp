@@ -9,16 +9,13 @@ namespace CepGen
   {
     GenericKTProcess::GenericKTProcess( const std::string& name,
                                         const std::string& description,
-                                        const unsigned int& num_user_dimensions,
                                         const std::array<ParticleCode,2>& partons,
                                         const std::vector<ParticleCode>& central ) :
       GenericProcess( name, description+" (kT-factorisation approach)" ),
-      kt_jacobian_( 0. ), aux_jacobian_( 0. ),
-      log_qmin_( 0. ), log_qmax_( 0. ),
+      num_dimensions_( 0 ), kt_jacobian_( 0. ), aux_jacobian_( 0. ),
       qt1_( 0. ), phi_qt1_( 0. ),
       qt2_( 0. ), phi_qt2_( 0. ),
       flux1_( 0. ), flux2_( 0. ),
-      kNumUserDimensions( num_user_dimensions ),
       kIntermediateParts( partons ), kProducedParts( central )
     {}
 
@@ -42,18 +39,9 @@ namespace CepGen
     }
 
     unsigned int
-    GenericKTProcess::numDimensions( const Kinematics::ProcessMode& process_mode ) const
+    GenericKTProcess::numDimensions( const Kinematics::ProcessMode& ) const
     {
-      switch ( process_mode ) {
-        default:
-        case Kinematics::ElasticElastic:
-          return kNumRequiredDimensions+kNumUserDimensions;
-        case Kinematics::ElasticInelastic:
-        case Kinematics::InelasticElastic:
-          return kNumRequiredDimensions+kNumUserDimensions+1;
-        case Kinematics::InelasticInelastic:
-          return kNumRequiredDimensions+kNumUserDimensions+2;
-      }
+      return num_dimensions_;
     }
 
     void
@@ -62,52 +50,52 @@ namespace CepGen
       cuts_ = kin;
 
       //----------------------------------------------------------------
+      // initialise the "constant" (wrt x) part of the Jacobian
+      //----------------------------------------------------------------
 
       kt_jacobian_ = 1.;
 
       //----------------------------------------------------------------
-
-      {
-        std::ostringstream oss; oss << Cuts::qt;
-        registerCut( oss.str().c_str(), cuts_.cuts.initial[Cuts::qt],
-                     qt1_, { 1.e-10, 500. }, 0, kLogarithmic );
-        registerCut( oss.str().c_str(), cuts_.cuts.initial[Cuts::qt],
-                     qt2_, { 1.e-10, 500. }, 1, kLogarithmic );
-      }
-
+      // register the incoming partons' variables
       //----------------------------------------------------------------
 
-      {
-        std::ostringstream oss; oss << Cuts::phi_qt;
-        registerCut( oss.str().c_str(), cuts_.cuts.initial[Cuts::phi_qt],
-                     phi_qt1_, { 0., 2.*M_PI }, 2, kLinear );
-        registerCut( oss.str().c_str(), cuts_.cuts.initial[Cuts::phi_qt],
-                     phi_qt2_, { 0., 2.*M_PI }, 3, kLinear );
-      }
+      registerVariable( qt1_, kLogarithmic, cuts_.cuts.initial[Cuts::qt], { 1.e-10, 500. }, "First incoming parton virtuality" );
+      registerVariable( qt2_, kLogarithmic, cuts_.cuts.initial[Cuts::qt], { 1.e-10, 500. }, "Second incoming parton virtuality" );
+      registerVariable( phi_qt1_, kLinear, cuts_.cuts.initial[Cuts::phi_qt], { 0., 2.*M_PI }, "First incoming parton azimuthal angle" );
+      registerVariable( phi_qt2_, kLinear, cuts_.cuts.initial[Cuts::phi_qt], { 0., 2.*M_PI }, "Second incoming parton azimuthal angle" );
 
+      //----------------------------------------------------------------
+      // register all process-dependent variables
+      //----------------------------------------------------------------
+
+      preparePhaseSpace();
+
+      //----------------------------------------------------------------
+      // register the outgoing remnants' variables
       //----------------------------------------------------------------
 
       MX_ = MY_ = event_->getOneByRole( Particle::IncomingBeam1 ).mass();
-      {
-        std::ostringstream oss; oss << Cuts::mass;
-        unsigned short op_index = kNumRequiredDimensions+kNumUserDimensions;
-        if ( cuts_.mode == Kinematics::InelasticElastic
-          || cuts_.mode == Kinematics::InelasticInelastic )
-          registerCut( oss.str().c_str(), cuts_.cuts.remnants[Cuts::mass],
-                       MX_, { 1.07, 1000. }, op_index++, kSquare );
-        if ( cuts_.mode == Kinematics::ElasticInelastic
-          || cuts_.mode == Kinematics::InelasticInelastic )
-          registerCut( oss.str().c_str(), cuts_.cuts.remnants[Cuts::mass],
-                       MY_, { 1.07, 1000. }, op_index++, kSquare );
-      }
-
-      preparePhaseSpace();
+      if ( cuts_.mode == Kinematics::InelasticElastic || cuts_.mode == Kinematics::InelasticInelastic )
+        registerVariable( MX_, kSquare, cuts_.cuts.remnants[Cuts::mass], { 1.07, 1000. }, "Positive z proton remnant mass" );
+      if ( cuts_.mode == Kinematics::ElasticInelastic || cuts_.mode == Kinematics::InelasticInelastic )
+        registerVariable( MY_, kSquare, cuts_.cuts.remnants[Cuts::mass], { 1.07, 1000. }, "Negative z proton remnant mass" );
     }
 
     double
     GenericKTProcess::computeWeight()
     {
-      mapCuts();
+      //----------------------------------------------------------------
+      // generate and initialise all variables for
+      // this phase space point
+      //----------------------------------------------------------------
+
+      generateVariables();
+
+      //----------------------------------------------------------------
+      // compute the integrand and auxiliary (x-dependent) part of
+      // the Jacobian, and combine everything together into a single
+      // weight for the phase space point.
+      //----------------------------------------------------------------
 
       const double integrand = computeKTFactorisedMatrixElement();
       const double weight = ( kt_jacobian_*aux_jacobian_ ) * integrand;
@@ -151,24 +139,24 @@ namespace CepGen
     }
 
     void
-    GenericKTProcess::registerCut( const char* description, const Kinematics::Limits& in,
-                                   double& out, Kinematics::Limits default_values,
-                                   unsigned short index, const MappingType& type )
+    GenericKTProcess::registerVariable( double& out, const MappingType& type,
+                                        const Kinematics::Limits& in, Kinematics::Limits default_limits,
+                                        const char* description )
     {
       Kinematics::Limits lim = in;
       if ( !in.valid() ) {
-        std::ostringstream oss; oss << default_values;
+        std::ostringstream oss; oss << default_limits;
         InWarning( Form( "%s could not be retrieved from the user configuration!\n\t"
                          "Setting it to the default value: %s.",
                          description, oss.str().c_str() ) );
-        lim = default_values;
+        lim = default_limits;
       }
       if ( type == kLogarithmic )
         lim = {
           std::max( log( in.min() ), -10. ),
           std::min( log( in.max() ), +10. )
         };
-      phase_space_cuts_.emplace_back( MappingVariable{ lim, out, type, index } );
+      mapped_variables_.emplace_back( MappingVariable{ lim, out, type, num_dimensions_++ } );
       switch ( type ) {
         case kSquare:
           kt_jacobian_ *= 2.*lim.range();
@@ -177,13 +165,22 @@ namespace CepGen
           kt_jacobian_ *= lim.range();
           break;
       }
+      if ( Logger::get().level >= Logger::Information ) {
+        std::ostringstream oss_lim; oss_lim << lim;
+        std::ostringstream oss_vt; oss_vt << type;
+        Information( Form( "%s has been mapped to variable %d.\n\t"
+                           "Allowed range for integration: %s.\n\t"
+                           "Variable integration mode: %s.",
+                           description, num_dimensions_,
+                           oss_lim.str().c_str(), oss_vt.str().c_str() ) );
+      }
     }
 
     void
-    GenericKTProcess::mapCuts()
+    GenericKTProcess::generateVariables()
     {
       aux_jacobian_ = 1.;
-      for ( const auto& cut : phase_space_cuts_ ) {
+      for ( const auto& cut : mapped_variables_ ) {
         const double xv = x( cut.index );
         switch ( cut.type ) {
           case kLinear: {
@@ -198,6 +195,15 @@ namespace CepGen
             aux_jacobian_ *= cut.variable;
           } break;
         }
+      }
+      if ( Logger::get().level >= Logger::DebugInsideLoop ) {
+        std::ostringstream oss;
+        for ( const auto& cut : mapped_variables_ ) {
+          oss << "variable " << cut.index
+              << " in range " << std::left << std::setw( 20 ) << cut.limits << std::right
+              << " has value " << cut.variable << std::endl;
+        }
+        DebuggingInsideLoop( oss.str() );
       }
     }
 
@@ -296,6 +302,17 @@ namespace CepGen
       const double f_C= 2.*F1/Q2;
 
       return Constants::alphaEM/M_PI*( 1.-x )/Q2*( f_D+0.5*x*x*f_C );
+    }
+
+    std::ostream&
+    operator<<( std::ostream& os, const GenericKTProcess::MappingType& type )
+    {
+      switch ( type ) {
+        case GenericKTProcess::kLinear: return os << "linear";
+        case GenericKTProcess::kLogarithmic: return os << "logarithmic";
+        case GenericKTProcess::kSquare: return os << "squared";
+      }
+      return os;
     }
   }
 }
