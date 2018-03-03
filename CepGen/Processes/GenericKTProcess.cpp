@@ -46,10 +46,13 @@ namespace CepGen
     {
       switch ( process_mode ) {
         default:
-        case Kinematics::ElasticElastic:     return kNumRequiredDimensions+kNumUserDimensions;
+        case Kinematics::ElasticElastic:
+          return kNumRequiredDimensions+kNumUserDimensions;
         case Kinematics::ElasticInelastic:
-        case Kinematics::InelasticElastic:   return kNumRequiredDimensions+kNumUserDimensions+1;
-        case Kinematics::InelasticInelastic: return kNumRequiredDimensions+kNumUserDimensions+2;
+        case Kinematics::InelasticElastic:
+          return kNumRequiredDimensions+kNumUserDimensions+1;
+        case Kinematics::InelasticInelastic:
+          return kNumRequiredDimensions+kNumUserDimensions+2;
       }
     }
 
@@ -66,16 +69,20 @@ namespace CepGen
 
       {
         std::ostringstream oss; oss << Cuts::qt;
-        registerCut( oss.str().c_str(), cuts_.cuts.initial[Cuts::qt], qt1_, { 1.e-10, 500. }, 0, kLogarithmic );
-        registerCut( oss.str().c_str(), cuts_.cuts.initial[Cuts::qt], qt2_, { 1.e-10, 500. }, 1, kLogarithmic );
+        registerCut( oss.str().c_str(), cuts_.cuts.initial[Cuts::qt],
+                     qt1_, { 1.e-10, 500. }, 0, kLogarithmic );
+        registerCut( oss.str().c_str(), cuts_.cuts.initial[Cuts::qt],
+                     qt2_, { 1.e-10, 500. }, 1, kLogarithmic );
       }
 
       //----------------------------------------------------------------
 
       {
         std::ostringstream oss; oss << Cuts::phi_qt;
-        registerCut( oss.str().c_str(), cuts_.cuts.initial[Cuts::phi_qt], phi_qt1_, { 0., 2.*M_PI }, 2, kLinear );
-        registerCut( oss.str().c_str(), cuts_.cuts.initial[Cuts::phi_qt], phi_qt2_, { 0., 2.*M_PI }, 3, kLinear );
+        registerCut( oss.str().c_str(), cuts_.cuts.initial[Cuts::phi_qt],
+                     phi_qt1_, { 0., 2.*M_PI }, 2, kLinear );
+        registerCut( oss.str().c_str(), cuts_.cuts.initial[Cuts::phi_qt],
+                     phi_qt2_, { 0., 2.*M_PI }, 3, kLinear );
       }
 
       //----------------------------------------------------------------
@@ -85,14 +92,13 @@ namespace CepGen
         std::ostringstream oss; oss << Cuts::mass;
         unsigned short op_index = kNumRequiredDimensions+kNumUserDimensions;
         if ( cuts_.mode == Kinematics::InelasticElastic
-          || cuts_.mode == Kinematics::InelasticInelastic ) {
-          registerCut( oss.str().c_str(), cuts_.cuts.remnants[Cuts::mass], MX_, { 1.07, 1000. }, op_index, kSquare );
-          op_index++;
-        }
+          || cuts_.mode == Kinematics::InelasticInelastic )
+          registerCut( oss.str().c_str(), cuts_.cuts.remnants[Cuts::mass],
+                       MX_, { 1.07, 1000. }, op_index++, kSquare );
         if ( cuts_.mode == Kinematics::ElasticInelastic
-          || cuts_.mode == Kinematics::InelasticInelastic ) {
-          registerCut( oss.str().c_str(), cuts_.cuts.remnants[Cuts::mass], MY_, { 1.07, 1000. }, op_index, kSquare );
-        }
+          || cuts_.mode == Kinematics::InelasticInelastic )
+          registerCut( oss.str().c_str(), cuts_.cuts.remnants[Cuts::mass],
+                       MY_, { 1.07, 1000. }, op_index++, kSquare );
       }
 
       preparePhaseSpace();
@@ -145,7 +151,9 @@ namespace CepGen
     }
 
     void
-    GenericKTProcess::registerCut( const char* description, const Kinematics::Limits& in, double& out, Kinematics::Limits default_values, unsigned short index, const MappingType& type )
+    GenericKTProcess::registerCut( const char* description, const Kinematics::Limits& in,
+                                   double& out, Kinematics::Limits default_values,
+                                   unsigned short index, const MappingType& type )
     {
       Kinematics::Limits lim = in;
       if ( !in.valid() ) {
@@ -229,7 +237,10 @@ namespace CepGen
           op1.setStatus( Particle::Unfragmented ); op1.setMass( MX_ );
           op2.setStatus( Particle::Unfragmented ); op2.setMass( MY_ );
           break;    
-        default: { FatalError( "This kT factorisation process is intended for p-on-p collisions! Aborting!" ); } break;
+        default: {
+          FatalError( "This kT factorisation process is intended for p-on-p collisions! "
+                      "Aborting!" );
+        } break;
       }
 
       //================================================================
