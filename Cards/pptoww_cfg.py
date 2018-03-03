@@ -1,14 +1,14 @@
 import Cards.Core as cepgen
 from Cards.integrators_cff import miser as integrator
 from Cards.ktProcess_cfi import ktProcess
-'''from Cards.pythia8_cff import pythia8 as hadroniser
+from Cards.pythia8_cff import pythia8 as hadroniser
 
 hadroniser.pythiaProcessConfiguration = (
     # process-specific
     '13:onMode = off', # disable muon decays
     '24:onMode = off', # disable all W decays, but...
     '24:onIfAny = 11 13' # enable e-nue + mu-numu final states
-)'''
+)
 
 process = ktProcess.clone('pptoww',
     mode = cepgen.ProcessMode.InelasticElastic,
@@ -50,8 +50,8 @@ process = ktProcess.clone('pptoww',
 
 #--- import the default generation parameters
 from Cards.generator_cff import generator
-generator.numEvents = 10000
-#generator.printEvery = 1
+generator.numEvents = 1000
+generator.printEvery = 100
 
 #print(process)
 #print(integrator)
