@@ -16,7 +16,6 @@ namespace CepGen
 
       private:
         void preparePhaseSpace() override;
-        void prepareKTKinematics() override;
         /// \note IncQQbar in pptoll
         double computeKTFactorisedMatrixElement() override;
         void fillCentralParticlesKinematics() override;

@@ -16,7 +16,6 @@ namespace CepGen
 
       private:
         void preparePhaseSpace() override;
-        void prepareKTKinematics() override;
         double computeKTFactorisedMatrixElement() override;
         void fillCentralParticlesKinematics() override;
         double WWamplitude( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 ) const;

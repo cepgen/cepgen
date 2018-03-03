@@ -11,7 +11,7 @@ hadroniser.pythiaProcessConfiguration = (
 )
 
 process = ktProcess.clone('pptoww',
-    mode = cepgen.ProcessMode.InelasticInelastic,
+    mode = cepgen.ProcessMode.InelasticElastic,
     inKinematics = cepgen.Parameters(
         cmEnergy = 13.e3,
         #structureFunctions = cepgen.StructureFunctions.SuriYennie,
@@ -51,7 +51,7 @@ process = ktProcess.clone('pptoww',
 #--- import the default generation parameters
 from Cards.generator_cff import generator
 generator.numEvents = 1000
-generator.printEvery = 1
+generator.printEvery = 100
 
 #print(process)
 #print(integrator)

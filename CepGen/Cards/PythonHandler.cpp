@@ -195,6 +195,7 @@ namespace CepGen
 
       // for the kT factorised matrix elements
       getLimits( kin, "qt", params_.kinematics.cuts.initial[Cuts::qt] );
+      getLimits( kin, "phiqt", params_.kinematics.cuts.initial[Cuts::phi_qt] );
       getLimits( kin, "ptdiff", params_.kinematics.cuts.central[Cuts::pt_diff] );
       getLimits( kin, "phiptdiff", params_.kinematics.cuts.central[Cuts::phi_pt_diff] );
       getLimits( kin, "rapiditydiff", params_.kinematics.cuts.central[Cuts::rapidity_diff] );

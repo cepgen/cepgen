@@ -14,52 +14,17 @@ namespace CepGen
     void
     PPtoWW::preparePhaseSpace()
     {
-      central_jacobian_ = 1.;
-
-      // outgoing Ws
-      if ( cuts_.cuts.central.count( Cuts::rapidity_single ) == 0
-        || !cuts_.cuts.central.at( Cuts::rapidity_single ).valid() ) {
-        InWarning( "Failed to retrieve a rapidity range for the outgoing Ws from the user configuration!\n\t"
-                   "Setting it to the default | y(W) | < 6 value." );
-        cuts_.cuts.central[Cuts::rapidity_single] = { -6., 6. };
-      }
-      rap_limits_ = cuts_.cuts.central.at( Cuts::rapidity_single );
-      central_jacobian_ *= pow( rap_limits_.range(), 2 ); // d(y1) d(y2)
-
-      if ( cuts_.cuts.central.count( Cuts::pt_diff ) == 0
-        || !cuts_.cuts.central.at( Cuts::pt_diff ).valid() ) {
-        InWarning( "Failed to retrieve a W bosons pT difference range from the user configuration!\n\t"
-                   "Setting it to the default ΔpT < 500 GeV value." );
-        cuts_.cuts.central[Cuts::pt_diff] = { 0., 500. }; //FIXME fine-tuning!
-      }
-      ptdiff_limits_ = cuts_.cuts.central.at( Cuts::pt_diff );
-      central_jacobian_ *= ptdiff_limits_.range(); // d(Dpt)
-
-      if ( cuts_.cuts.central.count( Cuts::phi_pt_diff ) == 0
-        || !cuts_.cuts.central.at( Cuts::phi_pt_diff ).valid() ) {
-        InWarning( "Failed to retrieve a leptons azimuthal angle difference range from the user configuration!\n\t"
-                   "Setting it to the default 0 < Δɸ < 2π value." );
-        cuts_.cuts.central[Cuts::phi_pt_diff] = { 0., 2*M_PI };
-      }
-      phi_pt_diff_limits_ = cuts_.cuts.central.at( Cuts::phi_pt_diff );
-      central_jacobian_ *= phi_pt_diff_limits_.range();
-    }
-
-    void
-    PPtoWW::prepareKTKinematics()
-    {
-      y1_ = rap_limits_.x( xkt( 0 ) );
-      y2_ = rap_limits_.x( xkt( 1 ) );
-
-      DebuggingInsideLoop( Form( "W bosons rapidities (%.2f < y < %.2f): %f / %f", rap_limits_.min(), rap_limits_.max(), y1_, y2_ ) );
-
-      pt_diff_ = ptdiff_limits_.x( xkt( 2 ) );
-      phi_pt_diff_ = phi_pt_diff_limits_.x( xkt( 3 ) );
-
-      DebuggingInsideLoop( Form( "W bosons pt difference:\n\t"
-                                 "  mag = %f (%.2f < Dpt < %.2f)\n\t"
-                                 "  phi = %f",
-                                 pt_diff_, ptdiff_limits_.min(), ptdiff_limits_.max(), phi_pt_diff_ ) );
+      std::ostringstream oss1; oss1 << Cuts::rapidity_single;
+      std::ostringstream oss2; oss2 << Cuts::pt_diff;
+      std::ostringstream oss3; oss3 << Cuts::phi_pt_diff;
+      registerCut( oss1.str().c_str(), cuts_.cuts.central[Cuts::rapidity_single],
+                   y1_, { -6., 6. }, kNumRequiredDimensions, kLinear );
+      registerCut( oss1.str().c_str(), cuts_.cuts.central[Cuts::rapidity_single],
+                   y2_, { -6., 6. }, kNumRequiredDimensions+1, kLinear );
+      registerCut( oss2.str().c_str(), cuts_.cuts.central[Cuts::pt_diff],
+                   pt_diff_, { 0., 500. }, kNumRequiredDimensions+2, kLinear );
+      registerCut( oss3.str().c_str(), cuts_.cuts.central[Cuts::phi_pt_diff],
+                   phi_pt_diff_, { 0., 2.*M_PI }, kNumRequiredDimensions+3, kLinear );
     }
 
     double
@@ -98,8 +63,10 @@ namespace CepGen
                    pt2x = 0.5 * ( ptsumx-ptdiffx ), pt2y = 0.5 * ( ptsumy-ptdiffy ), pt2 = sqrt( pt2x*pt2x+pt2y*pt2y );
 
       const Kinematics::Limits pt_limits = cuts_.cuts.central_particles[W][Cuts::pt_single];
-      if ( pt_limits.hasMin() && ( pt1 < pt_limits.min() || pt2 < pt_limits.min() ) ) return 0.;
-      if ( pt_limits.hasMax() && ( pt1 > pt_limits.max() || pt2 > pt_limits.max() ) ) return 0.;
+      if ( pt_limits.hasMin() && ( pt1 < pt_limits.min() || pt2 < pt_limits.min() ) )
+        return 0.;
+      if ( pt_limits.hasMax() && ( pt1 > pt_limits.max() || pt2 > pt_limits.max() ) )
+        return 0.;
 
       // transverse mass for the two leptons
       const double amt1 = sqrt( pt1*pt1+mw2 ),
@@ -111,15 +78,18 @@ namespace CepGen
 
       const double invm = sqrt( amt1*amt1 + amt2*amt2 + 2.*amt1*amt2*cosh( y1_-y2_ ) - ptsum*ptsum );
       const Kinematics::Limits invm_limits = cuts_.cuts.central[Cuts::mass_sum];
-      if ( invm_limits.hasMin() && invm < invm_limits.min() ) return 0.;
-      if ( invm_limits.hasMax() && invm > invm_limits.max() ) return 0.;
+      if ( invm_limits.hasMin() && invm < invm_limits.min() )
+        return 0.;
+      if ( invm_limits.hasMax() && invm > invm_limits.max() )
+        return 0.;
 
       //=================================================================
       //     a window in transverse momentum difference
       //=================================================================
 
       const Kinematics::Limits ptdiff_limits = cuts_.cuts.central[Cuts::pt_diff];
-      if ( ptdiff_limits.hasMax() && fabs( pt1-pt2 ) > ptdiff_limits.max() ) return 0.;
+      if ( ptdiff_limits.hasMax() && fabs( pt1-pt2 ) > ptdiff_limits.max() )
+        return 0.;
 
       //=================================================================
       //     a window in rapidity distance
@@ -127,8 +97,10 @@ namespace CepGen
 
       const double dely = fabs( y1_-y2_ );
       const Kinematics::Limits dely_limits = cuts_.cuts.central[Cuts::rapidity_diff];
-      if ( dely_limits.hasMin() && dely < dely_limits.min() ) return 0.;
-      if ( dely_limits.hasMax() && dely > dely_limits.max() ) return 0.;
+      if ( dely_limits.hasMin() && dely < dely_limits.min() )
+        return 0.;
+      if ( dely_limits.hasMax() && dely > dely_limits.max() )
+        return 0.;
 
       //=================================================================
       //     auxiliary quantities
@@ -160,7 +132,8 @@ namespace CepGen
       DebuggingInsideLoop( Form( "z(1/2)p = %f / %f\n\t"
                                  "z(1/2)m = %f / %f", z1p, z2p, z1m, z2m ) );
 
-      if ( x1 > 1. || x2 > 1. ) return 0.; // sanity check
+      if ( x1 > 1. || x2 > 1. )
+        return 0.; // sanity check
 
       // FIXME FIXME FIXME
       const double ak10 = event_->getOneByRole( Particle::IncomingBeam1 ).energy(),
@@ -179,10 +152,17 @@ namespace CepGen
                                  "dilepton invariant mass = %f GeV", s1_eff, s2_eff, invm ) );
 
       switch ( cuts_.mode ) {
-        case Kinematics::ElasticInelastic:   if ( sqrt( s1_eff ) <= ( MY_+invm ) ) return 0.;
-        case Kinematics::InelasticElastic:   if ( sqrt( s2_eff ) <= ( MX_+invm ) ) return 0.;
-        case Kinematics::InelasticInelastic: if ( sqrt( s1_eff ) <= ( MY_+invm ) ) return 0.;
-                                             if ( sqrt( s2_eff ) <= ( MX_+invm ) ) return 0.;
+        case Kinematics::ElasticInelastic:
+          if ( sqrt( s1_eff ) <= ( MY_+invm ) )
+            return 0.;
+        case Kinematics::InelasticElastic:
+          if ( sqrt( s2_eff ) <= ( MX_+invm ) )
+            return 0.;
+        case Kinematics::InelasticInelastic:
+          if ( sqrt( s1_eff ) <= ( MY_+invm ) )
+            return 0.;
+          if ( sqrt( s2_eff ) <= ( MX_+invm ) )
+            return 0.;
         default: break;
       }
 

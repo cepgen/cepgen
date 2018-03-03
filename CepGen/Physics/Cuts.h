@@ -32,7 +32,7 @@ namespace CepGen
         case eta_sum: return os << "Central system eta";
         case energy_sum: return os << "Central system energy";
         case pt_diff: return os << "Central system Δpt (GeV/c)";
-        case phi_pt_diff: return os << "Central system Δɸ (GeV/c)";
+        case phi_pt_diff: return os << "Central system Δɸ";
         case rapidity_diff: return os << "Central system ΔY";
       }
       return os;
