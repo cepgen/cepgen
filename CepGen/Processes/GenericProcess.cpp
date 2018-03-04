@@ -40,7 +40,7 @@ namespace CepGen
     }
 
     void
-    GenericProcess::addGenerationTime( const float& gen_time )
+    GenericProcess::addGenerationTime( double gen_time )
     {
       total_gen_time_ += gen_time;
       num_gen_events_++;

@@ -176,7 +176,7 @@ namespace CepGen
       grid_.correc = ( grid_.nm[ps_bin_] - 1. ) * grid_.f_max_diff / grid_.f_max_global * weight / grid_.f_max_global - 1.;
     }
 
-    Debugging( Form( "Correction applied: %f, phase space bin = %d", grid_.correc, ps_bin_ ) );
+    DebuggingInsideLoop( Form( "Correction applied: %f, phase space bin = %d", grid_.correc, ps_bin_ ) );
 
     // Return with an accepted event
     if ( weight > 0. )
@@ -187,10 +187,10 @@ namespace CepGen
   bool
   Integrator::correctionCycle( std::vector<double>& x, bool& has_correction )
   {
-    Debugging( Form( "Correction cycles are started.\n\t"
-                     "bin = %d"
-                     "correc = %g"
-                     "corre2 = %g", ps_bin_, grid_.correc, grid_.correc2 ) );
+    DebuggingInsideLoop( Form( "Correction cycles are started.\n\t"
+                               "bin = %d\t"
+                               "correc = %g\t"
+                               "corre2 = %g", ps_bin_, grid_.correc, grid_.correc2 ) );
 
     if ( grid_.correc >= 1. ) grid_.correc -= 1.;
     if ( uniform() < grid_.correc ) {

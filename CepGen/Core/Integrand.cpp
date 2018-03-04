@@ -20,6 +20,7 @@ namespace CepGen
   {
     Parameters* p = (Parameters*)params;
     std::shared_ptr<Event> ev = p->process()->event();
+    Logger::LoggingLevel log_level = Logger::get().level;
 
     if ( p->process()->hasEvent() ) {
       p->process()->clearEvent();
@@ -34,7 +35,7 @@ namespace CepGen
 
       if ( p->integrator.first_run ) {
 
-        if ( Logger::get().level >= Logger::Debug ) {
+        if ( log_level >= Logger::Debug ) {
           std::ostringstream oss; oss << p->kinematics.mode;
           Debugging( Form( "Process mode considered: %s", oss.str().c_str() ) );
         }
@@ -134,6 +135,9 @@ namespace CepGen
       }
     }
 
+    if ( integrand <= 0. )
+      return 0.;
+
     //--- set the CepGen part of the event generation
     if ( p->storage() )
       ev->time_generation = tmr.elapsed();
@@ -148,7 +152,7 @@ namespace CepGen
     }
 
     //--- apply cuts on final state system (after hadronisation!)
-    //    (watch out your cuts, as this might be extremely time-consuming...)
+    // (watch out your cuts, as this might be extremely time-consuming...)
 
     if ( p->kinematics.cuts.central_particles.size() > 0 ) {
       for ( const auto& part : ev->getByRole( Particle::CentralSystem ) ) {
@@ -175,16 +179,16 @@ namespace CepGen
     if ( p->storage() ) {
       ev->time_total = tmr.elapsed();
       p->process()->addGenerationTime( ev->time_total );
-
-      Debugging( Form( "Generation time:       %5.6f sec\n\t"
-                       "Total time (gen+hadr): %5.6f sec",
-                       ev->time_generation,
-                       ev->time_total ) );
-
       p->generation.last_event = ev;
+
+      Debugging( Form( "Event timing:\n\t"
+                       "Generation time:            %5.6f ms\n\t"
+                       "Total time (gen+hadr+cuts): %5.6f ms",
+                       ev->time_generation*1.e3,
+                       ev->time_total*1.e3 ) );
     } // generating events
 
-    if ( Logger::get().level >= Logger::DebugInsideLoop ) {
+    if ( log_level >= Logger::DebugInsideLoop ) {
       std::ostringstream oss;
       for ( unsigned short i = 0; i < ndim; ++i )
         oss << Form( "%10.8f ", x[i] );

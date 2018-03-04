@@ -94,9 +94,9 @@ namespace CepGen
         void clearRun();
         /// Add a new timing into the total generation time
         /// \param[in] gen_time Time to add (in seconds)
-        void addGenerationTime( const float& gen_time );
+        void addGenerationTime( double gen_time );
         /// Return the total generation time for this run (in seconds)
-        inline float totalGenerationTime() const { return total_gen_time_; }
+        inline double totalGenerationTime() const { return total_gen_time_; }
         /// Total number of events already generated in this run
         inline unsigned int numGeneratedEvents() const { return num_gen_events_; }
   
@@ -153,7 +153,7 @@ namespace CepGen
         /// Process human-readable description
         std::string description_;
         /// Total generation time (in seconds)
-        float total_gen_time_;
+        double total_gen_time_;
         /// Number of events already generated
         unsigned int num_gen_events_;
         /// Does the process contain (and hold) an event?
