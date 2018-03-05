@@ -49,7 +49,9 @@ namespace CepGen
     void
     GenericProcess::prepareKinematics()
     {
-      if ( !isKinematicsDefined() ) return; // FIXME dump some information...
+      if ( !isKinematicsDefined() )
+        throw Exception( __PRETTY_FUNCTION__, "Kinematics not properly defined for the process", FatalError );
+
       const Particle ib1 = event_->getOneByRole( Particle::IncomingBeam1 ),
                      ib2 = event_->getOneByRole( Particle::IncomingBeam2 );
 

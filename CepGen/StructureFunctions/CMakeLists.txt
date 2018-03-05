@@ -29,7 +29,7 @@ endif()
 #----- build the object
 
 add_library(CepGenStructureFunctions SHARED ${sources})
-target_link_libraries(CepGenStructureFunctions ${external_deps})
+target_link_libraries(CepGenStructureFunctions ${CEPGEN_EXTERNAL_STRF_REQS})
 
 #----- installation rules
 

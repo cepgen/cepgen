@@ -5,15 +5,18 @@ set(PROJECT_VERSION 1)
 #----- include external paths
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake)
-set(CEPGEN_EXTERNAL_REQS "")
+set(CEPGEN_EXTERNAL_CORE_REQS "")
+set(CEPGEN_EXTERNAL_IO_REQS "")
+set(CEPGEN_EXTERNAL_HADR_REQS "")
+set(CEPGEN_EXTERNAL_STRF_REQS "")
 include(UseEnvironment)
 
 set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/CepGen)
-set(CEPGEN_LIBRARIES CepGenCore CepGenEvent CepGenPhysics CepGenProcesses CepGenStructureFunctions CepGenExporter CepGenIO CepGenExternalHadronisers)
+set(CEPGEN_LIBRARIES CepGenCore CepGenEvent CepGenPhysics CepGenProcesses CepGenStructureFunctions CepGenIO CepGenExternalHadronisers)
 
 #----- define all individual modules to be built beforehand
 
-set(CEPGEN_MODULES Processes Event Physics StructureFunctions Export IO Hadronisers)
+set(CEPGEN_MODULES Processes Event Physics StructureFunctions IO Hadronisers)
 
 #----- enable fortran for external libraries linking
 

@@ -22,6 +22,8 @@ namespace CepGen
     std::shared_ptr<Event> ev = p->process()->event();
     Logger::LoggingLevel log_level = Logger::get().level;
 
+    Timer tmr; // start the timer
+
     if ( p->process()->hasEvent() ) {
       p->process()->clearEvent();
 
@@ -84,7 +86,7 @@ namespace CepGen
     } // event is not empty
 
     p->process()->setPoint( ndim, x );
-    if ( Logger::get().level >= Logger::DebugInsideLoop ) {
+    if ( log_level >= Logger::DebugInsideLoop ) {
       std::ostringstream oss;
       for ( unsigned int i = 0; i < ndim; ++i ) oss << x[i] << " ";
       DebuggingInsideLoop( Form( "Computing dim-%d point ( %s)", ndim, oss.str().c_str() ) );
@@ -93,8 +95,6 @@ namespace CepGen
     //--- from this step on, the phase space point is supposed to be set by 'GenericProcess::setPoint()'
 
     p->process()->beforeComputeWeight();
-
-    Timer tmr; // start the timer
 
     double integrand = p->process()->computeWeight();
 
@@ -177,15 +177,11 @@ namespace CepGen
     }
 
     if ( p->storage() ) {
-      ev->time_total = tmr.elapsed();
-      p->process()->addGenerationTime( ev->time_total );
       p->generation.last_event = ev;
+      p->generation.last_event->time_total = tmr.elapsed();
 
-      Debugging( Form( "Event timing:\n\t"
-                       "Generation time:            %5.6f ms\n\t"
-                       "Total time (gen+hadr+cuts): %5.6f ms",
-                       ev->time_generation*1.e3,
-                       ev->time_total*1.e3 ) );
+      Debugging( Form( "Indiv. time (gen+hadr+cuts): %5.6f ms",
+                       p->generation.last_event->time_total*1.e3 ) );
     } // generating events
 
     if ( log_level >= Logger::DebugInsideLoop ) {

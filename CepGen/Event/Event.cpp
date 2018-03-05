@@ -279,21 +279,23 @@ namespace CepGen
     for ( const auto& part : parts ) {
       const ParticlesIds mothers = part.mothers();
       {
-        std::ostringstream oss;
+        std::ostringstream oss_pdg;
         if ( part.pdgId() == invalidParticle && mothers.size() > 0 ) {
-          unsigned short i = 0;
-          for ( const auto& moth : mothers ) {
-            oss << ( i > 0 ? "/" : "" ) << getConstById( moth ).pdgId();
-            ++i;
-          }
+          for ( unsigned short i = 0; i < mothers.size(); ++i )
+            oss_pdg << ( i > 0 ? "/" : "" ) << getConstById( *std::next( mothers.begin(), i ) ).pdgId();
+          os << Form( "\n %2d\t\t%-10s", part.id(), oss_pdg.str().c_str() );
         }
-        else oss << part.pdgId();
-        os << Form( "\n %2d\t%-+7d %-10s", part.id(), part.integerPdgId(), oss.str().c_str() );
+        else {
+          oss_pdg << part.pdgId();
+          os << Form( "\n %2d\t%-+7d %-10s", part.id(), part.integerPdgId(), oss_pdg.str().c_str() );
+        }
       }
       os << "\t";
-      if ( part.charge() != 999. ) os << Form( "%6.2f ", part.charge() );
-      else                         os << "\t";
-      { std::ostringstream oss; oss << part.role(); os << Form( "%8s\t%6d\t", oss.str().c_str(), part.status() ); }
+      if ( part.charge() != 999. )
+        os << Form( "%-g\t", part.charge() );
+      else
+        os << "\t";
+      { std::ostringstream oss; oss << part.role(); os << Form( "%-8s %6d\t", oss.str().c_str(), part.status() ); }
       if ( !mothers.empty() ) {
         std::ostringstream oss;
         unsigned short i = 0;
@@ -323,10 +325,10 @@ namespace CepGen
     if ( fabs(  etot ) < minimal_precision_ ) etot = 0.;
     //
     Information( Form( "Dump of event content:\n"
-    " Id\tPDG id\tName\t\tCharge\t   Role\tStatus\tMother\tpx (GeV/c)    py (GeV/c)    pz (GeV/c)    E (GeV)\t M (GeV/c²)\n"
-    " --\t------\t----\t\t------\t   ----\t------\t------\t------------  ------------  ------------  ------------\t ----------"
+    " Id\tPDG id\tName\t\tCharge\tRole\t Status\tMother\tpx            py            pz            E      \t M         \n"
+    " --\t------\t----\t\t------\t----\t ------\t------\t----GeV/c---  ----GeV/c---  ----GeV/c---  ----GeV/c---\t --GeV/c²--"
     "%s\n"
     " ----------------------------------------------------------------------------------------------------------------------------------\n"
-    "\t\t\t\t\t\t\tOut-in:% 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), pxtot, pytot, pztot, etot ) );
+    "\t\t\t\t\t\t\tBalance% 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), pxtot, pytot, pztot, etot ) );
   }
 }

@@ -30,7 +30,8 @@ namespace CepGen
 
   Generator::~Generator()
   {
-    if ( parameters->generation.enabled && parameters->process() && parameters->process()->numGeneratedEvents()>0 ) {
+    if ( parameters->generation.enabled
+      && parameters->process() && parameters->process()->numGeneratedEvents() > 0 ) {
       Information( Form( "Mean generation time / event: %g ms",
                          parameters->process()->totalGenerationTime()*1.e3/parameters->process()->numGeneratedEvents() ) );
     }
@@ -140,6 +141,7 @@ namespace CepGen
     while ( !good )
       good = integrator_->generateOneEvent();
 
+    parameters->process()->addGenerationTime( parameters->generation.last_event->time_total );
     return parameters->generation.last_event;
   }
 

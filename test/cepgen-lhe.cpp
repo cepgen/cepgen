@@ -1,6 +1,7 @@
 #include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Generator.h"
-#include "CepGen/Export/LHEFHandler.h"
+#include "CepGen/Export/HepMCHandler.h"
+#include "CepGen/Core/utils.h"
 
 #include "HepMC/Version.h"
 
@@ -18,7 +19,8 @@ using namespace std;
 int main( int argc, char* argv[] ) {
   CepGen::Generator mg;
   
-  if ( argc == 1 ) FatalError( "No config file provided." );
+  if ( argc == 1 )
+    FatalError( "No config file provided." );
 
   Debugging( Form( "Reading config file stored in %s", argv[1] ) );
   CepGen::Cards::PythonHandler card( argv[1] );
@@ -31,7 +33,7 @@ int main( int argc, char* argv[] ) {
   double xsec, err;
   mg.computeXsection( xsec, err );
 
-  CepGen::OutputHandler::LHEFHandler writer( "example.dat" );
+  CepGen::OutputHandler::HepMCHandler writer( "example.dat" );
   writer.setCrossSection( xsec, err );
   writer.initialise( *mg.parameters );
 
