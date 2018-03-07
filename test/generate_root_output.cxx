@@ -57,6 +57,7 @@ int main( int argc, char* argv[] ) {
   run.xsect = xsec;
   run.errxsect = err;
   run.litigious_events = 0;
+  run.sqrt_s = mg.parameters->kinematics.sqrtS();
   run.fill();
 
   CepGen::TreeEvent ev;

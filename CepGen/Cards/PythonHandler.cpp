@@ -43,7 +43,7 @@ namespace CepGen
     //----- specialization for CepGen input cards
     PythonHandler::PythonHandler( const char* file )
     {
-      setenv( "PYTHONPATH", ".:..", 1 );
+      setenv( "PYTHONPATH", ".:..:Cards", 1 );
       std::string filename = getPythonPath( file );
       const size_t fn_len = filename.length()+1;
 #ifdef PYTHON2
@@ -342,8 +342,11 @@ namespace CepGen
     PythonHandler::getPythonPath( const char* file )
     {
       std::string s_filename = file;
-      s_filename = s_filename.substr( 0, s_filename.find_last_of( "." ) );
-      std::replace( s_filename.begin(), s_filename.end(), '/', '.' );
+      s_filename = s_filename.substr( 0, s_filename.find_last_of( "." ) ); // remove the extension
+      //size_t python_subdir_pos = s_filename.find( "/python" );
+      //if ( s_filename.size() > 7 && python_subdir_pos != std::string::npos )
+      //  s_filename.erase( python_subdir_pos, python_subdir_pos+7 );
+      std::replace( s_filename.begin(), s_filename.end(), '/', '.' ); // replace all '/' by '.'
       return s_filename;
     }
 

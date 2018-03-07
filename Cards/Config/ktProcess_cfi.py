@@ -1,4 +1,4 @@
-import Cards.Core as cepgen
+import Config.Core as cepgen
 from math import pi
 
 ktProcess = cepgen.Module('ktProcess',

@@ -1,4 +1,4 @@
-import Cards.Core as cepgen
+import Config.Core as cepgen
 
 generator = cepgen.Parameters(
     numEvents = 100000,

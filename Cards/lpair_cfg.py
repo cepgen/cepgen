@@ -1,6 +1,6 @@
-import Cards.Core as cepgen
-from Cards.integrators_cff import vegas as integrator
-#from Cards.pythia8_cff import pythia8 as hadroniser
+import Config.Core as cepgen
+from Config.integrators_cff import vegas as integrator
+#from Config.pythia8_cff import pythia8 as hadroniser
 
 process = cepgen.Module('lpair',
     mode = cepgen.ProcessMode.ElasticElastic,
@@ -27,7 +27,7 @@ process = cepgen.Module('lpair',
 )
 
 #--- either use the default generation (100k events)
-#from Cards.generator_cff import generator
+#from Config.generator_cff import generator
 
 #--- or let the user specify the run conditions
 generator = cepgen.Parameters(

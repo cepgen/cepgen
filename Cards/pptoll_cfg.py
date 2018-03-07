@@ -1,7 +1,7 @@
-import Cards.Core as cepgen
-from Cards.integrators_cff import miser as integrator
-#from Cards.pythia8_cff import pythia8 as hadroniser
-from Cards.ktProcess_cfi import ktProcess
+import Config.Core as cepgen
+from Config.integrators_cff import miser as integrator
+#from Config.pythia8_cff import pythia8 as hadroniser
+from Config.ktProcess_cfi import ktProcess
 
 process = ktProcess.clone('pptoll',
     mode = cepgen.ProcessMode.ElasticElastic,
@@ -24,5 +24,5 @@ process = ktProcess.clone('pptoll',
 )
 
 #--- events generation
-from Cards.generator_cff import generator
+from Config.generator_cff import generator
 generator.numEvents = 10000

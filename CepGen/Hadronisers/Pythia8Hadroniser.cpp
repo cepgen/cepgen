@@ -17,9 +17,9 @@ namespace CepGen
     {
 #ifdef PYTHIA8
       pythia_.reset( new Pythia8::Pythia );
-      readString( Form( "Beams:idA = %d", params.kinematics.inpdg.first ) );
-      readString( Form( "Beams:idB = %d", params.kinematics.inpdg.second ) );
-      readString( Form( "Beams:eCM = %.2f", params.kinematics.sqrtS() ) );
+      pythia_->settings.parm( "Beams:idA", params.kinematics.inpdg.first );
+      pythia_->settings.parm( "Beams:idB", params.kinematics.inpdg.second );
+      pythia_->settings.parm( "Beams:eCM", params.kinematics.sqrtS() );
 #endif
     }
 
@@ -64,21 +64,21 @@ namespace CepGen
       //--- start by cleaning up the previous runs leftovers
       const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
 
-      pythia_->event.reset();
       /*const double sqrt_s = ev.cmEnergy();
       pythia_->event[0].e( sqrt_s );
       pythia_->event[0].m( sqrt_s );*/
-      // handle slight energy conservation violation from the process...
-      Particle::Momentum p_out = ev.getOneByRole( Particle::OutgoingBeam1 ).momentum()
-                               + ev.getOneByRole( Particle::OutgoingBeam2 ).momentum();
-      for ( const auto& p : ev.getByRole( Particle::CentralSystem ) )
-        p_out += p.momentum();
-      //std::cout << p_out.pz() << "|" << p_out.mass() << "|" << p_out.energy() << std::endl;
-      pythia_->event[0].e( p_out.energy() );
-      pythia_->event[0].px( p_out.px() );
-      pythia_->event[0].py( p_out.py() );
-      pythia_->event[0].pz( p_out.pz() );
-      pythia_->event[0].m( p_out.mass() );
+      { // handle slight energy conservation violation from the process...
+        Particle::Momentum p_out = ev.getOneByRole( Particle::OutgoingBeam1 ).momentum()
+                                 + ev.getOneByRole( Particle::OutgoingBeam2 ).momentum();
+        for ( const auto& p : ev.getByRole( Particle::CentralSystem ) )
+          p_out += p.momentum();
+        //std::cout << p_out.pz() << "|" << p_out.mass() << "|" << p_out.energy() << std::endl;
+        pythia_->event[0].e( p_out.energy() );
+        pythia_->event[0].px( p_out.px() );
+        pythia_->event[0].py( p_out.py() );
+        pythia_->event[0].pz( p_out.pz() );
+        pythia_->event[0].m( p_out.mass() );
+      }
 
       const unsigned short num_before = ev.numParticles();
       std::map<short,short> py_cg_corresp, cg_py_corresp;
@@ -223,6 +223,7 @@ namespace CepGen
           }
         }
       }
+      pythia_->event.reset();
 #else
       FatalError( "Pythia8 is not linked to this instance!" );
 #endif

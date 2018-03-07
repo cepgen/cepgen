@@ -1,4 +1,4 @@
-import Cards.Core as cepgen
+import Config.Core as cepgen
 
 plain = cepgen.Module('Plain',
     numFunctionCalls = 1000000,

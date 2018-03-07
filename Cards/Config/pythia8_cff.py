@@ -1,4 +1,4 @@
-import Cards.Core as cepgen
+import Config.Core as cepgen
 
 pythia8 = cepgen.Module('pythia8',
     seed = 0,
@@ -17,6 +17,8 @@ pythia8 = cepgen.Module('pythia8',
         #'BeamRemnants:beamJunction = on',
         #'ProcessLevel:resonanceDecays = on',
         #'PartonLevel:Remnants = on',
+        #'PartonLevel:all = off',
+        #'PartonLevel:MPI = on',
         #'HadronLevel:all = on',
         'Diffraction:doHard = on',
         'HardQCD:all = on',

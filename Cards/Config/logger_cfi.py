@@ -1,4 +1,4 @@
-import Cards.Core as cepgen
+import Config.Core as cepgen
 
 logger = cepgen.Parameters(
     level = cepgen.Logging.Warning,

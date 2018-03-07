@@ -57,9 +57,11 @@ int main( int argc, char* argv[] ) {
     Information( Form( "Reading config file stored in %s", argv[1] ) );
     //CepGen::Cards::LpairReader card( argv[1] );
     const std::string extension = CepGen::Cards::Handler::getExtension( argv[1] );
-    if ( extension == "card" ) mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
+    if ( extension == "card" )
+      mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
 #ifdef PYTHON
-    else if ( extension == "py" ) mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
+    else if ( extension == "py" )
+      mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
 #endif
   }
 

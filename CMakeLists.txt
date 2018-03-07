@@ -33,7 +33,7 @@ endforeach()
 
 #----- copy the input cards and other files
 
-file(GLOB input_cards RELATIVE ${PROJECT_SOURCE_DIR} Cards/*)
+file(GLOB_RECURSE input_cards RELATIVE ${PROJECT_SOURCE_DIR} Cards/*)
 foreach(_files ${input_cards})
   configure_file(${_files} ${_files} COPYONLY)
 endforeach()
