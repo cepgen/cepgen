@@ -153,8 +153,8 @@ namespace CepGen
       }
       if ( type == kLogarithmic )
         lim = {
-          std::max( log( in.min() ), -10. ),
-          std::min( log( in.max() ), +10. )
+          std::max( log( lim.min() ), -10. ),
+          std::min( log( lim.max() ), +10. )
         };
       mapped_variables_.emplace_back( MappingVariable{ lim, out, type, num_dimensions_++ } );
       switch ( type ) {
