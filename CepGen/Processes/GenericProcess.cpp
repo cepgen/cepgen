@@ -33,7 +33,7 @@ namespace CepGen
     }
 
     void
-    GenericProcess::clearRun()
+    GenericProcess::clearRunStatistics()
     {
       total_gen_time_ = 0.;
       num_gen_events_ = 0;

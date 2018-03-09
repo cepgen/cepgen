@@ -146,7 +146,7 @@ namespace CepGen
       Kinematics::Limits lim = in;
       if ( !in.valid() ) {
         std::ostringstream oss; oss << default_limits;
-        InWarning( Form( "%s could not be retrieved from the user configuration!\n\t"
+        Debugging( Form( "%s could not be retrieved from the user configuration!\n\t"
                          "Setting it to the default value: %s.",
                          description, oss.str().c_str() ) );
         lim = default_limits;
@@ -276,7 +276,7 @@ namespace CepGen
       const double ela1 = ( 1.-x )*( 1.-Q2_min/Q2_ela );
       //const double ela3 = 1.-( Q2_ela-kt2 )/Q2_ela;
 
-      const double f_ela = Constants::alphaEM/M_PI/kt2*( ela1*ff.FE + 0.5*x*x*ff.FM );
+      const double f_ela = Constants::alphaEM*M_1_PI/kt2*( ela1*ff.FE + 0.5*x*x*ff.FM );
 
       // last factor below the Jacobian from dQ^2/Q^2 --> dkT^2/kT^2*(kT^2/Q^2)
       return f_ela*( 1.-x )*kt2 / Q2_ela;
@@ -285,7 +285,8 @@ namespace CepGen
     double
     GenericKTProcess::inelasticFlux( double x, double kt2, double mx, const StructureFunctions::Type& sf )
     {
-      const double mx2 = mx*mx, mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
+      const double mx2 = mx*mx;
+      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
 
       // F2 structure function
       const double Q2min = 1. / ( 1.-x )*( x*( mx2-mp2 ) + x*x*mp2 ),
@@ -301,7 +302,7 @@ namespace CepGen
       const double f_D = str_fun.F2/( mx2 + Q2 - mp2 ) * term1;
       const double f_C= 2.*F1/Q2;
 
-      return Constants::alphaEM/M_PI*( 1.-x )/Q2*( f_D+0.5*x*x*f_C );
+      return Constants::alphaEM*M_1_PI*( 1.-x )/Q2*( f_D+0.5*x*x*f_C );
     }
 
     std::ostream&

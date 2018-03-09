@@ -91,7 +91,7 @@ namespace CepGen
         bool hasEvent() const { return has_event_; }
 
         /// Reset the total generation time and the number of events generated for this run
-        void clearRun();
+        void clearRunStatistics();
         /// Add a new timing into the total generation time
         /// \param[in] gen_time Time to add (in seconds)
         void addGenerationTime( double gen_time );

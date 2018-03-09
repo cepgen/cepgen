@@ -167,17 +167,17 @@ namespace CepGen
       //     four-momenta of the outgoing protons (or remnants)
       //=================================================================
 
-      const double px_plus  = ( 1.-x1 )*fabs( ak1z )*sqrt( 2. ),
+      const double px_plus  = ( 1.-x1 )*fabs( ak1z )*M_SQRT2,
                    px_minus = ( MX_*MX_ + q1tx*q1tx + q1ty*q1ty )*0.5/px_plus;
 
-      const double py_minus = ( 1.-x2 )*fabs( ak2z )*sqrt( 2. ), // warning! sign of pz??
+      const double py_minus = ( 1.-x2 )*fabs( ak2z )*M_SQRT2, // warning! sign of pz??
                    py_plus  = ( MY_*MY_ + q2tx*q2tx + q2ty*q2ty )*0.5/py_minus;
 
-      DebuggingInsideLoop( Form( "px_(+/-) = %f / %f\n\t"
-                                 "py_(+/-) = %f / %f", px_plus, px_minus, py_plus, py_minus ) );
+      DebuggingInsideLoop( Form( "px± = %f / %f\n\t"
+                                 "py± = %f / %f", px_plus, px_minus, py_plus, py_minus ) );
 
-      PX_ = Particle::Momentum( -q1tx, -q1ty, 0.5*( px_plus-px_minus )*sqrt( 2. ), 0.5*( px_plus+px_minus )*sqrt( 2. ) );
-      PY_ = Particle::Momentum( -q2tx, -q2ty, 0.5*( py_plus-py_minus )*sqrt( 2. ), 0.5*( py_plus+py_minus )*sqrt( 2. ) );
+      PX_ = Particle::Momentum( -q1tx, -q1ty, ( px_plus-px_minus )*M_SQRT1_2, ( px_plus+px_minus )*M_SQRT1_2 );
+      PY_ = Particle::Momentum( -q2tx, -q2ty, ( py_plus-py_minus )*M_SQRT1_2, ( py_plus+py_minus )*M_SQRT1_2 );
 
       DebuggingInsideLoop( Form( "First remnant:  (E,p) = (%f, %f, %f, %f), mass = %f\n\t"
                                  "Second remnant: (E,p) = (%f, %f, %f, %f), mass = %f",

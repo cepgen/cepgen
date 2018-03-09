@@ -80,15 +80,16 @@ namespace CepGen
           }
         }
 
-        p->process()->clearRun();
+        p->process()->clearRunStatistics();
         p->integrator.first_run = false;
-      }
+      } // passed the first-run preparation
     } // event is not empty
 
     p->process()->setPoint( ndim, x );
     if ( log_level >= Logger::DebugInsideLoop ) {
       std::ostringstream oss;
-      for ( unsigned int i = 0; i < ndim; ++i ) oss << x[i] << " ";
+      for ( unsigned int i = 0; i < ndim; ++i )
+        oss << x[i] << " ";
       DebuggingInsideLoop( Form( "Computing dim-%d point ( %s)", ndim, oss.str().c_str() ) );
     }
 
@@ -144,8 +145,7 @@ namespace CepGen
 
     //--- event hadronisation and resonances decay
     if ( p->hadroniser() ) {
-      double br = 0.; // branching fraction for all decays
-      //if ( !p->hadroniser()->hadronise( *ev, br, true ) )
+      double br = -1.; // branching fraction for all decays
       if ( !p->hadroniser()->hadronise( *ev, br, p->storage() ) || br == 0. )
         return 0.;
       integrand *= br;

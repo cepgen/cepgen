@@ -117,7 +117,7 @@ main( int argc, char* argv[] )
           else
             mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SuriYennie;
 
-          mg.parameters->dump();
+          //mg.parameters->dump();
           Information( Form( "Process: %s/%s\n\t"
                              "Configuration time: %.3f ms",
                              values_vs_generator.first,

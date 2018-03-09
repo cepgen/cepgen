@@ -20,14 +20,18 @@ namespace CepGen
         double computeKTFactorisedMatrixElement() override;
         void fillCentralParticlesKinematics() override;
 
-        Kinematics::Limits rap_limits_, ptdiff_limits_, phi_pt_diff_limits_;
-
+        /// Rapidity range for the outgoing leptons
+        Kinematics::Limits rap_limits_;
         /// Rapidity of the first outgoing lepton
         double y1_;
         /// Rapidity of the first outgoing lepton
         double y2_;
+
+        Kinematics::Limits ptdiff_limits_;
         /// Transverse momentum difference for the two outgoing leptons
         double pt_diff_;
+
+        Kinematics::Limits phi_pt_diff_limits_;
         /// Azimuthal angle difference for the two outgoing leptons
         double phi_pt_diff_;
   
