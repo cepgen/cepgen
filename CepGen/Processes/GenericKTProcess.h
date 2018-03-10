@@ -21,6 +21,11 @@ namespace CepGen
     class GenericKTProcess : public GenericProcess
     {
       public:
+        enum FluxTypes
+        {
+          BudnevFluxes = 0
+        };
+      public:
         /**
          * \brief Class constructor
          * \param[in] name Generic process name
@@ -50,7 +55,7 @@ namespace CepGen
         /// \param[in] x Bjorken x
         /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming photon
         /// \param[in] mx Outgoing diffractive proton mass
-        static double inelasticFlux( double x, double kt2, double mx, const StructureFunctions::Type& sf );
+        static double inelasticFlux( double x, double kt2, double mx, const StructureFunctions::Type& sf, const FluxTypes& ft = BudnevFluxes );
 
       protected:
         /// Set the kinematics associated to the phase space definition

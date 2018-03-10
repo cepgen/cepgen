@@ -18,7 +18,10 @@ namespace CepGen
         void preparePhaseSpace() override;
         double computeKTFactorisedMatrixElement() override;
         void fillCentralParticlesKinematics() override;
-        double WWamplitude( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 ) const;
+
+        static double amplitudeWW( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 );
+        static double onShellME( double shat, double that, double uhat );
+        static double offShellME( double shat, double that, double uhat, double phi_sum, double phi_diff );
 
         /// Rapidity range for the outgoing W bosons
         Kinematics::Limits rap_limits_;

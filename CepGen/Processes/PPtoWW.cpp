@@ -224,8 +224,8 @@ namespace CepGen
       //const double shat = s_*x1*x2; // ishat = 1 (approximation)
       const double shat = ( q1+q2 ).mass2(); // ishat = 2 (exact formula)
 
-      const double that1 = ( q1-p_w1_ ).mass2(), that2 = ( q2-p_w2_ ).mass2(),
-                   uhat1 = ( q1-p_w2_ ).mass2(), uhat2 = ( q2-p_w1_ ).mass2();
+      const double that1 = ( q1-p_w1_ ).mass2(), that2 = ( q2-p_w2_ ).mass2();
+      const double uhat1 = ( q1-p_w2_ ).mass2(), uhat2 = ( q2-p_w1_ ).mass2();
       DebuggingInsideLoop( Form( "that(1/2) = %f / %f\n\t"
                                  "uhat(1/2) = %f / %f",
                                  that1, that2, uhat1, uhat2 ) );
@@ -238,47 +238,23 @@ namespace CepGen
       //     matrix elements
       //=================================================================
       double amat2 = 0.;
-      if ( method == 0 ) {
 
-        //=================================================================
-        //     matrix element for gamma gamma --> W^+ W^-
-        //     (Denner+Dittmaier+Schuster)
-        //     (work in collaboration with C. Royon)
-        //=================================================================
+      //=================================================================
+      //     matrix element for gamma gamma --> W^+ W^-
+      //     (Denner+Dittmaier+Schuster)
+      //     (work in collaboration with C. Royon)
+      //=================================================================
+      if ( method == 0 )
+        amat2 = onShellME( shat, that, uhat );
 
-        const double mw4 = mw2*mw2;
+      //=================================================================
+      //     off-shell Nachtmann formulae
+      //=================================================================
+      else if ( method == 1 )
+        amat2 = offShellME( shat, that, uhat, phi_qt1_+phi_qt2_, phi_qt1_-phi_qt2_ );
 
-        const double term1  = 2.*shat * ( 2.*shat+3.*mw2 ) / ( 3.*( mw2-that )*( mw2-uhat ) );
-        const double term2  = 2.*shat*shat * ( shat*shat + 3.*mw4 ) / ( 3.*pow( mw2-that, 2 )*pow( mw2-uhat, 2 ) );
-
-        const double auxil_gamgam = 1. - term1 + term2;
-        const double beta = sqrt( 1.-4.*mw2/shat );
-
-        amat2 = 3.*Constants::alphaEM*Constants::alphaEM*beta / ( 2.*shat ) * auxil_gamgam / ( beta/( 64.*M_PI*M_PI*shat ) );
-      }
-      else if ( method == 1 ) {
-
-        //=================================================================
-        //     off-shell Nachtmann formulae
-        //=================================================================
-
-        const double e2 = 4.*M_PI*Constants::alphaEM;
-
-        const double phi_diff = phi_qt1_-phi_qt2_, phi_sum = phi_qt1_+phi_qt2_;
-        double amat2_0 = 0., amat2_1 = 0., amat2_interf = 0.;
-        for ( const auto lam3 : { -1, 0, 1 } ) {
-          for ( const auto lam4 : { -1, 0, 1 } ) {
-            double ampli_pp = WWamplitude( shat, that, uhat, +1, +1, lam3, lam4 );
-            double ampli_mm = WWamplitude( shat, that, uhat, -1, -1, lam3, lam4 );
-            double ampli_pm = WWamplitude( shat, that, uhat, +1, -1, lam3, lam4 );
-            double ampli_mp = WWamplitude( shat, that, uhat, -1, +1, lam3, lam4 );
-            amat2_0 += ampli_pp*ampli_pp + ampli_mm*ampli_mm + 2.*cos( 2.*phi_diff )*ampli_pp*ampli_mm;
-            amat2_1 += ampli_pm*ampli_pm + ampli_mp*ampli_mp + 2.*cos( 2.*phi_sum  )*ampli_pm*ampli_mp;
-            amat2_interf -= 2.*( cos( phi_sum+phi_diff )*( ampli_pp*ampli_pm+ampli_mm*ampli_mp ) + cos( phi_sum-phi_diff )*( ampli_pp*ampli_mp+ampli_mm*ampli_pm ) );
-          }
-        }
-        amat2 = e2*e2 * ( amat2_0 + amat2_1 + amat2_interf );
-      }
+      if ( amat2 <= 0. )
+        return 0.;
 
       //============================================
       //     unintegrated photon distributions
@@ -293,9 +269,9 @@ namespace CepGen
       //       d^2 kappa_1 d^2 kappa_2 instead d kappa_1^2 d kappa_2^2
       //=================================================================
 
-      const double aintegral = amat2 * ( 2.*M_PI )/ ( 16.*M_PI*M_PI*( x1*x2*s_ )*( x1*x2*s_ ) )
+      const double aintegral = amat2 / ( 16.*M_PI*M_PI*( x1*x2*s_ )*( x1*x2*s_ ) )
                              * flux1_/M_PI * flux2_/M_PI * 0.25
-                             * Constants::GeV2toBarn * 0.5 / M_PI;
+                             * Constants::GeV2toBarn;
       /*const double aintegral = amat2 / ( 16.*M_PI*M_PI*x1*x1*x2*x2*s_*s_ )
                              * flux1_/M_PI * flux2_/M_PI
                              * Constants::GeV2toBarn * 0.25;*/
@@ -329,7 +305,41 @@ namespace CepGen
     }
 
     double
-    PPtoWW::WWamplitude( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 ) const
+    PPtoWW::onShellME( double shat, double that, double uhat )
+    {
+      const double mw = ParticleProperties::mass( W ), mw2 = mw*mw, mw4 = mw2*mw2;
+
+      const double term1 = 2.*shat * ( 2.*shat+3.*mw2 ) / ( 3.*( mw2-that )*( mw2-uhat ) );
+      const double term2 = 2.*shat*shat * ( shat*shat + 3.*mw4 ) / ( 3.*pow( mw2-that, 2 )*pow( mw2-uhat, 2 ) );
+
+      const double auxil_gamgam = 1.-term1+term2;
+      const double beta = sqrt( 1.-4.*mw2/shat );
+
+      return 3.*Constants::alphaEM*Constants::alphaEM*beta / ( 2.*shat ) * auxil_gamgam / ( beta/( 64.*M_PI*M_PI*shat ) );
+    }
+
+    double
+    PPtoWW::offShellME( double shat, double that, double uhat, double phi_sum, double phi_diff )
+    {
+      const double e2 = 4.*M_PI*Constants::alphaEM;
+
+      double amat2_0 = 0., amat2_1 = 0., amat2_interf = 0.;
+      for ( const auto lam3 : { -1, 0, 1 } ) {
+        for ( const auto lam4 : { -1, 0, 1 } ) {
+          double ampli_pp = amplitudeWW( shat, that, uhat, +1, +1, lam3, lam4 );
+          double ampli_mm = amplitudeWW( shat, that, uhat, -1, -1, lam3, lam4 );
+          double ampli_pm = amplitudeWW( shat, that, uhat, +1, -1, lam3, lam4 );
+          double ampli_mp = amplitudeWW( shat, that, uhat, -1, +1, lam3, lam4 );
+          amat2_0 += ampli_pp*ampli_pp + ampli_mm*ampli_mm + 2.*cos( 2.*phi_diff )*ampli_pp*ampli_mm;
+          amat2_1 += ampli_pm*ampli_pm + ampli_mp*ampli_mp + 2.*cos( 2.*phi_sum  )*ampli_pm*ampli_mp;
+          amat2_interf -= 2.*( cos( phi_sum+phi_diff )*( ampli_pp*ampli_pm+ampli_mm*ampli_mp ) + cos( phi_sum-phi_diff )*( ampli_pp*ampli_mp+ampli_mm*ampli_pm ) );
+        }
+      }
+      return e2*e2 * ( amat2_0 + amat2_1 + amat2_interf );
+    }
+
+    double
+    PPtoWW::amplitudeWW( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 )
     {
       const double mw = ParticleProperties::mass( W ), mw2 = mw*mw;
 

@@ -283,7 +283,7 @@ namespace CepGen
     }
 
     double
-    GenericKTProcess::inelasticFlux( double x, double kt2, double mx, const StructureFunctions::Type& sf )
+    GenericKTProcess::inelasticFlux( double x, double kt2, double mx, const StructureFunctions::Type& sf, const FluxTypes& ft )
     {
       const double mx2 = mx*mx;
       const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
@@ -295,12 +295,10 @@ namespace CepGen
 
       const StructureFunctions str_fun = StructureFunctionsBuilder::get( sf, Q2, xbj );
 
-      const double F1 = 0.5*( ( 1+4.*xbj*xbj*mp2/Q2 )*str_fun.F2 - str_fun.FL )/xbj;
-
       const double term1 = ( 1.-x )*( 1.-Q2min/Q2 );
 
       const double f_D = str_fun.F2/( mx2 + Q2 - mp2 ) * term1;
-      const double f_C= 2.*F1/Q2;
+      const double f_C= 2.*str_fun.F1( Q2, xbj )/Q2;
 
       return Constants::alphaEM*M_1_PI*( 1.-x )/Q2*( f_D+0.5*x*x*f_C );
     }

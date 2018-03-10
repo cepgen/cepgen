@@ -60,30 +60,20 @@ namespace CepGen
     Pythia8Hadroniser::hadronise( Event& ev, double& weight, bool proton_fragment )
     {
       weight = 1.;
-#ifdef PYTHIA8
-      //--- start by cleaning up the previous runs leftovers
+#ifndef PYTHIA8
+      FatalError( "Pythia8 is not linked to this instance!" );
+#else
       const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
+      //std::cout << pythia_->settings.flag( "ProcessLevel:all" ) << std::endl;
 
-      /*const double sqrt_s = ev.cmEnergy();
-      pythia_->event[0].e( sqrt_s );
-      pythia_->event[0].m( sqrt_s );*/
-      { // handle slight energy conservation violation from the process...
-        Particle::Momentum p_out = ev.getOneByRole( Particle::OutgoingBeam1 ).momentum()
-                                 + ev.getOneByRole( Particle::OutgoingBeam2 ).momentum();
-        for ( const auto& p : ev.getByRole( Particle::CentralSystem ) )
-          p_out += p.momentum();
-        //std::cout << p_out.pz() << "|" << p_out.mass() << "|" << p_out.energy() << std::endl;
-        pythia_->event[0].e( p_out.energy() );
-        pythia_->event[0].px( p_out.px() );
-        pythia_->event[0].py( p_out.py() );
-        pythia_->event[0].pz( p_out.pz() );
-        pythia_->event[0].m( p_out.mass() );
-      }
-
+      //--- start by cleaning up the previous runs leftovers
+      pythia_->event.reset();
       const unsigned short num_before = ev.numParticles();
       std::map<short,short> py_cg_corresp, cg_py_corresp;
 
-      //--- loop to add the particles
+      //===========================================================================================
+      // loop to add the particles
+      //===========================================================================================
 
       unsigned short idx_remn1 = invalid_idx_, idx_remn2 = invalid_idx_;
       for ( unsigned short i = 0; i < num_before; ++i ) {
@@ -94,10 +84,16 @@ namespace CepGen
         unsigned short py_id = invalid_idx_;
         switch ( part.role() ) {
           case Particle::IncomingBeam1:
-          case Particle::IncomingBeam2:
+          case Particle::IncomingBeam2: {
+            py8part.status( -12 );
+            py_id = pythia_->event.append( py8part );
+          } break;
           case Particle::Parton1:
           case Particle::Parton2:
-          case Particle::Parton3:
+          case Particle::Parton3: {
+            py8part.status( -21 );
+            py_id = pythia_->event.append( py8part );
+          } break;
           case Particle::Intermediate:
           case Particle::UnknownRole:
             continue;
@@ -128,6 +124,72 @@ namespace CepGen
           py_cg_corresp[py_id] = part.id();
         }
       }
+
+      //===========================================================================================
+      // Particles parentage
+      //===========================================================================================
+
+      for ( const auto& cg_py : cg_py_corresp ) {
+        const Particle& part = ev.getConstById( cg_py.first );
+        const auto mothers = part.mothers();
+        const auto daughters = part.daughters();
+        if ( mothers.size() == 0 && daughters.size() == 0 )
+          continue;
+        { //--- mothers part
+          unsigned short id_moth1 = 0, id_moth2 = 0;
+          if ( part.role() == Particle::CentralSystem ) {
+            const unsigned short id_p1 = ev.getOneByRole( Particle::Parton1 ).id();
+            const unsigned short id_p2 = ev.getOneByRole( Particle::Parton2 ).id();
+            if ( cg_py_corresp.count( id_p1 ) > 0 )
+              id_moth1 = cg_py_corresp.at( id_p1 );
+            if ( cg_py_corresp.count( id_p2 ) > 0 )
+              id_moth2 = cg_py_corresp.at( id_p2 );
+          }
+          else if ( mothers.size() > 0 ) {
+            if ( cg_py_corresp.count( *mothers.begin() ) > 0 )
+              id_moth1 = cg_py_corresp.at( *mothers.begin() );
+            if ( mothers.size() > 1 && cg_py_corresp.count( *mothers.rbegin() ) > 0 )
+              id_moth2 = cg_py_corresp.at( *mothers.rbegin() );
+          }
+          if ( id_moth2 > id_moth1+1 ) { // id2 <-> id1
+            id_moth1 = id_moth1 ^ id_moth2;
+            id_moth2 = id_moth1 ^ id_moth2;
+            id_moth1 = id_moth1 ^ id_moth2;
+          }
+          pythia_->event[cg_py.second].mothers( id_moth1, id_moth2 );
+        }
+        { //--- daughters part
+          unsigned short id_daugh1 = 0, id_daugh2 = 0;
+          if ( part.role() == Particle::Parton1 || part.role() == Particle::Parton2 ) {
+            const auto daugh_gg = ev.getOneByRole( Particle::Intermediate ).daughters();
+            if ( daugh_gg.size() == 0 )
+              continue;
+            if ( cg_py_corresp.count( *daugh_gg.begin() ) > 0 )
+              id_daugh1 = cg_py_corresp.at( *daugh_gg.begin() );
+            if ( daugh_gg.size() > 1 && cg_py_corresp.count( *daugh_gg.rbegin() ) > 0 )
+              id_daugh2 = cg_py_corresp.at( *daugh_gg.rbegin() );
+          }
+          else {
+            if ( daughters.size() == 0 )
+              continue;
+            if ( cg_py_corresp.count( *daughters.begin() ) > 0 )
+              id_daugh1 = cg_py_corresp.at( *daughters.begin() );
+            if ( daughters.size() > 1 && cg_py_corresp.count( *daughters.rbegin() ) > 0 )
+              id_daugh2 = cg_py_corresp.at( *daughters.rbegin() );
+          }
+          if ( id_daugh2 > id_daugh1+1 ) { // id2 <-> id1
+            id_daugh1 = id_daugh1 ^ id_daugh2;
+            id_daugh2 = id_daugh1 ^ id_daugh2;
+            id_daugh1 = id_daugh1 ^ id_daugh2;
+          }
+          pythia_->event[cg_py.second].daughters( id_daugh1, id_daugh2 );
+        }
+      }
+
+      //===========================================================================================
+      // outgoing remnants massaging
+      //===========================================================================================
+
       if ( proton_fragment ) {
         if ( idx_remn1 != invalid_idx_ ) {
           const Particle::Momentum& p0 = ev.getOneByRole( Particle::IncomingBeam1 ).momentum();
@@ -147,19 +209,24 @@ namespace CepGen
         }
       }
 
+//pythia_->event.list(true,true);
+//return true;
+
       const unsigned short num_py_parts = pythia_->event.size();
 //pythia_->event.list(true,true);
       //ev.dump();
 //      exit(0);
 
+      //===========================================================================================
+      // launch the hadronisation / resonances decays
+      //===========================================================================================
+
       //std::cout << ":::::" << pythia_->settings.parm("Check:mTolErr") << std::endl;
 
-      bool success = false;
       ev.num_hadronisation_trials = 0;
-      while ( !success ) {
+      while ( !pythia_->next() ) {
         //pythia_->event.list(true,true);
-        //success = pythia_->next();
-        pythia_->next(); success = pythia_->event.size() != num_py_parts; //FIXME discards any pythia error!
+        if ( pythia_->event.size() != num_py_parts ) break; //FIXME discards any pythia error!
         /*if ( proton_fragment ) {
           //std::cout << success << "attempt " << ev.num_hadronisation_trials << " / " << max_attempts_ << std::endl;
           pythia_->event.list(true,true);
@@ -183,19 +250,20 @@ namespace CepGen
       for ( unsigned short i = 1; i < pythia_->event.size(); ++i ) { // skip the central system
         const Pythia8::Particle& p = pythia_->event[i];
         if ( py_cg_corresp.count( i ) > 0 ) { // the particle is already in the event content
-          const auto& cg_id = py_cg_corresp.at( i );
+          Particle& cg_part = ev.getById( py_cg_corresp.at( i ) );
           if ( p.daughterList().size() > 0 ) {
-            if ( i != idx_remn1 && i != idx_remn2 ) {
+            if ( cg_part.role() == Particle::CentralSystem ) {
               weight *= p.particleDataEntry().pickChannel().bRatio();
-              ev.getById( cg_id ).setStatus( Particle::Resonance );
+              cg_part.setStatus( Particle::Resonance );
             }
             else
-              ev.getById( cg_id ).setStatus( Particle::Fragmented );
+              cg_part.setStatus( Particle::Fragmented );
           }
         }
         else { // the particle was not yet included in the CepGen event
           const std::vector<int> mothers = p.motherList();
-          if ( mothers.size() == 0 ) continue; // isolated particle
+          if ( mothers.size() == 0 ) // isolated particle
+            continue;
 
           Particle::Role role = Particle::CentralSystem;
           if ( py_cg_corresp.count( mothers[0] ) > 0 ) {
@@ -223,9 +291,6 @@ namespace CepGen
           }
         }
       }
-      pythia_->event.reset();
-#else
-      FatalError( "Pythia8 is not linked to this instance!" );
 #endif
       return true;
     }

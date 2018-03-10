@@ -7,7 +7,6 @@ pythia8 = cepgen.Module('pythia8',
         #'Init:showAllSettings = on',
         # disable all generation processes
         'ProcessLevel:all = off',
-        #'Check:event = off',
         # printout properties
         # start by disabling some unnecessary output
         'Next:numberCount = 0',
@@ -47,4 +46,5 @@ pythia8 = cepgen.Module('pythia8',
         '24:onMode = off', # disable all W decays...
         '13:onMode = off', # disable all muon decays...
     ),
+    pythiaProcessConfiguration = (),
 )

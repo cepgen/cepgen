@@ -1,9 +1,28 @@
 #include "StructureFunctions.h"
 #include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/utils.h"
 #include <iostream>
 
 namespace CepGen
 {
+  double
+  StructureFunctions::F1( double q2, double xbj ) const
+  {
+    if ( xbj == 0. || q2 == 0. ) {
+      InError( Form( "Invalid range for Q² or xBj: %g/%g", q2, xbj ) );
+      return 0.;
+    }
+    const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
+    const double F1 = 0.5*( ( 1+4.*xbj*xbj*mp2/q2 )*F2 - FL )/xbj;
+    if ( Logger::get().level >= Logger::DebugInsideLoop ) {
+      DebuggingInsideLoop( Form(  "F1 for Q² = %g, xBj = %g: %g\n\t"
+                                  "(F2 = %g, FL = %g)",
+                                  q2, xbj, F1, F2, FL ) );
+    }
+    return F1;
+  }
+
   void
   StructureFunctions::computeFL( double q2, double xbj, const SF::SigmaRatio& ratio )
   {
