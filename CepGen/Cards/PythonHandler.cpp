@@ -182,15 +182,22 @@ namespace CepGen
           ParticleCode pair = (ParticleCode)asInteger( ppair );
           params_.kinematics.central_system = { pair, pair };
         }
+       else if ( PyTuple_Check( ppair ) ) {
+         if ( PyTuple_Size( ppair ) != 2 )
+           FatalError( "Invalid value for in_kinematics.pair!" );
+          ParticleCode pair1 = (ParticleCode)asInteger( PyTuple_GetItem( ppair, 0 ) );
+          ParticleCode pair2 = (ParticleCode)asInteger( PyTuple_GetItem( ppair, 1 ) );
+          params_.kinematics.central_system = { pair1, pair2 };
+        }
         Py_DECREF( ppair );
       }
-      else if ( ppair && PyTuple_Check( ppair ) ) {
-        if ( PyTuple_Size( ppair ) != 2 )
-          FatalError( "Invalid value for in_kinematics.pair!" );
-        ParticleCode pair1 = (ParticleCode)asInteger( PyTuple_GetItem( ppair, 0 ) );
-        ParticleCode pair2 = (ParticleCode)asInteger( PyTuple_GetItem( ppair, 1 ) );
-        params_.kinematics.central_system = { pair1, pair2 };
-        Py_DECREF( ppair );
+
+      PyObject* pparts = getElement( kin, "minFinalState" );
+      if ( pparts ) {
+        if ( PyTuple_Check( pparts ) )
+          for ( unsigned short i = 0; i < PyTuple_Size( pparts ); ++i )
+            params_.kinematics.minimum_final_state.emplace_back( (ParticleCode)asInteger( PyTuple_GetItem( pparts, i ) ) );
+        Py_DECREF( pparts );
       }
 
       PyObject* pcuts = getElement( kin, "cuts" );
@@ -311,6 +318,7 @@ namespace CepGen
       Py_DECREF( pname );
 
       if ( hadr_name == "pythia8" ) {
+        getParameter( hadr, "maxTrials", params_.hadroniser_max_trials );
 #ifdef PYTHIA8
         Hadroniser::Pythia8Hadroniser* pythia8 = new Hadroniser::Pythia8Hadroniser( params_ );
         PyObject* pseed = getElement( hadr, "seed" );

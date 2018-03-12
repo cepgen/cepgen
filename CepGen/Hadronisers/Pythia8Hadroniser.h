@@ -23,7 +23,8 @@ namespace CepGen
         explicit Pythia8Hadroniser( const Parameters& );
         ~Pythia8Hadroniser();
 
-        bool hadronise( Event& ev, double& weight, bool proton_fragment ) override;
+        bool decay( Event& ev, double& weight ) override;
+        bool hadronise( Event& ev, double& weight ) override;
         void setSeed( long long seed ) override;
 
 #ifdef PYTHIA8
@@ -35,8 +36,12 @@ namespace CepGen
       private:
         static constexpr unsigned short invalid_idx_ = 999;
         unsigned short max_attempts_;
+        std::vector<unsigned short> min_ids_;
+        std::map<short,short> py_cg_corresp_, cg_py_corresp_;
 #ifdef PYTHIA8
+        bool launchPythia( Event& ev );
         void fragmentState( unsigned short idx, double xbj = 0. );
+        void updateEvent( Event& ev, double& weight );
         /// A Pythia8 core to be wrapped
         std::unique_ptr<Pythia8::Pythia> pythia_;
 #endif

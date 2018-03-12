@@ -239,13 +239,13 @@ namespace CepGen
        * Set the mass of the particle in \f$\textrm{GeV}/c^{2}\f$ while ensuring that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
        * \brief Compute the particle's mass in \f$\textrm{GeV}/c^{2}\f$
        */
-      void computeMass( bool off_shell=false );
+      void computeMass( bool off_shell = false );
       /**
        * Set the mass of the particle in \f$\textrm{GeV}/c^{2}\f$ according to a value given as an argument. This method ensures that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
        * \param m The mass in \f$\textrm{GeV}/c^{2}\f$ to set
        * \brief Set the particle's mass in \f$\textrm{GeV}/c^{2}\f$
        */
-      void setMass( double m=-1. );
+      void setMass( double m = -1. );
       /// Get the particle's squared mass (in \f$\textrm{GeV}^\textrm{2}\f$)
       inline double mass2() const { return mass_*mass_; };
       /// Retrieve the momentum object associated with this particle

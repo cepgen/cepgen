@@ -22,7 +22,15 @@ namespace CepGen
     std::shared_ptr<Event> ev = p->process()->event();
     Logger::LoggingLevel log_level = Logger::get().level;
 
-    Timer tmr; // start the timer
+    //=============================================================================================
+    // start the timer
+    //=============================================================================================
+
+    Timer tmr;
+
+    //=============================================================================================
+    // prepare the event content prior to the process generation
+    //=============================================================================================
 
     if ( p->process()->hasEvent() ) {
       p->process()->clearEvent();
@@ -45,7 +53,10 @@ namespace CepGen
         Particle& op1 = ev->getOneByRole( Particle::OutgoingBeam1 ),
                  &op2 = ev->getOneByRole( Particle::OutgoingBeam2 );
 
-        //--- add outgoing protons or remnants
+        //=========================================================================================
+        // add outgoing protons or remnants
+        //=========================================================================================
+
         switch ( p->kinematics.mode ) {
           case Kinematics::ElectronProton: default: {
             InError( Form( "Process mode %d not yet handled!", (int)p->kinematics.mode ) );
@@ -64,10 +75,16 @@ namespace CepGen
             break;
         }
 
-        //--- prepare the function to be integrated
+        //=========================================================================================
+        // prepare the function to be integrated
+        //=========================================================================================
+
         p->process()->prepareKinematics();
 
-        //--- add central system
+        //=========================================================================================
+        // add central system
+        //=========================================================================================
+
         Particles& central_system = ev->getByRole( Particle::CentralSystem );
         if ( central_system.size() == p->kinematics.central_system.size() ) {
           unsigned short i = 0;
@@ -85,6 +102,10 @@ namespace CepGen
       } // passed the first-run preparation
     } // event is not empty
 
+    //=============================================================================================
+    // specify the phase space point to probe
+    //=============================================================================================
+
     p->process()->setPoint( ndim, x );
     if ( log_level >= Logger::DebugInsideLoop ) {
       std::ostringstream oss;
@@ -93,28 +114,41 @@ namespace CepGen
       DebuggingInsideLoop( Form( "Computing dim-%d point ( %s)", ndim, oss.str().c_str() ) );
     }
 
-    //--- from this step on, the phase space point is supposed to be set by 'GenericProcess::setPoint()'
+    //=============================================================================================
+    // from this step on, the phase space point is supposed to be set
+    //=============================================================================================
 
     p->process()->beforeComputeWeight();
 
     double integrand = p->process()->computeWeight();
 
-    //--- invalidate any unphysical behaviour
+    //=============================================================================================
+    // invalidate any unphysical behaviour
+    //=============================================================================================
+
     if ( integrand <= 0. )
       return 0.;
 
-    //--- speed up the integration process if no event needs to be generated
+    //=============================================================================================
+    // speed up the integration process if no event needs to be generated
+    //=============================================================================================
+
     if ( !p->storage()
       && !p->taming_functions
       && !p->hadroniser()
       && p->kinematics.cuts.central_particles.size() == 0 )
       return integrand;
   
-    //--- fill in the process' Event object
+    //=============================================================================================
+    // fill in the process' Event object
+    //=============================================================================================
+
     p->process()->fillKinematics();
 
-    //--- once the kinematics variables have been populated,
-    //    can apply the collection of taming functions
+    //=============================================================================================
+    // once the kinematics variables have been populated, can apply the collection of taming functions
+    //=============================================================================================
+
     if ( p->taming_functions ) {
       if ( p->taming_functions->has( "m_central" )
         || p->taming_functions->has( "pt_central" ) ) {
@@ -139,20 +173,35 @@ namespace CepGen
     if ( integrand <= 0. )
       return 0.;
 
-    //--- set the CepGen part of the event generation
+    //=============================================================================================
+    // set the CepGen part of the event generation
+    //=============================================================================================
+
     if ( p->storage() )
       ev->time_generation = tmr.elapsed();
 
-    //--- event hadronisation and resonances decay
+    //=============================================================================================
+    // event hadronisation and resonances decay
+    //=============================================================================================
+
     if ( p->hadroniser() ) {
-      double br = -1.; // branching fraction for all decays
-      if ( !p->hadroniser()->hadronise( *ev, br, p->storage() ) || br == 0. )
-        return 0.;
-      integrand *= br;
+      double br = -1., weight_hadr = -1.;
+      unsigned short num_decays_trials = 0;
+      while ( !p->hadroniser()->decay( *ev, br ) || br == 0. )
+        if ( ++num_decays_trials > 2 )
+          return 0.;
+      integrand *= br; // branching fraction for all decays
+      if ( p->storage() ) {
+        if ( !p->hadroniser()->hadronise( *ev, weight_hadr ) || weight_hadr == 0. )
+          return 0.;
+        integrand *= weight_hadr;
+      }
     }
 
-    //--- apply cuts on final state system (after hadronisation!)
+    //=============================================================================================
+    // apply cuts on final state system (after hadronisation!)
     // (watch out your cuts, as this might be extremely time-consuming...)
+    //=============================================================================================
 
     if ( p->kinematics.cuts.central_particles.size() > 0 ) {
       for ( const auto& part : ev->getByRole( Particle::CentralSystem ) ) {
@@ -176,13 +225,21 @@ namespace CepGen
       }
     }
 
+    //=============================================================================================
+    // store the last event in the parameters for its usage by the end user
+    //=============================================================================================
+
     if ( p->storage() ) {
       p->generation.last_event = ev;
       p->generation.last_event->time_total = tmr.elapsed();
 
       Debugging( Form( "Indiv. time (gen+hadr+cuts): %5.6f ms",
                        p->generation.last_event->time_total*1.e3 ) );
-    } // generating events
+    }
+
+    //=============================================================================================
+    // a bit of useful debugging
+    //=============================================================================================
 
     if ( log_level >= Logger::DebugInsideLoop ) {
       std::ostringstream oss;

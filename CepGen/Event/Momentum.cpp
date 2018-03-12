@@ -229,13 +229,14 @@ namespace CepGen
   const std::vector<double>
   Momentum::pVector() const
   {
-    return std::vector<double>( { px(), py(), pz(), energy(), mass() } );
+    return std::vector<double>{ px(), py(), pz(), energy(), mass() };
   }
 
   double
   Momentum::mass() const
   {
-    if ( mass2() >= 0. ) return sqrt( mass2() );
+    if ( mass2() >= 0. )
+      return sqrt( mass2() );
     return -sqrt( -mass2() );
   }
 
@@ -292,7 +293,8 @@ namespace CepGen
   Momentum::lorentzBoost( const Momentum& p )
   {
     const double m = p.mass();
-    if ( m == p.energy() ) return *this;
+    if ( m == p.energy() )
+      return *this;
 
     const double pf4 = ( ( *this )*p ) / m,
                  fn = ( pf4+energy() )/( p.energy()+m );

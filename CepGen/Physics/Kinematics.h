@@ -87,6 +87,8 @@ namespace CepGen
       std::pair<ParticleCode,ParticleCode> inpdg;
       /// PDG id of the outgoing central particles
       std::vector<ParticleCode> central_system;
+      /// Minimum list of central particles required
+      std::vector<ParticleCode> minimum_final_state;
 
       /// Type of kinematics to consider for the phase space
       ProcessMode mode;

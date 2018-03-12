@@ -8,13 +8,12 @@ namespace CepGen
 {
   Kinematics::Kinematics() :
     inp( { 6500., 6500. } ), inpdg( { Proton, Proton } ),
-    central_system( {} ),
     mode( ElasticElastic ), structure_functions( StructureFunctions::SuriYennie )
   {}
 
   Kinematics::Kinematics( const Kinematics& kin ) :
     inp( kin.inp ), inpdg( kin.inpdg ),
-    central_system( kin.central_system ),
+    central_system( kin.central_system ), minimum_final_state( kin.minimum_final_state ),
     mode( kin.mode ), structure_functions( kin.structure_functions ),
     cuts( kin.cuts )
   {}

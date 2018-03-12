@@ -26,11 +26,12 @@ namespace CepGen
         explicit GenericHadroniser( const char* name="unnamed_hadroniser" ) : name_( name ) {}
         virtual ~GenericHadroniser() {}
 
+        virtual bool decay( Event& ev, double& weight ) = 0;
         /// Hadronise a full event
         /// \param[inout] ev Event to hadronise
         /// \param[inout] weight Event weight after hadronisation
         /// \return Boolean stating whether or not the hadronisation occured successfully
-        virtual bool hadronise( Event& ev, double& weight, bool proton_fragment = true ) = 0;
+        virtual bool hadronise( Event& ev, double& weight ) = 0;
         /// Specify a random numbers generator seed for the hadroniser
         /// \param[in] seed A RNG seed
         virtual void setSeed( long long seed ) = 0;

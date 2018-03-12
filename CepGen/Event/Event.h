@@ -31,7 +31,7 @@ namespace CepGen
       /// Dump all the known information on every Particle object contained in this Event container in the output stream
       /// \param[out] os Output stream where to dump the information
       /// \param[in] stable_ Do we only show the stable particles in this event?
-      void dump( std::ostream& os = Logger::get().outputStream, bool stable_=false ) const;
+      void dump( std::ostream& os = Logger::get().outputStream, bool stable_ = false ) const;
 
       double cmEnergy() const { return CMEnergy( getOneByRole( Particle::IncomingBeam1 ), getOneByRole( Particle::IncomingBeam2 ) ); }
 
@@ -40,11 +40,11 @@ namespace CepGen
       /// Set the information on one particle in the process
       /// \param[in] part The Particle object to insert or modify in the event
       /// \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
-      Particle& addParticle( Particle& part, bool replace=false );
+      Particle& addParticle( Particle& part, bool replace = false );
       /// \brief Create a new particle in the event, with no kinematic information but the role it has to play in the process
       /// \param[in] role The role the particle will play in the process
       /// \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
-      Particle& addParticle( Particle::Role role, bool replace=false );
+      Particle& addParticle( Particle::Role role, bool replace = false );
 
       //----- particles retrievers
 
