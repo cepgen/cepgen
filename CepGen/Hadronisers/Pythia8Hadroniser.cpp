@@ -62,40 +62,23 @@ namespace CepGen
     }
 
     bool
-    Pythia8Hadroniser::decay( Event& ev, double& weight )
+    Pythia8Hadroniser::run( Event& ev, double& weight )
     {
       weight = 1.;
 #ifndef PYTHIA8
       FatalError( "Pythia8 is not linked to this instance!" );
 #else
       lhaevt_->feedEvent( ev );
-      pythia_->next();
-      lhaevt_->listEvent();
-      pythia_->event.list();
-
-      //updateEvent( ev, weight );
-#endif
-      return true;
-    }
-
-    bool
-    Pythia8Hadroniser::hadronise( Event& ev, double& weight )
-    {
-      weight = 1.;
-#ifndef PYTHIA8
-      FatalError( "Pythia8 is not linked to this instance!" );
-#else
 
       //===========================================================================================
       // launch the hadronisation / resonances decays
       //===========================================================================================
 
-      if ( !launchPythia( ev ) )
-        return false;
+      pythia_->next();
+      lhaevt_->listEvent();
+      pythia_->event.list();
 
       updateEvent( ev, weight );
-
-      ev.dump();
 #endif
       return true;
     }
@@ -158,11 +141,13 @@ namespace CepGen
     void
     Pythia8Hadroniser::updateEvent( Event& ev, double& weight )
     {
+      //lhaevt_->dumpCorresp();
       for ( unsigned short i = 1; i < pythia_->event.size(); ++i ) { // skip the central system
         const Pythia8::Particle& p = pythia_->event[i];
-        if ( py_cg_corresp_.count( i ) > 0 ) {
+        const unsigned short cg_id = lhaevt_->cgPart( i );
+        if ( cg_id != LHAEvent::invalid_id ) {
           // the particle is already in the event content
-          Particle& cg_part = ev.getById( py_cg_corresp_.at( i ) );
+          Particle& cg_part = ev.getById( cg_id );
           if ( p.daughterList().size() == 0 )
             continue;
           if ( cg_part.role() != Particle::CentralSystem ) {
@@ -179,16 +164,16 @@ namespace CepGen
           continue;
 
         Particle::Role role = Particle::CentralSystem;
-        if ( py_cg_corresp_.count( mothers[0] ) > 0 ) {
-          const Particle& moth = ev.getById( py_cg_corresp_.at( mothers[0] ) );
+        const unsigned short moth_id = lhaevt_->cgPart( mothers[0] );
+        if ( moth_id != LHAEvent::invalid_id ) {
+          const Particle& moth = ev.getById( moth_id );
           if ( moth.role() == Particle::OutgoingBeam1
             || moth.role() == Particle::OutgoingBeam2 )
             role = moth.role();
         }
 
         Particle& op = ev.addParticle( role );
-        cg_py_corresp_[op.id()] = i;
-        py_cg_corresp_[i] = op.id();
+        lhaevt_->addCorresp( op.id(), i );
 
         op.setPdgId( static_cast<ParticleCode>( abs( p.id() ) ), p.charge() );
         op.setStatus( p.isFinal()
@@ -197,18 +182,19 @@ namespace CepGen
         );
         op.setMomentum( Particle::Momentum( p.px(), p.py(), p.pz(), p.e() ) );
         for ( const auto& moth : mothers ) {
-          if ( moth != 0 && py_cg_corresp_.count( moth ) == 0 )
+          const unsigned short moth_id = lhaevt_->cgPart( moth );
+          if ( moth != 0 && moth_id == LHAEvent::invalid_id )
             FatalError( Form( "Particle with id=%d was not found in the event content!", moth ) );
-          op.addMother( ev.getById( py_cg_corresp_.at( moth ) ) );
+          op.addMother( ev.getById( moth_id ) );
         }
       }
+      //ev.dump();
     }
   }
 
   LHAEvent::LHAEvent() :
     LHAup( 3 )
   {
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
     addProcess( 0, 1., 0., 1. );
   }
 
@@ -219,48 +205,32 @@ namespace CepGen
     unsigned short parton1_id = 0, parton2_id = 0;
     for ( const auto& p : ev.particles() ) {
       int status = 0;
-      unsigned short moth1 = 0, moth2 = 0;
-      if ( p.mothers().size() > 0 ) {
-        moth1 = *p.mothers().begin()+1;
-        if ( p.mothers().size() > 1 ) {
-          unsigned short tmp = *p.mothers().rbegin()+1;
-          if ( tmp > moth1+1 ) {
-            moth2 = moth1;
-            moth1 = tmp;
-          }
-          else
-            moth2 = tmp;
-        }
-      }
       const double mass2 = p.momentum().energy2()-p.momentum().p2(), mass = ( mass2 < 0 ) ? -sqrt( -mass2 ) : sqrt( mass2 );
       switch ( p.status() ) {
         case Particle::Unfragmented:
         case Particle::Undecayed:
           status = 1;
           break;
-        case Particle::PrimordialIncoming:
-          status = -9;
-          break;
         case Particle::Incoming:
-          status = 2;
+          status = -1;
           break;
         case Particle::FinalState:
         default:
-          status = 3;
           break;
       }
       switch ( p.role() ) {
         case Particle::Parton1:
           parton1_id = sizePart();
-          moth1 = moth2 = 0;
+          py_cg_corresp_.emplace_back( sizePart(), p.id() );
           addParticle( p.integerPdgId(), status, 0, 0, 0, 0, p.momentum().px(), p.momentum().py(), p.momentum().pz(), p.momentum().energy(), mass, 0., 0., 0. );
           break;
         case Particle::Parton2:
           parton2_id = sizePart();
-          moth1 = moth2 = 0;
+          py_cg_corresp_.emplace_back( sizePart(), p.id() );
           addParticle( p.integerPdgId(), status, 0, 0, 0, 0, p.momentum().px(), p.momentum().py(), p.momentum().pz(), p.momentum().energy(), mass, 0., 0., 0. );
           break;
         case Particle::CentralSystem:
+          py_cg_corresp_.emplace_back( sizePart(), p.id() );
           addParticle( p.integerPdgId(), status, parton1_id, parton2_id, 0, 0, p.momentum().px(), p.momentum().py(), p.momentum().pz(), p.momentum().energy(), mass, 0., 0., 0. );
           continue;
         case Particle::IncomingBeam1:
@@ -276,6 +246,10 @@ namespace CepGen
     }
   }
 
+  //================================================================================================
+  // Custom LHA event definition
+  //================================================================================================
+
   bool
   LHAEvent::setInit()
   {
@@ -286,6 +260,47 @@ namespace CepGen
   LHAEvent::setEvent( int )
   {
     return true;
+  }
+
+  void
+  LHAEvent::setProcess( int id, double xsec, double q2_scale, double alpha_qed, double alpha_qcd )
+  {
+    LHAup::setProcess( id, xsec, q2_scale, alpha_qed, alpha_qcd );
+    py_cg_corresp_.clear();
+  }
+
+  unsigned short
+  LHAEvent::cgPart( unsigned short py_id ) const
+  {
+    for ( const auto& py_cg : py_cg_corresp_ )
+      if ( py_cg.first == py_id )
+        return py_cg.second;
+    return invalid_id;
+  }
+
+  unsigned short
+  LHAEvent::pyPart( unsigned short cg_id ) const
+  {
+    for ( const auto& py_cg : py_cg_corresp_ )
+      if ( py_cg.second == cg_id )
+        return py_cg.first;
+    return invalid_id;
+  }
+
+  void
+  LHAEvent::addCorresp( unsigned short py_id, unsigned short cg_id )
+  {
+    py_cg_corresp_.emplace_back( py_id, cg_id );
+  }
+
+  void
+  LHAEvent::dumpCorresp() const
+  {
+    std::ostringstream oss;
+    oss << "List of Pythia <-> CepGen particle ids correspondance";
+    for ( const auto& py_cg : py_cg_corresp_ )
+      oss << "\n\t" << py_cg.first << " <-> " << py_cg.second;
+    Information( oss.str() );
   }
 }
 

@@ -18,6 +18,16 @@ namespace CepGen
       void feedEvent( const Event& ev );
       bool setInit() override;
       bool setEvent( int ) override;
+      void setProcess( int id, double xsec, double q2_scale, double alpha_qed, double alpha_qcd );
+
+      unsigned short cgPart( unsigned short py_id ) const;
+      unsigned short pyPart( unsigned short cg_id ) const;
+      void addCorresp( unsigned short py_id, unsigned short cg_id );
+      void dumpCorresp() const;
+
+      static constexpr unsigned short invalid_id = 999;
+    private:
+      std::vector<std::pair<unsigned short, unsigned short> > py_cg_corresp_;
   };
 
   namespace Hadroniser
@@ -32,8 +42,7 @@ namespace CepGen
         explicit Pythia8Hadroniser( const Parameters& );
         ~Pythia8Hadroniser();
 
-        bool decay( Event& ev, double& weight ) override;
-        bool hadronise( Event& ev, double& weight ) override;
+        bool run( Event& ev, double& weight ) override;
         void setSeed( long long seed ) override;
 
 #ifdef PYTHIA8
