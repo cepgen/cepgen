@@ -86,6 +86,9 @@ namespace CepGen
         Particle& p = event_->addParticle( ip.first );
         p.setPdgId( ip.second, ParticleProperties::charge( ip.second ) );
         p.setMass( ParticleProperties::mass( ip.second ) );
+        if ( ip.first == Particle::IncomingBeam1
+          || ip.first == Particle::IncomingBeam2 )
+          p.setStatus( Particle::PrimordialIncoming );
       }
       //--- central system (if not already there)
       const auto& central_system = ini.find( Particle::CentralSystem );

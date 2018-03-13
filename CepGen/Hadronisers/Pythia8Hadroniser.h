@@ -11,6 +11,15 @@
 namespace CepGen
 {
   class Parameters;
+  class LHAEvent : public Pythia8::LHAup
+  {
+    public:
+      LHAEvent();
+      void feedEvent( const Event& ev );
+      bool setInit() override;
+      bool setEvent( int ) override;
+  };
+
   namespace Hadroniser
   {
     /**
@@ -44,6 +53,7 @@ namespace CepGen
         void updateEvent( Event& ev, double& weight );
         /// A Pythia8 core to be wrapped
         std::unique_ptr<Pythia8::Pythia> pythia_;
+        std::shared_ptr<LHAEvent> lhaevt_;
 #endif
     };
   }

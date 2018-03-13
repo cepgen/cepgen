@@ -6,7 +6,7 @@ pythia8 = cepgen.Module('pythia8',
     pythiaPreConfiguration = (
         #'Init:showAllSettings = on',
         # disable all generation processes
-        'ProcessLevel:all = off',
+        #'ProcessLevel:all = off',
         # printout properties
         # start by disabling some unnecessary output
         'Next:numberCount = 0',
@@ -18,11 +18,11 @@ pythia8 = cepgen.Module('pythia8',
         #'PartonLevel:Remnants = on',
         #'PartonLevel:all = off',
         #'PartonLevel:MPI = on',
-        'HadronLevel:all = on',
+        #'HadronLevel:all = on',
         #'Diffraction:doHard = on',
         #'HardQCD:all = on',
         # disable all Bremsstrahlung/FSR photon production
-        'PartonLevel:all = on',
+        #'PartonLevel:all = on',
         'PartonLevel:ISR = off',
         'PartonLevel:FSR = off',
         'PartonLevel:MPI = on',
