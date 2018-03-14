@@ -1,7 +1,7 @@
 import Config.Core as cepgen
 
 pythia8 = cepgen.Module('pythia8',
-    seed = 0,
+    seed = 1000,
     maxTrials = 1,
     pythiaPreConfiguration = (
         #'Init:showAllSettings = on',
@@ -23,9 +23,9 @@ pythia8 = cepgen.Module('pythia8',
         #'HardQCD:all = on',
         # disable all Bremsstrahlung/FSR photon production
         #'PartonLevel:all = on',
-        'PartonLevel:ISR = off',
-        'PartonLevel:FSR = off',
-        'PartonLevel:MPI = on',
+        #'PartonLevel:ISR = off',
+        #'PartonLevel:FSR = off',
+        #'PartonLevel:MPI = on',
         'ParticleDecays:allowPhotonRadiation = off',
     ),
     pythiaConfiguration = (

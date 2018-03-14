@@ -35,6 +35,9 @@ namespace CepGen
       void computeFL( double q2, double xbj, double r );
       double F1( double q2, double xbj ) const;
 
+    protected:
+      static const double mp_, mp2_;
+
     private:
       std::string name_;
   };

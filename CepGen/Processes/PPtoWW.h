@@ -15,6 +15,8 @@ namespace CepGen
         inline ~PPtoWW() {}
 
       private:
+        static const double mw_, mw2_;
+
         void preparePhaseSpace() override;
         double computeKTFactorisedMatrixElement() override;
         void fillCentralParticlesKinematics() override;

@@ -1,6 +1,7 @@
 #include "Integrator.h"
 
 #include "CepGen/Parameters.h"
+#include "CepGen/Hadronisers/GenericHadroniser.h"
 
 #include "CepGen/Core/utils.h"
 #include "CepGen/Core/Exception.h"
@@ -9,6 +10,11 @@
 
 #include <fstream>
 #include <math.h>
+
+#ifdef TIMING_ANALYSIS
+extern std::vector<double> steps;
+extern unsigned long num_points;
+#endif
 
 namespace CepGen
 {
@@ -110,6 +116,16 @@ namespace CepGen
     if      ( algorithm == Plain ) gsl_monte_plain_free( pln_state );
     else if ( algorithm == Vegas ) gsl_monte_vegas_free( veg_state );
     else if ( algorithm == MISER ) gsl_monte_miser_free( mis_state );
+
+#ifdef TIMING_ANALYSIS
+    std::cout << "|steps: ";
+    for ( const auto& st : steps )
+    std::cout << "|" << st/num_points;
+    std::cout << std::endl;
+#endif
+
+    if ( input_params_->hadroniser() )
+      input_params_->hadroniser()->setCrossSection( result, abserr );
 
     return res;
   }

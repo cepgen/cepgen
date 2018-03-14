@@ -6,6 +6,9 @@
 
 namespace CepGen
 {
+  const double StructureFunctions::mp_ = ParticleProperties::mass( Proton );
+  const double StructureFunctions::mp2_ = StructureFunctions::mp_*StructureFunctions::mp_;
+
   double
   StructureFunctions::F1( double q2, double xbj ) const
   {
@@ -13,8 +16,7 @@ namespace CepGen
       InError( Form( "Invalid range for Q² or xBj: %g/%g", q2, xbj ) );
       return 0.;
     }
-    const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
-    const double F1 = 0.5*( ( 1+4.*xbj*xbj*mp2/q2 )*F2 - FL )/xbj;
+    const double F1 = 0.5*( ( 1+4.*xbj*xbj*mp2_/q2 )*F2 - FL )/xbj;
     if ( Logger::get().level >= Logger::DebugInsideLoop ) {
       DebuggingInsideLoop( Form(  "F1 for Q² = %g, xBj = %g: %g\n\t"
                                   "(F2 = %g, FL = %g)",
@@ -33,8 +35,7 @@ namespace CepGen
   void
   StructureFunctions::computeFL( double q2, double xbj, double r )
   {
-    const double mp2 = ParticleProperties::mass( Proton )*ParticleProperties::mass( Proton );
-    const double tau = 4.*xbj*xbj*mp2/q2;
+    const double tau = 4.*xbj*xbj*mp2_/q2;
     FL = F2 * ( 1.+tau ) * ( r/( 1.+r ) );
   }
 

@@ -112,6 +112,7 @@ namespace CepGen
     px_ *= c;
     py_ *= c;
     pz_ *= c;
+    energy_ *= c;
     computeP();
     return *this;
   }

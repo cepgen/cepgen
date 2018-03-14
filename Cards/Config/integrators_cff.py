@@ -12,7 +12,7 @@ class VegasIntegrationMode:
 
 vegas = plain.clone('Vegas',
     numFunctionCalls = 50000,
-    numPoints = 10,
+    numPoints = 100,
     # VEGAS-specific parameters
     iterations = 5,
     alpha = 1.5,

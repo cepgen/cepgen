@@ -101,6 +101,8 @@ namespace CepGen
         inline unsigned int numGeneratedEvents() const { return num_gen_events_; }
   
       protected:
+        static const double mp_, mp2_;
+
         /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
         void setEventContent( const IncomingState& ini, const OutgoingState& fin );
         /// Compute the electric/magnetic form factors for the two considered \f$Q^{2}\f$ momenta transfers

@@ -10,7 +10,7 @@ namespace CepGen
     Schaefer::Parameterisation::standard()
     {
       Parameterisation par;
-      par.amp = ParticleProperties::mass( Proton );
+      par.amp = mp_;
       par.alpha_em = Constants::alphaEM;
       par.q2_cut = 9.;
       par.w2_hi = 4.;

@@ -23,7 +23,6 @@ namespace CepGen
     double
     PPtoLL::computeKTFactorisedMatrixElement()
     {
-      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
       const double ml = event_->getByRole( Particle::CentralSystem )[0].mass(), ml2 = ml*ml;
 
       const unsigned int iterm11 = 1, // Long-long
@@ -47,7 +46,7 @@ namespace CepGen
       //=================================================================
       //     matrix element computation
       //=================================================================
-      //const double stild = s_/2.*(1+sqrt(1.-(4*pow(mp2, 2))/s_*s_));
+      //const double stild = s_/2.*(1+sqrt(1.-(4*pow(mp2_, 2))/s_*s_));
 
       // Inner photons
       const double q1tx = qt1_*cos( phi_qt1_ ), q1ty = qt1_*sin( phi_qt1_ ),
@@ -278,8 +277,8 @@ namespace CepGen
         const double ak1_x = z1m*pt1x - z1p*pt2x, ak1_y = z1m*pt1y - z1p*pt2y,
                      ak2_x = z2m*pt1x - z2p*pt2x, ak2_y = z2m*pt1y - z2p*pt2y;
 
-        const double t1abs = ( q1t2 + x1*( MX_*MX_-mp2 )+x1*x1*mp2 )/( 1.-x1 ),
-                     t2abs = ( q2t2 + x2*( MY_*MY_-mp2 )+x2*x2*mp2 )/( 1.-x2 );
+        const double t1abs = ( q1t2 + x1*( MX_*MX_-mp2_ )+x1*x1*mp2_ )/( 1.-x1 ),
+                     t2abs = ( q2t2 + x2*( MY_*MY_-mp2_ )+x2*x2*mp2_ )/( 1.-x2 );
 
         const double eps12 = ml2 + z1p*z1m*t1abs,
                      eps22 = ml2 + z2p*z2m*t2abs;
@@ -348,8 +347,8 @@ namespace CepGen
                                    "amat2(1/2), amat2 = %e / %e / %e", aux2_1, aux2_2, amat2_1, amat2_2, amat2 ) );
         /*const double xx1 = alpha1+alpha2, xx2 = beta1+beta2;
 
-        const double sudakov_2 = ( MX_*MX_ - mp2+q2t2+xx2*mp2 )/( ( 1.-xx2 )*s_ );
-        const double sudakov_1 = ( q1t2 + xx1*mp2 )/( ( 1.-xx1 )*s_ );
+        const double sudakov_2 = ( MX_*MX_ - mp2_+q2t2+xx2*mp2_ )/( ( 1.-xx2 )*s_ );
+        const double sudakov_1 = ( q1t2 + xx1*mp2_ )/( ( 1.-xx1 )*s_ );
         const double ratio1 = sudakov_1 / xx1,
                      ratio2 = sudakov_2 / xx2;*/
 
