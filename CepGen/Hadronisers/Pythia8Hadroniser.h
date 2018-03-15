@@ -10,7 +10,6 @@
 
 namespace CepGen
 {
-  class Parameters;
   class Particle;
   class LHAEvent : public Pythia8::LHAup
   {
@@ -30,7 +29,6 @@ namespace CepGen
       static constexpr unsigned short invalid_id = 999;
     private:
       static const double mp_, mp2_;
-      void fragmentState( const Particle& p_x, double xbj );
       std::vector<std::pair<unsigned short, unsigned short> > py_cg_corresp_;
       const Parameters* params_;
   };
@@ -52,7 +50,7 @@ namespace CepGen
         void setCrossSection( double xsec, double xsec_err ) override;
 
 #ifdef PYTHIA8
-        bool init();
+        bool init( bool enable_all_processes );
         void readString( const char* param );
         void readString( const std::string& param ) { readString( param.c_str() ); }
 #endif
@@ -63,12 +61,15 @@ namespace CepGen
         std::vector<unsigned short> min_ids_;
         std::map<short,short> py_cg_corresp_, cg_py_corresp_;
 #ifdef PYTHIA8
-        bool launchPythia( Event& ev );
-        void updateEvent( Event& ev, double& weight );
+        unsigned short findRole( const Pythia8::Pythia* pythia, const LHAEvent* lhaevt, const Event& ev, const Pythia8::Particle& p, unsigned short offset ) const;
+        void updateEvent( const Pythia8::Pythia* pythia, LHAEvent* lhaevt, Event& ev, double& weight ) const;
+        Particle& addParticle( LHAEvent* lhaevt, Event& ev, const Pythia8::Particle&, unsigned short, unsigned short offset = 0 ) const;
         /// A Pythia8 core to be wrapped
         std::unique_ptr<Pythia8::Pythia> pythia_;
         std::shared_ptr<LHAEvent> lhaevt_;
+        bool full_evt_;
 #endif
+        const Parameters* params_; // not owning
     };
   }
 }

@@ -189,18 +189,10 @@ namespace CepGen
     //=============================================================================================
 
     if ( p->hadroniser() ) {
-      double br = -1., weight_hadr = -1.;
-      unsigned short num_decays_trials = 0;
-//      while ( !p->hadroniser()->run( *ev, br, p->storage() ) || br == 0. )
-      while ( !p->hadroniser()->run( *ev, br, true ) || br == 0. )//FIXME
-        if ( ++num_decays_trials > 2 )
-          return 0.;
+      double br = -1.;
+      if ( !p->hadroniser()->run( *ev, br, p->storage() ) || br == 0. )
+        return 0.;
       integrand *= br; // branching fraction for all decays
-      /*if ( p->storage() ) {
-        if ( !p->hadroniser()->hadronise( *ev, weight_hadr ) || weight_hadr == 0. )
-          return 0.;
-        integrand *= weight_hadr;
-      }*/
     }
 
     //=============================================================================================

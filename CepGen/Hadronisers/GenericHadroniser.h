@@ -8,6 +8,7 @@ namespace CepGen
 {
   class Event;
   class Particle;
+  class Parameters;
   /// Location for all hadronisers to be run downstream to the events generation
   namespace Hadroniser
   {
