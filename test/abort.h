@@ -5,7 +5,12 @@
 #include "CepGen/Core/utils.h"
 #include <signal.h>
 
-void handle_ctrl_c( int signal ) { throw CepGen::Exception( __PRETTY_FUNCTION__, Form( "Process aborted with signal %d", signal ), CepGen::JustWarning ); }
+namespace CepGen
+{
+  struct AbortException : Exception { using Exception::Exception; };
+}
+
+void handle_ctrl_c( int signal ) { throw CepGen::AbortException( __PRETTY_FUNCTION__, Form( "Process aborted with signal %d", signal ), CepGen::JustWarning ); }
 
 class AbortHandler
 {
@@ -14,7 +19,9 @@ class AbortHandler
       handler_.sa_handler = handle_ctrl_c;
       sigemptyset( &handler_.sa_mask );
       handler_.sa_flags = flags;
-      sigaction( SIGINT, &handler_, NULL );
+      if ( sigaction( SIGINT, &handler_, NULL ) != 0
+        || sigaction( SIGTERM, &handler_, NULL ) != 0 )
+        throw CepGen::AbortException( __PRETTY_FUNCTION__, "Failed to initialise the C-c handler!", CepGen::FatalError );
     }
 
   private:
