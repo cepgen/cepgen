@@ -20,7 +20,6 @@ namespace CepGen
 #endif
       full_evt_( false ), params_( &params )
     {
-std::cout << "hahaha" << std::endl;
 #ifdef PYTHIA8
       pythia_->setLHAupPtr( (Pythia8::LHAup*)lhaevt_.get() );
       pythia_->settings.parm( "Beams:idA", params.kinematics.inpdg.first );
@@ -32,11 +31,14 @@ std::cout << "hahaha" << std::endl;
     }
 
     Pythia8Hadroniser::~Pythia8Hadroniser()
-    {}
+    {
+      pythia_->stat();
+    }
 
     bool
     Pythia8Hadroniser::init( bool enable_all_processes )
     {
+      //enable_all_processes = true;//FIXME FIXME
       if ( pythia_->settings.flag( "ProcessLevel:all" ) != enable_all_processes )
         pythia_->settings.flag( "ProcessLevel:all", enable_all_processes );
 

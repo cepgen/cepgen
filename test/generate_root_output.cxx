@@ -8,7 +8,7 @@
 #include "TTree.h"
 #include "TLorentzVector.h"
 
-#include "TreeEvent.h"
+#include "TreeInfo.h"
 #include "abort.h"
 
 #include <iostream>
@@ -60,7 +60,6 @@ int main( int argc, char* argv[] ) {
   run.errxsect = err;
   run.litigious_events = 0;
   run.sqrt_s = mg.parameters->kinematics.sqrtS();
-  run.fill();
 
   CepGen::TreeEvent ev;
   ev.create( ev_tree );
@@ -99,11 +98,12 @@ int main( int argc, char* argv[] ) {
 
         ev.np++;
       }
-
+      run.num_events += 1;
       ev_tree->Fill();
     }
   } catch ( CepGen::Exception& e ) {}
   //cout << "Number of litigious events = " << run.litigious_events << " -> fraction = " << ( run.litigious_events*100./ngen ) << "%" << endl;
+  run.fill();
   file->Write();
   delete file;
 

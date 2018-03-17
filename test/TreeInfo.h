@@ -1,5 +1,5 @@
-#ifndef Test_TreeEvent_h
-#define Test_TreeEvent_h
+#ifndef Test_TreeInfo_h
+#define Test_TreeInfo_h
 
 #include "TTree.h"
 #include "../CepGen/Core/Exception.h"
@@ -11,20 +11,21 @@ namespace CepGen
   {
     double sqrt_s;
     double xsect, errxsect;
-    unsigned int litigious_events;
+    unsigned int num_events, litigious_events;
     TTree* tree;
 
     TreeRun() { clear(); }
     void clear() {
       sqrt_s = -1.;
       xsect = errxsect = -1.;
-      litigious_events = 0;
+      num_events = litigious_events = 0;
     }
     void create() {
       tree = new TTree( "run", "a tree containing information on the previous run" );
       if ( !tree ) return;
       tree->Branch( "xsect", &xsect, "xsect/D" );
       tree->Branch( "errxsect", &errxsect, "errxsect/D" );
+      tree->Branch( "num_events", &num_events, "num_events/i" );
       tree->Branch( "litigious_events", &litigious_events, "litigious_events/i" );
       tree->Branch( "sqrt_s", &sqrt_s, "sqrt_s/D" );
     }
@@ -39,6 +40,7 @@ namespace CepGen
       if ( !tree ) return;
       tree->SetBranchAddress( "xsect", &xsect );
       tree->SetBranchAddress( "errxsect", &errxsect );
+      tree->SetBranchAddress( "num_events", &num_events );
       tree->SetBranchAddress( "litigious_events", &litigious_events );
       tree->SetBranchAddress( "sqrt_s", &sqrt_s );
       if ( tree->GetEntriesFast() > 1 ) InWarning( "The run tree has more than one entry." );
