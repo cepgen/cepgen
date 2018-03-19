@@ -44,13 +44,22 @@ namespace CepGen
     bool
     Pythia8Hadroniser::init( bool enable_all_processes )
     {
-      enable_all_processes = true;//FIXME FIXME
+      //enable_all_processes = true;//FIXME FIXME
       if ( pythia_->settings.flag( "ProcessLevel:all" ) != enable_all_processes )
         pythia_->settings.flag( "ProcessLevel:all", enable_all_processes );
 
       if ( !pythia_->init() )
         FatalError( "Failed to initialise the Pythia8 core!\n\t"
                     "See the message above for more details." );
+
+      if ( params_->kinematics.mode == Kinematics::ElasticElastic )
+        pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 3 );
+      if ( params_->kinematics.mode == Kinematics::ElasticInelastic )
+        pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 1 );
+      if ( params_->kinematics.mode == Kinematics::InelasticElastic )
+        pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 2 );
+      if ( params_->kinematics.mode == Kinematics::InelasticInelastic )
+        pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 0 );
 
       full_evt_ = enable_all_processes;
       return true;
@@ -89,6 +98,9 @@ namespace CepGen
 #ifndef PYTHIA8
       FatalError( "Pythia8 is not linked to this instance!" );
 #else
+      if ( !full && !pythia_->settings.flag( "ProcessLevel:resonanceDecays" ) )
+        return true;
+
       if ( full && !full_evt_ )
         init( true );
 
@@ -98,9 +110,8 @@ namespace CepGen
       //===========================================================================================
       // convert our event into a custom LHA format
       //===========================================================================================
-//      std::cout << "bbb" << std::endl;
-      lhaevt_->feedEvent( ev, full, mom_p1+mom_p2 );
-//      lhaevt_->listEvent();
+
+      lhaevt_->feedEvent( ev, full, mom_p1, mom_p2 );
 
       //===========================================================================================
       // launch the hadronisation / resonances decays, and update the event accordingly
@@ -110,11 +121,7 @@ namespace CepGen
       while ( !pythia_->next() && num_try < ev.num_hadronisation_trials )
         num_try++;
 
-      pythia_->event.list();
-      updateEvent( ev, weight, mom_p1, mom_p2 );
-      //lhaevt_->listEvent();
-//      if ( pythia_->info.nMPI() > 0 )
-//        std::cout << "#MPI:" << pythia_->info.nMPI() << std::endl;
+      updateEvent( ev, weight, full, mom_p1, mom_p2 );
 
 #endif
       return true;
@@ -136,18 +143,28 @@ namespace CepGen
     }
 
     void
-    Pythia8Hadroniser::updateEvent( Event& ev, double& weight, const Pythia8::Vec4& boost_p1, const Pythia8::Vec4& boost_p2 ) const
+    Pythia8Hadroniser::updateEvent( Event& ev, double& weight, bool full, const Pythia8::Vec4& boost_p1, const Pythia8::Vec4& boost_p2 ) const
     {
       unsigned short offset = 0;
+
+      Pythia8::RotBstMatrix mat, mat_b1, mat_b2;
+      if ( full )
+        mat.fromCMframe( boost_p1, boost_p2 );
+
       for ( unsigned short i = 1; i < pythia_->event.size(); ++i ) {
-        const Pythia8::Particle& p = pythia_->event[i];
-        if ( p.status() == -12 ) { // skip the incoming particles
-          offset++;
+        if ( pythia_->event[i].status() != -12 )
           continue;
-        }
-//        if ( p.status() == -21 ) { // skip the incoming particles
-//          offset++;
-//        }
+        // skip the incoming particles
+        offset++;
+      }
+      if ( offset == 2 ) {
+        Pythia8::Vec4 ip1 = pythia_->event[1].p(), ip2 = pythia_->event[2].p();
+        mat_b1.bst( ip1-pythia_->event[offset+1].p(), ip1-boost_p1 );
+        mat_b2.bst( ip2-pythia_->event[offset+2].p(), ip2-boost_p2 );
+      }
+
+      for ( unsigned short i = 1+offset; i < pythia_->event.size(); ++i ) {
+        const Pythia8::Particle& p = pythia_->event[i];
         const unsigned short cg_id = lhaevt_->cgPart( i-offset );
         if ( cg_id != LHAEvent::invalid_id ) { // particle already in the event
           Particle& cg_part = ev.getById( cg_id );
@@ -161,23 +178,24 @@ namespace CepGen
         }
         // new particle to be added
         Particle::Role role = (Particle::Role)findRole( ev, p, offset );
-        Pythia8::Vec4 mom = p.p(), boost = boost_p1+boost_p2;
-        Pythia8::RotBstMatrix mat;
-//        mom.bst( boost_p1+boost_p2 );
-std::cout << p.id() << "\t" << role << std::endl;
-        if ( role == Particle::OutgoingBeam1 ) {
-          ev.getByRole( Particle::OutgoingBeam1 )[0].setStatus( Particle::Fragmented );
-          mat.bst( mom, boost_p1 );
+        Pythia8::Vec4 mom = p.p();
+        switch ( role ) {
+          case Particle::OutgoingBeam1: // no break!
+            ev.getByRole( Particle::OutgoingBeam1 )[0].setStatus( Particle::Fragmented );
+            if ( abs( p.status() ) != 61 ) {
+              mom.rotbst( mat_b1 );
+              break;
+            }
+          case Particle::OutgoingBeam2: // no break!
+            ev.getByRole( Particle::OutgoingBeam2 )[0].setStatus( Particle::Fragmented );
+            if ( abs( p.status() ) != 61 ) {
+              mom.rotbst( mat_b2 );
+              break;
+            }
+          default:
+            mom.rotbst( mat );
+            break;
         }
-        if ( role == Particle::OutgoingBeam2 ) {
-          ev.getByRole( Particle::OutgoingBeam2 )[0].setStatus( Particle::Fragmented );
-          mat.bst( mom, boost_p2 );
-        }
-//        mom.bst( boost );
-//        mat.fromCMframe( boost_p1, boost_p2 );
-//        mat.rot( boost );
-        mom.rotbst( mat );
-        std::cout << p.id() << "\t" << p.p() << "\t" << mom << "\t" << boost << "\t" << boost.mCalc() << std::endl;
         // found the role ; now we can add the particle
         Particle& cg_part = addParticle( ev, p, mom, (unsigned short)role, offset );
         for ( const auto& moth_id : p.motherList() ) {
@@ -194,9 +212,6 @@ std::cout << p.id() << "\t" << role << std::endl;
           }
         }
       }
-//      lhaevt_->dumpCorresp();
-      ev.dump();
-//      exit(0);
     }
 
     unsigned short
@@ -227,8 +242,6 @@ std::cout << p.id() << "\t" << role << std::endl;
     LHAup( 4 ), params_( params )
   {
     addProcess( 0, 10., 0., 100. );
-//    setIdX( 2212, 2212, 0., 0. );
-//    setIdX( 22, 22, 0.5, 0.5 );
     if ( params_ ) {
       setBeamA( (short)params_->kinematics.inpdg.first, params_->kinematics.inp.first );
       setBeamB( (short)params_->kinematics.inpdg.second, params_->kinematics.inp.second );
@@ -238,32 +251,25 @@ std::cout << p.id() << "\t" << role << std::endl;
   void
   LHAEvent::setCrossSection( int id, double xsec, double xsec_err )
   {
-//    addProcess( id, xsec, xsec_err );
     setXSec( id, xsec );
     setXErr( id, xsec_err );
-    listInit();
+    //listInit();
   }
 
   void
-  LHAEvent::feedEvent( const Event& ev, bool full, const Pythia8::Vec4& boost_cm )
+  LHAEvent::feedEvent( const Event& ev, bool full, const Pythia8::Vec4& boost_p1, const Pythia8::Vec4& boost_p2 )
   {
     const double scale = ev.getOneByRole( Particle::Intermediate ).mass();
     setProcess( 0, 1., scale, Constants::alphaEM, Constants::alphaQCD );
-
-//    const Particle::Momentum mom_pho1 = ev.getOneByRole( Particle::Parton1 ).momentum();
-//    const Particle::Momentum mom_pho2 = ev.getOneByRole( Particle::Parton2 ).momentum();
-//    Pythia8::Vec4 boost_pho1( mom_pho1.px(), mom_pho1.py(), mom_pho1.pz(), 1. );
-//    Pythia8::Vec4 boost_pho1( mom_pho1.px(), mom_pho1.py(), mom_pho1.pz(), mom_pho1.energy() );
-//    Pythia8::Vec4 boost_pho2( mom_pho2.px(), mom_pho2.py(), mom_pho2.pz(), mom_pho2.energy() );
+    Pythia8::RotBstMatrix mat;
 
     double x1 = 0., x2 = 0.;
     if ( full ) {
-      const Particle& ip1 = ev.getOneByRole( Particle::IncomingBeam1 ), &ip2 = ev.getOneByRole( Particle::IncomingBeam2 );
       const Particle& op1 = ev.getOneByRole( Particle::OutgoingBeam1 ), &op2 = ev.getOneByRole( Particle::OutgoingBeam2 );
-      const double q2_1 = -( ip1.momentum()-op1.momentum() ).mass2(), x1 = q2_1/( q2_1+op1.mass2()-mp2_ );
-      const double q2_2 = -( ip2.momentum()-op2.momentum() ).mass2(), x2 = q2_2/( q2_2+op2.mass2()-mp2_ );
-      //const double x1 = ( ip1.momentum()-op1.momentum() ).energy()/ip1.energy(), x2 = ( ip2.momentum()-op2.momentum() ).energy()/ip2.energy();
-      setIdX( ip1.integerPdgId(), ip2.integerPdgId(), x1, x2 );
+      const double q2_1 = -boost_p1.m2Calc(), x1 = q2_1/( q2_1+op1.mass2()-mp2_ );
+      const double q2_2 = -boost_p2.m2Calc(), x2 = q2_2/( q2_2+op2.mass2()-mp2_ );
+      setIdX( op1.integerPdgId(), op2.integerPdgId(), x1, x2 );
+      mat.toCMframe( boost_p1, boost_p2 );
     }
 
     unsigned short parton1_id = 0, parton2_id = 0, parton1_pdgid = 0, parton2_pdgid = 0;
@@ -282,20 +288,18 @@ std::cout << p.id() << "\t" << role << std::endl;
           py_cg_corresp_.emplace_back( sizePart(), p.id() );
 
           Pythia8::Vec4 mom_part( p.momentum().px(), p.momentum().py(), p.momentum().pz(), p.momentum().energy() );
-          if ( full )
-            mom_part.bstback( boost_cm );
+          mom_part.rotbst( mat );
 //          std::cout << boost_cm.px() << "\t" << p.momentum() << "\n" << mom_part << std::endl;
 
           if ( full )
             addParticle( p.integerPdgId(), -2, 0, 0, 0, 0, mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), p.mass(), 0., 0., -mom_part.mCalc() );
           else
-            addParticle( p.integerPdgId(), -2, 0, 0, 0, 0, mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), -mom_part.mCalc(), 0., 0., 0. );
+            addParticle( p.integerPdgId(), -2, 0, 0, 0, 0, mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), mom_part.mCalc(), 0., 0., 0. );
         } break;
         case Particle::CentralSystem: {
           py_cg_corresp_.emplace_back( sizePart(), p.id() );
           Pythia8::Vec4 mom_part( p.momentum().px(), p.momentum().py(), p.momentum().pz(), p.momentum().energy() );
-          if ( full )
-            mom_part.bstback( boost_cm );
+          mom_part.rotbst( mat );
           addParticle( p.integerPdgId(), 1, parton1_id, parton2_id, 0, 0, mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), mom_part.mCalc(), 0., 0., 0. );
           continue;
         } break;
@@ -305,7 +309,6 @@ std::cout << p.id() << "\t" << role << std::endl;
     }
     if ( full )
       setPdf( parton1_pdgid, parton2_pdgid, x1, x2, scale, 0., 0., true );
-//    listEvent();
   }
 
   bool

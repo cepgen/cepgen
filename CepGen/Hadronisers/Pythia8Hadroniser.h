@@ -15,7 +15,7 @@ namespace CepGen
   {
     public:
       LHAEvent( const Parameters* );
-      void feedEvent( const Event& ev, bool full, const Pythia8::Vec4& boost_cm );
+      void feedEvent( const Event& ev, bool full, const Pythia8::Vec4& boost_p1, const Pythia8::Vec4& boost_p2 );
       bool setInit() override;
       bool setEvent( int ) override;
       void setCrossSection( int id, double xsec, double xsec_err );
@@ -49,6 +49,9 @@ namespace CepGen
         void setSeed( long long seed ) override;
         void setCrossSection( double xsec, double xsec_err ) override;
 
+        bool fullEvent() const { return full_evt_; }
+        void setFullEvent( bool full = true ) { full_evt_ = full; }
+
 #ifdef PYTHIA8
         bool init( bool enable_all_processes );
         void readString( const char* param );
@@ -62,7 +65,7 @@ namespace CepGen
         std::map<short,short> py_cg_corresp_, cg_py_corresp_;
 #ifdef PYTHIA8
         unsigned short findRole( const Event& ev, const Pythia8::Particle& p, unsigned short offset ) const;
-        void updateEvent( Event& ev, double& weight, const Pythia8::Vec4& boost_p1, const Pythia8::Vec4& boost_p2 ) const;
+        void updateEvent( Event& ev, double& weight, bool full, const Pythia8::Vec4& boost_p1, const Pythia8::Vec4& boost_p2 ) const;
         Particle& addParticle( Event& ev, const Pythia8::Particle&, const Pythia8::Vec4& mom, unsigned short, unsigned short offset = 0 ) const;
         /// A Pythia8 core to be wrapped
         std::unique_ptr<Pythia8::Pythia> pythia_;
