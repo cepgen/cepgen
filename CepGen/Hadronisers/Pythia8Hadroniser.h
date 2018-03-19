@@ -24,7 +24,7 @@ namespace CepGen
         ~Pythia8Hadroniser();
 
         bool decay( Event& ev, double& weight ) override;
-        bool hadronise( Event& ev, double& weight ) override;
+        bool run( Event& ev, double& weight ) override;
         void setSeed( long long seed ) override;
 
 #ifdef PYTHIA8

@@ -23,7 +23,7 @@ namespace CepGen
         friend std::ostream& operator<<( std::ostream& os, const GenericHadroniser* hadr ) { os << hadr->name().c_str(); return os; }
 
         /// Default constructor for an undefined hadroniser
-        explicit GenericHadroniser( const char* name="unnamed_hadroniser" ) : name_( name ) {}
+        explicit GenericHadroniser( const char* name = "unnamed_hadroniser" ) : name_( name ) {}
         virtual ~GenericHadroniser() {}
 
         virtual bool decay( Event& ev, double& weight ) = 0;
@@ -31,7 +31,7 @@ namespace CepGen
         /// \param[inout] ev Event to hadronise
         /// \param[inout] weight Event weight after hadronisation
         /// \return Boolean stating whether or not the hadronisation occured successfully
-        virtual bool hadronise( Event& ev, double& weight ) = 0;
+        virtual bool run( Event& ev, double& weight ) = 0;
         /// Specify a random numbers generator seed for the hadroniser
         /// \param[in] seed A RNG seed
         virtual void setSeed( long long seed ) = 0;

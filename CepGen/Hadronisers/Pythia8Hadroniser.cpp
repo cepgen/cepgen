@@ -125,7 +125,7 @@ namespace CepGen
     }
 
     bool
-    Pythia8Hadroniser::hadronise( Event& ev, double& weight )
+    Pythia8Hadroniser::run( Event& ev, double& weight )
     {
       weight = 1.;
 #ifndef PYTHIA8
