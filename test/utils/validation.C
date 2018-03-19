@@ -2,7 +2,7 @@
 #include "TTree.h"
 #include "TFile.h"
 #include "THStack.h"
-#include "../TreeEvent.h"
+#include "../TreeInfo.h"
 #include "../Canvas.h"
 #include "CepGen/Event/Particle.h"
 

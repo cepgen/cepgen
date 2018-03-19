@@ -49,30 +49,30 @@ namespace CepGen
     {
       cuts_ = kin;
 
-      //----------------------------------------------------------------
+      //============================================================================================
       // initialise the "constant" (wrt x) part of the Jacobian
-      //----------------------------------------------------------------
+      //============================================================================================
 
       kt_jacobian_ = 1.;
 
-      //----------------------------------------------------------------
+      //============================================================================================
       // register the incoming partons' variables
-      //----------------------------------------------------------------
+      //============================================================================================
 
       registerVariable( qt1_, kLogarithmic, cuts_.cuts.initial[Cuts::qt], { 1.e-10, 500. }, "First incoming parton virtuality" );
       registerVariable( qt2_, kLogarithmic, cuts_.cuts.initial[Cuts::qt], { 1.e-10, 500. }, "Second incoming parton virtuality" );
       registerVariable( phi_qt1_, kLinear, cuts_.cuts.initial[Cuts::phi_qt], { 0., 2.*M_PI }, "First incoming parton azimuthal angle" );
       registerVariable( phi_qt2_, kLinear, cuts_.cuts.initial[Cuts::phi_qt], { 0., 2.*M_PI }, "Second incoming parton azimuthal angle" );
 
-      //----------------------------------------------------------------
+      //============================================================================================
       // register all process-dependent variables
-      //----------------------------------------------------------------
+      //============================================================================================
 
       preparePhaseSpace();
 
-      //----------------------------------------------------------------
+      //============================================================================================
       // register the outgoing remnants' variables
-      //----------------------------------------------------------------
+      //============================================================================================
 
       MX_ = MY_ = event_->getOneByRole( Particle::IncomingBeam1 ).mass();
       if ( cuts_.mode == Kinematics::InelasticElastic || cuts_.mode == Kinematics::InelasticInelastic )
@@ -84,28 +84,35 @@ namespace CepGen
     double
     GenericKTProcess::computeWeight()
     {
-      //----------------------------------------------------------------
-      // generate and initialise all variables for
-      // this phase space point
-      //----------------------------------------------------------------
+      if ( kt_jacobian_ == 0. )
+        FatalError( "Point-independant component of the Jacobian for this"
+                    "kt-factorised process is null.\n\tPlease check the"
+                    "validity of the phase space" );
+
+      //============================================================================================
+      // generate and initialise all variables for this phase space point
+      //============================================================================================
 
       generateVariables();
 
-      //----------------------------------------------------------------
-      // compute the integrand and auxiliary (x-dependent) part of
-      // the Jacobian, and combine everything together into a single
-      // weight for the phase space point.
-      //----------------------------------------------------------------
+      //============================================================================================
+      // compute the integrand and auxiliary (x-dependent) part of the Jacobian,
+      // and combine everything together into a single weight for the phase space point.
+      //============================================================================================
+
+      if ( aux_jacobian_ == 0. )
+        return 0.;
 
       const double integrand = computeKTFactorisedMatrixElement();
       const double weight = ( kt_jacobian_*aux_jacobian_ ) * integrand;
 
-      DebuggingInsideLoop( Form( "\n\tJacobian = %g * %g"
-                                 "\n\tIntegrand = %g"
-                                 "\n\tdW = %g",
-                                 kt_jacobian_, aux_jacobian_,
-                                 integrand,
-                                 weight ) );
+      if ( Logger::get().level >= Logger::DebugInsideLoop )
+        DebuggingInsideLoop( Form( "\n\tJacobian = %g * %g"
+                                   "\n\tIntegrand = %g"
+                                   "\n\tdW = %g",
+                                   kt_jacobian_, aux_jacobian_,
+                                   integrand,
+                                   weight ) );
 
       return weight;
     }
@@ -217,9 +224,10 @@ namespace CepGen
     void
     GenericKTProcess::fillPrimaryParticlesKinematics()
     {
-      //================================================================
+      //============================================================================================
       //     outgoing protons
-      //================================================================
+      //============================================================================================
+
       Particle& op1 = event_->getOneByRole( Particle::OutgoingBeam1 ),
                &op2 = event_->getOneByRole( Particle::OutgoingBeam2 );
 
@@ -245,14 +253,14 @@ namespace CepGen
           break;    
         default: {
           FatalError( "This kT factorisation process is intended for p-on-p collisions! "
-                      "Aborting!" );
+                      "Aborting." );
         } break;
       }
 
-      //================================================================
+      //============================================================================================
       //     incoming partons (photons, pomerons, ...)
-      //================================================================
-      //FIXME ensure the validity of this approach
+      //============================================================================================
+
       Particle& g1 = event_->getOneByRole( Particle::Parton1 ),
                &g2 = event_->getOneByRole( Particle::Parton2 );
       g1.setMomentum( event_->getOneByRole( Particle::IncomingBeam1 ).momentum()-PX_, true );
@@ -260,18 +268,17 @@ namespace CepGen
       g2.setMomentum( event_->getOneByRole( Particle::IncomingBeam2 ).momentum()-PY_, true );
       g2.setStatus( Particle::Incoming );
 
-      //================================================================
+      //============================================================================================
       //     two-parton system
-      //================================================================
+      //============================================================================================
+
       event_->getOneByRole( Particle::Intermediate ).setMomentum( g1.momentum()+g2.momentum() );
     }
 
     double
     GenericKTProcess::elasticFlux( double x, double kt2 )
     {
-      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
-
-      const double Q2_min = x*x*mp2/( 1.-x ), Q2_ela = ( kt2+x*x*mp2 )/( 1.-x );
+      const double Q2_min = x*x*mp2_/( 1.-x ), Q2_ela = ( kt2+x*x*mp2_ )/( 1.-x );
       const FormFactors ff = FormFactors::ProtonElastic( Q2_ela );
       const double ela1 = ( 1.-x )*( 1.-Q2_min/Q2_ela );
       //const double ela3 = 1.-( Q2_ela-kt2 )/Q2_ela;
@@ -286,18 +293,17 @@ namespace CepGen
     GenericKTProcess::inelasticFlux( double x, double kt2, double mx, const StructureFunctions::Type& sf, const FluxTypes& ft )
     {
       const double mx2 = mx*mx;
-      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
 
       // F2 structure function
-      const double Q2min = 1. / ( 1.-x )*( x*( mx2-mp2 ) + x*x*mp2 ),
+      const double Q2min = 1. / ( 1.-x )*( x*( mx2-mp2_ ) + x*x*mp2_ ),
                    Q2 = Q2min + kt2/( 1.-x );
-      float xbj = Q2 / ( Q2 + mx2 - mp2 );
+      float xbj = Q2 / ( Q2 + mx2 - mp2_ );
 
       const StructureFunctions str_fun = StructureFunctionsBuilder::get( sf, Q2, xbj );
 
       const double term1 = ( 1.-x )*( 1.-Q2min/Q2 );
 
-      const double f_D = str_fun.F2/( mx2 + Q2 - mp2 ) * term1;
+      const double f_D = str_fun.F2/( mx2 + Q2 - mp2_ ) * term1;
       const double f_C= 2.*str_fun.F1( Q2, xbj )/Q2;
 
       return Constants::alphaEM*M_1_PI*( 1.-x )/Q2*( f_D+0.5*x*x*f_C );

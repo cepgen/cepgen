@@ -13,13 +13,18 @@
 #include <sstream>
 #include <fstream>
 
+#ifdef TIMING_ANALYSIS
+unsigned long num_points = 0;
+std::vector<double> steps( 6, 0. );
+#endif
+
 namespace CepGen
 {
   double
   f( double* x, size_t ndim, void* params )
   {
     Parameters* p = (Parameters*)params;
-    std::shared_ptr<Event> ev = p->process()->event();
+    std::shared_ptr<Event> ev;
     Logger::LoggingLevel log_level = Logger::get().level;
 
     //=============================================================================================
@@ -33,46 +38,21 @@ namespace CepGen
     //=============================================================================================
 
     if ( p->process()->hasEvent() ) {
+      ev = p->process()->event();
       p->process()->clearEvent();
 
-      const Particle::Momentum p1( 0., 0.,  p->kinematics.inp.first ), p2( 0., 0., -p->kinematics.inp.second );
-      p->process()->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
-
-      DebuggingInsideLoop( Form( "Function f called -- some parameters:\n\t"
-                                 "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
-                                 "  remnant mode: %d",
-                                 p->kinematics.inp.first, p->kinematics.inp.second, p->kinematics.structure_functions ) );
-
       if ( p->integrator.first_run ) {
+        const Particle::Momentum p1( 0., 0.,  p->kinematics.inp.first ), p2( 0., 0., -p->kinematics.inp.second );
+        p->process()->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
 
         if ( log_level >= Logger::Debug ) {
           std::ostringstream oss; oss << p->kinematics.mode;
-          Debugging( Form( "Process mode considered: %s", oss.str().c_str() ) );
-        }
-
-        Particle& op1 = ev->getOneByRole( Particle::OutgoingBeam1 ),
-                 &op2 = ev->getOneByRole( Particle::OutgoingBeam2 );
-
-        //=========================================================================================
-        // add outgoing protons or remnants
-        //=========================================================================================
-
-        switch ( p->kinematics.mode ) {
-          case Kinematics::ElectronProton: default: {
-            InError( Form( "Process mode %d not yet handled!", (int)p->kinematics.mode ) );
-          }
-          case Kinematics::ElasticElastic:
-          break; // nothing to change in the event
-          case Kinematics::ElasticInelastic:
-            op2.setPdgId( DiffractiveProton, 1 );
-            break;
-          case Kinematics::InelasticElastic: // set one of the outgoing protons to be fragmented
-            op1.setPdgId( DiffractiveProton, 1 );
-            break;
-          case Kinematics::InelasticInelastic: // set both the outgoing protons to be fragmented
-            op1.setPdgId( DiffractiveProton, 1 );
-            op2.setPdgId( DiffractiveProton, 1 );
-            break;
+          Debugging( Form( "Process mode considered: %s"
+                           "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
+                           "  remnant mode: %d",
+                            oss.str().c_str(),
+                            p->kinematics.inp.first, p->kinematics.inp.second,
+                            p->kinematics.structure_functions ) );
         }
 
         //=========================================================================================
@@ -106,6 +86,10 @@ namespace CepGen
     // specify the phase space point to probe
     //=============================================================================================
 
+#ifdef TIMING_ANALYSIS
+    steps[0] += tmr.elapsed();
+#endif
+
     p->process()->setPoint( ndim, x );
     if ( log_level >= Logger::DebugInsideLoop ) {
       std::ostringstream oss;
@@ -120,7 +104,15 @@ namespace CepGen
 
     p->process()->beforeComputeWeight();
 
+#ifdef TIMING_ANALYSIS
+    steps[1] += tmr.elapsed();
+#endif
+
     double integrand = p->process()->computeWeight();
+
+#ifdef TIMING_ANALYSIS
+    steps[2] += tmr.elapsed();
+#endif
 
     //=============================================================================================
     // invalidate any unphysical behaviour
@@ -138,12 +130,20 @@ namespace CepGen
       && !p->hadroniser()
       && p->kinematics.cuts.central_particles.size() == 0 )
       return integrand;
-  
+
+#ifdef TIMING_ANALYSIS
+    steps[3] += tmr.elapsed();
+#endif
+
     //=============================================================================================
     // fill in the process' Event object
     //=============================================================================================
 
     p->process()->fillKinematics();
+
+#ifdef TIMING_ANALYSIS
+    steps[4] += tmr.elapsed();
+#endif
 
     //=============================================================================================
     // once the kinematics variables have been populated, can apply the collection of taming functions
@@ -170,6 +170,10 @@ namespace CepGen
       }
     }
 
+#ifdef TIMING_ANALYSIS
+    steps[5] += tmr.elapsed();
+#endif
+
     if ( integrand <= 0. )
       return 0.;
 
@@ -185,17 +189,10 @@ namespace CepGen
     //=============================================================================================
 
     if ( p->hadroniser() ) {
-      double br = -1., weight_hadr = -1.;
-      unsigned short num_decays_trials = 0;
-      while ( !p->hadroniser()->decay( *ev, br ) || br == 0. )
-        if ( ++num_decays_trials > 2 )
-          return 0.;
+      double br = -1.;
+      if ( !p->hadroniser()->hadronise( *ev, br ) || br == 0. )
+        return 0.;
       integrand *= br; // branching fraction for all decays
-      if ( p->storage() ) {
-        if ( !p->hadroniser()->hadronise( *ev, weight_hadr ) || weight_hadr == 0. )
-          return 0.;
-        integrand *= weight_hadr;
-      }
     }
 
     //=============================================================================================
@@ -233,8 +230,9 @@ namespace CepGen
       p->generation.last_event = ev;
       p->generation.last_event->time_total = tmr.elapsed();
 
-      Debugging( Form( "Indiv. time (gen+hadr+cuts): %5.6f ms",
-                       p->generation.last_event->time_total*1.e3 ) );
+      if ( log_level >= Logger::Debug )
+        Debugging( Form( "Indiv. time (gen+hadr+cuts): %5.6f ms",
+                         p->generation.last_event->time_total*1.e3 ) );
     }
 
     //=============================================================================================
@@ -249,6 +247,9 @@ namespace CepGen
                        ndim, oss.str().c_str(), integrand ) );
     }
 
+#ifdef TIMING_ANALYSIS
+    num_points++;
+#endif
     return integrand;
   }
 }

@@ -1,6 +1,7 @@
 #include "Integrator.h"
 
 #include "CepGen/Parameters.h"
+#include "CepGen/Hadronisers/GenericHadroniser.h"
 
 #include "CepGen/Core/utils.h"
 #include "CepGen/Core/Exception.h"
@@ -9,6 +10,11 @@
 
 #include <fstream>
 #include <math.h>
+
+#ifdef TIMING_ANALYSIS
+extern std::vector<double> steps;
+extern unsigned long num_points;
+#endif
 
 namespace CepGen
 {
@@ -32,9 +38,9 @@ namespace CepGen
     input_params_->integrator.vegas.ostream = stderr; // redirect all debugging information to the error stream
     input_params_->integrator.vegas.iterations = 10;
 
-    Debugging( Form( "Number of integration dimensions: %d\n\t"
-                     "Number of iterations [VEGAS]:     %d\n\t"
-                     "Number of function calls:         %d",
+    Debugging( Form( "Number of integration dimensions: %d,\n\t"
+                     "Number of iterations [VEGAS]:     %d,\n\t"
+                     "Number of function calls:         %d.",
                      dim,
                      input_params_->integrator.vegas.iterations,
                      input_params_->integrator.ncvg ) );
@@ -80,7 +86,7 @@ namespace CepGen
           &result, &abserr );
         grid_.grid_prepared = true;
       }
-      Information( "Finished the Vegas warm-up" );
+      Information( "Finished the Vegas warm-up." );
       //----- integration
       unsigned short it_chisq = 0;
       do {
@@ -90,7 +96,7 @@ namespace CepGen
           rng_, veg_state,
           &result, &abserr );
         PrintMessage( Form( "\t>> at call %2d: average = %10.6f   "
-                            "sigma = %10.6f   chi2 = %4.3f",
+                            "sigma = %10.6f   chi2 = %4.3f.",
                             it_chisq+1, result, abserr,
                             gsl_monte_vegas_chisq( veg_state ) ) );
         it_chisq++;
@@ -110,6 +116,13 @@ namespace CepGen
     if      ( algorithm == Plain ) gsl_monte_plain_free( pln_state );
     else if ( algorithm == Vegas ) gsl_monte_vegas_free( veg_state );
     else if ( algorithm == MISER ) gsl_monte_miser_free( mis_state );
+
+#ifdef TIMING_ANALYSIS
+    std::cout << "|steps: ";
+    for ( const auto& st : steps )
+    std::cout << "|" << st/num_points;
+    std::cout << std::endl;
+#endif
 
     return res;
   }
@@ -190,7 +203,7 @@ namespace CepGen
     DebuggingInsideLoop( Form( "Correction cycles are started.\n\t"
                                "bin = %d\t"
                                "correc = %g\t"
-                               "corre2 = %g", ps_bin_, grid_.correc, grid_.correc2 ) );
+                               "corre2 = %g.", ps_bin_, grid_.correc, grid_.correc2 ) );
 
     if ( grid_.correc >= 1. ) grid_.correc -= 1.;
     if ( uniform() < grid_.correc ) {
@@ -258,7 +271,7 @@ namespace CepGen
     do {
       weight = F( x );
       i++;
-    } while ( weight <= 0. && i < 5 );
+    } while ( weight <= 0. && i < 2 );
     input_params_->setStorage( false );
 
     if ( weight <= 0. )
@@ -266,7 +279,7 @@ namespace CepGen
 
     input_params_->generation.ngen += 1;
     if ( input_params_->generation.ngen % input_params_->generation.gen_print_every == 0 ) {
-      Debugging( Form( "Generated events: %d", input_params_->generation.ngen ) );
+      Information( Form( "Generated events: %d", input_params_->generation.ngen ) );
       input_params_->generation.last_event->dump();
     }
     return true;
@@ -275,7 +288,7 @@ namespace CepGen
   void
   Integrator::setGen()
   {
-    Information( Form( "Preparing the grid for the generation of unweighted events: %d points", input_params_->integrator.npoints ) );
+    Information( Form( "Preparing the grid (%d points) for the generation of unweighted events.", input_params_->integrator.npoints ) );
     // Variables for debugging
     std::ostringstream os;
     if ( Logger::get().level >= Logger::Debug )
@@ -294,6 +307,7 @@ namespace CepGen
     std::vector<double> x( function_->dim, 0. );
 
     input_params_->generation.ngen = 0;
+    input_params_->setStorage( false );
 
     // ...
     double sum = 0., sum2 = 0., sum2p = 0.;

@@ -6,6 +6,9 @@ namespace CepGen
 {
   namespace Process
   {
+    const double PPtoWW::mw_ = ParticleProperties::mass( W );
+    const double PPtoWW::mw2_ = PPtoWW::mw_*PPtoWW::mw_;
+
     PPtoWW::PPtoWW() :
       GenericKTProcess( "pptoww", "ɣɣ → W⁺W¯", { { Photon, Photon } }, { W, W } ),
       y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )
@@ -23,8 +26,6 @@ namespace CepGen
     double
     PPtoWW::computeKTFactorisedMatrixElement()
     {
-      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
-      const double mw = ParticleProperties::mass( W ), mw2 = mw*mw;
 
       //=================================================================
       //     How matrix element is calculated
@@ -35,7 +36,7 @@ namespace CepGen
       //=================================================================
       //     matrix element computation
       //=================================================================
-      //const double stild = s_/2.*(1+sqrt(1.-(4*pow(mp2, 2))/s_*s_));
+      //const double stild = s_/2.*(1+sqrt(1.-(4*pow(mp2_, 2))/s_*s_));
 
       // Inner photons
       const double q1tx = qt1_*cos( phi_qt1_ ), q1ty = qt1_*sin( phi_qt1_ ),
@@ -62,8 +63,8 @@ namespace CepGen
         return 0.;
 
       // transverse mass for the two leptons
-      const double amt1 = sqrt( pt1*pt1+mw2 ),
-                   amt2 = sqrt( pt2*pt2+mw2 );
+      const double amt1 = sqrt( pt1*pt1+mw2_ ),
+                   amt2 = sqrt( pt2*pt2+mw2_ );
 
       //=================================================================
       //     a window in two-boson invariant mass
@@ -189,7 +190,7 @@ namespace CepGen
       //     four-momenta squared of the virtual photons
       //=================================================================
 
-      const double ww = 0.5 * ( 1.+sqrt( 1.-4.*mp2/s_ ) );
+      const double ww = 0.5 * ( 1.+sqrt( 1.-4.*mp2_/s_ ) );
 
       // FIXME FIXME FIXME /////////////////////
       Particle::Momentum q1( q1tx, q1ty, +0.5 * x1*ww*sqs_*( 1.-q1t2/x1/x1/ww/ww/s_ ), 0.5 * x1*ww*sqs_*( 1.+q1t2/x1/x1/ww/ww/s_ ) ),
@@ -307,13 +308,13 @@ namespace CepGen
     double
     PPtoWW::onShellME( double shat, double that, double uhat )
     {
-      const double mw = ParticleProperties::mass( W ), mw2 = mw*mw, mw4 = mw2*mw2;
+      const double mw4 = mw2_*mw2_;
 
-      const double term1 = 2.*shat * ( 2.*shat+3.*mw2 ) / ( 3.*( mw2-that )*( mw2-uhat ) );
-      const double term2 = 2.*shat*shat * ( shat*shat + 3.*mw4 ) / ( 3.*pow( mw2-that, 2 )*pow( mw2-uhat, 2 ) );
+      const double term1 = 2.*shat * ( 2.*shat+3.*mw2_ ) / ( 3.*( mw2_-that )*( mw2_-uhat ) );
+      const double term2 = 2.*shat*shat * ( shat*shat + 3.*mw4 ) / ( 3.*pow( mw2_-that, 2 )*pow( mw2_-uhat, 2 ) );
 
       const double auxil_gamgam = 1.-term1+term2;
-      const double beta = sqrt( 1.-4.*mw2/shat );
+      const double beta = sqrt( 1.-4.*mw2_/shat );
 
       return 3.*Constants::alphaEM*Constants::alphaEM*beta / ( 2.*shat ) * auxil_gamgam / ( beta/( 64.*M_PI*M_PI*shat ) );
     }
@@ -341,12 +342,10 @@ namespace CepGen
     double
     PPtoWW::amplitudeWW( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 )
     {
-      const double mw = ParticleProperties::mass( W ), mw2 = mw*mw;
-
       // then compute some kinematic variables
-      const double cos_theta = ( that-uhat ) / shat / sqrt( 1.+1.e-10-4.*mw2/shat ), cos_theta2 = cos_theta*cos_theta;
+      const double cos_theta = ( that-uhat ) / shat / sqrt( 1.+1.e-10-4.*mw2_/shat ), cos_theta2 = cos_theta*cos_theta;
       const double sin_theta2 = 1.-cos_theta2, sin_theta = sqrt( sin_theta2 );
-      const double beta = sqrt( 1.-4.*mw2/shat ), beta2 = beta*beta;
+      const double beta = sqrt( 1.-4.*mw2_/shat ), beta2 = beta*beta;
       const double gamma = 1./sqrt( 1.-beta2 ), gamma2 = gamma*gamma;
       const double invA = 1./( 1.-beta2*cos_theta2 );
 

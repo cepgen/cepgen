@@ -78,9 +78,9 @@ namespace CepGen
       // 2 kinematic regions:
       //  - resonances ( w < 2.5 )
       //  - DIS ( w > 2.5 )
-      const double mp = ParticleProperties::mass( Proton );
-      const double w2 = mp*mp + q2*( 1.-xbj )/xbj, w = sqrt( w2 );
-      const double xth = q2/( q2+2.5*2.5-mp*mp ); // xth = x( W = 2.5 GeV )
+      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
+      const double w2 = mp2 + q2*( 1.-xbj )/xbj, w = sqrt( w2 );
+      const double xth = q2/( q2+2.5*2.5-mp2 ); // xth = x( W = 2.5 GeV )
       const double zeta = log( 25.*q2 );
       const double xitmp = ( w < 2.5 ) ? theta( q2, xth ) : theta( q2, xbj );
       const double tmp = 0.041*xitmp/zeta + 0.592/q2 - 0.331/( 0.09+q2*q2 );

@@ -115,7 +115,7 @@ namespace CepGen
       case Z:                return os << "Z";
       case W:                return os << "W± ";
       case PiPlus:           return os << "π±  ";
-      case PiZero:           return os << "π⁰   ";
+      case PiZero:           return os << "π⁰\t";
       case KPlus:            return os << "K± ";
       case DPlus:            return os << "D± ";
       case Rho770_0:         return os << "ρ(770)₀  ";

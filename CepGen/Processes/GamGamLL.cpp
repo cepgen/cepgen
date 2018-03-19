@@ -512,7 +512,7 @@ namespace CepGen
     double
     GamGamLL::computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dw )
     {
-      const double mx0 = ParticleProperties::mass( Proton )+ParticleProperties::mass( PiZero ); // 1.07
+      const double mx0 = mp_+ParticleProperties::mass( PiZero ); // 1.07
       const Kinematics::Limits mx_limits = cuts_.cuts.remnants[Cuts::mass];
       const double wx2min = pow( std::max( mx0, mx_limits.min() ), 2 ),
                    wx2max = pow( std::min( sqs_-outmass-2.*lepmass, mx_limits.max() ), 2 );

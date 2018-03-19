@@ -1,7 +1,7 @@
 #ifndef CepGen_Core_Timer_h
 #define CepGen_Core_Timer_h
 
-#include <time.h>
+#include <chrono>
 
 /**
  * A generic timer to extract the processing time between two steps in this software's flow
@@ -9,25 +9,24 @@
  */
 class Timer
 {
- public:
-  inline Timer() { reset(); }
-  /**
-   * Get the time elapsed since the last @a reset call (or class construction)
-   * \return Elapsed time (since the last reset), in seconds
-   */
-  inline double elapsed() {
-    timespec end;
-    clock_gettime( clock_, &end );
-    return end.tv_sec -beg_.tv_sec+( end.tv_nsec-beg_.tv_nsec )/1.e9;
-  }
-  /// Reset the clock counter
-  inline void reset() {
-    clock_gettime( clock_, &beg_ );
-  }
- private:
-  static constexpr clockid_t clock_ = CLOCK_REALTIME;
-  /// Timestamp marking the beginning of the counter
-  timespec beg_;
+  public:
+    inline Timer() { reset(); }
+    /**
+     * Get the time elapsed since the last @a reset call (or class construction)
+     * \return Elapsed time (since the last reset), in seconds
+     */
+    inline double elapsed() {
+      auto end = std::chrono::high_resolution_clock::now();
+      return std::chrono::duration<double>( end-beg_ ).count();
+    }
+    /// Reset the clock counter
+    inline void reset() {
+      beg_ = std::chrono::high_resolution_clock::now();
+    }
+
+  private:
+    /// Timestamp marking the beginning of the counter
+    std::chrono::time_point<std::chrono::high_resolution_clock> beg_;
 };
 
 #endif

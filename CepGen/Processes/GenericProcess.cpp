@@ -6,6 +6,9 @@ namespace CepGen
 {
   namespace Process
   {
+    const double GenericProcess::mp_ = ParticleProperties::mass( Proton );
+    const double GenericProcess::mp2_ = GenericProcess::mp_*GenericProcess::mp_;
+
     GenericProcess::GenericProcess( const std::string& name, const std::string& description, bool has_event ) :
       s_( 0. ), sqs_( 0. ), w1_( 0. ), w2_( 0. ), t1_( 0. ), t2_( 0. ), MX_( 0. ), MY_( 0. ),
       event_( std::shared_ptr<Event>( new Event ) ),
@@ -86,6 +89,9 @@ namespace CepGen
         Particle& p = event_->addParticle( ip.first );
         p.setPdgId( ip.second, ParticleProperties::charge( ip.second ) );
         p.setMass( ParticleProperties::mass( ip.second ) );
+        if ( ip.first == Particle::IncomingBeam1
+          || ip.first == Particle::IncomingBeam2 )
+          p.setStatus( Particle::PrimordialIncoming );
       }
       //--- central system (if not already there)
       const auto& central_system = ini.find( Particle::CentralSystem );
