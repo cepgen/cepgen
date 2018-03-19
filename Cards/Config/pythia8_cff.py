@@ -7,6 +7,7 @@ pythia8 = cepgen.Module('pythia8',
         #'Init:showAllSettings = on',
         # disable all generation processes
         #'ProcessLevel:all = off',
+        'Beams:frameType = 5',
         # printout properties
         # start by disabling some unnecessary output
         'Next:numberCount = 0',
@@ -27,6 +28,7 @@ pythia8 = cepgen.Module('pythia8',
         #'PartonLevel:FSR = off',
         #'PartonLevel:MPI = on',
         'ParticleDecays:allowPhotonRadiation = off',
+        'BeamRemnants:primordialKT = off',
     ),
     pythiaConfiguration = (
         'Tune:preferLHAPDF = 2',

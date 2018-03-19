@@ -15,7 +15,7 @@ namespace CepGen
   {
     public:
       LHAEvent( const Parameters* );
-      void feedEvent( const Event& ev, bool full );
+      void feedEvent( const Event& ev, bool full, const Pythia8::Vec4& boost_cm );
       bool setInit() override;
       bool setEvent( int ) override;
       void setCrossSection( int id, double xsec, double xsec_err );
@@ -61,9 +61,9 @@ namespace CepGen
         std::vector<unsigned short> min_ids_;
         std::map<short,short> py_cg_corresp_, cg_py_corresp_;
 #ifdef PYTHIA8
-        unsigned short findRole( const Pythia8::Pythia* pythia, const LHAEvent* lhaevt, const Event& ev, const Pythia8::Particle& p, unsigned short offset ) const;
-        void updateEvent( const Pythia8::Pythia* pythia, LHAEvent* lhaevt, Event& ev, double& weight ) const;
-        Particle& addParticle( LHAEvent* lhaevt, Event& ev, const Pythia8::Particle&, unsigned short, unsigned short offset = 0 ) const;
+        unsigned short findRole( const Event& ev, const Pythia8::Particle& p, unsigned short offset ) const;
+        void updateEvent( Event& ev, double& weight, const Pythia8::Vec4& boost_p1, const Pythia8::Vec4& boost_p2 ) const;
+        Particle& addParticle( Event& ev, const Pythia8::Particle&, const Pythia8::Vec4& mom, unsigned short, unsigned short offset = 0 ) const;
         /// A Pythia8 core to be wrapped
         std::unique_ptr<Pythia8::Pythia> pythia_;
         std::shared_ptr<LHAEvent> lhaevt_;

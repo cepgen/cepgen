@@ -4,11 +4,23 @@ from Config.ktProcess_cfi import ktProcess
 from Config.logger_cfi import logger
 from Config.pythia8_cff import pythia8 as hadroniser
 
-hadroniser.pythiaProcessConfiguration = (
+hadroniser.pythiaProcessConfiguration= (
     # process-specific
     '13:onMode = off', # disable muon decays
     '24:onMode = off', # disable all W decays, but...
-    '24:onIfAny = 11 13' # enable e-nue + mu-numu final states
+    '24:onIfAny = 11 13', # enable e-nue + mu-numu final states
+)
+hadroniser.pythiaPreConfiguration += (
+    'PartonLevel:MPI = off',
+    'PartonLevel:ISR = off',
+    'PartonLevel:FSR = off',
+    'HadronLevel:all = off',
+    'ProcessLevel:resonanceDecays = off',
+#    'BeamRemnants:unresolvedHadron = 3',
+#    'Photon:ProcessType = 4',
+    #'PartonLevel:Remnants = off',
+#    'TimeShower:MEcorrections = off',
+#    'TimeShower:globalRecoil = on',
 )
 
 #logger.level = cepgen.Logging.DebugInsideLoop
