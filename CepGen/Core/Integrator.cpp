@@ -208,18 +208,20 @@ namespace CepGen
                                "correc = %g\t"
                                "corre2 = %g.", ps_bin_, grid_.correc, grid_.correc2 ) );
 
-    if ( grid_.correc >= 1. ) grid_.correc -= 1.;
+    if ( grid_.correc >= 1. )
+      grid_.correc -= 1.;
     if ( uniform() < grid_.correc ) {
       grid_.correc = -1.;
-      std::vector<double> xtmp( function_->dim, 0. );
+      std::vector<double> xtmp;
       // Select x values in phase space bin
       for ( unsigned int k = 0; k < function_->dim; ++k )
-        xtmp[k] = ( uniform() + grid_.n[k] ) * inv_mbin_;
+        xtmp.emplace_back( ( uniform() + grid_.n[k] ) * inv_mbin_ );
       // Compute weight for x value
       const double weight = F( xtmp );
       // Parameter for correction of correction
       if ( weight > grid_.f_max[ps_bin_] ) {
-        if ( weight > grid_.f_max2 ) grid_.f_max2 = weight;
+        if ( weight > grid_.f_max2 )
+          grid_.f_max2 = weight;
         grid_.correc2 -= 1.;
         grid_.correc += 1.;
       }
@@ -269,12 +271,7 @@ namespace CepGen
   Integrator::storeEvent( const std::vector<double>& x )
   {
     input_params_->setStorage( true );
-    double weight = 0.;
-    unsigned short i = 0;
-    do {
-      weight = F( x );
-      i++;
-    } while ( weight <= 0. && i < 2 );
+    const double weight = F( x );
     input_params_->setStorage( false );
 
     if ( weight <= 0. )
@@ -301,7 +298,7 @@ namespace CepGen
     const double inv_npoin = 1./input_params_->integrator.npoints;
 
     if ( function_->dim > max_dimensions_ )
-      FatalError( Form( "Number of dimensions to integrate exceed the maximum number, %d", max_dimensions_ ) );
+      FatalError( Form( "Number of dimensions to integrate exceeds the maximum number, %d", max_dimensions_ ) );
 
     grid_.nm = std::vector<int>( max, 0 );
     grid_.f_max = std::vector<double>( max, 0. );
