@@ -6,8 +6,6 @@
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
 
-//#include <ext/stdio_filebuf.h>
-
 namespace CepGen
 {
   Parameters::Parameters() :
@@ -35,7 +33,7 @@ namespace CepGen
   void
   Parameters::setThetaRange( float thetamin, float thetamax )
   {
-    kinematics.cuts.central[Cuts::eta_single] = { Particle::thetaToEta( thetamax ), Particle::thetaToEta( thetamin ) };
+    kinematics.cuts.central[Cuts::eta_single].in( Particle::thetaToEta( thetamax ), Particle::thetaToEta( thetamin ) );
 
     if ( Logger::get().level >= Logger::Debug ) {
       std::ostringstream os; os << kinematics.cuts.central[Cuts::eta_single];
@@ -53,9 +51,8 @@ namespace CepGen
   std::string
   Parameters::processName() const
   {
-    if ( !process_ )
-      return "no process";
-    return process_->name();
+    if ( process_ ) return process_->name();
+    return "no process";
   }
 
   void
@@ -115,7 +112,11 @@ namespace CepGen
     os
       << std::setw( wt ) << "Integration algorithm" << ( pretty ? boldify( int_algo.str().c_str() ) : int_algo.str() ) << std::endl
       //<< std::setw( wt ) << "Maximum number of iterations" << ( pretty ? boldify( integrator.itvg ) : std::to_string( integrator.itvg ) ) << std::endl
-      << std::setw( wt ) << "Number of function calls" << integrator.ncvg << std::endl
+      << std::setw( wt ) << "Number of function calls" << integrator.ncvg << std::endl;
+    if ( integrator.num_threads > 1 )
+      os
+        << std::setw( wt ) << "Number of threads" << integrator.num_threads << std::endl;
+    os
       << std::setw( wt ) << "Number of points to try per bin" << integrator.npoints << std::endl
       << std::setw( wt ) << "Random number generator seed" << integrator.seed << std::endl
       << std::endl
@@ -125,28 +126,21 @@ namespace CepGen
       << std::endl;
     std::ostringstream proc_mode; proc_mode << kinematics.mode;
     std::ostringstream ip1, ip2, op; ip1 << kinematics.inpdg.first; ip2 << kinematics.inpdg.second;
-    {
-      unsigned short i = 0;
-      for ( const auto& part : kinematics.central_system ) {
-        op << ( i > 0 ? ", " : "" ) << part;
-        ++i;
-      }
-    }
+    for ( std::vector<ParticleCode>::const_iterator cp = kinematics.central_system.begin(); cp != kinematics.central_system.end(); ++cp )
+      op << ( cp != kinematics.central_system.begin() ? ", " : "" ) << *cp;
+    std::ostringstream q2range; q2range << kinematics.cuts.initial.at( Cuts::q2 );
     os
       << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << std::endl
       << std::setw( wt ) << "Incoming particles" << ( pretty ? boldify( ip1.str().c_str() ) : ip1.str() ) << ", " << ( pretty ? boldify( ip2.str().c_str() ) : ip2.str() ) << std::endl
-      << std::setw( wt ) << "Momenta (GeV/c)" << kinematics.inp.first << ", " << kinematics.inp.second << std::endl;
-    if ( kinematics.mode != Kinematics::ElasticElastic )
-      os << std::setw( wt ) << "Structure functions" << kinematics.structure_functions << std::endl;
-    os
+      << std::setw( wt ) << "Momenta (GeV/c)" << kinematics.inp.first << ", " << kinematics.inp.second << std::endl
+      << std::setw( wt ) << "Structure functions" << kinematics.structure_functions << std::endl
       << std::endl
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << std::endl
       << std::endl;
     if ( kinematics.cuts.central.size() > 0 ) {
-      for ( const auto& lim : kinematics.cuts.initial ) { // map(particles class, limits)
-        if ( !lim.second.valid() )
-          continue;
-        os << std::setw( wt ) << lim.first << lim.second << std::endl;
+      for ( std::map<Cuts::InitialState,Kinematics::Limits>::const_iterator lim = kinematics.cuts.initial.begin(); lim != kinematics.cuts.initial.end(); ++lim ) {
+        if ( !lim->second.valid() ) continue;
+        os << std::setw( wt ) << lim->first << lim->second << std::endl;
       }
     }
     os
@@ -155,38 +149,33 @@ namespace CepGen
       << std::endl
       << std::setw( wt ) << "Central particles" << ( pretty ? boldify( op.str().c_str() ) : op.str() ) << std::endl;
     if ( kinematics.cuts.central.size() > 0 ) {
-      for ( const auto& lim : kinematics.cuts.central ) {
-        if ( !lim.second.valid() )
-          continue;
-        os << std::setw( wt ) << lim.first << lim.second << std::endl;
+      for ( std::map<Cuts::Central,Kinematics::Limits>::const_iterator lim = kinematics.cuts.central.begin(); lim != kinematics.cuts.central.end(); ++lim ) {
+        if ( !lim->second.valid() ) continue;
+        os << std::setw( wt ) << lim->first << lim->second << std::endl;
       }
     }
     if ( kinematics.cuts.central_particles.size() > 0 ) {
       os << std::setw( wt ) << ( pretty ? boldify( ">>> per-particle cuts:" ) : ">>> per-particle cuts:" ) << std::endl;
-      for ( const auto& part_per_lim : kinematics.cuts.central_particles ) {
-        os << " * all single " << std::setw( wt-3 ) << part_per_lim.first << std::endl;
-        for ( const auto& lim : part_per_lim.second ) {
-          if ( !lim.second.valid() )
-            continue;
-          os << "   - " << std::setw( wt-5 ) << lim.first << lim.second << std::endl;
+      for ( std::map<ParticleCode,std::map<Cuts::Central,Kinematics::Limits> >::const_iterator part_lim = kinematics.cuts.central_particles.begin(); part_lim != kinematics.cuts.central_particles.end(); ++part_lim ) {
+        os << " * " << std::setw( wt-3 ) << part_lim->first << std::endl;
+        for ( std::map<Cuts::Central,Kinematics::Limits>::const_iterator lim = part_lim->second.begin(); lim != part_lim->second.end(); ++lim ) {
+          if ( !lim->second.valid() ) continue;
+          os << "   - " << std::setw( wt-5 ) << lim->first << lim->second << std::endl;
         }
       }
     }
     os << std::endl;
     os << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Proton / remnants " ) : "Proton / remnants" ) << std::setfill( ' ' ) << std::endl;
     os << std::endl;
-    for ( const auto& lim : kinematics.cuts.remnants )
-      os << std::setw( wt ) << lim.first << lim.second << std::endl;
-
-    if ( pretty ) {
-      Information( os.str() );
+    for ( std::map<Cuts::Remnants,Kinematics::Limits>::const_iterator lim = kinematics.cuts.remnants.begin(); lim != kinematics.cuts.remnants.end(); ++lim ) {
+      os << std::setw( wt ) << lim->first << lim->second << std::endl;
     }
-    else
-      out << os.str();
+    if ( pretty ) { Information( os.str() ); }
+    else out << os.str();
   }
 
   Parameters::IntegratorParameters::IntegratorParameters() :
-    type( Integrator::Vegas ), ncvg( 500000 ),
+    type( Integrator::Vegas ), num_threads( 1 ), ncvg( 500000 ),
     npoints( 100 ), first_run( true ), seed( 0 )
   {
     const size_t ndof = 10;
@@ -195,8 +184,6 @@ namespace CepGen
     gsl_monte_vegas_params_get( veg_state, &vegas );
     gsl_monte_vegas_free( veg_state );
     vegas.ostream = stderr; // redirect all debugging information to the error stream
-    /*__gnu_cxx::stdio_filebuf<char> fpt( fileno( vegas.ostream ), std::ios::in );
-    std::istream fstr( &fpt );*/
 
     gsl_monte_miser_state* mis_state = gsl_monte_miser_alloc( ndof );
     gsl_monte_miser_params_get( mis_state, &miser );

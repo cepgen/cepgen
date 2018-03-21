@@ -137,28 +137,21 @@ namespace CepGen
     if ( cross_section_ < 0. )
       computeXsection( cross_section_, cross_section_error_ );
 
-    bool good = false;
-    while ( !good )
-      good = integrator_->generateOneEvent();
+    integrator_->generate( 1 );
 
     parameters->process()->addGenerationTime( parameters->generation.last_event->time_total );
     return parameters->generation.last_event;
   }
 
   void
-  Generator::generate( std::function<void( const Event&, unsigned int& )> callback )
+  Generator::generate( std::function<void( const Event&, unsigned long )> callback )
   {
     Information( Form( "%d events will be generated.",
                        parameters->generation.maxgen ) );
 
-    unsigned int i = 0;
-    while ( i < parameters->generation.maxgen )
-      if ( generateOneEvent() ) {
-        callback( *parameters->generation.last_event, i );
-        i++;
-      }
+    integrator_->generate( parameters->generation.maxgen, callback );
 
-    Information( Form( "%d events generated", i ) );
+    Information( Form( "%d events generated", parameters->generation.maxgen ) );
   }
 
   void
