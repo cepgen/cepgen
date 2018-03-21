@@ -53,7 +53,7 @@ namespace CepGen
         void setFullEvent( bool full = true ) { full_evt_ = full; }
 
 #ifdef PYTHIA8
-        bool init( bool enable_all_processes );
+        bool init();
         void readString( const char* param );
         void readString( const std::string& param ) { readString( param.c_str() ); }
 #endif

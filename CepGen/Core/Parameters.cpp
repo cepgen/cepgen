@@ -6,6 +6,8 @@
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
 
+//#include <ext/stdio_filebuf.h>
+
 namespace CepGen
 {
   Parameters::Parameters() :
@@ -193,6 +195,8 @@ namespace CepGen
     gsl_monte_vegas_params_get( veg_state, &vegas );
     gsl_monte_vegas_free( veg_state );
     vegas.ostream = stderr; // redirect all debugging information to the error stream
+    /*__gnu_cxx::stdio_filebuf<char> fpt( fileno( vegas.ostream ), std::ios::in );
+    std::istream fstr( &fpt );*/
 
     gsl_monte_miser_state* mis_state = gsl_monte_miser_alloc( ndof );
     gsl_monte_miser_params_get( mis_state, &miser );

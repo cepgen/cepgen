@@ -42,26 +42,31 @@ namespace CepGen
     }
 
     bool
-    Pythia8Hadroniser::init( bool enable_all_processes )
+    Pythia8Hadroniser::init()
     {
       //enable_all_processes = true;//FIXME FIXME
-      if ( pythia_->settings.flag( "ProcessLevel:all" ) != enable_all_processes )
-        pythia_->settings.flag( "ProcessLevel:all", enable_all_processes );
+      if ( pythia_->settings.flag( "ProcessLevel:all" ) != full_evt_ )
+        pythia_->settings.flag( "ProcessLevel:all", full_evt_ );
+
+      switch ( params_->kinematics.mode ) {
+        case Kinematics::ElasticElastic:
+          pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 3 );
+          break;
+        case Kinematics::ElasticInelastic:
+          pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 1 );
+          break;
+        case Kinematics::InelasticElastic:
+          pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 2 );
+          break;
+        case Kinematics::InelasticInelastic: default:
+          pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 0 );
+          break;
+      }
 
       if ( !pythia_->init() )
         FatalError( "Failed to initialise the Pythia8 core!\n\t"
                     "See the message above for more details." );
 
-      if ( params_->kinematics.mode == Kinematics::ElasticElastic )
-        pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 3 );
-      if ( params_->kinematics.mode == Kinematics::ElasticInelastic )
-        pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 1 );
-      if ( params_->kinematics.mode == Kinematics::InelasticElastic )
-        pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 2 );
-      if ( params_->kinematics.mode == Kinematics::InelasticInelastic )
-        pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 0 );
-
-      full_evt_ = enable_all_processes;
       return true;
     }
 
@@ -101,8 +106,10 @@ namespace CepGen
       if ( !full && !pythia_->settings.flag( "ProcessLevel:resonanceDecays" ) )
         return true;
 
-      if ( full && !full_evt_ )
-        init( true );
+      if ( full != full_evt_ ) {
+        full_evt_ = full;
+        init();
+      }
 
       const Pythia8::Vec4 mom_p1( momToVec4( ev.getOneByRole( Particle::Parton1 ).momentum() ) );
       const Pythia8::Vec4 mom_p2( momToVec4( ev.getOneByRole( Particle::Parton2 ).momentum() ) );
