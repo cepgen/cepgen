@@ -12,7 +12,7 @@ namespace CepGen
     {
       public:
         PPtoLL();
-        inline ~PPtoLL() {}
+        std::shared_ptr<GenericProcess> clone() const override { return std::make_shared<PPtoLL>( *this ); }
 
       private:
         void preparePhaseSpace() override;

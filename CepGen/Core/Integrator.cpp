@@ -1,6 +1,7 @@
 #include "Integrator.h"
 
 #include "CepGen/Parameters.h"
+#include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
 
 #include "CepGen/Core/utils.h"
@@ -144,7 +145,7 @@ namespace CepGen
     std::vector<std::thread> threads;
     std::vector<std::shared_ptr<ThreadWorker> > workers;
     for ( unsigned short i = 0; i < input_params_->integrator.num_threads; ++i ) {
-      std::shared_ptr<ThreadWorker> worker( new ThreadWorker( rng_, function_.get(), &grid_, callback ) );
+      std::shared_ptr<ThreadWorker> worker( new ThreadWorker( &mutex_, rng_, function_.get(), &grid_, callback ) );
       workers.emplace_back( worker );
       threads.emplace_back( &ThreadWorker::generate, worker.get() );
     }
@@ -256,11 +257,14 @@ namespace CepGen
 
   //------------------------------------------------------------------------------------------------
 
-  ThreadWorker::ThreadWorker( std::shared_ptr<gsl_rng> rng, gsl_monte_function* function, GridParameters* grid, std::function<void( const Event&, unsigned long )> callback ) :
-    ps_bin_( 0 ), rng_( rng ), function_( function ), grid_( grid ), callback_( callback )
+  ThreadWorker::ThreadWorker( std::mutex* mutex, std::shared_ptr<gsl_rng> rng, gsl_monte_function* function, GridParameters* grid, std::function<void( const Event&, unsigned long )> callback ) :
+    ps_bin_( 0 ), rng_( rng ), function_( function ), grid_( grid ),
+    mutex_( mutex ), callback_( callback )
   {
     if ( function )
-      params_ = (Parameters*)function->params;
+      params_ = std::shared_ptr<Parameters>( static_cast<Parameters*>( function->params ) );
+
+    params_->setProcess( params_->process()->clone() );
   }
 
   bool
@@ -272,7 +276,6 @@ namespace CepGen
     while ( true ) {
       if ( !next() )
         continue;
-      std::cout << __PRETTY_FUNCTION__ << "|" << params_->generation.ngen << std::endl;
       if ( params_->generation.ngen >= params_->generation.maxgen )
         return true;
     }
@@ -294,6 +297,7 @@ namespace CepGen
       if ( has_correction )
         return storeEvent( x );
     }
+
 
     double weight = 0., y = -1.;
 
@@ -318,7 +322,8 @@ namespace CepGen
 
       // Get weight for selected x value
       weight = eval( x );
-      if ( weight <= 0. ) continue;
+      if ( weight <= 0. )
+        continue;
     } while ( y > weight );
 
     if ( weight <= grid_->f_max[ps_bin_] )
@@ -404,7 +409,10 @@ namespace CepGen
   double
   ThreadWorker::eval( const std::vector<double>& x )
   {
-    return function_->f( (double*)&x[0], function_->dim, (void*)params_ );
+    mutex_->lock();
+    double f = function_->f( (double*)&x[0], function_->dim, (void*)params_.get() );
+    mutex_->unlock();
+    return f;
   }
 
   double
@@ -424,11 +432,12 @@ namespace CepGen
       return false;
 
     params_->generation.ngen += 1;
-    std::cout << __PRETTY_FUNCTION__ << ">>>" << params_->generation.ngen << std::endl;
+
     if ( params_->generation.ngen % params_->generation.gen_print_every == 0 ) {
       Information( Form( "Generated events: %d", params_->generation.ngen ) );
       params_->generation.last_event->dump();
     }
+
     if ( callback_ )
       callback_( *params_->generation.last_event, params_->generation.ngen );
 

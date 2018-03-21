@@ -33,12 +33,12 @@ namespace CepGen
 
       /// Process for which the cross-section will be computed and the events will be generated
       Process::GenericProcess* process();
-      /// Process for which the cross-section will be computed and the events will be generated
-      const Process::GenericProcess* process() const;
       /// Name of the process considered
       std::string processName() const;
       /// Set the process to study
       void setProcess( Process::GenericProcess* proc );
+      /// Set the process to study
+      void setProcess( std::shared_ptr<Process::GenericProcess> proc );
 
       //----- events kinematics
 
@@ -122,7 +122,7 @@ namespace CepGen
       inline unsigned int numGeneratedEvents() const { return num_gen_events_; }
 
     private:
-      std::unique_ptr<Process::GenericProcess> process_;
+      std::shared_ptr<Process::GenericProcess> process_;
       std::unique_ptr<Hadroniser::GenericHadroniser> hadroniser_;
 
       bool store_;

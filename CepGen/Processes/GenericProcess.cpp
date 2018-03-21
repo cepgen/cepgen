@@ -16,14 +16,27 @@ namespace CepGen
       name_( name ), description_( description ), has_event_( has_event )
     {}
 
+    GenericProcess::GenericProcess( const GenericProcess& proc ) :
+      s_( proc.s_ ), sqs_( proc.sqs_ ), w1_( proc.w1_ ), w2_( proc.w2_ ), t1_( proc.w1_ ), t2_( proc.w2_ ),
+      MX_( proc.w1_ ), MY_( proc.w2_ ), event_( proc.event_ ),
+      is_point_set_( proc.is_point_set_ ),
+      is_incoming_state_set_( proc.is_incoming_state_set_ ), is_outgoing_state_set_( proc.is_outgoing_state_set_ ),
+      is_kinematics_set_( proc.is_kinematics_set_ ),
+      name_( proc.name_ ), description_( proc.description_ ),
+      has_event_( proc.has_event_ )
+    {}
+
     void
     GenericProcess::setPoint( const unsigned int ndim, double* x )
     {
-      if ( ndim != x_.size() ) x_.resize( ndim );
+      if ( ndim != x_.size() )
+        x_.resize( ndim );
 
       x_ = std::vector<double>( x, x+ndim );
       is_point_set_ = true;
-      if ( Logger::get().level>=Logger::DebugInsideLoop ) { dumpPoint(); }
+
+      if ( Logger::get().level>=Logger::DebugInsideLoop )
+        dumpPoint();
     }
 
     double
@@ -53,7 +66,7 @@ namespace CepGen
     }
 
     void
-    GenericProcess::dumpPoint()
+    GenericProcess::dumpPoint() const
     {
       std::ostringstream os;
       for ( unsigned short i = 0; i < x_.size(); ++i ) {

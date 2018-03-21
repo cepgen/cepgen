@@ -40,7 +40,8 @@ namespace CepGen
         /// Class constructor ; set the mandatory parameters before integration and events generation
         /// \param[in] nopt Optimisation (legacy from LPAIR)
         explicit GamGamLL( int nopt = 0 );
-  
+        std::shared_ptr<GenericProcess> clone() const override { return std::make_shared<GamGamLL>( *this ); }
+
         void addEventContent() override;
         void beforeComputeWeight() override;
         /// Compute the process' weight for the given point

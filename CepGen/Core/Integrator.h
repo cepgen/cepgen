@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <memory>
+#include <mutex>
 #include <functional>
 
 namespace CepGen
@@ -81,13 +82,14 @@ namespace CepGen
       /// GSL structure storing the function to be integrated by this integrator instance (along with its parameters)
       std::unique_ptr<gsl_monte_function> function_;
       std::shared_ptr<gsl_rng> rng_;
+      std::mutex mutex_;
   };
   std::ostream& operator<<( std::ostream&, const Integrator::Type& );
 
   class ThreadWorker
   {
     public:
-      ThreadWorker( std::shared_ptr<gsl_rng> rng, gsl_monte_function* function, GridParameters* grid, std::function<void( const Event&, unsigned long )> callback = nullptr );
+      ThreadWorker( std::mutex* mutex, std::shared_ptr<gsl_rng> rng, gsl_monte_function* function, GridParameters* grid, std::function<void( const Event&, unsigned long )> callback = nullptr );
 
       /// Generate one event according to the grid parameters set in the initialisation
       /// \return A boolean stating if the generation was successful (in term of the computed weight for the phase space point)
@@ -116,7 +118,8 @@ namespace CepGen
       std::shared_ptr<gsl_monte_function> function_;
       std::shared_ptr<GridParameters> grid_;
 
-      Parameters* params_;
+      std::shared_ptr<Parameters> params_;
+      std::mutex* mutex_;
       std::function<void( const Event&, unsigned long )> callback_;
   };
 }

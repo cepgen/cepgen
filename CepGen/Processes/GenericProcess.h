@@ -38,7 +38,10 @@ namespace CepGen
         /// \param[in] description Human-readable description of the process
         /// \param[in] has_event Do we generate the associated event structure?
         GenericProcess( const std::string& name, const std::string& description = "<invalid process>", bool has_event = true );
+        GenericProcess( const GenericProcess& );
         virtual ~GenericProcess() {}
+
+        virtual std::shared_ptr<GenericProcess> clone() const = 0;
 
         /// Restore the Event object to its initial state
         inline void clearEvent() { event_->restore(); }
@@ -73,10 +76,10 @@ namespace CepGen
          */
         void setPoint( const unsigned int ndim, double* x );
         /// Dump the evaluated point's coordinates in the standard output stream
-        void dumpPoint();
+        void dumpPoint() const;
         /// Complete list of Particle with their role in the process for the point considered in the phase space, returned as an Event object.
         /// \return Event object containing all the generated Particle objects
-        inline std::shared_ptr<Event> event() { return event_; }
+        inline std::shared_ptr<Event> event() const { return event_; }
 
         ///Get the number of dimensions on which the integration is performed
         inline const unsigned int ndim() const { return x_.size(); }
