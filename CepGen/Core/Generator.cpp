@@ -31,9 +31,9 @@ namespace CepGen
   Generator::~Generator()
   {
     if ( parameters->generation.enabled
-      && parameters->process() && parameters->process()->numGeneratedEvents() > 0 ) {
+      && parameters->process() && parameters->numGeneratedEvents() > 0 ) {
       Information( Form( "Mean generation time / event: %g ms",
-                         parameters->process()->totalGenerationTime()*1.e3/parameters->process()->numGeneratedEvents() ) );
+                         parameters->totalGenerationTime()*1.e3/parameters->numGeneratedEvents() ) );
     }
   }
 
@@ -139,19 +139,23 @@ namespace CepGen
 
     integrator_->generate( 1 );
 
-    parameters->process()->addGenerationTime( parameters->generation.last_event->time_total );
+    parameters->addGenerationTime( parameters->generation.last_event->time_total );
     return parameters->generation.last_event;
   }
 
   void
   Generator::generate( std::function<void( const Event&, unsigned long )> callback )
   {
-    Information( Form( "%d events will be generated.",
-                       parameters->generation.maxgen ) );
+    if ( cross_section_ < 0. )
+      computeXsection( cross_section_, cross_section_error_ );
+
+    Information( Form( "%g events will be generated.",
+                       parameters->generation.maxgen*1. ) );
 
     integrator_->generate( parameters->generation.maxgen, callback );
 
-    Information( Form( "%d events generated", parameters->generation.maxgen ) );
+    Information( Form( "%g events generated",
+                       parameters->generation.maxgen*1. ) );
   }
 
   void

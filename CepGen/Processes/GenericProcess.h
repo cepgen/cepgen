@@ -89,16 +89,6 @@ namespace CepGen
 
         /// Does the process contain (and hold) an event?
         bool hasEvent() const { return has_event_; }
-
-        /// Reset the total generation time and the number of events generated for this run
-        void clearRunStatistics();
-        /// Add a new timing into the total generation time
-        /// \param[in] gen_time Time to add (in seconds)
-        void addGenerationTime( double gen_time );
-        /// Return the total generation time for this run (in seconds)
-        inline double totalGenerationTime() const { return total_gen_time_; }
-        /// Total number of events already generated in this run
-        inline unsigned int numGeneratedEvents() const { return num_gen_events_; }
   
       protected:
         static const double mp_, mp2_;
@@ -154,10 +144,6 @@ namespace CepGen
         std::string name_;
         /// Process human-readable description
         std::string description_;
-        /// Total generation time (in seconds)
-        double total_gen_time_;
-        /// Number of events already generated
-        unsigned int num_gen_events_;
         /// Does the process contain (and hold) an event?
         bool has_event_;
 

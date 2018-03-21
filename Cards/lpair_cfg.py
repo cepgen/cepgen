@@ -35,4 +35,3 @@ generator = cepgen.Parameters(
     printEvery = 10000,
 )
 
-print integrator.numFunctionCalls

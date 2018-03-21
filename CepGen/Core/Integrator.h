@@ -33,6 +33,12 @@ namespace CepGen
     double f_max_global;
     std::vector<int> n;
     std::vector<int> nm;
+
+    /// Maximal number of dimensions handled by this integrator instance
+    static constexpr unsigned short max_dimensions_ = 15;
+    /// Integration grid size parameter
+    static constexpr unsigned short mbin_ = 3;
+    static constexpr double inv_mbin_ = 1./mbin_;
   };
   /**
    * Main occurence of the Monte-Carlo integrator @cite PeterLepage1978192 developed by G.P. Lepage in 1978
@@ -68,31 +74,28 @@ namespace CepGen
       void generate( unsigned long num_events, std::function<void( const Event&, unsigned long )> callback = nullptr );
 
     private:
+      void setGen();
       /// List of parameters to specify the integration range and the physics determining the phase space
       Parameters* input_params_;
       GridParameters grid_;
       /// GSL structure storing the function to be integrated by this integrator instance (along with its parameters)
       std::unique_ptr<gsl_monte_function> function_;
-      gsl_rng* rng_;
+      std::shared_ptr<gsl_rng> rng_;
   };
-  class ThreadArgs
+  std::ostream& operator<<( std::ostream&, const Integrator::Type& );
+
+  class ThreadWorker
   {
     public:
-      ThreadArgs( gsl_rng* rng, gsl_monte_function* function, GridParameters* grid );
+      ThreadWorker( std::shared_ptr<gsl_rng> rng, gsl_monte_function* function, GridParameters* grid, std::function<void( const Event&, unsigned long )> callback = nullptr );
 
-      void initialise();
       /// Generate one event according to the grid parameters set in the initialisation
       /// \return A boolean stating if the generation was successful (in term of the computed weight for the phase space point)
       bool generate();
 
     private:
-      /// Maximal number of dimensions handled by this integrator instance
-      static constexpr unsigned short max_dimensions_ = 15;
-      /// Integration grid size parameter
-      static constexpr unsigned short mbin_ = 3;
-      static constexpr double inv_mbin_ = 1./mbin_;
-
-      double uniform() const { return gsl_rng_uniform( rng_ ); }
+      bool next();
+      double uniform() const;
       /// Start the correction cycle on the grid
       /// \param x Point in the phase space considered
       /// \param has_correction Correction cycle started?
@@ -109,12 +112,13 @@ namespace CepGen
       /// Selected bin at which the function will be evaluated
       int ps_bin_;
 
-      gsl_rng* rng_;
-      gsl_monte_function* function_;
-      GridParameters* grid_;
+      std::shared_ptr<gsl_rng> rng_;
+      std::shared_ptr<gsl_monte_function> function_;
+      std::shared_ptr<GridParameters> grid_;
+
       Parameters* params_;
+      std::function<void( const Event&, unsigned long )> callback_;
   };
-  std::ostream& operator<<( std::ostream&, const Integrator::Type& );
 }
 
 #endif

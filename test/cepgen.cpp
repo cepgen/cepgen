@@ -15,7 +15,7 @@
 
 using namespace std;
 
-void printEvent( const CepGen::Event& ev, unsigned int& ev_id )
+void printEvent( const CepGen::Event& ev, unsigned long ev_id )
 {
   if ( ev_id % 5000 == 0 ) {
     Information( Form( "Generating event #%d", ev_id ) );

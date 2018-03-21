@@ -15,6 +15,44 @@
 
 using namespace std;
 
+TTree* ev_tree;
+CepGen::TreeRun* run;
+CepGen::TreeEvent* ev;
+
+void fill_event_tree( const CepGen::Event& event, unsigned long ev_id )
+{
+  if ( ev_id % 10000 == 0 )
+    cout << ">> event " << ev_id << " generated" << endl;
+
+  ev->clear();
+
+  ev->gen_time = event.time_generation;
+  ev->tot_time = event.time_total;
+  ev->np = 0;
+  for ( const auto& p : event.particles() ) {
+    const CepGen::Particle::Momentum m = p.momentum();
+
+    //ev.kinematics[ev.np].SetXYZM( m.px(), m.py(), m.pz(), m.mass() );
+    ev->rapidity[ev->np] = m.rapidity();
+    ev->pt[ev->np] = m.pt();
+    ev->eta[ev->np] = m.eta();
+    ev->phi[ev->np] = m.phi();
+    ev->E[ev->np] = p.energy();
+    ev->m[ev->np] = p.mass();
+    ev->pdg_id[ev->np] = p.integerPdgId();
+    ev->parent1[ev->np] = ( p.mothers().size() > 0 ) ? *p.mothers().begin() : -1;
+    ev->parent2[ev->np] = ( p.mothers().size() > 1 ) ? *p.mothers().rbegin() : -1;
+    ev->status[ev->np] = p.status();
+    ev->stable[ev->np] = ( (short)p.status() > 0 );
+    ev->charge[ev->np] = p.charge();
+    ev->role[ev->np] = p.role();
+
+    ev->np++;
+  }
+  run->num_events += 1;
+  ev_tree->Fill();
+}
+
 /**
  * Generation of events and storage in a ROOT format
  * @author Laurent Forthomme <laurent.forthomme@cern.ch>
@@ -52,60 +90,28 @@ int main( int argc, char* argv[] ) {
 
   //----- then generate the events and the container tree structure
 
-  auto ev_tree = new TTree( "events", "A TTree containing information from the events produced from CepGen" );
+  ev_tree = new TTree( "events", "A TTree containing information from the events produced from CepGen" );
 
-  CepGen::TreeRun run;
-  run.create();
-  run.xsect = xsec;
-  run.errxsect = err;
-  run.litigious_events = 0;
-  run.sqrt_s = mg.parameters->kinematics.sqrtS();
+  run = new CepGen::TreeRun;
+  run->create();
+  run->xsect = xsec;
+  run->errxsect = err;
+  run->litigious_events = 0;
+  run->sqrt_s = mg.parameters->kinematics.sqrtS();
 
-  CepGen::TreeEvent ev;
-  ev.create( ev_tree );
+  ev = new CepGen::TreeEvent;
+  ev->create( ev_tree );
 
   try {
-    for ( unsigned int i = 0; i < mg.parameters->generation.maxgen; ++i ) {
-      const auto event = mg.generateOneEvent();
-      if ( !event ) FatalError( "Failed to generate the event!" );
-
-      ev.clear();
-      if ( i % 10000 == 0 ) {
-        cout << ">> event " << i << " generated" << endl;
-        //event->dump();
-      }
-
-      ev.gen_time = event->time_generation;
-      ev.tot_time = event->time_total;
-      ev.np = 0;
-      for ( const auto& p : event->particles() ) {
-        const CepGen::Particle::Momentum m = p.momentum();
-
-        //ev.kinematics[ev.np].SetXYZM( m.px(), m.py(), m.pz(), m.mass() );
-        ev.rapidity[ev.np] = m.rapidity();
-        ev.pt[ev.np] = m.pt();
-        ev.eta[ev.np] = m.eta();
-        ev.phi[ev.np] = m.phi();
-        ev.E[ev.np] = p.energy();
-        ev.m[ev.np] = p.mass();
-        ev.pdg_id[ev.np] = p.integerPdgId();
-        ev.parent1[ev.np] = ( p.mothers().size() > 0 ) ? *p.mothers().begin() : -1;
-        ev.parent2[ev.np] = ( p.mothers().size() > 1 ) ? *p.mothers().rbegin() : -1;
-        ev.status[ev.np] = p.status();
-        ev.stable[ev.np] = ( (short)p.status() > 0 );
-        ev.charge[ev.np] = p.charge();
-        ev.role[ev.np] = p.role();
-
-        ev.np++;
-      }
-      run.num_events += 1;
-      ev_tree->Fill();
-    }
+    mg.generate( fill_event_tree );
   } catch ( CepGen::Exception& e ) {}
   //cout << "Number of litigious events = " << run.litigious_events << " -> fraction = " << ( run.litigious_events*100./ngen ) << "%" << endl;
-  run.fill();
+  run->fill();
   file->Write();
+
   delete file;
+  delete run;
+  delete ev;
 
   return 0;
 }

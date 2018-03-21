@@ -91,10 +91,8 @@ namespace CepGen
       double crossSection() const { return cross_section_; }
       /// Last error on the cross section computed by the generator
       double crossSectionError() const { return cross_section_error_; }
-      /**
-       * Generate one single event given the phase space computed by Vegas in the integration step
-       * \return A pointer to the Event object generated in this run
-       */
+      /// Generate one single event given the phase space computed by Vegas in the integration step
+      /// \return A pointer to the Event object generated in this run
       std::shared_ptr<Event> generateOneEvent();
       /// Launch the generation of events
       void generate( std::function<void( const Event&, unsigned long )> callback );

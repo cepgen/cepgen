@@ -33,6 +33,8 @@ namespace CepGen
 
       /// Process for which the cross-section will be computed and the events will be generated
       Process::GenericProcess* process();
+      /// Process for which the cross-section will be computed and the events will be generated
+      const Process::GenericProcess* process() const;
       /// Name of the process considered
       std::string processName() const;
       /// Set the process to study
@@ -107,10 +109,27 @@ namespace CepGen
       /// Functionals to be used to account for rescattering corrections (implemented within the process)
       std::unique_ptr<TamingFunctionsCollection> taming_functions;
 
+      //----- run statistics
+
+      /// Reset the total generation time and the number of events generated for this run
+      void clearRunStatistics();
+      /// Add a new timing into the total generation time
+      /// \param[in] gen_time Time to add (in seconds)
+      void addGenerationTime( double gen_time );
+      /// Return the total generation time for this run (in seconds)
+      inline double totalGenerationTime() const { return total_gen_time_; }
+      /// Total number of events already generated in this run
+      inline unsigned int numGeneratedEvents() const { return num_gen_events_; }
+
     private:
       std::unique_ptr<Process::GenericProcess> process_;
       std::unique_ptr<Hadroniser::GenericHadroniser> hadroniser_;
+
       bool store_;
+      /// Total generation time (in seconds)
+      double total_gen_time_;
+      /// Number of events already generated
+      unsigned int num_gen_events_;
   };
 }
 

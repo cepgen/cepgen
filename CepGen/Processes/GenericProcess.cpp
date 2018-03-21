@@ -13,8 +13,7 @@ namespace CepGen
       s_( 0. ), sqs_( 0. ), w1_( 0. ), w2_( 0. ), t1_( 0. ), t2_( 0. ), MX_( 0. ), MY_( 0. ),
       event_( std::shared_ptr<Event>( new Event ) ),
       is_point_set_( false ), is_incoming_state_set_( false ), is_outgoing_state_set_( false ), is_kinematics_set_( false ),
-      name_( name ), description_( description ),
-      total_gen_time_( 0. ), num_gen_events_( 0 ), has_event_( has_event )
+      name_( name ), description_( description ), has_event_( has_event )
     {}
 
     void
@@ -33,20 +32,6 @@ namespace CepGen
       if ( idx >= x_.size() )
         return -1.;
       return x_[idx];
-    }
-
-    void
-    GenericProcess::clearRunStatistics()
-    {
-      total_gen_time_ = 0.;
-      num_gen_events_ = 0;
-    }
-
-    void
-    GenericProcess::addGenerationTime( double gen_time )
-    {
-      total_gen_time_ += gen_time;
-      num_gen_events_++;
     }
 
     void

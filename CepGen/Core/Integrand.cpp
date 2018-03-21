@@ -77,7 +77,7 @@ namespace CepGen
           }
         }
 
-        p->process()->clearRunStatistics();
+        p->clearRunStatistics();
         p->integrator.first_run = false;
       } // passed the first-run preparation
     } // event is not empty
