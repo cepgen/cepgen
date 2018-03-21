@@ -72,13 +72,13 @@ namespace CepGen
     else if ( algorithm == Vegas ) {
       gsl_monte_vegas_params_set( veg_state, &input_params_->integrator.vegas );
       //----- Vegas warmup (prepare the grid)
-      if ( !grid_.grid_prepared ) {
+      if ( !grid.grid_prepared ) {
         res = gsl_monte_vegas_integrate( function_.get(),
           &x_low[0], &x_up[0],
           function_->dim, 25000,
           rng_.get(), veg_state,
           &result, &abserr );
-        grid_.grid_prepared = true;
+        grid.grid_prepared = true;
       }
       Information( "Finished the Vegas warm-up." );
       //----- integration
@@ -135,23 +135,24 @@ namespace CepGen
   void
   Integrator::generate( unsigned long num_events, std::function<void( const Event&, unsigned long )> callback )
   {
-    if ( !grid_.gen_prepared )
+    if ( !grid.gen_prepared )
       setGen();
 
-    if ( input_params_->integrator.num_threads > 1 )
-      Information( Form( "Will generate events using %d threads", input_params_->integrator.num_threads ) );
+    if ( input_params_->generation.num_threads > 1 )
+      Information( Form( "Will generate events using %d threads", input_params_->generation.num_threads ) );
 
     // define the threads and workers
     std::vector<std::thread> threads;
     std::vector<std::shared_ptr<ThreadWorker> > workers;
-    for ( unsigned short i = 0; i < input_params_->integrator.num_threads; ++i ) {
-      std::shared_ptr<ThreadWorker> worker( new ThreadWorker( &mutex_, rng_, function_.get(), &grid_, callback ) );
+    for ( unsigned int i = 0; i < input_params_->generation.num_threads; ++i ) {
+      std::shared_ptr<ThreadWorker> worker( new ThreadWorker( &mutex_, rng_.get(), function_.get(), &grid, callback ) );
       workers.emplace_back( worker );
       threads.emplace_back( &ThreadWorker::generate, worker.get() );
     }
     // launch the multi-threaded events generation
     for ( auto& thread : threads )
-      thread.join();
+      if ( thread.joinable() )
+        thread.join();
   }
 
   void
@@ -162,15 +163,15 @@ namespace CepGen
     if ( Logger::get().level >= Logger::Debug )
       Debugging( Form( "Maximum weight = %d", input_params_->generation.maxgen ) );
 
-    const unsigned int max = pow( grid_.mbin_, function_->dim );
+    const unsigned int max = pow( grid.mbin_, function_->dim );
     const double inv_npoin = 1./input_params_->integrator.npoints;
 
-    if ( function_->dim > grid_.max_dimensions_ )
-      FatalError( Form( "Number of dimensions to integrate exceeds the maximum number, %d", grid_.max_dimensions_ ) );
+    if ( function_->dim > grid.max_dimensions_ )
+      FatalError( Form( "Number of dimensions to integrate exceeds the maximum number, %d", grid.max_dimensions_ ) );
 
-    grid_.nm = std::vector<int>( max, 0 );
-    grid_.f_max = std::vector<double>( max, 0. );
-    grid_.n = std::vector<int>( function_->dim, 0 );
+    grid.nm = std::vector<int>( max, 0 );
+    grid.f_max = std::vector<double>( max, 0. );
+    grid.n = std::vector<int>( function_->dim, 0 );
 
     std::vector<double> x( function_->dim, 0. );
 
@@ -184,16 +185,16 @@ namespace CepGen
     for ( unsigned int i = 0; i < max; ++i ) {
       int jj = i;
       for ( unsigned int j = 0; j < function_->dim; ++j ) {
-        int jjj = jj*grid_.inv_mbin_;
-        grid_.n[j] = jj-jjj*grid_.mbin_;
+        int jjj = jj*grid.inv_mbin_;
+        grid.n[j] = jj-jjj*grid.mbin_;
         jj = jjj;
       }
       double fsum = 0., fsum2 = 0.;
       for ( unsigned int j = 0; j < input_params_->integrator.npoints; ++j ) {
         for ( unsigned int k = 0; k < function_->dim; ++k )
-          x[k] = ( gsl_rng_uniform( rng_.get() ) + grid_.n[k] ) * grid_.inv_mbin_;
+          x[k] = ( gsl_rng_uniform( rng_.get() ) + grid.n[k] ) * grid.inv_mbin_;
         const double z = function_->f( (double*)&x[0], function_->dim, (void*)input_params_ );
-        grid_.f_max[i] = std::max( grid_.f_max[i], z );
+        grid.f_max[i] = std::max( grid.f_max[i], z );
         fsum += z;
         fsum2 += z*z;
       }
@@ -201,21 +202,21 @@ namespace CepGen
       sum += av;
       sum2 += av2;
       sum2p += sig2;
-      grid_.f_max_global = std::max( grid_.f_max_global, grid_.f_max[i] );
+      grid.f_max_global = std::max( grid.f_max_global, grid.f_max[i] );
 
       if ( Logger::get().level >= Logger::DebugInsideLoop ) {
         const double sig = sqrt( sig2 );
-        const double eff = ( grid_.f_max[i] != 0. ) ? grid_.f_max[i]/av : 1.e4;
+        const double eff = ( grid.f_max[i] != 0. ) ? grid.f_max[i]/av : 1.e4;
         std::ostringstream os;
         for ( unsigned int j = 0; j < function_->dim; ++j )
-          os << grid_.n[j] << ( j != function_->dim-1 ? ", " : "" );
+          os << grid.n[j] << ( j != function_->dim-1 ? ", " : "" );
         DebuggingInsideLoop( Form( "In iteration #%d:\n\t"
                                    "av   = %f\n\t"
                                    "sig  = %f\n\t"
                                    "fmax = %f\n\t"
                                    "eff  = %f\n\t"
                                    "n = (%s)",
-                                   i, av, sig, grid_.f_max[i], eff, os.str().c_str() ) );
+                                   i, av, sig, grid.f_max[i], eff, os.str().c_str() ) );
       }
     } // end of main loop
 
@@ -228,8 +229,8 @@ namespace CepGen
 
       double eff1 = 0.;
       for ( unsigned int i = 0; i < max; ++i )
-        eff1 += ( grid_.f_max[i] / ( max*sum ) );
-      const double eff2 = grid_.f_max_global/sum;
+        eff1 += ( grid.f_max[i] / ( max*sum ) );
+      const double eff2 = grid.f_max_global/sum;
 
       Debugging( Form( "Average function value     =  sum   = %f\n\t"
                        "Average function value**2  =  sum2  = %f\n\t"
@@ -238,9 +239,9 @@ namespace CepGen
                        "Maximum function value     = ffmax  = %f\n\t"
                        "Average inefficiency       =  eff1  = %f\n\t"
                        "Overall inefficiency       =  eff2  = %f\n\t",
-                       sum, sum2, sig, sigp, grid_.f_max_global, eff1, eff2 ) );
+                       sum, sum2, sig, sigp, grid.f_max_global, eff1, eff2 ) );
     }
-    grid_.gen_prepared = true;
+    grid.gen_prepared = true;
     Information( "Grid prepared! Now launching the production." );
   }
 
@@ -257,14 +258,17 @@ namespace CepGen
 
   //------------------------------------------------------------------------------------------------
 
-  ThreadWorker::ThreadWorker( std::mutex* mutex, std::shared_ptr<gsl_rng> rng, gsl_monte_function* function, GridParameters* grid, std::function<void( const Event&, unsigned long )> callback ) :
+  ThreadWorker::ThreadWorker( std::mutex* mutex,
+                              gsl_rng* rng, gsl_monte_function* function,
+                              GridParameters* grid,
+                              std::function<void( const Event&, unsigned long )> callback ) :
     ps_bin_( 0 ), rng_( rng ), function_( function ), grid_( grid ),
     mutex_( mutex ), callback_( callback )
   {
     if ( function )
-      params_ = std::shared_ptr<Parameters>( static_cast<Parameters*>( function->params ) );
+      params_ = static_cast<Parameters*>( function->params );
 
-    params_->setProcess( params_->process()->clone() );
+    //params_->setProcess( params_->process()->clone() );
   }
 
   bool
@@ -276,6 +280,8 @@ namespace CepGen
     while ( true ) {
       if ( !next() )
         continue;
+      if ( grid_->finishing )
+        throw Exception( __PRETTY_FUNCTION__, "Finishing", JustWarning );
       if ( params_->generation.ngen >= params_->generation.maxgen )
         return true;
     }
@@ -285,6 +291,10 @@ namespace CepGen
   bool
   ThreadWorker::next()
   {
+    if ( params_->generation.ngen >= params_->generation.maxgen )
+      return true;
+    //std::cout << grid_->finishing << std::endl;
+
     const unsigned int max = pow( grid_->mbin_, function_->dim );
 
     std::vector<double> x( function_->dim, 0. );
@@ -297,7 +307,6 @@ namespace CepGen
       if ( has_correction )
         return storeEvent( x );
     }
-
 
     double weight = 0., y = -1.;
 
@@ -409,16 +418,14 @@ namespace CepGen
   double
   ThreadWorker::eval( const std::vector<double>& x )
   {
-    mutex_->lock();
-    double f = function_->f( (double*)&x[0], function_->dim, (void*)params_.get() );
-    mutex_->unlock();
-    return f;
+    std::lock_guard<std::mutex> guard( *mutex_ );
+    return function_->f( (double*)&x[0], function_->dim, (void*)params_ );
   }
 
   double
   ThreadWorker::uniform() const
   {
-    return gsl_rng_uniform( rng_.get() );
+    return gsl_rng_uniform( rng_ );
   }
 
   bool
@@ -434,12 +441,19 @@ namespace CepGen
     params_->generation.ngen += 1;
 
     if ( params_->generation.ngen % params_->generation.gen_print_every == 0 ) {
-      Information( Form( "Generated events: %d", params_->generation.ngen ) );
+      mutex_->lock();
+      Information( Form( "[thread 0x%zx] Generated events: %d",
+                         std::hash<std::thread::id>()( std::this_thread::get_id() ),
+                         params_->generation.ngen ) );
       params_->generation.last_event->dump();
+      mutex_->unlock();
     }
 
-    if ( callback_ )
+    if ( callback_ ) {
+      mutex_->lock();
       callback_( *params_->generation.last_event, params_->generation.ngen );
+      mutex_->unlock();
+    }
 
     return true;
   }

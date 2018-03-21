@@ -52,8 +52,6 @@ namespace CepGen
       {
         IntegratorParameters();
         Integrator::Type type;
-        /// Number of threads to perform the integration
-        unsigned short num_threads;
         /// Number of function calls to be computed for each point
         unsigned int ncvg; // ??
         /// Number of points to "shoot" in each integration bin by the algorithm
@@ -86,6 +84,8 @@ namespace CepGen
         unsigned int ngen;
         /// Frequency at which the events are displayed to the end-user
         unsigned int gen_print_every;
+        /// Number of threads to perform the integration
+        unsigned int num_threads;
       };
       /// Events generation parameters
       Generation generation;

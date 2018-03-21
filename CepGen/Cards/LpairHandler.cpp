@@ -76,11 +76,13 @@ namespace CepGen
       registerParameter<unsigned int>( "NCSG", "Number of points to probe", &params->integrator.npoints );
       registerParameter<unsigned int>( "ITVG", "Number of integration iterations", (unsigned int*)&params->integrator.vegas.iterations );
       registerParameter<unsigned int>( "SEED", "Random generator seed", (unsigned int*)&params->integrator.seed );
+      registerParameter<unsigned int>( "NTHR", "Number of threads to use for events generation", &params->generation.num_threads );
       registerParameter<unsigned int>( "MODE", "Subprocess' mode", (unsigned int*)&params->kinematics.mode );
       registerParameter<unsigned int>( "PMOD", "Outgoing primary particles' mode", (unsigned int*)&params->kinematics.structure_functions );
       registerParameter<unsigned int>( "EMOD", "Outgoing primary particles' mode", (unsigned int*)&params->kinematics.structure_functions );
       registerParameter<unsigned int>( "PAIR", "Outgoing particles' PDG id", (unsigned int*)&pair_ );
       registerParameter<unsigned int>( "NGEN", "Number of events to generate", &params->generation.maxgen );
+      registerParameter<unsigned int>( "NPRN", "Number of events before printout", &params->generation.gen_print_every );
 
       registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params->kinematics.inp.first );
       registerParameter<double>( "INPE", "Momentum (2nd primary particle)", &params->kinematics.inp.second );

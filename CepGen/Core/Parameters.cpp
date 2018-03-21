@@ -28,13 +28,16 @@ namespace CepGen
     store_( param.store_ ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ )
   {}
 
-  Parameters::~Parameters()
+  Parameters::~Parameters() // required for unique_ptr initialisation!
   {}
 
   void
   Parameters::setThetaRange( float thetamin, float thetamax )
   {
-    kinematics.cuts.central[Cuts::eta_single] = { Particle::thetaToEta( thetamax ), Particle::thetaToEta( thetamin ) };
+    kinematics.cuts.central[Cuts::eta_single] = {
+      Particle::thetaToEta( thetamax ),
+      Particle::thetaToEta( thetamin )
+    };
 
     if ( Logger::get().level >= Logger::Debug ) {
       std::ostringstream os; os << kinematics.cuts.central[Cuts::eta_single];
@@ -117,7 +120,11 @@ namespace CepGen
     os
       << std::endl
       << std::setw( wt ) << "Events generation? " << ( pretty ? yesno( generation.enabled ) : std::to_string( generation.enabled ) ) << std::endl
-      << std::setw( wt ) << "Number of events to generate" << ( pretty ? boldify( generation.maxgen ) : std::to_string( generation.maxgen ) ) << std::endl
+      << std::setw( wt ) << "Number of events to generate" << ( pretty ? boldify( generation.maxgen ) : std::to_string( generation.maxgen ) ) << std::endl;
+    if ( generation.num_threads > 1 )
+      os
+        << std::setw( wt ) << "Number of threads" << generation.num_threads << std::endl;
+    os
       << std::setw( wt ) << "Verbosity level " << Logger::get().level << std::endl;
     if ( hadroniser_ ) {
       os
@@ -134,11 +141,7 @@ namespace CepGen
     os
       << std::setw( wt ) << "Integration algorithm" << ( pretty ? boldify( int_algo.str().c_str() ) : int_algo.str() ) << std::endl
       //<< std::setw( wt ) << "Maximum number of iterations" << ( pretty ? boldify( integrator.itvg ) : std::to_string( integrator.itvg ) ) << std::endl
-      << std::setw( wt ) << "Number of function calls" << integrator.ncvg << std::endl;
-    if ( integrator.num_threads > 1 )
-      os
-        << std::setw( wt ) << "Number of threads" << integrator.num_threads << std::endl;
-    os
+      << std::setw( wt ) << "Number of function calls" << integrator.ncvg << std::endl
       << std::setw( wt ) << "Number of points to try per bin" << integrator.npoints << std::endl
       << std::setw( wt ) << "Random number generator seed" << integrator.seed << std::endl
       << std::endl
@@ -209,7 +212,7 @@ namespace CepGen
   }
 
   Parameters::IntegratorParameters::IntegratorParameters() :
-    type( Integrator::Vegas ), num_threads( 2 ), ncvg( 500000 ),
+    type( Integrator::Vegas ), ncvg( 500000 ),
     npoints( 100 ), first_run( true ), seed( 0 )
   {
     const size_t ndof = 10;
@@ -228,6 +231,7 @@ namespace CepGen
 
   Parameters::Generation::Generation() :
     enabled( false ), maxgen( 0 ),
-    symmetrise( false ), ngen( 0 ), gen_print_every( 10000 )
+    symmetrise( false ), ngen( 0 ), gen_print_every( 10000 ),
+    num_threads( 2 )
   {}
 }

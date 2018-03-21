@@ -284,6 +284,7 @@ namespace CepGen
       params_.generation.enabled = true;
       getParameter( gen, "numEvents", params_.generation.maxgen );
       getParameter( gen, "printEvery", params_.generation.gen_print_every );
+      getParameter( gen, "numThreads", params_.generation.num_threads );
     }
 
     void

@@ -91,6 +91,8 @@ namespace CepGen
       double crossSection() const { return cross_section_; }
       /// Last error on the cross section computed by the generator
       double crossSectionError() const { return cross_section_error_; }
+
+      void terminate();
       /// Generate one single event given the phase space computed by Vegas in the integration step
       /// \return A pointer to the Event object generated in this run
       std::shared_ptr<Event> generateOneEvent();
@@ -104,7 +106,6 @@ namespace CepGen
       double computePoint( double* x );
       /// Physical Parameters used in the events generation and cross-section computation
       std::unique_ptr<Parameters> parameters;
-
    private:
       /// Prepare the function before its integration (add particles/compute kinematics/...)
       void prepareFunction();

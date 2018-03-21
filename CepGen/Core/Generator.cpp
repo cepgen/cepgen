@@ -159,6 +159,12 @@ namespace CepGen
   }
 
   void
+  Generator::terminate()
+  {
+    integrator_->grid.finishing = true;
+  }
+
+  void
   Generator::prepareFunction()
   {
     if ( !parameters->process() )

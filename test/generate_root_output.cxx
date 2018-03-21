@@ -15,14 +15,18 @@
 
 using namespace std;
 
-TTree* ev_tree;
-CepGen::TreeRun* run;
-CepGen::TreeEvent* ev;
+TFile* file = nullptr;
+TTree* ev_tree = nullptr;
+CepGen::TreeRun* run = nullptr;
+CepGen::TreeEvent* ev = nullptr;
 
 void fill_event_tree( const CepGen::Event& event, unsigned long ev_id )
 {
-  if ( ev_id % 10000 == 0 )
-    cout << ">> event " << ev_id << " generated" << endl;
+  //if ( ev_id % 10 == 0 )
+  //  cout << ">> event " << ev_id << " generated" << endl;
+
+  if ( !ev_tree || !ev || !run )
+    return;
 
   ev->clear();
 
@@ -77,11 +81,9 @@ int main( int argc, char* argv[] ) {
   //----- open the output root file
 
   const TString filename = ( argc > 2 ) ? argv[2] : "events.root";
-  auto file = TFile::Open( filename, "recreate" );
-  if ( !file ) {
-    cerr << "ERROR while trying to create the output file!" << endl;
-    return -1;
-  }
+  file = TFile::Open( filename, "recreate" );
+  if ( !file )
+    throw CepGen::Exception( __PRETTY_FUNCTION__, "ERROR while trying to create the output file!", CepGen::FatalError );
 
   AbortHandler ctrl_c;
   //----- start by computing the cross section for the list of parameters applied
@@ -104,10 +106,14 @@ int main( int argc, char* argv[] ) {
 
   try {
     mg.generate( fill_event_tree );
-  } catch ( CepGen::Exception& e ) {}
+  } catch ( CepGen::Exception& e ) {
+    cout << "terminating" << endl;
+    mg.terminate();
+  }
   //cout << "Number of litigious events = " << run.litigious_events << " -> fraction = " << ( run.litigious_events*100./ngen ) << "%" << endl;
   run->fill();
   file->Write();
+  Information( Form( "Events written on \"%s\".", filename.Data() ) );
 
   delete file;
   delete run;

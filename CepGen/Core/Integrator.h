@@ -18,7 +18,8 @@ namespace CepGen
     GridParameters() :
       grid_prepared( false ), gen_prepared( false ),
       correc( 0. ), correc2( 0. ),
-      f_max2( 0. ), f_max_diff( 0. ), f_max_old( 0. ), f_max_global( 0. ) {}
+      f_max2( 0. ), f_max_diff( 0. ), f_max_old( 0. ), f_max_global( 0. ),
+      finishing( false ) {}
     /// Has the grid been prepared for integration?
     bool grid_prepared;
     /// Has the generation been prepared using @a SetGen call? (very time-consuming operation, thus needs to be called once)
@@ -34,6 +35,8 @@ namespace CepGen
     double f_max_global;
     std::vector<int> n;
     std::vector<int> nm;
+
+    bool finishing;
 
     /// Maximal number of dimensions handled by this integrator instance
     static constexpr unsigned short max_dimensions_ = 15;
@@ -69,16 +72,17 @@ namespace CepGen
        * \param[out] abserr_ The error associated to the computed cross section
        * \return 0 if the integration was performed successfully
        */
-      int integrate( double& result_,double& abserr_ );
+      int integrate( double& result_, double& abserr_ );
       /// Dimensional size of the phase space
       unsigned short dimensions() const;
       void generate( unsigned long num_events, std::function<void( const Event&, unsigned long )> callback = nullptr );
+
+      GridParameters grid;
 
     private:
       void setGen();
       /// List of parameters to specify the integration range and the physics determining the phase space
       Parameters* input_params_;
-      GridParameters grid_;
       /// GSL structure storing the function to be integrated by this integrator instance (along with its parameters)
       std::unique_ptr<gsl_monte_function> function_;
       std::shared_ptr<gsl_rng> rng_;
@@ -89,7 +93,7 @@ namespace CepGen
   class ThreadWorker
   {
     public:
-      ThreadWorker( std::mutex* mutex, std::shared_ptr<gsl_rng> rng, gsl_monte_function* function, GridParameters* grid, std::function<void( const Event&, unsigned long )> callback = nullptr );
+      ThreadWorker( std::mutex* mutex, gsl_rng* rng, gsl_monte_function* function, GridParameters* grid, std::function<void( const Event&, unsigned long )> callback = nullptr );
 
       /// Generate one event according to the grid parameters set in the initialisation
       /// \return A boolean stating if the generation was successful (in term of the computed weight for the phase space point)
@@ -114,12 +118,13 @@ namespace CepGen
       /// Selected bin at which the function will be evaluated
       int ps_bin_;
 
-      std::shared_ptr<gsl_rng> rng_;
-      std::shared_ptr<gsl_monte_function> function_;
-      std::shared_ptr<GridParameters> grid_;
+      gsl_rng* rng_;
+      gsl_monte_function* function_;
+      GridParameters* grid_;
 
-      std::shared_ptr<Parameters> params_;
+      Parameters* params_;
       std::mutex* mutex_;
+
       std::function<void( const Event&, unsigned long )> callback_;
   };
 }
