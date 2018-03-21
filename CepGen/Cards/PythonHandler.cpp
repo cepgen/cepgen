@@ -330,7 +330,7 @@ namespace CepGen
         }
         pythia8->setSeed( seed );
         feedPythia( pythia8, hadr, "pythiaPreConfiguration" );
-        pythia8->init();
+        pythia8->init( false );
         feedPythia( pythia8, hadr, "pythiaConfiguration" );
         feedPythia( pythia8, hadr, "pythiaProcessConfiguration" );
 

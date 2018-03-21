@@ -124,6 +124,9 @@ namespace CepGen
     std::cout << std::endl;
 #endif
 
+    if ( input_params_->hadroniser() )
+      input_params_->hadroniser()->setCrossSection( result, abserr );
+
     return res;
   }
 

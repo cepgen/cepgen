@@ -2,6 +2,7 @@
 #include "Pythia8Hadroniser.h"
 
 #include "CepGen/Parameters.h"
+#include "CepGen/Physics/Constants.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 #include "CepGen/Event/Event.h"
@@ -12,12 +13,21 @@ namespace CepGen
 {
   namespace Hadroniser
   {
+    Pythia8::Vec4
+    momToVec4( const Particle::Momentum& mom )
+    {
+      return Pythia8::Vec4( mom.px(), mom.py(), mom.pz(), mom.energy() );
+    }
+
     Pythia8Hadroniser::Pythia8Hadroniser( const Parameters& params ) :
-      GenericHadroniser( "pythia8" ),
-      max_attempts_( params.hadroniser_max_trials )
+      GenericHadroniser( "pythia8" ), max_attempts_( params.hadroniser_max_trials ),
+#ifdef PYTHIA8
+      pythia_( new Pythia8::Pythia ), lhaevt_( new LHAEvent( &params ) ),
+#endif
+      full_evt_( false ), params_( &params )
     {
 #ifdef PYTHIA8
-      pythia_.reset( new Pythia8::Pythia );
+      pythia_->setLHAupPtr( (Pythia8::LHAup*)lhaevt_.get() );
       pythia_->settings.parm( "Beams:idA", params.kinematics.inpdg.first );
       pythia_->settings.parm( "Beams:idB", params.kinematics.inpdg.second );
       pythia_->settings.parm( "Beams:eCM", params.kinematics.sqrtS() );
@@ -27,16 +37,32 @@ namespace CepGen
     }
 
     Pythia8Hadroniser::~Pythia8Hadroniser()
-    {}
+    {
+      pythia_->stat();
+    }
 
     bool
-    Pythia8Hadroniser::init()
+    Pythia8Hadroniser::init( bool enable_all_processes )
     {
-      bool res = pythia_->init();
-      if ( !res )
+      //enable_all_processes = true;//FIXME FIXME
+      if ( pythia_->settings.flag( "ProcessLevel:all" ) != enable_all_processes )
+        pythia_->settings.flag( "ProcessLevel:all", enable_all_processes );
+
+      if ( !pythia_->init() )
         FatalError( "Failed to initialise the Pythia8 core!\n\t"
                     "See the message above for more details." );
-      return res;
+
+      if ( params_->kinematics.mode == Kinematics::ElasticElastic )
+        pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 3 );
+      if ( params_->kinematics.mode == Kinematics::ElasticInelastic )
+        pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 1 );
+      if ( params_->kinematics.mode == Kinematics::InelasticElastic )
+        pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 2 );
+      if ( params_->kinematics.mode == Kinematics::InelasticInelastic )
+        pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 0 );
+
+      full_evt_ = enable_all_processes;
+      return true;
     }
 
     void
@@ -55,381 +81,287 @@ namespace CepGen
         return;
       }
       pythia_->settings.flag( "Random:setSeed", true );
-      pythia_->settings.parm( "Random:seed", seed );
+      pythia_->settings.mode( "Random:seed", seed );
 #endif
     }
 
+    void
+    Pythia8Hadroniser::setCrossSection( double xsec, double xsec_err )
+    {
+      lhaevt_->setCrossSection( 0, xsec, xsec_err );
+    }
+
     bool
-    Pythia8Hadroniser::decay( Event& ev, double& weight )
+    Pythia8Hadroniser::run( Event& ev, double& weight, bool full )
     {
       weight = 1.;
 #ifndef PYTHIA8
       FatalError( "Pythia8 is not linked to this instance!" );
 #else
-      //--- start by cleaning up the previous runs leftovers
-      pythia_->event.reset();
-      py_cg_corresp_.clear();
-      cg_py_corresp_.clear();
-
-      //===========================================================================================
-      // loop to add the particles
-      //===========================================================================================
-
-      for ( unsigned short i = 0; i < ev.numParticles(); ++i ) {
-        const Particle& part = ev.getConstById( i );
-        if ( part.role() != Particle::CentralSystem )
-          continue;
-
-        const Particle::Momentum mom = part.momentum();
-        const double mass2 = mom.energy2()-mom.p2(), mass = ( mass2 < 0 ) ? -sqrt( -mass2 ) : sqrt( mass2 );
-        Pythia8::Particle py8part( part.integerPdgId(), 23, 0, 0, 0, 0, 0, 0, mom.px(), mom.py(), mom.pz(), mom.energy(), mass );
-        unsigned short py_id = pythia_->event.append( py8part );
-        // populate the CepGen id <-> Pythia id map
-        cg_py_corresp_[part.id()] = py_id;
-        py_cg_corresp_[py_id] = part.id();
-      }
-
-      //===========================================================================================
-      // launch the resonances decays
-      //===========================================================================================
-
-      const unsigned short num_py_parts = pythia_->event.size();
-      unsigned short num_decays_trials = 0;
-      while ( true ) {
-        if ( !launchPythia( ev ) )
-          return false;
-        if ( pythia_->event.size() == num_py_parts )
-          return true;
-
-        //--- check if the final state is found
-        if ( min_ids_.size() == 0 )
-          break;
-        std::vector<unsigned short> ids = min_ids_;
-        for ( unsigned short i = num_py_parts; i < pythia_->event.size(); ++i ) {
-          const Pythia8::Particle& p = pythia_->event[i];
-          if ( !p.isFinal() )
-            continue;
-          std::vector<unsigned short>::iterator it = std::find( ids.begin(), ids.end(), abs( p.id() ) );
-          if ( it != ids.end() )
-            ids.erase( it );
-        }
-        if ( ids.size() == 0 )
-          break;
-        if ( ++num_decays_trials > 5 )
-          return false;
-      }
-
-      updateEvent( ev, weight );
-#endif
-      return true;
-    }
-
-    bool
-    Pythia8Hadroniser::run( Event& ev, double& weight )
-    {
-      weight = 1.;
-#ifndef PYTHIA8
-      FatalError( "Pythia8 is not linked to this instance!" );
-#else
-      const bool full_event = false;
-      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
-
-      //--- start by cleaning up the previous runs leftovers
-      pythia_->event.reset();
-      py_cg_corresp_.clear();
-      cg_py_corresp_.clear();
-
-      //===========================================================================================
-      // loop to add the particles
-      //===========================================================================================
-
-      unsigned short idx_remn1 = invalid_idx_, idx_remn2 = invalid_idx_;
-      for ( unsigned short i = 0; i < ev.numParticles(); ++i ) {
-        const Particle& part = ev.getConstById( i );
-
-        const Particle::Momentum mom = part.momentum();
-        const double mass2 = mom.energy2()-mom.p2(), mass = ( mass2 < 0 ) ? -sqrt( -mass2 ) : sqrt( mass2 );
-        Pythia8::Particle py8part( part.integerPdgId(), 0, 0, 0, 0, 0, 0, 0, mom.px(), mom.py(), mom.pz(), mom.energy(), mass );
-        unsigned short py_id = invalid_idx_;
-        switch ( part.role() ) {
-          case Particle::IncomingBeam1:
-          case Particle::IncomingBeam2: {
-            if ( !full_event )
-              continue;
-            py8part.status( -12 );
-            py_id = pythia_->event.append( py8part );
-          } break;
-          case Particle::Parton1:
-          case Particle::Parton2:
-          case Particle::Parton3: {
-            if ( !full_event )
-              continue;
-            py8part.status( -21 );
-            py_id = pythia_->event.append( py8part );
-          } break;
-          case Particle::Intermediate:
-          case Particle::UnknownRole:
-            continue;
-          case Particle::CentralSystem: {
-            if ( !full_event )
-              continue;
-            py8part.status( -23 ); // outgoing particles of the hardest subprocess
-            py_id = pythia_->event.append( py8part );
-          } break;
-          case Particle::OutgoingBeam1:
-          case Particle::OutgoingBeam2: {
-            py8part.status(
-              ( part.status() == Particle::Unfragmented )
-                ? 15
-                : 14 // final state proton
-            );
-//            py8part.scale( 20. );
-//            py8part.id( 2212 );
-            py_id = pythia_->event.append( py8part );
-
-            if ( part.status() == Particle::Unfragmented ) {
-              if ( part.role() == Particle::OutgoingBeam1 )
-                idx_remn1 = py_id;
-              if ( part.role() == Particle::OutgoingBeam2 )
-                idx_remn2 = py_id;
-            }
-          } break;
-        }
-        // populate the CepGen id <-> Pythia id map
-        if ( py_id != invalid_idx_ ) {
-          cg_py_corresp_[part.id()] = py_id;
-          py_cg_corresp_[py_id] = part.id();
-        }
-      }
-
-      //===========================================================================================
-      // Particles parentage
-      //===========================================================================================
-
-      if ( full_event ) {
-        for ( const auto& cg_py : cg_py_corresp_ ) {
-          const Particle& part = ev.getConstById( cg_py.first );
-          const auto mothers = part.mothers();
-          const auto daughters = part.daughters();
-          if ( mothers.size() == 0 && daughters.size() == 0 )
-            continue;
-          { //--- mothers part
-            unsigned short id_moth1 = 0, id_moth2 = 0;
-            if ( part.role() == Particle::CentralSystem ) {
-              const unsigned short id_p1 = ev.getOneByRole( Particle::Parton1 ).id();
-              const unsigned short id_p2 = ev.getOneByRole( Particle::Parton2 ).id();
-              if ( cg_py_corresp_.count( id_p1 ) > 0 )
-                id_moth1 = cg_py_corresp_.at( id_p1 );
-              if ( cg_py_corresp_.count( id_p2 ) > 0 )
-                id_moth2 = cg_py_corresp_.at( id_p2 );
-            }
-            else if ( mothers.size() > 0 ) {
-              if ( cg_py_corresp_.count( *mothers.begin() ) > 0 )
-                id_moth1 = cg_py_corresp_.at( *mothers.begin() );
-              if ( mothers.size() > 1 && cg_py_corresp_.count( *mothers.rbegin() ) > 0 )
-                id_moth2 = cg_py_corresp_.at( *mothers.rbegin() );
-            }
-            if ( id_moth2 > id_moth1+1 ) { // id2 <-> id1
-              id_moth1 = id_moth1 ^ id_moth2;
-              id_moth2 = id_moth1 ^ id_moth2;
-              id_moth1 = id_moth1 ^ id_moth2;
-            }
-            pythia_->event[cg_py.second].mothers( id_moth1, id_moth2 );
-          }
-          { //--- daughters part
-            unsigned short id_daugh1 = 0, id_daugh2 = 0;
-            if ( part.role() == Particle::Parton1 || part.role() == Particle::Parton2 ) {
-              const auto daugh_gg = ev.getOneByRole( Particle::Intermediate ).daughters();
-              if ( daugh_gg.size() == 0 )
-                continue;
-              if ( cg_py_corresp_.count( *daugh_gg.begin() ) > 0 )
-                id_daugh1 = cg_py_corresp_.at( *daugh_gg.begin() );
-              if ( daugh_gg.size() > 1 && cg_py_corresp_.count( *daugh_gg.rbegin() ) > 0 )
-                id_daugh2 = cg_py_corresp_.at( *daugh_gg.rbegin() );
-            }
-            else {
-              if ( daughters.size() == 0 )
-                continue;
-              if ( cg_py_corresp_.count( *daughters.begin() ) > 0 )
-                id_daugh1 = cg_py_corresp_.at( *daughters.begin() );
-              if ( daughters.size() > 1 && cg_py_corresp_.count( *daughters.rbegin() ) > 0 )
-                id_daugh2 = cg_py_corresp_.at( *daughters.rbegin() );
-            }
-            if ( id_daugh2 > id_daugh1+1 ) { // id2 <-> id1
-              id_daugh1 = id_daugh1 ^ id_daugh2;
-              id_daugh2 = id_daugh1 ^ id_daugh2;
-              id_daugh1 = id_daugh1 ^ id_daugh2;
-            }
-            pythia_->event[cg_py.second].daughters( id_daugh1, id_daugh2 );
-            //std::cout << cg_py.second << "|" << abs(pythia_->event[cg_py.second].mCalc() - pythia_->event[cg_py.second].m()) / std::max( 1.0, pythia_->event[cg_py.second].e()) << std::endl;
-          }
-        }
-      }
-
-      //===========================================================================================
-      // outgoing remnants massaging
-      //===========================================================================================
-
-      if ( idx_remn1 != invalid_idx_ ) {
-        const Particle::Momentum& p0 = ev.getOneByRole( Particle::IncomingBeam1 ).momentum();
-        const Particle::Momentum& p = ev.getOneByRole( Particle::OutgoingBeam1 ).momentum();
-        const double q2 = -( p-p0 ).mass2();
-        const double mx2 = p.mass2();
-        const double xbj = q2/( q2+mx2-mp2 );
-        fragmentState( idx_remn1, xbj );
-      }
-      if ( idx_remn2 != invalid_idx_ ) {
-        const Particle::Momentum& p0 = ev.getOneByRole( Particle::IncomingBeam2 ).momentum();
-        const Particle::Momentum& p = ev.getOneByRole( Particle::OutgoingBeam2 ).momentum();
-        const double q2 = -( p-p0 ).mass2();
-        const double my2 = p.mass2();
-        const double xbj = q2/( q2+my2-mp2 );
-        fragmentState( idx_remn2, xbj );
-      }
-      //pythia_->forceHadronLevel();
-
-//pythia_->event.list(true,true);
-//return true;
-
-      const unsigned short num_py_parts = pythia_->event.size();
-//pythia_->event.list(true,true);
-      //ev.dump();
-//      exit(0);
-
-      //===========================================================================================
-      // launch the hadronisation / resonances decays
-      //===========================================================================================
-
-      //std::cout << ":::::" << pythia_->settings.parm("Check:mTolErr") << std::endl;
-
-      if ( !launchPythia( ev ) )
-        return false;
-      if ( pythia_->event.size() == num_py_parts )
+      if ( !full && !pythia_->settings.flag( "ProcessLevel:resonanceDecays" ) )
         return true;
 
-//        pythia_->event.list(true,true);
-/*      for ( unsigned short i = 0; i < pythia_->event.size(); ++i ) {
-        const double err = abs( pythia_->event[i].mCalc()-pythia_->event[i].m() )/std::max( 1.0, pythia_->event[i].e());
-        std::cout << ">> " << pythia_->event[i].id() << "::" << err << "::" << (err>pythia_->settings.parm("Check:mTolErr")) << std::endl;
-      }*/
-//        exit(0);
-      //std::cout << "bad" << std::endl;
-      //InWarning( "Pythia8 failed to process the event." );
-      //pythia_->event.list( true, true );
+      if ( full && !full_evt_ )
+        init( true );
 
-      // check if something happened in the event processing by Pythia
-      // if not, return the event as it is...
+      const Pythia8::Vec4 mom_p1( momToVec4( ev.getOneByRole( Particle::Parton1 ).momentum() ) );
+      const Pythia8::Vec4 mom_p2( momToVec4( ev.getOneByRole( Particle::Parton2 ).momentum() ) );
 
-      updateEvent( ev, weight );
+      //===========================================================================================
+      // convert our event into a custom LHA format
+      //===========================================================================================
 
-      ev.dump();
+      lhaevt_->feedEvent( ev, full, mom_p1, mom_p2 );
+
+      //===========================================================================================
+      // launch the hadronisation / resonances decays, and update the event accordingly
+      //===========================================================================================
+
+      unsigned short num_try = 0;
+      while ( !pythia_->next() && num_try < ev.num_hadronisation_trials )
+        num_try++;
+
+      updateEvent( ev, weight, full, mom_p1, mom_p2 );
+
 #endif
       return true;
     }
 
-    bool
-    Pythia8Hadroniser::launchPythia( Event& ev )
+    Particle&
+    Pythia8Hadroniser::addParticle( Event& ev, const Pythia8::Particle& py_part, const Pythia8::Vec4& mom, unsigned short role, unsigned short offset ) const
     {
-      ev.num_hadronisation_trials = 0;
-      while ( !pythia_->next() ) {
-        //pythia_->event.list(true,true);
-        //if ( pythia_->event.size() != num_py_parts ) break; //FIXME discards any pythia error!
-        /*if ( proton_fragment ) {
-          //std::cout << success << "attempt " << ev.num_hadronisation_trials << " / " << max_attempts_ << std::endl;
-          pythia_->event.list(true,true);
-        }*/
-//        pythia_->stat();
-        if ( ++ev.num_hadronisation_trials > max_attempts_ )
-          return false;
-          //exit(0);
+      Particle& op = ev.addParticle( (Particle::Role)role );
+      op.setPdgId( static_cast<ParticleCode>( abs( py_part.id() ) ), py_part.charge() );
+      op.setStatus( py_part.isFinal()
+        ? Particle::FinalState
+        : Particle::Propagator
+      );
+      op.setMomentum( Particle::Momentum( mom.px(), mom.py(), mom.pz(), mom.e() ) );
+      op.setMass( mom.mCalc() );
+      lhaevt_->addCorresp( py_part.index()-offset, op.id() );
+      return op;
+    }
+
+    void
+    Pythia8Hadroniser::updateEvent( Event& ev, double& weight, bool full, const Pythia8::Vec4& boost_p1, const Pythia8::Vec4& boost_p2 ) const
+    {
+      unsigned short offset = 0;
+
+      Pythia8::RotBstMatrix mat, mat_b1, mat_b2;
+      if ( full )
+        mat.fromCMframe( boost_p1, boost_p2 );
+
+      for ( unsigned short i = 1; i < pythia_->event.size(); ++i ) {
+        if ( pythia_->event[i].status() != -12 )
+          continue;
+        // skip the incoming particles
+        offset++;
       }
-      return true;
-    }
+      if ( offset == 2 ) {
+        Pythia8::Vec4 ip1 = pythia_->event[1].p(), ip2 = pythia_->event[2].p();
+        mat_b1.bst( ip1-pythia_->event[offset+1].p(), ip1-boost_p1 );
+        mat_b2.bst( ip2-pythia_->event[offset+2].p(), ip2-boost_p2 );
+      }
 
-    void
-    Pythia8Hadroniser::fragmentState( unsigned short idx, double xbj )
-    {
-      const Pythia8::Particle& remn = pythia_->event[idx];
-      // specify the quark/diquark flavours
-      //FIXME naive approach (weighted by e_q^2/1-e_dq^2); to be improved
-      const double rnd = 1./RAND_MAX * rand();
-      unsigned short pdg_q = 0, pdg_dq = 0;
-      if      ( rnd < 1./9. ) { pdg_q = 1; pdg_dq = 2203; }
-      else if ( rnd < 5./9. ) { pdg_q = 2; pdg_dq = 2101; }
-      else                    { pdg_q = 2; pdg_dq = 2103; }
-      // then assign the quark/diquark a 4-momentum
-      const double px_x = remn.px(), px_y = remn.py(), px_z = remn.pz(), ex = remn.e();
-      const double xdq = 1.-xbj;
-      //const double m_q = pythia_->particleData.m0( pdg_q );
-      //const double m_dq = pythia_->particleData.m0( pdg_dq );
-      // fractional momenta of the two partons:
-      // -> x * p_X for the quark
-      // -> ( 1-x ) * p_X for the diquark
-      Pythia8::Particle diquark( pdg_dq, 63, idx, 0, 0, 0, 0, 100+idx, px_x*xdq, px_y*xdq, px_z*xdq, ex*xdq );
-      Pythia8::Particle   quark( pdg_q,  63, idx, 0, 0, 0, 100+idx, 0, px_x*xbj, px_y*xbj, px_z*xbj, ex*xbj );
-      //diquark.e( diquark.eCalc() );
-      //quark.e( quark.eCalc() );
-      diquark.m( diquark.mCalc() );
-      quark.m( quark.mCalc() );
-      //std::cout << "> " << xdq << "|" << xbj << std::endl;
-      const unsigned short id_dq = pythia_->event.append( diquark );
-      const unsigned short id_q = pythia_->event.append( quark );
-      // keep up with the particles parentage
-      pythia_->event[idx].daughter1( id_dq );
-      pythia_->event[idx].daughter2( id_q );
-      //std::cout << "-->" << diquark.m() << "|" << quark.m() << std::endl;
-      // set the quark/diquark to be hadronised through a string
-      pythia_->event[idx].status( -15 );
-    }
-
-    void
-    Pythia8Hadroniser::updateEvent( Event& ev, double& weight )
-    {
-      for ( unsigned short i = 1; i < pythia_->event.size(); ++i ) { // skip the central system
+      for ( unsigned short i = 1+offset; i < pythia_->event.size(); ++i ) {
         const Pythia8::Particle& p = pythia_->event[i];
-        if ( py_cg_corresp_.count( i ) > 0 ) {
-          // the particle is already in the event content
-          Particle& cg_part = ev.getById( py_cg_corresp_.at( i ) );
-          if ( p.daughterList().size() == 0 )
+        const unsigned short cg_id = lhaevt_->cgPart( i-offset );
+        if ( cg_id != LHAEvent::invalid_id ) { // particle already in the event
+          Particle& cg_part = ev.getById( cg_id );
+          if ( abs( p.id() ) != (unsigned short)cg_part.pdgId() )
+            FatalError( Form( "Event list corruption detected for particle %d", i ) );
+          if ( p.particleDataEntry().sizeChannels() == 0 )
             continue;
-          if ( cg_part.role() != Particle::CentralSystem ) {
-            cg_part.setStatus( Particle::Fragmented );
-            continue;
-          }
           weight *= p.particleDataEntry().pickChannel().bRatio();
           cg_part.setStatus( Particle::Resonance );
           continue;
         }
-        // the particle was not yet included in the CepGen event
-        const std::vector<int> mothers = p.motherList();
-        if ( mothers.size() == 0 ) // isolated particle
-          continue;
-
-        Particle::Role role = Particle::CentralSystem;
-        if ( py_cg_corresp_.count( mothers[0] ) > 0 ) {
-          const Particle& moth = ev.getById( py_cg_corresp_.at( mothers[0] ) );
-          if ( moth.role() == Particle::OutgoingBeam1
-            || moth.role() == Particle::OutgoingBeam2 )
-            role = moth.role();
+        // new particle to be added
+        Particle::Role role = (Particle::Role)findRole( ev, p, offset );
+        Pythia8::Vec4 mom = p.p();
+        switch ( role ) {
+          case Particle::OutgoingBeam1: // no break!
+            ev.getByRole( Particle::OutgoingBeam1 )[0].setStatus( Particle::Fragmented );
+            if ( abs( p.status() ) != 61 ) {
+              mom.rotbst( mat_b1 );
+              break;
+            }
+          case Particle::OutgoingBeam2: // no break!
+            ev.getByRole( Particle::OutgoingBeam2 )[0].setStatus( Particle::Fragmented );
+            if ( abs( p.status() ) != 61 ) {
+              mom.rotbst( mat_b2 );
+              break;
+            }
+          default:
+            mom.rotbst( mat );
+            break;
         }
-
-        Particle& op = ev.addParticle( role );
-        cg_py_corresp_[op.id()] = i;
-        py_cg_corresp_[i] = op.id();
-
-        op.setPdgId( static_cast<ParticleCode>( abs( p.id() ) ), p.charge() );
-        op.setStatus( p.isFinal()
-          ? Particle::FinalState
-          : Particle::Propagator
-        );
-        op.setMomentum( Particle::Momentum( p.px(), p.py(), p.pz(), p.e() ) );
-        for ( const auto& moth : mothers ) {
-          if ( moth != 0 && py_cg_corresp_.count( moth ) == 0 )
-            FatalError( Form( "Particle with id=%d was not found in the event content!", moth ) );
-          op.addMother( ev.getById( py_cg_corresp_.at( moth ) ) );
+        // found the role ; now we can add the particle
+        Particle& cg_part = addParticle( ev, p, mom, (unsigned short)role, offset );
+        for ( const auto& moth_id : p.motherList() ) {
+          if ( moth_id <= offset )
+            continue;
+          const unsigned short moth_cg_id = lhaevt_->cgPart( moth_id-offset );
+          if ( moth_cg_id != LHAEvent::invalid_id ) {
+            Particle& moth = ev.getById( moth_cg_id );
+            cg_part.addMother( moth );
+          }
+          else {
+            Particle& cg_moth = addParticle( ev, pythia_->event[moth_id], mom, (unsigned short)role, offset );
+            cg_part.addMother( cg_moth );
+          }
         }
       }
     }
+
+    unsigned short
+    Pythia8Hadroniser::findRole( const Event& ev, const Pythia8::Particle& p, unsigned short offset ) const
+    {
+      for ( const auto& par_id : p.motherList() ) {
+        if ( offset > 0 && par_id == 1 )
+          return (unsigned short)Particle::OutgoingBeam1;
+        if ( offset > 0 && par_id == 2 )
+          return (unsigned short)Particle::OutgoingBeam2;
+        const unsigned short par_cg_id = lhaevt_->cgPart( par_id-offset );
+        if ( par_cg_id != LHAEvent::invalid_id )
+          return (unsigned short)ev.getConstById( par_cg_id ).role();
+        return findRole( ev, pythia_->event[par_id], offset );
+      }
+      return (unsigned short)Particle::UnknownRole;
+    }
+  }
+
+  //================================================================================================
+  // Custom LHA event definition
+  //================================================================================================
+
+  const double LHAEvent::mp_ = ParticleProperties::mass( Proton );
+  const double LHAEvent::mp2_ = LHAEvent::mp_*LHAEvent::mp_;
+
+  LHAEvent::LHAEvent( const Parameters* params ) :
+    LHAup( 4 ), params_( params )
+  {
+    addProcess( 0, 10., 0., 100. );
+    if ( params_ ) {
+      setBeamA( (short)params_->kinematics.inpdg.first, params_->kinematics.inp.first );
+      setBeamB( (short)params_->kinematics.inpdg.second, params_->kinematics.inp.second );
+    }
+  }
+
+  void
+  LHAEvent::setCrossSection( int id, double xsec, double xsec_err )
+  {
+    setXSec( id, xsec );
+    setXErr( id, xsec_err );
+    //listInit();
+  }
+
+  void
+  LHAEvent::feedEvent( const Event& ev, bool full, const Pythia8::Vec4& boost_p1, const Pythia8::Vec4& boost_p2 )
+  {
+    const double scale = ev.getOneByRole( Particle::Intermediate ).mass();
+    setProcess( 0, 1., scale, Constants::alphaEM, Constants::alphaQCD );
+    Pythia8::RotBstMatrix mat;
+
+    double x1 = 0., x2 = 0.;
+    if ( full ) {
+      const Particle& op1 = ev.getOneByRole( Particle::OutgoingBeam1 ), &op2 = ev.getOneByRole( Particle::OutgoingBeam2 );
+      const double q2_1 = -boost_p1.m2Calc(), x1 = q2_1/( q2_1+op1.mass2()-mp2_ );
+      const double q2_2 = -boost_p2.m2Calc(), x2 = q2_2/( q2_2+op2.mass2()-mp2_ );
+      setIdX( op1.integerPdgId(), op2.integerPdgId(), x1, x2 );
+      mat.toCMframe( boost_p1, boost_p2 );
+    }
+
+    unsigned short parton1_id = 0, parton2_id = 0, parton1_pdgid = 0, parton2_pdgid = 0;
+    for ( const auto& p : ev.particles() ) {
+      switch ( p.role() ) {
+        case Particle::Parton1:
+        case Particle::Parton2: {
+          if ( p.role() == Particle::Parton1 ) {
+            parton1_id = sizePart();
+            parton1_pdgid = p.integerPdgId();
+          }
+          else {
+            parton2_id = sizePart();
+            parton2_pdgid = p.integerPdgId();
+          }
+          py_cg_corresp_.emplace_back( sizePart(), p.id() );
+
+          Pythia8::Vec4 mom_part( p.momentum().px(), p.momentum().py(), p.momentum().pz(), p.momentum().energy() );
+          mom_part.rotbst( mat );
+//          std::cout << boost_cm.px() << "\t" << p.momentum() << "\n" << mom_part << std::endl;
+
+          if ( full )
+            addParticle( p.integerPdgId(), -2, 0, 0, 0, 0, mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), p.mass(), 0., 0., -mom_part.mCalc() );
+          else
+            addParticle( p.integerPdgId(), -2, 0, 0, 0, 0, mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), mom_part.mCalc(), 0., 0., 0. );
+        } break;
+        case Particle::CentralSystem: {
+          py_cg_corresp_.emplace_back( sizePart(), p.id() );
+          Pythia8::Vec4 mom_part( p.momentum().px(), p.momentum().py(), p.momentum().pz(), p.momentum().energy() );
+          mom_part.rotbst( mat );
+          addParticle( p.integerPdgId(), 1, parton1_id, parton2_id, 0, 0, mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), mom_part.mCalc(), 0., 0., 0. );
+          continue;
+        } break;
+        default:
+          continue;
+      }
+    }
+    if ( full )
+      setPdf( parton1_pdgid, parton2_pdgid, x1, x2, scale, 0., 0., true );
+  }
+
+  bool
+  LHAEvent::setInit()
+  {
+    return true;
+  }
+
+  bool
+  LHAEvent::setEvent( int )
+  {
+    return true;
+  }
+
+  void
+  LHAEvent::setProcess( int id, double xsec, double q2_scale, double alpha_qed, double alpha_qcd )
+  {
+    LHAup::setProcess( id, xsec, q2_scale, alpha_qed, alpha_qcd );
+    py_cg_corresp_.clear();
+  }
+
+  unsigned short
+  LHAEvent::cgPart( unsigned short py_id ) const
+  {
+    for ( const auto& py_cg : py_cg_corresp_ )
+      if ( py_cg.first == py_id )
+        return py_cg.second;
+    return invalid_id;
+  }
+
+  unsigned short
+  LHAEvent::pyPart( unsigned short cg_id ) const
+  {
+    for ( const auto& py_cg : py_cg_corresp_ )
+      if ( py_cg.second == cg_id )
+        return py_cg.first;
+    return invalid_id;
+  }
+
+  void
+  LHAEvent::addCorresp( unsigned short py_id, unsigned short cg_id )
+  {
+    py_cg_corresp_.emplace_back( py_id, cg_id );
+  }
+
+  void
+  LHAEvent::dumpCorresp() const
+  {
+    std::ostringstream oss;
+    oss << "List of Pythia <-> CepGen particle ids correspondance";
+    for ( const auto& py_cg : py_cg_corresp_ )
+      oss << "\n\t" << py_cg.first << " <-> " << py_cg.second;
+    Information( oss.str() );
   }
 }
 

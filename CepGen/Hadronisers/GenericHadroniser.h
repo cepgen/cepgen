@@ -8,6 +8,7 @@ namespace CepGen
 {
   class Event;
   class Particle;
+  class Parameters;
   /// Location for all hadronisers to be run downstream to the events generation
   namespace Hadroniser
   {
@@ -26,15 +27,16 @@ namespace CepGen
         explicit GenericHadroniser( const char* name = "unnamed_hadroniser" ) : name_( name ) {}
         virtual ~GenericHadroniser() {}
 
-        virtual bool decay( Event& ev, double& weight ) = 0;
         /// Hadronise a full event
         /// \param[inout] ev Event to hadronise
         /// \param[inout] weight Event weight after hadronisation
+        /// \param[in] full Perform the full state hadronisation (incl. remnants fragmentation)
         /// \return Boolean stating whether or not the hadronisation occured successfully
-        virtual bool run( Event& ev, double& weight ) = 0;
+        virtual bool run( Event& ev, double& weight, bool full ) = 0;
         /// Specify a random numbers generator seed for the hadroniser
         /// \param[in] seed A RNG seed
         virtual void setSeed( long long seed ) = 0;
+        virtual void setCrossSection( double xsec, double xsec_err ) {};
 
         /// Return a human-readable name for this hadroniser
         inline std::string name() const { return name_; }

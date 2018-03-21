@@ -1,12 +1,13 @@
 import Config.Core as cepgen
 
 pythia8 = cepgen.Module('pythia8',
-    seed = 0,
+    seed = 1000,
     maxTrials = 1,
     pythiaPreConfiguration = (
         #'Init:showAllSettings = on',
         # disable all generation processes
-        'ProcessLevel:all = off',
+        #'ProcessLevel:all = off',
+        'Beams:frameType = 5',
         # printout properties
         # start by disabling some unnecessary output
         'Next:numberCount = 0',
@@ -18,22 +19,23 @@ pythia8 = cepgen.Module('pythia8',
         #'PartonLevel:Remnants = on',
         #'PartonLevel:all = off',
         #'PartonLevel:MPI = on',
-        'HadronLevel:all = on',
+        #'HadronLevel:all = on',
         #'Diffraction:doHard = on',
         #'HardQCD:all = on',
         # disable all Bremsstrahlung/FSR photon production
-        'PartonLevel:all = on',
-        'PartonLevel:ISR = off',
-        'PartonLevel:FSR = off',
-        'PartonLevel:MPI = on',
+        #'PartonLevel:all = on',
+        #'PartonLevel:ISR = off',
+        #'PartonLevel:FSR = off',
+        #'PartonLevel:MPI = on',
         'ParticleDecays:allowPhotonRadiation = off',
+        'BeamRemnants:primordialKT = off',
     ),
     pythiaConfiguration = (
         'Tune:preferLHAPDF = 2',
         #'Main:timesAllowErrors = 10000',
         #'Check:epTolErr = 0.01',
-        'Check:abortIfVeto = off',
-        'Beams:setProductionScalesFromLHEF = off',
+        #'Check:abortIfVeto = off',
+        #'Beams:setProductionScalesFromLHEF = off',
         'SLHA:keepSM = on',
         'SLHA:minMassSM = 1000.',
         'ParticleDecays:limitTau0 = on',
