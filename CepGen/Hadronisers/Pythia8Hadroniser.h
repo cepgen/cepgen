@@ -14,7 +14,7 @@ namespace CepGen
   class LHAEvent : public Pythia8::LHAup
   {
     public:
-      LHAEvent( const Parameters* );
+      explicit LHAEvent( const Parameters* );
       void feedEvent( const Event& ev, bool full, const Pythia8::Vec4& boost_p1, const Pythia8::Vec4& boost_p2 );
       bool setInit() override;
       bool setEvent( int ) override;

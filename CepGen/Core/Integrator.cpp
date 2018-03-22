@@ -271,7 +271,7 @@ namespace CepGen
   ThreadWorker::ThreadWorker( std::mutex* mutex,
                               gsl_rng* rng, gsl_monte_function* function,
                               GridParameters* grid,
-                              std::function<void( const Event&, unsigned long )> callback ) :
+                              std::function<void( const Event&, unsigned long )>& callback ) :
     ps_bin_( 0 ), rng_( rng ), function_( function ), grid_( grid ),
     mutex_( mutex ), callback_( callback )
   {
