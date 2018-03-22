@@ -6,6 +6,9 @@
 
 #include <memory>
 
+#include <gsl/gsl_monte_vegas.h>
+#include <gsl/gsl_monte_miser.h>
+
 namespace CepGen
 {
   class Event;
