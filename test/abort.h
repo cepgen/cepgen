@@ -20,7 +20,7 @@ class AbortHandler
       action_.sa_flags = flags;
       if ( sigaction( SIGINT, &action_, nullptr ) != 0
         || sigaction( SIGTERM, &action_, nullptr ) != 0 )
-        throw CepGen::Exception( __PRETTY_FUNCTION__, "Failed to initialise the C-c handler!", CepGen::FatalError ); 
+        throw CepGen::Exception( __PRETTY_FUNCTION__, "Failed to initialise the C-c handler!", CepGen::FatalError );
     }
 
   private:
