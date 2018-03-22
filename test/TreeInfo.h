@@ -67,11 +67,8 @@ namespace CepGen
     double E[maxpart], m[maxpart], charge[maxpart];
     int pdg_id[maxpart], parent1[maxpart], parent2[maxpart];
     int stable[maxpart], role[maxpart], status[maxpart];
-    TClonesArray* kinematics;
 
-    TreeEvent() : tree( nullptr ), kinematics( new TClonesArray( "TLorentzVector", maxpart ) ) {
-      for ( unsigned short i = 0; i < maxpart; ++i )
-        new ( kinematics->operator[]( i ) ) TLorentzVector;
+    TreeEvent() : tree( nullptr ) {
       clear();
     }
 
@@ -84,11 +81,7 @@ namespace CepGen
       for ( unsigned short i = 0; i < maxpart; ++i ) {
         pt[i] = eta[i] = phi[i] = rapidity[i] = E[i] = m[i] = charge[i] = 0.;
         pdg_id[i] = parent1[i] = parent2[i] = stable[i] = role[i] = status[i] = 0;
-        momentum( i )->Clear();
       }
-    }
-    TLorentzVector* momentum( unsigned short i ) {
-      return static_cast<TLorentzVector*>( kinematics->At( i ) );
     }
     void fill() {
       if ( !tree )
@@ -103,7 +96,6 @@ namespace CepGen
       tree->Branch( "npart", &np, "npart/I" );
       tree->Branch( "nremn_charged", nremn_ch, "nremn_charged[2]/I" );
       tree->Branch( "nremn_neutral", nremn_nt, "nremn_neutral[2]/I" );
-      tree->Branch( "kinematics", "TClonesArray", &kinematics, 32000, 0 );
       tree->Branch( "role", role, "role[npart]/I" );
       tree->Branch( "pt", pt, "pt[npart]/D" );
       tree->Branch( "eta", eta, "eta[npart]/D" );
@@ -126,7 +118,6 @@ namespace CepGen
       tree->SetBranchAddress( "npart", &np );
       tree->SetBranchAddress( "nremn_charged", nremn_ch );
       tree->SetBranchAddress( "nremn_neutral", nremn_ch );
-      tree->SetBranchAddress( "kinematics", &kinematics );
       tree->SetBranchAddress( "role", role );
       tree->SetBranchAddress( "pt", pt );
       tree->SetBranchAddress( "eta", eta );

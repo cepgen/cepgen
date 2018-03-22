@@ -14,7 +14,6 @@ class AbortHandler
 {
   public:
     AbortHandler( int flags = SA_SIGINFO ) {
-      memset( &action_, 0, sizeof( struct sigaction ) );
       action_.sa_sigaction = handle_ctrl_c;
       sigemptyset( &action_.sa_mask );
       action_.sa_flags = flags;

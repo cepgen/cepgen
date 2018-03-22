@@ -32,7 +32,6 @@ void fill_event_tree( const CepGen::Event& event, unsigned long ev_id )
   for ( const auto& p : event.particles() ) {
     const CepGen::Particle::Momentum m = p.momentum();
 
-    ev->momentum( ev->np )->SetPxPyPzE( m.px(), m.py(), m.pz(), m.energy() );
     ev->rapidity[ev->np] = m.rapidity();
     ev->pt[ev->np] = m.pt();
     ev->eta[ev->np] = m.eta();

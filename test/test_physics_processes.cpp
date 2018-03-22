@@ -27,7 +27,7 @@ main( int argc, char* argv[] )
   // process -> { pt cut -> { kinematics -> ( sigma, delta(sigma) ) } }
   vector<pair<const char*,ValuesAtCutMap> > values_map = {
     //--- LPAIR values at sqrt(s) = 13 TeV
-    /*{ "lpair", {
+    { "lpair", {
       { 3.0, { // pt cut
         { "elastic",    { 2.0871703e1, 3.542e-2 } },
         { "singlediss", { 1.5042536e1, 3.256e-2 } },
@@ -38,7 +38,7 @@ main( int argc, char* argv[] )
         { "singlediss", { 4.8504819e-1, 1.171e-3 } },
         { "doublediss", { 6.35650e-1, 1.93968e-3 } }
       } },
-    } },*/
+    } },
     //--- PPTOLL values
     { "pptoll", {
       { 3.0, { // pt cut
