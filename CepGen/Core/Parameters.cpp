@@ -17,14 +17,13 @@ namespace CepGen
     kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
     hadroniser_max_trials( param.hadroniser_max_trials ),
     taming_functions( std::move( param.taming_functions ) ),
-    process_( param.process_ ), hadroniser_( std::move( param.hadroniser_ ) ),
+    process_( std::move( param.process_ ) ), hadroniser_( std::move( param.hadroniser_ ) ),
     store_( param.store_ ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ )
   {}
 
   Parameters::Parameters( const Parameters& param ) :
     kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
     hadroniser_max_trials( param.hadroniser_max_trials ),
-    process_( param.process_ ),
     store_( param.store_ ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ )
   {}
 
@@ -78,12 +77,6 @@ namespace CepGen
   Parameters::setProcess( Process::GenericProcess* proc )
   {
     process_.reset( proc );
-  }
-
-  void
-  Parameters::setProcess( std::shared_ptr<Process::GenericProcess> proc )
-  {
-    process_ = proc;
   }
 
   Hadroniser::GenericHadroniser*

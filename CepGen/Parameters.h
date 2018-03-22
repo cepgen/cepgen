@@ -37,8 +37,6 @@ namespace CepGen
       std::string processName() const;
       /// Set the process to study
       void setProcess( Process::GenericProcess* proc );
-      /// Set the process to study
-      void setProcess( std::shared_ptr<Process::GenericProcess> proc );
 
       //----- events kinematics
 
@@ -122,7 +120,7 @@ namespace CepGen
       inline unsigned int numGeneratedEvents() const { return num_gen_events_; }
 
     private:
-      std::shared_ptr<Process::GenericProcess> process_;
+      std::unique_ptr<Process::GenericProcess> process_;
       std::unique_ptr<Hadroniser::GenericHadroniser> hadroniser_;
 
       bool store_;

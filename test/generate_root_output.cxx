@@ -15,20 +15,16 @@
 
 using namespace std;
 
-TFile* file = nullptr;
-TTree* ev_tree = nullptr;
-CepGen::TreeRun* run = nullptr;
-CepGen::TreeEvent* ev = nullptr;
+std::unique_ptr<CepGen::TreeRun> run;
+std::unique_ptr<CepGen::TreeEvent> ev;
 
 void fill_event_tree( const CepGen::Event& event, unsigned long ev_id )
 {
   //if ( ev_id % 10 == 0 )
   //  cout << ">> event " << ev_id << " generated" << endl;
 
-  if ( !ev_tree || !ev || !run )
+  if ( !ev || !run )
     return;
-
-  ev->clear();
 
   ev->gen_time = event.time_generation;
   ev->tot_time = event.time_total;
@@ -36,7 +32,7 @@ void fill_event_tree( const CepGen::Event& event, unsigned long ev_id )
   for ( const auto& p : event.particles() ) {
     const CepGen::Particle::Momentum m = p.momentum();
 
-    //ev.kinematics[ev.np].SetXYZM( m.px(), m.py(), m.pz(), m.mass() );
+    ev->momentum( ev->np )->SetPxPyPzE( m.px(), m.py(), m.pz(), m.energy() );
     ev->rapidity[ev->np] = m.rapidity();
     ev->pt[ev->np] = m.pt();
     ev->eta[ev->np] = m.eta();
@@ -54,7 +50,7 @@ void fill_event_tree( const CepGen::Event& event, unsigned long ev_id )
     ev->np++;
   }
   run->num_events += 1;
-  ev_tree->Fill();
+  ev->fill();
 }
 
 /**
@@ -81,7 +77,7 @@ int main( int argc, char* argv[] ) {
   //----- open the output root file
 
   const TString filename = ( argc > 2 ) ? argv[2] : "events.root";
-  file = TFile::Open( filename, "recreate" );
+  auto file = TFile::Open( filename, "recreate" );
   if ( !file )
     throw CepGen::Exception( __PRETTY_FUNCTION__, "ERROR while trying to create the output file!", CepGen::FatalError );
 
@@ -92,32 +88,24 @@ int main( int argc, char* argv[] ) {
 
   //----- then generate the events and the container tree structure
 
-  ev_tree = new TTree( "events", "A TTree containing information from the events produced from CepGen" );
+  std::unique_ptr<TTree> ev_tree( new TTree( "events", "A TTree containing information from the events produced from CepGen" ) );
 
-  run = new CepGen::TreeRun;
+  run.reset( new CepGen::TreeRun );
   run->create();
   run->xsect = xsec;
   run->errxsect = err;
   run->litigious_events = 0;
   run->sqrt_s = mg.parameters->kinematics.sqrtS();
 
-  ev = new CepGen::TreeEvent;
-  ev->create( ev_tree );
+  ev.reset( new CepGen::TreeEvent );
+  ev->create( ev_tree.get() );
 
-  try {
-    mg.generate( fill_event_tree );
-  } catch ( CepGen::Exception& e ) {
-    cout << "terminating" << endl;
-    mg.terminate();
-  }
-  //cout << "Number of litigious events = " << run.litigious_events << " -> fraction = " << ( run.litigious_events*100./ngen ) << "%" << endl;
+  // launch the events generation
+  mg.generate( fill_event_tree );
+
   run->fill();
   file->Write();
   Information( Form( "Events written on \"%s\".", filename.Data() ) );
-
-  delete file;
-  delete run;
-  delete ev;
 
   return 0;
 }

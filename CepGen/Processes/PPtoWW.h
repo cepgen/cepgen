@@ -12,7 +12,6 @@ namespace CepGen
     {
       public:
         PPtoWW();
-        std::shared_ptr<GenericProcess> clone() const override { return std::make_shared<PPtoWW>( *this ); }
 
       private:
         static const double mw_, mw2_;

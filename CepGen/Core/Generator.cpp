@@ -12,6 +12,7 @@
 
 namespace CepGen
 {
+  volatile int gSignal;
   Generator::Generator() :
     parameters( std::unique_ptr<Parameters>( new Parameters ) ),
     cross_section_( -1. ), cross_section_error_( -1. )
@@ -155,13 +156,7 @@ namespace CepGen
     integrator_->generate( parameters->generation.maxgen, callback );
 
     Information( Form( "%g events generated",
-                       parameters->generation.maxgen*1. ) );
-  }
-
-  void
-  Generator::terminate()
-  {
-    integrator_->grid.finishing = true;
+                       parameters->generation.ngen*1. ) );
   }
 
   void

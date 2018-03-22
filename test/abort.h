@@ -7,19 +7,22 @@
 
 namespace CepGen
 {
-  struct AbortException : Exception { using Exception::Exception; };
-}
-
-void handle_ctrl_c( int signal ) {
-  throw CepGen::AbortException( __PRETTY_FUNCTION__, Form( "Process aborted with signal %d", signal ), CepGen::JustWarning );
+  extern volatile int gSignal;
 }
 
 struct AbortHandler
 {
   AbortHandler() {
-    std::signal( SIGINT, handle_ctrl_c );
-    std::signal( SIGTERM, handle_ctrl_c );
+    memset( &action, 0, sizeof( struct sigaction ) );
+    action.sa_sigaction = handle_ctrl_c;
+    action.sa_flags = SA_SIGINFO;
+    sigaction( SIGINT, &action, nullptr );
+    sigaction( SIGTERM, &action, nullptr );
   }
+  static void handle_ctrl_c( int signal, siginfo_t*, void* ) {
+    CepGen::gSignal = signal;
+  }
+  struct sigaction action;
 };
 
 #endif

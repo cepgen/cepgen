@@ -231,8 +231,8 @@ namespace CepGen
       p->generation.last_event->time_total = tmr.elapsed();
 
       if ( log_level >= Logger::Debug )
-        Debugging( Form( "Indiv. time (gen+hadr+cuts): %5.6f ms",
-                         p->generation.last_event->time_total*1.e3 ) );
+        Debugging( Form( "[process 0x%zx] Individual time (gen+hadr+cuts): %5.6f ms",
+                         p->process(), p->generation.last_event->time_total*1.e3 ) );
     }
 
     //=============================================================================================

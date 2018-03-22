@@ -41,8 +41,6 @@ namespace CepGen
         GenericProcess( const GenericProcess& );
         virtual ~GenericProcess() {}
 
-        virtual std::shared_ptr<GenericProcess> clone() const = 0;
-
         /// Restore the Event object to its initial state
         inline void clearEvent() { event_->restore(); }
         /// Set the kinematics of the incoming state particles

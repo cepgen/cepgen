@@ -258,6 +258,16 @@ namespace CepGen
 
   //------------------------------------------------------------------------------------------------
 
+  GridParameters::GridParameters() :
+    grid_prepared( false ), gen_prepared( false ),
+    correc( 0. ), correc2( 0. ),
+    f_max2( 0. ), f_max_diff( 0. ), f_max_old( 0. ), f_max_global( 0. )
+  {}
+
+  //------------------------------------------------------------------------------------------------
+
+  extern int gSignal;
+
   ThreadWorker::ThreadWorker( std::mutex* mutex,
                               gsl_rng* rng, gsl_monte_function* function,
                               GridParameters* grid,
@@ -267,8 +277,6 @@ namespace CepGen
   {
     if ( function )
       params_ = static_cast<Parameters*>( function->params );
-
-    //params_->setProcess( params_->process()->clone() );
   }
 
   bool
@@ -280,8 +288,8 @@ namespace CepGen
     while ( true ) {
       if ( !next() )
         continue;
-      if ( grid_->finishing )
-        throw Exception( __PRETTY_FUNCTION__, "Finishing", JustWarning );
+      if ( gSignal != 0 )
+        return false;
       if ( params_->generation.ngen >= params_->generation.maxgen )
         return true;
     }
@@ -293,7 +301,6 @@ namespace CepGen
   {
     if ( params_->generation.ngen >= params_->generation.maxgen )
       return true;
-    //std::cout << grid_->finishing << std::endl;
 
     const unsigned int max = pow( grid_->mbin_, function_->dim );
 
