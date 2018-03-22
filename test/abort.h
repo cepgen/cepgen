@@ -10,19 +10,24 @@ namespace CepGen
   extern volatile int gSignal;
 }
 
-struct AbortHandler
+class AbortHandler
 {
-  AbortHandler() {
-    memset( &action, 0, sizeof( struct sigaction ) );
-    action.sa_sigaction = handle_ctrl_c;
-    action.sa_flags = SA_SIGINFO;
-    sigaction( SIGINT, &action, nullptr );
-    sigaction( SIGTERM, &action, nullptr );
-  }
-  static void handle_ctrl_c( int signal, siginfo_t*, void* ) {
-    CepGen::gSignal = signal;
-  }
-  struct sigaction action;
+  public:
+    AbortHandler( int flags = SA_SIGINFO ) {
+      memset( &action_, 0, sizeof( struct sigaction ) );
+      action_.sa_sigaction = handle_ctrl_c;
+      sigemptyset( &action_.sa_mask );
+      action_.sa_flags = flags;
+      if ( sigaction( SIGINT, &action_, nullptr ) != 0
+        || sigaction( SIGTERM, &action_, nullptr ) != 0 )
+        throw CepGen::Exception( __PRETTY_FUNCTION__, "Failed to initialise the C-c handler!", CepGen::FatalError ); 
+    }
+
+  private:
+    static void handle_ctrl_c( int signal, siginfo_t*, void* ) {
+      CepGen::gSignal = signal;
+    }
+    struct sigaction action_;
 };
 
 #endif
