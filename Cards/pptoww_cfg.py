@@ -13,10 +13,9 @@ hadroniser.pythiaProcessConfiguration += (
     '24:onNegIfAny = 13', # enable e-nue + mu-numu final states
 )
 hadroniser.pythiaPreConfiguration += (
-    'PartonLevel:MPI = off',
-    #'PartonLevel:ISR = off',
-    #'PartonLevel:FSR = off',
-    #'HadronLevel:all = off',
+    #'PartonLevel:MPI = on',
+    #'PartonLevel:ISR = on',
+    'PartonLevel:FSR = on',
     'ProcessLevel:resonanceDecays = off',
 #    'BeamRemnants:unresolvedHadron = 3',
 #    'Photon:ProcessType = 4',
@@ -63,13 +62,7 @@ process = ktProcess.clone('pptoww',
     )
 )
 
-#integrator.numPoints = 10000
-
 #--- import the default generation parameters
 from Config.generator_cff import generator
 generator.numEvents = 1000
 generator.printEvery = 100
-
-#print(process)
-#print(integrator)
-#print(hadroniser)

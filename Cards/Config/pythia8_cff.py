@@ -12,9 +12,9 @@ pythia8 = cepgen.Module('pythia8',
         # parameterise the fragmentation part
         #'PartonLevel:Remnants = off',
         # disable all Bremsstrahlung/FSR photon production
-        #'PartonLevel:ISR = off',
-        #'PartonLevel:FSR = off',
-        #'PartonLevel:MPI = off',
+        'PartonLevel:ISR = off',
+        'PartonLevel:FSR = off',
+        'PartonLevel:MPI = off',
         'ParticleDecays:allowPhotonRadiation = off',
         'BeamRemnants:primordialKT = off',
     ),
