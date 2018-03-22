@@ -12,6 +12,7 @@ namespace CepGen
     {
       public:
         PPtoWW();
+        ProcessPtr clone() const override { return ProcessPtr( new PPtoWW( *this ) ); }
 
       private:
         static const double mw_, mw2_;

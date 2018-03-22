@@ -6,14 +6,19 @@
 #include <mutex>
 #include <functional>
 
+#include "CepGen/Processes/GenericProcess.h"
+
 #include <gsl/gsl_monte.h>
 #include <gsl/gsl_rng.h>
 
 namespace CepGen
 {
+  //--- forward declarations
   class Parameters;
   class Event;
   class GridParameters;
+
+  //--- class definition
   class ThreadWorker
   {
     public:
@@ -46,7 +51,9 @@ namespace CepGen
       gsl_monte_function* function_;
       GridParameters* grid_;
 
-      Parameters* params_;
+      Parameters* global_params_;
+      Parameters* local_params_;
+      std::unique_ptr<Process::GenericProcess> process_;
       std::mutex* mutex_;
 
       std::function<void( const Event&, unsigned long )> callback_;

@@ -51,7 +51,7 @@ namespace CepGen
   Generator::clearRun()
   {
     integrator_.reset();
-    parameters->integrator.first_run = true;
+    parameters->process()->first_run = true;
     cross_section_ = cross_section_error_ = -1.;
   }
 
@@ -141,8 +141,8 @@ namespace CepGen
 
     integrator_->generate( 1 );
 
-    parameters->addGenerationTime( parameters->generation.last_event->time_total );
-    return parameters->generation.last_event;
+    parameters->addGenerationTime( parameters->process()->last_event->time_total );
+    return parameters->process()->last_event;
   }
 
   void

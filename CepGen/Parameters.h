@@ -40,6 +40,7 @@ namespace CepGen
       std::string processName() const;
       /// Set the process to study
       void setProcess( Process::GenericProcess* proc );
+      std::unique_ptr<Process::GenericProcess> processClone() const;
 
       //----- events kinematics
 
@@ -57,8 +58,6 @@ namespace CepGen
         unsigned int ncvg; // ??
         /// Number of points to "shoot" in each integration bin by the algorithm
         unsigned int npoints;
-        /// Is it the first time the integrator is run?
-        bool first_run;
         /// Random number generator seed
         unsigned long seed;
         gsl_monte_vegas_params vegas;
@@ -77,8 +76,6 @@ namespace CepGen
         bool enabled;
         /// Maximal number of events to generate in this run
         unsigned int maxgen;
-        /// Pointer to the last event produced in this run
-        std::shared_ptr<Event> last_event;
         /// Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?
         bool symmetrise;
         /// Number of events already generated in this run
@@ -108,7 +105,7 @@ namespace CepGen
       //----- taming functions
 
       /// Functionals to be used to account for rescattering corrections (implemented within the process)
-      std::unique_ptr<TamingFunctionsCollection> taming_functions;
+      std::shared_ptr<TamingFunctionsCollection> taming_functions;
 
       //----- run statistics
 
@@ -124,7 +121,7 @@ namespace CepGen
 
     private:
       std::unique_ptr<Process::GenericProcess> process_;
-      std::unique_ptr<Hadroniser::GenericHadroniser> hadroniser_;
+      std::shared_ptr<Hadroniser::GenericHadroniser> hadroniser_;
 
       bool store_;
       /// Total generation time (in seconds)

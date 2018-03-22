@@ -13,26 +13,24 @@
 #include <sstream>
 #include <fstream>
 
-#ifdef TIMING_ANALYSIS
-unsigned long num_points = 0;
-std::vector<double> steps( 6, 0. );
-#endif
-
 namespace CepGen
 {
   namespace Integrand
   {
-    Logger::LoggingLevel log_level = Logger::get().level;
-    std::shared_ptr<Event> ev;
-    Parameters* p = nullptr;
+    Logger::LoggingLevel log_level;
     Timer tmr;
 
     double
     eval( double* x, size_t ndim, void* params )
     {
-      p = static_cast<Parameters*>( params );
+      log_level = Logger::get().level;
+      std::shared_ptr<Event> ev;
+
+      Parameters* p = static_cast<Parameters*>( params );
       if ( !p )
         throw Exception( __PRETTY_FUNCTION__, "Failed to retrieve the run parameters!", FatalError );
+
+      Process::GenericProcess* proc = p->process();
 
       //=============================================================================================
       // start the timer
@@ -44,13 +42,16 @@ namespace CepGen
       // prepare the event content prior to the process generation
       //=============================================================================================
 
-      if ( p->process()->hasEvent() ) {
-        ev = p->process()->event();
-        p->process()->clearEvent();
+      if ( proc->hasEvent() ) {
+        ev = proc->event();
+        proc->clearEvent();
 
-        if ( p->integrator.first_run ) {
+        if ( proc->first_run ) {
+          if ( log_level >= Logger::Debug )
+            Debugging( Form( "Computation launched for %s process 0x%zx", p->processName().c_str(), p->process() ) );
+
           const Particle::Momentum p1( 0., 0.,  p->kinematics.inp.first ), p2( 0., 0., -p->kinematics.inp.second );
-          p->process()->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
+          proc->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
 
           if ( log_level >= Logger::Debug ) {
             std::ostringstream oss; oss << p->kinematics.mode;
@@ -66,7 +67,7 @@ namespace CepGen
           // prepare the function to be integrated
           //=========================================================================================
 
-          p->process()->prepareKinematics();
+          proc->prepareKinematics();
 
           //=========================================================================================
           // add central system
@@ -85,7 +86,7 @@ namespace CepGen
           }
 
           p->clearRunStatistics();
-          p->integrator.first_run = false;
+          proc->first_run = false;
         } // passed the first-run preparation
       } // event is not empty
 
@@ -93,11 +94,7 @@ namespace CepGen
       // specify the phase space point to probe
       //=============================================================================================
 
-#ifdef TIMING_ANALYSIS
-      steps[0] += tmr.elapsed();
-#endif
-
-      p->process()->setPoint( ndim, x );
+      proc->setPoint( ndim, x );
       if ( log_level >= Logger::DebugInsideLoop ) {
         std::ostringstream oss;
         for ( unsigned int i = 0; i < ndim; ++i )
@@ -111,15 +108,7 @@ namespace CepGen
 
       p->process()->beforeComputeWeight();
 
-#ifdef TIMING_ANALYSIS
-      steps[1] += tmr.elapsed();
-#endif
-
       double integrand = p->process()->computeWeight();
-
-  #ifdef TIMING_ANALYSIS
-      steps[2] += tmr.elapsed();
-  #endif
 
       //=============================================================================================
       // invalidate any unphysical behaviour
@@ -138,19 +127,11 @@ namespace CepGen
         &&  p->kinematics.cuts.central_particles.size() == 0 )
         return integrand;
 
-#ifdef TIMING_ANALYSIS
-      steps[3] += tmr.elapsed();
-#endif
-
       //=============================================================================================
       // fill in the process' Event object
       //=============================================================================================
 
       p->process()->fillKinematics();
-
-#ifdef TIMING_ANALYSIS
-      steps[4] += tmr.elapsed();
-#endif
 
       //=============================================================================================
       // once the kinematics variables have been populated, can apply the collection of taming functions
@@ -176,10 +157,6 @@ namespace CepGen
           integrand *= p->taming_functions->eval( "q2", -ev->getOneByRole( Particle::Parton2 ).momentum().mass() );
         }
       }
-
-#ifdef TIMING_ANALYSIS
-      steps[5] += tmr.elapsed();
-#endif
 
       if ( integrand <= 0. )
         return 0.;
@@ -234,12 +211,12 @@ namespace CepGen
       //=============================================================================================
 
       if ( p->storage() ) {
-        p->generation.last_event = ev;
-        p->generation.last_event->time_total = tmr.elapsed();
+        p->process()->last_event = ev;
+        p->process()->last_event->time_total = tmr.elapsed();
 
         if ( log_level >= Logger::Debug )
           Debugging( Form( "[process 0x%zx] Individual time (gen+hadr+cuts): %5.6f ms",
-                           p->process(), p->generation.last_event->time_total*1.e3 ) );
+                           p->process(), p->process()->last_event->time_total*1.e3 ) );
       }
 
       //=============================================================================================
@@ -254,9 +231,6 @@ namespace CepGen
                          ndim, oss.str().c_str(), integrand ) );
       }
 
-#ifdef TIMING_ANALYSIS
-      num_points++;
-#endif
       return integrand;
     }
   }

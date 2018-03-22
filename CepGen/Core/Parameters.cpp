@@ -16,14 +16,16 @@ namespace CepGen
   Parameters::Parameters( Parameters& param ) :
     kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
     hadroniser_max_trials( param.hadroniser_max_trials ),
-    taming_functions( std::move( param.taming_functions ) ),
-    process_( std::move( param.process_ ) ), hadroniser_( std::move( param.hadroniser_ ) ),
+    taming_functions( param.taming_functions ),
+    process_( std::move( param.process_ ) ), hadroniser_( param.hadroniser_ ),
     store_( param.store_ ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ )
   {}
 
   Parameters::Parameters( const Parameters& param ) :
     kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
     hadroniser_max_trials( param.hadroniser_max_trials ),
+    taming_functions( param.taming_functions ),
+    hadroniser_( param.hadroniser_ ),
     store_( param.store_ ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ )
   {}
 
@@ -77,6 +79,12 @@ namespace CepGen
   Parameters::setProcess( Process::GenericProcess* proc )
   {
     process_.reset( proc );
+  }
+
+  std::unique_ptr<Process::GenericProcess>
+  Parameters::processClone() const
+  {
+    return process_->clone();
   }
 
   Hadroniser::GenericHadroniser*
@@ -206,7 +214,7 @@ namespace CepGen
 
   Parameters::IntegratorParameters::IntegratorParameters() :
     type( Integrator::Vegas ), ncvg( 500000 ),
-    npoints( 100 ), first_run( true ), seed( 0 )
+    npoints( 100 ), seed( 0 )
   {
     const size_t ndof = 10;
 

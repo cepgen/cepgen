@@ -10,6 +10,7 @@ namespace CepGen
     const double GenericProcess::mp2_ = GenericProcess::mp_*GenericProcess::mp_;
 
     GenericProcess::GenericProcess( const std::string& name, const std::string& description, bool has_event ) :
+      first_run( true ),
       s_( 0. ), sqs_( 0. ), w1_( 0. ), w2_( 0. ), t1_( 0. ), t2_( 0. ), MX_( 0. ), MY_( 0. ),
       event_( std::shared_ptr<Event>( new Event ) ),
       is_point_set_( false ), is_incoming_state_set_( false ), is_outgoing_state_set_( false ), is_kinematics_set_( false ),
@@ -17,6 +18,7 @@ namespace CepGen
     {}
 
     GenericProcess::GenericProcess( const GenericProcess& proc ) :
+      first_run( true ),
       s_( proc.s_ ), sqs_( proc.sqs_ ), w1_( proc.w1_ ), w2_( proc.w2_ ), t1_( proc.w1_ ), t2_( proc.w2_ ),
       MX_( proc.w1_ ), MY_( proc.w2_ ), event_( proc.event_ ),
       is_point_set_( proc.is_point_set_ ),

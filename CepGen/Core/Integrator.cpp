@@ -12,11 +12,6 @@
 #include <gsl/gsl_monte_vegas.h>
 #include <gsl/gsl_monte_miser.h>
 
-#ifdef TIMING_ANALYSIS
-extern std::vector<double> steps;
-extern unsigned long num_points;
-#endif
-
 namespace CepGen
 {
   Integrator::Integrator( unsigned int ndim, double integrand( double*, size_t, void* ), Parameters* params ) :
@@ -109,13 +104,6 @@ namespace CepGen
     if      ( algorithm == Plain ) gsl_monte_plain_free( pln_state );
     else if ( algorithm == Vegas ) gsl_monte_vegas_free( veg_state );
     else if ( algorithm == MISER ) gsl_monte_miser_free( mis_state );
-
-#ifdef TIMING_ANALYSIS
-    std::cout << "|steps: ";
-    for ( const auto& st : steps )
-    std::cout << "|" << st/num_points;
-    std::cout << std::endl;
-#endif
 
     if ( input_params_->hadroniser() )
       input_params_->hadroniser()->setCrossSection( result, abserr );

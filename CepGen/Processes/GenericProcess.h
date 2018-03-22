@@ -19,6 +19,14 @@ namespace CepGen
     class GenericProcess
     {
       public:
+        /// Default constructor for an undefined process
+        /// \param[in] name Process name
+        /// \param[in] description Human-readable description of the process
+        /// \param[in] has_event Do we generate the associated event structure?
+        GenericProcess( const std::string& name, const std::string& description = "<invalid process>", bool has_event = true );
+        GenericProcess( const GenericProcess& );
+        virtual ~GenericProcess() {}
+
         /// Human-readable format dump of a GenericProcess object
         friend std::ostream& operator<<( std::ostream& os, const GenericProcess& proc );
         /// Human-readable format dump of a pointer to a GenericProcess object
@@ -33,13 +41,7 @@ namespace CepGen
         /// Map of all outgoing particles in the process
         typedef std::map<Particle::Role,std::vector<ParticleCode> > OutgoingState;
 
-        /// Default constructor for an undefined process
-        /// \param[in] name Process name
-        /// \param[in] description Human-readable description of the process
-        /// \param[in] has_event Do we generate the associated event structure?
-        GenericProcess( const std::string& name, const std::string& description = "<invalid process>", bool has_event = true );
-        GenericProcess( const GenericProcess& );
-        virtual ~GenericProcess() {}
+        virtual std::unique_ptr<GenericProcess> clone() const = 0;
 
         /// Restore the Event object to its initial state
         inline void clearEvent() { event_->restore(); }
@@ -90,7 +92,12 @@ namespace CepGen
 
         /// Does the process contain (and hold) an event?
         bool hasEvent() const { return has_event_; }
-  
+        /// Pointer to the last event produced in this run
+        std::shared_ptr<Event> last_event;
+
+        /// Is it the first time the process is computed?
+        bool first_run;
+
       protected:
         static const double mp_, mp2_;
 
@@ -158,6 +165,7 @@ namespace CepGen
         bool isKinematicsDefined();
     };
   }
+  typedef std::unique_ptr<Process::GenericProcess> ProcessPtr;
 }
 
 #endif

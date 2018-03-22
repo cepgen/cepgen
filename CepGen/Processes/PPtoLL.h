@@ -12,6 +12,7 @@ namespace CepGen
     {
       public:
         PPtoLL();
+        ProcessPtr clone() const override { return ProcessPtr( new PPtoLL( *this ) ); }
 
       private:
         void preparePhaseSpace() override;

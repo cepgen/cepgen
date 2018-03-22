@@ -3,6 +3,7 @@
 #include "CepGen/Core/utils.h"
 
 #include "CepGen/Event/Event.h"
+#include "CepGen/Processes/GenericProcess.h"
 
 #include "CepGen/Parameters.h"
 
@@ -20,8 +21,13 @@ namespace CepGen
     ps_bin_( 0 ), rng_( rng ), function_( function ), grid_( grid ),
     mutex_( mutex ), callback_( callback )
   {
-    if ( function )
-      params_ = static_cast<Parameters*>( function->params );
+    if ( !function )
+      throw Exception( __PRETTY_FUNCTION__, "Invalid integration function passed!", FatalError );
+
+    global_params_ = static_cast<Parameters*>( function->params );
+    process_ = global_params_->processClone();
+    local_params_ = new Parameters( *static_cast<const Parameters*>( global_params_ ) );
+    local_params_->setProcess( process_.get() );
   }
 
   bool
@@ -35,7 +41,7 @@ namespace CepGen
         continue;
       if ( gSignal != 0 )
         return false;
-      if ( params_->generation.ngen >= params_->generation.maxgen )
+      if ( global_params_->generation.ngen >= global_params_->generation.maxgen )
         return true;
     }
     return false;
@@ -44,7 +50,7 @@ namespace CepGen
   bool
   ThreadWorker::next()
   {
-    if ( params_->generation.ngen >= params_->generation.maxgen )
+    if ( global_params_->generation.ngen >= global_params_->generation.maxgen )
       return true;
 
     const unsigned int max = pow( grid_->mbin_, function_->dim );
@@ -170,8 +176,7 @@ namespace CepGen
   double
   ThreadWorker::eval( const std::vector<double>& x )
   {
-    std::lock_guard<std::mutex> guard( *mutex_ );
-    return function_->f( (double*)&x[0], function_->dim, (void*)params_ );
+    return function_->f( (double*)&x[0], function_->dim, (void*)local_params_ );
   }
 
   double
@@ -183,28 +188,27 @@ namespace CepGen
   bool
   ThreadWorker::storeEvent( const std::vector<double>& x )
   {
-    params_->setStorage( true );
+    std::lock_guard<std::mutex> guard( *mutex_ );
+    local_params_->setStorage( true );
     const double weight = eval( x );
-    params_->setStorage( false );
+    local_params_->setStorage( false );
 
     if ( weight <= 0. )
       return false;
 
-    params_->generation.ngen += 1;
+    global_params_->generation.ngen += 1;
 
-    if ( params_->generation.ngen % params_->generation.gen_print_every == 0 ) {
-      mutex_->lock();
+    if ( global_params_->generation.ngen % global_params_->generation.gen_print_every == 0 ) {
+      //mutex_->lock();
       Information( Form( "[thread 0x%zx] Generated events: %d",
                          std::hash<std::thread::id>()( std::this_thread::get_id() ),
-                         params_->generation.ngen ) );
-      params_->generation.last_event->dump();
-      mutex_->unlock();
+                         global_params_->generation.ngen ) );
+      local_params_->process()->last_event->dump();
+      //mutex_->unlock();
     }
 
     if ( callback_ ) {
-      mutex_->lock();
-      callback_( *params_->generation.last_event, params_->generation.ngen );
-      mutex_->unlock();
+      callback_( *local_params_->process()->last_event, global_params_->generation.ngen );
     }
 
     return true;
