@@ -88,9 +88,9 @@ namespace CepGen
           os << "[\033[32;1mInfo.\033[0m]\t" << what() << std::endl;
           return;
         }
-        if ( type() == DebugMessage ) {
-          os << "==================================== \033[33;1mDebug\033[0m ====================================" << std::endl
-             << " From:        " << from() << std::endl;
+        else if ( type() == DebugMessage ) {
+          os << "[\033[33;1mDebug\033[0m] \033[30;4m" << from() << "\033[0m\n\t" << what() << std::endl;
+          return;
         }
         else {
           os << "============================= Exception detected! =============================" << std::endl

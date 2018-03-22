@@ -19,6 +19,16 @@ namespace CepGen
       kIntermediateParts( partons ), kProducedParts( central )
     {}
 
+    GenericKTProcess::GenericKTProcess( const GenericKTProcess& proc ) :
+      GenericProcess( proc.name_, proc.description_ ),
+      num_dimensions_( proc.num_dimensions_ ),
+      kt_jacobian_( proc.kt_jacobian_ ), aux_jacobian_( proc.aux_jacobian_ ),
+      qt1_( proc.qt1_ ), phi_qt1_( proc.phi_qt1_ ),
+      qt2_( proc.qt2_ ), phi_qt2_( proc.phi_qt2_ ),
+      flux1_( proc.flux1_ ), flux2_( proc.flux2_ ),
+      kIntermediateParts( proc.kIntermediateParts ), kProducedParts( proc.kProducedParts )
+    {}
+
     void
     GenericKTProcess::addEventContent()
     {

@@ -12,7 +12,6 @@ namespace CepGen
     {
       public:
         PPtoWW();
-        inline ~PPtoWW() {}
 
       private:
         static const double mw_, mw2_;

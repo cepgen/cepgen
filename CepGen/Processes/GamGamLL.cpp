@@ -787,39 +787,37 @@ namespace CepGen
 
       const Kinematics::Limits mx_limits = cuts_.cuts.remnants[Cuts::mass];
       if ( cuts_.mode == Kinematics::InelasticElastic || cuts_.mode == Kinematics::InelasticInelastic ) {
-        if ( mx_limits.hasMin() && MX_ < mx_limits.min() ) return 0.;
-        if ( mx_limits.hasMax() && MX_ > mx_limits.max() ) return 0.;
+        if ( !mx_limits.passes( MX_ ) )
+          return 0.;
       }
       if ( cuts_.mode == Kinematics::ElasticInelastic || cuts_.mode == Kinematics::InelasticInelastic ) {
-        if ( mx_limits.hasMin() && MY_ < mx_limits.min() ) return 0.;
-        if ( mx_limits.hasMax() && MY_ > mx_limits.max() ) return 0.;
+        if ( !mx_limits.passes( MY_ ) )
+          return 0.;
       }
 
       //--- cut on the proton's Q2 (first photon propagator T1)
 
-      const Kinematics::Limits q2_limits = cuts_.cuts.initial[Cuts::q2];
-      if ( q2_limits.hasMax() && t1_ < -q2_limits.max() ) return 0;
-      if ( q2_limits.hasMin() && t1_ > -q2_limits.min() ) return 0.;
+      if ( !cuts_.cuts.initial[Cuts::q2].passes( -t1_ ) )
+        return 0.;
 
       //--- cuts on outgoing leptons' kinematics
 
-      const Kinematics::Limits m_limits = cuts_.cuts.central[Cuts::mass_sum];
-      if ( m_limits.hasMin() && ( p6_cm_+p7_cm_ ).mass() < m_limits.min() ) return 0.;
-      if ( m_limits.hasMax() && ( p6_cm_+p7_cm_ ).mass() > m_limits.max() ) return 0.;
+      if ( !cuts_.cuts.central[Cuts::mass_sum].passes( ( p6_cm_+p7_cm_ ).mass() ) )
+        return 0.;
 
       //----- cuts on the individual leptons
 
       const Kinematics::Limits pt_limits = cuts_.cuts.central[Cuts::pt_single];
-      if ( pt_limits.hasMin() && ( p6_cm_.pt() < pt_limits.min() || p7_cm_.pt() < pt_limits.min() ) ) return 0.;
-      if ( pt_limits.hasMax() && ( p6_cm_.pt() > pt_limits.max() || p7_cm_.pt() > pt_limits.max() ) ) return 0.;
+      if ( !pt_limits.passes( p6_cm_.pt() ) || !pt_limits.passes( p7_cm_.pt() ) )
+        return 0.;
 
       const Kinematics::Limits energy_limits = cuts_.cuts.central[Cuts::energy_single];
-      if ( energy_limits.hasMin() && ( p6_cm_.energy() < energy_limits.min() || p7_cm_.energy() < energy_limits.min() ) ) return 0.;
-      if ( energy_limits.hasMax() && ( p6_cm_.energy() > energy_limits.max() || p7_cm_.energy() > energy_limits.max() ) ) return 0.;
+      if ( !energy_limits.passes( p6_cm_.energy() ) || !energy_limits.passes( p7_cm_.energy() ) )
+        return 0.;
 
       const Kinematics::Limits eta_limits = cuts_.cuts.central[Cuts::eta_single];
-      if ( eta_limits.hasMin() && ( p6_cm_.eta() < eta_limits.min() || p7_cm_.eta() < eta_limits.min() ) ) return 0.;
-      if ( eta_limits.hasMax() && ( p6_cm_.eta() > eta_limits.max() || p7_cm_.eta() > eta_limits.max() ) ) return 0.;
+      if ( !eta_limits.passes( p6_cm_.eta() ) || !eta_limits.passes( p7_cm_.eta() ) )
+        return 0.;
 
       //--- compute the structure functions factors
 

@@ -28,15 +28,18 @@
 /// Common namespace for this Monte Carlo generator
 namespace CepGen
 {
-  /**
-   * Function to be integrated. It returns the value of the weight for one point
-   * of the full phase space (or "event"). This weights includes the matrix element
-   * of the process considered, along with all the kinematic factors, and the cut
-   * restrictions imposed on this phase space. \f$x\f$ is therefore an array of random
-   * numbers defined inside its boundaries (as normalised so that \f$\forall i<\mathrm{ndim}\f$,
-   * \f$0<x_i<1\f$.
-   */
-  double f( double*, size_t, void* );
+  namespace Integrand
+  {
+    /**
+     * Function to be integrated. It returns the value of the weight for one point
+     * of the full phase space (or "event"). This weights includes the matrix element
+     * of the process considered, along with all the kinematic factors, and the cut
+     * restrictions imposed on this phase space. \f$x\f$ is therefore an array of random
+     * numbers defined inside its boundaries (as normalised so that \f$\forall i<\mathrm{ndim}\f$,
+     * \f$0<x_i<1\f$.
+     */
+    double eval( double*, size_t, void* );
+  }
 
   class Event;
   class Integrator;
@@ -91,13 +94,13 @@ namespace CepGen
       double crossSection() const { return cross_section_; }
       /// Last error on the cross section computed by the generator
       double crossSectionError() const { return cross_section_error_; }
-      /**
-       * Generate one single event given the phase space computed by Vegas in the integration step
-       * \return A pointer to the Event object generated in this run
-       */
+
+      //void terminate();
+      /// Generate one single event given the phase space computed by Vegas in the integration step
+      /// \return A pointer to the Event object generated in this run
       std::shared_ptr<Event> generateOneEvent();
       /// Launch the generation of events
-      void generate( std::function<void( const Event&, unsigned int& )> callback );
+      void generate( std::function<void( const Event&, unsigned long )> callback );
       /// Number of dimensions on which the integration is performed
       size_t numDimensions() const;
       /// Compute one single point from the total phase space
@@ -106,7 +109,6 @@ namespace CepGen
       double computePoint( double* x );
       /// Physical Parameters used in the events generation and cross-section computation
       std::unique_ptr<Parameters> parameters;
-
    private:
       /// Prepare the function before its integration (add particles/compute kinematics/...)
       void prepareFunction();

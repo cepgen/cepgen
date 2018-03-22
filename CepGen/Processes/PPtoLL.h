@@ -12,7 +12,6 @@ namespace CepGen
     {
       public:
         PPtoLL();
-        inline ~PPtoLL() {}
 
       private:
         void preparePhaseSpace() override;

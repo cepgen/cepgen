@@ -6,13 +6,11 @@
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
 
-//#include <ext/stdio_filebuf.h>
-
 namespace CepGen
 {
   Parameters::Parameters() :
     hadroniser_max_trials( 5 ),
-    store_( false )
+    store_( false ), total_gen_time_( 0. ), num_gen_events_( 0 )
   {}
 
   Parameters::Parameters( Parameters& param ) :
@@ -20,28 +18,45 @@ namespace CepGen
     hadroniser_max_trials( param.hadroniser_max_trials ),
     taming_functions( std::move( param.taming_functions ) ),
     process_( std::move( param.process_ ) ), hadroniser_( std::move( param.hadroniser_ ) ),
-    store_( param.store_ )
+    store_( param.store_ ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ )
   {}
 
   Parameters::Parameters( const Parameters& param ) :
     kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
     hadroniser_max_trials( param.hadroniser_max_trials ),
-    store_( param.store_ )
+    store_( param.store_ ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ )
   {}
 
-  Parameters::~Parameters()
+  Parameters::~Parameters() // required for unique_ptr initialisation!
   {}
 
   void
   Parameters::setThetaRange( float thetamin, float thetamax )
   {
-    kinematics.cuts.central[Cuts::eta_single] = { Particle::thetaToEta( thetamax ), Particle::thetaToEta( thetamin ) };
+    kinematics.cuts.central[Cuts::eta_single] = {
+      Particle::thetaToEta( thetamax ),
+      Particle::thetaToEta( thetamin )
+    };
 
     if ( Logger::get().level >= Logger::Debug ) {
       std::ostringstream os; os << kinematics.cuts.central[Cuts::eta_single];
       Debugging( Form( "eta in range: %s => theta(min) = %g, theta(max) = %g",
                        os.str().c_str(), thetamin, thetamax ) );
     }
+  }
+
+  void
+  Parameters::clearRunStatistics()
+  {
+    total_gen_time_ = 0.;
+    num_gen_events_ = 0;
+  }
+
+  void
+  Parameters::addGenerationTime( double gen_time )
+  {
+    total_gen_time_ += gen_time;
+    num_gen_events_++;
   }
 
   Process::GenericProcess*
@@ -98,7 +113,11 @@ namespace CepGen
     os
       << std::endl
       << std::setw( wt ) << "Events generation? " << ( pretty ? yesno( generation.enabled ) : std::to_string( generation.enabled ) ) << std::endl
-      << std::setw( wt ) << "Number of events to generate" << ( pretty ? boldify( generation.maxgen ) : std::to_string( generation.maxgen ) ) << std::endl
+      << std::setw( wt ) << "Number of events to generate" << ( pretty ? boldify( generation.maxgen ) : std::to_string( generation.maxgen ) ) << std::endl;
+    if ( generation.num_threads > 1 )
+      os
+        << std::setw( wt ) << "Number of threads" << generation.num_threads << std::endl;
+    os
       << std::setw( wt ) << "Verbosity level " << Logger::get().level << std::endl;
     if ( hadroniser_ ) {
       os
@@ -205,6 +224,7 @@ namespace CepGen
 
   Parameters::Generation::Generation() :
     enabled( false ), maxgen( 0 ),
-    symmetrise( false ), ngen( 0 ), gen_print_every( 10000 )
+    symmetrise( false ), ngen( 0 ), gen_print_every( 10000 ),
+    num_threads( 2 )
   {}
 }

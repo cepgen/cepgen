@@ -6,21 +6,21 @@
 #include "CepGen/Core/Logger.h"
 #include "CepGen/Core/Exception.h"
 
+// necessary includes to build the default run
 #include "CepGen/Processes/GamGamLL.h"
-#include "CepGen/Hadronisers/Pythia8Hadroniser.h"
-
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include <iostream>
 
 using namespace std;
 
-void printEvent( const CepGen::Event& ev, unsigned int& ev_id )
+void printEvent( const CepGen::Event& ev, unsigned long ev_id )
 {
-  if ( ev_id % 5000 == 0 ) {
-    Information( Form( "Generating event #%d", ev_id ) );
-    ev.dump();
-  }
+  if ( ev_id % 5000 != 0 )
+    return;
+
+  Information( Form( "Generating event #%d", ev_id ) );
+  ev.dump();
 }
 
 /**
@@ -48,9 +48,8 @@ int main( int argc, char* argv[] ) {
     mg.parameters->kinematics.central_system = { CepGen::Muon, CepGen::Muon };
     mg.parameters->kinematics.cuts.central[CepGen::Cuts::pt_single].min() = 15.;
     mg.parameters->kinematics.cuts.central[CepGen::Cuts::eta_single] = { -2.5, 2.5 };
-    mg.parameters->integrator.ncvg = 5e4; //FIXME
+    mg.parameters->integrator.ncvg = 5e4;
     mg.parameters->generation.enabled = true;
-    //mg.parameters->maxgen = 2;
     mg.parameters->generation.maxgen = 2e4;
   }
   else {
@@ -69,7 +68,7 @@ int main( int argc, char* argv[] ) {
   mg.parameters->dump();
 
   // Let there be cross-section...
-  double xsec, err;
+  double xsec = 0., err = 0.;
   mg.computeXsection( xsec, err );
 
   if ( mg.parameters->generation.enabled )

@@ -38,6 +38,7 @@ namespace CepGen
         /// \param[in] description Human-readable description of the process
         /// \param[in] has_event Do we generate the associated event structure?
         GenericProcess( const std::string& name, const std::string& description = "<invalid process>", bool has_event = true );
+        GenericProcess( const GenericProcess& );
         virtual ~GenericProcess() {}
 
         /// Restore the Event object to its initial state
@@ -73,10 +74,10 @@ namespace CepGen
          */
         void setPoint( const unsigned int ndim, double* x );
         /// Dump the evaluated point's coordinates in the standard output stream
-        void dumpPoint();
+        void dumpPoint() const;
         /// Complete list of Particle with their role in the process for the point considered in the phase space, returned as an Event object.
         /// \return Event object containing all the generated Particle objects
-        inline std::shared_ptr<Event> event() { return event_; }
+        inline std::shared_ptr<Event> event() const { return event_; }
 
         ///Get the number of dimensions on which the integration is performed
         inline const unsigned int ndim() const { return x_.size(); }
@@ -89,16 +90,6 @@ namespace CepGen
 
         /// Does the process contain (and hold) an event?
         bool hasEvent() const { return has_event_; }
-
-        /// Reset the total generation time and the number of events generated for this run
-        void clearRunStatistics();
-        /// Add a new timing into the total generation time
-        /// \param[in] gen_time Time to add (in seconds)
-        void addGenerationTime( double gen_time );
-        /// Return the total generation time for this run (in seconds)
-        inline double totalGenerationTime() const { return total_gen_time_; }
-        /// Total number of events already generated in this run
-        inline unsigned int numGeneratedEvents() const { return num_gen_events_; }
   
       protected:
         static const double mp_, mp2_;
@@ -154,10 +145,6 @@ namespace CepGen
         std::string name_;
         /// Process human-readable description
         std::string description_;
-        /// Total generation time (in seconds)
-        double total_gen_time_;
-        /// Number of events already generated
-        unsigned int num_gen_events_;
         /// Does the process contain (and hold) an event?
         bool has_event_;
 

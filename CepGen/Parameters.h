@@ -6,6 +6,9 @@
 
 #include <memory>
 
+#include <gsl/gsl_monte_vegas.h>
+#include <gsl/gsl_monte_miser.h>
+
 namespace CepGen
 {
   class Event;
@@ -82,6 +85,8 @@ namespace CepGen
         unsigned int ngen;
         /// Frequency at which the events are displayed to the end-user
         unsigned int gen_print_every;
+        /// Number of threads to perform the integration
+        unsigned int num_threads;
       };
       /// Events generation parameters
       Generation generation;
@@ -105,10 +110,27 @@ namespace CepGen
       /// Functionals to be used to account for rescattering corrections (implemented within the process)
       std::unique_ptr<TamingFunctionsCollection> taming_functions;
 
+      //----- run statistics
+
+      /// Reset the total generation time and the number of events generated for this run
+      void clearRunStatistics();
+      /// Add a new timing into the total generation time
+      /// \param[in] gen_time Time to add (in seconds)
+      void addGenerationTime( double gen_time );
+      /// Return the total generation time for this run (in seconds)
+      inline double totalGenerationTime() const { return total_gen_time_; }
+      /// Total number of events already generated in this run
+      inline unsigned int numGeneratedEvents() const { return num_gen_events_; }
+
     private:
       std::unique_ptr<Process::GenericProcess> process_;
       std::unique_ptr<Hadroniser::GenericHadroniser> hadroniser_;
+
       bool store_;
+      /// Total generation time (in seconds)
+      double total_gen_time_;
+      /// Number of events already generated
+      unsigned int num_gen_events_;
   };
 }
 

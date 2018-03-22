@@ -12,6 +12,7 @@
 
 namespace CepGen
 {
+  volatile int gSignal;
   Generator::Generator() :
     parameters( std::unique_ptr<Parameters>( new Parameters ) ),
     cross_section_( -1. ), cross_section_error_( -1. )
@@ -31,9 +32,9 @@ namespace CepGen
   Generator::~Generator()
   {
     if ( parameters->generation.enabled
-      && parameters->process() && parameters->process()->numGeneratedEvents() > 0 ) {
+      && parameters->process() && parameters->numGeneratedEvents() > 0 ) {
       Information( Form( "Mean generation time / event: %g ms",
-                         parameters->process()->totalGenerationTime()*1.e3/parameters->process()->numGeneratedEvents() ) );
+                         parameters->totalGenerationTime()*1.e3/parameters->numGeneratedEvents() ) );
     }
   }
 
@@ -57,6 +58,7 @@ namespace CepGen
   void
   Generator::setParameters( Parameters& ip )
   {
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
     parameters = std::unique_ptr<Parameters>( new Parameters( ip ) ); // copy constructor
   }
 
@@ -81,7 +83,7 @@ namespace CepGen
   Generator::computePoint( double* x )
   {
     prepareFunction();
-    double res = f( x, numDimensions(), (void*)parameters.get() );
+    double res = Integrand::eval( x, numDimensions(), (void*)parameters.get() );
     std::ostringstream os;
     for ( unsigned int i = 0; i < numDimensions(); ++i )
       os << x[i] << " ";
@@ -102,9 +104,9 @@ namespace CepGen
 
     // first destroy and recreate the integrator instance
     if ( !integrator_ )
-      integrator_ = std::unique_ptr<Integrator>( new Integrator( numDimensions(), f, parameters.get() ) );
+      integrator_ = std::unique_ptr<Integrator>( new Integrator( numDimensions(), Integrand::eval, parameters.get() ) );
     else if ( integrator_->dimensions() != numDimensions() )
-      integrator_.reset( new Integrator( numDimensions(), f, parameters.get() ) );
+      integrator_.reset( new Integrator( numDimensions(), Integrand::eval, parameters.get() ) );
 
     if ( Logger::get().level >= Logger::Debug ) {
       std::ostringstream topo; topo << parameters->kinematics.mode;
@@ -137,28 +139,25 @@ namespace CepGen
     if ( cross_section_ < 0. )
       computeXsection( cross_section_, cross_section_error_ );
 
-    bool good = false;
-    while ( !good )
-      good = integrator_->generateOneEvent();
+    integrator_->generate( 1 );
 
-    parameters->process()->addGenerationTime( parameters->generation.last_event->time_total );
+    parameters->addGenerationTime( parameters->generation.last_event->time_total );
     return parameters->generation.last_event;
   }
 
   void
-  Generator::generate( std::function<void( const Event&, unsigned int& )> callback )
+  Generator::generate( std::function<void( const Event&, unsigned long )> callback )
   {
-    Information( Form( "%d events will be generated.",
-                       parameters->generation.maxgen ) );
+    if ( cross_section_ < 0. )
+      computeXsection( cross_section_, cross_section_error_ );
 
-    unsigned int i = 0;
-    while ( i < parameters->generation.maxgen )
-      if ( generateOneEvent() ) {
-        callback( *parameters->generation.last_event, i );
-        i++;
-      }
+    Information( Form( "%g events will be generated.",
+                       parameters->generation.maxgen*1. ) );
 
-    Information( Form( "%d events generated", i ) );
+    integrator_->generate( parameters->generation.maxgen, callback );
+
+    Information( Form( "%g events generated",
+                       parameters->generation.ngen*1. ) );
   }
 
   void

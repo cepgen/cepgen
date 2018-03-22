@@ -2,8 +2,13 @@
 #define Test_TreeInfo_h
 
 #include "TTree.h"
+#include "TClonesArray.h"
 #include "../CepGen/Core/Exception.h"
 #include <string>
+
+#ifdef __CINT__
+#pragma link C++ class std::vector<TLorentzVector>+;
+#endif
 
 namespace CepGen
 {
@@ -14,7 +19,7 @@ namespace CepGen
     unsigned int num_events, litigious_events;
     TTree* tree;
 
-    TreeRun() { clear(); }
+    TreeRun() : tree( nullptr ) { clear(); }
     void clear() {
       sqrt_s = -1.;
       xsect = errxsect = -1.;
@@ -52,7 +57,9 @@ namespace CepGen
   {
     // book a sufficienly large number to allow the large multiplicity
     // of excited proton fragmentation products
-    static constexpr unsigned short maxpart = 1000;
+    static constexpr unsigned short maxpart = 5000;
+
+    TTree* tree;
 
     float gen_time, tot_time;
     int nremn_ch[2], nremn_nt[2], np;
@@ -60,9 +67,11 @@ namespace CepGen
     double E[maxpart], m[maxpart], charge[maxpart];
     int pdg_id[maxpart], parent1[maxpart], parent2[maxpart];
     int stable[maxpart], role[maxpart], status[maxpart];
-    //TLorentzVector kinematics[maxpart];
 
-    TreeEvent() { clear(); }
+    TreeEvent() : tree( nullptr ) {
+      clear();
+    }
+
     void clear() {
       gen_time = tot_time = 0.;
       for ( unsigned short i = 0; i < 2; ++i ) {
@@ -72,15 +81,21 @@ namespace CepGen
       for ( unsigned short i = 0; i < maxpart; ++i ) {
         pt[i] = eta[i] = phi[i] = rapidity[i] = E[i] = m[i] = charge[i] = 0.;
         pdg_id[i] = parent1[i] = parent2[i] = stable[i] = role[i] = status[i] = 0;
-        //kinematics[i] = TLorentzVector();
       }
     }
-    void create( TTree* tree ) {
+    void fill() {
+      if ( !tree )
+        FatalError( "Trying to fill a non-existent tree" );
+
+      tree->Fill();
+      clear();
+    }
+    void create( TTree* t ) {
+      tree = t;
       if ( !tree ) return;
       tree->Branch( "npart", &np, "npart/I" );
       tree->Branch( "nremn_charged", nremn_ch, "nremn_charged[2]/I" );
       tree->Branch( "nremn_neutral", nremn_nt, "nremn_neutral[2]/I" );
-      //tree->Branch( "kinematics", kinematics, "TLorentzVector[npart]" );
       tree->Branch( "role", role, "role[npart]/I" );
       tree->Branch( "pt", pt, "pt[npart]/D" );
       tree->Branch( "eta", eta, "eta[npart]/D" );
@@ -97,7 +112,8 @@ namespace CepGen
       tree->Branch( "generation_time", &gen_time, "generation_time/F" );
       tree->Branch( "total_time", &tot_time, "total_time/F" );
     }
-    void attach( TTree* tree ) {
+    void attach( TTree* t ) {
+      tree = t;
       if ( !tree ) return;
       tree->SetBranchAddress( "npart", &np );
       tree->SetBranchAddress( "nremn_charged", nremn_ch );
