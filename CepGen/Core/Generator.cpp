@@ -58,6 +58,7 @@ namespace CepGen
   void
   Generator::setParameters( Parameters& ip )
   {
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
     parameters = std::unique_ptr<Parameters>( new Parameters( ip ) ); // copy constructor
   }
 
@@ -82,7 +83,7 @@ namespace CepGen
   Generator::computePoint( double* x )
   {
     prepareFunction();
-    double res = f( x, numDimensions(), (void*)parameters.get() );
+    double res = Integrand::eval( x, numDimensions(), (void*)parameters.get() );
     std::ostringstream os;
     for ( unsigned int i = 0; i < numDimensions(); ++i )
       os << x[i] << " ";
@@ -103,9 +104,9 @@ namespace CepGen
 
     // first destroy and recreate the integrator instance
     if ( !integrator_ )
-      integrator_ = std::unique_ptr<Integrator>( new Integrator( numDimensions(), f, parameters.get() ) );
+      integrator_ = std::unique_ptr<Integrator>( new Integrator( numDimensions(), Integrand::eval, parameters.get() ) );
     else if ( integrator_->dimensions() != numDimensions() )
-      integrator_.reset( new Integrator( numDimensions(), f, parameters.get() ) );
+      integrator_.reset( new Integrator( numDimensions(), Integrand::eval, parameters.get() ) );
 
     if ( Logger::get().level >= Logger::Debug ) {
       std::ostringstream topo; topo << parameters->kinematics.mode;

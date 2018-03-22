@@ -20,15 +20,15 @@ extern unsigned long num_points;
 
 namespace CepGen
 {
-  Integrator::Integrator( const unsigned int dim, double f_( double*, size_t, void* ), Parameters* param ) :
-    input_params_( param ),
-    function_( new gsl_monte_function{ f_, dim, (void*)param } )
+  Integrator::Integrator( unsigned int ndim, double integrand( double*, size_t, void* ), Parameters* params ) :
+    input_params_( params ),
+    function_( new gsl_monte_function{ integrand, ndim, (void*)input_params_ } )
   {
     //--- initialise the random number generator
     gsl_rng_env_setup();
     rng_ = std::shared_ptr<gsl_rng>( gsl_rng_alloc( gsl_rng_default ), gsl_rng_free );
-    unsigned long seed = ( param->integrator.seed > 0 )
-      ? param->integrator.seed
+    unsigned long seed = ( input_params_->integrator.seed > 0 )
+      ? input_params_->integrator.seed
       : time( nullptr ); // seed with time
     gsl_rng_set( rng_.get(), seed );
 
@@ -38,7 +38,7 @@ namespace CepGen
     Debugging( Form( "Number of integration dimensions: %d,\n\t"
                      "Number of iterations [VEGAS]:     %d,\n\t"
                      "Number of function calls:         %d.",
-                     dim,
+                     function_->dim,
                      input_params_->integrator.vegas.iterations,
                      input_params_->integrator.ncvg ) );
   }

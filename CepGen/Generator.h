@@ -28,15 +28,18 @@
 /// Common namespace for this Monte Carlo generator
 namespace CepGen
 {
-  /**
-   * Function to be integrated. It returns the value of the weight for one point
-   * of the full phase space (or "event"). This weights includes the matrix element
-   * of the process considered, along with all the kinematic factors, and the cut
-   * restrictions imposed on this phase space. \f$x\f$ is therefore an array of random
-   * numbers defined inside its boundaries (as normalised so that \f$\forall i<\mathrm{ndim}\f$,
-   * \f$0<x_i<1\f$.
-   */
-  double f( double*, size_t, void* );
+  namespace Integrand
+  {
+    /**
+     * Function to be integrated. It returns the value of the weight for one point
+     * of the full phase space (or "event"). This weights includes the matrix element
+     * of the process considered, along with all the kinematic factors, and the cut
+     * restrictions imposed on this phase space. \f$x\f$ is therefore an array of random
+     * numbers defined inside its boundaries (as normalised so that \f$\forall i<\mathrm{ndim}\f$,
+     * \f$0<x_i<1\f$.
+     */
+    double eval( double*, size_t, void* );
+  }
 
   class Event;
   class Integrator;
