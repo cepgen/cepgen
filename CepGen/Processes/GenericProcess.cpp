@@ -12,15 +12,18 @@ namespace CepGen
     GenericProcess::GenericProcess( const std::string& name, const std::string& description, bool has_event ) :
       first_run( true ),
       s_( 0. ), sqs_( 0. ), w1_( 0. ), w2_( 0. ), t1_( 0. ), t2_( 0. ), MX_( 0. ), MY_( 0. ),
-      event_( std::shared_ptr<Event>( new Event ) ),
+      event_( new Event ),
       is_point_set_( false ), is_incoming_state_set_( false ), is_outgoing_state_set_( false ), is_kinematics_set_( false ),
       name_( name ), description_( description ), has_event_( has_event )
     {}
 
     GenericProcess::GenericProcess( const GenericProcess& proc ) :
-      first_run( true ),
-      s_( proc.s_ ), sqs_( proc.sqs_ ), w1_( proc.w1_ ), w2_( proc.w2_ ), t1_( proc.w1_ ), t2_( proc.w2_ ),
-      MX_( proc.w1_ ), MY_( proc.w2_ ), event_( proc.event_ ),
+      first_run( proc.first_run ),
+      s_( proc.s_ ), sqs_( proc.sqs_ ),
+      w1_( proc.w1_ ), w2_( proc.w2_ ),
+      t1_( proc.w1_ ), t2_( proc.w2_ ),
+      MX_( proc.w1_ ), MY_( proc.w2_ ),
+      event_( new Event( *proc.event_.get() ) ),
       is_point_set_( proc.is_point_set_ ),
       is_incoming_state_set_( proc.is_incoming_state_set_ ), is_outgoing_state_set_( proc.is_outgoing_state_set_ ),
       is_kinematics_set_( proc.is_kinematics_set_ ),
@@ -31,13 +34,10 @@ namespace CepGen
     void
     GenericProcess::setPoint( const unsigned int ndim, double* x )
     {
-      if ( ndim != x_.size() )
-        x_.resize( ndim );
-
       x_ = std::vector<double>( x, x+ndim );
       is_point_set_ = true;
 
-      if ( Logger::get().level>=Logger::DebugInsideLoop )
+      if ( Logger::get().level >= Logger::DebugInsideLoop )
         dumpPoint();
     }
 
@@ -55,8 +55,8 @@ namespace CepGen
       if ( !isKinematicsDefined() )
         throw Exception( __PRETTY_FUNCTION__, "Kinematics not properly defined for the process", FatalError );
 
-      const Particle ib1 = event_->getOneByRole( Particle::IncomingBeam1 ),
-                     ib2 = event_->getOneByRole( Particle::IncomingBeam2 );
+      const Particle& ib1 = event_->getOneByRole( Particle::IncomingBeam1 );
+      const Particle& ib2 = event_->getOneByRole( Particle::IncomingBeam2 );
 
       sqs_ = CMEnergy( ib1, ib2 );
       s_ = sqs_*sqs_;

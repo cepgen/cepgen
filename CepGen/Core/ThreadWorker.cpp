@@ -19,13 +19,19 @@ namespace CepGen
                               GridParameters* grid,
                               std::function<void( const Event&, unsigned long )>& callback ) :
     ps_bin_( 0 ), rng_( rng ), function_( function ), grid_( grid ),
+    grid_correc_( 0. ), grid_correc2_( 0. ),
+    grid_f_max2_( 0. ), grid_f_max_diff_( 0. ), grid_f_max_old_( 0. ),
     mutex_( mutex ), callback_( callback )
   {
     if ( !function )
       throw Exception( __PRETTY_FUNCTION__, "Invalid integration function passed!", FatalError );
 
+    grid_nm_.reserve( grid_->max );
+    // retrieve standard parameters
     global_params_ = static_cast<Parameters*>( function->params );
+    // clone the process for this thread
     process_ = global_params_->processClone();
+    // copy the standard parameters and feed the cloned process
     local_params_ = new Parameters( *static_cast<const Parameters*>( global_params_ ) );
     local_params_->setProcess( process_.get() );
   }
@@ -53,8 +59,6 @@ namespace CepGen
     if ( global_params_->generation.ngen >= global_params_->generation.maxgen )
       return true;
 
-    const unsigned int max = pow( grid_->mbin_, function_->dim );
-
     std::vector<double> x( function_->dim, 0. );
 
     //--- correction cycles
@@ -74,9 +78,9 @@ namespace CepGen
     do {
       do {
         // ...
-        ps_bin_ = uniform() * max;
+        ps_bin_ = uniform() * grid_->max;
         y = uniform() * grid_->f_max_global;
-        grid_->nm[ps_bin_] += 1;
+        grid_nm_[ps_bin_] += 1;
       } while ( y > grid_->f_max[ps_bin_] );
       // Select x values in this Integrator bin
       int jj = ps_bin_;
@@ -97,20 +101,20 @@ namespace CepGen
       ps_bin_ = 0;
     // Init correction cycle if weight is higher than fmax or ffmax
     else if ( weight <= grid_->f_max_global ) {
-      grid_->f_max_old = grid_->f_max[ps_bin_];
+      grid_f_max_old_ = grid_->f_max[ps_bin_];
       grid_->f_max[ps_bin_] = weight;
-      grid_->f_max_diff = weight-grid_->f_max_old;
-      grid_->correc = ( grid_->nm[ps_bin_] - 1. ) * grid_->f_max_diff / grid_->f_max_global - 1.;
+      grid_f_max_diff_ = weight-grid_f_max_old_;
+      grid_correc_ = ( grid_nm_[ps_bin_] - 1. ) * grid_f_max_diff_ / grid_->f_max_global - 1.;
     }
     else {
-      grid_->f_max_old = grid_->f_max[ps_bin_];
+      grid_f_max_old_ = grid_->f_max[ps_bin_];
       grid_->f_max[ps_bin_] = weight;
-      grid_->f_max_diff = weight-grid_->f_max_old;
+      grid_f_max_diff_ = weight-grid_f_max_old_;
       grid_->f_max_global = weight;
-      grid_->correc = ( grid_->nm[ps_bin_] - 1. ) * grid_->f_max_diff / grid_->f_max_global * weight / grid_->f_max_global - 1.;
+      grid_correc_ = ( grid_nm_[ps_bin_] - 1. ) * grid_f_max_diff_ / grid_->f_max_global * weight / grid_->f_max_global - 1.;
     }
 
-    DebuggingInsideLoop( Form( "Correction applied: %f, phase space bin = %d", grid_->correc, ps_bin_ ) );
+    DebuggingInsideLoop( Form( "Correction applied: %f, phase space bin = %d", grid_correc_, ps_bin_ ) );
 
     // Return with an accepted event
     if ( weight > 0. )
@@ -121,15 +125,16 @@ namespace CepGen
   bool
   ThreadWorker::correctionCycle( std::vector<double>& x, bool& has_correction )
   {
+    //std::lock_guard<std::mutex> guard( *mutex_ );
     DebuggingInsideLoop( Form( "Correction cycles are started.\n\t"
                                "bin = %d\t"
                                "correc = %g\t"
-                               "corre2 = %g.", ps_bin_, grid_->correc, grid_->correc2 ) );
+                               "corre2 = %g.", ps_bin_, grid_correc_, grid_correc2_ ) );
 
-    if ( grid_->correc >= 1. )
-      grid_->correc -= 1.;
-    if ( uniform() < grid_->correc ) {
-      grid_->correc = -1.;
+    if ( grid_correc_ >= 1. )
+      grid_correc_ -= 1.;
+    if ( uniform() < grid_correc_ ) {
+      grid_correc_ = -1.;
       std::vector<double> xtmp;
       // Select x values in phase space bin
       for ( unsigned int k = 0; k < function_->dim; ++k )
@@ -138,13 +143,13 @@ namespace CepGen
       const double weight = eval( xtmp );
       // Parameter for correction of correction
       if ( weight > grid_->f_max[ps_bin_] ) {
-        if ( weight > grid_->f_max2 )
-          grid_->f_max2 = weight;
-        grid_->correc2 -= 1.;
-        grid_->correc += 1.;
+        if ( weight > grid_f_max2_ )
+          grid_f_max2_ = weight;
+        grid_correc2_ -= 1.;
+        grid_correc_ += 1.;
       }
       // Accept event
-      if ( weight >= grid_->f_max_diff*uniform() + grid_->f_max_old ) { // FIXME!!!!
+      if ( weight >= grid_f_max_diff_*uniform() + grid_f_max_old_ ) { // FIXME!!!!
         //Error("Accepting event!!!");
         //return storeEvent(x);
         x = xtmp;
@@ -155,19 +160,19 @@ namespace CepGen
     }
     // Correction if too big weight is found while correction
     // (All your bases are belong to us...)
-    if ( grid_->f_max2 > grid_->f_max[ps_bin_] ) {
-      grid_->f_max_old = grid_->f_max[ps_bin_];
-      grid_->f_max[ps_bin_] = grid_->f_max2;
-      grid_->f_max_diff = grid_->f_max2-grid_->f_max_old;
-      const double correc_tmp = ( grid_->nm[ps_bin_] - 1. ) * grid_->f_max_diff / grid_->f_max_global;
-      if ( grid_->f_max2 < grid_->f_max_global )
-        grid_->correc = correc_tmp - grid_->correc2;
+    if ( grid_f_max2_ > grid_->f_max[ps_bin_] ) {
+      grid_f_max_old_ = grid_->f_max[ps_bin_];
+      grid_->f_max[ps_bin_] = grid_f_max2_;
+      grid_f_max_diff_ = grid_f_max2_-grid_f_max_old_;
+      const double correc_tmp = ( grid_nm_[ps_bin_] - 1. ) * grid_f_max_diff_ / grid_->f_max_global;
+      if ( grid_f_max2_ < grid_->f_max_global )
+        grid_correc_ = correc_tmp - grid_correc2_;
       else {
-        grid_->f_max_global = grid_->f_max2;
-        grid_->correc = correc_tmp * grid_->f_max2 / grid_->f_max_global - grid_->correc2;
+        grid_->f_max_global = grid_f_max2_;
+        grid_correc_ = correc_tmp * grid_f_max2_ / grid_->f_max_global - grid_correc2_;
       }
-      grid_->correc2 = 0.;
-      grid_->f_max2 = 0.;
+      grid_correc2_ = 0.;
+      grid_f_max2_ = 0.;
       return false;
     }
     return true;
@@ -196,20 +201,17 @@ namespace CepGen
     if ( weight <= 0. )
       return false;
 
+    //mutex_->lock();
     global_params_->generation.ngen += 1;
-
     if ( global_params_->generation.ngen % global_params_->generation.gen_print_every == 0 ) {
-      //mutex_->lock();
       Information( Form( "[thread 0x%zx] Generated events: %d",
                          std::hash<std::thread::id>()( std::this_thread::get_id() ),
                          global_params_->generation.ngen ) );
       local_params_->process()->last_event->dump();
-      //mutex_->unlock();
     }
-
-    if ( callback_ ) {
+    if ( callback_ )
       callback_( *local_params_->process()->last_event, global_params_->generation.ngen );
-    }
+    //mutex_->unlock();
 
     return true;
   }

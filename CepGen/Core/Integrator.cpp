@@ -147,17 +147,13 @@ namespace CepGen
   {
     Information( Form( "Preparing the grid (%d points) for the generation of unweighted events.", input_params_->integrator.npoints ) );
 
-    if ( Logger::get().level >= Logger::Debug )
-      Debugging( Form( "Maximum weight = %d", input_params_->generation.maxgen ) );
-
-    const unsigned int max = pow( grid.mbin_, function_->dim );
+    grid.max = pow( grid.mbin_, function_->dim );
     const double inv_npoin = 1./input_params_->integrator.npoints;
 
     if ( function_->dim > grid.max_dimensions_ )
       FatalError( Form( "Number of dimensions to integrate exceeds the maximum number, %d", grid.max_dimensions_ ) );
 
-    grid.nm = std::vector<int>( max, 0 );
-    grid.f_max = std::vector<double>( max, 0. );
+    grid.f_max = std::vector<double>( grid.max, 0. );
     grid.n = std::vector<int>( function_->dim, 0 );
 
     std::vector<double> x( function_->dim, 0. );
@@ -169,7 +165,7 @@ namespace CepGen
     double sum = 0., sum2 = 0., sum2p = 0.;
 
     //--- main loop
-    for ( unsigned int i = 0; i < max; ++i ) {
+    for ( unsigned int i = 0; i < grid.max; ++i ) {
       int jj = i;
       for ( unsigned int j = 0; j < function_->dim; ++j ) {
         int jjj = jj*grid.inv_mbin_;
@@ -207,25 +203,26 @@ namespace CepGen
       }
     } // end of main loop
 
-    sum = sum/max;
-    sum2 = sum2/max;
-    sum2p = sum2p/max;
+    const double inv_max = 1./grid.max;
+    sum *= inv_max;
+    sum2 *= inv_max;
+    sum2p *= inv_max;
 
     if ( Logger::get().level >= Logger::Debug ) {
       const double sig = sqrt( sum2-sum*sum ), sigp = sqrt( sum2p );
 
       double eff1 = 0.;
-      for ( unsigned int i = 0; i < max; ++i )
-        eff1 += ( grid.f_max[i] / ( max*sum ) );
+      for ( unsigned int i = 0; i < grid.max; ++i )
+        eff1 += ( grid.f_max[i] / ( grid.max*sum ) );
       const double eff2 = grid.f_max_global/sum;
 
-      Debugging( Form( "Average function value     =  sum  = %g\n\t"
-                       "Average function value**2  =  sum2 = %g\n\t"
-                       "Overall standard deviation =  sig  = %g\n\t"
-                       "Average standard deviation =  sigp = %g\n\t"
-                       "Maximum function value     = ffmax = %g\n\t"
-                       "Average inefficiency       =  eff1 = %g\n\t"
-                       "Overall inefficiency       =  eff2 = %g\n\t",
+      Debugging( Form( "Average function value     = sum   = %g\n\t"
+                       "Average function value**2  = sum2  = %g\n\t"
+                       "Overall standard deviation = sig   = %g\n\t"
+                       "Average standard deviation = sigp  = %g\n\t"
+                       "Maximum function value     = f_max = %g\n\t"
+                       "Average inefficiency       = eff1  = %g\n\t"
+                       "Overall inefficiency       = eff2  = %g\n\t",
                        sum, sum2, sig, sigp, grid.f_max_global, eff1, eff2 ) );
     }
     grid.gen_prepared = true;
@@ -247,7 +244,6 @@ namespace CepGen
 
   GridParameters::GridParameters() :
     grid_prepared( false ), gen_prepared( false ),
-    correc( 0. ), correc2( 0. ),
-    f_max2( 0. ), f_max_diff( 0. ), f_max_old( 0. ), f_max_global( 0. )
+    f_max_global( 0. )
   {}
 }

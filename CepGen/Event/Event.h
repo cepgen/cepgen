@@ -14,14 +14,7 @@ namespace CepGen
     public:
       Event();
       Event( const Event& );
-      ~Event();
-      /**
-       * \brief Copies all the relevant quantities from one Event object to another
-       */
-      Event& operator=( const Event& );
-      /**
-       * \brief Empties the whole event content
-       */
+      /// Empty the whole event content
       void clear();
       /// Initialize an "empty" event collection
       void freeze();
@@ -33,7 +26,7 @@ namespace CepGen
       /// \param[in] stable_ Do we only show the stable particles in this event?
       void dump( std::ostream& os = Logger::get().outputStream, bool stable_ = false ) const;
 
-      double cmEnergy() const { return CMEnergy( getOneByRole( Particle::IncomingBeam1 ), getOneByRole( Particle::IncomingBeam2 ) ); }
+      double cmEnergy() const;
 
       //----- particles adders
 
@@ -119,12 +112,12 @@ namespace CepGen
       /// List of particles in the event, mapped to their role in the process
       ParticlesMap particles_;
       /// Last particle in an "empty" event
-      struct num_particles {
-        num_particles() : cs( 0 ), op1( 0 ), op2( 0 ) {}
-        num_particles( const num_particles& np ) : cs( np.cs ), op1( np.op1 ), op2( np.op2 ) {}
+      struct NumParticles {
+        NumParticles();
+        NumParticles( const NumParticles& np );
         unsigned short cs, op1, op2;
       };
-      num_particles evtcontent_;
+      NumParticles evtcontent_;
   };
 }
 

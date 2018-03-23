@@ -8,6 +8,7 @@
 namespace CepGen
 {
   extern volatile int gSignal;
+  struct RunAbortedException : Exception { using Exception::Exception; };
 }
 
 class AbortHandler
@@ -17,14 +18,28 @@ class AbortHandler
       action_.sa_sigaction = handle_ctrl_c;
       sigemptyset( &action_.sa_mask );
       action_.sa_flags = flags;
-      if ( sigaction( SIGINT, &action_, nullptr ) != 0
-        || sigaction( SIGTERM, &action_, nullptr ) != 0 )
-        throw CepGen::Exception( __PRETTY_FUNCTION__, "Failed to initialise the C-c handler!", CepGen::FatalError );
+      init();
+    }
+    void setMT( bool mt_on = true ) {
+      if ( mt_on )
+        action_.sa_sigaction = handle_ctrl_c_mt;
+      else
+        action_.sa_sigaction = handle_ctrl_c;
+      init();
     }
 
   private:
+    static void handle_ctrl_c_mt( int signal, siginfo_t*, void* ) {
+      CepGen::gSignal = signal;
+    }
     static void handle_ctrl_c( int signal, siginfo_t*, void* ) {
       CepGen::gSignal = signal;
+      throw CepGen::RunAbortedException( __PRETTY_FUNCTION__, "Run aborted...", CepGen::JustWarning );
+    }
+    void init() {
+      if ( sigaction( SIGINT, &action_, nullptr ) != 0
+        || sigaction( SIGTERM, &action_, nullptr ) != 0 )
+        throw CepGen::Exception( __PRETTY_FUNCTION__, "Failed to initialise the C-c handler!", CepGen::FatalError );
     }
     struct sigaction action_;
 };

@@ -49,7 +49,14 @@ namespace CepGen
 
       gsl_rng* rng_;
       gsl_monte_function* function_;
+
       GridParameters* grid_;
+      std::vector<int> grid_nm_;
+      double grid_correc_;
+      double grid_correc2_;
+      double grid_f_max2_;
+      double grid_f_max_diff_;
+      double grid_f_max_old_;
 
       Parameters* global_params_;
       Parameters* local_params_;
@@ -61,4 +68,3 @@ namespace CepGen
 }
 
 #endif
-

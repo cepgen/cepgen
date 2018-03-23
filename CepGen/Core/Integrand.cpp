@@ -31,6 +31,8 @@ namespace CepGen
         throw Exception( __PRETTY_FUNCTION__, "Failed to retrieve the run parameters!", FatalError );
 
       Process::GenericProcess* proc = p->process();
+      if ( !proc )
+        throw Exception( __PRETTY_FUNCTION__, "Failed to retrieve the process!", FatalError );
 
       //=============================================================================================
       // start the timer
@@ -55,8 +57,9 @@ namespace CepGen
 
           if ( log_level >= Logger::Debug ) {
             std::ostringstream oss; oss << p->kinematics.mode;
-            Debugging( Form( "Process mode considered: %s"
-                             "  pz(p1) = %5.2f  pz(p2) = %5.2f\n\t"
+            Debugging( Form( "Process mode considered: %s\n\t"
+                             "  pz(p1) = %5.2f\n\t"
+                             "  pz(p2) = %5.2f\n\t"
                              "  remnant mode: %d",
                               oss.str().c_str(),
                               p->kinematics.inp.first, p->kinematics.inp.second,
@@ -126,6 +129,7 @@ namespace CepGen
         && !p->hadroniser()
         &&  p->kinematics.cuts.central_particles.size() == 0 )
         return integrand;
+//std::cout << integrand << std::endl;
 
       //=============================================================================================
       // fill in the process' Event object

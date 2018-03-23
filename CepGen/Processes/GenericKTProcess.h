@@ -37,7 +37,6 @@ namespace CepGen
                           const std::string& description,
                           const std::array<ParticleCode,2>& partons,
                           const std::vector<ParticleCode>& output );
-        GenericKTProcess( const GenericKTProcess& proc );
 
         /// Populate the event content with the generated process' topology
         void addEventContent() override;
@@ -96,15 +95,14 @@ namespace CepGen
         /// \param[in] description Human-readable description of the variable
         void registerVariable( double& out, const MappingType& type, const Kinematics::Limits& in, Kinematics::Limits default_limits, const char* description );
         /// Generate and initialise all variables handled by this process
+        /// \return Phase space point-dependent component of the Jacobian weight of the point in the phase space for integration
         /// \note To be run at each point computation (therefore, to be optimised!)
-        void generateVariables();
+        double generateVariables() const;
   
         unsigned short num_dimensions_;
 
         /// Phase space point-independant component of the Jacobian weight of the point in the phase space for integration
         double kt_jacobian_;
-        /// Phase space point-dependent component of the Jacobian weight of the point in the phase space for integration
-        double aux_jacobian_;
 
         /// Log-virtuality range of the intermediate parton
         Kinematics::Limits log_qt_limits_;

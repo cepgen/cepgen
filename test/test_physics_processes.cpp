@@ -4,6 +4,7 @@
 
 #include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Processes/PPtoLL.h"
+#include "CepGen/Processes/PPtoWW.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
@@ -27,7 +28,7 @@ main( int argc, char* argv[] )
   // process -> { pt cut -> { kinematics -> ( sigma, delta(sigma) ) } }
   vector<pair<const char*,ValuesAtCutMap> > values_map = {
     //--- LPAIR values at sqrt(s) = 13 TeV
-    { "lpair", {
+    /*{ "lpair", {
       { 3.0, { // pt cut
         { "elastic",    { 2.0871703e1, 3.542e-2 } },
         { "singlediss", { 1.5042536e1, 3.256e-2 } },
@@ -38,8 +39,19 @@ main( int argc, char* argv[] )
         { "singlediss", { 4.8504819e-1, 1.171e-3 } },
         { "doublediss", { 6.35650e-1, 1.93968e-3 } }
       } },
+    } },*/
+    //--- PPtoWW values
+    { "pptoww", {
+      { 0.0, { // pt cut
+        { "elastic",         { 0.273, 0.01 } },
+        { "elastic",         { 0.273, 0.01 } }, // FIXME
+        { "singlediss_lux",  { 0.409, 0.01 } },
+        { "doublediss_lux",  { 1.090, 0.01 } },
+        { "singlediss_allm", { 0.318, 0.01 } },
+        { "doublediss_allm", { 0.701, 0.01 } }
+      } }
     } },
-    //--- PPTOLL values
+    //--- PPtoLL values
     { "pptoll", {
       { 3.0, { // pt cut
         { "elastic",       { 2.0936541e1, 1.4096e-2 } },
@@ -94,6 +106,11 @@ main( int argc, char* argv[] )
         mg.parameters->setProcess( new CepGen::Process::PPtoLL );
         mg.parameters->kinematics.cuts.initial[CepGen::Cuts::qt] = { 0., 50. };
       }
+      else if ( generator == "pptoww" ) {
+        mg.parameters->setProcess( new CepGen::Process::PPtoWW );
+        mg.parameters->kinematics.setSqrtS( 13.e3 );
+        //mg.parameters->kinematics.cuts.initial[CepGen::Cuts::qt] = { 0., 50. };
+      }
       else { InError( Form( "Unrecognized generator mode: %s", values_vs_generator.first ) ); break; }
 
       for ( const auto& values_vs_cut : values_vs_generator.second ) { // loop over the single lepton pT cut
@@ -114,6 +131,10 @@ main( int argc, char* argv[] )
 
           if ( kin_mode.find( "_su" ) != string::npos )
             mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SzczurekUleshchenko;
+          else if ( kin_mode.find( "_lux" ) != string::npos )
+            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::Schaefer;
+          else if ( kin_mode.find( "_allm" ) != string::npos )
+            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::ALLM97;
           else
             mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SuriYennie;
 
@@ -131,7 +152,7 @@ main( int argc, char* argv[] )
           double xsec_cepgen, err_xsec_cepgen;
           mg.computeXsection( xsec_cepgen, err_xsec_cepgen );
 
-          const double sigma = fabs( xsec_ref-xsec_cepgen ) / sqrt( err_xsec_cepgen*err_xsec_cepgen + err_xsec_ref*err_xsec_ref );
+          const double sigma = fabs( xsec_ref-xsec_cepgen ) / std::hypot( err_xsec_cepgen, err_xsec_ref );
 
           Information( Form( "Computed cross section:\n\t"
                              "Ref.   = %.3e +/- %.3e\n\t"

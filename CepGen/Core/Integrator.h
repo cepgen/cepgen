@@ -17,21 +17,16 @@ namespace CepGen
   class Event;
   struct GridParameters {
     GridParameters();
+    unsigned int max;
     /// Has the grid been prepared for integration?
     bool grid_prepared;
     /// Has the generation been prepared using @a SetGen call? (very time-consuming operation, thus needs to be called once)
     bool gen_prepared;
-    double correc;
-    double correc2;
     /// Maximal value of the function at one given point
     std::vector<double> f_max;
-    double f_max2;
-    double f_max_diff;
-    double f_max_old;
     /// Maximal value of the function in the considered integration range
     double f_max_global;
     std::vector<int> n;
-    std::vector<int> nm;
 
     /// Maximal number of dimensions handled by this integrator instance
     static constexpr unsigned short max_dimensions_ = 15;

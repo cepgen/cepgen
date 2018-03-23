@@ -19,7 +19,11 @@ namespace CepGen
   {
     if ( Logger::get().level > Logger::Nothing ) {
       Debugging( "Generator initialized" );
-      try { printHeader(); } catch ( Exception& e ) { e.dump(); }
+      try {
+        printHeader();
+      } catch ( Exception& e ) {
+        e.dump();
+      }
     }
     srand( time( 0 ) ); // Random number initialization
   }
@@ -58,7 +62,6 @@ namespace CepGen
   void
   Generator::setParameters( Parameters& ip )
   {
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
     parameters = std::unique_ptr<Parameters>( new Parameters( ip ) ); // copy constructor
   }
 
@@ -83,6 +86,7 @@ namespace CepGen
   Generator::computePoint( double* x )
   {
     prepareFunction();
+
     double res = Integrand::eval( x, numDimensions(), (void*)parameters.get() );
     std::ostringstream os;
     for ( unsigned int i = 0; i < numDimensions(); ++i )

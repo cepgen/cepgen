@@ -275,7 +275,7 @@ namespace CepGen
       const Particle& op1 = ev.getOneByRole( Particle::OutgoingBeam1 ), &op2 = ev.getOneByRole( Particle::OutgoingBeam2 );
       const double q2_1 = -boost_p1.m2Calc(), x1 = q2_1/( q2_1+op1.mass2()-mp2_ );
       const double q2_2 = -boost_p2.m2Calc(), x2 = q2_2/( q2_2+op2.mass2()-mp2_ );
-      setIdX( op1.integerPdgId(), op2.integerPdgId(), x1, x2 );
+      setIdX( op1.integerPdgId(), op2.integerPdgId(), x1, x2 ); //FIXME initiator = photon or proton?
       mat.toCMframe( boost_p1, boost_p2 );
     }
 

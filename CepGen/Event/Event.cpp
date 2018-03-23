@@ -19,20 +19,6 @@ namespace CepGen
     evtcontent_( rhs.evtcontent_ )
   {}
 
-  Event::~Event()
-  {}
-
-  Event&
-  Event::operator=( const Event &ev_ )
-  {
-    particles_ = ev_.particles_;
-    time_generation = ev_.time_generation;
-    time_total = ev_.time_total;
-    num_hadronisation_trials = ev_.num_hadronisation_trials;
-    evtcontent_ = ev_.evtcontent_;
-    return *this;
-  }
-
   void
   Event::clear()
   {
@@ -63,6 +49,12 @@ namespace CepGen
       particles_[Particle::OutgoingBeam1].resize( evtcontent_.op1 );
     if ( particles_.count( Particle::OutgoingBeam2 ) > 0 )
       particles_[Particle::OutgoingBeam2].resize( evtcontent_.op2 );
+  }
+
+  double
+  Event::cmEnergy() const
+  {
+    return CMEnergy( getOneByRole( Particle::IncomingBeam1 ), getOneByRole( Particle::IncomingBeam2 ) );
   }
 
   Particles&
@@ -331,4 +323,14 @@ namespace CepGen
     " ----------------------------------------------------------------------------------------------------------------------------------\n"
     "\t\t\t\t\t\t\tBalance% 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), pxtot, pytot, pztot, etot ) );
   }
+
+  //------------------------------------------------------------------------------------------------
+
+  Event::NumParticles::NumParticles() :
+    cs( 0 ), op1( 0 ), op2( 0 )
+  {}
+
+  Event::NumParticles::NumParticles( const NumParticles& np ) :
+    cs( np.cs ), op1( np.op1 ), op2( np.op2 )
+  {}
 }

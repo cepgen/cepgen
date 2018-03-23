@@ -12,21 +12,11 @@ namespace CepGen
                                         const std::array<ParticleCode,2>& partons,
                                         const std::vector<ParticleCode>& central ) :
       GenericProcess( name, description+" (kT-factorisation approach)" ),
-      num_dimensions_( 0 ), kt_jacobian_( 0. ), aux_jacobian_( 0. ),
+      num_dimensions_( 0 ), kt_jacobian_( 0. ),
       qt1_( 0. ), phi_qt1_( 0. ),
       qt2_( 0. ), phi_qt2_( 0. ),
       flux1_( 0. ), flux2_( 0. ),
       kIntermediateParts( partons ), kProducedParts( central )
-    {}
-
-    GenericKTProcess::GenericKTProcess( const GenericKTProcess& proc ) :
-      GenericProcess( proc.name_, proc.description_ ),
-      num_dimensions_( proc.num_dimensions_ ),
-      kt_jacobian_( proc.kt_jacobian_ ), aux_jacobian_( proc.aux_jacobian_ ),
-      qt1_( proc.qt1_ ), phi_qt1_( proc.phi_qt1_ ),
-      qt2_( proc.qt2_ ), phi_qt2_( proc.phi_qt2_ ),
-      flux1_( proc.flux1_ ), flux2_( proc.flux2_ ),
-      kIntermediateParts( proc.kIntermediateParts ), kProducedParts( proc.kProducedParts )
     {}
 
     void
@@ -64,6 +54,8 @@ namespace CepGen
       //============================================================================================
 
       kt_jacobian_ = 1.;
+      num_dimensions_ = 0;
+      mapped_variables_.clear();
 
       //============================================================================================
       // register the incoming partons' variables
@@ -95,32 +87,31 @@ namespace CepGen
     GenericKTProcess::computeWeight()
     {
       if ( kt_jacobian_ == 0. )
-        FatalError( "Point-independant component of the Jacobian for this"
-                    "kt-factorised process is null.\n\tPlease check the"
-                    "validity of the phase space" );
+        FatalError( "Point-independant component of the Jacobian for this "
+                    "kt-factorised process is null.\n\tPlease check the "
+                    "validity of the phase space!" );
 
       //============================================================================================
-      // generate and initialise all variables for this phase space point
+      // generate and initialise all variables, and auxiliary (x-dependent) part of the Jacobian
+      // for this phase space point.
       //============================================================================================
 
-      generateVariables();
-
-      //============================================================================================
-      // compute the integrand and auxiliary (x-dependent) part of the Jacobian,
-      // and combine everything together into a single weight for the phase space point.
-      //============================================================================================
-
-      if ( aux_jacobian_ == 0. )
+      const double aux_jacobian = generateVariables();
+      if ( aux_jacobian == 0. )
         return 0.;
 
+      //============================================================================================
+      // compute the integrand and combine together into a single weight for the phase space point.
+      //============================================================================================
+
       const double integrand = computeKTFactorisedMatrixElement();
-      const double weight = ( kt_jacobian_*aux_jacobian_ ) * integrand;
+      const double weight = ( kt_jacobian_*aux_jacobian ) * integrand;
 
       if ( Logger::get().level >= Logger::DebugInsideLoop )
         DebuggingInsideLoop( Form( "\n\tJacobian = %g * %g"
                                    "\n\tIntegrand = %g"
                                    "\n\tdW = %g",
-                                   kt_jacobian_, aux_jacobian_,
+                                   kt_jacobian_, aux_jacobian,
                                    integrand,
                                    weight ) );
 
@@ -148,7 +139,8 @@ namespace CepGen
           flux1_ = inelasticFlux( x1, q1t2, MX_, cuts_.structure_functions );
           flux2_ = inelasticFlux( x2, q2t2, MY_, cuts_.structure_functions );
           break;
-        default: return;
+        default:
+          throw Exception( __PRETTY_FUNCTION__, "Invalid kinematics mode selected!", FatalError );
       }
       flux1_ = std::max( flux1_, 1.e-20 );
       flux2_ = std::max( flux2_, 1.e-20 );
@@ -161,6 +153,7 @@ namespace CepGen
                                         const char* description )
     {
       Kinematics::Limits lim = in;
+      out = 0.; // reset the variable
       if ( !in.valid() ) {
         std::ostringstream oss; oss << default_limits;
         Debugging( Form( "%s could not be retrieved from the user configuration!\n\t"
@@ -182,34 +175,36 @@ namespace CepGen
           kt_jacobian_ *= lim.range();
           break;
       }
-      if ( Logger::get().level >= Logger::Information ) {
+      if ( Logger::get().level >= Logger::Debug ) {
         std::ostringstream oss_lim; oss_lim << lim;
         std::ostringstream oss_vt; oss_vt << type;
-        Information( Form( "%s has been mapped to variable %d.\n\t"
-                           "Allowed range for integration: %s.\n\t"
-                           "Variable integration mode: %s.",
-                           description, num_dimensions_,
-                           oss_lim.str().c_str(), oss_vt.str().c_str() ) );
+        Debugging( Form( "%s has been mapped to variable %d.\n\t"
+                         "Allowed range for integration: %s.\n\t"
+                         "Variable integration mode: %s.",
+                         description, num_dimensions_,
+                         oss_lim.str().c_str(), oss_vt.str().c_str() ) );
       }
     }
 
-    void
-    GenericKTProcess::generateVariables()
+    double
+    GenericKTProcess::generateVariables() const
     {
-      aux_jacobian_ = 1.;
+      double jacobian = 1.;
       for ( const auto& cut : mapped_variables_ ) {
-        const double xv = x( cut.index );
+        if ( !cut.limits.valid() )
+          continue;
+        const double xv = x( cut.index ); // between 0 and 1
         switch ( cut.type ) {
           case kLinear: {
             cut.variable = cut.limits.x( xv );
           } break;
           case kLogarithmic: {
             cut.variable = exp( cut.limits.x( xv ) );
-            aux_jacobian_ *= cut.variable;
+            jacobian *= cut.variable;
           } break;
           case kSquare: {
             cut.variable = cut.limits.x( xv );
-            aux_jacobian_ *= cut.variable;
+            jacobian *= cut.variable;
           } break;
         }
       }
@@ -218,10 +213,11 @@ namespace CepGen
         for ( const auto& cut : mapped_variables_ ) {
           oss << "variable " << cut.index
               << " in range " << std::left << std::setw( 20 ) << cut.limits << std::right
-              << " has value " << cut.variable << std::endl;
+              << " has value " << cut.variable << "\n\t";
         }
         DebuggingInsideLoop( oss.str() );
       }
+      return jacobian;
     }
 
     void
@@ -271,10 +267,11 @@ namespace CepGen
       //     incoming partons (photons, pomerons, ...)
       //============================================================================================
 
-      Particle& g1 = event_->getOneByRole( Particle::Parton1 ),
-               &g2 = event_->getOneByRole( Particle::Parton2 );
+      Particle& g1 = event_->getOneByRole( Particle::Parton1 );
       g1.setMomentum( event_->getOneByRole( Particle::IncomingBeam1 ).momentum()-PX_, true );
       g1.setStatus( Particle::Incoming );
+
+      Particle& g2 = event_->getOneByRole( Particle::Parton2 );
       g2.setMomentum( event_->getOneByRole( Particle::IncomingBeam2 ).momentum()-PY_, true );
       g2.setStatus( Particle::Incoming );
 
@@ -314,7 +311,7 @@ namespace CepGen
       const double term1 = ( 1.-x )*( 1.-Q2min/Q2 );
 
       const double f_D = str_fun.F2/( mx2 + Q2 - mp2_ ) * term1;
-      const double f_C= 2.*str_fun.F1( Q2, xbj )/Q2;
+      const double f_C = str_fun.F1( Q2, xbj ) * 2./Q2;
 
       return Constants::alphaEM*M_1_PI*( 1.-x )/Q2*( f_D+0.5*x*x*f_C );
     }

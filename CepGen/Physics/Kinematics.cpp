@@ -66,14 +66,13 @@ namespace CepGen
     return os;
   }
 
-  std::ostream&
-  operator<<( std::ostream& os, const Kinematics::Limits& lim )
-  {
-    if ( !lim.hasMin() && !lim.hasMax() ) return os << "no cuts";
-    if ( !lim.hasMin() ) return os << Form( "≤ %g", lim.max() );
-    if ( !lim.hasMax() ) return os << Form( "≥ %g", lim.min() );
-    return os << Form( "%g → %g", lim.min(), lim.max() );
-  }
+  //------------------------------------------------------------------------------------------------
+  // Kinematics limits
+  //------------------------------------------------------------------------------------------------
+
+  Kinematics::Limits::Limits( double min, double max ) :
+    std::pair<double,double>( min, max )
+  {}
 
   void
   Kinematics::Limits::in( double low, double up )
@@ -85,7 +84,9 @@ namespace CepGen
   double
   Kinematics::Limits::range() const
   {
-    return ( !valid() ? 0. : second-first );
+    if ( !hasMin() || !hasMax() )
+      return 0.;
+    return second-first;
   }
 
   bool
@@ -127,6 +128,19 @@ namespace CepGen
 
     return first + ( second-first ) * v;
   }
+
+  std::ostream&
+  operator<<( std::ostream& os, const Kinematics::Limits& lim )
+  {
+    if ( !lim.hasMin() && !lim.hasMax() ) return os << "no cuts";
+    if ( !lim.hasMin() ) return os << Form( "≤ %g", lim.max() );
+    if ( !lim.hasMax() ) return os << Form( "≥ %g", lim.min() );
+    return os << Form( "%g → %g", lim.min(), lim.max() );
+  }
+
+  //------------------------------------------------------------------------------------------------
+  // List of kinematics limits
+  //------------------------------------------------------------------------------------------------
 
   Kinematics::CutsList::CutsList() :
     initial( { { Cuts::q2, { 0., 1.e5 } } } ),

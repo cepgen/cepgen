@@ -27,8 +27,7 @@ namespace CepGen
       {
         public:
           /// Define lower and upper limits on a quantity
-          Limits( double min = invalid_, double max = invalid_ ) :
-            std::pair<double,double>( min, max ) {}
+          Limits( double min = invalid_, double max = invalid_ );
 
           /// Lower limit to apply on the variable
           double min() const { return first; }
