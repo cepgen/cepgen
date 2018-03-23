@@ -41,6 +41,7 @@ if(ROOT_FOUND)
     endif()
   endif()
   include_directories(${ROOT_INCLUDE_DIRS})
+  include_directories(${ROOT_INCLUDE_DIR})
   link_directories(${ROOT_LIBRARY_DIR})
 
   foreach(exec_src ${executables_root})

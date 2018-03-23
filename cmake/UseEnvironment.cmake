@@ -33,7 +33,7 @@ if($ENV{HOSTNAME} MATCHES "^lxplus[0-9]+.cern.ch")
   find_library(GSL_CBLAS_LIB gslcblas HINTS ${GSL_DIR} PATH_SUFFIXES lib)
   #--- searching for Pythia 8
   find_library(PYTHIA8 pythia8 HINTS $ENV{PYTHIA8_DIR} ${PYTHIA8_DIR} PATH_SUFFIXES lib)
-  find_path(PYTHIA8_INCLUDE Pythia8 HINTS $ENV{PYTHIA8_DIR} {${PYTHIA8_DIR} PATH_SUFFIXES include)
+  find_path(PYTHIA8_INCLUDE Pythia8 HINTS $ENV{PYTHIA8_DIR} ${PYTHIA8_DIR} PATH_SUFFIXES include)
   #--- searching for LHAPDF
   find_library(LHAPDF LHAPDF HINTS ${LHAPDF_DIR} PATH_SUFFIXES lib)
   find_path(LHAPDF_INCLUDE LHAPDF HINTS ${LHAPDF_DIR} PATH_SUFFIXES include)
