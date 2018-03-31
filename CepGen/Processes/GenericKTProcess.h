@@ -21,18 +21,17 @@ namespace CepGen
     class GenericKTProcess : public GenericProcess
     {
       public:
+        /// Type of incoming partons fluxes
         enum FluxTypes
         {
           BudnevFluxes = 0
         };
       public:
-        /**
-         * \brief Class constructor
-         * \param[in] name Generic process name
-         * \param[in] description Human-readable kT-factorised process name
-         * \param[in] partons First and second incoming parton
-         * \param[in] output Produced final state particles
-         */
+        /// Class constructor
+        /// \param[in] name Generic process name
+        /// \param[in] description Human-readable kT-factorised process name
+        /// \param[in] partons First and second incoming parton
+        /// \param[in] output Produced final state particles
         GenericKTProcess( const std::string& name,
                           const std::string& description,
                           const std::array<ParticleCode,2>& partons,
@@ -47,13 +46,13 @@ namespace CepGen
         /// Populate the event content with the generated process' kinematics  
         void fillKinematics( bool ) override;
 
-        /// Get the elastic flux to be expected at a given x_bjorken / kT
-        /// \param[in] x Bjorken x
-        /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming photon
+        /// Get the elastic flux to be expected at a given parton x/kT
+        /// \param[in] x Parton momentum fraction
+        /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming parton
         static double elasticFlux( double x, double kt2 );
-        /// Get the inelastic flux to be expected at a given x_bjorken / kT
-        /// \param[in] x Bjorken x
-        /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming photon
+        /// Get the inelastic flux to be expected at a given parton x/kT
+        /// \param[in] x Parton momentum loss
+        /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming parton
         /// \param[in] mx Outgoing diffractive proton mass
         static double inelasticFlux( double x, double kt2, double mx, const StructureFunctions::Type& sf, const FluxTypes& ft = BudnevFluxes );
 
@@ -129,11 +128,16 @@ namespace CepGen
         /// Second incoming parton's flux
         double flux2_;
 
+        /// Handler to a variable mapped by this process
         struct MappingVariable
         {
+          /// Kinematic limits to apply on the variable
           Kinematics::Limits limits;
+          /// Reference to the process variable to generate/map
           double& variable;
+          /// Interpolation type
           MappingType type;
+          /// Corresponding integration variable
           unsigned short index;
         };
         /// Collection of variables to be mapped at the weight generation stage
@@ -149,3 +153,4 @@ namespace CepGen
 }
 
 #endif
+
