@@ -58,6 +58,8 @@ namespace MSTW
       std::array<gsl_spline2d*,2> splines_;
       gsl_interp_accel* xacc_, *yacc_;
       std::array<double*,2> values_;
+#else
+      std::vector<double> xbj_vals_, q2_vals_;
 #endif
 
     public:

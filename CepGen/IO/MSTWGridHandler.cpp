@@ -45,8 +45,10 @@ namespace MSTW
       while ( file.read( reinterpret_cast<char*>( &val ), sizeof( sfval_t ) ) ) {
         q2_vals.insert( log10( val.q2 ) );
         xbj_vals.insert( log10( val.xbj ) );
-        /*val.f2 = std::max( val.f2, 0. );
-        val.fl = std::max( val.fl, 0. );*/
+#ifndef GOOD_GSL
+        q2_vals_.emplace_back( val.q2 );
+        xbj_vals_.emplace_back( val.xbj );
+#endif
         values_raw_.emplace_back( val );
       }
       file.close();
@@ -112,7 +114,7 @@ namespace MSTW
       gsl_spline2d_init( splines_[i], &q2_vec[0], &xbj_vec[0], values_[i], q2_vals.size(), xbj_vals.size() );
     }
 #else
-    FatalError( Form( "GSL version ≥ 2.1 is required for bilinear interpolation.\n\tVersion %s is installed on this system!", GSL_VERSION ) );
+    InWarning( Form( "GSL version ≥ 2.1 is required for bilinear interpolation.\n\tVersion %s is installed on this system!\n\tWill use a linear approximation instead. You may check the numerical validity of this approach...", GSL_VERSION ) );
 #endif
   }
 
@@ -127,7 +129,49 @@ namespace MSTW
       return ev;
     }
 #else
-    FatalError( Form( "GSL version ≥ 2.1 is required for bilinear interpolation.\n\tVersion %s is installed on this system!", GSL_VERSION ) );
+    double q2_1 = -1., q2_2 = -1., xbj_1 = -1., xbj_2 = -1.;
+    double f2_11 = 0., f2_12 = 0., f2_21 = 0., f2_22 = 0.;
+    double fl_11 = 0., fl_12 = 0., fl_21 = 0., fl_22 = 0.;
+    for ( unsigned int i = 0; i < q2_vals_.size()-1; ++i ) {
+      if ( q2 >= q2_vals_.at( i ) && q2 < q2_vals_.at( i+1 ) ) {
+        q2_1 = q2_vals_.at( i );
+        q2_2 = q2_vals_.at( i+1 );
+        break;
+      }
+    }
+    for ( unsigned int i = 0; i < xbj_vals_.size()-1; ++i ) {
+      if ( xbj >= xbj_vals_.at( i ) && xbj < xbj_vals_.at( i+1 ) ) {
+        xbj_1 = xbj_vals_.at( i );
+        xbj_2 = xbj_vals_.at( i+1 );
+        break;
+      }
+    }
+    for ( const auto& val : values_raw_ ) {
+      if ( q2_1 == val.q2 && xbj_1 == val.xbj ) {
+        f2_11 = val.f2;
+        fl_11 = val.fl;
+      }
+      if ( q2_2 == val.q2 && xbj_1 == val.xbj ) {
+        f2_12 = val.f2;
+        fl_12 = val.fl;
+      }
+      if ( q2_1 == val.q2 && xbj_2 == val.xbj ) {
+        f2_21 = val.f2;
+        fl_21 = val.fl;
+      }
+      if ( q2_2 == val.q2 && xbj_2 == val.xbj ) {
+        f2_22 = val.f2;
+        fl_22 = val.fl;
+      }
+    }
+    const double x2x1 = xbj_2-xbj_1;
+    const double y2y1 = q2_2-q2_1;
+    const double x2x = xbj_2-xbj;
+    const double y2y = q2_2-q2;
+    const double yy1 = q2-q2_1;
+    const double xx1 = xbj-xbj_1;
+    ev.F2 = 1.0 / (x2x1 * y2y1) * ( f2_11*x2x*y2y + f2_21*xx1*y2y + f2_12*x2x*yy1 + f2_22*xx1*yy1 );
+    ev.FL = 1.0 / (x2x1 * y2y1) * ( fl_11*x2x*y2y + fl_21*xx1*y2y + fl_12*x2x*yy1 + fl_22*xx1*yy1 );
 #endif
     return ev;
   }
