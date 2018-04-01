@@ -114,7 +114,10 @@ namespace MSTW
       gsl_spline2d_init( splines_[i], &q2_vec[0], &xbj_vec[0], values_[i], q2_vals.size(), xbj_vals.size() );
     }
 #else
-    InWarning( Form( "GSL version ≥ 2.1 is required for bilinear interpolation.\n\tVersion %s is installed on this system!\n\tWill use a linear approximation instead. You may check the numerical validity of this approach...", GSL_VERSION ) );
+    InWarning( Form( "GSL version ≥ 2.1 is required for spline bilinear interpolation.\n\t"
+                     "Version %s is installed on this system!\n\t"
+                     "Will use a linear approximation instead.\n\t"
+                     "You may check the numerical validity of this approach...", GSL_VERSION ) );
 #endif
   }
 
