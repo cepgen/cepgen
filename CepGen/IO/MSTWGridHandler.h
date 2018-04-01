@@ -3,13 +3,12 @@
 
 #include <gsl/gsl_version.h>
 
+#ifdef GSL_MAJOR_VERSION
 #if GSL_MAJOR_VERSION > 2 || ( GSL_MAJOR_VERSION == 2 && GSL_MINOR_VERSION >= 1 )
-#define GOOD_GSL 1
-#endif
-
-#ifdef GOOD_GSL
 #include <gsl/gsl_interp2d.h>
 #include <gsl/gsl_spline2d.h>
+#define GOOD_GSL 1
+#endif
 #endif
 
 #include <array>
@@ -58,6 +57,8 @@ namespace MSTW
       std::array<gsl_spline2d*,2> splines_;
       gsl_interp_accel* xacc_, *yacc_;
       std::array<double*,2> values_;
+#else
+      std::vector<double> xbj_vals_, q2_vals_;
 #endif
 
     public:
