@@ -31,7 +31,7 @@ namespace CepGen
   double
   Kinematics::sqrtS() const
   {
-    return ( inp.first+inp.second );
+    return inp.first + inp.second;
   }
 
   void
@@ -55,13 +55,20 @@ namespace CepGen
   operator<<( std::ostream& os, const Kinematics::ProcessMode& pm )
   {
     switch ( pm ) {
-      case Kinematics::ElectronElectron:   return os << "electron/electron";
-      case Kinematics::ElectronProton:     return os << "electron/proton";
-      case Kinematics::ProtonElectron:     return os << "proton/electron";
-      case Kinematics::ElasticElastic:     return os << "elastic/elastic";
-      case Kinematics::InelasticElastic:   return os << "inelastic/elastic";
-      case Kinematics::ElasticInelastic:   return os << "elastic/inelastic";
-      case Kinematics::InelasticInelastic: return os << "inelastic/inelastic";
+      case Kinematics::ElectronElectron:
+        return os << "electron/electron";
+      case Kinematics::ElectronProton:
+        return os << "electron/proton";
+      case Kinematics::ProtonElectron:
+        return os << "proton/electron";
+      case Kinematics::ElasticElastic:
+        return os << "elastic/elastic";
+      case Kinematics::InelasticElastic:
+        return os << "inelastic/elastic";
+      case Kinematics::ElasticInelastic:
+        return os << "elastic/inelastic";
+      case Kinematics::InelasticInelastic:
+        return os << "inelastic/inelastic";
     }
     return os;
   }
@@ -92,13 +99,13 @@ namespace CepGen
   bool
   Kinematics::Limits::hasMin() const
   {
-    return first != invalid_;
+    return first != kInvalid;
   }
 
   bool
   Kinematics::Limits::hasMax() const
   {
-    return second != invalid_;
+    return second != kInvalid;
   }
 
   bool
@@ -124,7 +131,7 @@ namespace CepGen
       InError( Form( "x must be comprised between 0 and 1 ; x value = %g", v ) );
     }
     if ( !valid() )
-      return invalid_;
+      return kInvalid;
 
     return first + ( second-first ) * v;
   }
@@ -132,9 +139,12 @@ namespace CepGen
   std::ostream&
   operator<<( std::ostream& os, const Kinematics::Limits& lim )
   {
-    if ( !lim.hasMin() && !lim.hasMax() ) return os << "no cuts";
-    if ( !lim.hasMin() ) return os << Form( "≤ %g", lim.max() );
-    if ( !lim.hasMax() ) return os << Form( "≥ %g", lim.min() );
+    if ( !lim.hasMin() && !lim.hasMax() )
+      return os << "no cuts";
+    if ( !lim.hasMin() )
+      return os << Form( "≤ %g", lim.max() );
+    if ( !lim.hasMax() )
+      return os << Form( "≥ %g", lim.min() );
     return os << Form( "%g → %g", lim.min(), lim.max() );
   }
 

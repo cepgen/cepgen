@@ -24,8 +24,12 @@ namespace CepGen
         /// \param[in] description Human-readable description of the process
         /// \param[in] has_event Do we generate the associated event structure?
         GenericProcess( const std::string& name, const std::string& description = "<invalid process>", bool has_event = true );
+        /// Copy constructor for a user process
         GenericProcess( const GenericProcess& );
-        virtual ~GenericProcess() {}
+        virtual ~GenericProcess() {std::cout<<__PRETTY_FUNCTION__<<std::endl;}
+
+        /// Assignment operator
+        void operator=( const GenericProcess& );
 
         /// Human-readable format dump of a GenericProcess object
         friend std::ostream& operator<<( std::ostream& os, const GenericProcess& proc );
@@ -96,9 +100,6 @@ namespace CepGen
         /// Pointer to the last event produced in this run
         std::shared_ptr<Event> last_event;
 
-        /// Is it the first time the process is computed?
-        bool first_run;
-
       protected:
         static const double mp_, mp2_;
 
@@ -107,13 +108,18 @@ namespace CepGen
         /// Compute the electric/magnetic form factors for the two considered \f$Q^{2}\f$ momenta transfers
         void formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const;
  
-        /// Get a list of references to the particles with a given role in the process
-        /// \param[in] role role in the process for the particle to retrieve
-        /// \return A vector of references to Particle objects associated to the role
-        Particles& particles( const Particle::Role& role );
-
         // --- 
   
+        /// Name of the process
+        std::string name_;
+        /// Process human-readable description
+        std::string description_;
+
+      public:
+        /// Is it the first time the process is computed?
+        bool first_run;
+
+      protected:
         /// Array of double precision floats representing the point on which the weight in the cross-section is computed
         std::vector<double> x_;
         /// List of incoming state particles (including intermediate partons)
@@ -139,22 +145,12 @@ namespace CepGen
 
         /// Set of cuts to apply on the final phase space
         Kinematics cuts_;
+        /// Does the process contain (and hold) an event?
+        bool has_event_;
         /// Event object containing all the information on the in- and outgoing particles
         std::shared_ptr<Event> event_;
         /// Is the phase space point set?
         bool is_point_set_;
-        /// Are the event's incoming particles set?
-        bool is_incoming_state_set_;
-        /// Are the event's outgoing particles set?
-        bool is_outgoing_state_set_;
-        /// Is the full event's kinematic set?
-        bool is_kinematics_set_;
-        /// Name of the process
-        std::string name_;
-        /// Process human-readable description
-        std::string description_;
-        /// Does the process contain (and hold) an event?
-        bool has_event_;
 
       private:
         /**

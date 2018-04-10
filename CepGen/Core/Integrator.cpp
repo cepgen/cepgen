@@ -247,3 +247,4 @@ namespace CepGen
     f_max_global( 0. )
   {}
 }
+

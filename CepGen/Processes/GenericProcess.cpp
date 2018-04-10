@@ -10,26 +10,35 @@ namespace CepGen
     const double GenericProcess::mp2_ = GenericProcess::mp_*GenericProcess::mp_;
 
     GenericProcess::GenericProcess( const std::string& name, const std::string& description, bool has_event ) :
+      name_( name ), description_( description ),
       first_run( true ),
-      s_( 0. ), sqs_( 0. ), w1_( 0. ), w2_( 0. ), t1_( 0. ), t2_( 0. ), MX_( 0. ), MY_( 0. ),
-      event_( new Event ),
-      is_point_set_( false ), is_incoming_state_set_( false ), is_outgoing_state_set_( false ), is_kinematics_set_( false ),
-      name_( name ), description_( description ), has_event_( has_event )
-    {}
+      s_( -1. ), sqs_( -1. ),
+      w1_( -1. ), w2_( -1. ), t1_( -1. ), t2_( -1. ), MX_( -1. ), MY_( -1. ),
+      has_event_( has_event ), event_( new Event ),
+      is_point_set_( false )
+    {std::cout<<__PRETTY_FUNCTION__<<std::endl;}
 
     GenericProcess::GenericProcess( const GenericProcess& proc ) :
+      name_( proc.name_ ), description_( proc.description_ ),
       first_run( proc.first_run ),
       s_( proc.s_ ), sqs_( proc.sqs_ ),
-      w1_( proc.w1_ ), w2_( proc.w2_ ),
-      t1_( proc.w1_ ), t2_( proc.w2_ ),
-      MX_( proc.w1_ ), MY_( proc.w2_ ),
-      event_( new Event( *proc.event_.get() ) ),
-      is_point_set_( proc.is_point_set_ ),
-      is_incoming_state_set_( proc.is_incoming_state_set_ ), is_outgoing_state_set_( proc.is_outgoing_state_set_ ),
-      is_kinematics_set_( proc.is_kinematics_set_ ),
-      name_( proc.name_ ), description_( proc.description_ ),
-      has_event_( proc.has_event_ )
-    {}
+      w1_( -1. ), w2_( -1. ), t1_( -1. ), t2_( -1. ), MX_( -1. ), MY_( -1. ),
+      has_event_( proc.has_event_ ), event_( new Event( *proc.event_.get() ) ),
+      is_point_set_( false )
+    {std::cout<<__PRETTY_FUNCTION__<<std::endl;}
+
+    void
+    GenericProcess::operator=( const GenericProcess& proc )
+    {
+      name_ = proc.name_;
+      description_ = proc.description_;
+      first_run = proc.first_run;
+      s_ = proc.s_;
+      sqs_ = proc.sqs_;
+      has_event_ = proc.has_event_;
+      event_.reset( new Event( *proc.event_.get() ) );
+      is_point_set_ = false;
+    }
 
     void
     GenericProcess::setPoint( const unsigned int ndim, double* x )
@@ -183,29 +192,22 @@ namespace CepGen
       }
     }
 
-    Particles&
-    GenericProcess::particles( const Particle::Role& role )
-    {
-      return event_->getByRole( role );
-    }
-
     bool
     GenericProcess::isKinematicsDefined()
     {
       // check the incoming state
-      if ( !particles( Particle::IncomingBeam1 ).empty()
-        && !particles( Particle::IncomingBeam2 ).empty() )
-        is_incoming_state_set_ = true;
+      bool is_incoming_state_set =
+        ( !event_->getByRole( Particle::IncomingBeam1 ).empty()
+       && !event_->getByRole( Particle::IncomingBeam2 ).empty() );
 
       // check the outgoing state
-      if ( !particles( Particle::OutgoingBeam1 ).empty()
-        && !particles( Particle::OutgoingBeam2 ).empty()
-        && !particles( Particle::CentralSystem ).empty() )
-        is_outgoing_state_set_ = true;
+      bool is_outgoing_state_set =
+        ( !event_->getByRole( Particle::OutgoingBeam1 ).empty()
+       && !event_->getByRole( Particle::OutgoingBeam2 ).empty()
+       && !event_->getByRole( Particle::CentralSystem ).empty() );
 
       // combine both states
-      is_kinematics_set_ = is_incoming_state_set_ && is_outgoing_state_set_;
-      return is_kinematics_set_;
+      return is_incoming_state_set && is_outgoing_state_set;
     }
 
     std::ostream&
