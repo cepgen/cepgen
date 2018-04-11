@@ -98,10 +98,8 @@ int main( int argc, char* argv[] ) {
   ev.reset( new CepGen::TreeEvent );
   ev->create( ev_tree.get() );
 
-  ctrl_c.setMT( true );
   // launch the events generation
   mg.generate( fill_event_tree );
-  ctrl_c.setMT( false );
 
   run->fill();
   file->Write();
