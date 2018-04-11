@@ -53,13 +53,11 @@ namespace CepGen
                    ptdiffy = pt_diff_*sin( phi_pt_diff_ );
 
       // Outgoing leptons
-      const double pt1x = 0.5 * ( ptsumx+ptdiffx ), pt1y = 0.5 * ( ptsumy+ptdiffy ), pt1 = sqrt( pt1x*pt1x+pt1y*pt1y ),
-                   pt2x = 0.5 * ( ptsumx-ptdiffx ), pt2y = 0.5 * ( ptsumy-ptdiffy ), pt2 = sqrt( pt2x*pt2x+pt2y*pt2y );
+      const double pt1x = ( ptsumx+ptdiffx )*0.5, pt1y = ( ptsumy+ptdiffy )*0.5, pt1 = std::hypot( pt1x, pt1y ),
+                   pt2x = ( ptsumx-ptdiffx )*0.5, pt2y = ( ptsumy-ptdiffy )*0.5, pt2 = std::hypot( pt2x, pt2y );
 
       const Kinematics::Limits pt_limits = cuts_.cuts.central_particles[W][Cuts::pt_single];
-      if ( pt_limits.hasMin() && ( pt1 < pt_limits.min() || pt2 < pt_limits.min() ) )
-        return 0.;
-      if ( pt_limits.hasMax() && ( pt1 > pt_limits.max() || pt2 > pt_limits.max() ) )
+      if ( !pt_limits.passes( pt1 ) || !pt_limits.passes( pt2 ) )
         return 0.;
 
       // transverse mass for the two leptons
@@ -71,55 +69,37 @@ namespace CepGen
       //=================================================================
 
       const double invm = sqrt( amt1*amt1 + amt2*amt2 + 2.*amt1*amt2*cosh( y1_-y2_ ) - ptsum*ptsum );
-      const Kinematics::Limits invm_limits = cuts_.cuts.central[Cuts::mass_sum];
-      if ( invm_limits.hasMin() && invm < invm_limits.min() )
-        return 0.;
-      if ( invm_limits.hasMax() && invm > invm_limits.max() )
+      if ( !cuts_.cuts.central[Cuts::mass_sum].passes( invm ) )
         return 0.;
 
       //=================================================================
       //     a window in transverse momentum difference
       //=================================================================
 
-      const Kinematics::Limits ptdiff_limits = cuts_.cuts.central[Cuts::pt_diff];
-      if ( ptdiff_limits.hasMax() && fabs( pt1-pt2 ) > ptdiff_limits.max() )
+      if ( !cuts_.cuts.central[Cuts::pt_diff].passes( fabs( pt1-pt2 ) ) )
         return 0.;
 
       //=================================================================
       //     a window in rapidity distance
       //=================================================================
 
-      const double dely = fabs( y1_-y2_ );
-      const Kinematics::Limits dely_limits = cuts_.cuts.central[Cuts::rapidity_diff];
-      if ( dely_limits.hasMin() && dely < dely_limits.min() )
-        return 0.;
-      if ( dely_limits.hasMax() && dely > dely_limits.max() )
+      if ( !cuts_.cuts.central[Cuts::rapidity_diff].passes( fabs( y1_-y2_ ) ) )
         return 0.;
 
       //=================================================================
       //     auxiliary quantities
       //=================================================================
 
-      const double alpha1 = amt1/sqs_*exp( +y1_ ),
-                   alpha2 = amt2/sqs_*exp( +y2_ ),
-                   beta1  = amt1/sqs_*exp( -y1_ ),
-                   beta2  = amt2/sqs_*exp( -y2_ );
+      const double alpha1 = amt1/sqs_*exp( y1_ ), beta1  = amt1/sqs_*exp( -y1_ ),
+                   alpha2 = amt2/sqs_*exp( y2_ ), beta2  = amt2/sqs_*exp( -y2_ );
+
       DebuggingInsideLoop( Form( "Sudakov parameters:\n\t"
                                  "  alpha1/2 = %f / %f\n\t"
                                  "   beta1/2 = %f / %f", alpha1, alpha2, beta1, beta2 ) );
 
-      const double q1t2 = q1tx*q1tx + q1ty*q1ty,
-                   q2t2 = q2tx*q2tx + q2ty*q2ty;
+      const double q1t2 = q1tx*q1tx+q1ty*q1ty, q2t2 = q2tx*q2tx+q2ty*q2ty;
 
-      //const double old_x2 = 0.; //FIXME figure out where this comes from
-      //const double delta_x1 = (MX_*MX_+q2t2)/((1.-old_x2)*s_);
-
-      //x1 = alpha1+alpha2+delta_x1;
-      const double x1 = alpha1 + alpha2,
-                   x2 = beta1  + beta2;
-
-      /*const double xi_x1 = log10(x1);
-      const double xi_x2 = log10(x2);*/
+      const double x1 = alpha1+alpha2, x2 = beta1+beta2;
 
       const double z1p = alpha1/x1, z1m = alpha2/x1,
                    z2p = beta1 /x2, z2m = beta2 /x2;
@@ -145,20 +125,12 @@ namespace CepGen
       DebuggingInsideLoop( Form( "s(1/2)_eff = %f / %f GeV^2\n\t"
                                  "dilepton invariant mass = %f GeV", s1_eff, s2_eff, invm ) );
 
-      switch ( cuts_.mode ) {
-        case Kinematics::ElasticInelastic:
-          if ( sqrt( s1_eff ) <= ( MY_+invm ) )
-            return 0.;
-        case Kinematics::InelasticElastic:
-          if ( sqrt( s2_eff ) <= ( MX_+invm ) )
-            return 0.;
-        case Kinematics::InelasticInelastic:
-          if ( sqrt( s1_eff ) <= ( MY_+invm ) )
-            return 0.;
-          if ( sqrt( s2_eff ) <= ( MX_+invm ) )
-            return 0.;
-        default: break;
-      }
+      if ( ( cuts_.mode == Kinematics::ElasticInelastic || cuts_.mode == Kinematics::InelasticInelastic )
+        && ( sqrt( s1_eff ) <= ( MY_+invm ) ) )
+        return 0.;
+      if ( ( cuts_.mode == Kinematics::InelasticElastic || cuts_.mode == Kinematics::InelasticInelastic )
+        && ( sqrt( s2_eff ) <= ( MX_+invm ) ) )
+        return 0.;
 
       //const double qcaptx = pcaptx, qcapty = pcapty;
 
@@ -178,8 +150,8 @@ namespace CepGen
       PX_ = Particle::Momentum( -q1tx, -q1ty, ( px_plus-px_minus )*M_SQRT1_2, ( px_plus+px_minus )*M_SQRT1_2 );
       PY_ = Particle::Momentum( -q2tx, -q2ty, ( py_plus-py_minus )*M_SQRT1_2, ( py_plus+py_minus )*M_SQRT1_2 );
 
-      DebuggingInsideLoop( Form( "First remnant:  (E,p) = (%f, %f, %f, %f)\n\t"
-                                 "Second remnant: (E,p) = (%f, %f, %f, %f)",
+      DebuggingInsideLoop( Form( "First remnant:  (p,E) = (%f, %f, %f, %f)\n\t"
+                                 "Second remnant: (p,E) = (%f, %f, %f, %f)",
                                  PX_.px(), PX_.py(), PX_.pz(), PX_.energy(),
                                  PY_.px(), PY_.py(), PY_.pz(), PY_.energy() ) );
 
@@ -286,7 +258,7 @@ namespace CepGen
     PPtoWW::fillCentralParticlesKinematics()
     {
       // randomise the charge of the outgoing leptons
-      short sign = ( drand()>.5 ) ? +1 : -1;
+      short sign = ( drand() > 0.5 ) ? +1 : -1;
 
       //=================================================================
       //     first outgoing lepton
@@ -346,18 +318,17 @@ namespace CepGen
       const double cos_theta = ( that-uhat ) / shat / sqrt( 1.+1.e-10-4.*mw2_/shat ), cos_theta2 = cos_theta*cos_theta;
       const double sin_theta2 = 1.-cos_theta2, sin_theta = sqrt( sin_theta2 );
       const double beta = sqrt( 1.-4.*mw2_/shat ), beta2 = beta*beta;
-      const double gamma = 1./sqrt( 1.-beta2 ), gamma2 = gamma*gamma;
+      const double inv_gamma = sqrt( 1.-beta2 ), gamma = 1./inv_gamma, gamma2 = gamma*gamma, inv_gamma2 = inv_gamma*inv_gamma;
       const double invA = 1./( 1.-beta2*cos_theta2 );
 
-      const double term1 = 1./gamma2*( ( gamma2+1. )*( 1.-lam1*lam2 )*sin_theta2 - ( 1.+lam1*lam2 ) );
-      const double term2 = -M_SQRT2/gamma*( lam1-lam2 ) * ( 1.+lam1*lam3*cos_theta )*sin_theta;
-      const double term3 = -0.5*( 2.*beta*( lam1+lam2 )*( lam3+lam4 ) - ( 1./gamma2 )*( 1.+lam3*lam4 )*( 2.*lam1*lam2+( 1.-lam1*lam2 ) * cos_theta2 )+( 1.+lam1*lam2*lam3*lam4 )*( 3.+lam1*lam2 ) + 2.*( lam1-lam2 )*( lam3-lam4 )*cos_theta + ( 1.-lam1*lam2 )*( 1.-lam3*lam4 )*cos_theta2 );
-      const double term4 = -M_SQRT2/gamma*( lam2-lam1 )*( 1.+lam2*lam4*cos_theta )*sin_theta;
-
-      if ( lam3 == 0 && lam4 == 0 ) return invA*term1;
-      if ( lam4 == 0 )              return invA*term2;
-      if ( lam3 == 0 )              return invA*term4;
-      if ( lam3 != 0 && lam4 != 0 ) return invA*term3;
+      if ( lam3 == 0 && lam4 == 0 )
+        return invA*inv_gamma2*( ( gamma2+1. )*( 1.-lam1*lam2 )*sin_theta2 - ( 1.+lam1*lam2 ) );
+      if ( lam4 == 0 )
+        return invA*( -M_SQRT2*inv_gamma*( lam1-lam2 )*( 1.+lam1*lam3*cos_theta )*sin_theta );
+      if ( lam3 == 0 )
+        return invA*( -M_SQRT2*inv_gamma*( lam2-lam1 )*( 1.+lam2*lam4*cos_theta )*sin_theta );
+      if ( lam3 != 0 && lam4 != 0 )
+        return invA*( -0.5*( 2.*beta*( lam1+lam2 )*( lam3+lam4 ) - inv_gamma2*( 1.+lam3*lam4 )*( 2.*lam1*lam2+( 1.-lam1*lam2 ) * cos_theta2 )+( 1.+lam1*lam2*lam3*lam4 )*( 3.+lam1*lam2 ) + 2.*( lam1-lam2 )*( lam3-lam4 )*cos_theta + ( 1.-lam1*lam2 )*( 1.-lam3*lam4 )*cos_theta2 ) );
       return 0.;
     }
   }

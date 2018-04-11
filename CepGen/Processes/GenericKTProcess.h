@@ -43,7 +43,7 @@ namespace CepGen
         unsigned int numDimensions( const Kinematics::ProcessMode& ) const override;
         /// Retrieve the event weight in the phase space
         double computeWeight() override;
-        /// Populate the event content with the generated process' kinematics  
+        /// Populate the event content with the generated process' kinematics
         void fillKinematics( bool ) override;
 
         /// Get the elastic flux to be expected at a given parton x/kT
@@ -97,7 +97,7 @@ namespace CepGen
         /// \return Phase space point-dependent component of the Jacobian weight of the point in the phase space for integration
         /// \note To be run at each point computation (therefore, to be optimised!)
         double generateVariables() const;
-  
+
         unsigned short num_dimensions_;
 
         /// Phase space point-independant component of the Jacobian weight of the point in the phase space for integration
@@ -144,6 +144,7 @@ namespace CepGen
         std::vector<MappingVariable> mapped_variables_;
 
       private:
+        static const double kMinFlux;
         /// First and second intermediate parton (photon, pomeron, ...)
         std::array<ParticleCode,2> kIntermediateParts;
         /// Type of particles produced in the final state

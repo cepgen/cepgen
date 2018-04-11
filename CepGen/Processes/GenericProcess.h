@@ -107,9 +107,9 @@ namespace CepGen
         void setEventContent( const IncomingState& ini, const OutgoingState& fin );
         /// Compute the electric/magnetic form factors for the two considered \f$Q^{2}\f$ momenta transfers
         void formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const;
- 
-        // --- 
-  
+
+        // ---
+
         /// Name of the process
         std::string name_;
         /// Process human-readable description
@@ -130,6 +130,10 @@ namespace CepGen
         double s_;
         /// \f$\sqrt s\f$, centre of mass energy of the incoming particles' system (in GeV)
         double sqs_;
+        /// Invariant mass of the first proton-like outgoing particle (or remnant)
+        double MX_;
+        /// Invariant mass of the second proton-like outgoing particle (or remnant)
+        double MY_;
         /// \f$m_1^2\f$, squared mass of the first proton-like incoming particle
         double w1_;
         /// \f$m_2^2\f$, squared mass of the second proton-like incoming particle
@@ -138,10 +142,6 @@ namespace CepGen
         double t1_;
         /// Virtuality of the second incoming photon
         double t2_;
-        /// Invariant mass of the first proton-like outgoing particle (or remnant)
-        double MX_;
-        /// Invariant mass of the second proton-like outgoing particle (or remnant)
-        double MY_;
 
         /// Set of cuts to apply on the final phase space
         Kinematics cuts_;

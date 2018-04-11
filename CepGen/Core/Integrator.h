@@ -70,7 +70,7 @@ namespace CepGen
       GridParameters grid;
 
     private:
-      void setGen();
+      void computeGenerationParameters();
       /// List of parameters to specify the integration range and the physics determining the phase space
       Parameters* input_params_;
       /// GSL structure storing the function to be integrated by this integrator instance (along with its parameters)

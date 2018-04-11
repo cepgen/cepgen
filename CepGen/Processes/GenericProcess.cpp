@@ -13,7 +13,8 @@ namespace CepGen
       name_( name ), description_( description ),
       first_run( true ),
       s_( -1. ), sqs_( -1. ),
-      w1_( -1. ), w2_( -1. ), t1_( -1. ), t2_( -1. ), MX_( -1. ), MY_( -1. ),
+      MX_( -1. ), MY_( -1. ), w1_( -1. ), w2_( -1. ),
+      t1_( -1. ), t2_( -1. ),
       has_event_( has_event ), event_( new Event ),
       is_point_set_( false )
     {std::cout<<__PRETTY_FUNCTION__<<std::endl;}
@@ -22,7 +23,8 @@ namespace CepGen
       name_( proc.name_ ), description_( proc.description_ ),
       first_run( proc.first_run ),
       s_( proc.s_ ), sqs_( proc.sqs_ ),
-      w1_( -1. ), w2_( -1. ), t1_( -1. ), t2_( -1. ), MX_( -1. ), MY_( -1. ),
+      MX_( proc.MX_ ), MY_( proc.MY_ ), w1_( proc.w1_ ), w2_( proc.w2_ ),
+      t1_( -1. ), t2_( -1. ),
       has_event_( proc.has_event_ ), event_( new Event( *proc.event_.get() ) ),
       is_point_set_( false )
     {std::cout<<__PRETTY_FUNCTION__<<std::endl;}
@@ -35,8 +37,13 @@ namespace CepGen
       first_run = proc.first_run;
       s_ = proc.s_;
       sqs_ = proc.sqs_;
+      MX_ = proc.MX_;
+      MY_ = proc.MY_;
+      w1_ = proc.w1_;
+      w2_ = proc.w2_;
       has_event_ = proc.has_event_;
       event_.reset( new Event( *proc.event_.get() ) );
+//      event_.reset( proc.event_.get() );
       is_point_set_ = false;
     }
 

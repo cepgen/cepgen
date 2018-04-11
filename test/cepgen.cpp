@@ -16,6 +16,7 @@ using namespace std;
 
 void printEvent( const CepGen::Event& ev, unsigned long ev_id )
 {
+cout << ev_id << endl;
   if ( ev_id % 5000 != 0 )
     return;
 
@@ -32,14 +33,14 @@ void printEvent( const CepGen::Event& ev, unsigned long ev_id )
  */
 int main( int argc, char* argv[] ) {
   CepGen::Generator mg;
-  
+
   //CepGen::Logger::get().level = CepGen::Logger::Debug;
   //CepGen::Logger::get().level = CepGen::Logger::DebugInsideLoop;
   //CepGen::Logger::get().outputStream( ofstream( "log.txt" ) );
-  
+
   if ( argc == 1 ) {
     Information( "No config file provided. Setting the default parameters." );
-    
+
     mg.parameters->setProcess( new CepGen::Process::GamGamLL );
     //mg.parameters->process_mode = Kinematics::InelasticElastic;
     mg.parameters->kinematics.mode = CepGen::Kinematics::ElasticElastic;
@@ -49,6 +50,7 @@ int main( int argc, char* argv[] ) {
     mg.parameters->kinematics.cuts.central[CepGen::Cuts::pt_single].min() = 15.;
     mg.parameters->kinematics.cuts.central[CepGen::Cuts::eta_single] = { -2.5, 2.5 };
     mg.parameters->integrator.ncvg = 5e4;
+    mg.parameters->generation.num_threads = 4;
     mg.parameters->generation.enabled = true;
     mg.parameters->generation.maxgen = 2e4;
   }

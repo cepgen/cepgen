@@ -92,14 +92,14 @@ namespace CepGen
       //     auxiliary quantities
       //=================================================================
 
-      const double alpha1 = amt1/sqs_*exp(  y1_ ), beta1  = amt1/sqs_*exp( -y1_ ),
-                   alpha2 = amt2/sqs_*exp(  y2_ ), beta2  = amt2/sqs_*exp( -y2_ );
+      const double alpha1 = amt1/sqs_*exp( y1_ ), beta1  = amt1/sqs_*exp( -y1_ ),
+                   alpha2 = amt2/sqs_*exp( y2_ ), beta2  = amt2/sqs_*exp( -y2_ );
 
       DebuggingInsideLoop( Form( "Sudakov parameters:\n\t"
                                  "  alpha1/2 = %f / %f\n\t"
                                  "   beta1/2 = %f / %f", alpha1, alpha2, beta1, beta2 ) );
 
-      const double q1t2 = std::hypot( q1tx, q1ty ), q2t2 = std::hypot( q2tx, q2ty );
+      const double q1t2 = q1tx*q1tx+q1ty*q1ty, q2t2 = q2tx*q2tx+q2ty*q2ty;
 
       const double x1 = alpha1+alpha2, x2 = beta1+beta2;
 
@@ -131,7 +131,7 @@ namespace CepGen
       if ( ( cuts_.mode == Kinematics::ElasticInelastic || cuts_.mode == Kinematics::InelasticInelastic )
         && ( sqrt( s1_eff ) <= ( MY_+invm ) ) )
         return 0.;
-      if ( ( cuts_.mode == Kinematics::InelasticInelastic || cuts_.mode == Kinematics::InelasticInelastic )
+      if ( ( cuts_.mode == Kinematics::InelasticElastic || cuts_.mode == Kinematics::InelasticInelastic )
         && ( sqrt( s2_eff ) <= ( MX_+invm ) ) )
         return 0.;
 
@@ -153,8 +153,8 @@ namespace CepGen
       PX_ = Particle::Momentum( -q1tx, -q1ty, ( px_plus-px_minus )*M_SQRT1_2, ( px_plus+px_minus )*M_SQRT1_2 );
       PY_ = Particle::Momentum( -q2tx, -q2ty, ( py_plus-py_minus )*M_SQRT1_2, ( py_plus+py_minus )*M_SQRT1_2 );
 
-      DebuggingInsideLoop( Form( "First remnant:  (E,p) = (%f, %f, %f, %f), mass = %f\n\t"
-                                 "Second remnant: (E,p) = (%f, %f, %f, %f), mass = %f",
+      DebuggingInsideLoop( Form( "First remnant:  (p,E) = (%f, %f, %f, %f), mass = %f\n\t"
+                                 "Second remnant: (p,E) = (%f, %f, %f, %f), mass = %f",
                                  PX_.px(), PX_.py(), PX_.pz(), PX_.energy(), PX_.mass(),
                                  PY_.px(), PY_.py(), PY_.pz(), PY_.energy(), PY_.mass() ) );
 
@@ -192,8 +192,8 @@ namespace CepGen
       const Particle::Momentum q2( q2tx, q2ty, 0., 0. );
       //////////////////////////////////////////
 
-      DebuggingInsideLoop( Form( "First photon*:  (E,p), m2 = (%f, %f, %f, %f), %e\n\t"
-                                 "Second photon*: (E,p), m2 = (%f, %f, %f, %f), %e",
+      DebuggingInsideLoop( Form( "First photon*:  (p,E), m2 = (%f, %f, %f, %f), %e\n\t"
+                                 "Second photon*: (p,E), m2 = (%f, %f, %f, %f), %e",
                                  q1.px(), q1.py(), q1.pz(), q1.energy(), q1.mass2(),
                                  q2.px(), q2.py(), q2.pz(), q2.energy(), q2.mass2() ) );
 
@@ -204,8 +204,8 @@ namespace CepGen
       //const double shat = s_*x1*x2; // ishat = 1 (approximation)
       //const double shat = ( q1+q2 ).mass2(); // ishat = 2 (exact formula)
 
-      const double that1 = ( q1-p1 ).mass2(), that2 = ( q2-p2 ).mass2(),
-                   uhat1 = ( q1-p2 ).mass2(), uhat2 = ( q2-p1 ).mass2();
+      const double that1 = ( q1-p1 ).mass2(), that2 = ( q2-p2 ).mass2();
+      const double uhat1 = ( q1-p2 ).mass2(), uhat2 = ( q2-p1 ).mass2();
       DebuggingInsideLoop( Form( "that(1/2) = %f / %f\n\t"
                                  "uhat(1/2) = %f / %f",
                                  that1, that2, uhat1, uhat2 ) );

@@ -62,10 +62,10 @@ namespace CepGen
     std::vector<double> x( function_->dim, 0. );
 
     //--- correction cycles
-    
+
     if ( ps_bin_ != 0 ) {
       bool has_correction = false;
-      while ( !correctionCycle( x, has_correction ) ) {}
+      while ( !correctionCycle( x, has_correction ) ) {std::cout <<"correctioncycle"<<std::endl;}
       if ( has_correction )
         return storeEvent( x );
     }
@@ -82,7 +82,7 @@ namespace CepGen
         y = uniform() * grid_->f_max_global;
         grid_nm_[ps_bin_] += 1;
       } while ( y > grid_->f_max[ps_bin_] );
-      // Select x values in this Integrator bin
+      // shoot a point x in this bin
       int jj = ps_bin_;
       for ( unsigned int i = 0; i < function_->dim; ++i ) {
         int jjj = jj * grid_->inv_mbin_;
@@ -93,9 +93,12 @@ namespace CepGen
 
       // Get weight for selected x value
       weight = eval( x );
+//std::cout << weight << "|" << y << std::endl;
       if ( weight <= 0. )
         continue;
     } while ( y > weight );
+
+//std::cout << __PRETTY_FUNCTION__<<"|"<< weight<< std::endl;
 
     if ( weight <= grid_->f_max[ps_bin_] )
       ps_bin_ = 0;
@@ -135,10 +138,10 @@ namespace CepGen
       grid_correc_ -= 1.;
     if ( uniform() < grid_correc_ ) {
       grid_correc_ = -1.;
-      std::vector<double> xtmp;
+      std::vector<double> xtmp( function_->dim );
       // Select x values in phase space bin
       for ( unsigned int k = 0; k < function_->dim; ++k )
-        xtmp.emplace_back( ( uniform() + grid_->n[k] ) * grid_->inv_mbin_ );
+        xtmp[k] = ( uniform() + grid_->n[k] ) * grid_->inv_mbin_;
       // Compute weight for x value
       const double weight = eval( xtmp );
       // Parameter for correction of correction
@@ -150,7 +153,7 @@ namespace CepGen
       }
       // Accept event
       if ( weight >= grid_f_max_diff_*uniform() + grid_f_max_old_ ) { // FIXME!!!!
-        //Error("Accepting event!!!");
+        InError("Accepting event!!!");
         //return storeEvent(x);
         x = xtmp;
         has_correction = true;
@@ -193,15 +196,17 @@ namespace CepGen
   bool
   ThreadWorker::storeEvent( const std::vector<double>& x )
   {
+//    std::cout << "------------store!!!" << std::endl;
     std::lock_guard<std::mutex> guard( *mutex_ );
+    //mutex_->lock();
     local_params_->setStorage( true );
     const double weight = eval( x );
     local_params_->setStorage( false );
+    //mutex_->unlock();
 
     if ( weight <= 0. )
       return false;
 
-    global_params_->generation.ngen += 1;
     if ( global_params_->generation.ngen % global_params_->generation.gen_print_every == 0 ) {
       Information( Form( "[thread 0x%zx] Generated events: %d",
                          std::hash<std::thread::id>()( std::this_thread::get_id() ),
@@ -211,6 +216,8 @@ namespace CepGen
     if ( callback_ )
       callback_( *local_params_->process()->last_event, global_params_->generation.ngen );
 
+    global_params_->generation.ngen += 1;
     return true;
   }
 }
+

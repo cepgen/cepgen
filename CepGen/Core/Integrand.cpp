@@ -129,7 +129,6 @@ namespace CepGen
         && !p->hadroniser()
         &&  p->kinematics.cuts.central_particles.size() == 0 )
         return integrand;
-//std::cout << integrand << std::endl;
 
       //=============================================================================================
       // fill in the process' Event object
@@ -164,6 +163,7 @@ namespace CepGen
 
       if ( integrand <= 0. )
         return 0.;
+//if (p->storage())std::cout << __PRETTY_FUNCTION__<<"|"<<integrand << std::endl;
 
       //=============================================================================================
       // set the CepGen part of the event generation
