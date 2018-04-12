@@ -19,6 +19,7 @@ namespace CepGen
     Pythia8::Vec4
     momToVec4( const Particle::Momentum& mom )
     {
+//std::cout << mom << "|" << mom.mass() << "|" << Pythia8::Vec4( mom.px(), mom.py(), mom.pz(), mom.energy() ).mCalc() << std::endl;
       return Pythia8::Vec4( mom.px(), mom.py(), mom.pz(), mom.energy() );
     }
 
@@ -49,7 +50,6 @@ namespace CepGen
     bool
     Pythia8Hadroniser::init()
     {
-      //enable_all_processes = true;//FIXME FIXME
       if ( pythia_->settings.flag( "ProcessLevel:all" ) != full_evt_ )
         pythia_->settings.flag( "ProcessLevel:all", full_evt_ );
 
@@ -67,6 +67,7 @@ namespace CepGen
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 0 );
           break;
       }
+//      pythia_->settings.mode( "BeamRemnants:remnantMode", 1 );
 
       if ( !pythia_->init() )
         throw CG_FATAL( "Pythia8Hadroniser" )
@@ -106,6 +107,9 @@ namespace CepGen
     Pythia8Hadroniser::run( Event& ev, double& weight, bool full )
     {
       weight = 1.;
+
+full = true;//FIXME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 #ifndef PYTHIA8
       throw CG_FATAL( "Pythia8Hadroniser" ) << "Pythia8 is not linked to this instance!";
 #else
@@ -117,15 +121,12 @@ namespace CepGen
         init();
       }
 
-      const Pythia8::Vec4 mom_p1( momToVec4( ev.getOneByRole( Particle::Parton1 ).momentum() ) );
-      const Pythia8::Vec4 mom_p2( momToVec4( ev.getOneByRole( Particle::Parton2 ).momentum() ) );
-
       //===========================================================================================
       // convert our event into a custom LHA format
       //===========================================================================================
 
-      lhaevt_->feedEvent( ev, full, mom_p1, mom_p2 );
-
+      lhaevt_->feedEvent( ev, full );
+lhaevt_->listEvent();
       //===========================================================================================
       // launch the hadronisation / resonances decays, and update the event accordingly
       //===========================================================================================
@@ -134,9 +135,10 @@ namespace CepGen
       unsigned short num_try = 0;
       while ( !pythia_->next() && num_try < ev.num_hadronisation_trials )
         num_try++;
-
+//pythia_->process.list();
 //pythia_->event.list();
-      updateEvent( ev, weight, full, mom_p1, mom_p2 );
+
+      updateEvent( ev, weight, full );
 
 #endif
       ev.dump();
@@ -159,24 +161,16 @@ namespace CepGen
     }
 
     void
-    Pythia8Hadroniser::updateEvent( Event& ev, double& weight, bool full, const Pythia8::Vec4& boost_p1, const Pythia8::Vec4& boost_p2 ) const
+    Pythia8Hadroniser::updateEvent( Event& ev, double& weight, bool full ) const
     {
       unsigned short offset = 0;
 
-      Pythia8::RotBstMatrix mat, mat_b1, mat_b2;
-      if ( full )
-        mat.fromCMframe( boost_p1, boost_p2 );
-
+//pythia_->event.list();
       for ( unsigned short i = 1; i < pythia_->event.size(); ++i ) {
         if ( pythia_->event[i].status() != -12 )
           continue;
         // skip the incoming particles
         offset++;
-      }
-      if ( offset == 2 ) {
-        Pythia8::Vec4 ip1 = pythia_->event[1].p(), ip2 = pythia_->event[2].p();
-        mat_b1.bst( ip1-pythia_->event[offset+1].p(), ip1-boost_p1 );
-        mat_b2.bst( ip2-pythia_->event[offset+2].p(), ip2-boost_p2 );
       }
 
       for ( unsigned short i = 1+offset; i < pythia_->event.size(); ++i ) {
@@ -198,18 +192,13 @@ namespace CepGen
         switch ( role ) {
           case Particle::OutgoingBeam1: // no break!
             ev.getByRole( Particle::OutgoingBeam1 )[0].setStatus( Particle::Fragmented );
-            if ( abs( p.status() ) != 61 ) {
-              mom.rotbst( mat_b1 );
+            if ( abs( p.status() ) != 61 )
               break;
-            }
           case Particle::OutgoingBeam2: // no break!
             ev.getByRole( Particle::OutgoingBeam2 )[0].setStatus( Particle::Fragmented );
-            if ( abs( p.status() ) != 61 ) {
-              mom.rotbst( mat_b2 );
+            if ( abs( p.status() ) != 61 )
               break;
-            }
           default:
-            mom.rotbst( mat );
             break;
         }
         // found the role ; now we can add the particle
@@ -256,7 +245,7 @@ namespace CepGen
   const double LHAEvent::mp2_ = LHAEvent::mp_*LHAEvent::mp_;
 
   LHAEvent::LHAEvent( const Parameters* params ) :
-    LHAup( 4 ), params_( params )
+    LHAup( 3 ), params_( params )
   {
     addProcess( 0, 10., 0., 100. );
     if ( params_ ) {
@@ -274,60 +263,111 @@ namespace CepGen
   }
 
   void
-  LHAEvent::feedEvent( const Event& ev, bool full, const Pythia8::Vec4& boost_p1, const Pythia8::Vec4& boost_p2 )
+  LHAEvent::feedEvent( const Event& ev, bool full )
   {
     const double scale = ev.getOneByRole( Particle::Intermediate ).mass();
     setProcess( 0, 1., scale, Constants::alphaEM, Constants::alphaQCD );
-    Pythia8::RotBstMatrix mat;
 
+    Pythia8::Vec4 mom_iq1, mom_iq2;
+    unsigned short quark1_id = 0, quark2_id = 0, quark1_pdgid = 0, quark2_pdgid = 0;
     double x1 = 0., x2 = 0.;
+
+    const Particle& part1 = ev.getOneByRole( Particle::Parton1 ), &part2 = ev.getOneByRole( Particle::Parton2 );
+
     if ( full ) {
       const Particle& op1 = ev.getOneByRole( Particle::OutgoingBeam1 ), &op2 = ev.getOneByRole( Particle::OutgoingBeam2 );
-      const double q2_1 = -boost_p1.m2Calc(), q2_2 = -boost_p2.m2Calc();
+      const Particle& ip1 = ev.getOneByRole( Particle::IncomingBeam1 ), &ip2 = ev.getOneByRole( Particle::IncomingBeam2 );
+      const double q2_1 = -part1.momentum().mass2(), q2_2 = -part2.momentum().mass2();
       x1 = q2_1/( q2_1+op1.mass2()-mp2_ );
       x2 = q2_2/( q2_2+op2.mass2()-mp2_ );
+
+      quark1_pdgid = quark2_pdgid = 2; //FIXME
+
       setIdX( op1.integerPdgId(), op2.integerPdgId(), x1, x2 ); //FIXME initiator = photon or proton?
-      mat.toCMframe( boost_p1, boost_p2 );
+      //setIdX( quark1_pdgid, quark2_pdgid, x1, x2 );
+
+      //===========================================================================================
+      // incoming valence quarks
+      //===========================================================================================
+
+      mom_iq1 = Pythia8::Vec4( 0., 0., x1*ip1.momentum().pz(), x1*ip1.energy() );
+      quark1_id = sizePart();
+      addCorresp( quark1_id, op1.id() );
+      addParticle( quark1_pdgid, -1, 0, 0, 501, 0, mom_iq1.px(), mom_iq1.py(), mom_iq1.pz(), mom_iq1.e(), mom_iq1.mCalc(), 0., 1. );
+
+      mom_iq2 = Pythia8::Vec4( 0., 0., x2*ip2.momentum().pz(), x2*ip2.energy() );
+      quark2_id = sizePart();
+      addCorresp( quark2_id, op2.id() );
+      addParticle( quark2_pdgid, -1, 0, 0, 502, 0, mom_iq2.px(), mom_iq2.py(), mom_iq2.pz(), mom_iq2.e(), mom_iq2.mCalc(), 0., 1. );
+      /*const Pythia8::Vec4 mom_dq1( Hadroniser::momToVec4( ip1.momentum() )-mom_iq1 );
+      addParticle( 2101, -1, 0, 0, 0, 501, mom_dq1.px(), mom_dq1.py(), mom_dq1.pz(), mom_dq1.e(), mom_dq1.mCalc(), 0., 1. );
+      const Pythia8::Vec4 mom_dq2( Hadroniser::momToVec4( ip2.momentum() )-mom_iq2 );
+      addParticle( 2101, -1, 0, 0, 0, 502, mom_dq2.px(), mom_dq2.py(), mom_dq2.pz(), mom_dq2.e(), mom_dq2.mCalc(), 0., 1. );*/
     }
 //    std::cout << x1 << "|" << x2 << std::endl;
 
-    unsigned short parton1_id = 0, parton2_id = 0, parton1_pdgid = 0, parton2_pdgid = 0;
-    for ( const auto& p : ev.particles() ) {
-      switch ( p.role() ) {
-        case Particle::Parton1:
-        case Particle::Parton2: {
-          if ( p.role() == Particle::Parton1 ) {
-            parton1_id = sizePart();
-            parton1_pdgid = p.integerPdgId();
-          }
-          else {
-            parton2_id = sizePart();
-            parton2_pdgid = p.integerPdgId();
-          }
-          py_cg_corresp_.emplace_back( sizePart(), p.id() );
+    //=============================================================================================
+    // incoming partons
+    //=============================================================================================
 
-          Pythia8::Vec4 mom_part( p.momentum().px(), p.momentum().py(), p.momentum().pz(), p.momentum().energy() );
-          mom_part.rotbst( mat );
-//          std::cout << boost_cm.px() << "\t" << p.momentum() << "\n" << mom_part << std::endl;
+    const Pythia8::Vec4 mom_part1( Hadroniser::momToVec4( part1.momentum() ) );
+    addCorresp( sizePart(), part1.id() );
+    addParticle( part1.integerPdgId(), 2, quark1_id, quark1_id+2, 0, 0, mom_part1.px(), mom_part1.py(), mom_part1.pz(), mom_part1.e(), mom_part1.mCalc(), 0., 0. );
 
-          if ( full )
-            addParticle( p.integerPdgId(), -2, 0, 0, 0, 0, mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), p.mass(), 0., 0., -mom_part.mCalc() );
-          else
-            addParticle( p.integerPdgId(), -2, 0, 0, 0, 0, mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), mom_part.mCalc(), 0., 0., 0. );
-        } break;
-        case Particle::CentralSystem: {
-          py_cg_corresp_.emplace_back( sizePart(), p.id() );
-          Pythia8::Vec4 mom_part( p.momentum().px(), p.momentum().py(), p.momentum().pz(), p.momentum().energy() );
-          mom_part.rotbst( mat );
-          addParticle( p.integerPdgId(), 1, parton1_id, parton2_id, 0, 0, mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), mom_part.mCalc(), 0., 0., 0. );
-          continue;
-        } break;
-        default:
-          continue;
+    const Pythia8::Vec4 mom_part2( Hadroniser::momToVec4( part2.momentum() ) );
+    addCorresp( sizePart(), part2.id() );
+    addParticle( part2.integerPdgId(), 2, quark2_id, quark2_id+2, 0, 0, mom_part2.px(), mom_part2.py(), mom_part2.pz(), mom_part2.e(), mom_part2.mCalc(), 0., 0. );
+
+/*    if ( full ) {
+      //===========================================================================================
+      // outgoing valence quarks
+      //===========================================================================================
+
+      const Pythia8::Vec4 mom_oq1 = mom_iq1-mom_part1;
+      //addParticle( quark1_pdgid, 1, quark1_id, pyPart( part1.id() ), 501, 0, mom_oq1.px(), mom_oq1.py(), mom_oq1.pz(), mom_oq1.e(), mom_oq1.mCalc() );
+      addParticle( quark1_pdgid, 1, quark1_id, 0, 501, 0, mom_oq1.px(), mom_oq1.py(), mom_oq1.pz(), mom_oq1.e(), mom_oq1.mCalc(), 0., 1. );
+
+      const Pythia8::Vec4 mom_oq2 = mom_iq2-mom_part2;
+      //addParticle( quark2_pdgid, 1, quark2_id, pyPart( part2.id() ), 502, 0, mom_oq2.px(), mom_oq2.py(), mom_oq2.pz(), mom_oq2.e(), mom_oq2.mCalc() );
+      addParticle( quark2_pdgid, 1, quark2_id, 0, 502, 0, mom_oq2.px(), mom_oq2.py(), mom_oq2.pz(), mom_oq2.e(), mom_oq2.mCalc(), 0., 1. );
+//std::cout << "MX=" << op1.momentum().mass() << "|MY=" << op2.momentum().mass() << std::endl;
+    }*/
+
+    //=============================================================================================
+    // central system
+    //=============================================================================================
+
+    for ( const auto& p : ev.getByRole( Particle::CentralSystem ) ) {
+      addCorresp( sizePart(), p.id() );
+      Pythia8::Vec4 mom_part( p.momentum().px(), p.momentum().py(), p.momentum().pz(), p.momentum().energy() );
+      const auto mothers = p.mothers();
+      //unsigned short moth1_id = 1, moth2_id = 2;
+      unsigned short moth1_id = 0, moth2_id = 0;
+      if ( mothers.size() > 0 ) {
+        const unsigned short moth1_cg_id = *mothers.begin();
+        moth1_id = pyPart( moth1_cg_id );
+        if ( moth1_id == invalid_id ) {
+          const Particle& moth = ev.getConstById( moth1_cg_id );
+          if ( moth.mothers().size() > 0 )
+            moth1_id = pyPart( *moth.mothers().begin() );
+          if ( moth.mothers().size() > 1 )
+            moth2_id = pyPart( *moth.mothers().rbegin() );
+        }
+        if ( mothers.size() > 1 ) {
+          const unsigned short moth2_cg_id = *mothers.rbegin();
+          moth2_id = pyPart( moth2_cg_id );
+          if ( moth2_id == invalid_id ) {
+            const Particle& moth = ev.getConstById( moth2_cg_id );
+            moth.dump();
+            moth2_id = pyPart( *moth.mothers().rbegin() );
+          }
+        }
       }
+      addParticle( p.integerPdgId(), 1, moth1_id, moth2_id, 0, 0, mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), mom_part.mCalc(), 0., 0., 0. );
     }
     if ( full )
-      setPdf( parton1_pdgid, parton2_pdgid, x1, x2, scale, 0., 0., true );
+      //setPdf( quark1_pdgid, quark2_pdgid, x1, x2, scale, x1*( 1-x1 ), x2*( 1-x2 ), true );
+      setPdf( quark1_pdgid, quark2_pdgid, x1, x2, scale, 0., 0., false );
   }
 
   bool
