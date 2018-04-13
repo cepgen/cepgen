@@ -126,7 +126,7 @@ full = true;//FIXME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       //===========================================================================================
 
       lhaevt_->feedEvent( ev, full );
-lhaevt_->listEvent();
+//lhaevt_->listEvent();
       //===========================================================================================
       // launch the hadronisation / resonances decays, and update the event accordingly
       //===========================================================================================
@@ -283,8 +283,7 @@ lhaevt_->listEvent();
 
       quark1_pdgid = quark2_pdgid = 2; //FIXME
 
-      setIdX( op1.integerPdgId(), op2.integerPdgId(), x1, x2 ); //FIXME initiator = photon or proton?
-      //setIdX( quark1_pdgid, quark2_pdgid, x1, x2 );
+      setIdX( op1.integerPdgId(), op2.integerPdgId(), x1, x2 );
 
       //===========================================================================================
       // incoming valence quarks
@@ -299,39 +298,33 @@ lhaevt_->listEvent();
       quark2_id = sizePart();
       addCorresp( quark2_id, op2.id() );
       addParticle( quark2_pdgid, -1, 0, 0, 502, 0, mom_iq2.px(), mom_iq2.py(), mom_iq2.pz(), mom_iq2.e(), mom_iq2.mCalc(), 0., 1. );
-      /*const Pythia8::Vec4 mom_dq1( Hadroniser::momToVec4( ip1.momentum() )-mom_iq1 );
-      addParticle( 2101, -1, 0, 0, 0, 501, mom_dq1.px(), mom_dq1.py(), mom_dq1.pz(), mom_dq1.e(), mom_dq1.mCalc(), 0., 1. );
-      const Pythia8::Vec4 mom_dq2( Hadroniser::momToVec4( ip2.momentum() )-mom_iq2 );
-      addParticle( 2101, -1, 0, 0, 0, 502, mom_dq2.px(), mom_dq2.py(), mom_dq2.pz(), mom_dq2.e(), mom_dq2.mCalc(), 0., 1. );*/
     }
 //    std::cout << x1 << "|" << x2 << std::endl;
 
-    //=============================================================================================
-    // incoming partons
-    //=============================================================================================
+    const Pythia8::Vec4 mom_part1( Hadroniser::momToVec4( part1.momentum() ) ), mom_part2( Hadroniser::momToVec4( part2.momentum() ) );
 
-    const Pythia8::Vec4 mom_part1( Hadroniser::momToVec4( part1.momentum() ) );
-    addCorresp( sizePart(), part1.id() );
-    addParticle( part1.integerPdgId(), 2, quark1_id, quark1_id+2, 0, 0, mom_part1.px(), mom_part1.py(), mom_part1.pz(), mom_part1.e(), mom_part1.mCalc(), 0., 0. );
+    if ( !full ) {
+      //=============================================================================================
+      // incoming partons
+      //=============================================================================================
 
-    const Pythia8::Vec4 mom_part2( Hadroniser::momToVec4( part2.momentum() ) );
-    addCorresp( sizePart(), part2.id() );
-    addParticle( part2.integerPdgId(), 2, quark2_id, quark2_id+2, 0, 0, mom_part2.px(), mom_part2.py(), mom_part2.pz(), mom_part2.e(), mom_part2.mCalc(), 0., 0. );
+      addCorresp( sizePart(), part1.id() );
+      addParticle( part1.integerPdgId(), -2, quark1_id, 0, 0, 0, mom_part1.px(), mom_part1.py(), mom_part1.pz(), mom_part1.e(), mom_part1.mCalc(), 0., 0. );
 
-/*    if ( full ) {
+      addCorresp( sizePart(), part2.id() );
+      addParticle( part2.integerPdgId(), -2, quark2_id, 0, 0, 0, mom_part2.px(), mom_part2.py(), mom_part2.pz(), mom_part2.e(), mom_part2.mCalc(), 0., 0. );
+    }
+    if ( full ) {
       //===========================================================================================
       // outgoing valence quarks
       //===========================================================================================
 
       const Pythia8::Vec4 mom_oq1 = mom_iq1-mom_part1;
-      //addParticle( quark1_pdgid, 1, quark1_id, pyPart( part1.id() ), 501, 0, mom_oq1.px(), mom_oq1.py(), mom_oq1.pz(), mom_oq1.e(), mom_oq1.mCalc() );
-      addParticle( quark1_pdgid, 1, quark1_id, 0, 501, 0, mom_oq1.px(), mom_oq1.py(), mom_oq1.pz(), mom_oq1.e(), mom_oq1.mCalc(), 0., 1. );
+      addParticle( quark1_pdgid, 1, quark1_id, quark2_id, 501, 0, mom_oq1.px(), mom_oq1.py(), mom_oq1.pz(), mom_oq1.e(), mom_oq1.mCalc(), 0., 1. );
 
       const Pythia8::Vec4 mom_oq2 = mom_iq2-mom_part2;
-      //addParticle( quark2_pdgid, 1, quark2_id, pyPart( part2.id() ), 502, 0, mom_oq2.px(), mom_oq2.py(), mom_oq2.pz(), mom_oq2.e(), mom_oq2.mCalc() );
-      addParticle( quark2_pdgid, 1, quark2_id, 0, 502, 0, mom_oq2.px(), mom_oq2.py(), mom_oq2.pz(), mom_oq2.e(), mom_oq2.mCalc(), 0., 1. );
-//std::cout << "MX=" << op1.momentum().mass() << "|MY=" << op2.momentum().mass() << std::endl;
-    }*/
+      addParticle( quark2_pdgid, 1, quark1_id, quark2_id, 502, 0, mom_oq2.px(), mom_oq2.py(), mom_oq2.pz(), mom_oq2.e(), mom_oq2.mCalc(), 0., 1. );
+    }
 
     //=============================================================================================
     // central system
@@ -341,32 +334,33 @@ lhaevt_->listEvent();
       addCorresp( sizePart(), p.id() );
       Pythia8::Vec4 mom_part( p.momentum().px(), p.momentum().py(), p.momentum().pz(), p.momentum().energy() );
       const auto mothers = p.mothers();
-      //unsigned short moth1_id = 1, moth2_id = 2;
-      unsigned short moth1_id = 0, moth2_id = 0;
-      if ( mothers.size() > 0 ) {
-        const unsigned short moth1_cg_id = *mothers.begin();
-        moth1_id = pyPart( moth1_cg_id );
-        if ( moth1_id == invalid_id ) {
-          const Particle& moth = ev.getConstById( moth1_cg_id );
-          if ( moth.mothers().size() > 0 )
-            moth1_id = pyPart( *moth.mothers().begin() );
-          if ( moth.mothers().size() > 1 )
-            moth2_id = pyPart( *moth.mothers().rbegin() );
-        }
-        if ( mothers.size() > 1 ) {
-          const unsigned short moth2_cg_id = *mothers.rbegin();
-          moth2_id = pyPart( moth2_cg_id );
-          if ( moth2_id == invalid_id ) {
-            const Particle& moth = ev.getConstById( moth2_cg_id );
-            moth.dump();
-            moth2_id = pyPart( *moth.mothers().rbegin() );
+      unsigned short moth1_id = 1, moth2_id = 2;
+      if ( !full ) {
+        moth1_id = moth2_id = 0;
+        if ( mothers.size() > 0 ) {
+          const unsigned short moth1_cg_id = *mothers.begin();
+          moth1_id = pyPart( moth1_cg_id );
+          if ( moth1_id == invalid_id ) {
+            const Particle& moth = ev.getConstById( moth1_cg_id );
+            if ( moth.mothers().size() > 0 )
+              moth1_id = pyPart( *moth.mothers().begin() );
+            if ( moth.mothers().size() > 1 )
+              moth2_id = pyPart( *moth.mothers().rbegin() );
+          }
+          if ( mothers.size() > 1 ) {
+            const unsigned short moth2_cg_id = *mothers.rbegin();
+            moth2_id = pyPart( moth2_cg_id );
+            if ( moth2_id == invalid_id ) {
+              const Particle& moth = ev.getConstById( moth2_cg_id );
+              moth.dump();
+              moth2_id = pyPart( *moth.mothers().rbegin() );
+            }
           }
         }
       }
       addParticle( p.integerPdgId(), 1, moth1_id, moth2_id, 0, 0, mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), mom_part.mCalc(), 0., 0., 0. );
     }
     if ( full )
-      //setPdf( quark1_pdgid, quark2_pdgid, x1, x2, scale, x1*( 1-x1 ), x2*( 1-x2 ), true );
       setPdf( quark1_pdgid, quark2_pdgid, x1, x2, scale, 0., 0., false );
   }
 
