@@ -118,6 +118,8 @@ namespace CepGen
       return weight;
     }
 
+    const double GenericKTProcess::kMinFlux = 1.e-20;
+
     void
     GenericKTProcess::computeIncomingFluxes( double x1, double q1t2, double x2, double q2t2 )
     {
@@ -142,8 +144,8 @@ namespace CepGen
         default:
           throw Exception( __PRETTY_FUNCTION__, "Invalid kinematics mode selected!", FatalError );
       }
-      flux1_ = std::max( flux1_, 1.e-20 );
-      flux2_ = std::max( flux2_, 1.e-20 );
+      flux1_ = std::max( flux1_, kMinFlux );
+      flux2_ = std::max( flux2_, kMinFlux );
       DebuggingInsideLoop( Form( "Form factors: %g / %g", flux1_, flux2_ ) );
     }
 
@@ -256,7 +258,7 @@ namespace CepGen
         case Kinematics::InelasticInelastic:
           op1.setStatus( Particle::Unfragmented ); op1.setMass( MX_ );
           op2.setStatus( Particle::Unfragmented ); op2.setMass( MY_ );
-          break;    
+          break;
         default: {
           FatalError( "This kT factorisation process is intended for p-on-p collisions! "
                       "Aborting." );

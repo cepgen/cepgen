@@ -572,11 +572,6 @@ namespace CepGen
     double
     GamGamLL::computeWeight()
     {
-      if ( !is_outgoing_state_set_ ) {
-        InWarning( "Output state not set!" );
-        return 0.;
-      }
-
       DebuggingInsideLoop( Form( "sqrt(s)=%f\n\tm(X1)=%f\tm(X2)=%f", sqs_, MX_, MY_ ) );
 
       Kinematics::Limits& w_limits = cuts_.cuts.initial[Cuts::w];

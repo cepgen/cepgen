@@ -1,4 +1,4 @@
-#include "StructureFunctionsBuilder.h"
+#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 
 #include "CepGen/StructureFunctions/ALLM.h"
 #include "CepGen/StructureFunctions/BlockDurandHa.h"

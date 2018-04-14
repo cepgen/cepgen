@@ -21,18 +21,17 @@ namespace CepGen
     class GenericKTProcess : public GenericProcess
     {
       public:
+        /// Type of incoming partons fluxes
         enum FluxTypes
         {
           BudnevFluxes = 0
         };
       public:
-        /**
-         * \brief Class constructor
-         * \param[in] name Generic process name
-         * \param[in] description Human-readable kT-factorised process name
-         * \param[in] partons First and second incoming parton
-         * \param[in] output Produced final state particles
-         */
+        /// Class constructor
+        /// \param[in] name Generic process name
+        /// \param[in] description Human-readable kT-factorised process name
+        /// \param[in] partons First and second incoming parton
+        /// \param[in] output Produced final state particles
         GenericKTProcess( const std::string& name,
                           const std::string& description,
                           const std::array<ParticleCode,2>& partons,
@@ -44,16 +43,16 @@ namespace CepGen
         unsigned int numDimensions( const Kinematics::ProcessMode& ) const override;
         /// Retrieve the event weight in the phase space
         double computeWeight() override;
-        /// Populate the event content with the generated process' kinematics  
+        /// Populate the event content with the generated process' kinematics
         void fillKinematics( bool ) override;
 
-        /// Get the elastic flux to be expected at a given x_bjorken / kT
-        /// \param[in] x Bjorken x
-        /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming photon
+        /// Get the elastic flux to be expected at a given parton x/kT
+        /// \param[in] x Parton momentum fraction
+        /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming parton
         static double elasticFlux( double x, double kt2 );
-        /// Get the inelastic flux to be expected at a given x_bjorken / kT
-        /// \param[in] x Bjorken x
-        /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming photon
+        /// Get the inelastic flux to be expected at a given parton x/kT
+        /// \param[in] x Parton momentum loss
+        /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming parton
         /// \param[in] mx Outgoing diffractive proton mass
         static double inelasticFlux( double x, double kt2, double mx, const StructureFunctions::Type& sf, const FluxTypes& ft = BudnevFluxes );
 
@@ -98,7 +97,7 @@ namespace CepGen
         /// \return Phase space point-dependent component of the Jacobian weight of the point in the phase space for integration
         /// \note To be run at each point computation (therefore, to be optimised!)
         double generateVariables() const;
-  
+
         unsigned short num_dimensions_;
 
         /// Phase space point-independant component of the Jacobian weight of the point in the phase space for integration
@@ -129,17 +128,23 @@ namespace CepGen
         /// Second incoming parton's flux
         double flux2_;
 
+        /// Handler to a variable mapped by this process
         struct MappingVariable
         {
+          /// Kinematic limits to apply on the variable
           Kinematics::Limits limits;
+          /// Reference to the process variable to generate/map
           double& variable;
+          /// Interpolation type
           MappingType type;
+          /// Corresponding integration variable
           unsigned short index;
         };
         /// Collection of variables to be mapped at the weight generation stage
         std::vector<MappingVariable> mapped_variables_;
 
       private:
+        static const double kMinFlux;
         /// First and second intermediate parton (photon, pomeron, ...)
         std::array<ParticleCode,2> kIntermediateParts;
         /// Type of particles produced in the final state
@@ -149,3 +154,4 @@ namespace CepGen
 }
 
 #endif
+

@@ -27,7 +27,7 @@ namespace CepGen
       {
         public:
           /// Define lower and upper limits on a quantity
-          Limits( double min = invalid_, double max = invalid_ );
+          Limits( double min = kInvalid, double max = kInvalid );
 
           /// Lower limit to apply on the variable
           double min() const { return first; }
@@ -52,7 +52,7 @@ namespace CepGen
           /// Human-readable expression of the limits
           friend std::ostream& operator<<( std::ostream&, const Limits& );
         private:
-          static constexpr double invalid_ = -999.999;
+          static constexpr double kInvalid = -999.999;
       };
     public:
       Kinematics();

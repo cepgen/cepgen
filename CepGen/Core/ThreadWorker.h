@@ -19,9 +19,11 @@ namespace CepGen
   class GridParameters;
 
   //--- class definition
+  /// Single thread handling events definition for a given parameters set
   class ThreadWorker
   {
     public:
+      /// Build a thread using a Mutex, GSL objects, a grid and the functional
       ThreadWorker( std::mutex* mutex, gsl_rng* rng, gsl_monte_function* function, GridParameters* grid, std::function<void( const Event&, unsigned long )>& callback );
 
       /// Generate one event according to the grid parameters set in the initialisation
@@ -29,7 +31,9 @@ namespace CepGen
       bool generate();
 
     private:
+      /// Generate the next event
       bool next();
+      /// Generate a random number following a uniform distribution
       double uniform() const;
       /// Start the correction cycle on the grid
       /// \param x Point in the phase space considered
@@ -47,7 +51,9 @@ namespace CepGen
       /// Selected bin at which the function will be evaluated
       int ps_bin_;
 
+      /// Pointer to the random numbers generator
       gsl_rng* rng_;
+      /// Pointer to the functional to be used for generations
       gsl_monte_function* function_;
 
       GridParameters* grid_;
@@ -58,11 +64,15 @@ namespace CepGen
       double grid_f_max_diff_;
       double grid_f_max_old_;
 
+      /// Pointer to the (thread-independent) run parameters
       Parameters* global_params_;
+      /// Pointer to the run parameters specific to this thread
       Parameters* local_params_;
+      /// Clone of the user physics process to be handled by this thread
       std::unique_ptr<Process::GenericProcess> process_;
       std::mutex* mutex_;
 
+      /// A function to be called after each event generation
       std::function<void( const Event&, unsigned long )> callback_;
   };
 }

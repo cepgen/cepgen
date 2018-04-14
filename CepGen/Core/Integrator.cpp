@@ -44,18 +44,21 @@ namespace CepGen
   Integrator::integrate( double& result, double& abserr )
   {
     int res = -1;
-    gsl_monte_plain_state* pln_state;
-    gsl_monte_vegas_state* veg_state;
-    gsl_monte_miser_state* mis_state;
+    gsl_monte_plain_state* pln_state = nullptr;
+    gsl_monte_vegas_state* veg_state = nullptr;
+    gsl_monte_miser_state* mis_state = nullptr;
     const Integrator::Type algorithm = input_params_->integrator.type;
 
     //--- integration bounds
     std::vector<double> x_low( function_->dim, 0. ), x_up( function_->dim, 1. );
 
     //--- prepare integrator
-    if      ( algorithm == Plain ) pln_state = gsl_monte_plain_alloc( function_->dim );
-    else if ( algorithm == Vegas ) veg_state = gsl_monte_vegas_alloc( function_->dim );
-    else if ( algorithm == MISER ) mis_state = gsl_monte_miser_alloc( function_->dim );
+    if ( algorithm == Plain )
+      pln_state = gsl_monte_plain_alloc( function_->dim );
+    else if ( algorithm == Vegas )
+      veg_state = gsl_monte_vegas_alloc( function_->dim );
+    else if ( algorithm == MISER )
+      mis_state = gsl_monte_miser_alloc( function_->dim );
 
     if ( algorithm == Plain )
       res = gsl_monte_plain_integrate( function_.get(),
@@ -101,9 +104,12 @@ namespace CepGen
     }
 
     //--- clean integrator
-    if      ( algorithm == Plain ) gsl_monte_plain_free( pln_state );
-    else if ( algorithm == Vegas ) gsl_monte_vegas_free( veg_state );
-    else if ( algorithm == MISER ) gsl_monte_miser_free( mis_state );
+    if ( algorithm == Plain )
+      gsl_monte_plain_free( pln_state );
+    else if ( algorithm == Vegas )
+      gsl_monte_vegas_free( veg_state );
+    else if ( algorithm == MISER )
+      gsl_monte_miser_free( mis_state );
 
     if ( input_params_->hadroniser() )
       input_params_->hadroniser()->setCrossSection( result, abserr );
@@ -123,7 +129,7 @@ namespace CepGen
   Integrator::generate( unsigned long num_events, std::function<void( const Event&, unsigned long )> callback )
   {
     if ( !grid.gen_prepared )
-      setGen();
+      computeGenerationParameters();
 
     if ( input_params_->generation.num_threads > 1 )
       Information( Form( "Will generate events using %d threads", input_params_->generation.num_threads ) );
@@ -143,7 +149,7 @@ namespace CepGen
   }
 
   void
-  Integrator::setGen()
+  Integrator::computeGenerationParameters()
   {
     Information( Form( "Preparing the grid (%d points) for the generation of unweighted events.", input_params_->integrator.npoints ) );
 
@@ -181,7 +187,7 @@ namespace CepGen
         fsum += z;
         fsum2 += z*z;
       }
-      const double av = fsum*inv_npoin, av2 = fsum2*inv_npoin, sig2 = av2 - av*av;
+      const double av = fsum*inv_npoin, av2 = fsum2*inv_npoin, sig2 = av2-av*av;
       sum += av;
       sum2 += av2;
       sum2p += sig2;
@@ -213,8 +219,8 @@ namespace CepGen
 
       double eff1 = 0.;
       for ( unsigned int i = 0; i < grid.max; ++i )
-        eff1 += ( grid.f_max[i] / ( grid.max*sum ) );
-      const double eff2 = grid.f_max_global/sum;
+        eff1 += sum*grid.max/grid.f_max[i];
+      const double eff2 = sum/grid.f_max_global;
 
       Debugging( Form( "Average function value     = sum   = %g\n\t"
                        "Average function value**2  = sum2  = %g\n\t"
@@ -227,6 +233,7 @@ namespace CepGen
     }
     grid.gen_prepared = true;
     Information( "Grid prepared! Now launching the production." );
+//exit(0);
   }
 
   std::ostream&
@@ -247,3 +254,4 @@ namespace CepGen
     f_max_global( 0. )
   {}
 }
+
