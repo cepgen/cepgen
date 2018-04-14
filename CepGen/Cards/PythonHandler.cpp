@@ -48,7 +48,7 @@ namespace CepGen
       const size_t fn_len = filename.length()+1;
 #ifdef PYTHON2
       char* sfilename = new char[fn_len];
-      sprintf( sfilename, "%s", filename.c_str() );
+      snprintf( sfilename, fn_len, "%s", filename.c_str() );
 #else
       wchar_t* sfilename = new wchar_t[fn_len];
       swprintf( sfilename, fn_len, L"%s", filename.c_str() );

@@ -125,7 +125,6 @@ namespace CepGen
   bool
   ThreadWorker::correctionCycle( std::vector<double>& x, bool& has_correction )
   {
-    //std::lock_guard<std::mutex> guard( *mutex_ );
     DebuggingInsideLoop( Form( "Correction cycles are started.\n\t"
                                "bin = %d\t"
                                "correc = %g\t"
@@ -201,7 +200,6 @@ namespace CepGen
     if ( weight <= 0. )
       return false;
 
-    //mutex_->lock();
     global_params_->generation.ngen += 1;
     if ( global_params_->generation.ngen % global_params_->generation.gen_print_every == 0 ) {
       Information( Form( "[thread 0x%zx] Generated events: %d",
@@ -211,7 +209,6 @@ namespace CepGen
     }
     if ( callback_ )
       callback_( *local_params_->process()->last_event, global_params_->generation.ngen );
-    //mutex_->unlock();
 
     return true;
   }

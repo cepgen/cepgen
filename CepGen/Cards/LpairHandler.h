@@ -2,9 +2,9 @@
 #define CepGen_Cards_LpairReader_h
 
 #include "Handler.h"
+#include <map>
 
 using std::string;
-using std::map;
 
 namespace CepGen
 {

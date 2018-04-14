@@ -25,7 +25,10 @@ namespace CepGen
         e.dump();
       }
     }
-    srand( time( 0 ) ); // Random number initialization
+    // Random number initialization
+    struct timespec ts;
+    if ( timespec_get( &ts, TIME_UTC ) != 0 )
+      srandom( ts.tv_nsec ^ ts.tv_sec );
   }
 
   Generator::Generator( Parameters* ip ) :

@@ -4,8 +4,6 @@ pythia8 = cepgen.Module('pythia8',
     seed = 1000,
     maxTrials = 1,
     pythiaPreConfiguration = (
-        # specify we will be using a LHA input
-        'Beams:frameType = 5',
         # printout properties
         # start by disabling some unnecessary output
         'Next:numberCount = 0',

@@ -1,4 +1,3 @@
-#ifdef PYTHIA8
 #include "Pythia8Hadroniser.h"
 
 #include "CepGen/Parameters.h"
@@ -30,6 +29,8 @@ namespace CepGen
       pythia_->setLHAupPtr( (Pythia8::LHAup*)lhaevt_.get() );
       pythia_->settings.parm( "Beams:idA", params.kinematics.inpdg.first );
       pythia_->settings.parm( "Beams:idB", params.kinematics.inpdg.second );
+      // specify we will be using a LHA input
+      pythia_->settings.mode( "Beams:frameType", 5 );
       pythia_->settings.parm( "Beams:eCM", params.kinematics.sqrtS() );
 #endif
       for ( const auto& pdgid : params.kinematics.minimum_final_state )
@@ -124,13 +125,16 @@ namespace CepGen
       // launch the hadronisation / resonances decays, and update the event accordingly
       //===========================================================================================
 
+//lhaevt_->listEvent();
       unsigned short num_try = 0;
       while ( !pythia_->next() && num_try < ev.num_hadronisation_trials )
         num_try++;
 
+//pythia_->event.list();
       updateEvent( ev, weight, full, mom_p1, mom_p2 );
 
 #endif
+      ev.dump();
       return true;
     }
 
@@ -242,6 +246,7 @@ namespace CepGen
   // Custom LHA event definition
   //================================================================================================
 
+#ifdef PYTHIA8
   const double LHAEvent::mp_ = ParticleProperties::mass( Proton );
   const double LHAEvent::mp2_ = LHAEvent::mp_*LHAEvent::mp_;
 
@@ -273,11 +278,13 @@ namespace CepGen
     double x1 = 0., x2 = 0.;
     if ( full ) {
       const Particle& op1 = ev.getOneByRole( Particle::OutgoingBeam1 ), &op2 = ev.getOneByRole( Particle::OutgoingBeam2 );
-      const double q2_1 = -boost_p1.m2Calc(), x1 = q2_1/( q2_1+op1.mass2()-mp2_ );
-      const double q2_2 = -boost_p2.m2Calc(), x2 = q2_2/( q2_2+op2.mass2()-mp2_ );
+      const double q2_1 = -boost_p1.m2Calc(), q2_2 = -boost_p2.m2Calc();
+      x1 = q2_1/( q2_1+op1.mass2()-mp2_ );
+      x2 = q2_2/( q2_2+op2.mass2()-mp2_ );
       setIdX( op1.integerPdgId(), op2.integerPdgId(), x1, x2 ); //FIXME initiator = photon or proton?
       mat.toCMframe( boost_p1, boost_p2 );
     }
+//    std::cout << x1 << "|" << x2 << std::endl;
 
     unsigned short parton1_id = 0, parton2_id = 0, parton1_pdgid = 0, parton2_pdgid = 0;
     for ( const auto& p : ev.particles() ) {
@@ -370,6 +377,6 @@ namespace CepGen
       oss << "\n\t" << py_cg.first << " <-> " << py_cg.second;
     Information( oss.str() );
   }
+#endif
 }
 
-#endif

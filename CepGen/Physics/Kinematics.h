@@ -11,7 +11,7 @@
 #include "Cuts.h"
 
 #include <vector>
-#include <map>
+#include <unordered_map>
 
 using std::cout;
 using std::string;
@@ -98,12 +98,12 @@ namespace CepGen
         CutsList();
         CutsList( const CutsList& cuts );
         /// Cuts on the initial particles kinematics
-        std::map<Cuts::InitialState,Limits> initial;
+        std::unordered_map<Cuts::InitialState,Limits> initial;
         /// Cuts on the central system produced
-        std::map<Cuts::Central,Limits> central;
-        std::map<ParticleCode,std::map<Cuts::Central,Limits> > central_particles;
+        std::unordered_map<Cuts::Central,Limits> central;
+        std::unordered_map<ParticleCode,std::unordered_map<Cuts::Central,Limits> > central_particles;
         /// Cuts on the beam remnants system
-        std::map<Cuts::Remnants,Limits> remnants;
+        std::unordered_map<Cuts::Remnants,Limits> remnants;
       };
       CutsList cuts;
   };
