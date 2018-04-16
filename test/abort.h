@@ -39,7 +39,7 @@ class AbortHandler
     void init() {
       if ( sigaction( SIGINT, &action_, nullptr ) != 0
         || sigaction( SIGTERM, &action_, nullptr ) != 0 )
-        throw CepGen::Exception( __PRETTY_FUNCTION__, "Failed to initialise the C-c handler!", CepGen::FatalError );
+        throw FatalError( "AbortHandler" ) << "Failed to initialise the C-c handler!";
     }
     struct sigaction action_;
 };

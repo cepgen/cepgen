@@ -83,8 +83,9 @@ namespace CepGen
   {
     mothers_.insert( part.id() );
 
-    DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) is the new mother of %2d (pdgId=%4d)",
-                               part.id(), part.pdgId(), id_, pdg_id_ ) );
+    DebuggingInsideLoop( "Particle" )
+      <<  "Particle " << id() << " (pdgId=" << part.integerPdgId() << ") "
+      << "is the new mother of " << id_ << " (pdgId=" << (int)pdg_id_ << ").";
 
     part.addDaughter( *this );
   }
@@ -98,13 +99,16 @@ namespace CepGen
       std::ostringstream os;
       for ( const auto& daugh : daughters_ )
         os << Form( "\n\t * id=%d", daugh );
-      DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) has now %2d daughter(s):"
-                                 "%s", role_, pdg_id_, numDaughters(), os.str().c_str() ) );
+      DebuggingInsideLoop( "Particle" )
+        << "Particle " << role_ << " (pdgId=" << (int)pdg_id_ << ") "
+        << "has now " << daughters_.size() << " daughter(s):"
+        << os.str();
     }
 
     if ( ret.second ) {
-      DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) is a new daughter of %2d (pdgId=%4d)",
-                                 part.role(), part.pdgId(), role_, pdg_id_ ) );
+      DebuggingInsideLoop( "Particle" )
+        << "Particle " << part.role() << " (pdgId=" << part.integerPdgId() << ") "
+        << "is a new daughter of " << role_ << " (pdgId=" << (int)pdg_id_ << "%4d).";
 
       if ( part.mothers().find( id_ ) == part.mothers().end() )
         part.addMother( *this );
@@ -187,7 +191,8 @@ namespace CepGen
     }
     os << " (" << pdg_id_ << ")";
     if ( os.str() == " ()" ) os.str("");
-    Information( Form(
+    Information( "Particle" )
+      << Form(
       "Dumping a particle with id=%3d, role=%3d, status=% 3d\n\t"
       "PDG Id:%4d%s, mass = %5.4f GeV\n\t"
       "(E,P) = (%4.2f, %4.2f, %4.2f, %4.2f) GeV\t"
@@ -198,8 +203,7 @@ namespace CepGen
       id_, role_, status_, pdg_id_, os.str().c_str(),
       mass(), energy(), momentum_.px(), momentum_.py(), momentum_.pz(),
       momentum_.p(), momentum_.pt(), momentum_.eta(), momentum_.phi(),
-      yesno( primary() ), osm.str().c_str(), numDaughters(), osd.str().c_str() )
-    );
+      yesno( primary() ), osm.str().c_str(), numDaughters(), osd.str().c_str() );
   }
 
   Particle&

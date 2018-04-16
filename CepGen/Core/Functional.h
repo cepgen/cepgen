@@ -48,10 +48,14 @@ namespace CepGen
           parser_.SetExpr( expr );
         } catch ( const mu::Parser::exception_type& e ) {
           std::ostringstream os; for ( unsigned short i = 0; i < e.GetPos(); ++i ) os << "-"; os << "^";
-          throw Exception( __PRETTY_FUNCTION__, Form( "Failed to define the function\n\t%s\n\t%s\n\t%s", expression_.c_str(), os.str().c_str(), e.GetMsg().c_str() ), JustWarning );
+          throw JustWarning( "Functional" )
+            << "Failed to define the function\n\t"
+            << expression_ << "\n\t"
+            << os.str() << "\n\t"
+            << e.GetMsg();
         }
 #else
-        FatalError( "muParser is not linked to this program! the math evaluator is hence disabled!" );
+        throw FatalError( "Functional" ) << "muParser is not linked to this program! the math evaluator is hence disabled!";
 #endif
       }
       /// Compute the functional for a given value of the variable (N=1 case)
@@ -68,10 +72,14 @@ namespace CepGen
         values_ = x;
         try { ret = parser_.Eval(); } catch ( const mu::Parser::exception_type& e ) {
           std::ostringstream os; for ( unsigned short i = 0; i < e.GetPos(); ++i ) os << "-"; os << "^";
-          throw Exception( __PRETTY_FUNCTION__, Form( "Failed to evaluate the function\n\t%s\n\t%s\n\t%s", expression_.c_str(), os.str().c_str(), e.GetMsg().c_str() ), JustWarning );
+          throw JustWarning( "Functional" )
+            << "Failed to evaluate the function\n\t"
+            << expression_ << "\n\t"
+            << os.str() << "\n\t"
+            << e.GetMsg();
         }
 #else
-        FatalError( "muParser is not linked to this program! the math evaluator is hence disabled!" );
+        throw FatalError( "Functional" ) << "muParser is not linked to this program! the math evaluator is hence disabled!";
 #endif
         return ret;
       }

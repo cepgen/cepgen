@@ -87,9 +87,10 @@ namespace CepGen
     GenericKTProcess::computeWeight()
     {
       if ( kt_jacobian_ == 0. )
-        FatalError( "Point-independant component of the Jacobian for this "
-                    "kt-factorised process is null.\n\tPlease check the "
-                    "validity of the phase space!" );
+        throw FatalError( "GenericKTProcess" )
+          << "Point-independant component of the Jacobian for this "
+          << "kt-factorised process is null.\n\tPlease check the "
+          << "validity of the phase space!";
 
       //============================================================================================
       // generate and initialise all variables, and auxiliary (x-dependent) part of the Jacobian
@@ -108,12 +109,10 @@ namespace CepGen
       const double weight = ( kt_jacobian_*aux_jacobian ) * integrand;
 
       if ( Logger::get().level >= Logger::DebugInsideLoop )
-        DebuggingInsideLoop( Form( "\n\tJacobian = %g * %g"
-                                   "\n\tIntegrand = %g"
-                                   "\n\tdW = %g",
-                                   kt_jacobian_, aux_jacobian,
-                                   integrand,
-                                   weight ) );
+        DebuggingInsideLoop( "GenericKTProcess" )
+          << "Jacobian = " << kt_jacobian_ << " * " << aux_jacobian
+          << "\n\tIntegrand = " << integrand
+          << "\n\tdW = " << weight << ".";
 
       return weight;
     }
@@ -142,11 +141,11 @@ namespace CepGen
           flux2_ = inelasticFlux( x2, q2t2, MY_, cuts_.structure_functions );
           break;
         default:
-          throw Exception( __PRETTY_FUNCTION__, "Invalid kinematics mode selected!", FatalError );
+          throw FatalError( "GenericKTProcess" ) << "Invalid kinematics mode selected!";
       }
       flux1_ = std::max( flux1_, kMinFlux );
       flux2_ = std::max( flux2_, kMinFlux );
-      DebuggingInsideLoop( Form( "Form factors: %g / %g", flux1_, flux2_ ) );
+      DebuggingInsideLoop( "GenericKTProcess" ) << "Form factors: " << flux1_ << " / " << flux2_ << ".";
     }
 
     void
@@ -157,10 +156,9 @@ namespace CepGen
       Kinematics::Limits lim = in;
       out = 0.; // reset the variable
       if ( !in.valid() ) {
-        std::ostringstream oss; oss << default_limits;
-        Debugging( Form( "%s could not be retrieved from the user configuration!\n\t"
-                         "Setting it to the default value: %s.",
-                         description, oss.str().c_str() ) );
+        Debugging( "GenericKTProcess" )
+          << description << " could not be retrieved from the user configuration!\n\t"
+          << "Setting it to the default value: " << default_limits << ".";
         lim = default_limits;
       }
       if ( type == kLogarithmic )
@@ -177,15 +175,11 @@ namespace CepGen
           kt_jacobian_ *= lim.range();
           break;
       }
-      if ( Logger::get().level >= Logger::Debug ) {
-        std::ostringstream oss_lim; oss_lim << lim;
-        std::ostringstream oss_vt; oss_vt << type;
-        Debugging( Form( "%s has been mapped to variable %d.\n\t"
-                         "Allowed range for integration: %s.\n\t"
-                         "Variable integration mode: %s.",
-                         description, num_dimensions_,
-                         oss_lim.str().c_str(), oss_vt.str().c_str() ) );
-      }
+      if ( Logger::get().level >= Logger::Debug )
+        Debugging( "GenericKTProcess" )
+          << description << " has been mapped to variable " << num_dimensions_ << ".\n\t"
+          << "Allowed range for integration: " << lim << ".\n\t"
+          << "Variable integration mode: " << type << ".";
     }
 
     double
@@ -217,7 +211,7 @@ namespace CepGen
               << " in range " << std::left << std::setw( 20 ) << cut.limits << std::right
               << " has value " << cut.variable << "\n\t";
         }
-        DebuggingInsideLoop( oss.str() );
+        DebuggingInsideLoop( "GenericKTProcess" ) << oss.str();
       }
       return jacobian;
     }
@@ -260,8 +254,8 @@ namespace CepGen
           op2.setStatus( Particle::Unfragmented ); op2.setMass( MY_ );
           break;
         default: {
-          FatalError( "This kT factorisation process is intended for p-on-p collisions! "
-                      "Aborting." );
+          throw FatalError( "GenericKTProcess" )
+            << "This kT factorisation process is intended for p-on-p collisions! Aborting.";
         } break;
       }
 

@@ -28,11 +28,11 @@ namespace CepGen
 
       Parameters* p = static_cast<Parameters*>( params );
       if ( !p )
-        throw Exception( __PRETTY_FUNCTION__, "Failed to retrieve the run parameters!", FatalError );
+        throw FatalError( "Integrand" ) << "Failed to retrieve the run parameters!";
 
       Process::GenericProcess* proc = p->process();
       if ( !proc )
-        throw Exception( __PRETTY_FUNCTION__, "Failed to retrieve the process!", FatalError );
+        throw FatalError( "Integrand" ) << "Failed to retrieve the process!";
 
       //=============================================================================================
       // start the timer
@@ -50,21 +50,19 @@ namespace CepGen
 
         if ( proc->first_run ) {
           if ( log_level >= Logger::Debug )
-            Debugging( Form( "Computation launched for %s process 0x%zx", p->processName().c_str(), p->process() ) );
+            Debugging( "Integrand" )
+              << "Computation launched for " << p->processName() << " process "
+              << "0x" << std::hex << p->process() << std::dec << ".";
 
           const Particle::Momentum p1( 0., 0.,  p->kinematics.inp.first ), p2( 0., 0., -p->kinematics.inp.second );
           proc->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
 
-          if ( log_level >= Logger::Debug ) {
-            std::ostringstream oss; oss << p->kinematics.mode;
-            Debugging( Form( "Process mode considered: %s\n\t"
-                             "  pz(p1) = %5.2f\n\t"
-                             "  pz(p2) = %5.2f\n\t"
-                             "  remnant mode: %d",
-                              oss.str().c_str(),
-                              p->kinematics.inp.first, p->kinematics.inp.second,
-                              p->kinematics.structure_functions ) );
-          }
+          if ( log_level >= Logger::Debug )
+            Debugging( "Integrand" )
+              << "Process mode considered: " << p->kinematics.mode << "\n\t"
+              << "  pz(p1) = " << p->kinematics.inp.first << "\n\t"
+              << "  pz(p2) = " << p->kinematics.inp.second << "\n\t"
+              << "  structure functions: " << p->kinematics.structure_functions;
 
           //=========================================================================================
           // prepare the function to be integrated
@@ -102,7 +100,7 @@ namespace CepGen
         std::ostringstream oss;
         for ( unsigned int i = 0; i < ndim; ++i )
           oss << ( i == 0 ? "" : " " ) << x[i];
-        DebuggingInsideLoop( Form( "Computing dim-%d point (%s)", ndim, oss.str().c_str() ) );
+        DebuggingInsideLoop( "Integrand" ) << "Computing dim-" << ndim << " point (" << oss.str() << ")";
       }
 
       //=============================================================================================
@@ -220,8 +218,9 @@ namespace CepGen
         p->process()->last_event->time_total = tmr.elapsed();
 
         if ( log_level >= Logger::Debug )
-          Debugging( Form( "[process 0x%zx] Individual time (gen+hadr+cuts): %5.6f ms",
-                           p->process(), p->process()->last_event->time_total*1.e3 ) );
+          Debugging( "Integrand" )
+            << "[process 0x" << std::hex << p->process() << std::dec << "] "
+            << "Individual time (gen+hadr+cuts): " << p->process()->last_event->time_total*1.e3 << " ms";
       }
 
       //=============================================================================================
@@ -232,8 +231,9 @@ namespace CepGen
         std::ostringstream oss;
         for ( unsigned short i = 0; i < ndim; ++i )
           oss << Form( "%10.8f ", x[i] );
-        Debugging( Form( "f value for dim-%d point ( %s): %4.4e",
-                         ndim, oss.str().c_str(), integrand ) );
+        Debugging( "Integrand" )
+          << "f value for dim-" << ndim << " point ( " << oss.str() << "): "
+          << integrand;
       }
 
       return integrand;

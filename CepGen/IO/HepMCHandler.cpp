@@ -41,7 +41,7 @@ HepMCHandler::operator<<( const Event* evt )
 {
   fillEvent( evt );
   if ( !event.get() ) {
-    throw Exception( __PRETTY_FUNCTION__, "Failed to retrieve the HepMC event to be stored!", FatalError );
+    throw FatalError( "HepMCHandler" ) << "Failed to retrieve the HepMC event to be stored!";
   }
 #ifdef HEPMC_VERSION3
   output->write_event( *event );

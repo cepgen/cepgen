@@ -65,7 +65,7 @@ namespace CepGen
       }
 
       if ( !pythia_->init() )
-        throw FatalError( "Hadroniser" )
+        throw FatalError( "Pythia8Hadroniser" )
           << "Failed to initialise the Pythia8 core!\n\t"
           << "See the message above for more details.";
 
@@ -76,7 +76,7 @@ namespace CepGen
     Pythia8Hadroniser::readString( const char* param )
     {
       if ( !pythia_->readString( param ) )
-        FatalError( Form( "The Pythia8 core failed to parse the following setting:\n\t%s", param ) );
+        throw FatalError( "Pythia8Hadroniser" ) << "The Pythia8 core failed to parse the following setting:\n\t" << param;
     }
 
     void
@@ -103,7 +103,7 @@ namespace CepGen
     {
       weight = 1.;
 #ifndef PYTHIA8
-      FatalError( "Pythia8 is not linked to this instance!" );
+      throw FatalError( "Pythia8Hadroniser" ) << "Pythia8 is not linked to this instance!";
 #else
       if ( !full && !pythia_->settings.flag( "ProcessLevel:resonanceDecays" ) )
         return true;
@@ -181,7 +181,7 @@ namespace CepGen
         if ( cg_id != LHAEvent::invalid_id ) { // particle already in the event
           Particle& cg_part = ev.getById( cg_id );
           if ( abs( p.id() ) != (unsigned short)cg_part.pdgId() )
-            FatalError( Form( "Event list corruption detected for particle %d", i ) );
+            throw FatalError( "Pythia8Hadroniser" ) << "Event list corruption detected for particle " << i << "!";
           if ( p.particleDataEntry().sizeChannels() == 0 )
             continue;
           weight *= p.particleDataEntry().pickChannel().bRatio();
@@ -376,7 +376,7 @@ namespace CepGen
     oss << "List of Pythia <-> CepGen particle ids correspondance";
     for ( const auto& py_cg : py_cg_corresp_ )
       oss << "\n\t" << py_cg.first << " <-> " << py_cg.second;
-    Information( oss.str() );
+    Information( "LHAEvent" ) << oss.str();
   }
 #endif
 }

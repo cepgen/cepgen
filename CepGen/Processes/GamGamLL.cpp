@@ -324,7 +324,7 @@ namespace CepGen
           << std::scientific
           << "dd = " << dd << " <= 0\n\t"
           << "dd1 = " << dd1_ << "\t"
-          << "dd2 = " << dd2_ << std::dec;
+          << "dd2 = " << dd2_ << std::fixed;
         return false;
       }
 
@@ -340,7 +340,7 @@ namespace CepGen
       jacobian_ = ds2 * dt1 * dt2 * 0.125 * M_PI*M_PI/( sl1_*sqrt( -ap ) );
 
       DebuggingInsideLoop( "GamGamLL" )
-        << "Jacobian = " << std::scientific << jacobian_ << std::dec;
+        << "Jacobian = " << std::scientific << jacobian_ << std::fixed;
 
       gram_ = ( 1.-yy4*yy4 )*dd/ap;
 
@@ -413,7 +413,7 @@ namespace CepGen
         << std::scientific
         << " re = " << re << "\n\t"
         << "w12_ = " << masses_.w12_
-        << std::dec;
+        << std::fixed;
       DebuggingInsideLoop( "GamGamLL" )
         << "Incoming particles' energy = " << ep1_ << ", " << ep2_;
 
@@ -459,7 +459,7 @@ namespace CepGen
         << std::scientific
         << "sin_theta3 = " << sin_theta3 << "\n\t"
         << "sin_theta5 = " << sin_theta5
-        << std::dec;
+        << std::fixed;
 
       if ( sin_theta3 > 1. ) {
         InWarning( "GamGamLL" )

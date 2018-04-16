@@ -18,11 +18,11 @@ using namespace std;
  */
 int main( int argc, char* argv[] ) {
   CepGen::Generator mg;
-  
-  if ( argc == 1 )
-    FatalError( "No config file provided." );
 
-  Debugging( Form( "Reading config file stored in %s", argv[1] ) );
+  if ( argc == 1 )
+    throw FatalError( "main" ) << "No config file provided!";
+
+  Debugging( "main" ) << "Reading config file stored in \"" << argv[1] << "\"";
   CepGen::Cards::PythonHandler card( argv[1] );
   mg.setParameters( card.parameters() );
 

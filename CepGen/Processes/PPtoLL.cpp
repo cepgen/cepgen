@@ -51,8 +51,9 @@ namespace CepGen
       // Inner photons
       const double q1tx = qt1_*cos( phi_qt1_ ), q1ty = qt1_*sin( phi_qt1_ ),
                    q2tx = qt2_*cos( phi_qt2_ ), q2ty = qt2_*sin( phi_qt2_ );
-      DebuggingInsideLoop( Form( "q1t(x/y) = %e / %e\n\t"
-                                 "q2t(x/y) = %e / %e", q1tx, q1ty, q2tx, q2ty ) );
+      DebuggingInsideLoop( "PPtoLL" )
+        << "q1t(x/y) = " << q1tx << " / " << q1ty << "\n\t"
+        << "q2t(x/y) = " << q2tx << " / " << q2ty;
 
       // Two-photon system
       const double ptsumx = q1tx+q2tx,
@@ -95,9 +96,10 @@ namespace CepGen
       const double alpha1 = amt1/sqs_*exp( y1_ ), beta1  = amt1/sqs_*exp( -y1_ ),
                    alpha2 = amt2/sqs_*exp( y2_ ), beta2  = amt2/sqs_*exp( -y2_ );
 
-      DebuggingInsideLoop( Form( "Sudakov parameters:\n\t"
-                                 "  alpha1/2 = %f / %f\n\t"
-                                 "   beta1/2 = %f / %f", alpha1, alpha2, beta1, beta2 ) );
+      DebuggingInsideLoop( "PPtoLL" )
+        << "Sudakov parameters:\n\t"
+        << "  alpha1/2 = " << alpha1 << " / " << alpha2 << "\n\t"
+        << "   beta1/2 = " << beta1 << " / " << beta2 << ".";
 
       const double q1t2 = q1tx*q1tx+q1ty*q1ty, q2t2 = q2tx*q2tx+q2ty*q2ty;
 
@@ -105,8 +107,9 @@ namespace CepGen
 
       const double z1p = alpha1/x1, z1m = alpha2/x1,
                    z2p = beta1 /x2, z2m = beta2 /x2;
-      DebuggingInsideLoop( Form( "z(1/2)p = %f / %f\n\t"
-                                 "z(1/2)m = %f / %f", z1p, z2p, z1m, z2m ) );
+      DebuggingInsideLoop( "PPtoLL" )
+        << "z(1/2)p = " << z1p << " / " << z2p << "\n\t"
+        << "z(1/2)m = " << z1m << " / " << z2m << ".";
 
       if ( x1 > 1. || x2 > 1. )
         return 0.; // sanity check
@@ -116,8 +119,9 @@ namespace CepGen
                    ak1z = event_->getOneByRole( Particle::IncomingBeam1 ).momentum().pz(),
                    ak20 = event_->getOneByRole( Particle::IncomingBeam2 ).energy(),
                    ak2z = event_->getOneByRole( Particle::IncomingBeam2 ).momentum().pz();
-      DebuggingInsideLoop( Form( "incoming particles: p1: %f / %f\n\t"
-                                 "                    p2: %f / %f", ak1z, ak10, ak2z, ak20 ) );
+      DebuggingInsideLoop( "PPtoLL" )
+        << "incoming particles: p1: " << ak1z << " / " << ak10 << "\n\t"
+        << "                    p2: " << ak2z << " / " << ak20;
 
       //=================================================================
       //     additional conditions for energy-momentum conservation
@@ -125,8 +129,9 @@ namespace CepGen
 
       const double s1_eff = x1*s_-qt1_*qt1_, s2_eff = x2*s_-qt2_*qt2_;
       const double invm = sqrt( amt1*amt1 + amt2*amt2 + 2.*amt1*amt2*cosh(y1_-y2_) - ptsum*ptsum );
-      DebuggingInsideLoop( Form( "s(1/2)_eff = %f / %f GeV^2\n\t"
-                                 "dilepton invariant mass = %f GeV", s1_eff, s2_eff, invm ) );
+      DebuggingInsideLoop( "PPtoLL" )
+        << "s(1/2)_eff = " << s1_eff << " / " << s2_eff << " GeV^2\n\t"
+        << "dilepton invariant mass = " << invm << " GeV.";
 
       if ( ( cuts_.mode == Kinematics::ElasticInelastic || cuts_.mode == Kinematics::InelasticInelastic )
         && ( sqrt( s1_eff ) <= ( MY_+invm ) ) )
@@ -147,16 +152,16 @@ namespace CepGen
       const double py_minus = ( 1.-x2 )*fabs( ak2z )*M_SQRT2, // warning! sign of pz??
                    py_plus  = ( MY_*MY_ + q2tx*q2tx + q2ty*q2ty )*0.5/py_minus;
 
-      DebuggingInsideLoop( Form( "px± = %f / %f\n\t"
-                                 "py± = %f / %f", px_plus, px_minus, py_plus, py_minus ) );
+      DebuggingInsideLoop( "PPtoLL" )
+        << "px± = " << px_plus << " / " << px_minus << "\n\t"
+        << "py± = " << py_plus << " / " << py_minus << ".";
 
       PX_ = Particle::Momentum( -q1tx, -q1ty, ( px_plus-px_minus )*M_SQRT1_2, ( px_plus+px_minus )*M_SQRT1_2 );
       PY_ = Particle::Momentum( -q2tx, -q2ty, ( py_plus-py_minus )*M_SQRT1_2, ( py_plus+py_minus )*M_SQRT1_2 );
 
-      DebuggingInsideLoop( Form( "First remnant:  (p,E) = (%f, %f, %f, %f), mass = %f\n\t"
-                                 "Second remnant: (p,E) = (%f, %f, %f, %f), mass = %f",
-                                 PX_.px(), PX_.py(), PX_.pz(), PX_.energy(), PX_.mass(),
-                                 PY_.px(), PY_.py(), PY_.pz(), PY_.energy(), PY_.mass() ) );
+      DebuggingInsideLoop( "PPtoLL" )
+        << "First remnant:  " << PX_ << ", mass = " << PX_.mass() << "\n\t"
+        << "Second remnant: " << PY_ << ", mass = " << PY_.mass() << ".";
 
       assert( fabs( PX_.mass()-MX_ ) < 1.e-6 );
       assert( fabs( PY_.mass()-MY_ ) < 1.e-6 );
@@ -167,18 +172,16 @@ namespace CepGen
 
       const Particle::Momentum p1( pt1x, pt1y, alpha1*ak1z + beta1*ak2z, alpha1*ak10 + beta1*ak20 );
       const Particle::Momentum p2( pt2x, pt2y, alpha2*ak1z + beta2*ak2z, alpha2*ak10 + beta2*ak20 );
-      DebuggingInsideLoop( Form( "unboosted first lepton:  (E,p), m = (%f, %f, %f, %f), %f\n\t"
-                                 "          second lepton: (E,p), m = (%f, %f, %f, %f), %f",
-                                 p1.px(), p1.py(), p1.pz(), p1.energy(), p1.mass(),
-                                 p2.px(), p2.py(), p2.pz(), p2.energy(), p2.mass() ) );
+      DebuggingInsideLoop( "PPtoLL" )
+        << "unboosted first lepton:  " << p1 << ", mass = " << p1.mass() << "\n\t"
+        << "          second lepton: " << p2 << ", mass = " << p2.mass() << ".";
 
       Pl1_ = Particle::Momentum( pt1x, pt1y, sqrt( pt1*pt1 + ml2 )*sinh( y1_ ), sqrt( pt1*pt1 + ml2 )*cosh( y1_ ) );
       Pl2_ = Particle::Momentum( pt2x, pt2y, sqrt( pt2*pt2 + ml2 )*sinh( y2_ ), sqrt( pt2*pt2 + ml2 )*cosh( y2_ ) );
 
-      DebuggingInsideLoop( Form( "First lepton:  (E,p), m = (%f, %f, %f, %f), %f\n\t"
-                                 "Second lepton: (E,p), m = (%f, %f, %f, %f), %f",
-                                 Pl1_.px(), Pl1_.py(), Pl1_.pz(), Pl1_.energy(), Pl1_.mass(),
-                                 Pl2_.px(), Pl2_.py(), Pl2_.pz(), Pl2_.energy(), Pl2_.mass() ) );
+      DebuggingInsideLoop( "PPtoLL" )
+        << "First lepton:  " << Pl1_ << ", mass = " << Pl1_.mass() << "\n\t"
+        << "Second lepton: " << Pl2_ << ", mass = " << Pl2_.mass() << ".";
 
       assert( fabs( Pl1_.mass()-event_->getByRole( Particle::CentralSystem )[0].mass() ) < 1.e-6 );
       assert( fabs( Pl2_.mass()-event_->getByRole( Particle::CentralSystem )[1].mass() ) < 1.e-6 );
@@ -192,10 +195,9 @@ namespace CepGen
       const Particle::Momentum q2( q2tx, q2ty, 0., 0. );
       //////////////////////////////////////////
 
-      DebuggingInsideLoop( Form( "First photon*:  (p,E), m2 = (%f, %f, %f, %f), %e\n\t"
-                                 "Second photon*: (p,E), m2 = (%f, %f, %f, %f), %e",
-                                 q1.px(), q1.py(), q1.pz(), q1.energy(), q1.mass2(),
-                                 q2.px(), q2.py(), q2.pz(), q2.energy(), q2.mass2() ) );
+      DebuggingInsideLoop( "PPtoLL" )
+        << "First photon*:  " << q1 << ", mass2 = " << q1.mass2() << "\n\t"
+        << "Second photon*: " << q2 << ", mass2 = " << q2.mass2() << ".";
 
       //=================================================================
       //     Mendelstam variables
@@ -206,9 +208,9 @@ namespace CepGen
 
       const double that1 = ( q1-p1 ).mass2(), that2 = ( q2-p2 ).mass2();
       const double uhat1 = ( q1-p2 ).mass2(), uhat2 = ( q2-p1 ).mass2();
-      DebuggingInsideLoop( Form( "that(1/2) = %f / %f\n\t"
-                                 "uhat(1/2) = %f / %f",
-                                 that1, that2, uhat1, uhat2 ) );
+      DebuggingInsideLoop( "PPtoLL" )
+        << "that(1/2) = " << that1 << " / " << that2 << "\n\t"
+        << "uhat(1/2) = " << uhat1 << " / " << uhat2 << ".";
 
       //const double mll = sqrt( shat );
 
@@ -273,12 +275,11 @@ namespace CepGen
 
         const double Phi11_dot_e = ( Phi11_x*q1tx + Phi11_y*q1ty )/qt1_, Phi11_cross_e = ( Phi11_x*q1ty-Phi11_y*q1tx )/qt1_;
         const double Phi21_dot_e = ( Phi21_x*q2tx + Phi21_y*q2ty )/qt2_, Phi21_cross_e = ( Phi21_x*q2ty-Phi21_y*q2tx )/qt2_;
-        DebuggingInsideLoop( Form( "Phi1: E, px, py = %e, %e, %e\n\t"
-                                   "Phi2: E, px, py = %e, %e, %e\n\t"
-                                   "(dot):   %e / %e\n\t"
-                                   "(cross): %e / %e",
-                                   Phi10, Phi11_x, Phi11_y, Phi20, Phi21_x, Phi21_y,
-                                   Phi11_dot_e, Phi21_dot_e, Phi11_cross_e, Phi21_cross_e ) );
+        DebuggingInsideLoop( "PPtoLL" )
+          << "Phi1: E, px, py = " << Phi10 << ", " << Phi11_x << ", " << Phi11_y << "\n\t"
+          << "Phi2: E, px, py = " << Phi20 << ", " << Phi21_x << ", " << Phi21_y << "\n\t"
+          << "(dot):   " << Phi11_dot_e << " / " << Phi21_dot_e << "\n\t"
+          << "(cross): " << Phi11_cross_e << " / " << Phi21_cross_e << ".";
 
         const double aux2_1 = iterm11 * ( ml2 + 4.*z1p*z1p*z1m*z1m*t1abs ) * Phi102
                              +iterm22 * ( ( z1p*z1p + z1m*z1m )*( Phi11_dot_e*Phi11_dot_e + Phi11_cross_e*Phi11_cross_e ) )
@@ -306,8 +307,9 @@ namespace CepGen
 
         amat2 = 0.5*( imat1*amat2_1 + imat2*amat2_2 );
 
-        DebuggingInsideLoop( Form( "aux2(1/2) = %e / %e\n\t"
-                                   "amat2(1/2), amat2 = %e / %e / %e", aux2_1, aux2_2, amat2_1, amat2_2, amat2 ) );
+        DebuggingInsideLoop( "PPtoLL" )
+          << "aux2(1/2) = " << aux2_1 << " / " << aux2_2 << "\n\t"
+          << "amat2(1/2), amat2 = " << amat2_1 << " / " << amat2_2 << " / " << amat2 << ".";
       }
 
       //============================================

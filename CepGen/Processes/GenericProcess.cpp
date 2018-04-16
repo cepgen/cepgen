@@ -75,7 +75,7 @@ namespace CepGen
     GenericProcess::prepareKinematics()
     {
       if ( !isKinematicsDefined() )
-        throw Exception( __PRETTY_FUNCTION__, "Kinematics not properly defined for the process", FatalError );
+        throw FatalError( "GenericProcess" ) << "Kinematics not properly defined for the process.";
 
       const Particle& ib1 = event_->getOneByRole( Particle::IncomingBeam1 );
       const Particle& ib2 = event_->getOneByRole( Particle::IncomingBeam2 );
@@ -86,7 +86,7 @@ namespace CepGen
       w1_ = ib1.mass2();
       w2_ = ib2.mass2();
 
-      Debugging( Form( "Kinematics successfully prepared! sqrt(s) = %.2f", sqs_ ) );
+      Debugging( "GenericProcess" ) << "Kinematics successfully prepared! sqrt(s) = " << sqs_ << ".";
     }
 
     void
@@ -96,8 +96,9 @@ namespace CepGen
       for ( unsigned short i = 0; i < x_.size(); ++i ) {
         os << Form( "  x(%2d) = %8.6f\n\t", i, x_[i] );
       }
-      Information( Form( "Number of integration parameters: %d\n\t"
-                         "%s", x_.size(), os.str().c_str() ) );
+      Information( "GenericProcess" )
+        << "Number of integration parameters: " << x_.size() << "\n\t"
+        << os.str() << ".";
     }
 
     void

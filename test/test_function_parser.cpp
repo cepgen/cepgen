@@ -15,8 +15,10 @@ main()
   { // test with a 1-variable function
     const double exp_result_test1 = 6.795704571;
     CepGen::Functional<1> test( "2.5*exp(0.1*x)", { { "x" } } );
-    if ( fabs( test.eval( 10. ) - exp_result_test1 ) > epsilon  ) throw CepGen::Exception( __PRETTY_FUNCTION__, "Test 1.1 failed!", CepGen::FatalError );
-    if ( fabs( test.eval( { { 10. } } ) - exp_result_test1 ) > epsilon  ) throw CepGen::Exception( __PRETTY_FUNCTION__, "Test 1.2 failed!", CepGen::FatalError );
+    if ( fabs( test.eval( 10. ) - exp_result_test1 ) > epsilon  )
+      throw FatalError( "main" ) << "Test 1.1 failed!";
+    if ( fabs( test.eval( { { 10. } } ) - exp_result_test1 ) > epsilon  )
+      throw FatalError( "main" ) << "Test 1.2 failed!";
     cout << "Test 1 passed!" << endl;
   }
   { // test with an invalid function
@@ -25,11 +27,13 @@ main()
       CepGen::Functional<1> test( "sqrt(x+x**3-log(10)", { { "x" } } );
       test.eval( 10 );
     } catch ( CepGen::Exception& e ) { cout << "Test 2 passed!" /*<< e.what()*/ << endl; passed = true; }
-    if ( !passed ) throw CepGen::Exception( __PRETTY_FUNCTION__, "Test 2 failed!", CepGen::FatalError );
+    if ( !passed )
+      throw FatalError( "main" ) << "Test 2 failed!";
   }
   { // test with a 2-variables function
     CepGen::Functional<2> test( "sqrt(a^2+b^2)", { { "a", "b" } } );
-    if ( fabs( test.eval( { { 3, 4 } } ) - 5.0 ) > epsilon  ) throw CepGen::Exception( __PRETTY_FUNCTION__, "Test 3 failed!", CepGen::FatalError );
+    if ( fabs( test.eval( { { 3, 4 } } ) - 5.0 ) > epsilon  )
+      throw FatalError( "main" ) << "Test 3 failed!";
     cout << "Test 3 passed!" << endl;
   }
   { // test with an invalid function
@@ -37,7 +41,8 @@ main()
     bool passed = true;
     try { test.eval( 10 ); passed = false; } catch ( CepGen::Exception& e ) {}
     try { test.eval( { { 10 } } ); passed = false; } catch ( CepGen::Exception& e ) {}
-    if ( !passed  ) throw CepGen::Exception( __PRETTY_FUNCTION__, "Test 4 failed!", CepGen::FatalError );
+    if ( !passed  )
+      throw FatalError( "main" ) << "Test 4 failed!";
     cout << "Test 4 passed!" << endl;
   }
 

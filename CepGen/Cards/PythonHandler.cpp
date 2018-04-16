@@ -57,11 +57,12 @@ namespace CepGen
 
       Py_InitializeEx( 0 );
       if ( !Py_IsInitialized() )
-        throw Exception( __PRETTY_FUNCTION__, "Failed to initialise the python parser!", FatalError );
+        throw FatalError( "PythonHandler" ) << "Failed to initialise the python parser!";
 
-      Debugging( Form( "Initialised the Python cards parser\n\t"
-                       "Python version: %s\n\t"
-                       "Platform: %s", Py_GetVersion(), Py_GetPlatform() ) );
+      Debugging( "PythonHandler" )
+        << "Initialised the Python cards parser\n\t"
+        << "Python version: " << Py_GetVersion() << "\n\t"
+        << "Platform: " << Py_GetPlatform() << ".";
 
       PyObject* fn = encode( filename.c_str() );
       if ( !fn )
@@ -89,7 +90,7 @@ namespace CepGen
         params_.setProcess( new Process::PPtoLL );
       else if ( proc_name == "pptoww" )
         params_.setProcess( new Process::PPtoWW );
-      else FatalError( Form( "Unrecognised process: %s", proc_name.c_str() ) );
+      else throw FatalError( "PythonHandler" ) << "Unrecognised process: " << proc_name << ".";
 
       //--- process mode
       getParameter( process, "mode", (int&)params_.kinematics.mode );
@@ -146,10 +147,8 @@ namespace CepGen
 #ifdef PYTHON2
       Py_Finalize();
 #else
-      if ( Py_IsInitialized() )
-        throw Exception( __PRETTY_FUNCTION__, "Failed to unregister the python parser!", FatalError );
-      if ( Py_FinalizeEx() != 0 )
-        throw Exception( __PRETTY_FUNCTION__, "Failed to unregister the python parser!", FatalError );
+      if ( Py_IsInitialized() || Py_FinalizeEx() != 0 )
+        throw FatalError( "PythonHandler" ) << "Failed to unregister the python parser!";
 #endif
       if ( sfilename ) delete [] sfilename;
     }
@@ -184,7 +183,7 @@ namespace CepGen
         }
        else if ( PyTuple_Check( ppair ) ) {
          if ( PyTuple_Size( ppair ) != 2 )
-           FatalError( "Invalid value for in_kinematics.pair!" );
+           throw FatalError( "PythonHandler" ) << "Invalid value for in_kinematics.pair!";
           ParticleCode pair1 = (ParticleCode)asInteger( PyTuple_GetItem( ppair, 0 ) );
           ParticleCode pair2 = (ParticleCode)asInteger( PyTuple_GetItem( ppair, 1 ) );
           params_.kinematics.central_system = { pair1, pair2 };
@@ -346,8 +345,9 @@ namespace CepGen
 
         params_.setHadroniser( pythia8 );
 #else
-        InWarning( "Pythia8 is not linked to this instance... "
-                   "Ignoring this part of the configuration file." )
+        InWarning( "PythonHandler" )
+          << "Pythia8 is not linked to this instance... "
+          << "Ignoring this part of the configuration file.";
 #endif
       }
     }
@@ -426,7 +426,7 @@ namespace CepGen
         }
       }*/
       Py_Finalize();
-      throw Exception( __PRETTY_FUNCTION__, oss.str().c_str(), type );
+      throw Exception( "PythonError", type ) << oss.str();
     }
 
     const char*
@@ -470,9 +470,9 @@ namespace CepGen
       if ( !pobj )
         return;
       if ( !PyTuple_Check( pobj ) )
-        FatalError( Form( "Invalid value retrieved for %s", key ) );
+        throw FatalError( "PythonHandler" ) << "Invalid value retrieved for " << key << ".";
       if ( PyTuple_Size( pobj ) < 1 )
-        FatalError( Form( "Invalid number of values unpacked for %s!", key ) );
+        throw FatalError( "PythonHandler" ) << "Invalid number of values unpacked for " << key << "!";
       double min = PyFloat_AsDouble( PyTuple_GetItem( pobj, 0 ) );
       lim.min() = min;
       if ( PyTuple_Size( pobj ) > 1 ) {

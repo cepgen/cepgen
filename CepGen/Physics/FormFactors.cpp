@@ -33,7 +33,7 @@ namespace CepGen
   {
     switch ( sf ) {
       case StructureFunctions::ElasticProton:
-        InWarning( "Elastic proton form factors requested! Check your process definition!" );
+        InWarning( "FormFactors" ) << "Elastic proton form factors requested! Check your process definition!";
         return FormFactors::ProtonElastic( q2 );
       case StructureFunctions::SuriYennie:
         return FormFactors::SuriYennie( q2, mi2, mf2 );
@@ -41,7 +41,7 @@ namespace CepGen
         return FormFactors::SzczurekUleshchenko( q2, mi2, mf2 );
       case StructureFunctions::FioreBrasse:
         return FormFactors::FioreBrasse( q2, mi2, mf2 );
-      default: throw Exception( __PRETTY_FUNCTION__, "Invalid structure functions required!", FatalError );
+      default: throw FatalError( "FormFactors" ) << "Invalid structure functions required!";
     }
   }
 

@@ -6,20 +6,13 @@
 
 #include "Logger.h"
 
-/*#define PrintMessage( m ) \
-  { if ( CepGen::Logger::get().level > CepGen::Logger::Nothing ) { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::Verbatim ).dump( CepGen::Logger::get().outputStream ); } }
-#define Information( m ) \
-  { if ( CepGen::Logger::get().level > CepGen::Logger::Nothing ) { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::Information ).dump( CepGen::Logger::get().outputStream ); } }
-#define Debugging( m ) \
-  { if ( CepGen::Logger::get().level >= CepGen::Logger::Debug )  { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::DebugMessage ).dump( CepGen::Logger::get().outputStream ); } }
-#define DebuggingInsideLoop( m ) \
-  { if ( CepGen::Logger::get().level >= CepGen::Logger::DebugInsideLoop ) { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::DebugMessage ).dump( CepGen::Logger::get().outputStream ); } }
-#define InWarning( m ) \
-  { if ( CepGen::Logger::get().level >= CepGen::Logger::Warning )  { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::JustWarning ).dump( CepGen::Logger::get().outputStream ); } }
-#define InError( m ) \
-  { if ( CepGen::Logger::get().level >= CepGen::Logger::Error )  { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::ErrorMessage ).dump( CepGen::Logger::get().outputStream ); } }
-#define FatalError( m ) \
-  { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::FatalError ).dump( CepGen::Logger::get().outputStream ); }*/
+#define FatalError( mod ) CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::FatalError )
+#define InError( mod ) CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::ErrorMessage )
+#define InWarning( mod ) CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::JustWarning )
+#define Information( mod ) CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Information )
+#define PrintMessage( mod ) CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Verbatim )
+#define Debugging( mod ) CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::DebugMessage )
+#define DebuggingInsideLoop( mod ) CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::DebugMessage )
 
 namespace CepGen
 {
@@ -152,14 +145,6 @@ namespace CepGen
       /// Integer exception number
       int error_num_;
   };
-
-#define FatalError( mod ) CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::FatalError )
-#define InError( mod ) CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::ErrorMessage )
-#define InWarning( mod ) CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::JustWarning )
-#define Information( mod ) CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Information )
-#define PrintMessage( mod ) CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Verbatim )
-#define Debugging( mod ) CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::DebugMessage )
-#define DebuggingInsideLoop( mod ) CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::DebugMessage )
 }
 
 #endif

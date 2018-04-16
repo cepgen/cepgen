@@ -96,8 +96,9 @@ namespace CepGen
 
       FioreBrasse fb;
       if ( mx < m_min || mx > 1.99 ) {
-        InWarning( Form( "Fiore-Brasse form factors to be retrieved for an invalid MX value:\n\t"
-                         "%.2e GeV, while allowed range is [1.07, 1.99] GeV", mx ) );
+        InWarning( "FioreBrasse" )
+          << "Fiore-Brasse form factors to be retrieved for an invalid MX value:\n\t"
+          << mx << " GeV, while allowed range is [1.07, 1.99] GeV.";
         return fb;
       }
 

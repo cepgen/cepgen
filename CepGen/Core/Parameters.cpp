@@ -41,11 +41,10 @@ namespace CepGen
       Particle::thetaToEta( thetamin )
     };
 
-    if ( Logger::get().level >= Logger::Debug ) {
-      std::ostringstream os; os << kinematics.cuts.central[Cuts::eta_single];
-      Debugging( Form( "eta in range: %s => theta(min) = %g, theta(max) = %g",
-                       os.str().c_str(), thetamin, thetamax ) );
-    }
+    if ( Logger::get().level >= Logger::Debug )
+      Debugging( "Parameters" )
+        << "eta in range: " << kinematics.cuts.central[Cuts::eta_single]
+        << " => theta(min) = " << thetamin << ", theta(max) = " << thetamax << ".";
   }
 
   void
@@ -211,7 +210,7 @@ namespace CepGen
       os << std::setw( wt ) << lim.first << lim.second << std::endl;
 
     if ( pretty ) {
-      Information( os.str() );
+      Information( "Parameters" ) << os.str();
     }
     else
       out << os.str();
