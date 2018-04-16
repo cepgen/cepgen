@@ -20,9 +20,9 @@ namespace CepGen
   {
     //--- initialise the random number generator
     gsl_rng_env_setup();
-    rng_ = std::shared_ptr<gsl_rng>( gsl_rng_alloc( gsl_rng_default ), gsl_rng_free );
-    unsigned long seed = ( input_params_->integrator.seed > 0 )
-      ? input_params_->integrator.seed
+    rng_ = std::shared_ptr<gsl_rng>( gsl_rng_alloc( input_params_->integrator.rng_engine ), gsl_rng_free );
+    unsigned long seed = ( input_params_->integrator.rng_seed > 0 )
+      ? input_params_->integrator.rng_seed
       : time( nullptr ); // seed with time
     gsl_rng_set( rng_.get(), seed );
 
@@ -31,10 +31,12 @@ namespace CepGen
 
     Debugging( Form( "Number of integration dimensions: %d,\n\t"
                      "Number of iterations [VEGAS]:     %d,\n\t"
-                     "Number of function calls:         %d.",
+                     "Number of function calls:         %d,\n\t"
+                     "Random numbers generator:         %s.",
                      function_->dim,
                      input_params_->integrator.vegas.iterations,
-                     input_params_->integrator.ncvg ) );
+                     input_params_->integrator.ncvg,
+                     gsl_rng_name( rng_.get() ) ) );
   }
 
   Integrator::~Integrator()

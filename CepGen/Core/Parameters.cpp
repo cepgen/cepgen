@@ -145,7 +145,8 @@ namespace CepGen
       //<< std::setw( wt ) << "Maximum number of iterations" << ( pretty ? boldify( integrator.itvg ) : std::to_string( integrator.itvg ) ) << std::endl
       << std::setw( wt ) << "Number of function calls" << integrator.ncvg << std::endl
       << std::setw( wt ) << "Number of points to try per bin" << integrator.npoints << std::endl
-      << std::setw( wt ) << "Random number generator seed" << integrator.seed << std::endl
+      << std::setw( wt ) << "Random number generator seed" << integrator.rng_seed << std::endl
+      << std::setw( wt ) << "Random number generator engine" << integrator.rng_engine->name << std::endl
       << std::endl
       << std::setfill('_') << std::setw( wb+3 ) << "_/¯¯EVENTS¯KINEMATICS¯¯\\_" << std::setfill( ' ' ) << std::endl
       << std::endl
@@ -214,8 +215,8 @@ namespace CepGen
   }
 
   Parameters::IntegratorParameters::IntegratorParameters() :
-    type( Integrator::Vegas ), ncvg( 500000 ),
-    npoints( 100 ), seed( 0 )
+    type( Integrator::Vegas ), ncvg( 500000 ), npoints( 100 ),
+    rng_seed( 0 ), rng_engine( (gsl_rng_type*)gsl_rng_mt19937 )
   {
     const size_t ndof = 10;
 

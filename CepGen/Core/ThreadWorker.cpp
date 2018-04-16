@@ -18,7 +18,7 @@ namespace CepGen
                               gsl_rng* rng, gsl_monte_function* function,
                               GridParameters* grid,
                               std::function<void( const Event&, unsigned long )>& callback ) :
-    ps_bin_( 0 ), rng_( rng ), function_( function ), grid_( grid ),
+    ps_bin_( 0 ), function_( function ), grid_( grid ),
     grid_correc_( 0. ), grid_correc2_( 0. ),
     grid_f_max2_( 0. ), grid_f_max_diff_( 0. ), grid_f_max_old_( 0. ),
     mutex_( mutex ), callback_( callback )
@@ -26,6 +26,7 @@ namespace CepGen
     if ( !function )
       throw Exception( __PRETTY_FUNCTION__, "Invalid integration function passed!", FatalError );
 
+    rng_ = std::shared_ptr<gsl_rng>( gsl_rng_clone( rng ), gsl_rng_free );
     grid_nm_.reserve( grid_->max );
     // retrieve standard parameters
     global_params_ = static_cast<Parameters*>( function->params );
@@ -189,7 +190,7 @@ namespace CepGen
   double
   ThreadWorker::uniform() const
   {
-    return gsl_rng_uniform( rng_ );
+    return gsl_rng_uniform( rng_.get() );
   }
 
   bool

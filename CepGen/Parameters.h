@@ -59,7 +59,9 @@ namespace CepGen
         /// Number of points to "shoot" in each integration bin by the algorithm
         unsigned int npoints;
         /// Random number generator seed
-        unsigned long seed;
+        long rng_seed;
+        /// Random number generator engine
+        gsl_rng_type* rng_engine;
         gsl_monte_vegas_params vegas;
         gsl_monte_miser_params miser;
       };

@@ -52,7 +52,7 @@ namespace CepGen
       int ps_bin_;
 
       /// Pointer to the random numbers generator
-      gsl_rng* rng_;
+      std::shared_ptr<gsl_rng> rng_;
       /// Pointer to the functional to be used for generations
       gsl_monte_function* function_;
 

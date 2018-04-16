@@ -273,7 +273,15 @@ namespace CepGen
 
       getParameter( integr, "numPoints", params_.integrator.npoints );
       getParameter( integr, "numFunctionCalls", params_.integrator.ncvg );
-      getParameter( integr, "seed", (unsigned long&)params_.integrator.seed );
+      getParameter( integr, "seed", (unsigned long&)params_.integrator.rng_seed );
+      unsigned int rng_engine;
+      getParameter( integr, "rngEngine", rng_engine );
+      switch ( rng_engine ) {
+        case 0: default: params_.integrator.rng_engine = (gsl_rng_type*)gsl_rng_mt19937; break;
+        case 1: params_.integrator.rng_engine = (gsl_rng_type*)gsl_rng_taus2; break;
+        case 2: params_.integrator.rng_engine = (gsl_rng_type*)gsl_rng_gfsr4; break;
+        case 3: params_.integrator.rng_engine = (gsl_rng_type*)gsl_rng_ranlxs0; break;
+      }
     }
 
     void
