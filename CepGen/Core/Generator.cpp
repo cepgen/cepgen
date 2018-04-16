@@ -18,7 +18,7 @@ namespace CepGen
     cross_section_( -1. ), cross_section_error_( -1. )
   {
     if ( Logger::get().level > Logger::Nothing ) {
-      Debugging( "Generator initialized" );
+      Debugging( "Generator" ) << "Generator initialized";
       try {
         printHeader();
       } catch ( Exception& e ) {
@@ -40,8 +40,10 @@ namespace CepGen
   {
     if ( parameters->generation.enabled
       && parameters->process() && parameters->numGeneratedEvents() > 0 ) {
-      Information( Form( "Mean generation time / event: %g ms",
-                         parameters->totalGenerationTime()*1.e3/parameters->numGeneratedEvents() ) );
+      Information( "Generator" )
+        << "Mean generation time / event: "
+        << parameters->totalGenerationTime()*1.e3/parameters->numGeneratedEvents()
+        << " ms";
     }
   }
 

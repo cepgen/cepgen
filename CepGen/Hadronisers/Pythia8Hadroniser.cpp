@@ -65,8 +65,9 @@ namespace CepGen
       }
 
       if ( !pythia_->init() )
-        FatalError( "Failed to initialise the Pythia8 core!\n\t"
-                    "See the message above for more details." );
+        throw FatalError( "Hadroniser" )
+          << "Failed to initialise the Pythia8 core!\n\t"
+          << "See the message above for more details.";
 
       return true;
     }

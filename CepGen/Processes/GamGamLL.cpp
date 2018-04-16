@@ -51,7 +51,7 @@ namespace CepGen
     GamGamLL::numDimensions( const Kinematics::ProcessMode& process_mode ) const
     {
       switch ( process_mode ) {
-        case Kinematics::ElectronProton:     { InError( "Not supported yet!" ); }
+        case Kinematics::ElectronProton:     { InError( "GamGamLL" ) << "Not yet supported!"; }
         case Kinematics::ElasticElastic:
         default:                             return 7;
         case Kinematics::ElasticInelastic:
@@ -63,7 +63,8 @@ namespace CepGen
     bool
     GamGamLL::pickin()
     {
-      DebuggingInsideLoop( Form( "Optimised mode? %i", n_opt_ ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "Optimised mode? " << n_opt_;
 
       jacobian_ = 0.;
 
@@ -74,9 +75,10 @@ namespace CepGen
       double sig1 = sig*sig,
              sig2 = sig1;
 
-      DebuggingInsideLoop( Form( "mc4 = %f\n\t"
-                                 "sig1 = %f\n\t"
-                                 "sig2 = %f", mc4_, sig1, sig2 ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "mc4 = " << mc4_ << "\n\t"
+        << "sig1 = " << sig1 << "\n\t"
+        << "sig2 = " << sig2;
 
       // Mass difference between the first outgoing particle
       // and the first incoming particle
@@ -90,20 +92,23 @@ namespace CepGen
       // and the second outgoing particle
       const double d6 = w4_-masses_.MY2_;
 
-      DebuggingInsideLoop( Form( "w1 = %f\n\t"
-                                 "w2 = %f\n\t"
-                                 "w3 = %f\n\t"
-                                 "w4 = %f\n\t"
-                                 "w5 = %f",
-                                 w1_, w2_, masses_.MX2_, w4_, masses_.MY2_ ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "w1 = " << w1_ << "\n\t"
+        << "w2 = " << w2_ << "\n\t"
+        << "w3 = " << masses_.MX2_ << "\n\t"
+        << "w4 = " << w4_ << "\n\t"
+        << "w5 = " << masses_.MY2_;;
 
-      DebuggingInsideLoop( Form( "w31 = %f\n\tw52 = %f\n\tw12 = %f", masses_.w31_, masses_.w52_, masses_.w12_ ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "w31 = " << masses_.w31_ << "\n\t"
+        << "w52 = " << masses_.w52_ << "\n\t"
+        << "w12 = " << masses_.w12_;;
 
       const double ss = s_+masses_.w12_;
 
       const double rl1 = ss*ss-4.*w1_*s_; // lambda(s, m1**2, m2**2)
       if ( rl1 <= 0. ) {
-        InWarning( Form( "rl1 = %f <= 0", rl1 ) );
+        InWarning( "GamGamLL" ) << "rl1 = " << rl1 << " <= 0";
         return false;
       }
       sl1_ = sqrt( rl1 );
@@ -116,7 +121,8 @@ namespace CepGen
         sig1 = s2_; //FIXME!!!!!!!!!!!!!!!!!!!!
       }
 
-      DebuggingInsideLoop( Form( "s2 = %f", s2_ ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "s2 = " << s2_;
 
       //std::cout << "s=" << _s << ", w3=" << masses_.MX2_ << ", sig1=" << sig1 << std::endl;
       const double sp = s_+masses_.MX2_-sig1,
@@ -124,7 +130,7 @@ namespace CepGen
 
       const double rl2 = sp*sp-4.*s_*masses_.MX2_; // lambda(s, m3**2, sigma)
       if ( rl2 <= 0. ) {
-        InWarning( Form( "rl2 = %f <= 0", rl2 ) );
+        InWarning( "GamGamLL" ) << "rl2 = " << rl2 << " <= 0";
         return false;
       }
       const double sl2 = sqrt( rl2 );
@@ -136,11 +142,12 @@ namespace CepGen
       // FIXME dropped in CDF version
       const Kinematics::Limits q2_limits = cuts_.cuts.initial[Cuts::q2];
       if ( t1_max > -q2_limits.min() ) {
-        InWarning( Form( "t1max = %f > -q2min = %f", t1_max, -q2_limits.min() ) );
+        InWarning( "GamGamLL" ) << "t1max = " << t1_max << " > -q2min = " << ( -q2_limits.min() );
         return false;
       }
       if ( t1_min < -q2_limits.max() && q2_limits.hasMax() ) {
-        Debugging( Form( "t1min = %f < -q2max = %f", t1_min, -q2_limits.max() ) );
+        Debugging( "GamGamLL" )
+          << "t1min = " << t1_min << " < -q2max = " << -q2_limits.max();
         return false;
       }
       if ( t1_max < -q2_limits.max() && q2_limits.hasMax() )
@@ -156,9 +163,9 @@ namespace CepGen
       // changes wrt mapt1 : dx->-dx
       dt1 *= -1.;
 
-      DebuggingInsideLoop( Form( "Definition of t1 = %f according to\n\t"
-                                 "(t1min, t1max) = (%f, %f)",
-                                 t1_, t1_min, t1_max ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "Definition of t1 = " << t1_ << " according to\n\t"
+        << "(t1min, t1max) = (" << t1_min << ", " << t1_max << ")";
 
       dd4_ = w4_-t1_;
 
@@ -166,7 +173,7 @@ namespace CepGen
 
       sa1_ = -pow( t1_-masses_.w31_, 2 )/4.+w1_*t1_;
       if ( sa1_ >= 0. ) {
-        InWarning( Form( "sa1_ = %f >= 0", sa1_ ) );
+        InWarning( "GamGamLL" ) << "sa1_ = " << sa1_ << " >= 0";
         return false;
       }
 
@@ -196,12 +203,14 @@ namespace CepGen
       // 4
       double s2x = s2max;
 
-      DebuggingInsideLoop( Form( "s2x = s2max = %f", s2x ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "s2x = s2max = " << s2x;
 
       if ( n_opt_ < 0 ) { // 5
         if ( splus > sig2 ) {
           sig2 = splus;
-          DebuggingInsideLoop( Form( "sig2 truncated to splus = %f", splus ) );
+          DebuggingInsideLoop( "GamGamLL" )
+            << "sig2 truncated to splus = " << splus;
         }
         if ( n_opt_ < -1 ) { Map( x(2), sig2, s2max, s2_, ds2, "s2" ); }
         else               { Mapla( t1_, w2_, x(2), sig2, s2max, s2_, ds2 ); } // n_opt_==-1
@@ -210,14 +219,16 @@ namespace CepGen
       else if ( n_opt_ == 0 )
         s2x = s2_; // 6
 
-      DebuggingInsideLoop( Form( "s2x = %f", s2x ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "s2x = " << s2x;
 
       // 7
       const double r1 = s2x-d8, r2 = s2x-d6;
 
       const double rl4 = ( r1*r1-4.*w2_*s2x )*( r2*r2-4.*masses_.MY2_*s2x );
       if ( rl4 <= 0. ) {
-        DebuggingInsideLoop( Form( "rl4 = %f <= 0", rl4 ) );
+        DebuggingInsideLoop( "GamGamLL" )
+          << "rl4 = " << rl4 << " <= 0";
         return false;
       }
       const double sl4 = sqrt( rl4 );
@@ -239,7 +250,11 @@ namespace CepGen
                    r3 = dd4_-t2_,
                    r4 = masses_.w52_-t2_;
 
-      DebuggingInsideLoop( Form( "r1 = %f\n\tr2 = %f\n\tr3 = %f\n\tr4 = %f", r1, r2, r3, r4 ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "r1 = " << r1 << "\n\t"
+        << "r2 = " << r2 << "\n\t"
+        << "r3 = " << r3 << "\n\t"
+        << "r4 = " << r4;
 
       const double b = r3*r4-2.*( t1_+w2_ )*t2_;
       const double c = t2_*d6*d8+( d6-d8 )*( d6*w2_-d8*masses_.MY2_ );
@@ -248,7 +263,8 @@ namespace CepGen
 
       sa2_ = -0.25 * r4*r4 + w2_*t2_;
       if ( sa2_ >= 0. ) {
-        InWarning( Form( "sa2_ = %f >= 0", sa2_ ) );
+        InWarning( "GamGamLL" )
+          <<  "sa2_ = " << sa2_ << " >= 0";
         return false;
       }
 
@@ -256,7 +272,7 @@ namespace CepGen
 
       g4_ = -r3*r3/4.+t1_*t2_;
       if ( g4_ >= 0. ) {
-        InWarning( Form( "g4_ = %f >= 0", g4_ ) );
+        InWarning( "GamGamLL" ) << "g4_ = " << g4_ << " >= 0";
         return false;
       }
 
@@ -280,7 +296,8 @@ namespace CepGen
 
       const double ap = -0.25*pow( s2_+d8, 2 )+s2_*t1_;
 
-      DebuggingInsideLoop( Form( "s2 = %f, s2max = %f, splus = %f", s2_, s2max, splus ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "s2 = " << s2_ << ", s2max = " << s2max << ", splus = " << splus;
 
       if ( w1_ != 0. )
         dd1_ = -0.25 * ( s2_-s2max ) * ( s2_-splus ) * w1_; // 10
@@ -289,7 +306,12 @@ namespace CepGen
       // 11
       dd2_ = -0.25 * t2_*( s2_-s2p )*( s2_-s2min );
 
-      DebuggingInsideLoop( Form( "t2 =%f\n\ts2 =%f\n\ts2p=%f\n\ts2min=%f\n\tdd2=%f", t2_, s2_, s2p, s2min, dd2_ ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "t2    = " << t2_ << "\n\t"
+        << "s2    = " << s2_ << "\n\t"
+        << "s2p   = " << s2p << "\n\t"
+        << "s2min = " << s2min << "\n\t"
+        << "dd2   = " << dd2_;;
 
       const double yy4 = cos( M_PI*x( 3 ) );
       const double dd = dd1_*dd2_;
@@ -298,7 +320,11 @@ namespace CepGen
       const double delb = ( 2.*w2_*r3+r4*st )*( 4.*p12_*t1_-( t1_-masses_.w31_ )*st )/( 16.*ap );
 
       if ( dd <= 0. ) {
-        DebuggingInsideLoop( Form( "dd = %e <= 0\n\tdd1 = %e\tdd2 = %e", dd, dd1_, dd2_ ) );
+        DebuggingInsideLoop( "GamGamLL" )
+          << std::scientific
+          << "dd = " << dd << " <= 0\n\t"
+          << "dd1 = " << dd1_ << "\t"
+          << "dd2 = " << dd2_ << std::dec;
         return false;
       }
 
@@ -306,13 +332,15 @@ namespace CepGen
       s1_ = t2_+w1_+( 2.*p12_*r3-4.*delta_ )/st;
 
       if ( ap >= 0. ) {
-        DebuggingInsideLoop( Form( "ap = %f >= 0", ap ) );
+        DebuggingInsideLoop( "GamGamLL" )
+          <<  "ap = " << ap << " >= 0";
         return false;
       }
 
       jacobian_ = ds2 * dt1 * dt2 * 0.125 * M_PI*M_PI/( sl1_*sqrt( -ap ) );
 
-      DebuggingInsideLoop( Form( "Jacobian = %e", jacobian_ ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "Jacobian = " << std::scientific << jacobian_ << std::dec;
 
       gram_ = ( 1.-yy4*yy4 )*dd/ap;
 
@@ -372,7 +400,8 @@ namespace CepGen
     GamGamLL::orient()
     {
       if ( !pickin() || jacobian_ == 0. ) {
-        DebuggingInsideLoop( Form( "Pickin failed! Jacobian = %f", jacobian_ ) );
+        DebuggingInsideLoop( "GamGamLL" )
+          << "Pickin failed! Jacobian = " << jacobian_;
         return false;
       }
 
@@ -380,8 +409,13 @@ namespace CepGen
       ep1_ = re*( s_+masses_.w12_ );
       ep2_ = re*( s_-masses_.w12_ );
 
-      DebuggingInsideLoop( Form( " re = %e\n\tw12_ = %e", re, masses_.w12_ ) );
-      DebuggingInsideLoop( Form( "Incoming particles' energy = %f, %f", ep1_, ep2_ ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << std::scientific
+        << " re = " << re << "\n\t"
+        << "w12_ = " << masses_.w12_
+        << std::dec;
+      DebuggingInsideLoop( "GamGamLL" )
+        << "Incoming particles' energy = " << ep1_ << ", " << ep2_;
 
       p_cm_ = re*sl1_;
 
@@ -394,7 +428,9 @@ namespace CepGen
       ec4_ = de3_+de5_;
 
       if ( ec4_ < mc4_ ) {
-        InWarning( Form( "ec4_ = %f < mc4_ = %f\n\t==> de3 = %f, de5 = %f", ec4_, mc4_, de3_, de5_ ) );
+        InWarning( "GamGamLL" )
+          << "ec4_ = " << ec4_ << " < mc4_ = " << mc4_ << "\n\t"
+          << "==> de3 = " << de3_ << ", de5 = " << de5_;
         return false;
       }
 
@@ -402,31 +438,37 @@ namespace CepGen
       pc4_ = sqrt( ec4_*ec4_-mc4_*mc4_ );
 
       if ( pc4_ == 0. ) {
-        InWarning( "pzc4 is null and should not be..." );
+        InWarning( "GamGamLL" ) << "pzc4 is null and should not be...";
         return false;
       }
 
       const double pp3 = sqrt( ep3*ep3-masses_.MX2_ ), pt3 = sqrt( dd1_/s_ )/p_cm_,
                    pp5 = sqrt( ep5*ep5-masses_.MY2_ ), pt5 = sqrt( dd3_/s_ )/p_cm_;
 
-      DebuggingInsideLoop( Form( "Central system's energy: E4 = %f\n\t"
-                                 "                 momentum: p4 = %f\n\t"
-                                 "                 invariant mass: m4 = %f\n\t"
-                                 "Outgoing particles' energy: E3 = %f\n\t"
-                                 "                            E5 = %f",
-                                 ec4_, pc4_, mc4_, ep3, ep5 ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "Central system's energy: E4 = " << ec4_ << "\n\t"
+        << "               momentum: p4 = " << pc4_ << "\n\t"
+        << "         invariant mass: m4 = " << mc4_ << "\n\t"
+        << "Outgoing particles' energy: E3 = " << ep3 << "\n\t"
+        << "                            E5 = " << ep5;
 
       const double sin_theta3 = pt3/pp3,
                    sin_theta5 = pt5/pp5;
 
-      DebuggingInsideLoop( Form( "sin_theta3 = %e\n\tsin_theta5 = %e", sin_theta3, sin_theta5 ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << std::scientific
+        << "sin_theta3 = " << sin_theta3 << "\n\t"
+        << "sin_theta5 = " << sin_theta5
+        << std::dec;
 
       if ( sin_theta3 > 1. ) {
-        InWarning( Form( "sin_theta3 = %e > 1", sin_theta3 ) );
+        InWarning( "GamGamLL" )
+          << "sin_theta3 = " << sin_theta3 << " > 1";
         return false;
       }
       if ( sin_theta5 > 1. ) {
-        InWarning( Form( "sin_theta5 = %e > 1", sin_theta5 ) );
+        InWarning( "GamGamLL" )
+          << "sin_theta5 = " << sin_theta5 << " > 1";
         return false;
       }
 
@@ -438,10 +480,13 @@ namespace CepGen
       if ( ep2_*ep5 > p25_ )
         ct5 *= -1.;
 
-      DebuggingInsideLoop( Form( "ct3 = %e\n\tct5 = %e", ct3, ct5 ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "ct3 = " << ct3 << "\n\t"
+        << "ct5 = " << ct5;;
 
       if ( dd5_ < 0. ) {
-        InWarning( Form( "dd5 = %f < 0", dd5_ ) );
+        InWarning( "GamGamLL" )
+          <<  "dd5 = " << dd5_ << " < 0";
         return false;
       }
 
@@ -450,7 +495,8 @@ namespace CepGen
       sin_theta4_ = pt4_/pc4_;
 
       if ( sin_theta4_ > 1. ) {
-        InWarning( Form( "st4 = %f > 1", sin_theta4_ ) );
+        InWarning( "GamGamLL" )
+          << "st4 = " << sin_theta4_ << " > 1";
         return false;
       }
 
@@ -464,18 +510,22 @@ namespace CepGen
       if ( cos_theta4_ < 0. ) be4_ = sin_theta4_*sin_theta4_/al4_;
       else                    al4_ = sin_theta4_*sin_theta4_/be4_;
 
-      DebuggingInsideLoop( Form( "ct4 = %f\n\tal4 = %f, be4 = %f", cos_theta4_, al4_, be4_ ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "ct4 = " << cos_theta4_ << "\n\t"
+        << "al4 = " << al4_ << ", be4 = " << be4_;
 
       const double rr  = sqrt( -gram_/s_ )/( p_cm_*pt4_ );
       const double sin_phi3 =  rr / pt3,
                    sin_phi5 = -rr / pt5;
 
       if ( fabs( sin_phi3 ) > 1. ) {
-        InWarning( Form( "sin(phi_3) = %e while it must be in [-1 ; 1]", sin_phi3 ) );
+        InWarning( "GamGamLL" )
+          << "sin(phi_3) = " << sin_phi3 << " while it must be in [-1 ; 1]";
         return false;
       }
       if ( fabs( sin_phi5 ) > 1. ) {
-        InWarning( Form( "sin(phi_5) = %e while it must be in [-1 ; 1]", sin_phi5 ) );
+        InWarning( "GamGamLL" )
+          << "sin(phi_5) = " << sin_phi5 << " while it must be in [-1 ; 1]";
         return false;
       }
 
@@ -487,21 +537,23 @@ namespace CepGen
 
       const double a1 = p3_lab_.px()-p5_lab_.px();
 
-      DebuggingInsideLoop( Form( "Kinematic quantities\n\t"
-                                 "cos(theta3) = %1.4f\tsin(theta3) = %1.4f\tcos( phi3 ) = %1.4f\tsin( phi3 ) = %1.4f\n\t"
-                                 "cos(theta4) = %1.4f\tsin(theta4) = %1.4f\n\t"
-                                 "cos(theta5) = %1.4f\tsin(theta5) = %1.4f\tcos( phi5 ) = %1.4f\tsin( phi5 ) = %1.4f\n\t"
-                                 "a1 = %f",
-                                 ct3, sin_theta3, cos_phi3, sin_phi3,
-                                 cos_theta4_, sin_theta4_,
-                                 ct5, sin_theta5, cos_phi5, sin_phi5, a1 ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "Kinematic quantities\n\t"
+        << "cos(theta3) = " << ct3 << "\t" << "sin(theta3) = " << sin_theta3 << "\n\t"
+        << "cos( phi3 ) = " << cos_phi3 << "\t" << "sin( phi3 ) = " << sin_phi3 << "\n\t"
+        << "cos(theta4) = " << cos_theta4_ << "\t" << "sin(theta4) = " << sin_theta4_ << "\n\t"
+        << "cos(theta5) = " << ct5 << "\t" << "sin(theta5) = " << sin_theta5 << "\n\t"
+        << "cos( phi5 ) = " << cos_phi5 << "\t" << "sin( phi5 ) = " << sin_phi5 << "\n\t"
+        << "a1 = " << a1;
 
       if ( fabs( pt4_+p3_lab_.px()+p5_lab_.px() ) < fabs( fabs( a1 )-pt4_ ) ) {
-        DebuggingInsideLoop( Form( "|pp4+pp3*cos(phi3)+pp5*cos(phi5)| < | |a1|-pp4 |\n\t"
-                                   "pp4 = %f\tpp5 = %f\n\t"
-                                   "cos(phi3) = %f\tcos(phi5) = %f"
-                                   "a1 = %f",
-                                   pt4_, pt5, cos_phi3, cos_phi5, a1 ) );
+        DebuggingInsideLoop( "GamGamLL" )
+          << "|pt4+pt3*cos(phi3)+pt5*cos(phi5)| < | |a1|-pt4 |\n\t"
+          << "pt4 = " << pt4_ << "\t"
+          << "pt5 = " << pt5 << "\n\t"
+          << "cos(phi3) = " << cos_phi3 << "\t"
+          << "cos(phi5) = " << cos_phi5 << "\n\t"
+          << "a1 = " << a1;
         return true;
       }
       if ( a1 < 0. ) p5_lab_.setP( 0, -p5_lab_.px() );
@@ -520,9 +572,10 @@ namespace CepGen
       double mx2 = 0., dmx2 = 0.;
       Map( x, wx2min, wx2max, mx2, dmx2, "mx2" );
 
-      DebuggingInsideLoop( Form( "mX^2 in range (%f, %f), x = %f\n\t"
-                                 "mX^2 = %f, d(mX^2) = %f\n\t"
-                                 "mX = %f, d(mX) = %f", wx2min, wx2max, x, mx2, dmx2, sqrt( mx2 ), sqrt( dmx2 ) ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "mX^2 in range (" << wx2min << ", " << wx2max << "), x = " << x << "\n\t"
+        << "mX^2 = " << mx2 << ", d(mX^2) = " << dmx2 << "\n\t"
+        << "mX = " << sqrt( mx2 ) << ", d(mX) = " << sqrt( dmx2 );
 
       dw = sqrt( dmx2 );
       return sqrt( mx2 );
@@ -543,7 +596,7 @@ namespace CepGen
 
       switch ( cuts_.mode ) {
         case Kinematics::ElectronProton: default:
-          { InError( "Case not yet supported!" ); } break;
+          { InError( "GamGamLL" ) << "Case not yet supported!"; } break;
         case Kinematics::ElasticElastic:
           masses_.dw31_ = masses_.dw52_ = 0.; break;
         case Kinematics::InelasticElastic: {
@@ -572,7 +625,10 @@ namespace CepGen
     double
     GamGamLL::computeWeight()
     {
-      DebuggingInsideLoop( Form( "sqrt(s)=%f\n\tm(X1)=%f\tm(X2)=%f", sqs_, MX_, MY_ ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "sqrt(s) = " << sqs_ << " GeV\n\t"
+        << "m(X1) = " << MX_ << " GeV\t"
+        << "m(X2) = " << MY_ << " GeV";
 
       Kinematics::Limits& w_limits = cuts_.cuts.initial[Cuts::w];
       if ( !w_limits.hasMax() )
@@ -584,7 +640,9 @@ namespace CepGen
       // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or _wmax if specified)
       const double wmax = std::min( pow( sqs_-MX_-MY_, 2 ), w_limits.max() );
 
-      DebuggingInsideLoop( Form( "wmin = %f\n\twmax = %f\n\twmax/wmin = %f", w_limits.min(), wmax, wmax/w_limits.min() ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "w limits = " << w_limits << "\n\t"
+        << "wmax/wmin = " << wmax/w_limits.min();
 
       // compute the two-photon energy for this point
       w4_ = 0.;
@@ -593,14 +651,15 @@ namespace CepGen
       Map( x( 4 ), w_limits.min(), wmax, w4_, dw4, "w4" );
       mc4_ = sqrt( w4_ );
 
-      DebuggingInsideLoop( Form( "Computed value for w4 = %f -> mc4 = %f", w4_, mc4_ ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "Computed value for w4 = " << w4_ << " → mc4 = " << mc4_;
 
       if ( !orient() ) return 0.;
 
-      if ( jacobian_ == 0. ) { InWarning( Form( "dj = %f", jacobian_ ) ); return 0.; }
+      if ( jacobian_ == 0. ) { InWarning( "GamGamLL" ) << "dj = " << jacobian_; return 0.; }
 
-      if ( t1_>0. )  { InWarning( Form( "t1 = %f > 0", t1_ ) ); return 0.; }
-      if ( t2_>0. )  { InWarning( Form( "t2 = %f > 0", t2_ ) ); return 0.; }
+      if ( t1_>0. )  { InWarning( "GamGamLL" ) << "t1 = " << t1_ << " > 0"; return 0.; }
+      if ( t2_>0. )  { InWarning( "GamGamLL" ) << "t2 = " << t2_ << " > 0"; return 0.; }
 
       const double ecm6 = w4_ / ( 2.*mc4_ ),
                    pp6cm = sqrt( ecm6*ecm6-masses_.Ml2_ );
@@ -622,10 +681,7 @@ namespace CepGen
                    pgy = -p3_lab_.py(),
                    pgz = mc4_*de3_/( ec4_+pc4_ )-ec4_*de3_*al4_/mc4_-p3_lab_.px()*ec4_*sin_theta4_/mc4_+ec4_*cos_theta4_/mc4_*( p3_lab_.p()*al3+e3mp3-e1mp1 );
 
-      DebuggingInsideLoop( Form( "pg3 = (%f, %f, %f)\n\t"
-                                 "pg3^2 = %f",
-                                 pgx, pgy, pgz,
-                                 sqrt( pgx*pgx+pgy*pgy+pgz*pgz ) ) );
+      DebuggingInsideLoop( "GamGamLL" ) << "pg = " << Particle::Momentum( pgx, pgy, pgz );
 
       const double pgp = sqrt( pgx*pgx + pgy*pgy ), // outgoing proton (3)'s transverse momentum
                    pgg = sqrt( pgp*pgp + pgz*pgz ); // outgoing proton (3)'s momentum
@@ -651,7 +707,11 @@ namespace CepGen
       xx6 = 0.5 * ( 1. + amap/bmap*( beta-1. )/( beta+1. ) );
       xx6 = std::max( 0., std::min( xx6, 1. ) ); // xx6 in [0., 1.]
 
-      DebuggingInsideLoop( Form( "amap = %f\n\tbmap = %f\n\tymap = %f\n\tbeta = %f", amap, bmap, ymap, beta ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "amap = " << amap << "\n\t"
+        << "bmap = " << bmap << "\n\t"
+        << "ymap = " << ymap << "\n\t"
+        << "beta = " << beta;;
 
       // 3D rotation of the first outgoing lepton wrt the CM system
       const double theta6cm = acos( 1.-2.*xx6 );
@@ -664,16 +724,18 @@ namespace CepGen
       jacobian_ *= log( ymap );
       jacobian_ *= 0.5;
 
-      DebuggingInsideLoop( Form( "Jacobian = %e", jacobian_ ) );
+      DebuggingInsideLoop( "GamGamLL" ) << "Jacobian = " << jacobian_;
 
-      DebuggingInsideLoop( Form( "ctcm6 = %f\n\tstcm6 = %f", cos( theta6cm ), sin( theta6cm ) ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "ctcm6 = " << cos( theta6cm ) << "\n\t"
+        << "stcm6 = " << sin( theta6cm );
 
       const double phi6cm = 2.*M_PI*x( 6 );
 
       // First outgoing lepton's 3-momentum in the centre of mass system
       Particle::Momentum p6cm = Particle::Momentum::fromPThetaPhi( pp6cm, theta6cm, phi6cm );
 
-      DebuggingInsideLoop( Form( "p3cm6 = (%f, %f, %f)", p6cm.px(), p6cm.py(), p6cm.pz() ) );
+      DebuggingInsideLoop( "GamGamLL" ) << "p3cm6 = " << p6cm;
 
       const double h1 = stg*p6cm.pz()+ctg*p6cm.px();
       const double pc6z = ctg*p6cm.pz()-stg*p6cm.px(), pc6x = cpg*h1-spg*p6cm.py();
@@ -684,7 +746,7 @@ namespace CepGen
       const double el6 = ( ec4_*ecm6+pc4_*pc6z ) / mc4_,
                    h2  = ( ec4_*pc6z+pc4_*ecm6 ) / mc4_;
 
-      DebuggingInsideLoop( Form( "h1 = %f\n\th2 = %f", h1, h2 ) );
+      DebuggingInsideLoop( "GamGamLL" ) << "h1 = " << h1 << "\n\th2 = " << h2;
 
       // first outgoing lepton's 3-momentum
       const double p6x = cos_theta4_*pc6x+sin_theta4_*h2,
@@ -693,7 +755,7 @@ namespace CepGen
 
       // first outgoing lepton's kinematics
       p6_cm_ = Particle::Momentum( p6x, p6y, p6z, el6 );
-      DebuggingInsideLoop( Form( "E6(cm) = %f\n\tP6(cm) = (%f, %f, %f)", el6, p6x, p6y, p6z ) );
+      DebuggingInsideLoop( "GamGamLL" ) << "p6(cm) = " << p6_cm_;
 
       const double hq = ec4_*qcz/mc4_;
 
@@ -707,10 +769,10 @@ namespace CepGen
       // Available energy for the second lepton is the 2-photon system's energy with the first lepton's energy removed
       const double el7 = ec4_-el6;
 
-      DebuggingInsideLoop( Form( "Outgoing kinematics\n\t"
-                                 " first outgoing lepton: p = %f, E = %f\n\t"
-                                 "second outgoing lepton: p = %f, E = %f",
-                                 p6_cm_.p(), p6_cm_.energy(), p7_cm_.p(), p6_cm_.energy() ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "Outgoing kinematics\n\t"
+        << " first outgoing lepton: p = " << p6_cm_.p() << ", E = " << p6_cm_.energy() << "\n\t"
+        << "second outgoing lepton: p = " << p7_cm_.p() << ", E = " << p7_cm_.energy();;
 
       // Second outgoing lepton's 3-momentum
       const double p7x = -p6x + pt4_,
@@ -758,7 +820,9 @@ namespace CepGen
             -( ep2_*qve.energy()+p_cm_*qve.pz() )*( cos_phi3*cos_phi5 + sin_phi3*sin_phi5 )*pt3*pt5
             +( de3_*qve.pz()-qve.energy()*( p_cm_-p3_lab_.pz() ) )*b3;
 
-      DebuggingInsideLoop( Form( "a5 = %f\n\ta6 = %f", a5_, a6_ ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "a5 = " << a5_ << "\n\t"
+        << "a6 = " << a6_;
 
       ////////////////////////////////////////////////////////////////
       // END of GAMGAMLL subroutine in the FORTRAN version
@@ -927,12 +991,18 @@ namespace CepGen
     double
     GamGamLL::periPP( int nup_, int ndown_ )
     {
-      DebuggingInsideLoop( Form( " Nup  = %d\n\tNdown = %d", nup_, ndown_ ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << " Nup  = " << nup_ << "\n\t"
+        << "Ndown = " << ndown_;
 
       FormFactors fp1, fp2;
       GenericProcess::formFactors( -t1_, -t2_, fp1, fp2 );
 
-      DebuggingInsideLoop( Form( "u1 = %f\n\tu2 = %f\n\tv1 = %f\n\tv2 = %f", fp1.FM, fp1.FE, fp2.FM, fp2.FE ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "u1 = " << fp1.FM << "\n\t"
+        << "u2 = " << fp1.FE << "\n\t"
+        << "v1 = " << fp2.FM << "\n\t"
+        << "v2 = " << fp2.FE;
 
       const double qqq = q1dq_*q1dq_,
                    qdq = 4.*masses_.Ml2_-w4_;
@@ -943,9 +1013,12 @@ namespace CepGen
 
       const double peripp = ( fp1.FM*fp2.FM*t11 + fp1.FE*fp2.FM*t21 + fp1.FM*fp2.FE*t12 + fp1.FE*fp2.FE*t22 ) / pow( 2.*t1_*t2_*bb_, 2 );
 
-      DebuggingInsideLoop( Form( "t11 = %5.2f\tt12 = %5.2f\n\t"
-                                 "t21 = %5.2f\tt22 = %5.2f\n\t"
-                                 "=> PeriPP = %e", t11, t12, t21, t22, peripp ) );
+      DebuggingInsideLoop( "GamGamLL" )
+        << "t11 = " << t11 << "\t"
+        << "t12 = " << t12 << "\n\t"
+        << "t21 = " << t21 << "\t"
+        << "t22 = " << t22 << "\n\t"
+        << "=> PeriPP = " << peripp;
 
       return peripp;
     }

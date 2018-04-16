@@ -52,7 +52,7 @@ int main( int argc, char* argv[] ) {
     mg.parameters->integrator.ncvg = 5e4;
     mg.parameters->generation.num_threads = 4;
     mg.parameters->generation.enabled = true;
-    mg.parameters->generation.maxgen = 2e4;
+    mg.parameters->generation.maxgen = 1e5;
   }
   else {
     Information( Form( "Reading config file stored in %s", argv[1] ) );

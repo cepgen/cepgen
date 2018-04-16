@@ -10,11 +10,14 @@ void Map( double expo, double xmin, double xmax, double& out, double& dout, cons
   const double y = xmax/xmin;
   out = xmin*pow( y, expo );
   dout = out*log( y );
-  DebuggingInsideLoop( Form( "Mapping variable \"%s\"\n\t"
-                             "min = %f\n\tmax = %f\n\tmax/min = %f\n\t"
-                             "exponent = %f\n\t"
-                             "output = %f\n\td(output) = %f",
-                             var_name_.c_str(), xmin, xmax, y, expo, out, dout ) );
+  DebuggingInsideLoop( "Map" )
+    << "Mapping variable \"" << var_name_ << "\"\n\t"
+    << "min = " << xmin << "\n\t"
+    << "max = " << xmax << "\n\t"
+    << "max/min = " << y << "\n\t"
+    << "exponent = " << expo << "\n\t"
+    << "output = " << out << "\n\t"
+    << "d(output) = " << dout;
 }
 
 void Mapla( double y, double z, int u, double xm, double xp, double& x, double& d )

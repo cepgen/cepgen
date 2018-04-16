@@ -90,10 +90,12 @@ namespace CepGen
           function_->dim, 0.2 * input_params_->integrator.ncvg,
           rng_.get(), veg_state,
           &result, &abserr );
-        PrintMessage( Form( "\t>> at call %2d: average = %10.6f   "
-                            "sigma = %10.6f   chi2 = %4.3f.",
-                            it_chisq+1, result, abserr,
-                            gsl_monte_vegas_chisq( veg_state ) ) );
+        PrintMessage( "Integrator" )
+          << "\t>> at call " << ( it_chisq+1 ) << ": "
+          << Form( "average = %10.6f   "
+                   "sigma = %10.6f   chi2 = %4.3f.",
+                   result, abserr,
+                   gsl_monte_vegas_chisq( veg_state ) );
         it_chisq++;
       } while ( fabs( gsl_monte_vegas_chisq( veg_state )-1. )
               > input_params_->integrator.vegas_chisq_cut-1. );
