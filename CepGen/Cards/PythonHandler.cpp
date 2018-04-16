@@ -282,6 +282,7 @@ namespace CepGen
         case 2: params_.integrator.rng_engine = (gsl_rng_type*)gsl_rng_gfsr4; break;
         case 3: params_.integrator.rng_engine = (gsl_rng_type*)gsl_rng_ranlxs0; break;
       }
+      getParameter( integr, "chiSqCut", params_.integrator.vegas_chisq_cut );
     }
 
     void

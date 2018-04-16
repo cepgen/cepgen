@@ -66,7 +66,7 @@ namespace CepGen
 
     if ( ps_bin_ != 0 ) {
       bool has_correction = false;
-      while ( !correctionCycle( x, has_correction ) ) {std::cout <<"correctioncycle"<<std::endl;}
+      while ( !correctionCycle( x, has_correction ) ) {/*std::cout <<"correctioncycle"<<std::endl;*/}
       if ( has_correction )
         return storeEvent( x );
     }
@@ -94,9 +94,9 @@ namespace CepGen
 
       // Get weight for selected x value
       weight = eval( x );
-//std::cout << weight << "|" << y << std::endl;
       if ( weight <= 0. )
         continue;
+//std::cout << weight << "|" << y << std::endl;
     } while ( y > weight );
 
 //std::cout << __PRETTY_FUNCTION__<<"|"<< weight<< std::endl;
@@ -129,6 +129,7 @@ namespace CepGen
   bool
   ThreadWorker::correctionCycle( std::vector<double>& x, bool& has_correction )
   {
+//    std::cout << __PRETTY_FUNCTION__ << std::endl;
     DebuggingInsideLoop( Form( "Correction cycles are started.\n\t"
                                "bin = %d\t"
                                "correc = %g\t"
@@ -167,7 +168,7 @@ namespace CepGen
       grid_f_max_old_ = grid_->f_max[ps_bin_];
       grid_->f_max[ps_bin_] = grid_f_max2_;
       grid_f_max_diff_ = grid_f_max2_-grid_f_max_old_;
-      const double correc_tmp = ( grid_nm_[ps_bin_] - 1. ) * grid_f_max_diff_ / grid_->f_max_global;
+      const double correc_tmp = ( grid_nm_[ps_bin_]-1. ) * grid_f_max_diff_ / grid_->f_max_global;
       if ( grid_f_max2_ < grid_->f_max_global )
         grid_correc_ = correc_tmp - grid_correc2_;
       else {

@@ -4,7 +4,7 @@ from Config.gsl_cff import GslRngEngine
 plain = cepgen.Module('Plain',
     numFunctionCalls = 1000000,
     numPoints = 100,
-    rngEngine = GslRngEngine.Taus,
+    rngEngine = GslRngEngine.MT19937,
 )
 
 class VegasIntegrationMode:
@@ -15,6 +15,7 @@ class VegasIntegrationMode:
 vegas = plain.clone('Vegas',
     numFunctionCalls = 50000,
     numPoints = 100,
+    chiSqCut = 1.5,
     # VEGAS-specific parameters
     iterations = 5,
     alpha = 1.5,

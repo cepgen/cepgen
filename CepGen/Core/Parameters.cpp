@@ -219,7 +219,8 @@ namespace CepGen
 
   Parameters::IntegratorParameters::IntegratorParameters() :
     type( Integrator::Vegas ), ncvg( 500000 ), npoints( 100 ),
-    rng_seed( 0 ), rng_engine( (gsl_rng_type*)gsl_rng_mt19937 )
+    rng_seed( 0 ), rng_engine( (gsl_rng_type*)gsl_rng_mt19937 ),
+    vegas_chisq_cut( 1.5 )
   {
     const size_t ndof = 10;
 

@@ -79,7 +79,9 @@ namespace CepGen
           &result, &abserr );
         grid.grid_prepared = true;
       }
-      Information( "Finished the Vegas warm-up." );
+      Information( Form( "Finished the Vegas warm-up.\n\t"
+                         "Will now iterate until χ² < %g.",
+                         input_params_->integrator.vegas_chisq_cut ) );
       //----- integration
       unsigned short it_chisq = 0;
       do {
@@ -93,7 +95,8 @@ namespace CepGen
                             it_chisq+1, result, abserr,
                             gsl_monte_vegas_chisq( veg_state ) ) );
         it_chisq++;
-      } while ( fabs( gsl_monte_vegas_chisq( veg_state )-1. ) > 0.5 );
+      } while ( fabs( gsl_monte_vegas_chisq( veg_state )-1. )
+              > input_params_->integrator.vegas_chisq_cut-1. );
     }
     //----- integration
     else if ( algorithm == MISER ) {

@@ -63,6 +63,7 @@ namespace CepGen
         /// Random number generator engine
         gsl_rng_type* rng_engine;
         gsl_monte_vegas_params vegas;
+        double vegas_chisq_cut;
         gsl_monte_miser_params miser;
       };
       /// Integrator parameters
