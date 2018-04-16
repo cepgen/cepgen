@@ -16,7 +16,7 @@ using namespace std;
 
 void printEvent( const CepGen::Event& ev, unsigned long ev_id )
 {
-cout << ev_id << endl;
+//cout << ev_id << endl;
   if ( ev_id % 5000 != 0 )
     return;
 

@@ -154,7 +154,7 @@ namespace CepGen
       }
       // Accept event
       if ( weight >= grid_f_max_diff_*uniform() + grid_f_max_old_ ) { // FIXME!!!!
-        InError("Accepting event!!!");
+//        InError("Accepting event!!!");
         //return storeEvent(x);
         x = xtmp;
         has_correction = true;

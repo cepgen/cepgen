@@ -130,6 +130,12 @@ namespace CepGen
     return function_->dim;
   }
 
+  double
+  Integrator::eval( const std::vector<double>& x )
+  {
+    return function_->f( (double*)&x[0], function_->dim, (void*)input_params_ );
+  }
+
   void
   Integrator::generate( unsigned long num_events, std::function<void( const Event&, unsigned long )> callback )
   {
@@ -187,7 +193,7 @@ namespace CepGen
       for ( unsigned int j = 0; j < input_params_->integrator.npoints; ++j ) {
         for ( unsigned int k = 0; k < function_->dim; ++k )
           x[k] = ( gsl_rng_uniform( rng_.get() ) + grid.n[k] ) * grid.inv_mbin_;
-        const double z = function_->f( (double*)&x[0], function_->dim, (void*)input_params_ );
+        const double z = eval( x );
         grid.f_max[i] = std::max( grid.f_max[i], z );
         fsum += z;
         fsum2 += z*z;

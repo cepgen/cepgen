@@ -17,7 +17,8 @@ namespace CepGen
       t1_( -1. ), t2_( -1. ),
       has_event_( has_event ), event_( new Event ),
       is_point_set_( false )
-    {std::cout<<__PRETTY_FUNCTION__<<std::endl;}
+//    {std::cout<<__PRETTY_FUNCTION__<<std::endl;}
+    {}
 
     GenericProcess::GenericProcess( const GenericProcess& proc ) :
       name_( proc.name_ ), description_( proc.description_ ),
@@ -27,7 +28,12 @@ namespace CepGen
       t1_( -1. ), t2_( -1. ),
       has_event_( proc.has_event_ ), event_( new Event( *proc.event_.get() ) ),
       is_point_set_( false )
-    {std::cout<<__PRETTY_FUNCTION__<<std::endl;}
+//    {std::cout<<__PRETTY_FUNCTION__<<std::endl;}
+    {}
+
+    GenericProcess::~GenericProcess()
+//    {std::cout<<__PRETTY_FUNCTION__<<std::endl;}
+    {}
 
     void
     GenericProcess::operator=( const GenericProcess& proc )
