@@ -15,13 +15,8 @@ hadroniser.pythiaProcessConfiguration += (
 hadroniser.pythiaPreConfiguration += (
     #'PartonLevel:MPI = on',
     #'PartonLevel:ISR = on',
-    'PartonLevel:FSR = on',
+    #'PartonLevel:FSR = on',
     'ProcessLevel:resonanceDecays = off',
-#    'BeamRemnants:unresolvedHadron = 3',
-#    'Photon:ProcessType = 4',
-    #'PartonLevel:Remnants = off',
-#    'TimeShower:MEcorrections = off',
-#    'TimeShower:globalRecoil = on',
 )
 
 #logger.level = cepgen.Logging.DebugInsideLoop
@@ -30,10 +25,7 @@ process = ktProcess.clone('pptoww',
     mode = cepgen.ProcessMode.InelasticInelastic,
     inKinematics = cepgen.Parameters(
         cmEnergy = 13.e3,
-        #structureFunctions = cepgen.StructureFunctions.SuriYennie,
-        #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
         #structureFunctions = cepgen.StructureFunctions.SzczurekUleshchenko,
-        #structureFunctions = cepgen.StructureFunctions.ALLM91,
         #structureFunctions = cepgen.StructureFunctions.ALLM97,
         structureFunctions = cepgen.StructureFunctions.LUXlike,
     ),
