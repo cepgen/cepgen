@@ -25,7 +25,7 @@ namespace CepGen
       private:
         static constexpr const char* module_name_ = "mod_name";
 
-        static void throwPythonError( const std::string& message, const ExceptionType& type = kFatalError );
+        static void throwPythonError( const std::string& message );
         static std::string getPythonPath( const char* file );
         static bool isInteger( PyObject* obj );
         static int asInteger( PyObject* obj );
@@ -35,6 +35,7 @@ namespace CepGen
         void getParameter( PyObject* parent, const char* key, unsigned long& out );
         void getParameter( PyObject* parent, const char* key, unsigned int& out );
         void getParameter( PyObject* parent, const char* key, double& out );
+        void getParameter( PyObject* parent, const char* key, std::vector<const char*>& out );
 
         void parseIncomingKinematics( PyObject* );
         void parseOutgoingKinematics( PyObject* );

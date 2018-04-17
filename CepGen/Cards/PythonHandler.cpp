@@ -238,6 +238,10 @@ namespace CepGen
     PythonHandler::parseLogging( PyObject* log )
     {
       getParameter( log, "level", (int&)Logger::get().level );
+      std::vector<const char*> enabled_modules;
+      getParameter( log, "enabledModules", enabled_modules );
+      for ( const auto& mod : enabled_modules )
+        Logger::get().addExceptionRule( mod );
     }
 
     void
@@ -369,7 +373,7 @@ namespace CepGen
     }
 
     void
-    PythonHandler::throwPythonError( const std::string& message, const ExceptionType& type )
+    PythonHandler::throwPythonError( const std::string& message )
     {
       PyObject* ptype = nullptr, *pvalue = nullptr, *ptraceback_obj = nullptr;
       PyErr_Fetch( &ptype, &pvalue, &ptraceback_obj );
@@ -378,7 +382,7 @@ namespace CepGen
       std::ostringstream oss; oss << message;
       if ( ptype == nullptr ) {
         Py_Finalize();
-        throw Exception( __PRETTY_FUNCTION__, oss.str().c_str(), type );
+        throw FatalError( "PythonHandler" ) << oss.str();
       }
 
       oss << "\n\tError: "
@@ -426,7 +430,7 @@ namespace CepGen
         }
       }*/
       Py_Finalize();
-      throw Exception( "PythonError", type ) << oss.str();
+      throw FatalError( "PythonError" ) << oss.str();
     }
 
     const char*
@@ -549,6 +553,21 @@ namespace CepGen
       if ( !PyFloat_Check( pobj ) )
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       out = PyFloat_AsDouble( pobj );
+      Py_DECREF( pobj );
+    }
+
+    void
+    PythonHandler::getParameter( PyObject* parent, const char* key, std::vector<const char*>& out )
+    {
+      PyObject* pobj = getElement( parent, key );
+      if ( !pobj )
+        return;
+      if ( !PyTuple_Check( pobj ) )
+        throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
+      for ( Py_ssize_t i = 0; i < PyTuple_Size( pobj ); ++i ) {
+        PyObject* pit = PyTuple_GetItem( pobj, i );
+        out.emplace_back( decode( pit ) );
+      }
       Py_DECREF( pobj );
     }
 
