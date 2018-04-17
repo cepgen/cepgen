@@ -41,10 +41,9 @@ namespace CepGen
       Particle::thetaToEta( thetamin )
     };
 
-    if ( Logger::get().level >= Logger::Debug )
-      Debugging( "Parameters" )
-        << "eta in range: " << kinematics.cuts.central[Cuts::eta_single]
-        << " => theta(min) = " << thetamin << ", theta(max) = " << thetamax << ".";
+    Debugging( "Parameters" )
+      << "eta in range: " << kinematics.cuts.central[Cuts::eta_single]
+      << " => theta(min) = " << thetamin << ", theta(max) = " << thetamax << ".";
   }
 
   void

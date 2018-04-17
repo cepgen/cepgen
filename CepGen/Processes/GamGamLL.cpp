@@ -124,7 +124,6 @@ namespace CepGen
       DebuggingInsideLoop( "GamGamLL" )
         << "s2 = " << s2_;
 
-      //std::cout << "s=" << _s << ", w3=" << masses_.MX2_ << ", sig1=" << sig1 << std::endl;
       const double sp = s_+masses_.MX2_-sig1,
                    d3 = sig1-w2_;
 
@@ -135,7 +134,6 @@ namespace CepGen
       }
       const double sl2 = sqrt( rl2 );
 
-      //std::cout << "ss=" << ss << ", sp=" << sp << ", sl1=" << sl1_ << ", sl2=" << sl2 << std::endl;
       double t1_max = w1_+masses_.MX2_-( ss*sp+sl1_*sl2 )/( 2.*s_ ), // definition from eq. (A.4) in [1]
              t1_min = ( masses_.w31_*d3+( d3-masses_.w31_ )*( d3*w1_-masses_.w31_*w2_ )/s_ )/t1_max; // definition from eq. (A.5) in [1]
 

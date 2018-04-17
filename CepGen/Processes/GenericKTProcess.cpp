@@ -108,11 +108,10 @@ namespace CepGen
       const double integrand = computeKTFactorisedMatrixElement();
       const double weight = ( kt_jacobian_*aux_jacobian ) * integrand;
 
-      if ( Logger::get().level >= Logger::DebugInsideLoop )
-        DebuggingInsideLoop( "GenericKTProcess" )
-          << "Jacobian = " << kt_jacobian_ << " * " << aux_jacobian
-          << "\n\tIntegrand = " << integrand
-          << "\n\tdW = " << weight << ".";
+      DebuggingInsideLoop( "GenericKTProcess" )
+        << "Jacobian = " << kt_jacobian_ << " * " << aux_jacobian
+        << "\n\tIntegrand = " << integrand
+        << "\n\tdW = " << weight << ".";
 
       return weight;
     }
@@ -156,7 +155,7 @@ namespace CepGen
       Kinematics::Limits lim = in;
       out = 0.; // reset the variable
       if ( !in.valid() ) {
-        Debugging( "GenericKTProcess" )
+        Debugging( "GenericKTProcess:registerVariable" )
           << description << " could not be retrieved from the user configuration!\n\t"
           << "Setting it to the default value: " << default_limits << ".";
         lim = default_limits;
@@ -175,11 +174,10 @@ namespace CepGen
           kt_jacobian_ *= lim.range();
           break;
       }
-      if ( Logger::get().level >= Logger::Debug )
-        Debugging( "GenericKTProcess" )
-          << description << " has been mapped to variable " << num_dimensions_ << ".\n\t"
-          << "Allowed range for integration: " << lim << ".\n\t"
-          << "Variable integration mode: " << type << ".";
+      Debugging( "GenericKTProcess:registerVariable" )
+        << description << " has been mapped to variable " << num_dimensions_ << ".\n\t"
+        << "Allowed range for integration: " << lim << ".\n\t"
+        << "Variable integration mode: " << type << ".";
     }
 
     double

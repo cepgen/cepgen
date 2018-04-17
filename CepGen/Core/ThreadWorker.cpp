@@ -118,7 +118,7 @@ namespace CepGen
       grid_correc_ = ( grid_nm_[ps_bin_] - 1. ) * grid_f_max_diff_ / grid_->f_max_global * weight / grid_->f_max_global - 1.;
     }
 
-    DebuggingInsideLoop( "ThreadWorker" )
+    DebuggingInsideLoop( "ThreadWorker:next" )
       << "Correction applied: " << grid_correc_ << ", phase space bin = " << ps_bin_;
 
     // Return with an accepted event
@@ -131,7 +131,7 @@ namespace CepGen
   ThreadWorker::correctionCycle( std::vector<double>& x, bool& has_correction )
   {
 //    std::cout << __PRETTY_FUNCTION__ << std::endl;
-    DebuggingInsideLoop( "ThreadWorker" )
+    DebuggingInsideLoop( "ThreadWorker:correction" )
       << "Correction cycles are started.\n\t"
       << "bin = " << ps_bin_ << "\t"
       << "correc = " << grid_correc_ << "\t"
@@ -211,7 +211,7 @@ namespace CepGen
       return false;
 
     if ( global_params_->generation.ngen % global_params_->generation.gen_print_every == 0 ) {
-      Information( "ThreadWorker" )
+      Information( "ThreadWorker:store" )
         << "[thread 0x" << std::hex << std::hash<std::thread::id>()( std::this_thread::get_id() ) << std::dec
         << "] Generated events: " << global_params_->generation.ngen;
       local_params_->process()->last_event->dump();

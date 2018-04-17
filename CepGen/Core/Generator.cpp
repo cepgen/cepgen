@@ -17,13 +17,11 @@ namespace CepGen
     parameters( std::unique_ptr<Parameters>( new Parameters ) ),
     cross_section_( -1. ), cross_section_error_( -1. )
   {
-    if ( Logger::get().level > Logger::Nothing ) {
-      Debugging( "Generator" ) << "Generator initialized";
-      try {
-        printHeader();
-      } catch ( Exception& e ) {
-        e.dump();
-      }
+    Debugging( "Generator:init" ) << "Generator initialized";
+    try {
+      printHeader();
+    } catch ( Exception& e ) {
+      e.dump();
     }
     // Random number initialization
     struct timespec ts;
@@ -96,7 +94,7 @@ namespace CepGen
     std::ostringstream os;
     for ( unsigned int i = 0; i < numDimensions(); ++i )
       os << x[i] << " ";
-    Debugging( "Generator" )
+    Debugging( "Generator:computePoint" )
       << "Result for x[" << numDimensions() << "] = ( " << os.str() << "):\n\t"
       << res << ".";
     return res;
@@ -119,11 +117,10 @@ namespace CepGen
     else if ( integrator_->dimensions() != numDimensions() )
       integrator_.reset( new Integrator( numDimensions(), Integrand::eval, parameters.get() ) );
 
-    if ( Logger::get().level >= Logger::Debug )
-      Debugging( "Generator" )
-        << "New integrator instance created\n\t"
-        << "Considered topology: " << parameters->kinematics.mode << " case\n\t"
-        << "Will proceed with " << numDimensions() << "-dimensional integration.";
+    Debugging( "Generator:newInstance" )
+      << "New integrator instance created\n\t"
+      << "Considered topology: " << parameters->kinematics.mode << " case\n\t"
+      << "Will proceed with " << numDimensions() << "-dimensional integration.";
 
     const int res = integrator_->integrate( cross_section_, cross_section_error_ );
     if ( res != 0 )
@@ -133,11 +130,14 @@ namespace CepGen
     err = cross_section_error_;
 
     if ( xsec < 1.e-2 )
-      Information( "Generator" ) << "Total cross section: " << xsec*1.e3 << " +/- " << err*1.e3 << " fb.";
+      Information( "Generator" )
+        << "Total cross section: " << xsec*1.e3 << " +/- " << err*1.e3 << " fb.";
     else if ( xsec > 5.e2 )
-      Information( "Generator" ) << "Total cross section: " << xsec*1.e-3 << " +/- " << err*1.e-3 << " nb.";
+      Information( "Generator" )
+        << "Total cross section: " << xsec*1.e-3 << " +/- " << err*1.e-3 << " nb.";
     else
-      Information( "Generator" ) << "Total cross section: " << xsec << " +/- " << err << " pb.";
+      Information( "Generator" )
+        << "Total cross section: " << xsec << " +/- " << err << " pb.";
   }
 
   std::shared_ptr<Event>
@@ -176,7 +176,7 @@ namespace CepGen
     Kinematics kin = parameters->kinematics;
     parameters->process()->addEventContent();
     parameters->process()->setKinematics( kin );
-    Debugging( "Generator" ) << "Function prepared to be integrated!";
+    Debugging( "Generator:prepare" ) << "Function prepared to be integrated!";
   }
 }
 

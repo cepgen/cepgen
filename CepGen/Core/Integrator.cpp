@@ -29,7 +29,7 @@ namespace CepGen
     input_params_->integrator.vegas.ostream = stderr; // redirect all debugging information to the error stream
     input_params_->integrator.vegas.iterations = 10;
 
-    Debugging( "Integrator" )
+    Debugging( "Integrator:build" )
       << "Number of integration dimensions: " << function_->dim << ",\n\t"
       << "Number of iterations [VEGAS]:     " << input_params_->integrator.vegas.iterations << ",\n\t"
       << "Number of function calls:         " << input_params_->integrator.ncvg << ",\n\t"
@@ -76,7 +76,7 @@ namespace CepGen
           &result, &abserr );
         grid.grid_prepared = true;
       }
-      Information( "Integrator" )
+      Information( "Integrator:integrate" )
         << "Finished the Vegas warm-up.\n\t"
         << "Will now iterate until χ² < " << input_params_->integrator.vegas_chisq_cut << ".";
       //----- integration
@@ -87,7 +87,7 @@ namespace CepGen
           function_->dim, 0.2 * input_params_->integrator.ncvg,
           rng_.get(), veg_state,
           &result, &abserr );
-        PrintMessage( "Integrator" )
+        PrintMessage( "Integrator:integrate" )
           << "\t>> at call " << ( it_chisq+1 ) << ": "
           << Form( "average = %10.6f   "
                    "sigma = %10.6f   chi2 = %4.3f.",
@@ -142,7 +142,7 @@ namespace CepGen
       computeGenerationParameters();
 
     if ( input_params_->generation.num_threads > 1 )
-      Information( "Integrator" )
+      Information( "Integrator:generate" )
         << "Will generate events using " << input_params_->generation.num_threads << " threads.";
 
     // define the threads and workers
@@ -162,7 +162,7 @@ namespace CepGen
   void
   Integrator::computeGenerationParameters()
   {
-    Information( "Integrator" )
+    Information( "Integrator:setGen" )
       << "Preparing the grid (" << input_params_->integrator.npoints << " points) "
       << "for the generation of unweighted events.";
 
@@ -170,7 +170,7 @@ namespace CepGen
     const double inv_npoin = 1./input_params_->integrator.npoints;
 
     if ( function_->dim > grid.max_dimensions_ )
-      throw FatalError( "Integrator" )
+      throw FatalError( "Integrator:setGen" )
        << "Number of dimensions to integrate exceeds the maximum number, " << grid.max_dimensions_ << ".";
 
     grid.f_max = std::vector<double>( grid.max, 0. );
@@ -228,25 +228,24 @@ namespace CepGen
     sum2 *= inv_max;
     sum2p *= inv_max;
 
-    if ( Logger::get().level >= Logger::Debug ) {
-      const double sig = sqrt( sum2-sum*sum ), sigp = sqrt( sum2p );
+    const double sig = sqrt( sum2-sum*sum ), sigp = sqrt( sum2p );
 
-      double eff1 = 0.;
-      for ( unsigned int i = 0; i < grid.max; ++i )
-        eff1 += sum*grid.max/grid.f_max[i];
-      const double eff2 = sum/grid.f_max_global;
+    double eff1 = 0.;
+    for ( unsigned int i = 0; i < grid.max; ++i )
+      eff1 += sum*grid.max/grid.f_max[i];
+    const double eff2 = sum/grid.f_max_global;
 
-      Debugging( "Integrator" )
-        << "Average function value     = sum   = " << sum << "\n\t"
-        << "Average function value**2  = sum2  = " << sum2 << "\n\t"
-        << "Overall standard deviation = sig   = " << sig << "\n\t"
-        << "Average standard deviation = sigp  = " << sigp << "\n\t"
-        << "Maximum function value     = f_max = " << grid.f_max_global << "\n\t"
-        << "Average inefficiency       = eff1  = " << eff1 << "\n\t"
-        << "Overall inefficiency       = eff2  = " << eff2;
-    }
+    Debugging( "Integrator:setGen" )
+      << "Average function value     = sum   = " << sum << "\n\t"
+      << "Average function value**2  = sum2  = " << sum2 << "\n\t"
+      << "Overall standard deviation = sig   = " << sig << "\n\t"
+      << "Average standard deviation = sigp  = " << sigp << "\n\t"
+      << "Maximum function value     = f_max = " << grid.f_max_global << "\n\t"
+      << "Average inefficiency       = eff1  = " << eff1 << "\n\t"
+      << "Overall inefficiency       = eff2  = " << eff2;
+
     grid.gen_prepared = true;
-    Information( "Integrator" ) << "Grid prepared! Now launching the production.";
+    Information( "Integrator:setGen" ) << "Grid prepared! Now launching the production.";
   }
 
   std::ostream&

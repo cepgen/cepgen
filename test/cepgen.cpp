@@ -38,7 +38,17 @@ int main( int argc, char* argv[] ) {
   //CepGen::Logger::get().level = CepGen::Logger::DebugInsideLoop;
   //CepGen::Logger::get().outputStream( ofstream( "log.txt" ) );
 
-  if ( argc == 1 ) {
+  if ( argc > 1 ) {
+    Information( "main" ) << "Reading config file stored in " << argv[1] << ".";
+    const std::string extension = CepGen::Cards::Handler::getExtension( argv[1] );
+    if ( extension == "card" )
+      mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
+#ifdef PYTHON
+    else if ( extension == "py" )
+      mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
+#endif
+  }
+  else {
     Information( "main" ) << "No config file provided. Setting the default parameters.";
 
     mg.parameters->setProcess( new CepGen::Process::GamGamLL );
@@ -53,17 +63,6 @@ int main( int argc, char* argv[] ) {
     mg.parameters->generation.num_threads = 4;
     mg.parameters->generation.enabled = true;
     mg.parameters->generation.maxgen = 1e5;
-  }
-  else {
-    Information( "main" ) << "Reading config file stored in " << argv[1] << ".";
-    //CepGen::Cards::LpairReader card( argv[1] );
-    const std::string extension = CepGen::Cards::Handler::getExtension( argv[1] );
-    if ( extension == "card" )
-      mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
-#ifdef PYTHON
-    else if ( extension == "py" )
-      mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
-#endif
   }
 
   // We might want to cross-check visually the validity of our run

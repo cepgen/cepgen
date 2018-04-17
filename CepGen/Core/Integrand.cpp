@@ -49,20 +49,18 @@ namespace CepGen
         proc->clearEvent();
 
         if ( proc->first_run ) {
-          if ( log_level >= Logger::Debug )
-            Debugging( "Integrand" )
-              << "Computation launched for " << p->processName() << " process "
-              << "0x" << std::hex << p->process() << std::dec << ".";
+          Debugging( "Integrand" )
+            << "Computation launched for " << p->processName() << " process "
+            << "0x" << std::hex << p->process() << std::dec << ".";
 
           const Particle::Momentum p1( 0., 0.,  p->kinematics.inp.first ), p2( 0., 0., -p->kinematics.inp.second );
           proc->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
 
-          if ( log_level >= Logger::Debug )
-            Debugging( "Integrand" )
-              << "Process mode considered: " << p->kinematics.mode << "\n\t"
-              << "  pz(p1) = " << p->kinematics.inp.first << "\n\t"
-              << "  pz(p2) = " << p->kinematics.inp.second << "\n\t"
-              << "  structure functions: " << p->kinematics.structure_functions;
+          Debugging( "Integrand" )
+            << "Process mode considered: " << p->kinematics.mode << "\n\t"
+            << "  pz(p1) = " << p->kinematics.inp.first << "\n\t"
+            << "  pz(p2) = " << p->kinematics.inp.second << "\n\t"
+            << "  structure functions: " << p->kinematics.structure_functions;
 
           //=========================================================================================
           // prepare the function to be integrated
@@ -217,10 +215,9 @@ namespace CepGen
         p->process()->last_event = ev;
         p->process()->last_event->time_total = tmr.elapsed();
 
-        if ( log_level >= Logger::Debug )
-          Debugging( "Integrand" )
-            << "[process 0x" << std::hex << p->process() << std::dec << "] "
-            << "Individual time (gen+hadr+cuts): " << p->process()->last_event->time_total*1.e3 << " ms";
+        Debugging( "Integrand" )
+          << "[process 0x" << std::hex << p->process() << std::dec << "] "
+          << "Individual time (gen+hadr+cuts): " << p->process()->last_event->time_total*1.e3 << " ms";
       }
 
       //=============================================================================================

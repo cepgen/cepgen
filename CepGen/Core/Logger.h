@@ -31,16 +31,12 @@ namespace CepGen
         static Logger log;
         return log;
       }
-      void addExceptionRule( const char* rule ) {
-        allowed_exc_.emplace_back( rule );
-      }
-      bool passExceptionRule( const std::string& tmpl ) const {
-        std::smatch match;
-        for ( const auto& rule : allowed_exc_ )
-          if ( std::regex_match( tmpl, match, rule ) )
-            return true;
-        return false;
-      }
+      /// Add a new rule to display exceptions/messages
+      /// \param[in] rule Regex rule to handle
+      void addExceptionRule( const char* rule );
+      /// Is the module set to be displayed/logged?
+      /// \param[in] tmpl Module name to probe
+      bool passExceptionRule( const std::string& tmpl ) const;
 
       /// Redirect the logger to a given output stream
       friend std::ostream& operator<<( std::ostream& os, const Logger::LoggingLevel& lvl ) {
