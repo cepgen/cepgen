@@ -2,6 +2,8 @@
 #define CepGen_Core_Logger_h
 
 #include <iostream>
+#include <vector>
+#include <regex>
 
 namespace CepGen
 {
@@ -21,11 +23,23 @@ namespace CepGen
       Logger() : level( Information ), outputStream( std::cout ) {}
       ~Logger() {}
 
+      std::vector<std::regex> allowed_exc_;
+
     public:
       /// Retrieve the running instance of the logger
       static Logger& get() {
         static Logger log;
         return log;
+      }
+      void addExceptionRule( const char* rule ) {
+        allowed_exc_.emplace_back( rule );
+      }
+      bool passExceptionRule( const std::string& tmpl ) const {
+        std::smatch match;
+        for ( const auto& rule : allowed_exc_ )
+          if ( std::regex_match( tmpl, match, rule ) )
+            return true;
+        return false;
       }
 
       /// Redirect the logger to a given output stream
