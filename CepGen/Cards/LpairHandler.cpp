@@ -106,7 +106,7 @@ namespace CepGen
     {
       std::ofstream f( file, std::fstream::out | std::fstream::trunc );
       if ( !f.is_open() ) {
-        throw InError( "LpairHandler" ) << "Failed to open file \"" << file << "%s\" for writing.";
+        InError( "LpairHandler" ) << "Failed to open file \"" << file << "%s\" for writing.";
       }
       for ( const auto& it : p_strings_ )
         if ( it.second.value )

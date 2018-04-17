@@ -18,7 +18,7 @@ namespace CepGen
 
     private:
       /// Initialize a logging object
-      Logger() : level( Warning ), outputStream( std::cout ) {}
+      Logger() : level( Information ), outputStream( std::cout ) {}
       ~Logger() {}
 
     public:
@@ -46,5 +46,5 @@ namespace CepGen
       std::ostream& outputStream;
   };
 }
-  
+
 #endif
