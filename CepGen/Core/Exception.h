@@ -7,46 +7,42 @@
 #include "Logger.h"
 
 #define PrintMessage( mod ) \
-  ( CepGen::Logger::get().level >= CepGen::Logger::Nothing ) \
-  ? CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kVerbatim ) \
-  : CepGen::NullStream( mod )
+  ( CepGen::Logger::get().level < CepGen::Logger::Nothing ) \
+  ? CepGen::NullStream( mod ) \
+  : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kVerbatim )
 #define Information( mod ) \
-  ( CepGen::Logger::get().level >= CepGen::Logger::Nothing ) \
-  ? CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kInformation ) \
-  : CepGen::NullStream( mod )
+  ( CepGen::Logger::get().level < CepGen::Logger::Information ) \
+  ? CepGen::NullStream( mod ) \
+  : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kInformation )
 #define Debugging( mod ) \
-  ( CepGen::Logger::get().level >= CepGen::Logger::Debug ) \
-  ? CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kDebugMessage ) \
-  : CepGen::NullStream( mod )
+  ( CepGen::Logger::get().level < CepGen::Logger::Debug ) \
+  ? CepGen::NullStream( mod ) \
+  : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kDebugMessage )
 #define DebuggingInsideLoop( mod ) \
-  ( CepGen::Logger::get().level >= CepGen::Logger::DebugInsideLoop ) \
-  ? CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kDebugMessage ) \
-  : CepGen::NullStream( mod )
+  ( CepGen::Logger::get().level < CepGen::Logger::DebugInsideLoop ) \
+  ? CepGen::NullStream( mod ) \
+  : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kDebugMessage )
 #define InWarning( mod ) \
-  ( CepGen::Logger::get().level >= CepGen::Logger::Warning ) \
-  ? CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kJustWarning ) \
-  : CepGen::NullStream( mod )
+  ( CepGen::Logger::get().level < CepGen::Logger::Warning ) \
+  ? CepGen::NullStream( mod ) \
+  : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kJustWarning )
 #define InError( mod ) \
-  ( CepGen::Logger::get().level >= CepGen::Logger::Error ) \
-  ? CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kErrorMessage ) \
-  : CepGen::NullStream( mod )
+  ( CepGen::Logger::get().level < CepGen::Logger::Error ) \
+  ? CepGen::NullStream( mod ) \
+  : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kErrorMessage )
 #define FatalError( mod ) \
   CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kErrorMessage )
 
 namespace CepGen
 {
-  /**
-   * \brief Enumeration of exception severities
-   * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-   * \date 27 Mar 2015
-   */
+  /// Enumeration of exception severities
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date 27 Mar 2015
   enum ExceptionType { kUndefined = -1, kDebugMessage, kVerbatim, kInformation, kJustWarning, kErrorMessage, kFatalError };
 
-  /**
-   * \brief A simple exception handler
-   * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-   * \date 24 Mar 2015
-   */
+  /// A simple exception handler
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date 24 Mar 2015
   class Exception : public std::exception
   {
     public:
