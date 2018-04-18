@@ -1,7 +1,8 @@
 #include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Generator.h"
-#include "CepGen/Export/HepMCHandler.h"
+#include "CepGen/IO/LHEFHandler.h"
 #include "CepGen/Core/utils.h"
+#include "CepGen/Core/Exception.h"
 
 #include "HepMC/Version.h"
 
@@ -18,11 +19,11 @@ using namespace std;
  */
 int main( int argc, char* argv[] ) {
   CepGen::Generator mg;
-  
-  if ( argc == 1 )
-    FatalError( "No config file provided." );
 
-  Debugging( Form( "Reading config file stored in %s", argv[1] ) );
+  if ( argc == 1 )
+    throw CG_FATAL( "main" ) << "No config file provided!";
+
+  CG_DEBUG( "main" ) << "Reading config file stored in \"" << argv[1] << "\"";
   CepGen::Cards::PythonHandler card( argv[1] );
   mg.setParameters( card.parameters() );
 
@@ -33,13 +34,13 @@ int main( int argc, char* argv[] ) {
   double xsec, err;
   mg.computeXsection( xsec, err );
 
-  CepGen::OutputHandler::HepMCHandler writer( "example.dat" );
+  CepGen::OutputHandler::LHEFHandler writer( "example.dat" );
   writer.setCrossSection( xsec, err );
   writer.initialise( *mg.parameters );
 
   // The events generation starts here !
   for ( unsigned int i = 0; i < mg.parameters->generation.maxgen; ++i ) {
-    if ( i%1000 == 0 )
+    if ( i % 1000 == 0 )
       cout << "Generating event #" << i+1 << endl;
     try {
       writer << mg.generateOneEvent().get();

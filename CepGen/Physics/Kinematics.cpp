@@ -127,9 +127,9 @@ namespace CepGen
   double
   Kinematics::Limits::x( double v ) const
   {
-    if ( v < 0. || v > 1. ) {
-      InError( Form( "x must be comprised between 0 and 1 ; x value = %g", v ) );
-    }
+    if ( v < 0. || v > 1. )
+      CG_ERROR( "Kinematics:shoot" )
+        << "x must be comprised between 0 and 1; x value = " << v << ".";
     if ( !valid() )
       return kInvalid;
 

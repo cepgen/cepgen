@@ -22,7 +22,7 @@ namespace CepGen
       LHAPDF::initPDFSet( set, LHAPDF::LHGRID, 0 );
 #endif
 #else
-      FatalError( "LHAPDF is not liked to this instance!" );
+      throw FatalError( "GenericLHAPDF" ) << "LHAPDF is not liked to this instance!";
 #endif
     }
 
@@ -46,7 +46,7 @@ namespace CepGen
         pdf.F2 += qtimes3_[i]*qtimes3_[i]/9. * ( xq + xqbar );
       }
 #else
-      FatalError( "LHAPDF is not liked to this instance!" );
+      throw FatalError( "GenericLHAPDF" ) << "LHAPDF is not liked to this instance!";
 #endif
 
       return pdf;

@@ -7,6 +7,8 @@
 
 #include <sstream>
 
+using namespace std;
+
 void produce_plot( const char* name, TH1* hist )
 {
   CepGen::Canvas c( name, "CepGen Simulation" );
@@ -16,43 +18,45 @@ void produce_plot( const char* name, TH1* hist )
   c.Save( "pdf" );
 }
 
+unique_ptr<TH1D> h_mass, h_ptpair, h_ptsingle, h_etasingle;
+void process_event( const CepGen::Event& ev, unsigned long event_id )
+{
+  const auto central_system = ev.getByRole( CepGen::Particle::CentralSystem );
+  const auto pl1 = central_system[0].momentum(), pl2 = central_system[1].momentum();
+  h_mass->Fill( ( pl1+pl2 ).mass() );
+  h_ptpair->Fill( ( pl1+pl2 ).pt() );
+  h_ptsingle->Fill( pl1.pt() );
+  h_etasingle->Fill( pl1.eta() );
+}
+
 int main( int argc, char* argv[] )
 {
   CepGen::Generator mg;
-  //CepGen::Logger::get().level = CepGen::Logger::Debug;
 
-  if ( argc < 2 ) {
-    InError( Form( "Usage: %s [input card]", argv[0] ) );
-    return -1;
-  }
+  if ( argc < 2 )
+    throw FatalError( "main" ) << "Usage: " << argv[0] << " [input card]";
   mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
 
-  TH1D h_mass( "invm", "Dilepton invariant mass\\d#sigma/dM\\GeV?.2f", 1000, 0., 500. ),
-       h_ptpair( "ptpair", "Dilepton p_{T}\\d#sigma/dp_{T}\\GeV?.2f", 500, 0., 50. ),
-       h_ptsingle( "pt_single", "Single lepton p_{T}\\d#sigma/dp_{T}\\?.2f", 100, 0., 100. ),
-       h_etasingle( "eta_single", "Single lepton #eta\\d#sigma/d#eta\\?.2f", 60, -3., 3. );
+  h_mass = unique_ptr<TH1D>( new TH1D( "invm", ";Dilepton invariant mass;d#sigma/dM (pb/GeV)", 500, 0., 500. ) );
+  h_ptpair = unique_ptr<TH1D>( new TH1D( "ptpair", ";Dilepton p_{T};d#sigma/dp_{T} (pb/GeV)", 500, 0., 50. ) );
+  h_ptsingle = unique_ptr<TH1D>( new TH1D( "pt_single", ";Single lepton p_{T};d#sigma/dp_{T} (pb/GeV)", 100, 0., 100. ) );
+  h_etasingle = unique_ptr<TH1D>( new TH1D( "eta_single", ";Single lepton #eta;d#sigma/d#eta (pb)\\?.2f", 60, -3., 3. ) );
 
-  Information( Form( "Process name: %s", mg.parameters->processName().c_str() ) );
+  Information( "main" ) << "Process name: " << mg.parameters->processName() << ".";
   //mg.parameters->taming_functions.dump();
 
-  for ( unsigned int i = 0; i < mg.parameters->generation.maxgen; ++i ) {
-    const CepGen::Event& ev = *mg.generateOneEvent();
-    if ( i%100==0 ) Information( Form( "Produced event #%d", i ) );
-    const auto central_system = ev.getByRole( CepGen::Particle::CentralSystem );
-    const auto pl1 = central_system[0].momentum(), pl2 = central_system[1].momentum();
-    h_mass.Fill( ( pl1+pl2 ).mass() );
-    h_ptpair.Fill( ( pl1+pl2 ).pt() );
-    h_ptsingle.Fill( pl1.pt() );
-    h_etasingle.Fill( pl1.eta() );
-  }
-  const double weight = mg.crossSection()/mg.parameters->generation.maxgen;
-  h_mass.Scale( weight );
-  h_ptpair.Scale( weight );
+  mg.generate( process_event );
 
-  produce_plot( "dilepton_invm", &h_mass );
-  produce_plot( "dilepton_ptpair", &h_ptpair );
-  produce_plot( "singlelepton_pt", &h_ptsingle );
-  produce_plot( "singlelepton_eta", &h_etasingle );
+  const double weight = mg.crossSection()/mg.parameters->generation.maxgen;
+  h_mass->Scale( weight, "width" );
+  h_ptpair->Scale( weight, "width" );
+  h_ptsingle->Scale( weight, "width" );
+  h_etasingle->Scale( weight, "width" );
+
+  produce_plot( "dilepton_invm", h_mass.get() );
+  produce_plot( "dilepton_ptpair", h_ptpair.get() );
+  produce_plot( "singlelepton_pt", h_ptsingle.get() );
+  produce_plot( "singlelepton_eta", h_etasingle.get() );
 
   return 0;
 }

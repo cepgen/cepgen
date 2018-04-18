@@ -31,7 +31,8 @@ int main( int argc, char* argv[] )
     chi2 += pow( gr_fb.GetY()[i]-gr_rt.GetY()[i], 2 );
   }
   chi2 = sqrt( chi2 );
-  if ( chi2 > 1.e-9 ) throw CepGen::Exception( __PRETTY_FUNCTION__, Form( "Test failed with chi2 = %.5e!", chi2 ), CepGen::FatalError );
+  if ( chi2 > 1.e-9 )
+    throw FatalError( "main" ) << "Test failed with chi2 = " << chi2 << "!";
   cout << "Test passed!" << endl;
 
   if ( argc > 1 && !strcmp( argv[1], "draw" ) ) {

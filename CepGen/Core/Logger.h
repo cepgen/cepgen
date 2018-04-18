@@ -2,6 +2,8 @@
 #define CepGen_Core_Logger_h
 
 #include <iostream>
+#include <vector>
+#include <regex>
 
 namespace CepGen
 {
@@ -18,8 +20,10 @@ namespace CepGen
 
     private:
       /// Initialize a logging object
-      Logger() : level( Warning ), outputStream( std::cout ) {}
+      Logger() : level( Information ), outputStream( std::cout ) {}
       ~Logger() {}
+
+      std::vector<std::regex> allowed_exc_;
 
     public:
       /// Retrieve the running instance of the logger
@@ -27,6 +31,12 @@ namespace CepGen
         static Logger log;
         return log;
       }
+      /// Add a new rule to display exceptions/messages
+      /// \param[in] rule Regex rule to handle
+      void addExceptionRule( const char* rule );
+      /// Is the module set to be displayed/logged?
+      /// \param[in] tmpl Module name to probe
+      bool passExceptionRule( const std::string& tmpl ) const;
 
       /// Redirect the logger to a given output stream
       friend std::ostream& operator<<( std::ostream& os, const Logger::LoggingLevel& lvl ) {
@@ -46,5 +56,5 @@ namespace CepGen
       std::ostream& outputStream;
   };
 }
-  
+
 #endif

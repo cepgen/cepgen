@@ -16,11 +16,11 @@ using namespace std;
 
 void printEvent( const CepGen::Event& ev, unsigned long ev_id )
 {
-cout << ev_id << endl;
+//cout << ev_id << endl;
   if ( ev_id % 5000 != 0 )
     return;
 
-  Information( Form( "Generating event #%d", ev_id ) );
+  CG_INFO( "printEvent" ) << "Generating event #" << ev_id << ".";
   ev.dump();
 }
 
@@ -38,8 +38,18 @@ int main( int argc, char* argv[] ) {
   //CepGen::Logger::get().level = CepGen::Logger::DebugInsideLoop;
   //CepGen::Logger::get().outputStream( ofstream( "log.txt" ) );
 
-  if ( argc == 1 ) {
-    Information( "No config file provided. Setting the default parameters." );
+  if ( argc > 1 ) {
+    CG_INFO( "main" ) << "Reading config file stored in " << argv[1] << ".";
+    const std::string extension = CepGen::Cards::Handler::getExtension( argv[1] );
+    if ( extension == "card" )
+      mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
+#ifdef PYTHON
+    else if ( extension == "py" )
+      mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
+#endif
+  }
+  else {
+    CG_INFO( "main" ) << "No config file provided. Setting the default parameters.";
 
     mg.parameters->setProcess( new CepGen::Process::GamGamLL );
     //mg.parameters->process_mode = Kinematics::InelasticElastic;
@@ -52,18 +62,7 @@ int main( int argc, char* argv[] ) {
     mg.parameters->integrator.ncvg = 5e4;
     mg.parameters->generation.num_threads = 4;
     mg.parameters->generation.enabled = true;
-    mg.parameters->generation.maxgen = 2e4;
-  }
-  else {
-    Information( Form( "Reading config file stored in %s", argv[1] ) );
-    //CepGen::Cards::LpairReader card( argv[1] );
-    const std::string extension = CepGen::Cards::Handler::getExtension( argv[1] );
-    if ( extension == "card" )
-      mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
-#ifdef PYTHON
-    else if ( extension == "py" )
-      mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
-#endif
+    mg.parameters->generation.maxgen = 1e5;
   }
 
   // We might want to cross-check visually the validity of our run

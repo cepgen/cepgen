@@ -47,10 +47,11 @@ namespace CepGen
       const double prefactor = q2*( 1.-xbj ) / ( 4.*M_PI*Constants::alphaEM*akin );
       const double s = q2*( 1.-xbj )/xbj + mp2_;
 
-      double ampli_res = 0., ampli_tot = 0.;
+      double ampli_res = 0., ampli_bg = 0., ampli_tot = 0.;
       for ( unsigned short i = 0; i < 3; ++i ) { //FIXME 4??
         const Parameterisation::ResonanceParameters res = params_.resonances[i];
-        if ( !res.enabled ) continue;
+        if ( !res.enabled )
+          continue;
         const double sqrts0 = sqrt( params_.s0 );
 
         std::complex<double> alpha;
@@ -75,10 +76,15 @@ namespace CepGen
         double formfactor = 1./pow( 1. + q2/res.q02, 2 );
         double sp = 1.5*res.spin;
         double denom = pow( sp-std::real( alpha ), 2 ) + pow( std::imag( alpha ), 2 );
-        double ampli_bg = res.a*formfactor*formfactor*std::imag( alpha )/denom;
-        ampli_res += ampli_bg;
+        ampli_bg = res.a*formfactor*formfactor*std::imag( alpha )/denom;
       }
-      ampli_tot = params_.norm*ampli_res;
+      ampli_tot = params_.norm*( ampli_res+ampli_bg );
+
+      CG_DEBUG_LOOP( "FioreBrasse:amplitudes" )
+        << "Amplitudes:\n\t"
+        << " resonance part:  " << ampli_res << ",\n\t"
+        << " background part: " << ampli_bg << ",\n\t"
+        << " total (with norm.): " << ampli_tot << ".";
 
       FioreBrasse fb;
       fb.F2 = prefactor*ampli_tot;
@@ -96,8 +102,9 @@ namespace CepGen
 
       FioreBrasse fb;
       if ( mx < m_min || mx > 1.99 ) {
-        InWarning( Form( "Fiore-Brasse form factors to be retrieved for an invalid MX value:\n\t"
-                         "%.2e GeV, while allowed range is [1.07, 1.99] GeV", mx ) );
+        CG_WARNING( "FioreBrasse" )
+          << "Fiore-Brasse form factors to be retrieved for an invalid MX value:\n\t"
+          << mx << " GeV, while allowed range is [1.07, 1.99] GeV.";
         return fb;
       }
 

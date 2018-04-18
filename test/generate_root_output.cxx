@@ -60,10 +60,8 @@ void fill_event_tree( const CepGen::Event& event, unsigned long ev_id )
 int main( int argc, char* argv[] ) {
   CepGen::Generator mg;
 
-  if ( argc < 2 ) {
-    InError( Form( "Usage: %s <input card> [output .root filename]", argv[0] ) );
-    return -1;
-  }
+  if ( argc < 2 )
+    throw InError( "main" ) << "Usage: " << argv[0] << " <input card> [output .root filename]";
   const std::string extension = CepGen::Cards::Handler::getExtension( argv[1] );
   if ( extension == "card" )
     mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
@@ -78,7 +76,7 @@ int main( int argc, char* argv[] ) {
   const TString filename = ( argc > 2 ) ? argv[2] : "events.root";
   auto file = TFile::Open( filename, "recreate" );
   if ( !file )
-    throw CepGen::Exception( __PRETTY_FUNCTION__, "ERROR while trying to create the output file!", CepGen::FatalError );
+    throw FatalError( "main" ) << "Failed to create the output file!";
 
   AbortHandler ctrl_c;
   //----- start by computing the cross section for the list of parameters applied
@@ -106,7 +104,7 @@ int main( int argc, char* argv[] ) {
 
   run->fill();
   file->Write();
-  Information( Form( "Events written on \"%s\".", filename.Data() ) );
+  Information( "main" ) << "Events written on \"" << filename << "\".";
 
   return 0;
 }

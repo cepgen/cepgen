@@ -29,14 +29,11 @@ namespace CepGen
     input_params_->integrator.vegas.ostream = stderr; // redirect all debugging information to the error stream
     input_params_->integrator.vegas.iterations = 10;
 
-    Debugging( Form( "Number of integration dimensions: %d,\n\t"
-                     "Number of iterations [VEGAS]:     %d,\n\t"
-                     "Number of function calls:         %d,\n\t"
-                     "Random numbers generator:         %s.",
-                     function_->dim,
-                     input_params_->integrator.vegas.iterations,
-                     input_params_->integrator.ncvg,
-                     gsl_rng_name( rng_.get() ) ) );
+    CG_DEBUG( "Integrator:build" )
+      << "Number of integration dimensions: " << function_->dim << ",\n\t"
+      << "Number of iterations [VEGAS]:     " << input_params_->integrator.vegas.iterations << ",\n\t"
+      << "Number of function calls:         " << input_params_->integrator.ncvg << ",\n\t"
+      << "Random numbers generator:         " << gsl_rng_name( rng_.get() ) << ".";
   }
 
   Integrator::~Integrator()
@@ -79,9 +76,9 @@ namespace CepGen
           &result, &abserr );
         grid.grid_prepared = true;
       }
-      Information( Form( "Finished the Vegas warm-up.\n\t"
-                         "Will now iterate until χ² < %g.",
-                         input_params_->integrator.vegas_chisq_cut ) );
+      CG_INFO( "Integrator:integrate" )
+        << "Finished the Vegas warm-up.\n\t"
+        << "Will now iterate until χ² < " << input_params_->integrator.vegas_chisq_cut << ".";
       //----- integration
       unsigned short it_chisq = 0;
       do {
@@ -90,10 +87,12 @@ namespace CepGen
           function_->dim, 0.2 * input_params_->integrator.ncvg,
           rng_.get(), veg_state,
           &result, &abserr );
-        PrintMessage( Form( "\t>> at call %2d: average = %10.6f   "
-                            "sigma = %10.6f   chi2 = %4.3f.",
-                            it_chisq+1, result, abserr,
-                            gsl_monte_vegas_chisq( veg_state ) ) );
+        CG_LOG( "Integrator:integrate" )
+          << "\t>> at call " << ( it_chisq+1 ) << ": "
+          << Form( "average = %10.6f   "
+                   "sigma = %10.6f   chi2 = %4.3f.",
+                   result, abserr,
+                   gsl_monte_vegas_chisq( veg_state ) );
         it_chisq++;
       } while ( fabs( gsl_monte_vegas_chisq( veg_state )-1. )
               > input_params_->integrator.vegas_chisq_cut-1. );
@@ -130,6 +129,12 @@ namespace CepGen
     return function_->dim;
   }
 
+  double
+  Integrator::eval( const std::vector<double>& x )
+  {
+    return function_->f( (double*)&x[0], function_->dim, (void*)input_params_ );
+  }
+
   void
   Integrator::generate( unsigned long num_events, std::function<void( const Event&, unsigned long )> callback )
   {
@@ -137,7 +142,8 @@ namespace CepGen
       computeGenerationParameters();
 
     if ( input_params_->generation.num_threads > 1 )
-      Information( Form( "Will generate events using %d threads", input_params_->generation.num_threads ) );
+      CG_INFO( "Integrator:generate" )
+        << "Will generate events using " << input_params_->generation.num_threads << " threads.";
 
     // define the threads and workers
     std::vector<std::thread> threads;
@@ -156,13 +162,16 @@ namespace CepGen
   void
   Integrator::computeGenerationParameters()
   {
-    Information( Form( "Preparing the grid (%d points) for the generation of unweighted events.", input_params_->integrator.npoints ) );
+    CG_INFO( "Integrator:setGen" )
+      << "Preparing the grid (" << input_params_->integrator.npoints << " points) "
+      << "for the generation of unweighted events.";
 
     grid.max = pow( grid.mbin_, function_->dim );
     const double inv_npoin = 1./input_params_->integrator.npoints;
 
     if ( function_->dim > grid.max_dimensions_ )
-      FatalError( Form( "Number of dimensions to integrate exceeds the maximum number, %d", grid.max_dimensions_ ) );
+      throw CG_FATAL( "Integrator:setGen" )
+       << "Number of dimensions to integrate exceeds the maximum number, " << grid.max_dimensions_ << ".";
 
     grid.f_max = std::vector<double>( grid.max, 0. );
     grid.n = std::vector<int>( function_->dim, 0 );
@@ -187,7 +196,7 @@ namespace CepGen
       for ( unsigned int j = 0; j < input_params_->integrator.npoints; ++j ) {
         for ( unsigned int k = 0; k < function_->dim; ++k )
           x[k] = ( gsl_rng_uniform( rng_.get() ) + grid.n[k] ) * grid.inv_mbin_;
-        const double z = function_->f( (double*)&x[0], function_->dim, (void*)input_params_ );
+        const double z = eval( x );
         grid.f_max[i] = std::max( grid.f_max[i], z );
         fsum += z;
         fsum2 += z*z;
@@ -204,13 +213,13 @@ namespace CepGen
         std::ostringstream os;
         for ( unsigned int j = 0; j < function_->dim; ++j )
           os << grid.n[j] << ( j != function_->dim-1 ? ", " : "" );
-        DebuggingInsideLoop( Form( "In iteration #%d:\n\t"
-                                   "av   = %f\n\t"
-                                   "sig  = %f\n\t"
-                                   "fmax = %f\n\t"
-                                   "eff  = %f\n\t"
-                                   "n = (%s)",
-                                   i, av, sig, grid.f_max[i], eff, os.str().c_str() ) );
+        CG_DEBUG_LOOP( "Integrator" )
+          << "In iteration #" << i << ":\n\t"
+          << "av   = " << av << "\n\t"
+          << "sig  = " << sig << "\n\t"
+          << "fmax = " << grid.f_max[i] << "\n\t"
+          << "eff  = " << eff << "\n\t"
+          << "n = (" << os.str() << ")";
       }
     } // end of main loop
 
@@ -219,26 +228,24 @@ namespace CepGen
     sum2 *= inv_max;
     sum2p *= inv_max;
 
-    if ( Logger::get().level >= Logger::Debug ) {
-      const double sig = sqrt( sum2-sum*sum ), sigp = sqrt( sum2p );
+    const double sig = sqrt( sum2-sum*sum ), sigp = sqrt( sum2p );
 
-      double eff1 = 0.;
-      for ( unsigned int i = 0; i < grid.max; ++i )
-        eff1 += sum*grid.max/grid.f_max[i];
-      const double eff2 = sum/grid.f_max_global;
+    double eff1 = 0.;
+    for ( unsigned int i = 0; i < grid.max; ++i )
+      eff1 += sum*grid.max/grid.f_max[i];
+    const double eff2 = sum/grid.f_max_global;
 
-      Debugging( Form( "Average function value     = sum   = %g\n\t"
-                       "Average function value**2  = sum2  = %g\n\t"
-                       "Overall standard deviation = sig   = %g\n\t"
-                       "Average standard deviation = sigp  = %g\n\t"
-                       "Maximum function value     = f_max = %g\n\t"
-                       "Average inefficiency       = eff1  = %g\n\t"
-                       "Overall inefficiency       = eff2  = %g\n\t",
-                       sum, sum2, sig, sigp, grid.f_max_global, eff1, eff2 ) );
-    }
+    CG_DEBUG( "Integrator:setGen" )
+      << "Average function value     = sum   = " << sum << "\n\t"
+      << "Average function value**2  = sum2  = " << sum2 << "\n\t"
+      << "Overall standard deviation = sig   = " << sig << "\n\t"
+      << "Average standard deviation = sigp  = " << sigp << "\n\t"
+      << "Maximum function value     = f_max = " << grid.f_max_global << "\n\t"
+      << "Average inefficiency       = eff1  = " << eff1 << "\n\t"
+      << "Overall inefficiency       = eff2  = " << eff2;
+
     grid.gen_prepared = true;
-    Information( "Grid prepared! Now launching the production." );
-//exit(0);
+    CG_INFO( "Integrator:setGen" ) << "Grid prepared! Now launching the production.";
   }
 
   std::ostream&

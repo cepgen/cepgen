@@ -24,7 +24,7 @@ namespace CepGen
     mutex_( mutex ), callback_( callback )
   {
     if ( !function )
-      throw Exception( __PRETTY_FUNCTION__, "Invalid integration function passed!", FatalError );
+      throw CG_FATAL( "ThreadWorker" ) << "Invalid integration function passed!";
 
     rng_ = std::shared_ptr<gsl_rng>( gsl_rng_clone( rng ), gsl_rng_free );
     grid_nm_.reserve( grid_->max );
@@ -41,7 +41,7 @@ namespace CepGen
   ThreadWorker::generate()
   {
     if ( !grid_->gen_prepared )
-      throw Exception( __PRETTY_FUNCTION__, "Generation not prepared!", FatalError );
+      throw CG_FATAL( "ThreadWorker" ) << "Generation not prepared!";
 
     while ( true ) {
       if ( !next() )
@@ -118,7 +118,8 @@ namespace CepGen
       grid_correc_ = ( grid_nm_[ps_bin_] - 1. ) * grid_f_max_diff_ / grid_->f_max_global * weight / grid_->f_max_global - 1.;
     }
 
-    DebuggingInsideLoop( Form( "Correction applied: %f, phase space bin = %d", grid_correc_, ps_bin_ ) );
+    CG_DEBUG_LOOP( "ThreadWorker:next" )
+      << "Correction applied: " << grid_correc_ << ", phase space bin = " << ps_bin_;
 
     // Return with an accepted event
     if ( weight > 0. )
@@ -130,10 +131,11 @@ namespace CepGen
   ThreadWorker::correctionCycle( std::vector<double>& x, bool& has_correction )
   {
 //    std::cout << __PRETTY_FUNCTION__ << std::endl;
-    DebuggingInsideLoop( Form( "Correction cycles are started.\n\t"
-                               "bin = %d\t"
-                               "correc = %g\t"
-                               "corre2 = %g.", ps_bin_, grid_correc_, grid_correc2_ ) );
+    CG_DEBUG_LOOP( "ThreadWorker:correction" )
+      << "Correction cycles are started.\n\t"
+      << "bin = " << ps_bin_ << "\t"
+      << "correc = " << grid_correc_ << "\t"
+      << "corre2 = " << grid_correc2_ << ".";
 
     if ( grid_correc_ >= 1. )
       grid_correc_ -= 1.;
@@ -154,7 +156,7 @@ namespace CepGen
       }
       // Accept event
       if ( weight >= grid_f_max_diff_*uniform() + grid_f_max_old_ ) { // FIXME!!!!
-        InError("Accepting event!!!");
+//        CG_ERROR("Accepting event!!!");
         //return storeEvent(x);
         x = xtmp;
         has_correction = true;
@@ -209,9 +211,9 @@ namespace CepGen
       return false;
 
     if ( global_params_->generation.ngen % global_params_->generation.gen_print_every == 0 ) {
-      Information( Form( "[thread 0x%zx] Generated events: %d",
-                         std::hash<std::thread::id>()( std::this_thread::get_id() ),
-                         global_params_->generation.ngen ) );
+      CG_INFO( "ThreadWorker:store" )
+        << "[thread 0x" << std::hex << std::hash<std::thread::id>()( std::this_thread::get_id() ) << std::dec
+        << "] Generated events: " << global_params_->generation.ngen;
       local_params_->process()->last_event->dump();
     }
     if ( callback_ )
