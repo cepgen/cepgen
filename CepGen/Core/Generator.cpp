@@ -17,7 +17,7 @@ namespace CepGen
     parameters( std::unique_ptr<Parameters>( new Parameters ) ),
     cross_section_( -1. ), cross_section_error_( -1. )
   {
-    Debugging( "Generator:init" ) << "Generator initialized";
+    CG_DEBUG( "Generator:init" ) << "Generator initialized";
     try {
       printHeader();
     } catch ( Exception& e ) {
@@ -38,7 +38,7 @@ namespace CepGen
   {
     if ( parameters->generation.enabled
       && parameters->process() && parameters->numGeneratedEvents() > 0 ) {
-      Information( "Generator" )
+      CG_INFO( "Generator" )
         << "Mean generation time / event: "
         << parameters->totalGenerationTime()*1.e3/parameters->numGeneratedEvents()
         << " ms.";
@@ -75,14 +75,14 @@ namespace CepGen
     std::ostringstream os; os << "version " << version() << std::endl;
     std::ifstream hf( "README" );
     if ( !hf.good() )
-      throw CG_Warning( "Generator" ) << "Failed to open README file.";
+      throw CG_WARNING( "Generator" ) << "Failed to open README file.";
     while ( true ) {
       if ( !hf.good() ) break;
       getline( hf, tmp );
       os << "\n " << tmp;
     }
     hf.close();
-    Information( "Generator" ) << os.str();
+    CG_INFO( "Generator" ) << os.str();
   }
 
   double
@@ -94,7 +94,7 @@ namespace CepGen
     std::ostringstream os;
     for ( unsigned int i = 0; i < numDimensions(); ++i )
       os << x[i] << " ";
-    Debugging( "Generator:computePoint" )
+    CG_DEBUG( "Generator:computePoint" )
       << "Result for x[" << numDimensions() << "] = ( " << os.str() << "):\n\t"
       << res << ".";
     return res;
@@ -103,7 +103,7 @@ namespace CepGen
   void
   Generator::computeXsection( double& xsec, double& err )
   {
-    Information( "Generator" ) << "Starting the computation of the process cross-section.";
+    CG_INFO( "Generator" ) << "Starting the computation of the process cross-section.";
 
     try {
       prepareFunction();
@@ -117,26 +117,26 @@ namespace CepGen
     else if ( integrator_->dimensions() != numDimensions() )
       integrator_.reset( new Integrator( numDimensions(), Integrand::eval, parameters.get() ) );
 
-    Debugging( "Generator:newInstance" )
+    CG_DEBUG( "Generator:newInstance" )
       << "New integrator instance created\n\t"
       << "Considered topology: " << parameters->kinematics.mode << " case\n\t"
       << "Will proceed with " << numDimensions() << "-dimensional integration.";
 
     const int res = integrator_->integrate( cross_section_, cross_section_error_ );
     if ( res != 0 )
-      throw FatalError( "Generator" ) << "Error while computing the cross-section: return value = " << res << ".";
+      throw CG_FATAL( "Generator" ) << "Error while computing the cross-section: return value = " << res << ".";
 
     xsec = cross_section_;
     err = cross_section_error_;
 
     if ( xsec < 1.e-2 )
-      Information( "Generator" )
+      CG_INFO( "Generator" )
         << "Total cross section: " << xsec*1.e3 << " +/- " << err*1.e3 << " fb.";
     else if ( xsec > 5.e2 )
-      Information( "Generator" )
+      CG_INFO( "Generator" )
         << "Total cross section: " << xsec*1.e-3 << " +/- " << err*1.e-3 << " nb.";
     else
-      Information( "Generator" )
+      CG_INFO( "Generator" )
         << "Total cross section: " << xsec << " +/- " << err << " pb.";
   }
 
@@ -158,12 +158,12 @@ namespace CepGen
     if ( cross_section_ < 0. )
       computeXsection( cross_section_, cross_section_error_ );
 
-    Information( "Generator" )
+    CG_INFO( "Generator" )
       << parameters->generation.maxgen << " events will be generated.";
 
     integrator_->generate( parameters->generation.maxgen, callback );
 
-    Information( "Generator" )
+    CG_INFO( "Generator" )
       << parameters->generation.ngen << " events generated.";
   }
 
@@ -171,12 +171,12 @@ namespace CepGen
   Generator::prepareFunction()
   {
     if ( !parameters->process() )
-      throw FatalError( "Generator" ) << "No process defined!";
+      throw CG_FATAL( "Generator" ) << "No process defined!";
 
     Kinematics kin = parameters->kinematics;
     parameters->process()->addEventContent();
     parameters->process()->setKinematics( kin );
-    Debugging( "Generator:prepare" ) << "Function prepared to be integrated!";
+    CG_DEBUG( "Generator:prepare" ) << "Function prepared to be integrated!";
   }
 }
 

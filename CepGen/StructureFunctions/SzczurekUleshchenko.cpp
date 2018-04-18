@@ -21,7 +21,7 @@ namespace CepGen
 
       grv95lo_( xbj_arg, amu2, xuv, xdv, xus, xds, xss, xg );
 
-      DebuggingInsideLoop( "SzczurekUleshchenko" )
+      CG_DEBUG_LOOP( "SzczurekUleshchenko" )
         << "Form factor content at xB = " << xbj << " (scale = " << amu2 << " GeV^2):\n\t"
         << "  valence quarks: u / d     = " << xuv << " / " << xdv << "\n\t"
         << "  sea quarks:     u / d / s = " << xus << " / " << xds << " / " << xss << "\n\t"

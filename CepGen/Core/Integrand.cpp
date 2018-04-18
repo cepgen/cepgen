@@ -28,11 +28,11 @@ namespace CepGen
 
       Parameters* p = static_cast<Parameters*>( params );
       if ( !p )
-        throw FatalError( "Integrand" ) << "Failed to retrieve the run parameters!";
+        throw CG_FATAL( "Integrand" ) << "Failed to retrieve the run parameters!";
 
       Process::GenericProcess* proc = p->process();
       if ( !proc )
-        throw FatalError( "Integrand" ) << "Failed to retrieve the process!";
+        throw CG_FATAL( "Integrand" ) << "Failed to retrieve the process!";
 
       //=============================================================================================
       // start the timer
@@ -49,14 +49,14 @@ namespace CepGen
         proc->clearEvent();
 
         if ( proc->first_run ) {
-          Debugging( "Integrand" )
+          CG_DEBUG( "Integrand" )
             << "Computation launched for " << p->processName() << " process "
             << "0x" << std::hex << p->process() << std::dec << ".";
 
           const Particle::Momentum p1( 0., 0.,  p->kinematics.inp.first ), p2( 0., 0., -p->kinematics.inp.second );
           proc->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
 
-          Debugging( "Integrand" )
+          CG_DEBUG( "Integrand" )
             << "Process mode considered: " << p->kinematics.mode << "\n\t"
             << "  pz(p1) = " << p->kinematics.inp.first << "\n\t"
             << "  pz(p2) = " << p->kinematics.inp.second << "\n\t"
@@ -98,7 +98,7 @@ namespace CepGen
         std::ostringstream oss;
         for ( unsigned int i = 0; i < ndim; ++i )
           oss << ( i == 0 ? "" : " " ) << x[i];
-        DebuggingInsideLoop( "Integrand" ) << "Computing dim-" << ndim << " point (" << oss.str() << ")";
+        CG_DEBUG_LOOP( "Integrand" ) << "Computing dim-" << ndim << " point (" << oss.str() << ")";
       }
 
       //=============================================================================================
@@ -215,7 +215,7 @@ namespace CepGen
         p->process()->last_event = ev;
         p->process()->last_event->time_total = tmr.elapsed();
 
-        Debugging( "Integrand" )
+        CG_DEBUG( "Integrand" )
           << "[process 0x" << std::hex << p->process() << std::dec << "] "
           << "Individual time (gen+hadr+cuts): " << p->process()->last_event->time_total*1.e3 << " ms";
       }
@@ -228,7 +228,7 @@ namespace CepGen
         std::ostringstream oss;
         for ( unsigned short i = 0; i < ndim; ++i )
           oss << Form( "%10.8f ", x[i] );
-        Debugging( "Integrand" )
+        CG_DEBUG( "Integrand" )
           << "f value for dim-" << ndim << " point ( " << oss.str() << "): "
           << integrand;
       }

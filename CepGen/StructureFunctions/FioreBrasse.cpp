@@ -80,7 +80,7 @@ namespace CepGen
       }
       ampli_tot = params_.norm*( ampli_res+ampli_bg );
 
-      DebuggingInsideLoop( "FioreBrasse:amplitudes" )
+      CG_DEBUG_LOOP( "FioreBrasse:amplitudes" )
         << "Amplitudes:\n\t"
         << " resonance part:  " << ampli_res << ",\n\t"
         << " background part: " << ampli_bg << ",\n\t"
@@ -102,7 +102,7 @@ namespace CepGen
 
       FioreBrasse fb;
       if ( mx < m_min || mx > 1.99 ) {
-        CG_Warning( "FioreBrasse" )
+        CG_WARNING( "FioreBrasse" )
           << "Fiore-Brasse form factors to be retrieved for an invalid MX value:\n\t"
           << mx << " GeV, while allowed range is [1.07, 1.99] GeV.";
         return fb;

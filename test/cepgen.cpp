@@ -20,7 +20,7 @@ void printEvent( const CepGen::Event& ev, unsigned long ev_id )
   if ( ev_id % 5000 != 0 )
     return;
 
-  Information( "printEvent" ) << "Generating event #" << ev_id << ".";
+  CG_INFO( "printEvent" ) << "Generating event #" << ev_id << ".";
   ev.dump();
 }
 
@@ -39,7 +39,7 @@ int main( int argc, char* argv[] ) {
   //CepGen::Logger::get().outputStream( ofstream( "log.txt" ) );
 
   if ( argc > 1 ) {
-    Information( "main" ) << "Reading config file stored in " << argv[1] << ".";
+    CG_INFO( "main" ) << "Reading config file stored in " << argv[1] << ".";
     const std::string extension = CepGen::Cards::Handler::getExtension( argv[1] );
     if ( extension == "card" )
       mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
@@ -49,7 +49,7 @@ int main( int argc, char* argv[] ) {
 #endif
   }
   else {
-    Information( "main" ) << "No config file provided. Setting the default parameters.";
+    CG_INFO( "main" ) << "No config file provided. Setting the default parameters.";
 
     mg.parameters->setProcess( new CepGen::Process::GamGamLL );
     //mg.parameters->process_mode = Kinematics::InelasticElastic;

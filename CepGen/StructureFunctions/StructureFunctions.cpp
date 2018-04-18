@@ -13,12 +13,12 @@ namespace CepGen
   StructureFunctions::F1( double q2, double xbj ) const
   {
     if ( xbj == 0. || q2 == 0. ) {
-      InError( "StructureFunctions:F1" )
+      CG_ERROR( "StructureFunctions:F1" )
         << "Invalid range for Q² = " << q2 << " or xBj = " << xbj << ".";
       return 0.;
     }
     const double F1 = 0.5*( ( 1+4.*xbj*xbj*mp2_/q2 )*F2 - FL )/xbj;
-    DebuggingInsideLoop( "StructureFunctions:F1" )
+    CG_DEBUG_LOOP( "StructureFunctions:F1" )
       << "F1 for Q² = " << q2 << ", xBj = " << xbj << ": " << F1 << "\n\t"
       << "(F2 = " << F2 << ", FL = " << FL << ").";
     return F1;

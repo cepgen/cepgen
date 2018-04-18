@@ -41,7 +41,7 @@ namespace CepGen
       Particle::thetaToEta( thetamin )
     };
 
-    Debugging( "Parameters" )
+    CG_DEBUG( "Parameters" )
       << "eta in range: " << kinematics.cuts.central[Cuts::eta_single]
       << " => theta(min) = " << thetamin << ", theta(max) = " << thetamax << ".";
   }
@@ -209,7 +209,7 @@ namespace CepGen
       os << std::setw( wt ) << lim.first << lim.second << std::endl;
 
     if ( pretty ) {
-      Information( "Parameters" ) << os.str();
+      CG_INFO( "Parameters" ) << os.str();
     }
     else
       out << os.str();

@@ -55,7 +55,7 @@ namespace CepGen
             << e.GetMsg();
         }
 #else
-        throw FatalError( "Functional" ) << "muParser is not linked to this program! the math evaluator is hence disabled!";
+        throw CG_FATAL( "Functional" ) << "muParser is not linked to this program! the math evaluator is hence disabled!";
 #endif
       }
       /// Compute the functional for a given value of the variable (N=1 case)
@@ -79,7 +79,7 @@ namespace CepGen
             << e.GetMsg();
         }
 #else
-        throw FatalError( "Functional" ) << "muParser is not linked to this program! the math evaluator is hence disabled!";
+        throw CG_FATAL( "Functional" ) << "muParser is not linked to this program! the math evaluator is hence disabled!";
 #endif
         return ret;
       }

@@ -20,7 +20,7 @@ namespace CepGen
     {
       std::ifstream f( file, std::fstream::in );
       if ( !f.is_open() )
-        throw FatalError( "LpairHandler" ) << "Failed to parse file \"" << file << "%s\".";
+        throw CG_FATAL( "LpairHandler" ) << "Failed to parse file \"" << file << "%s\".";
 
       init( &params_ );
 
@@ -43,7 +43,7 @@ namespace CepGen
       if      ( proc_name_ == "lpair" )  params_.setProcess( new Process::GamGamLL() );
       else if ( proc_name_ == "pptoll" ) params_.setProcess( new Process::PPtoLL() );
       else if ( proc_name_ == "pptoww" ) params_.setProcess( new Process::PPtoWW() );
-      else throw FatalError( "LpairHandler" ) << "Unrecognised process name: " << proc_name_ << "!";
+      else throw CG_FATAL( "LpairHandler" ) << "Unrecognised process name: " << proc_name_ << "!";
 
       if      ( integr_type_ == "Plain" ) params_.integrator.type = Integrator::Plain;
       else if ( integr_type_ == "Vegas" ) params_.integrator.type = Integrator::Vegas;
@@ -59,7 +59,7 @@ namespace CepGen
       if ( pair_ != invalidParticle )
         params_.kinematics.central_system = { pair_, pair_ };
 
-      Information( "LpairHandler" ) << os.str();
+      CG_INFO( "LpairHandler" ) << os.str();
     }
 
     void
@@ -106,7 +106,7 @@ namespace CepGen
     {
       std::ofstream f( file, std::fstream::out | std::fstream::trunc );
       if ( !f.is_open() ) {
-        InError( "LpairHandler" ) << "Failed to open file \"" << file << "%s\" for writing.";
+        CG_ERROR( "LpairHandler" ) << "Failed to open file \"" << file << "%s\" for writing.";
       }
       for ( const auto& it : p_strings_ )
         if ( it.second.value )

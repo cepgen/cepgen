@@ -68,7 +68,7 @@ namespace CepGen
   Event::getByRole( Particle::Role role ) const
   {
     if ( particles_.count( role ) == 0 )
-      throw FatalError( "Event" ) << "Failed to retrieve a particle with " << role << " role.";
+      throw CG_FATAL( "Event" ) << "Failed to retrieve a particle with " << role << " role.";
     //--- retrieve all particles with a given role
     return particles_.at( role );
   }
@@ -93,9 +93,9 @@ namespace CepGen
     //--- retrieve the first particle a the given role
     Particles& parts_by_role = getByRole( role );
     if ( parts_by_role.size() == 0 )
-      throw FatalError( "Event" ) << "No particle retrieved with " << role << " role.";
+      throw CG_FATAL( "Event" ) << "No particle retrieved with " << role << " role.";
     if ( parts_by_role.size() > 1 )
-      throw FatalError( "Event" ) << "More than one particle with " << role << " role: "
+      throw CG_FATAL( "Event" ) << "More than one particle with " << role << " role: "
         << parts_by_role.size() << " particles.";
     return *parts_by_role.begin();
   }
@@ -104,13 +104,13 @@ namespace CepGen
   Event::getOneByRole( Particle::Role role ) const
   {
     if ( particles_.count( role ) == 0 )
-      throw FatalError( "Event" ) << "Failed to retrieve a particle with " << role << " role.";
+      throw CG_FATAL( "Event" ) << "Failed to retrieve a particle with " << role << " role.";
     //--- retrieve the first particle a the given role
     const Particles& parts_by_role = particles_.at( role );
     if ( parts_by_role.size() == 0 )
-      throw FatalError( "Event" ) << "No particle retrieved with " << role << " role.";
+      throw CG_FATAL( "Event" ) << "No particle retrieved with " << role << " role.";
     if ( parts_by_role.size() > 1 )
-      throw FatalError( "Event" ) << "More than one particle with " << role << " role: "
+      throw CG_FATAL( "Event" ) << "More than one particle with " << role << " role: "
         << parts_by_role.size() << " particles";
     return *parts_by_role.begin();
   }
@@ -123,7 +123,7 @@ namespace CepGen
         if ( part.id() == id )
           return part;
 
-    throw FatalError( "Event" ) << "Failed to retrieve the particle with id=" << id << ".";
+    throw CG_FATAL( "Event" ) << "Failed to retrieve the particle with id=" << id << ".";
   }
 
   const Particle&
@@ -134,7 +134,7 @@ namespace CepGen
         if ( part.id() == id )
           return part;
 
-    throw FatalError( "Event" ) << "Failed to retrieve the particle with id=" << id << ".";
+    throw CG_FATAL( "Event" ) << "Failed to retrieve the particle with id=" << id << ".";
   }
 
   Particles
@@ -173,9 +173,9 @@ namespace CepGen
   Particle&
   Event::addParticle( Particle& part, bool replace )
   {
-    DebuggingInsideLoop( "Event" ) << "Particle with PDGid = " << part.integerPdgId() << " has role " << part.role();
+    CG_DEBUG_LOOP( "Event" ) << "Particle with PDGid = " << part.integerPdgId() << " has role " << part.role();
     if ( part.role() <= 0 )
-      throw FatalError( "Event" ) << "Trying to add a particle with role=" << (int)part.role() << ".";
+      throw CG_FATAL( "Event" ) << "Trying to add a particle with role=" << (int)part.role() << ".";
 
     //--- retrieve the list of particles with the same role
     Particles& part_with_same_role = getByRole( part.role() );
@@ -258,7 +258,7 @@ namespace CepGen
       const double mass_diff = ( ptot-part.momentum() ).mass();
       if ( fabs( mass_diff ) > minimal_precision_ ) {
         dump();
-        throw FatalError( "Event" ) << "Error in momentum balance for particle " << part.id() << ": mdiff = " << mass_diff << ".";
+        throw CG_FATAL( "Event" ) << "Error in momentum balance for particle " << part.id() << ": mdiff = " << mass_diff << ".";
       }
     }
   }
@@ -319,7 +319,7 @@ namespace CepGen
     if ( fabs( pztot ) < minimal_precision_ ) pztot = 0.;
     if ( fabs(  etot ) < minimal_precision_ ) etot = 0.;
     //
-    Information( "Event" )
+    CG_INFO( "Event" )
      << Form( "Dump of event content:\n"
               " Id\tPDG id\tName\t\tCharge\tRole\t Status\tMother\tpx            py            pz            E      \t M         \n"
               " --\t------\t----\t\t------\t----\t ------\t------\t----GeV/c---  ----GeV/c---  ----GeV/c---  ----GeV/c---\t --GeV/c²--"

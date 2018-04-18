@@ -83,7 +83,7 @@ namespace CepGen
   {
     mothers_.insert( part.id() );
 
-    DebuggingInsideLoop( "Particle" )
+    CG_DEBUG_LOOP( "Particle" )
       <<  "Particle " << id() << " (pdgId=" << part.integerPdgId() << ") "
       << "is the new mother of " << id_ << " (pdgId=" << (int)pdg_id_ << ").";
 
@@ -99,14 +99,14 @@ namespace CepGen
       std::ostringstream os;
       for ( const auto& daugh : daughters_ )
         os << Form( "\n\t * id=%d", daugh );
-      DebuggingInsideLoop( "Particle" )
+      CG_DEBUG_LOOP( "Particle" )
         << "Particle " << role_ << " (pdgId=" << (int)pdg_id_ << ") "
         << "has now " << daughters_.size() << " daughter(s):"
         << os.str();
     }
 
     if ( ret.second ) {
-      DebuggingInsideLoop( "Particle" )
+      CG_DEBUG_LOOP( "Particle" )
         << "Particle " << part.role() << " (pdgId=" << part.integerPdgId() << ") "
         << "is a new daughter of " << role_ << " (pdgId=" << (int)pdg_id_ << "%4d).";
 
@@ -135,7 +135,7 @@ namespace CepGen
   {
     setMomentum( px, py, pz );
     if ( fabs( e-momentum_.energy() )>1.e-6 ) { // more than 1 eV difference
-      InError( Form( "Energy difference: %.5e", e-momentum_.energy() ) );
+      CG_ERROR( Form( "Energy difference: %.5e", e-momentum_.energy() ) );
       return;
     }
   }
@@ -171,7 +171,7 @@ namespace CepGen
   void
   Particle::dump() const
   {
-    std::ostringstream osm, osd, os;
+    std::ostringstream osm, osd;
     if ( !primary() ) {
       osm << ": mother(s): ";
       unsigned short i = 0;
@@ -189,21 +189,13 @@ namespace CepGen
         ++i;
       }
     }
-    os << " (" << pdg_id_ << ")";
-    if ( os.str() == " ()" ) os.str("");
-    Information( "Particle" )
-      << Form(
-      "Dumping a particle with id=%3d, role=%3d, status=% 3d\n\t"
-      "PDG Id:%4d%s, mass = %5.4f GeV\n\t"
-      "(E,P) = (%4.2f, %4.2f, %4.2f, %4.2f) GeV\t"
-      "(|P| = p = %4.2f GeV)\n\t"
-      " Pt = %5.4f GeV, eta = %4.3f, phi = % 4.3f\n\t"
-      "Primary? %s%s\n\t"
-      "%d daughter(s)%s",
-      id_, role_, status_, pdg_id_, os.str().c_str(),
-      mass(), energy(), momentum_.px(), momentum_.py(), momentum_.pz(),
-      momentum_.p(), momentum_.pt(), momentum_.eta(), momentum_.phi(),
-      yesno( primary() ), osm.str().c_str(), numDaughters(), osd.str().c_str() );
+    CG_INFO( "Particle" )
+      << "Dumping a particle with id=" << id_ << ", role=" << role_ << ", status=" << status_ << "\n\t"
+      << "Particle id: " << integerPdgId() << " (" << pdg_id_ << "), mass = " << mass() << " GeV\n\t"
+      << "Momentum: " << momentum_ << " GeV\t" << "(|P| = p = " << momentum_.p() << " GeV)\n\t"
+      << " p⟂ = " << momentum_.pt() << " GeV, eta = " << momentum_.eta() << ", phi = " << momentum_.phi() << "\n\t"
+      << "Primary? " << yesno( primary() ) << osm.str() << "\n\t"
+      << numDaughters() << " daughter(s)" << osd.str();
   }
 
   Particle&

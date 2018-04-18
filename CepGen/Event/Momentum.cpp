@@ -83,7 +83,7 @@ namespace CepGen
   double
   Momentum::threeProduct( const Momentum& mom ) const
   {
-    DebuggingInsideLoop( "Momentum" )
+    CG_DEBUG_LOOP( "Momentum" )
       << "  (" << px_ << ", " << py_ << ", " << pz_ << ")\n\t"
       << "* (" << mom.px_ << ", " << mom.py_ << ", " << mom.pz_ << ")\n\t"
       << "= " << px_*mom.px_+py_*mom.py_+pz_*mom.pz_;
@@ -93,7 +93,7 @@ namespace CepGen
   double
   Momentum::fourProduct( const Momentum& mom ) const
   {
-    DebuggingInsideLoop( "Momentum" )
+    CG_DEBUG_LOOP( "Momentum" )
       << "  (" << px_ << ", " << py_ << ", " << pz_ << ", " << energy_ << ")\n\t"
       << "* (" << mom.px_ << ", " << mom.py_ << ", " << mom.pz_ << ", " << mom.energy_ << ")\n\t"
       << "= " << energy_*mom.energy_-threeProduct(mom);
@@ -210,7 +210,7 @@ namespace CepGen
       case 2: return pz_;
       case 3: return energy_;
       default:
-        throw FatalError( "Momentum" ) << "Failed to retrieve the component " << i << ".";
+        throw CG_FATAL( "Momentum" ) << "Failed to retrieve the component " << i << ".";
     }
   }
 
@@ -223,7 +223,7 @@ namespace CepGen
       case 2: return pz_;
       case 3: return energy_;
       default:
-        throw FatalError( "Momentum" ) << "Failed to retrieve the component " << i << ".";
+        throw CG_FATAL( "Momentum" ) << "Failed to retrieve the component " << i << ".";
     }
   }
 

@@ -58,9 +58,9 @@ namespace CepGen
 
       Py_InitializeEx( 0 );
       if ( !Py_IsInitialized() )
-        throw FatalError( "PythonHandler" ) << "Failed to initialise the python parser!";
+        throw CG_FATAL( "PythonHandler" ) << "Failed to initialise the python parser!";
 
-      Debugging( "PythonHandler" )
+      CG_DEBUG( "PythonHandler" )
         << "Initialised the Python cards parser\n\t"
         << "Python version: " << Py_GetVersion() << "\n\t"
         << "Platform: " << Py_GetPlatform() << ".";
@@ -91,7 +91,7 @@ namespace CepGen
         params_.setProcess( new Process::PPtoLL );
       else if ( proc_name == "pptoww" )
         params_.setProcess( new Process::PPtoWW );
-      else throw FatalError( "PythonHandler" ) << "Unrecognised process: " << proc_name << ".";
+      else throw CG_FATAL( "PythonHandler" ) << "Unrecognised process: " << proc_name << ".";
 
       //--- process mode
       getParameter( process, "mode", (int&)params_.kinematics.mode );
@@ -149,7 +149,7 @@ namespace CepGen
       Py_Finalize();
 #else
       if ( Py_IsInitialized() || Py_FinalizeEx() != 0 )
-        throw FatalError( "PythonHandler" ) << "Failed to unregister the python parser!";
+        throw CG_FATAL( "PythonHandler" ) << "Failed to unregister the python parser!";
 #endif
       if ( sfilename ) delete [] sfilename;
     }
@@ -184,7 +184,7 @@ namespace CepGen
         }
        else if ( PyTuple_Check( ppair ) ) {
          if ( PyTuple_Size( ppair ) != 2 )
-           throw FatalError( "PythonHandler" ) << "Invalid value for in_kinematics.pair!";
+           throw CG_FATAL( "PythonHandler" ) << "Invalid value for in_kinematics.pair!";
           ParticleCode pair1 = (ParticleCode)asInteger( PyTuple_GetItem( ppair, 0 ) );
           ParticleCode pair2 = (ParticleCode)asInteger( PyTuple_GetItem( ppair, 1 ) );
           params_.kinematics.central_system = { pair1, pair2 };
@@ -383,7 +383,7 @@ namespace CepGen
       std::ostringstream oss; oss << message;
       if ( ptype == nullptr ) {
         Py_Finalize();
-        throw FatalError( "PythonHandler" ) << oss.str();
+        throw CG_FATAL( "PythonHandler" ) << oss.str();
       }
 
       oss << "\n\tError: "
@@ -431,7 +431,7 @@ namespace CepGen
         }
       }*/
       Py_Finalize();
-      throw FatalError( "PythonError" ) << oss.str();
+      throw CG_FATAL( "PythonError" ) << oss.str();
     }
 
     const char*
@@ -475,9 +475,9 @@ namespace CepGen
       if ( !pobj )
         return;
       if ( !PyTuple_Check( pobj ) )
-        throw FatalError( "PythonHandler" ) << "Invalid value retrieved for " << key << ".";
+        throw CG_FATAL( "PythonHandler" ) << "Invalid value retrieved for " << key << ".";
       if ( PyTuple_Size( pobj ) < 1 )
-        throw FatalError( "PythonHandler" ) << "Invalid number of values unpacked for " << key << "!";
+        throw CG_FATAL( "PythonHandler" ) << "Invalid number of values unpacked for " << key << "!";
       double min = PyFloat_AsDouble( PyTuple_GetItem( pobj, 0 ) );
       lim.min() = min;
       if ( PyTuple_Size( pobj ) > 1 ) {

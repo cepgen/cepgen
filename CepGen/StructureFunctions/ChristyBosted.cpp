@@ -29,7 +29,7 @@ namespace CepGen
         q20 = 0.125;
       }
       else {
-        InError( "ChristyBosted" ) << "Invalid direction retrieved! Aborting.";
+        CG_ERROR( "ChristyBosted" ) << "Invalid direction retrieved! Aborting.";
         return 0.;
       }
 

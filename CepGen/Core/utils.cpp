@@ -10,7 +10,7 @@ void Map( double expo, double xmin, double xmax, double& out, double& dout, cons
   const double y = xmax/xmin;
   out = xmin*pow( y, expo );
   dout = out*log( y );
-  DebuggingInsideLoop( "Map" )
+  CG_DEBUG_LOOP( "Map" )
     << "Mapping variable \"" << var_name_ << "\"\n\t"
     << "min = " << xmin << "\n\t"
     << "max = " << xmax << "\n\t"

@@ -87,7 +87,7 @@ namespace CepGen
     GenericKTProcess::computeWeight()
     {
       if ( kt_jacobian_ == 0. )
-        throw FatalError( "GenericKTProcess" )
+        throw CG_FATAL( "GenericKTProcess" )
           << "Point-independant component of the Jacobian for this "
           << "kt-factorised process is null.\n\tPlease check the "
           << "validity of the phase space!";
@@ -108,7 +108,7 @@ namespace CepGen
       const double integrand = computeKTFactorisedMatrixElement();
       const double weight = ( kt_jacobian_*aux_jacobian ) * integrand;
 
-      DebuggingInsideLoop( "GenericKTProcess" )
+      CG_DEBUG_LOOP( "GenericKTProcess" )
         << "Jacobian = " << kt_jacobian_ << " * " << aux_jacobian
         << "\n\tIntegrand = " << integrand
         << "\n\tdW = " << weight << ".";
@@ -140,11 +140,11 @@ namespace CepGen
           flux2_ = inelasticFlux( x2, q2t2, MY_, cuts_.structure_functions );
           break;
         default:
-          throw FatalError( "GenericKTProcess" ) << "Invalid kinematics mode selected!";
+          throw CG_FATAL( "GenericKTProcess" ) << "Invalid kinematics mode selected!";
       }
       flux1_ = std::max( flux1_, kMinFlux );
       flux2_ = std::max( flux2_, kMinFlux );
-      DebuggingInsideLoop( "GenericKTProcess" ) << "Form factors: " << flux1_ << " / " << flux2_ << ".";
+      CG_DEBUG_LOOP( "GenericKTProcess" ) << "Form factors: " << flux1_ << " / " << flux2_ << ".";
     }
 
     void
@@ -155,7 +155,7 @@ namespace CepGen
       Kinematics::Limits lim = in;
       out = 0.; // reset the variable
       if ( !in.valid() ) {
-        Debugging( "GenericKTProcess:registerVariable" )
+        CG_DEBUG( "GenericKTProcess:registerVariable" )
           << description << " could not be retrieved from the user configuration!\n\t"
           << "Setting it to the default value: " << default_limits << ".";
         lim = default_limits;
@@ -174,7 +174,7 @@ namespace CepGen
           kt_jacobian_ *= lim.range();
           break;
       }
-      Debugging( "GenericKTProcess:registerVariable" )
+      CG_DEBUG( "GenericKTProcess:registerVariable" )
         << description << " has been mapped to variable " << num_dimensions_ << ".\n\t"
         << "Allowed range for integration: " << lim << ".\n\t"
         << "Variable integration mode: " << type << ".";
@@ -209,7 +209,7 @@ namespace CepGen
               << " in range " << std::left << std::setw( 20 ) << cut.limits << std::right
               << " has value " << cut.variable << "\n\t";
         }
-        DebuggingInsideLoop( "GenericKTProcess" ) << oss.str();
+        CG_DEBUG_LOOP( "GenericKTProcess" ) << oss.str();
       }
       return jacobian;
     }
@@ -252,7 +252,7 @@ namespace CepGen
           op2.setStatus( Particle::Unfragmented ); op2.setMass( MY_ );
           break;
         default: {
-          throw FatalError( "GenericKTProcess" )
+          throw CG_FATAL( "GenericKTProcess" )
             << "This kT factorisation process is intended for p-on-p collisions! Aborting.";
         } break;
       }

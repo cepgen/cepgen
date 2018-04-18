@@ -6,34 +6,34 @@
 
 #include "Logger.h"
 
-#define CEPGEN_EXCEPT_MATCH( str ) \
+#define CG_EXCEPT_MATCH( str ) \
   CepGen::Logger::get().passExceptionRule( str )
 
-#define PrintMessage( mod ) \
+#define CG_LOG( mod ) \
   ( CepGen::Logger::get().level < CepGen::Logger::Nothing ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kVerbatim )
-#define Information( mod ) \
-  ( CepGen::Logger::get().level < CepGen::Logger::Information && !CEPGEN_EXCEPT_MATCH( mod ) ) \
+#define CG_INFO( mod ) \
+  ( CepGen::Logger::get().level < CepGen::Logger::Information && !CG_EXCEPT_MATCH( mod ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kInformation )
-#define Debugging( mod ) \
-  ( CepGen::Logger::get().level < CepGen::Logger::Debug && !CEPGEN_EXCEPT_MATCH( mod ) ) \
+#define CG_DEBUG( mod ) \
+  ( CepGen::Logger::get().level < CepGen::Logger::Debug && !CG_EXCEPT_MATCH( mod ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kDebugMessage )
-#define DebuggingInsideLoop( mod ) \
-  ( CepGen::Logger::get().level < CepGen::Logger::DebugInsideLoop && !CEPGEN_EXCEPT_MATCH( mod ) ) \
+#define CG_DEBUG_LOOP( mod ) \
+  ( CepGen::Logger::get().level < CepGen::Logger::DebugInsideLoop && !CG_EXCEPT_MATCH( mod ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kDebugMessage )
-#define CG_Warning( mod ) \
-  ( CepGen::Logger::get().level < CepGen::Logger::Warning && !CEPGEN_EXCEPT_MATCH( mod ) ) \
+#define CG_WARNING( mod ) \
+  ( CepGen::Logger::get().level < CepGen::Logger::Warning && !CG_EXCEPT_MATCH( mod ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kJustWarning )
-#define InError( mod ) \
-  ( CepGen::Logger::get().level < CepGen::Logger::Error && !CEPGEN_EXCEPT_MATCH( mod ) ) \
+#define CG_ERROR( mod ) \
+  ( CepGen::Logger::get().level < CepGen::Logger::Error && !CG_EXCEPT_MATCH( mod ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kErrorMessage )
-#define FatalError( mod ) \
+#define CG_FATAL( mod ) \
   CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kErrorMessage )
 
 namespace CepGen
@@ -55,26 +55,24 @@ namespace CepGen
       /// \param[in] type exception type
       /// \param[in] id exception code (useful for logging)
       explicit inline Exception( const char* module = "", ExceptionType type = kUndefined, const int id = 0 ) :
-        std::exception(), module_( module ), type_( type ), error_num_( id ) {}
+        module_( module ), type_( type ), error_num_( id ) {}
       /// Generic constructor
       /// \param[in] from method invoking the exception
       /// \param[in] module exception classifier
       /// \param[in] type exception type
       /// \param[in] id exception code (useful for logging)
       explicit inline Exception( const char* from, const char* module, ExceptionType type = kUndefined, const int id = 0 ) :
-        std::exception(), from_( from ), module_( module ), type_( type ), error_num_( id ) {}
+        from_( from ), module_( module ), type_( type ), error_num_( id ) {}
       /// Generic constructor
       /// \param[in] from method invoking the exception
       /// \param[in] module exception classifier
       /// \param[in] type exception type
       /// \param[in] id exception code (useful for logging)
       explicit inline Exception( const char* from, const std::string& module, ExceptionType type = kUndefined, const int id = 0 ) :
-        std::exception(), from_( from ), module_( module ), type_( type ), error_num_( id ) {}
+        from_( from ), module_( module ), type_( type ), error_num_( id ) {}
       /// Copy constructor
       inline Exception( const Exception& rhs ) :
-        from_( rhs.from_ ), module_( rhs.module_ ), type_( rhs.type_ ), error_num_( rhs.error_num_ ) {
-        message_ << rhs.message_.str();
-      }
+        from_( rhs.from_ ), module_( rhs.module_ ), message_( rhs.message_.str() ), type_( rhs.type_ ), error_num_( rhs.error_num_ ) {}
       /// Default destructor (potentially killing the process)
       inline ~Exception() noexcept override {
         dump();
@@ -85,7 +83,7 @@ namespace CepGen
 
       //----- Overloaded stream operators
 
-      /// Generic templated pipe operator
+      /// Generic templated message feeder operator
       template<typename T>
       inline friend const Exception& operator<<( const Exception& exc, T var ) {
         Exception& nc_except = const_cast<Exception&>( exc );
@@ -100,9 +98,9 @@ namespace CepGen
       }
 
       /// Exception message
-      inline const char* what() const noexcept override {
-        return fullMessage().c_str();
-      }
+      /*inline const char* what() const noexcept override {
+        return message_.str().c_str();
+      }*/
 
       /// Extract the origin of the exception
       inline std::string from() const { return from_; }
