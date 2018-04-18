@@ -1,13 +1,9 @@
-#ifdef LIBHEPMC
-
-#include "HepMCHandler.h"
-
-#ifdef HEPMC_VERSION3
-#include "LHEFHandler.h"
+#include "CepGen/IO/LHEFHandler.h"
 
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Version.h"
+#include "CepGen/Event/Event.h"
 
 namespace CepGen
 {
@@ -15,12 +11,29 @@ namespace CepGen
   {
     LHEFHandler::LHEFHandler( const char* filename ) :
       ExportHandler( ExportHandler::LHE ),
+#ifdef HEPMC_LHEF
       lhe_output_( new LHEF::Writer( filename ) )
-    {}
+#else
+      pythia_( new Pythia8::Pythia ),
+      py_lhe_output_( new Pythia8::LHAupFromPYTHIA8( &pythia_->process, &pythia_->info ) )
+#endif
+    {
+#ifndef HEPMC_LHEF
+      py_lhe_output_->openLHEF( filename );
+#endif
+    }
+
+    LHEFHandler::~LHEFHandler()
+    {
+#ifndef HEPMC_LHEF
+      py_lhe_output_->closeLHEF( true );
+#endif
+    }
 
     void
     LHEFHandler::initialise( const Parameters& params )
     {
+#ifdef HEPMC_LHEF
       lhe_output_->headerBlock()
         << "<!--\n"
         << "***** Sample generated with CepGen v" << version() << " *****\n"
@@ -59,11 +72,17 @@ namespace CepGen
       run.LPRUP[0] = 1;
       lhe_output_->heprup = run;
       lhe_output_->init();
+#else
+      pythia_->init();
+      py_lhe_output_->setInit();
+      py_lhe_output_->initLHEF();
+#endif
     }
 
     void
     LHEFHandler::operator<<( const Event* ev )
     {
+#ifdef HEPMC_LHEF
       LHEF::HEPEUP out;
       out.heprup = &lhe_output_->heprup;
       out.XWGTUP = 1.;
@@ -86,10 +105,12 @@ namespace CepGen
       lhe_output_->eventComments() << "haha";
       lhe_output_->hepeup = out;
       lhe_output_->writeEvent();
+#else
+      pythia_->next();
+      py_lhe_output_->setEvent();
+      py_lhe_output_->eventLHEF();
+#endif
     }
   }
 }
 
-#endif
-
-#endif
