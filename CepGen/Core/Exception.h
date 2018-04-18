@@ -25,7 +25,7 @@
   ( CepGen::Logger::get().level < CepGen::Logger::DebugInsideLoop && !CEPGEN_EXCEPT_MATCH( mod ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kDebugMessage )
-#define InWarning( mod ) \
+#define CG_Warning( mod ) \
   ( CepGen::Logger::get().level < CepGen::Logger::Warning && !CEPGEN_EXCEPT_MATCH( mod ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kJustWarning )

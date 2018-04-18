@@ -75,7 +75,7 @@ namespace CepGen
     std::ostringstream os; os << "version " << version() << std::endl;
     std::ifstream hf( "README" );
     if ( !hf.good() )
-      throw InWarning( "Generator" ) << "Failed to open README file.";
+      throw CG_Warning( "Generator" ) << "Failed to open README file.";
     while ( true ) {
       if ( !hf.good() ) break;
       getline( hf, tmp );

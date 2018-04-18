@@ -4,6 +4,7 @@
 #ifdef PYTHON
 
 #include "CepGen/Core/TamingFunction.h"
+#include "CepGen/Core/Exception.h"
 
 #include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Processes/PPtoLL.h"
@@ -349,7 +350,7 @@ namespace CepGen
 
         params_.setHadroniser( pythia8 );
 #else
-        InWarning( "PythonHandler" )
+        CG_Warning( "PythonHandler" )
           << "Pythia8 is not linked to this instance... "
           << "Ignoring this part of the configuration file.";
 #endif

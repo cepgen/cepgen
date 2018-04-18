@@ -4,7 +4,6 @@
 #ifdef PYTHON
 #include <Python.h>
 
-#include "CepGen/Core/Exception.h"
 #include "Handler.h"
 
 namespace CepGen

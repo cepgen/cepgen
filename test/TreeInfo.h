@@ -49,7 +49,7 @@ namespace CepGen
       tree->SetBranchAddress( "litigious_events", &litigious_events );
       tree->SetBranchAddress( "sqrt_s", &sqrt_s );
       if ( tree->GetEntriesFast() > 1 )
-        InWarning( "TreeRun" ) << "The run tree has more than one entry.";
+        CG_Warning( "TreeRun" ) << "The run tree has more than one entry.";
       tree->GetEntry( 0 );
     }
   };

@@ -33,7 +33,7 @@ namespace CepGen
   {
     switch ( sf ) {
       case StructureFunctions::ElasticProton:
-        InWarning( "FormFactors" ) << "Elastic proton form factors requested! Check your process definition!";
+        CG_Warning( "FormFactors" ) << "Elastic proton form factors requested! Check your process definition!";
         return FormFactors::ProtonElastic( q2 );
       case StructureFunctions::SuriYennie:
         return FormFactors::SuriYennie( q2, mi2, mf2 );

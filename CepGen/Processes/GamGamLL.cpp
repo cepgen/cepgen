@@ -108,7 +108,7 @@ namespace CepGen
 
       const double rl1 = ss*ss-4.*w1_*s_; // lambda(s, m1**2, m2**2)
       if ( rl1 <= 0. ) {
-        InWarning( "GamGamLL" ) << "rl1 = " << rl1 << " <= 0";
+        CG_Warning( "GamGamLL" ) << "rl1 = " << rl1 << " <= 0";
         return false;
       }
       sl1_ = sqrt( rl1 );
@@ -129,7 +129,7 @@ namespace CepGen
 
       const double rl2 = sp*sp-4.*s_*masses_.MX2_; // lambda(s, m3**2, sigma)
       if ( rl2 <= 0. ) {
-        InWarning( "GamGamLL" ) << "rl2 = " << rl2 << " <= 0";
+        CG_Warning( "GamGamLL" ) << "rl2 = " << rl2 << " <= 0";
         return false;
       }
       const double sl2 = sqrt( rl2 );
@@ -140,7 +140,7 @@ namespace CepGen
       // FIXME dropped in CDF version
       const Kinematics::Limits q2_limits = cuts_.cuts.initial[Cuts::q2];
       if ( t1_max > -q2_limits.min() ) {
-        InWarning( "GamGamLL" ) << "t1max = " << t1_max << " > -q2min = " << ( -q2_limits.min() );
+        CG_Warning( "GamGamLL" ) << "t1max = " << t1_max << " > -q2min = " << ( -q2_limits.min() );
         return false;
       }
       if ( t1_min < -q2_limits.max() && q2_limits.hasMax() ) {
@@ -171,7 +171,7 @@ namespace CepGen
 
       sa1_ = -pow( t1_-masses_.w31_, 2 )/4.+w1_*t1_;
       if ( sa1_ >= 0. ) {
-        InWarning( "GamGamLL" ) << "sa1_ = " << sa1_ << " >= 0";
+        CG_Warning( "GamGamLL" ) << "sa1_ = " << sa1_ << " >= 0";
         return false;
       }
 
@@ -261,7 +261,7 @@ namespace CepGen
 
       sa2_ = -0.25 * r4*r4 + w2_*t2_;
       if ( sa2_ >= 0. ) {
-        InWarning( "GamGamLL" )
+        CG_Warning( "GamGamLL" )
           <<  "sa2_ = " << sa2_ << " >= 0";
         return false;
       }
@@ -270,7 +270,7 @@ namespace CepGen
 
       g4_ = -r3*r3/4.+t1_*t2_;
       if ( g4_ >= 0. ) {
-        InWarning( "GamGamLL" ) << "g4_ = " << g4_ << " >= 0";
+        CG_Warning( "GamGamLL" ) << "g4_ = " << g4_ << " >= 0";
         return false;
       }
 
@@ -426,7 +426,7 @@ namespace CepGen
       ec4_ = de3_+de5_;
 
       if ( ec4_ < mc4_ ) {
-        InWarning( "GamGamLL" )
+        CG_Warning( "GamGamLL" )
           << "ec4_ = " << ec4_ << " < mc4_ = " << mc4_ << "\n\t"
           << "==> de3 = " << de3_ << ", de5 = " << de5_;
         return false;
@@ -436,7 +436,7 @@ namespace CepGen
       pc4_ = sqrt( ec4_*ec4_-mc4_*mc4_ );
 
       if ( pc4_ == 0. ) {
-        InWarning( "GamGamLL" ) << "pzc4 is null and should not be...";
+        CG_Warning( "GamGamLL" ) << "pzc4 is null and should not be...";
         return false;
       }
 
@@ -460,12 +460,12 @@ namespace CepGen
         << std::fixed;
 
       if ( sin_theta3 > 1. ) {
-        InWarning( "GamGamLL" )
+        CG_Warning( "GamGamLL" )
           << "sin_theta3 = " << sin_theta3 << " > 1";
         return false;
       }
       if ( sin_theta5 > 1. ) {
-        InWarning( "GamGamLL" )
+        CG_Warning( "GamGamLL" )
           << "sin_theta5 = " << sin_theta5 << " > 1";
         return false;
       }
@@ -483,7 +483,7 @@ namespace CepGen
         << "ct5 = " << ct5;;
 
       if ( dd5_ < 0. ) {
-        InWarning( "GamGamLL" )
+        CG_Warning( "GamGamLL" )
           <<  "dd5 = " << dd5_ << " < 0";
         return false;
       }
@@ -493,7 +493,7 @@ namespace CepGen
       sin_theta4_ = pt4_/pc4_;
 
       if ( sin_theta4_ > 1. ) {
-        InWarning( "GamGamLL" )
+        CG_Warning( "GamGamLL" )
           << "st4 = " << sin_theta4_ << " > 1";
         return false;
       }
@@ -517,12 +517,12 @@ namespace CepGen
                    sin_phi5 = -rr / pt5;
 
       if ( fabs( sin_phi3 ) > 1. ) {
-        InWarning( "GamGamLL" )
+        CG_Warning( "GamGamLL" )
           << "sin(phi_3) = " << sin_phi3 << " while it must be in [-1 ; 1]";
         return false;
       }
       if ( fabs( sin_phi5 ) > 1. ) {
-        InWarning( "GamGamLL" )
+        CG_Warning( "GamGamLL" )
           << "sin(phi_5) = " << sin_phi5 << " while it must be in [-1 ; 1]";
         return false;
       }
@@ -652,12 +652,22 @@ namespace CepGen
       DebuggingInsideLoop( "GamGamLL" )
         << "Computed value for w4 = " << w4_ << " → mc4 = " << mc4_;
 
-      if ( !orient() ) return 0.;
+      if ( !orient() )
+        return 0.;
 
-      if ( jacobian_ == 0. ) { InWarning( "GamGamLL" ) << "dj = " << jacobian_; return 0.; }
+      if ( jacobian_ == 0. ) {
+        CG_Warning( "GamGamLL" ) << "dj = " << jacobian_;
+        return 0.;
+      }
 
-      if ( t1_>0. )  { InWarning( "GamGamLL" ) << "t1 = " << t1_ << " > 0"; return 0.; }
-      if ( t2_>0. )  { InWarning( "GamGamLL" ) << "t2 = " << t2_ << " > 0"; return 0.; }
+      if ( t1_ > 0. ) {
+        CG_Warning( "GamGamLL" ) << "t1 = " << t1_ << " > 0";
+        return 0.;
+      }
+      if ( t2_ > 0. ) {
+        CG_Warning( "GamGamLL" ) << "t2 = " << t2_ << " > 0";
+        return 0.;
+      }
 
       const double ecm6 = w4_ / ( 2.*mc4_ ),
                    pp6cm = sqrt( ecm6*ecm6-masses_.Ml2_ );
