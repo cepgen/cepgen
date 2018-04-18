@@ -52,11 +52,12 @@ namespace CepGen
       std::unique_ptr<Pythia8::LHAupFromPYTHIA8> py_lhe_output_;
       struct LHAevent : Pythia8::LHAup
       {
-        explicit LHAevent( const Parameters* );
+        explicit LHAevent( const Parameters& );
         void feedEvent( const Event& ev );
         bool setInit() override { return true; }
         bool setEvent( int ) override { return true; }
       };
+      std::unique_ptr<LHAevent> lhaevt_;
 #endif
     };
   }

@@ -115,6 +115,9 @@ namespace CepGen
     else if ( algorithm == MISER )
       gsl_monte_miser_free( mis_state );
 
+    input_params_->integrator.result = result;
+    input_params_->integrator.err_result = abserr;
+
     if ( input_params_->hadroniser() )
       input_params_->hadroniser()->setCrossSection( result, abserr );
 

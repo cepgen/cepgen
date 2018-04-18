@@ -73,6 +73,7 @@ namespace CepGen
       lhe_output_->heprup = run;
       lhe_output_->init();
 #else
+      lhaevt_ = std::unique_ptr<LHAevent>( new LHAevent( params ) );
       pythia_->init();
       py_lhe_output_->setInit();
       py_lhe_output_->initLHEF();
@@ -111,6 +112,19 @@ namespace CepGen
       py_lhe_output_->eventLHEF();
 #endif
     }
+
+    //---------------------------------------------------------------------------------------------
+    // Define LHA event record if one uses Pythia to store the LHE
+    //---------------------------------------------------------------------------------------------
+
+#ifndef HEPMC_LHEF
+    LHEFHandler::LHAevent::LHAevent( const Parameters& params )
+    {
+      addProcess( 0, 10., 0., 100. );
+      setBeamA( (short)params.kinematics.inpdg.first, params.kinematics.inp.first );
+      setBeamB( (short)params.kinematics.inpdg.second, params.kinematics.inp.second );
+    }
+#endif
   }
 }
 
