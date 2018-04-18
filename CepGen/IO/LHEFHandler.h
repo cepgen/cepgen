@@ -38,9 +38,9 @@ namespace CepGen
       /// \param[in] filename Output file path
       explicit LHEFHandler( const char* filename );
       ~LHEFHandler() override;
-      void initialise( const Parameters& params );
+      void initialise( const Parameters& params ) override;
       /// Writer operator
-      void operator<<( const Event* );
+      void operator<<( const Event& ) override;
 
      private:
 #ifdef HEPMC_LHEF

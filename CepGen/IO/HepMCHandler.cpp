@@ -37,7 +37,7 @@ HepMCHandler::~HepMCHandler()
 {}
 
 void
-HepMCHandler::operator<<( const Event* evt )
+HepMCHandler::operator<<( const Event& evt )
 {
   fillEvent( evt );
   if ( !event.get() ) {
@@ -52,7 +52,7 @@ HepMCHandler::operator<<( const Event* evt )
 }
 
 void
-HepMCHandler::fillEvent( const Event* evt )
+HepMCHandler::fillEvent( const Event& evt )
 {
   event->clear();
 
@@ -75,7 +75,7 @@ HepMCHandler::fillEvent( const Event* evt )
 
   // filling the particles content
   const HepMC::FourVector origin( 0., 0., 0., 0. );
-  Particles part_vec = evt->particles();
+  Particles part_vec = evt.particles();
 
   int cm_id = 0, idx = 1;
 

@@ -38,16 +38,22 @@ namespace CepGen
   }
 
   bool
-  ThreadWorker::generate()
+  ThreadWorker::generate( unsigned long max_gen )
   {
     if ( !grid_->gen_prepared )
       throw CG_FATAL( "ThreadWorker" ) << "Generation not prepared!";
 
     while ( true ) {
+      // only keep physical events
       if ( !next() )
         continue;
+      // check if the user interrupted the generation
       if ( gSignal != 0 )
         return false;
+      // check if we generated enough events for this thread
+      if ( max_gen > 0 && local_params_->generation.ngen >= max_gen )
+        return true;
+      // check if we generated enough events for the full run [all threads]
       if ( global_params_->generation.ngen >= global_params_->generation.maxgen )
         return true;
     }
@@ -66,7 +72,7 @@ namespace CepGen
 
     if ( ps_bin_ != 0 ) {
       bool has_correction = false;
-      while ( !correctionCycle( x, has_correction ) ) {/*std::cout <<"correctioncycle"<<std::endl;*/}
+      while ( !correctionCycle( x, has_correction ) ) {}
       if ( has_correction )
         return storeEvent( x );
     }
@@ -130,7 +136,6 @@ namespace CepGen
   bool
   ThreadWorker::correctionCycle( std::vector<double>& x, bool& has_correction )
   {
-//    std::cout << __PRETTY_FUNCTION__ << std::endl;
     CG_DEBUG_LOOP( "ThreadWorker:correction" )
       << "Correction cycles are started.\n\t"
       << "bin = " << ps_bin_ << "\t"
@@ -216,10 +221,13 @@ namespace CepGen
         << "] Generated events: " << global_params_->generation.ngen;
       local_params_->process()->last_event->dump();
     }
+    global_params_->process()->last_event = local_params_->process()->last_event;
+
+    local_params_->generation.ngen += 1;
+    global_params_->generation.ngen += 1;
+
     if ( callback_ )
       callback_( *local_params_->process()->last_event, global_params_->generation.ngen );
-
-    global_params_->generation.ngen += 1;
     return true;
   }
 }

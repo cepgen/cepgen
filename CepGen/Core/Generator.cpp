@@ -146,7 +146,7 @@ namespace CepGen
     if ( cross_section_ < 0. )
       computeXsection( cross_section_, cross_section_error_ );
 
-    integrator_->generate( 1 );
+    integrator_->generateOne();
 
     parameters->addGenerationTime( parameters->process()->last_event->time_total );
     return parameters->process()->last_event;

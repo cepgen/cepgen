@@ -39,15 +39,15 @@ namespace CepGen
         /// \param[in] type Output type
         HepMCHandler( const char* filename, const ExportHandler::OutputType& type = ExportHandler::HepMC );
         ~HepMCHandler();
-        void initialise( const Parameters& params ) {}
+        void initialise( const Parameters& params ) override {}
         /// Writer operator
-        void operator<<( const Event* );
+        void operator<<( const Event& ) override;
 
       protected:
         /// Clear the associated HepMC event content
         void clearEvent();
         /// Populate the associated HepMC event with a Event object
-        void fillEvent( const Event* );
+        void fillEvent( const Event& );
 
         /// Associated HepMC event
         std::shared_ptr<HepMC::GenEvent> event;

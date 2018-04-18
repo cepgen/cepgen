@@ -28,7 +28,7 @@ namespace CepGen
 
       /// Generate one event according to the grid parameters set in the initialisation
       /// \return A boolean stating if the generation was successful (in term of the computed weight for the phase space point)
-      bool generate();
+      bool generate( unsigned long max_gen = 0 );
 
     private:
       /// Generate the next event

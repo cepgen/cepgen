@@ -46,7 +46,7 @@ namespace CepGen
         /// Set the event number
         void setEventNumber( const unsigned int& ev_id ) { event_num_ = ev_id; }
         /// Writer operator
-        virtual void operator<<( const Event* ) = 0;
+        virtual void operator<<( const Event& ) = 0;
 
       protected:
         /// Type of output requested

@@ -1,10 +1,9 @@
 #include "CepGen/Cards/PythonHandler.h"
-#include "CepGen/Generator.h"
 #include "CepGen/IO/LHEFHandler.h"
-#include "CepGen/Core/utils.h"
-#include "CepGen/Core/Exception.h"
 
-#include "HepMC/Version.h"
+#include "CepGen/Generator.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Event/Event.h"
 
 #include <iostream>
 
@@ -38,12 +37,14 @@ int main( int argc, char* argv[] ) {
   writer.setCrossSection( xsec, err );
   writer.initialise( *mg.parameters );
 
-  // The events generation starts here !
+  // The events generation starts here!
+  //FIXME move to a callback function for a more efficient usage of MT capabilities!
   for ( unsigned int i = 0; i < mg.parameters->generation.maxgen; ++i ) {
     if ( i % 1000 == 0 )
       cout << "Generating event #" << i+1 << endl;
     try {
-      writer << mg.generateOneEvent().get();
+      auto evt = *mg.generateOneEvent();
+      writer << evt;
     } catch ( CepGen::Exception& e ) { e.dump(); }
   }
 
