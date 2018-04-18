@@ -6,30 +6,31 @@
 
 #include "Logger.h"
 
-#define ExceptionMatch( str ) CepGen::Logger::get().passExceptionRule( str )
+#define CEPGEN_EXCEPT_MATCH( str ) \
+  CepGen::Logger::get().passExceptionRule( str )
 
 #define PrintMessage( mod ) \
   ( CepGen::Logger::get().level < CepGen::Logger::Nothing ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kVerbatim )
 #define Information( mod ) \
-  ( CepGen::Logger::get().level < CepGen::Logger::Information && !ExceptionMatch( mod ) ) \
+  ( CepGen::Logger::get().level < CepGen::Logger::Information && !CEPGEN_EXCEPT_MATCH( mod ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kInformation )
 #define Debugging( mod ) \
-  ( CepGen::Logger::get().level < CepGen::Logger::Debug && !ExceptionMatch( mod ) ) \
+  ( CepGen::Logger::get().level < CepGen::Logger::Debug && !CEPGEN_EXCEPT_MATCH( mod ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kDebugMessage )
 #define DebuggingInsideLoop( mod ) \
-  ( CepGen::Logger::get().level < CepGen::Logger::DebugInsideLoop && !ExceptionMatch( mod ) ) \
+  ( CepGen::Logger::get().level < CepGen::Logger::DebugInsideLoop && !CEPGEN_EXCEPT_MATCH( mod ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kDebugMessage )
 #define InWarning( mod ) \
-  ( CepGen::Logger::get().level < CepGen::Logger::Warning && !ExceptionMatch( mod ) ) \
+  ( CepGen::Logger::get().level < CepGen::Logger::Warning && !CEPGEN_EXCEPT_MATCH( mod ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kJustWarning )
 #define InError( mod ) \
-  ( CepGen::Logger::get().level < CepGen::Logger::Error && !ExceptionMatch( mod ) ) \
+  ( CepGen::Logger::get().level < CepGen::Logger::Error && !CEPGEN_EXCEPT_MATCH( mod ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::kErrorMessage )
 #define FatalError( mod ) \

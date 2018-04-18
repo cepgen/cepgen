@@ -34,7 +34,7 @@ class AbortHandler
     }
     static void handle_ctrl_c( int signal, siginfo_t*, void* ) {
       CepGen::gSignal = signal;
-      throw CepGen::RunAbortedException( __PRETTY_FUNCTION__, "Run aborted...", CepGen::JustWarning );
+      throw CepGen::RunAbortedException( __PRETTY_FUNCTION__, CepGen::kJustWarning ) << "Run aborted.";
     }
     void init() {
       if ( sigaction( SIGINT, &action_, nullptr ) != 0
