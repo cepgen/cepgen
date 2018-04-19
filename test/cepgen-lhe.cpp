@@ -11,6 +11,13 @@ using namespace std;
 
 std::shared_ptr<CepGen::OutputHandler::ExportHandler> writer;
 
+void storeEvent( const CepGen::Event& ev, unsigned long )
+{
+  if ( !writer )
+    throw CG_FATAL( "storeEvent" ) << "Failed to retrieve a valid writer!";
+  *writer << ev;
+}
+
 /**
  * Main caller for this Monte Carlo generator. Loads the configuration files'
  * variables if set as an argument to this program, else loads a default
@@ -40,15 +47,7 @@ int main( int argc, char* argv[] ) {
   writer->setCrossSection( xsec, err );
 
   // The events generation starts here!
-  //FIXME move to a callback function for a more efficient usage of MT capabilities!
-  for ( unsigned int i = 0; i < mg.parameters->generation.maxgen; ++i ) {
-    if ( i % 1000 == 0 )
-      cout << "Generating event #" << i+1 << endl;
-    try {
-      auto evt = *mg.generateOneEvent();
-      *writer << evt;
-    } catch ( CepGen::Exception& e ) { e.dump(); }
-  }
+  mg.generate( storeEvent );
 
   return 0;
 }
