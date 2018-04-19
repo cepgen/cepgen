@@ -39,30 +39,25 @@ namespace CepGen
         void operator<<( const Event& ) override;
         void setCrossSection( double, double ) override;
 
-      protected:
+      private:
         /// Clear the associated HepMC event content
         void clearEvent();
         /// Populate the associated HepMC event with a Event object
         void fillEvent( const Event& );
-
-#ifdef LIBHEPMC
-        /// Associated HepMC event
-        std::shared_ptr<HepMC::GenEvent> event;
-#endif
-
-      private:
 #ifdef LIBHEPMC
 #  ifdef HEPMC_VERSION3
         /// Writer object (from HepMC v3+)
-        std::unique_ptr<HepMC::WriterAscii> output;
+        std::unique_ptr<HepMC::WriterAscii> output_;
         /// Generator cross section and error
-        HepMC::GenCrossSectionPtr xs;
+        HepMC::GenCrossSectionPtr xs_;
 #  else
         /// Writer object (from HepMC v<3)
-        std::unique_ptr<HepMC::IO_GenEvent> output;
+        std::unique_ptr<HepMC::IO_GenEvent> output_;
         /// Generator cross section and error
-        HepMC::GenCrossSection xs;
+        HepMC::GenCrossSection xs_;
 #  endif
+        /// Associated HepMC event
+        std::shared_ptr<HepMC::GenEvent> event_;
 #endif
     };
   }

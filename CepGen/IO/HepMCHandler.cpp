@@ -28,17 +28,14 @@ namespace CepGen
     HepMCHandler::HepMCHandler( const char* filename, const ExportHandler::OutputType& type ) :
       ExportHandler( type )
 #ifdef LIBHEPMC
-      , event( new HepMC::GenEvent() )
-#endif
-    {
-#ifdef LIBHEPMC
 #  ifdef HEPMC_VERSION3
-      output = std::unique_ptr<HepMC::WriterAscii>( new HepMC::WriterAscii( filename ) );
+      , output_( new HepMC::WriterAscii( filename ) ),
 #  else
-      output = std::unique_ptr<HepMC::IO_GenEvent>( new HepMC::IO_GenEvent( filename ) );
+      , output_( new HepMC::IO_GenEvent( filename ) ),
 #  endif
+      event_( new HepMC::GenEvent() )
 #endif
-    }
+    {}
 
     void
     HepMCHandler::operator<<( const Event& evt )
@@ -46,11 +43,10 @@ namespace CepGen
       fillEvent( evt );
 #ifdef LIBHEPMC
 #  ifdef HEPMC_VERSION3
-      output->write_event( *event );
+      output_->write_event( *event_ );
 #  else
-      output->write_event( event.get() );
+      output_->write_event( event_.get() );
 #  endif
-      event->clear();
 #endif
     }
 
@@ -59,13 +55,13 @@ namespace CepGen
     {
 #ifdef LIBHEPMC
 #  ifdef HEPMC_VERSION3
-      xs->set_cross_section( xsect, xsect_err_ );
-      event->add_attribute( "AlphaQCD", HepMC::make_shared<HepMC::DoubleAttribute>( Constants::alphaQCD ) );
-      event->add_attribute( "AlphaEM", HepMC::make_shared<HepMC::DoubleAttribute>( Constants::alphaEM ) );
+      xs_->set_cross_section( xsect, xsect_err_ );
+      event_->add_attribute( "AlphaQCD", HepMC::make_shared<HepMC::DoubleAttribute>( Constants::alphaQCD ) );
+      event_->add_attribute( "AlphaEM", HepMC::make_shared<HepMC::DoubleAttribute>( Constants::alphaEM ) );
 #  else
-      xs.set_cross_section( xsect, xsect_err );
-      event->set_alphaQCD( Constants::alphaQCD );
-      event->set_alphaQED( Constants::alphaEM );
+      xs_.set_cross_section( xsect, xsect_err );
+      event_->set_alphaQCD( Constants::alphaQCD );
+      event_->set_alphaQED( Constants::alphaEM );
 #  endif
 #endif
     }
@@ -74,13 +70,13 @@ namespace CepGen
     HepMCHandler::fillEvent( const Event& evt )
     {
 #ifdef LIBHEPMC
-      event->clear();
+      event_->clear();
 
       // general information
-      event->set_cross_section( xs );
+      event_->set_cross_section( xs_ );
 
-      event->set_event_number( event_num_ );
-      event->weights().push_back( 1. ); //FIXME we generate unweighted events
+      event_->set_event_number( event_num_ );
+      event_->weights().push_back( 1. ); // unweighted events
 
       // filling the particles content
       const HepMC::FourVector origin( 0., 0., 0., 0. );
@@ -133,14 +129,14 @@ namespace CepGen
         }
         idx++;
       }
-      event->add_vertex( v1 );
-      event->add_vertex( v2 );
-      event->add_vertex( vcm );
+      event_->add_vertex( v1 );
+      event_->add_vertex( v2 );
+      event_->add_vertex( vcm );
 
 #  ifndef HEPMC_VERSION3
-      event->set_beam_particles( *v1->particles_in_const_begin(), *v2->particles_in_const_begin() );
-      event->set_signal_process_vertex( *v1->vertices_begin() );
-      event->set_beam_particles( *v1->particles_in_const_begin(), *v2->particles_in_const_end() );
+      event_->set_beam_particles( *v1->particles_in_const_begin(), *v2->particles_in_const_begin() );
+      event_->set_signal_process_vertex( *v1->vertices_begin() );
+      event_->set_beam_particles( *v1->particles_in_const_begin(), *v2->particles_in_const_end() );
 #  endif
 #endif
       event_num_++;
