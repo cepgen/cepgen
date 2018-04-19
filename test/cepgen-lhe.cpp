@@ -34,7 +34,7 @@ int main( int argc, char* argv[] ) {
   if ( argc < 2 )
     throw CG_FATAL( "main" )
       << "No config file provided!\n\t"
-      << "Usage: " << argv[0] << " config-file [filename=example.dat] [format=lhef,hepmc]";
+      << "Usage: " << argv[0] << " config-file [format=lhef,hepmc] [filename=example.dat]";
 
   CepGen::Generator mg;
 
@@ -55,8 +55,8 @@ int main( int argc, char* argv[] ) {
   // Output file writer definition
   //-----------------------------------------------------------------------------------------------
 
-  const char* filename = ( argc > 2 ) ? argv[2] : "example.dat";
-  const string format = ( argc > 3 ) ? argv[3] : "lhef";
+  const string format = ( argc > 2 ) ? argv[2] : "lhef";
+  const char* filename = ( argc > 3 ) ? argv[3] : "example.dat";
   if ( format == "lhef" )
     writer = std::make_shared<CepGen::OutputHandler::LHEFHandler>( filename );
   else if ( format == "hepmc" )
