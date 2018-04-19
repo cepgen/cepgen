@@ -18,8 +18,6 @@ namespace CepGen
   struct GridParameters {
     GridParameters();
     unsigned int max;
-    /// Has the grid been prepared for integration?
-    bool grid_prepared;
     /// Has the generation been prepared using @a SetGen call? (very time-consuming operation, thus needs to be called once)
     bool gen_prepared;
     /// Maximal value of the function at one given point
@@ -65,7 +63,8 @@ namespace CepGen
       int integrate( double& result_, double& abserr_ );
       /// Dimensional size of the phase space
       unsigned short dimensions() const;
-      void generate( unsigned long num_events, std::function<void( const Event&, unsigned long )> callback = nullptr );
+      void generateOne( std::function<void( const Event&, unsigned long )> callback = nullptr );
+      void generate( unsigned long num_events = 0, std::function<void( const Event&, unsigned long )> callback = nullptr );
 
       GridParameters grid;
 

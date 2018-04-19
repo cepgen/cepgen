@@ -68,14 +68,11 @@ namespace CepGen
     else if ( algorithm == Vegas ) {
       gsl_monte_vegas_params_set( veg_state, &input_params_->integrator.vegas );
       //----- Vegas warmup (prepare the grid)
-      if ( !grid.grid_prepared ) {
-        res = gsl_monte_vegas_integrate( function_.get(),
-          &x_low[0], &x_up[0],
-          function_->dim, 25000,
-          rng_.get(), veg_state,
-          &result, &abserr );
-        grid.grid_prepared = true;
-      }
+      res = gsl_monte_vegas_integrate( function_.get(),
+        &x_low[0], &x_up[0],
+        function_->dim, 25000,
+        rng_.get(), veg_state,
+        &result, &abserr );
       CG_INFO( "Integrator:integrate" )
         << "Finished the Vegas warm-up.\n\t"
         << "Will now iterate until χ² < " << input_params_->integrator.vegas_chisq_cut << ".";
@@ -115,6 +112,9 @@ namespace CepGen
     else if ( algorithm == MISER )
       gsl_monte_miser_free( mis_state );
 
+    input_params_->integrator.result = result;
+    input_params_->integrator.err_result = abserr;
+
     if ( input_params_->hadroniser() )
       input_params_->hadroniser()->setCrossSection( result, abserr );
 
@@ -136,27 +136,58 @@ namespace CepGen
   }
 
   void
-  Integrator::generate( unsigned long num_events, std::function<void( const Event&, unsigned long )> callback )
+  Integrator::generateOne( std::function<void( const Event&, unsigned long )> callback )
   {
     if ( !grid.gen_prepared )
       computeGenerationParameters();
 
-    if ( input_params_->generation.num_threads > 1 )
-      CG_INFO( "Integrator:generate" )
-        << "Will generate events using " << input_params_->generation.num_threads << " threads.";
+    ThreadWorker worker( &mutex_, rng_, function_.get(), &grid, callback );
+    worker.generate( 1 );
+  }
+
+  void
+  Integrator::generate( unsigned long num_events, std::function<void( const Event&, unsigned long )> callback )
+  {
+    if ( num_events < 2 ) {
+      CG_DEBUG( "Integrator:generate" )
+        << "Only one event to be generated! disabling the multithreaded generation.";
+      generateOne( callback );
+    }
+
+    if ( !grid.gen_prepared )
+      computeGenerationParameters();
+
+    CG_INFO( "Integrator:generate" )
+      << "Will generate events using " << input_params_->generation.num_threads << " thread"
+      << s( input_params_->generation.num_threads ) << ".";
 
     // define the threads and workers
     std::vector<std::thread> threads;
+    std::vector<std::thread::id> threads_ids;
     std::vector<std::shared_ptr<ThreadWorker> > workers;
     for ( unsigned int i = 0; i < input_params_->generation.num_threads; ++i ) {
-      std::shared_ptr<ThreadWorker> worker( new ThreadWorker( &mutex_, rng_.get(), function_.get(), &grid, callback ) );
+      std::shared_ptr<ThreadWorker> worker( new ThreadWorker( &mutex_, rng_, function_.get(), &grid, callback ) );
       workers.emplace_back( worker );
-      threads.emplace_back( &ThreadWorker::generate, worker.get() );
+      try {
+        threads.emplace_back( &ThreadWorker::generate, worker.get(), 0 );
+      } catch ( const std::system_error& e ) {
+        CG_ERROR( "Integrator:generate" )
+          << "Failed to add a new thread on the stack.\n\t"
+          << "Error code " << e.code() << ": " << e.what();
+      }
     }
     // launch the multi-threaded events generation
     for ( auto& thread : threads )
-      if ( thread.joinable() )
+      if ( thread.joinable() ) {
+        threads_ids.emplace_back( thread.get_id() );
         thread.join();
+      }
+    std::ostringstream os;
+    for ( const auto& id : threads_ids )
+      os << " 0x" << std::hex << id << std::dec;
+    CG_INFO( "Integrator:generate" )
+      << "Launched the following thread" << s( threads_ids.size() )
+      << ":" << os.str();
   }
 
   void
@@ -262,8 +293,7 @@ namespace CepGen
   //------------------------------------------------------------------------------------------------
 
   GridParameters::GridParameters() :
-    grid_prepared( false ), gen_prepared( false ),
-    f_max_global( 0. )
+    gen_prepared( false ), f_max_global( 0. )
   {}
 }
 

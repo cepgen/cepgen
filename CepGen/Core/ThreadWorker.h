@@ -24,11 +24,11 @@ namespace CepGen
   {
     public:
       /// Build a thread using a Mutex, GSL objects, a grid and the functional
-      ThreadWorker( std::mutex* mutex, gsl_rng* rng, gsl_monte_function* function, GridParameters* grid, std::function<void( const Event&, unsigned long )>& callback );
+      ThreadWorker( std::mutex* mutex, std::shared_ptr<gsl_rng> rng, gsl_monte_function* function, GridParameters* grid, std::function<void( const Event&, unsigned long )>& callback );
 
       /// Generate one event according to the grid parameters set in the initialisation
       /// \return A boolean stating if the generation was successful (in term of the computed weight for the phase space point)
-      bool generate();
+      bool generate( unsigned long max_gen = 0 );
 
     private:
       /// Generate the next event

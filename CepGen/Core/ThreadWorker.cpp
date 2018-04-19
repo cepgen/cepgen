@@ -15,10 +15,10 @@ namespace CepGen
   extern int gSignal;
 
   ThreadWorker::ThreadWorker( std::mutex* mutex,
-                              gsl_rng* rng, gsl_monte_function* function,
+                              std::shared_ptr<gsl_rng> rng, gsl_monte_function* function,
                               GridParameters* grid,
                               std::function<void( const Event&, unsigned long )>& callback ) :
-    ps_bin_( 0 ), function_( function ), grid_( grid ),
+    ps_bin_( 0 ), rng_( rng ), function_( function ), grid_( grid ),
     grid_correc_( 0. ), grid_correc2_( 0. ),
     grid_f_max2_( 0. ), grid_f_max_diff_( 0. ), grid_f_max_old_( 0. ),
     mutex_( mutex ), callback_( callback )
@@ -26,7 +26,6 @@ namespace CepGen
     if ( !function )
       throw CG_FATAL( "ThreadWorker" ) << "Invalid integration function passed!";
 
-    rng_ = std::shared_ptr<gsl_rng>( gsl_rng_clone( rng ), gsl_rng_free );
     grid_nm_.reserve( grid_->max );
     // retrieve standard parameters
     global_params_ = static_cast<Parameters*>( function->params );
@@ -38,16 +37,22 @@ namespace CepGen
   }
 
   bool
-  ThreadWorker::generate()
+  ThreadWorker::generate( unsigned long max_gen )
   {
     if ( !grid_->gen_prepared )
       throw CG_FATAL( "ThreadWorker" ) << "Generation not prepared!";
 
     while ( true ) {
+      // only keep physical events
       if ( !next() )
         continue;
+      // check if the user interrupted the generation
       if ( gSignal != 0 )
         return false;
+      // check if we generated enough events for this thread
+      if ( max_gen > 0 && local_params_->generation.ngen >= max_gen )
+        return true;
+      // check if we generated enough events for the full run [all threads]
       if ( global_params_->generation.ngen >= global_params_->generation.maxgen )
         return true;
     }
@@ -66,7 +71,7 @@ namespace CepGen
 
     if ( ps_bin_ != 0 ) {
       bool has_correction = false;
-      while ( !correctionCycle( x, has_correction ) ) {/*std::cout <<"correctioncycle"<<std::endl;*/}
+      while ( !correctionCycle( x, has_correction ) ) {}
       if ( has_correction )
         return storeEvent( x );
     }
@@ -130,7 +135,6 @@ namespace CepGen
   bool
   ThreadWorker::correctionCycle( std::vector<double>& x, bool& has_correction )
   {
-//    std::cout << __PRETTY_FUNCTION__ << std::endl;
     CG_DEBUG_LOOP( "ThreadWorker:correction" )
       << "Correction cycles are started.\n\t"
       << "bin = " << ps_bin_ << "\t"
@@ -216,10 +220,13 @@ namespace CepGen
         << "] Generated events: " << global_params_->generation.ngen;
       local_params_->process()->last_event->dump();
     }
+    global_params_->process()->last_event = local_params_->process()->last_event;
+
+    local_params_->generation.ngen += 1;
+    global_params_->generation.ngen += 1;
+
     if ( callback_ )
       callback_( *local_params_->process()->last_event, global_params_->generation.ngen );
-
-    global_params_->generation.ngen += 1;
     return true;
   }
 }

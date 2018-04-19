@@ -4,6 +4,11 @@
 #include <string>
 #include <stdarg.h>  // For va_start, etc.
 
+namespace CepGen
+{
+  inline const char* s( unsigned short num ) { return ( num > 1 ) ? "s" : ""; }
+}
+
 /// Provide a random number generated along a uniform distribution between 0 and 1
 //inline double drand() { srand (time(nullptr)); return static_cast<double>(rand())/RAND_MAX; }
 #define drand() static_cast<double>( rand()/RAND_MAX )
