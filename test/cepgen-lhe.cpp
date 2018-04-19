@@ -9,6 +9,8 @@
 
 using namespace std;
 
+std::shared_ptr<CepGen::OutputHandler::ExportHandler> writer;
+
 /**
  * Main caller for this Monte Carlo generator. Loads the configuration files'
  * variables if set as an argument to this program, else loads a default
@@ -33,9 +35,9 @@ int main( int argc, char* argv[] ) {
   double xsec = 0., err = 0.;
   mg.computeXsection( xsec, err );
 
-  CepGen::OutputHandler::LHEFHandler writer( "example.dat" );
-  writer.initialise( *mg.parameters );
-  writer.setCrossSection( xsec, err );
+  writer = std::make_shared<CepGen::OutputHandler::LHEFHandler>( "example.dat" );
+  writer->initialise( *mg.parameters );
+  writer->setCrossSection( xsec, err );
 
   // The events generation starts here!
   //FIXME move to a callback function for a more efficient usage of MT capabilities!
@@ -44,7 +46,7 @@ int main( int argc, char* argv[] ) {
       cout << "Generating event #" << i+1 << endl;
     try {
       auto evt = *mg.generateOneEvent();
-      writer << evt;
+      *writer << evt;
     } catch ( CepGen::Exception& e ) { e.dump(); }
   }
 

@@ -79,7 +79,8 @@ namespace CepGen
       lhaevt_->addComments( oss_init.str() );
       lhaevt_->initialise( params );
       pythia_->settings.mode( "Beams:frameType", 5 );
-      pythia_->settings.flag( "ProcessLevel:all", false );
+      pythia_->settings.mode( "Next:numberCount", 0 ); // remove some of the Pythia output
+      pythia_->settings.flag( "ProcessLevel:all", false ); // we do not want Pythia to interfere...
       pythia_->setLHAupPtr( lhaevt_.get() );
       pythia_->init();
       lhaevt_->initLHEF();
