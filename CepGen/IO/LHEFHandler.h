@@ -1,25 +1,26 @@
 #ifndef CepGen_Export_LHEFHandler_h
 #define CepGen_Export_LHEFHandler_h
 
+#include "CepGen/IO/ExportHandler.h"
+#include "CepGen/IO/HepMCHandler.h"
+
 #ifndef LIBHEPMC
 # ifndef PYTHIA8
-#  error "HepMC/Pythia8 are not linked to this instance!"
+#  pragma message( "HepMC/Pythia8 are not linked to this instance!" )
 # endif
 #else
 # ifndef HEPMC_VERSION3
 #  ifdef PYTHIA8
 #   include "Pythia8/Pythia.h"
+#   define PYTHIA_LHEF 1
 #  else
 #   pragma message( "HepMC v3 or Pythia8 are required for the LHEF export!" )
 #  endif
 # else
-#  include "HepMCHandler.h"
 #  include "HepMC/LHEF.h"
 #  define HEPMC_LHEF 1
 # endif
 #endif
-
-#include "ExportHandler.h"
 
 namespace CepGen
 {
@@ -44,20 +45,21 @@ namespace CepGen
         void setCrossSection( double, double ) override;
 
       private:
-#ifdef HEPMC_LHEF
+#if defined ( HEPMC_LHEF )
         /// Writer object (from HepMC)
         std::unique_ptr<LHEF::Writer> lhe_output_;
         LHEF::HEPRUP run_;
-#else
+#elif defined ( PYTHIA_LHEF )
         std::unique_ptr<Pythia8::Pythia> pythia_;
-        std::unique_ptr<Pythia8::LHAupFromPYTHIA8> py_lhe_output_;
         struct LHAevent : Pythia8::LHAup
         {
-          explicit LHAevent( const Parameters& );
-          void setCrossSection( double, double );
-          void feedEvent( const Event& ev );
+          explicit LHAevent();
+          void initialise( const Parameters& );
+          void setCrossSection( unsigned short, double, double );
+          void feedEvent( unsigned short proc_id, const Event& ev );
           bool setInit() override { return true; }
           bool setEvent( int ) override { return true; }
+          void addComments( const std::string& );
         };
         std::unique_ptr<LHAevent> lhaevt_;
 #endif

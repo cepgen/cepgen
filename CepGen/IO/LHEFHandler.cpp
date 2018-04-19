@@ -10,56 +10,58 @@ namespace CepGen
   namespace OutputHandler
   {
     LHEFHandler::LHEFHandler( const char* filename ) :
-      ExportHandler( ExportHandler::LHE ),
-#ifdef HEPMC_LHEF
-      lhe_output_( new LHEF::Writer( filename ) )
-#else
-      pythia_( new Pythia8::Pythia ),
-      py_lhe_output_( new Pythia8::LHAupFromPYTHIA8( &pythia_->process, &pythia_->info ) )
+      ExportHandler( ExportHandler::LHE )
+#if defined ( HEPMC_LHEF )
+      , lhe_output_( new LHEF::Writer( filename ) )
+#elif defined ( PYTHIA_LHEF )
+      , pythia_( new Pythia8::Pythia ), lhaevt_( new LHAevent )
 #endif
     {
-#ifndef HEPMC_LHEF
-      py_lhe_output_->openLHEF( filename );
+#if defined ( PYTHIA_LHEF )
+      lhaevt_->openLHEF( filename );
 #endif
     }
 
     LHEFHandler::~LHEFHandler()
     {
-#ifndef HEPMC_LHEF
-      py_lhe_output_->closeLHEF( true );
+#if defined ( PYTHIA_LHEF )
+      if ( lhaevt_ )
+        lhaevt_->closeLHEF( false ); // we do not want to rewrite the init block
 #endif
     }
 
     void
     LHEFHandler::initialise( const Parameters& params )
     {
-#ifdef HEPMC_LHEF
-      lhe_output_->headerBlock()
+      std::ostringstream oss_init;
+      oss_init
         << "<!--\n"
-        << "***** Sample generated with CepGen v" << version() << " *****\n"
-        << "* process: " << params.processName() << " (" << params.kinematics.mode << ")\n"
-        << "* structure functions: " << params.kinematics.structure_functions << "\n"
-        << "*--- incoming state\n";
+        << "  ***** Sample generated with CepGen v" << version() << " *****\n"
+        << "  * process: " << params.processName() << " (" << params.kinematics.mode << ")\n"
+        << "  * structure functions: " << params.kinematics.structure_functions << "\n"
+        << "  *--- incoming state\n";
       if ( params.kinematics.cuts.initial.count( Cuts::q2 ) )
-        lhe_output_->headerBlock()
-          << "* Q² range (GeV²): " << params.kinematics.cuts.initial.at( Cuts::q2 ) << "\n";
+        oss_init
+          << "  * Q² range (GeV²): " << params.kinematics.cuts.initial.at( Cuts::q2 ) << "\n";
       if ( params.kinematics.cuts.remnants.count( Cuts::mass ) )
-        lhe_output_->headerBlock()
-          << "* remnants mass range (GeV): " << params.kinematics.cuts.remnants.at( Cuts::mass ) << "\n";
-      lhe_output_->headerBlock()
-        << "*--- central system\n";
+        oss_init
+          << "  * remnants mass range (GeV): " << params.kinematics.cuts.remnants.at( Cuts::mass ) << "\n";
+      oss_init
+        << "  *--- central system\n";
       if ( params.kinematics.cuts.central.count( Cuts::pt_single ) )
-        lhe_output_->headerBlock()
-          << "* single particle pT (GeV): " << params.kinematics.cuts.central.at( Cuts::pt_single ) << "\n";
+        oss_init
+          << "  * single particle pT (GeV): " << params.kinematics.cuts.central.at( Cuts::pt_single ) << "\n";
       if ( params.kinematics.cuts.central.count( Cuts::energy_single ) )
-        lhe_output_->headerBlock()
-          << "* single particle energy (GeV): " << params.kinematics.cuts.central.at( Cuts::energy_single ) << "\n";
+        oss_init
+          << "  * single particle energy (GeV): " << params.kinematics.cuts.central.at( Cuts::energy_single ) << "\n";
       if ( params.kinematics.cuts.central.count( Cuts::eta_single ) )
-        lhe_output_->headerBlock()
-          << "* single particle eta: " << params.kinematics.cuts.central.at( Cuts::eta_single ) << "\n";
-      lhe_output_->headerBlock()
-        << "**************************************************\n"
+        oss_init
+          << "  * single particle eta: " << params.kinematics.cuts.central.at( Cuts::eta_single ) << "\n";
+      oss_init
+        << "  **************************************************\n"
         << "-->";
+#if defined ( HEPMC_LHEF )
+      lhe_output_->headerBlock() << oss_init.str();
       //params.dump( lhe_output_->initComments(), false );
       LHEF::HEPRUP run = lhe_output_->heprup;
       run.IDBMUP = params.kinematics.inpdg;
@@ -72,22 +74,22 @@ namespace CepGen
       run.LPRUP[0] = 1;
       lhe_output_->heprup = run;
       lhe_output_->init();
-#else
-      lhaevt_ = std::unique_ptr<LHAevent>( new LHAevent( params ) );
-      lhaevt_->setCrossSection( params.integrator.result, params.integrator.err_result );
+#elif defined ( PYTHIA_LHEF )
+      oss_init << std::endl; // LHEF is usually not beautifully parsed as a standard XML...
+      lhaevt_->addComments( oss_init.str() );
+      lhaevt_->initialise( params );
       pythia_->settings.mode( "Beams:frameType", 5 );
       pythia_->settings.flag( "ProcessLevel:all", false );
       pythia_->setLHAupPtr( lhaevt_.get() );
       pythia_->init();
-      py_lhe_output_->setInit();
-      py_lhe_output_->initLHEF();
+      lhaevt_->initLHEF();
 #endif
     }
 
     void
     LHEFHandler::operator<<( const Event& ev )
     {
-#ifdef HEPMC_LHEF
+#if defined ( HEPMC_LHEF )
       LHEF::HEPEUP out;
       out.heprup = &lhe_output_->heprup;
       out.XWGTUP = 1.;
@@ -110,20 +112,18 @@ namespace CepGen
       lhe_output_->eventComments() << "haha";
       lhe_output_->hepeup = out;
       lhe_output_->writeEvent();
-#else
-      lhaevt_->feedEvent( ev );
+#elif defined ( PYTHIA_LHEF )
+      lhaevt_->feedEvent( 0, ev );
       pythia_->next();
-      py_lhe_output_->setEvent();
-      py_lhe_output_->eventLHEF();
+      lhaevt_->eventLHEF();
 #endif
     }
 
     void
     LHEFHandler::setCrossSection( double xsect, double xsect_err )
     {
-#ifndef HEPMC_LHEF
-      lhaevt_->setCrossSection( xsect, xsect_err );
-      py_lhe_output_->updateSigma();
+#if defined ( PYTHIA_LHEF )
+      lhaevt_->setCrossSection( 0, xsect, xsect_err );
 #endif
     }
 
@@ -131,31 +131,54 @@ namespace CepGen
     // Define LHA event record if one uses Pythia to store the LHE
     //---------------------------------------------------------------------------------------------
 
-#ifndef HEPMC_LHEF
-    LHEFHandler::LHAevent::LHAevent( const Parameters& params )
+#if defined ( PYTHIA_LHEF )
+    LHEFHandler::LHAevent::LHAevent() : LHAup( 3 )
+    {}
+
+    void
+    LHEFHandler::LHAevent::initialise( const Parameters& params )
     {
-      std::cout << params.integrator.result << "/////" << params.integrator.err_result <<std::endl;
       setBeamA( (short)params.kinematics.inpdg.first, params.kinematics.inp.first );
       setBeamB( (short)params.kinematics.inpdg.second, params.kinematics.inp.second );
       addProcess( 0, params.integrator.result, params.integrator.err_result, 100. );
     }
 
     void
-    LHEFHandler::LHAevent::setCrossSection( double xsect, double xsect_err )
+    LHEFHandler::LHAevent::addComments( const std::string& comments )
     {
-      setXSec( 0, xsect );
-      setXErr( 0, xsect_err );
+      osLHEF << comments;
     }
 
     void
-    LHEFHandler::LHAevent::feedEvent( const Event& ev )
+    LHEFHandler::LHAevent::setCrossSection( unsigned short proc_id, double xsect, double xsect_err )
     {
-      setProcess( 0, 1., ev.getOneByRole( Particle::Intermediate ).mass(), Constants::alphaEM, Constants::alphaQCD );
+      setXSec( proc_id, xsect );
+      setXErr( proc_id, xsect_err );
+    }
+
+    void
+    LHEFHandler::LHAevent::feedEvent( unsigned short proc_id, const Event& ev )
+    {
+      const double scale = ev.getOneByRole( Particle::Intermediate ).mass();
+      setProcess( proc_id, 1., scale, Constants::alphaEM, Constants::alphaQCD );
+
+      const Particle& part1 = ev.getOneByRole( Particle::Parton1 ), &part2 = ev.getOneByRole( Particle::Parton2 );
+      const Particle& ip1 = ev.getOneByRole( Particle::IncomingBeam1 ), &ip2 = ev.getOneByRole( Particle::IncomingBeam2 );
+      const Particle& op1 = ev.getOneByRole( Particle::OutgoingBeam1 ), &op2 = ev.getOneByRole( Particle::OutgoingBeam2 );
+      const double q2_1 = -part1.momentum().mass2(), q2_2 = -part2.momentum().mass2();
+      const double x1 = q2_1/( q2_1+op1.mass2()-ip1.mass2() ), x2 = q2_2/( q2_2+op2.mass2()-ip2.mass2() );
+      setIdX( ip1.integerPdgId(), ip2.integerPdgId(), x1, x2 );
+
+      short parton1_pdgid = 0, parton2_pdgid = 0;
       for ( const auto& part : ev.particles() ) {
         short pdg_id = part.integerPdgId(), status = 0, moth1 = 0, moth2 = 0;
         switch ( part.role() ) {
           case Particle::Parton1: case Particle::Parton2:
-            status = -1;
+            if ( part.role() == Particle::Parton1 )
+              parton1_pdgid = part.integerPdgId();
+            if ( part.role() == Particle::Parton2 )
+              parton2_pdgid = part.integerPdgId();
+            status = -2; // conserving xbj/Q2
             break;
           case Particle::Intermediate:
             status = 2;
@@ -179,7 +202,7 @@ namespace CepGen
         const Particle::Momentum& mom = part.momentum();
         addParticle( pdg_id, status, moth1, moth2, 0, 0, mom.px(), mom.py(), mom.pz(), mom.energy(), mom.mass(), 0. ,0., 0. );
       }
-      //listEvent();
+      setPdf( parton1_pdgid, parton2_pdgid, x1, x2, scale, 0., 0., true );
     }
 #endif
   }
