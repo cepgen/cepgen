@@ -1,24 +1,20 @@
-#ifndef CepGen_Export_HepMCHandler_h
-#define CepGen_Export_HepMCHandler_h
+#ifndef CepGen_IO_HepMCHandler_h
+#define CepGen_IO_HepMCHandler_h
 
-#include "ExportHandler.h"
+#include "CepGen/IO/ExportHandler.h"
 
 #ifdef LIBHEPMC
-
-#include "HepMC/Version.h"
-
-#ifndef HEPMC_VERSION_CODE // HepMC v2
-#include "HepMC/IO_GenEvent.h"
-#include "HepMC/SimpleVector.h"
-
-#else // HepMC v3+
-#define HEPMC_VERSION3
-#include "HepMC/WriterAscii.h"
-#include "HepMC/FourVector.h"
-
+#  include "HepMC/Version.h"
+#  ifndef HEPMC_VERSION_CODE // HepMC v2
+#    include "HepMC/IO_GenEvent.h"
+#    include "HepMC/SimpleVector.h"
+#  else // HepMC v3+
+#    define HEPMC_VERSION3
+#    include "HepMC/WriterAscii.h"
+#    include "HepMC/FourVector.h"
+#  endif
+#  include "HepMC/GenEvent.h"
 #endif
-
-#include "HepMC/GenEvent.h"
 
 #include <memory>
 
@@ -38,10 +34,10 @@ namespace CepGen
         /// \param[in] filename Output file path
         /// \param[in] type Output type
         HepMCHandler( const char* filename, const ExportHandler::OutputType& type = ExportHandler::HepMC );
-        ~HepMCHandler();
         void initialise( const Parameters& params ) override {}
         /// Writer operator
         void operator<<( const Event& ) override;
+        void setCrossSection( double, double ) override;
 
       protected:
         /// Clear the associated HepMC event content
@@ -49,20 +45,28 @@ namespace CepGen
         /// Populate the associated HepMC event with a Event object
         void fillEvent( const Event& );
 
+#ifdef LIBHEPMC
         /// Associated HepMC event
         std::shared_ptr<HepMC::GenEvent> event;
+#endif
 
       private:
-#ifdef HEPMC_VERSION3
+#ifdef LIBHEPMC
+#  ifdef HEPMC_VERSION3
         /// Writer object (from HepMC v3+)
         std::unique_ptr<HepMC::WriterAscii> output;
-#else
+        /// Generator cross section and error
+        HepMC::GenCrossSectionPtr xs;
+#  else
         /// Writer object (from HepMC v<3)
         std::unique_ptr<HepMC::IO_GenEvent> output;
+        /// Generator cross section and error
+        HepMC::GenCrossSection xs;
+#  endif
 #endif
     };
   }
 }
 
 #endif
-#endif
+

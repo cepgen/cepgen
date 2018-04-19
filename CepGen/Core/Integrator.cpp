@@ -141,7 +141,7 @@ namespace CepGen
     if ( !grid.gen_prepared )
       computeGenerationParameters();
 
-    ThreadWorker worker( &mutex_, rng_.get(), function_.get(), &grid, callback );
+    ThreadWorker worker( &mutex_, rng_, function_.get(), &grid, callback );
     worker.generate( 1 );
   }
 
@@ -166,7 +166,7 @@ namespace CepGen
     std::vector<std::thread::id> threads_ids;
     std::vector<std::shared_ptr<ThreadWorker> > workers;
     for ( unsigned int i = 0; i < input_params_->generation.num_threads; ++i ) {
-      std::shared_ptr<ThreadWorker> worker( new ThreadWorker( &mutex_, rng_.get(), function_.get(), &grid, callback ) );
+      std::shared_ptr<ThreadWorker> worker( new ThreadWorker( &mutex_, rng_, function_.get(), &grid, callback ) );
       workers.emplace_back( worker );
       try {
         threads.emplace_back( &ThreadWorker::generate, worker.get(), 0 );

@@ -66,14 +66,15 @@ namespace CepGen
       run.EBMUP = params.kinematics.inp;
       run.NPRUP = 1;
       run.resize();
-      run.XSECUP[0] = cross_sect_;
-      run.XERRUP[0] = cross_sect_err_;
+      run.XSECUP[0] = params.integrator.result;
+      run.XERRUP[0] = params.integrator.err_result;
       run.XMAXUP[0] = 1.;
       run.LPRUP[0] = 1;
       lhe_output_->heprup = run;
       lhe_output_->init();
 #else
       lhaevt_ = std::unique_ptr<LHAevent>( new LHAevent( params ) );
+      lhaevt_->setCrossSection( params.integrator.result, params.integrator.err_result );
       pythia_->settings.mode( "Beams:frameType", 5 );
       pythia_->settings.flag( "ProcessLevel:all", false );
       pythia_->setLHAupPtr( lhaevt_.get() );
@@ -117,6 +118,15 @@ namespace CepGen
 #endif
     }
 
+    void
+    LHEFHandler::setCrossSection( double xsect, double xsect_err )
+    {
+#ifndef HEPMC_LHEF
+      lhaevt_->setCrossSection( xsect, xsect_err );
+      py_lhe_output_->updateSigma();
+#endif
+    }
+
     //---------------------------------------------------------------------------------------------
     // Define LHA event record if one uses Pythia to store the LHE
     //---------------------------------------------------------------------------------------------
@@ -124,9 +134,17 @@ namespace CepGen
 #ifndef HEPMC_LHEF
     LHEFHandler::LHAevent::LHAevent( const Parameters& params )
     {
-      addProcess( 0, params.integrator.result, params.integrator.err_result, 100. );
+      std::cout << params.integrator.result << "/////" << params.integrator.err_result <<std::endl;
       setBeamA( (short)params.kinematics.inpdg.first, params.kinematics.inp.first );
       setBeamB( (short)params.kinematics.inpdg.second, params.kinematics.inp.second );
+      addProcess( 0, params.integrator.result, params.integrator.err_result, 100. );
+    }
+
+    void
+    LHEFHandler::LHAevent::setCrossSection( double xsect, double xsect_err )
+    {
+      setXSec( 0, xsect );
+      setXErr( 0, xsect_err );
     }
 
     void

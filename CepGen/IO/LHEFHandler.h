@@ -33,31 +33,33 @@ namespace CepGen
      */
     class LHEFHandler : public ExportHandler
     {
-     public:
-      /// Class constructor
-      /// \param[in] filename Output file path
-      explicit LHEFHandler( const char* filename );
-      ~LHEFHandler() override;
-      void initialise( const Parameters& params ) override;
-      /// Writer operator
-      void operator<<( const Event& ) override;
+      public:
+        /// Class constructor
+        /// \param[in] filename Output file path
+        explicit LHEFHandler( const char* filename );
+        ~LHEFHandler() override;
+        void initialise( const Parameters& ) override;
+        /// Writer operator
+        void operator<<( const Event& ) override;
+        void setCrossSection( double, double ) override;
 
-     private:
+      private:
 #ifdef HEPMC_LHEF
-      /// Writer object (from HepMC)
-      std::unique_ptr<LHEF::Writer> lhe_output_;
-      LHEF::HEPRUP run_;
+        /// Writer object (from HepMC)
+        std::unique_ptr<LHEF::Writer> lhe_output_;
+        LHEF::HEPRUP run_;
 #else
-      std::unique_ptr<Pythia8::Pythia> pythia_;
-      std::unique_ptr<Pythia8::LHAupFromPYTHIA8> py_lhe_output_;
-      struct LHAevent : Pythia8::LHAup
-      {
-        explicit LHAevent( const Parameters& );
-        void feedEvent( const Event& ev );
-        bool setInit() override { return true; }
-        bool setEvent( int ) override { return true; }
-      };
-      std::unique_ptr<LHAevent> lhaevt_;
+        std::unique_ptr<Pythia8::Pythia> pythia_;
+        std::unique_ptr<Pythia8::LHAupFromPYTHIA8> py_lhe_output_;
+        struct LHAevent : Pythia8::LHAup
+        {
+          explicit LHAevent( const Parameters& );
+          void setCrossSection( double, double );
+          void feedEvent( const Event& ev );
+          bool setInit() override { return true; }
+          bool setEvent( int ) override { return true; }
+        };
+        std::unique_ptr<LHAevent> lhaevt_;
 #endif
     };
   }

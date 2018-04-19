@@ -30,12 +30,12 @@ int main( int argc, char* argv[] ) {
   mg.parameters->dump();
 
   // Let there be cross-section...
-  double xsec, err;
+  double xsec = 0., err = 0.;
   mg.computeXsection( xsec, err );
 
   CepGen::OutputHandler::LHEFHandler writer( "example.dat" );
-  writer.setCrossSection( xsec, err );
   writer.initialise( *mg.parameters );
+  writer.setCrossSection( xsec, err );
 
   // The events generation starts here!
   //FIXME move to a callback function for a more efficient usage of MT capabilities!
