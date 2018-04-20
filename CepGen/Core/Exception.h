@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <stdexcept>
+#include <csignal>
 
 #include "Logger.h"
 
@@ -81,7 +82,8 @@ namespace CepGen
         dump();
         // we stop this process' execution on fatal exception
         if ( type_ == Type::fatal )
-          exit(0);
+          if ( raise( SIGINT ) != 0 )
+            exit( 0 );
       }
 
       //----- Overloaded stream operators

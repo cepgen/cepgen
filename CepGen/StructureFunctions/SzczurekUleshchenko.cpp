@@ -10,7 +10,7 @@ namespace CepGen
     SzczurekUleshchenko::operator()( double q2, double xbj, const SigmaRatio& ratio ) const
     {
 #ifndef GRVPDF
-      throw FatalError( "SzczurekUleshchenko" )
+      throw CG_FATAL( "SzczurekUleshchenko" )
         << "Szczurek-Uleshchenko structure functions cannot be computed"
         << " as GRV PDF set is not linked to this instance!";
 #else

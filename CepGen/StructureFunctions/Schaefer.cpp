@@ -33,7 +33,7 @@ namespace CepGen
     {
       Schaefer luxlike;
 #ifndef SchaeferF2
-      throw FatalError( "Schaefer" )
+      throw CG_FATAL( "Schaefer" )
         << "LUXlike structure functions cannot be computed "
         << "as the Fortran subroutine is not linked to this instance!";
 #else

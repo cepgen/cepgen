@@ -14,9 +14,6 @@
 #include <vector>
 #include <unordered_map>
 
-using std::cout;
-using std::string;
-
 namespace CepGen
 {
   /// List of kinematic constraints to apply on the process phase space.
@@ -24,8 +21,6 @@ namespace CepGen
   {
     public:
       Kinematics();
-      Kinematics( const Kinematics& kin );
-      Kinematics& operator=( const Kinematics& kin );
       ~Kinematics();
 
       /// Type of kinematics to consider for the process
@@ -66,8 +61,6 @@ namespace CepGen
       struct CutsList
       {
         CutsList();
-        CutsList( const CutsList& cuts );
-        CutsList& operator=( const CutsList& cuts );
         struct EnumClassHash
         {
           template <typename T> std::size_t operator()( T t ) const {
@@ -85,8 +78,7 @@ namespace CepGen
         std::unordered_map<Cuts,Limits,EnumClassHash> initial;
         /// Cuts on the central system produced
         std::unordered_map<Cuts,Limits,EnumClassHash> central;
-        std::map<PDG,std::unordered_map<Cuts,Limits,EnumClassHash> > central_particles;
-        //std::unordered_map<PDG,std::unordered_map<Cuts,Limits,EnumClassHash>,PDGHash> central_particles;
+        std::unordered_map<PDG,std::unordered_map<Cuts,Limits,EnumClassHash>,EnumClassHash> central_particles;
         /// Cuts on the beam remnants system
         std::unordered_map<Cuts,Limits,EnumClassHash> remnants;
       };

@@ -24,44 +24,52 @@ namespace CepGen
 
       init( &params_ );
 
-      std::ostringstream os;
-      os << Form( "File '%s' succesfully opened! The following parameters are set:\n", file );
 
       std::map<std::string, std::string> m_params;
       std::string key, value;
+      std::ostringstream os;
       while ( f >> key >> value ) {
         if ( key[0] == '#' ) continue; // FIXME need to ensure there is no extra space before!
         setParameter( key, value );
-        m_params.insert( std::pair<std::string,std::string>( key, value ) );
+        m_params.insert( { key, value } );
         if ( getDescription( key ) != "null" )
-          os << ">> " << key << " = " << std::setw( 15 )
-             << getParameter( key )
-             << " (" << getDescription( key ) << ")" << std::endl;
+          os << "\n>> " << key << " = " << std::setw( 15 ) << getParameter( key )
+             << " (" << getDescription( key ) << ")";
       }
       f.close();
 
-      if      ( proc_name_ == "lpair" )  params_.setProcess( new Process::GamGamLL );
-      else if ( proc_name_ == "pptoll" ) params_.setProcess( new Process::PPtoLL );
-      else if ( proc_name_ == "pptoww" ) params_.setProcess( new Process::PPtoWW );
-      else throw CG_FATAL( "LpairHandler" ) << "Unrecognised process name: " << proc_name_ << "!";
+      if ( proc_name_ == "lpair" )
+        params_.setProcess( new Process::GamGamLL );
+      else if ( proc_name_ == "pptoll" )
+        params_.setProcess( new Process::PPtoLL );
+      else if ( proc_name_ == "pptoww" )
+        params_.setProcess( new Process::PPtoWW );
+      else
+        throw CG_FATAL( "LpairHandler" ) << "Unrecognised process name: " << proc_name_ << "!";
 
-      if      ( integr_type_ == "plain" ) params_.integrator.type = Integrator::Type::plain;
-      else if ( integr_type_ == "Vegas" ) params_.integrator.type = Integrator::Type::Vegas;
-      else if ( integr_type_ == "MISER" ) params_.integrator.type = Integrator::Type::MISER;
+      if ( integr_type_ == "plain" )
+        params_.integrator.type = Integrator::Type::plain;
+      else if ( integr_type_ == "Vegas" )
+        params_.integrator.type = Integrator::Type::Vegas;
+      else if ( integr_type_ == "MISER" )
+        params_.integrator.type = Integrator::Type::MISER;
       else if ( integr_type_ != "" )
         throw CG_FATAL( "LpairHandler" ) << "Unrecognized integrator type: " << integr_type_ << "!";
 
 #ifdef PYTHIA8
-      if ( hadr_name_ == "pythia8" ) params_.setHadroniser( new Hadroniser::Pythia8Hadroniser( params_ ) );
+      if ( hadr_name_ == "pythia8" )
+        params_.setHadroniser( new Hadroniser::Pythia8Hadroniser( params_ ) );
 #endif
 
-      if ( m_params.count( "IEND" ) ) setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
+      if ( m_params.count( "IEND" ) )
+        setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
 
       //--- for LPAIR: specify the lepton pair to be produced
       if ( pair_ != PDG::invalid )
         params_.kinematics.central_system = { pair_, pair_ };
 
-      CG_INFO( "LpairHandler" ) << os.str();
+      CG_INFO( "LpairHandler" ) << "File '" << file << "' succesfully opened!\n\t"
+        << "The following parameters are set:" << os.str();
     }
 
     void

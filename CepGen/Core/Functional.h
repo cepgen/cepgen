@@ -48,7 +48,7 @@ namespace CepGen
           parser_.SetExpr( expr );
         } catch ( const mu::Parser::exception_type& e ) {
           std::ostringstream os; for ( unsigned short i = 0; i < e.GetPos(); ++i ) os << "-"; os << "^";
-          throw JustWarning( "Functional" )
+          throw CG_WARNING( "Functional" )
             << "Failed to define the function\n\t"
             << expression_ << "\n\t"
             << os.str() << "\n\t"
@@ -72,7 +72,7 @@ namespace CepGen
         values_ = x;
         try { ret = parser_.Eval(); } catch ( const mu::Parser::exception_type& e ) {
           std::ostringstream os; for ( unsigned short i = 0; i < e.GetPos(); ++i ) os << "-"; os << "^";
-          throw JustWarning( "Functional" )
+          throw CG_WARNING( "Functional" )
             << "Failed to evaluate the function\n\t"
             << expression_ << "\n\t"
             << os.str() << "\n\t"

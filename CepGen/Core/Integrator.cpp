@@ -17,7 +17,7 @@ namespace CepGen
   Integrator::Integrator( unsigned int ndim, double integrand( double*, size_t, void* ), Parameters* params ) :
     input_params_( params ),
     function_( new gsl_monte_function{ integrand, ndim, (void*)input_params_ } ),
-    rng_( gsl_rng_alloc( input_params_->integrator.rng_engine ) )
+    rng_( gsl_rng_alloc( input_params_->integrator.rng_engine ), gsl_rng_free )
   {
     //--- initialise the random number generator
     unsigned long seed = ( input_params_->integrator.rng_seed > 0 )
@@ -287,14 +287,6 @@ namespace CepGen
       case Integrator::Type::MISER: return os << "MISER";
     }
     return os;
-  }
-
-  //------------------------------------------------------------------------------------------------
-
-  void Integrator::gsl_rng_deleter::operator()( gsl_rng* rng ) noexcept
-  {
-    if ( rng )
-      gsl_rng_free( rng );
   }
 
   //------------------------------------------------------------------------------------------------

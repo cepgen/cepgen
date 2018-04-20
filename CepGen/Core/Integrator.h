@@ -75,10 +75,7 @@ namespace CepGen
       Parameters* input_params_;
       /// GSL structure storing the function to be integrated by this integrator instance (along with its parameters)
       std::unique_ptr<gsl_monte_function> function_;
-      struct gsl_rng_deleter {
-        void operator()( gsl_rng* rng ) noexcept;
-      };
-      std::unique_ptr<gsl_rng,gsl_rng_deleter> rng_;
+      std::unique_ptr<gsl_rng,void(*)( gsl_rng* )> rng_;
       std::mutex mutex_;
   };
   std::ostream& operator<<( std::ostream&, const Integrator::Type& );

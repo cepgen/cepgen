@@ -33,11 +33,9 @@ void printEvent( const CepGen::Event& ev, unsigned long ev_id )
  */
 int main( int argc, char* argv[] ) {
   //CepGen::Logger::get( new ofstream( "log.txt" ) );
+  //CepGen::Logger::get().level = CepGen::Logger::Level::Debug;
 
   CepGen::Generator mg;
-
-  //CepGen::Logger::get().level = CepGen::Logger::Level::Debug;
-  //CepGen::Logger::get().level = CepGen::Logger::Level::DebugInsideLoop;
 
   if ( argc > 1 ) {
     CG_INFO( "main" ) << "Reading config file stored in " << argv[1] << ".";
@@ -48,6 +46,8 @@ int main( int argc, char* argv[] ) {
     else if ( extension == "py" )
       mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
 #endif
+    else
+      throw CG_FATAL( "main" ) << "Unrecognized steering card extension: ." << extension << "!";
   }
   else {
     CG_INFO( "main" ) << "No config file provided. Setting the default parameters.";

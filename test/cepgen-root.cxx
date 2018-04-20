@@ -61,7 +61,8 @@ int main( int argc, char* argv[] ) {
   CepGen::Generator mg;
 
   if ( argc < 2 )
-    throw CG_ERROR( "main" ) << "Usage: " << argv[0] << " <input card> [output .root filename]";
+    throw CG_FATAL( "main" ) << "Usage: " << argv[0] << " input-card [filename=events.root]";
+
   const std::string extension = CepGen::Cards::Handler::getExtension( argv[1] );
   if ( extension == "card" )
     mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
@@ -73,7 +74,7 @@ int main( int argc, char* argv[] ) {
 
   //----- open the output root file
 
-  const TString filename = ( argc > 2 ) ? argv[2] : "events.root";
+  const char* filename = ( argc > 2 ) ? argv[2] : "events.root";
   auto file = TFile::Open( filename, "recreate" );
   if ( !file )
     throw CG_FATAL( "main" ) << "Failed to create the output file!";

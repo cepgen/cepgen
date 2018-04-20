@@ -11,25 +11,6 @@ namespace CepGen
     mode( Mode::ElasticElastic ), structure_functions( StructureFunctions::SuriYennie )
   {}
 
-  Kinematics::Kinematics( const Kinematics& kin ) :
-    inp( kin.inp ), inpdg( kin.inpdg ),
-    central_system( kin.central_system ), minimum_final_state( kin.minimum_final_state ),
-    mode( kin.mode ), structure_functions( kin.structure_functions ),
-    cuts( kin.cuts )
-  {}
-
-  Kinematics&
-  Kinematics::operator=( const Kinematics& kin )
-  {
-    inp = kin.inp; inpdg = kin.inpdg;
-    central_system = kin.central_system;
-    minimum_final_state = kin.minimum_final_state;
-    mode = kin.mode;
-    structure_functions = kin.structure_functions;
-    cuts = kin.cuts;
-    return *this;
-  }
-
   Kinematics::~Kinematics()
   {}
 
@@ -94,21 +75,5 @@ namespace CepGen
     central( { { Cuts::pt_single, 0. } } ),
     remnants( { { Cuts::mass_single, { 1.07, 320. } } } )
   {}
-
-  Kinematics::CutsList::CutsList( const CutsList& cuts ) :
-    initial( cuts.initial ),
-    central( cuts.central ), central_particles( cuts.central_particles ),
-    remnants( cuts.remnants )
-  {}
-
-  Kinematics::CutsList&
-  Kinematics::CutsList::operator=( const CutsList& cuts )
-  {
-    initial = cuts.initial;
-    central = cuts.central;
-    central_particles = cuts.central_particles;
-    remnants = cuts.remnants;
-    return *this;
-  }
 }
 

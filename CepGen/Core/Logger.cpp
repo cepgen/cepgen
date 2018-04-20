@@ -2,6 +2,16 @@
 
 namespace CepGen
 {
+  Logger::Logger( std::ostream* os ) :
+    level( Level::Information ), output( os )
+  {}
+
+  Logger::~Logger()
+  {
+    if ( output.get() == &std::cout )
+      output.reset();
+  }
+
   void
   Logger::addExceptionRule( const char* rule )
   {
@@ -15,6 +25,26 @@ namespace CepGen
       if ( std::regex_match( tmpl, rule ) )
         return true;
     return false;
+  }
+
+  std::ostream&
+  operator<<( std::ostream& os, const Logger::Level& lvl )
+  {
+    switch ( lvl ) {
+      case Logger::Level::Nothing:
+        return os << "None";
+      case Logger::Level::Error:
+        return os << "Errors";
+      case Logger::Level::Warning:
+        return os << "Warnings";
+      case Logger::Level::Information:
+        return os << "Infos";
+      case Logger::Level::Debug:
+        return os << "Debug";
+      case Logger::Level::DebugInsideLoop:
+        return os << "Debug (in loops)";
+    }
+    return os;
   }
 }
 
