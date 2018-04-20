@@ -95,7 +95,7 @@ namespace CepGen
   {
     const auto ret = daughters_.insert( part.id() );
 
-    if ( Logger::get().level >= Logger::DebugInsideLoop ) {
+    if ( Logger::get().level >= Logger::Level::DebugInsideLoop ) {
       std::ostringstream os;
       for ( const auto& daugh : daughters_ )
         os << Form( "\n\t * id=%d", daugh );

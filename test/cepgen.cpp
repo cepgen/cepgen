@@ -11,12 +11,12 @@
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
 void printEvent( const CepGen::Event& ev, unsigned long ev_id )
 {
-//cout << ev_id << endl;
   if ( ev_id % 5000 != 0 )
     return;
 
@@ -32,11 +32,12 @@ void printEvent( const CepGen::Event& ev, unsigned long ev_id )
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
  */
 int main( int argc, char* argv[] ) {
+  //CepGen::Logger::get( new ofstream( "log.txt" ) );
+
   CepGen::Generator mg;
 
-  //CepGen::Logger::get().level = CepGen::Logger::Debug;
-  //CepGen::Logger::get().level = CepGen::Logger::DebugInsideLoop;
-  //CepGen::Logger::get().outputStream( ofstream( "log.txt" ) );
+  //CepGen::Logger::get().level = CepGen::Logger::Level::Debug;
+  //CepGen::Logger::get().level = CepGen::Logger::Level::DebugInsideLoop;
 
   if ( argc > 1 ) {
     CG_INFO( "main" ) << "Reading config file stored in " << argv[1] << ".";
@@ -52,7 +53,6 @@ int main( int argc, char* argv[] ) {
     CG_INFO( "main" ) << "No config file provided. Setting the default parameters.";
 
     mg.parameters->setProcess( new CepGen::Process::GamGamLL );
-    //mg.parameters->process_mode = Kinematics::Mode::InelasticElastic;
     mg.parameters->kinematics.mode = CepGen::Kinematics::Mode::ElasticElastic;
     mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SuriYennie;
     mg.parameters->kinematics.inp = { 6500., 6500. };

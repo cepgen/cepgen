@@ -237,7 +237,7 @@ namespace CepGen
       sum2p += sig2;
       grid.f_max_global = std::max( grid.f_max_global, grid.f_max[i] );
 
-      if ( Logger::get().level >= Logger::DebugInsideLoop ) {
+      if ( Logger::get().level >= Logger::Level::DebugInsideLoop ) {
         const double sig = sqrt( sig2 );
         const double eff = ( grid.f_max[i] != 0. ) ? grid.f_max[i]/av : 1.e4;
         std::ostringstream os;

@@ -202,7 +202,7 @@ namespace CepGen
           } break;
         }
       }
-      if ( Logger::get().level >= Logger::DebugInsideLoop ) {
+      if ( Logger::get().level >= Logger::Level::DebugInsideLoop ) {
         std::ostringstream oss;
         for ( const auto& cut : mapped_variables_ ) {
           oss << "variable " << cut.index

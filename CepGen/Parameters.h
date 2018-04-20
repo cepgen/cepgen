@@ -30,7 +30,7 @@ namespace CepGen
       /// \param[in] thetamax The maximal value of \f$\theta\f$ for the outgoing leptons
       void setThetaRange( float thetamin, float thetamax );
       /// Dump the input parameters in the console
-      void dump( std::ostream& os = Logger::get().outputStream, bool pretty = true ) const;
+      void dump( std::ostream& os = *Logger::get().output, bool pretty = true ) const;
 
       //----- process to compute
 

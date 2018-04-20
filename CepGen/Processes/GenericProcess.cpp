@@ -56,7 +56,7 @@ namespace CepGen
       x_ = std::vector<double>( x, x+ndim );
       is_point_set_ = true;
 
-      if ( Logger::get().level >= Logger::DebugInsideLoop )
+      if ( Logger::get().level >= Logger::Level::DebugInsideLoop )
         dumpPoint();
     }
 

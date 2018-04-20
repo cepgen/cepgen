@@ -28,7 +28,7 @@ namespace CepGen
         return it->second.function.eval( x );
       }
       /// Dump a full list of taming functions handled
-      void dump( std::ostream& os=Logger::get().outputStream ) const {
+      void dump( std::ostream& os = *Logger::get().output ) const {
         os << "List of taming functions:\n";
         for ( const auto& it : *this )
           os << ">> \"" << it.second.expression << "\" applied on variable \"" << it.first << "\"\n";

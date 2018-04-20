@@ -16,19 +16,22 @@ namespace CepGen
   {
     public:
       /// Logging threshold for the output stream
-      enum LoggingLevel { Nothing = 0, Error, Warning, Information, Debug, DebugInsideLoop };
+      enum class Level { Nothing = 0, Error, Warning, Information, Debug, DebugInsideLoop };
 
     private:
       /// Initialize a logging object
-      Logger() : level( Information ), outputStream( std::cout ) {}
-      ~Logger() {}
+      Logger( std::ostream* os = &std::cout ) : level( Level::Information ), output( os ) {}
+      ~Logger() {
+        if ( output.get() == &std::cout )
+          output.reset();
+      }
 
       std::vector<std::regex> allowed_exc_;
 
     public:
       /// Retrieve the running instance of the logger
-      static Logger& get() {
-        static Logger log;
+      static Logger& get( std::ostream* os = &std::cout ) {
+        static Logger log( os );
         return log;
       }
       /// Add a new rule to display exceptions/messages
@@ -39,21 +42,21 @@ namespace CepGen
       bool passExceptionRule( const std::string& tmpl ) const;
 
       /// Redirect the logger to a given output stream
-      friend std::ostream& operator<<( std::ostream& os, const Logger::LoggingLevel& lvl ) {
+      friend std::ostream& operator<<( std::ostream& os, const Logger::Level& lvl ) {
         switch ( lvl ) {
-          case Logger::Nothing:         os << "None"; break;
-          case Logger::Error:           os << "Errors"; break;
-          case Logger::Warning:         os << "Warnings"; break;
-          case Logger::Information:     os << "Infos"; break;
-          case Logger::Debug:           os << "Debug"; break;
-          case Logger::DebugInsideLoop: os << "Debug (in loops)"; break;
+          case Level::Nothing:         return os << "None";
+          case Level::Error:           return os << "Errors";
+          case Level::Warning:         return os << "Warnings";
+          case Level::Information:     return os << "Infos";
+          case Level::Debug:           return os << "Debug";
+          case Level::DebugInsideLoop: return os << "Debug (in loops)";
         }
         return os;
       }
       /// Logging threshold for the output stream
-      LoggingLevel level;
+      Level level;
       /// Output stream to use for all logging operations
-      std::ostream& outputStream;
+      std::shared_ptr<std::ostream> output;
   };
 }
 

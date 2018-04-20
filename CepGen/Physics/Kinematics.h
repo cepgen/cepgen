@@ -80,7 +80,7 @@ namespace CepGen
 
       /// Dump all the parameters used in this process cross-section computation
       /// or events generation
-      void dump( std::ostream& os = Logger::get().outputStream ) const;
+      void dump( std::ostream& os = *Logger::get().output ) const;
 
       /// Incoming particles' momentum (in \f$\text{GeV}/c\f$)
       std::pair<double,double> inp;
@@ -104,20 +104,20 @@ namespace CepGen
         CutsList();
         CutsList( const CutsList& cuts );
         CutsList& operator=( const CutsList& cuts );
-        /*/// Cuts on the initial particles kinematics
+        /// Cuts on the initial particles kinematics
         std::map<Cuts,Limits> initial;
         /// Cuts on the central system produced
         std::map<Cuts,Limits> central;
         std::map<PDG,std::map<Cuts,Limits> > central_particles;
         /// Cuts on the beam remnants system
-        std::map<Cuts,Limits> remnants;*/
-        /// Cuts on the initial particles kinematics
+        std::map<Cuts,Limits> remnants;
+        /*/// Cuts on the initial particles kinematics
         std::unordered_map<Cuts,Limits,CutsHash> initial;
         /// Cuts on the central system produced
         std::unordered_map<Cuts,Limits,CutsHash> central;
         std::unordered_map<PDG,std::unordered_map<Cuts,Limits,CutsHash>,PDGHash> central_particles;
         /// Cuts on the beam remnants system
-        std::unordered_map<Cuts,Limits,CutsHash> remnants;
+        std::unordered_map<Cuts,Limits,CutsHash> remnants;*/
       };
       CutsList cuts;
   };

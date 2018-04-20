@@ -8,29 +8,31 @@
 
 #define CG_EXCEPT_MATCH( str ) \
   CepGen::Logger::get().passExceptionRule( str )
+#define CG_EXCEPT_LEVEL( lev ) \
+  ( CepGen::Logger::get().level >= CepGen::Logger::Level::lev )
 
 #define CG_LOG( mod ) \
-  ( CepGen::Logger::get().level < CepGen::Logger::Nothing ) \
+  ( !CG_EXCEPT_LEVEL( Nothing ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::verbatim )
 #define CG_INFO( mod ) \
-  ( CepGen::Logger::get().level < CepGen::Logger::Information && !CG_EXCEPT_MATCH( mod ) ) \
+  ( !CG_EXCEPT_LEVEL( Information ) && !CG_EXCEPT_MATCH( mod ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::info )
 #define CG_DEBUG( mod ) \
-  ( CepGen::Logger::get().level < CepGen::Logger::Debug && !CG_EXCEPT_MATCH( mod ) ) \
+  ( !CG_EXCEPT_LEVEL( Debug ) && !CG_EXCEPT_MATCH( mod ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::debug )
 #define CG_DEBUG_LOOP( mod ) \
-  ( CepGen::Logger::get().level < CepGen::Logger::DebugInsideLoop && !CG_EXCEPT_MATCH( mod ) ) \
+  ( !CG_EXCEPT_LEVEL( DebugInsideLoop ) && !CG_EXCEPT_MATCH( mod ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::debug )
 #define CG_WARNING( mod ) \
-  ( CepGen::Logger::get().level < CepGen::Logger::Warning && !CG_EXCEPT_MATCH( mod ) ) \
+  ( !CG_EXCEPT_LEVEL( Warning ) && !CG_EXCEPT_MATCH( mod ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::warning )
 #define CG_ERROR( mod ) \
-  ( CepGen::Logger::get().level < CepGen::Logger::Error && !CG_EXCEPT_MATCH( mod ) ) \
+  ( !CG_EXCEPT_LEVEL( Error ) && !CG_EXCEPT_MATCH( mod ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::warning )
 #define CG_FATAL( mod ) \
@@ -123,7 +125,7 @@ namespace CepGen
 
       /// Dump the full exception information in a given output stream
       /// \param[inout] os the output stream where the information is dumped
-      inline void dump( std::ostream& os = Logger::get().outputStream ) const {
+      inline void dump( std::ostream& os = *Logger::get().output ) const {
         os << fullMessage() << std::endl;
       }
       /// Extract a one-line summary of the exception
