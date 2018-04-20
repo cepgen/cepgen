@@ -469,7 +469,7 @@ namespace CepGen
     }
 
     void
-    PythonHandler::getLimits( PyObject* obj, const char* key, Kinematics::Limits& lim )
+    PythonHandler::getLimits( PyObject* obj, const char* key, Limits& lim )
     {
       PyObject* pobj = getElement( obj, key );
       if ( !pobj )

@@ -6,9 +6,10 @@
 
 #include "CepGen/Core/Logger.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
-#include "CepGen/Physics/ParticleProperties.h"
 
-#include "Cuts.h"
+#include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Physics/Cuts.h"
+#include "CepGen/Physics/Limits.h"
 
 #include <vector>
 #include <unordered_map>
@@ -21,44 +22,6 @@ namespace CepGen
   /// List of kinematic constraints to apply on the process phase space.
   class Kinematics
   {
-    public:
-      /// Validity interval for a variable
-      class Limits : private std::pair<double,double>
-      {
-        public:
-          /// Define lower and upper limits on a quantity
-          Limits( double min = kInvalid, double max = kInvalid );
-          Limits( const Limits& );
-
-          /// Lower limit to apply on the variable
-          double min() const { return first; }
-          /// Lower limit to apply on the variable
-          double& min() { return first; }
-          /// Upper limit to apply on the variable
-          double max() const { return second; }
-          /// Upper limit to apply on the variable
-          double& max() { return second; }
-          /// Find the [0,1] value scaled between minimum and maximum
-          double x( double v ) const;
-          /// Specify the lower and upper limits on the variable
-          void in( double low, double up );
-          /// Full variable range allowed
-          double range() const;
-          /// Have a lower limit?
-          bool hasMin() const;
-          /// Have an upper limit?
-          bool hasMax() const;
-          /// Check if the value is inside limits' boundaries
-          bool passes( double val ) const;
-          /// Is there a lower and upper limit?
-          bool valid() const;
-
-          /// Human-readable expression of the limits
-          friend std::ostream& operator<<( std::ostream&, const Limits& );
-
-        private:
-          static constexpr double kInvalid = -999.999;
-      };
     public:
       Kinematics();
       Kinematics( const Kinematics& kin );
@@ -100,24 +63,32 @@ namespace CepGen
       /// Type of structure functions to consider
       StructureFunctions::Type structure_functions;
 
-      struct CutsList {
+      struct CutsList
+      {
         CutsList();
         CutsList( const CutsList& cuts );
         CutsList& operator=( const CutsList& cuts );
+        struct EnumClassHash
+        {
+          template <typename T> std::size_t operator()( T t ) const {
+            return static_cast<std::size_t>( t );
+          }
+        };
         /// Cuts on the initial particles kinematics
-        std::map<Cuts,Limits> initial;
+        /*std::map<Cuts,Limits> initial;
         /// Cuts on the central system produced
         std::map<Cuts,Limits> central;
         std::map<PDG,std::map<Cuts,Limits> > central_particles;
         /// Cuts on the beam remnants system
-        std::map<Cuts,Limits> remnants;
-        /*/// Cuts on the initial particles kinematics
-        std::unordered_map<Cuts,Limits,CutsHash> initial;
+        std::map<Cuts,Limits> remnants;*/
+        /// Cuts on the initial particles kinematics
+        std::unordered_map<Cuts,Limits,EnumClassHash> initial;
         /// Cuts on the central system produced
-        std::unordered_map<Cuts,Limits,CutsHash> central;
-        std::unordered_map<PDG,std::unordered_map<Cuts,Limits,CutsHash>,PDGHash> central_particles;
+        std::unordered_map<Cuts,Limits,EnumClassHash> central;
+        std::map<PDG,std::unordered_map<Cuts,Limits,EnumClassHash> > central_particles;
+        //std::unordered_map<PDG,std::unordered_map<Cuts,Limits,EnumClassHash>,PDGHash> central_particles;
         /// Cuts on the beam remnants system
-        std::unordered_map<Cuts,Limits,CutsHash> remnants;*/
+        std::unordered_map<Cuts,Limits,EnumClassHash> remnants;
       };
       CutsList cuts;
   };

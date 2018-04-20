@@ -92,7 +92,7 @@ namespace CepGen
         /// \param[in] in Integration limits
         /// \param[in] default_limits Limits to apply if none retrieved from the user configuration
         /// \param[in] description Human-readable description of the variable
-        void registerVariable( double& out, const Mapping& type, const Kinematics::Limits& in, Kinematics::Limits default_limits, const char* description );
+        void registerVariable( double& out, const Mapping& type, const Limits& in, Limits default_limits, const char* description );
         /// Generate and initialise all variables handled by this process
         /// \return Phase space point-dependent component of the Jacobian weight of the point in the phase space for integration
         /// \note To be run at each point computation (therefore, to be optimised!)
@@ -104,11 +104,11 @@ namespace CepGen
         double kt_jacobian_;
 
         /// Log-virtuality range of the intermediate parton
-        Kinematics::Limits log_qt_limits_;
+        Limits log_qt_limits_;
         /// Intermediate azimuthal angle range
-        Kinematics::Limits phi_qt_limits_;
+        Limits phi_qt_limits_;
         /// Invariant mass range for the scattered excited system
-        Kinematics::Limits mx_limits_;
+        Limits mx_limits_;
 
         /// Virtuality of the first intermediate parton (photon, pomeron, ...)
         double qt1_;
@@ -132,7 +132,7 @@ namespace CepGen
         struct MappingVariable
         {
           /// Kinematic limits to apply on the variable
-          Kinematics::Limits limits;
+          Limits limits;
           /// Reference to the process variable to generate/map
           double& variable;
           /// Interpolation type

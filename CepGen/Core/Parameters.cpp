@@ -215,6 +215,8 @@ namespace CepGen
       out << os.str();
   }
 
+  //-----------------------------------------------------------------------------------------------
+
   Parameters::IntegratorParameters::IntegratorParameters() :
     type( Integrator::Type::Vegas ), ncvg( 500000 ), npoints( 100 ),
     rng_seed( 0 ), rng_engine( (gsl_rng_type*)gsl_rng_mt19937 ),
@@ -222,18 +224,20 @@ namespace CepGen
     result( -1. ), err_result( -1. )
   {
     const size_t ndof = 10;
-
-    gsl_monte_vegas_state* veg_state = gsl_monte_vegas_alloc( ndof );
-    gsl_monte_vegas_params_get( veg_state, &vegas );
-    gsl_monte_vegas_free( veg_state );
-    vegas.ostream = stderr; // redirect all debugging information to the error stream
-    /*__gnu_cxx::stdio_filebuf<char> fpt( fileno( vegas.ostream ), std::ios::in );
-    std::istream fstr( &fpt );*/
-
-    gsl_monte_miser_state* mis_state = gsl_monte_miser_alloc( ndof );
-    gsl_monte_miser_params_get( mis_state, &miser );
-    gsl_monte_miser_free( mis_state );
+    {
+      std::shared_ptr<gsl_monte_vegas_state> tmp_state( gsl_monte_vegas_alloc( ndof ), gsl_monte_vegas_free );
+      gsl_monte_vegas_params_get( tmp_state.get(), &vegas );
+      vegas.ostream = stderr; // redirect all debugging information to the error stream
+      /*__gnu_cxx::stdio_filebuf<char> fpt( fileno( vegas.ostream ), std::ios::in );
+      std::istream fstr( &fpt );*/
+    }
+    {
+      std::shared_ptr<gsl_monte_miser_state> tmp_state( gsl_monte_miser_alloc( ndof ), gsl_monte_miser_free );
+      gsl_monte_miser_params_get( tmp_state.get(), &miser );
+    }
   }
+
+  //-----------------------------------------------------------------------------------------------
 
   Parameters::Generation::Generation() :
     enabled( false ), maxgen( 0 ),

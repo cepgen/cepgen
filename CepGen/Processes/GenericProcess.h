@@ -29,7 +29,7 @@ namespace CepGen
         virtual ~GenericProcess();
 
         /// Assignment operator
-        void operator=( const GenericProcess& );
+        GenericProcess& operator=( const GenericProcess& );
 
         /// Human-readable format dump of a GenericProcess object
         friend std::ostream& operator<<( std::ostream& os, const GenericProcess& proc );

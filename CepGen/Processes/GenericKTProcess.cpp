@@ -149,10 +149,10 @@ namespace CepGen
 
     void
     GenericKTProcess::registerVariable( double& out, const Mapping& type,
-                                        const Kinematics::Limits& in, Kinematics::Limits default_limits,
+                                        const Limits& in, Limits default_limits,
                                         const char* description )
     {
-      Kinematics::Limits lim = in;
+      Limits lim = in;
       out = 0.; // reset the variable
       if ( !in.valid() ) {
         CG_DEBUG( "GenericKTProcess:registerVariable" )

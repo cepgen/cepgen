@@ -143,7 +143,7 @@ namespace CepGen
              t1_min = ( masses_.w31_*d3+( d3-masses_.w31_ )*( d3*w1_-masses_.w31_*w2_ )/s_ )/t1_max; // definition from eq. (A.5) in [1]
 
       // FIXME dropped in CDF version
-      const Kinematics::Limits q2_limits = cuts_.cuts.initial[Cuts::q2];
+      const Limits q2_limits = cuts_.cuts.initial[Cuts::q2];
       if ( t1_max > -q2_limits.min() ) {
         CG_WARNING( "GamGamLL" ) << "t1max = " << t1_max << " > -q2min = " << ( -q2_limits.min() );
         return false;
@@ -568,7 +568,7 @@ namespace CepGen
     GamGamLL::computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dw )
     {
       const double mx0 = mp_+ParticleProperties::mass( PDG::PiZero ); // 1.07
-      const Kinematics::Limits mx_limits = cuts_.cuts.remnants[Cuts::mass_single];
+      const Limits mx_limits = cuts_.cuts.remnants[Cuts::mass_single];
       const double wx2min = pow( std::max( mx0, mx_limits.min() ), 2 ),
                    wx2max = pow( std::min( sqs_-outmass-2.*lepmass, mx_limits.max() ), 2 );
 
@@ -633,7 +633,7 @@ namespace CepGen
         << "m(X1) = " << MX_ << " GeV\t"
         << "m(X2) = " << MY_ << " GeV";
 
-      Kinematics::Limits& w_limits = cuts_.cuts.initial[Cuts::w];
+      Limits& w_limits = cuts_.cuts.initial[Cuts::w];
       if ( !w_limits.hasMax() )
         w_limits.max() = s_;
       // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
@@ -857,7 +857,7 @@ namespace CepGen
 
       //--- cut on mass of final hadronic system (MX/Y)
 
-      const Kinematics::Limits mx_limits = cuts_.cuts.remnants[Cuts::mass_single];
+      const Limits mx_limits = cuts_.cuts.remnants[Cuts::mass_single];
       if ( cuts_.mode == Kinematics::Mode::InelasticElastic
         || cuts_.mode == Kinematics::Mode::InelasticInelastic ) {
         if ( !mx_limits.passes( MX_ ) )
@@ -881,15 +881,15 @@ namespace CepGen
 
       //----- cuts on the individual leptons
 
-      const Kinematics::Limits pt_limits = cuts_.cuts.central[Cuts::pt_single];
+      const Limits pt_limits = cuts_.cuts.central[Cuts::pt_single];
       if ( !pt_limits.passes( p6_cm_.pt() ) || !pt_limits.passes( p7_cm_.pt() ) )
         return 0.;
 
-      const Kinematics::Limits energy_limits = cuts_.cuts.central[Cuts::energy_single];
+      const Limits energy_limits = cuts_.cuts.central[Cuts::energy_single];
       if ( !energy_limits.passes( p6_cm_.energy() ) || !energy_limits.passes( p7_cm_.energy() ) )
         return 0.;
 
-      const Kinematics::Limits eta_limits = cuts_.cuts.central[Cuts::eta_single];
+      const Limits eta_limits = cuts_.cuts.central[Cuts::eta_single];
       if ( !eta_limits.passes( p6_cm_.eta() ) || !eta_limits.passes( p7_cm_.eta() ) )
         return 0.;
 

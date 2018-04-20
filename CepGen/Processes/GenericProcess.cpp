@@ -32,22 +32,17 @@ namespace CepGen
     GenericProcess::~GenericProcess()
     {}
 
-    void
+    GenericProcess&
     GenericProcess::operator=( const GenericProcess& proc )
     {
-      name_ = proc.name_;
-      description_ = proc.description_;
+      name_ = proc.name_; description_ = proc.description_;
       first_run = proc.first_run;
-      s_ = proc.s_;
-      sqs_ = proc.sqs_;
-      MX_ = proc.MX_;
-      MY_ = proc.MY_;
-      w1_ = proc.w1_;
-      w2_ = proc.w2_;
-      has_event_ = proc.has_event_;
-      event_.reset( new Event( *proc.event_.get() ) );
-//      event_.reset( proc.event_.get() );
+      s_ = proc.s_; sqs_ = proc.sqs_;
+      MX_ = proc.MX_; MY_ = proc.MY_; w1_ = proc.w1_; w2_ = proc.w2_;
+      cuts_ = proc.cuts_;
+      has_event_ = proc.has_event_; event_.reset( new Event( *proc.event_.get() ) );
       is_point_set_ = false;
+      return *this;
     }
 
     void

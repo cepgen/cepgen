@@ -67,12 +67,19 @@ namespace CepGen
     void
     LpairHandler::init( Parameters* params )
     {
+      //-------------------------------------------------------------------------------------------
+      // Process/integration/hadronisation parameters
+      //-------------------------------------------------------------------------------------------
+
       registerParameter<std::string>( "PROC", "Process name to simulate", &proc_name_ );
       registerParameter<std::string>( "ITYP", "Integration algorithm", &integr_type_ );
       registerParameter<std::string>( "HADR", "Hadronisation algorithm", &hadr_name_ );
 
-      registerParameter<bool>( "IEND", "Generation type", &params->generation.enabled );
+      //-------------------------------------------------------------------------------------------
+      // General parameters
+      //-------------------------------------------------------------------------------------------
 
+      registerParameter<bool>( "IEND", "Generation type", &params->generation.enabled );
       registerParameter<unsigned int>( "DEBG", "Debugging verbosity", (unsigned int*)&Logger::get().level );
       registerParameter<unsigned int>( "NCVG", "Number of function calls", &params->integrator.ncvg );
       registerParameter<unsigned int>( "NCSG", "Number of points to probe", &params->integrator.npoints );
@@ -86,19 +93,23 @@ namespace CepGen
       registerParameter<unsigned int>( "NGEN", "Number of events to generate", &params->generation.maxgen );
       registerParameter<unsigned int>( "NPRN", "Number of events before printout", &params->generation.gen_print_every );
 
+      //-------------------------------------------------------------------------------------------
+      // Process kinematics parameters
+      //-------------------------------------------------------------------------------------------
+
+      registerParameter<double>( "INP1", "Momentum (1st primary particle)", &params->kinematics.inp.first );
+      registerParameter<double>( "INP2", "Momentum (2nd primary particle)", &params->kinematics.inp.second );
       registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params->kinematics.inp.first );
       registerParameter<double>( "INPE", "Momentum (2nd primary particle)", &params->kinematics.inp.second );
       registerParameter<double>( "PTCT", "Minimal transverse momentum (single central outgoing particle)", &params->kinematics.cuts.central[Cuts::pt_single].min() );
       registerParameter<double>( "MSCT", "Minimal central system mass", &params->kinematics.cuts.central[Cuts::mass_sum].min() );
       registerParameter<double>( "ECUT", "Minimal energy (single central outgoing particle)", &params->kinematics.cuts.central[Cuts::energy_single].min() );
-      //registerParameter<double>( "THMN", "Minimal polar production angle for the central particles", &params->kinematics.eta_min );
-      //registerParameter<double>( "THMX", "Maximal polar production angle for the central particles", &params->kinematics.eta_max );
       registerParameter<double>( "ETMN", "Minimal pseudo-rapidity (central outgoing particles)", &params->kinematics.cuts.central[Cuts::eta_single].min() );
       registerParameter<double>( "ETMX", "Maximal pseudo-rapidity (central outgoing particles)", &params->kinematics.cuts.central[Cuts::eta_single].max() );
       registerParameter<double>( "YMIN", "Minimal rapidity (central outgoing particles)", &params->kinematics.cuts.central[Cuts::rapidity_single].min() );
       registerParameter<double>( "YMAX", "Maximal rapidity (central outgoing particles)", &params->kinematics.cuts.central[Cuts::rapidity_single].max() );
-      registerParameter<double>( "Q2MN", "Minimal Q^2 (exchanged parton)", &params->kinematics.cuts.initial[Cuts::q2].min() );
-      registerParameter<double>( "Q2MX", "Maximal Q^2 (exchanged parton)", &params->kinematics.cuts.initial[Cuts::q2].max() );
+      registerParameter<double>( "Q2MN", "Minimal Q² = -q² (exchanged parton)", &params->kinematics.cuts.initial[Cuts::q2].min() );
+      registerParameter<double>( "Q2MX", "Maximal Q² = -q² (exchanged parton)", &params->kinematics.cuts.initial[Cuts::q2].max() );
       registerParameter<double>( "MXMN", "Minimal invariant mass of proton remnants", &params->kinematics.cuts.remnants[Cuts::mass_single].min() );
       registerParameter<double>( "MXMX", "Maximal invariant mass of proton remnants", &params->kinematics.cuts.remnants[Cuts::mass_single].max() );
     }
