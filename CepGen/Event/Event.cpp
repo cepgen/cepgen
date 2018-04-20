@@ -275,7 +275,7 @@ namespace CepGen
       const ParticlesIds mothers = part.mothers();
       {
         std::ostringstream oss_pdg;
-        if ( part.pdgId() == invalidParticle && mothers.size() > 0 ) {
+        if ( part.pdgId() == PDG::invalid && mothers.size() > 0 ) {
           for ( unsigned short i = 0; i < mothers.size(); ++i )
             oss_pdg << ( i > 0 ? "/" : "" ) << getConstById( *std::next( mothers.begin(), i ) ).pdgId();
           os << Form( "\n %2d\t\t%-10s", part.id(), oss_pdg.str().c_str() );

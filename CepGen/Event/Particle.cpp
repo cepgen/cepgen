@@ -8,15 +8,15 @@ namespace CepGen
   Particle::Particle() :
     id_( -1 ), charge_sign_( 1 ),
     mass_( -1. ), helicity_( 0. ),
-    role_( UnknownRole ), status_( Undefined ), pdg_id_( invalidParticle )
+    role_( UnknownRole ), status_( Undefined ), pdg_id_( PDG::invalid )
   {}
 
-  Particle::Particle( Role role, ParticleCode pdgId, Status st ) :
+  Particle::Particle( Role role, PDG pdgId, Status st ) :
     id_( -1 ), charge_sign_( 1 ),
     mass_( -1. ), helicity_( 0. ),
     role_( role ), status_( st ), pdg_id_( pdgId )
   {
-    if ( pdg_id_!=invalidParticle ) {
+    if ( pdg_id_ != PDG::invalid ) {
       computeMass();
     }
   }
@@ -50,7 +50,7 @@ namespace CepGen
   bool
   Particle::valid()
   {
-    if ( pdg_id_ == invalidParticle ) return false;
+    if ( pdg_id_ == PDG::invalid ) return false;
     if ( momentum_.p() == 0. && mass() == 0. ) return false;
     return true;
   }
@@ -58,7 +58,7 @@ namespace CepGen
   void
   Particle::computeMass( bool off_shell )
   {
-    if ( !off_shell && pdg_id_ != invalidParticle ) { // retrieve the mass from the on-shell particle's properties
+    if ( !off_shell && pdg_id_ != PDG::invalid ) { // retrieve the mass from the on-shell particle's properties
       mass_ = ParticleProperties::mass( pdg_id_ );
     }
     else if ( momentum_.energy() >= 0. ) {
@@ -154,7 +154,7 @@ namespace CepGen
   }
 
   void
-  Particle::setPdgId( const ParticleCode& pdg, short ch )
+  Particle::setPdgId( const PDG& pdg, short ch )
   {
     pdg_id_ = pdg;
     charge_sign_ = ch;

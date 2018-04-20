@@ -1,7 +1,7 @@
 import Config.Core as cepgen
 from Config.gsl_cff import GslRngEngine
 
-plain = cepgen.Module('Plain',
+plain = cepgen.Module('plain',
     numFunctionCalls = 1000000,
     numPoints = 100,
     rngEngine = GslRngEngine.MT19937,

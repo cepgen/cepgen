@@ -1,6 +1,7 @@
 #include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/Core/Exception.h"
 
 #include "Canvas.h"
 #include "TH1.h"
@@ -34,7 +35,7 @@ int main( int argc, char* argv[] )
   CepGen::Generator mg;
 
   if ( argc < 2 )
-    throw FatalError( "main" ) << "Usage: " << argv[0] << " [input card]";
+    throw CG_FATAL( "main" ) << "Usage: " << argv[0] << " [input card]";
   mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
 
   h_mass = unique_ptr<TH1D>( new TH1D( "invm", ";Dilepton invariant mass;d#sigma/dM (pb/GeV)", 500, 0., 500. ) );
@@ -42,7 +43,7 @@ int main( int argc, char* argv[] )
   h_ptsingle = unique_ptr<TH1D>( new TH1D( "pt_single", ";Single lepton p_{T};d#sigma/dp_{T} (pb/GeV)", 100, 0., 100. ) );
   h_etasingle = unique_ptr<TH1D>( new TH1D( "eta_single", ";Single lepton #eta;d#sigma/d#eta (pb)\\?.2f", 60, -3., 3. ) );
 
-  Information( "main" ) << "Process name: " << mg.parameters->processName() << ".";
+  CG_INFO( "main" ) << "Process name: " << mg.parameters->processName() << ".";
   //mg.parameters->taming_functions.dump();
 
   mg.generate( process_event );

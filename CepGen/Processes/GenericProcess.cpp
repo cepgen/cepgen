@@ -6,7 +6,7 @@ namespace CepGen
 {
   namespace Process
   {
-    const double GenericProcess::mp_ = ParticleProperties::mass( Proton );
+    const double GenericProcess::mp_ = ParticleProperties::mass( PDG::Proton );
     const double GenericProcess::mp2_ = GenericProcess::mp_*GenericProcess::mp_;
 
     GenericProcess::GenericProcess( const std::string& name, const std::string& description, bool has_event ) :
@@ -17,7 +17,6 @@ namespace CepGen
       t1_( -1. ), t2_( -1. ),
       has_event_( has_event ), event_( new Event ),
       is_point_set_( false )
-//    {std::cout<<__PRETTY_FUNCTION__<<std::endl;}
     {}
 
     GenericProcess::GenericProcess( const GenericProcess& proc ) :
@@ -25,14 +24,12 @@ namespace CepGen
       first_run( proc.first_run ),
       s_( proc.s_ ), sqs_( proc.sqs_ ),
       MX_( proc.MX_ ), MY_( proc.MY_ ), w1_( proc.w1_ ), w2_( proc.w2_ ),
-      t1_( -1. ), t2_( -1. ),
+      t1_( -1. ), t2_( -1. ), cuts_( proc.cuts_ ),
       has_event_( proc.has_event_ ), event_( new Event( *proc.event_.get() ) ),
       is_point_set_( false )
-//    {std::cout<<__PRETTY_FUNCTION__<<std::endl;}
     {}
 
     GenericProcess::~GenericProcess()
-//    {std::cout<<__PRETTY_FUNCTION__<<std::endl;}
     {}
 
     void
@@ -120,7 +117,7 @@ namespace CepGen
       const auto& central_system = ini.find( Particle::CentralSystem );
       if ( central_system == ini.end() ) {
         Particle& p = event_->addParticle( Particle::Intermediate );
-        p.setPdgId( invalidParticle );
+        p.setPdgId( PDG::invalid );
         p.setStatus( Particle::Propagator );
       }
       //--- outgoing state
@@ -175,31 +172,31 @@ namespace CepGen
       const double mx2 = MX_*MX_, my2 = MY_*MY_;
 
       switch ( cuts_.mode ) {
-        case Kinematics::ElectronElectron: {
+        case Kinematics::Mode::ElectronElectron: {
           fp1 = FormFactors::Trivial(); // electron (trivial) form factor
           fp2 = FormFactors::Trivial(); // electron (trivial) form factor
         } break;
-        case Kinematics::ProtonElectron: {
+        case Kinematics::Mode::ProtonElectron: {
           fp1 = FormFactors::ProtonElastic( -t1_ ); // proton elastic form factor
           fp2 = FormFactors::Trivial(); // electron (trivial) form factor
         } break;
-        case Kinematics::ElectronProton: {
+        case Kinematics::Mode::ElectronProton: {
           fp1 = FormFactors::Trivial(); // electron (trivial) form factor
           fp2 = FormFactors::ProtonElastic( -t2_ ); // proton elastic form factor
         } break;
-        case Kinematics::ElasticElastic: {
+        case Kinematics::Mode::ElasticElastic: {
           fp1 = FormFactors::ProtonElastic( -t1_ ); // proton elastic form factor
           fp2 = FormFactors::ProtonElastic( -t2_ ); // proton elastic form factor
         } break;
-        case Kinematics::ElasticInelastic: {
+        case Kinematics::Mode::ElasticInelastic: {
           fp1 = FormFactors::ProtonElastic( -t1_ );
           fp2 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t2_, w2_, my2 );
         } break;
-        case Kinematics::InelasticElastic: {
+        case Kinematics::Mode::InelasticElastic: {
           fp1 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t1_, w1_, mx2 );
           fp2 = FormFactors::ProtonElastic( -t2_ );
         } break;
-        case Kinematics::InelasticInelastic: {
+        case Kinematics::Mode::InelasticInelastic: {
           fp1 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t1_, w1_, mx2 );
           fp2 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t2_, w2_, my2 );
         } break;

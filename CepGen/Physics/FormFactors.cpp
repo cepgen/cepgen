@@ -13,6 +13,9 @@
 
 namespace CepGen
 {
+  const double FormFactors::mp_ = ParticleProperties::mass( PDG::Proton );
+  const double FormFactors::mp2_ = FormFactors::mp_*FormFactors::mp_;
+
   FormFactors
   FormFactors::Trivial()
   {
@@ -22,10 +25,9 @@ namespace CepGen
   FormFactors
   FormFactors::ProtonElastic( double q2 )
   {
-    const double mp2 = ParticleProperties::mass( Proton )*ParticleProperties::mass( Proton );
     const double GE = pow( 1.+q2/0.71, -2. ), GE2 = GE*GE;
     const double GM = 2.79*GE, GM2 = GM*GM;
-    return FormFactors( ( 4.*mp2*GE2 + q2*GM2 ) / ( 4.*mp2 + q2 ), GM2 );
+    return FormFactors( ( 4.*mp2_*GE2 + q2*GM2 ) / ( 4.*mp2_ + q2 ), GM2 );
   }
 
   FormFactors
@@ -73,8 +75,7 @@ namespace CepGen
   double
   FormFactors::x( double q2, double w2, double m2 ) const
   {
-    const double mp2 = ParticleProperties::mass( Proton )*ParticleProperties::mass( Proton );
-    return 1./( 1.+( w2-mp2 ) / q2+m2 );
+    return 1./( 1.+( w2-mp2_ ) / q2+m2 );
   }
 
   std::ostream&

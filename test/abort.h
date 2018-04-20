@@ -34,12 +34,12 @@ class AbortHandler
     }
     static void handle_ctrl_c( int signal, siginfo_t*, void* ) {
       CepGen::gSignal = signal;
-      throw CepGen::RunAbortedException( __PRETTY_FUNCTION__, CepGen::kJustWarning ) << "Run aborted.";
+      throw CepGen::RunAbortedException( __PRETTY_FUNCTION__, CepGen::Exception::Type::warning ) << "Run aborted.";
     }
     void init() {
       if ( sigaction( SIGINT, &action_, nullptr ) != 0
         || sigaction( SIGTERM, &action_, nullptr ) != 0 )
-        throw FatalError( "AbortHandler" ) << "Failed to initialise the C-c handler!";
+        throw CG_FATAL( "AbortHandler" ) << "Failed to initialise the C-c handler!";
     }
     struct sigaction action_;
 };

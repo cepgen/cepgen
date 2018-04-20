@@ -39,7 +39,7 @@ namespace CepGen
   class Integrator
   {
     public:
-      enum Type { Plain = 0, Vegas = 1, MISER = 2 };
+      enum class Type { plain = 0, Vegas = 1, MISER = 2 };
       /**
        * Book the memory slots and structures for the integrator
        * \note Three integration algorithms are currently supported:
@@ -75,7 +75,10 @@ namespace CepGen
       Parameters* input_params_;
       /// GSL structure storing the function to be integrated by this integrator instance (along with its parameters)
       std::unique_ptr<gsl_monte_function> function_;
-      std::shared_ptr<gsl_rng> rng_;
+      struct gsl_rng_deleter {
+        void operator()( gsl_rng* rng ) noexcept;
+      };
+      std::unique_ptr<gsl_rng,gsl_rng_deleter> rng_;
       std::mutex mutex_;
   };
   std::ostream& operator<<( std::ostream&, const Integrator::Type& );

@@ -38,6 +38,9 @@ namespace CepGen
       double FM;
       /// Dumping operator for standard output streams
       friend std::ostream& operator<<( std::ostream&, const FormFactors& );
+
+    private:
+      static const double mp_, mp2_;
   };
 }
 

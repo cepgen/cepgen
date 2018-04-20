@@ -6,21 +6,21 @@ namespace CepGen
 {
   namespace Process
   {
-    const double PPtoWW::mw_ = ParticleProperties::mass( W );
+    const double PPtoWW::mw_ = ParticleProperties::mass( PDG::W );
     const double PPtoWW::mw2_ = PPtoWW::mw_*PPtoWW::mw_;
 
     PPtoWW::PPtoWW() :
-      GenericKTProcess( "pptoww", "ɣɣ → W⁺W¯", { { Photon, Photon } }, { W, W } ),
+      GenericKTProcess( "pptoww", "ɣɣ → W⁺W¯", { { PDG::Photon, PDG::Photon } }, { PDG::W, PDG::W } ),
       y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )
     {}
 
     void
     PPtoWW::preparePhaseSpace()
     {
-      registerVariable( y1_, kLinear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "First outgoing W rapidity" );
-      registerVariable( y2_, kLinear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "Second outgoing W rapidity" );
-      registerVariable( pt_diff_, kLinear, cuts_.cuts.central[Cuts::pt_diff], { 0., 500. }, "Ws transverse momentum difference" );
-      registerVariable( phi_pt_diff_, kLinear, cuts_.cuts.central[Cuts::phi_pt_diff], { 0., 2.*M_PI }, "Ws azimuthal angle difference" );
+      registerVariable( y1_, Mapping::linear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "First outgoing W rapidity" );
+      registerVariable( y2_, Mapping::linear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "Second outgoing W rapidity" );
+      registerVariable( pt_diff_, Mapping::linear, cuts_.cuts.central[Cuts::pt_diff], { 0., 500. }, "Ws transverse momentum difference" );
+      registerVariable( phi_pt_diff_, Mapping::linear, cuts_.cuts.central[Cuts::phi_pt_diff], { 0., 2.*M_PI }, "Ws azimuthal angle difference" );
     }
 
     double
@@ -57,7 +57,7 @@ namespace CepGen
       const double pt1x = ( ptsumx+ptdiffx )*0.5, pt1y = ( ptsumy+ptdiffy )*0.5, pt1 = std::hypot( pt1x, pt1y ),
                    pt2x = ( ptsumx-ptdiffx )*0.5, pt2y = ( ptsumy-ptdiffy )*0.5, pt2 = std::hypot( pt2x, pt2y );
 
-      const Kinematics::Limits pt_limits = cuts_.cuts.central_particles[W][Cuts::pt_single];
+      const Kinematics::Limits pt_limits = cuts_.cuts.central_particles[PDG::W][Cuts::pt_single];
       if ( !pt_limits.passes( pt1 ) || !pt_limits.passes( pt2 ) )
         return 0.;
 
@@ -130,10 +130,12 @@ namespace CepGen
         << "s(1/2)_eff = " << s1_eff << " / " << s2_eff << " GeV^2\n\t"
         << "diboson invariant mass = " << invm << " GeV";
 
-      if ( ( cuts_.mode == Kinematics::ElasticInelastic || cuts_.mode == Kinematics::InelasticInelastic )
+      if ( ( cuts_.mode == Kinematics::Mode::ElasticInelastic
+          || cuts_.mode == Kinematics::Mode::InelasticInelastic )
         && ( sqrt( s1_eff ) <= ( MY_+invm ) ) )
         return 0.;
-      if ( ( cuts_.mode == Kinematics::InelasticElastic || cuts_.mode == Kinematics::InelasticInelastic )
+      if ( ( cuts_.mode == Kinematics::Mode::InelasticElastic
+          || cuts_.mode == Kinematics::Mode::InelasticInelastic )
         && ( sqrt( s2_eff ) <= ( MX_+invm ) ) )
         return 0.;
 

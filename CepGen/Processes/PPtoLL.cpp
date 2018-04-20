@@ -7,17 +7,17 @@ namespace CepGen
   namespace Process
   {
     PPtoLL::PPtoLL() :
-      GenericKTProcess( "pptoll", "ɣɣ → l⁺l¯", { { Photon, Photon } }, { Muon, Muon } ),
+      GenericKTProcess( "pptoll", "ɣɣ → l⁺l¯", { { PDG::Photon, PDG::Photon } }, { PDG::Muon, PDG::Muon } ),
       y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )
     {}
 
     void
     PPtoLL::preparePhaseSpace()
     {
-      registerVariable( y1_, kLinear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "First outgoing lepton rapidity" );
-      registerVariable( y2_, kLinear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "Second outgoing lepton rapidity" );
-      registerVariable( pt_diff_, kLinear, cuts_.cuts.central[Cuts::pt_diff], { 0., 50. }, "Leptons transverse momentum difference" );
-      registerVariable( phi_pt_diff_, kLinear, cuts_.cuts.central[Cuts::phi_pt_diff], { 0., 2.*M_PI }, "Leptons azimuthal angle difference" );
+      registerVariable( y1_, Mapping::linear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "First outgoing lepton rapidity" );
+      registerVariable( y2_, Mapping::linear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "Second outgoing lepton rapidity" );
+      registerVariable( pt_diff_, Mapping::linear, cuts_.cuts.central[Cuts::pt_diff], { 0., 50. }, "Leptons transverse momentum difference" );
+      registerVariable( phi_pt_diff_, Mapping::linear, cuts_.cuts.central[Cuts::phi_pt_diff], { 0., 2.*M_PI }, "Leptons azimuthal angle difference" );
     }
 
     double
@@ -133,10 +133,12 @@ namespace CepGen
         << "s(1/2)_eff = " << s1_eff << " / " << s2_eff << " GeV^2\n\t"
         << "dilepton invariant mass = " << invm << " GeV.";
 
-      if ( ( cuts_.mode == Kinematics::ElasticInelastic || cuts_.mode == Kinematics::InelasticInelastic )
+      if ( ( cuts_.mode == Kinematics::Mode::ElasticInelastic
+          || cuts_.mode == Kinematics::Mode::InelasticInelastic )
         && ( sqrt( s1_eff ) <= ( MY_+invm ) ) )
         return 0.;
-      if ( ( cuts_.mode == Kinematics::InelasticElastic || cuts_.mode == Kinematics::InelasticInelastic )
+      if ( ( cuts_.mode == Kinematics::Mode::InelasticElastic
+          || cuts_.mode == Kinematics::Mode::InelasticInelastic )
         && ( sqrt( s2_eff ) <= ( MX_+invm ) ) )
         return 0.;
 

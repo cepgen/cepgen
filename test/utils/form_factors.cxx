@@ -20,7 +20,7 @@ main( int argc, char* argv[] )
   //TGraph g_fb_fe_100, g_fb_fm_100;
   TGraph g_su_fe_100, g_su_fm_100;
 
-  const float mp2 = pow( CepGen::ParticleProperties::mass( CepGen::Proton ), 2 );
+  const float mp2 = pow( CepGen::ParticleProperties::mass( CepGen::PDG::Proton ), 2 );
 
   for ( unsigned int i=0; i<npoints; i++ ) {
     const float q2 = min_q2 + i*( max_q2-min_q2 )/(npoints-1);

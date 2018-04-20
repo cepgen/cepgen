@@ -4,6 +4,6 @@ using namespace CepGen;
 
 int main()
 {
-  throw Exception( "Test", kJustWarning ) << "Haha";
+  throw Exception( "Test", Exception::Type::warning ) << "Haha";
   return 0;
 }

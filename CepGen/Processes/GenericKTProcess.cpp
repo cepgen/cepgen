@@ -9,8 +9,8 @@ namespace CepGen
   {
     GenericKTProcess::GenericKTProcess( const std::string& name,
                                         const std::string& description,
-                                        const std::array<ParticleCode,2>& partons,
-                                        const std::vector<ParticleCode>& central ) :
+                                        const std::array<PDG,2>& partons,
+                                        const std::vector<PDG>& central ) :
       GenericProcess( name, description+" (kT-factorisation approach)" ),
       num_dimensions_( 0 ), kt_jacobian_( 0. ),
       qt1_( 0. ), phi_qt1_( 0. ),
@@ -24,14 +24,14 @@ namespace CepGen
     {
       GenericProcess::setEventContent(
         { // incoming state
-          { Particle::IncomingBeam1, Proton },
-          { Particle::IncomingBeam2, Proton },
+          { Particle::IncomingBeam1, PDG::Proton },
+          { Particle::IncomingBeam2, PDG::Proton },
           { Particle::Parton1, kIntermediateParts[0] },
           { Particle::Parton2, kIntermediateParts[1] }
         },
         { // outgoing state
-          { Particle::OutgoingBeam1, { Proton } },
-          { Particle::OutgoingBeam2, { Proton } },
+          { Particle::OutgoingBeam1, { PDG::Proton } },
+          { Particle::OutgoingBeam2, { PDG::Proton } },
           { Particle::CentralSystem, kProducedParts }
         }
       );
@@ -39,7 +39,7 @@ namespace CepGen
     }
 
     unsigned int
-    GenericKTProcess::numDimensions( const Kinematics::ProcessMode& ) const
+    GenericKTProcess::numDimensions( const Kinematics::Mode& ) const
     {
       return num_dimensions_;
     }
@@ -61,10 +61,10 @@ namespace CepGen
       // register the incoming partons' variables
       //============================================================================================
 
-      registerVariable( qt1_, kLogarithmic, cuts_.cuts.initial[Cuts::qt], { 1.e-10, 500. }, "First incoming parton virtuality" );
-      registerVariable( qt2_, kLogarithmic, cuts_.cuts.initial[Cuts::qt], { 1.e-10, 500. }, "Second incoming parton virtuality" );
-      registerVariable( phi_qt1_, kLinear, cuts_.cuts.initial[Cuts::phi_qt], { 0., 2.*M_PI }, "First incoming parton azimuthal angle" );
-      registerVariable( phi_qt2_, kLinear, cuts_.cuts.initial[Cuts::phi_qt], { 0., 2.*M_PI }, "Second incoming parton azimuthal angle" );
+      registerVariable( qt1_, Mapping::logarithmic, cuts_.cuts.initial[Cuts::qt], { 1.e-10, 500. }, "First incoming parton virtuality" );
+      registerVariable( qt2_, Mapping::logarithmic, cuts_.cuts.initial[Cuts::qt], { 1.e-10, 500. }, "Second incoming parton virtuality" );
+      registerVariable( phi_qt1_, Mapping::linear, cuts_.cuts.initial[Cuts::phi_qt], { 0., 2.*M_PI }, "First incoming parton azimuthal angle" );
+      registerVariable( phi_qt2_, Mapping::linear, cuts_.cuts.initial[Cuts::phi_qt], { 0., 2.*M_PI }, "Second incoming parton azimuthal angle" );
 
       //============================================================================================
       // register all process-dependent variables
@@ -77,10 +77,10 @@ namespace CepGen
       //============================================================================================
 
       MX_ = MY_ = event_->getOneByRole( Particle::IncomingBeam1 ).mass();
-      if ( cuts_.mode == Kinematics::InelasticElastic || cuts_.mode == Kinematics::InelasticInelastic )
-        registerVariable( MX_, kSquare, cuts_.cuts.remnants[Cuts::mass], { 1.07, 1000. }, "Positive z proton remnant mass" );
-      if ( cuts_.mode == Kinematics::ElasticInelastic || cuts_.mode == Kinematics::InelasticInelastic )
-        registerVariable( MY_, kSquare, cuts_.cuts.remnants[Cuts::mass], { 1.07, 1000. }, "Negative z proton remnant mass" );
+      if ( cuts_.mode == Kinematics::Mode::InelasticElastic || cuts_.mode == Kinematics::Mode::InelasticInelastic )
+        registerVariable( MX_, Mapping::square, cuts_.cuts.remnants[Cuts::mass_single], { 1.07, 1000. }, "Positive z proton remnant mass" );
+      if ( cuts_.mode == Kinematics::Mode::ElasticInelastic || cuts_.mode == Kinematics::Mode::InelasticInelastic )
+        registerVariable( MY_, Mapping::square, cuts_.cuts.remnants[Cuts::mass_single], { 1.07, 1000. }, "Negative z proton remnant mass" );
     }
 
     double
@@ -123,19 +123,19 @@ namespace CepGen
     {
       flux1_ = flux2_ = 0.;
       switch ( cuts_.mode ) {
-        case Kinematics::ElasticElastic:
+        case Kinematics::Mode::ElasticElastic:
           flux1_ = elasticFlux( x1, q1t2 );
           flux2_ = elasticFlux( x2, q2t2 );
           break;
-        case Kinematics::ElasticInelastic:
+        case Kinematics::Mode::ElasticInelastic:
           flux1_ = elasticFlux( x1, q1t2 );
           flux2_ = inelasticFlux( x2, q2t2, MY_, cuts_.structure_functions );
           break;
-        case Kinematics::InelasticElastic:
+        case Kinematics::Mode::InelasticElastic:
           flux1_ = inelasticFlux( x1, q1t2, MX_, cuts_.structure_functions );
           flux2_ = elasticFlux( x2, q2t2 );
           break;
-        case Kinematics::InelasticInelastic:
+        case Kinematics::Mode::InelasticInelastic:
           flux1_ = inelasticFlux( x1, q1t2, MX_, cuts_.structure_functions );
           flux2_ = inelasticFlux( x2, q2t2, MY_, cuts_.structure_functions );
           break;
@@ -148,7 +148,7 @@ namespace CepGen
     }
 
     void
-    GenericKTProcess::registerVariable( double& out, const MappingType& type,
+    GenericKTProcess::registerVariable( double& out, const Mapping& type,
                                         const Kinematics::Limits& in, Kinematics::Limits default_limits,
                                         const char* description )
     {
@@ -160,14 +160,14 @@ namespace CepGen
           << "Setting it to the default value: " << default_limits << ".";
         lim = default_limits;
       }
-      if ( type == kLogarithmic )
+      if ( type == Mapping::logarithmic )
         lim = {
           std::max( log( lim.min() ), -10. ),
           std::min( log( lim.max() ), +10. )
         };
       mapped_variables_.emplace_back( MappingVariable{ lim, out, type, num_dimensions_++ } );
       switch ( type ) {
-        case kSquare:
+        case Mapping::square:
           kt_jacobian_ *= 2.*lim.range();
           break;
         default:
@@ -189,14 +189,14 @@ namespace CepGen
           continue;
         const double xv = x( cut.index ); // between 0 and 1
         switch ( cut.type ) {
-          case kLinear: {
+          case Mapping::linear: {
             cut.variable = cut.limits.x( xv );
           } break;
-          case kLogarithmic: {
+          case Mapping::logarithmic: {
             cut.variable = exp( cut.limits.x( xv ) );
             jacobian *= cut.variable;
           } break;
-          case kSquare: {
+          case Mapping::square: {
             cut.variable = cut.limits.x( xv );
             jacobian *= cut.variable;
           } break;
@@ -235,19 +235,19 @@ namespace CepGen
       op2.setMomentum( PY_ );
 
       switch ( cuts_.mode ) {
-        case Kinematics::ElasticElastic:
+        case Kinematics::Mode::ElasticElastic:
           op1.setStatus( Particle::FinalState );
           op2.setStatus( Particle::FinalState );
           break;
-        case Kinematics::ElasticInelastic:
+        case Kinematics::Mode::ElasticInelastic:
           op1.setStatus( Particle::FinalState );
           op2.setStatus( Particle::Unfragmented ); op2.setMass( MY_ );
           break;
-        case Kinematics::InelasticElastic:
+        case Kinematics::Mode::InelasticElastic:
           op1.setStatus( Particle::Unfragmented ); op1.setMass( MX_ );
           op2.setStatus( Particle::FinalState );
           break;
-        case Kinematics::InelasticInelastic:
+        case Kinematics::Mode::InelasticInelastic:
           op1.setStatus( Particle::Unfragmented ); op1.setMass( MX_ );
           op2.setStatus( Particle::Unfragmented ); op2.setMass( MY_ );
           break;
@@ -291,7 +291,7 @@ namespace CepGen
     }
 
     double
-    GenericKTProcess::inelasticFlux( double x, double kt2, double mx, const StructureFunctions::Type& sf, const FluxTypes& ft )
+    GenericKTProcess::inelasticFlux( double x, double kt2, double mx, const StructureFunctions::Type& sf, const Fluxes& ft )
     {
       const double mx2 = mx*mx;
 
@@ -311,12 +311,12 @@ namespace CepGen
     }
 
     std::ostream&
-    operator<<( std::ostream& os, const GenericKTProcess::MappingType& type )
+    operator<<( std::ostream& os, const GenericKTProcess::Mapping& type )
     {
       switch ( type ) {
-        case GenericKTProcess::kLinear: return os << "linear";
-        case GenericKTProcess::kLogarithmic: return os << "logarithmic";
-        case GenericKTProcess::kSquare: return os << "squared";
+        case GenericKTProcess::Mapping::linear: return os << "linear";
+        case GenericKTProcess::Mapping::logarithmic: return os << "logarithmic";
+        case GenericKTProcess::Mapping::square: return os << "squared";
       }
       return os;
     }

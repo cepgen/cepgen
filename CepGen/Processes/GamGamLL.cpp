@@ -36,31 +36,31 @@ namespace CepGen
     GamGamLL::addEventContent()
     {
       GenericProcess::setEventContent( {
-        { Particle::IncomingBeam1, Proton },
-        { Particle::IncomingBeam2, Proton },
-        { Particle::Parton1, Photon },
-        { Particle::Parton2, Photon }
+        { Particle::IncomingBeam1, PDG::Proton },
+        { Particle::IncomingBeam2, PDG::Proton },
+        { Particle::Parton1, PDG::Photon },
+        { Particle::Parton2, PDG::Photon }
       }, {
-        { Particle::OutgoingBeam1, { Proton } },
-        { Particle::OutgoingBeam2, { Proton } },
-        { Particle::CentralSystem, { Muon, Muon } }
+        { Particle::OutgoingBeam1, { PDG::Proton } },
+        { Particle::OutgoingBeam2, { PDG::Proton } },
+        { Particle::CentralSystem, { PDG::Muon, PDG::Muon } }
       } );
     }
 
     unsigned int
-    GamGamLL::numDimensions( const Kinematics::ProcessMode& process_mode ) const
+    GamGamLL::numDimensions( const Kinematics::Mode& process_mode ) const
     {
       switch ( process_mode ) {
-        case Kinematics::ElectronProton: default:
+        case Kinematics::Mode::ElectronProton: default:
           throw CG_FATAL( "GamGamLL" )
             << "Process mode " << process_mode << " not (yet) supported! "
             << "Please contact the developers to consider an implementation.";
-        case Kinematics::ElasticElastic:
+        case Kinematics::Mode::ElasticElastic:
           return 7;
-        case Kinematics::ElasticInelastic:
-        case Kinematics::InelasticElastic:
+        case Kinematics::Mode::ElasticInelastic:
+        case Kinematics::Mode::InelasticElastic:
           return 8;
-        case Kinematics::InelasticInelastic:
+        case Kinematics::Mode::InelasticInelastic:
           return 9;
       }
     }
@@ -567,8 +567,8 @@ namespace CepGen
     double
     GamGamLL::computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dw )
     {
-      const double mx0 = mp_+ParticleProperties::mass( PiZero ); // 1.07
-      const Kinematics::Limits mx_limits = cuts_.cuts.remnants[Cuts::mass];
+      const double mx0 = mp_+ParticleProperties::mass( PDG::PiZero ); // 1.07
+      const Kinematics::Limits mx_limits = cuts_.cuts.remnants[Cuts::mass_single];
       const double wx2min = pow( std::max( mx0, mx_limits.min() ), 2 ),
                    wx2max = pow( std::min( sqs_-outmass-2.*lepmass, mx_limits.max() ), 2 );
 
@@ -598,21 +598,21 @@ namespace CepGen
       masses_.Ml2_ = event_->getByRole( Particle::CentralSystem )[0].mass2();
 
       switch ( cuts_.mode ) {
-        case Kinematics::ElectronProton: default:
+        case Kinematics::Mode::ElectronProton: default:
           CG_ERROR( "GamGamLL" ) << "Case not yet supported!"; break;
-        case Kinematics::ElasticElastic:
+        case Kinematics::Mode::ElasticElastic:
           masses_.dw31_ = masses_.dw52_ = 0.; break;
-        case Kinematics::InelasticElastic: {
+        case Kinematics::Mode::InelasticElastic: {
           const double m = computeOutgoingPrimaryParticlesMasses( x( 7 ), p1.mass(), sqrt( masses_.Ml2_ ), masses_.dw31_ );
           event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( m );
           event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( ParticleProperties::mass( p2.pdgId() ) );
         } break;
-        case Kinematics::ElasticInelastic: {
+        case Kinematics::Mode::ElasticInelastic: {
           const double m = computeOutgoingPrimaryParticlesMasses( x( 7 ), p2.mass(), sqrt( masses_.Ml2_ ), masses_.dw52_ );
           event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( ParticleProperties::mass( p1.pdgId() ) );
           event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( m );
         } break;
-        case Kinematics::InelasticInelastic: {
+        case Kinematics::Mode::InelasticInelastic: {
           const double mx = computeOutgoingPrimaryParticlesMasses( x( 7 ), p2.mass(), sqrt( masses_.Ml2_ ), masses_.dw31_ );
           event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( mx );
           const double my = computeOutgoingPrimaryParticlesMasses( x( 8 ), p1.mass(), sqrt( masses_.Ml2_ ), masses_.dw52_ );
@@ -857,12 +857,14 @@ namespace CepGen
 
       //--- cut on mass of final hadronic system (MX/Y)
 
-      const Kinematics::Limits mx_limits = cuts_.cuts.remnants[Cuts::mass];
-      if ( cuts_.mode == Kinematics::InelasticElastic || cuts_.mode == Kinematics::InelasticInelastic ) {
+      const Kinematics::Limits mx_limits = cuts_.cuts.remnants[Cuts::mass_single];
+      if ( cuts_.mode == Kinematics::Mode::InelasticElastic
+        || cuts_.mode == Kinematics::Mode::InelasticInelastic ) {
         if ( !mx_limits.passes( MX_ ) )
           return 0.;
       }
-      if ( cuts_.mode == Kinematics::ElasticInelastic || cuts_.mode == Kinematics::InelasticInelastic ) {
+      if ( cuts_.mode == Kinematics::Mode::ElasticInelastic
+        || cuts_.mode == Kinematics::Mode::InelasticInelastic ) {
         if ( !mx_limits.passes( MY_ ) )
           return 0.;
       }
@@ -894,11 +896,11 @@ namespace CepGen
       //--- compute the structure functions factors
 
       switch ( cuts_.mode ) { // inherited from CDF version
-        case Kinematics::ElectronProton: default: jacobian_ *= periPP( 1, 2 ); break; // ep case
-        case Kinematics::ElasticElastic:          jacobian_ *= periPP( 2, 2 ); break; // elastic case
-        case Kinematics::InelasticElastic:        jacobian_ *= periPP( 3, 2 )*( masses_.dw31_*masses_.dw31_ ); break;
-        case Kinematics::ElasticInelastic:        jacobian_ *= periPP( 3, 2 )*( masses_.dw52_*masses_.dw52_ ); break; // single-dissociative case
-        case Kinematics::InelasticInelastic:      jacobian_ *= periPP( 3, 3 )*( masses_.dw31_*masses_.dw31_ )*( masses_.dw52_*masses_.dw52_ ); break; // double-dissociative case
+        case Kinematics::Mode::ElectronProton: default: jacobian_ *= periPP( 1, 2 ); break; // ep case
+        case Kinematics::Mode::ElasticElastic:          jacobian_ *= periPP( 2, 2 ); break; // elastic case
+        case Kinematics::Mode::InelasticElastic:        jacobian_ *= periPP( 3, 2 )*( masses_.dw31_*masses_.dw31_ ); break;
+        case Kinematics::Mode::ElasticInelastic:        jacobian_ *= periPP( 3, 2 )*( masses_.dw52_*masses_.dw52_ ); break; // single-dissociative case
+        case Kinematics::Mode::InelasticInelastic:      jacobian_ *= periPP( 3, 3 )*( masses_.dw31_*masses_.dw31_ )*( masses_.dw52_*masses_.dw52_ ); break; // double-dissociative case
       }
 
       //--- compute the event weight using the Jacobian
@@ -945,13 +947,13 @@ namespace CepGen
 
       op1.setMomentum( p3_lab_ );
       switch ( cuts_.mode ) {
-        case Kinematics::ElasticElastic:
-        case Kinematics::ElasticInelastic:
+        case Kinematics::Mode::ElasticElastic:
+        case Kinematics::Mode::ElasticInelastic:
         default:
           op1.setStatus( Particle::FinalState ); // stable proton
           break;
-        case Kinematics::InelasticElastic:
-        case Kinematics::InelasticInelastic:
+        case Kinematics::Mode::InelasticElastic:
+        case Kinematics::Mode::InelasticInelastic:
           op1.setStatus( Particle::Unfragmented ); // fragmenting remnants
           op1.setMass( MX_ );
           break;
@@ -961,13 +963,13 @@ namespace CepGen
       Particle& op2 = event_->getOneByRole( Particle::OutgoingBeam2 );
       op2.setMomentum( p5_lab_ );
       switch ( cuts_.mode ) {
-        case Kinematics::ElasticElastic:
-        case Kinematics::InelasticElastic:
+        case Kinematics::Mode::ElasticElastic:
+        case Kinematics::Mode::InelasticElastic:
         default:
           op2.setStatus( Particle::FinalState ); // stable proton
           break;
-        case Kinematics::ElasticInelastic:
-        case Kinematics::InelasticInelastic:
+        case Kinematics::Mode::ElasticInelastic:
+        case Kinematics::Mode::InelasticInelastic:
           op2.setStatus( Particle::Unfragmented ); // fragmenting remnants
           op2.setMass( MY_ );
           break;

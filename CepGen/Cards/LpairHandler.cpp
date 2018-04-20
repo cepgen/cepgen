@@ -16,7 +16,7 @@ namespace CepGen
     //----- specialization for LPAIR input cards
 
     LpairHandler::LpairHandler( const char* file ) :
-      pair_( invalidParticle )
+      pair_( PDG::invalid )
     {
       std::ifstream f( file, std::fstream::in );
       if ( !f.is_open() )
@@ -40,14 +40,16 @@ namespace CepGen
       }
       f.close();
 
-      if      ( proc_name_ == "lpair" )  params_.setProcess( new Process::GamGamLL() );
-      else if ( proc_name_ == "pptoll" ) params_.setProcess( new Process::PPtoLL() );
-      else if ( proc_name_ == "pptoww" ) params_.setProcess( new Process::PPtoWW() );
+      if      ( proc_name_ == "lpair" )  params_.setProcess( new Process::GamGamLL );
+      else if ( proc_name_ == "pptoll" ) params_.setProcess( new Process::PPtoLL );
+      else if ( proc_name_ == "pptoww" ) params_.setProcess( new Process::PPtoWW );
       else throw CG_FATAL( "LpairHandler" ) << "Unrecognised process name: " << proc_name_ << "!";
 
-      if      ( integr_type_ == "Plain" ) params_.integrator.type = Integrator::Plain;
-      else if ( integr_type_ == "Vegas" ) params_.integrator.type = Integrator::Vegas;
-      else if ( integr_type_ == "MISER" ) params_.integrator.type = Integrator::MISER;
+      if      ( integr_type_ == "plain" ) params_.integrator.type = Integrator::Type::plain;
+      else if ( integr_type_ == "Vegas" ) params_.integrator.type = Integrator::Type::Vegas;
+      else if ( integr_type_ == "MISER" ) params_.integrator.type = Integrator::Type::MISER;
+      else if ( integr_type_ != "" )
+        throw CG_FATAL( "LpairHandler" ) << "Unrecognized integrator type: " << integr_type_ << "!";
 
 #ifdef PYTHIA8
       if ( hadr_name_ == "pythia8" ) params_.setHadroniser( new Hadroniser::Pythia8Hadroniser( params_ ) );
@@ -56,7 +58,7 @@ namespace CepGen
       if ( m_params.count( "IEND" ) ) setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
 
       //--- for LPAIR: specify the lepton pair to be produced
-      if ( pair_ != invalidParticle )
+      if ( pair_ != PDG::invalid )
         params_.kinematics.central_system = { pair_, pair_ };
 
       CG_INFO( "LpairHandler" ) << os.str();
@@ -97,8 +99,8 @@ namespace CepGen
       registerParameter<double>( "YMAX", "Maximal rapidity (central outgoing particles)", &params->kinematics.cuts.central[Cuts::rapidity_single].max() );
       registerParameter<double>( "Q2MN", "Minimal Q^2 (exchanged parton)", &params->kinematics.cuts.initial[Cuts::q2].min() );
       registerParameter<double>( "Q2MX", "Maximal Q^2 (exchanged parton)", &params->kinematics.cuts.initial[Cuts::q2].max() );
-      registerParameter<double>( "MXMN", "Minimal invariant mass of proton remnants", &params->kinematics.cuts.remnants[Cuts::mass].min() );
-      registerParameter<double>( "MXMX", "Maximal invariant mass of proton remnants", &params->kinematics.cuts.remnants[Cuts::mass].max() );
+      registerParameter<double>( "MXMN", "Minimal invariant mass of proton remnants", &params->kinematics.cuts.remnants[Cuts::mass_single].min() );
+      registerParameter<double>( "MXMX", "Maximal invariant mass of proton remnants", &params->kinematics.cuts.remnants[Cuts::mass_single].max() );
     }
 
     void

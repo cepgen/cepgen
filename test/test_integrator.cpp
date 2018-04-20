@@ -29,7 +29,7 @@ main( int argc, char* argv[] )
     mg.parameters->setProcess( new CepGen::Process::TestProcess<3> );
     mg.computeXsection( result, error );
     if ( fabs( exact - result ) > max_sigma * error )
-      throw FatalError( "main" ) << "pull = " << fabs( exact-result )/error << ".";
+      throw CG_FATAL( "main" ) << "pull = " << fabs( exact-result )/error << ".";
     cout << "Test 1 passed!" << endl;
   }
   { // test 2
@@ -37,7 +37,7 @@ main( int argc, char* argv[] )
     mg.parameters->setProcess( new CepGen::Process::TestProcess<2>( "x^2+y^2", { { "x", "y" } } ) );
     mg.computeXsection( result, error );
     if ( fabs( exact - result ) > max_sigma * error )
-      throw FatalError( "main" ) << "pull = " << fabs( exact-result )/error << ".";
+      throw CG_FATAL( "main" ) << "pull = " << fabs( exact-result )/error << ".";
     cout << "Test 2 passed!" << endl;
   }
   { // test 3
@@ -45,7 +45,7 @@ main( int argc, char* argv[] )
     mg.parameters->setProcess( new CepGen::Process::TestProcess<3>( "x+y^2+z^3", { { "x", "y", "z" } } ) );
     mg.computeXsection( result, error );
     if ( fabs( exact - result ) > max_sigma * error )
-      throw FatalError( "main" ) << "pull = " << fabs( exact-result )/error << ".";
+      throw CG_FATAL( "main" ) << "pull = " << fabs( exact-result )/error << ".";
     cout << "Test 3 passed!" << endl;
   }
 

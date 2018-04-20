@@ -154,7 +154,7 @@ namespace CepGen
           double energy_;
       };
       /// Human-readable format for a particle's PDG code
-      friend std::ostream& operator<<( std::ostream& os, const ParticleCode& pc );
+      friend std::ostream& operator<<( std::ostream& os, const PDG& pc );
       /// Human-readable format for a particle's role in the event
       friend std::ostream& operator<<( std::ostream& os, const Particle::Role& rl );
       /// Compute the 4-vector sum of two 4-momenta
@@ -179,10 +179,10 @@ namespace CepGen
 
       Particle();
       /// Build using the role of the particle in the process and its PDG id
-      /// \param[in] pdgId ParticleCode (PDG ID)
+      /// \param[in] pdgId PDG identifier
       /// \param[in] role Role of the particle in the process
       /// \param[in] st Current status
-      Particle( Role role, ParticleCode pdgId = invalidParticle, Status st = Undefined );
+      Particle( Role role, PDG pdgId = PDG::invalid, Status st = Undefined );
       /// Copy constructor
       Particle( const Particle& );
       inline ~Particle() {}
@@ -218,11 +218,11 @@ namespace CepGen
       void setStatus( Status status ) { status_ = status; }
 
       /// Set the PDG identifier (along with the particle's electric charge)
-      /// \param[in] pdg ParticleCode (PDG ID)
+      /// \param[in] pdg PDG identifier
       /// \param[in] ch Electric charge (0, 1, or -1)
-      void setPdgId( const ParticleCode& pdg, short ch = 0 );
+      void setPdgId( const PDG& pdg, short ch = 0 );
       /// Retrieve the objectified PDG identifier
-      inline ParticleCode pdgId() const { return pdg_id_; }
+      inline PDG pdgId() const { return pdg_id_; }
       /// Retrieve the integer value of the PDG identifier
       int integerPdgId() const;
       /// Particle's helicity
@@ -339,7 +339,7 @@ namespace CepGen
       /// List of daughter particles
       ParticlesIds daughters_;
       /// PDG id
-      ParticleCode pdg_id_;
+      PDG pdg_id_;
   };
 
   /// Compute the centre of mass energy of two particles (incoming or outgoing states)

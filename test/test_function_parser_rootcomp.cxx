@@ -32,7 +32,7 @@ int main( int argc, char* argv[] )
   }
   chi2 = sqrt( chi2 );
   if ( chi2 > 1.e-9 )
-    throw FatalError( "main" ) << "Test failed with chi2 = " << chi2 << "!";
+    throw CG_FATAL( "main" ) << "Test failed with chi2 = " << chi2 << "!";
   cout << "Test passed!" << endl;
 
   if ( argc > 1 && !strcmp( argv[1], "draw" ) ) {

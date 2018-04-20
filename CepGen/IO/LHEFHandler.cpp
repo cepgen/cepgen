@@ -43,9 +43,9 @@ namespace CepGen
       if ( params.kinematics.cuts.initial.count( Cuts::q2 ) )
         oss_init
           << "  * Q² range (GeV²): " << params.kinematics.cuts.initial.at( Cuts::q2 ) << "\n";
-      if ( params.kinematics.cuts.remnants.count( Cuts::mass ) )
+      if ( params.kinematics.cuts.remnants.count( Cuts::mass_single ) )
         oss_init
-          << "  * remnants mass range (GeV): " << params.kinematics.cuts.remnants.at( Cuts::mass ) << "\n";
+          << "  * remnants mass range (GeV): " << params.kinematics.cuts.remnants.at( Cuts::mass_single ) << "\n";
       oss_init
         << "  *--- central system\n";
       if ( params.kinematics.cuts.central.count( Cuts::pt_single ) )

@@ -179,14 +179,14 @@ namespace CepGen
       PyObject* ppair = getElement( kin, "pair" );
       if ( ppair ) {
         if ( isInteger( ppair ) ) {
-          ParticleCode pair = (ParticleCode)asInteger( ppair );
+          PDG pair = (PDG)asInteger( ppair );
           params_.kinematics.central_system = { pair, pair };
         }
        else if ( PyTuple_Check( ppair ) ) {
          if ( PyTuple_Size( ppair ) != 2 )
            throw CG_FATAL( "PythonHandler" ) << "Invalid value for in_kinematics.pair!";
-          ParticleCode pair1 = (ParticleCode)asInteger( PyTuple_GetItem( ppair, 0 ) );
-          ParticleCode pair2 = (ParticleCode)asInteger( PyTuple_GetItem( ppair, 1 ) );
+          PDG pair1 = (PDG)asInteger( PyTuple_GetItem( ppair, 0 ) );
+          PDG pair2 = (PDG)asInteger( PyTuple_GetItem( ppair, 1 ) );
           params_.kinematics.central_system = { pair1, pair2 };
         }
         Py_DECREF( ppair );
@@ -196,7 +196,7 @@ namespace CepGen
       if ( pparts ) {
         if ( PyTuple_Check( pparts ) )
           for ( unsigned short i = 0; i < PyTuple_Size( pparts ); ++i )
-            params_.kinematics.minimum_final_state.emplace_back( (ParticleCode)asInteger( PyTuple_GetItem( pparts, i ) ) );
+            params_.kinematics.minimum_final_state.emplace_back( (PDG)asInteger( PyTuple_GetItem( pparts, i ) ) );
         Py_DECREF( pparts );
       }
 
@@ -218,7 +218,7 @@ namespace CepGen
       getLimits( kin, "eta", params_.kinematics.cuts.central[Cuts::eta_single] );
       getLimits( kin, "pt", params_.kinematics.cuts.central[Cuts::pt_single] );
 
-      getLimits( kin, "mx", params_.kinematics.cuts.remnants[Cuts::mass] );
+      getLimits( kin, "mx", params_.kinematics.cuts.remnants[Cuts::mass_single] );
     }
 
     void
@@ -227,7 +227,7 @@ namespace CepGen
       PyObject* pkey = nullptr, *pvalue = nullptr;
       Py_ssize_t pos = 0;
       while ( PyDict_Next( cuts, &pos, &pkey, &pvalue ) ) {
-        ParticleCode pdg = (ParticleCode)asInteger( pkey );
+        PDG pdg = (PDG)asInteger( pkey );
         getLimits( pvalue, "pt", params_.kinematics.cuts.central_particles[pdg][Cuts::pt_single] );
         getLimits( pvalue, "energy", params_.kinematics.cuts.central_particles[pdg][Cuts::energy_single] );
         getLimits( pvalue, "eta", params_.kinematics.cuts.central_particles[pdg][Cuts::eta_single] );
@@ -255,17 +255,17 @@ namespace CepGen
         throwPythonError( "Failed to retrieve the integration algorithm name!" );
       std::string algo = decode( palgo );
       Py_DECREF( palgo );
-      if ( algo == "Plain" )
-        params_.integrator.type = Integrator::Plain;
+      if ( algo == "plain" )
+        params_.integrator.type = Integrator::Type::plain;
       else if ( algo == "Vegas" ) {
-        params_.integrator.type = Integrator::Vegas;
+        params_.integrator.type = Integrator::Type::Vegas;
         getParameter( integr, "alpha", (double&)params_.integrator.vegas.alpha );
         getParameter( integr, "iterations", params_.integrator.vegas.iterations );
         getParameter( integr, "mode", (int&)params_.integrator.vegas.mode );
         getParameter( integr, "verbosity", (int&)params_.integrator.vegas.verbose );
       }
       else if ( algo == "MISER" ) {
-        params_.integrator.type = Integrator::MISER;
+        params_.integrator.type = Integrator::Type::MISER;
         getParameter( integr, "estimateFraction", (double&)params_.integrator.miser.estimate_frac );
         getParameter( integr, "minCalls", params_.integrator.miser.min_calls );
         getParameter( integr, "minCallsPerBisection", params_.integrator.miser.min_calls_per_bisection );

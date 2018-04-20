@@ -95,8 +95,7 @@ namespace CepGen
     FioreBrasse
     FioreBrasse::operator()( double q2, double xbj, bool ) const
     {
-      //const double m_min = Particle::massFromPDGId(Particle::Proton)+0.135;
-      const double m_min = mp_+ParticleProperties::mass( PiZero );
+      const double m_min = mp_+ParticleProperties::mass( PDG::PiZero );
 
       const double mx2 = mp2_ + q2*( 1.-xbj )/xbj, mx = sqrt( mx2 );
 

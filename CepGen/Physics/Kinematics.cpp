@@ -7,8 +7,8 @@
 namespace CepGen
 {
   Kinematics::Kinematics() :
-    inp( { 6500., 6500. } ), inpdg( { Proton, Proton } ),
-    mode( ElasticElastic ), structure_functions( StructureFunctions::SuriYennie )
+    inp( { 6500., 6500. } ), inpdg( { PDG::Proton, PDG::Proton } ),
+    mode( Mode::ElasticElastic ), structure_functions( StructureFunctions::SuriYennie )
   {}
 
   Kinematics::Kinematics( const Kinematics& kin ) :
@@ -17,6 +17,18 @@ namespace CepGen
     mode( kin.mode ), structure_functions( kin.structure_functions ),
     cuts( kin.cuts )
   {}
+
+  Kinematics&
+  Kinematics::operator=( const Kinematics& kin )
+  {
+    inp = kin.inp; inpdg = kin.inpdg;
+    central_system = kin.central_system;
+    minimum_final_state = kin.minimum_final_state;
+    mode = kin.mode;
+    structure_functions = kin.structure_functions;
+    cuts = kin.cuts;
+    return *this;
+  }
 
   Kinematics::~Kinematics()
   {}
@@ -52,22 +64,22 @@ namespace CepGen
   }
 
   std::ostream&
-  operator<<( std::ostream& os, const Kinematics::ProcessMode& pm )
+  operator<<( std::ostream& os, const Kinematics::Mode& pm )
   {
     switch ( pm ) {
-      case Kinematics::ElectronElectron:
+      case Kinematics::Mode::ElectronElectron:
         return os << "electron/electron";
-      case Kinematics::ElectronProton:
+      case Kinematics::Mode::ElectronProton:
         return os << "electron/proton";
-      case Kinematics::ProtonElectron:
+      case Kinematics::Mode::ProtonElectron:
         return os << "proton/electron";
-      case Kinematics::ElasticElastic:
+      case Kinematics::Mode::ElasticElastic:
         return os << "elastic/elastic";
-      case Kinematics::InelasticElastic:
+      case Kinematics::Mode::InelasticElastic:
         return os << "inelastic/elastic";
-      case Kinematics::ElasticInelastic:
+      case Kinematics::Mode::ElasticInelastic:
         return os << "elastic/inelastic";
-      case Kinematics::InelasticInelastic:
+      case Kinematics::Mode::InelasticInelastic:
         return os << "inelastic/inelastic";
     }
     return os;
@@ -79,6 +91,10 @@ namespace CepGen
 
   Kinematics::Limits::Limits( double min, double max ) :
     std::pair<double,double>( min, max )
+  {}
+
+  Kinematics::Limits::Limits( const Limits& rhs ) :
+    std::pair<double,double>( rhs.first, rhs.second )
   {}
 
   void
@@ -155,7 +171,7 @@ namespace CepGen
   Kinematics::CutsList::CutsList() :
     initial( { { Cuts::q2, { 0., 1.e5 } } } ),
     central( { { Cuts::pt_single, 0. } } ),
-    remnants( { { Cuts::mass, { 1.07, 320. } } } )
+    remnants( { { Cuts::mass_single, { 1.07, 320. } } } )
   {}
 
   Kinematics::CutsList::CutsList( const CutsList& cuts ) :
@@ -163,5 +179,15 @@ namespace CepGen
     central( cuts.central ), central_particles( cuts.central_particles ),
     remnants( cuts.remnants )
   {}
+
+  Kinematics::CutsList&
+  Kinematics::CutsList::operator=( const CutsList& cuts )
+  {
+    initial = cuts.initial;
+    central = cuts.central;
+    central_particles = cuts.central_particles;
+    remnants = cuts.remnants;
+    return *this;
+  }
 }
 

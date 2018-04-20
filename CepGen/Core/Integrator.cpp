@@ -16,11 +16,10 @@ namespace CepGen
 {
   Integrator::Integrator( unsigned int ndim, double integrand( double*, size_t, void* ), Parameters* params ) :
     input_params_( params ),
-    function_( new gsl_monte_function{ integrand, ndim, (void*)input_params_ } )
+    function_( new gsl_monte_function{ integrand, ndim, (void*)input_params_ } ),
+    rng_( gsl_rng_alloc( input_params_->integrator.rng_engine ) )
   {
     //--- initialise the random number generator
-    gsl_rng_env_setup();
-    rng_ = std::shared_ptr<gsl_rng>( gsl_rng_alloc( input_params_->integrator.rng_engine ), gsl_rng_free );
     unsigned long seed = ( input_params_->integrator.rng_seed > 0 )
       ? input_params_->integrator.rng_seed
       : time( nullptr ); // seed with time
@@ -52,20 +51,20 @@ namespace CepGen
     std::vector<double> x_low( function_->dim, 0. ), x_up( function_->dim, 1. );
 
     //--- prepare integrator
-    if ( algorithm == Plain )
+    if ( algorithm == Type::plain )
       pln_state = gsl_monte_plain_alloc( function_->dim );
-    else if ( algorithm == Vegas )
+    else if ( algorithm == Type::Vegas )
       veg_state = gsl_monte_vegas_alloc( function_->dim );
-    else if ( algorithm == MISER )
+    else if ( algorithm == Type::MISER )
       mis_state = gsl_monte_miser_alloc( function_->dim );
 
-    if ( algorithm == Plain )
+    if ( algorithm == Type::plain )
       res = gsl_monte_plain_integrate( function_.get(),
         &x_low[0], &x_up[0],
         function_->dim, input_params_->integrator.ncvg,
         rng_.get(), pln_state,
         &result, &abserr );
-    else if ( algorithm == Vegas ) {
+    else if ( algorithm == Type::Vegas ) {
       gsl_monte_vegas_params_set( veg_state, &input_params_->integrator.vegas );
       //----- Vegas warmup (prepare the grid)
       res = gsl_monte_vegas_integrate( function_.get(),
@@ -95,7 +94,7 @@ namespace CepGen
               > input_params_->integrator.vegas_chisq_cut-1. );
     }
     //----- integration
-    else if ( algorithm == MISER ) {
+    else if ( algorithm == Type::MISER ) {
       gsl_monte_miser_params_set( mis_state, &input_params_->integrator.miser );
       res = gsl_monte_miser_integrate( function_.get(),
         &x_low[0], &x_up[0],
@@ -105,11 +104,11 @@ namespace CepGen
     }
 
     //--- clean integrator
-    if ( algorithm == Plain )
+    if ( algorithm == Type::plain )
       gsl_monte_plain_free( pln_state );
-    else if ( algorithm == Vegas )
+    else if ( algorithm == Type::Vegas )
       gsl_monte_vegas_free( veg_state );
-    else if ( algorithm == MISER )
+    else if ( algorithm == Type::MISER )
       gsl_monte_miser_free( mis_state );
 
     input_params_->integrator.result = result;
@@ -141,7 +140,7 @@ namespace CepGen
     if ( !grid.gen_prepared )
       computeGenerationParameters();
 
-    ThreadWorker worker( &mutex_, rng_, function_.get(), &grid, callback );
+    ThreadWorker worker( &mutex_, rng_.get(), function_.get(), &grid, callback );
     worker.generate( 1 );
   }
 
@@ -166,7 +165,7 @@ namespace CepGen
     std::vector<std::thread::id> threads_ids;
     std::vector<std::shared_ptr<ThreadWorker> > workers;
     for ( unsigned int i = 0; i < input_params_->generation.num_threads; ++i ) {
-      std::shared_ptr<ThreadWorker> worker( new ThreadWorker( &mutex_, rng_, function_.get(), &grid, callback ) );
+      std::shared_ptr<ThreadWorker> worker( new ThreadWorker( &mutex_, rng_.get(), function_.get(), &grid, callback ) );
       workers.emplace_back( worker );
       try {
         threads.emplace_back( &ThreadWorker::generate, worker.get(), 0 );
@@ -283,11 +282,19 @@ namespace CepGen
   operator<<( std::ostream& os, const Integrator::Type& type )
   {
     switch ( type ) {
-      case Integrator::Plain: return os << "Plain";
-      case Integrator::Vegas: return os << "Vegas";
-      case Integrator::MISER: return os << "MISER";
+      case Integrator::Type::plain: return os << "plain";
+      case Integrator::Type::Vegas: return os << "Vegas";
+      case Integrator::Type::MISER: return os << "MISER";
     }
     return os;
+  }
+
+  //------------------------------------------------------------------------------------------------
+
+  void Integrator::gsl_rng_deleter::operator()( gsl_rng* rng ) noexcept
+  {
+    if ( rng )
+      gsl_rng_free( rng );
   }
 
   //------------------------------------------------------------------------------------------------

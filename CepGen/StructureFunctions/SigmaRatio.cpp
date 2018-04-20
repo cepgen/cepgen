@@ -7,6 +7,9 @@ namespace CepGen
 {
   namespace SF
   {
+    const double SigmaRatio::mp_ = ParticleProperties::mass( PDG::Proton );
+    const double SigmaRatio::mp2_ = SigmaRatio::mp_*SigmaRatio::mp_;
+
     double
     SigmaRatio::theta( double q2, double xbj ) const
     {
@@ -78,9 +81,8 @@ namespace CepGen
       // 2 kinematic regions:
       //  - resonances ( w < 2.5 )
       //  - DIS ( w > 2.5 )
-      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
-      const double w2 = mp2 + q2*( 1.-xbj )/xbj, w = sqrt( w2 );
-      const double xth = q2/( q2+2.5*2.5-mp2 ); // xth = x( W = 2.5 GeV )
+      const double w2 = mp2_ + q2*( 1.-xbj )/xbj, w = sqrt( w2 );
+      const double xth = q2/( q2+2.5*2.5-mp2_ ); // xth = x( W = 2.5 GeV )
       const double zeta = log( 25.*q2 );
       const double xitmp = ( w < 2.5 ) ? theta( q2, xth ) : theta( q2, xbj );
       const double tmp = 0.041*xitmp/zeta + 0.592/q2 - 0.331/( 0.09+q2*q2 );

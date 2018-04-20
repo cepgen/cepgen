@@ -76,7 +76,7 @@ namespace CepGen
           if ( central_system.size() == p->kinematics.central_system.size() ) {
             unsigned short i = 0;
             for ( auto& part : central_system ) {
-              if ( p->kinematics.central_system[i] == invalidParticle )
+              if ( p->kinematics.central_system[i] == PDG::invalid )
                 continue;
               part.setPdgId( p->kinematics.central_system[i] );
               part.computeMass();

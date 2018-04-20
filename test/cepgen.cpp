@@ -52,11 +52,11 @@ int main( int argc, char* argv[] ) {
     CG_INFO( "main" ) << "No config file provided. Setting the default parameters.";
 
     mg.parameters->setProcess( new CepGen::Process::GamGamLL );
-    //mg.parameters->process_mode = Kinematics::InelasticElastic;
-    mg.parameters->kinematics.mode = CepGen::Kinematics::ElasticElastic;
+    //mg.parameters->process_mode = Kinematics::Mode::InelasticElastic;
+    mg.parameters->kinematics.mode = CepGen::Kinematics::Mode::ElasticElastic;
     mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SuriYennie;
     mg.parameters->kinematics.inp = { 6500., 6500. };
-    mg.parameters->kinematics.central_system = { CepGen::Muon, CepGen::Muon };
+    mg.parameters->kinematics.central_system = { CepGen::PDG::Muon, CepGen::PDG::Muon };
     mg.parameters->kinematics.cuts.central[CepGen::Cuts::pt_single].min() = 15.;
     mg.parameters->kinematics.cuts.central[CepGen::Cuts::eta_single] = { -2.5, 2.5 };
     mg.parameters->integrator.ncvg = 5e4;

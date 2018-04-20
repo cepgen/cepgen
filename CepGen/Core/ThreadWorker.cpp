@@ -15,7 +15,7 @@ namespace CepGen
   extern int gSignal;
 
   ThreadWorker::ThreadWorker( std::mutex* mutex,
-                              std::shared_ptr<gsl_rng> rng, gsl_monte_function* function,
+                              gsl_rng* rng, gsl_monte_function* function,
                               GridParameters* grid,
                               std::function<void( const Event&, unsigned long )>& callback ) :
     ps_bin_( 0 ), rng_( rng ), function_( function ), grid_( grid ),
@@ -42,6 +42,7 @@ namespace CepGen
     if ( !grid_->gen_prepared )
       throw CG_FATAL( "ThreadWorker" ) << "Generation not prepared!";
 
+    grid_correc_ = 0.;
     while ( true ) {
       // only keep physical events
       if ( !next() )
@@ -197,7 +198,7 @@ namespace CepGen
   double
   ThreadWorker::uniform() const
   {
-    return gsl_rng_uniform( rng_.get() );
+    return gsl_rng_uniform( rng_ );
   }
 
   bool

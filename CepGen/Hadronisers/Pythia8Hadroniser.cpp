@@ -27,8 +27,8 @@ namespace CepGen
     {
 #ifdef PYTHIA8
       pythia_->setLHAupPtr( (Pythia8::LHAup*)lhaevt_.get() );
-      pythia_->settings.parm( "Beams:idA", params.kinematics.inpdg.first );
-      pythia_->settings.parm( "Beams:idB", params.kinematics.inpdg.second );
+      pythia_->settings.parm( "Beams:idA", (short)params.kinematics.inpdg.first );
+      pythia_->settings.parm( "Beams:idB", (short)params.kinematics.inpdg.second );
       // specify we will be using a LHA input
       pythia_->settings.mode( "Beams:frameType", 5 );
       pythia_->settings.parm( "Beams:eCM", params.kinematics.sqrtS() );
@@ -50,16 +50,16 @@ namespace CepGen
         pythia_->settings.flag( "ProcessLevel:all", full_evt_ );
 
       switch ( params_->kinematics.mode ) {
-        case Kinematics::ElasticElastic:
+        case Kinematics::Mode::ElasticElastic:
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 3 );
           break;
-        case Kinematics::ElasticInelastic:
+        case Kinematics::Mode::ElasticInelastic:
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 1 );
           break;
-        case Kinematics::InelasticElastic:
+        case Kinematics::Mode::InelasticElastic:
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 2 );
           break;
-        case Kinematics::InelasticInelastic: default:
+        case Kinematics::Mode::InelasticInelastic: default:
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 0 );
           break;
       }
@@ -143,7 +143,7 @@ namespace CepGen
     Pythia8Hadroniser::addParticle( Event& ev, const Pythia8::Particle& py_part, const Pythia8::Vec4& mom, unsigned short role, unsigned short offset ) const
     {
       Particle& op = ev.addParticle( (Particle::Role)role );
-      op.setPdgId( static_cast<ParticleCode>( abs( py_part.id() ) ), py_part.charge() );
+      op.setPdgId( static_cast<PDG>( abs( py_part.id() ) ), py_part.charge() );
       op.setStatus( py_part.isFinal()
         ? Particle::FinalState
         : Particle::Propagator
@@ -248,7 +248,7 @@ namespace CepGen
   //================================================================================================
 
 #ifdef PYTHIA8
-  const double LHAEvent::mp_ = ParticleProperties::mass( Proton );
+  const double LHAEvent::mp_ = ParticleProperties::mass( PDG::Proton );
   const double LHAEvent::mp2_ = LHAEvent::mp_*LHAEvent::mp_;
 
   LHAEvent::LHAEvent( const Parameters* params ) :
