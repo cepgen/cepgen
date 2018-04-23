@@ -31,7 +31,7 @@ namespace CepGen
       }
       /// Add a new rule to display exceptions/messages
       /// \param[in] rule Regex rule to handle
-      void addExceptionRule( const char* rule );
+      void addExceptionRule( const std::string& rule );
       /// Is the module set to be displayed/logged?
       /// \param[in] tmpl Module name to probe
       bool passExceptionRule( const std::string& tmpl ) const;
@@ -41,7 +41,7 @@ namespace CepGen
       /// Logging threshold for the output stream
       Level level;
       /// Output stream to use for all logging operations
-      std::shared_ptr<std::ostream> output;
+      std::ostream* output;
   };
 }
 

@@ -57,11 +57,12 @@ namespace CepGen
       gsl_monte_function* function_;
 
       GridParameters* grid_;
-      std::vector<int> grid_nm_;
+      std::vector<unsigned short> grid_nm_;
+      std::vector<unsigned short> grid_n_;
       double grid_correc_;
       double grid_correc2_;
-      double grid_f_max2_;
-      double grid_f_max_diff_;
+      /*double grid_f_max2_;
+      double grid_f_max_diff_;*/
       double grid_f_max_old_;
 
       /// Pointer to the (thread-independent) run parameters

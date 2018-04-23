@@ -14,13 +14,13 @@ class VegasIntegrationMode:
 
 vegas = plain.clone('Vegas',
     numFunctionCalls = 50000,
-    numPoints = 100,
     chiSqCut = 1.5,
     # VEGAS-specific parameters
-    iterations = 5,
+    iterations = 10,
     alpha = 1.5,
     mode = VegasIntegrationMode.Importance,
     verbosity = -1,
+    loggingOutput = 'cerr',
 )
 
 miser = plain.clone('MISER',

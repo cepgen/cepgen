@@ -50,9 +50,10 @@ namespace CepGen
       //----- VEGAS
 
       /// Collection of integrator parameters
-      struct IntegratorParameters
+      struct Integration
       {
-        IntegratorParameters();
+        Integration();
+        ~Integration();
         Integrator::Type type;
         /// Number of function calls to be computed for each point
         unsigned int ncvg; // ??
@@ -68,7 +69,7 @@ namespace CepGen
         double result, err_result;
       };
       /// Integrator parameters
-      IntegratorParameters integrator;
+      Integration integrator;
 
       //----- events generation
 

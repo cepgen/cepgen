@@ -7,13 +7,10 @@ namespace CepGen
   {}
 
   Logger::~Logger()
-  {
-    if ( output.get() == &std::cout )
-      output.reset();
-  }
+  {}
 
   void
-  Logger::addExceptionRule( const char* rule )
+  Logger::addExceptionRule( const std::string& rule )
   {
     allowed_exc_.emplace_back( rule );
   }

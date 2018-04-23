@@ -1,5 +1,6 @@
 #include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/ThreadWorker.h"
+#include "CepGen/Core/GridParameters.h"
 #include "CepGen/Core/utils.h"
 #include "CepGen/Core/Exception.h"
 
@@ -17,26 +18,49 @@ namespace CepGen
   Integrator::Integrator( unsigned int ndim, double integrand( double*, size_t, void* ), Parameters* params ) :
     input_params_( params ),
     function_( new gsl_monte_function{ integrand, ndim, (void*)input_params_ } ),
-    rng_( gsl_rng_alloc( input_params_->integrator.rng_engine ), gsl_rng_free )
+    rng_( gsl_rng_alloc( input_params_->integrator.rng_engine ), gsl_rng_free ),
+    grid_( new GridParameters )
   {
     //--- initialise the random number generator
+
     unsigned long seed = ( input_params_->integrator.rng_seed > 0 )
       ? input_params_->integrator.rng_seed
       : time( nullptr ); // seed with time
     gsl_rng_set( rng_.get(), seed );
 
-    input_params_->integrator.vegas.ostream = stderr; // redirect all debugging information to the error stream
-    input_params_->integrator.vegas.iterations = 10;
+    //--- a bit of printout for debugging
 
     CG_DEBUG( "Integrator:build" )
       << "Number of integration dimensions: " << function_->dim << ",\n\t"
-      << "Number of iterations [VEGAS]:     " << input_params_->integrator.vegas.iterations << ",\n\t"
       << "Number of function calls:         " << input_params_->integrator.ncvg << ",\n\t"
       << "Random numbers generator:         " << gsl_rng_name( rng_.get() ) << ".";
+    switch ( input_params_->integrator.type ) {
+      case Type::Vegas:
+        CG_DEBUG( "Integrator:build" ) << "Vegas parameters:\n\t"
+          << "Number of iterations in Vegas: " << input_params_->integrator.vegas.iterations << ",\n\t"
+          << "α-value: " << input_params_->integrator.vegas.alpha << ",\n\t"
+          << "Verbosity: " << input_params_->integrator.vegas.verbose << ",\n\t"
+          << "Grid interpolation mode: " << (Integrator::VegasMode)input_params_->integrator.vegas.mode << ".";
+        break;
+      case Type::MISER:
+        CG_DEBUG( "Integrator:build" ) << "MISER parameters:\n\t"
+          << "Number of calls: " << input_params_->integrator.miser.min_calls << ", "
+          << "per bisection: " << input_params_->integrator.miser.min_calls_per_bisection << ",\n\t"
+          << "Estimate fraction: " << input_params_->integrator.miser.estimate_frac << ",\n\t"
+          << "α-value: " << input_params_->integrator.miser.alpha << ",\n\t"
+          << "Dither: " << input_params_->integrator.miser.dither << ".";
+        break;
+      case Type::plain:
+        break;
+    }
   }
 
   Integrator::~Integrator()
   {}
+
+  //-----------------------------------------------------------------------------------------------
+  // cross section computation part
+  //-----------------------------------------------------------------------------------------------
 
   int
   Integrator::integrate( double& result, double& abserr )
@@ -106,8 +130,13 @@ namespace CepGen
     //--- clean integrator
     if ( algorithm == Type::plain )
       gsl_monte_plain_free( pln_state );
-    else if ( algorithm == Type::Vegas )
+    else if ( algorithm == Type::Vegas ) {
+      CG_DEBUG( "Integrator:integrate" )
+        << "Vegas grid information:\n\t"
+        << "ran for " << veg_state->dim << " dimensions, and generated " << veg_state->bins_max << " bins.\n\t"
+        << "Integration volume: " << veg_state->vol << ".";
       gsl_monte_vegas_free( veg_state );
+    }
     else if ( algorithm == Type::MISER )
       gsl_monte_miser_free( mis_state );
 
@@ -120,27 +149,17 @@ namespace CepGen
     return res;
   }
 
-  unsigned short
-  Integrator::dimensions() const
-  {
-    if ( !function_ )
-      return 0;
-    return function_->dim;
-  }
-
-  double
-  Integrator::eval( const std::vector<double>& x )
-  {
-    return function_->f( (double*)&x[0], function_->dim, (void*)input_params_ );
-  }
+  //-----------------------------------------------------------------------------------------------
+  // events generation part
+  //-----------------------------------------------------------------------------------------------
 
   void
   Integrator::generateOne( std::function<void( const Event&, unsigned long )> callback )
   {
-    if ( !grid.gen_prepared )
+    if ( !grid_->gen_prepared )
       computeGenerationParameters();
 
-    ThreadWorker worker( &mutex_, rng_.get(), function_.get(), &grid, callback );
+    ThreadWorker worker( &mutex_, rng_.get(), function_.get(), grid_.get(), callback );
     worker.generate( 1 );
   }
 
@@ -153,7 +172,7 @@ namespace CepGen
       generateOne( callback );
     }
 
-    if ( !grid.gen_prepared )
+    if ( !grid_->gen_prepared )
       computeGenerationParameters();
 
     CG_INFO( "Integrator:generate" )
@@ -165,9 +184,9 @@ namespace CepGen
     std::vector<std::thread::id> threads_ids;
     std::vector<std::shared_ptr<ThreadWorker> > workers;
     for ( unsigned int i = 0; i < input_params_->generation.num_threads; ++i ) {
-      std::shared_ptr<ThreadWorker> worker( new ThreadWorker( &mutex_, rng_.get(), function_.get(), &grid, callback ) );
-      workers.emplace_back( worker );
       try {
+        auto worker = std::make_shared<ThreadWorker>( &mutex_, rng_.get(), function_.get(), grid_.get(), callback );
+        workers.emplace_back( worker );
         threads.emplace_back( &ThreadWorker::generate, worker.get(), 0 );
       } catch ( const std::system_error& e ) {
         CG_ERROR( "Integrator:generate" )
@@ -189,6 +208,10 @@ namespace CepGen
       << ":" << os.str();
   }
 
+  //-----------------------------------------------------------------------------------------------
+  // initial preparation run before the generation of unweighted events
+  //-----------------------------------------------------------------------------------------------
+
   void
   Integrator::computeGenerationParameters()
   {
@@ -196,17 +219,18 @@ namespace CepGen
       << "Preparing the grid (" << input_params_->integrator.npoints << " points) "
       << "for the generation of unweighted events.";
 
-    grid.max = pow( grid.mbin_, function_->dim );
+    grid_->max = pow( GridParameters::mbin_, function_->dim );
     const double inv_npoin = 1./input_params_->integrator.npoints;
 
-    if ( function_->dim > grid.max_dimensions_ )
+    if ( function_->dim > GridParameters::max_dimensions_ )
       throw CG_FATAL( "Integrator:setGen" )
-       << "Number of dimensions to integrate exceeds the maximum number, " << grid.max_dimensions_ << ".";
+        << "Number of dimensions to integrate exceeds the maximum number, "
+        << GridParameters::max_dimensions_ << ".";
 
-    grid.f_max = std::vector<double>( grid.max, 0. );
-    grid.n = std::vector<int>( function_->dim, 0 );
+    grid_->f_max = std::vector<double>( grid_->max, 0. );
 
     std::vector<double> x( function_->dim, 0. );
+    std::vector<unsigned short> n( function_->dim, 0 );
 
     input_params_->generation.ngen = 0;
     input_params_->setStorage( false );
@@ -215,19 +239,19 @@ namespace CepGen
     double sum = 0., sum2 = 0., sum2p = 0.;
 
     //--- main loop
-    for ( unsigned int i = 0; i < grid.max; ++i ) {
+    for ( unsigned int i = 0; i < grid_->max; ++i ) {
       int jj = i;
       for ( unsigned int j = 0; j < function_->dim; ++j ) {
-        int jjj = jj*grid.inv_mbin_;
-        grid.n[j] = jj-jjj*grid.mbin_;
+        int jjj = jj*GridParameters::inv_mbin_;
+        n[j] = jj-jjj*GridParameters::mbin_;
         jj = jjj;
       }
       double fsum = 0., fsum2 = 0.;
       for ( unsigned int j = 0; j < input_params_->integrator.npoints; ++j ) {
         for ( unsigned int k = 0; k < function_->dim; ++k )
-          x[k] = ( gsl_rng_uniform( rng_.get() ) + grid.n[k] ) * grid.inv_mbin_;
+          x[k] = ( uniform()+n[k] ) * GridParameters::inv_mbin_;
         const double z = eval( x );
-        grid.f_max[i] = std::max( grid.f_max[i], z );
+        grid_->f_max[i] = std::max( grid_->f_max[i], z );
         fsum += z;
         fsum2 += z*z;
       }
@@ -235,25 +259,28 @@ namespace CepGen
       sum += av;
       sum2 += av2;
       sum2p += sig2;
-      grid.f_max_global = std::max( grid.f_max_global, grid.f_max[i] );
+      grid_->f_max_global = std::max( grid_->f_max_global, grid_->f_max[i] );
 
-      if ( Logger::get().level >= Logger::Level::DebugInsideLoop ) {
+      // per-bin debugging loop
+      if ( CG_EXCEPT_LEVEL( DebugInsideLoop ) && CG_EXCEPT_MATCH( "Integrator:setGen" ) ) {
         const double sig = sqrt( sig2 );
-        const double eff = ( grid.f_max[i] != 0. ) ? grid.f_max[i]/av : 1.e4;
+        const double eff = ( grid_->f_max[i] != 0. )
+          ? grid_->f_max[i]/av
+          : 1.e4;
         std::ostringstream os;
         for ( unsigned int j = 0; j < function_->dim; ++j )
-          os << grid.n[j] << ( j != function_->dim-1 ? ", " : "" );
-        CG_DEBUG_LOOP( "Integrator" )
+          os << ( j != 0 ? ", " : "" ) << n[j];
+        CG_DEBUG_LOOP( "Integrator:setGen" )
           << "In iteration #" << i << ":\n\t"
           << "av   = " << av << "\n\t"
           << "sig  = " << sig << "\n\t"
-          << "fmax = " << grid.f_max[i] << "\n\t"
+          << "fmax = " << grid_->f_max[i] << "\n\t"
           << "eff  = " << eff << "\n\t"
           << "n = (" << os.str() << ")";
       }
     } // end of main loop
 
-    const double inv_max = 1./grid.max;
+    const double inv_max = 1./grid_->max;
     sum *= inv_max;
     sum2 *= inv_max;
     sum2p *= inv_max;
@@ -261,38 +288,75 @@ namespace CepGen
     const double sig = sqrt( sum2-sum*sum ), sigp = sqrt( sum2p );
 
     double eff1 = 0.;
-    for ( unsigned int i = 0; i < grid.max; ++i )
-      eff1 += sum*grid.max/grid.f_max[i];
-    const double eff2 = sum/grid.f_max_global;
+    for ( unsigned int i = 0; i < grid_->max; ++i )
+      eff1 += sum*grid_->max/grid_->f_max[i];
+    const double eff2 = sum/grid_->f_max_global;
 
     CG_DEBUG( "Integrator:setGen" )
       << "Average function value     = sum   = " << sum << "\n\t"
       << "Average function value**2  = sum2  = " << sum2 << "\n\t"
       << "Overall standard deviation = sig   = " << sig << "\n\t"
       << "Average standard deviation = sigp  = " << sigp << "\n\t"
-      << "Maximum function value     = f_max = " << grid.f_max_global << "\n\t"
+      << "Maximum function value     = f_max = " << grid_->f_max_global << "\n\t"
       << "Average inefficiency       = eff1  = " << eff1 << "\n\t"
       << "Overall inefficiency       = eff2  = " << eff2;
 
-    grid.gen_prepared = true;
+    grid_->gen_prepared = true;
     CG_INFO( "Integrator:setGen" ) << "Grid prepared! Now launching the production.";
   }
+
+  //------------------------------------------------------------------------------------------------
+  // helper / alias methods
+  //------------------------------------------------------------------------------------------------
+
+  unsigned short
+  Integrator::dimensions() const
+  {
+    if ( !function_ )
+      return 0;
+    return function_->dim;
+  }
+
+  double
+  Integrator::eval( const std::vector<double>& x )
+  {
+    return function_->f( (double*)&x[0], function_->dim, (void*)input_params_ );
+  }
+
+  double
+  Integrator::uniform() const
+  {
+    return gsl_rng_uniform( rng_.get() );
+  }
+
+  //------------------------------------------------------------------------------------------------
 
   std::ostream&
   operator<<( std::ostream& os, const Integrator::Type& type )
   {
     switch ( type ) {
-      case Integrator::Type::plain: return os << "plain";
-      case Integrator::Type::Vegas: return os << "Vegas";
-      case Integrator::Type::MISER: return os << "MISER";
+      case Integrator::Type::plain:
+        return os << "plain";
+      case Integrator::Type::Vegas:
+        return os << "Vegas";
+      case Integrator::Type::MISER:
+        return os << "MISER";
     }
     return os;
   }
 
-  //------------------------------------------------------------------------------------------------
-
-  GridParameters::GridParameters() :
-    gen_prepared( false ), f_max_global( 0. )
-  {}
+  std::ostream&
+  operator<<( std::ostream& os, const Integrator::VegasMode& mode )
+  {
+    switch ( mode ) {
+      case Integrator::VegasMode::importance:
+        return os << "importance";
+      case Integrator::VegasMode::importanceOnly:
+        return os << "importance-only";
+      case Integrator::VegasMode::stratified:
+        return os << "stratified";
+    }
+    return os;
+  }
 }
 

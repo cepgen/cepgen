@@ -217,7 +217,7 @@ namespace CepGen
 
   //-----------------------------------------------------------------------------------------------
 
-  Parameters::IntegratorParameters::IntegratorParameters() :
+  Parameters::Integration::Integration() :
     type( Integrator::Type::Vegas ), ncvg( 500000 ), npoints( 100 ),
     rng_seed( 0 ), rng_engine( (gsl_rng_type*)gsl_rng_mt19937 ),
     vegas_chisq_cut( 1.5 ),
@@ -227,14 +227,17 @@ namespace CepGen
     {
       std::shared_ptr<gsl_monte_vegas_state> tmp_state( gsl_monte_vegas_alloc( ndof ), gsl_monte_vegas_free );
       gsl_monte_vegas_params_get( tmp_state.get(), &vegas );
-      vegas.ostream = stderr; // redirect all debugging information to the error stream
-      /*__gnu_cxx::stdio_filebuf<char> fpt( fileno( vegas.ostream ), std::ios::in );
-      std::istream fstr( &fpt );*/
     }
     {
       std::shared_ptr<gsl_monte_miser_state> tmp_state( gsl_monte_miser_alloc( ndof ), gsl_monte_miser_free );
       gsl_monte_miser_params_get( tmp_state.get(), &miser );
     }
+  }
+
+  Parameters::Integration::~Integration()
+  {
+    if ( vegas.ostream && vegas.ostream != stdout && vegas.ostream != stderr )
+      fclose( vegas.ostream );
   }
 
   //-----------------------------------------------------------------------------------------------
