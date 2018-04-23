@@ -263,7 +263,6 @@ namespace CepGen
         getParameter( integr, "verbosity", (int&)params_.integrator.vegas.verbose );
         std::string vegas_logging_output = "cerr";
         getParameter( integr, "loggingOutput", vegas_logging_output );
-        std::cout << vegas_logging_output << std::endl;
         if ( vegas_logging_output == "cerr" )
           // redirect all debugging information to the error stream
           params_.integrator.vegas.ostream = stderr;

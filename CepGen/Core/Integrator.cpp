@@ -288,18 +288,21 @@ namespace CepGen
     const double sig = sqrt( sum2-sum*sum ), sigp = sqrt( sum2p );
 
     double eff1 = 0.;
-    for ( unsigned int i = 0; i < grid_->max; ++i )
+    for ( unsigned int i = 0; i < grid_->max; ++i ) {
+      if ( grid_->f_max[i] == 0. )
+        continue;
       eff1 += sum*grid_->max/grid_->f_max[i];
+    }
     const double eff2 = sum/grid_->f_max_global;
 
     CG_DEBUG( "Integrator:setGen" )
-      << "Average function value     = sum   = " << sum << "\n\t"
-      << "Average function value**2  = sum2  = " << sum2 << "\n\t"
-      << "Overall standard deviation = sig   = " << sig << "\n\t"
-      << "Average standard deviation = sigp  = " << sigp << "\n\t"
-      << "Maximum function value     = f_max = " << grid_->f_max_global << "\n\t"
-      << "Average inefficiency       = eff1  = " << eff1 << "\n\t"
-      << "Overall inefficiency       = eff2  = " << eff2;
+      << "Average function value         = sum   = " << sum << "\n\t"
+      << "Average squared function value = sum2  = " << sum2 << "\n\t"
+      << "Overall standard deviation     = sig   = " << sig << "\n\t"
+      << "Average standard deviation     = sigp  = " << sigp << "\n\t"
+      << "Maximum function value         = f_max = " << grid_->f_max_global << "\n\t"
+      << "Average inefficiency           = eff1  = " << eff1 << "\n\t"
+      << "Overall inefficiency           = eff2  = " << eff2;
 
     grid_->gen_prepared = true;
     CG_INFO( "Integrator:setGen" ) << "Grid prepared! Now launching the production.";
