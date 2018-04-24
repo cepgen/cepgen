@@ -2,6 +2,7 @@
 #define CepGen_Core_GridParameters_h
 
 #include <vector>
+#include <map>
 
 namespace CepGen
 {
@@ -14,9 +15,10 @@ namespace CepGen
       static constexpr unsigned short mbin_ = 3;
       static constexpr double inv_mbin_ = 1./mbin_;
 
-      GridParameters() :
-        gen_prepared( false ), f_max_global( 0. ), f_max2( 0. ), f_max_diff( 0. )
-      {}
+      GridParameters();
+
+      std::map<unsigned int,std::vector<unsigned short> > n_map;
+
       unsigned int max;
       /// Has the generation been prepared?
       bool gen_prepared;
@@ -24,7 +26,6 @@ namespace CepGen
       std::vector<double> f_max;
       /// Maximal value of the function in the considered integration range
       double f_max_global;
-      double f_max2;
       double f_max_diff;
       //std::set<unsigned int> probed_bins;
   };

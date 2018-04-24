@@ -5,10 +5,14 @@ namespace CepGen
 {
   namespace Process
   {
+    //---------------------------------------------------------------------------------------------
+
     GamGamLL::Masses::Masses() :
       MX2_( 0. ), MY2_( 0. ), Ml2_( 0. ),
       w12_( 0. ), w31_( 0. ), dw31_( 0. ), w52_( 0. ), dw52_( 0. )
     {}
+
+    //---------------------------------------------------------------------------------------------
 
     GamGamLL::GamGamLL( int nopt ) :
       GenericProcess( "lpair", "pp → p(*) ( ɣɣ → l⁺l¯ ) p(*)" ),
@@ -31,6 +35,8 @@ namespace CepGen
       pt4_( 0. ),
       jacobian_( 0. )
     {}
+
+    //---------------------------------------------------------------------------------------------
 
     void
     GamGamLL::addEventContent()
@@ -64,6 +70,8 @@ namespace CepGen
           return 9;
       }
     }
+
+    //---------------------------------------------------------------------------------------------
 
     bool
     GamGamLL::pickin()
@@ -399,6 +407,8 @@ namespace CepGen
       return true;
     }
 
+    //---------------------------------------------------------------------------------------------
+
     bool
     GamGamLL::orient()
     {
@@ -564,6 +574,8 @@ namespace CepGen
       return true;
     }
 
+    //---------------------------------------------------------------------------------------------
+
     double
     GamGamLL::computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dw )
     {
@@ -583,6 +595,8 @@ namespace CepGen
       dw = sqrt( dmx2 );
       return sqrt( mx2 );
     }
+
+    //---------------------------------------------------------------------------------------------
 
     void
     GamGamLL::beforeComputeWeight()
@@ -624,6 +638,8 @@ namespace CepGen
       masses_.MX2_ = MX_*MX_;
       masses_.MY2_ = MY_*MY_;
     }
+
+    //---------------------------------------------------------------------------------------------
 
     double
     GamGamLL::computeWeight()
@@ -908,6 +924,8 @@ namespace CepGen
       return Constants::GeV2toBarn*jacobian_;
     }
 
+    //---------------------------------------------------------------------------------------------
+
     void
     GamGamLL::fillKinematics( bool )
     {
@@ -1002,6 +1020,8 @@ namespace CepGen
       //----- intermediate two-lepton system
       event_->getOneByRole( Particle::Intermediate ).setMomentum( p6_cm_+p7_cm_ );
     }
+
+    //---------------------------------------------------------------------------------------------
 
     double
     GamGamLL::periPP( int nup_, int ndown_ )

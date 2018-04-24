@@ -215,6 +215,9 @@ namespace CepGen
   void
   Integrator::computeGenerationParameters()
   {
+    input_params_->generation.ngen = 0;
+    input_params_->setStorage( false );
+
     CG_INFO( "Integrator:setGen" )
       << "Preparing the grid (" << input_params_->integrator.npoints << " points) "
       << "for the generation of unweighted events.";
@@ -230,30 +233,35 @@ namespace CepGen
     grid_->f_max = std::vector<double>( grid_->max, 0. );
 
     std::vector<double> x( function_->dim, 0. );
-    std::vector<unsigned short> n( function_->dim, 0 );
-
-    input_params_->generation.ngen = 0;
-    input_params_->setStorage( false );
+    std::vector<unsigned short> n( function_->dim, 0 );;
 
     // ...
     double sum = 0., sum2 = 0., sum2p = 0.;
 
     //--- main loop
     for ( unsigned int i = 0; i < grid_->max; ++i ) {
-      int jj = i;
+      unsigned int jj = i;
       for ( unsigned int j = 0; j < function_->dim; ++j ) {
-        int jjj = jj*GridParameters::inv_mbin_;
-        n[j] = jj-jjj*GridParameters::mbin_;
-        jj = jjj;
+        unsigned int tmp = jj*GridParameters::inv_mbin_;
+        n[j] = jj-tmp*GridParameters::mbin_;
+        jj = tmp;
+      }
+      grid_->n_map[i] = n;
+      if ( CG_EXCEPT_LEVEL( DebugInsideLoop ) && CG_EXCEPT_MATCH( "Integrator:setGen" ) ) {
+        std::ostringstream os;
+        for ( const auto& ni : n )
+          os << ni << " ";
+        CG_DEBUG_LOOP( "Integrator:setGen" )
+          << "n-vector for bin " << i << ": " << os.str();
       }
       double fsum = 0., fsum2 = 0.;
       for ( unsigned int j = 0; j < input_params_->integrator.npoints; ++j ) {
         for ( unsigned int k = 0; k < function_->dim; ++k )
           x[k] = ( uniform()+n[k] ) * GridParameters::inv_mbin_;
-        const double z = eval( x );
-        grid_->f_max[i] = std::max( grid_->f_max[i], z );
-        fsum += z;
-        fsum2 += z*z;
+        const double weight = eval( x );
+        grid_->f_max[i] = std::max( grid_->f_max[i], weight );
+        fsum += weight;
+        fsum2 += weight*weight;
       }
       const double av = fsum*inv_npoin, av2 = fsum2*inv_npoin, sig2 = av2-av*av;
       sum += av;
@@ -288,11 +296,8 @@ namespace CepGen
     const double sig = sqrt( sum2-sum*sum ), sigp = sqrt( sum2p );
 
     double eff1 = 0.;
-    for ( unsigned int i = 0; i < grid_->max; ++i ) {
-      if ( grid_->f_max[i] == 0. )
-        continue;
-      eff1 += sum*grid_->max/grid_->f_max[i];
-    }
+    for ( unsigned int i = 0; i < grid_->max; ++i )
+      eff1 += sum/grid_->max*grid_->f_max[i];
     const double eff2 = sum/grid_->f_max_global;
 
     CG_DEBUG( "Integrator:setGen" )

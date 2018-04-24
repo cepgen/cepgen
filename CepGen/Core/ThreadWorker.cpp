@@ -19,24 +19,22 @@ namespace CepGen
                               gsl_rng* rng, gsl_monte_function* function,
                               GridParameters* grid,
                               std::function<void( const Event&, unsigned long )>& callback ) :
-    ps_bin_( 0 ), rng_( rng ), function_( function ), grid_( grid ),
+    ps_bin_( 0 ), rng_( rng ), function_( function ),
+    grid_( grid ), grid_num_( grid_->max, 0 ),
     grid_correc_( 0. ), grid_correc2_( 0. ),
-    /*grid_f_max2_( 0. ), grid_f_max_diff_( 0. ), */grid_f_max_old_( 0. ),
-    global_params_( nullptr ), local_params_( nullptr ),
+    grid_f_max2_( 0. ), /*grid_f_max_diff_( 0. ), */grid_f_max_old_( 0. ),
+    global_params_( nullptr ),
     mutex_( mutex ), callback_( callback )
   {
     if ( !function )
       throw CG_FATAL( "ThreadWorker" ) << "Invalid integration function passed!";
 
-    grid_n_ = std::vector<unsigned short>( function_->dim, 0 );
-    grid_nm_ = std::vector<unsigned short>( grid_->max, 0 );
     // retrieve standard parameters
     global_params_ = static_cast<Parameters*>( function->params );
-    // clone the process for this thread
-    process_ = global_params_->processClone();
     // copy the standard parameters and feed the cloned process
-    local_params_ = new Parameters( *static_cast<const Parameters*>( global_params_ ) );
-    local_params_->setProcess( process_.get() );
+    local_params_ = std::unique_ptr<Parameters>( new Parameters( *const_cast<const Parameters*>( global_params_ ) ) );
+    // clone the process for this thread
+    local_params_->cloneProcess( global_params_->process() );
   }
 
   bool
@@ -86,24 +84,21 @@ namespace CepGen
     double weight = 0.;
 
     while ( true ) {
+      if ( gSignal != 0 )
+        return false;
       double y = -1.;
       //--- select a bin and reject if fmax is too small
       while ( true ) {
         ps_bin_ = uniform() * grid_->max;
-        grid_nm_[ps_bin_]++;
+        grid_num_[ps_bin_]++;
         y = uniform() * grid_->f_max_global;
         if ( y <= grid_->f_max[ps_bin_] )
           break;
       }
       // shoot a point x in this bin
-      int jj = ps_bin_;
-      for ( unsigned int i = 0; i < function_->dim; ++i ) {
-        int jjj = jj * GridParameters::inv_mbin_;
-        grid_n_[i] = jj - jjj * GridParameters::mbin_;
-        x[i] = ( uniform()+grid_n_[i] ) * GridParameters::inv_mbin_;
-        jj = jjj;
-      }
-
+      std::vector<unsigned short> grid_n = grid_->n_map.at( ps_bin_ );
+      for ( unsigned int i = 0; i < function_->dim; ++i )
+        x[i] = ( uniform()+grid_n[i] ) * GridParameters::inv_mbin_;
       // get weight for selected x value
       weight = eval( x );
 //std::cout << weight << std::endl;
@@ -121,7 +116,7 @@ namespace CepGen
       grid_f_max_old_ = grid_->f_max[ps_bin_];
       grid_->f_max[ps_bin_] = weight;
       grid_->f_max_diff = weight-grid_f_max_old_;
-      grid_correc_ = ( grid_nm_[ps_bin_]-1. ) * grid_->f_max_diff / grid_->f_max_global - 1.;
+      grid_correc_ = ( grid_num_[ps_bin_]-1. ) * grid_->f_max_diff / grid_->f_max_global - 1.;
     }
     else {
       // a new function global maximum has been found!
@@ -130,11 +125,11 @@ namespace CepGen
       grid_->f_max[ps_bin_] = weight;
       grid_->f_max_diff = weight-grid_f_max_old_;
       grid_->f_max_global = weight;
-      grid_correc_ = ( grid_nm_[ps_bin_]-1. ) * grid_->f_max_diff / grid_->f_max_global * weight / grid_->f_max_global - 1.;
+      grid_correc_ = ( grid_num_[ps_bin_]-1. ) * grid_->f_max_diff / grid_->f_max_global * weight / grid_->f_max_global - 1.;
     }
 
     CG_DEBUG_LOOP( "ThreadWorker:next" )
-      << "Correction applied: " << grid_correc_ << ", phase space bin = " << ps_bin_;
+      << "Correction " << grid_correc_ << " will be applied for phase space bin " << ps_bin_ << ".";
 
     // return with an accepted event
     if ( weight > 0. )
@@ -157,13 +152,13 @@ namespace CepGen
       grid_correc_ = -1.;
       std::vector<double> xtmp( function_->dim );
       // Select x values in phase space bin
+      const std::vector<unsigned short> grid_n = grid_->n_map.at( ps_bin_ );
       for ( unsigned int k = 0; k < function_->dim; ++k )
-        xtmp[k] = ( uniform() + grid_n_[k] ) * GridParameters::inv_mbin_;
-      // Compute weight for x value
+        xtmp[k] = ( uniform() + grid_n[k] ) * GridParameters::inv_mbin_;
       const double weight = eval( xtmp );
       // Parameter for correction of correction
       if ( weight > grid_->f_max[ps_bin_] ) {
-        grid_->f_max2 = std::max( grid_->f_max2, weight );
+        grid_f_max2_ = std::max( grid_f_max2_, weight );
         grid_correc_ += 1.;
         grid_correc2_ -= 1.;
       }
@@ -177,20 +172,20 @@ namespace CepGen
     }
     // Correction if too big weight is found while correction
     // (All your bases are belong to us...)
-    if ( grid_->f_max2 > grid_->f_max[ps_bin_] ) {
+    if ( grid_f_max2_ > grid_->f_max[ps_bin_] ) {
       grid_f_max_old_ = grid_->f_max[ps_bin_];
-      grid_->f_max[ps_bin_] = grid_->f_max2;
-      grid_->f_max_diff = grid_->f_max2-grid_f_max_old_;
-      const double correc_tmp = ( grid_nm_[ps_bin_]-1. ) * grid_->f_max_diff / grid_->f_max_global;
-      if ( grid_->f_max2 < grid_->f_max_global )
+      grid_->f_max[ps_bin_] = grid_f_max2_;
+      grid_->f_max_diff = grid_f_max2_-grid_f_max_old_;
+      const double correc_tmp = ( grid_num_[ps_bin_]-1. ) * grid_->f_max_diff / grid_->f_max_global;
+      if ( grid_f_max2_ < grid_->f_max_global )
         grid_correc_ = correc_tmp;
       else {
-        grid_->f_max_global = grid_->f_max2;
-        grid_correc_ = correc_tmp * grid_->f_max2 / grid_->f_max_global;
+        grid_->f_max_global = grid_f_max2_;
+        grid_correc_ = correc_tmp * grid_f_max2_ / grid_->f_max_global;
       }
       grid_correc_ -= grid_correc2_;
       grid_correc2_ = 0.;
-      grid_->f_max2 = 0.;
+      grid_f_max2_ = 0.;
       return false;
     }
     return true;
@@ -199,21 +194,20 @@ namespace CepGen
   double
   ThreadWorker::eval( const std::vector<double>& x )
   {
-    return function_->f( (double*)&x[0], function_->dim, (void*)local_params_ );
+    return function_->f( (double*)&x[0], function_->dim, (void*)local_params_.get() );
   }
 
   double
   ThreadWorker::uniform() const
   {
     return gsl_rng_uniform( rng_ );
-    //return rand()*1./RAND_MAX;
   }
 
   bool
   ThreadWorker::storeEvent( const std::vector<double>& x )
   {
-    std::cout << "------------store!!!" << std::endl;
     std::lock_guard<std::mutex> guard( *mutex_ );
+    //std::cout << "------------store!!! " << global_params_->generation.ngen << std::endl;
     //mutex_->lock();
     local_params_->setStorage( true );
     const double weight = eval( x );
