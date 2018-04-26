@@ -243,7 +243,8 @@ namespace CepGen
   Parameters::Integration::Integration( const Integration& rhs ) :
     type( rhs.type ), ncvg( rhs.ncvg ),
     rng_seed( rhs.rng_seed ), rng_engine( rhs.rng_engine ),
-    vegas_chisq_cut( rhs.vegas_chisq_cut ),
+    vegas( rhs.vegas ), vegas_chisq_cut( rhs.vegas_chisq_cut ),
+    miser( rhs.miser ),
     result( -1. ), err_result( -1. )
   {}
 
