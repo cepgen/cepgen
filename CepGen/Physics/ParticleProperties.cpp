@@ -1,6 +1,5 @@
 #include "CepGen/Physics/ParticleProperties.h"
-
-#include <iostream>
+#include "CepGen/Physics/PDG.h"
 
 namespace CepGen
 {

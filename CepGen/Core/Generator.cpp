@@ -4,7 +4,9 @@
 
 #include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/Timer.h"
 
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Event/Event.h"
 
@@ -158,13 +160,18 @@ namespace CepGen
     if ( cross_section_ < 0. )
       computeXsection( cross_section_, cross_section_error_ );
 
+    const Timer tmr;
+
     CG_INFO( "Generator" )
       << parameters->generation.maxgen << " events will be generated.";
 
-    integrator_->generate( parameters->generation.maxgen, callback );
+    integrator_->generate( parameters->generation.maxgen, callback, &tmr );
 
+    const double gen_time_s = tmr.elapsed();
     CG_INFO( "Generator" )
-      << parameters->generation.ngen << " events generated.";
+      << parameters->generation.ngen << " events generated "
+      << "in " << gen_time_s << " s "
+      << "(" << gen_time_s/parameters->generation.ngen*1.e3 << " ms/event).";
   }
 
   void

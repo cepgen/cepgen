@@ -1,8 +1,9 @@
-#include "FormFactors.h"
+#include "CepGen/Physics/FormFactors.h"
 
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Physics/PDG.h"
 
 #include "CepGen/StructureFunctions/ALLM.h"
 #include "CepGen/StructureFunctions/BlockDurandHa.h"

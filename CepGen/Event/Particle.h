@@ -182,7 +182,7 @@ namespace CepGen
       /// \param[in] pdgId PDG identifier
       /// \param[in] role Role of the particle in the process
       /// \param[in] st Current status
-      Particle( Role role, PDG pdgId = PDG::invalid, Status st = Undefined );
+      Particle( Role role, PDG pdgId, Status st = Undefined );
       /// Copy constructor
       Particle( const Particle& );
       inline ~Particle() {}
@@ -317,7 +317,7 @@ namespace CepGen
       // --- global particle information extraction
 
       /// Dump all the information on this particle into the standard output stream
-      void dump() const;    
+      void dump() const;
 
     private:
       /// Unique identifier in an event

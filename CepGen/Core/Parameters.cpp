@@ -131,6 +131,7 @@ namespace CepGen
       os
         << std::setw( wt ) << "Number of threads" << generation.num_threads << std::endl;
     os
+      << std::setw( wt ) << "Number of points to try per bin" << generation.num_points << std::endl
       << std::setw( wt ) << "Verbosity level " << Logger::get().level << std::endl;
     if ( hadroniser_ ) {
       os
@@ -148,7 +149,6 @@ namespace CepGen
       << std::setw( wt ) << "Integration algorithm" << ( pretty ? boldify( int_algo.str().c_str() ) : int_algo.str() ) << std::endl
       //<< std::setw( wt ) << "Maximum number of iterations" << ( pretty ? boldify( integrator.itvg ) : std::to_string( integrator.itvg ) ) << std::endl
       << std::setw( wt ) << "Number of function calls" << integrator.ncvg << std::endl
-      << std::setw( wt ) << "Number of points to try per bin" << integrator.npoints << std::endl
       << std::setw( wt ) << "Random number generator seed" << integrator.rng_seed << std::endl;
     if ( integrator.rng_engine )
       os
@@ -224,7 +224,7 @@ namespace CepGen
   //-----------------------------------------------------------------------------------------------
 
   Parameters::Integration::Integration() :
-    type( Integrator::Type::Vegas ), ncvg( 500000 ), npoints( 100 ),
+    type( Integrator::Type::Vegas ), ncvg( 500000 ),
     rng_seed( 0 ), rng_engine( (gsl_rng_type*)gsl_rng_mt19937 ),
     vegas_chisq_cut( 1.5 ),
     result( -1. ), err_result( -1. )
@@ -240,10 +240,17 @@ namespace CepGen
     }
   }
 
+  Parameters::Integration::Integration( const Integration& rhs ) :
+    type( rhs.type ), ncvg( rhs.ncvg ),
+    rng_seed( rhs.rng_seed ), rng_engine( rhs.rng_engine ),
+    vegas_chisq_cut( rhs.vegas_chisq_cut ),
+    result( -1. ), err_result( -1. )
+  {}
+
   Parameters::Integration::~Integration()
   {
-    if ( vegas.ostream && vegas.ostream != stdout && vegas.ostream != stderr )
-      fclose( vegas.ostream );
+    //if ( vegas.ostream && vegas.ostream != stdout && vegas.ostream != stderr )
+    //  fclose( vegas.ostream );
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -251,6 +258,6 @@ namespace CepGen
   Parameters::Generation::Generation() :
     enabled( false ), maxgen( 0 ),
     symmetrise( false ), ngen( 0 ), gen_print_every( 10000 ),
-    num_threads( 2 )
+    num_threads( 2 ), num_points( 100 )
   {}
 }

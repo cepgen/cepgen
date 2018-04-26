@@ -79,7 +79,7 @@ namespace CepGen
         from_( rhs.from_ ), module_( rhs.module_ ), message_( rhs.message_.str() ), type_( rhs.type_ ), error_num_( rhs.error_num_ ) {}
       /// Default destructor (potentially killing the process)
       inline ~Exception() noexcept override {
-        dump();
+        do { dump(); } while ( 0 );
         // we stop this process' execution on fatal exception
         if ( type_ == Type::fatal )
           if ( raise( SIGINT ) != 0 )
@@ -141,6 +141,14 @@ namespace CepGen
       }
 
     private:
+      inline static char* now() {
+        static char buffer[10];
+        time_t rawtime;
+        time( &rawtime );
+        struct tm* timeinfo = localtime( &rawtime );
+        strftime( buffer, 10, "%H:%M:%S", timeinfo );
+        return buffer;
+      }
       /// Extract a full exception message
       inline std::string fullMessage() const {
         if ( type_ == Type::info || type_ == Type::debug )

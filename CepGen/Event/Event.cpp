@@ -1,4 +1,5 @@
-#include "Event.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
@@ -197,7 +198,7 @@ namespace CepGen
   Particle&
   Event::addParticle( Particle::Role role, bool replace )
   {
-    Particle np( role );
+    Particle np( role, PDG::invalid );
     return addParticle( np, replace );
   }
 

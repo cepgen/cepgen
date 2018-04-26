@@ -164,7 +164,7 @@ namespace CepGen
   }
 
   void
-  Integrator::generate( unsigned long num_events, std::function<void( const Event&, unsigned long )> callback )
+  Integrator::generate( unsigned long num_events, std::function<void( const Event&, unsigned long )> callback, const Timer* tmr )
   {
     if ( num_events < 2 ) {
       CG_DEBUG( "Integrator:generate" )
@@ -219,11 +219,11 @@ namespace CepGen
     input_params_->setStorage( false );
 
     CG_INFO( "Integrator:setGen" )
-      << "Preparing the grid (" << input_params_->integrator.npoints << " points) "
+      << "Preparing the grid (" << input_params_->generation.num_points << " points/bin) "
       << "for the generation of unweighted events.";
 
     grid_->max = pow( GridParameters::mbin_, function_->dim );
-    const double inv_npoin = 1./input_params_->integrator.npoints;
+    const double inv_num_points = 1./input_params_->generation.num_points;
 
     if ( function_->dim > GridParameters::max_dimensions_ )
       throw CG_FATAL( "Integrator:setGen" )
@@ -255,7 +255,7 @@ namespace CepGen
           << "n-vector for bin " << i << ": " << os.str();
       }
       double fsum = 0., fsum2 = 0.;
-      for ( unsigned int j = 0; j < input_params_->integrator.npoints; ++j ) {
+      for ( unsigned int j = 0; j < input_params_->generation.num_points; ++j ) {
         for ( unsigned int k = 0; k < function_->dim; ++k )
           x[k] = ( uniform()+n[k] ) * GridParameters::inv_mbin_;
         const double weight = eval( x );
@@ -263,7 +263,7 @@ namespace CepGen
         fsum += weight;
         fsum2 += weight*weight;
       }
-      const double av = fsum*inv_npoin, av2 = fsum2*inv_npoin, sig2 = av2-av*av;
+      const double av = fsum*inv_num_points, av2 = fsum2*inv_num_points, sig2 = av2-av*av;
       sum += av;
       sum2 += av2;
       sum2p += sig2;

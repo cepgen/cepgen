@@ -5,6 +5,7 @@
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Processes/GenericProcess.h"
+#include "CepGen/Processes/GenericKTProcess.h" //FIXME
 
 #include "CepGen/Parameters.h"
 
@@ -64,7 +65,6 @@ namespace CepGen
   bool
   ThreadWorker::next()
   {
-    //std::lock_guard<std::mutex> guard( *mutex_ );
     if ( global_params_->generation.ngen >= global_params_->generation.maxgen )
       return true;
 
@@ -95,6 +95,7 @@ namespace CepGen
         if ( y <= grid_->f_max[ps_bin_] )
           break;
       }
+      //std::cout << "---> " << y << "::" << ps_bin_ << std::endl;
       // shoot a point x in this bin
       std::vector<unsigned short> grid_n = grid_->n_map.at( ps_bin_ );
       for ( unsigned int i = 0; i < function_->dim; ++i )
@@ -191,6 +192,40 @@ namespace CepGen
     return true;
   }
 
+  bool
+  ThreadWorker::storeEvent( const std::vector<double>& x )
+  {
+//    std::cout << "------------store!!! " << global_params_->generation.ngen << std::endl;
+    local_params_->setStorage( true );
+    const double weight = eval( x );
+    local_params_->setStorage( false );
+
+    if ( weight <= 0. )
+      return false;
+
+    {
+      std::lock_guard<std::mutex> guard( *mutex_ );
+      if ( global_params_->generation.ngen % global_params_->generation.gen_print_every == 0 ) {
+        CG_INFO( "ThreadWorker:store" )
+          << "[thread 0x" << std::hex << std::hash<std::thread::id>()( std::this_thread::get_id() ) << std::dec
+          << "] Generated events: " << global_params_->generation.ngen;
+        local_params_->process()->last_event->dump();
+      }
+      global_params_->process()->last_event = local_params_->process()->last_event;
+
+      local_params_->generation.ngen += 1;
+      global_params_->generation.ngen += 1;
+
+      if ( callback_ )
+        callback_( *local_params_->process()->last_event, global_params_->generation.ngen );
+    }
+    return true;
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  // Helper methods
+  //-----------------------------------------------------------------------------------------------
+
   double
   ThreadWorker::eval( const std::vector<double>& x )
   {
@@ -201,36 +236,6 @@ namespace CepGen
   ThreadWorker::uniform() const
   {
     return gsl_rng_uniform( rng_ );
-  }
-
-  bool
-  ThreadWorker::storeEvent( const std::vector<double>& x )
-  {
-    std::lock_guard<std::mutex> guard( *mutex_ );
-    //std::cout << "------------store!!! " << global_params_->generation.ngen << std::endl;
-    //mutex_->lock();
-    local_params_->setStorage( true );
-    const double weight = eval( x );
-    local_params_->setStorage( false );
-    //mutex_->unlock();
-
-    if ( weight <= 0. )
-      return false;
-
-    if ( global_params_->generation.ngen % global_params_->generation.gen_print_every == 0 ) {
-      CG_INFO( "ThreadWorker:store" )
-        << "[thread 0x" << std::hex << std::hash<std::thread::id>()( std::this_thread::get_id() ) << std::dec
-        << "] Generated events: " << global_params_->generation.ngen;
-      local_params_->process()->last_event->dump();
-    }
-    global_params_->process()->last_event = local_params_->process()->last_event;
-
-    local_params_->generation.ngen += 1;
-    global_params_->generation.ngen += 1;
-
-    if ( callback_ )
-      callback_( *local_params_->process()->last_event, global_params_->generation.ngen );
-    return true;
   }
 }
 

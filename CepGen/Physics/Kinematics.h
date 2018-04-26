@@ -7,6 +7,7 @@
 #include "CepGen/Core/Logger.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/Cuts.h"
 #include "CepGen/Physics/Limits.h"

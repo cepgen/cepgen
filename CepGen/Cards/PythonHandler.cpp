@@ -283,7 +283,6 @@ namespace CepGen
       else
         throwPythonError( Form( "Invalid integration algorithm: %s", algo.c_str() ) );
 
-      getParameter( integr, "numPoints", params_.integrator.npoints );
       getParameter( integr, "numFunctionCalls", params_.integrator.ncvg );
       getParameter( integr, "seed", (unsigned long&)params_.integrator.rng_seed );
       unsigned int rng_engine;
@@ -306,6 +305,7 @@ namespace CepGen
       getParameter( gen, "numEvents", params_.generation.maxgen );
       getParameter( gen, "printEvery", params_.generation.gen_print_every );
       getParameter( gen, "numThreads", params_.generation.num_threads );
+      getParameter( gen, "numPoints", params_.generation.num_points );
     }
 
     void

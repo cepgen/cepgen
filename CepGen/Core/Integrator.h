@@ -16,6 +16,7 @@ namespace CepGen
   class Parameters;
   class Event;
   class GridParameters;
+  class Timer;
   /**
    * Main occurence of the Monte-Carlo integrator @cite PeterLepage1978192 developed by G.P. Lepage in 1978
    * \brief Monte-Carlo integrator instance
@@ -49,7 +50,7 @@ namespace CepGen
       /// Dimensional size of the phase space
       unsigned short dimensions() const;
       void generateOne( std::function<void( const Event&, unsigned long )> callback = nullptr );
-      void generate( unsigned long num_events = 0, std::function<void( const Event&, unsigned long )> callback = nullptr );
+      void generate( unsigned long num_events = 0, std::function<void( const Event&, unsigned long )> callback = nullptr, const Timer* tmr = nullptr );
 
     private:
       void computeGenerationParameters();

@@ -86,11 +86,14 @@ namespace CepGen
     double
     GenericKTProcess::computeWeight()
     {
+      if ( mapped_variables_.size() == 0 )
+        throw CG_FATAL( "GenericKTProcess" )
+          << "No variables are mapped with this process!";
       if ( kt_jacobian_ == 0. )
         throw CG_FATAL( "GenericKTProcess" )
           << "Point-independant component of the Jacobian for this "
-          << "kt-factorised process is null.\n\tPlease check the "
-          << "validity of the phase space!";
+          << "kt-factorised process is null.\n\t"
+          << "Please check the validity of the phase space!";
 
       //============================================================================================
       // generate and initialise all variables, and auxiliary (x-dependent) part of the Jacobian
@@ -165,7 +168,7 @@ namespace CepGen
           std::max( log( lim.min() ), -10. ),
           std::min( log( lim.max() ), +10. )
         };
-      mapped_variables_.emplace_back( MappingVariable{ lim, out, type, num_dimensions_++ } );
+      mapped_variables_.emplace_back( MappingVariable{ description, lim, out, type, num_dimensions_++ } );
       switch ( type ) {
         case Mapping::square:
           kt_jacobian_ *= 2.*lim.range();
@@ -178,6 +181,17 @@ namespace CepGen
         << description << " has been mapped to variable " << num_dimensions_ << ".\n\t"
         << "Allowed range for integration: " << lim << ".\n\t"
         << "Variable integration mode: " << type << ".";
+    }
+
+    void
+    GenericKTProcess::dumpVariables() const
+    {
+      std::ostringstream os;
+      for ( const auto& var : mapped_variables_ )
+        os << "\n\t(" << var.index << ") " << var.type << " mapping (" << var.description << ") in range " << var.limits;
+      CG_INFO( "GenericKTProcess:dumpVariables" )
+        << "List of variables handled by this kt-factorised process:"
+        << os.str();
     }
 
     double

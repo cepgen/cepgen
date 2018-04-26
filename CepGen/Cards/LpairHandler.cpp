@@ -90,7 +90,6 @@ namespace CepGen
       registerParameter<bool>( "IEND", "Generation type", &params->generation.enabled );
       registerParameter<unsigned int>( "DEBG", "Debugging verbosity", (unsigned int*)&Logger::get().level );
       registerParameter<unsigned int>( "NCVG", "Number of function calls", &params->integrator.ncvg );
-      registerParameter<unsigned int>( "NCSG", "Number of points to probe", &params->integrator.npoints );
       registerParameter<unsigned int>( "ITVG", "Number of integration iterations", (unsigned int*)&params->integrator.vegas.iterations );
       registerParameter<unsigned int>( "SEED", "Random generator seed", (unsigned int*)&params->integrator.rng_seed );
       registerParameter<unsigned int>( "NTHR", "Number of threads to use for events generation", &params->generation.num_threads );
@@ -98,6 +97,7 @@ namespace CepGen
       registerParameter<unsigned int>( "PMOD", "Outgoing primary particles' mode", (unsigned int*)&params->kinematics.structure_functions );
       registerParameter<unsigned int>( "EMOD", "Outgoing primary particles' mode", (unsigned int*)&params->kinematics.structure_functions );
       registerParameter<unsigned int>( "PAIR", "Outgoing particles' PDG id", (unsigned int*)&pair_ );
+      registerParameter<unsigned int>( "NCSG", "Number of points to probe", &params->generation.num_points );
       registerParameter<unsigned int>( "NGEN", "Number of events to generate", &params->generation.maxgen );
       registerParameter<unsigned int>( "NPRN", "Number of events before printout", &params->generation.gen_print_every );
 

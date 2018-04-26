@@ -53,12 +53,11 @@ namespace CepGen
       struct Integration
       {
         Integration();
+        Integration( const Integration& );
         ~Integration();
         Integrator::Type type;
         /// Number of function calls to be computed for each point
         unsigned int ncvg; // ??
-        /// Number of points to "shoot" in each integration bin by the algorithm
-        unsigned int npoints;
         /// Random number generator seed
         long rng_seed;
         /// Random number generator engine
@@ -89,6 +88,8 @@ namespace CepGen
         unsigned int gen_print_every;
         /// Number of threads to perform the integration
         unsigned int num_threads;
+        /// Number of points to "shoot" in each integration bin by the algorithm
+        unsigned int num_points;
       };
       /// Events generation parameters
       Generation generation;

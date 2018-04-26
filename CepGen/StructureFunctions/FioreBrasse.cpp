@@ -1,7 +1,8 @@
-#include "FioreBrasse.h"
+#include "CepGen/StructureFunctions/FioreBrasse.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/Constants.h"
 

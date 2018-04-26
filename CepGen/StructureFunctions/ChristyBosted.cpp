@@ -1,4 +1,5 @@
-#include "ChristyBosted.h"
+#include "CepGen/StructureFunctions/ChristyBosted.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Core/Exception.h"
 

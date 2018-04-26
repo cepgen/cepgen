@@ -1,5 +1,7 @@
-#include "SigmaRatio.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/ParticleProperties.h"
+
 #include <math.h>
 #include <iostream>
 

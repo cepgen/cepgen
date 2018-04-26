@@ -46,6 +46,8 @@ namespace CepGen
         /// Populate the event content with the generated process' kinematics
         void fillKinematics( bool ) override;
 
+        void dumpVariables() const;
+
         /// Get the elastic flux to be expected at a given parton x/kT
         /// \param[in] x Parton momentum fraction
         /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming parton
@@ -131,6 +133,8 @@ namespace CepGen
         /// Handler to a variable mapped by this process
         struct MappingVariable
         {
+          /// Human-readable description of the variable
+          std::string description;
           /// Kinematic limits to apply on the variable
           Limits limits;
           /// Reference to the process variable to generate/map

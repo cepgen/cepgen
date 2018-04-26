@@ -3,7 +3,6 @@ from Config.gsl_cff import GslRngEngine
 
 plain = cepgen.Module('plain',
     numFunctionCalls = 1000000,
-    numPoints = 100,
     rngEngine = GslRngEngine.MT19937,
 )
 
