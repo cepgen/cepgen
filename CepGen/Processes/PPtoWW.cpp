@@ -1,4 +1,5 @@
-#include "PPtoWW.h"
+#include "CepGen/Processes/PPtoWW.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Core/Exception.h"
 #include <assert.h>
 

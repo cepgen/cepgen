@@ -3,6 +3,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/TamingFunction.h"
 
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
 

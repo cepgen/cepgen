@@ -10,17 +10,17 @@ int
 main( int argc, char* argv[] )
 {
   if ( argc < 3 || string( argv[2] ) != "debug" )
-    CepGen::Logger::get().level = CepGen::Logger::Nothing;
+    CepGen::Logger::get().level = CepGen::Logger::Level::Nothing;
 
   const double max_sigma = 3.0;
 
   CepGen::Generator mg;
   if ( argc > 1 && string( argv[1] ) == "plain" )
-    mg.parameters->integrator.type = CepGen::Integrator::Plain;
+    mg.parameters->integrator.type = CepGen::Integrator::Type::plain;
   if ( argc > 1 && string( argv[1] ) == "vegas" )
-    mg.parameters->integrator.type = CepGen::Integrator::Vegas;
+    mg.parameters->integrator.type = CepGen::Integrator::Type::Vegas;
   if ( argc > 1 && string( argv[1] ) == "miser" )
-    mg.parameters->integrator.type = CepGen::Integrator::MISER;
+    mg.parameters->integrator.type = CepGen::Integrator::Type::MISER;
 
   double result, error;
 

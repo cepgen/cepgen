@@ -7,7 +7,6 @@
 #include "CepGen/Core/Logger.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
-#include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/Cuts.h"
 #include "CepGen/Physics/Limits.h"
@@ -17,6 +16,7 @@
 
 namespace CepGen
 {
+  enum class PDG;
   /// List of kinematic constraints to apply on the process phase space.
   class Kinematics
   {

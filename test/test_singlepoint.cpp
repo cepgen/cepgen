@@ -18,7 +18,7 @@ int main()
   p->kinematics.cuts.remnants[CepGen::Cuts::mass_single] = { 1.07, 320. };
 
   p->dump();
-  CepGen::Logger::get().level = CepGen::Logger::DebugInsideLoop;
+  CepGen::Logger::get().level = CepGen::Logger::Level::DebugInsideLoop;
 
   const unsigned short ndim = g.numDimensions();
   double x[12];

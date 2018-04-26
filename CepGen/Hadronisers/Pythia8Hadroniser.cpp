@@ -1,11 +1,15 @@
-#include "Pythia8Hadroniser.h"
+#include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/PDG.h"
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
+
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
+
 #include "CepGen/Version.h"
 
 namespace CepGen

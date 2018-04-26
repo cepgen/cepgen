@@ -20,7 +20,7 @@ int main( int argc, char* argv[] )
 
   CepGen::Generator mg;
 
-  CepGen::Logger::get().level = CepGen::Logger::Error;
+  CepGen::Logger::get().level = CepGen::Logger::Level::Error;
 
   CepGen::Parameters* par = mg.parameters.get();
   par->kinematics.inp = { 6500., 6500. };

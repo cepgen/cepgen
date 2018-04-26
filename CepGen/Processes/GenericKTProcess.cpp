@@ -1,7 +1,10 @@
-#include "GenericKTProcess.h"
+#include "CepGen/Processes/GenericKTProcess.h"
+
 #include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
+
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Physics/PDG.h"
 
 namespace CepGen
 {

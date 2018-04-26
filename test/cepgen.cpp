@@ -1,6 +1,7 @@
 #include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Cards/LpairHandler.h"
 
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Generator.h"
 
 #include "CepGen/Core/Logger.h"

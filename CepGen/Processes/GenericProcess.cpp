@@ -1,6 +1,7 @@
-#include "GenericProcess.h"
+#include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Physics/PDG.h"
 
 namespace CepGen
 {

@@ -3,6 +3,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 #include "CepGen/Event/Particle.h"
+#include "CepGen/Physics/PDG.h"
 
 namespace CepGen
 {

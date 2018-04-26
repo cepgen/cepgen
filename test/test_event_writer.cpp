@@ -1,4 +1,5 @@
 #include "CepGen/IO/HepMCHandler.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Event/Event.h"
 
 using namespace std;

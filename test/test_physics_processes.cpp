@@ -71,10 +71,10 @@ main( int argc, char* argv[] )
   const double num_sigma = 3.0;
 
   if ( argc < 3 || strcmp( argv[2], "debug" ) != 0 ) {
-    CepGen::Logger::get().level = CepGen::Logger::Nothing;
+    CepGen::Logger::get().level = CepGen::Logger::Level::Nothing;
   }
 
-  Timer tmr;
+  CepGen::Timer tmr;
   CepGen::Generator mg;
 
   if ( argc > 1 && strcmp( argv[1], "plain" ) == 0 )

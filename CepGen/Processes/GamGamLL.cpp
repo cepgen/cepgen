@@ -1,5 +1,6 @@
 #include "GamGamLL.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Physics/PDG.h"
 
 namespace CepGen
 {
