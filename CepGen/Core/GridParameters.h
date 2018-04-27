@@ -10,10 +10,10 @@ namespace CepGen
   {
     public:
       /// Maximal number of dimensions handled by this integrator instance
-      static constexpr unsigned short max_dimensions_ = 15;
+      static const unsigned short max_dimensions_;
       /// Integration grid size parameter
-      static constexpr unsigned short mbin_ = 3;
-      static constexpr double inv_mbin_ = 1./mbin_;
+      static const unsigned short mbin_;
+      static const double inv_mbin_;
 
       GridParameters();
 

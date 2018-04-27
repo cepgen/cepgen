@@ -96,7 +96,7 @@ namespace CepGen
   {
     const auto ret = daughters_.insert( part.id() );
 
-    if ( Logger::get().level >= Logger::Level::DebugInsideLoop ) {
+    if ( CG_EXCEPT_MATCH( "Particle", debugInsideLoop ) ) {
       std::ostringstream os;
       for ( const auto& daugh : daughters_ )
         os << Form( "\n\t * id=%d", daugh );

@@ -10,7 +10,7 @@ set(CEPGEN_EXTERNAL_IO_REQS "")
 set(CEPGEN_EXTERNAL_HADR_REQS "")
 set(CEPGEN_EXTERNAL_STRF_REQS "")
 include(UseEnvironment)
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 
 set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/CepGen)
 set(CEPGEN_LIBRARIES CepGenCore CepGenEvent CepGenPhysics CepGenProcesses CepGenStructureFunctions CepGenIO CepGenExternalHadronisers)

@@ -49,7 +49,7 @@ namespace MSTW
       void initGSL( const std::set<double>& q2_vals, const std::set<double>& xbj_vals );
 
       enum spline_type { F2 = 0, FL = 1, num_functions_ };
-      static constexpr unsigned int good_magic = 0x5754534d; // MSTW in ASCII
+      static const unsigned int good_magic;
 
       header_t header_;
       std::vector<sfval_t> values_raw_;

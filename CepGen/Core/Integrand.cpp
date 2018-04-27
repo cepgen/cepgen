@@ -95,7 +95,7 @@ namespace CepGen
       //=============================================================================================
 
       proc->setPoint( ndim, x );
-      if ( log_level >= Logger::Level::DebugInsideLoop ) {
+      if ( CG_EXCEPT_MATCH( "Integrand", debugInsideLoop ) ) {
         std::ostringstream oss;
         for ( unsigned int i = 0; i < ndim; ++i )
           oss << ( i == 0 ? "" : " " ) << x[i];
@@ -225,7 +225,7 @@ namespace CepGen
       // a bit of useful debugging
       //=============================================================================================
 
-      if ( log_level >= Logger::Level::DebugInsideLoop ) {
+      if ( CG_EXCEPT_MATCH( "Integrand", debugInsideLoop ) ) {
         std::ostringstream oss;
         for ( unsigned short i = 0; i < ndim; ++i )
           oss << Form( "%10.8f ", x[i] );

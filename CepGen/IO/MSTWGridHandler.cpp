@@ -10,6 +10,8 @@
 
 namespace MSTW
 {
+  const unsigned int GridHandler::good_magic = 0x5754534d; // MSTW in ASCII
+
   GridHandler&
   GridHandler::get( const char* filename )
   {

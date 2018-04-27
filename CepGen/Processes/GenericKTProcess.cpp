@@ -219,14 +219,14 @@ namespace CepGen
           } break;
         }
       }
-      if ( Logger::get().level >= Logger::Level::DebugInsideLoop ) {
+      if ( CG_EXCEPT_MATCH( "KtProcess:vars", debugInsideLoop ) ) {
         std::ostringstream oss;
         for ( const auto& cut : mapped_variables_ ) {
           oss << "variable " << cut.index
               << " in range " << std::left << std::setw( 20 ) << cut.limits << std::right
               << " has value " << cut.variable << "\n\t";
         }
-        CG_DEBUG_LOOP( "GenericKTProcess" ) << oss.str();
+        CG_DEBUG_LOOP( "KtProcess:vars" ) << oss.str();
       }
       return jacobian;
     }

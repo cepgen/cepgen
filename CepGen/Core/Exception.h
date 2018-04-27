@@ -7,33 +7,31 @@
 
 #include "Logger.h"
 
-#define CG_EXCEPT_MATCH( str ) \
-  CepGen::Logger::get().passExceptionRule( str )
-#define CG_EXCEPT_LEVEL( lev ) \
-  ( CepGen::Logger::get().level >= CepGen::Logger::Level::lev )
+#define CG_EXCEPT_MATCH( str, type ) \
+  CepGen::Logger::get().passExceptionRule( str, CepGen::Logger::Level::type )
 
 #define CG_LOG( mod ) \
-  ( !CG_EXCEPT_LEVEL( Nothing ) ) \
+  ( !CG_EXCEPT_MATCH( mod, information ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::verbatim )
 #define CG_INFO( mod ) \
-  ( !CG_EXCEPT_LEVEL( Information ) && !CG_EXCEPT_MATCH( mod ) ) \
+  ( !CG_EXCEPT_MATCH( mod, information ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::info )
 #define CG_DEBUG( mod ) \
-  ( !CG_EXCEPT_LEVEL( Debug ) && !CG_EXCEPT_MATCH( mod ) ) \
+  ( !CG_EXCEPT_MATCH( mod, debug ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::debug )
 #define CG_DEBUG_LOOP( mod ) \
-  ( !CG_EXCEPT_LEVEL( DebugInsideLoop ) && !CG_EXCEPT_MATCH( mod ) ) \
+  ( !CG_EXCEPT_MATCH( mod, debugInsideLoop ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::debug )
 #define CG_WARNING( mod ) \
-  ( !CG_EXCEPT_LEVEL( Warning ) && !CG_EXCEPT_MATCH( mod ) ) \
+  ( !CG_EXCEPT_MATCH( mod, warning ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::warning )
 #define CG_ERROR( mod ) \
-  ( !CG_EXCEPT_LEVEL( Error ) && !CG_EXCEPT_MATCH( mod ) ) \
+  ( !CG_EXCEPT_MATCH( mod, error ) ) \
   ? CepGen::NullStream( mod ) \
   : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::warning )
 #define CG_FATAL( mod ) \

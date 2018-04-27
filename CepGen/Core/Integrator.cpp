@@ -247,7 +247,7 @@ namespace CepGen
         jj = tmp;
       }
       grid_->n_map[i] = n;
-      if ( CG_EXCEPT_LEVEL( DebugInsideLoop ) && CG_EXCEPT_MATCH( "Integrator:setGen" ) ) {
+      if ( CG_EXCEPT_MATCH( "Integrator:setGen", debugInsideLoop ) ) {
         std::ostringstream os;
         for ( const auto& ni : n )
           os << ni << " ";
@@ -270,7 +270,7 @@ namespace CepGen
       grid_->f_max_global = std::max( grid_->f_max_global, grid_->f_max[i] );
 
       // per-bin debugging loop
-      if ( CG_EXCEPT_LEVEL( DebugInsideLoop ) && CG_EXCEPT_MATCH( "Integrator:setGen" ) ) {
+      if ( CG_EXCEPT_MATCH( "Integrator:setGen", debugInsideLoop ) ) {
         const double sig = sqrt( sig2 );
         const double eff = ( grid_->f_max[i] != 0. )
           ? grid_->f_max[i]/av

@@ -14,7 +14,7 @@ namespace CepGen
   {
     public:
       /// Logging threshold for the output stream
-      enum class Level { Nothing = 0, Error, Warning, Information, Debug, DebugInsideLoop };
+      enum class Level { nothing = 0, error, warning, information, debug, debugInsideLoop };
 
     private:
       /// Initialize a logging object
@@ -34,7 +34,7 @@ namespace CepGen
       void addExceptionRule( const std::string& rule );
       /// Is the module set to be displayed/logged?
       /// \param[in] tmpl Module name to probe
-      bool passExceptionRule( const std::string& tmpl ) const;
+      bool passExceptionRule( const std::string& tmpl, const Level& lev ) const;
 
       /// Redirect the logger to a given output stream
       friend std::ostream& operator<<( std::ostream& os, const Logger::Level& lvl );
