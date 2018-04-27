@@ -84,6 +84,8 @@ namespace CepGen
         registerVariable( MX_, Mapping::square, cuts_.cuts.remnants[Cuts::mass_single], { 1.07, 1000. }, "Positive z proton remnant mass" );
       if ( cuts_.mode == Kinematics::Mode::ElasticInelastic || cuts_.mode == Kinematics::Mode::InelasticInelastic )
         registerVariable( MY_, Mapping::square, cuts_.cuts.remnants[Cuts::mass_single], { 1.07, 1000. }, "Negative z proton remnant mass" );
+
+      prepareKinematics();
     }
 
     double

@@ -70,14 +70,18 @@ namespace CepGen
       if ( !isKinematicsDefined() )
         throw CG_FATAL( "GenericProcess" ) << "Kinematics not properly defined for the process.";
 
-      const Particle& ib1 = event_->getOneByRole( Particle::IncomingBeam1 );
-      const Particle& ib2 = event_->getOneByRole( Particle::IncomingBeam2 );
+      // at some point introduce non head-on colliding beams?
+      Particle::Momentum p1( 0., 0.,  cuts_.inp.first ), p2( 0., 0., -cuts_.inp.second );
+      // on-shell beam particles
+      p1.setMass( ParticleProperties::mass( cuts_.inpdg.first ) );
+      p2.setMass( ParticleProperties::mass( cuts_.inpdg.second ) );
+      setIncomingKinematics( p1, p2 );
 
-      sqs_ = CMEnergy( ib1, ib2 );
+      sqs_ = CMEnergy( p1, p2 );
       s_ = sqs_*sqs_;
 
-      w1_ = ib1.mass2();
-      w2_ = ib2.mass2();
+      w1_ = p1.mass2();
+      w2_ = p2.mass2();
 
       CG_DEBUG( "GenericProcess" ) << "Kinematics successfully prepared! sqrt(s) = " << sqs_ << ".";
     }

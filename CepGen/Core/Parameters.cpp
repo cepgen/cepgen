@@ -43,7 +43,7 @@ namespace CepGen
     };
 
     CG_DEBUG( "Parameters" )
-      << "eta in range: " << kinematics.cuts.central[Cuts::eta_single]
+      << "eta in range: " << kinematics.cuts.central.at( Cuts::eta_single )
       << " => theta(min) = " << thetamin << ", theta(max) = " << thetamax << ".";
   }
 

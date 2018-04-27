@@ -49,6 +49,7 @@ namespace CepGen
         ///   the differential cross-section for the given point in the phase space.
         double computeWeight() override;
         unsigned int numDimensions( const Kinematics::Mode& ) const override;
+        void setKinematics( const Kinematics& cuts ) override;
         void fillKinematics( bool ) override;
         /// Compute the ougoing proton remnant mass
         /// \param[in] x A random number (between 0 and 1)
@@ -94,6 +95,9 @@ namespace CepGen
         /// Internal switch for the optimised code version (LPAIR legacy ; unimplemented here)
         int n_opt_;
 
+        Limits w_limits_;
+        Limits q2_limits_;
+        Limits mx_limits_;
         struct Masses
         {
           Masses();
@@ -191,6 +195,30 @@ namespace CepGen
         /// Kinematics of the second outgoing lepton (in the two-proton CM)
         Particle::Momentum p7_cm_;
         double jacobian_;
+
+      private:
+        /**
+         * Define modified variables of integration to avoid peaks integrations (see @cite Vermaseren1983347 for details)
+         * Return a set of two modified variables of integration to maintain the stability of the integrant. These two new variables are :
+         * - \f$y_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\f$ the new variable
+         * - \f$\mathrm dy_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\log\frac{x_{min}}{x_{max}}\f$, the new variable's differential form
+         * @brief Redefine the variables of integration in order to avoid the strong peaking of the integrant.
+         * @param[in] expo Exponant
+         * @param[in] xmin Minimal value of the variable
+         * @param[in] xmax Maximal value of the variable
+         * @param[out] out The new variable definition
+         * @param[out] dout The differential variant of the new variable definition
+         * @param[in] var_name The variable name
+         * @note This method overrides the set of `mapxx` subroutines in ILPAIR, with a slight difference according to the sign of the
+         *  \f$\mathrm dy_{out}\f$ parameter :
+         *  - left unchanged :
+         * > `mapw2`, `mapxq`, `mapwx`, `maps2`
+         *  - opposite sign :
+         * > `mapt1`, `mapt2`
+         */
+        void map( double expo, const Limits& lim, double& out, double& dout, const std::string& var_name="" );
+        void mapla( double y, double z, int u, double xm, double xp, double& x, double& d );
+
     };
   }
 }

@@ -47,27 +47,15 @@ namespace CepGen
 
       if ( proc->hasEvent() ) {
         ev = proc->event();
-        proc->clearEvent();
 
         if ( proc->first_run ) {
           CG_DEBUG( "Integrand" )
             << "Computation launched for " << p->processName() << " process "
-            << "0x" << std::hex << p->process() << std::dec << ".";
-
-          const Particle::Momentum p1( 0., 0.,  p->kinematics.inp.first ), p2( 0., 0., -p->kinematics.inp.second );
-          proc->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
-
-          CG_DEBUG( "Integrand" )
+            << "0x" << std::hex << p->process() << std::dec << ".\n\t"
             << "Process mode considered: " << p->kinematics.mode << "\n\t"
             << "  pz(p1) = " << p->kinematics.inp.first << "\n\t"
             << "  pz(p2) = " << p->kinematics.inp.second << "\n\t"
             << "  structure functions: " << p->kinematics.structure_functions;
-
-          //=========================================================================================
-          // prepare the function to be integrated
-          //=========================================================================================
-
-          proc->prepareKinematics();
 
           //=========================================================================================
           // add central system
@@ -88,6 +76,8 @@ namespace CepGen
           p->clearRunStatistics();
           proc->first_run = false;
         } // passed the first-run preparation
+
+        proc->clearEvent();
       } // event is not empty
 
       //=============================================================================================
@@ -95,19 +85,12 @@ namespace CepGen
       //=============================================================================================
 
       proc->setPoint( ndim, x );
-      if ( CG_EXCEPT_MATCH( "Integrand", debugInsideLoop ) ) {
-        std::ostringstream oss;
-        for ( unsigned int i = 0; i < ndim; ++i )
-          oss << ( i == 0 ? "" : " " ) << x[i];
-        CG_DEBUG_LOOP( "Integrand" ) << "Computing dim-" << ndim << " point (" << oss.str() << ")";
-      }
 
       //=============================================================================================
       // from this step on, the phase space point is supposed to be set
       //=============================================================================================
 
       p->process()->beforeComputeWeight();
-
       double integrand = p->process()->computeWeight();
 
       //=============================================================================================
@@ -160,7 +143,6 @@ namespace CepGen
 
       if ( integrand <= 0. )
         return 0.;
-//if (p->storage())std::cout << __PRETTY_FUNCTION__<<"|"<<integrand << std::endl;
 
       //=============================================================================================
       // set the CepGen part of the event generation

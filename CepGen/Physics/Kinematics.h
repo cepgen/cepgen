@@ -62,10 +62,26 @@ namespace CepGen
       struct CutsList
       {
         CutsList();
-        struct EnumClassHash
+        template<class T,bool>
+        struct hasher
         {
-          template <typename T> std::size_t operator()( T t ) const {
-            return static_cast<std::size_t>( t );
+          inline size_t operator()( const T& t ) const {
+            return std::hash<T>()( t );
+          }
+        };
+        template<class T>
+        struct hasher<T, true>
+        {
+          inline size_t operator() ( const T& t ) {
+            typedef typename std::underlying_type<T>::type enumType;
+            return std::hash<enumType>()( static_cast<enumType>( t ) );
+          }
+        };
+        template<class T>
+        struct EnumHash
+        {
+          inline size_t operator()( const T& t ) const {
+            return hasher<T,std::is_enum<T>::value>()( t );
           }
         };
         /// Cuts on the initial particles kinematics
@@ -76,12 +92,12 @@ namespace CepGen
         /// Cuts on the beam remnants system
         std::map<Cuts,Limits> remnants;*/
         /// Cuts on the initial particles kinematics
-        std::unordered_map<Cuts,Limits,EnumClassHash> initial;
+        std::unordered_map<Cuts,Limits,EnumHash<Cuts> > initial;
         /// Cuts on the central system produced
-        std::unordered_map<Cuts,Limits,EnumClassHash> central;
-        std::unordered_map<PDG,std::unordered_map<Cuts,Limits,EnumClassHash>,EnumClassHash> central_particles;
+        std::unordered_map<Cuts,Limits,EnumHash<Cuts> > central;
+        std::unordered_map<PDG,std::unordered_map<Cuts,Limits,EnumHash<Cuts> >,EnumHash<PDG> > central_particles;
         /// Cuts on the beam remnants system
-        std::unordered_map<Cuts,Limits,EnumClassHash> remnants;
+        std::unordered_map<Cuts,Limits,EnumHash<Cuts> > remnants;
       };
       CutsList cuts;
   };

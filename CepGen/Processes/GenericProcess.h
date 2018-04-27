@@ -58,6 +58,13 @@ namespace CepGen
       public:
         /// Set the incoming and outgoing state to be expected in the process
         inline virtual void addEventContent() {}
+        /// Set the list of kinematic cuts to apply on the outgoing particles' final state
+        /// \param[in] cuts The Cuts object containing the kinematic parameters
+        inline virtual void setKinematics( const Kinematics& cuts ) { cuts_ = cuts; }
+        /// Return the number of dimensions on which the integration has to be performed
+        /// \return Number of dimensions on which to integrate
+        virtual unsigned int numDimensions( const Kinematics::Mode& ) const = 0;
+
         /// Prepare the process for its integration over the whole phase space
         inline virtual void beforeComputeWeight() {}
         /// Compute the weight for this point in the phase-space
@@ -65,12 +72,6 @@ namespace CepGen
         /// Fill the Event object with the particles' kinematics
         /// \param[in] symmetrise Symmetrise the event? (randomise the production of positively- and negatively-charged outgoing central particles)
         virtual void fillKinematics( bool symmetrise = false ) = 0;
-        /// Return the number of dimensions on which the integration has to be performed
-        /// \return Number of dimensions on which to integrate
-        virtual unsigned int numDimensions( const Kinematics::Mode& ) const = 0;
-        /// Set the list of kinematic cuts to apply on the outgoing particles' final state
-        /// \param[in] cuts The Cuts object containing the kinematic parameters
-        inline virtual void setKinematics( const Kinematics& cuts ) { cuts_ = cuts; }
 
       public:
         /**

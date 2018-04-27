@@ -52,6 +52,8 @@ namespace CepGen
         { Particle::OutgoingBeam2, { PDG::Proton } },
         { Particle::CentralSystem, { PDG::Muon, PDG::Muon } }
       } );
+
+      masses_.Ml2_ = event_->getByRole( Particle::CentralSystem )[0].mass2();
     }
 
     unsigned int
@@ -70,6 +72,32 @@ namespace CepGen
         case Kinematics::Mode::InelasticInelastic:
           return 9;
       }
+    }
+
+    //---------------------------------------------------------------------------------------------
+
+    void
+    GamGamLL::setKinematics( const Kinematics& kin )
+    {
+      cuts_ = kin;
+
+      prepareKinematics();
+
+      w_limits_ = cuts_.cuts.initial[Cuts::w];
+      if ( !w_limits_.hasMax() )
+        w_limits_.max() = s_;
+      // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
+      if ( !w_limits_.hasMin() )
+        w_limits_.min() = 4.*masses_.Ml2_;
+      // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or wmax if specified)
+      w_limits_.max() = std::min( pow( sqs_-MX_-MY_, 2 ), w_limits_.max() );
+
+      CG_DEBUG_LOOP( "GamGamLL:setKinematics" )
+        << "w limits = " << w_limits_ << "\n\t"
+        << "wmax/wmin = " << w_limits_.max()/w_limits_.min();
+
+      q2_limits_ = cuts_.cuts.initial[Cuts::q2];
+      mx_limits_ = cuts_.cuts.remnants[Cuts::mass_single];
     }
 
     //---------------------------------------------------------------------------------------------
@@ -131,7 +159,7 @@ namespace CepGen
       double ds2 = 0.;
       if ( n_opt_ == 0 ) {
         const double smax = s_+masses_.MX2_-2.*MX_*sqs_;
-        Map( x(2), sig1, smax, s2_, ds2, "s2" );
+        map( x(2), Limits( sig1, smax ), s2_, ds2, "s2" );
         sig1 = s2_; //FIXME!!!!!!!!!!!!!!!!!!!!
       }
 
@@ -152,26 +180,24 @@ namespace CepGen
              t1_min = ( masses_.w31_*d3+( d3-masses_.w31_ )*( d3*w1_-masses_.w31_*w2_ )/s_ )/t1_max; // definition from eq. (A.5) in [1]
 
       // FIXME dropped in CDF version
-      const Limits q2_limits = cuts_.cuts.initial[Cuts::q2];
-      if ( t1_max > -q2_limits.min() ) {
-        CG_WARNING( "GamGamLL" ) << "t1max = " << t1_max << " > -q2min = " << ( -q2_limits.min() );
+      if ( t1_max > -q2_limits_.min() ) {
+        CG_WARNING( "GamGamLL" ) << "t1max = " << t1_max << " > -q2min = " << ( -q2_limits_.min() );
         return false;
       }
-      if ( t1_min < -q2_limits.max() && q2_limits.hasMax() ) {
-        CG_DEBUG( "GamGamLL" )
-          << "t1min = " << t1_min << " < -q2max = " << -q2_limits.max();
+      if ( t1_min < -q2_limits_.max() && q2_limits_.hasMax() ) {
+        CG_DEBUG( "GamGamLL" ) << "t1min = " << t1_min << " < -q2max = " << -q2_limits_.max();
         return false;
       }
-      if ( t1_max < -q2_limits.max() && q2_limits.hasMax() )
-        t1_max = -q2_limits.max();
-      if ( t1_min > -q2_limits.min() && q2_limits.hasMin() )
-        t1_min = -q2_limits.min();
+      if ( t1_max < -q2_limits_.max() && q2_limits_.hasMax() )
+        t1_max = -q2_limits_.max();
+      if ( t1_min > -q2_limits_.min() && q2_limits_.hasMin() )
+        t1_min = -q2_limits_.min();
       /////
 
       // t1, the first photon propagator, is defined here
       t1_ = 0.;
       double dt1 = 0.;
-      Map( x(0), t1_min, t1_max, t1_, dt1, "t1" );
+      map( x(0), Limits( t1_min, t1_max ), t1_, dt1, "t1" );
       // changes wrt mapt1 : dx->-dx
       dt1 *= -1.;
 
@@ -224,8 +250,10 @@ namespace CepGen
           CG_DEBUG_LOOP( "GamGamLL" )
             << "sig2 truncated to splus = " << splus;
         }
-        if ( n_opt_ < -1 ) { Map( x(2), sig2, s2max, s2_, ds2, "s2" ); }
-        else               { Mapla( t1_, w2_, x(2), sig2, s2max, s2_, ds2 ); } // n_opt_==-1
+        if ( n_opt_ < -1 )
+          map( x(2), Limits( sig2, s2max ), s2_, ds2, "s2" );
+        else
+          mapla( t1_, w2_, x(2), sig2, s2max, s2_, ds2 ); // n_opt_==-1
         s2x = s2_;
       }
       else if ( n_opt_ == 0 )
@@ -252,7 +280,7 @@ namespace CepGen
       // t2, the second photon propagator, is defined here
       t2_ = 0.;
       double dt2 = 0.;
-      Map( x(1), t2_min, t2_max, t2_, dt2, "t2" );
+      map( x(1), Limits( t2_min, t2_max ), t2_, dt2, "t2" );
       // changes wrt mapt2 : dx->-dx
 
       dt2 *= -1.;
@@ -302,9 +330,9 @@ namespace CepGen
       }
       // 9
       if ( n_opt_ > 1 )
-        Map( x( 2 ), s2min, s2max, s2_, ds2, "s2" );
+        map( x( 2 ), Limits( s2min, s2max ), s2_, ds2, "s2" );
       else if ( n_opt_ == 1 )
-        Mapla( t1_, w2_, x( 2 ), s2min, s2max, s2_, ds2 );
+        mapla( t1_, w2_, x( 2 ), s2min, s2max, s2_, ds2 );
 
       const double ap = -0.25*pow( s2_+d8, 2 )+s2_*t1_;
 
@@ -581,12 +609,11 @@ namespace CepGen
     GamGamLL::computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dw )
     {
       const double mx0 = mp_+ParticleProperties::mass( PDG::PiZero ); // 1.07
-      const Limits mx_limits = cuts_.cuts.remnants[Cuts::mass_single];
-      const double wx2min = pow( std::max( mx0, mx_limits.min() ), 2 ),
-                   wx2max = pow( std::min( sqs_-outmass-2.*lepmass, mx_limits.max() ), 2 );
+      const double wx2min = pow( std::max( mx0, mx_limits_.min() ), 2 ),
+                   wx2max = pow( std::min( sqs_-outmass-2.*lepmass, mx_limits_.max() ), 2 );
 
       double mx2 = 0., dmx2 = 0.;
-      Map( x, wx2min, wx2max, mx2, dmx2, "mx2" );
+      map( x, Limits( wx2min, wx2max ), mx2, dmx2, "mx2" );
 
       CG_DEBUG_LOOP( "GamGamLL" )
         << "mX^2 in range (" << wx2min << ", " << wx2max << "), x = " << x << "\n\t"
@@ -610,8 +637,7 @@ namespace CepGen
       ep1_ = p1.energy();
       ep2_ = p2.energy();
 
-      masses_.Ml2_ = event_->getByRole( Particle::CentralSystem )[0].mass2();
-
+      //std::cout << __PRETTY_FUNCTION__ << ":" << w_limits_ << "|" << q2_limits_ << "|" << mx_limits_ << std::endl;
       switch ( cuts_.mode ) {
         case Kinematics::Mode::ElectronProton: default:
           CG_ERROR( "GamGamLL" ) << "Case not yet supported!"; break;
@@ -650,25 +676,10 @@ namespace CepGen
         << "m(X1) = " << MX_ << " GeV\t"
         << "m(X2) = " << MY_ << " GeV";
 
-      Limits& w_limits = cuts_.cuts.initial[Cuts::w];
-      if ( !w_limits.hasMax() )
-        w_limits.max() = s_;
-      // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
-      if ( !w_limits.hasMin() )
-        w_limits.min() = 4.*masses_.Ml2_;
-
-      // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or _wmax if specified)
-      const double wmax = std::min( pow( sqs_-MX_-MY_, 2 ), w_limits.max() );
-
-      CG_DEBUG_LOOP( "GamGamLL" )
-        << "w limits = " << w_limits << "\n\t"
-        << "wmax/wmin = " << wmax/w_limits.min();
-
       // compute the two-photon energy for this point
       w4_ = 0.;
       double dw4 = 0.;
-      Map( x( 4 ), w_limits.min(), wmax, w4_, dw4, "w4" );
-      Map( x( 4 ), w_limits.min(), wmax, w4_, dw4, "w4" );
+      map( x( 4 ), w_limits_, w4_, dw4, "w4" );
       mc4_ = sqrt( w4_ );
 
       CG_DEBUG_LOOP( "GamGamLL" )
@@ -874,41 +885,48 @@ namespace CepGen
 
       //--- cut on mass of final hadronic system (MX/Y)
 
-      const Limits mx_limits = cuts_.cuts.remnants[Cuts::mass_single];
-      if ( cuts_.mode == Kinematics::Mode::InelasticElastic
-        || cuts_.mode == Kinematics::Mode::InelasticInelastic ) {
-        if ( !mx_limits.passes( MX_ ) )
+      if ( cuts_.cuts.remnants.count( Cuts::mass_single ) > 0 ) {
+        if ( ( cuts_.mode == Kinematics::Mode::InelasticElastic
+            || cuts_.mode == Kinematics::Mode::InelasticInelastic )
+          && !mx_limits_.passes( MX_ ) )
           return 0.;
-      }
-      if ( cuts_.mode == Kinematics::Mode::ElasticInelastic
-        || cuts_.mode == Kinematics::Mode::InelasticInelastic ) {
-        if ( !mx_limits.passes( MY_ ) )
+        if ( ( cuts_.mode == Kinematics::Mode::ElasticInelastic
+            || cuts_.mode == Kinematics::Mode::InelasticInelastic )
+          && !mx_limits_.passes( MY_ ) )
           return 0.;
       }
 
       //--- cut on the proton's Q2 (first photon propagator T1)
 
-      if ( !cuts_.cuts.initial[Cuts::q2].passes( -t1_ ) )
+      if ( cuts_.cuts.initial.count( Cuts::q2 )
+        && !cuts_.cuts.initial.at( Cuts::q2 ).passes( -t1_ ) )
         return 0.;
 
       //--- cuts on outgoing leptons' kinematics
 
-      if ( !cuts_.cuts.central[Cuts::mass_sum].passes( ( p6_cm_+p7_cm_ ).mass() ) )
+      if ( cuts_.cuts.central.count( Cuts::mass_sum )
+        && !cuts_.cuts.central.at( Cuts::mass_sum ).passes( ( p6_cm_+p7_cm_ ).mass() ) )
         return 0.;
 
       //----- cuts on the individual leptons
 
-      const Limits pt_limits = cuts_.cuts.central[Cuts::pt_single];
-      if ( !pt_limits.passes( p6_cm_.pt() ) || !pt_limits.passes( p7_cm_.pt() ) )
-        return 0.;
+      if ( cuts_.cuts.central.count( Cuts::pt_single ) > 0 ) {
+        const Limits& pt_limits = cuts_.cuts.central.at( Cuts::pt_single );
+        if ( !pt_limits.passes( p6_cm_.pt() ) || !pt_limits.passes( p7_cm_.pt() ) )
+          return 0.;
+      }
 
-      const Limits energy_limits = cuts_.cuts.central[Cuts::energy_single];
-      if ( !energy_limits.passes( p6_cm_.energy() ) || !energy_limits.passes( p7_cm_.energy() ) )
-        return 0.;
+      if ( cuts_.cuts.central.count( Cuts::energy_single ) > 0 ) {
+        const Limits& energy_limits = cuts_.cuts.central.at( Cuts::energy_single );
+        if ( !energy_limits.passes( p6_cm_.energy() ) || !energy_limits.passes( p7_cm_.energy() ) )
+          return 0.;
+      }
 
-      const Limits eta_limits = cuts_.cuts.central[Cuts::eta_single];
-      if ( !eta_limits.passes( p6_cm_.eta() ) || !eta_limits.passes( p7_cm_.eta() ) )
-        return 0.;
+      if ( cuts_.cuts.central.count( Cuts::eta_single ) > 0 ) {
+        const Limits& eta_limits = cuts_.cuts.central.at( Cuts::eta_single );
+        if ( !eta_limits.passes( p6_cm_.eta() ) || !eta_limits.passes( p7_cm_.eta() ) )
+          return 0.;
+      }
 
       //--- compute the structure functions factors
 
@@ -1058,5 +1076,35 @@ namespace CepGen
 
       return peripp;
     }
+
+    void
+    GamGamLL::map( double expo, const Limits& lim, double& out, double& dout, const std::string& var_name_ )
+    {
+      const double y = lim.max()/lim.min();
+      out = lim.min()*pow( y, expo );
+      dout = out*log( y );
+      CG_DEBUG_LOOP( "GamGamLL:map" )
+        << "Mapping variable \"" << var_name_ << "\"\n\t"
+        << "limits = " << lim << "\n\t"
+        << "max/min = " << y << "\n\t"
+        << "exponent = " << expo << "\n\t"
+        << "output = " << out << "\n\t"
+        << "d(output) = " << dout;
+    }
+
+    void
+    GamGamLL::mapla( double y, double z, int u, double xm, double xp, double& x, double& d )
+    {
+      const double xmb = xm-y-z, xpb = xp-y-z;
+      const double c = -4.*y*z;
+      const double alp = sqrt( xpb*xpb + c ), alm = sqrt( xmb*xmb + c );
+      const double am = xmb+alm, ap = xpb+alp;
+      const double yy = ap/am, zz = pow( yy, u );
+
+      x = y + z + ( am*zz - c / ( am*zz ) ) / 2.;
+      const double ax = sqrt( pow( x-y-z, 2 ) + c );
+      d = ax*log( yy );
+    }
+
   }
 }

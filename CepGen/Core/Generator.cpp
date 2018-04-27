@@ -53,6 +53,8 @@ namespace CepGen
     if ( !parameters->process() )
       return 0;
 
+    parameters->process()->addEventContent();
+    parameters->process()->setKinematics( parameters->kinematics );
     return parameters->process()->numDimensions( parameters->kinematics.mode );
   }
 
@@ -90,8 +92,6 @@ namespace CepGen
   double
   Generator::computePoint( double* x )
   {
-    prepareFunction();
-
     double res = Integrand::eval( x, numDimensions(), (void*)parameters.get() );
     std::ostringstream os;
     for ( unsigned int i = 0; i < numDimensions(); ++i )
@@ -106,12 +106,6 @@ namespace CepGen
   Generator::computeXsection( double& xsec, double& err )
   {
     CG_INFO( "Generator" ) << "Starting the computation of the process cross-section.";
-
-    try {
-      prepareFunction();
-    } catch ( Exception& e ) {
-      e.dump();
-    }
 
     // first destroy and recreate the integrator instance
     if ( !integrator_ )
@@ -145,9 +139,6 @@ namespace CepGen
   std::shared_ptr<Event>
   Generator::generateOneEvent()
   {
-    if ( cross_section_ < 0. )
-      computeXsection( cross_section_, cross_section_error_ );
-
     integrator_->generateOne();
 
     parameters->addGenerationTime( parameters->process()->last_event->time_total );
@@ -157,9 +148,6 @@ namespace CepGen
   void
   Generator::generate( std::function<void( const Event&, unsigned long )> callback )
   {
-    if ( cross_section_ < 0. )
-      computeXsection( cross_section_, cross_section_error_ );
-
     const Timer tmr;
 
     CG_INFO( "Generator" )
@@ -172,18 +160,6 @@ namespace CepGen
       << parameters->generation.ngen << " events generated "
       << "in " << gen_time_s << " s "
       << "(" << gen_time_s/parameters->generation.ngen*1.e3 << " ms/event).";
-  }
-
-  void
-  Generator::prepareFunction()
-  {
-    if ( !parameters->process() )
-      throw CG_FATAL( "Generator" ) << "No process defined!";
-
-    Kinematics kin = parameters->kinematics;
-    parameters->process()->addEventContent();
-    parameters->process()->setKinematics( kin );
-    CG_DEBUG( "Generator:prepare" ) << "Function prepared to be integrated!";
   }
 }
 
