@@ -2,7 +2,7 @@
 #define CepGen_Core_TamingFunction_h
 
 #include "Functional.h"
-#include <map>
+#include <unordered_map>
 
 namespace CepGen
 {
@@ -14,7 +14,7 @@ namespace CepGen
     Functional<1> function;
   };
   /// A collection of taming functions evaluator with helper classes
-  class TamingFunctionsCollection : public std::map<std::string, TamingFunction>
+  class TamingFunctionsCollection : public std::unordered_map<std::string, TamingFunction>
   {
     public:
       /// Insert a new variable/expression into the collection

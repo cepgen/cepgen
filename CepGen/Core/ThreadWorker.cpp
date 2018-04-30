@@ -83,12 +83,10 @@ namespace CepGen
 
     double weight = 0.;
 
-    while ( true ) {
-      if ( gSignal != 0 )
-        return false;
+    while ( gSignal == 0 ) {
       double y = -1.;
       //--- select a bin and reject if fmax is too small
-      while ( true ) {
+      while ( gSignal == 0 ) {
         ps_bin_ = uniform() * grid_->max;
         grid_num_[ps_bin_]++;
         y = uniform() * grid_->f_max_global;
@@ -107,6 +105,8 @@ namespace CepGen
         break;
 //std::cout << weight << "|" << y << std::endl;
     }
+    if ( gSignal != 0 )
+      return false;
 
 //std::cout << __PRETTY_FUNCTION__<<"|"<< weight<< std::endl;
 

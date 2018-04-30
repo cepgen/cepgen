@@ -27,11 +27,9 @@ namespace CepGen
         /// Rapidity of the first outgoing lepton
         double y2_;
 
-        Limits ptdiff_limits_;
         /// Transverse momentum difference for the two outgoing leptons
         double pt_diff_;
 
-        Limits phi_pt_diff_limits_;
         /// Azimuthal angle difference for the two outgoing leptons
         double phi_pt_diff_;
 

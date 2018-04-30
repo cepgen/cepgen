@@ -26,7 +26,7 @@ namespace CepGen
       init( &params_ );
 
 
-      std::map<std::string, std::string> m_params;
+      std::unordered_map<std::string, std::string> m_params;
       std::string key, value;
       std::ostringstream os;
       while ( f >> key >> value ) {

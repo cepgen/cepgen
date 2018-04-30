@@ -80,14 +80,16 @@ namespace CepGen
       //     a window in transverse momentum difference
       //=================================================================
 
-      if ( !ptdiff_limits_.passes( fabs( pt1-pt2 ) ) )
+      if ( cuts_.cuts.central.count( Cuts::pt_diff ) > 0
+        && !cuts_.cuts.central.at( Cuts::pt_diff ).passes( fabs( pt1-pt2 ) ) )
         return 0.;
 
       //=================================================================
       //     a window in rapidity distance
       //=================================================================
 
-      if ( !cuts_.cuts.central[Cuts::rapidity_diff].passes( fabs( y1_-y2_ ) ) )
+      if ( cuts_.cuts.central.count( Cuts::rapidity_diff ) > 0
+        && !cuts_.cuts.central[Cuts::rapidity_diff].passes( fabs( y1_-y2_ ) ) )
         return 0.;
 
       //=================================================================
