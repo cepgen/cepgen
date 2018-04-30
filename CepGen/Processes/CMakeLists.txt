@@ -1,5 +1,4 @@
-file(GLOB sources *.cpp)
-file(GLOB headers *.h)
+file(GLOB sources *.cpp Fortran/*.f)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
