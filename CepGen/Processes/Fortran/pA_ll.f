@@ -11,7 +11,7 @@ c     local variables
 c     =================================================================
       double precision s,s12,am_l2
       double precision alpha1,alpha2,amt1,amt2
-      double precision pt1,pt2,dely
+      double precision pt1,pt2,eta1,eta2,dely
       double precision pt1x,pt1y,pt2x,pt2y
       double precision ak10,ak1x,ak1y,ak1z,ak20,ak2x,ak2y,ak2z
       double precision beta1,beta2,x1,x2
@@ -237,6 +237,8 @@ c     =================================================================
       py_x = - q2tx
       py_y = - q2ty
 
+c      print *,py_0,py_x,py_y,py_z
+
       q1t = dsqrt(q1t2)
       q2t = dsqrt(q2t2)
 
@@ -253,6 +255,19 @@ c     =================================================================
       p2x = pt2x
       p2y = pt2y
       p2z = alpha2*ak1z + beta2*ak2z
+
+      eta1 = 0.5d0*dlog((dsqrt(amt1**2*(dcosh(y1))**2 - am_l**2) +
+     2       amt1*dsinh(y1))/(dsqrt(amt1**2*(dcosh(y1))**2 - am_l**2)
+     3       - amt1*dsinh(y1)))
+
+      eta2 = 0.5d0*dlog((dsqrt(amt2**2*(dcosh(y2))**2 - am_l**2) +
+     2       amt2*dsinh(y2))/(dsqrt(amt2**2*(dcosh(y2))**2 - am_l**2)
+     3       - amt2*dsinh(y2)))
+
+      if(ieta.eq.1) then
+        if(eta1.lt.eta_min.or.eta2.lt.eta_min) return
+        if(eta1.gt.eta_max.or.eta2.gt.eta_max) return
+      endif
 
 c     matrix element squared
 c     averaged over initial spin polarizations
@@ -390,7 +405,6 @@ c     ============================================
       if(icontri.eq.1) then
         f1 = CepGen_kT_flux(10,q1t2,x1,am_x,0)
         f2 = CepGen_kT_flux_HI(100,q2t2,x2,a_nuc,z_nuc)
-c        print *,q2t2,x2,a_nuc,z_nuc,f2
       elseif(icontri.eq.2) then
         f1 = CepGen_kT_flux(10,q1t2,x1,am_x,0)
         if(imode.eq.1) then
@@ -408,10 +422,10 @@ c        print *,q2t2,x2,a_nuc,z_nuc,f2
       elseif(icontri.eq.4) then
         if(imode.eq.1) then
           f1 = CepGen_kT_flux(1,q1t2,x1,11,am_x)
-          f2 = CepGen_kT_flux(1,q2t2,x1,11,am_y)
+          f2 = CepGen_kT_flux(1,q2t2,x2,11,am_y)
         else
           f1 = CepGen_kT_flux(11,q1t2,x1,11,am_x)
-          f2 = CepGen_kT_flux(11,q2t2,x1,11,am_y)
+          f2 = CepGen_kT_flux(11,q2t2,x2,11,am_y)
         endif
       endif
       if(f1.lt.1.d-20) f1 = 0.0d0
@@ -433,8 +447,6 @@ c     =================================================================
       aintegrand = aintegral*q1t*q2t*ptdiff
 c     =================================================================
 c     *****************************************************************
-
-c      print *,aintegrand,aintegral,f2
 
       return
       end

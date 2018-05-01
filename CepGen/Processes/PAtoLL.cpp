@@ -10,7 +10,7 @@ extern "C"
     double m_p, units, pi, alpha_em;
   } constants_;
   extern struct {
-    int mode, pdg_l, a_nuc, z_nuc;
+    int mode, sfmode, pdg_l, a_nuc, z_nuc;
     double m_l;
     double inp1, inp2;
   } params_;
@@ -18,12 +18,12 @@ extern "C"
    double q1t, q2t, phiq1t, phiq2t, y1, y2, ptdiff, phiptdiff, m_x, m_y;
   } ktkin_;
   extern struct {
-    int ipt, idely;
-    double pt_min, pt_max, dely_min, dely_max;
+    int ipt, ieta, idely;
+    double pt_min, pt_max, eta_min, eta_max, dely_min, dely_max;
   } kincuts_;
   extern struct {
     double p10, p1x, p1y, p1z, p20, p2x, p2y, p2z;
-    double px_0, px_x, px_y, px_z, py_0, py_x, py_y, py_z;
+    double px0, pxx, pxy, pxz, py0, pyx, pyy, pyz;
   } evtkin_;
 }
 
@@ -33,12 +33,6 @@ PAtoLL::PAtoLL() : GenericKTProcess( "patoll", "pA ↝ ɣɣ → l⁺l¯", { { PD
   constants_.units = Constants::GeV2toBarn;
   constants_.pi = M_PI;
   constants_.alpha_em = Constants::alphaEM;
-  params_.mode = 1;
-  params_.pdg_l = (int)PDG::Muon;
-  params_.m_l = ParticleProperties::mass( (PDG)params_.pdg_l );
-  params_.a_nuc = 208;
-  params_.z_nuc = 82;
-  params_.inp1 = params_.inp2 = 6500.;
 }
 
 void
@@ -51,7 +45,18 @@ PAtoLL::preparePhaseSpace()
 
   // feed phase space cuts to the common block
   cuts_.cuts.central[Cuts::pt_single].save( (bool&)kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max );
+  cuts_.cuts.central[Cuts::eta_single].save( (bool&)kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max );
   cuts_.cuts.central[Cuts::rapidity_diff].save( (bool&)kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max );
+  std::cout << ">>> " << kincuts_.ipt << "|" << kincuts_.ieta << "|" << kincuts_.idely << std::endl;
+
+  // feed run parameters to the common block
+  params_.mode = 1;
+  params_.pdg_l = (int)PDG::Muon;
+  params_.m_l = ParticleProperties::mass( (PDG)params_.pdg_l );
+  params_.a_nuc = 208;
+  params_.z_nuc = 82;
+  params_.inp1 = cuts_.inp.first;
+  params_.inp2 = cuts_.inp.second;
 }
 
 double
@@ -75,4 +80,16 @@ PAtoLL::computeKTFactorisedMatrixElement()
 void
 PAtoLL::fillCentralParticlesKinematics()
 {
+  Particle& ol1 = event_->getByRole( Particle::CentralSystem )[0];
+  ol1.setPdgId( (PDG)params_.pdg_l, +1 );
+  ol1.setStatus( Particle::FinalState );
+  ol1.setMomentum( Particle::Momentum( evtkin_.p1x, evtkin_.p1y, evtkin_.p1z, evtkin_.p10 ) );
+
+  Particle& ol2 = event_->getByRole( Particle::CentralSystem )[1];
+  ol2.setPdgId( (PDG)params_.pdg_l, -1 );
+  ol2.setStatus( Particle::FinalState );
+  ol2.setMomentum( Particle::Momentum( evtkin_.p2x, evtkin_.p2y, evtkin_.p2z, evtkin_.p20 ) );
+
+  PX_ = Particle::Momentum( evtkin_.pxx, evtkin_.pxy, evtkin_.pxz, evtkin_.px0 );
+  PY_ = Particle::Momentum( evtkin_.pyx, evtkin_.pyy, evtkin_.pyz, evtkin_.py0 );
 }

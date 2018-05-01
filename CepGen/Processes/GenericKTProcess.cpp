@@ -333,12 +333,12 @@ namespace CepGen
     GenericKTProcess::flux( const Flux& type, double kt2, double x, const HeavyIon& hi )
     {
       switch ( type ) {
-        case Flux::HIElasticBudnev: {
-          const double r_a = 1.1*std::pow( hi.A, 1./3. ), a0 = 0.7, m_a = hi.A*mp_;
+        case Flux::HIElastic: {
+          const double r_a = 1.1*std::pow( hi.A, 1./3 ), a0 = 0.7, m_a = hi.A*mp_;
           const double q2_ela = ( kt2+x*x*m_a*m_a )/( 1.-x ), cons = sqrt( q2_ela )/0.1973;
           const double tau = cons*r_a, tau1 = cons*a0;
           // "Realistic nuclear form-factor" as used in STARLIGHT
-          const double ff1 = 3.*( sin( tau )-tau*cos( tau ) )/pow( tau+1.-10, 3 ), ff2 = 1./( 1.+tau1*tau1 );
+          const double ff1 = 3.*( sin( tau )-tau*cos( tau ) )/pow( tau+1.e-10, 3 ), ff2 = 1./( 1.+tau1*tau1 );
           const double ela1 = pow( kt2/( kt2+x*x*m_a*m_a ), 2 ), ela2 = pow( ff1*ff2, 2 )/*, ela3 = 1.-( q2_ela-kt2 )/q2_ela*/;
           //std::cout << q2_ela << "|" << cons << "|" << ff1 << "|" << tau << "|" << (hi.Z*hi.Z*Constants::alphaEM*M_1_PI*ela1*ela2/q2_ela) << std::endl;
           return hi.Z*hi.Z*Constants::alphaEM*M_1_PI*ela1*ela2/q2_ela;
@@ -357,7 +357,7 @@ namespace CepGen
         case GenericKTProcess::Flux::Inelastic: return os << "[p] Inelastic";
         case GenericKTProcess::Flux::ElasticBudnev: return os << "[p] Budnev elastic";
         case GenericKTProcess::Flux::InelasticBudnev: return os << "[p] Budnev inelastic";
-        case GenericKTProcess::Flux::HIElasticBudnev: return os << "[HI] Budnev elastic";
+        case GenericKTProcess::Flux::HIElastic: return os << "[HI] Elastic";
       }
       return os;
     }
