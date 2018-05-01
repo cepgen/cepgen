@@ -9,6 +9,7 @@
 #include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Processes/PPtoFF.h"
 #include "CepGen/Processes/PPtoWW.h"
+#include "CepGen/Processes/PAtoLL.h"
 
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 
@@ -92,6 +93,8 @@ namespace CepGen
         params_.setProcess( new Process::PPtoFF );
       else if ( proc_name == "pptoww" )
         params_.setProcess( new Process::PPtoWW );
+      else if ( proc_name == "patoll" )
+        params_.setProcess( new Process::PAtoLL );
       else throw CG_FATAL( "PythonHandler" ) << "Unrecognised process: " << proc_name << ".";
 
       //--- process mode

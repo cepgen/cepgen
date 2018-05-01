@@ -60,7 +60,7 @@ namespace CepGen
   Limits::save( bool& on, double& lmin, double& lmax ) const
   {
     on = false; lmin = lmax = 0.;
-    if ( !hasMin() || !hasMax() )
+    if ( !valid() )
       return;
     on = true;
     if ( hasMin() )

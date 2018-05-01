@@ -10,7 +10,7 @@ extern "C"
     double m_p, units, pi, alpha_em;
   } constants_;
   extern struct {
-    int mode, sfmode, pdg_l, a_nuc, z_nuc;
+    int icontri, imode, sfmod, pdg_l, a_nuc, z_nuc;
     double m_l;
     double inp1, inp2;
   } params_;
@@ -18,8 +18,8 @@ extern "C"
    double q1t, q2t, phiq1t, phiq2t, y1, y2, ptdiff, phiptdiff, m_x, m_y;
   } ktkin_;
   extern struct {
-    int ipt, ieta, idely;
-    double pt_min, pt_max, eta_min, eta_max, dely_min, dely_max;
+    int ipt, iene, ieta, idely;
+    double pt_min, pt_max, ene_min, ene_max, eta_min, eta_max, dely_min, dely_max;
   } kincuts_;
   extern struct {
     double p10, p1x, p1y, p1z, p20, p2x, p2y, p2z;
@@ -45,12 +45,14 @@ PAtoLL::preparePhaseSpace()
 
   // feed phase space cuts to the common block
   cuts_.cuts.central[Cuts::pt_single].save( (bool&)kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max );
+  cuts_.cuts.central[Cuts::energy_single].save( (bool&)kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max );
   cuts_.cuts.central[Cuts::eta_single].save( (bool&)kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max );
   cuts_.cuts.central[Cuts::rapidity_diff].save( (bool&)kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max );
-  std::cout << ">>> " << kincuts_.ipt << "|" << kincuts_.ieta << "|" << kincuts_.idely << std::endl;
 
   // feed run parameters to the common block
-  params_.mode = 1;
+  params_.icontri = (int)cuts_.mode;
+  params_.imode = 2; // Budnev flux
+  params_.sfmod = (int)cuts_.structure_functions;
   params_.pdg_l = (int)PDG::Muon;
   params_.m_l = ParticleProperties::mass( (PDG)params_.pdg_l );
   params_.a_nuc = 208;

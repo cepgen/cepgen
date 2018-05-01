@@ -14,8 +14,9 @@ c       inp1 = proton energy in lab frame
 c       inp2 = nucleus energy **per nucleon** in LAB frame
 c       Collision is along z-axis
 c     =================================================================
-      common/params/mode,sfmod,pdg_l,a_nuc,z_nuc,am_l,inp1,inp2
-      integer mode,sfmod,pdg_l,a_nuc,z_nuc
+      common/params/icontri,imode,sfmod,pdg_l,a_nuc,z_nuc,
+     &     am_l,inp1,inp2
+      integer icontri,imode,sfmod,pdg_l,a_nuc,z_nuc
       double precision am_l,inp1,inp2
 
 c     =================================================================
@@ -29,10 +30,12 @@ c     =================================================================
 c     =================================================================
 c     phase space cuts
 c     =================================================================
-      common/kincuts/ipt,ieta,idely,pt_min,pt_max,eta_min,eta_max,
+      common/kincuts/ipt,ieta,iene,idely,pt_min,pt_max,ene_min,ene_max,
+     &      eta_min,eta_max,
      &      dely_min,dely_max
-      integer ipt,ieta,idely
-      double precision pt_min,pt_max,eta_min,eta_max,dely_min,dely_max
+      integer ipt,iene,ieta,idely
+      double precision pt_min,pt_max,ene_min,ene_max,eta_min,eta_max,
+     &      dely_min,dely_max
 
 c     =================================================================
 c     generated event kinematics

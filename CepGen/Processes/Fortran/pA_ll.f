@@ -9,7 +9,7 @@ c     =================================================================
 c     =================================================================
 c     local variables
 c     =================================================================
-      double precision s,s12,am_l2
+      double precision s,s12
       double precision alpha1,alpha2,amt1,amt2
       double precision pt1,pt2,eta1,eta2,dely
       double precision pt1x,pt1y,pt2x,pt2y
@@ -30,7 +30,7 @@ c     =================================================================
       double precision Phi11_dot_e,Phi11_cross_e
       double precision Phi21_dot_e,Phi21_cross_e
       double precision aintegral
-      integer icontri,imode,imethod,imat1,imat2
+      integer imethod,imat1,imat2
 
       double precision px_plus,px_minus,py_plus,py_minus
       double precision r1,r2
@@ -87,25 +87,6 @@ c      s = 4.*inp1*inp_A
       p1_plus = (ak10+ak1z)/dsqrt(2.d0)
       p2_minus = (ak20-ak2z)/dsqrt(2.d0)
 
-c     =================================================================
-c     contribution included
-c         icontri = 1: elastic-elastic
-c         icontri = 2: elastic-inelastic
-c         icontri = 3: inelastic-elastic
-c         icontri = 4: inelastic-inelastic
-c     =================================================================
-      icontri = mode
-c     =================================================================
-c     choice of F2 structure function
-c         imode = 1: Szczurek-Uleshchenko
-c         imode = 2: Fiore et al.(parametrization of JLAB data)
-c         imode = 3: Suri-Yennie
-c         imode = 4: ALLM
-c         imode = 5: LUX
-
-c     =================================================================
-      imode = 5 ! 5
-      am_l2 = am_l*am_l
 c     terms in the matrix element
 c
       iterm11 = 1         ! LL
@@ -129,7 +110,7 @@ c     =================================================================
 c     Outgoing proton final state's mass
 c     =================================================================
       if((icontri.eq.1).or.(icontri.eq.2)) am_x = am_p
-      if((icontri.eq.1).or.(icontri.eq.3)) am_y = am_p
+      if((icontri.eq.1).or.(icontri.eq.3)) am_y = am_p*a_nuc
 
       q1tx = q1t*cos(phiq1t)
       q1ty = q1t*sin(phiq1t)
@@ -158,8 +139,8 @@ c     =================================================================
         if(pt1.lt.pt_min.or.pt2.lt.pt_min) return
       endif
 
-      amt1 = dsqrt(pt1**2+am_l2)
-      amt2 = dsqrt(pt2**2+am_l2)
+      amt1 = dsqrt(pt1**2+am_l**2)
+      amt2 = dsqrt(pt2**2+am_l**2)
 
       invm2 = amt1**2 + amt2**2 + 2.d0*amt1*amt2*dcosh(y1-y2)
      >      -ptsum**2
@@ -237,8 +218,6 @@ c     =================================================================
       py_x = - q2tx
       py_y = - q2ty
 
-c      print *,py_0,py_x,py_y,py_z
-
       q1t = dsqrt(q1t2)
       q2t = dsqrt(q2t2)
 
@@ -258,17 +237,18 @@ c     =================================================================
 
       eta1 = 0.5d0*dlog((dsqrt(amt1**2*(dcosh(y1))**2 - am_l**2) +
      2       amt1*dsinh(y1))/(dsqrt(amt1**2*(dcosh(y1))**2 - am_l**2)
-     3       - amt1*dsinh(y1)))
+     3     - amt1*dsinh(y1)))
 
       eta2 = 0.5d0*dlog((dsqrt(amt2**2*(dcosh(y2))**2 - am_l**2) +
      2       amt2*dsinh(y2))/(dsqrt(amt2**2*(dcosh(y2))**2 - am_l**2)
-     3       - amt2*dsinh(y2)))
+     3     - amt2*dsinh(y2)))
 
       if(ieta.eq.1) then
-        if(eta1.lt.eta_min.or.eta2.lt.eta_min) return
-        if(eta1.gt.eta_max.or.eta2.gt.eta_max) return
+        if(eta1.lt.eta_min.or.eta1.gt.eta_max) return
+        if(eta2.lt.eta_min.or.eta2.gt.eta_max) return
       endif
 
+c     =================================================================
 c     matrix element squared
 c     averaged over initial spin polarizations
 c     and summed over final spin polarizations
@@ -307,7 +287,7 @@ c     =================================================================
 
       auxil_gamgam = -2.d0*(  term1+term2+term3+term4+term5
      2                    +term6+term7+term8+term9+term10 )
-     3             / ( (am_l2-that)**2 * (am_l2-uhat)**2 )
+     3             / ( (am_l**2-that)**2 * (am_l**2-uhat)**2 )
 
       g_em = dsqrt(4.d0*pi*alpha_em)
 
@@ -408,24 +388,24 @@ c     ============================================
       elseif(icontri.eq.2) then
         f1 = CepGen_kT_flux(10,q1t2,x1,am_x,0)
         if(imode.eq.1) then
-          f2 = CepGen_kT_flux(1,q2t2,x2,11,am_y)
+          f2 = CepGen_kT_flux(1,q2t2,x2,sfmod,am_y)
         else
-          f2 = CepGen_kT_flux(11,q2t2,x2,11,am_y)
+          f2 = CepGen_kT_flux(11,q2t2,x2,sfmod,am_y)
         endif
       elseif(icontri.eq.3) then
         if(imode.eq.1) then
-          f1 = CepGen_kT_flux(1,q1t2,x1,11,am_y)
+          f1 = CepGen_kT_flux(1,q1t2,x1,sfmod,am_x)
         else
-          f1 = CepGen_kT_flux(11,q1t2,x1,11,am_y)
+          f1 = CepGen_kT_flux(11,q1t2,x1,sfmod,am_x)
         endif
         f2 = CepGen_kT_flux_HI(100,q2t2,x2,a_nuc,z_nuc)
       elseif(icontri.eq.4) then
         if(imode.eq.1) then
-          f1 = CepGen_kT_flux(1,q1t2,x1,11,am_x)
-          f2 = CepGen_kT_flux(1,q2t2,x2,11,am_y)
+          f1 = CepGen_kT_flux(1,q1t2,x1,sfmod,am_x)
+          f2 = CepGen_kT_flux(1,q2t2,x2,sfmod,am_y)
         else
-          f1 = CepGen_kT_flux(11,q1t2,x1,11,am_x)
-          f2 = CepGen_kT_flux(11,q2t2,x2,11,am_y)
+          f1 = CepGen_kT_flux(11,q1t2,x1,sfmod,am_x)
+          f2 = CepGen_kT_flux(11,q2t2,x2,sfmod,am_y)
         endif
       endif
       if(f1.lt.1.d-20) f1 = 0.0d0

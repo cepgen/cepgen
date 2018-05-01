@@ -92,10 +92,10 @@ namespace CepGen
     GenericKTProcess::computeWeight()
     {
       if ( mapped_variables_.size() == 0 )
-        throw CG_FATAL( "GenericKTProcess" )
+        throw CG_FATAL( "GenericKTProcess:weight" )
           << "No variables are mapped with this process!";
       if ( kt_jacobian_ == 0. )
-        throw CG_FATAL( "GenericKTProcess" )
+        throw CG_FATAL( "GenericKTProcess:weight" )
           << "Point-independant component of the Jacobian for this "
           << "kt-factorised process is null.\n\t"
           << "Please check the validity of the phase space!";
@@ -119,7 +119,7 @@ namespace CepGen
 
       const double weight = ( kt_jacobian_*aux_jacobian ) * integrand;
 
-      CG_DEBUG_LOOP( "GenericKTProcess" )
+      CG_DEBUG_LOOP( "GenericKTProcess:weight" )
         << "Jacobian = " << kt_jacobian_ << " * " << aux_jacobian
         << "\n\tIntegrand = " << integrand
         << "\n\tdW = " << weight << ".";
@@ -340,7 +340,6 @@ namespace CepGen
           // "Realistic nuclear form-factor" as used in STARLIGHT
           const double ff1 = 3.*( sin( tau )-tau*cos( tau ) )/pow( tau+1.e-10, 3 ), ff2 = 1./( 1.+tau1*tau1 );
           const double ela1 = pow( kt2/( kt2+x*x*m_a*m_a ), 2 ), ela2 = pow( ff1*ff2, 2 )/*, ela3 = 1.-( q2_ela-kt2 )/q2_ela*/;
-          //std::cout << q2_ela << "|" << cons << "|" << ff1 << "|" << tau << "|" << (hi.Z*hi.Z*Constants::alphaEM*M_1_PI*ela1*ela2/q2_ela) << std::endl;
           return hi.Z*hi.Z*Constants::alphaEM*M_1_PI*ela1*ela2/q2_ela;
         }
         default:
