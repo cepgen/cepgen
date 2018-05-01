@@ -94,4 +94,5 @@ PAtoLL::fillCentralParticlesKinematics()
 
   PX_ = Particle::Momentum( evtkin_.pxx, evtkin_.pxy, evtkin_.pxz, evtkin_.px0 );
   PY_ = Particle::Momentum( evtkin_.pyx, evtkin_.pyy, evtkin_.pyz, evtkin_.py0 );
+  PY_ *= 1./params_.z_nuc;
 }
