@@ -152,9 +152,9 @@ c
          WRITE (6,*) 'Wrong flavour number for FFNS evolution. STOP'
          STOP
       END IF
-c     
+c
       IF ( NAORD .GT. 3 ) THEN
-         WRITE (6,*) 'Specified order in a_s too high. STOP' 
+         WRITE (6,*) 'Specified order in a_s too high. STOP'
          STOP
       END IF
 c
@@ -167,12 +167,12 @@ c
          WRITE (6,*) 'Too high mu_0 for VFNS evolution. STOP'
          STOP
       END IF
-c     
+c
       IF ( (ASI .GT. 2.D0) .OR. (ASI .LT. 2.D-2) ) THEN
          WRITE (6,*) 'alpha_s out of range. STOP'
          STOP
       END IF
-c     
+c
       IF ( (IVFNS .EQ. 1) .AND. (MC2 .GT. MB2) ) THEN
          WRITE (6,*) 'Wrong charm-bottom mass hierarchy. STOP'
          STOP
@@ -206,10 +206,10 @@ C----------------------------------------------------------------------
      &     R2,ASI,ASF,R20,R2T,R2B,R2C,AS
       PARAMETER ( PI = 3.1415 92653 58979 D0 )
 c
-c ..Input common blocks 
-c 
+c ..Input common blocks
+c
        COMMON / NFFIX  / NFF
-       COMMON / VARFLV / IVFNS 
+       COMMON / VARFLV / IVFNS
        COMMON / FRRAT  / LOGFR
        COMMON / ASINP  / AS0, M20
        COMMON / ASFTHR / ASC, M2C, ASB, M2B, AST, M2T
@@ -240,19 +240,19 @@ c
              R2B = M2B * R2/M2
              ASI = ASB
              ASF = AS (R2, R2B, ASB, NF)
-c     
+c
           ELSE IF (M2 .GT. M2C) THEN
              NF = 4
              R2C = M2C * R2/M2
              ASI = ASC
              ASF = AS (R2, R2C, ASC, NF)
-c     
+c
           ELSE
              NF = 3
              R20 = M20 * R2/M2
              ASI = AS0
              ASF = AS (R2, R20, AS0, NF)
-c       
+c
           END IF
 c
        END IF
@@ -269,19 +269,19 @@ c =================================================================av==
 
 c =====================================================================
 c
-c ..The threshold matching of the QCD coupling in the MS(bar) scheme,  
-c    a_s = alpha_s(mu_r^2)/(4 pi),  for  NF -> NF + 1  active flavours 
+c ..The threshold matching of the QCD coupling in the MS(bar) scheme,
+c    a_s = alpha_s(mu_r^2)/(4 pi),  for  NF -> NF + 1  active flavours
 c    up to order a_s^4 (NNNLO).
 c
-c ..The value  ASNF  of a_s for NF flavours at the matching scale, the 
+c ..The value  ASNF  of a_s for NF flavours at the matching scale, the
 c    logarithm  LOGRH = ln (mu_r^2/m_H^2) -- where m_H is the pole mass
-c    of the heavy quark -- and  NF  are passed as arguments to the 
-c    function  ASNF1.  The order of the expansion  NAORD  (defined as 
+c    of the heavy quark -- and  NF  are passed as arguments to the
+c    function  ASNF1.  The order of the expansion  NAORD  (defined as
 c    the 'n' in N^nLO) is provided by the common-block  ASPAR.
 c
 c ..The matching coefficients are inverted from Chetyrkin, Kniehl and
 c    Steinhauser, Phys. Rev. Lett. 79 (1997) 2184. The QCD colour
-c    factors have been hard-wired in these results. The lowest integer 
+c    factors have been hard-wired in these results. The lowest integer
 c    values of the Zeta function are given by the common-block  RZETA.
 c
 c =====================================================================
@@ -298,7 +298,7 @@ c
 c
 c ---------------------------------------------------------------------
 c
-c ..Input common-blocks 
+c ..Input common-blocks
 c
       COMMON / ASPAR  / NAORD, NASTPS
       COMMON / RZETA  / ZETA(6)
@@ -309,7 +309,7 @@ c
 c
 c ---------------------------------------------------------------------
 c
-c ..The coupling-constant matching coefficients (CMC's) up to NNNLO 
+c ..The coupling-constant matching coefficients (CMC's) up to NNNLO
 c   (calculated and saved in the first call of this routine)
 c
        IF (PRVCLL .NE. 1) THEN
@@ -319,9 +319,9 @@ c
 c
          CMC(2,0) = 14./3.D0
          CMC(2,1) = 38./3.D0
-         CMC(2,2) =  4./9.D0  
+         CMC(2,2) =  4./9.D0
 c
-         CMCI30 = + 80507./432.D0 * ZETA(3) + 58933./1944.D0 
+         CMCI30 = + 80507./432.D0 * ZETA(3) + 58933./1944.D0
      1            + 128./3.D0 * ZETA(2) * (1.+ DLOG(2.D0)/3.D0)
          CMCF30 = - 64./9.D0 * (ZETA(2) + 2479./3456.D0)
          CMCI31 =   8941./27.D0
@@ -335,7 +335,7 @@ c
 c
 c ---------------------------------------------------------------------
 c
-c ..The N_f dependent CMC's, and the alpha_s matching at order NAORD 
+c ..The N_f dependent CMC's, and the alpha_s matching at order NAORD
 c
        CMC(3,0) = CMCI30 + NF * CMCF30
        CMC(3,1) = CMCI31 + NF * CMCF31
@@ -344,7 +344,7 @@ c
        IF (NAORD .EQ. 0) GO TO 1
        ASP   = ASNF
 c
-       DO 11 K1 = 1, NAORD 
+       DO 11 K1 = 1, NAORD
          ASP = ASP * ASNF
          LRHP = 1.D0
 c
@@ -368,7 +368,7 @@ c    from a three-flavour initial scale to the four- to six-flavour
 c    thresholds (identified with the squares of the corresponding quark
 c    masses).  The results are written to the common-block  ASFTHR.
 c
-c ..The input scale  M20 = mu_(f,0)^2  and the corresponding value 
+c ..The input scale  M20 = mu_(f,0)^2  and the corresponding value
 c    AS0  of a_s  are provided by  ASINP.  The fixed scale logarithm
 c    LOGFR = ln (mu_f^2/mu_r^2) is specified in  FRRAT.  The alpha_s
 c    matching is done by the function ASNF1.
@@ -379,14 +379,14 @@ c
        SUBROUTINE EVNFTHR (MC2, MB2, MT2)
 c
        IMPLICIT NONE
-       DOUBLE PRECISION MC2, MB2, MT2, M20, M2C, M2B, M2T, R20, R2C, 
+       DOUBLE PRECISION MC2, MB2, MT2, M20, M2C, M2B, M2T, R20, R2C,
      1                  R2B, R2T, AS, ASNF1, AS0, ASC, ASB, AST,
      2                  ASC3, ASB4, AST5, LOGFR, SC, SB, ST
 c
 c ---------------------------------------------------------------------
-c 
+c
 c ..Input common blocks
-c  
+c
        COMMON / ASINP  / AS0, M20
        COMMON / FRRAT  / LOGFR
 c
@@ -397,7 +397,7 @@ c
 c ---------------------------------------------------------------------
 c
 c ..Coupling constants at and evolution distances to/between thresholds
-c 
+c
        R20 = M20 * EXP(-LOGFR)
 c
 c ..Charm
@@ -408,7 +408,7 @@ c
        SC   = LOG (AS0 / ASC3)
        ASC  = ASNF1 (ASC3, -LOGFR, 3)
 c
-c ..Bottom 
+c ..Bottom
 c
        M2B  = MB2
        R2B  = M2B * R20/M20
@@ -430,19 +430,19 @@ c
 c
 c =================================================================av==
 c
-c ..The running coupling of QCD,  
+c ..The running coupling of QCD,
 c
 c         AS  =  a_s  =  alpha_s(mu_r^2)/(4 pi),
 c
 c    obtained by integrating the evolution equation for a fixed number
-c    of massless flavours  NF.  Except at leading order (LO),  AS  is 
+c    of massless flavours  NF.  Except at leading order (LO),  AS  is
 c    obtained using a fourth-order Runge-Kutta integration.
 c
 c ..The initial and final scales  R20  and  R2,  the value  AS0  at
-c    R20, and  NF  are passed as function arguments.  The coefficients 
-c    of the beta function up to  a_s^5 (N^3LO)  are provided by the 
+c    R20, and  NF  are passed as function arguments.  The coefficients
+c    of the beta function up to  a_s^5 (N^3LO)  are provided by the
 c    common-block  BETACOM.  The order of the expansion  NAORD (defined
-c    as the 'n' in N^nLO) and the number of steps  NASTPS  for the 
+c    as the 'n' in N^nLO) and the number of steps  NASTPS  for the
 c    integration beyond LO are given by the common-block  ASPAR.
 c
 c =====================================================================
@@ -459,7 +459,7 @@ c
 c
 c ---------------------------------------------------------------------
 c
-c ..Input common-blocks 
+c ..Input common-blocks
 c
        COMMON / ASPAR  / NAORD, NASTPS
        COMMON / BETACOM   / BETA0 (NFMIN:NFMAX), BETA1 (NFMIN:NFMAX),
@@ -507,7 +507,7 @@ c
          XK3 = DLR * FBETA2 (AS + XK2)
          AS = AS + SXTH * (XK0 + 2.* XK1 + 2.* XK2 + XK3)
   3    CONTINUE
-c  
+c
        ELSE IF (NAORD .EQ. 3) THEN
 c
        DO 4 K1 = 1, NASTPS
@@ -527,15 +527,15 @@ c
 c
 c =================================================================av==
 c
-c ..The subroutine BETAFCT for the coefficients  BETA0...BETA3  of the 
-c    beta function of QCD up to order alpha_s^5 (N^3LO), normalized by 
+c ..The subroutine BETAFCT for the coefficients  BETA0...BETA3  of the
+c    beta function of QCD up to order alpha_s^5 (N^3LO), normalized by
 c
 c
-c        d a_s / d ln mu_r^2  =  - BETA0 a_s^2 - BETA1 a_s^3 - ... 
+c        d a_s / d ln mu_r^2  =  - BETA0 a_s^2 - BETA1 a_s^3 - ...
 c
-c    with  a_s = alpha_s/(4*pi). 
+c    with  a_s = alpha_s/(4*pi).
 c
-c ..The MSbar coefficients are written to the common-block BETACOM for 
+c ..The MSbar coefficients are written to the common-block BETACOM for
 c
 c   NF = 3...6  (parameters NFMIN, NFMAX) quark flavours.
 c
@@ -566,7 +566,7 @@ c
 c
 c ---------------------------------------------------------------------
 c
-c ..The full LO and NLO coefficients 
+c ..The full LO and NLO coefficients
 c
        B00 =  11./3.D0 * CA
        B01 =  -4./3.D0 * TR
@@ -581,7 +581,7 @@ c
        BETA1(NF) = B10 + B11 * NF
 c
        BETA2(NF) = 1428.50 - 279.611 * NF + 6.01852 * NF**2
-       BETA3(NF) = 29243.0 - 6946.30 * NF + 405.089 * NF**2 
+       BETA3(NF) = 29243.0 - 6946.30 * NF + 405.089 * NF**2
      1             + 1.49931 * NF**3
 c
 c ---------------------------------------------------------------------

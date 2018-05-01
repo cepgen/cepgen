@@ -10,7 +10,7 @@
       print *,'========================================================'
       print *,'List of parameters retrieved from CepGen:'
       print *,'========================================================'
-      print *,'Cut                        enab.     minimum     maximum'
+      print *,'Cut                       enabled    minimum     maximum'
       print 100,'pt',ipt,pt_min,pt_max
       print 100,'energy',iene,ene_min,ene_max
       print 100,'eta',ieta,eta_min,eta_max

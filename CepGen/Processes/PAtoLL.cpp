@@ -22,6 +22,7 @@ extern "C"
     double pt_min, pt_max, ene_min, ene_max, eta_min, eta_max, dely_min, dely_max;
   } kincuts_;
   extern struct {
+    int ipdgpar1, ipdgpar2;
     double p10, p1x, p1y, p1z, p20, p2x, p2y, p2z;
     double px0, pxx, pxy, pxz, py0, pyx, pyy, pyz;
   } evtkin_;
@@ -51,7 +52,8 @@ PAtoLL::preparePhaseSpace()
 
   // feed run parameters to the common block
   params_.icontri = (int)cuts_.mode;
-  params_.iflux1 = (int)Flux::Gluon; // gluon flux
+  params_.iflux1 = (int)Flux::ElasticBudnev;
+  //params_.iflux1 = (int)Flux::Gluon; // gluon flux
   params_.iflux2 = (int)Flux::HIElastic; // elastic [HI] flux
   //params_.iflux1 = params_.iflux2 = (int)Flux::ElasticBudnev;
   params_.sfmod = (int)cuts_.structure_functions;
@@ -93,6 +95,9 @@ PAtoLL::fillCentralParticlesKinematics()
   ol2.setPdgId( (PDG)params_.pdg_l, -1 );
   ol2.setStatus( Particle::FinalState );
   ol2.setMomentum( Particle::Momentum( evtkin_.p2x, evtkin_.p2y, evtkin_.p2z, evtkin_.p20 ) );
+
+  event_->getOneByRole( Particle::Parton1 ).setPdgId( (PDG)evtkin_.ipdgpar1 );
+  event_->getOneByRole( Particle::Parton2 ).setPdgId( (PDG)evtkin_.ipdgpar2 );
 
   PX_ = Particle::Momentum( evtkin_.pxx, evtkin_.pxy, evtkin_.pxz, evtkin_.px0 );
   PY_ = Particle::Momentum( evtkin_.pyx, evtkin_.pyy, evtkin_.pyz, evtkin_.py0 );

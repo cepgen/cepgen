@@ -47,21 +47,28 @@ c     =================================================================
 c     =================================================================
 c     quarks production
 c     =================================================================
-#ifdef ALPHA_S
       double precision t_max,amu2,alpha_S,alphas
       double precision rx,rkt2,rmu2,parton
       logical first_init
-      data first_init/.false./
-      if(first_init.eqv..false.) then
-        if(iflux1.eq.20) then
-          print *,'Loading KMR interpolation...'
-          call f_inter_kmr_fg(rx,rkt2,rmu2,0,parton)
-        endif
-        print *,'Initialisation of the alpha(S) evolution algorithm...'
-        call initAlphaS(2,1.d0,1.d0,0.5d0,1.4d0,4.75d0,1.d10)
-        first_init = .true.
-      endif
+      data first_init/.true./
+      if(first_init) then
+        ipdgpar1 = 22
+        ipdgpar2 = 22
+        if(iflux1.ge.20.and.iflux1.lt.40) then
+          if(iflux1.eq.20) then
+            print *,'Loading KMR interpolation...'
+            call f_inter_kmr_fg(rx,rkt2,rmu2,0,parton)
+          endif
+#ifdef ALPHA_S
+          print *,'Initialisation of the alpha(S) evolution algorithm..'
+          call initAlphaS(2,1.d0,1.d0,0.5d0,
+     &       CepGen_particle_mass(4), ! charm
+     &       CepGen_particle_mass(5), ! bottom
+     &       CepGen_particle_mass(6)) ! top
 #endif
+        endif
+        first_init = .false.
+      endif
 
 c     =================================================================
 c     FIXME
@@ -380,14 +387,11 @@ c     =================================================================
      4     - iterm12*4.d0*z2p*z2m*(z2p-z2m)*Phi20
      5     *(q2tx*Phi21_x+q2ty*Phi21_y)
 
-
-c     =================================================================
-c     convention of matrix element as in our kt-factorization
-c     for heavy flavours
-c     =================================================================
-
       coupling = 1.d0
-      if(iflux1.ge.20.and.iflux1.lt.40) then
+c     =================================================================
+c     first parton coupling
+c     =================================================================
+      if(iflux1.ge.20.and.iflux1.lt.40) then ! at least one gluon exchanged
 #ifdef ALPHA_S
         t_max = max(amt1**2,amt2**2)
         amu2 = max(eps12,t_max)
@@ -397,15 +401,27 @@ c     =================================================================
         print *,'alphaS not linked to this instance!'
         stop
 #endif
+        ipdgpar1 = 20
         coupling = coupling*alpha_S
-      else
+        coupling = coupling*0.5d0 ! colour
+      else ! photon exchange
         coupling = coupling*alpha_em
       endif
-      coupling = coupling*alpha_em
+c     =================================================================
+c     second parton coupling
+c     =================================================================
+      coupling = coupling*alpha_em ! photon exchange
+c     =================================================================
+c     electromagnetic coupling
+c     =================================================================
       if(pdg_l.le.6) then ! quarks production
         coupling = coupling * CepGen_particle_charge(pdg_l)**2 ! charge
-        coupling = coupling * 0.5d0 ! colour
       endif
+
+c     =================================================================
+c     convention of matrix element as in our kt-factorization
+c     for heavy flavours
+c     =================================================================
 
       amat2_1 = (4.d0*pi)**2*coupling*(x1*x2*s)**2
      2        * aux2_1 * 2.*z1p*z1m*q1t2 / (q1t2*q2t2)

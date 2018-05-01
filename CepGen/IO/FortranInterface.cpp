@@ -32,6 +32,12 @@ extern "C" {
   }
 
   double
+  cepgen_particle_mass_( int& pdg_id )
+  {
+    return CepGen::ParticleProperties::mass( (CepGen::PDG)pdg_id );
+  }
+
+  double
   cepgen_particle_charge_( int& pdg_id )
   {
     return CepGen::ParticleProperties::charge( pdg_id );

@@ -40,8 +40,9 @@ c     =================================================================
 c     =================================================================
 c     generated event kinematics
 c     =================================================================
-      common/evtkin/p10,p1x,p1y,p1z,p20,p2x,p2y,p2z,
+      common/evtkin/ipdgpar1,ipdgpar2,p10,p1x,p1y,p1z,p20,p2x,p2y,p2z,
      &     px_0,px_x,px_y,px_z,py_0,py_x,py_y,py_z
+      integer ipdgpar1,ipdgpar2
       double precision p10,p1x,p1y,p1z,p20,p2x,p2y,p2z,
      &     px_0,px_x,px_y,px_z,py_0,py_x,py_y,py_z
 
@@ -50,5 +51,5 @@ c     helpers for the evaluation of unintegrated parton fluxes
 c     =================================================================
       external CepGen_kT_flux,CepGen_kT_flux_HI
       double precision CepGen_kT_flux,CepGen_kT_flux_HI
-      external CepGen_particle_charge
-      double precision CepGen_particle_charge
+      external CepGen_particle_charge,CepGen_particle_mass
+      double precision CepGen_particle_charge,CepGen_particle_mass
