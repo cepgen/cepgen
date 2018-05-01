@@ -19,6 +19,8 @@ namespace CepGen
         /// \note IncQQbar in pptoll
         double computeKTFactorisedMatrixElement() override;
         void fillCentralParticlesKinematics() override;
+
+        double y1_, y2_, pt_diff_, phi_pt_diff_;
     };
   }
 }

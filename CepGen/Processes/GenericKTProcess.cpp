@@ -135,20 +135,20 @@ namespace CepGen
       flux1_ = flux2_ = 0.;
       switch ( cuts_.mode ) {
         case Kinematics::Mode::ElasticElastic:
-          flux1_ = flux( Flux::ElasticBudnev, x1, q1t2 );
-          flux2_ = flux( Flux::ElasticBudnev, x2, q2t2 );
+          flux1_ = flux( Flux::ElasticBudnev, q1t2, x1 );
+          flux2_ = flux( Flux::ElasticBudnev, q2t2, x2 );
           break;
         case Kinematics::Mode::ElasticInelastic:
-          flux1_ = flux( Flux::ElasticBudnev, x1, q1t2 );
-          flux2_ = flux( Flux::InelasticBudnev, x2, q2t2, cuts_.structure_functions, MY_ );
+          flux1_ = flux( Flux::ElasticBudnev, q1t2, x1 );
+          flux2_ = flux( Flux::InelasticBudnev, q2t2, x2, cuts_.structure_functions, MY_ );
           break;
         case Kinematics::Mode::InelasticElastic:
-          flux1_ = flux( Flux::InelasticBudnev, x1, q1t2, cuts_.structure_functions, MX_ );
-          flux2_ = flux( Flux::ElasticBudnev, x2, q2t2 );
+          flux1_ = flux( Flux::InelasticBudnev, q1t2, x1, cuts_.structure_functions, MX_ );
+          flux2_ = flux( Flux::ElasticBudnev, q2t2, x2 );
           break;
         case Kinematics::Mode::InelasticInelastic:
-          flux1_ = flux( Flux::InelasticBudnev, x1, q1t2, cuts_.structure_functions, MX_ );
-          flux2_ = flux( Flux::InelasticBudnev, x2, q2t2, cuts_.structure_functions, MY_ );
+          flux1_ = flux( Flux::InelasticBudnev, q1t2, x1, cuts_.structure_functions, MX_ );
+          flux2_ = flux( Flux::InelasticBudnev, q2t2, x2, cuts_.structure_functions, MY_ );
           break;
         default:
           throw CG_FATAL( "GenericKTProcess" ) << "Invalid kinematics mode selected!";
@@ -299,7 +299,7 @@ namespace CepGen
     }
 
     double
-    GenericKTProcess::flux( const Flux& type, double x, double kt2, const StructureFunctions::Type& sf, double mx )
+    GenericKTProcess::flux( const Flux& type, double kt2, double x, const StructureFunctions::Type& sf, double mx )
     {
       switch ( type ) {
         case Flux::ElasticBudnev: {
@@ -324,13 +324,13 @@ namespace CepGen
           return Constants::alphaEM*M_1_PI*( 1.-x )/Q2*( f_D+0.5*x*x*f_C );
         }
         default:
-          throw CG_ERROR("GenericKTProcess:flux") << "Invalid flux type: " << type;
+          throw CG_FATAL("GenericKTProcess:flux") << "Invalid flux type: " << type;
       }
       return 0.;
     }
 
     double
-    GenericKTProcess::flux( const Flux& type, double x, double kt2, const HeavyIon& hi )
+    GenericKTProcess::flux( const Flux& type, double kt2, double x, const HeavyIon& hi )
     {
       switch ( type ) {
         case Flux::HIElasticBudnev: {
@@ -338,11 +338,11 @@ namespace CepGen
           const double q2_ela = ( kt2+x*x*m_a*m_a )/( 1.-x ), tau = sqrt( q2_ela )*r_a/0.1973, tau1 = sqrt( q2_ela )*a0/0.1973;
           // "Realistic nuclear form-factor" as used in STARLIGHT
           const double ff1 = 3.*( sin( tau )-tau*cos( tau ) )/pow( tau+1.-10, 3 ), ff2 = 1./( 1.+tau1*tau1 );
-          const double ela1 = pow( kt2/( kt2+x*x*m_a*m_a), 2 ), ela2 = pow( ff1*ff2, 2 )/*, ela3 = 1.-( q2_ela-kt2 )/q2_ela*/;
+          const double ela1 = pow( kt2/( kt2+x*x*m_a*m_a ), 2 ), ela2 = pow( ff1*ff2, 2 )/*, ela3 = 1.-( q2_ela-kt2 )/q2_ela*/;
           return hi.Z*hi.Z*Constants::alphaEM*M_1_PI*ela1*ela2/q2_ela;
         }
         default:
-          throw CG_ERROR("GenericKTProcess:flux") << "Invalid flux type: " << type;
+          throw CG_FATAL("GenericKTProcess:flux") << "Invalid flux type: " << type;
       }
       return 0.;
     }

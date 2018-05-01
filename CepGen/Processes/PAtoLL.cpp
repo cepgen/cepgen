@@ -31,18 +31,30 @@ PAtoLL::PAtoLL() : GenericKTProcess( "patoll", "pA ↝ ɣɣ → l⁺l¯", { { PD
   params_.a_nuc = 82;
   params_.z_nuc = 208;
   params_.inp1 = params_.inp2 = 6500.;
-  ktkin_.q1t = ktkin_.q2t = ktkin_.phiq1t = ktkin_.phiq2t = ktkin_.y1 = ktkin_.y2 = ktkin_.ptdiff = ktkin_.phiptdiff = 0.;
-  ktkin_.m_x = ktkin_.m_y = ParticleProperties::mass( PDG::Proton );
 }
 
 void
 PAtoLL::preparePhaseSpace()
 {
+  registerVariable( y1_, Mapping::linear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "First outgoing lepton rapidity" );
+  registerVariable( y2_, Mapping::linear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "Second outgoing lepton rapidity" );
+  registerVariable( pt_diff_, Mapping::linear, cuts_.cuts.central[Cuts::pt_diff], { 0., 50. }, "Leptons transverse momentum difference" );
+  registerVariable( phi_pt_diff_, Mapping::linear, cuts_.cuts.central[Cuts::phi_pt_diff], { 0., 2.*M_PI }, "Leptons azimuthal angle difference" );
 }
 
 double
 PAtoLL::computeKTFactorisedMatrixElement()
 {
+  ktkin_.q1t = qt1_;
+  ktkin_.q2t = qt2_;
+  ktkin_.phiq1t = phi_qt1_;
+  ktkin_.phiq2t = phi_qt2_;
+  ktkin_.y1 = y1_;
+  ktkin_.y2 = y2_;
+  ktkin_.ptdiff = pt_diff_;
+  ktkin_.phiptdiff = phi_pt_diff_;
+  ktkin_.m_x = MX_;
+  ktkin_.m_y = MY_;
   double weight = 0.;
   pa_ll_( weight );
   return weight;
