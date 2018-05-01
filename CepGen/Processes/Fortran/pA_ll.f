@@ -4,42 +4,20 @@
 c     =================================================================
 c     CepGen common blocks for kinematics definition
 c     =================================================================
+      include 'cepgen_blocks.inc'
+
 c     =================================================================
-c       INPUT:
-c       inp1 = proton energy in lab frame
-c       inp2 = nucleus energy **per nucleon** in LAB frame
-c       Collision is along z-axis
+c     local variables
 c     =================================================================
-      common/params/mode,pdg_l,a_nuc,z_nuc,am_l,inp1,inp2
-      common/constants/am_p,units,pi,alpha_em
-      common/ktkin/q1t,q2t,phiq1t,phiq2t,y1,y2,ptdiff,phiptdiff,
-     +     am_x,am_y
-      common/evtkin/p10,p1x,p1y,p1z,p20,p2x,p2y,p2z,
-     +     px_0,px_x,px_y,px_z,py_0,py_x,py_y,py_z
-
-      double precision inp1,inp2
-      integer mode,pdg_l,a_nuc,z_nuc
-      double precision am_l,am_p,units,pi,alpha_em
-      double precision q1t,q2t,phiq1t,phiq2t,y1,y2,ptdiff,phiptdiff
-      double precision am_x,am_y
-      double precision p10,p1x,p1y,p1z,p20,p2x,p2y,p2z
-      double precision px_0,px_x,px_y,px_z,py_0,py_x,py_y,py_z
-
-      ! unintegrated fluxes
-      !external CepGen_kT_flux,CepGen_kT_flux_HI
-      double precision CepGen_kT_flux,CepGen_kT_flux_HI
-
-      ! other quantities
       double precision s,s12,am_l2
-      double precision dely_min,dely_max
-      double precision dely,pt1,pt2
       double precision alpha1,alpha2,amt1,amt2
+      double precision pt1,pt2,dely
       double precision pt1x,pt1y,pt2x,pt2y
       double precision ak10,ak1x,ak1y,ak1z,ak20,ak2x,ak2y,ak2z
       double precision beta1,beta2,x1,x2
-      double precision z1p,z1m,z2p,z2m,q1tx,q1ty
-      double precision q2tx,q2ty,q10,q1z,q20,q2z
-      double precision q1t2,q2t2
+      double precision z1p,z1m,z2p,z2m
+      double precision q1tx,q1ty,q1z,q10,q1t2
+      double precision q2tx,q2ty,q2z,q20,q2t2
       double precision ptsum
       double precision that1,that2,that,uhat1,uhat2,uhat
       double precision term1,term2,term3,term4,term5,term6,term7
@@ -53,7 +31,6 @@ c     =================================================================
       double precision Phi21_dot_e,Phi21_cross_e
       double precision aintegral
       integer icontri,imode,imethod,imat1,imat2
-      integer idely
 
       double precision px_plus,px_minus,py_plus,py_minus
       double precision r1,r2
@@ -69,43 +46,46 @@ c     =================================================================
 c     FIXME
 c     =================================================================
 
-        q10 = 0.d0
-        q1z = 0.d0
-        q20 = 0.d0
-        q2z = 0.d0
+      aintegrand = 0.d0
+      q10 = 0.d0
+      q1z = 0.d0
+      q20 = 0.d0
+      q2z = 0.d0
+
+      call CepGen_print
 
 c     =================================================================
-c       go to energy of Nucleus = A*inp in order that generator puts out
-c       proper momenta in LAB frame
+c     go to energy of Nucleus = A*inp in order that generator puts out
+c     proper momenta in LAB frame
 c     =================================================================
 
-        inp_A = inp2*a_nuc
+      inp_A = inp2*a_nuc
 
 c     =================================================================
 c     four-momenta for incoming beams in LAB !!!!
 c     =================================================================
 
-        r1 = dsqrt(1.d0-am_p**2/inp1**2)
-        r2 = dsqrt(1.d0-(a_nuc*am_p)**2/inp_A**2)
+      r1 = dsqrt(1.d0-am_p**2/inp1**2)
+      r2 = dsqrt(1.d0-(a_nuc*am_p)**2/inp_A**2)
 
-        ak10 = inp1
-        ak1x = 0.d0
-        ak1y = 0.d0
-        ak1z = inp1*r1
+      ak10 = inp1
+      ak1x = 0.d0
+      ak1y = 0.d0
+      ak1z = inp1*r1
 
-        ak20 = inp_A
-        ak2x = 0.d0
-        ak2y = 0.d0
-        ak2z = -inp_A*r2
+      ak20 = inp_A
+      ak2x = 0.d0
+      ak2y = 0.d0
+      ak2z = -inp_A*r2
 
-        s = 4.*inp1*inp_A*(1.d0 + r1*r2)/2.d0
+      s = 4.*inp1*inp_A*(1.d0 + r1*r2)/2.d0
      >                       + am_p**2 + (a_nuc*am_p)**2
 
-c        s = 4.*inp1*inp_A
-        s12 = dsqrt(s)
+c      s = 4.*inp1*inp_A
+      s12 = dsqrt(s)
 
-        p1_plus = (ak10+ak1z)/dsqrt(2.d0)
-        p2_minus = (ak20-ak2z)/dsqrt(2.d0)
+      p1_plus = (ak10+ak1z)/dsqrt(2.d0)
+      p2_minus = (ak20-ak2z)/dsqrt(2.d0)
 
 c     =================================================================
 c     contribution included
@@ -138,19 +118,13 @@ c     How matrix element is calculated
 c         imethod = 0: on-shell formula
 c         imethod = 1: off-shell formula
 c     =================================================================
-        imethod = 1
+      imethod = 1
 c     =================================================================
 c     two terms in the Wolfgang's formula for
 c     off-shell gamma gamma --> l^+ l^-
 c     =================================================================
       imat1 = 1
       imat2 = 1
-c     =================================================================
-c     the distance in rapidity between W^+ and W^-
-c     =================================================================
-      idely = 0         ! 0 or 1
-      dely_min = 4.0d0
-      dely_max = 5.0d0
 c     =================================================================
 c     Outgoing proton final state's mass
 c     =================================================================
@@ -180,20 +154,19 @@ c     =================================================================
       pt1 = sqrt(pt1x**2+pt1y**2)
       pt2 = sqrt(pt2x**2+pt2y**2)
 
-c FIXME cut on pt here!
+      if(ipt.eq.1) then
+        if(pt1.lt.pt_min.or.pt2.lt.pt_min) return
+      endif
 
       amt1 = dsqrt(pt1**2+am_l2)
       amt2 = dsqrt(pt2**2+am_l2)
 
-        invm2 = amt1**2 + amt2**2 + 2.d0*amt1*amt2*dcosh(y1-y2)
+      invm2 = amt1**2 + amt2**2 + 2.d0*amt1*amt2*dcosh(y1-y2)
      >      -ptsum**2
 
-        invm = dsqrt(invm2)
+      invm = dsqrt(invm2)
 
-c        if(invm.lt.1500.0d0) then
-c        aintegrand = 0.d0
-c        return
-c        endif
+c      if(invm.lt.1500.0d0) return
 
 c     =================================================================
       dely = dabs(y1-y2)
@@ -201,7 +174,7 @@ c     =================================================================
 c     a window in rapidity distance
 c     =================================================================
       if(idely.eq.1) then
-      if(dely.lt.dely_min.or.dely.gt.dely_max) return
+        if(dely.lt.dely_min.or.dely.gt.dely_max) return
       endif
 
 c     =================================================================
@@ -213,7 +186,7 @@ c     =================================================================
       beta1  = amt1/(dsqrt(2.d0)*p2_minus)*dexp(-y1)
       beta2  = amt2/(dsqrt(2.d0)*p2_minus)*dexp(-y2)
 
-       q1t2 = q1tx**2 + q1ty**2
+      q1t2 = q1tx**2 + q1ty**2
       q2t2 = q2tx**2 + q2ty**2
 
       x1 = alpha1 + alpha2
@@ -225,28 +198,19 @@ c     =================================================================
       z2m = beta2/x2
 
 c     -----------------------------------------------------------------
-      if(x1.gt.1.0.or.x2.gt.1.0) then
-        aintegrand=0.d0
-        return
-      endif
+      if(x1.gt.1.0.or.x2.gt.1.0) return
 c     -----------------------------------------------------------------
 
-        s1_eff = x1*s - q1t**2
-        s2_eff = x2*s - q2t**2
+      s1_eff = x1*s - q1t**2
+      s2_eff = x2*s - q2t**2
 
 c-------------------------------------------------------------------
 c     Additional conditions for energy-momentum conservation
 c     -----------------------------------------------------------------
       if(((icontri.eq.2).or.(icontri.eq.4))
-     1       .and.(dsqrt(s1_eff).le.(am_y+invm))) then
-        aintegrand=0.d0
-        return
-        endif
+     1       .and.(dsqrt(s1_eff).le.(am_y+invm))) return
       if(((icontri.eq.3).or.(icontri.eq.4))
-     1       .and.(dsqrt(s2_eff).le.(am_x+invm))) then
-        aintegrand=0.d0
-        return
-        endif
+     1       .and.(dsqrt(s2_eff).le.(am_x+invm))) return
 
 c     =================================================================
 c     >>> TO THE OUTPUT COMMON BLOCK

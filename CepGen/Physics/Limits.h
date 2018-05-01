@@ -22,6 +22,8 @@ namespace CepGen
       double max() const { return second; }
       /// Upper limit to apply on the variable
       double& max() { return second; }
+      /// Export the limits into external variables
+      void save( bool& on, double& lmin, double& lmax ) const;
       /// Find the [0,1] value scaled between minimum and maximum
       double x( double v ) const;
       /// Specify the lower and upper limits on the variable

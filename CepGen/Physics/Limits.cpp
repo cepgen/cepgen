@@ -56,6 +56,19 @@ namespace CepGen
     return hasMin() || hasMax();
   }
 
+  void
+  Limits::save( bool& on, double& lmin, double& lmax ) const
+  {
+    on = false;
+    lmin = lmax = 0.;
+    if ( !valid() )
+      return;
+    if ( hasMin() )
+      lmin = min();
+    if ( hasMax() )
+      lmax = max();
+  }
+
   double
   Limits::x( double v ) const
   {
