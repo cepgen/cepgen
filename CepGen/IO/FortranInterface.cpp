@@ -9,8 +9,7 @@ extern "C" {
   cepgen_structure_functions_( int& sfmode, double& q2, double& xbj, double& f2, double& fl )
   {
     using namespace CepGen;
-    const StructureFunctions::Type mode = ( StructureFunctions::Type )sfmode;
-    const StructureFunctions sf = StructureFunctionsBuilder::get( mode, q2, xbj );
+    const StructureFunctions sf = StructureFunctionsBuilder::get( (StructureFunctions::Type)sfmode, q2, xbj );
     f2 = sf.F2;
     fl = sf.FL;
   }
@@ -20,18 +19,16 @@ extern "C" {
   {
     using namespace CepGen;
     using namespace CepGen::Process;
-    const StructureFunctions::Type sf_mode = ( StructureFunctions::Type )sfmode;
-    const GenericKTProcess::Flux f_mode = ( GenericKTProcess::Flux )fmode;
-    return GenericKTProcess::flux( f_mode, kt2, x, sf_mode, mx );
+    return GenericKTProcess::flux( (GenericKTProcess::Flux)fmode, kt2, x,
+                                   (StructureFunctions::Type)sfmode, mx );
   }
 
   double
   cepgen_kt_flux_hi_( int& fmode, double& kt2, double& x, int& a, int& z )
   {
     using namespace CepGen::Process;
-    const GenericKTProcess::Flux f_mode = ( GenericKTProcess::Flux )fmode;
-    const GenericKTProcess::HeavyIon hi{ ( unsigned short )a, ( unsigned short )z };
-    return GenericKTProcess::flux( f_mode, kt2, x, hi );
+    return GenericKTProcess::flux( (GenericKTProcess::Flux)fmode, kt2, x,
+                                   GenericKTProcess::HeavyIon{ ( unsigned short )a, ( unsigned short )z } );
   }
 
 #ifdef __cplusplus

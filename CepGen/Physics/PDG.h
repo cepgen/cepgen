@@ -13,7 +13,7 @@ namespace CepGen
   {
     invalid = 0,
     //--- fundamental particles
-    TopQuark = 6,
+    DownQuark = 1, UpQuark = 2, StrangeQuark = 3, CharmQuark = 4, BottomQuark = 5, TopQuark = 6,
     Electron = 11, ElectronNeutrino = 12,
     Muon = 13, MuonNeutrino = 14,
     Tau = 15, TauNeutrino = 16,

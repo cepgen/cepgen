@@ -1,22 +1,23 @@
       subroutine f_inter_kmr_fg(rx,rkt2,rmu2,iread,parton)
+      implicit double precision (a-h,o-z)
 c     =================================================================
-c     interpolation routine of the KMR UGDF from grids  
+c     interpolation routine of the KMR UGDF from grids
 c     =================================================================
-      integer iread,iparton
+      integer iread
       double precision rx,rkt2,rmu2,parton
       common/transferg/fmap_kmr_fg(140,140,140)
 
 c     -----------------------------------------------------------------
 c     rx = log(x)
 c     -----------------------------------------------------------------
-      rx_min = -7.d0 
+      rx_min = -7.d0
       rx_max =  0.d0
-      nrx = 140    
+      nrx = 140
       drx = (rx_max-rx_min)/nrx
 c     -----------------------------------------------------------------
 c     rkt2 = log(kt2)
 c     -----------------------------------------------------------------
-      rkt2_min = -1.d0 
+      rkt2_min = -1.d0
       rkt2_max =  6.d0
       nrkt2 = 140
       drkt2 = (rkt2_max-rkt2_min)/nrkt2
@@ -24,10 +25,10 @@ c     -----------------------------------------------------------------
 c     -----------------------------------------------------------------
 c     rmu2 = log(mu2)
 c     -----------------------------------------------------------------
-      rmu2_min = -1.d0 
+      rmu2_min = -1.d0
       rmu2_max =  6.d0
       nrmu2 = 140
-      drmu2 = (rmu2_max-rmu2_min)/nrmu2  
+      drmu2 = (rmu2_max-rmu2_min)/nrmu2
 
 c     =================================================================
 c     first time, only reading
@@ -95,19 +96,19 @@ c    ==================================================================
       if(rmu2.lt.(rmu2_min+drmu2/2.).or.rmu2.gt.(rmu2_max-drmu2/2.))
      & then
       parton = 0.d0
-      goto 200       
+      goto 200
       endif
 
       if(rkt2.lt.(rkt2_min+drkt2/2.).or.rkt2.gt.(rkt2_max-drkt2/2.))
      & then
       parton = 0.d0
-      goto 200       
+      goto 200
       endif
 
       if(rx.lt.(rx_min+drx/2.).or.rx.gt.(rx_max-drx/2.))
      & then
       parton = 0.d0
-      goto 200       
+      goto 200
       endif
 
 c     =================================================================
@@ -117,19 +118,19 @@ c     =================================================================
       delrx = (rx-rx_min)
       delrkt2 = (rkt2-rkt2_min)
       delrmu2 = (rmu2-rmu2_min)
-      
+
       srx = (delrx-drx/2.) / drx
-      irx = (delrx-drx/2.) / drx
+      irx = int(srx)
       irx_lo = irx+1
       irx_up = irx_lo+1
 
       srkt2 = (delrkt2-drkt2/2.) / drkt2
-      irkt2 = (delrkt2-drkt2/2.) / drkt2
+      irkt2 = int(srkt2)
       irkt2_lo = irkt2+1
       irkt2_up = irkt2_lo+1
 
       srmu2 = (delrmu2-drmu2/2.) / drmu2
-      irmu2 = (delrmu2-drmu2/2.) / drmu2
+      irmu2 = int(srmu2)
       irmu2_lo = irmu2+1
       irmu2_up = irmu2_lo+1
 
@@ -165,40 +166,40 @@ c     =================================================================
       ddrkt2  = (srkt2 - float(irkt2))*drkt2
       ddrmu2  = (srmu2 - float(irmu2))*drmu2
 
-      w111 =   (drx-ddrx)      /drx 
-     *       * (drkt2-ddrkt2)  /drkt2 
+      w111 =   (drx-ddrx)      /drx
+     *       * (drkt2-ddrkt2)  /drkt2
      *       * (drmu2-ddrmu2)/drmu2
-      w112 =   (drx-ddrx)      /drx 
+      w112 =   (drx-ddrx)      /drx
      *       * (drkt2-ddrkt2)    /drkt2
      *       *   ddrmu2        /drmu2
-      w121 =   (drx-ddrx)      /drx 
+      w121 =   (drx-ddrx)      /drx
      *       *   ddrkt2             /drkt2
      *       * (drmu2-ddrmu2)/drmu2
-      w122 =   (drx-ddrx)      /drx 
+      w122 =   (drx-ddrx)      /drx
      *       *   ddrkt2             /drkt2
      *       *   ddrmu2         /drmu2
-      w211 =     ddrx            /drx 
+      w211 =     ddrx            /drx
      *       * (drkt2-ddrkt2)        /drkt2
      *       * (drmu2-ddrmu2)/drmu2
-      w212 =     ddrx            /drx 
+      w212 =     ddrx            /drx
      *       * (drkt2-ddrkt2)        /drkt2
      *       *   ddrmu2         /drmu2
-      w221 =     ddrx            /drx 
+      w221 =     ddrx            /drx
      *       *   ddrkt2             /drkt2
      *       * (drmu2-ddrmu2)/drmu2
-      w222 =     ddrx            /drx 
+      w222 =     ddrx            /drx
      *       *   ddrkt2             /drkt2
      *       *   ddrmu2         /drmu2
 c     =================================================================
-      f_int =  w111*f111 + w112*f112 
+      f_int =  w111*f111 + w112*f112
      *       + w121*f121 + w122*f122
      *       + w211*f211 + w212*f212
      *       + w221*f221 + w222*f222
 c     =================================================================
 
-      parton = f_int 
+      parton = f_int
 
-  200 continue   
+  200 continue
 
       endif
 

@@ -43,6 +43,21 @@ c     =================================================================
       integer iterm11,iterm22,iterm12,itermtt
 
 c     =================================================================
+c     quarks production
+c     =================================================================
+#ifdef ALPHA_S
+      double precision color,e_q,t_max,amu2,a_s,alphas
+      double precision rx,rkt2,rmu2,parton
+      logical first_init
+      data first_init/.false./
+      if(first_init.eqv..false.) then
+        call f_inter_kmr_fg(rx,rkt2,rmu2,0,parton)
+        call initAlphaS(2,1.d0,1.d0,0.5d0,1.4d0,4.75d0,1.d10)
+        first_init = .true.
+      endif
+#endif
+
+c     =================================================================
 c     FIXME
 c     =================================================================
 
@@ -365,10 +380,28 @@ c     convention of matrix element as in our kt-factorization
 c     for heavy flavours
 c     =================================================================
 
-      amat2_1 = (4.d0*pi*alpha_em)**2 * (x1*x2*s)**2
-     2        * aux2_1 * 2.*z1p*z1m*q1t2 / (q1t2*q2t2)
-      amat2_2 = (4.d0*pi*alpha_em)**2 * (x1*x2*s)**2
-     2        * aux2_2 * 2.*z2p*z2m*q2t2 / (q1t2*q2t2)
+      if(pdg_l.le.6.and.imode.ge.20.and.imode.lt.40) then ! diquarks photo-production
+#ifdef ALPHA_S
+        color = 0.5d0
+        e_Q = 2.d0/3.d0
+        t_max = max(amt1**2,amt2**2)
+        amu2 = max(eps12,t_max)
+        a_S = alphaS(dsqrt(amu2))
+        amat2_1 = (4.d0*pi)**2*e_Q**2*alpha_em*a_S*(x1*x2*s)**2
+     2          * color* aux2_1 * 2.*z1p*z1m*q1t2 / (q1t2*q2t2)
+        amat2_2 = (4.d0*pi)**2*e_Q**2*alpha_em*a_S* (x1*x2*s)**2
+     2          * color* aux2_2 * 2.*z2p*z2m*q2t2 / (q1t2*q2t2)
+        am_x = amu2
+#else
+        print *,'alphaS not linked to this instance!'
+        stop
+#endif
+      else ! dilepton production
+        amat2_1 = (4.d0*pi*alpha_em)**2 * (x1*x2*s)**2
+     2          * aux2_1 * 2.*z1p*z1m*q1t2 / (q1t2*q2t2)
+        amat2_2 = (4.d0*pi*alpha_em)**2 * (x1*x2*s)**2
+     2          * aux2_2 * 2.*z2p*z2m*q2t2 / (q1t2*q2t2)
+       endif
 
 c     =================================================================
 c     symmetrization
@@ -383,30 +416,17 @@ c     unintegrated photon distributions
 c     ============================================
 
       if(icontri.eq.1) then
-        f1 = CepGen_kT_flux(10,q1t2,x1,am_x,0)
+        f1 = CepGen_kT_flux(imode,q1t2,x1,0,am_x)
         f2 = CepGen_kT_flux_HI(100,q2t2,x2,a_nuc,z_nuc)
       elseif(icontri.eq.2) then
-        f1 = CepGen_kT_flux(10,q1t2,x1,am_x,0)
-        if(imode.eq.1) then
-          f2 = CepGen_kT_flux(1,q2t2,x2,sfmod,am_y)
-        else
-          f2 = CepGen_kT_flux(11,q2t2,x2,sfmod,am_y)
-        endif
+        f1 = CepGen_kT_flux(imode,q1t2,x1,0,am_x)
+        f2 = CepGen_kT_flux(imode,q2t2,x2,sfmod,am_y)
       elseif(icontri.eq.3) then
-        if(imode.eq.1) then
-          f1 = CepGen_kT_flux(1,q1t2,x1,sfmod,am_x)
-        else
-          f1 = CepGen_kT_flux(11,q1t2,x1,sfmod,am_x)
-        endif
+        f1 = CepGen_kT_flux(imode,q1t2,x1,sfmod,am_x)
         f2 = CepGen_kT_flux_HI(100,q2t2,x2,a_nuc,z_nuc)
       elseif(icontri.eq.4) then
-        if(imode.eq.1) then
-          f1 = CepGen_kT_flux(1,q1t2,x1,sfmod,am_x)
-          f2 = CepGen_kT_flux(1,q2t2,x2,sfmod,am_y)
-        else
-          f1 = CepGen_kT_flux(11,q1t2,x1,sfmod,am_x)
-          f2 = CepGen_kT_flux(11,q2t2,x2,sfmod,am_y)
-        endif
+        f1 = CepGen_kT_flux(imode,q1t2,x1,sfmod,am_x)
+        f2 = CepGen_kT_flux(imode,q2t2,x2,sfmod,am_y)
       endif
       if(f1.lt.1.d-20) f1 = 0.0d0
       if(f2.lt.1.d-20) f2 = 0.0d0

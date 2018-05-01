@@ -6,6 +6,12 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/PDG.h"
 
+#ifdef KMR_FLUX
+extern "C" {
+  extern void f_inter_kmr_fg_( double& rx, double& rkt2, double& rmu2, int& iread, double& parton);
+}
+#endif
+
 namespace CepGen
 {
   namespace Process
@@ -323,6 +329,16 @@ namespace CepGen
           const double f_C = str_fun.F1( Q2, xbj ) * 2./Q2;
           return Constants::alphaEM*M_1_PI*( 1.-x )/Q2*( f_D+0.5*x*x*f_C );
         }
+        case Flux::Gluon: {
+#ifdef KMR_FLUX
+          double logx = log10( x ), logkt2 = log10( kt2 ), logmu2 = log10( mx ), fg = 0.;
+          int iread = 1;
+          f_inter_kmr_fg_( logx, logkt2, logmu2, iread, fg );
+          return fg;
+#else
+          throw CG_FATAL("GenericKTProcess:flux") << "KMR gluon fluxes are not linked to this instance!";
+#endif
+        }
         default:
           throw CG_FATAL("GenericKTProcess:flux") << "Invalid flux type: " << type;
       }
@@ -356,6 +372,7 @@ namespace CepGen
         case GenericKTProcess::Flux::Inelastic: return os << "[p] Inelastic";
         case GenericKTProcess::Flux::ElasticBudnev: return os << "[p] Budnev elastic";
         case GenericKTProcess::Flux::InelasticBudnev: return os << "[p] Budnev inelastic";
+        case GenericKTProcess::Flux::Gluon: return os << "[p] Gluon";
         case GenericKTProcess::Flux::HIElastic: return os << "[HI] Elastic";
       }
       return os;

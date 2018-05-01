@@ -51,9 +51,10 @@ PAtoLL::preparePhaseSpace()
 
   // feed run parameters to the common block
   params_.icontri = (int)cuts_.mode;
-  params_.imode = 2; // Budnev flux
+  //params_.imode = 2; // Budnev flux
+  params_.imode = 20; // gluon flux
   params_.sfmod = (int)cuts_.structure_functions;
-  params_.pdg_l = (int)PDG::Muon;
+  params_.pdg_l = (int)cuts_.central_system[0];
   params_.m_l = ParticleProperties::mass( (PDG)params_.pdg_l );
   params_.a_nuc = 208;
   params_.z_nuc = 82;
