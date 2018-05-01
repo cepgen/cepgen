@@ -135,20 +135,20 @@ namespace CepGen
       flux1_ = flux2_ = 0.;
       switch ( cuts_.mode ) {
         case Kinematics::Mode::ElasticElastic:
-          flux1_ = elasticFlux( x1, q1t2 );
-          flux2_ = elasticFlux( x2, q2t2 );
+          flux1_ = flux( Flux::ElasticBudnev, x1, q1t2 );
+          flux2_ = flux( Flux::ElasticBudnev, x2, q2t2 );
           break;
         case Kinematics::Mode::ElasticInelastic:
-          flux1_ = elasticFlux( x1, q1t2 );
-          flux2_ = inelasticFlux( x2, q2t2, MY_, cuts_.structure_functions );
+          flux1_ = flux( Flux::ElasticBudnev, x1, q1t2 );
+          flux2_ = flux( Flux::InelasticBudnev, x2, q2t2, cuts_.structure_functions, MY_ );
           break;
         case Kinematics::Mode::InelasticElastic:
-          flux1_ = inelasticFlux( x1, q1t2, MX_, cuts_.structure_functions );
-          flux2_ = elasticFlux( x2, q2t2 );
+          flux1_ = flux( Flux::InelasticBudnev, x1, q1t2, cuts_.structure_functions, MX_ );
+          flux2_ = flux( Flux::ElasticBudnev, x2, q2t2 );
           break;
         case Kinematics::Mode::InelasticInelastic:
-          flux1_ = inelasticFlux( x1, q1t2, MX_, cuts_.structure_functions );
-          flux2_ = inelasticFlux( x2, q2t2, MY_, cuts_.structure_functions );
+          flux1_ = flux( Flux::InelasticBudnev, x1, q1t2, cuts_.structure_functions, MX_ );
+          flux2_ = flux( Flux::InelasticBudnev, x2, q2t2, cuts_.structure_functions, MY_ );
           break;
         default:
           throw CG_FATAL( "GenericKTProcess" ) << "Invalid kinematics mode selected!";
@@ -299,37 +299,65 @@ namespace CepGen
     }
 
     double
-    GenericKTProcess::elasticFlux( double x, double kt2 )
+    GenericKTProcess::flux( const Flux& type, double x, double kt2, const StructureFunctions::Type& sf, double mx )
     {
-      const double Q2_min = x*x*mp2_/( 1.-x ), Q2_ela = ( kt2+x*x*mp2_ )/( 1.-x );
-      const FormFactors ff = FormFactors::ProtonElastic( Q2_ela );
-      const double ela1 = ( 1.-x )*( 1.-Q2_min/Q2_ela );
-      //const double ela3 = 1.-( Q2_ela-kt2 )/Q2_ela;
-
-      const double f_ela = Constants::alphaEM*M_1_PI/kt2*( ela1*ff.FE + 0.5*x*x*ff.FM );
-
-      // last factor below the Jacobian from dQ^2/Q^2 --> dkT^2/kT^2*(kT^2/Q^2)
-      return f_ela*( 1.-x )*kt2 / Q2_ela;
+      switch ( type ) {
+        case Flux::ElasticBudnev: {
+          const double Q2_min = x*x*mp2_/( 1.-x ), Q2_ela = ( kt2+x*x*mp2_ )/( 1.-x );
+          const FormFactors ff = FormFactors::ProtonElastic( Q2_ela );
+          const double ela1 = ( 1.-x )*( 1.-Q2_min/Q2_ela );
+          //const double ela3 = 1.-( Q2_ela-kt2 )/Q2_ela;
+          const double f_ela = Constants::alphaEM*M_1_PI/kt2*( ela1*ff.FE + 0.5*x*x*ff.FM );
+          // last factor below the Jacobian from dQ^2/Q^2 --> dkT^2/kT^2*(kT^2/Q^2)
+          return f_ela*( 1.-x )*kt2 / Q2_ela;
+        }
+        case Flux::InelasticBudnev: {
+          const double mx2 = mx*mx;
+          // F2 structure function
+          const double Q2min = 1. / ( 1.-x )*( x*( mx2-mp2_ ) + x*x*mp2_ ),
+                       Q2 = Q2min + kt2/( 1.-x );
+          float xbj = Q2 / ( Q2 + mx2 - mp2_ );
+          const StructureFunctions str_fun = StructureFunctionsBuilder::get( sf, Q2, xbj );
+          const double term1 = ( 1.-x )*( 1.-Q2min/Q2 );
+          const double f_D = str_fun.F2/( mx2 + Q2 - mp2_ ) * term1;
+          const double f_C = str_fun.F1( Q2, xbj ) * 2./Q2;
+          return Constants::alphaEM*M_1_PI*( 1.-x )/Q2*( f_D+0.5*x*x*f_C );
+        }
+        default:
+          throw CG_ERROR("GenericKTProcess:flux") << "Invalid flux type: " << type;
+      }
+      return 0.;
     }
 
     double
-    GenericKTProcess::inelasticFlux( double x, double kt2, double mx, const StructureFunctions::Type& sf, const Fluxes& ft )
+    GenericKTProcess::flux( const Flux& type, double x, double kt2, const HeavyIon& hi )
     {
-      const double mx2 = mx*mx;
+      switch ( type ) {
+        case Flux::HIElasticBudnev: {
+          const double r_a = 1.1*std::pow( hi.A, 1./3. ), a0 = 0.7, m_a = hi.A*mp_;
+          const double q2_ela = ( kt2+x*x*m_a*m_a )/( 1.-x ), tau = sqrt( q2_ela )*r_a/0.1973, tau1 = sqrt( q2_ela )*a0/0.1973;
+          // "Realistic nuclear form-factor" as used in STARLIGHT
+          const double ff1 = 3.*( sin( tau )-tau*cos( tau ) )/pow( tau+1.-10, 3 ), ff2 = 1./( 1.+tau1*tau1 );
+          const double ela1 = pow( kt2/( kt2+x*x*m_a*m_a), 2 ), ela2 = pow( ff1*ff2, 2 )/*, ela3 = 1.-( q2_ela-kt2 )/q2_ela*/;
+          return hi.Z*hi.Z*Constants::alphaEM*M_1_PI*ela1*ela2/q2_ela;
+        }
+        default:
+          throw CG_ERROR("GenericKTProcess:flux") << "Invalid flux type: " << type;
+      }
+      return 0.;
+    }
 
-      // F2 structure function
-      const double Q2min = 1. / ( 1.-x )*( x*( mx2-mp2_ ) + x*x*mp2_ ),
-                   Q2 = Q2min + kt2/( 1.-x );
-      float xbj = Q2 / ( Q2 + mx2 - mp2_ );
-
-      const StructureFunctions str_fun = StructureFunctionsBuilder::get( sf, Q2, xbj );
-
-      const double term1 = ( 1.-x )*( 1.-Q2min/Q2 );
-
-      const double f_D = str_fun.F2/( mx2 + Q2 - mp2_ ) * term1;
-      const double f_C = str_fun.F1( Q2, xbj ) * 2./Q2;
-
-      return Constants::alphaEM*M_1_PI*( 1.-x )/Q2*( f_D+0.5*x*x*f_C );
+    std::ostream&
+    operator<<( std::ostream& os, const GenericKTProcess::Flux& type )
+    {
+      switch ( type ) {
+        case GenericKTProcess::Flux::Elastic: return os << "[p] Elastic";
+        case GenericKTProcess::Flux::Inelastic: return os << "[p] Inelastic";
+        case GenericKTProcess::Flux::ElasticBudnev: return os << "[p] Budnev elastic";
+        case GenericKTProcess::Flux::InelasticBudnev: return os << "[p] Budnev inelastic";
+        case GenericKTProcess::Flux::HIElasticBudnev: return os << "[HI] Budnev elastic";
+      }
+      return os;
     }
 
     std::ostream&
