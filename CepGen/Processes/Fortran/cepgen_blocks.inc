@@ -14,9 +14,9 @@ c       inp1 = proton energy in lab frame
 c       inp2 = nucleus energy **per nucleon** in LAB frame
 c       Collision is along z-axis
 c     =================================================================
-      common/params/icontri,imode,sfmod,pdg_l,a_nuc,z_nuc,
+      common/params/icontri,iflux1,iflux2,sfmod,pdg_l,a_nuc,z_nuc,idum,
      &     am_l,inp1,inp2
-      integer icontri,imode,sfmod,pdg_l,a_nuc,z_nuc
+      integer icontri,iflux1,iflux2,sfmod,pdg_l,idum,a_nuc,z_nuc
       double precision am_l,inp1,inp2
 
 c     =================================================================
@@ -50,4 +50,5 @@ c     helpers for the evaluation of unintegrated parton fluxes
 c     =================================================================
       external CepGen_kT_flux,CepGen_kT_flux_HI
       double precision CepGen_kT_flux,CepGen_kT_flux_HI
-
+      external CepGen_particle_charge
+      double precision CepGen_particle_charge

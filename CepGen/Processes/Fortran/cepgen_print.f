@@ -16,8 +16,8 @@
       print 100,'eta',ieta,eta_min,eta_max
       print 100,'delta(y)',idely,dely_min,dely_max
       print *,'========================================================'
-      print 101,'Process mode:', icontri
-      print 101,'Fluxes mode:', imode
+      print 101,'Process mode:',icontri
+      print 102,'Fluxes modes:',iflux1,iflux2
       print 101,'Structure functions:',sfmod
       print 101,'Central system PDG:',pdg_l
       print *,'========================================================'
@@ -26,6 +26,7 @@
 
 100   format(A25,'    (',L1,')',f12.4,f12.4)
 101   format(A30,I5)
+102   format(A30,I5,I5)
 
       end
 

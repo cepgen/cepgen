@@ -10,7 +10,7 @@ extern "C"
     double m_p, units, pi, alpha_em;
   } constants_;
   extern struct {
-    int icontri, imode, sfmod, pdg_l, a_nuc, z_nuc;
+    int icontri, iflux1, iflux2, sfmod, pdg_l, a_nuc, z_nuc, idum;
     double m_l;
     double inp1, inp2;
   } params_;
@@ -51,8 +51,9 @@ PAtoLL::preparePhaseSpace()
 
   // feed run parameters to the common block
   params_.icontri = (int)cuts_.mode;
-  //params_.imode = 2; // Budnev flux
-  params_.imode = 20; // gluon flux
+  params_.iflux1 = (int)Flux::Gluon; // gluon flux
+  params_.iflux2 = (int)Flux::HIElastic; // elastic [HI] flux
+  //params_.iflux1 = params_.iflux2 = (int)Flux::ElasticBudnev;
   params_.sfmod = (int)cuts_.structure_functions;
   params_.pdg_l = (int)cuts_.central_system[0];
   params_.m_l = ParticleProperties::mass( (PDG)params_.pdg_l );

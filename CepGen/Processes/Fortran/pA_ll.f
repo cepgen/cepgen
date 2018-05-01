@@ -42,16 +42,22 @@ c     =================================================================
       double precision amat2_1,amat2_2
       integer iterm11,iterm22,iterm12,itermtt
 
+      double precision coupling
+
 c     =================================================================
 c     quarks production
 c     =================================================================
 #ifdef ALPHA_S
-      double precision color,e_q,t_max,amu2,a_s,alphas
+      double precision t_max,amu2,alpha_S,alphas
       double precision rx,rkt2,rmu2,parton
       logical first_init
       data first_init/.false./
       if(first_init.eqv..false.) then
-        call f_inter_kmr_fg(rx,rkt2,rmu2,0,parton)
+        if(iflux1.eq.20) then
+          print *,'Loading KMR interpolation...'
+          call f_inter_kmr_fg(rx,rkt2,rmu2,0,parton)
+        endif
+        print *,'Initialisation of the alpha(S) evolution algorithm...'
         call initAlphaS(2,1.d0,1.d0,0.5d0,1.4d0,4.75d0,1.d10)
         first_init = .true.
       endif
@@ -380,28 +386,31 @@ c     convention of matrix element as in our kt-factorization
 c     for heavy flavours
 c     =================================================================
 
-      if(pdg_l.le.6.and.imode.ge.20.and.imode.lt.40) then ! diquarks photo-production
+      coupling = 1.d0
+      if(iflux1.ge.20.and.iflux1.lt.40) then
 #ifdef ALPHA_S
-        color = 0.5d0
-        e_Q = 2.d0/3.d0
         t_max = max(amt1**2,amt2**2)
         amu2 = max(eps12,t_max)
-        a_S = alphaS(dsqrt(amu2))
-        amat2_1 = (4.d0*pi)**2*e_Q**2*alpha_em*a_S*(x1*x2*s)**2
-     2          * color* aux2_1 * 2.*z1p*z1m*q1t2 / (q1t2*q2t2)
-        amat2_2 = (4.d0*pi)**2*e_Q**2*alpha_em*a_S* (x1*x2*s)**2
-     2          * color* aux2_2 * 2.*z2p*z2m*q2t2 / (q1t2*q2t2)
+        alpha_S = alphaS(dsqrt(amu2))
         am_x = amu2
 #else
         print *,'alphaS not linked to this instance!'
         stop
 #endif
-      else ! dilepton production
-        amat2_1 = (4.d0*pi*alpha_em)**2 * (x1*x2*s)**2
-     2          * aux2_1 * 2.*z1p*z1m*q1t2 / (q1t2*q2t2)
-        amat2_2 = (4.d0*pi*alpha_em)**2 * (x1*x2*s)**2
-     2          * aux2_2 * 2.*z2p*z2m*q2t2 / (q1t2*q2t2)
-       endif
+        coupling = coupling*alpha_S
+      else
+        coupling = coupling*alpha_em
+      endif
+      coupling = coupling*alpha_em
+      if(pdg_l.le.6) then ! quarks production
+        coupling = coupling * CepGen_particle_charge(pdg_l)**2 ! charge
+        coupling = coupling * 0.5d0 ! colour
+      endif
+
+      amat2_1 = (4.d0*pi)**2*coupling*(x1*x2*s)**2
+     2        * aux2_1 * 2.*z1p*z1m*q1t2 / (q1t2*q2t2)
+      amat2_2 = (4.d0*pi)**2*coupling*(x1*x2*s)**2
+     2        * aux2_2 * 2.*z2p*z2m*q2t2 / (q1t2*q2t2)
 
 c     =================================================================
 c     symmetrization
@@ -416,17 +425,18 @@ c     unintegrated photon distributions
 c     ============================================
 
       if(icontri.eq.1) then
-        f1 = CepGen_kT_flux(imode,q1t2,x1,0,am_x)
-        f2 = CepGen_kT_flux_HI(100,q2t2,x2,a_nuc,z_nuc)
+        f1 = CepGen_kT_flux(iflux1,q1t2,x1,0,am_x)
+c        f2 = CepGen_kT_flux(iflux2,q2t2,x2,0,am_y)
+        f2 = CepGen_kT_flux_HI(iflux2,q2t2,x2,a_nuc,z_nuc)
       elseif(icontri.eq.2) then
-        f1 = CepGen_kT_flux(imode,q1t2,x1,0,am_x)
-        f2 = CepGen_kT_flux(imode,q2t2,x2,sfmod,am_y)
+        f1 = CepGen_kT_flux(iflux1,q1t2,x1,0,am_x)
+        f2 = CepGen_kT_flux(iflux2,q2t2,x2,sfmod,am_y)
       elseif(icontri.eq.3) then
-        f1 = CepGen_kT_flux(imode,q1t2,x1,sfmod,am_x)
-        f2 = CepGen_kT_flux_HI(100,q2t2,x2,a_nuc,z_nuc)
+        f1 = CepGen_kT_flux(iflux1,q1t2,x1,sfmod,am_x)
+        f2 = CepGen_kT_flux_HI(iflux2,q2t2,x2,a_nuc,z_nuc)
       elseif(icontri.eq.4) then
-        f1 = CepGen_kT_flux(imode,q1t2,x1,sfmod,am_x)
-        f2 = CepGen_kT_flux(imode,q2t2,x2,sfmod,am_y)
+        f1 = CepGen_kT_flux(iflux1,q1t2,x1,sfmod,am_x)
+        f2 = CepGen_kT_flux(iflux2,q2t2,x2,sfmod,am_y)
       endif
       if(f1.lt.1.d-20) f1 = 0.0d0
       if(f2.lt.1.d-20) f2 = 0.0d0

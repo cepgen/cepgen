@@ -50,17 +50,20 @@ namespace CepGen
     charge( const PDG& pdg_id )
     {
       switch ( pdg_id ) {
-        case PDG::Proton:
-        case PDG::DiffractiveProton: return +1.;
-        case PDG::Electron:
-        case PDG::Muon:
-        case PDG::Tau:               return -1.;
-        case PDG::TopQuark:          return +2./3;
-        case PDG::W:                 return +1.;
-        case PDG::PiPlus:
-        case PDG::KPlus:
-        case PDG::DPlus:             return +1.;
-        default: return 0.;
+        case PDG::Proton: case PDG::DiffractiveProton:
+          return +1.;
+        case PDG::Electron: case PDG::Muon: case PDG::Tau:
+          return -1.;
+        case PDG::DownQuark: case PDG::StrangeQuark: case PDG::BottomQuark:
+          return -1./3;
+        case PDG::UpQuark: case PDG::CharmQuark: case PDG::TopQuark:
+          return +2./3;
+        case PDG::W:
+          return +1.;
+        case PDG::PiPlus: case PDG::KPlus: case PDG::DPlus:
+          return +1.;
+        default:
+          return 0.;
       }
     }
 

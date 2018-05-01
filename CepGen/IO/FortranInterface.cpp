@@ -31,6 +31,11 @@ extern "C" {
                                    GenericKTProcess::HeavyIon{ ( unsigned short )a, ( unsigned short )z } );
   }
 
+  double
+  cepgen_particle_charge_( int& pdg_id )
+  {
+    return CepGen::ParticleProperties::charge( pdg_id );
+  }
 #ifdef __cplusplus
 }
 #endif
