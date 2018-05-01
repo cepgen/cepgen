@@ -53,8 +53,11 @@ namespace CepGen
         };
         friend std::ostream& operator<<( std::ostream&, const Flux& );
         struct HeavyIon {
-          static HeavyIon Pb82() { return HeavyIon{ 208, 82 }; }
-          unsigned short A,Z;
+          static HeavyIon Pb208() { return HeavyIon{ 208, 82 }; }
+          /// Mass number
+          unsigned short A;
+          /// Atomic number
+          unsigned short Z;
         };
         /// Get the flux at a given parton x/kT
         /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming parton

@@ -1,6 +1,6 @@
-      subroutine pA_ll(integrand)
+      subroutine pA_ll(aintegrand)
       implicit none
-      double precision integrand
+      double precision aintegrand
 c     =================================================================
 c     CepGen common blocks for kinematics definition
 c     =================================================================
@@ -38,7 +38,7 @@ c     =================================================================
       double precision ak10,ak1x,ak1y,ak1z,ak20,ak2x,ak2y,ak2z
       double precision beta1,beta2,x1,x2
       double precision z1p,z1m,z2p,z2m,q1tx,q1ty
-      double precision q2tx,q2ty,q10,q1z,q20,q2z,q1x,q1y,q2x,q2y
+      double precision q2tx,q2ty,q10,q1z,q20,q2z
       double precision q1t2,q2t2
       double precision ptsum
       double precision that1,that2,that,uhat1,uhat2,uhat
@@ -64,6 +64,15 @@ c     =================================================================
       double precision p1_plus, p2_minus
       double precision amat2_1,amat2_2
       integer iterm11,iterm22,iterm12,itermtt
+
+c     =================================================================
+c     FIXME
+c     =================================================================
+
+        q10 = 0.d0
+        q1z = 0.d0
+        q20 = 0.d0
+        q2z = 0.d0
 
 c     =================================================================
 c       go to energy of Nucleus = A*inp in order that generator puts out
@@ -182,7 +191,7 @@ c FIXME cut on pt here!
         invm = dsqrt(invm2)
 
 c        if(invm.lt.1500.0d0) then
-c        integrand = 0.d0
+c        aintegrand = 0.d0
 c        return
 c        endif
 
@@ -217,7 +226,7 @@ c     =================================================================
 
 c     -----------------------------------------------------------------
       if(x1.gt.1.0.or.x2.gt.1.0) then
-        integrand=0.d0
+        aintegrand=0.d0
         return
       endif
 c     -----------------------------------------------------------------
@@ -230,12 +239,12 @@ c     Additional conditions for energy-momentum conservation
 c     -----------------------------------------------------------------
       if(((icontri.eq.2).or.(icontri.eq.4))
      1       .and.(dsqrt(s1_eff).le.(am_y+invm))) then
-        integrand=0.d0
+        aintegrand=0.d0
         return
         endif
       if(((icontri.eq.3).or.(icontri.eq.4))
      1       .and.(dsqrt(s2_eff).le.(am_x+invm))) then
-        integrand=0.d0
+        aintegrand=0.d0
         return
         endif
 
@@ -417,6 +426,7 @@ c     ============================================
       if(icontri.eq.1) then
         f1 = CepGen_kT_flux(10,q1t2,x1,am_x,0)
         f2 = CepGen_kT_flux_HI(100,q2t2,x2,a_nuc,z_nuc)
+c        print *,q2t2,x2,a_nuc,z_nuc,f2
       elseif(icontri.eq.2) then
         f1 = CepGen_kT_flux(10,q1t2,x1,am_x,0)
         if(imode.eq.1) then
@@ -456,9 +466,11 @@ c     =================================================================
 
 c     *****************************************************************
 c     =================================================================
-      integrand = aintegral*q1t*q2t*ptdiff
+      aintegrand = aintegral*q1t*q2t*ptdiff
 c     =================================================================
 c     *****************************************************************
+
+c      print *,aintegrand,aintegral,f2
 
       return
       end

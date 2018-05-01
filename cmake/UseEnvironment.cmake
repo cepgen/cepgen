@@ -1,4 +1,5 @@
 set(LXPLUS_GCC_ENV "source /afs/cern.ch/sw/lcg/external/gcc/4.9.3/x86_64-slc6-gcc49-opt/setup.sh")
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wall")
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic-errors -std=c++11 -g")
 else()

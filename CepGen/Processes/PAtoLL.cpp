@@ -28,8 +28,8 @@ PAtoLL::PAtoLL() : GenericKTProcess( "patoll", "pA ↝ ɣɣ → l⁺l¯", { { PD
   params_.mode = 1;
   params_.pdg_l = (int)PDG::Muon;
   params_.m_l = ParticleProperties::mass( (PDG)params_.pdg_l );
-  params_.a_nuc = 82;
-  params_.z_nuc = 208;
+  params_.a_nuc = 208;
+  params_.z_nuc = 82;
   params_.inp1 = params_.inp2 = 6500.;
 }
 
