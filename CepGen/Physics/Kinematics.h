@@ -13,6 +13,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include "CepGen/Core/Hasher.h"
 
 namespace CepGen
 {
@@ -36,6 +37,14 @@ namespace CepGen
       };
       /// Human-readable format of a process mode (elastic/dissociative parts)
       friend std::ostream& operator<<( std::ostream&, const Mode& );
+      struct HeavyIon {
+        static HeavyIon Proton() { return HeavyIon{ 1, 1 }; }
+        static HeavyIon Pb208() { return HeavyIon{ 208, 82 }; }
+        /// Mass number
+        unsigned short A;
+        /// Atomic number
+        unsigned short Z;
+      };
 
       /// Incoming particles' momentum (in \f$\text{GeV}/c\f$)
       std::pair<double,double> inp;
@@ -45,6 +54,8 @@ namespace CepGen
       double sqrtS() const;
       /// Beam/primary particle's PDG identifier
       std::pair<PDG,PDG> inpdg;
+      std::pair<HeavyIon,HeavyIon> inhi;
+      std::pair<unsigned short,unsigned short> kt_fluxes;
       /// PDG id of the outgoing central particles
       std::vector<PDG> central_system;
       /// Minimum list of central particles required
@@ -58,28 +69,6 @@ namespace CepGen
       struct CutsList
       {
         CutsList();
-        template<class T,bool>
-        struct hasher
-        {
-          inline size_t operator()( const T& t ) const {
-            return std::hash<T>()( t );
-          }
-        };
-        template<class T>
-        struct hasher<T, true>
-        {
-          inline size_t operator() ( const T& t ) {
-            typedef typename std::underlying_type<T>::type enumType;
-            return std::hash<enumType>()( static_cast<enumType>( t ) );
-          }
-        };
-        template<class T>
-        struct EnumHash
-        {
-          inline size_t operator()( const T& t ) const {
-            return hasher<T,std::is_enum<T>::value>()( t );
-          }
-        };
         /// Cuts on the initial particles kinematics
         Cuts initial;
         /// Cuts on the central system produced

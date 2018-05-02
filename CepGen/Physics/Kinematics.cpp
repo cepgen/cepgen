@@ -9,6 +9,7 @@ namespace CepGen
 {
   Kinematics::Kinematics() :
     inp( { 6500., 6500. } ), inpdg( { PDG::Proton, PDG::Proton } ),
+    inhi( { HeavyIon::Proton(), HeavyIon::Proton() } ), kt_fluxes( { 10, 10 } ),
     mode( Mode::ElasticElastic ), structure_functions( StructureFunctions::SuriYennie )
   {}
 

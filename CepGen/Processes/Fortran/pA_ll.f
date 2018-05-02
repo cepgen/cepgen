@@ -5,6 +5,7 @@ c     =================================================================
 c     CepGen common blocks for kinematics definition
 c     =================================================================
       include 'cepgen_blocks.inc'
+      data iflux1,iflux2,sfmod,pdg_l,a_nuc2,z_nuc2/10,100,11,13,208,82/
 
 c     =================================================================
 c     local variables
@@ -37,7 +38,7 @@ c     =================================================================
       double precision ptdiffx,ptsumx,ptdiffy,ptsumy
       double precision invm,invm2,s1_eff,s2_eff
       double precision t1abs,t2abs
-      double precision inp_A,am_nuc
+      double precision am_l,inp_A,inp_B,am_A,am_B
       double precision p1_plus, p2_minus
       double precision amat2_1,amat2_2
       integer iterm11,iterm22,iterm12,itermtt
@@ -52,8 +53,7 @@ c     =================================================================
       logical first_init
       data first_init/.true./
       if(first_init) then
-        ipdgpar1 = 22
-        ipdgpar2 = 22
+        am_l = CepGen_particle_mass(pdg_l)
         if(iflux1.ge.20.and.iflux1.lt.40) then
           if(iflux1.eq.20) then
             print *,'Loading KMR interpolation...'
@@ -87,27 +87,30 @@ c     go to energy of Nucleus = A*inp in order that generator puts out
 c     proper momenta in LAB frame
 c     =================================================================
 
-      inp_A = inp2*a_nuc
+      inp_A = inp1*a_nuc1
+      inp_B = inp2*a_nuc2
+      am_A = am_p*a_nuc1
+      am_B = am_p*a_nuc2
 
 c     =================================================================
 c     four-momenta for incoming beams in LAB !!!!
 c     =================================================================
 
-      r1 = dsqrt(1.d0-am_p**2/inp1**2)
-      r2 = dsqrt(1.d0-(a_nuc*am_p)**2/inp_A**2)
+      r1 = dsqrt(1.d0-am_A**2/inp_A**2)
+      r2 = dsqrt(1.d0-am_B**2/inp_B**2)
 
-      ak10 = inp1
+      ak10 = inp_A
       ak1x = 0.d0
       ak1y = 0.d0
       ak1z = inp1*r1
 
-      ak20 = inp_A
+      ak20 = inp_B
       ak2x = 0.d0
       ak2y = 0.d0
-      ak2z = -inp_A*r2
+      ak2z = -inp_B*r2
 
-      s = 4.*inp1*inp_A*(1.d0 + r1*r2)/2.d0
-     >                       + am_p**2 + (a_nuc*am_p)**2
+      s = 4.*inp_A*inp_B*(1.d0 + r1*r2)/2.d0
+     >    + am_A**2 + am_B**2
 
 c      s = 4.*inp1*inp_A
       s12 = dsqrt(s)
@@ -137,8 +140,8 @@ c     =================================================================
 c     =================================================================
 c     Outgoing proton final state's mass
 c     =================================================================
-      if((icontri.eq.1).or.(icontri.eq.2)) am_x = am_p
-      if((icontri.eq.1).or.(icontri.eq.3)) am_y = am_p*a_nuc
+      if((icontri.eq.1).or.(icontri.eq.2)) am_x = am_A
+      if((icontri.eq.1).or.(icontri.eq.3)) am_y = am_B
 
       q1tx = q1t*cos(phiq1t)
       q1ty = q1t*sin(phiq1t)
@@ -230,21 +233,20 @@ c     four-momenta of the outgoing protons (or remnants)
 c     =================================================================
 
       px_plus = (1.d0-x1) * p1_plus
-      px_minus = (am_x**2 + q1tx**2 + q1ty**2)/2.d0/px_plus
+      px_minus = ((a_nuc1*am_x)**2 + q1tx**2 + q1ty**2)/2.d0/px_plus
 
-      px_0 = (px_plus + px_minus)/dsqrt(2.d0)
-      px_z = (px_plus - px_minus)/dsqrt(2.d0)
-      px_x = - q1tx
-      px_y = - q1ty
+      px0 = (px_plus + px_minus)/dsqrt(2.d0)
+      pxz = (px_plus - px_minus)/dsqrt(2.d0)
+      pxx = - q1tx
+      pxy = - q1ty
 
-      am_nuc = a_nuc*am_y
       py_minus = (1.d0-x2) * p2_minus
-      py_plus =  (am_nuc**2 + q2tx**2 + q2ty**2)/2.d0/py_minus
+      py_plus =  ((a_nuc2*am_y)**2 + q2tx**2 + q2ty**2)/2.d0/py_minus
 
-      py_0 = (py_plus + py_minus)/dsqrt(2.d0)
-      py_z = (py_plus - py_minus)/dsqrt(2.d0)
-      py_x = - q2tx
-      py_y = - q2ty
+      py0 = (py_plus + py_minus)/dsqrt(2.d0)
+      pyz = (py_plus - py_minus)/dsqrt(2.d0)
+      pyx = - q2tx
+      pyy = - q2ty
 
       q1t = dsqrt(q1t2)
       q2t = dsqrt(q2t2)
@@ -332,6 +334,7 @@ c     =================================================================
       ak2_x = z2m*pt1x-z2p*pt2x
       ak2_y = z2m*pt1y-z2p*pt2y
 
+      !FIXME FIXME FIXME am_p or am_A/B???
       t1abs = (q1t2+x1*(am_x**2-am_p**2)+x1**2*am_p**2)/(1.d0-x1)
       t2abs = (q2t2+x2*(am_y**2-am_p**2)+x2**2*am_p**2)/(1.d0-x2)
 
@@ -401,7 +404,6 @@ c     =================================================================
         print *,'alphaS not linked to this instance!'
         stop
 #endif
-        ipdgpar1 = 20
         coupling = coupling*alpha_S
         coupling = coupling*0.5d0 ! colour
       else ! photon exchange
@@ -443,13 +445,13 @@ c     ============================================
       if(icontri.eq.1) then
         f1 = CepGen_kT_flux(iflux1,q1t2,x1,0,am_x)
 c        f2 = CepGen_kT_flux(iflux2,q2t2,x2,0,am_y)
-        f2 = CepGen_kT_flux_HI(iflux2,q2t2,x2,a_nuc,z_nuc)
+        f2 = CepGen_kT_flux_HI(iflux2,q2t2,x2,a_nuc2,z_nuc2)
       elseif(icontri.eq.2) then
         f1 = CepGen_kT_flux(iflux1,q1t2,x1,0,am_x)
         f2 = CepGen_kT_flux(iflux2,q2t2,x2,sfmod,am_y)
       elseif(icontri.eq.3) then
         f1 = CepGen_kT_flux(iflux1,q1t2,x1,sfmod,am_x)
-        f2 = CepGen_kT_flux_HI(iflux2,q2t2,x2,a_nuc,z_nuc)
+        f2 = CepGen_kT_flux_HI(iflux2,q2t2,x2,a_nuc2,z_nuc2)
       elseif(icontri.eq.4) then
         f1 = CepGen_kT_flux(iflux1,q1t2,x1,sfmod,am_x)
         f2 = CepGen_kT_flux(iflux2,q2t2,x2,sfmod,am_y)

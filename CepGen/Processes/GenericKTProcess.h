@@ -53,19 +53,12 @@ namespace CepGen
           HIElastic = 100
         };
         friend std::ostream& operator<<( std::ostream&, const Flux& );
-        struct HeavyIon {
-          static HeavyIon Pb208() { return HeavyIon{ 208, 82 }; }
-          /// Mass number
-          unsigned short A;
-          /// Atomic number
-          unsigned short Z;
-        };
         /// Get the flux at a given parton x/kT
         /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming parton
         /// \param[in] x Parton momentum fraction
         /// \param[in] mx Outgoing diffractive proton mass
         static double flux( const Flux& type, double kt2, double x, const StructureFunctions::Type& sf = StructureFunctions::SuriYennie, double mx = 0. );
-        static double flux( const Flux& type, double kt2, double x, const HeavyIon& hi );
+        static double flux( const Flux& type, double kt2, double x, const Kinematics::HeavyIon& hi );
 
       protected:
         /// Set the kinematics associated to the phase space definition

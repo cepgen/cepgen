@@ -9,12 +9,17 @@
 #include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Processes/PPtoFF.h"
 #include "CepGen/Processes/PPtoWW.h"
-#include "CepGen/Processes/PAtoLL.h"
+#include "CepGen/Processes/FortranKTProcess.h"
 
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 
 #include <algorithm>
 #include <frameobject.h>
+
+extern "C"
+{
+  extern void pa_ll_( double& );
+}
 
 #ifdef PYTHIA8
 void
@@ -94,7 +99,7 @@ namespace CepGen
       else if ( proc_name == "pptoww" )
         params_.setProcess( new Process::PPtoWW );
       else if ( proc_name == "patoll" )
-        params_.setProcess( new Process::PAtoLL );
+        params_.setProcess( new Process::FortranKTProcess( "patoll", "pA ↝ ɣɣ → l⁺l¯", pa_ll_ ) );
       else throw CG_FATAL( "PythonHandler" ) << "Unrecognised process: " << proc_name << ".";
 
       //--- process mode

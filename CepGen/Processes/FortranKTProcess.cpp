@@ -1,34 +1,40 @@
-#include "CepGen/Processes/PAtoLL.h"
+#include "CepGen/Processes/FortranKTProcess.h"
 #include "CepGen/Physics/PDG.h"
 
 using namespace CepGen::Process;
 
 extern "C"
 {
-  extern void pa_ll_( double& );
-  extern struct {
+  struct Constants {
     double m_p, units, pi, alpha_em;
-  } constants_;
-  extern struct {
-    int icontri, iflux1, iflux2, sfmod, pdg_l, a_nuc, z_nuc, idum;
-    double m_l;
+  };
+  struct Parameters {
+    int icontri, iflux1, iflux2, sfmod, pdg_l, a_nuc1, z_nuc1, a_nuc2, z_nuc2, idum;
     double inp1, inp2;
-  } params_;
-  extern struct {
+  };
+  struct KtKinematics {
    double q1t, q2t, phiq1t, phiq2t, y1, y2, ptdiff, phiptdiff, m_x, m_y;
-  } ktkin_;
-  extern struct {
+  };
+  struct KinematicsCuts {
     int ipt, iene, ieta, idely;
     double pt_min, pt_max, ene_min, ene_max, eta_min, eta_max, dely_min, dely_max;
-  } kincuts_;
-  extern struct {
-    int ipdgpar1, ipdgpar2;
+  };
+  struct EventKinematics {
     double p10, p1x, p1y, p1z, p20, p2x, p2y, p2z;
     double px0, pxx, pxy, pxz, py0, pyx, pyy, pyz;
-  } evtkin_;
+  };
+
+  extern Constants constants_;
+  extern Parameters params_;
+  extern KtKinematics ktkin_;
+  extern KinematicsCuts kincuts_;
+  extern EventKinematics evtkin_;
+  extern void pa_ll_( double& );
 }
 
-PAtoLL::PAtoLL() : GenericKTProcess( "patoll", "pA ↝ ɣɣ → l⁺l¯", { { PDG::Photon, PDG::Photon } }, { PDG::Muon, PDG::Muon } )
+FortranKTProcess::FortranKTProcess( const char* name, const char* descr, std::function<void( double& )> func ) :
+  GenericKTProcess( name, descr, { { PDG::Photon, PDG::Photon } }, { PDG::Muon, PDG::Muon } ),
+  func_( func )
 {
   constants_.m_p = ParticleProperties::mass( PDG::Proton );
   constants_.units = Constants::GeV2toBarn;
@@ -37,7 +43,7 @@ PAtoLL::PAtoLL() : GenericKTProcess( "patoll", "pA ↝ ɣɣ → l⁺l¯", { { PD
 }
 
 void
-PAtoLL::preparePhaseSpace()
+FortranKTProcess::preparePhaseSpace()
 {
   registerVariable( y1_, Mapping::linear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "First outgoing lepton rapidity" );
   registerVariable( y2_, Mapping::linear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "Second outgoing lepton rapidity" );
@@ -52,21 +58,20 @@ PAtoLL::preparePhaseSpace()
 
   // feed run parameters to the common block
   params_.icontri = (int)cuts_.mode;
-  params_.iflux1 = (int)Flux::ElasticBudnev;
-  //params_.iflux1 = (int)Flux::Gluon; // gluon flux
-  params_.iflux2 = (int)Flux::HIElastic; // elastic [HI] flux
-  //params_.iflux1 = params_.iflux2 = (int)Flux::ElasticBudnev;
+  params_.iflux1 = (int)cuts_.kt_fluxes.first;
+  params_.iflux2 = (int)cuts_.kt_fluxes.second;
   params_.sfmod = (int)cuts_.structure_functions;
   params_.pdg_l = (int)cuts_.central_system[0];
-  params_.m_l = ParticleProperties::mass( (PDG)params_.pdg_l );
-  params_.a_nuc = 208;
-  params_.z_nuc = 82;
+  params_.a_nuc1 = cuts_.inhi.first.A;
+  params_.z_nuc1 = cuts_.inhi.first.Z;
+  params_.a_nuc2 = cuts_.inhi.second.A;
+  params_.z_nuc2 = cuts_.inhi.second.Z;
   params_.inp1 = cuts_.inp.first;
   params_.inp2 = cuts_.inp.second;
 }
 
 double
-PAtoLL::computeKTFactorisedMatrixElement()
+FortranKTProcess::computeKTFactorisedMatrixElement()
 {
   ktkin_.q1t = qt1_;
   ktkin_.q2t = qt2_;
@@ -79,12 +84,12 @@ PAtoLL::computeKTFactorisedMatrixElement()
   ktkin_.m_x = MX_;
   ktkin_.m_y = MY_;
   double weight = 0.;
-  pa_ll_( weight );
+  func_( weight );
   return weight;
 }
 
 void
-PAtoLL::fillCentralParticlesKinematics()
+FortranKTProcess::fillCentralParticlesKinematics()
 {
   Particle& ol1 = event_->getByRole( Particle::CentralSystem )[0];
   ol1.setPdgId( (PDG)params_.pdg_l, +1 );
@@ -96,10 +101,8 @@ PAtoLL::fillCentralParticlesKinematics()
   ol2.setStatus( Particle::FinalState );
   ol2.setMomentum( Particle::Momentum( evtkin_.p2x, evtkin_.p2y, evtkin_.p2z, evtkin_.p20 ) );
 
-  event_->getOneByRole( Particle::Parton1 ).setPdgId( (PDG)evtkin_.ipdgpar1 );
-  event_->getOneByRole( Particle::Parton2 ).setPdgId( (PDG)evtkin_.ipdgpar2 );
-
   PX_ = Particle::Momentum( evtkin_.pxx, evtkin_.pxy, evtkin_.pxz, evtkin_.px0 );
+  PX_ *= 1./params_.z_nuc1;
   PY_ = Particle::Momentum( evtkin_.pyx, evtkin_.pyy, evtkin_.pyz, evtkin_.py0 );
-  PY_ *= 1./params_.z_nuc;
+  PY_ *= 1./params_.z_nuc2;
 }

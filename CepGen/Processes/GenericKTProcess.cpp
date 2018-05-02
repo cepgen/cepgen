@@ -346,7 +346,7 @@ namespace CepGen
     }
 
     double
-    GenericKTProcess::flux( const Flux& type, double kt2, double x, const HeavyIon& hi )
+    GenericKTProcess::flux( const Flux& type, double kt2, double x, const Kinematics::HeavyIon& hi )
     {
       switch ( type ) {
         case Flux::HIElastic: {
