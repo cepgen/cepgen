@@ -1,10 +1,10 @@
 #include "CepGen/Core/Integrator.h"
-#include "CepGen/Core/ThreadWorker.h"
 #include "CepGen/Core/GridParameters.h"
 #include "CepGen/Core/utils.h"
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Parameters.h"
+#include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
 
 #include <thread>
@@ -16,7 +16,7 @@
 namespace CepGen
 {
   Integrator::Integrator( unsigned int ndim, double integrand( double*, size_t, void* ), Parameters* params ) :
-    input_params_( params ),
+    ps_bin_( 0 ), input_params_( params ),
     function_( new gsl_monte_function{ integrand, ndim, (void*)input_params_ } ),
     rng_( gsl_rng_alloc( input_params_->integrator.rng_engine ), gsl_rng_free ),
     grid_( new GridParameters )
@@ -159,53 +159,155 @@ namespace CepGen
     if ( !grid_->gen_prepared )
       computeGenerationParameters();
 
-    ThreadWorker worker( &mutex_, rng_.get(), function_.get(), grid_.get(), callback );
-    worker.generate( 1 );
+    std::vector<double> x( function_->dim, 0. );
+
+    //--- correction cycles
+
+    if ( ps_bin_ != 0 ) {
+      bool has_correction = false;
+      while ( !correctionCycle( x, has_correction ) ) {}
+      if ( has_correction ) {
+        storeEvent( x, callback );
+        return;
+      }
+    }
+
+    double weight = 0.;
+
+    //--- normal generation cycle
+
+    while ( true ) {
+      double y = -1.;
+      //----- select a and reject if fmax is too small
+      while ( true ) {
+        // ...
+        ps_bin_ = uniform() * grid_->max;
+        y = uniform() * grid_->f_max_global;
+        grid_->num[ps_bin_] += 1;
+        if ( y <= grid_->f_max[ps_bin_] )
+          break;
+      }
+      // shoot a point x in this bin
+      std::vector<unsigned short> grid_n = grid_->n_map.at( ps_bin_ );
+      for ( unsigned int i = 0; i < function_->dim; ++i )
+        x[i] = ( uniform() + grid_n[i] ) * GridParameters::inv_mbin_;
+      // get weight for selected x value
+      weight = eval( x );
+      if ( weight <= 0. )
+        continue;
+      if ( weight > y )
+        break;
+    }
+
+    if ( weight <= grid_->f_max[ps_bin_] )
+      ps_bin_ = 0;
+    // init correction cycle if weight is higher than fmax or ffmax
+    else if ( weight <= grid_->f_max_global ) {
+      grid_->f_max_old = grid_->f_max[ps_bin_];
+      grid_->f_max[ps_bin_] = weight;
+      grid_->f_max_diff = weight-grid_->f_max_old;
+      grid_->correc = ( grid_->num[ps_bin_]-1. ) * grid_->f_max_diff / grid_->f_max_global - 1.;
+    }
+    else {
+      grid_->f_max_old = grid_->f_max[ps_bin_];
+      grid_->f_max[ps_bin_] = weight;
+      grid_->f_max_diff = weight-grid_->f_max_old;
+      grid_->f_max_global = weight;
+      grid_->correc = ( grid_->num[ps_bin_] - 1. ) * grid_->f_max_diff / grid_->f_max_global * weight / grid_->f_max_global - 1.;
+    }
+
+    CG_DEBUG("Integrator::generateOne")
+      << "Correction " << grid_->correc << " will be applied for phase space bin " << ps_bin_ << ".";
+
+    // return with an accepted event
+    if ( weight > 0. )
+      storeEvent( x, callback );
   }
 
   void
   Integrator::generate( unsigned long num_events, std::function<void( const Event&, unsigned long )> callback, const Timer* tmr )
   {
-    if ( num_events < 2 ) {
-      CG_DEBUG( "Integrator:generate" )
-        << "Only one event to be generated! disabling the multithreaded generation.";
+    if ( num_events < 1 )
+      num_events = input_params_->generation.maxgen;
+    while ( input_params_->generation.ngen < num_events )
       generateOne( callback );
-    }
+  }
 
-    if ( !grid_->gen_prepared )
-      computeGenerationParameters();
+  bool
+  Integrator::correctionCycle( std::vector<double>& x, bool& has_correction )
+  {
+    CG_DEBUG_LOOP( "Integrator:correction" )
+      << "Correction cycles are started.\n\t"
+      << "bin = " << ps_bin_ << "\t"
+      << "correc = " << grid_->correc << "\t"
+      << "corre2 = " << grid_->correc2 << ".";
 
-    CG_INFO( "Integrator:generate" )
-      << "Will generate events using " << input_params_->generation.num_threads << " thread"
-      << s( input_params_->generation.num_threads ) << ".";
+    if ( grid_->correc >= 1. )
+      grid_->correc -= 1.;
 
-    // define the threads and workers
-    std::vector<std::thread> threads;
-    std::vector<std::thread::id> threads_ids;
-    std::vector<std::shared_ptr<ThreadWorker> > workers;
-    for ( unsigned int i = 0; i < input_params_->generation.num_threads; ++i ) {
-      try {
-        auto worker = std::make_shared<ThreadWorker>( &mutex_, rng_.get(), function_.get(), grid_.get(), callback );
-        workers.emplace_back( worker );
-        threads.emplace_back( &ThreadWorker::generate, worker.get(), 0 );
-      } catch ( const std::system_error& e ) {
-        CG_ERROR( "Integrator:generate" )
-          << "Failed to add a new thread on the stack.\n\t"
-          << "Error code " << e.code() << ": " << e.what();
+    if ( uniform() < grid_->correc ) {
+      grid_->correc = -1.;
+      std::vector<double> xtmp( function_->dim );
+      // Select x values in phase space bin
+      const std::vector<unsigned short> grid_n = grid_->n_map.at( ps_bin_ );
+      for ( unsigned int k = 0; k < function_->dim; ++k )
+        xtmp[k] = ( uniform() + grid_n[k] ) * GridParameters::inv_mbin_;
+      const double weight = eval( xtmp );
+      // Parameter for correction of correction
+      if ( weight > grid_->f_max[ps_bin_] ) {
+        grid_->f_max2 = std::max( grid_->f_max2, weight );
+        grid_->correc += 1.;
+        grid_->correc2 -= 1.;
       }
-    }
-    // launch the multi-threaded events generation
-    for ( auto& thread : threads )
-      if ( thread.joinable() ) {
-        threads_ids.emplace_back( thread.get_id() );
-        thread.join();
+      // Accept event
+      if ( weight >= grid_->f_max_diff*uniform() + grid_->f_max_old ) {
+        x = xtmp;
+        has_correction = true;
+        return true;
       }
-    std::ostringstream os;
-    for ( const auto& id : threads_ids )
-      os << " 0x" << std::hex << id << std::dec;
-    CG_INFO( "Integrator:generate" )
-      << "Launched the following thread" << s( threads_ids.size() )
-      << ":" << os.str();
+      return false;
+    }
+    // Correction if too big weight is found while correction
+    // (All your bases are belong to us...)
+    if ( grid_->f_max2 > grid_->f_max[ps_bin_] ) {
+      grid_->f_max_old = grid_->f_max[ps_bin_];
+      grid_->f_max[ps_bin_] = grid_->f_max2;
+      grid_->f_max_diff = grid_->f_max2-grid_->f_max_old;
+      grid_->correc = ( grid_->num[ps_bin_]-1. ) * grid_->f_max_diff / grid_->f_max_global;
+      if ( grid_->f_max2 >= grid_->f_max_global ) {
+        grid_->correc *= grid_->f_max2 / grid_->f_max_global;
+        grid_->f_max_global = grid_->f_max2;
+      }
+      grid_->correc -= grid_->correc2;
+      grid_->correc2 = 0.;
+      grid_->f_max2 = 0.;
+      return false;
+    }
+    return true;
+  }
+
+  bool
+  Integrator::storeEvent( const std::vector<double>& x, std::function<void( const Event&, unsigned long )> callback )
+  {
+    input_params_->setStorage( true );
+    const double weight = eval( x );
+    input_params_->setStorage( false );
+
+    if ( weight <= 0. )
+      return false;
+
+    {
+      if ( input_params_->generation.ngen % input_params_->generation.gen_print_every == 0 ) {
+        CG_INFO( "Integrator:store" )
+          << "Generated events: " << input_params_->generation.ngen;
+        input_params_->process()->last_event->dump();
+      }
+      input_params_->generation.ngen += 1;
+
+      if ( callback )
+        callback( *input_params_->process()->last_event, input_params_->generation.ngen );
+    }
+    return true;
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -231,6 +333,7 @@ namespace CepGen
         << GridParameters::max_dimensions_ << ".";
 
     grid_->f_max = std::vector<double>( grid_->max, 0. );
+    grid_->num.reserve( grid_->max );
 
     std::vector<double> x( function_->dim, 0. );
     std::vector<unsigned short> n( function_->dim, 0 );;
