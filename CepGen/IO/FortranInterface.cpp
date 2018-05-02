@@ -14,6 +14,16 @@ extern "C" {
     fl = sf.FL;
   }
 
+  /*bool lhapdf_init = false;
+
+  double
+  cepgen_coll_flux_( int& fmode, double& q2, double& x )
+  {
+    if ( !lhapdf_init ) {
+      LHAPDF::initPDFSet( set, LHAPDF::LHGRID, 0 );
+    }
+  }*/
+
   double
   cepgen_kt_flux_( int& fmode, double& kt2, double& x, int& sfmode, double& mx )
   {

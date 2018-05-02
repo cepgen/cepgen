@@ -38,7 +38,8 @@ c     =================================================================
       double precision ptdiffx,ptsumx,ptdiffy,ptsumy
       double precision invm,invm2,s1_eff,s2_eff
       double precision t1abs,t2abs
-      double precision am_l,inp_A,inp_B,am_A,am_B
+      double precision am_l,q_l
+      double precision inp_A,inp_B,am_A,am_B
       double precision p1_plus, p2_minus
       double precision amat2_1,amat2_2
       integer iterm11,iterm22,iterm12,itermtt
@@ -56,12 +57,18 @@ c     =================================================================
 #endif
       logical first_init
       data first_init/.true./
+      save first_init,am_l,q_l
 
       call CepGen_print
 
       if(first_init) then
-        am_l = CepGen_particle_mass(pdg_l)
+        am_l = CepGen_particle_mass(pdg_l) ! central particles mass
+        q_l = CepGen_particle_charge(pdg_l) ! central particles charge
         if(iflux1.ge.20.and.iflux1.lt.40) then
+          if(icontri.eq.3.or.icontri.eq.4) then
+            print *,'Invalid process mode for collinear gluon emission!'
+            stop
+          endif
           if(iflux1.eq.20) then
 #ifdef KMR_FLUX
             print *,'Loading KMR interpolation...'
@@ -106,18 +113,18 @@ c     =================================================================
 c     four-momenta for incoming beams in LAB !!!!
 c     =================================================================
 
-      r1 = dsqrt(1.d0-am_A**2/inp_A**2)
-      r2 = dsqrt(1.d0-am_B**2/inp_B**2)
+      r1 = dsqrt(1.d0+am_A**2/inp_A**2)
+      r2 = dsqrt(1.d0+am_B**2/inp_B**2)
 
-      ak10 = inp_A
+      ak10 = inp_A*r1
       ak1x = 0.d0
       ak1y = 0.d0
-      ak1z = inp_A*r1
+      ak1z = inp_A
 
-      ak20 = inp_B
+      ak20 = inp_B*r2
       ak2x = 0.d0
       ak2y = 0.d0
-      ak2z = -inp_B*r2
+      ak2z = -inp_B
 
       s = 4.*inp_A*inp_B*(1.d0 + r1*r2)/2.d0+(am_A**2+am_B**2)
       s12 = dsqrt(s)
@@ -161,6 +168,18 @@ c     =================================================================
 
       ptsum = sqrt(ptsumx**2+ptsumy**2)
 
+c     =================================================================
+c     a window in final state transverse momentum
+c     =================================================================
+
+      if(iptsum.eq.1) then
+        if(ptsum.lt.ptsum_min.or.ptsum.gt.ptsum_max) return
+      endif
+
+c     =================================================================
+c     compute the individual central particles momentum
+c     =================================================================
+
       ptdiffx = ptdiff*cos(phiptdiff)
       ptdiffy = ptdiff*sin(phiptdiff)
 
@@ -181,17 +200,23 @@ c     =================================================================
       amt2 = dsqrt(pt2**2+am_l**2)
 
       invm2 = amt1**2 + amt2**2 + 2.d0*amt1*amt2*dcosh(y1-y2)
-     >      -ptsum**2
+     &       -ptsum**2
 
       invm = dsqrt(invm2)
 
-c      if(invm.lt.1500.0d0) return
-
 c     =================================================================
-      dely = dabs(y1-y2)
+c     a window in final state invariant mass
+c     =================================================================
+
+      if(iinvm.eq.1) then
+        if(invm.lt.invm_min.or.invm.gt.invm_max) return
+      endif
+
 c     =================================================================
 c     a window in rapidity distance
 c     =================================================================
+
+      dely = dabs(y1-y2)
       if(idely.eq.1) then
         if(dely.lt.dely_min.or.dely.gt.dely_max) return
       endif
@@ -223,7 +248,7 @@ c     -----------------------------------------------------------------
       s1_eff = x1*s - q1t**2
       s2_eff = x2*s - q2t**2
 
-c-------------------------------------------------------------------
+c     -----------------------------------------------------------------
 c     Additional conditions for energy-momentum conservation
 c     -----------------------------------------------------------------
       if(((icontri.eq.2).or.(icontri.eq.4))
@@ -259,7 +284,7 @@ c     =================================================================
       q2t = dsqrt(q2t2)
 
 c     =================================================================
-c     four-momenta of the outgoing l^+ and l^-
+c     four-momenta of the outgoing central particles
 c     =================================================================
 
       p10 = alpha1*ak10 + beta1*ak20
@@ -397,7 +422,7 @@ c     =================================================================
      4     - iterm12*4.d0*z2p*z2m*(z2p-z2m)*Phi20
      5     *(q2tx*Phi21_x+q2ty*Phi21_y)
 
-      coupling = 1.d0
+      coupling = q_l**2
 c     =================================================================
 c     first parton coupling
 c     =================================================================
@@ -411,7 +436,7 @@ c     =================================================================
         print *,'alphaS not linked to this instance!'
         stop
 #endif
-        coupling = coupling*0.5d0 ! colour
+        coupling = coupling/2.d0 ! colour
       else ! photon exchange
         coupling = coupling*alpha_em
       endif
@@ -419,12 +444,6 @@ c     =================================================================
 c     second parton coupling
 c     =================================================================
       coupling = coupling*alpha_em ! photon exchange
-c     =================================================================
-c     electromagnetic coupling
-c     =================================================================
-      if(pdg_l.le.6) then ! quarks production
-        coupling = coupling * CepGen_particle_charge(pdg_l)**2 ! charge
-      endif
 
 c     =================================================================
 c     convention of matrix element as in our kt-factorization
@@ -448,12 +467,12 @@ c     ============================================
 c     unintegrated photon distributions
 c     ============================================
 
-      if(a_nuc1.eq.1) then
+      if(a_nuc1.le.1) then
         f1 = CepGen_kT_flux(iflux1,q1t2,x1,sfmod,am_x)
       else
         f1 = CepGen_kT_flux_HI(iflux1,q1t2,x1,a_nuc1,z_nuc1)
       endif
-      if(a_nuc2.eq.1) then
+      if(a_nuc2.le.1) then
         f2 = CepGen_kT_flux(iflux2,q2t2,x2,sfmod,am_y)
       else
         f2 = CepGen_kT_flux_HI(iflux2,q2t2,x2,a_nuc2,z_nuc2)

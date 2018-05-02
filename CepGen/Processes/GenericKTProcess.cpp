@@ -331,9 +331,9 @@ namespace CepGen
         }
         case Flux::Gluon: {
 #ifdef KMR_FLUX
-          double logx = log10( x ), logkt2 = log10( kt2 ), logmu2 = 2.*log10( mx ), fg = 0.;
+          double logx = log10( x ), logq2 = log10( kt2 ), logmu2 = 2.*log10( mx ), fg = 0.;
           int iread = 1;
-          f_inter_kmr_fg_( logx, logkt2, logmu2, iread, fg );
+          f_inter_kmr_fg_( logx, logq2, logmu2, iread, fg );
           return fg;
 #else
           throw CG_FATAL("GenericKTProcess:flux") << "KMR gluon fluxes are not linked to this instance!";

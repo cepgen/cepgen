@@ -102,6 +102,14 @@ class StructureFunctions:
     MSTWgrid            = 205
     LUXlike             = 301
 
+class KTFlux:
+    PhotonElastic         = 0
+    PhotonElasticBudnev   = 10
+    PhotonInelasticBudnev = 1
+    PhotonInelasticBudnev = 11
+    PhotonElasticHI       = 100
+    GluonKMR              = 20
+
 class ProcessMode:
     '''Types of processes supported'''
     ElectronProton = 0

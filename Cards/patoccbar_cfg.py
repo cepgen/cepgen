@@ -1,22 +1,24 @@
 import Config.Core as cepgen
-from Config.integrators_cff import miser as integrator
+from Config.integrators_cff import vegas as integrator
 from Config.ktProcess_cfi import ktProcess
 
 process = ktProcess.clone('patoll',
-    mode = cepgen.ProcessMode.InelasticElastic,
+    #mode = cepgen.ProcessMode.InelasticElastic,
+    mode = cepgen.ProcessMode.ElasticElastic,
     inKinematics = cepgen.Parameters(
         pz = (6500., 2562.2),
         structureFunctions = cepgen.StructureFunctions.SuriYennie,
         #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
-        #structureFunctions = cepgen.StructureFunctions.ALLM91,
-        ktFluxes = (cepgen.KTFlux.PhotonInelasticBudnev, cepgen.KTFlux.PhotonElasticHI),
+        ktFluxes = (cepgen.KTFlux.GluonKMR, cepgen.KTFlux.PhotonElasticHI),
+        #ktFluxes = (cepgen.KTFlux.PhotonElasticBudnev, cepgen.KTFlux.PhotonElasticHI),
         heavyIonB = (208, 82),
     ),
     outKinematics = ktProcess.outKinematics.clone(
-        pair = 13,
-        pt = (4.,),
+        pair = 4,
+        pt = (0.,),
         energy = (0.,),
-        rapidity = (-6., 7.),
+        rapidity = (-7., 9.),
+        #qt = (0.,1000.),
         #eta = (-2.5, 2.5),
         mx = (1.07, 1000.),
         #--- extra cuts on the p1t(l) and p2t(l) plane

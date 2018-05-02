@@ -16,8 +16,10 @@ extern "C"
    double q1t, q2t, phiq1t, phiq2t, y1, y2, ptdiff, phiptdiff, m_x, m_y;
   };
   struct KinematicsCuts {
-    int ipt, iene, ieta, idely;
-    double pt_min, pt_max, ene_min, ene_max, eta_min, eta_max, dely_min, dely_max;
+    int ipt, iene, ieta, iinvm, iptsum, idely;
+    double pt_min, pt_max, ene_min, ene_max, eta_min, eta_max;
+    double invm_min, invm_max, ptsum_min, ptsum_max;
+    double dely_min, dely_max;
   };
   struct EventKinematics {
     double p10, p1x, p1y, p1z, p20, p2x, p2y, p2z;
@@ -53,6 +55,8 @@ FortranKTProcess::preparePhaseSpace()
   cuts_.cuts.central[Cuts::pt_single].save( (bool&)kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max );
   cuts_.cuts.central[Cuts::energy_single].save( (bool&)kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max );
   cuts_.cuts.central[Cuts::eta_single].save( (bool&)kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max );
+  cuts_.cuts.central[Cuts::mass_sum].save( (bool&)kincuts_.iinvm, kincuts_.invm_min, kincuts_.invm_max );
+  cuts_.cuts.central[Cuts::pt_sum].save( (bool&)kincuts_.iptsum, kincuts_.ptsum_min, kincuts_.ptsum_max );
   cuts_.cuts.central[Cuts::rapidity_diff].save( (bool&)kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max );
 
   // feed run parameters to the common block

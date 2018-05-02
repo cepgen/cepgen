@@ -169,6 +169,19 @@ namespace CepGen
       if ( sqrt_s != -1. )
         params_.kinematics.setSqrtS( sqrt_s );
       getParameter( kin, "structureFunctions", (int&)params_.kinematics.structure_functions );
+      std::vector<int> kt_fluxes;
+      getParameter( kin, "ktFluxes", kt_fluxes );
+      if ( kt_fluxes.size() > 0 )
+        params_.kinematics.incoming_beams.first.kt_flux = kt_fluxes.at( 0 );
+      if ( kt_fluxes.size() > 1 )
+        params_.kinematics.incoming_beams.second.kt_flux = kt_fluxes.at( 1 );
+      std::vector<int> hi_beam1, hi_beam2;
+      getParameter( kin, "heavyIonA", hi_beam1 );
+      if ( hi_beam1.size() == 2 )
+        params_.kinematics.incoming_beams.first.hi = Kinematics::HeavyIon{ (unsigned short)hi_beam1[0], (unsigned short)hi_beam1[1] };
+      getParameter( kin, "heavyIonB", hi_beam2 );
+      if ( hi_beam2.size() == 2 )
+        params_.kinematics.incoming_beams.second.hi = Kinematics::HeavyIon{ (unsigned short)hi_beam2[0], (unsigned short)hi_beam2[1] };
     }
 
     void
@@ -622,6 +635,25 @@ namespace CepGen
         out.emplace_back( decode( pit ) );
       }
       Py_XDECREF( pobj );
+    }
+
+    void
+    PythonHandler::getParameter( PyObject* parent, const char* key, std::vector<int>& out )
+    {
+      PyObject* pobj = getElement( parent, key );
+      if ( !pobj )
+        return;
+      if ( !PyTuple_Check( pobj ) ) {
+        Py_DECREF( pobj );
+        throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
+      }
+      for ( Py_ssize_t i = 0; i < PyTuple_Size( pobj ); ++i ) {
+        PyObject* pit = PyTuple_GetItem( pobj, i );
+        if ( !isInteger( pit ) )
+          throwPythonError( Form( "Object %d has invalid type", i ) );
+        out.emplace_back( asInteger( pit ) );
+      }
+      Py_DECREF( pobj );
     }
 
     bool

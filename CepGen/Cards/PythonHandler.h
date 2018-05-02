@@ -36,6 +36,7 @@ namespace CepGen
         void getParameter( PyObject* parent, const char* key, double& out );
         void getParameter( PyObject* parent, const char* key, std::string& out );
         void getParameter( PyObject* parent, const char* key, std::vector<std::string>& out );
+        void getParameter( PyObject* parent, const char* key, std::vector<int>& out );
 
         void parseIncomingKinematics( PyObject* );
         void parseOutgoingKinematics( PyObject* );
