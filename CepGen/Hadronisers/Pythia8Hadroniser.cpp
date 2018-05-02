@@ -108,8 +108,6 @@ namespace CepGen
     {
       weight = 1.;
 
-full = true;//FIXME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 #ifndef PYTHIA8
       throw CG_FATAL( "Pythia8Hadroniser" ) << "Pythia8 is not linked to this instance!";
 #else
@@ -141,7 +139,6 @@ full = true;//FIXME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       updateEvent( ev, weight, full );
 
 #endif
-      ev.dump();
       return true;
     }
 
@@ -178,7 +175,12 @@ full = true;//FIXME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         const unsigned short cg_id = lhaevt_->cgPart( i-offset );
         if ( cg_id != LHAEvent::invalid_id ) { // particle already in the event
           Particle& cg_part = ev.getById( cg_id );
-          if ( abs( p.id() ) != (unsigned short)cg_part.pdgId() )
+          if ( cg_part.role() == Particle::OutgoingBeam1
+            || cg_part.role() == Particle::OutgoingBeam2 ) {
+            cg_part.setStatus( Particle::Fragmented );
+            continue;
+          }
+          if ( abs( p.id() ) != abs( cg_part.integerPdgId() ) )
             throw CG_FATAL( "Pythia8Hadroniser" ) << "Event list corruption detected for particle " << i << "!";
           if ( p.particleDataEntry().sizeChannels() == 0 )
             continue;
