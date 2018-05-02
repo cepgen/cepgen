@@ -48,20 +48,32 @@ c     =================================================================
 c     =================================================================
 c     quarks production
 c     =================================================================
-      double precision t_max,amu2,alpha_S,alphas
+#ifdef KMR_FLUX
       double precision rx,rkt2,rmu2,parton
+#endif
+#ifdef ALPHA_S
+      double precision t_max,amu2,alphas
+#endif
       logical first_init
       data first_init/.true./
+
+      call CepGen_print
+
       if(first_init) then
         am_l = CepGen_particle_mass(pdg_l)
         if(iflux1.ge.20.and.iflux1.lt.40) then
           if(iflux1.eq.20) then
+#ifdef KMR_FLUX
             print *,'Loading KMR interpolation...'
             call f_inter_kmr_fg(rx,rkt2,rmu2,0,parton)
+#else
+            print *,'KMR interpolation is not linked!'
+            stop
+#endif
           endif
 #ifdef ALPHA_S
           print *,'Initialisation of the alpha(S) evolution algorithm..'
-          call initAlphaS(2,1.d0,1.d0,0.5d0,
+          call initAlphaS(0,1.d0,1.d0,0.5d0,
      &       CepGen_particle_mass(4), ! charm
      &       CepGen_particle_mass(5), ! bottom
      &       CepGen_particle_mass(6)) ! top
@@ -80,16 +92,14 @@ c     =================================================================
       q20 = 0.d0
       q2z = 0.d0
 
-      call CepGen_print
-
 c     =================================================================
 c     go to energy of Nucleus = A*inp in order that generator puts out
 c     proper momenta in LAB frame
 c     =================================================================
 
       inp_A = inp1*a_nuc1
-      inp_B = inp2*a_nuc2
       am_A = am_p*a_nuc1
+      inp_B = inp2*a_nuc2
       am_B = am_p*a_nuc2
 
 c     =================================================================
@@ -102,17 +112,14 @@ c     =================================================================
       ak10 = inp_A
       ak1x = 0.d0
       ak1y = 0.d0
-      ak1z = inp1*r1
+      ak1z = inp_A*r1
 
       ak20 = inp_B
       ak2x = 0.d0
       ak2y = 0.d0
       ak2z = -inp_B*r2
 
-      s = 4.*inp_A*inp_B*(1.d0 + r1*r2)/2.d0
-     >    + am_A**2 + am_B**2
-
-c      s = 4.*inp1*inp_A
+      s = 4.*inp_A*inp_B*(1.d0 + r1*r2)/2.d0+(am_A**2+am_B**2)
       s12 = dsqrt(s)
 
       p1_plus = (ak10+ak1z)/dsqrt(2.d0)
@@ -398,13 +405,12 @@ c     =================================================================
 #ifdef ALPHA_S
         t_max = max(amt1**2,amt2**2)
         amu2 = max(eps12,t_max)
-        alpha_S = alphaS(dsqrt(amu2))
-        am_x = amu2
+        am_x = dsqrt(amu2)
+        coupling = coupling*alphaS(am_x)
 #else
         print *,'alphaS not linked to this instance!'
         stop
 #endif
-        coupling = coupling*alpha_S
         coupling = coupling*0.5d0 ! colour
       else ! photon exchange
         coupling = coupling*alpha_em
@@ -426,9 +432,9 @@ c     for heavy flavours
 c     =================================================================
 
       amat2_1 = (4.d0*pi)**2*coupling*(x1*x2*s)**2
-     2        * aux2_1 * 2.*z1p*z1m*q1t2 / (q1t2*q2t2)
+     &        * aux2_1 * 2.*z1p*z1m*q1t2 / (q1t2*q2t2)
       amat2_2 = (4.d0*pi)**2*coupling*(x1*x2*s)**2
-     2        * aux2_2 * 2.*z2p*z2m*q2t2 / (q1t2*q2t2)
+     &        * aux2_2 * 2.*z2p*z2m*q2t2 / (q1t2*q2t2)
 
 c     =================================================================
 c     symmetrization
@@ -442,19 +448,15 @@ c     ============================================
 c     unintegrated photon distributions
 c     ============================================
 
-      if(icontri.eq.1) then
-        f1 = CepGen_kT_flux(iflux1,q1t2,x1,0,am_x)
-c        f2 = CepGen_kT_flux(iflux2,q2t2,x2,0,am_y)
-        f2 = CepGen_kT_flux_HI(iflux2,q2t2,x2,a_nuc2,z_nuc2)
-      elseif(icontri.eq.2) then
-        f1 = CepGen_kT_flux(iflux1,q1t2,x1,0,am_x)
-        f2 = CepGen_kT_flux(iflux2,q2t2,x2,sfmod,am_y)
-      elseif(icontri.eq.3) then
+      if(a_nuc1.eq.1) then
         f1 = CepGen_kT_flux(iflux1,q1t2,x1,sfmod,am_x)
-        f2 = CepGen_kT_flux_HI(iflux2,q2t2,x2,a_nuc2,z_nuc2)
-      elseif(icontri.eq.4) then
-        f1 = CepGen_kT_flux(iflux1,q1t2,x1,sfmod,am_x)
+      else
+        f1 = CepGen_kT_flux_HI(iflux1,q1t2,x1,a_nuc1,z_nuc1)
+      endif
+      if(a_nuc2.eq.1) then
         f2 = CepGen_kT_flux(iflux2,q2t2,x2,sfmod,am_y)
+      else
+        f2 = CepGen_kT_flux_HI(iflux2,q2t2,x2,a_nuc2,z_nuc2)
       endif
       if(f1.lt.1.d-20) f1 = 0.0d0
       if(f2.lt.1.d-20) f2 = 0.0d0
@@ -467,15 +469,15 @@ c     over d^2 kappa_1 d^2 kappa_2 instead d kappa_1^2 d kappa_2^2
 c     =================================================================
 
       aintegral = (2.d0*pi)*1.d0/(16.d0*pi**2*(x1*x2*s)**2) * amat2
-     2          * f1/pi * f2/pi * (1.d0/4.d0) * units
-     3          * 0.5d0 * 4.0d0 / (4.d0*pi)
+     &          * f1/pi * f2/pi * (1.d0/4.d0) * units
+     &          * 0.5d0 * 4.0d0 / (4.d0*pi)
 
 c     *****************************************************************
 c     =================================================================
       aintegrand = aintegral*q1t*q2t*ptdiff
 c     =================================================================
 c     *****************************************************************
+c      print *,aintegrand,aintegral,coupling
 
       return
       end
-

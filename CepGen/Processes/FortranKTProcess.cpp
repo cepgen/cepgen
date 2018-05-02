@@ -29,7 +29,6 @@ extern "C"
   extern KtKinematics ktkin_;
   extern KinematicsCuts kincuts_;
   extern EventKinematics evtkin_;
-  extern void pa_ll_( double& );
 }
 
 FortranKTProcess::FortranKTProcess( const char* name, const char* descr, std::function<void( double& )> func ) :
@@ -91,6 +90,33 @@ FortranKTProcess::computeKTFactorisedMatrixElement()
 void
 FortranKTProcess::fillCentralParticlesKinematics()
 {
+  const Particle::Momentum& mom_ip1 = event_->getOneByRole( Particle::IncomingBeam1 ).momentum();
+  const Particle::Momentum& mom_ip2 = event_->getOneByRole( Particle::IncomingBeam2 ).momentum();
+
+  //===============================================================================================
+  // outgoing beam remnants
+  //===============================================================================================
+
+  PX_ = Particle::Momentum( evtkin_.pxx, evtkin_.pxy, evtkin_.pxz, evtkin_.px0 );
+  PX_ *= 1./params_.z_nuc1;
+  PY_ = Particle::Momentum( evtkin_.pyx, evtkin_.pyy, evtkin_.pyz, evtkin_.py0 );
+  PY_ *= 1./params_.z_nuc2;
+
+  //===============================================================================================
+  // intermediate partons
+  //===============================================================================================
+
+  const Particle::Momentum mom_par1 = mom_ip1-PX_, mom_par2 = mom_ip2-PY_;
+  Particle& par1 = event_->getOneByRole( Particle::Parton1 );
+  par1.setMomentum( mom_par1 );
+  Particle& par2 = event_->getOneByRole( Particle::Parton2 );
+  par2.setMomentum( mom_par2 );
+  event_->getOneByRole( Particle::Intermediate ).setMomentum( mom_par1+mom_par2 );
+
+  //===============================================================================================
+  // central system
+  //===============================================================================================
+
   Particle& ol1 = event_->getByRole( Particle::CentralSystem )[0];
   ol1.setPdgId( (PDG)params_.pdg_l, +1 );
   ol1.setStatus( Particle::FinalState );
@@ -100,9 +126,5 @@ FortranKTProcess::fillCentralParticlesKinematics()
   ol2.setPdgId( (PDG)params_.pdg_l, -1 );
   ol2.setStatus( Particle::FinalState );
   ol2.setMomentum( Particle::Momentum( evtkin_.p2x, evtkin_.p2y, evtkin_.p2z, evtkin_.p20 ) );
-
-  PX_ = Particle::Momentum( evtkin_.pxx, evtkin_.pxy, evtkin_.pxz, evtkin_.px0 );
-  PX_ *= 1./params_.z_nuc1;
-  PY_ = Particle::Momentum( evtkin_.pyx, evtkin_.pyy, evtkin_.pyz, evtkin_.py0 );
-  PY_ *= 1./params_.z_nuc2;
 }
+

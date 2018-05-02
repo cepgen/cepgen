@@ -67,6 +67,8 @@ namespace CepGen
       lmin = min();
     if ( hasMax() )
       lmax = max();
+    if ( lmin == lmax )
+      on = false;
   }
 
   double

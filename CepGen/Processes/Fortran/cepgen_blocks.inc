@@ -1,5 +1,8 @@
 c     ================================================================
-c     CepGen interface
+c     F77 process-to-CepGen helper
+c     > this header file defines a set of common blocks useful for
+c     > the interfacing of any kt-factorised matrix element computation
+c     > to a mother CepGen instance
 c     ================================================================
 
 c     =================================================================
@@ -32,12 +35,12 @@ c     =================================================================
 c     =================================================================
 c     phase space cuts
 c     =================================================================
-      common/kincuts/ipt,ieta,iene,idely,pt_min,pt_max,ene_min,ene_max,
-     &      eta_min,eta_max,
-     &      dely_min,dely_max
+      common/kincuts/ipt,iene,ieta,idely,
+     &     pt_min,pt_max,ene_min,ene_max,eta_min,eta_max,
+     &     dely_min,dely_max
       integer ipt,iene,ieta,idely
       double precision pt_min,pt_max,ene_min,ene_max,eta_min,eta_max,
-     &      dely_min,dely_max
+     &     dely_min,dely_max
 
 c     =================================================================
 c     generated event kinematics
