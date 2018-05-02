@@ -1,4 +1,4 @@
-      subroutine pA_ll(aintegrand)
+      subroutine nucl_to_ff(aintegrand)
       implicit none
       double precision aintegrand
 c     =================================================================

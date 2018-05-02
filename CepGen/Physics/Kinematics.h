@@ -46,16 +46,24 @@ namespace CepGen
         unsigned short Z;
       };
 
-      /// Incoming particles' momentum (in \f$\text{GeV}/c\f$)
-      std::pair<double,double> inp;
+      /// Dump all the parameters used in this process cross-section computation
+      /// or events generation
+      void dump( std::ostream& os = *Logger::get().output ) const;
+
+      struct Beam
+      {
+        /// Incoming particle's momentum (in \f$\text{GeV}/c\f$)
+        double pz;
+        PDG pdg;
+        HeavyIon hi;
+        unsigned short kt_flux;
+      };
+      /// Beam/primary particle's kinematics
+      std::pair<Beam,Beam> incoming_beams;
       /// Set the incoming particles' momenta (if the collision is symmetric)
       void setSqrtS( double sqrts );
       /// Process centre of mass energy
       double sqrtS() const;
-      /// Beam/primary particle's PDG identifier
-      std::pair<PDG,PDG> inpdg;
-      std::pair<HeavyIon,HeavyIon> inhi;
-      std::pair<unsigned short,unsigned short> kt_fluxes;
       /// PDG id of the outgoing central particles
       std::vector<PDG> central_system;
       /// Minimum list of central particles required

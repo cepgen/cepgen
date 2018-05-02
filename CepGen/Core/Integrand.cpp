@@ -53,8 +53,8 @@ namespace CepGen
             << "Computation launched for " << p->processName() << " process "
             << "0x" << std::hex << p->process() << std::dec << ".\n\t"
             << "Process mode considered: " << p->kinematics.mode << "\n\t"
-            << "  pz(p1) = " << p->kinematics.inp.first << "\n\t"
-            << "  pz(p2) = " << p->kinematics.inp.second << "\n\t"
+            << "  pz(p1) = " << p->kinematics.incoming_beams.first.pz << "\n\t"
+            << "  pz(p2) = " << p->kinematics.incoming_beams.second.pz << "\n\t"
             << "  structure functions: " << p->kinematics.structure_functions;
 
           //=========================================================================================

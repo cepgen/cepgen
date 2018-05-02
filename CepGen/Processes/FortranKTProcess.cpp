@@ -58,16 +58,16 @@ FortranKTProcess::preparePhaseSpace()
 
   // feed run parameters to the common block
   params_.icontri = (int)cuts_.mode;
-  params_.iflux1 = (int)cuts_.kt_fluxes.first;
-  params_.iflux2 = (int)cuts_.kt_fluxes.second;
   params_.sfmod = (int)cuts_.structure_functions;
   params_.pdg_l = (int)cuts_.central_system[0];
-  params_.a_nuc1 = cuts_.inhi.first.A;
-  params_.z_nuc1 = cuts_.inhi.first.Z;
-  params_.a_nuc2 = cuts_.inhi.second.A;
-  params_.z_nuc2 = cuts_.inhi.second.Z;
-  params_.inp1 = cuts_.inp.first;
-  params_.inp2 = cuts_.inp.second;
+  params_.iflux1 = cuts_.incoming_beams.first.kt_flux;
+  params_.iflux2 = cuts_.incoming_beams.second.kt_flux;
+  params_.a_nuc1 = cuts_.incoming_beams.first.hi.A;
+  params_.z_nuc1 = cuts_.incoming_beams.first.hi.Z;
+  params_.a_nuc2 = cuts_.incoming_beams.second.hi.A;
+  params_.z_nuc2 = cuts_.incoming_beams.second.hi.Z;
+  params_.inp1 = cuts_.incoming_beams.first.pz;
+  params_.inp2 = cuts_.incoming_beams.second.pz;
 }
 
 double

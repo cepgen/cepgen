@@ -18,7 +18,7 @@
 
 extern "C"
 {
-  extern void pa_ll_( double& );
+  extern void nucl_to_ff_( double& );
 }
 
 #ifdef PYTHIA8
@@ -99,7 +99,7 @@ namespace CepGen
       else if ( proc_name == "pptoww" )
         params_.setProcess( new Process::PPtoWW );
       else if ( proc_name == "patoll" )
-        params_.setProcess( new Process::FortranKTProcess( "patoll", "pA ↝ ɣɣ → l⁺l¯", pa_ll_ ) );
+        params_.setProcess( new Process::FortranKTProcess( "nucltoff", "(p/A)(p/A) ↝ (g/ɣ)ɣ → f⁺f¯", nucl_to_ff_ ) );
       else throw CG_FATAL( "PythonHandler" ) << "Unrecognised process: " << proc_name << ".";
 
       //--- process mode
@@ -159,7 +159,8 @@ namespace CepGen
         if ( PyTuple_Check( ppz ) && PyTuple_Size( ppz ) == 2 ) {
           double pz0 = PyFloat_AsDouble( PyTuple_GetItem( ppz, 0 ) );
           double pz1 = PyFloat_AsDouble( PyTuple_GetItem( ppz, 1 ) );
-          params_.kinematics.inp = { pz0, pz1 };
+          params_.kinematics.incoming_beams.first.pz = pz0;
+          params_.kinematics.incoming_beams.second.pz = pz1;
         }
         Py_XDECREF( ppz );
       }
