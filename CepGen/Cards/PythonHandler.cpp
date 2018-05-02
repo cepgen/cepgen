@@ -83,6 +83,7 @@ namespace CepGen
         throwPythonError( Form( "Failed to extract the process name from the configuration card %s", file ) );
 
       const std::string proc_name = decode( pproc_name );
+      Py_DECREF( pproc_name );
       if ( proc_name == "lpair" )
         params_.setProcess( new Process::GamGamLL );
       else if ( proc_name == "pptoll" )
@@ -96,12 +97,16 @@ namespace CepGen
 
       //--- process kinematics
       PyObject* pin_kinematics = getElement( process, "inKinematics" );
-      if ( pin_kinematics )
+      if ( pin_kinematics ) {
         parseIncomingKinematics( pin_kinematics );
+        Py_DECREF( pin_kinematics );
+      }
 
       PyObject* pout_kinematics = getElement( process, "outKinematics" );
-      if ( pout_kinematics )
+      if ( pout_kinematics ) {
         parseOutgoingKinematics( pout_kinematics );
+        Py_DECREF( pout_kinematics );
+      }
 
       Py_DECREF( process );
 
@@ -253,6 +258,7 @@ namespace CepGen
       if ( !palgo )
         throwPythonError( "Failed to retrieve the integration algorithm name!" );
       std::string algo = decode( palgo );
+      Py_DECREF( palgo );
       if ( algo == "plain" )
         params_.integrator.type = Integrator::Type::plain;
       else if ( algo == "Vegas" ) {
@@ -337,6 +343,7 @@ namespace CepGen
         throwPythonError( "Hadroniser name is required!" );
 
       std::string hadr_name = decode( pname );
+      Py_DECREF( pname );
 
       if ( hadr_name == "pythia8" ) {
         getParameter( hadr, "maxTrials", params_.hadroniser_max_trials );
