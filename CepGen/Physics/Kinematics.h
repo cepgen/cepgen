@@ -37,10 +37,6 @@ namespace CepGen
       /// Human-readable format of a process mode (elastic/dissociative parts)
       friend std::ostream& operator<<( std::ostream&, const Mode& );
 
-      /// Dump all the parameters used in this process cross-section computation
-      /// or events generation
-      void dump( std::ostream& os = *Logger::get().output ) const;
-
       /// Incoming particles' momentum (in \f$\text{GeV}/c\f$)
       std::pair<double,double> inp;
       /// Set the incoming particles' momenta (if the collision is symmetric)
@@ -85,19 +81,12 @@ namespace CepGen
           }
         };
         /// Cuts on the initial particles kinematics
-        /*std::map<Cuts,Limits> initial;
+        Cuts initial;
         /// Cuts on the central system produced
-        std::map<Cuts,Limits> central;
-        std::map<PDG,std::map<Cuts,Limits> > central_particles;
+        Cuts central;
+        std::unordered_map<PDG,Cuts,EnumHash<PDG> > central_particles;
         /// Cuts on the beam remnants system
-        std::map<Cuts,Limits> remnants;*/
-        /// Cuts on the initial particles kinematics
-        std::unordered_map<Cuts,Limits,EnumHash<Cuts> > initial;
-        /// Cuts on the central system produced
-        std::unordered_map<Cuts,Limits,EnumHash<Cuts> > central;
-        std::unordered_map<PDG,std::unordered_map<Cuts,Limits,EnumHash<Cuts> >,EnumHash<PDG> > central_particles;
-        /// Cuts on the beam remnants system
-        std::unordered_map<Cuts,Limits,EnumHash<Cuts> > remnants;
+        Cuts remnants;
       };
       CutsList cuts;
   };

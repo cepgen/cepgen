@@ -64,10 +64,10 @@ namespace CepGen
       // register the incoming partons' variables
       //============================================================================================
 
-      registerVariable( qt1_, Mapping::logarithmic, cuts_.cuts.initial[Cuts::qt], { 1.e-10, 500. }, "First incoming parton virtuality" );
-      registerVariable( qt2_, Mapping::logarithmic, cuts_.cuts.initial[Cuts::qt], { 1.e-10, 500. }, "Second incoming parton virtuality" );
-      registerVariable( phi_qt1_, Mapping::linear, cuts_.cuts.initial[Cuts::phi_qt], { 0., 2.*M_PI }, "First incoming parton azimuthal angle" );
-      registerVariable( phi_qt2_, Mapping::linear, cuts_.cuts.initial[Cuts::phi_qt], { 0., 2.*M_PI }, "Second incoming parton azimuthal angle" );
+      registerVariable( qt1_, Mapping::logarithmic, cuts_.cuts.initial.qt, { 1.e-10, 500. }, "First incoming parton virtuality" );
+      registerVariable( qt2_, Mapping::logarithmic, cuts_.cuts.initial.qt, { 1.e-10, 500. }, "Second incoming parton virtuality" );
+      registerVariable( phi_qt1_, Mapping::linear, cuts_.cuts.initial.phi_qt, { 0., 2.*M_PI }, "First incoming parton azimuthal angle" );
+      registerVariable( phi_qt2_, Mapping::linear, cuts_.cuts.initial.phi_qt, { 0., 2.*M_PI }, "Second incoming parton azimuthal angle" );
 
       //============================================================================================
       // register all process-dependent variables
@@ -81,9 +81,9 @@ namespace CepGen
 
       MX_ = MY_ = event_->getOneByRole( Particle::IncomingBeam1 ).mass();
       if ( cuts_.mode == Kinematics::Mode::InelasticElastic || cuts_.mode == Kinematics::Mode::InelasticInelastic )
-        registerVariable( MX_, Mapping::square, cuts_.cuts.remnants[Cuts::mass_single], { 1.07, 1000. }, "Positive z proton remnant mass" );
+        registerVariable( MX_, Mapping::square, cuts_.cuts.remnants.mass_single, { 1.07, 1000. }, "Positive z proton remnant mass" );
       if ( cuts_.mode == Kinematics::Mode::ElasticInelastic || cuts_.mode == Kinematics::Mode::InelasticInelastic )
-        registerVariable( MY_, Mapping::square, cuts_.cuts.remnants[Cuts::mass_single], { 1.07, 1000. }, "Negative z proton remnant mass" );
+        registerVariable( MY_, Mapping::square, cuts_.cuts.remnants.mass_single, { 1.07, 1000. }, "Negative z proton remnant mass" );
 
       prepareKinematics();
     }

@@ -40,23 +40,23 @@ namespace CepGen
         << "  * process: " << params.processName() << " (" << params.kinematics.mode << ")\n"
         << "  * structure functions: " << params.kinematics.structure_functions << "\n"
         << "  *--- incoming state\n";
-      if ( params.kinematics.cuts.initial.count( Cuts::q2 ) )
+      if ( params.kinematics.cuts.initial.q2.valid() )
         oss_init
-          << "  * Q² range (GeV²): " << params.kinematics.cuts.initial.at( Cuts::q2 ) << "\n";
-      if ( params.kinematics.cuts.remnants.count( Cuts::mass_single ) )
+          << "  * Q² range (GeV²): " << params.kinematics.cuts.initial.q2 << "\n";
+      if ( params.kinematics.cuts.remnants.mass_single.valid() )
         oss_init
-          << "  * remnants mass range (GeV): " << params.kinematics.cuts.remnants.at( Cuts::mass_single ) << "\n";
+          << "  * remnants mass range (GeV): " << params.kinematics.cuts.remnants.mass_single << "\n";
       oss_init
         << "  *--- central system\n";
-      if ( params.kinematics.cuts.central.count( Cuts::pt_single ) )
+      if ( params.kinematics.cuts.central.pt_single.valid() )
         oss_init
-          << "  * single particle pT (GeV): " << params.kinematics.cuts.central.at( Cuts::pt_single ) << "\n";
-      if ( params.kinematics.cuts.central.count( Cuts::energy_single ) )
+          << "  * single particle pT (GeV): " << params.kinematics.cuts.central.pt_single << "\n";
+      if ( params.kinematics.cuts.central.energy_single.valid() )
         oss_init
-          << "  * single particle energy (GeV): " << params.kinematics.cuts.central.at( Cuts::energy_single ) << "\n";
-      if ( params.kinematics.cuts.central.count( Cuts::eta_single ) )
+          << "  * single particle energy (GeV): " << params.kinematics.cuts.central.energy_single << "\n";
+      if ( params.kinematics.cuts.central.eta_single.valid() )
         oss_init
-          << "  * single particle eta: " << params.kinematics.cuts.central.at( Cuts::eta_single ) << "\n";
+          << "  * single particle eta: " << params.kinematics.cuts.central.eta_single << "\n";
       oss_init
         << "  **************************************************\n"
         << "-->";

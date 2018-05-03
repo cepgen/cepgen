@@ -18,10 +18,10 @@ namespace CepGen
     void
     PPtoWW::preparePhaseSpace()
     {
-      registerVariable( y1_, Mapping::linear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "First outgoing W rapidity" );
-      registerVariable( y2_, Mapping::linear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "Second outgoing W rapidity" );
-      registerVariable( pt_diff_, Mapping::linear, cuts_.cuts.central[Cuts::pt_diff], { 0., 500. }, "Ws transverse momentum difference" );
-      registerVariable( phi_pt_diff_, Mapping::linear, cuts_.cuts.central[Cuts::phi_pt_diff], { 0., 2.*M_PI }, "Ws azimuthal angle difference" );
+      registerVariable( y1_, Mapping::linear, cuts_.cuts.central.rapidity_single, { -6., 6. }, "First outgoing W rapidity" );
+      registerVariable( y2_, Mapping::linear, cuts_.cuts.central.rapidity_single, { -6., 6. }, "Second outgoing W rapidity" );
+      registerVariable( pt_diff_, Mapping::linear, cuts_.cuts.central.pt_diff, { 0., 500. }, "Ws transverse momentum difference" );
+      registerVariable( phi_pt_diff_, Mapping::linear, cuts_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Ws azimuthal angle difference" );
     }
 
     double
@@ -58,9 +58,8 @@ namespace CepGen
       const double pt1x = ( ptsumx+ptdiffx )*0.5, pt1y = ( ptsumy+ptdiffy )*0.5, pt1 = std::hypot( pt1x, pt1y ),
                    pt2x = ( ptsumx-ptdiffx )*0.5, pt2y = ( ptsumy-ptdiffy )*0.5, pt2 = std::hypot( pt2x, pt2y );
 
-      if ( cuts_.cuts.central_particles.count( PDG::W ) > 0
-        && cuts_.cuts.central_particles.at( PDG::W ).count( Cuts::pt_single ) > 0 ) {
-        const Limits pt_limits = cuts_.cuts.central_particles.at( PDG::W ).at( Cuts::pt_single );
+      if ( cuts_.cuts.central_particles.at( PDG::W ).pt_single.valid() ) {
+        const Limits pt_limits = cuts_.cuts.central_particles.at( PDG::W ).pt_single;
         if ( !pt_limits.passes( pt1 ) || !pt_limits.passes( pt2 ) )
           return 0.;
       }
@@ -74,24 +73,21 @@ namespace CepGen
       //=================================================================
 
       const double invm = sqrt( amt1*amt1 + amt2*amt2 + 2.*amt1*amt2*cosh( y1_-y2_ ) - ptsum*ptsum );
-      if ( cuts_.cuts.central.count( Cuts::mass_sum ) > 0
-        && !cuts_.cuts.central.at( Cuts::mass_sum ).passes( invm ) )
+      if ( !cuts_.cuts.central.mass_sum.passes( invm ) )
         return 0.;
 
       //=================================================================
       //     a window in transverse momentum difference
       //=================================================================
 
-      if ( cuts_.cuts.central.count( Cuts::pt_diff ) > 0
-        && !cuts_.cuts.central.at( Cuts::pt_diff ).passes( fabs( pt1-pt2 ) ) )
+      if ( !cuts_.cuts.central.pt_diff.passes( fabs( pt1-pt2 ) ) )
         return 0.;
 
       //=================================================================
       //     a window in rapidity distance
       //=================================================================
 
-      if ( cuts_.cuts.central.count( Cuts::rapidity_diff ) > 0
-        && !cuts_.cuts.central[Cuts::rapidity_diff].passes( fabs( y1_-y2_ ) ) )
+      if ( !cuts_.cuts.central.rapidity_diff.passes( fabs( y1_-y2_ ) ) )
         return 0.;
 
       //=================================================================

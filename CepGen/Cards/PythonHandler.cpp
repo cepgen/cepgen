@@ -208,21 +208,21 @@ namespace CepGen
       if ( pcuts && PyDict_Check( pcuts ) ) parseParticlesCuts( pcuts );
 
       // for LPAIR/collinear matrix elements
-      getLimits( kin, "q2", params_.kinematics.cuts.initial[Cuts::q2] );
+      getLimits( kin, "q2", params_.kinematics.cuts.initial.q2 );
 
       // for the kT factorised matrix elements
-      getLimits( kin, "qt", params_.kinematics.cuts.initial[Cuts::qt] );
-      getLimits( kin, "phiqt", params_.kinematics.cuts.initial[Cuts::phi_qt] );
-      getLimits( kin, "ptdiff", params_.kinematics.cuts.central[Cuts::pt_diff] );
-      getLimits( kin, "phiptdiff", params_.kinematics.cuts.central[Cuts::phi_pt_diff] );
-      getLimits( kin, "rapiditydiff", params_.kinematics.cuts.central[Cuts::rapidity_diff] );
+      getLimits( kin, "qt", params_.kinematics.cuts.initial.qt );
+      getLimits( kin, "phiqt", params_.kinematics.cuts.initial.phi_qt );
+      getLimits( kin, "ptdiff", params_.kinematics.cuts.central.pt_diff );
+      getLimits( kin, "phiptdiff", params_.kinematics.cuts.central.phi_pt_diff );
+      getLimits( kin, "rapiditydiff", params_.kinematics.cuts.central.rapidity_diff );
 
       // generic phase space limits
-      getLimits( kin, "rapidity", params_.kinematics.cuts.central[Cuts::rapidity_single] );
-      getLimits( kin, "eta", params_.kinematics.cuts.central[Cuts::eta_single] );
-      getLimits( kin, "pt", params_.kinematics.cuts.central[Cuts::pt_single] );
+      getLimits( kin, "rapidity", params_.kinematics.cuts.central.rapidity_single );
+      getLimits( kin, "eta", params_.kinematics.cuts.central.eta_single );
+      getLimits( kin, "pt", params_.kinematics.cuts.central.pt_single );
 
-      getLimits( kin, "mx", params_.kinematics.cuts.remnants[Cuts::mass_single] );
+      getLimits( kin, "mx", params_.kinematics.cuts.remnants.mass_single );
     }
 
     void
@@ -232,10 +232,10 @@ namespace CepGen
       Py_ssize_t pos = 0;
       while ( PyDict_Next( cuts, &pos, &pkey, &pvalue ) ) {
         PDG pdg = (PDG)asInteger( pkey );
-        getLimits( pvalue, "pt", params_.kinematics.cuts.central_particles[pdg][Cuts::pt_single] );
-        getLimits( pvalue, "energy", params_.kinematics.cuts.central_particles[pdg][Cuts::energy_single] );
-        getLimits( pvalue, "eta", params_.kinematics.cuts.central_particles[pdg][Cuts::eta_single] );
-        getLimits( pvalue, "rapidity", params_.kinematics.cuts.central_particles[pdg][Cuts::rapidity_single] );
+        getLimits( pvalue, "pt", params_.kinematics.cuts.central_particles[pdg].pt_single );
+        getLimits( pvalue, "energy", params_.kinematics.cuts.central_particles[pdg].energy_single );
+        getLimits( pvalue, "eta", params_.kinematics.cuts.central_particles[pdg].eta_single );
+        getLimits( pvalue, "rapidity", params_.kinematics.cuts.central_particles[pdg].rapidity_single );
       }
     }
 

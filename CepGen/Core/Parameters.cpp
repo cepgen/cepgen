@@ -37,13 +37,13 @@ namespace CepGen
   void
   Parameters::setThetaRange( float thetamin, float thetamax )
   {
-    kinematics.cuts.central[Cuts::eta_single] = {
+    kinematics.cuts.central.eta_single = {
       Particle::thetaToEta( thetamax ),
       Particle::thetaToEta( thetamin )
     };
 
     CG_DEBUG( "Parameters" )
-      << "eta in range: " << kinematics.cuts.central.at( Cuts::eta_single )
+      << "eta in range: " << kinematics.cuts.central.eta_single
       << " => theta(min) = " << thetamin << ", theta(max) = " << thetamax << ".";
   }
 
@@ -179,30 +179,26 @@ namespace CepGen
       << std::endl
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << std::endl
       << std::endl;
-    if ( kinematics.cuts.central.size() > 0 ) {
-      for ( const auto& lim : kinematics.cuts.initial ) { // map(particles class, limits)
-        if ( !lim.second.valid() )
-          continue;
-        os << std::setw( wt ) << lim.first << lim.second << std::endl;
-      }
+    for ( const auto& lim : kinematics.cuts.initial.list() ) { // map(particles class, limits)
+      if ( !lim.second.valid() )
+        continue;
+      os << std::setw( wt ) << lim.first << lim.second << std::endl;
     }
     os
       << std::endl
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Outgoing central system " ) : "Outgoing central system" ) << std::setfill( ' ' ) << std::endl
       << std::endl
       << std::setw( wt ) << "Central particles" << ( pretty ? boldify( op.str().c_str() ) : op.str() ) << std::endl;
-    if ( kinematics.cuts.central.size() > 0 ) {
-      for ( const auto& lim : kinematics.cuts.central ) {
-        if ( !lim.second.valid() )
-          continue;
-        os << std::setw( wt ) << lim.first << lim.second << std::endl;
-      }
+    for ( const auto& lim : kinematics.cuts.central.list() ) {
+      if ( !lim.second.valid() )
+        continue;
+      os << std::setw( wt ) << lim.first << lim.second << std::endl;
     }
     if ( kinematics.cuts.central_particles.size() > 0 ) {
       os << std::setw( wt ) << ( pretty ? boldify( ">>> per-particle cuts:" ) : ">>> per-particle cuts:" ) << std::endl;
       for ( const auto& part_per_lim : kinematics.cuts.central_particles ) {
         os << " * all single " << std::setw( wt-3 ) << part_per_lim.first << std::endl;
-        for ( const auto& lim : part_per_lim.second ) {
+        for ( const auto& lim : part_per_lim.second.list() ) {
           if ( !lim.second.valid() )
             continue;
           os << "   - " << std::setw( wt-5 ) << lim.first << lim.second << std::endl;
@@ -212,7 +208,7 @@ namespace CepGen
     os << std::endl;
     os << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Proton / remnants " ) : "Proton / remnants" ) << std::setfill( ' ' ) << std::endl;
     os << std::endl;
-    for ( const auto& lim : kinematics.cuts.remnants )
+    for ( const auto& lim : kinematics.cuts.remnants.list() )
       os << std::setw( wt ) << lim.first << lim.second << std::endl;
 
     if ( pretty ) {

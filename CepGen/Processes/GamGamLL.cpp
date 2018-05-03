@@ -83,7 +83,7 @@ namespace CepGen
 
       prepareKinematics();
 
-      w_limits_ = cuts_.cuts.initial[Cuts::w];
+      w_limits_ = cuts_.cuts.initial.w;
       if ( !w_limits_.hasMax() )
         w_limits_.max() = s_;
       // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
@@ -96,8 +96,8 @@ namespace CepGen
         << "w limits = " << w_limits_ << "\n\t"
         << "wmax/wmin = " << w_limits_.max()/w_limits_.min();
 
-      q2_limits_ = cuts_.cuts.initial[Cuts::q2];
-      mx_limits_ = cuts_.cuts.remnants[Cuts::mass_single];
+      q2_limits_ = cuts_.cuts.initial.q2;
+      mx_limits_ = cuts_.cuts.remnants.mass_single;
     }
 
     //---------------------------------------------------------------------------------------------
@@ -885,7 +885,7 @@ namespace CepGen
 
       //--- cut on mass of final hadronic system (MX/Y)
 
-      if ( cuts_.cuts.remnants.count( Cuts::mass_single ) > 0 ) {
+      if ( mx_limits_.valid() ) {
         if ( ( cuts_.mode == Kinematics::Mode::InelasticElastic
             || cuts_.mode == Kinematics::Mode::InelasticInelastic )
           && !mx_limits_.passes( MX_ ) )
@@ -898,32 +898,30 @@ namespace CepGen
 
       //--- cut on the proton's Q2 (first photon propagator T1)
 
-      if ( cuts_.cuts.initial.count( Cuts::q2 )
-        && !cuts_.cuts.initial.at( Cuts::q2 ).passes( -t1_ ) )
+      if ( !cuts_.cuts.initial.q2.passes( -t1_ ) )
         return 0.;
 
       //--- cuts on outgoing leptons' kinematics
 
-      if ( cuts_.cuts.central.count( Cuts::mass_sum )
-        && !cuts_.cuts.central.at( Cuts::mass_sum ).passes( ( p6_cm_+p7_cm_ ).mass() ) )
+      if ( !cuts_.cuts.central.mass_sum.passes( ( p6_cm_+p7_cm_ ).mass() ) )
         return 0.;
 
       //----- cuts on the individual leptons
 
-      if ( cuts_.cuts.central.count( Cuts::pt_single ) > 0 ) {
-        const Limits& pt_limits = cuts_.cuts.central.at( Cuts::pt_single );
+      if ( cuts_.cuts.central.pt_single.valid() ) {
+        const Limits& pt_limits = cuts_.cuts.central.pt_single;
         if ( !pt_limits.passes( p6_cm_.pt() ) || !pt_limits.passes( p7_cm_.pt() ) )
           return 0.;
       }
 
-      if ( cuts_.cuts.central.count( Cuts::energy_single ) > 0 ) {
-        const Limits& energy_limits = cuts_.cuts.central.at( Cuts::energy_single );
+      if ( cuts_.cuts.central.energy_single.valid() ) {
+        const Limits& energy_limits = cuts_.cuts.central.energy_single;
         if ( !energy_limits.passes( p6_cm_.energy() ) || !energy_limits.passes( p7_cm_.energy() ) )
           return 0.;
       }
 
-      if ( cuts_.cuts.central.count( Cuts::eta_single ) > 0 ) {
-        const Limits& eta_limits = cuts_.cuts.central.at( Cuts::eta_single );
+      if ( cuts_.cuts.central.eta_single.valid() ) {
+        const Limits& eta_limits = cuts_.cuts.central.eta_single;
         if ( !eta_limits.passes( p6_cm_.eta() ) || !eta_limits.passes( p7_cm_.eta() ) )
           return 0.;
       }

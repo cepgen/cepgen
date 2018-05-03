@@ -15,10 +15,10 @@ namespace CepGen
     void
     PPtoLL::preparePhaseSpace()
     {
-      registerVariable( y1_, Mapping::linear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "First outgoing lepton rapidity" );
-      registerVariable( y2_, Mapping::linear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "Second outgoing lepton rapidity" );
-      registerVariable( pt_diff_, Mapping::linear, cuts_.cuts.central[Cuts::pt_diff], { 0., 50. }, "Leptons transverse momentum difference" );
-      registerVariable( phi_pt_diff_, Mapping::linear, cuts_.cuts.central[Cuts::phi_pt_diff], { 0., 2.*M_PI }, "Leptons azimuthal angle difference" );
+      registerVariable( y1_, Mapping::linear, cuts_.cuts.central.rapidity_single, { -6., 6. }, "First outgoing lepton rapidity" );
+      registerVariable( y2_, Mapping::linear, cuts_.cuts.central.rapidity_single, { -6., 6. }, "Second outgoing lepton rapidity" );
+      registerVariable( pt_diff_, Mapping::linear, cuts_.cuts.central.pt_diff, { 0., 50. }, "Leptons transverse momentum difference" );
+      registerVariable( phi_pt_diff_, Mapping::linear, cuts_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Leptons azimuthal angle difference" );
     }
 
     double
@@ -68,7 +68,7 @@ namespace CepGen
       const double pt1x = ( ptsumx+ptdiffx )*0.5, pt1y = ( ptsumy+ptdiffy )*0.5, pt1 = std::hypot( pt1x, pt1y ),
                    pt2x = ( ptsumx-ptdiffx )*0.5, pt2y = ( ptsumy-ptdiffy )*0.5, pt2 = std::hypot( pt2x, pt2y );
 
-      const Limits pt_limits = cuts_.cuts.central[Cuts::pt_single];
+      const Limits pt_limits = cuts_.cuts.central.pt_single;
       if ( !pt_limits.passes( pt1 ) || !pt_limits.passes( pt2 ) )
         return 0.;
 
@@ -80,16 +80,14 @@ namespace CepGen
       //     a window in transverse momentum difference
       //=================================================================
 
-      if ( cuts_.cuts.central.count( Cuts::pt_diff ) > 0
-        && !cuts_.cuts.central.at( Cuts::pt_diff ).passes( fabs( pt1-pt2 ) ) )
+      if ( !cuts_.cuts.central.pt_diff.passes( fabs( pt1-pt2 ) ) )
         return 0.;
 
       //=================================================================
       //     a window in rapidity distance
       //=================================================================
 
-      if ( cuts_.cuts.central.count( Cuts::rapidity_diff ) > 0
-        && !cuts_.cuts.central[Cuts::rapidity_diff].passes( fabs( y1_-y2_ ) ) )
+      if ( !cuts_.cuts.central.rapidity_diff.passes( fabs( y1_-y2_ ) ) )
         return 0.;
 
       //=================================================================
