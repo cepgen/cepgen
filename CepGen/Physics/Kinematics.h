@@ -44,17 +44,13 @@ namespace CepGen
           unsigned int ipdg = (unsigned int)pdg;
           return HeavyIon{ (unsigned short)( ipdg % 1000 ), (unsigned short)( ( ipdg / 1000 ) % 1000 ) };
         }
-        inline PDG pdg() const { return (PDG)( 1e3*Z+A ); } // (Pythia8 convention/10-1e10)
+        inline PDG pdg() const { return (PDG)( 1e6+1e3*Z+A ); } // (Pythia8 convention/10-1e10+1e6)
         /// Mass number
         unsigned short A;
         /// Atomic number
         unsigned short Z;
       };
       friend std::ostream& operator<<( std::ostream&, const HeavyIon& );
-
-      /// Dump all the parameters used in this process cross-section computation
-      /// or events generation
-      void dump( std::ostream& os = *Logger::get().output ) const;
 
       struct Beam
       {

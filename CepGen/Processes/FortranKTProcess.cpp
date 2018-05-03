@@ -51,25 +51,21 @@ namespace CepGen
       mom_ip1_ = event_->getOneByRole( Particle::IncomingBeam1 ).momentum();
       mom_ip2_ = event_->getOneByRole( Particle::IncomingBeam2 ).momentum();
 
-      registerVariable( y1_, Mapping::linear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. },
-                       "First central particle rapidity" );
-      registerVariable( y2_, Mapping::linear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. },
-                        "Second central particle rapidity" );
-      registerVariable( pt_diff_, Mapping::linear, cuts_.cuts.central[Cuts::pt_diff], { 0., 50. },
-                        "Transverse momentum difference between central particles" );
-      registerVariable( phi_pt_diff_, Mapping::linear, cuts_.cuts.central[Cuts::phi_pt_diff], { 0., 2.*M_PI },
-                        "Central particles azimuthal angle difference" );
+      registerVariable( y1_, Mapping::linear, cuts_.cuts.central.rapidity_single, { -6., 6. }, "First central particle rapidity" );
+      registerVariable( y2_, Mapping::linear, cuts_.cuts.central.rapidity_single, { -6., 6. }, "Second central particle rapidity" );
+      registerVariable( pt_diff_, Mapping::linear, cuts_.cuts.central.pt_diff, { 0., 50. }, "Transverse momentum difference between central particles" );
+      registerVariable( phi_pt_diff_, Mapping::linear, cuts_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Central particles azimuthal angle difference" );
 
       //===========================================================================================
       // feed phase space cuts to the common block
       //===========================================================================================
 
-      cuts_.cuts.central[Cuts::pt_single].save( (bool&)kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max );
-      cuts_.cuts.central[Cuts::energy_single].save( (bool&)kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max );
-      cuts_.cuts.central[Cuts::eta_single].save( (bool&)kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max );
-      cuts_.cuts.central[Cuts::mass_sum].save( (bool&)kincuts_.iinvm, kincuts_.invm_min, kincuts_.invm_max );
-      cuts_.cuts.central[Cuts::pt_sum].save( (bool&)kincuts_.iptsum, kincuts_.ptsum_min, kincuts_.ptsum_max );
-      cuts_.cuts.central[Cuts::rapidity_diff].save( (bool&)kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max );
+      cuts_.cuts.central.pt_single.save( (bool&)kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max );
+      cuts_.cuts.central.energy_single.save( (bool&)kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max );
+      cuts_.cuts.central.eta_single.save( (bool&)kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max );
+      cuts_.cuts.central.mass_sum.save( (bool&)kincuts_.iinvm, kincuts_.invm_min, kincuts_.invm_max );
+      cuts_.cuts.central.pt_sum.save( (bool&)kincuts_.iptsum, kincuts_.ptsum_min, kincuts_.ptsum_max );
+      cuts_.cuts.central.rapidity_diff.save( (bool&)kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max );
 
       //===========================================================================================
       // feed run parameters to the common block
