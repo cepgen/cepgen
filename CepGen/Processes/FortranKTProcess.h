@@ -23,6 +23,8 @@ namespace CepGen
 
         std::function<void(double&)> func_;
         double y1_, y2_, pt_diff_, phi_pt_diff_;
+
+        Particle::Momentum mom_ip1_, mom_ip2_;
     };
   }
 }

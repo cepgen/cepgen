@@ -46,6 +46,9 @@ FortranKTProcess::FortranKTProcess( const char* name, const char* descr, std::fu
 void
 FortranKTProcess::preparePhaseSpace()
 {
+  mom_ip1_ = event_->getOneByRole( Particle::IncomingBeam1 ).momentum();
+  mom_ip2_ = event_->getOneByRole( Particle::IncomingBeam2 ).momentum();
+
   registerVariable( y1_, Mapping::linear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "First outgoing lepton rapidity" );
   registerVariable( y2_, Mapping::linear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "Second outgoing lepton rapidity" );
   registerVariable( pt_diff_, Mapping::linear, cuts_.cuts.central[Cuts::pt_diff], { 0., 50. }, "Leptons transverse momentum difference" );
@@ -65,10 +68,18 @@ FortranKTProcess::preparePhaseSpace()
   params_.pdg_l = (int)cuts_.central_system[0];
   params_.iflux1 = cuts_.incoming_beams.first.kt_flux;
   params_.iflux2 = cuts_.incoming_beams.second.kt_flux;
+  if ( (Flux)params_.iflux1 == Flux::GluonKMR )
+    event_->getOneByRole( Particle::Parton1 ).setPdgId( PDG::Gluon );
+  if ( (Flux)params_.iflux2 == Flux::GluonKMR )
+    event_->getOneByRole( Particle::Parton2 ).setPdgId( PDG::Gluon );
   params_.a_nuc1 = cuts_.incoming_beams.first.hi.A;
   params_.z_nuc1 = cuts_.incoming_beams.first.hi.Z;
+  if ( params_.z_nuc1 > 1 )
+    event_->getOneByRole( Particle::IncomingBeam1 ).setPdgId( cuts_.incoming_beams.first.hi.pdg() );
   params_.a_nuc2 = cuts_.incoming_beams.second.hi.A;
   params_.z_nuc2 = cuts_.incoming_beams.second.hi.Z;
+  if ( params_.z_nuc2 > 1 )
+    event_->getOneByRole( Particle::IncomingBeam2 ).setPdgId( cuts_.incoming_beams.second.hi.pdg() );
   params_.inp1 = cuts_.incoming_beams.first.pz;
   params_.inp2 = cuts_.incoming_beams.second.pz;
 }
@@ -94,9 +105,6 @@ FortranKTProcess::computeKTFactorisedMatrixElement()
 void
 FortranKTProcess::fillCentralParticlesKinematics()
 {
-  const Particle::Momentum& mom_ip1 = event_->getOneByRole( Particle::IncomingBeam1 ).momentum();
-  const Particle::Momentum& mom_ip2 = event_->getOneByRole( Particle::IncomingBeam2 ).momentum();
-
   //===============================================================================================
   // outgoing beam remnants
   //===============================================================================================
@@ -110,11 +118,9 @@ FortranKTProcess::fillCentralParticlesKinematics()
   // intermediate partons
   //===============================================================================================
 
-  const Particle::Momentum mom_par1 = mom_ip1-PX_, mom_par2 = mom_ip2-PY_;
-  Particle& par1 = event_->getOneByRole( Particle::Parton1 );
-  par1.setMomentum( mom_par1 );
-  Particle& par2 = event_->getOneByRole( Particle::Parton2 );
-  par2.setMomentum( mom_par2 );
+  const Particle::Momentum mom_par1 = mom_ip1_-PX_, mom_par2 = mom_ip2_-PY_;
+  event_->getOneByRole( Particle::Parton1 ).setMomentum( mom_par1 );
+  event_->getOneByRole( Particle::Parton2 ).setMomentum( mom_par2 );
   event_->getOneByRole( Particle::Intermediate ).setMomentum( mom_par1+mom_par2 );
 
   //===============================================================================================

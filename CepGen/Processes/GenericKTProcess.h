@@ -49,7 +49,7 @@ namespace CepGen
           ElasticBudnev = 10,
           Inelastic = 1,
           InelasticBudnev = 11,
-          Gluon = 20,
+          GluonKMR = 20,
           HIElastic = 100
         };
         friend std::ostream& operator<<( std::ostream&, const Flux& );

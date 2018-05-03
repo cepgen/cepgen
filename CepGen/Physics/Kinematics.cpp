@@ -31,6 +31,10 @@ namespace CepGen
   // User-friendly displayers
   //-----------------------------------------------------------------------------------------------
 
+  //-----------------------------------------------------------------------------------------------
+  // User-friendly displayers
+  //-----------------------------------------------------------------------------------------------
+
   std::ostream&
   operator<<( std::ostream& os, const Kinematics::Mode& pm )
   {
@@ -51,6 +55,12 @@ namespace CepGen
         return os << "inelastic/inelastic";
     }
     return os;
+  }
+
+  std::ostream&
+  operator<<( std::ostream& os, const Kinematics::HeavyIon& hi )
+  {
+    return os << "HI{Z=" << hi.Z << ", A=" << hi.A << "}";
   }
 
   //------------------------------------------------------------------------------------------------
