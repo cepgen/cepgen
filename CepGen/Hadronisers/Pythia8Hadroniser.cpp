@@ -19,7 +19,6 @@ namespace CepGen
     Pythia8::Vec4
     momToVec4( const Particle::Momentum& mom )
     {
-//std::cout << mom << "|" << mom.mass() << "|" << Pythia8::Vec4( mom.px(), mom.py(), mom.pz(), mom.energy() ).mCalc() << std::endl;
       return Pythia8::Vec4( mom.px(), mom.py(), mom.pz(), mom.energy() );
     }
 
@@ -28,7 +27,7 @@ namespace CepGen
 #ifdef PYTHIA8
       pythia_( new Pythia8::Pythia ), lhaevt_( new LHAEvent( &params ) ),
 #endif
-      full_evt_( false ), params_( &params )
+      full_evt_( false ), offset_( 0 ), first_evt_( true ), params_( &params )
     {
 #ifdef PYTHIA8
       pythia_->setLHAupPtr( (Pythia8::LHAup*)lhaevt_.get() );
@@ -124,17 +123,24 @@ namespace CepGen
       //===========================================================================================
 
       lhaevt_->feedEvent( ev, full );
-//lhaevt_->listEvent();
+
       //===========================================================================================
       // launch the hadronisation / resonances decays, and update the event accordingly
       //===========================================================================================
 
-//lhaevt_->listEvent();
-      unsigned short num_try = 0;
-      while ( !pythia_->next() && num_try < ev.num_hadronisation_trials )
-        num_try++;
-//pythia_->process.list();
-//pythia_->event.list();
+      ev.num_hadronisation_trials = 0;
+      while ( ev.num_hadronisation_trials < max_attempts_ ) {
+        bool res = pythia_->next();
+        if ( res && full && first_evt_ ) {
+          offset_ = 0;
+          for ( unsigned short i = 1; i < pythia_->event.size(); ++i )
+            if ( pythia_->event[i].status() == -12 ) // skip the incoming particles
+              offset_++;
+          first_evt_ = false;
+          continue;
+        }
+        ev.num_hadronisation_trials++;
+      }
 
       updateEvent( ev, weight, full );
 
@@ -143,7 +149,7 @@ namespace CepGen
     }
 
     Particle&
-    Pythia8Hadroniser::addParticle( Event& ev, const Pythia8::Particle& py_part, const Pythia8::Vec4& mom, unsigned short role, unsigned short offset ) const
+    Pythia8Hadroniser::addParticle( Event& ev, const Pythia8::Particle& py_part, const Pythia8::Vec4& mom, unsigned short role ) const
     {
       Particle& op = ev.addParticle( (Particle::Role)role );
       op.setPdgId( static_cast<PDG>( abs( py_part.id() ) ), py_part.charge() );
@@ -153,26 +159,16 @@ namespace CepGen
       );
       op.setMomentum( Particle::Momentum( mom.px(), mom.py(), mom.pz(), mom.e() ) );
       op.setMass( mom.mCalc() );
-      lhaevt_->addCorresp( py_part.index()-offset, op.id() );
+      lhaevt_->addCorresp( py_part.index()-offset_, op.id() );
       return op;
     }
 
     void
     Pythia8Hadroniser::updateEvent( Event& ev, double& weight, bool full ) const
     {
-      unsigned short offset = 0;
-
-//pythia_->event.list();
-      for ( unsigned short i = 1; i < pythia_->event.size(); ++i ) {
-        if ( pythia_->event[i].status() != -12 )
-          continue;
-        // skip the incoming particles
-        offset++;
-      }
-
-      for ( unsigned short i = 1+offset; i < pythia_->event.size(); ++i ) {
+      for ( unsigned short i = 1+offset_; i < pythia_->event.size(); ++i ) {
         const Pythia8::Particle& p = pythia_->event[i];
-        const unsigned short cg_id = lhaevt_->cgPart( i-offset );
+        const unsigned short cg_id = lhaevt_->cgPart( i-offset_ );
         if ( cg_id != LHAEvent::invalid_id ) { // particle already in the event
           Particle& cg_part = ev.getById( cg_id );
           if ( cg_part.role() == Particle::OutgoingBeam1
@@ -186,53 +182,49 @@ namespace CepGen
             continue;
           weight *= p.particleDataEntry().pickChannel().bRatio();
           cg_part.setStatus( Particle::Resonance );
-          continue;
         }
-        // new particle to be added
-        Particle::Role role = (Particle::Role)findRole( ev, p, offset );
-        Pythia8::Vec4 mom = p.p();
-        switch ( role ) {
-          case Particle::OutgoingBeam1: // no break!
-            ev.getByRole( Particle::OutgoingBeam1 )[0].setStatus( Particle::Fragmented );
-            if ( abs( p.status() ) != 61 )
+        else { // new particle to be added
+          Particle::Role role = (Particle::Role)findRole( ev, p );
+          Pythia8::Vec4 mom = p.p();
+          switch ( role ) {
+            case Particle::OutgoingBeam1: // no break!
+              ev.getByRole( Particle::OutgoingBeam1 )[0].setStatus( Particle::Fragmented );
+              if ( abs( p.status() ) != 61 )
+                break;
+            case Particle::OutgoingBeam2: // no break!
+              ev.getByRole( Particle::OutgoingBeam2 )[0].setStatus( Particle::Fragmented );
+              if ( abs( p.status() ) != 61 )
+                break;
+            default:
               break;
-          case Particle::OutgoingBeam2: // no break!
-            ev.getByRole( Particle::OutgoingBeam2 )[0].setStatus( Particle::Fragmented );
-            if ( abs( p.status() ) != 61 )
-              break;
-          default:
-            break;
-        }
-        // found the role ; now we can add the particle
-        Particle& cg_part = addParticle( ev, p, mom, (unsigned short)role, offset );
-        for ( const auto& moth_id : p.motherList() ) {
-          if ( moth_id <= offset )
-            continue;
-          const unsigned short moth_cg_id = lhaevt_->cgPart( moth_id-offset );
-          if ( moth_cg_id != LHAEvent::invalid_id ) {
-            Particle& moth = ev.getById( moth_cg_id );
-            cg_part.addMother( moth );
           }
-          else {
-            Particle& cg_moth = addParticle( ev, pythia_->event[moth_id], mom, (unsigned short)role, offset );
-            cg_part.addMother( cg_moth );
+          // found the role ; now we can add the particle
+          Particle& cg_part = addParticle( ev, p, mom, (unsigned short)role );
+          for ( const auto& moth_id : p.motherList() ) {
+            if ( moth_id <= offset_ )
+              continue;
+            const unsigned short moth_cg_id = lhaevt_->cgPart( moth_id-offset_ );
+            if ( moth_cg_id != LHAEvent::invalid_id )
+              cg_part.addMother( ev.getById( moth_cg_id ) );
+            else
+              cg_part.addMother( addParticle( ev, pythia_->event[moth_id], mom, (unsigned short)role ) );
           }
         }
       }
     }
 
     unsigned short
-    Pythia8Hadroniser::findRole( const Event& ev, const Pythia8::Particle& p, unsigned short offset ) const
+    Pythia8Hadroniser::findRole( const Event& ev, const Pythia8::Particle& p ) const
     {
       for ( const auto& par_id : p.motherList() ) {
-        if ( offset > 0 && par_id == 1 )
+        if ( par_id == 1 && offset_ > 0 )
           return (unsigned short)Particle::OutgoingBeam1;
-        if ( offset > 0 && par_id == 2 )
+        if ( par_id == 2 && offset_ > 0 )
           return (unsigned short)Particle::OutgoingBeam2;
-        const unsigned short par_cg_id = lhaevt_->cgPart( par_id-offset );
+        const unsigned short par_cg_id = lhaevt_->cgPart( par_id-offset_ );
         if ( par_cg_id != LHAEvent::invalid_id )
           return (unsigned short)ev.getConstById( par_cg_id ).role();
-        return findRole( ev, pythia_->event[par_id], offset );
+        return findRole( ev, pythia_->event[par_id] );
       }
       return (unsigned short)Particle::UnknownRole;
     }
@@ -275,9 +267,9 @@ namespace CepGen
     double x1 = 0., x2 = 0.;
 
     const Particle& part1 = ev.getOneByRole( Particle::Parton1 ), &part2 = ev.getOneByRole( Particle::Parton2 );
+    const Particle& op1 = ev.getOneByRole( Particle::OutgoingBeam1 ), &op2 = ev.getOneByRole( Particle::OutgoingBeam2 );
 
     if ( full ) {
-      const Particle& op1 = ev.getOneByRole( Particle::OutgoingBeam1 ), &op2 = ev.getOneByRole( Particle::OutgoingBeam2 );
       const Particle& ip1 = ev.getOneByRole( Particle::IncomingBeam1 ), &ip2 = ev.getOneByRole( Particle::IncomingBeam2 );
       const double q2_1 = -part1.momentum().mass2(), q2_2 = -part2.momentum().mass2();
       x1 = q2_1/( q2_1+op1.mass2()-mp2_ );
@@ -293,15 +285,12 @@ namespace CepGen
 
       mom_iq1 = Pythia8::Vec4( 0., 0., x1*ip1.momentum().pz(), x1*ip1.energy() );
       quark1_id = sizePart();
-      addCorresp( quark1_id, op1.id() );
       addParticle( quark1_pdgid, -1, 0, 0, 501, 0, mom_iq1.px(), mom_iq1.py(), mom_iq1.pz(), mom_iq1.e(), mom_iq1.mCalc(), 0., 1. );
 
       mom_iq2 = Pythia8::Vec4( 0., 0., x2*ip2.momentum().pz(), x2*ip2.energy() );
       quark2_id = sizePart();
-      addCorresp( quark2_id, op2.id() );
       addParticle( quark2_pdgid, -1, 0, 0, 502, 0, mom_iq2.px(), mom_iq2.py(), mom_iq2.pz(), mom_iq2.e(), mom_iq2.mCalc(), 0., 1. );
     }
-//    std::cout << x1 << "|" << x2 << std::endl;
 
     const Pythia8::Vec4 mom_part1( Hadroniser::momToVec4( part1.momentum() ) ), mom_part2( Hadroniser::momToVec4( part2.momentum() ) );
 
@@ -322,9 +311,11 @@ namespace CepGen
       //===========================================================================================
 
       const Pythia8::Vec4 mom_oq1 = mom_iq1-mom_part1;
+      addCorresp( sizePart(), op1.id() );
       addParticle( quark1_pdgid, 1, quark1_id, quark2_id, 501, 0, mom_oq1.px(), mom_oq1.py(), mom_oq1.pz(), mom_oq1.e(), mom_oq1.mCalc(), 0., 1. );
 
       const Pythia8::Vec4 mom_oq2 = mom_iq2-mom_part2;
+      addCorresp( sizePart(), op2.id() );
       addParticle( quark2_pdgid, 1, quark1_id, quark2_id, 502, 0, mom_oq2.px(), mom_oq2.py(), mom_oq2.pz(), mom_oq2.e(), mom_oq2.mCalc(), 0., 1. );
     }
 

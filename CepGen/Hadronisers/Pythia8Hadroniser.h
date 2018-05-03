@@ -68,14 +68,16 @@ namespace CepGen
         std::vector<unsigned short> min_ids_;
         std::unordered_map<short,short> py_cg_corresp_, cg_py_corresp_;
 #ifdef PYTHIA8
-        unsigned short findRole( const Event& ev, const Pythia8::Particle& p, unsigned short offset ) const;
+        unsigned short findRole( const Event& ev, const Pythia8::Particle& p ) const;
         void updateEvent( Event& ev, double& weight, bool full ) const;
-        Particle& addParticle( Event& ev, const Pythia8::Particle&, const Pythia8::Vec4& mom, unsigned short, unsigned short offset = 0 ) const;
+        Particle& addParticle( Event& ev, const Pythia8::Particle&, const Pythia8::Vec4& mom, unsigned short ) const;
         /// A Pythia8 core to be wrapped
         std::unique_ptr<Pythia8::Pythia> pythia_;
         std::shared_ptr<LHAEvent> lhaevt_;
         bool full_evt_;
 #endif
+        unsigned short offset_;
+        bool first_evt_;
         const Parameters* params_; // not owning
     };
   }
