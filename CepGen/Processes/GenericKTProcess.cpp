@@ -236,8 +236,8 @@ namespace CepGen
     void
     GenericKTProcess::fillKinematics( bool )
     {
-      fillPrimaryParticlesKinematics();
       fillCentralParticlesKinematics(); // process-dependent!
+      fillPrimaryParticlesKinematics();
     }
 
     void

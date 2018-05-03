@@ -123,10 +123,6 @@ namespace CepGen
       protected:
         /// Array of double precision floats representing the point on which the weight in the cross-section is computed
         std::vector<double> x_;
-        /// List of incoming state particles (including intermediate partons)
-        IncomingState incoming_state_;
-        /// List of outgoing state particles
-        OutgoingState outgoing_state_;
         /// \f$s\f$, squared centre of mass energy of the incoming particles' system, in \f$\mathrm{GeV}^2\f$
         double s_;
         /// \f$\sqrt s\f$, centre of mass energy of the incoming particles' system (in GeV)
