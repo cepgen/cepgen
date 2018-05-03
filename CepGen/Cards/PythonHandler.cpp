@@ -222,6 +222,9 @@ namespace CepGen
       getLimits( kin, "eta", params_.kinematics.cuts.central.eta_single );
       getLimits( kin, "pt", params_.kinematics.cuts.central.pt_single );
 
+      getLimits( kin, "ptsum", params_.kinematics.cuts.central.pt_sum );
+      getLimits( kin, "invmass", params_.kinematics.cuts.central.mass_sum );
+
       getLimits( kin, "mx", params_.kinematics.cuts.remnants.mass_single );
     }
 

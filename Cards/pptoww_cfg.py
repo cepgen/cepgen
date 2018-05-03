@@ -35,6 +35,10 @@ process = ktProcess.clone('pptoww',
         qt = (0., 1000.),
         #--- extra cuts on the pt(W+) and pt(W-) plane
         ptdiff = (0., 2000.),
+        #--- extra cuts on the W+W- system
+        invmass = (0.,),
+        ptsum = (0.,),
+        #--- cuts on single particles' level
         cuts = {
             # cuts on the single W level
             24: cepgen.Parameters(
