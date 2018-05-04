@@ -1,4 +1,5 @@
 #include "CepGen/Core/Logger.h"
+#if !defined(__CINT__) && !defined(__CLING__)
 
 namespace CepGen
 {
@@ -48,4 +49,6 @@ namespace CepGen
     return os;
   }
 }
+
+#endif
 

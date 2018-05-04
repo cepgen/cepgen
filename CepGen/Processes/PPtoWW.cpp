@@ -58,7 +58,8 @@ namespace CepGen
       const double pt1x = ( ptsumx+ptdiffx )*0.5, pt1y = ( ptsumy+ptdiffy )*0.5, pt1 = std::hypot( pt1x, pt1y ),
                    pt2x = ( ptsumx-ptdiffx )*0.5, pt2y = ( ptsumy-ptdiffy )*0.5, pt2 = std::hypot( pt2x, pt2y );
 
-      if ( cuts_.cuts.central_particles.at( PDG::W ).pt_single.valid() ) {
+      if ( cuts_.cuts.central_particles.count( PDG::W ) > 0
+        && cuts_.cuts.central_particles.at( PDG::W ).pt_single.valid() ) {
         const Limits pt_limits = cuts_.cuts.central_particles.at( PDG::W ).pt_single;
         if ( !pt_limits.passes( pt1 ) || !pt_limits.passes( pt2 ) )
           return 0.;

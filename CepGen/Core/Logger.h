@@ -43,6 +43,13 @@ namespace CepGen
       /// Output stream to use for all logging operations
       std::ostream* output;
   };
+
+#if defined(__CINT__) || defined(__CLING__)
+  inline Logger::Logger( std::ostream* ) {}
+  inline Logger::~Logger() {}
+  inline void Logger::addExceptionRule( const std::string& ) {}
+  inline bool Logger::passExceptionRule( const std::string&, const Logger::Level& ) const { return false; }
+#endif
 }
 
 #endif
