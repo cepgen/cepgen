@@ -2,13 +2,7 @@
 #define Test_TreeInfo_h
 
 #include "TTree.h"
-#include "TClonesArray.h"
-#include "../CepGen/Core/Exception.h"
 #include <string>
-
-#ifdef __CINT__
-#pragma link C++ class std::vector<TLorentzVector>+;
-#endif
 
 namespace CepGen
 {
@@ -19,7 +13,7 @@ namespace CepGen
     unsigned int num_events, litigious_events;
     TTree* tree;
 
-    TreeRun() : tree( nullptr ) { clear(); }
+    TreeRun() : tree( NULL ) { clear(); }
     void clear() {
       sqrt_s = -1.;
       xsect = errxsect = -1.;
@@ -49,7 +43,7 @@ namespace CepGen
       tree->SetBranchAddress( "litigious_events", &litigious_events );
       tree->SetBranchAddress( "sqrt_s", &sqrt_s );
       if ( tree->GetEntriesFast() > 1 )
-        CG_WARNING( "TreeRun" ) << "The run tree has more than one entry.";
+        std::cerr << "The run tree has more than one entry." << std::endl;
       tree->GetEntry( 0 );
     }
   };
@@ -58,7 +52,7 @@ namespace CepGen
   {
     // book a sufficienly large number to allow the large multiplicity
     // of excited proton fragmentation products
-    static constexpr unsigned short maxpart = 5000;
+    static const unsigned short maxpart = 5000;
 
     TTree* tree;
 
@@ -69,7 +63,7 @@ namespace CepGen
     int pdg_id[maxpart], parent1[maxpart], parent2[maxpart];
     int stable[maxpart], role[maxpart], status[maxpart];
 
-    TreeEvent() : tree( nullptr ) {
+    TreeEvent() : tree( NULL ) {
       clear();
     }
 
@@ -86,7 +80,7 @@ namespace CepGen
     }
     void fill() {
       if ( !tree )
-        throw CG_FATAL( "TreeEvent" ) << "Trying to fill a non-existent tree!";
+        throw std::runtime_error( "TreeEvent: Trying to fill a non-existent tree!" );
 
       tree->Fill();
       clear();
