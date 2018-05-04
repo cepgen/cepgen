@@ -229,8 +229,12 @@ namespace CepGen
   {
     if ( num_events < 1 )
       num_events = input_params_->generation.maxgen;
-    while ( input_params_->generation.ngen < num_events )
-      generateOne( callback );
+    try {
+      while ( input_params_->generation.ngen < num_events )
+        generateOne( callback );
+    } catch ( const Exception& e ) {
+      throw e;
+    }
   }
 
   bool

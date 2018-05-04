@@ -264,33 +264,12 @@ namespace CepGen
 
     Pythia8::Vec4 mom_iq1, mom_iq2;
     unsigned short quark1_id = 0, quark2_id = 0, quark1_pdgid = 0, quark2_pdgid = 0;
-    double x1 = 0., x2 = 0.;
 
     const Particle& part1 = ev.getOneByRole( Particle::Parton1 ), &part2 = ev.getOneByRole( Particle::Parton2 );
     const Particle& op1 = ev.getOneByRole( Particle::OutgoingBeam1 ), &op2 = ev.getOneByRole( Particle::OutgoingBeam2 );
+    const double q2_1 = -part1.momentum().mass2(), q2_2 = -part2.momentum().mass2();
+    const double x1 = q2_1/( q2_1+op1.mass2()-mp2_ ), x2 = q2_2/( q2_2+op2.mass2()-mp2_ );
 
-    if ( full ) {
-      const Particle& ip1 = ev.getOneByRole( Particle::IncomingBeam1 ), &ip2 = ev.getOneByRole( Particle::IncomingBeam2 );
-      const double q2_1 = -part1.momentum().mass2(), q2_2 = -part2.momentum().mass2();
-      x1 = q2_1/( q2_1+op1.mass2()-mp2_ );
-      x2 = q2_2/( q2_2+op2.mass2()-mp2_ );
-
-      quark1_pdgid = quark2_pdgid = 2; //FIXME
-
-      setIdX( op1.integerPdgId(), op2.integerPdgId(), x1, x2 );
-
-      //===========================================================================================
-      // incoming valence quarks
-      //===========================================================================================
-
-      mom_iq1 = Pythia8::Vec4( 0., 0., x1*ip1.momentum().pz(), x1*ip1.energy() );
-      quark1_id = sizePart();
-      addParticle( quark1_pdgid, -1, 0, 0, 501, 0, mom_iq1.px(), mom_iq1.py(), mom_iq1.pz(), mom_iq1.e(), mom_iq1.mCalc(), 0., 1. );
-
-      mom_iq2 = Pythia8::Vec4( 0., 0., x2*ip2.momentum().pz(), x2*ip2.energy() );
-      quark2_id = sizePart();
-      addParticle( quark2_pdgid, -1, 0, 0, 502, 0, mom_iq2.px(), mom_iq2.py(), mom_iq2.pz(), mom_iq2.e(), mom_iq2.mCalc(), 0., 1. );
-    }
 
     const Pythia8::Vec4 mom_part1( Hadroniser::momToVec4( part1.momentum() ) ), mom_part2( Hadroniser::momToVec4( part2.momentum() ) );
 
@@ -305,7 +284,26 @@ namespace CepGen
       addCorresp( sizePart(), part2.id() );
       addParticle( part2.integerPdgId(), -2, quark2_id, 0, 0, 0, mom_part2.px(), mom_part2.py(), mom_part2.pz(), mom_part2.e(), mom_part2.mCalc(), 0., 0. );
     }
-    if ( full ) {
+    else { // full event content (with collinear partons)
+      //FIXME select quark flavours accordingly
+      quark1_pdgid = quark2_pdgid = 2;
+      //FIXME
+
+      setIdX( op1.integerPdgId(), op2.integerPdgId(), x1, x2 );
+
+      //===========================================================================================
+      // incoming valence quarks
+      //===========================================================================================
+
+      const Particle& ip1 = ev.getOneByRole( Particle::IncomingBeam1 ), &ip2 = ev.getOneByRole( Particle::IncomingBeam2 );
+      mom_iq1 = Pythia8::Vec4( 0., 0., x1*ip1.momentum().pz(), x1*ip1.energy() );
+      quark1_id = sizePart();
+      addParticle( quark1_pdgid, -1, 0, 0, 501, 0, mom_iq1.px(), mom_iq1.py(), mom_iq1.pz(), mom_iq1.e(), mom_iq1.mCalc(), 0., 1. );
+
+      mom_iq2 = Pythia8::Vec4( 0., 0., x2*ip2.momentum().pz(), x2*ip2.energy() );
+      quark2_id = sizePart();
+      addParticle( quark2_pdgid, -1, 0, 0, 502, 0, mom_iq2.px(), mom_iq2.py(), mom_iq2.pz(), mom_iq2.e(), mom_iq2.mCalc(), 0., 1. );
+
       //===========================================================================================
       // outgoing valence quarks
       //===========================================================================================
