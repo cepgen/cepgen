@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include <gsl/gsl_monte.h>
+#include <gsl/gsl_monte_vegas.h>
 #include <gsl/gsl_rng.h>
 
 namespace CepGen
@@ -70,7 +71,7 @@ namespace CepGen
        */
       void computeGenerationParameters();
       double uniform() const;
-      double eval( const std::vector<double>& x );
+      double eval( const std::vector<double>& x, bool treat = false );
       /// Selected bin at which the function will be evaluated
       int ps_bin_;
       /// List of parameters to specify the integration range and the physics determining the phase space
@@ -79,6 +80,8 @@ namespace CepGen
       std::unique_ptr<gsl_monte_function> function_;
       std::unique_ptr<gsl_rng,void(*)( gsl_rng* )> rng_;
       std::unique_ptr<GridParameters> grid_;
+      gsl_monte_vegas_state* veg_state_;
+      double r_boxes_;
   };
   std::ostream& operator<<( std::ostream&, const Integrator::Type& );
   std::ostream& operator<<( std::ostream&, const Integrator::VegasMode& );
