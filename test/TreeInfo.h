@@ -113,6 +113,10 @@ namespace CepGen
       tree->Branch( "generation_time", &gen_time, "generation_time/F" );
       tree->Branch( "total_time", &tot_time, "total_time/F" );
     }
+    void attach( TFile* f ) {
+      tree = dynamic_cast<TTree*>( f->Get( "events" ) );
+      attach( tree );
+    }
     void attach( TTree* t ) {
       tree = t;
       if ( !tree ) return;
