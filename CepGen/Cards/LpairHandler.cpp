@@ -89,6 +89,7 @@ namespace CepGen
       //-------------------------------------------------------------------------------------------
 
       registerParameter<bool>( "IEND", "Generation type", &params->generation.enabled );
+      registerParameter<bool>( "NTRT", "Smoothen the integrand", &params->generation.treat );
       registerParameter<unsigned int>( "DEBG", "Debugging verbosity", (unsigned int*)&Logger::get().level );
       registerParameter<unsigned int>( "NCVG", "Number of function calls", &params->integrator.ncvg );
       registerParameter<unsigned int>( "ITVG", "Number of integration iterations", (unsigned int*)&params->integrator.vegas.iterations );
@@ -146,7 +147,7 @@ namespace CepGen
     }
 
     void
-    LpairHandler::setParameter( std::string key, std::string value )
+    LpairHandler::setParameter( const std::string& key, const std::string& value )
     {
       try { setValue<double>( key.c_str(), std::stod( value ) ); } catch ( std::invalid_argument& ) {}
       try { setValue<unsigned int>( key.c_str(), std::stoi( value ) ); } catch ( std::invalid_argument& ) {}

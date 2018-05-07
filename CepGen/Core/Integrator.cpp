@@ -194,7 +194,7 @@ namespace CepGen
       for ( unsigned int i = 0; i < function_->dim; ++i )
         x[i] = ( uniform() + grid_n[i] ) * GridParameters::inv_mbin_;
       // get weight for selected x value
-      weight = eval( x, true );
+      weight = eval( x, input_params_->generation.treat );
       if ( weight <= 0. )
         continue;
       if ( weight > y )
@@ -234,9 +234,7 @@ namespace CepGen
     try {
       while ( input_params_->generation.ngen < num_events )
         generateOne( callback );
-    } catch ( const Exception& e ) {
-      throw e;
-    }
+    } catch ( const Exception& e ) { throw; }
   }
 
   bool
@@ -258,7 +256,7 @@ namespace CepGen
       const std::vector<unsigned short> grid_n = grid_->n_map.at( ps_bin_ );
       for ( unsigned int k = 0; k < function_->dim; ++k )
         xtmp[k] = ( uniform() + grid_n[k] ) * GridParameters::inv_mbin_;
-      const double weight = eval( xtmp, true );
+      const double weight = eval( xtmp, input_params_->generation.treat );
       // Parameter for correction of correction
       if ( weight > grid_->f_max[ps_bin_] ) {
         grid_->f_max2 = std::max( grid_->f_max2, weight );
@@ -296,7 +294,7 @@ namespace CepGen
   Integrator::storeEvent( const std::vector<double>& x, std::function<void( const Event&, unsigned long )> callback )
   {
     input_params_->setStorage( true );
-    const double weight = eval( x );
+    const double weight = eval( x, input_params_->generation.treat );
     input_params_->setStorage( false );
 
     if ( weight <= 0. )
@@ -367,7 +365,7 @@ namespace CepGen
       for ( unsigned int j = 0; j < input_params_->generation.num_points; ++j ) {
         for ( unsigned int k = 0; k < function_->dim; ++k )
           x[k] = ( uniform()+n[k] ) * GridParameters::inv_mbin_;
-        const double weight = eval( x, true );
+        const double weight = eval( x, input_params_->generation.treat );
         grid_->f_max[i] = std::max( grid_->f_max[i], weight );
         fsum += weight;
         fsum2 += weight*weight;

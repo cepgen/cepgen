@@ -82,6 +82,8 @@ namespace CepGen
         unsigned int maxgen;
         /// Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?
         bool symmetrise;
+        /// Is the integrand to be smoothed for events generation?
+        bool treat;
         /// Number of events already generated in this run
         unsigned int ngen;
         /// Frequency at which the events are displayed to the end-user
