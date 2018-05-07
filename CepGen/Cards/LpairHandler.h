@@ -29,11 +29,11 @@ namespace CepGen
         /// Register a parameter to be steered to a configuration variable
         template<class T> void registerParameter( const char* key, const char* description, T* def ) {}
         /// Set a parameter value
-        template<class T> void setValue( const char* key, T value ) {}
+        template<class T> void setValue( const char* key, const T& value ) {}
         /// Retrieve a parameter value
         template<class T> T getValue( const char* key ) const {}
 
-        void setParameter( std::string key, std::string value );
+        void setParameter( const std::string& key, const std::string& value );
         std::string getParameter( std::string key ) const;
         std::string getDescription( std::string key ) const;
 
@@ -56,19 +56,19 @@ namespace CepGen
 
     //----- specialised setters
 
-    template<> inline void LpairHandler::setValue<std::string>( const char* key, std::string value ) {
+    template<> inline void LpairHandler::setValue<std::string>( const char* key, const std::string& value ) {
       auto it = p_strings_.find( key );
       if ( it != p_strings_.end() ) *it->second.value = value;
     }
-    template<> inline void LpairHandler::setValue<double>( const char* key, double value ) {
+    template<> inline void LpairHandler::setValue<double>( const char* key, const double& value ) {
       auto it = p_doubles_.find( key );
       if ( it != p_doubles_.end() ) *it->second.value = value;
     }
-    template<> inline void LpairHandler::setValue<unsigned int>( const char* key, unsigned int value ) {
+    template<> inline void LpairHandler::setValue<unsigned int>( const char* key, const unsigned int& value ) {
       auto it = p_ints_.find( key );
       if ( it != p_ints_.end() ) *it->second.value = value;
     }
-    template<> inline void LpairHandler::setValue<bool>( const char* key, bool value ) {
+    template<> inline void LpairHandler::setValue<bool>( const char* key, const bool& value ) {
       auto it = p_bools_.find( key );
       if ( it != p_bools_.end() ) *it->second.value = value;
     }

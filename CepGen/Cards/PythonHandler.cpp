@@ -311,6 +311,7 @@ namespace CepGen
       if ( !PyDict_Check( gen ) )
         throwPythonError( "Generation information object should be a dictionary!" );
       params_.generation.enabled = true;
+      getParameter( gen, "treat", params_.generation.treat );
       getParameter( gen, "numEvents", params_.generation.maxgen );
       getParameter( gen, "printEvery", params_.generation.gen_print_every );
       getParameter( gen, "numThreads", params_.generation.num_threads );
@@ -506,19 +507,33 @@ namespace CepGen
     }
 
     void
+    PythonHandler::getParameter( PyObject* parent, const char* key, bool& out )
+    {
+      PyObject* pobj = getElement( parent, key );
+      if ( !pobj )
+        return;
+      if ( !PyBool_Check( pobj ) ) {
+        Py_DECREF( pobj );
+        throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
+      }
+      Py_DECREF( pobj );
+      getParameter( parent, key, (int&)out );
+    }
+
+    void
     PythonHandler::getParameter( PyObject* parent, const char* key, int& out )
     {
       PyObject* pobj = getElement( parent, key );
       if ( !pobj )
         return;
 #ifdef PYTHON2
-      if ( !PyInt_Check( pobj ) ) {
+      if ( !PyInt_Check( pobj ) && !PyBool_Check( pobj ) ) {
         Py_DECREF( pobj );
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       }
       out = PyInt_AsLong( pobj );
 #else
-      if ( !PyLong_Check( pobj ) ) {
+      if ( !PyLong_Check( pobj ) && !PyBool_Check( pobj ) ) {
         Py_DECREF( pobj );
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       }

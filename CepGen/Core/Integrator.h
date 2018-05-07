@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include <gsl/gsl_monte.h>
+#include <gsl/gsl_monte_vegas.h>
 #include <gsl/gsl_rng.h>
 
 namespace CepGen
@@ -64,13 +65,14 @@ namespace CepGen
       /// \param x Point in the phase space considered
       /// \param has_correction Correction cycle started?
       bool correctionCycle( std::vector<double>& x, bool& has_correction );
+      int warmupVegas( std::vector<double>& x_low, std::vector<double>& x_up, unsigned int ncall );
       /**
        * Set all the generation mode variables and align them to the integration grid set while computing the cross-section
        * \brief Prepare the class for events generation
        */
       void computeGenerationParameters();
       double uniform() const;
-      double eval( const std::vector<double>& x );
+      double eval( const std::vector<double>& x, bool treat = false );
       /// Selected bin at which the function will be evaluated
       int ps_bin_;
       /// List of parameters to specify the integration range and the physics determining the phase space
@@ -79,6 +81,8 @@ namespace CepGen
       std::unique_ptr<gsl_monte_function> function_;
       std::unique_ptr<gsl_rng,void(*)( gsl_rng* )> rng_;
       std::unique_ptr<GridParameters> grid_;
+      gsl_monte_vegas_state* veg_state_;
+      double r_boxes_;
   };
   std::ostream& operator<<( std::ostream&, const Integrator::Type& );
   std::ostream& operator<<( std::ostream&, const Integrator::VegasMode& );
