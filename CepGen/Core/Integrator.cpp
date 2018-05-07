@@ -79,8 +79,6 @@ namespace CepGen
     //--- prepare integrator
     if ( algorithm == Type::plain )
       pln_state = gsl_monte_plain_alloc( function_->dim );
-    else if ( algorithm == Type::Vegas )
-      veg_state_ = gsl_monte_vegas_alloc( function_->dim );
     else if ( algorithm == Type::MISER )
       mis_state = gsl_monte_miser_alloc( function_->dim );
 
@@ -93,14 +91,7 @@ namespace CepGen
     else if ( algorithm == Type::Vegas ) {
       gsl_monte_vegas_params_set( veg_state_, &input_params_->integrator.vegas );
       //----- Vegas warmup (prepare the grid)
-      res = gsl_monte_vegas_integrate( function_.get(),
-        &x_low[0], &x_up[0],
-        function_->dim, 25000,
-        rng_.get(), veg_state_,
-        &result, &abserr );
-      CG_INFO( "Integrator:integrate" )
-        << "Finished the Vegas warm-up.\n\t"
-        << "Will now iterate until χ² < " << input_params_->integrator.vegas_chisq_cut << ".";
+      res = warmupVegas( x_low, x_up, 25000 );
       //----- integration
       unsigned short it_chisq = 0;
       do {
@@ -148,6 +139,25 @@ namespace CepGen
     if ( input_params_->hadroniser() )
       input_params_->hadroniser()->setCrossSection( result, abserr );
 
+    return res;
+  }
+
+  int
+  Integrator::warmupVegas( std::vector<double>& x_low, std::vector<double>& x_up, unsigned int ncall )
+  {
+    veg_state_ = gsl_monte_vegas_alloc( function_->dim );
+    double result = 0., abserr = 0.;
+    int res = gsl_monte_vegas_integrate( function_.get(),
+      &x_low[0], &x_up[0],
+      function_->dim, ncall,
+      rng_.get(), veg_state_,
+      &result, &abserr );
+    if ( res != GSL_SUCCESS )
+      CG_ERROR( "Integrator:vegas" )
+        << "Failed to warm-up the Vegas grid.\n\t"
+        << "GSL error: " << gsl_strerror( res ) << ".";
+    CG_INFO( "Integrator:vegas" )
+      << "Finished the Vegas warm-up.";
     return res;
   }
 
@@ -324,6 +334,19 @@ namespace CepGen
     input_params_->generation.ngen = 0;
     input_params_->setStorage( false );
 
+    if ( input_params_->generation.treat
+      && input_params_->integrator.type != Type::Vegas ) {
+      CG_INFO( "Integrator:setGen" )
+        << "Treat switched on without a proper Vegas grid; running a warm-up beforehand.";
+      std::vector<double> x_low( function_->dim, 0. ), x_up( function_->dim, 1. );
+      int res = warmupVegas( x_low, x_up, 25000 );
+      if ( res != GSL_SUCCESS ) {
+        CG_ERROR( "Integrator::setGen" )
+          << "Failed to perform a Vegas warm-up.\n\t"
+          << "Disabling treat...";
+        input_params_->generation.treat = false;
+      }
+    }
     CG_INFO( "Integrator:setGen" )
       << "Preparing the grid (" << input_params_->generation.num_points << " points/bin) "
       << "for the generation of unweighted events.";

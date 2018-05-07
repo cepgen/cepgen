@@ -517,7 +517,7 @@ namespace CepGen
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       }
       Py_DECREF( pobj );
-      getParameter( parent, key, (bool&)out );
+      getParameter( parent, key, (int&)out );
     }
 
     void

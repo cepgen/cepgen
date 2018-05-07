@@ -65,6 +65,7 @@ namespace CepGen
       /// \param x Point in the phase space considered
       /// \param has_correction Correction cycle started?
       bool correctionCycle( std::vector<double>& x, bool& has_correction );
+      int warmupVegas( std::vector<double>& x_low, std::vector<double>& x_up, unsigned int ncall );
       /**
        * Set all the generation mode variables and align them to the integration grid set while computing the cross-section
        * \brief Prepare the class for events generation
