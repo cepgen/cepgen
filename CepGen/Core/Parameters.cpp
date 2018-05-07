@@ -115,7 +115,7 @@ namespace CepGen
     os
       << "Parameters dump" << std::left << "\n\n"
       << std::setfill('_') << std::setw( wb+3 ) << "_/¯¯RUN¯INFORMATION¯¯\\_" << std::setfill( ' ' ) << "\n"
-      << std::right << std::setw( wb ) << std::left << "\n"
+      << std::right << std::setw( wb ) << std::left << std::endl
       << std::setw( wt ) << "Process to generate";
     if ( process_ ) {
       os << ( pretty ? boldify( process_->name().c_str() ) : process_->name() ) << "\n"

@@ -89,7 +89,6 @@ namespace CepGen
         rng_.get(), pln_state,
         &result, &abserr );
     else if ( algorithm == Type::Vegas ) {
-      gsl_monte_vegas_params_set( veg_state_, &input_params_->integrator.vegas );
       //----- Vegas warmup (prepare the grid)
       res = warmupVegas( x_low, x_up, 25000 );
       //----- integration
@@ -145,13 +144,17 @@ namespace CepGen
   int
   Integrator::warmupVegas( std::vector<double>& x_low, std::vector<double>& x_up, unsigned int ncall )
   {
+    // start by preparing the grid/state
     veg_state_ = gsl_monte_vegas_alloc( function_->dim );
+    gsl_monte_vegas_params_set( veg_state_, &input_params_->integrator.vegas );
+    // then perform a first integration with the given calls count
     double result = 0., abserr = 0.;
     int res = gsl_monte_vegas_integrate( function_.get(),
       &x_low[0], &x_up[0],
       function_->dim, ncall,
       rng_.get(), veg_state_,
       &result, &abserr );
+    // ensure the operation was successful
     if ( res != GSL_SUCCESS )
       CG_ERROR( "Integrator:vegas" )
         << "Failed to warm-up the Vegas grid.\n\t"
