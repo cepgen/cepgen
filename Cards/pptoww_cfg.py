@@ -63,4 +63,5 @@ generator = generator.clone(
     numEvents = 1000,
     printEvery = 100,
     numThreads = 4,
+    treat = True, # smoothing of the integrand
 )

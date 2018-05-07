@@ -52,7 +52,6 @@ namespace CepGen
 #else
         wchar_t* sfilename_;
 #endif
-        PyObject* cfg_;
     };
   }
 }
