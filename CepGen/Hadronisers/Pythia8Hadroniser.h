@@ -1,7 +1,8 @@
-#ifndef Pythia8Hadroniser_h
-#define Pythia8Hadroniser_h
+#ifndef CepGan_Hadronisers_Pythia8Hadroniser_h
+#define CepGen_Hadronisers_Pythia8Hadroniser_h
 
-#include "GenericHadroniser.h"
+#include "CepGen/Hadronisers/GenericHadroniser.h"
+#include "CepGen/Physics/Kinematics.h"
 
 #ifdef PYTHIA8
 #include <Pythia8/Pythia.h>
@@ -18,7 +19,7 @@ namespace CepGen
   {
     public:
       explicit LHAEvent( const Parameters* );
-      void feedEvent( const Event& ev, bool full );
+      void feedEvent( const Event& ev, bool full, const Kinematics::Mode& );
       bool setInit() override;
       bool setEvent( int ) override;
       void setCrossSection( int id, double xsec, double xsec_err );
@@ -84,3 +85,4 @@ namespace CepGen
 }
 
 #endif
+
