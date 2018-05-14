@@ -18,8 +18,8 @@ process = ktProcess.clone('pptoff',
         pair = 6,
         #eta = (-2.5, 2.5),
         mx = (1.07, 1000.),
-        #--- extra cuts on the p1t(l) and p2t(l) plane
-        #ptdiff = (0., 2.5),
+        #--- extra cuts on the p1t(t) and p2t(t) plane
+        ptdiff = (0., 2000.),
         #--- distance in rapidity between l^+ and l^-
         #dely = (4., 5.),
     ),
@@ -27,4 +27,6 @@ process = ktProcess.clone('pptoff',
 
 #--- events generation
 from Config.generator_cff import generator
-generator.numEvents = 10000
+generator.numEvents = 25000
+#generator.treat = True
+
