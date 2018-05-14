@@ -101,6 +101,12 @@ namespace CepGen
   }
 
   double
+  Momentum::crossProduct( const Momentum& mom ) const
+  {
+    return px_*mom.py_-py_*mom.px_;
+  }
+
+  double
   Momentum::operator*=( const Momentum& mom )
   {
     return threeProduct( mom );

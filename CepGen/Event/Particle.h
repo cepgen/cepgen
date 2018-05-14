@@ -65,6 +65,8 @@ namespace CepGen
           double threeProduct( const Momentum& ) const;
           /// Scalar product of the 4-momentum with another 4-momentum
           double fourProduct( const Momentum& ) const;
+          /// Vector product of the 3-momentum with another 3-momentum
+          double crossProduct( const Momentum& ) const;
           /// Add a 4-momentum through a 4-vector sum
           Momentum& operator+=( const Momentum& );
           /// Subtract a 4-momentum through a 4-vector sum

@@ -21,6 +21,8 @@ namespace CepGen
         void fillCentralParticlesKinematics() override;
 
         /// Rapidity range for the outgoing fermions
+        double onShellME( double shat, double that, double uhat ) const;
+        double offShellME( double shat, double that, double, double, double, double, const Particle::Momentum&, const Particle::Momentum&, const Particle::Momentum&, const Particle::Momentum& ) const;
         Limits rap_limits_;
         /// Rapidity of the first outgoing fermion
         double y1_;
@@ -33,10 +35,12 @@ namespace CepGen
         /// Azimuthal angle difference for the two outgoing fermions
         double phi_pt_diff_;
 
+        double mf_, mf2_, qf_;
+        unsigned short colf_;
         /// First outgoing fermion's momentum
-        Particle::Momentum Pl1_;
+        Particle::Momentum p_f1_;
         /// Second outgoing fermion's momentum
-        Particle::Momentum Pl2_;
+        Particle::Momentum p_f2_;
     };
   }
 }

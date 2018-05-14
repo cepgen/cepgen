@@ -16,6 +16,7 @@ namespace CepGen
     /// Electric charge of a particle, in \f$e\f$
     /// \param[in] id integer PDG id
     double charge( int id );
+    unsigned short colours( const PDG& pdg_id );
     /// Total decay width of an unstable particle, in GeV
     /// \param[in] pdg_id PDG (PDG ID)
     double width( const PDG& pdg_id );
