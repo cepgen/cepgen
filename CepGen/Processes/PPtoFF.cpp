@@ -41,38 +41,36 @@ namespace CepGen
       //=================================================================
       //     matrix element computation
       //=================================================================
-      //const double stild = s_/2.*(1+sqrt(1.-(4*pow(mp2_, 2))/s_*s_));
 
-      // Inner photons
-      const double q1tx = qt1_*cos( phi_qt1_ ), q1ty = qt1_*sin( phi_qt1_ ),
-                   q2tx = qt2_*cos( phi_qt2_ ), q2ty = qt2_*sin( phi_qt2_ );
-      CG_DEBUG_LOOP( "PPtoFF" )
-        << "q1t(x/y) = " << q1tx << " / " << q1ty << "\n\t"
-        << "q2t(x/y) = " << q2tx << " / " << q2ty;
+      //--- central partons
+      const Particle::Momentum q1t( qt1_*cos( phi_qt1_ ), qt1_*sin( phi_qt1_ ), 0. );
+      const Particle::Momentum q2t( qt2_*cos( phi_qt2_ ), qt2_*sin( phi_qt2_ ), 0. );
 
-      // Two-photon system
-      const double ptsumx = q1tx+q2tx, ptsumy = q1ty+q2ty,
-                   ptsum = std::hypot( ptsumx, ptsumy );
+      CG_DEBUG_LOOP( "PPtoFF" ) << "q(1/2)t = " << q1t << ", " << q2t << ".";
 
-      const double ptdiffx = pt_diff_*cos( phi_pt_diff_ ),
-                   ptdiffy = pt_diff_*sin( phi_pt_diff_ );
+      //--- two-parton system
+      const Particle::Momentum ptsum = q1t+q2t;
+      const Particle::Momentum ptdiff( pt_diff_*cos( phi_pt_diff_ ), pt_diff_*sin( phi_pt_diff_ ), 0. );
 
-      // Outgoing fermions
-      const double pt1x = ( ptsumx+ptdiffx )*0.5, pt1y = ( ptsumy+ptdiffy )*0.5, pt1 = std::hypot( pt1x, pt1y ),
-                   pt2x = ( ptsumx-ptdiffx )*0.5, pt2y = ( ptsumy-ptdiffy )*0.5, pt2 = std::hypot( pt2x, pt2y );
+      //--- outgoing fermions
+      const Particle::Momentum p1_cm = 0.5*( ptsum+ptdiff ), p2_cm = 0.5*( ptsum-ptdiff );
+
+      //=================================================================
+      //     a window in single particle transverse momentum
+      //=================================================================
 
       const Limits& pt_limits = cuts_.cuts.central.pt_single;
-      if ( !pt_limits.passes( pt1 ) || !pt_limits.passes( pt2 ) )
+      if ( !pt_limits.passes( p1_cm.pt() ) || !pt_limits.passes( p2_cm.pt() ) )
         return 0.;
 
       // transverse mass for the two fermions
-      const double amt1 = std::hypot( pt1, mf_ ), amt2 = std::hypot( pt2, mf_ );
+      const double amt1 = std::hypot( p1_cm.pt(), mf_ ), amt2 = std::hypot( p2_cm.pt(), mf_ );
 
       //=================================================================
       //     a window in transverse momentum difference
       //=================================================================
 
-      if ( !cuts_.cuts.central.pt_diff.passes( fabs( pt1-pt2 ) ) )
+      if ( !cuts_.cuts.central.pt_diff.passes( fabs( p1_cm.pt()-p2_cm.pt() ) ) )
         return 0.;
 
       //=================================================================
@@ -94,9 +92,9 @@ namespace CepGen
         << "  alpha1/2 = " << alpha1 << " / " << alpha2 << "\n\t"
         << "   beta1/2 = " << beta1 << " / " << beta2 << ".";
 
-      const double q1t2 = q1tx*q1tx+q1ty*q1ty, q2t2 = q2tx*q2tx+q2ty*q2ty;
-
       const double x1 = alpha1+alpha2, x2 = beta1+beta2;
+      if ( x1 <= 0. || x1 > 1. || x2 <= 0. || x2 > 1. )
+        return 0.; // sanity check
 
       const double z1p = alpha1/x1, z1m = alpha2/x1,
                    z2p = beta1 /x2, z2m = beta2 /x2;
@@ -104,24 +102,18 @@ namespace CepGen
         << "z(1/2)p = " << z1p << " / " << z2p << "\n\t"
         << "z(1/2)m = " << z1m << " / " << z2m << ".";
 
-      if ( x1 > 1. || x2 > 1. )
-        return 0.; // sanity check
-
       // FIXME FIXME FIXME
-      const double ak10 = event_->getOneByRole( Particle::IncomingBeam1 ).energy(),
-                   ak1z = event_->getOneByRole( Particle::IncomingBeam1 ).momentum().pz(),
-                   ak20 = event_->getOneByRole( Particle::IncomingBeam2 ).energy(),
-                   ak2z = event_->getOneByRole( Particle::IncomingBeam2 ).momentum().pz();
+      const Particle::Momentum& ak1 = event_->getOneByRole( Particle::IncomingBeam1 ).momentum(),
+                               &ak2 = event_->getOneByRole( Particle::IncomingBeam2 ).momentum();
       CG_DEBUG_LOOP( "PPtoFF" )
-        << "incoming particles: p1: " << ak1z << " / " << ak10 << "\n\t"
-        << "                    p2: " << ak2z << " / " << ak20;
+        << "incoming particles: p1/p2 = " << ak1 << "/" << ak2 << ".";
 
       //=================================================================
       //     additional conditions for energy-momentum conservation
       //=================================================================
 
       const double s1_eff = x1*s_-qt1_*qt1_, s2_eff = x2*s_-qt2_*qt2_;
-      const double invm = sqrt( amt1*amt1 + amt2*amt2 + 2.*amt1*amt2*cosh(y1_-y2_) - ptsum*ptsum );
+      const double invm = sqrt( amt1*amt1 + amt2*amt2 + 2.*amt1*amt2*cosh(y1_-y2_) - ptsum.pt2() );
       CG_DEBUG_LOOP( "PPtoFF" )
         << "s(1/2)_eff = " << s1_eff << " / " << s2_eff << " GeV^2\n\t"
         << "central system's invariant mass = " << invm << " GeV.";
@@ -141,18 +133,18 @@ namespace CepGen
       //     four-momenta of the outgoing protons (or remnants)
       //=================================================================
 
-      const double px_plus  = ( 1.-x1 )*fabs( ak1z )*M_SQRT2,
-                   px_minus = ( MX_*MX_ + q1tx*q1tx + q1ty*q1ty )*0.5/px_plus;
+      const double px_plus  = ( 1.-x1 )*M_SQRT2*ak1.p(),
+                   px_minus = ( MX_*MX_ + q1t.pt2() )*0.5/px_plus;
 
-      const double py_minus = ( 1.-x2 )*fabs( ak2z )*M_SQRT2, // warning! sign of pz??
-                   py_plus  = ( MY_*MY_ + q2tx*q2tx + q2ty*q2ty )*0.5/py_minus;
+      const double py_minus = ( 1.-x2 )*M_SQRT2*ak2.p(),
+                   py_plus  = ( MY_*MY_ + q2t.pt2() )*0.5/py_minus;
 
       CG_DEBUG_LOOP( "PPtoFF" )
         << "px± = " << px_plus << " / " << px_minus << "\n\t"
         << "py± = " << py_plus << " / " << py_minus << ".";
 
-      PX_ = Particle::Momentum( -q1tx, -q1ty, ( px_plus-px_minus )*M_SQRT1_2, ( px_plus+px_minus )*M_SQRT1_2 );
-      PY_ = Particle::Momentum( -q2tx, -q2ty, ( py_plus-py_minus )*M_SQRT1_2, ( py_plus+py_minus )*M_SQRT1_2 );
+      PX_ = Particle::Momentum( -q1t.px(), -q1t.py(), ( px_plus-px_minus )*M_SQRT1_2, ( px_plus+px_minus )*M_SQRT1_2 );
+      PY_ = Particle::Momentum( -q2t.px(), -q2t.py(), ( py_plus-py_minus )*M_SQRT1_2, ( py_plus+py_minus )*M_SQRT1_2 );
 
       CG_DEBUG_LOOP( "PPtoFF" )
         << "First remnant:  " << PX_ << ", mass = " << PX_.mass() << "\n\t"
@@ -165,14 +157,14 @@ namespace CepGen
       //     four-momenta of the outgoing l^+ and l^-
       //=================================================================
 
-      const Particle::Momentum p1( pt1x, pt1y, alpha1*ak1z + beta1*ak2z, alpha1*ak10 + beta1*ak20 );
-      const Particle::Momentum p2( pt2x, pt2y, alpha2*ak1z + beta2*ak2z, alpha2*ak10 + beta2*ak20 );
+      const Particle::Momentum p1 = p1_cm + alpha1*ak1 + beta1*ak2;
+      const Particle::Momentum p2 = p2_cm + alpha2*ak1 + beta2*ak2;
       CG_DEBUG_LOOP( "PPtoFF" )
         << "unboosted first fermion:  " << p1 << ", mass = " << p1.mass() << "\n\t"
         << "          second fermion: " << p2 << ", mass = " << p2.mass() << ".";
 
-      p_f1_ = Particle::Momentum( pt1x, pt1y, sqrt( pt1*pt1 + mf2_ )*sinh( y1_ ), sqrt( pt1*pt1 + mf2_ )*cosh( y1_ ) );
-      p_f2_ = Particle::Momentum( pt2x, pt2y, sqrt( pt2*pt2 + mf2_ )*sinh( y2_ ), sqrt( pt2*pt2 + mf2_ )*cosh( y2_ ) );
+      p_f1_ = Particle::Momentum::fromPxPyYM( p1_cm.px(), p1_cm.py(), y2_, mf_ );
+      p_f2_ = Particle::Momentum::fromPxPyYM( p2_cm.px(), p2_cm.py(), y1_, mf_ );
 
       CG_DEBUG_LOOP( "PPtoFF" )
         << "First fermion:  " << p_f1_ << ", mass = " << p_f1_.mass() << "\n\t"
@@ -185,31 +177,9 @@ namespace CepGen
       //     four-momenta squared of the virtual photons
       //=================================================================
 
-      // FIXME FIXME FIXME /////////////////////
-      const Particle::Momentum q1( q1tx, q1ty, 0., 0. );
-      const Particle::Momentum q2( q2tx, q2ty, 0., 0. );
-      //////////////////////////////////////////
-
       CG_DEBUG_LOOP( "PPtoFF" )
-        << "First photon*:  " << q1 << ", mass2 = " << q1.mass2() << "\n\t"
-        << "Second photon*: " << q2 << ", mass2 = " << q2.mass2() << ".";
-
-      //=================================================================
-      //     Mendelstam variables
-      //=================================================================
-
-      //const double shat = s_*x1*x2; // ishat = 1 (approximation)
-      const double shat = ( q1+q2 ).mass2(); // ishat = 2 (exact formula)
-
-      const double that1 = ( q1-p1 ).mass2(), that2 = ( q2-p2 ).mass2();
-      const double uhat1 = ( q1-p2 ).mass2(), uhat2 = ( q2-p1 ).mass2();
-      CG_DEBUG_LOOP( "PPtoFF" )
-        << "that(1/2) = " << that1 << " / " << that2 << "\n\t"
-        << "uhat(1/2) = " << uhat1 << " / " << uhat2 << ".";
-
-      //const double mll = sqrt( shat );
-
-      const double that = 0.5*( that1+that2 ), uhat = 0.5*( uhat1+uhat2 );
+        << "First photon*:  " << q1t << ", mass2 = " << q1t.mass2() << "\n\t"
+        << "Second photon*: " << q2t << ", mass2 = " << q2t.mass2() << ".";
 
       //=================================================================
       //     matrix elements
@@ -219,14 +189,29 @@ namespace CepGen
       CG_DEBUG_LOOP( "PPtoFF" )
         << "matrix element mode: " << method << ".";
 
-      if ( method == 0 )
+      if ( method == 0 ) {
+        //=================================================================
+        //     Mendelstam variables
+        //=================================================================
+
+        //const double shat = s_*x1*x2; // approximation
+        const double shat = ( q1t+q2t ).mass2(); // exact formula
+        //const double mll = sqrt( shat );
+        const double that1 = ( q1t-p1 ).mass2(), that2 = ( q2t-p2 ).mass2();
+        const double uhat1 = ( q1t-p2 ).mass2(), uhat2 = ( q2t-p1 ).mass2();
+        const double that = 0.5*( that1+that2 ), uhat = 0.5*( uhat1+uhat2 );
+
+        CG_DEBUG_LOOP( "PPtoFF:onShell" )
+          << "that(1/2) = " << that1 << " / " << that2 << "\n\t"
+          << "uhat(1/2) = " << uhat1 << " / " << uhat2 << ".";
+
         amat2 = onShellME( shat, that, uhat );
+      }
 
       else if ( method == 1 ) {
-        Particle::Momentum ak1 = ( z1m*p_f1_-z1p*p_f2_ ), ak2 = ( z2m*p_f1_-z2p*p_f2_ );
-        const double t1abs = ( q1.pt2() + x1*( MX_*MX_-mp2_ )+x1*x1*mp2_ )/( 1.-x1 ),
-                     t2abs = ( q2.pt2() + x2*( MY_*MY_-mp2_ )+x2*x2*mp2_ )/( 1.-x2 );
-        amat2 = offShellME( t1abs, t2abs, z1m, z1p, z2m, z2p, q1, q2, ak1, ak2 ) * pow( x1*x2*s_, 2 );
+        const double t1abs = ( q1t.pt2() + x1*( MX_*MX_-mp2_ )+x1*x1*mp2_ )/( 1.-x1 ),
+                     t2abs = ( q2t.pt2() + x2*( MY_*MY_-mp2_ )+x2*x2*mp2_ )/( 1.-x2 );
+        amat2 = offShellME( t1abs, t2abs, z1m, z1p, z2m, z2p, q1t, q2t ) * pow( x1*x2*s_, 2 );
       }
 
       const double g_em = 4.*M_PI*Constants::alphaEM*qf_;
@@ -235,12 +220,12 @@ namespace CepGen
       //     unintegrated photon distributions
       //============================================
 
-      GenericKTProcess::computeIncomingFluxes( x1, q1t2, x2, q2t2 );
+      GenericKTProcess::computeIncomingFluxes( x1, q1t.pt2(), x2, q2t.pt2() );
 
       CG_DEBUG_LOOP( "PPtoFF" )
         << "Incoming photon fluxes for (x/kt2) = "
-        << "(" << x1 << "/" << q1t2 << "), "
-        << "(" << x2 << "/" << q2t2 << "):\n\t"
+        << "(" << x1 << "/" << q1t.pt2() << "), "
+        << "(" << x2 << "/" << q2t.pt2() << "):\n\t"
         << flux1_ << ", " << flux2_ << ".";
 
       //=================================================================
@@ -306,33 +291,36 @@ namespace CepGen
     }
 
     double
-    PPtoFF::offShellME( double t1abs, double t2abs, double z1m, double z1p, double z2m, double z2p, const Particle::Momentum& q1, const Particle::Momentum& q2, const Particle::Momentum& ak1, const Particle::Momentum& ak2 ) const
+    PPtoFF::offShellME( double t1abs, double t2abs, double z1m, double z1p, double z2m, double z2p, const Particle::Momentum& q1, const Particle::Momentum& q2 ) const
     {
       //=================================================================
       //     Wolfgang's formulae
       //=================================================================
 
+      const Particle::Momentum ak1 = ( z1m*p_f1_-z1p*p_f2_ ), ak2 = ( z2m*p_f1_-z2p*p_f2_ );
       const double z1 = z1p*z1m, z2 = z2p*z2m;
-      const double eps12 = mf2_ + z1*t1abs,
-                   eps22 = mf2_ + z2*t2abs;
+      const double eps12 = mf2_+z1*t1abs, eps22 = mf2_+z2*t2abs;
+
+      const Particle::Momentum ph_p1 = ak1+z1p*q2, ph_m1 = ak1-z1m*q2;
+      const Particle::Momentum ph_p2 = ak2+z2p*q1, ph_m2 = ak2-z2m*q1;
 
       const Particle::Momentum phi1(
-        ( ak1+z1p*q2 ).px()/( ( ak1+z1p*q2 ).pt2() + eps12 )-( ak1-z1m*q2 ).px()/( ( ak1-z1m*q2 ).pt2() + eps12 ),
-        ( ak1+z1p*q2 ).py()/( ( ak1+z1p*q2 ).pt2() + eps12 )-( ak1-z1m*q2 ).py()/( ( ak1-z1m*q2 ).pt2() + eps12 ),
+        ph_p1.px()/( ph_p1.pt2()+eps12 )-ph_m1.px()/( ph_m1.pt2()+eps12 ),
+        ph_p1.py()/( ph_p1.pt2()+eps12 )-ph_m1.py()/( ph_m1.pt2()+eps12 ),
         0.,
-        1./( ( ak1+z1p*q2 ).pt2() + eps12 )-1./( ( ak1-z1m*q2 ).pt2() + eps12 )
+        1./( ph_p1.pt2()+eps12 )-1./( ph_m1.pt2()+eps12 )
       );
 
       const Particle::Momentum phi2(
-        ( ak2+z2p*q1 ).px()/( ( ak2+z2p*q1 ).pt2() + eps22 )-( ak2-z2m*q1 ).px()/( ( ak2-z2m*q1 ).pt2() + eps22 ),
-        ( ak2+z2p*q1 ).py()/( ( ak2+z2p*q1 ).pt2() + eps22 )-( ak2-z2m*q1 ).py()/( ( ak2-z2m*q1 ).pt2() + eps22 ),
+        ph_p2.px()/( ph_p2.pt2()+eps22 )-ph_m2.px()/( ph_m2.pt2()+eps22 ),
+        ph_p2.py()/( ph_p2.pt2()+eps22 )-ph_m2.py()/( ph_m2.pt2()+eps22 ),
         0.,
-        1./( ( ak2+z2p*q1 ).pt2() + eps22 )-1./( ( ak2-z2m*q1 ).pt2() + eps22 )
+        1./( ph_p2.pt2()+eps22 )-1./( ph_m2.pt2()+eps22 )
       );
 
       const double dot1 = phi1.threeProduct( q1 )/qt1_, cross1 = phi1.crossProduct( q1 )/qt1_;
       const double dot2 = phi2.threeProduct( q2 )/qt2_, cross2 = phi2.crossProduct( q2 )/qt2_;
-      CG_DEBUG_LOOP( "PPtoFF" )
+      CG_DEBUG_LOOP( "PPtoFF:offShell" )
         << "phi1 = " << phi1 << "\n\t"
         << "phi2 = " << phi2 << "\n\t"
         << "(dot):   " << dot1 << " / " << dot2 << "\n\t"
@@ -368,7 +356,7 @@ namespace CepGen
       //     symmetrization
       //=================================================================
 
-      CG_DEBUG_LOOP( "PPtoFF" )
+      CG_DEBUG_LOOP( "PPtoFF:offShell" )
         << "aux2(1/2) = " << aux2_1 << " / " << aux2_2 << "\n\t"
         << "amat2(1/2), amat2 = " << amat2_1 << " / " << amat2_2 << " / " << ( 0.5*( imat1*amat2_1 + imat2*amat2_2 ) ) << ".";
 
@@ -376,3 +364,4 @@ namespace CepGen
     }
   }
 }
+

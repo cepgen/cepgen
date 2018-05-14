@@ -47,6 +47,13 @@ namespace CepGen
     return Momentum( px, py, pz, e );
   }
 
+  Momentum
+  Momentum::fromPxPyYM( double px, double py, double rap, double m )
+  {
+    const double pt = std::hypot( px, py ), et = std::hypot( pt, m );
+    return Momentum( px, py, et*sinh( rap ), et*cosh( rap ) );
+  }
+
   //--- arithmetic operators
 
   Momentum&
