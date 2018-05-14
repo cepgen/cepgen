@@ -1,4 +1,4 @@
-#include "CepGen/Processes/PPtoLL.h"
+#include "CepGen/Processes/PPtoFF.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Core/Exception.h"
 #include <assert.h>
@@ -7,22 +7,22 @@ namespace CepGen
 {
   namespace Process
   {
-    PPtoLL::PPtoLL() :
-      GenericKTProcess( "pptoll", "ɣɣ → l⁺l¯", { { PDG::Photon, PDG::Photon } }, { PDG::Muon, PDG::Muon } ),
+    PPtoFF::PPtoFF() :
+      GenericKTProcess( "pptoff", "ɣɣ → f⁺f¯", { { PDG::Photon, PDG::Photon } }, { PDG::Muon, PDG::Muon } ),
       y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )
     {}
 
     void
-    PPtoLL::preparePhaseSpace()
+    PPtoFF::preparePhaseSpace()
     {
-      registerVariable( y1_, Mapping::linear, cuts_.cuts.central.rapidity_single, { -6., 6. }, "First outgoing lepton rapidity" );
-      registerVariable( y2_, Mapping::linear, cuts_.cuts.central.rapidity_single, { -6., 6. }, "Second outgoing lepton rapidity" );
-      registerVariable( pt_diff_, Mapping::linear, cuts_.cuts.central.pt_diff, { 0., 50. }, "Leptons transverse momentum difference" );
-      registerVariable( phi_pt_diff_, Mapping::linear, cuts_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Leptons azimuthal angle difference" );
+      registerVariable( y1_, Mapping::linear, cuts_.cuts.central.rapidity_single, { -6., 6. }, "First outgoing fermion rapidity" );
+      registerVariable( y2_, Mapping::linear, cuts_.cuts.central.rapidity_single, { -6., 6. }, "Second outgoing fermion rapidity" );
+      registerVariable( pt_diff_, Mapping::linear, cuts_.cuts.central.pt_diff, { 0., 50. }, "Fermions transverse momentum difference" );
+      registerVariable( phi_pt_diff_, Mapping::linear, cuts_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Fermions azimuthal angle difference" );
     }
 
     double
-    PPtoLL::computeKTFactorisedMatrixElement()
+    PPtoFF::computeKTFactorisedMatrixElement()
     {
       const double ml = event_->getByRole( Particle::CentralSystem )[0].mass(), ml2 = ml*ml;
 
@@ -52,7 +52,7 @@ namespace CepGen
       // Inner photons
       const double q1tx = qt1_*cos( phi_qt1_ ), q1ty = qt1_*sin( phi_qt1_ ),
                    q2tx = qt2_*cos( phi_qt2_ ), q2ty = qt2_*sin( phi_qt2_ );
-      CG_DEBUG_LOOP( "PPtoLL" )
+      CG_DEBUG_LOOP( "PPtoFF" )
         << "q1t(x/y) = " << q1tx << " / " << q1ty << "\n\t"
         << "q2t(x/y) = " << q2tx << " / " << q2ty;
 
@@ -97,7 +97,7 @@ namespace CepGen
       const double alpha1 = amt1/sqs_*exp( y1_ ), beta1  = amt1/sqs_*exp( -y1_ ),
                    alpha2 = amt2/sqs_*exp( y2_ ), beta2  = amt2/sqs_*exp( -y2_ );
 
-      CG_DEBUG_LOOP( "PPtoLL" )
+      CG_DEBUG_LOOP( "PPtoFF" )
         << "Sudakov parameters:\n\t"
         << "  alpha1/2 = " << alpha1 << " / " << alpha2 << "\n\t"
         << "   beta1/2 = " << beta1 << " / " << beta2 << ".";
@@ -108,7 +108,7 @@ namespace CepGen
 
       const double z1p = alpha1/x1, z1m = alpha2/x1,
                    z2p = beta1 /x2, z2m = beta2 /x2;
-      CG_DEBUG_LOOP( "PPtoLL" )
+      CG_DEBUG_LOOP( "PPtoFF" )
         << "z(1/2)p = " << z1p << " / " << z2p << "\n\t"
         << "z(1/2)m = " << z1m << " / " << z2m << ".";
 
@@ -120,7 +120,7 @@ namespace CepGen
                    ak1z = event_->getOneByRole( Particle::IncomingBeam1 ).momentum().pz(),
                    ak20 = event_->getOneByRole( Particle::IncomingBeam2 ).energy(),
                    ak2z = event_->getOneByRole( Particle::IncomingBeam2 ).momentum().pz();
-      CG_DEBUG_LOOP( "PPtoLL" )
+      CG_DEBUG_LOOP( "PPtoFF" )
         << "incoming particles: p1: " << ak1z << " / " << ak10 << "\n\t"
         << "                    p2: " << ak2z << " / " << ak20;
 
@@ -130,7 +130,7 @@ namespace CepGen
 
       const double s1_eff = x1*s_-qt1_*qt1_, s2_eff = x2*s_-qt2_*qt2_;
       const double invm = sqrt( amt1*amt1 + amt2*amt2 + 2.*amt1*amt2*cosh(y1_-y2_) - ptsum*ptsum );
-      CG_DEBUG_LOOP( "PPtoLL" )
+      CG_DEBUG_LOOP( "PPtoFF" )
         << "s(1/2)_eff = " << s1_eff << " / " << s2_eff << " GeV^2\n\t"
         << "dilepton invariant mass = " << invm << " GeV.";
 
@@ -155,14 +155,14 @@ namespace CepGen
       const double py_minus = ( 1.-x2 )*fabs( ak2z )*M_SQRT2, // warning! sign of pz??
                    py_plus  = ( MY_*MY_ + q2tx*q2tx + q2ty*q2ty )*0.5/py_minus;
 
-      CG_DEBUG_LOOP( "PPtoLL" )
+      CG_DEBUG_LOOP( "PPtoFF" )
         << "px± = " << px_plus << " / " << px_minus << "\n\t"
         << "py± = " << py_plus << " / " << py_minus << ".";
 
       PX_ = Particle::Momentum( -q1tx, -q1ty, ( px_plus-px_minus )*M_SQRT1_2, ( px_plus+px_minus )*M_SQRT1_2 );
       PY_ = Particle::Momentum( -q2tx, -q2ty, ( py_plus-py_minus )*M_SQRT1_2, ( py_plus+py_minus )*M_SQRT1_2 );
 
-      CG_DEBUG_LOOP( "PPtoLL" )
+      CG_DEBUG_LOOP( "PPtoFF" )
         << "First remnant:  " << PX_ << ", mass = " << PX_.mass() << "\n\t"
         << "Second remnant: " << PY_ << ", mass = " << PY_.mass() << ".";
 
@@ -175,14 +175,14 @@ namespace CepGen
 
       const Particle::Momentum p1( pt1x, pt1y, alpha1*ak1z + beta1*ak2z, alpha1*ak10 + beta1*ak20 );
       const Particle::Momentum p2( pt2x, pt2y, alpha2*ak1z + beta2*ak2z, alpha2*ak10 + beta2*ak20 );
-      CG_DEBUG_LOOP( "PPtoLL" )
+      CG_DEBUG_LOOP( "PPtoFF" )
         << "unboosted first lepton:  " << p1 << ", mass = " << p1.mass() << "\n\t"
         << "          second lepton: " << p2 << ", mass = " << p2.mass() << ".";
 
       Pl1_ = Particle::Momentum( pt1x, pt1y, sqrt( pt1*pt1 + ml2 )*sinh( y1_ ), sqrt( pt1*pt1 + ml2 )*cosh( y1_ ) );
       Pl2_ = Particle::Momentum( pt2x, pt2y, sqrt( pt2*pt2 + ml2 )*sinh( y2_ ), sqrt( pt2*pt2 + ml2 )*cosh( y2_ ) );
 
-      CG_DEBUG_LOOP( "PPtoLL" )
+      CG_DEBUG_LOOP( "PPtoFF" )
         << "First lepton:  " << Pl1_ << ", mass = " << Pl1_.mass() << "\n\t"
         << "Second lepton: " << Pl2_ << ", mass = " << Pl2_.mass() << ".";
 
@@ -198,7 +198,7 @@ namespace CepGen
       const Particle::Momentum q2( q2tx, q2ty, 0., 0. );
       //////////////////////////////////////////
 
-      CG_DEBUG_LOOP( "PPtoLL" )
+      CG_DEBUG_LOOP( "PPtoFF" )
         << "First photon*:  " << q1 << ", mass2 = " << q1.mass2() << "\n\t"
         << "Second photon*: " << q2 << ", mass2 = " << q2.mass2() << ".";
 
@@ -211,7 +211,7 @@ namespace CepGen
 
       const double that1 = ( q1-p1 ).mass2(), that2 = ( q2-p2 ).mass2();
       const double uhat1 = ( q1-p2 ).mass2(), uhat2 = ( q2-p1 ).mass2();
-      CG_DEBUG_LOOP( "PPtoLL" )
+      CG_DEBUG_LOOP( "PPtoFF" )
         << "that(1/2) = " << that1 << " / " << that2 << "\n\t"
         << "uhat(1/2) = " << uhat1 << " / " << uhat2 << ".";
 
@@ -278,7 +278,7 @@ namespace CepGen
 
         const double Phi11_dot_e = ( Phi11_x*q1tx + Phi11_y*q1ty )/qt1_, Phi11_cross_e = ( Phi11_x*q1ty-Phi11_y*q1tx )/qt1_;
         const double Phi21_dot_e = ( Phi21_x*q2tx + Phi21_y*q2ty )/qt2_, Phi21_cross_e = ( Phi21_x*q2ty-Phi21_y*q2tx )/qt2_;
-        CG_DEBUG_LOOP( "PPtoLL" )
+        CG_DEBUG_LOOP( "PPtoFF" )
           << "Phi1: E, px, py = " << Phi10 << ", " << Phi11_x << ", " << Phi11_y << "\n\t"
           << "Phi2: E, px, py = " << Phi20 << ", " << Phi21_x << ", " << Phi21_y << "\n\t"
           << "(dot):   " << Phi11_dot_e << " / " << Phi21_dot_e << "\n\t"
@@ -310,7 +310,7 @@ namespace CepGen
 
         amat2 = 0.5*( imat1*amat2_1 + imat2*amat2_2 );
 
-        CG_DEBUG_LOOP( "PPtoLL" )
+        CG_DEBUG_LOOP( "PPtoFF" )
           << "aux2(1/2) = " << aux2_1 << " / " << aux2_2 << "\n\t"
           << "amat2(1/2), amat2 = " << amat2_1 << " / " << amat2_2 << " / " << amat2 << ".";
       }
@@ -338,7 +338,7 @@ namespace CepGen
     }
 
     void
-    PPtoLL::fillCentralParticlesKinematics()
+    PPtoFF::fillCentralParticlesKinematics()
     {
       // randomise the charge of the outgoing leptons
       short sign = ( drand() > 0.5 ) ? +1 : -1;

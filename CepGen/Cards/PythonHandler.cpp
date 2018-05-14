@@ -7,7 +7,7 @@
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Processes/GamGamLL.h"
-#include "CepGen/Processes/PPtoLL.h"
+#include "CepGen/Processes/PPtoFF.h"
 #include "CepGen/Processes/PPtoWW.h"
 
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
@@ -85,8 +85,8 @@ namespace CepGen
       const std::string proc_name = decode( pproc_name );
       if ( proc_name == "lpair" )
         params_.setProcess( new Process::GamGamLL );
-      else if ( proc_name == "pptoll" )
-        params_.setProcess( new Process::PPtoLL );
+      else if ( proc_name == "pptoll" || proc_name == "pptoff" )
+        params_.setProcess( new Process::PPtoFF );
       else if ( proc_name == "pptoww" )
         params_.setProcess( new Process::PPtoWW );
       else throw CG_FATAL( "PythonHandler" ) << "Unrecognised process: " << proc_name << ".";
