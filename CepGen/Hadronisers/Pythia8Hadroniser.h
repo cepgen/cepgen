@@ -10,6 +10,7 @@
 #endif
 
 #include <unordered_map>
+#include <vector>
 
 namespace CepGen
 {
@@ -57,11 +58,9 @@ namespace CepGen
         bool fullEvent() const { return full_evt_; }
         void setFullEvent( bool full = true ) { full_evt_ = full; }
 
-#ifdef PYTHIA8
         bool init();
         void readString( const char* param );
         void readString( const std::string& param ) { readString( param.c_str() ); }
-#endif
 
       private:
         static constexpr unsigned short invalid_idx_ = 999;
@@ -75,8 +74,8 @@ namespace CepGen
         /// A Pythia8 core to be wrapped
         std::unique_ptr<Pythia8::Pythia> pythia_;
         std::shared_ptr<LHAEvent> lhaevt_;
-        bool full_evt_;
 #endif
+        bool full_evt_;
         unsigned short offset_;
         bool first_evt_;
         const Parameters* params_; // not owning

@@ -45,7 +45,7 @@ namespace CepGen
     {
 #ifdef LIBHEPMC
 #  ifdef HEPMC_VERSION3
-      xs_->set_cross_section( xsect, xsect_err_ );
+      xs_->set_cross_section( xsect, xsect_err );
       event_->add_attribute( "AlphaQCD", HepMC::make_shared<HepMC::DoubleAttribute>( Constants::alphaQCD ) );
       event_->add_attribute( "AlphaEM", HepMC::make_shared<HepMC::DoubleAttribute>( Constants::alphaEM ) );
 #  else

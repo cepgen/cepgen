@@ -352,7 +352,7 @@ namespace CepGen
         feedPythia( pythia8, hadr, "pythiaConfiguration" );
         feedPythia( pythia8, hadr, "pythiaProcessConfiguration" );
 #else
-        CG_Warning( "PythonHandler" )
+        CG_WARNING( "PythonHandler" )
           << "Pythia8 is not linked to this instance... "
           << "Ignoring this part of the configuration file.";
 #endif
