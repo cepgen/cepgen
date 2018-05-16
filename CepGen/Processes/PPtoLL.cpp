@@ -99,7 +99,8 @@ namespace CepGen
                                  "  alpha1/2 = %f / %f\n\t"
                                  "   beta1/2 = %f / %f", alpha1, alpha2, beta1, beta2 ) );
 
-      const double q1t2 = std::hypot( q1tx, q1ty ), q2t2 = std::hypot( q2tx, q2ty );
+      const double q1t2 = q1tx*q1tx + q1ty*q1ty,
+                   q2t2 = q2tx*q2tx + q2ty*q2ty;
 
       const double x1 = alpha1+alpha2, x2 = beta1+beta2;
 
@@ -162,6 +163,20 @@ namespace CepGen
       assert( fabs( PY_.mass()-MY_ ) < 1.e-6 );
 
       //=================================================================
+      //     four-momenta squared of the virtual photons
+      //=================================================================
+
+      // FIXME FIXME FIXME /////////////////////
+      const Particle::Momentum q1( q1tx, q1ty, 0., 0. );
+      const Particle::Momentum q2( q2tx, q2ty, 0., 0. );
+      //////////////////////////////////////////
+
+      DebuggingInsideLoop( Form( "First photon*:  (E,p), m2 = (%f, %f, %f, %f), %e\n\t"
+                                 "Second photon*: (E,p), m2 = (%f, %f, %f, %f), %e",
+                                 q1.px(), q1.py(), q1.pz(), q1.energy(), q1.mass2(),
+                                 q2.px(), q2.py(), q2.pz(), q2.energy(), q2.mass2() ) );
+
+      //=================================================================
       //     four-momenta of the outgoing l^+ and l^-
       //=================================================================
 
@@ -182,20 +197,6 @@ namespace CepGen
 
       assert( fabs( Pl1_.mass()-event_->getByRole( Particle::CentralSystem )[0].mass() ) < 1.e-6 );
       assert( fabs( Pl2_.mass()-event_->getByRole( Particle::CentralSystem )[1].mass() ) < 1.e-6 );
-
-      //=================================================================
-      //     four-momenta squared of the virtual photons
-      //=================================================================
-
-      // FIXME FIXME FIXME /////////////////////
-      const Particle::Momentum q1( q1tx, q1ty, 0., 0. );
-      const Particle::Momentum q2( q2tx, q2ty, 0., 0. );
-      //////////////////////////////////////////
-
-      DebuggingInsideLoop( Form( "First photon*:  (E,p), m2 = (%f, %f, %f, %f), %e\n\t"
-                                 "Second photon*: (E,p), m2 = (%f, %f, %f, %f), %e",
-                                 q1.px(), q1.py(), q1.pz(), q1.energy(), q1.mass2(),
-                                 q2.px(), q2.py(), q2.pz(), q2.energy(), q2.mass2() ) );
 
       //=================================================================
       //     Mendelstam variables

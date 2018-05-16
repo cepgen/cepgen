@@ -97,7 +97,7 @@ namespace CepGen
       //============================================================================================
 
       const double aux_jacobian = generateVariables();
-      if ( aux_jacobian == 0. )
+      if ( aux_jacobian <= 0. )
         return 0.;
 
       //============================================================================================
@@ -105,6 +105,9 @@ namespace CepGen
       //============================================================================================
 
       const double integrand = computeKTFactorisedMatrixElement();
+      if ( integrand <= 0. )
+        return 0.;
+
       const double weight = ( kt_jacobian_*aux_jacobian ) * integrand;
 
       if ( Logger::get().level >= Logger::DebugInsideLoop )
@@ -142,8 +145,6 @@ namespace CepGen
         default:
           throw Exception( __PRETTY_FUNCTION__, "Invalid kinematics mode selected!", FatalError );
       }
-      flux1_ = std::max( flux1_, 1.e-20 );
-      flux2_ = std::max( flux2_, 1.e-20 );
       DebuggingInsideLoop( Form( "Form factors: %g / %g", flux1_, flux2_ ) );
     }
 
@@ -180,9 +181,10 @@ namespace CepGen
         std::ostringstream oss_vt; oss_vt << type;
         Debugging( Form( "%s has been mapped to variable %d.\n\t"
                          "Allowed range for integration: %s.\n\t"
-                         "Variable integration mode: %s.",
+                         "Variable integration mode: %s.\n\t"
+                         "New Jacobian: %g.",
                          description, num_dimensions_,
-                         oss_lim.str().c_str(), oss_vt.str().c_str() ) );
+                         oss_lim.str().c_str(), oss_vt.str().c_str(), kt_jacobian_ ) );
       }
     }
 
@@ -256,7 +258,7 @@ namespace CepGen
         case Kinematics::InelasticInelastic:
           op1.setStatus( Particle::Unfragmented ); op1.setMass( MX_ );
           op2.setStatus( Particle::Unfragmented ); op2.setMass( MY_ );
-          break;    
+          break;
         default: {
           FatalError( "This kT factorisation process is intended for p-on-p collisions! "
                       "Aborting." );

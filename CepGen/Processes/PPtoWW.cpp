@@ -19,7 +19,7 @@ namespace CepGen
     {
       registerVariable( y1_, kLinear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "First outgoing W rapidity" );
       registerVariable( y2_, kLinear, cuts_.cuts.central[Cuts::rapidity_single], { -6., 6. }, "Second outgoing W rapidity" );
-      registerVariable( pt_diff_, kLinear, cuts_.cuts.central[Cuts::pt_diff], { 0., 500. }, "Ws transverse momentum difference" );
+      registerVariable( pt_diff_, kLinear, cuts_.cuts.central[Cuts::pt_diff], { 0., 50. }, "Ws transverse momentum difference" );
       registerVariable( phi_pt_diff_, kLinear, cuts_.cuts.central[Cuts::phi_pt_diff], { 0., 2.*M_PI }, "Ws azimuthal angle difference" );
     }
 
