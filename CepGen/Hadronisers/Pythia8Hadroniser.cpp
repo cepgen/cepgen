@@ -16,11 +16,13 @@ namespace CepGen
 {
   namespace Hadroniser
   {
+#ifdef PYTHIA8
     Pythia8::Vec4
     momToVec4( const Particle::Momentum& mom )
     {
       return Pythia8::Vec4( mom.px(), mom.py(), mom.pz(), mom.energy() );
     }
+#endif
 
     Pythia8Hadroniser::Pythia8Hadroniser( const Parameters& params ) :
       GenericHadroniser( "pythia8" ), max_attempts_( params.hadroniser_max_trials ),
@@ -43,12 +45,15 @@ namespace CepGen
 
     Pythia8Hadroniser::~Pythia8Hadroniser()
     {
+#ifdef PYTHIA8
       pythia_->stat();
+#endif
     }
 
     bool
     Pythia8Hadroniser::init()
     {
+#ifdef PYTHIA8
       if ( pythia_->settings.flag( "ProcessLevel:all" ) != full_evt_ )
         pythia_->settings.flag( "ProcessLevel:all", full_evt_ );
 
@@ -72,15 +77,20 @@ namespace CepGen
         throw CG_FATAL( "Pythia8Hadroniser" )
           << "Failed to initialise the Pythia8 core!\n\t"
           << "See the message above for more details.";
-
+#else
+      throw CG_FATAL( "Pythia8Hadroniser" )
+        << "Pythia8 is not linked to thin instance!";
+#endif
       return true;
     }
 
     void
     Pythia8Hadroniser::readString( const char* param )
     {
+#ifdef PYTHIA8
       if ( !pythia_->readString( param ) )
         throw CG_FATAL( "Pythia8Hadroniser" ) << "The Pythia8 core failed to parse the following setting:\n\t" << param;
+#endif
     }
 
     void
@@ -99,7 +109,9 @@ namespace CepGen
     void
     Pythia8Hadroniser::setCrossSection( double xsec, double xsec_err )
     {
+#ifdef PYTHIA8
       lhaevt_->setCrossSection( 0, xsec, xsec_err );
+#endif
     }
 
     bool
@@ -148,6 +160,7 @@ namespace CepGen
       return true;
     }
 
+#ifdef PYTHIA8
     Particle&
     Pythia8Hadroniser::addParticle( Event& ev, const Pythia8::Particle& py_part, const Pythia8::Vec4& mom, unsigned short role ) const
     {
@@ -228,6 +241,7 @@ namespace CepGen
       }
       return (unsigned short)Particle::UnknownRole;
     }
+#endif
   }
 
   //================================================================================================

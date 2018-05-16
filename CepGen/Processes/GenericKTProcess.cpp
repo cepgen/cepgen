@@ -106,7 +106,7 @@ namespace CepGen
       //============================================================================================
 
       const double aux_jacobian = generateVariables();
-      if ( aux_jacobian == 0. )
+      if ( aux_jacobian <= 0. )
         return 0.;
 
       //============================================================================================
@@ -114,6 +114,9 @@ namespace CepGen
       //============================================================================================
 
       const double integrand = computeKTFactorisedMatrixElement();
+      if ( integrand <= 0. )
+        return 0.;
+
       const double weight = ( kt_jacobian_*aux_jacobian ) * integrand;
 
       CG_DEBUG_LOOP( "GenericKTProcess" )

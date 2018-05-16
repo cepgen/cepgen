@@ -64,7 +64,7 @@ namespace CepGen
       lhe_output_->headerBlock() << oss_init.str();
       //params.dump( lhe_output_->initComments(), false );
       LHEF::HEPRUP run = lhe_output_->heprup;
-      run.IDBMUP = params.kinematics.inpdg;
+      run.IDBMUP = { (int)params.kinematics.inpdg.first, (int)params.kinematics.inpdg.second };
       run.EBMUP = params.kinematics.inp;
       run.NPRUP = 1;
       run.resize();
