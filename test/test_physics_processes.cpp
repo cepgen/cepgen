@@ -3,10 +3,11 @@
 #include "CepGen/Core/Timer.h"
 
 #include "CepGen/Processes/GamGamLL.h"
-#include "CepGen/Processes/PPtoLL.h"
+#include "CepGen/Processes/PPtoFF.h"
 #include "CepGen/Processes/PPtoWW.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/Physics/PDG.h"
 
 #include "abort.h"
 
@@ -40,17 +41,6 @@ main( int argc, char* argv[] )
         { "doublediss", { 6.35650e-1, 1.93968e-3 } }
       } },
     } },*/
-    //--- PPtoWW values
-    { "pptoww", {
-      { 0.0, { // pt cut
-        { "elastic",         { 0.273, 0.01 } },
-        { "elastic",         { 0.273, 0.01 } }, // FIXME
-        { "singlediss_lux",  { 0.409, 0.01 } },
-        { "doublediss_lux",  { 1.090, 0.01 } },
-        { "singlediss_allm", { 0.318, 0.01 } },
-        { "doublediss_allm", { 0.701, 0.01 } }
-      } }
-    } },
     //--- PPtoLL values
     { "pptoll", {
       { 3.0, { // pt cut
@@ -66,12 +56,23 @@ main( int argc, char* argv[] )
         { "3_doublediss", { 5.6316353e-1, 1.1829e-3 } }, // SU, qt<500*/
       } },
     } },
+    //--- PPtoWW values
+    { "pptoww", {
+      { 0.0, { // pt cut
+        { "elastic",         { 0.273, 0.01 } },
+        { "elastic",         { 0.273, 0.01 } }, // FIXME
+        { "singlediss_lux",  { 0.409, 0.01 } },
+        { "doublediss_lux",  { 1.090, 0.01 } },
+        { "singlediss_allm", { 0.318, 0.01 } },
+        { "doublediss_allm", { 0.701, 0.01 } }
+      } }
+    } },
   };
 
   const double num_sigma = 3.0;
 
   if ( argc < 3 || strcmp( argv[2], "debug" ) != 0 ) {
-    CepGen::Logger::get().level = CepGen::Logger::Level::Nothing;
+    CepGen::Logger::get().level = CepGen::Logger::Level::nothing;
   }
 
   CepGen::Timer tmr;
@@ -87,8 +88,8 @@ main( int argc, char* argv[] )
   { cout << "Testing with " << mg.parameters->integrator.type << " integrator" << endl; }
 
   mg.parameters->kinematics.setSqrtS( 13.e3 );
-  mg.parameters->kinematics.cuts.central[CepGen::Cuts::eta_single].in( -2.5, 2.5 );
-  mg.parameters->kinematics.cuts.remnants[CepGen::Cuts::mass_single].max() = 1000.;
+  mg.parameters->kinematics.cuts.central.eta_single.in( -2.5, 2.5 );
+  mg.parameters->kinematics.cuts.remnants.mass_single.max() = 1000.;
   //mg.parameters->integrator.ncvg = 50000;
 
   CG_INFO( "main" ) << "Initial configuration time: " << tmr.elapsed()*1.e3 << " ms.";
@@ -103,13 +104,14 @@ main( int argc, char* argv[] )
       if ( generator == "lpair"  )
         mg.parameters->setProcess( new CepGen::Process::GamGamLL );
       else if ( generator == "pptoll" ) {
-        mg.parameters->setProcess( new CepGen::Process::PPtoLL );
-        mg.parameters->kinematics.cuts.initial[CepGen::Cuts::qt] = { 0., 50. };
+        mg.parameters->setProcess( new CepGen::Process::PPtoFF );
+        mg.parameters->kinematics.central_system = { CepGen::PDG::Muon, CepGen::PDG::Muon };
+        mg.parameters->kinematics.cuts.initial.qt = { 0., 50. };
       }
       else if ( generator == "pptoww" ) {
         mg.parameters->setProcess( new CepGen::Process::PPtoWW );
         mg.parameters->kinematics.setSqrtS( 13.e3 );
-        //mg.parameters->kinematics.cuts.initial[CepGen::Cuts::qt] = { 0., 50. };
+        //mg.parameters->kinematics.cuts.initial.qt = { 0., 50. };
       }
       else {
         CG_ERROR( "main" ) << "Unrecognized generator mode: " << values_vs_generator.first << ".";
@@ -117,7 +119,7 @@ main( int argc, char* argv[] )
       }
 
       for ( const auto& values_vs_cut : values_vs_generator.second ) { // loop over the single lepton pT cut
-        mg.parameters->kinematics.cuts.central[CepGen::Cuts::pt_single].min() = values_vs_cut.first;
+        mg.parameters->kinematics.cuts.central.pt_single.min() = values_vs_cut.first;
         for ( const auto& values_vs_kin : values_vs_cut.second ) { // loop over all possible kinematics
           const string kin_mode = values_vs_kin.first;
 

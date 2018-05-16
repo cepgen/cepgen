@@ -66,6 +66,15 @@ namespace CepGen
       return sign * charge( (PDG)abs( id ) );
     }
 
+    unsigned short
+    colours( const PDG& pdg_id )
+    {
+      switch ( pdg_id ) {
+        case PDG::TopQuark: return 3;
+        default: return 1;
+      }
+    }
+
     double
     width( const PDG& pdg_id )
     {

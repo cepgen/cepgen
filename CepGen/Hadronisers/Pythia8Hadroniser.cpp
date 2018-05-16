@@ -54,7 +54,6 @@ namespace CepGen
     Pythia8Hadroniser::init()
     {
 #ifdef PYTHIA8
-      //enable_all_processes = true;//FIXME FIXME
       if ( pythia_->settings.flag( "ProcessLevel:all" ) != full_evt_ )
         pythia_->settings.flag( "ProcessLevel:all", full_evt_ );
 

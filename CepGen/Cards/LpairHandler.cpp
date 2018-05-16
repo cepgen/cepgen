@@ -3,7 +3,7 @@
 
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Processes/GamGamLL.h"
-#include "CepGen/Processes/PPtoLL.h"
+#include "CepGen/Processes/PPtoFF.h"
 #include "CepGen/Processes/PPtoWW.h"
 
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
@@ -41,8 +41,8 @@ namespace CepGen
 
       if ( proc_name_ == "lpair" )
         params_.setProcess( new Process::GamGamLL );
-      else if ( proc_name_ == "pptoll" )
-        params_.setProcess( new Process::PPtoLL );
+      else if ( proc_name_ == "pptoll" || proc_name_ == "pptoff" )
+        params_.setProcess( new Process::PPtoFF );
       else if ( proc_name_ == "pptoww" )
         params_.setProcess( new Process::PPtoWW );
       else
