@@ -5,7 +5,9 @@ c     interpolation routine of the KMR UGDF from grids
 c     =================================================================
       integer iread
       double precision rx,rkt2,rmu2,parton
-      common/transferg/fmap_kmr_fg(140,140,140)
+      logical there
+      character*256 filename
+      common/transferg/filename,fmap_kmr_fg(140,140,140)
 
 c     -----------------------------------------------------------------
 c     rx = log(x)
@@ -49,21 +51,16 @@ c     =================================================================
 c     =================================================================
 c     reading file with the grid
 c     =================================================================
-c      open(unit=11,file='KMRgrid_gluon_mstw08.dat',
-c     &     status='unknown')
 
-cc      open(unit=11,
-cc     &   file='gluon_mmht2014lo_Watt.dat',
-cc     &     status='unknown')
-
+      inquire(file=filename, exist=there)
+      if(.not.there) then
+         write(*,*) 'Impossible to read the file "', filename,
+     &      '" to extract the grid!'
+         stop
+      endif
       open(unit=11,
-     &   file='gluon_mmht2014nlo_Watt.dat',
+     &   file=filename,
      &     status='unknown')
-
-
-c      open(unit=11,
-c     &   file='KMRWatt_gluon_mmht2014_LO.dat',
-c     &     status='unknown')
 
 c     =================================================================
 

@@ -139,6 +139,13 @@ namespace CepGen
       if ( ptam )
         parseTamingFunctions( ptam );
 
+      PyObject* pkmr_path = PyObject_GetAttrString( cfg, "kmrGridPath" );
+      if ( pkmr_path ) {
+        //strncpy( Constants::kmr_grid_path, decode( pkmr_path ).c_str(), 256 );
+        params_.kinematics.kmr_grid_path = decode( pkmr_path );
+        Py_XDECREF( pkmr_path );
+      }
+
       //Py_XDECREF( cfg );
 
 #ifdef PYTHON2

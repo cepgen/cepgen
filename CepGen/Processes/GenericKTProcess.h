@@ -155,6 +155,8 @@ namespace CepGen
         std::array<PDG,2> kIntermediateParts;
         /// Type of particles produced in the final state
         std::vector<PDG> kProducedParts;
+        static std::string kKMRInterpGridPath;
+        static bool kKMRInterpLoaded;
     };
   }
 }

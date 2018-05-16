@@ -9,6 +9,11 @@
 #ifdef KMR_FLUX
 extern "C" {
   extern void f_inter_kmr_fg_( double& rx, double& rkt2, double& rmu2, int& iread, double& parton);
+  // common/transferg/filename,fmap_kmr_fg(140,140,140)
+  extern struct {
+    char filename[256];
+    double fmap_kmr_fg[140][140][140];
+  } transferg_;
 }
 #endif
 
@@ -16,6 +21,9 @@ namespace CepGen
 {
   namespace Process
   {
+    bool GenericKTProcess::kKMRInterpLoaded = false;
+    std::string GenericKTProcess::kKMRInterpGridPath = "gluon_mmht2014nlo_Watt.dat";
+
     GenericKTProcess::GenericKTProcess( const std::string& name,
                                         const std::string& description,
                                         const std::array<PDG,2>& partons,
@@ -92,6 +100,7 @@ namespace CepGen
         registerVariable( MY_, Mapping::square, cuts_.cuts.remnants.mass_single, { 1.07, 1000. }, "Negative z proton remnant mass" );
 
       prepareKinematics();
+      kKMRInterpGridPath = cuts_.kmr_grid_path;
     }
 
     double
@@ -332,6 +341,13 @@ namespace CepGen
         case Flux::GluonKMR: {
 #ifdef KMR_FLUX
           double logx = log10( x ), logq2 = log10( kt2 ), logmu2 = 2.*log10( mx ), fg = 0.;
+          if ( !kKMRInterpLoaded ) {
+            CG_INFO("GenericKTProcess:flux") << "Loading KMR interpolation grid from \"" << kKMRInterpGridPath << "\".";
+            strncpy( transferg_.filename, kKMRInterpGridPath.c_str(), 256 );
+            int iread = 0;
+            f_inter_kmr_fg_( logx, logq2, logmu2, iread, fg );
+            kKMRInterpLoaded = true;
+          }
           int iread = 1;
           f_inter_kmr_fg_( logx, logq2, logmu2, iread, fg );
           return fg;

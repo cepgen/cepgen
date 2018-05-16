@@ -49,9 +49,6 @@ c     =================================================================
 c     =================================================================
 c     quarks production
 c     =================================================================
-#ifdef KMR_FLUX
-      double precision rx,rkt2,rmu2,parton
-#endif
 #ifdef ALPHA_S
       double precision t_max,amu2,alphas
 #endif
@@ -68,15 +65,6 @@ c     =================================================================
           if(icontri.eq.3.or.icontri.eq.4) then
             print *,'Invalid process mode for collinear gluon emission!'
             stop
-          endif
-          if(iflux1.eq.20) then
-#ifdef KMR_FLUX
-            print *,'Loading KMR interpolation...'
-            call f_inter_kmr_fg(rx,rkt2,rmu2,0,parton)
-#else
-            print *,'KMR interpolation is not linked!'
-            stop
-#endif
           endif
 #ifdef ALPHA_S
           print *,'Initialisation of the alpha(S) evolution algorithm..'

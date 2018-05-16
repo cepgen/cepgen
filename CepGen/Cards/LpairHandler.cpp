@@ -83,6 +83,7 @@ namespace CepGen
       registerParameter<std::string>( "PROC", "Process name to simulate", &proc_name_ );
       registerParameter<std::string>( "ITYP", "Integration algorithm", &integr_type_ );
       registerParameter<std::string>( "HADR", "Hadronisation algorithm", &hadr_name_ );
+      registerParameter<std::string>( "KMRG", "KMR grid interpolation path", &params_.kinematics.kmr_grid_path );
 
       //-------------------------------------------------------------------------------------------
       // General parameters

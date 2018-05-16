@@ -28,6 +28,8 @@ process = ktProcess.clone('patoll',
     ),
 )
 
+kmrGridPath = 'gluon_mmht2014nlo_Watt.dat'
+
 #--- events generation
 from Config.generator_cff import generator
 generator.numEvents = 10000
