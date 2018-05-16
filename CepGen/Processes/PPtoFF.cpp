@@ -25,7 +25,9 @@ namespace CepGen
       qf_ = ParticleProperties::charge( pdg_f );
       colf_ = ParticleProperties::colours( pdg_f );
       CG_DEBUG( "PPtoFF:prepare" )
-        << "Produced system (" << pdg_f << pdg_f << ") will have mass = " << mf_ << " GeV, charge = " << qf_ << " e";
+        << "Produced particle" << s( cuts_.central_system.size() )
+        << " (" << pdg_f << ") with mass = " << mf_ << " GeV, "
+        << "and charge = " << qf_ << " e";
     }
 
     double
@@ -224,7 +226,7 @@ namespace CepGen
       //=================================================================
 
       const double g_em = 4.*M_PI*Constants::alphaEM*qf_*qf_;
-      const double aintegral = colf_ * g_em*g_em * amat2
+      const double aintegral = amat2 * colf_ * ( g_em*g_em )
                              * 1. / pow( 4.*M_PI*( x1*x2*s_ ), 2 )
                              * flux1_/M_PI * flux2_/M_PI * 0.25
                              * Constants::GeV2toBarn;
