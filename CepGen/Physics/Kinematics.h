@@ -6,61 +6,26 @@
 
 #include "CepGen/Core/Logger.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
-#include "CepGen/Physics/ParticleProperties.h"
 
-#include "Cuts.h"
+#include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Physics/Cuts.h"
+#include "CepGen/Physics/Limits.h"
 
 #include <vector>
-#include <map>
-
-using std::cout;
-using std::string;
+#include <unordered_map>
 
 namespace CepGen
 {
+  enum class PDG;
   /// List of kinematic constraints to apply on the process phase space.
   class Kinematics
   {
     public:
-      /// Validity interval for a variable
-      class Limits : private std::pair<double,double>
-      {
-        public:
-          /// Define lower and upper limits on a quantity
-          Limits( double min = kInvalid, double max = kInvalid );
-
-          /// Lower limit to apply on the variable
-          double min() const { return first; }
-          /// Lower limit to apply on the variable
-          double& min() { return first; }
-          /// Upper limit to apply on the variable
-          double max() const { return second; }
-          /// Upper limit to apply on the variable
-          double& max() { return second; }
-          double x( double v ) const;
-          /// Specify the lower and upper limits on the variable
-          void in( double low, double up );
-          /// Full variable range allowed
-          double range() const;
-          /// Have a lower limit?
-          bool hasMin() const;
-          /// Have an upper limit?
-          bool hasMax() const;
-          bool passes( double val ) const;
-          bool valid() const;
-
-          /// Human-readable expression of the limits
-          friend std::ostream& operator<<( std::ostream&, const Limits& );
-        private:
-          static constexpr double kInvalid = -999.999;
-      };
-    public:
       Kinematics();
-      Kinematics( const Kinematics& kin );
       ~Kinematics();
 
       /// Type of kinematics to consider for the process
-      enum ProcessMode {
+      enum class Mode {
         ElectronProton = 0,     ///< electron-proton elastic case
         ElasticElastic = 1,     ///< proton-proton elastic case
         ElasticInelastic = 2,   ///< proton-proton single-dissociative (or inelastic-elastic) case
@@ -70,11 +35,11 @@ namespace CepGen
         ElectronElectron
       };
       /// Human-readable format of a process mode (elastic/dissociative parts)
-      friend std::ostream& operator<<( std::ostream&, const ProcessMode& );
-  
+      friend std::ostream& operator<<( std::ostream&, const Mode& );
+
       /// Dump all the parameters used in this process cross-section computation
       /// or events generation
-      void dump( std::ostream& os = Logger::get().outputStream ) const;
+      void dump( std::ostream& os = *Logger::get().output ) const;
 
       /// Incoming particles' momentum (in \f$\text{GeV}/c\f$)
       std::pair<double,double> inp;
@@ -83,27 +48,56 @@ namespace CepGen
       /// Process centre of mass energy
       double sqrtS() const;
       /// Beam/primary particle's PDG identifier
-      std::pair<ParticleCode,ParticleCode> inpdg;
+      std::pair<PDG,PDG> inpdg;
       /// PDG id of the outgoing central particles
-      std::vector<ParticleCode> central_system;
+      std::vector<PDG> central_system;
       /// Minimum list of central particles required
-      std::vector<ParticleCode> minimum_final_state;
+      std::vector<PDG> minimum_final_state;
 
       /// Type of kinematics to consider for the phase space
-      ProcessMode mode;
+      Mode mode;
       /// Type of structure functions to consider
       StructureFunctions::Type structure_functions;
 
-      struct CutsList {
+      struct CutsList
+      {
         CutsList();
-        CutsList( const CutsList& cuts );
+        template<class T,bool>
+        struct hasher
+        {
+          inline size_t operator()( const T& t ) const {
+            return std::hash<T>()( t );
+          }
+        };
+        template<class T>
+        struct hasher<T, true>
+        {
+          inline size_t operator() ( const T& t ) {
+            typedef typename std::underlying_type<T>::type enumType;
+            return std::hash<enumType>()( static_cast<enumType>( t ) );
+          }
+        };
+        template<class T>
+        struct EnumHash
+        {
+          inline size_t operator()( const T& t ) const {
+            return hasher<T,std::is_enum<T>::value>()( t );
+          }
+        };
         /// Cuts on the initial particles kinematics
-        std::map<Cuts::InitialState,Limits> initial;
+        /*std::map<Cuts,Limits> initial;
         /// Cuts on the central system produced
-        std::map<Cuts::Central,Limits> central;
-        std::map<ParticleCode,std::map<Cuts::Central,Limits> > central_particles;
+        std::map<Cuts,Limits> central;
+        std::map<PDG,std::map<Cuts,Limits> > central_particles;
         /// Cuts on the beam remnants system
-        std::map<Cuts::Remnants,Limits> remnants;
+        std::map<Cuts,Limits> remnants;*/
+        /// Cuts on the initial particles kinematics
+        std::unordered_map<Cuts,Limits,EnumHash<Cuts> > initial;
+        /// Cuts on the central system produced
+        std::unordered_map<Cuts,Limits,EnumHash<Cuts> > central;
+        std::unordered_map<PDG,std::unordered_map<Cuts,Limits,EnumHash<Cuts> >,EnumHash<PDG> > central_particles;
+        /// Cuts on the beam remnants system
+        std::unordered_map<Cuts,Limits,EnumHash<Cuts> > remnants;
       };
       CutsList cuts;
   };

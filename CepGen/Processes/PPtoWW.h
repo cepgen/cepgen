@@ -26,17 +26,17 @@ namespace CepGen
         static double offShellME( double shat, double that, double uhat, double phi_sum, double phi_diff );
 
         /// Rapidity range for the outgoing W bosons
-        Kinematics::Limits rap_limits_;
+        Limits rap_limits_;
         /// Rapidity of the first outgoing W boson
         double y1_;
         /// Rapidity of the first outgoing W boson
         double y2_;
 
-        Kinematics::Limits ptdiff_limits_;
+        Limits ptdiff_limits_;
         /// Transverse momentum difference for the two outgoing W bosons
         double pt_diff_;
 
-        Kinematics::Limits phi_pt_diff_limits_;
+        Limits phi_pt_diff_limits_;
         /// Azimuthal angle difference for the two outgoing W bosons
         double phi_pt_diff_;
 

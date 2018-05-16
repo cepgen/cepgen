@@ -2,9 +2,9 @@
 #define CepGen_Cards_LpairReader_h
 
 #include "Handler.h"
+#include <unordered_map>
 
 using std::string;
-using std::map;
 
 namespace CepGen
 {
@@ -37,13 +37,13 @@ namespace CepGen
         std::string getParameter( std::string key ) const;
         std::string getDescription( std::string key ) const;
 
-        std::map<std::string, Parameter<std::string> > p_strings_;
-        std::map<std::string, Parameter<double> > p_doubles_;
-        std::map<std::string, Parameter<unsigned int> > p_ints_;
-        std::map<std::string, Parameter<bool> > p_bools_;
+        std::unordered_map<std::string, Parameter<std::string> > p_strings_;
+        std::unordered_map<std::string, Parameter<double> > p_doubles_;
+        std::unordered_map<std::string, Parameter<unsigned int> > p_ints_;
+        std::unordered_map<std::string, Parameter<bool> > p_bools_;
 
         void init( Parameters* );
-        ParticleCode pair_;
+        PDG pair_;
         std::string proc_name_, hadr_name_, integr_type_;
     };
 
@@ -103,3 +103,4 @@ namespace CepGen
 }
 
 #endif
+

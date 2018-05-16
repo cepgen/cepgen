@@ -26,10 +26,10 @@ namespace CepGen
         GenericProcess( const std::string& name, const std::string& description = "<invalid process>", bool has_event = true );
         /// Copy constructor for a user process
         GenericProcess( const GenericProcess& );
-        virtual ~GenericProcess() {std::cout<<__PRETTY_FUNCTION__<<std::endl;}
+        virtual ~GenericProcess();
 
         /// Assignment operator
-        void operator=( const GenericProcess& );
+        GenericProcess& operator=( const GenericProcess& );
 
         /// Human-readable format dump of a GenericProcess object
         friend std::ostream& operator<<( std::ostream& os, const GenericProcess& proc );
@@ -37,13 +37,13 @@ namespace CepGen
         friend std::ostream& operator<<( std::ostream& os, const GenericProcess* proc );
 
         /// Generic map of particles with their role in the process
-        typedef std::map<Particle::Role,ParticleCode> ParticlesRoleMap;
+        typedef std::map<Particle::Role,PDG> ParticlesRoleMap;
         /// Pair of particle with their associated role in the process
-        typedef std::pair<Particle::Role,ParticleCode> ParticleWithRole;
+        typedef std::pair<Particle::Role,PDG> ParticleWithRole;
         /// Map of all incoming state particles in the process
         typedef ParticlesRoleMap IncomingState;
         /// Map of all outgoing particles in the process
-        typedef std::map<Particle::Role,std::vector<ParticleCode> > OutgoingState;
+        typedef std::map<Particle::Role,std::vector<PDG> > OutgoingState;
 
         /// Copy all process' attributes into a new object
         virtual std::unique_ptr<GenericProcess> clone() const = 0;
@@ -58,6 +58,13 @@ namespace CepGen
       public:
         /// Set the incoming and outgoing state to be expected in the process
         inline virtual void addEventContent() {}
+        /// Set the list of kinematic cuts to apply on the outgoing particles' final state
+        /// \param[in] cuts The Cuts object containing the kinematic parameters
+        inline virtual void setKinematics( const Kinematics& cuts ) { cuts_ = cuts; }
+        /// Return the number of dimensions on which the integration has to be performed
+        /// \return Number of dimensions on which to integrate
+        virtual unsigned int numDimensions( const Kinematics::Mode& ) const = 0;
+
         /// Prepare the process for its integration over the whole phase space
         inline virtual void beforeComputeWeight() {}
         /// Compute the weight for this point in the phase-space
@@ -65,12 +72,6 @@ namespace CepGen
         /// Fill the Event object with the particles' kinematics
         /// \param[in] symmetrise Symmetrise the event? (randomise the production of positively- and negatively-charged outgoing central particles)
         virtual void fillKinematics( bool symmetrise = false ) = 0;
-        /// Return the number of dimensions on which the integration has to be performed
-        /// \return Number of dimensions on which to integrate
-        virtual unsigned int numDimensions( const Kinematics::ProcessMode& ) const = 0;
-        /// Set the list of kinematic cuts to apply on the outgoing particles' final state
-        /// \param[in] cuts The Cuts object containing the kinematic parameters
-        inline virtual void setKinematics( const Kinematics& cuts ) { cuts_ = cuts; }
 
       public:
         /**
@@ -107,9 +108,9 @@ namespace CepGen
         void setEventContent( const IncomingState& ini, const OutgoingState& fin );
         /// Compute the electric/magnetic form factors for the two considered \f$Q^{2}\f$ momenta transfers
         void formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const;
- 
-        // --- 
-  
+
+        // ---
+
         /// Name of the process
         std::string name_;
         /// Process human-readable description
@@ -130,6 +131,10 @@ namespace CepGen
         double s_;
         /// \f$\sqrt s\f$, centre of mass energy of the incoming particles' system (in GeV)
         double sqs_;
+        /// Invariant mass of the first proton-like outgoing particle (or remnant)
+        double MX_;
+        /// Invariant mass of the second proton-like outgoing particle (or remnant)
+        double MY_;
         /// \f$m_1^2\f$, squared mass of the first proton-like incoming particle
         double w1_;
         /// \f$m_2^2\f$, squared mass of the second proton-like incoming particle
@@ -138,10 +143,6 @@ namespace CepGen
         double t1_;
         /// Virtuality of the second incoming photon
         double t2_;
-        /// Invariant mass of the first proton-like outgoing particle (or remnant)
-        double MX_;
-        /// Invariant mass of the second proton-like outgoing particle (or remnant)
-        double MY_;
 
         /// Set of cuts to apply on the final phase space
         Kinematics cuts_;

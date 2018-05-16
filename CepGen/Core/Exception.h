@@ -3,130 +3,187 @@
 
 #include <sstream>
 #include <stdexcept>
+#include <csignal>
 
 #include "Logger.h"
 
-#define PrintMessage( m ) \
-  { if ( CepGen::Logger::get().level > CepGen::Logger::Nothing ) { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::Verbatim ).dump( CepGen::Logger::get().outputStream ); } }
-#define Information( m ) \
-  { if ( CepGen::Logger::get().level > CepGen::Logger::Nothing ) { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::Information ).dump( CepGen::Logger::get().outputStream ); } }
-#define Debugging( m ) \
-  { if ( CepGen::Logger::get().level >= CepGen::Logger::Debug )  { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::DebugMessage ).dump( CepGen::Logger::get().outputStream ); } }
-#define DebuggingInsideLoop( m ) \
-  { if ( CepGen::Logger::get().level >= CepGen::Logger::DebugInsideLoop ) { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::DebugMessage ).dump( CepGen::Logger::get().outputStream ); } }
-#define InWarning( m ) \
-  { if ( CepGen::Logger::get().level >= CepGen::Logger::Warning )  { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::JustWarning ).dump( CepGen::Logger::get().outputStream ); } }
-#define InError( m ) \
-  { if ( CepGen::Logger::get().level >= CepGen::Logger::Error )  { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::ErrorMessage ).dump( CepGen::Logger::get().outputStream ); } }
-#define FatalError( m ) \
-  { CepGen::Exception( __PRETTY_FUNCTION__, m, CepGen::FatalError ).dump( CepGen::Logger::get().outputStream ); }
+#define CG_EXCEPT_MATCH( str, type ) \
+  CepGen::Logger::get().passExceptionRule( str, CepGen::Logger::Level::type )
+
+#define CG_LOG( mod ) \
+  ( !CG_EXCEPT_MATCH( mod, information ) ) \
+  ? CepGen::NullStream( mod ) \
+  : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::verbatim )
+#define CG_INFO( mod ) \
+  ( !CG_EXCEPT_MATCH( mod, information ) ) \
+  ? CepGen::NullStream( mod ) \
+  : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::info )
+#define CG_DEBUG( mod ) \
+  ( !CG_EXCEPT_MATCH( mod, debug ) ) \
+  ? CepGen::NullStream( mod ) \
+  : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::debug )
+#define CG_DEBUG_LOOP( mod ) \
+  ( !CG_EXCEPT_MATCH( mod, debugInsideLoop ) ) \
+  ? CepGen::NullStream( mod ) \
+  : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::debug )
+#define CG_WARNING( mod ) \
+  ( !CG_EXCEPT_MATCH( mod, warning ) ) \
+  ? CepGen::NullStream( mod ) \
+  : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::warning )
+#define CG_ERROR( mod ) \
+  ( !CG_EXCEPT_MATCH( mod, error ) ) \
+  ? CepGen::NullStream( mod ) \
+  : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::warning )
+#define CG_FATAL( mod ) \
+  CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::fatal )
 
 namespace CepGen
 {
-  /**
-   * \brief Enumeration of exception severities
-   * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-   * \date 27 Mar 2015
-   */
-  enum ExceptionType { Undefined=-1, Verbatim, Information, DebugMessage, JustWarning, ErrorMessage, FatalError };
-
-  /**
-   * \brief A simple exception handler
-   * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-   * \date 24 Mar 2015
-   */
-  class Exception : public std::runtime_error
+  /// A simple exception handler
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date 24 Mar 2015
+  class Exception : public std::exception
   {
     public:
-      /// Initialize a new exception object
+      /// Enumeration of exception severities
+      /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+      /// \date 27 Mar 2015
+      enum class Type {
+        undefined = -1, debug, verbatim, info, warning, error, fatal };
+
+      /// Generic constructor
       /// \param[in] from method invoking the exception
-      /// \param[in] desc brief description of the exception
+      /// \param[in] module exception classifier
       /// \param[in] type exception type
       /// \param[in] id exception code (useful for logging)
-      inline Exception( const char* from, std::string desc, ExceptionType type = Undefined, const int id = 0 ) :
-        std::runtime_error( desc ), from_( from ), type_( type ), error_num_( id ) {}
-
-      /// Initialize a new exception object
+      explicit inline Exception( const char* module = "", Type type = Type::undefined, const int id = 0 ) :
+        module_( module ), type_( type ), error_num_( id ) {}
+      /// Generic constructor
       /// \param[in] from method invoking the exception
-      /// \param[in] desc brief description of the exception
+      /// \param[in] module exception classifier
       /// \param[in] type exception type
       /// \param[in] id exception code (useful for logging)
-      inline Exception( const char* from, const char* desc, ExceptionType type = Undefined, const int id = 0 ) :
-        std::runtime_error( desc ), from_( from ), type_( type ), error_num_( id ) {}
-
-      inline ~Exception() throw() {
-        if ( type() == FatalError ) exit(0);
+      explicit inline Exception( const char* from, const char* module, Type type = Type::undefined, const int id = 0 ) :
+        from_( from ), module_( module ), type_( type ), error_num_( id ) {}
+      /// Generic constructor
+      /// \param[in] from method invoking the exception
+      /// \param[in] module exception classifier
+      /// \param[in] type exception type
+      /// \param[in] id exception code (useful for logging)
+      explicit inline Exception( const char* from, const std::string& module, Type type = Type::undefined, const int id = 0 ) :
+        from_( from ), module_( module ), type_( type ), error_num_( id ) {}
+      /// Copy constructor
+      inline Exception( const Exception& rhs ) :
+        from_( rhs.from_ ), module_( rhs.module_ ), message_( rhs.message_.str() ), type_( rhs.type_ ), error_num_( rhs.error_num_ ) {}
+      /// Default destructor (potentially killing the process)
+      inline ~Exception() noexcept override {
+        do { dump(); } while ( 0 );
         // we stop this process' execution on fatal exception
+        if ( type_ == Type::fatal )
+          if ( raise( SIGINT ) != 0 )
+            exit( 0 );
       }
+
+      //----- Overloaded stream operators
+
+      /// Generic templated message feeder operator
+      template<typename T>
+      inline friend const Exception& operator<<( const Exception& exc, T var ) {
+        Exception& nc_except = const_cast<Exception&>( exc );
+        nc_except.message_ << var;
+        return exc;
+      }
+      /// Pipe modifier operator
+      inline friend const Exception& operator<<( const Exception& exc, std::ios_base&( *f )( std::ios_base& ) ) {
+        Exception& nc_except = const_cast<Exception&>( exc );
+        f( nc_except.message_ );
+        return exc;
+      }
+
+      /// Exception message
+      /*inline const char* what() const noexcept override {
+        return message_.str().c_str();
+      }*/
 
       /// Extract the origin of the exception
       inline std::string from() const { return from_; }
       /// Extract the exception code
       inline int errorNumber() const { return error_num_; }
       /// Extract the exception type
-      inline ExceptionType type() const { return type_; }
+      inline Type type() const { return type_; }
       /// Extract a human-readable (and colourified) version of the exception type
       inline std::string typeString() const {
         switch ( type() ) {
-          case JustWarning: return "\033[34;1mJustWarning\033[0m";
-          case Information: return "\033[32;1mInfo\033[0m";
-          case DebugMessage: return "\033[33;1mDebug\033[0m";
-          case ErrorMessage: return "\033[31;1mError\033[0m";
-          case FatalError: return "\033[31;1mFatal\033[0m";
-          case Undefined: default: return "\33[7;1mUndefined\033[0m";
+          case Type::warning: return "\033[34;1mJustWarning\033[0m";
+          case Type::info: return "\033[32;1mInfo.\033[0m";
+          case Type::debug: return "\033[33;1mDebug\033[0m";
+          case Type::error: return "\033[31;1mError\033[0m";
+          case Type::fatal: return "\033[31;1mFatal\033[0m";
+          case Type::undefined: default: return "\33[7;1mUndefined\033[0m";
         }
       }
 
       /// Dump the full exception information in a given output stream
       /// \param[inout] os the output stream where the information is dumped
-      inline void dump( std::ostream& os = Logger::get().outputStream ) const {
-        if ( type() == Verbatim ) {
-          os << what() << std::endl;
-          return;
-        }
-        if ( type() == Information ) {
-          os << "[\033[32;1mInfo.\033[0m]\t" << what() << std::endl;
-          return;
-        }
-        else if ( type() == DebugMessage ) {
-          os << "[\033[33;1mDebug\033[0m] \033[30;4m" << from() << "\033[0m\n\t" << what() << std::endl;
-          return;
-        }
-        else {
-          os << "============================= Exception detected! =============================" << std::endl
-             << " Class:       " << typeString() << std::endl
-             << " Raised by:   " << from() << std::endl;
-        }
-        os << " Description: \t" << what() << std::endl;
-        if ( errorNumber() != 0 )
-          os << "-------------------------------------------------------------------------------" << std::endl
-             << " Error #" << errorNumber() << std::endl;
-        os << "===============================================================================" << std::endl;
+      inline void dump( std::ostream& os = *Logger::get().output ) const {
+        os << fullMessage() << std::endl;
       }
       /// Extract a one-line summary of the exception
-      inline std::string OneLine() const {
+      inline std::string shortMessage() const {
         std::ostringstream os;
-        os << "[" << type() << "] === " << from() << " === "
-           << what();
+        os << "[" << typeString() << "]";
+        if ( type_ == Type::debug )
+          os << " \033[30;4m" << from_ << "\033[0m\n";
+        os << "\t" << message_.str();
         return os.str();
       }
 
     private:
+      inline static char* now() {
+        static char buffer[10];
+        time_t rawtime;
+        time( &rawtime );
+        struct tm* timeinfo = localtime( &rawtime );
+        strftime( buffer, 10, "%H:%M:%S", timeinfo );
+        return buffer;
+      }
+      /// Extract a full exception message
+      inline std::string fullMessage() const {
+        if ( type_ == Type::info || type_ == Type::debug )
+          return shortMessage();
+        if ( type_ == Type::verbatim )
+          return message_.str();
+        std::ostringstream os;
+        os << "============================= Exception detected! =============================" << std::endl
+           << " Class:       " << typeString() << std::endl;
+        if ( !from_.empty() )
+          os << " Raised by:   " << from_ << std::endl;
+        os << " Description: \t" << message_.str() << std::endl;
+        if ( errorNumber() != 0 )
+          os << "-------------------------------------------------------------------------------" << std::endl
+             << " Error #" << error_num_ << std::endl;
+        os << "===============================================================================";
+        return os.str();
+      }
       /// Origin of the exception
       std::string from_;
+      /// Exception classificator
+      std::string module_;
+      /// Message to throw
+      std::ostringstream message_;
       /// Exception type
-      ExceptionType type_;
+      Type type_;
       /// Integer exception number
       int error_num_;
   };
-
-  class Printer
+  /// Placeholder for debugging messages if logging threshold is not reached
+  /// \date Apr 2018
+  struct NullStream
   {
-    public:
-      inline static Exception LogInfo( const char* name ) { return Exception( "", name, Information ); }
-      void operator<<( const char* text ) {
-        LogInfo( text ).dump( Logger::get().outputStream );
-      }
+    explicit NullStream( const char* ) {}
+    explicit NullStream( const std::string& ) {}
+    NullStream( const Exception& ) {}
+    template<class T> NullStream& operator<<( const T& ) { return *this; }
   };
 }
 

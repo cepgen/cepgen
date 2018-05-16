@@ -3,19 +3,13 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 #include "CepGen/Event/Particle.h"
+#include "CepGen/Physics/PDG.h"
 
 namespace CepGen
 {
   Kinematics::Kinematics() :
-    inp( { 6500., 6500. } ), inpdg( { Proton, Proton } ),
-    mode( ElasticElastic ), structure_functions( StructureFunctions::SuriYennie )
-  {}
-
-  Kinematics::Kinematics( const Kinematics& kin ) :
-    inp( kin.inp ), inpdg( kin.inpdg ),
-    central_system( kin.central_system ), minimum_final_state( kin.minimum_final_state ),
-    mode( kin.mode ), structure_functions( kin.structure_functions ),
-    cuts( kin.cuts )
+    inp( { 6500., 6500. } ), inpdg( { PDG::Proton, PDG::Proton } ),
+    mode( Mode::ElasticElastic ), structure_functions( StructureFunctions::SuriYennie )
   {}
 
   Kinematics::~Kinematics()
@@ -52,100 +46,25 @@ namespace CepGen
   }
 
   std::ostream&
-  operator<<( std::ostream& os, const Kinematics::ProcessMode& pm )
+  operator<<( std::ostream& os, const Kinematics::Mode& pm )
   {
     switch ( pm ) {
-      case Kinematics::ElectronElectron:
+      case Kinematics::Mode::ElectronElectron:
         return os << "electron/electron";
-      case Kinematics::ElectronProton:
+      case Kinematics::Mode::ElectronProton:
         return os << "electron/proton";
-      case Kinematics::ProtonElectron:
+      case Kinematics::Mode::ProtonElectron:
         return os << "proton/electron";
-      case Kinematics::ElasticElastic:
+      case Kinematics::Mode::ElasticElastic:
         return os << "elastic/elastic";
-      case Kinematics::InelasticElastic:
+      case Kinematics::Mode::InelasticElastic:
         return os << "inelastic/elastic";
-      case Kinematics::ElasticInelastic:
+      case Kinematics::Mode::ElasticInelastic:
         return os << "elastic/inelastic";
-      case Kinematics::InelasticInelastic:
+      case Kinematics::Mode::InelasticInelastic:
         return os << "inelastic/inelastic";
     }
     return os;
-  }
-
-  //------------------------------------------------------------------------------------------------
-  // Kinematics limits
-  //------------------------------------------------------------------------------------------------
-
-  Kinematics::Limits::Limits( double min, double max ) :
-    std::pair<double,double>( min, max )
-  {}
-
-  void
-  Kinematics::Limits::in( double low, double up )
-  {
-    first = low;
-    second = up;
-  }
-
-  double
-  Kinematics::Limits::range() const
-  {
-    if ( !hasMin() || !hasMax() )
-      return 0.;
-    return second-first;
-  }
-
-  bool
-  Kinematics::Limits::hasMin() const
-  {
-    return first != kInvalid;
-  }
-
-  bool
-  Kinematics::Limits::hasMax() const
-  {
-    return second != kInvalid;
-  }
-
-  bool
-  Kinematics::Limits::passes( double val ) const
-  {
-    if ( hasMin() && val < min() )
-      return false;
-    if ( hasMax() && val > max() )
-      return false;
-    return true;
-  }
-
-  bool
-  Kinematics::Limits::valid() const
-  {
-    return hasMin() || hasMax();
-  }
-
-  double
-  Kinematics::Limits::x( double v ) const
-  {
-    if ( v < 0. || v > 1. ) {
-      InError( Form( "x must be comprised between 0 and 1 ; x value = %g", v ) );
-    }
-    if ( !valid() )
-      return kInvalid;
-
-    return first + ( second-first ) * v;
-  }
-
-  std::ostream&
-  operator<<( std::ostream& os, const Kinematics::Limits& lim )
-  {
-    if ( !lim.hasMin() && !lim.hasMax() )
-      return os << "no cuts";
-    if ( !lim.hasMin() )
-      return os << Form( "≤ %g", lim.max() );
-    if ( !lim.hasMax() )
-      return os << Form( "≥ %g", lim.min() );
-    return os << Form( "%g → %g", lim.min(), lim.max() );
   }
 
   //------------------------------------------------------------------------------------------------
@@ -155,13 +74,7 @@ namespace CepGen
   Kinematics::CutsList::CutsList() :
     initial( { { Cuts::q2, { 0., 1.e5 } } } ),
     central( { { Cuts::pt_single, 0. } } ),
-    remnants( { { Cuts::mass, { 1.07, 320. } } } )
-  {}
-
-  Kinematics::CutsList::CutsList( const CutsList& cuts ) :
-    initial( cuts.initial ),
-    central( cuts.central ), central_particles( cuts.central_particles ),
-    remnants( cuts.remnants )
+    remnants( { { Cuts::mass_single, { 1.07, 320. } } } )
   {}
 }
 

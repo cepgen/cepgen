@@ -83,20 +83,20 @@ namespace CepGen
   double
   Momentum::threeProduct( const Momentum& mom ) const
   {
-    DebuggingInsideLoop( Form( "  (%f, %f, %f, %f)\n\t* (%f, %f, %f, %f)\n\t= %f",
-      px_, py_, pz_, energy_,
-      mom.px_, mom.py_, mom.pz_, mom.energy_,
-      px_*mom.px_+py_*mom.py_+pz_*mom.pz_ ) );
+    CG_DEBUG_LOOP( "Momentum" )
+      << "  (" << px_ << ", " << py_ << ", " << pz_ << ")\n\t"
+      << "* (" << mom.px_ << ", " << mom.py_ << ", " << mom.pz_ << ")\n\t"
+      << "= " << px_*mom.px_+py_*mom.py_+pz_*mom.pz_;
     return px_*mom.px_+py_*mom.py_+pz_*mom.pz_;
   }
 
   double
   Momentum::fourProduct( const Momentum& mom ) const
   {
-    DebuggingInsideLoop( Form( "  (%f, %f, %f, %f)\n\t* (%f, %f, %f, %f)\n\t= %f",
-      px_, py_, pz_, energy_,
-      mom.px_, mom.py_, mom.pz_, mom.energy_,
-      px_*mom.px_+py_*mom.py_+pz_*mom.pz_ ) );
+    CG_DEBUG_LOOP( "Momentum" )
+      << "  (" << px_ << ", " << py_ << ", " << pz_ << ", " << energy_ << ")\n\t"
+      << "* (" << mom.px_ << ", " << mom.py_ << ", " << mom.pz_ << ", " << mom.energy_ << ")\n\t"
+      << "= " << energy_*mom.energy_-threeProduct(mom);
     return energy_*mom.energy_-threeProduct(mom);
   }
 
@@ -210,7 +210,7 @@ namespace CepGen
       case 2: return pz_;
       case 3: return energy_;
       default:
-        throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve the component %d", i ), FatalError );
+        throw CG_FATAL( "Momentum" ) << "Failed to retrieve the component " << i << ".";
     }
   }
 
@@ -223,7 +223,7 @@ namespace CepGen
       case 2: return pz_;
       case 3: return energy_;
       default:
-        throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve the component %d", i ), FatalError );
+        throw CG_FATAL( "Momentum" ) << "Failed to retrieve the component " << i << ".";
     }
   }
 
@@ -336,6 +336,6 @@ namespace CepGen
   std::ostream&
   operator<<( std::ostream& os, const Momentum& mom )
   {
-    return os << "(E ; p) = (" << mom.energy_ << " ; " << mom.px_ << ", " << mom.py_ << ", " << mom.pz_ << ")";
+    return os << "(E/p) = (" << mom.energy_ << " / " << mom.px_ << ", " << mom.py_ << ", " << mom.pz_ << ")";
   }
 }

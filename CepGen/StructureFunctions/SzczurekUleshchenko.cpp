@@ -10,8 +10,9 @@ namespace CepGen
     SzczurekUleshchenko::operator()( double q2, double xbj, const SigmaRatio& ratio ) const
     {
 #ifndef GRVPDF
-      FatalError( "Szczurek-Uleshchenko structure functions cannot be computed"
-                  " as GRV PDF set is not linked to this instance!" );
+      throw CG_FATAL( "SzczurekUleshchenko" )
+        << "Szczurek-Uleshchenko structure functions cannot be computed"
+        << " as GRV PDF set is not linked to this instance!";
 #else
       const float q02 = 0.8;
       float amu2 = q2+q02; // shift the overall scale
@@ -20,11 +21,11 @@ namespace CepGen
 
       grv95lo_( xbj_arg, amu2, xuv, xdv, xus, xds, xss, xg );
 
-      DebuggingInsideLoop( Form( "Form factor content at xB = %e (scale = %f GeV^2):\n\t"
-                                 "  valence quarks: u / d     = %e / %e\n\t"
-                                 "  sea quarks:     u / d / s = %e / %e / %e\n\t"
-                                 "  gluons:                   = %e",
-                                 xbj, amu2, xuv, xdv, xus, xds, xss, xg ) );
+      CG_DEBUG_LOOP( "SzczurekUleshchenko" )
+        << "Form factor content at xB = " << xbj << " (scale = " << amu2 << " GeV^2):\n\t"
+        << "  valence quarks: u / d     = " << xuv << " / " << xdv << "\n\t"
+        << "  sea quarks:     u / d / s = " << xus << " / " << xds << " / " << xss << "\n\t"
+        << "  gluons:                   = " << xg;
 
       // standard partonic structure function
       const double F2_aux = 4./9.*( xuv + 2.*xus )

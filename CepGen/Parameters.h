@@ -30,7 +30,7 @@ namespace CepGen
       /// \param[in] thetamax The maximal value of \f$\theta\f$ for the outgoing leptons
       void setThetaRange( float thetamin, float thetamax );
       /// Dump the input parameters in the console
-      void dump( std::ostream& os = Logger::get().outputStream, bool pretty = true ) const;
+      void dump( std::ostream& os = *Logger::get().output, bool pretty = true ) const;
 
       //----- process to compute
 
@@ -40,7 +40,7 @@ namespace CepGen
       std::string processName() const;
       /// Set the process to study
       void setProcess( Process::GenericProcess* proc );
-      std::unique_ptr<Process::GenericProcess> processClone() const;
+      void cloneProcess( const Process::GenericProcess* proc );
 
       //----- events kinematics
 
@@ -50,21 +50,25 @@ namespace CepGen
       //----- VEGAS
 
       /// Collection of integrator parameters
-      struct IntegratorParameters
+      struct Integration
       {
-        IntegratorParameters();
+        Integration();
+        Integration( const Integration& );
+        ~Integration();
         Integrator::Type type;
         /// Number of function calls to be computed for each point
         unsigned int ncvg; // ??
-        /// Number of points to "shoot" in each integration bin by the algorithm
-        unsigned int npoints;
         /// Random number generator seed
-        unsigned long seed;
+        long rng_seed;
+        /// Random number generator engine
+        gsl_rng_type* rng_engine;
         gsl_monte_vegas_params vegas;
+        double vegas_chisq_cut;
         gsl_monte_miser_params miser;
+        double result, err_result;
       };
       /// Integrator parameters
-      IntegratorParameters integrator;
+      Integration integrator;
 
       //----- events generation
 
@@ -84,6 +88,8 @@ namespace CepGen
         unsigned int gen_print_every;
         /// Number of threads to perform the integration
         unsigned int num_threads;
+        /// Number of points to "shoot" in each integration bin by the algorithm
+        unsigned int num_points;
       };
       /// Events generation parameters
       Generation generation;

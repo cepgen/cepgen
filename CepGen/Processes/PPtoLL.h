@@ -21,20 +21,18 @@ namespace CepGen
         void fillCentralParticlesKinematics() override;
 
         /// Rapidity range for the outgoing leptons
-        Kinematics::Limits rap_limits_;
+        Limits rap_limits_;
         /// Rapidity of the first outgoing lepton
         double y1_;
         /// Rapidity of the first outgoing lepton
         double y2_;
 
-        Kinematics::Limits ptdiff_limits_;
         /// Transverse momentum difference for the two outgoing leptons
         double pt_diff_;
 
-        Kinematics::Limits phi_pt_diff_limits_;
         /// Azimuthal angle difference for the two outgoing leptons
         double phi_pt_diff_;
-  
+
         /// First outgoing lepton's momentum
         Particle::Momentum Pl1_;
         /// Second outgoing lepton's momentum

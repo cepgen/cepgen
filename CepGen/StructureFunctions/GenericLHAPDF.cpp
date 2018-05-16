@@ -15,14 +15,14 @@ namespace CepGen
     GenericLHAPDF::initialise( const char* set )
     {
 #ifdef LIBLHAPDF
-#if LHAPDF_MAJOR_VERSION==6
+#  if LHAPDF_MAJOR_VERSION == 6
       pdf_set_ = LHAPDF::PDFSet( set );
       pdfs_ = pdf_set_.mkPDFs();
-#else
+#  else
       LHAPDF::initPDFSet( set, LHAPDF::LHGRID, 0 );
-#endif
+#  endif
 #else
-      FatalError( "LHAPDF is not liked to this instance!" );
+      throw CG_FATAL( "GenericLHAPDF" ) << "LHAPDF is not liked to this instance!";
 #endif
     }
 
@@ -31,22 +31,23 @@ namespace CepGen
     {
       GenericLHAPDF pdf;
 
-      if ( num_flavours == 0 || num_flavours > 6 ) return pdf;
+      if ( num_flavours == 0 || num_flavours > 6 )
+        return pdf;
 
       //if ( q2 < 1.69 ) return pdf;
 #ifdef LIBLHAPDF
       for ( int i = 0; i < num_flavours; ++i ) {
-#if LHAPDF_MAJOR_VERSION==6
+#  if LHAPDF_MAJOR_VERSION == 6
         const double xq = pdfs_[0]->xfxQ2( i, xbj, q2 );
         const double xqbar = pdfs_[0]->xfxQ2( -i, xbj, q2 );
-#else
+#  else
         const double xq = LHAPDF::xfx( xbj, q2, i+1 );
         const double xqbar = LHAPDF::xfx( xbj, q2, -i-1 );
-#endif
+#  endif
         pdf.F2 += qtimes3_[i]*qtimes3_[i]/9. * ( xq + xqbar );
       }
 #else
-      FatalError( "LHAPDF is not liked to this instance!" );
+      throw CG_FATAL( "GenericLHAPDF" ) << "LHAPDF is not liked to this instance!";
 #endif
 
       return pdf;

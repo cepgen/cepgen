@@ -48,7 +48,8 @@ namespace CepGen
       tree->SetBranchAddress( "num_events", &num_events );
       tree->SetBranchAddress( "litigious_events", &litigious_events );
       tree->SetBranchAddress( "sqrt_s", &sqrt_s );
-      if ( tree->GetEntriesFast() > 1 ) InWarning( "The run tree has more than one entry." );
+      if ( tree->GetEntriesFast() > 1 )
+        CG_WARNING( "TreeRun" ) << "The run tree has more than one entry.";
       tree->GetEntry( 0 );
     }
   };
@@ -85,7 +86,7 @@ namespace CepGen
     }
     void fill() {
       if ( !tree )
-        FatalError( "Trying to fill a non-existent tree" );
+        throw CG_FATAL( "TreeEvent" ) << "Trying to fill a non-existent tree!";
 
       tree->Fill();
       clear();

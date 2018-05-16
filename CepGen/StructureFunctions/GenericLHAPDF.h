@@ -25,10 +25,10 @@ namespace CepGen
         void initialise( const char* set );
 
 #ifdef LIBLHAPDF
-#if LHAPDF_MAJOR_VERSION==6
+#  if LHAPDF_MAJOR_VERSION == 6
         LHAPDF::PDFSet pdf_set_;
         std::vector<LHAPDF::PDF*> pdfs_;
-#endif
+#  endif
 #endif
         static constexpr std::array<double,6> qtimes3_ = { {
           -1.0 /*d*/, 2.0 /*u*/,

@@ -1,27 +1,28 @@
-#include "StructureFunctions.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
+
 #include <iostream>
 
 namespace CepGen
 {
-  const double StructureFunctions::mp_ = ParticleProperties::mass( Proton );
+  const double StructureFunctions::mp_ = ParticleProperties::mass( PDG::Proton );
   const double StructureFunctions::mp2_ = StructureFunctions::mp_*StructureFunctions::mp_;
 
   double
   StructureFunctions::F1( double q2, double xbj ) const
   {
     if ( xbj == 0. || q2 == 0. ) {
-      InError( Form( "Invalid range for Q² or xBj: %g/%g", q2, xbj ) );
+      CG_ERROR( "StructureFunctions:F1" )
+        << "Invalid range for Q² = " << q2 << " or xBj = " << xbj << ".";
       return 0.;
     }
     const double F1 = 0.5*( ( 1+4.*xbj*xbj*mp2_/q2 )*F2 - FL )/xbj;
-    if ( Logger::get().level >= Logger::DebugInsideLoop ) {
-      DebuggingInsideLoop( Form(  "F1 for Q² = %g, xBj = %g: %g\n\t"
-                                  "(F2 = %g, FL = %g)",
-                                  q2, xbj, F1, F2, FL ) );
-    }
+    CG_DEBUG_LOOP( "StructureFunctions:F1" )
+      << "F1 for Q² = " << q2 << ", xBj = " << xbj << ": " << F1 << "\n\t"
+      << "(F2 = " << F2 << ", FL = " << FL << ").";
     return F1;
   }
 

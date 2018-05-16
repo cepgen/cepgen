@@ -23,7 +23,7 @@ namespace CepGen
      * - 2 = \f$s_2\f$ mapping
      * - 3 = yy4 = \f$\cos\left(\pi x_3\right)\f$ definition
      * - 4 = \f$w_4\f$, the two-photon system's invariant mass
-     * - 5 = xx6 = \f$\frac{1}{2}\left(1-\cos\theta^\text{CM}_6\right)\f$ definition (3D rotation of the first outgoing lepton with respect to the two-photon centre-of-mass system). If the @a nm_ optimisation flag is set this angle coefficient value becomes 
+     * - 5 = xx6 = \f$\frac{1}{2}\left(1-\cos\theta^\text{CM}_6\right)\f$ definition (3D rotation of the first outgoing lepton with respect to the two-photon centre-of-mass system). If the @a nm_ optimisation flag is set this angle coefficient value becomes
      *   \f[\frac{1}{2}\left(\frac{a_\text{map}}{b_\text{map}}\frac{\beta-1}{\beta+1}+1\right)\f]
      *   with \f$a_\text{map}=\frac{1}{2}\left(w_4-t_1-t_2\right)\f$, \f$b_\text{map}=\frac{1}{2}\sqrt{\left(\left(w_4-t_1-t_2\right)^2-4t_1t_2\right)\left(1-4\frac{w_6}{w_4}\right)}\f$, and \f$\beta=\left(\frac{a_\text{map}+b_\text{map}}{a_\text{map}-b_\text{map}}\right)^{2x_5-1}\f$
      *   and the \a fJacobian element is scaled by a factor \f$\frac{1}{2}\frac{\left(a_\text{map}^2-b_\text{map}^2\cos^2\theta^\text{CM}_6\right)}{a_\text{map}b_\text{map}}\log\left(\frac{a_\text{map}+b_\text{map}}{a_\text{map}-b_\text{map}}\right)\f$
@@ -48,7 +48,8 @@ namespace CepGen
         /// \return \f$\mathrm d\sigma(\mathbf x)(\gamma\gamma\to\ell^{+}\ell^{-})\f$,
         ///   the differential cross-section for the given point in the phase space.
         double computeWeight() override;
-        unsigned int numDimensions( const Kinematics::ProcessMode& ) const override;
+        unsigned int numDimensions( const Kinematics::Mode& ) const override;
+        void setKinematics( const Kinematics& cuts ) override;
         void fillKinematics( bool ) override;
         /// Compute the ougoing proton remnant mass
         /// \param[in] x A random number (between 0 and 1)
@@ -94,6 +95,9 @@ namespace CepGen
         /// Internal switch for the optimised code version (LPAIR legacy ; unimplemented here)
         int n_opt_;
 
+        Limits w_limits_;
+        Limits q2_limits_;
+        Limits mx_limits_;
         struct Masses
         {
           Masses();
@@ -191,6 +195,30 @@ namespace CepGen
         /// Kinematics of the second outgoing lepton (in the two-proton CM)
         Particle::Momentum p7_cm_;
         double jacobian_;
+
+      private:
+        /**
+         * Define modified variables of integration to avoid peaks integrations (see @cite Vermaseren1983347 for details)
+         * Return a set of two modified variables of integration to maintain the stability of the integrant. These two new variables are :
+         * - \f$y_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\f$ the new variable
+         * - \f$\mathrm dy_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\log\frac{x_{min}}{x_{max}}\f$, the new variable's differential form
+         * @brief Redefine the variables of integration in order to avoid the strong peaking of the integrant.
+         * @param[in] expo Exponant
+         * @param[in] xmin Minimal value of the variable
+         * @param[in] xmax Maximal value of the variable
+         * @param[out] out The new variable definition
+         * @param[out] dout The differential variant of the new variable definition
+         * @param[in] var_name The variable name
+         * @note This method overrides the set of `mapxx` subroutines in ILPAIR, with a slight difference according to the sign of the
+         *  \f$\mathrm dy_{out}\f$ parameter :
+         *  - left unchanged :
+         * > `mapw2`, `mapxq`, `mapwx`, `maps2`
+         *  - opposite sign :
+         * > `mapt1`, `mapt2`
+         */
+        void map( double expo, const Limits& lim, double& out, double& dout, const std::string& var_name="" );
+        void mapla( double y, double z, int u, double xm, double xp, double& x, double& d );
+
     };
   }
 }

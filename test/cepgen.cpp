@@ -1,6 +1,7 @@
 #include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Cards/LpairHandler.h"
 
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Generator.h"
 
 #include "CepGen/Core/Logger.h"
@@ -11,6 +12,7 @@
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -19,7 +21,7 @@ void printEvent( const CepGen::Event& ev, unsigned long ev_id )
   if ( ev_id % 5000 != 0 )
     return;
 
-  Information( Form( "Generating event #%d", ev_id ) );
+  CG_INFO( "printEvent" ) << "Generating event #" << ev_id << ".";
   ev.dump();
 }
 
@@ -31,30 +33,13 @@ void printEvent( const CepGen::Event& ev, unsigned long ev_id )
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
  */
 int main( int argc, char* argv[] ) {
+  //CepGen::Logger::get( new ofstream( "log.txt" ) );
+  //CepGen::Logger::get().level = CepGen::Logger::Level::Debug;
+
   CepGen::Generator mg;
-  
-  //CepGen::Logger::get().level = CepGen::Logger::Debug;
-  //CepGen::Logger::get().level = CepGen::Logger::DebugInsideLoop;
-  //CepGen::Logger::get().outputStream( ofstream( "log.txt" ) );
-  
-  if ( argc == 1 ) {
-    Information( "No config file provided. Setting the default parameters." );
-    
-    mg.parameters->setProcess( new CepGen::Process::GamGamLL );
-    //mg.parameters->process_mode = Kinematics::InelasticElastic;
-    mg.parameters->kinematics.mode = CepGen::Kinematics::ElasticElastic;
-    mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SuriYennie;
-    mg.parameters->kinematics.inp = { 6500., 6500. };
-    mg.parameters->kinematics.central_system = { CepGen::Muon, CepGen::Muon };
-    mg.parameters->kinematics.cuts.central[CepGen::Cuts::pt_single].min() = 15.;
-    mg.parameters->kinematics.cuts.central[CepGen::Cuts::eta_single] = { -2.5, 2.5 };
-    mg.parameters->integrator.ncvg = 5e4;
-    mg.parameters->generation.enabled = true;
-    mg.parameters->generation.maxgen = 2e4;
-  }
-  else {
-    Information( Form( "Reading config file stored in %s", argv[1] ) );
-    //CepGen::Cards::LpairReader card( argv[1] );
+
+  if ( argc > 1 ) {
+    CG_INFO( "main" ) << "Reading config file stored in " << argv[1] << ".";
     const std::string extension = CepGen::Cards::Handler::getExtension( argv[1] );
     if ( extension == "card" )
       mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
@@ -62,6 +47,23 @@ int main( int argc, char* argv[] ) {
     else if ( extension == "py" )
       mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
 #endif
+    else
+      throw CG_FATAL( "main" ) << "Unrecognized steering card extension: ." << extension << "!";
+  }
+  else {
+    CG_INFO( "main" ) << "No config file provided. Setting the default parameters.";
+
+    mg.parameters->setProcess( new CepGen::Process::GamGamLL );
+    mg.parameters->kinematics.mode = CepGen::Kinematics::Mode::ElasticElastic;
+    mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SuriYennie;
+    mg.parameters->kinematics.inp = { 6500., 6500. };
+    mg.parameters->kinematics.central_system = { CepGen::PDG::Muon, CepGen::PDG::Muon };
+    mg.parameters->kinematics.cuts.central[CepGen::Cuts::pt_single].min() = 15.;
+    mg.parameters->kinematics.cuts.central[CepGen::Cuts::eta_single] = { -2.5, 2.5 };
+    mg.parameters->integrator.ncvg = 5e4;
+    mg.parameters->generation.num_threads = 4;
+    mg.parameters->generation.enabled = true;
+    mg.parameters->generation.maxgen = 1e5;
   }
 
   // We might want to cross-check visually the validity of our run

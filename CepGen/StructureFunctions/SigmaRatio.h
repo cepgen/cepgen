@@ -17,6 +17,7 @@ namespace CepGen
       protected:
         /// \f$x_{\textrm{Bj}}\f$ dependence for QCD-matching of R at high-Q²
         double theta( double q2, double xbj ) const;
+        static const double mp_, mp2_;
     };
 
     // Reference: arXiv:hep-ex/9808028

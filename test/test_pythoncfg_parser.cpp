@@ -10,7 +10,7 @@ int
 main( int argc, char* argv[] )
 {
   if ( argc < 2 )
-    FatalError( "One argument required!" );
+    throw CG_FATAL( "main" ) << "One argument required!";
 
   try {
     CepGen::Cards::PythonHandler py( argv[1] );

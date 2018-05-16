@@ -1,4 +1,5 @@
-#include "Event.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
@@ -68,7 +69,7 @@ namespace CepGen
   Event::getByRole( Particle::Role role ) const
   {
     if ( particles_.count( role ) == 0 )
-      throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve a particle with role %d", role ), FatalError );
+      throw CG_FATAL( "Event" ) << "Failed to retrieve a particle with " << role << " role.";
     //--- retrieve all particles with a given role
     return particles_.at( role );
   }
@@ -93,9 +94,10 @@ namespace CepGen
     //--- retrieve the first particle a the given role
     Particles& parts_by_role = getByRole( role );
     if ( parts_by_role.size() == 0 )
-      FatalError( Form( "No particle retrieved with role %d", (int)role ) );
+      throw CG_FATAL( "Event" ) << "No particle retrieved with " << role << " role.";
     if ( parts_by_role.size() > 1 )
-      FatalError( Form( "More than one particle with role %d: %d particles", (int)role, parts_by_role.size() ) );
+      throw CG_FATAL( "Event" ) << "More than one particle with " << role << " role: "
+        << parts_by_role.size() << " particles.";
     return *parts_by_role.begin();
   }
 
@@ -103,13 +105,14 @@ namespace CepGen
   Event::getOneByRole( Particle::Role role ) const
   {
     if ( particles_.count( role ) == 0 )
-      throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve a particle with role %d", role ), FatalError );
+      throw CG_FATAL( "Event" ) << "Failed to retrieve a particle with " << role << " role.";
     //--- retrieve the first particle a the given role
     const Particles& parts_by_role = particles_.at( role );
     if ( parts_by_role.size() == 0 )
-      FatalError( Form( "No particle retrieved with role %d", (int)role ) );
+      throw CG_FATAL( "Event" ) << "No particle retrieved with " << role << " role.";
     if ( parts_by_role.size() > 1 )
-      FatalError( Form( "More than one particle with role %d: %d particles", (int)role, parts_by_role.size() ) );
+      throw CG_FATAL( "Event" ) << "More than one particle with " << role << " role: "
+        << parts_by_role.size() << " particles";
     return *parts_by_role.begin();
   }
 
@@ -121,7 +124,7 @@ namespace CepGen
         if ( part.id() == id )
           return part;
 
-    throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve the particle with id=%d", id ), FatalError );
+    throw CG_FATAL( "Event" ) << "Failed to retrieve the particle with id=" << id << ".";
   }
 
   const Particle&
@@ -132,7 +135,7 @@ namespace CepGen
         if ( part.id() == id )
           return part;
 
-    throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve the particle with id=%d", id ), FatalError );
+    throw CG_FATAL( "Event" ) << "Failed to retrieve the particle with id=" << id << ".";
   }
 
   Particles
@@ -171,8 +174,9 @@ namespace CepGen
   Particle&
   Event::addParticle( Particle& part, bool replace )
   {
-    DebuggingInsideLoop( Form( "Particle with PDGid = %d has role %d", part.pdgId(), part.role() ) );
-    if ( part.role() <= 0 ) FatalError( Form( "Trying to add a particle with role=%d", (int)part.role() ) );
+    CG_DEBUG_LOOP( "Event" ) << "Particle with PDGid = " << part.integerPdgId() << " has role " << part.role();
+    if ( part.role() <= 0 )
+      throw CG_FATAL( "Event" ) << "Trying to add a particle with role=" << (int)part.role() << ".";
 
     //--- retrieve the list of particles with the same role
     Particles& part_with_same_role = getByRole( part.role() );
@@ -194,7 +198,7 @@ namespace CepGen
   Particle&
   Event::addParticle( Particle::Role role, bool replace )
   {
-    Particle np( role );
+    Particle np( role, PDG::invalid );
     return addParticle( np, replace );
   }
 
@@ -255,7 +259,7 @@ namespace CepGen
       const double mass_diff = ( ptot-part.momentum() ).mass();
       if ( fabs( mass_diff ) > minimal_precision_ ) {
         dump();
-        FatalError( Form( "Error in momentum balance for particle %d: mdiff = %.5e", part.id(), mass_diff ) );
+        throw CG_FATAL( "Event" ) << "Error in momentum balance for particle " << part.id() << ": mdiff = " << mass_diff << ".";
       }
     }
   }
@@ -272,7 +276,7 @@ namespace CepGen
       const ParticlesIds mothers = part.mothers();
       {
         std::ostringstream oss_pdg;
-        if ( part.pdgId() == invalidParticle && mothers.size() > 0 ) {
+        if ( part.pdgId() == PDG::invalid && mothers.size() > 0 ) {
           for ( unsigned short i = 0; i < mothers.size(); ++i )
             oss_pdg << ( i > 0 ? "/" : "" ) << getConstById( *std::next( mothers.begin(), i ) ).pdgId();
           os << Form( "\n %2d\t\t%-10s", part.id(), oss_pdg.str().c_str() );
@@ -316,12 +320,13 @@ namespace CepGen
     if ( fabs( pztot ) < minimal_precision_ ) pztot = 0.;
     if ( fabs(  etot ) < minimal_precision_ ) etot = 0.;
     //
-    Information( Form( "Dump of event content:\n"
-    " Id\tPDG id\tName\t\tCharge\tRole\t Status\tMother\tpx            py            pz            E      \t M         \n"
-    " --\t------\t----\t\t------\t----\t ------\t------\t----GeV/c---  ----GeV/c---  ----GeV/c---  ----GeV/c---\t --GeV/c²--"
-    "%s\n"
-    " ----------------------------------------------------------------------------------------------------------------------------------\n"
-    "\t\t\t\t\t\t\tBalance% 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), pxtot, pytot, pztot, etot ) );
+    CG_INFO( "Event" )
+     << Form( "Dump of event content:\n"
+              " Id\tPDG id\tName\t\tCharge\tRole\t Status\tMother\tpx            py            pz            E      \t M         \n"
+              " --\t------\t----\t\t------\t----\t ------\t------\t----GeV/c---  ----GeV/c---  ----GeV/c---  ----GeV/c---\t --GeV/c²--"
+              "%s\n"
+              " ----------------------------------------------------------------------------------------------------------------------------------\n"
+              "\t\t\t\t\t\t\tBalance% 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), pxtot, pytot, pztot, etot );
   }
 
   //------------------------------------------------------------------------------------------------

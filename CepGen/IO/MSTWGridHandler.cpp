@@ -10,6 +10,8 @@
 
 namespace MSTW
 {
+  const unsigned int GridHandler::good_magic = 0x5754534d; // MSTW in ASCII
+
   GridHandler&
   GridHandler::get( const char* filename )
   {
@@ -27,17 +29,17 @@ namespace MSTW
     { // file readout part
       std::ifstream file( filename, std::ios::binary | std::ios::in );
       if ( !file.is_open() )
-        FatalError( Form( "Impossible to load grid file \"%s\"!", filename ) );
+        throw CG_FATAL( "GridHandler" ) << "Impossible to load grid file \"" << filename << "%s\"!";
 
       file.read( reinterpret_cast<char*>( &header_ ), sizeof( header_t ) );
 
       // first checks on the file header
 
       if ( header_.magic != good_magic )
-        FatalError( Form( "Wrong magic number retrieved: %u, expecting %u!", header_.magic, good_magic ) );
+        throw CG_FATAL( "GridHandler" ) << "Wrong magic number retrieved: " << header_.magic << ", expecting " << good_magic << ".";
 
       if ( header_.nucleon != header_t::proton )
-        FatalError( "Only proton structure function grids can be retrieved for this purpose!" );
+        throw CG_FATAL( "GridHandler" ) << "Only proton structure function grids can be retrieved for this purpose!";
 
       // retrieve all points and evaluate grid boundaries
 
@@ -55,7 +57,7 @@ namespace MSTW
     }
 
     if ( q2_vals.size() < 2 || xbj_vals.size() < 2 )
-      FatalError( "Invalid grid retrieved!" );
+      throw CG_FATAL( "GridHandler" ) << "Invalid grid retrieved!";
 
     initGSL( q2_vals, xbj_vals );
 
@@ -64,12 +66,11 @@ namespace MSTW
       ss_cl << header_.cl;
       ss_ord << header_.order;
       ss_nucl << header_.nucleon;
-      Information( Form( "MSTW@%s grid evaluator built for %s structure functions (%s)\n\t"
-                         " Q² in range [%.3e:%.3e]\n\t"
-                         "xBj in range [%.3e:%.3e]",
-                         ss_ord.str().c_str(), ss_nucl.str().c_str(), ss_cl.str().c_str(),
-                         pow( 10.,  *q2_vals.begin() ), pow( 10.,  *q2_vals.rbegin() ),
-                         pow( 10., *xbj_vals.begin() ), pow( 10., *xbj_vals.rbegin() ) ) );
+      CG_INFO( "GridHandler" )
+        << "MSTW@" << header_.order << " grid evaluator built "
+        << "for " << header_.nucleon << " structure functions (" << header_.cl << ")\n\t"
+        << " Q² in range [" << pow( 10.,  *q2_vals.begin() ) << ":" << pow( 10.,  *q2_vals.rbegin() ) << "]\n\t"
+        << "xBj in range [" << pow( 10., *xbj_vals.begin() ) << ":" << pow( 10., *xbj_vals.rbegin() ) << "].";
     }
   }
 
@@ -114,10 +115,11 @@ namespace MSTW
       gsl_spline2d_init( splines_[i], &q2_vec[0], &xbj_vec[0], values_[i], q2_vals.size(), xbj_vals.size() );
     }
 #else
-    InWarning( Form( "GSL version ≥ 2.1 is required for spline bilinear interpolation.\n\t"
-                     "Version %s is installed on this system!\n\t"
-                     "Will use a linear approximation instead.\n\t"
-                     "You may check the numerical validity of this approach...", GSL_VERSION ) );
+    CG_WARNING( "GridHandler" )
+      << "GSL version ≥ 2.1 is required for spline bilinear interpolation.\n\t"
+      << "Version " << GSL_VERSION << " is installed on this system!\n\t"
+      << "Will use a linear approximation instead.\n\t"
+      << "You may check the numerical validity of this approach...";
 #endif
   }
 
@@ -128,7 +130,9 @@ namespace MSTW
 #ifdef GOOD_GSL
     if ( gsl_spline2d_eval_e( splines_[F2], log10( q2 ), log10( xbj ), xacc_, yacc_, &ev.F2 ) != GSL_SUCCESS
       || gsl_spline2d_eval_e( splines_[FL], log10( q2 ), log10( xbj ), xacc_, yacc_, &ev.FL ) != GSL_SUCCESS ) {
-      InWarning( Form( "Failed to evaluate the structure functions for Q² = %.5e GeV² / xbj = %.5e", q2, xbj ) );
+      CG_WARNING( "GridHandler" )
+        << "Failed to evaluate the structure functions "
+        << "for Q² = " << q2 << " GeV² / xbj = " << xbj << ".";
       return ev;
     }
 #else

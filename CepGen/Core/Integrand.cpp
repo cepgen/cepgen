@@ -4,6 +4,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Physics/PDG.h"
 
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
@@ -17,7 +18,7 @@ namespace CepGen
 {
   namespace Integrand
   {
-    Logger::LoggingLevel log_level;
+    Logger::Level log_level;
     Timer tmr;
 
     double
@@ -28,11 +29,11 @@ namespace CepGen
 
       Parameters* p = static_cast<Parameters*>( params );
       if ( !p )
-        throw Exception( __PRETTY_FUNCTION__, "Failed to retrieve the run parameters!", FatalError );
+        throw CG_FATAL( "Integrand" ) << "Failed to retrieve the run parameters!";
 
       Process::GenericProcess* proc = p->process();
       if ( !proc )
-        throw Exception( __PRETTY_FUNCTION__, "Failed to retrieve the process!", FatalError );
+        throw CG_FATAL( "Integrand" ) << "Failed to retrieve the process!";
 
       //=============================================================================================
       // start the timer
@@ -46,31 +47,15 @@ namespace CepGen
 
       if ( proc->hasEvent() ) {
         ev = proc->event();
-        proc->clearEvent();
 
         if ( proc->first_run ) {
-          if ( log_level >= Logger::Debug )
-            Debugging( Form( "Computation launched for %s process 0x%zx", p->processName().c_str(), p->process() ) );
-
-          const Particle::Momentum p1( 0., 0.,  p->kinematics.inp.first ), p2( 0., 0., -p->kinematics.inp.second );
-          proc->setIncomingKinematics( p1, p2 ); // at some point introduce non head-on colliding beams?
-
-          if ( log_level >= Logger::Debug ) {
-            std::ostringstream oss; oss << p->kinematics.mode;
-            Debugging( Form( "Process mode considered: %s\n\t"
-                             "  pz(p1) = %5.2f\n\t"
-                             "  pz(p2) = %5.2f\n\t"
-                             "  remnant mode: %d",
-                              oss.str().c_str(),
-                              p->kinematics.inp.first, p->kinematics.inp.second,
-                              p->kinematics.structure_functions ) );
-          }
-
-          //=========================================================================================
-          // prepare the function to be integrated
-          //=========================================================================================
-
-          proc->prepareKinematics();
+          CG_DEBUG( "Integrand" )
+            << "Computation launched for " << p->processName() << " process "
+            << "0x" << std::hex << p->process() << std::dec << ".\n\t"
+            << "Process mode considered: " << p->kinematics.mode << "\n\t"
+            << "  pz(p1) = " << p->kinematics.inp.first << "\n\t"
+            << "  pz(p2) = " << p->kinematics.inp.second << "\n\t"
+            << "  structure functions: " << p->kinematics.structure_functions;
 
           //=========================================================================================
           // add central system
@@ -80,7 +65,7 @@ namespace CepGen
           if ( central_system.size() == p->kinematics.central_system.size() ) {
             unsigned short i = 0;
             for ( auto& part : central_system ) {
-              if ( p->kinematics.central_system[i] == invalidParticle )
+              if ( p->kinematics.central_system[i] == PDG::invalid )
                 continue;
               part.setPdgId( p->kinematics.central_system[i] );
               part.computeMass();
@@ -91,6 +76,8 @@ namespace CepGen
           p->clearRunStatistics();
           proc->first_run = false;
         } // passed the first-run preparation
+
+        proc->clearEvent();
       } // event is not empty
 
       //=============================================================================================
@@ -98,19 +85,12 @@ namespace CepGen
       //=============================================================================================
 
       proc->setPoint( ndim, x );
-      if ( log_level >= Logger::DebugInsideLoop ) {
-        std::ostringstream oss;
-        for ( unsigned int i = 0; i < ndim; ++i )
-          oss << ( i == 0 ? "" : " " ) << x[i];
-        DebuggingInsideLoop( Form( "Computing dim-%d point (%s)", ndim, oss.str().c_str() ) );
-      }
 
       //=============================================================================================
       // from this step on, the phase space point is supposed to be set
       //=============================================================================================
 
       p->process()->beforeComputeWeight();
-
       double integrand = p->process()->computeWeight();
 
       //=============================================================================================
@@ -129,7 +109,6 @@ namespace CepGen
         && !p->hadroniser()
         &&  p->kinematics.cuts.central_particles.size() == 0 )
         return integrand;
-//std::cout << integrand << std::endl;
 
       //=============================================================================================
       // fill in the process' Event object
@@ -179,6 +158,7 @@ namespace CepGen
       if ( p->hadroniser() ) {
         double br = -1.;
         if ( !p->hadroniser()->run( *ev, br, p->storage() ) || br == 0. )
+//        if ( !p->hadroniser()->run( *ev, br, true ) || br == 0. )
           return 0.;
         integrand *= br; // branching fraction for all decays
       }
@@ -218,21 +198,22 @@ namespace CepGen
         p->process()->last_event = ev;
         p->process()->last_event->time_total = tmr.elapsed();
 
-        if ( log_level >= Logger::Debug )
-          Debugging( Form( "[process 0x%zx] Individual time (gen+hadr+cuts): %5.6f ms",
-                           p->process(), p->process()->last_event->time_total*1.e3 ) );
+        CG_DEBUG( "Integrand" )
+          << "[process 0x" << std::hex << p->process() << std::dec << "] "
+          << "Individual time (gen+hadr+cuts): " << p->process()->last_event->time_total*1.e3 << " ms";
       }
 
       //=============================================================================================
       // a bit of useful debugging
       //=============================================================================================
 
-      if ( log_level >= Logger::DebugInsideLoop ) {
+      if ( CG_EXCEPT_MATCH( "Integrand", debugInsideLoop ) ) {
         std::ostringstream oss;
         for ( unsigned short i = 0; i < ndim; ++i )
           oss << Form( "%10.8f ", x[i] );
-        Debugging( Form( "f value for dim-%d point ( %s): %4.4e",
-                         ndim, oss.str().c_str(), integrand ) );
+        CG_DEBUG( "Integrand" )
+          << "f value for dim-" << ndim << " point ( " << oss.str() << "): "
+          << integrand;
       }
 
       return integrand;

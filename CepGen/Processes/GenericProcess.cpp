@@ -1,43 +1,49 @@
-#include "GenericProcess.h"
+#include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Physics/PDG.h"
 
 namespace CepGen
 {
   namespace Process
   {
-    const double GenericProcess::mp_ = ParticleProperties::mass( Proton );
+    const double GenericProcess::mp_ = ParticleProperties::mass( PDG::Proton );
     const double GenericProcess::mp2_ = GenericProcess::mp_*GenericProcess::mp_;
 
     GenericProcess::GenericProcess( const std::string& name, const std::string& description, bool has_event ) :
       name_( name ), description_( description ),
       first_run( true ),
       s_( -1. ), sqs_( -1. ),
-      w1_( -1. ), w2_( -1. ), t1_( -1. ), t2_( -1. ), MX_( -1. ), MY_( -1. ),
+      MX_( -1. ), MY_( -1. ), w1_( -1. ), w2_( -1. ),
+      t1_( -1. ), t2_( -1. ),
       has_event_( has_event ), event_( new Event ),
       is_point_set_( false )
-    {std::cout<<__PRETTY_FUNCTION__<<std::endl;}
+    {}
 
     GenericProcess::GenericProcess( const GenericProcess& proc ) :
       name_( proc.name_ ), description_( proc.description_ ),
       first_run( proc.first_run ),
       s_( proc.s_ ), sqs_( proc.sqs_ ),
-      w1_( -1. ), w2_( -1. ), t1_( -1. ), t2_( -1. ), MX_( -1. ), MY_( -1. ),
+      MX_( proc.MX_ ), MY_( proc.MY_ ), w1_( proc.w1_ ), w2_( proc.w2_ ),
+      t1_( -1. ), t2_( -1. ), cuts_( proc.cuts_ ),
       has_event_( proc.has_event_ ), event_( new Event( *proc.event_.get() ) ),
       is_point_set_( false )
-    {std::cout<<__PRETTY_FUNCTION__<<std::endl;}
+    {}
 
-    void
+    GenericProcess::~GenericProcess()
+    {}
+
+    GenericProcess&
     GenericProcess::operator=( const GenericProcess& proc )
     {
-      name_ = proc.name_;
-      description_ = proc.description_;
+      name_ = proc.name_; description_ = proc.description_;
       first_run = proc.first_run;
-      s_ = proc.s_;
-      sqs_ = proc.sqs_;
-      has_event_ = proc.has_event_;
-      event_.reset( new Event( *proc.event_.get() ) );
+      s_ = proc.s_; sqs_ = proc.sqs_;
+      MX_ = proc.MX_; MY_ = proc.MY_; w1_ = proc.w1_; w2_ = proc.w2_;
+      cuts_ = proc.cuts_;
+      has_event_ = proc.has_event_; event_.reset( new Event( *proc.event_.get() ) );
       is_point_set_ = false;
+      return *this;
     }
 
     void
@@ -46,7 +52,7 @@ namespace CepGen
       x_ = std::vector<double>( x, x+ndim );
       is_point_set_ = true;
 
-      if ( Logger::get().level >= Logger::DebugInsideLoop )
+      if ( CG_EXCEPT_MATCH( "Process:dumpPoint", debugInsideLoop ) )
         dumpPoint();
     }
 
@@ -62,18 +68,22 @@ namespace CepGen
     GenericProcess::prepareKinematics()
     {
       if ( !isKinematicsDefined() )
-        throw Exception( __PRETTY_FUNCTION__, "Kinematics not properly defined for the process", FatalError );
+        throw CG_FATAL( "GenericProcess" ) << "Kinematics not properly defined for the process.";
 
-      const Particle& ib1 = event_->getOneByRole( Particle::IncomingBeam1 );
-      const Particle& ib2 = event_->getOneByRole( Particle::IncomingBeam2 );
+      // at some point introduce non head-on colliding beams?
+      Particle::Momentum p1( 0., 0.,  cuts_.inp.first ), p2( 0., 0., -cuts_.inp.second );
+      // on-shell beam particles
+      p1.setMass( ParticleProperties::mass( cuts_.inpdg.first ) );
+      p2.setMass( ParticleProperties::mass( cuts_.inpdg.second ) );
+      setIncomingKinematics( p1, p2 );
 
-      sqs_ = CMEnergy( ib1, ib2 );
+      sqs_ = CMEnergy( p1, p2 );
       s_ = sqs_*sqs_;
 
-      w1_ = ib1.mass2();
-      w2_ = ib2.mass2();
+      w1_ = p1.mass2();
+      w2_ = p2.mass2();
 
-      Debugging( Form( "Kinematics successfully prepared! sqrt(s) = %.2f", sqs_ ) );
+      CG_DEBUG( "GenericProcess" ) << "Kinematics successfully prepared! sqrt(s) = " << sqs_ << ".";
     }
 
     void
@@ -83,8 +93,9 @@ namespace CepGen
       for ( unsigned short i = 0; i < x_.size(); ++i ) {
         os << Form( "  x(%2d) = %8.6f\n\t", i, x_[i] );
       }
-      Information( Form( "Number of integration parameters: %d\n\t"
-                         "%s", x_.size(), os.str().c_str() ) );
+      CG_INFO( "GenericProcess" )
+        << "Number of integration parameters: " << x_.size() << "\n\t"
+        << os.str() << ".";
     }
 
     void
@@ -106,7 +117,7 @@ namespace CepGen
       const auto& central_system = ini.find( Particle::CentralSystem );
       if ( central_system == ini.end() ) {
         Particle& p = event_->addParticle( Particle::Intermediate );
-        p.setPdgId( invalidParticle );
+        p.setPdgId( PDG::invalid );
         p.setStatus( Particle::Propagator );
       }
       //--- outgoing state
@@ -161,31 +172,31 @@ namespace CepGen
       const double mx2 = MX_*MX_, my2 = MY_*MY_;
 
       switch ( cuts_.mode ) {
-        case Kinematics::ElectronElectron: {
+        case Kinematics::Mode::ElectronElectron: {
           fp1 = FormFactors::Trivial(); // electron (trivial) form factor
           fp2 = FormFactors::Trivial(); // electron (trivial) form factor
         } break;
-        case Kinematics::ProtonElectron: {
+        case Kinematics::Mode::ProtonElectron: {
           fp1 = FormFactors::ProtonElastic( -t1_ ); // proton elastic form factor
           fp2 = FormFactors::Trivial(); // electron (trivial) form factor
         } break;
-        case Kinematics::ElectronProton: {
+        case Kinematics::Mode::ElectronProton: {
           fp1 = FormFactors::Trivial(); // electron (trivial) form factor
           fp2 = FormFactors::ProtonElastic( -t2_ ); // proton elastic form factor
         } break;
-        case Kinematics::ElasticElastic: {
+        case Kinematics::Mode::ElasticElastic: {
           fp1 = FormFactors::ProtonElastic( -t1_ ); // proton elastic form factor
           fp2 = FormFactors::ProtonElastic( -t2_ ); // proton elastic form factor
         } break;
-        case Kinematics::ElasticInelastic: {
+        case Kinematics::Mode::ElasticInelastic: {
           fp1 = FormFactors::ProtonElastic( -t1_ );
           fp2 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t2_, w2_, my2 );
         } break;
-        case Kinematics::InelasticElastic: {
+        case Kinematics::Mode::InelasticElastic: {
           fp1 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t1_, w1_, mx2 );
           fp2 = FormFactors::ProtonElastic( -t2_ );
         } break;
-        case Kinematics::InelasticInelastic: {
+        case Kinematics::Mode::InelasticInelastic: {
           fp1 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t1_, w1_, mx2 );
           fp2 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t2_, w2_, my2 );
         } break;

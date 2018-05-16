@@ -22,9 +22,9 @@ namespace CepGen
     {
       public:
         /// Type of incoming partons fluxes
-        enum FluxTypes
+        enum class Fluxes
         {
-          BudnevFluxes = 0
+          Budnev = 0
         };
       public:
         /// Class constructor
@@ -34,17 +34,19 @@ namespace CepGen
         /// \param[in] output Produced final state particles
         GenericKTProcess( const std::string& name,
                           const std::string& description,
-                          const std::array<ParticleCode,2>& partons,
-                          const std::vector<ParticleCode>& output );
+                          const std::array<PDG,2>& partons,
+                          const std::vector<PDG>& output );
 
         /// Populate the event content with the generated process' topology
         void addEventContent() override;
         /// Retrieve the total number of dimensions on which the integration is being performet
-        unsigned int numDimensions( const Kinematics::ProcessMode& ) const override;
+        unsigned int numDimensions( const Kinematics::Mode& ) const override;
         /// Retrieve the event weight in the phase space
         double computeWeight() override;
-        /// Populate the event content with the generated process' kinematics  
+        /// Populate the event content with the generated process' kinematics
         void fillKinematics( bool ) override;
+
+        void dumpVariables() const;
 
         /// Get the elastic flux to be expected at a given parton x/kT
         /// \param[in] x Parton momentum fraction
@@ -54,7 +56,7 @@ namespace CepGen
         /// \param[in] x Parton momentum loss
         /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming parton
         /// \param[in] mx Outgoing diffractive proton mass
-        static double inelasticFlux( double x, double kt2, double mx, const StructureFunctions::Type& sf, const FluxTypes& ft = BudnevFluxes );
+        static double inelasticFlux( double x, double kt2, double mx, const StructureFunctions::Type& sf, const Fluxes& ft = Fluxes::Budnev );
 
       protected:
         /// Set the kinematics associated to the phase space definition
@@ -74,16 +76,16 @@ namespace CepGen
         virtual void fillCentralParticlesKinematics() = 0;
 
         /// Type of mapping to apply on the variable
-        enum MappingType
+        enum class Mapping
         {
           /// a linear \f$\textrm dx\f$ mapping
-          kLinear = 0,
+          linear = 0,
           /// a logarithmic \f$\frac{\textrm dx}{x} = \textrm d(\log x)\f$ mapping
-          kLogarithmic,
+          logarithmic,
           /// a square \f$\textrm dx^2=2x\cdot\textrm dx\f$ mapping
-          kSquare
+          square
         };
-        friend std::ostream& operator<<( std::ostream&, const MappingType& );
+        friend std::ostream& operator<<( std::ostream&, const Mapping& );
         /// Register a variable to be handled and populated whenever
         ///  a new phase space point weight is to be calculated.
         /// \note To be run once per generation (before any point computation)
@@ -92,23 +94,23 @@ namespace CepGen
         /// \param[in] in Integration limits
         /// \param[in] default_limits Limits to apply if none retrieved from the user configuration
         /// \param[in] description Human-readable description of the variable
-        void registerVariable( double& out, const MappingType& type, const Kinematics::Limits& in, Kinematics::Limits default_limits, const char* description );
+        void registerVariable( double& out, const Mapping& type, const Limits& in, Limits default_limits, const char* description );
         /// Generate and initialise all variables handled by this process
         /// \return Phase space point-dependent component of the Jacobian weight of the point in the phase space for integration
         /// \note To be run at each point computation (therefore, to be optimised!)
         double generateVariables() const;
-  
+
         unsigned short num_dimensions_;
 
         /// Phase space point-independant component of the Jacobian weight of the point in the phase space for integration
         double kt_jacobian_;
 
         /// Log-virtuality range of the intermediate parton
-        Kinematics::Limits log_qt_limits_;
+        Limits log_qt_limits_;
         /// Intermediate azimuthal angle range
-        Kinematics::Limits phi_qt_limits_;
+        Limits phi_qt_limits_;
         /// Invariant mass range for the scattered excited system
-        Kinematics::Limits mx_limits_;
+        Limits mx_limits_;
 
         /// Virtuality of the first intermediate parton (photon, pomeron, ...)
         double qt1_;
@@ -131,12 +133,14 @@ namespace CepGen
         /// Handler to a variable mapped by this process
         struct MappingVariable
         {
+          /// Human-readable description of the variable
+          std::string description;
           /// Kinematic limits to apply on the variable
-          Kinematics::Limits limits;
+          Limits limits;
           /// Reference to the process variable to generate/map
           double& variable;
           /// Interpolation type
-          MappingType type;
+          Mapping type;
           /// Corresponding integration variable
           unsigned short index;
         };
@@ -144,10 +148,11 @@ namespace CepGen
         std::vector<MappingVariable> mapped_variables_;
 
       private:
+        static const double kMinFlux;
         /// First and second intermediate parton (photon, pomeron, ...)
-        std::array<ParticleCode,2> kIntermediateParts;
+        std::array<PDG,2> kIntermediateParts;
         /// Type of particles produced in the final state
-        std::vector<ParticleCode> kProducedParts;
+        std::vector<PDG> kProducedParts;
     };
   }
 }

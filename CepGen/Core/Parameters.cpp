@@ -3,6 +3,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/TamingFunction.h"
 
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
 
@@ -41,11 +42,9 @@ namespace CepGen
       Particle::thetaToEta( thetamin )
     };
 
-    if ( Logger::get().level >= Logger::Debug ) {
-      std::ostringstream os; os << kinematics.cuts.central[Cuts::eta_single];
-      Debugging( Form( "eta in range: %s => theta(min) = %g, theta(max) = %g",
-                       os.str().c_str(), thetamin, thetamax ) );
-    }
+    CG_DEBUG( "Parameters" )
+      << "eta in range: " << kinematics.cuts.central.at( Cuts::eta_single )
+      << " => theta(min) = " << thetamin << ", theta(max) = " << thetamax << ".";
   }
 
   void
@@ -79,13 +78,19 @@ namespace CepGen
   void
   Parameters::setProcess( Process::GenericProcess* proc )
   {
+    if ( !proc )
+      throw CG_FATAL( "Parameters" )
+        << "Trying to clone an invalid process!";
     process_.reset( proc );
   }
 
-  std::unique_ptr<Process::GenericProcess>
-  Parameters::processClone() const
+  void
+  Parameters::cloneProcess( const Process::GenericProcess* proc )
   {
-    return process_->clone();
+    if ( !proc )
+      throw CG_FATAL( "Parameters" )
+        << "Trying to clone an invalid process!";
+    process_ = std::move( proc->clone() );
   }
 
   Hadroniser::GenericHadroniser*
@@ -127,6 +132,7 @@ namespace CepGen
       os
         << std::setw( wt ) << "Number of threads" << generation.num_threads << std::endl;
     os
+      << std::setw( wt ) << "Number of points to try per bin" << generation.num_points << std::endl
       << std::setw( wt ) << "Verbosity level " << Logger::get().level << std::endl;
     if ( hadroniser_ ) {
       os
@@ -144,8 +150,11 @@ namespace CepGen
       << std::setw( wt ) << "Integration algorithm" << ( pretty ? boldify( int_algo.str().c_str() ) : int_algo.str() ) << std::endl
       //<< std::setw( wt ) << "Maximum number of iterations" << ( pretty ? boldify( integrator.itvg ) : std::to_string( integrator.itvg ) ) << std::endl
       << std::setw( wt ) << "Number of function calls" << integrator.ncvg << std::endl
-      << std::setw( wt ) << "Number of points to try per bin" << integrator.npoints << std::endl
-      << std::setw( wt ) << "Random number generator seed" << integrator.seed << std::endl
+      << std::setw( wt ) << "Random number generator seed" << integrator.rng_seed << std::endl;
+    if ( integrator.rng_engine )
+      os
+        << std::setw( wt ) << "Random number generator engine" << integrator.rng_engine->name << std::endl;
+    os
       << std::endl
       << std::setfill('_') << std::setw( wb+3 ) << "_/¯¯EVENTS¯KINEMATICS¯¯\\_" << std::setfill( ' ' ) << std::endl
       << std::endl
@@ -164,7 +173,7 @@ namespace CepGen
       << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << std::endl
       << std::setw( wt ) << "Incoming particles" << ( pretty ? boldify( ip1.str().c_str() ) : ip1.str() ) << ", " << ( pretty ? boldify( ip2.str().c_str() ) : ip2.str() ) << std::endl
       << std::setw( wt ) << "Momenta (GeV/c)" << kinematics.inp.first << ", " << kinematics.inp.second << std::endl;
-    if ( kinematics.mode != Kinematics::ElasticElastic )
+    if ( kinematics.mode != Kinematics::Mode::ElasticElastic )
       os << std::setw( wt ) << "Structure functions" << kinematics.structure_functions << std::endl;
     os
       << std::endl
@@ -207,33 +216,50 @@ namespace CepGen
       os << std::setw( wt ) << lim.first << lim.second << std::endl;
 
     if ( pretty ) {
-      Information( os.str() );
+      CG_INFO( "Parameters" ) << os.str();
     }
     else
       out << os.str();
   }
 
-  Parameters::IntegratorParameters::IntegratorParameters() :
-    type( Integrator::Vegas ), ncvg( 500000 ),
-    npoints( 100 ), seed( 0 )
+  //-----------------------------------------------------------------------------------------------
+
+  Parameters::Integration::Integration() :
+    type( Integrator::Type::Vegas ), ncvg( 500000 ),
+    rng_seed( 0 ), rng_engine( (gsl_rng_type*)gsl_rng_mt19937 ),
+    vegas_chisq_cut( 1.5 ),
+    result( -1. ), err_result( -1. )
   {
     const size_t ndof = 10;
-
-    gsl_monte_vegas_state* veg_state = gsl_monte_vegas_alloc( ndof );
-    gsl_monte_vegas_params_get( veg_state, &vegas );
-    gsl_monte_vegas_free( veg_state );
-    vegas.ostream = stderr; // redirect all debugging information to the error stream
-    /*__gnu_cxx::stdio_filebuf<char> fpt( fileno( vegas.ostream ), std::ios::in );
-    std::istream fstr( &fpt );*/
-
-    gsl_monte_miser_state* mis_state = gsl_monte_miser_alloc( ndof );
-    gsl_monte_miser_params_get( mis_state, &miser );
-    gsl_monte_miser_free( mis_state );
+    {
+      std::shared_ptr<gsl_monte_vegas_state> tmp_state( gsl_monte_vegas_alloc( ndof ), gsl_monte_vegas_free );
+      gsl_monte_vegas_params_get( tmp_state.get(), &vegas );
+    }
+    {
+      std::shared_ptr<gsl_monte_miser_state> tmp_state( gsl_monte_miser_alloc( ndof ), gsl_monte_miser_free );
+      gsl_monte_miser_params_get( tmp_state.get(), &miser );
+    }
   }
+
+  Parameters::Integration::Integration( const Integration& rhs ) :
+    type( rhs.type ), ncvg( rhs.ncvg ),
+    rng_seed( rhs.rng_seed ), rng_engine( rhs.rng_engine ),
+    vegas( rhs.vegas ), vegas_chisq_cut( rhs.vegas_chisq_cut ),
+    miser( rhs.miser ),
+    result( -1. ), err_result( -1. )
+  {}
+
+  Parameters::Integration::~Integration()
+  {
+    //if ( vegas.ostream && vegas.ostream != stdout && vegas.ostream != stderr )
+    //  fclose( vegas.ostream );
+  }
+
+  //-----------------------------------------------------------------------------------------------
 
   Parameters::Generation::Generation() :
     enabled( false ), maxgen( 0 ),
     symmetrise( false ), ngen( 0 ), gen_print_every( 10000 ),
-    num_threads( 2 )
+    num_threads( 2 ), num_points( 100 )
   {}
 }
