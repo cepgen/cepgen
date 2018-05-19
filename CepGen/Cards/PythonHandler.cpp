@@ -40,20 +40,23 @@ namespace CepGen
   namespace Cards
   {
     //----- specialization for CepGen input cards
-    PythonHandler::PythonHandler( const char* file ) :
-      sfilename_( nullptr )
+    PythonHandler::PythonHandler( const char* file )
     {
       setenv( "PYTHONPATH", ".:..:Cards", 1 );
       std::string filename = getPythonPath( file );
       const size_t fn_len = filename.length()+1;
+
 #ifdef PYTHON2
-      sfilename_ = new char[fn_len];
-      snprintf( sfilename_, fn_len, "%s", filename.c_str() );
 #else
-      sfilename_ = new wchar_t[fn_len];
-      swprintf( sfilename_, fn_len, L"%s", filename.c_str() );
 #endif
-      Py_SetProgramName( sfilename_ );
+#ifdef PYTHON2
+      char* sfilename = new char[fn_len];
+      snprintf( sfilename, fn_len, "%s", filename.c_str() );
+#else
+      wchar_t* sfilename = new wchar_t[fn_len];
+      swprintf( sfilename, fn_len, L"%s", filename.c_str() );
+#endif
+      Py_SetProgramName( sfilename );
 
       Py_InitializeEx( 0 );
       if ( !Py_IsInitialized() )
@@ -103,7 +106,7 @@ namespace CepGen
       if ( pout_kinematics )
         parseOutgoingKinematics( pout_kinematics );
 
-      Py_XDECREF( process );
+      //Py_XDECREF( process );
 
       PyObject* plog = PyObject_GetAttrString( cfg, "logger" );
       if ( plog )
@@ -128,20 +131,16 @@ namespace CepGen
       if ( ptam )
         parseTamingFunctions( ptam );
 
-      Py_XDECREF( cfg );
-    }
+      //Py_XDECREF( cfg );
 
-    PythonHandler::~PythonHandler()
-    {
 #ifdef PYTHON2
       Py_Finalize();
 #else
       if ( Py_IsInitialized() || Py_FinalizeEx() != 0 )
         throw CG_FATAL( "PythonHandler" ) << "Failed to unregister the python parser!";
 #endif
-
-      if ( sfilename_ )
-        delete [] sfilename_;
+      if ( sfilename )
+        delete [] sfilename;
     }
 
     void
@@ -332,20 +331,20 @@ namespace CepGen
         throwPythonError( "Hadroniser name is required!" );
 
       std::string hadr_name = decode( pname );
-      Py_XDECREF( pname );
 
+      getParameter( hadr, "maxTrials", params_.hadroniser_max_trials );
+      PyObject* pseed = getElement( hadr, "seed" );
+      long long seed = -1ll;
+      if ( pseed ) {
+        if ( isInteger( pseed ) )
+          seed = PyLong_AsLongLong( pseed );
+        Py_XDECREF( pseed );
+      }
+      CG_DEBUG( "PythonHandler:hadroniser" ) << "Hadroniser seed set to " << seed;
       if ( hadr_name == "pythia8" ) {
-        getParameter( hadr, "maxTrials", params_.hadroniser_max_trials );
 #ifdef PYTHIA8
         params_.setHadroniser( new Hadroniser::Pythia8Hadroniser( params_ ) );
         auto pythia8 = dynamic_cast<Hadroniser::Pythia8Hadroniser*>( params_.hadroniser() );
-        PyObject* pseed = getElement( hadr, "seed" );
-        long long seed = -1ll;
-        if ( pseed ) {
-          if ( isInteger( pseed ) )
-            seed = PyLong_AsLongLong( pseed );
-          Py_XDECREF( pseed );
-        }
         pythia8->setSeed( seed );
         feedPythia( pythia8, hadr, "pythiaPreConfiguration" );
         pythia8->init();
