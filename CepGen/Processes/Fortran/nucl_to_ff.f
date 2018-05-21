@@ -410,7 +410,7 @@ c     =================================================================
      4     - iterm12*4.d0*z2p*z2m*(z2p-z2m)*Phi20
      5     *(q2tx*Phi21_x+q2ty*Phi21_y)
 
-      coupling = q_l**2
+      coupling = 1.d0
 c     =================================================================
 c     first parton coupling
 c     =================================================================
@@ -419,28 +419,28 @@ c     =================================================================
         t_max = max(amt1**2,amt2**2)
         amu2 = max(eps12,t_max)
         am_x = dsqrt(amu2)
-        coupling = coupling*alphaS(am_x)
+        coupling = coupling * 4.d0*pi*alphaS(am_x)/2.d0 ! colour flow
 #else
         print *,'alphaS not linked to this instance!'
         stop
 #endif
-        coupling = coupling/2.d0 ! colour
       else ! photon exchange
-        coupling = coupling*alpha_em
+        coupling = coupling * 4.d0*pi*alpha_em*q_l**2
       endif
 c     =================================================================
 c     second parton coupling
 c     =================================================================
-      coupling = coupling*alpha_em ! photon exchange
+      coupling = coupling * 4.d0*pi*alpha_em*q_l**2 ! photon exchange
+      coupling = coupling * 3.d0
 
 c     =================================================================
 c     convention of matrix element as in our kt-factorization
 c     for heavy flavours
 c     =================================================================
 
-      amat2_1 = (4.d0*pi)**2*coupling*(x1*x2*s)**2
+      amat2_1 = coupling*(x1*x2*s)**2
      &        * aux2_1 * 2.*z1p*z1m*q1t2 / (q1t2*q2t2)
-      amat2_2 = (4.d0*pi)**2*coupling*(x1*x2*s)**2
+      amat2_2 = coupling*(x1*x2*s)**2
      &        * aux2_2 * 2.*z2p*z2m*q2t2 / (q1t2*q2t2)
 
 c     =================================================================
