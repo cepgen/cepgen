@@ -28,22 +28,9 @@ namespace CepGen
     return inp.first + inp.second;
   }
 
-  void
-  Kinematics::dump( std::ostream& os ) const
-  {
-    os << std::setfill(' ');
-    os << "===== Central system\n";
-    for ( const auto& pdg_lim : cuts.central )
-      os << std::setw(30) << pdg_lim.first << ": " << pdg_lim.second;
-
-    os << "===== Initial state\n";
-    for ( const auto& pdg_lim : cuts.initial )
-      os << std::setw(30) << pdg_lim.first << ": " << pdg_lim.second;
-
-    os << "===== Remnants\n";
-    for ( const auto& pdg_lim : cuts.remnants )
-      os << std::setw(30) << pdg_lim.first << ": " << pdg_lim.second;
-  }
+  //-----------------------------------------------------------------------------------------------
+  // User-friendly displayers
+  //-----------------------------------------------------------------------------------------------
 
   std::ostream&
   operator<<( std::ostream& os, const Kinematics::Mode& pm )
@@ -71,10 +58,11 @@ namespace CepGen
   // List of kinematics limits
   //------------------------------------------------------------------------------------------------
 
-  Kinematics::CutsList::CutsList() :
-    initial( { { Cuts::q2, { 0., 1.e5 } } } ),
-    central( { { Cuts::pt_single, 0. } } ),
-    remnants( { { Cuts::mass_single, { 1.07, 320. } } } )
-  {}
+  Kinematics::CutsList::CutsList()
+  {
+    initial.q2 = { 0., 1.e5 };
+    central.pt_single.min() = 0.;
+    remnants.mass_single = { 1.07, 320. };
+  }
 }
 

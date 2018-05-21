@@ -157,6 +157,7 @@ namespace CepGen
       //----- freeze the event as it is
 
       event_->freeze();
+      last_event = event_;
     }
 
     void

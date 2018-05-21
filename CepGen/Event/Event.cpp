@@ -288,7 +288,7 @@ namespace CepGen
       }
       os << "\t";
       if ( part.charge() != 999. )
-        os << Form( "%-g\t", part.charge() );
+        os << Form( "%-.2f\t", part.charge() );
       else
         os << "\t";
       { std::ostringstream oss; oss << part.role(); os << Form( "%-8s %6d\t", oss.str().c_str(), part.status() ); }

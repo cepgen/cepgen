@@ -58,12 +58,12 @@ int main( int argc, char* argv[] ) {
     mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SuriYennie;
     mg.parameters->kinematics.inp = { 6500., 6500. };
     mg.parameters->kinematics.central_system = { CepGen::PDG::Muon, CepGen::PDG::Muon };
-    mg.parameters->kinematics.cuts.central[CepGen::Cuts::pt_single].min() = 15.;
-    mg.parameters->kinematics.cuts.central[CepGen::Cuts::eta_single] = { -2.5, 2.5 };
+    mg.parameters->kinematics.cuts.central.pt_single.min() = 15.;
+    mg.parameters->kinematics.cuts.central.eta_single = { -2.5, 2.5 };
     mg.parameters->integrator.ncvg = 5e4;
     mg.parameters->generation.num_threads = 4;
     mg.parameters->generation.enabled = true;
-    mg.parameters->generation.maxgen = 1e5;
+    mg.parameters->generation.maxgen = 1e3;
   }
 
   // We might want to cross-check visually the validity of our run

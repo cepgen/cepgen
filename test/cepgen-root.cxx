@@ -41,7 +41,7 @@ void fill_event_tree( const CepGen::Event& event, unsigned long ev_id )
     ev->pdg_id[ev->np] = p.integerPdgId();
     ev->parent1[ev->np] = ( p.mothers().size() > 0 ) ? *p.mothers().begin() : -1;
     ev->parent2[ev->np] = ( p.mothers().size() > 1 ) ? *p.mothers().rbegin() : -1;
-    ev->status[ev->np] = p.status();
+    ev->status[ev->np] = (int)p.status();
     ev->stable[ev->np] = ( (short)p.status() > 0 );
     ev->charge[ev->np] = p.charge();
     ev->role[ev->np] = p.role();
@@ -98,10 +98,10 @@ int main( int argc, char* argv[] ) {
   ev.reset( new CepGen::TreeEvent );
   ev->create( ev_tree.get() );
 
-  ctrl_c.setMT( true );
-  // launch the events generation
-  mg.generate( fill_event_tree );
-  ctrl_c.setMT( false );
+  try {
+    // launch the events generation
+    mg.generate( fill_event_tree );
+  } catch ( const CepGen::Exception& ) {}
 
   run->fill();
   file->Write();

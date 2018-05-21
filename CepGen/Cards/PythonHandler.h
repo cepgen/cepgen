@@ -16,7 +16,6 @@ namespace CepGen
       public:
         /// Read a standard configuration card
         explicit PythonHandler( const char* file );
-        ~PythonHandler();
         static PyObject* getElement( PyObject* obj, const char* key );
         static std::string decode( PyObject* obj );
         static PyObject* encode( const char* str );
@@ -30,6 +29,7 @@ namespace CepGen
         static int asInteger( PyObject* obj );
 
         void getLimits( PyObject* obj, const char* key, Limits& lim );
+        void getParameter( PyObject* parent, const char* key, bool& out );
         void getParameter( PyObject* parent, const char* key, int& out );
         void getParameter( PyObject* parent, const char* key, unsigned long& out );
         void getParameter( PyObject* parent, const char* key, unsigned int& out );
@@ -45,13 +45,6 @@ namespace CepGen
         void parseGenerator( PyObject* );
         void parseTamingFunctions( PyObject* );
         void parseHadroniser( PyObject* );
-
-#ifdef PYTHON2
-        char* sfilename_;
-#else
-        wchar_t* sfilename_;
-#endif
-        PyObject* cfg_;
     };
   }
 }

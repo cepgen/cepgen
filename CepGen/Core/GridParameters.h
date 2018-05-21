@@ -22,12 +22,16 @@ namespace CepGen
       unsigned int max;
       /// Has the generation been prepared?
       bool gen_prepared;
+      double correc;
+      double correc2;
       /// Maximal value of the function at one given point
       std::vector<double> f_max;
       /// Maximal value of the function in the considered integration range
       double f_max_global;
+      double f_max2;
       double f_max_diff;
-      //std::set<unsigned int> probed_bins;
+      double f_max_old;
+      std::vector<unsigned int> num;
   };
 }
 

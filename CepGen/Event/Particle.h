@@ -58,6 +58,7 @@ namespace CepGen
           static Momentum fromPThetaPhi( double p, double theta, double phi, double e = -1. );
           /// Build a 4-momentum from its four momentum and energy coordinates
           static Momentum fromPxPyPzE( double px, double py, double pz, double e );
+          static Momentum fromPxPyYM( double px, double py, double rap, double m );
 
           // --- vector and scalar operators
 
@@ -65,6 +66,8 @@ namespace CepGen
           double threeProduct( const Momentum& ) const;
           /// Scalar product of the 4-momentum with another 4-momentum
           double fourProduct( const Momentum& ) const;
+          /// Vector product of the 3-momentum with another 3-momentum
+          double crossProduct( const Momentum& ) const;
           /// Add a 4-momentum through a 4-vector sum
           Momentum& operator+=( const Momentum& );
           /// Subtract a 4-momentum through a 4-vector sum

@@ -18,12 +18,15 @@ namespace CepGen
 
     private:
       /// Initialize a logging object
-      Logger( std::ostream* os = &std::cout );
-      ~Logger();
+      Logger( std::ostream* os = &std::cout ) :
+        level( Level::information ), output( os ) {}
 
+#if !defined(__CINT__) && !defined(__CLING__)
       std::vector<std::regex> allowed_exc_;
+#endif
 
     public:
+#if !defined(__CINT__) && !defined(__CLING__)
       /// Retrieve the running instance of the logger
       static Logger& get( std::ostream* os = &std::cout ) {
         static Logger log( os );
@@ -31,13 +34,41 @@ namespace CepGen
       }
       /// Add a new rule to display exceptions/messages
       /// \param[in] rule Regex rule to handle
-      void addExceptionRule( const std::string& rule );
+      void addExceptionRule( const std::string& rule ) {
+        allowed_exc_.emplace_back( rule );
+      }
       /// Is the module set to be displayed/logged?
       /// \param[in] tmpl Module name to probe
-      bool passExceptionRule( const std::string& tmpl, const Level& lev ) const;
+      bool passExceptionRule( const std::string& tmpl, const Level& lev ) const {
+        if ( level >= lev )
+          return true;
+        if ( allowed_exc_.size() == 0 )
+          return false;
+        for ( const auto& rule : allowed_exc_ )
+          if ( std::regex_match( tmpl, rule ) )
+            return true;
+        return false;
+      }
+#endif
 
       /// Redirect the logger to a given output stream
-      friend std::ostream& operator<<( std::ostream& os, const Logger::Level& lvl );
+      friend std::ostream& operator<<( std::ostream& os, const Logger::Level& lvl ) {
+        switch ( lvl ) {
+          case Logger::Level::nothing:
+            return os << "None";
+          case Logger::Level::error:
+            return os << "Errors";
+          case Logger::Level::warning:
+            return os << "Warnings";
+          case Logger::Level::information:
+            return os << "Infos";
+          case Logger::Level::debug:
+            return os << "Debug";
+          case Logger::Level::debugInsideLoop:
+            return os << "Debug (in loops)";
+        }
+        return os;
+      }
       /// Logging threshold for the output stream
       Level level;
       /// Output stream to use for all logging operations

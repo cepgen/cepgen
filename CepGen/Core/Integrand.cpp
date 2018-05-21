@@ -175,17 +175,13 @@ namespace CepGen
             continue;
           const auto& cuts_pdgid = p->kinematics.cuts.central_particles.at( part.pdgId() );
           // apply these cuts on the given particle
-          if ( cuts_pdgid.count( Cuts::pt_single ) > 0
-           && !cuts_pdgid.at( Cuts::pt_single ).passes( part.momentum().pt() ) )
+          if ( !cuts_pdgid.pt_single.passes( part.momentum().pt() ) )
             return 0.;
-          if ( cuts_pdgid.count( Cuts::energy_single ) > 0
-           && !cuts_pdgid.at( Cuts::energy_single ).passes( part.momentum().energy() ) )
+          if ( !cuts_pdgid.energy_single.passes( part.momentum().energy() ) )
             return 0.;
-          if ( cuts_pdgid.count( Cuts::eta_single ) > 0
-           && !cuts_pdgid.at( Cuts::eta_single ).passes( part.momentum().eta() ) )
+          if ( !cuts_pdgid.eta_single.passes( part.momentum().eta() ) )
             return 0.;
-          if ( cuts_pdgid.count( Cuts::rapidity_single ) > 0
-           && !cuts_pdgid.at( Cuts::rapidity_single ).passes( part.momentum().rapidity() ) )
+          if ( !cuts_pdgid.rapidity_single.passes( part.momentum().rapidity() ) )
             return 0.;
         }
       }

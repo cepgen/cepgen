@@ -20,8 +20,6 @@ hadroniser.pythiaPreConfiguration += (
     'ProcessLevel:resonanceDecays = off', # disable the W decays
 )
 
-#logger.level = cepgen.Logging.DebugInsideLoop
-
 process = ktProcess.clone('pptoww',
     mode = cepgen.ProcessMode.InelasticInelastic,
     inKinematics = cepgen.Parameters(
@@ -35,6 +33,10 @@ process = ktProcess.clone('pptoww',
         qt = (0., 1000.),
         #--- extra cuts on the pt(W+) and pt(W-) plane
         ptdiff = (0., 2000.),
+        #--- extra cuts on the W+W- system
+        invmass = (0.,),
+        ptsum = (0.,),
+        #--- cuts on single particles' level
         cuts = {
             # cuts on the single W level
             24: cepgen.Parameters(
@@ -58,5 +60,5 @@ process = ktProcess.clone('pptoww',
 generator = generator.clone(
     numEvents = 1000,
     printEvery = 100,
-    numThreads = 4,
+    treat = True, # smoothing of the integrand
 )

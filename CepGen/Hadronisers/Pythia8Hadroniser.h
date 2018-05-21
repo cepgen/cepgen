@@ -1,7 +1,8 @@
-#ifndef Pythia8Hadroniser_h
-#define Pythia8Hadroniser_h
+#ifndef CepGan_Hadronisers_Pythia8Hadroniser_h
+#define CepGen_Hadronisers_Pythia8Hadroniser_h
 
-#include "GenericHadroniser.h"
+#include "CepGen/Hadronisers/GenericHadroniser.h"
+#include "CepGen/Physics/Kinematics.h"
 
 #ifdef PYTHIA8
 #include <Pythia8/Pythia.h>
@@ -19,7 +20,7 @@ namespace CepGen
   {
     public:
       explicit LHAEvent( const Parameters* );
-      void feedEvent( const Event& ev, bool full, const Pythia8::Vec4& boost_p1, const Pythia8::Vec4& boost_p2 );
+      void feedEvent( const Event& ev, bool full, const Kinematics::Mode& );
       bool setInit() override;
       bool setEvent( int ) override;
       void setCrossSection( int id, double xsec, double xsec_err );
@@ -67,17 +68,20 @@ namespace CepGen
         std::vector<unsigned short> min_ids_;
         std::unordered_map<short,short> py_cg_corresp_, cg_py_corresp_;
 #ifdef PYTHIA8
-        unsigned short findRole( const Event& ev, const Pythia8::Particle& p, unsigned short offset ) const;
-        void updateEvent( Event& ev, double& weight, bool full, const Pythia8::Vec4& boost_p1, const Pythia8::Vec4& boost_p2 ) const;
-        Particle& addParticle( Event& ev, const Pythia8::Particle&, const Pythia8::Vec4& mom, unsigned short, unsigned short offset = 0 ) const;
+        unsigned short findRole( const Event& ev, const Pythia8::Particle& p ) const;
+        void updateEvent( Event& ev, double& weight, bool full ) const;
+        Particle& addParticle( Event& ev, const Pythia8::Particle&, const Pythia8::Vec4& mom, unsigned short ) const;
         /// A Pythia8 core to be wrapped
         std::unique_ptr<Pythia8::Pythia> pythia_;
         std::shared_ptr<LHAEvent> lhaevt_;
 #endif
         bool full_evt_;
+        unsigned short offset_;
+        bool first_evt_;
         const Parameters* params_; // not owning
     };
   }
 }
 
 #endif
+
