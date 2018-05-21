@@ -64,8 +64,8 @@ namespace CepGen
       lhe_output_->headerBlock() << oss_init.str();
       //params.dump( lhe_output_->initComments(), false );
       LHEF::HEPRUP run = lhe_output_->heprup;
-      run.IDBMUP = { params.kinematics.incoming_beams.first.pdg, params.kinematics.incoming_beams.second.pdg };
-      run.EBMUP = params.kinematics.inp;
+      run.IDBMUP = { (int)params.kinematics.incoming_beams.first.pdg, (int)params.kinematics.incoming_beams.second.pdg };
+      run.EBMUP = { (double)params.kinematics.incoming_beams.first.pz, (double)params.kinematics.incoming_beams.second.pz };
       run.NPRUP = 1;
       run.resize();
       run.XSECUP[0] = params.integrator.result;
