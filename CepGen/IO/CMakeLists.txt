@@ -1,4 +1,4 @@
-file(GLOB io_sources FortranInterface.cpp *Handler.cpp)
+file(GLOB io_sources *.cpp)
 
 include_directories(${PROJECT_SOURCE_DIR})
 

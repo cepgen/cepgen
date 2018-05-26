@@ -9,7 +9,7 @@
 #include "CepGen/StructureFunctions/SuriYennie.h"
 #include "CepGen/StructureFunctions/SzczurekUleshchenko.h"
 #include "CepGen/StructureFunctions/Schaefer.h"
-#include "CepGen/IO/MSTWGridHandler.h"
+#include "CepGen/StructureFunctions/MSTWGrid.h"
 
 namespace CepGen
 {
@@ -66,7 +66,7 @@ namespace CepGen
         return luxlike( q2, xbj );
       } break;
       case StructureFunctions::MSTWgrid: {
-        return MSTW::GridHandler::get().eval( q2, xbj );
+        return MSTW::Grid::get( "External/F2_Luxlike_fit/mstw_f2_scan_nnlo.dat" ).eval( q2, xbj );
       } break;
     }
     return StructureFunctions(); //FIXME
