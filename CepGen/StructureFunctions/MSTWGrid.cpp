@@ -19,7 +19,8 @@ namespace MSTW
     return instance;
   }
 
-  Grid::Grid( const char* filename )
+  Grid::Grid( const char* filename ) :
+    CepGen::GridHandler<2>( CepGen::GridType::kLogarithmic )
   {
     std::set<double> q2_vals, xbj_vals;
 

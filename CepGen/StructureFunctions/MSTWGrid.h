@@ -3,15 +3,18 @@
 
 #include "CepGen/IO/GridHandler.h"
 
+/// Martin-Stirling-Thorne-Watt PDFs structure functions
 namespace MSTW
 {
   /// \note x/y = Q2/xbj given by the parent
   typedef CepGen::GridHandler<2>::grid_t sfval_t;
   std::ostream& operator<<( std::ostream&, const sfval_t& );
 
+  /// A \f$F_{2,L}\f$ grid interpolator
   class Grid : public CepGen::GridHandler<2>
   {
     public:
+      /// Grid header information as parsed from the file
       struct header_t {
         enum order_t : unsigned short { lo = 0, nlo = 1, nnlo = 2 };
         enum cl_t : unsigned short { cl68 = 0, cl95 = 1 };
@@ -23,8 +26,11 @@ namespace MSTW
       };
 
     public:
+      /// Retrieve the grid interpolator (singleton)
       static Grid& get( const char* filename = "External/F2_Luxlike_fit/mstw_f2_scan_nnlo.dat" );
+      /// Compute the structure functions at a given \f$Q^2/x_{\rm Bj}\f$
       CepGen::StructureFunctions eval( double q2, double xbj ) const;
+      /// Retrieve the grid's header information
       header_t header() const { return header_; }
 
     public:
@@ -33,8 +39,6 @@ namespace MSTW
 
     private:
       explicit Grid( const char* );
-
-      enum spline_type { F2 = 0, FL = 1, num_functions_ };
       static const unsigned int good_magic;
 
       header_t header_;
