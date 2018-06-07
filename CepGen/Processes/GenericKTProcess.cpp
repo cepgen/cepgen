@@ -321,10 +321,10 @@ namespace CepGen
           const double Q2_min = x*x*mp2_/( 1.-x ), Q2_ela = ( kt2+x*x*mp2_ )/( 1.-x );
           const FormFactors ff = FormFactors::ProtonElastic( Q2_ela );
           const double ela1 = ( 1.-x )*( 1.-Q2_min/Q2_ela );
-          //const double ela3 = 1.-( Q2_ela-kt2 )/Q2_ela;
-          const double f_ela = Constants::alphaEM*M_1_PI/kt2*( ela1*ff.FE + 0.5*x*x*ff.FM );
-          // last factor below the Jacobian from dQ^2/Q^2 --> dkT^2/kT^2*(kT^2/Q^2)
-          return f_ela*( 1.-x )*kt2 / Q2_ela;
+          const double ela2 = ff.FE;
+          const double f_ela = Constants::alphaEM*M_1_PI/kt2*( ela1*ela2 + 0.25*x*x*ff.FM );
+          // last factor below the jacobian from dQ^2/Q^2 --> dkT^2/kT^2*(kT^2/Q^2)
+          return f_ela/( 1.-x )*kt2 / Q2_ela;
         }
         case Flux::InelasticBudnev: {
           const double mx2 = mx*mx;
