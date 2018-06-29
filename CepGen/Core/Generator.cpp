@@ -11,6 +11,7 @@
 #include "CepGen/Event/Event.h"
 
 #include <fstream>
+#include <chrono>
 
 namespace CepGen
 {
@@ -26,9 +27,8 @@ namespace CepGen
       e.dump();
     }
     // Random number initialization
-    struct timespec ts;
-    if ( timespec_get( &ts, TIME_UTC ) != 0 )
-      srandom( ts.tv_nsec ^ ts.tv_sec );
+    std::chrono::system_clock::time_point time = std::chrono::system_clock::now();
+    srandom( time.time_since_epoch().count() );
   }
 
   Generator::Generator( Parameters* ip ) :
