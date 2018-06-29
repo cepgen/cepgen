@@ -15,26 +15,6 @@
 #include <algorithm>
 #include <frameobject.h>
 
-#ifdef PYTHIA8
-void
-feedPythia( CepGen::Hadroniser::Pythia8Hadroniser* py8, PyObject* hadr, const char* config )
-{
-  PyObject* ppc = CepGen::Cards::PythonHandler::getElement( hadr, config );
-  if ( !ppc )
-    return;
-  if ( !PyTuple_Check( ppc ) ) {
-    Py_XDECREF( ppc );
-    return;
-  }
-  for ( Py_ssize_t i = 0; i < PyTuple_Size( ppc ); ++i ) {
-    PyObject* pln = PyTuple_GetItem( ppc, i );
-    if ( !pln )
-      continue;
-    py8->readString( CepGen::Cards::PythonHandler::decode( pln ) );
-  }
-}
-#endif
-
 namespace CepGen
 {
   namespace Cards
@@ -342,19 +322,17 @@ namespace CepGen
       }
       CG_DEBUG( "PythonHandler:hadroniser" ) << "Hadroniser seed set to " << seed;
       if ( hadr_name == "pythia8" ) {
-#ifdef PYTHIA8
         params_.setHadroniser( new Hadroniser::Pythia8Hadroniser( params_ ) );
+        std::vector<std::string> config;
         auto pythia8 = dynamic_cast<Hadroniser::Pythia8Hadroniser*>( params_.hadroniser() );
         pythia8->setSeed( seed );
-        feedPythia( pythia8, hadr, "pythiaPreConfiguration" );
+        getParameter( hadr, "pythiaPreConfiguration", config );
+        pythia8->readStrings( config );
         pythia8->init();
-        feedPythia( pythia8, hadr, "pythiaConfiguration" );
-        feedPythia( pythia8, hadr, "pythiaProcessConfiguration" );
-#else
-        CG_WARNING( "PythonHandler" )
-          << "Pythia8 is not linked to this instance... "
-          << "Ignoring this part of the configuration file.";
-#endif
+        getParameter( hadr, "pythiaConfiguration", config );
+        pythia8->readStrings( config );
+        getParameter( hadr, "pythiaProcessConfiguration", config );
+        pythia8->readStrings( config );
       }
     }
 
