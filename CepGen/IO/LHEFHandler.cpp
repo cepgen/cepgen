@@ -158,7 +158,7 @@ namespace CepGen
     }
 
     void
-    LHEFHandler::LHAevent::feedEvent( unsigned short proc_id, const Event& ev )
+    LHEFHandler::LHAevent::feedEvent( unsigned short proc_id, const Event& ev, bool full_event )
     {
       const double scale = ev.getOneByRole( Particle::Intermediate ).mass();
       setProcess( proc_id, 1., scale, Constants::alphaEM, Constants::alphaQCD );
@@ -169,6 +169,7 @@ namespace CepGen
       const double q2_1 = -part1.momentum().mass2(), q2_2 = -part2.momentum().mass2();
       const double x1 = q2_1/( q2_1+op1.mass2()-ip1.mass2() ), x2 = q2_2/( q2_2+op2.mass2()-ip2.mass2() );
       setIdX( ip1.integerPdgId(), ip2.integerPdgId(), x1, x2 );
+      const Particles& cs = ev.getByRole( Particle::CentralSystem );
 
       short parton1_pdgid = 0, parton2_pdgid = 0;
       for ( const auto& part : ev.particles() ) {
@@ -179,14 +180,20 @@ namespace CepGen
               parton1_pdgid = part.integerPdgId();
             if ( part.role() == Particle::Parton2 )
               parton2_pdgid = part.integerPdgId();
+            if ( !full_event )
+              continue;
             status = -2; // conserving xbj/Q2
             break;
           case Particle::Intermediate:
+            if ( !full_event )
+              continue;
             status = 2;
             if ( pdg_id == 0 )
               pdg_id = ev.getConstById( *part.mothers().begin() ).integerPdgId();
             break;
           case Particle::IncomingBeam1: case Particle::IncomingBeam2:
+            if ( !full_event )
+              continue;
             status = -9;
             break;
           case Particle::OutgoingBeam1: case Particle::OutgoingBeam2:
@@ -195,11 +202,13 @@ namespace CepGen
             break;
           default: break;
         }
-        const auto& mothers = part.mothers();
-        if ( mothers.size() > 0 )
-          moth1 = *mothers.begin()+1;
-        if ( mothers.size() > 1 )
-          moth2 = *mothers.rbegin()+1;
+        if ( full_event ) {
+          const auto& mothers = part.mothers();
+          if ( mothers.size() > 0 )
+            moth1 = *mothers.begin()+1;
+          if ( mothers.size() > 1 )
+            moth2 = *mothers.rbegin()+1;
+        }
         const Particle::Momentum& mom = part.momentum();
         addParticle( pdg_id, status, moth1, moth2, 0, 0, mom.px(), mom.py(), mom.pz(), mom.energy(), mom.mass(), 0. ,0., 0. );
       }

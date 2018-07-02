@@ -579,6 +579,7 @@ namespace CepGen
     void
     PythonHandler::getParameter( PyObject* parent, const char* key, std::vector<std::string>& out )
     {
+      out.clear();
       PyObject* pobj = getElement( parent, key );
       if ( !pobj )
         return;
