@@ -16,12 +16,14 @@ namespace CepGen
       public:
         /// Read a standard configuration card
         explicit PythonHandler( const char* file );
+        ~PythonHandler();
         static PyObject* getElement( PyObject* obj, const char* key );
         static std::string decode( PyObject* obj );
         static PyObject* encode( const char* str );
 
       private:
-        static constexpr const char* module_name_ = "mod_name";
+        static constexpr const char* MODULE_NAME = "mod_name";
+        static constexpr const char* PROCESS_NAME = "process";
 
         static void throwPythonError( const std::string& message );
         static std::string getPythonPath( const char* file );

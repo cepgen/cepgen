@@ -15,6 +15,10 @@
 #include <algorithm>
 #include <frameobject.h>
 
+#if PY_MAJOR_VERSION < 3
+#  define PYTHON2
+#endif
+
 namespace CepGen
 {
   namespace Cards
@@ -26,9 +30,9 @@ namespace CepGen
       std::string filename = getPythonPath( file );
       const size_t fn_len = filename.length()+1;
 
-#ifdef PYTHON2
-#else
-#endif
+      //Py_DebugFlag = 1;
+      //Py_VerboseFlag = 1;
+
 #ifdef PYTHON2
       char* sfilename = new char[fn_len];
       snprintf( sfilename, fn_len, "%s", filename.c_str() );
@@ -36,36 +40,37 @@ namespace CepGen
       wchar_t* sfilename = new wchar_t[fn_len];
       swprintf( sfilename, fn_len, L"%s", filename.c_str() );
 #endif
-      Py_SetProgramName( sfilename );
+      if ( sfilename )
+        Py_SetProgramName( sfilename );
 
-      Py_InitializeEx( 0 );
+      Py_InitializeEx( 1 );
+
+      if ( sfilename )
+        delete [] sfilename;
       if ( !Py_IsInitialized() )
-        throw CG_FATAL( "PythonHandler" ) << "Failed to initialise the python parser!";
+        throw CG_FATAL( "PythonHandler" ) << "Failed to initialise the Python cards parser!";
 
-      CG_DEBUG( "PythonHandler" )
+      CG_INFO( "PythonHandler" )
         << "Initialised the Python cards parser\n\t"
         << "Python version: " << Py_GetVersion() << "\n\t"
         << "Platform: " << Py_GetPlatform() << ".";
 
-      PyObject* fn = encode( filename.c_str() );
-      if ( !fn )
-        throwPythonError( Form( "Failed to encode the configuration filename %s", filename.c_str() ) );
-
-      PyObject* cfg = PyImport_Import( fn );
-      Py_XDECREF( fn );
+      PyObject* cfg = PyImport_ImportModule( filename.c_str() );
       if ( !cfg )
         throwPythonError( Form( "Failed to parse the configuration card %s", file ) );
 
-      PyObject* process = PyObject_GetAttrString( cfg, "process" );
+      PyObject* process = PyObject_GetAttrString( cfg, PROCESS_NAME );
       if ( !process )
-        throwPythonError( Form( "Failed to extract a \"process\" keyword from the configuration card %s", file ) );
+        throwPythonError( Form( "Failed to extract a \"%s\" keyword from the configuration card %s", PROCESS_NAME, file ) );
 
       //--- type of process to consider
-      PyObject* pproc_name = PyDict_GetItem( process, encode( module_name_ ) );
+      PyObject* pproc_name = getElement( process, MODULE_NAME );
       if ( !pproc_name )
         throwPythonError( Form( "Failed to extract the process name from the configuration card %s", file ) );
 
       const std::string proc_name = decode( pproc_name );
+      Py_CLEAR( pproc_name );
+
       if ( proc_name == "lpair" )
         params_.setProcess( new Process::GamGamLL );
       else if ( proc_name == "pptoll" || proc_name == "pptoff" )
@@ -86,7 +91,7 @@ namespace CepGen
       if ( pout_kinematics )
         parseOutgoingKinematics( pout_kinematics );
 
-      //Py_XDECREF( process );
+      //Py_CLEAR( process );
 
       PyObject* plog = PyObject_GetAttrString( cfg, "logger" );
       if ( plog )
@@ -111,16 +116,14 @@ namespace CepGen
       if ( ptam )
         parseTamingFunctions( ptam );
 
-      //Py_XDECREF( cfg );
+      //--- finalisation
+      Py_CLEAR( cfg );
+    }
 
-#ifdef PYTHON2
-      Py_Finalize();
-#else
-      if ( Py_IsInitialized() || Py_FinalizeEx() != 0 )
-        throw CG_FATAL( "PythonHandler" ) << "Failed to unregister the python parser!";
-#endif
-      if ( sfilename )
-        delete [] sfilename;
+    PythonHandler::~PythonHandler()
+    {
+      if ( Py_IsInitialized() )
+        Py_Finalize();
     }
 
     void
@@ -133,7 +136,7 @@ namespace CepGen
           double pz1 = PyFloat_AsDouble( PyTuple_GetItem( ppz, 1 ) );
           params_.kinematics.inp = { pz0, pz1 };
         }
-        Py_XDECREF( ppz );
+        Py_CLEAR( ppz );
       }
       double sqrt_s = -1.;
       getParameter( kin, "cmEnergy", sqrt_s );
@@ -151,14 +154,14 @@ namespace CepGen
           PDG pair = (PDG)asInteger( ppair );
           params_.kinematics.central_system = { pair, pair };
         }
-       else if ( PyTuple_Check( ppair ) ) {
-         if ( PyTuple_Size( ppair ) != 2 )
-           throw CG_FATAL( "PythonHandler" ) << "Invalid value for in_kinematics.pair!";
+        else if ( PyTuple_Check( ppair ) ) {
+          if ( PyTuple_Size( ppair ) != 2 )
+            throw CG_FATAL( "PythonHandler" ) << "Invalid value for in_kinematics.pair!";
           PDG pair1 = (PDG)asInteger( PyTuple_GetItem( ppair, 0 ) );
           PDG pair2 = (PDG)asInteger( PyTuple_GetItem( ppair, 1 ) );
           params_.kinematics.central_system = { pair1, pair2 };
         }
-        Py_XDECREF( ppair );
+        Py_CLEAR( ppair );
       }
 
       PyObject* pparts = getElement( kin, "minFinalState" );
@@ -166,11 +169,14 @@ namespace CepGen
         if ( PyTuple_Check( pparts ) )
           for ( unsigned short i = 0; i < PyTuple_Size( pparts ); ++i )
             params_.kinematics.minimum_final_state.emplace_back( (PDG)asInteger( PyTuple_GetItem( pparts, i ) ) );
-        Py_XDECREF( pparts );
+        Py_CLEAR( pparts );
       }
 
       PyObject* pcuts = getElement( kin, "cuts" );
-      if ( pcuts && PyDict_Check( pcuts ) ) parseParticlesCuts( pcuts );
+      if ( pcuts ) {
+        parseParticlesCuts( pcuts );
+        Py_CLEAR( pcuts );
+      }
 
       // for LPAIR/collinear matrix elements
       getLimits( kin, "q2", params_.kinematics.cuts.initial.q2 );
@@ -196,10 +202,12 @@ namespace CepGen
     void
     PythonHandler::parseParticlesCuts( PyObject* cuts )
     {
+      if ( !PyDict_Check( cuts ) )
+        throwPythonError( "Particle cuts object should be a dictionary!" );
       PyObject* pkey = nullptr, *pvalue = nullptr;
       Py_ssize_t pos = 0;
       while ( PyDict_Next( cuts, &pos, &pkey, &pvalue ) ) {
-        PDG pdg = (PDG)asInteger( pkey );
+        const PDG pdg = (PDG)asInteger( pkey );
         getLimits( pvalue, "pt", params_.kinematics.cuts.central_particles[pdg].pt_single );
         getLimits( pvalue, "energy", params_.kinematics.cuts.central_particles[pdg].energy_single );
         getLimits( pvalue, "eta", params_.kinematics.cuts.central_particles[pdg].eta_single );
@@ -222,7 +230,7 @@ namespace CepGen
     {
       if ( !PyDict_Check( integr ) )
         throwPythonError( "Integrator object should be a dictionary!" );
-      PyObject* palgo = getElement( integr, module_name_ );
+      PyObject* palgo = getElement( integr, MODULE_NAME );
       if ( !palgo )
         throwPythonError( "Failed to retrieve the integration algorithm name!" );
       std::string algo = decode( palgo );
@@ -295,8 +303,8 @@ namespace CepGen
         PyObject* pvar = getElement( pit, "variable" );
         PyObject* pexpr = getElement( pit, "expression" );
         params_.taming_functions->add( decode( pvar ).c_str(), decode( pexpr ).c_str() );
-        Py_XDECREF( pvar );
-        Py_XDECREF( pexpr );
+        Py_CLEAR( pvar );
+        Py_CLEAR( pexpr );
       }
     }
 
@@ -306,11 +314,12 @@ namespace CepGen
       if ( !PyDict_Check( hadr ) )
         throwPythonError( "Hadroniser object should be a dictionary!" );
 
-      PyObject* pname = getElement( hadr, module_name_ );
+      PyObject* pname = getElement( hadr, MODULE_NAME );
       if ( !pname )
         throwPythonError( "Hadroniser name is required!" );
 
       std::string hadr_name = decode( pname );
+      Py_CLEAR( pname );
 
       getParameter( hadr, "maxTrials", params_.hadroniser_max_trials );
       PyObject* pseed = getElement( hadr, "seed" );
@@ -318,7 +327,7 @@ namespace CepGen
       if ( pseed ) {
         if ( isInteger( pseed ) )
           seed = PyLong_AsLongLong( pseed );
-        Py_XDECREF( pseed );
+        Py_CLEAR( pseed );
       }
       CG_DEBUG( "PythonHandler:hadroniser" ) << "Hadroniser seed set to " << seed;
       if ( hadr_name == "pythia8" ) {
@@ -345,9 +354,6 @@ namespace CepGen
     {
       std::string s_filename = file;
       s_filename = s_filename.substr( 0, s_filename.find_last_of( "." ) ); // remove the extension
-      //size_t python_subdir_pos = s_filename.find( "/python" );
-      //if ( s_filename.size() > 7 && python_subdir_pos != std::string::npos )
-      //  s_filename.erase( python_subdir_pos, python_subdir_pos+7 );
       std::replace( s_filename.begin(), s_filename.end(), '/', '.' ); // replace all '/' by '.'
       return s_filename;
     }
@@ -369,7 +375,7 @@ namespace CepGen
 #ifdef PYTHON2
           << PyString_AsString( PyObject_Str( pvalue ) ); // deprecated in python v3+
 #else
-          << _PyUnicode_AsString( PyObject_Str( pvalue ) );
+          << PyUnicode_AsUTF8( PyObject_Str( pvalue ) );
 #endif
       PyTracebackObject* ptraceback = (PyTracebackObject*)ptraceback_obj;
       string tabul = "↪ ";
@@ -382,8 +388,8 @@ namespace CepGen
             const char* filename = PyString_AsString( pframe->f_code->co_filename );
             const char* funcname = PyString_AsString( pframe->f_code->co_name );
 #else
-            const char* filename = _PyUnicode_AsString( pframe->f_code->co_filename );
-            const char* funcname = _PyUnicode_AsString( pframe->f_code->co_name );
+            const char* filename = PyUnicode_AsUTF8( pframe->f_code->co_filename );
+            const char* funcname = PyUnicode_AsUTF8( pframe->f_code->co_name );
 #endif
             oss << Form( "\n\t%s%s on %s (line %d)", tabul.c_str(), boldify( funcname ).c_str(), filename, line );
             tabul = string( "  " )+tabul;
@@ -393,22 +399,6 @@ namespace CepGen
           ptraceback = ptraceback->tb_next;
         }
       }
-      /*PyThreadState* ptstate = PyThreadState_GET();
-      if ( ptstate != nullptr && ptstate->frame != nullptr ) {
-        PyFrameObject* pframe = ptstate->frame;
-        while ( pframe != nullptr ) {
-          int line = PyCode_Addr2Line( pframe->f_code, pframe->f_lasti );
-#ifdef PYTHON2
-          const char* filename = PyString_AsString( pframe->f_code->co_filename );
-          const char* funcname = PyString_AsString( pframe->f_code->co_name );
-#else
-          const char* filename = _PyUnicode_AsString( pframe->f_code->co_filename );
-          const char* funcname = _PyUnicode_AsString( pframe->f_code->co_name );
-#endif
-          oss << Form( "Stack trace:\n\t\t%s(%d): %s\n", filename, line, funcname );
-          pframe = pframe->f_back;
-        }
-      }*/
       Py_Finalize();
       throw CG_FATAL( "PythonError" ) << oss.str();
     }
@@ -416,15 +406,17 @@ namespace CepGen
     std::string
     PythonHandler::decode( PyObject* obj )
     {
+      std::string out;
 #ifdef PYTHON2
-      const char* str = PyString_AsString( obj ); // deprecated in python v3+
+      out = PyString_AsString( obj ); // deprecated in python v3+
 #else
-      const char* str = _PyUnicode_AsString( obj );
-#endif
-      //Py_XDECREF( obj );
-      if ( !str )
+      PyObject* pstr = PyUnicode_AsEncodedString( obj, "utf-8", "strict" );
+      if ( !pstr )
         throwPythonError( "Failed to decode a Python object!" );
-      return std::string( str );
+      out = PyBytes_AS_STRING( pstr );
+      Py_CLEAR( pstr );
+#endif
+      return out;
     }
 
     PyObject*
@@ -439,12 +431,19 @@ namespace CepGen
     PyObject*
     PythonHandler::getElement( PyObject* obj, const char* key )
     {
-      PyObject* pout = nullptr;
-      PyObject* nink = encode( key );
+      PyObject* pout = nullptr, *nink = encode( key );
       if ( !nink )
         return pout;
       pout = PyDict_GetItem( obj, nink );
-      Py_XDECREF( nink );
+      Py_CLEAR( nink );
+      if ( pout )
+        CG_DEBUG( "PythonHandler:getElement" )
+          << "retrieved " << pout->ob_type->tp_name << " element \"" << key << "\" "
+          << "from " << obj->ob_type->tp_name << " object\n\t"
+          << "new reference count: " << pout->ob_refcnt;
+      else
+        CG_DEBUG( "PythonHandler:getElement" )
+          << "did not retrieve a valid element \"" << key << "\"";
       return pout;
     }
 
@@ -465,7 +464,7 @@ namespace CepGen
         if ( max != -1 )
           lim.max() = max;
       }
-      Py_XDECREF( pobj );
+      Py_CLEAR( pobj );
     }
 
     void
@@ -475,10 +474,10 @@ namespace CepGen
       if ( !pobj )
         return;
       if ( !PyBool_Check( pobj ) ) {
-        Py_XDECREF( pobj );
+        Py_CLEAR( pobj );
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       }
-      Py_XDECREF( pobj );
+      Py_CLEAR( pobj );
       getParameter( parent, key, (int&)out );
     }
 
@@ -490,18 +489,18 @@ namespace CepGen
         return;
 #ifdef PYTHON2
       if ( !PyInt_Check( pobj ) && !PyBool_Check( pobj ) ) {
-        Py_XDECREF( pobj );
+        Py_CLEAR( pobj );
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       }
       out = PyInt_AsLong( pobj );
 #else
       if ( !PyLong_Check( pobj ) && !PyBool_Check( pobj ) ) {
-        Py_XDECREF( pobj );
+        Py_CLEAR( pobj );
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       }
       out = PyLong_AsLong( pobj );
 #endif
-      Py_XDECREF( pobj );
+      Py_CLEAR( pobj );
     }
 
     void
@@ -515,7 +514,7 @@ namespace CepGen
         && !PyInt_Check( pobj )
 #endif
       ) {
-        Py_XDECREF( pobj );
+        Py_CLEAR( pobj );
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       }
       if ( PyLong_Check( pobj ) )
@@ -524,7 +523,7 @@ namespace CepGen
       else if ( PyInt_Check( pobj ) )
         out = PyInt_AsUnsignedLongMask( pobj );
 #endif
-      Py_XDECREF( pobj );
+      Py_CLEAR( pobj );
     }
 
     void
@@ -535,18 +534,18 @@ namespace CepGen
         return;
 #ifdef PYTHON2
       if ( !PyInt_Check( pobj ) ) {
-        Py_XDECREF( pobj );
+        Py_CLEAR( pobj );
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       }
       out = PyInt_AsUnsignedLongMask( pobj );
 #else
       if ( !PyLong_Check( pobj ) ) {
-        Py_XDECREF( pobj );
+        Py_CLEAR( pobj );
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       }
       out = PyLong_AsUnsignedLong( pobj );
 #endif
-      Py_XDECREF( pobj );
+      Py_CLEAR( pobj );
     }
 
     void
@@ -556,11 +555,11 @@ namespace CepGen
       if ( !pobj )
         return;
       if ( !PyFloat_Check( pobj ) ) {
-        Py_XDECREF( pobj );
+        Py_CLEAR( pobj );
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       }
       out = PyFloat_AsDouble( pobj );
-      Py_XDECREF( pobj );
+      Py_CLEAR( pobj );
     }
 
     void
@@ -569,11 +568,18 @@ namespace CepGen
       PyObject* pobj = getElement( parent, key );
       if ( !pobj )
         return;
-      if ( !PyString_Check( pobj ) ) {
-        Py_XDECREF( pobj );
+      if ( !
+#ifdef PYTHON2
+        PyString_Check( pobj )
+#else
+        PyUnicode_Check( pobj )
+#endif
+      ) {
+        Py_CLEAR( pobj );
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       }
       out = decode( pobj );
+      Py_CLEAR( pobj );
     }
 
     void
@@ -584,14 +590,14 @@ namespace CepGen
       if ( !pobj )
         return;
       if ( !PyTuple_Check( pobj ) ) {
-        Py_XDECREF( pobj );
+        Py_CLEAR( pobj );
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       }
       for ( Py_ssize_t i = 0; i < PyTuple_Size( pobj ); ++i ) {
         PyObject* pit = PyTuple_GetItem( pobj, i );
         out.emplace_back( decode( pit ) );
       }
-      Py_XDECREF( pobj );
+      Py_CLEAR( pobj );
     }
 
     bool
@@ -608,7 +614,7 @@ namespace CepGen
     PythonHandler::asInteger( PyObject* obj )
     {
 #ifdef PYTHON2
-      return _PyInt_AsInt( obj );
+      return PyInt_AsLong( obj );
 #else
       return PyLong_AsLong( obj );
 #endif
