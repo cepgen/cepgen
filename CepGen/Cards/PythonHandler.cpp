@@ -384,10 +384,10 @@ namespace CepGen
               const char* funcname = PyUnicode_AsUTF8( pframe->f_code->co_name );
 #endif
               oss << Form( "\n\t%s%s on %s (line %d)", tabul.c_str(), boldify( funcname ).c_str(), filename, line );
-              tabul = string( "  " )+tabul;
             }
             else
-              oss << Form( "\n\t\tissue in line %d", ptraceback->tb_lineno );
+              oss << Form( "\n\t%s issue in line %d", tabul.c_str(), ptraceback->tb_lineno );
+            tabul = string( "  " )+tabul;
             ptraceback = ptraceback->tb_next;
           }
         }
