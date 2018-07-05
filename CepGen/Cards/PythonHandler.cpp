@@ -64,12 +64,10 @@ namespace CepGen
         throwPythonError( Form( "Failed to extract a \"%s\" keyword from the configuration card %s", PROCESS_NAME, file ) );
 
       //--- type of process to consider
-      PyObject* pproc_name = getElement( process, MODULE_NAME );
+      PyObject* pproc_name = getElement( process, MODULE_NAME ); // borrowed
       if ( !pproc_name )
         throwPythonError( Form( "Failed to extract the process name from the configuration card %s", file ) );
-
       const std::string proc_name = decode( pproc_name );
-      Py_CLEAR( pproc_name );
 
       if ( proc_name == "lpair" )
         params_.setProcess( new Process::GamGamLL );
@@ -83,11 +81,11 @@ namespace CepGen
       getParameter( process, "mode", (int&)params_.kinematics.mode );
 
       //--- process kinematics
-      PyObject* pin_kinematics = getElement( process, "inKinematics" );
+      PyObject* pin_kinematics = getElement( process, "inKinematics" ); // borrowed
       if ( pin_kinematics )
         parseIncomingKinematics( pin_kinematics );
 
-      PyObject* pout_kinematics = getElement( process, "outKinematics" );
+      PyObject* pout_kinematics = getElement( process, "outKinematics" ); // borrowed
       if ( pout_kinematics )
         parseOutgoingKinematics( pout_kinematics );
 
@@ -113,8 +111,10 @@ namespace CepGen
 
       //--- taming functions
       PyObject* ptam = PyObject_GetAttrString( cfg, "tamingFunctions" );
-      if ( ptam )
+      if ( ptam ) {
         parseTamingFunctions( ptam );
+        Py_CLEAR( ptam );
+      }
 
       //--- finalisation
       Py_CLEAR( cfg );
@@ -129,14 +129,11 @@ namespace CepGen
     void
     PythonHandler::parseIncomingKinematics( PyObject* kin )
     {
-      PyObject* ppz = getElement( kin, "pz" );
-      if ( ppz ) {
-        if ( PyTuple_Check( ppz ) && PyTuple_Size( ppz ) == 2 ) {
-          double pz0 = PyFloat_AsDouble( PyTuple_GetItem( ppz, 0 ) );
-          double pz1 = PyFloat_AsDouble( PyTuple_GetItem( ppz, 1 ) );
-          params_.kinematics.inp = { pz0, pz1 };
-        }
-        Py_CLEAR( ppz );
+      PyObject* ppz = getElement( kin, "pz" ); // borrowed
+      if ( ppz && PyTuple_Check( ppz ) && PyTuple_Size( ppz ) == 2 ) {
+        double pz0 = PyFloat_AsDouble( PyTuple_GetItem( ppz, 0 ) );
+        double pz1 = PyFloat_AsDouble( PyTuple_GetItem( ppz, 1 ) );
+        params_.kinematics.inp = { pz0, pz1 };
       }
       double sqrt_s = -1.;
       getParameter( kin, "cmEnergy", sqrt_s );
@@ -148,7 +145,7 @@ namespace CepGen
     void
     PythonHandler::parseOutgoingKinematics( PyObject* kin )
     {
-      PyObject* ppair = getElement( kin, "pair" );
+      PyObject* ppair = getElement( kin, "pair" ); // borrowed
       if ( ppair ) {
         if ( isInteger( ppair ) ) {
           PDG pair = (PDG)asInteger( ppair );
@@ -161,22 +158,16 @@ namespace CepGen
           PDG pair2 = (PDG)asInteger( PyTuple_GetItem( ppair, 1 ) );
           params_.kinematics.central_system = { pair1, pair2 };
         }
-        Py_CLEAR( ppair );
       }
 
-      PyObject* pparts = getElement( kin, "minFinalState" );
-      if ( pparts ) {
-        if ( PyTuple_Check( pparts ) )
-          for ( unsigned short i = 0; i < PyTuple_Size( pparts ); ++i )
-            params_.kinematics.minimum_final_state.emplace_back( (PDG)asInteger( PyTuple_GetItem( pparts, i ) ) );
-        Py_CLEAR( pparts );
-      }
+      PyObject* pparts = getElement( kin, "minFinalState" ); // borrowed
+      if ( pparts && PyTuple_Check( pparts ) )
+        for ( unsigned short i = 0; i < PyTuple_Size( pparts ); ++i )
+          params_.kinematics.minimum_final_state.emplace_back( (PDG)asInteger( PyTuple_GetItem( pparts, i ) ) );
 
-      PyObject* pcuts = getElement( kin, "cuts" );
-      if ( pcuts ) {
+      PyObject* pcuts = getElement( kin, "cuts" ); // borrowed
+      if ( pcuts )
         parseParticlesCuts( pcuts );
-        Py_CLEAR( pcuts );
-      }
 
       // for LPAIR/collinear matrix elements
       getLimits( kin, "q2", params_.kinematics.cuts.initial.q2 );
@@ -230,7 +221,7 @@ namespace CepGen
     {
       if ( !PyDict_Check( integr ) )
         throwPythonError( "Integrator object should be a dictionary!" );
-      PyObject* palgo = getElement( integr, MODULE_NAME );
+      PyObject* palgo = getElement( integr, MODULE_NAME ); // borrowed
       if ( !palgo )
         throwPythonError( "Failed to retrieve the integration algorithm name!" );
       std::string algo = decode( palgo );
@@ -298,13 +289,12 @@ namespace CepGen
 
       for ( Py_ssize_t i = 0; i < PyList_Size( tf ); ++i ) {
         PyObject* pit = PyList_GetItem( tf, i );
+        if ( !pit )
+          continue;
         if ( !PyDict_Check( pit ) )
-          throwPythonError( Form( "Item %d is invalid", i ) );
-        PyObject* pvar = getElement( pit, "variable" );
-        PyObject* pexpr = getElement( pit, "expression" );
+          throwPythonError( Form( "Item %d is has invalid type %s", i, pit->ob_type->tp_name ) );
+        PyObject* pvar = getElement( pit, "variable" ), *pexpr = getElement( pit, "expression" ); // borrowed
         params_.taming_functions->add( decode( pvar ).c_str(), decode( pexpr ).c_str() );
-        Py_CLEAR( pvar );
-        Py_CLEAR( pexpr );
       }
     }
 
@@ -314,22 +304,18 @@ namespace CepGen
       if ( !PyDict_Check( hadr ) )
         throwPythonError( "Hadroniser object should be a dictionary!" );
 
-      PyObject* pname = getElement( hadr, MODULE_NAME );
+      PyObject* pname = getElement( hadr, MODULE_NAME ); // borrowed
       if ( !pname )
         throwPythonError( "Hadroniser name is required!" );
-
       std::string hadr_name = decode( pname );
-      Py_CLEAR( pname );
 
       getParameter( hadr, "maxTrials", params_.hadroniser_max_trials );
-      PyObject* pseed = getElement( hadr, "seed" );
+      PyObject* pseed = getElement( hadr, "seed" ); // borrowed
       long long seed = -1ll;
-      if ( pseed ) {
-        if ( isInteger( pseed ) )
-          seed = PyLong_AsLongLong( pseed );
-        Py_CLEAR( pseed );
+      if ( pseed && isInteger( pseed ) ) {
+        seed = PyLong_AsLongLong( pseed );
+        CG_DEBUG( "PythonHandler:hadroniser" ) << "Hadroniser seed set to " << seed;
       }
-      CG_DEBUG( "PythonHandler:hadroniser" ) << "Hadroniser seed set to " << seed;
       if ( hadr_name == "pythia8" ) {
         params_.setHadroniser( new Hadroniser::Pythia8Hadroniser( params_ ) );
         std::vector<std::string> config;
@@ -450,7 +436,7 @@ namespace CepGen
     void
     PythonHandler::getLimits( PyObject* obj, const char* key, Limits& lim )
     {
-      PyObject* pobj = getElement( obj, key );
+      PyObject* pobj = getElement( obj, key ); // borrowed
       if ( !pobj )
         return;
       if ( !PyTuple_Check( pobj ) )
@@ -464,27 +450,25 @@ namespace CepGen
         if ( max != -1 )
           lim.max() = max;
       }
-      Py_CLEAR( pobj );
     }
 
     void
     PythonHandler::getParameter( PyObject* parent, const char* key, bool& out )
     {
-      PyObject* pobj = getElement( parent, key );
+      PyObject* pobj = getElement( parent, key ); // borrowed
       if ( !pobj )
         return;
       if ( !PyBool_Check( pobj ) ) {
         Py_CLEAR( pobj );
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       }
-      Py_CLEAR( pobj );
       getParameter( parent, key, (int&)out );
     }
 
     void
     PythonHandler::getParameter( PyObject* parent, const char* key, int& out )
     {
-      PyObject* pobj = getElement( parent, key );
+      PyObject* pobj = getElement( parent, key ); // borrowed
       if ( !pobj )
         return;
 #ifdef PYTHON2
@@ -500,13 +484,12 @@ namespace CepGen
       }
       out = PyLong_AsLong( pobj );
 #endif
-      Py_CLEAR( pobj );
     }
 
     void
     PythonHandler::getParameter( PyObject* parent, const char* key, unsigned long& out )
     {
-      PyObject* pobj = getElement( parent, key );
+      PyObject* pobj = getElement( parent, key ); // borrowed
       if ( !pobj )
         return;
       if ( !PyLong_Check( pobj )
@@ -523,13 +506,12 @@ namespace CepGen
       else if ( PyInt_Check( pobj ) )
         out = PyInt_AsUnsignedLongMask( pobj );
 #endif
-      Py_CLEAR( pobj );
     }
 
     void
     PythonHandler::getParameter( PyObject* parent, const char* key, unsigned int& out )
     {
-      PyObject* pobj = getElement( parent, key );
+      PyObject* pobj = getElement( parent, key ); // borrowed
       if ( !pobj )
         return;
 #ifdef PYTHON2
@@ -545,13 +527,12 @@ namespace CepGen
       }
       out = PyLong_AsUnsignedLong( pobj );
 #endif
-      Py_CLEAR( pobj );
     }
 
     void
     PythonHandler::getParameter( PyObject* parent, const char* key, double& out )
     {
-      PyObject* pobj = getElement( parent, key );
+      PyObject* pobj = getElement( parent, key ); // borrowed
       if ( !pobj )
         return;
       if ( !PyFloat_Check( pobj ) ) {
@@ -559,13 +540,12 @@ namespace CepGen
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       }
       out = PyFloat_AsDouble( pobj );
-      Py_CLEAR( pobj );
     }
 
     void
     PythonHandler::getParameter( PyObject* parent, const char* key, std::string& out )
     {
-      PyObject* pobj = getElement( parent, key );
+      PyObject* pobj = getElement( parent, key ); // borrowed
       if ( !pobj )
         return;
       if ( !
@@ -579,14 +559,13 @@ namespace CepGen
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
       }
       out = decode( pobj );
-      Py_CLEAR( pobj );
     }
 
     void
     PythonHandler::getParameter( PyObject* parent, const char* key, std::vector<std::string>& out )
     {
       out.clear();
-      PyObject* pobj = getElement( parent, key );
+      PyObject* pobj = getElement( parent, key ); // borrowed
       if ( !pobj )
         return;
       if ( !PyTuple_Check( pobj ) ) {
@@ -597,7 +576,6 @@ namespace CepGen
         PyObject* pit = PyTuple_GetItem( pobj, i );
         out.emplace_back( decode( pit ) );
       }
-      Py_CLEAR( pobj );
     }
 
     bool

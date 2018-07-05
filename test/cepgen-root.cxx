@@ -106,6 +106,7 @@ int main( int argc, char* argv[] ) {
   run->fill();
   file->Write();
   CG_INFO( "main" ) << "Events written on \"" << filename << "\".";
+  delete file;
 
   return 0;
 }
