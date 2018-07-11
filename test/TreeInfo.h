@@ -2,6 +2,9 @@
 #define Test_TreeInfo_h
 
 #include "TTree.h"
+#include "Math/Vector3D.h"
+#include "Math/Vector4D.h"
+
 #include <string>
 
 namespace CepGen
@@ -58,21 +61,22 @@ namespace CepGen
 
     float gen_time, tot_time;
     int nremn_ch[2], nremn_nt[2], np;
+    std::vector<ROOT::Math::XYZTVector> momentum, *pMom;
     double pt[maxpart], eta[maxpart], phi[maxpart], rapidity[maxpart];
     double E[maxpart], m[maxpart], charge[maxpart];
     int pdg_id[maxpart], parent1[maxpart], parent2[maxpart];
     int stable[maxpart], role[maxpart], status[maxpart];
 
-    TreeEvent() : tree( NULL ) {
+    TreeEvent() : tree( nullptr ), pMom( nullptr ) {
       clear();
     }
 
     void clear() {
       gen_time = tot_time = 0.;
-      for ( unsigned short i = 0; i < 2; ++i ) {
+      for ( unsigned short i = 0; i < 2; ++i )
         nremn_ch[i] = nremn_nt[i] = 0;
-      }
       np = 0;
+      momentum.clear();
       for ( unsigned short i = 0; i < maxpart; ++i ) {
         pt[i] = eta[i] = phi[i] = rapidity[i] = E[i] = m[i] = charge[i] = 0.;
         pdg_id[i] = parent1[i] = parent2[i] = stable[i] = role[i] = status[i] = 0;
@@ -92,6 +96,8 @@ namespace CepGen
       tree->Branch( "nremn_charged", nremn_ch, "nremn_charged[2]/I" );
       tree->Branch( "nremn_neutral", nremn_nt, "nremn_neutral[2]/I" );
       tree->Branch( "role", role, "role[npart]/I" );
+      pMom = &momentum;
+      tree->Branch( "momentum", "std::vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > >", &pMom );
       tree->Branch( "pt", pt, "pt[npart]/D" );
       tree->Branch( "eta", eta, "eta[npart]/D" );
       tree->Branch( "phi", phi, "phi[npart]/D" );
@@ -118,6 +124,7 @@ namespace CepGen
       tree->SetBranchAddress( "nremn_charged", nremn_ch );
       tree->SetBranchAddress( "nremn_neutral", nremn_ch );
       tree->SetBranchAddress( "role", role );
+      tree->SetBranchAddress( "momentum", &pMom );
       tree->SetBranchAddress( "pt", pt );
       tree->SetBranchAddress( "eta", eta );
       tree->SetBranchAddress( "phi", phi );

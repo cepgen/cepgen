@@ -1,4 +1,4 @@
-#ifndef CepGan_Hadronisers_Pythia8Hadroniser_h
+#ifndef CepGen_Hadronisers_Pythia8Hadroniser_h
 #define CepGen_Hadronisers_Pythia8Hadroniser_h
 
 #include "CepGen/Hadronisers/GenericHadroniser.h"
