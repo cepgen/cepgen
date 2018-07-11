@@ -119,7 +119,6 @@ namespace CepGen
     Pythia8Hadroniser::run( Event& ev, double& weight, bool full )
     {
       weight = 1.;
-full = true;
 
 #ifndef PYTHIA8
       throw CG_FATAL( "Pythia8Hadroniser" ) << "Pythia8 is not linked to this instance!";
@@ -145,11 +144,7 @@ full = true;
 
       ev.num_hadronisation_trials = 0;
       while ( ev.num_hadronisation_trials < max_attempts_ ) {
-//std::cout << "before next:" << ev.num_hadronisation_trials << std::endl;
-lhaevt_->listEvent();
         bool res = pythia_->next();
-pythia_->event.list();
-//std::cout << "after next:" << res << std::endl;
         if ( res && full && first_evt_ ) {
           offset_ = 0;
           for ( unsigned short i = 1; i < pythia_->event.size(); ++i )
@@ -161,7 +156,6 @@ pythia_->event.list();
         ev.num_hadronisation_trials++;
       }
 
-//pythia_->event.list();
       updateEvent( ev, weight, full );
 
 #endif
@@ -176,8 +170,7 @@ pythia_->event.list();
       op.setPdgId( static_cast<PDG>( abs( py_part.id() ) ), py_part.charge() );
       op.setStatus( py_part.isFinal()
         ? Particle::FinalState
-        : Particle::Propagator
-      );
+        : Particle::Propagator );
       op.setMomentum( Particle::Momentum( mom.px(), mom.py(), mom.pz(), mom.e() ) );
       op.setMass( mom.mCalc() );
       lhaevt_->addCorresp( py_part.index()-offset_, op.id() );
@@ -200,8 +193,10 @@ pythia_->event.list();
             continue;
           }
           //--- particle is not what we expect
-          if ( abs( p.id() ) != abs( cg_part.integerPdgId() ) )
+          if ( abs( p.id() ) != abs( cg_part.integerPdgId() ) ) {
+            pythia_->event.list();
             throw CG_FATAL( "Pythia8Hadroniser:update" ) << "Event list corruption detected for particle " << i << "!";
+          }
           //--- no decay for this particle
           if ( p.particleDataEntry().sizeChannels() == 0 )
             continue;
@@ -343,17 +338,6 @@ pythia_->event.list();
       addParticle( quark2_pdgid, -1, 0, 0, quark2_colour, 0, mom_iq2.px(), mom_iq2.py(), mom_iq2.pz(), mom_iq2.e(), mom_iq2.mCalc(), 0., 1. );
       quark2_id = sizePart()-1;
 
-/*      if ( !inel1 ) {
-        const Pythia8::Vec4 mom_op1( Hadroniser::momToVec4( op1.momentum() ) );
-        addParticle( op1.integerPdgId(), 1, 0, 0, 0, 0, mom_op1.px(), mom_op1.py(), mom_op1.pz(), mom_op1.e(), mom_op1.mCalc(), 0., 1. );
-//        quark1_id = 0;
-      }
-      if ( !inel2 ) {
-        const Pythia8::Vec4 mom_op2( Hadroniser::momToVec4( op2.momentum() ) );
-        addParticle( op2.integerPdgId(), 1, 0, 0, 0, 0, mom_op2.px(), mom_op2.py(), mom_op2.pz(), mom_op2.e(), mom_op2.mCalc(), 0., 1. );
-//        quark2_id = 0;
-      }*/
-
       //===========================================================================================
       // outgoing valence quarks
       //===========================================================================================
@@ -368,7 +352,6 @@ pythia_->event.list();
         addCorresp( sizePart(), op2.id() );
         addParticle( quark2_pdgid, 1, quark1_id, quark2_id, quark2_colour, 0, mom_oq2.px(), mom_oq2.py(), mom_oq2.pz(), mom_oq2.e(), mom_oq2.mCalc(), 0., 1. );
       }
-
     }
 
     //=============================================================================================
