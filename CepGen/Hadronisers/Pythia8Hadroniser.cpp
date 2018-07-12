@@ -156,6 +156,10 @@ namespace CepGen
         ev.num_hadronisation_trials++;
       }
 
+      //===========================================================================================
+      // update the event content with Pythia's output
+      //===========================================================================================
+
       updateEvent( ev, weight, full );
 
 #endif
@@ -229,6 +233,12 @@ namespace CepGen
               cg_part.addMother( ev.getById( moth_cg_id ) );
             else
               cg_part.addMother( addParticle( ev, pythia_->event[moth_id], mom, (unsigned short)role ) );
+            if ( !p.isFinal() ) {
+              if ( p.isResonance() || p.daughterList().size() > 0 )
+                cg_part.setStatus( Particle::Resonance );
+              else
+                cg_part.setStatus( Particle::Undefined );
+            }
           }
         }
       }

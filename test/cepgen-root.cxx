@@ -29,7 +29,7 @@ void fill_event_tree( const CepGen::Event& event, unsigned long ev_id )
   ev->gen_time = event.time_generation;
   ev->tot_time = event.time_total;
   ev->np = 0;
-  cout << event.particles().size() << endl;
+  //cout << event.particles().size() << endl;
   ev->momentum.reserve( event.particles().size() );
   for ( const auto& p : event.particles() ) {
     const CepGen::Particle::Momentum m = p.momentum();
