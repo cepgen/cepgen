@@ -28,7 +28,6 @@ enable_language(Fortran)
 include_directories(${PROJECT_SOURCE_DIR})
 add_subdirectory(${CEPGEN_SOURCE_DIR})
 foreach(_module ${CEPGEN_MODULES})
-  include_directories(${CEPGEN_SOURCE_DIR}/${_module})
   add_subdirectory(${CEPGEN_SOURCE_DIR}/${_module})
 endforeach()
 
