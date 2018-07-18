@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include "CepGen/Core/Logger.h"
+#include "CepGen/Core/Hasher.h"
 
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/Cuts.h"

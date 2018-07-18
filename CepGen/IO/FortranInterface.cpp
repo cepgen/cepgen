@@ -1,4 +1,5 @@
 #include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/StructureFunctions/MSTWGrid.h"
 #include "CepGen/Processes/GenericKTProcess.h"
 #include "CepGen/Core/Exception.h"
@@ -6,7 +7,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
   void
   cepgen_structure_functions_( int& sfmode, double& q2, double& xbj, double& f2, double& fl )
   {
