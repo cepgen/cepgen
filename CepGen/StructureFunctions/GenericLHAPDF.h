@@ -19,10 +19,10 @@ namespace CepGen
       public:
         struct Parameterisation
         {
-          Parameterisation() : numFlavours( 4 ), pdfSet( "cteq6" ) {}
+          Parameterisation() : num_flavours( 4 ), pdf_set( "cteq6" ) {}
           static Parameterisation cteq6();
-          unsigned short numFlavours;
-          std::string pdfSet;
+          unsigned short num_flavours;
+          std::string pdf_set;
         };
 
         explicit GenericLHAPDF( const Parameterisation& param = Parameterisation::cteq6() );

@@ -159,8 +159,8 @@ namespace CepGen
         switch( (SF::Type)str_fun ) {
           case SF::Type::GenericLHAPDF: {
             auto sf = dynamic_cast<SF::GenericLHAPDF*>( params_.kinematics.structure_functions.get() );
-            fillParameter( psfp, "pdfSet", sf->params.pdfSet );
-            fillParameter( psfp, "numFlavours", (unsigned int&)sf->params.numFlavours );
+            fillParameter( psfp, "pdfSet", sf->params.pdf_set );
+            fillParameter( psfp, "numFlavours", (unsigned int&)sf->params.num_flavours );
           } break;
           case SF::Type::Schaefer: {
             auto sf = dynamic_cast<SF::Schaefer*>( params_.kinematics.structure_functions.get() );

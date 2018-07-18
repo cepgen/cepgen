@@ -11,8 +11,8 @@ namespace CepGen
     GenericLHAPDF::Parameterisation::cteq6()
     {
       Parameterisation p;
-      p.numFlavours = 4;
-      p.pdfSet = "cteq6";
+      p.num_flavours = 4;
+      p.pdf_set = "cteq6";
       return p;
     }
 
@@ -23,7 +23,7 @@ namespace CepGen
     GenericLHAPDF::GenericLHAPDF( const char* set ) :
       StructureFunctions( Type::GenericLHAPDF )
     {
-      params.pdfSet = set;
+      params.pdf_set = set;
       initialise();
     }
 
@@ -32,14 +32,14 @@ namespace CepGen
     {
 #ifdef LIBLHAPDF
 #  if LHAPDF_MAJOR_VERSION == 6
-      pdf_set_ = LHAPDF::PDFSet( params.pdfSet );
+      pdf_set_ = LHAPDF::PDFSet( params.pdf_set );
       pdfs_ = pdf_set_.mkPDFs();
 #  else
-      LHAPDF::initPDFSet( params.pdfSet, LHAPDF::LHGRID, 0 );
+      LHAPDF::initPDFSet( params.pdf_set, LHAPDF::LHGRID, 0 );
 #  endif
       CG_INFO( "GenericLHAPDF" ) << "LHAPDF structure functions evaluator successfully built.\n"
-        << " *) number of flavours: " << params.numFlavours << "\n"
-        << " *) PDFset: " << params.pdfSet;
+        << " *) number of flavours: " << params.num_flavours << "\n"
+        << " *) PDFset: " << params.pdf_set;
       initialised_ = true;
 #else
       throw CG_FATAL( "GenericLHAPDF" ) << "LHAPDF is not liked to this instance!";
@@ -55,13 +55,13 @@ namespace CepGen
       old_vals_ = nv;
 
       F2 = 0.;
-      if ( params.numFlavours == 0 || params.numFlavours > 6 )
+      if ( params.num_flavours == 0 || params.num_flavours > 6 )
         return *this;
 
       if ( !initialised_ )
         initialise();
 #ifdef LIBLHAPDF
-      for ( int i = 0; i < params.numFlavours; ++i ) {
+      for ( int i = 0; i < params.num_flavours; ++i ) {
 #  if LHAPDF_MAJOR_VERSION == 6
         const double xq = pdfs_[0]->xfxQ2( i, xbj, q2 );
         const double xqbar = pdfs_[0]->xfxQ2( -i, xbj, q2 );
