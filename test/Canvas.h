@@ -114,7 +114,7 @@ namespace CepGen
               }
               else y_title = Form( "%s (%s / %d %s)", y_title.Data(), distrib.Data(), static_cast<unsigned int>( GetBinning( obj ) ), unit.Data() );
             }
-            else { 
+            else {
               if ( !form_spec.IsNull() ) {
                 TString format = Form( "%%s / %%%s %%s", form_spec.Data() );
                 y_title = Form( format.Data(), y_title.Data(), GetBinning( obj ), unit.Data() );
@@ -239,13 +239,11 @@ namespace CepGen
       }
 
       inline void Save(const char* ext, const char* out_dir=".") {
-        if (strstr(ext, "pdf")==NULL) {
-          if (strstr(ext, "png")==NULL) {
-            if (strstr(ext, "root")==NULL) {
-              return;
-            }
-          }
-        }
+        if (strstr(ext, "pdf")==NULL)
+          if (strstr(ext, "eps")==NULL)
+            if (strstr(ext, "png")==NULL)
+              if (strstr(ext, "root")==NULL)
+                return;
         TCanvas::cd();
         if ( fLeg ) fLeg->Draw();
         if ( fTopLabel ) fTopLabel->Draw();

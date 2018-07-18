@@ -4,7 +4,6 @@
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include <fstream>
-#include <atomic>
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_math.h>
