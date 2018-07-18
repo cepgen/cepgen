@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include "CepGen/Core/Logger.h"
+#include "CepGen/Core/Hasher.h"
 
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/Cuts.h"
@@ -58,28 +59,6 @@ namespace CepGen
       struct CutsList
       {
         CutsList();
-        template<class T,bool>
-        struct hasher
-        {
-          inline size_t operator()( const T& t ) const {
-            return std::hash<T>()( t );
-          }
-        };
-        template<class T>
-        struct hasher<T, true>
-        {
-          inline size_t operator() ( const T& t ) {
-            typedef typename std::underlying_type<T>::type enumType;
-            return std::hash<enumType>()( static_cast<enumType>( t ) );
-          }
-        };
-        template<class T>
-        struct EnumHash
-        {
-          inline size_t operator()( const T& t ) const {
-            return hasher<T,std::is_enum<T>::value>()( t );
-          }
-        };
         /// Cuts on the initial particles kinematics
         Cuts initial;
         /// Cuts on the central system produced

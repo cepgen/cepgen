@@ -2,8 +2,9 @@
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Core/Exception.h"
 
-extern "C"
-{
+#ifdef __cplusplus
+extern "C" {
+#endif
   void
   cepgen_structure_functions_( int& sfmode, double& q2, double& xbj, double& f2, double& fl )
   {
@@ -16,5 +17,7 @@ extern "C"
     f2 = val.F2;
     fl = val.FL;
   }
+#ifdef __cplusplus
 }
+#endif
 

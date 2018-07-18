@@ -12,6 +12,7 @@
 
 #include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 #include "CepGen/StructureFunctions/GenericLHAPDF.h"
+#include "CepGen/StructureFunctions/MSTWGrid.h"
 #include "CepGen/StructureFunctions/Schaefer.h"
 
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
@@ -167,6 +168,10 @@ namespace CepGen
           auto sf = dynamic_cast<SF::GenericLHAPDF*>( params_.kinematics.structure_functions.get() );
           fillParameter( psf, "pdfSet", sf->params.pdf_set );
           fillParameter( psf, "numFlavours", (unsigned int&)sf->params.num_flavours );
+        } break;
+        case SF::Type::MSTWgrid: {
+          auto sf = dynamic_cast<MSTW::Grid*>( params_.kinematics.structure_functions.get() );
+          fillParameter( psf, "gridPath", sf->params.grid_path );
         } break;
         case SF::Type::Schaefer: {
           auto sf = dynamic_cast<SF::Schaefer*>( params_.kinematics.structure_functions.get() );
