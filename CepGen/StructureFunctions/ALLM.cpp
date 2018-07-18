@@ -23,6 +23,7 @@ namespace CepGen
       p.mr2 = 0.20623;
       p.q02 = 0.27799;
       p.lambda2 = 0.06527;
+      p.type = Type::ALLM91;
       return p;
     }
 
@@ -43,6 +44,7 @@ namespace CepGen
       p.mr2 = 0.15052;
       p.q02 = 0.52544;
       p.lambda2 = 0.06526;
+      p.type = Type::ALLM97;
       return p;
     }
 
@@ -63,6 +65,7 @@ namespace CepGen
       p.mr2 = 29.3;
       p.q02 = 4.74e-5;
       p.lambda2 = 2.2e-8;
+      p.type = Type::Invalid;
       return p;
     }
 
@@ -83,6 +86,7 @@ namespace CepGen
       p.mr2 = 0.838;
       p.q02 = 1.87e-5;
       p.lambda2 = 4.4e-9;
+      p.type = Type::Invalid;
       return p;
     }
 
@@ -103,6 +107,7 @@ namespace CepGen
       p.mr2 = 0.117;
       p.q02 = 1.15;
       p.lambda2 = 0.06527;
+      p.type = Type::GD07p;
       return p;
     }
 
@@ -123,11 +128,12 @@ namespace CepGen
       p.mr2 = 0.03190;
       p.q02 = 1.374;
       p.lambda2 = 0.06527;
+      p.type = Type::GD11p;
       return p;
     }
 
     ALLM::ALLM( const ALLM::Parameterisation& param ) :
-      params_( param )
+      StructureFunctions( param.type ), params_( param )
     {}
 
     ALLM

@@ -25,7 +25,8 @@ namespace CepGen
       GD07p               = 203,
       GD11p               = 204,
       MSTWgrid            = 205,
-      Schaefer            = 301
+      Schaefer            = 301,
+      GenericLHAPDF       = 401,
     };
   }
   std::ostream& operator<<( std::ostream&, const SF::Type& );

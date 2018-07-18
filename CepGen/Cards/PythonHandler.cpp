@@ -147,7 +147,9 @@ namespace CepGen
       fillParameter( kin, "cmEnergy", sqrt_s );
       if ( sqrt_s != -1. )
         params_.kinematics.setSqrtS( sqrt_s );
-      fillParameter( kin, "structureFunctions", (int&)params_.kinematics.structure_functions );
+      int str_fun = 0;
+      fillParameter( kin, "structureFunctions", str_fun );
+      //params_.kinematics.structure_functions = ;
     }
 
     void

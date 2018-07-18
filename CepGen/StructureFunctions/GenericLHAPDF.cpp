@@ -6,7 +6,13 @@ namespace CepGen
   namespace SF
   {
     constexpr std::array<double,6> GenericLHAPDF::qtimes3_;
-    GenericLHAPDF::GenericLHAPDF( const char* set )
+
+    GenericLHAPDF::GenericLHAPDF() :
+      StructureFunctions( Type::GenericLHAPDF )
+    {}
+
+    GenericLHAPDF::GenericLHAPDF( const char* set ) :
+      StructureFunctions( Type::GenericLHAPDF )
     {
       initialise( set );
     }

@@ -46,6 +46,7 @@ namespace CepGen
             double q02;
             /// Squared QCD scale
             double lambda2;
+            Type type;
         };
 
         explicit ALLM( const ALLM::Parameterisation& param = ALLM::Parameterisation::allm97() );

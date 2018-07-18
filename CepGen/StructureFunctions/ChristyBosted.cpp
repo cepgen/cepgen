@@ -8,7 +8,7 @@ namespace CepGen
   namespace SF
   {
     ChristyBosted::ChristyBosted( const ChristyBosted::Parameterisation& params ) :
-      params_( params )
+      StructureFunctions( Type::ChristyBosted ), params_( params )
     {}
 
     double

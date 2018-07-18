@@ -20,7 +20,7 @@ namespace CepGen
     }
 
     BlockDurandHa::BlockDurandHa( const BlockDurandHa::Parameterisation& param ) :
-      params_( param )
+      StructureFunctions( Type::BlockDurandHa ), params_( param )
     {}
 
     BlockDurandHa&
