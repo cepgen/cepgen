@@ -48,6 +48,7 @@ namespace CepGen
         void parseGenerator( PyObject* );
         void parseTamingFunctions( PyObject* );
         void parseHadroniser( PyObject* );
+        void parseStructureFunctions( PyObject* );
     };
   }
 }

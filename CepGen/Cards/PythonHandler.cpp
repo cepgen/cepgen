@@ -151,36 +151,45 @@ namespace CepGen
       fillParameter( kin, "cmEnergy", sqrt_s );
       if ( sqrt_s != -1. )
         params_.kinematics.setSqrtS( sqrt_s );
+      PyObject* psf = getElement( kin, "structureFunctions" ); // borrowed
+      if ( psf )
+        parseStructureFunctions( psf );
+    }
+
+    void
+    PythonHandler::parseStructureFunctions( PyObject* psf )
+    {
       int str_fun = 0;
-      fillParameter( kin, "structureFunctions", str_fun );
+      fillParameter( psf, "id", str_fun );
       params_.kinematics.structure_functions.reset( StructureFunctionsBuilder::get( (SF::Type)str_fun ) );
-      PyObject* psfp = getElement( kin, "structureFunctionsParameters" ); // borrowed
-      if ( psfp ) {
-        switch( (SF::Type)str_fun ) {
-          case SF::Type::GenericLHAPDF: {
-            auto sf = dynamic_cast<SF::GenericLHAPDF*>( params_.kinematics.structure_functions.get() );
-            fillParameter( psfp, "pdfSet", sf->params.pdf_set );
-            fillParameter( psfp, "numFlavours", (unsigned int&)sf->params.num_flavours );
-          } break;
-          case SF::Type::Schaefer: {
-            auto sf = dynamic_cast<SF::Schaefer*>( params_.kinematics.structure_functions.get() );
-            fillParameter( psfp, "Q2cut", sf->params.q2_cut );
-            std::vector<double> w2_lims;
-            fillParameter( psfp, "W2limits", w2_lims );
-            if ( w2_lims.size() != 0 ) {
-              if ( w2_lims.size() != 2 )
-                throwPythonError( Form( "Invalid size for W2limits attribute: %d != 2!", w2_lims.size() ) );
-              else {
-                sf->params.w2_lo = *std::min_element( w2_lims.begin(), w2_lims.end() );
-                sf->params.w2_hi = *std::max_element( w2_lims.begin(), w2_lims.end() );
-              }
+      switch( (SF::Type)str_fun ) {
+        case SF::Type::GenericLHAPDF: {
+          auto sf = dynamic_cast<SF::GenericLHAPDF*>( params_.kinematics.structure_functions.get() );
+          fillParameter( psf, "pdfSet", sf->params.pdf_set );
+          fillParameter( psf, "numFlavours", (unsigned int&)sf->params.num_flavours );
+        } break;
+        case SF::Type::Schaefer: {
+          auto sf = dynamic_cast<SF::Schaefer*>( params_.kinematics.structure_functions.get() );
+          fillParameter( psf, "Q2cut", sf->params.q2_cut );
+          std::vector<double> w2_lims;
+          fillParameter( psf, "W2limits", w2_lims );
+          if ( w2_lims.size() != 0 ) {
+            if ( w2_lims.size() != 2 )
+              throwPythonError( Form( "Invalid size for W2limits attribute: %d != 2!", w2_lims.size() ) );
+            else {
+              sf->params.w2_lo = *std::min_element( w2_lims.begin(), w2_lims.end() );
+              sf->params.w2_hi = *std::max_element( w2_lims.begin(), w2_lims.end() );
             }
-            fillParameter( psfp, "continuumSF", sf->params.cont_model );
-            fillParameter( psfp, "resonancesSF", sf->params.res_model );
-            fillParameter( psfp, "higherTwist", (bool&)sf->params.higher_twist );
-          } break;
-          default: break;
-        }
+          }
+          PyObject* pcsf = getElement( psf, "continuumSF" ); // borrowed
+          if ( pcsf )
+            fillParameter( pcsf, "id", sf->params.cont_model );
+          PyObject* prsf = getElement( psf, "resonancesSF" ); // borrowed
+          if ( prsf )
+            fillParameter( prsf, "id", sf->params.res_model );
+          fillParameter( psf, "higherTwist", (bool&)sf->params.higher_twist );
+        } break;
+        default: break;
       }
     }
 
