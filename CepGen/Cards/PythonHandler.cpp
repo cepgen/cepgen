@@ -137,13 +137,6 @@ namespace CepGen
         Py_CLEAR( ptam );
       }
 
-      PyObject* pkmr_path = PyObject_GetAttrString( cfg, "kmrGridPath" ); // new
-      if ( pkmr_path ) {
-        //strncpy( Constants::kmr_grid_path, decode( pkmr_path ).c_str(), 256 );
-        params_.kinematics.kmr_grid_path = decode( pkmr_path );
-        Py_CLEAR( pkmr_path );
-      }
-
       //--- finalisation
       Py_CLEAR( cfg );
     }
@@ -166,6 +159,7 @@ namespace CepGen
       }
       double sqrt_s = -1.;
       fillParameter( kin, "cmEnergy", sqrt_s );
+      fillParameter( kin, "kmrGridPath", params_.kinematics.kmr_grid_path );
       if ( sqrt_s != -1. )
         params_.kinematics.setSqrtS( sqrt_s );
       PyObject* psf = getElement( kin, "structureFunctions" ); // borrowed
