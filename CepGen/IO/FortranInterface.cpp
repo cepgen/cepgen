@@ -15,11 +15,9 @@ extern "C" {
 
     CG_DEBUG( "cepgen_structure_functions" ) << sf_mode;
 
-    StructureFunctions* sf = StructureFunctionsBuilder::get( sf_mode );
-    StructureFunctions val = ( *sf )( q2, xbj );
+    StructureFunctions& val = ( *StructureFunctionsBuilder::get( sf_mode ) )( q2, xbj );
     f2 = val.F2;
     fl = val.FL;
-    delete sf;
   }
 
   /*bool lhapdf_init = false;

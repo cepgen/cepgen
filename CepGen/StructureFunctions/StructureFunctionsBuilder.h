@@ -1,10 +1,12 @@
 #ifndef CepGen_StructureFunctions_StructureFunctionsBuilder_h
 #define CepGen_StructureFunctions_StructureFunctionsBuilder_h
 
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include <memory>
 
 namespace CepGen
 {
+  class StructureFunctions;
+  namespace SF { enum class Type; }
   /// Helper class to generate any supported set of structure functions
   class StructureFunctionsBuilder
   {
@@ -13,9 +15,9 @@ namespace CepGen
       ~StructureFunctionsBuilder() {}
 
       /// Build structure functions from the modelling type
-      static StructureFunctions* get( const SF::Type& );
+      static std::shared_ptr<StructureFunctions> get( const SF::Type& );
       /// Build structure functions from the modelling name
-      static StructureFunctions* get( const char* );
+      static std::shared_ptr<StructureFunctions> get( const char* );
   };
 }
 

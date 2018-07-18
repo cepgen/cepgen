@@ -33,6 +33,7 @@ namespace MSTW
     public:
       /// Retrieve the grid interpolator (singleton)
       static Grid& get( const char* path = "External/F2_Luxlike_fit/mstw_f2_scan_nnlo.dat" );
+
       /// Compute the structure functions at a given \f$Q^2/x_{\rm Bj}\f$
       Grid& operator()( double q2, double xbj ) override;
       /// Retrieve the grid's header information
@@ -44,11 +45,13 @@ namespace MSTW
       void operator=( const GridHandler& ) = delete;
 
     private:
-      explicit Grid( const Parameterisation& );
+      explicit Grid( const Parameterisation& = Parameterisation() );
       static const unsigned int good_magic;
+      static std::shared_ptr<Grid> singl_;
 
       header_t header_;
   };
+
   std::ostream& operator<<( std::ostream&, const Grid::header_t::order_t& );
   std::ostream& operator<<( std::ostream&, const Grid::header_t::cl_t& );
   std::ostream& operator<<( std::ostream&, const Grid::header_t::nucleon_t& );
