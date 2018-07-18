@@ -16,27 +16,30 @@ namespace CepGen
       public:
         /// Read a standard configuration card
         explicit PythonHandler( const char* file );
+        ~PythonHandler();
         static PyObject* getElement( PyObject* obj, const char* key );
         static std::string decode( PyObject* obj );
         static PyObject* encode( const char* str );
 
       private:
-        static constexpr const char* module_name_ = "mod_name";
+        static constexpr const char* MODULE_NAME = "mod_name";
+        static constexpr const char* PROCESS_NAME = "process";
 
         static void throwPythonError( const std::string& message );
         static std::string getPythonPath( const char* file );
         static bool isInteger( PyObject* obj );
         static int asInteger( PyObject* obj );
 
-        void getLimits( PyObject* obj, const char* key, Limits& lim );
-        void getParameter( PyObject* parent, const char* key, bool& out );
-        void getParameter( PyObject* parent, const char* key, int& out );
-        void getParameter( PyObject* parent, const char* key, unsigned long& out );
-        void getParameter( PyObject* parent, const char* key, unsigned int& out );
-        void getParameter( PyObject* parent, const char* key, double& out );
-        void getParameter( PyObject* parent, const char* key, std::string& out );
-        void getParameter( PyObject* parent, const char* key, std::vector<std::string>& out );
-        void getParameter( PyObject* parent, const char* key, std::vector<int>& out );
+        void fillLimits( PyObject* obj, const char* key, Limits& lim );
+        void fillParameter( PyObject* parent, const char* key, bool& out );
+        void fillParameter( PyObject* parent, const char* key, int& out );
+        void fillParameter( PyObject* parent, const char* key, unsigned long& out );
+        void fillParameter( PyObject* parent, const char* key, unsigned int& out );
+        void fillParameter( PyObject* parent, const char* key, double& out );
+        void fillParameter( PyObject* parent, const char* key, std::string& out );
+        void fillParameter( PyObject* parent, const char* key, std::vector<int>& out );
+        void fillParameter( PyObject* parent, const char* key, std::vector<double>& out );
+        void fillParameter( PyObject* parent, const char* key, std::vector<std::string>& out );
 
         void parseIncomingKinematics( PyObject* );
         void parseOutgoingKinematics( PyObject* );
@@ -46,6 +49,7 @@ namespace CepGen
         void parseGenerator( PyObject* );
         void parseTamingFunctions( PyObject* );
         void parseHadroniser( PyObject* );
+        void parseStructureFunctions( PyObject* );
     };
   }
 }

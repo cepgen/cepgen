@@ -57,7 +57,7 @@ namespace CepGen
         /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming parton
         /// \param[in] x Parton momentum fraction
         /// \param[in] mx Outgoing diffractive proton mass
-        static double flux( const Flux& type, double kt2, double x, const StructureFunctions::Type& sf = StructureFunctions::SuriYennie, double mx = 0. );
+        static double flux( const Flux& type, double kt2, double x, StructureFunctions&, double mx = 0. );
         static double flux( const Flux& type, double kt2, double x, const Kinematics::HeavyIon& hi );
 
       protected:

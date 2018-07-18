@@ -1,4 +1,4 @@
-#ifndef CepGan_Hadronisers_Pythia8Hadroniser_h
+#ifndef CepGen_Hadronisers_Pythia8Hadroniser_h
 #define CepGen_Hadronisers_Pythia8Hadroniser_h
 
 #include "CepGen/Hadronisers/GenericHadroniser.h"
@@ -59,8 +59,7 @@ namespace CepGen
         void setFullEvent( bool full = true ) { full_evt_ = full; }
 
         bool init();
-        void readString( const char* param );
-        void readString( const std::string& param ) { readString( param.c_str() ); }
+        void readString( const char* param ) override;
 
       private:
         static constexpr unsigned short invalid_idx_ = 999;

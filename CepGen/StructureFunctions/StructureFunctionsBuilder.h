@@ -13,9 +13,9 @@ namespace CepGen
       ~StructureFunctionsBuilder() {}
 
       /// Build structure functions from the modelling type
-      static StructureFunctions get( const StructureFunctions::Type&, double q2, double xbj );
+      static StructureFunctions* get( const SF::Type& );
       /// Build structure functions from the modelling name
-      static StructureFunctions get( const char*, double q2, double xbj );
+      static StructureFunctions* get( const char* );
   };
 }
 

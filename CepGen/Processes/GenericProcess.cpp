@@ -191,15 +191,15 @@ namespace CepGen
         } break;
         case Kinematics::Mode::ElasticInelastic: {
           fp1 = FormFactors::ProtonElastic( -t1_ );
-          fp2 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t2_, w2_, my2 );
+          fp2 = FormFactors::ProtonInelastic( *cuts_.structure_functions, -t2_, w2_, my2 );
         } break;
         case Kinematics::Mode::InelasticElastic: {
-          fp1 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t1_, w1_, mx2 );
+          fp1 = FormFactors::ProtonInelastic( *cuts_.structure_functions, -t1_, w1_, mx2 );
           fp2 = FormFactors::ProtonElastic( -t2_ );
         } break;
         case Kinematics::Mode::InelasticInelastic: {
-          fp1 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t1_, w1_, mx2 );
-          fp2 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t2_, w2_, my2 );
+          fp1 = FormFactors::ProtonInelastic( *cuts_.structure_functions, -t1_, w1_, mx2 );
+          fp2 = FormFactors::ProtonInelastic( *cuts_.structure_functions, -t2_, w2_, my2 );
         } break;
       }
     }

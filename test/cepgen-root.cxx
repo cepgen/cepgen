@@ -29,9 +29,11 @@ void fill_event_tree( const CepGen::Event& event, unsigned long ev_id )
   ev->gen_time = event.time_generation;
   ev->tot_time = event.time_total;
   ev->np = 0;
+  //cout << event.particles().size() << endl;
+  ev->momentum.reserve( event.particles().size() );
   for ( const auto& p : event.particles() ) {
     const CepGen::Particle::Momentum m = p.momentum();
-
+    ev->momentum[ev->np].SetPxPyPzE( m.px(), m.py(), m.pz(), p.energy() );
     ev->rapidity[ev->np] = m.rapidity();
     ev->pt[ev->np] = m.pt();
     ev->eta[ev->np] = m.eta();
@@ -75,7 +77,7 @@ int main( int argc, char* argv[] ) {
   //----- open the output root file
 
   const char* filename = ( argc > 2 ) ? argv[2] : "events.root";
-  auto file = TFile::Open( filename, "recreate" );
+  std::unique_ptr<TFile> file( TFile::Open( filename, "recreate" ) );
   if ( !file )
     throw CG_FATAL( "main" ) << "Failed to create the output file!";
 
@@ -98,8 +100,8 @@ int main( int argc, char* argv[] ) {
   ev.reset( new CepGen::TreeEvent );
   ev->create( ev_tree.get() );
 
+  // launch the events generation
   try {
-    // launch the events generation
     mg.generate( fill_event_tree );
   } catch ( const CepGen::Exception& ) {}
 
@@ -109,4 +111,3 @@ int main( int argc, char* argv[] ) {
 
   return 0;
 }
-

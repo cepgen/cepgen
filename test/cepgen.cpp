@@ -55,7 +55,6 @@ int main( int argc, char* argv[] ) {
 
     mg.parameters->setProcess( new CepGen::Process::GamGamLL );
     mg.parameters->kinematics.mode = CepGen::Kinematics::Mode::ElasticElastic;
-    mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SuriYennie;
     mg.parameters->kinematics.central_system = { CepGen::PDG::Muon, CepGen::PDG::Muon };
     mg.parameters->kinematics.cuts.central.pt_single.min() = 15.;
     mg.parameters->kinematics.cuts.central.eta_single = { -2.5, 2.5 };

@@ -163,9 +163,9 @@ namespace CepGen
         << "First fermion:  " << p_f1_ << ", mass = " << p_f1_.mass() << "\n\t"
         << "Second fermion: " << p_f2_ << ", mass = " << p_f2_.mass() << ".";
 
-      if ( fabs( p_f1_.mass()-mf_ ) > 1.e-6 )
+      if ( fabs( p_f1_.mass()-mf_ ) > 1.e-4 )
         throw CG_FATAL( "PPtoFF" ) << "Invalid fermion 1 mass: " << p_f1_.mass() << "/" << mf_ << ".";
-      if ( fabs( p_f2_.mass()-mf_ ) > 1.e-6 )
+      if ( fabs( p_f2_.mass()-mf_ ) > 1.e-4 )
         throw CG_FATAL( "PPtoFF" ) << "Invalid fermion 2 mass: " << p_f2_.mass() << "/" << mf_ << ".";
 
       //=================================================================

@@ -6,14 +6,23 @@ namespace CepGen
 {
   namespace SF
   {
-    SzczurekUleshchenko
-    SzczurekUleshchenko::operator()( double q2, double xbj, const SigmaRatio& ratio ) const
+    SzczurekUleshchenko::SzczurekUleshchenko() :
+      StructureFunctions( Type::SzczurekUleshchenko ), F1( 0. )
+    {}
+
+    SzczurekUleshchenko&
+    SzczurekUleshchenko::operator()( double q2, double xbj )
     {
 #ifndef GRVPDF
       throw CG_FATAL( "SzczurekUleshchenko" )
         << "Szczurek-Uleshchenko structure functions cannot be computed"
         << " as GRV PDF set is not linked to this instance!";
 #else
+      std::pair<double,double> nv = { q2, xbj };
+      if ( nv == old_vals_ )
+        return *this;
+      old_vals_ = nv;
+
       const float q02 = 0.8;
       float amu2 = q2+q02; // shift the overall scale
       float xuv, xdv, xus, xds, xss, xg;
@@ -32,12 +41,9 @@ namespace CepGen
                           + 1./9.*( xdv + 2.*xds )
                           + 1./9.*(       2.*xss );
 
-      SzczurekUleshchenko su;
-      su.F2 = F2_aux * q2 / amu2; // F2 corrected for low Q^2 behaviour
-      double r_err = 0.;
-      su.computeFL( q2, xbj, ratio( q2, xbj, r_err ) );
+      F2 = F2_aux * q2 / amu2; // F2 corrected for low Q^2 behaviour
 
-      return su;
+      return *this;
 #endif
     }
   }

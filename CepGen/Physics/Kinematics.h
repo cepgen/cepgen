@@ -5,7 +5,6 @@
 #include <algorithm>
 
 #include "CepGen/Core/Logger.h"
-#include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/Cuts.h"
@@ -18,6 +17,7 @@
 namespace CepGen
 {
   enum class PDG;
+  class StructureFunctions;
   /// List of kinematic constraints to apply on the process phase space.
   class Kinematics
   {
@@ -74,7 +74,7 @@ namespace CepGen
       /// Type of kinematics to consider for the phase space
       Mode mode;
       /// Type of structure functions to consider
-      StructureFunctions::Type structure_functions;
+      std::shared_ptr<StructureFunctions> structure_functions;
 
       struct CutsList
       {

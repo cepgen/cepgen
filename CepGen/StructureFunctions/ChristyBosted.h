@@ -67,8 +67,7 @@ namespace CepGen
         };
 
         explicit ChristyBosted( const ChristyBosted::Parameterisation& params = ChristyBosted::Parameterisation::standard() );
-
-        ChristyBosted operator()( double q2, double xbj ) const;
+        ChristyBosted& operator()( double q2, double xbj ) override;
 
       private:
         double resmod507( char sf, double w2, double q2 ) const;

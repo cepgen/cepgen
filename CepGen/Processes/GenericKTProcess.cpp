@@ -1,6 +1,5 @@
 #include "CepGen/Processes/GenericKTProcess.h"
 
-#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 
 #include "CepGen/Core/Exception.h"
@@ -150,20 +149,20 @@ namespace CepGen
       flux1_ = flux2_ = 0.;
       switch ( cuts_.mode ) {
         case Kinematics::Mode::ElasticElastic:
-          flux1_ = flux( Flux::ElasticBudnev, q1t2, x1 );
-          flux2_ = flux( Flux::ElasticBudnev, q2t2, x2 );
+          flux1_ = flux( Flux::ElasticBudnev, q1t2, x1, *cuts_.structure_functions );
+          flux2_ = flux( Flux::ElasticBudnev, q2t2, x2, *cuts_.structure_functions );
           break;
         case Kinematics::Mode::ElasticInelastic:
-          flux1_ = flux( Flux::ElasticBudnev, q1t2, x1 );
-          flux2_ = flux( Flux::InelasticBudnev, q2t2, x2, cuts_.structure_functions, MY_ );
+          flux1_ = flux( Flux::ElasticBudnev, q1t2, x1, *cuts_.structure_functions );
+          flux2_ = flux( Flux::InelasticBudnev, q2t2, x2, *cuts_.structure_functions, MY_ );
           break;
         case Kinematics::Mode::InelasticElastic:
-          flux1_ = flux( Flux::InelasticBudnev, q1t2, x1, cuts_.structure_functions, MX_ );
-          flux2_ = flux( Flux::ElasticBudnev, q2t2, x2 );
+          flux1_ = flux( Flux::InelasticBudnev, q1t2, x1, *cuts_.structure_functions, MX_ );
+          flux2_ = flux( Flux::ElasticBudnev, q2t2, x2, *cuts_.structure_functions );
           break;
         case Kinematics::Mode::InelasticInelastic:
-          flux1_ = flux( Flux::InelasticBudnev, q1t2, x1, cuts_.structure_functions, MX_ );
-          flux2_ = flux( Flux::InelasticBudnev, q2t2, x2, cuts_.structure_functions, MY_ );
+          flux1_ = flux( Flux::InelasticBudnev, q1t2, x1, *cuts_.structure_functions, MX_ );
+          flux2_ = flux( Flux::InelasticBudnev, q2t2, x2, *cuts_.structure_functions, MY_ );
           break;
         default:
           throw CG_FATAL( "GenericKTProcess" ) << "Invalid kinematics mode selected!";
@@ -314,7 +313,7 @@ namespace CepGen
     }
 
     double
-    GenericKTProcess::flux( const Flux& type, double kt2, double x, const StructureFunctions::Type& sf, double mx )
+    GenericKTProcess::flux( const Flux& type, double kt2, double x, StructureFunctions& sf, double mx )
     {
       switch ( type ) {
         case Flux::ElasticBudnev: {
@@ -331,8 +330,9 @@ namespace CepGen
           // F2 structure function
           const double Q2min = 1. / ( 1.-x )*( x*( mx2-mp2_ ) + x*x*mp2_ ),
                        Q2 = Q2min + kt2/( 1.-x );
-          float xbj = Q2 / ( Q2 + mx2 - mp2_ );
-          const StructureFunctions str_fun = StructureFunctionsBuilder::get( sf, Q2, xbj );
+          const double xbj = Q2 / ( Q2 + mx2 - mp2_ );
+          auto& str_fun = sf( Q2, xbj );
+          str_fun.computeFL( Q2, xbj );
           const double term1 = ( 1.-x )*( 1.-Q2min/Q2 );
           const double f_D = str_fun.F2/( mx2 + Q2 - mp2_ ) * term1;
           const double f_C = str_fun.F1( Q2, xbj ) * 2./Q2;
