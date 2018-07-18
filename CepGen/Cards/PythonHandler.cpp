@@ -161,7 +161,7 @@ namespace CepGen
     {
       int str_fun = 0;
       fillParameter( psf, "id", str_fun );
-      params_.kinematics.structure_functions.reset( StructureFunctionsBuilder::get( (SF::Type)str_fun ) );
+      params_.kinematics.structure_functions = StructureFunctionsBuilder::get( (SF::Type)str_fun );
       switch( (SF::Type)str_fun ) {
         case SF::Type::GenericLHAPDF: {
           auto sf = dynamic_cast<SF::GenericLHAPDF*>( params_.kinematics.structure_functions.get() );
