@@ -22,6 +22,7 @@ namespace CepGen
   {
     public:
       Kinematics();
+      Kinematics( const Kinematics& );
       ~Kinematics();
 
       /// Type of kinematics to consider for the process

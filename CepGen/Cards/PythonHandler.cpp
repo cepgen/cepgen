@@ -10,6 +10,7 @@
 #include "CepGen/Processes/PPtoFF.h"
 #include "CepGen/Processes/PPtoWW.h"
 
+#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 
 #include <algorithm>
@@ -149,7 +150,7 @@ namespace CepGen
         params_.kinematics.setSqrtS( sqrt_s );
       int str_fun = 0;
       fillParameter( kin, "structureFunctions", str_fun );
-      //params_.kinematics.structure_functions = ;
+      params_.kinematics.structure_functions = StructureFunctionsBuilder::get( (SF::Type)str_fun );
     }
 
     void
