@@ -18,9 +18,8 @@ namespace CepGen
   {
     switch ( sf_type ) {
       case SF::Type::Electron:
-      case SF::Type::MSTWgrid: //FIXME
-      default:
-      case SF::Type::ElasticProton:       return new StructureFunctions();
+      case SF::Type::ElasticProton:
+      default:                            return new StructureFunctions();
       case SF::Type::SzczurekUleshchenko: return new SF::SzczurekUleshchenko();
       case SF::Type::SuriYennie:          return new SF::SuriYennie();
       case SF::Type::FioreBrasse:         return new SF::FioreBrasse();
@@ -33,6 +32,7 @@ namespace CepGen
       case SF::Type::GD11p:               return new SF::ALLM( SF::ALLM::Parameterisation::gd11p() );
       case SF::Type::Schaefer:            return new SF::Schaefer();
       case SF::Type::GenericLHAPDF:       return new SF::GenericLHAPDF();
+      case SF::Type::MSTWgrid:            return &MSTW::Grid::get();
     }
   }
 }

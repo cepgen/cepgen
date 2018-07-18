@@ -99,7 +99,10 @@ class StructureFunctions:
     ALLM97              = Parameters(id=202)
     GD07p               = Parameters(id=203)
     GD11p               = Parameters(id=204)
-    MSTWgrid            = Parameters(id=205)
+    MSTWgrid            = Parameters(
+        id = 205,
+        gridPath = 'External/F2_Luxlike_fit/mstw_f2_scan_nnlo.dat',
+    )
     LUXlike = Parameters(
         id = 301,
         #Q2cut = 10.,

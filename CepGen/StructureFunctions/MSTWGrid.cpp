@@ -15,19 +15,23 @@ namespace MSTW
   Grid&
   Grid::get( const char* filename )
   {
-    static Grid instance( filename );
+    Parameterisation p;
+    p.grid_path = filename;
+    static Grid instance( p );
     return instance;
   }
 
-  Grid::Grid( const char* filename ) :
-    CepGen::GridHandler<2>( CepGen::GridType::kLogarithmic )
+  Grid::Grid( const Parameterisation& param ) :
+    CepGen::StructureFunctions( CepGen::SF::Type::MSTWgrid ),
+    CepGen::GridHandler<2>( CepGen::GridType::kLogarithmic ),
+    params( param )
   {
     std::set<double> q2_vals, xbj_vals;
 
     { // file readout part
-      std::ifstream file( filename, std::ios::binary | std::ios::in );
+      std::ifstream file( params.grid_path, std::ios::binary | std::ios::in );
       if ( !file.is_open() )
-        throw CG_FATAL( "Grid" ) << "Impossible to load grid file \"" << filename << "%s\"!";
+        throw CG_FATAL( "Grid" ) << "Impossible to load grid file \"" << params.grid_path << "\"!";
 
       file.read( reinterpret_cast<char*>( &header_ ), sizeof( header_t ) );
 
@@ -66,14 +70,13 @@ namespace MSTW
       << "xBj in range [" << pow( 10., *xbj_vals.begin() ) << ":" << pow( 10., *xbj_vals.rbegin() ) << "].";
   }
 
-  CepGen::StructureFunctions
-  Grid::eval( double q2, double xbj ) const
+  Grid&
+  Grid::operator()( double q2, double xbj )
   {
     const sfval_t val = CepGen::GridHandler<2>::eval( q2, xbj );
-    CepGen::StructureFunctions sf;
-    sf.F2 = val.value[0];
-    sf.FL = val.value[1];
-    return sf;
+    F2 = val.value[0];
+    FL = val.value[1];
+    return *this;
   }
 
   std::ostream&
