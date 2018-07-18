@@ -38,9 +38,7 @@ namespace CepGen
         FioreBrasse& operator()( double q2, double xbj, bool old );
 
         double W1, W2;
-
-      private:
-        Parameterisation params_;
+        Parameterisation params;
     };
   }
 }

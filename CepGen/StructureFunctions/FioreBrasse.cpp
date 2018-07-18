@@ -38,7 +38,7 @@ namespace CepGen
     }
 
     FioreBrasse::FioreBrasse( const FioreBrasse::Parameterisation& params ) :
-      StructureFunctions( Type::FioreBrasse ), W1( 0. ), W2( 0. ), params_( params )
+      StructureFunctions( Type::FioreBrasse ), W1( 0. ), W2( 0. ), params( params )
     {}
 
     FioreBrasse&
@@ -55,16 +55,16 @@ namespace CepGen
 
       double ampli_res = 0., ampli_bg = 0., ampli_tot = 0.;
       for ( unsigned short i = 0; i < 3; ++i ) { //FIXME 4??
-        const Parameterisation::ResonanceParameters res = params_.resonances[i];
+        const Parameterisation::ResonanceParameters res = params.resonances[i];
         if ( !res.enabled )
           continue;
-        const double sqrts0 = sqrt( params_.s0 );
+        const double sqrts0 = sqrt( params.s0 );
 
         std::complex<double> alpha;
-        if ( s > params_.s0 )
-          alpha = std::complex<double>( res.alpha0 + res.alpha2*sqrts0 + res.alpha1*s, res.alpha2*sqrt( s-params_.s0 ) );
+        if ( s > params.s0 )
+          alpha = std::complex<double>( res.alpha0 + res.alpha2*sqrts0 + res.alpha1*s, res.alpha2*sqrt( s-params.s0 ) );
         else
-          alpha = std::complex<double>( res.alpha0 + res.alpha1*s + res.alpha2*( sqrts0 - sqrt( params_.s0 - s ) ), 0. );
+          alpha = std::complex<double>( res.alpha0 + res.alpha1*s + res.alpha2*( sqrts0 - sqrt( params.s0 - s ) ), 0. );
 
         double formfactor = 1./pow( 1. + q2/res.q02, 2 );
         double denom = pow( res.spin-std::real( alpha ), 2 ) + pow( std::imag( alpha ), 2 );
@@ -72,7 +72,7 @@ namespace CepGen
         ampli_res += ampli_imag;
       }
       {
-        const Parameterisation::ResonanceParameters res = params_.resonances[3];
+        const Parameterisation::ResonanceParameters res = params.resonances[3];
         double sE = res.alpha2, sqrtsE = sqrt( sE );
         std::complex<double> alpha;
         if ( s > sE )
@@ -84,7 +84,7 @@ namespace CepGen
         double denom = pow( sp-std::real( alpha ), 2 ) + pow( std::imag( alpha ), 2 );
         ampli_bg = res.a*formfactor*formfactor*std::imag( alpha )/denom;
       }
-      ampli_tot = params_.norm*( ampli_res+ampli_bg );
+      ampli_tot = params.norm*( ampli_res+ampli_bg );
 
       CG_DEBUG_LOOP( "FioreBrasse:amplitudes" )
         << "Amplitudes:\n\t"

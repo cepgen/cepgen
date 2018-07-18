@@ -11,6 +11,9 @@
 #include "CepGen/Processes/PPtoWW.h"
 
 #include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
+#include "CepGen/StructureFunctions/GenericLHAPDF.h"
+#include "CepGen/StructureFunctions/Schaefer.h"
+
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 
 #include <algorithm>
@@ -151,6 +154,34 @@ namespace CepGen
       int str_fun = 0;
       fillParameter( kin, "structureFunctions", str_fun );
       params_.kinematics.structure_functions.reset( StructureFunctionsBuilder::get( (SF::Type)str_fun ) );
+      PyObject* psfp = getElement( kin, "structureFunctionsParameters" ); // borrowed
+      if ( psfp ) {
+        switch( (SF::Type)str_fun ) {
+          case SF::Type::GenericLHAPDF: {
+            auto sf = dynamic_cast<SF::GenericLHAPDF*>( params_.kinematics.structure_functions.get() );
+            fillParameter( psfp, "pdfSet", sf->params.pdfSet );
+            fillParameter( psfp, "numFlavours", (unsigned int&)sf->params.numFlavours );
+          } break;
+          case SF::Type::Schaefer: {
+            auto sf = dynamic_cast<SF::Schaefer*>( params_.kinematics.structure_functions.get() );
+            fillParameter( psfp, "Q2cut", sf->params.q2_cut );
+            std::vector<double> w2_lims;
+            fillParameter( psfp, "W2limits", w2_lims );
+            if ( w2_lims.size() != 0 ) {
+              if ( w2_lims.size() != 2 )
+                throwPythonError( Form( "Invalid size for W2limits attribute: %d != 2!", w2_lims.size() ) );
+              else {
+                sf->params.w2_lo = *std::min_element( w2_lims.begin(), w2_lims.end() );
+                sf->params.w2_hi = *std::max_element( w2_lims.begin(), w2_lims.end() );
+              }
+            }
+            fillParameter( psfp, "continuumSF", sf->params.cont_model );
+            fillParameter( psfp, "resonancesSF", sf->params.res_model );
+            fillParameter( psfp, "higherTwist", (bool&)sf->params.higher_twist );
+          } break;
+          default: break;
+        }
+      }
     }
 
     void
@@ -553,6 +584,23 @@ namespace CepGen
       )
         throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
       out = decode( pobj );
+    }
+
+    void
+    PythonHandler::fillParameter( PyObject* parent, const char* key, std::vector<double>& out )
+    {
+      out.clear();
+      PyObject* pobj = getElement( parent, key ); // borrowed
+      if ( !pobj )
+        return;
+      if ( !PyTuple_Check( pobj ) )
+        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
+      for ( Py_ssize_t i = 0; i < PyTuple_Size( pobj ); ++i ) {
+        PyObject* pit = PyTuple_GetItem( pobj, i ); // borrowed
+        if ( !PyFloat_Check( pit ) )
+          continue;
+        out.emplace_back( PyFloat_AsDouble( pit ) );
+      }
     }
 
     void

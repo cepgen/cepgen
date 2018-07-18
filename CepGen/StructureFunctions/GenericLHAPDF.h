@@ -17,13 +17,23 @@ namespace CepGen
     class GenericLHAPDF : public StructureFunctions
     {
       public:
-        explicit GenericLHAPDF();
+        struct Parameterisation
+        {
+          Parameterisation() : numFlavours( 4 ), pdfSet( "cteq6" ) {}
+          static Parameterisation cteq6();
+          unsigned short numFlavours;
+          std::string pdfSet;
+        };
+
+        explicit GenericLHAPDF( const Parameterisation& param = Parameterisation::cteq6() );
         explicit GenericLHAPDF( const char* set );
         GenericLHAPDF& operator()( double q2, double xbj ) override;
-        unsigned short num_flavours;
+
+        Parameterisation params;
 
       private:
-        void initialise( const char* set );
+        void initialise();
+        bool initialised_;
 
 #ifdef LIBLHAPDF
 #  if LHAPDF_MAJOR_VERSION == 6

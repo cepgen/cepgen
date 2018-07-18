@@ -32,6 +32,7 @@ namespace CepGen
       case SF::Type::GD07p:               return new SF::ALLM( SF::ALLM::Parameterisation::gd07p() );
       case SF::Type::GD11p:               return new SF::ALLM( SF::ALLM::Parameterisation::gd11p() );
       case SF::Type::Schaefer:            return new SF::Schaefer();
+      case SF::Type::GenericLHAPDF:       return new SF::GenericLHAPDF();
     }
   }
 }

@@ -5,7 +5,6 @@
 #include <algorithm>
 
 #include "CepGen/Core/Logger.h"
-//#include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/Cuts.h"
@@ -23,7 +22,6 @@ namespace CepGen
   {
     public:
       Kinematics();
-      //Kinematics( const Kinematics& );
       ~Kinematics();
 
       /// Type of kinematics to consider for the process

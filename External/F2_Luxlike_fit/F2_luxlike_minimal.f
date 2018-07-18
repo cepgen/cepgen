@@ -11,7 +11,7 @@ c       -----------------------------
         w2 = amp**2 + q2*(1.d0-xbj)/xbj
 c       -----------------------------
         omega = (w2-w2_lo)/(w2_hi-w2_lo)
-        rho = 2.d0*omega**2 - omega**4 
+        rho = 2.d0*omega**2 - omega**4
 
         if(q2.ge.q2_cut) then
            if(w2.gt.w2_hi) then ! MSTW grid, perturbative
@@ -52,13 +52,11 @@ c       ----------------------------------------------------------------
         double precision Q2,xbj,F2,FL
         integer irm
 
-        if(irm.eq.1) then     ! Christy-Bosted
-           call CepGen_Structure_Functions(102,Q2,xbj,F2,FL)
-        elseif(irm.eq.2) then ! Fiore-Brasse
-           call CepGen_Structure_Functions(101,Q2,xbj,F2,FL)
-        elseif(irm.eq.3) then ! CLAS parameterisation
-           call CepGen_Structure_Functions(103,Q2,xbj,F2,FL)
+        if(irm.lt.100.or.irm.ge.200) then
+          print *,'ERROR: wrong resonance model: ', irm
+          stop
         endif
+        call CepGen_Structure_Functions(irm,Q2,xbj,F2,FL)
 
         return
         end
@@ -67,13 +65,11 @@ c       ----------------------------------------------------------------
         double precision Q2,xbj,F2,FL
         integer icm
 
-        if(icm.eq.1) then     ! GD11p
-           call CepGen_Structure_Functions(204,Q2,xbj,F2,FL)
-        elseif(icm.eq.2) then ! ALLM91
-           call CepGen_Structure_Functions(201,Q2,xbj,F2,FL)
-        elseif(icm.eq.3) then ! ALLM97
-           call CepGen_Structure_Functions(202,Q2,xbj,F2,FL)
+        if(icm.lt.200.or.icm.ge.300) then
+          print *,'ERROR: wrong continuum model: ', icm
+          stop
         endif
+        call CepGen_Structure_Functions(icm,Q2,xbj,F2,FL)
 
         return
         end
