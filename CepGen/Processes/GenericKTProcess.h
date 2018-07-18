@@ -56,7 +56,7 @@ namespace CepGen
         /// \param[in] x Parton momentum loss
         /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming parton
         /// \param[in] mx Outgoing diffractive proton mass
-        static double inelasticFlux( double x, double kt2, double mx, const StructureFunctions::Type& sf, const Fluxes& ft = Fluxes::Budnev );
+        static double inelasticFlux( double x, double kt2, double mx, StructureFunctions& sf, const Fluxes& ft = Fluxes::Budnev );
 
       protected:
         /// Set the kinematics associated to the phase space definition

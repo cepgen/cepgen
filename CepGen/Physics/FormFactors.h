@@ -30,7 +30,7 @@ namespace CepGen
       /// Szczurek-Uleschenko inelastic form factors
       static FormFactors SzczurekUleshchenko( double q2, double mi2, double mf2 );
       /// Generate the form factors according to the proton structure functions set
-      static FormFactors ProtonInelastic( const StructureFunctions::Type& sf, double q2, double mi2, double mf2 );
+      static FormFactors ProtonInelastic( const StructureFunctions& sf, double q2, double mi2, double mf2 );
 
       /// Electric form factor
       double FE;

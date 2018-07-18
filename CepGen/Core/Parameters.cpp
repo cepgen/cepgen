@@ -170,7 +170,7 @@ namespace CepGen
       << std::setw( wt ) << "Incoming particles" << ( pretty ? boldify( ip1.str().c_str() ) : ip1.str() ) << ", " << ( pretty ? boldify( ip2.str().c_str() ) : ip2.str() ) << "\n"
       << std::setw( wt ) << "Momenta (GeV/c)" << kinematics.inp.first << ", " << kinematics.inp.second << "\n";
     if ( kinematics.mode != Kinematics::Mode::ElasticElastic )
-      os << std::setw( wt ) << "Structure functions" << kinematics.structure_functions << "\n";
+      os << std::setw( wt ) << "Structure functions" << kinematics.structure_functions->type << "\n";
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << "\n\n";

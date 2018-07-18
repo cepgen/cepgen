@@ -19,7 +19,7 @@ namespace CepGen
         };
 
         explicit SuriYennie( const SuriYennie::Parameterisation& param = SuriYennie::Parameterisation::standard() );
-        SuriYennie operator()( double q2, double xbj ) const;
+        SuriYennie& operator()( double q2, double xbj ) override;
 
         double F1, FE, FM;
       private:

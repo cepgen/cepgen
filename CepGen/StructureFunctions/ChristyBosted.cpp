@@ -8,7 +8,7 @@ namespace CepGen
   namespace SF
   {
     ChristyBosted::ChristyBosted( const ChristyBosted::Parameterisation& params ) :
-      params_( params )
+      StructureFunctions( Type::ChristyBosted ), params_( params )
     {}
 
     double
@@ -236,15 +236,21 @@ namespace CepGen
       return 0.5 * ( mass*mass+m2-mp2_ ) / mass;
     }
 
-    ChristyBosted
-    ChristyBosted::operator()( double q2, double xbj ) const
+    ChristyBosted&
+    ChristyBosted::operator()( double q2, double xbj )
     {
+      std::pair<double,double> nv = { q2, xbj };
+      if ( nv == old_vals_ )
+        return *this;
+      old_vals_ = nv;
+
       const double w2 = mp2_ + q2*( 1.-xbj )/xbj;
       const double w_min = mp_+ParticleProperties::mass( PDG::PiZero );
 
-      ChristyBosted cb;
-      if ( sqrt( w2 ) < w_min )
-        return cb;
+      if ( sqrt( w2 ) < w_min ) {
+        F2 = 0.;
+        return *this;
+      }
 
       //-----------------------------
       // modification of Christy-Bosted at large q2 as described in the LUXqed paper
@@ -264,14 +270,14 @@ namespace CepGen
       const double sigT = resmod507( 'T', w2_eff, q2_eff );
       const double sigL = resmod507( 'L', w2_eff, q2_eff );
 
-      cb.F2 = prefac * q2_eff / ( 1+tau ) * ( sigT+sigL ) / Constants::GeV2toBarn * 1.e6;
+      F2 = prefac * q2_eff / ( 1+tau ) * ( sigT+sigL ) / Constants::GeV2toBarn * 1.e6;
       if ( q2 > q20 )
-        cb.F2 *= q21/( q21 + delq2 );
+        F2 *= q21/( q21 + delq2 );
 
       if ( sigT != 0. )
-        cb.computeFL( q2_eff, xbj, sigL/sigT );
+        computeFL( q2_eff, xbj, sigL/sigT );
 
-      return cb;
+      return *this;
     }
   }
 }

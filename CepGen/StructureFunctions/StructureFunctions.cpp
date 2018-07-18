@@ -1,6 +1,8 @@
 #include "CepGen/StructureFunctions/StructureFunctions.h"
+
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/ParticleProperties.h"
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
@@ -48,23 +50,25 @@ namespace CepGen
   }
   /// Human-readable format of a structure function type
   std::ostream&
-  operator<<( std::ostream& os, const StructureFunctions::Type& sf )
+  operator<<( std::ostream& os, const SF::Type& sf )
   {
     switch ( sf ) {
-      case StructureFunctions::Electron:            return os << "electron";
-      case StructureFunctions::ElasticProton:       return os << "elastic proton";
-      case StructureFunctions::SuriYennie:          return os << "Suri-Yennie";
-      case StructureFunctions::SzczurekUleshchenko: return os << "Szczurek-Uleshchenko";
-      case StructureFunctions::FioreBrasse:         return os << "Fiore-Brasse";
-      case StructureFunctions::ChristyBosted:       return os << "Christy-Bosted";
-      case StructureFunctions::CLAS:                return os << "CLAS";
-      case StructureFunctions::BlockDurandHa:       return os << "BDH";
-      case StructureFunctions::ALLM91:              return os << "ALLM;91";
-      case StructureFunctions::ALLM97:              return os << "ALLM;97";
-      case StructureFunctions::GD07p:               return os << "ALLM;GD07p";
-      case StructureFunctions::GD11p:               return os << "ALLM;GD11p";
-      case StructureFunctions::Schaefer:            return os << "Schaefer";
-      case StructureFunctions::MSTWgrid:            return os << "MSTW (grid)";
+      case SF::Type::Invalid:             return os << "[INVALID]";
+      case SF::Type::Electron:            return os << "electron";
+      case SF::Type::ElasticProton:       return os << "elastic proton";
+      case SF::Type::SuriYennie:          return os << "Suri-Yennie";
+      case SF::Type::SzczurekUleshchenko: return os << "Szczurek-Uleshchenko";
+      case SF::Type::FioreBrasse:         return os << "Fiore-Brasse";
+      case SF::Type::ChristyBosted:       return os << "Christy-Bosted";
+      case SF::Type::CLAS:                return os << "CLAS";
+      case SF::Type::BlockDurandHa:       return os << "BDH";
+      case SF::Type::ALLM91:              return os << "ALLM;91";
+      case SF::Type::ALLM97:              return os << "ALLM;97";
+      case SF::Type::GD07p:               return os << "ALLM;GD07p";
+      case SF::Type::GD11p:               return os << "ALLM;GD11p";
+      case SF::Type::Schaefer:            return os << "Schaefer";
+      case SF::Type::MSTWgrid:            return os << "MSTW (grid)";
+      case SF::Type::GenericLHAPDF:       return os << "LHAPDF (generic)";
     }
     return os;
   }

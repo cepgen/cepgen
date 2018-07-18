@@ -45,7 +45,7 @@ namespace CepGen
 
         explicit CLAS( const CLAS::Parameterisation& params = CLAS::Parameterisation::standard_proton() );
 
-        CLAS operator()( double q2, double xbj, const SigmaRatio& rcomp = E143Ratio() ) const;
+        CLAS& operator()( double q2, double xbj ) override;
 
       private:
         /// \brief Method to evaluate the background/resonance terms of

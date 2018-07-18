@@ -13,62 +13,26 @@
 
 namespace CepGen
 {
-  StructureFunctions
-  StructureFunctionsBuilder::get( const StructureFunctions::Type& sf_type, double q2, double xbj )
+  StructureFunctions*
+  StructureFunctionsBuilder::get( const SF::Type& sf_type )
   {
     switch ( sf_type ) {
-      case StructureFunctions::Electron:
-      case StructureFunctions::ElasticProton:
-        return StructureFunctions();
-        break;
-      case StructureFunctions::SzczurekUleshchenko: {
-        const SF::SzczurekUleshchenko su;
-        return su( q2, xbj );
-      } break;
-      case StructureFunctions::SuriYennie: {
-        const SF::SuriYennie sy;
-        return sy( q2, xbj );
-      } break;
-      case StructureFunctions::FioreBrasse: {
-        const SF::FioreBrasse fb;
-        return fb( q2, xbj );
-      } break;
-      case StructureFunctions::ChristyBosted: {
-        const SF::ChristyBosted cb;
-        return cb( q2, xbj );
-      } break;
-      case StructureFunctions::CLAS: {
-        const SF::CLAS clas;
-        return clas( q2, xbj );
-      } break;
-      case StructureFunctions::BlockDurandHa: {
-        const SF::BlockDurandHa bdh;
-        return bdh( q2, xbj );
-      } break;
-      case StructureFunctions::ALLM91: {
-        const SF::ALLM allm91( SF::ALLM::Parameterisation::allm91() );
-        return allm91( q2, xbj );
-      } break;
-      case StructureFunctions::ALLM97: {
-        const SF::ALLM allm97( SF::ALLM::Parameterisation::allm97() );
-        return allm97( q2, xbj );
-      } break;
-      case StructureFunctions::GD07p: {
-        const SF::ALLM gd07p( SF::ALLM::Parameterisation::gd07p() );
-        return gd07p( q2, xbj );
-      } break;
-      case StructureFunctions::GD11p: {
-        const SF::ALLM gd11p( SF::ALLM::Parameterisation::gd11p() );
-        return gd11p( q2, xbj );
-      } break;
-      case StructureFunctions::Schaefer: {
-        const SF::Schaefer luxlike;
-        return luxlike( q2, xbj );
-      } break;
-      case StructureFunctions::MSTWgrid: {
-        return MSTW::GridHandler::get().eval( q2, xbj );
-      } break;
+      case SF::Type::Electron:
+      case SF::Type::MSTWgrid: //FIXME
+      default:
+      case SF::Type::ElasticProton:       return new StructureFunctions();
+      case SF::Type::SzczurekUleshchenko: return new SF::SzczurekUleshchenko();
+      case SF::Type::SuriYennie:          return new SF::SuriYennie();
+      case SF::Type::FioreBrasse:         return new SF::FioreBrasse();
+      case SF::Type::ChristyBosted:       return new SF::ChristyBosted();
+      case SF::Type::CLAS:                return new SF::CLAS();
+      case SF::Type::BlockDurandHa:       return new SF::BlockDurandHa();
+      case SF::Type::ALLM91:              return new SF::ALLM( SF::ALLM::Parameterisation::allm91() );
+      case SF::Type::ALLM97:              return new SF::ALLM( SF::ALLM::Parameterisation::allm97() );
+      case SF::Type::GD07p:               return new SF::ALLM( SF::ALLM::Parameterisation::gd07p() );
+      case SF::Type::GD11p:               return new SF::ALLM( SF::ALLM::Parameterisation::gd11p() );
+      case SF::Type::Schaefer:            return new SF::Schaefer();
+      case SF::Type::GenericLHAPDF:       return new SF::GenericLHAPDF();
     }
-    return StructureFunctions(); //FIXME
   }
 }
