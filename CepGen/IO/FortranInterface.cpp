@@ -1,5 +1,5 @@
 #include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
-#include "CepGen/IO/MSTWGridHandler.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Core/Exception.h"
 
 extern "C"

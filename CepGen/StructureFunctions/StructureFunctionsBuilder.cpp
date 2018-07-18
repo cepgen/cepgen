@@ -9,7 +9,7 @@
 #include "CepGen/StructureFunctions/SuriYennie.h"
 #include "CepGen/StructureFunctions/SzczurekUleshchenko.h"
 #include "CepGen/StructureFunctions/Schaefer.h"
-#include "CepGen/IO/MSTWGridHandler.h"
+#include "CepGen/StructureFunctions/MSTWGrid.h"
 
 namespace CepGen
 {
