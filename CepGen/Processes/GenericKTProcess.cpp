@@ -321,7 +321,8 @@ namespace CepGen
                    Q2 = Q2min + kt2/( 1.-x );
       const double xbj = Q2 / ( Q2 + mx2 - mp2_ );
 
-      const auto& str_fun = sf( Q2, xbj );
+      auto& str_fun = sf( Q2, xbj );
+      str_fun.computeFL( Q2, xbj );
 
       const double term1 = ( 1.-x )*( 1.-Q2min/Q2 );
 

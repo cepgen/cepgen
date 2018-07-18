@@ -136,8 +136,8 @@ namespace CepGen
       StructureFunctions( param.type ), params_( param )
     {}
 
-    ALLM
-    ALLM::operator()( double q2, double xbj, const SigmaRatio& rcomp ) const
+    ALLM&
+    ALLM::operator()( double q2, double xbj )
     {
       const double W2_eff = q2*( 1.-xbj )/xbj;
       const double xp = ( q2+params_.mp2 )/( q2+W2_eff+params_.mp2 ),
@@ -157,11 +157,9 @@ namespace CepGen
       const double F2_Pom = cpom*pow( xp, apom )*pow( 1.-xbj, bpom ),
                    F2_Reg = creg*pow( xr, areg )*pow( 1.-xbj, breg );
 
-      ALLM allm;
-      allm.F2 = q2/( q2+params_.m02 ) * ( F2_Pom + F2_Reg );
-      allm.computeFL( q2, xbj, rcomp );
+      F2 = q2/( q2+params_.m02 ) * ( F2_Pom + F2_Reg );
 
-      return allm;
+      return *this;
     }
   }
 }

@@ -14,11 +14,6 @@ namespace CepGen
     mode( Mode::ElasticElastic ), structure_functions( new SF::SuriYennie )
   {}
 
-  /*Kinematics::Kinematics( const Kinematics& kin ) :
-    inp( kin.inp ), inpdg( kin.inpdg ), mode( kin.mode ),
-    structure_functions( kin.structure_functions.get() )
-  {}*/
-
   Kinematics::~Kinematics()
   {}
 
