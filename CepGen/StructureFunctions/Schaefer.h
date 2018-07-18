@@ -18,7 +18,7 @@ namespace CepGen
           int res_model, cont_model, higher_twist;
         };
         explicit Schaefer( const Parameterisation& param = Parameterisation::standard() );
-        Schaefer operator()( double q2, double xbj ) const;
+        Schaefer& operator()( double q2, double xbj ) override;
 
       private:
         enum ResonancesModel { ChristyBosted = 1, FioreBrasse = 2 };

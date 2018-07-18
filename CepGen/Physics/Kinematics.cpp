@@ -11,13 +11,13 @@ namespace CepGen
 {
   Kinematics::Kinematics() :
     inp( { 6500., 6500. } ), inpdg( { PDG::Proton, PDG::Proton } ),
-    mode( Mode::ElasticElastic ), structure_functions( SF::SuriYennie() )
+    mode( Mode::ElasticElastic ), structure_functions( new SF::SuriYennie )
   {}
 
-  Kinematics::Kinematics( const Kinematics& kin ) :
+  /*Kinematics::Kinematics( const Kinematics& kin ) :
     inp( kin.inp ), inpdg( kin.inpdg ), mode( kin.mode ),
-    structure_functions( kin.structure_functions )
-  {}
+    structure_functions( kin.structure_functions.get() )
+  {}*/
 
   Kinematics::~Kinematics()
   {}

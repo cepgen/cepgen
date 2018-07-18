@@ -41,6 +41,7 @@ namespace CepGen
         type( sf.type ), F2( sf.F2 ), FL( sf.FL ), old_vals_( sf.old_vals_ ) {}
       StructureFunctions( const SF::Type& type = SF::Type::Invalid, double f2 = 0., double fl = 0. ) :
         type( type ), F2( f2 ), FL( fl ), old_vals_({ 0., 0. }) {}
+      virtual ~StructureFunctions() {}
 
       static StructureFunctions builder( const SF::Type& );
 

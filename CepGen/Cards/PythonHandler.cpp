@@ -150,7 +150,7 @@ namespace CepGen
         params_.kinematics.setSqrtS( sqrt_s );
       int str_fun = 0;
       fillParameter( kin, "structureFunctions", str_fun );
-      params_.kinematics.structure_functions = StructureFunctionsBuilder::get( (SF::Type)str_fun );
+      params_.kinematics.structure_functions.reset( StructureFunctionsBuilder::get( (SF::Type)str_fun ) );
     }
 
     void

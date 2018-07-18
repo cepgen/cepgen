@@ -28,18 +28,17 @@ namespace CepGen
 #endif
     }
 
-    Schaefer
-    Schaefer::operator()( double q2, double xbj ) const
+    Schaefer&
+    Schaefer::operator()( double q2, double xbj )
     {
-      Schaefer luxlike;
 #ifndef SchaeferF2
       throw CG_FATAL( "Schaefer" )
         << "LUXlike structure functions cannot be computed "
         << "as the Fortran subroutine is not linked to this instance!";
 #else
-      f2_fit_luxlike_( xbj, q2, luxlike.F2, luxlike.FL );
+      f2_fit_luxlike_( xbj, q2, F2, FL );
 #endif
-      return luxlike;
+      return *this;
     }
   }
 }

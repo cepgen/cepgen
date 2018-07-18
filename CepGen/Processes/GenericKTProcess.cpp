@@ -139,15 +139,15 @@ namespace CepGen
           break;
         case Kinematics::Mode::ElasticInelastic:
           flux1_ = elasticFlux( x1, q1t2 );
-          flux2_ = inelasticFlux( x2, q2t2, MY_, cuts_.structure_functions );
+          flux2_ = inelasticFlux( x2, q2t2, MY_, *cuts_.structure_functions );
           break;
         case Kinematics::Mode::InelasticElastic:
-          flux1_ = inelasticFlux( x1, q1t2, MX_, cuts_.structure_functions );
+          flux1_ = inelasticFlux( x1, q1t2, MX_, *cuts_.structure_functions );
           flux2_ = elasticFlux( x2, q2t2 );
           break;
         case Kinematics::Mode::InelasticInelastic:
-          flux1_ = inelasticFlux( x1, q1t2, MX_, cuts_.structure_functions );
-          flux2_ = inelasticFlux( x2, q2t2, MY_, cuts_.structure_functions );
+          flux1_ = inelasticFlux( x1, q1t2, MX_, *cuts_.structure_functions );
+          flux2_ = inelasticFlux( x2, q2t2, MY_, *cuts_.structure_functions );
           break;
         default:
           throw CG_FATAL( "GenericKTProcess" ) << "Invalid kinematics mode selected!";
