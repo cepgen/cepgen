@@ -1,6 +1,5 @@
 #include "CepGen/Processes/GenericKTProcess.h"
 
-#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 
 #include "CepGen/Core/Exception.h"
@@ -313,16 +312,16 @@ namespace CepGen
     }
 
     double
-    GenericKTProcess::inelasticFlux( double x, double kt2, double mx, const StructureFunctions::Type& sf, const Fluxes& ft )
+    GenericKTProcess::inelasticFlux( double x, double kt2, double mx, StructureFunctions& sf, const Fluxes& ft )
     {
       const double mx2 = mx*mx;
 
       // F2 structure function
       const double Q2min = 1. / ( 1.-x )*( x*( mx2-mp2_ ) + x*x*mp2_ ),
                    Q2 = Q2min + kt2/( 1.-x );
-      float xbj = Q2 / ( Q2 + mx2 - mp2_ );
+      const double xbj = Q2 / ( Q2 + mx2 - mp2_ );
 
-      const StructureFunctions str_fun = StructureFunctionsBuilder::get( sf, Q2, xbj );
+      const auto& str_fun = sf( Q2, xbj );
 
       const double term1 = ( 1.-x )*( 1.-Q2min/Q2 );
 

@@ -1,15 +1,17 @@
-#include "Kinematics.h"
+#include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Physics/PDG.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
+
+#include "CepGen/StructureFunctions/SuriYennie.h"
 #include "CepGen/Event/Particle.h"
-#include "CepGen/Physics/PDG.h"
 
 namespace CepGen
 {
   Kinematics::Kinematics() :
     inp( { 6500., 6500. } ), inpdg( { PDG::Proton, PDG::Proton } ),
-    mode( Mode::ElasticElastic ), structure_functions( StructureFunctions::SuriYennie )
+    mode( Mode::ElasticElastic ), structure_functions( SF::SuriYennie() )
   {}
 
   Kinematics::~Kinematics()

@@ -53,7 +53,7 @@ namespace CepGen
       /// Type of kinematics to consider for the phase space
       Mode mode;
       /// Type of structure functions to consider
-      StructureFunctions::Type structure_functions;
+      StructureFunctions structure_functions;
 
       struct CutsList
       {

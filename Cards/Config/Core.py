@@ -101,6 +101,7 @@ class StructureFunctions:
     GD11p               = 204
     MSTWgrid            = 205
     LUXlike             = 301
+    GenericLHAPDF       = 401
 
 class ProcessMode:
     '''Types of processes supported'''

@@ -26,15 +26,18 @@ namespace CepGen
 #endif
     }
 
-    GenericLHAPDF
-    GenericLHAPDF::operator()( double q2, double xbj, unsigned short num_flavours ) const
+    GenericLHAPDF&
+    GenericLHAPDF::operator()( double q2, double xbj )
     {
-      GenericLHAPDF pdf;
+      std::pair<double,double> nv = { q2, xbj };
+      if ( nv == old_vals_ )
+        return *this;
+      old_vals_ = nv;
 
+      F2 = 0.;
       if ( num_flavours == 0 || num_flavours > 6 )
-        return pdf;
+        return *this;
 
-      //if ( q2 < 1.69 ) return pdf;
 #ifdef LIBLHAPDF
       for ( int i = 0; i < num_flavours; ++i ) {
 #  if LHAPDF_MAJOR_VERSION == 6
@@ -44,13 +47,13 @@ namespace CepGen
         const double xq = LHAPDF::xfx( xbj, q2, i+1 );
         const double xqbar = LHAPDF::xfx( xbj, q2, -i-1 );
 #  endif
-        pdf.F2 += qtimes3_[i]*qtimes3_[i]/9. * ( xq + xqbar );
+        F2 += qtimes3_[i]*qtimes3_[i]/9. * ( xq + xqbar );
       }
 #else
       throw CG_FATAL( "GenericLHAPDF" ) << "LHAPDF is not liked to this instance!";
 #endif
 
-      return pdf;
+      return *this;
     }
   }
 }

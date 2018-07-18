@@ -19,7 +19,8 @@ namespace CepGen
       public:
         explicit GenericLHAPDF() : StructureFunctions() {}
         explicit GenericLHAPDF( const char* set );
-        GenericLHAPDF operator()( double q2, double xbj, unsigned short num_flavours = 4 ) const;
+        GenericLHAPDF& operator()( double q2, double xbj ) override;
+        unsigned short num_flavours;
 
       private:
         void initialise( const char* set );

@@ -41,9 +41,14 @@ namespace CepGen
       W1( 0. ), W2( 0. ), params_( params )
     {}
 
-    FioreBrasse
-    FioreBrasse::operator()( double q2, double xbj ) const
+    FioreBrasse&
+    FioreBrasse::operator()( double q2, double xbj )
     {
+      std::pair<double,double> nv = { q2, xbj };
+      if ( nv == old_vals_ )
+        return *this;
+      old_vals_ = nv;
+
       const double akin = 1. + 4.*mp2_ * xbj*xbj/q2;
       const double prefactor = q2*( 1.-xbj ) / ( 4.*M_PI*Constants::alphaEM*akin );
       const double s = q2*( 1.-xbj )/xbj + mp2_;
@@ -87,25 +92,28 @@ namespace CepGen
         << " background part: " << ampli_bg << ",\n\t"
         << " total (with norm.): " << ampli_tot << ".";
 
-      FioreBrasse fb;
-      fb.F2 = prefactor*ampli_tot;
-      fb.computeFL( q2, xbj );
-      return fb;
+      F2 = prefactor*ampli_tot;
+      return *this;
     }
 
-    FioreBrasse
-    FioreBrasse::operator()( double q2, double xbj, bool ) const
+    FioreBrasse&
+    FioreBrasse::operator()( double q2, double xbj, bool )
     {
+      std::pair<double,double> nv = { q2, xbj };
+      if ( nv == old_vals_ )
+        return *this;
+      old_vals_ = nv;
+
       const double m_min = mp_+ParticleProperties::mass( PDG::PiZero );
 
       const double mx2 = mp2_ + q2*( 1.-xbj )/xbj, mx = sqrt( mx2 );
 
-      FioreBrasse fb;
       if ( mx < m_min || mx > 1.99 ) {
         CG_WARNING( "FioreBrasse" )
           << "Fiore-Brasse form factors to be retrieved for an invalid MX value:\n\t"
           << mx << " GeV, while allowed range is [1.07, 1.99] GeV.";
-        return fb;
+        *this = FioreBrasse();
+        return *this;
       }
 
       int n_bin;
@@ -161,9 +169,9 @@ namespace CepGen
       const double w1 = ( mx2-mp2_ )/( 8.*M_PI*M_PI*mp_*Constants::alphaEM )/Constants::GeV2toBarn*1.e6 * sigma_t;
       const double w2 = w1 * q2 / ( q2+nu2 );
 
-      fb.W1 = w1; //FIXME
-      fb.W2 = w2; //FIXME
-      return fb;
+      W1 = w1; //FIXME
+      W2 = w2; //FIXME
+      return *this;
     }
   }
 }
