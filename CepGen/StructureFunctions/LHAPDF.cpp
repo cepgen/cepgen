@@ -26,11 +26,11 @@ namespace CepGen
       StructureFunctions( Type::LHAPDF ), params( param ), initialised_( false )
     {}
 
-    LHAPDF::LHAPDF( const char* set ) :
+    LHAPDF::LHAPDF( const char* set, unsigned short member ) :
       StructureFunctions( Type::LHAPDF ), initialised_( false )
     {
       params.pdf_set = set;
-      initialise();
+      params.pdf_member = member;
     }
 
     void
@@ -40,7 +40,7 @@ namespace CepGen
         return;
 #ifdef LIBLHAPDF
       std::string lhapdf_version, pdf_description, pdf_type;
-#  if LHAPDF_MAJOR_VERSION == 6
+#  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
       try {
         pdf_set_ = ::LHAPDF::PDFSet( params.pdf_set );
         pdf_set_.mkPDFs<std::unique_ptr<::LHAPDF::PDF> >( pdfs_ );
@@ -87,7 +87,7 @@ namespace CepGen
 #ifdef LIBLHAPDF
       for ( int i = 0; i < params.num_flavours; ++i ) {
         const double prefactor = 1./9.*qtimes3_[i]*qtimes3_[i];
-#  if LHAPDF_MAJOR_VERSION == 6
+#  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
         const double xq = pdfs_[params.pdf_member]->xfxQ2( i, xbj, q2 );
         const double xqbar = pdfs_[params.pdf_member]->xfxQ2( -i, xbj, q2 );
 #  else

@@ -27,7 +27,7 @@ namespace CepGen
         };
 
         explicit LHAPDF( const Parameterisation& param = Parameterisation::cteq6() );
-        explicit LHAPDF( const char* set );
+        explicit LHAPDF( const char* set, unsigned short member = 0 );
         LHAPDF& operator()( double q2, double xbj ) override;
 
         Parameterisation params;
@@ -37,7 +37,7 @@ namespace CepGen
         bool initialised_;
 
 #ifdef LIBLHAPDF
-#  if LHAPDF_MAJOR_VERSION == 6
+#  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
         ::LHAPDF::PDFSet pdf_set_;
         std::vector<std::unique_ptr<::LHAPDF::PDF> > pdfs_;
 #  endif

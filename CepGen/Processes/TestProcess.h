@@ -1,7 +1,7 @@
 #ifndef CepGen_Processes_TestProcess_h
 #define CepGen_Processes_TestProcess_h
 
-#include "GenericProcess.h"
+#include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Core/Functional.h"
 
 namespace CepGen

@@ -6,7 +6,6 @@ file(GLOB executables_fortran RELATIVE ${PROJECT_SOURCE_DIR}/test *.f)
 
 #----- include the utilitaries
 
-add_subdirectory(utils)
 set(tests "")
 
 #----- build all tests and link them to the core library

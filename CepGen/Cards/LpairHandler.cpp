@@ -1,4 +1,4 @@
-#include "LpairHandler.h"
+#include "CepGen/Cards/LpairHandler.h"
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Physics/PDG.h"

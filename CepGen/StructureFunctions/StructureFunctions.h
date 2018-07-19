@@ -41,13 +41,13 @@ namespace CepGen
         type( sf.type ), F2( sf.F2 ), FL( sf.FL ), old_vals_( sf.old_vals_ ) {}
       StructureFunctions( const SF::Type& type = SF::Type::Invalid, double f2 = 0., double fl = 0. ) :
         type( type ), F2( f2 ), FL( fl ), old_vals_({ 0., 0. }) {}
-      virtual ~StructureFunctions() {}
+      ~StructureFunctions() {}
 
       static StructureFunctions builder( const SF::Type& );
 
       virtual StructureFunctions& operator()( double q2, double xbj ) { return *this; }
-      void computeFL( double q2, double xbj, const SF::SigmaRatio& ratio = SF::E143Ratio() );
-      void computeFL( double q2, double xbj, double r );
+      virtual void computeFL( double q2, double xbj, const SF::SigmaRatio& ratio = SF::E143Ratio() );
+      virtual void computeFL( double q2, double xbj, double r );
       double F1( double q2, double xbj ) const;
 
       SF::Type type;

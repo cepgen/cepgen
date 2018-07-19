@@ -1,4 +1,4 @@
-#include "SzczurekUleshchenko.h"
+#include "CepGen/StructureFunctions/SzczurekUleshchenko.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 

@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <csignal>
 
-#include "Logger.h"
+#include "CepGen/Core/Logger.h"
 
 #define CG_EXCEPT_MATCH( str, type ) \
   CepGen::Logger::get().passExceptionRule( str, CepGen::Logger::Level::type )
