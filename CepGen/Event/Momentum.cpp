@@ -1,4 +1,4 @@
-#include "Particle.h"
+#include "CepGen/Event/Particle.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"

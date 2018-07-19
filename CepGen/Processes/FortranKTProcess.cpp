@@ -1,4 +1,7 @@
 #include "CepGen/Processes/FortranKTProcess.h"
+
+#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 
 extern "C"

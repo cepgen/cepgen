@@ -1,6 +1,10 @@
 #include "CepGen/Processes/GenericProcess.h"
+
 #include "CepGen/Core/Exception.h"
+
 #include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
 
 namespace CepGen
@@ -174,32 +178,32 @@ namespace CepGen
 
       switch ( cuts_.mode ) {
         case Kinematics::Mode::ElectronElectron: {
-          fp1 = FormFactors::Trivial(); // electron (trivial) form factor
-          fp2 = FormFactors::Trivial(); // electron (trivial) form factor
+          fp1 = FormFactors::trivial(); // electron (trivial) form factor
+          fp2 = FormFactors::trivial(); // electron (trivial) form factor
         } break;
         case Kinematics::Mode::ProtonElectron: {
-          fp1 = FormFactors::ProtonElastic( -t1_ ); // proton elastic form factor
-          fp2 = FormFactors::Trivial(); // electron (trivial) form factor
+          fp1 = FormFactors::protonElastic( -t1_ ); // proton elastic form factor
+          fp2 = FormFactors::trivial(); // electron (trivial) form factor
         } break;
         case Kinematics::Mode::ElectronProton: {
-          fp1 = FormFactors::Trivial(); // electron (trivial) form factor
-          fp2 = FormFactors::ProtonElastic( -t2_ ); // proton elastic form factor
+          fp1 = FormFactors::trivial(); // electron (trivial) form factor
+          fp2 = FormFactors::protonElastic( -t2_ ); // proton elastic form factor
         } break;
         case Kinematics::Mode::ElasticElastic: {
-          fp1 = FormFactors::ProtonElastic( -t1_ ); // proton elastic form factor
-          fp2 = FormFactors::ProtonElastic( -t2_ ); // proton elastic form factor
+          fp1 = FormFactors::protonElastic( -t1_ ); // proton elastic form factor
+          fp2 = FormFactors::protonElastic( -t2_ ); // proton elastic form factor
         } break;
         case Kinematics::Mode::ElasticInelastic: {
-          fp1 = FormFactors::ProtonElastic( -t1_ );
-          fp2 = FormFactors::ProtonInelastic( *cuts_.structure_functions, -t2_, w2_, my2 );
+          fp1 = FormFactors::protonElastic( -t1_ );
+          fp2 = FormFactors::protonInelastic( -t2_, w2_, my2, *cuts_.structure_functions );
         } break;
         case Kinematics::Mode::InelasticElastic: {
-          fp1 = FormFactors::ProtonInelastic( *cuts_.structure_functions, -t1_, w1_, mx2 );
-          fp2 = FormFactors::ProtonElastic( -t2_ );
+          fp1 = FormFactors::protonInelastic( -t1_, w1_, mx2, *cuts_.structure_functions );
+          fp2 = FormFactors::protonElastic( -t2_ );
         } break;
         case Kinematics::Mode::InelasticInelastic: {
-          fp1 = FormFactors::ProtonInelastic( *cuts_.structure_functions, -t1_, w1_, mx2 );
-          fp2 = FormFactors::ProtonInelastic( *cuts_.structure_functions, -t2_, w2_, my2 );
+          fp1 = FormFactors::protonInelastic( -t1_, w1_, mx2, *cuts_.structure_functions );
+          fp2 = FormFactors::protonInelastic( -t2_, w2_, my2, *cuts_.structure_functions );
         } break;
       }
     }

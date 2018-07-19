@@ -1,8 +1,7 @@
 #ifndef CepGen_StructureFunctions_SzczurekUleshchenko_h
 #define CepGen_StructureFunctions_SzczurekUleshchenko_h
 
-#include "StructureFunctions.h"
-#include "SigmaRatio.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 
 extern "C"
 {

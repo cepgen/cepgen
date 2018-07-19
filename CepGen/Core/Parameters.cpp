@@ -7,6 +7,8 @@
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
 
+#include "CepGen/StructureFunctions/StructureFunctions.h"
+
 namespace CepGen
 {
   Parameters::Parameters() :

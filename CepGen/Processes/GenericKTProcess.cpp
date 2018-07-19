@@ -1,8 +1,12 @@
 #include "CepGen/Processes/GenericKTProcess.h"
 
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 
 #include "CepGen/Core/Exception.h"
+
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
 
 #ifdef KMR_FLUX
@@ -318,7 +322,7 @@ namespace CepGen
       switch ( type ) {
         case Flux::ElasticBudnev: {
           const double Q2_min = x*x*mp2_/( 1.-x ), Q2_ela = ( kt2+x*x*mp2_ )/( 1.-x );
-          const FormFactors ff = FormFactors::ProtonElastic( Q2_ela );
+          const FormFactors ff = FormFactors::protonElastic( Q2_ela );
           const double ela1 = ( 1.-x )*( 1.-Q2_min/Q2_ela );
           //const double ela3 = 1.-( Q2_ela-kt2 )/Q2_ela;
           const double f_ela = Constants::alphaEM*M_1_PI/kt2*( ela1*ff.FE + 0.5*x*x*ff.FM );

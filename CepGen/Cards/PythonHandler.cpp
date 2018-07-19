@@ -1,4 +1,4 @@
-#include "PythonHandler.h"
+#include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Core/Exception.h"
 
 #ifdef PYTHON
@@ -12,7 +12,7 @@
 #include "CepGen/Processes/FortranKTProcess.h"
 
 #include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
-#include "CepGen/StructureFunctions/GenericLHAPDF.h"
+#include "CepGen/StructureFunctions/LHAPDF.h"
 #include "CepGen/StructureFunctions/MSTWGrid.h"
 #include "CepGen/StructureFunctions/Schaefer.h"
 
@@ -187,17 +187,18 @@ namespace CepGen
       fillParameter( psf, "id", str_fun );
       params_.kinematics.structure_functions = StructureFunctionsBuilder::get( (SF::Type)str_fun );
       switch( (SF::Type)str_fun ) {
-        case SF::Type::GenericLHAPDF: {
-          auto sf = dynamic_cast<SF::GenericLHAPDF*>( params_.kinematics.structure_functions.get() );
+        case SF::Type::LHAPDF: {
+          auto sf = std::dynamic_pointer_cast<SF::LHAPDF>( params_.kinematics.structure_functions );
           fillParameter( psf, "pdfSet", sf->params.pdf_set );
           fillParameter( psf, "numFlavours", (unsigned int&)sf->params.num_flavours );
+          fillParameter( psf, "pdfMember", (unsigned int&)sf->params.pdf_member );
         } break;
         case SF::Type::MSTWgrid: {
-          auto sf = dynamic_cast<MSTW::Grid*>( params_.kinematics.structure_functions.get() );
+          auto sf = std::dynamic_pointer_cast<MSTW::Grid>( params_.kinematics.structure_functions );
           fillParameter( psf, "gridPath", sf->params.grid_path );
         } break;
         case SF::Type::Schaefer: {
-          auto sf = dynamic_cast<SF::Schaefer*>( params_.kinematics.structure_functions.get() );
+          auto sf = std::dynamic_pointer_cast<SF::Schaefer>( params_.kinematics.structure_functions );
           fillParameter( psf, "Q2cut", sf->params.q2_cut );
           std::vector<double> w2_lims;
           fillParameter( psf, "W2limits", w2_lims );

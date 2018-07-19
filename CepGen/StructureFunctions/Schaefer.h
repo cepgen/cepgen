@@ -17,7 +17,7 @@ namespace CepGen
           double q2_cut, w2_lo, w2_hi;
           int res_model, cont_model, higher_twist;
         };
-        explicit Schaefer( const Parameterisation& param = Parameterisation::standard() );
+        Schaefer( const Parameterisation& param = Parameterisation::standard() );
         Schaefer& operator()( double q2, double xbj ) override;
 
         Parameterisation params;
@@ -38,3 +38,4 @@ extern "C"
 #endif
 
 #endif
+

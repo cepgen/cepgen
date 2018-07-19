@@ -5,7 +5,7 @@
 #include "CepGen/StructureFunctions/FioreBrasse.h"
 #include "CepGen/StructureFunctions/ChristyBosted.h"
 #include "CepGen/StructureFunctions/CLAS.h"
-#include "CepGen/StructureFunctions/GenericLHAPDF.h"
+#include "CepGen/StructureFunctions/LHAPDF.h"
 #include "CepGen/StructureFunctions/SuriYennie.h"
 #include "CepGen/StructureFunctions/SzczurekUleshchenko.h"
 #include "CepGen/StructureFunctions/Schaefer.h"
@@ -31,7 +31,7 @@ namespace CepGen
       case SF::Type::GD07p:               return std::make_shared<SF::ALLM>( SF::ALLM::Parameterisation::gd07p() );
       case SF::Type::GD11p:               return std::make_shared<SF::ALLM>( SF::ALLM::Parameterisation::gd11p() );
       case SF::Type::Schaefer:            return std::make_shared<SF::Schaefer>();
-      case SF::Type::GenericLHAPDF:       return std::make_shared<SF::GenericLHAPDF>();
+      case SF::Type::LHAPDF:              return std::make_shared<SF::LHAPDF>();
       //--- particular case for the MSTW grid as we are dealing
       //--- with a singleton ; hence, no deleter is needed!
       case SF::Type::MSTWgrid:            return std::shared_ptr<MSTW::Grid>( &MSTW::Grid::get(), [=]( MSTW::Grid* ){} );

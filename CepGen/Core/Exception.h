@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <csignal>
 
-#include "Logger.h"
+#include "CepGen/Core/Logger.h"
 
 #define CG_EXCEPT_MATCH( str, type ) \
   CepGen::Logger::get().passExceptionRule( str, CepGen::Logger::Level::type )
@@ -114,7 +114,7 @@ namespace CepGen
       /// Extract a human-readable (and colourified) version of the exception type
       inline std::string typeString() const {
         switch ( type() ) {
-          case Type::warning: return "\033[34;1mJustWarning\033[0m";
+          case Type::warning: return "\033[34;1mWarning\033[0m";
           case Type::info: return "\033[32;1mInfo.\033[0m";
           case Type::debug: return "\033[33;1mDebug\033[0m";
           case Type::error: return "\033[31;1mError\033[0m";
@@ -132,7 +132,7 @@ namespace CepGen
       inline std::string shortMessage() const {
         std::ostringstream os;
         os << "[" << typeString() << "]";
-        if ( type_ == Type::debug )
+        if ( type_ == Type::debug || type_ == Type::warning )
           os << " \033[30;4m" << from_ << "\033[0m\n";
         os << "\t" << message_.str();
         return os.str();
@@ -149,7 +149,7 @@ namespace CepGen
       }
       /// Extract a full exception message
       inline std::string fullMessage() const {
-        if ( type_ == Type::info || type_ == Type::debug )
+        if ( type_ == Type::info || type_ == Type::debug || type_ == Type::warning )
           return shortMessage();
         if ( type_ == Type::verbatim )
           return message_.str();

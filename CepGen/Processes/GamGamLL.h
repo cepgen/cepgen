@@ -1,7 +1,7 @@
 #ifndef CepGen_Processes_GamGamLL_h
 #define CepGen_Processes_GamGamLL_h
 
-#include "GenericProcess.h"
+#include "CepGen/Processes/GenericProcess.h"
 
 namespace CepGen
 {

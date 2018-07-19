@@ -40,6 +40,10 @@ namespace MSTW
       header_t header() const { return header_; }
       Parameterisation params;
 
+        //--- already retrieved from grid, so no need to recompute it
+      void computeFL( double q2, double xbj, const CepGen::SF::SigmaRatio& ) override {}
+      void computeFL( double q2, double xbj, double r ) override {}
+
     public:
       Grid( const Grid& ) = delete;
       void operator=( const GridHandler& ) = delete;

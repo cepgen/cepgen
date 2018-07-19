@@ -1,7 +1,7 @@
 #ifndef CepGen_Core_TamingFunction_h
 #define CepGen_Core_TamingFunction_h
 
-#include "Functional.h"
+#include "CepGen/Core/Functional.h"
 #include <unordered_map>
 
 namespace CepGen

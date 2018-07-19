@@ -1,9 +1,8 @@
 #ifndef CepGen_StructureFunctions_CLAS_h
 #define CepGen_StructureFunctions_CLAS_h
 
-#include "StructureFunctions.h"
-#include "CepGen/Physics/Constants.h"
-#include "SigmaRatio.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
+
 #include <array>
 #include <vector>
 
