@@ -59,11 +59,11 @@ namespace CepGen
 #  endif
       replace_all( pdf_description, ". ", ".\n  " );
       CG_INFO( "LHAPDF" ) << "LHAPDF structure functions evaluator successfully built.\n"
-        << " *) LHAPDF version: " << lhapdf_version << "\n"
-        << " *) number of flavours: " << params.num_flavours << "\n"
-        << " *) PDF set: " << params.pdf_set << "\n"
+        << " * LHAPDF version: " << lhapdf_version << "\n"
+        << " * number of flavours: " << params.num_flavours << "\n"
+        << " * PDF set: " << params.pdf_set << "\n"
         << ( pdf_description.empty() ? "" : "  "+pdf_description+"\n" )
-        << " *) PDF member: " << params.pdf_member << ( pdf_type.empty() ? "" : " ("+pdf_type+")" );
+        << " * PDF member: " << params.pdf_member << ( pdf_type.empty() ? "" : " ("+pdf_type+")" );
       initialised_ = true;
 #else
       throw CG_FATAL( "LHAPDF" ) << "LHAPDF is not liked to this instance!";
@@ -91,8 +91,8 @@ namespace CepGen
         const double xq = pdfs_[params.pdf_member]->xfxQ2( i, xbj, q2 );
         const double xqbar = pdfs_[params.pdf_member]->xfxQ2( -i, xbj, q2 );
 #  else
-        const double xq = LHAPDF::xfx( xbj, q2, i+1 );
-        const double xqbar = LHAPDF::xfx( xbj, q2, -( i+1 ) );
+        const double xq = ::LHAPDF::xfx( xbj, q2, i+1 );
+        const double xqbar = ::LHAPDF::xfx( xbj, q2, -( i+1 ) );
 #  endif
         F2 += prefactor*( xq+xqbar );
       }

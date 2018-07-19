@@ -34,13 +34,13 @@ namespace CepGen
 #ifdef SchaeferF2
       luxlike_params_ = params;
       CG_INFO( "Schaefer" ) << "LUXlike structure functions evaluator successfully initialised.\n"
-        << " *) proton mass:     " << params.amp << " GeV/c²\n"
-        << " *) alpha(em):       " << params.alpha_em << "\n"
-        << " *) Q² cut:          " << params.q2_cut << " GeV²\n"
-        << " *) W² ranges:       " << params.w2_lo << " GeV² / " << params.w2_hi << " GeV²\n"
-        << " *) resonance model: " << (SF::Type)params.res_model << "\n"
-        << " *) continuum model: " << (SF::Type)params.cont_model << "\n"
-        << " *) higher-twist?    " << std::boolalpha << (bool)params.higher_twist;
+        << " * proton mass:     " << params.amp << " GeV/c²\n"
+        << " * alpha(em):       " << params.alpha_em << "\n"
+        << " * Q² cut:          " << params.q2_cut << " GeV²\n"
+        << " * W² ranges:       " << params.w2_lo << " GeV² / " << params.w2_hi << " GeV²\n"
+        << " * resonance model: " << (SF::Type)params.res_model << "\n"
+        << " * continuum model: " << (SF::Type)params.cont_model << "\n"
+        << " * higher-twist?    " << std::boolalpha << (bool)params.higher_twist;
       initialised_ = true;
 #endif
     }

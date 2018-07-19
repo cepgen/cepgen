@@ -26,11 +26,9 @@ process = cepgen.Module('lpair',
     #),
 )
 
-#--- either use the default generation (100k events)
-#from Config.generator_cff import generator
-
-#--- or let the user specify the run conditions
-generator = cepgen.Parameters(
+#--- let the user specify the run conditions
+from Config.generator_cff import generator
+generator = generator.clone(
     numEvents = 100000,
     printEvery = 10000,
 )
