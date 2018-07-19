@@ -1,5 +1,5 @@
 import Config.Core as cepgen
-from Config.integrators_cff import miser as integrator
+from Config.integrators_cff import vegas as integrator
 from Config.ktProcess_cfi import ktProcess
 
 process = ktProcess.clone('patoll',
@@ -28,6 +28,5 @@ process = ktProcess.clone('patoll',
 
 #--- events generation
 from Config.generator_cff import generator
-generator.numEvents = 10000
-generator.numThreads = 1
+generator.numEvents = 100000
 
