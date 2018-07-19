@@ -1,5 +1,6 @@
 #include "GenericLHAPDF.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/utils.h"
 
 namespace CepGen
 {
@@ -38,28 +39,31 @@ namespace CepGen
       if ( initialised_ )
         return;
 #ifdef LIBLHAPDF
-      std::string lhapdf_version, pdf_description;
+      std::string lhapdf_version, pdf_description, pdf_type;
 #  if LHAPDF_MAJOR_VERSION == 6
       try {
         pdf_set_ = LHAPDF::PDFSet( params.pdf_set );
         pdf_set_.mkPDFs<std::unique_ptr<LHAPDF::PDF> >( pdfs_ );
+        lhapdf_version = LHAPDF::version();
+        pdf_description = pdf_set_.description();
+        pdf_type = pdfs_[params.pdf_member]->type();
       } catch ( const LHAPDF::Exception& e ) {
         throw CG_FATAL( "GenericLHAPDF" )
           << "Caught LHAPDF exception:\n\t"
           << e.what();
       }
-      lhapdf_version = LHAPDF::version();
-      pdf_description = pdf_set_.description();
 #  else
       LHAPDF::initPDFSet( params.pdf_set, LHAPDF::LHGRID, params.pdf_member );
       lhapdf_version = LHAPDF::getVersion();
       pdf_description = LHAPDF::getDescription();
 #  endif
+      replace_all( pdf_description, ". ", ".\n  " );
       CG_INFO( "GenericLHAPDF" ) << "LHAPDF structure functions evaluator successfully built.\n"
         << " *) LHAPDF version: " << lhapdf_version << "\n"
         << " *) number of flavours: " << params.num_flavours << "\n"
-        << " *) PDF set: " << params.pdf_set << ( pdf_description.empty() ? "" : " ("+pdf_description+")" ) << "\n"
-        << " *) PDF member: " << params.pdf_member;
+        << " *) PDF set: " << params.pdf_set << "\n"
+        << ( pdf_description.empty() ? "" : "  "+pdf_description+"\n" )
+        << " *) PDF member: " << params.pdf_member << ( pdf_type.empty() ? "" : " ("+pdf_type+")" );
       initialised_ = true;
 #else
       throw CG_FATAL( "GenericLHAPDF" ) << "LHAPDF is not liked to this instance!";

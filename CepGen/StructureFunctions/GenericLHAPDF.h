@@ -23,7 +23,7 @@ namespace CepGen
           static Parameterisation cteq6();
           unsigned short num_flavours;
           std::string pdf_set;
-          short pdf_member;
+          unsigned short pdf_member;
         };
 
         explicit GenericLHAPDF( const Parameterisation& param = Parameterisation::cteq6() );
