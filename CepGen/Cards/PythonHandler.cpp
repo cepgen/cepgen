@@ -168,6 +168,7 @@ namespace CepGen
           auto sf = dynamic_cast<SF::GenericLHAPDF*>( params_.kinematics.structure_functions.get() );
           fillParameter( psf, "pdfSet", sf->params.pdf_set );
           fillParameter( psf, "numFlavours", (unsigned int&)sf->params.num_flavours );
+          fillParameter( psf, "pdfMember", (int&)sf->params.pdf_member );
         } break;
         case SF::Type::MSTWgrid: {
           auto sf = dynamic_cast<MSTW::Grid*>( params_.kinematics.structure_functions.get() );

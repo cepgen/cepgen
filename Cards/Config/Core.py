@@ -113,7 +113,7 @@ class StructureFunctions:
     GenericLHAPDF = Parameters(
         id = 401,
         pdfSet = 'LUXqed17_plus_PDF4LHC15_nnlo_100',
-        numFlavours = 5,
+        numFlavours = 4,
     )
 
 class ProcessMode:

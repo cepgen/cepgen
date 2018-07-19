@@ -19,10 +19,11 @@ namespace CepGen
       public:
         struct Parameterisation
         {
-          Parameterisation() : num_flavours( 4 ), pdf_set( "cteq6" ) {}
+          Parameterisation();
           static Parameterisation cteq6();
           unsigned short num_flavours;
           std::string pdf_set;
+          short pdf_member;
         };
 
         explicit GenericLHAPDF( const Parameterisation& param = Parameterisation::cteq6() );
@@ -38,13 +39,13 @@ namespace CepGen
 #ifdef LIBLHAPDF
 #  if LHAPDF_MAJOR_VERSION == 6
         LHAPDF::PDFSet pdf_set_;
-        std::vector<LHAPDF::PDF*> pdfs_;
+        std::vector<std::unique_ptr<LHAPDF::PDF> > pdfs_;
 #  endif
 #endif
-        static constexpr std::array<double,6> qtimes3_ = { {
-          -1.0 /*d*/, 2.0 /*u*/,
-          -1.0 /*s*/, 2.0 /*c*/,
-          -1.0 /*b*/, 2.0 /*t*/
+        static constexpr std::array<short,6> qtimes3_ = { {
+          -1 /*d*/, 2 /*u*/,
+          -1 /*s*/, 2 /*c*/,
+          -1 /*b*/, 2 /*t*/
         } };
     };
   }

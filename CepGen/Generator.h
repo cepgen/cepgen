@@ -100,7 +100,7 @@ namespace CepGen
       /// \return A pointer to the Event object generated in this run
       std::shared_ptr<Event> generateOneEvent();
       /// Launch the generation of events
-      void generate( std::function<void( const Event&, unsigned long )> callback );
+      void generate( std::function<void( const Event&, unsigned long )> callback = {} );
       /// Number of dimensions on which the integration is performed
       size_t numDimensions() const;
       /// Compute one single point from the total phase space
