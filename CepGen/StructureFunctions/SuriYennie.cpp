@@ -34,6 +34,7 @@ namespace CepGen
     }
 
     SuriYennie::SuriYennie( const SuriYennie::Parameterisation& param ) :
+      StructureFunctions( SF::Type::SuriYennie ),
       F1( 0. ), FE( 0. ), FM( 0. ), params_( param )
     {}
 

@@ -328,7 +328,7 @@ namespace CepGen
           const double f_ela = Constants::alphaEM*M_1_PI/kt2*( ela1*ff.FE + 0.5*x*x*ff.FM );
           // last factor below the Jacobian from dQ^2/Q^2 --> dkT^2/kT^2*(kT^2/Q^2)
           return f_ela*( 1.-x )*kt2 / Q2_ela;
-        }
+        } break;
         case Flux::InelasticBudnev: {
           const double mx2 = mx*mx;
           // F2 structure function
@@ -341,7 +341,7 @@ namespace CepGen
           const double f_D = str_fun.F2/( mx2 + Q2 - mp2_ ) * term1;
           const double f_C = str_fun.F1( Q2, xbj ) * 2./Q2;
           return Constants::alphaEM*M_1_PI*( 1.-x )/Q2*( f_D+0.5*x*x*f_C );
-        }
+        } break;
         case Flux::GluonKMR: {
 #ifdef KMR_FLUX
           double logx = log10( x ), logq2 = log10( kt2 ), logmu2 = 2.*log10( mx ), fg = 0.;
@@ -358,7 +358,7 @@ namespace CepGen
 #else
           throw CG_FATAL("GenericKTProcess:flux") << "KMR gluon fluxes are not linked to this instance!";
 #endif
-        }
+        } break;
         default:
           throw CG_FATAL("GenericKTProcess:flux") << "Invalid flux type: " << type;
       }
@@ -377,7 +377,7 @@ namespace CepGen
           const double ff1 = 3.*( sin( tau )-tau*cos( tau ) )/pow( tau+1.e-10, 3 ), ff2 = 1./( 1.+tau1*tau1 );
           const double ela1 = pow( kt2/( kt2+x*x*m_a*m_a ), 2 ), ela2 = pow( ff1*ff2, 2 )/*, ela3 = 1.-( q2_ela-kt2 )/q2_ela*/;
           return hi.Z*hi.Z*Constants::alphaEM*M_1_PI*ela1*ela2/q2_ela;
-        }
+        } break;
         default:
           throw CG_FATAL("GenericKTProcess:flux") << "Invalid flux type: " << type;
       }
