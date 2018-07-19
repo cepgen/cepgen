@@ -3,13 +3,13 @@
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Physics/FormFactors.h"
 
 #include <vector>
 #include <memory>
 
 namespace CepGen
 {
+  class FormFactors;
   /// Location for all physics processes to be generated
   namespace Process
   {

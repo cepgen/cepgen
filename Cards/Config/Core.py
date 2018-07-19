@@ -110,7 +110,7 @@ class StructureFunctions:
         continuumSF = GD11p,
         resonancesSF = ChristyBosted,
     )
-    GenericLHAPDF = Parameters(
+    LHAPDF = Parameters(
         id = 401,
         pdfSet = 'LUXqed17_plus_PDF4LHC15_nnlo_100',
         numFlavours = 4,

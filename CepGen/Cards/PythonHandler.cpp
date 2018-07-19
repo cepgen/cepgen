@@ -11,7 +11,7 @@
 #include "CepGen/Processes/PPtoWW.h"
 
 #include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
-#include "CepGen/StructureFunctions/GenericLHAPDF.h"
+#include "CepGen/StructureFunctions/LHAPDF.h"
 #include "CepGen/StructureFunctions/MSTWGrid.h"
 #include "CepGen/StructureFunctions/Schaefer.h"
 
@@ -164,8 +164,8 @@ namespace CepGen
       fillParameter( psf, "id", str_fun );
       params_.kinematics.structure_functions = StructureFunctionsBuilder::get( (SF::Type)str_fun );
       switch( (SF::Type)str_fun ) {
-        case SF::Type::GenericLHAPDF: {
-          auto sf = dynamic_cast<SF::GenericLHAPDF*>( params_.kinematics.structure_functions.get() );
+        case SF::Type::LHAPDF: {
+          auto sf = dynamic_cast<SF::LHAPDF*>( params_.kinematics.structure_functions.get() );
           fillParameter( psf, "pdfSet", sf->params.pdf_set );
           fillParameter( psf, "numFlavours", (unsigned int&)sf->params.num_flavours );
           fillParameter( psf, "pdfMember", (unsigned int&)sf->params.pdf_member );

@@ -1,8 +1,12 @@
 #include "CepGen/Processes/GenericKTProcess.h"
 
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 
 #include "CepGen/Core/Exception.h"
+
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
 
 namespace CepGen
@@ -301,7 +305,7 @@ namespace CepGen
     GenericKTProcess::elasticFlux( double x, double kt2 )
     {
       const double Q2_min = x*x*mp2_/( 1.-x ), Q2_ela = ( kt2+x*x*mp2_ )/( 1.-x );
-      const FormFactors ff = FormFactors::ProtonElastic( Q2_ela );
+      const FormFactors ff = FormFactors::protonElastic( Q2_ela );
       const double ela1 = ( 1.-x )*( 1.-Q2_min/Q2_ela );
       //const double ela3 = 1.-( Q2_ela-kt2 )/Q2_ela;
 
@@ -321,13 +325,13 @@ namespace CepGen
                    Q2 = Q2min + kt2/( 1.-x );
       const double xbj = Q2 / ( Q2 + mx2 - mp2_ );
 
-      auto& str_fun = sf( Q2, xbj );
-      str_fun.computeFL( Q2, xbj );
+      sf = sf( Q2, xbj );
+      sf.computeFL( Q2, xbj );
 
       const double term1 = ( 1.-x )*( 1.-Q2min/Q2 );
 
-      const double f_D = str_fun.F2/( mx2 + Q2 - mp2_ ) * term1;
-      const double f_C = str_fun.F1( Q2, xbj ) * 2./Q2;
+      const double f_D = sf.F2/( mx2 + Q2 - mp2_ ) * term1;
+      const double f_C = sf.F1( Q2, xbj ) * 2./Q2;
 
       return Constants::alphaEM*M_1_PI*( 1.-x )/Q2*( f_D+0.5*x*x*f_C );
     }

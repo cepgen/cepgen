@@ -5,12 +5,9 @@
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/PDG.h"
 
-#include "CepGen/StructureFunctions/ALLM.h"
-#include "CepGen/StructureFunctions/BlockDurandHa.h"
 #include "CepGen/StructureFunctions/FioreBrasse.h"
-#include "CepGen/StructureFunctions/GenericLHAPDF.h"
 #include "CepGen/StructureFunctions/SuriYennie.h"
-#include "CepGen/StructureFunctions/SzczurekUleshchenko.h"
+#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 
 namespace CepGen
 {
@@ -18,13 +15,13 @@ namespace CepGen
   const double FormFactors::mp2_ = FormFactors::mp_*FormFactors::mp_;
 
   FormFactors
-  FormFactors::Trivial()
+  FormFactors::trivial()
   {
     return FormFactors( 1.0, 1.0 );
   }
 
   FormFactors
-  FormFactors::ProtonElastic( double q2 )
+  FormFactors::protonElastic( double q2 )
   {
     const double GE = pow( 1.+q2/0.71, -2. ), GE2 = GE*GE;
     const double GM = 2.79*GE, GM2 = GM*GM;
@@ -32,24 +29,23 @@ namespace CepGen
   }
 
   FormFactors
-  FormFactors::ProtonInelastic( const StructureFunctions& sf, double q2, double mi2, double mf2 )
+  FormFactors::protonInelastic( double q2, double mi2, double mf2, StructureFunctions& sf )
   {
     switch ( sf.type ) {
       case SF::Type::ElasticProton:
         CG_WARNING( "FormFactors" ) << "Elastic proton form factors requested! Check your process definition!";
-        return FormFactors::ProtonElastic( q2 );
+        return FormFactors::protonElastic( q2 );
       case SF::Type::SuriYennie:
-        return FormFactors::SuriYennie( q2, mi2, mf2 );
-      case SF::Type::SzczurekUleshchenko:
-        return FormFactors::SzczurekUleshchenko( q2, mi2, mf2 );
+        return FormFactors::suriYennie( q2, mi2, mf2 );
       case SF::Type::FioreBrasse:
-        return FormFactors::FioreBrasse( q2, mi2, mf2 );
-      default: throw CG_FATAL( "FormFactors" ) << "Invalid structure functions required!";
+        return FormFactors::fioreBrasse( q2, mi2, mf2 );
+      default:
+        return FormFactors::generic( q2, mi2, mf2, sf );
     }
   }
 
   FormFactors
-  FormFactors::SuriYennie( double q2, double mi2, double mf2 )
+  FormFactors::suriYennie( double q2, double mi2, double mf2 )
   {
     const double x = q2 / ( q2 + mf2 - mi2 );
     SF::SuriYennie suriyennie, sy = (SF::SuriYennie)suriyennie( q2, x );
@@ -58,7 +54,7 @@ namespace CepGen
   }
 
   FormFactors
-  FormFactors::FioreBrasse( double q2, double mi2, double mf2 )
+  FormFactors::fioreBrasse( double q2, double mi2, double mf2 )
   {
     const double x = q2 / ( q2 + mf2 - mi2 );
     SF::FioreBrasse fb, sf = fb( q2, x );
@@ -66,11 +62,12 @@ namespace CepGen
   }
 
   FormFactors
-  FormFactors::SzczurekUleshchenko( double q2, double mi2, double mf2 )
+  FormFactors::generic( double q2, double mi2, double mf2, StructureFunctions& sf )
   {
     const double x = q2 / ( q2 + mf2 - mi2 );
-    SF::SzczurekUleshchenko su, sf = su( q2, x );
-    return FormFactors( sf.F2 * x / q2, -2.*sf.F1 / q2 );
+    sf = sf( q2, x );
+    sf.computeFL( q2, x );
+    return FormFactors( sf.F2 * x / q2, -2.*sf.F1( q2, x ) / q2 );
   }
 
   double

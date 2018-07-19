@@ -1,5 +1,5 @@
-#ifndef CepGen_StructureFunctions_CTEQ_h
-#define CepGen_StructureFunctions_CTEQ_h
+#ifndef CepGen_StructureFunctions_LHAPDF_h
+#define CepGen_StructureFunctions_LHAPDF_h
 
 #include "StructureFunctions.h"
 
@@ -14,7 +14,7 @@ namespace CepGen
   namespace SF
   {
     /// Generic, tree-level import of structure functions from an external PDFs grid
-    class GenericLHAPDF : public StructureFunctions
+    class LHAPDF : public StructureFunctions
     {
       public:
         struct Parameterisation
@@ -26,9 +26,9 @@ namespace CepGen
           unsigned short pdf_member;
         };
 
-        explicit GenericLHAPDF( const Parameterisation& param = Parameterisation::cteq6() );
-        explicit GenericLHAPDF( const char* set );
-        GenericLHAPDF& operator()( double q2, double xbj ) override;
+        explicit LHAPDF( const Parameterisation& param = Parameterisation::cteq6() );
+        explicit LHAPDF( const char* set );
+        LHAPDF& operator()( double q2, double xbj ) override;
 
         Parameterisation params;
 
@@ -38,8 +38,8 @@ namespace CepGen
 
 #ifdef LIBLHAPDF
 #  if LHAPDF_MAJOR_VERSION == 6
-        LHAPDF::PDFSet pdf_set_;
-        std::vector<std::unique_ptr<LHAPDF::PDF> > pdfs_;
+        ::LHAPDF::PDFSet pdf_set_;
+        std::vector<std::unique_ptr<::LHAPDF::PDF> > pdfs_;
 #  endif
 #endif
         static constexpr std::array<short,6> qtimes3_ = { {
