@@ -94,6 +94,11 @@ namespace CepGen
       if ( pout_kinematics )
         parseOutgoingKinematics( pout_kinematics );
 
+      //--- taming functions
+      PyObject* ptam = getElement( process, "tamingFunctions" ); // borrowed
+      if ( ptam )
+        parseTamingFunctions( ptam );
+
       Py_CLEAR( process );
 
       PyObject* plog = PyObject_GetAttrString( cfg, "logger" ); // new
@@ -120,13 +125,6 @@ namespace CepGen
       if ( pgen ) {
         parseGenerator( pgen );
         Py_CLEAR( pgen );
-      }
-
-      //--- taming functions
-      PyObject* ptam = PyObject_GetAttrString( cfg, "tamingFunctions" ); // new
-      if ( ptam ) {
-        parseTamingFunctions( ptam );
-        Py_CLEAR( ptam );
       }
 
       //--- finalisation

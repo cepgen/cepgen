@@ -13,6 +13,7 @@ namespace CepGen
 {
   Parameters::Parameters() :
     hadroniser_max_trials( 5 ),
+    taming_functions( new TamingFunctionsCollection ),
     store_( false ), total_gen_time_( 0. ), num_gen_events_( 0 )
   {}
 
