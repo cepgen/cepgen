@@ -39,6 +39,7 @@ foreach(_files ${input_cards})
   configure_file(${_files} ${_files} COPYONLY)
 endforeach()
 configure_file(${CEPGEN_SOURCE_DIR}/README README COPYONLY)
+configure_file(${PROJECT_SOURCE_DIR}/External/mstw_sf_scan_nnlo.dat ${PROJECT_BINARY_DIR}/External/mstw_sf_scan_nnlo.dat COPYONLY)
 
 #----- installation rules
 

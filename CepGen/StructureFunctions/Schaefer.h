@@ -2,6 +2,7 @@
 #define CepGen_StructureFunctions_Schaefer_h
 
 #include "StructureFunctions.h"
+#include <memory>
 
 namespace CepGen
 {
@@ -13,9 +14,9 @@ namespace CepGen
         struct Parameterisation
         {
           static Parameterisation standard();
-          double amp, alpha_em;
           double q2_cut, w2_lo, w2_hi;
-          int res_model, cont_model, higher_twist;
+          std::shared_ptr<StructureFunctions> resonances_model, perturbative_model, continuum_model;
+          bool higher_twist;
         };
         Schaefer( const Parameterisation& param = Parameterisation::standard() );
         Schaefer& operator()( double q2, double xbj ) override;
@@ -23,19 +24,13 @@ namespace CepGen
         Parameterisation params;
 
       private:
+        double rho( double w2 ) const;
         void initialise();
         bool initialised_;
+        double inv_omega_range_;
     };
   }
 }
-
-#ifdef SchaeferF2
-extern "C"
-{
-  extern void f2_fit_luxlike_( double& xbj, double& q2, double& F2, double& FL );
-  extern CepGen::SF::Schaefer::Parameterisation luxlike_params_;
-}
-#endif
 
 #endif
 
