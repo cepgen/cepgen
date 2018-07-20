@@ -4,6 +4,8 @@
 #include "CepGen/IO/GridHandler.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
+#define DEFAULT_MSTW_GRID_PATH "External/mstw_sf_scan_nnlo.dat"
+
 /// Martin-Stirling-Thorne-Watt PDFs structure functions
 namespace MSTW
 {
@@ -26,13 +28,13 @@ namespace MSTW
         nucleon_t nucleon;
       };
       struct Parameterisation {
-        Parameterisation() : grid_path( "External/F2_Luxlike_fit/mstw_f2_scan_nnlo.dat" ) {}
+        Parameterisation() : grid_path( DEFAULT_MSTW_GRID_PATH ) {}
         std::string grid_path;
       };
 
     public:
       /// Retrieve the grid interpolator (singleton)
-      static Grid& get( const char* path = "External/F2_Luxlike_fit/mstw_f2_scan_nnlo.dat" );
+      static Grid& get( const char* path = DEFAULT_MSTW_GRID_PATH );
 
       /// Compute the structure functions at a given \f$Q^2/x_{\rm Bj}\f$
       Grid& operator()( double q2, double xbj ) override;
@@ -60,6 +62,8 @@ namespace MSTW
   std::ostream& operator<<( std::ostream&, const Grid::header_t::cl_t& );
   std::ostream& operator<<( std::ostream&, const Grid::header_t::nucleon_t& );
 }
+
+#undef DEFAULT_MSTW_GRID_PATH
 
 #endif
 
