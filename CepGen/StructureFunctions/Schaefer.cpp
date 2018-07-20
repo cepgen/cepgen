@@ -78,8 +78,15 @@ namespace CepGen
       else {
         if ( w2 < params.w2_hi )
           sel_sf = ( *params.continuum_model )( q2, xbj );
-        else
-          sel_sf = ( *params.perturbative_model )( q2, xbj );
+        else {
+          auto sf_p = ( *params.perturbative_model )( q2, xbj );
+          F2 = sf_p.F2;
+          sf_p.computeFL( q2, xbj );
+          FL = sel_sf.FL;
+          if ( params.higher_twist )
+            F2 *= ( 1.+5.5/q2 );
+          return *this;
+        }
       }
 
       F2 = sel_sf( q2, xbj ).F2;
