@@ -8,6 +8,7 @@
 
 namespace CepGen
 {
+  class StructureFunctions;
   namespace Cards
   {
     /// CepGen Python configuration cards reader/writer
@@ -49,7 +50,7 @@ namespace CepGen
         void parseGenerator( PyObject* );
         void parseTamingFunctions( PyObject* );
         void parseHadroniser( PyObject* );
-        void parseStructureFunctions( PyObject* );
+        void parseStructureFunctions( PyObject*, std::shared_ptr<StructureFunctions>& sf_handler );
     };
   }
 }
@@ -57,3 +58,4 @@ namespace CepGen
 #endif
 
 #endif
+

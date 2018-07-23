@@ -102,6 +102,11 @@ namespace CepGen
       if ( pout_kinematics )
         parseOutgoingKinematics( pout_kinematics );
 
+      //--- taming functions
+      PyObject* ptam = getElement( process, "tamingFunctions" ); // borrowed
+      if ( ptam )
+        parseTamingFunctions( ptam );
+
       Py_CLEAR( process );
 
       PyObject* plog = PyObject_GetAttrString( cfg, "logger" ); // new
@@ -128,13 +133,6 @@ namespace CepGen
       if ( pgen ) {
         parseGenerator( pgen );
         Py_CLEAR( pgen );
-      }
-
-      //--- taming functions
-      PyObject* ptam = PyObject_GetAttrString( cfg, "tamingFunctions" ); // new
-      if ( ptam ) {
-        parseTamingFunctions( ptam );
-        Py_CLEAR( ptam );
       }
 
       //--- finalisation
@@ -164,7 +162,7 @@ namespace CepGen
         params_.kinematics.setSqrtS( sqrt_s );
       PyObject* psf = getElement( kin, "structureFunctions" ); // borrowed
       if ( psf )
-        parseStructureFunctions( psf );
+        parseStructureFunctions( psf, params_.kinematics.structure_functions );
       std::vector<int> kt_fluxes;
       fillParameter( kin, "ktFluxes", kt_fluxes );
       if ( kt_fluxes.size() > 0 )
@@ -181,11 +179,11 @@ namespace CepGen
     }
 
     void
-    PythonHandler::parseStructureFunctions( PyObject* psf )
+    PythonHandler::parseStructureFunctions( PyObject* psf, std::shared_ptr<StructureFunctions>& sf_handler )
     {
       int str_fun = 0;
       fillParameter( psf, "id", str_fun );
-      params_.kinematics.structure_functions = StructureFunctionsBuilder::get( (SF::Type)str_fun );
+      sf_handler = StructureFunctionsBuilder::get( (SF::Type)str_fun );
       switch( (SF::Type)str_fun ) {
         case SF::Type::LHAPDF: {
           auto sf = std::dynamic_pointer_cast<SF::LHAPDF>( params_.kinematics.structure_functions );
@@ -212,10 +210,13 @@ namespace CepGen
           }
           PyObject* pcsf = getElement( psf, "continuumSF" ); // borrowed
           if ( pcsf )
-            fillParameter( pcsf, "id", sf->params.cont_model );
+            parseStructureFunctions( pcsf, sf->params.continuum_model );
+          PyObject* ppsf = getElement( psf, "perturbativeSF" ); // borrowed
+          if ( ppsf )
+            parseStructureFunctions( ppsf, sf->params.perturbative_model );
           PyObject* prsf = getElement( psf, "resonancesSF" ); // borrowed
           if ( prsf )
-            fillParameter( prsf, "id", sf->params.res_model );
+            parseStructureFunctions( prsf, sf->params.resonances_model );
           fillParameter( psf, "higherTwist", (bool&)sf->params.higher_twist );
         } break;
         default: break;

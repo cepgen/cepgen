@@ -34,11 +34,11 @@ namespace CepGen
     void fill() {
       tree->Fill();
     }
-    void attach( const char* filename ) {
-      attach( TFile::Open( filename ) );
+    void attach( const char* filename, const char* run_tree = "run" ) {
+      attach( TFile::Open( filename ), run_tree );
     }
-    void attach( TFile* file ) {
-      tree = dynamic_cast<TTree*>( file->Get( "run" ) );
+    void attach( TFile* file, const char* run_tree = "run" ) {
+      tree = dynamic_cast<TTree*>( file->Get( run_tree ) );
       if ( !tree ) return;
       tree->SetBranchAddress( "xsect", &xsect );
       tree->SetBranchAddress( "errxsect", &errxsect );
@@ -58,6 +58,7 @@ namespace CepGen
     static const unsigned short maxpart = 5000;
 
     TTree* tree;
+    std::unique_ptr<TFile> file;
 
     float gen_time, tot_time;
     int nremn_ch[2], nremn_nt[2], np;
@@ -113,8 +114,12 @@ namespace CepGen
       tree->Branch( "generation_time", &gen_time, "generation_time/F" );
       tree->Branch( "total_time", &tot_time, "total_time/F" );
     }
-    void attach( TFile* f ) {
-      tree = dynamic_cast<TTree*>( f->Get( "events" ) );
+    void attach( const char* filename, const char* events_tree = "events" ) {
+      file.reset( TFile::Open( filename ) );
+      attach( file.get(), events_tree );
+    }
+    void attach( TFile* f, const char* events_tree = "events" ) {
+      tree = dynamic_cast<TTree*>( f->Get( events_tree ) );
       attach( tree );
     }
     void attach( TTree* t ) {

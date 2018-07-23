@@ -16,17 +16,6 @@ else()
   message(STATUS "GRV PDFset not found. Will proceed without it")
 endif()
 
-set(SCH_PATH ${PROJECT_SOURCE_DIR}/External/F2_Luxlike_fit)
-file(GLOB sch_sources ${SCH_PATH}/F2_luxlike_minimal.f ${PROJECT_SOURCE_DIR}/CepGen/IO/GridHandler.cpp)
-if(sch_sources)
-  message(STATUS "LUXlike structure functions found!")
-  add_definitions(-DSchaeferF2)
-  list(APPEND sf_sources ${sch_sources})
-  configure_file(${SCH_PATH}/mstw_f2_scan_nnlo.dat ${PROJECT_BINARY_DIR}/External/F2_Luxlike_fit/mstw_f2_scan_nnlo.dat COPYONLY)
-else()
-  message(STATUS "LUXlike structure functions not found")
-endif()
-
 #----- check the external dependencies for physics utilities
 
 if(alphas_sources)
