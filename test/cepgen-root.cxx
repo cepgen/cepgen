@@ -96,6 +96,7 @@ int main( int argc, char* argv[] ) {
   run->errxsect = err;
   run->litigious_events = 0;
   run->sqrt_s = mg.parameters->kinematics.sqrtS();
+  run->fill();
 
   ev.reset( new CepGen::TreeEvent );
   ev->create( ev_tree.get() );
@@ -105,7 +106,6 @@ int main( int argc, char* argv[] ) {
     mg.generate( fill_event_tree );
   } catch ( const CepGen::Exception& ) {}
 
-  run->fill();
   file->Write();
   CG_INFO( "main" ) << "Events written on \"" << filename << "\".";
 
