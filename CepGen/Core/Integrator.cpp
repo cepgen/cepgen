@@ -306,9 +306,7 @@ namespace CepGen
   bool
   Integrator::storeEvent( const std::vector<double>& x, std::function<void( const Event&, unsigned long )> callback )
   {
-    input_params_->setStorage( true );
     const double weight = eval( x, input_params_->generation.treat );
-    input_params_->setStorage( false );
 
     if ( weight <= 0. )
       return false;
@@ -443,6 +441,7 @@ namespace CepGen
       << "Overall inefficiency           = eff2  = " << eff2;
 
     grid_->gen_prepared = true;
+    input_params_->setStorage( true );
     CG_INFO( "Integrator:setGen" ) << "Grid prepared! Now launching the production.";
   }
 

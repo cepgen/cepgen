@@ -203,7 +203,8 @@ namespace CepGen
       for ( const auto& part : ev.particles() ) {
         short pdg_id = part.integerPdgId(), status = 0, moth1 = 0, moth2 = 0;
         switch ( part.role() ) {
-          case Particle::Parton1: case Particle::Parton2:
+          case Particle::Parton1:
+          case Particle::Parton2: {
             if ( part.role() == Particle::Parton1 )
               parton1_pdgid = part.integerPdgId();
             if ( part.role() == Particle::Parton2 )
@@ -211,23 +212,27 @@ namespace CepGen
             if ( !full_event )
               continue;
             status = -2; // conserving xbj/Q2
-            break;
-          case Particle::Intermediate:
+          } break;
+          case Particle::Intermediate: {
             if ( !full_event )
               continue;
             status = 2;
             if ( pdg_id == 0 )
               pdg_id = ev.getConstById( *part.mothers().begin() ).integerPdgId();
-            break;
-          case Particle::IncomingBeam1: case Particle::IncomingBeam2:
+          } break;
+          case Particle::IncomingBeam1:
+          case Particle::IncomingBeam2: {
             if ( !full_event )
               continue;
             status = -9;
-            break;
-          case Particle::OutgoingBeam1: case Particle::OutgoingBeam2:
-          case Particle::CentralSystem:
-            status = 1;
-            break;
+          } break;
+          case Particle::OutgoingBeam1:
+          case Particle::OutgoingBeam2:
+          case Particle::CentralSystem: {
+            status = part.status();
+            if ( status != 1 )
+              continue;
+          } break;
           default: break;
         }
         if ( full_event ) {

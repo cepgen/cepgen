@@ -131,7 +131,7 @@ namespace CepGen
 
     private:
       std::unique_ptr<Process::GenericProcess> process_;
-      std::shared_ptr<Hadroniser::GenericHadroniser> hadroniser_;
+      std::unique_ptr<Hadroniser::GenericHadroniser> hadroniser_;
 
       bool store_;
       /// Total generation time (in seconds)

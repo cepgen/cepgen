@@ -136,7 +136,7 @@ namespace CepGen
       //===========================================================================================
 
       lhaevt_->feedEvent( ev, full, params_->kinematics.mode );
-      //lhaevt_->listEvent();
+      //if ( full ) lhaevt_->listEvent();
 
       //===========================================================================================
       // launch the hadronisation / resonances decays, and update the event accordingly
@@ -144,6 +144,7 @@ namespace CepGen
 
       ev.num_hadronisation_trials = 0;
       while ( ev.num_hadronisation_trials < max_attempts_ ) {
+        //--- run the hadronisation/fragmentation algorithm
         bool res = pythia_->next();
         if ( res && full && first_evt_ ) {
           offset_ = 0;
@@ -151,8 +152,9 @@ namespace CepGen
             if ( pythia_->event[i].status() == -12 ) // skip the incoming particles
               offset_++;
           first_evt_ = false;
-          continue;
+          break;
         }
+        //--- hadronisation unsuccessful
         ev.num_hadronisation_trials++;
       }
 
@@ -198,8 +200,18 @@ namespace CepGen
           }
           //--- particle is not what we expect
           if ( abs( p.id() ) != abs( cg_part.integerPdgId() ) ) {
-            pythia_->event.list();
-            throw CG_FATAL( "Pythia8Hadroniser:update" ) << "Event list corruption detected for particle " << i << "!";
+            {
+              CG_INFO( "Pythia8Hadroniser:update" ) << "Pythia event content:";
+              pythia_->event.list();
+              CG_INFO( "Pythia8Hadroniser:update" ) << "CepGen event content:";
+              ev.dump();
+              CG_INFO( "Pythia8Hadroniser:update" ) << "Correspondence:";
+              lhaevt_->dumpCorresp();
+            }
+            throw CG_FATAL( "Pythia8Hadroniser:update" )
+              << "Event list corruption detected for (Pythia/CepGen) particle " << i << "/" << cg_id << ":\n\t"
+              << "should be " << abs( p.id() ) << ", "
+              << "got " << cg_part.integerPdgId() << "!";
           }
           //--- no decay for this particle
           if ( p.particleDataEntry().sizeChannels() == 0 )
@@ -342,11 +354,13 @@ namespace CepGen
       // incoming valence quarks
       //===========================================================================================
 
+      quark1_id = sizePart();
+      addCorresp( sizePart(), op1.id() );
       addParticle( quark1_pdgid, -1, 0, 0, quark1_colour, 0, mom_iq1.px(), mom_iq1.py(), mom_iq1.pz(), mom_iq1.e(), mom_iq1.mCalc(), 0., 1. );
-      quark1_id = sizePart()-1;
 
+      quark2_id = sizePart();
+      addCorresp( sizePart(), op2.id() );
       addParticle( quark2_pdgid, -1, 0, 0, quark2_colour, 0, mom_iq2.px(), mom_iq2.py(), mom_iq2.pz(), mom_iq2.e(), mom_iq2.mCalc(), 0., 1. );
-      quark2_id = sizePart()-1;
 
       //===========================================================================================
       // outgoing valence quarks
@@ -354,12 +368,10 @@ namespace CepGen
 
       if ( inel1 ) {
         const Pythia8::Vec4 mom_oq1 = mom_iq1-mom_part1;
-        addCorresp( sizePart(), op1.id() );
         addParticle( quark1_pdgid, 1, quark1_id, quark2_id, quark1_colour, 0, mom_oq1.px(), mom_oq1.py(), mom_oq1.pz(), mom_oq1.e(), mom_oq1.mCalc(), 0., 1. );
       }
       if ( inel2 ) {
         const Pythia8::Vec4 mom_oq2 = mom_iq2-mom_part2;
-        addCorresp( sizePart(), op2.id() );
         addParticle( quark2_pdgid, 1, quark1_id, quark2_id, quark2_colour, 0, mom_oq2.px(), mom_oq2.py(), mom_oq2.pz(), mom_oq2.e(), mom_oq2.mCalc(), 0., 1. );
       }
     }
@@ -369,8 +381,6 @@ namespace CepGen
     //=============================================================================================
 
     for ( const auto& p : ev.getByRole( Particle::CentralSystem ) ) {
-      addCorresp( sizePart(), p.id() );
-      Pythia8::Vec4 mom_part( p.momentum().px(), p.momentum().py(), p.momentum().pz(), p.momentum().energy() );
       const auto mothers = p.mothers();
       unsigned short moth1_id = 1, moth2_id = 2;
       if ( !full ) {
@@ -396,6 +406,8 @@ namespace CepGen
           }
         }
       }
+      const Pythia8::Vec4 mom_part( p.momentum().px(), p.momentum().py(), p.momentum().pz(), p.momentum().energy() );
+      addCorresp( sizePart(), p.id() );
       addParticle( p.integerPdgId(), 1, moth1_id, moth2_id, 0, 0, mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), mom_part.mCalc(), 0., 0., 0. );
     }
     if ( full )
