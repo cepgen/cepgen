@@ -102,6 +102,14 @@ namespace CepGen
     return hadroniser_.get();
   }
 
+  std::string
+  Parameters::hadroniserName() const
+  {
+    if ( !hadroniser_ )
+      return "";
+    return hadroniser_->name();
+  }
+
   void
   Parameters::setHadroniser( Hadroniser::GenericHadroniser* hadr )
   {

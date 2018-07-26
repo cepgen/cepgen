@@ -105,6 +105,8 @@ namespace CepGen
 
       /// Hadronisation algorithm to use for the proton(s) fragmentation
       Hadroniser::GenericHadroniser* hadroniser();
+      /// Name of the hadroniser (if applicable)
+      std::string hadroniserName() const;
       /// Set the hadronisation algorithm
       void setHadroniser( Hadroniser::GenericHadroniser* hadr );
       /// Maximal number of trials for the hadronisation of the proton(s) remnants
