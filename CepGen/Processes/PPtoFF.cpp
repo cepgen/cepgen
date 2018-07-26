@@ -232,7 +232,7 @@ namespace CepGen
       const double g_em = 4.*M_PI*Constants::alphaEM*qf_*qf_;
       const double aintegral = amat2 * colf_ * ( g_em*g_em )
                              * 1. / pow( 4.*M_PI*( x1*x2*s_ ), 2 )
-                             * flux1_/M_PI * flux2_/M_PI * 0.25
+                             * flux1_*M_1_PI * flux2_*M_1_PI * 0.25
                              * Constants::GeV2toBarn;
 
       //=================================================================
@@ -359,4 +359,3 @@ namespace CepGen
     }
   }
 }
-
