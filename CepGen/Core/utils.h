@@ -34,7 +34,15 @@ inline std::string Form( const std::string fmt, ... ) {
   return str;
 }
 
-
+inline size_t replace_all( std::string& str, const std::string& from, const std::string& to ) {
+  size_t count = 0, pos = 0;
+  while ( ( pos = str.find( from, pos ) ) != std::string::npos ) {
+    str.replace( pos, from.length(), to );
+    pos += to.length();
+    ++count;
+  }
+  return count;
+}
 inline const char* yesno( const bool& test ) { return ( test ) ? "\033[32;1myes\033[0m" : "\033[31;1mno\033[0m"; }
 //inline const char* boldify( const char* str ) { const std::string out = std::string( "\033[33;1m" ) + std::string( str ) + std::string( "\033[0m" ); return out.c_str(); }
 inline std::string boldify( const std::string& str ) { return Form( "\033[1m%s\033[0m", str.c_str() ); }

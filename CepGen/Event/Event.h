@@ -1,7 +1,7 @@
 #ifndef CepGen_Event_Event_h
 #define CepGen_Event_Event_h
 
-#include "Particle.h"
+#include "CepGen/Event/Particle.h"
 #include "CepGen/Core/Logger.h"
 
 namespace CepGen

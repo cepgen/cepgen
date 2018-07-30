@@ -1,7 +1,7 @@
 #ifndef CepGen_Processes_PPtoFF_h
 #define CepGen_Processes_PPtoFF_h
 
-#include "GenericKTProcess.h"
+#include "CepGen/Processes/GenericKTProcess.h"
 
 namespace CepGen
 {

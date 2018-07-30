@@ -154,24 +154,26 @@ namespace CepGen
         TCanvas::cd();
       }
 
-      inline void RatioPlot( TH1* obj1, const TH1* obj2=0, float ymin=-999., float ymax=-999. ) {
-        if ( !fRatio ) return;
+      inline TH1* RatioPlot( TH1* obj1, const TH1* obj2=0, float ymin=-999., float ymax=-999., const char* plot_type = "p" ) {
+        if ( !fRatio )
+          return obj1;
         TH1* ratio;
         if ( obj2 ) {
           ratio = dynamic_cast<TH1*>( obj2->Clone() );
           ratio->Divide( obj1 );
         }
-        else { ratio = dynamic_cast<TH1*>( obj1->Clone() ); }
+        else
+          ratio = dynamic_cast<TH1*>( obj1->Clone() );
 
         TCanvas::cd( 2 );
-        ratio->Draw("p");
-        obj1->GetXaxis()->SetTitle("");
-        if ( ymin!=ymax ) {
+        ratio->Draw( plot_type );
+        obj1->GetXaxis()->SetTitle( "" );
+        if ( ymin != ymax )
           ratio->GetYaxis()->SetRangeUser( ymin, ymax );
-        }
-        Prettify(ratio);
-        ratio->GetYaxis()->SetTitle("Ratio");
+        Prettify( ratio );
+        ratio->GetYaxis()->SetTitle( "Ratio" );
         TCanvas::cd();
+        return ratio;
       }
 
       inline TGraphErrors* RatioPlot(TGraphErrors* obj1, const TGraphErrors* obj2, float ymin=-999., float ymax=-999.) {

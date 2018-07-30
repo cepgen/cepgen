@@ -1,4 +1,4 @@
-#include "LpairHandler.h"
+#include "CepGen/Cards/LpairHandler.h"
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Physics/PDG.h"
@@ -57,10 +57,8 @@ namespace CepGen
       else if ( integr_type_ != "" )
         throw CG_FATAL( "LpairHandler" ) << "Unrecognized integrator type: " << integr_type_ << "!";
 
-#ifdef PYTHIA8
       if ( hadr_name_ == "pythia8" )
         params_.setHadroniser( new Hadroniser::Pythia8Hadroniser( params_ ) );
-#endif
 
       if ( m_params.count( "IEND" ) )
         setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );

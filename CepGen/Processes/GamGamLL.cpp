@@ -1,5 +1,9 @@
-#include "GamGamLL.h"
+#include "CepGen/Processes/GamGamLL.h"
+
 #include "CepGen/Core/Exception.h"
+
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
 
 namespace CepGen
@@ -171,7 +175,7 @@ namespace CepGen
 
       const double rl2 = sp*sp-4.*s_*masses_.MX2_; // lambda(s, m3**2, sigma)
       if ( rl2 <= 0. ) {
-        CG_WARNING( "GamGamLL" ) << "rl2 = " << rl2 << " <= 0";
+        CG_DEBUG( "GamGamLL" ) << "rl2 = " << rl2 << " <= 0";
         return false;
       }
       const double sl2 = sqrt( rl2 );

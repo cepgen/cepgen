@@ -46,6 +46,7 @@ namespace CepGen
     Pythia8Hadroniser::~Pythia8Hadroniser()
     {
 #ifdef PYTHIA8
+      pythia_->settings.writeFile( "last_pythia_config.cmd", true );
       pythia_->stat();
 #endif
     }
@@ -61,11 +62,11 @@ namespace CepGen
         case Kinematics::Mode::ElasticElastic:
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 3 );
           break;
-        case Kinematics::Mode::ElasticInelastic:
-          pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 1 );
-          break;
         case Kinematics::Mode::InelasticElastic:
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 2 );
+          break;
+        case Kinematics::Mode::ElasticInelastic:
+          pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 1 );
           break;
         case Kinematics::Mode::InelasticInelastic: default:
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 0 );
@@ -97,12 +98,12 @@ namespace CepGen
     Pythia8Hadroniser::setSeed( long long seed )
     {
 #ifdef PYTHIA8
-      if ( seed == -1ll ) {
+      if ( seed == -1ll )
         pythia_->settings.flag( "Random:setSeed", false );
-        return;
+      else {
+        pythia_->settings.flag( "Random:setSeed", true );
+        pythia_->settings.mode( "Random:seed", seed );
       }
-      pythia_->settings.flag( "Random:setSeed", true );
-      pythia_->settings.mode( "Random:seed", seed );
 #endif
     }
 
@@ -135,6 +136,7 @@ namespace CepGen
       //===========================================================================================
 
       lhaevt_->feedEvent( ev, full, params_->kinematics.mode );
+      //lhaevt_->listEvent();
 
       //===========================================================================================
       // launch the hadronisation / resonances decays, and update the event accordingly
@@ -154,6 +156,10 @@ namespace CepGen
         ev.num_hadronisation_trials++;
       }
 
+      //===========================================================================================
+      // update the event content with Pythia's output
+      //===========================================================================================
+
       updateEvent( ev, weight, full );
 
 #endif
@@ -168,8 +174,7 @@ namespace CepGen
       op.setPdgId( static_cast<PDG>( abs( py_part.id() ) ), py_part.charge() );
       op.setStatus( py_part.isFinal()
         ? Particle::FinalState
-        : Particle::Propagator
-      );
+        : Particle::Propagator );
       op.setMomentum( Particle::Momentum( mom.px(), mom.py(), mom.pz(), mom.e() ) );
       op.setMass( mom.mCalc() );
       lhaevt_->addCorresp( py_part.index()-offset_, op.id() );
@@ -182,24 +187,33 @@ namespace CepGen
       for ( unsigned short i = 1+offset_; i < pythia_->event.size(); ++i ) {
         const Pythia8::Particle& p = pythia_->event[i];
         const unsigned short cg_id = lhaevt_->cgPart( i-offset_ );
-        if ( cg_id != LHAEvent::invalid_id ) { // particle already in the event
+        if ( cg_id != LHAEvent::invalid_id ) {
+          //----- particle already in the event
           Particle& cg_part = ev.getById( cg_id );
+          //--- fragmentation result
           if ( cg_part.role() == Particle::OutgoingBeam1
             || cg_part.role() == Particle::OutgoingBeam2 ) {
             cg_part.setStatus( Particle::Fragmented );
             continue;
           }
-          if ( abs( p.id() ) != abs( cg_part.integerPdgId() ) )
-            throw CG_FATAL( "Pythia8Hadroniser" ) << "Event list corruption detected for particle " << i << "!";
+          //--- particle is not what we expect
+          if ( abs( p.id() ) != abs( cg_part.integerPdgId() ) ) {
+            pythia_->event.list();
+            throw CG_FATAL( "Pythia8Hadroniser:update" ) << "Event list corruption detected for particle " << i << "!";
+          }
+          //--- no decay for this particle
           if ( p.particleDataEntry().sizeChannels() == 0 )
             continue;
+          //--- resonance decayed; apply branching ratio for this decay
           weight *= p.particleDataEntry().pickChannel().bRatio();
           cg_part.setStatus( Particle::Resonance );
         }
-        else { // new particle to be added
+        else {
+          //----- new particle to be added
           Particle::Role role = (Particle::Role)findRole( ev, p );
           Pythia8::Vec4 mom = p.p();
           switch ( role ) {
+            default: break;
             case Particle::OutgoingBeam1: // no break!
               ev.getByRole( Particle::OutgoingBeam1 )[0].setStatus( Particle::Fragmented );
               if ( abs( p.status() ) != 61 )
@@ -208,8 +222,6 @@ namespace CepGen
               ev.getByRole( Particle::OutgoingBeam2 )[0].setStatus( Particle::Fragmented );
               if ( abs( p.status() ) != 61 )
                 break;
-            default:
-              break;
           }
           // found the role ; now we can add the particle
           Particle& cg_part = addParticle( ev, p, mom, (unsigned short)role );
@@ -221,6 +233,12 @@ namespace CepGen
               cg_part.addMother( ev.getById( moth_cg_id ) );
             else
               cg_part.addMother( addParticle( ev, pythia_->event[moth_id], mom, (unsigned short)role ) );
+            if ( !p.isFinal() ) {
+              if ( p.isResonance() || p.daughterList().size() > 0 )
+                cg_part.setStatus( Particle::Resonance );
+              else
+                cg_part.setStatus( Particle::Undefined );
+            }
           }
         }
       }
@@ -255,7 +273,7 @@ namespace CepGen
   LHAEvent::LHAEvent( const Parameters* params ) :
     LHAup( 3 ), params_( params )
   {
-    addProcess( 0, 10., 0., 100. );
+    addProcess( 0, 1., 1., 1.e3 );
     if ( params_ ) {
       setBeamA( (short)params_->kinematics.incoming_beams.first.pdg, params_->kinematics.incoming_beams.first.pz );
       setBeamB( (short)params_->kinematics.incoming_beams.second.pdg, params_->kinematics.incoming_beams.second.pz );
@@ -283,7 +301,6 @@ namespace CepGen
 
     unsigned short quark1_id = 0, quark2_id = 0;
     unsigned short quark1_pdgid = part1.integerPdgId(), quark2_pdgid = part2.integerPdgId();
-    unsigned short quark1_colour = 0, quark2_colour = 0;
 
     const Pythia8::Vec4 mom_part1( Hadroniser::momToVec4( part1.momentum() ) ), mom_part2( Hadroniser::momToVec4( part2.momentum() ) );
 
@@ -299,48 +316,48 @@ namespace CepGen
       addParticle( quark2_pdgid, -2, quark2_id, 0, 0, 0, mom_part2.px(), mom_part2.py(), mom_part2.pz(), mom_part2.e(), mom_part2.mCalc(), 0., 0. );
     }
     else { // full event content (with collinear partons)
+      const bool inel1 = ( mode == Kinematics::Mode::InelasticElastic || mode == Kinematics::Mode::InelasticInelastic );
+      const bool inel2 = ( mode == Kinematics::Mode::ElasticInelastic || mode == Kinematics::Mode::InelasticInelastic );
+
+      unsigned short quark1_colour = 0, quark2_colour = 0;
       Pythia8::Vec4 mom_iq1 = mom_part1, mom_iq2 = mom_part2;
       //FIXME select quark flavours accordingly
-      if ( mode == Kinematics::Mode::InelasticElastic
-        || mode == Kinematics::Mode::InelasticInelastic ) {
+      if ( inel1 ) {
         quark1_pdgid = 2;
         quark1_colour = 501;
         const Particle& ip1 = ev.getOneByRole( Particle::IncomingBeam1 );
         mom_iq1 = Pythia8::Vec4( 0., 0., x1*ip1.momentum().pz(), x1*ip1.energy() );
       }
-      if ( mode == Kinematics::Mode::ElasticInelastic
-        || mode == Kinematics::Mode::InelasticInelastic ) {
+      if ( inel2 ) {
         quark2_pdgid = 2;
         quark2_colour = 502;
         const Particle& ip2 = ev.getOneByRole( Particle::IncomingBeam2 );
         mom_iq2 = Pythia8::Vec4( 0., 0., x2*ip2.momentum().pz(), x2*ip2.energy() );
       }
 
+      //--- flavour / x value of hard-process initiators
       setIdX( op1.integerPdgId(), op2.integerPdgId(), x1, x2 );
 
       //===========================================================================================
       // incoming valence quarks
       //===========================================================================================
 
-      quark1_id = sizePart();
       addParticle( quark1_pdgid, -1, 0, 0, quark1_colour, 0, mom_iq1.px(), mom_iq1.py(), mom_iq1.pz(), mom_iq1.e(), mom_iq1.mCalc(), 0., 1. );
+      quark1_id = sizePart()-1;
 
-      quark2_id = sizePart();
       addParticle( quark2_pdgid, -1, 0, 0, quark2_colour, 0, mom_iq2.px(), mom_iq2.py(), mom_iq2.pz(), mom_iq2.e(), mom_iq2.mCalc(), 0., 1. );
+      quark2_id = sizePart()-1;
 
       //===========================================================================================
       // outgoing valence quarks
       //===========================================================================================
 
-      if ( mode == Kinematics::Mode::InelasticElastic
-        || mode == Kinematics::Mode::InelasticInelastic ) {
+      if ( inel1 ) {
         const Pythia8::Vec4 mom_oq1 = mom_iq1-mom_part1;
         addCorresp( sizePart(), op1.id() );
         addParticle( quark1_pdgid, 1, quark1_id, quark2_id, quark1_colour, 0, mom_oq1.px(), mom_oq1.py(), mom_oq1.pz(), mom_oq1.e(), mom_oq1.mCalc(), 0., 1. );
       }
-
-      if ( mode == Kinematics::Mode::ElasticInelastic
-        || mode == Kinematics::Mode::InelasticInelastic ) {
+      if ( inel2 ) {
         const Pythia8::Vec4 mom_oq2 = mom_iq2-mom_part2;
         addCorresp( sizePart(), op2.id() );
         addParticle( quark2_pdgid, 1, quark1_id, quark2_id, quark2_colour, 0, mom_oq2.px(), mom_oq2.py(), mom_oq2.pz(), mom_oq2.e(), mom_oq2.mCalc(), 0., 1. );
@@ -435,8 +452,7 @@ namespace CepGen
     oss << "List of Pythia <-> CepGen particle ids correspondance";
     for ( const auto& py_cg : py_cg_corresp_ )
       oss << "\n\t" << py_cg.first << " <-> " << py_cg.second;
-    CG_INFO( "LHAEvent" ) << oss.str();
+    CG_INFO( "LHAEvent:dump" ) << oss.str();
   }
 #endif
 }
-

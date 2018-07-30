@@ -1,6 +1,8 @@
 #include "CepGen/StructureFunctions/CLAS.h"
 
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/Constants.h"
+
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Core/Exception.h"
 
@@ -110,25 +112,31 @@ namespace CepGen
     }
 
     CLAS::CLAS( const CLAS::Parameterisation& params ) :
-      params_( params )
+      StructureFunctions( Type::CLAS ), params_( params )
     {}
 
-    CLAS
-    CLAS::operator()( double q2, double xbj, const SigmaRatio& rcomp ) const
+    CLAS&
+    CLAS::operator()( double q2, double xbj )
     {
+      std::pair<double,double> nv = { q2, xbj };
+      if ( nv == old_vals_ )
+        return *this;
+      old_vals_ = nv;
+
       const double mp2 = params_.mp*params_.mp;
       const double w2 = mp2 + q2*( 1.-xbj )/xbj;
       const double w_min = params_.mp+params_.mpi0;
 
-      CLAS cl;
-      if ( sqrt( w2 ) < w_min ) return cl;
+      if ( sqrt( w2 ) < w_min ) {
+        F2 = 0.;
+        return *this;
+      }
 
-      cl.F2 = f2slac( q2, xbj );
+      F2 = f2slac( q2, xbj );
       std::pair<double,double> rb = resbkg( q2, sqrt( w2 ) );
 
-      cl.F2 *= ( rb.first+rb.second );
-      cl.computeFL( q2, xbj, rcomp );
-      return cl;
+      F2 *= ( rb.first+rb.second );
+      return *this;
     }
 
     double

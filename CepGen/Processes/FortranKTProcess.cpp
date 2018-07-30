@@ -1,4 +1,7 @@
 #include "CepGen/Processes/FortranKTProcess.h"
+
+#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 
 extern "C"
@@ -72,7 +75,7 @@ namespace CepGen
       //===========================================================================================
 
       params_.icontri = (int)cuts_.mode;
-      params_.sfmod = (int)cuts_.structure_functions;
+      params_.sfmod = (int)cuts_.structure_functions->type;
       params_.pdg_l = (int)cuts_.central_system[0];
 
       //-------------------------------------------------------------------------------------------

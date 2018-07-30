@@ -1,9 +1,12 @@
 #include "CepGen/Processes/GenericKTProcess.h"
 
-#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 
 #include "CepGen/Core/Exception.h"
+
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
 
 #ifdef KMR_FLUX
@@ -150,20 +153,20 @@ namespace CepGen
       flux1_ = flux2_ = 0.;
       switch ( cuts_.mode ) {
         case Kinematics::Mode::ElasticElastic:
-          flux1_ = flux( Flux::ElasticBudnev, q1t2, x1 );
-          flux2_ = flux( Flux::ElasticBudnev, q2t2, x2 );
+          flux1_ = flux( Flux::ElasticBudnev, q1t2, x1, *cuts_.structure_functions );
+          flux2_ = flux( Flux::ElasticBudnev, q2t2, x2, *cuts_.structure_functions );
           break;
         case Kinematics::Mode::ElasticInelastic:
-          flux1_ = flux( Flux::ElasticBudnev, q1t2, x1 );
-          flux2_ = flux( Flux::InelasticBudnev, q2t2, x2, cuts_.structure_functions, MY_ );
+          flux1_ = flux( Flux::ElasticBudnev, q1t2, x1, *cuts_.structure_functions );
+          flux2_ = flux( Flux::InelasticBudnev, q2t2, x2, *cuts_.structure_functions, MY_ );
           break;
         case Kinematics::Mode::InelasticElastic:
-          flux1_ = flux( Flux::InelasticBudnev, q1t2, x1, cuts_.structure_functions, MX_ );
-          flux2_ = flux( Flux::ElasticBudnev, q2t2, x2 );
+          flux1_ = flux( Flux::InelasticBudnev, q1t2, x1, *cuts_.structure_functions, MX_ );
+          flux2_ = flux( Flux::ElasticBudnev, q2t2, x2, *cuts_.structure_functions );
           break;
         case Kinematics::Mode::InelasticInelastic:
-          flux1_ = flux( Flux::InelasticBudnev, q1t2, x1, cuts_.structure_functions, MX_ );
-          flux2_ = flux( Flux::InelasticBudnev, q2t2, x2, cuts_.structure_functions, MY_ );
+          flux1_ = flux( Flux::InelasticBudnev, q1t2, x1, *cuts_.structure_functions, MX_ );
+          flux2_ = flux( Flux::InelasticBudnev, q2t2, x2, *cuts_.structure_functions, MY_ );
           break;
         default:
           throw CG_FATAL( "GenericKTProcess" ) << "Invalid kinematics mode selected!";
@@ -314,30 +317,31 @@ namespace CepGen
     }
 
     double
-    GenericKTProcess::flux( const Flux& type, double kt2, double x, const StructureFunctions::Type& sf, double mx )
+    GenericKTProcess::flux( const Flux& type, double kt2, double x, StructureFunctions& sf, double mx )
     {
       switch ( type ) {
         case Flux::ElasticBudnev: {
           const double Q2_min = x*x*mp2_/( 1.-x ), Q2_ela = ( kt2+x*x*mp2_ )/( 1.-x );
-          const FormFactors ff = FormFactors::ProtonElastic( Q2_ela );
+          const FormFactors ff = FormFactors::protonElastic( Q2_ela );
           const double ela1 = ( 1.-x )*( 1.-Q2_min/Q2_ela );
-          const double ela2 = ff.FE;
-          const double f_ela = Constants::alphaEM*M_1_PI/kt2*( ela1*ela2 + 0.25*x*x*ff.FM );
-          // last factor below the jacobian from dQ^2/Q^2 --> dkT^2/kT^2*(kT^2/Q^2)
-          return f_ela/( 1.-x )*kt2 / Q2_ela;
-        }
+          //const double ela3 = 1.-( Q2_ela-kt2 )/Q2_ela;
+          const double f_ela = Constants::alphaEM*M_1_PI/kt2*( ela1*ff.FE + 0.5*x*x*ff.FM );
+          // last factor below the Jacobian from dQ^2/Q^2 --> dkT^2/kT^2*(kT^2/Q^2)
+          return f_ela*( 1.-x )*kt2 / Q2_ela;
+        } break;
         case Flux::InelasticBudnev: {
           const double mx2 = mx*mx;
           // F2 structure function
           const double Q2min = 1. / ( 1.-x )*( x*( mx2-mp2_ ) + x*x*mp2_ ),
                        Q2 = Q2min + kt2/( 1.-x );
-          float xbj = Q2 / ( Q2 + mx2 - mp2_ );
-          const StructureFunctions str_fun = StructureFunctionsBuilder::get( sf, Q2, xbj );
+          const double xbj = Q2 / ( Q2 + mx2 - mp2_ );
+          auto& str_fun = sf( Q2, xbj );
+          str_fun.computeFL( Q2, xbj );
           const double term1 = ( 1.-x )*( 1.-Q2min/Q2 );
           const double f_D = str_fun.F2/( mx2 + Q2 - mp2_ ) * term1;
           const double f_C = str_fun.F1( Q2, xbj ) * 2./Q2;
           return Constants::alphaEM*M_1_PI*( 1.-x )/Q2*( f_D+0.5*x*x*f_C );
-        }
+        } break;
         case Flux::GluonKMR: {
 #ifdef KMR_FLUX
           double logx = log10( x ), logq2 = log10( kt2 ), logmu2 = 2.*log10( mx ), fg = 0.;
@@ -354,7 +358,7 @@ namespace CepGen
 #else
           throw CG_FATAL("GenericKTProcess:flux") << "KMR gluon fluxes are not linked to this instance!";
 #endif
-        }
+        } break;
         default:
           throw CG_FATAL("GenericKTProcess:flux") << "Invalid flux type: " << type;
       }
@@ -373,7 +377,7 @@ namespace CepGen
           const double ff1 = 3.*( sin( tau )-tau*cos( tau ) )/pow( tau+1.e-10, 3 ), ff2 = 1./( 1.+tau1*tau1 );
           const double ela1 = pow( kt2/( kt2+x*x*m_a*m_a ), 2 ), ela2 = pow( ff1*ff2, 2 )/*, ela3 = 1.-( q2_ela-kt2 )/q2_ela*/;
           return hi.Z*hi.Z*Constants::alphaEM*M_1_PI*ela1*ela2/q2_ela;
-        }
+        } break;
         default:
           throw CG_FATAL("GenericKTProcess:flux") << "Invalid flux type: " << type;
       }

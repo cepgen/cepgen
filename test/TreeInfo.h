@@ -2,6 +2,9 @@
 #define Test_TreeInfo_h
 
 #include "TTree.h"
+#include "Math/Vector3D.h"
+#include "Math/Vector4D.h"
+
 #include <string>
 
 namespace CepGen
@@ -31,11 +34,11 @@ namespace CepGen
     void fill() {
       tree->Fill();
     }
-    void attach( const char* filename ) {
-      attach( TFile::Open( filename ) );
+    void attach( const char* filename, const char* run_tree = "run" ) {
+      attach( TFile::Open( filename ), run_tree );
     }
-    void attach( TFile* file ) {
-      tree = dynamic_cast<TTree*>( file->Get( "run" ) );
+    void attach( TFile* file, const char* run_tree = "run" ) {
+      tree = dynamic_cast<TTree*>( file->Get( run_tree ) );
       if ( !tree ) return;
       tree->SetBranchAddress( "xsect", &xsect );
       tree->SetBranchAddress( "errxsect", &errxsect );
@@ -55,24 +58,26 @@ namespace CepGen
     static const unsigned short maxpart = 5000;
 
     TTree* tree;
+    std::unique_ptr<TFile> file;
 
     float gen_time, tot_time;
     int nremn_ch[2], nremn_nt[2], np;
+    std::vector<ROOT::Math::XYZTVector> momentum, *pMom;
     double pt[maxpart], eta[maxpart], phi[maxpart], rapidity[maxpart];
     double E[maxpart], m[maxpart], charge[maxpart];
     int pdg_id[maxpart], parent1[maxpart], parent2[maxpart];
     int stable[maxpart], role[maxpart], status[maxpart];
 
-    TreeEvent() : tree( NULL ) {
+    TreeEvent() : tree( nullptr ), pMom( nullptr ) {
       clear();
     }
 
     void clear() {
       gen_time = tot_time = 0.;
-      for ( unsigned short i = 0; i < 2; ++i ) {
+      for ( unsigned short i = 0; i < 2; ++i )
         nremn_ch[i] = nremn_nt[i] = 0;
-      }
       np = 0;
+      momentum.clear();
       for ( unsigned short i = 0; i < maxpart; ++i ) {
         pt[i] = eta[i] = phi[i] = rapidity[i] = E[i] = m[i] = charge[i] = 0.;
         pdg_id[i] = parent1[i] = parent2[i] = stable[i] = role[i] = status[i] = 0;
@@ -92,6 +97,8 @@ namespace CepGen
       tree->Branch( "nremn_charged", nremn_ch, "nremn_charged[2]/I" );
       tree->Branch( "nremn_neutral", nremn_nt, "nremn_neutral[2]/I" );
       tree->Branch( "role", role, "role[npart]/I" );
+      pMom = &momentum;
+      tree->Branch( "momentum", "std::vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > >", &pMom );
       tree->Branch( "pt", pt, "pt[npart]/D" );
       tree->Branch( "eta", eta, "eta[npart]/D" );
       tree->Branch( "phi", phi, "phi[npart]/D" );
@@ -107,8 +114,12 @@ namespace CepGen
       tree->Branch( "generation_time", &gen_time, "generation_time/F" );
       tree->Branch( "total_time", &tot_time, "total_time/F" );
     }
-    void attach( TFile* f ) {
-      tree = dynamic_cast<TTree*>( f->Get( "events" ) );
+    void attach( const char* filename, const char* events_tree = "events" ) {
+      file.reset( TFile::Open( filename ) );
+      attach( file.get(), events_tree );
+    }
+    void attach( TFile* f, const char* events_tree = "events" ) {
+      tree = dynamic_cast<TTree*>( f->Get( events_tree ) );
       attach( tree );
     }
     void attach( TTree* t ) {
@@ -118,6 +129,7 @@ namespace CepGen
       tree->SetBranchAddress( "nremn_charged", nremn_ch );
       tree->SetBranchAddress( "nremn_neutral", nremn_ch );
       tree->SetBranchAddress( "role", role );
+      tree->SetBranchAddress( "momentum", &pMom );
       tree->SetBranchAddress( "pt", pt );
       tree->SetBranchAddress( "eta", eta );
       tree->SetBranchAddress( "phi", phi );

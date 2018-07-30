@@ -5,4 +5,5 @@ generator = cepgen.Parameters(
     numPoints = 100,
     printEvery = 10000,
     numThreads = 2,
+    treat = True,
 )

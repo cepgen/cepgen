@@ -12,6 +12,7 @@ process = ktProcess.clone('patoll',
         ktFluxes = (cepgen.KTFlux.GluonKMR, cepgen.KTFlux.PhotonElasticHI),
         #ktFluxes = (cepgen.KTFlux.PhotonElasticBudnev, cepgen.KTFlux.PhotonElasticHI),
         heavyIonB = (208, 82),
+        kmrGridPath = 'gluon_mmht2014nlo_Watt.dat',
     ),
     outKinematics = ktProcess.outKinematics.clone(
         pair = 4,
@@ -27,8 +28,6 @@ process = ktProcess.clone('patoll',
         #dely = (4., 5.),
     ),
 )
-
-kmrGridPath = 'gluon_mmht2014nlo_Watt.dat'
 
 #--- events generation
 from Config.generator_cff import generator

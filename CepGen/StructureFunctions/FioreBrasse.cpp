@@ -38,28 +38,33 @@ namespace CepGen
     }
 
     FioreBrasse::FioreBrasse( const FioreBrasse::Parameterisation& params ) :
-      W1( 0. ), W2( 0. ), params_( params )
+      StructureFunctions( Type::FioreBrasse ), W1( 0. ), W2( 0. ), params( params )
     {}
 
-    FioreBrasse
-    FioreBrasse::operator()( double q2, double xbj ) const
+    FioreBrasse&
+    FioreBrasse::operator()( double q2, double xbj )
     {
+      std::pair<double,double> nv = { q2, xbj };
+      if ( nv == old_vals_ )
+        return *this;
+      old_vals_ = nv;
+
       const double akin = 1. + 4.*mp2_ * xbj*xbj/q2;
       const double prefactor = q2*( 1.-xbj ) / ( 4.*M_PI*Constants::alphaEM*akin );
       const double s = q2*( 1.-xbj )/xbj + mp2_;
 
       double ampli_res = 0., ampli_bg = 0., ampli_tot = 0.;
       for ( unsigned short i = 0; i < 3; ++i ) { //FIXME 4??
-        const Parameterisation::ResonanceParameters res = params_.resonances[i];
+        const Parameterisation::ResonanceParameters res = params.resonances[i];
         if ( !res.enabled )
           continue;
-        const double sqrts0 = sqrt( params_.s0 );
+        const double sqrts0 = sqrt( params.s0 );
 
         std::complex<double> alpha;
-        if ( s > params_.s0 )
-          alpha = std::complex<double>( res.alpha0 + res.alpha2*sqrts0 + res.alpha1*s, res.alpha2*sqrt( s-params_.s0 ) );
+        if ( s > params.s0 )
+          alpha = std::complex<double>( res.alpha0 + res.alpha2*sqrts0 + res.alpha1*s, res.alpha2*sqrt( s-params.s0 ) );
         else
-          alpha = std::complex<double>( res.alpha0 + res.alpha1*s + res.alpha2*( sqrts0 - sqrt( params_.s0 - s ) ), 0. );
+          alpha = std::complex<double>( res.alpha0 + res.alpha1*s + res.alpha2*( sqrts0 - sqrt( params.s0 - s ) ), 0. );
 
         double formfactor = 1./pow( 1. + q2/res.q02, 2 );
         double denom = pow( res.spin-std::real( alpha ), 2 ) + pow( std::imag( alpha ), 2 );
@@ -67,7 +72,7 @@ namespace CepGen
         ampli_res += ampli_imag;
       }
       {
-        const Parameterisation::ResonanceParameters res = params_.resonances[3];
+        const Parameterisation::ResonanceParameters res = params.resonances[3];
         double sE = res.alpha2, sqrtsE = sqrt( sE );
         std::complex<double> alpha;
         if ( s > sE )
@@ -79,7 +84,7 @@ namespace CepGen
         double denom = pow( sp-std::real( alpha ), 2 ) + pow( std::imag( alpha ), 2 );
         ampli_bg = res.a*formfactor*formfactor*std::imag( alpha )/denom;
       }
-      ampli_tot = params_.norm*( ampli_res+ampli_bg );
+      ampli_tot = params.norm*( ampli_res+ampli_bg );
 
       CG_DEBUG_LOOP( "FioreBrasse:amplitudes" )
         << "Amplitudes:\n\t"
@@ -87,25 +92,28 @@ namespace CepGen
         << " background part: " << ampli_bg << ",\n\t"
         << " total (with norm.): " << ampli_tot << ".";
 
-      FioreBrasse fb;
-      fb.F2 = prefactor*ampli_tot;
-      fb.computeFL( q2, xbj );
-      return fb;
+      F2 = prefactor*ampli_tot;
+      return *this;
     }
 
-    FioreBrasse
-    FioreBrasse::operator()( double q2, double xbj, bool ) const
+    FioreBrasse&
+    FioreBrasse::operator()( double q2, double xbj, bool )
     {
+      std::pair<double,double> nv = { q2, xbj };
+      if ( nv == old_vals_ )
+        return *this;
+      old_vals_ = nv;
+
       const double m_min = mp_+ParticleProperties::mass( PDG::PiZero );
 
       const double mx2 = mp2_ + q2*( 1.-xbj )/xbj, mx = sqrt( mx2 );
 
-      FioreBrasse fb;
       if ( mx < m_min || mx > 1.99 ) {
         CG_WARNING( "FioreBrasse" )
           << "Fiore-Brasse form factors to be retrieved for an invalid MX value:\n\t"
           << mx << " GeV, while allowed range is [1.07, 1.99] GeV.";
-        return fb;
+        *this = FioreBrasse();
+        return *this;
       }
 
       int n_bin;
@@ -161,9 +169,9 @@ namespace CepGen
       const double w1 = ( mx2-mp2_ )/( 8.*M_PI*M_PI*mp_*Constants::alphaEM )/Constants::GeV2toBarn*1.e6 * sigma_t;
       const double w2 = w1 * q2 / ( q2+nu2 );
 
-      fb.W1 = w1; //FIXME
-      fb.W2 = w2; //FIXME
-      return fb;
+      W1 = w1; //FIXME
+      W2 = w2; //FIXME
+      return *this;
     }
   }
 }

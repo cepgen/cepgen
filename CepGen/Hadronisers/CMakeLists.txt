@@ -5,9 +5,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 #----- build the object
 
 add_library(CepGenExternalHadronisers SHARED ${sources})
-if(PYTHIA8)
-  target_link_libraries(CepGenExternalHadronisers ${PYTHIA8} dl)
-endif()
+target_link_libraries(CepGenExternalHadronisers ${CEPGEN_EXTERNAL_HADR_REQS})
 
 #----- check the external dependencies
 
