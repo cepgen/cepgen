@@ -9,6 +9,8 @@
 #include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Physics/PDG.h"
 
+#include "abort.h"
+
 #include <iostream>
 
 using namespace std;
@@ -53,14 +55,20 @@ int main( int argc, char* argv[] ) {
   //--- list all parameters
   gen.parameters->dump();
 
-  //--- let there be a cross-section...
-  double xsec = 0., err = 0.;
-  gen.computeXsection( xsec, err );
+  AbortHandler ctrl_c;
 
-  if ( gen.parameters->generation.enabled )
-    //--- events generation starts here
-    // (one may use a callback function)
-    gen.generate();
+  try {
+    //--- let there be a cross-section...
+    double xsec = 0., err = 0.;
+    gen.computeXsection( xsec, err );
+
+    if ( gen.parameters->generation.enabled )
+      //--- events generation starts here
+      // (one may use a callback function)
+      gen.generate();
+  } catch ( const CepGen::Exception& e ) {
+    return EXIT_FAILURE;
+  }
 
   return 0;
 }

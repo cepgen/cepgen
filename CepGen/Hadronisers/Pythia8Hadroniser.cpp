@@ -47,7 +47,6 @@ namespace CepGen
     {
 #ifdef PYTHIA8
       pythia_->settings.writeFile( "last_pythia_config.cmd", true );
-      pythia_->stat();
 #endif
     }
 
@@ -118,6 +117,7 @@ namespace CepGen
     bool
     Pythia8Hadroniser::run( Event& ev, double& weight, bool full )
     {
+      //--- initialise the event weight before running any decay algorithm
       weight = 1.;
 
 #ifndef PYTHIA8
@@ -126,6 +126,7 @@ namespace CepGen
       if ( !full && !pythia_->settings.flag( "ProcessLevel:resonanceDecays" ) )
         return true;
 
+      //--- switch full <-> partial event
       if ( full != full_evt_ ) {
         full_evt_ = full;
         init();
@@ -143,19 +144,22 @@ namespace CepGen
       //===========================================================================================
 
       ev.num_hadronisation_trials = 0;
-      while ( ev.num_hadronisation_trials < max_attempts_ ) {
+      while ( true ) {
+        ev.num_hadronisation_trials++; // start at 1
+        if ( ev.num_hadronisation_trials > max_attempts_ )
+          return false;
         //--- run the hadronisation/fragmentation algorithm
-        bool res = pythia_->next();
-        if ( res && full && first_evt_ ) {
+        if ( !pythia_->next() )
+          continue;
+        //--- hadronisation successful
+        if ( first_evt_ && full ) {
           offset_ = 0;
           for ( unsigned short i = 1; i < pythia_->event.size(); ++i )
             if ( pythia_->event[i].status() == -12 ) // skip the incoming particles
               offset_++;
           first_evt_ = false;
-          break;
         }
-        //--- hadronisation unsuccessful
-        ev.num_hadronisation_trials++;
+        break;
       }
 
       //===========================================================================================
@@ -200,14 +204,15 @@ namespace CepGen
           }
           //--- particle is not what we expect
           if ( abs( p.id() ) != abs( cg_part.integerPdgId() ) ) {
-            {
-              CG_INFO( "Pythia8Hadroniser:update" ) << "Pythia event content:";
-              pythia_->event.list();
-              CG_INFO( "Pythia8Hadroniser:update" ) << "CepGen event content:";
-              ev.dump();
-              CG_INFO( "Pythia8Hadroniser:update" ) << "Correspondence:";
-              lhaevt_->dumpCorresp();
-            }
+            CG_INFO( "Pythia8Hadroniser:update" ) << "LHAEVT event content:";
+            lhaevt_->listEvent();
+            CG_INFO( "Pythia8Hadroniser:update" ) << "Pythia event content:";
+            pythia_->event.list();
+            CG_INFO( "Pythia8Hadroniser:update" ) << "CepGen event content:";
+            ev.dump();
+            CG_INFO( "Pythia8Hadroniser:update" ) << "Correspondence:";
+            lhaevt_->dumpCorresp();
+
             throw CG_FATAL( "Pythia8Hadroniser:update" )
               << "Event list corruption detected for (Pythia/CepGen) particle " << i << "/" << cg_id << ":\n\t"
               << "should be " << abs( p.id() ) << ", "
@@ -348,7 +353,7 @@ namespace CepGen
       }
 
       //--- flavour / x value of hard-process initiators
-      setIdX( op1.integerPdgId(), op2.integerPdgId(), x1, x2 );
+      setIdX( part1.integerPdgId(), part2.integerPdgId(), x1, x2 );
 
       //===========================================================================================
       // incoming valence quarks
@@ -410,8 +415,7 @@ namespace CepGen
       addCorresp( sizePart(), p.id() );
       addParticle( p.integerPdgId(), 1, moth1_id, moth2_id, 0, 0, mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), mom_part.mCalc(), 0., 0., 0. );
     }
-    if ( full )
-      setPdf( quark1_pdgid, quark2_pdgid, x1, x2, scale, 0., 0., false );
+    setPdf( quark1_pdgid, quark2_pdgid, x1, x2, scale, 0., 0., false );
   }
 
   bool
