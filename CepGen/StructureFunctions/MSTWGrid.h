@@ -10,11 +10,15 @@
 namespace MSTW
 {
   /// \note x/y = Q2/xbj given by the parent
-  typedef CepGen::GridHandler<2>::grid_t sfval_t;
+  struct sfval_t
+  {
+    float q2, xbj;
+    double f2, fl;
+  };
   std::ostream& operator<<( std::ostream&, const sfval_t& );
 
   /// A \f$F_{2,L}\f$ grid interpolator
-  class Grid : public CepGen::StructureFunctions, private CepGen::GridHandler<2>
+  class Grid : public CepGen::StructureFunctions, private CepGen::GridHandler<2,2>
   {
     public:
       /// Grid header information as parsed from the file

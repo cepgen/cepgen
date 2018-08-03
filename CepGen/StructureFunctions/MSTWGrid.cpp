@@ -23,7 +23,7 @@ namespace MSTW
 
   Grid::Grid( const Parameterisation& param ) :
     CepGen::StructureFunctions( CepGen::SF::Type::MSTWgrid ),
-    CepGen::GridHandler<2>( CepGen::GridType::kLogarithmic ),
+    CepGen::GridHandler<2,2>( CepGen::GridType::logarithmic ),
     params( param )
   {
     std::set<double> q2_vals, xbj_vals;
@@ -47,13 +47,9 @@ namespace MSTW
 
       sfval_t val;
       while ( file.read( reinterpret_cast<char*>( &val ), sizeof( sfval_t ) ) ) {
-        q2_vals.insert( log10( val.x ) );
-        xbj_vals.insert( log10( val.y ) );
-#ifndef GOOD_GSL
-        x_vals_.emplace_back( val.x );
-        y_vals_.emplace_back( val.y );
-#endif
-        values_raw_.emplace_back( val );
+        q2_vals.insert( val.q2 );
+        xbj_vals.insert( val.xbj );
+        insert( CepGen::GridHandler<2,2>::point_t{ { val.q2, val.xbj }, { val.f2, val.fl } } );
       }
       file.close();
     }
@@ -61,28 +57,28 @@ namespace MSTW
     if ( q2_vals.size() < 2 || xbj_vals.size() < 2 )
       throw CG_FATAL( "Grid" ) << "Invalid grid retrieved!";
 
-    initGSL( q2_vals, xbj_vals );
+    init();
 
     CG_INFO( "Grid" )
       << "MSTW@" << header_.order << " grid evaluator built "
       << "for " << header_.nucleon << " structure functions (" << header_.cl << ")\n\t"
-      << " Q² in range [" << pow( 10., *q2_vals.begin() ) << ":" << pow( 10., *q2_vals.rbegin() ) << "]\n\t"
-      << "xBj in range [" << pow( 10., *xbj_vals.begin() ) << ":" << pow( 10., *xbj_vals.rbegin() ) << "].";
+      << " Q² in range [" << *q2_vals.begin() << ":" << *q2_vals.rbegin() << "]\n\t"
+      << "xBj in range [" << *xbj_vals.begin() << ":" << *xbj_vals.rbegin() << "].";
   }
 
   Grid&
   Grid::operator()( double q2, double xbj )
   {
-    const sfval_t val = CepGen::GridHandler<2>::eval( q2, xbj );
-    F2 = val.value[0];
-    FL = val.value[1];
+    const std::array<double,2> val = CepGen::GridHandler<2,2>::eval( { q2, xbj } );
+    F2 = val[0];
+    FL = val[1];
     return *this;
   }
 
   std::ostream&
   operator<<( std::ostream& os, const sfval_t& val )
   {
-    return os << Form( "Q² = %.5e GeV²\txbj = %.4f\tF₂ = % .6e\tFL = % .6e", val.x, val.y, val.value[0], val.value[1] );
+    return os << Form( "Q² = %.5e GeV²\txbj = %.4f\tF₂ = % .6e\tFL = % .6e", val.q2, val.xbj, val.f2, val.fl );
   }
 
   std::ostream&
