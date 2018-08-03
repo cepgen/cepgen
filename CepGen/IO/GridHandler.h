@@ -75,6 +75,14 @@ namespace CepGen
         //--- dimension of the vector space coordinate to evaluate
         switch ( D ) {
           case 1: {
+            const double x = coord.at( 0 );
+            for ( size_t i = 0; i < N; ++i )
+              if ( gsl_spline_eval_e( splines_1d_.at( i ).get(), x, accel_.at( 0 ).get(), &out[i] ) != GSL_SUCCESS ) {
+                out.fill( 0. );
+                CG_WARNING( "GridHandler" )
+                  << "Failed to evaluate the grid value "
+                  << "for x = " << in_coords.at( 0 ) << ".";
+              }
           } break;
           case 2: {
             const double x = coord.at( 0 ), y = coord.at( 1 );
@@ -83,10 +91,12 @@ namespace CepGen
               if ( gsl_spline2d_eval_e( splines_2d_.at( i ).get(),
                                         x, y,
                                         accel_.at( 0 ).get(), accel_.at( 1 ).get(),
-                                        &out[i] ) != GSL_SUCCESS )
+                                        &out[i] ) != GSL_SUCCESS ) {
+                out.fill( 0. );
                 CG_WARNING( "GridHandler" )
                   << "Failed to evaluate the grid value "
                   << "for x = " << in_coords.at( 0 ) << " / y = " << in_coords.at( 1 ) << ".";
+              }
 #else
             //--- retrieve the indices of the bin in the set
             std::array<unsigned short,D> id;
@@ -163,7 +173,6 @@ namespace CepGen
       /// Return the list of values handled in the grid
       std::vector<point_t> values() const { return values_raw_; }
 
-    protected:
       /// Initialise the grid and all useful interpolators/accelerators
       void init() {
         if ( values_raw_.empty() )
@@ -193,12 +202,18 @@ namespace CepGen
           case 1: { //--- x |-> (f1,...)
             const gsl_interp_type* type = gsl_interp_cspline;
             for ( size_t i = 0; i < N; ++i ) {
-              values_[i] = new double[coords_.at( 0 ).size()];
-              splines_1d_.emplace_back( gsl_spline_alloc( type, coords_.at( 0 ).size() ), gsl_spline_free );
+              values_[i] = new double[values_raw_.size()];
+              splines_1d_.emplace_back( gsl_spline_alloc( type, values_raw_.size() ), gsl_spline_free );
             }
-            std::vector<double> x_vec( coords_.at( 0 ).begin(), coords_.at( 0 ).end() );
+            std::vector<double> x_vec;
+            for ( unsigned short i = 0; i < values_raw_.size(); ++i ) {
+              const auto& val = values_raw_.at( i );
+              x_vec.emplace_back( val.coord.at( 0 ) );
+              for ( size_t j = 0; j < N; ++j )
+                values_[j][i] = val.value.at( j );
+            }
             for ( unsigned short i = 0; i < splines_1d_.size(); ++i )
-              gsl_spline_init( splines_1d_.at( i ).get(), &x_vec[0], values_.at( i ), x_vec.size() );
+              gsl_spline_init( splines_1d_.at( i ).get(), &x_vec[0], values_.at( i ), values_raw_.size() );
           } break;
           case 2: { //--- (x,y) |-> (f1,...)
 #ifdef GOOD_GSL
@@ -212,14 +227,11 @@ namespace CepGen
             // second loop over all points to populate the grid
             for ( const auto& val : values_raw_ ) {
               double val_x = val.coord.at( 0 ), val_y = val.coord.at( 1 );
-              // retrieve the index of the Q2/xbj bin in the set
+              // retrieve the index of the bin in the set
               const unsigned short id_x = std::distance( coords_.at( 0 ).begin(), coords_.at( 0 ).lower_bound( val_x ) );
               const unsigned short id_y = std::distance( coords_.at( 1 ).begin(), coords_.at( 1 ).lower_bound( val_y ) );
-              unsigned short i = 0;
-              for ( auto& sp : splines_2d_ ) {
-                gsl_spline2d_set( sp.get(), values_[i], id_x, id_y, val.value[i] );
-                ++i;
-              }
+              for ( unsigned short i = 0; i < splines_2d_.size(); ++i )
+                gsl_spline2d_set( splines_2d_.at( i ).get(), values_[i], id_x, id_y, val.value[i] );
             }
 
             // initialise splines objects
@@ -236,6 +248,7 @@ namespace CepGen
         }
       }
 
+    protected:
       GridType grid_type_;
       /// List of coordinates and associated value(s) in the grid
       std::vector<point_t> values_raw_;
