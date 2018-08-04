@@ -9,6 +9,7 @@
 //#    define GOOD_GSL 1
 #  endif
 #endif
+#include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_math.h>
@@ -76,27 +77,33 @@ namespace CepGen
         switch ( D ) {
           case 1: {
             const double x = coord.at( 0 );
-            for ( size_t i = 0; i < N; ++i )
-              if ( gsl_spline_eval_e( splines_1d_.at( i ).get(), x, accel_.at( 0 ).get(), &out[i] ) != GSL_SUCCESS ) {
+            for ( size_t i = 0; i < N; ++i ) {
+              int res = gsl_spline_eval_e( splines_1d_.at( i ).get(), x, accel_.at( 0 ).get(), &out[i] );
+              if ( res != GSL_SUCCESS ) {
                 out.fill( 0. );
                 CG_WARNING( "GridHandler" )
                   << "Failed to evaluate the grid value "
-                  << "for x = " << in_coords.at( 0 ) << ".";
+                  << "for x = " << in_coords.at( 0 ) << ". "
+                  << "GSL error: " << gsl_strerror( res );
               }
+            }
           } break;
           case 2: {
             const double x = coord.at( 0 ), y = coord.at( 1 );
 #ifdef GOOD_GSL
-            for ( size_t i = 0; i < N; ++i )
-              if ( gsl_spline2d_eval_e( splines_2d_.at( i ).get(),
-                                        x, y,
-                                        accel_.at( 0 ).get(), accel_.at( 1 ).get(),
-                                        &out[i] ) != GSL_SUCCESS ) {
+            for ( size_t i = 0; i < N; ++i ) {
+              int res = gsl_spline2d_eval_e( splines_2d_.at( i ).get(),
+                                             x, y,
+                                             accel_.at( 0 ).get(), accel_.at( 1 ).get(),
+                                             &out[i] );
+              if ( res != GSL_SUCCESS ) {
                 out.fill( 0. );
                 CG_WARNING( "GridHandler" )
                   << "Failed to evaluate the grid value "
-                  << "for x = " << in_coords.at( 0 ) << " / y = " << in_coords.at( 1 ) << ".";
+                  << "for x = " << in_coords.at( 0 ) << " / y = " << in_coords.at( 1 ) << ". "
+                  << "GSL error: " << gsl_strerror( res );
               }
+            }
 #else
             //--- retrieve the indices of the bin in the set
             std::array<unsigned short,D> id;
@@ -201,6 +208,10 @@ namespace CepGen
         switch ( D ) {
           case 1: { //--- x |-> (f1,...)
             const gsl_interp_type* type = gsl_interp_cspline;
+            //const gsl_interp_type* type = gsl_interp_steffen;
+            if ( gsl_interp_type_min_size( type ) >= values_raw_.size() )
+              throw CG_FATAL( "GridHandler" ) << "Not enough points for \"" << type->name << "\" type of interpolation.\n\t"
+                << "Minimum required: " << gsl_interp_type_min_size( type ) << ", got " << values_raw_.size() << "!";
             for ( size_t i = 0; i < N; ++i ) {
               values_[i] = new double[values_raw_.size()];
               splines_1d_.emplace_back( gsl_spline_alloc( type, values_raw_.size() ), gsl_spline_free );
