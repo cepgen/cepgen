@@ -5,7 +5,7 @@
 
 #define DEFAULT_KMR_GRID_PATH "gluon_mmht2014nlo_Watt.dat"
 
-/// Khoze-Martin-R unintegrated gluon densities
+/// Kimber-Martin-Ryskin unintegrated gluon densities
 namespace kmr
 {
   /// A KMR unintegrated gluon densities grid interpolator
@@ -22,7 +22,7 @@ namespace kmr
       static GluonGrid& get( const char* path = DEFAULT_KMR_GRID_PATH );
 
       /// Compute the gluon flux
-      double operator()( double q2, double x, double mu2 ) const;
+      double operator()( double kt2, double x, double mu2 ) const;
       Parameterisation params;
 
     public:
@@ -31,8 +31,6 @@ namespace kmr
 
     private:
       explicit GluonGrid( const Parameterisation& = Parameterisation() );
-      static std::shared_ptr<GluonGrid> singl_;
-
   };
 }
 
