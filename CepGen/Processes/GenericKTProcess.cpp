@@ -8,23 +8,12 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
-
-#ifdef KMR_FLUX
-extern "C" {
-  extern void f_inter_kmr_fg_( double& rx, double& rkt2, double& rmu2, int& iread, double& parton);
-  // common/transferg/filename,fmap_kmr_fg(140,140,140)
-  extern struct {
-    char filename[256];
-    double fmap_kmr_fg[140][140][140];
-  } transferg_;
-}
-#endif
+#include "CepGen/Physics/GluonGrid.h"
 
 namespace CepGen
 {
   namespace Process
   {
-    bool GenericKTProcess::kKMRInterpLoaded = false;
     std::string GenericKTProcess::kKMRInterpGridPath = "gluon_mmht2014nlo_Watt.dat";
 
     GenericKTProcess::GenericKTProcess( const std::string& name,
@@ -343,21 +332,8 @@ namespace CepGen
           return Constants::alphaEM*M_1_PI*( 1.-x )/Q2*( f_D+0.5*x*x*f_C );
         } break;
         case Flux::GluonKMR: {
-#ifdef KMR_FLUX
-          double logx = log10( x ), logq2 = log10( kt2 ), logmu2 = 2.*log10( mx ), fg = 0.;
-          if ( !kKMRInterpLoaded ) {
-            CG_INFO("GenericKTProcess:flux") << "Loading KMR interpolation grid from \"" << kKMRInterpGridPath << "\".";
-            strncpy( transferg_.filename, kKMRInterpGridPath.c_str(), 256 );
-            int iread = 0;
-            f_inter_kmr_fg_( logx, logq2, logmu2, iread, fg );
-            kKMRInterpLoaded = true;
-          }
-          int iread = 1;
-          f_inter_kmr_fg_( logx, logq2, logmu2, iread, fg );
-          return fg;
-#else
-          throw CG_FATAL("GenericKTProcess:flux") << "KMR gluon fluxes are not linked to this instance!";
-#endif
+          const double logx = log10( x ), logq2 = log10( kt2 ), logmu2 = 2.*log10( mx );
+          return kmr::GluonGrid::get( kKMRInterpGridPath.c_str() )( logq2, logx, logmu2 );
         } break;
         default:
           throw CG_FATAL("GenericKTProcess:flux") << "Invalid flux type: " << type;
