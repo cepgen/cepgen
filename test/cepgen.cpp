@@ -14,10 +14,10 @@
 using namespace std;
 
 /**
- * Main caller for this MC generator. Loads the configuration files'
- * variables if passed as an argument to this program, else loads a default
- * LPAIR-like configuration, then launches the cross-section computation and
- * the events generation.
+ * Main caller for this MC generator.
+ *  * loads the configuration files' variables if passed as an argument,
+ *    or a default LPAIR-like configuration,
+ *  * launches the cross-section computation and the events generation.
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
  */
 int main( int argc, char* argv[] ) {
