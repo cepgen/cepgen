@@ -158,7 +158,6 @@ namespace CepGen
       if ( p->hadroniser() ) {
         double br = -1.;
         if ( !p->hadroniser()->run( *ev, br, p->storage() ) || br == 0. )
-//        if ( !p->hadroniser()->run( *ev, br, true ) || br == 0. )
           return 0.;
         integrand *= br; // branching fraction for all decays
       }

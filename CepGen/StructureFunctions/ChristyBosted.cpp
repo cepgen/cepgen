@@ -275,7 +275,7 @@ namespace CepGen
         F2 *= q21/( q21 + delq2 );
 
       if ( sigT != 0. )
-        computeFL( q2_eff, xbj, sigL/sigT );
+        StructureFunctions::computeFL( q2_eff, xbj, sigL/sigT );
 
       return *this;
     }

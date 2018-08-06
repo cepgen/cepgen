@@ -8,7 +8,11 @@
 namespace CepGen
 {
   extern volatile int gSignal;
-  struct RunAbortedException : Exception { using Exception::Exception; };
+  struct RunAbortedException : Exception
+  {
+    using Exception::Exception;
+    ~RunAbortedException() override {}
+  };
 }
 
 class AbortHandler
@@ -34,7 +38,8 @@ class AbortHandler
     }
     static void handle_ctrl_c( int signal, siginfo_t*, void* ) {
       CepGen::gSignal = signal;
-      throw CepGen::RunAbortedException( __PRETTY_FUNCTION__, CepGen::Exception::Type::warning ) << "Run aborted.";
+      throw CepGen::RunAbortedException( __PRETTY_FUNCTION__, CepGen::Exception::Type::info )
+        << "Run aborted.";
     }
     void init() {
       if ( sigaction( SIGINT, &action_, nullptr ) != 0

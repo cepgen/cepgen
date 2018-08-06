@@ -1,9 +1,11 @@
 #include "CepGen/IO/LHEFHandler.h"
 
+#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
+
 #include "CepGen/Parameters.h"
 #include "CepGen/Version.h"
-#include "CepGen/Event/Event.h"
 
 namespace CepGen
 {
@@ -37,26 +39,54 @@ namespace CepGen
       oss_init
         << "<!--\n"
         << "  ***** Sample generated with CepGen v" << version() << " *****\n"
-        << "  * process: " << params.processName() << " (" << params.kinematics.mode << ")\n"
-        << "  * structure functions: " << params.kinematics.structure_functions << "\n"
+        << "  * process: " << params.processName() << " (" << params.kinematics.mode << ")\n";
+      if ( params.kinematics.mode != Kinematics::Mode::ElasticElastic ) {
+        oss_init
+          << "  * structure functions: " << params.kinematics.structure_functions->type << "\n";
+        if ( !params.hadroniserName().empty() )
+          oss_init
+            << "  * hadroniser: " << params.hadroniserName() << "\n";
+      }
+      oss_init
         << "  *--- incoming state\n";
       if ( params.kinematics.cuts.initial.q2.valid() )
         oss_init
-          << "  * Q² range (GeV²): " << params.kinematics.cuts.initial.q2 << "\n";
-      if ( params.kinematics.cuts.remnants.mass_single.valid() )
+          << "  * Q2 range (GeV2): "
+          << params.kinematics.cuts.initial.q2.min() << ", "
+          << params.kinematics.cuts.initial.q2.max() << "\n";
+      if ( params.kinematics.mode != Kinematics::Mode::ElasticElastic
+        && params.kinematics.cuts.remnants.mass_single.valid() )
         oss_init
-          << "  * remnants mass range (GeV): " << params.kinematics.cuts.remnants.mass_single << "\n";
+          << "  * remnants mass range (GeV/c2): "
+          << params.kinematics.cuts.remnants.mass_single.min() << ", "
+          << params.kinematics.cuts.remnants.mass_single.max() << "\n";
       oss_init
         << "  *--- central system\n";
       if ( params.kinematics.cuts.central.pt_single.valid() )
         oss_init
-          << "  * single particle pT (GeV): " << params.kinematics.cuts.central.pt_single << "\n";
+          << "  * single particle pt (GeV/c): "
+          << params.kinematics.cuts.central.pt_single.min() << ", "
+          << params.kinematics.cuts.central.pt_single.max() << "\n";
       if ( params.kinematics.cuts.central.energy_single.valid() )
         oss_init
-          << "  * single particle energy (GeV): " << params.kinematics.cuts.central.energy_single << "\n";
+          << "  * single particle energy (GeV): "
+          << params.kinematics.cuts.central.energy_single.min() << ", "
+          << params.kinematics.cuts.central.energy_single.max() << "\n";
       if ( params.kinematics.cuts.central.eta_single.valid() )
         oss_init
-          << "  * single particle eta: " << params.kinematics.cuts.central.eta_single << "\n";
+          << "  * single particle eta: "
+          << params.kinematics.cuts.central.eta_single.min() << ", "
+          << params.kinematics.cuts.central.eta_single.max() << "\n";
+      if ( params.kinematics.cuts.central.pt_sum.valid() )
+        oss_init
+          << "  * total pt (GeV/c): "
+          << params.kinematics.cuts.central.mass_sum.min() << ", "
+          << params.kinematics.cuts.central.mass_sum.max() << "\n";
+      if ( params.kinematics.cuts.central.mass_sum.valid() )
+        oss_init
+          << "  * total invariant mass (GeV/c2): "
+          << params.kinematics.cuts.central.mass_sum.min() << ", "
+          << params.kinematics.cuts.central.mass_sum.max() << "\n";
       oss_init
         << "  **************************************************\n"
         << "-->";
@@ -173,7 +203,8 @@ namespace CepGen
       for ( const auto& part : ev.particles() ) {
         short pdg_id = part.integerPdgId(), status = 0, moth1 = 0, moth2 = 0;
         switch ( part.role() ) {
-          case Particle::Parton1: case Particle::Parton2:
+          case Particle::Parton1:
+          case Particle::Parton2: {
             if ( part.role() == Particle::Parton1 )
               parton1_pdgid = part.integerPdgId();
             if ( part.role() == Particle::Parton2 )
@@ -181,23 +212,27 @@ namespace CepGen
             if ( !full_event )
               continue;
             status = -2; // conserving xbj/Q2
-            break;
-          case Particle::Intermediate:
+          } break;
+          case Particle::Intermediate: {
             if ( !full_event )
               continue;
             status = 2;
             if ( pdg_id == 0 )
               pdg_id = ev.getConstById( *part.mothers().begin() ).integerPdgId();
-            break;
-          case Particle::IncomingBeam1: case Particle::IncomingBeam2:
+          } break;
+          case Particle::IncomingBeam1:
+          case Particle::IncomingBeam2: {
             if ( !full_event )
               continue;
             status = -9;
-            break;
-          case Particle::OutgoingBeam1: case Particle::OutgoingBeam2:
-          case Particle::CentralSystem:
-            status = 1;
-            break;
+          } break;
+          case Particle::OutgoingBeam1:
+          case Particle::OutgoingBeam2:
+          case Particle::CentralSystem: {
+            status = part.status();
+            if ( status != 1 )
+              continue;
+          } break;
           default: break;
         }
         if ( full_event ) {
@@ -215,4 +250,3 @@ namespace CepGen
 #endif
   }
 }
-

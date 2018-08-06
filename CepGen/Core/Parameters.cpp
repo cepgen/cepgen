@@ -22,16 +22,15 @@ namespace CepGen
     hadroniser_max_trials( param.hadroniser_max_trials ),
     taming_functions( param.taming_functions ),
     process_( std::move( param.process_ ) ),
-    hadroniser_( param.hadroniser_ ),
-    store_( param.store_ ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ )
+    hadroniser_( std::move( param.hadroniser_ ) ),
+    store_( false ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ )
   {}
 
   Parameters::Parameters( const Parameters& param ) :
     kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
     hadroniser_max_trials( param.hadroniser_max_trials ),
     taming_functions( param.taming_functions ),
-    hadroniser_( param.hadroniser_ ),
-    store_( param.store_ ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ )
+    store_( false ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ )
   {}
 
   Parameters::~Parameters() // required for unique_ptr initialisation!
@@ -100,6 +99,14 @@ namespace CepGen
   Parameters::hadroniser()
   {
     return hadroniser_.get();
+  }
+
+  std::string
+  Parameters::hadroniserName() const
+  {
+    if ( !hadroniser_ )
+      return "";
+    return hadroniser_->name();
   }
 
   void
