@@ -49,7 +49,6 @@ namespace kmr
   double
   GluonGrid::operator()( double kt2, double x, double mu2 ) const
   {
-    std::cout << kt2 << "|" << x << "|" << mu2 << std::endl;
     return CepGen::GridHandler<3,1>::eval( { kt2, x, mu2 } ).at( 0 );
   }
 }

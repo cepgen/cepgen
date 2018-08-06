@@ -32,7 +32,7 @@ namespace CepGen
   class GridHandler
   {
     public:
-      typedef std::array<double,D> coord_t;
+      typedef std::vector<double> coord_t;
       typedef std::array<double,N> values_t;
       /// A point and its associated value(s)
       struct point_t
@@ -102,20 +102,19 @@ namespace CepGen
             }
 #else
             //--- retrieve the indices of the bin in the set
-            coord_t min, max;
-            findIndices( coord, min, max );
+            coord_t before, after;
+            findIndices( coord, before, after );
             //--- find boundaries values
-            gridpoint_t ext_11, ext_12, ext_21, ext_22;
-            for ( const auto& val : values_raw_ ) {
-              if      ( min[0] == val.coord.at( 0 ) && min[1] == val.coord.at( 1 ) ) ext_11 = val.value;
-              else if ( min[0] == val.coord.at( 0 ) && max[1] == val.coord.at( 1 ) ) ext_12 = val.value;
-              else if ( max[0] == val.coord.at( 0 ) && min[1] == val.coord.at( 1 ) ) ext_21 = val.value;
-              else if ( max[0] == val.coord.at( 0 ) && max[1] == val.coord.at( 1 ) ) ext_22 = val.value;
-            }
+            const gridpoint_t& ext_11 = values_raw_.at( { before[0], befor [1] } ),
+                              &ext_12 = values_raw_.at( { before[0],  after[1] } ),
+                              &ext_21 = values_raw_.at( {  after[0], before[1] } ),
+                              &ext_22 = values_raw_.at( {  after[0],  after[1] } );
             //--- now that we have the boundaries, we may interpolate
-            coord_t c_d;
+            coord_t c_d( D );
             for ( size_t i = 0; i < D; ++i )
-              c_d[i] = ( coord.at( i )-min[i] )/( max[i]-min[i] );
+              c_d[i] = ( after[i] != before[i] )
+                ? ( coord.at( i )-before[i] )/( after[i]-before[i] )
+                : 0.;
             const gridpoint_t ext_1 = ext_11*( 1.-c_d[0] ) + ext_21*c_d[0];
             const gridpoint_t ext_2 = ext_12*( 1.-c_d[0] ) + ext_22*c_d[0];
             out = ext_1*( 1.-c_d[1] )+ext_2*c_d[1];
@@ -123,24 +122,23 @@ namespace CepGen
           } break;
           case 3: {
             //--- retrieve the indices of the bin in the set
-            coord_t min, max;
-            findIndices( coord, min, max );
+            coord_t before, after;
+            findIndices( coord, before, after );
             //--- find boundaries values
-            gridpoint_t ext_111, ext_112, ext_121, ext_122, ext_211, ext_212, ext_221, ext_222;
-            for ( const auto& val : values_raw_ ) {
-              if      ( min[0] == val.coord.at( 0 ) && min[1] == val.coord.at( 1 ) && min[2] == val.coord.at( 2 ) ) ext_111 = val.value;
-              else if ( min[0] == val.coord.at( 0 ) && min[1] == val.coord.at( 1 ) && max[2] == val.coord.at( 2 ) ) ext_112 = val.value;
-              else if ( min[0] == val.coord.at( 0 ) && max[1] == val.coord.at( 1 ) && min[2] == val.coord.at( 2 ) ) ext_121 = val.value;
-              else if ( min[0] == val.coord.at( 0 ) && max[1] == val.coord.at( 1 ) && max[2] == val.coord.at( 2 ) ) ext_122 = val.value;
-              else if ( max[0] == val.coord.at( 0 ) && min[1] == val.coord.at( 1 ) && min[2] == val.coord.at( 2 ) ) ext_211 = val.value;
-              else if ( max[0] == val.coord.at( 0 ) && min[1] == val.coord.at( 1 ) && max[2] == val.coord.at( 2 ) ) ext_212 = val.value;
-              else if ( max[0] == val.coord.at( 0 ) && max[1] == val.coord.at( 1 ) && min[2] == val.coord.at( 2 ) ) ext_221 = val.value;
-              else if ( max[0] == val.coord.at( 0 ) && max[1] == val.coord.at( 1 ) && max[2] == val.coord.at( 2 ) ) ext_222 = val.value;
-            }
+            const gridpoint_t& ext_111 = values_raw_.at( { before[0], before[1], before[2] } ),
+                              &ext_112 = values_raw_.at( { before[0], before[1],  after[2] } ),
+                              &ext_121 = values_raw_.at( { before[0],  after[1], before[2] } ),
+                              &ext_122 = values_raw_.at( { before[0],  after[1],  after[2] } ),
+                              &ext_211 = values_raw_.at( {  after[0], before[1], before[2] } ),
+                              &ext_212 = values_raw_.at( {  after[0], before[1],  after[2] } ),
+                              &ext_221 = values_raw_.at( {  after[0],  after[1], before[2] } ),
+                              &ext_222 = values_raw_.at( {  after[0],  after[1],  after[2] } );
             //--- now that we have the boundaries, we may interpolate
-            coord_t c_d;
+            coord_t c_d( D );
             for ( size_t i = 0; i < D; ++i )
-              c_d[i] = ( coord.at( i )-min[i] )/( max[i]-min[i] );
+              c_d[i] = ( after[i] != before[i] )
+                ? ( coord.at( i )-before[i] )/( after[i]-before[i] )
+                : 0.;
             const gridpoint_t ext_11 = ext_111*( 1.-c_d[0] ) + ext_211*c_d[0];
             const gridpoint_t ext_12 = ext_112*( 1.-c_d[0] ) + ext_212*c_d[0];
             const gridpoint_t ext_21 = ext_121*( 1.-c_d[0] ) + ext_221*c_d[0];
@@ -150,7 +148,8 @@ namespace CepGen
             out = ext_1*( 1.-c_d[2] )+ext_2*c_d[2];
           } break;
           default:
-            throw CG_FATAL( "GridHandler" ) << "Unsupported number of dimensions: " << N;
+            throw CG_FATAL( "GridHandler" ) << "Unsupported number of dimensions: " << N << ".\n\t"
+              << "Please contact the developers to add such a new feature.";
         }
         return out;
       }
@@ -167,10 +166,10 @@ namespace CepGen
                 c *= c; break;
               default: break;
             }
-        values_raw_.emplace_back( point_t{ mod_coord, point.value } );
+        values_raw_[mod_coord] = point.value;
       }
       /// Return the list of values handled in the grid
-      std::vector<point_t> values() const { return values_raw_; }
+      std::map<coord_t,values_t> values() const { return values_raw_; }
 
       /// Initialise the grid and all useful interpolators/accelerators
       void init() {
@@ -182,7 +181,7 @@ namespace CepGen
           c.clear();
         for ( const auto& val : values_raw_ ) {
           unsigned short i = 0;
-          for ( const auto& c : val.coord ) {
+          for ( const auto& c : val.first ) {
             if ( std::find( coords_.at( i ).begin(), coords_.at( i ).end(), c ) == coords_.at( i ).end() )
               coords_.at( i ).emplace_back( c );
             ++i;
@@ -194,7 +193,7 @@ namespace CepGen
           std::ostringstream os;
           unsigned short i = 0;
           for ( const auto& cs : coords_ ) {
-            os << "coordinate " << (i++) << " has " << cs.size() << " member(s):";
+            os << "coordinate " << (i++) << " has " << cs.size() << " member" << ( cs.size() > 1 ? "s" : "" ) << ":";
             unsigned short j = 0;
             for ( const auto& val : cs )
               os << ( j++ % 20 == 0 ? "\n  " : " " ) << val;
@@ -215,11 +214,12 @@ namespace CepGen
               splines_1d_.emplace_back( gsl_spline_alloc( type, values_raw_.size() ), gsl_spline_free );
             }
             std::vector<double> x_vec;
-            for ( unsigned short i = 0; i < values_raw_.size(); ++i ) {
-              const auto& val = values_raw_.at( i );
-              x_vec.emplace_back( val.coord.at( 0 ) );
-              for ( size_t j = 0; j < N; ++j )
-                values_[j][i] = val.value.at( j );
+            unsigned short i = 0;
+            for ( const auto& vals : values_raw_ ) {
+              x_vec.emplace_back( vals.first.at( 0 ) );
+              unsigned short j = 0;
+              for ( const auto& val : vals.second )
+                values_[j++][i++] = val;
             }
             for ( unsigned short i = 0; i < splines_1d_.size(); ++i )
               gsl_spline_init( splines_1d_.at( i ).get(), &x_vec[0], values_.at( i ), values_raw_.size() );
@@ -235,16 +235,16 @@ namespace CepGen
 
             // second loop over all points to populate the grid
             for ( const auto& val : values_raw_ ) {
-              double val_x = val.coord.at( 0 ), val_y = val.coord.at( 1 );
+              double val_x = val.first.at( 0 ), val_y = val.first.at( 1 );
               // retrieve the index of the bin in the set
               const unsigned short id_x = std::distance( coords_.at( 0 ).begin(), std::lower_bound( coords_.at( 0 ).begin(), coords_.at( 0 ).end(), val_x ) );
               const unsigned short id_y = std::distance( coords_.at( 1 ).begin(), std::lower_bound( coords_.at( 1 ).begin(), coords_.at( 1 ).end(), val_y ) );
               for ( unsigned short i = 0; i < splines_2d_.size(); ++i )
-                gsl_spline2d_set( splines_2d_.at( i ).get(), values_[i], id_x, id_y, val.value[i] );
+                gsl_spline2d_set( splines_2d_.at( i ).get(), values_[i], id_x, id_y, val.second[i] );
             }
 
             // initialise splines objects
-            std::vector<double> x_vec( coords_.at( 0 ).begin(), coords_.at( 0 ).end() ), y_vec( coords_.at( 1 ).begin(), coords_.at( 1 ).end() );
+            std::vector<double> x_vec = coords_.at( 0 ), y_vec = coords_.at( 1 );
             for ( unsigned short i = 0; i < splines_2d_.size(); ++i )
               gsl_spline2d_init( splines_2d_.at( i ).get(), &x_vec[0], &y_vec[0], values_.at( i ), x_vec.size(), y_vec.size() );
 #else
@@ -260,7 +260,7 @@ namespace CepGen
     protected:
       GridType grid_type_;
       /// List of coordinates and associated value(s) in the grid
-      std::vector<point_t> values_raw_;
+      std::map<coord_t,values_t> values_raw_;
 
       std::vector<std::unique_ptr<gsl_interp_accel,void(*)( gsl_interp_accel* )> > accel_;
       std::vector<std::unique_ptr<gsl_spline,void(*)( gsl_spline* )> > splines_1d_;
@@ -272,16 +272,18 @@ namespace CepGen
 
     private:
       void findIndices( const coord_t& coord, coord_t& min, coord_t& max ) const {
+        min.reserve( D );
+        max.reserve( D );
         for ( size_t i = 0; i < D; ++i ) {
-          if ( coord.at( i ) < *coords_.at( i ).begin() )
-            min[i] = max[i] = *coords_.at( i ).begin();
-          else if ( coord.at( i ) > *coords_.at( i ).rbegin() )
-            min[i] = max[i] = *coords_.at( i ).rbegin();
+          const auto& c = coords_.at( i );
+          if ( coord.at( i ) < c.front() )
+            min[i] = max[i] = c.front();
+          else if ( coord.at( i ) > c.back() )
+            min[i] = max[i] = c.back();
           else {
-            auto it_coord = std::lower_bound( coords_.at( i ).begin(), coords_.at( i ).end(), coord.at( i ) );
-            const unsigned short id = std::distance( coords_.at( i ).begin(), it_coord );
-            min[i] = coords_.at( i ).at( id );
-            max[i] = coords_.at( i ).at( id < coords_.at( i ).size()-1 ? id+1 : id );
+            auto it_coord = std::lower_bound( c.begin(), c.end(), coord.at( i ) );
+            min[i] = *it_coord;
+            max[i] = ( it_coord != c.end() ) ? *( it_coord++ ) : *it_coord;
           }
         }
       }
