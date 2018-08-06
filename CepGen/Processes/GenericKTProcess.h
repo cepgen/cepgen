@@ -156,7 +156,6 @@ namespace CepGen
         /// Type of particles produced in the final state
         std::vector<PDG> kProducedParts;
         static std::string kKMRInterpGridPath;
-        static bool kKMRInterpLoaded;
     };
   }
 }
