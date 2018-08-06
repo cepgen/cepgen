@@ -34,14 +34,6 @@ namespace CepGen
     public:
       typedef std::vector<double> coord_t;
       typedef std::array<double,N> values_t;
-      /// A point and its associated value(s)
-      struct point_t
-      {
-        /// Coordinate(s)
-        coord_t coord;
-        /// (list of) value(s) for this point
-        values_t value;
-      };
 
     public:
       explicit GridHandler( const GridType& grid_type ) :
@@ -149,8 +141,8 @@ namespace CepGen
       }
 
       /// Insert a new value in the grid
-      void insert( const point_t& point ) {
-        auto mod_coord = point.coord;
+      void insert( coord_t coord, values_t value ) {
+        auto mod_coord = coord;
         if ( grid_type_ != GridType::linear )
           for ( auto& c : mod_coord )
             switch ( grid_type_ ) {
@@ -160,7 +152,7 @@ namespace CepGen
                 c *= c; break;
               default: break;
             }
-        values_raw_[mod_coord] = point.value;
+        values_raw_[mod_coord] = value;
       }
       /// Return the list of values handled in the grid
       std::map<coord_t,values_t> values() const { return values_raw_; }

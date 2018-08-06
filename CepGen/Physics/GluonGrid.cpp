@@ -32,7 +32,7 @@ namespace kmr
         kt2_vals.insert( kt2 );
         x_vals.insert( x );
         mu2_vals.insert( mu2 );
-        insert( CepGen::GridHandler<3,1>::point_t{ { kt2, x, mu2 }, { fg } } );
+        insert( { kt2, x, mu2 }, { fg } );
       }
       file.close();
     }

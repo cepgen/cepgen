@@ -47,7 +47,7 @@ namespace MSTW
       while ( file.read( reinterpret_cast<char*>( &val ), sizeof( sfval_t ) ) ) {
         q2_vals.insert( val.q2 );
         xbj_vals.insert( val.xbj );
-        insert( CepGen::GridHandler<2,2>::point_t{ { val.q2, val.xbj }, { val.f2, val.fl } } );
+        insert( { val.q2, val.xbj }, { val.f2, val.fl } );
       }
       file.close();
     }
