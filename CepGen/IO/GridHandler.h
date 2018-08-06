@@ -48,15 +48,9 @@ namespace CepGen
         grid_type_( grid_type ), accel_{}
       {
         for ( size_t i = 0; i < D; ++i )
-          accel_.emplace_back( std::unique_ptr<gsl_interp_accel,void(*)( gsl_interp_accel* )>( gsl_interp_accel_alloc(), gsl_interp_accel_free ) );
+          accel_.emplace_back( gsl_interp_accel_alloc(), gsl_interp_accel_free );
       }
-      ~GridHandler() {
-#ifdef GOOD_GSL
-        for ( size_t i = 0; i < D; ++i )
-          if ( values_[i] )
-            delete[] values_[i];
-#endif
-      }
+      ~GridHandler() {}
 
       /// Interpolate a point to a given coordinate
       values_t eval( coord_t in_coords ) const {
@@ -193,13 +187,12 @@ namespace CepGen
           std::ostringstream os;
           unsigned short i = 0;
           for ( const auto& cs : coords_ ) {
-            os << "coordinate " << (i++) << " has " << cs.size() << " member" << ( cs.size() > 1 ? "s" : "" ) << ":";
+            os << "\n>> coordinate " << (i++) << " has " << cs.size() << " member" << ( cs.size() > 1 ? "s" : "" ) << ":";
             unsigned short j = 0;
             for ( const auto& val : cs )
               os << ( j++ % 20 == 0 ? "\n  " : " " ) << val;
-            os << "\n";
           }
-          CG_DEBUG( "GridHandler" ) << "Grid dump:\n" << os.str();
+          CG_DEBUG( "GridHandler" ) << "Grid dump:" << os.str();
         }
         //--- particularise by dimension
         switch ( D ) {
@@ -210,7 +203,7 @@ namespace CepGen
               throw CG_FATAL( "GridHandler" ) << "Not enough points for \"" << type->name << "\" type of interpolation.\n\t"
                 << "Minimum required: " << gsl_interp_type_min_size( type ) << ", got " << values_raw_.size() << "!";
             for ( size_t i = 0; i < N; ++i ) {
-              values_[i] = new double[values_raw_.size()];
+              values_[i].reset( new double[values_raw_.size()] );
               splines_1d_.emplace_back( gsl_spline_alloc( type, values_raw_.size() ), gsl_spline_free );
             }
             std::vector<double> x_vec;
@@ -219,17 +212,17 @@ namespace CepGen
               x_vec.emplace_back( vals.first.at( 0 ) );
               unsigned short j = 0;
               for ( const auto& val : vals.second )
-                values_[j++][i++] = val;
+                values_[j++].get()[i++] = val;
             }
             for ( unsigned short i = 0; i < splines_1d_.size(); ++i )
-              gsl_spline_init( splines_1d_.at( i ).get(), &x_vec[0], values_.at( i ), values_raw_.size() );
+              gsl_spline_init( splines_1d_.at( i ).get(), &x_vec[0], values_[i].get(), values_raw_.size() );
           } break;
           case 2: { //--- (x,y) |-> (f1,...)
 #ifdef GOOD_GSL
             const gsl_interp2d_type* type = gsl_interp2d_bilinear;
             splines_2d_.clear();
             for ( size_t i = 0; i < N; ++i ) {
-              values_[i] = new double[coords_.at( 0 ).size() * coords_.at( 1 ).size()];
+              values_[i].reset( new double[coords_.at( 0 ).size() * coords_.at( 1 ).size()] );
               splines_2d_.emplace_back( gsl_spline2d_alloc( type, coords_.at( 0 ).size(), coords_.at( 1 ).size() ), gsl_spline2d_free );
             }
 
@@ -240,18 +233,18 @@ namespace CepGen
               const unsigned short id_x = std::distance( coords_.at( 0 ).begin(), std::lower_bound( coords_.at( 0 ).begin(), coords_.at( 0 ).end(), val_x ) );
               const unsigned short id_y = std::distance( coords_.at( 1 ).begin(), std::lower_bound( coords_.at( 1 ).begin(), coords_.at( 1 ).end(), val_y ) );
               for ( unsigned short i = 0; i < splines_2d_.size(); ++i )
-                gsl_spline2d_set( splines_2d_.at( i ).get(), values_[i], id_x, id_y, val.second[i] );
+                gsl_spline2d_set( splines_2d_.at( i ).get(), values_[i].get(), id_x, id_y, val.second[i] );
             }
 
             // initialise splines objects
             std::vector<double> x_vec = coords_.at( 0 ), y_vec = coords_.at( 1 );
             for ( unsigned short i = 0; i < splines_2d_.size(); ++i )
-              gsl_spline2d_init( splines_2d_.at( i ).get(), &x_vec[0], &y_vec[0], values_.at( i ), x_vec.size(), y_vec.size() );
+              gsl_spline2d_init( splines_2d_.at( i ).get(), &x_vec[0], &y_vec[0], values_[i].get(), x_vec.size(), y_vec.size() );
 #else
             CG_WARNING( "GridHandler" )
               << "GSL version ≥ 2.1 is required for spline bilinear interpolation.\n\t"
               << "Version " << GSL_VERSION << " is installed on this system!\n\t"
-              << "Will use a linear approximation instead.";
+              << "Will use a simple bilinear approximation instead.";
 #endif
           } break;
         }
@@ -268,7 +261,7 @@ namespace CepGen
       std::vector<std::unique_ptr<gsl_spline2d,void(*)( gsl_spline2d* )> > splines_2d_;
 #endif
       std::array<std::vector<double>,D> coords_;
-      std::array<double*,N> values_;
+      std::array<std::unique_ptr<double[]>,N> values_;
 
     private:
       void findIndices( const coord_t& coord, coord_t& min, coord_t& max ) const {
