@@ -2,9 +2,7 @@
 #include "CepGen/Core/Exception.h"
 
 #include <fstream>
-
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_math.h>
+#include <set>
 
 namespace kmr
 {
@@ -51,6 +49,7 @@ namespace kmr
   double
   GluonGrid::operator()( double kt2, double x, double mu2 ) const
   {
+    std::cout << kt2 << "|" << x << "|" << mu2 << std::endl;
     return CepGen::GridHandler<3,1>::eval( { kt2, x, mu2 } ).at( 0 );
   }
 }
