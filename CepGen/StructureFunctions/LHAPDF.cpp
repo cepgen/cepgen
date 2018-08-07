@@ -9,7 +9,7 @@ namespace CepGen
     constexpr std::array<short,6> LHAPDF::qtimes3_;
 
     LHAPDF::Parameterisation::Parameterisation() :
-      num_flavours( 4 ), pdf_set( "cteq6" ), pdf_member( 0 )
+      num_flavours( 4 ), pdf_set( "cteq6" ), pdf_member( 0 ), mode( Mode::full )
     {}
 
     LHAPDF::Parameterisation
@@ -19,6 +19,7 @@ namespace CepGen
       p.num_flavours = 4;
       p.pdf_set = "cteq6";
       p.pdf_member = 0;
+      p.mode = Mode::full;
       return p;
     }
 
@@ -26,11 +27,12 @@ namespace CepGen
       StructureFunctions( Type::LHAPDF ), params( param ), initialised_( false )
     {}
 
-    LHAPDF::LHAPDF( const char* set, unsigned short member ) :
+    LHAPDF::LHAPDF( const char* set, unsigned short member, const Parameterisation::Mode& mode ) :
       StructureFunctions( Type::LHAPDF ), initialised_( false )
     {
       params.pdf_set = set;
       params.pdf_member = member;
+      params.mode = mode;
     }
 
     void
@@ -63,7 +65,8 @@ namespace CepGen
         << " * number of flavours: " << params.num_flavours << "\n"
         << " * PDF set: " << params.pdf_set << "\n"
         << ( pdf_description.empty() ? "" : "  "+pdf_description+"\n" )
-        << " * PDF member: " << params.pdf_member << ( pdf_type.empty() ? "" : " ("+pdf_type+")" );
+        << " * PDF member: " << params.pdf_member << ( pdf_type.empty() ? "" : " ("+pdf_type+")" ) << "\n"
+        << " * quarks mode: " << params.mode;
       initialised_ = true;
 #else
       throw CG_FATAL( "LHAPDF" ) << "LHAPDF is not liked to this instance!";
@@ -94,7 +97,14 @@ namespace CepGen
         const double xq = ::LHAPDF::xfx( xbj, q2, i+1 );
         const double xqbar = ::LHAPDF::xfx( xbj, q2, -( i+1 ) );
 #  endif
-        F2 += prefactor*( xq+xqbar );
+        switch ( params.mode ) {
+          case Parameterisation::Mode::full:
+            F2 += prefactor*( xq+xqbar ); break;
+          case Parameterisation::Mode::valence:
+            F2 += prefactor*( xq-xqbar ); break;
+          case Parameterisation::Mode::sea:
+            F2 += prefactor*( 2.*xqbar ); break;
+        }
       }
 #else
       throw CG_FATAL( "LHAPDF" ) << "LHAPDF is not liked to this instance!";
@@ -102,5 +112,16 @@ namespace CepGen
 
       return *this;
     }
+  }
+
+  std::ostream&
+  operator<<( std::ostream& os, const SF::LHAPDF::Parameterisation::Mode& mode )
+  {
+    switch ( mode ) {
+      case SF::LHAPDF::Parameterisation::Mode::full: return os << "all quarks";
+      case SF::LHAPDF::Parameterisation::Mode::valence: return os << "valence quarks";
+      case SF::LHAPDF::Parameterisation::Mode::sea: return os << "sea quarks";
+    }
+    return os;
   }
 }

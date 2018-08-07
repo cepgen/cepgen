@@ -86,6 +86,10 @@ class Logging:
     DebugInsideLoop = 5
 
 class StructureFunctions:
+    class PDFMode:
+        AllQuarks     = 0
+        ValenceQuarks = 1
+        SeaQuarks     = 2
     '''Types of structure functions supported'''
     Electron            = Parameters(id=1)
     ElasticProton       = Parameters(id=2)
@@ -114,6 +118,7 @@ class StructureFunctions:
         id = 401,
         pdfSet = 'LUXqed17_plus_PDF4LHC15_nnlo_100',
         numFlavours = 4,
+        mode = PDFMode.AllQuarks,
     )
 
 class ProcessMode:

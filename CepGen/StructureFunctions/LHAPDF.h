@@ -24,10 +24,12 @@ namespace CepGen
           unsigned short num_flavours;
           std::string pdf_set;
           unsigned short pdf_member;
+          enum class Mode { full = 0, valence = 1, sea = 2 };
+          Mode mode;
         };
 
         explicit LHAPDF( const Parameterisation& param = Parameterisation::cteq6() );
-        explicit LHAPDF( const char* set, unsigned short member = 0 );
+        explicit LHAPDF( const char* set, unsigned short member = 0, const Parameterisation::Mode& mode = Parameterisation::Mode::full );
         LHAPDF& operator()( double q2, double xbj ) override;
 
         Parameterisation params;
@@ -49,6 +51,7 @@ namespace CepGen
         } };
     };
   }
+  std::ostream& operator<<( std::ostream& os, const SF::LHAPDF::Parameterisation::Mode& mode );
 }
 
 #endif
