@@ -5,7 +5,8 @@ c     =================================================================
 c     CepGen common blocks for kinematics definition
 c     =================================================================
       include 'cepgen_blocks.inc'
-      data iflux1,iflux2,sfmod,pdg_l,a_nuc2,z_nuc2/10,100,11,13,208,82/
+      data iflux1,iflux2,sfmod,pdg_l/10,100,11,13/
+      data a_nuc1,z_nuc1,a_nuc2,z_nuc2/1,1,208,82/
 
 c     =================================================================
 c     local variables
@@ -31,7 +32,7 @@ c     =================================================================
       double precision Phi11_dot_e,Phi11_cross_e
       double precision Phi21_dot_e,Phi21_cross_e
       double precision aintegral
-      integer imethod,imat1,imat2
+      integer imat1,imat2
 
       double precision px_plus,px_minus,py_plus,py_minus
       double precision r1,r2
@@ -127,12 +128,6 @@ c
       iterm12 = 1         ! LT
       itermtt = 1         ! TT'
 
-c     =================================================================
-c     How matrix element is calculated
-c         imethod = 0: on-shell formula
-c         imethod = 1: off-shell formula
-c     =================================================================
-      imethod = 1
 c     =================================================================
 c     two terms in the Wolfgang's formula for
 c     off-shell gamma gamma --> l^+ l^-
@@ -319,6 +314,10 @@ c     =================================================================
 
 c     =================================================================
 c     matrix elements
+c     =================================================================
+c     How matrix element is calculated
+c         imethod = 0: on-shell formula
+c         imethod = 1: off-shell formula
 c     =================================================================
       if(imethod.eq.0) then
 c     =================================================================

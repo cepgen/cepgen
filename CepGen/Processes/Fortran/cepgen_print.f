@@ -11,6 +11,7 @@
       print *,'Parameter                                  value(s)'
       print *,'--------------------------------------------------------'
       print 101,'Process mode:',icontri
+      print 101,'Computation method:',imethod
       print 101,'Structure functions:',sfmod
       print 101,'Central system PDG:',pdg_l
       print 103,'Beams momenta:',inp1,inp2

@@ -17,10 +17,10 @@ c       inp1 = proton energy in lab frame
 c       inp2 = nucleus energy **per nucleon** in LAB frame
 c       Collision is along z-axis
 c     =================================================================
-      common/params/icontri,iflux1,iflux2,sfmod,pdg_l,
-     &     a_nuc1,z_nuc1,a_nuc2,z_nuc2,idum,
+      common/params/icontri,iflux1,iflux2,imethod,sfmod,pdg_l,
+     &     a_nuc1,z_nuc1,a_nuc2,z_nuc2,
      &     inp1,inp2
-      integer icontri,iflux1,iflux2,sfmod,pdg_l,idum,
+      integer icontri,iflux1,iflux2,imethod,sfmod,pdg_l,
      &     a_nuc1,z_nuc1,a_nuc2,z_nuc2
       double precision inp1,inp2
 

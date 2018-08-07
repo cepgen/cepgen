@@ -45,6 +45,7 @@ namespace CepGen
         void init( Parameters* );
         PDG pair_;
         std::string proc_name_, hadr_name_, integr_type_;
+        unsigned int method_;
     };
 
     //----- specialised registerers

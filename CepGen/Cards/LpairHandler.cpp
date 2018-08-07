@@ -41,10 +41,14 @@ namespace CepGen
 
       if ( proc_name_ == "lpair" )
         params_.setProcess( new Process::GamGamLL );
-      else if ( proc_name_ == "pptoll" || proc_name_ == "pptoff" )
+      else if ( proc_name_ == "pptoll" || proc_name_ == "pptoff" ) {
         params_.setProcess( new Process::PPtoFF );
-      else if ( proc_name_ == "pptoww" )
+        dynamic_cast<Process::GenericKTProcess*>( params_.process() )->setComputationMethod( method_ );
+      }
+      else if ( proc_name_ == "pptoww" ) {
         params_.setProcess( new Process::PPtoWW );
+        dynamic_cast<Process::GenericKTProcess*>( params_.process() )->setComputationMethod( method_ );
+      }
       else
         throw CG_FATAL( "LpairHandler" ) << "Unrecognised process name: " << proc_name_ << "!";
 
@@ -95,6 +99,7 @@ namespace CepGen
       registerParameter<unsigned int>( "SEED", "Random generator seed", (unsigned int*)&params->integrator.rng_seed );
       registerParameter<unsigned int>( "NTHR", "Number of threads to use for events generation", &params->generation.num_threads );
       registerParameter<unsigned int>( "MODE", "Subprocess' mode", (unsigned int*)&params->kinematics.mode );
+      registerParameter<unsigned int>( "METH", "Computation method (kT-factorisation)", &method_ );
       registerParameter<unsigned int>( "PMOD", "Outgoing primary particles' mode", (unsigned int*)&params->kinematics.structure_functions );
       registerParameter<unsigned int>( "EMOD", "Outgoing primary particles' mode", (unsigned int*)&params->kinematics.structure_functions );
       registerParameter<unsigned int>( "PAIR", "Outgoing particles' PDG id", (unsigned int*)&pair_ );

@@ -38,12 +38,6 @@ namespace CepGen
     PPtoFF::computeKTFactorisedMatrixElement()
     {
       //=================================================================
-      //     How matrix element is calculated
-      //=================================================================
-
-      const unsigned short method = 1;
-
-      //=================================================================
       //     matrix element computation
       //=================================================================
 
@@ -177,13 +171,17 @@ namespace CepGen
       //=================================================================
       double amat2 = 0.;
 
-      CG_DEBUG_LOOP( "PPtoFF" )
-        << "matrix element mode: " << method << ".";
+      //=================================================================
+      //     How matrix element is calculated
+      //=================================================================
 
-      if ( method == 0 ) {
-        //=================================================================
+      CG_DEBUG_LOOP( "PPtoFF" )
+        << "matrix element mode: " << method_ << ".";
+
+      if ( method_ == 0 ) {
+        //===============================================================
         //     Mendelstam variables
-        //=================================================================
+        //===============================================================
 
         //const double shat = s_*x1*x2; // approximation
         const double shat = ( q1t+q2t ).mass2(); // exact formula
@@ -199,7 +197,7 @@ namespace CepGen
         amat2 = onShellME( shat, that, uhat );
       }
 
-      else if ( method == 1 ) {
+      else if ( method_ == 1 ) {
         const double t1abs = ( q1t.pt2() + x1*( MX_*MX_-mp2_ )+x1*x1*mp2_ )/( 1.-x1 ),
                      t2abs = ( q2t.pt2() + x2*( MY_*MY_-mp2_ )+x2*x2*mp2_ )/( 1.-x2 );
         const double z1p = alpha1/x1, z1m = alpha2/x1,

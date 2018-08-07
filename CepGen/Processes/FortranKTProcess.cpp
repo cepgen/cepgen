@@ -10,7 +10,7 @@ extern "C"
     double m_p, units, pi, alpha_em;
   };
   struct Parameters {
-    int icontri, iflux1, iflux2, sfmod, pdg_l, a_nuc1, z_nuc1, a_nuc2, z_nuc2, idum;
+    int icontri, iflux1, iflux2, imethod, sfmod, pdg_l, a_nuc1, z_nuc1, a_nuc2, z_nuc2;
     double inp1, inp2;
   };
   struct KtKinematics {
@@ -75,6 +75,7 @@ namespace CepGen
       //===========================================================================================
 
       params_.icontri = (int)cuts_.mode;
+      params_.imethod = (int)method_;
       params_.sfmod = (int)cuts_.structure_functions->type;
       params_.pdg_l = (int)cuts_.central_system[0];
 

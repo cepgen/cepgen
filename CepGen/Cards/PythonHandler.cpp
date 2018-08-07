@@ -80,14 +80,23 @@ namespace CepGen
         throwPythonError( Form( "Failed to extract the process name from the configuration card %s", file ) );
       const std::string proc_name = decode( pproc_name );
 
+      unsigned short method = 1;
+      fillParameter( process, "method", (int&)method );
+
       if ( proc_name == "lpair" )
         params_.setProcess( new Process::GamGamLL );
-      else if ( proc_name == "pptoll" || proc_name == "pptoff" )
+      else if ( proc_name == "pptoll" || proc_name == "pptoff" ) {
         params_.setProcess( new Process::PPtoFF );
-      else if ( proc_name == "pptoww" )
+        dynamic_cast<Process::GenericKTProcess*>( params_.process() )->setComputationMethod( method );
+      }
+      else if ( proc_name == "pptoww" ) {
         params_.setProcess( new Process::PPtoWW );
-      else if ( proc_name == "patoll" )
+        dynamic_cast<Process::GenericKTProcess*>( params_.process() )->setComputationMethod( method );
+      }
+      else if ( proc_name == "patoll" ) {
         params_.setProcess( new Process::FortranKTProcess( "nucltoff", "(p/A)(p/A) ↝ (g/ɣ)ɣ → f⁺f¯", nucl_to_ff_ ) );
+        dynamic_cast<Process::GenericKTProcess*>( params_.process() )->setComputationMethod( method );
+      }
       else throw CG_FATAL( "PythonHandler" ) << "Unrecognised process: " << proc_name << ".";
 
       //--- process mode
