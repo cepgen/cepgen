@@ -6,6 +6,7 @@
 #include "CepGen/Processes/PPtoFF.h"
 #include "CepGen/Processes/PPtoWW.h"
 
+#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Physics/PDG.h"
 
@@ -14,6 +15,7 @@
 #include <unordered_map>
 #include <assert.h>
 #include <string.h>
+#include <math.h>
 
 using namespace std;
 
@@ -29,7 +31,7 @@ main( int argc, char* argv[] )
   // process -> { pt cut -> { kinematics -> ( sigma, delta(sigma) ) } }
   vector<pair<const char*,ValuesAtCutMap> > values_map = {
     //--- LPAIR values at sqrt(s) = 13 TeV
-    /*{ "lpair", {
+    { "lpair", {
       { 3.0, { // pt cut
         { "elastic",    { 2.0871703e1, 3.542e-2 } },
         { "singlediss", { 1.5042536e1, 3.256e-2 } },
@@ -40,7 +42,7 @@ main( int argc, char* argv[] )
         { "singlediss", { 4.8504819e-1, 1.171e-3 } },
         { "doublediss", { 6.35650e-1, 1.93968e-3 } }
       } },
-    } },*/
+    } },
     //--- PPtoLL values
     { "pptoll", {
       { 3.0, { // pt cut
@@ -134,13 +136,13 @@ main( int argc, char* argv[] )
           }
 
           if ( kin_mode.find( "_su" ) != string::npos )
-            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SzczurekUleshchenko;
+            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctionsBuilder::get( CepGen::SF::Type::SzczurekUleshchenko );
           else if ( kin_mode.find( "_lux" ) != string::npos )
-            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::Schaefer;
+            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctionsBuilder::get( CepGen::SF::Type::Schaefer );
           else if ( kin_mode.find( "_allm" ) != string::npos )
-            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::ALLM97;
+            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctionsBuilder::get( CepGen::SF::Type::ALLM97 );
           else
-            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SuriYennie;
+            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctionsBuilder::get( CepGen::SF::Type::SuriYennie );
 
           //mg.parameters->dump();
           CG_INFO( "main" )

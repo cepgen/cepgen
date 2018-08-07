@@ -6,7 +6,7 @@ namespace CepGen
 {
   namespace SF
   {
-    constexpr std::array<short,6> LHAPDF::qtimes3_;
+    constexpr std::array<short,6> LHAPDF::qtimes3_, LHAPDF::pdgid_;
 
     LHAPDF::Parameterisation::Parameterisation() :
       num_flavours( 4 ), pdf_set( "cteq6" ), pdf_member( 0 ), mode( Mode::full )
@@ -91,8 +91,8 @@ namespace CepGen
       for ( int i = 0; i < params.num_flavours; ++i ) {
         const double prefactor = 1./9.*qtimes3_[i]*qtimes3_[i];
 #  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
-        const double xq = pdfs_[params.pdf_member]->xfxQ2( i, xbj, q2 );
-        const double xqbar = pdfs_[params.pdf_member]->xfxQ2( -i, xbj, q2 );
+        const double xq = pdfs_[params.pdf_member]->xfxQ2( pdgid_[i], xbj, q2 );
+        const double xqbar = pdfs_[params.pdf_member]->xfxQ2( -pdgid_[i], xbj, q2 );
 #  else
         const double xq = ::LHAPDF::xfx( xbj, q2, i+1 );
         const double xqbar = ::LHAPDF::xfx( xbj, q2, -( i+1 ) );
