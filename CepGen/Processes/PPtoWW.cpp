@@ -32,13 +32,6 @@ namespace CepGen
     double
     PPtoWW::computeKTFactorisedMatrixElement()
     {
-
-      //=================================================================
-      //     How matrix element is calculated
-      //=================================================================
-
-      const unsigned short method = 1;
-
       //=================================================================
       //     matrix element computation
       //=================================================================
@@ -226,21 +219,25 @@ namespace CepGen
       //=================================================================
       double amat2 = 0.;
 
+      //=================================================================
+      //     How matrix element is calculated
+      //=================================================================
+
       CG_DEBUG_LOOP( "PPtoWW" )
-        << "matrix element mode: " << method << ".";
+        << "matrix element mode: " << method_ << ".";
 
       //=================================================================
       //     matrix element for gamma gamma --> W^+ W^-
       //     (Denner+Dittmaier+Schuster)
       //     (work in collaboration with C. Royon)
       //=================================================================
-      if ( method == 0 )
+      if ( method_ == 0 )
         amat2 = onShellME( shat, that, uhat );
 
       //=================================================================
       //     off-shell Nachtmann formulae
       //=================================================================
-      else if ( method == 1 )
+      else if ( method_ == 1 )
         amat2 = offShellME( shat, that, uhat, phi_qt1_+phi_qt2_, phi_qt1_-phi_qt2_ );
 
       if ( amat2 <= 0. )

@@ -47,6 +47,8 @@ namespace CepGen
         void fillKinematics( bool ) override;
 
         void dumpVariables() const;
+        unsigned short computationMethod() const { return method_; }
+        void setComputationMethod( unsigned short i ) { method_ = i; }
 
         /// Get the elastic flux to be expected at a given parton x/kT
         /// \param[in] x Parton momentum fraction
@@ -101,6 +103,7 @@ namespace CepGen
         double generateVariables() const;
 
         unsigned short num_dimensions_;
+        unsigned short method_;
 
         /// Phase space point-independant component of the Jacobian weight of the point in the phase space for integration
         double kt_jacobian_;
