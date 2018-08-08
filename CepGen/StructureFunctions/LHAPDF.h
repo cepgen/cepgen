@@ -39,7 +39,7 @@ namespace CepGen
         bool initialised_;
 
 #ifdef LIBLHAPDF
-#  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+#  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION >= 6
         ::LHAPDF::PDFSet pdf_set_;
         std::vector<std::unique_ptr<::LHAPDF::PDF> > pdfs_;
 #  endif

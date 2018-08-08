@@ -65,7 +65,7 @@ namespace CepGen
         static constexpr unsigned short invalid_idx_ = 999;
         unsigned short max_attempts_;
         std::vector<unsigned short> min_ids_;
-        std::unordered_map<short,short> py_cg_corresp_, cg_py_corresp_;
+        std::unordered_map<short,short> py_cg_corresp_;
 #ifdef PYTHIA8
         unsigned short findRole( const Event& ev, const Pythia8::Particle& p ) const;
         void updateEvent( Event& ev, double& weight, bool full ) const;

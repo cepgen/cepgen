@@ -76,6 +76,7 @@ namespace CepGen
     LHAPDF&
     LHAPDF::operator()( double q2, double xbj )
     {
+#ifdef LIBLHAPDF
       std::pair<double,double> nv = { q2, xbj };
       if ( nv == old_vals_ )
         return *this;
@@ -87,15 +88,37 @@ namespace CepGen
 
       if ( !initialised_ )
         initialise();
-#ifdef LIBLHAPDF
+#  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION >= 6
+      auto& member = *pdfs_[params.pdf_member];
+      if ( !member.inPhysicalRangeXQ2( xbj, q2 ) ) {
+        CG_WARNING( "LHAPDF" ) << "(x=" << xbj << "/Q²=" << q2 << " GeV²) "
+          << "not in physical range for PDF member " << params.pdf_member << ":\n"
+          << "  min: (x=" << member.xMin() << "/Q²=" << member.q2Min() << "),\n"
+          << "  max: (x=" << member.xMax() << "/Q²=" << member.q2Max() << ").";
+        return *this;
+      }
+#  else
+      if ( q2 < ::LHAPDF::getQ2min( params.pdf_member ) || q2 > ::LHAPDF::getQ2max( params.pdf_member )
+        || xbj < ::LHAPDF::getXmin( params.pdf_member ) || xbj > ::LHAPDF::getXmax( params.pdf_member ) ) {
+        CG_WARNING( "LHAPDF" ) << "(x=" << xbj << "/Q²=" << q2 << " GeV²) "
+          << "not in physical range for PDF member " << params.pdf_member << ":\n"
+          << "  min: (x=" << ::LHAPDF::getXmin( params.pdf_member ) << "/Q²=" << ::LHAPDF::getQ2min( params.pdf_member ) << "),\n"
+          << "  max: (x=" << ::LHAPDF::getXmax( params.pdf_member ) << "/Q²=" << ::LHAPDF::getQ2max( params.pdf_member ) << ").";
+        return *this;
+      }
+      const double q = sqrt( q2 );
+#  endif
+
       for ( int i = 0; i < params.num_flavours; ++i ) {
         const double prefactor = 1./9.*qtimes3_[i]*qtimes3_[i];
-#  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
-        const double xq = pdfs_[params.pdf_member]->xfxQ2( pdgid_[i], xbj, q2 );
-        const double xqbar = pdfs_[params.pdf_member]->xfxQ2( -pdgid_[i], xbj, q2 );
+#  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION >= 6
+        if ( !pdfs_[params.pdf_member]->hasFlavor( pdgid_[i] ) )
+          throw CG_FATAL( "LHAPDF" ) << "Flavour " << pdgid_[i] << " is unsupported!";
+        const double xq = member.xfxQ2( pdgid_[i], xbj, q2 );
+        const double xqbar = member.xfxQ2( -pdgid_[i], xbj, q2 );
 #  else
-        const double xq = ::LHAPDF::xfx( xbj, q2, i+1 );
-        const double xqbar = ::LHAPDF::xfx( xbj, q2, -( i+1 ) );
+        const double xq = ::LHAPDF::xfx( xbj, q, pdgid_[i] );
+        const double xqbar = ::LHAPDF::xfx( xbj, q, -pdgid_[i] );
 #  endif
         switch ( params.mode ) {
           case Parameterisation::Mode::full:
