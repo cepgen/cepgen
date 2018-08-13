@@ -1,7 +1,5 @@
 #include "CepGen/StructureFunctions/Schaefer.h"
-#include "CepGen/StructureFunctions/ALLM.h"
-#include "CepGen/StructureFunctions/ChristyBosted.h"
-#include "CepGen/StructureFunctions/MSTWGrid.h"
+#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 
 #include "CepGen/Core/Exception.h"
 
@@ -19,9 +17,23 @@ namespace CepGen
       par.q2_cut = 9.;
       par.w2_hi = 4.;
       par.w2_lo = 3.;
-      par.resonances_model.reset( new ChristyBosted() );
-      par.perturbative_model = std::shared_ptr<MSTW::Grid>( &MSTW::Grid::get(), [=]( MSTW::Grid* ){} );
-      par.continuum_model.reset( new ALLM( ALLM::Parameterisation::gd11p() ) );
+      par.resonances_model = StructureFunctionsBuilder::get( SF::Type::ChristyBosted );
+      par.perturbative_model = StructureFunctionsBuilder::get( SF::Type::MSTWgrid );
+      par.continuum_model = StructureFunctionsBuilder::get( SF::Type::GD11p );
+      par.higher_twist = 0;
+      return par;
+    }
+
+    Schaefer::Parameterisation
+    Schaefer::Parameterisation::cteq()
+    {
+      Parameterisation par;
+      par.q2_cut = 9.;
+      par.w2_hi = 4.;
+      par.w2_lo = 3.;
+      par.resonances_model = StructureFunctionsBuilder::get( SF::Type::ChristyBosted );
+      par.perturbative_model = StructureFunctionsBuilder::get( SF::Type::MSTWgrid );
+      par.continuum_model = StructureFunctionsBuilder::get( SF::Type::GD11p );
       par.higher_twist = 0;
       return par;
     }
@@ -34,7 +46,7 @@ namespace CepGen
     void
     Schaefer::initialise()
     {
-      CG_INFO( "Schaefer" ) << "LUXlike structure functions evaluator successfully initialised.\n"
+      CG_INFO( "LUXlike" ) << "LUXlike structure functions evaluator successfully initialised.\n"
         << " * Q² cut:             " << params.q2_cut << " GeV²\n"
         << " * W² ranges:          " << params.w2_lo << " GeV² / " << params.w2_hi << " GeV²\n"
         << " * resonance model:    " << params.resonances_model->type << "\n"
