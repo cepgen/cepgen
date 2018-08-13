@@ -44,7 +44,7 @@ namespace CepGen
 
         explicit CLAS( const CLAS::Parameterisation& params = CLAS::Parameterisation::standard_proton() );
 
-        CLAS& operator()( double q2, double xbj ) override;
+        CLAS& operator()( double xbj, double q2 ) override;
 
       private:
         /// \brief Method to evaluate the background/resonance terms of
@@ -56,7 +56,7 @@ namespace CepGen
         /// \param[in] q2 squared four-momentum transfer in GeV²
         /// \param[in] xbj Bjorken scaling variable
         /// \return \f$F_{2}^{N}\f$
-        double f2slac( double q2, double xbj ) const;
+        double f2slac( double xbj, double q2 ) const;
         Parameterisation params_;
     };
   }

@@ -199,6 +199,7 @@ namespace CepGen
           fillParameter( psf, "pdfSet", sf->params.pdf_set );
           fillParameter( psf, "numFlavours", (unsigned int&)sf->params.num_flavours );
           fillParameter( psf, "pdfMember", (unsigned int&)sf->params.pdf_member );
+          fillParameter( psf, "mode", (unsigned int&)sf->params.mode );
         } break;
         case SF::Type::MSTWgrid: {
           auto sf = std::dynamic_pointer_cast<MSTW::Grid>( params_.kinematics.structure_functions );

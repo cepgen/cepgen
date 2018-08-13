@@ -25,7 +25,7 @@ namespace CepGen
           static Parameterisation standard();
         };
         explicit BlockDurandHa( const BlockDurandHa::Parameterisation& params = BlockDurandHa::Parameterisation::standard() );
-        BlockDurandHa& operator()( double q2, double xbj ) override;
+        BlockDurandHa& operator()( double xbj, double q2 ) override;
 
       private:
         Parameterisation params_;

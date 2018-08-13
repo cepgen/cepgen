@@ -323,11 +323,11 @@ namespace CepGen
           const double Q2min = 1. / ( 1.-x )*( x*( mx2-mp2_ ) + x*x*mp2_ ),
                        Q2 = Q2min + kt2/( 1.-x );
           const double xbj = Q2 / ( Q2 + mx2 - mp2_ );
-          auto& str_fun = sf( Q2, xbj );
-          str_fun.computeFL( Q2, xbj );
+          auto& str_fun = sf( xbj, Q2 );
+          str_fun.computeFL( xbj, Q2 );
           const double term1 = ( 1.-x )*( 1.-Q2min/Q2 );
           const double f_D = str_fun.F2/( mx2 + Q2 - mp2_ ) * term1;
-          const double f_C = str_fun.F1( Q2, xbj ) * 2./Q2;
+          const double f_C = str_fun.F1( xbj, Q2 ) * 2./Q2;
           return Constants::alphaEM*M_1_PI*( 1.-x )/Q2*( f_D+0.5*x*x*f_C );
         } break;
         case Flux::GluonKMR: {

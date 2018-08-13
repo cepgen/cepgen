@@ -116,9 +116,9 @@ namespace CepGen
     {}
 
     CLAS&
-    CLAS::operator()( double q2, double xbj )
+    CLAS::operator()( double xbj, double q2 )
     {
-      std::pair<double,double> nv = { q2, xbj };
+      std::pair<double,double> nv = { xbj, q2 };
       if ( nv == old_vals_ )
         return *this;
       old_vals_ = nv;
@@ -132,7 +132,7 @@ namespace CepGen
         return *this;
       }
 
-      F2 = f2slac( q2, xbj );
+      F2 = f2slac( xbj, q2 );
       std::pair<double,double> rb = resbkg( q2, sqrt( w2 ) );
 
       F2 *= ( rb.first+rb.second );
@@ -140,7 +140,7 @@ namespace CepGen
     }
 
     double
-    CLAS::f2slac( double q2, double xbj ) const
+    CLAS::f2slac( double xbj, double q2 ) const
     {
       if ( xbj >= 1. )
         return 0.;
@@ -215,4 +215,3 @@ namespace CepGen
     }
   }
 }
-

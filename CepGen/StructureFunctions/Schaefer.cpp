@@ -1,7 +1,5 @@
 #include "CepGen/StructureFunctions/Schaefer.h"
-#include "CepGen/StructureFunctions/ALLM.h"
-#include "CepGen/StructureFunctions/ChristyBosted.h"
-#include "CepGen/StructureFunctions/MSTWGrid.h"
+#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 
 #include "CepGen/Core/Exception.h"
 
@@ -19,9 +17,23 @@ namespace CepGen
       par.q2_cut = 9.;
       par.w2_hi = 4.;
       par.w2_lo = 3.;
-      par.resonances_model.reset( new ChristyBosted() );
-      par.perturbative_model = std::shared_ptr<MSTW::Grid>( &MSTW::Grid::get(), [=]( MSTW::Grid* ){} );
-      par.continuum_model.reset( new ALLM( ALLM::Parameterisation::gd11p() ) );
+      par.resonances_model = StructureFunctionsBuilder::get( SF::Type::ChristyBosted );
+      par.perturbative_model = StructureFunctionsBuilder::get( SF::Type::MSTWgrid );
+      par.continuum_model = StructureFunctionsBuilder::get( SF::Type::GD11p );
+      par.higher_twist = 0;
+      return par;
+    }
+
+    Schaefer::Parameterisation
+    Schaefer::Parameterisation::cteq()
+    {
+      Parameterisation par;
+      par.q2_cut = 9.;
+      par.w2_hi = 4.;
+      par.w2_lo = 3.;
+      par.resonances_model = StructureFunctionsBuilder::get( SF::Type::ChristyBosted );
+      par.perturbative_model = StructureFunctionsBuilder::get( SF::Type::MSTWgrid );
+      par.continuum_model = StructureFunctionsBuilder::get( SF::Type::GD11p );
       par.higher_twist = 0;
       return par;
     }
@@ -34,7 +46,7 @@ namespace CepGen
     void
     Schaefer::initialise()
     {
-      CG_INFO( "Schaefer" ) << "LUXlike structure functions evaluator successfully initialised.\n"
+      CG_INFO( "LUXlike" ) << "LUXlike structure functions evaluator successfully initialised.\n"
         << " * Q² cut:             " << params.q2_cut << " GeV²\n"
         << " * W² ranges:          " << params.w2_lo << " GeV² / " << params.w2_hi << " GeV²\n"
         << " * resonance model:    " << params.resonances_model->type << "\n"
@@ -46,12 +58,12 @@ namespace CepGen
     }
 
     Schaefer&
-    Schaefer::operator()( double q2, double xbj )
+    Schaefer::operator()( double xbj, double q2 )
     {
       if ( !initialised_ )
         initialise();
 
-      std::pair<double,double> nv = { q2, xbj };
+      std::pair<double,double> nv = { xbj, q2 };
       if ( nv == old_vals_ )
         return *this;
       old_vals_ = nv;
@@ -61,27 +73,27 @@ namespace CepGen
       StructureFunctions sel_sf;
       if ( q2 < params.q2_cut ) {
         if ( w2 < params.w2_lo )
-          sel_sf = ( *params.resonances_model )( q2, xbj );
+          sel_sf = ( *params.resonances_model )( xbj, q2 );
         else if ( w2 < params.w2_hi ) {
-          auto sf_r = ( *params.resonances_model )( q2, xbj );
-          auto sf_c = ( *params.continuum_model )( q2, xbj );
-          sf_r.computeFL( q2, xbj );
-          sf_c.computeFL( q2, xbj );
+          auto sf_r = ( *params.resonances_model )( xbj, q2 );
+          auto sf_c = ( *params.continuum_model )( xbj, q2 );
+          sf_r.computeFL( xbj, q2 );
+          sf_c.computeFL( xbj, q2 );
           const double r = rho( w2 );
           F2 = r*sf_c.F2 + ( 1.-r )*sf_r.F2;
           FL = r*sf_c.FL + ( 1.-r )*sf_r.FL;
           return *this;
         }
         else
-          sel_sf = ( *params.continuum_model )( q2, xbj );
+          sel_sf = ( *params.continuum_model )( xbj, q2 );
       }
       else {
         if ( w2 < params.w2_hi )
-          sel_sf = ( *params.continuum_model )( q2, xbj );
+          sel_sf = ( *params.continuum_model )( xbj, q2 );
         else {
-          auto sf_p = ( *params.perturbative_model )( q2, xbj );
+          auto sf_p = ( *params.perturbative_model )( xbj, q2 );
           F2 = sf_p.F2;
-          sf_p.computeFL( q2, xbj );
+          sf_p.computeFL( xbj, q2 );
           FL = sel_sf.FL;
           if ( params.higher_twist )
             F2 *= ( 1.+5.5/q2 );
@@ -89,8 +101,8 @@ namespace CepGen
         }
       }
 
-      F2 = sel_sf( q2, xbj ).F2;
-      sel_sf.computeFL( q2, xbj );
+      F2 = sel_sf( xbj, q2 ).F2;
+      sel_sf.computeFL( xbj, q2 );
       FL = sel_sf.FL;
 
       return *this;

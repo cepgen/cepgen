@@ -47,7 +47,7 @@ namespace MSTW
       while ( file.read( reinterpret_cast<char*>( &val ), sizeof( sfval_t ) ) ) {
         q2_vals.insert( val.q2 );
         xbj_vals.insert( val.xbj );
-        insert( { val.q2, val.xbj }, { val.f2, val.fl } );
+        insert( { val.xbj, val.q2 }, { val.f2, val.fl } );
       }
       file.close();
     }
@@ -60,23 +60,23 @@ namespace MSTW
     CG_INFO( "Grid" )
       << "MSTW@" << header_.order << " grid evaluator built "
       << "for " << header_.nucleon << " structure functions (" << header_.cl << ")\n\t"
-      << " Q² in range [" << *q2_vals.begin() << ":" << *q2_vals.rbegin() << "]\n\t"
-      << "xBj in range [" << *xbj_vals.begin() << ":" << *xbj_vals.rbegin() << "].";
+      << "xBj in range [" << pow( 10., *xbj_vals.begin() ) << ":" << pow( 10., *xbj_vals.rbegin() ) << "]\n\t"
+      << " Q² in range [" << pow( 10., *q2_vals.begin() ) << ":" << pow( 10., *q2_vals.rbegin() ) << "].";
   }
 
   Grid&
-  Grid::operator()( double q2, double xbj )
+  Grid::operator()( double xbj, double q2 )
   {
-    const std::array<double,2> val = CepGen::GridHandler<2,2>::eval( { q2, xbj } );
+    const std::array<double,2> val = CepGen::GridHandler<2,2>::eval( { xbj, q2 } );
     F2 = val[0];
     FL = val[1];
     return *this;
   }
 
   std::ostream&
-  operator<<( std::ostream& os, const sfval_t& val )
+  operator<<( std::ostream& os, const Grid::sfval_t& val )
   {
-    return os << Form( "Q² = %.5e GeV²\txbj = %.4f\tF₂ = % .6e\tFL = % .6e", val.q2, val.xbj, val.f2, val.fl );
+    return os << Form( "xbj = %.4f\tQ² = %.5e GeV²\tF₂ = % .6e\tFL = % .6e", val.xbj, val.q2, val.f2, val.fl );
   }
 
   std::ostream&

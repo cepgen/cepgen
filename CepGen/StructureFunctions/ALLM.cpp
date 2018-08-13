@@ -137,7 +137,7 @@ namespace CepGen
     {}
 
     ALLM&
-    ALLM::operator()( double q2, double xbj )
+    ALLM::operator()( double xbj, double q2 )
     {
       const double W2_eff = q2*( 1.-xbj )/xbj;
       const double xp = ( q2+params_.mp2 )/( q2+W2_eff+params_.mp2 ),

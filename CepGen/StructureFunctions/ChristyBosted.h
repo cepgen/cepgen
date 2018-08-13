@@ -67,11 +67,11 @@ namespace CepGen
         };
 
         explicit ChristyBosted( const ChristyBosted::Parameterisation& params = ChristyBosted::Parameterisation::standard() );
-        ChristyBosted& operator()( double q2, double xbj ) override;
+        ChristyBosted& operator()( double xbj, double q2 ) override;
 
         //--- already computed internally during F2 computation
-        void computeFL( double q2, double xbj, const CepGen::SF::SigmaRatio& ) override {}
-        void computeFL( double q2, double xbj, double r ) override {}
+        void computeFL( double xbj, double q2, const CepGen::SF::SigmaRatio& ) override {}
+        void computeFL( double xbj, double q2, double r ) override {}
 
       private:
         double resmod507( char sf, double w2, double q2 ) const;

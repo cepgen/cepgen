@@ -11,14 +11,14 @@ namespace CepGen
     {}
 
     SzczurekUleshchenko&
-    SzczurekUleshchenko::operator()( double q2, double xbj )
+    SzczurekUleshchenko::operator()( double xbj, double q2 )
     {
 #ifndef GRVPDF
       throw CG_FATAL( "SzczurekUleshchenko" )
         << "Szczurek-Uleshchenko structure functions cannot be computed"
         << " as GRV PDF set is not linked to this instance!";
 #else
-      std::pair<double,double> nv = { q2, xbj };
+      std::pair<double,double> nv = { xbj, q2 };
       if ( nv == old_vals_ )
         return *this;
       old_vals_ = nv;

@@ -9,20 +9,13 @@
 /// Martin-Stirling-Thorne-Watt PDFs structure functions
 namespace MSTW
 {
-  /// \note x/y = Q2/xbj given by the parent
-  struct sfval_t
-  {
-    float q2, xbj;
-    double f2, fl;
-  };
-  std::ostream& operator<<( std::ostream&, const sfval_t& );
-
   /// A \f$F_{2,L}\f$ grid interpolator
   class Grid : public CepGen::StructureFunctions, private CepGen::GridHandler<2,2>
   {
     public:
       /// Grid header information as parsed from the file
-      struct header_t {
+      struct header_t
+      {
         enum order_t : unsigned short { lo = 0, nlo = 1, nnlo = 2 };
         enum cl_t : unsigned short { cl68 = 0, cl95 = 1 };
         enum nucleon_t : unsigned short { proton = 1, neutron = 2 };
@@ -30,6 +23,11 @@ namespace MSTW
         order_t order;
         cl_t cl;
         nucleon_t nucleon;
+      };
+      struct sfval_t
+      {
+        float q2, xbj;
+        double f2, fl;
       };
       struct Parameterisation {
         Parameterisation() : grid_path( DEFAULT_MSTW_GRID_PATH ) {}
@@ -41,14 +39,14 @@ namespace MSTW
       static Grid& get( const char* path = DEFAULT_MSTW_GRID_PATH );
 
       /// Compute the structure functions at a given \f$Q^2/x_{\rm Bj}\f$
-      Grid& operator()( double q2, double xbj ) override;
+      Grid& operator()( double xbj, double q2 ) override;
       /// Retrieve the grid's header information
       header_t header() const { return header_; }
       Parameterisation params;
 
         //--- already retrieved from grid, so no need to recompute it
-      void computeFL( double q2, double xbj, const CepGen::SF::SigmaRatio& ) override {}
-      void computeFL( double q2, double xbj, double r ) override {}
+      void computeFL( double xbj, double q2, const CepGen::SF::SigmaRatio& ) override {}
+      void computeFL( double xbj, double q2, double r ) override {}
 
     public:
       Grid( const Grid& ) = delete;
@@ -62,6 +60,7 @@ namespace MSTW
       header_t header_;
   };
 
+  std::ostream& operator<<( std::ostream&, const Grid::sfval_t& );
   std::ostream& operator<<( std::ostream&, const Grid::header_t::order_t& );
   std::ostream& operator<<( std::ostream&, const Grid::header_t::cl_t& );
   std::ostream& operator<<( std::ostream&, const Grid::header_t::nucleon_t& );
