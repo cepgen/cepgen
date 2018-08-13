@@ -16,6 +16,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include <vector>
+#include <map>
 
 namespace CepGen
 {
@@ -74,8 +75,8 @@ namespace CepGen
             }
           } break;
           case 2: {
-            const double x = coord.at( 0 ), y = coord.at( 1 );
 #ifdef GOOD_GSL
+            const double x = coord.at( 0 ), y = coord.at( 1 );
             for ( size_t i = 0; i < N; ++i ) {
               int res = gsl_spline2d_eval_e( splines_2d_.at( i ).get(), x, y, accel_.at( 0 ).get(), accel_.at( 1 ).get(), &out[i] );
               if ( res != GSL_SUCCESS ) {
@@ -91,7 +92,7 @@ namespace CepGen
             coord_t before, after;
             findIndices( coord, before, after );
             //--- find boundaries values
-            const gridpoint_t& ext_11 = values_raw_.at( { before[0], befor [1] } ),
+            const gridpoint_t& ext_11 = values_raw_.at( { before[0], before[1] } ),
                               &ext_12 = values_raw_.at( { before[0],  after[1] } ),
                               &ext_21 = values_raw_.at( {  after[0], before[1] } ),
                               &ext_22 = values_raw_.at( {  after[0],  after[1] } );
@@ -191,9 +192,14 @@ namespace CepGen
           case 1: { //--- x |-> (f1,...)
             const gsl_interp_type* type = gsl_interp_cspline;
             //const gsl_interp_type* type = gsl_interp_steffen;
-            if ( gsl_interp_type_min_size( type ) >= values_raw_.size() )
+#ifdef GOOD_GSL
+            const unsigned short min_size = gsl_interp_type_min_size( type );
+#else
+            const unsigned short min_size = type->min_size;
+#endif
+            if ( min_size >= values_raw_.size() )
               throw CG_FATAL( "GridHandler" ) << "Not enough points for \"" << type->name << "\" type of interpolation.\n\t"
-                << "Minimum required: " << gsl_interp_type_min_size( type ) << ", got " << values_raw_.size() << "!";
+                << "Minimum required: " << min_size << ", got " << values_raw_.size() << "!";
             for ( size_t i = 0; i < N; ++i ) {
               values_[i].reset( new double[values_raw_.size()] );
               splines_1d_.emplace_back( gsl_spline_alloc( type, values_raw_.size() ), gsl_spline_free );
