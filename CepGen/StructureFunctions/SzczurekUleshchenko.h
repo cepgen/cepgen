@@ -16,7 +16,7 @@ namespace CepGen
     {
       public:
         SzczurekUleshchenko();
-        SzczurekUleshchenko& operator()( double q2, double xbj ) override;
+        SzczurekUleshchenko& operator()( double xbj, double q2 ) override;
 
         double F1;
     };

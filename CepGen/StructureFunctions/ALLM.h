@@ -50,7 +50,7 @@ namespace CepGen
         };
 
         explicit ALLM( const ALLM::Parameterisation& param = ALLM::Parameterisation::allm97() );
-        ALLM& operator()( double q2, double xbj ) override;
+        ALLM& operator()( double xbj, double q2 ) override;
 
       private:
         Parameterisation params_;

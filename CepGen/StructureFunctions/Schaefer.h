@@ -20,7 +20,7 @@ namespace CepGen
           bool higher_twist;
         };
         Schaefer( const Parameterisation& param = Parameterisation::standard() );
-        Schaefer& operator()( double q2, double xbj ) override;
+        Schaefer& operator()( double xbj, double q2 ) override;
 
         Parameterisation params;
 
@@ -34,4 +34,3 @@ namespace CepGen
 }
 
 #endif
-

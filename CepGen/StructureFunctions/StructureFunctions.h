@@ -50,10 +50,10 @@ namespace CepGen
 
       static StructureFunctions builder( const SF::Type& );
 
-      virtual StructureFunctions& operator()( double q2, double xbj ) { return *this; }
-      virtual void computeFL( double q2, double xbj, const SF::SigmaRatio& ratio = SF::E143Ratio() );
-      virtual void computeFL( double q2, double xbj, double r );
-      double F1( double q2, double xbj ) const;
+      virtual StructureFunctions& operator()( double xbj, double q2 ) { return *this; }
+      virtual void computeFL( double xbj, double q2, const SF::SigmaRatio& ratio = SF::E143Ratio() );
+      virtual void computeFL( double xbj, double q2, double r );
+      double F1( double xbj, double q2 ) const;
 
       SF::Type type;
       double F2, FL;

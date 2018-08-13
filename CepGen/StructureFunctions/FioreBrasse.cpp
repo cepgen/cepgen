@@ -42,9 +42,9 @@ namespace CepGen
     {}
 
     FioreBrasse&
-    FioreBrasse::operator()( double q2, double xbj )
+    FioreBrasse::operator()( double xbj, double q2 )
     {
-      std::pair<double,double> nv = { q2, xbj };
+      std::pair<double,double> nv = { xbj, q2 };
       if ( nv == old_vals_ )
         return *this;
       old_vals_ = nv;
@@ -97,9 +97,9 @@ namespace CepGen
     }
 
     FioreBrasse&
-    FioreBrasse::operator()( double q2, double xbj, bool )
+    FioreBrasse::operator()( double xbj, double q2, bool )
     {
-      std::pair<double,double> nv = { q2, xbj };
+      std::pair<double,double> nv = { xbj, q2 };
       if ( nv == old_vals_ )
         return *this;
       old_vals_ = nv;

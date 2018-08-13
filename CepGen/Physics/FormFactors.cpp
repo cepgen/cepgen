@@ -48,7 +48,7 @@ namespace CepGen
   FormFactors::suriYennie( double q2, double mi2, double mf2 )
   {
     const double x = q2 / ( q2 + mf2 - mi2 );
-    SF::SuriYennie suriyennie, sy = (SF::SuriYennie)suriyennie( q2, x );
+    SF::SuriYennie suriyennie, sy = (SF::SuriYennie)suriyennie( x, q2 );
 //std::cout << "---> " << sy.FM << "\t" << sy.F2*x/q2 << "\t" << sy.F2*x*sqrt(mi2)/q2 << std::endl;
     return FormFactors( sy.F2 * x * sqrt( mi2 ) / q2, sy.FM ); //FIXME
   }
@@ -57,7 +57,7 @@ namespace CepGen
   FormFactors::fioreBrasse( double q2, double mi2, double mf2 )
   {
     const double x = q2 / ( q2 + mf2 - mi2 );
-    SF::FioreBrasse fb, sf = fb( q2, x );
+    SF::FioreBrasse fb, sf = fb( x, q2 );
     return FormFactors( sf.F2 * x / q2, -2.*sf.W1 / q2 );
   }
 
@@ -65,9 +65,9 @@ namespace CepGen
   FormFactors::generic( double q2, double mi2, double mf2, StructureFunctions& sf )
   {
     const double x = q2 / ( q2 + mf2 - mi2 );
-    sf = sf( q2, x );
-    sf.computeFL( q2, x );
-    return FormFactors( sf.F2 * x / q2, -2.*sf.F1( q2, x ) / q2 );
+    sf = sf( x, q2 );
+    sf.computeFL( x, q2 );
+    return FormFactors( sf.F2 * x / q2, -2.*sf.F1( x, q2 ) / q2 );
   }
 
   double

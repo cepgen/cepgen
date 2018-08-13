@@ -14,7 +14,7 @@ namespace CepGen
   const double StructureFunctions::mp2_ = StructureFunctions::mp_*StructureFunctions::mp_;
 
   double
-  StructureFunctions::F1( double q2, double xbj ) const
+  StructureFunctions::F1( double xbj, double q2 ) const
   {
     if ( xbj == 0. || q2 == 0. ) {
       CG_ERROR( "StructureFunctions:F1" )
@@ -29,14 +29,14 @@ namespace CepGen
   }
 
   void
-  StructureFunctions::computeFL( double q2, double xbj, const SF::SigmaRatio& ratio )
+  StructureFunctions::computeFL( double xbj, double q2, const SF::SigmaRatio& ratio )
   {
     double r_error = 0.;
-    computeFL( q2, xbj, ratio( q2, xbj, r_error ) );
+    computeFL( xbj, q2, ratio( xbj, q2, r_error ) );
   }
 
   void
-  StructureFunctions::computeFL( double q2, double xbj, double r )
+  StructureFunctions::computeFL( double xbj, double q2, double r )
   {
     const double tau = 4.*xbj*xbj*mp2_/q2;
     FL = F2 * ( 1.+tau ) * ( r/( 1.+r ) );

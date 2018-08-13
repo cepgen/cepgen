@@ -34,8 +34,8 @@ namespace CepGen
         /// \param[in] q2 Squared 4-momentum transfer
         /// \param[in] xbj Bjorken's x
         /// \cite Brasse1976413
-        FioreBrasse& operator()( double q2, double xbj ) override;
-        FioreBrasse& operator()( double q2, double xbj, bool old );
+        FioreBrasse& operator()( double xbj, double q2 ) override;
+        FioreBrasse& operator()( double xbj, double q2, bool old );
 
         double W1, W2;
         Parameterisation params;

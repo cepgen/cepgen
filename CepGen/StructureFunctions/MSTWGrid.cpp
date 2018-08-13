@@ -47,13 +47,9 @@ namespace MSTW
 
       sfval_t val;
       while ( file.read( reinterpret_cast<char*>( &val ), sizeof( sfval_t ) ) ) {
-        q2_vals.insert( log10( val.x ) );
-        xbj_vals.insert( log10( val.y ) );
-#ifndef GOOD_GSL
-        x_vals_.emplace_back( val.x );
-        y_vals_.emplace_back( val.y );
-#endif
-        values_raw_.emplace_back( val );
+        q2_vals.insert( log10( val.q2 ) );
+        xbj_vals.insert( log10( val.xbj ) );
+        values_raw_.emplace_back( CepGen::GridHandler<2>::grid_t{ val.xbj, val.q2, val.f2, val.fl } );
       }
       file.close();
     }
@@ -61,28 +57,28 @@ namespace MSTW
     if ( q2_vals.size() < 2 || xbj_vals.size() < 2 )
       throw CG_FATAL( "Grid" ) << "Invalid grid retrieved!";
 
-    initGSL( q2_vals, xbj_vals );
+    initGSL( xbj_vals, q2_vals );
 
     CG_INFO( "Grid" )
       << "MSTW@" << header_.order << " grid evaluator built "
       << "for " << header_.nucleon << " structure functions (" << header_.cl << ")\n\t"
-      << " Q² in range [" << pow( 10., *q2_vals.begin() ) << ":" << pow( 10., *q2_vals.rbegin() ) << "]\n\t"
-      << "xBj in range [" << pow( 10., *xbj_vals.begin() ) << ":" << pow( 10., *xbj_vals.rbegin() ) << "].";
+      << "xBj in range [" << pow( 10., *xbj_vals.begin() ) << ":" << pow( 10., *xbj_vals.rbegin() ) << "]\n\t"
+      << " Q² in range [" << pow( 10., *q2_vals.begin() ) << ":" << pow( 10., *q2_vals.rbegin() ) << "].";
   }
 
   Grid&
-  Grid::operator()( double q2, double xbj )
+  Grid::operator()( double xbj, double q2 )
   {
-    const sfval_t val = CepGen::GridHandler<2>::eval( q2, xbj );
+    const auto& val = CepGen::GridHandler<2>::eval( xbj, q2 );
     F2 = val.value[0];
     FL = val.value[1];
     return *this;
   }
 
   std::ostream&
-  operator<<( std::ostream& os, const sfval_t& val )
+  operator<<( std::ostream& os, const Grid::sfval_t& val )
   {
-    return os << Form( "Q² = %.5e GeV²\txbj = %.4f\tF₂ = % .6e\tFL = % .6e", val.x, val.y, val.value[0], val.value[1] );
+    return os << Form( "xbj = %.4f\tQ² = %.5e GeV²\tF₂ = % .6e\tFL = % .6e", val.xbj, val.q2, val.f2, val.fl );
   }
 
   std::ostream&

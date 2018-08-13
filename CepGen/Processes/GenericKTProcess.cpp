@@ -324,13 +324,13 @@ namespace CepGen
                    Q2 = Q2min + kt2/( 1.-x );
       const double xbj = Q2 / ( Q2 + mx2 - mp2_ );
 
-      sf = sf( Q2, xbj );
-      sf.computeFL( Q2, xbj );
+      sf = sf( xbj, Q2 );
+      sf.computeFL( xbj, Q2 );
 
       const double term1 = ( 1.-x )*( 1.-Q2min/Q2 );
 
       const double f_D = sf.F2/( mx2 + Q2 - mp2_ ) * term1;
-      const double f_C = sf.F1( Q2, xbj ) * 2./Q2;
+      const double f_C = sf.F1( xbj, Q2 ) * 2./Q2;
 
       return Constants::alphaEM*M_1_PI*( 1.-x )/Q2*( f_D+0.5*x*x*f_C );
     }

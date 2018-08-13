@@ -30,7 +30,7 @@ namespace CepGen
 
         explicit LHAPDF( const Parameterisation& param = Parameterisation::cteq6() );
         explicit LHAPDF( const char* set, unsigned short member = 0, const Parameterisation::Mode& mode = Parameterisation::Mode::full );
-        LHAPDF& operator()( double q2, double xbj ) override;
+        LHAPDF& operator()( double xbj, double q2 ) override;
 
         Parameterisation params;
 

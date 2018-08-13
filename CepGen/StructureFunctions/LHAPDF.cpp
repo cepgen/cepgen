@@ -74,10 +74,10 @@ namespace CepGen
     }
 
     LHAPDF&
-    LHAPDF::operator()( double q2, double xbj )
+    LHAPDF::operator()( double xbj, double q2 )
     {
 #ifdef LIBLHAPDF
-      std::pair<double,double> nv = { q2, xbj };
+      std::pair<double,double> nv = { xbj, q2 };
       if ( nv == old_vals_ )
         return *this;
       old_vals_ = nv;
@@ -91,10 +91,10 @@ namespace CepGen
 #  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION >= 6
       auto& member = *pdfs_[params.pdf_member];
       if ( !member.inPhysicalRangeXQ2( xbj, q2 ) ) {
-        CG_WARNING( "LHAPDF" ) << "(x=" << xbj << "/Q²=" << q2 << " GeV²) "
-          << "not in physical range for PDF member " << params.pdf_member << ":\n"
-          << "  min: (x=" << member.xMin() << "/Q²=" << member.q2Min() << "),\n"
-          << "  max: (x=" << member.xMax() << "/Q²=" << member.q2Max() << ").";
+        CG_WARNING( "LHAPDF" ) << "(x=" << xbj << ", Q²=" << q2 << " GeV²) "
+          << "not in physical range for PDF member " << params.pdf_member << ":\n\t"
+          << "  min: (x=" << member.xMin() << ", Q²=" << member.q2Min() << "),\n\t"
+          << "  max: (x=" << member.xMax() << ", Q²=" << member.q2Max() << ").";
         return *this;
       }
 #  else

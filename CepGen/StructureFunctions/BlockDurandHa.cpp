@@ -24,9 +24,9 @@ namespace CepGen
     {}
 
     BlockDurandHa&
-    BlockDurandHa::operator()( double q2, double xbj )
+    BlockDurandHa::operator()( double xbj, double q2 )
     {
-      std::pair<double,double> nv = { q2, xbj };
+      std::pair<double,double> nv = { xbj, q2 };
       if ( nv == old_vals_ )
         return *this;
       old_vals_ = nv;
