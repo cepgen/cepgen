@@ -4,9 +4,7 @@
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include <fstream>
-
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_math.h>
+#include <set>
 
 namespace MSTW
 {
@@ -23,7 +21,7 @@ namespace MSTW
 
   Grid::Grid( const Parameterisation& param ) :
     CepGen::StructureFunctions( CepGen::SF::Type::MSTWgrid ),
-    CepGen::GridHandler<2>( CepGen::GridType::kLogarithmic ),
+    CepGen::GridHandler<2,2>( CepGen::GridType::logarithmic ),
     params( param )
   {
     std::set<double> q2_vals, xbj_vals;
@@ -47,9 +45,9 @@ namespace MSTW
 
       sfval_t val;
       while ( file.read( reinterpret_cast<char*>( &val ), sizeof( sfval_t ) ) ) {
-        q2_vals.insert( log10( val.q2 ) );
-        xbj_vals.insert( log10( val.xbj ) );
-        values_raw_.emplace_back( CepGen::GridHandler<2>::grid_t{ val.xbj, val.q2, val.f2, val.fl } );
+        q2_vals.insert( val.q2 );
+        xbj_vals.insert( val.xbj );
+        insert( { val.xbj, val.q2 }, { val.f2, val.fl } );
       }
       file.close();
     }
@@ -57,7 +55,7 @@ namespace MSTW
     if ( q2_vals.size() < 2 || xbj_vals.size() < 2 )
       throw CG_FATAL( "Grid" ) << "Invalid grid retrieved!";
 
-    initGSL( xbj_vals, q2_vals );
+    init();
 
     CG_INFO( "Grid" )
       << "MSTW@" << header_.order << " grid evaluator built "
@@ -69,9 +67,9 @@ namespace MSTW
   Grid&
   Grid::operator()( double xbj, double q2 )
   {
-    const auto& val = CepGen::GridHandler<2>::eval( xbj, q2 );
-    F2 = val.value[0];
-    FL = val.value[1];
+    const std::array<double,2> val = CepGen::GridHandler<2,2>::eval( { xbj, q2 } );
+    F2 = val[0];
+    FL = val[1];
     return *this;
   }
 

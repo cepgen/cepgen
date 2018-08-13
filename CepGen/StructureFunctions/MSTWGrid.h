@@ -10,7 +10,7 @@
 namespace MSTW
 {
   /// A \f$F_{2,L}\f$ grid interpolator
-  class Grid : public CepGen::StructureFunctions, private CepGen::GridHandler<2>
+  class Grid : public CepGen::StructureFunctions, private CepGen::GridHandler<2,2>
   {
     public:
       /// Grid header information as parsed from the file
