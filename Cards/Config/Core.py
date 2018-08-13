@@ -121,6 +121,12 @@ class StructureFunctions:
         mode = PDFMode.AllQuarks,
     )
 
+class KTFlux:
+    PhotonElastic         = 0
+    PhotonElasticBudnev   = 10
+    PhotonInelasticBudnev = 1
+    PhotonInelasticBudnev = 11
+
 class ProcessMode:
     '''Types of processes supported'''
     ElectronProton = 0

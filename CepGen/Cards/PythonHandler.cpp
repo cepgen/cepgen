@@ -151,7 +151,8 @@ namespace CepGen
       if ( ppz && PyTuple_Check( ppz ) && PyTuple_Size( ppz ) == 2 ) {
         double pz0 = PyFloat_AsDouble( PyTuple_GetItem( ppz, 0 ) );
         double pz1 = PyFloat_AsDouble( PyTuple_GetItem( ppz, 1 ) );
-        params_.kinematics.inp = { pz0, pz1 };
+        params_.kinematics.incoming_beams.first.pz = pz0;
+        params_.kinematics.incoming_beams.second.pz = pz1;
       }
       double sqrt_s = -1.;
       fillParameter( kin, "cmEnergy", sqrt_s );
@@ -160,6 +161,12 @@ namespace CepGen
       PyObject* psf = getElement( kin, "structureFunctions" ); // borrowed
       if ( psf )
         parseStructureFunctions( psf, params_.kinematics.structure_functions );
+      std::vector<int> kt_fluxes;
+      fillParameter( kin, "ktFluxes", kt_fluxes );
+      if ( kt_fluxes.size() > 0 )
+        params_.kinematics.incoming_beams.first.kt_flux = kt_fluxes.at( 0 );
+      if ( kt_fluxes.size() > 1 )
+        params_.kinematics.incoming_beams.second.kt_flux = kt_fluxes.at( 1 );
     }
 
     void
@@ -639,6 +646,24 @@ namespace CepGen
       for ( Py_ssize_t i = 0; i < PyTuple_Size( pobj ); ++i ) {
         PyObject* pit = PyTuple_GetItem( pobj, i ); // borrowed
         out.emplace_back( decode( pit ) );
+      }
+    }
+
+
+    void
+    PythonHandler::fillParameter( PyObject* parent, const char* key, std::vector<int>& out )
+    {
+      out.clear();
+      PyObject* pobj = getElement( parent, key ); // borrowed
+      if ( !pobj )
+        return;
+      if ( !PyTuple_Check( pobj ) )
+        throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
+      for ( Py_ssize_t i = 0; i < PyTuple_Size( pobj ); ++i ) {
+        PyObject* pit = PyTuple_GetItem( pobj, i );
+        if ( !isInteger( pit ) )
+          throwPythonError( Form( "Object %d has invalid type", i ) );
+        out.emplace_back( asInteger( pit ) );
       }
     }
 

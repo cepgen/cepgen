@@ -33,8 +33,8 @@ namespace CepGen
     {
 #ifdef PYTHIA8
       pythia_->setLHAupPtr( (Pythia8::LHAup*)lhaevt_.get() );
-      pythia_->settings.parm( "Beams:idA", (short)params.kinematics.inpdg.first );
-      pythia_->settings.parm( "Beams:idB", (short)params.kinematics.inpdg.second );
+      pythia_->settings.parm( "Beams:idA", (short)params.kinematics.incoming_beams.first.pdg );
+      pythia_->settings.parm( "Beams:idB", (short)params.kinematics.incoming_beams.second.pdg );
       // specify we will be using a LHA input
       pythia_->settings.mode( "Beams:frameType", 5 );
       pythia_->settings.parm( "Beams:eCM", params.kinematics.sqrtS() );
@@ -292,8 +292,8 @@ namespace CepGen
   {
     addProcess( 0, 1., 1., 1.e3 );
     if ( params_ ) {
-      setBeamA( (short)params_->kinematics.inpdg.first, params_->kinematics.inp.first );
-      setBeamB( (short)params_->kinematics.inpdg.second, params_->kinematics.inp.second );
+      setBeamA( (short)params_->kinematics.incoming_beams.first.pdg, params_->kinematics.incoming_beams.first.pz );
+      setBeamB( (short)params_->kinematics.incoming_beams.second.pdg, params_->kinematics.incoming_beams.second.pz );
     }
   }
 

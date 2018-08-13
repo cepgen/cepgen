@@ -10,7 +10,7 @@
 namespace CepGen
 {
   Kinematics::Kinematics() :
-    inp( { 6500., 6500. } ), inpdg( { PDG::Proton, PDG::Proton } ),
+    incoming_beams( { { 6500., PDG::Proton, 10 }, { 6500., PDG::Proton, 10 } } ),
     mode( Mode::ElasticElastic ), structure_functions( new SF::SuriYennie )
   {}
 
@@ -20,14 +20,13 @@ namespace CepGen
   void
   Kinematics::setSqrtS( double sqrts )
   {
-    const double pin = 0.5 * sqrts;
-    inp = { pin, pin };
+    incoming_beams.first.pz = incoming_beams.second.pz = 0.5 * sqrts;
   }
 
   double
   Kinematics::sqrtS() const
   {
-    return inp.first + inp.second;
+    return incoming_beams.first.pz + incoming_beams.second.pz;
   }
 
   //-----------------------------------------------------------------------------------------------

@@ -13,6 +13,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include "CepGen/Core/Hasher.h"
 
 namespace CepGen
 {
@@ -38,14 +39,19 @@ namespace CepGen
       /// Human-readable format of a process mode (elastic/dissociative parts)
       friend std::ostream& operator<<( std::ostream&, const Mode& );
 
-      /// Incoming particles' momentum (in \f$\text{GeV}/c\f$)
-      std::pair<double,double> inp;
+      struct Beam
+      {
+        /// Incoming particle's momentum (in \f$\text{GeV}/c\f$)
+        double pz;
+        PDG pdg;
+        unsigned short kt_flux;
+      };
+      /// Beam/primary particle's kinematics
+      std::pair<Beam,Beam> incoming_beams;
       /// Set the incoming particles' momenta (if the collision is symmetric)
       void setSqrtS( double sqrts );
       /// Process centre of mass energy
       double sqrtS() const;
-      /// Beam/primary particle's PDG identifier
-      std::pair<PDG,PDG> inpdg;
       /// PDG id of the outgoing central particles
       std::vector<PDG> central_system;
       /// Minimum list of central particles required

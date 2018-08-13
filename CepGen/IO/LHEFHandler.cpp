@@ -94,8 +94,8 @@ namespace CepGen
       lhe_output_->headerBlock() << oss_init.str();
       //params.dump( lhe_output_->initComments(), false );
       LHEF::HEPRUP run = lhe_output_->heprup;
-      run.IDBMUP = { (int)params.kinematics.inpdg.first, (int)params.kinematics.inpdg.second };
-      run.EBMUP = params.kinematics.inp;
+      run.IDBMUP = { (int)params.kinematics.incoming_beams.first.pdg, (int)params.kinematics.incoming_beams.second.pdg };
+      run.EBMUP = { (double)params.kinematics.incoming_beams.first.pz, (double)params.kinematics.incoming_beams.second.pz };
       run.NPRUP = 1;
       run.resize();
       run.XSECUP[0] = params.integrator.result;
@@ -169,8 +169,8 @@ namespace CepGen
     void
     LHEFHandler::LHAevent::initialise( const Parameters& params )
     {
-      setBeamA( (short)params.kinematics.inpdg.first, params.kinematics.inp.first );
-      setBeamB( (short)params.kinematics.inpdg.second, params.kinematics.inp.second );
+      setBeamA( (short)params.kinematics.incoming_beams.first.pdg, params.kinematics.incoming_beams.first.pz );
+      setBeamB( (short)params.kinematics.incoming_beams.second.pdg, params.kinematics.incoming_beams.second.pz );
       addProcess( 0, params.integrator.result, params.integrator.err_result, 100. );
     }
 

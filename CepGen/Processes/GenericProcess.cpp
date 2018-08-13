@@ -75,10 +75,10 @@ namespace CepGen
         throw CG_FATAL( "GenericProcess" ) << "Kinematics not properly defined for the process.";
 
       // at some point introduce non head-on colliding beams?
-      Particle::Momentum p1( 0., 0.,  cuts_.inp.first ), p2( 0., 0., -cuts_.inp.second );
+      Particle::Momentum p1( 0., 0.,  cuts_.incoming_beams.first.pz ), p2( 0., 0., -cuts_.incoming_beams.second.pz );
       // on-shell beam particles
-      p1.setMass( ParticleProperties::mass( cuts_.inpdg.first ) );
-      p2.setMass( ParticleProperties::mass( cuts_.inpdg.second ) );
+      p1.setMass( ParticleProperties::mass( cuts_.incoming_beams.first.pdg ) );
+      p2.setMass( ParticleProperties::mass( cuts_.incoming_beams.second.pdg ) );
       setIncomingKinematics( p1, p2 );
 
       sqs_ = CMEnergy( p1, p2 );

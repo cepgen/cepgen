@@ -167,7 +167,7 @@ namespace CepGen
       << std::setfill('_') << std::setw( wb+3 ) << "_/¯¯EVENTS¯KINEMATICS¯¯\\_" << std::setfill( ' ' ) << "\n\n"
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming particles " ) : "Incoming particles" ) << std::setfill( ' ' ) << "\n\n";
     std::ostringstream proc_mode; proc_mode << kinematics.mode;
-    std::ostringstream ip1, ip2, op; ip1 << kinematics.inpdg.first; ip2 << kinematics.inpdg.second;
+    std::ostringstream ip1, ip2, op; ip1 << kinematics.incoming_beams.first.pdg; ip2 << kinematics.incoming_beams.second.pdg;
     {
       unsigned short i = 0;
       for ( const auto& part : kinematics.central_system ) {
@@ -178,7 +178,7 @@ namespace CepGen
     os
       << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << "\n"
       << std::setw( wt ) << "Incoming particles" << ( pretty ? boldify( ip1.str().c_str() ) : ip1.str() ) << ", " << ( pretty ? boldify( ip2.str().c_str() ) : ip2.str() ) << "\n"
-      << std::setw( wt ) << "Momenta (GeV/c)" << kinematics.inp.first << ", " << kinematics.inp.second << "\n";
+      << std::setw( wt ) << "Momenta (GeV/c)" << kinematics.incoming_beams.first.pz << ", " << kinematics.incoming_beams.second.pz << "\n";
     if ( kinematics.mode != Kinematics::Mode::ElasticElastic )
       os << std::setw( wt ) << "Structure functions" << kinematics.structure_functions->type << "\n";
     os
