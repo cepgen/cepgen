@@ -22,7 +22,6 @@ void produce_plot( const char* name, TH1* hist )
 unique_ptr<TH1D> h_mass, h_ptpair, h_ptsingle, h_etasingle;
 void process_event( const CepGen::Event& ev, unsigned long event_id )
 {
-ev.dump();
   const auto central_system = ev.getByRole( CepGen::Particle::CentralSystem );
   const auto pl1 = central_system[0].momentum(), pl2 = central_system[1].momentum();
   h_mass->Fill( ( pl1+pl2 ).mass() );
@@ -33,16 +32,16 @@ ev.dump();
 
 int main( int argc, char* argv[] )
 {
-  h_mass = unique_ptr<TH1D>( new TH1D( "invm", ";Dilepton invariant mass;d#sigma/dM (pb/GeV)", 500, 0., 500. ) );
-  h_ptpair = unique_ptr<TH1D>( new TH1D( "ptpair", ";Dilepton p_{T};d#sigma/dp_{T} (pb/GeV)", 500, 0., 50. ) );
-  h_ptsingle = unique_ptr<TH1D>( new TH1D( "pt_single", ";Single lepton p_{T};d#sigma/dp_{T} (pb/GeV)", 100, 0., 100. ) );
-  h_etasingle = unique_ptr<TH1D>( new TH1D( "eta_single", ";Single lepton #eta;d#sigma/d#eta (pb)\\?.2f", 60, -3., 3. ) );
-
   CepGen::Generator mg;
 
   if ( argc < 2 )
     throw CG_FATAL( "main" ) << "Usage: " << argv[0] << " [input card]";
   mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
+
+  h_mass = unique_ptr<TH1D>( new TH1D( "invm", ";Dilepton invariant mass;d#sigma/dM (pb/GeV)", 500, 0., 500. ) );
+  h_ptpair = unique_ptr<TH1D>( new TH1D( "ptpair", ";Dilepton p_{T};d#sigma/dp_{T} (pb/GeV)", 500, 0., 50. ) );
+  h_ptsingle = unique_ptr<TH1D>( new TH1D( "pt_single", ";Single lepton p_{T};d#sigma/dp_{T} (pb/GeV)", 100, 0., 100. ) );
+  h_etasingle = unique_ptr<TH1D>( new TH1D( "eta_single", ";Single lepton #eta;d#sigma/d#eta (pb)\\?.2f", 60, -3., 3. ) );
 
   CG_INFO( "main" ) << "Process name: " << mg.parameters->processName() << ".";
   //mg.parameters->taming_functions.dump();
