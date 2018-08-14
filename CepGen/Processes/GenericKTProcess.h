@@ -57,7 +57,7 @@ namespace CepGen
         /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming parton
         /// \param[in] x Parton momentum fraction
         /// \param[in] mx Outgoing diffractive proton mass
-        static double flux( const Flux& type, double x, double kt2, StructureFunctions& sf, double mx = 0. );
+        static double flux( const Flux& type, double x, double kt2, StructureFunctions& sf, double mx = mp_ );
 
       protected:
         /// Set the kinematics associated to the phase space definition
