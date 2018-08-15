@@ -112,7 +112,7 @@ namespace CepGen
           /// Transverse momentum (in GeV)
           double pt() const;
           /// Squared transverse momentum (in GeV\f$^\textrm{2}\f$)
-          inline double pt2() const { return ( px()*px()+py()*py() ); }
+          double pt2() const;
           /// 4-vector of double precision floats (in GeV)
           const std::vector<double> pVector() const;
           /// 3-momentum norm (in GeV)
@@ -164,6 +164,8 @@ namespace CepGen
       friend Particle::Momentum operator+( const Particle::Momentum& mom1, const Particle::Momentum& mom2 );
       /// Compute the 4-vector difference of two 4-momenta
       friend Particle::Momentum operator-( const Particle::Momentum& mom1, const Particle::Momentum& mom2 );
+      /// Compute the inverse per-coordinate 4-vector
+      friend Particle::Momentum operator-( const Particle::Momentum& mom );
       /// Scalar product of two 3-momenta
       friend double operator*( const Particle::Momentum& mom1, const Particle::Momentum& mom2 );
       /// Multiply all components of a 4-momentum by a scalar

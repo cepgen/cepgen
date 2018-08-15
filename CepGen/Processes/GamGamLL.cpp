@@ -81,13 +81,11 @@ namespace CepGen
     void
     GamGamLL::setKinematics( const Kinematics& kin )
     {
-      cuts_ = kin;
-
-      prepareKinematics();
+      GenericProcess::setKinematics( kin );
 
       masses_.Ml2_ = pow( ParticleProperties::mass( kin.central_system[0] ), 2 );
 
-      w_limits_ = cuts_.cuts.initial.w;
+      w_limits_ = cuts_.cuts.central.mass_single;
       if ( !w_limits_.hasMax() )
         w_limits_.max() = s_;
       // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)

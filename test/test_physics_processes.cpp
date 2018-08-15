@@ -168,12 +168,12 @@ main( int argc, char* argv[] )
           tmr.reset();
 
           ostringstream oss; oss << values_vs_kin.first;
-          string test_res = Form( "%-10s", values_vs_generator.first )+"\t"+
-                            Form( "pt-gt-%.1f", values_vs_cut.first )+"\t"+
-                            Form( "%-16s", oss.str().c_str() )+"\t"
-                            "ref="+Form( "%g", xsec_ref )+"\t"
-                            "got="+Form( "%g", xsec_cepgen )+"\t"
-                            "pull="+Form( "%+g", sigma );
+          string test_res = CepGen::Form( "%-10s", values_vs_generator.first )+"\t"+
+                            CepGen::Form( "pt-gt-%.1f", values_vs_cut.first )+"\t"+
+                            CepGen::Form( "%-16s", oss.str().c_str() )+"\t"
+                            "ref="+CepGen::Form( "%g", xsec_ref )+"\t"
+                            "got="+CepGen::Form( "%g", xsec_cepgen )+"\t"
+                            "pull="+CepGen::Form( "%+g", sigma );
           if ( fabs( sigma ) < num_sigma ) {
             passed_tests.emplace_back( test_res );
             num_tests_passed++;

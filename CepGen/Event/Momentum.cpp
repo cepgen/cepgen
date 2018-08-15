@@ -62,7 +62,7 @@ namespace CepGen
     px_ += mom.px_;
     py_ += mom.py_;
     pz_ += mom.pz_;
-    energy_ += mom.energy_; //FIXME not supposed to be this way!
+    energy_ += mom.energy_;
     computeP();
     return *this;
   }
@@ -73,7 +73,7 @@ namespace CepGen
     px_ -= mom.px_;
     py_ -= mom.py_;
     pz_ -= mom.pz_;
-    energy_ -= mom.energy_; //FIXME not supposed to be this way!
+    energy_ -= mom.energy_;
     computeP();
     return *this;
   }
@@ -162,6 +162,12 @@ namespace CepGen
     return out;
   }
 
+  Momentum
+  operator-( const Momentum& mom )
+  {
+    return Momentum()-mom;
+  }
+
   double
   operator*( const Momentum& mom1, const Momentum& mom2 )
   {
@@ -209,7 +215,7 @@ namespace CepGen
   void
   Momentum::computeP()
   {
-    p_ = sqrt( px_*px_ + py_*py_ + pz_*pz_ );
+    p_ = std::hypot( pt(), pz_ );
   }
 
   //--- various getters
@@ -269,7 +275,13 @@ namespace CepGen
   double
   Momentum::pt() const
   {
-    return sqrt( pt2() );
+    return std::hypot( px_, py_ );
+  }
+
+  double
+  Momentum::pt2() const
+  {
+    return px_*px_+py_*py_;
   }
 
   double

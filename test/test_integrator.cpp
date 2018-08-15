@@ -10,7 +10,7 @@ int
 main( int argc, char* argv[] )
 {
   if ( argc < 3 || string( argv[2] ) != "debug" )
-    CepGen::Logger::get().level = CepGen::Logger::Level::Nothing;
+    CepGen::Logger::get().level = CepGen::Logger::Level::nothing;
 
   const double max_sigma = 3.0;
 
