@@ -4,6 +4,7 @@
 #include "CepGen/Core/utils.h"
 
 #include <math.h>
+#include <iomanip>
 
 namespace CepGen
 {
@@ -319,13 +320,14 @@ namespace CepGen
   Momentum::lorentzBoost( const Momentum& p )
   {
     const double m = p.mass();
-    if ( m == p.energy() )
+    //--- do not boost on a system at rest
+    if ( m == p.energy_ )
       return *this;
 
-    const double pf4 = ( ( *this )*p ) / m,
-                 fn = ( pf4+energy() )/( p.energy()+m );
+    const double pf4 = ( energy_*p.energy_-px_*p.px_-py_*p.py_-pz_*p.pz_ ) / m,
+                 fn = ( pf4+energy_ )/( p.energy_+m );
     *this -= p*fn;
-    setEnergy( pf4 );
+    energy_ = pf4;
     return *this;
   }
 
@@ -361,6 +363,10 @@ namespace CepGen
   std::ostream&
   operator<<( std::ostream& os, const Momentum& mom )
   {
-    return os << "(E/p) = (" << mom.energy_ << " / " << mom.px_ << ", " << mom.py_ << ", " << mom.pz_ << ")";
+    return os << "(E|p) = (" << std::fixed
+      << std::setw( 9 ) << mom.energy_ << "|"
+      << std::setw( 9 ) << mom.px_ << " "
+      << std::setw( 9 ) << mom.py_ << " "
+      << std::setw( 9 ) << mom.pz_ << ")";
   }
 }
