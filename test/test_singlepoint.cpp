@@ -13,9 +13,9 @@ int main()
   p->kinematics.mode = CepGen::Kinematics::Mode::ElasticElastic;
   //p->kinematics.mode = CepGen::Kinematics::Mode::InelasticElastic;
   //p->kinematics.mode = CepGen::Kinematics::Mode::ElasticInelastic;
-  p->kinematics.cuts.central[CepGen::Cuts::pt_single] = 5.;
-  p->kinematics.cuts.central[CepGen::Cuts::eta_single] = { -2.5, 2.5 };
-  p->kinematics.cuts.remnants[CepGen::Cuts::mass_single] = { 1.07, 320. };
+  p->kinematics.cuts.central.pt_single = 5.;
+  p->kinematics.cuts.central.eta_single = { -2.5, 2.5 };
+  p->kinematics.cuts.remnants.mass_single = { 1.07, 320. };
 
   p->dump();
   CepGen::Logger::get().level = CepGen::Logger::Level::debugInsideLoop;

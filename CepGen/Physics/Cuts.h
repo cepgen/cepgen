@@ -24,7 +24,6 @@ namespace CepGen
     Limits q2;              ///< parton virtuality
     Limits qt;              ///< parton transverse virtuality
     Limits phi_qt;          ///< parton azimuthal angle difference
-    Limits w;               ///< two-parton squared momentum
     std::vector<std::pair<std::string,Limits> > list() const;
   };
 }

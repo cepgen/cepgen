@@ -106,20 +106,20 @@ namespace CepGen
             distrib = ( ( TObjString* )tok->At( 3 ) )->String();
           }
           if ( !unit.IsNull() or !form_spec.IsNull() ) {
-            if ( !unit.IsNull() ) x_title = Form( "%s (%s)", x_title.Data(), unit.Data() );
+            if ( !unit.IsNull() ) x_title = ::Form( "%s (%s)", x_title.Data(), unit.Data() );
             if ( !distrib.IsNull() ) {
               if ( !form_spec.IsNull() ) {
-                TString format = Form( "%%s (%s / %%%s %%s)", distrib.Data(), form_spec.Data() );
-                y_title = Form( format.Data(), y_title.Data(), GetBinning( obj ), unit.Data() );
+                TString format = ::Form( "%%s (%s / %%%s %%s)", distrib.Data(), form_spec.Data() );
+                y_title = ::Form( format.Data(), y_title.Data(), GetBinning( obj ), unit.Data() );
               }
-              else y_title = Form( "%s (%s / %d %s)", y_title.Data(), distrib.Data(), static_cast<unsigned int>( GetBinning( obj ) ), unit.Data() );
+              else y_title = ::Form( "%s (%s / %d %s)", y_title.Data(), distrib.Data(), static_cast<unsigned int>( GetBinning( obj ) ), unit.Data() );
             }
             else {
               if ( !form_spec.IsNull() ) {
-                TString format = Form( "%%s / %%%s %%s", form_spec.Data() );
-                y_title = Form( format.Data(), y_title.Data(), GetBinning( obj ), unit.Data() );
+                TString format = ::Form( "%%s / %%%s %%s", form_spec.Data() );
+                y_title = ::Form( format.Data(), y_title.Data(), GetBinning( obj ), unit.Data() );
               }
-              else y_title = Form( "%s / %d %s", y_title.Data(), static_cast<unsigned int>( GetBinning( obj ) ), unit.Data() );
+              else y_title = ::Form( "%s / %d %s", y_title.Data(), static_cast<unsigned int>( GetBinning( obj ) ), unit.Data() );
             }
           }
           obj->GetXaxis()->SetTitle( x_title );
@@ -249,7 +249,7 @@ namespace CepGen
         TCanvas::cd();
         if ( fLeg ) fLeg->Draw();
         if ( fTopLabel ) fTopLabel->Draw();
-        TCanvas::SaveAs(Form("%s/%s.%s", out_dir, TCanvas::GetName(), ext));
+        TCanvas::SaveAs( ::Form( "%s/%s.%s", out_dir, TCanvas::GetName(), ext ) );
       }
       inline TLegend* GetLegend() { return fLeg; }
 

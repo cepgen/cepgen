@@ -34,9 +34,6 @@ namespace CepGen
       is_point_set_( false )
     {}
 
-    GenericProcess::~GenericProcess()
-    {}
-
     GenericProcess&
     GenericProcess::operator=( const GenericProcess& proc )
     {
@@ -66,6 +63,13 @@ namespace CepGen
       if ( idx >= x_.size() )
         return -1.;
       return x_[idx];
+    }
+
+    void
+    GenericProcess::setKinematics( const Kinematics& cuts )
+    {
+      cuts_ = cuts;
+      prepareKinematics();
     }
 
     void

@@ -15,7 +15,7 @@ extern "C" {
 
     CG_DEBUG( "cepgen_structure_functions" ) << sf_mode;
 
-    StructureFunctions& val = ( *StructureFunctionsBuilder::get( sf_mode ) )( xbj, q2 );
+    static StructureFunctions& val = ( *StructureFunctionsBuilder::get( sf_mode ) )( xbj, q2 );
     f2 = val.F2;
     fl = val.FL;
   }

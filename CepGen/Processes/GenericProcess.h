@@ -26,7 +26,7 @@ namespace CepGen
         GenericProcess( const std::string& name, const std::string& description = "<invalid process>", bool has_event = true );
         /// Copy constructor for a user process
         GenericProcess( const GenericProcess& );
-        virtual ~GenericProcess();
+        virtual ~GenericProcess() = default;
 
         /// Assignment operator
         GenericProcess& operator=( const GenericProcess& );
@@ -60,7 +60,7 @@ namespace CepGen
         inline virtual void addEventContent() {}
         /// Set the list of kinematic cuts to apply on the outgoing particles' final state
         /// \param[in] cuts The Cuts object containing the kinematic parameters
-        inline virtual void setKinematics( const Kinematics& cuts ) { cuts_ = cuts; }
+        virtual void setKinematics( const Kinematics& cuts );
         /// Return the number of dimensions on which the integration has to be performed
         /// \return Number of dimensions on which to integrate
         virtual unsigned int numDimensions( const Kinematics::Mode& ) const = 0;

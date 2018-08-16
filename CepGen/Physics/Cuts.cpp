@@ -36,8 +36,6 @@ namespace CepGen
      out.emplace_back( "Transverse virtuality range (GeV)", qt );
     if ( phi_qt.valid() )
      out.emplace_back( "Partons Δɸ range", phi_qt );
-    if ( w.valid() )
-     out.emplace_back( "W (GeV²)", w );
     return out;
   }
 }

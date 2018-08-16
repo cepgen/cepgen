@@ -56,8 +56,6 @@ namespace CepGen
         { Particle::OutgoingBeam2, { PDG::Proton } },
         { Particle::CentralSystem, { PDG::Muon, PDG::Muon } }
       } );
-
-      masses_.Ml2_ = event_->getByRole( Particle::CentralSystem )[0].mass2();
     }
 
     unsigned int
@@ -83,11 +81,11 @@ namespace CepGen
     void
     GamGamLL::setKinematics( const Kinematics& kin )
     {
-      cuts_ = kin;
+      GenericProcess::setKinematics( kin );
 
-      prepareKinematics();
+      masses_.Ml2_ = pow( ParticleProperties::mass( kin.central_system[0] ), 2 );
 
-      w_limits_ = cuts_.cuts.initial.w;
+      w_limits_ = cuts_.cuts.central.mass_single;
       if ( !w_limits_.hasMax() )
         w_limits_.max() = s_;
       // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
@@ -528,7 +526,7 @@ namespace CepGen
 
       CG_DEBUG_LOOP( "GamGamLL" )
         << "ct3 = " << ct3 << "\n\t"
-        << "ct5 = " << ct5;;
+        << "ct5 = " << ct5;
 
       if ( dd5_ < 0. ) {
         CG_WARNING( "GamGamLL" )
@@ -733,11 +731,8 @@ namespace CepGen
       if ( pgg > pgp*0.9 && pgg > pg )
         pg = pgg; //FIXME ???
 
-      // Phi angle for the 2-photon system ?!
-      const double cpg = pgx/pgp,
-                   spg = pgy/pgp;
-
-      // Theta angle for the 2-photon system ?!
+      // angles for the 2-photon system ?!
+      const double cpg = pgx/pgp, spg = pgy/pgp;
       const double stg = pgp/pg;
 
       const int theta_sign = ( pgz>0. ) ? 1 : -1;
@@ -745,7 +740,7 @@ namespace CepGen
 
       double xx6 = x( 5 );
 
-      const double amap = 0.5 * (w4_-t1_-t2_),
+      const double amap = 0.5 * ( w4_-t1_-t2_ ),
                    bmap = 0.5 * sqrt( ( pow( w4_-t1_-t2_, 2 )-4.*t1_*t2_ )*( 1.-4.*masses_.Ml2_/w4_ ) ),
                    ymap = ( amap+bmap )/( amap-bmap ),
                    beta = pow( ymap, 2.*xx6-1. );
@@ -756,7 +751,7 @@ namespace CepGen
         << "amap = " << amap << "\n\t"
         << "bmap = " << bmap << "\n\t"
         << "ymap = " << ymap << "\n\t"
-        << "beta = " << beta;;
+        << "beta = " << beta;
 
       // 3D rotation of the first outgoing lepton wrt the CM system
       const double theta6cm = acos( 1.-2.*xx6 );

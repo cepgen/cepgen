@@ -76,7 +76,7 @@ namespace MSTW
   std::ostream&
   operator<<( std::ostream& os, const Grid::sfval_t& val )
   {
-    return os << Form( "xbj = %.4f\tQ² = %.5e GeV²\tF₂ = % .6e\tFL = % .6e", val.xbj, val.q2, val.f2, val.fl );
+    return os << CepGen::Form( "xbj = %.4f\tQ² = %.5e GeV²\tF₂ = % .6e\tFL = % .6e", val.xbj, val.q2, val.f2, val.fl );
   }
 
   std::ostream&

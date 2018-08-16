@@ -4,6 +4,7 @@
 #include "CepGen/Core/utils.h"
 
 #include <math.h>
+#include <iomanip>
 
 namespace CepGen
 {
@@ -62,7 +63,7 @@ namespace CepGen
     px_ += mom.px_;
     py_ += mom.py_;
     pz_ += mom.pz_;
-    energy_ += mom.energy_; //FIXME not supposed to be this way!
+    energy_ += mom.energy_;
     computeP();
     return *this;
   }
@@ -73,7 +74,7 @@ namespace CepGen
     px_ -= mom.px_;
     py_ -= mom.py_;
     pz_ -= mom.pz_;
-    energy_ -= mom.energy_; //FIXME not supposed to be this way!
+    energy_ -= mom.energy_;
     computeP();
     return *this;
   }
@@ -162,6 +163,12 @@ namespace CepGen
     return out;
   }
 
+  Momentum
+  operator-( const Momentum& mom )
+  {
+    return Momentum()-mom;
+  }
+
   double
   operator*( const Momentum& mom1, const Momentum& mom2 )
   {
@@ -209,7 +216,7 @@ namespace CepGen
   void
   Momentum::computeP()
   {
-    p_ = sqrt( px_*px_ + py_*py_ + pz_*pz_ );
+    p_ = std::hypot( pt(), pz_ );
   }
 
   //--- various getters
@@ -269,7 +276,13 @@ namespace CepGen
   double
   Momentum::pt() const
   {
-    return sqrt( pt2() );
+    return std::hypot( px_, py_ );
+  }
+
+  double
+  Momentum::pt2() const
+  {
+    return px_*px_+py_*py_;
   }
 
   double
@@ -307,13 +320,14 @@ namespace CepGen
   Momentum::lorentzBoost( const Momentum& p )
   {
     const double m = p.mass();
-    if ( m == p.energy() )
+    //--- do not boost on a system at rest
+    if ( m == p.energy_ )
       return *this;
 
-    const double pf4 = ( ( *this )*p ) / m,
-                 fn = ( pf4+energy() )/( p.energy()+m );
+    const double pf4 = ( energy_*p.energy_-px_*p.px_-py_*p.py_-pz_*p.pz_ ) / m,
+                 fn = ( pf4+energy_ )/( p.energy_+m );
     *this -= p*fn;
-    setEnergy( pf4 );
+    energy_ = pf4;
     return *this;
   }
 
@@ -349,6 +363,10 @@ namespace CepGen
   std::ostream&
   operator<<( std::ostream& os, const Momentum& mom )
   {
-    return os << "(E/p) = (" << mom.energy_ << " / " << mom.px_ << ", " << mom.py_ << ", " << mom.pz_ << ")";
+    return os << "(E|p) = (" << std::fixed
+      << std::setw( 9 ) << mom.energy_ << "|"
+      << std::setw( 9 ) << mom.px_ << " "
+      << std::setw( 9 ) << mom.py_ << " "
+      << std::setw( 9 ) << mom.pz_ << ")";
   }
 }

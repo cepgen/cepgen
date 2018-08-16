@@ -22,7 +22,8 @@ namespace CepGen
         case PDG::MuonNeutrino:
         case PDG::TauNeutrino:  return 0.;
         case PDG::Gluon:
-        case PDG::Photon:       return 0.;
+        case PDG::Photon:
+        case PDG::Pomeron:      return 0.;
         case PDG::Z:            return 91.1876;
         case PDG::W:            return 80.385;
         case PDG::PiPlus:       return 0.13957018;
