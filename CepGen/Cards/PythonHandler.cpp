@@ -154,6 +154,11 @@ namespace CepGen
         params_.kinematics.incoming_beams.first.pz = pz0;
         params_.kinematics.incoming_beams.second.pz = pz1;
       }
+      PyObject* ppdg = getElement( kin, "pdgIds" ); // borrowed
+      if ( ppdg && PyTuple_Check( ppdg ) && PyTuple_Size( ppdg ) == 2 ) {
+        params_.kinematics.incoming_beams.first.pdg = (PDG)asInteger( PyTuple_GetItem( ppdg, 0 ) );
+        params_.kinematics.incoming_beams.second.pdg = (PDG)asInteger( PyTuple_GetItem( ppdg, 1 ) );
+      }
       double sqrt_s = -1.;
       fillParameter( kin, "cmEnergy", sqrt_s );
       if ( sqrt_s != -1. )
