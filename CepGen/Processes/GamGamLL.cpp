@@ -984,11 +984,11 @@ namespace CepGen
         case Kinematics::Mode::ElasticElastic:
         case Kinematics::Mode::ElasticInelastic:
         default:
-          op1.setStatus( Particle::FinalState ); // stable proton
+          op1.setStatus( Particle::Status::FinalState ); // stable proton
           break;
         case Kinematics::Mode::InelasticElastic:
         case Kinematics::Mode::InelasticInelastic:
-          op1.setStatus( Particle::Unfragmented ); // fragmenting remnants
+          op1.setStatus( Particle::Status::Unfragmented ); // fragmenting remnants
           op1.setMass( MX_ );
           break;
       }
@@ -1000,11 +1000,11 @@ namespace CepGen
         case Kinematics::Mode::ElasticElastic:
         case Kinematics::Mode::InelasticElastic:
         default:
-          op2.setStatus( Particle::FinalState ); // stable proton
+          op2.setStatus( Particle::Status::FinalState ); // stable proton
           break;
         case Kinematics::Mode::ElasticInelastic:
         case Kinematics::Mode::InelasticInelastic:
-          op2.setStatus( Particle::Unfragmented ); // fragmenting remnants
+          op2.setStatus( Particle::Status::Unfragmented ); // fragmenting remnants
           op2.setMass( MY_ );
           break;
       }
@@ -1012,12 +1012,10 @@ namespace CepGen
       //----- first incoming photon
       Particle& ph1 = event_->getOneByRole( Particle::Parton1 );
       ph1.setMomentum( plab_ph1 );
-      ph1.setStatus( Particle::Incoming );
 
       //----- second incoming photon
       Particle& ph2 = event_->getOneByRole( Particle::Parton2 );
       ph2.setMomentum( plab_ph2 );
-      ph2.setStatus( Particle::Incoming );
 
       Particles& central_system = event_->getByRole( Particle::CentralSystem );
 
@@ -1025,13 +1023,13 @@ namespace CepGen
       Particle& ol1 = central_system[0];
       ol1.setPdgId( ol1.pdgId(), ransign );
       ol1.setMomentum( p6_cm_ );
-      ol1.setStatus( Particle::FinalState );
+      ol1.setStatus( Particle::Status::FinalState );
 
       //----- second outgoing lepton
       Particle& ol2 = central_system[1];
       ol2.setPdgId( ol2.pdgId(), -ransign );
       ol2.setMomentum( p7_cm_ );
-      ol2.setStatus( Particle::FinalState );
+      ol2.setStatus( Particle::Status::FinalState );
 
       //----- intermediate two-lepton system
       event_->getOneByRole( Particle::Intermediate ).setMomentum( p6_cm_+p7_cm_ );

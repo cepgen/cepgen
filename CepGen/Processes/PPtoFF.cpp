@@ -249,7 +249,7 @@ namespace CepGen
       //=================================================================
       Particle& of1 = event_->getByRole( Particle::CentralSystem )[0];
       of1.setPdgId( of1.pdgId(), sign );
-      of1.setStatus( Particle::FinalState );
+      of1.setStatus( Particle::Status::FinalState );
       of1.setMomentum( p_f1_ );
 
       //=================================================================
@@ -257,7 +257,7 @@ namespace CepGen
       //=================================================================
       Particle& of2 = event_->getByRole( Particle::CentralSystem )[1];
       of2.setPdgId( of2.pdgId(), -sign );
-      of2.setStatus( Particle::FinalState );
+      of2.setStatus( Particle::Status::FinalState );
       of2.setMomentum( p_f2_ );
     }
 

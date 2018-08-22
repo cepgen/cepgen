@@ -179,8 +179,8 @@ namespace CepGen
       Particle& op = ev.addParticle( (Particle::Role)role );
       op.setPdgId( static_cast<PDG>( abs( py_part.id() ) ), py_part.charge() );
       op.setStatus( py_part.isFinal()
-        ? Particle::FinalState
-        : Particle::Propagator );
+        ? Particle::Status::FinalState
+        : Particle::Status::Propagator );
       op.setMomentum( Particle::Momentum( mom.px(), mom.py(), mom.pz(), mom.e() ) );
       op.setMass( mom.mCalc() );
       lhaevt_->addCorresp( py_part.index()-offset_, op.id() );
@@ -199,7 +199,7 @@ namespace CepGen
           //--- fragmentation result
           if ( cg_part.role() == Particle::OutgoingBeam1
             || cg_part.role() == Particle::OutgoingBeam2 ) {
-            cg_part.setStatus( Particle::Fragmented );
+            cg_part.setStatus( Particle::Status::Fragmented );
             continue;
           }
           //--- particle is not what we expect
@@ -223,7 +223,7 @@ namespace CepGen
             continue;
           //--- resonance decayed; apply branching ratio for this decay
           weight *= p.particleDataEntry().pickChannel().bRatio();
-          cg_part.setStatus( Particle::Resonance );
+          cg_part.setStatus( Particle::Status::Resonance );
         }
         else {
           //----- new particle to be added
@@ -232,11 +232,11 @@ namespace CepGen
           switch ( role ) {
             default: break;
             case Particle::OutgoingBeam1: // no break!
-              ev.getByRole( Particle::OutgoingBeam1 )[0].setStatus( Particle::Fragmented );
+              ev.getByRole( Particle::OutgoingBeam1 )[0].setStatus( Particle::Status::Fragmented );
               if ( abs( p.status() ) != 61 )
                 break;
             case Particle::OutgoingBeam2: // no break!
-              ev.getByRole( Particle::OutgoingBeam2 )[0].setStatus( Particle::Fragmented );
+              ev.getByRole( Particle::OutgoingBeam2 )[0].setStatus( Particle::Status::Fragmented );
               if ( abs( p.status() ) != 61 )
                 break;
           }
@@ -252,9 +252,9 @@ namespace CepGen
               cg_part.addMother( addParticle( ev, pythia_->event[moth_id], mom, (unsigned short)role ) );
             if ( !p.isFinal() ) {
               if ( p.isResonance() || p.daughterList().size() > 0 )
-                cg_part.setStatus( Particle::Resonance );
+                cg_part.setStatus( Particle::Status::Resonance );
               else
-                cg_part.setStatus( Particle::Undefined );
+                cg_part.setStatus( Particle::Status::Undefined );
             }
           }
         }

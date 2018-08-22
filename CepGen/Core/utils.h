@@ -6,13 +6,6 @@
 namespace CepGen
 {
   inline const char* s( unsigned short num ) { return ( num > 1 ) ? "s" : ""; }
-  struct BreitWigner
-  {
-    BreitWigner( double er, double gamma, double emin, double emax ) :
-      er( er ), gamma( gamma ), emin( emin ), emax( emax ) {}
-    double operator()( double x ) const;
-    double er, gamma, emin, emax;
-  };
 
   /// Format a string using a printf style format descriptor.
   std::string Form( const std::string fmt, ... );

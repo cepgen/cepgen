@@ -90,9 +90,9 @@ namespace CepGen
                                 part_orig.momentum().pz(),
                                 part_orig.energy() );
 #  ifdef HEPMC_VERSION3
-        HepMC::GenParticlePtr part = HepMC::make_shared<HepMC::GenParticle>( pmom, part_orig.integerPdgId(), part_orig.status() );
+        HepMC::GenParticlePtr part = HepMC::make_shared<HepMC::GenParticle>( pmom, part_orig.integerPdgId(), (int)part_orig.status() );
 #  else
-        HepMC::GenParticle* part = new HepMC::GenParticle( pmom, part_orig.integerPdgId(), part_orig.status() );
+        HepMC::GenParticle* part = new HepMC::GenParticle( pmom, part_orig.integerPdgId(), (int)part_orig.status() );
         part->suggest_barcode( idx++ );
 #  endif
         const ParticlesIds moth = part_orig.mothers();

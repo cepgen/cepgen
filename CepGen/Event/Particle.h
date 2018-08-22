@@ -17,7 +17,7 @@ namespace CepGen
   class Particle {
     public:
       /// Internal status code for a particle
-      enum Status {
+      enum class Status {
         PrimordialIncoming = -9,
         DebugResonance = -5,
         Resonance = -4,
@@ -187,7 +187,7 @@ namespace CepGen
       /// \param[in] pdgId PDG identifier
       /// \param[in] role Role of the particle in the process
       /// \param[in] st Current status
-      Particle( Role role, PDG pdgId, Status st = Undefined );
+      Particle( Role role, PDG pdgId, Status st = Status::Undefined );
       /// Copy constructor
       Particle( const Particle& );
       inline ~Particle() {}

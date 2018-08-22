@@ -119,14 +119,17 @@ namespace CepGen
         p.setMass( ParticleProperties::mass( ip.second ) );
         if ( ip.first == Particle::IncomingBeam1
           || ip.first == Particle::IncomingBeam2 )
-          p.setStatus( Particle::PrimordialIncoming );
+          p.setStatus( Particle::Status::PrimordialIncoming );
+        if ( ip.first == Particle::Parton1
+          || ip.first == Particle::Parton2 )
+          p.setStatus( Particle::Status::Incoming );
       }
       //--- central system (if not already there)
       const auto& central_system = ini.find( Particle::CentralSystem );
       if ( central_system == ini.end() ) {
         Particle& p = event_->addParticle( Particle::Intermediate );
         p.setPdgId( PDG::invalid );
-        p.setStatus( Particle::Propagator );
+        p.setStatus( Particle::Status::Propagator );
       }
       //--- outgoing state
       for ( const auto& opl : fin ) { // pair(role, list of PDGids)

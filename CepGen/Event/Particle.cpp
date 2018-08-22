@@ -9,7 +9,7 @@ namespace CepGen
   Particle::Particle() :
     id_( -1 ), charge_sign_( 1 ),
     mass_( -1. ), helicity_( 0. ),
-    role_( UnknownRole ), status_( Undefined ), pdg_id_( PDG::invalid )
+    role_( UnknownRole ), status_( Status::Undefined ), pdg_id_( PDG::invalid )
   {}
 
   Particle::Particle( Role role, PDG pdgId, Status st ) :
@@ -200,7 +200,7 @@ namespace CepGen
       }
     }
     CG_INFO( "Particle" )
-      << "Dumping a particle with id=" << id_ << ", role=" << role_ << ", status=" << status_ << "\n\t"
+      << "Dumping a particle with id=" << id_ << ", role=" << role_ << ", status=" << (int)status_ << "\n\t"
       << "Particle id: " << integerPdgId() << " (" << pdg_id_ << "), mass = " << mass() << " GeV\n\t"
       << "Momentum: " << momentum_ << " GeV\t" << "(|P| = p = " << momentum_.p() << " GeV)\n\t"
       << " p⟂ = " << momentum_.pt() << " GeV, eta = " << momentum_.eta() << ", phi = " << momentum_.phi() << "\n\t"

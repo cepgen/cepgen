@@ -307,7 +307,7 @@ namespace CepGen
 
       // discard non-primary, decayed particles
       if ( (short)part.status() >= 0. ) {
-        const int sign = ( part.status() == Particle::Undefined ) ? -1 : 1;
+        const int sign = ( part.status() == Particle::Status::Undefined ) ? -1 : 1;
         pxtot += sign*mom.px();
         pytot += sign*mom.py();
         pztot += sign*mom.pz();

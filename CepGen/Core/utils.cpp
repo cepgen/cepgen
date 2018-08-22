@@ -5,20 +5,6 @@
 
 namespace CepGen
 {
-  double
-  BreitWigner::operator()( double x ) const
-  {
-    if ( gamma < 1.e-3*er )
-      return er;
-
-    const double inv_gamma = 1./gamma;
-    const double a = atan( 2.*( emax-er )*inv_gamma ),
-                 b = atan( 2.*( emin-er )*inv_gamma );
-    const double e = er + 0.5*gamma*tan( x*( a-b )+b );
-
-    return std::min( e, emax );
-  }
-
   std::string
   Form( const std::string fmt, ... )
   {
