@@ -117,7 +117,7 @@ namespace CepGen
   }
 
   Particle&
-  Event::getById( int id )
+  Event::operator[]( int id )
   {
     for ( auto& role_part : particles_ )
       for ( auto& part : role_part.second )

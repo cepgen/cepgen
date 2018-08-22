@@ -195,7 +195,7 @@ namespace CepGen
         const unsigned short cg_id = lhaevt_->cgPart( i-offset_ );
         if ( cg_id != LHAEvent::invalid_id ) {
           //----- particle already in the event
-          Particle& cg_part = ev.getById( cg_id );
+          Particle& cg_part = ev[cg_id];
           //--- fragmentation result
           if ( cg_part.role() == Particle::OutgoingBeam1
             || cg_part.role() == Particle::OutgoingBeam2 ) {
@@ -247,7 +247,7 @@ namespace CepGen
               continue;
             const unsigned short moth_cg_id = lhaevt_->cgPart( moth_id-offset_ );
             if ( moth_cg_id != LHAEvent::invalid_id )
-              cg_part.addMother( ev.getById( moth_cg_id ) );
+              cg_part.addMother( ev[moth_cg_id] );
             else
               cg_part.addMother( addParticle( ev, pythia_->event[moth_id], mom, (unsigned short)role ) );
             if ( !p.isFinal() ) {

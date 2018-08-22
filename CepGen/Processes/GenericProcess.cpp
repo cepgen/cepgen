@@ -141,7 +141,7 @@ namespace CepGen
 
       const Particles parts = event_->particles();
       for ( const auto& p : parts ) {
-        Particle& part = event_->getById( p.id() );
+        Particle& part = event_->operator[]( p.id() );
         switch ( part.role() ) {
           case Particle::OutgoingBeam1:
           case Particle::Parton1:

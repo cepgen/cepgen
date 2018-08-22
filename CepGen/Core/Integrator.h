@@ -72,7 +72,7 @@ namespace CepGen
        */
       void computeGenerationParameters();
       double uniform() const;
-      double eval( const std::vector<double>& x, bool treat = false );
+      double eval( const std::vector<double>& x );
       /// Selected bin at which the function will be evaluated
       int ps_bin_;
       /// List of parameters to specify the integration range and the physics determining the phase space
