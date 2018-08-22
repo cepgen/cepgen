@@ -600,8 +600,8 @@ namespace CepGen
           << "a1 = " << a1;
         return true;
       }
-      if ( a1 < 0. ) p5_lab_.setP( 0, -p5_lab_.px() );
-      else           p3_lab_.setP( 0, -p3_lab_.px() );
+      if ( a1 < 0. ) p5_lab_[0] = -p5_lab_.px();
+      else           p3_lab_[0] = -p3_lab_.px();
       return true;
     }
 

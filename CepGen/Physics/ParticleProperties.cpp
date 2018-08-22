@@ -1,5 +1,6 @@
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Core/Exception.h"
 
 namespace CepGen
 {
@@ -89,7 +90,10 @@ namespace CepGen
         case PDG::Rho770_0:  return 0.150; // PDG
         case PDG::Rho1450_0: return 0.400; // PDG
         case PDG::Rho1700_0: return 0.250; // PDG
-        default:             return -1.;
+        default:
+          CG_WARNING( "ParticleProperties:width" )
+            << "Particle " << pdg_id << " has no registered width.";
+          return -1.;
       }
     }
   }

@@ -201,19 +201,6 @@ namespace CepGen
   }
 
   void
-  Momentum::setP( unsigned int i, double p )
-  {
-    switch ( i ) {
-      case 0: px_ = p; break;
-      case 1: py_ = p; break;
-      case 2: pz_ = p; break;
-      case 3: energy_ = p; break;
-      default: return;
-    }
-    computeP();
-  }
-
-  void
   Momentum::computeP()
   {
     p_ = std::hypot( pt(), pz_ );
@@ -222,7 +209,7 @@ namespace CepGen
   //--- various getters
 
   double
-  Momentum::operator[]( const unsigned int i ) const
+  Momentum::operator[]( unsigned int i ) const
   {
     switch ( i ) {
       case 0: return px_;
@@ -230,7 +217,7 @@ namespace CepGen
       case 2: return pz_;
       case 3: return energy_;
       default:
-        throw CG_FATAL( "Momentum" ) << "Failed to retrieve the component " << i << ".";
+        throw CG_FATAL( "Momentum" ) << "Failed to retrieve the component " << i << "!";
     }
   }
 
@@ -243,7 +230,7 @@ namespace CepGen
       case 2: return pz_;
       case 3: return energy_;
       default:
-        throw CG_FATAL( "Momentum" ) << "Failed to retrieve the component " << i << ".";
+        throw CG_FATAL( "Momentum" ) << "Failed to retrieve the component " << i << "!";
     }
   }
 
@@ -319,13 +306,13 @@ namespace CepGen
   Momentum&
   Momentum::lorentzBoost( const Momentum& p )
   {
-    const double m = p.mass();
     //--- do not boost on a system at rest
-    if ( m == p.energy_ )
+    if ( p.p() == 0. )
       return *this;
 
-    const double pf4 = ( energy_*p.energy_-px_*p.px_-py_*p.py_-pz_*p.pz_ ) / m,
-                 fn = ( pf4+energy_ )/( p.energy_+m );
+    const double m = p.mass();
+    const double pf4 = fourProduct( p )/m;
+    const double fn = ( pf4+energy_ )/( p.energy_+m );
     *this -= p*fn;
     energy_ = pf4;
     return *this;
