@@ -41,8 +41,6 @@ namespace CepGen
         void fillKinematics( bool ) override;
 
         void dumpVariables() const;
-        unsigned short computationMethod() const { return method_; }
-        void setComputationMethod( unsigned short i ) { method_ = i; }
 
         /// Type of incoming partons fluxes
         enum class Flux
@@ -101,7 +99,6 @@ namespace CepGen
         /// \note To be run at each point computation (therefore, to be optimised!)
         double generateVariables() const;
 
-        unsigned short method_;
         unsigned short num_dimensions_;
 
         /// Phase space point-independant component of the Jacobian weight of the point in the phase space for integration

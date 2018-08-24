@@ -8,6 +8,41 @@ namespace CepGen
     std::ostream&
     operator<<( std::ostream& os, const Parameters& params )
     {
+      for ( const auto& kv : params.int_values_ )
+        os << "\n" << kv.first << ": int(" << kv.second << ")";
+      for ( const auto& kv : params.dbl_values_ )
+        os << "\n" << kv.first << ": double(" << kv.second << ")";
+      for ( const auto& kv : params.str_values_ )
+        os << "\n" << kv.first << ": string(" << kv.second << ")";
+      for ( const auto& kv : params.param_values_ )
+        os << "\n" << kv.first << ": param({" << kv.second << "\n})";
+      for ( const auto& kv : params.vec_int_values_ ) {
+        os << "\n" << kv.first << ": vint(";
+        bool first = true;
+        for ( const auto& v : kv.second ) {
+          os << ( first ? "" : ", " ) << v;
+          first = false;
+        }
+        os << ")";
+      }
+      for ( const auto& kv : params.vec_dbl_values_ ) {
+        os << "\n" << kv.first << ": vdouble(";
+        bool first = true;
+        for ( const auto& v : kv.second ) {
+          os << ( first ? "" : ", " ) << v;
+          first = false;
+        }
+        os << ")";
+      }
+      for ( const auto& kv : params.vec_str_values_ ) {
+        os << "\n" << kv.first << ": vstring(";
+        bool first = true;
+        for ( const auto& v : kv.second ) {
+          os << ( first ? "" : ", " ) << v;
+          first = false;
+        }
+        os << ")";
+      }
       return os;
     }
 

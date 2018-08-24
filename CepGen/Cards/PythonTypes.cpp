@@ -107,44 +107,49 @@ namespace CepGen
           out.set<std::string>( skey, get<std::string>( pvalue ) );
         else if ( is<Process::Parameters>( pvalue ) )
           out.set<Process::Parameters>( skey, get<Process::Parameters>( pvalue ) );
-        else if ( PyTuple_Check( pvalue ) ) { // vector
+        else if ( PyTuple_Check( pvalue ) || PyList_Check( pvalue ) ) { // vector
           PyObject* pfirst = PyTuple_GetItem( pvalue, 0 );
+          PyObject* pit = nullptr;
+          const bool tuple = PyTuple_Check( pvalue );
+          const Py_ssize_t num_entries = ( tuple )
+            ? PyTuple_Size( pvalue )
+            : PyList_Size( pvalue );
           if ( is<int>( pfirst ) ) {
             std::vector<int> vec;
-            for ( Py_ssize_t i = 0; i < PyTuple_Size( pvalue ); ++i ) {
-              PyObject* pit = PyTuple_GetItem( pvalue, i );
+            for ( Py_ssize_t i = 0; i < num_entries; ++i ) {
+              pit = ( tuple ) ? PyTuple_GetItem( pvalue, i ) : PyList_GetItem( pvalue, i );
               if ( pit->ob_type != pfirst->ob_type )
-                throwPythonError( Form( "Mixed types detected in vector %s", skey ) );
+                throwPythonError( Form( "Mixed types detected in vector '%s'", skey.c_str() ) );
               vec.emplace_back( get<int>( pit ) );
             }
             out.set<std::vector<int> >( skey, vec );
           }
           else if ( is<double>( pfirst ) ) {
             std::vector<double> vec;
-            for ( Py_ssize_t i = 0; i < PyTuple_Size( pvalue ); ++i ) {
-              PyObject* pit = PyTuple_GetItem( pvalue, i );
+            for ( Py_ssize_t i = 0; i < num_entries; ++i ) {
+              pit = ( tuple ) ? PyTuple_GetItem( pvalue, i ) : PyList_GetItem( pvalue, i );
               if ( pit->ob_type != pfirst->ob_type )
-                throwPythonError( Form( "Mixed types detected in vector %s", skey ) );
+                throwPythonError( Form( "Mixed types detected in vector '%s'", skey.c_str() ) );
               vec.emplace_back( get<double>( pit ) );
             }
             out.set<std::vector<double> >( skey, vec );
           }
           else if ( is<std::string>( pfirst ) ) {
             std::vector<std::string> vec;
-            for ( Py_ssize_t i = 0; i < PyTuple_Size( pvalue ); ++i ) {
-              PyObject* pit = PyTuple_GetItem( pvalue, i );
+            for ( Py_ssize_t i = 0; i < num_entries; ++i ) {
+              pit = ( tuple ) ? PyTuple_GetItem( pvalue, i ) : PyList_GetItem( pvalue, i );
               if ( pit->ob_type != pfirst->ob_type )
-                throwPythonError( Form( "Mixed types detected in vector %s", skey ) );
+                throwPythonError( Form( "Mixed types detected in vector '%s'", skey.c_str() ) );
               vec.emplace_back( get<std::string>( pit ) );
             }
             out.set<std::vector<std::string> >( skey, vec );
           }
           else if ( is<Process::Parameters>( pfirst ) ) {
             std::vector<Process::Parameters> vec;
-            for ( Py_ssize_t i = 0; i < PyTuple_Size( pvalue ); ++i ) {
-              PyObject* pit = PyTuple_GetItem( pvalue, i );
+            for ( Py_ssize_t i = 0; i < num_entries; ++i ) {
+              pit = ( tuple ) ? PyTuple_GetItem( pvalue, i ) : PyList_GetItem( pvalue, i );
               if ( pit->ob_type != pfirst->ob_type )
-                throwPythonError( Form( "Mixed types detected in vector %s", skey ) );
+                throwPythonError( Form( "Mixed types detected in vector '%s'", skey.c_str() ) );
               vec.emplace_back( get<Process::Parameters>( pit ) );
             }
             out.set<std::vector<Process::Parameters> >( skey, vec );

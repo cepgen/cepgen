@@ -23,6 +23,9 @@ namespace CepGen
         /// Rapidity range for the outgoing fermions
         double onShellME( double shat, double that, double uhat ) const;
         double offShellME( double, double, double, double, double, double, const Particle::Momentum&, const Particle::Momentum& ) const;
+
+        int method_;
+
         Limits rap_limits_;
         /// Rapidity of the first outgoing fermion
         double y1_;

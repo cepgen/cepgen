@@ -12,6 +12,7 @@ namespace CepGen
   {
     PPtoFF::PPtoFF() :
       GenericKTProcess( "pptoff", "ɣɣ → f⁺f¯", { { PDG::Photon, PDG::Photon } }, { PDG::Muon, PDG::Muon } ),
+      method_( parameters.get<int>( "method", 1 ) ),
       y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )
     {}
 

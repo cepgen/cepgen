@@ -29,6 +29,8 @@ namespace CepGen
         double onShellME( double shat, double that, double uhat );
         double offShellME( double shat, double that, double uhat, double phi_sum, double phi_diff );
 
+        int method_;
+
         /// Rapidity range for the outgoing W bosons
         Limits rap_limits_;
         /// Rapidity of the first outgoing W boson
