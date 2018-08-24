@@ -174,8 +174,14 @@ namespace CepGen
       const double ww = 0.5 * ( 1.+sqrt( 1.-4.*mp2_/s_ ) );
 
       // FIXME FIXME FIXME /////////////////////
-      Particle::Momentum q1( q1tx, q1ty, +0.5 * x1*ww*sqs_*( 1.-q1t2/x1/x1/ww/ww/s_ ), 0.5 * x1*ww*sqs_*( 1.+q1t2/x1/x1/ww/ww/s_ ) ),
-                         q2( q2tx, q2ty, -0.5 * x2*ww*sqs_*( 1.-q2t2/x2/x2/ww/ww/s_ ), 0.5 * x2*ww*sqs_*( 1.+q2t2/x2/x2/ww/ww/s_ ) );
+      const Particle::Momentum q1(
+        q1tx, q1ty,
+        +0.5 * x1*ww*sqs_*( 1.-q1t2/x1/x1/ww/ww/s_ ),
+        +0.5 * x1*ww*sqs_*( 1.+q1t2/x1/x1/ww/ww/s_ ) );
+      const Particle::Momentum q2(
+        q2tx, q2ty,
+        -0.5 * x2*ww*sqs_*( 1.-q2t2/x2/x2/ww/ww/s_ ),
+        +0.5 * x2*ww*sqs_*( 1.+q2t2/x2/x2/ww/ww/s_ ) );
       //////////////////////////////////////////
 
       CG_DEBUG_LOOP( "PPtoWW:partons" )
@@ -317,38 +323,58 @@ namespace CepGen
       const double e2 = 4.*M_PI*Constants::alphaEM;
 
       double amat2_0 = 0., amat2_1 = 0., amat2_interf = 0.;
-      for ( const auto lam3 : { -1, 0, 1 } ) {
-        for ( const auto lam4 : { -1, 0, 1 } ) {
+      const std::vector<short> pol_w1 = {
+        -1, 1, // transverse polarisation
+        0 // longitudinal polarisation
+      };
+      const std::vector<short> pol_w2 = {
+        -1, 1, // transverse polarisation
+        0 // longitudinal polarisation
+      };
+      for ( const auto lam3 : pol_w1 )
+        for ( const auto lam4 : pol_w2 ) {
           double ampli_pp = amplitudeWW( shat, that, uhat, +1, +1, lam3, lam4 );
           double ampli_mm = amplitudeWW( shat, that, uhat, -1, -1, lam3, lam4 );
           double ampli_pm = amplitudeWW( shat, that, uhat, +1, -1, lam3, lam4 );
           double ampli_mp = amplitudeWW( shat, that, uhat, -1, +1, lam3, lam4 );
           amat2_0 += ampli_pp*ampli_pp + ampli_mm*ampli_mm + 2.*cos( 2.*phi_diff )*ampli_pp*ampli_mm;
           amat2_1 += ampli_pm*ampli_pm + ampli_mp*ampli_mp + 2.*cos( 2.*phi_sum  )*ampli_pm*ampli_mp;
-          amat2_interf -= 2.*( cos( phi_sum+phi_diff )*( ampli_pp*ampli_pm+ampli_mm*ampli_mp ) + cos( phi_sum-phi_diff )*( ampli_pp*ampli_mp+ampli_mm*ampli_pm ) );
+          amat2_interf -= 2.*( cos( phi_sum+phi_diff )*( ampli_pp*ampli_pm+ampli_mm*ampli_mp )
+                              +cos( phi_sum-phi_diff )*( ampli_pp*ampli_mp+ampli_mm*ampli_pm ) );
         }
-      }
-      return e2*e2 * ( amat2_0 + amat2_1 + amat2_interf );
+      return e2*e2*( amat2_0+amat2_1+amat2_interf );
     }
 
     double
     PPtoWW::amplitudeWW( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 )
     {
-      // then compute some kinematic variables
-      const double cos_theta = ( that-uhat ) / shat / sqrt( 1.+1.e-10-4.*mw2_/shat ), cos_theta2 = cos_theta*cos_theta;
-      const double sin_theta2 = 1.-cos_theta2, sin_theta = sqrt( sin_theta2 );
+      //--- first compute some kinematic variables
+      const double cos_theta = ( that-uhat ) / shat / sqrt( 1.+1.e-10-4.*mw2_/shat ),
+                   cos_theta2 = cos_theta*cos_theta;
+      const double sin_theta2 = 1.-cos_theta2,
+                   sin_theta = sqrt( sin_theta2 );
       const double beta = sqrt( 1.-4.*mw2_/shat ), beta2 = beta*beta;
-      const double inv_gamma = sqrt( 1.-beta2 ), gamma = 1./inv_gamma, gamma2 = gamma*gamma, inv_gamma2 = inv_gamma*inv_gamma;
+      const double inv_gamma = sqrt( 1.-beta2 ), gamma = 1./inv_gamma,
+                   gamma2 = gamma*gamma, inv_gamma2 = inv_gamma*inv_gamma;
       const double invA = 1./( 1.-beta2*cos_theta2 );
 
+      //--- per-helicity amplitude
+      // longitudinal-longitudinal
       if ( lam3 == 0 && lam4 == 0 )
         return invA*inv_gamma2*( ( gamma2+1. )*( 1.-lam1*lam2 )*sin_theta2 - ( 1.+lam1*lam2 ) );
+      // transverse-longitudinal
       if ( lam4 == 0 )
         return invA*( -M_SQRT2*inv_gamma*( lam1-lam2 )*( 1.+lam1*lam3*cos_theta )*sin_theta );
+      // longitudinal-transverse
       if ( lam3 == 0 )
         return invA*( -M_SQRT2*inv_gamma*( lam2-lam1 )*( 1.+lam2*lam4*cos_theta )*sin_theta );
+      // transverse-transverse
       if ( lam3 != 0 && lam4 != 0 )
-        return invA*( -0.5*( 2.*beta*( lam1+lam2 )*( lam3+lam4 ) - inv_gamma2*( 1.+lam3*lam4 )*( 2.*lam1*lam2+( 1.-lam1*lam2 ) * cos_theta2 )+( 1.+lam1*lam2*lam3*lam4 )*( 3.+lam1*lam2 ) + 2.*( lam1-lam2 )*( lam3-lam4 )*cos_theta + ( 1.-lam1*lam2 )*( 1.-lam3*lam4 )*cos_theta2 ) );
+        return -0.5*invA*( 2.*beta*( lam1+lam2 )*( lam3+lam4 )
+                          -inv_gamma2*( 1.+lam3*lam4 )*( 2.*lam1*lam2+( 1.-lam1*lam2 ) * cos_theta2 )
+                          +( 1.+lam1*lam2*lam3*lam4 )*( 3.+lam1*lam2 )
+                          +2.*( lam1-lam2 )*( lam3-lam4 )*cos_theta
+                          +( 1.-lam1*lam2 )*( 1.-lam3*lam4 )*cos_theta2 );
       return 0.;
     }
   }
