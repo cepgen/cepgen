@@ -10,9 +10,9 @@ namespace CepGen
 {
   namespace Process
   {
-    PPtoFF::PPtoFF() :
+    PPtoFF::PPtoFF( const ParametersList& params ) :
       GenericKTProcess( "pptoff", "ɣɣ → f⁺f¯", { { PDG::Photon, PDG::Photon } }, { PDG::Muon, PDG::Muon } ),
-      method_( parameters.get<int>( "method", 1 ) ),
+      method_( params.get<int>( "method", 1 ) ),
       y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )
     {}
 
@@ -33,6 +33,8 @@ namespace CepGen
         << "Produced particle" << s( cuts_.central_system.size() )
         << " (" << pdg_f << ") with mass = " << mf_ << " GeV, "
         << "and charge = " << qf_ << " e";
+      CG_DEBUG( "PPtoFF:mode" )
+        << "matrix element computation method: " << method_ << ".";
     }
 
     double
@@ -176,9 +178,6 @@ namespace CepGen
       //     How matrix element is calculated
       //=================================================================
 
-      CG_DEBUG_LOOP( "PPtoFF" )
-        << "matrix element mode: " << method_ << ".";
-
       if ( method_ == 0 ) {
         //===============================================================
         //     Mendelstam variables
@@ -191,11 +190,12 @@ namespace CepGen
         const double uhat1 = ( q1t-p2 ).mass2(), uhat2 = ( q2t-p1 ).mass2();
         const double that = 0.5*( that1+that2 ), uhat = 0.5*( uhat1+uhat2 );
 
+        amat2 = onShellME( shat, that, uhat );
+
         CG_DEBUG_LOOP( "PPtoFF:onShell" )
           << "that(1/2) = " << that1 << " / " << that2 << "\n\t"
-          << "uhat(1/2) = " << uhat1 << " / " << uhat2 << ".";
-
-        amat2 = onShellME( shat, that, uhat );
+          << "uhat(1/2) = " << uhat1 << " / " << uhat2 << "\n\t"
+          << "squared matrix element: " << amat2 << ".";
       }
 
       else if ( method_ == 1 ) {
@@ -203,7 +203,7 @@ namespace CepGen
                      t2abs = ( q2t.pt2() + x2*( MY_*MY_-mp2_ )+x2*x2*mp2_ )/( 1.-x2 );
         const double z1p = alpha1/x1, z1m = alpha2/x1,
                      z2p = beta1 /x2, z2m = beta2 /x2;
-        CG_DEBUG_LOOP( "PPtoFF:onShell" )
+        CG_DEBUG_LOOP( "PPtoFF:offShell" )
           << "z(1/2)p = " << z1p << ", " << z2p << "\n\t"
           << "z(1/2)m = " << z1m << ", " << z2m << ".";
         amat2 = offShellME( t1abs, t2abs, z1m, z1p, z2m, z2p, q1t, q2t ) * pow( x1*x2*s_, 2 );
@@ -265,6 +265,9 @@ namespace CepGen
     double
     PPtoFF::onShellME( double shat, double that, double uhat ) const
     {
+      CG_DEBUG_LOOP( "PPtoFF:onShell" )
+        << "shat: " << shat << ", that: " << that << ", uhat: " << uhat << ".";
+
       //=================================================================
       //     on-shell formula for M^2
       //=================================================================
@@ -281,7 +284,8 @@ namespace CepGen
                    term9  =          -that*that*that*uhat,
                    term10 =          -that*uhat*uhat*uhat;
 
-      return -2.*( term1+term2+term3+term4+term5+term6+term7+term8+term9+term10 )/( pow( ( mf2_-that )*( mf2_-uhat ), 2) );
+      return -2.*( term1+term2+term3+term4+term5
+                  +term6+term7+term8+term9+term10 )/( pow( ( mf2_-that )*( mf2_-uhat ), 2) );
     }
 
     double

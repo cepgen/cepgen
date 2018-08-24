@@ -15,10 +15,10 @@ namespace CepGen
     const double PPtoWW::mw_ = ParticleProperties::mass( PDG::W );
     const double PPtoWW::mw2_ = PPtoWW::mw_*PPtoWW::mw_;
 
-    PPtoWW::PPtoWW() :
+    PPtoWW::PPtoWW( const ParametersList& params ) :
       GenericKTProcess( "pptoww", "ɣɣ → W⁺W¯", { { PDG::Photon, PDG::Photon } }, { PDG::W, PDG::W } ),
-      method_( parameters.get<int>( "method", 1 ) ),
-      pol_state_( (Polarisation)parameters.get<int>( "polarisationStates", 0 ) ),
+      method_( params.get<int>( "method", 1 ) ),
+      pol_state_( (Polarisation)params.get<int>( "polarisationStates", 0 ) ),
       y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )
     {}
 
@@ -49,6 +49,8 @@ namespace CepGen
           pol_w1_ = pol_w2_ = { -1, 1 };
           break;
       }
+      CG_DEBUG( "PPtoWW:mode" )
+        << "matrix element computation method: " << method_ << ".";
     }
 
     double

@@ -11,7 +11,7 @@ namespace CepGen
     class PPtoWW : public GenericKTProcess
     {
       public:
-        PPtoWW();
+        PPtoWW( const ParametersList& params = ParametersList() );
         ProcessPtr clone() const override { return ProcessPtr( new PPtoWW( *this ) ); }
         enum class Polarisation
         {

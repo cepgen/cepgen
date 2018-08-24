@@ -74,15 +74,16 @@ namespace CepGen
         throwPythonError( Form( "Failed to extract the process name from the configuration card %s", file ) );
       const std::string proc_name = get<std::string>( pproc_name );
 
-      if ( proc_name == "lpair" )
-        params_.setProcess( new Process::GamGamLL );
-      else if ( proc_name == "pptoll" || proc_name == "pptoff" )
-        params_.setProcess( new Process::PPtoFF );
-      else if ( proc_name == "pptoww" )
-        params_.setProcess( new Process::PPtoWW );
-      else throw CG_FATAL( "PythonHandler" ) << "Unrecognised process: " << proc_name << ".";
+      ParametersList proc_params;
+      fillParameter( process, "processParameters", proc_params );
 
-      fillParameter( process, "processParameters", params_.process()->parameters );
+      if ( proc_name == "lpair" )
+        params_.setProcess( new Process::GamGamLL( proc_params ) );
+      else if ( proc_name == "pptoll" || proc_name == "pptoff" )
+        params_.setProcess( new Process::PPtoFF( proc_params ) );
+      else if ( proc_name == "pptoww" )
+        params_.setProcess( new Process::PPtoWW( proc_params ) );
+      else throw CG_FATAL( "PythonHandler" ) << "Unrecognised process: " << proc_name << ".";
 
       //--- process mode
       fillParameter( process, "mode", (int&)params_.kinematics.mode );

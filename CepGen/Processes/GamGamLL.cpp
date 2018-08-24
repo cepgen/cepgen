@@ -19,9 +19,9 @@ namespace CepGen
 
     //---------------------------------------------------------------------------------------------
 
-    GamGamLL::GamGamLL( int nopt ) :
+    GamGamLL::GamGamLL( const ParametersList& params ) :
       GenericProcess( "lpair", "pp → p(*) ( ɣɣ → l⁺l¯ ) p(*)" ),
-      n_opt_( nopt ),
+      n_opt_( params.get<int>( "nopt", 0 ) ),
       ep1_( 0. ), ep2_( 0. ), p_cm_( 0. ),
       ec4_( 0. ), pc4_( 0. ), mc4_( 0. ), w4_( 0. ),
       p12_( 0. ), p1k2_( 0. ), p2k1_( 0. ),

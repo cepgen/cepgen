@@ -102,9 +102,6 @@ namespace CepGen
         /// Pointer to the last event produced in this run
         std::shared_ptr<Event> last_event;
 
-        /// List of process-specific parameters
-        ParametersList parameters;
-
       protected:
         static const double mp_, mp2_;
 

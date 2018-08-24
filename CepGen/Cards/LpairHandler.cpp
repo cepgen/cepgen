@@ -40,19 +40,20 @@ namespace CepGen
       }
       f.close();
 
+      ParametersList proc_params;
+      if ( method_ != kInvalid )
+        proc_params.set<int>( "method", method_ );
+      if ( pol_state_ != kInvalid )
+        proc_params.set<int>( "polarisationStates", pol_state_ );
+
       if ( proc_name_ == "lpair" )
-        params_.setProcess( new Process::GamGamLL );
+        params_.setProcess( new Process::GamGamLL( proc_params ) );
       else if ( proc_name_ == "pptoll" || proc_name_ == "pptoff" )
-        params_.setProcess( new Process::PPtoFF );
+        params_.setProcess( new Process::PPtoFF( proc_params ) );
       else if ( proc_name_ == "pptoww" )
-        params_.setProcess( new Process::PPtoWW );
+        params_.setProcess( new Process::PPtoWW( proc_params ) );
       else
         throw CG_FATAL( "LpairHandler" ) << "Unrecognised process name: " << proc_name_ << "!";
-
-      if ( method_ != kInvalid )
-        params_.process()->parameters.set<int>( "method", method_ );
-      if ( pol_state_ != kInvalid )
-        params_.process()->parameters.set<int>( "polarisationStates", pol_state_ );
 
       if ( integr_type_ == "plain" )
         params_.integrator.type = Integrator::Type::plain;

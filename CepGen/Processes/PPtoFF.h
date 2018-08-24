@@ -11,7 +11,7 @@ namespace CepGen
     class PPtoFF : public GenericKTProcess
     {
       public:
-        PPtoFF();
+        PPtoFF( const ParametersList& params = ParametersList() );
         ProcessPtr clone() const override { return ProcessPtr( new PPtoFF( *this ) ); }
 
       private:

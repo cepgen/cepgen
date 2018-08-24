@@ -25,7 +25,6 @@ namespace CepGen
     {}
 
     GenericProcess::GenericProcess( const GenericProcess& proc ) :
-      parameters( proc.parameters ),
       name_( proc.name_ ), description_( proc.description_ ),
       first_run( proc.first_run ),
       s_( proc.s_ ), sqs_( proc.sqs_ ),
@@ -38,7 +37,6 @@ namespace CepGen
     GenericProcess&
     GenericProcess::operator=( const GenericProcess& proc )
     {
-      parameters = proc.parameters;
       name_ = proc.name_; description_ = proc.description_;
       first_run = proc.first_run;
       s_ = proc.s_; sqs_ = proc.sqs_;
@@ -111,6 +109,9 @@ namespace CepGen
     void
     GenericProcess::setEventContent( const IncomingState& ini, const OutgoingState& fin )
     {
+      if ( !has_event_ )
+        return;
+
       event_->clear();
       //----- add the particles in the event
 
@@ -176,6 +177,9 @@ namespace CepGen
     void
     GenericProcess::setIncomingKinematics( const Particle::Momentum& p1, const Particle::Momentum& p2 )
     {
+      if ( !has_event_ )
+        return;
+
       event_->getOneByRole( Particle::IncomingBeam1 ).setMomentum( p1 );
       event_->getOneByRole( Particle::IncomingBeam2 ).setMomentum( p2 );
     }
@@ -220,6 +224,9 @@ namespace CepGen
     bool
     GenericProcess::isKinematicsDefined()
     {
+      if ( !has_event_ )
+        return true;
+
       // check the incoming state
       bool is_incoming_state_set =
         ( !event_->getByRole( Particle::IncomingBeam1 ).empty()
