@@ -14,7 +14,7 @@ namespace CepGen
 {
   namespace Cards
   {
-    const unsigned int LpairHandler::kInvalid = 99999;
+    const int LpairHandler::kInvalid = 99999;
 
     //----- specialization for LPAIR input cards
 
@@ -45,6 +45,8 @@ namespace CepGen
         proc_params.set<int>( "method", method_ );
       if ( pol_state_ != kInvalid )
         proc_params.set<int>( "polarisationStates", pol_state_ );
+      if ( vm_flavour_ != kInvalid )
+        proc_params.set<int>( "vmFlavour", vm_flavour_ );
 
       if ( proc_name_ == "lpair" )
         params_.setProcess( new Process::GamGamLL( proc_params ) );
@@ -95,25 +97,34 @@ namespace CepGen
 
       registerParameter<bool>( "IEND", "Generation type", &params->generation.enabled );
       registerParameter<bool>( "NTRT", "Smoothen the integrand", &params->generation.treat );
-      registerParameter<unsigned int>( "DEBG", "Debugging verbosity", (unsigned int*)&Logger::get().level );
-      registerParameter<unsigned int>( "NCVG", "Number of function calls", &params->integrator.ncvg );
-      registerParameter<unsigned int>( "ITVG", "Number of integration iterations", (unsigned int*)&params->integrator.vegas.iterations );
-      registerParameter<unsigned int>( "SEED", "Random generator seed", (unsigned int*)&params->integrator.rng_seed );
-      registerParameter<unsigned int>( "NTHR", "Number of threads to use for events generation", &params->generation.num_threads );
-      registerParameter<unsigned int>( "MODE", "Subprocess' mode", (unsigned int*)&params->kinematics.mode );
-      registerParameter<unsigned int>( "METH", "Computation method (kT-factorisation)", &method_ );
-      registerParameter<unsigned int>( "PMOD", "Outgoing primary particles' mode", (unsigned int*)&params->kinematics.structure_functions );
-      registerParameter<unsigned int>( "EMOD", "Outgoing primary particles' mode", (unsigned int*)&params->kinematics.structure_functions );
-      registerParameter<unsigned int>( "PAIR", "Outgoing particles' PDG id", (unsigned int*)&pair_ );
-      registerParameter<unsigned int>( "NCSG", "Number of points to probe", &params->generation.num_points );
-      registerParameter<unsigned int>( "NGEN", "Number of events to generate", &params->generation.maxgen );
-      registerParameter<unsigned int>( "NPRN", "Number of events before printout", &params->generation.gen_print_every );
-      registerParameter<unsigned int>( "IPOL", "Polarisation states to consider (not available for all processes)", (unsigned int*)&pol_state_ );
+      registerParameter<int>( "DEBG", "Debugging verbosity", (int*)&Logger::get().level );
+      registerParameter<int>( "NCVG", "Number of function calls", (int*)&params->integrator.ncvg );
+      registerParameter<int>( "ITVG", "Number of integration iterations", (int*)&params->integrator.vegas.iterations );
+      registerParameter<int>( "SEED", "Random generator seed", (int*)&params->integrator.rng_seed );
+      registerParameter<int>( "NTHR", "Number of threads to use for events generation", (int*)&params->generation.num_threads );
+      registerParameter<int>( "MODE", "Subprocess' mode", (int*)&params->kinematics.mode );
+      registerParameter<int>( "NCSG", "Number of points to probe", (int*)&params->generation.num_points );
+      registerParameter<int>( "NGEN", "Number of events to generate", (int*)&params->generation.maxgen );
+      registerParameter<int>( "NPRN", "Number of events before printout", (int*)&params->generation.gen_print_every );
+
+      //-------------------------------------------------------------------------------------------
+      // Process-specific parameters
+      //-------------------------------------------------------------------------------------------
+
+      registerParameter<int>( "METH", "Computation method (kT-factorisation)", &method_ );
+      registerParameter<int>( "IPOL", "Polarisation states to consider (not available for all processes)", (int*)&pol_state_ );
+      registerParameter<int>( "VMID", "Vector meson flavour (DiffVM process)", (int*)&vm_flavour_ );
+      registerParameter<int>( "VMMD", "Vector meson generation mode (DiffVM process)", (int*)&vm_mode_ );
+      registerParameter<int>( "PRMD", "Proton generation mode (DiffVM process)", (int*)&proton_mode_ );
+      registerParameter<int>( "PHMD", "Photon generation mode (DiffVM process)", (int*)&photon_mode_ );
 
       //-------------------------------------------------------------------------------------------
       // Process kinematics parameters
       //-------------------------------------------------------------------------------------------
 
+      registerParameter<int>( "PMOD", "Outgoing primary particles' mode", (int*)&params->kinematics.structure_functions );
+      registerParameter<int>( "EMOD", "Outgoing primary particles' mode", (int*)&params->kinematics.structure_functions );
+      registerParameter<int>( "PAIR", "Outgoing particles' PDG id", (int*)&pair_ );
       registerParameter<double>( "INP1", "Momentum (1st primary particle)", &params->kinematics.incoming_beams.first.pz );
       registerParameter<double>( "INP2", "Momentum (2nd primary particle)", &params->kinematics.incoming_beams.second.pz );
       registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params->kinematics.incoming_beams.first.pz );
@@ -157,7 +168,7 @@ namespace CepGen
     LpairHandler::setParameter( const std::string& key, const std::string& value )
     {
       try { setValue<double>( key.c_str(), std::stod( value ) ); } catch ( std::invalid_argument& ) {}
-      try { setValue<unsigned int>( key.c_str(), std::stoi( value ) ); } catch ( std::invalid_argument& ) {}
+      try { setValue<int>( key.c_str(), std::stoi( value ) ); } catch ( std::invalid_argument& ) {}
       //setValue<bool>( key.c_str(), std::stoi( value ) );
       setValue<std::string>( key.c_str(), value );
     }
@@ -169,7 +180,7 @@ namespace CepGen
       if ( dd != -999. )
         return std::to_string( dd );
 
-      unsigned int ui = getValue<unsigned int>( key.c_str() );
+      int ui = getValue<int>( key.c_str() );
       if ( ui != 999 )
         return std::to_string( ui );
 
