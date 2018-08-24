@@ -45,8 +45,6 @@ namespace CepGen
         proc_params.set<int>( "method", method_ );
       if ( pol_state_ != kInvalid )
         proc_params.set<int>( "polarisationStates", pol_state_ );
-      if ( vm_flavour_ != kInvalid )
-        proc_params.set<int>( "vmFlavour", vm_flavour_ );
 
       if ( proc_name_ == "lpair" )
         params_.setProcess( new Process::GamGamLL( proc_params ) );
@@ -113,10 +111,6 @@ namespace CepGen
 
       registerParameter<int>( "METH", "Computation method (kT-factorisation)", &method_ );
       registerParameter<int>( "IPOL", "Polarisation states to consider (not available for all processes)", (int*)&pol_state_ );
-      registerParameter<int>( "VMID", "Vector meson flavour (DiffVM process)", (int*)&vm_flavour_ );
-      registerParameter<int>( "VMMD", "Vector meson generation mode (DiffVM process)", (int*)&vm_mode_ );
-      registerParameter<int>( "PRMD", "Proton generation mode (DiffVM process)", (int*)&proton_mode_ );
-      registerParameter<int>( "PHMD", "Photon generation mode (DiffVM process)", (int*)&photon_mode_ );
 
       //-------------------------------------------------------------------------------------------
       // Process kinematics parameters

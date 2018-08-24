@@ -49,8 +49,6 @@ namespace CepGen
         std::string proc_name_, hadr_name_, integr_type_;
         // kT-factorised processes
         int method_, pol_state_;
-        // DiffVM
-        int vm_flavour_, proton_mode_, vm_mode_, photon_mode_;
     };
 
     //----- specialised registerers
