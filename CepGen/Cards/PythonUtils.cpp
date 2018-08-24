@@ -1,5 +1,5 @@
 #include "CepGen/Cards/PythonHandler.h"
-#include "CepGen/Processes/Parameters.h"
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
@@ -237,14 +237,14 @@ namespace CepGen
     }
 
     void
-    PythonHandler::fillParameter( PyObject* parent, const char* key, Process::Parameters& out )
+    PythonHandler::fillParameter( PyObject* parent, const char* key, ParametersList& out )
     {
       PyObject* pobj = getElement( parent, key ); // borrowed
       if ( !pobj )
         return;
       if ( !PyDict_Check( pobj ) )
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
-      out = get<Process::Parameters>( pobj );
+      out = get<ParametersList>( pobj );
     }
   }
 }

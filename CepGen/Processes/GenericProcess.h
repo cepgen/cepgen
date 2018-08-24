@@ -3,7 +3,7 @@
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Processes/Parameters.h"
+#include "CepGen/Core/ParametersList.h"
 
 #include <vector>
 #include <memory>
@@ -103,7 +103,7 @@ namespace CepGen
         std::shared_ptr<Event> last_event;
 
         /// List of process-specific parameters
-        Parameters parameters;
+        ParametersList parameters;
 
       protected:
         static const double mp_, mp2_;

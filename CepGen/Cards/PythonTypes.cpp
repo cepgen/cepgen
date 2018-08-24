@@ -1,5 +1,5 @@
 #include "CepGen/Cards/PythonHandler.h"
-#include "CepGen/Processes/Parameters.h"
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/utils.h"
 
 #ifdef PYTHON
@@ -86,15 +86,15 @@ namespace CepGen
     }
 
     template<> bool
-    PythonHandler::is<Process::Parameters>( PyObject* obj ) const
+    PythonHandler::is<ParametersList>( PyObject* obj ) const
     {
       return PyDict_Check( obj );
     }
 
-    template<> Process::Parameters
-    PythonHandler::get<Process::Parameters>( PyObject* obj ) const
+    template<> ParametersList
+    PythonHandler::get<ParametersList>( PyObject* obj ) const
     {
-      Process::Parameters out;
+      ParametersList out;
       PyObject* pkey = nullptr, *pvalue = nullptr;
       Py_ssize_t pos = 0;
       while ( PyDict_Next( obj, &pos, &pkey, &pvalue ) ) {
@@ -105,8 +105,8 @@ namespace CepGen
           out.set<double>( skey, get<double>( pvalue ) );
         else if ( is<std::string>( pvalue ) )
           out.set<std::string>( skey, get<std::string>( pvalue ) );
-        else if ( is<Process::Parameters>( pvalue ) )
-          out.set<Process::Parameters>( skey, get<Process::Parameters>( pvalue ) );
+        else if ( is<ParametersList>( pvalue ) )
+          out.set<ParametersList>( skey, get<ParametersList>( pvalue ) );
         else if ( PyTuple_Check( pvalue ) || PyList_Check( pvalue ) ) { // vector
           PyObject* pfirst = PyTuple_GetItem( pvalue, 0 );
           PyObject* pit = nullptr;
@@ -144,15 +144,15 @@ namespace CepGen
             }
             out.set<std::vector<std::string> >( skey, vec );
           }
-          else if ( is<Process::Parameters>( pfirst ) ) {
-            std::vector<Process::Parameters> vec;
+          else if ( is<ParametersList>( pfirst ) ) {
+            std::vector<ParametersList> vec;
             for ( Py_ssize_t i = 0; i < num_entries; ++i ) {
               pit = ( tuple ) ? PyTuple_GetItem( pvalue, i ) : PyList_GetItem( pvalue, i );
               if ( pit->ob_type != pfirst->ob_type )
                 throwPythonError( Form( "Mixed types detected in vector '%s'", skey.c_str() ) );
-              vec.emplace_back( get<Process::Parameters>( pit ) );
+              vec.emplace_back( get<ParametersList>( pit ) );
             }
-            out.set<std::vector<Process::Parameters> >( skey, vec );
+            out.set<std::vector<ParametersList> >( skey, vec );
           }
         }
       }

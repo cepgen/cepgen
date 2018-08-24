@@ -5,8 +5,8 @@
 
 #include "CepGen/Core/TamingFunction.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersList.h"
 
-#include "CepGen/Processes/Parameters.h"
 #include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Processes/PPtoFF.h"
 #include "CepGen/Processes/PPtoWW.h"

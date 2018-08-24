@@ -9,9 +9,7 @@
 namespace CepGen
 {
   class StructureFunctions;
-  namespace Process {
-    class Parameters;
-  }
+  class ParametersList;
   namespace Cards
   {
     /// CepGen Python configuration cards reader/writer
@@ -44,7 +42,7 @@ namespace CepGen
         void fillParameter( PyObject* parent, const char* key, std::vector<int>& out );
         void fillParameter( PyObject* parent, const char* key, std::vector<double>& out );
         void fillParameter( PyObject* parent, const char* key, std::vector<std::string>& out );
-        void fillParameter( PyObject* parent, const char* key, Process::Parameters& out );
+        void fillParameter( PyObject* parent, const char* key, ParametersList& out );
 
         void parseIncomingKinematics( PyObject* );
         void parseOutgoingKinematics( PyObject* );
@@ -59,8 +57,8 @@ namespace CepGen
     template<> bool PythonHandler::is<int>( PyObject* obj ) const;
     template<> int PythonHandler::get<int>( PyObject* obj ) const;
     template<> unsigned long PythonHandler::get<unsigned long>( PyObject* obj ) const;
-    template<> bool PythonHandler::is<Process::Parameters>( PyObject* obj ) const;
-    template<> Process::Parameters PythonHandler::get<Process::Parameters>( PyObject* obj ) const;
+    template<> bool PythonHandler::is<ParametersList>( PyObject* obj ) const;
+    template<> ParametersList PythonHandler::get<ParametersList>( PyObject* obj ) const;
     template<> bool PythonHandler::is<double>( PyObject* obj ) const;
     template<> double PythonHandler::get<double>( PyObject* obj ) const;
     template<> bool PythonHandler::is<std::string>( PyObject* obj ) const;
