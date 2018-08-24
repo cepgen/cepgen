@@ -133,7 +133,7 @@ namespace CepGen
       for ( unsigned short ip = 0; ip < ev.numParticles(); ++ip ) {
         const Particle part = ev.getConstById( ip );
         out.IDUP[ip] = part.integerPdgId(); // PDG id
-        out.ISTUP[ip] = part.status(); // status code
+        out.ISTUP[ip] = (short)part.status(); // status code
         out.MOTHUP[ip] = std::pair<int,int>( ( part.mothers().size() > 0 ) ? *part.mothers().begin()+1 : 0, ( part.mothers().size() > 1 ) ? *part.mothers().rbegin()+1 : 0 ); // mothers
         out.ICOLUP[ip] = std::pair<int,int>( 0, 0 );
         out.PUP[ip] = std::vector<double>( { { part.momentum().px(), part.momentum().py(), part.momentum().pz(), part.energy(), part.mass() } } ); // momentum
@@ -229,7 +229,7 @@ namespace CepGen
           case Particle::OutgoingBeam1:
           case Particle::OutgoingBeam2:
           case Particle::CentralSystem: {
-            status = part.status();
+            status = (short)part.status();
             if ( status != 1 )
               continue;
           } break;

@@ -17,7 +17,7 @@ namespace CepGen
   class Particle {
     public:
       /// Internal status code for a particle
-      enum Status {
+      enum class Status {
         PrimordialIncoming = -9,
         DebugResonance = -5,
         Resonance = -4,
@@ -91,8 +91,6 @@ namespace CepGen
           void setP( double px, double py, double pz, double e );
           /// Set all the components of the 3-momentum (in GeV)
           void setP( double px, double py, double pz );
-          /// Set an individual component of the 4-momentum (in GeV)
-          void setP( unsigned int i, double p );
           /// Set the energy (in GeV)
           inline void setEnergy( double e ) { energy_ = e; }
           /// Compute the energy from the mass
@@ -187,7 +185,7 @@ namespace CepGen
       /// \param[in] pdgId PDG identifier
       /// \param[in] role Role of the particle in the process
       /// \param[in] st Current status
-      Particle( Role role, PDG pdgId, Status st = Undefined );
+      Particle( Role role, PDG pdgId, Status st = Status::Undefined );
       /// Copy constructor
       Particle( const Particle& );
       inline ~Particle() {}
@@ -195,9 +193,6 @@ namespace CepGen
       bool operator<( const Particle& rhs ) const;
       /// Comparison operator (from their reference's unique identifier)
       //bool operator<( Particle *rhs ) const { return ( id < rhs->id ); }
-      Particle& lorentzBoost( double m_, const Momentum& mom_ );
-      /// Lorentz boost (shamelessly stolen from ROOT)
-      std::vector<double> lorentzBoost( const Momentum& mom_ );
 
       // --- general particle properties
 

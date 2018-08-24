@@ -38,8 +38,9 @@ namespace CepGen
 {
   namespace Process
   {
-    FortranKTProcess::FortranKTProcess( const char* name, const char* descr, std::function<void( double& )> func ) :
+    FortranKTProcess::FortranKTProcess( const ParametersList& params, const char* name, const char* descr, std::function<void( double& )> func ) :
       GenericKTProcess( name, descr, { { PDG::Photon, PDG::Photon } }, { PDG::Muon, PDG::Muon } ),
+      method_( params.get<int>( "method", 1 ) ),
       func_( func )
     {
       constants_.m_p = ParticleProperties::mass( PDG::Proton );
@@ -158,12 +159,12 @@ namespace CepGen
 
       Particle& ol1 = event_->getByRole( Particle::CentralSystem )[0];
       ol1.setPdgId( (PDG)params_.pdg_l, +1 );
-      ol1.setStatus( Particle::FinalState );
+      ol1.setStatus( Particle::Status::FinalState );
       ol1.setMomentum( Particle::Momentum( evtkin_.p1x, evtkin_.p1y, evtkin_.p1z, evtkin_.p10 ) );
 
       Particle& ol2 = event_->getByRole( Particle::CentralSystem )[1];
       ol2.setPdgId( (PDG)params_.pdg_l, -1 );
-      ol2.setStatus( Particle::FinalState );
+      ol2.setStatus( Particle::Status::FinalState );
       ol2.setMomentum( Particle::Momentum( evtkin_.p2x, evtkin_.p2y, evtkin_.p2z, evtkin_.p20 ) );
     }
   }

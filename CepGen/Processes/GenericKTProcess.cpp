@@ -21,7 +21,7 @@ namespace CepGen
                                         const std::array<PDG,2>& partons,
                                         const std::vector<PDG>& central ) :
       GenericProcess( name, description+" (kT-factorisation approach)" ),
-      num_dimensions_( 0 ), method_( 1 ), kt_jacobian_( 0. ),
+      num_dimensions_( 0 ), kt_jacobian_( 0. ),
       qt1_( 0. ), phi_qt1_( 0. ), qt2_( 0. ), phi_qt2_( 0. ),
       flux1_( 0. ), flux2_( 0. ),
       kIntermediateParts( partons ), kProducedParts( central )
@@ -264,20 +264,20 @@ namespace CepGen
 
       switch ( cuts_.mode ) {
         case Kinematics::Mode::ElasticElastic:
-          op1.setStatus( Particle::FinalState );
-          op2.setStatus( Particle::FinalState );
+          op1.setStatus( Particle::Status::FinalState );
+          op2.setStatus( Particle::Status::FinalState );
           break;
         case Kinematics::Mode::ElasticInelastic:
-          op1.setStatus( Particle::FinalState );
-          op2.setStatus( Particle::Unfragmented ); op2.setMass( MY_ );
+          op1.setStatus( Particle::Status::FinalState );
+          op2.setStatus( Particle::Status::Unfragmented ); op2.setMass( MY_ );
           break;
         case Kinematics::Mode::InelasticElastic:
-          op1.setStatus( Particle::Unfragmented ); op1.setMass( MX_ );
-          op2.setStatus( Particle::FinalState );
+          op1.setStatus( Particle::Status::Unfragmented ); op1.setMass( MX_ );
+          op2.setStatus( Particle::Status::FinalState );
           break;
         case Kinematics::Mode::InelasticInelastic:
-          op1.setStatus( Particle::Unfragmented ); op1.setMass( MX_ );
-          op2.setStatus( Particle::Unfragmented ); op2.setMass( MY_ );
+          op1.setStatus( Particle::Status::Unfragmented ); op1.setMass( MX_ );
+          op2.setStatus( Particle::Status::Unfragmented ); op2.setMass( MY_ );
           break;
         default: {
           throw CG_FATAL( "GenericKTProcess" )
@@ -291,11 +291,9 @@ namespace CepGen
 
       Particle& g1 = event_->getOneByRole( Particle::Parton1 );
       g1.setMomentum( event_->getOneByRole( Particle::IncomingBeam1 ).momentum()-PX_, true );
-      g1.setStatus( Particle::Incoming );
 
       Particle& g2 = event_->getOneByRole( Particle::Parton2 );
       g2.setMomentum( event_->getOneByRole( Particle::IncomingBeam2 ).momentum()-PY_, true );
-      g2.setStatus( Particle::Incoming );
 
       //============================================================================================
       //     two-parton system

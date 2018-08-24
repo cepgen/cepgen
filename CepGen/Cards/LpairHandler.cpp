@@ -14,17 +14,18 @@ namespace CepGen
 {
   namespace Cards
   {
+    const unsigned int LpairHandler::kInvalid = 99999;
+
     //----- specialization for LPAIR input cards
 
     LpairHandler::LpairHandler( const char* file ) :
-      pair_( PDG::invalid )
+      pair_( PDG::invalid ), method_( kInvalid ), pol_state_( kInvalid )
     {
       std::ifstream f( file, std::fstream::in );
       if ( !f.is_open() )
         throw CG_FATAL( "LpairHandler" ) << "Failed to parse file \"" << file << "%s\".";
 
       init( &params_ );
-
 
       std::unordered_map<std::string, std::string> m_params;
       std::string key, value;
@@ -39,16 +40,18 @@ namespace CepGen
       }
       f.close();
 
+      ParametersList proc_params;
+      if ( method_ != kInvalid )
+        proc_params.set<int>( "method", method_ );
+      if ( pol_state_ != kInvalid )
+        proc_params.set<int>( "polarisationStates", pol_state_ );
+
       if ( proc_name_ == "lpair" )
-        params_.setProcess( new Process::GamGamLL );
-      else if ( proc_name_ == "pptoll" || proc_name_ == "pptoff" ) {
-        params_.setProcess( new Process::PPtoFF );
-        dynamic_cast<Process::GenericKTProcess*>( params_.process() )->setComputationMethod( method_ );
-      }
-      else if ( proc_name_ == "pptoww" ) {
-        params_.setProcess( new Process::PPtoWW );
-        dynamic_cast<Process::GenericKTProcess*>( params_.process() )->setComputationMethod( method_ );
-      }
+        params_.setProcess( new Process::GamGamLL( proc_params ) );
+      else if ( proc_name_ == "pptoll" || proc_name_ == "pptoff" )
+        params_.setProcess( new Process::PPtoFF( proc_params ) );
+      else if ( proc_name_ == "pptoww" )
+        params_.setProcess( new Process::PPtoWW( proc_params ) );
       else
         throw CG_FATAL( "LpairHandler" ) << "Unrecognised process name: " << proc_name_ << "!";
 
@@ -106,6 +109,7 @@ namespace CepGen
       registerParameter<unsigned int>( "NCSG", "Number of points to probe", &params->generation.num_points );
       registerParameter<unsigned int>( "NGEN", "Number of events to generate", &params->generation.maxgen );
       registerParameter<unsigned int>( "NPRN", "Number of events before printout", &params->generation.gen_print_every );
+      registerParameter<unsigned int>( "IPOL", "Polarisation states to consider (not available for all processes)", (unsigned int*)&pol_state_ );
 
       //-------------------------------------------------------------------------------------------
       // Process kinematics parameters

@@ -109,6 +109,9 @@ namespace CepGen
     void
     GenericProcess::setEventContent( const IncomingState& ini, const OutgoingState& fin )
     {
+      if ( !has_event_ )
+        return;
+
       event_->clear();
       //----- add the particles in the event
 
@@ -119,14 +122,17 @@ namespace CepGen
         p.setMass( ParticleProperties::mass( ip.second ) );
         if ( ip.first == Particle::IncomingBeam1
           || ip.first == Particle::IncomingBeam2 )
-          p.setStatus( Particle::PrimordialIncoming );
+          p.setStatus( Particle::Status::PrimordialIncoming );
+        if ( ip.first == Particle::Parton1
+          || ip.first == Particle::Parton2 )
+          p.setStatus( Particle::Status::Incoming );
       }
       //--- central system (if not already there)
       const auto& central_system = ini.find( Particle::CentralSystem );
       if ( central_system == ini.end() ) {
         Particle& p = event_->addParticle( Particle::Intermediate );
         p.setPdgId( PDG::invalid );
-        p.setStatus( Particle::Propagator );
+        p.setStatus( Particle::Status::Propagator );
       }
       //--- outgoing state
       for ( const auto& opl : fin ) { // pair(role, list of PDGids)
@@ -141,7 +147,7 @@ namespace CepGen
 
       const Particles parts = event_->particles();
       for ( const auto& p : parts ) {
-        Particle& part = event_->getById( p.id() );
+        Particle& part = event_->operator[]( p.id() );
         switch ( part.role() ) {
           case Particle::OutgoingBeam1:
           case Particle::Parton1:
@@ -171,6 +177,9 @@ namespace CepGen
     void
     GenericProcess::setIncomingKinematics( const Particle::Momentum& p1, const Particle::Momentum& p2 )
     {
+      if ( !has_event_ )
+        return;
+
       event_->getOneByRole( Particle::IncomingBeam1 ).setMomentum( p1 );
       event_->getOneByRole( Particle::IncomingBeam2 ).setMomentum( p2 );
     }
@@ -215,6 +224,9 @@ namespace CepGen
     bool
     GenericProcess::isKinematicsDefined()
     {
+      if ( !has_event_ )
+        return true;
+
       // check the incoming state
       bool is_incoming_state_set =
         ( !event_->getByRole( Particle::IncomingBeam1 ).empty()

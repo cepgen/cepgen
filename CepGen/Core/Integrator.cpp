@@ -207,7 +207,7 @@ namespace CepGen
       for ( unsigned int i = 0; i < function_->dim; ++i )
         x[i] = ( uniform() + grid_n[i] ) * GridParameters::inv_mbin_;
       // get weight for selected x value
-      weight = eval( x, input_params_->generation.treat );
+      weight = eval( x );
       if ( weight <= 0. )
         continue;
       if ( weight > y )
@@ -269,7 +269,7 @@ namespace CepGen
       const std::vector<unsigned short> grid_n = grid_->n_map.at( ps_bin_ );
       for ( unsigned int k = 0; k < function_->dim; ++k )
         xtmp[k] = ( uniform() + grid_n[k] ) * GridParameters::inv_mbin_;
-      const double weight = eval( xtmp, input_params_->generation.treat );
+      const double weight = eval( xtmp );
       // Parameter for correction of correction
       if ( weight > grid_->f_max[ps_bin_] ) {
         grid_->f_max2 = std::max( grid_->f_max2, weight );
@@ -306,7 +306,7 @@ namespace CepGen
   bool
   Integrator::storeEvent( const std::vector<double>& x, std::function<void( const Event&, unsigned long )> callback )
   {
-    const double weight = eval( x, input_params_->generation.treat );
+    const double weight = eval( x );
 
     if ( weight <= 0. )
       return false;
@@ -389,7 +389,7 @@ namespace CepGen
       for ( unsigned int j = 0; j < input_params_->generation.num_points; ++j ) {
         for ( unsigned int k = 0; k < function_->dim; ++k )
           x[k] = ( uniform()+n[k] ) * GridParameters::inv_mbin_;
-        const double weight = eval( x, input_params_->generation.treat );
+        const double weight = eval( x );
         grid_->f_max[i] = std::max( grid_->f_max[i], weight );
         fsum += weight;
         fsum2 += weight*weight;
@@ -458,9 +458,9 @@ namespace CepGen
   }
 
   double
-  Integrator::eval( const std::vector<double>& x, bool treat )
+  Integrator::eval( const std::vector<double>& x )
   {
-    if ( treat ) {
+    if ( input_params_->generation.treat ) {
       double w = r_boxes_;
       std::vector<double> x_new( x.size() );
       for ( unsigned short j = 0; j < function_->dim; ++j ) {

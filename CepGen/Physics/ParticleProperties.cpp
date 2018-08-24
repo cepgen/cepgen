@@ -1,5 +1,6 @@
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Core/Exception.h"
 
 namespace CepGen
 {
@@ -30,7 +31,7 @@ namespace CepGen
         case PDG::PiZero:       return 0.1349766;
         case PDG::KPlus:        return 0.49368;
         case PDG::DPlus:        return 1.86962;
-        case PDG::JPsi:         return 20.;            //FIXME FIXME FIXME
+        case PDG::JPsi:         return 3.0969;
         case PDG::Proton:       return 0.938272046;
         case PDG::Neutron:      return 0.939565346;
         case PDG::Upsilon1S:    return 9.46030;
@@ -88,7 +89,7 @@ namespace CepGen
     width( const PDG& pdg_id )
     {
       switch ( pdg_id ) {
-        case PDG::JPsi:      return 5.; //FIXME
+        case PDG::JPsi:      return 92.9e-6; //FIXME
         case PDG::Z:         return 2.4952;
         case PDG::W:         return 2.085;
         case PDG::Upsilon1S: return 54.02e-6;
@@ -97,7 +98,10 @@ namespace CepGen
         case PDG::Rho770_0:  return 0.150; // PDG
         case PDG::Rho1450_0: return 0.400; // PDG
         case PDG::Rho1700_0: return 0.250; // PDG
-        default:             return -1.;
+        default:
+          CG_WARNING( "ParticleProperties:width" )
+            << "Particle " << pdg_id << " has no registered width.";
+          return -1.;
       }
     }
   }

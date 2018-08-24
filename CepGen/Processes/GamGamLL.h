@@ -39,7 +39,7 @@ namespace CepGen
       public:
         /// Class constructor ; set the mandatory parameters before integration and events generation
         /// \param[in] nopt Optimisation (legacy from LPAIR)
-        explicit GamGamLL( int nopt = 0 );
+        explicit GamGamLL( const ParametersList& params = ParametersList() );
         ProcessPtr clone() const override { return ProcessPtr( new GamGamLL( *this ) ); }
 
         void addEventContent() override;

@@ -14,12 +14,12 @@ int main() {
 
   Particle p1( Particle::IncomingBeam1, PDG::Proton );
   p1.setMomentum( 1., -15., 100. );
-  p1.setStatus( Particle::Incoming );
+  p1.setStatus( Particle::Status::Incoming );
   ev.addParticle(p1);
 
   Particle p2( Particle::IncomingBeam2, PDG::Electron );
   p2.setMomentum( 10., 5., 3200. );
-  p2.setStatus( Particle::Incoming );
+  p2.setStatus( Particle::Status::Incoming );
   ev.addParticle(p2);
 
   ev.dump();

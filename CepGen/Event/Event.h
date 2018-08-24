@@ -69,7 +69,7 @@ namespace CepGen
        * \param[in] id_ The unique identifier to this particle in the event
        * \return A reference to the requested Particle object
        */
-      Particle& getById( int id_ );
+      Particle& operator[]( int id_ );
       /// Get a const Particle object using its unique identifier
       /// \param[in] id_ Unique identifier of the particle in the event
       /// \return Constant object to be retrieved

@@ -9,7 +9,7 @@ namespace CepGen
   Particle::Particle() :
     id_( -1 ), charge_sign_( 1 ),
     mass_( -1. ), helicity_( 0. ),
-    role_( UnknownRole ), status_( Undefined ), pdg_id_( PDG::invalid )
+    role_( UnknownRole ), status_( Status::Undefined ), pdg_id_( PDG::invalid )
   {}
 
   Particle::Particle( Role role, PDG pdgId, Status st ) :
@@ -200,48 +200,12 @@ namespace CepGen
       }
     }
     CG_INFO( "Particle" )
-      << "Dumping a particle with id=" << id_ << ", role=" << role_ << ", status=" << status_ << "\n\t"
+      << "Dumping a particle with id=" << id_ << ", role=" << role_ << ", status=" << (int)status_ << "\n\t"
       << "Particle id: " << integerPdgId() << " (" << pdg_id_ << "), mass = " << mass() << " GeV\n\t"
       << "Momentum: " << momentum_ << " GeV\t" << "(|P| = p = " << momentum_.p() << " GeV)\n\t"
       << " p⟂ = " << momentum_.pt() << " GeV, eta = " << momentum_.eta() << ", phi = " << momentum_.phi() << "\n\t"
       << "Primary? " << yesno( primary() ) << osm.str() << "\n\t"
       << numDaughters() << " daughter(s)" << osd.str();
-  }
-
-  Particle&
-  Particle::lorentzBoost( double m, const Particle::Momentum& mom )
-  {
-    if ( mom.energy() == m )
-      return *this;
-
-    double pf4 = 0.;
-    for ( unsigned int i = 0; i < 4; ++i )
-      pf4 += momentum_[i]*mom[i];
-    pf4 /= m;
-    const double fn = ( pf4+energy() )/( momentum_.energy()+m );
-    for ( unsigned int i = 0; i < 3; ++i )
-      momentum_.setP( i, momentum_[i]+fn*mom[i] );
-
-    return *this;
-  }
-
-  std::vector<double>
-  Particle::lorentzBoost( const Particle::Momentum& mom )
-  {
-    std::vector<double> out( 3, 0. );
-
-    const double p2 = mom.p2();
-    const double gamma = 1./sqrt( 1.-p2 );
-    double bp = 0.;
-    for ( unsigned int i = 0; i < 3; ++i )
-      bp += mom[i]*momentum_[i];
-
-    const double gamma2 = ( p2 > 0. ) ? ( gamma-1. )/p2 : 0.;
-
-    for ( unsigned int i = 0; i < 3; ++i ) {
-      out[i] = momentum_[i] + gamma2*bp*mom[i]+gamma*mom[i]*energy();
-    }
-    return out;
   }
 
   double

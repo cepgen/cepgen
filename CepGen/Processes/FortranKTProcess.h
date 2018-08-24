@@ -12,7 +12,7 @@ namespace CepGen
     class FortranKTProcess : public GenericKTProcess
     {
       public:
-        FortranKTProcess( const char* name, const char* descr, std::function<void(double&)> func );
+        FortranKTProcess( const ParametersList& params, const char* name, const char* descr, std::function<void(double&)> func );
         ProcessPtr clone() const override { return ProcessPtr( new FortranKTProcess( *this ) ); }
 
       private:
@@ -20,6 +20,7 @@ namespace CepGen
         double computeKTFactorisedMatrixElement() override;
         void fillCentralParticlesKinematics() override;
 
+        int method_;
         /// Subroutine to be called for weight computation
         std::function<void(double&)> func_;
         double y1_, y2_, pt_diff_, phi_pt_diff_;

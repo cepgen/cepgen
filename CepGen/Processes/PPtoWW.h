@@ -11,8 +11,12 @@ namespace CepGen
     class PPtoWW : public GenericKTProcess
     {
       public:
-        PPtoWW();
+        PPtoWW( const ParametersList& params = ParametersList() );
         ProcessPtr clone() const override { return ProcessPtr( new PPtoWW( *this ) ); }
+        enum class Polarisation
+        {
+          full = 0, LL = 1, LT = 2, TL = 3, TT = 4
+        };
 
       private:
         static const double mw_, mw2_;
@@ -21,9 +25,13 @@ namespace CepGen
         double computeKTFactorisedMatrixElement() override;
         void fillCentralParticlesKinematics() override;
 
-        static double amplitudeWW( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 );
-        static double onShellME( double shat, double that, double uhat );
-        static double offShellME( double shat, double that, double uhat, double phi_sum, double phi_diff );
+        double amplitudeWW( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 );
+        double onShellME( double shat, double that, double uhat );
+        double offShellME( double shat, double that, double uhat, double phi_sum, double phi_diff );
+
+        int method_;
+        Polarisation pol_state_;
+        std::vector<short> pol_w1_, pol_w2_;
 
         /// Rapidity range for the outgoing W bosons
         Limits rap_limits_;

@@ -117,7 +117,7 @@ namespace CepGen
   }
 
   Particle&
-  Event::getById( int id )
+  Event::operator[]( int id )
   {
     for ( auto& role_part : particles_ )
       for ( auto& part : role_part.second )
@@ -307,7 +307,7 @@ namespace CepGen
 
       // discard non-primary, decayed particles
       if ( (short)part.status() >= 0. ) {
-        const int sign = ( part.status() == Particle::Undefined ) ? -1 : 1;
+        const int sign = ( part.status() == Particle::Status::Undefined ) ? -1 : 1;
         pxtot += sign*mom.px();
         pytot += sign*mom.py();
         pztot += sign*mom.pz();

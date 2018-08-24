@@ -3,6 +3,7 @@
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Core/ParametersList.h"
 
 #include <vector>
 #include <memory>
