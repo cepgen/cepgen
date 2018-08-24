@@ -30,6 +30,8 @@ namespace CepGen
         double offShellME( double shat, double that, double uhat, double phi_sum, double phi_diff );
 
         int method_;
+        Polarisation pol_state_;
+        std::vector<short> pol_w1_, pol_w2_;
 
         /// Rapidity range for the outgoing W bosons
         Limits rap_limits_;
@@ -50,8 +52,6 @@ namespace CepGen
         Particle::Momentum p_w1_;
         /// Second outgoing W boson's momentum
         Particle::Momentum p_w2_;
-        Polarisation pol_state_;
-        std::vector<short> pol_w1_, pol_w2_;
     };
   }
 }

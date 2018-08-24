@@ -18,8 +18,8 @@ namespace CepGen
     PPtoWW::PPtoWW() :
       GenericKTProcess( "pptoww", "ɣɣ → W⁺W¯", { { PDG::Photon, PDG::Photon } }, { PDG::W, PDG::W } ),
       method_( parameters.get<int>( "method", 1 ) ),
-      y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. ),
-      pol_state_( (Polarisation)parameters.get<int>( "polarisationStates", 0 ) )
+      pol_state_( (Polarisation)parameters.get<int>( "polarisationStates", 0 ) ),
+      y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )
     {}
 
     void
