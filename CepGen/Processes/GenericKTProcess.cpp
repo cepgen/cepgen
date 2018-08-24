@@ -18,7 +18,8 @@ namespace CepGen
                                         const std::array<PDG,2>& partons,
                                         const std::vector<PDG>& central ) :
       GenericProcess( name, description+" (kT-factorisation approach)" ),
-      num_dimensions_( 0 ), method_( 1 ), kt_jacobian_( 0. ),
+      method_( parameters.get<int>( "method", 1 ) ),
+      num_dimensions_( 0 ), kt_jacobian_( 0. ),
       qt1_( 0. ), phi_qt1_( 0. ), qt2_( 0. ), phi_qt2_( 0. ),
       flux1_( 0. ), flux2_( 0. ),
       kIntermediateParts( partons ), kProducedParts( central )

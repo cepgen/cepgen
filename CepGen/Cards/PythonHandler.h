@@ -9,6 +9,9 @@
 namespace CepGen
 {
   class StructureFunctions;
+  namespace Process {
+    class Parameters;
+  }
   namespace Cards
   {
     /// CepGen Python configuration cards reader/writer
@@ -19,7 +22,6 @@ namespace CepGen
         explicit PythonHandler( const char* file );
         ~PythonHandler();
         static PyObject* getElement( PyObject* obj, const char* key );
-        static std::string decode( PyObject* obj );
         static PyObject* encode( const char* str );
 
       private:
@@ -28,8 +30,9 @@ namespace CepGen
 
         static void throwPythonError( const std::string& message );
         static std::string getPythonPath( const char* file );
-        static bool isInteger( PyObject* obj );
-        static int asInteger( PyObject* obj );
+
+        template<typename T> bool is( PyObject* obj ) const;
+        template<typename T> T get( PyObject* obj ) const;
 
         void fillLimits( PyObject* obj, const char* key, Limits& lim );
         void fillParameter( PyObject* parent, const char* key, bool& out );
@@ -41,6 +44,7 @@ namespace CepGen
         void fillParameter( PyObject* parent, const char* key, std::vector<int>& out );
         void fillParameter( PyObject* parent, const char* key, std::vector<double>& out );
         void fillParameter( PyObject* parent, const char* key, std::vector<std::string>& out );
+        void fillParameter( PyObject* parent, const char* key, Process::Parameters& out );
 
         void parseIncomingKinematics( PyObject* );
         void parseOutgoingKinematics( PyObject* );
@@ -52,6 +56,15 @@ namespace CepGen
         void parseHadroniser( PyObject* );
         void parseStructureFunctions( PyObject*, std::shared_ptr<StructureFunctions>& sf_handler );
     };
+    template<> bool PythonHandler::is<int>( PyObject* obj ) const;
+    template<> int PythonHandler::get<int>( PyObject* obj ) const;
+    template<> unsigned long PythonHandler::get<unsigned long>( PyObject* obj ) const;
+    template<> bool PythonHandler::is<Process::Parameters>( PyObject* obj ) const;
+    template<> Process::Parameters PythonHandler::get<Process::Parameters>( PyObject* obj ) const;
+    template<> bool PythonHandler::is<double>( PyObject* obj ) const;
+    template<> double PythonHandler::get<double>( PyObject* obj ) const;
+    template<> bool PythonHandler::is<std::string>( PyObject* obj ) const;
+    template<> std::string PythonHandler::get<std::string>( PyObject* obj ) const;
   }
 }
 

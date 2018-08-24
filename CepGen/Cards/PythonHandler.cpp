@@ -6,6 +6,7 @@
 #include "CepGen/Core/TamingFunction.h"
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Processes/Parameters.h"
 #include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Processes/PPtoFF.h"
 #include "CepGen/Processes/PPtoWW.h"
@@ -18,7 +19,6 @@
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 
 #include <algorithm>
-#include <frameobject.h>
 
 #if PY_MAJOR_VERSION < 3
 #  define PYTHON2
@@ -72,27 +72,17 @@ namespace CepGen
       PyObject* pproc_name = getElement( process, MODULE_NAME ); // borrowed
       if ( !pproc_name )
         throwPythonError( Form( "Failed to extract the process name from the configuration card %s", file ) );
-      const std::string proc_name = decode( pproc_name );
-
-      unsigned short method = 1;
-      fillParameter( process, "method", (int&)method );
+      const std::string proc_name = get<std::string>( pproc_name );
 
       if ( proc_name == "lpair" )
         params_.setProcess( new Process::GamGamLL );
-      else if ( proc_name == "pptoll" || proc_name == "pptoff" ) {
-        auto proc = new Process::PPtoFF;
-        proc->setComputationMethod( method );
-        params_.setProcess( proc );
-      }
-      else if ( proc_name == "pptoww" ) {
-        auto proc = new Process::PPtoWW;
-        proc->setComputationMethod( method );
-        unsigned short pol_state = 0;
-        fillParameter( process, "polarisation", (int&)pol_state );
-        proc->parameters.set<int>( "polarisationStates", pol_state );
-        params_.setProcess( proc );
-      }
+      else if ( proc_name == "pptoll" || proc_name == "pptoff" )
+        params_.setProcess( new Process::PPtoFF );
+      else if ( proc_name == "pptoww" )
+        params_.setProcess( new Process::PPtoWW );
       else throw CG_FATAL( "PythonHandler" ) << "Unrecognised process: " << proc_name << ".";
+
+      fillParameter( process, "processParameters", params_.process()->parameters );
 
       //--- process mode
       fillParameter( process, "mode", (int&)params_.kinematics.mode );
@@ -154,15 +144,15 @@ namespace CepGen
     {
       PyObject* ppz = getElement( kin, "pz" ); // borrowed
       if ( ppz && PyTuple_Check( ppz ) && PyTuple_Size( ppz ) == 2 ) {
-        double pz0 = PyFloat_AsDouble( PyTuple_GetItem( ppz, 0 ) );
-        double pz1 = PyFloat_AsDouble( PyTuple_GetItem( ppz, 1 ) );
+        double pz0 = get<double>( PyTuple_GetItem( ppz, 0 ) );
+        double pz1 = get<double>( PyTuple_GetItem( ppz, 1 ) );
         params_.kinematics.incoming_beams.first.pz = pz0;
         params_.kinematics.incoming_beams.second.pz = pz1;
       }
       PyObject* ppdg = getElement( kin, "pdgIds" ); // borrowed
       if ( ppdg && PyTuple_Check( ppdg ) && PyTuple_Size( ppdg ) == 2 ) {
-        params_.kinematics.incoming_beams.first.pdg = (PDG)asInteger( PyTuple_GetItem( ppdg, 0 ) );
-        params_.kinematics.incoming_beams.second.pdg = (PDG)asInteger( PyTuple_GetItem( ppdg, 1 ) );
+        params_.kinematics.incoming_beams.first.pdg = (PDG)get<int>( PyTuple_GetItem( ppdg, 0 ) );
+        params_.kinematics.incoming_beams.second.pdg = (PDG)get<int>( PyTuple_GetItem( ppdg, 1 ) );
       }
       double sqrt_s = -1.;
       fillParameter( kin, "cmEnergy", sqrt_s );
@@ -230,15 +220,15 @@ namespace CepGen
     {
       PyObject* ppair = getElement( kin, "pair" ); // borrowed
       if ( ppair ) {
-        if ( isInteger( ppair ) ) {
-          PDG pair = (PDG)asInteger( ppair );
+        if ( is<int>( ppair ) ) {
+          PDG pair = (PDG)get<int>( ppair );
           params_.kinematics.central_system = { pair, pair };
         }
         else if ( PyTuple_Check( ppair ) ) {
           if ( PyTuple_Size( ppair ) != 2 )
             throw CG_FATAL( "PythonHandler" ) << "Invalid value for in_kinematics.pair!";
-          PDG pair1 = (PDG)asInteger( PyTuple_GetItem( ppair, 0 ) );
-          PDG pair2 = (PDG)asInteger( PyTuple_GetItem( ppair, 1 ) );
+          PDG pair1 = (PDG)get<int>( PyTuple_GetItem( ppair, 0 ) );
+          PDG pair2 = (PDG)get<int>( PyTuple_GetItem( ppair, 1 ) );
           params_.kinematics.central_system = { pair1, pair2 };
         }
       }
@@ -246,7 +236,7 @@ namespace CepGen
       PyObject* pparts = getElement( kin, "minFinalState" ); // borrowed
       if ( pparts && PyTuple_Check( pparts ) )
         for ( unsigned short i = 0; i < PyTuple_Size( pparts ); ++i )
-          params_.kinematics.minimum_final_state.emplace_back( (PDG)asInteger( PyTuple_GetItem( pparts, i ) ) );
+          params_.kinematics.minimum_final_state.emplace_back( (PDG)get<int>( PyTuple_GetItem( pparts, i ) ) );
 
       PyObject* pcuts = getElement( kin, "cuts" ); // borrowed
       if ( pcuts )
@@ -281,7 +271,7 @@ namespace CepGen
       PyObject* pkey = nullptr, *pvalue = nullptr;
       Py_ssize_t pos = 0;
       while ( PyDict_Next( cuts, &pos, &pkey, &pvalue ) ) {
-        const PDG pdg = (PDG)asInteger( pkey );
+        const PDG pdg = (PDG)get<int>( pkey );
         fillLimits( pvalue, "pt", params_.kinematics.cuts.central_particles[pdg].pt_single );
         fillLimits( pvalue, "energy", params_.kinematics.cuts.central_particles[pdg].energy_single );
         fillLimits( pvalue, "eta", params_.kinematics.cuts.central_particles[pdg].eta_single );
@@ -307,7 +297,7 @@ namespace CepGen
       PyObject* palgo = getElement( integr, MODULE_NAME ); // borrowed
       if ( !palgo )
         throwPythonError( "Failed to retrieve the integration algorithm name!" );
-      std::string algo = decode( palgo );
+      std::string algo = get<std::string>( palgo );
       if ( algo == "plain" )
         params_.integrator.type = Integrator::Type::plain;
       else if ( algo == "Vegas" ) {
@@ -377,7 +367,7 @@ namespace CepGen
         if ( !PyDict_Check( pit ) )
           throwPythonError( Form( "Item %d has invalid type %s", i, pit->ob_type->tp_name ) );
         PyObject* pvar = getElement( pit, "variable" ), *pexpr = getElement( pit, "expression" ); // borrowed
-        params_.taming_functions->add( decode( pvar ).c_str(), decode( pexpr ).c_str() );
+        params_.taming_functions->add( get<std::string>( pvar ).c_str(), get<std::string>( pexpr ).c_str() );
       }
     }
 
@@ -390,12 +380,12 @@ namespace CepGen
       PyObject* pname = getElement( hadr, MODULE_NAME ); // borrowed
       if ( !pname )
         throwPythonError( "Hadroniser name is required!" );
-      std::string hadr_name = decode( pname );
+      std::string hadr_name = get<std::string>( pname );
 
       fillParameter( hadr, "maxTrials", params_.hadroniser_max_trials );
       PyObject* pseed = getElement( hadr, "seed" ); // borrowed
       long long seed = -1ll;
-      if ( pseed && isInteger( pseed ) ) {
+      if ( pseed && is<int>( pseed ) ) {
         seed = PyLong_AsLongLong( pseed );
         CG_DEBUG( "PythonHandler:hadroniser" ) << "Hadroniser seed set to " << seed;
       }
@@ -412,289 +402,6 @@ namespace CepGen
         fillParameter( hadr, "pythiaProcessConfiguration", config );
         pythia8->readStrings( config );
       }
-    }
-
-    //------------------------------------------------------------------
-    // Python API helpers
-    //------------------------------------------------------------------
-
-    std::string
-    PythonHandler::getPythonPath( const char* file )
-    {
-      std::string s_filename = file;
-      s_filename = s_filename.substr( 0, s_filename.find_last_of( "." ) ); // remove the extension
-      std::replace( s_filename.begin(), s_filename.end(), '/', '.' ); // replace all '/' by '.'
-      return s_filename;
-    }
-
-    void
-    PythonHandler::throwPythonError( const std::string& message )
-    {
-      PyObject* ptype = nullptr, *pvalue = nullptr, *ptraceback_obj = nullptr;
-      // retrieve error indicator and clear it to handle ourself the error
-      PyErr_Fetch( &ptype, &pvalue, &ptraceback_obj );
-      PyErr_Clear();
-      // ensure the objects retrieved are properly normalised and point to compatible objects
-      PyErr_NormalizeException( &ptype, &pvalue, &ptraceback_obj );
-      std::ostringstream oss; oss << message;
-      if ( ptype != nullptr ) { // we can start the traceback
-        oss << "\n\tError: "
-#ifdef PYTHON2
-            << PyString_AsString( PyObject_Str( pvalue ) ); // deprecated in python v3+
-#else
-            << PyUnicode_AsUTF8( PyObject_Str( pvalue ) );
-#endif
-        PyTracebackObject* ptraceback = (PyTracebackObject*)ptraceback_obj;
-        string tabul = "↪ ";
-        if ( ptraceback != nullptr ) {
-          while ( ptraceback->tb_next != nullptr ) {
-            PyFrameObject* pframe = ptraceback->tb_frame;
-            if ( pframe != nullptr ) {
-              int line = PyCode_Addr2Line( pframe->f_code, pframe->f_lasti );
-#ifdef PYTHON2
-              const char* filename = PyString_AsString( pframe->f_code->co_filename );
-              const char* funcname = PyString_AsString( pframe->f_code->co_name );
-#else
-              const char* filename = PyUnicode_AsUTF8( pframe->f_code->co_filename );
-              const char* funcname = PyUnicode_AsUTF8( pframe->f_code->co_name );
-#endif
-              oss << Form( "\n\t%s%s on %s (line %d)", tabul.c_str(), boldify( funcname ).c_str(), filename, line );
-            }
-            else
-              oss << Form( "\n\t%s issue in line %d", tabul.c_str(), ptraceback->tb_lineno );
-            tabul = string( "  " )+tabul;
-            ptraceback = ptraceback->tb_next;
-          }
-        }
-      }
-      Py_Finalize();
-      throw CG_FATAL( "PythonHandler:error" ) << oss.str();
-    }
-
-    std::string
-    PythonHandler::decode( PyObject* obj )
-    {
-      std::string out;
-#ifdef PYTHON2
-      out = PyString_AsString( obj ); // deprecated in python v3+
-#else
-      PyObject* pstr = PyUnicode_AsEncodedString( obj, "utf-8", "strict" ); // new
-      if ( !pstr )
-        throwPythonError( "Failed to decode a Python object!" );
-      out = PyBytes_AS_STRING( pstr );
-      Py_CLEAR( pstr );
-#endif
-      return out;
-    }
-
-    PyObject*
-    PythonHandler::encode( const char* str )
-    {
-      PyObject* obj = PyUnicode_FromString( str ); // new
-      if ( !obj )
-        throwPythonError( Form( "Failed to encode the following string:\n\t%s", str ) );
-      return obj;
-    }
-
-    PyObject*
-    PythonHandler::getElement( PyObject* obj, const char* key )
-    {
-      PyObject* pout = nullptr, *nink = encode( key );
-      if ( !nink )
-        return pout;
-      pout = PyDict_GetItem( obj, nink ); // borrowed
-      Py_CLEAR( nink );
-      if ( pout )
-        CG_DEBUG( "PythonHandler:getElement" )
-          << "retrieved " << pout->ob_type->tp_name << " element \"" << key << "\" "
-          << "from " << obj->ob_type->tp_name << " object\n\t"
-          << "new reference count: " << pout->ob_refcnt;
-      else
-        CG_DEBUG( "PythonHandler:getElement" )
-          << "did not retrieve a valid element \"" << key << "\"";
-      return pout;
-    }
-
-    void
-    PythonHandler::fillLimits( PyObject* obj, const char* key, Limits& lim )
-    {
-      PyObject* pobj = getElement( obj, key ); // borrowed
-      if ( !pobj )
-        return;
-      if ( !PyTuple_Check( pobj ) )
-        throw CG_FATAL( "PythonHandler:fillLimits" ) << "Invalid value retrieved for " << key << ".";
-      if ( PyTuple_Size( pobj ) < 1 )
-        throw CG_FATAL( "PythonHandler:fillLimits" ) << "Invalid number of values unpacked for " << key << "!";
-      double min = PyFloat_AsDouble( PyTuple_GetItem( pobj, 0 ) );
-      lim.min() = min;
-      if ( PyTuple_Size( pobj ) > 1 ) {
-        double max = PyFloat_AsDouble( PyTuple_GetItem( pobj, 1 ) );
-        if ( max != -1 )
-          lim.max() = max;
-      }
-    }
-
-    void
-    PythonHandler::fillParameter( PyObject* parent, const char* key, bool& out )
-    {
-      PyObject* pobj = getElement( parent, key ); // borrowed
-      if ( !pobj )
-        return;
-      if ( !PyBool_Check( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
-      fillParameter( parent, key, (int&)out );
-    }
-
-    void
-    PythonHandler::fillParameter( PyObject* parent, const char* key, int& out )
-    {
-      PyObject* pobj = getElement( parent, key ); // borrowed
-      if ( !pobj )
-        return;
-#ifdef PYTHON2
-      if ( !PyInt_Check( pobj ) && !PyBool_Check( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
-      out = PyInt_AsLong( pobj );
-#else
-      if ( !PyLong_Check( pobj ) && !PyBool_Check( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
-      out = PyLong_AsLong( pobj );
-#endif
-    }
-
-    void
-    PythonHandler::fillParameter( PyObject* parent, const char* key, unsigned long& out )
-    {
-      PyObject* pobj = getElement( parent, key ); // borrowed
-      if ( !pobj )
-        return;
-      if ( !PyLong_Check( pobj )
-#ifdef PYTHON2
-        && !PyInt_Check( pobj )
-#endif
-      )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
-      if ( PyLong_Check( pobj ) )
-        out = PyLong_AsUnsignedLong( pobj );
-#ifdef PYTHON2
-      else if ( PyInt_Check( pobj ) )
-        out = PyInt_AsUnsignedLongMask( pobj );
-#endif
-    }
-
-    void
-    PythonHandler::fillParameter( PyObject* parent, const char* key, unsigned int& out )
-    {
-      PyObject* pobj = getElement( parent, key ); // borrowed
-      if ( !pobj )
-        return;
-#ifdef PYTHON2
-      if ( !PyInt_Check( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
-      out = PyInt_AsUnsignedLongMask( pobj );
-#else
-      if ( !PyLong_Check( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
-      out = PyLong_AsUnsignedLong( pobj );
-#endif
-    }
-
-    void
-    PythonHandler::fillParameter( PyObject* parent, const char* key, double& out )
-    {
-      PyObject* pobj = getElement( parent, key ); // borrowed
-      if ( !pobj )
-        return;
-      if ( !PyFloat_Check( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
-      out = PyFloat_AsDouble( pobj );
-    }
-
-    void
-    PythonHandler::fillParameter( PyObject* parent, const char* key, std::string& out )
-    {
-      PyObject* pobj = getElement( parent, key ); // borrowed
-      if ( !pobj )
-        return;
-      if ( !
-#ifdef PYTHON2
-        PyString_Check( pobj )
-#else
-        PyUnicode_Check( pobj )
-#endif
-      )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
-      out = decode( pobj );
-    }
-
-    void
-    PythonHandler::fillParameter( PyObject* parent, const char* key, std::vector<double>& out )
-    {
-      out.clear();
-      PyObject* pobj = getElement( parent, key ); // borrowed
-      if ( !pobj )
-        return;
-      if ( !PyTuple_Check( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
-      for ( Py_ssize_t i = 0; i < PyTuple_Size( pobj ); ++i ) {
-        PyObject* pit = PyTuple_GetItem( pobj, i ); // borrowed
-        if ( !PyFloat_Check( pit ) )
-          continue;
-        out.emplace_back( PyFloat_AsDouble( pit ) );
-      }
-    }
-
-    void
-    PythonHandler::fillParameter( PyObject* parent, const char* key, std::vector<std::string>& out )
-    {
-      out.clear();
-      PyObject* pobj = getElement( parent, key ); // borrowed
-      if ( !pobj )
-        return;
-      if ( !PyTuple_Check( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
-      for ( Py_ssize_t i = 0; i < PyTuple_Size( pobj ); ++i ) {
-        PyObject* pit = PyTuple_GetItem( pobj, i ); // borrowed
-        out.emplace_back( decode( pit ) );
-      }
-    }
-
-
-    void
-    PythonHandler::fillParameter( PyObject* parent, const char* key, std::vector<int>& out )
-    {
-      out.clear();
-      PyObject* pobj = getElement( parent, key ); // borrowed
-      if ( !pobj )
-        return;
-      if ( !PyTuple_Check( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
-      for ( Py_ssize_t i = 0; i < PyTuple_Size( pobj ); ++i ) {
-        PyObject* pit = PyTuple_GetItem( pobj, i );
-        if ( !isInteger( pit ) )
-          throwPythonError( Form( "Object %d has invalid type", i ) );
-        out.emplace_back( asInteger( pit ) );
-      }
-    }
-
-    bool
-    PythonHandler::isInteger( PyObject* obj )
-    {
-#ifdef PYTHON2
-      return PyInt_Check( obj );
-#else
-      return PyLong_Check( obj );
-#endif
-    }
-
-    int
-    PythonHandler::asInteger( PyObject* obj )
-    {
-#ifdef PYTHON2
-      return PyInt_AsLong( obj );
-#else
-      return PyLong_AsLong( obj );
-#endif
     }
   }
 }

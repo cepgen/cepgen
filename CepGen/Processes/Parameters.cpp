@@ -16,13 +16,13 @@ namespace CepGen
     //------------------------------------------------------------------
 
     template<typename T> T
-    Parameters::get( const char* key, T def ) const
+    Parameters::get( std::string key, T def ) const
     {
       throw CG_FATAL( "ProcessParameters" ) << "Invalid type retrieved for key=" << key << "!";
     }
 
     template<typename T> void
-    Parameters::set( const char* key, const T& value )
+    Parameters::set( std::string key, const T& value )
     {
       throw CG_FATAL( "ProcessParameters" ) << "Invalid type to be set for key=" << key << "!";
     }
@@ -32,7 +32,7 @@ namespace CepGen
     //------------------------------------------------------------------
 
     template<> Parameters
-    Parameters::get<Parameters>( const char* key, Parameters def ) const
+    Parameters::get<Parameters>( std::string key, Parameters def ) const
     {
       for ( const auto& kv : param_values_ )
         if ( kv.first.compare( key ) == 0 )
@@ -42,13 +42,13 @@ namespace CepGen
     }
 
     template<> void
-    Parameters::set<Parameters>( const char* key, const Parameters& value )
+    Parameters::set<Parameters>( std::string key, const Parameters& value )
     {
       param_values_[key] = value;
     }
 
     template<> std::vector<Parameters>
-    Parameters::get<std::vector<Parameters> >( const char* key, std::vector<Parameters> def ) const
+    Parameters::get<std::vector<Parameters> >( std::string key, std::vector<Parameters> def ) const
     {
       for ( const auto& kv : vec_param_values_ )
         if ( kv.first.compare( key ) == 0 )
@@ -58,7 +58,7 @@ namespace CepGen
     }
 
     template<> void
-    Parameters::set<std::vector<Parameters> >( const char* key, const std::vector<Parameters>& value )
+    Parameters::set<std::vector<Parameters> >( std::string key, const std::vector<Parameters>& value )
     {
       vec_param_values_[key] = value;
     }
@@ -68,7 +68,7 @@ namespace CepGen
     //------------------------------------------------------------------
 
     template<> int
-    Parameters::get<int>( const char* key, int def ) const
+    Parameters::get<int>( std::string key, int def ) const
     {
       for ( const auto& kv : int_values_ )
         if ( kv.first.compare( key ) == 0 )
@@ -78,13 +78,13 @@ namespace CepGen
     }
 
     template<> void
-    Parameters::set<int>( const char* key, const int& value )
+    Parameters::set<int>( std::string key, const int& value )
     {
       int_values_[key] = value;
     }
 
     template<> std::vector<int>
-    Parameters::get<std::vector<int> >( const char* key, std::vector<int> def ) const
+    Parameters::get<std::vector<int> >( std::string key, std::vector<int> def ) const
     {
       for ( const auto& kv : vec_int_values_ )
         if ( kv.first.compare( key ) == 0 )
@@ -94,7 +94,7 @@ namespace CepGen
     }
 
     template<> void
-    Parameters::set<std::vector<int> >( const char* key, const std::vector<int>& value )
+    Parameters::set<std::vector<int> >( std::string key, const std::vector<int>& value )
     {
       vec_int_values_[key] = value;
     }
@@ -104,7 +104,7 @@ namespace CepGen
     //------------------------------------------------------------------
 
     template<> double
-    Parameters::get<double>( const char* key, double def ) const
+    Parameters::get<double>( std::string key, double def ) const
     {
       for ( const auto& kv : dbl_values_ )
         if ( kv.first.compare( key ) == 0 )
@@ -114,13 +114,13 @@ namespace CepGen
     }
 
     template<> void
-    Parameters::set<double>( const char* key, const double& value )
+    Parameters::set<double>( std::string key, const double& value )
     {
       dbl_values_[key] = value;
     }
 
     template<> std::vector<double>
-    Parameters::get<std::vector<double> >( const char* key, std::vector<double> def ) const
+    Parameters::get<std::vector<double> >( std::string key, std::vector<double> def ) const
     {
       for ( const auto& kv : vec_dbl_values_ )
         if ( kv.first.compare( key ) == 0 )
@@ -130,7 +130,7 @@ namespace CepGen
     }
 
     template<> void
-    Parameters::set<std::vector<double> >( const char* key, const std::vector<double>& value )
+    Parameters::set<std::vector<double> >( std::string key, const std::vector<double>& value )
     {
       vec_dbl_values_[key] = value;
     }
@@ -140,7 +140,7 @@ namespace CepGen
     //------------------------------------------------------------------
 
     template<> std::string
-    Parameters::get<std::string>( const char* key, std::string def ) const
+    Parameters::get<std::string>( std::string key, std::string def ) const
     {
       for ( const auto& kv : str_values_ )
         if ( kv.first.compare( key ) == 0 )
@@ -150,13 +150,13 @@ namespace CepGen
     }
 
     template<> void
-    Parameters::set<std::string>( const char* key, const std::string& value )
+    Parameters::set<std::string>( std::string key, const std::string& value )
     {
       str_values_[key] = value;
     }
 
     template<> std::vector<std::string>
-    Parameters::get<std::vector<std::string> >( const char* key, std::vector<std::string> def ) const
+    Parameters::get<std::vector<std::string> >( std::string key, std::vector<std::string> def ) const
     {
       for ( const auto& kv : vec_str_values_ )
         if ( kv.first.compare( key ) == 0 )
@@ -166,7 +166,7 @@ namespace CepGen
     }
 
     template<> void
-    Parameters::set<std::vector<std::string> >( const char* key, const std::vector<std::string>& value )
+    Parameters::set<std::vector<std::string> >( std::string key, const std::vector<std::string>& value )
     {
       vec_str_values_[key] = value;
     }

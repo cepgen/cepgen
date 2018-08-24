@@ -101,8 +101,8 @@ namespace CepGen
         /// \note To be run at each point computation (therefore, to be optimised!)
         double generateVariables() const;
 
-        unsigned short num_dimensions_;
         unsigned short method_;
+        unsigned short num_dimensions_;
 
         /// Phase space point-independant component of the Jacobian weight of the point in the phase space for integration
         double kt_jacobian_;
