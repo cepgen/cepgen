@@ -3,6 +3,7 @@
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Processes/Parameters.h"
 
 #include <vector>
 #include <memory>
@@ -100,6 +101,9 @@ namespace CepGen
         bool hasEvent() const { return has_event_; }
         /// Pointer to the last event produced in this run
         std::shared_ptr<Event> last_event;
+
+        /// List of process-specific parameters
+        Parameters parameters;
 
       protected:
         static const double mp_, mp2_;

@@ -17,7 +17,8 @@ namespace CepGen
 
     PPtoWW::PPtoWW() :
       GenericKTProcess( "pptoww", "ɣɣ → W⁺W¯", { { PDG::Photon, PDG::Photon } }, { PDG::W, PDG::W } ),
-      y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )
+      y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. ),
+      pol_state_( (Polarisation)parameters.get<int>( "polarisationStates", 0 ) )
     {}
 
     void
@@ -27,6 +28,26 @@ namespace CepGen
       registerVariable( y2_, Mapping::linear, cuts_.cuts.central.rapidity_single, { -6., 6. }, "Second outgoing W rapidity" );
       registerVariable( pt_diff_, Mapping::linear, cuts_.cuts.central.pt_diff, { 0., 500. }, "Ws transverse momentum difference" );
       registerVariable( phi_pt_diff_, Mapping::linear, cuts_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Ws azimuthal angle difference" );
+
+      switch ( pol_state_ ) {
+        case Polarisation::full: default:
+          pol_w1_ = pol_w2_ = { -1, 0, 1 };
+          break;
+        case Polarisation::LL:
+          pol_w1_ = pol_w2_ = { 0 };
+          break;
+        case Polarisation::LT:
+          pol_w1_ = { 0 };
+          pol_w2_ = { -1, 1 };
+          break;
+        case Polarisation::TL:
+          pol_w1_ = { -1, 1 };
+          pol_w2_ = { 0 };
+          break;
+        case Polarisation::TT:
+          pol_w1_ = pol_w2_ = { -1, 1 };
+          break;
+      }
     }
 
     double
@@ -323,16 +344,8 @@ namespace CepGen
       const double e2 = 4.*M_PI*Constants::alphaEM;
 
       double amat2_0 = 0., amat2_1 = 0., amat2_interf = 0.;
-      const std::vector<short> pol_w1 = {
-        -1, 1, // transverse polarisation
-        0 // longitudinal polarisation
-      };
-      const std::vector<short> pol_w2 = {
-        -1, 1, // transverse polarisation
-        0 // longitudinal polarisation
-      };
-      for ( const auto lam3 : pol_w1 )
-        for ( const auto lam4 : pol_w2 ) {
+      for ( const auto lam3 : pol_w1_ )
+        for ( const auto lam4 : pol_w2_ ) {
           double ampli_pp = amplitudeWW( shat, that, uhat, +1, +1, lam3, lam4 );
           double ampli_mm = amplitudeWW( shat, that, uhat, -1, -1, lam3, lam4 );
           double ampli_pm = amplitudeWW( shat, that, uhat, +1, -1, lam3, lam4 );

@@ -80,12 +80,17 @@ namespace CepGen
       if ( proc_name == "lpair" )
         params_.setProcess( new Process::GamGamLL );
       else if ( proc_name == "pptoll" || proc_name == "pptoff" ) {
-        params_.setProcess( new Process::PPtoFF );
-        dynamic_cast<Process::GenericKTProcess*>( params_.process() )->setComputationMethod( method );
+        auto proc = new Process::PPtoFF;
+        proc->setComputationMethod( method );
+        params_.setProcess( proc );
       }
       else if ( proc_name == "pptoww" ) {
-        params_.setProcess( new Process::PPtoWW );
-        dynamic_cast<Process::GenericKTProcess*>( params_.process() )->setComputationMethod( method );
+        auto proc = new Process::PPtoWW;
+        proc->setComputationMethod( method );
+        unsigned short pol_state = 0;
+        fillParameter( process, "polarisation", (int&)pol_state );
+        proc->parameters.set<int>( "polarisationStates", pol_state );
+        params_.setProcess( proc );
       }
       else throw CG_FATAL( "PythonHandler" ) << "Unrecognised process: " << proc_name << ".";
 

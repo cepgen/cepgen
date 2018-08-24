@@ -22,6 +22,9 @@ hadroniser.pythiaPreConfiguration += (
 
 process = ktProcess.clone('pptoww',
     mode = cepgen.ProcessMode.InelasticInelastic,
+    processParameters = cepgen.Parameters(
+        polarisationState = 0, # full
+    ),
     inKinematics = cepgen.Parameters(
         cmEnergy = 13.e3,
         #structureFunctions = cepgen.StructureFunctions.SzczurekUleshchenko,

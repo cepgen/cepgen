@@ -25,6 +25,7 @@ namespace CepGen
     {}
 
     GenericProcess::GenericProcess( const GenericProcess& proc ) :
+      parameters( proc.parameters ),
       name_( proc.name_ ), description_( proc.description_ ),
       first_run( proc.first_run ),
       s_( proc.s_ ), sqs_( proc.sqs_ ),
@@ -37,6 +38,7 @@ namespace CepGen
     GenericProcess&
     GenericProcess::operator=( const GenericProcess& proc )
     {
+      parameters = proc.parameters;
       name_ = proc.name_; description_ = proc.description_;
       first_run = proc.first_run;
       s_ = proc.s_; sqs_ = proc.sqs_;

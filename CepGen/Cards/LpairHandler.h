@@ -37,6 +37,8 @@ namespace CepGen
         std::string getParameter( std::string key ) const;
         std::string getDescription( std::string key ) const;
 
+        static const unsigned int kInvalid;
+
         std::unordered_map<std::string, Parameter<std::string> > p_strings_;
         std::unordered_map<std::string, Parameter<double> > p_doubles_;
         std::unordered_map<std::string, Parameter<unsigned int> > p_ints_;
@@ -45,7 +47,7 @@ namespace CepGen
         void init( Parameters* );
         PDG pair_;
         std::string proc_name_, hadr_name_, integr_type_;
-        unsigned int method_;
+        unsigned int method_, pol_state_;
     };
 
     //----- specialised registerers
