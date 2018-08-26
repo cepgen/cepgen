@@ -123,8 +123,7 @@ class StructureFunctions:
 
 class KTFlux:
     PhotonElastic         = 0
-    PhotonElasticBudnev   = 10
-    PhotonInelasticBudnev = 1
+    PhotonInelastic       = 1
     PhotonInelasticBudnev = 11
     PhotonElasticHI       = 100
     GluonKMR              = 20

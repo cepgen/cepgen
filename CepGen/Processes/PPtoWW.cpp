@@ -31,23 +31,12 @@ namespace CepGen
       registerVariable( phi_pt_diff_, Mapping::linear, cuts_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Ws azimuthal angle difference" );
 
       switch ( pol_state_ ) {
-        case Polarisation::full: default:
-          pol_w1_ = pol_w2_ = { -1, 0, 1 };
-          break;
-        case Polarisation::LL:
-          pol_w1_ = pol_w2_ = { 0 };
-          break;
-        case Polarisation::LT:
-          pol_w1_ = { 0 };
-          pol_w2_ = { -1, 1 };
-          break;
-        case Polarisation::TL:
-          pol_w1_ = { -1, 1 };
-          pol_w2_ = { 0 };
-          break;
-        case Polarisation::TT:
-          pol_w1_ = pol_w2_ = { -1, 1 };
-          break;
+        case Polarisation::LL: pol_w1_ = pol_w2_ = { 0 }; break;
+        case Polarisation::LT: pol_w1_ = { 0 }; pol_w2_ = { -1, 1 }; break;
+        case Polarisation::TL: pol_w1_ = { -1, 1 }; pol_w2_ = { 0 }; break;
+        case Polarisation::TT: pol_w1_ = pol_w2_ = { -1, 1 }; break;
+        default:
+        case Polarisation::full: pol_w1_ = pol_w2_ = { -1, 0, 1 }; break;
       }
       CG_DEBUG( "PPtoWW:mode" )
         << "matrix element computation method: " << method_ << ".";
@@ -277,13 +266,14 @@ namespace CepGen
       //     unintegrated photon distributions
       //============================================
 
-      GenericKTProcess::computeIncomingFluxes( x1, q1t2, x2, q2t2 );
+      const std::pair<double,double> fluxes
+        = GenericKTProcess::incomingFluxes( x1, q1t2, x2, q2t2 );
 
       CG_DEBUG_LOOP( "PPtoWW:fluxes" )
         << "Incoming photon fluxes for (x/kt2) = "
         << "(" << x1 << "/" << q1t2 << "), "
         << "(" << x2 << "/" << q2t2 << "):\n\t"
-        << flux1_ << ", " << flux2_ << ".";
+        << fluxes.first << ", " << fluxes.second << ".";
 
       //=================================================================
       //     factor 2.*pi from integration over phi_sum
@@ -293,10 +283,10 @@ namespace CepGen
       //=================================================================
 
       const double aintegral = amat2 / ( 16.*M_PI*M_PI*( x1*x2*s_ )*( x1*x2*s_ ) )
-                             * flux1_*M_1_PI * flux2_*M_1_PI * 0.25
+                             * fluxes.first*M_1_PI * fluxes.second*M_1_PI * 0.25
                              * Constants::GeV2toBarn;
       /*const double aintegral = amat2 / ( 16.*M_PI*M_PI*x1*x1*x2*x2*s_*s_ )
-                             * flux1_*M_1_PI * flux2_*M_1_PI
+                             * fluxes.first*M_1_PI * fluxes.second*M_1_PI
                              * Constants::GeV2toBarn * 0.25;*/
 
       //=================================================================

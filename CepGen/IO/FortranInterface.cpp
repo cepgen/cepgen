@@ -20,23 +20,14 @@ extern "C" {
     fl = val.FL;
   }
 
-  /*bool lhapdf_init = false;
-
-  double
-  cepgen_coll_flux_( int& fmode, double& q2, double& x )
-  {
-    if ( !lhapdf_init ) {
-      LHAPDF::initPDFSet( set, LHAPDF::LHGRID, 0 );
-    }
-  }*/
-
   double
   cepgen_kt_flux_( int& fmode, double& kt2, double& x, int& sfmode, double& mx )
   {
     using namespace CepGen;
     using namespace CepGen::Process;
-    return GenericKTProcess::flux( (GenericKTProcess::Flux)fmode, kt2, x,
-                                   *StructureFunctionsBuilder::get( (SF::Type)sfmode ), mx );
+    return GenericKTProcess::flux(
+      (GenericKTProcess::Flux)fmode, kt2, x,
+      *StructureFunctionsBuilder::get( (SF::Type)sfmode ), mx );
   }
 
   double
@@ -44,20 +35,31 @@ extern "C" {
   {
     using namespace CepGen;
     using namespace CepGen::Process;
-    return GenericKTProcess::flux( (GenericKTProcess::Flux)fmode, kt2, x,
-                                   Kinematics::HeavyIon{ (unsigned short)a, (unsigned short)z } );
+    return GenericKTProcess::flux(
+      (GenericKTProcess::Flux)fmode, kt2, x,
+      Kinematics::HeavyIon{ (unsigned short)a, (unsigned short)z } );
   }
 
   double
   cepgen_particle_mass_( int& pdg_id )
   {
-    return CepGen::ParticleProperties::mass( (CepGen::PDG)pdg_id );
+    try {
+      return CepGen::ParticleProperties::mass( (CepGen::PDG)pdg_id );
+    } catch ( const CepGen::Exception& e ) {
+      e.dump();
+      exit( 0 );
+    }
   }
 
   double
   cepgen_particle_charge_( int& pdg_id )
   {
-    return CepGen::ParticleProperties::charge( pdg_id );
+    try {
+      return CepGen::ParticleProperties::charge( pdg_id );
+    } catch ( const CepGen::Exception& e ) {
+      e.dump();
+      exit( 0 );
+    }
   }
 #ifdef __cplusplus
 }

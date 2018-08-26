@@ -45,12 +45,11 @@ namespace CepGen
         /// Type of incoming partons fluxes
         enum class Flux
         {
-          Elastic = 0,
-          ElasticBudnev = 10,
-          Inelastic = 1,
-          InelasticBudnev = 11,
-          GluonKMR = 20,
-          HIElastic = 100
+          P_Photon_Elastic = 0,
+          P_Photon_Inelastic = 1,
+          P_Photon_Inelastic_Budnev = 11,
+          P_Gluon_KMR = 20,
+          HI_Photon_Elastic = 100
         };
         friend std::ostream& operator<<( std::ostream&, const Flux& );
         /// Get the flux at a given parton x/kT
@@ -71,7 +70,7 @@ namespace CepGen
         /// \return Weight of the point in the phase space to the integral
         virtual double computeKTFactorisedMatrixElement() = 0;
         /// Compute the unintegrated photon fluxes (for inelastic distributions, interpolation on double logarithmic grid)
-        void computeIncomingFluxes( double, double, double, double );
+        std::pair<double,double> incomingFluxes( double, double, double, double ) const;
         /// Set the kinematics of the incoming and outgoing protons (or remnants)
         void fillPrimaryParticlesKinematics();
         /// Set the kinematics of the outgoing central system
@@ -127,10 +126,6 @@ namespace CepGen
         Particle::Momentum PX_;
         /// Second outgoing proton
         Particle::Momentum PY_;
-        /// First incoming parton's flux
-        double flux1_;
-        /// Second incoming parton's flux
-        double flux2_;
 
         /// Handler to a variable mapped by this process
         struct MappingVariable
