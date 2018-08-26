@@ -1,5 +1,6 @@
 #include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/Processes/GenericKTProcess.h"
 #include "CepGen/Core/Exception.h"
 
 #ifdef __cplusplus
@@ -22,9 +23,8 @@ extern "C" {
   cepgen_kt_flux_( int& fmode, double& kt2, double& x, int& sfmode, double& mx )
   {
     using namespace CepGen;
-    using namespace CepGen::Process;
-    return GenericKTProcess::flux(
-      (GenericKTProcess::Flux)fmode, kt2, x,
+    return Process::GenericKTProcess::flux(
+      (Process::GenericKTProcess::Flux)fmode, kt2, x,
       *StructureFunctionsBuilder::get( (SF::Type)sfmode ), mx );
   }
 
