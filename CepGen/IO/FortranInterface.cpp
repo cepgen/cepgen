@@ -23,8 +23,9 @@ extern "C" {
   cepgen_kt_flux_( int& fmode, double& kt2, double& x, int& sfmode, double& mx )
   {
     using namespace CepGen;
-    return Process::GenericKTProcess::flux(
-      (Process::GenericKTProcess::Flux)fmode, kt2, x,
+    using namespace CepGen::Process;
+    return GenericKTProcess::flux(
+      (GenericKTProcess::Flux)fmode, kt2, x,
       *StructureFunctionsBuilder::get( (SF::Type)sfmode ), mx );
   }
 
