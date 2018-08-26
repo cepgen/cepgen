@@ -3,6 +3,20 @@
 
 namespace CepGen
 {
+  ParametersList&
+  ParametersList::operator+=( const ParametersList& oth )
+  {
+    param_values_.insert( oth.param_values_.begin(), oth.param_values_.end() );
+    int_values_.insert( oth.int_values_.begin(), oth.int_values_.end() );
+    dbl_values_.insert( oth.dbl_values_.begin(), oth.dbl_values_.end() );
+    str_values_.insert( oth.str_values_.begin(), oth.str_values_.end() );
+    vec_param_values_.insert( oth.vec_param_values_.begin(), oth.vec_param_values_.end() );
+    vec_int_values_.insert( oth.vec_int_values_.begin(), oth.vec_int_values_.end() );
+    vec_dbl_values_.insert( oth.vec_dbl_values_.begin(), oth.vec_dbl_values_.end() );
+    vec_str_values_.insert( oth.vec_str_values_.begin(), oth.vec_str_values_.end() );
+    return *this;
+  }
+
   std::ostream&
   operator<<( std::ostream& os, const ParametersList& params )
   {

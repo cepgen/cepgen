@@ -14,6 +14,7 @@ namespace CepGen
       ParametersList() {}
       template<typename T> T get( std::string key, T def ) const;
       template<typename T> void set( std::string key, const T& value );
+      ParametersList& operator+=( const ParametersList& oth );
 
       friend std::ostream& operator<<( std::ostream& os, const ParametersList& );
 

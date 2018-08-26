@@ -244,7 +244,7 @@ namespace CepGen
         return;
       if ( !PyDict_Check( pobj ) )
         throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
-      out = get<ParametersList>( pobj );
+      out += get<ParametersList>( pobj );
     }
   }
 }
