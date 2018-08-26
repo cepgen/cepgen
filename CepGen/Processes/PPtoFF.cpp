@@ -213,13 +213,14 @@ namespace CepGen
       //     unintegrated photon distributions
       //============================================
 
-      GenericKTProcess::computeIncomingFluxes( x1, q1t.pt2(), x2, q2t.pt2() );
+      const std::pair<double,double> fluxes
+        = GenericKTProcess::incomingFluxes( x1, q1t.pt2(), x2, q2t.pt2() );
 
       CG_DEBUG_LOOP( "PPtoFF" )
         << "Incoming photon fluxes for (x/kt2) = "
         << "(" << x1 << "/" << q1t.pt2() << "), "
         << "(" << x2 << "/" << q2t.pt2() << "):\n\t"
-        << flux1_ << ", " << flux2_ << ".";
+        << fluxes.first << ", " << fluxes.second << ".";
 
       //=================================================================
       //     factor 2.*pi from integration over phi_sum
@@ -231,7 +232,7 @@ namespace CepGen
       const double g_em = 4.*M_PI*Constants::alphaEM*qf_*qf_;
       const double aintegral = amat2 * colf_ * ( g_em*g_em )
                              * 1. / pow( 4.*M_PI*( x1*x2*s_ ), 2 )
-                             * flux1_*M_1_PI * flux2_*M_1_PI * 0.25
+                             * fluxes.first*M_1_PI * fluxes.second*M_1_PI * 0.25
                              * Constants::GeV2toBarn;
 
       //=================================================================
