@@ -2,13 +2,13 @@
 #define CepGen_Cards_LpairReader_h
 
 #include "CepGen/Cards/Handler.h"
+#include "CepGen/Core/ParametersList.h"
 #include <unordered_map>
 
 using std::string;
 
 namespace CepGen
 {
-  class ParametersList;
   namespace Cards
   {
     /// LPAIR-like steering cards parser and writer

@@ -10,10 +10,16 @@ namespace CepGen
 {
   class ParametersList
   {
+    private:
+      template<typename T> struct default_arg
+      {
+        static T get() { return T(); }
+      };
+
     public:
-      ParametersList() {}
-      ~ParametersList() {} // required for unique_ptr initialisation!
-      template<typename T> T get( std::string key, T def ) const;
+      ParametersList() = default;
+      ~ParametersList() = default; // required for unique_ptr initialisation!
+      template<typename T> T get( std::string key, T def = default_arg<T>::get() ) const;
       template<typename T> T& operator[]( std::string key );
       template<typename T> void set( std::string key, const T& value );
       ParametersList& operator+=( const ParametersList& oth );
