@@ -13,7 +13,8 @@ namespace CepGen
 {
   namespace Process
   {
-    GenericKTProcess::GenericKTProcess( const std::string& name,
+    GenericKTProcess::GenericKTProcess( const ParametersList& params,
+                                        const std::string& name,
                                         const std::string& description,
                                         const std::array<PDG,2>& partons,
                                         const std::vector<PDG>& central ) :
@@ -43,7 +44,7 @@ namespace CepGen
     }
 
     unsigned int
-    GenericKTProcess::numDimensions( const Kinematics::Mode& ) const
+    GenericKTProcess::numDimensions() const
     {
       return num_dimensions_;
     }

@@ -64,7 +64,7 @@ namespace CepGen
         virtual void setKinematics( const Kinematics& cuts );
         /// Return the number of dimensions on which the integration has to be performed
         /// \return Number of dimensions on which to integrate
-        virtual unsigned int numDimensions( const Kinematics::Mode& ) const = 0;
+        virtual unsigned int numDimensions() const = 0;
 
         /// Prepare the process for its integration over the whole phase space
         inline virtual void beforeComputeWeight() {}
@@ -107,8 +107,6 @@ namespace CepGen
 
         /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
         void setEventContent( const IncomingState& ini, const OutgoingState& fin );
-        /// Compute the electric/magnetic form factors for the two considered \f$Q^{2}\f$ momenta transfers
-        void formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const;
 
         // ---
 

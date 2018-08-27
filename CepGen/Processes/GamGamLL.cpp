@@ -22,6 +22,7 @@ namespace CepGen
     GamGamLL::GamGamLL( const ParametersList& params ) :
       GenericProcess( "lpair", "pp → p(*) ( ɣɣ → l⁺l¯ ) p(*)" ),
       n_opt_( params.get<int>( "nopt", 0 ) ),
+      pair_( params.get<int>( "pair", 0 ) ),
       ep1_( 0. ), ep2_( 0. ), p_cm_( 0. ),
       ec4_( 0. ), pc4_( 0. ), mc4_( 0. ), w4_( 0. ),
       p12_( 0. ), p1k2_( 0. ), p2k1_( 0. ),
@@ -54,17 +55,17 @@ namespace CepGen
       }, {
         { Particle::OutgoingBeam1, { PDG::Proton } },
         { Particle::OutgoingBeam2, { PDG::Proton } },
-        { Particle::CentralSystem, { PDG::Muon, PDG::Muon } }
+        { Particle::CentralSystem, { (PDG)pair_, (PDG)pair_ } }
       } );
     }
 
     unsigned int
-    GamGamLL::numDimensions( const Kinematics::Mode& process_mode ) const
+    GamGamLL::numDimensions() const
     {
-      switch ( process_mode ) {
+      switch ( cuts_.mode ) {
         case Kinematics::Mode::ElectronProton: default:
           throw CG_FATAL( "GamGamLL" )
-            << "Process mode " << process_mode << " not (yet) supported! "
+            << "Process mode " << cuts_.mode << " not (yet) supported! "
             << "Please contact the developers to consider an implementation.";
         case Kinematics::Mode::ElasticElastic:
           return 7;
@@ -83,7 +84,7 @@ namespace CepGen
     {
       GenericProcess::setKinematics( kin );
 
-      masses_.Ml2_ = pow( ParticleProperties::mass( kin.central_system[0] ), 2 );
+      masses_.Ml2_ = event_->getByRole( Particle::CentralSystem )[0].mass2();
 
       w_limits_ = cuts_.cuts.central.mass_single;
       if ( !w_limits_.hasMax() )
@@ -1045,7 +1046,7 @@ namespace CepGen
         << "Ndown = " << ndown_;
 
       FormFactors fp1, fp2;
-      GenericProcess::formFactors( -t1_, -t2_, fp1, fp2 );
+      formFactors( -t1_, -t2_, fp1, fp2 );
 
       CG_DEBUG_LOOP( "GamGamLL" )
         << "u1 = " << fp1.FM << "\n\t"
@@ -1101,5 +1102,41 @@ namespace CepGen
       d = ax*log( yy );
     }
 
+    void
+    GamGamLL::formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const
+    {
+      const double mx2 = MX_*MX_, my2 = MY_*MY_;
+
+      switch ( cuts_.mode ) {
+        case Kinematics::Mode::ElectronElectron: {
+          fp1 = FormFactors::trivial(); // electron (trivial) form factor
+          fp2 = FormFactors::trivial(); // electron (trivial) form factor
+        } break;
+        case Kinematics::Mode::ProtonElectron: {
+          fp1 = FormFactors::protonElastic( -t1_ ); // proton elastic form factor
+          fp2 = FormFactors::trivial(); // electron (trivial) form factor
+        } break;
+        case Kinematics::Mode::ElectronProton: {
+          fp1 = FormFactors::trivial(); // electron (trivial) form factor
+          fp2 = FormFactors::protonElastic( -t2_ ); // proton elastic form factor
+        } break;
+        case Kinematics::Mode::ElasticElastic: {
+          fp1 = FormFactors::protonElastic( -t1_ ); // proton elastic form factor
+          fp2 = FormFactors::protonElastic( -t2_ ); // proton elastic form factor
+        } break;
+        case Kinematics::Mode::ElasticInelastic: {
+          fp1 = FormFactors::protonElastic( -t1_ );
+          fp2 = FormFactors::protonInelastic( -t2_, w2_, my2, *cuts_.structure_functions );
+        } break;
+        case Kinematics::Mode::InelasticElastic: {
+          fp1 = FormFactors::protonInelastic( -t1_, w1_, mx2, *cuts_.structure_functions );
+          fp2 = FormFactors::protonElastic( -t2_ );
+        } break;
+        case Kinematics::Mode::InelasticInelastic: {
+          fp1 = FormFactors::protonInelastic( -t1_, w1_, mx2, *cuts_.structure_functions );
+          fp2 = FormFactors::protonInelastic( -t2_, w2_, my2, *cuts_.structure_functions );
+        } break;
+      }
+    }
   }
 }

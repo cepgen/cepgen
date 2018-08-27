@@ -52,8 +52,6 @@ namespace CepGen
       void setSqrtS( double sqrts );
       /// Process centre of mass energy
       double sqrtS() const;
-      /// PDG id of the outgoing central particles
-      std::vector<PDG> central_system;
       /// Minimum list of central particles required
       std::vector<PDG> minimum_final_state;
 

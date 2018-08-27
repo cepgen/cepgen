@@ -13,6 +13,7 @@ namespace CepGen
 {
   class Event;
   class TamingFunctionsCollection;
+  class ParametersList;
   namespace Process { class GenericProcess; }
   namespace Hadroniser { class GenericHadroniser; }
   /// List of parameters used to start and run the simulation job
@@ -31,6 +32,8 @@ namespace CepGen
       void setThetaRange( float thetamin, float thetamax );
       /// Dump the input parameters in the console
       void dump( std::ostream& os = *Logger::get().output, bool pretty = true ) const;
+
+      std::shared_ptr<ParametersList> general;
 
       //----- process to compute
 

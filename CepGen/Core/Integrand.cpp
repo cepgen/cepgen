@@ -57,22 +57,6 @@ namespace CepGen
             << "  pz(p2) = " << p->kinematics.incoming_beams.second.pz << "\n\t"
             << "  structure functions: " << p->kinematics.structure_functions;
 
-          //=========================================================================================
-          // add central system
-          //=========================================================================================
-
-          Particles& central_system = ev->getByRole( Particle::CentralSystem );
-          if ( central_system.size() == p->kinematics.central_system.size() ) {
-            unsigned short i = 0;
-            for ( auto& part : central_system ) {
-              if ( p->kinematics.central_system[i] == PDG::invalid )
-                continue;
-              part.setPdgId( p->kinematics.central_system[i] );
-              part.computeMass();
-              i++;
-            }
-          }
-
           p->clearRunStatistics();
           proc->first_run = false;
         } // passed the first-run preparation

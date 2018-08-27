@@ -30,8 +30,9 @@ int main( int argc, char* argv[] ) {
     CG_INFO( "main" ) << "No config file provided. Setting the default parameters.";
 
     //--- default run: LPAIR elastic ɣɣ → µ⁺µ¯ at 13 TeV
-    gen.parameters->setProcess( new CepGen::Process::GamGamLL );
-    gen.parameters->kinematics.central_system = { CepGen::PDG::Muon, CepGen::PDG::Muon };
+    CepGen::ParametersList pgen;
+    pgen.set<int>( "pair", (int)CepGen::PDG::Muon );
+    gen.parameters->setProcess( new CepGen::Process::GamGamLL( pgen ) );
     gen.parameters->kinematics.mode = CepGen::Kinematics::Mode::ElasticElastic;
     gen.parameters->kinematics.cuts.central.pt_single.min() = 15.;
     gen.parameters->kinematics.cuts.central.eta_single = { -2.5, 2.5 };

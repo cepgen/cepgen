@@ -22,11 +22,13 @@ namespace CepGen
     {
       public:
         /// Class constructor
+        /// \param[in] params Parameters list
         /// \param[in] name Generic process name
         /// \param[in] description Human-readable kT-factorised process name
         /// \param[in] partons First and second incoming parton
         /// \param[in] output Produced final state particles
-        GenericKTProcess( const std::string& name,
+        GenericKTProcess( const ParametersList& params,
+                          const std::string& name,
                           const std::string& description,
                           const std::array<PDG,2>& partons,
                           const std::vector<PDG>& output );
@@ -34,7 +36,7 @@ namespace CepGen
         /// Populate the event content with the generated process' topology
         void addEventContent() override;
         /// Retrieve the total number of dimensions on which the integration is being performet
-        unsigned int numDimensions( const Kinematics::Mode& ) const override;
+        unsigned int numDimensions() const override;
         /// Retrieve the event weight in the phase space
         double computeWeight() override;
         /// Populate the event content with the generated process' kinematics

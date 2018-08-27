@@ -184,43 +184,6 @@ namespace CepGen
       event_->getOneByRole( Particle::IncomingBeam2 ).setMomentum( p2 );
     }
 
-    void
-    GenericProcess::formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const
-    {
-      const double mx2 = MX_*MX_, my2 = MY_*MY_;
-
-      switch ( cuts_.mode ) {
-        case Kinematics::Mode::ElectronElectron: {
-          fp1 = FormFactors::trivial(); // electron (trivial) form factor
-          fp2 = FormFactors::trivial(); // electron (trivial) form factor
-        } break;
-        case Kinematics::Mode::ProtonElectron: {
-          fp1 = FormFactors::protonElastic( -t1_ ); // proton elastic form factor
-          fp2 = FormFactors::trivial(); // electron (trivial) form factor
-        } break;
-        case Kinematics::Mode::ElectronProton: {
-          fp1 = FormFactors::trivial(); // electron (trivial) form factor
-          fp2 = FormFactors::protonElastic( -t2_ ); // proton elastic form factor
-        } break;
-        case Kinematics::Mode::ElasticElastic: {
-          fp1 = FormFactors::protonElastic( -t1_ ); // proton elastic form factor
-          fp2 = FormFactors::protonElastic( -t2_ ); // proton elastic form factor
-        } break;
-        case Kinematics::Mode::ElasticInelastic: {
-          fp1 = FormFactors::protonElastic( -t1_ );
-          fp2 = FormFactors::protonInelastic( -t2_, w2_, my2, *cuts_.structure_functions );
-        } break;
-        case Kinematics::Mode::InelasticElastic: {
-          fp1 = FormFactors::protonInelastic( -t1_, w1_, mx2, *cuts_.structure_functions );
-          fp2 = FormFactors::protonElastic( -t2_ );
-        } break;
-        case Kinematics::Mode::InelasticInelastic: {
-          fp1 = FormFactors::protonInelastic( -t1_, w1_, mx2, *cuts_.structure_functions );
-          fp2 = FormFactors::protonInelastic( -t2_, w2_, my2, *cuts_.structure_functions );
-        } break;
-      }
-    }
-
     bool
     GenericProcess::isKinematicsDefined()
     {

@@ -7,7 +7,9 @@ from Config.logger_cfi import logger
 logger.enabledModules += ('PPtoFF.prepare',)
 
 process = ktProcess.clone('pptoff',
-    mode = cepgen.ProcessMode.ElasticElastic,
+    processParameters = cepgen.Parameters(
+        mode = cepgen.ProcessMode.ElasticElastic,
+    ),
     inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),
         #structureFunctions = cepgen.StructureFunctions.SuriYennie,

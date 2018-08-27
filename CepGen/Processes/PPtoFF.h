@@ -24,6 +24,8 @@ namespace CepGen
         double onShellME( double shat, double that, double uhat ) const;
         double offShellME( double, double, double, double, double, double, const Particle::Momentum&, const Particle::Momentum& ) const;
 
+        /// PDG id of the fermion pair produced
+        int pair_;
         int method_;
 
         Limits rap_limits_;
