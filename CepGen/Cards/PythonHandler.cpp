@@ -144,17 +144,19 @@ namespace CepGen
     void
     PythonHandler::parseIncomingKinematics( PyObject* kin )
     {
-      PyObject* ppz = getElement( kin, "pz" ); // borrowed
-      if ( ppz && PyTuple_Check( ppz ) && PyTuple_Size( ppz ) == 2 ) {
-        double pz0 = get<double>( PyTuple_GetItem( ppz, 0 ) );
-        double pz1 = get<double>( PyTuple_GetItem( ppz, 1 ) );
-        params_.kinematics.incoming_beams.first.pz = pz0;
-        params_.kinematics.incoming_beams.second.pz = pz1;
+      //--- retrieve the beams PDG ids
+      std::vector<double> beams_pz;
+      fillParameter( kin, "pz", beams_pz );
+      if ( beams_pz.size() == 2 ) {
+        params_.kinematics.incoming_beams.first.pz = beams_pz.at( 0 );
+        params_.kinematics.incoming_beams.second.pz = beams_pz.at( 1 );
       }
-      PyObject* ppdg = getElement( kin, "pdgIds" ); // borrowed
-      if ( ppdg && PyTuple_Check( ppdg ) && PyTuple_Size( ppdg ) == 2 ) {
-        params_.kinematics.incoming_beams.first.pdg = (PDG)get<int>( PyTuple_GetItem( ppdg, 0 ) );
-        params_.kinematics.incoming_beams.second.pdg = (PDG)get<int>( PyTuple_GetItem( ppdg, 1 ) );
+      //--- retrieve the beams longitudinal momentum
+      std::vector<int> beams_pdg;
+      fillParameter( kin, "pdgIds", beams_pdg );
+      if ( beams_pdg.size() == 2 ) {
+        params_.kinematics.incoming_beams.first.pdg = (PDG)beams_pdg.at( 0 );
+        params_.kinematics.incoming_beams.second.pdg = (PDG)beams_pdg.at( 1 );
       }
       double sqrt_s = -1.;
       fillParameter( kin, "cmEnergy", sqrt_s );

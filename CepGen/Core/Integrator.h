@@ -17,14 +17,15 @@ namespace CepGen
   class Event;
   class GridParameters;
   class Timer;
-  /**
-   * Main occurence of the Monte-Carlo integrator @cite PeterLepage1978192 developed by G.P. Lepage in 1978
-   * \brief Monte-Carlo integrator instance
-   */
+  /// Monte-Carlo integrator instance
   class Integrator
   {
     public:
-      enum class Type { plain = 0, Vegas = 1, MISER = 2 };
+      enum class Type {
+        plain = 0,
+        Vegas = 1, ///< @cite PeterLepage1978192 developed by G.P. Lepage in 1978
+        MISER = 2
+      };
       enum class VegasMode { importance = 1, importanceOnly = 0, stratified = -1 };
       /**
        * Book the memory slots and structures for the integrator
