@@ -1,0 +1,40 @@
+language: cpp
+sudo: true
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+            - libgsl-dev
+            - libpython-dev
+      env:
+        - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4-9"
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+            - libgsl-dev
+            - libpython-dev
+            - libpythia8-dev
+      env:
+        - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4-9"
+
+before_script:
+  - mkdir build
+  - eval "${MATRIX_EVAL}"
+  - cd build
+  - cmake ..
+
+script:
+  - pwd
+  - make cepgen
+

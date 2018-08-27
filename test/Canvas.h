@@ -106,20 +106,20 @@ namespace CepGen
             distrib = ( ( TObjString* )tok->At( 3 ) )->String();
           }
           if ( !unit.IsNull() or !form_spec.IsNull() ) {
-            if ( !unit.IsNull() ) x_title = Form( "%s (%s)", x_title.Data(), unit.Data() );
+            if ( !unit.IsNull() ) x_title = ::Form( "%s (%s)", x_title.Data(), unit.Data() );
             if ( !distrib.IsNull() ) {
               if ( !form_spec.IsNull() ) {
-                TString format = Form( "%%s (%s / %%%s %%s)", distrib.Data(), form_spec.Data() );
-                y_title = Form( format.Data(), y_title.Data(), GetBinning( obj ), unit.Data() );
+                TString format = ::Form( "%%s (%s / %%%s %%s)", distrib.Data(), form_spec.Data() );
+                y_title = ::Form( format.Data(), y_title.Data(), GetBinning( obj ), unit.Data() );
               }
-              else y_title = Form( "%s (%s / %d %s)", y_title.Data(), distrib.Data(), static_cast<unsigned int>( GetBinning( obj ) ), unit.Data() );
+              else y_title = ::Form( "%s (%s / %d %s)", y_title.Data(), distrib.Data(), static_cast<unsigned int>( GetBinning( obj ) ), unit.Data() );
             }
-            else { 
+            else {
               if ( !form_spec.IsNull() ) {
-                TString format = Form( "%%s / %%%s %%s", form_spec.Data() );
-                y_title = Form( format.Data(), y_title.Data(), GetBinning( obj ), unit.Data() );
+                TString format = ::Form( "%%s / %%%s %%s", form_spec.Data() );
+                y_title = ::Form( format.Data(), y_title.Data(), GetBinning( obj ), unit.Data() );
               }
-              else y_title = Form( "%s / %d %s", y_title.Data(), static_cast<unsigned int>( GetBinning( obj ) ), unit.Data() );
+              else y_title = ::Form( "%s / %d %s", y_title.Data(), static_cast<unsigned int>( GetBinning( obj ) ), unit.Data() );
             }
           }
           obj->GetXaxis()->SetTitle( x_title );
@@ -154,24 +154,26 @@ namespace CepGen
         TCanvas::cd();
       }
 
-      inline void RatioPlot( TH1* obj1, const TH1* obj2=0, float ymin=-999., float ymax=-999. ) {
-        if ( !fRatio ) return;
+      inline TH1* RatioPlot( TH1* obj1, const TH1* obj2=0, float ymin=-999., float ymax=-999., const char* plot_type = "p" ) {
+        if ( !fRatio )
+          return obj1;
         TH1* ratio;
         if ( obj2 ) {
           ratio = dynamic_cast<TH1*>( obj2->Clone() );
           ratio->Divide( obj1 );
         }
-        else { ratio = dynamic_cast<TH1*>( obj1->Clone() ); }
+        else
+          ratio = dynamic_cast<TH1*>( obj1->Clone() );
 
         TCanvas::cd( 2 );
-        ratio->Draw("p");
-        obj1->GetXaxis()->SetTitle("");
-        if ( ymin!=ymax ) {
+        ratio->Draw( plot_type );
+        obj1->GetXaxis()->SetTitle( "" );
+        if ( ymin != ymax )
           ratio->GetYaxis()->SetRangeUser( ymin, ymax );
-        }
-        Prettify(ratio);
-        ratio->GetYaxis()->SetTitle("Ratio");
+        Prettify( ratio );
+        ratio->GetYaxis()->SetTitle( "Ratio" );
         TCanvas::cd();
+        return ratio;
       }
 
       inline TGraphErrors* RatioPlot(TGraphErrors* obj1, const TGraphErrors* obj2, float ymin=-999., float ymax=-999.) {
@@ -239,17 +241,15 @@ namespace CepGen
       }
 
       inline void Save(const char* ext, const char* out_dir=".") {
-        if (strstr(ext, "pdf")==NULL) {
-          if (strstr(ext, "png")==NULL) {
-            if (strstr(ext, "root")==NULL) {
-              return;
-            }
-          }
-        }
+        if (strstr(ext, "pdf")==NULL)
+          if (strstr(ext, "eps")==NULL)
+            if (strstr(ext, "png")==NULL)
+              if (strstr(ext, "root")==NULL)
+                return;
         TCanvas::cd();
         if ( fLeg ) fLeg->Draw();
         if ( fTopLabel ) fTopLabel->Draw();
-        TCanvas::SaveAs(Form("%s/%s.%s", out_dir, TCanvas::GetName(), ext));
+        TCanvas::SaveAs( ::Form( "%s/%s.%s", out_dir, TCanvas::GetName(), ext ) );
       }
       inline TLegend* GetLegend() { return fLeg; }
 

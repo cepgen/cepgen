@@ -1,80 +1,79 @@
-#include "FormFactors.h"
+#include "CepGen/Physics/FormFactors.h"
 
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Physics/PDG.h"
 
-#include "CepGen/StructureFunctions/ALLM.h"
-#include "CepGen/StructureFunctions/BlockDurandHa.h"
 #include "CepGen/StructureFunctions/FioreBrasse.h"
-#include "CepGen/StructureFunctions/GenericLHAPDF.h"
 #include "CepGen/StructureFunctions/SuriYennie.h"
-#include "CepGen/StructureFunctions/SzczurekUleshchenko.h"
+#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 
 namespace CepGen
 {
+  const double FormFactors::mp_ = ParticleProperties::mass( PDG::Proton );
+  const double FormFactors::mp2_ = FormFactors::mp_*FormFactors::mp_;
+
   FormFactors
-  FormFactors::Trivial()
+  FormFactors::trivial()
   {
     return FormFactors( 1.0, 1.0 );
   }
 
   FormFactors
-  FormFactors::ProtonElastic( double q2 )
+  FormFactors::protonElastic( double q2 )
   {
-    const double mp2 = ParticleProperties::mass( Proton )*ParticleProperties::mass( Proton );
     const double GE = pow( 1.+q2/0.71, -2. ), GE2 = GE*GE;
     const double GM = 2.79*GE, GM2 = GM*GM;
-    return FormFactors( ( 4.*mp2*GE2 + q2*GM2 ) / ( 4.*mp2 + q2 ), GM2 );
+    return FormFactors( ( 4.*mp2_*GE2 + q2*GM2 ) / ( 4.*mp2_ + q2 ), GM2 );
   }
 
   FormFactors
-  FormFactors::ProtonInelastic( const StructureFunctions::Type& sf, double q2, double mi2, double mf2 )
+  FormFactors::protonInelastic( double q2, double mi2, double mf2, StructureFunctions& sf )
   {
-    switch ( sf ) {
-      case StructureFunctions::ElasticProton:
-        InWarning( "Elastic proton form factors requested! Check your process definition!" );
-        return FormFactors::ProtonElastic( q2 );
-      case StructureFunctions::SuriYennie:
-        return FormFactors::SuriYennie( q2, mi2, mf2 );
-      case StructureFunctions::SzczurekUleshchenko:
-        return FormFactors::SzczurekUleshchenko( q2, mi2, mf2 );
-      case StructureFunctions::FioreBrasse:
-        return FormFactors::FioreBrasse( q2, mi2, mf2 );
-      default: throw Exception( __PRETTY_FUNCTION__, "Invalid structure functions required!", FatalError );
+    switch ( sf.type ) {
+      case SF::Type::ElasticProton:
+        CG_WARNING( "FormFactors" ) << "Elastic proton form factors requested! Check your process definition!";
+        return FormFactors::protonElastic( q2 );
+      case SF::Type::SuriYennie:
+        return FormFactors::suriYennie( q2, mi2, mf2 );
+      case SF::Type::FioreBrasse:
+        return FormFactors::fioreBrasse( q2, mi2, mf2 );
+      default:
+        return FormFactors::generic( q2, mi2, mf2, sf );
     }
   }
 
   FormFactors
-  FormFactors::SuriYennie( double q2, double mi2, double mf2 )
+  FormFactors::suriYennie( double q2, double mi2, double mf2 )
   {
     const double x = q2 / ( q2 + mf2 - mi2 );
-    const SF::SuriYennie suriyennie, sy = suriyennie( q2, x );
+    SF::SuriYennie suriyennie, sy = (SF::SuriYennie)suriyennie( x, q2 );
 //std::cout << "---> " << sy.FM << "\t" << sy.F2*x/q2 << "\t" << sy.F2*x*sqrt(mi2)/q2 << std::endl;
     return FormFactors( sy.F2 * x * sqrt( mi2 ) / q2, sy.FM ); //FIXME
   }
 
   FormFactors
-  FormFactors::FioreBrasse( double q2, double mi2, double mf2 )
+  FormFactors::fioreBrasse( double q2, double mi2, double mf2 )
   {
     const double x = q2 / ( q2 + mf2 - mi2 );
-    SF::FioreBrasse fb, sf = fb( q2, x );
+    SF::FioreBrasse fb, sf = fb( x, q2 );
     return FormFactors( sf.F2 * x / q2, -2.*sf.W1 / q2 );
   }
 
   FormFactors
-  FormFactors::SzczurekUleshchenko( double q2, double mi2, double mf2 )
+  FormFactors::generic( double q2, double mi2, double mf2, StructureFunctions& sf )
   {
     const double x = q2 / ( q2 + mf2 - mi2 );
-    SF::SzczurekUleshchenko su, sf = su( q2, x );
-    return FormFactors( sf.F2 * x / q2, -2.*sf.F1 / q2 );
+    sf = sf( x, q2 );
+    sf.computeFL( x, q2 );
+    return FormFactors( sf.F2 * x / q2, -2.*sf.F1( x, q2 ) / q2 );
   }
 
   double
   FormFactors::x( double q2, double w2, double m2 ) const
   {
-    const double mp2 = ParticleProperties::mass( Proton )*ParticleProperties::mass( Proton );
-    return 1./( 1.+( w2-mp2 ) / q2+m2 );
+    return 1./( 1.+( w2-mp2_ ) / q2+m2 );
   }
 
   std::ostream&

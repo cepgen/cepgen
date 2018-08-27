@@ -1,79 +1,74 @@
+//--- steering cards
 #include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Cards/LpairHandler.h"
 
 #include "CepGen/Generator.h"
-
-#include "CepGen/Core/Logger.h"
 #include "CepGen/Core/Exception.h"
 
+//--- necessary include to build the default run
 #include "CepGen/Processes/GamGamLL.h"
-#include "CepGen/Hadronisers/Pythia8Hadroniser.h"
+#include "CepGen/Physics/PDG.h"
 
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "abort.h"
 
 #include <iostream>
 
 using namespace std;
 
-void printEvent( const CepGen::Event& ev, unsigned int& ev_id )
-{
-  if ( ev_id % 5000 == 0 ) {
-    Information( Form( "Generating event #%d", ev_id ) );
-    ev.dump();
-  }
-}
-
 /**
- * Main caller for this Monte Carlo generator. Loads the configuration files'
- * variables if set as an argument to this program, else loads a default
- * "LHC-like" configuration, then launches the cross-section computation and
+ * Main caller for this MC generator. Loads the configuration files'
+ * variables if passed as an argument to this program, else loads a default
+ * LPAIR-like configuration, then launches the cross-section computation and
  * the events generation.
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
  */
 int main( int argc, char* argv[] ) {
-  CepGen::Generator mg;
-  
-  //CepGen::Logger::get().level = CepGen::Logger::Debug;
-  //CepGen::Logger::get().level = CepGen::Logger::DebugInsideLoop;
-  //CepGen::Logger::get().outputStream( ofstream( "log.txt" ) );
-  
-  if ( argc == 1 ) {
-    Information( "No config file provided. Setting the default parameters." );
-    
-    mg.parameters->setProcess( new CepGen::Process::GamGamLL );
-    //mg.parameters->process_mode = Kinematics::InelasticElastic;
-    mg.parameters->kinematics.mode = CepGen::Kinematics::ElasticElastic;
-    mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SuriYennie;
-    mg.parameters->kinematics.inp = { 6500., 6500. };
-    mg.parameters->kinematics.central_system = { CepGen::Muon, CepGen::Muon };
-    mg.parameters->kinematics.cuts.central[CepGen::Cuts::pt_single].min() = 15.;
-    mg.parameters->kinematics.cuts.central[CepGen::Cuts::eta_single] = { -2.5, 2.5 };
-    mg.parameters->integrator.ncvg = 5e4; //FIXME
-    mg.parameters->generation.enabled = true;
-    //mg.parameters->maxgen = 2;
-    mg.parameters->generation.maxgen = 2e4;
+  //--- first start by defining the generator object
+  CepGen::Generator gen;
+
+  if ( argc < 2 ) {
+    CG_INFO( "main" ) << "No config file provided. Setting the default parameters.";
+
+    //--- default run: LPAIR elastic ɣɣ → µ⁺µ¯ at 13 TeV
+    CepGen::ParametersList pgen;
+    pgen.set<int>( "pair", (int)CepGen::PDG::Muon );
+    gen.parameters->setProcess( new CepGen::Process::GamGamLL( pgen ) );
+    gen.parameters->kinematics.mode = CepGen::Kinematics::Mode::ElasticElastic;
+    gen.parameters->kinematics.cuts.central.pt_single.min() = 15.;
+    gen.parameters->kinematics.cuts.central.eta_single = { -2.5, 2.5 };
+    gen.parameters->generation.enabled = true;
+    gen.parameters->generation.maxgen = 1e3;
   }
   else {
-    Information( Form( "Reading config file stored in %s", argv[1] ) );
-    //CepGen::Cards::LpairReader card( argv[1] );
+    CG_INFO( "main" ) << "Reading config file stored in " << argv[1] << ".";
     const std::string extension = CepGen::Cards::Handler::getExtension( argv[1] );
-    if ( extension == "card" ) mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
+    if ( extension == "card" )
+      gen.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
 #ifdef PYTHON
-    else if ( extension == "py" ) mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
+    else if ( extension == "py" )
+      gen.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
 #endif
+    else
+      throw CG_FATAL( "main" ) << "Unrecognized steering card extension: ." << extension << "!";
   }
 
-  // We might want to cross-check visually the validity of our run
-  mg.parameters->dump();
+  //--- list all parameters
+  gen.parameters->dump();
 
-  // Let there be cross-section...
-  double xsec, err;
-  mg.computeXsection( xsec, err );
+  AbortHandler ctrl_c;
 
-  if ( mg.parameters->generation.enabled )
-    // The events generation starts here !
-    mg.generate( printEvent ); // use a callback function!
+  try {
+    //--- let there be a cross-section...
+    double xsec = 0., err = 0.;
+    gen.computeXsection( xsec, err );
+
+    if ( gen.parameters->generation.enabled )
+      //--- events generation starts here
+      // (one may use a callback function)
+      gen.generate();
+  } catch ( const CepGen::RunAbortedException& e ) {
+    CG_INFO( "main" ) << "Run aborted!";
+  }
 
   return 0;
 }
-

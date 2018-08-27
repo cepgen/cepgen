@@ -1,4 +1,5 @@
-#include "ChristyBosted.h"
+#include "CepGen/StructureFunctions/ChristyBosted.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Core/Exception.h"
 
@@ -7,18 +8,17 @@ namespace CepGen
   namespace SF
   {
     ChristyBosted::ChristyBosted( const ChristyBosted::Parameterisation& params ) :
-      params_( params )
+      StructureFunctions( Type::ChristyBosted ), params_( params )
     {}
 
     double
     ChristyBosted::resmod507( char sf, double w2, double q2 ) const
     {
-      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp,
-                   mpi = ParticleProperties::mass( PiZero ), mpi2 = mpi*mpi,
-                   meta = ParticleProperties::mass( Eta ), meta2 = meta*meta;
+      const double mpi = ParticleProperties::mass( PDG::PiZero ), mpi2 = mpi*mpi,
+                   meta = ParticleProperties::mass( PDG::Eta ), meta2 = meta*meta;
       const double w = sqrt( w2 );
 
-      const double xb = q2/( q2+w2-mp2 );
+      const double xb = q2/( q2+w2-mp2_ );
       double m0 = 0., q20 = 0.;
 
       if ( sf == 'T' ) { // transverse
@@ -30,7 +30,7 @@ namespace CepGen
         q20 = 0.125;
       }
       else {
-        InError( "Invalid direction retrieved! Aborting." )
+        CG_ERROR( "ChristyBosted" ) << "Invalid direction retrieved! Aborting.";
         return 0.;
       }
 
@@ -39,12 +39,12 @@ namespace CepGen
 
       //--- calculate kinematics needed for threshold relativistic B-W
       // equivalent photon energies
-      const double k   = 0.5 * ( w2 - mp2 )/mp;
-      const double kcm = 0.5 * ( w2 - mp2 )/w;
+      const double k   = 0.5 * ( w2 - mp2_ )/mp_;
+      const double kcm = 0.5 * ( w2 - mp2_ )/w;
 
-      const double epicm  = 0.5 * ( w2 +    mpi2 - mp2 )/w, ppicm  = sqrt( std::max( 0.,  epicm* epicm -   mpi2 ) );
-      const double epi2cm = 0.5 * ( w2 + 4.*mpi2 - mp2 )/w, ppi2cm = sqrt( std::max( 0., epi2cm*epi2cm - 4*mpi2 ) );
-      const double eetacm = 0.5 * ( w2 +   meta2 - mp2 )/w, petacm = sqrt( std::max( 0., eetacm*eetacm -  meta2 ) );
+      const double epicm  = 0.5 * ( w2 +    mpi2 - mp2_ )/w, ppicm  = sqrt( std::max( 0.,  epicm* epicm -   mpi2 ) );
+      const double epi2cm = 0.5 * ( w2 + 4.*mpi2 - mp2_ )/w, ppi2cm = sqrt( std::max( 0., epi2cm*epi2cm - 4*mpi2 ) );
+      const double eetacm = 0.5 * ( w2 +   meta2 - mp2_ )/w, petacm = sqrt( std::max( 0., eetacm*eetacm -  meta2 ) );
 
       std::array<double,7> width, height, pgam;
       for ( unsigned short i = 0; i < 7; ++i ) {
@@ -91,12 +91,12 @@ namespace CepGen
       sig_res *= w;
 
       //--- non-resonant background calculation
-      const double xpr = 1./( 1.+( w2-pow( mp+mpi, 2 ) )/( q2+q20 ) );
+      const double xpr = 1./( 1.+( w2-pow( mp_+mpi, 2 ) )/( q2+q20 ) );
       if ( xpr > 1. ) return 0.; // FIXME
 
       double sig_nr = 0.;
       if ( sf == 'T' ) { // transverse
-        const double wdif = w - ( mp + mpi );
+        const double wdif = w - ( mp_ + mpi );
         if ( wdif >= 0. ) {
           for ( unsigned short i = 0; i < 2; ++i ) {
             const double expo = params_.continuum.transverse[i].fit_parameters[1]
@@ -226,28 +226,31 @@ namespace CepGen
     double
     ChristyBosted::Parameterisation::ResonanceParameters::kr() const
     {
-      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
-      return 0.5 * ( mass*mass-mp2 ) / mp;
+      return 0.5 * ( mass*mass-mp2_ ) / mp_;
     }
 
     double
     ChristyBosted::Parameterisation::ResonanceParameters::ecmr( double m2 ) const
     {
       if ( mass == 0. ) return 0.;
-      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
-      return 0.5 * ( mass*mass+m2-mp2 ) / mass;
+      return 0.5 * ( mass*mass+m2-mp2_ ) / mass;
     }
 
-    ChristyBosted
-    ChristyBosted::operator()( double q2, double xbj ) const
+    ChristyBosted&
+    ChristyBosted::operator()( double xbj, double q2 )
     {
-      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
-      const double w2 = mp2 + q2*( 1.-xbj )/xbj;
-      const double w_min = mp+ParticleProperties::mass( PiZero );
+      std::pair<double,double> nv = { xbj, q2 };
+      if ( nv == old_vals_ )
+        return *this;
+      old_vals_ = nv;
 
-      ChristyBosted cb;
-      if ( sqrt( w2 ) < w_min )
-        return cb;
+      const double w2 = mp2_ + q2*( 1.-xbj )/xbj;
+      const double w_min = mp_+ParticleProperties::mass( PDG::PiZero );
+
+      if ( sqrt( w2 ) < w_min ) {
+        F2 = 0.;
+        return *this;
+      }
 
       //-----------------------------
       // modification of Christy-Bosted at large q2 as described in the LUXqed paper
@@ -261,21 +264,20 @@ namespace CepGen
       double q2_eff = q2, w2_eff = w2;
       if ( q2 > q20 ) {
         q2_eff = q20 + delq2/( 1.+delq2/qq );
-        w2_eff = mp2 + q2_eff*( 1.-xbj )/xbj;
+        w2_eff = mp2_ + q2_eff*( 1.-xbj )/xbj;
       }
-      const double tau = 4.*xbj*xbj*mp2/q2_eff;
+      const double tau = 4.*xbj*xbj*mp2_/q2_eff;
       const double sigT = resmod507( 'T', w2_eff, q2_eff );
       const double sigL = resmod507( 'L', w2_eff, q2_eff );
 
-      cb.F2 = prefac * q2_eff / ( 1+tau ) * ( sigT+sigL ) / Constants::GeV2toBarn * 1.e6;
+      F2 = prefac * q2_eff / ( 1+tau ) * ( sigT+sigL ) / Constants::GeV2toBarn * 1.e6;
       if ( q2 > q20 )
-        cb.F2 *= q21/( q21 + delq2 );
+        F2 *= q21/( q21 + delq2 );
 
       if ( sigT != 0. )
-        cb.computeFL( q2_eff, xbj, sigL/sigT );
+        StructureFunctions::computeFL( q2_eff, xbj, sigL/sigT );
 
-      return cb;
+      return *this;
     }
   }
 }
-

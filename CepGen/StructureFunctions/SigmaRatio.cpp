@@ -1,5 +1,7 @@
-#include "SigmaRatio.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/ParticleProperties.h"
+
 #include <math.h>
 #include <iostream>
 
@@ -7,8 +9,11 @@ namespace CepGen
 {
   namespace SF
   {
+    const double SigmaRatio::mp_ = ParticleProperties::mass( PDG::Proton );
+    const double SigmaRatio::mp2_ = SigmaRatio::mp_*SigmaRatio::mp_;
+
     double
-    SigmaRatio::theta( double q2, double xbj ) const
+    SigmaRatio::theta( double xbj, double q2 ) const
     {
       return 1.+12.*( q2/( q2+1. ) )*( 0.125*0.125/( 0.125*0.125+xbj*xbj ) );
     }
@@ -30,13 +35,13 @@ namespace CepGen
     {}
 
     double
-    E143Ratio::operator()( double q2, double xbj, double& err ) const
+    E143Ratio::operator()( double xbj, double q2, double& err ) const
     {
       const double u = q2/params_.q2_b;
       const double inv_xl = 1./log( q2/params_.lambda2 );
       const double pa = ( 1.+params_.a[3]*xbj+params_.a[4]*xbj*xbj )*pow( xbj, params_.a[5] );
       const double pb = ( 1.+params_.b[3]*xbj+params_.b[4]*xbj*xbj )*pow( xbj, params_.b[5] );
-      const double theta = SigmaRatio::theta( q2, xbj );
+      const double theta = SigmaRatio::theta( xbj, q2 );
       const double q2_thr = params_.c[3]*xbj + params_.c[4]*xbj*xbj+params_.c[5]*xbj*xbj*xbj;
       // here come the three fits
       const double ra = params_.a[0]*inv_xl*theta + params_.a[1]/pow( pow( q2, 4 )+pow( params_.a[2], 4 ), 0.25 )*pa,
@@ -46,7 +51,8 @@ namespace CepGen
       const double r = ( ra+rb+rc ) / 3.; // R is set to be the average of the three fits
       // numerical safety for low-Q²
       err = 0.0078-0.013*xbj+( 0.070-0.39*xbj+0.70*xbj*xbj )/( 1.7+q2 );
-      if ( q2 > params_.q2_b ) return r;
+      if ( q2 > params_.q2_b )
+        return r;
       return r * 0.5 * ( 3.*u-u*u*u );
     }
 
@@ -64,36 +70,34 @@ namespace CepGen
     {}
 
     double
-    R1990Ratio::operator()( double q2, double xbj, double& err ) const
+    R1990Ratio::operator()( double xbj, double q2, double& err ) const
     {
       err = 0.;
-      return ( params_.b[0]+SigmaRatio::theta( q2, xbj )/log( q2/params_.lambda2 )
+      return ( params_.b[0]+SigmaRatio::theta( xbj, q2 )/log( q2/params_.lambda2 )
              + params_.b[1]/q2
              + params_.b[2]/( q2*q2+0.09 ) );
     }
 
     double
-    CLASRatio::operator()( double q2, double xbj, double& err ) const
+    CLASRatio::operator()( double xbj, double q2, double& err ) const
     {
       // 2 kinematic regions:
       //  - resonances ( w < 2.5 )
       //  - DIS ( w > 2.5 )
-      const double mp = ParticleProperties::mass( Proton );
-      const double w2 = mp*mp + q2*( 1.-xbj )/xbj, w = sqrt( w2 );
-      const double xth = q2/( q2+2.5*2.5-mp*mp ); // xth = x( W = 2.5 GeV )
+      const double w2 = mp2_ + q2*( 1.-xbj )/xbj, w = sqrt( w2 );
+      const double xth = q2/( q2+2.5*2.5-mp2_ ); // xth = x( W = 2.5 GeV )
       const double zeta = log( 25.*q2 );
-      const double xitmp = ( w < 2.5 ) ? theta( q2, xth ) : theta( q2, xbj );
+      const double xitmp = ( w < 2.5 ) ? theta( xth, q2 ) : theta( xbj, q2 );
       const double tmp = 0.041*xitmp/zeta + 0.592/q2 - 0.331/( 0.09+q2*q2 );
       if ( w < 2.5 ) return tmp * pow( ( 1.-xbj )/( 1.-xth ), 3 );
       return tmp;
     }
 
     double
-    SBRatio::operator()( double q2, double xbj, double& err ) const
+    SBRatio::operator()( double xbj, double q2, double& err ) const
     {
       err = 0.;
       return 0.014*q2*( exp( -0.07*q2 )+41.*exp( -0.8*q2 ) );
     }
   }
 }
-

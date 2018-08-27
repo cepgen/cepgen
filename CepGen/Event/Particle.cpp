@@ -1,4 +1,5 @@
-#include "Particle.h"
+#include "CepGen/Event/Particle.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 #include "CepGen/Physics/Constants.h"
@@ -8,15 +9,15 @@ namespace CepGen
   Particle::Particle() :
     id_( -1 ), charge_sign_( 1 ),
     mass_( -1. ), helicity_( 0. ),
-    role_( UnknownRole ), status_( Undefined ), pdg_id_( invalidParticle )
+    role_( UnknownRole ), status_( Status::Undefined ), pdg_id_( PDG::invalid )
   {}
 
-  Particle::Particle( Role role, ParticleCode pdgId, Status st ) :
+  Particle::Particle( Role role, PDG pdgId, Status st ) :
     id_( -1 ), charge_sign_( 1 ),
     mass_( -1. ), helicity_( 0. ),
     role_( role ), status_( st ), pdg_id_( pdgId )
   {
-    if ( pdg_id_!=invalidParticle ) {
+    if ( pdg_id_ != PDG::invalid ) {
       computeMass();
     }
   }
@@ -50,7 +51,7 @@ namespace CepGen
   bool
   Particle::valid()
   {
-    if ( pdg_id_ == invalidParticle ) return false;
+    if ( pdg_id_ == PDG::invalid ) return false;
     if ( momentum_.p() == 0. && mass() == 0. ) return false;
     return true;
   }
@@ -58,7 +59,7 @@ namespace CepGen
   void
   Particle::computeMass( bool off_shell )
   {
-    if ( !off_shell && pdg_id_ != invalidParticle ) { // retrieve the mass from the on-shell particle's properties
+    if ( !off_shell && pdg_id_ != PDG::invalid ) { // retrieve the mass from the on-shell particle's properties
       mass_ = ParticleProperties::mass( pdg_id_ );
     }
     else if ( momentum_.energy() >= 0. ) {
@@ -83,8 +84,9 @@ namespace CepGen
   {
     mothers_.insert( part.id() );
 
-    DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) is the new mother of %2d (pdgId=%4d)",
-                               part.id(), part.pdgId(), id_, pdg_id_ ) );
+    CG_DEBUG_LOOP( "Particle" )
+      <<  "Particle " << id() << " (pdgId=" << part.integerPdgId() << ") "
+      << "is the new mother of " << id_ << " (pdgId=" << (int)pdg_id_ << ").";
 
     part.addDaughter( *this );
   }
@@ -94,17 +96,20 @@ namespace CepGen
   {
     const auto ret = daughters_.insert( part.id() );
 
-    if ( Logger::get().level >= Logger::DebugInsideLoop ) {
+    if ( CG_EXCEPT_MATCH( "Particle", debugInsideLoop ) ) {
       std::ostringstream os;
       for ( const auto& daugh : daughters_ )
         os << Form( "\n\t * id=%d", daugh );
-      DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) has now %2d daughter(s):"
-                                 "%s", role_, pdg_id_, numDaughters(), os.str().c_str() ) );
+      CG_DEBUG_LOOP( "Particle" )
+        << "Particle " << role_ << " (pdgId=" << (int)pdg_id_ << ") "
+        << "has now " << daughters_.size() << " daughter(s):"
+        << os.str();
     }
 
     if ( ret.second ) {
-      DebuggingInsideLoop( Form( "Particle %2d (pdgId=%4d) is a new daughter of %2d (pdgId=%4d)",
-                                 part.role(), part.pdgId(), role_, pdg_id_ ) );
+      CG_DEBUG_LOOP( "Particle" )
+        << "Particle " << part.role() << " (pdgId=" << part.integerPdgId() << ") "
+        << "is a new daughter of " << role_ << " (pdgId=" << (int)pdg_id_ << "%4d).";
 
       if ( part.mothers().find( id_ ) == part.mothers().end() )
         part.addMother( *this );
@@ -131,7 +136,7 @@ namespace CepGen
   {
     setMomentum( px, py, pz );
     if ( fabs( e-momentum_.energy() )>1.e-6 ) { // more than 1 eV difference
-      InError( Form( "Energy difference: %.5e", e-momentum_.energy() ) );
+      CG_ERROR( Form( "Energy difference: %.5e", e-momentum_.energy() ) );
       return;
     }
   }
@@ -150,10 +155,19 @@ namespace CepGen
   }
 
   void
-  Particle::setPdgId( const ParticleCode& pdg, short ch )
+  Particle::setPdgId( const PDG& pdg, short ch )
   {
     pdg_id_ = pdg;
-    charge_sign_ = ch;
+    switch ( pdg_id_ ) {
+      case PDG::Electron:
+      case PDG::Muon:
+      case PDG::Tau:
+        charge_sign_ = -ch;
+        break;
+      default:
+        charge_sign_ = ch;
+        break;
+    }
   }
 
   int
@@ -167,7 +181,7 @@ namespace CepGen
   void
   Particle::dump() const
   {
-    std::ostringstream osm, osd, os;
+    std::ostringstream osm, osd;
     if ( !primary() ) {
       osm << ": mother(s): ";
       unsigned short i = 0;
@@ -185,57 +199,13 @@ namespace CepGen
         ++i;
       }
     }
-    os << " (" << pdg_id_ << ")";
-    if ( os.str() == " ()" ) os.str("");
-    Information( Form(
-      "Dumping a particle with id=%3d, role=%3d, status=% 3d\n\t"
-      "PDG Id:%4d%s, mass = %5.4f GeV\n\t"
-      "(E,P) = (%4.2f, %4.2f, %4.2f, %4.2f) GeV\t"
-      "(|P| = p = %4.2f GeV)\n\t"
-      " Pt = %5.4f GeV, eta = %4.3f, phi = % 4.3f\n\t"
-      "Primary? %s%s\n\t"
-      "%d daughter(s)%s",
-      id_, role_, status_, pdg_id_, os.str().c_str(),
-      mass(), energy(), momentum_.px(), momentum_.py(), momentum_.pz(),
-      momentum_.p(), momentum_.pt(), momentum_.eta(), momentum_.phi(),
-      yesno( primary() ), osm.str().c_str(), numDaughters(), osd.str().c_str() )
-    );
-  }
-
-  Particle&
-  Particle::lorentzBoost( double m, const Particle::Momentum& mom )
-  {
-    if ( mom.energy() == m )
-      return *this;
-
-    double pf4 = 0.;
-    for ( unsigned int i = 0; i < 4; ++i )
-      pf4 += momentum_[i]*mom[i];
-    pf4 /= m;
-    const double fn = ( pf4+energy() )/( momentum_.energy()+m );
-    for ( unsigned int i = 0; i < 3; ++i )
-      momentum_.setP( i, momentum_[i]+fn*mom[i] );
-
-    return *this;
-  }
-
-  std::vector<double>
-  Particle::lorentzBoost( const Particle::Momentum& mom )
-  {
-    std::vector<double> out( 3, 0. );
-
-    const double p2 = mom.p2();
-    const double gamma = 1./sqrt( 1.-p2 );
-    double bp = 0.;
-    for ( unsigned int i = 0; i < 3; ++i )
-      bp += mom[i]*momentum_[i];
-
-    const double gamma2 = ( p2 > 0. ) ? ( gamma-1. )/p2 : 0.;
-
-    for ( unsigned int i = 0; i < 3; ++i ) {
-      out[i] = momentum_[i] + gamma2*bp*mom[i]+gamma*mom[i]*energy();
-    }
-    return out;
+    CG_INFO( "Particle" )
+      << "Dumping a particle with id=" << id_ << ", role=" << role_ << ", status=" << (int)status_ << "\n\t"
+      << "Particle id: " << integerPdgId() << " (" << pdg_id_ << "), mass = " << mass() << " GeV\n\t"
+      << "Momentum: " << momentum_ << " GeV\t" << "(|P| = p = " << momentum_.p() << " GeV)\n\t"
+      << " p⟂ = " << momentum_.pt() << " GeV, eta = " << momentum_.eta() << ", phi = " << momentum_.phi() << "\n\t"
+      << "Primary? " << yesno( primary() ) << osm.str() << "\n\t"
+      << numDaughters() << " daughter(s)" << osd.str();
   }
 
   double

@@ -3,15 +3,19 @@
 #include "CepGen/Core/Timer.h"
 
 #include "CepGen/Processes/GamGamLL.h"
-#include "CepGen/Processes/PPtoLL.h"
+#include "CepGen/Processes/PPtoFF.h"
+#include "CepGen/Processes/PPtoWW.h"
 
+#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/Physics/PDG.h"
 
 #include "abort.h"
 
 #include <unordered_map>
 #include <assert.h>
 #include <string.h>
+#include <math.h>
 
 using namespace std;
 
@@ -39,7 +43,7 @@ main( int argc, char* argv[] )
         { "doublediss", { 6.35650e-1, 1.93968e-3 } }
       } },
     } },
-    //--- PPTOLL values
+    //--- PPtoLL values
     { "pptoll", {
       { 3.0, { // pt cut
         { "elastic",       { 2.0936541e1, 1.4096e-2 } },
@@ -54,32 +58,42 @@ main( int argc, char* argv[] )
         { "3_doublediss", { 5.6316353e-1, 1.1829e-3 } }, // SU, qt<500*/
       } },
     } },
+    //--- PPtoWW values
+    { "pptoww", {
+      { 0.0, { // pt cut
+        { "elastic",         { 0.273, 0.01 } },
+        { "elastic",         { 0.273, 0.01 } }, // FIXME
+        { "singlediss_lux",  { 0.409, 0.01 } },
+        { "doublediss_lux",  { 1.090, 0.01 } },
+        { "singlediss_allm", { 0.318, 0.01 } },
+        { "doublediss_allm", { 0.701, 0.01 } }
+      } }
+    } },
   };
 
   const double num_sigma = 3.0;
 
-  if ( argc < 3 || strcmp( argv[2], "debug" ) != 0 ) {
-    CepGen::Logger::get().level = CepGen::Logger::Nothing;
-  }
+  if ( argc < 3 || strcmp( argv[2], "debug" ) != 0 )
+    CepGen::Logger::get().level = CepGen::Logger::Level::nothing;
 
-  Timer tmr;
+  CepGen::Timer tmr;
   CepGen::Generator mg;
 
   if ( argc > 1 && strcmp( argv[1], "plain" ) == 0 )
-    mg.parameters->integrator.type = CepGen::Integrator::Plain;
+    mg.parameters->integrator.type = CepGen::Integrator::Type::plain;
   if ( argc > 1 && strcmp( argv[1], "vegas" ) == 0 )
-    mg.parameters->integrator.type = CepGen::Integrator::Vegas;
+    mg.parameters->integrator.type = CepGen::Integrator::Type::Vegas;
   if ( argc > 1 && strcmp( argv[1], "miser" ) == 0 )
-    mg.parameters->integrator.type = CepGen::Integrator::MISER;
+    mg.parameters->integrator.type = CepGen::Integrator::Type::MISER;
 
   { cout << "Testing with " << mg.parameters->integrator.type << " integrator" << endl; }
 
   mg.parameters->kinematics.setSqrtS( 13.e3 );
-  mg.parameters->kinematics.cuts.central[CepGen::Cuts::eta_single].in( -2.5, 2.5 );
-  mg.parameters->kinematics.cuts.remnants[CepGen::Cuts::mass].max() = 1000.;
+  mg.parameters->kinematics.cuts.central.eta_single.in( -2.5, 2.5 );
+  mg.parameters->kinematics.cuts.remnants.mass_single.max() = 1000.;
   //mg.parameters->integrator.ncvg = 50000;
 
-  Information( Form( "Initial configuration time: %.3f ms", tmr.elapsed()*1.e3 ) );
+  CG_INFO( "main" ) << "Initial configuration time: " << tmr.elapsed()*1.e3 << " ms.";
   tmr.reset();
 
   unsigned short num_tests = 0, num_tests_passed = 0;
@@ -91,38 +105,49 @@ main( int argc, char* argv[] )
       if ( generator == "lpair"  )
         mg.parameters->setProcess( new CepGen::Process::GamGamLL );
       else if ( generator == "pptoll" ) {
-        mg.parameters->setProcess( new CepGen::Process::PPtoLL );
-        mg.parameters->kinematics.cuts.initial[CepGen::Cuts::qt] = { 0., 50. };
+        mg.parameters->setProcess( new CepGen::Process::PPtoFF );
+        mg.parameters->kinematics.central_system = { CepGen::PDG::Muon, CepGen::PDG::Muon };
+        mg.parameters->kinematics.cuts.initial.qt = { 0., 50. };
       }
-      else { InError( Form( "Unrecognized generator mode: %s", values_vs_generator.first ) ); break; }
+      else if ( generator == "pptoww" ) {
+        mg.parameters->setProcess( new CepGen::Process::PPtoWW );
+        mg.parameters->kinematics.setSqrtS( 13.e3 );
+        //mg.parameters->kinematics.cuts.initial.qt = { 0., 50. };
+      }
+      else {
+        CG_ERROR( "main" ) << "Unrecognized generator mode: " << values_vs_generator.first << ".";
+        break;
+      }
 
       for ( const auto& values_vs_cut : values_vs_generator.second ) { // loop over the single lepton pT cut
-        mg.parameters->kinematics.cuts.central[CepGen::Cuts::pt_single].min() = values_vs_cut.first;
+        mg.parameters->kinematics.cuts.central.pt_single.min() = values_vs_cut.first;
         for ( const auto& values_vs_kin : values_vs_cut.second ) { // loop over all possible kinematics
           const string kin_mode = values_vs_kin.first;
 
           if ( kin_mode.find( "elastic"    ) != string::npos )
-            mg.parameters->kinematics.mode = CepGen::Kinematics::ElasticElastic;
+            mg.parameters->kinematics.mode = CepGen::Kinematics::Mode::ElasticElastic;
           else if ( kin_mode.find( "singlediss" ) != string::npos )
-            mg.parameters->kinematics.mode = CepGen::Kinematics::InelasticElastic;
+            mg.parameters->kinematics.mode = CepGen::Kinematics::Mode::InelasticElastic;
           else if ( kin_mode.find( "doublediss" ) != string::npos )
-            mg.parameters->kinematics.mode = CepGen::Kinematics::InelasticInelastic;
+            mg.parameters->kinematics.mode = CepGen::Kinematics::Mode::InelasticInelastic;
           else {
-            InError( Form( "Unrecognized kinematics mode: %s", values_vs_kin.first ) );
+            CG_ERROR( "main" ) << "Unrecognized kinematics mode: " << values_vs_kin.first << ".";
             break;
           }
 
           if ( kin_mode.find( "_su" ) != string::npos )
-            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SzczurekUleshchenko;
+            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctionsBuilder::get( CepGen::SF::Type::SzczurekUleshchenko );
+          else if ( kin_mode.find( "_lux" ) != string::npos )
+            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctionsBuilder::get( CepGen::SF::Type::Schaefer );
+          else if ( kin_mode.find( "_allm" ) != string::npos )
+            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctionsBuilder::get( CepGen::SF::Type::ALLM97 );
           else
-            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctions::SuriYennie;
+            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctionsBuilder::get( CepGen::SF::Type::SuriYennie );
 
-          mg.parameters->dump();
-          Information( Form( "Process: %s/%s\n\t"
-                             "Configuration time: %.3f ms",
-                             values_vs_generator.first,
-                             values_vs_kin.first,
-                             tmr.elapsed()*1.e3 ) );
+          //mg.parameters->dump();
+          CG_INFO( "main" )
+            << "Process: "<< values_vs_generator.first << "/" << values_vs_kin.first << "\n\t"
+            << "Configuration time: " << tmr.elapsed()*1.e3 << " ms.";
           tmr.reset();
 
           mg.clearRun();
@@ -131,26 +156,24 @@ main( int argc, char* argv[] )
           double xsec_cepgen, err_xsec_cepgen;
           mg.computeXsection( xsec_cepgen, err_xsec_cepgen );
 
-          const double sigma = fabs( xsec_ref-xsec_cepgen ) / sqrt( err_xsec_cepgen*err_xsec_cepgen + err_xsec_ref*err_xsec_ref );
+          const double sigma = fabs( xsec_ref-xsec_cepgen ) / std::hypot( err_xsec_cepgen, err_xsec_ref );
 
-          Information( Form( "Computed cross section:\n\t"
-                             "Ref.   = %.3e +/- %.3e\n\t"
-                             "CepGen = %.3e +/- %.3e\n\t"
-                             "Pull: %.6f",
-                             xsec_ref, err_xsec_ref,
-                             xsec_cepgen, err_xsec_cepgen,
-                             sigma ) );
+          CG_INFO( "main" )
+            << "Computed cross section:\n\t"
+            << "Ref.   = " << xsec_ref << " +/- " << err_xsec_ref << "\n\t"
+            << "CepGen = " << xsec_cepgen << " +/- " << err_xsec_cepgen << "\n\t"
+            << "Pull: " << sigma << ".";
 
-          Information( Form( "Computation time: %.3f ms", tmr.elapsed()*1.e3 ) );
+          CG_INFO( "main" ) << "Computation time: " << tmr.elapsed()*1.e3 << " ms.";
           tmr.reset();
 
           ostringstream oss; oss << values_vs_kin.first;
-          string test_res = Form( "%-10s", values_vs_generator.first )+"\t"+
-                            Form( "pt-gt-%.1f", values_vs_cut.first )+"\t"+
-                            Form( "%-16s", oss.str().c_str() )+"\t"
-                            "ref="+Form( "%g", xsec_ref )+"\t"
-                            "got="+Form( "%g", xsec_cepgen )+"\t"
-                            "pull="+Form( "%+g", sigma );
+          string test_res = CepGen::Form( "%-10s", values_vs_generator.first )+"\t"+
+                            CepGen::Form( "pt-gt-%.1f", values_vs_cut.first )+"\t"+
+                            CepGen::Form( "%-16s", oss.str().c_str() )+"\t"
+                            "ref="+CepGen::Form( "%g", xsec_ref )+"\t"
+                            "got="+CepGen::Form( "%g", xsec_cepgen )+"\t"
+                            "pull="+CepGen::Form( "%+g", sigma );
           if ( fabs( sigma ) < num_sigma ) {
             passed_tests.emplace_back( test_res );
             num_tests_passed++;
@@ -171,16 +194,14 @@ main( int argc, char* argv[] )
       os_failed << " (*) " << fail << endl;
     for ( const auto& pass : passed_tests )
       os_passed << " (*) " << pass << endl;
-    throw CepGen::Exception( __PRETTY_FUNCTION__,
-      Form( "Some tests failed!\n"
-            "%s\n"
-            "Passed tests:\n"
-            "%s",
-            os_failed.str().c_str(),
-            os_passed.str().c_str() ), CepGen::FatalError );
+    throw CG_FATAL( "main" )
+      << "Some tests failed!\n"
+      << os_failed.str() << "\n"
+      << "Passed tests:\n"
+      << os_passed.str() << ".";
   }
 
-  Information( "ALL TESTS PASSED!" );
+  CG_INFO( "main" ) << "ALL TESTS PASSED!";
 
   return 0;
 }

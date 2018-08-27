@@ -1,13 +1,11 @@
 #ifndef CepGen_StructureFunctions_SzczurekUleshchenko_h
 #define CepGen_StructureFunctions_SzczurekUleshchenko_h
 
-#include "StructureFunctions.h"
-#include "SigmaRatio.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 
 extern "C"
 {
   extern void grv95lo_( float&, float&, float&, float&, float&, float&, float&, float& );
-  //extern void grv95lo_( double&, double&, double&, double&, double&, double&, double&, double& );
 }
 
 namespace CepGen
@@ -17,8 +15,8 @@ namespace CepGen
     class SzczurekUleshchenko : public StructureFunctions
     {
       public:
-        SzczurekUleshchenko() : F1( 0. ) {}
-        SzczurekUleshchenko operator()( double q2, double xbj, const SigmaRatio& ratio = E143Ratio() ) const;
+        SzczurekUleshchenko();
+        SzczurekUleshchenko& operator()( double xbj, double q2 ) override;
 
         double F1;
     };

@@ -1,51 +1,41 @@
 #include "CepGen/Core/utils.h"
-#include "CepGen/Core/Exception.h"
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
+#include <stdarg.h>  // For va_start, etc.
 
-void Map( double expo, double xmin, double xmax, double& out, double& dout, const std::string& var_name_ )
+namespace CepGen
 {
-  const double y = xmax/xmin;
-  out = xmin*pow( y, expo );
-  dout = out*log( y );
-  DebuggingInsideLoop( Form( "Mapping variable \"%s\"\n\t"
-                             "min = %f\n\tmax = %f\n\tmax/min = %f\n\t"
-                             "exponent = %f\n\t"
-                             "output = %f\n\td(output) = %f",
-                             var_name_.c_str(), xmin, xmax, y, expo, out, dout ) );
+  std::string
+  Form( const std::string fmt, ... )
+  {
+    int size = ( (int)fmt.size() ) * 2 + 50;
+    std::string str;
+    va_list ap;
+    while ( true ) {
+      //--- maximum two passes on a POSIX system...
+      str.resize( size );
+      va_start( ap, fmt );
+      int n = vsnprintf( (char*)str.data(), size, fmt.c_str(), ap );
+      va_end( ap );
+      //--- check if everything worked
+      if ( n > -1 && n < size ) {
+        str.resize( n );
+        return str;
+      }
+      size = ( n > -1 ) ? n+1 : size*2;
+    }
+    return str;
+  }
+
+  size_t
+  replace_all( std::string& str, const std::string& from, const std::string& to )
+  {
+    size_t count = 0, pos = 0;
+    while ( ( pos = str.find( from, pos ) ) != std::string::npos ) {
+      str.replace( pos, from.length(), to );
+      pos += to.length();
+      ++count;
+    }
+    return count;
+  }
 }
-
-void Mapla( double y, double z, int u, double xm, double xp, double& x, double& d )
-{
-  double xmb, xpb, c, yy, zz, alp, alm, am, ap, ax;
-
-  xmb = xm-y-z;
-  xpb = xp-y-z;
-  c = -4.*y*z;
-  alp = sqrt( xpb*xpb + c );
-  alm = sqrt( xmb*xmb + c );
-  am = xmb+alm;
-  ap = xpb+alp;
-  yy = ap/am;
-  zz = pow( yy, u );
-
-  x = y + z + ( am*zz - c / ( am*zz ) ) / 2.;
-  ax = sqrt( pow( x-y-z, 2 ) + c );
-  d = ax*log( yy );
-}
-
-double BreitWigner( double er, double gamma, double emin, double emax, double x )
-{
-  if ( x==-1. ) x = drand();
-  if ( gamma<1.e-3*er ) { return er; }
-
-  const double a = atan( 2.*( emax-er ) / gamma ),
-               b = atan( 2.*( emin-er ) / gamma ),
-               e = er + gamma*tan( x*( a - b ) + b ) / 2.;
-
-  if ( e>emax ) { return emax; }
-  return e;
-}
-

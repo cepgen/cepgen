@@ -1,7 +1,8 @@
-#include "FioreBrasse.h"
+#include "CepGen/StructureFunctions/FioreBrasse.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/Constants.h"
 
@@ -37,28 +38,33 @@ namespace CepGen
     }
 
     FioreBrasse::FioreBrasse( const FioreBrasse::Parameterisation& params ) :
-      W1( 0. ), W2( 0. ), params_( params )
+      StructureFunctions( Type::FioreBrasse ), W1( 0. ), W2( 0. ), params( params )
     {}
 
-    FioreBrasse
-    FioreBrasse::operator()( double q2, double xbj ) const
+    FioreBrasse&
+    FioreBrasse::operator()( double xbj, double q2 )
     {
-      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
-      const double akin = 1. + 4.*mp2 * xbj*xbj/q2;
-      const double prefactor = q2*( 1.-xbj ) / ( 4.*M_PI*Constants::alphaEM*akin );
-      const double s = q2*( 1.-xbj )/xbj + mp2;
+      std::pair<double,double> nv = { xbj, q2 };
+      if ( nv == old_vals_ )
+        return *this;
+      old_vals_ = nv;
 
-      double ampli_res = 0., ampli_tot = 0.;
+      const double akin = 1. + 4.*mp2_ * xbj*xbj/q2;
+      const double prefactor = q2*( 1.-xbj ) / ( 4.*M_PI*Constants::alphaEM*akin );
+      const double s = q2*( 1.-xbj )/xbj + mp2_;
+
+      double ampli_res = 0., ampli_bg = 0., ampli_tot = 0.;
       for ( unsigned short i = 0; i < 3; ++i ) { //FIXME 4??
-        const Parameterisation::ResonanceParameters res = params_.resonances[i];
-        if ( !res.enabled ) continue;
-        const double sqrts0 = sqrt( params_.s0 );
+        const Parameterisation::ResonanceParameters res = params.resonances[i];
+        if ( !res.enabled )
+          continue;
+        const double sqrts0 = sqrt( params.s0 );
 
         std::complex<double> alpha;
-        if ( s > params_.s0 )
-          alpha = std::complex<double>( res.alpha0 + res.alpha2*sqrts0 + res.alpha1*s, res.alpha2*sqrt( s-params_.s0 ) );
+        if ( s > params.s0 )
+          alpha = std::complex<double>( res.alpha0 + res.alpha2*sqrts0 + res.alpha1*s, res.alpha2*sqrt( s-params.s0 ) );
         else
-          alpha = std::complex<double>( res.alpha0 + res.alpha1*s + res.alpha2*( sqrts0 - sqrt( params_.s0 - s ) ), 0. );
+          alpha = std::complex<double>( res.alpha0 + res.alpha1*s + res.alpha2*( sqrts0 - sqrt( params.s0 - s ) ), 0. );
 
         double formfactor = 1./pow( 1. + q2/res.q02, 2 );
         double denom = pow( res.spin-std::real( alpha ), 2 ) + pow( std::imag( alpha ), 2 );
@@ -66,7 +72,7 @@ namespace CepGen
         ampli_res += ampli_imag;
       }
       {
-        const Parameterisation::ResonanceParameters res = params_.resonances[3];
+        const Parameterisation::ResonanceParameters res = params.resonances[3];
         double sE = res.alpha2, sqrtsE = sqrt( sE );
         std::complex<double> alpha;
         if ( s > sE )
@@ -76,31 +82,38 @@ namespace CepGen
         double formfactor = 1./pow( 1. + q2/res.q02, 2 );
         double sp = 1.5*res.spin;
         double denom = pow( sp-std::real( alpha ), 2 ) + pow( std::imag( alpha ), 2 );
-        double ampli_bg = res.a*formfactor*formfactor*std::imag( alpha )/denom;
-        ampli_res += ampli_bg;
+        ampli_bg = res.a*formfactor*formfactor*std::imag( alpha )/denom;
       }
-      ampli_tot = params_.norm*ampli_res;
+      ampli_tot = params.norm*( ampli_res+ampli_bg );
 
-      FioreBrasse fb;
-      fb.F2 = prefactor*ampli_tot;
-      fb.computeFL( q2, xbj );
-      return fb;
+      CG_DEBUG_LOOP( "FioreBrasse:amplitudes" )
+        << "Amplitudes:\n\t"
+        << " resonance part:  " << ampli_res << ",\n\t"
+        << " background part: " << ampli_bg << ",\n\t"
+        << " total (with norm.): " << ampli_tot << ".";
+
+      F2 = prefactor*ampli_tot;
+      return *this;
     }
 
-    FioreBrasse
-    FioreBrasse::operator()( double q2, double xbj, bool ) const
+    FioreBrasse&
+    FioreBrasse::operator()( double xbj, double q2, bool )
     {
-      const double mp = ParticleProperties::mass( Proton ), mp2 = mp*mp;
-      //const double m_min = Particle::massFromPDGId(Particle::Proton)+0.135;
-      const double m_min = mp+ParticleProperties::mass( PiZero );
+      std::pair<double,double> nv = { xbj, q2 };
+      if ( nv == old_vals_ )
+        return *this;
+      old_vals_ = nv;
 
-      const double mx2 = mp2 + q2*( 1.-xbj )/xbj, mx = sqrt( mx2 );
+      const double m_min = mp_+ParticleProperties::mass( PDG::PiZero );
 
-      FioreBrasse fb;
+      const double mx2 = mp2_ + q2*( 1.-xbj )/xbj, mx = sqrt( mx2 );
+
       if ( mx < m_min || mx > 1.99 ) {
-        InWarning( Form( "Fiore-Brasse form factors to be retrieved for an invalid MX value:\n\t"
-                         "%.2e GeV, while allowed range is [1.07, 1.99] GeV", mx ) );
-        return fb;
+        CG_WARNING( "FioreBrasse" )
+          << "Fiore-Brasse form factors to be retrieved for an invalid MX value:\n\t"
+          << mx << " GeV, while allowed range is [1.07, 1.99] GeV.";
+        *this = FioreBrasse();
+        return *this;
       }
 
       int n_bin;
@@ -143,8 +156,8 @@ namespace CepGen
                             -1.021,-1.092,-1.313,-1.341,-1.266,-1.473 };
 
       const double d = 3.0;
-      const double nu = 0.5 * ( q2 + mx2 - mp2 ) / mp, nu2 = nu*nu,
-                   logqq0 = 0.5 * log( ( nu2+q2 ) / pow( ( mx2-mp2 ) / ( 2.*mp ), 2 ) );
+      const double nu = 0.5 * ( q2 + mx2 - mp2_ ) / mp_, nu2 = nu*nu,
+                   logqq0 = 0.5 * log( ( nu2+q2 ) / pow( ( mx2-mp2_ ) / ( 2.*mp_ ), 2 ) );
       const double gd2 = pow( 1. / ( 1+q2 / .71 ), 4 ); // dipole form factor of the proton
 
       const double sigLow = ( n_bin == 0 ) ? 0. :
@@ -153,12 +166,12 @@ namespace CepGen
         gd2 * exp( a[n_bin]   + b[n_bin]  *logqq0 + c[n_bin]  *pow( fabs( logqq0 ), d ) );
 
       const double sigma_t = sigLow + x_bin*( sigHigh-sigLow )/dx;
-      const double w1 = ( mx2-mp2 )/( 8.*M_PI*M_PI*mp*Constants::alphaEM )/Constants::GeV2toBarn*1.e6 * sigma_t;
+      const double w1 = ( mx2-mp2_ )/( 8.*M_PI*M_PI*mp_*Constants::alphaEM )/Constants::GeV2toBarn*1.e6 * sigma_t;
       const double w2 = w1 * q2 / ( q2+nu2 );
 
-      fb.W1 = w1; //FIXME
-      fb.W2 = w2; //FIXME
-      return fb;
+      W1 = w1; //FIXME
+      W2 = w2; //FIXME
+      return *this;
     }
   }
 }

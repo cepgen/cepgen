@@ -1,74 +1,40 @@
-#include "StructureFunctionsBuilder.h"
+#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 
 #include "CepGen/StructureFunctions/ALLM.h"
 #include "CepGen/StructureFunctions/BlockDurandHa.h"
 #include "CepGen/StructureFunctions/FioreBrasse.h"
 #include "CepGen/StructureFunctions/ChristyBosted.h"
 #include "CepGen/StructureFunctions/CLAS.h"
-#include "CepGen/StructureFunctions/GenericLHAPDF.h"
+#include "CepGen/StructureFunctions/LHAPDF.h"
 #include "CepGen/StructureFunctions/SuriYennie.h"
 #include "CepGen/StructureFunctions/SzczurekUleshchenko.h"
 #include "CepGen/StructureFunctions/Schaefer.h"
-#include "CepGen/IO/MSTWGridHandler.h"
+#include "CepGen/StructureFunctions/MSTWGrid.h"
 
 namespace CepGen
 {
-  StructureFunctions
-  StructureFunctionsBuilder::get( const StructureFunctions::Type& sf_type, double q2, double xbj )
+  std::shared_ptr<StructureFunctions>
+  StructureFunctionsBuilder::get( const SF::Type& sf_type )
   {
     switch ( sf_type ) {
-      case StructureFunctions::Electron:
-      case StructureFunctions::ElasticProton:
-        return StructureFunctions();
-        break;
-      case StructureFunctions::SzczurekUleshchenko: {
-        const SF::SzczurekUleshchenko su;
-        return su( q2, xbj );
-      } break;
-      case StructureFunctions::SuriYennie: {
-        const SF::SuriYennie sy;
-        return sy( q2, xbj );
-      } break;
-      case StructureFunctions::FioreBrasse: {
-        const SF::FioreBrasse fb;
-        return fb( q2, xbj );
-      } break;
-      case StructureFunctions::ChristyBosted: {
-        const SF::ChristyBosted cb;
-        return cb( q2, xbj );
-      } break;
-      case StructureFunctions::CLAS: {
-        const SF::CLAS clas;
-        return clas( q2, xbj );
-      } break;
-      case StructureFunctions::BlockDurandHa: {
-        const SF::BlockDurandHa bdh;
-        return bdh( q2, xbj );
-      } break;
-      case StructureFunctions::ALLM91: {
-        const SF::ALLM allm91( SF::ALLM::Parameterisation::allm91() );
-        return allm91( q2, xbj );
-      } break;
-      case StructureFunctions::ALLM97: {
-        const SF::ALLM allm97( SF::ALLM::Parameterisation::allm97() );
-        return allm97( q2, xbj );
-      } break;
-      case StructureFunctions::GD07p: {
-        const SF::ALLM gd07p( SF::ALLM::Parameterisation::gd07p() );
-        return gd07p( q2, xbj );
-      } break;
-      case StructureFunctions::GD11p: {
-        const SF::ALLM gd11p( SF::ALLM::Parameterisation::gd11p() );
-        return gd11p( q2, xbj );
-      } break;
-      case StructureFunctions::Schaefer: {
-        const SF::Schaefer luxlike;
-        return luxlike( q2, xbj );
-      } break;
-      case StructureFunctions::MSTWgrid: {
-        return MSTW::GridHandler::get().eval( q2, xbj );
-      } break;
+      case SF::Type::Electron:
+      case SF::Type::ElasticProton:
+      default:                            return std::make_shared<StructureFunctions>();
+      case SF::Type::SzczurekUleshchenko: return std::make_shared<SF::SzczurekUleshchenko>();
+      case SF::Type::SuriYennie:          return std::make_shared<SF::SuriYennie>();
+      case SF::Type::FioreBrasse:         return std::make_shared<SF::FioreBrasse>();
+      case SF::Type::ChristyBosted:       return std::make_shared<SF::ChristyBosted>();
+      case SF::Type::CLAS:                return std::make_shared<SF::CLAS>();
+      case SF::Type::BlockDurandHa:       return std::make_shared<SF::BlockDurandHa>();
+      case SF::Type::ALLM91:              return std::make_shared<SF::ALLM>( SF::ALLM::Parameterisation::allm91() );
+      case SF::Type::ALLM97:              return std::make_shared<SF::ALLM>( SF::ALLM::Parameterisation::allm97() );
+      case SF::Type::GD07p:               return std::make_shared<SF::ALLM>( SF::ALLM::Parameterisation::gd07p() );
+      case SF::Type::GD11p:               return std::make_shared<SF::ALLM>( SF::ALLM::Parameterisation::gd11p() );
+      case SF::Type::Schaefer:            return std::make_shared<SF::Schaefer>();
+      case SF::Type::LHAPDF:              return std::make_shared<SF::LHAPDF>();
+      //--- particular case for the MSTW grid as we are dealing
+      //--- with a singleton ; hence, no deleter is needed!
+      case SF::Type::MSTWgrid:            return std::shared_ptr<MSTW::Grid>( &MSTW::Grid::get(), [=]( MSTW::Grid* ){} );
     }
-    return StructureFunctions(); //FIXME
   }
 }

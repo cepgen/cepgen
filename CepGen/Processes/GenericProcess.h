@@ -1,15 +1,16 @@
 #ifndef CepGen_Processes_GenericProcess_h
 #define CepGen_Processes_GenericProcess_h
 
-#include "CepGen/Event/Event.h"
+#include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Physics/FormFactors.h"
 
 #include <vector>
 #include <memory>
 
 namespace CepGen
 {
+  class Event;
+  class FormFactors;
   /// Location for all physics processes to be generated
   namespace Process
   {
@@ -19,29 +20,37 @@ namespace CepGen
     class GenericProcess
     {
       public:
+        /// Default constructor for an undefined process
+        /// \param[in] name Process name
+        /// \param[in] description Human-readable description of the process
+        /// \param[in] has_event Do we generate the associated event structure?
+        GenericProcess( const std::string& name, const std::string& description = "<invalid process>", bool has_event = true );
+        /// Copy constructor for a user process
+        GenericProcess( const GenericProcess& );
+        virtual ~GenericProcess() = default;
+
+        /// Assignment operator
+        GenericProcess& operator=( const GenericProcess& );
+
         /// Human-readable format dump of a GenericProcess object
         friend std::ostream& operator<<( std::ostream& os, const GenericProcess& proc );
         /// Human-readable format dump of a pointer to a GenericProcess object
         friend std::ostream& operator<<( std::ostream& os, const GenericProcess* proc );
 
         /// Generic map of particles with their role in the process
-        typedef std::map<Particle::Role,ParticleCode> ParticlesRoleMap;
+        typedef std::map<Particle::Role,PDG> ParticlesRoleMap;
         /// Pair of particle with their associated role in the process
-        typedef std::pair<Particle::Role,ParticleCode> ParticleWithRole;
+        typedef std::pair<Particle::Role,PDG> ParticleWithRole;
         /// Map of all incoming state particles in the process
         typedef ParticlesRoleMap IncomingState;
         /// Map of all outgoing particles in the process
-        typedef std::map<Particle::Role,std::vector<ParticleCode> > OutgoingState;
+        typedef std::map<Particle::Role,std::vector<PDG> > OutgoingState;
 
-        /// Default constructor for an undefined process
-        /// \param[in] name Process name
-        /// \param[in] description Human-readable description of the process
-        /// \param[in] has_event Do we generate the associated event structure?
-        GenericProcess( const std::string& name, const std::string& description = "<invalid process>", bool has_event = true );
-        virtual ~GenericProcess() {}
+        /// Copy all process' attributes into a new object
+        virtual std::unique_ptr<GenericProcess> clone() const = 0;
 
         /// Restore the Event object to its initial state
-        inline void clearEvent() { event_->restore(); }
+        void clearEvent();
         /// Set the kinematics of the incoming state particles
         void setIncomingKinematics( const Particle::Momentum& p1, const Particle::Momentum& p2 );
         /// Compute the incoming state kinematics
@@ -50,6 +59,13 @@ namespace CepGen
       public:
         /// Set the incoming and outgoing state to be expected in the process
         inline virtual void addEventContent() {}
+        /// Set the list of kinematic cuts to apply on the outgoing particles' final state
+        /// \param[in] cuts The Cuts object containing the kinematic parameters
+        virtual void setKinematics( const Kinematics& cuts );
+        /// Return the number of dimensions on which the integration has to be performed
+        /// \return Number of dimensions on which to integrate
+        virtual unsigned int numDimensions() const = 0;
+
         /// Prepare the process for its integration over the whole phase space
         inline virtual void beforeComputeWeight() {}
         /// Compute the weight for this point in the phase-space
@@ -57,12 +73,6 @@ namespace CepGen
         /// Fill the Event object with the particles' kinematics
         /// \param[in] symmetrise Symmetrise the event? (randomise the production of positively- and negatively-charged outgoing central particles)
         virtual void fillKinematics( bool symmetrise = false ) = 0;
-        /// Return the number of dimensions on which the integration has to be performed
-        /// \return Number of dimensions on which to integrate
-        virtual unsigned int numDimensions( const Kinematics::ProcessMode& ) const = 0;
-        /// Set the list of kinematic cuts to apply on the outgoing particles' final state
-        /// \param[in] cuts The Cuts object containing the kinematic parameters
-        inline virtual void setKinematics( const Kinematics& cuts ) { cuts_ = cuts; }
 
       public:
         /**
@@ -73,10 +83,10 @@ namespace CepGen
          */
         void setPoint( const unsigned int ndim, double* x );
         /// Dump the evaluated point's coordinates in the standard output stream
-        void dumpPoint();
+        void dumpPoint() const;
         /// Complete list of Particle with their role in the process for the point considered in the phase space, returned as an Event object.
         /// \return Event object containing all the generated Particle objects
-        inline std::shared_ptr<Event> event() { return event_; }
+        inline std::shared_ptr<Event> event() const { return event_; }
 
         ///Get the number of dimensions on which the integration is performed
         inline const unsigned int ndim() const { return x_.size(); }
@@ -89,40 +99,37 @@ namespace CepGen
 
         /// Does the process contain (and hold) an event?
         bool hasEvent() const { return has_event_; }
+        /// Pointer to the last event produced in this run
+        std::shared_ptr<Event> last_event;
 
-        /// Reset the total generation time and the number of events generated for this run
-        void clearRun();
-        /// Add a new timing into the total generation time
-        /// \param[in] gen_time Time to add (in seconds)
-        void addGenerationTime( const float& gen_time );
-        /// Return the total generation time for this run (in seconds)
-        inline float totalGenerationTime() const { return total_gen_time_; }
-        /// Total number of events already generated in this run
-        inline unsigned int numGeneratedEvents() const { return num_gen_events_; }
-  
       protected:
+        static const double mp_, mp2_;
+
         /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
         void setEventContent( const IncomingState& ini, const OutgoingState& fin );
-        /// Compute the electric/magnetic form factors for the two considered \f$Q^{2}\f$ momenta transfers
-        void formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const;
- 
-        /// Get a list of references to the particles with a given role in the process
-        /// \param[in] role role in the process for the particle to retrieve
-        /// \return A vector of references to Particle objects associated to the role
-        Particles& particles( const Particle::Role& role );
 
-        // --- 
-  
+        // ---
+
+        /// Name of the process
+        std::string name_;
+        /// Process human-readable description
+        std::string description_;
+
+      public:
+        /// Is it the first time the process is computed?
+        bool first_run;
+
+      protected:
         /// Array of double precision floats representing the point on which the weight in the cross-section is computed
         std::vector<double> x_;
-        /// List of incoming state particles (including intermediate partons)
-        IncomingState incoming_state_;
-        /// List of outgoing state particles
-        OutgoingState outgoing_state_;
         /// \f$s\f$, squared centre of mass energy of the incoming particles' system, in \f$\mathrm{GeV}^2\f$
         double s_;
         /// \f$\sqrt s\f$, centre of mass energy of the incoming particles' system (in GeV)
         double sqs_;
+        /// Invariant mass of the first proton-like outgoing particle (or remnant)
+        double MX_;
+        /// Invariant mass of the second proton-like outgoing particle (or remnant)
+        double MY_;
         /// \f$m_1^2\f$, squared mass of the first proton-like incoming particle
         double w1_;
         /// \f$m_2^2\f$, squared mass of the second proton-like incoming particle
@@ -131,33 +138,15 @@ namespace CepGen
         double t1_;
         /// Virtuality of the second incoming photon
         double t2_;
-        /// Invariant mass of the first proton-like outgoing particle (or remnant)
-        double MX_;
-        /// Invariant mass of the second proton-like outgoing particle (or remnant)
-        double MY_;
 
         /// Set of cuts to apply on the final phase space
         Kinematics cuts_;
+        /// Does the process contain (and hold) an event?
+        bool has_event_;
         /// Event object containing all the information on the in- and outgoing particles
         std::shared_ptr<Event> event_;
         /// Is the phase space point set?
         bool is_point_set_;
-        /// Are the event's incoming particles set?
-        bool is_incoming_state_set_;
-        /// Are the event's outgoing particles set?
-        bool is_outgoing_state_set_;
-        /// Is the full event's kinematic set?
-        bool is_kinematics_set_;
-        /// Name of the process
-        std::string name_;
-        /// Process human-readable description
-        std::string description_;
-        /// Total generation time (in seconds)
-        float total_gen_time_;
-        /// Number of events already generated
-        unsigned int num_gen_events_;
-        /// Does the process contain (and hold) an event?
-        bool has_event_;
 
       private:
         /**
@@ -169,6 +158,8 @@ namespace CepGen
         bool isKinematicsDefined();
     };
   }
+  /// Helper typedef for a Process unique pointer
+  typedef std::unique_ptr<Process::GenericProcess> ProcessPtr;
 }
 
 #endif

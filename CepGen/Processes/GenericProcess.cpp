@@ -1,27 +1,62 @@
-#include "GenericProcess.h"
+#include "CepGen/Processes/GenericProcess.h"
+
 #include "CepGen/Core/Exception.h"
+
+#include "CepGen/Event/Event.h"
+
 #include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/FormFactors.h"
+#include "CepGen/Physics/PDG.h"
 
 namespace CepGen
 {
   namespace Process
   {
+    const double GenericProcess::mp_ = ParticleProperties::mass( PDG::Proton );
+    const double GenericProcess::mp2_ = GenericProcess::mp_*GenericProcess::mp_;
+
     GenericProcess::GenericProcess( const std::string& name, const std::string& description, bool has_event ) :
-      s_( 0. ), sqs_( 0. ), w1_( 0. ), w2_( 0. ), t1_( 0. ), t2_( 0. ), MX_( 0. ), MY_( 0. ),
-      event_( std::shared_ptr<Event>( new Event ) ),
-      is_point_set_( false ), is_incoming_state_set_( false ), is_outgoing_state_set_( false ), is_kinematics_set_( false ),
       name_( name ), description_( description ),
-      total_gen_time_( 0. ), num_gen_events_( 0 ), has_event_( has_event )
+      first_run( true ),
+      s_( -1. ), sqs_( -1. ),
+      MX_( -1. ), MY_( -1. ), w1_( -1. ), w2_( -1. ),
+      t1_( -1. ), t2_( -1. ),
+      has_event_( has_event ), event_( new Event ),
+      is_point_set_( false )
     {}
+
+    GenericProcess::GenericProcess( const GenericProcess& proc ) :
+      name_( proc.name_ ), description_( proc.description_ ),
+      first_run( proc.first_run ),
+      s_( proc.s_ ), sqs_( proc.sqs_ ),
+      MX_( proc.MX_ ), MY_( proc.MY_ ), w1_( proc.w1_ ), w2_( proc.w2_ ),
+      t1_( -1. ), t2_( -1. ), cuts_( proc.cuts_ ),
+      has_event_( proc.has_event_ ), event_( new Event( *proc.event_.get() ) ),
+      is_point_set_( false )
+    {}
+
+    GenericProcess&
+    GenericProcess::operator=( const GenericProcess& proc )
+    {
+      name_ = proc.name_; description_ = proc.description_;
+      first_run = proc.first_run;
+      s_ = proc.s_; sqs_ = proc.sqs_;
+      MX_ = proc.MX_; MY_ = proc.MY_; w1_ = proc.w1_; w2_ = proc.w2_;
+      cuts_ = proc.cuts_;
+      has_event_ = proc.has_event_; event_.reset( new Event( *proc.event_.get() ) );
+      is_point_set_ = false;
+      return *this;
+    }
 
     void
     GenericProcess::setPoint( const unsigned int ndim, double* x )
     {
-      if ( ndim != x_.size() ) x_.resize( ndim );
-
       x_ = std::vector<double>( x, x+ndim );
       is_point_set_ = true;
-      if ( Logger::get().level>=Logger::DebugInsideLoop ) { dumpPoint(); }
+
+      if ( CG_EXCEPT_MATCH( "Process:dumpPoint", debugInsideLoop ) )
+        dumpPoint();
     }
 
     double
@@ -33,49 +68,58 @@ namespace CepGen
     }
 
     void
-    GenericProcess::clearRun()
+    GenericProcess::clearEvent()
     {
-      total_gen_time_ = 0.;
-      num_gen_events_ = 0;
+      event_->restore();
     }
 
     void
-    GenericProcess::addGenerationTime( const float& gen_time )
+    GenericProcess::setKinematics( const Kinematics& cuts )
     {
-      total_gen_time_ += gen_time;
-      num_gen_events_++;
+      cuts_ = cuts;
+      prepareKinematics();
     }
 
     void
     GenericProcess::prepareKinematics()
     {
-      if ( !isKinematicsDefined() ) return; // FIXME dump some information...
-      const Particle ib1 = event_->getOneByRole( Particle::IncomingBeam1 ),
-                     ib2 = event_->getOneByRole( Particle::IncomingBeam2 );
+      if ( !isKinematicsDefined() )
+        throw CG_FATAL( "GenericProcess" ) << "Kinematics not properly defined for the process.";
 
-      sqs_ = CMEnergy( ib1, ib2 );
+      // at some point introduce non head-on colliding beams?
+      Particle::Momentum p1( 0., 0.,  cuts_.incoming_beams.first.pz ), p2( 0., 0., -cuts_.incoming_beams.second.pz );
+      // on-shell beam particles
+      p1.setMass( ParticleProperties::mass( cuts_.incoming_beams.first.pdg ) );
+      p2.setMass( ParticleProperties::mass( cuts_.incoming_beams.second.pdg ) );
+      setIncomingKinematics( p1, p2 );
+
+      sqs_ = CMEnergy( p1, p2 );
       s_ = sqs_*sqs_;
 
-      w1_ = ib1.mass2();
-      w2_ = ib2.mass2();
+      w1_ = p1.mass2();
+      w2_ = p2.mass2();
 
-      Debugging( Form( "Kinematics successfully prepared! sqrt(s) = %.2f", sqs_ ) );
+      CG_DEBUG( "GenericProcess" ) << "Kinematics successfully prepared! sqrt(s) = " << sqs_ << ".";
     }
 
     void
-    GenericProcess::dumpPoint()
+    GenericProcess::dumpPoint() const
     {
       std::ostringstream os;
       for ( unsigned short i = 0; i < x_.size(); ++i ) {
         os << Form( "  x(%2d) = %8.6f\n\t", i, x_[i] );
       }
-      Information( Form( "Number of integration parameters: %d\n\t"
-                         "%s", x_.size(), os.str().c_str() ) );
+      CG_INFO( "GenericProcess" )
+        << "Number of integration parameters: " << x_.size() << "\n\t"
+        << os.str() << ".";
     }
 
     void
     GenericProcess::setEventContent( const IncomingState& ini, const OutgoingState& fin )
     {
+      if ( !has_event_ )
+        return;
+
       event_->clear();
       //----- add the particles in the event
 
@@ -84,13 +128,19 @@ namespace CepGen
         Particle& p = event_->addParticle( ip.first );
         p.setPdgId( ip.second, ParticleProperties::charge( ip.second ) );
         p.setMass( ParticleProperties::mass( ip.second ) );
+        if ( ip.first == Particle::IncomingBeam1
+          || ip.first == Particle::IncomingBeam2 )
+          p.setStatus( Particle::Status::PrimordialIncoming );
+        if ( ip.first == Particle::Parton1
+          || ip.first == Particle::Parton2 )
+          p.setStatus( Particle::Status::Incoming );
       }
       //--- central system (if not already there)
       const auto& central_system = ini.find( Particle::CentralSystem );
       if ( central_system == ini.end() ) {
         Particle& p = event_->addParticle( Particle::Intermediate );
-        p.setPdgId( invalidParticle );
-        p.setStatus( Particle::Propagator );
+        p.setPdgId( PDG::invalid );
+        p.setStatus( Particle::Status::Propagator );
       }
       //--- outgoing state
       for ( const auto& opl : fin ) { // pair(role, list of PDGids)
@@ -105,7 +155,7 @@ namespace CepGen
 
       const Particles parts = event_->particles();
       for ( const auto& p : parts ) {
-        Particle& part = event_->getById( p.id() );
+        Particle& part = event_->operator[]( p.id() );
         switch ( part.role() ) {
           case Particle::OutgoingBeam1:
           case Particle::Parton1:
@@ -129,75 +179,38 @@ namespace CepGen
       //----- freeze the event as it is
 
       event_->freeze();
+      last_event = event_;
     }
 
     void
     GenericProcess::setIncomingKinematics( const Particle::Momentum& p1, const Particle::Momentum& p2 )
     {
+      if ( !has_event_ )
+        return;
+
       event_->getOneByRole( Particle::IncomingBeam1 ).setMomentum( p1 );
       event_->getOneByRole( Particle::IncomingBeam2 ).setMomentum( p2 );
-    }
-
-    void
-    GenericProcess::formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const
-    {
-      const double mx2 = MX_*MX_, my2 = MY_*MY_;
-
-      switch ( cuts_.mode ) {
-        case Kinematics::ElectronElectron: {
-          fp1 = FormFactors::Trivial(); // electron (trivial) form factor
-          fp2 = FormFactors::Trivial(); // electron (trivial) form factor
-        } break;
-        case Kinematics::ProtonElectron: {
-          fp1 = FormFactors::ProtonElastic( -t1_ ); // proton elastic form factor
-          fp2 = FormFactors::Trivial(); // electron (trivial) form factor
-        } break;
-        case Kinematics::ElectronProton: {
-          fp1 = FormFactors::Trivial(); // electron (trivial) form factor
-          fp2 = FormFactors::ProtonElastic( -t2_ ); // proton elastic form factor
-        } break;
-        case Kinematics::ElasticElastic: {
-          fp1 = FormFactors::ProtonElastic( -t1_ ); // proton elastic form factor
-          fp2 = FormFactors::ProtonElastic( -t2_ ); // proton elastic form factor
-        } break;
-        case Kinematics::ElasticInelastic: {
-          fp1 = FormFactors::ProtonElastic( -t1_ );
-          fp2 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t2_, w2_, my2 );
-        } break;
-        case Kinematics::InelasticElastic: {
-          fp1 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t1_, w1_, mx2 );
-          fp2 = FormFactors::ProtonElastic( -t2_ );
-        } break;
-        case Kinematics::InelasticInelastic: {
-          fp1 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t1_, w1_, mx2 );
-          fp2 = FormFactors::ProtonInelastic( cuts_.structure_functions, -t2_, w2_, my2 );
-        } break;
-      }
-    }
-
-    Particles&
-    GenericProcess::particles( const Particle::Role& role )
-    {
-      return event_->getByRole( role );
     }
 
     bool
     GenericProcess::isKinematicsDefined()
     {
+      if ( !has_event_ )
+        return true;
+
       // check the incoming state
-      if ( !particles( Particle::IncomingBeam1 ).empty()
-        && !particles( Particle::IncomingBeam2 ).empty() )
-        is_incoming_state_set_ = true;
+      bool is_incoming_state_set =
+        ( !event_->getByRole( Particle::IncomingBeam1 ).empty()
+       && !event_->getByRole( Particle::IncomingBeam2 ).empty() );
 
       // check the outgoing state
-      if ( !particles( Particle::OutgoingBeam1 ).empty()
-        && !particles( Particle::OutgoingBeam2 ).empty()
-        && !particles( Particle::CentralSystem ).empty() )
-        is_outgoing_state_set_ = true;
+      bool is_outgoing_state_set =
+        ( !event_->getByRole( Particle::OutgoingBeam1 ).empty()
+       && !event_->getByRole( Particle::OutgoingBeam2 ).empty()
+       && !event_->getByRole( Particle::CentralSystem ).empty() );
 
       // combine both states
-      is_kinematics_set_ = is_incoming_state_set_ && is_outgoing_state_set_;
-      return is_kinematics_set_;
+      return is_incoming_state_set && is_outgoing_state_set;
     }
 
     std::ostream&

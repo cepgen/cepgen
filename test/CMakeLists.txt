@@ -6,7 +6,6 @@ file(GLOB executables_fortran RELATIVE ${PROJECT_SOURCE_DIR}/test *.f)
 
 #----- include the utilitaries
 
-add_subdirectory(utils)
 set(tests "")
 
 #----- build all tests and link them to the core library
@@ -15,7 +14,7 @@ foreach(exec_src ${executables_noroot})
   string(REPLACE ".cpp" "" exec_bin ${exec_src})
   add_executable(${exec_bin} ${exec_src})
   set_target_properties(${exec_bin} PROPERTIES EXCLUDE_FROM_ALL true)
-  target_link_libraries(${exec_bin} ${CEPGEN_EXTERNAL_REQS} ${CEPGEN_LIBRARIES})
+  target_link_libraries(${exec_bin} ${CEPGEN_LIBRARIES})
   list(APPEND tests ${exec_bin})
 endforeach()
 
@@ -23,7 +22,7 @@ foreach(exec_src ${executables_fortran})
   string(REPLACE ".f" "" exec_bin ${exec_src})
   add_executable(${exec_bin} ${exec_src})
   set_target_properties(${exec_bin} PROPERTIES EXCLUDE_FROM_ALL true)
-  target_link_libraries(${exec_bin} ${CEPGEN_EXTERNAL_REQS} ${CEPGEN_LIBRARIES})
+  target_link_libraries(${exec_bin} ${CEPGEN_LIBRARIES})
   list(APPEND tests ${exec_bin})
 endforeach()
 
@@ -41,13 +40,14 @@ if(ROOT_FOUND)
     endif()
   endif()
   include_directories(${ROOT_INCLUDE_DIRS})
+  include_directories(${ROOT_INCLUDE_DIR})
   link_directories(${ROOT_LIBRARY_DIR})
 
   foreach(exec_src ${executables_root})
     string(REPLACE ".cxx" "" exec_bin ${exec_src})
     add_executable(${exec_bin} ${exec_src})
     set_target_properties(${exec_bin} PROPERTIES EXCLUDE_FROM_ALL true)
-    target_link_libraries(${exec_bin} ${CEPGEN_EXTERNAL_REQS} ${CEPGEN_LIBRARIES} ${ROOT_LIBRARIES})
+    target_link_libraries(${exec_bin} ${CEPGEN_LIBRARIES} ${ROOT_LIBRARIES})
     list(APPEND tests ${exec_bin})
   endforeach()
 else()

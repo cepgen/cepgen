@@ -46,10 +46,11 @@ namespace CepGen
             double q02;
             /// Squared QCD scale
             double lambda2;
+            Type type;
         };
 
         explicit ALLM( const ALLM::Parameterisation& param = ALLM::Parameterisation::allm97() );
-        ALLM operator()( double q2, double xbj, const SigmaRatio& rcomp = E143Ratio() ) const;
+        ALLM& operator()( double xbj, double q2 ) override;
 
       private:
         Parameterisation params_;

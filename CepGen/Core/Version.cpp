@@ -1,13 +1,12 @@
 #include "CepGen/Version.h"
+#include "CepGen/Core/utils.h"
 
 namespace CepGen
 {
-  const char* version()
+  const std::string version()
   {
-    char* str = new char[9];
-    sprintf( str, "%02u.%02u.%02u", ( cepgen_version >> 16 ) & 0xff,
-                                    ( cepgen_version >>  8 ) & 0xff,
-                                      cepgen_version         & 0xff );
-    return str;
+    return Form( "%02u.%02u.%02u", ( cepgen_version >> 16 ) & 0xff,
+                                   ( cepgen_version >>  8 ) & 0xff,
+                                     cepgen_version         & 0xff );
   }
 }

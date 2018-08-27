@@ -1,4 +1,5 @@
-#include "Event.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
@@ -18,20 +19,6 @@ namespace CepGen
     particles_( rhs.particles_ ),
     evtcontent_( rhs.evtcontent_ )
   {}
-
-  Event::~Event()
-  {}
-
-  Event&
-  Event::operator=( const Event &ev_ )
-  {
-    particles_ = ev_.particles_;
-    time_generation = ev_.time_generation;
-    time_total = ev_.time_total;
-    num_hadronisation_trials = ev_.num_hadronisation_trials;
-    evtcontent_ = ev_.evtcontent_;
-    return *this;
-  }
 
   void
   Event::clear()
@@ -65,6 +52,12 @@ namespace CepGen
       particles_[Particle::OutgoingBeam2].resize( evtcontent_.op2 );
   }
 
+  double
+  Event::cmEnergy() const
+  {
+    return CMEnergy( getOneByRole( Particle::IncomingBeam1 ), getOneByRole( Particle::IncomingBeam2 ) );
+  }
+
   Particles&
   Event::getByRole( Particle::Role role )
   {
@@ -76,7 +69,7 @@ namespace CepGen
   Event::getByRole( Particle::Role role ) const
   {
     if ( particles_.count( role ) == 0 )
-      throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve a particle with role %d", role ), FatalError );
+      throw CG_FATAL( "Event" ) << "Failed to retrieve a particle with " << role << " role.";
     //--- retrieve all particles with a given role
     return particles_.at( role );
   }
@@ -101,9 +94,10 @@ namespace CepGen
     //--- retrieve the first particle a the given role
     Particles& parts_by_role = getByRole( role );
     if ( parts_by_role.size() == 0 )
-      FatalError( Form( "No particle retrieved with role %d", (int)role ) );
+      throw CG_FATAL( "Event" ) << "No particle retrieved with " << role << " role.";
     if ( parts_by_role.size() > 1 )
-      FatalError( Form( "More than one particle with role %d: %d particles", (int)role, parts_by_role.size() ) );
+      throw CG_FATAL( "Event" ) << "More than one particle with " << role << " role: "
+        << parts_by_role.size() << " particles.";
     return *parts_by_role.begin();
   }
 
@@ -111,25 +105,26 @@ namespace CepGen
   Event::getOneByRole( Particle::Role role ) const
   {
     if ( particles_.count( role ) == 0 )
-      throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve a particle with role %d", role ), FatalError );
+      throw CG_FATAL( "Event" ) << "Failed to retrieve a particle with " << role << " role.";
     //--- retrieve the first particle a the given role
     const Particles& parts_by_role = particles_.at( role );
     if ( parts_by_role.size() == 0 )
-      FatalError( Form( "No particle retrieved with role %d", (int)role ) );
+      throw CG_FATAL( "Event" ) << "No particle retrieved with " << role << " role.";
     if ( parts_by_role.size() > 1 )
-      FatalError( Form( "More than one particle with role %d: %d particles", (int)role, parts_by_role.size() ) );
+      throw CG_FATAL( "Event" ) << "More than one particle with " << role << " role: "
+        << parts_by_role.size() << " particles";
     return *parts_by_role.begin();
   }
 
   Particle&
-  Event::getById( int id )
+  Event::operator[]( int id )
   {
     for ( auto& role_part : particles_ )
       for ( auto& part : role_part.second )
         if ( part.id() == id )
           return part;
 
-    throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve the particle with id=%d", id ), FatalError );
+    throw CG_FATAL( "Event" ) << "Failed to retrieve the particle with id=" << id << ".";
   }
 
   const Particle&
@@ -140,7 +135,7 @@ namespace CepGen
         if ( part.id() == id )
           return part;
 
-    throw Exception( __PRETTY_FUNCTION__, Form( "Failed to retrieve the particle with id=%d", id ), FatalError );
+    throw CG_FATAL( "Event" ) << "Failed to retrieve the particle with id=" << id << ".";
   }
 
   Particles
@@ -179,8 +174,9 @@ namespace CepGen
   Particle&
   Event::addParticle( Particle& part, bool replace )
   {
-    DebuggingInsideLoop( Form( "Particle with PDGid = %d has role %d", part.pdgId(), part.role() ) );
-    if ( part.role() <= 0 ) FatalError( Form( "Trying to add a particle with role=%d", (int)part.role() ) );
+    CG_DEBUG_LOOP( "Event" ) << "Particle with PDGid = " << part.integerPdgId() << " has role " << part.role();
+    if ( part.role() <= 0 )
+      throw CG_FATAL( "Event" ) << "Trying to add a particle with role=" << (int)part.role() << ".";
 
     //--- retrieve the list of particles with the same role
     Particles& part_with_same_role = getByRole( part.role() );
@@ -202,7 +198,7 @@ namespace CepGen
   Particle&
   Event::addParticle( Particle::Role role, bool replace )
   {
-    Particle np( role );
+    Particle np( role, PDG::invalid );
     return addParticle( np, replace );
   }
 
@@ -263,7 +259,7 @@ namespace CepGen
       const double mass_diff = ( ptot-part.momentum() ).mass();
       if ( fabs( mass_diff ) > minimal_precision_ ) {
         dump();
-        FatalError( Form( "Error in momentum balance for particle %d: mdiff = %.5e", part.id(), mass_diff ) );
+        throw CG_FATAL( "Event" ) << "Error in momentum balance for particle " << part.id() << ": mdiff = " << mass_diff << ".";
       }
     }
   }
@@ -279,21 +275,23 @@ namespace CepGen
     for ( const auto& part : parts ) {
       const ParticlesIds mothers = part.mothers();
       {
-        std::ostringstream oss;
-        if ( part.pdgId() == invalidParticle && mothers.size() > 0 ) {
-          unsigned short i = 0;
-          for ( const auto& moth : mothers ) {
-            oss << ( i > 0 ? "/" : "" ) << getConstById( moth ).pdgId();
-            ++i;
-          }
+        std::ostringstream oss_pdg;
+        if ( part.pdgId() == PDG::invalid && mothers.size() > 0 ) {
+          for ( unsigned short i = 0; i < mothers.size(); ++i )
+            oss_pdg << ( i > 0 ? "/" : "" ) << getConstById( *std::next( mothers.begin(), i ) ).pdgId();
+          os << Form( "\n %2d\t\t%-10s", part.id(), oss_pdg.str().c_str() );
         }
-        else oss << part.pdgId();
-        os << Form( "\n %2d\t%-+7d %-10s", part.id(), part.integerPdgId(), oss.str().c_str() );
+        else {
+          oss_pdg << part.pdgId();
+          os << Form( "\n %2d\t%-+7d %-10s", part.id(), part.integerPdgId(), oss_pdg.str().c_str() );
+        }
       }
       os << "\t";
-      if ( part.charge() != 999. ) os << Form( "%6.2f ", part.charge() );
-      else                         os << "\t";
-      { std::ostringstream oss; oss << part.role(); os << Form( "%8s\t%6d\t", oss.str().c_str(), part.status() ); }
+      if ( part.charge() != 999. )
+        os << Form( "%-.2f\t", part.charge() );
+      else
+        os << "\t";
+      { std::ostringstream oss; oss << part.role(); os << Form( "%-8s %6d\t", oss.str().c_str(), part.status() ); }
       if ( !mothers.empty() ) {
         std::ostringstream oss;
         unsigned short i = 0;
@@ -309,7 +307,7 @@ namespace CepGen
 
       // discard non-primary, decayed particles
       if ( (short)part.status() >= 0. ) {
-        const int sign = ( part.status() == Particle::Undefined ) ? -1 : 1;
+        const int sign = ( part.status() == Particle::Status::Undefined ) ? -1 : 1;
         pxtot += sign*mom.px();
         pytot += sign*mom.py();
         pztot += sign*mom.pz();
@@ -322,11 +320,22 @@ namespace CepGen
     if ( fabs( pztot ) < minimal_precision_ ) pztot = 0.;
     if ( fabs(  etot ) < minimal_precision_ ) etot = 0.;
     //
-    Information( Form( "Dump of event content:\n"
-    " Id\tPDG id\tName\t\tCharge\t   Role\tStatus\tMother\tpx (GeV/c)    py (GeV/c)    pz (GeV/c)    E (GeV)\t M (GeV/c²)\n"
-    " --\t------\t----\t\t------\t   ----\t------\t------\t------------  ------------  ------------  ------------\t ----------"
-    "%s\n"
-    " ----------------------------------------------------------------------------------------------------------------------------------\n"
-    "\t\t\t\t\t\t\tOut-in:% 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), pxtot, pytot, pztot, etot ) );
+    CG_INFO( "Event" )
+     << Form( "Dump of event content:\n"
+              " Id\tPDG id\tName\t\tCharge\tRole\t Status\tMother\tpx            py            pz            E      \t M         \n"
+              " --\t------\t----\t\t------\t----\t ------\t------\t----GeV/c---  ----GeV/c---  ----GeV/c---  ----GeV/c---\t --GeV/c²--"
+              "%s\n"
+              " ----------------------------------------------------------------------------------------------------------------------------------\n"
+              "\t\t\t\t\t\t\tBalance% 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), pxtot, pytot, pztot, etot );
   }
+
+  //------------------------------------------------------------------------------------------------
+
+  Event::NumParticles::NumParticles() :
+    cs( 0 ), op1( 0 ), op2( 0 )
+  {}
+
+  Event::NumParticles::NumParticles( const NumParticles& np ) :
+    cs( np.cs ), op1( np.op1 ), op2( np.op2 )
+  {}
 }

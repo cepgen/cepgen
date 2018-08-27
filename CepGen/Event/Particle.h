@@ -17,7 +17,7 @@ namespace CepGen
   class Particle {
     public:
       /// Internal status code for a particle
-      enum Status {
+      enum class Status {
         PrimordialIncoming = -9,
         DebugResonance = -5,
         Resonance = -4,
@@ -58,6 +58,7 @@ namespace CepGen
           static Momentum fromPThetaPhi( double p, double theta, double phi, double e = -1. );
           /// Build a 4-momentum from its four momentum and energy coordinates
           static Momentum fromPxPyPzE( double px, double py, double pz, double e );
+          static Momentum fromPxPyYM( double px, double py, double rap, double m );
 
           // --- vector and scalar operators
 
@@ -65,6 +66,8 @@ namespace CepGen
           double threeProduct( const Momentum& ) const;
           /// Scalar product of the 4-momentum with another 4-momentum
           double fourProduct( const Momentum& ) const;
+          /// Vector product of the 3-momentum with another 3-momentum
+          double crossProduct( const Momentum& ) const;
           /// Add a 4-momentum through a 4-vector sum
           Momentum& operator+=( const Momentum& );
           /// Subtract a 4-momentum through a 4-vector sum
@@ -88,8 +91,6 @@ namespace CepGen
           void setP( double px, double py, double pz, double e );
           /// Set all the components of the 3-momentum (in GeV)
           void setP( double px, double py, double pz );
-          /// Set an individual component of the 4-momentum (in GeV)
-          void setP( unsigned int i, double p );
           /// Set the energy (in GeV)
           inline void setEnergy( double e ) { energy_ = e; }
           /// Compute the energy from the mass
@@ -109,7 +110,7 @@ namespace CepGen
           /// Transverse momentum (in GeV)
           double pt() const;
           /// Squared transverse momentum (in GeV\f$^\textrm{2}\f$)
-          inline double pt2() const { return ( px()*px()+py()*py() ); }
+          double pt2() const;
           /// 4-vector of double precision floats (in GeV)
           const std::vector<double> pVector() const;
           /// 3-momentum norm (in GeV)
@@ -154,13 +155,15 @@ namespace CepGen
           double energy_;
       };
       /// Human-readable format for a particle's PDG code
-      friend std::ostream& operator<<( std::ostream& os, const ParticleCode& pc );
+      friend std::ostream& operator<<( std::ostream& os, const PDG& pc );
       /// Human-readable format for a particle's role in the event
       friend std::ostream& operator<<( std::ostream& os, const Particle::Role& rl );
       /// Compute the 4-vector sum of two 4-momenta
       friend Particle::Momentum operator+( const Particle::Momentum& mom1, const Particle::Momentum& mom2 );
       /// Compute the 4-vector difference of two 4-momenta
       friend Particle::Momentum operator-( const Particle::Momentum& mom1, const Particle::Momentum& mom2 );
+      /// Compute the inverse per-coordinate 4-vector
+      friend Particle::Momentum operator-( const Particle::Momentum& mom );
       /// Scalar product of two 3-momenta
       friend double operator*( const Particle::Momentum& mom1, const Particle::Momentum& mom2 );
       /// Multiply all components of a 4-momentum by a scalar
@@ -179,10 +182,10 @@ namespace CepGen
 
       Particle();
       /// Build using the role of the particle in the process and its PDG id
-      /// \param[in] pdgId ParticleCode (PDG ID)
+      /// \param[in] pdgId PDG identifier
       /// \param[in] role Role of the particle in the process
       /// \param[in] st Current status
-      Particle( Role role, ParticleCode pdgId = invalidParticle, Status st = Undefined );
+      Particle( Role role, PDG pdgId, Status st = Status::Undefined );
       /// Copy constructor
       Particle( const Particle& );
       inline ~Particle() {}
@@ -190,9 +193,6 @@ namespace CepGen
       bool operator<( const Particle& rhs ) const;
       /// Comparison operator (from their reference's unique identifier)
       //bool operator<( Particle *rhs ) const { return ( id < rhs->id ); }
-      Particle& lorentzBoost( double m_, const Momentum& mom_ );
-      /// Lorentz boost (shamelessly stolen from ROOT)
-      std::vector<double> lorentzBoost( const Momentum& mom_ );
 
       // --- general particle properties
 
@@ -218,11 +218,11 @@ namespace CepGen
       void setStatus( Status status ) { status_ = status; }
 
       /// Set the PDG identifier (along with the particle's electric charge)
-      /// \param[in] pdg ParticleCode (PDG ID)
+      /// \param[in] pdg PDG identifier
       /// \param[in] ch Electric charge (0, 1, or -1)
-      void setPdgId( const ParticleCode& pdg, short ch = 0 );
+      void setPdgId( const PDG& pdg, short ch = 0 );
       /// Retrieve the objectified PDG identifier
-      inline ParticleCode pdgId() const { return pdg_id_; }
+      inline PDG pdgId() const { return pdg_id_; }
       /// Retrieve the integer value of the PDG identifier
       int integerPdgId() const;
       /// Particle's helicity
@@ -239,13 +239,13 @@ namespace CepGen
        * Set the mass of the particle in \f$\textrm{GeV}/c^{2}\f$ while ensuring that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
        * \brief Compute the particle's mass in \f$\textrm{GeV}/c^{2}\f$
        */
-      void computeMass( bool off_shell=false );
+      void computeMass( bool off_shell = false );
       /**
        * Set the mass of the particle in \f$\textrm{GeV}/c^{2}\f$ according to a value given as an argument. This method ensures that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
        * \param m The mass in \f$\textrm{GeV}/c^{2}\f$ to set
        * \brief Set the particle's mass in \f$\textrm{GeV}/c^{2}\f$
        */
-      void setMass( double m=-1. );
+      void setMass( double m = -1. );
       /// Get the particle's squared mass (in \f$\textrm{GeV}^\textrm{2}\f$)
       inline double mass2() const { return mass_*mass_; };
       /// Retrieve the momentum object associated with this particle
@@ -317,7 +317,7 @@ namespace CepGen
       // --- global particle information extraction
 
       /// Dump all the information on this particle into the standard output stream
-      void dump() const;    
+      void dump() const;
 
     private:
       /// Unique identifier in an event
@@ -339,7 +339,7 @@ namespace CepGen
       /// List of daughter particles
       ParticlesIds daughters_;
       /// PDG id
-      ParticleCode pdg_id_;
+      PDG pdg_id_;
   };
 
   /// Compute the centre of mass energy of two particles (incoming or outgoing states)

@@ -20,14 +20,21 @@ namespace CepGen
     }
 
     BlockDurandHa::BlockDurandHa( const BlockDurandHa::Parameterisation& param ) :
-      params_( param )
+      StructureFunctions( Type::BlockDurandHa ), params_( param )
     {}
- 
-    BlockDurandHa
-    BlockDurandHa::operator()( double q2, double xbj ) const
+
+    BlockDurandHa&
+    BlockDurandHa::operator()( double xbj, double q2 )
     {
-      BlockDurandHa bdh;
-      if ( q2 <= 0. ) return bdh;
+      std::pair<double,double> nv = { xbj, q2 };
+      if ( nv == old_vals_ )
+        return *this;
+      old_vals_ = nv;
+
+      if ( q2 <= 0 ) {
+        F2 = 0.;
+        return *this;
+      }
 
       const double tau = q2 / ( q2 + params_.mu2 );
       const double xl = log1p( q2 / params_.mu2 );
@@ -38,9 +45,9 @@ namespace CepGen
       const double C = params_.c[0] + params_.c[1]*xl;
       const double D = q2*( q2+params_.lambda*params_.m2 ) / pow( q2+params_.m2, 2 );
 
-      bdh.F2 = D*pow( 1.-xbj, params_.n ) * ( C + A*xlx + B*xlx*xlx );
+      F2 = D*pow( 1.-xbj, params_.n ) * ( C + A*xlx + B*xlx*xlx );
 
-      return bdh;
+      return *this;
     }
   }
 }

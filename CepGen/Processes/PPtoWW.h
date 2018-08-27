@@ -1,7 +1,8 @@
 #ifndef CepGen_Processes_PPtoWW_h
 #define CepGen_Processes_PPtoWW_h
 
-#include "GenericKTProcess.h"
+#include "CepGen/Processes/GenericKTProcess.h"
+#include "CepGen/Core/ParametersList.h"
 
 namespace CepGen
 {
@@ -11,29 +12,43 @@ namespace CepGen
     class PPtoWW : public GenericKTProcess
     {
       public:
-        PPtoWW();
-        inline ~PPtoWW() {}
+        PPtoWW( const ParametersList& params = ParametersList() );
+        ProcessPtr clone() const override { return ProcessPtr( new PPtoWW( *this ) ); }
+        enum class Polarisation { full = 0, LL = 1, LT = 2, TL = 3, TT = 4 };
 
       private:
+        static const double mw_, mw2_;
+
         void preparePhaseSpace() override;
         double computeKTFactorisedMatrixElement() override;
         void fillCentralParticlesKinematics() override;
-        double WWamplitude( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 ) const;
 
-        Kinematics::Limits rap_limits_, ptdiff_limits_, phi_pt_diff_limits_;
+        double amplitudeWW( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 );
+        double onShellME( double shat, double that, double uhat );
+        double offShellME( double shat, double that, double uhat, double phi_sum, double phi_diff );
 
+        int method_;
+        Polarisation pol_state_;
+        std::vector<short> pol_w1_, pol_w2_;
+
+        /// Rapidity range for the outgoing W bosons
+        Limits rap_limits_;
         /// Rapidity of the first outgoing W boson
         double y1_;
         /// Rapidity of the first outgoing W boson
         double y2_;
+
+        Limits ptdiff_limits_;
         /// Transverse momentum difference for the two outgoing W bosons
         double pt_diff_;
+
+        Limits phi_pt_diff_limits_;
         /// Azimuthal angle difference for the two outgoing W bosons
         double phi_pt_diff_;
 
-        // first outgoing W boson
+        /// First outgoing W boson's momentum
         Particle::Momentum p_w1_;
-        // second outgoing W boson
+        /// Second outgoing W boson's momentum
         Particle::Momentum p_w2_;
     };
   }

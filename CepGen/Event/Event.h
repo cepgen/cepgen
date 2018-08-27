@@ -1,7 +1,7 @@
 #ifndef CepGen_Event_Event_h
 #define CepGen_Event_Event_h
 
-#include "Particle.h"
+#include "CepGen/Event/Particle.h"
 #include "CepGen/Core/Logger.h"
 
 namespace CepGen
@@ -14,14 +14,7 @@ namespace CepGen
     public:
       Event();
       Event( const Event& );
-      ~Event();
-      /**
-       * \brief Copies all the relevant quantities from one Event object to another
-       */
-      Event& operator=( const Event& );
-      /**
-       * \brief Empties the whole event content
-       */
+      /// Empty the whole event content
       void clear();
       /// Initialize an "empty" event collection
       void freeze();
@@ -31,20 +24,20 @@ namespace CepGen
       /// Dump all the known information on every Particle object contained in this Event container in the output stream
       /// \param[out] os Output stream where to dump the information
       /// \param[in] stable_ Do we only show the stable particles in this event?
-      void dump( std::ostream& os = Logger::get().outputStream, bool stable_=false ) const;
+      void dump( std::ostream& os = *Logger::get().output, bool stable_ = false ) const;
 
-      double cmEnergy() const { return CMEnergy( getOneByRole( Particle::IncomingBeam1 ), getOneByRole( Particle::IncomingBeam2 ) ); }
+      double cmEnergy() const;
 
       //----- particles adders
 
       /// Set the information on one particle in the process
       /// \param[in] part The Particle object to insert or modify in the event
       /// \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
-      Particle& addParticle( Particle& part, bool replace=false );
+      Particle& addParticle( Particle& part, bool replace = false );
       /// \brief Create a new particle in the event, with no kinematic information but the role it has to play in the process
       /// \param[in] role The role the particle will play in the process
       /// \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
-      Particle& addParticle( Particle::Role role, bool replace=false );
+      Particle& addParticle( Particle::Role role, bool replace = false );
 
       //----- particles retrievers
 
@@ -76,7 +69,7 @@ namespace CepGen
        * \param[in] id_ The unique identifier to this particle in the event
        * \return A reference to the requested Particle object
        */
-      Particle& getById( int id_ );
+      Particle& operator[]( int id_ );
       /// Get a const Particle object using its unique identifier
       /// \param[in] id_ Unique identifier of the particle in the event
       /// \return Constant object to be retrieved
@@ -119,12 +112,12 @@ namespace CepGen
       /// List of particles in the event, mapped to their role in the process
       ParticlesMap particles_;
       /// Last particle in an "empty" event
-      struct num_particles {
-        num_particles() : cs( 0 ), op1( 0 ), op2( 0 ) {}
-        num_particles( const num_particles& np ) : cs( np.cs ), op1( np.op1 ), op2( np.op2 ) {}
+      struct NumParticles {
+        NumParticles();
+        NumParticles( const NumParticles& np );
         unsigned short cs, op1, op2;
       };
-      num_particles evtcontent_;
+      NumParticles evtcontent_;
   };
 }
 

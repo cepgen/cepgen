@@ -12,11 +12,12 @@ namespace CepGen
       public:
         SigmaRatio() {}
         /// Extract the longitudinal/transverse cross section ratio and associated error for a given Q²/\f$x_{\textrm{Bj}}\f$ couple.
-        virtual double operator()( double q2, double xbj, double& err ) const = 0;
+        virtual double operator()( double xbj, double q2, double& err ) const = 0;
 
       protected:
         /// \f$x_{\textrm{Bj}}\f$ dependence for QCD-matching of R at high-Q²
-        double theta( double q2, double xbj ) const;
+        double theta( double xbj, double q2 ) const;
+        static const double mp_, mp2_;
     };
 
     // Reference: arXiv:hep-ex/9808028
@@ -30,7 +31,7 @@ namespace CepGen
           static Parameterisation standard();
         };
         explicit E143Ratio( const Parameterisation& param = Parameterisation::standard() );
-        double operator()( double q2, double xbj, double& err ) const override;
+        double operator()( double xbj, double q2, double& err ) const override;
 
       private:
         Parameterisation params_;
@@ -48,7 +49,7 @@ namespace CepGen
           static Parameterisation standard();
         };
         explicit R1990Ratio( const Parameterisation& param = Parameterisation::standard() );
-        double operator()( double q2, double xbj, double& err ) const override;
+        double operator()( double xbj, double q2, double& err ) const override;
 
       private:
         Parameterisation params_;
@@ -58,7 +59,7 @@ namespace CepGen
     {
       public:
         CLASRatio() {}
-        double operator()( double q2, double xbj, double& err ) const override;
+        double operator()( double xbj, double q2, double& err ) const override;
     };
 
     /// Sibirtsev & Blunden parameterisation of the R ratio
@@ -67,10 +68,9 @@ namespace CepGen
     {
       public:
         SBRatio() {}
-        double operator()( double q2, double xbj, double& err ) const override;
+        double operator()( double xbj, double q2, double& err ) const override;
     };
   }
 }
 
 #endif
-

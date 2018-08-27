@@ -1,7 +1,7 @@
 #ifndef CepGen_Processes_TestProcess_h
 #define CepGen_Processes_TestProcess_h
 
-#include "GenericProcess.h"
+#include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Core/Functional.h"
 
 namespace CepGen
@@ -20,9 +20,11 @@ namespace CepGen
           GenericProcess( "test", Form( ".oO TEST PROCESS (%s) Oo.", formula ), false ),
           funct_( formula, args ) {}
 
+        ProcessPtr clone() const override { return ProcessPtr( new TestProcess<N>( *this ) ); }
+
         void addEventContent() override {}
         /// Number of dimensions on which to perform the integration
-        unsigned int numDimensions( const Kinematics::ProcessMode& ) const override { return N; }
+        unsigned int numDimensions( const Kinematics::Mode& ) const override { return N; }
         /// Generic formula to compute a weight out of a point in the phase space
         double computeWeight() override {
           std::array<double,N> args;

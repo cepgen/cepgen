@@ -1,6 +1,7 @@
 #ifndef CepGen_Hadronisers_GenericHadroniser_h
 #define CepGen_Hadronisers_GenericHadroniser_h
 
+#include <vector>
 #include <memory>
 #include <iostream>
 
@@ -8,6 +9,7 @@ namespace CepGen
 {
   class Event;
   class Particle;
+  class Parameters;
   /// Location for all hadronisers to be run downstream to the events generation
   namespace Hadroniser
   {
@@ -19,24 +21,30 @@ namespace CepGen
     class GenericHadroniser
     {
       public:
-        friend std::ostream& operator<<( std::ostream& os, const GenericHadroniser& hadr ) { os << hadr.name().c_str(); return os; }
-        friend std::ostream& operator<<( std::ostream& os, const GenericHadroniser* hadr ) { os << hadr->name().c_str(); return os; }
+        friend std::ostream& operator<<( std::ostream& os, const GenericHadroniser& hadr );
+        friend std::ostream& operator<<( std::ostream& os, const GenericHadroniser* hadr );
 
         /// Default constructor for an undefined hadroniser
-        explicit GenericHadroniser( const char* name="unnamed_hadroniser" ) : name_( name ) {}
+        explicit GenericHadroniser( const char* name = "unnamed_hadroniser" );
         virtual ~GenericHadroniser() {}
 
         /// Hadronise a full event
         /// \param[inout] ev Event to hadronise
         /// \param[inout] weight Event weight after hadronisation
+        /// \param[in] full Perform the full state hadronisation (incl. remnants fragmentation)
         /// \return Boolean stating whether or not the hadronisation occured successfully
-        virtual bool hadronise( Event& ev, double& weight, bool proton_fragment = true ) = 0;
+        virtual bool run( Event& ev, double& weight, bool full ) = 0;
         /// Specify a random numbers generator seed for the hadroniser
         /// \param[in] seed A RNG seed
         virtual void setSeed( long long seed ) = 0;
+        virtual void setCrossSection( double xsec, double xsec_err ) {}
+
+        virtual void readString( const char* ) {}
+        virtual void readString( const std::string& param ) { readString( param.c_str() ); }
+        virtual void readStrings( const std::vector<std::string>& params );
 
         /// Return a human-readable name for this hadroniser
-        inline std::string name() const { return name_; }
+        std::string name() const;
 
       protected:
         /// Name of the hadroniser

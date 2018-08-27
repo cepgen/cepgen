@@ -23,6 +23,7 @@ namespace CepGen
       p.mr2 = 0.20623;
       p.q02 = 0.27799;
       p.lambda2 = 0.06527;
+      p.type = Type::ALLM91;
       return p;
     }
 
@@ -43,6 +44,7 @@ namespace CepGen
       p.mr2 = 0.15052;
       p.q02 = 0.52544;
       p.lambda2 = 0.06526;
+      p.type = Type::ALLM97;
       return p;
     }
 
@@ -63,6 +65,7 @@ namespace CepGen
       p.mr2 = 29.3;
       p.q02 = 4.74e-5;
       p.lambda2 = 2.2e-8;
+      p.type = Type::Invalid;
       return p;
     }
 
@@ -83,6 +86,7 @@ namespace CepGen
       p.mr2 = 0.838;
       p.q02 = 1.87e-5;
       p.lambda2 = 4.4e-9;
+      p.type = Type::Invalid;
       return p;
     }
 
@@ -103,6 +107,7 @@ namespace CepGen
       p.mr2 = 0.117;
       p.q02 = 1.15;
       p.lambda2 = 0.06527;
+      p.type = Type::GD07p;
       return p;
     }
 
@@ -123,15 +128,16 @@ namespace CepGen
       p.mr2 = 0.03190;
       p.q02 = 1.374;
       p.lambda2 = 0.06527;
+      p.type = Type::GD11p;
       return p;
     }
 
     ALLM::ALLM( const ALLM::Parameterisation& param ) :
-      params_( param )
+      StructureFunctions( param.type ), params_( param )
     {}
 
-    ALLM
-    ALLM::operator()( double q2, double xbj, const SigmaRatio& rcomp ) const
+    ALLM&
+    ALLM::operator()( double xbj, double q2 )
     {
       const double W2_eff = q2*( 1.-xbj )/xbj;
       const double xp = ( q2+params_.mp2 )/( q2+W2_eff+params_.mp2 ),
@@ -151,11 +157,10 @@ namespace CepGen
       const double F2_Pom = cpom*pow( xp, apom )*pow( 1.-xbj, bpom ),
                    F2_Reg = creg*pow( xr, areg )*pow( 1.-xbj, breg );
 
-      ALLM allm;
-      allm.F2 = q2/( q2+params_.m02 ) * ( F2_Pom + F2_Reg );
-      allm.computeFL( q2, xbj, rcomp );
+      F2 = q2/( q2+params_.m02 ) * ( F2_Pom + F2_Reg );
 
-      return allm;
+      return *this;
     }
   }
 }
+

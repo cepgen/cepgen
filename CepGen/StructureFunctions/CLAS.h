@@ -1,9 +1,8 @@
 #ifndef CepGen_StructureFunctions_CLAS_h
 #define CepGen_StructureFunctions_CLAS_h
 
-#include "StructureFunctions.h"
-#include "CepGen/Physics/Constants.h"
-#include "SigmaRatio.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
+
 #include <array>
 #include <vector>
 
@@ -45,7 +44,7 @@ namespace CepGen
 
         explicit CLAS( const CLAS::Parameterisation& params = CLAS::Parameterisation::standard_proton() );
 
-        CLAS operator()( double q2, double xbj, const SigmaRatio& rcomp = E143Ratio() ) const;
+        CLAS& operator()( double xbj, double q2 ) override;
 
       private:
         /// \brief Method to evaluate the background/resonance terms of
@@ -57,7 +56,7 @@ namespace CepGen
         /// \param[in] q2 squared four-momentum transfer in GeV²
         /// \param[in] xbj Bjorken scaling variable
         /// \return \f$F_{2}^{N}\f$
-        double f2slac( double q2, double xbj ) const;
+        double f2slac( double xbj, double q2 ) const;
         Parameterisation params_;
     };
   }

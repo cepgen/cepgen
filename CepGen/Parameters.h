@@ -6,10 +6,14 @@
 
 #include <memory>
 
+#include <gsl/gsl_monte_vegas.h>
+#include <gsl/gsl_monte_miser.h>
+
 namespace CepGen
 {
   class Event;
   class TamingFunctionsCollection;
+  class ParametersList;
   namespace Process { class GenericProcess; }
   namespace Hadroniser { class GenericHadroniser; }
   /// List of parameters used to start and run the simulation job
@@ -27,7 +31,9 @@ namespace CepGen
       /// \param[in] thetamax The maximal value of \f$\theta\f$ for the outgoing leptons
       void setThetaRange( float thetamin, float thetamax );
       /// Dump the input parameters in the console
-      void dump( std::ostream& os = Logger::get().outputStream, bool pretty = true ) const;
+      void dump( std::ostream& os = *Logger::get().output, bool pretty = true ) const;
+
+      std::shared_ptr<ParametersList> general;
 
       //----- process to compute
 
@@ -37,6 +43,7 @@ namespace CepGen
       std::string processName() const;
       /// Set the process to study
       void setProcess( Process::GenericProcess* proc );
+      void cloneProcess( const Process::GenericProcess* proc );
 
       //----- events kinematics
 
@@ -46,23 +53,25 @@ namespace CepGen
       //----- VEGAS
 
       /// Collection of integrator parameters
-      struct IntegratorParameters
+      struct Integration
       {
-        IntegratorParameters();
+        Integration();
+        Integration( const Integration& );
+        ~Integration();
         Integrator::Type type;
         /// Number of function calls to be computed for each point
         unsigned int ncvg; // ??
-        /// Number of points to "shoot" in each integration bin by the algorithm
-        unsigned int npoints;
-        /// Is it the first time the integrator is run?
-        bool first_run;
         /// Random number generator seed
-        unsigned long seed;
+        long rng_seed;
+        /// Random number generator engine
+        gsl_rng_type* rng_engine;
         gsl_monte_vegas_params vegas;
+        double vegas_chisq_cut;
         gsl_monte_miser_params miser;
+        double result, err_result;
       };
       /// Integrator parameters
-      IntegratorParameters integrator;
+      Integration integrator;
 
       //----- events generation
 
@@ -74,14 +83,18 @@ namespace CepGen
         bool enabled;
         /// Maximal number of events to generate in this run
         unsigned int maxgen;
-        /// Pointer to the last event produced in this run
-        std::shared_ptr<Event> last_event;
         /// Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?
         bool symmetrise;
+        /// Is the integrand to be smoothed for events generation?
+        bool treat;
         /// Number of events already generated in this run
         unsigned int ngen;
         /// Frequency at which the events are displayed to the end-user
         unsigned int gen_print_every;
+        /// Number of threads to perform the integration
+        unsigned int num_threads;
+        /// Number of points to "shoot" in each integration bin by the algorithm
+        unsigned int num_points;
       };
       /// Events generation parameters
       Generation generation;
@@ -95,6 +108,8 @@ namespace CepGen
 
       /// Hadronisation algorithm to use for the proton(s) fragmentation
       Hadroniser::GenericHadroniser* hadroniser();
+      /// Name of the hadroniser (if applicable)
+      std::string hadroniserName() const;
       /// Set the hadronisation algorithm
       void setHadroniser( Hadroniser::GenericHadroniser* hadr );
       /// Maximal number of trials for the hadronisation of the proton(s) remnants
@@ -103,12 +118,29 @@ namespace CepGen
       //----- taming functions
 
       /// Functionals to be used to account for rescattering corrections (implemented within the process)
-      std::unique_ptr<TamingFunctionsCollection> taming_functions;
+      std::shared_ptr<TamingFunctionsCollection> taming_functions;
+
+      //----- run statistics
+
+      /// Reset the total generation time and the number of events generated for this run
+      void clearRunStatistics();
+      /// Add a new timing into the total generation time
+      /// \param[in] gen_time Time to add (in seconds)
+      void addGenerationTime( double gen_time );
+      /// Return the total generation time for this run (in seconds)
+      inline double totalGenerationTime() const { return total_gen_time_; }
+      /// Total number of events already generated in this run
+      inline unsigned int numGeneratedEvents() const { return num_gen_events_; }
 
     private:
       std::unique_ptr<Process::GenericProcess> process_;
       std::unique_ptr<Hadroniser::GenericHadroniser> hadroniser_;
+
       bool store_;
+      /// Total generation time (in seconds)
+      double total_gen_time_;
+      /// Number of events already generated
+      unsigned int num_gen_events_;
   };
 }
 
