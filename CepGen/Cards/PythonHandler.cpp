@@ -74,14 +74,15 @@ namespace CepGen
       if ( !process )
         throwPythonError( Form( "Failed to extract a \"%s\" keyword from the configuration card %s", PROCESS_NAME, file ) );
 
+      //--- list of process-specific parameters
+      ParametersList proc_params;
+      fillParameter( process, "processParameters", proc_params );
+
       //--- type of process to consider
       PyObject* pproc_name = getElement( process, MODULE_NAME ); // borrowed
       if ( !pproc_name )
         throwPythonError( Form( "Failed to extract the process name from the configuration card %s", file ) );
       const std::string proc_name = get<std::string>( pproc_name );
-
-      ParametersList proc_params;
-      fillParameter( process, "processParameters", proc_params );
 
       if ( proc_name == "lpair" )
         params_.setProcess( new Process::GamGamLL( proc_params ) );
@@ -235,21 +236,6 @@ namespace CepGen
     void
     PythonHandler::parseOutgoingKinematics( PyObject* kin )
     {
-      PyObject* ppair = getElement( kin, "pair" ); // borrowed
-      if ( ppair ) {
-        if ( is<int>( ppair ) ) {
-          PDG pair = (PDG)get<int>( ppair );
-          params_.kinematics.central_system = { pair, pair };
-        }
-        else if ( PyTuple_Check( ppair ) ) {
-          if ( PyTuple_Size( ppair ) != 2 )
-            throw CG_FATAL( "PythonHandler" ) << "Invalid value for in_kinematics.pair!";
-          PDG pair1 = (PDG)get<int>( PyTuple_GetItem( ppair, 0 ) );
-          PDG pair2 = (PDG)get<int>( PyTuple_GetItem( ppair, 1 ) );
-          params_.kinematics.central_system = { pair1, pair2 };
-        }
-      }
-
       PyObject* pparts = getElement( kin, "minFinalState" ); // borrowed
       if ( pparts && PyTuple_Check( pparts ) )
         for ( unsigned short i = 0; i < PyTuple_Size( pparts ); ++i )

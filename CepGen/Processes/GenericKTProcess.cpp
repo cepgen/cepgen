@@ -1,10 +1,11 @@
 #include "CepGen/Processes/GenericKTProcess.h"
 
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersList.h"
+
+#include "CepGen/Event/Event.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
-
-#include "CepGen/Core/Exception.h"
-
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
@@ -16,7 +17,8 @@ namespace CepGen
   {
     std::string GenericKTProcess::kKMRInterpGridPath = "gluon_mmht2014nlo_Watt.dat";
 
-    GenericKTProcess::GenericKTProcess( const std::string& name,
+    GenericKTProcess::GenericKTProcess( const ParametersList& params,
+                                        const std::string& name,
                                         const std::string& description,
                                         const std::array<PDG,2>& partons,
                                         const std::vector<PDG>& central ) :
@@ -46,7 +48,7 @@ namespace CepGen
     }
 
     unsigned int
-    GenericKTProcess::numDimensions( const Kinematics::Mode& ) const
+    GenericKTProcess::numDimensions() const
     {
       return num_dimensions_;
     }

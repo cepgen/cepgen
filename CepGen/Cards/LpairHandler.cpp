@@ -1,4 +1,5 @@
 #include "CepGen/Cards/LpairHandler.h"
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Physics/PDG.h"
@@ -19,7 +20,7 @@ namespace CepGen
     //----- specialization for LPAIR input cards
 
     LpairHandler::LpairHandler( const char* file ) :
-      pair_( PDG::invalid ), method_( kInvalid ), pol_state_( kInvalid )
+      proc_params_( new ParametersList )
     {
       std::ifstream f( file, std::fstream::in );
       if ( !f.is_open() )
@@ -40,18 +41,12 @@ namespace CepGen
       }
       f.close();
 
-      ParametersList proc_params;
-      if ( method_ != kInvalid )
-        proc_params.set<int>( "method", method_ );
-      if ( pol_state_ != kInvalid )
-        proc_params.set<int>( "polarisationStates", pol_state_ );
-
       if ( proc_name_ == "lpair" )
-        params_.setProcess( new Process::GamGamLL( proc_params ) );
+        params_.setProcess( new Process::GamGamLL( *proc_params_ ) );
       else if ( proc_name_ == "pptoll" || proc_name_ == "pptoff" )
-        params_.setProcess( new Process::PPtoFF( proc_params ) );
+        params_.setProcess( new Process::PPtoFF( *proc_params_ ) );
       else if ( proc_name_ == "pptoww" )
-        params_.setProcess( new Process::PPtoWW( proc_params ) );
+        params_.setProcess( new Process::PPtoWW( *proc_params_ ) );
       else
         throw CG_FATAL( "LpairHandler" ) << "Unrecognised process name: " << proc_name_ << "!";
 
@@ -69,10 +64,6 @@ namespace CepGen
 
       if ( m_params.count( "IEND" ) )
         setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
-
-      //--- for LPAIR: specify the lepton pair to be produced
-      if ( pair_ != PDG::invalid )
-        params_.kinematics.central_system = { pair_, pair_ };
 
       CG_INFO( "LpairHandler" ) << "File '" << file << "' succesfully opened!\n\t"
         << "The following parameters are set:" << os.str();
@@ -110,8 +101,8 @@ namespace CepGen
       // Process-specific parameters
       //-------------------------------------------------------------------------------------------
 
-      registerParameter<int>( "METH", "Computation method (kT-factorisation)", &method_ );
-      registerParameter<int>( "IPOL", "Polarisation states to consider (not available for all processes)", (int*)&pol_state_ );
+      registerParameter<int>( "METH", "Computation method (kT-factorisation)", &proc_params_->operator[]<int>( "method" ) );
+      registerParameter<int>( "IPOL", "Polarisation states to consider", &proc_params_->operator[]<int>( "polarisationStates" ) );
 
       //-------------------------------------------------------------------------------------------
       // Process kinematics parameters
@@ -119,7 +110,7 @@ namespace CepGen
 
       registerParameter<int>( "PMOD", "Outgoing primary particles' mode", (int*)&params->kinematics.structure_functions );
       registerParameter<int>( "EMOD", "Outgoing primary particles' mode", (int*)&params->kinematics.structure_functions );
-      registerParameter<int>( "PAIR", "Outgoing particles' PDG id", (int*)&pair_ );
+      registerParameter<int>( "PAIR", "Outgoing particles' PDG id", (int*)&proc_params_->operator[]<int>( "pair" ) );
       registerParameter<double>( "INP1", "Momentum (1st primary particle)", &params->kinematics.incoming_beams.first.pz );
       registerParameter<double>( "INP2", "Momentum (2nd primary particle)", &params->kinematics.incoming_beams.second.pz );
       registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params->kinematics.incoming_beams.first.pz );

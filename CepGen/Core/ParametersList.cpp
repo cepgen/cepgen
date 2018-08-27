@@ -68,6 +68,12 @@ namespace CepGen
     throw CG_FATAL( "ParametersList" ) << "Invalid type retrieved for key=" << key << "!";
   }
 
+  template<typename T> T&
+  ParametersList::operator[]( std::string key )
+  {
+    throw CG_FATAL( "ParametersList" ) << "Invalid type retrieved for key=" << key << "!";
+  }
+
   template<typename T> void
   ParametersList::set( std::string key, const T& value )
   {
@@ -88,6 +94,15 @@ namespace CepGen
     return def;
   }
 
+  template<> ParametersList&
+  ParametersList::operator[]<ParametersList>( std::string key )
+  {
+    for ( auto& kv : param_values_ )
+      if ( kv.first.compare( key ) == 0 )
+        return kv.second;
+    throw CG_FATAL( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+  }
+
   template<> void
   ParametersList::set<ParametersList>( std::string key, const ParametersList& value )
   {
@@ -102,6 +117,15 @@ namespace CepGen
         return kv.second;
     CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
     return def;
+  }
+
+  template<> std::vector<ParametersList>&
+  ParametersList::operator[]<std::vector<ParametersList> >( std::string key )
+  {
+    for ( auto& kv : vec_param_values_ )
+      if ( kv.first.compare( key ) == 0 )
+        return kv.second;
+    throw CG_FATAL( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
   }
 
   template<> void
@@ -124,6 +148,15 @@ namespace CepGen
     return def;
   }
 
+  template<> int&
+  ParametersList::operator[]<int>( std::string key )
+  {
+    for ( auto& kv : int_values_ )
+      if ( kv.first.compare( key ) == 0 )
+        return kv.second;
+    throw CG_FATAL( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+  }
+
   template<> void
   ParametersList::set<int>( std::string key, const int& value )
   {
@@ -138,6 +171,15 @@ namespace CepGen
         return kv.second;
     CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
     return def;
+  }
+
+  template<> std::vector<int>&
+  ParametersList::operator[]<std::vector<int> >( std::string key )
+  {
+    for ( auto& kv : vec_int_values_ )
+      if ( kv.first.compare( key ) == 0 )
+        return kv.second;
+    throw CG_FATAL( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
   }
 
   template<> void
@@ -160,6 +202,15 @@ namespace CepGen
     return def;
   }
 
+  template<> double&
+  ParametersList::operator[]<double>( std::string key )
+  {
+    for ( auto& kv : dbl_values_ )
+      if ( kv.first.compare( key ) == 0 )
+        return kv.second;
+    throw CG_FATAL( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+  }
+
   template<> void
   ParametersList::set<double>( std::string key, const double& value )
   {
@@ -174,6 +225,15 @@ namespace CepGen
         return kv.second;
     CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
     return def;
+  }
+
+  template<> std::vector<double>&
+  ParametersList::operator[]<std::vector<double> >( std::string key )
+  {
+    for ( auto& kv : vec_dbl_values_ )
+      if ( kv.first.compare( key ) == 0 )
+        return kv.second;
+    throw CG_FATAL( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
   }
 
   template<> void
@@ -196,6 +256,15 @@ namespace CepGen
     return def;
   }
 
+  template<> std::string&
+  ParametersList::operator[]<std::string>( std::string key )
+  {
+    for ( auto& kv : str_values_ )
+      if ( kv.first.compare( key ) == 0 )
+        return kv.second;
+    throw CG_FATAL( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+  }
+
   template<> void
   ParametersList::set<std::string>( std::string key, const std::string& value )
   {
@@ -210,6 +279,15 @@ namespace CepGen
         return kv.second;
     CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
     return def;
+  }
+
+  template<> std::vector<std::string>&
+  ParametersList::operator[]<std::vector<std::string> >( std::string key )
+  {
+    for ( auto& kv : vec_str_values_ )
+      if ( kv.first.compare( key ) == 0 )
+        return kv.second;
+    throw CG_FATAL( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
   }
 
   template<> void

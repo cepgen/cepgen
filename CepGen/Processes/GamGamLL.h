@@ -2,12 +2,12 @@
 #define CepGen_Processes_GamGamLL_h
 
 #include "CepGen/Processes/GenericProcess.h"
+#include "CepGen/Core/ParametersList.h"
 
 namespace CepGen
 {
   namespace Process
   {
-
     /**
      * Full class of methods and objects to compute the full analytic matrix element
      * \cite Vermaseren1983347 for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$ process
@@ -48,7 +48,7 @@ namespace CepGen
         /// \return \f$\mathrm d\sigma(\mathbf x)(\gamma\gamma\to\ell^{+}\ell^{-})\f$,
         ///   the differential cross-section for the given point in the phase space.
         double computeWeight() override;
-        unsigned int numDimensions( const Kinematics::Mode& ) const override;
+        unsigned int numDimensions() const override;
         void setKinematics( const Kinematics& cuts ) override;
         void fillKinematics( bool ) override;
         /// Compute the ougoing proton remnant mass
@@ -94,6 +94,7 @@ namespace CepGen
 
         /// Internal switch for the optimised code version (LPAIR legacy ; unimplemented here)
         int n_opt_;
+        int pair_;
 
         Limits w_limits_;
         Limits q2_limits_;
@@ -218,7 +219,8 @@ namespace CepGen
          */
         void map( double expo, const Limits& lim, double& out, double& dout, const std::string& var_name="" );
         void mapla( double y, double z, int u, double xm, double xp, double& x, double& d );
-
+        /// Compute the electric/magnetic form factors for the two considered \f$Q^{2}\f$ momenta transfers
+        void formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const;
     };
   }
 }

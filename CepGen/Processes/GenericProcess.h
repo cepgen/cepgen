@@ -1,15 +1,15 @@
 #ifndef CepGen_Processes_GenericProcess_h
 #define CepGen_Processes_GenericProcess_h
 
-#include "CepGen/Event/Event.h"
+#include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Core/ParametersList.h"
 
 #include <vector>
 #include <memory>
 
 namespace CepGen
 {
+  class Event;
   class FormFactors;
   /// Location for all physics processes to be generated
   namespace Process
@@ -50,7 +50,7 @@ namespace CepGen
         virtual std::unique_ptr<GenericProcess> clone() const = 0;
 
         /// Restore the Event object to its initial state
-        inline void clearEvent() { event_->restore(); }
+        void clearEvent();
         /// Set the kinematics of the incoming state particles
         void setIncomingKinematics( const Particle::Momentum& p1, const Particle::Momentum& p2 );
         /// Compute the incoming state kinematics
@@ -64,7 +64,7 @@ namespace CepGen
         virtual void setKinematics( const Kinematics& cuts );
         /// Return the number of dimensions on which the integration has to be performed
         /// \return Number of dimensions on which to integrate
-        virtual unsigned int numDimensions( const Kinematics::Mode& ) const = 0;
+        virtual unsigned int numDimensions() const = 0;
 
         /// Prepare the process for its integration over the whole phase space
         inline virtual void beforeComputeWeight() {}
@@ -107,8 +107,6 @@ namespace CepGen
 
         /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
         void setEventContent( const IncomingState& ini, const OutgoingState& fin );
-        /// Compute the electric/magnetic form factors for the two considered \f$Q^{2}\f$ momenta transfers
-        void formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const;
 
         // ---
 

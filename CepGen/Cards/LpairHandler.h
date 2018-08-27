@@ -8,6 +8,7 @@ using std::string;
 
 namespace CepGen
 {
+  class ParametersList;
   namespace Cards
   {
     /// LPAIR-like steering cards parser and writer
@@ -45,10 +46,8 @@ namespace CepGen
         std::unordered_map<std::string, Parameter<bool> > p_bools_;
 
         void init( Parameters* );
-        PDG pair_;
+        std::shared_ptr<ParametersList> proc_params_;
         std::string proc_name_, hadr_name_, integr_type_;
-        // kT-factorised processes
-        int method_, pol_state_;
     };
 
     //----- specialised registerers

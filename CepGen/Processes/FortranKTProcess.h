@@ -20,6 +20,7 @@ namespace CepGen
         double computeKTFactorisedMatrixElement() override;
         void fillCentralParticlesKinematics() override;
 
+        int pair_;
         int method_;
         /// Subroutine to be called for weight computation
         std::function<void(double&)> func_;

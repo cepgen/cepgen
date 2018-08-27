@@ -4,7 +4,9 @@ from Config.integrators_cff import miser as integrator
 from Config.ktProcess_cfi import ktProcess
 
 process = ktProcess.clone('pptoll',
-    mode = cepgen.ProcessMode.ElasticElastic,
+    processParameters = cepgen.Parameters(
+        mode = cepgen.ProcessMode.ElasticElastic,
+    ),
     inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),
         structureFunctions = cepgen.StructureFunctions.SuriYennie,

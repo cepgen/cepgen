@@ -55,7 +55,7 @@ namespace CepGen
 
     parameters->process()->addEventContent();
     parameters->process()->setKinematics( parameters->kinematics );
-    return parameters->process()->numDimensions( parameters->kinematics.mode );
+    return parameters->process()->numDimensions();
   }
 
   void

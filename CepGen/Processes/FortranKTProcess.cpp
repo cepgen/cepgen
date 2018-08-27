@@ -1,6 +1,8 @@
 #include "CepGen/Processes/FortranKTProcess.h"
+#include "CepGen/Core/ParametersList.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 
@@ -39,7 +41,8 @@ namespace CepGen
   namespace Process
   {
     FortranKTProcess::FortranKTProcess( const ParametersList& params, const char* name, const char* descr, std::function<void( double& )> func ) :
-      GenericKTProcess( name, descr, { { PDG::Photon, PDG::Photon } }, { PDG::Muon, PDG::Muon } ),
+      GenericKTProcess( params, name, descr, { { PDG::Photon, PDG::Photon } }, { PDG::Muon, PDG::Muon } ),
+      pair_( params.get<int>( "pair", 13 ) ),
       method_( params.get<int>( "method", 1 ) ),
       func_( func )
     {
@@ -76,9 +79,9 @@ namespace CepGen
       //===========================================================================================
 
       params_.icontri = (int)cuts_.mode;
-      params_.imethod = (int)method_;
+      params_.imethod = method_;
       params_.sfmod = (int)cuts_.structure_functions->type;
-      params_.pdg_l = (int)cuts_.central_system[0];
+      params_.pdg_l = pair_;
 
       //-------------------------------------------------------------------------------------------
       // incoming beams information

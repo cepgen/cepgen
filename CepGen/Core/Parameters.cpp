@@ -1,5 +1,6 @@
 #include "CepGen/Parameters.h"
 
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/TamingFunction.h"
 
@@ -12,12 +13,14 @@
 namespace CepGen
 {
   Parameters::Parameters() :
+    general( new ParametersList ),
     hadroniser_max_trials( 5 ),
     taming_functions( new TamingFunctionsCollection ),
     store_( false ), total_gen_time_( 0. ), num_gen_events_( 0 )
   {}
 
   Parameters::Parameters( Parameters& param ) :
+    general( param.general ),
     kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
     hadroniser_max_trials( param.hadroniser_max_trials ),
     taming_functions( param.taming_functions ),
@@ -27,6 +30,7 @@ namespace CepGen
   {}
 
   Parameters::Parameters( const Parameters& param ) :
+    general( param.general ),
     kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
     hadroniser_max_trials( param.hadroniser_max_trials ),
     taming_functions( param.taming_functions ),
@@ -167,14 +171,7 @@ namespace CepGen
       << std::setfill('_') << std::setw( wb+3 ) << "_/¯¯EVENTS¯KINEMATICS¯¯\\_" << std::setfill( ' ' ) << "\n\n"
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming particles " ) : "Incoming particles" ) << std::setfill( ' ' ) << "\n\n";
     std::ostringstream proc_mode; proc_mode << kinematics.mode;
-    std::ostringstream ip1, ip2, op; ip1 << kinematics.incoming_beams.first.pdg; ip2 << kinematics.incoming_beams.second.pdg;
-    {
-      unsigned short i = 0;
-      for ( const auto& part : kinematics.central_system ) {
-        op << ( i > 0 ? ", " : "" ) << part;
-        ++i;
-      }
-    }
+    std::ostringstream ip1, ip2; ip1 << kinematics.incoming_beams.first.pdg; ip2 << kinematics.incoming_beams.second.pdg;
     os
       << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << "\n"
       << std::setw( wt ) << "Incoming particles" << ( pretty ? boldify( ip1.str().c_str() ) : ip1.str() ) << ", " << ( pretty ? boldify( ip2.str().c_str() ) : ip2.str() ) << "\n"
@@ -191,8 +188,7 @@ namespace CepGen
     }
     os
       << "\n"
-      << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Outgoing central system " ) : "Outgoing central system" ) << std::setfill( ' ' ) << "\n\n"
-      << std::setw( wt ) << "Central particles" << ( pretty ? boldify( op.str().c_str() ) : op.str() ) << "\n";
+      << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Outgoing central system " ) : "Outgoing central system" ) << std::setfill( ' ' ) << "\n\n";
     for ( const auto& lim : kinematics.cuts.central.list() ) {
       if ( !lim.second.valid() )
         continue;

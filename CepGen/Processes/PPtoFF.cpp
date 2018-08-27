@@ -1,5 +1,7 @@
 #include "CepGen/Processes/PPtoFF.h"
 
+#include "CepGen/Event/Event.h"
+
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
@@ -11,7 +13,8 @@ namespace CepGen
   namespace Process
   {
     PPtoFF::PPtoFF( const ParametersList& params ) :
-      GenericKTProcess( "pptoff", "ɣɣ → f⁺f¯", { { PDG::Photon, PDG::Photon } }, { PDG::Muon, PDG::Muon } ),
+      GenericKTProcess( params, "pptoff", "ɣɣ → f⁺f¯", { { PDG::Photon, PDG::Photon } }, { PDG::Muon, PDG::Muon } ),
+      pair_( params.get<int>( "pair", 0 ) ),
       method_( params.get<int>( "method", 1 ) ),
       y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )
     {}
@@ -24,14 +27,14 @@ namespace CepGen
       registerVariable( pt_diff_, Mapping::linear, cuts_.cuts.central.pt_diff, { 0., 50. }, "Fermions transverse momentum difference" );
       registerVariable( phi_pt_diff_, Mapping::linear, cuts_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Fermions azimuthal angle difference" );
 
-      const PDG& pdg_f = cuts_.central_system[0];
+      const PDG pdg_f = (PDG)pair_;
       mf_ = ParticleProperties::mass( pdg_f );
       mf2_ = mf_*mf_;
       qf_ = ParticleProperties::charge( pdg_f );
       colf_ = ParticleProperties::colours( pdg_f );
       CG_DEBUG( "PPtoFF:prepare" )
-        << "Produced particle" << s( cuts_.central_system.size() )
-        << " (" << pdg_f << ") with mass = " << mf_ << " GeV, "
+        << "Produced particles (" << pdg_f << ") "
+        << "with mass = " << mf_ << " GeV, "
         << "and charge = " << qf_ << " e";
       CG_DEBUG( "PPtoFF:mode" )
         << "matrix element computation method: " << method_ << ".";
