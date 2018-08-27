@@ -5,6 +5,7 @@
 
 namespace CepGen
 {
+  class ParametersList;
   namespace Process
   {
     /**

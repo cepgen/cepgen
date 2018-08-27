@@ -2,6 +2,7 @@
 #define CepGen_Processes_PPtoWW_h
 
 #include "CepGen/Processes/GenericKTProcess.h"
+#include "CepGen/Core/ParametersList.h"
 
 namespace CepGen
 {

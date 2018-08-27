@@ -2,6 +2,8 @@
 
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Event/Event.h"
+
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
@@ -63,6 +65,12 @@ namespace CepGen
       if ( idx >= x_.size() )
         return -1.;
       return x_[idx];
+    }
+
+    void
+    GenericProcess::clearEvent()
+    {
+      event_->restore();
     }
 
     void

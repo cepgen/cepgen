@@ -2,13 +2,12 @@
 #define CepGen_Processes_GamGamLL_h
 
 #include "CepGen/Processes/GenericProcess.h"
+#include "CepGen/Core/ParametersList.h"
 
 namespace CepGen
 {
-
   namespace Process
   {
-
     /**
      * Full class of methods and objects to compute the full analytic matrix element
      * \cite Vermaseren1983347 for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$ process

@@ -1,5 +1,7 @@
 #include "CepGen/Processes/PPtoFF.h"
 
+#include "CepGen/Event/Event.h"
+
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"

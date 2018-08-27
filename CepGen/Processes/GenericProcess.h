@@ -1,15 +1,15 @@
 #ifndef CepGen_Processes_GenericProcess_h
 #define CepGen_Processes_GenericProcess_h
 
-#include "CepGen/Event/Event.h"
+#include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Core/ParametersList.h"
 
 #include <vector>
 #include <memory>
 
 namespace CepGen
 {
+  class Event;
   class FormFactors;
   /// Location for all physics processes to be generated
   namespace Process
@@ -50,7 +50,7 @@ namespace CepGen
         virtual std::unique_ptr<GenericProcess> clone() const = 0;
 
         /// Restore the Event object to its initial state
-        inline void clearEvent() { event_->restore(); }
+        void clearEvent();
         /// Set the kinematics of the incoming state particles
         void setIncomingKinematics( const Particle::Momentum& p1, const Particle::Momentum& p2 );
         /// Compute the incoming state kinematics

@@ -6,6 +6,7 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
+#include "CepGen/Event/Event.h"
 
 #include <thread>
 #include <math.h>
