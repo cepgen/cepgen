@@ -62,10 +62,10 @@ namespace CepGen
       case SF::Type::ChristyBosted:       return os << "Christy-Bosted";
       case SF::Type::CLAS:                return os << "CLAS";
       case SF::Type::BlockDurandHa:       return os << "BDH";
-      case SF::Type::ALLM91:              return os << "ALLM;91";
-      case SF::Type::ALLM97:              return os << "ALLM;97";
-      case SF::Type::GD07p:               return os << "ALLM;GD07p";
-      case SF::Type::GD11p:               return os << "ALLM;GD11p";
+      case SF::Type::ALLM91:              return os << "ALLM91";
+      case SF::Type::ALLM97:              return os << "ALLM97";
+      case SF::Type::GD07p:               return os << "GD07p";
+      case SF::Type::GD11p:               return os << "GD11p";
       case SF::Type::Schaefer:            return os << "LUXlike";
       case SF::Type::MSTWgrid:            return os << "MSTW (grid)";
       case SF::Type::LHAPDF:              return os << "LHAPDF (generic)";
