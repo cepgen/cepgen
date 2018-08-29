@@ -82,7 +82,13 @@ namespace CepGen
       std::unique_ptr<gsl_monte_function> function_;
       std::unique_ptr<gsl_rng,void(*)( gsl_rng* )> rng_;
       std::unique_ptr<GridParameters> grid_;
-      gsl_monte_vegas_state* veg_state_;
+      struct gsl_monte_vegas_deleter
+      {
+        void operator()( gsl_monte_vegas_state* state ) {
+          gsl_monte_vegas_free( state );
+        }
+      };
+      std::unique_ptr<gsl_monte_vegas_state,gsl_monte_vegas_deleter> veg_state_;
       double r_boxes_;
   };
   std::ostream& operator<<( std::ostream&, const Integrator::Type& );

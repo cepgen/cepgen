@@ -1,5 +1,6 @@
 #include "CepGen/StructureFunctions/Schaefer.h"
 #include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
+#include "CepGen/StructureFunctions/LHAPDF.h"
 
 #include "CepGen/Core/Exception.h"
 
@@ -11,7 +12,7 @@ namespace CepGen
   namespace SF
   {
     Schaefer::Parameterisation
-    Schaefer::Parameterisation::standard()
+    Schaefer::Parameterisation::mstwGrid()
     {
       Parameterisation par;
       par.q2_cut = 9.;
@@ -25,6 +26,20 @@ namespace CepGen
     }
 
     Schaefer::Parameterisation
+    Schaefer::Parameterisation::mstwParton()
+    {
+      Parameterisation par;
+      par.q2_cut = 9.;
+      par.w2_hi = 4.;
+      par.w2_lo = 3.;
+      par.resonances_model = StructureFunctionsBuilder::get( SF::Type::ChristyBosted );
+      par.perturbative_model = std::make_shared<SF::LHAPDF>( "MSTW2008nnlo90cl" );
+      par.continuum_model = StructureFunctionsBuilder::get( SF::Type::GD11p );
+      par.higher_twist = 1;
+      return par;
+    }
+
+    Schaefer::Parameterisation
     Schaefer::Parameterisation::cteq()
     {
       Parameterisation par;
@@ -32,7 +47,7 @@ namespace CepGen
       par.w2_hi = 4.;
       par.w2_lo = 3.;
       par.resonances_model = StructureFunctionsBuilder::get( SF::Type::ChristyBosted );
-      par.perturbative_model = StructureFunctionsBuilder::get( SF::Type::MSTWgrid );
+      par.perturbative_model = std::make_shared<SF::LHAPDF>( "cteq6l1" );
       par.continuum_model = StructureFunctionsBuilder::get( SF::Type::GD11p );
       par.higher_twist = 0;
       return par;

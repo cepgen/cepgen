@@ -68,7 +68,7 @@ namespace CepGen
       case SF::Type::GD11p:               return os << "GD11p";
       case SF::Type::Schaefer:            return os << "LUXlike";
       case SF::Type::MSTWgrid:            return os << "MSTW (grid)";
-      case SF::Type::LHAPDF:              return os << "LHAPDF (generic)";
+      case SF::Type::LHAPDF:              return os << "LHAPDF";
     }
     return os;
   }

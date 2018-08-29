@@ -13,13 +13,14 @@ namespace CepGen
       public:
         struct Parameterisation
         {
-          static Parameterisation standard();
+          static Parameterisation mstwGrid();
+          static Parameterisation mstwParton();
           static Parameterisation cteq();
           double q2_cut, w2_lo, w2_hi;
           std::shared_ptr<StructureFunctions> resonances_model, perturbative_model, continuum_model;
           bool higher_twist;
         };
-        Schaefer( const Parameterisation& param = Parameterisation::standard() );
+        Schaefer( const Parameterisation& param = Parameterisation::mstwGrid() );
         Schaefer& operator()( double xbj, double q2 ) override;
 
         Parameterisation params;
