@@ -17,14 +17,15 @@ namespace CepGen
   class Event;
   class GridParameters;
   class Timer;
-  /**
-   * Main occurence of the Monte-Carlo integrator @cite PeterLepage1978192 developed by G.P. Lepage in 1978
-   * \brief Monte-Carlo integrator instance
-   */
+  /// Monte-Carlo integrator instance
   class Integrator
   {
     public:
-      enum class Type { plain = 0, Vegas = 1, MISER = 2 };
+      enum class Type {
+        plain = 0,
+        Vegas = 1, ///< @cite PeterLepage1978192 developed by G.P. Lepage in 1978
+        MISER = 2
+      };
       enum class VegasMode { importance = 1, importanceOnly = 0, stratified = -1 };
       /**
        * Book the memory slots and structures for the integrator
@@ -81,7 +82,13 @@ namespace CepGen
       std::unique_ptr<gsl_monte_function> function_;
       std::unique_ptr<gsl_rng,void(*)( gsl_rng* )> rng_;
       std::unique_ptr<GridParameters> grid_;
-      gsl_monte_vegas_state* veg_state_;
+      struct gsl_monte_vegas_deleter
+      {
+        void operator()( gsl_monte_vegas_state* state ) {
+          gsl_monte_vegas_free( state );
+        }
+      };
+      std::unique_ptr<gsl_monte_vegas_state,gsl_monte_vegas_deleter> veg_state_;
       double r_boxes_;
   };
   std::ostream& operator<<( std::ostream&, const Integrator::Type& );

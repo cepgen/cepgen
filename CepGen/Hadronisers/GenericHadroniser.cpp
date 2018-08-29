@@ -11,6 +11,8 @@ namespace CepGen
 
     void
     GenericHadroniser::readStrings( const std::vector<std::string>& params ) {
+      if ( params.empty() )
+        return;
       std::ostringstream os;
       for ( const auto& p : params ) {
         readString( p );

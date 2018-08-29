@@ -20,7 +20,7 @@ namespace CepGen
     ps_bin_( 0 ), input_params_( params ),
     function_( new gsl_monte_function{ integrand, ndim, (void*)input_params_ } ),
     rng_( gsl_rng_alloc( input_params_->integrator.rng_engine ), gsl_rng_free ),
-    grid_( new GridParameters ), veg_state_( nullptr ), r_boxes_( 0 )
+    grid_( new GridParameters ), r_boxes_( 0 )
   {
     //--- initialise the random number generator
 
@@ -57,10 +57,7 @@ namespace CepGen
   }
 
   Integrator::~Integrator()
-  {
-    if ( veg_state_ )
-      gsl_monte_vegas_free( veg_state_ );
-  }
+  {}
 
   //-----------------------------------------------------------------------------------------------
   // cross section computation part
@@ -70,68 +67,57 @@ namespace CepGen
   Integrator::integrate( double& result, double& abserr )
   {
     int res = -1;
-    gsl_monte_plain_state* pln_state = nullptr;
-    gsl_monte_miser_state* mis_state = nullptr;
-    const Integrator::Type algorithm = input_params_->integrator.type;
 
     //--- integration bounds
     std::vector<double> x_low( function_->dim, 0. ), x_up( function_->dim, 1. );
 
-    //--- prepare integrator
-    if ( algorithm == Type::plain )
-      pln_state = gsl_monte_plain_alloc( function_->dim );
-    else if ( algorithm == Type::MISER )
-      mis_state = gsl_monte_miser_alloc( function_->dim );
-
-    if ( algorithm == Type::plain )
-      res = gsl_monte_plain_integrate( function_.get(),
-        &x_low[0], &x_up[0],
-        function_->dim, input_params_->integrator.ncvg,
-        rng_.get(), pln_state,
-        &result, &abserr );
-    else if ( algorithm == Type::Vegas ) {
-      //----- Vegas warmup (prepare the grid)
-      res = warmupVegas( x_low, x_up, 25000 );
-      //----- integration
-      unsigned short it_chisq = 0;
-      do {
-        res = gsl_monte_vegas_integrate( function_.get(),
+    //--- launch integration
+    switch ( input_params_->integrator.type ) {
+      case Type::plain: {
+        std::unique_ptr<gsl_monte_plain_state,void(*)( gsl_monte_plain_state* )>
+          pln_state( gsl_monte_plain_alloc( function_->dim ), gsl_monte_plain_free );
+        res = gsl_monte_plain_integrate( function_.get(),
           &x_low[0], &x_up[0],
-          function_->dim, 0.2 * input_params_->integrator.ncvg,
-          rng_.get(), veg_state_,
+          function_->dim, input_params_->integrator.ncvg,
+          rng_.get(), pln_state.get(),
           &result, &abserr );
-        CG_LOG( "Integrator:integrate" )
-          << "\t>> at call " << ( it_chisq+1 ) << ": "
-          << Form( "average = %10.6f   "
-                   "sigma = %10.6f   chi2 = %4.3f.",
-                   result, abserr,
-                   gsl_monte_vegas_chisq( veg_state_ ) );
-        it_chisq++;
-      } while ( fabs( gsl_monte_vegas_chisq( veg_state_ )-1. )
-              > input_params_->integrator.vegas_chisq_cut-1. );
+      } break;
+      case Type::Vegas: {
+        //----- warmup (prepare the grid)
+        res = warmupVegas( x_low, x_up, 25000 );
+        //----- integration
+        unsigned short it_chisq = 0;
+        do {
+          res = gsl_monte_vegas_integrate( function_.get(),
+            &x_low[0], &x_up[0],
+            function_->dim, 0.2 * input_params_->integrator.ncvg,
+            rng_.get(), veg_state_.get(),
+            &result, &abserr );
+          CG_LOG( "Integrator:integrate" )
+            << "\t>> at call " << ( ++it_chisq ) << ": "
+            << Form( "average = %10.6f   "
+                     "sigma = %10.6f   chi2 = %4.3f.",
+                     result, abserr,
+                     gsl_monte_vegas_chisq( veg_state_.get() ) );
+        } while ( fabs( gsl_monte_vegas_chisq( veg_state_.get() )-1. )
+                > input_params_->integrator.vegas_chisq_cut-1. );
+        CG_DEBUG( "Integrator:integrate" )
+          << "Vegas grid information:\n\t"
+          << "ran for " << veg_state_->dim << " dimensions, and generated " << veg_state_->bins_max << " bins.\n\t"
+          << "Integration volume: " << veg_state_->vol << ".";
+        r_boxes_ = std::pow( veg_state_->bins, function_->dim );
+      } break;
+      case Type::MISER: {
+        std::unique_ptr<gsl_monte_miser_state,void(*)( gsl_monte_miser_state* )>
+          mis_state( gsl_monte_miser_alloc( function_->dim ), gsl_monte_miser_free );
+        gsl_monte_miser_params_set( mis_state.get(), &input_params_->integrator.miser );
+        res = gsl_monte_miser_integrate( function_.get(),
+          &x_low[0], &x_up[0],
+          function_->dim, input_params_->integrator.ncvg,
+          rng_.get(), mis_state.get(),
+          &result, &abserr );
+      } break;
     }
-    //----- integration
-    else if ( algorithm == Type::MISER ) {
-      gsl_monte_miser_params_set( mis_state, &input_params_->integrator.miser );
-      res = gsl_monte_miser_integrate( function_.get(),
-        &x_low[0], &x_up[0],
-        function_->dim, input_params_->integrator.ncvg,
-        rng_.get(), mis_state,
-        &result, &abserr );
-    }
-
-    //--- clean integrator
-    if ( algorithm == Type::plain )
-      gsl_monte_plain_free( pln_state );
-    else if ( algorithm == Type::Vegas ) {
-      CG_DEBUG( "Integrator:integrate" )
-        << "Vegas grid information:\n\t"
-        << "ran for " << veg_state_->dim << " dimensions, and generated " << veg_state_->bins_max << " bins.\n\t"
-        << "Integration volume: " << veg_state_->vol << ".";
-      r_boxes_ = std::pow( veg_state_->bins, function_->dim );
-    }
-    else if ( algorithm == Type::MISER )
-      gsl_monte_miser_free( mis_state );
 
     input_params_->integrator.result = result;
     input_params_->integrator.err_result = abserr;
@@ -146,14 +132,14 @@ namespace CepGen
   Integrator::warmupVegas( std::vector<double>& x_low, std::vector<double>& x_up, unsigned int ncall )
   {
     // start by preparing the grid/state
-    veg_state_ = gsl_monte_vegas_alloc( function_->dim );
-    gsl_monte_vegas_params_set( veg_state_, &input_params_->integrator.vegas );
+    veg_state_.reset( gsl_monte_vegas_alloc( function_->dim ) );
+    gsl_monte_vegas_params_set( veg_state_.get(), &input_params_->integrator.vegas );
     // then perform a first integration with the given calls count
     double result = 0., abserr = 0.;
     int res = gsl_monte_vegas_integrate( function_.get(),
       &x_low[0], &x_up[0],
       function_->dim, ncall,
-      rng_.get(), veg_state_,
+      rng_.get(), veg_state_.get(),
       &result, &abserr );
     // ensure the operation was successful
     if ( res != GSL_SUCCESS )
