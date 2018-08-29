@@ -170,14 +170,25 @@ namespace CepGen
       << "\n"
       << std::setfill('_') << std::setw( wb+3 ) << "_/¯¯EVENTS¯KINEMATICS¯¯\\_" << std::setfill( ' ' ) << "\n\n"
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming particles " ) : "Incoming particles" ) << std::setfill( ' ' ) << "\n\n";
-    std::ostringstream proc_mode; proc_mode << kinematics.mode;
-    std::ostringstream ip1, ip2; ip1 << kinematics.incoming_beams.first.pdg; ip2 << kinematics.incoming_beams.second.pdg;
+    if ( kinematics.mode != Kinematics::Mode::invalid ) {
+      std::ostringstream proc_mode; proc_mode << kinematics.mode;
+      os
+        << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << "\n";
+      if ( kinematics.mode != Kinematics::Mode::ElasticElastic )
+        os << std::setw( wt ) << "Structure functions" << kinematics.structure_functions->type << "\n";
+    }
+    std::ostringstream ip1, ip2;
+    if ( kinematics.incoming_beams.first.hi )
+      ip1 << kinematics.incoming_beams.first.hi;
+    else
+      ip1 << kinematics.incoming_beams.first.pdg;
+    if ( kinematics.incoming_beams.second.hi )
+      ip2 << kinematics.incoming_beams.second.hi;
+    else
+      ip2 << kinematics.incoming_beams.second.pdg;
     os
-      << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << "\n"
       << std::setw( wt ) << "Incoming particles" << ( pretty ? boldify( ip1.str().c_str() ) : ip1.str() ) << ", " << ( pretty ? boldify( ip2.str().c_str() ) : ip2.str() ) << "\n"
       << std::setw( wt ) << "Momenta (GeV/c)" << kinematics.incoming_beams.first.pz << ", " << kinematics.incoming_beams.second.pz << "\n";
-    if ( kinematics.mode != Kinematics::Mode::ElasticElastic )
-      os << std::setw( wt ) << "Structure functions" << kinematics.structure_functions->type << "\n";
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << "\n\n";

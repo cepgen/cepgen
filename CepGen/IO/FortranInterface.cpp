@@ -37,7 +37,7 @@ extern "C" {
     using namespace CepGen::Process;
     return GenericKTProcess::flux(
       (GenericKTProcess::Flux)fmode, kt2, x,
-      Kinematics::HeavyIon{ (unsigned short)a, (unsigned short)z } );
+      HeavyIon{ (unsigned short)a, (unsigned short)z } );
   }
 
   double

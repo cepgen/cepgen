@@ -2,7 +2,7 @@
 #define CepGen_Physics_Limits_h
 
 #include <utility>
-#include <iostream>
+#include <ostream>
 
 namespace CepGen
 {

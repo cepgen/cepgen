@@ -1,15 +1,14 @@
 import Config.Core as cepgen
 from Config.integrators_cff import vegas as integrator
-from Config.ktProcess_cfi import ktProcess
+from Config.ktProcess_cfi import ktProcess, KTFlux
 
 process = ktProcess.clone('patoll',
-    mode = cepgen.ProcessMode.InelasticElastic,
     inKinematics = cepgen.Parameters(
         pz = (6500., 2562.2),
         structureFunctions = cepgen.StructureFunctions.SuriYennie,
         #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
         #structureFunctions = cepgen.StructureFunctions.ALLM91,
-        ktFluxes = (cepgen.KTFlux.PhotonInelasticBudnev, cepgen.KTFlux.PhotonElasticHI),
+        ktFluxes = (KTFlux.PhotonInelasticBudnev, KTFlux.PhotonElasticHI),
         heavyIonB = (208, 82),
     ),
     outKinematics = ktProcess.outKinematics.clone(

@@ -9,6 +9,7 @@
 
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/Cuts.h"
+#include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/Limits.h"
 
 #include <vector>
@@ -28,6 +29,7 @@ namespace CepGen
 
       /// Type of kinematics to consider for the process
       enum class Mode {
+        invalid = -1,
         ElectronProton = 0,     ///< electron-proton elastic case
         ElasticElastic = 1,     ///< proton-proton elastic case
         ElasticInelastic = 2,   ///< proton-proton single-dissociative (or inelastic-elastic) case
@@ -38,20 +40,6 @@ namespace CepGen
       };
       /// Human-readable format of a process mode (elastic/dissociative parts)
       friend std::ostream& operator<<( std::ostream&, const Mode& );
-      struct HeavyIon {
-        static inline HeavyIon Proton() { return HeavyIon{ 1, 1 }; }
-        static inline HeavyIon Pb208() { return HeavyIon{ 208, 82 }; }
-        static inline HeavyIon fromPDG( const PDG& pdg ) {
-          unsigned int ipdg = (unsigned int)pdg;
-          return HeavyIon{ (unsigned short)( ipdg % 1000 ), (unsigned short)( ( ipdg / 1000 ) % 1000 ) };
-        }
-        inline PDG pdg() const { return (PDG)( 1e6+1e3*Z+A ); } // (Pythia8 convention/10-1e10+1e6)
-        /// Mass number
-        unsigned short A;
-        /// Atomic number
-        unsigned short Z;
-      };
-      friend std::ostream& operator<<( std::ostream&, const HeavyIon& );
 
       struct Beam
       {

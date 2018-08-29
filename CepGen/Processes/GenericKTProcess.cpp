@@ -61,44 +61,62 @@ namespace CepGen
       const Flux flux1 = (Flux)cuts_.incoming_beams.first.kt_flux,
                  flux2 = (Flux)cuts_.incoming_beams.second.kt_flux;
 
-      //============================================================================================
-      // ensure the first incoming flux is compatible with the kinematics mode
-      //============================================================================================
-
-      if ( ( cuts_.mode == Kinematics::Mode::ElasticElastic ||
-             cuts_.mode == Kinematics::Mode::ElasticInelastic )
-        && ( flux1 != Flux::P_Photon_Elastic ) ) {
-        cuts_.incoming_beams.first.kt_flux = (unsigned short)Flux::P_Photon_Elastic;
-        CG_DEBUG( "GenericKTProcess:kinematics" )
-          << "Set the kt flux for first incoming photon to \""
-          << cuts_.incoming_beams.first.kt_flux << "\".";
+      if ( cuts_.mode == Kinematics::Mode::invalid ) {
+        bool el1 = false, el2 = false;
+        if ( flux1 == Flux::P_Photon_Elastic
+          || flux1 == Flux::HI_Photon_Elastic
+          || flux1 == Flux::P_Gluon_KMR )
+          el1 = true;
+        if ( flux2 == Flux::P_Photon_Elastic
+          || flux2 == Flux::HI_Photon_Elastic
+          || flux2 == Flux::P_Gluon_KMR )
+          el2 = true;
+        if ( el1 && el2 )
+          cuts_.mode = Kinematics::Mode::ElasticElastic;
+        else if ( el1 )
+          cuts_.mode = Kinematics::Mode::ElasticInelastic;
+        else if ( el2 )
+          cuts_.mode = Kinematics::Mode::InelasticElastic;
+        else
+          cuts_.mode = Kinematics::Mode::InelasticInelastic;
       }
-      else if ( flux1 != Flux::P_Photon_Inelastic
-             && flux1 != Flux::P_Photon_Inelastic_Budnev ) {
-        cuts_.incoming_beams.first.kt_flux = (unsigned short)Flux::P_Photon_Inelastic_Budnev;
-        CG_DEBUG( "GenericKTProcess:kinematics" )
-          << "Set the kt flux for first incoming photon to \""
-          << cuts_.incoming_beams.first.kt_flux << "\".";
-      }
-
-      //============================================================================================
-      // ensure the second incoming flux is compatible with the kinematics mode
-      //============================================================================================
-
-      if ( ( cuts_.mode == Kinematics::Mode::ElasticElastic ||
-             cuts_.mode == Kinematics::Mode::InelasticElastic )
-        && ( flux2 != Flux::P_Photon_Elastic ) ) {
-        cuts_.incoming_beams.second.kt_flux = (unsigned short)Flux::P_Photon_Elastic;
-        CG_DEBUG( "GenericKTProcess:kinematics" )
-          << "Set the kt flux for second incoming photon to \""
-          << cuts_.incoming_beams.second.kt_flux << "\".";
-      }
-      else if ( flux2 != Flux::P_Photon_Inelastic
-             && flux2 != Flux::P_Photon_Inelastic_Budnev ) {
-        cuts_.incoming_beams.second.kt_flux = (unsigned short)Flux::P_Photon_Inelastic_Budnev;
-        CG_DEBUG( "GenericKTProcess:kinematics" )
-          << "Set the kt flux for second incoming photon to \""
-          << cuts_.incoming_beams.second.kt_flux << "\".";
+      else {
+        //==========================================================================================
+        // ensure the first incoming flux is compatible with the kinematics mode
+        //==========================================================================================
+        if ( ( cuts_.mode == Kinematics::Mode::ElasticElastic ||
+               cuts_.mode == Kinematics::Mode::ElasticInelastic )
+          && ( flux1 != Flux::P_Photon_Elastic ) ) {
+          cuts_.incoming_beams.first.kt_flux = (unsigned short)Flux::P_Photon_Elastic;
+          CG_DEBUG( "GenericKTProcess:kinematics" )
+            << "Set the kt flux for first incoming photon to \""
+            << cuts_.incoming_beams.first.kt_flux << "\".";
+        }
+        else if ( flux1 != Flux::P_Photon_Inelastic
+               && flux1 != Flux::P_Photon_Inelastic_Budnev ) {
+          cuts_.incoming_beams.first.kt_flux = (unsigned short)Flux::P_Photon_Inelastic_Budnev;
+          CG_DEBUG( "GenericKTProcess:kinematics" )
+            << "Set the kt flux for first incoming photon to \""
+            << cuts_.incoming_beams.first.kt_flux << "\".";
+        }
+        //==========================================================================================
+        // ensure the second incoming flux is compatible with the kinematics mode
+        //==========================================================================================
+        if ( ( cuts_.mode == Kinematics::Mode::ElasticElastic ||
+               cuts_.mode == Kinematics::Mode::InelasticElastic )
+          && ( flux2 != Flux::P_Photon_Elastic ) ) {
+          cuts_.incoming_beams.second.kt_flux = (unsigned short)Flux::P_Photon_Elastic;
+          CG_DEBUG( "GenericKTProcess:kinematics" )
+            << "Set the kt flux for second incoming photon to \""
+            << cuts_.incoming_beams.second.kt_flux << "\".";
+        }
+        else if ( flux2 != Flux::P_Photon_Inelastic
+               && flux2 != Flux::P_Photon_Inelastic_Budnev ) {
+          cuts_.incoming_beams.second.kt_flux = (unsigned short)Flux::P_Photon_Inelastic_Budnev;
+          CG_DEBUG( "GenericKTProcess:kinematics" )
+            << "Set the kt flux for second incoming photon to \""
+            << cuts_.incoming_beams.second.kt_flux << "\".";
+        }
       }
 
       //============================================================================================
@@ -372,7 +390,7 @@ namespace CepGen
     }
 
     double
-    GenericKTProcess::flux( const Flux& type, double kt2, double x, const Kinematics::HeavyIon& hi )
+    GenericKTProcess::flux( const Flux& type, double kt2, double x, const HeavyIon& hi )
     {
       switch ( type ) {
         case Flux::HI_Photon_Elastic: {

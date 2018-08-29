@@ -3,8 +3,6 @@ from Config.integrators_cff import vegas as integrator
 from Config.ktProcess_cfi import ktProcess
 
 process = ktProcess.clone('patoll',
-    #mode = cepgen.ProcessMode.InelasticElastic,
-    mode = cepgen.ProcessMode.ElasticElastic,
     inKinematics = cepgen.Parameters(
         pz = (6500., 2562.2),
         structureFunctions = cepgen.StructureFunctions.SuriYennie,

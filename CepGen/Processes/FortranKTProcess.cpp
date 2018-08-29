@@ -92,14 +92,14 @@ namespace CepGen
       params_.a_nuc1 = cuts_.incoming_beams.first.hi.A;
       params_.z_nuc1 = cuts_.incoming_beams.first.hi.Z;
       if ( params_.z_nuc1 > 1 ) {
-        event_->getOneByRole( Particle::IncomingBeam1 ).setPdgId( cuts_.incoming_beams.first.hi.pdg() );
-        event_->getOneByRole( Particle::OutgoingBeam1 ).setPdgId( cuts_.incoming_beams.first.hi.pdg() );
+        event_->getOneByRole( Particle::IncomingBeam1 ).setPdgId( cuts_.incoming_beams.first.hi );
+        event_->getOneByRole( Particle::OutgoingBeam1 ).setPdgId( cuts_.incoming_beams.first.hi );
       }
       params_.a_nuc2 = cuts_.incoming_beams.second.hi.A;
       params_.z_nuc2 = cuts_.incoming_beams.second.hi.Z;
       if ( params_.z_nuc2 > 1 ) {
-        event_->getOneByRole( Particle::IncomingBeam2 ).setPdgId( cuts_.incoming_beams.second.hi.pdg() );
-        event_->getOneByRole( Particle::OutgoingBeam2 ).setPdgId( cuts_.incoming_beams.second.hi.pdg() );
+        event_->getOneByRole( Particle::IncomingBeam2 ).setPdgId( cuts_.incoming_beams.second.hi );
+        event_->getOneByRole( Particle::OutgoingBeam2 ).setPdgId( cuts_.incoming_beams.second.hi );
       }
 
       //-------------------------------------------------------------------------------------------

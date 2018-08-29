@@ -60,7 +60,7 @@ namespace CepGen
         /// \param[in] x Parton momentum fraction
         /// \param[in] mx Outgoing diffractive proton mass
         static double flux( const Flux& type, double x, double kt2, StructureFunctions& sf, double mx = mp_ );
-        static double flux( const Flux& type, double kt2, double x, const Kinematics::HeavyIon& hi );
+        static double flux( const Flux& type, double kt2, double x, const HeavyIon& hi );
 
       protected:
         /// Set the kinematics associated to the phase space definition
