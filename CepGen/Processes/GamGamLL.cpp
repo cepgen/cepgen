@@ -1110,7 +1110,7 @@ namespace CepGen
       const double mx2 = MX_*MX_, my2 = MY_*MY_;
 
       switch ( cuts_.mode ) {
-        case Kinematics::Mode::ElectronElectron: {
+        case Kinematics::Mode::ElectronElectron: default: {
           fp1 = FormFactors::trivial(); // electron (trivial) form factor
           fp2 = FormFactors::trivial(); // electron (trivial) form factor
         } break;

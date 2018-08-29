@@ -11,7 +11,7 @@ namespace CepGen
 {
   Kinematics::Kinematics() :
     incoming_beams( { { 6500., PDG::Proton, 10 }, { 6500., PDG::Proton, 10 } } ),
-    mode( Mode::ElasticElastic ), structure_functions( new SF::SuriYennie )
+    mode( Mode::invalid ), structure_functions( new SF::SuriYennie )
   {}
 
   Kinematics::~Kinematics()
@@ -37,6 +37,8 @@ namespace CepGen
   operator<<( std::ostream& os, const Kinematics::Mode& pm )
   {
     switch ( pm ) {
+      case Kinematics::Mode::invalid:
+        return os << "invalid";
       case Kinematics::Mode::ElectronElectron:
         return os << "electron/electron";
       case Kinematics::Mode::ElectronProton:
