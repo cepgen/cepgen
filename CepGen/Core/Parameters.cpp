@@ -178,14 +178,8 @@ namespace CepGen
         os << std::setw( wt ) << "Structure functions" << kinematics.structure_functions->type << "\n";
     }
     std::ostringstream ip1, ip2;
-    if ( kinematics.incoming_beams.first.hi )
-      ip1 << kinematics.incoming_beams.first.hi;
-    else
-      ip1 << kinematics.incoming_beams.first.pdg;
-    if ( kinematics.incoming_beams.second.hi )
-      ip2 << kinematics.incoming_beams.second.hi;
-    else
-      ip2 << kinematics.incoming_beams.second.pdg;
+    ip1 << kinematics.incoming_beams.first.pdg;
+    ip2 << kinematics.incoming_beams.second.pdg;
     os
       << std::setw( wt ) << "Incoming particles" << ( pretty ? boldify( ip1.str().c_str() ) : ip1.str() ) << ", " << ( pretty ? boldify( ip2.str().c_str() ) : ip2.str() ) << "\n"
       << std::setw( wt ) << "Momenta (GeV/c)" << kinematics.incoming_beams.first.pz << ", " << kinematics.incoming_beams.second.pz << "\n";

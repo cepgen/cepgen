@@ -60,13 +60,9 @@ namespace CepGen
 
       if ( cuts_.mode == Kinematics::Mode::invalid ) {
         bool el1 = false, el2 = false;
-        if ( flux1 == Flux::P_Photon_Elastic
-          || flux1 == Flux::HI_Photon_Elastic
-          || flux1 == Flux::P_Gluon_KMR )
+        if ( flux1 == Flux::P_Photon_Elastic )
           el1 = true;
-        if ( flux2 == Flux::P_Photon_Elastic
-          || flux2 == Flux::HI_Photon_Elastic
-          || flux2 == Flux::P_Gluon_KMR )
+        if ( flux2 == Flux::P_Photon_Elastic )
           el2 = true;
         if ( el1 && el2 )
           cuts_.mode = Kinematics::Mode::ElasticElastic;

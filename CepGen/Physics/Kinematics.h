@@ -9,7 +9,6 @@
 
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/Cuts.h"
-#include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/Limits.h"
 
 #include <vector>
