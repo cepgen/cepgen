@@ -136,6 +136,7 @@ namespace CepGen
           double eta() const;
           /// Rapidity
           double rapidity() const;
+          void truncate( double tolerance = 1.e-10 );
           /// Rotate the transverse components by an angle phi (and reflect the y coordinate)
           Momentum& rotatePhi( double phi, double sign );
           /// Rotate the particle's momentum by a polar/azimuthal angle

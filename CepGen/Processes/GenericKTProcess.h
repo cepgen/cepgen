@@ -45,6 +45,7 @@ namespace CepGen
 
         void dumpVariables() const;
 
+        static constexpr double kMinFlux = 1.e-20;
         /// Type of incoming partons fluxes
         enum class Flux
         {
@@ -148,7 +149,6 @@ namespace CepGen
         std::vector<MappingVariable> mapped_variables_;
 
       private:
-        static const double kMinFlux;
         /// First and second intermediate parton (photon, pomeron, ...)
         std::array<PDG,2> kIntermediateParts;
         /// Type of particles produced in the final state

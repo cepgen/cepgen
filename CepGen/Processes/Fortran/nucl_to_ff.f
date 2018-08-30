@@ -453,21 +453,19 @@ c     =================================================================
       coupling = coupling * 3.d0
 
 c     ============================================
-c     unintegrated photon distributions
+c     unintegrated parton distributions
 c     ============================================
 
       if(a_nuc1.le.1) then
-        f1 = CepGen_kT_flux(iflux1,q1t2,x1,sfmod,am_x)
+        f1 = CepGen_kT_flux(iflux1,x1,q1t2,sfmod,am_x)
       else
-        f1 = CepGen_kT_flux_HI(iflux1,q1t2,x1,a_nuc1,z_nuc1)
+        f1 = CepGen_kT_flux_HI(iflux1,x1,q1t2,a_nuc1,z_nuc1)
       endif
       if(a_nuc2.le.1) then
-        f2 = CepGen_kT_flux(iflux2,q2t2,x2,sfmod,am_y)
+        f2 = CepGen_kT_flux(iflux2,x2,q2t2,sfmod,am_y)
       else
-        f2 = CepGen_kT_flux_HI(iflux2,q2t2,x2,a_nuc2,z_nuc2)
+        f2 = CepGen_kT_flux_HI(iflux2,x2,q2t2,a_nuc2,z_nuc2)
       endif
-      if(f1.lt.1.d-20) f1 = 0.0d0
-      if(f2.lt.1.d-20) f2 = 0.0d0
 
 c     =================================================================
 c     factor 2.*pi below from integration over phi_sum

@@ -66,15 +66,12 @@ namespace CepGen
                  flux2 = (Flux)cuts_.incoming_beams.second.kt_flux;
 
       if ( cuts_.mode == Kinematics::Mode::invalid ) {
-        bool el1 = false, el2 = false;
-        if ( flux1 == Flux::P_Photon_Elastic
-          || flux1 == Flux::HI_Photon_Elastic
-          || flux1 == Flux::P_Gluon_KMR )
-          el1 = true;
-        if ( flux2 == Flux::P_Photon_Elastic
-          || flux2 == Flux::HI_Photon_Elastic
-          || flux2 == Flux::P_Gluon_KMR )
-          el2 = true;
+        bool el1 = ( flux1 == Flux::P_Photon_Elastic
+                  || flux1 == Flux::HI_Photon_Elastic
+                  || flux1 == Flux::P_Gluon_KMR );
+        bool el2 = ( flux2 == Flux::P_Photon_Elastic
+                  || flux2 == Flux::HI_Photon_Elastic
+                  || flux2 == Flux::P_Gluon_KMR );
         if ( el1 && el2 )
           cuts_.mode = Kinematics::Mode::ElasticElastic;
         else if ( el1 )
@@ -209,15 +206,13 @@ namespace CepGen
       return weight;
     }
 
-    const double GenericKTProcess::kMinFlux = 1.e-20;
-
     std::pair<double,double>
     GenericKTProcess::incomingFluxes( double x1, double q1t2, double x2, double q2t2 ) const
     {
       //--- compute fluxes according to modelling specified in parameters card
       std::pair<double,double> fluxes = {
-        std::max( flux( (Flux)cuts_.incoming_beams.first.kt_flux, x1, q1t2, *cuts_.structure_functions, MX_ ), kMinFlux ),
-        std::max( flux( (Flux)cuts_.incoming_beams.second.kt_flux, x2, q2t2, *cuts_.structure_functions, MY_ ), kMinFlux )
+        flux( (Flux)cuts_.incoming_beams.first.kt_flux, x1, q1t2, *cuts_.structure_functions, MX_ ),
+        flux( (Flux)cuts_.incoming_beams.second.kt_flux, x2, q2t2, *cuts_.structure_functions, MY_ )
       };
 
       CG_DEBUG_LOOP( "GenericKTProcess:fluxes" )
@@ -366,6 +361,7 @@ namespace CepGen
     double
     GenericKTProcess::flux( const Flux& type, double x, double kt2, StructureFunctions& sf, double mx )
     {
+      double flux = 0.;
       switch ( type ) {
         case Flux::P_Photon_Elastic: {
           const double x2 = x*x;
@@ -377,7 +373,7 @@ namespace CepGen
           const double ela1 = ( 1.-x )*( 1.-q2min/q2 );
           //const double ela3 = 1.-( q2-kt2 )/q2;
 
-          return Constants::alphaEM*M_1_PI*( 1.-x )/q2*( ela1*ff.FE + 0.5*x2*ff.FM );
+          flux = Constants::alphaEM*M_1_PI*( 1.-x )/q2*( ela1*ff.FE + 0.5*x2*ff.FM );
         } break;
         case Flux::P_Photon_Inelastic_Budnev: {
           const double mx2 = mx*mx, x2 = x*x;
@@ -391,21 +387,23 @@ namespace CepGen
           const double f_D = str_fun.F2/( q2+mx2-mp2_ ) * ( 1.-x )*( 1.-q2min/q2 );
           const double f_C = str_fun.F1( xbj, q2 ) * 2./q2;
 
-          return Constants::alphaEM*M_1_PI*( 1.-x )/q2*( f_D+0.5*x2*f_C );
+          flux = Constants::alphaEM*M_1_PI*( 1.-x )/q2*( f_D+0.5*x2*f_C );
         } break;
         case Flux::P_Gluon_KMR: {
-          const double logx = log10( x ), logq2 = log10( kt2 ), logmu2 = 2.*log10( mx );
-          return kmr::GluonGrid::get( kKMRInterpGridPath.c_str() )( logq2, logx, logmu2 );
+          flux = kmr::GluonGrid::get( kKMRInterpGridPath.c_str() )( log10( x ), log10( kt2 ), 2.*log10( mx ) );
         } break;
         default:
           throw CG_FATAL( "GenericKTProcess:flux" ) << "Invalid flux type: " << type;
       }
-      return 0.;
+      if ( flux < kMinFlux )
+        return 0.;
+      return flux;
     }
 
     double
     GenericKTProcess::flux( const Flux& type, double kt2, double x, const HeavyIon& hi )
     {
+      double flux = 0.;
       switch ( type ) {
         case Flux::HI_Photon_Elastic: {
           const double r_a = 1.1*std::pow( hi.A, 1./3 ), a0 = 0.7, m_a = hi.A*mp_;
@@ -414,14 +412,17 @@ namespace CepGen
           // "Realistic nuclear form-factor" as used in STARLIGHT
           const double ff1 = 3.*( sin( tau )-tau*cos( tau ) )/pow( tau+1.e-10, 3 );
           const double ff2 = 1./( 1.+tau1*tau1 );
-          const double ela1 = pow( kt2/( kt2+x*x*m_a*m_a ), 2 ), ela2 = pow( ff1*ff2, 2 )/*, ela3 = 1.-( q2_ela-kt2 )/q2_ela*/;
-          const double z2 = (unsigned short)hi.Z*(unsigned short)hi.Z;
-          return z2*Constants::alphaEM*M_1_PI*ela1*ela2/q2_ela;
+          const double ela1 = pow( kt2/( kt2+x*x*m_a*m_a ), 2 );
+          const double ela2 = pow( ff1*ff2, 2 )/*, ela3 = 1.-( q2_ela-kt2 )/q2_ela*/;
+          const unsigned int z = (unsigned short)hi.Z;
+          flux = Constants::alphaEM*M_1_PI*z*z*ela1*ela2/q2_ela;
         } break;
         default:
           throw CG_FATAL("GenericKTProcess:flux") << "Invalid flux type: " << type;
       }
-      return 0.;
+      if ( flux < kMinFlux )
+        return 0.;
+      return flux;
     }
 
     std::ostream&

@@ -29,10 +29,10 @@ namespace kmr
       std::string x_tmp, kt2_tmp, mu2_tmp, fg_tmp;
       while ( file >> x_tmp >> kt2_tmp >> mu2_tmp >> fg_tmp ) {
         const double x = stod( x_tmp ), kt2 = stod( kt2_tmp ), mu2 = stod( mu2_tmp ), fg = stod( fg_tmp );
-        kt2_vals.insert( kt2 );
         x_vals.insert( x );
+        kt2_vals.insert( kt2 );
         mu2_vals.insert( mu2 );
-        insert( { kt2, x, mu2 }, { fg } );
+        insert( { x, kt2, mu2 }, { fg } );
       }
       file.close();
     }
@@ -47,9 +47,9 @@ namespace kmr
   }
 
   double
-  GluonGrid::operator()( double kt2, double x, double mu2 ) const
+  GluonGrid::operator()( double x, double kt2, double mu2 ) const
   {
-    return CepGen::GridHandler<3,1>::eval( { kt2, x, mu2 } ).at( 0 );
+    return CepGen::GridHandler<3,1>::eval( { x, kt2, mu2 } ).at( 0 );
   }
 }
 

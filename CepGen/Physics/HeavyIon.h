@@ -6,6 +6,7 @@
 namespace CepGen
 {
   enum class PDG;
+  /// Enumeration of chemical elements
   enum class Element
   {
     invalid = 0,
@@ -19,11 +20,19 @@ namespace CepGen
   /// Heavy ion container (Z+A)
   struct HeavyIon
   {
+    /// General constructor from mass and atomic number
     HeavyIon( unsigned short a, const Element& z ) : A( a ), Z( z ) {}
+    /// Build from a custom PDG id
     HeavyIon( const PDG& pdg );
+    /// Simple proton
     static inline HeavyIon proton() { return HeavyIon( 1, Element::H ); }
+    /// Convert the HI into a custom PDG id
     operator PDG() const;
-    inline operator bool() const { return Z > Element::invalid; }
+    /// Check the validity of the heavy ion
+    inline operator bool() const {
+      return Z > Element::invalid && A > 1; // skip the proton
+    }
+    /// Human-readable expression of the ion
     friend std::ostream& operator<<( std::ostream& os, const HeavyIon& hi );
     /// Mass number
     unsigned short A;
