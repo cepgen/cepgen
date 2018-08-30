@@ -1,6 +1,6 @@
 import Config.Core as cepgen
+import Config.ktProcess_cfi as ktfactor
 from Config.integrators_cff import vegas as integrator
-from Config.ktProcess_cfi import ktProcess
 from Config.logger_cfi import logger
 from Config.pythia8_cff import pythia8 as hadroniser
 from Config.generator_cff import generator
@@ -20,7 +20,7 @@ hadroniser.pythiaPreConfiguration += (
     'ProcessLevel:resonanceDecays = off', # disable the W decays
 )
 
-process = ktProcess.clone('pptoww',
+process = ktfactor.process.clone('pptoww',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.ElasticElastic,
         polarisationStates = 0, # full
@@ -31,7 +31,7 @@ process = ktProcess.clone('pptoww',
         #structureFunctions = cepgen.StructureFunctions.ALLM97,
         structureFunctions = cepgen.StructureFunctions.LUXlike,
     ),
-    outKinematics = ktProcess.outKinematics.clone(
+    outKinematics = ktfactor.process.outKinematics.clone(
         mx = (1.07, 1000.),
         qt = (0., 1000.),
         #--- extra cuts on the pt(W+) and pt(W-) plane

@@ -1,7 +1,7 @@
 import Config.Core as cepgen
 from math import pi
 
-class Flux:
+class ProtonFlux:
     PhotonElastic         = 0
     PhotonInelastic       = 1
     PhotonInelasticBudnev = 11

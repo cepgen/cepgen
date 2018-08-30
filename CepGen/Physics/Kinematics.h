@@ -1,19 +1,14 @@
 #ifndef CepGen_Physics_Kinematics_h
 #define CepGen_Physics_Kinematics_h
 
-#include <iomanip>
-#include <algorithm>
-
-#include "CepGen/Core/Logger.h"
 #include "CepGen/Core/Hasher.h"
 
-#include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/Cuts.h"
-#include "CepGen/Physics/Limits.h"
 
+#include <ostream>
 #include <vector>
 #include <unordered_map>
-#include "CepGen/Core/Hasher.h"
+#include <memory>
 
 namespace CepGen
 {
@@ -47,6 +42,7 @@ namespace CepGen
         PDG pdg;
         unsigned short kt_flux;
       };
+      friend std::ostream& operator<<( std::ostream&, const Beam& );
       /// Beam/primary particle's kinematics
       std::pair<Beam,Beam> incoming_beams;
       /// Set the incoming particles' momenta (if the collision is symmetric)

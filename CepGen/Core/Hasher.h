@@ -1,6 +1,9 @@
 #ifndef CepGen_Core_Hasher_h
 #define CepGen_Core_Hasher_h
 
+#include <cstddef>
+#include <functional>
+
 namespace CepGen
 {
   template<class T,bool>

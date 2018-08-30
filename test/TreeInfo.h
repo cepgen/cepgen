@@ -1,6 +1,7 @@
 #ifndef Test_TreeInfo_h
 #define Test_TreeInfo_h
 
+#include "TFile.h"
 #include "TTree.h"
 #include "Math/Vector3D.h"
 #include "Math/Vector4D.h"
