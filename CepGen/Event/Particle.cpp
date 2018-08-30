@@ -159,7 +159,7 @@ namespace CepGen
   {
     pdg_id_ = (PDG)abs( pdg );
     switch ( pdg_id_ ) {
-      case PDG::Electron: case PDG::Muon: case PDG::Tau:
+      case PDG::electron: case PDG::muon: case PDG::tau:
         charge_sign_ = -pdg/abs( pdg ); break;
       default:
         charge_sign_ = pdg/abs( pdg ); break;
@@ -171,7 +171,7 @@ namespace CepGen
   {
     pdg_id_ = pdg;
     switch ( pdg_id_ ) {
-      case PDG::Electron: case PDG::Muon: case PDG::Tau:
+      case PDG::electron: case PDG::muon: case PDG::tau:
         charge_sign_ = -ch; break;
       default:
         charge_sign_ = ch; break;

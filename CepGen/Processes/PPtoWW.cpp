@@ -18,7 +18,7 @@ namespace CepGen
     const double PPtoWW::mw2_ = PPtoWW::mw_*PPtoWW::mw_;
 
     PPtoWW::PPtoWW( const ParametersList& params ) :
-      GenericKTProcess( params, "pptoww", "ɣɣ → W⁺W¯", { { PDG::Photon, PDG::Photon } }, { PDG::W, PDG::W } ),
+      GenericKTProcess( params, "pptoww", "ɣɣ → W⁺W¯", { { PDG::photon, PDG::photon } }, { PDG::W, PDG::W } ),
       method_( params.get<int>( "method", 1 ) ),
       pol_state_( (Polarisation)params.get<int>( "polarisationStates", 0 ) ),
       y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )

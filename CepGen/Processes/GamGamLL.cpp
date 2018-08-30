@@ -50,13 +50,13 @@ namespace CepGen
     GamGamLL::addEventContent()
     {
       GenericProcess::setEventContent( {
-        { Particle::IncomingBeam1, PDG::Proton },
-        { Particle::IncomingBeam2, PDG::Proton },
-        { Particle::Parton1, PDG::Photon },
-        { Particle::Parton2, PDG::Photon }
+        { Particle::IncomingBeam1, PDG::proton },
+        { Particle::IncomingBeam2, PDG::proton },
+        { Particle::Parton1, PDG::photon },
+        { Particle::Parton2, PDG::photon }
       }, {
-        { Particle::OutgoingBeam1, { PDG::Proton } },
-        { Particle::OutgoingBeam2, { PDG::Proton } },
+        { Particle::OutgoingBeam1, { PDG::proton } },
+        { Particle::OutgoingBeam2, { PDG::proton } },
         { Particle::CentralSystem, { (PDG)pair_, (PDG)pair_ } }
       } );
     }
@@ -613,7 +613,7 @@ namespace CepGen
     double
     GamGamLL::computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dw )
     {
-      const double mx0 = mp_+ParticleProperties::mass( PDG::PiZero ); // 1.07
+      const double mx0 = mp_+ParticleProperties::mass( PDG::piZero ); // 1.07
       const double wx2min = pow( std::max( mx0, mx_limits_.min() ), 2 ),
                    wx2max = pow( std::min( sqs_-outmass-2.*lepmass, mx_limits_.max() ), 2 );
 

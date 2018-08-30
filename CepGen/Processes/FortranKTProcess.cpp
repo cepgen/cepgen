@@ -42,12 +42,12 @@ namespace CepGen
   namespace Process
   {
     FortranKTProcess::FortranKTProcess( const ParametersList& params, const char* name, const char* descr, std::function<void( double& )> func ) :
-      GenericKTProcess( params, name, descr, { { PDG::Photon, PDG::Photon } }, { PDG::Muon, PDG::Muon } ),
+      GenericKTProcess( params, name, descr, { { PDG::photon, PDG::photon } }, { PDG::muon, PDG::muon } ),
       pair_( params.get<int>( "pair", 13 ) ),
       method_( params.get<int>( "method", 1 ) ),
       func_( func )
     {
-      constants_.m_p = ParticleProperties::mass( PDG::Proton );
+      constants_.m_p = ParticleProperties::mass( PDG::proton );
       constants_.units = Constants::GeV2toBarn;
       constants_.pi = M_PI;
       constants_.alpha_em = Constants::alphaEM;
@@ -110,9 +110,9 @@ namespace CepGen
       params_.iflux1 = cuts_.incoming_beams.first.kt_flux;
       params_.iflux2 = cuts_.incoming_beams.second.kt_flux;
       if ( (Flux)params_.iflux1 == Flux::P_Gluon_KMR )
-        event_->getOneByRole( Particle::Parton1 ).setPdgId( PDG::Gluon );
+        event_->getOneByRole( Particle::Parton1 ).setPdgId( PDG::gluon );
       if ( (Flux)params_.iflux2 == Flux::P_Gluon_KMR )
-        event_->getOneByRole( Particle::Parton2 ).setPdgId( PDG::Gluon );
+        event_->getOneByRole( Particle::Parton2 ).setPdgId( PDG::gluon );
     }
 
     double

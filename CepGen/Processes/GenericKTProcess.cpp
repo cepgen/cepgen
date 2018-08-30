@@ -37,14 +37,14 @@ namespace CepGen
     {
       GenericProcess::setEventContent(
         { // incoming state
-          { Particle::IncomingBeam1, PDG::Proton },
-          { Particle::IncomingBeam2, PDG::Proton },
+          { Particle::IncomingBeam1, PDG::proton },
+          { Particle::IncomingBeam2, PDG::proton },
           { Particle::Parton1, kIntermediateParts[0] },
           { Particle::Parton2, kIntermediateParts[1] }
         },
         { // outgoing state
-          { Particle::OutgoingBeam1, { PDG::Proton } },
-          { Particle::OutgoingBeam2, { PDG::Proton } },
+          { Particle::OutgoingBeam1, { PDG::proton } },
+          { Particle::OutgoingBeam2, { PDG::proton } },
           { Particle::CentralSystem, kProducedParts }
         }
       );

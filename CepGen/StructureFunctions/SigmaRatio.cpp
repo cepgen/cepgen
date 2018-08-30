@@ -9,7 +9,7 @@ namespace CepGen
 {
   namespace SF
   {
-    const double SigmaRatio::mp_ = ParticleProperties::mass( PDG::Proton );
+    const double SigmaRatio::mp_ = ParticleProperties::mass( PDG::proton );
     const double SigmaRatio::mp2_ = SigmaRatio::mp_*SigmaRatio::mp_;
 
     double
