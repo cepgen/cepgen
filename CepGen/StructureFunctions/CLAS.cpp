@@ -16,7 +16,7 @@ namespace CepGen
       Parameterisation params;
       params.mode = Parameterisation::proton;
       params.mp = mp_;
-      params.mpi0 = ParticleProperties::mass( PDG::PiZero );
+      params.mpi0 = ParticleProperties::mass( PDG::piZero );
       // SLAC fit parameters
       params.c_slac = { { 0.25615, 2.1785, 0.89784, -6.7162, 3.7557, 1.6421, 0.37636 } };
       // CLAS parameterisation

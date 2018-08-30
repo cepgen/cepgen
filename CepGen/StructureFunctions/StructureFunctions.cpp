@@ -10,7 +10,7 @@
 
 namespace CepGen
 {
-  const double StructureFunctions::mp_ = ParticleProperties::mass( PDG::Proton );
+  const double StructureFunctions::mp_ = ParticleProperties::mass( PDG::proton );
   const double StructureFunctions::mp2_ = StructureFunctions::mp_*StructureFunctions::mp_;
 
   double

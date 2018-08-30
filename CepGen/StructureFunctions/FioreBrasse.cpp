@@ -104,7 +104,7 @@ namespace CepGen
         return *this;
       old_vals_ = nv;
 
-      const double m_min = mp_+ParticleProperties::mass( PDG::PiZero );
+      const double m_min = mp_+ParticleProperties::mass( PDG::piZero );
 
       const double mx2 = mp2_ + q2*( 1.-xbj )/xbj, mx = sqrt( mx2 );
 

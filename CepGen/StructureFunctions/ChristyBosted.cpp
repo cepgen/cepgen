@@ -14,8 +14,8 @@ namespace CepGen
     double
     ChristyBosted::resmod507( char sf, double w2, double q2 ) const
     {
-      const double mpi = ParticleProperties::mass( PDG::PiZero ), mpi2 = mpi*mpi,
-                   meta = ParticleProperties::mass( PDG::Eta ), meta2 = meta*meta;
+      const double mpi = ParticleProperties::mass( PDG::piZero ), mpi2 = mpi*mpi,
+                   meta = ParticleProperties::mass( PDG::eta ), meta2 = meta*meta;
       const double w = sqrt( w2 );
 
       const double xb = q2/( q2+w2-mp2_ );
@@ -245,7 +245,7 @@ namespace CepGen
       old_vals_ = nv;
 
       const double w2 = mp2_ + q2*( 1.-xbj )/xbj;
-      const double w_min = mp_+ParticleProperties::mass( PDG::PiZero );
+      const double w_min = mp_+ParticleProperties::mass( PDG::piZero );
 
       if ( sqrt( w2 ) < w_min ) {
         F2 = 0.;

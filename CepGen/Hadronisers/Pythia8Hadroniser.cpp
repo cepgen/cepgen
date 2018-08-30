@@ -284,7 +284,7 @@ namespace CepGen
   //================================================================================================
 
 #ifdef PYTHIA8
-  const double LHAEvent::mp_ = ParticleProperties::mass( PDG::Proton );
+  const double LHAEvent::mp_ = ParticleProperties::mass( PDG::proton );
   const double LHAEvent::mp2_ = LHAEvent::mp_*LHAEvent::mp_;
 
   LHAEvent::LHAEvent( const Parameters* params ) :

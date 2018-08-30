@@ -31,7 +31,7 @@ int main( int argc, char* argv[] ) {
 
     //--- default run: LPAIR elastic ɣɣ → µ⁺µ¯ at 13 TeV
     CepGen::ParametersList pgen;
-    pgen.set<int>( "pair", (int)CepGen::PDG::Muon );
+    pgen.set<int>( "pair", (int)CepGen::PDG::muon );
     gen.parameters->setProcess( new CepGen::Process::GamGamLL( pgen ) );
     gen.parameters->kinematics.mode = CepGen::Kinematics::Mode::ElasticElastic;
     gen.parameters->kinematics.cuts.central.pt_single.min() = 15.;

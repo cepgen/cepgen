@@ -1,5 +1,6 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Parameters.h"
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Timer.h"
 
 #include "CepGen/Processes/GamGamLL.h"
@@ -101,12 +102,15 @@ main( int argc, char* argv[] )
 
   try {
     for ( const auto& values_vs_generator : values_map ) { // loop over all generators
+      CepGen::ParametersList param;
       const string generator = values_vs_generator.first;
-      if ( generator == "lpair"  )
-        mg.parameters->setProcess( new CepGen::Process::GamGamLL );
+      if ( generator == "lpair"  ) {
+        param.set<int>( "pair", 13 );
+        mg.parameters->setProcess( new CepGen::Process::GamGamLL( param ) );
+      }
       else if ( generator == "pptoll" ) {
-        mg.parameters->setProcess( new CepGen::Process::PPtoFF );
-        mg.parameters->kinematics.central_system = { CepGen::PDG::Muon, CepGen::PDG::Muon };
+        param.set<int>( "pair", 13 );
+        mg.parameters->setProcess( new CepGen::Process::PPtoFF( param ) );
         mg.parameters->kinematics.cuts.initial.qt = { 0., 50. };
       }
       else if ( generator == "pptoww" ) {
