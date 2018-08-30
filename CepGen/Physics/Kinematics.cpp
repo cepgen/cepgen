@@ -10,7 +10,7 @@
 namespace CepGen
 {
   Kinematics::Kinematics() :
-    incoming_beams( { { 6500., PDG::Proton, HeavyIon::Proton(), 10 }, { 6500., PDG::Proton, HeavyIon::Proton(), 10 } } ),
+    incoming_beams( { { 6500., PDG::Proton, HeavyIon::proton(), 10 }, { 6500., PDG::Proton, HeavyIon::proton(), 10 } } ),
     mode( Mode::invalid ), structure_functions( new SF::SuriYennie )
   {}
 

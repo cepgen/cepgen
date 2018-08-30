@@ -87,13 +87,18 @@ namespace CepGen
         if ( ( cuts_.mode == Kinematics::Mode::ElasticElastic ||
                cuts_.mode == Kinematics::Mode::ElasticInelastic )
           && ( flux1 != Flux::P_Photon_Elastic ) ) {
-          cuts_.incoming_beams.first.kt_flux = (unsigned short)Flux::P_Photon_Elastic;
+          cuts_.incoming_beams.first.kt_flux = ( !cuts_.incoming_beams.first.hi )
+            ? (unsigned short)Flux::P_Photon_Elastic
+            : (unsigned short)Flux::HI_Photon_Elastic;
           CG_DEBUG( "GenericKTProcess:kinematics" )
             << "Set the kt flux for first incoming photon to \""
             << cuts_.incoming_beams.first.kt_flux << "\".";
         }
         else if ( flux1 != Flux::P_Photon_Inelastic
                && flux1 != Flux::P_Photon_Inelastic_Budnev ) {
+          if ( cuts_.incoming_beams.first.hi )
+            throw CG_FATAL( "GenericKTProcess:kinematics" )
+              << "Inelastic photon emission from HI not yet supported!";
           cuts_.incoming_beams.first.kt_flux = (unsigned short)Flux::P_Photon_Inelastic_Budnev;
           CG_DEBUG( "GenericKTProcess:kinematics" )
             << "Set the kt flux for first incoming photon to \""
@@ -105,13 +110,18 @@ namespace CepGen
         if ( ( cuts_.mode == Kinematics::Mode::ElasticElastic ||
                cuts_.mode == Kinematics::Mode::InelasticElastic )
           && ( flux2 != Flux::P_Photon_Elastic ) ) {
-          cuts_.incoming_beams.second.kt_flux = (unsigned short)Flux::P_Photon_Elastic;
+          cuts_.incoming_beams.second.kt_flux = ( !cuts_.incoming_beams.second.hi )
+            ? (unsigned short)Flux::P_Photon_Elastic
+            : (unsigned short)Flux::HI_Photon_Elastic;
           CG_DEBUG( "GenericKTProcess:kinematics" )
             << "Set the kt flux for second incoming photon to \""
             << cuts_.incoming_beams.second.kt_flux << "\".";
         }
         else if ( flux2 != Flux::P_Photon_Inelastic
                && flux2 != Flux::P_Photon_Inelastic_Budnev ) {
+          if ( cuts_.incoming_beams.second.hi )
+            throw CG_FATAL( "GenericKTProcess:kinematics" )
+              << "Inelastic photon emission from HI not yet supported!";
           cuts_.incoming_beams.second.kt_flux = (unsigned short)Flux::P_Photon_Inelastic_Budnev;
           CG_DEBUG( "GenericKTProcess:kinematics" )
             << "Set the kt flux for second incoming photon to \""
@@ -398,9 +408,11 @@ namespace CepGen
           const double q2_ela = ( kt2+x*x*m_a*m_a )/( 1.-x ), cons = sqrt( q2_ela )/0.1973;
           const double tau = cons*r_a, tau1 = cons*a0;
           // "Realistic nuclear form-factor" as used in STARLIGHT
-          const double ff1 = 3.*( sin( tau )-tau*cos( tau ) )/pow( tau+1.e-10, 3 ), ff2 = 1./( 1.+tau1*tau1 );
+          const double ff1 = 3.*( sin( tau )-tau*cos( tau ) )/pow( tau+1.e-10, 3 );
+          const double ff2 = 1./( 1.+tau1*tau1 );
           const double ela1 = pow( kt2/( kt2+x*x*m_a*m_a ), 2 ), ela2 = pow( ff1*ff2, 2 )/*, ela3 = 1.-( q2_ela-kt2 )/q2_ela*/;
-          return hi.Z*hi.Z*Constants::alphaEM*M_1_PI*ela1*ela2/q2_ela;
+          const double z2 = (unsigned short)hi.Z*(unsigned short)hi.Z;
+          return z2*Constants::alphaEM*M_1_PI*ela1*ela2/q2_ela;
         } break;
         default:
           throw CG_FATAL("GenericKTProcess:flux") << "Invalid flux type: " << type;

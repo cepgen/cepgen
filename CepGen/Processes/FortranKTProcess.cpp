@@ -90,13 +90,13 @@ namespace CepGen
       params_.inp1 = cuts_.incoming_beams.first.pz;
       params_.inp2 = cuts_.incoming_beams.second.pz;
       params_.a_nuc1 = cuts_.incoming_beams.first.hi.A;
-      params_.z_nuc1 = cuts_.incoming_beams.first.hi.Z;
+      params_.z_nuc1 = (unsigned short)cuts_.incoming_beams.first.hi.Z;
       if ( params_.z_nuc1 > 1 ) {
         event_->getOneByRole( Particle::IncomingBeam1 ).setPdgId( cuts_.incoming_beams.first.hi );
         event_->getOneByRole( Particle::OutgoingBeam1 ).setPdgId( cuts_.incoming_beams.first.hi );
       }
       params_.a_nuc2 = cuts_.incoming_beams.second.hi.A;
-      params_.z_nuc2 = cuts_.incoming_beams.second.hi.Z;
+      params_.z_nuc2 = (unsigned short)cuts_.incoming_beams.second.hi.Z;
       if ( params_.z_nuc2 > 1 ) {
         event_->getOneByRole( Particle::IncomingBeam2 ).setPdgId( cuts_.incoming_beams.second.hi );
         event_->getOneByRole( Particle::OutgoingBeam2 ).setPdgId( cuts_.incoming_beams.second.hi );

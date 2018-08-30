@@ -23,7 +23,7 @@ c     =================================================================
       double precision ptsum
       double precision that1,that2,that,uhat1,uhat2,uhat
       double precision term1,term2,term3,term4,term5,term6,term7
-      double precision term8,term9,term10,auxil_gamgam,g_em,amat2
+      double precision term8,term9,term10,amat2
       double precision ak1_x,ak1_y,ak2_x,ak2_y
       double precision eps12,eps22
       double precision aux2_1,aux2_2,f1,f2
@@ -334,13 +334,9 @@ c     =================================================================
       term9  = -that**3*uhat
       term10 = -that*uhat**3
 
-      auxil_gamgam = -2.d0*(  term1+term2+term3+term4+term5
+      amat2 = -2.d0*(  term1+term2+term3+term4+term5
      2                    +term6+term7+term8+term9+term10 )
      3             / ( (am_l**2-that)**2 * (am_l**2-uhat)**2 )
-
-      g_em = dsqrt(4.d0*pi*alpha_em)
-
-      amat2 = g_em**4*auxil_gamgam
 
       elseif(imethod.eq.1)then
 c     =================================================================
@@ -409,6 +405,22 @@ c     =================================================================
      4     - iterm12*4.d0*z2p*z2m*(z2p-z2m)*Phi20
      5     *(q2tx*Phi21_x+q2ty*Phi21_y)
 
+c     =================================================================
+c     convention of matrix element as in our kt-factorization
+c     for heavy flavours
+c     =================================================================
+
+      amat2_1 = (x1*x2*s)**2 * aux2_1 * 2.*z1p*z1m*q1t2 / (q1t2*q2t2)
+      amat2_2 = (x1*x2*s)**2 * aux2_2 * 2.*z2p*z2m*q2t2 / (q1t2*q2t2)
+
+c     =================================================================
+c     symmetrization
+c     =================================================================
+
+      amat2 = (imat1*amat2_1 + imat2*amat2_2)/2.d0
+
+      endif
+
       coupling = 1.d0
 c     =================================================================
 c     first parton coupling
@@ -431,24 +443,6 @@ c     second parton coupling
 c     =================================================================
       coupling = coupling * 4.d0*pi*alpha_em*q_l**2 ! photon exchange
       coupling = coupling * 3.d0
-
-c     =================================================================
-c     convention of matrix element as in our kt-factorization
-c     for heavy flavours
-c     =================================================================
-
-      amat2_1 = coupling*(x1*x2*s)**2
-     &        * aux2_1 * 2.*z1p*z1m*q1t2 / (q1t2*q2t2)
-      amat2_2 = coupling*(x1*x2*s)**2
-     &        * aux2_2 * 2.*z2p*z2m*q2t2 / (q1t2*q2t2)
-
-c     =================================================================
-c     symmetrization
-c     =================================================================
-
-      amat2 = (imat1*amat2_1 + imat2*amat2_2)/2.d0
-
-      endif
 
 c     ============================================
 c     unintegrated photon distributions
@@ -475,6 +469,7 @@ c     over d^2 kappa_1 d^2 kappa_2 instead d kappa_1^2 d kappa_2^2
 c     =================================================================
 
       aintegral = (2.d0*pi)*1.d0/(16.d0*pi**2*(x1*x2*s)**2) * amat2
+     &          * coupling
      &          * f1/pi * f2/pi * (1.d0/4.d0) * units
      &          * 0.5d0 * 4.0d0 / (4.d0*pi)
 

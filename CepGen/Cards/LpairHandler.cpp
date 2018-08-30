@@ -111,11 +111,14 @@ namespace CepGen
       registerParameter<int>( "PMOD", "Outgoing primary particles' mode", (int*)&params->kinematics.structure_functions );
       registerParameter<int>( "EMOD", "Outgoing primary particles' mode", (int*)&params->kinematics.structure_functions );
       registerParameter<int>( "PAIR", "Outgoing particles' PDG id", (int*)&proc_params_->operator[]<int>( "pair" ) );
+      registerParameter<int>( "INZ1", "Heavy ion atomic number (1st incoming beam)", (int*)&params->kinematics.incoming_beams.first.hi.Z );
+      registerParameter<int>( "INA1", "Heavy ion atomic weight (1st incoming beam)", (int*)&params->kinematics.incoming_beams.first.hi.A );
+      registerParameter<int>( "INZ2", "Heavy ion atomic number (1st incoming beam)", (int*)&params->kinematics.incoming_beams.second.hi.Z );
+      registerParameter<int>( "INA2", "Heavy ion atomic weight (1st incoming beam)", (int*)&params->kinematics.incoming_beams.second.hi.A );
       registerParameter<double>( "INP1", "Momentum (1st primary particle)", &params->kinematics.incoming_beams.first.pz );
       registerParameter<double>( "INP2", "Momentum (2nd primary particle)", &params->kinematics.incoming_beams.second.pz );
       registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params->kinematics.incoming_beams.first.pz );
       registerParameter<double>( "INPE", "Momentum (2nd primary particle)", &params->kinematics.incoming_beams.second.pz );
-      registerParameter<double>( "PTCT", "Minimal transverse momentum (single central outgoing particle)", &params->kinematics.cuts.central.pt_single.min() );
       registerParameter<double>( "MSCT", "Minimal central system mass", &params->kinematics.cuts.central.mass_sum.min() );
       registerParameter<double>( "ECUT", "Minimal energy (single central outgoing particle)", &params->kinematics.cuts.central.energy_single.min() );
       registerParameter<double>( "ETMN", "Minimal pseudo-rapidity (central outgoing particles)", &params->kinematics.cuts.central.eta_single.min() );
