@@ -13,7 +13,7 @@ process = ktfactor.process.clone('patoll',
         #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
         #structureFunctions = cepgen.StructureFunctions.ALLM91,
         structureFunctions = cepgen.StructureFunctions.LUXlike,
-        ktFluxes = (ktfactor.ProtonFlux.PhotonInelasticBudnev, ktfactor.HeavyFlux.PhotonElastic),
+        ktFluxes = (ktfactor.ProtonFlux.PhotonInelasticBudnev, ktfactor.HeavyIonFlux.PhotonElastic),
         heavyIonB = (208, 82),
     ),
     outKinematics = ktfactor.process.outKinematics.clone(

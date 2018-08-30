@@ -250,18 +250,18 @@ c     =================================================================
       px_plus = (1.d0-x1) * p1_plus
       px_minus = ((a_nuc1*am_x)**2 + q1tx**2 + q1ty**2)/2.d0/px_plus
 
-      px0 = (px_plus + px_minus)/dsqrt(2.d0)
-      pxz = (px_plus - px_minus)/dsqrt(2.d0)
-      pxx = - q1tx
-      pxy = - q1ty
+      px(1) = - q1tx
+      px(2) = - q1ty
+      px(3) = (px_plus - px_minus)/dsqrt(2.d0)
+      px(4) = (px_plus + px_minus)/dsqrt(2.d0)
 
       py_minus = (1.d0-x2) * p2_minus
       py_plus =  ((a_nuc2*am_y)**2 + q2tx**2 + q2ty**2)/2.d0/py_minus
 
-      py0 = (py_plus + py_minus)/dsqrt(2.d0)
-      pyz = (py_plus - py_minus)/dsqrt(2.d0)
-      pyx = - q2tx
-      pyy = - q2ty
+      py(1) = - q2tx
+      py(2) = - q2ty
+      py(3) = (py_plus - py_minus)/dsqrt(2.d0)
+      py(4) = (py_plus + py_minus)/dsqrt(2.d0)
 
       q1t = dsqrt(q1t2)
       q2t = dsqrt(q2t2)
@@ -270,15 +270,19 @@ c     =================================================================
 c     four-momenta of the outgoing central particles
 c     =================================================================
 
-      p10 = alpha1*ak10 + beta1*ak20
-      p1x = pt1x
-      p1y = pt1y
-      p1z = alpha1*ak1z + beta1*ak2z
+      nout = 2
 
-      p20 = alpha2*ak10 + beta2*ak20
-      p2x = pt2x
-      p2y = pt2y
-      p2z = alpha2*ak1z + beta2*ak2z
+      ipdg(1) = pdg_l
+      pc(1,1) = pt1x
+      pc(2,1) = pt1y
+      pc(3,1) = alpha1*ak1z + beta1*ak2z
+      pc(4,1) = alpha1*ak10 + beta1*ak20
+
+      ipdg(2) = -pdg_l
+      pc(1,2) = pt2x
+      pc(2,2) = pt2y
+      pc(3,2) = alpha2*ak1z + beta2*ak2z
+      pc(4,2) = alpha2*ak10 + beta2*ak20
 
       eta1 = 0.5d0*dlog((dsqrt(amt1**2*(dcosh(y1))**2 - am_l**2) +
      2       amt1*dsinh(y1))/(dsqrt(amt1**2*(dcosh(y1))**2 - am_l**2)
@@ -304,10 +308,14 @@ c     =================================================================
 c     Mendelstam variables
 c     =================================================================
 
-      that1 = (q10-p10)**2 -(q1tx-p1x)**2 -(q1ty-p1y)**2 -(q1z-p1z)**2
-      uhat1 = (q10-p20)**2 -(q1tx-p2x)**2 -(q1ty-p2y)**2 -(q1z-p2z)**2
-      that2 = (q20-p20)**2 -(q2tx-p2x)**2 -(q2ty-p2y)**2 -(q2z-p2z)**2
-      uhat2 = (q20-p10)**2 -(q2tx-p1x)**2 -(q2ty-p1y)**2 -(q2z-p1z)**2
+      that1 = (q10-pc(1,4))**2
+     &       -(q1tx-pc(1,1))**2-(q1ty-pc(2,1))**2-(q1z-pc(3,1))**2
+      uhat1 = (q10-pc(2,4))**2
+     &       -(q1tx-pc(1,2))**2-(q1ty-pc(2,2))**2-(q1z-pc(3,2))**2
+      that2 = (q20-pc(2,4))**2
+     &       -(q2tx-pc(1,2))**2-(q2ty-pc(2,2))**2-(q2z-pc(3,2))**2
+      uhat2 = (q20-pc(1,4))**2
+     &       -(q2tx-pc(1,1))**2-(q2ty-pc(2,1))**2-(q2z-pc(3,1))**2
 
       that = (that1+that2)/2.d0
       uhat = (uhat1+uhat2)/2.d0

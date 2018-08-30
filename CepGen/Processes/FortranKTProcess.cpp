@@ -25,8 +25,9 @@ extern "C"
     double dely_min, dely_max;
   };
   struct EventKinematics {
-    double p10, p1x, p1y, p1z, p20, p2x, p2y, p2z;
-    double px0, pxx, pxy, pxz, py0, pyx, pyy, pyz;
+    double px[4], py[4];
+    int nout, idum, pdg[4];
+    double pc[4][4];
   };
 
   extern Constants constants_;
@@ -92,14 +93,14 @@ namespace CepGen
       params_.a_nuc1 = cuts_.incoming_beams.first.hi.A;
       params_.z_nuc1 = (unsigned short)cuts_.incoming_beams.first.hi.Z;
       if ( params_.z_nuc1 > 1 ) {
-        event_->getOneByRole( Particle::IncomingBeam1 ).setPdgId( cuts_.incoming_beams.first.hi );
-        event_->getOneByRole( Particle::OutgoingBeam1 ).setPdgId( cuts_.incoming_beams.first.hi );
+        event_->getOneByRole( Particle::IncomingBeam1 ).setPdgId( (PDG)cuts_.incoming_beams.first.hi );
+        event_->getOneByRole( Particle::OutgoingBeam1 ).setPdgId( (PDG)cuts_.incoming_beams.first.hi );
       }
       params_.a_nuc2 = cuts_.incoming_beams.second.hi.A;
       params_.z_nuc2 = (unsigned short)cuts_.incoming_beams.second.hi.Z;
       if ( params_.z_nuc2 > 1 ) {
-        event_->getOneByRole( Particle::IncomingBeam2 ).setPdgId( cuts_.incoming_beams.second.hi );
-        event_->getOneByRole( Particle::OutgoingBeam2 ).setPdgId( cuts_.incoming_beams.second.hi );
+        event_->getOneByRole( Particle::IncomingBeam2 ).setPdgId( (PDG)cuts_.incoming_beams.second.hi );
+        event_->getOneByRole( Particle::OutgoingBeam2 ).setPdgId( (PDG)cuts_.incoming_beams.second.hi );
       }
 
       //-------------------------------------------------------------------------------------------
@@ -139,8 +140,8 @@ namespace CepGen
       // outgoing beam remnants
       //===========================================================================================
 
-      PX_ = Particle::Momentum( evtkin_.pxx, evtkin_.pxy, evtkin_.pxz, evtkin_.px0 );
-      PY_ = Particle::Momentum( evtkin_.pyx, evtkin_.pyy, evtkin_.pyz, evtkin_.py0 );
+      PX_ = Particle::Momentum( evtkin_.px );
+      PY_ = Particle::Momentum( evtkin_.py );
       // express these momenta per nucleon
       PX_ *= 1./params_.a_nuc1;
       PY_ *= 1./params_.a_nuc2;
@@ -160,15 +161,13 @@ namespace CepGen
       // central system
       //===========================================================================================
 
-      Particle& ol1 = event_->getByRole( Particle::CentralSystem )[0];
-      ol1.setPdgId( (PDG)params_.pdg_l, +1 );
-      ol1.setStatus( Particle::Status::FinalState );
-      ol1.setMomentum( Particle::Momentum( evtkin_.p1x, evtkin_.p1y, evtkin_.p1z, evtkin_.p10 ) );
-
-      Particle& ol2 = event_->getByRole( Particle::CentralSystem )[1];
-      ol2.setPdgId( (PDG)params_.pdg_l, -1 );
-      ol2.setStatus( Particle::Status::FinalState );
-      ol2.setMomentum( Particle::Momentum( evtkin_.p2x, evtkin_.p2y, evtkin_.p2z, evtkin_.p20 ) );
+      Particles& oc = event_->getByRole( Particle::CentralSystem );
+      for ( int i = 0; i < evtkin_.nout; ++i ) {
+        auto& p = oc[i];
+        p.setPdgId( evtkin_.pdg[i] );
+        p.setStatus( Particle::Status::FinalState );
+        p.setMomentum( Particle::Momentum( evtkin_.pc[i] ) );
+      }
     }
   }
 }

@@ -22,6 +22,12 @@ namespace CepGen
     computeP();
   }
 
+  Momentum::Momentum( double* p ) :
+    px_( p[0] ), py_( p[1] ), pz_( p[2] ), energy_( p[3] )
+  {
+    computeP();
+  }
+
   //--- static constructors
 
   Momentum
