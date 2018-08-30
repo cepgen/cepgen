@@ -13,6 +13,11 @@ namespace CepGen
         case PDG::Electron:     return 0.510998928e-3;
         case PDG::Muon:         return 0.1056583715;
         case PDG::Tau:          return 1.77682;
+        case PDG::DownQuark:    return 0.0048;
+        case PDG::UpQuark:      return 0.0023;
+        case PDG::StrangeQuark: return 0.095;
+        case PDG::CharmQuark:   return 1.29;
+        case PDG::BottomQuark:  return 4.18;
         case PDG::TopQuark:     return 172.44;
         case PDG::ElectronNeutrino:
         case PDG::MuonNeutrino:
@@ -47,17 +52,20 @@ namespace CepGen
     charge( const PDG& pdg_id )
     {
       switch ( pdg_id ) {
-        case PDG::Proton:
-        case PDG::DiffractiveProton: return +1.;
-        case PDG::Electron:
-        case PDG::Muon:
-        case PDG::Tau:               return -1.;
-        case PDG::TopQuark:          return +2./3;
-        case PDG::W:                 return +1.;
-        case PDG::PiPlus:
-        case PDG::KPlus:
-        case PDG::DPlus:             return +1.;
-        default: return 0.;
+        case PDG::Proton: case PDG::DiffractiveProton:
+          return +1.;
+        case PDG::Electron: case PDG::Muon: case PDG::Tau:
+          return -1.;
+        case PDG::DownQuark: case PDG::StrangeQuark: case PDG::BottomQuark:
+          return -1./3;
+        case PDG::UpQuark: case PDG::CharmQuark: case PDG::TopQuark:
+          return +2./3;
+        case PDG::W:
+          return +1.;
+        case PDG::PiPlus: case PDG::KPlus: case PDG::DPlus:
+          return +1.;
+        default:
+          return 0.;
       }
     }
 
@@ -132,6 +140,11 @@ namespace CepGen
       case PDG::Neutron:          return os << "neutron";
       case PDG::Pomeron:          return os << "pomeron";
       case PDG::Reggeon:          return os << "reggeon";
+      case PDG::DownQuark:        return os << "d";
+      case PDG::UpQuark:          return os << "u";
+      case PDG::StrangeQuark:     return os << "s";
+      case PDG::CharmQuark:       return os << "c";
+      case PDG::BottomQuark:      return os << "b";
       case PDG::TopQuark:         return os << "t";
       case PDG::invalid:          return os << "[...]";
     }
