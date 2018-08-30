@@ -85,12 +85,12 @@ namespace CepGen
         //==========================================================================================
         // ensure the first incoming flux is compatible with the kinematics mode
         //==========================================================================================
-        if ( ( cuts_.mode == Kinematics::Mode::ElasticElastic ||
-               cuts_.mode == Kinematics::Mode::ElasticInelastic )
+        if ( ( cuts_.mode == Kinematics::Mode::ElasticElastic
+            || cuts_.mode == Kinematics::Mode::ElasticInelastic )
           && ( flux1 != Flux::P_Photon_Elastic ) ) {
-          cuts_.incoming_beams.first.kt_flux = ( !cuts_.incoming_beams.first.hi )
-            ? (unsigned short)Flux::P_Photon_Elastic
-            : (unsigned short)Flux::HI_Photon_Elastic;
+          cuts_.incoming_beams.first.kt_flux = ( cuts_.incoming_beams.first.hi )
+            ? (unsigned short)Flux::HI_Photon_Elastic
+            : (unsigned short)Flux::P_Photon_Elastic;
           CG_DEBUG( "GenericKTProcess:kinematics" )
             << "Set the kt flux for first incoming photon to \""
             << cuts_.incoming_beams.first.kt_flux << "\".";
@@ -108,12 +108,12 @@ namespace CepGen
         //==========================================================================================
         // ensure the second incoming flux is compatible with the kinematics mode
         //==========================================================================================
-        if ( ( cuts_.mode == Kinematics::Mode::ElasticElastic ||
-               cuts_.mode == Kinematics::Mode::InelasticElastic )
+        if ( ( cuts_.mode == Kinematics::Mode::ElasticElastic
+            || cuts_.mode == Kinematics::Mode::InelasticElastic )
           && ( flux2 != Flux::P_Photon_Elastic ) ) {
-          cuts_.incoming_beams.second.kt_flux = ( !cuts_.incoming_beams.second.hi )
-            ? (unsigned short)Flux::P_Photon_Elastic
-            : (unsigned short)Flux::HI_Photon_Elastic;
+          cuts_.incoming_beams.second.kt_flux = ( cuts_.incoming_beams.second.hi )
+            ? (unsigned short)Flux::HI_Photon_Elastic
+            : (unsigned short)Flux::P_Photon_Elastic;
           CG_DEBUG( "GenericKTProcess:kinematics" )
             << "Set the kt flux for second incoming photon to \""
             << cuts_.incoming_beams.second.kt_flux << "\".";
@@ -199,9 +199,10 @@ namespace CepGen
       const double weight = ( kt_jacobian_*aux_jacobian ) * integrand;
 
       CG_DEBUG_LOOP( "GenericKTProcess:weight" )
-        << "Jacobian = " << kt_jacobian_ << " * " << aux_jacobian
-        << "\n\tIntegrand = " << integrand
-        << "\n\tdW = " << weight << ".";
+        << "Jacobian: " << kt_jacobian_ << " * " << aux_jacobian
+        << " = " << ( kt_jacobian_*aux_jacobian ) << ".\n\t"
+        << "Integrand = " << integrand << "\n\t"
+        << "dW = " << weight << ".";
 
       return weight;
     }
