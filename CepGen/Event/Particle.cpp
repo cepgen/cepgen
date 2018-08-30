@@ -155,18 +155,26 @@ namespace CepGen
   }
 
   void
+  Particle::setPdgId( short pdg )
+  {
+    pdg_id_ = (PDG)abs( pdg );
+    switch ( pdg_id_ ) {
+      case PDG::Electron: case PDG::Muon: case PDG::Tau:
+        charge_sign_ = -pdg/abs( pdg ); break;
+      default:
+        charge_sign_ = pdg/abs( pdg ); break;
+    }
+  }
+
+  void
   Particle::setPdgId( const PDG& pdg, short ch )
   {
     pdg_id_ = pdg;
     switch ( pdg_id_ ) {
-      case PDG::Electron:
-      case PDG::Muon:
-      case PDG::Tau:
-        charge_sign_ = -ch;
-        break;
+      case PDG::Electron: case PDG::Muon: case PDG::Tau:
+        charge_sign_ = -ch; break;
       default:
-        charge_sign_ = ch;
-        break;
+        charge_sign_ = ch; break;
     }
   }
 

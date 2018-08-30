@@ -49,6 +49,8 @@ namespace CepGen
           Momentum();
           /// Build a 4-momentum using its 3-momentum coordinates and its energy
           Momentum( double x, double y, double z, double t = -1. );
+          /// Build a 4-momentum using its 3-momentum coordinates and its energy
+          Momentum( double* p );
 
           // --- static definitions
 
@@ -221,6 +223,9 @@ namespace CepGen
       /// \param[in] pdg PDG identifier
       /// \param[in] ch Electric charge (0, 1, or -1)
       void setPdgId( const PDG& pdg, short ch = 0 );
+      /// Set the PDG identifier (along with the particle's electric charge)
+      /// \param[in] pdg_id PDG identifier (incl. electric charge in e)
+      void setPdgId( short pdg_id );
       /// Retrieve the objectified PDG identifier
       inline PDG pdgId() const { return pdg_id_; }
       /// Retrieve the integer value of the PDG identifier
