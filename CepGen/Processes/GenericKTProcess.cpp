@@ -63,11 +63,8 @@ namespace CepGen
                  flux2 = (Flux)cuts_.incoming_beams.second.kt_flux;
 
       if ( cuts_.mode == Kinematics::Mode::invalid ) {
-        bool el1 = false, el2 = false;
-        if ( flux1 == Flux::P_Photon_Elastic )
-          el1 = true;
-        if ( flux2 == Flux::P_Photon_Elastic )
-          el2 = true;
+        bool el1 = ( flux1 == Flux::P_Photon_Elastic );
+        bool el2 = ( flux2 == Flux::P_Photon_Elastic );
         if ( el1 && el2 )
           cuts_.mode = Kinematics::Mode::ElasticElastic;
         else if ( el1 )
@@ -191,15 +188,13 @@ namespace CepGen
       return weight;
     }
 
-    const double GenericKTProcess::kMinFlux = 1.e-20;
-
     std::pair<double,double>
     GenericKTProcess::incomingFluxes( double x1, double q1t2, double x2, double q2t2 ) const
     {
       //--- compute fluxes according to modelling specified in parameters card
       std::pair<double,double> fluxes = {
-        std::max( flux( (Flux)cuts_.incoming_beams.first.kt_flux, x1, q1t2, *cuts_.structure_functions, MX_ ), kMinFlux ),
-        std::max( flux( (Flux)cuts_.incoming_beams.second.kt_flux, x2, q2t2, *cuts_.structure_functions, MY_ ), kMinFlux )
+        flux( (Flux)cuts_.incoming_beams.first.kt_flux, x1, q1t2, *cuts_.structure_functions, MX_ ),
+        flux( (Flux)cuts_.incoming_beams.second.kt_flux, x2, q2t2, *cuts_.structure_functions, MY_ )
       };
 
       CG_DEBUG_LOOP( "GenericKTProcess:fluxes" )
@@ -348,6 +343,7 @@ namespace CepGen
     double
     GenericKTProcess::flux( const Flux& type, double x, double kt2, StructureFunctions& sf, double mx )
     {
+      double flux = 0.;
       switch ( type ) {
         case Flux::P_Photon_Elastic: {
           const double x2 = x*x;
@@ -359,7 +355,7 @@ namespace CepGen
           const double ela1 = ( 1.-x )*( 1.-q2min/q2 );
           //const double ela3 = 1.-( q2-kt2 )/q2;
 
-          return Constants::alphaEM*M_1_PI*( 1.-x )/q2*( ela1*ff.FE + 0.5*x2*ff.FM );
+          flux = Constants::alphaEM*M_1_PI*( 1.-x )/q2*( ela1*ff.FE + 0.5*x2*ff.FM );
         } break;
         case Flux::P_Photon_Inelastic_Budnev: {
           const double mx2 = mx*mx, x2 = x*x;
@@ -373,12 +369,14 @@ namespace CepGen
           const double f_D = str_fun.F2/( q2+mx2-mp2_ ) * ( 1.-x )*( 1.-q2min/q2 );
           const double f_C = str_fun.F1( xbj, q2 ) * 2./q2;
 
-          return Constants::alphaEM*M_1_PI*( 1.-x )/q2*( f_D+0.5*x2*f_C );
+          flux = Constants::alphaEM*M_1_PI*( 1.-x )/q2*( f_D+0.5*x2*f_C );
         } break;
         default:
           throw CG_FATAL( "GenericKTProcess:flux" ) << "Invalid flux type: " << type;
       }
-      return 0.;
+      if ( flux < kMinFlux )
+        return 0.;
+      return flux;
     }
 
     std::ostream&

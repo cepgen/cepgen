@@ -20,7 +20,7 @@ extern "C" {
   }
 
   double
-  cepgen_kt_flux_( int& fmode, double& kt2, double& x, int& sfmode, double& mx )
+  cepgen_kt_flux_( int& fmode, double& x, double& kt2, int& sfmode, double& mx )
   {
     using namespace CepGen;
     using namespace CepGen::Process;

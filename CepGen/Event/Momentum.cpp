@@ -212,6 +212,20 @@ namespace CepGen
     p_ = std::hypot( pt(), pz_ );
   }
 
+  void
+  Momentum::truncate( double tolerance )
+  {
+    if ( px_ <= tolerance )
+      px_ = 0.;
+    if ( py_ <= tolerance )
+      py_ = 0.;
+    if ( pz_ <= tolerance )
+      pz_ = 0.;
+    if ( energy_ <= tolerance )
+      energy_ = 0.;
+    computeP();
+  }
+
   //--- various getters
 
   double
