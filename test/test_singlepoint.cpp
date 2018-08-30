@@ -1,6 +1,7 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Processes/GamGamLL.h"
+#include "CepGen/Core/Exception.h"
 
 using namespace std;
 
@@ -17,7 +18,7 @@ int main()
   p->kinematics.cuts.central.eta_single = { -2.5, 2.5 };
   p->kinematics.cuts.remnants.mass_single = { 1.07, 320. };
 
-  p->dump();
+  CG_INFO( "main" ) << p;
   CepGen::Logger::get().level = CepGen::Logger::Level::debugInsideLoop;
 
   const unsigned short ndim = g.numDimensions();

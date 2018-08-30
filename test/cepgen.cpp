@@ -53,7 +53,7 @@ int main( int argc, char* argv[] ) {
   }
 
   //--- list all parameters
-  gen.parameters->dump();
+  CG_INFO( "main" ) << gen.parameters.get();
 
   AbortHandler ctrl_c;
 

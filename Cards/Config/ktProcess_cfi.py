@@ -1,7 +1,12 @@
 import Config.Core as cepgen
 from math import pi
 
-ktProcess = cepgen.Module('ktProcess',
+class ProtonFlux:
+    PhotonElastic         = 0
+    PhotonInelastic       = 1
+    PhotonInelasticBudnev = 11
+
+process = cepgen.Module('ktProcess',
     outKinematics = cepgen.Parameters(
         qt = (0., 50.),
         phiqt = (0., 2.*pi),
