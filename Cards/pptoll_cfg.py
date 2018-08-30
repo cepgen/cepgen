@@ -1,9 +1,9 @@
 import Config.Core as cepgen
+import Config.ktProcess_cfi as ktfactor
 from Config.integrators_cff import miser as integrator
 #from Config.pythia8_cff import pythia8 as hadroniser
-from Config.ktProcess_cfi import ktProcess
 
-process = ktProcess.clone('pptoll',
+process = ktfactor.process.clone('pptoll',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.ElasticElastic,
     ),
@@ -12,7 +12,7 @@ process = ktProcess.clone('pptoll',
         structureFunctions = cepgen.StructureFunctions.SuriYennie,
         #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
     ),
-    outKinematics = ktProcess.outKinematics.clone(
+    outKinematics = ktfactor.process.outKinematics.clone(
         pair = 13,
         pt = (25.,),
         energy = (0.,),

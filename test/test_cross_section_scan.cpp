@@ -32,7 +32,7 @@ int main( int argc, char* argv[] )
   par->kinematics.cuts.remnants.mass_single.max() = 1000.0;
   par->setProcess( new CepGen::Process::GamGamLL );
   par->kinematics.mode = static_cast<CepGen::Kinematics::Mode>( proc_mode );
-  par->dump();
+  CG_INFO( "main" ) << par;
 
   double xsect, err_xsect;
 

@@ -146,8 +146,6 @@ namespace CepGen
       case PDG::CharmQuark:       return os << "c";
       case PDG::BottomQuark:      return os << "b";
       case PDG::TopQuark:         return os << "t";
-      case PDG::Pb208:            return os << "208Pb";
-      case PDG::Xe129:            return os << "129Xe";
       case PDG::invalid:          return os << "[...]";
     }
     return os;

@@ -29,9 +29,7 @@ namespace CepGen
     Upsilon1S = 553, Upsilon2S = 100553, Upsilon3S = 200553,
     Proton = 2212, Neutron = 2112,
     Pomeron = 990, Reggeon = 110,
-    DiffractiveProton = 9902210,
-    // heavy ions
-    Pb208 = 82208, Xe129 = 29063
+    DiffractiveProton = 9902210
   };
   std::ostream& operator<<( std::ostream& os, const PDG& pc );
 }

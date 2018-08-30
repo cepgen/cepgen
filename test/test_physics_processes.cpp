@@ -144,7 +144,7 @@ main( int argc, char* argv[] )
           else
             mg.parameters->kinematics.structure_functions = CepGen::StructureFunctionsBuilder::get( CepGen::SF::Type::SuriYennie );
 
-          //mg.parameters->dump();
+          //CG_INFO( "main" ) << mg.parameters.get();
           CG_INFO( "main" )
             << "Process: "<< values_vs_generator.first << "/" << values_vs_kin.first << "\n\t"
             << "Configuration time: " << tmr.elapsed()*1.e3 << " ms.";

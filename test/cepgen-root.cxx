@@ -3,15 +3,16 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Event/Event.h"
 
-// ROOT includes
-#include "TFile.h"
-#include "TTree.h"
-#include "TLorentzVector.h"
+#include <iomanip>
+#include <iostream>
 
 #include "TreeInfo.h"
 #include "abort.h"
 
-#include <iostream>
+// ROOT includes
+#include "TFile.h"
+#include "TTree.h"
+#include "TLorentzVector.h"
 
 using namespace std;
 
@@ -72,7 +73,7 @@ int main( int argc, char* argv[] ) {
     mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
 
   mg.parameters->generation.enabled = true;
-  mg.parameters->dump();
+  CG_INFO( "main" ) << mg.parameters.get();
 
   //----- open the output root file
 

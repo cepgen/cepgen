@@ -14,7 +14,7 @@ main( int argc, char* argv[] )
 
   try {
     CepGen::Cards::PythonHandler py( argv[1] );
-    py.parameters().dump();
+    CG_INFO( "main" ) << py.parameters();
   } catch ( CepGen::Exception& e ) {
     e.dump();
   }

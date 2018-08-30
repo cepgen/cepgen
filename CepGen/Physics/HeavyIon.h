@@ -9,8 +9,9 @@ namespace CepGen
   enum class Element
   {
     H = 1, C = 6, O = 8,
-    Cu = 29,
-    Xe = 54, Au = 79, Pb = 82
+    Al = 13, Cu = 29,
+    Xe = 54, Au = 79, Pb = 82,
+    U = 92
   };
   std::ostream& operator<<( std::ostream& os, const Element& elem );
 
@@ -18,7 +19,6 @@ namespace CepGen
   struct HeavyIon
   {
     static inline HeavyIon proton() { return HeavyIon{ 1, Element::H }; }
-    static HeavyIon fromPDG( const PDG& pdg );
     operator PDG() const;
     inline operator bool() const { return Z > Element::H; }
     friend std::ostream& operator<<( std::ostream& os, const HeavyIon& hi );
