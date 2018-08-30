@@ -14,7 +14,7 @@ extern "C" {
 
     CG_DEBUG( "cepgen_structure_functions" ) << sf_mode;
 
-    static StructureFunctions& val = ( *StructureFunctionsBuilder::get( sf_mode ) )( xbj, q2 );
+    static StructureFunctions& val = StructureFunctionsBuilder::get( sf_mode )->operator()( xbj, q2 );
     f2 = val.F2;
     fl = val.FL;
   }
@@ -24,9 +24,9 @@ extern "C" {
   {
     using namespace CepGen;
     using namespace CepGen::Process;
+    static auto sf = StructureFunctionsBuilder::get( (SF::Type)sfmode );
     return GenericKTProcess::flux(
-      (GenericKTProcess::Flux)fmode, kt2, x,
-      *StructureFunctionsBuilder::get( (SF::Type)sfmode ), mx );
+      (GenericKTProcess::Flux)fmode, x, kt2, *sf, mx );
   }
 
   double
