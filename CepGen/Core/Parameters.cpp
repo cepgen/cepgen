@@ -149,7 +149,8 @@ namespace CepGen
         << std::setw( wt ) << "Number of threads" << p->generation.num_threads << "\n";
     os
       << std::setw( wt ) << "Number of points to try per bin" << p->generation.num_points << "\n"
-      << std::setw( wt ) << "Integrand treatment" << std::boolalpha << p->generation.treat << "\n"
+      << std::setw( wt ) << "Integrand treatment"
+      << ( pretty ? yesno( p->generation.treat ) : std::to_string( p->generation.treat ) ) << "\n"
       << std::setw( wt ) << "Verbosity level " << Logger::get().level << "\n";
     if ( p->hadroniser_ ) {
       os
