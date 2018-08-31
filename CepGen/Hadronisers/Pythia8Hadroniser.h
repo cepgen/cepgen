@@ -2,7 +2,6 @@
 #define CepGen_Hadronisers_Pythia8Hadroniser_h
 
 #include "CepGen/Hadronisers/GenericHadroniser.h"
-#include "CepGen/Physics/Kinematics.h"
 
 #ifdef PYTHIA8
 #include <Pythia8/Pythia.h>
@@ -15,6 +14,7 @@
 namespace CepGen
 {
   class Particle;
+  enum class KinematicsMode;
 #ifdef PYTHIA8
   class LHAEvent : public Pythia8::LHAup
   {

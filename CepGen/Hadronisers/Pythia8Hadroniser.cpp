@@ -1,6 +1,7 @@
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 
 #include "CepGen/Parameters.h"
+#include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 
