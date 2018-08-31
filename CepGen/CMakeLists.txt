@@ -8,6 +8,7 @@ file(GLOB core_sources
         Utils/*.cpp
         *.cpp)
 file(GLOB phys_sources
+        CollinearFluxes/*.cpp
         Event/*.cpp
         FormFactors/*.cpp
         PartonFluxes/*.cpp
@@ -18,6 +19,7 @@ file(GLOB proc_sources
         Process/Fortran/*.f)
 file(GLOB core_includes
         Cards
+        CollinearFluxes
         Core
         EventFilter
         FormFactors

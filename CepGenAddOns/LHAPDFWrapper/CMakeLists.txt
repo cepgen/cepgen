@@ -10,6 +10,7 @@ endif()
 
 cepgen_build(CepGenLHAPDF SOURCES PartonicStructureFunctionsLHAPDF.cpp AlphaSLHAPDF.cpp
     EXT_LIBS ${LHAPDF}
+    TESTS test/*.cc
     EXT_HEADERS ${LHAPDF_INCLUDE}
     INSTALL_COMPONENT lhapdf)
 cpack_add_component(lhapdf

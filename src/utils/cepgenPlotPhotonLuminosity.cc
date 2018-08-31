@@ -1,0 +1,101 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2022  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include <fstream>
+
+#include "CepGen/CollinearFluxes/Parameterisation.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Generator.h"
+#include "CepGen/Modules/CollinearFluxFactory.h"
+#include "CepGen/Modules/DrawerFactory.h"
+#include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/Drawer.h"
+#include "CepGen/Utils/GSLIntegrator.h"
+#include "CepGen/Utils/Graph.h"
+#include "CepGen/Utils/String.h"
+
+using namespace std;
+using namespace cepgen;
+
+int main(int argc, char* argv[]) {
+  vector<int> cfluxes;
+  int num_points;
+  double q2max, sqrts, mxmin, mxmax;
+  string output_file, plotter;
+  bool logy, draw_grid;
+
+  cepgen::ArgumentsParser(argc, argv)
+      .addOptionalArgument("collflux,i", "collinear flux modelling(s)", &cfluxes, vector<int>{1})
+      .addOptionalArgument("q2max,q", "maximum Q^2", &q2max, 1000.)
+      .addOptionalArgument("sqrts,s", "two-proton centre of mass energy (GeV)", &sqrts, 13.e3)
+      .addOptionalArgument("mxmin,m", "minimal two-photon mass", &mxmin, 0.)
+      .addOptionalArgument("mxmax,M", "maximal two-photon mass", &mxmax, 100.)
+      .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
+      .addOptionalArgument("output,o", "output file name", &output_file, "collflux.int.scan.output.txt")
+      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
+      .addOptionalArgument("logy,l", "logarithmic y-scale", &logy, false)
+      .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
+      .parse();
+
+  cepgen::initialise();
+
+  ofstream out(output_file);
+
+  out << "# coll. fluxes: " << cepgen::utils::merge(cfluxes, ",") << "\n"
+      << "# two-photon mass range: " << cepgen::Limits(mxmin, mxmax) << "\n";
+  map<int, cepgen::utils::Graph1D> m_gr_fluxes;  // {collinear flux -> graph}
+  auto integr = cepgen::utils::GSLIntegrator();
+  const auto s = sqrts * sqrts;
+  for (const auto& cflux : cfluxes) {
+    auto coll_flux = cepgen::collflux::CollinearFluxFactory::get().build(cflux);
+    ostringstream oss;
+    oss << cflux;
+    m_gr_fluxes[cflux].setTitle(oss.str());
+
+    for (int j = 0; j < num_points; ++j) {
+      const double mx = mxmin + j * (mxmax - mxmin) / num_points;
+      auto lumi_wgg = integr.eval(
+          [&mx, &s, &coll_flux](double x) { return 2. * mx / x / s * (*coll_flux)(x) * (*coll_flux)(mx * mx / x / s); },
+          mx * mx / s,
+          1.);
+      out << mx << "\t" << lumi_wgg << "\n";
+      m_gr_fluxes[cflux].addPoint(mx, lumi_wgg);
+    }
+  }
+  out.close();
+
+  if (!plotter.empty()) {
+    ostringstream oss;
+    auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+    cepgen::utils::Drawer::Mode dm;
+    if (logy)
+      dm |= cepgen::utils::Drawer::Mode::logy;
+    if (draw_grid)
+      dm |= cepgen::utils::Drawer::Mode::grid;
+    cepgen::utils::DrawableColl coll;
+    for (auto& cf_gr : m_gr_fluxes) {
+      cf_gr.second.yAxis().setLabel("d$L_{\\gamma\\gamma}$/d$\\omega_{\\gamma\\gamma}$ (GeV$^{-1}$)");
+      cf_gr.second.setTitle(
+          cepgen::utils::format("%s", cepgen::collflux::CollinearFluxFactory::get().describe(cf_gr.first).data()));
+      coll.emplace_back(&cf_gr.second);
+    }
+    plt->draw(coll, "comp_photonlumi", oss.str(), dm);
+  }
+
+  return 0;
+}
