@@ -79,8 +79,8 @@ namespace CepGen
         //==========================================================================================
         // ensure the first incoming flux is compatible with the kinematics mode
         //==========================================================================================
-        if ( ( cuts_.mode == KinematicsMode::ElasticElastic ||
-               cuts_.mode == KinematicsMode::ElasticInelastic )
+        if ( ( cuts_.mode == KinematicsMode::ElasticElastic
+            || cuts_.mode == KinematicsMode::ElasticInelastic )
           && ( flux1 != KTFlux::P_Photon_Elastic ) ) {
           cuts_.incoming_beams.first.kt_flux = KTFlux::P_Photon_Elastic;
           CG_DEBUG( "GenericKTProcess:kinematics" )
@@ -182,9 +182,10 @@ namespace CepGen
       const double weight = ( kt_jacobian_*aux_jacobian ) * integrand;
 
       CG_DEBUG_LOOP( "GenericKTProcess:weight" )
-        << "Jacobian = " << kt_jacobian_ << " * " << aux_jacobian
-        << "\n\tIntegrand = " << integrand
-        << "\n\tdW = " << weight << ".";
+        << "Jacobian: " << kt_jacobian_ << " * " << aux_jacobian
+        << " = " << ( kt_jacobian_*aux_jacobian ) << ".\n\t"
+        << "Integrand = " << integrand << "\n\t"
+        << "dW = " << weight << ".";
 
       return weight;
     }
