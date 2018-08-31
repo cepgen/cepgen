@@ -20,13 +20,6 @@ namespace CepGen
       static FormFactors trivial();
       /// Elastic proton form factors
       static FormFactors protonElastic( double q2 );
-      /// Suri-Yennie inelastic form factors
-      static FormFactors suriYennie( double q2, double mi2, double mf2 );
-      /// Brasse et al. inelastic form factors
-      /// \cite Brasse1976413
-      static FormFactors fioreBrasse( double q2, double mi2, double mf2 );
-      /// Generic inelastic form factors
-      static FormFactors generic( double q2, double mi2, double mf2, StructureFunctions& );
       /// Generate the form factors according to the proton structure functions set
       static FormFactors protonInelastic( double q2, double mi2, double mf2, StructureFunctions& );
 

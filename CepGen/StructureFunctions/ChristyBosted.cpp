@@ -135,90 +135,91 @@ namespace CepGen
         ContinuumParameters::DirectionParameters( 86.746, { { 0., 4.0294, 3.1285, 0.33403, 4.9623 } } )
       } };
 
-      //--- P33(1232)
-      ResonanceParameters p33;
-      p33.br = ResonanceParameters::BranchingRatios( 1., 0., 0. );
-      p33.angular_momentum = 1.;
-      //p33.x0 = 0.15;
-      p33.x0 = 0.14462;
-      p33.mass = 1.2298;
-      p33.width = 0.13573;
-      p33.fit_parameters = { { 4.2291, 1.2598, 2.1242, 19.910, 0.22587 } };
-      p33.A0_T = 7.7805;
-      p33.A0_L = 29.414;
-      params.resonances.emplace_back( p33 );
-
-      //--- S11(1535)
-      ResonanceParameters s11_1535;
-      s11_1535.br = ResonanceParameters::BranchingRatios( 0.45, 0.1, 0.45 );
-      s11_1535.angular_momentum = 0.;
-      s11_1535.x0 = 0.215;
-      s11_1535.mass = 1.5304;
-      s11_1535.width = 0.220;
-      s11_1535.fit_parameters = { { 6823.2, 33521., 2.5686, 0., 0. } };
-      s11_1535.A0_T = 6.3351;
-      s11_1535.A0_L = 0.;
-      params.resonances.emplace_back( s11_1535 );
-
-      //--- D13(1520)
-      ResonanceParameters d13;
-      d13.br = ResonanceParameters::BranchingRatios( 0.65, 0.35, 0. );
-      d13.angular_momentum = 2.;
-      d13.x0 = 0.215;
-      d13.mass = 1.5057;
-      d13.width = 0.082956;
-      d13.fit_parameters = { { 21.240, 0.055746, 2.4886, 97.046, 0.31042 } };
-      d13.A0_T = 0.60347;
-      d13.A0_L = 157.92;
-      params.resonances.emplace_back( d13 );
-
-      //--- F15(1680)
-      ResonanceParameters f15;
-      f15.br = ResonanceParameters::BranchingRatios( 0.65, 0.35, 0. );
-      f15.angular_momentum = 3.;
-      f15.x0 = 0.215;
-      f15.mass = 1.6980;
-      f15.width = 0.095782;
-      f15.fit_parameters = { { -0.28789, 0.18607, 0.063534, 0.038200, 1.2182 } };
-      f15.A0_T = 2.3305;
-      f15.A0_L = 4.2160;
-      params.resonances.emplace_back( f15 );
-
-      //--- S11(1650)
-      ResonanceParameters s11_1650;
-      s11_1650.br = ResonanceParameters::BranchingRatios( 0.4, 0.5, 0.1 );
-      s11_1650.angular_momentum = 0.;
-      s11_1650.x0 = 0.215;
-      s11_1650.mass = 1.6650;
-      s11_1650.width = 0.10936;
-      s11_1650.fit_parameters = { { -0.56175, 0.38964, 0.54883, 0.31393, 2.9997 } };
-      s11_1650.A0_T = 1.9790;
-      s11_1650.A0_L = 13.764;
-      params.resonances.emplace_back( s11_1650 );
-
-      //--- P11(1440) roper
-      ResonanceParameters p11;
-      p11.br = ResonanceParameters::BranchingRatios( 0.65, 0.35, 0. );
-      p11.angular_momentum = 1.;
-      p11.x0 = 0.215;
-      p11.mass = 1.4333;
-      p11.width = 0.37944;
-      p11.fit_parameters = { { 46.213, 0.19221, 1.9141, 0.053743, 1.3091 } };
-      p11.A0_T = 0.022506;
-      p11.A0_L = 5.5124;
-      params.resonances.emplace_back( p11 );
-
-      //--- F37(1950)
-      ResonanceParameters f37;
-      f37.br = ResonanceParameters::BranchingRatios( 0.5, 0.5, 0. );
-      f37.angular_momentum = 3.;
-      f37.x0 = 0.215;
-      f37.mass = 1.9341;
-      f37.width = 0.380;
-      f37.fit_parameters = { { 0., 0., 1., 1.8951, 0.51376 } };
-      f37.A0_T = 3.4187;
-      f37.A0_L = 1.8951;
-      params.resonances.emplace_back( f37 );
+      { //--- P33(1232)
+        ResonanceParameters p33;
+        p33.br = ResonanceParameters::BranchingRatios( 1., 0., 0. );
+        p33.angular_momentum = 1.;
+        //p33.x0 = 0.15;
+        p33.x0 = 0.14462;
+        p33.mass = 1.2298;
+        p33.width = 0.13573;
+        p33.fit_parameters = { { 4.2291, 1.2598, 2.1242, 19.910, 0.22587 } };
+        p33.A0_T = 7.7805;
+        p33.A0_L = 29.414;
+        params.resonances.emplace_back( p33 );
+      }
+      { //--- S11(1535)
+        ResonanceParameters s11_1535;
+        s11_1535.br = ResonanceParameters::BranchingRatios( 0.45, 0.1, 0.45 );
+        s11_1535.angular_momentum = 0.;
+        s11_1535.x0 = 0.215;
+        s11_1535.mass = 1.5304;
+        s11_1535.width = 0.220;
+        s11_1535.fit_parameters = { { 6823.2, 33521., 2.5686, 0., 0. } };
+        s11_1535.A0_T = 6.3351;
+        s11_1535.A0_L = 0.;
+        params.resonances.emplace_back( s11_1535 );
+      }
+      { //--- D13(1520)
+        ResonanceParameters d13;
+        d13.br = ResonanceParameters::BranchingRatios( 0.65, 0.35, 0. );
+        d13.angular_momentum = 2.;
+        d13.x0 = 0.215;
+        d13.mass = 1.5057;
+        d13.width = 0.082956;
+        d13.fit_parameters = { { 21.240, 0.055746, 2.4886, 97.046, 0.31042 } };
+        d13.A0_T = 0.60347;
+        d13.A0_L = 157.92;
+        params.resonances.emplace_back( d13 );
+      }
+      { //--- F15(1680)
+        ResonanceParameters f15;
+        f15.br = ResonanceParameters::BranchingRatios( 0.65, 0.35, 0. );
+        f15.angular_momentum = 3.;
+        f15.x0 = 0.215;
+        f15.mass = 1.6980;
+        f15.width = 0.095782;
+        f15.fit_parameters = { { -0.28789, 0.18607, 0.063534, 0.038200, 1.2182 } };
+        f15.A0_T = 2.3305;
+        f15.A0_L = 4.2160;
+        params.resonances.emplace_back( f15 );
+      }
+      { //--- S11(1650)
+        ResonanceParameters s11_1650;
+        s11_1650.br = ResonanceParameters::BranchingRatios( 0.4, 0.5, 0.1 );
+        s11_1650.angular_momentum = 0.;
+        s11_1650.x0 = 0.215;
+        s11_1650.mass = 1.6650;
+        s11_1650.width = 0.10936;
+        s11_1650.fit_parameters = { { -0.56175, 0.38964, 0.54883, 0.31393, 2.9997 } };
+        s11_1650.A0_T = 1.9790;
+        s11_1650.A0_L = 13.764;
+        params.resonances.emplace_back( s11_1650 );
+      }
+      { //--- P11(1440) roper
+        ResonanceParameters p11;
+        p11.br = ResonanceParameters::BranchingRatios( 0.65, 0.35, 0. );
+        p11.angular_momentum = 1.;
+        p11.x0 = 0.215;
+        p11.mass = 1.4333;
+        p11.width = 0.37944;
+        p11.fit_parameters = { { 46.213, 0.19221, 1.9141, 0.053743, 1.3091 } };
+        p11.A0_T = 0.022506;
+        p11.A0_L = 5.5124;
+        params.resonances.emplace_back( p11 );
+      }
+      { //--- F37(1950)
+        ResonanceParameters f37;
+        f37.br = ResonanceParameters::BranchingRatios( 0.5, 0.5, 0. );
+        f37.angular_momentum = 3.;
+        f37.x0 = 0.215;
+        f37.mass = 1.9341;
+        f37.width = 0.380;
+        f37.fit_parameters = { { 0., 0., 1., 1.8951, 0.51376 } };
+        f37.A0_T = 3.4187;
+        f37.A0_L = 1.8951;
+        params.resonances.emplace_back( f37 );
+      }
 
       return params;
     }

@@ -34,7 +34,7 @@ namespace CepGen
       case SF::Type::LHAPDF:              return std::make_shared<SF::LHAPDF>();
       //--- particular case for the MSTW grid as we are dealing
       //--- with a singleton ; hence, no deleter is needed!
-      case SF::Type::MSTWgrid:            return std::shared_ptr<MSTW::Grid>( &MSTW::Grid::get(), [=]( MSTW::Grid* ){} );
+      case SF::Type::MSTWgrid:            return std::shared_ptr<mstw::Grid>( &mstw::Grid::get(), [=]( mstw::Grid* ){} );
     }
   }
 }

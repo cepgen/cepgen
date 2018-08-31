@@ -204,7 +204,7 @@ namespace CepGen
           fillParameter( psf, "mode", (unsigned int&)sf->params.mode );
         } break;
         case SF::Type::MSTWgrid: {
-          auto sf = std::dynamic_pointer_cast<MSTW::Grid>( params_.kinematics.structure_functions );
+          auto sf = std::dynamic_pointer_cast<mstw::Grid>( params_.kinematics.structure_functions );
           fillParameter( psf, "gridPath", sf->params.grid_path );
         } break;
         case SF::Type::Schaefer: {
