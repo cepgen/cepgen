@@ -180,13 +180,11 @@ namespace CepGen
       << "_/¯¯EVENTS¯KINEMATICS¯¯\\_" << std::setfill( ' ' ) << "\n\n"
       << std::setw( wt ) << "Incoming particles"
       << p->kinematics.incoming_beams.first << ",\n" << std::setw( wt ) << ""
-      << p->kinematics.incoming_beams.second << "\n"
-      << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << "\n";
+      << p->kinematics.incoming_beams.second << "\n";
+    if ( p->kinematics.mode != KinematicsMode::invalid )
+      os << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << "\n";
     if ( p->kinematics.mode != KinematicsMode::ElasticElastic )
       os << std::setw( wt ) << "Structure functions" << p->kinematics.structure_functions->type << "\n";
-    std::ostringstream ip1, ip2;
-    ip1 << p->kinematics.incoming_beams.first;
-    ip2 << p->kinematics.incoming_beams.second;
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << "\n\n";
