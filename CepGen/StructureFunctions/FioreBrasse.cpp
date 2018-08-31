@@ -18,10 +18,10 @@ namespace CepGen
       Parameterisation p;
       p.s0 = 1.14;
       p.norm = 0.021;
-      p.resonances.emplace_back( -0.8377, 0.95, 0.1473, 1.0, 2.4617, 3./2. );
-      p.resonances.emplace_back( -0.37, 0.95, 0.1471, 0.5399, 2.4617, 5./2. );
-      p.resonances.emplace_back( 0.0038, 0.85, 0.1969, 4.2225, 1.5722, 3./2. );
-      p.resonances.emplace_back( 0.5645, 0.1126, 1.3086, 19.2694, 4.5259, 1. );
+      p.resonances.emplace_back( ResonanceParameters{ -0.8377, 0.95, 0.1473, 1.0, 2.4617, 3./2. } ); // N*(1520)
+      p.resonances.emplace_back( ResonanceParameters{ -0.37, 0.95, 0.1471, 0.5399, 2.4617, 5./2. } ); // N*(1680)
+      p.resonances.emplace_back( ResonanceParameters{ 0.0038, 0.85, 0.1969, 4.2225, 1.5722, 3./2. } ); // Δ(1236)
+      p.resonances.emplace_back( ResonanceParameters{ 0.5645, 0.1126, 1.3086, 19.2694, 4.5259, 1. } ); // exotic
       return p;
     }
     FioreBrasse::Parameterisation
@@ -30,10 +30,10 @@ namespace CepGen
       Parameterisation p;
       p.s0 = 1.2871;
       p.norm = 0.0207;
-      p.resonances.emplace_back( -0.8070, 0.9632, 0.1387, 1.0, 2.6066, 3./2. );
-      p.resonances.emplace_back( -0.3640, 0.9531, 0.1239, 0.6086, 2.6066, 5./2. );
-      p.resonances.emplace_back( -0.0065, 0.8355, 0.2320, 4.7279, 1.4828, 3./2. );
-      p.resonances.emplace_back( 0.5484, 0.1373, 1.3139, 14.7267, 4.6041, 1. );
+      p.resonances.emplace_back( ResonanceParameters{ -0.8070, 0.9632, 0.1387, 1.0, 2.6066, 3./2. } ); // N*(1520)
+      p.resonances.emplace_back( ResonanceParameters{ -0.3640, 0.9531, 0.1239, 0.6086, 2.6066, 5./2. } ); // N*(1680)
+      p.resonances.emplace_back( ResonanceParameters{ -0.0065, 0.8355, 0.2320, 4.7279, 1.4828, 3./2. } ); // Δ(1236)
+      p.resonances.emplace_back( ResonanceParameters{ 0.5484, 0.1373, 1.3139, 14.7267, 4.6041, 1. } ); // exotic
       return p;
     }
 
@@ -56,8 +56,6 @@ namespace CepGen
       double ampli_res = 0., ampli_bg = 0., ampli_tot = 0.;
       for ( unsigned short i = 0; i < 3; ++i ) { //FIXME 4??
         const Parameterisation::ResonanceParameters res = params.resonances[i];
-        if ( !res.enabled )
-          continue;
         const double sqrts0 = sqrt( params.s0 );
 
         std::complex<double> alpha;

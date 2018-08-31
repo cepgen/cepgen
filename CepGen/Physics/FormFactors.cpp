@@ -31,43 +31,21 @@ namespace CepGen
   FormFactors
   FormFactors::protonInelastic( double q2, double mi2, double mf2, StructureFunctions& sf )
   {
+    const double xbj = q2 / ( q2 + mf2 - mi2 );
     switch ( sf.type ) {
       case SF::Type::ElasticProton:
         CG_WARNING( "FormFactors" ) << "Elastic proton form factors requested! Check your process definition!";
         return FormFactors::protonElastic( q2 );
-      case SF::Type::SuriYennie:
-        return FormFactors::suriYennie( q2, mi2, mf2 );
-      case SF::Type::FioreBrasse:
-        return FormFactors::fioreBrasse( q2, mi2, mf2 );
-      default:
-        return FormFactors::generic( q2, mi2, mf2, sf );
+      case SF::Type::SuriYennie: {
+        SF::SuriYennie suriyennie, sy = (SF::SuriYennie)suriyennie( xbj, q2 );
+        return FormFactors( sy.F2 * xbj * sqrt( mi2 ) / q2, sy.FM ); //FIXME
+      } break;
+      default: {
+        sf = sf( xbj, q2 );
+        sf.computeFL( xbj, q2 );
+        return FormFactors( sf.F2 * xbj / q2, -2.*sf.F1( xbj, q2 ) / q2 );
+      } break;
     }
-  }
-
-  FormFactors
-  FormFactors::suriYennie( double q2, double mi2, double mf2 )
-  {
-    const double x = q2 / ( q2 + mf2 - mi2 );
-    SF::SuriYennie suriyennie, sy = (SF::SuriYennie)suriyennie( x, q2 );
-//std::cout << "---> " << sy.FM << "\t" << sy.F2*x/q2 << "\t" << sy.F2*x*sqrt(mi2)/q2 << std::endl;
-    return FormFactors( sy.F2 * x * sqrt( mi2 ) / q2, sy.FM ); //FIXME
-  }
-
-  FormFactors
-  FormFactors::fioreBrasse( double q2, double mi2, double mf2 )
-  {
-    const double x = q2 / ( q2 + mf2 - mi2 );
-    SF::FioreBrasse fb, sf = fb( x, q2 );
-    return FormFactors( sf.F2 * x / q2, -2.*sf.W1 / q2 );
-  }
-
-  FormFactors
-  FormFactors::generic( double q2, double mi2, double mf2, StructureFunctions& sf )
-  {
-    const double x = q2 / ( q2 + mf2 - mi2 );
-    sf = sf( x, q2 );
-    sf.computeFL( x, q2 );
-    return FormFactors( sf.F2 * x / q2, -2.*sf.F1( x, q2 ) / q2 );
   }
 
   std::ostream&
