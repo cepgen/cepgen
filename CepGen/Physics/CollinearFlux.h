@@ -1,24 +1,27 @@
 #ifndef CepGen_Physics_CollinearFlux_h
 #define CepGen_Physics_CollinearFlux_h
 
-#include "CepGen/Processes/GenericKTProcess.h"
-
 #include <gsl/gsl_integration.h>
 #include <memory>
 
 namespace CepGen
 {
   class Limits;
+  class StructureFunctions;
+  class HeavyIon;
+  enum class KTFlux;
   struct FluxArguments
   {
-    Process::GenericKTProcess::Flux flux_type;
-    StructureFunctions* str_functions;
     double x, mx;
+    KTFlux flux_type;
+    StructureFunctions* str_functions;
+    HeavyIon* heavy_ion;
   };
   class CollinearFlux
   {
     public:
-      CollinearFlux( const Process::GenericKTProcess::Flux& flux_type, const Limits& range, StructureFunctions* str_fun = nullptr );
+      CollinearFlux( const KTFlux& flux_type, const Limits& range, StructureFunctions* str_fun = nullptr );
+      CollinearFlux( const KTFlux& flux_type, const Limits& range, HeavyIon* hi );
       double operator()( double x, double mx ) const;
 
     private:
