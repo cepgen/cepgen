@@ -63,7 +63,7 @@ namespace CepGen
       const KTFlux flux1 = (KTFlux)cuts_.incoming_beams.first.kt_flux,
                    flux2 = (KTFlux)cuts_.incoming_beams.second.kt_flux;
 
-      if ( cuts_.mode == Kinematics::Mode::invalid ) {
+      if ( cuts_.mode == KinematicsMode::invalid ) {
         bool el1 = ( flux1 == KTFlux::P_Photon_Elastic
                   || flux1 == KTFlux::HI_Photon_Elastic
                   || flux1 == KTFlux::P_Gluon_KMR );
@@ -71,24 +71,24 @@ namespace CepGen
                   || flux2 == KTFlux::HI_Photon_Elastic
                   || flux2 == KTFlux::P_Gluon_KMR );
         if ( el1 && el2 )
-          cuts_.mode = Kinematics::Mode::ElasticElastic;
+          cuts_.mode = KinematicsMode::ElasticElastic;
         else if ( el1 )
-          cuts_.mode = Kinematics::Mode::ElasticInelastic;
+          cuts_.mode = KinematicsMode::ElasticInelastic;
         else if ( el2 )
-          cuts_.mode = Kinematics::Mode::InelasticElastic;
+          cuts_.mode = KinematicsMode::InelasticElastic;
         else
-          cuts_.mode = Kinematics::Mode::InelasticInelastic;
+          cuts_.mode = KinematicsMode::InelasticInelastic;
       }
       else {
         //==========================================================================================
         // ensure the first incoming flux is compatible with the kinematics mode
         //==========================================================================================
-        if ( ( cuts_.mode == Kinematics::Mode::ElasticElastic
-            || cuts_.mode == Kinematics::Mode::ElasticInelastic )
+        if ( ( cuts_.mode == KinematicsMode::ElasticElastic
+            || cuts_.mode == KinematicsMode::ElasticInelastic )
           && ( flux1 != KTFlux::P_Photon_Elastic ) ) {
           cuts_.incoming_beams.first.kt_flux = ( (HeavyIon)cuts_.incoming_beams.first.pdg )
-            ? (unsigned short)KTFlux::HI_Photon_Elastic
-            : (unsigned short)KTFlux::P_Photon_Elastic;
+            ? KTFlux::HI_Photon_Elastic
+            : KTFlux::P_Photon_Elastic;
           CG_DEBUG( "GenericKTProcess:kinematics" )
             << "Set the kt flux for first incoming photon to \""
             << cuts_.incoming_beams.first.kt_flux << "\".";
@@ -98,7 +98,7 @@ namespace CepGen
           if ( (HeavyIon)cuts_.incoming_beams.first.pdg )
             throw CG_FATAL( "GenericKTProcess:kinematics" )
               << "Inelastic photon emission from HI not yet supported!";
-          cuts_.incoming_beams.first.kt_flux = (unsigned short)KTFlux::P_Photon_Inelastic_Budnev;
+          cuts_.incoming_beams.first.kt_flux = KTFlux::P_Photon_Inelastic_Budnev;
           CG_DEBUG( "GenericKTProcess:kinematics" )
             << "Set the kt flux for first incoming photon to \""
             << cuts_.incoming_beams.first.kt_flux << "\".";
@@ -106,12 +106,12 @@ namespace CepGen
         //==========================================================================================
         // ensure the second incoming flux is compatible with the kinematics mode
         //==========================================================================================
-        if ( ( cuts_.mode == Kinematics::Mode::ElasticElastic
-            || cuts_.mode == Kinematics::Mode::InelasticElastic )
+        if ( ( cuts_.mode == KinematicsMode::ElasticElastic
+            || cuts_.mode == KinematicsMode::InelasticElastic )
           && ( flux2 != KTFlux::P_Photon_Elastic ) ) {
           cuts_.incoming_beams.second.kt_flux = ( (HeavyIon)cuts_.incoming_beams.second.pdg )
-            ? (unsigned short)KTFlux::HI_Photon_Elastic
-            : (unsigned short)KTFlux::P_Photon_Elastic;
+            ? KTFlux::HI_Photon_Elastic
+            : KTFlux::P_Photon_Elastic;
           CG_DEBUG( "GenericKTProcess:kinematics" )
             << "Set the kt flux for second incoming photon to \""
             << cuts_.incoming_beams.second.kt_flux << "\".";
@@ -121,7 +121,7 @@ namespace CepGen
           if ( (HeavyIon)cuts_.incoming_beams.second.pdg )
             throw CG_FATAL( "GenericKTProcess:kinematics" )
               << "Inelastic photon emission from HI not yet supported!";
-          cuts_.incoming_beams.second.kt_flux = (unsigned short)KTFlux::P_Photon_Inelastic_Budnev;
+          cuts_.incoming_beams.second.kt_flux = KTFlux::P_Photon_Inelastic_Budnev;
           CG_DEBUG( "GenericKTProcess:kinematics" )
             << "Set the kt flux for second incoming photon to \""
             << cuts_.incoming_beams.second.kt_flux << "\".";
@@ -156,9 +156,9 @@ namespace CepGen
       //============================================================================================
 
       MX_ = MY_ = event_->getOneByRole( Particle::IncomingBeam1 ).mass();
-      if ( cuts_.mode == Kinematics::Mode::InelasticElastic || cuts_.mode == Kinematics::Mode::InelasticInelastic )
+      if ( cuts_.mode == KinematicsMode::InelasticElastic || cuts_.mode == KinematicsMode::InelasticInelastic )
         registerVariable( MX_, Mapping::square, cuts_.cuts.remnants.mass_single, { 1.07, 1000. }, "Positive z proton remnant mass" );
-      if ( cuts_.mode == Kinematics::Mode::ElasticInelastic || cuts_.mode == Kinematics::Mode::InelasticInelastic )
+      if ( cuts_.mode == KinematicsMode::ElasticInelastic || cuts_.mode == KinematicsMode::InelasticInelastic )
         registerVariable( MY_, Mapping::square, cuts_.cuts.remnants.mass_single, { 1.07, 1000. }, "Negative z proton remnant mass" );
 
       prepareKinematics();
@@ -317,19 +317,19 @@ namespace CepGen
       op2.setMomentum( PY_ );
 
       switch ( cuts_.mode ) {
-        case Kinematics::Mode::ElasticElastic:
+        case KinematicsMode::ElasticElastic:
           op1.setStatus( Particle::Status::FinalState );
           op2.setStatus( Particle::Status::FinalState );
           break;
-        case Kinematics::Mode::ElasticInelastic:
+        case KinematicsMode::ElasticInelastic:
           op1.setStatus( Particle::Status::FinalState );
           op2.setStatus( Particle::Status::Unfragmented ); op2.setMass( MY_ );
           break;
-        case Kinematics::Mode::InelasticElastic:
+        case KinematicsMode::InelasticElastic:
           op1.setStatus( Particle::Status::Unfragmented ); op1.setMass( MX_ );
           op2.setStatus( Particle::Status::FinalState );
           break;
-        case Kinematics::Mode::InelasticInelastic:
+        case KinematicsMode::InelasticInelastic:
           op1.setStatus( Particle::Status::Unfragmented ); op1.setMass( MX_ );
           op2.setStatus( Particle::Status::Unfragmented ); op2.setMass( MY_ );
           break;

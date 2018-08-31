@@ -147,12 +147,12 @@ namespace CepGen
         << "s(1/2)_eff = " << s1_eff << " / " << s2_eff << " GeV^2\n\t"
         << "diboson invariant mass = " << invm << " GeV";
 
-      if ( ( cuts_.mode == Kinematics::Mode::ElasticInelastic
-          || cuts_.mode == Kinematics::Mode::InelasticInelastic )
+      if ( ( cuts_.mode == KinematicsMode::ElasticInelastic
+          || cuts_.mode == KinematicsMode::InelasticInelastic )
         && ( sqrt( s1_eff ) <= ( MY_+invm ) ) )
         return 0.;
-      if ( ( cuts_.mode == Kinematics::Mode::InelasticElastic
-          || cuts_.mode == Kinematics::Mode::InelasticInelastic )
+      if ( ( cuts_.mode == KinematicsMode::InelasticElastic
+          || cuts_.mode == KinematicsMode::InelasticInelastic )
         && ( sqrt( s2_eff ) <= ( MX_+invm ) ) )
         return 0.;
 

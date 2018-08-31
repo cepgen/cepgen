@@ -15,6 +15,7 @@ namespace CepGen
   /// Type of incoming partons fluxes
   enum class KTFlux
   {
+    invalid = -1,
     P_Photon_Elastic = 0,
     P_Photon_Inelastic = 1,
     P_Photon_Inelastic_Budnev = 11,

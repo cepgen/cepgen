@@ -33,7 +33,7 @@ int main( int argc, char* argv[] ) {
     CepGen::ParametersList pgen;
     pgen.set<int>( "pair", (int)CepGen::PDG::muon );
     gen.parameters->setProcess( new CepGen::Process::GamGamLL( pgen ) );
-    gen.parameters->kinematics.mode = CepGen::Kinematics::Mode::ElasticElastic;
+    gen.parameters->kinematics.mode = CepGen::KinematicsMode::ElasticElastic;
     gen.parameters->kinematics.cuts.central.pt_single.min() = 15.;
     gen.parameters->kinematics.cuts.central.eta_single = { -2.5, 2.5 };
     gen.parameters->generation.enabled = true;

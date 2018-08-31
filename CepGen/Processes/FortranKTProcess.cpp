@@ -120,8 +120,8 @@ namespace CepGen
       // intermediate partons information
       //-------------------------------------------------------------------------------------------
 
-      params_.iflux1 = cuts_.incoming_beams.first.kt_flux;
-      params_.iflux2 = cuts_.incoming_beams.second.kt_flux;
+      params_.iflux1 = (int)cuts_.incoming_beams.first.kt_flux;
+      params_.iflux2 = (int)cuts_.incoming_beams.second.kt_flux;
       if ( (KTFlux)params_.iflux1 == KTFlux::P_Gluon_KMR )
         event_->getOneByRole( Particle::Parton1 ).setPdgId( PDG::gluon );
       if ( (KTFlux)params_.iflux2 == KTFlux::P_Gluon_KMR )

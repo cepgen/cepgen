@@ -84,6 +84,9 @@ namespace CepGen
         throwPythonError( Form( "Failed to extract the process name from the configuration card %s", file ) );
       const std::string proc_name = get<std::string>( pproc_name );
 
+      //--- process mode
+      params_.kinematics.mode = (KinematicsMode)proc_params.get<int>( "mode" );
+
       if ( proc_name == "lpair" )
         params_.setProcess( new Process::GamGamLL( proc_params ) );
       else if ( proc_name == "pptoll" || proc_name == "pptoff" )
@@ -93,9 +96,6 @@ namespace CepGen
       else if ( proc_name == "patoll" )
         params_.setProcess( new Process::FortranKTProcess( proc_params, "nucltoff", "(p/A)(p/A) ↝ (g/ɣ)ɣ → f⁺f¯", nucl_to_ff_ ) );
       else throw CG_FATAL( "PythonHandler" ) << "Unrecognised process: " << proc_name << ".";
-
-      //--- process mode
-      fillParameter( process, "mode", (int&)params_.kinematics.mode );
 
       //--- process kinematics
       PyObject* pin_kinematics = getElement( process, "inKinematics" ); // borrowed
@@ -177,9 +177,9 @@ namespace CepGen
       std::vector<int> kt_fluxes;
       fillParameter( kin, "ktFluxes", kt_fluxes );
       if ( kt_fluxes.size() > 0 )
-        params_.kinematics.incoming_beams.first.kt_flux = kt_fluxes.at( 0 );
+        params_.kinematics.incoming_beams.first.kt_flux = (KTFlux)kt_fluxes.at( 0 );
       if ( kt_fluxes.size() > 1 )
-        params_.kinematics.incoming_beams.second.kt_flux = kt_fluxes.at( 1 );
+        params_.kinematics.incoming_beams.second.kt_flux = (KTFlux)kt_fluxes.at( 1 );
       std::vector<int> hi_beam1, hi_beam2;
       fillParameter( kin, "heavyIonA", hi_beam1 );
       if ( hi_beam1.size() == 2 )

@@ -96,7 +96,8 @@ namespace CepGen
         return os << "elastic gluon from proton (KMR)";
       case KTFlux::HI_Photon_Elastic:
         return os << "elastic photon from HI";
+      case KTFlux::invalid: default:
+        return os << "unrecognized flux (" << (int)type << ")";
     }
-    return os;
   }
 }

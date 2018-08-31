@@ -20,7 +20,7 @@ namespace CepGen
   {
     public:
       explicit LHAEvent( const Parameters* );
-      void feedEvent( const Event& ev, bool full, const Kinematics::Mode& );
+      void feedEvent( const Event& ev, bool full, const KinematicsMode& );
       bool setInit() override;
       bool setEvent( int ) override;
       void setCrossSection( int id, double xsec, double xsec_err );
