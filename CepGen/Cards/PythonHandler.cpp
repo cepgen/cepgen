@@ -85,7 +85,7 @@ namespace CepGen
       const std::string proc_name = get<std::string>( pproc_name );
 
       //--- process mode
-      params_.kinematics.mode = (KinematicsMode)proc_params.get<int>( "mode" );
+      params_.kinematics.mode = (KinematicsMode)proc_params.get<int>( "mode", (int)KinematicsMode::invalid );
 
       if ( proc_name == "lpair" )
         params_.setProcess( new Process::GamGamLL( proc_params ) );
