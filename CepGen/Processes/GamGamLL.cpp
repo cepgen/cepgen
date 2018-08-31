@@ -65,16 +65,16 @@ namespace CepGen
     GamGamLL::numDimensions() const
     {
       switch ( cuts_.mode ) {
-        case Kinematics::Mode::ElectronProton: default:
+        case KinematicsMode::ElectronProton: default:
           throw CG_FATAL( "GamGamLL" )
             << "Process mode " << cuts_.mode << " not (yet) supported! "
             << "Please contact the developers to consider an implementation.";
-        case Kinematics::Mode::ElasticElastic:
+        case KinematicsMode::ElasticElastic:
           return 7;
-        case Kinematics::Mode::ElasticInelastic:
-        case Kinematics::Mode::InelasticElastic:
+        case KinematicsMode::ElasticInelastic:
+        case KinematicsMode::InelasticElastic:
           return 8;
-        case Kinematics::Mode::InelasticInelastic:
+        case KinematicsMode::InelasticInelastic:
           return 9;
       }
     }
@@ -644,21 +644,21 @@ namespace CepGen
 
       //std::cout << __PRETTY_FUNCTION__ << ":" << w_limits_ << "|" << q2_limits_ << "|" << mx_limits_ << std::endl;
       switch ( cuts_.mode ) {
-        case Kinematics::Mode::ElectronProton: default:
+        case KinematicsMode::ElectronProton: default:
           CG_ERROR( "GamGamLL" ) << "Case not yet supported!"; break;
-        case Kinematics::Mode::ElasticElastic:
+        case KinematicsMode::ElasticElastic:
           masses_.dw31_ = masses_.dw52_ = 0.; break;
-        case Kinematics::Mode::InelasticElastic: {
+        case KinematicsMode::InelasticElastic: {
           const double m = computeOutgoingPrimaryParticlesMasses( x( 7 ), p1.mass(), sqrt( masses_.Ml2_ ), masses_.dw31_ );
           event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( m );
           event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( ParticleProperties::mass( p2.pdgId() ) );
         } break;
-        case Kinematics::Mode::ElasticInelastic: {
+        case KinematicsMode::ElasticInelastic: {
           const double m = computeOutgoingPrimaryParticlesMasses( x( 7 ), p2.mass(), sqrt( masses_.Ml2_ ), masses_.dw52_ );
           event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( ParticleProperties::mass( p1.pdgId() ) );
           event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( m );
         } break;
-        case Kinematics::Mode::InelasticInelastic: {
+        case KinematicsMode::InelasticInelastic: {
           const double mx = computeOutgoingPrimaryParticlesMasses( x( 7 ), p2.mass(), sqrt( masses_.Ml2_ ), masses_.dw31_ );
           event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( mx );
           const double my = computeOutgoingPrimaryParticlesMasses( x( 8 ), p1.mass(), sqrt( masses_.Ml2_ ), masses_.dw52_ );
@@ -888,12 +888,12 @@ namespace CepGen
       //--- cut on mass of final hadronic system (MX/Y)
 
       if ( mx_limits_.valid() ) {
-        if ( ( cuts_.mode == Kinematics::Mode::InelasticElastic
-            || cuts_.mode == Kinematics::Mode::InelasticInelastic )
+        if ( ( cuts_.mode == KinematicsMode::InelasticElastic
+            || cuts_.mode == KinematicsMode::InelasticInelastic )
           && !mx_limits_.passes( MX_ ) )
           return 0.;
-        if ( ( cuts_.mode == Kinematics::Mode::ElasticInelastic
-            || cuts_.mode == Kinematics::Mode::InelasticInelastic )
+        if ( ( cuts_.mode == KinematicsMode::ElasticInelastic
+            || cuts_.mode == KinematicsMode::InelasticInelastic )
           && !mx_limits_.passes( MY_ ) )
           return 0.;
       }
@@ -931,11 +931,11 @@ namespace CepGen
       //--- compute the structure functions factors
 
       switch ( cuts_.mode ) { // inherited from CDF version
-        case Kinematics::Mode::ElectronProton: default: jacobian_ *= periPP( 1, 2 ); break; // ep case
-        case Kinematics::Mode::ElasticElastic:          jacobian_ *= periPP( 2, 2 ); break; // elastic case
-        case Kinematics::Mode::InelasticElastic:        jacobian_ *= periPP( 3, 2 )*( masses_.dw31_*masses_.dw31_ ); break;
-        case Kinematics::Mode::ElasticInelastic:        jacobian_ *= periPP( 3, 2 )*( masses_.dw52_*masses_.dw52_ ); break; // single-dissociative case
-        case Kinematics::Mode::InelasticInelastic:      jacobian_ *= periPP( 3, 3 )*( masses_.dw31_*masses_.dw31_ )*( masses_.dw52_*masses_.dw52_ ); break; // double-dissociative case
+        case KinematicsMode::ElectronProton: default: jacobian_ *= periPP( 1, 2 ); break; // ep case
+        case KinematicsMode::ElasticElastic:          jacobian_ *= periPP( 2, 2 ); break; // elastic case
+        case KinematicsMode::InelasticElastic:        jacobian_ *= periPP( 3, 2 )*( masses_.dw31_*masses_.dw31_ ); break;
+        case KinematicsMode::ElasticInelastic:        jacobian_ *= periPP( 3, 2 )*( masses_.dw52_*masses_.dw52_ ); break; // single-dissociative case
+        case KinematicsMode::InelasticInelastic:      jacobian_ *= periPP( 3, 3 )*( masses_.dw31_*masses_.dw31_ )*( masses_.dw52_*masses_.dw52_ ); break; // double-dissociative case
       }
 
       //--- compute the event weight using the Jacobian
@@ -984,13 +984,13 @@ namespace CepGen
 
       op1.setMomentum( p3_lab_ );
       switch ( cuts_.mode ) {
-        case Kinematics::Mode::ElasticElastic:
-        case Kinematics::Mode::ElasticInelastic:
+        case KinematicsMode::ElasticElastic:
+        case KinematicsMode::ElasticInelastic:
         default:
           op1.setStatus( Particle::Status::FinalState ); // stable proton
           break;
-        case Kinematics::Mode::InelasticElastic:
-        case Kinematics::Mode::InelasticInelastic:
+        case KinematicsMode::InelasticElastic:
+        case KinematicsMode::InelasticInelastic:
           op1.setStatus( Particle::Status::Unfragmented ); // fragmenting remnants
           op1.setMass( MX_ );
           break;
@@ -1000,13 +1000,13 @@ namespace CepGen
       Particle& op2 = event_->getOneByRole( Particle::OutgoingBeam2 );
       op2.setMomentum( p5_lab_ );
       switch ( cuts_.mode ) {
-        case Kinematics::Mode::ElasticElastic:
-        case Kinematics::Mode::InelasticElastic:
+        case KinematicsMode::ElasticElastic:
+        case KinematicsMode::InelasticElastic:
         default:
           op2.setStatus( Particle::Status::FinalState ); // stable proton
           break;
-        case Kinematics::Mode::ElasticInelastic:
-        case Kinematics::Mode::InelasticInelastic:
+        case KinematicsMode::ElasticInelastic:
+        case KinematicsMode::InelasticInelastic:
           op2.setStatus( Particle::Status::Unfragmented ); // fragmenting remnants
           op2.setMass( MY_ );
           break;
@@ -1110,31 +1110,31 @@ namespace CepGen
       const double mx2 = MX_*MX_, my2 = MY_*MY_;
 
       switch ( cuts_.mode ) {
-        case Kinematics::Mode::ElectronElectron: default: {
+        case KinematicsMode::ElectronElectron: default: {
           fp1 = FormFactors::trivial(); // electron (trivial) form factor
           fp2 = FormFactors::trivial(); // electron (trivial) form factor
         } break;
-        case Kinematics::Mode::ProtonElectron: {
+        case KinematicsMode::ProtonElectron: {
           fp1 = FormFactors::protonElastic( -t1_ ); // proton elastic form factor
           fp2 = FormFactors::trivial(); // electron (trivial) form factor
         } break;
-        case Kinematics::Mode::ElectronProton: {
+        case KinematicsMode::ElectronProton: {
           fp1 = FormFactors::trivial(); // electron (trivial) form factor
           fp2 = FormFactors::protonElastic( -t2_ ); // proton elastic form factor
         } break;
-        case Kinematics::Mode::ElasticElastic: {
+        case KinematicsMode::ElasticElastic: {
           fp1 = FormFactors::protonElastic( -t1_ ); // proton elastic form factor
           fp2 = FormFactors::protonElastic( -t2_ ); // proton elastic form factor
         } break;
-        case Kinematics::Mode::ElasticInelastic: {
+        case KinematicsMode::ElasticInelastic: {
           fp1 = FormFactors::protonElastic( -t1_ );
           fp2 = FormFactors::protonInelastic( -t2_, w2_, my2, *cuts_.structure_functions );
         } break;
-        case Kinematics::Mode::InelasticElastic: {
+        case KinematicsMode::InelasticElastic: {
           fp1 = FormFactors::protonInelastic( -t1_, w1_, mx2, *cuts_.structure_functions );
           fp2 = FormFactors::protonElastic( -t2_ );
         } break;
-        case Kinematics::Mode::InelasticInelastic: {
+        case KinematicsMode::InelasticInelastic: {
           fp1 = FormFactors::protonInelastic( -t1_, w1_, mx2, *cuts_.structure_functions );
           fp2 = FormFactors::protonInelastic( -t2_, w2_, my2, *cuts_.structure_functions );
         } break;

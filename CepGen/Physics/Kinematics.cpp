@@ -1,5 +1,6 @@
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/KTFlux.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
@@ -10,8 +11,9 @@
 namespace CepGen
 {
   Kinematics::Kinematics() :
-    incoming_beams( { { 6500., PDG::proton, 10 }, { 6500., PDG::proton, 10 } } ),
-    mode( Mode::invalid ), structure_functions( new SF::SuriYennie )
+    incoming_beams( { { 6500., PDG::proton, KTFlux::invalid },
+                      { 6500., PDG::proton, KTFlux::invalid } } ),
+    mode( KinematicsMode::invalid ), structure_functions( new SF::SuriYennie )
   {}
 
   Kinematics::~Kinematics()
@@ -30,28 +32,28 @@ namespace CepGen
   }
 
   //-----------------------------------------------------------------------------------------------
-  // User-friendly displayers
+  // User-friendly display of the kinematics mode
   //-----------------------------------------------------------------------------------------------
 
   std::ostream&
-  operator<<( std::ostream& os, const Kinematics::Mode& pm )
+  operator<<( std::ostream& os, const KinematicsMode& pm )
   {
     switch ( pm ) {
-      case Kinematics::Mode::invalid:
+      case KinematicsMode::invalid:
         return os << "invalid";
-      case Kinematics::Mode::ElectronElectron:
+      case KinematicsMode::ElectronElectron:
         return os << "electron/electron";
-      case Kinematics::Mode::ElectronProton:
+      case KinematicsMode::ElectronProton:
         return os << "electron/proton";
-      case Kinematics::Mode::ProtonElectron:
+      case KinematicsMode::ProtonElectron:
         return os << "proton/electron";
-      case Kinematics::Mode::ElasticElastic:
+      case KinematicsMode::ElasticElastic:
         return os << "elastic/elastic";
-      case Kinematics::Mode::InelasticElastic:
+      case KinematicsMode::InelasticElastic:
         return os << "inelastic/elastic";
-      case Kinematics::Mode::ElasticInelastic:
+      case KinematicsMode::ElasticInelastic:
         return os << "elastic/inelastic";
-      case Kinematics::Mode::InelasticInelastic:
+      case KinematicsMode::InelasticInelastic:
         return os << "inelastic/inelastic";
     }
     return os;

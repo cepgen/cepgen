@@ -27,6 +27,10 @@ namespace CepGen
       registerVariable( pt_diff_, Mapping::linear, cuts_.cuts.central.pt_diff, { 0., 50. }, "Fermions transverse momentum difference" );
       registerVariable( phi_pt_diff_, Mapping::linear, cuts_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Fermions azimuthal angle difference" );
 
+      if ( (PDG)pair_ == PDG::invalid )
+        throw CG_FATAL( "PPtoFF:prepare" )
+          << "Invalid fermion pair selected: " << pair_ << "!";
+
       const PDG pdg_f = (PDG)pair_;
       mf_ = ParticleProperties::mass( pdg_f );
       mf2_ = mf_*mf_;
@@ -110,12 +114,12 @@ namespace CepGen
         << "s(1/2)eff = " << s1_eff << ", " << s2_eff << " GeV²\n\t"
         << "central system's invariant mass = " << invm << " GeV.";
 
-      if ( ( cuts_.mode == Kinematics::Mode::ElasticInelastic
-          || cuts_.mode == Kinematics::Mode::InelasticInelastic )
+      if ( ( cuts_.mode == KinematicsMode::ElasticInelastic
+          || cuts_.mode == KinematicsMode::InelasticInelastic )
         && ( sqrt( s1_eff ) <= ( MY_+invm ) ) )
         return 0.;
-      if ( ( cuts_.mode == Kinematics::Mode::InelasticElastic
-          || cuts_.mode == Kinematics::Mode::InelasticInelastic )
+      if ( ( cuts_.mode == KinematicsMode::InelasticElastic
+          || cuts_.mode == KinematicsMode::InelasticInelastic )
         && ( sqrt( s2_eff ) <= ( MX_+invm ) ) )
         return 0.;
 

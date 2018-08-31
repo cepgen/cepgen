@@ -1,6 +1,7 @@
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 
 #include "CepGen/Parameters.h"
+#include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 
@@ -58,16 +59,16 @@ namespace CepGen
         pythia_->settings.flag( "ProcessLevel:all", full_evt_ );
 
       switch ( params_->kinematics.mode ) {
-        case Kinematics::Mode::ElasticElastic:
+        case KinematicsMode::ElasticElastic:
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 3 );
           break;
-        case Kinematics::Mode::InelasticElastic:
+        case KinematicsMode::InelasticElastic:
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 2 );
           break;
-        case Kinematics::Mode::ElasticInelastic:
+        case KinematicsMode::ElasticInelastic:
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 1 );
           break;
-        case Kinematics::Mode::InelasticInelastic: default:
+        case KinematicsMode::InelasticInelastic: default:
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 0 );
           break;
       }
@@ -306,7 +307,7 @@ namespace CepGen
   }
 
   void
-  LHAEvent::feedEvent( const Event& ev, bool full, const Kinematics::Mode& mode )
+  LHAEvent::feedEvent( const Event& ev, bool full, const KinematicsMode& mode )
   {
     const double scale = ev.getOneByRole( Particle::Intermediate ).mass();
     setProcess( 0, 1., scale, Constants::alphaEM, Constants::alphaQCD );
@@ -333,8 +334,8 @@ namespace CepGen
       addParticle( quark2_pdgid, -2, quark2_id, 0, 0, 0, mom_part2.px(), mom_part2.py(), mom_part2.pz(), mom_part2.e(), mom_part2.mCalc(), 0., 0. );
     }
     else { // full event content (with collinear partons)
-      const bool inel1 = ( mode == Kinematics::Mode::InelasticElastic || mode == Kinematics::Mode::InelasticInelastic );
-      const bool inel2 = ( mode == Kinematics::Mode::ElasticInelastic || mode == Kinematics::Mode::InelasticInelastic );
+      const bool inel1 = ( mode == KinematicsMode::InelasticElastic || mode == KinematicsMode::InelasticInelastic );
+      const bool inel2 = ( mode == KinematicsMode::ElasticInelastic || mode == KinematicsMode::InelasticInelastic );
 
       unsigned short quark1_colour = 0, quark2_colour = 0;
       Pythia8::Vec4 mom_iq1 = mom_part1, mom_iq2 = mom_part2;

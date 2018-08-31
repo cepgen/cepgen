@@ -61,7 +61,8 @@ namespace CepGen
         return os << "inelastic photon from proton";
       case KTFlux::P_Photon_Inelastic_Budnev:
         return os << "inelastic photon from proton (Budnev)";
+      case KTFlux::invalid: default:
+        return os << "unrecognized flux (" << (int)type << ")";
     }
-    return os;
   }
 }

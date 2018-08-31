@@ -173,19 +173,16 @@ namespace CepGen
       os
         << std::setw( wt ) << "Random number generator engine"
         << p->integrator.rng_engine->name << "\n";
+    std::ostringstream proc_mode; proc_mode << p->kinematics.mode;
     os
       << "\n"
       << std::setfill('_') << std::setw( wb+3 )
       << "_/¯¯EVENTS¯KINEMATICS¯¯\\_" << std::setfill( ' ' ) << "\n\n"
       << std::setfill( '-' ) << std::setw( wb+6 )
-      << ( pretty ? boldify( " Incoming particles " ) : "Incoming particles" ) << std::setfill( ' ' ) << "\n\n";
-    if ( p->kinematics.mode != Kinematics::Mode::invalid ) {
-      std::ostringstream proc_mode; proc_mode << p->kinematics.mode;
-      os
-        << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << "\n";
-      if ( p->kinematics.mode != Kinematics::Mode::ElasticElastic )
-        os << std::setw( wt ) << "Structure functions" << p->kinematics.structure_functions->type << "\n";
-    }
+      << ( pretty ? boldify( " Incoming particles " ) : "Incoming particles" ) << std::setfill( ' ' ) << "\n\n"
+      << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << "\n";
+    if ( p->kinematics.mode != KinematicsMode::ElasticElastic )
+      os << std::setw( wt ) << "Structure functions" << p->kinematics.structure_functions->type << "\n";
     std::ostringstream ip1, ip2;
     ip1 << p->kinematics.incoming_beams.first.pdg;
     ip2 << p->kinematics.incoming_beams.second.pdg;
