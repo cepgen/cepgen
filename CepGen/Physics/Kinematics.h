@@ -4,6 +4,7 @@
 #include "CepGen/Core/Hasher.h"
 
 #include "CepGen/Physics/Cuts.h"
+#include "CepGen/Physics/HeavyIon.h"
 
 #include <ostream>
 #include <vector>
@@ -70,6 +71,7 @@ namespace CepGen
         Cuts remnants;
       };
       CutsList cuts;
+      std::string kmr_grid_path;
   };
 }
 

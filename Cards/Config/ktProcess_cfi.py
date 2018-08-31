@@ -5,6 +5,9 @@ class ProtonFlux:
     PhotonElastic         = 0
     PhotonInelastic       = 1
     PhotonInelasticBudnev = 11
+    GluonKMR              = 20
+class HeavyIonFlux:
+    PhotonElastic         = 100
 
 process = cepgen.Module('ktProcess',
     outKinematics = cepgen.Parameters(

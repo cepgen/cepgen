@@ -65,7 +65,11 @@ namespace CepGen
   std::ostream&
   operator<<( std::ostream& os, const Kinematics::Beam& beam )
   {
-    os << beam.pdg << " (" << beam.pz << " GeV/c)";
+    if ( (HeavyIon)beam.pdg )
+      os << (HeavyIon)beam.pdg;
+    else
+      os << beam.pdg;
+    os << " (" << beam.pz << " GeV/c)";
     if ( beam.kt_flux != KTFlux::invalid )
       os << " [unint.flux: " << beam.kt_flux << "]";
     return os;

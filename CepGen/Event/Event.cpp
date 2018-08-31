@@ -1,5 +1,6 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
@@ -282,7 +283,10 @@ namespace CepGen
           os << Form( "\n %2d\t\t%-10s", part.id(), oss_pdg.str().c_str() );
         }
         else {
-          oss_pdg << part.pdgId();
+          if ( (HeavyIon)part.pdgId() )
+            oss_pdg << (HeavyIon)part.pdgId();
+          else
+            oss_pdg << part.pdgId();
           os << Form( "\n %2d\t%-+7d %-10s", part.id(), part.integerPdgId(), oss_pdg.str().c_str() );
         }
       }

@@ -7,6 +7,7 @@
 namespace CepGen
 {
   class StructureFunctions;
+  class HeavyIon;
   struct KTFluxParameters
   {
     static const double kMinKTFlux, kMP, kMP2;
@@ -18,6 +19,8 @@ namespace CepGen
     P_Photon_Elastic = 0,
     P_Photon_Inelastic = 1,
     P_Photon_Inelastic_Budnev = 11,
+    P_Gluon_KMR = 20,
+    HI_Photon_Elastic = 100
   };
   std::ostream& operator<<( std::ostream&, const KTFlux& );
   /// Get the flux at a given parton x/kT
@@ -26,6 +29,7 @@ namespace CepGen
   /// \param[in] sf Structure functions evaluator
   /// \param[in] mx Outgoing diffractive proton mass
   double ktFlux( const KTFlux& type, double x, double kt2, StructureFunctions& sf, double mx = KTFluxParameters::kMP );
+  double ktFlux( const KTFlux& type, double x, double kt2, const HeavyIon& hi );
 }
 
 #endif

@@ -64,8 +64,12 @@ namespace CepGen
                    flux2 = (KTFlux)cuts_.incoming_beams.second.kt_flux;
 
       if ( cuts_.mode == KinematicsMode::invalid ) {
-        bool el1 = ( flux1 == KTFlux::P_Photon_Elastic );
-        bool el2 = ( flux2 == KTFlux::P_Photon_Elastic );
+        bool el1 = ( flux1 == KTFlux::P_Photon_Elastic
+                  || flux1 == KTFlux::HI_Photon_Elastic
+                  || flux1 == KTFlux::P_Gluon_KMR );
+        bool el2 = ( flux2 == KTFlux::P_Photon_Elastic
+                  || flux2 == KTFlux::HI_Photon_Elastic
+                  || flux2 == KTFlux::P_Gluon_KMR );
         if ( el1 && el2 )
           cuts_.mode = KinematicsMode::ElasticElastic;
         else if ( el1 )
@@ -82,13 +86,18 @@ namespace CepGen
         if ( ( cuts_.mode == KinematicsMode::ElasticElastic
             || cuts_.mode == KinematicsMode::ElasticInelastic )
           && ( flux1 != KTFlux::P_Photon_Elastic ) ) {
-          cuts_.incoming_beams.first.kt_flux = KTFlux::P_Photon_Elastic;
+          cuts_.incoming_beams.first.kt_flux = ( (HeavyIon)cuts_.incoming_beams.first.pdg )
+            ? KTFlux::HI_Photon_Elastic
+            : KTFlux::P_Photon_Elastic;
           CG_DEBUG( "GenericKTProcess:kinematics" )
             << "Set the kt flux for first incoming photon to \""
             << cuts_.incoming_beams.first.kt_flux << "\".";
         }
         else if ( flux1 != KTFlux::P_Photon_Inelastic
                && flux1 != KTFlux::P_Photon_Inelastic_Budnev ) {
+          if ( (HeavyIon)cuts_.incoming_beams.first.pdg )
+            throw CG_FATAL( "GenericKTProcess:kinematics" )
+              << "Inelastic photon emission from HI not yet supported!";
           cuts_.incoming_beams.first.kt_flux = KTFlux::P_Photon_Inelastic_Budnev;
           CG_DEBUG( "GenericKTProcess:kinematics" )
             << "Set the kt flux for first incoming photon to \""
@@ -100,13 +109,18 @@ namespace CepGen
         if ( ( cuts_.mode == KinematicsMode::ElasticElastic
             || cuts_.mode == KinematicsMode::InelasticElastic )
           && ( flux2 != KTFlux::P_Photon_Elastic ) ) {
-          cuts_.incoming_beams.second.kt_flux = KTFlux::P_Photon_Elastic;
+          cuts_.incoming_beams.second.kt_flux = ( (HeavyIon)cuts_.incoming_beams.second.pdg )
+            ? KTFlux::HI_Photon_Elastic
+            : KTFlux::P_Photon_Elastic;
           CG_DEBUG( "GenericKTProcess:kinematics" )
             << "Set the kt flux for second incoming photon to \""
             << cuts_.incoming_beams.second.kt_flux << "\".";
         }
         else if ( flux2 != KTFlux::P_Photon_Inelastic
                && flux2 != KTFlux::P_Photon_Inelastic_Budnev ) {
+          if ( (HeavyIon)cuts_.incoming_beams.second.pdg )
+            throw CG_FATAL( "GenericKTProcess:kinematics" )
+              << "Inelastic photon emission from HI not yet supported!";
           cuts_.incoming_beams.second.kt_flux = KTFlux::P_Photon_Inelastic_Budnev;
           CG_DEBUG( "GenericKTProcess:kinematics" )
             << "Set the kt flux for second incoming photon to \""

@@ -2,6 +2,7 @@
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Physics/KTFlux.h"
+#include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/ParticleProperties.h"
 
 #include "CepGen/Core/Exception.h"
@@ -29,6 +30,14 @@ extern "C" {
     static auto sf = StructureFunctionsBuilder::get( (SF::Type)sfmode );
     return ktFlux(
       (KTFlux)fmode, x, kt2, *sf, mx );
+  }
+
+  double
+  cepgen_kt_flux_hi_( int& fmode, double& x, double& kt2, int& a, int& z )
+  {
+    using namespace CepGen;
+    return ktFlux(
+      (KTFlux)fmode, x, kt2, HeavyIon{ (unsigned short)a, (Element)z } );
   }
 
   double
