@@ -21,18 +21,27 @@
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/PartonFlux.h"
+#include "CepGen/Process/CollinearPhaseSpaceGenerator.h"
 #include "CepGen/Process/FactorisedProcess.h"
 #include "CepGen/Process/KTPhaseSpaceGenerator.h"
 
 namespace cepgen {
   namespace proc {
     FactorisedProcess::FactorisedProcess(const ParametersList& params, const pdgids_t& central)
-        : Process(params), produced_parts_(central), psgen_(new KTPhaseSpaceGenerator(this)) {
+        : Process(params),
+          produced_parts_(central),
+          psgen_(steer<bool>("ktFactorised")
+                     ? std::unique_ptr<PhaseSpaceGenerator>(new KTPhaseSpaceGenerator(this))
+                     : std::unique_ptr<PhaseSpaceGenerator>(new CollinearPhaseSpaceGenerator(this))) {
       event().map()[Particle::CentralSystem].resize(central.size());
     }
 
     FactorisedProcess::FactorisedProcess(const FactorisedProcess& proc)
-        : Process(proc), produced_parts_(proc.produced_parts_), psgen_(new KTPhaseSpaceGenerator(this)) {}
+        : Process(proc),
+          produced_parts_(proc.produced_parts_),
+          psgen_(proc.psgen_->ktFactorised()
+                     ? std::unique_ptr<PhaseSpaceGenerator>(new KTPhaseSpaceGenerator(this))
+                     : std::unique_ptr<PhaseSpaceGenerator>(new CollinearPhaseSpaceGenerator(this))) {}
 
     void FactorisedProcess::addEventContent() {
       Process::setEventContent(

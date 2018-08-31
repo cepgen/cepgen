@@ -127,6 +127,7 @@ int main(int argc, char* argv[]) {
     LOOP_FACTORY("Event modification", cepgen::EventModifierFactory);
     LOOP_FACTORY("Event export", cepgen::EventExporterFactory);
     // physics evaluators
+    LOOP_FACTORY("Collinear parton flux modelling", cepgen::CollinearFluxFactory);
     LOOP_FACTORY("KT-factorised parton flux modelling", cepgen::KTFluxFactory);
     LOOP_FACTORY("Beam form factors modelling", cepgen::FormFactorsFactory);
     LOOP_FACTORY_INT("Structure functions modelling", cepgen::StructureFunctionsFactory);

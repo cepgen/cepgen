@@ -16,18 +16,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Modules/PartonFluxFactory.h"
-#include "CepGen/Utils/String.h"
+#include "CepGen/CollinearFluxes/CollinearFlux.h"
+#include "CepGen/Physics/Utils.h"
 
 namespace cepgen {
-  ParametersDescription PartonFluxFactory::describeParameters(const std::string& name,
-                                                              const ParametersList& params) const {
-    if (utils::contains(CollinearFluxFactory::get().modules(), name))
-      return CollinearFluxFactory::get().describeParameters(name, params);
-    if (utils::contains(KTFluxFactory::get().modules(), name))
-      return KTFluxFactory::get().describeParameters(name, params);
-    throw CG_FATAL("PartonFluxFactory:describeParameters")
-        << "Failed to find a parton flux with name '" << name << "'.";
+  CollinearFlux::CollinearFlux(const ParametersList& params) : PartonFlux(params) {}
+
+  ParametersDescription CollinearFlux::description() {
+    auto desc = PartonFlux::description();
+    desc.setDescription("Collinear parton flux");
+    return desc;
+  }
+
+  double CollinearFlux::fluxQ2(double x, double q2) const {
+    return fluxMX2(x, utils::mX2(x, q2, mass2()) /*FIXME on-shell assumption: xbj == x*/);
+  }
+
+  double CollinearFlux::fluxMX2(double x, double mx2) const {
+    if (mx2 <= 0.)
+      mx2 = mass2();
+    return fluxQ2(x, utils::q2(x, mass2(), mx2) /*FIXME on-shell assumption: xbj == x*/);
   }
 }  // namespace cepgen

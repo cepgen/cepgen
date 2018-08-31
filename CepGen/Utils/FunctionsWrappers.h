@@ -32,6 +32,7 @@ namespace cepgen {
       explicit Function1D(const std::function<double(double, const ParametersList&)>& func) : func_params_(func) {}
       explicit Function1D(const std::function<double(double, void*)>& func) : func_obj_(func) {}
 
+      /// Call the function with a user collection of parameters
       double operator()(double x, const ParametersList& params = ParametersList()) const {
         if (func_params_)
           return func_params_(x, params);
