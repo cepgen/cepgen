@@ -70,12 +70,6 @@ namespace CepGen
     return FormFactors( sf.F2 * x / q2, -2.*sf.F1( x, q2 ) / q2 );
   }
 
-  double
-  FormFactors::x( double q2, double w2, double m2 ) const
-  {
-    return 1./( 1.+( w2-mp2_ ) / q2+m2 );
-  }
-
   std::ostream&
   operator<<( std::ostream& os, const FormFactors& ff )
   {
