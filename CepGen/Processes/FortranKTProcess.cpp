@@ -3,6 +3,8 @@
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Event/Event.h"
+
+#include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 
@@ -109,9 +111,9 @@ namespace CepGen
 
       params_.iflux1 = cuts_.incoming_beams.first.kt_flux;
       params_.iflux2 = cuts_.incoming_beams.second.kt_flux;
-      if ( (Flux)params_.iflux1 == Flux::P_Gluon_KMR )
+      if ( (KTFlux)params_.iflux1 == KTFlux::P_Gluon_KMR )
         event_->getOneByRole( Particle::Parton1 ).setPdgId( PDG::gluon );
-      if ( (Flux)params_.iflux2 == Flux::P_Gluon_KMR )
+      if ( (KTFlux)params_.iflux2 == KTFlux::P_Gluon_KMR )
         event_->getOneByRole( Particle::Parton2 ).setPdgId( PDG::gluon );
     }
 
