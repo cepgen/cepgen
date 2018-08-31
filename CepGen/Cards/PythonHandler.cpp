@@ -10,6 +10,7 @@
 #include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Processes/PPtoFF.h"
 #include "CepGen/Processes/PPtoWW.h"
+#include "CepGen/Processes/FortranKTProcess.h"
 
 #include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 #include "CepGen/StructureFunctions/LHAPDF.h"
@@ -19,6 +20,11 @@
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 
 #include <algorithm>
+
+extern "C"
+{
+  extern void nucl_to_ff_( double& );
+}
 
 #if PY_MAJOR_VERSION < 3
 #  define PYTHON2
@@ -78,16 +84,18 @@ namespace CepGen
         throwPythonError( Form( "Failed to extract the process name from the configuration card %s", file ) );
       const std::string proc_name = get<std::string>( pproc_name );
 
+      //--- process mode
+      params_.kinematics.mode = (KinematicsMode)proc_params.get<int>( "mode", (int)KinematicsMode::invalid );
+
       if ( proc_name == "lpair" )
         params_.setProcess( new Process::GamGamLL( proc_params ) );
       else if ( proc_name == "pptoll" || proc_name == "pptoff" )
         params_.setProcess( new Process::PPtoFF( proc_params ) );
       else if ( proc_name == "pptoww" )
         params_.setProcess( new Process::PPtoWW( proc_params ) );
+      else if ( proc_name == "patoll" )
+        params_.setProcess( new Process::FortranKTProcess( proc_params, "nucltoff", "(p/A)(p/A) ↝ (g/ɣ)ɣ → f⁺f¯", nucl_to_ff_ ) );
       else throw CG_FATAL( "PythonHandler" ) << "Unrecognised process: " << proc_name << ".";
-
-      //--- process mode
-      fillParameter( process, "mode", (int&)params_.kinematics.mode );
 
       //--- process kinematics
       PyObject* pin_kinematics = getElement( process, "inKinematics" ); // borrowed
@@ -160,6 +168,7 @@ namespace CepGen
       }
       double sqrt_s = -1.;
       fillParameter( kin, "cmEnergy", sqrt_s );
+      fillParameter( kin, "kmrGridPath", params_.kinematics.kmr_grid_path );
       if ( sqrt_s != -1. )
         params_.kinematics.setSqrtS( sqrt_s );
       PyObject* psf = getElement( kin, "structureFunctions" ); // borrowed
@@ -168,9 +177,16 @@ namespace CepGen
       std::vector<int> kt_fluxes;
       fillParameter( kin, "ktFluxes", kt_fluxes );
       if ( kt_fluxes.size() > 0 )
-        params_.kinematics.incoming_beams.first.kt_flux = kt_fluxes.at( 0 );
+        params_.kinematics.incoming_beams.first.kt_flux = (KTFlux)kt_fluxes.at( 0 );
       if ( kt_fluxes.size() > 1 )
-        params_.kinematics.incoming_beams.second.kt_flux = kt_fluxes.at( 1 );
+        params_.kinematics.incoming_beams.second.kt_flux = (KTFlux)kt_fluxes.at( 1 );
+      std::vector<int> hi_beam1, hi_beam2;
+      fillParameter( kin, "heavyIonA", hi_beam1 );
+      if ( hi_beam1.size() == 2 )
+        params_.kinematics.incoming_beams.first.pdg = HeavyIon{ (unsigned short)hi_beam1[0], (Element)hi_beam1[1] };
+      fillParameter( kin, "heavyIonB", hi_beam2 );
+      if ( hi_beam2.size() == 2 )
+        params_.kinematics.incoming_beams.second.pdg = HeavyIon{ (unsigned short)hi_beam2[0], (Element)hi_beam2[1] };
     }
 
     void
@@ -188,7 +204,7 @@ namespace CepGen
           fillParameter( psf, "mode", (unsigned int&)sf->params.mode );
         } break;
         case SF::Type::MSTWgrid: {
-          auto sf = std::dynamic_pointer_cast<MSTW::Grid>( params_.kinematics.structure_functions );
+          auto sf = std::dynamic_pointer_cast<mstw::Grid>( params_.kinematics.structure_functions );
           fillParameter( psf, "gridPath", sf->params.grid_path );
         } break;
         case SF::Type::Schaefer: {

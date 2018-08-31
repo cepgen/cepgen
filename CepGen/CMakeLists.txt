@@ -16,6 +16,12 @@ else()
   message(STATUS "GRV PDFset not found. Will proceed without it")
 endif()
 
+#----- check the external dependencies for physics utilities
+
+if(alphas_sources)
+  list(APPEND phys_sources ${alphas_sources})
+endif()
+
 #----- build the object
 
 add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${sf_sources})

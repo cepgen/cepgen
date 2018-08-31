@@ -173,25 +173,18 @@ namespace CepGen
       os
         << std::setw( wt ) << "Random number generator engine"
         << p->integrator.rng_engine->name << "\n";
+    std::ostringstream proc_mode; proc_mode << p->kinematics.mode;
     os
       << "\n"
       << std::setfill('_') << std::setw( wb+3 )
       << "_/¯¯EVENTS¯KINEMATICS¯¯\\_" << std::setfill( ' ' ) << "\n\n"
-      << std::setfill( '-' ) << std::setw( wb+6 )
-      << ( pretty ? boldify( " Incoming particles " ) : "Incoming particles" ) << std::setfill( ' ' ) << "\n\n";
-    if ( p->kinematics.mode != Kinematics::Mode::invalid ) {
-      std::ostringstream proc_mode; proc_mode << p->kinematics.mode;
-      os
-        << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << "\n";
-      if ( p->kinematics.mode != Kinematics::Mode::ElasticElastic )
-        os << std::setw( wt ) << "Structure functions" << p->kinematics.structure_functions->type << "\n";
-    }
-    std::ostringstream ip1, ip2;
-    ip1 << p->kinematics.incoming_beams.first.pdg;
-    ip2 << p->kinematics.incoming_beams.second.pdg;
-    os
-      << std::setw( wt ) << "Incoming particles" << ( pretty ? boldify( ip1.str().c_str() ) : ip1.str() ) << ", " << ( pretty ? boldify( ip2.str().c_str() ) : ip2.str() ) << "\n"
-      << std::setw( wt ) << "Momenta (GeV/c)" << p->kinematics.incoming_beams.first.pz << ", " << p->kinematics.incoming_beams.second.pz << "\n";
+      << std::setw( wt ) << "Incoming particles"
+      << p->kinematics.incoming_beams.first << ",\n" << std::setw( wt ) << ""
+      << p->kinematics.incoming_beams.second << "\n";
+    if ( p->kinematics.mode != KinematicsMode::invalid )
+      os << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << "\n";
+    if ( p->kinematics.mode != KinematicsMode::ElasticElastic )
+      os << std::setw( wt ) << "Structure functions" << p->kinematics.structure_functions->type << "\n";
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << "\n\n";

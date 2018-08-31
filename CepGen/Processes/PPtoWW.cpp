@@ -18,7 +18,7 @@ namespace CepGen
     const double PPtoWW::mw2_ = PPtoWW::mw_*PPtoWW::mw_;
 
     PPtoWW::PPtoWW( const ParametersList& params ) :
-      GenericKTProcess( params, "pptoww", "ɣɣ → W⁺W¯", { { PDG::Photon, PDG::Photon } }, { PDG::W, PDG::W } ),
+      GenericKTProcess( params, "pptoww", "ɣɣ → W⁺W¯", { { PDG::photon, PDG::photon } }, { PDG::W, PDG::W } ),
       method_( params.get<int>( "method", 1 ) ),
       pol_state_( (Polarisation)params.get<int>( "polarisationStates", 0 ) ),
       y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )
@@ -147,12 +147,12 @@ namespace CepGen
         << "s(1/2)_eff = " << s1_eff << " / " << s2_eff << " GeV^2\n\t"
         << "diboson invariant mass = " << invm << " GeV";
 
-      if ( ( cuts_.mode == Kinematics::Mode::ElasticInelastic
-          || cuts_.mode == Kinematics::Mode::InelasticInelastic )
+      if ( ( cuts_.mode == KinematicsMode::ElasticInelastic
+          || cuts_.mode == KinematicsMode::InelasticInelastic )
         && ( sqrt( s1_eff ) <= ( MY_+invm ) ) )
         return 0.;
-      if ( ( cuts_.mode == Kinematics::Mode::InelasticElastic
-          || cuts_.mode == Kinematics::Mode::InelasticInelastic )
+      if ( ( cuts_.mode == KinematicsMode::InelasticElastic
+          || cuts_.mode == KinematicsMode::InelasticInelastic )
         && ( sqrt( s2_eff ) <= ( MX_+invm ) ) )
         return 0.;
 

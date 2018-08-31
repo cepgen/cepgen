@@ -22,6 +22,12 @@ namespace CepGen
     computeP();
   }
 
+  Momentum::Momentum( double* p ) :
+    px_( p[0] ), py_( p[1] ), pz_( p[2] ), energy_( p[3] )
+  {
+    computeP();
+  }
+
   //--- static constructors
 
   Momentum
@@ -204,6 +210,20 @@ namespace CepGen
   Momentum::computeP()
   {
     p_ = std::hypot( pt(), pz_ );
+  }
+
+  void
+  Momentum::truncate( double tolerance )
+  {
+    if ( px_ <= tolerance )
+      px_ = 0.;
+    if ( py_ <= tolerance )
+      py_ = 0.;
+    if ( pz_ <= tolerance )
+      pz_ = 0.;
+    if ( energy_ <= tolerance )
+      energy_ = 0.;
+    computeP();
   }
 
   //--- various getters

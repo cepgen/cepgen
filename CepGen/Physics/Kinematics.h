@@ -4,6 +4,7 @@
 #include "CepGen/Core/Hasher.h"
 
 #include "CepGen/Physics/Cuts.h"
+#include "CepGen/Physics/HeavyIon.h"
 
 #include <ostream>
 #include <vector>
@@ -13,7 +14,22 @@
 namespace CepGen
 {
   enum class PDG;
+  enum class KTFlux;
   class StructureFunctions;
+  /// Type of kinematics to consider for the process
+  enum class KinematicsMode
+  {
+    invalid = -1,
+    ElectronProton = 0,     ///< electron-proton elastic case
+    ElasticElastic = 1,     ///< proton-proton elastic case
+    ElasticInelastic = 2,   ///< proton-proton single-dissociative (or inelastic-elastic) case
+    InelasticElastic = 3,   ///< proton-proton single-dissociative (or elastic-inelastic) case
+    InelasticInelastic = 4, ///< proton-proton double-dissociative case
+    ProtonElectron,
+    ElectronElectron
+  };
+  /// Human-readable format of a process mode (elastic/dissociative parts)
+  std::ostream& operator<<( std::ostream&, const KinematicsMode& );
   /// List of kinematic constraints to apply on the process phase space.
   class Kinematics
   {
@@ -21,26 +37,12 @@ namespace CepGen
       Kinematics();
       ~Kinematics();
 
-      /// Type of kinematics to consider for the process
-      enum class Mode {
-        invalid = -1,
-        ElectronProton = 0,     ///< electron-proton elastic case
-        ElasticElastic = 1,     ///< proton-proton elastic case
-        ElasticInelastic = 2,   ///< proton-proton single-dissociative (or inelastic-elastic) case
-        InelasticElastic = 3,   ///< proton-proton single-dissociative (or elastic-inelastic) case
-        InelasticInelastic = 4, ///< proton-proton double-dissociative case
-        ProtonElectron,
-        ElectronElectron
-      };
-      /// Human-readable format of a process mode (elastic/dissociative parts)
-      friend std::ostream& operator<<( std::ostream&, const Mode& );
-
       struct Beam
       {
         /// Incoming particle's momentum (in \f$\text{GeV}/c\f$)
         double pz;
         PDG pdg;
-        unsigned short kt_flux;
+        KTFlux kt_flux;
       };
       friend std::ostream& operator<<( std::ostream&, const Beam& );
       /// Beam/primary particle's kinematics
@@ -53,7 +55,7 @@ namespace CepGen
       std::vector<PDG> minimum_final_state;
 
       /// Type of kinematics to consider for the phase space
-      Mode mode;
+      KinematicsMode mode;
       /// Type of structure functions to consider
       std::shared_ptr<StructureFunctions> structure_functions;
 
@@ -69,6 +71,7 @@ namespace CepGen
         Cuts remnants;
       };
       CutsList cuts;
+      std::string kmr_grid_path;
   };
 }
 

@@ -235,7 +235,7 @@ namespace CepGen
             }
 
             // initialise splines objects
-            std::vector<double> x_vec = coords_.at( 0 ), y_vec = coords_.at( 1 );
+            const coord_t& x_vec = coords_.at( 0 ), &y_vec = coords_.at( 1 );
             for ( unsigned short i = 0; i < splines_2d_.size(); ++i )
               gsl_spline2d_init( splines_2d_.at( i ).get(), &x_vec[0], &y_vec[0], values_[i].get(), x_vec.size(), y_vec.size() );
 #else
@@ -258,7 +258,7 @@ namespace CepGen
 #ifdef GOOD_GSL
       std::vector<std::unique_ptr<gsl_spline2d,void(*)( gsl_spline2d* )> > splines_2d_;
 #endif
-      std::array<std::vector<double>,D> coords_;
+      std::array<coord_t,D> coords_;
       std::array<std::unique_ptr<double[]>,N> values_;
 
     private:

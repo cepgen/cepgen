@@ -40,7 +40,7 @@ namespace CepGen
         << "<!--\n"
         << "  ***** Sample generated with CepGen v" << version() << " *****\n"
         << "  * process: " << params.processName() << " (" << params.kinematics.mode << ")\n";
-      if ( params.kinematics.mode != Kinematics::Mode::ElasticElastic ) {
+      if ( params.kinematics.mode != KinematicsMode::ElasticElastic ) {
         oss_init
           << "  * structure functions: " << params.kinematics.structure_functions->type << "\n";
         if ( !params.hadroniserName().empty() )
@@ -54,7 +54,7 @@ namespace CepGen
           << "  * Q2 range (GeV2): "
           << params.kinematics.cuts.initial.q2.min() << ", "
           << params.kinematics.cuts.initial.q2.max() << "\n";
-      if ( params.kinematics.mode != Kinematics::Mode::ElasticElastic
+      if ( params.kinematics.mode != KinematicsMode::ElasticElastic
         && params.kinematics.cuts.remnants.mass_single.valid() )
         oss_init
           << "  * remnants mass range (GeV/c2): "

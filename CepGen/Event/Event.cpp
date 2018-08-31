@@ -1,5 +1,6 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
@@ -271,7 +272,7 @@ namespace CepGen
 
     std::ostringstream os;
 
-    double pxtot = 0., pytot = 0., pztot = 0., etot = 0.;
+    Particle::Momentum p_total;
     for ( const auto& part : parts ) {
       const ParticlesIds mothers = part.mothers();
       {
@@ -282,7 +283,10 @@ namespace CepGen
           os << Form( "\n %2d\t\t%-10s", part.id(), oss_pdg.str().c_str() );
         }
         else {
-          oss_pdg << part.pdgId();
+          if ( (HeavyIon)part.pdgId() )
+            oss_pdg << (HeavyIon)part.pdgId();
+          else
+            oss_pdg << part.pdgId();
           os << Form( "\n %2d\t%-+7d %-10s", part.id(), part.integerPdgId(), oss_pdg.str().c_str() );
         }
       }
@@ -306,19 +310,15 @@ namespace CepGen
       os << Form( "% 9.6e % 9.6e % 9.6e % 9.6e % 12.5f", mom.px(), mom.py(), mom.pz(), part.energy(), part.mass() );
 
       // discard non-primary, decayed particles
-      if ( (short)part.status() >= 0. ) {
-        const int sign = ( part.status() == Particle::Status::Undefined ) ? -1 : 1;
-        pxtot += sign*mom.px();
-        pytot += sign*mom.py();
-        pztot += sign*mom.pz();
-        etot += sign*part.energy();
+      if ( part.status() >= Particle::Status::Undefined ) {
+        const int sign = ( part.status() == Particle::Status::Undefined )
+          ? -1
+          : +1;
+        p_total += sign*mom;
       }
     }
     //--- set a threshold to the computation precision
-    if ( fabs( pxtot ) < minimal_precision_ ) pxtot = 0.;
-    if ( fabs( pytot ) < minimal_precision_ ) pytot = 0.;
-    if ( fabs( pztot ) < minimal_precision_ ) pztot = 0.;
-    if ( fabs(  etot ) < minimal_precision_ ) etot = 0.;
+    p_total.truncate();
     //
     CG_INFO( "Event" )
      << Form( "Dump of event content:\n"
@@ -326,7 +326,7 @@ namespace CepGen
               " --\t------\t----\t\t------\t----\t ------\t------\t----GeV/c---  ----GeV/c---  ----GeV/c---  ----GeV/c---\t --GeV/c²--"
               "%s\n"
               " ----------------------------------------------------------------------------------------------------------------------------------\n"
-              "\t\t\t\t\t\t\tBalance% 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), pxtot, pytot, pztot, etot );
+              "\t\t\t\t\t\t\tBalance% 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), p_total.px(), p_total.py(), p_total.pz(), p_total.energy() );
   }
 
   //------------------------------------------------------------------------------------------------

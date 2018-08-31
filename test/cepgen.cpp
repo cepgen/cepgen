@@ -16,10 +16,10 @@
 using namespace std;
 
 /**
- * Main caller for this MC generator. Loads the configuration files'
- * variables if passed as an argument to this program, else loads a default
- * LPAIR-like configuration, then launches the cross-section computation and
- * the events generation.
+ * Main caller for this MC generator.
+ *  * loads the configuration files' variables if passed as an argument,
+ *    or a default LPAIR-like configuration,
+ *  * launches the cross-section computation and the events generation.
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
  */
 int main( int argc, char* argv[] ) {
@@ -31,9 +31,9 @@ int main( int argc, char* argv[] ) {
 
     //--- default run: LPAIR elastic ɣɣ → µ⁺µ¯ at 13 TeV
     CepGen::ParametersList pgen;
-    pgen.set<int>( "pair", (int)CepGen::PDG::Muon );
+    pgen.set<int>( "pair", (int)CepGen::PDG::muon );
     gen.parameters->setProcess( new CepGen::Process::GamGamLL( pgen ) );
-    gen.parameters->kinematics.mode = CepGen::Kinematics::Mode::ElasticElastic;
+    gen.parameters->kinematics.mode = CepGen::KinematicsMode::ElasticElastic;
     gen.parameters->kinematics.cuts.central.pt_single.min() = 15.;
     gen.parameters->kinematics.cuts.central.eta_single = { -2.5, 2.5 };
     gen.parameters->generation.enabled = true;

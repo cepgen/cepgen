@@ -13,23 +13,23 @@ namespace CepGen
   {
     invalid = 0,
     //--- fundamental particles
-    TopQuark = 6,
-    Electron = 11, ElectronNeutrino = 12,
-    Muon = 13, MuonNeutrino = 14,
-    Tau = 15, TauNeutrino = 16,
-    Gluon = 21, Photon = 22, Z = 23, W = 24,
+    down = 1, up = 2, strange = 3, charm = 4, bottom = 5, top = 6,
+    electron = 11, electronNeutrino = 12,
+    muon = 13, muonNeutrino = 14,
+    tau = 15, tauNeutrino = 16,
+    gluon = 21, photon = 22, Z = 23, W = 24,
     //--- composite particles
-    PiPlus = 211, PiZero = 111,
+    piPlus = 211, piZero = 111,
     KPlus = 321, DPlus = 411,
-    Rho770_0 = 113, Rho1450_0 = 100113, Rho1700_0 = 30113,
-    Eta = 221, Omega782 = 223,
+    rho770_0 = 113, rho1450_0 = 100113, rho1700_0 = 30113,
+    eta = 221, omega782 = 223,
     h1380_1 = 10333,
-    JPsi= 443,
-    Phi1680 = 100333,
+    Jpsi= 443,
+    phi1680 = 100333,
     Upsilon1S = 553, Upsilon2S = 100553, Upsilon3S = 200553,
-    Proton = 2212, Neutron = 2112,
-    Pomeron = 990, Reggeon = 110,
-    DiffractiveProton = 9902210
+    proton = 2212, neutron = 2112,
+    pomeron = 990, reggeon = 110,
+    diffractiveProton = 9902210
   };
   std::ostream& operator<<( std::ostream& os, const PDG& pc );
 }
