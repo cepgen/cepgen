@@ -7,7 +7,7 @@
 #define DEFAULT_MSTW_GRID_PATH "External/mstw_sf_scan_nnlo.dat"
 
 /// Martin-Stirling-Thorne-Watt PDFs structure functions
-namespace MSTW
+namespace mstw
 {
   /// A \f$F_{2,L}\f$ grid interpolator
   class Grid : public CepGen::StructureFunctions, private CepGen::GridHandler<2,2>

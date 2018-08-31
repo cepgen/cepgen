@@ -6,7 +6,7 @@
 #include <fstream>
 #include <set>
 
-namespace MSTW
+namespace mstw
 {
   const unsigned int Grid::good_magic = 0x5754534d; // MSTW in ASCII
 

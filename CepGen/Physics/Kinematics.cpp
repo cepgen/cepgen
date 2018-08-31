@@ -11,8 +11,7 @@
 namespace CepGen
 {
   Kinematics::Kinematics() :
-    incoming_beams( { { 6500., PDG::proton, KTFlux::invalid },
-                      { 6500., PDG::proton, KTFlux::invalid } } ),
+    incoming_beams( { { 6500., PDG::proton, KTFlux::invalid }, { 6500., PDG::proton, KTFlux::invalid } } ),
     mode( KinematicsMode::invalid ), structure_functions( new SF::SuriYennie )
   {}
 
@@ -31,9 +30,9 @@ namespace CepGen
     return incoming_beams.first.pz + incoming_beams.second.pz;
   }
 
-  //-----------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------
   // User-friendly display of the kinematics mode
-  //-----------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------
 
   std::ostream&
   operator<<( std::ostream& os, const KinematicsMode& pm )
@@ -59,9 +58,22 @@ namespace CepGen
     return os;
   }
 
-  //------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------
+  // User-friendly display of incoming particles
+  //--------------------------------------------------------------------
+
+  std::ostream&
+  operator<<( std::ostream& os, const Kinematics::Beam& beam )
+  {
+    os << beam.pdg << " (" << beam.pz << " GeV/c)";
+    if ( beam.kt_flux != KTFlux::invalid )
+      os << " [unint.flux: " << beam.kt_flux << "]";
+    return os;
+  }
+
+  //--------------------------------------------------------------------
   // List of kinematics limits
-  //------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------
 
   Kinematics::CutsList::CutsList()
   {

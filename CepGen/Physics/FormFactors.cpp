@@ -5,9 +5,7 @@
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/PDG.h"
 
-#include "CepGen/StructureFunctions/FioreBrasse.h"
 #include "CepGen/StructureFunctions/SuriYennie.h"
-#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 
 namespace CepGen
 {
