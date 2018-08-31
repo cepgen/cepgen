@@ -45,21 +45,6 @@ namespace CepGen
 
         void dumpVariables() const;
 
-        static constexpr double kMinFlux = 1.e-20;
-        /// Type of incoming partons fluxes
-        enum class Flux
-        {
-          P_Photon_Elastic = 0,
-          P_Photon_Inelastic = 1,
-          P_Photon_Inelastic_Budnev = 11,
-        };
-        friend std::ostream& operator<<( std::ostream&, const Flux& );
-        /// Get the flux at a given parton x/kT
-        /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming parton
-        /// \param[in] x Parton momentum fraction
-        /// \param[in] mx Outgoing diffractive proton mass
-        static double flux( const Flux& type, double x, double kt2, StructureFunctions& sf, double mx = mp_ );
-
       protected:
         /// Set the kinematics associated to the phase space definition
         void setKinematics( const Kinematics& kin ) override;
