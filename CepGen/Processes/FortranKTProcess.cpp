@@ -92,18 +92,29 @@ namespace CepGen
 
       params_.inp1 = cuts_.incoming_beams.first.pz;
       params_.inp2 = cuts_.incoming_beams.second.pz;
-      params_.a_nuc1 = cuts_.incoming_beams.first.hi.A;
-      params_.z_nuc1 = (unsigned short)cuts_.incoming_beams.first.hi.Z;
-      if ( params_.z_nuc1 > 1 ) {
-        event_->getOneByRole( Particle::IncomingBeam1 ).setPdgId( (PDG)cuts_.incoming_beams.first.hi );
-        event_->getOneByRole( Particle::OutgoingBeam1 ).setPdgId( (PDG)cuts_.incoming_beams.first.hi );
+      const HeavyIon in1 = (HeavyIon)cuts_.incoming_beams.first.pdg;
+      if ( in1 ) {
+        params_.a_nuc1 = in1.A;
+        params_.z_nuc1 = (unsigned short)in1.Z;
+        if ( params_.z_nuc1 > 1 ) {
+          event_->getOneByRole( Particle::IncomingBeam1 ).setPdgId( (PDG)in1 );
+          event_->getOneByRole( Particle::OutgoingBeam1 ).setPdgId( (PDG)in1 );
+        }
       }
-      params_.a_nuc2 = cuts_.incoming_beams.second.hi.A;
-      params_.z_nuc2 = (unsigned short)cuts_.incoming_beams.second.hi.Z;
-      if ( params_.z_nuc2 > 1 ) {
-        event_->getOneByRole( Particle::IncomingBeam2 ).setPdgId( (PDG)cuts_.incoming_beams.second.hi );
-        event_->getOneByRole( Particle::OutgoingBeam2 ).setPdgId( (PDG)cuts_.incoming_beams.second.hi );
+      else
+        params_.a_nuc1 = params_.z_nuc1 = 1;
+
+      const HeavyIon in2 = (HeavyIon)cuts_.incoming_beams.second.pdg;
+      if ( in2 ) {
+        params_.a_nuc2 = in2.A;
+        params_.z_nuc2 = (unsigned short)in2.Z;
+        if ( params_.z_nuc2 > 1 ) {
+          event_->getOneByRole( Particle::IncomingBeam2 ).setPdgId( (PDG)in2 );
+          event_->getOneByRole( Particle::OutgoingBeam2 ).setPdgId( (PDG)in2 );
+        }
       }
+      else
+        params_.a_nuc2 = params_.z_nuc2 = 1;
 
       //-------------------------------------------------------------------------------------------
       // intermediate partons information

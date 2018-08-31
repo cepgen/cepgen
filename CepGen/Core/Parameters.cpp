@@ -187,12 +187,12 @@ namespace CepGen
         os << std::setw( wt ) << "Structure functions" << p->kinematics.structure_functions->type << "\n";
     }
     std::ostringstream ip1, ip2;
-    if ( p->kinematics.incoming_beams.first.hi )
-      ip1 << p->kinematics.incoming_beams.first.hi;
+    if ( (HeavyIon)p->kinematics.incoming_beams.first.pdg )
+      ip1 << (HeavyIon)p->kinematics.incoming_beams.first.pdg;
     else
       ip1 << p->kinematics.incoming_beams.first.pdg;
-    if ( p->kinematics.incoming_beams.second.hi )
-      ip2 << p->kinematics.incoming_beams.second.hi;
+    if ( (HeavyIon)p->kinematics.incoming_beams.second.pdg )
+      ip2 << (HeavyIon)p->kinematics.incoming_beams.second.pdg;
     else
       ip2 << p->kinematics.incoming_beams.second.pdg;
     os

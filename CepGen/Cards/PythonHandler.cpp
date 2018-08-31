@@ -183,10 +183,10 @@ namespace CepGen
       std::vector<int> hi_beam1, hi_beam2;
       fillParameter( kin, "heavyIonA", hi_beam1 );
       if ( hi_beam1.size() == 2 )
-        params_.kinematics.incoming_beams.first.hi = HeavyIon{ (unsigned short)hi_beam1[0], (Element)hi_beam1[1] };
+        params_.kinematics.incoming_beams.first.pdg = HeavyIon{ (unsigned short)hi_beam1[0], (Element)hi_beam1[1] };
       fillParameter( kin, "heavyIonB", hi_beam2 );
       if ( hi_beam2.size() == 2 )
-        params_.kinematics.incoming_beams.second.hi = HeavyIon{ (unsigned short)hi_beam2[0], (Element)hi_beam2[1] };
+        params_.kinematics.incoming_beams.second.pdg = HeavyIon{ (unsigned short)hi_beam2[0], (Element)hi_beam2[1] };
     }
 
     void

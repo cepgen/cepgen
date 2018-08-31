@@ -41,7 +41,6 @@ namespace CepGen
         /// Incoming particle's momentum (in \f$\text{GeV}/c\f$)
         double pz;
         PDG pdg;
-        HeavyIon hi;
         unsigned short kt_flux;
       };
       friend std::ostream& operator<<( std::ostream&, const Beam& );

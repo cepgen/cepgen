@@ -20,7 +20,8 @@ namespace CepGen
     //----- specialization for LPAIR input cards
 
     LpairHandler::LpairHandler( const char* file ) :
-      proc_params_( new ParametersList )
+      proc_params_( new ParametersList ),
+      hi_1_( { 0, 0 } ), hi_2_( { 0, 0 } )
     {
       std::ifstream f( file, std::fstream::in );
       if ( !f.is_open() )
@@ -64,6 +65,12 @@ namespace CepGen
 
       if ( m_params.count( "IEND" ) )
         setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
+
+      HeavyIon hi1{ hi_1_.first, (Element)hi_1_.second }, hi2{ hi_2_.first, (Element)hi_2_.second };
+      if ( hi1 )
+        params_.kinematics.incoming_beams.first.pdg = hi1;
+      if ( hi2 )
+        params_.kinematics.incoming_beams.second.pdg = hi2;
 
       CG_INFO( "LpairHandler" ) << "File '" << file << "' succesfully opened!\n\t"
         << "The following parameters are set:" << os.str();
@@ -111,10 +118,11 @@ namespace CepGen
       registerParameter<int>( "PMOD", "Outgoing primary particles' mode", (int*)&params->kinematics.structure_functions );
       registerParameter<int>( "EMOD", "Outgoing primary particles' mode", (int*)&params->kinematics.structure_functions );
       registerParameter<int>( "PAIR", "Outgoing particles' PDG id", (int*)&proc_params_->operator[]<int>( "pair" ) );
-      registerParameter<int>( "INZ1", "Heavy ion atomic number (1st incoming beam)", (int*)&params->kinematics.incoming_beams.first.hi.Z );
-      registerParameter<int>( "INA1", "Heavy ion atomic weight (1st incoming beam)", (int*)&params->kinematics.incoming_beams.first.hi.A );
-      registerParameter<int>( "INZ2", "Heavy ion atomic number (1st incoming beam)", (int*)&params->kinematics.incoming_beams.second.hi.Z );
-      registerParameter<int>( "INA2", "Heavy ion atomic weight (1st incoming beam)", (int*)&params->kinematics.incoming_beams.second.hi.A );
+
+      registerParameter<int>( "INA1", "Heavy ion atomic weight (1st incoming beam)", (int*)&hi_1_.first );
+      registerParameter<int>( "INZ1", "Heavy ion atomic number (1st incoming beam)", (int*)&hi_1_.second );
+      registerParameter<int>( "INA2", "Heavy ion atomic weight (1st incoming beam)", (int*)&hi_2_.first );
+      registerParameter<int>( "INZ2", "Heavy ion atomic number (1st incoming beam)", (int*)&hi_2_.second );
       registerParameter<double>( "INP1", "Momentum (1st primary particle)", &params->kinematics.incoming_beams.first.pz );
       registerParameter<double>( "INP2", "Momentum (2nd primary particle)", &params->kinematics.incoming_beams.second.pz );
       registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params->kinematics.incoming_beams.first.pz );

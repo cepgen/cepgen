@@ -86,7 +86,7 @@ namespace CepGen
         if ( ( cuts_.mode == Kinematics::Mode::ElasticElastic
             || cuts_.mode == Kinematics::Mode::ElasticInelastic )
           && ( flux1 != KTFlux::P_Photon_Elastic ) ) {
-          cuts_.incoming_beams.first.kt_flux = ( cuts_.incoming_beams.first.hi )
+          cuts_.incoming_beams.first.kt_flux = ( (HeavyIon)cuts_.incoming_beams.first.pdg )
             ? (unsigned short)KTFlux::HI_Photon_Elastic
             : (unsigned short)KTFlux::P_Photon_Elastic;
           CG_DEBUG( "GenericKTProcess:kinematics" )
@@ -95,7 +95,7 @@ namespace CepGen
         }
         else if ( flux1 != KTFlux::P_Photon_Inelastic
                && flux1 != KTFlux::P_Photon_Inelastic_Budnev ) {
-          if ( cuts_.incoming_beams.first.hi )
+          if ( (HeavyIon)cuts_.incoming_beams.first.pdg )
             throw CG_FATAL( "GenericKTProcess:kinematics" )
               << "Inelastic photon emission from HI not yet supported!";
           cuts_.incoming_beams.first.kt_flux = (unsigned short)KTFlux::P_Photon_Inelastic_Budnev;
@@ -109,7 +109,7 @@ namespace CepGen
         if ( ( cuts_.mode == Kinematics::Mode::ElasticElastic
             || cuts_.mode == Kinematics::Mode::InelasticElastic )
           && ( flux2 != KTFlux::P_Photon_Elastic ) ) {
-          cuts_.incoming_beams.second.kt_flux = ( cuts_.incoming_beams.second.hi )
+          cuts_.incoming_beams.second.kt_flux = ( (HeavyIon)cuts_.incoming_beams.second.pdg )
             ? (unsigned short)KTFlux::HI_Photon_Elastic
             : (unsigned short)KTFlux::P_Photon_Elastic;
           CG_DEBUG( "GenericKTProcess:kinematics" )
@@ -118,7 +118,7 @@ namespace CepGen
         }
         else if ( flux2 != KTFlux::P_Photon_Inelastic
                && flux2 != KTFlux::P_Photon_Inelastic_Budnev ) {
-          if ( cuts_.incoming_beams.second.hi )
+          if ( (HeavyIon)cuts_.incoming_beams.second.pdg )
             throw CG_FATAL( "GenericKTProcess:kinematics" )
               << "Inelastic photon emission from HI not yet supported!";
           cuts_.incoming_beams.second.kt_flux = (unsigned short)KTFlux::P_Photon_Inelastic_Budnev;
