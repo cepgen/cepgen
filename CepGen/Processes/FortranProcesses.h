@@ -3,21 +3,27 @@
 
 #include "CepGen/Processes/FortranKTProcess.h"
 
-#ifdef __cplusplus__
-extern "C" {
-#endif
-  extern void nucl_to_ff_( double& );
-#ifdef __cplusplus__
-}
-#endif
-
 namespace CepGen
 {
   namespace Process
   {
-    static std::map<const char*,void(*)( double& )> kFortranProcesses;
+    struct FortranProcess
+    {
+      const char* name;
+      void ( *method )( double& );
+      const char* description;
+    };
+    static std::vector<FortranProcess> kFortranProcesses;
   }
 }
+void generateCepGenFortranProcesses();
+
+#define F77_NAME( name ) name ## _
+#define BEGIN_FORTRAN_PROCESSES_ENUM void generateCepGenFortranProcesses() {
+#define REGISTER_FORTRAN_PROCESS( name, method, description ) \
+  extern void F77_NAME( method )( double& ); \
+  CepGen::Process::kFortranProcesses.emplace_back( CepGen::Process::FortranProcess{ name, F77_NAME( method ), description } );
+#define END_FORTRAN_PROCESSES_ENUM }
 
 #endif
 

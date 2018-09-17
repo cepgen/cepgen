@@ -49,10 +49,14 @@ namespace CepGen
         params_.setProcess( new Process::PPtoFF( *proc_params_ ) );
       else if ( proc_name_ == "pptoww" )
         params_.setProcess( new Process::PPtoWW( *proc_params_ ) );
-      else if ( proc_name_ == "patoll" || proc_name_ == "patoff" )
-        params_.setProcess( new Process::FortranKTProcess( *proc_params_, "nucltoff", "(p/A)(p/A) ↝ (g/ɣ)ɣ → f⁺f¯", nucl_to_ff_ ) );
-      else
-        throw CG_FATAL( "LpairHandler" ) << "Unrecognised process name: " << proc_name_ << "!";
+      else {
+        generateCepGenFortranProcesses();
+        for ( auto& proc : Process::kFortranProcesses )
+          if ( proc_name_ == std::string( proc.name ) )
+            params_.setProcess( new Process::FortranKTProcess( *proc_params_, proc.name, proc.description, proc.method ) );
+        if ( !params_.process() )
+          throw CG_FATAL( "LpairHandler" ) << "Unrecognised process name: " << proc_name_ << "!";
+      }
 
       if ( integr_type_ == "plain" )
         params_.integrator.type = Integrator::Type::plain;

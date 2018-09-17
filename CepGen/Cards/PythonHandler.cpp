@@ -88,11 +88,14 @@ namespace CepGen
         params_.setProcess( new Process::PPtoFF( proc_params ) );
       else if ( proc_name == "pptoww" )
         params_.setProcess( new Process::PPtoWW( proc_params ) );
-      else if ( proc_name == "patoll" || proc_name == "patoff"
-             || proc_name == "aptoll" || proc_name == "aptoff"
-             || proc_name == "aatoll" || proc_name == "aatoff" )
-        params_.setProcess( new Process::FortranKTProcess( proc_params, "nucltoff", "(p/A)(p/A) ↝ (g/ɣ)ɣ → f⁺f¯", nucl_to_ff_ ) );
-      else throw CG_FATAL( "PythonHandler" ) << "Unrecognised process: " << proc_name << ".";
+      else {
+        generateCepGenFortranProcesses();
+        for ( auto& proc : Process::kFortranProcesses )
+          if ( proc_name == std::string( proc.name ) )
+            params_.setProcess( new Process::FortranKTProcess( proc_params, proc.name, proc.description, proc.method ) );
+        if ( !params_.process() )
+          throw CG_FATAL( "PythonHandler" ) << "Unrecognised process name: " << proc_name << "!";
+      }
 
       //--- process kinematics
       PyObject* pin_kinematics = getElement( process, "inKinematics" ); // borrowed
