@@ -89,8 +89,8 @@ namespace CepGen
       else if ( proc_name == "pptoww" )
         params_.setProcess( new Process::PPtoWW( proc_params ) );
       else {
-        generateCepGenFortranProcesses();
-        for ( auto& proc : Process::kFortranProcesses )
+        Process::generateFortranProcesses();
+        for ( auto& proc : Process::FortranProcessesHandler::get().list() )
           if ( proc_name == std::string( proc.name ) )
             params_.setProcess( new Process::FortranKTProcess( proc_params, proc.name, proc.description, proc.method ) );
         if ( !params_.process() )
