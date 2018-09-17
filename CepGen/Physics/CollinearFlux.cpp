@@ -10,6 +10,9 @@
 
 namespace CepGen
 {
+  const gsl_integration_fixed_type*
+  INTEGR_TYPE = gsl_integration_fixed_jacobi;
+
   double
   unintegrated_flux( double kt2, void* params )
   {
@@ -23,13 +26,13 @@ namespace CepGen
   }
 
   CollinearFlux::CollinearFlux( const KTFlux& flux_type, const Limits& range, StructureFunctions* str_fun ) :
-    workspace_( gsl_integration_fixed_alloc( gsl_integration_fixed_jacobi, 50, range.min(), range.max(), 0., 0. ) ),
+    workspace_( gsl_integration_fixed_alloc( INTEGR_TYPE, 50, range.min(), range.max(), 0., 0. ) ),
     params_( new FluxArguments{ 0., 0., flux_type, str_fun, nullptr } ),
     function_( { &unintegrated_flux, (void*)params_.get() } )
   {}
 
   CollinearFlux::CollinearFlux( const KTFlux& flux_type, const Limits& range, HeavyIon* hi ) :
-    workspace_( gsl_integration_fixed_alloc( gsl_integration_fixed_jacobi, 50, range.min(), range.max(), 0., 0. ) ),
+    workspace_( gsl_integration_fixed_alloc( INTEGR_TYPE, 50, range.min(), range.max(), 0., 0. ) ),
     params_( new FluxArguments{ 0., 0., flux_type, nullptr, hi } ),
     function_( { &unintegrated_flux, (void*)params_.get() } )
   {}
