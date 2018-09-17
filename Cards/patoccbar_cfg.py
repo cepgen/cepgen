@@ -6,7 +6,7 @@ from Config.pdg_cff import PDG
 from Config.logger_cfi import logger
 logger.enabledModules += ('GenericKTProcess.registerVariable',)
 
-process = ktfactor.process.clone('patoll',
+process = ktfactor.process.clone('patoff',
     processParameters = cepgen.Parameters(
         pair = PDG.charm,
     ),

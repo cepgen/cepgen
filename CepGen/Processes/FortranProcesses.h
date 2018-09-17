@@ -34,10 +34,12 @@ namespace CepGen
     void generateFortranProcesses();
   }
 }
-
-#define BEGIN_FORTRAN_PROCESSES_ENUM namespace CepGen { namespace Process { void generateFortranProcesses() {
+#define DECLARE_FORTRAN_SUBROUTINE( method ) \
+  extern "C" { extern void method ## _( double& ); }
+#define BEGIN_FORTRAN_PROCESSES_ENUM \
+  namespace CepGen { namespace Process { void generateFortranProcesses() {
 #define REGISTER_FORTRAN_PROCESS( name, method, description ) \
-  CepGen::Process::FortranProcessesHandler::get().add( CepGen::Process::FortranProcess{ name, method, description } );
+  CepGen::Process::FortranProcessesHandler::get().add( CepGen::Process::FortranProcess{ name, method ## _, description } );
 #define END_FORTRAN_PROCESSES_ENUM }}}
 
 #endif
