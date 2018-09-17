@@ -3,7 +3,7 @@ import Config.ktProcess_cfi as ktfactor
 from Config.integrators_cff import vegas as integrator
 from Config.pdg_cff import PDG
 
-process = ktfactor.process.clone('patoll',
+process = ktfactor.process.clone('patoff',
     processParameters = cepgen.Parameters(
         pair = PDG.muon,
     ),
@@ -11,7 +11,7 @@ process = ktfactor.process.clone('patoll',
         pz = (6500., 2562.2),
         #structureFunctions = cepgen.StructureFunctions.SuriYennie,
         #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
-        #structureFunctions = cepgen.StructureFunctions.ALLM91,
+        #structureFunctions = cepgen.StructureFunctions.ALLM97,
         structureFunctions = cepgen.StructureFunctions.LUXlike,
         ktFluxes = (ktfactor.ProtonFlux.PhotonInelasticBudnev, ktfactor.HeavyIonFlux.PhotonElastic),
         heavyIonB = (208, 82),

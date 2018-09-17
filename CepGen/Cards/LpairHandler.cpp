@@ -6,6 +6,7 @@
 #include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Processes/PPtoFF.h"
 #include "CepGen/Processes/PPtoWW.h"
+#include "CepGen/Processes/FortranProcesses.h"
 
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 
@@ -48,6 +49,8 @@ namespace CepGen
         params_.setProcess( new Process::PPtoFF( *proc_params_ ) );
       else if ( proc_name_ == "pptoww" )
         params_.setProcess( new Process::PPtoWW( *proc_params_ ) );
+      else if ( proc_name_ == "patoll" || proc_name_ == "patoff" )
+        params_.setProcess( new Process::FortranKTProcess( *proc_params_, "nucltoff", "(p/A)(p/A) ↝ (g/ɣ)ɣ → f⁺f¯", nucl_to_ff_ ) );
       else
         throw CG_FATAL( "LpairHandler" ) << "Unrecognised process name: " << proc_name_ << "!";
 

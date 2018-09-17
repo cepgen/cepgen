@@ -49,7 +49,7 @@ namespace CepGen
       method_( params.get<int>( "method", 1 ) ),
       func_( func )
     {
-      constants_.m_p = ParticleProperties::mass( PDG::proton );
+      constants_.m_p = GenericProcess::mp_;
       constants_.units = Constants::GeV2toBarn;
       constants_.pi = M_PI;
       constants_.alpha_em = Constants::alphaEM;
@@ -141,6 +141,8 @@ namespace CepGen
       ktkin_.phiptdiff = phi_pt_diff_;
       ktkin_.m_x = MX_;
       ktkin_.m_y = MY_;
+
+      //--- compute the event weight
       double weight = 0.;
       func_( weight );
       return weight;
@@ -159,8 +161,6 @@ namespace CepGen
       PX_ *= 1./params_.a_nuc1;
       PY_ *= 1./params_.a_nuc2;
 
-//std::cout << PX_ << PY_ << std::endl;
-
       //===========================================================================================
       // intermediate partons
       //===========================================================================================
@@ -176,7 +176,7 @@ namespace CepGen
 
       Particles& oc = event_->getByRole( Particle::CentralSystem );
       for ( int i = 0; i < evtkin_.nout; ++i ) {
-        auto& p = oc[i];
+        Particle& p = oc[i];
         p.setPdgId( evtkin_.pdg[i] );
         p.setStatus( Particle::Status::FinalState );
         p.setMomentum( Particle::Momentum( evtkin_.pc[i] ) );

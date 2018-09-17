@@ -10,7 +10,7 @@
 #include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Processes/PPtoFF.h"
 #include "CepGen/Processes/PPtoWW.h"
-#include "CepGen/Processes/FortranKTProcess.h"
+#include "CepGen/Processes/FortranProcesses.h"
 
 #include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 #include "CepGen/StructureFunctions/LHAPDF.h"
@@ -20,11 +20,6 @@
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 
 #include <algorithm>
-
-extern "C"
-{
-  extern void nucl_to_ff_( double& );
-}
 
 #if PY_MAJOR_VERSION < 3
 #  define PYTHON2
@@ -93,7 +88,9 @@ namespace CepGen
         params_.setProcess( new Process::PPtoFF( proc_params ) );
       else if ( proc_name == "pptoww" )
         params_.setProcess( new Process::PPtoWW( proc_params ) );
-      else if ( proc_name == "patoll" )
+      else if ( proc_name == "patoll" || proc_name == "patoff"
+             || proc_name == "aptoll" || proc_name == "aptoff"
+             || proc_name == "aatoll" || proc_name == "aatoff" )
         params_.setProcess( new Process::FortranKTProcess( proc_params, "nucltoff", "(p/A)(p/A) ↝ (g/ɣ)ɣ → f⁺f¯", nucl_to_ff_ ) );
       else throw CG_FATAL( "PythonHandler" ) << "Unrecognised process: " << proc_name << ".";
 
