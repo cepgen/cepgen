@@ -1,12 +1,12 @@
 import Config.Core as cepgen
-import Config.ktProcess_cfi as ktfactor
+import Config.ktProcess_cfi as kt
 from Config.integrators_cff import vegas as integrator
 from Config.pdg_cff import PDG
 
 from Config.logger_cfi import logger
 logger.enabledModules += ('GenericKTProcess.registerVariable',)
 
-process = ktfactor.process.clone('patoff',
+process = kt.process.clone('patoff',
     processParameters = cepgen.Parameters(
         pair = PDG.charm,
     ),
@@ -14,12 +14,12 @@ process = ktfactor.process.clone('patoff',
         pz = (6500., 2562.2),
         structureFunctions = cepgen.StructureFunctions.SuriYennie,
         #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
-        ktFluxes = (ktfactor.ProtonFlux.GluonKMR, ktfactor.HeavyIonFlux.PhotonElastic),
-        #ktFluxes = (ktfactor.ProtonFlux.PhotonElastic, ktfactor.HeavyIonFlux.PhotonElastic),
+        ktFluxes = (kt.ProtonFlux.GluonKMR, kt.HeavyIonFlux.PhotonElastic),
+        #ktFluxes = (kt.ProtonFlux.PhotonElastic, kt.HeavyIonFlux.PhotonElastic),
         heavyIonB = (208, 82),
         kmrGridPath = 'gluon_mmht2014nlo_Watt.dat',
     ),
-    outKinematics = ktfactor.process.outKinematics.clone(
+    outKinematics = kt.process.outKinematics.clone(
         pt = (0.,),
         energy = (0.,),
         rapidity = (-7., 9.),
