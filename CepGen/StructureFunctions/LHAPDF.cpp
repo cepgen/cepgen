@@ -35,6 +35,14 @@ namespace CepGen
       params.mode = mode;
     }
 
+    std::string
+    LHAPDF::description() const
+    {
+      std::ostringstream os;
+      os << "LHAPDF{" << params.pdf_set << ",m=" << params.pdf_member << ",mode=" << params.mode << "}";
+      return os.str();
+    }
+
     void
     LHAPDF::initialise()
     {

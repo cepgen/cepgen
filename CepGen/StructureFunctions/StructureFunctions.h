@@ -43,6 +43,7 @@ namespace CepGen
         type( type ), F2( f2 ), FL( fl ), old_vals_({ 0., 0. }) {}
       ~StructureFunctions() {}
 
+      friend std::ostream& operator<<( std::ostream&, const StructureFunctions& );
       StructureFunctions& operator=( const StructureFunctions& sf ) {
         type = sf.type, F2 = sf.F2, FL = sf.FL, old_vals_ = sf.old_vals_;
         return *this;
@@ -59,13 +60,13 @@ namespace CepGen
       double F2, FL;
 
     protected:
+      virtual std::string description() const;
       static const double mp_, mp2_;
       std::pair<double,double> old_vals_;
 
     private:
       std::string name_;
   };
-  std::ostream& operator<<( std::ostream&, const StructureFunctions& );
 }
 
 #endif

@@ -42,12 +42,25 @@ namespace CepGen
     FL = F2 * ( 1.+tau ) * ( r/( 1.+r ) );
   }
 
+  std::string
+  StructureFunctions::description() const
+  {
+    std::ostringstream os;
+    os << type;
+    return os.str();
+  }
+
   /// Human-readable format of a structure function object
   std::ostream&
   operator<<( std::ostream& os, const StructureFunctions& sf )
   {
-    return os << "F2 = " << sf.F2 << ", FL = " << sf.FL;
+    os << sf.description();
+    if ( sf.old_vals_ != std::pair<double,double>() )
+      os << " at (" << sf.old_vals_.first << ", " << sf.old_vals_.second << "): "
+         << "F2 = " << sf.F2 << ", FL = " << sf.FL;
+    return os;
   }
+
   /// Human-readable format of a structure function type
   std::ostream&
   operator<<( std::ostream& os, const SF::Type& sf )

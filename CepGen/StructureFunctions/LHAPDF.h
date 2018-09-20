@@ -36,6 +36,7 @@ namespace CepGen
         Parameterisation params;
 
       private:
+        std::string description() const override;
         void initialise();
         bool initialised_;
 

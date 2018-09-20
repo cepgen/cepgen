@@ -58,6 +58,20 @@ namespace CepGen
       params( params ), initialised_( false ), inv_omega_range_( -1. )
     {}
 
+    std::string
+    Schaefer::description() const
+    {
+      std::ostringstream os;
+      os << "LUXlike{"
+         << "r=" << *params.resonances_model
+         << ",p=" << *params.perturbative_model
+         << ",c=" << *params.continuum_model;
+      if ( params.higher_twist )
+        os << ",HT";
+      os << "}";
+      return os.str();
+    }
+
     void
     Schaefer::initialise()
     {

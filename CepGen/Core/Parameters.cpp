@@ -185,7 +185,7 @@ namespace CepGen
     if ( p->kinematics.mode != KinematicsMode::invalid )
       os << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << "\n";
     if ( p->kinematics.mode != KinematicsMode::ElasticElastic )
-      os << std::setw( wt ) << "Structure functions" << p->kinematics.structure_functions->type << "\n";
+      os << std::setw( wt ) << "Structure functions" << *p->kinematics.structure_functions << "\n";
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << "\n\n";
