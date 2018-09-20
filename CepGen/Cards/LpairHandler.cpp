@@ -3,6 +3,9 @@
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
+#include "CepGen/StructureFunctions/LHAPDF.h"
+
 #include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Processes/PPtoFF.h"
 #include "CepGen/Processes/PPtoWW.h"
@@ -22,7 +25,7 @@ namespace CepGen
 
     LpairHandler::LpairHandler( const char* file ) :
       proc_params_( new ParametersList ),
-      hi_1_( { 0, 0 } ), hi_2_( { 0, 0 } )
+      str_fun_( 11 ), hi_1_( { 0, 0 } ), hi_2_( { 0, 0 } )
     {
       std::ifstream f( file, std::fstream::in );
       if ( !f.is_open() )
@@ -30,6 +33,7 @@ namespace CepGen
 
       init( &params_ );
 
+      //--- parse all fields
       std::unordered_map<std::string, std::string> m_params;
       std::string key, value;
       std::ostringstream os;
@@ -43,6 +47,7 @@ namespace CepGen
       }
       f.close();
 
+      //--- parse the process name
       if ( proc_name_ == "lpair" )
         params_.setProcess( new Process::GamGamLL( *proc_params_ ) );
       else if ( proc_name_ == "pptoll" || proc_name_ == "pptoff" )
@@ -58,6 +63,19 @@ namespace CepGen
           throw CG_FATAL( "LpairHandler" ) << "Unrecognised process name: " << proc_name_ << "!";
       }
 
+      //--- parse the structure functions code
+      const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
+      if ( str_fun_ / kLHAPDFCodeDec == 1 ) { // SF from parton
+        params_.kinematics.structure_functions = StructureFunctionsBuilder::get( SF::Type::LHAPDF );
+        auto sf = dynamic_cast<SF::LHAPDF*>( params_.kinematics.structure_functions.get() );
+        const unsigned long icode = str_fun_ % kLHAPDFCodeDec;
+        sf->params.pdf_code = icode % kLHAPDFPartDec;
+        sf->params.mode = (SF::LHAPDF::Parameterisation::Mode)( icode / kLHAPDFPartDec ); // 0, 1, 2
+      }
+      else
+        params_.kinematics.structure_functions = StructureFunctionsBuilder::get( (SF::Type)str_fun_ );
+
+      //--- parse the integration algorithm name
       if ( integr_type_ == "plain" )
         params_.integrator.type = Integrator::Type::plain;
       else if ( integr_type_ == "Vegas" )
@@ -67,12 +85,14 @@ namespace CepGen
       else if ( integr_type_ != "" )
         throw CG_FATAL( "LpairHandler" ) << "Unrecognized integrator type: " << integr_type_ << "!";
 
+      //--- parse the hadronisation algorithm name
       if ( hadr_name_ == "pythia8" )
         params_.setHadroniser( new Hadroniser::Pythia8Hadroniser( params_ ) );
 
       if ( m_params.count( "IEND" ) )
         setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
 
+      //--- check if we are dealing with heavy ions for incoming states
       HeavyIon hi1{ hi_1_.first, (Element)hi_1_.second }, hi2{ hi_2_.first, (Element)hi_2_.second };
       if ( hi1 )
         params_.kinematics.incoming_beams.first.pdg = hi1;
@@ -122,8 +142,8 @@ namespace CepGen
       // Process kinematics parameters
       //-------------------------------------------------------------------------------------------
 
-      registerParameter<int>( "PMOD", "Outgoing primary particles' mode", (int*)&params->kinematics.structure_functions );
-      registerParameter<int>( "EMOD", "Outgoing primary particles' mode", (int*)&params->kinematics.structure_functions );
+      registerParameter<int>( "PMOD", "Outgoing primary particles' mode", &str_fun_ );
+      registerParameter<int>( "EMOD", "Outgoing primary particles' mode", &str_fun_ );
       registerParameter<int>( "PAIR", "Outgoing particles' PDG id", (int*)&proc_params_->operator[]<int>( "pair" ) );
 
       registerParameter<int>( "INA1", "Heavy ion atomic weight (1st incoming beam)", (int*)&hi_1_.first );

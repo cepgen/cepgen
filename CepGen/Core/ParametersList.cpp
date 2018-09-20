@@ -100,7 +100,7 @@ namespace CepGen
     for ( auto& kv : param_values_ )
       if ( kv.first.compare( key ) == 0 )
         return kv.second;
-    throw CG_FATAL( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+    return param_values_[key];
   }
 
   template<> void
@@ -125,7 +125,7 @@ namespace CepGen
     for ( auto& kv : vec_param_values_ )
       if ( kv.first.compare( key ) == 0 )
         return kv.second;
-    throw CG_FATAL( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+    return vec_param_values_[key];
   }
 
   template<> void
@@ -154,7 +154,7 @@ namespace CepGen
     for ( auto& kv : int_values_ )
       if ( kv.first.compare( key ) == 0 )
         return kv.second;
-    throw CG_FATAL( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+    return int_values_[key];
   }
 
   template<> void
@@ -179,7 +179,7 @@ namespace CepGen
     for ( auto& kv : vec_int_values_ )
       if ( kv.first.compare( key ) == 0 )
         return kv.second;
-    throw CG_FATAL( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+    return vec_int_values_[key];
   }
 
   template<> void
@@ -208,7 +208,7 @@ namespace CepGen
     for ( auto& kv : dbl_values_ )
       if ( kv.first.compare( key ) == 0 )
         return kv.second;
-    throw CG_FATAL( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+    return dbl_values_[key];
   }
 
   template<> void
@@ -233,7 +233,7 @@ namespace CepGen
     for ( auto& kv : vec_dbl_values_ )
       if ( kv.first.compare( key ) == 0 )
         return kv.second;
-    throw CG_FATAL( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+    return vec_dbl_values_[key];
   }
 
   template<> void
@@ -262,7 +262,7 @@ namespace CepGen
     for ( auto& kv : str_values_ )
       if ( kv.first.compare( key ) == 0 )
         return kv.second;
-    throw CG_FATAL( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+    return str_values_[key];
   }
 
   template<> void
@@ -287,7 +287,7 @@ namespace CepGen
     for ( auto& kv : vec_str_values_ )
       if ( kv.first.compare( key ) == 0 )
         return kv.second;
-    throw CG_FATAL( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+    return vec_str_values_[key];
   }
 
   template<> void

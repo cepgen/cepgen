@@ -47,6 +47,7 @@ namespace CepGen
 
         void init( Parameters* );
         std::shared_ptr<ParametersList> proc_params_;
+        int str_fun_;
         std::string proc_name_, hadr_name_, integr_type_;
         std::pair<unsigned short,unsigned short> hi_1_, hi_2_;
     };

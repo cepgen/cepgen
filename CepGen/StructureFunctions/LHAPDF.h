@@ -23,6 +23,7 @@ namespace CepGen
           static Parameterisation cteq6();
           unsigned short num_flavours;
           std::string pdf_set;
+          unsigned long pdf_code;
           unsigned short pdf_member;
           enum class Mode { full = 0, valence = 1, sea = 2 };
           Mode mode;
