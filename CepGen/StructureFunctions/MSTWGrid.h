@@ -54,6 +54,7 @@ namespace mstw
 
     private:
       explicit Grid( const Parameterisation& = Parameterisation() );
+      std::string description() const override;
       static const unsigned int good_magic;
       static std::shared_ptr<Grid> singl_;
 
