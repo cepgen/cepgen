@@ -247,6 +247,19 @@ namespace CepGen
           } break;
         }
       }
+      std::array<std::pair<double,double>,D> boundaries() const {
+        std::array<std::pair<double,double>,D> out;
+        unsigned short i = 0;
+        for ( const auto& c : coords_ ) {
+          if ( c.size() < 1 )
+            out[i++] = { std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity() };
+          else if ( c.size() < 2 )
+            out[i++] = { *c.begin(), std::numeric_limits<double>::infinity() };
+          else
+            out[i++] = { *c.begin(), *c.rbegin() };
+        }
+        return out;
+      }
 
     protected:
       GridType grid_type_;
