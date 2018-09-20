@@ -64,7 +64,10 @@ namespace CepGen
           << e.what();
       }
 #  else
-      ::LHAPDF::initPDFSet( params.pdf_set, ::LHAPDF::LHGRID, params.pdf_member );
+      if ( params.pdf_code != 0l )
+        ::LHAPDF::initPDFSet( (int)params.pdf_code, params.pdf_member );
+      else
+        ::LHAPDF::initPDFSet( params.pdf_set, ::LHAPDF::LHGRID, params.pdf_member );
       lhapdf_version = ::LHAPDF::getVersion();
       pdf_description = ::LHAPDF::getDescription();
 #  endif
