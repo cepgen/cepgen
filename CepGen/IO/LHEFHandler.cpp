@@ -131,7 +131,7 @@ namespace CepGen
       out.NUP = ev.numParticles();
       out.resize();
       for ( unsigned short ip = 0; ip < ev.numParticles(); ++ip ) {
-        const Particle part = ev.getConstById( ip );
+        const Particle part = ev.at( ip );
         out.IDUP[ip] = part.integerPdgId(); // PDG id
         out.ISTUP[ip] = (short)part.status(); // status code
         out.MOTHUP[ip] = std::pair<int,int>( ( part.mothers().size() > 0 ) ? *part.mothers().begin()+1 : 0, ( part.mothers().size() > 1 ) ? *part.mothers().rbegin()+1 : 0 ); // mothers
@@ -218,7 +218,7 @@ namespace CepGen
               continue;
             status = 2;
             if ( pdg_id == 0 )
-              pdg_id = ev.getConstById( *part.mothers().begin() ).integerPdgId();
+              pdg_id = ev.at( *part.mothers().begin() ).integerPdgId();
           } break;
           case Particle::IncomingBeam1:
           case Particle::IncomingBeam2: {

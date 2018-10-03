@@ -73,7 +73,7 @@ namespace CepGen
       /// Get a const Particle object using its unique identifier
       /// \param[in] id_ Unique identifier of the particle in the event
       /// \return Constant object to be retrieved
-      const Particle& getConstById( int id_ ) const;
+      const Particle& at( int id_ ) const;
       /**
        * Returns the references to the Particle objects corresponding to the unique identifiers in the event
        * \brief Gets a vector of particles by their unique identifier in the event

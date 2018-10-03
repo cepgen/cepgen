@@ -28,6 +28,11 @@ namespace CepGen
         explicit GenericHadroniser( const char* name = "unnamed_hadroniser" );
         virtual ~GenericHadroniser() {}
 
+        virtual void readString( const char* ) {}
+        virtual void readString( const std::string& param ) { readString( param.c_str() ); }
+        virtual void readStrings( const std::vector<std::string>& params );
+
+        virtual void init() = 0;
         /// Hadronise a full event
         /// \param[inout] ev Event to hadronise
         /// \param[inout] weight Event weight after hadronisation
@@ -38,10 +43,6 @@ namespace CepGen
         /// \param[in] seed A RNG seed
         virtual void setSeed( long long seed ) = 0;
         virtual void setCrossSection( double xsec, double xsec_err ) {}
-
-        virtual void readString( const char* ) {}
-        virtual void readString( const std::string& param ) { readString( param.c_str() ); }
-        virtual void readStrings( const std::vector<std::string>& params );
 
         /// Return a human-readable name for this hadroniser
         std::string name() const;
