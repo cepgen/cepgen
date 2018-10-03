@@ -113,8 +113,6 @@ namespace CepGen
       std::string hadroniserName() const;
       /// Set the hadronisation algorithm
       void setHadroniser( Hadroniser::GenericHadroniser* hadr );
-      /// Maximal number of trials for the hadronisation of the proton(s) remnants
-      unsigned int hadroniser_max_trials;
 
       //----- taming functions
 

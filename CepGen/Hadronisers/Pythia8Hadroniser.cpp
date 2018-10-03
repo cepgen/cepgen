@@ -5,6 +5,7 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
@@ -25,8 +26,8 @@ namespace CepGen
     }
 #endif
 
-    Pythia8Hadroniser::Pythia8Hadroniser( const Parameters& params ) :
-      GenericHadroniser( "pythia8" ), max_attempts_( params.hadroniser_max_trials ),
+    Pythia8Hadroniser::Pythia8Hadroniser( const Parameters& params, const ParametersList& plist ) :
+      GenericHadroniser( "pythia8", plist ),
 #ifdef PYTHIA8
       pythia_( new Pythia8::Pythia ), lhaevt_( new LHAEvent( &params ) ),
 #endif
@@ -67,6 +68,13 @@ namespace CepGen
       if ( pythia_->settings.flag( "ProcessLevel:all" ) != full_evt_ )
         pythia_->settings.flag( "ProcessLevel:all", full_evt_ );
 
+      if ( seed_ == -1ll )
+        pythia_->settings.flag( "Random:setSeed", false );
+      else {
+        pythia_->settings.flag( "Random:setSeed", true );
+        pythia_->settings.mode( "Random:seed", seed_ );
+      }
+
       switch ( params_->kinematics.mode ) {
         case KinematicsMode::ElasticElastic: {
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 3 );
@@ -89,19 +97,6 @@ namespace CepGen
 #else
       throw CG_FATAL( "Pythia8Hadroniser" )
         << "Pythia8 is not linked to this instance!";
-#endif
-    }
-
-    void
-    Pythia8Hadroniser::setSeed( long long seed )
-    {
-#ifdef PYTHIA8
-      if ( seed == -1ll )
-        pythia_->settings.flag( "Random:setSeed", false );
-      else {
-        pythia_->settings.flag( "Random:setSeed", true );
-        pythia_->settings.mode( "Random:seed", seed );
-      }
 #endif
     }
 
@@ -142,7 +137,7 @@ namespace CepGen
 
       ev.num_hadronisation_trials = 0;
       while ( true ) {
-        if ( ev.num_hadronisation_trials++ > max_attempts_ )
+        if ( ev.num_hadronisation_trials++ > max_trials_ )
           return false;
         //--- run the hadronisation/fragmentation algorithm
         if ( pythia_->next() ) {

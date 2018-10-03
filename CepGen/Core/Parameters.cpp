@@ -16,7 +16,6 @@ namespace CepGen
 {
   Parameters::Parameters() :
     general( new ParametersList ),
-    hadroniser_max_trials( 5 ),
     taming_functions( new TamingFunctionsCollection ),
     store_( false ), total_gen_time_( 0. ), num_gen_events_( 0 )
   {}
@@ -24,7 +23,6 @@ namespace CepGen
   Parameters::Parameters( Parameters& param ) :
     general( param.general ),
     kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
-    hadroniser_max_trials( param.hadroniser_max_trials ),
     taming_functions( param.taming_functions ),
     process_( std::move( param.process_ ) ),
     hadroniser_( std::move( param.hadroniser_ ) ),
@@ -34,7 +32,6 @@ namespace CepGen
   Parameters::Parameters( const Parameters& param ) :
     general( param.general ),
     kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
-    hadroniser_max_trials( param.hadroniser_max_trials ),
     taming_functions( param.taming_functions ),
     store_( false ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ )
   {}

@@ -47,6 +47,12 @@ namespace CepGen
 #endif
     }
 
+    template<> long long
+    PythonHandler::get<long long>( PyObject* obj ) const
+    {
+      return PyLong_AsLongLong( obj );
+    }
+
     template<> bool
     PythonHandler::is<double>( PyObject* obj ) const
     {

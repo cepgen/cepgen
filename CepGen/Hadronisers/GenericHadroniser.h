@@ -10,6 +10,7 @@ namespace CepGen
   class Event;
   class Particle;
   class Parameters;
+  class ParametersList;
   /// Location for all hadronisers to be run downstream to the events generation
   namespace Hadroniser
   {
@@ -25,7 +26,7 @@ namespace CepGen
         friend std::ostream& operator<<( std::ostream& os, const GenericHadroniser* hadr );
 
         /// Default constructor for an undefined hadroniser
-        explicit GenericHadroniser( const char* name = "unnamed_hadroniser" );
+        explicit GenericHadroniser( const char* name, const ParametersList& );
         virtual ~GenericHadroniser() {}
 
         /// Parse a configuration string
@@ -42,11 +43,12 @@ namespace CepGen
         /// \param[in] full Perform the full state hadronisation (incl. remnants fragmentation)
         /// \return Boolean stating whether or not the hadronisation occured successfully
         virtual bool run( Event& ev, double& weight, bool full ) = 0;
-        /// Specify a random numbers generator seed for the hadroniser
-        /// \param[in] seed A RNG seed
-        virtual void setSeed( long long seed ) = 0;
         /// Specify the process cross section, in pb
         virtual void setCrossSection( double xsec, double xsec_err ) {}
+
+        /// Specify a random numbers generator seed for the hadroniser
+        /// \param[in] seed A RNG seed
+        void setSeed( long long seed ) { seed_ = seed; }
 
         /// Return a human-readable name for this hadroniser
         std::string name() const;
@@ -54,6 +56,9 @@ namespace CepGen
       protected:
         /// Name of the hadroniser
         std::string name_;
+        long long seed_;
+        /// Maximal number of trials for the hadronisation of the proton(s) remnants
+        unsigned short max_trials_;
     };
   }
 }

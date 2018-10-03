@@ -1,8 +1,10 @@
-from containers_cfi import Module
+from containers_cfi import Module, Parameters
 
 pythia8 = Module('pythia8',
-    seed = 1000,
-    maxTrials = 1,
+    moduleParameters = Parameters(
+        seed = 1000,
+        maxTrials = 1,
+    ),
     preConfiguration = (
         # printout properties
         # start by disabling some unnecessary output

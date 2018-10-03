@@ -387,28 +387,30 @@ namespace CepGen
         throwPythonError( "Hadroniser name is required!" );
       std::string hadr_name = get<std::string>( pname );
 
-      fillParameter( hadr, "maxTrials", params_.hadroniser_max_trials );
-      PyObject* pseed = getElement( hadr, "seed" ); // borrowed
-      long long seed = -1ll;
-      if ( pseed && is<int>( pseed ) ) {
-        seed = PyLong_AsLongLong( pseed );
-        CG_DEBUG( "PythonHandler:hadroniser" ) << "Hadroniser seed set to " << seed;
-      }
+      //--- list of module-specific parameters
+      ParametersList mod_params;
+      fillParameter( hadr, "moduleParameters", mod_params );
+
       if ( hadr_name == "pythia8" )
-        params_.setHadroniser( new Hadroniser::Pythia8Hadroniser( params_ ) );
+        params_.setHadroniser( new Hadroniser::Pythia8Hadroniser( params_, mod_params ) );
+      else
+        throwPythonError( Form( "Unrecognised hadronisation algorithm: \"%s\"!", hadr_name.c_str() ) );
+
       auto h = params_.hadroniser();
-      if ( !h )
-        return;
-      std::vector<std::string> config;
-      h->setSeed( seed );
-      fillParameter( hadr, "preConfiguration", config );
-      h->readStrings( config );
+      { //--- before calling the init() method
+        std::vector<std::string> config;
+        fillParameter( hadr, "preConfiguration", config );
+        h->readStrings( config );
+      }
       h->init();
-      fillParameter( hadr, "processConfiguration", config );
-      for ( const auto& block : config ) {
-        std::vector<std::string> config_blk;
-        fillParameter( hadr, block.c_str(), config_blk );
-        h->readStrings( config_blk );
+      { //--- after init() has been called
+        std::vector<std::string> config;
+        fillParameter( hadr, "processConfiguration", config );
+        for ( const auto& block : config ) {
+          std::vector<std::string> config_blk;
+          fillParameter( hadr, block.c_str(), config_blk );
+          h->readStrings( config_blk );
+        }
       }
     }
   }
