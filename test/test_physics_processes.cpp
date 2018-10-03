@@ -129,11 +129,11 @@ main( int argc, char* argv[] )
           const string kin_mode = values_vs_kin.first;
 
           if ( kin_mode.find( "elastic"    ) != string::npos )
-            mg.parameters->kinematics.mode = CepGen::Kinematics::Mode::ElasticElastic;
+            mg.parameters->kinematics.mode = CepGen::KinematicsMode::ElasticElastic;
           else if ( kin_mode.find( "singlediss" ) != string::npos )
-            mg.parameters->kinematics.mode = CepGen::Kinematics::Mode::InelasticElastic;
+            mg.parameters->kinematics.mode = CepGen::KinematicsMode::InelasticElastic;
           else if ( kin_mode.find( "doublediss" ) != string::npos )
-            mg.parameters->kinematics.mode = CepGen::Kinematics::Mode::InelasticInelastic;
+            mg.parameters->kinematics.mode = CepGen::KinematicsMode::InelasticInelastic;
           else {
             CG_ERROR( "main" ) << "Unrecognized kinematics mode: " << values_vs_kin.first << ".";
             break;

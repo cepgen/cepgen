@@ -111,19 +111,19 @@ namespace CepGen
           inline double pz() const { return pz_; }
           /// Transverse momentum (in GeV)
           double pt() const;
-          /// Squared transverse momentum (in GeV\f$^\textrm{2}\f$)
+          /// Squared transverse momentum (in GeV²)
           double pt2() const;
           /// 4-vector of double precision floats (in GeV)
           const std::vector<double> pVector() const;
           /// 3-momentum norm (in GeV)
           inline double p() const { return p_; }
-          /// Squared 3-momentum norm (in GeV\f$^\textrm{2}\f$)
+          /// Squared 3-momentum norm (in GeV²)
           inline double p2() const { return p_*p_; }
           /// Energy (in GeV)
           inline double energy() const { return energy_; }
-          /// Squared energy (in GeV^2)
+          /// Squared energy (in GeV²)
           inline double energy2() const { return energy_*energy_; }
-          /// Squared mass (in GeV^2) as computed from its energy and momentum
+          /// Squared mass (in GeV²) as computed from its energy and momentum
           inline double mass2() const { return energy2()-p2(); }
           /// Mass (in GeV) as computed from its energy and momentum
           /// \note Returns \f$-\sqrt{|E^2-\mathbf{p}^2|}<0\f$ if \f$\mathbf{p}^2>E^2\f$
@@ -235,24 +235,18 @@ namespace CepGen
       float helicity() const { return helicity_; }
       /// Set the helicity of the particle
       void setHelicity( float heli ) { helicity_ = heli; }
-      /**
-       * Gets the particle's mass in \f$\textrm{GeV}/c^{2}\f$.
-       * \brief Gets the particle's mass
-       * \return The particle's mass
-       */
+      /// Particle mass in GeV/c²
+      /// \return Particle's mass
       inline double mass() const { return mass_; };
-      /**
-       * Set the mass of the particle in \f$\textrm{GeV}/c^{2}\f$ while ensuring that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
-       * \brief Compute the particle's mass in \f$\textrm{GeV}/c^{2}\f$
-       */
+      /// Compute the particle mass
+      /// \param[in] off_shell Allow the particle to be produced off-shell?
+      /// \note This method ensures that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
       void computeMass( bool off_shell = false );
-      /**
-       * Set the mass of the particle in \f$\textrm{GeV}/c^{2}\f$ according to a value given as an argument. This method ensures that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
-       * \param m The mass in \f$\textrm{GeV}/c^{2}\f$ to set
-       * \brief Set the particle's mass in \f$\textrm{GeV}/c^{2}\f$
-       */
+      /// Set the particle mass, in GeV/c²
+      /// \param m Mass in GeV/c²
+      /// \note This method ensures that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
       void setMass( double m = -1. );
-      /// Get the particle's squared mass (in \f$\textrm{GeV}^\textrm{2}\f$)
+      /// Particle squared mass, in GeV²/c⁴
       inline double mass2() const { return mass_*mass_; };
       /// Retrieve the momentum object associated with this particle
       inline Momentum& momentum() { return momentum_; }
@@ -261,33 +255,22 @@ namespace CepGen
       /// Associate a momentum object to this particle
       void setMomentum( const Momentum& mom, bool offshell = false );
       /**
-       * \brief Set the 3-momentum associated to the particle
-       * \param[in] px Momentum along the \f$x\f$-axis, in \f$\textrm{GeV}/c\f$
-       * \param[in] py Momentum along the \f$y\f$-axis, in \f$\textrm{GeV}/c\f$
-       * \param[in] pz Momentum along the \f$z\f$-axis, in \f$\textrm{GeV}/c\f$
-       */
-      void setMomentum( double px, double py, double pz );
-      /**
-       * \brief Set the 4-momentum associated to the particle
-       * \param[in] px Momentum along the \f$x\f$-axis, in \f$\textrm{GeV}/c\f$
-       * \param[in] py Momentum along the \f$y\f$-axis, in \f$\textrm{GeV}/c\f$
-       * \param[in] pz Momentum along the \f$z\f$-axis, in \f$\textrm{GeV}/c\f$
+       * \brief Set the 3- or 4-momentum associated to the particle
+       * \param[in] px Momentum along the \f$x\f$-axis, in GeV/c
+       * \param[in] py Momentum along the \f$y\f$-axis, in GeV/c
+       * \param[in] pz Momentum along the \f$z\f$-axis, in GeV/c
        * \param[in] e Energy, in GeV
        */
-      void setMomentum( double px, double py, double pz, double e );
-      /**
-       * \brief Set the 4-momentum associated to the particle
-       * \param[in] p 4-momentum
-       */
+      void setMomentum( double px, double py, double pz, double e = -1. );
+      /// Set the 4-momentum associated to the particle
+      /// \param[in] p 4-momentum
       inline void setMomentum( double p[4] ) { setMomentum( p[0], p[1], p[2], p[3] ); }
-      /**
-       * \brief Set the particle's energy
-       * \param[in] e Energy, in GeV
-       */
-      void setEnergy( double e=-1. );
-      /// Get the particle's energy (in GeV)
+      /// Set the particle's energy
+      /// \param[in] e Energy, in GeV
+      void setEnergy( double e = -1. );
+      /// Get the particle's energy, in GeV
       double energy() const;
-      /// Get the particle's squared energy (in \f$\textrm{GeV}^\textrm{2}\f$)
+      /// Get the particle's squared energy, in GeV²
       inline double energy2() const { return energy()*energy(); };
       /// Is this particle a valid particle which can be used for kinematic computations?
       bool valid();
@@ -296,15 +279,11 @@ namespace CepGen
 
       /// Is this particle a primary particle?
       inline bool primary() const { return mothers_.empty(); }
-      /**
-       * \brief Set the mother particle
-       * \param[in] part A Particle object containing all the information on the mother particle
-       */
+      /// Set the mother particle
+      /// \param[in] part A Particle object containing all the information on the mother particle
       void addMother( Particle& part );
-      /**
-       * \brief Gets the unique identifier to the mother particle from which this particle arises
-       * \return An integer representing the unique identifier to the mother of this particle in the event
-       */
+      /// Get the unique identifier to the mother particle from which this particle arises
+      /// \return An integer representing the unique identifier to the mother of this particle in the event
       inline ParticlesIds mothers() const { return mothers_; }
       /**
        * \brief Add a decay product
@@ -314,10 +293,8 @@ namespace CepGen
       void addDaughter( Particle& part );
       /// Gets the number of daughter particles
       inline unsigned int numDaughters() const { return daughters_.size(); };
-      /**
-       * \brief Get an identifiers list all daughter particles
-       * \return An integer vector containing all the daughters' unique identifier in the event
-       */
+      /// Get an identifiers list all daughter particles
+      /// \return An integer vector containing all the daughters' unique identifier in the event
       inline ParticlesIds daughters() const { return daughters_; }
 
       // --- global particle information extraction
@@ -332,7 +309,7 @@ namespace CepGen
       short charge_sign_;
       /// Momentum properties handler
       Momentum momentum_;
-      /// Mass in \f$\textrm{GeV}/c^2\f$
+      /// Mass, in GeV/c²
       double mass_;
       /// Helicity
       float helicity_;

@@ -24,13 +24,18 @@ namespace mstw
         cl_t cl;
         nucleon_t nucleon;
       };
+      /// Structure functions value at a given Q²/xbj coordinate
       struct sfval_t
       {
-        float q2, xbj;
-        double f2, fl;
+        float q2; ///< four-momentum transfer, in GeV²
+        float xbj; ///< Bjorken's scaling variable
+        double f2; ///< Transverse structure function value
+        double fl; ///< Longitudinal structure function value
       };
+      /// List of parameters for this grid definition
       struct Parameterisation {
         Parameterisation() : grid_path( DEFAULT_MSTW_GRID_PATH ) {}
+        /// Location of the grid to be interpolated
         std::string grid_path;
       };
 

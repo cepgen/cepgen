@@ -8,7 +8,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * \image latex cepgen_logo.pdf
  * \mainpage Foreword
  * This Monte Carlo generator was developed as a modern version of the LPAIR code introduced
  * in the early 1990s by J. Vermaseren *et al*\cite Vermaseren1983347. This latter allows to
@@ -51,12 +50,12 @@ namespace CepGen
    * This object represents the core of this Monte Carlo generator, with its
    * capability to generate the events (using the embedded Vegas object) and to
    * study the phase space in term of the variation of resulting cross section
-   * while scanning the various parameters (point \f$\textbf{x}\f$ in the
+   * while scanning the various parameters (point \f${\bf x}\f$ in the
    * multi-dimensional phase space).
    *
    * The phase space is constrained using the Parameters object given as an
    * argument to the constructor, and the differential cross-sections for each
-   * value of the array \f$\textbf{x}\f$ are computed in the \a f-function defined
+   * value of the array \f${\bf x}\f$ are computed in the \a f-function defined
    * outside (but populated inside) this object.
    *
    * This f-function embeds a GenericProcess-inherited object which defines all the

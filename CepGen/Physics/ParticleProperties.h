@@ -8,7 +8,7 @@ namespace CepGen
   {
     /// Mass (in GeV) of a particle
     /// \param pdg_id PDG identifier
-    /// \return Mass of the particle in \f$\textrm{GeV}/c^2\f$
+    /// \return Mass of the particle in GeV/c²
     double mass( const PDG& pdg_id );
     /// Electric charge of a particle, in \f$e\f$
     /// \param[in] pdg_id PDG id

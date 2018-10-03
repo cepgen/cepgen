@@ -8,11 +8,11 @@ namespace CepGen
   /// List of physical constants useful that may be used for the matrix element definition
   namespace Constants
   {
-    /// Electromagnetic coupling constant \f$\alpha_\textrm{em}=\frac{e^2}{4\pi\epsilon_0\hbar c}\f$
+    /// Electromagnetic coupling constant \f$\alpha_{\rm em}=\frac{e^2}{4\pi\epsilon_0\hbar c}\f$
     constexpr double alphaEM = 1./137.035;
-    /// Strong coupling constant \f$\alpha_\textrm{QCD}\f$
+    /// Strong coupling constant \f$\alpha_{\rm QCD}\f$
     constexpr double alphaQCD = 0.1184; // at the Z pole
-    /// Conversion factor between GeV^2 and barn
+    /// Conversion factor between GeV² and barn
     constexpr double GeV2toBarn = 0.389351824e9; // 1.e4*(197.3271**2);
     constexpr double sconstb = 2.1868465e10; // 1.1868465e10;
   }

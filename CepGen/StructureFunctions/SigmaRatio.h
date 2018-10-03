@@ -11,11 +11,11 @@ namespace CepGen
     {
       public:
         SigmaRatio() {}
-        /// Extract the longitudinal/transverse cross section ratio and associated error for a given Q²/\f$x_{\textrm{Bj}}\f$ couple.
+        /// Extract the longitudinal/transverse cross section ratio and associated error for a given Q²/\f$x_{\rm Bj}\f$ couple.
         virtual double operator()( double xbj, double q2, double& err ) const = 0;
 
       protected:
-        /// \f$x_{\textrm{Bj}}\f$ dependence for QCD-matching of R at high-Q²
+        /// \f$x_{\rm Bj}\f$ dependence for QCD-matching of R at high-Q²
         double theta( double xbj, double q2 ) const;
         static const double mp_, mp2_;
     };

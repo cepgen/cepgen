@@ -1,13 +1,20 @@
 #!/usr/bin/env python
 
+'''@package cepgen
+A collection of tools for Python steering cards definition
+'''
 class PrintHelper(object):
+    '''Helper class for the pretty-printing of configuration parameters'''
     _indent = 0
     _indent_size = 4
     def indent(self):
+        '''Move to the next indentation block'''
         self._indent += self._indent_size
     def unindent(self):
+        '''Go up to the previous indentation block'''
         self._indent -= self._indent_size
     def indentation(self):
+        '''Current indentation level'''
         return ' '*self._indent
 
 class Parameters(dict):

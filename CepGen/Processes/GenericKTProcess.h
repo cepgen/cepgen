@@ -65,11 +65,11 @@ namespace CepGen
         /// Type of mapping to apply on the variable
         enum class Mapping
         {
-          /// a linear \f$\textrm dx\f$ mapping
+          /// a linear \f${\rm d}x\f$ mapping
           linear = 0,
-          /// a logarithmic \f$\frac{\textrm dx}{x} = \textrm d(\log x)\f$ mapping
+          /// a logarithmic \f$\frac{{\rm d}x}{x} = {\rm d}(\log x)\f$ mapping
           logarithmic,
-          /// a square \f$\textrm dx^2=2x\cdot\textrm dx\f$ mapping
+          /// a square \f${\rm d}x^2=2x\cdot{\rm d}x\f$ mapping
           square
         };
         friend std::ostream& operator<<( std::ostream&, const Mapping& );

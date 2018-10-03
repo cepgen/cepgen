@@ -39,7 +39,7 @@ namespace CepGen
 
       struct Beam
       {
-        /// Incoming particle's momentum (in \f$\text{GeV}/c\f$)
+        /// Incoming particle's momentum (in GeV/c)
         double pz;
         PDG pdg;
         KTFlux kt_flux;
