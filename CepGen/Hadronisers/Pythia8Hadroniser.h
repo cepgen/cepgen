@@ -26,8 +26,8 @@ namespace CepGen
       void setCrossSection( int id, double xsec, double xsec_err );
       void setProcess( int id, double xsec, double q2_scale, double alpha_qed, double alpha_qcd );
 
-      unsigned short cgPart( unsigned short py_id ) const;
-      unsigned short pyPart( unsigned short cg_id ) const;
+      unsigned short cepgenId( unsigned short py_id ) const;
+      unsigned short pythiaId( unsigned short cg_id ) const;
       void addCorresp( unsigned short py_id, unsigned short cg_id );
       void dumpCorresp() const;
 
@@ -83,4 +83,3 @@ namespace CepGen
 }
 
 #endif
-

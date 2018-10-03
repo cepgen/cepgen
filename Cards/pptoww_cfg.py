@@ -1,10 +1,8 @@
 import Config.Core as cepgen
-import Config.ktProcess_cfi as kt
 from Config.integrators_cff import vegas as integrator
 from Config.logger_cfi import logger
-from Config.pythia8_cff import pythia8 as hadroniser
-from Config.generator_cff import generator
 
+from Config.pythia8_cff import pythia8 as hadroniser
 hadroniser.pythiaProcessConfiguration += (
     # process-specific
     '13:onMode = off', # disable muon decays
@@ -20,6 +18,7 @@ hadroniser.pythiaPreConfiguration += (
     'ProcessLevel:resonanceDecays = off', # disable the W decays
 )
 
+import Config.ktProcess_cfi as kt
 process = kt.process.clone('pptoww',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.ElasticElastic,
@@ -42,24 +41,17 @@ process = kt.process.clone('pptoww',
         #--- cuts on single particles' level
         cuts = {
             # cuts on the single W level
-            24: cepgen.Parameters(
-                pt = (0.,), # no pt cut on Ws
-            ),
+            24: cepgen.Parameters(pt = (0.,)), # no pt cut on Ws
             # cuts on the W decay products
             # (mimicking LHC-like experimental cuts)
-            11: cepgen.Parameters(
-                pt = (20.,),
-                eta = (-2.5, 2.5),
-            ),
-            13: cepgen.Parameters(
-                pt = (20.,),
-                eta = (-2.5, 2.5),
-            )
+            11: cepgen.Parameters(pt = (20.,), eta = (-2.5, 2.5)),
+            13: cepgen.Parameters(pt = (20.,), eta = (-2.5, 2.5))
         },
     )
 )
 
-#--- import the default generation parameters
+#--- generation parameters
+from Config.generator_cff import generator
 generator = generator.clone(
     numEvents = 1000,
     printEvery = 100,

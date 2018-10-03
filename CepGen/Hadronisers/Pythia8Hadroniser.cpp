@@ -193,7 +193,7 @@ namespace CepGen
     {
       for ( unsigned short i = 1+offset_; i < pythia_->event.size(); ++i ) {
         const Pythia8::Particle& p = pythia_->event[i];
-        const unsigned short cg_id = lhaevt_->cgPart( i-offset_ );
+        const unsigned short cg_id = lhaevt_->cepgenId( i-offset_ );
         if ( cg_id != LHAEvent::invalid_id ) {
           //----- particle already in the event
           Particle& cg_part = ev[cg_id];
@@ -246,7 +246,7 @@ namespace CepGen
           for ( const auto& moth_id : p.motherList() ) {
             if ( moth_id <= offset_ )
               continue;
-            const unsigned short moth_cg_id = lhaevt_->cgPart( moth_id-offset_ );
+            const unsigned short moth_cg_id = lhaevt_->cepgenId( moth_id-offset_ );
             if ( moth_cg_id != LHAEvent::invalid_id )
               cg_part.addMother( ev[moth_cg_id] );
             else
@@ -270,7 +270,7 @@ namespace CepGen
           return (unsigned short)Particle::OutgoingBeam1;
         if ( par_id == 2 && offset_ > 0 )
           return (unsigned short)Particle::OutgoingBeam2;
-        const unsigned short par_cg_id = lhaevt_->cgPart( par_id-offset_ );
+        const unsigned short par_cg_id = lhaevt_->cepgenId( par_id-offset_ );
         if ( par_cg_id != LHAEvent::invalid_id )
           return (unsigned short)ev.getConstById( par_cg_id ).role();
         return findRole( ev, pythia_->event[par_id] );
@@ -393,21 +393,21 @@ namespace CepGen
         moth1_id = moth2_id = 0;
         if ( mothers.size() > 0 ) {
           const unsigned short moth1_cg_id = *mothers.begin();
-          moth1_id = pyPart( moth1_cg_id );
+          moth1_id = pythiaId( moth1_cg_id );
           if ( moth1_id == invalid_id ) {
             const Particle& moth = ev.getConstById( moth1_cg_id );
             if ( moth.mothers().size() > 0 )
-              moth1_id = pyPart( *moth.mothers().begin() );
+              moth1_id = pythiaId( *moth.mothers().begin() );
             if ( moth.mothers().size() > 1 )
-              moth2_id = pyPart( *moth.mothers().rbegin() );
+              moth2_id = pythiaId( *moth.mothers().rbegin() );
           }
           if ( mothers.size() > 1 ) {
             const unsigned short moth2_cg_id = *mothers.rbegin();
-            moth2_id = pyPart( moth2_cg_id );
+            moth2_id = pythiaId( moth2_cg_id );
             if ( moth2_id == invalid_id ) {
               const Particle& moth = ev.getConstById( moth2_cg_id );
               moth.dump();
-              moth2_id = pyPart( *moth.mothers().rbegin() );
+              moth2_id = pythiaId( *moth.mothers().rbegin() );
             }
           }
         }
@@ -439,7 +439,7 @@ namespace CepGen
   }
 
   unsigned short
-  LHAEvent::cgPart( unsigned short py_id ) const
+  LHAEvent::cepgenId( unsigned short py_id ) const
   {
     for ( const auto& py_cg : py_cg_corresp_ )
       if ( py_cg.first == py_id )
@@ -448,7 +448,7 @@ namespace CepGen
   }
 
   unsigned short
-  LHAEvent::pyPart( unsigned short cg_id ) const
+  LHAEvent::pythiaId( unsigned short cg_id ) const
   {
     for ( const auto& py_cg : py_cg_corresp_ )
       if ( py_cg.second == cg_id )
