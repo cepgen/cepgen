@@ -3,85 +3,11 @@
 '''@package cepgen
 A collection of tools for Python steering cards definition
 '''
-class PrintHelper(object):
-    '''Helper class for the pretty-printing of configuration parameters'''
-    _indent = 0
-    _indent_size = 4
-    def indent(self):
-        '''Move to the next indentation block'''
-        self._indent += self._indent_size
-    def unindent(self):
-        '''Go up to the previous indentation block'''
-        self._indent -= self._indent_size
-    def indentation(self):
-        '''Current indentation level'''
-        return ' '*self._indent
 
-class Parameters(dict):
-    '''A raw list of steering parameters'''
-    __getattr__ = dict.get
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
-    def __init__(self, *args, **kwargs):
-        self.update(*args, **kwargs)
-        super(Parameters, self).__init__(*args, **kwargs)
-    def __deepcopy__(self, memo):
-        from copy import deepcopy
-        return Parameters([(deepcopy(k, memo), deepcopy(v, memo)) for k, v in self.items()])
-    def dump(self, printer=PrintHelper()):
-        out = self.__class__.__name__+'(\n'
-        for k, v in self.items():
-            printer.indent()
-            out += ('%s%s = ' % (printer.indentation(), k))
-            if v.__class__.__name__ not in ['Parameters', 'Module']:
-                out += v.__repr__()
-            else:
-                out += v.dump(printer)
-            out += ',\n'
-            printer.unindent()
-        out += printer.indentation()+')'
-        return out
-    def __repr__(self):
-        return self.dump()
-    def clone(self, *args, **kwargs):
-        from copy import deepcopy
-        out = deepcopy(self)
-        for k in kwargs:
-            out[k] = kwargs.get(k)
-        return type(self)(out)
-    def load(self, mod):
-        mod = mod.replace('/', '.')
-        module = __import__(mod)
-        self.extend(sys.modules[mod])
-
-class Module(Parameters):
-    '''A named parameters set to steer a generic module'''
-    def __init__(self, name, *args, **kwargs):
-        super(Module, self).__init__(*args, **kwargs)
-        self.mod_name = name
-    def __len__(self):
-        return dict.__len__(self)-1 # discard the name key
-    def dump(self, printer=PrintHelper()):
-        out = self.__class__.__name__+'('+self.mod_name.__repr__()+'\n'
-        mod_repr = self.clone('')
-        mod_repr.pop('mod_name', None)
-        for k, v in mod_repr.items():
-            printer.indent()
-            out += ('%s%s = ' % (printer.indentation(), k))
-            if v.__class__.__name__ not in ['Parameters', 'Module']:
-                out += v.__repr__()
-            else:
-                out += v.dump(printer)
-            out += ',\n'
-            printer.unindent()
-        out += printer.indentation()+')'
-        return out
-    def __repr__(self):
-        return self.dump()
-    def clone(self, name, **kwargs):
-        out = Parameters(self).clone(**kwargs)
-        out.mod_name = name
-        return out
+from containers_cfi import Module, Parameters
+#--- physics-level includes
+from StructureFunctions_cfi import StructureFunctions
+from ProcessMode_cfi import ProcessMode
 
 class Logging:
     '''Logging verbosity'''
@@ -91,52 +17,6 @@ class Logging:
     Information     = 3
     Debug           = 4
     DebugInsideLoop = 5
-
-class StructureFunctions:
-    class PDFMode:
-        AllQuarks     = 0
-        ValenceQuarks = 1
-        SeaQuarks     = 2
-    '''Types of structure functions supported'''
-    Electron            = Parameters(id=1)
-    ElasticProton       = Parameters(id=2)
-    SuriYennie          = Parameters(id=11)
-    SzczurekUleshchenko = Parameters(id=12)
-    BlockDurandHa       = Parameters(id=13)
-    FioreBrasse         = Parameters(id=101)
-    ChristyBosted       = Parameters(id=102)
-    CLAS                = Parameters(id=103)
-    ALLM91              = Parameters(id=201)
-    ALLM97              = Parameters(id=202)
-    GD07p               = Parameters(id=203)
-    GD11p               = Parameters(id=204)
-    MSTWgrid = Parameters(
-        id = 205,
-        gridPath = 'External/F2_Luxlike_fit/mstw_f2_scan_nnlo.dat',
-    )
-    LUXlike = Parameters(
-        id = 301,
-        #Q2cut = 10.,
-        #W2limits = (4.,1.),
-        continuumSF = GD11p,
-        resonancesSF = ChristyBosted,
-    )
-    LHAPDF = Parameters(
-        id = 401,
-        pdfSet = 'LUXqed17_plus_PDF4LHC15_nnlo_100',
-        numFlavours = 4,
-        mode = PDFMode.AllQuarks,
-    )
-
-class ProcessMode:
-    '''Types of processes supported'''
-    ElectronProton = 0
-    ElasticElastic = 1
-    ElasticInelastic = 2
-    InelasticElastic = 3
-    InelasticInelastic = 4
-    ProtonElectron = 5
-    ElectronElectron = 6
 
 if __name__ == '__main__':
     import unittest

@@ -10,6 +10,7 @@ namespace CepGen
 {
   namespace SF
   {
+    /// \f$F_{2/L}\f$ parameterisation by Christy and Bosted \cite Bosted:2007xd
     class ChristyBosted : public StructureFunctions
     {
       public:

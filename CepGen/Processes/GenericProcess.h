@@ -14,7 +14,7 @@ namespace CepGen
   /// Location for all physics processes to be generated
   namespace Process
   {
-    /// Class template to define any process to compute using this MC integrator/events generator
+    /// \brief Class template to define any process to compute using this MC integrator/events generator
     /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
     /// \date Jan 2014
     class GenericProcess

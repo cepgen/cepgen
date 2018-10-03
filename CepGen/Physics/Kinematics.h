@@ -37,12 +37,12 @@ namespace CepGen
       Kinematics();
       ~Kinematics();
 
+      /// Incoming beams characteristics
       struct Beam
       {
-        /// Incoming particle's momentum (in GeV/c)
-        double pz;
-        PDG pdg;
-        KTFlux kt_flux;
+        double pz; ///< Incoming particle momentum, in GeV/c
+        PDG pdg; ///< PDG identifier for the beam
+        KTFlux kt_flux; ///< Type of kT-factorised flux to be considered (if any)
       };
       friend std::ostream& operator<<( std::ostream&, const Beam& );
       /// Beam/primary particle's kinematics

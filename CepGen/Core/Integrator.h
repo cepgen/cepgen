@@ -23,7 +23,7 @@ namespace CepGen
     public:
       enum class Type {
         plain = 0,
-        Vegas = 1, ///< @cite PeterLepage1978192 developed by G.P. Lepage in 1978
+        Vegas = 1, ///< VEGAS algorithm \cite Lepage:1977sw developed by G.P. Lepage
         MISER = 2
       };
       enum class VegasMode { importance = 1, importanceOnly = 0, stratified = -1 };

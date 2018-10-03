@@ -10,15 +10,14 @@
 /**
  * \mainpage Foreword
  * This Monte Carlo generator was developed as a modern version of the LPAIR code introduced
- * in the early 1990s by J. Vermaseren *et al*\cite Vermaseren1983347. This latter allows to
+ * in the early 1990s by J. Vermaseren *et al*\cite Baranov:1991yq\cite Vermaseren:1982cz. This latter allows to
  * compute the cross-section and to generate events for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
  * process in the scope of high energy physics.
  *
  * Soon after the integration of its matrix element, it was extended as a tool to compute and
  * generate events for any generic 2\f$\rightarrow\f$ 3 central exclusive process.
  * To do so, the main operation performed here is the integration of the matrix element (given as a
- * subset of a GenericProcess object) by the GSL implementation of the *Vegas* algorithm, a
- * numerical technique for importance sampling integration developed in 1972 by G. P. Lepage\cite PeterLepage1978192.
+ * subset of a GenericProcess object) over the full available phase space.
  *
  */
 

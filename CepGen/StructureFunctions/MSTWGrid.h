@@ -16,13 +16,16 @@ namespace mstw
       /// Grid header information as parsed from the file
       struct header_t
       {
+        /// Interpolation order
         enum order_t : unsigned short { lo = 0, nlo = 1, nnlo = 2 };
+        /// Confidence level
         enum cl_t : unsigned short { cl68 = 0, cl95 = 1 };
+        /// Type of nucleon interpolated
         enum nucleon_t : unsigned short { proton = 1, neutron = 2 };
-        unsigned int magic;
-        order_t order;
-        cl_t cl;
-        nucleon_t nucleon;
+        unsigned int magic; ///< Grid file magic number
+        order_t order; ///< Interpolation order
+        cl_t cl; ///< Confidence level
+        nucleon_t nucleon; ///< Type of nucleon interpolated
       };
       /// Structure functions value at a given Q²/xbj coordinate
       struct sfval_t
@@ -47,6 +50,7 @@ namespace mstw
       Grid& operator()( double xbj, double q2 ) override;
       /// Retrieve the grid's header information
       header_t header() const { return header_; }
+      /// Grid parameterisation object
       Parameterisation params;
 
         //--- already retrieved from grid, so no need to recompute it
@@ -66,10 +70,10 @@ namespace mstw
       header_t header_;
   };
 
-  std::ostream& operator<<( std::ostream&, const Grid::sfval_t& );
-  std::ostream& operator<<( std::ostream&, const Grid::header_t::order_t& );
-  std::ostream& operator<<( std::ostream&, const Grid::header_t::cl_t& );
-  std::ostream& operator<<( std::ostream&, const Grid::header_t::nucleon_t& );
+  std::ostream& operator<<( std::ostream&, const Grid::sfval_t& ); ///< Human-readable description of a values point
+  std::ostream& operator<<( std::ostream&, const Grid::header_t::order_t& ); ///< Human-readable description of an interpolation order
+  std::ostream& operator<<( std::ostream&, const Grid::header_t::cl_t& ); ///< Human-readable description of a confidence level
+  std::ostream& operator<<( std::ostream&, const Grid::header_t::nucleon_t& ); ///< Human-readable description of a nucleon type
 }
 
 #undef DEFAULT_MSTW_GRID_PATH

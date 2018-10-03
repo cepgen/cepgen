@@ -9,6 +9,7 @@ namespace CepGen
 {
   namespace SF
   {
+    ///\f${\cal W}_{1,2}\f$ structure functions parameterisation by Fiore et al \cite Fiore:2002re
     class FioreBrasse : public StructureFunctions
     {
       public:

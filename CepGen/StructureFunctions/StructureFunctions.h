@@ -34,6 +34,7 @@ namespace CepGen
   std::ostream& operator<<( std::ostream&, const SF::Type& );
 
   class StructureFunctionsFactory;
+  /// Generic placeholder for the parameterisation of nucleon structure functions
   class StructureFunctions
   {
     public:

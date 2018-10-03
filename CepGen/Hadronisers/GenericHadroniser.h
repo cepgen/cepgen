@@ -14,7 +14,7 @@ namespace CepGen
   namespace Hadroniser
   {
     /**
-     * Class template to define any hadroniser as a general object with defined methods
+     * \brief Class template to define any hadroniser as a general object with defined methods
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date January 2014
      */
@@ -28,8 +28,11 @@ namespace CepGen
         explicit GenericHadroniser( const char* name = "unnamed_hadroniser" );
         virtual ~GenericHadroniser() {}
 
+        /// Parse a configuration string
         virtual void readString( const char* ) {}
+        /// Parse a configuration string
         virtual void readString( const std::string& param ) { readString( param.c_str() ); }
+        /// Parse a list of configuration strings
         virtual void readStrings( const std::vector<std::string>& params );
 
         virtual void init() = 0;
@@ -42,6 +45,7 @@ namespace CepGen
         /// Specify a random numbers generator seed for the hadroniser
         /// \param[in] seed A RNG seed
         virtual void setSeed( long long seed ) = 0;
+        /// Specify the process cross section, in pb
         virtual void setCrossSection( double xsec, double xsec_err ) {}
 
         /// Return a human-readable name for this hadroniser

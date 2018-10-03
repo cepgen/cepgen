@@ -14,6 +14,7 @@ namespace kmr
     public:
       struct Parameterisation {
         Parameterisation() : grid_path( DEFAULT_KMR_GRID_PATH ) {}
+        /// Location of the grid to be interpolated
         std::string grid_path;
       };
 
@@ -23,6 +24,7 @@ namespace kmr
 
       /// Compute the gluon flux
       double operator()( double x, double kt2, double mu2 ) const;
+      /// Grid parameterisation object
       Parameterisation params;
 
     public:
