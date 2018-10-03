@@ -2,21 +2,26 @@ import Config.Core as cepgen
 from Config.integrators_cff import vegas as integrator
 from Config.logger_cfi import logger
 
-from Config.pythia8_cff import pythia8 as hadroniser
-hadroniser.pythiaProcessConfiguration += (
-    # process-specific
-    '13:onMode = off', # disable muon decays
-    '24:onMode = off', # disable all W decays, but...
-    #'24:onIfAny = 11 13', # enable e-nue + mu-numu final states
-    '24:onPosIfAny = 11', # enable W- -> e- + nu_e decay
-    '24:onNegIfAny = 13', # enable W+ -> mu+ + nu_mu decay
+from Config.pythia8_cff import pythia8
+hadroniser = pythia8.clone('pythia8',
+    preConfiguration = pythia8.preConfiguration+(
+        #'PartonLevel:MPI = on',
+        #'PartonLevel:ISR = on',
+        #'PartonLevel:FSR = on',
+        'ProcessLevel:resonanceDecays = off', # disable the W decays
+    ),
+    pythiaConfiguration = (
+        # process-specific
+        '13:onMode = off', # disable muon decays
+        '24:onMode = off', # disable all W decays, but...
+        #'24:onIfAny = 11 13', # enable e-nue + mu-numu final states
+        '24:onPosIfAny = 11', # enable W- -> e- + nu_e decay
+        '24:onNegIfAny = 13', # enable W+ -> mu+ + nu_mu decay
+    ),
+    processConfiguration = pythia8.processConfiguration+('pythiaConfiguration',),
 )
-hadroniser.pythiaPreConfiguration += (
-    #'PartonLevel:MPI = on',
-    #'PartonLevel:ISR = on',
-    #'PartonLevel:FSR = on',
-    'ProcessLevel:resonanceDecays = off', # disable the W decays
-)
+#from Config.logger_cfi import logger
+#logger.enabledModules += ('Hadroniser.configure',)
 
 import Config.ktProcess_cfi as kt
 process = kt.process.clone('pptoww',

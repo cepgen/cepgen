@@ -394,18 +394,21 @@ namespace CepGen
         seed = PyLong_AsLongLong( pseed );
         CG_DEBUG( "PythonHandler:hadroniser" ) << "Hadroniser seed set to " << seed;
       }
-      if ( hadr_name == "pythia8" ) {
+      if ( hadr_name == "pythia8" )
         params_.setHadroniser( new Hadroniser::Pythia8Hadroniser( params_ ) );
-        std::vector<std::string> config;
-        auto pythia8 = dynamic_cast<Hadroniser::Pythia8Hadroniser*>( params_.hadroniser() );
-        pythia8->setSeed( seed );
-        fillParameter( hadr, "pythiaPreConfiguration", config );
-        pythia8->readStrings( config );
-        pythia8->init();
-        fillParameter( hadr, "pythiaConfiguration", config );
-        pythia8->readStrings( config );
-        fillParameter( hadr, "pythiaProcessConfiguration", config );
-        pythia8->readStrings( config );
+      auto h = params_.hadroniser();
+      if ( !h )
+        return;
+      std::vector<std::string> config;
+      h->setSeed( seed );
+      fillParameter( hadr, "preConfiguration", config );
+      h->readStrings( config );
+      h->init();
+      fillParameter( hadr, "processConfiguration", config );
+      for ( const auto& block : config ) {
+        std::vector<std::string> config_blk;
+        fillParameter( hadr, block.c_str(), config_blk );
+        h->readStrings( config_blk );
       }
     }
   }
