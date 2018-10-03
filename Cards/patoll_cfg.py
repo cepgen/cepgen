@@ -1,7 +1,7 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
 from Config.integrators_cff import vegas as integrator
-from Config.pdg_cff import PDG
+from Config.PDG_cfi import PDG
 
 process = kt.process.clone('patoff',
     processParameters = cepgen.Parameters(

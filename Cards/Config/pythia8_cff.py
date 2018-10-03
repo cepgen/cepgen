@@ -1,6 +1,6 @@
-import Config.Core as cepgen
+from containers_cfi import Module
 
-pythia8 = cepgen.Module('pythia8',
+pythia8 = Module('pythia8',
     seed = 1000,
     maxTrials = 1,
     pythiaPreConfiguration = (

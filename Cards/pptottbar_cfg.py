@@ -2,7 +2,7 @@ import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
 from Config.integrators_cff import vegas as integrator
 #from Config.pythia8_cff import pythia8 as hadroniser
-from Config.pdg_cff import PDG
+from Config.PDG_cfi import PDG
 
 from Config.logger_cfi import logger
 logger.enabledModules += ('PPtoFF.prepare',)

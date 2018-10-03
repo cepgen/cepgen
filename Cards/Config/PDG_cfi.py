@@ -1,4 +1,5 @@
 class PDG:
+    '''Named list of PDG identifiers'''
     down      = 1
     up        = 2
     strange   = 3
