@@ -14,7 +14,7 @@ DECLARE_FORTRAN_SUBROUTINE( nucl_to_ff )
 BEGIN_FORTRAN_PROCESSES_ENUM                                                                     //
 // START THE MAPPING name -> Fortran SUBROUTINE                                                  //
 // usage:                                                                                        //
-//  REGISTER_FORTRAN_PROCESS( "name", subroutine_name_, "description )                           //
+//  REGISTER_FORTRAN_PROCESS( "name", subroutine_name, "description )                            //
 //=================================================================================================
 
 REGISTER_FORTRAN_PROCESS( "patoff", nucl_to_ff, "pA ↝ (g/ɣ)ɣ → f⁺f¯" )
