@@ -13,26 +13,34 @@ namespace CepGen
 {
   namespace SF
   {
-    /// Generic, tree-level import of structure functions from an external PDFs grid
+    /// Generic partonic level perturbative structure functions built from an external PDFs grid
     class LHAPDF : public StructureFunctions
     {
       public:
+        /// Model parameterisation
         struct Parameterisation
         {
+          /// Standard (usual CTEQ6) constructor
           Parameterisation();
-          static Parameterisation cteq6();
+          /// Number of quark flavours considered in the SF building
           unsigned short num_flavours;
+          /// String-type PDF identifier (default)
           std::string pdf_set;
+          /// Integer-type PDF identifier (if no string version is provided)
           unsigned long pdf_code;
+          /// PDF set used
           unsigned short pdf_member;
+          /// Quarks types
           enum class Mode { full = 0, valence = 1, sea = 2 };
+          /// Quarks types considered in the SF building
           Mode mode;
         };
-
-        explicit LHAPDF( const Parameterisation& param = Parameterisation::cteq6() );
+        /// Build a calculator from its Parameterisation object
+        explicit LHAPDF( const Parameterisation& param = Parameterisation() );
+        /// Build a calculator from a set, its member, and the contributing quarks
         explicit LHAPDF( const char* set, unsigned short member = 0, const Parameterisation::Mode& mode = Parameterisation::Mode::full );
         LHAPDF& operator()( double xbj, double q2 ) override;
-
+        /// Parameterisation used in this SFs calculator
         Parameterisation params;
 
       private:

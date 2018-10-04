@@ -10,26 +10,70 @@
 
 extern "C"
 {
+  /// General physics constants
   struct Constants {
-    double m_p, units, pi, alpha_em;
+    double m_p; ///< Proton mass
+    double units; ///< Conversion factor GeV\f${}^2\to\f$ barn
+    double pi; ///< \f$\pi\f$
+    double alpha_em; ///< Electromagnetic coupling constant
   };
+  /// Generic run parameters
   struct Parameters {
-    int icontri, iflux1, iflux2, imethod, sfmod, pdg_l, a_nuc1, z_nuc1, a_nuc2, z_nuc2;
-    double inp1, inp2;
+    int icontri; ///< Kinematics mode
+    int iflux1; ///< Type of kT-factorised flux for first incoming parton
+    int iflux2; ///< Type of kT-factorised flux for second incoming parton
+    int imethod; ///< Computation method for matrix element
+    int sfmod; ///< Structure functions modelling
+    int pdg_l; ///< Central system PDG id
+    int a_nuc1; ///< First beam mass number
+    int z_nuc1; ///< First beam atomic number
+    int a_nuc2; ///< Second beam mass number
+    int z_nuc2; ///< Second beam atomic number
+    double inp1; ///< First beam momentum, in GeV/c
+    double inp2; ///< Second beam momentum, in GeV/c
   };
+  /// Kinematics properties of the kT-factorised process
   struct KtKinematics {
-   double q1t, q2t, phiq1t, phiq2t, y1, y2, ptdiff, phiptdiff, m_x, m_y;
+   double q1t; ///< Transverse momentum of the first incoming parton
+   double q2t; ///< Transverse momentum of the second incoming parton
+   double phiq1t; ///< Azimutal angle of the first incoming parton
+   double phiq2t; ///< Azimutal angle of the second incoming parton
+   double y1; ///< First incoming parton rapidity
+   double y2; ///< Second incoming parton rapidity
+   double ptdiff; ///< Central system pT balance
+   double phiptdiff; ///< Central system azimutal angle difference
+   double m_x; ///< Invariant mass for the first diffractive state
+   double m_y; ///< Invariant mass for the second diffractive state
   };
+  /// Phase space cuts for event kinematics
   struct KinematicsCuts {
-    int ipt, iene, ieta, iinvm, iptsum, idely;
-    double pt_min, pt_max, ene_min, ene_max, eta_min, eta_max;
-    double invm_min, invm_max, ptsum_min, ptsum_max;
-    double dely_min, dely_max;
+    int ipt; ///< Switch for cut on single particle transverse momentum
+    int iene; ///< Switch for cut on single particle energy
+    int ieta; ///< Switch for cut on single particle pseudo-rapidity
+    int iinvm; ///< Switch for cut on central system invariant mass
+    int iptsum; ///< Switch for cut on central system transverse momentum
+    int idely; ///< Switch for cut on rapididty difference
+    double pt_min; ///< Minimal single particle transverse momentum
+    double pt_max; ///< Maximal single particle transverse momentum
+    double ene_min; ///< Minimal single particle energy
+    double ene_max; ///< Maximal single particle energy
+    double eta_min; ///< Minimal single particle pseudo-rapidity
+    double eta_max; ///< Maximal single particle pseudo-rapidity
+    double invm_min; ///< Minimal central system invariant mass
+    double invm_max; ///< Maximal central system invariant mass
+    double ptsum_min; ///< Minimal central system transverse momentum
+    double ptsum_max; ///< Maximal central system transverse momentum
+    double dely_min; ///< Minimal rapidity difference for central system
+    double dely_max; ///< Maximal rapidity difference for central system
   };
+  /// Single event kinematics
   struct EventKinematics {
-    double px[4], py[4];
-    int nout, idum, pdg[4];
-    double pc[4][4];
+    double px[4]; ///< 4-momentum of first outgoing proton state
+    double py[4]; ///< 4-momentum of second outgoing proton state
+    int nout; ///< Number of particles in central system
+    int idum; ///< Placeholder for blocks alignment
+    int pdg[4]; ///< PDG ids of all particles in central system
+    double pc[4][4]; ///< 4-momenta of all particles in central system
   };
 
   extern Constants constants_;

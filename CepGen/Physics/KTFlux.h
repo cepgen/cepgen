@@ -8,6 +8,7 @@ namespace CepGen
 {
   class StructureFunctions;
   class HeavyIon;
+  /// Collection of fundamental constants for kT fluxes definition
   struct KTFluxParameters
   {
     static const double kMinKTFlux, kMP, kMP2;
@@ -23,12 +24,18 @@ namespace CepGen
     HI_Photon_Elastic = 100
   };
   std::ostream& operator<<( std::ostream&, const KTFlux& );
-  /// Get the flux at a given parton x/kT
+  /// \brief Compute the flux for a given parton x/kT
+  /// \param[in] type Flux modelling
   /// \param[in] x Parton momentum fraction
   /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming parton
   /// \param[in] sf Structure functions evaluator
   /// \param[in] mx Outgoing diffractive proton mass
   double ktFlux( const KTFlux& type, double x, double kt2, StructureFunctions& sf, double mx = KTFluxParameters::kMP );
+  /// \brief Compute the flux (from heavy ion) for a given parton x/kT
+  /// \param[in] type Flux modelling
+  /// \param[in] x Parton momentum fraction
+  /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming parton
+  /// \param[in] hi Heavy ion properties
   double ktFlux( const KTFlux& type, double x, double kt2, const HeavyIon& hi );
 }
 

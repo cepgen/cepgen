@@ -103,8 +103,8 @@ namespace CepGen
         std::shared_ptr<Event> last_event;
 
       protected:
-        static const double mp_; ///< Proton mass, in GeV/c²
-        static const double mp2_; ///< Squared proton mass, in GeV²/c⁴
+        static const double mp_; ///< Proton mass, in GeV/c\f${}^2\f$
+        static const double mp2_; ///< Squared proton mass, in GeV\f${}^2\f$/c\f${}^4\f$
 
         /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
         void setEventContent( const IncomingState& ini, const OutgoingState& fin );

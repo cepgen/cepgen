@@ -8,6 +8,7 @@
 namespace CepGen
 {
   extern volatile int gSignal;
+  /// Exception raised when the user terminates the process
   struct RunAbortedException : Exception
   {
     using Exception::Exception;
@@ -15,6 +16,7 @@ namespace CepGen
   };
 }
 
+/// Object handling an user-driven process abortion
 class AbortHandler
 {
   public:
@@ -24,6 +26,7 @@ class AbortHandler
       action_.sa_flags = flags;
       init();
     }
+    /// Switch on/off multithreading capabilities
     void setMT( bool mt_on = true ) {
       if ( mt_on )
         action_.sa_sigaction = handle_ctrl_c_mt;

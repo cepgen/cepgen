@@ -27,10 +27,10 @@ namespace mstw
         cl_t cl; ///< Confidence level
         nucleon_t nucleon; ///< Type of nucleon interpolated
       };
-      /// Structure functions value at a given Q²/xbj coordinate
+      /// Structure functions value at a given \f$Q^2/x_{\rm Bj}\f$ coordinate
       struct sfval_t
       {
-        float q2; ///< four-momentum transfer, in GeV²
+        float q2; ///< four-momentum transfer, in GeV\f${}^2\f$
         float xbj; ///< Bjorken's scaling variable
         double f2; ///< Transverse structure function value
         double fl; ///< Longitudinal structure function value

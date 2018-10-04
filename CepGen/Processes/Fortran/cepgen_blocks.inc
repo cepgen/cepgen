@@ -1,3 +1,4 @@
+      !> \file cepgen_blocks.inc
 c     ================================================================
 c     F77 process-to-CepGen helper
 c     > this header file defines a set of common blocks useful for
@@ -6,8 +7,7 @@ c     > to a mother CepGen instance
 c     ================================================================
 
 c     =================================================================
-c     collection of fundamental physics constants
-c     =================================================================
+      !> collection of fundamental physics constants
       common/constants/am_p,units,pi,alpha_em
       double precision am_p,units,pi,alpha_em
 

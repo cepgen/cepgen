@@ -89,7 +89,8 @@ namespace CepGen
       const double zeta = log( 25.*q2 );
       const double xitmp = ( w < 2.5 ) ? theta( xth, q2 ) : theta( xbj, q2 );
       const double tmp = 0.041*xitmp/zeta + 0.592/q2 - 0.331/( 0.09+q2*q2 );
-      if ( w < 2.5 ) return tmp * pow( ( 1.-xbj )/( 1.-xth ), 3 );
+      if ( w < 2.5 )
+        return tmp * pow( ( 1.-xbj )/( 1.-xth ), 3 );
       return tmp;
     }
 

@@ -7,9 +7,11 @@ namespace CepGen
 {
   namespace SF
   {
+    /// \f$F_{1/2/E/M}\f$ modelling by Suri and Yennie \cite Suri:1971yx
     class SuriYennie : public StructureFunctions
     {
       public:
+        /// Collection of parameterisation-dependent couplings
         struct Parameterisation {
           // values extracted from experimental fits
           static Parameterisation standard();
@@ -21,7 +23,9 @@ namespace CepGen
         explicit SuriYennie( const SuriYennie::Parameterisation& param = SuriYennie::Parameterisation::standard() );
         SuriYennie& operator()( double xbj, double q2 ) override;
 
-        double F1, FE, FM;
+        double F1;
+        double FE; ///< Electric proton form factor
+        double FM; ///< Magnetic proton form factor
       private:
         Parameterisation params_;
     };

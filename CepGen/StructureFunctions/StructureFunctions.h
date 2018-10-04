@@ -8,6 +8,7 @@
 
 namespace CepGen
 {
+  /// Structure functions modelling scope
   namespace SF
   {
     /// Proton structure function to be used in the outgoing state description
@@ -57,13 +58,13 @@ namespace CepGen
       /// Build a SF parameterisation for a given type
       static StructureFunctions builder( const SF::Type& );
 
-      /// Compute all relevant structure functions for a given (xbj,Q²) couple
+      /// Compute all relevant structure functions for a given \f$(x_{\rm Bj},Q^2)\f$ couple
       virtual StructureFunctions& operator()( double xbj, double q2 ) { return *this; }
       /// Compute the longitudinal structure function for a given point
       virtual void computeFL( double xbj, double q2, const SF::SigmaRatio& ratio = SF::E143Ratio() );
       /// Compute the longitudinal structure function for a given point
       virtual void computeFL( double xbj, double q2, double r );
-      /// Compute the F₁ structure function for a given point
+      /// Compute the \f$F_1\f$ structure function for a given point
       double F1( double xbj, double q2 ) const;
 
       /// Interpolation type of structure functions
@@ -73,9 +74,9 @@ namespace CepGen
 
     protected:
       virtual std::string description() const; ///< Human-readable description of this SF set
-      static const double mp_; ///< Proton mass, in GeV/c²
-      static const double mp2_; ///< Squared proton mass, in GeV²/c⁴
-      std::pair<double,double> old_vals_; ///< Last (xbj,Q²) couple computed
+      static const double mp_; ///< Proton mass, in GeV/c\f${}^2\f$
+      static const double mp2_; ///< Squared proton mass, in GeV\f${}^2\f$/c\f${}^4\f$
+      std::pair<double,double> old_vals_; ///< Last \f$(x_{\rm Bj},Q^2)\f$ couple computed
 
     private:
       std::string name_;

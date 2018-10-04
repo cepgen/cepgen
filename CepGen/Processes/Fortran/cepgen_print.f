@@ -1,4 +1,6 @@
+      !> \file cepgen_print.f
       subroutine cepgen_print
+      !> Print useful run information in standard stream
       implicit none
       include 'cepgen_blocks.inc'
       logical params_shown

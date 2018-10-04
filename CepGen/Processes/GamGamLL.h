@@ -10,12 +10,9 @@ namespace CepGen
   {
     /**
      * Full class of methods and objects to compute the full analytic matrix element
-     * \cite Vermaseren1983347 for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$ process
+     * \cite Vermaseren:1982cz for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$ process
      * according to a set of kinematic constraints provided for the incoming and
      * outgoing particles (the Kinematics object).
-     * The particle roles in this process are defined as following: \n
-     * \image latex lpair_kinematics.pdf Detailed particle roles in the two-photon process as defined by the @a GamGamLL object. The incoming protons/electrons are denoted by a role 1, and 2, as the outgoing protons/protons remnants/ electrons carry the indices 3 and 5. The two outgoing leptons have the roles 6 and 7, while the lepton/antilepton distinction is done randomly (thus, the arrow convention is irrelevant here).
-     *
      * The \a f function created by this Process child has its \a _ndim -dimensional
      * coordinates mapped as :
      * - 0 = \f$t_1\f$, first incoming photon's virtuality
@@ -23,10 +20,10 @@ namespace CepGen
      * - 2 = \f$s_2\f$ mapping
      * - 3 = yy4 = \f$\cos\left(\pi x_3\right)\f$ definition
      * - 4 = \f$w_4\f$, the two-photon system's invariant mass
-     * - 5 = xx6 = \f$\frac{1}{2}\left(1-\cos\theta^{\rm CM}_6\right)\f$ definition (3D rotation of the first outgoing lepton with respect to the two-photon centre-of-mass system). If the @a nm_ optimisation flag is set this angle coefficient value becomes
+     * - 5 = xx6 = \f$\frac{1}{2}\left(1-\cos\theta^{\rm CM}_6\right)\f$ definition (3D rotation of the first outgoing lepton with respect to the two-photon centre-of-mass system). If the \a nm_ optimisation flag is set this angle coefficient value becomes
      *   \f[\frac{1}{2}\left(\frac{a_{\rm map}}{b_{\rm map}}\frac{\beta-1}{\beta+1}+1\right)\f]
      *   with \f$a_{\rm map}=\frac{1}{2}\left(w_4-t_1-t_2\right)\f$, \f$b_{\rm map}=\frac{1}{2}\sqrt{\left(\left(w_4-t_1-t_2\right)^2-4t_1t_2\right)\left(1-4\frac{w_6}{w_4}\right)}\f$, and \f$\beta=\left(\frac{a_{\rm map}+b_{\rm map}}{a_{\rm map}-b_{\rm map}}\right)^{2x_5-1}\f$
-     *   and the \a fJacobian element is scaled by a factor \f$\frac{1}{2}\frac{\left(a_{\rm map}^2-b_{\rm map}^2\cos^2\theta^{\rm CM}_6\right)}{a_{\rm map}b_{\rm map}}\log\left(\frac{a_{\rm map}+b_{\rm map}}{a_{\rm map}-b_{\rm map}}\right)\f$
+     *   and the Jacobian element is scaled by a factor \f$\frac{1}{2}\frac{\left(a_{\rm map}^2-b_{\rm map}^2\cos^2\theta^{\rm CM}_6\right)}{a_{\rm map}b_{\rm map}}\log\left(\frac{a_{\rm map}+b_{\rm map}}{a_{\rm map}-b_{\rm map}}\right)\f$
      * - 6 = _phicm6_, or \f$\phi_6^{\rm CM}\f$ the rotation angle of the dilepton system in the centre-of-mass
      *   system
      * - 7 = \f$x_q\f$, \f$w_X\f$ mappings, as used in the single- and double-dissociative
@@ -109,15 +106,15 @@ namespace CepGen
           /// squared mass of the outgoing leptons
           double Ml2_;
           /// \f$\delta_2=m_1^2-m_2^2\f$ as defined in Vermaseren's paper
-          /// \cite Vermaseren1983347 for the full definition of this quantity
+          /// \cite Vermaseren:1982cz for the full definition of this quantity
           double w12_;
 
           /// \f$\delta_1=m_3^2-m_1^2\f$ as defined in Vermaseren's paper
-          /// \cite Vermaseren1983347 for the full definition of this quantity
+          /// \cite Vermaseren:1982cz for the full definition of this quantity
           double w31_;
           double dw31_;
           /// \f$\delta_4=m_5^2-m_2^2\f$ as defined in Vermaseren's paper
-          /// \cite Vermaseren1983347 for the full definition of this quantity
+          /// \cite Vermaseren:1982cz for the full definition of this quantity
           double w52_;
           double dw52_;
         };
@@ -157,7 +154,7 @@ namespace CepGen
         double gram_;
         double dd1_, dd2_, dd3_;
         /// \f$\delta_5=m_4^2-t_1\f$ as defined in Vermaseren's paper
-        /// \cite Vermaseren1983347 for the full definition of this quantity
+        /// \cite Vermaseren:1982cz for the full definition of this quantity
         double dd4_;
         double dd5_;
         /**
@@ -199,18 +196,18 @@ namespace CepGen
 
       private:
         /**
-         * Define modified variables of integration to avoid peaks integrations (see @cite Vermaseren1983347 for details)
+         * Define modified variables of integration to avoid peaks integrations (see \cite Vermaseren:1982cz for details)
          * Return a set of two modified variables of integration to maintain the stability of the integrant. These two new variables are :
          * - \f$y_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\f$ the new variable
          * - \f$\mathrm dy_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\log\frac{x_{min}}{x_{max}}\f$, the new variable's differential form
-         * @brief Redefine the variables of integration in order to avoid the strong peaking of the integrant.
-         * @param[in] expo Exponant
-         * @param[in] xmin Minimal value of the variable
-         * @param[in] xmax Maximal value of the variable
-         * @param[out] out The new variable definition
-         * @param[out] dout The differential variant of the new variable definition
-         * @param[in] var_name The variable name
-         * @note This method overrides the set of `mapxx` subroutines in ILPAIR, with a slight difference according to the sign of the
+         * \brief Redefine the variables of integration in order to avoid the strong peaking of the integrant.
+         * \param[in] expo Exponant
+         * \param[in] xmin Minimal value of the variable
+         * \param[in] xmax Maximal value of the variable
+         * \param[out] out The new variable definition
+         * \param[out] dout The differential variant of the new variable definition
+         * \param[in] var_name The variable name
+         * \note This method overrides the set of `mapxx` subroutines in ILPAIR, with a slight difference according to the sign of the
          *  \f$\mathrm dy_{out}\f$ parameter :
          *  - left unchanged :
          * > `mapw2`, `mapxq`, `mapwx`, `maps2`
@@ -226,4 +223,3 @@ namespace CepGen
 }
 
 #endif
-

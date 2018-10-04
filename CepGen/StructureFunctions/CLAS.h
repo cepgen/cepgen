@@ -10,10 +10,8 @@ namespace CepGen
 {
   namespace SF
   {
-    /// CLAS parameterisation developed to describe nucleon data at \f$Q^2 > 0.5\f$ GeV² and \f$x_{Bj} > 0.15\f$.
-    /// \note This code was provided on 2016-04-13 by Silvano Simula and
-    ///  reflects the parametrisation used in hep-ph/0301204 (CLAS) and
-    ///  described in hep-ph/9901360.
+    /// \brief CLAS parameterisation for nucleon data at \f$Q^2\f$ > 0.5 GeV\f${}^2\f$ and \f$x_{\rm Bj}\f$ > 0.15
+    /// \note This code was provided on 2016-04-13 by Silvano Simula and reflects the parameterisation used in \cite Osipenko:2003bu (CLAS) and described in \cite Ricco:1998yr.
     class CLAS : public StructureFunctions
     {
       public:
@@ -53,7 +51,7 @@ namespace CepGen
         std::pair<double,double> resbkg( double q2, double w ) const;
         /// \brief Method to evaluate the deep inelastic structure function
         /// \f$F_{2}^{N}\f$ using the SLAC parameterisation
-        /// \param[in] q2 squared four-momentum transfer in GeV²
+        /// \param[in] q2 squared four-momentum transfer in GeV\f${}^2\f$
         /// \param[in] xbj Bjorken scaling variable
         /// \return \f$F_{2}^{N}\f$
         double f2slac( double xbj, double q2 ) const;

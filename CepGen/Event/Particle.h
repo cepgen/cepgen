@@ -111,19 +111,19 @@ namespace CepGen
           inline double pz() const { return pz_; }
           /// Transverse momentum (in GeV)
           double pt() const;
-          /// Squared transverse momentum (in GeV²)
+          /// Squared transverse momentum (in GeV\f${}^2\f$)
           double pt2() const;
           /// 4-vector of double precision floats (in GeV)
           const std::vector<double> pVector() const;
           /// 3-momentum norm (in GeV)
           inline double p() const { return p_; }
-          /// Squared 3-momentum norm (in GeV²)
+          /// Squared 3-momentum norm (in GeV\f${}^2\f$)
           inline double p2() const { return p_*p_; }
           /// Energy (in GeV)
           inline double energy() const { return energy_; }
-          /// Squared energy (in GeV²)
+          /// Squared energy (in GeV\f${}^2\f$)
           inline double energy2() const { return energy_*energy_; }
-          /// Squared mass (in GeV²) as computed from its energy and momentum
+          /// Squared mass (in GeV\f${}^2\f$) as computed from its energy and momentum
           inline double mass2() const { return energy2()-p2(); }
           /// Mass (in GeV) as computed from its energy and momentum
           /// \note Returns \f$-\sqrt{|E^2-\mathbf{p}^2|}<0\f$ if \f$\mathbf{p}^2>E^2\f$
@@ -235,18 +235,18 @@ namespace CepGen
       float helicity() const { return helicity_; }
       /// Set the helicity of the particle
       void setHelicity( float heli ) { helicity_ = heli; }
-      /// Particle mass in GeV/c²
+      /// Particle mass in GeV/c\f${}^2\f$
       /// \return Particle's mass
       inline double mass() const { return mass_; };
       /// Compute the particle mass
       /// \param[in] off_shell Allow the particle to be produced off-shell?
       /// \note This method ensures that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
       void computeMass( bool off_shell = false );
-      /// Set the particle mass, in GeV/c²
-      /// \param m Mass in GeV/c²
+      /// Set the particle mass, in GeV/c\f${}^2\f$
+      /// \param m Mass in GeV/c\f${}^2\f$
       /// \note This method ensures that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
       void setMass( double m = -1. );
-      /// Particle squared mass, in GeV²/c⁴
+      /// Particle squared mass, in GeV\f${}^2\f$/c\f${}^4\f$
       inline double mass2() const { return mass_*mass_; };
       /// Retrieve the momentum object associated with this particle
       inline Momentum& momentum() { return momentum_; }
@@ -270,7 +270,7 @@ namespace CepGen
       void setEnergy( double e = -1. );
       /// Get the particle's energy, in GeV
       double energy() const;
-      /// Get the particle's squared energy, in GeV²
+      /// Get the particle's squared energy, in GeV\f${}^2\f$
       inline double energy2() const { return energy()*energy(); };
       /// Is this particle a valid particle which can be used for kinematic computations?
       bool valid();
@@ -309,7 +309,7 @@ namespace CepGen
       short charge_sign_;
       /// Momentum properties handler
       Momentum momentum_;
-      /// Mass, in GeV/c²
+      /// Mass, in GeV/c\f${}^2\f$
       double mass_;
       /// Helicity
       float helicity_;

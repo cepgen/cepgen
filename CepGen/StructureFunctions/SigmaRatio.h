@@ -7,20 +7,22 @@ namespace CepGen
 {
   namespace SF
   {
+    /// A generic modelling of the \f$R=\sigma_L/\sigma_T\f$ ratio
     class SigmaRatio
     {
       public:
         SigmaRatio() {}
-        /// Extract the longitudinal/transverse cross section ratio and associated error for a given Q²/\f$x_{\rm Bj}\f$ couple.
+        /// Extract the longitudinal/transverse cross section ratio and associated error for a given \f$(x_{\rm Bj},Q^2)\f$ couple.
         virtual double operator()( double xbj, double q2, double& err ) const = 0;
 
       protected:
-        /// \f$x_{\rm Bj}\f$ dependence for QCD-matching of R at high-Q²
+        /// \f$x_{\rm Bj}\f$ dependence for QCD-matching of R at high-\f$Q^2\f$
         double theta( double xbj, double q2 ) const;
-        static const double mp_, mp2_;
+        static const double mp_; ///< Proton mass, in GeV/c\f${}^2\f$
+        static const double mp2_; ///< Squared proton mass, in GeV\f${}^2\f$/c\f${}^4\f$
     };
 
-    // Reference: arXiv:hep-ex/9808028
+    /// E143 experimental R measurement \cite Abe:1998ym
     class E143Ratio : public SigmaRatio
     {
       public:
@@ -37,8 +39,9 @@ namespace CepGen
         Parameterisation params_;
     };
 
-    /// \warning valid for Q² > 0.3 GeV²
-    // Reference: Phys.Lett. B 250 (1990) 193-198 (https://inspirehep.net/record/296980)
+    /** \brief SLAC experimental R measurement \cite Whitlow:1990gk
+     * \warning valid for \f$Q^2\f$ > 0.3 GeV\f${}^2\f$
+     */
     class R1990Ratio: public SigmaRatio
     {
       public:
@@ -55,6 +58,7 @@ namespace CepGen
         Parameterisation params_;
     };
 
+    /// CLAS experimental R measurement
     class CLASRatio : public SigmaRatio
     {
       public:
@@ -62,8 +66,7 @@ namespace CepGen
         double operator()( double xbj, double q2, double& err ) const override;
     };
 
-    /// Sibirtsev & Blunden parameterisation of the R ratio
-    // Reference: Phys.Rev. C 88,065202 (2013)
+    /// Sibirtsev & Blunden parameterisation of the R ratio \cite Sibirtsev:2013cga
     class SBRatio : public SigmaRatio
     {
       public:
