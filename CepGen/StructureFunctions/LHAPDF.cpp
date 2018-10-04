@@ -12,17 +12,6 @@ namespace CepGen
       num_flavours( 4 ), pdf_set( "cteq6" ), pdf_code( 0l ), pdf_member( 0 ), mode( Mode::full )
     {}
 
-    LHAPDF::Parameterisation
-    LHAPDF::Parameterisation::cteq6()
-    {
-      Parameterisation p;
-      p.num_flavours = 4;
-      p.pdf_set = "cteq6";
-      p.pdf_member = 0;
-      p.mode = Mode::full;
-      return p;
-    }
-
     LHAPDF::LHAPDF( const Parameterisation& param ) :
       StructureFunctions( Type::LHAPDF ), params( param ), initialised_( false )
     {}
