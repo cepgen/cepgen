@@ -52,7 +52,6 @@ namespace CepGen
         undefined = -1, debug, verbatim, info, warning, error, fatal };
 
       /// Generic constructor
-      /// \param[in] from method invoking the exception
       /// \param[in] module exception classifier
       /// \param[in] type exception type
       /// \param[in] id exception code (useful for logging)
@@ -176,13 +175,17 @@ namespace CepGen
       /// Integer exception number
       int error_num_;
   };
-  /// Placeholder for debugging messages if logging threshold is not reached
+  /// \brief Placeholder for debugging messages if logging threshold is not reached
   /// \date Apr 2018
   struct NullStream
   {
+    /// Construct from a module name
     explicit NullStream( const char* ) {}
+    /// Construct from a module name
     explicit NullStream( const std::string& ) {}
+    /// Copy constructor
     NullStream( const Exception& ) {}
+    /// Stream operator (null and void)
     template<class T> NullStream& operator<<( const T& ) { return *this; }
   };
 }

@@ -11,7 +11,9 @@ namespace CepGen
   /// Collection of fundamental constants for kT fluxes definition
   struct KTFluxParameters
   {
-    static const double kMinKTFlux, kMP, kMP2;
+    static const double kMinKTFlux; ///< Minimal value taken for a kT-factorised flux
+    static const double kMP; ///< Proton mass, un GeV/c\f${}^2\f$
+    static const double kMP2; ///< Squared proton mass
   };
   /// Type of incoming partons fluxes
   enum class KTFlux
@@ -23,6 +25,7 @@ namespace CepGen
     P_Gluon_KMR = 20,
     HI_Photon_Elastic = 100
   };
+  /// Human version of the flux name
   std::ostream& operator<<( std::ostream&, const KTFlux& );
   /// \brief Compute the flux for a given parton x/kT
   /// \param[in] type Flux modelling

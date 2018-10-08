@@ -34,16 +34,13 @@ namespace CepGen
     class GamGamLL : public GenericProcess
     {
       public:
-        /// Class constructor ; set the mandatory parameters before integration and events generation
-        /// \param[in] nopt Optimisation (legacy from LPAIR)
+        /// \brief Class constructor: set the mandatory parameters before integration and events generation
+        /// \param[in] params General process parameters (nopt = Optimisation, legacy from LPAIR)
         explicit GamGamLL( const ParametersList& params = ParametersList() );
         ProcessPtr clone() const override { return ProcessPtr( new GamGamLL( *this ) ); }
 
         void addEventContent() override;
         void beforeComputeWeight() override;
-        /// Compute the process' weight for the given point
-        /// \return \f$\mathrm d\sigma(\mathbf x)(\gamma\gamma\to\ell^{+}\ell^{-})\f$,
-        ///   the differential cross-section for the given point in the phase space.
         double computeWeight() override;
         unsigned int numDimensions() const override;
         void setKinematics( const Kinematics& cuts ) override;
@@ -56,8 +53,8 @@ namespace CepGen
         /// \return Mass of the outgoing proton remnant
         double computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dw );
         /// Set all the kinematic variables for the outgoing proton remnants, and prepare the hadronisation
-        /// \param[in] part_ Particle to "prepare" for the hadronisation to be performed
-        void prepareHadronisation( Particle *part_ );
+        /// \param[in] part Particle to "prepare" for the hadronisation to be performed
+        void prepareHadronisation( Particle *part );
 
       private:
         /**
@@ -200,12 +197,11 @@ namespace CepGen
          * Return a set of two modified variables of integration to maintain the stability of the integrant. These two new variables are :
          * - \f$y_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\f$ the new variable
          * - \f$\mathrm dy_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\log\frac{x_{min}}{x_{max}}\f$, the new variable's differential form
-         * \brief Redefine the variables of integration in order to avoid the strong peaking of the integrant.
+         * \brief Redefine the variables of integration in order to avoid the strong peaking of the integrant
          * \param[in] expo Exponant
-         * \param[in] xmin Minimal value of the variable
-         * \param[in] xmax Maximal value of the variable
+         * \param[in] lim Min/maximal value of the variable
          * \param[out] out The new variable definition
-         * \param[out] dout The differential variant of the new variable definition
+         * \param[out] dout The bin width the new variable definition
          * \param[in] var_name The variable name
          * \note This method overrides the set of `mapxx` subroutines in ILPAIR, with a slight difference according to the sign of the
          *  \f$\mathrm dy_{out}\f$ parameter :
@@ -214,7 +210,7 @@ namespace CepGen
          *  - opposite sign :
          * > `mapt1`, `mapt2`
          */
-        void map( double expo, const Limits& lim, double& out, double& dout, const std::string& var_name="" );
+        void map( double expo, const Limits& lim, double& out, double& dout, const std::string& var_name = "" );
         void mapla( double y, double z, int u, double xm, double xp, double& x, double& d );
         /// Compute the electric/magnetic form factors for the two considered \f$Q^{2}\f$ momenta transfers
         void formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const;

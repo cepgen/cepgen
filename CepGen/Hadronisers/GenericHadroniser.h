@@ -22,7 +22,9 @@ namespace CepGen
     class GenericHadroniser
     {
       public:
+        /// Write out all hadroniser attributes in output stream
         friend std::ostream& operator<<( std::ostream& os, const GenericHadroniser& hadr );
+        /// Write out all hadroniser attributes in output stream
         friend std::ostream& operator<<( std::ostream& os, const GenericHadroniser* hadr );
 
         /// Default constructor for an undefined hadroniser
@@ -35,18 +37,19 @@ namespace CepGen
         virtual void readString( const std::string& param ) { readString( param.c_str() ); }
         /// Parse a list of configuration strings
         virtual void readStrings( const std::vector<std::string>& params );
-
+        /// Initialise the event hadroniser before its running
         virtual void init() = 0;
-        /// Hadronise a full event
-        /// \param[inout] ev Event to hadronise
-        /// \param[inout] weight Event weight after hadronisation
-        /// \param[in] full Perform the full state hadronisation (incl. remnants fragmentation)
-        /// \return Boolean stating whether or not the hadronisation occured successfully
+        /** \brief Hadronise a full event
+         * \param[inout] ev Event to hadronise
+         * \param[inout] weight Event weight after hadronisation
+         * \param[in] full Perform the full state hadronisation (incl. remnants fragmentation)
+         * \return Boolean stating whether or not the hadronisation occured successfully
+         */
         virtual bool run( Event& ev, double& weight, bool full ) = 0;
         /// Specify the process cross section, in pb
         virtual void setCrossSection( double xsec, double xsec_err ) {}
 
-        /// Specify a random numbers generator seed for the hadroniser
+        /// \brief Specify a random numbers generator seed for the hadroniser
         /// \param[in] seed A RNG seed
         void setSeed( long long seed ) { seed_ = seed; }
 
@@ -56,6 +59,7 @@ namespace CepGen
       protected:
         /// Name of the hadroniser
         std::string name_;
+        /// Random numbers generator seed for the hadroniser
         long long seed_;
         /// Maximal number of trials for the hadronisation of the proton(s) remnants
         unsigned short max_trials_;
