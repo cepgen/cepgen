@@ -198,9 +198,8 @@ namespace CepGen
         throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
       for ( Py_ssize_t i = 0; i < PyTuple_Size( pobj ); ++i ) {
         PyObject* pit = PyTuple_GetItem( pobj, i ); // borrowed
-        if ( !is<double>( pit ) )
-          continue;
-        out.emplace_back( get<double>( pit ) );
+        if ( is<double>( pit ) )
+          out.emplace_back( get<double>( pit ) );
       }
     }
 

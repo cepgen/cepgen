@@ -27,7 +27,7 @@ namespace CepGen
     logarithmic = 1,
     square = 2
   };
-  /// A generic class for D-dimensional grid interpolation
+  /// \brief A generic class for D-dimensional grid interpolation
   /// \param N Number of values handled per point
   template <size_t D,size_t N=1>
   class GridHandler

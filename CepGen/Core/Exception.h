@@ -39,7 +39,7 @@
 
 namespace CepGen
 {
-  /// A simple exception handler
+  /// \brief A simple exception handler
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date 24 Mar 2015
   class Exception : public std::exception

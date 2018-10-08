@@ -251,11 +251,9 @@ namespace CepGen
         ptot += d.momentum();
         if ( mothers.size() < 2 )
           continue;
-        for ( const auto& moth : mothers ) {
-          if ( moth == part.id() )
-            continue;
-          ptot -= at( moth ).momentum();
-        }
+        for ( const auto& moth : mothers )
+          if ( moth != part.id() )
+            ptot -= at( moth ).momentum();
       }
       const double mass_diff = ( ptot-part.momentum() ).mass();
       if ( fabs( mass_diff ) > minimal_precision_ ) {

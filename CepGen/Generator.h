@@ -88,10 +88,12 @@ namespace CepGen
        * \param[out] err The absolute integration error on the computed cross-section, in pb
        */
       void computeXsection( double& xsec, double& err );
+      /// Integrate the functional over the whole phase space
+      void integrate();
       /// Last cross section computed by the generator
-      double crossSection() const { return cross_section_; }
+      double crossSection() const { return result_; }
       /// Last error on the cross section computed by the generator
-      double crossSectionError() const { return cross_section_error_; }
+      double crossSectionError() const { return result_error_; }
 
       //void terminate();
       /// Generate one single event given the phase space computed by Vegas in the integration step
@@ -111,9 +113,9 @@ namespace CepGen
       /// Vegas instance which will integrate the function
       std::unique_ptr<Integrator> integrator_;
       /// Cross section value computed at the last integration
-      double cross_section_;
+      double result_;
       /// Error on the cross section as computed in the last integration
-      double cross_section_error_;
+      double result_error_;
   };
 }
 

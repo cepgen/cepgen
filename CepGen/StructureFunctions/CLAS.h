@@ -15,10 +15,14 @@ namespace CepGen
     class CLAS : public StructureFunctions
     {
       public:
+        /// List of steering parameters for a physics case
         struct Parameterisation
         {
+          /// Standard parameterisation of a parton-from-neutron emission
           static Parameterisation standard_neutron();
+          /// Standard parameterisation of a parton-from-proton emission
           static Parameterisation standard_proton();
+          /// Standard parameterisation of a parton-from-deuteron emission
           static Parameterisation standard_deuteron();
 
           /// Physical properties associated to a resonance
@@ -28,8 +32,9 @@ namespace CepGen
             short angular_momentum;
           };
 
-          enum { neutron = 0, proton = 1, deuteron = 2 } mode;
-          double mp, mpi0;
+          enum { neutron = 0, proton = 1, deuteron = 2 } mode; ///< Nucleon type
+          double mp; ///< Proton mass
+          double mpi0; ///< Neutral pion mass
           // SLAC fit parameters
           std::array<double,7> c_slac;
           // CLAS parameterisation
@@ -40,6 +45,7 @@ namespace CepGen
           std::array<unsigned short,4> lr;
         };
 
+        /// Standard parameterisation interpolator constructor (photon from proton)
         explicit CLAS( const CLAS::Parameterisation& params = CLAS::Parameterisation::standard_proton() );
 
         CLAS& operator()( double xbj, double q2 ) override;

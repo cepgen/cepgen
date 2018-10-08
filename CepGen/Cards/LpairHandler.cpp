@@ -38,7 +38,8 @@ namespace CepGen
       std::string key, value;
       std::ostringstream os;
       while ( f >> key >> value ) {
-        if ( key[0] == '#' ) continue; // FIXME need to ensure there is no extra space before!
+        if ( key[0] == '#' ) // FIXME need to ensure there is no extra space before!
+          continue;
         setParameter( key, value );
         m_params.insert( { key, value } );
         if ( getDescription( key ) != "null" )

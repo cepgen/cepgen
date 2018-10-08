@@ -59,6 +59,7 @@ namespace CepGen
       /// Type of structure functions to consider
       std::shared_ptr<StructureFunctions> structure_functions;
 
+      /// A collection of cuts to apply on the physical phase space
       struct CutsList
       {
         CutsList();

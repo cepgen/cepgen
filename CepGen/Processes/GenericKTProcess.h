@@ -42,7 +42,7 @@ namespace CepGen
         double computeWeight() override;
         /// Populate the event content with the generated process' kinematics
         void fillKinematics( bool ) override;
-
+        /// List all variables handled by this generic process
         void dumpVariables() const;
 
       protected:
@@ -86,7 +86,7 @@ namespace CepGen
         /// \return Phase space point-dependent component of the Jacobian weight of the point in the phase space for integration
         /// \note To be run at each point computation (therefore, to be optimised!)
         double generateVariables() const;
-
+        /// Number of dimensions on which to perform the integration
         unsigned short num_dimensions_;
 
         /// Phase space point-independant component of the Jacobian weight of the point in the phase space for integration
