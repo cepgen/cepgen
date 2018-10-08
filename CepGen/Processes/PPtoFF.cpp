@@ -7,6 +7,7 @@
 #include "CepGen/Physics/PDG.h"
 
 #include "CepGen/Core/Exception.h"
+#include <iomanip>
 
 namespace CepGen
 {
@@ -39,7 +40,7 @@ namespace CepGen
       CG_DEBUG( "PPtoFF:prepare" )
         << "Produced particles (" << pdg_f << ") "
         << "with mass = " << mf_ << " GeV, "
-        << "and charge = " << qf_ << " e";
+        << "and charge = " << std::setprecision( 2 ) << qf_ << " e";
       CG_DEBUG( "PPtoFF:mode" )
         << "matrix element computation method: " << method_ << ".";
     }
