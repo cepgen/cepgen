@@ -1,7 +1,10 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
+#include "CepGen/Core/ParametersList.h"
+
 #include "CepGen/Processes/PPtoFF.h"
 #include "CepGen/Processes/ProcessesHandler.h"
+
 #include <sstream>
 
 namespace CepGen
@@ -31,11 +34,11 @@ namespace CepGen
   }
 
   std::unique_ptr<Process::GenericProcess>
-  ProcessesHandler::build( const std::string& name ) const
+  ProcessesHandler::build( const std::string& name, const ParametersList& params ) const
   {
     if ( map_.count( name ) == 0 )
       throw CG_FATAL( "ProcessesHandler:build" )
         << "Failed to retrieve a process with name \"" << name << "\"!";
-    return map_.at( name )->clone();
+    return map_.at( name )->clone( params );
   }
 }

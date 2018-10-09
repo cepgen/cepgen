@@ -13,7 +13,7 @@ namespace CepGen
     {
       public:
         PPtoFF( const ParametersList& params = ParametersList() );
-        ProcessPtr clone() const override { return ProcessPtr( new PPtoFF( *this ) ); }
+        ProcessPtr clone( const ParametersList& params ) const override { return ProcessPtr( new PPtoFF( params ) ); }
 
       private:
         void preparePhaseSpace() override;

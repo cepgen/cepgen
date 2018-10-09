@@ -43,8 +43,8 @@ namespace CepGen
       /// Name of the process considered
       std::string processName() const;
       /// Set the process to study
+      void setProcess( std::unique_ptr<Process::GenericProcess> proc );
       void setProcess( Process::GenericProcess* proc );
-      void cloneProcess( const Process::GenericProcess* proc );
 
       //----- events kinematics
 

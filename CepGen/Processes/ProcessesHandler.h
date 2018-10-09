@@ -15,6 +15,7 @@
 
 namespace CepGen
 {
+  class ParametersList;
   //namespace Process { class GenericProcess; }
   class ProcessesHandler
   {
@@ -23,7 +24,7 @@ namespace CepGen
       ~ProcessesHandler() = default;
 
       void registerProcess( const std::string& name, const CepGen::Process::GenericProcess* );
-      std::unique_ptr<CepGen::Process::GenericProcess> build( const std::string& name ) const;
+      std::unique_ptr<CepGen::Process::GenericProcess> build( const std::string& name, const ParametersList& ) const;
       void dump() const;
 
     private:

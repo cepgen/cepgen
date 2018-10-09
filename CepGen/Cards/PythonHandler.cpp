@@ -7,9 +7,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 
-#include "CepGen/Processes/GamGamLL.h"
-#include "CepGen/Processes/PPtoFF.h"
-#include "CepGen/Processes/PPtoWW.h"
+#include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Processes/FortranProcesses.h"
 
 #include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
@@ -82,13 +80,10 @@ namespace CepGen
       //--- process mode
       params_.kinematics.mode = (KinematicsMode)proc_params.get<int>( "mode", (int)KinematicsMode::invalid );
 
-      if ( proc_name == "lpair" )
-        params_.setProcess( new Process::GamGamLL( proc_params ) );
-      else if ( proc_name == "pptoll" || proc_name == "pptoff" )
-        params_.setProcess( new Process::PPtoFF( proc_params ) );
-      else if ( proc_name == "pptoww" )
-        params_.setProcess( new Process::PPtoWW( proc_params ) );
-      else {
+      try {
+        auto proc = CepGen::ProcessesHandler::get().build( proc_name, proc_params );
+        params_.setProcess( std::move( proc ) );
+      } catch ( const Exception& e ) {
         Process::generateFortranProcesses();
         for ( auto& proc : Process::FortranProcessesHandler::get().list() )
           if ( proc_name == std::string( proc.name ) )
