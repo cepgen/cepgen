@@ -1,6 +1,6 @@
 import Config.Core as cepgen
 from Config.integrators_cff import vegas as integrator
-#from Config.pythia8_cff import pythia8 as hadroniser
+#from Config.Pythia8_cff import pythia8 as hadroniser
 
 process = cepgen.Module('lpair',
     processParameters = cepgen.Parameters(

@@ -2,7 +2,7 @@ import Config.Core as cepgen
 from Config.integrators_cff import vegas as integrator
 from Config.logger_cfi import logger
 
-from Config.pythia8_cff import pythia8
+from Config.Pythia8_cff import pythia8
 hadroniser = pythia8.clone('pythia8',
     preConfiguration = pythia8.preConfiguration+(
         #'PartonLevel:MPI = on',

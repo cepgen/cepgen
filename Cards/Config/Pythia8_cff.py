@@ -1,4 +1,6 @@
 from containers_cfi import Module, Parameters
+from pythia8Defaults_cfi import pythia8Defaults
+from pythia8Tunes_cfi import pythia8CUEP8M1Settings
 
 pythia8 = Module('pythia8',
     moduleParameters = Parameters(
@@ -17,21 +19,11 @@ pythia8 = Module('pythia8',
         'PartonLevel:MPI = off',
         'BeamRemnants:primordialKT = off',
     ),
-    pythiaDefaults = (
-        'ParticleDecays:allowPhotonRadiation = off',
-        'Tune:preferLHAPDF = 2',
-        #'Beams:setProductionScalesFromLHEF = off',
-        'SLHA:keepSM = on',
-        'SLHA:minMassSM = 1000.',
-        'ParticleDecays:limitTau0 = on',
-        'ParticleDecays:tau0Max = 10',
-        # CUEP8M1 tuning
-        'Tune:pp 14', # Monash 2013 tune by Peter Skands (January 2014)
-        'MultipartonInteractions:pT0Ref = 2.4024',
-        'MultipartonInteractions:ecmPow = 0.25208',
-        'MultipartonInteractions:expPow = 1.6',
-    ),
+    commonSettings = pythia8Defaults,
+    tuningSettings = pythia8CUEP8M1Settings,
+    #tuningSettings = pythiaCUEP8S1CTEQ6L1Settings,
+    #tuningSettings = pythiaCUEP8M2T4Settings,
     processConfiguration = (
-        'pythiaDefaults',
+        'commonSettings', 'tuningSettings',
     ),
 )
