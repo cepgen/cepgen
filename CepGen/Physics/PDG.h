@@ -5,9 +5,9 @@
 
 namespace cepgen
 {
-  /** Unique identifier for a particle type. From \cite Beringer:1900zz :
+  /** \brief PDG ids of all known particles
+   * \note From \cite Beringer:1900zz :
    * `The Monte Carlo particle numbering scheme [...] is intended to facilitate interfacing between event generators, detector simulators, and analysis packages used in particle physics.`
-   * \brief PDG ids of all known particles
    */
   enum class PDG
   {
