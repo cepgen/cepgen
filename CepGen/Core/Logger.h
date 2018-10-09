@@ -38,8 +38,9 @@ namespace CepGen
         allowed_exc_.emplace_back( rule );
 #endif
       }
-      /// Is the module set to be displayed/logged?
+      /// \brief Is the module set to be displayed/logged?
       /// \param[in] tmpl Module name to probe
+      /// \param[in] lev Upper verbosity level
       bool passExceptionRule( const std::string& tmpl, const Level& lev ) const {
 #if !defined(__CINT__) && !defined(__CLING__)
         if ( level >= lev )

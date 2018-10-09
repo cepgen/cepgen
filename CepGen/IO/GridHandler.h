@@ -21,22 +21,20 @@
 namespace CepGen
 {
   class StructureFunctions;
-  enum struct GridType
-  {
-    linear = 0,
-    logarithmic = 1,
-    square = 2
-  };
+  /// Interpolation type for the grid coordinates
+  enum struct GridType { linear, logarithmic, square };
   /// \brief A generic class for D-dimensional grid interpolation
+  /// \param D Number of variables in the grid (dimension)
   /// \param N Number of values handled per point
   template <size_t D,size_t N=1>
   class GridHandler
   {
     public:
-      typedef std::vector<double> coord_t;
-      typedef std::array<double,N> values_t;
+      typedef std::vector<double> coord_t; ///< Coordinates container
+      typedef std::array<double,N> values_t; ///< Value(s) at a given coordinate
 
     public:
+      /// Build a grid interpolator from a grid type
       explicit GridHandler( const GridType& grid_type ) :
         grid_type_( grid_type ), accel_{}
       {
@@ -247,6 +245,7 @@ namespace CepGen
           } break;
         }
       }
+      /// Grid boundaries (collection of pair(min,max))
       std::array<std::pair<double,double>,D> boundaries() const {
         std::array<std::pair<double,double>,D> out;
         unsigned short i = 0;
@@ -260,19 +259,25 @@ namespace CepGen
       }
 
     protected:
+      /// Type of interpolation for the grid members
       GridType grid_type_;
       /// List of coordinates and associated value(s) in the grid
       std::map<coord_t,values_t> values_raw_;
-
+      /// GSL grid interpolation accelerator
       std::vector<std::unique_ptr<gsl_interp_accel,void(*)( gsl_interp_accel* )> > accel_;
+      /// Collection of splines for linear interpolations
       std::vector<std::unique_ptr<gsl_spline,void(*)( gsl_spline* )> > splines_1d_;
 #ifdef GOOD_GSL
+      /// Collection of splines for bilinear interpolations
       std::vector<std::unique_ptr<gsl_spline2d,void(*)( gsl_spline2d* )> > splines_2d_;
 #endif
+      /// Collection of coordinates building up the grid
       std::array<coord_t,D> coords_;
+      /// Collection of values for all points in the grid
       std::array<std::unique_ptr<double[]>,N> values_;
 
     private:
+      /// Retrieve lower and upper grid indices for a given coordinate
       void findIndices( const coord_t& coord, coord_t& min, coord_t& max ) const {
         min.reserve( D );
         max.reserve( D );
@@ -289,7 +294,7 @@ namespace CepGen
           }
         }
       }
-
+      /// A single value in grid coordinates
       struct gridpoint_t : values_t
       {
         gridpoint_t() : values_t() {}

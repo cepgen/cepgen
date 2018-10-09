@@ -1,11 +1,15 @@
 from containers_cfi import Parameters
 
 class StructureFunctions:
-    class PDFMode:
-        AllQuarks     = 0
-        ValenceQuarks = 1
-        SeaQuarks     = 2
     '''Types of structure functions supported'''
+    ## Quarks flavours contributions to consider in perturbative SFs definition
+    class PDFMode:
+        ## Consider both valence and sea quarks
+        AllQuarks     = 0
+        ## Consider only valence quarks
+        ValenceQuarks = 1
+        ## Consider only sea quarks
+        SeaQuarks     = 2
     Electron            = Parameters(id=1)
     ElasticProton       = Parameters(id=2)
     SuriYennie          = Parameters(id=11)

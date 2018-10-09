@@ -19,11 +19,11 @@ namespace CepGen
      */
     double charge( int id );
     /** \brief Colour factor for a given particle
-     * \param[in] id integer PDG id
+     * \param[in] pdg_id PDG id
      */
     unsigned short colours( const PDG& pdg_id );
     /** \brief Total decay width of an unstable particle, in GeV
-     * \param[in] pdg_id PDG (PDG ID)
+     * \param[in] pdg_id PDG id
      */
     double width( const PDG& pdg_id );
   }

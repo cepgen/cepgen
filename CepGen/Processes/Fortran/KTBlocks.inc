@@ -1,4 +1,4 @@
-      !> \file cepgen_blocks.inc
+      !> \file KTBblocks.inc
 c     ================================================================
 c     F77 process-to-CepGen helper
 c     > this header file defines a set of common blocks useful for

@@ -8,10 +8,10 @@
 
 #include <string>
 
-namespace CepGen
+namespace ROOT
 {
   /// All useful information about a generation run
-  struct TreeRun
+  struct CepGenRun
   {
     double sqrt_s; ///< Centre of mass energy for beam particles
     double xsect; ///< Process cross section, in pb
@@ -21,7 +21,7 @@ namespace CepGen
     /// ROOT tree used for storage/retrieval of this run information
     TTree* tree;
 
-    TreeRun() : tree( NULL ) { clear(); }
+    CepGenRun() : tree( NULL ) { clear(); }
     /// Reinitialise the run tree
     void clear() {
       sqrt_s = -1.;
@@ -62,7 +62,7 @@ namespace CepGen
   };
 
   /// All useful information about a generated event
-  struct TreeEvent
+  struct CepGenEvent
   {
     // book a sufficienly large number to allow the large multiplicity
     // of excited proton fragmentation products
@@ -91,7 +91,7 @@ namespace CepGen
     int role[maxpart]; ///< Particles role in the event
     int status[maxpart]; ///< Integer status code
 
-    TreeEvent() : tree( nullptr ), pMom( nullptr ) {
+    CepGenEvent() : tree( nullptr ), pMom( nullptr ) {
       clear();
     }
     /// Reinitialise the event content
@@ -109,7 +109,7 @@ namespace CepGen
     /// Fill the tree with a new event
     void fill() {
       if ( !tree )
-        throw std::runtime_error( "TreeEvent: Trying to fill a non-existent tree!" );
+        throw std::runtime_error( "CepGenEvent: Trying to fill a non-existent tree!" );
 
       tree->Fill();
       clear();
@@ -177,5 +177,3 @@ namespace CepGen
 }
 
 #endif
-
-

@@ -16,8 +16,8 @@
 
 using namespace std;
 
-std::unique_ptr<CepGen::TreeRun> run;
-std::unique_ptr<CepGen::TreeEvent> ev;
+std::unique_ptr<ROOT::CepGenRun> run;
+std::unique_ptr<ROOT::CepGenEvent> ev;
 
 void fill_event_tree( const CepGen::Event& event, unsigned long ev_id )
 {
@@ -91,7 +91,7 @@ int main( int argc, char* argv[] ) {
 
   std::unique_ptr<TTree> ev_tree( new TTree( "events", "A TTree containing information from the events produced from CepGen" ) );
 
-  run.reset( new CepGen::TreeRun );
+  run.reset( new ROOT::CepGenRun );
   run->create();
   run->xsect = xsec;
   run->errxsect = err;
@@ -99,7 +99,7 @@ int main( int argc, char* argv[] ) {
   run->sqrt_s = mg.parameters->kinematics.sqrtS();
   run->fill();
 
-  ev.reset( new CepGen::TreeEvent );
+  ev.reset( new ROOT::CepGenEvent );
   ev->create( ev_tree.get() );
 
   // launch the events generation
