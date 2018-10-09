@@ -13,7 +13,7 @@ namespace CepGen
     {
       public:
         FortranKTProcess( const ParametersList& params, const char* name, const char* descr, std::function<void(double&)> func );
-        ProcessPtr clone() const override { return ProcessPtr( new FortranKTProcess( *this ) ); }
+        ProcessPtr clone( const ParametersList& params ) const override { return ProcessPtr( new FortranKTProcess( *this ) ); }
 
       private:
         void preparePhaseSpace() override;

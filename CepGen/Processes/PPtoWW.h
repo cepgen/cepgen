@@ -14,7 +14,7 @@ namespace CepGen
     {
       public:
         PPtoWW( const ParametersList& params = ParametersList() );
-        ProcessPtr clone() const override { return ProcessPtr( new PPtoWW( *this ) ); }
+        ProcessPtr clone( const ParametersList& params ) const override { return ProcessPtr( new PPtoWW( params ) ); }
         enum class Polarisation { full = 0, LL = 1, LT = 2, TL = 3, TT = 4 };
 
       private:

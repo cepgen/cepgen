@@ -6,9 +6,7 @@
 #include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 #include "CepGen/StructureFunctions/LHAPDF.h"
 
-#include "CepGen/Processes/GamGamLL.h"
-#include "CepGen/Processes/PPtoFF.h"
-#include "CepGen/Processes/PPtoWW.h"
+#include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Processes/FortranProcesses.h"
 
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
@@ -49,20 +47,8 @@ namespace CepGen
       f.close();
 
       //--- parse the process name
-      if ( proc_name_ == "lpair" )
-        params_.setProcess( new Process::GamGamLL( *proc_params_ ) );
-      else if ( proc_name_ == "pptoll" || proc_name_ == "pptoff" )
-        params_.setProcess( new Process::PPtoFF( *proc_params_ ) );
-      else if ( proc_name_ == "pptoww" )
-        params_.setProcess( new Process::PPtoWW( *proc_params_ ) );
-      else {
-        Process::generateFortranProcesses();
-        for ( auto& proc : Process::FortranProcessesHandler::get().list() )
-          if ( proc_name_ == std::string( proc.name ) )
-            params_.setProcess( new Process::FortranKTProcess( *proc_params_, proc.name, proc.description, proc.method ) );
-        if ( !params_.process() )
-          throw CG_FATAL( "LpairHandler" ) << "Unrecognised process name: " << proc_name_ << "!";
-      }
+      auto proc = CepGen::ProcessesHandler::get().build( proc_name_, *proc_params_ );
+      params_.setProcess( std::move( proc ) );
 
       //--- parse the structure functions code
       const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;

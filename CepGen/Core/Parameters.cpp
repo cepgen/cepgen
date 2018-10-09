@@ -81,21 +81,18 @@ namespace CepGen
   }
 
   void
+  Parameters::setProcess( std::unique_ptr<Process::GenericProcess> proc )
+  {
+    process_ = std::move( proc );
+  }
+
+  void
   Parameters::setProcess( Process::GenericProcess* proc )
   {
     if ( !proc )
       throw CG_FATAL( "Parameters" )
         << "Trying to clone an invalid process!";
     process_.reset( proc );
-  }
-
-  void
-  Parameters::cloneProcess( const Process::GenericProcess* proc )
-  {
-    if ( !proc )
-      throw CG_FATAL( "Parameters" )
-        << "Trying to clone an invalid process!";
-    process_ = std::move( proc->clone() );
   }
 
   Hadroniser::GenericHadroniser*

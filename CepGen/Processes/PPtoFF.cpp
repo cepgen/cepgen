@@ -9,6 +9,8 @@
 #include "CepGen/Core/Exception.h"
 #include <iomanip>
 
+#include "CepGen/Processes/ProcessesHandler.h"
+
 namespace CepGen
 {
   namespace Process
@@ -369,5 +371,9 @@ namespace CepGen
 
       return 0.5*( imat1*amat2_1 + imat2*amat2_2 );
     }
+    // register process and define aliases
+    REGISTER_PROCESS( pptoll, PPtoFF )
+    REGISTER_PROCESS( pptoff, PPtoFF )
   }
 }
+

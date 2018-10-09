@@ -7,9 +7,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 
-#include "CepGen/Processes/GamGamLL.h"
-#include "CepGen/Processes/PPtoFF.h"
-#include "CepGen/Processes/PPtoWW.h"
+#include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Processes/FortranProcesses.h"
 
 #include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
@@ -82,20 +80,8 @@ namespace CepGen
       //--- process mode
       params_.kinematics.mode = (KinematicsMode)proc_params.get<int>( "mode", (int)KinematicsMode::invalid );
 
-      if ( proc_name == "lpair" )
-        params_.setProcess( new Process::GamGamLL( proc_params ) );
-      else if ( proc_name == "pptoll" || proc_name == "pptoff" )
-        params_.setProcess( new Process::PPtoFF( proc_params ) );
-      else if ( proc_name == "pptoww" )
-        params_.setProcess( new Process::PPtoWW( proc_params ) );
-      else {
-        Process::generateFortranProcesses();
-        for ( auto& proc : Process::FortranProcessesHandler::get().list() )
-          if ( proc_name == std::string( proc.name ) )
-            params_.setProcess( new Process::FortranKTProcess( proc_params, proc.name, proc.description, proc.method ) );
-        if ( !params_.process() )
-          throw CG_FATAL( "PythonHandler" ) << "Unrecognised process name: " << proc_name << "!";
-      }
+      auto proc = CepGen::ProcessesHandler::get().build( proc_name, proc_params );
+      params_.setProcess( std::move( proc ) );
 
       //--- process kinematics
       PyObject* pin_kinematics = getElement( process, "inKinematics" ); // borrowed
