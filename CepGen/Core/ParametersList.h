@@ -55,6 +55,13 @@ namespace cepgen
   /// Set a vector of integers parameter value
   template<> void ParametersList::set<std::vector<int> >( std::string key, const std::vector<int>& value );
 
+  /// Get a boolean parameter value
+  template<> inline bool ParametersList::get<bool>( std::string key, bool def ) const { return static_cast<bool>( get<int>( key, def ) ); }
+  /// Reference to a boolean parameter value
+  template<> inline bool& ParametersList::operator[]<bool>( std::string key ) { return (bool&)operator[]<int>( key ); }
+  /// Set a boolean parameter value
+  template<> inline void ParametersList::set<bool>( std::string key, const bool& value ) { set<int>( key, static_cast<bool>( value ) ); }
+
   /// Get a double floating point parameter value
   template<> double ParametersList::get<double>( std::string key, double def ) const;
   /// Reference to a double floating point parameter value
