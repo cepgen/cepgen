@@ -12,10 +12,10 @@
 namespace cepgen
 {
   class Event;
-  class TamingFunctionsCollection;
   class ParametersList;
   namespace proc { class GenericProcess; }
   namespace hadr { class GenericHadroniser; }
+  namespace utils { class TamingFunctionsCollection; }
   /// List of parameters used to start and run the simulation job
   class Parameters
   {
@@ -118,7 +118,7 @@ namespace cepgen
       //----- taming functions
 
       /// Functionals to be used to account for rescattering corrections (implemented within the process)
-      std::shared_ptr<TamingFunctionsCollection> taming_functions;
+      std::shared_ptr<utils::TamingFunctionsCollection> taming_functions;
 
       //----- run statistics
 

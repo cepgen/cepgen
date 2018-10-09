@@ -154,7 +154,7 @@ namespace cepgen
   void
   Generator::generate( std::function<void( const Event&, unsigned long )> callback )
   {
-    const Timer tmr;
+    const utils::Timer tmr;
 
     CG_INFO( "Generator" )
       << parameters->generation.maxgen << " events will be generated.";

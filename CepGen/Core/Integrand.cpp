@@ -18,13 +18,13 @@ namespace cepgen
 {
   namespace integrand
   {
-    Logger::Level log_level;
-    Timer tmr;
+    utils::Logger::Level log_level;
+    utils::Timer tmr;
 
     double
     eval( double* x, size_t ndim, void* params )
     {
-      log_level = Logger::get().level;
+      log_level = utils::Logger::get().level;
       std::shared_ptr<Event> ev;
 
       Parameters* p = static_cast<Parameters*>( params );

@@ -16,7 +16,7 @@ namespace cepgen
 {
   Parameters::Parameters() :
     general( new ParametersList ),
-    taming_functions( new TamingFunctionsCollection ),
+    taming_functions( new utils::TamingFunctionsCollection ),
     store_( false ), total_gen_time_( 0. ), num_gen_events_( 0 )
   {}
 
@@ -145,7 +145,7 @@ namespace cepgen
       << std::setw( wt ) << "Number of points to try per bin" << p->generation.num_points << "\n"
       << std::setw( wt ) << "Integrand treatment"
       << ( pretty ? yesno( p->generation.treat ) : std::to_string( p->generation.treat ) ) << "\n"
-      << std::setw( wt ) << "Verbosity level " << Logger::get().level << "\n";
+      << std::setw( wt ) << "Verbosity level " << utils::Logger::get().level << "\n";
     if ( p->hadroniser_ ) {
       os
         << "\n"

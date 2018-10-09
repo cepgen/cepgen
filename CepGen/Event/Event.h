@@ -24,7 +24,7 @@ namespace cepgen
       /// Dump all the known information on every Particle object contained in this Event container in the output stream
       /// \param[out] os Output stream where to dump the information
       /// \param[in] stable_ Do we only show the stable particles in this event?
-      void dump( std::ostream& os = *Logger::get().output, bool stable_ = false ) const;
+      void dump( std::ostream& os = *utils::Logger::get().output, bool stable_ = false ) const;
       /// Incoming beams centre-of-mass energy, in GeV
       double cmEnergy() const;
 

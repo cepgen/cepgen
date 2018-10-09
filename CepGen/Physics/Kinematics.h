@@ -67,7 +67,7 @@ namespace cepgen
         Cuts initial;
         /// Cuts on the central system produced
         Cuts central;
-        std::unordered_map<PDG,Cuts,EnumHash<PDG> > central_particles;
+        std::unordered_map<PDG,Cuts,utils::EnumHash<PDG> > central_particles;
         /// Cuts on the beam remnants system
         Cuts remnants;
       };

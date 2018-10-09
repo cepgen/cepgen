@@ -24,8 +24,8 @@ namespace cepgen
   /// Interpolation type for the grid coordinates
   enum struct GridType { linear, logarithmic, square };
   /// \brief A generic class for D-dimensional grid interpolation
-  /// \param D Number of variables in the grid (dimension)
-  /// \param N Number of values handled per point
+  /// \tparam D Number of variables in the grid (dimension)
+  /// \tparam N Number of values handled per point
   template <size_t D,size_t N=1>
   class GridHandler
   {

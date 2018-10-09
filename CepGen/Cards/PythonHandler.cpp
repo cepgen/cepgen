@@ -272,11 +272,11 @@ namespace cepgen
     void
     PythonHandler::parseLogging( PyObject* log )
     {
-      fillParameter( log, "level", (int&)Logger::get().level );
+      fillParameter( log, "level", (int&)utils::Logger::get().level );
       std::vector<std::string> enabled_modules;
       fillParameter( log, "enabledModules", enabled_modules );
       for ( const auto& mod : enabled_modules )
-        Logger::get().addExceptionRule( mod );
+        utils::Logger::get().addExceptionRule( mod );
     }
 
     void

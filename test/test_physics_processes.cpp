@@ -77,7 +77,7 @@ main( int argc, char* argv[] )
   if ( argc < 3 || strcmp( argv[2], "debug" ) != 0 )
     Logger::get().level = Logger::Level::nothing;
 
-  Timer tmr;
+  utils::Timer tmr;
   Generator mg;
 
   if ( argc > 1 && strcmp( argv[1], "plain" ) == 0 )
@@ -106,15 +106,15 @@ main( int argc, char* argv[] )
       const string generator = values_vs_generator.first;
       if ( generator == "lpair"  ) {
         param.set<int>( "pair", 13 );
-        mg.parameters->setProcess( new Process::GamGamLL( param ) );
+        mg.parameters->setProcess( new proc::GamGamLL( param ) );
       }
       else if ( generator == "pptoll" ) {
         param.set<int>( "pair", 13 );
-        mg.parameters->setProcess( new Process::PPtoFF( param ) );
+        mg.parameters->setProcess( new proc::PPtoFF( param ) );
         mg.parameters->kinematics.cuts.initial.qt = { 0., 50. };
       }
       else if ( generator == "pptoww" ) {
-        mg.parameters->setProcess( new Process::PPtoWW );
+        mg.parameters->setProcess( new proc::PPtoWW );
         mg.parameters->kinematics.setSqrtS( 13.e3 );
         //mg.parameters->kinematics.cuts.initial.qt = { 0., 50. };
       }

@@ -107,7 +107,7 @@ namespace cepgen
 
       registerParameter<bool>( "IEND", "Generation type", &params->generation.enabled );
       registerParameter<bool>( "NTRT", "Smoothen the integrand", &params->generation.treat );
-      registerParameter<int>( "DEBG", "Debugging verbosity", (int*)&Logger::get().level );
+      registerParameter<int>( "DEBG", "Debugging verbosity", (int*)&utils::Logger::get().level );
       registerParameter<int>( "NCVG", "Number of function calls", (int*)&params->integrator.ncvg );
       registerParameter<int>( "ITVG", "Number of integration iterations", (int*)&params->integrator.vegas.iterations );
       registerParameter<int>( "SEED", "Random generator seed", (int*)&params->integrator.rng_seed );

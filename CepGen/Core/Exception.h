@@ -8,7 +8,7 @@
 #include "CepGen/Core/Logger.h"
 
 #define CG_EXCEPT_MATCH( str, type ) \
-  cepgen::Logger::get().passExceptionRule( str, cepgen::Logger::Level::type )
+  cepgen::utils::Logger::get().passExceptionRule( str, cepgen::utils::Logger::Level::type )
 
 #define CG_LOG( mod ) \
   ( !CG_EXCEPT_MATCH( mod, information ) ) \
@@ -124,7 +124,7 @@ namespace cepgen
 
       /// Dump the full exception information in a given output stream
       /// \param[inout] os the output stream where the information is dumped
-      inline void dump( std::ostream& os = *Logger::get().output ) const {
+      inline void dump( std::ostream& os = *utils::Logger::get().output ) const {
         os << fullMessage() << std::endl;
       }
       /// Extract a one-line summary of the exception
