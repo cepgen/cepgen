@@ -66,7 +66,7 @@ namespace cepgen
     num_gen_events_++;
   }
 
-  process::GenericProcess*
+  proc::GenericProcess*
   Parameters::process()
   {
     return process_.get();
@@ -81,13 +81,13 @@ namespace cepgen
   }
 
   void
-  Parameters::setProcess( std::unique_ptr<process::GenericProcess> proc )
+  Parameters::setProcess( std::unique_ptr<proc::GenericProcess> proc )
   {
     process_ = std::move( proc );
   }
 
   void
-  Parameters::setProcess( process::GenericProcess* proc )
+  Parameters::setProcess( proc::GenericProcess* proc )
   {
     if ( !proc )
       throw CG_FATAL( "Parameters" )
@@ -95,7 +95,7 @@ namespace cepgen
     process_.reset( proc );
   }
 
-  hadroniser::GenericHadroniser*
+  hadr::GenericHadroniser*
   Parameters::hadroniser()
   {
     return hadroniser_.get();
@@ -110,7 +110,7 @@ namespace cepgen
   }
 
   void
-  Parameters::setHadroniser( hadroniser::GenericHadroniser* hadr )
+  Parameters::setHadroniser( hadr::GenericHadroniser* hadr )
   {
     hadroniser_.reset( hadr );
   }

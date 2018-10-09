@@ -15,20 +15,20 @@
 namespace cepgen
 {
   class ParametersList;
-  //namespace process { class GenericProcess; }
+  //namespace proc { class GenericProcess; }
   class ProcessesHandler
   {
     public:
       static ProcessesHandler& get();
       ~ProcessesHandler() = default;
 
-      void registerProcess( const std::string& name, const cepgen::process::GenericProcess* );
+      void registerProcess( const std::string& name, const cepgen::proc::GenericProcess* );
       ProcessPtr build( const std::string& name, const ParametersList& ) const;
       void dump() const;
 
     private:
       explicit ProcessesHandler() = default;
-      std::unordered_map<std::string, std::unique_ptr<const process::GenericProcess> > map_;
+      std::unordered_map<std::string, std::unique_ptr<const proc::GenericProcess> > map_;
 
     public:
       ProcessesHandler( const ProcessesHandler& ) = delete;

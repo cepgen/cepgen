@@ -13,7 +13,7 @@
 
 namespace cepgen
 {
-  namespace process
+  namespace proc
   {
     PPtoFF::PPtoFF( const ParametersList& params ) :
       GenericKTProcess( params, "pptoff", "ɣɣ → f⁺f¯", { { PDG::photon, PDG::photon } }, { PDG::muon, PDG::muon } ),

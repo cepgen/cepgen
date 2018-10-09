@@ -11,7 +11,7 @@
 
 namespace cepgen
 {
-  namespace process
+  namespace proc
   {
     const double GenericProcess::mp_ = particleproperties::mass( PDG::proton );
     const double GenericProcess::mp2_ = GenericProcess::mp_*GenericProcess::mp_;

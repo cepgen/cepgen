@@ -17,7 +17,7 @@ namespace cepgen
   }
 
   void
-  ProcessesHandler::registerProcess( const std::string& name, const process::GenericProcess* proc )
+  ProcessesHandler::registerProcess( const std::string& name, const proc::GenericProcess* proc )
   {
     map_[name].reset( proc );
     CG_DEBUG( "ProcessesHandler" ) << "Process name \"" << name << "\" registered in database.";

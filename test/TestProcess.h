@@ -6,7 +6,7 @@
 
 namespace cepgen
 {
-  namespace process
+  namespace proc
   {
     /// Generic process to test the Vegas instance
     template<size_t N>

@@ -6,7 +6,7 @@
 
 namespace cepgen
 {
-  namespace process
+  namespace proc
   {
     /// Compute the matrix element for a CE \f$\gamma\gamma\rightarrow f\bar f\f$ process using \f$k_T\f$-factorization approach
     class PPtoFF : public GenericKTProcess

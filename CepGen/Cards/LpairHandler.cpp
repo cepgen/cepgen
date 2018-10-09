@@ -73,7 +73,7 @@ namespace cepgen
 
       //--- parse the hadronisation algorithm name
       if ( hadr_name_ == "pythia8" )
-        params_.setHadroniser( new hadroniser::Pythia8Hadroniser( params_, ParametersList() ) );
+        params_.setHadroniser( new hadr::Pythia8Hadroniser( params_, ParametersList() ) );
 
       if ( m_params.count( "IEND" ) )
         setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );

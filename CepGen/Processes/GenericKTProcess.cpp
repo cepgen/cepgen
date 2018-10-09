@@ -17,7 +17,7 @@
 
 namespace cepgen
 {
-  namespace process
+  namespace proc
   {
     GenericKTProcess::GenericKTProcess( const ParametersList& params,
                                         const std::string& name,

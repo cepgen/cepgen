@@ -14,8 +14,8 @@ namespace cepgen
   class Event;
   class TamingFunctionsCollection;
   class ParametersList;
-  namespace process { class GenericProcess; }
-  namespace hadroniser { class GenericHadroniser; }
+  namespace proc { class GenericProcess; }
+  namespace hadr { class GenericHadroniser; }
   /// List of parameters used to start and run the simulation job
   class Parameters
   {
@@ -39,13 +39,13 @@ namespace cepgen
       //----- process to compute
 
       /// Process for which the cross-section will be computed and the events will be generated
-      process::GenericProcess* process();
+      proc::GenericProcess* process();
       /// Name of the process considered
       std::string processName() const;
       /// Set the process to study
-      void setProcess( std::unique_ptr<process::GenericProcess> proc );
+      void setProcess( std::unique_ptr<proc::GenericProcess> proc );
       /// Set the process to study
-      void setProcess( process::GenericProcess* proc );
+      void setProcess( proc::GenericProcess* proc );
 
       //----- events kinematics
 
@@ -109,11 +109,11 @@ namespace cepgen
       //----- hadronisation algorithm
 
       /// Hadronisation algorithm to use for the proton(s) fragmentation
-      hadroniser::GenericHadroniser* hadroniser();
+      hadr::GenericHadroniser* hadroniser();
       /// Name of the hadroniser (if applicable)
       std::string hadroniserName() const;
       /// Set the hadronisation algorithm
-      void setHadroniser( hadroniser::GenericHadroniser* hadr );
+      void setHadroniser( hadr::GenericHadroniser* hadr );
 
       //----- taming functions
 
@@ -133,8 +133,8 @@ namespace cepgen
       inline unsigned int numGeneratedEvents() const { return num_gen_events_; }
 
     private:
-      std::unique_ptr<process::GenericProcess> process_;
-      std::unique_ptr<hadroniser::GenericHadroniser> hadroniser_;
+      std::unique_ptr<proc::GenericProcess> process_;
+      std::unique_ptr<hadr::GenericHadroniser> hadroniser_;
 
       bool store_;
       /// Total generation time (in seconds)

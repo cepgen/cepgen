@@ -21,7 +21,7 @@ extern "C"
 
 namespace cepgen
 {
-  namespace process
+  namespace proc
   {
     FortranKTProcess::FortranKTProcess( const ParametersList& params, const char* name, const char* descr, std::function<void( double& )> func ) :
       GenericKTProcess( params, name, descr, { { PDG::photon, PDG::photon } }, { PDG::muon, PDG::muon } ),
