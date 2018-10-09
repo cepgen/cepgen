@@ -10,7 +10,7 @@
 namespace mstw
 {
   /// A \f$F_{2,L}\f$ grid interpolator
-  class Grid : public CepGen::SF::Parameterisation, private CepGen::GridHandler<2,2>
+  class Grid : public CepGen::sf::Parameterisation, private CepGen::GridHandler<2,2>
   {
     public:
       /// Grid header information as parsed from the file
@@ -36,8 +36,8 @@ namespace mstw
         double fl; ///< Longitudinal structure function value
       };
       /// List of parameters for this grid definition
-      struct Parameterisation {
-        Parameterisation() : grid_path( DEFAULT_MSTW_GRID_PATH ) {}
+      struct Parameters {
+        Parameters() : grid_path( DEFAULT_MSTW_GRID_PATH ) {}
         /// Location of the grid to be interpolated
         std::string grid_path;
       };
@@ -51,10 +51,10 @@ namespace mstw
       /// Retrieve the grid's header information
       header_t header() const { return header_; }
       /// Grid parameterisation object
-      Parameterisation params;
+      Parameters params;
 
         //--- already retrieved from grid, so no need to recompute it
-      void computeFL( double xbj, double q2, const CepGen::SF::SigmaRatio& ) override {}
+      void computeFL( double xbj, double q2, const CepGen::sr::Parameterisation& ) override {}
       void computeFL( double xbj, double q2, double r ) override {}
 
     public:
@@ -62,7 +62,7 @@ namespace mstw
       void operator=( const GridHandler& ) = delete;
 
     private:
-      explicit Grid( const Parameterisation& = Parameterisation() );
+      explicit Grid( const Parameters& = Parameters() );
       std::string description() const override;
       static const unsigned int good_magic;
       static std::shared_ptr<Grid> singl_;

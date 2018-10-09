@@ -140,13 +140,13 @@ main( int argc, char* argv[] )
           }
 
           if ( kin_mode.find( "_su" ) != string::npos )
-            mg.parameters->kinematics.structure_functions = SF::Parameterisation::build( SF::Type::SzczurekUleshchenko );
+            mg.parameters->kinematics.structure_functions = sf::Parameterisation::build( sf::Type::SzczurekUleshchenko );
           else if ( kin_mode.find( "_lux" ) != string::npos )
-            mg.parameters->kinematics.structure_functions = SF::Parameterisation::build( SF::Type::Schaefer );
+            mg.parameters->kinematics.structure_functions = sf::Parameterisation::build( sf::Type::Schaefer );
           else if ( kin_mode.find( "_allm" ) != string::npos )
-            mg.parameters->kinematics.structure_functions = SF::Parameterisation::build( SF::Type::ALLM97 );
+            mg.parameters->kinematics.structure_functions = sf::Parameterisation::build( sf::Type::ALLM97 );
           else
-            mg.parameters->kinematics.structure_functions = SF::Parameterisation::build( SF::Type::SuriYennie );
+            mg.parameters->kinematics.structure_functions = sf::Parameterisation::build( sf::Type::SuriYennie );
 
           //CG_INFO( "main" ) << mg.parameters.get();
           CG_INFO( "main" )

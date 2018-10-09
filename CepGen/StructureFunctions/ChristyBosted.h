@@ -8,22 +8,23 @@
 
 namespace CepGen
 {
-  namespace SF
+  namespace sf
   {
     /// \f$F_{2/L}\f$ parameterisation by Christy and Bosted \cite Bosted:2007xd
     class ChristyBosted : public Parameterisation
     {
       public:
-        struct Parameterisation
+        struct Parameters
         {
-          static Parameterisation standard();
+          static Parameters standard();
 
-          struct ResonanceParameters
+          struct Resonance
           {
-            struct BranchingRatios
+            /// Branching ratios container for resonance decay into single, double pion or eta states
+            struct BR
             {
-              BranchingRatios() : singlepi( 0. ), doublepi( 0. ), eta( 0. ) {}
-              BranchingRatios( double singlepi, double doublepi, double eta ) : singlepi( singlepi ), doublepi( doublepi ), eta( eta ) {}
+              BR() : singlepi( 0. ), doublepi( 0. ), eta( 0. ) {}
+              BR( double singlepi, double doublepi, double eta ) : singlepi( singlepi ), doublepi( doublepi ), eta( eta ) {}
               bool valid() const { return ( singlepi+doublepi+eta == 1. ); }
               /// single pion branching ratio
               double singlepi;
@@ -32,12 +33,12 @@ namespace CepGen
               /// eta meson branching ratio
               double eta;
             };
-            ResonanceParameters() : angular_momentum( 0. ), x0( 0. ), mass( 0. ), width( 0. ), A0_T( 0. ), A0_L( 0. ) {}
+            Resonance() : angular_momentum( 0. ), x0( 0. ), mass( 0. ), width( 0. ), A0_T( 0. ), A0_L( 0. ) {}
             double kr() const;
             double ecmr( double m2 ) const;
             double kcmr() const { return ecmr( 0. ); }
             double pcmr( double m2 ) const { return sqrt( std::max( 0., ecmr( m2 )*ecmr( m2 )-m2 ) ); }
-            BranchingRatios br;
+            BR br;
             /// meson angular momentum
             double angular_momentum;
             /// damping parameter
@@ -50,33 +51,33 @@ namespace CepGen
             double A0_L;
             std::array<double,5> fit_parameters;
           };
-          struct ContinuumParameters
+          struct Continuum
           {
-            struct DirectionParameters
+            struct Direction
             {
-              DirectionParameters() : sig0( 0. ) {}
-              DirectionParameters( double sig0, const std::vector<double>& params ) : sig0( sig0 ), fit_parameters( params ) {}
+              Direction() : sig0( 0. ) {}
+              Direction( double sig0, const std::vector<double>& params ) : sig0( sig0 ), fit_parameters( params ) {}
               double sig0;
               std::vector<double> fit_parameters;
             };
-            std::array<DirectionParameters,2> transverse;
-            std::array<DirectionParameters,1> longitudinal;
+            std::array<Direction,2> transverse;
+            std::array<Direction,1> longitudinal;
           };
           double m0;
-          std::vector<ResonanceParameters> resonances;
-          ContinuumParameters continuum;
+          std::vector<Resonance> resonances;
+          Continuum continuum;
         };
 
-        explicit ChristyBosted( const ChristyBosted::Parameterisation& params = ChristyBosted::Parameterisation::standard() );
+        explicit ChristyBosted( const Parameters& params = Parameters::standard() );
         ChristyBosted& operator()( double xbj, double q2 ) override;
 
         //--- already computed internally during F2 computation
-        void computeFL( double xbj, double q2, const CepGen::SF::SigmaRatio& ) override {}
+        void computeFL( double xbj, double q2, const sr::Parameterisation& ) override {}
         void computeFL( double xbj, double q2, double r ) override {}
 
       private:
         double resmod507( char sf, double w2, double q2 ) const;
-        Parameterisation params_;
+        Parameters params_;
     };
   }
 }

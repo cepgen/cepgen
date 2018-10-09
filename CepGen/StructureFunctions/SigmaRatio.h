@@ -5,13 +5,14 @@
 
 namespace CepGen
 {
-  namespace SF
+  /// A collector namespace for modellings of the \f$R=\sigma_L/\sigma_T\f$ ratio
+  namespace sr
   {
     /// A generic modelling of the \f$R=\sigma_L/\sigma_T\f$ ratio
-    class SigmaRatio
+    class Parameterisation
     {
       public:
-        SigmaRatio() {}
+        Parameterisation() {}
         /// Extract the longitudinal/transverse cross section ratio and associated error for a given \f$(x_{\rm Bj},Q^2)\f$ couple.
         virtual double operator()( double xbj, double q2, double& err ) const = 0;
 
@@ -23,54 +24,54 @@ namespace CepGen
     };
 
     /// E143 experimental R measurement \cite Abe:1998ym
-    class E143Ratio : public SigmaRatio
+    class E143 : public Parameterisation
     {
       public:
-        struct Parameterisation
+        struct Parameters
         {
           double q2_b, lambda2;
           std::array<double,6> a, b, c;
-          static Parameterisation standard();
+          static Parameters standard();
         };
-        explicit E143Ratio( const Parameterisation& param = Parameterisation::standard() );
+        explicit E143( const Parameters& param = Parameters::standard() );
         double operator()( double xbj, double q2, double& err ) const override;
 
       private:
-        Parameterisation params_;
+        Parameters params_;
     };
 
     /** \brief SLAC experimental R measurement \cite Whitlow:1990gk
      * \warning valid for \f$Q^2\f$ > 0.3 GeV\f${}^2\f$
      */
-    class R1990Ratio: public SigmaRatio
+    class R1990: public Parameterisation
     {
       public:
-        struct Parameterisation
+        struct Parameters
         {
           double lambda2;
           std::array<double,3> b;
-          static Parameterisation standard();
+          static Parameters standard();
         };
-        explicit R1990Ratio( const Parameterisation& param = Parameterisation::standard() );
+        explicit R1990( const Parameters& param = Parameters::standard() );
         double operator()( double xbj, double q2, double& err ) const override;
 
       private:
-        Parameterisation params_;
+        Parameters params_;
     };
 
     /// CLAS experimental R measurement
-    class CLASRatio : public SigmaRatio
+    class CLAS : public Parameterisation
     {
       public:
-        CLASRatio() {}
+        CLAS() {}
         double operator()( double xbj, double q2, double& err ) const override;
     };
 
     /// Sibirtsev & Blunden parameterisation of the R ratio \cite Sibirtsev:2013cga
-    class SBRatio : public SigmaRatio
+    class SibirtsevBlunden : public Parameterisation
     {
       public:
-        SBRatio() {}
+        SibirtsevBlunden() {}
         double operator()( double xbj, double q2, double& err ) const override;
     };
   }

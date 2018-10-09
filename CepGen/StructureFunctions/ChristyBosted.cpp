@@ -5,10 +5,10 @@
 
 namespace CepGen
 {
-  namespace SF
+  namespace sf
   {
-    ChristyBosted::ChristyBosted( const ChristyBosted::Parameterisation& params ) :
-      SF::Parameterisation( Type::ChristyBosted ), params_( params )
+    ChristyBosted::ChristyBosted( const Parameters& params ) :
+      Parameterisation( Type::ChristyBosted ), params_( params )
     {}
 
     double
@@ -48,7 +48,7 @@ namespace CepGen
 
       std::array<double,7> width, height, pgam;
       for ( unsigned short i = 0; i < 7; ++i ) {
-        const Parameterisation::ResonanceParameters& res = params_.resonances[i];
+        const Parameters::Resonance& res = params_.resonances[i];
         width[i] = res.width;
 
         //--- calculate partial widths
@@ -83,7 +83,7 @@ namespace CepGen
 
       double sig_res = 0.;
       for ( unsigned short i = 0; i < 7; ++i ) {
-        const Parameterisation::ResonanceParameters res = params_.resonances[i];
+        const Parameters::Resonance& res = params_.resonances[i];
         const double mass2 = res.mass*res.mass, width2 = width[i]*width[i];
         const double sigr = height[i]*res.kr()/k*res.kcmr()/kcm/res.width * ( width[i]*pgam[i] / ( pow( w2-mass2, 2 ) + mass2*width2 ) );
         sig_res += sigr;
@@ -121,23 +121,23 @@ namespace CepGen
       return sig_res + sig_nr;
     }
 
-    ChristyBosted::Parameterisation
-    ChristyBosted::Parameterisation::standard()
+    ChristyBosted::Parameters
+    ChristyBosted::Parameters::standard()
     {
-      Parameterisation params;
+      Parameters params;
 
       params.m0 = 4.2802;
       params.continuum.transverse = { {
-        ContinuumParameters::DirectionParameters( 246.06, { { 0.067469, 1.3501, 0.12054, -0.0038495 } } ),
-        ContinuumParameters::DirectionParameters( -89.360, { { 0.20977, 1.5715, 0.090736, 0.010362 } } )
+        Continuum::Direction( 246.06, { { 0.067469, 1.3501, 0.12054, -0.0038495 } } ),
+        Continuum::Direction( -89.360, { { 0.20977, 1.5715, 0.090736, 0.010362 } } )
       } };
       params.continuum.longitudinal = { {
-        ContinuumParameters::DirectionParameters( 86.746, { { 0., 4.0294, 3.1285, 0.33403, 4.9623 } } )
+        Continuum::Direction( 86.746, { { 0., 4.0294, 3.1285, 0.33403, 4.9623 } } )
       } };
 
       { //--- P33(1232)
-        ResonanceParameters p33;
-        p33.br = ResonanceParameters::BranchingRatios( 1., 0., 0. );
+        Resonance p33;
+        p33.br = Resonance::BR( 1., 0., 0. );
         p33.angular_momentum = 1.;
         //p33.x0 = 0.15;
         p33.x0 = 0.14462;
@@ -149,8 +149,8 @@ namespace CepGen
         params.resonances.emplace_back( p33 );
       }
       { //--- S11(1535)
-        ResonanceParameters s11_1535;
-        s11_1535.br = ResonanceParameters::BranchingRatios( 0.45, 0.1, 0.45 );
+        Resonance s11_1535;
+        s11_1535.br = Resonance::BR( 0.45, 0.1, 0.45 );
         s11_1535.angular_momentum = 0.;
         s11_1535.x0 = 0.215;
         s11_1535.mass = 1.5304;
@@ -161,8 +161,8 @@ namespace CepGen
         params.resonances.emplace_back( s11_1535 );
       }
       { //--- D13(1520)
-        ResonanceParameters d13;
-        d13.br = ResonanceParameters::BranchingRatios( 0.65, 0.35, 0. );
+        Resonance d13;
+        d13.br = Resonance::BR( 0.65, 0.35, 0. );
         d13.angular_momentum = 2.;
         d13.x0 = 0.215;
         d13.mass = 1.5057;
@@ -173,8 +173,8 @@ namespace CepGen
         params.resonances.emplace_back( d13 );
       }
       { //--- F15(1680)
-        ResonanceParameters f15;
-        f15.br = ResonanceParameters::BranchingRatios( 0.65, 0.35, 0. );
+        Resonance f15;
+        f15.br = Resonance::BR( 0.65, 0.35, 0. );
         f15.angular_momentum = 3.;
         f15.x0 = 0.215;
         f15.mass = 1.6980;
@@ -185,8 +185,8 @@ namespace CepGen
         params.resonances.emplace_back( f15 );
       }
       { //--- S11(1650)
-        ResonanceParameters s11_1650;
-        s11_1650.br = ResonanceParameters::BranchingRatios( 0.4, 0.5, 0.1 );
+        Resonance s11_1650;
+        s11_1650.br = Resonance::BR( 0.4, 0.5, 0.1 );
         s11_1650.angular_momentum = 0.;
         s11_1650.x0 = 0.215;
         s11_1650.mass = 1.6650;
@@ -197,8 +197,8 @@ namespace CepGen
         params.resonances.emplace_back( s11_1650 );
       }
       { //--- P11(1440) roper
-        ResonanceParameters p11;
-        p11.br = ResonanceParameters::BranchingRatios( 0.65, 0.35, 0. );
+        Resonance p11;
+        p11.br = Resonance::BR( 0.65, 0.35, 0. );
         p11.angular_momentum = 1.;
         p11.x0 = 0.215;
         p11.mass = 1.4333;
@@ -209,8 +209,8 @@ namespace CepGen
         params.resonances.emplace_back( p11 );
       }
       { //--- F37(1950)
-        ResonanceParameters f37;
-        f37.br = ResonanceParameters::BranchingRatios( 0.5, 0.5, 0. );
+        Resonance f37;
+        f37.br = Resonance::BR( 0.5, 0.5, 0. );
         f37.angular_momentum = 3.;
         f37.x0 = 0.215;
         f37.mass = 1.9341;
@@ -225,13 +225,13 @@ namespace CepGen
     }
 
     double
-    ChristyBosted::Parameterisation::ResonanceParameters::kr() const
+    ChristyBosted::Parameters::Resonance::kr() const
     {
       return 0.5 * ( mass*mass-mp2_ ) / mp_;
     }
 
     double
-    ChristyBosted::Parameterisation::ResonanceParameters::ecmr( double m2 ) const
+    ChristyBosted::Parameters::Resonance::ecmr( double m2 ) const
     {
       if ( mass == 0. ) return 0.;
       return 0.5 * ( mass*mass+m2-mp2_ ) / mass;
@@ -276,7 +276,7 @@ namespace CepGen
         F2 *= q21/( q21 + delq2 );
 
       if ( sigT != 0. )
-        SF::Parameterisation::computeFL( q2_eff, xbj, sigL/sigT );
+        Parameterisation::computeFL( q2_eff, xbj, sigL/sigT );
 
       return *this;
     }

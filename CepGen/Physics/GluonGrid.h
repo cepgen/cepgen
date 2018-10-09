@@ -12,8 +12,8 @@ namespace kmr
   class GluonGrid : private CepGen::GridHandler<3,1>
   {
     public:
-      struct Parameterisation {
-        Parameterisation() : grid_path( DEFAULT_KMR_GRID_PATH ) {}
+      struct Parameters {
+        Parameters() : grid_path( DEFAULT_KMR_GRID_PATH ) {}
         /// Location of the grid to be interpolated
         std::string grid_path;
       };
@@ -25,18 +25,17 @@ namespace kmr
       /// Compute the gluon flux
       double operator()( double x, double kt2, double mu2 ) const;
       /// Grid parameterisation object
-      Parameterisation params;
+      Parameters params;
 
     public:
       GluonGrid( const GluonGrid& ) = delete;
       void operator=( const GridHandler& ) = delete;
 
     private:
-      explicit GluonGrid( const Parameterisation& = Parameterisation() );
+      explicit GluonGrid( const Parameters& = Parameters() );
   };
 }
 
 #undef DEFAULT_KMR_GRID_PATH
 
 #endif
-

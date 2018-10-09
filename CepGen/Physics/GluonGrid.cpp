@@ -9,13 +9,13 @@ namespace kmr
   GluonGrid&
   GluonGrid::get( const char* filename )
   {
-    Parameterisation p;
+    Parameters p;
     p.grid_path = filename;
     static GluonGrid instance( p );
     return instance;
   }
 
-  GluonGrid::GluonGrid( const Parameterisation& param ) :
+  GluonGrid::GluonGrid( const Parameters& param ) :
     CepGen::GridHandler<3,1>( CepGen::GridType::linear ),
     params( param )
   {
@@ -52,4 +52,3 @@ namespace kmr
     return CepGen::GridHandler<3,1>::eval( { x, kt2, mu2 } ).at( 0 );
   }
 }
-

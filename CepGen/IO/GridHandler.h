@@ -20,7 +20,7 @@
 
 namespace CepGen
 {
-  namespace SF { class Parameterisation; }
+  namespace sf { class Parameterisation; }
   /// Interpolation type for the grid coordinates
   enum struct GridType { linear, logarithmic, square };
   /// \brief A generic class for D-dimensional grid interpolation
@@ -316,4 +316,3 @@ namespace CepGen
 }
 
 #endif
-

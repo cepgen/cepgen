@@ -6,7 +6,7 @@
 
 namespace CepGen
 {
-  namespace SF { class Parameterisation; }
+  namespace sf { class Parameterisation; }
   class HeavyIon;
   /// Collection of fundamental constants for kT fluxes definition
   struct KTFluxParameters
@@ -33,7 +33,7 @@ namespace CepGen
   /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\mathrm{T}}^2\f$ of the incoming parton
   /// \param[in] sf Structure functions evaluator
   /// \param[in] mx Outgoing diffractive proton mass
-  double ktFlux( const KTFlux& type, double x, double kt2, SF::Parameterisation& sf, double mx = KTFluxParameters::kMP );
+  double ktFlux( const KTFlux& type, double x, double kt2, sf::Parameterisation& sf, double mx = KTFluxParameters::kMP );
   /// \brief Compute the flux (from heavy ion) for a given parton x/kT
   /// \param[in] type Flux modelling
   /// \param[in] x Parton momentum fraction

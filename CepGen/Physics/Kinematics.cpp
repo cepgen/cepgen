@@ -12,7 +12,7 @@ namespace CepGen
 {
   Kinematics::Kinematics() :
     incoming_beams( { { 6500., PDG::proton, KTFlux::invalid }, { 6500., PDG::proton, KTFlux::invalid } } ),
-    mode( KinematicsMode::invalid ), structure_functions( new SF::SuriYennie )
+    mode( KinematicsMode::invalid ), structure_functions( new sf::SuriYennie )
   {}
 
   Kinematics::~Kinematics()
@@ -86,4 +86,3 @@ namespace CepGen
     remnants.mass_single = { 1.07, 320. };
   }
 }
-

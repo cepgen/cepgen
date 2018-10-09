@@ -27,15 +27,15 @@ namespace CepGen
   }
 
   FormFactors
-  FormFactors::protonInelastic( double q2, double mi2, double mf2, SF::Parameterisation& sf )
+  FormFactors::protonInelastic( double q2, double mi2, double mf2, sf::Parameterisation& sf )
   {
     const double xbj = q2 / ( q2 + mf2 - mi2 );
     switch ( sf.type ) {
-      case SF::Type::ElasticProton:
+      case sf::Type::ElasticProton:
         CG_WARNING( "FormFactors" ) << "Elastic proton form factors requested! Check your process definition!";
         return FormFactors::protonElastic( q2 );
-      case SF::Type::SuriYennie: {
-        SF::SuriYennie suriyennie, sy = (SF::SuriYennie)suriyennie( xbj, q2 );
+      case sf::Type::SuriYennie: {
+        sf::SuriYennie suriyennie, sy = (sf::SuriYennie)suriyennie( xbj, q2 );
         return FormFactors( sy.F2 * xbj * sqrt( mi2 ) / q2, sy.FM ); //FIXME
       } break;
       default: {

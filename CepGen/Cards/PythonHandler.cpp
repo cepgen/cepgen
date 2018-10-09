@@ -175,25 +175,25 @@ namespace CepGen
     }
 
     void
-    PythonHandler::parseStructureFunctions( PyObject* psf, std::shared_ptr<SF::Parameterisation>& sf_handler )
+    PythonHandler::parseStructureFunctions( PyObject* psf, std::shared_ptr<sf::Parameterisation>& sf_handler )
     {
       int str_fun = 0;
       fillParameter( psf, "id", str_fun );
-      sf_handler = SF::Parameterisation::build( (SF::Type)str_fun );
-      switch( (SF::Type)str_fun ) {
-        case SF::Type::LHAPDF: {
-          auto sf = std::dynamic_pointer_cast<SF::LHAPDF>( params_.kinematics.structure_functions );
+      sf_handler = sf::Parameterisation::build( (sf::Type)str_fun );
+      switch( (sf::Type)str_fun ) {
+        case sf::Type::LHAPDF: {
+          auto sf = std::dynamic_pointer_cast<sf::LHAPDF>( params_.kinematics.structure_functions );
           fillParameter( psf, "pdfSet", sf->params.pdf_set );
           fillParameter( psf, "numFlavours", (unsigned int&)sf->params.num_flavours );
           fillParameter( psf, "pdfMember", (unsigned int&)sf->params.pdf_member );
           fillParameter( psf, "mode", (unsigned int&)sf->params.mode );
         } break;
-        case SF::Type::MSTWgrid: {
+        case sf::Type::MSTWgrid: {
           auto sf = std::dynamic_pointer_cast<mstw::Grid>( params_.kinematics.structure_functions );
           fillParameter( psf, "gridPath", sf->params.grid_path );
         } break;
-        case SF::Type::Schaefer: {
-          auto sf = std::dynamic_pointer_cast<SF::Schaefer>( params_.kinematics.structure_functions );
+        case sf::Type::Schaefer: {
+          auto sf = std::dynamic_pointer_cast<sf::Schaefer>( params_.kinematics.structure_functions );
           fillParameter( psf, "Q2cut", sf->params.q2_cut );
           std::vector<double> w2_lims;
           fillParameter( psf, "W2limits", w2_lims );

@@ -8,7 +8,7 @@
 
 namespace CepGen
 {
-  namespace SF { class Parameterisation; }
+  namespace sf { class Parameterisation; }
   class ParametersList;
   namespace Cards
   {
@@ -52,7 +52,7 @@ namespace CepGen
         void parseGenerator( PyObject* );
         void parseTamingFunctions( PyObject* );
         void parseHadroniser( PyObject* );
-        void parseStructureFunctions( PyObject*, std::shared_ptr<SF::Parameterisation>& sf_handler );
+        void parseStructureFunctions( PyObject*, std::shared_ptr<sf::Parameterisation>& sf_handler );
     };
     template<> bool PythonHandler::is<int>( PyObject* obj ) const;
     template<> int PythonHandler::get<int>( PyObject* obj ) const;

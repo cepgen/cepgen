@@ -12,14 +12,14 @@ namespace mstw
   Grid&
   Grid::get( const char* filename )
   {
-    Parameterisation p;
+    Parameters p;
     p.grid_path = filename;
     static Grid instance( p );
     return instance;
   }
 
-  Grid::Grid( const Parameterisation& param ) :
-    CepGen::SF::Parameterisation( CepGen::SF::Type::MSTWgrid ),
+  Grid::Grid( const Parameters& param ) :
+    CepGen::sf::Parameterisation( CepGen::sf::Type::MSTWgrid ),
     CepGen::GridHandler<2,2>( CepGen::GridType::logarithmic ),
     params( param )
   {

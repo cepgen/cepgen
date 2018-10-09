@@ -10,7 +10,7 @@ extern "C"
 
 namespace CepGen
 {
-  namespace SF
+  namespace sf
   {
     /// Szcurek and Uleshchenko modelling of \f$F_{1/2}\f$ \cite Szczurek:1999wp
     class SzczurekUleshchenko : public Parameterisation

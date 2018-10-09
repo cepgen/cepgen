@@ -4,7 +4,7 @@
 
 namespace CepGen
 {
-  namespace SF
+  namespace sf
   {
     constexpr std::array<short,6> LHAPDF::qtimes3_, LHAPDF::pdgid_;
 
@@ -147,12 +147,12 @@ namespace CepGen
   }
 
   std::ostream&
-  operator<<( std::ostream& os, const SF::LHAPDF::Parameters::Mode& mode )
+  operator<<( std::ostream& os, const sf::LHAPDF::Parameters::Mode& mode )
   {
     switch ( mode ) {
-      case SF::LHAPDF::Parameters::Mode::full: return os << "all quarks";
-      case SF::LHAPDF::Parameters::Mode::valence: return os << "valence quarks";
-      case SF::LHAPDF::Parameters::Mode::sea: return os << "sea quarks";
+      case sf::LHAPDF::Parameters::Mode::full: return os << "all quarks";
+      case sf::LHAPDF::Parameters::Mode::valence: return os << "valence quarks";
+      case sf::LHAPDF::Parameters::Mode::sea: return os << "sea quarks";
     }
     return os;
   }

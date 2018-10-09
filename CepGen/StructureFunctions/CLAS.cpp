@@ -8,13 +8,13 @@
 
 namespace CepGen
 {
-  namespace SF
+  namespace sf
   {
-    CLAS::Parameterisation
-    CLAS::Parameterisation::standard_proton()
+    CLAS::Parameters
+    CLAS::Parameters::standard_proton()
     {
-      Parameterisation params;
-      params.mode = Parameterisation::proton;
+      Parameters params;
+      params.mode = Parameters::proton;
       params.mp = mp_;
       params.mpi0 = ParticleProperties::mass( PDG::piZero );
       // SLAC fit parameters
@@ -27,28 +27,28 @@ namespace CepGen
       params.mu = -0.0352567;
       params.mup = 3.51852;
 
-      Parameterisation::Resonance r0;
+      Parameters::Resonance r0;
       r0.amplitude = 1.04;
       r0.mass = 1.22991;
       r0.width = 0.106254;
       r0.angular_momentum = 1;
       params.resonances.emplace_back( r0 );
 
-      Parameterisation::Resonance r1;
+      Parameters::Resonance r1;
       r1.amplitude = 0.481327;
       r1.mass = 1.51015;
       r1.width = 0.0816620;
       r1.angular_momentum = 2;
       params.resonances.emplace_back( r1 );
 
-      Parameterisation::Resonance r2;
+      Parameters::Resonance r2;
       r2.amplitude = 0.655872;
       r2.mass = 1.71762;
       r2.width = 0.125520;
       r2.angular_momentum = 3;
       params.resonances.emplace_back( r2 );
 
-      Parameterisation::Resonance r3;
+      Parameters::Resonance r3;
       r3.amplitude = 0.747338;
       r3.mass = 1.95381;
       r3.width = 0.198915;
@@ -58,20 +58,20 @@ namespace CepGen
       return params;
     }
 
-    CLAS::Parameterisation
-    CLAS::Parameterisation::standard_neutron()
+    CLAS::Parameters
+    CLAS::Parameters::standard_neutron()
     {
-      Parameterisation params = standard_proton();
-      params.mode = Parameterisation::neutron;
+      Parameters params = standard_proton();
+      params.mode = Parameters::neutron;
       params.c_slac = { { 0.0640, 0.2250, 4.1060, -7.0790, 3.0550, 1.6421, 0.37636 } };
       return params;
     }
 
-    CLAS::Parameterisation
-    CLAS::Parameterisation::standard_deuteron()
+    CLAS::Parameters
+    CLAS::Parameters::standard_deuteron()
     {
-      Parameterisation params = standard_proton();
-      params.mode = Parameterisation::deuteron;
+      Parameters params = standard_proton();
+      params.mode = Parameters::deuteron;
       params.c_slac = { { 0.47709, 2.1602, 3.6274, -10.470, 4.9272, 1.5121, 0.35115 } };
       params.x = { { -0.21262, 6.9690, 0.40314 } };
       params.b = { { 0.76111, 4.1470, 3.7119, 1.4218 } };
@@ -80,28 +80,28 @@ namespace CepGen
 
       params.resonances.clear();
 
-      Parameterisation::Resonance r0;
+      Parameters::Resonance r0;
       r0.amplitude = 0.74847;
       r0.mass = 1.2400;
       r0.width = 0.12115;
       r0.angular_momentum = 1;
       params.resonances.emplace_back( r0 );
 
-      Parameterisation::Resonance r1;
+      Parameters::Resonance r1;
       r1.amplitude = 0.011500;
       r1.mass = 1.4772;
       r1.width = 0.0069580;
       r1.angular_momentum = 2;
       params.resonances.emplace_back( r1 );
 
-      Parameterisation::Resonance r2;
+      Parameters::Resonance r2;
       r2.amplitude = 0.12662;
       r2.mass = 1.5233;
       r2.width = 0.084095;
       r2.angular_momentum = 3;
       params.resonances.emplace_back( r2 );
 
-      Parameterisation::Resonance r3;
+      Parameters::Resonance r3;
       r3.amplitude = 0.747338;
       r3.mass = 1.95381;
       r3.width = 0.198915;
@@ -111,8 +111,8 @@ namespace CepGen
       return params;
     }
 
-    CLAS::CLAS( const CLAS::Parameterisation& params ) :
-      SF::Parameterisation( Type::CLAS ), params_( params )
+    CLAS::CLAS( const Parameters& params ) :
+      Parameterisation( Type::CLAS ), params_( params )
     {}
 
     CLAS&
@@ -152,7 +152,7 @@ namespace CepGen
       for ( unsigned short i = 0; i < 5; ++i )
         f2 += params_.c_slac[i]*pow( 1.-xs, i );
 
-      if ( params_.mode == Parameterisation::deuteron && xbj > 0. )
+      if ( params_.mode == Parameters::deuteron && xbj > 0. )
         f2 /= ( 1.-exp( -7.70*( 1./xbj-1.+params_.mp*params_.mp/q2 ) ) );
 
       return f2 * pow( 1.-xs, 3 ) / xsxb;
@@ -188,7 +188,7 @@ namespace CepGen
       f2bkg *= ( 1.+( 1.-f2bkg )*( params_.x[0]+params_.x[1]*pow( xn-params_.x[2], 2 ) ) );
 
       double etab = 1., etad = 1.;
-      if ( params_.mode != Parameterisation::deuteron && q2 <= 2. && w <= 2.5 ) {
+      if ( params_.mode != Parameters::deuteron && q2 <= 2. && w <= 2.5 ) {
         etab = 1.-2.5*q2*exp( -12.5*q2*q2-50.*( w-1.325 )*( w-1.325 ) );
         etad = 1.+2.5*q2*exp( -12.5*q2*q2 );
       }
@@ -197,7 +197,7 @@ namespace CepGen
       double f2resn = 0.;
 
       for ( unsigned short i = 0; i < params_.resonances.size(); ++i ) {
-        const Parameterisation::Resonance& res = params_.resonances[i];
+        const Parameters::Resonance& res = params_.resonances[i];
         const double ai = ( i == 0 )
           ? etad * ( res.amplitude + q2*std::min( 0., params_.alpha+params_.beta*q2 ) )
           : res.amplitude;

@@ -4,7 +4,7 @@
 
 namespace CepGen
 {
-  namespace SF
+  namespace sf
   {
     ALLM::Parameters
     ALLM::Parameters::allm91()

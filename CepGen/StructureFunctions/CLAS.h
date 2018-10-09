@@ -8,7 +8,7 @@
 
 namespace CepGen
 {
-  namespace SF
+  namespace sf
   {
     /// \brief CLAS parameterisation for nucleon data at \f$Q^2\f$ > 0.5 GeV\f${}^2\f$ and \f$x_{\rm Bj}\f$ > 0.15
     /// \note This code was provided on 2016-04-13 by Silvano Simula and reflects the parameterisation used in \cite Osipenko:2003bu (CLAS) and described in \cite Ricco:1998yr.
@@ -16,14 +16,14 @@ namespace CepGen
     {
       public:
         /// List of steering parameters for a physics case
-        struct Parameterisation
+        struct Parameters
         {
           /// Standard parameterisation of a parton-from-neutron emission
-          static Parameterisation standard_neutron();
+          static Parameters standard_neutron();
           /// Standard parameterisation of a parton-from-proton emission
-          static Parameterisation standard_proton();
+          static Parameters standard_proton();
           /// Standard parameterisation of a parton-from-deuteron emission
-          static Parameterisation standard_deuteron();
+          static Parameters standard_deuteron();
 
           /// Physical properties associated to a resonance
           struct Resonance
@@ -46,7 +46,7 @@ namespace CepGen
         };
 
         /// Standard parameterisation interpolator constructor (photon from proton)
-        explicit CLAS( const CLAS::Parameterisation& params = CLAS::Parameterisation::standard_proton() );
+        explicit CLAS( const Parameters& params = Parameters::standard_proton() );
 
         CLAS& operator()( double xbj, double q2 ) override;
 
@@ -61,7 +61,7 @@ namespace CepGen
         /// \param[in] xbj Bjorken scaling variable
         /// \return \f$F_{2}^{N}\f$
         double f2slac( double xbj, double q2 ) const;
-        Parameterisation params_;
+        Parameters params_;
     };
   }
 }

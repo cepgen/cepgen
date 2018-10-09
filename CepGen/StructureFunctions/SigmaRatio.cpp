@@ -7,21 +7,21 @@
 
 namespace CepGen
 {
-  namespace SF
+  namespace sr
   {
-    const double SigmaRatio::mp_ = ParticleProperties::mass( PDG::proton );
-    const double SigmaRatio::mp2_ = SigmaRatio::mp_*SigmaRatio::mp_;
+    const double Parameterisation::mp_ = ParticleProperties::mass( PDG::proton );
+    const double Parameterisation::mp2_ = Parameterisation::mp_*Parameterisation::mp_;
 
     double
-    SigmaRatio::theta( double xbj, double q2 ) const
+    Parameterisation::theta( double xbj, double q2 ) const
     {
       return 1.+12.*( q2/( q2+1. ) )*( 0.125*0.125/( 0.125*0.125+xbj*xbj ) );
     }
 
-    E143Ratio::Parameterisation
-    E143Ratio::Parameterisation::standard()
+    E143::Parameters
+    E143::Parameters::standard()
     {
-      Parameterisation out;
+      Parameters out;
       out.q2_b = 0.34;
       out.lambda2 = 0.2*0.2;
       out.a = { { 0.0485, 0.5470,  2.0621, -0.3804,   0.5090, -0.0285 } };
@@ -30,23 +30,23 @@ namespace CepGen
       return out;
     }
 
-    E143Ratio::E143Ratio( const Parameterisation& param ) :
+    E143::E143( const Parameters& param ) :
       params_( param )
     {}
 
     double
-    E143Ratio::operator()( double xbj, double q2, double& err ) const
+    E143::operator()( double xbj, double q2, double& err ) const
     {
       const double u = q2/params_.q2_b;
       const double inv_xl = 1./log( q2/params_.lambda2 );
       const double pa = ( 1.+params_.a[3]*xbj+params_.a[4]*xbj*xbj )*pow( xbj, params_.a[5] );
       const double pb = ( 1.+params_.b[3]*xbj+params_.b[4]*xbj*xbj )*pow( xbj, params_.b[5] );
-      const double theta = SigmaRatio::theta( xbj, q2 );
+      const double th = theta( xbj, q2 );
       const double q2_thr = params_.c[3]*xbj + params_.c[4]*xbj*xbj+params_.c[5]*xbj*xbj*xbj;
       // here come the three fits
-      const double ra = params_.a[0]*inv_xl*theta + params_.a[1]/pow( pow( q2, 4 )+pow( params_.a[2], 4 ), 0.25 )*pa,
-                   rb = params_.b[0]*inv_xl*theta + ( params_.b[1]/q2+params_.b[2]/( q2*q2+0.3*0.3 ) )*pb,
-                   rc = params_.c[0]*inv_xl*theta + params_.c[1]*pow( pow( q2-q2_thr, 2 )+pow( params_.c[2], 2 ), -0.5 );
+      const double ra = params_.a[0]*inv_xl*th + params_.a[1]/pow( pow( q2, 4 )+pow( params_.a[2], 4 ), 0.25 )*pa,
+                   rb = params_.b[0]*inv_xl*th + ( params_.b[1]/q2+params_.b[2]/( q2*q2+0.3*0.3 ) )*pb,
+                   rc = params_.c[0]*inv_xl*th + params_.c[1]*pow( pow( q2-q2_thr, 2 )+pow( params_.c[2], 2 ), -0.5 );
 
       const double r = ( ra+rb+rc ) / 3.; // R is set to be the average of the three fits
       // numerical safety for low-Q²
@@ -56,30 +56,30 @@ namespace CepGen
       return r * 0.5 * ( 3.*u-u*u*u );
     }
 
-    R1990Ratio::Parameterisation
-    R1990Ratio::Parameterisation::standard()
+    R1990::Parameters
+    R1990::Parameters::standard()
     {
-      Parameterisation out;
+      Parameters out;
       out.lambda2 = 0.2*0.2;
       out.b = { { 0.0635, 0.5747, -0.3534 } };
       return out;
     }
 
-    R1990Ratio::R1990Ratio( const Parameterisation& param ) :
+    R1990::R1990( const Parameters& param ) :
       params_( param )
     {}
 
     double
-    R1990Ratio::operator()( double xbj, double q2, double& err ) const
+    R1990::operator()( double xbj, double q2, double& err ) const
     {
       err = 0.;
-      return ( params_.b[0]+SigmaRatio::theta( xbj, q2 )/log( q2/params_.lambda2 )
+      return ( params_.b[0]+theta( xbj, q2 )/log( q2/params_.lambda2 )
              + params_.b[1]/q2
              + params_.b[2]/( q2*q2+0.09 ) );
     }
 
     double
-    CLASRatio::operator()( double xbj, double q2, double& err ) const
+    CLAS::operator()( double xbj, double q2, double& err ) const
     {
       // 2 kinematic regions:
       //  - resonances ( w < 2.5 )
@@ -95,7 +95,7 @@ namespace CepGen
     }
 
     double
-    SBRatio::operator()( double xbj, double q2, double& err ) const
+    SibirtsevBlunden::operator()( double xbj, double q2, double& err ) const
     {
       err = 0.;
       return 0.014*q2*( exp( -0.07*q2 )+41.*exp( -0.8*q2 ) );

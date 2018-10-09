@@ -6,7 +6,7 @@
 
 namespace CepGen
 {
-  namespace SF
+  namespace sf
   {
     /// \f$F_2\f$ parameterisation from Block, Durand, and Ha \cite Block:2014kza
     class BlockDurandHa : public Parameterisation

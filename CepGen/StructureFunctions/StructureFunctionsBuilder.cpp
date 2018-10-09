@@ -11,7 +11,7 @@
 
 namespace CepGen
 {
-  namespace SF
+  namespace sf
   {
     std::shared_ptr<Parameterisation>
     Parameterisation::build( const Type& sf_type )
@@ -31,7 +31,7 @@ namespace CepGen
         case Type::GD07p:               return std::make_shared<ALLM>( ALLM::Parameters::gd07p() );
         case Type::GD11p:               return std::make_shared<ALLM>( ALLM::Parameters::gd11p() );
         case Type::Schaefer:            return std::make_shared<Schaefer>();
-        case Type::LHAPDF:              return std::make_shared<SF::LHAPDF>();
+        case Type::LHAPDF:              return std::make_shared<sf::LHAPDF>();
         //--- particular case for the MSTW grid as we are dealing
         //--- with a singleton ; hence, no deleter is needed!
         case Type::MSTWgrid:            return std::shared_ptr<mstw::Grid>( &mstw::Grid::get(), [=]( mstw::Grid* ){} );
@@ -39,4 +39,3 @@ namespace CepGen
     }
   }
 }
-

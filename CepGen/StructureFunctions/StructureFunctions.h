@@ -9,7 +9,7 @@
 namespace CepGen
 {
   /// Structure functions modelling scope
-  namespace SF
+  namespace sf
   {
     /// Proton structure function to be used in the outgoing state description
     /// \note Values correspond to the LPAIR legacy steering card values
@@ -57,7 +57,7 @@ namespace CepGen
         /// Compute all relevant structure functions for a given \f$(x_{\rm Bj},Q^2)\f$ couple
         virtual Parameterisation& operator()( double xbj, double q2 ) { return *this; }
         /// Compute the longitudinal structure function for a given point
-        virtual void computeFL( double xbj, double q2, const SigmaRatio& ratio = E143Ratio() );
+        virtual void computeFL( double xbj, double q2, const sr::Parameterisation& ratio = sr::E143() );
         /// Compute the longitudinal structure function for a given point
         virtual void computeFL( double xbj, double q2, double r );
         /// Compute the \f$F_1\f$ structure function for a given point
@@ -79,7 +79,7 @@ namespace CepGen
     };
   }
   /// Human-readable description of this SF parameterisation type
-  std::ostream& operator<<( std::ostream&, const SF::Type& );
+  std::ostream& operator<<( std::ostream&, const sf::Type& );
 }
 
 #endif

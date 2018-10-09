@@ -11,7 +11,7 @@
 
 namespace CepGen
 {
-  namespace SF
+  namespace sf
   {
     /// Generic partonic level perturbative structure functions built from an external PDFs grid
     class LHAPDF : public Parameterisation
@@ -62,7 +62,7 @@ namespace CepGen
         } };
     };
   }
-  std::ostream& operator<<( std::ostream& os, const SF::LHAPDF::Parameters::Mode& mode );
+  std::ostream& operator<<( std::ostream& os, const sf::LHAPDF::Parameters::Mode& mode );
 }
 
 #endif

@@ -48,8 +48,8 @@ c     =================================================================
 c     generated event kinematics
 c     =================================================================
       common/evtkin/px,py,nout,idum,ipdg,pc
-      integer nout,idum,ipdg(4)
-      double precision px(4),py(4),pc(4,4)
+      integer nout,idum,ipdg(10)
+      double precision pc(4,10),px(4),py(4)
 
 c     =================================================================
 c     helpers for the evaluation of unintegrated parton fluxes

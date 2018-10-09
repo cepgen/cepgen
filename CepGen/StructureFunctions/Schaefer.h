@@ -6,7 +6,7 @@
 
 namespace CepGen
 {
-  namespace SF
+  namespace sf
   {
     /// LUX-like hybrid modelling of \f$F_{2/L}\f$ structure functions
     class Schaefer : public Parameterisation

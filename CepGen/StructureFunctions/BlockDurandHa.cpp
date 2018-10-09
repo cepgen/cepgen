@@ -3,7 +3,7 @@
 
 namespace CepGen
 {
-  namespace SF
+  namespace sf
   {
     BlockDurandHa::Parameters
     BlockDurandHa::Parameters::standard()
