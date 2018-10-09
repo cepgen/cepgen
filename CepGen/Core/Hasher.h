@@ -8,7 +8,7 @@ namespace cepgen
 {
   /// A hasher table for a given structure
   template<class T,bool>
-  struct hasher
+  struct Hasher
   {
     inline size_t operator()( const T& t ) const {
       return std::hash<T>()( t );
@@ -16,7 +16,7 @@ namespace cepgen
   };
   /// A hasher table for a given structure
   template<class T>
-  struct hasher<T, true>
+  struct Hasher<T, true>
   {
     inline size_t operator() ( const T& t ) {
       typedef typename std::underlying_type<T>::type enumType;
@@ -28,7 +28,7 @@ namespace cepgen
   struct EnumHash
   {
     inline size_t operator()( const T& t ) const {
-      return hasher<T,std::is_enum<T>::value>()( t );
+      return Hasher<T,std::is_enum<T>::value>()( t );
     }
   };
 }
