@@ -12,7 +12,7 @@ namespace CepGen
   class Parameters;
   class ParametersList;
   /// Location for all hadronisers to be run downstream to the events generation
-  namespace Hadroniser
+  namespace hadroniser
   {
     /**
      * \brief Class template to define any hadroniser as a general object with defined methods

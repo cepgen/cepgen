@@ -31,7 +31,7 @@ namespace CepGen
       if ( !p )
         throw CG_FATAL( "Integrand" ) << "Failed to retrieve the run parameters!";
 
-      Process::GenericProcess* proc = p->process();
+      process::GenericProcess* proc = p->process();
       if ( !proc )
         throw CG_FATAL( "Integrand" ) << "Failed to retrieve the process!";
 
@@ -199,4 +199,3 @@ namespace CepGen
     }
   }
 }
-

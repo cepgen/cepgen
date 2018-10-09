@@ -377,7 +377,7 @@ namespace CepGen
       fillParameter( hadr, "moduleParameters", mod_params );
 
       if ( hadr_name == "pythia8" )
-        params_.setHadroniser( new Hadroniser::Pythia8Hadroniser( params_, mod_params ) );
+        params_.setHadroniser( new hadroniser::Pythia8Hadroniser( params_, mod_params ) );
       else
         throwPythonError( Form( "Unrecognised hadronisation algorithm: \"%s\"!", hadr_name.c_str() ) );
 

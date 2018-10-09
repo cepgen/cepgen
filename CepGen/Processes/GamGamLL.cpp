@@ -12,7 +12,7 @@
 
 namespace CepGen
 {
-  namespace Process
+  namespace process
   {
     //---------------------------------------------------------------------------------------------
 
@@ -1147,4 +1147,3 @@ namespace CepGen
     REGISTER_PROCESS( gamgamll, GamGamLL )
   }
 }
-

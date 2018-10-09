@@ -5,7 +5,7 @@
 
 namespace CepGen
 {
-  namespace Hadroniser
+  namespace hadroniser
   {
     GenericHadroniser::GenericHadroniser( const char* name, const ParametersList& plist ) :
       name_( name ),
@@ -40,15 +40,14 @@ namespace CepGen
   }
 
   std::ostream&
-  operator<<( std::ostream& os, const Hadroniser::GenericHadroniser& hadr )
+  operator<<( std::ostream& os, const hadroniser::GenericHadroniser& hadr )
   {
     return os << hadr.name().c_str();
   }
 
   std::ostream&
-  operator<<( std::ostream& os, const Hadroniser::GenericHadroniser* hadr )
+  operator<<( std::ostream& os, const hadroniser::GenericHadroniser* hadr )
   {
     return os << hadr->name().c_str();
   }
 }
-

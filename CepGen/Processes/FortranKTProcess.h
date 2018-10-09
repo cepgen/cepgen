@@ -6,7 +6,7 @@
 
 namespace CepGen
 {
-  namespace Process
+  namespace process
   {
     /// Compute the matrix element for a generic \f$k_T\f$-factorised process defined in a Fortran subroutine
     class FortranKTProcess : public GenericKTProcess
@@ -35,4 +35,3 @@ namespace CepGen
 }
 
 #endif
-

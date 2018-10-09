@@ -6,7 +6,7 @@
 
 namespace CepGen
 {
-  namespace Process
+  namespace process
   {
     /**
      * Full class of methods and objects to compute the full analytic matrix element

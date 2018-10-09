@@ -6,7 +6,7 @@
 namespace CepGen
 {
   class ParametersList;
-  namespace Process
+  namespace process
   {
     /**
      * A generic kT-factorisation process.
@@ -140,4 +140,3 @@ namespace CepGen
 }
 
 #endif
-

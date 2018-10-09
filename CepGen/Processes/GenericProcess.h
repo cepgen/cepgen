@@ -13,7 +13,7 @@ namespace CepGen
   class FormFactors;
   class ParametersList;
   /// Location for all physics processes to be generated
-  namespace Process
+  namespace process
   {
     /// \brief Class template to define any process to compute using this MC integrator/events generator
     /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
@@ -161,7 +161,7 @@ namespace CepGen
     };
   }
   /// Helper typedef for a Process unique pointer
-  typedef std::unique_ptr<Process::GenericProcess> ProcessPtr;
+  typedef std::unique_ptr<process::GenericProcess> ProcessPtr;
 }
 
 #endif

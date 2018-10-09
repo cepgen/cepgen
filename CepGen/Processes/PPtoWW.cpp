@@ -14,7 +14,7 @@
 
 namespace CepGen
 {
-  namespace Process
+  namespace process
   {
     const double PPtoWW::mw_ = ParticleProperties::mass( PDG::W );
     const double PPtoWW::mw2_ = PPtoWW::mw_*PPtoWW::mw_;
@@ -391,4 +391,3 @@ namespace CepGen
     REGISTER_PROCESS( pptoww, PPtoWW )
   }
 }
-

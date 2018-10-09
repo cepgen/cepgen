@@ -14,8 +14,8 @@ namespace CepGen
   class Event;
   class TamingFunctionsCollection;
   class ParametersList;
-  namespace Process { class GenericProcess; }
-  namespace Hadroniser { class GenericHadroniser; }
+  namespace process { class GenericProcess; }
+  namespace hadroniser { class GenericHadroniser; }
   /// List of parameters used to start and run the simulation job
   class Parameters
   {
@@ -39,13 +39,13 @@ namespace CepGen
       //----- process to compute
 
       /// Process for which the cross-section will be computed and the events will be generated
-      Process::GenericProcess* process();
+      process::GenericProcess* process();
       /// Name of the process considered
       std::string processName() const;
       /// Set the process to study
-      void setProcess( std::unique_ptr<Process::GenericProcess> proc );
+      void setProcess( std::unique_ptr<process::GenericProcess> proc );
       /// Set the process to study
-      void setProcess( Process::GenericProcess* proc );
+      void setProcess( process::GenericProcess* proc );
 
       //----- events kinematics
 
@@ -109,11 +109,11 @@ namespace CepGen
       //----- hadronisation algorithm
 
       /// Hadronisation algorithm to use for the proton(s) fragmentation
-      Hadroniser::GenericHadroniser* hadroniser();
+      hadroniser::GenericHadroniser* hadroniser();
       /// Name of the hadroniser (if applicable)
       std::string hadroniserName() const;
       /// Set the hadronisation algorithm
-      void setHadroniser( Hadroniser::GenericHadroniser* hadr );
+      void setHadroniser( hadroniser::GenericHadroniser* hadr );
 
       //----- taming functions
 
@@ -133,8 +133,8 @@ namespace CepGen
       inline unsigned int numGeneratedEvents() const { return num_gen_events_; }
 
     private:
-      std::unique_ptr<Process::GenericProcess> process_;
-      std::unique_ptr<Hadroniser::GenericHadroniser> hadroniser_;
+      std::unique_ptr<process::GenericProcess> process_;
+      std::unique_ptr<hadroniser::GenericHadroniser> hadroniser_;
 
       bool store_;
       /// Total generation time (in seconds)
