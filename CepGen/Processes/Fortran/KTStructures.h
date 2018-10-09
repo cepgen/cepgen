@@ -4,7 +4,7 @@
 namespace CepGen
 {
   /// Collection of common blocks for Fortran kT-processes
-  namespace KTBlock
+  namespace ktblock
   {
     /// General physics constants
     struct Constants {

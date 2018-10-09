@@ -25,7 +25,7 @@
 namespace CepGen
 {
   class Event;
-  namespace OutputHandler
+  namespace output
   {
     /**
      * \brief Handler for the LHE file output
@@ -68,4 +68,3 @@ namespace CepGen
 }
 
 #endif
-

@@ -10,7 +10,7 @@ namespace CepGen
 {
   namespace sf { class Parameterisation; }
   class ParametersList;
-  namespace Cards
+  namespace cards
   {
     /// CepGen Python configuration cards reader/writer
     class PythonHandler : public Handler

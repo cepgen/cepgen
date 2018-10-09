@@ -12,11 +12,11 @@
 
 extern "C"
 {
-  extern CepGen::KTBlock::Constants constants_;
-  extern CepGen::KTBlock::Parameters params_;
-  extern CepGen::KTBlock::KTKinematics ktkin_;
-  extern CepGen::KTBlock::Cuts kincuts_;
-  extern CepGen::KTBlock::Event evtkin_;
+  extern CepGen::ktblock::Constants constants_;
+  extern CepGen::ktblock::Parameters params_;
+  extern CepGen::ktblock::KTKinematics ktkin_;
+  extern CepGen::ktblock::Cuts kincuts_;
+  extern CepGen::ktblock::Event evtkin_;
 }
 
 namespace CepGen
@@ -30,9 +30,9 @@ namespace CepGen
       func_( func )
     {
       constants_.m_p = GenericProcess::mp_;
-      constants_.units = Constants::GeV2toBarn;
+      constants_.units = constants::GeV2toBarn;
       constants_.pi = M_PI;
-      constants_.alpha_em = Constants::alphaEM;
+      constants_.alpha_em = constants::alphaEM;
     }
 
     void

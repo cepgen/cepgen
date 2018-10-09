@@ -35,10 +35,10 @@ namespace CepGen
           << "Invalid fermion pair selected: " << pair_ << "!";
 
       const PDG pdg_f = (PDG)pair_;
-      mf_ = ParticleProperties::mass( pdg_f );
+      mf_ = part::mass( pdg_f );
       mf2_ = mf_*mf_;
-      qf_ = ParticleProperties::charge( pdg_f );
-      colf_ = ParticleProperties::colours( pdg_f );
+      qf_ = part::charge( pdg_f );
+      colf_ = part::colours( pdg_f );
       CG_DEBUG( "PPtoFF:prepare" )
         << "Produced particles (" << pdg_f << ") "
         << "with mass = " << mf_ << " GeV, "
@@ -239,11 +239,11 @@ namespace CepGen
       //       d^2 kappa_1 d^2 kappa_2 instead d kappa_1^2 d kappa_2^2
       //=================================================================
 
-      const double g_em = 4.*M_PI*Constants::alphaEM*qf_*qf_;
+      const double g_em = 4.*M_PI*constants::alphaEM*qf_*qf_;
       const double aintegral = amat2 * colf_ * ( g_em*g_em )
                              * 1. / pow( 4.*M_PI*( x1*x2*s_ ), 2 )
                              * fluxes.first*M_1_PI * fluxes.second*M_1_PI * 0.25
-                             * Constants::GeV2toBarn;
+                             * constants::GeV2toBarn;
 
       //=================================================================
       return aintegral*qt1_*qt2_*pt_diff_;

@@ -14,7 +14,7 @@
 
 namespace CepGen
 {
-  namespace Cards
+  namespace cards
   {
     const int LpairHandler::kInvalid = 99999;
 

@@ -206,7 +206,7 @@ namespace CepGen
       /// Set the particle unique identifier in an event
       void setId( int id ) { id_ = id; }
       /// Electric charge (given as a float number, for the quarks and bound states)
-      float charge() const { return charge_sign_ * ParticleProperties::charge( pdg_id_ ); }
+      float charge() const { return charge_sign_ * part::charge( pdg_id_ ); }
       /// Set the electric charge sign (+-1 for charged or 0 for neutral particles)
       void setChargeSign( int sign ) { charge_sign_ = sign; }
       /// Role in the considered process

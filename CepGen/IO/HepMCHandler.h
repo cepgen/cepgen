@@ -20,7 +20,7 @@
 
 namespace CepGen
 {
-  namespace OutputHandler
+  namespace output
   {
     /**
      * \brief Handler for the HepMC file output
@@ -64,4 +64,3 @@ namespace CepGen
 }
 
 #endif
-

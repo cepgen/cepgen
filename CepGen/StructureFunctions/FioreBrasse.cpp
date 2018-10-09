@@ -50,7 +50,7 @@ namespace CepGen
       old_vals_ = nv;
 
       const double akin = 1. + 4.*mp2_ * xbj*xbj/q2;
-      const double prefactor = q2*( 1.-xbj ) / ( 4.*M_PI*Constants::alphaEM*akin );
+      const double prefactor = q2*( 1.-xbj ) / ( 4.*M_PI*constants::alphaEM*akin );
       const double s = q2*( 1.-xbj )/xbj + mp2_;
 
       double ampli_res = 0., ampli_bg = 0., ampli_tot = 0.;

@@ -9,7 +9,7 @@ namespace CepGen
 {
   namespace sr
   {
-    const double Parameterisation::mp_ = ParticleProperties::mass( PDG::proton );
+    const double Parameterisation::mp_ = part::mass( PDG::proton );
     const double Parameterisation::mp2_ = Parameterisation::mp_*Parameterisation::mp_;
 
     double

@@ -7,7 +7,7 @@ using namespace CepGen;
 
 int main() {
 
-  OutputHandler::HepMCHandler writer( "example.dat" );
+  output::HepMCHandler writer( "example.dat" );
   writer.setCrossSection(1., 2.);
 
   Event ev;

@@ -44,7 +44,7 @@ extern "C" {
   cepgen_particle_mass_( int& pdg_id )
   {
     try {
-      return CepGen::ParticleProperties::mass( (CepGen::PDG)pdg_id );
+      return CepGen::part::mass( (CepGen::PDG)pdg_id );
     } catch ( const CepGen::Exception& e ) {
       e.dump();
       exit( 0 );
@@ -55,7 +55,7 @@ extern "C" {
   cepgen_particle_charge_( int& pdg_id )
   {
     try {
-      return CepGen::ParticleProperties::charge( pdg_id );
+      return CepGen::part::charge( pdg_id );
     } catch ( const CepGen::Exception& e ) {
       e.dump();
       exit( 0 );

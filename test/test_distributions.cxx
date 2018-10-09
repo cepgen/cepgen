@@ -36,7 +36,7 @@ int main( int argc, char* argv[] )
 
   if ( argc < 2 )
     throw CG_FATAL( "main" ) << "Usage: " << argv[0] << " [input card]";
-  mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
+  mg.setParameters( CepGen::cards::PythonHandler( argv[1] ).parameters() );
 
   h_mass = unique_ptr<TH1D>( new TH1D( "invm", ";Dilepton invariant mass;d#sigma/dM (pb/GeV)", 500, 0., 500. ) );
   h_ptpair = unique_ptr<TH1D>( new TH1D( "ptpair", ";Dilepton p_{T};d#sigma/dp_{T} (pb/GeV)", 500, 0., 50. ) );

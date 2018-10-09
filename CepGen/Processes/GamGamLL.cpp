@@ -615,7 +615,7 @@ namespace CepGen
     double
     GamGamLL::computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dw )
     {
-      const double mx0 = mp_+ParticleProperties::mass( PDG::piZero ); // 1.07
+      const double mx0 = mp_+part::mass( PDG::piZero ); // 1.07
       const double wx2min = pow( std::max( mx0, mx_limits_.min() ), 2 ),
                    wx2max = pow( std::min( sqs_-outmass-2.*lepmass, mx_limits_.max() ), 2 );
 
@@ -653,11 +653,11 @@ namespace CepGen
         case KinematicsMode::InelasticElastic: {
           const double m = computeOutgoingPrimaryParticlesMasses( x( 7 ), p1.mass(), sqrt( masses_.Ml2_ ), masses_.dw31_ );
           event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( m );
-          event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( ParticleProperties::mass( p2.pdgId() ) );
+          event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( part::mass( p2.pdgId() ) );
         } break;
         case KinematicsMode::ElasticInelastic: {
           const double m = computeOutgoingPrimaryParticlesMasses( x( 7 ), p2.mass(), sqrt( masses_.Ml2_ ), masses_.dw52_ );
-          event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( ParticleProperties::mass( p1.pdgId() ) );
+          event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( part::mass( p1.pdgId() ) );
           event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( m );
         } break;
         case KinematicsMode::InelasticInelastic: {
@@ -712,7 +712,7 @@ namespace CepGen
       const double ecm6 = w4_ / ( 2.*mc4_ ),
                    pp6cm = sqrt( ecm6*ecm6-masses_.Ml2_ );
 
-      jacobian_ *= dw4*pp6cm/( mc4_*Constants::sconstb*s_ );
+      jacobian_ *= dw4*pp6cm/( mc4_*constants::sconstb*s_ );
 
       // Let the most obscure part of this code begin...
 
@@ -942,7 +942,7 @@ namespace CepGen
 
       //--- compute the event weight using the Jacobian
 
-      return Constants::GeV2toBarn*jacobian_;
+      return constants::GeV2toBarn*jacobian_;
     }
 
     //---------------------------------------------------------------------------------------------

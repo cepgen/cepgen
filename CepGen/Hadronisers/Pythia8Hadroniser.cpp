@@ -276,7 +276,7 @@ namespace CepGen
   //================================================================================================
 
 #ifdef PYTHIA8
-  const double LHAEvent::mp_ = ParticleProperties::mass( PDG::proton );
+  const double LHAEvent::mp_ = part::mass( PDG::proton );
   const double LHAEvent::mp2_ = LHAEvent::mp_*LHAEvent::mp_;
 
   LHAEvent::LHAEvent( const Parameters* params ) :
@@ -301,7 +301,7 @@ namespace CepGen
   LHAEvent::feedEvent( const Event& ev, bool full, const KinematicsMode& mode )
   {
     const double scale = ev.getOneByRole( Particle::Intermediate ).mass();
-    setProcess( 0, 1., scale, Constants::alphaEM, Constants::alphaQCD );
+    setProcess( 0, 1., scale, constants::alphaEM, constants::alphaQCD );
 
     const Particle& part1 = ev.getOneByRole( Particle::Parton1 ), &part2 = ev.getOneByRole( Particle::Parton2 );
     const Particle& op1 = ev.getOneByRole( Particle::OutgoingBeam1 ), &op2 = ev.getOneByRole( Particle::OutgoingBeam2 );

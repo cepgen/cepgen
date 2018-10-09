@@ -24,7 +24,7 @@
 
 namespace CepGen
 {
-  namespace Cards
+  namespace cards
   {
     //----- specialization for CepGen input cards
     PythonHandler::PythonHandler( const char* file )

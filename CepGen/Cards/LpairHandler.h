@@ -9,7 +9,7 @@ using std::string;
 namespace CepGen
 {
   class ParametersList;
-  namespace Cards
+  namespace cards
   {
     /// LPAIR-like steering cards parser and writer
     class LpairHandler : public Handler
@@ -112,4 +112,3 @@ namespace CepGen
 }
 
 #endif
-

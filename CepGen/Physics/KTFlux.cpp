@@ -11,7 +11,7 @@
 namespace CepGen
 {
   const double KTFluxParameters::kMinKTFlux = 1.e-20;
-  const double KTFluxParameters::kMP = ParticleProperties::mass( PDG::proton );
+  const double KTFluxParameters::kMP = part::mass( PDG::proton );
   const double KTFluxParameters::kMP2 = KTFluxParameters::kMP*KTFluxParameters::kMP;
 
   double
@@ -30,7 +30,7 @@ namespace CepGen
         const double ela1 = ( 1.-x )*( 1.-q2min/q2 );
         //const double ela3 = 1.-( q2-kt2 )/q2;
 
-        flux = Constants::alphaEM*M_1_PI*( 1.-x )/q2*( ela1*ff.FE + 0.5*x2*ff.FM );
+        flux = constants::alphaEM*M_1_PI*( 1.-x )/q2*( ela1*ff.FE + 0.5*x2*ff.FM );
       } break;
       case KTFlux::P_Photon_Inelastic_Budnev: {
         const double mx2 = mx*mx, x2 = x*x;
@@ -44,7 +44,7 @@ namespace CepGen
         const double f_D = str_fun.F2/( q2+mx2-mp2 )* ( 1.-x )*( 1.-q2min/q2 );
         const double f_C = str_fun.F1( xbj, q2 ) * 2./q2;
 
-        flux = Constants::alphaEM*M_1_PI*( 1.-x )/q2*( f_D+0.5*x2*f_C );
+        flux = constants::alphaEM*M_1_PI*( 1.-x )/q2*( f_D+0.5*x2*f_C );
       } break;
       case KTFlux::P_Gluon_KMR: {
         flux = kmr::GluonGrid::get()( log10( x ), log10( kt2 ), 2.*log10( mx ) );
@@ -72,7 +72,7 @@ namespace CepGen
         const double ela1 = pow( kt2/( kt2+x*x*m_a*m_a ), 2 );
         const double ela2 = pow( ff1*ff2, 2 )/*, ela3 = 1.-( q2_ela-kt2 )/q2_ela*/;
         const unsigned int z = (unsigned short)hi.Z;
-        flux = Constants::alphaEM*M_1_PI*z*z*ela1*ela2/q2_ela;
+        flux = constants::alphaEM*M_1_PI*z*z*ela1*ela2/q2_ela;
       } break;
       default:
         throw CG_FATAL("GenericKTProcess:flux") << "Invalid flux type: " << type;

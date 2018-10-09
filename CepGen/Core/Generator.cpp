@@ -90,7 +90,7 @@ namespace CepGen
   double
   Generator::computePoint( double* x )
   {
-    double res = Integrand::eval( x, numDimensions(), (void*)parameters.get() );
+    double res = integrand::eval( x, numDimensions(), (void*)parameters.get() );
     std::ostringstream os;
     for ( unsigned int i = 0; i < numDimensions(); ++i )
       os << x[i] << " ";
@@ -126,9 +126,9 @@ namespace CepGen
   {
     // first destroy and recreate the integrator instance
     if ( !integrator_ )
-      integrator_ = std::unique_ptr<Integrator>( new Integrator( numDimensions(), Integrand::eval, parameters.get() ) );
+      integrator_ = std::unique_ptr<Integrator>( new Integrator( numDimensions(), integrand::eval, parameters.get() ) );
     else if ( integrator_->dimensions() != numDimensions() )
-      integrator_.reset( new Integrator( numDimensions(), Integrand::eval, parameters.get() ) );
+      integrator_.reset( new Integrator( numDimensions(), integrand::eval, parameters.get() ) );
 
     CG_DEBUG( "Generator:newInstance" )
       << "New integrator instance created\n\t"
@@ -168,4 +168,3 @@ namespace CepGen
       << "(" << gen_time_s/parameters->generation.ngen*1.e3 << " ms/event).";
   }
 }
-

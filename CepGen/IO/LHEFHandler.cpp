@@ -9,7 +9,7 @@
 
 namespace CepGen
 {
-  namespace OutputHandler
+  namespace output
   {
     LHEFHandler::LHEFHandler( const char* filename ) :
       ExportHandler( ExportHandler::LHE )
@@ -126,8 +126,8 @@ namespace CepGen
       out.XWGTUP = 1.;
       out.XPDWUP = std::pair<double,double>( 0., 0. );
       out.SCALUP = 0.;
-      out.AQEDUP = Constants::alphaEM;
-      out.AQCDUP = Constants::alphaQCD;
+      out.AQEDUP = constants::alphaEM;
+      out.AQCDUP = constants::alphaQCD;
       out.NUP = ev.numParticles();
       out.resize();
       for ( unsigned short ip = 0; ip < ev.numParticles(); ++ip ) {
@@ -191,7 +191,7 @@ namespace CepGen
     LHEFHandler::LHAevent::feedEvent( unsigned short proc_id, const Event& ev, bool full_event )
     {
       const double scale = ev.getOneByRole( Particle::Intermediate ).mass();
-      setProcess( proc_id, 1., scale, Constants::alphaEM, Constants::alphaQCD );
+      setProcess( proc_id, 1., scale, constants::alphaEM, constants::alphaQCD );
 
       const Particle& ip1 = ev.getOneByRole( Particle::IncomingBeam1 ), &ip2 = ev.getOneByRole( Particle::IncomingBeam2 );
       const Particles& op1 = ev.getByRole( Particle::OutgoingBeam1 ), &op2 = ev.getByRole( Particle::OutgoingBeam2 );

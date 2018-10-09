@@ -13,7 +13,7 @@
 
 namespace CepGen
 {
-  namespace OutputHandler
+  namespace output
   {
     HepMCHandler::HepMCHandler( const char* filename, const ExportHandler::OutputType& type ) :
       ExportHandler( type )
@@ -46,12 +46,12 @@ namespace CepGen
 #ifdef LIBHEPMC
 #  ifdef HEPMC_VERSION3
       xs_->set_cross_section( xsect, xsect_err );
-      event_->add_attribute( "AlphaQCD", HepMC::make_shared<HepMC::DoubleAttribute>( Constants::alphaQCD ) );
-      event_->add_attribute( "AlphaEM", HepMC::make_shared<HepMC::DoubleAttribute>( Constants::alphaEM ) );
+      event_->add_attribute( "AlphaQCD", HepMC::make_shared<HepMC::DoubleAttribute>( constants::alphaQCD ) );
+      event_->add_attribute( "AlphaEM", HepMC::make_shared<HepMC::DoubleAttribute>( constants::alphaEM ) );
 #  else
       xs_.set_cross_section( xsect, xsect_err );
-      event_->set_alphaQCD( Constants::alphaQCD );
-      event_->set_alphaQED( Constants::alphaEM );
+      event_->set_alphaQCD( constants::alphaQCD );
+      event_->set_alphaQED( constants::alphaEM );
 #  endif
 #endif
     }
@@ -131,4 +131,3 @@ namespace CepGen
     }
   }
 }
-

@@ -4,7 +4,8 @@
 namespace CepGen
 {
   enum class PDG;
-  namespace ParticleProperties
+  /// All useful properties about particles
+  namespace part
   {
     /** \brief Mass of a particle, in GeV/c\f${}^2\f$
      * \param pdg_id PDG identifier
@@ -30,4 +31,3 @@ namespace CepGen
 }
 
 #endif
-

@@ -9,7 +9,7 @@
 
 namespace CepGen
 {
-  namespace Cards
+  namespace cards
   {
     //------------------------------------------------------------------
     // typed retrieval helpers
@@ -168,4 +168,3 @@ namespace CepGen
 }
 
 #endif
-

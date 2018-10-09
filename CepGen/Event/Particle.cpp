@@ -63,7 +63,7 @@ namespace CepGen
   Particle::computeMass( bool off_shell )
   {
     if ( !off_shell && pdg_id_ != PDG::invalid ) { // retrieve the mass from the on-shell particle's properties
-      mass_ = ParticleProperties::mass( pdg_id_ );
+      mass_ = part::mass( pdg_id_ );
     }
     else if ( momentum_.energy() >= 0. ) {
       mass_ = sqrt( energy2() - momentum_.p2() );
@@ -183,7 +183,7 @@ namespace CepGen
   int
   Particle::integerPdgId() const
   {
-    const float ch = ParticleProperties::charge( pdg_id_ );
+    const float ch = part::charge( pdg_id_ );
     if ( ch == 0 )
       return static_cast<int>( pdg_id_ );
     return static_cast<int>( pdg_id_ ) * charge_sign_ * ( ch/fabs( ch ) );

@@ -66,11 +66,11 @@ int main( int argc, char* argv[] ) {
   if ( argc < 2 )
     throw CG_FATAL( "main" ) << "Usage: " << argv[0] << " input-card [filename=events.root]";
 
-  const std::string extension = CepGen::Cards::Handler::getExtension( argv[1] );
+  const std::string extension = CepGen::cards::Handler::getExtension( argv[1] );
   if ( extension == "card" )
-    mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
+    mg.setParameters( CepGen::cards::LpairHandler( argv[1] ).parameters() );
   else if ( extension == "py" )
-    mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
+    mg.setParameters( CepGen::cards::PythonHandler( argv[1] ).parameters() );
 
   mg.parameters->generation.enabled = true;
   CG_INFO( "main" ) << mg.parameters.get();

@@ -16,7 +16,7 @@
 
 namespace CepGen
 {
-  namespace Integrand
+  namespace integrand
   {
     Logger::Level log_level;
     Timer tmr;

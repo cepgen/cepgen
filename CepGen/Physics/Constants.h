@@ -6,7 +6,7 @@
 namespace CepGen
 {
   /// List of physical constants useful that may be used for the matrix element definition
-  namespace Constants
+  namespace constants
   {
     /// Electromagnetic coupling constant \f$\alpha_{\rm em}=\frac{e^2}{4\pi\epsilon_0\hbar c}\f$
     constexpr double alphaEM = 1./137.035;
@@ -19,4 +19,3 @@ namespace CepGen
 }
 
 #endif
-

@@ -26,7 +26,7 @@
 /// Common namespace for this Monte Carlo generator
 namespace CepGen
 {
-  namespace Integrand
+  namespace integrand
   {
     /**
      * Function to be integrated. It returns the value of the weight for one point

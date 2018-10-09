@@ -41,12 +41,12 @@ int main( int argc, char* argv[] ) {
   }
   else {
     CG_INFO( "main" ) << "Reading config file stored in " << argv[1] << ".";
-    const std::string extension = CepGen::Cards::Handler::getExtension( argv[1] );
+    const std::string extension = CepGen::cards::Handler::getExtension( argv[1] );
     if ( extension == "card" )
-      gen.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
+      gen.setParameters( CepGen::cards::LpairHandler( argv[1] ).parameters() );
 #ifdef PYTHON
     else if ( extension == "py" )
-      gen.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
+      gen.setParameters( CepGen::cards::PythonHandler( argv[1] ).parameters() );
 #endif
     else
       throw CG_FATAL( "main" ) << "Unrecognized steering card extension: ." << extension << "!";

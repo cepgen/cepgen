@@ -13,7 +13,7 @@
 using namespace std;
 
 // we use polymorphism here
-std::shared_ptr<CepGen::OutputHandler::ExportHandler> writer;
+std::shared_ptr<CepGen::output::ExportHandler> writer;
 
 void storeEvent( const CepGen::Event& ev, unsigned long )
 {
@@ -43,11 +43,11 @@ int main( int argc, char* argv[] ) {
   //-----------------------------------------------------------------------------------------------
 
   CG_DEBUG( "main" ) << "Reading config file stored in \"" << argv[1] << "\"";
-  const string extension = CepGen::Cards::Handler::getExtension( argv[1] );
+  const string extension = CepGen::cards::Handler::getExtension( argv[1] );
   if ( extension == "card" )
-    mg.setParameters( CepGen::Cards::LpairHandler( argv[1] ).parameters() );
+    mg.setParameters( CepGen::cards::LpairHandler( argv[1] ).parameters() );
   else if ( extension == "py" )
-    mg.setParameters( CepGen::Cards::PythonHandler( argv[1] ).parameters() );
+    mg.setParameters( CepGen::cards::PythonHandler( argv[1] ).parameters() );
   else
     throw CG_FATAL( "main" ) << "Unrecognized card format: ." << extension;
 
@@ -58,9 +58,9 @@ int main( int argc, char* argv[] ) {
   const string format = ( argc > 2 ) ? argv[2] : "lhef";
   const char* filename = ( argc > 3 ) ? argv[3] : "example.dat";
   if ( format == "lhef" )
-    writer = std::make_shared<CepGen::OutputHandler::LHEFHandler>( filename );
+    writer = std::make_shared<CepGen::output::LHEFHandler>( filename );
   else if ( format == "hepmc" )
-    writer = std::make_shared<CepGen::OutputHandler::HepMCHandler>( filename );
+    writer = std::make_shared<CepGen::output::HepMCHandler>( filename );
   else
     throw CG_FATAL( "main" ) << "Unrecognized output format: " << format;
 
@@ -83,4 +83,3 @@ int main( int argc, char* argv[] ) {
 
   return 0;
 }
-

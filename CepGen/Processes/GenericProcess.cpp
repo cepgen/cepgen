@@ -13,7 +13,7 @@ namespace CepGen
 {
   namespace process
   {
-    const double GenericProcess::mp_ = ParticleProperties::mass( PDG::proton );
+    const double GenericProcess::mp_ = part::mass( PDG::proton );
     const double GenericProcess::mp2_ = GenericProcess::mp_*GenericProcess::mp_;
 
     GenericProcess::GenericProcess( const std::string& name, const std::string& description, bool has_event ) :
@@ -89,8 +89,8 @@ namespace CepGen
       // at some point introduce non head-on colliding beams?
       Particle::Momentum p1( 0., 0.,  cuts_.incoming_beams.first.pz ), p2( 0., 0., -cuts_.incoming_beams.second.pz );
       // on-shell beam particles
-      p1.setMass( ParticleProperties::mass( cuts_.incoming_beams.first.pdg ) );
-      p2.setMass( ParticleProperties::mass( cuts_.incoming_beams.second.pdg ) );
+      p1.setMass( part::mass( cuts_.incoming_beams.first.pdg ) );
+      p2.setMass( part::mass( cuts_.incoming_beams.second.pdg ) );
       setIncomingKinematics( p1, p2 );
 
       sqs_ = CMEnergy( p1, p2 );
@@ -126,8 +126,8 @@ namespace CepGen
       //--- incoming state
       for ( const auto& ip : ini ) {
         Particle& p = event_->addParticle( ip.first );
-        p.setPdgId( ip.second, ParticleProperties::charge( ip.second ) );
-        p.setMass( ParticleProperties::mass( ip.second ) );
+        p.setPdgId( ip.second, part::charge( ip.second ) );
+        p.setMass( part::mass( ip.second ) );
         if ( ip.first == Particle::IncomingBeam1
           || ip.first == Particle::IncomingBeam2 )
           p.setStatus( Particle::Status::PrimordialIncoming );
@@ -146,8 +146,8 @@ namespace CepGen
       for ( const auto& opl : fin ) { // pair(role, list of PDGids)
         for ( const auto& pdg : opl.second ) {
           Particle& p = event_->addParticle( opl.first );
-          p.setPdgId( pdg, ParticleProperties::charge( pdg ) );
-          p.setMass( ParticleProperties::mass( pdg ) );
+          p.setPdgId( pdg, part::charge( pdg ) );
+          p.setMass( part::mass( pdg ) );
         }
       }
 

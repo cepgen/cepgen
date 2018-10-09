@@ -4,7 +4,7 @@
 
 namespace CepGen
 {
-  namespace ParticleProperties
+  namespace part
   {
     double
     mass( const PDG& pdg_id )
@@ -151,4 +151,3 @@ namespace CepGen
     return os;
   }
 }
-

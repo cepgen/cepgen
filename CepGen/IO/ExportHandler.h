@@ -8,7 +8,7 @@ namespace CepGen
   class Event;
   class Parameters;
   /// Location for all output generators
-  namespace OutputHandler
+  namespace output
   {
     /**
      * \brief Output format handler for events export
