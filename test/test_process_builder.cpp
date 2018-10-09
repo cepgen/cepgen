@@ -15,7 +15,6 @@ int main( int argc, const char* argv[] )
   //--- at this point, the process has been found
   std::cout << "Successfully built the process \"" << proc->name() << "\"!\n"
     << " *) description: " << proc->description() << "\n"
-    << " *) number of integration dimensions: " << proc->numDimensions() << "\n"
     << " *) has event? " << proc->hasEvent() << "\n";
   if ( proc->hasEvent() ) { //--- dump a typical event content
     std::cout << "    event content (invalid kinematics, only check the parentage):\n";

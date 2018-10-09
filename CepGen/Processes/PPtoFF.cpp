@@ -371,8 +371,9 @@ namespace CepGen
 
       return 0.5*( imat1*amat2_1 + imat2*amat2_2 );
     }
-    REGISTER_PROCESS( "pptoll", PPtoFF )
+    // register process and define aliases
+    REGISTER_PROCESS( pptoll, PPtoFF )
+    REGISTER_PROCESS( pptoff, PPtoFF )
   }
-  //ProcessesHandler::get().registerProcess( "pptoll", Process::PPtoFF );
 }
 

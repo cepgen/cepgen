@@ -5,15 +5,13 @@
 #include <unordered_map>
 #include <memory>
 
-
-#define BUILDERNM(obj) obj ## Builder
+#define BUILDERNM( obj ) obj ## Builder
+#define STRINGIFY( name ) #name
 #define REGISTER_PROCESS( name, obj ) \
-  class BUILDERNM( obj ) { \
-    public: BUILDERNM( obj )() { CepGen::ProcessesHandler::get().registerProcess( name, new obj ); } \
+  class BUILDERNM( name ) { \
+    public: BUILDERNM( name )() { CepGen::ProcessesHandler::get().registerProcess( STRINGIFY( name ), new obj ); } \
   }; \
-  static BUILDERNM(obj) g ## obj;
-
-//virtual PPS::GeometryComponent* Build(std::string name) { return new obj(name); }
+  static BUILDERNM( name ) g ## name;
 
 namespace CepGen
 {

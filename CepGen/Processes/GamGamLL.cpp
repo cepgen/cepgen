@@ -8,6 +8,8 @@
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
 
+#include "CepGen/Processes/ProcessesHandler.h"
+
 namespace CepGen
 {
   namespace Process
@@ -1140,5 +1142,7 @@ namespace CepGen
         } break;
       }
     }
+    // register process and define aliases
+    REGISTER_PROCESS( lpair, GamGamLL )
   }
 }

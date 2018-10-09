@@ -10,6 +10,8 @@
 
 #include <assert.h>
 
+#include "CepGen/Processes/ProcessesHandler.h"
+
 namespace CepGen
 {
   namespace Process
@@ -385,5 +387,7 @@ namespace CepGen
                           +( 1.-lam1*lam2 )*( 1.-lam3*lam4 )*cos_theta2 );
       return 0.;
     }
+    // register process and define aliases
+    REGISTER_PROCESS( pptoww, PPtoWW )
   }
 }
