@@ -1,4 +1,4 @@
-file(GLOB sources *.cpp)
+file(GLOB sources *Hadroniser.cpp)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
