@@ -1,6 +1,6 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
-from Config.integrators_cff import vegas as integrator
+from Config.Integration.vegas_cff import integrator
 from Config.PDG_cfi import PDG
 
 from Config.logger_cfi import logger
