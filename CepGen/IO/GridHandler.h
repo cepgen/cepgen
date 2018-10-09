@@ -18,7 +18,7 @@
 #include <vector>
 #include <map>
 
-namespace CepGen
+namespace cepgen
 {
   namespace sf { class Parameterisation; }
   /// Interpolation type for the grid coordinates

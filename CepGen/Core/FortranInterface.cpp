@@ -13,7 +13,7 @@ extern "C" {
   void
   cepgen_structure_functions_( int& sfmode, double& xbj, double& q2, double& f2, double& fl )
   {
-    using namespace CepGen;
+    using namespace cepgen;
     sf::Type sf_mode = (sf::Type)sfmode;
 
     CG_DEBUG( "cepgen_structure_functions" ) << sf_mode;
@@ -26,7 +26,7 @@ extern "C" {
   double
   cepgen_kt_flux_( int& fmode, double& x, double& kt2, int& sfmode, double& mx )
   {
-    using namespace CepGen;
+    using namespace cepgen;
     static auto sf = sf::Parameterisation::build( (sf::Type)sfmode );
     return ktFlux(
       (KTFlux)fmode, x, kt2, *sf, mx );
@@ -35,7 +35,7 @@ extern "C" {
   double
   cepgen_kt_flux_hi_( int& fmode, double& x, double& kt2, int& a, int& z )
   {
-    using namespace CepGen;
+    using namespace cepgen;
     return ktFlux(
       (KTFlux)fmode, x, kt2, HeavyIon{ (unsigned short)a, (Element)z } );
   }
@@ -44,8 +44,8 @@ extern "C" {
   cepgen_particle_mass_( int& pdg_id )
   {
     try {
-      return CepGen::part::mass( (CepGen::PDG)pdg_id );
-    } catch ( const CepGen::Exception& e ) {
+      return cepgen::particleproperties::mass( (cepgen::PDG)pdg_id );
+    } catch ( const cepgen::Exception& e ) {
       e.dump();
       exit( 0 );
     }
@@ -55,8 +55,8 @@ extern "C" {
   cepgen_particle_charge_( int& pdg_id )
   {
     try {
-      return CepGen::part::charge( pdg_id );
-    } catch ( const CepGen::Exception& e ) {
+      return cepgen::particleproperties::charge( pdg_id );
+    } catch ( const cepgen::Exception& e ) {
       e.dump();
       exit( 0 );
     }

@@ -1,6 +1,6 @@
 #include "CepGen/Physics/Cuts.h"
 
-namespace CepGen
+namespace cepgen
 {
   std::vector<std::pair<std::string,Limits> >
   Cuts::list() const

@@ -6,7 +6,7 @@
 #include <math.h>
 #include <iomanip>
 
-namespace CepGen
+namespace cepgen
 {
   using Momentum = Particle::Momentum;
 

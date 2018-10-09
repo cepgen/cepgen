@@ -7,7 +7,7 @@
 
 #include <sstream>
 
-namespace CepGen
+namespace cepgen
 {
   ProcessesHandler&
   ProcessesHandler::get()

@@ -8,7 +8,7 @@
 
 #include <complex>
 
-namespace CepGen
+namespace cepgen
 {
   namespace sf
   {

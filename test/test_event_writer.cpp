@@ -3,7 +3,7 @@
 #include "CepGen/Event/Event.h"
 
 using namespace std;
-using namespace CepGen;
+using namespace cepgen;
 
 int main() {
 

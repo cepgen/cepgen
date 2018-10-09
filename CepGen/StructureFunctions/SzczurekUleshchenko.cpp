@@ -2,7 +2,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
-namespace CepGen
+namespace cepgen
 {
   namespace sf
   {

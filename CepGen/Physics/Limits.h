@@ -4,7 +4,7 @@
 #include <utility>
 #include <ostream>
 
-namespace CepGen
+namespace cepgen
 {
   /// Validity interval for a variable
   class Limits : private std::pair<double,double>

@@ -4,7 +4,7 @@
 #include "CepGen/Physics/Limits.h"
 #include <vector>
 
-namespace CepGen
+namespace cepgen
 {
   /// Constraints to be applied on the events kinematics
   struct Cuts

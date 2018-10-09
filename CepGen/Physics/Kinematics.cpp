@@ -8,7 +8,7 @@
 #include "CepGen/StructureFunctions/SuriYennie.h"
 #include "CepGen/Event/Particle.h"
 
-namespace CepGen
+namespace cepgen
 {
   Kinematics::Kinematics() :
     incoming_beams( { { 6500., PDG::proton, KTFlux::invalid }, { 6500., PDG::proton, KTFlux::invalid } } ),

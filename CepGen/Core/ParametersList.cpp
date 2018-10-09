@@ -1,7 +1,7 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
-namespace CepGen
+namespace cepgen
 {
   ParametersList&
   ParametersList::operator+=( const ParametersList& oth )

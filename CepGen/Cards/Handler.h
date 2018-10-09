@@ -3,7 +3,7 @@
 
 #include "CepGen/Parameters.h"
 
-namespace CepGen
+namespace cepgen
 {
   class Parameters;
   /// Location for all steering card parsers/writers

@@ -23,15 +23,15 @@ int main( int argc, char* argv[] )
               max_value = atof( argv[4] );
   const char* output_file = ( argc>5 ) ? argv[5] : "xsect.dat";
 
-  CepGen::Generator mg;
+  cepgen::Generator mg;
 
-  //CepGen::Logger::get().level = CepGen::Logger::Level::error;
+  //cepgen::Logger::get().level = cepgen::Logger::Level::error;
 
-  CepGen::Parameters* par = mg.parameters.get();
+  cepgen::Parameters* par = mg.parameters.get();
   par->kinematics.cuts.central.eta_single = { -2.5, 2.5 };
   par->kinematics.cuts.remnants.mass_single.max() = 1000.0;
-  par->setProcess( new CepGen::Process::GamGamLL );
-  par->kinematics.mode = static_cast<CepGen::Kinematics::Mode>( proc_mode );
+  par->setProcess( new cepgen::Process::GamGamLL );
+  par->kinematics.mode = static_cast<cepgen::Kinematics::Mode>( proc_mode );
   CG_INFO( "main" ) << par;
 
   double xsect, err_xsect;
@@ -44,8 +44,8 @@ int main( int argc, char* argv[] )
     par->kinematics.cuts.central.pt_single.min() = min_value + (max_value-min_value)*i/npoints;
     //par->kinematics.dump();
     mg.computeXsection( xsect, err_xsect );
-    xsect_file << CepGen::Form( "%.2f\t%.5f\t%.5f\n", par->kinematics.cuts.central.pt_single.min(), xsect, err_xsect );
-    cout << CepGen::Form( "%.2f\t%.5f\t%.5f\n", par->kinematics.cuts.central.pt_single.min(), xsect, err_xsect );
+    xsect_file << cepgen::Form( "%.2f\t%.5f\t%.5f\n", par->kinematics.cuts.central.pt_single.min(), xsect, err_xsect );
+    cout << cepgen::Form( "%.2f\t%.5f\t%.5f\n", par->kinematics.cuts.central.pt_single.min(), xsect, err_xsect );
     xsect_file.flush();
   }
 

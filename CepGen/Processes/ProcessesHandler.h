@@ -9,10 +9,10 @@
 #define STRINGIFY( name ) #name
 #define REGISTER_PROCESS( name, obj ) \
   struct BUILDERNM( name ) { \
-    BUILDERNM( name )() { CepGen::ProcessesHandler::get().registerProcess( STRINGIFY( name ), new obj ); } }; \
+    BUILDERNM( name )() { cepgen::ProcessesHandler::get().registerProcess( STRINGIFY( name ), new obj ); } }; \
   static BUILDERNM( name ) g ## name;
 
-namespace CepGen
+namespace cepgen
 {
   class ParametersList;
   //namespace process { class GenericProcess; }
@@ -22,7 +22,7 @@ namespace CepGen
       static ProcessesHandler& get();
       ~ProcessesHandler() = default;
 
-      void registerProcess( const std::string& name, const CepGen::process::GenericProcess* );
+      void registerProcess( const std::string& name, const cepgen::process::GenericProcess* );
       ProcessPtr build( const std::string& name, const ParametersList& ) const;
       void dump() const;
 

@@ -8,36 +8,36 @@
 #include "CepGen/Core/Logger.h"
 
 #define CG_EXCEPT_MATCH( str, type ) \
-  CepGen::Logger::get().passExceptionRule( str, CepGen::Logger::Level::type )
+  cepgen::Logger::get().passExceptionRule( str, cepgen::Logger::Level::type )
 
 #define CG_LOG( mod ) \
   ( !CG_EXCEPT_MATCH( mod, information ) ) \
-  ? CepGen::NullStream( mod ) \
-  : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::verbatim )
+  ? cepgen::NullStream( mod ) \
+  : cepgen::Exception( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::verbatim )
 #define CG_INFO( mod ) \
   ( !CG_EXCEPT_MATCH( mod, information ) ) \
-  ? CepGen::NullStream( mod ) \
-  : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::info )
+  ? cepgen::NullStream( mod ) \
+  : cepgen::Exception( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::info )
 #define CG_DEBUG( mod ) \
   ( !CG_EXCEPT_MATCH( mod, debug ) ) \
-  ? CepGen::NullStream( mod ) \
-  : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::debug )
+  ? cepgen::NullStream( mod ) \
+  : cepgen::Exception( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::debug )
 #define CG_DEBUG_LOOP( mod ) \
   ( !CG_EXCEPT_MATCH( mod, debugInsideLoop ) ) \
-  ? CepGen::NullStream( mod ) \
-  : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::debug )
+  ? cepgen::NullStream( mod ) \
+  : cepgen::Exception( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::debug )
 #define CG_WARNING( mod ) \
   ( !CG_EXCEPT_MATCH( mod, warning ) ) \
-  ? CepGen::NullStream( mod ) \
-  : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::warning )
+  ? cepgen::NullStream( mod ) \
+  : cepgen::Exception( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::warning )
 #define CG_ERROR( mod ) \
   ( !CG_EXCEPT_MATCH( mod, error ) ) \
-  ? CepGen::NullStream( mod ) \
-  : CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::warning )
+  ? cepgen::NullStream( mod ) \
+  : cepgen::Exception( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::warning )
 #define CG_FATAL( mod ) \
-  CepGen::Exception( __PRETTY_FUNCTION__, mod, CepGen::Exception::Type::fatal )
+  cepgen::Exception( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::fatal )
 
-namespace CepGen
+namespace cepgen
 {
   /// \brief A simple exception handler
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>

@@ -8,10 +8,10 @@
 
 #include "CepGen/Core/Exception.h"
 
-namespace CepGen
+namespace cepgen
 {
   const double KTFluxParameters::kMinKTFlux = 1.e-20;
-  const double KTFluxParameters::kMP = part::mass( PDG::proton );
+  const double KTFluxParameters::kMP = particleproperties::mass( PDG::proton );
   const double KTFluxParameters::kMP2 = KTFluxParameters::kMP*KTFluxParameters::kMP;
 
   double

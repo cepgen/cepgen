@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-namespace CepGen
+namespace cepgen
 {
   /** Unique identifier for a particle type. From \cite Beringer:1900zz :
    * `The Monte Carlo particle numbering scheme [...] is intended to facilitate interfacing between event generators, detector simulators, and analysis packages used in particle physics.`

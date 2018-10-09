@@ -4,7 +4,7 @@
 #include "CepGen/Core/Functional.h"
 #include <unordered_map>
 
-namespace CepGen
+namespace cepgen
 {
   /// A collection of expression/variable with the associated functional
   struct TamingFunction

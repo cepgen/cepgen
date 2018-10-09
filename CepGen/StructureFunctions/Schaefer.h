@@ -4,7 +4,7 @@
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include <memory>
 
-namespace CepGen
+namespace cepgen
 {
   namespace sf
   {

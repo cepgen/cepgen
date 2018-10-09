@@ -16,7 +16,7 @@ namespace kmr
   }
 
   GluonGrid::GluonGrid( const Parameters& param ) :
-    CepGen::GridHandler<3,1>( CepGen::GridType::linear ),
+    cepgen::GridHandler<3,1>( cepgen::GridType::linear ),
     params( param )
   {
     std::set<double> kt2_vals, x_vals, mu2_vals;
@@ -49,6 +49,6 @@ namespace kmr
   double
   GluonGrid::operator()( double x, double kt2, double mu2 ) const
   {
-    return CepGen::GridHandler<3,1>::eval( { x, kt2, mu2 } ).at( 0 );
+    return cepgen::GridHandler<3,1>::eval( { x, kt2, mu2 } ).at( 0 );
   }
 }

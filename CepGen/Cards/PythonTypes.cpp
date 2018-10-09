@@ -7,7 +7,7 @@
 #  define PYTHON2
 #endif
 
-namespace CepGen
+namespace cepgen
 {
   namespace cards
   {

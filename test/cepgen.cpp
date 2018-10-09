@@ -24,16 +24,16 @@ using namespace std;
  */
 int main( int argc, char* argv[] ) {
   //--- first start by defining the generator object
-  CepGen::Generator gen;
+  cepgen::Generator gen;
 
   if ( argc < 2 ) {
     CG_INFO( "main" ) << "No config file provided. Setting the default parameters.";
 
     //--- default run: LPAIR elastic ɣɣ → µ⁺µ¯ at 13 TeV
-    CepGen::ParametersList pgen;
-    pgen.set<int>( "pair", (int)CepGen::PDG::muon );
-    gen.parameters->setProcess( new CepGen::process::GamGamLL( pgen ) );
-    gen.parameters->kinematics.mode = CepGen::KinematicsMode::ElasticElastic;
+    cepgen::ParametersList pgen;
+    pgen.set<int>( "pair", (int)cepgen::PDG::muon );
+    gen.parameters->setProcess( new cepgen::process::GamGamLL( pgen ) );
+    gen.parameters->kinematics.mode = cepgen::KinematicsMode::ElasticElastic;
     gen.parameters->kinematics.cuts.central.pt_single.min() = 15.;
     gen.parameters->kinematics.cuts.central.eta_single = { -2.5, 2.5 };
     gen.parameters->generation.enabled = true;
@@ -41,12 +41,12 @@ int main( int argc, char* argv[] ) {
   }
   else {
     CG_INFO( "main" ) << "Reading config file stored in " << argv[1] << ".";
-    const std::string extension = CepGen::cards::Handler::getExtension( argv[1] );
+    const std::string extension = cepgen::cards::Handler::getExtension( argv[1] );
     if ( extension == "card" )
-      gen.setParameters( CepGen::cards::LpairHandler( argv[1] ).parameters() );
+      gen.setParameters( cepgen::cards::LpairHandler( argv[1] ).parameters() );
 #ifdef PYTHON
     else if ( extension == "py" )
-      gen.setParameters( CepGen::cards::PythonHandler( argv[1] ).parameters() );
+      gen.setParameters( cepgen::cards::PythonHandler( argv[1] ).parameters() );
 #endif
     else
       throw CG_FATAL( "main" ) << "Unrecognized steering card extension: ." << extension << "!";
@@ -66,7 +66,7 @@ int main( int argc, char* argv[] ) {
       //--- events generation starts here
       // (one may use a callback function)
       gen.generate();
-  } catch ( const CepGen::RunAbortedException& e ) {
+  } catch ( const cepgen::RunAbortedException& e ) {
     CG_INFO( "main" ) << "Run aborted!";
   }
 

@@ -10,8 +10,8 @@
   extern "C" { extern void method ## _( double& ); }
 #define PROCESS_F77_NAME( name ) F77_ ## name
 #define REGISTER_FORTRAN_PROCESS( name, method, description ) \
-  struct PROCESS_F77_NAME( name ) : public CepGen::process::FortranKTProcess { \
-    PROCESS_F77_NAME( name )() : CepGen::process::FortranKTProcess( CepGen::ParametersList(), STRINGIFY( name ), description, method ## _ ) {} }; \
+  struct PROCESS_F77_NAME( name ) : public cepgen::process::FortranKTProcess { \
+    PROCESS_F77_NAME( name )() : cepgen::process::FortranKTProcess( cepgen::ParametersList(), STRINGIFY( name ), description, method ## _ ) {} }; \
   REGISTER_PROCESS( name, PROCESS_F77_NAME( name ) )
 
 #endif

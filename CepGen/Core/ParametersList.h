@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <string>
 
-namespace CepGen
+namespace cepgen
 {
   /// Parameters container
   class ParametersList

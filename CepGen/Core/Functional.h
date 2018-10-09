@@ -12,7 +12,7 @@
 
 using std::string;
 
-namespace CepGen
+namespace cepgen
 {
   /// \brief A string-to-functional parser
   /// \tparam N Number of arguments

@@ -3,7 +3,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 
-namespace CepGen
+namespace cepgen
 {
   namespace hadroniser
   {

@@ -11,7 +11,7 @@
 #include <gsl/gsl_monte_vegas.h>
 #include <gsl/gsl_rng.h>
 
-namespace CepGen
+namespace cepgen
 {
   class Parameters;
   class Event;

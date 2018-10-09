@@ -3,7 +3,7 @@
 #include "CepGen/Core/Exception.h"
 #include <math.h>
 
-namespace CepGen
+namespace cepgen
 {
   namespace sf
   {

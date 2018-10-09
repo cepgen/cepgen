@@ -1,7 +1,7 @@
 #include "CepGen/Core/GridParameters.h"
 #include "CepGen/Core/Exception.h"
 
-namespace CepGen
+namespace cepgen
 {
   const unsigned short GridParameters::max_dimensions_ = 15;
   const unsigned short GridParameters::mbin_ = 3;

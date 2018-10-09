@@ -15,7 +15,7 @@
 
 #include <iomanip>
 
-namespace CepGen
+namespace cepgen
 {
   namespace process
   {

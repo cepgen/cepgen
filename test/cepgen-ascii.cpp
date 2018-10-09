@@ -13,9 +13,9 @@
 using namespace std;
 
 // we use polymorphism here
-std::shared_ptr<CepGen::output::ExportHandler> writer;
+std::shared_ptr<cepgen::output::ExportHandler> writer;
 
-void storeEvent( const CepGen::Event& ev, unsigned long )
+void storeEvent( const cepgen::Event& ev, unsigned long )
 {
   if ( !writer )
     throw CG_FATAL( "storeEvent" ) << "Failed to retrieve a valid writer!";
@@ -36,18 +36,18 @@ int main( int argc, char* argv[] ) {
       << "No config file provided!\n\t"
       << "Usage: " << argv[0] << " config-file [format=lhef,hepmc] [filename=example.dat]";
 
-  CepGen::Generator mg;
+  cepgen::Generator mg;
 
   //-----------------------------------------------------------------------------------------------
   // Steering card readout
   //-----------------------------------------------------------------------------------------------
 
   CG_DEBUG( "main" ) << "Reading config file stored in \"" << argv[1] << "\"";
-  const string extension = CepGen::cards::Handler::getExtension( argv[1] );
+  const string extension = cepgen::cards::Handler::getExtension( argv[1] );
   if ( extension == "card" )
-    mg.setParameters( CepGen::cards::LpairHandler( argv[1] ).parameters() );
+    mg.setParameters( cepgen::cards::LpairHandler( argv[1] ).parameters() );
   else if ( extension == "py" )
-    mg.setParameters( CepGen::cards::PythonHandler( argv[1] ).parameters() );
+    mg.setParameters( cepgen::cards::PythonHandler( argv[1] ).parameters() );
   else
     throw CG_FATAL( "main" ) << "Unrecognized card format: ." << extension;
 
@@ -58,9 +58,9 @@ int main( int argc, char* argv[] ) {
   const string format = ( argc > 2 ) ? argv[2] : "lhef";
   const char* filename = ( argc > 3 ) ? argv[3] : "example.dat";
   if ( format == "lhef" )
-    writer = std::make_shared<CepGen::output::LHEFHandler>( filename );
+    writer = std::make_shared<cepgen::output::LHEFHandler>( filename );
   else if ( format == "hepmc" )
-    writer = std::make_shared<CepGen::output::HepMCHandler>( filename );
+    writer = std::make_shared<cepgen::output::HepMCHandler>( filename );
   else
     throw CG_FATAL( "main" ) << "Unrecognized output format: " << format;
 

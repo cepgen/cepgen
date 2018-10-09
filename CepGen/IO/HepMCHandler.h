@@ -18,7 +18,7 @@
 
 #include <memory>
 
-namespace CepGen
+namespace cepgen
 {
   namespace output
   {

@@ -13,7 +13,7 @@
 #include <fstream>
 #include <chrono>
 
-namespace CepGen
+namespace cepgen
 {
   volatile int gSignal;
   Generator::Generator() :

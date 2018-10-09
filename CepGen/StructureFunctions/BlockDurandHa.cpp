@@ -1,7 +1,7 @@
 #include "BlockDurandHa.h"
 #include <cmath>
 
-namespace CepGen
+namespace cepgen
 {
   namespace sf
   {

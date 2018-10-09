@@ -6,7 +6,7 @@
 
 #include "Handler.h"
 
-namespace CepGen
+namespace cepgen
 {
   namespace sf { class Parameterisation; }
   class ParametersList;

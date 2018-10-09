@@ -22,7 +22,7 @@
 #  define PYTHON2
 #endif
 
-namespace CepGen
+namespace cepgen
 {
   namespace cards
   {
@@ -79,7 +79,7 @@ namespace CepGen
       //--- process mode
       params_.kinematics.mode = (KinematicsMode)proc_params.get<int>( "mode", (int)KinematicsMode::invalid );
 
-      auto proc = CepGen::ProcessesHandler::get().build( proc_name, proc_params );
+      auto proc = cepgen::ProcessesHandler::get().build( proc_name, proc_params );
       params_.setProcess( std::move( proc ) );
 
       //--- process kinematics

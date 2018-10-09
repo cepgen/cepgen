@@ -3,7 +3,7 @@
 
 #include <chrono>
 
-namespace CepGen
+namespace cepgen
 {
   /**
    * A generic timer to extract the processing time between two steps in this software's flow

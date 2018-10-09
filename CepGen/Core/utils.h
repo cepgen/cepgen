@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace CepGen
+namespace cepgen
 {
   /// Add a closing "s" when needed
   inline const char* s( unsigned short num ) { return ( num > 1 ) ? "s" : ""; }

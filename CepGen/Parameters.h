@@ -9,7 +9,7 @@
 #include <gsl/gsl_monte_vegas.h>
 #include <gsl/gsl_monte_miser.h>
 
-namespace CepGen
+namespace cepgen
 {
   class Event;
   class TamingFunctionsCollection;

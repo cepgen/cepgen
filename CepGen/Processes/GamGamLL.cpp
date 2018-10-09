@@ -10,7 +10,7 @@
 
 #include "CepGen/Processes/ProcessesHandler.h"
 
-namespace CepGen
+namespace cepgen
 {
   namespace process
   {
@@ -615,7 +615,7 @@ namespace CepGen
     double
     GamGamLL::computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dw )
     {
-      const double mx0 = mp_+part::mass( PDG::piZero ); // 1.07
+      const double mx0 = mp_+particleproperties::mass( PDG::piZero ); // 1.07
       const double wx2min = pow( std::max( mx0, mx_limits_.min() ), 2 ),
                    wx2max = pow( std::min( sqs_-outmass-2.*lepmass, mx_limits_.max() ), 2 );
 
@@ -653,11 +653,11 @@ namespace CepGen
         case KinematicsMode::InelasticElastic: {
           const double m = computeOutgoingPrimaryParticlesMasses( x( 7 ), p1.mass(), sqrt( masses_.Ml2_ ), masses_.dw31_ );
           event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( m );
-          event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( part::mass( p2.pdgId() ) );
+          event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( particleproperties::mass( p2.pdgId() ) );
         } break;
         case KinematicsMode::ElasticInelastic: {
           const double m = computeOutgoingPrimaryParticlesMasses( x( 7 ), p2.mass(), sqrt( masses_.Ml2_ ), masses_.dw52_ );
-          event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( part::mass( p1.pdgId() ) );
+          event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( particleproperties::mass( p1.pdgId() ) );
           event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( m );
         } break;
         case KinematicsMode::InelasticInelastic: {

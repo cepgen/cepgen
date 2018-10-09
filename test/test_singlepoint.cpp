@@ -7,19 +7,19 @@ using namespace std;
 
 int main()
 {
-  CepGen::Generator g;
-  CepGen::Parameters* p = g.parameters.get();
+  cepgen::Generator g;
+  cepgen::Parameters* p = g.parameters.get();
   //p->setProcess( new GamGamLL );
-  p->setProcess( new CepGen::Process::GamGamLL );
-  p->kinematics.mode = CepGen::Kinematics::Mode::ElasticElastic;
-  //p->kinematics.mode = CepGen::Kinematics::Mode::InelasticElastic;
-  //p->kinematics.mode = CepGen::Kinematics::Mode::ElasticInelastic;
+  p->setProcess( new cepgen::Process::GamGamLL );
+  p->kinematics.mode = cepgen::Kinematics::Mode::ElasticElastic;
+  //p->kinematics.mode = cepgen::Kinematics::Mode::InelasticElastic;
+  //p->kinematics.mode = cepgen::Kinematics::Mode::ElasticInelastic;
   p->kinematics.cuts.central.pt_single = 5.;
   p->kinematics.cuts.central.eta_single = { -2.5, 2.5 };
   p->kinematics.cuts.remnants.mass_single = { 1.07, 320. };
 
   CG_INFO( "main" ) << p;
-  CepGen::Logger::get().level = CepGen::Logger::Level::debugInsideLoop;
+  cepgen::Logger::get().level = cepgen::Logger::Level::debugInsideLoop;
 
   const unsigned short ndim = g.numDimensions();
   double x[12];

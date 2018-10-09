@@ -5,7 +5,7 @@
 #include <vector>
 #include <regex>
 
-namespace CepGen
+namespace cepgen
 {
   /// General purposes logger
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>

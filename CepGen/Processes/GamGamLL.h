@@ -4,7 +4,7 @@
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Core/ParametersList.h"
 
-namespace CepGen
+namespace cepgen
 {
   namespace process
   {

@@ -3,7 +3,7 @@
 
 #include <ostream>
 
-namespace CepGen
+namespace cepgen
 {
   enum class PDG;
   /// Enumeration of chemical elements

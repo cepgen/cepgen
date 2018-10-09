@@ -11,7 +11,7 @@
 #  include "HepMC/GenParticle.h"
 #endif
 
-namespace CepGen
+namespace cepgen
 {
   namespace output
   {

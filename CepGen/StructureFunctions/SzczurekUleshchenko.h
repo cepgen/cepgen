@@ -8,7 +8,7 @@ extern "C"
   extern void grv95lo_( float&, float&, float&, float&, float&, float&, float&, float& );
 }
 
-namespace CepGen
+namespace cepgen
 {
   namespace sf
   {

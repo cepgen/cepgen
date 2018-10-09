@@ -3,7 +3,7 @@
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Core/Exception.h"
 
-namespace CepGen
+namespace cepgen
 {
   namespace sf
   {
@@ -14,8 +14,8 @@ namespace CepGen
     double
     ChristyBosted::resmod507( char sf, double w2, double q2 ) const
     {
-      const double mpi = part::mass( PDG::piZero ), mpi2 = mpi*mpi,
-                   meta = part::mass( PDG::eta ), meta2 = meta*meta;
+      const double mpi = particleproperties::mass( PDG::piZero ), mpi2 = mpi*mpi,
+                   meta = particleproperties::mass( PDG::eta ), meta2 = meta*meta;
       const double w = sqrt( w2 );
 
       const double xb = q2/( q2+w2-mp2_ );
@@ -246,7 +246,7 @@ namespace CepGen
       old_vals_ = nv;
 
       const double w2 = mp2_ + q2*( 1.-xbj )/xbj;
-      const double w_min = mp_+part::mass( PDG::piZero );
+      const double w_min = mp_+particleproperties::mass( PDG::piZero );
 
       if ( sqrt( w2 ) < w_min ) {
         F2 = 0.;

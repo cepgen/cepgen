@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-namespace CepGen
+namespace cepgen
 {
   HeavyIon::HeavyIon( const PDG& pdg ) :
     A( (unsigned int)pdg % 1000 ),

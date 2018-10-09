@@ -10,9 +10,9 @@ int main( int argc, const char* argv[] )
   const char* proc_name = ( argc > 1 ) ? argv[1] : "lpair";
   cout << "Will build a process named \"" << proc_name << "\"." << endl;
 
-  CepGen::ProcessesHandler::get().dump();
+  cepgen::ProcessesHandler::get().dump();
 
-  auto proc = CepGen::ProcessesHandler::get().build( proc_name, CepGen::ParametersList() );
+  auto proc = cepgen::ProcessesHandler::get().build( proc_name, cepgen::ParametersList() );
   //--- at this point, the process has been found
   std::cout << "Successfully built the process \"" << proc->name() << "\"!\n"
     << " *) description: " << proc->description() << "\n"

@@ -4,7 +4,7 @@
 #include "CepGen/Physics/PDG.h"
 #include <ostream>
 
-namespace CepGen
+namespace cepgen
 {
   namespace sf { class Parameterisation; }
   class HeavyIon;

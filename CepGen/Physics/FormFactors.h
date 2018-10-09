@@ -7,7 +7,7 @@
 #include "CepGen/Core/utils.h"
 #include "CepGen/Physics/Constants.h"
 
-namespace CepGen
+namespace cepgen
 {
   namespace sf { class Parameterisation; }
   /// Form factors collection (electric and magnetic parts)

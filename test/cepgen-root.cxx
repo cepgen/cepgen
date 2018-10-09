@@ -19,7 +19,7 @@ using namespace std;
 std::unique_ptr<ROOT::CepGenRun> run;
 std::unique_ptr<ROOT::CepGenEvent> ev;
 
-void fill_event_tree( const CepGen::Event& event, unsigned long ev_id )
+void fill_event_tree( const cepgen::Event& event, unsigned long ev_id )
 {
   //if ( ev_id % 10 == 0 )
   //  cout << ">> event " << ev_id << " generated" << endl;
@@ -33,7 +33,7 @@ void fill_event_tree( const CepGen::Event& event, unsigned long ev_id )
   //cout << event.particles().size() << endl;
   ev->momentum.reserve( event.particles().size() );
   for ( const auto& p : event.particles() ) {
-    const CepGen::Particle::Momentum m = p.momentum();
+    const cepgen::Particle::Momentum m = p.momentum();
     ev->momentum[ev->np].SetPxPyPzE( m.px(), m.py(), m.pz(), p.energy() );
     ev->rapidity[ev->np] = m.rapidity();
     ev->pt[ev->np] = m.pt();
@@ -61,16 +61,16 @@ void fill_event_tree( const CepGen::Event& event, unsigned long ev_id )
  * @date 27 jan 2014
  */
 int main( int argc, char* argv[] ) {
-  CepGen::Generator mg;
+  cepgen::Generator mg;
 
   if ( argc < 2 )
     throw CG_FATAL( "main" ) << "Usage: " << argv[0] << " input-card [filename=events.root]";
 
-  const std::string extension = CepGen::cards::Handler::getExtension( argv[1] );
+  const std::string extension = cepgen::cards::Handler::getExtension( argv[1] );
   if ( extension == "card" )
-    mg.setParameters( CepGen::cards::LpairHandler( argv[1] ).parameters() );
+    mg.setParameters( cepgen::cards::LpairHandler( argv[1] ).parameters() );
   else if ( extension == "py" )
-    mg.setParameters( CepGen::cards::PythonHandler( argv[1] ).parameters() );
+    mg.setParameters( cepgen::cards::PythonHandler( argv[1] ).parameters() );
 
   mg.parameters->generation.enabled = true;
   CG_INFO( "main" ) << mg.parameters.get();
@@ -105,7 +105,7 @@ int main( int argc, char* argv[] ) {
   // launch the events generation
   try {
     mg.generate( fill_event_tree );
-  } catch ( const CepGen::Exception& ) {}
+  } catch ( const cepgen::Exception& ) {}
 
   file->Write();
   CG_INFO( "main" ) << "Events written on \"" << filename << "\".";

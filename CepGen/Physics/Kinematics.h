@@ -11,7 +11,7 @@
 #include <unordered_map>
 #include <memory>
 
-namespace CepGen
+namespace cepgen
 {
   enum class PDG;
   enum class KTFlux;

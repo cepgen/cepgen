@@ -19,8 +19,8 @@ namespace mstw
   }
 
   Grid::Grid( const Parameters& param ) :
-    CepGen::sf::Parameterisation( CepGen::sf::Type::MSTWgrid ),
-    CepGen::GridHandler<2,2>( CepGen::GridType::logarithmic ),
+    cepgen::sf::Parameterisation( cepgen::sf::Type::MSTWgrid ),
+    cepgen::GridHandler<2,2>( cepgen::GridType::logarithmic ),
     params( param )
   {
     { // file readout part
@@ -70,7 +70,7 @@ namespace mstw
   Grid&
   Grid::operator()( double xbj, double q2 )
   {
-    const std::array<double,2> val = CepGen::GridHandler<2,2>::eval( { xbj, q2 } );
+    const std::array<double,2> val = cepgen::GridHandler<2,2>::eval( { xbj, q2 } );
     F2 = val[0];
     FL = val[1];
     return *this;
@@ -79,7 +79,7 @@ namespace mstw
   std::ostream&
   operator<<( std::ostream& os, const Grid::sfval_t& val )
   {
-    return os << CepGen::Form( "xbj = %.4f\tQ² = %.5e GeV²\tF₂ = % .6e\tFL = % .6e", val.xbj, val.q2, val.f2, val.fl );
+    return os << cepgen::Form( "xbj = %.4f\tQ² = %.5e GeV²\tF₂ = % .6e\tFL = % .6e", val.xbj, val.q2, val.f2, val.fl );
   }
 
   std::ostream&

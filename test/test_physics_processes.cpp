@@ -18,7 +18,7 @@
 #include <math.h>
 
 using namespace std;
-using namespace CepGen;
+using namespace cepgen;
 
 int
 main( int argc, char* argv[] )

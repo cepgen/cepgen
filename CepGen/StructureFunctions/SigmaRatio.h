@@ -3,7 +3,7 @@
 
 #include <array>
 
-namespace CepGen
+namespace cepgen
 {
   /// A collector namespace for modellings of the \f$R=\sigma_L/\sigma_T\f$ ratio
   namespace sr

@@ -4,7 +4,7 @@
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Core/Logger.h"
 
-namespace CepGen
+namespace cepgen
 {
   /**
    * Class containing all the information on the in- and outgoing particles' kinematics

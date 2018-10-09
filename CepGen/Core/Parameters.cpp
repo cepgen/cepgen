@@ -12,7 +12,7 @@
 
 #include <iomanip>
 
-namespace CepGen
+namespace cepgen
 {
   Parameters::Parameters() :
     general( new ParametersList ),

@@ -1,11 +1,11 @@
 #ifndef CepGen_Physics_ParticleProperties_h
 #define CepGen_Physics_ParticleProperties_h
 
-namespace CepGen
+namespace cepgen
 {
   enum class PDG;
   /// All useful properties about particles
-  namespace part
+  namespace particleproperties
   {
     /** \brief Mass of a particle, in GeV/c\f${}^2\f$
      * \param pdg_id PDG identifier

@@ -1,7 +1,7 @@
 #include "CepGen/Version.h"
 #include "CepGen/Core/utils.h"
 
-namespace CepGen
+namespace cepgen
 {
   const std::string version()
   {

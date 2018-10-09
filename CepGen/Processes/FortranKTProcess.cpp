@@ -12,14 +12,14 @@
 
 extern "C"
 {
-  extern CepGen::ktblock::Constants constants_;
-  extern CepGen::ktblock::Parameters params_;
-  extern CepGen::ktblock::KTKinematics ktkin_;
-  extern CepGen::ktblock::Cuts kincuts_;
-  extern CepGen::ktblock::Event evtkin_;
+  extern cepgen::ktblock::Constants constants_;
+  extern cepgen::ktblock::Parameters params_;
+  extern cepgen::ktblock::KTKinematics ktkin_;
+  extern cepgen::ktblock::Cuts kincuts_;
+  extern cepgen::ktblock::Event evtkin_;
 }
 
-namespace CepGen
+namespace cepgen
 {
   namespace process
   {

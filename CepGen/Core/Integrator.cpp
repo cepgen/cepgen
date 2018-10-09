@@ -14,7 +14,7 @@
 #include <gsl/gsl_monte_miser.h>
 #define COORD(s,i,j) ((s)->xi[(i)*(s)->dim + (j)])
 
-namespace CepGen
+namespace cepgen
 {
   Integrator::Integrator( unsigned int ndim, double integrand( double*, size_t, void* ), Parameters* params ) :
     ps_bin_( 0 ), input_params_( params ),

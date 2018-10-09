@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <functional>
 
-namespace CepGen
+namespace cepgen
 {
   /// A hasher table for a given structure
   template<class T,bool>

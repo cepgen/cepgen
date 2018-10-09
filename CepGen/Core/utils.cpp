@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdarg.h>  // For va_start, etc.
 
-namespace CepGen
+namespace cepgen
 {
   std::string
   Form( const std::string fmt, ... )

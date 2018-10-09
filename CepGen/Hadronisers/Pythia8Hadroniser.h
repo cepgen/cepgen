@@ -11,7 +11,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace CepGen
+namespace cepgen
 {
   class Particle;
   class ParametersList;

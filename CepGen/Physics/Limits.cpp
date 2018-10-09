@@ -3,7 +3,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
-namespace CepGen
+namespace cepgen
 {
   Limits::Limits( double min, double max ) :
     std::pair<double,double>( min, max )

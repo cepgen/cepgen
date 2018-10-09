@@ -14,7 +14,7 @@
 #include <sstream>
 #include <fstream>
 
-namespace CepGen
+namespace cepgen
 {
   namespace integrand
   {

@@ -3,7 +3,7 @@
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
-namespace CepGen
+namespace cepgen
 {
   namespace sf
   {

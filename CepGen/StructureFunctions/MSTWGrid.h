@@ -10,7 +10,7 @@
 namespace mstw
 {
   /// A \f$F_{2,L}\f$ grid interpolator
-  class Grid : public CepGen::sf::Parameterisation, private CepGen::GridHandler<2,2>
+  class Grid : public cepgen::sf::Parameterisation, private cepgen::GridHandler<2,2>
   {
     public:
       /// Grid header information as parsed from the file
@@ -54,7 +54,7 @@ namespace mstw
       Parameters params;
 
         //--- already retrieved from grid, so no need to recompute it
-      void computeFL( double xbj, double q2, const CepGen::sr::Parameterisation& ) override {}
+      void computeFL( double xbj, double q2, const cepgen::sr::Parameterisation& ) override {}
       void computeFL( double xbj, double q2, double r ) override {}
 
     public:

@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace CepGen
+namespace cepgen
 {
   /// CepGen version
   /// \note Format: 0xMMmmff, with

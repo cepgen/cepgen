@@ -1,6 +1,6 @@
 #include "CepGen/Core/Exception.h"
 
-using namespace CepGen;
+using namespace cepgen;
 
 int main()
 {

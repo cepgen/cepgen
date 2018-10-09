@@ -6,7 +6,7 @@
 
 using std::string;
 
-namespace CepGen
+namespace cepgen
 {
   class ParametersList;
   namespace cards

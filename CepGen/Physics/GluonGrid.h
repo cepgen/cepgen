@@ -9,7 +9,7 @@
 namespace kmr
 {
   /// A KMR unintegrated gluon densities grid interpolator
-  class GluonGrid : private CepGen::GridHandler<3,1>
+  class GluonGrid : private cepgen::GridHandler<3,1>
   {
     public:
       struct Parameters {

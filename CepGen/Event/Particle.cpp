@@ -4,7 +4,7 @@
 #include "CepGen/Core/utils.h"
 #include "CepGen/Physics/Constants.h"
 
-namespace CepGen
+namespace cepgen
 {
   Particle::Particle() :
     id_( -1 ), charge_sign_( 1 ),
@@ -63,7 +63,7 @@ namespace CepGen
   Particle::computeMass( bool off_shell )
   {
     if ( !off_shell && pdg_id_ != PDG::invalid ) { // retrieve the mass from the on-shell particle's properties
-      mass_ = part::mass( pdg_id_ );
+      mass_ = particleproperties::mass( pdg_id_ );
     }
     else if ( momentum_.energy() >= 0. ) {
       mass_ = sqrt( energy2() - momentum_.p2() );
@@ -183,7 +183,7 @@ namespace CepGen
   int
   Particle::integerPdgId() const
   {
-    const float ch = part::charge( pdg_id_ );
+    const float ch = particleproperties::charge( pdg_id_ );
     if ( ch == 0 )
       return static_cast<int>( pdg_id_ );
     return static_cast<int>( pdg_id_ ) * charge_sign_ * ( ch/fabs( ch ) );

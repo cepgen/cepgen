@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-namespace CepGen
+namespace cepgen
 {
   class Event;
   class Parameters;

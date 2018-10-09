@@ -4,7 +4,7 @@
 #include <vector>
 #include <map>
 
-namespace CepGen
+namespace cepgen
 {
   /// A parameters placeholder for the grid integration helper
   class GridParameters

@@ -3,7 +3,7 @@
 
 #include <math.h>
 
-namespace CepGen
+namespace cepgen
 {
   /// List of physical constants useful that may be used for the matrix element definition
   namespace constants

@@ -6,7 +6,7 @@
 #include <array>
 #include <vector>
 
-namespace CepGen
+namespace cepgen
 {
   namespace sf
   {

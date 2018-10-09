@@ -7,7 +7,7 @@
 #include <vector>
 #include <memory>
 
-namespace CepGen
+namespace cepgen
 {
   class Event;
   class FormFactors;

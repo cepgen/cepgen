@@ -12,11 +12,11 @@
 
 #include "CepGen/Processes/ProcessesHandler.h"
 
-namespace CepGen
+namespace cepgen
 {
   namespace process
   {
-    const double PPtoWW::mw_ = part::mass( PDG::W );
+    const double PPtoWW::mw_ = particleproperties::mass( PDG::W );
     const double PPtoWW::mw2_ = PPtoWW::mw_*PPtoWW::mw_;
 
     PPtoWW::PPtoWW( const ParametersList& params ) :

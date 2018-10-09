@@ -5,7 +5,7 @@
 #include "CepGen/Core/utils.h"
 #include <csignal>
 
-namespace CepGen
+namespace cepgen
 {
   extern volatile int gSignal;
   /// Exception raised when the user terminates the process
@@ -37,11 +37,11 @@ class AbortHandler
 
   private:
     static void handle_ctrl_c_mt( int signal, siginfo_t*, void* ) {
-      CepGen::gSignal = signal;
+      cepgen::gSignal = signal;
     }
     static void handle_ctrl_c( int signal, siginfo_t*, void* ) {
-      CepGen::gSignal = signal;
-      throw CepGen::RunAbortedException( __PRETTY_FUNCTION__, CepGen::Exception::Type::info )
+      cepgen::gSignal = signal;
+      throw cepgen::RunAbortedException( __PRETTY_FUNCTION__, cepgen::Exception::Type::info )
         << "Run aborted.";
     }
     void init() {

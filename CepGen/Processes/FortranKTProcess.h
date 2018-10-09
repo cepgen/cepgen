@@ -4,7 +4,7 @@
 #include "CepGen/Processes/GenericKTProcess.h"
 #include <functional>
 
-namespace CepGen
+namespace cepgen
 {
   namespace process
   {

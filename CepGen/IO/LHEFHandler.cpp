@@ -7,7 +7,7 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Version.h"
 
-namespace CepGen
+namespace cepgen
 {
   namespace output
   {

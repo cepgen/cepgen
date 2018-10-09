@@ -24,7 +24,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /// Common namespace for this Monte Carlo generator
-namespace CepGen
+namespace cepgen
 {
   namespace integrand
   {

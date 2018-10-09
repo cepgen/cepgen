@@ -16,13 +16,13 @@ int main( int argc, char* argv[] )
   TGraph gr_fb, gr_rt;
   TF1 f_rt( "f_rt", "TMath::Min(1.,TMath::Exp(-x/10))", min_x, max_x );
 
-  CepGen::Functional<1> test1( "min(1,exp(-x/10))", { { "x" } } );
+  cepgen::Functional<1> test1( "min(1,exp(-x/10))", { { "x" } } );
   for ( unsigned short i = 0; i < num_points; ++i ) {
     const double x = min_x + ( max_x-min_x )/( num_points-1 )*i;
     gr_rt.SetPoint( i, x, f_rt.Eval( x ) );
     try {
       gr_fb.SetPoint( i, x, test1.eval( x ) );
-    } catch ( const CepGen::Exception& e ) { e.dump(); }
+    } catch ( const cepgen::Exception& e ) { e.dump(); }
   }
   TGraph gr_diff;
   double chi2 = 0.;
@@ -36,7 +36,7 @@ int main( int argc, char* argv[] )
   cout << "Test passed!" << endl;
 
   if ( argc > 1 && !strcmp( argv[1], "draw" ) ) {
-    CepGen::Canvas c( "test_graph", "CepGen validation" );
+    cepgen::Canvas c( "test_graph", "CepGen validation" );
     TMultiGraph mg;
     mg.Add( &gr_fb );
     mg.Add( &gr_rt );

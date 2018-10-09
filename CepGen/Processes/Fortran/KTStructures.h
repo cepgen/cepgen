@@ -1,7 +1,7 @@
 #ifndef CepGen_Processes_Fortran_KTStructures_h
 #define CepGen_Processes_Fortran_KTStructures_h
 
-namespace CepGen
+namespace cepgen
 {
   /// Collection of common blocks for Fortran kT-processes
   namespace ktblock

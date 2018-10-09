@@ -6,7 +6,7 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/ParticleProperties.h"
 
-namespace CepGen
+namespace cepgen
 {
   namespace sf
   {

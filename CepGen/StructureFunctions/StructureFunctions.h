@@ -6,7 +6,7 @@
 #include <iostream>
 #include <memory>
 
-namespace CepGen
+namespace cepgen
 {
   /// Structure functions modelling scope
   namespace sf

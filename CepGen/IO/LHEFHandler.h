@@ -22,7 +22,7 @@
 # endif
 #endif
 
-namespace CepGen
+namespace cepgen
 {
   class Event;
   namespace output

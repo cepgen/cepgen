@@ -3,7 +3,7 @@
 
 #include <math.h>
 
-namespace CepGen
+namespace cepgen
 {
   /// A Breit-Wigner/Cauchy distribution generator
   class BreitWigner

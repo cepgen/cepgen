@@ -12,7 +12,7 @@
 
 #include <fstream>
 
-namespace CepGen
+namespace cepgen
 {
   namespace cards
   {
@@ -46,7 +46,7 @@ namespace CepGen
       f.close();
 
       //--- parse the process name
-      auto proc = CepGen::ProcessesHandler::get().build( proc_name_, *proc_params_ );
+      auto proc = cepgen::ProcessesHandler::get().build( proc_name_, *proc_params_ );
       params_.setProcess( std::move( proc ) );
 
       //--- parse the structure functions code

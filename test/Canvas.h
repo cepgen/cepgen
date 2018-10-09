@@ -14,7 +14,7 @@
 
 #define font_type(x) 130+x
 
-namespace CepGen
+namespace cepgen
 {
   class PaveText : public TPaveText
   {

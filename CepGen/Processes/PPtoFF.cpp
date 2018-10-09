@@ -11,7 +11,7 @@
 
 #include "CepGen/Processes/ProcessesHandler.h"
 
-namespace CepGen
+namespace cepgen
 {
   namespace process
   {
@@ -35,10 +35,10 @@ namespace CepGen
           << "Invalid fermion pair selected: " << pair_ << "!";
 
       const PDG pdg_f = (PDG)pair_;
-      mf_ = part::mass( pdg_f );
+      mf_ = particleproperties::mass( pdg_f );
       mf2_ = mf_*mf_;
-      qf_ = part::charge( pdg_f );
-      colf_ = part::colours( pdg_f );
+      qf_ = particleproperties::charge( pdg_f );
+      colf_ = particleproperties::colours( pdg_f );
       CG_DEBUG( "PPtoFF:prepare" )
         << "Produced particles (" << pdg_f << ") "
         << "with mass = " << mf_ << " GeV, "

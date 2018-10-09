@@ -2,9 +2,9 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Core/Exception.h"
 
-namespace CepGen
+namespace cepgen
 {
-  namespace part
+  namespace particleproperties
   {
     double
     mass( const PDG& pdg_id )

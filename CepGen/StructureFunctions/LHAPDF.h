@@ -9,7 +9,7 @@
 
 #include <array>
 
-namespace CepGen
+namespace cepgen
 {
   namespace sf
   {

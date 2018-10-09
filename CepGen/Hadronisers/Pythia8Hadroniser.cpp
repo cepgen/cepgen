@@ -14,7 +14,7 @@
 
 #include "CepGen/Version.h"
 
-namespace CepGen
+namespace cepgen
 {
   namespace hadroniser
   {
@@ -276,7 +276,7 @@ namespace CepGen
   //================================================================================================
 
 #ifdef PYTHIA8
-  const double LHAEvent::mp_ = part::mass( PDG::proton );
+  const double LHAEvent::mp_ = particleproperties::mass( PDG::proton );
   const double LHAEvent::mp2_ = LHAEvent::mp_*LHAEvent::mp_;
 
   LHAEvent::LHAEvent( const Parameters* params ) :

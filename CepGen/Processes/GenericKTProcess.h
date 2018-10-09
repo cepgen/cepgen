@@ -3,7 +3,7 @@
 
 #include "GenericProcess.h"
 
-namespace CepGen
+namespace cepgen
 {
   class ParametersList;
   namespace process
