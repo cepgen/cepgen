@@ -2,51 +2,17 @@
 #define CepGen_Processes_FortranProcesses_h
 
 #include "CepGen/Processes/FortranKTProcess.h"
+#include "CepGen/Processes/ProcessesHandler.h"
 
-namespace CepGen
-{
-  namespace Process
-  {
-    /// A Fortran process handler
-    struct FortranProcess
-    {
-      const char* name; ///< CepGen-readable process name
-      void ( *method )( double& ); ///< Pointer to the weight computation functional
-      const char* description; ///< Human-readable process description
-    };
-    /// Fortran processes collector
-    class FortranProcessesHandler
-    {
-      public:
-        /// Static collector retrieval method
-        static FortranProcessesHandler& get() {
-          static FortranProcessesHandler fph;
-          return fph;
-        }
-        /// Register a Fortran process into the collector
-        void add( const FortranProcess& proc ) {
-          processes_.emplace_back( proc );
-        }
-        /// Get a list of processes handled by this collector
-        const std::vector<FortranProcess>& list() const { return processes_; }
-        /// Generic copy-constructor
-        FortranProcessesHandler( const FortranProcessesHandler& ) = delete;
+#include "CepGen/Core/ParametersList.h"
 
-      private:
-        explicit FortranProcessesHandler() {}
-        std::vector<FortranProcess> processes_;
-    };
-
-    void generateFortranProcesses();
-  }
-}
 #define DECLARE_FORTRAN_SUBROUTINE( method ) \
   extern "C" { extern void method ## _( double& ); }
-#define BEGIN_FORTRAN_PROCESSES_ENUM \
-  namespace CepGen { namespace Process { void generateFortranProcesses() {
+#define PROCESS_F77_NAME( name ) F77_ ## name
 #define REGISTER_FORTRAN_PROCESS( name, method, description ) \
-  CepGen::Process::FortranProcessesHandler::get().add( CepGen::Process::FortranProcess{ name, method ## _, description } );
-#define END_FORTRAN_PROCESSES_ENUM }}}
+  struct PROCESS_F77_NAME( name ) : public CepGen::Process::FortranKTProcess { \
+    PROCESS_F77_NAME( name )() : CepGen::Process::FortranKTProcess( CepGen::ParametersList(), STRINGIFY( name ), description, method ## _ ) {} }; \
+  REGISTER_PROCESS( name, PROCESS_F77_NAME( name ) )
 
 #endif
 

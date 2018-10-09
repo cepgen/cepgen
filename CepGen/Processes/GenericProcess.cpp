@@ -36,9 +36,6 @@ namespace CepGen
       is_point_set_( false )
     {}
 
-    GenericProcess::~GenericProcess() // required for unique_ptr initialisation!
-    {}
-
     GenericProcess&
     GenericProcess::operator=( const GenericProcess& proc )
     {

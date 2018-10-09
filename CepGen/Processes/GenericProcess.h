@@ -28,7 +28,7 @@ namespace CepGen
         GenericProcess( const std::string& name, const std::string& description = "<invalid process>", bool has_event = true );
         /// Copy constructor for a user process
         GenericProcess( const GenericProcess& );
-        virtual ~GenericProcess(); // required for unique_ptr initialisation!
+        virtual ~GenericProcess() = default;
 
         /// Assignment operator
         GenericProcess& operator=( const GenericProcess& );

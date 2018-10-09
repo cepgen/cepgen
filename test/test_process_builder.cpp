@@ -1,5 +1,6 @@
 #include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/Core/ParametersList.h"
 #include <iostream>
 
 using namespace std;
@@ -11,7 +12,7 @@ int main( int argc, const char* argv[] )
 
   CepGen::ProcessesHandler::get().dump();
 
-  auto proc = CepGen::ProcessesHandler::get().build( proc_name );
+  auto proc = CepGen::ProcessesHandler::get().build( proc_name, CepGen::ParametersList() );
   //--- at this point, the process has been found
   std::cout << "Successfully built the process \"" << proc->name() << "\"!\n"
     << " *) description: " << proc->description() << "\n"

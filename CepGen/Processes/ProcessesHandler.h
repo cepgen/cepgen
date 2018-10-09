@@ -8,9 +8,8 @@
 #define BUILDERNM( obj ) obj ## Builder
 #define STRINGIFY( name ) #name
 #define REGISTER_PROCESS( name, obj ) \
-  class BUILDERNM( name ) { \
-    public: BUILDERNM( name )() { CepGen::ProcessesHandler::get().registerProcess( STRINGIFY( name ), new obj ); } \
-  }; \
+  struct BUILDERNM( name ) { \
+    BUILDERNM( name )() { CepGen::ProcessesHandler::get().registerProcess( STRINGIFY( name ), new obj ); } }; \
   static BUILDERNM( name ) g ## name;
 
 namespace CepGen

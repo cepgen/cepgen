@@ -47,17 +47,8 @@ namespace CepGen
       f.close();
 
       //--- parse the process name
-      try {
-        auto proc = CepGen::ProcessesHandler::get().build( proc_name_, *proc_params_ );
-        params_.setProcess( std::move( proc ) );
-      } catch ( const Exception& e ) {
-        Process::generateFortranProcesses();
-        for ( auto& proc : Process::FortranProcessesHandler::get().list() )
-          if ( proc_name_ == std::string( proc.name ) )
-            params_.setProcess( new Process::FortranKTProcess( *proc_params_, proc.name, proc.description, proc.method ) );
-        if ( !params_.process() )
-          throw CG_FATAL( "LpairHandler" ) << "Unrecognised process name: " << proc_name_ << "!";
-      }
+      auto proc = CepGen::ProcessesHandler::get().build( proc_name_, *proc_params_ );
+      params_.setProcess( std::move( proc ) );
 
       //--- parse the structure functions code
       const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
