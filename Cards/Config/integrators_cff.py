@@ -1,7 +1,7 @@
-import Config.Core as cepgen
-from Config.gsl_cff import GslRngEngine
+from containers_cfi import Module
+from Gsl_cfi import GslRngEngine
 
-plain = cepgen.Module('plain',
+plain = Module('plain',
     numFunctionCalls = 1000000,
     rngEngine = GslRngEngine.MT19937,
 )

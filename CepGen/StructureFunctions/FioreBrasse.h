@@ -9,6 +9,7 @@ namespace CepGen
 {
   namespace SF
   {
+    ///\f${\cal W}_{1,2}\f$ structure functions parameterisation by Fiore et al \cite Fiore:2002re and Brasse et al \cite Brasse:1976bf
     class FioreBrasse : public StructureFunctions
     {
       public:
@@ -27,13 +28,10 @@ namespace CepGen
           std::vector<ResonanceParameters> resonances;
           double s0, norm;
         };
-        /// Fiore-Brasse proton structure functions (F.W Brasse et al., DESY 76/11 (1976),
-        /// http://dx.doi.org/10.1016/0550-3213(76)90231-5)
+        /// Fiore \cite Fiore:2002re and Brasse \cite Brasse:1976bf proton structure functions
         explicit FioreBrasse( const FioreBrasse::Parameterisation& params = FioreBrasse::Parameterisation::standard() );
-        /// \param[in] q2 Squared 4-momentum transfer
-        /// \param[in] xbj Bjorken's x
-        /// \cite Brasse1976413
         FioreBrasse& operator()( double xbj, double q2 ) override;
+        /// Old implementation from LPAIR
         FioreBrasse& operator()( double xbj, double q2, bool old );
 
         double W1, W2;

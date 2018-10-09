@@ -23,7 +23,7 @@ namespace CepGen
     public:
       enum class Type {
         plain = 0,
-        Vegas = 1, ///< @cite PeterLepage1978192 developed by G.P. Lepage in 1978
+        Vegas = 1, ///< VEGAS algorithm \cite Lepage:1977sw developed by G.P. Lepage
         MISER = 2
       };
       enum class VegasMode { importance = 1, importanceOnly = 0, stratified = -1 };
@@ -31,8 +31,8 @@ namespace CepGen
        * Book the memory slots and structures for the integrator
        * \note Three integration algorithms are currently supported:
        *  * the plain algorithm randomly sampling points in the phase space
-       *  * the Vegas algorithm developed by P. Lepage, as documented in @cite PeterLepage1978192,
-       *  * the MISER algorithm developed by W.H. Press and G.R. Farrar, as documented in @cite Press:1989vk.
+       *  * the Vegas algorithm developed by P. Lepage, as documented in \cite Lepage:1977sw
+       *  * the MISER algorithm developed by W.H. Press and G.R. Farrar, as documented in \cite Press:1989vk.
        * \param[in] ndim Number of dimensions on which the function will be integrated
        * \param[in] integrand Function to be integrated
        * \param[inout] params Run parameters to define the phase space on which this integration is performed (embedded in an Parameters object)
@@ -96,4 +96,3 @@ namespace CepGen
 }
 
 #endif
-

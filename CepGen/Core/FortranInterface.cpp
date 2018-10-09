@@ -10,6 +10,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+  /// Expose structure functions calculators to Fortran
   void
   cepgen_structure_functions_( int& sfmode, double& xbj, double& q2, double& f2, double& fl )
   {

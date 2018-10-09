@@ -1,9 +1,11 @@
-import Config.Core as cepgen
+from containers_cfi import Module, Parameters
 
-pythia8 = cepgen.Module('pythia8',
-    seed = 1000,
-    maxTrials = 1,
-    pythiaPreConfiguration = (
+pythia8 = Module('pythia8',
+    moduleParameters = Parameters(
+        seed = 1000,
+        maxTrials = 1,
+    ),
+    preConfiguration = (
         # printout properties
         # start by disabling some unnecessary output
         'Next:numberCount = 0',
@@ -15,7 +17,7 @@ pythia8 = cepgen.Module('pythia8',
         'PartonLevel:MPI = off',
         'BeamRemnants:primordialKT = off',
     ),
-    pythiaConfiguration = (
+    pythiaDefaults = (
         'ParticleDecays:allowPhotonRadiation = off',
         'Tune:preferLHAPDF = 2',
         #'Beams:setProductionScalesFromLHEF = off',
@@ -29,5 +31,7 @@ pythia8 = cepgen.Module('pythia8',
         'MultipartonInteractions:ecmPow = 0.25208',
         'MultipartonInteractions:expPow = 1.6',
     ),
-    pythiaProcessConfiguration = (),
+    processConfiguration = (
+        'pythiaDefaults',
+    ),
 )

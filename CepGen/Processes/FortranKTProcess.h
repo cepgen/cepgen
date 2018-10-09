@@ -20,13 +20,16 @@ namespace CepGen
         double computeKTFactorisedMatrixElement() override;
         void fillCentralParticlesKinematics() override;
 
-        int pair_;
-        int method_;
-        /// Subroutine to be called for weight computation
-        std::function<void(double&)> func_;
-        double y1_, y2_, pt_diff_, phi_pt_diff_;
+        int pair_; ///< Outgoing particles type
+        int method_; ///< Computation method for the process
+        std::function<void(double&)> func_; ///< Subroutine to be called for weight computation
+        double y1_; ///< First outgoing particle rapidity
+        double y2_; ///< Second outgoing particle rapidity
+        double pt_diff_; ///< Transverse momentum balance between outgoing particles
+        double phi_pt_diff_; ///< Azimutal angle difference between outgoing particles
 
-        Particle::Momentum mom_ip1_, mom_ip2_;
+        Particle::Momentum mom_ip1_; ///< First incoming beam momentum
+        Particle::Momentum mom_ip2_; ///< Second incoming beam momentum
     };
   }
 }

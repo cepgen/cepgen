@@ -10,7 +10,7 @@
 #include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Processes/PPtoFF.h"
 #include "CepGen/Processes/PPtoWW.h"
-#include "CepGen/Processes/FortranKTProcess.h"
+#include "CepGen/Processes/FortranProcesses.h"
 
 #include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 #include "CepGen/StructureFunctions/LHAPDF.h"
@@ -20,11 +20,6 @@
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 
 #include <algorithm>
-
-extern "C"
-{
-  extern void nucl_to_ff_( double& );
-}
 
 #if PY_MAJOR_VERSION < 3
 #  define PYTHON2
@@ -93,9 +88,14 @@ namespace CepGen
         params_.setProcess( new Process::PPtoFF( proc_params ) );
       else if ( proc_name == "pptoww" )
         params_.setProcess( new Process::PPtoWW( proc_params ) );
-      else if ( proc_name == "patoll" )
-        params_.setProcess( new Process::FortranKTProcess( proc_params, "nucltoff", "(p/A)(p/A) ↝ (g/ɣ)ɣ → f⁺f¯", nucl_to_ff_ ) );
-      else throw CG_FATAL( "PythonHandler" ) << "Unrecognised process: " << proc_name << ".";
+      else {
+        Process::generateFortranProcesses();
+        for ( auto& proc : Process::FortranProcessesHandler::get().list() )
+          if ( proc_name == std::string( proc.name ) )
+            params_.setProcess( new Process::FortranKTProcess( proc_params, proc.name, proc.description, proc.method ) );
+        if ( !params_.process() )
+          throw CG_FATAL( "PythonHandler" ) << "Unrecognised process name: " << proc_name << "!";
+      }
 
       //--- process kinematics
       PyObject* pin_kinematics = getElement( process, "inKinematics" ); // borrowed
@@ -387,25 +387,30 @@ namespace CepGen
         throwPythonError( "Hadroniser name is required!" );
       std::string hadr_name = get<std::string>( pname );
 
-      fillParameter( hadr, "maxTrials", params_.hadroniser_max_trials );
-      PyObject* pseed = getElement( hadr, "seed" ); // borrowed
-      long long seed = -1ll;
-      if ( pseed && is<int>( pseed ) ) {
-        seed = PyLong_AsLongLong( pseed );
-        CG_DEBUG( "PythonHandler:hadroniser" ) << "Hadroniser seed set to " << seed;
-      }
-      if ( hadr_name == "pythia8" ) {
-        params_.setHadroniser( new Hadroniser::Pythia8Hadroniser( params_ ) );
+      //--- list of module-specific parameters
+      ParametersList mod_params;
+      fillParameter( hadr, "moduleParameters", mod_params );
+
+      if ( hadr_name == "pythia8" )
+        params_.setHadroniser( new Hadroniser::Pythia8Hadroniser( params_, mod_params ) );
+      else
+        throwPythonError( Form( "Unrecognised hadronisation algorithm: \"%s\"!", hadr_name.c_str() ) );
+
+      auto h = params_.hadroniser();
+      { //--- before calling the init() method
         std::vector<std::string> config;
-        auto pythia8 = dynamic_cast<Hadroniser::Pythia8Hadroniser*>( params_.hadroniser() );
-        pythia8->setSeed( seed );
-        fillParameter( hadr, "pythiaPreConfiguration", config );
-        pythia8->readStrings( config );
-        pythia8->init();
-        fillParameter( hadr, "pythiaConfiguration", config );
-        pythia8->readStrings( config );
-        fillParameter( hadr, "pythiaProcessConfiguration", config );
-        pythia8->readStrings( config );
+        fillParameter( hadr, "preConfiguration", config );
+        h->readStrings( config );
+      }
+      h->init();
+      { //--- after init() has been called
+        std::vector<std::string> config;
+        fillParameter( hadr, "processConfiguration", config );
+        for ( const auto& block : config ) {
+          std::vector<std::string> config_blk;
+          fillParameter( hadr, block.c_str(), config_blk );
+          h->readStrings( config_blk );
+        }
       }
     }
   }

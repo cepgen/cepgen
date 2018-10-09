@@ -8,7 +8,8 @@ namespace CepGen
 {
   namespace Process
   {
-    /// Compute the matrix element for a CE \f$\gamma\gamma\rightarrow W^+W^-\f$ process using \f$k_T\f$-factorization approach
+    /// \brief Compute the matrix element for a CE \f$\gamma\gamma\rightarrow W^+W^-\f$ process using \f$k_T\f$-factorization approach
+    /// \note The full theoretical description of this process definition may be found in \cite Luszczak:2018ntp.
     class PPtoWW : public GenericKTProcess
     {
       public:

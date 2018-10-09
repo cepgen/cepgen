@@ -14,6 +14,7 @@
 namespace CepGen
 {
   class Particle;
+  class ParametersList;
   enum class KinematicsMode;
 #ifdef PYTHIA8
   class LHAEvent : public Pythia8::LHAup
@@ -26,8 +27,8 @@ namespace CepGen
       void setCrossSection( int id, double xsec, double xsec_err );
       void setProcess( int id, double xsec, double q2_scale, double alpha_qed, double alpha_qcd );
 
-      unsigned short cgPart( unsigned short py_id ) const;
-      unsigned short pyPart( unsigned short cg_id ) const;
+      unsigned short cepgenId( unsigned short py_id ) const;
+      unsigned short pythiaId( unsigned short cg_id ) const;
       void addCorresp( unsigned short py_id, unsigned short cg_id );
       void dumpCorresp() const;
 
@@ -48,22 +49,20 @@ namespace CepGen
     class Pythia8Hadroniser : public GenericHadroniser
     {
       public:
-        explicit Pythia8Hadroniser( const Parameters& );
+        explicit Pythia8Hadroniser( const Parameters&, const ParametersList& );
         ~Pythia8Hadroniser();
 
+        void readString( const char* param ) override;
+        void init() override;
         bool run( Event& ev, double& weight, bool full ) override;
-        void setSeed( long long seed ) override;
+
         void setCrossSection( double xsec, double xsec_err ) override;
 
         bool fullEvent() const { return full_evt_; }
         void setFullEvent( bool full = true ) { full_evt_ = full; }
 
-        bool init();
-        void readString( const char* param ) override;
-
       private:
         static constexpr unsigned short invalid_idx_ = 999;
-        unsigned short max_attempts_;
         std::vector<unsigned short> min_ids_;
         std::unordered_map<short,short> py_cg_corresp_;
 #ifdef PYTHIA8
@@ -72,7 +71,7 @@ namespace CepGen
         Particle& addParticle( Event& ev, const Pythia8::Particle&, const Pythia8::Vec4& mom, unsigned short ) const;
         /// A Pythia8 core to be wrapped
         std::unique_ptr<Pythia8::Pythia> pythia_;
-        std::shared_ptr<LHAEvent> lhaevt_;
+        std::unique_ptr<LHAEvent> lhaevt_;
 #endif
         bool full_evt_;
         unsigned short offset_;
@@ -83,4 +82,3 @@ namespace CepGen
 }
 
 #endif
-

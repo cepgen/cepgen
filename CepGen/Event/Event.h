@@ -25,12 +25,12 @@ namespace CepGen
       /// \param[out] os Output stream where to dump the information
       /// \param[in] stable_ Do we only show the stable particles in this event?
       void dump( std::ostream& os = *Logger::get().output, bool stable_ = false ) const;
-
+      /// Incoming beams centre-of-mass energy, in GeV
       double cmEnergy() const;
 
       //----- particles adders
 
-      /// Set the information on one particle in the process
+      /// \brief Set the information on one particle in the process
       /// \param[in] part The Particle object to insert or modify in the event
       /// \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
       Particle& addParticle( Particle& part, bool replace = false );
@@ -43,46 +43,41 @@ namespace CepGen
 
       /// Number of particles in the event
       size_t numParticles() const;
-      /// \brief Vector of all particles in the event
+      /// Vector of all particles in the event
       const Particles particles() const;
-      /// \brief Vector of all stable particles in the event
+      /// Vector of all stable particles in the event
       const Particles stableParticles() const;
-      /**
-       * Returns the list of Particle objects corresponding to a certain role in the process kinematics
-       * \brief Gets a list of particles by their role in the event
+      /** Get a list of Particle objects corresponding to a certain role in the process kinematics
        * \param[in] role The role the particles have to play in the process
        * \return A vector of references to the requested Particle objects
        */
       Particles& getByRole( Particle::Role role );
+      /// Get a list of constant Particle objects corresponding to a certain role in the process kinematics
       const Particles& getByRole( Particle::Role role ) const;
+      /// Get a list of particle identifiers in Event corresponding to a certain role in the process kinematics
       ParticlesIds getIdsByRole( Particle::Role role ) const;
-      /**
-       * Returns the first Particle object in the particles list whose role corresponds to the given argument
+      /** \brief Get the first Particle object in the particles list whose role corresponds to the given argument
        * \param[in] role The role the particle has to play in the event
        * \return A Particle object corresponding to the first particle with the role
        */
       Particle& getOneByRole( Particle::Role role );
       const Particle& getOneByRole( Particle::Role role ) const;
-      /**
-       * Returns the reference to the Particle object corresponding to a unique identifier in the event
-       * \brief Gets one particle by its unique identifier in the event
-       * \param[in] id_ The unique identifier to this particle in the event
+      /** \brief Get the reference to the Particle object corresponding to a unique identifier in the event
+       * \param[in] id The unique identifier to this particle in the event
        * \return A reference to the requested Particle object
        */
-      Particle& operator[]( int id_ );
-      /// Get a const Particle object using its unique identifier
-      /// \param[in] id_ Unique identifier of the particle in the event
-      /// \return Constant object to be retrieved
-      const Particle& getConstById( int id_ ) const;
-      /**
-       * Returns the references to the Particle objects corresponding to the unique identifiers in the event
-       * \brief Gets a vector of particles by their unique identifier in the event
+      Particle& operator[]( int id );
+      /** \brief Get a const Particle object using its unique identifier
+       * \param[in] id Unique identifier of the particle in the event
+       * \return Constant object to be retrieved
+       */
+      const Particle& at( int id ) const;
+      /** \brief Get references to the Particle objects corresponding to the unique identifiers in the event
        * \param[in] ids_ The unique identifiers to the particles to be selected in the event
        * \return A vector of references to the requested Particle objects
        */
       Particles getByIds( const ParticlesIds& ids_ ) const;
-      /**
-       * Returns the list of mother particles of any given Particle object in this event
+      /** \brief Get the list of mother particles of any given Particle object in this event
        * \param[in] part The reference to the Particle object from which we want to extract the mother particles
        * \return A list of parenting Particle object
        */

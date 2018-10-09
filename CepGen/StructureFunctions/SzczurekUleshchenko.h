@@ -12,6 +12,7 @@ namespace CepGen
 {
   namespace SF
   {
+    /// Szcurek and Uleshchenko modelling of \f$F_{1/2}\f$ \cite Szczurek:1999wp
     class SzczurekUleshchenko : public StructureFunctions
     {
       public:

@@ -37,12 +37,12 @@ namespace CepGen
       Kinematics();
       ~Kinematics();
 
+      /// Incoming beams characteristics
       struct Beam
       {
-        /// Incoming particle's momentum (in \f$\text{GeV}/c\f$)
-        double pz;
-        PDG pdg;
-        KTFlux kt_flux;
+        double pz; ///< Incoming particle momentum, in GeV/c
+        PDG pdg; ///< PDG identifier for the beam
+        KTFlux kt_flux; ///< Type of kT-factorised flux to be considered (if any)
       };
       friend std::ostream& operator<<( std::ostream&, const Beam& );
       /// Beam/primary particle's kinematics
@@ -59,6 +59,7 @@ namespace CepGen
       /// Type of structure functions to consider
       std::shared_ptr<StructureFunctions> structure_functions;
 
+      /// A collection of cuts to apply on the physical phase space
       struct CutsList
       {
         CutsList();

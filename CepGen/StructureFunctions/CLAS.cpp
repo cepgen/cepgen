@@ -165,8 +165,10 @@ namespace CepGen
       const double coef = 6.08974;
 
       double wth = params_.mp+params_.mpi0;
-      if ( w < wth ) return std::make_pair( 0., 0. );
-      if ( w > 4. ) return std::make_pair( 1., 0. );
+      if ( w < wth )
+        return std::make_pair( 0., 0. );
+      if ( w > 4. )
+        return std::make_pair( 1., 0. );
 
       const double w2 = w*w;
 
@@ -203,13 +205,14 @@ namespace CepGen
           ? res.mass * ( 1.+params_.mu/( 1.+params_.mup*q2 ) )
           : res.mass;
         double qs0 = pow( dmi*dmi+mp2-mpi02, 2 )-4.*mp2*dmi*dmi;
-        if ( qs0 <= 0. ) break;
+        if ( qs0 <= 0. )
+          break;
         qs0 = 0.5*sqrt( qs0 )/dmi;
         int ji = 2*res.angular_momentum;
         const double dg = 0.5*res.width*pow( qs/qs0, ji+1 )*( 1.+pow( coef*qs0, ji ) )/( 1.+pow( coef*qs, ji ) );
         f2resn += ai*dg/( ( w-dmi )*( w-dmi )+dg*dg );
       }
-      f2resn *= 0.5*( 1.-params_.b[0] )*bkg2/( params_.mp*M_PI );
+      f2resn *= 0.5*( 1.-params_.b[0] )*bkg2/params_.mp*M_1_PI;
 
       return std::make_pair( f2bkg, f2resn );
     }

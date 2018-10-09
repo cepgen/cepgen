@@ -4,7 +4,6 @@
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include <fstream>
-#include <set>
 
 namespace mstw
 {
@@ -24,8 +23,6 @@ namespace mstw
     CepGen::GridHandler<2,2>( CepGen::GridType::logarithmic ),
     params( param )
   {
-    std::set<double> q2_vals, xbj_vals;
-
     { // file readout part
       std::ifstream file( params.grid_path, std::ios::binary | std::ios::in );
       if ( !file.is_open() )
@@ -44,24 +41,30 @@ namespace mstw
       // retrieve all points and evaluate grid boundaries
 
       sfval_t val;
-      while ( file.read( reinterpret_cast<char*>( &val ), sizeof( sfval_t ) ) ) {
-        q2_vals.insert( val.q2 );
-        xbj_vals.insert( val.xbj );
+      while ( file.read( reinterpret_cast<char*>( &val ), sizeof( sfval_t ) ) )
         insert( { val.xbj, val.q2 }, { val.f2, val.fl } );
-      }
       file.close();
     }
 
-    if ( q2_vals.size() < 2 || xbj_vals.size() < 2 )
-      throw CG_FATAL( "Grid" ) << "Invalid grid retrieved!";
-
     init();
 
+    const auto& bounds = boundaries();
     CG_INFO( "Grid" )
       << "MSTW@" << header_.order << " grid evaluator built "
       << "for " << header_.nucleon << " structure functions (" << header_.cl << ")\n\t"
-      << "xBj in range [" << pow( 10., *xbj_vals.begin() ) << ":" << pow( 10., *xbj_vals.rbegin() ) << "]\n\t"
-      << " Q² in range [" << pow( 10., *q2_vals.begin() ) << ":" << pow( 10., *q2_vals.rbegin() ) << "].";
+      << "xBj in range [" << pow( 10., bounds[0].first ) << ":" << pow( 10., bounds[0].second ) << "]\n\t"
+      << " Q² in range [" << pow( 10., bounds[1].first ) << ":" << pow( 10., bounds[1].second ) << "].";
+  }
+
+  std::string
+  Grid::description() const
+  {
+    std::ostringstream os;
+    const auto& bounds = boundaries();
+    os << "MSTW grid{"
+       << pow( 10., bounds[0].first ) << "<xbj<" << pow( 10., bounds[0].second ) << ","
+       << pow( 10., bounds[1].first ) << "<Q²/GeV²<" << pow( 10., bounds[1].second ) << "}";
+    return os.str();
   }
 
   Grid&

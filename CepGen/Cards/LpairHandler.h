@@ -47,15 +47,20 @@ namespace CepGen
 
         void init( Parameters* );
         std::shared_ptr<ParametersList> proc_params_;
+        int str_fun_;
         std::string proc_name_, hadr_name_, integr_type_;
         std::pair<unsigned short,unsigned short> hi_1_, hi_2_;
     };
 
     //----- specialised registerers
 
+    /// Register a string parameter
     template<> inline void LpairHandler::registerParameter<std::string>( const char* key, const char* description, std::string* def ) { p_strings_.insert( std::make_pair( key, Parameter<std::string>( key, description, def ) ) ); }
+    /// Register a double floating point parameter
     template<> inline void LpairHandler::registerParameter<double>( const char* key, const char* description, double* def ) { p_doubles_.insert( std::make_pair( key, Parameter<double>( key, description, def ) ) ); }
+    /// Register an integer parameter
     template<> inline void LpairHandler::registerParameter<int>( const char* key, const char* description, int* def ) { p_ints_.insert( std::make_pair( key, Parameter<int>( key, description, def ) ) ); }
+    /// Register a boolean parameter
     template<> inline void LpairHandler::registerParameter<bool>( const char* key, const char* description, bool* def ) { p_bools_.insert( std::make_pair( key, Parameter<bool>( key, description, def ) ) ); }
 
     //----- specialised setters

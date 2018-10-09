@@ -42,7 +42,7 @@ namespace CepGen
         double computeWeight() override;
         /// Populate the event content with the generated process' kinematics
         void fillKinematics( bool ) override;
-
+        /// List all variables handled by this generic process
         void dumpVariables() const;
 
       protected:
@@ -65,11 +65,11 @@ namespace CepGen
         /// Type of mapping to apply on the variable
         enum class Mapping
         {
-          /// a linear \f$\textrm dx\f$ mapping
+          /// a linear \f${\rm d}x\f$ mapping
           linear = 0,
-          /// a logarithmic \f$\frac{\textrm dx}{x} = \textrm d(\log x)\f$ mapping
+          /// a logarithmic \f$\frac{{\rm d}x}{x} = {\rm d}(\log x)\f$ mapping
           logarithmic,
-          /// a square \f$\textrm dx^2=2x\cdot\textrm dx\f$ mapping
+          /// a square \f${\rm d}x^2=2x\cdot{\rm d}x\f$ mapping
           square
         };
         friend std::ostream& operator<<( std::ostream&, const Mapping& );
@@ -86,7 +86,7 @@ namespace CepGen
         /// \return Phase space point-dependent component of the Jacobian weight of the point in the phase space for integration
         /// \note To be run at each point computation (therefore, to be optimised!)
         double generateVariables() const;
-
+        /// Number of dimensions on which to perform the integration
         unsigned short num_dimensions_;
 
         /// Phase space point-independant component of the Jacobian weight of the point in the phase space for integration

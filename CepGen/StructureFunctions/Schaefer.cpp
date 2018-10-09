@@ -58,15 +58,29 @@ namespace CepGen
       params( params ), initialised_( false ), inv_omega_range_( -1. )
     {}
 
+    std::string
+    Schaefer::description() const
+    {
+      std::ostringstream os;
+      os << "LUXlike{"
+         << "r=" << *params.resonances_model << ","
+         << "p=" << *params.perturbative_model << ","
+         << "c=" << *params.continuum_model;
+      if ( params.higher_twist )
+        os << ",HT";
+      os << "}";
+      return os.str();
+    }
+
     void
     Schaefer::initialise()
     {
       CG_INFO( "LUXlike" ) << "LUXlike structure functions evaluator successfully initialised.\n"
         << " * Q² cut:             " << params.q2_cut << " GeV²\n"
         << " * W² ranges:          " << params.w2_lo << " GeV² / " << params.w2_hi << " GeV²\n"
-        << " * resonance model:    " << params.resonances_model->type << "\n"
-        << " * perturbative model: " << params.perturbative_model->type << "\n"
-        << " * continuum model:    " << params.continuum_model->type << "\n"
+        << " * resonance model:    " << *params.resonances_model << "\n"
+        << " * perturbative model: " << *params.perturbative_model << "\n"
+        << " * continuum model:    " << *params.continuum_model << "\n"
         << " * higher-twist?       " << std::boolalpha << params.higher_twist;
       inv_omega_range_ = 1./( params.w2_hi-params.w2_lo );
       initialised_ = true;

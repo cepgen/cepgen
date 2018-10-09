@@ -1,5 +1,3 @@
-#import Config.Core as cepgen
-
 class GslRngEngine:
     '''GSL random number generator engine'''
     MT19937         = 0

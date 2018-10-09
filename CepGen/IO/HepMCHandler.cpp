@@ -110,11 +110,9 @@ namespace CepGen
           default: {
             if ( moth.size() == 0 ) continue;
             if ( *moth.begin() == cm_id ) vcm->add_particle_out( part );
-            else {
-              std::cout << "other particle!!" << std::endl;
-              continue;
-              //FIXME secondary products... to be implemented!
-            }
+            else
+              throw CG_FATAL( "HepMCHandler:fillEvent" )
+                << "Other particle requested! Not yet implemented!";
           } break;
         }
         idx++;

@@ -5,6 +5,7 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
@@ -25,8 +26,8 @@ namespace CepGen
     }
 #endif
 
-    Pythia8Hadroniser::Pythia8Hadroniser( const Parameters& params ) :
-      GenericHadroniser( "pythia8" ), max_attempts_( params.hadroniser_max_trials ),
+    Pythia8Hadroniser::Pythia8Hadroniser( const Parameters& params, const ParametersList& plist ) :
+      GenericHadroniser( "pythia8", plist ),
 #ifdef PYTHIA8
       pythia_( new Pythia8::Pythia ), lhaevt_( new LHAEvent( &params ) ),
 #endif
@@ -47,42 +48,8 @@ namespace CepGen
     Pythia8Hadroniser::~Pythia8Hadroniser()
     {
 #ifdef PYTHIA8
-      pythia_->settings.writeFile( "last_pythia_config.cmd", true );
+      pythia_->settings.writeFile( "last_pythia_config.cmd", false );
 #endif
-    }
-
-    bool
-    Pythia8Hadroniser::init()
-    {
-#ifdef PYTHIA8
-      if ( pythia_->settings.flag( "ProcessLevel:all" ) != full_evt_ )
-        pythia_->settings.flag( "ProcessLevel:all", full_evt_ );
-
-      switch ( params_->kinematics.mode ) {
-        case KinematicsMode::ElasticElastic:
-          pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 3 );
-          break;
-        case KinematicsMode::InelasticElastic:
-          pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 2 );
-          break;
-        case KinematicsMode::ElasticInelastic:
-          pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 1 );
-          break;
-        case KinematicsMode::InelasticInelastic: default:
-          pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 0 );
-          break;
-      }
-//      pythia_->settings.mode( "BeamRemnants:remnantMode", 1 );
-
-      if ( !pythia_->init() )
-        throw CG_FATAL( "Pythia8Hadroniser" )
-          << "Failed to initialise the Pythia8 core!\n\t"
-          << "See the message above for more details.";
-#else
-      throw CG_FATAL( "Pythia8Hadroniser" )
-        << "Pythia8 is not linked to thin instance!";
-#endif
-      return true;
     }
 
     void
@@ -95,15 +62,41 @@ namespace CepGen
     }
 
     void
-    Pythia8Hadroniser::setSeed( long long seed )
+    Pythia8Hadroniser::init()
     {
 #ifdef PYTHIA8
-      if ( seed == -1ll )
+      if ( pythia_->settings.flag( "ProcessLevel:all" ) != full_evt_ )
+        pythia_->settings.flag( "ProcessLevel:all", full_evt_ );
+
+      if ( seed_ == -1ll )
         pythia_->settings.flag( "Random:setSeed", false );
       else {
         pythia_->settings.flag( "Random:setSeed", true );
-        pythia_->settings.mode( "Random:seed", seed );
+        pythia_->settings.mode( "Random:seed", seed_ );
       }
+
+      switch ( params_->kinematics.mode ) {
+        case KinematicsMode::ElasticElastic: {
+          pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 3 );
+        } break;
+        case KinematicsMode::InelasticElastic: {
+          pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 2 );
+        } break;
+        case KinematicsMode::ElasticInelastic: {
+          pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 1 );
+        } break;
+        case KinematicsMode::InelasticInelastic: default: {
+          pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 0 );
+        } break;
+      }
+
+      if ( !pythia_->init() )
+        throw CG_FATAL( "Pythia8Hadroniser" )
+          << "Failed to initialise the Pythia8 core!\n\t"
+          << "See the message above for more details.";
+#else
+      throw CG_FATAL( "Pythia8Hadroniser" )
+        << "Pythia8 is not linked to this instance!";
 #endif
     }
 
@@ -121,9 +114,7 @@ namespace CepGen
       //--- initialise the event weight before running any decay algorithm
       weight = 1.;
 
-#ifndef PYTHIA8
-      throw CG_FATAL( "Pythia8Hadroniser" ) << "Pythia8 is not linked to this instance!";
-#else
+#ifdef PYTHIA8
       if ( !full && !pythia_->settings.flag( "ProcessLevel:resonanceDecays" ) )
         return true;
 
@@ -146,21 +137,20 @@ namespace CepGen
 
       ev.num_hadronisation_trials = 0;
       while ( true ) {
-        ev.num_hadronisation_trials++; // start at 1
-        if ( ev.num_hadronisation_trials > max_attempts_ )
+        if ( ev.num_hadronisation_trials++ > max_trials_ )
           return false;
         //--- run the hadronisation/fragmentation algorithm
-        if ( !pythia_->next() )
-          continue;
-        //--- hadronisation successful
-        if ( first_evt_ && full ) {
-          offset_ = 0;
-          for ( unsigned short i = 1; i < pythia_->event.size(); ++i )
-            if ( pythia_->event[i].status() == -12 ) // skip the incoming particles
-              offset_++;
-          first_evt_ = false;
+        if ( pythia_->next() ) {
+          //--- hadronisation successful
+          if ( first_evt_ && full ) {
+            offset_ = 0;
+            for ( unsigned short i = 1; i < pythia_->event.size(); ++i )
+              if ( pythia_->event[i].status() == -12 ) // skip the incoming particles
+                offset_++;
+            first_evt_ = false;
+          }
+          break;
         }
-        break;
       }
 
       //===========================================================================================
@@ -168,9 +158,10 @@ namespace CepGen
       //===========================================================================================
 
       updateEvent( ev, weight, full );
-
-#endif
       return true;
+#else
+      throw CG_FATAL( "Pythia8Hadroniser" ) << "Pythia8 is not linked to this instance!";
+#endif
     }
 
 #ifdef PYTHIA8
@@ -193,7 +184,7 @@ namespace CepGen
     {
       for ( unsigned short i = 1+offset_; i < pythia_->event.size(); ++i ) {
         const Pythia8::Particle& p = pythia_->event[i];
-        const unsigned short cg_id = lhaevt_->cgPart( i-offset_ );
+        const unsigned short cg_id = lhaevt_->cepgenId( i-offset_ );
         if ( cg_id != LHAEvent::invalid_id ) {
           //----- particle already in the event
           Particle& cg_part = ev[cg_id];
@@ -204,7 +195,7 @@ namespace CepGen
             continue;
           }
           //--- particle is not what we expect
-          if ( abs( p.id() ) != abs( cg_part.integerPdgId() ) ) {
+          if ( p.idAbs() != abs( cg_part.integerPdgId() ) ) {
             CG_INFO( "Pythia8Hadroniser:update" ) << "LHAEVT event content:";
             lhaevt_->listEvent();
             CG_INFO( "Pythia8Hadroniser:update" ) << "Pythia event content:";
@@ -219,38 +210,38 @@ namespace CepGen
               << "should be " << abs( p.id() ) << ", "
               << "got " << cg_part.integerPdgId() << "!";
           }
-          //--- no decay for this particle
-          if ( p.particleDataEntry().sizeChannels() == 0 )
-            continue;
           //--- resonance decayed; apply branching ratio for this decay
-          weight *= p.particleDataEntry().pickChannel().bRatio();
-          cg_part.setStatus( Particle::Status::Resonance );
+          if ( p.particleDataEntry().sizeChannels() > 0 ) {
+            weight *= p.particleDataEntry().pickChannel().bRatio();
+            cg_part.setStatus( Particle::Status::Resonance );
+          }
         }
         else {
           //----- new particle to be added
-          Particle::Role role = (Particle::Role)findRole( ev, p );
-          Pythia8::Vec4 mom = p.p();
-          switch ( role ) {
+          const unsigned short role = findRole( ev, p );
+          switch ( (Particle::Role)role ) {
             default: break;
-            case Particle::OutgoingBeam1: // no break!
+            case Particle::OutgoingBeam1: {
               ev.getByRole( Particle::OutgoingBeam1 )[0].setStatus( Particle::Status::Fragmented );
               if ( abs( p.status() ) != 61 )
                 break;
-            case Particle::OutgoingBeam2: // no break!
+            } // no break!
+            case Particle::OutgoingBeam2: {
               ev.getByRole( Particle::OutgoingBeam2 )[0].setStatus( Particle::Status::Fragmented );
               if ( abs( p.status() ) != 61 )
                 break;
+            } // no break!
           }
           // found the role ; now we can add the particle
-          Particle& cg_part = addParticle( ev, p, mom, (unsigned short)role );
+          Particle& cg_part = addParticle( ev, p, p.p(), role );
           for ( const auto& moth_id : p.motherList() ) {
             if ( moth_id <= offset_ )
               continue;
-            const unsigned short moth_cg_id = lhaevt_->cgPart( moth_id-offset_ );
+            const unsigned short moth_cg_id = lhaevt_->cepgenId( moth_id-offset_ );
             if ( moth_cg_id != LHAEvent::invalid_id )
               cg_part.addMother( ev[moth_cg_id] );
             else
-              cg_part.addMother( addParticle( ev, pythia_->event[moth_id], mom, (unsigned short)role ) );
+              cg_part.addMother( addParticle( ev, pythia_->event[moth_id], p.p(), role ) );
             if ( !p.isFinal() ) {
               if ( p.isResonance() || p.daughterList().size() > 0 )
                 cg_part.setStatus( Particle::Status::Resonance );
@@ -270,9 +261,9 @@ namespace CepGen
           return (unsigned short)Particle::OutgoingBeam1;
         if ( par_id == 2 && offset_ > 0 )
           return (unsigned short)Particle::OutgoingBeam2;
-        const unsigned short par_cg_id = lhaevt_->cgPart( par_id-offset_ );
+        const unsigned short par_cg_id = lhaevt_->cepgenId( par_id-offset_ );
         if ( par_cg_id != LHAEvent::invalid_id )
-          return (unsigned short)ev.getConstById( par_cg_id ).role();
+          return (unsigned short)ev.at( par_cg_id ).role();
         return findRole( ev, pythia_->event[par_id] );
       }
       return (unsigned short)Particle::UnknownRole;
@@ -337,20 +328,18 @@ namespace CepGen
       const bool inel1 = ( mode == KinematicsMode::InelasticElastic || mode == KinematicsMode::InelasticInelastic );
       const bool inel2 = ( mode == KinematicsMode::ElasticInelastic || mode == KinematicsMode::InelasticInelastic );
 
-      unsigned short quark1_colour = 0, quark2_colour = 0;
       Pythia8::Vec4 mom_iq1 = mom_part1, mom_iq2 = mom_part2;
+      unsigned short colour_index = 501, quark1_colour = 0, quark2_colour = 0;
       //FIXME select quark flavours accordingly
       if ( inel1 ) {
         quark1_pdgid = 2;
-        quark1_colour = 501;
-        const Particle& ip1 = ev.getOneByRole( Particle::IncomingBeam1 );
-        mom_iq1 = Pythia8::Vec4( 0., 0., x1*ip1.momentum().pz(), x1*ip1.energy() );
+        quark1_colour = colour_index++;
+        mom_iq1 = Hadroniser::momToVec4( x1*ev.getOneByRole( Particle::IncomingBeam1 ).momentum() );
       }
       if ( inel2 ) {
         quark2_pdgid = 2;
-        quark2_colour = 502;
-        const Particle& ip2 = ev.getOneByRole( Particle::IncomingBeam2 );
-        mom_iq2 = Pythia8::Vec4( 0., 0., x2*ip2.momentum().pz(), x2*ip2.energy() );
+        quark2_colour = colour_index++;
+        mom_iq2 = Hadroniser::momToVec4( x2*ev.getOneByRole( Particle::IncomingBeam2 ).momentum() );
       }
 
       //--- flavour / x value of hard-process initiators
@@ -361,11 +350,11 @@ namespace CepGen
       //===========================================================================================
 
       quark1_id = sizePart();
-      addCorresp( sizePart(), op1.id() );
+      addCorresp( quark1_id, op1.id() );
       addParticle( quark1_pdgid, -1, 0, 0, quark1_colour, 0, mom_iq1.px(), mom_iq1.py(), mom_iq1.pz(), mom_iq1.e(), mom_iq1.mCalc(), 0., 1. );
 
       quark2_id = sizePart();
-      addCorresp( sizePart(), op2.id() );
+      addCorresp( quark2_id, op2.id() );
       addParticle( quark2_pdgid, -1, 0, 0, quark2_colour, 0, mom_iq2.px(), mom_iq2.py(), mom_iq2.pz(), mom_iq2.e(), mom_iq2.mCalc(), 0., 1. );
 
       //===========================================================================================
@@ -393,21 +382,21 @@ namespace CepGen
         moth1_id = moth2_id = 0;
         if ( mothers.size() > 0 ) {
           const unsigned short moth1_cg_id = *mothers.begin();
-          moth1_id = pyPart( moth1_cg_id );
+          moth1_id = pythiaId( moth1_cg_id );
           if ( moth1_id == invalid_id ) {
-            const Particle& moth = ev.getConstById( moth1_cg_id );
+            const Particle& moth = ev.at( moth1_cg_id );
             if ( moth.mothers().size() > 0 )
-              moth1_id = pyPart( *moth.mothers().begin() );
+              moth1_id = pythiaId( *moth.mothers().begin() );
             if ( moth.mothers().size() > 1 )
-              moth2_id = pyPart( *moth.mothers().rbegin() );
+              moth2_id = pythiaId( *moth.mothers().rbegin() );
           }
           if ( mothers.size() > 1 ) {
             const unsigned short moth2_cg_id = *mothers.rbegin();
-            moth2_id = pyPart( moth2_cg_id );
+            moth2_id = pythiaId( moth2_cg_id );
             if ( moth2_id == invalid_id ) {
-              const Particle& moth = ev.getConstById( moth2_cg_id );
+              const Particle& moth = ev.at( moth2_cg_id );
               moth.dump();
-              moth2_id = pyPart( *moth.mothers().rbegin() );
+              moth2_id = pythiaId( *moth.mothers().rbegin() );
             }
           }
         }
@@ -439,7 +428,7 @@ namespace CepGen
   }
 
   unsigned short
-  LHAEvent::cgPart( unsigned short py_id ) const
+  LHAEvent::cepgenId( unsigned short py_id ) const
   {
     for ( const auto& py_cg : py_cg_corresp_ )
       if ( py_cg.first == py_id )
@@ -448,7 +437,7 @@ namespace CepGen
   }
 
   unsigned short
-  LHAEvent::pyPart( unsigned short cg_id ) const
+  LHAEvent::pythiaId( unsigned short cg_id ) const
   {
     for ( const auto& py_cg : py_cg_corresp_ )
       if ( py_cg.second == cg_id )

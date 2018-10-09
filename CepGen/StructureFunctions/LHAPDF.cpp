@@ -9,19 +9,8 @@ namespace CepGen
     constexpr std::array<short,6> LHAPDF::qtimes3_, LHAPDF::pdgid_;
 
     LHAPDF::Parameterisation::Parameterisation() :
-      num_flavours( 4 ), pdf_set( "cteq6" ), pdf_member( 0 ), mode( Mode::full )
+      num_flavours( 4 ), pdf_set( "cteq6" ), pdf_code( 0l ), pdf_member( 0 ), mode( Mode::full )
     {}
-
-    LHAPDF::Parameterisation
-    LHAPDF::Parameterisation::cteq6()
-    {
-      Parameterisation p;
-      p.num_flavours = 4;
-      p.pdf_set = "cteq6";
-      p.pdf_member = 0;
-      p.mode = Mode::full;
-      return p;
-    }
 
     LHAPDF::LHAPDF( const Parameterisation& param ) :
       StructureFunctions( Type::LHAPDF ), params( param ), initialised_( false )
@@ -35,6 +24,14 @@ namespace CepGen
       params.mode = mode;
     }
 
+    std::string
+    LHAPDF::description() const
+    {
+      std::ostringstream os;
+      os << "LHAPDF{" << params.pdf_set << ",m=" << params.pdf_member << ",mode=" << params.mode << "}";
+      return os.str();
+    }
+
     void
     LHAPDF::initialise()
     {
@@ -44,6 +41,15 @@ namespace CepGen
       std::string lhapdf_version, pdf_description, pdf_type;
 #  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
       try {
+        //--- check if PDF code is set
+        if ( params.pdf_code != 0l ) {
+          auto pdf = ::LHAPDF::lookupPDF( params.pdf_code );
+          if ( pdf.second != 0 )
+            throw CG_FATAL( "LHAPDF" ) << "Failed to retrieve PDFset with id=" << params.pdf_code << "!";
+          if ( !params.pdf_set.empty() && params.pdf_set != pdf.first )
+            CG_WARNING( "LHAPDF" ) << "PDF set name changed from \"" << params.pdf_set << "\" to \"" << pdf.first << "\".";
+          params.pdf_set = pdf.first;
+        }
         pdf_set_ = ::LHAPDF::PDFSet( params.pdf_set );
         pdf_set_.mkPDFs<std::unique_ptr<::LHAPDF::PDF> >( pdfs_ );
         lhapdf_version = ::LHAPDF::version();
@@ -55,7 +61,10 @@ namespace CepGen
           << e.what();
       }
 #  else
-      ::LHAPDF::initPDFSet( params.pdf_set, ::LHAPDF::LHGRID, params.pdf_member );
+      if ( params.pdf_code != 0l )
+        ::LHAPDF::initPDFSet( (int)params.pdf_code, params.pdf_member );
+      else
+        ::LHAPDF::initPDFSet( params.pdf_set, ::LHAPDF::LHGRID, params.pdf_member );
       lhapdf_version = ::LHAPDF::getVersion();
       pdf_description = ::LHAPDF::getDescription();
 #  endif

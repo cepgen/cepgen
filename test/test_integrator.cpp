@@ -1,6 +1,6 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Parameters.h"
-#include "CepGen/Processes/TestProcess.h"
+#include "TestProcess.h"
 
 #include <iostream>
 

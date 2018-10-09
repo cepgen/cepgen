@@ -14,7 +14,7 @@ namespace CepGen
   /// Location for all physics processes to be generated
   namespace Process
   {
-    /// Class template to define any process to compute using this MC integrator/events generator
+    /// \brief Class template to define any process to compute using this MC integrator/events generator
     /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
     /// \date Jan 2014
     class GenericProcess
@@ -46,7 +46,7 @@ namespace CepGen
         /// Map of all outgoing particles in the process
         typedef std::map<Particle::Role,std::vector<PDG> > OutgoingState;
 
-        /// Copy all process' attributes into a new object
+        /// Copy all process attributes into a new object
         virtual std::unique_ptr<GenericProcess> clone() const = 0;
 
         /// Restore the Event object to its initial state
@@ -103,7 +103,8 @@ namespace CepGen
         std::shared_ptr<Event> last_event;
 
       protected:
-        static const double mp_, mp2_;
+        static const double mp_; ///< Proton mass, in GeV/c\f${}^2\f$
+        static const double mp2_; ///< Squared proton mass, in GeV\f${}^2\f$/c\f${}^4\f$
 
         /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
         void setEventContent( const IncomingState& ini, const OutgoingState& fin );

@@ -1,14 +1,16 @@
 import Config.Core as cepgen
-import Config.ktProcess_cfi as ktfactor
+import Config.ktProcess_cfi as kt
 from Config.integrators_cff import vegas as integrator
 #from Config.pythia8_cff import pythia8 as hadroniser
+from Config.PDG_cfi import PDG
 
 from Config.logger_cfi import logger
 logger.enabledModules += ('PPtoFF.prepare',)
 
-process = ktfactor.process.clone('pptoff',
+process = kt.process.clone('pptoff',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.ElasticElastic,
+        pair = PDG.top,
     ),
     inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),
@@ -16,7 +18,7 @@ process = ktfactor.process.clone('pptoff',
         structureFunctions = cepgen.StructureFunctions.LUXlike,
         #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
     ),
-    outKinematics = ktfactor.process.outKinematics.clone(
+    outKinematics = kt.process.outKinematics.clone(
         pair = 6,
         #eta = (-2.5, 2.5),
         mx = (1.07, 1000.),

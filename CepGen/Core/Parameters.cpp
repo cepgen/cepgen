@@ -16,7 +16,6 @@ namespace CepGen
 {
   Parameters::Parameters() :
     general( new ParametersList ),
-    hadroniser_max_trials( 5 ),
     taming_functions( new TamingFunctionsCollection ),
     store_( false ), total_gen_time_( 0. ), num_gen_events_( 0 )
   {}
@@ -24,7 +23,6 @@ namespace CepGen
   Parameters::Parameters( Parameters& param ) :
     general( param.general ),
     kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
-    hadroniser_max_trials( param.hadroniser_max_trials ),
     taming_functions( param.taming_functions ),
     process_( std::move( param.process_ ) ),
     hadroniser_( std::move( param.hadroniser_ ) ),
@@ -34,7 +32,6 @@ namespace CepGen
   Parameters::Parameters( const Parameters& param ) :
     general( param.general ),
     kinematics( param.kinematics ), integrator( param.integrator ), generation( param.generation ),
-    hadroniser_max_trials( param.hadroniser_max_trials ),
     taming_functions( param.taming_functions ),
     store_( false ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ )
   {}
@@ -149,7 +146,8 @@ namespace CepGen
         << std::setw( wt ) << "Number of threads" << p->generation.num_threads << "\n";
     os
       << std::setw( wt ) << "Number of points to try per bin" << p->generation.num_points << "\n"
-      << std::setw( wt ) << "Integrand treatment" << std::boolalpha << p->generation.treat << "\n"
+      << std::setw( wt ) << "Integrand treatment"
+      << ( pretty ? yesno( p->generation.treat ) : std::to_string( p->generation.treat ) ) << "\n"
       << std::setw( wt ) << "Verbosity level " << Logger::get().level << "\n";
     if ( p->hadroniser_ ) {
       os
@@ -184,32 +182,26 @@ namespace CepGen
     if ( p->kinematics.mode != KinematicsMode::invalid )
       os << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << "\n";
     if ( p->kinematics.mode != KinematicsMode::ElasticElastic )
-      os << std::setw( wt ) << "Structure functions" << p->kinematics.structure_functions->type << "\n";
+      os << std::setw( wt ) << "Structure functions" << *p->kinematics.structure_functions << "\n";
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << "\n\n";
-    for ( const auto& lim : p->kinematics.cuts.initial.list() ) { // map(particles class, limits)
-      if ( !lim.second.valid() )
-        continue;
-      os << std::setw( wt ) << lim.first << lim.second << "\n";
-    }
+    for ( const auto& lim : p->kinematics.cuts.initial.list() ) // map(particles class, limits)
+      if ( lim.second.valid() )
+        os << std::setw( wt ) << lim.first << lim.second << "\n";
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Outgoing central system " ) : "Outgoing central system" ) << std::setfill( ' ' ) << "\n\n";
-    for ( const auto& lim : p->kinematics.cuts.central.list() ) {
-      if ( !lim.second.valid() )
-        continue;
-      os << std::setw( wt ) << lim.first << lim.second << "\n";
-    }
+    for ( const auto& lim : p->kinematics.cuts.central.list() )
+      if ( lim.second.valid() )
+        os << std::setw( wt ) << lim.first << lim.second << "\n";
     if ( p->kinematics.cuts.central_particles.size() > 0 ) {
       os << std::setw( wt ) << ( pretty ? boldify( ">>> per-particle cuts:" ) : ">>> per-particle cuts:" ) << "\n";
       for ( const auto& part_per_lim : p->kinematics.cuts.central_particles ) {
         os << " * all single " << std::setw( wt-3 ) << part_per_lim.first << "\n";
-        for ( const auto& lim : part_per_lim.second.list() ) {
-          if ( !lim.second.valid() )
-            continue;
-          os << "   - " << std::setw( wt-5 ) << lim.first << lim.second << "\n";
-        }
+        for ( const auto& lim : part_per_lim.second.list() )
+          if ( lim.second.valid() )
+            os << "   - " << std::setw( wt-5 ) << lim.first << lim.second << "\n";
       }
     }
     os << "\n";

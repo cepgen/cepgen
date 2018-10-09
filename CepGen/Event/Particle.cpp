@@ -17,9 +17,8 @@ namespace CepGen
     mass_( -1. ), helicity_( 0. ),
     role_( role ), status_( st ), pdg_id_( pdgId )
   {
-    if ( pdg_id_ != PDG::invalid ) {
+    if ( pdg_id_ != PDG::invalid )
       computeMass();
-    }
   }
 
   Particle::Particle( const Particle& part ) :
@@ -33,26 +32,30 @@ namespace CepGen
   bool
   Particle::operator<( const Particle& rhs ) const
   {
-    return ( id_ >= 0 && rhs.id_ > 0 && id_ < rhs.id_ );
+    return id_ >= 0
+        && rhs.id_ > 0
+        && id_ < rhs.id_;
   }
 
   double
   Particle::thetaToEta( double theta )
   {
-    return -log( tan( 0.5 * theta * M_PI/180. ) );
+    return -log( tan( 0.5*theta*M_PI/180. ) );
   }
 
   double
   Particle::etaToTheta( double eta )
   {
-    return 2.*atan( exp( -eta ) )*180. / M_PI;
+    return 2.*atan( exp( -eta ) )*180.*M_1_PI;
   }
 
   bool
   Particle::valid()
   {
-    if ( pdg_id_ == PDG::invalid ) return false;
-    if ( momentum_.p() == 0. && mass() == 0. ) return false;
+    if ( pdg_id_ == PDG::invalid )
+      return false;
+    if ( momentum_.p() == 0. && mass_ == 0. )
+      return false;
     return true;
   }
 
@@ -75,8 +78,10 @@ namespace CepGen
   void
   Particle::setMass( double m )
   {
-    if ( m >= 0. ) mass_ = m;
-    else computeMass();
+    if ( m >= 0. )
+      mass_ = m;
+    else
+      computeMass();
   }
 
   void
@@ -120,37 +125,34 @@ namespace CepGen
   Particle::setMomentum( const Momentum& mom, bool offshell )
   {
     momentum_ = mom;
-    if ( !offshell && mom.mass() > 0. ) mass_ = momentum_.mass();
-    else computeMass();
-  }
-
-  void
-  Particle::setMomentum( double px, double py, double pz )
-  {
-    momentum_.setP( px, py, pz );
-    setEnergy();
+    if ( !offshell && mom.mass() > 0. )
+      mass_ = momentum_.mass();
+    else
+      computeMass();
   }
 
   void
   Particle::setMomentum( double px, double py, double pz, double e )
   {
-    setMomentum( px, py, pz );
-    if ( fabs( e-momentum_.energy() )>1.e-6 ) { // more than 1 eV difference
+    momentum_.setP( px, py, pz );
+    setEnergy( e );
+    if ( fabs( e-momentum_.energy() ) > 1.e-6 ) // more than 1 eV difference
       CG_ERROR( Form( "Energy difference: %.5e", e-momentum_.energy() ) );
-      return;
-    }
   }
 
   double
   Particle::energy() const
   {
-    return ( momentum_.energy() < 0. ) ? sqrt( mass2()+momentum_.p2() ) : momentum_.energy();
+    return ( momentum_.energy() < 0.
+      ? std::hypot( mass_, momentum_.p() )
+      : momentum_.energy() );
   }
 
   void
   Particle::setEnergy( double e )
   {
-    if ( e < 0. && mass_ >= 0. ) e = sqrt( mass2()+momentum_.p2() );
+    if ( e < 0. && mass_ >= 0. )
+      e = std::hypot( mass_, momentum_.p() );
     momentum_.setEnergy( e );
   }
 
@@ -182,7 +184,8 @@ namespace CepGen
   Particle::integerPdgId() const
   {
     const float ch = ParticleProperties::charge( pdg_id_ );
-    if ( ch == 0 ) return static_cast<int>( pdg_id_ );
+    if ( ch == 0 )
+      return static_cast<int>( pdg_id_ );
     return static_cast<int>( pdg_id_ ) * charge_sign_ * ( ch/fabs( ch ) );
   }
 
@@ -209,7 +212,7 @@ namespace CepGen
     }
     CG_INFO( "Particle" )
       << "Dumping a particle with id=" << id_ << ", role=" << role_ << ", status=" << (int)status_ << "\n\t"
-      << "Particle id: " << integerPdgId() << " (" << pdg_id_ << "), mass = " << mass() << " GeV\n\t"
+      << "Particle id: " << integerPdgId() << " (" << pdg_id_ << "), mass = " << mass_ << " GeV\n\t"
       << "Momentum: " << momentum_ << " GeV\t" << "(|P| = p = " << momentum_.p() << " GeV)\n\t"
       << " p⟂ = " << momentum_.pt() << " GeV, eta = " << momentum_.eta() << ", phi = " << momentum_.phi() << "\n\t"
       << "Primary? " << yesno( primary() ) << osm.str() << "\n\t"
@@ -219,8 +222,8 @@ namespace CepGen
   double
   Particle::etaToY( double eta_, double m_, double pt_ )
   {
-    const double mt = m_*m_ + pt_*pt_;
-    return asinh( sqrt( ( ( ( mt*mt-m_*m_ )*cosh( 2.*eta_ ) + m_*m_ )/ mt*mt - 1. ) / 2. ) );
+    const double m2 = m_*m_, mt = std::hypot( m_, pt_ );
+    return asinh( sqrt( ( ( mt*mt-m2 )*cosh( 2.*eta_ )+m2 )/ mt*mt - 1. )*M_SQRT1_2 );
   }
 
   std::ostream&
@@ -228,14 +231,14 @@ namespace CepGen
   {
     switch ( rl ) {
       case Particle::UnknownRole:   return os << "unknown";
-      case Particle::IncomingBeam1: return os << "in.b.1";
-      case Particle::IncomingBeam2: return os << "in.b.2";
-      case Particle::OutgoingBeam1: return os << "out.b.1";
-      case Particle::OutgoingBeam2: return os << "out.b.2";
-      case Particle::Parton1:       return os << "parton1";
-      case Particle::Parton2:       return os << "parton2";
-      case Particle::Parton3:       return os << "parton3";
-      case Particle::Intermediate:  return os << "hard.pr.";
+      case Particle::IncomingBeam1: return os << "i.beam 1";
+      case Particle::IncomingBeam2: return os << "i.beam 2";
+      case Particle::OutgoingBeam1: return os << "o.beam 1";
+      case Particle::OutgoingBeam2: return os << "o.beam 2";
+      case Particle::Parton1:       return os << "parton 1";
+      case Particle::Parton2:       return os << "parton 2";
+      case Particle::Parton3:       return os << "parton 3";
+      case Particle::Intermediate:  return os << "hard pr.";
       case Particle::CentralSystem: return os << "central";
     }
     return os;
@@ -244,16 +247,18 @@ namespace CepGen
   double
   CMEnergy( const Particle& p1, const Particle& p2 )
   {
-    if ( p1.mass()*p2.mass() < 0. ) return 0.;
-    if ( p1.energy()*p2.energy() < 0. ) return 0.;
+    if ( p1.mass()*p2.mass() < 0.
+      || p1.energy()*p2.energy() < 0. )
+      return 0.;
     return sqrt( p1.mass2()+p2.mass2() + 2.*p1.energy()*p2.energy() - 2.*( p1.momentum()*p2.momentum() ) );
   }
 
   double
   CMEnergy( const Particle::Momentum& m1, const Particle::Momentum& m2 )
   {
-    if ( m1.mass()*m2.mass() < 0. ) return 0.;
-    if ( m1.energy()*m2.energy() < 0. ) return 0.;
+    if ( m1.mass()*m2.mass() < 0.
+      || m1.energy()*m2.energy() < 0. )
+      return 0.;
     return sqrt( m1.mass2()+m2.mass2() + 2.*m1.energy()*m2.energy() - 2.*( m1*m2 ) );
   }
 }

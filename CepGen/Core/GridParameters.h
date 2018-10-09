@@ -6,6 +6,7 @@
 
 namespace CepGen
 {
+  /// A parameters placeholder for the grid integration helper
   class GridParameters
   {
     public:

@@ -6,19 +6,25 @@ namespace CepGen
   enum class PDG;
   namespace ParticleProperties
   {
-    /// Mass (in GeV) of a particle
-    /// \param pdg_id PDG identifier
-    /// \return Mass of the particle in \f$\textrm{GeV}/c^2\f$
+    /** \brief Mass of a particle, in GeV/c\f${}^2\f$
+     * \param pdg_id PDG identifier
+     */
     double mass( const PDG& pdg_id );
-    /// Electric charge of a particle, in \f$e\f$
-    /// \param[in] pdg_id PDG id
+    /** \brief Electric charge of a particle, in \f$e\f$
+     * \param[in] pdg_id PDG id
+     */
     double charge( const PDG& pdg_id );
-    /// Electric charge of a particle, in \f$e\f$
-    /// \param[in] id integer PDG id
+    /** \brief Electric charge of a particle, in \f$e\f$
+     * \param[in] id integer PDG id
+     */
     double charge( int id );
+    /** \brief Colour factor for a given particle
+     * \param[in] id integer PDG id
+     */
     unsigned short colours( const PDG& pdg_id );
-    /// Total decay width of an unstable particle, in GeV
-    /// \param[in] pdg_id PDG (PDG ID)
+    /** \brief Total decay width of an unstable particle, in GeV
+     * \param[in] pdg_id PDG (PDG ID)
+     */
     double width( const PDG& pdg_id );
   }
 }

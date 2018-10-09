@@ -24,7 +24,7 @@ namespace CepGen
 
         void addEventContent() override {}
         /// Number of dimensions on which to perform the integration
-        unsigned int numDimensions( const Kinematics::Mode& ) const override { return N; }
+        unsigned int numDimensions() const override { return N; }
         /// Generic formula to compute a weight out of a point in the phase space
         double computeWeight() override {
           std::array<double,N> args;

@@ -6,6 +6,7 @@
 
 namespace CepGen
 {
+  /// A hasher table for a given structure
   template<class T,bool>
   struct hasher
   {
@@ -13,6 +14,7 @@ namespace CepGen
       return std::hash<T>()( t );
     }
   };
+  /// A hasher table for a given structure
   template<class T>
   struct hasher<T, true>
   {
@@ -21,6 +23,7 @@ namespace CepGen
       return std::hash<enumType>()( static_cast<enumType>( t ) );
     }
   };
+  /// A hasher table for an enumeration
   template<class T>
   struct EnumHash
   {

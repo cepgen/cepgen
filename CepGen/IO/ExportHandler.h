@@ -23,6 +23,7 @@ namespace CepGen
           HepMC, ///< HepMC ASCII format
           LHE ///< LHEF format
         };
+        /// Human-readable output name
         friend std::ostream& operator<<( std::ostream& os, const OutputType& type ) {
           switch ( type ) {
             case HepMC: return os << "HepMC ASCII";
@@ -32,11 +33,12 @@ namespace CepGen
         }
 
       public:
-        /// Class constructor
+        /// \brief Class constructor
         /// \param[in] type Requested output type
         explicit ExportHandler( const OutputType& type ) :
           type_( type ), event_num_( 0. ) {}
         virtual ~ExportHandler() {}
+        /// Initialise the handler and its inner parameterisation
         virtual void initialise( const Parameters& ) = 0;
         /// Set the process cross section and its associated error
         virtual void setCrossSection( double xsec, double err_xsec ) {}
