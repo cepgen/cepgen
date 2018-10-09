@@ -3,7 +3,7 @@
 
 namespace cepgen
 {
-  namespace sf
+  namespace strfun
   {
     BlockDurandHa::Parameters
     BlockDurandHa::Parameters::standard()

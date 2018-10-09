@@ -8,9 +8,9 @@
 
 namespace cepgen
 {
-  namespace sf { class Parameterisation; }
+  namespace strfun { class Parameterisation; }
   class ParametersList;
-  namespace cards
+  namespace card
   {
     /// CepGen Python configuration cards reader/writer
     class PythonHandler : public Handler
@@ -52,7 +52,7 @@ namespace cepgen
         void parseGenerator( PyObject* );
         void parseTamingFunctions( PyObject* );
         void parseHadroniser( PyObject* );
-        void parseStructureFunctions( PyObject*, std::shared_ptr<sf::Parameterisation>& sf_handler );
+        void parseStructureFunctions( PyObject*, std::shared_ptr<strfun::Parameterisation>& sf_handler );
     };
     template<> bool PythonHandler::is<int>( PyObject* obj ) const;
     template<> int PythonHandler::get<int>( PyObject* obj ) const;

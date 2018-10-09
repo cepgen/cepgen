@@ -1,5 +1,5 @@
-#ifndef CepGen_StructureFunctions_LHAPDF_h
-#define CepGen_StructureFunctions_LHAPDF_h
+#ifndef CepGen_StructureFunctions_Partonic_h
+#define CepGen_StructureFunctions_Partonic_h
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
@@ -11,10 +11,10 @@
 
 namespace cepgen
 {
-  namespace sf
+  namespace strfun
   {
     /// Generic partonic level perturbative structure functions built from an external PDFs grid
-    class LHAPDF : public Parameterisation
+    class Partonic : public Parameterisation
     {
       public:
         /// Model parameterisation
@@ -36,10 +36,10 @@ namespace cepgen
           Mode mode;
         };
         /// Build a calculator from its Parameters object
-        explicit LHAPDF( const Parameters& param = Parameters() );
+        explicit Partonic( const Parameters& param = Parameters() );
         /// Build a calculator from a set, its member, and the contributing quarks
-        explicit LHAPDF( const char* set, unsigned short member = 0, const Parameters::Mode& mode = Parameters::Mode::full );
-        LHAPDF& operator()( double xbj, double q2 ) override;
+        explicit Partonic( const char* set, unsigned short member = 0, const Parameters::Mode& mode = Parameters::Mode::full );
+        Partonic& operator()( double xbj, double q2 ) override;
         /// Parameterisation used in this SFs calculator
         Parameters params;
 
@@ -50,8 +50,8 @@ namespace cepgen
 
 #ifdef LIBLHAPDF
 #  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION >= 6
-        ::LHAPDF::PDFSet pdf_set_;
-        std::vector<std::unique_ptr<::LHAPDF::PDF> > pdfs_;
+        LHAPDF::PDFSet pdf_set_;
+        std::vector<std::unique_ptr<LHAPDF::PDF> > pdfs_;
 #  endif
 #endif
         static constexpr std::array<short,6> pdgid_ = { { 1, 2, 3, 4, 5, 6 } };
@@ -62,7 +62,7 @@ namespace cepgen
         } };
     };
   }
-  std::ostream& operator<<( std::ostream& os, const sf::LHAPDF::Parameters::Mode& mode );
+  std::ostream& operator<<( std::ostream& os, const strfun::Partonic::Parameters::Mode& mode );
 }
 
 #endif

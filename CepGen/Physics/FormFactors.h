@@ -9,7 +9,7 @@
 
 namespace cepgen
 {
-  namespace sf { class Parameterisation; }
+  namespace strfun { class Parameterisation; }
   /// Form factors collection (electric and magnetic parts)
   class FormFactors
   {
@@ -21,7 +21,7 @@ namespace cepgen
       /// Elastic proton form factors
       static FormFactors protonElastic( double q2 );
       /// Generate the form factors according to the proton structure functions set
-      static FormFactors protonInelastic( double q2, double mi2, double mf2, sf::Parameterisation& );
+      static FormFactors protonInelastic( double q2, double mi2, double mf2, strfun::Parameterisation& );
 
       /// Electric form factor
       double FE;

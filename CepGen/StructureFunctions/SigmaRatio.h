@@ -6,7 +6,7 @@
 namespace cepgen
 {
   /// A collector namespace for modellings of the \f$R=\sigma_L/\sigma_T\f$ ratio
-  namespace sr
+  namespace sigrat
   {
     /// A generic modelling of the \f$R=\sigma_L/\sigma_T\f$ ratio
     class Parameterisation

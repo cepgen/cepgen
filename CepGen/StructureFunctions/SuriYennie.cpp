@@ -5,7 +5,7 @@
 
 namespace cepgen
 {
-  namespace sf
+  namespace strfun
   {
     SuriYennie::Parameters
     SuriYennie::Parameters::standard()

@@ -12,7 +12,7 @@ namespace cepgen
 {
   Kinematics::Kinematics() :
     incoming_beams( { { 6500., PDG::proton, KTFlux::invalid }, { 6500., PDG::proton, KTFlux::invalid } } ),
-    mode( KinematicsMode::invalid ), structure_functions( new sf::SuriYennie )
+    mode( KinematicsMode::invalid ), structure_functions( new strfun::SuriYennie )
   {}
 
   Kinematics::~Kinematics()

@@ -4,7 +4,7 @@
 
 namespace cepgen
 {
-  namespace sf
+  namespace strfun
   {
     ALLM::Parameters
     ALLM::Parameters::allm91()

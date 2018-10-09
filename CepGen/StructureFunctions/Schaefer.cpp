@@ -1,5 +1,5 @@
 #include "CepGen/StructureFunctions/Schaefer.h"
-#include "CepGen/StructureFunctions/LHAPDF.h"
+#include "CepGen/StructureFunctions/Partonic.h"
 
 #include "CepGen/Core/Exception.h"
 
@@ -8,7 +8,7 @@
 
 namespace cepgen
 {
-  namespace sf
+  namespace strfun
   {
     Schaefer::Parameters
     Schaefer::Parameters::mstwGrid()
@@ -32,7 +32,7 @@ namespace cepgen
       par.w2_hi = 4.;
       par.w2_lo = 3.;
       par.resonances_model = Parameterisation::build( Type::ChristyBosted );
-      par.perturbative_model = std::make_shared<sf::LHAPDF>( "MSTW2008nnlo90cl" );
+      par.perturbative_model = std::make_shared<strfun::Partonic>( "MSTW2008nnlo90cl" );
       par.continuum_model = Parameterisation::build( Type::GD11p );
       par.higher_twist = 1;
       return par;
@@ -46,8 +46,8 @@ namespace cepgen
       par.w2_hi = 4.;
       par.w2_lo = 3.;
       par.resonances_model = Parameterisation::build( Type::ChristyBosted );
-      par.perturbative_model = std::make_shared<sf::LHAPDF>( "cteq6l1" );
-      par.continuum_model = Parameterisation::build( sf::Type::GD11p );
+      par.perturbative_model = std::make_shared<strfun::Partonic>( "cteq6l1" );
+      par.continuum_model = Parameterisation::build( strfun::Type::GD11p );
       par.higher_twist = 0;
       return par;
     }
@@ -98,7 +98,7 @@ namespace cepgen
 
       const double w2 = mp2_+q2*( 1.-xbj )/xbj;
 
-      sf::Parameterisation sel_sf;
+      strfun::Parameterisation sel_sf;
       if ( q2 < params.q2_cut ) {
         if ( w2 < params.w2_lo )
           sel_sf = ( *params.resonances_model )( xbj, q2 );

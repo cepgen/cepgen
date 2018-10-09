@@ -19,7 +19,7 @@ namespace mstw
   }
 
   Grid::Grid( const Parameters& param ) :
-    cepgen::sf::Parameterisation( cepgen::sf::Type::MSTWgrid ),
+    cepgen::strfun::Parameterisation( cepgen::strfun::Type::MSTWgrid ),
     cepgen::GridHandler<2,2>( cepgen::GridType::logarithmic ),
     params( param )
   {

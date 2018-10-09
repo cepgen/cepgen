@@ -4,7 +4,7 @@
 
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
-#include "CepGen/StructureFunctions/LHAPDF.h"
+#include "CepGen/StructureFunctions/Partonic.h"
 
 #include "CepGen/Processes/ProcessesHandler.h"
 
@@ -14,7 +14,7 @@
 
 namespace cepgen
 {
-  namespace cards
+  namespace card
   {
     const int LpairHandler::kInvalid = 99999;
 
@@ -52,14 +52,14 @@ namespace cepgen
       //--- parse the structure functions code
       const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
       if ( str_fun_ / kLHAPDFCodeDec == 1 ) { // SF from parton
-        params_.kinematics.structure_functions = sf::Parameterisation::build( sf::Type::LHAPDF );
-        auto sf = dynamic_cast<sf::LHAPDF*>( params_.kinematics.structure_functions.get() );
+        params_.kinematics.structure_functions = strfun::Parameterisation::build( strfun::Type::Partonic );
+        auto sf = dynamic_cast<strfun::Partonic*>( params_.kinematics.structure_functions.get() );
         const unsigned long icode = str_fun_ % kLHAPDFCodeDec;
         sf->params.pdf_code = icode % kLHAPDFPartDec;
-        sf->params.mode = (sf::LHAPDF::Parameters::Mode)( icode / kLHAPDFPartDec ); // 0, 1, 2
+        sf->params.mode = (strfun::Partonic::Parameters::Mode)( icode / kLHAPDFPartDec ); // 0, 1, 2
       }
       else
-        params_.kinematics.structure_functions = sf::Parameterisation::build( (sf::Type)str_fun_ );
+        params_.kinematics.structure_functions = strfun::Parameterisation::build( (strfun::Type)str_fun_ );
 
       //--- parse the integration algorithm name
       if ( integr_type_ == "plain" )

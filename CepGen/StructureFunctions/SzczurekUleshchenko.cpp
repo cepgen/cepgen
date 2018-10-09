@@ -4,7 +4,7 @@
 
 namespace cepgen
 {
-  namespace sf
+  namespace strfun
   {
     SzczurekUleshchenko::SzczurekUleshchenko() :
       Parameterisation( Type::SzczurekUleshchenko ), F1( 0. )

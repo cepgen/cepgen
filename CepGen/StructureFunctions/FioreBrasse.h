@@ -7,7 +7,7 @@
 
 namespace cepgen
 {
-  namespace sf
+  namespace strfun
   {
     ///\f${\cal W}_{1,2}\f$ structure functions parameterisation by Fiore et al \cite Fiore:2002re and Brasse et al \cite Brasse:1976bf
     class FioreBrasse : public Parameterisation

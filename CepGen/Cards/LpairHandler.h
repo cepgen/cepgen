@@ -9,7 +9,7 @@ using std::string;
 namespace cepgen
 {
   class ParametersList;
-  namespace cards
+  namespace card
   {
     /// LPAIR-like steering cards parser and writer
     class LpairHandler : public Handler

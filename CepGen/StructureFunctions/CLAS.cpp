@@ -8,7 +8,7 @@
 
 namespace cepgen
 {
-  namespace sf
+  namespace strfun
   {
     CLAS::Parameters
     CLAS::Parameters::standard_proton()

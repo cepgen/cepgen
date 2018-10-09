@@ -14,11 +14,11 @@ extern "C" {
   cepgen_structure_functions_( int& sfmode, double& xbj, double& q2, double& f2, double& fl )
   {
     using namespace cepgen;
-    sf::Type sf_mode = (sf::Type)sfmode;
+    strfun::Type sf_mode = (strfun::Type)sfmode;
 
     CG_DEBUG( "cepgen_structure_functions" ) << sf_mode;
 
-    static auto& val = sf::Parameterisation::build( sf_mode )->operator()( xbj, q2 );
+    static auto& val = strfun::Parameterisation::build( sf_mode )->operator()( xbj, q2 );
     f2 = val.F2;
     fl = val.FL;
   }
@@ -27,7 +27,7 @@ extern "C" {
   cepgen_kt_flux_( int& fmode, double& x, double& kt2, int& sfmode, double& mx )
   {
     using namespace cepgen;
-    static auto sf = sf::Parameterisation::build( (sf::Type)sfmode );
+    static auto sf = strfun::Parameterisation::build( (strfun::Type)sfmode );
     return ktFlux(
       (KTFlux)fmode, x, kt2, *sf, mx );
   }

@@ -7,7 +7,7 @@
 
 namespace cepgen
 {
-  namespace sr
+  namespace sigrat
   {
     const double Parameterisation::mp_ = particleproperties::mass( PDG::proton );
     const double Parameterisation::mp2_ = Parameterisation::mp_*Parameterisation::mp_;

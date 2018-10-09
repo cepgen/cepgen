@@ -5,7 +5,7 @@
 
 namespace cepgen
 {
-  namespace sf
+  namespace strfun
   {
     ChristyBosted::ChristyBosted( const Parameters& params ) :
       Parameterisation( Type::ChristyBosted ), params_( params )

@@ -15,7 +15,7 @@
 
 namespace cepgen
 {
-  namespace cards
+  namespace card
   {
     //------------------------------------------------------------------
     // Python API helpers

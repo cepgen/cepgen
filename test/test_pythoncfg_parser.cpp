@@ -13,7 +13,7 @@ main( int argc, char* argv[] )
     throw CG_FATAL( "main" ) << "One argument required!";
 
   try {
-    cepgen::cards::PythonHandler py( argv[1] );
+    cepgen::card::PythonHandler py( argv[1] );
     CG_INFO( "main" ) << py.parameters();
   } catch ( cepgen::Exception& e ) {
     e.dump();

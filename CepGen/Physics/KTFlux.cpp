@@ -15,7 +15,7 @@ namespace cepgen
   const double KTFluxParameters::kMP2 = KTFluxParameters::kMP*KTFluxParameters::kMP;
 
   double
-  ktFlux( const KTFlux& type, double x, double kt2, sf::Parameterisation& sf, double mx )
+  ktFlux( const KTFlux& type, double x, double kt2, strfun::Parameterisation& sf, double mx )
   {
     double flux = 0.;
     const double mp2 = KTFluxParameters::kMP2;

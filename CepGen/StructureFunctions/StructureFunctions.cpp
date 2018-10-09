@@ -10,7 +10,7 @@
 
 namespace cepgen
 {
-  namespace sf
+  namespace strfun
   {
     const double Parameterisation::mp_ = particleproperties::mass( PDG::proton );
     const double Parameterisation::mp2_ = Parameterisation::mp_*Parameterisation::mp_;
@@ -31,7 +31,7 @@ namespace cepgen
     }
 
     void
-    Parameterisation::computeFL( double xbj, double q2, const sr::Parameterisation& ratio )
+    Parameterisation::computeFL( double xbj, double q2, const sigrat::Parameterisation& ratio )
     {
       double r_error = 0.;
       computeFL( xbj, q2, ratio( xbj, q2, r_error ) );
@@ -65,25 +65,25 @@ namespace cepgen
 
   /// Human-readable format of a structure function type
   std::ostream&
-  operator<<( std::ostream& os, const sf::Type& sf )
+  operator<<( std::ostream& os, const strfun::Type& sf )
   {
     switch ( sf ) {
-      case sf::Type::Invalid:             return os << "[INVALID]";
-      case sf::Type::Electron:            return os << "electron";
-      case sf::Type::ElasticProton:       return os << "elastic proton";
-      case sf::Type::SuriYennie:          return os << "Suri-Yennie";
-      case sf::Type::SzczurekUleshchenko: return os << "Szczurek-Uleshchenko";
-      case sf::Type::FioreBrasse:         return os << "Fiore-Brasse";
-      case sf::Type::ChristyBosted:       return os << "Christy-Bosted";
-      case sf::Type::CLAS:                return os << "CLAS";
-      case sf::Type::BlockDurandHa:       return os << "BDH";
-      case sf::Type::ALLM91:              return os << "ALLM91";
-      case sf::Type::ALLM97:              return os << "ALLM97";
-      case sf::Type::GD07p:               return os << "GD07p";
-      case sf::Type::GD11p:               return os << "GD11p";
-      case sf::Type::Schaefer:            return os << "LUXlike";
-      case sf::Type::MSTWgrid:            return os << "MSTW (grid)";
-      case sf::Type::LHAPDF:              return os << "LHAPDF";
+      case strfun::Type::Invalid:             return os << "[INVALID]";
+      case strfun::Type::Electron:            return os << "electron";
+      case strfun::Type::ElasticProton:       return os << "elastic proton";
+      case strfun::Type::SuriYennie:          return os << "Suri-Yennie";
+      case strfun::Type::SzczurekUleshchenko: return os << "Szczurek-Uleshchenko";
+      case strfun::Type::FioreBrasse:         return os << "Fiore-Brasse";
+      case strfun::Type::ChristyBosted:       return os << "Christy-Bosted";
+      case strfun::Type::CLAS:                return os << "CLAS";
+      case strfun::Type::BlockDurandHa:       return os << "BDH";
+      case strfun::Type::ALLM91:              return os << "ALLM91";
+      case strfun::Type::ALLM97:              return os << "ALLM97";
+      case strfun::Type::GD07p:               return os << "GD07p";
+      case strfun::Type::GD11p:               return os << "GD11p";
+      case strfun::Type::Schaefer:            return os << "LUXlike";
+      case strfun::Type::MSTWgrid:            return os << "MSTW (grid)";
+      case strfun::Type::Partonic:            return os << "Partonic";
     }
     return os;
   }

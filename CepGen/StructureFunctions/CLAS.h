@@ -8,7 +8,7 @@
 
 namespace cepgen
 {
-  namespace sf
+  namespace strfun
   {
     /// \brief CLAS parameterisation for nucleon data at \f$Q^2\f$ > 0.5 GeV\f${}^2\f$ and \f$x_{\rm Bj}\f$ > 0.15
     /// \note This code was provided on 2016-04-13 by Silvano Simula and reflects the parameterisation used in \cite Osipenko:2003bu (CLAS) and described in \cite Ricco:1998yr.

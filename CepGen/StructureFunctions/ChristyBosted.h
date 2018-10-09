@@ -8,7 +8,7 @@
 
 namespace cepgen
 {
-  namespace sf
+  namespace strfun
   {
     /// \f$F_{2/L}\f$ parameterisation by Christy and Bosted \cite Bosted:2007xd
     class ChristyBosted : public Parameterisation
@@ -72,7 +72,7 @@ namespace cepgen
         ChristyBosted& operator()( double xbj, double q2 ) override;
 
         //--- already computed internally during F2 computation
-        void computeFL( double xbj, double q2, const sr::Parameterisation& ) override {}
+        void computeFL( double xbj, double q2, const sigrat::Parameterisation& ) override {}
         void computeFL( double xbj, double q2, double r ) override {}
 
       private:

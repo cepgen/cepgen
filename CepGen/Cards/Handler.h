@@ -7,7 +7,7 @@ namespace cepgen
 {
   class Parameters;
   /// Location for all steering card parsers/writers
-  namespace cards
+  namespace card
   {
     /// Generic steering card handler
     class Handler

@@ -10,7 +10,7 @@
 
 namespace cepgen
 {
-  namespace sf
+  namespace strfun
   {
     FioreBrasse::Parameters
     FioreBrasse::Parameters::standard()

@@ -9,7 +9,7 @@
 
 namespace cepgen
 {
-  namespace cards
+  namespace card
   {
     //------------------------------------------------------------------
     // typed retrieval helpers
