@@ -1,8 +1,8 @@
 #ifndef CepGen_StructureFunctions_ALLM_h
 #define CepGen_StructureFunctions_ALLM_h
 
-#include "StructureFunctions.h"
-#include "SigmaRatio.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
 
 #include <vector>
 
@@ -11,33 +11,33 @@ namespace CepGen
   namespace SF
   {
     /// \f$F_{2/L}\f$ parameterisation by Abramowicz, Levin, Levy, and Maor \cite Abramowicz:1991xz\cite Abramowicz:1997ms
-    class ALLM : public StructureFunctions
+    class ALLM : public Parameterisation
     {
       public:
-        class Parameterisation
+        class Parameters
         {
           private:
-            struct Parameters {
-              Parameters() :
+            struct Trajectory {
+              Trajectory() :
                 a( { 0., 0., 0. } ), b( { 0., 0., 0. } ), c( { 0., 0., 0. } ) {}
-              Parameters( const std::vector<double>& c, const std::vector<double>& a, const std::vector<double>& b ) :
+              Trajectory( const std::vector<double>& c, const std::vector<double>& a, const std::vector<double>& b ) :
                 a( a ), b( b ), c( c ) {}
               std::vector<double> a, b, c;
             };
 
           public:
-            Parameterisation() :
+            Parameters() :
               m02( 0. ), mp2( 0. ), mr2( 0. ), q02( 0. ), lambda2( 0. ) {}
             /// Pre-HERA data fit (694 data points)
-            static Parameterisation allm91();
+            static Parameters allm91();
             /// Fixed target and HERA photoproduction total cross sections (1356 points)
-            static Parameterisation allm97();
-            static Parameterisation hht_allm();
-            static Parameterisation hht_allm_ft();
-            static Parameterisation gd07p();
-            static Parameterisation gd11p();
+            static Parameters allm97();
+            static Parameters hht_allm();
+            static Parameters hht_allm_ft();
+            static Parameters gd07p();
+            static Parameters gd11p();
 
-            Parameters pomeron, reggeon;
+            Trajectory pomeron, reggeon;
             /// Effective photon squared mass
             double m02;
             /// Effective pomeron squared mass
@@ -50,11 +50,11 @@ namespace CepGen
             Type type;
         };
 
-        explicit ALLM( const ALLM::Parameterisation& param = ALLM::Parameterisation::allm97() );
+        explicit ALLM( const ALLM::Parameters& param = ALLM::Parameters::allm97() );
         ALLM& operator()( double xbj, double q2 ) override;
 
       private:
-        Parameterisation params_;
+        Parameters params_;
     };
   }
 }

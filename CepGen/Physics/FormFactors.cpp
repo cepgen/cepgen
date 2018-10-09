@@ -27,7 +27,7 @@ namespace CepGen
   }
 
   FormFactors
-  FormFactors::protonInelastic( double q2, double mi2, double mf2, StructureFunctions& sf )
+  FormFactors::protonInelastic( double q2, double mi2, double mf2, SF::Parameterisation& sf )
   {
     const double xbj = q2 / ( q2 + mf2 - mi2 );
     switch ( sf.type ) {

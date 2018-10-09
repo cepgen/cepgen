@@ -19,7 +19,7 @@ namespace mstw
   }
 
   Grid::Grid( const Parameterisation& param ) :
-    CepGen::StructureFunctions( CepGen::SF::Type::MSTWgrid ),
+    CepGen::SF::Parameterisation( CepGen::SF::Type::MSTWgrid ),
     CepGen::GridHandler<2,2>( CepGen::GridType::logarithmic ),
     params( param )
   {
@@ -113,4 +113,3 @@ namespace mstw
     return os;
   }
 }
-

@@ -1,4 +1,3 @@
-#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Physics/KTFlux.h"
@@ -19,7 +18,7 @@ extern "C" {
 
     CG_DEBUG( "cepgen_structure_functions" ) << sf_mode;
 
-    static StructureFunctions& val = StructureFunctionsBuilder::get( sf_mode )->operator()( xbj, q2 );
+    static auto& val = SF::Parameterisation::build( sf_mode )->operator()( xbj, q2 );
     f2 = val.F2;
     fl = val.FL;
   }
@@ -28,7 +27,7 @@ extern "C" {
   cepgen_kt_flux_( int& fmode, double& x, double& kt2, int& sfmode, double& mx )
   {
     using namespace CepGen;
-    static auto sf = StructureFunctionsBuilder::get( (SF::Type)sfmode );
+    static auto sf = SF::Parameterisation::build( (SF::Type)sfmode );
     return ktFlux(
       (KTFlux)fmode, x, kt2, *sf, mx );
   }
@@ -65,4 +64,3 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-

@@ -1,4 +1,4 @@
-#include "SuriYennie.h"
+#include "CepGen/StructureFunctions/SuriYennie.h"
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Core/Exception.h"
 #include <math.h>
@@ -7,10 +7,10 @@ namespace CepGen
 {
   namespace SF
   {
-    SuriYennie::Parameterisation
-    SuriYennie::Parameterisation::standard()
+    SuriYennie::Parameters
+    SuriYennie::Parameters::standard()
     {
-      Parameterisation p;
+      Parameters p;
       p.C1 = 0.86926;
       p.C2 = 2.23422;
       p.D1 = 0.12549;
@@ -20,10 +20,10 @@ namespace CepGen
       return p;
     }
 
-    SuriYennie::Parameterisation
-    SuriYennie::Parameterisation::alternative()
+    SuriYennie::Parameters
+    SuriYennie::Parameters::alternative()
     {
-      Parameterisation p;
+      Parameters p;
       p.C1 = 0.6303;
       p.C2 = 2.3049;
       p.D1 = 0.04681;
@@ -33,8 +33,8 @@ namespace CepGen
       return p;
     }
 
-    SuriYennie::SuriYennie( const SuriYennie::Parameterisation& param ) :
-      StructureFunctions( SF::Type::SuriYennie ),
+    SuriYennie::SuriYennie( const Parameters& param ) :
+      Parameterisation( Type::SuriYennie ),
       F1( 0. ), FE( 0. ), FM( 0. ), params_( param )
     {}
 

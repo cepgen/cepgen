@@ -7,7 +7,7 @@ namespace CepGen
   namespace SF
   {
     SzczurekUleshchenko::SzczurekUleshchenko() :
-      StructureFunctions( Type::SzczurekUleshchenko ), F1( 0. )
+      Parameterisation( Type::SzczurekUleshchenko ), F1( 0. )
     {}
 
     SzczurekUleshchenko&

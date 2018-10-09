@@ -8,16 +8,16 @@ namespace CepGen
   {
     constexpr std::array<short,6> LHAPDF::qtimes3_, LHAPDF::pdgid_;
 
-    LHAPDF::Parameterisation::Parameterisation() :
+    LHAPDF::Parameters::Parameters() :
       num_flavours( 4 ), pdf_set( "cteq6" ), pdf_code( 0l ), pdf_member( 0 ), mode( Mode::full )
     {}
 
-    LHAPDF::LHAPDF( const Parameterisation& param ) :
-      StructureFunctions( Type::LHAPDF ), params( param ), initialised_( false )
+    LHAPDF::LHAPDF( const Parameters& param ) :
+      Parameterisation( Type::LHAPDF ), params( param ), initialised_( false )
     {}
 
-    LHAPDF::LHAPDF( const char* set, unsigned short member, const Parameterisation::Mode& mode ) :
-      StructureFunctions( Type::LHAPDF ), initialised_( false )
+    LHAPDF::LHAPDF( const char* set, unsigned short member, const Parameters::Mode& mode ) :
+      Parameterisation( Type::LHAPDF ), initialised_( false )
     {
       params.pdf_set = set;
       params.pdf_member = member;
@@ -130,11 +130,11 @@ namespace CepGen
         const double xqbar = ::LHAPDF::xfx( xbj, q, -pdgid_[i] );
 #  endif
         switch ( params.mode ) {
-          case Parameterisation::Mode::full:
+          case Parameters::Mode::full:
             F2 += prefactor*( xq+xqbar ); break;
-          case Parameterisation::Mode::valence:
+          case Parameters::Mode::valence:
             F2 += prefactor*( xq-xqbar ); break;
-          case Parameterisation::Mode::sea:
+          case Parameters::Mode::sea:
             F2 += prefactor*( 2.*xqbar ); break;
         }
       }
@@ -147,12 +147,12 @@ namespace CepGen
   }
 
   std::ostream&
-  operator<<( std::ostream& os, const SF::LHAPDF::Parameterisation::Mode& mode )
+  operator<<( std::ostream& os, const SF::LHAPDF::Parameters::Mode& mode )
   {
     switch ( mode ) {
-      case SF::LHAPDF::Parameterisation::Mode::full: return os << "all quarks";
-      case SF::LHAPDF::Parameterisation::Mode::valence: return os << "valence quarks";
-      case SF::LHAPDF::Parameterisation::Mode::sea: return os << "sea quarks";
+      case SF::LHAPDF::Parameters::Mode::full: return os << "all quarks";
+      case SF::LHAPDF::Parameters::Mode::valence: return os << "valence quarks";
+      case SF::LHAPDF::Parameters::Mode::sea: return os << "sea quarks";
     }
     return os;
   }

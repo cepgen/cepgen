@@ -8,7 +8,7 @@ namespace CepGen
   namespace SF
   {
     ChristyBosted::ChristyBosted( const ChristyBosted::Parameterisation& params ) :
-      StructureFunctions( Type::ChristyBosted ), params_( params )
+      SF::Parameterisation( Type::ChristyBosted ), params_( params )
     {}
 
     double
@@ -276,7 +276,7 @@ namespace CepGen
         F2 *= q21/( q21 + delq2 );
 
       if ( sigT != 0. )
-        StructureFunctions::computeFL( q2_eff, xbj, sigL/sigT );
+        SF::Parameterisation::computeFL( q2_eff, xbj, sigL/sigT );
 
       return *this;
     }

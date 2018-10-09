@@ -1,5 +1,4 @@
 #include "CepGen/StructureFunctions/Schaefer.h"
-#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 #include "CepGen/StructureFunctions/LHAPDF.h"
 
 #include "CepGen/Core/Exception.h"
@@ -11,50 +10,50 @@ namespace CepGen
 {
   namespace SF
   {
-    Schaefer::Parameterisation
-    Schaefer::Parameterisation::mstwGrid()
+    Schaefer::Parameters
+    Schaefer::Parameters::mstwGrid()
     {
-      Parameterisation par;
+      Parameters par;
       par.q2_cut = 9.;
       par.w2_hi = 4.;
       par.w2_lo = 3.;
-      par.resonances_model = StructureFunctionsBuilder::get( SF::Type::ChristyBosted );
-      par.perturbative_model = StructureFunctionsBuilder::get( SF::Type::MSTWgrid );
-      par.continuum_model = StructureFunctionsBuilder::get( SF::Type::GD11p );
+      par.resonances_model = Parameterisation::build( Type::ChristyBosted );
+      par.perturbative_model = Parameterisation::build( Type::MSTWgrid );
+      par.continuum_model = Parameterisation::build( Type::GD11p );
       par.higher_twist = 0;
       return par;
     }
 
-    Schaefer::Parameterisation
-    Schaefer::Parameterisation::mstwParton()
+    Schaefer::Parameters
+    Schaefer::Parameters::mstwParton()
     {
-      Parameterisation par;
+      Parameters par;
       par.q2_cut = 9.;
       par.w2_hi = 4.;
       par.w2_lo = 3.;
-      par.resonances_model = StructureFunctionsBuilder::get( SF::Type::ChristyBosted );
+      par.resonances_model = Parameterisation::build( Type::ChristyBosted );
       par.perturbative_model = std::make_shared<SF::LHAPDF>( "MSTW2008nnlo90cl" );
-      par.continuum_model = StructureFunctionsBuilder::get( SF::Type::GD11p );
+      par.continuum_model = Parameterisation::build( Type::GD11p );
       par.higher_twist = 1;
       return par;
     }
 
-    Schaefer::Parameterisation
-    Schaefer::Parameterisation::cteq()
+    Schaefer::Parameters
+    Schaefer::Parameters::cteq()
     {
-      Parameterisation par;
+      Parameters par;
       par.q2_cut = 9.;
       par.w2_hi = 4.;
       par.w2_lo = 3.;
-      par.resonances_model = StructureFunctionsBuilder::get( SF::Type::ChristyBosted );
+      par.resonances_model = Parameterisation::build( Type::ChristyBosted );
       par.perturbative_model = std::make_shared<SF::LHAPDF>( "cteq6l1" );
-      par.continuum_model = StructureFunctionsBuilder::get( SF::Type::GD11p );
+      par.continuum_model = Parameterisation::build( SF::Type::GD11p );
       par.higher_twist = 0;
       return par;
     }
 
-    Schaefer::Schaefer( const Schaefer::Parameterisation& params ) :
-      StructureFunctions( Type::Schaefer ),
+    Schaefer::Schaefer( const Parameters& params ) :
+      Parameterisation( Type::Schaefer ),
       params( params ), initialised_( false ), inv_omega_range_( -1. )
     {}
 
@@ -99,7 +98,7 @@ namespace CepGen
 
       const double w2 = mp2_+q2*( 1.-xbj )/xbj;
 
-      StructureFunctions sel_sf;
+      SF::Parameterisation sel_sf;
       if ( q2 < params.q2_cut ) {
         if ( w2 < params.w2_lo )
           sel_sf = ( *params.resonances_model )( xbj, q2 );

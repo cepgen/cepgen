@@ -9,7 +9,7 @@
 
 #include "CepGen/Processes/ProcessesHandler.h"
 
-#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/StructureFunctions/LHAPDF.h"
 #include "CepGen/StructureFunctions/MSTWGrid.h"
 #include "CepGen/StructureFunctions/Schaefer.h"
@@ -175,11 +175,11 @@ namespace CepGen
     }
 
     void
-    PythonHandler::parseStructureFunctions( PyObject* psf, std::shared_ptr<StructureFunctions>& sf_handler )
+    PythonHandler::parseStructureFunctions( PyObject* psf, std::shared_ptr<SF::Parameterisation>& sf_handler )
     {
       int str_fun = 0;
       fillParameter( psf, "id", str_fun );
-      sf_handler = StructureFunctionsBuilder::get( (SF::Type)str_fun );
+      sf_handler = SF::Parameterisation::build( (SF::Type)str_fun );
       switch( (SF::Type)str_fun ) {
         case SF::Type::LHAPDF: {
           auto sf = std::dynamic_pointer_cast<SF::LHAPDF>( params_.kinematics.structure_functions );
@@ -402,4 +402,3 @@ namespace CepGen
 }
 
 #endif
-

@@ -7,7 +7,6 @@
 #include "CepGen/Processes/PPtoFF.h"
 #include "CepGen/Processes/PPtoWW.h"
 
-#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Physics/PDG.h"
 
@@ -19,6 +18,7 @@
 #include <math.h>
 
 using namespace std;
+using namespace CepGen;
 
 int
 main( int argc, char* argv[] )
@@ -75,17 +75,17 @@ main( int argc, char* argv[] )
   const double num_sigma = 3.0;
 
   if ( argc < 3 || strcmp( argv[2], "debug" ) != 0 )
-    CepGen::Logger::get().level = CepGen::Logger::Level::nothing;
+    Logger::get().level = Logger::Level::nothing;
 
-  CepGen::Timer tmr;
-  CepGen::Generator mg;
+  Timer tmr;
+  Generator mg;
 
   if ( argc > 1 && strcmp( argv[1], "plain" ) == 0 )
-    mg.parameters->integrator.type = CepGen::Integrator::Type::plain;
+    mg.parameters->integrator.type = Integrator::Type::plain;
   if ( argc > 1 && strcmp( argv[1], "vegas" ) == 0 )
-    mg.parameters->integrator.type = CepGen::Integrator::Type::Vegas;
+    mg.parameters->integrator.type = Integrator::Type::Vegas;
   if ( argc > 1 && strcmp( argv[1], "miser" ) == 0 )
-    mg.parameters->integrator.type = CepGen::Integrator::Type::MISER;
+    mg.parameters->integrator.type = Integrator::Type::MISER;
 
   { cout << "Testing with " << mg.parameters->integrator.type << " integrator" << endl; }
 
@@ -102,19 +102,19 @@ main( int argc, char* argv[] )
 
   try {
     for ( const auto& values_vs_generator : values_map ) { // loop over all generators
-      CepGen::ParametersList param;
+      ParametersList param;
       const string generator = values_vs_generator.first;
       if ( generator == "lpair"  ) {
         param.set<int>( "pair", 13 );
-        mg.parameters->setProcess( new CepGen::Process::GamGamLL( param ) );
+        mg.parameters->setProcess( new Process::GamGamLL( param ) );
       }
       else if ( generator == "pptoll" ) {
         param.set<int>( "pair", 13 );
-        mg.parameters->setProcess( new CepGen::Process::PPtoFF( param ) );
+        mg.parameters->setProcess( new Process::PPtoFF( param ) );
         mg.parameters->kinematics.cuts.initial.qt = { 0., 50. };
       }
       else if ( generator == "pptoww" ) {
-        mg.parameters->setProcess( new CepGen::Process::PPtoWW );
+        mg.parameters->setProcess( new Process::PPtoWW );
         mg.parameters->kinematics.setSqrtS( 13.e3 );
         //mg.parameters->kinematics.cuts.initial.qt = { 0., 50. };
       }
@@ -129,24 +129,24 @@ main( int argc, char* argv[] )
           const string kin_mode = values_vs_kin.first;
 
           if ( kin_mode.find( "elastic"    ) != string::npos )
-            mg.parameters->kinematics.mode = CepGen::KinematicsMode::ElasticElastic;
+            mg.parameters->kinematics.mode = KinematicsMode::ElasticElastic;
           else if ( kin_mode.find( "singlediss" ) != string::npos )
-            mg.parameters->kinematics.mode = CepGen::KinematicsMode::InelasticElastic;
+            mg.parameters->kinematics.mode = KinematicsMode::InelasticElastic;
           else if ( kin_mode.find( "doublediss" ) != string::npos )
-            mg.parameters->kinematics.mode = CepGen::KinematicsMode::InelasticInelastic;
+            mg.parameters->kinematics.mode = KinematicsMode::InelasticInelastic;
           else {
             CG_ERROR( "main" ) << "Unrecognized kinematics mode: " << values_vs_kin.first << ".";
             break;
           }
 
           if ( kin_mode.find( "_su" ) != string::npos )
-            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctionsBuilder::get( CepGen::SF::Type::SzczurekUleshchenko );
+            mg.parameters->kinematics.structure_functions = SF::Parameterisation::build( SF::Type::SzczurekUleshchenko );
           else if ( kin_mode.find( "_lux" ) != string::npos )
-            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctionsBuilder::get( CepGen::SF::Type::Schaefer );
+            mg.parameters->kinematics.structure_functions = SF::Parameterisation::build( SF::Type::Schaefer );
           else if ( kin_mode.find( "_allm" ) != string::npos )
-            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctionsBuilder::get( CepGen::SF::Type::ALLM97 );
+            mg.parameters->kinematics.structure_functions = SF::Parameterisation::build( SF::Type::ALLM97 );
           else
-            mg.parameters->kinematics.structure_functions = CepGen::StructureFunctionsBuilder::get( CepGen::SF::Type::SuriYennie );
+            mg.parameters->kinematics.structure_functions = SF::Parameterisation::build( SF::Type::SuriYennie );
 
           //CG_INFO( "main" ) << mg.parameters.get();
           CG_INFO( "main" )
@@ -172,12 +172,12 @@ main( int argc, char* argv[] )
           tmr.reset();
 
           ostringstream oss; oss << values_vs_kin.first;
-          string test_res = CepGen::Form( "%-10s", values_vs_generator.first )+"\t"+
-                            CepGen::Form( "pt-gt-%.1f", values_vs_cut.first )+"\t"+
-                            CepGen::Form( "%-16s", oss.str().c_str() )+"\t"
-                            "ref="+CepGen::Form( "%g", xsec_ref )+"\t"
-                            "got="+CepGen::Form( "%g", xsec_cepgen )+"\t"
-                            "pull="+CepGen::Form( "%+g", sigma );
+          string test_res = Form( "%-10s", values_vs_generator.first )+"\t"+
+                            Form( "pt-gt-%.1f", values_vs_cut.first )+"\t"+
+                            Form( "%-16s", oss.str().c_str() )+"\t"
+                            "ref="+Form( "%g", xsec_ref )+"\t"
+                            "got="+Form( "%g", xsec_cepgen )+"\t"
+                            "pull="+Form( "%+g", sigma );
           if ( fabs( sigma ) < num_sigma ) {
             passed_tests.emplace_back( test_res );
             num_tests_passed++;
@@ -191,7 +191,7 @@ main( int argc, char* argv[] )
         }
       }
     }
-  } catch ( CepGen::Exception& e ) {}
+  } catch ( Exception& e ) {}
   if ( failed_tests.size() != 0 ) {
     ostringstream os_failed, os_passed;
     for ( const auto& fail : failed_tests )

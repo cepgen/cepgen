@@ -112,7 +112,7 @@ namespace CepGen
     }
 
     CLAS::CLAS( const CLAS::Parameterisation& params ) :
-      StructureFunctions( Type::CLAS ), params_( params )
+      SF::Parameterisation( Type::CLAS ), params_( params )
     {}
 
     CLAS&

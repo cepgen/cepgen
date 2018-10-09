@@ -15,7 +15,7 @@ namespace CepGen
 {
   enum class PDG;
   enum class KTFlux;
-  class StructureFunctions;
+  namespace SF { class Parameterisation; }
   /// Type of kinematics to consider for the process
   enum class KinematicsMode
   {
@@ -57,7 +57,7 @@ namespace CepGen
       /// Type of kinematics to consider for the phase space
       KinematicsMode mode;
       /// Type of structure functions to consider
-      std::shared_ptr<StructureFunctions> structure_functions;
+      std::shared_ptr<SF::Parameterisation> structure_functions;
 
       /// A collection of cuts to apply on the physical phase space
       struct CutsList
@@ -77,4 +77,3 @@ namespace CepGen
 }
 
 #endif
-

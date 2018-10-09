@@ -6,15 +6,15 @@ namespace CepGen
 {
   namespace SF
   {
-    ALLM::Parameterisation
-    ALLM::Parameterisation::allm91()
+    ALLM::Parameters
+    ALLM::Parameters::allm91()
     {
-      Parameterisation p;
-      p.pomeron = Parameters( {
+      Parameters p;
+      p.pomeron = Trajectory( {
         {  0.26550,  0.04856,  1.04682 },
         { -0.04503, -0.36407,  8.17091 },
         {  0.49222,  0.52116,  3.5515  } } );
-      p.reggeon = Parameters( {
+      p.reggeon = Trajectory( {
         {  0.67639,  0.49027,  2.66275 },
         {  0.60408,  0.17353,  1.61812 },
         {  1.26066,  1.83624,  0.81141 } } );
@@ -27,15 +27,15 @@ namespace CepGen
       return p;
     }
 
-    ALLM::Parameterisation
-    ALLM::Parameterisation::allm97()
+    ALLM::Parameters
+    ALLM::Parameters::allm97()
     {
-      Parameterisation p;
-      p.pomeron = Parameters( {
+      Parameters p;
+      p.pomeron = Trajectory( {
         {  0.28067,  0.22291,  2.1979 },
         { -0.0808,  -0.44812,  1.1709 },
         {  0.36292,  1.8917,   1.8439 } } );
-      p.reggeon = Parameters( {
+      p.reggeon = Trajectory( {
         {  0.80107,  0.97307,  3.4924  },
         {  0.58400,  0.37888,  2.6063  },
         {  0.01147,  3.7582,   0.49338 } } );
@@ -48,15 +48,15 @@ namespace CepGen
       return p;
     }
 
-    ALLM::Parameterisation
-    ALLM::Parameterisation::hht_allm()
+    ALLM::Parameters
+    ALLM::Parameters::hht_allm()
     {
-      Parameterisation p;
-      p.pomeron = Parameters( {
+      Parameters p;
+      p.pomeron = Trajectory( {
         {  0.412,  0.164,  17.7  },
         { -0.835, -0.446,  10.6  },
         { -45.8,    55.7, -0.031 } } );
-      p.reggeon = Parameters( {
+      p.reggeon = Trajectory( {
         { -1.04,   2.97,   0.163 },
         {  0.706,  0.185, -16.4  },
         { -1.29,   4.51,   1.16  } } );
@@ -69,15 +69,15 @@ namespace CepGen
       return p;
     }
 
-    ALLM::Parameterisation
-    ALLM::Parameterisation::hht_allm_ft()
+    ALLM::Parameters
+    ALLM::Parameters::hht_allm_ft()
     {
-      Parameterisation p;
-      p.pomeron = Parameters( {
+      Parameters p;
+      p.pomeron = Trajectory( {
         {  0.356,  0.171, 18.6  },
         { -0.075, -0.470, 9.2   },
         { -0.477,  54.0,  0.073 } } );
-      p.reggeon = Parameters( {
+      p.reggeon = Trajectory( {
         { -0.636, 3.37,  -0.660 },
         {  0.882, 0.082, -8.5   },
         {  0.339, 3.38,   1.07  } } );
@@ -90,15 +90,15 @@ namespace CepGen
       return p;
     }
 
-    ALLM::Parameterisation
-    ALLM::Parameterisation::gd07p()
+    ALLM::Parameters
+    ALLM::Parameters::gd07p()
     {
-      Parameterisation p;
-      p.pomeron = Parameters( {
+      Parameters p;
+      p.pomeron = Trajectory( {
         {  0.339,  0.127, 1.16  },
         { -0.105, -0.495, 1.29  },
         { -1.42,   4.51,  0.551 } } );
-      p.reggeon = Parameters( {
+      p.reggeon = Trajectory( {
         { 0.838, 2.36,  1.77  },
         { 0.374, 0.998, 0.775 },
         { 2.71,  1.83,  1.26  } } );
@@ -111,15 +111,15 @@ namespace CepGen
       return p;
     }
 
-    ALLM::Parameterisation
-    ALLM::Parameterisation::gd11p()
+    ALLM::Parameters
+    ALLM::Parameters::gd11p()
     {
-      Parameterisation p;
-      p.pomeron = Parameters( {
+      Parameters p;
+      p.pomeron = Trajectory( {
         {  0.3638,   0.1211, 1.166 }, // c
         { -0.11895, -0.4783, 1.353 }, // a
         {  1.0833,   2.656,  1.771 } } ); // b
-      p.reggeon = Parameters( {
+      p.reggeon = Trajectory( {
         {   1.3633,  2.256,  2.209   },
         {   0.3425,  1.0603, 0.5164  },
         { -10.408,  14.857,  0.07739 } } );
@@ -132,8 +132,8 @@ namespace CepGen
       return p;
     }
 
-    ALLM::ALLM( const ALLM::Parameterisation& param ) :
-      StructureFunctions( param.type ), params_( param )
+    ALLM::ALLM( const ALLM::Parameters& param ) :
+      Parameterisation( param.type ), params_( param )
     {}
 
     ALLM&
@@ -163,4 +163,3 @@ namespace CepGen
     }
   }
 }
-

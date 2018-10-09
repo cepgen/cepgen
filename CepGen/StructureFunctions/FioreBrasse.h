@@ -10,7 +10,7 @@ namespace CepGen
   namespace SF
   {
     ///\f${\cal W}_{1,2}\f$ structure functions parameterisation by Fiore et al \cite Fiore:2002re and Brasse et al \cite Brasse:1976bf
-    class FioreBrasse : public StructureFunctions
+    class FioreBrasse : public SF::Parameterisation
     {
       public:
         struct Parameterisation

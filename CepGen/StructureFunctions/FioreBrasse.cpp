@@ -38,7 +38,7 @@ namespace CepGen
     }
 
     FioreBrasse::FioreBrasse( const FioreBrasse::Parameterisation& params ) :
-      StructureFunctions( Type::FioreBrasse ), W1( 0. ), W2( 0. ), params( params )
+      SF::Parameterisation( Type::FioreBrasse ), W1( 0. ), W2( 0. ), params( params )
     {}
 
     FioreBrasse&

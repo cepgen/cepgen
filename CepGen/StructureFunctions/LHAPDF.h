@@ -1,7 +1,7 @@
 #ifndef CepGen_StructureFunctions_LHAPDF_h
 #define CepGen_StructureFunctions_LHAPDF_h
 
-#include "StructureFunctions.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #ifdef LIBLHAPDF
 #include "LHAPDF/LHAPDF.h"
@@ -14,14 +14,14 @@ namespace CepGen
   namespace SF
   {
     /// Generic partonic level perturbative structure functions built from an external PDFs grid
-    class LHAPDF : public StructureFunctions
+    class LHAPDF : public Parameterisation
     {
       public:
         /// Model parameterisation
-        struct Parameterisation
+        struct Parameters
         {
           /// Standard (usual CTEQ6) constructor
-          Parameterisation();
+          Parameters();
           /// Number of quark flavours considered in the SF building
           unsigned short num_flavours;
           /// String-type PDF identifier (default)
@@ -35,13 +35,13 @@ namespace CepGen
           /// Quarks types considered in the SF building
           Mode mode;
         };
-        /// Build a calculator from its Parameterisation object
-        explicit LHAPDF( const Parameterisation& param = Parameterisation() );
+        /// Build a calculator from its Parameters object
+        explicit LHAPDF( const Parameters& param = Parameters() );
         /// Build a calculator from a set, its member, and the contributing quarks
-        explicit LHAPDF( const char* set, unsigned short member = 0, const Parameterisation::Mode& mode = Parameterisation::Mode::full );
+        explicit LHAPDF( const char* set, unsigned short member = 0, const Parameters::Mode& mode = Parameters::Mode::full );
         LHAPDF& operator()( double xbj, double q2 ) override;
         /// Parameterisation used in this SFs calculator
-        Parameterisation params;
+        Parameters params;
 
       private:
         std::string description() const override;
@@ -62,7 +62,7 @@ namespace CepGen
         } };
     };
   }
-  std::ostream& operator<<( std::ostream& os, const SF::LHAPDF::Parameterisation::Mode& mode );
+  std::ostream& operator<<( std::ostream& os, const SF::LHAPDF::Parameters::Mode& mode );
 }
 
 #endif

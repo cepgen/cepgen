@@ -4,7 +4,7 @@
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 
 #include <iostream>
-#include <map>
+#include <memory>
 
 namespace CepGen
 {
@@ -31,56 +31,55 @@ namespace CepGen
       Schaefer            = 301,
       LHAPDF              = 401,
     };
+    /// Generic placeholder for the parameterisation of nucleon structure functions
+    class Parameterisation
+    {
+      public:
+        /// Copy constructor
+        Parameterisation( const Parameterisation& sf ) :
+          type( sf.type ), F2( sf.F2 ), FL( sf.FL ), old_vals_( sf.old_vals_ ) {}
+        /// Standard SF parameterisation constructor
+        Parameterisation( const Type& type = Type::Invalid, double f2 = 0., double fl = 0. ) :
+          type( type ), F2( f2 ), FL( fl ), old_vals_({ 0., 0. }) {}
+        ~Parameterisation() {}
+
+        /// Assign from another SF parameterisation object
+        Parameterisation& operator=( const Parameterisation& sf ) {
+          type = sf.type, F2 = sf.F2, FL = sf.FL, old_vals_ = sf.old_vals_;
+          return *this;
+        }
+        /// Human-readable description of this SF parameterisation
+        friend std::ostream& operator<<( std::ostream&, const Parameterisation& );
+
+        /// Build a SF parameterisation for a given type
+        static std::shared_ptr<Parameterisation> build( const Type& );
+
+        /// Compute all relevant structure functions for a given \f$(x_{\rm Bj},Q^2)\f$ couple
+        virtual Parameterisation& operator()( double xbj, double q2 ) { return *this; }
+        /// Compute the longitudinal structure function for a given point
+        virtual void computeFL( double xbj, double q2, const SigmaRatio& ratio = E143Ratio() );
+        /// Compute the longitudinal structure function for a given point
+        virtual void computeFL( double xbj, double q2, double r );
+        /// Compute the \f$F_1\f$ structure function for a given point
+        double F1( double xbj, double q2 ) const;
+
+        /// Interpolation type of structure functions
+        Type type;
+        double F2; ///< Last computed transverse structure function value
+        double FL; ///< Last computed longitudinal structure function value
+
+      protected:
+        virtual std::string description() const; ///< Human-readable description of this SF set
+        static const double mp_; ///< Proton mass, in GeV/c\f${}^2\f$
+        static const double mp2_; ///< Squared proton mass, in GeV\f${}^2\f$/c\f${}^4\f$
+        std::pair<double,double> old_vals_; ///< Last \f$(x_{\rm Bj},Q^2)\f$ couple computed
+
+      private:
+        std::string name_;
+    };
   }
+  /// Human-readable description of this SF parameterisation type
   std::ostream& operator<<( std::ostream&, const SF::Type& );
-
-  class StructureFunctionsFactory;
-  /// Generic placeholder for the parameterisation of nucleon structure functions
-  class StructureFunctions
-  {
-    public:
-      /// Copy constructor
-      StructureFunctions( const StructureFunctions& sf ) :
-        type( sf.type ), F2( sf.F2 ), FL( sf.FL ), old_vals_( sf.old_vals_ ) {}
-      /// Standard SF parameterisation constructor
-      StructureFunctions( const SF::Type& type = SF::Type::Invalid, double f2 = 0., double fl = 0. ) :
-        type( type ), F2( f2 ), FL( fl ), old_vals_({ 0., 0. }) {}
-      ~StructureFunctions() {}
-
-      /// Human-readable description of this SF parameterisation
-      friend std::ostream& operator<<( std::ostream&, const StructureFunctions& );
-      /// Assign from another SF parameterisation object
-      StructureFunctions& operator=( const StructureFunctions& sf ) {
-        type = sf.type, F2 = sf.F2, FL = sf.FL, old_vals_ = sf.old_vals_;
-        return *this;
-      }
-
-      /// Build a SF parameterisation for a given type
-      static StructureFunctions builder( const SF::Type& );
-
-      /// Compute all relevant structure functions for a given \f$(x_{\rm Bj},Q^2)\f$ couple
-      virtual StructureFunctions& operator()( double xbj, double q2 ) { return *this; }
-      /// Compute the longitudinal structure function for a given point
-      virtual void computeFL( double xbj, double q2, const SF::SigmaRatio& ratio = SF::E143Ratio() );
-      /// Compute the longitudinal structure function for a given point
-      virtual void computeFL( double xbj, double q2, double r );
-      /// Compute the \f$F_1\f$ structure function for a given point
-      double F1( double xbj, double q2 ) const;
-
-      /// Interpolation type of structure functions
-      SF::Type type;
-      double F2; ///< Last computed transverse structure function value
-      double FL; ///< Last computed longitudinal structure function value
-
-    protected:
-      virtual std::string description() const; ///< Human-readable description of this SF set
-      static const double mp_; ///< Proton mass, in GeV/c\f${}^2\f$
-      static const double mp2_; ///< Squared proton mass, in GeV\f${}^2\f$/c\f${}^4\f$
-      std::pair<double,double> old_vals_; ///< Last \f$(x_{\rm Bj},Q^2)\f$ couple computed
-
-    private:
-      std::string name_;
-  };
 }
 
 #endif

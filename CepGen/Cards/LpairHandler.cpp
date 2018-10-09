@@ -3,7 +3,7 @@
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/StructureFunctions/LHAPDF.h"
 
 #include "CepGen/Processes/ProcessesHandler.h"
@@ -52,14 +52,14 @@ namespace CepGen
       //--- parse the structure functions code
       const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
       if ( str_fun_ / kLHAPDFCodeDec == 1 ) { // SF from parton
-        params_.kinematics.structure_functions = StructureFunctionsBuilder::get( SF::Type::LHAPDF );
+        params_.kinematics.structure_functions = SF::Parameterisation::build( SF::Type::LHAPDF );
         auto sf = dynamic_cast<SF::LHAPDF*>( params_.kinematics.structure_functions.get() );
         const unsigned long icode = str_fun_ % kLHAPDFCodeDec;
         sf->params.pdf_code = icode % kLHAPDFPartDec;
-        sf->params.mode = (SF::LHAPDF::Parameterisation::Mode)( icode / kLHAPDFPartDec ); // 0, 1, 2
+        sf->params.mode = (SF::LHAPDF::Parameters::Mode)( icode / kLHAPDFPartDec ); // 0, 1, 2
       }
       else
-        params_.kinematics.structure_functions = StructureFunctionsBuilder::get( (SF::Type)str_fun_ );
+        params_.kinematics.structure_functions = SF::Parameterisation::build( (SF::Type)str_fun_ );
 
       //--- parse the integration algorithm name
       if ( integr_type_ == "plain" )
@@ -215,4 +215,3 @@ namespace CepGen
     }
   }
 }
-

@@ -1,7 +1,7 @@
 #ifndef CepGen_StructureFunctions_ChristyBosted_h
 #define CepGen_StructureFunctions_ChristyBosted_h
 
-#include "StructureFunctions.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Physics/Constants.h"
 #include <array>
 #include <vector>
@@ -11,7 +11,7 @@ namespace CepGen
   namespace SF
   {
     /// \f$F_{2/L}\f$ parameterisation by Christy and Bosted \cite Bosted:2007xd
-    class ChristyBosted : public StructureFunctions
+    class ChristyBosted : public Parameterisation
     {
       public:
         struct Parameterisation

@@ -33,7 +33,7 @@ namespace CepGen
       << "List of process(es) handled in the database:" << oss.str();
   }
 
-  std::unique_ptr<Process::GenericProcess>
+  ProcessPtr
   ProcessesHandler::build( const std::string& name, const ParametersList& params ) const
   {
     if ( map_.count( name ) == 0 )

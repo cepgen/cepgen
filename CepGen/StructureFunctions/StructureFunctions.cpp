@@ -10,55 +10,57 @@
 
 namespace CepGen
 {
-  const double StructureFunctions::mp_ = ParticleProperties::mass( PDG::proton );
-  const double StructureFunctions::mp2_ = StructureFunctions::mp_*StructureFunctions::mp_;
-
-  double
-  StructureFunctions::F1( double xbj, double q2 ) const
+  namespace SF
   {
-    if ( xbj == 0. || q2 == 0. ) {
-      CG_ERROR( "StructureFunctions:F1" )
-        << "Invalid range for Q² = " << q2 << " or xBj = " << xbj << ".";
-      return 0.;
+    const double Parameterisation::mp_ = ParticleProperties::mass( PDG::proton );
+    const double Parameterisation::mp2_ = Parameterisation::mp_*Parameterisation::mp_;
+
+    double
+    Parameterisation::F1( double xbj, double q2 ) const
+    {
+      if ( xbj == 0. || q2 == 0. ) {
+        CG_ERROR( "StructureFunctions:F1" )
+          << "Invalid range for Q² = " << q2 << " or xBj = " << xbj << ".";
+        return 0.;
+      }
+      const double F1 = 0.5*( ( 1+4.*xbj*xbj*mp2_/q2 )*F2 - FL )/xbj;
+      CG_DEBUG_LOOP( "StructureFunctions:F1" )
+        << "F1 for Q² = " << q2 << ", xBj = " << xbj << ": " << F1 << "\n\t"
+        << "(F2 = " << F2 << ", FL = " << FL << ").";
+      return F1;
     }
-    const double F1 = 0.5*( ( 1+4.*xbj*xbj*mp2_/q2 )*F2 - FL )/xbj;
-    CG_DEBUG_LOOP( "StructureFunctions:F1" )
-      << "F1 for Q² = " << q2 << ", xBj = " << xbj << ": " << F1 << "\n\t"
-      << "(F2 = " << F2 << ", FL = " << FL << ").";
-    return F1;
-  }
 
-  void
-  StructureFunctions::computeFL( double xbj, double q2, const SF::SigmaRatio& ratio )
-  {
-    double r_error = 0.;
-    computeFL( xbj, q2, ratio( xbj, q2, r_error ) );
-  }
+    void
+    Parameterisation::computeFL( double xbj, double q2, const SF::SigmaRatio& ratio )
+    {
+      double r_error = 0.;
+      computeFL( xbj, q2, ratio( xbj, q2, r_error ) );
+    }
 
-  void
-  StructureFunctions::computeFL( double xbj, double q2, double r )
-  {
-    const double tau = 4.*xbj*xbj*mp2_/q2;
-    FL = F2 * ( 1.+tau ) * ( r/( 1.+r ) );
-  }
+    void
+    Parameterisation::computeFL( double xbj, double q2, double r )
+    {
+      const double tau = 4.*xbj*xbj*mp2_/q2;
+      FL = F2 * ( 1.+tau ) * ( r/( 1.+r ) );
+    }
 
-  std::string
-  StructureFunctions::description() const
-  {
-    std::ostringstream os;
-    os << type;
-    return os.str();
-  }
+    std::string
+    Parameterisation::description() const
+    {
+      std::ostringstream os;
+      os << type;
+      return os.str();
+    }
 
-  /// Human-readable format of a structure function object
-  std::ostream&
-  operator<<( std::ostream& os, const StructureFunctions& sf )
-  {
-    os << sf.description();
-    if ( sf.old_vals_ != std::pair<double,double>() )
-      os << " at (" << sf.old_vals_.first << ", " << sf.old_vals_.second << "): "
-         << "F2 = " << sf.F2 << ", FL = " << sf.FL;
-    return os;
+    std::ostream&
+    operator<<( std::ostream& os, const Parameterisation& sf )
+    {
+      os << sf.description();
+      if ( sf.old_vals_ != std::pair<double,double>() )
+        os << " at (" << sf.old_vals_.first << ", " << sf.old_vals_.second << "): "
+           << "F2 = " << sf.F2 << ", FL = " << sf.FL;
+      return os;
+    }
   }
 
   /// Human-readable format of a structure function type
@@ -86,3 +88,4 @@ namespace CepGen
     return os;
   }
 }
+

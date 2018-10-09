@@ -23,7 +23,7 @@ namespace CepGen
       ~ProcessesHandler() = default;
 
       void registerProcess( const std::string& name, const CepGen::Process::GenericProcess* );
-      std::unique_ptr<CepGen::Process::GenericProcess> build( const std::string& name, const ParametersList& ) const;
+      ProcessPtr build( const std::string& name, const ParametersList& ) const;
       void dump() const;
 
     private:
