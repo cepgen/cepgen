@@ -8,7 +8,6 @@
 #include "CepGen/Core/ParametersList.h"
 
 #include "CepGen/Processes/ProcessesHandler.h"
-#include "CepGen/Processes/FortranProcesses.h"
 
 #include "CepGen/StructureFunctions/StructureFunctionsBuilder.h"
 #include "CepGen/StructureFunctions/LHAPDF.h"

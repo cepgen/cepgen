@@ -7,7 +7,6 @@
 #include "CepGen/StructureFunctions/LHAPDF.h"
 
 #include "CepGen/Processes/ProcessesHandler.h"
-#include "CepGen/Processes/FortranProcesses.h"
 
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 
