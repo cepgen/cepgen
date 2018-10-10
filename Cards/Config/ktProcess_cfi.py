@@ -1,3 +1,9 @@
+"""@package kT-factorised process objects definition
+
+A collection of useful objects for the definition of a
+general kT-factorised process steering card
+"""
+
 import Config.Core as cepgen
 from math import pi
 
@@ -13,6 +19,7 @@ class HeavyIonFlux:
 
 process = cepgen.Module('ktProcess',
     outKinematics = cepgen.Parameters(
+        #--- cuts on initial-state partons
         qt = (0., 50.),
         phiqt = (0., 2.*pi),
         #--- cuts on individual particles defining the central system

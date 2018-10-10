@@ -122,7 +122,7 @@ namespace cepgen
           auto sf_p = ( *params.perturbative_model )( xbj, q2 );
           F2 = sf_p.F2;
           sf_p.computeFL( xbj, q2 );
-          FL = sel_sf.FL;
+          FL = sf_p.FL;
           if ( params.higher_twist )
             F2 *= ( 1.+5.5/q2 );
           return *this;
