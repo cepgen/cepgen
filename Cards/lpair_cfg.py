@@ -4,7 +4,7 @@ from Config.Integration.vegas_cff import integrator
 
 process = cepgen.Module('lpair',
     processParameters = cepgen.Parameters(
-        mode = cepgen.ProcessMode.ElasticElastic,
+        mode = cepgen.ProcessMode.InelasticElastic,
         pair = 13,
     ),
     inKinematics = cepgen.Parameters(

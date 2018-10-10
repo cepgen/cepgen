@@ -14,18 +14,22 @@
 
 #include "CepGen/Version.h"
 
+#ifdef PYTHIA8
+namespace Pythia8
+{
+  /// Convert a CepGen particle momentum into its Pythia8 counterpart
+  Vec4
+  momToVec4( const cepgen::Particle::Momentum& mom )
+  {
+    return Vec4( mom.px(), mom.py(), mom.pz(), mom.energy() );
+  }
+}
+#endif
+
 namespace cepgen
 {
   namespace hadr
   {
-#ifdef PYTHIA8
-    Pythia8::Vec4
-    momToVec4( const Particle::Momentum& mom )
-    {
-      return Pythia8::Vec4( mom.px(), mom.py(), mom.pz(), mom.energy() );
-    }
-#endif
-
     Pythia8Hadroniser::Pythia8Hadroniser( const Parameters& params, const ParametersList& plist ) :
       GenericHadroniser( "pythia8", plist ),
 #ifdef PYTHIA8
@@ -311,7 +315,7 @@ namespace cepgen
     unsigned short quark1_id = 0, quark2_id = 0;
     unsigned short quark1_pdgid = part1.integerPdgId(), quark2_pdgid = part2.integerPdgId();
 
-    const Pythia8::Vec4 mom_part1( hadr::momToVec4( part1.momentum() ) ), mom_part2( hadr::momToVec4( part2.momentum() ) );
+    const Pythia8::Vec4 mom_part1( Pythia8::momToVec4( part1.momentum() ) ), mom_part2( Pythia8::momToVec4( part2.momentum() ) );
 
     if ( !full ) {
       //=============================================================================================
@@ -334,12 +338,12 @@ namespace cepgen
       if ( inel1 ) {
         quark1_pdgid = 2;
         quark1_colour = colour_index++;
-        mom_iq1 = hadr::momToVec4( x1*ev.getOneByRole( Particle::IncomingBeam1 ).momentum() );
+        mom_iq1 = Pythia8::momToVec4( x1*ev.getOneByRole( Particle::IncomingBeam1 ).momentum() );
       }
       if ( inel2 ) {
         quark2_pdgid = 2;
         quark2_colour = colour_index++;
-        mom_iq2 = hadr::momToVec4( x2*ev.getOneByRole( Particle::IncomingBeam2 ).momentum() );
+        mom_iq2 = Pythia8::momToVec4( x2*ev.getOneByRole( Particle::IncomingBeam2 ).momentum() );
       }
 
       //--- flavour / x value of hard-process initiators

@@ -22,7 +22,8 @@ using namespace std;
  *  * launches the cross-section computation and the events generation.
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
  */
-int main( int argc, char* argv[] ) {
+int main( int argc, char* argv[] )
+{
   //--- first start by defining the generator object
   cepgen::Generator gen;
 

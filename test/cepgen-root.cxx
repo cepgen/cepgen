@@ -31,10 +31,8 @@ void fill_event_tree( const cepgen::Event& event, unsigned long ev_id )
   ev->tot_time = event.time_total;
   ev->np = 0;
   //cout << event.particles().size() << endl;
-  ev->momentum.reserve( event.particles().size() );
   for ( const auto& p : event.particles() ) {
     const cepgen::Particle::Momentum m = p.momentum();
-    ev->momentum[ev->np].SetPxPyPzE( m.px(), m.py(), m.pz(), p.energy() );
     ev->rapidity[ev->np] = m.rapidity();
     ev->pt[ev->np] = m.pt();
     ev->eta[ev->np] = m.eta();
@@ -60,7 +58,10 @@ void fill_event_tree( const cepgen::Event& event, unsigned long ev_id )
  * @author Laurent Forthomme <laurent.forthomme@cern.ch>
  * @date 27 jan 2014
  */
-int main( int argc, char* argv[] ) {
+int main( int argc, char* argv[] )
+{
+  AbortHandler ctrl_c;
+
   cepgen::Generator mg;
 
   if ( argc < 2 )
@@ -78,37 +79,39 @@ int main( int argc, char* argv[] ) {
   //----- open the output root file
 
   const char* filename = ( argc > 2 ) ? argv[2] : "events.root";
-  std::unique_ptr<TFile> file( TFile::Open( filename, "recreate" ) );
-  if ( !file )
+  TFile file( filename, "recreate" );
+  if ( !file.IsOpen() )
     throw CG_FATAL( "main" ) << "Failed to create the output file!";
 
-  AbortHandler ctrl_c;
+  //----- then generate the events and the container tree structure
+
+  run.reset( new ROOT::CepGenRun );
+  run->create();
+  ev.reset( new ROOT::CepGenEvent );
+  ev->create();
+
   //----- start by computing the cross section for the list of parameters applied
   double xsec, err;
   mg.computeXsection( xsec, err );
 
-  //----- then generate the events and the container tree structure
+  //----- populate the run tree
 
-  std::unique_ptr<TTree> ev_tree( new TTree( "events", "A TTree containing information from the events produced from CepGen" ) );
-
-  run.reset( new ROOT::CepGenRun );
-  run->create();
   run->xsect = xsec;
   run->errxsect = err;
   run->litigious_events = 0;
   run->sqrt_s = mg.parameters->kinematics.sqrtS();
-  run->fill();
 
-  ev.reset( new ROOT::CepGenEvent );
-  ev->create( ev_tree.get() );
-
-  // launch the events generation
+  //----- launch the events generation
   try {
     mg.generate( fill_event_tree );
   } catch ( const cepgen::Exception& ) {}
 
-  file->Write();
-  CG_INFO( "main" ) << "Events written on \"" << filename << "\".";
+  run->fill();
+  file.Write();
+  CG_INFO( "main" )
+    << run->num_events << " event" << cepgen::s( run->num_events )
+    << " written in \"" << filename << "\".";
 
   return 0;
 }
+

@@ -178,10 +178,12 @@ namespace cepgen
     void
     LpairHandler::setParameter( const std::string& key, const std::string& value )
     {
-      try { setValue<double>( key.c_str(), std::stod( value ) ); } catch ( std::invalid_argument& ) {}
-      try { setValue<int>( key.c_str(), std::stoi( value ) ); } catch ( std::invalid_argument& ) {}
-      //setValue<bool>( key.c_str(), std::stoi( value ) );
-      setValue<std::string>( key.c_str(), value );
+      try { setValue<double>( key.c_str(), std::stod( value ) ); } catch ( const std::invalid_argument& ) {}
+      try { setValue<int>( key.c_str(), std::stoi( value ) ); } catch ( const std::invalid_argument& ) {}
+      try { setValue<std::string>( key.c_str(), value ); } catch ( const std::invalid_argument& ) {
+        throw CG_FATAL( "LpairHandler:setParameter" )
+          << "Failed to add the parameter \"" << key << "\" → \"" << value << "\"!";
+      }
     }
 
     std::string

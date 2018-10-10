@@ -22,17 +22,20 @@ namespace cepgen
         void store( const char* file );
 
       private:
-        template<class T> struct Parameter {
+        /// Single parameter handler
+        /// \tparam T Parameter type
+        template<typename T> struct Parameter
+        {
           Parameter( const char* key, const char* descr, T* value ) : key( key ), description( descr ), value( value ) {}
           std::string key, description;
           T* value;
         };
         /// Register a parameter to be steered to a configuration variable
-        template<class T> void registerParameter( const char* key, const char* description, T* def ) {}
+        template<typename T> void registerParameter( const char* key, const char* description, T* def ) {}
         /// Set a parameter value
-        template<class T> void setValue( const char* key, const T& value ) {}
+        template<typename T> void setValue( const char* key, const T& value ) {}
         /// Retrieve a parameter value
-        template<class T> T getValue( const char* key ) const {}
+        template<typename T> T getValue( const char* key ) const {}
 
         void setParameter( const std::string& key, const std::string& value );
         std::string getParameter( std::string key ) const;

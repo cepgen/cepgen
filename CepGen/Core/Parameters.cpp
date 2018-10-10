@@ -251,7 +251,7 @@ namespace cepgen
 
   Parameters::Generation::Generation() :
     enabled( false ), maxgen( 0 ),
-    symmetrise( false ), treat( false ), ngen( 0 ), gen_print_every( 10000 ),
+    symmetrise( false ), treat( true ), ngen( 0 ), gen_print_every( 10000 ),
     num_threads( 2 ), num_points( 100 )
   {}
 }

@@ -22,7 +22,7 @@ namespace cepgen
     CG_DEBUG( "Generator:init" ) << "Generator initialized";
     try {
       printHeader();
-    } catch ( Exception& e ) {
+    } catch ( const Exception& e ) {
       e.dump();
     }
     // Random number initialization
