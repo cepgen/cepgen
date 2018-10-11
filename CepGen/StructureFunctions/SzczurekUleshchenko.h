@@ -12,7 +12,7 @@ namespace cepgen
 {
   namespace strfun
   {
-    /// Szcurek and Uleshchenko modelling of \f$F_{1/2}\f$ \cite Szczurek:1999wp
+    /// Szcurek and Uleshchenko modelling of \f$F_{1,2}\f$ \cite Szczurek:1999wp
     class SzczurekUleshchenko : public Parameterisation
     {
       public:

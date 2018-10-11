@@ -10,7 +10,7 @@ namespace cepgen
 {
   namespace strfun
   {
-    /// \f$F_{2/L}\f$ parameterisation by Christy and Bosted \cite Bosted:2007xd
+    /// \f$F_{2,L}\f$ parameterisation by Christy and Bosted \cite Bosted:2007xd
     class ChristyBosted : public Parameterisation
     {
       public:

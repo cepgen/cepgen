@@ -42,7 +42,7 @@ namespace cepgen
       {
         double pz; ///< Incoming particle momentum, in GeV/c
         PDG pdg; ///< PDG identifier for the beam
-        KTFlux kt_flux; ///< Type of kT-factorised flux to be considered (if any)
+        KTFlux kt_flux; ///< Type of \f$k_{\rm T}\f$-factorised flux to be considered (if any)
       };
       friend std::ostream& operator<<( std::ostream&, const Beam& );
       /// Beam/primary particle's kinematics

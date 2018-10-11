@@ -18,24 +18,28 @@ namespace cepgen
     public:
       /// Internal status code for a particle
       enum class Status {
-        PrimordialIncoming = -9,
-        DebugResonance = -5,
-        Resonance = -4,
-        Fragmented = -3,
-        Propagator = -2,
-        Incoming = -1,
-        Undefined = 0,
-        FinalState = 1,
-        Undecayed = 2, Unfragmented = 3
+        PrimordialIncoming = -9, ///< Incoming beam particle
+        DebugResonance = -5, ///< Intermediate resonance (for processes developers)
+        Resonance = -4, ///< Already decayed intermediate resonance
+        Fragmented = -3, ///< Already fragmented outgoing beam
+        Propagator = -2, ///< Generic propagator
+        Incoming = -1, ///< Incoming parton
+        Undefined = 0, ///< Undefined particle
+        FinalState = 1, ///< Stable, final state particle
+        Undecayed = 2, ///< Particle to be decayed externally
+        Unfragmented = 3 ///< Particle to be hadronised externally
       };
       /// Role of the particle in the process
       enum Role {
-        UnknownRole = -1,
-        IncomingBeam1 = 1, IncomingBeam2 = 2,
-        OutgoingBeam1 = 3, OutgoingBeam2 = 5,
-        CentralSystem = 6,
-        Intermediate = 4,
-        Parton1 = 41, Parton2 = 42, Parton3 = 43
+        UnknownRole = -1, ///< Undefined role
+        IncomingBeam1 = 1, ///< \f$z>0\f$ incoming beam particle
+        IncomingBeam2 = 2, ///< \f$z<0\f$ incoming beam particle
+        OutgoingBeam1 = 3, ///< \f$z<0\f$ outgoing beam state/particle
+        OutgoingBeam2 = 5, ///< \f$z>0\f$ outgoing beam state/particle
+        CentralSystem = 6, ///< Central particles system
+        Intermediate = 4, ///< Intermediate two-parton system
+        Parton1 = 41, ///< \f$z>0\f$ beam incoming parton
+        Parton2 = 42 ///< \f$z<0\f$ beam incoming parton
       };
       /**
        * Container for a particle's 4-momentum, along with useful methods to ease the development of any matrix element level generator
@@ -112,19 +116,19 @@ namespace cepgen
           inline double pz() const { return pz_; }
           /// Transverse momentum (in GeV)
           double pt() const;
-          /// Squared transverse momentum (in GeV\f${}^2\f$)
+          /// Squared transverse momentum (in GeV\f$^2\f$)
           double pt2() const;
           /// 4-vector of double precision floats (in GeV)
           const std::vector<double> pVector() const;
           /// 3-momentum norm (in GeV)
           inline double p() const { return p_; }
-          /// Squared 3-momentum norm (in GeV\f${}^2\f$)
+          /// Squared 3-momentum norm (in GeV\f$^2\f$)
           inline double p2() const { return p_*p_; }
           /// Energy (in GeV)
           inline double energy() const { return energy_; }
-          /// Squared energy (in GeV\f${}^2\f$)
+          /// Squared energy (in GeV\f$^2\f$)
           inline double energy2() const { return energy_*energy_; }
-          /// Squared mass (in GeV\f${}^2\f$) as computed from its energy and momentum
+          /// Squared mass (in GeV\f$^2\f$) as computed from its energy and momentum
           inline double mass2() const { return energy2()-p2(); }
           /// Mass (in GeV) as computed from its energy and momentum
           /// \note Returns \f$-\sqrt{|E^2-\mathbf{p}^2|}<0\f$ if \f$\mathbf{p}^2>E^2\f$
@@ -236,18 +240,18 @@ namespace cepgen
       float helicity() const { return helicity_; }
       /// Set the helicity of the particle
       void setHelicity( float heli ) { helicity_ = heli; }
-      /// Particle mass in GeV/c\f${}^2\f$
+      /// Particle mass in GeV/c\f$^2\f$
       /// \return Particle's mass
       inline double mass() const { return mass_; };
       /// Compute the particle mass
       /// \param[in] off_shell Allow the particle to be produced off-shell?
       /// \note This method ensures that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
       void computeMass( bool off_shell = false );
-      /// Set the particle mass, in GeV/c\f${}^2\f$
-      /// \param m Mass in GeV/c\f${}^2\f$
+      /// Set the particle mass, in GeV/c\f$^2\f$
+      /// \param m Mass in GeV/c\f$^2\f$
       /// \note This method ensures that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
       void setMass( double m = -1. );
-      /// Particle squared mass, in GeV\f${}^2\f$/c\f${}^4\f$
+      /// Particle squared mass, in GeV\f$^2\f$/c\f$^4\f$
       inline double mass2() const { return mass_*mass_; };
       /// Retrieve the momentum object associated with this particle
       inline Momentum& momentum() { return momentum_; }
@@ -271,7 +275,7 @@ namespace cepgen
       void setEnergy( double e = -1. );
       /// Get the particle's energy, in GeV
       double energy() const;
-      /// Get the particle's squared energy, in GeV\f${}^2\f$
+      /// Get the particle's squared energy, in GeV\f$^2\f$
       inline double energy2() const { return energy()*energy(); };
       /// Is this particle a valid particle which can be used for kinematic computations?
       bool valid();
@@ -310,7 +314,7 @@ namespace cepgen
       short charge_sign_;
       /// Momentum properties handler
       Momentum momentum_;
-      /// Mass, in GeV/c\f${}^2\f$
+      /// Mass, in GeV/c\f$^2\f$
       double mass_;
       /// Helicity
       float helicity_;

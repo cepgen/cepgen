@@ -8,7 +8,7 @@ namespace cepgen
 {
   namespace strfun
   {
-    /// LUX-like hybrid modelling of \f$F_{2/L}\f$ structure functions
+    /// LUX-like hybrid modelling of \f$F_{2,L}\f$ structure functions
     class Schaefer : public Parameterisation
     {
       public:

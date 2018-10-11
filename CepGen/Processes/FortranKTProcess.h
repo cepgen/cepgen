@@ -8,7 +8,7 @@ namespace cepgen
 {
   namespace proc
   {
-    /// Compute the matrix element for a generic \f$k_T\f$-factorised process defined in a Fortran subroutine
+    /// Compute the matrix element for a generic \f$k_{\rm T}\f$-factorised process defined in a Fortran subroutine
     class FortranKTProcess : public GenericKTProcess
     {
       public:

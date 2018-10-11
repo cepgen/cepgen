@@ -10,7 +10,7 @@ namespace cepgen
 {
   namespace strfun
   {
-    /// \f$F_{2/L}\f$ parameterisation by Abramowicz, Levin, Levy, and Maor \cite Abramowicz:1991xz\cite Abramowicz:1997ms
+    /// \f$F_{2,L}\f$ parameterisation by Abramowicz, Levin, Levy, and Maor \cite Abramowicz:1991xz\cite Abramowicz:1997ms
     class ALLM : public Parameterisation
     {
       public:

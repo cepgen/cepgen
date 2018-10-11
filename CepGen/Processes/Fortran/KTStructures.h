@@ -3,21 +3,21 @@
 
 namespace cepgen
 {
-  /// Collection of common blocks for Fortran kT-processes
+  /// Collection of common blocks for Fortran \f$k_{\rm T}\f$-processes
   namespace ktblock
   {
     /// General physics constants
     struct Constants {
       double m_p; ///< Proton mass
-      double units; ///< Conversion factor GeV\f${}^2\to\f$ barn
+      double units; ///< Conversion factor GeV\f$^2\to\f$ barn
       double pi; ///< \f$\pi\f$
       double alpha_em; ///< Electromagnetic coupling constant
     };
     /// Generic run parameters
     struct Parameters {
       int icontri; ///< Kinematics mode
-      int iflux1; ///< Type of kT-factorised flux for first incoming parton
-      int iflux2; ///< Type of kT-factorised flux for second incoming parton
+      int iflux1; ///< Type of \f$k_{\rm T}\f$-factorised flux for first incoming parton
+      int iflux2; ///< Type of \f$k_{\rm T}\f$-factorised flux for second incoming parton
       int imethod; ///< Computation method for matrix element
       int sfmod; ///< Structure functions modelling
       int pdg_l; ///< Central system PDG id
@@ -28,7 +28,7 @@ namespace cepgen
       double inp1; ///< First beam momentum, in GeV/c
       double inp2; ///< Second beam momentum, in GeV/c
     };
-    /// Kinematics properties of the kT-factorised process
+    /// Kinematics properties of the \f$k_{\rm T}\f$-factorised process
     struct KTKinematics {
       double q1t; ///< Transverse momentum of the first incoming parton
       double q2t; ///< Transverse momentum of the second incoming parton

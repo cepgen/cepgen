@@ -104,7 +104,6 @@ namespace cepgen
           case Particle::OutgoingBeam2: { v2->add_particle_out( part ); } break;
           case Particle::Parton1:       { v1->add_particle_out( part ); vcm->add_particle_in( part ); } break;
           case Particle::Parton2:       { v2->add_particle_out( part ); vcm->add_particle_in( part ); } break;
-          case Particle::Parton3:       { v2->add_particle_out( part ); vcm->add_particle_in( part ); } break;
           case Particle::Intermediate:  { cm_id = i; continue; } break;
           case Particle::CentralSystem:
           default: {

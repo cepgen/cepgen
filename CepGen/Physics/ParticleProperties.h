@@ -7,7 +7,7 @@ namespace cepgen
   /// All useful properties about particles
   namespace particleproperties
   {
-    /** \brief Mass of a particle, in GeV/c\f${}^2\f$
+    /** \brief Mass of a particle, in GeV/c\f$^2\f$
      * \param pdg_id PDG identifier
      */
     double mass( const PDG& pdg_id );

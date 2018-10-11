@@ -237,7 +237,6 @@ namespace cepgen
       case Particle::OutgoingBeam2: return os << "o.beam 2";
       case Particle::Parton1:       return os << "parton 1";
       case Particle::Parton2:       return os << "parton 2";
-      case Particle::Parton3:       return os << "parton 3";
       case Particle::Intermediate:  return os << "hard pr.";
       case Particle::CentralSystem: return os << "central";
     }

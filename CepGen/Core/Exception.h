@@ -49,7 +49,14 @@ namespace cepgen
       /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
       /// \date 27 Mar 2015
       enum class Type {
-        undefined = -1, debug, verbatim, info, warning, error, fatal };
+        undefined = -1, ///< Irregular exception
+        debug, ///< Debugging information to be enabled
+        verbatim, ///< Raw information
+        info, ///< Prettified information
+        warning, ///< Casual non-stopping warning
+        error, ///< General non-stopping error
+        fatal ///< Critical and stopping error
+      };
 
       /// Generic constructor
       /// \param[in] module exception classifier

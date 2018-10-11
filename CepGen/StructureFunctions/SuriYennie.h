@@ -7,7 +7,7 @@ namespace cepgen
 {
   namespace strfun
   {
-    /// \f$F_{1/2/E/M}\f$ modelling by Suri and Yennie \cite Suri:1971yx
+    /// \f$F_{1,2,E,M}\f$ modelling by Suri and Yennie \cite Suri:1971yx
     class SuriYennie : public Parameterisation
     {
       public:

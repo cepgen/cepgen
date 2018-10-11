@@ -9,13 +9,13 @@ namespace cepgen
   namespace proc
   {
     /**
-     * A generic kT-factorisation process.
+     * A generic \f$k_{\rm T}\f$-factorisation process.
      * \note
      * - First 4 dimensions of the phase space are required for the
      *    incoming partons' virtualities (radial and azimuthal coordinates).
      * - Last 0-2 dimensions may be used for the scattered diffractive
      *    system(s)' invariant mass definition.
-     * \brief Class template to define any kT-factorisation process
+     * \brief Class template to define any \f$k_{\rm T}\f$-factorisation process
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Apr 2016
      */
@@ -25,7 +25,7 @@ namespace cepgen
         /// Class constructor
         /// \param[in] params Parameters list
         /// \param[in] name Generic process name
-        /// \param[in] description Human-readable kT-factorised process name
+        /// \param[in] description Human-readable \f$k_{\rm T}\f$-factorised process name
         /// \param[in] partons First and second incoming parton
         /// \param[in] output Produced final state particles
         GenericKTProcess( const ParametersList& params,
@@ -52,7 +52,7 @@ namespace cepgen
         virtual void setExtraContent() {}
         /// Prepare the central part of the Jacobian (only done once, as soon as the kinematics is set)
         virtual void preparePhaseSpace() = 0;
-        /// kT-factorised matrix element (event weight)
+        /// \f$k_{\rm T}\f$-factorised matrix element (event weight)
         /// \return Weight of the point in the phase space to the integral
         virtual double computeKTFactorisedMatrixElement() = 0;
         /// Compute the unintegrated photon fluxes (for inelastic distributions, interpolation on double logarithmic grid)

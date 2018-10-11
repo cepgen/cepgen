@@ -70,8 +70,8 @@ namespace cepgen
 
       protected:
         virtual std::string description() const; ///< Human-readable description of this SF set
-        static const double mp_; ///< Proton mass, in GeV/c\f${}^2\f$
-        static const double mp2_; ///< Squared proton mass, in GeV\f${}^2\f$/c\f${}^4\f$
+        static const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
+        static const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
         std::pair<double,double> old_vals_; ///< Last \f$(x_{\rm Bj},Q^2)\f$ couple computed
 
       private:
