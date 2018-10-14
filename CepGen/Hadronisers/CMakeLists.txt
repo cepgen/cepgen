@@ -1,4 +1,4 @@
-file(GLOB sources *Hadroniser.cpp)
+file(GLOB sources *Hadroniser.cpp PythiaEventInterface.cpp)
 
 include_directories(${PROJECT_SOURCE_DIR})
 

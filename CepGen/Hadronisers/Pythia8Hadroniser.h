@@ -11,34 +11,12 @@
 #include <unordered_map>
 #include <vector>
 
+namespace Pythia8 { class CepGenEvent; }
 namespace cepgen
 {
   class Particle;
   class ParametersList;
   enum class KinematicsMode;
-#ifdef PYTHIA8
-  class LHAEvent : public Pythia8::LHAup
-  {
-    public:
-      explicit LHAEvent( const Parameters* );
-      void feedEvent( const Event& ev, bool full, const KinematicsMode& );
-      bool setInit() override;
-      bool setEvent( int ) override;
-      void setCrossSection( int id, double xsec, double xsec_err );
-      void setProcess( int id, double xsec, double q2_scale, double alpha_qed, double alpha_qcd );
-
-      unsigned short cepgenId( unsigned short py_id ) const;
-      unsigned short pythiaId( unsigned short cg_id ) const;
-      void addCorresp( unsigned short py_id, unsigned short cg_id );
-      void dumpCorresp() const;
-
-      static constexpr unsigned short invalid_id = 999;
-    private:
-      static const double mp_, mp2_;
-      std::vector<std::pair<unsigned short, unsigned short> > py_cg_corresp_;
-      const Parameters* params_;
-  };
-#endif
 
   namespace hadr
   {
@@ -71,7 +49,7 @@ namespace cepgen
         Particle& addParticle( Event& ev, const Pythia8::Particle&, const Pythia8::Vec4& mom, unsigned short ) const;
         /// A Pythia8 core to be wrapped
         std::unique_ptr<Pythia8::Pythia> pythia_;
-        std::unique_ptr<LHAEvent> lhaevt_;
+        std::unique_ptr<Pythia8::CepGenEvent> cg_evt_;
 #endif
         bool full_evt_;
         unsigned short offset_;
