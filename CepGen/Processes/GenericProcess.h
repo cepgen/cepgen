@@ -25,7 +25,7 @@ namespace cepgen
         /// \param[in] name Process name
         /// \param[in] description Human-readable description of the process
         /// \param[in] has_event Do we generate the associated event structure?
-        GenericProcess( const std::string& name, const std::string& description = "<invalid process>", bool has_event = true );
+        GenericProcess( const ParametersList& params, const std::string& name = "<invalid name>", const std::string& description = "<invalid process>", bool has_event = true );
         /// Copy constructor for a user process
         GenericProcess( const GenericProcess& );
         virtual ~GenericProcess() = default;

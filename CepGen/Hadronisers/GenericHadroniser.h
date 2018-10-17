@@ -28,7 +28,7 @@ namespace cepgen
         friend std::ostream& operator<<( std::ostream& os, const GenericHadroniser* hadr );
 
         /// Default constructor for an undefined hadroniser
-        explicit GenericHadroniser( const std::string& name, const ParametersList& );
+        explicit GenericHadroniser( const ParametersList&, const std::string& name = "<invalid hadroniser>" );
         virtual ~GenericHadroniser() {}
 
         /// Parse a configuration string
@@ -49,6 +49,7 @@ namespace cepgen
         /// Specify the process cross section, in pb
         virtual void setCrossSection( double xsec, double xsec_err ) {}
 
+        virtual void setParameters( const Parameters& params ) { params_ = &params; }
         /// \brief Specify a random numbers generator seed for the hadroniser
         /// \param[in] seed A RNG seed
         void setSeed( long long seed ) { seed_ = seed; }
@@ -63,6 +64,7 @@ namespace cepgen
         long long seed_;
         /// Maximal number of trials for the hadronisation of the proton(s) remnants
         unsigned short max_trials_;
+        const Parameters* params_; // not owning
     };
   }
 }

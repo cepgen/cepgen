@@ -1,4 +1,5 @@
 #include "CepGen/Cards/LpairHandler.h"
+
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ProcessesHandler.h"
@@ -73,6 +74,7 @@ namespace cepgen
 
       //--- parse the hadronisation algorithm name
       auto hadr = cepgen::hadr::HadronisersHandler::get().build( hadr_name_, ParametersList() );
+      hadr->setParameters( params_ );
       params_.setHadroniser( std::move( hadr ) );
 
       if ( m_params.count( "IEND" ) )

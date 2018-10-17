@@ -6,6 +6,7 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 
+#include "CepGen/Core/HadronisersHandler.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
@@ -19,22 +20,28 @@ namespace cepgen
 {
   namespace hadr
   {
-    Pythia8Hadroniser::Pythia8Hadroniser( const Parameters& params, const ParametersList& plist ) :
-      GenericHadroniser( "pythia8", plist ),
+    Pythia8Hadroniser::Pythia8Hadroniser( const ParametersList& plist ) :
+      GenericHadroniser( plist, "pythia8" ),
 #ifdef PYTHIA8
-      pythia_( new Pythia8::Pythia ), cg_evt_( new Pythia8::CepGenEvent( &params ) ),
+      pythia_( new Pythia8::Pythia ),
 #endif
-      full_evt_( false ), offset_( 0 ), first_evt_( true ), params_( &params )
+      full_evt_( false ), offset_( 0 ), first_evt_( true )
+    {}
+
+    void
+    Pythia8Hadroniser::setParameters( const Parameters& params )
     {
+      params_ = &params;
+      cg_evt_.reset( new Pythia8::CepGenEvent( params_ ) );
 #ifdef PYTHIA8
       pythia_->setLHAupPtr( (Pythia8::LHAup*)cg_evt_.get() );
-      pythia_->settings.parm( "Beams:idA", (short)params.kinematics.incoming_beams.first.pdg );
-      pythia_->settings.parm( "Beams:idB", (short)params.kinematics.incoming_beams.second.pdg );
+      pythia_->settings.parm( "Beams:idA", (short)params_->kinematics.incoming_beams.first.pdg );
+      pythia_->settings.parm( "Beams:idB", (short)params_->kinematics.incoming_beams.second.pdg );
       // specify we will be using a LHA input
       pythia_->settings.mode( "Beams:frameType", 5 );
-      pythia_->settings.parm( "Beams:eCM", params.kinematics.sqrtS() );
+      pythia_->settings.parm( "Beams:eCM", params_->kinematics.sqrtS() );
 #endif
-      for ( const auto& pdgid : params.kinematics.minimum_final_state )
+      for ( const auto& pdgid : params_->kinematics.minimum_final_state )
         min_ids_.emplace_back( (unsigned short)pdgid );
     }
 
@@ -262,5 +269,6 @@ namespace cepgen
       return (unsigned short)Particle::UnknownRole;
     }
 #endif
+    REGISTER_HADRONISER( pythia8, Pythia8Hadroniser )
   }
 }

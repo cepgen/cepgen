@@ -23,7 +23,7 @@ namespace cepgen
     //---------------------------------------------------------------------------------------------
 
     GamGamLL::GamGamLL( const ParametersList& params ) :
-      GenericProcess( "lpair", "pp → p(*) ( ɣɣ → l⁺l¯ ) p(*)" ),
+      GenericProcess( params, "lpair", "pp → p(*) ( ɣɣ → l⁺l¯ ) p(*)" ),
       n_opt_( params.get<int>( "nopt", 0 ) ),
       pair_( params.get<int>( "pair", 0 ) ),
       ep1_( 0. ), ep2_( 0. ), p_cm_( 0. ),

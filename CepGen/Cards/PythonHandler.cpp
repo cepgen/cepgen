@@ -16,8 +16,6 @@
 #include "CepGen/StructureFunctions/MSTWGrid.h"
 #include "CepGen/StructureFunctions/Schaefer.h"
 
-#include "CepGen/Hadronisers/Pythia8Hadroniser.h"
-
 #include <algorithm>
 
 #if PY_MAJOR_VERSION < 3
@@ -381,12 +379,10 @@ namespace cepgen
       ParametersList mod_params;
       fillParameter( hadr, "moduleParameters", mod_params );
 
-      if ( hadr_name == "pythia8" )
-        params_.setHadroniser( new hadr::Pythia8Hadroniser( params_, mod_params ) );
-      else
-        throwPythonError( Form( "Unrecognised hadronisation algorithm: \"%s\"!", hadr_name.c_str() ) );
+      params_.setHadroniser( cepgen::hadr::HadronisersHandler::get().build( hadr_name, mod_params ) );
 
       auto h = params_.hadroniser();
+      h->setParameters( params_ );
       { //--- before calling the init() method
         std::vector<std::string> config;
         fillParameter( hadr, "preConfiguration", config );

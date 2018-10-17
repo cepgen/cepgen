@@ -15,6 +15,7 @@ namespace Pythia8 { class CepGenEvent; }
 namespace cepgen
 {
   class Particle;
+  class Parameters;
   class ParametersList;
   enum class KinematicsMode;
 
@@ -27,9 +28,10 @@ namespace cepgen
     class Pythia8Hadroniser : public GenericHadroniser
     {
       public:
-        explicit Pythia8Hadroniser( const Parameters&, const ParametersList& );
+        explicit Pythia8Hadroniser( const ParametersList& );
         ~Pythia8Hadroniser();
 
+        void setParameters( const Parameters& ) override;
         void readString( const char* param ) override;
         void init() override;
         bool run( Event& ev, double& weight, bool full ) override;
@@ -54,7 +56,6 @@ namespace cepgen
         bool full_evt_;
         unsigned short offset_;
         bool first_evt_;
-        const Parameters* params_; // not owning
     };
   }
 }

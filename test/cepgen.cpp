@@ -6,8 +6,8 @@
 #include "CepGen/Core/Exception.h"
 
 //--- necessary include to build the default run
-#include "CepGen/Processes/GamGamLL.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Core/ProcessesHandler.h"
 
 #include "abort.h"
 
@@ -33,7 +33,7 @@ int main( int argc, char* argv[] )
     //--- default run: LPAIR elastic ɣɣ → µ⁺µ¯ at 13 TeV
     cepgen::ParametersList pgen;
     pgen.set<int>( "pair", (int)cepgen::PDG::muon );
-    gen.parameters->setProcess( new cepgen::proc::GamGamLL( pgen ) );
+    gen.parameters->setProcess( cepgen::proc::ProcessesHandler::get().build( "lpair", pgen ) );
     gen.parameters->kinematics.mode = cepgen::KinematicsMode::ElasticElastic;
     gen.parameters->kinematics.cuts.central.pt_single.min() = 15.;
     gen.parameters->kinematics.cuts.central.eta_single = { -2.5, 2.5 };

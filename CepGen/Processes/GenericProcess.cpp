@@ -16,7 +16,7 @@ namespace cepgen
     const double GenericProcess::mp_ = particleproperties::mass( PDG::proton );
     const double GenericProcess::mp2_ = GenericProcess::mp_*GenericProcess::mp_;
 
-    GenericProcess::GenericProcess( const std::string& name, const std::string& description, bool has_event ) :
+    GenericProcess::GenericProcess( const ParametersList& params, const std::string& name, const std::string& description, bool has_event ) :
       name_( name ), description_( description ),
       first_run( true ),
       s_( -1. ), sqs_( -1. ),
