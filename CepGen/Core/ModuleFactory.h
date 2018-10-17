@@ -11,15 +11,26 @@ namespace cepgen
   class ModuleFactory
   {
     public:
-      static ModuleFactory& get();
+      static ModuleFactory& get() {
+        static ModuleFactory<T> instance;
+        return instance;
+      }
       ~ModuleFactory() = default;
 
-      void registerModule( const std::string& name, const T* );
-      std::unique_ptr<T> build( const std::string& name, const ParametersList& ) const;
+      void registerModule( const std::string& name, const T* proc ) {
+        map_[name].reset( proc );
+      }
+      virtual std::unique_ptr<T> build( const std::string& name, const ParametersList& params ) const {
+        if ( map_.count( name ) == 0 )
+          throw std::logic_error( "Failed to retrieve a process with name \""+name+"\"!" );
+        return map_.at( name )->clone( params );
+      }
       void dump() const;
 
     private:
       explicit ModuleFactory() = default;
+
+    protected:
       std::unordered_map<std::string, std::unique_ptr<const T> > map_;
 
     public:
@@ -29,3 +40,4 @@ namespace cepgen
 }
 
 #endif
+

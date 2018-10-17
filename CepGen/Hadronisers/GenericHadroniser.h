@@ -28,7 +28,7 @@ namespace cepgen
         friend std::ostream& operator<<( std::ostream& os, const GenericHadroniser* hadr );
 
         /// Default constructor for an undefined hadroniser
-        explicit GenericHadroniser( const char* name, const ParametersList& );
+        explicit GenericHadroniser( const std::string& name, const ParametersList& );
         virtual ~GenericHadroniser() {}
 
         /// Parse a configuration string

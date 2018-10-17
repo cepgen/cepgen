@@ -6,8 +6,9 @@
 #include "CepGen/Core/TamingFunction.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/ProcessesHandler.h"
+#include "CepGen/Core/HadronisersHandler.h"
 
-#include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Physics/GluonGrid.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
@@ -80,7 +81,7 @@ namespace cepgen
       //--- process mode
       params_.kinematics.mode = (KinematicsMode)proc_params.get<int>( "mode", (int)KinematicsMode::invalid );
 
-      auto proc = cepgen::ProcessesHandler::get().build( proc_name, proc_params );
+      auto proc = cepgen::proc::ProcessesHandler::get().build( proc_name, proc_params );
       params_.setProcess( std::move( proc ) );
 
       //--- process kinematics

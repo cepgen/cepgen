@@ -7,7 +7,7 @@ namespace cepgen
 {
   namespace hadr
   {
-    GenericHadroniser::GenericHadroniser( const char* name, const ParametersList& plist ) :
+    GenericHadroniser::GenericHadroniser( const std::string& name, const ParametersList& plist ) :
       name_( name ),
       seed_      ( plist.get<int>( "seed", -1ll ) ),
       max_trials_( plist.get<int>( "maxTrials", 1 ) )

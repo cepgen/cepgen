@@ -6,11 +6,10 @@
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
 
+#include "CepGen/Core/ProcessesHandler.h"
 #include "CepGen/Core/Exception.h"
 
 #include <assert.h>
-
-#include "CepGen/Processes/ProcessesHandler.h"
 
 namespace cepgen
 {

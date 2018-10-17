@@ -2,13 +2,12 @@
 
 #include "CepGen/Event/Event.h"
 
+#include "CepGen/Core/ProcessesHandler.h"
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
-
-#include "CepGen/Processes/ProcessesHandler.h"
 
 namespace cepgen
 {

@@ -113,6 +113,8 @@ namespace cepgen
       /// Name of the hadroniser (if applicable)
       std::string hadroniserName() const;
       /// Set the hadronisation algorithm
+      void setHadroniser( std::unique_ptr<hadr::GenericHadroniser> hadr );
+      /// Set the hadronisation algorithm
       void setHadroniser( hadr::GenericHadroniser* hadr );
 
       //----- taming functions

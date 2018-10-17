@@ -1,15 +1,14 @@
 #include "CepGen/Cards/LpairHandler.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ProcessesHandler.h"
+#include "CepGen/Core/HadronisersHandler.h"
 
-#include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/GluonGrid.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/StructureFunctions/Partonic.h"
-
-#include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 
 #include <fstream>
 
@@ -47,7 +46,7 @@ namespace cepgen
       f.close();
 
       //--- parse the process name
-      auto proc = cepgen::ProcessesHandler::get().build( proc_name_, *proc_params_ );
+      auto proc = cepgen::proc::ProcessesHandler::get().build( proc_name_, *proc_params_ );
       params_.setProcess( std::move( proc ) );
 
       //--- parse the structure functions code
@@ -73,8 +72,8 @@ namespace cepgen
         throw CG_FATAL( "LpairHandler" ) << "Unrecognized integrator type: " << integr_type_ << "!";
 
       //--- parse the hadronisation algorithm name
-      if ( hadr_name_ == "pythia8" )
-        params_.setHadroniser( new hadr::Pythia8Hadroniser( params_, ParametersList() ) );
+      auto hadr = cepgen::hadr::HadronisersHandler::get().build( hadr_name_, ParametersList() );
+      params_.setHadroniser( std::move( hadr ) );
 
       if ( m_params.count( "IEND" ) )
         setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );

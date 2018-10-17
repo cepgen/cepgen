@@ -110,6 +110,12 @@ namespace cepgen
   }
 
   void
+  Parameters::setHadroniser( std::unique_ptr<hadr::GenericHadroniser> hadr )
+  {
+    hadroniser_ = std::move( hadr );
+  }
+
+  void
   Parameters::setHadroniser( hadr::GenericHadroniser* hadr )
   {
     hadroniser_.reset( hadr );
