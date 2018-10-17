@@ -35,8 +35,7 @@ namespace cepgen
           << "Invalid fermion pair selected: " << pair_ << "!";
 
       const PDG pdg_f = (PDG)pair_;
-      mf_ = particleproperties::mass( pdg_f );
-      mf2_ = mf_*mf_;
+      mf_ = particleproperties::mass( pdg_f ); mf2_ = mf_*mf_;
       qf_ = particleproperties::charge( pdg_f );
       colf_ = particleproperties::colours( pdg_f );
       CG_DEBUG( "PPtoFF:prepare" )
@@ -374,5 +373,6 @@ namespace cepgen
     // register process and define aliases
     REGISTER_PROCESS( pptoll, PPtoFF )
     REGISTER_PROCESS( pptoff, PPtoFF )
+    REGISTER_PROCESS( pptoqq, PPtoFF )
   }
 }

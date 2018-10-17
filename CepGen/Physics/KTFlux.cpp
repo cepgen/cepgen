@@ -23,27 +23,19 @@ namespace cepgen
       case KTFlux::P_Photon_Elastic: {
         const double x2 = x*x;
         const double q2min = x2*mp2/( 1.-x ), q2 = q2min + kt2/( 1.-x );
-
-        // electromagnetic form factors
+        //--- proton electromagnetic form factors
         const auto& ff = FormFactors::protonElastic( q2 );
-
-        const double ela1 = ( 1.-x )*( 1.-q2min/q2 );
-        //const double ela3 = 1.-( q2-kt2 )/q2;
-
-        flux = constants::alphaEM*M_1_PI*( 1.-x )/q2*( ela1*ff.FE + 0.5*x2*ff.FM );
+        flux = constants::alphaEM*M_1_PI/( 1.-x )/q2*( ( 1.-x )*( 1.-q2min/q2 )*ff.FE + 0.25*x2*ff.FM );
       } break;
       case KTFlux::P_Photon_Inelastic_Budnev: {
         const double mx2 = mx*mx, x2 = x*x;
-        const double q2min = ( x*( mx2-mp2 ) + x2*mp2 )/( 1.-x ), q2 = q2min + kt2/( 1.-x );
+        const double q2min = ( x2*mp2+x*( mx2-mp2 ) )/( 1.-x ), q2 = q2min + kt2/( 1.-x );
         const double xbj = q2 / ( q2+mx2-mp2 );
-
-        // structure functions
+        //--- proton structure functions
         auto& str_fun = sf( xbj, q2 );
         str_fun.computeFL( xbj, q2 );
-
-        const double f_D = str_fun.F2/( q2+mx2-mp2 )* ( 1.-x )*( 1.-q2min/q2 );
+        const double f_D = str_fun.F2/( q2+mx2-mp2 )*( 1.-x )*( 1.-q2min/q2 );
         const double f_C = str_fun.F1( xbj, q2 ) * 2./q2;
-
         flux = constants::alphaEM*M_1_PI*( 1.-x )/q2*( f_D+0.5*x2*f_C );
       } break;
       case KTFlux::P_Gluon_KMR: {

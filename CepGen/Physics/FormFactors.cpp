@@ -23,7 +23,7 @@ namespace cepgen
   {
     const double GE = pow( 1.+q2/0.71, -2. ), GE2 = GE*GE;
     const double GM = 2.79*GE, GM2 = GM*GM;
-    return FormFactors( ( 4.*mp2_*GE2 + q2*GM2 ) / ( 4.*mp2_ + q2 ), GM2 );
+    return FormFactors( ( 4.*mp2_*GE2+q2*GM2 ) / ( 4.*mp2_+q2 ), GM2 );
   }
 
   FormFactors

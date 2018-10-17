@@ -8,6 +8,7 @@
 #include "CepGen/Core/ParametersList.h"
 
 #include "CepGen/Processes/ProcessesHandler.h"
+#include "CepGen/Physics/GluonGrid.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/StructureFunctions/Partonic.h"
@@ -153,7 +154,6 @@ namespace cepgen
       }
       double sqrt_s = -1.;
       fillParameter( kin, "cmEnergy", sqrt_s );
-      fillParameter( kin, "kmrGridPath", params_.kinematics.kmr_grid_path );
       if ( sqrt_s != -1. )
         params_.kinematics.setSqrtS( sqrt_s );
       PyObject* psf = getElement( kin, "structureFunctions" ); // borrowed
@@ -165,6 +165,10 @@ namespace cepgen
         params_.kinematics.incoming_beams.first.kt_flux = (KTFlux)kt_fluxes.at( 0 );
       if ( kt_fluxes.size() > 1 )
         params_.kinematics.incoming_beams.second.kt_flux = (KTFlux)kt_fluxes.at( 1 );
+      std::string kmr_grid_path;
+      fillParameter( kin, "kmrGridPath", kmr_grid_path );
+      if ( !kmr_grid_path.empty() )
+        kmr::GluonGrid::get( kmr_grid_path.c_str() );
       std::vector<int> hi_beam1, hi_beam2;
       fillParameter( kin, "heavyIonA", hi_beam1 );
       if ( hi_beam1.size() == 2 )

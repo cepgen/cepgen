@@ -72,7 +72,6 @@ namespace cepgen
         Cuts remnants;
       };
       CutsList cuts;
-      std::string kmr_grid_path;
   };
 }
 

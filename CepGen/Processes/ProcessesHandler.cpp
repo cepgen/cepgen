@@ -2,7 +2,6 @@
 #include "CepGen/Core/utils.h"
 #include "CepGen/Core/ParametersList.h"
 
-#include "CepGen/Processes/PPtoFF.h"
 #include "CepGen/Processes/ProcessesHandler.h"
 
 #include <sstream>

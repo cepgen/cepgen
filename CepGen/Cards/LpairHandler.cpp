@@ -2,11 +2,12 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/GluonGrid.h"
+
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/StructureFunctions/Partonic.h"
-
-#include "CepGen/Processes/ProcessesHandler.h"
 
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 
@@ -78,6 +79,9 @@ namespace cepgen
       if ( m_params.count( "IEND" ) )
         setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
 
+      if ( m_params.count( "KMRG" ) && !kmr_grid_path_.empty() )
+        kmr::GluonGrid::get( kmr_grid_path_.c_str() );
+
       //--- check if we are dealing with heavy ions for incoming states
       HeavyIon hi1{ hi_1_.first, (Element)hi_1_.second }, hi2{ hi_2_.first, (Element)hi_2_.second };
       if ( hi1 )
@@ -99,7 +103,7 @@ namespace cepgen
       registerParameter<std::string>( "PROC", "Process name to simulate", &proc_name_ );
       registerParameter<std::string>( "ITYP", "Integration algorithm", &integr_type_ );
       registerParameter<std::string>( "HADR", "Hadronisation algorithm", &hadr_name_ );
-      registerParameter<std::string>( "KMRG", "KMR grid interpolation path", &params_.kinematics.kmr_grid_path );
+      registerParameter<std::string>( "KMRG", "KMR grid interpolation path", &kmr_grid_path_ );
 
       //-------------------------------------------------------------------------------------------
       // General parameters
