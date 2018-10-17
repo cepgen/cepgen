@@ -9,31 +9,32 @@
 #define STRINGIFY( name ) #name
 #define REGISTER_PROCESS( name, obj ) \
   struct BUILDERNM( name ) { \
-    BUILDERNM( name )() { cepgen::ProcessesHandler::get().registerProcess( STRINGIFY( name ), new obj ); } }; \
+    BUILDERNM( name )() { cepgen::ModuleFactory<cepgen::proc::GenericProcess>::get().registerModule( STRINGIFY( name ), new obj ); } }; \
   static BUILDERNM( name ) g ## name;
 
 namespace cepgen
 {
   class ParametersList;
-  //namespace proc { class GenericProcess; }
-  class ProcessesHandler
+  template<typename T>
+  class ModuleFactory
   {
     public:
-      static ProcessesHandler& get();
-      ~ProcessesHandler() = default;
+      static ModuleFactory& get();
+      ~ModuleFactory() = default;
 
-      void registerProcess( const std::string& name, const cepgen::proc::GenericProcess* );
-      ProcessPtr build( const std::string& name, const ParametersList& ) const;
+      void registerModule( const std::string& name, const T* );
+      std::unique_ptr<T> build( const std::string& name, const ParametersList& ) const;
       void dump() const;
 
     private:
-      explicit ProcessesHandler() = default;
-      std::unordered_map<std::string, std::unique_ptr<const proc::GenericProcess> > map_;
+      explicit ModuleFactory() = default;
+      std::unordered_map<std::string, std::unique_ptr<const T> > map_;
 
     public:
-      ProcessesHandler( const ProcessesHandler& ) = delete;
-      void operator=( const ProcessesHandler& ) = delete;
+      ModuleFactory( const ModuleFactory& ) = delete;
+      void operator=( const ModuleFactory& ) = delete;
   };
+  typedef ModuleFactory<cepgen::proc::GenericProcess> ProcessesHandler;
 }
 
 #endif

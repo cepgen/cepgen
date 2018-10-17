@@ -159,9 +159,9 @@ namespace cepgen
          */
         bool isKinematicsDefined();
     };
+    /// Helper typedef for a Process unique pointer
+    typedef std::unique_ptr<GenericProcess> ProcessPtr;
   }
-  /// Helper typedef for a Process unique pointer
-  typedef std::unique_ptr<proc::GenericProcess> ProcessPtr;
 }
 
 #endif

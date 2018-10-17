@@ -8,35 +8,36 @@
 
 namespace cepgen
 {
-  ProcessesHandler&
-  ProcessesHandler::get()
+  template<typename T>
+  ModuleFactory<T>&
+  ModuleFactory<T>::get()
   {
-    static ProcessesHandler instance;
+    static ModuleFactory<T> instance;
     return instance;
   }
 
-  void
-  ProcessesHandler::registerProcess( const std::string& name, const proc::GenericProcess* proc )
+  template<typename T> void
+  ModuleFactory<T>::registerModule( const std::string& name, const T* proc )
   {
     map_[name].reset( proc );
-    CG_DEBUG( "ProcessesHandler" ) << "Process name \"" << name << "\" registered in database.";
+    CG_DEBUG( "ModuleFactory" ) << "Module name \"" << name << "\" registered in database.";
   }
 
-  void
-  ProcessesHandler::dump() const
+  template<typename T> void
+  ModuleFactory<T>::dump() const
   {
     std::ostringstream oss;
     for ( const auto& p : map_ )
       oss << " '" << p.first << "'";
-    CG_INFO( "ProcessesHandler:dump" )
+    CG_INFO( "ModuleFactory:dump" )
       << "List of process(es) handled in the database:" << oss.str();
   }
 
-  ProcessPtr
-  ProcessesHandler::build( const std::string& name, const ParametersList& params ) const
+  template<typename T> std::unique_ptr<T>
+  ModuleFactory<T>::build( const std::string& name, const ParametersList& params ) const
   {
     if ( map_.count( name ) == 0 )
-      throw CG_FATAL( "ProcessesHandler:build" )
+      throw CG_FATAL( "ModuleFactory:build" )
         << "Failed to retrieve a process with name \"" << name << "\"!";
     return map_.at( name )->clone( params );
   }
