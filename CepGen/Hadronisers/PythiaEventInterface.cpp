@@ -154,18 +154,6 @@ namespace Pythia8
     setPdf( quark1_pdgid, quark2_pdgid, x1, x2, scale, 0., 0., false );
   }
 
-  bool
-  CepGenEvent::setInit()
-  {
-    return true;
-  }
-
-  bool
-  CepGenEvent::setEvent( int )
-  {
-    return true;
-  }
-
   void
   CepGenEvent::setProcess( int id, double xsec, double q2_scale, double alpha_qed, double alpha_qcd )
   {
@@ -208,3 +196,4 @@ namespace Pythia8
   }
 }
 #endif
+

@@ -14,8 +14,8 @@ namespace Pythia8
     public:
       explicit CepGenEvent( const cepgen::Parameters* );
       void feedEvent( const cepgen::Event& ev, bool full, const cepgen::KinematicsMode& );
-      bool setInit() override;
-      bool setEvent( int ) override;
+      inline bool setInit() override { return true; }
+      inline bool setEvent( int ) override { return true; }
       void setCrossSection( int id, double xsec, double xsec_err );
       void setProcess( int id, double xsec, double q2_scale, double alpha_qed, double alpha_qcd );
 
