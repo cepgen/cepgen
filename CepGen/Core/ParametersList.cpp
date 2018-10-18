@@ -295,4 +295,34 @@ namespace cepgen
   {
     vec_str_values_[key] = value;
   }
+
+  //------------------------------------------------------------------
+  // limits-type attributes
+  //------------------------------------------------------------------
+
+  template<> Limits
+  ParametersList::get<Limits>( std::string key, Limits def ) const
+  {
+    for ( const auto& kv : lim_values_ )
+      if ( kv.first.compare( key ) == 0 )
+        return kv.second;
+    CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+    return def;
+  }
+
+  template<> Limits&
+  ParametersList::operator[]<Limits>( std::string key )
+  {
+    for ( auto& kv : lim_values_ )
+      if ( kv.first.compare( key ) == 0 )
+        return kv.second;
+    return lim_values_[key];
+  }
+
+  template<> void
+  ParametersList::set<Limits>( std::string key, const Limits& value )
+  {
+    lim_values_[key] = value;
+  }
 }
+

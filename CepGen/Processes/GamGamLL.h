@@ -211,7 +211,7 @@ namespace cepgen
          * > `mapt1`, `mapt2`
          */
         void map( double expo, const Limits& lim, double& out, double& dout, const std::string& var_name = "" );
-        void mapla( double y, double z, int u, double xm, double xp, double& x, double& d );
+        void mapla( double y, double z, int u, const Limits& lim, double& x, double& d );
         /// Compute the electric/magnetic form factors for the two considered \f$Q^{2}\f$ momenta transfers
         void formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const;
     };

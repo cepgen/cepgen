@@ -9,6 +9,7 @@
 namespace cepgen
 {
   namespace strfun { class Parameterisation; }
+  class Limits;
   class ParametersList;
   namespace card
   {
@@ -32,13 +33,13 @@ namespace cepgen
         template<typename T> bool is( PyObject* obj ) const;
         template<typename T> T get( PyObject* obj ) const;
 
-        void fillLimits( PyObject* obj, const char* key, Limits& lim );
         void fillParameter( PyObject* parent, const char* key, bool& out );
         void fillParameter( PyObject* parent, const char* key, int& out );
         void fillParameter( PyObject* parent, const char* key, unsigned long& out );
         void fillParameter( PyObject* parent, const char* key, unsigned int& out );
         void fillParameter( PyObject* parent, const char* key, double& out );
         void fillParameter( PyObject* parent, const char* key, std::string& out );
+        void fillParameter( PyObject* parent, const char* key, Limits& out );
         void fillParameter( PyObject* parent, const char* key, std::vector<int>& out );
         void fillParameter( PyObject* parent, const char* key, std::vector<double>& out );
         void fillParameter( PyObject* parent, const char* key, std::vector<std::string>& out );
@@ -63,9 +64,12 @@ namespace cepgen
     template<> double PythonHandler::get<double>( PyObject* obj ) const;
     template<> bool PythonHandler::is<std::string>( PyObject* obj ) const;
     template<> std::string PythonHandler::get<std::string>( PyObject* obj ) const;
+    template<> bool PythonHandler::is<Limits>( PyObject* obj ) const;
+    template<> Limits PythonHandler::get<Limits>( PyObject* obj ) const;
   }
 }
 
 #endif
 
 #endif
+

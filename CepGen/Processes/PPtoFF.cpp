@@ -17,7 +17,7 @@ namespace cepgen
   {
     PPtoFF::PPtoFF( const ParametersList& params ) :
       GenericKTProcess( params, "pptoff", "ɣɣ → f⁺f¯", { { PDG::photon, PDG::photon } }, { PDG::muon, PDG::muon } ),
-      pair_( params.get<int>( "pair", 0 ) ),
+      pair_  ( params.get<int>( "pair", 0 ) ),
       method_( params.get<int>( "method", 1 ) ),
       y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )
     {}

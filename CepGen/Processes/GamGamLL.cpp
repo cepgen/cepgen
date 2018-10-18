@@ -25,7 +25,7 @@ namespace cepgen
     GamGamLL::GamGamLL( const ParametersList& params ) :
       GenericProcess( params, "lpair", "pp → p(*) ( ɣɣ → l⁺l¯ ) p(*)" ),
       n_opt_( params.get<int>( "nopt", 0 ) ),
-      pair_( params.get<int>( "pair", 0 ) ),
+      pair_ ( params.get<int>( "pair", 0 ) ),
       ep1_( 0. ), ep2_( 0. ), p_cm_( 0. ),
       ec4_( 0. ), pc4_( 0. ), mc4_( 0. ), w4_( 0. ),
       p12_( 0. ), p1k2_( 0. ), p2k1_( 0. ),
@@ -120,13 +120,11 @@ namespace cepgen
 
       // sig1 = sigma and sig2 = sigma' in [1]
       const double sig = mc4_+MY_;
-      double sig1 = sig*sig,
-             sig2 = sig1;
+      double sig1 = sig*sig;
 
       CG_DEBUG_LOOP( "GamGamLL" )
         << "mc4 = " << mc4_ << "\n\t"
-        << "sig1 = " << sig1 << "\n\t"
-        << "sig2 = " << sig2;
+        << "sig1 = " << sig1 << ".";
 
       // Mass difference between the first outgoing particle
       // and the first incoming particle
@@ -223,8 +221,10 @@ namespace cepgen
 
       const double sl3 = sqrt( -sa1_ );
 
+      Limits s2_lim;
+      s2_lim.min() = sig*sig;
       // one computes splus and (s2x=s2max)
-      double splus, s2max;
+      double splus;
       if ( w1_ != 0. ) {
         const double inv_w1 = 1./w1_;
         const double sb = masses_.MX2_ + 0.5 * ( s_*( t1_-masses_.w31_ )+masses_.w12_*t13 )*inv_w1,
@@ -233,33 +233,33 @@ namespace cepgen
 
         if ( fabs( ( sb-sd )/sd ) >= 1. ) {
           splus = sb-sd;
-          s2max = se/splus;
+          s2_lim.max() = se/splus;
         }
         else {
-          s2max = sb+sd;
-          splus = se/s2max;
+          s2_lim.max() = sb+sd;
+          splus = se/s2_lim.max();
         }
       }
       else { // 3
-        s2max = ( s_*( t1_*( s_+d8-masses_.MX2_ )-w2_*masses_.MX2_ )+w2_*masses_.MX2_*( w2_+masses_.MX2_-t1_ ) )/( ss*t13 );
-        splus = sig2;
+        s2_lim.max() = ( s_*( t1_*( s_+d8-masses_.MX2_ )-w2_*masses_.MX2_ )+w2_*masses_.MX2_*( w2_+masses_.MX2_-t1_ ) )/( ss*t13 );
+        splus = s2_lim.min();
       }
       // 4
-      double s2x = s2max;
+      double s2x = s2_lim.max();
 
       CG_DEBUG_LOOP( "GamGamLL" )
         << "s2x = s2max = " << s2x;
 
       if ( n_opt_ < 0 ) { // 5
-        if ( splus > sig2 ) {
-          sig2 = splus;
+        if ( splus > s2_lim.min() ) {
+          s2_lim.min() = splus;
           CG_DEBUG_LOOP( "GamGamLL" )
-            << "sig2 truncated to splus = " << splus;
+            << "min(sig2) truncated to splus = " << splus;
         }
         if ( n_opt_ < -1 )
-          map( x(2), Limits( sig2, s2max ), s2_, ds2, "s2" );
+          map( x(2), s2_lim, s2_, ds2, "s2" );
         else
-          mapla( t1_, w2_, x(2), sig2, s2max, s2_, ds2 ); // n_opt_==-1
+          mapla( t1_, w2_, x(2), s2_lim, s2_, ds2 ); // n_opt_==-1
         s2x = s2_;
       }
       else if ( n_opt_ == 0 )
@@ -325,39 +325,33 @@ namespace cepgen
       const double sl7 = 2.*sqrt( -g4_ ),
                    sl5 = sl6*sl7;
 
-      double s2p, s2min;
+      double s2p;
       if ( fabs( ( sl5-b )/sl5 ) >= 1. ) {
         s2p = 0.5 * ( sl5-b )/t2_;
-        s2min = c/( t2_*s2p );
+        s2_lim.min() = c/( t2_*s2p );
       }
       else { // 8
-        s2min = 0.5 * ( -sl5-b )/t2_;
-        s2p = c/( t2_*s2min );
+        s2_lim.min() = 0.5 * ( -sl5-b )/t2_;
+        s2p = c/( t2_*s2_lim.min() );
       }
       // 9
       if ( n_opt_ > 1 )
-        map( x( 2 ), Limits( s2min, s2max ), s2_, ds2, "s2" );
+        map( x( 2 ), s2_lim, s2_, ds2, "s2" );
       else if ( n_opt_ == 1 )
-        mapla( t1_, w2_, x( 2 ), s2min, s2max, s2_, ds2 );
+        mapla( t1_, w2_, x( 2 ), s2_lim, s2_, ds2 );
 
       const double ap = -0.25*pow( s2_+d8, 2 )+s2_*t1_;
 
-      CG_DEBUG_LOOP( "GamGamLL" )
-        << "s2 = " << s2_ << ", s2max = " << s2max << ", splus = " << splus;
-
-      if ( w1_ != 0. )
-        dd1_ = -0.25 * ( s2_-s2max ) * ( s2_-splus ) * w1_; // 10
-      else
-        dd1_ =  0.25 * ( s2_-s2max ) * ss * t13;
-      // 11
-      dd2_ = -0.25 * t2_*( s2_-s2p )*( s2_-s2min );
+      dd1_ = 0.25 * ( s2_-s2_lim.max() ) * ( w1_ != 0. ? ( splus-s2_ ) * w1_ : ss * t13 );
+      dd2_ = 0.25 * ( s2_-s2_lim.min() ) * ( s2p-s2_ ) * t2_;
 
       CG_DEBUG_LOOP( "GamGamLL" )
-        << "t2    = " << t2_ << "\n\t"
-        << "s2    = " << s2_ << "\n\t"
-        << "s2p   = " << s2p << "\n\t"
-        << "s2min = " << s2min << "\n\t"
-        << "dd2   = " << dd2_;;
+        << "t2      = " << t2_ << "\n\t"
+        << "s2      = " << s2_ << "\n\t"
+        << "s2p     = " << s2p << "\n\t"
+        << "splus   = " << splus << "\n\t"
+        << "s2 range= " << s2_lim << "\n\t"
+        << "dd2     = " << dd2_;;
 
       const double yy4 = cos( M_PI*x( 3 ) );
       const double dd = dd1_*dd2_;
@@ -1092,17 +1086,17 @@ namespace cepgen
     }
 
     void
-    GamGamLL::mapla( double y, double z, int u, double xm, double xp, double& x, double& d )
+    GamGamLL::mapla( double y, double z, int u, const Limits& lim, double& out, double& dout )
     {
-      const double xmb = xm-y-z, xpb = xp-y-z;
+      const double xmb = lim.min()-y-z, xpb = lim.max()-y-z;
       const double c = -4.*y*z;
       const double alp = sqrt( xpb*xpb + c ), alm = sqrt( xmb*xmb + c );
       const double am = xmb+alm, ap = xpb+alp;
       const double yy = ap/am, zz = pow( yy, u );
 
-      x = y + z + ( am*zz - c / ( am*zz ) ) / 2.;
-      const double ax = sqrt( pow( x-y-z, 2 ) + c );
-      d = ax*log( yy );
+      out = y+z+( am*zz - c / ( am*zz ) ) / 2.;
+      const double ax = sqrt( pow( out-y-z, 2 )+c );
+      dout = ax*log( yy );
     }
 
     void

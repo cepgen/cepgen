@@ -1,6 +1,8 @@
 #ifndef CepGen_Core_ParametersList_h
 #define CepGen_Core_ParametersList_h
 
+#include "CepGen/Physics/Limits.h"
+
 #include <vector>
 #include <map>
 #include <unordered_map>
@@ -37,6 +39,7 @@ namespace cepgen
       std::unordered_map<std::string,int> int_values_;
       std::unordered_map<std::string,double> dbl_values_;
       std::unordered_map<std::string,std::string> str_values_;
+      std::unordered_map<std::string,Limits> lim_values_;
       std::unordered_map<std::string,std::vector<ParametersList> > vec_param_values_;
       std::unordered_map<std::string,std::vector<int> > vec_int_values_;
       std::unordered_map<std::string,std::vector<double> > vec_dbl_values_;
@@ -87,6 +90,13 @@ namespace cepgen
   template<> std::vector<std::string>& ParametersList::operator[]<std::vector<std::string> >( std::string key );
   /// Set a vector of strings parameter value
   template<> void ParametersList::set<std::vector<std::string> >( std::string key, const std::vector<std::string>& value );
+
+  /// Get a boundary limits parameter value
+  template<> Limits ParametersList::get<Limits>( std::string key, Limits def ) const;
+  /// Reference to a boundary limits parameter value
+  template<> Limits& ParametersList::operator[]<Limits>( std::string key );
+  /// Set a boundary limits parameter value
+  template<> void ParametersList::set<Limits>( std::string key, const Limits& value );
 
   /// Get a parameters list parameter value
   template<> ParametersList ParametersList::get<ParametersList>( std::string key, ParametersList def ) const;

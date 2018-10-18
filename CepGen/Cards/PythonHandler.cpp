@@ -237,24 +237,24 @@ namespace cepgen
         parseParticlesCuts( pcuts );
 
       // for LPAIR/collinear matrix elements
-      fillLimits( kin, "q2", params_.kinematics.cuts.initial.q2 );
+      fillParameter( kin, "q2", params_.kinematics.cuts.initial.q2 );
 
       // for the kT factorised matrix elements
-      fillLimits( kin, "qt", params_.kinematics.cuts.initial.qt );
-      fillLimits( kin, "phiqt", params_.kinematics.cuts.initial.phi_qt );
-      fillLimits( kin, "ptdiff", params_.kinematics.cuts.central.pt_diff );
-      fillLimits( kin, "phiptdiff", params_.kinematics.cuts.central.phi_pt_diff );
-      fillLimits( kin, "rapiditydiff", params_.kinematics.cuts.central.rapidity_diff );
+      fillParameter( kin, "qt", params_.kinematics.cuts.initial.qt );
+      fillParameter( kin, "phiqt", params_.kinematics.cuts.initial.phi_qt );
+      fillParameter( kin, "ptdiff", params_.kinematics.cuts.central.pt_diff );
+      fillParameter( kin, "phiptdiff", params_.kinematics.cuts.central.phi_pt_diff );
+      fillParameter( kin, "rapiditydiff", params_.kinematics.cuts.central.rapidity_diff );
 
       // generic phase space limits
-      fillLimits( kin, "rapidity", params_.kinematics.cuts.central.rapidity_single );
-      fillLimits( kin, "eta", params_.kinematics.cuts.central.eta_single );
-      fillLimits( kin, "pt", params_.kinematics.cuts.central.pt_single );
+      fillParameter( kin, "rapidity", params_.kinematics.cuts.central.rapidity_single );
+      fillParameter( kin, "eta", params_.kinematics.cuts.central.eta_single );
+      fillParameter( kin, "pt", params_.kinematics.cuts.central.pt_single );
 
-      fillLimits( kin, "ptsum", params_.kinematics.cuts.central.pt_sum );
-      fillLimits( kin, "invmass", params_.kinematics.cuts.central.mass_sum );
+      fillParameter( kin, "ptsum", params_.kinematics.cuts.central.pt_sum );
+      fillParameter( kin, "invmass", params_.kinematics.cuts.central.mass_sum );
 
-      fillLimits( kin, "mx", params_.kinematics.cuts.remnants.mass_single );
+      fillParameter( kin, "mx", params_.kinematics.cuts.remnants.mass_single );
     }
 
     void
@@ -266,10 +266,10 @@ namespace cepgen
       Py_ssize_t pos = 0;
       while ( PyDict_Next( cuts, &pos, &pkey, &pvalue ) ) {
         const PDG pdg = (PDG)get<int>( pkey );
-        fillLimits( pvalue, "pt", params_.kinematics.cuts.central_particles[pdg].pt_single );
-        fillLimits( pvalue, "energy", params_.kinematics.cuts.central_particles[pdg].energy_single );
-        fillLimits( pvalue, "eta", params_.kinematics.cuts.central_particles[pdg].eta_single );
-        fillLimits( pvalue, "rapidity", params_.kinematics.cuts.central_particles[pdg].rapidity_single );
+        fillParameter( pvalue, "pt", params_.kinematics.cuts.central_particles[pdg].pt_single );
+        fillParameter( pvalue, "energy", params_.kinematics.cuts.central_particles[pdg].energy_single );
+        fillParameter( pvalue, "eta", params_.kinematics.cuts.central_particles[pdg].eta_single );
+        fillParameter( pvalue, "rapidity", params_.kinematics.cuts.central_particles[pdg].rapidity_single );
       }
     }
 

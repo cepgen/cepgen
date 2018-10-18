@@ -103,25 +103,6 @@ namespace cepgen
     }
 
     void
-    PythonHandler::fillLimits( PyObject* obj, const char* key, Limits& lim )
-    {
-      PyObject* pobj = element( obj, key ); // borrowed
-      if ( !pobj )
-        return;
-      if ( !PyTuple_Check( pobj ) )
-        throw CG_FATAL( "PythonHandler:fillLimits" ) << "Invalid value retrieved for " << key << ".";
-      if ( PyTuple_Size( pobj ) < 1 )
-        throw CG_FATAL( "PythonHandler:fillLimits" ) << "Invalid number of values unpacked for " << key << "!";
-      double min = get<double>( PyTuple_GetItem( pobj, 0 ) );
-      lim.min() = min;
-      if ( PyTuple_Size( pobj ) > 1 ) {
-        double max = get<double>( PyTuple_GetItem( pobj, 1 ) );
-        if ( max != -1 )
-          lim.max() = max;
-      }
-    }
-
-    void
     PythonHandler::fillParameter( PyObject* parent, const char* key, bool& out )
     {
       PyObject* pobj = element( parent, key ); // borrowed
@@ -188,6 +169,17 @@ namespace cepgen
     }
 
     void
+    PythonHandler::fillParameter( PyObject* obj, const char* key, Limits& out )
+    {
+      PyObject* pobj = element( obj, key ); // borrowed
+      if ( !pobj )
+        return;
+      if ( !is<Limits>( pobj ) )
+        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
+      out = get<Limits>( pobj );
+    }
+
+    void
     PythonHandler::fillParameter( PyObject* parent, const char* key, std::vector<double>& out )
     {
       out.clear();
@@ -249,3 +241,4 @@ namespace cepgen
 }
 
 #endif
+

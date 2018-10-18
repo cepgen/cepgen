@@ -92,6 +92,28 @@ namespace cepgen
     }
 
     template<> bool
+    PythonHandler::is<Limits>( PyObject* obj ) const
+    {
+      if ( !PyTuple_Check( obj ) || PyTuple_Size( obj ) < 1 || PyTuple_Size( obj ) > 2 )
+        return false;
+      return true;
+    }
+
+    template<> Limits
+    PythonHandler::get<Limits>( PyObject* obj ) const
+    {
+      Limits out;
+      double min = get<double>( PyTuple_GetItem( obj, 0 ) );
+      out.min() = min;
+      if ( PyTuple_Size( obj ) > 1 ) {
+        double max = get<double>( PyTuple_GetItem( obj, 1 ) );
+        if ( max != -1 )
+          out.max() = max;
+      }
+      return out;
+    }
+
+    template<> bool
     PythonHandler::is<ParametersList>( PyObject* obj ) const
     {
       return PyDict_Check( obj );
@@ -113,6 +135,8 @@ namespace cepgen
           out.set<std::string>( skey, get<std::string>( pvalue ) );
         else if ( is<ParametersList>( pvalue ) )
           out.set<ParametersList>( skey, get<ParametersList>( pvalue ) );
+        else if ( is<Limits>( pvalue ) )
+          out.set<Limits>( skey, get<Limits>( pvalue ) );
         else if ( PyTuple_Check( pvalue ) || PyList_Check( pvalue ) ) { // vector
           PyObject* pfirst = PyTuple_GetItem( pvalue, 0 );
           PyObject* pit = nullptr;
@@ -168,3 +192,4 @@ namespace cepgen
 }
 
 #endif
+
