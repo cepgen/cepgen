@@ -222,12 +222,12 @@ namespace cepgen
           switch ( (Particle::Role)role ) {
             default: break;
             case Particle::OutgoingBeam1: {
-              ev.getByRole( Particle::OutgoingBeam1 )[0].setStatus( Particle::Status::Fragmented );
+              ev[Particle::OutgoingBeam1][0].setStatus( Particle::Status::Fragmented );
               if ( abs( p.status() ) != 61 )
                 break;
             } // no break!
             case Particle::OutgoingBeam2: {
-              ev.getByRole( Particle::OutgoingBeam2 )[0].setStatus( Particle::Status::Fragmented );
+              ev[Particle::OutgoingBeam2][0].setStatus( Particle::Status::Fragmented );
               if ( abs( p.status() ) != 61 )
                 break;
             } // no break!
@@ -269,6 +269,8 @@ namespace cepgen
       return (unsigned short)Particle::UnknownRole;
     }
 #endif
-    REGISTER_HADRONISER( pythia8, Pythia8Hadroniser )
   }
 }
+// register hadroniser and define alias
+REGISTER_HADRONISER( pythia8, Pythia8Hadroniser )
+

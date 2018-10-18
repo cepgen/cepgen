@@ -60,14 +60,14 @@ namespace cepgen
   }
 
   Particles&
-  Event::getByRole( Particle::Role role )
+  Event::operator[]( Particle::Role role )
   {
     //--- retrieve all particles with a given role
     return particles_[role];
   }
 
   const Particles&
-  Event::getByRole( Particle::Role role ) const
+  Event::operator[]( Particle::Role role ) const
   {
     if ( particles_.count( role ) == 0 )
       throw CG_FATAL( "Event" ) << "Failed to retrieve a particle with " << role << " role.";
@@ -76,7 +76,7 @@ namespace cepgen
   }
 
   ParticlesIds
-  Event::getIdsByRole( Particle::Role role ) const
+  Event::ids( Particle::Role role ) const
   {
     ParticlesIds out;
     //--- retrieve all particles ids with a given role
@@ -93,7 +93,7 @@ namespace cepgen
   Event::getOneByRole( Particle::Role role )
   {
     //--- retrieve the first particle a the given role
-    Particles& parts_by_role = getByRole( role );
+    Particles& parts_by_role = operator[]( role );
     if ( parts_by_role.size() == 0 )
       throw CG_FATAL( "Event" ) << "No particle retrieved with " << role << " role.";
     if ( parts_by_role.size() > 1 )
@@ -180,7 +180,7 @@ namespace cepgen
       throw CG_FATAL( "Event" ) << "Trying to add a particle with role=" << (int)part.role() << ".";
 
     //--- retrieve the list of particles with the same role
-    Particles& part_with_same_role = getByRole( part.role() );
+    Particles& part_with_same_role = operator[]( part.role() );
 
     //--- specify the id
     if ( part_with_same_role.empty() && part.id() < 0 ) part.setId( numParticles() ); // set the id if previously invalid/inexistent

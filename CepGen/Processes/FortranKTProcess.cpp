@@ -154,7 +154,7 @@ namespace cepgen
       // central system
       //===========================================================================================
 
-      Particles& oc = event_->getByRole( Particle::CentralSystem );
+      Particles& oc = event_->operator[]( Particle::CentralSystem );
       for ( int i = 0; i < evtkin_.nout; ++i ) {
         Particle& p = oc[i];
         p.setPdgId( evtkin_.pdg[i] );

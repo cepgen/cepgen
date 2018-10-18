@@ -22,7 +22,7 @@ namespace cepgen
     //------------------------------------------------------------------
 
     std::string
-    PythonHandler::getPythonPath( const char* file )
+    PythonHandler::pythonPath( const char* file )
     {
       std::string s_filename = file;
       s_filename = s_filename.substr( 0, s_filename.find_last_of( "." ) ); // remove the extension
@@ -84,7 +84,7 @@ namespace cepgen
     }
 
     PyObject*
-    PythonHandler::getElement( PyObject* obj, const char* key )
+    PythonHandler::element( PyObject* obj, const char* key )
     {
       PyObject* pout = nullptr, *nink = encode( key );
       if ( !nink )
@@ -92,12 +92,12 @@ namespace cepgen
       pout = PyDict_GetItem( obj, nink ); // borrowed
       Py_CLEAR( nink );
       if ( pout )
-        CG_DEBUG( "PythonHandler:getElement" )
+        CG_DEBUG( "PythonHandler:element" )
           << "retrieved " << pout->ob_type->tp_name << " element \"" << key << "\" "
           << "from " << obj->ob_type->tp_name << " object\n\t"
           << "new reference count: " << pout->ob_refcnt;
       else
-        CG_DEBUG( "PythonHandler:getElement" )
+        CG_DEBUG( "PythonHandler:element" )
           << "did not retrieve a valid element \"" << key << "\"";
       return pout;
     }
@@ -105,7 +105,7 @@ namespace cepgen
     void
     PythonHandler::fillLimits( PyObject* obj, const char* key, Limits& lim )
     {
-      PyObject* pobj = getElement( obj, key ); // borrowed
+      PyObject* pobj = element( obj, key ); // borrowed
       if ( !pobj )
         return;
       if ( !PyTuple_Check( pobj ) )
@@ -124,7 +124,7 @@ namespace cepgen
     void
     PythonHandler::fillParameter( PyObject* parent, const char* key, bool& out )
     {
-      PyObject* pobj = getElement( parent, key ); // borrowed
+      PyObject* pobj = element( parent, key ); // borrowed
       if ( !pobj )
         return;
       if ( !PyBool_Check( pobj ) )
@@ -135,7 +135,7 @@ namespace cepgen
     void
     PythonHandler::fillParameter( PyObject* parent, const char* key, int& out )
     {
-      PyObject* pobj = getElement( parent, key ); // borrowed
+      PyObject* pobj = element( parent, key ); // borrowed
       if ( !pobj )
         return;
       if ( !is<int>( pobj ) )
@@ -146,7 +146,7 @@ namespace cepgen
     void
     PythonHandler::fillParameter( PyObject* parent, const char* key, unsigned long& out )
     {
-      PyObject* pobj = getElement( parent, key ); // borrowed
+      PyObject* pobj = element( parent, key ); // borrowed
       if ( !pobj )
         return;
       if ( !is<int>( pobj ) )
@@ -157,7 +157,7 @@ namespace cepgen
     void
     PythonHandler::fillParameter( PyObject* parent, const char* key, unsigned int& out )
     {
-      PyObject* pobj = getElement( parent, key ); // borrowed
+      PyObject* pobj = element( parent, key ); // borrowed
       if ( !pobj )
         return;
       if ( !is<int>( pobj ) )
@@ -168,7 +168,7 @@ namespace cepgen
     void
     PythonHandler::fillParameter( PyObject* parent, const char* key, double& out )
     {
-      PyObject* pobj = getElement( parent, key ); // borrowed
+      PyObject* pobj = element( parent, key ); // borrowed
       if ( !pobj )
         return;
       if ( !is<double>( pobj ) )
@@ -179,7 +179,7 @@ namespace cepgen
     void
     PythonHandler::fillParameter( PyObject* parent, const char* key, std::string& out )
     {
-      PyObject* pobj = getElement( parent, key ); // borrowed
+      PyObject* pobj = element( parent, key ); // borrowed
       if ( !pobj )
         return;
       if ( !is<std::string>( pobj ) )
@@ -191,7 +191,7 @@ namespace cepgen
     PythonHandler::fillParameter( PyObject* parent, const char* key, std::vector<double>& out )
     {
       out.clear();
-      PyObject* pobj = getElement( parent, key ); // borrowed
+      PyObject* pobj = element( parent, key ); // borrowed
       if ( !pobj )
         return;
       if ( !PyTuple_Check( pobj ) )
@@ -207,7 +207,7 @@ namespace cepgen
     PythonHandler::fillParameter( PyObject* parent, const char* key, std::vector<std::string>& out )
     {
       out.clear();
-      PyObject* pobj = getElement( parent, key ); // borrowed
+      PyObject* pobj = element( parent, key ); // borrowed
       if ( !pobj )
         return;
       if ( !PyTuple_Check( pobj ) )
@@ -222,7 +222,7 @@ namespace cepgen
     PythonHandler::fillParameter( PyObject* parent, const char* key, std::vector<int>& out )
     {
       out.clear();
-      PyObject* pobj = getElement( parent, key ); // borrowed
+      PyObject* pobj = element( parent, key ); // borrowed
       if ( !pobj )
         return;
       if ( !PyTuple_Check( pobj ) )
@@ -238,7 +238,7 @@ namespace cepgen
     void
     PythonHandler::fillParameter( PyObject* parent, const char* key, ParametersList& out )
     {
-      PyObject* pobj = getElement( parent, key ); // borrowed
+      PyObject* pobj = element( parent, key ); // borrowed
       if ( !pobj )
         return;
       if ( !PyDict_Check( pobj ) )

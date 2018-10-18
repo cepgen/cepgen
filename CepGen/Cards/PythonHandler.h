@@ -19,15 +19,15 @@ namespace cepgen
         /// Read a standard configuration card
         explicit PythonHandler( const char* file );
         ~PythonHandler();
-        static PyObject* getElement( PyObject* obj, const char* key );
-        static PyObject* encode( const char* str );
 
       private:
         static constexpr const char* MODULE_NAME = "mod_name";
         static constexpr const char* PROCESS_NAME = "process";
 
         static void throwPythonError( const std::string& message );
-        static std::string getPythonPath( const char* file );
+        static std::string pythonPath( const char* file );
+        static PyObject* element( PyObject* obj, const char* key );
+        static PyObject* encode( const char* str );
 
         template<typename T> bool is( PyObject* obj ) const;
         template<typename T> T get( PyObject* obj ) const;

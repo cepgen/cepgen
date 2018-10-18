@@ -200,14 +200,14 @@ namespace cepgen
 
       // check the incoming state
       bool is_incoming_state_set =
-        ( !event_->getByRole( Particle::IncomingBeam1 ).empty()
-       && !event_->getByRole( Particle::IncomingBeam2 ).empty() );
+        ( !event_->operator[]( Particle::IncomingBeam1 ).empty()
+       && !event_->operator[]( Particle::IncomingBeam2 ).empty() );
 
       // check the outgoing state
       bool is_outgoing_state_set =
-        ( !event_->getByRole( Particle::OutgoingBeam1 ).empty()
-       && !event_->getByRole( Particle::OutgoingBeam2 ).empty()
-       && !event_->getByRole( Particle::CentralSystem ).empty() );
+        ( !event_->operator[]( Particle::OutgoingBeam1 ).empty()
+       && !event_->operator[]( Particle::OutgoingBeam2 ).empty()
+       && !event_->operator[]( Particle::CentralSystem ).empty() );
 
       // combine both states
       return is_incoming_state_set && is_outgoing_state_set;

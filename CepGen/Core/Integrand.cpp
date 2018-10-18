@@ -110,7 +110,7 @@ namespace cepgen
 
           // build the kinematics of the central system
           Particle::Momentum central_system;
-          for ( const auto& part : ev->getByRole( Particle::CentralSystem ) )
+          for ( const auto& part : ev->operator[]( Particle::CentralSystem ) )
             central_system += part.momentum();
 
           // tame the cross-section by the reweighting function
@@ -152,7 +152,7 @@ namespace cepgen
       //=============================================================================================
 
       if ( p->kinematics.cuts.central_particles.size() > 0 ) {
-        for ( const auto& part : ev->getByRole( Particle::CentralSystem ) ) {
+        for ( const auto& part : ev->operator[]( Particle::CentralSystem ) ) {
           // retrieve all cuts associated to this final state particle
           if ( p->kinematics.cuts.central_particles.count( part.pdgId() ) == 0 )
             continue;

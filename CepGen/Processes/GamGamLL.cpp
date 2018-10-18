@@ -87,7 +87,7 @@ namespace cepgen
     {
       GenericProcess::setKinematics( kin );
 
-      masses_.Ml2_ = event_->getByRole( Particle::CentralSystem )[0].mass2();
+      masses_.Ml2_ = event_->operator[]( Particle::CentralSystem )[0].mass2();
 
       w_limits_ = cuts_.cuts.central.mass_single;
       if ( !w_limits_.hasMax() )
@@ -1021,7 +1021,7 @@ namespace cepgen
       Particle& ph2 = event_->getOneByRole( Particle::Parton2 );
       ph2.setMomentum( plab_ph2 );
 
-      Particles& central_system = event_->getByRole( Particle::CentralSystem );
+      Particles& central_system = event_->operator[]( Particle::CentralSystem );
 
       //----- first outgoing lepton
       Particle& ol1 = central_system[0];
@@ -1141,8 +1141,9 @@ namespace cepgen
         } break;
       }
     }
-    // register process and define aliases
-    REGISTER_PROCESS( lpair, GamGamLL )
-    REGISTER_PROCESS( gamgamll, GamGamLL )
   }
 }
+// register process and define aliases
+REGISTER_PROCESS( lpair, GamGamLL )
+REGISTER_PROCESS( gamgamll, GamGamLL )
+

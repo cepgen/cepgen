@@ -22,7 +22,7 @@ void produce_plot( const char* name, TH1* hist )
 unique_ptr<TH1D> h_mass, h_ptpair, h_ptsingle, h_etasingle;
 void process_event( const cepgen::Event& ev, unsigned long event_id )
 {
-  const auto central_system = ev.getByRole( cepgen::Particle::CentralSystem );
+  const auto central_system = ev[cepgen::Particle::CentralSystem];
   const auto pl1 = central_system[0].momentum(), pl2 = central_system[1].momentum();
   h_mass->Fill( ( pl1+pl2 ).mass() );
   h_ptpair->Fill( ( pl1+pl2 ).pt() );

@@ -216,8 +216,8 @@ namespace cepgen
         << "First W:  " << p_w1_ << ", mass = " << p_w1_.mass() << "\n\t"
         << "Second W: " << p_w2_ << ", mass = " << p_w2_.mass() << ".";
 
-      //assert( fabs( p_w1_.mass()-event_->getByRole( Particle::CentralSystem )[0].mass() ) < 1.e-6 );
-      //assert( fabs( p_w2_.mass()-event_->getByRole( Particle::CentralSystem )[1].mass() ) < 1.e-6 );
+      //assert( fabs( p_w1_.mass()-event_->operator[]( Particle::CentralSystem )[0].mass() ) < 1.e-6 );
+      //assert( fabs( p_w2_.mass()-event_->operator[]( Particle::CentralSystem )[1].mass() ) < 1.e-6 );
 
       //=================================================================
       //     Mendelstam variables
@@ -306,7 +306,7 @@ namespace cepgen
       //=================================================================
       //     first outgoing lepton
       //=================================================================
-      Particle& ow1 = event_->getByRole( Particle::CentralSystem )[0];
+      Particle& ow1 = event_->operator[]( Particle::CentralSystem )[0];
       ow1.setPdgId( ow1.pdgId(), sign );
       ow1.setStatus( Particle::Status::Undecayed );
       ow1.setMomentum( p_w1_ );
@@ -314,7 +314,7 @@ namespace cepgen
       //=================================================================
       //     second outgoing lepton
       //=================================================================
-      Particle& ow2 = event_->getByRole( Particle::CentralSystem )[1];
+      Particle& ow2 = event_->operator[]( Particle::CentralSystem )[1];
       ow2.setPdgId( ow2.pdgId(), -sign );
       ow2.setStatus( Particle::Status::Undecayed );
       ow2.setMomentum( p_w2_ );
@@ -386,8 +386,8 @@ namespace cepgen
                           +( 1.-lam1*lam2 )*( 1.-lam3*lam4 )*cos_theta2 );
       return 0.;
     }
-    // register process and define aliases
-    REGISTER_PROCESS( pptoww, PPtoWW )
   }
 }
+// register process and define aliases
+REGISTER_PROCESS( pptoww, PPtoWW )
 

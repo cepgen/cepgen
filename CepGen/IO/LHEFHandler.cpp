@@ -194,7 +194,7 @@ namespace cepgen
       setProcess( proc_id, 1., scale, constants::alphaEM, constants::alphaQCD );
 
       const Particle& ip1 = ev.getOneByRole( Particle::IncomingBeam1 ), &ip2 = ev.getOneByRole( Particle::IncomingBeam2 );
-      const Particles& op1 = ev.getByRole( Particle::OutgoingBeam1 ), &op2 = ev.getByRole( Particle::OutgoingBeam2 );
+      const Particles& op1 = ev[Particle::OutgoingBeam1], &op2 = ev[Particle::OutgoingBeam2];
       const double q2_1 = -( ip1.momentum()-op1[0].momentum() ).mass2(), q2_2 = -( ip2.momentum()-op2[0].momentum() ).mass2();
       const double x1 = q2_1/( q2_1+op1[0].mass2()-ip1.mass2() ), x2 = q2_2/( q2_2+op2[0].mass2()-ip2.mass2() );
       setIdX( ip1.integerPdgId(), ip2.integerPdgId(), x1, x2 );

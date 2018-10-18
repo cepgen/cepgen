@@ -121,7 +121,7 @@ namespace Pythia8
     // central system
     //=============================================================================================
 
-    for ( const auto& p : ev.getByRole( cepgen::Particle::CentralSystem ) ) {
+    for ( const auto& p : ev[cepgen::Particle::CentralSystem] ) {
       const auto mothers = p.mothers();
       unsigned short moth1_id = 1, moth2_id = 2;
       if ( !full ) {

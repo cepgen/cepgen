@@ -31,7 +31,7 @@ namespace cepgen
     PythonHandler::PythonHandler( const char* file )
     {
       setenv( "PYTHONPATH", ".:..:Cards", 1 );
-      std::string filename = getPythonPath( file );
+      std::string filename = pythonPath( file );
       const size_t fn_len = filename.length()+1;
 
       //Py_DebugFlag = 1;
@@ -72,7 +72,7 @@ namespace cepgen
       fillParameter( process, "processParameters", proc_params );
 
       //--- type of process to consider
-      PyObject* pproc_name = getElement( process, MODULE_NAME ); // borrowed
+      PyObject* pproc_name = element( process, MODULE_NAME ); // borrowed
       if ( !pproc_name )
         throwPythonError( Form( "Failed to extract the process name from the configuration card %s", file ) );
       const std::string proc_name = get<std::string>( pproc_name );
@@ -84,16 +84,16 @@ namespace cepgen
       params_.setProcess( std::move( proc ) );
 
       //--- process kinematics
-      PyObject* pin_kinematics = getElement( process, "inKinematics" ); // borrowed
+      PyObject* pin_kinematics = element( process, "inKinematics" ); // borrowed
       if ( pin_kinematics )
         parseIncomingKinematics( pin_kinematics );
 
-      PyObject* pout_kinematics = getElement( process, "outKinematics" ); // borrowed
+      PyObject* pout_kinematics = element( process, "outKinematics" ); // borrowed
       if ( pout_kinematics )
         parseOutgoingKinematics( pout_kinematics );
 
       //--- taming functions
-      PyObject* ptam = getElement( process, "tamingFunctions" ); // borrowed
+      PyObject* ptam = element( process, "tamingFunctions" ); // borrowed
       if ( ptam )
         parseTamingFunctions( ptam );
 
@@ -156,7 +156,7 @@ namespace cepgen
       fillParameter( kin, "cmEnergy", sqrt_s );
       if ( sqrt_s != -1. )
         params_.kinematics.setSqrtS( sqrt_s );
-      PyObject* psf = getElement( kin, "structureFunctions" ); // borrowed
+      PyObject* psf = element( kin, "structureFunctions" ); // borrowed
       if ( psf )
         parseStructureFunctions( psf, params_.kinematics.structure_functions );
       std::vector<int> kt_fluxes;
@@ -209,13 +209,13 @@ namespace cepgen
               sf->params.w2_hi = *std::max_element( w2_lims.begin(), w2_lims.end() );
             }
           }
-          PyObject* pcsf = getElement( psf, "continuumSF" ); // borrowed
+          PyObject* pcsf = element( psf, "continuumSF" ); // borrowed
           if ( pcsf )
             parseStructureFunctions( pcsf, sf->params.continuum_model );
-          PyObject* ppsf = getElement( psf, "perturbativeSF" ); // borrowed
+          PyObject* ppsf = element( psf, "perturbativeSF" ); // borrowed
           if ( ppsf )
             parseStructureFunctions( ppsf, sf->params.perturbative_model );
-          PyObject* prsf = getElement( psf, "resonancesSF" ); // borrowed
+          PyObject* prsf = element( psf, "resonancesSF" ); // borrowed
           if ( prsf )
             parseStructureFunctions( prsf, sf->params.resonances_model );
           fillParameter( psf, "higherTwist", (bool&)sf->params.higher_twist );
@@ -227,12 +227,12 @@ namespace cepgen
     void
     PythonHandler::parseOutgoingKinematics( PyObject* kin )
     {
-      PyObject* pparts = getElement( kin, "minFinalState" ); // borrowed
+      PyObject* pparts = element( kin, "minFinalState" ); // borrowed
       if ( pparts && PyTuple_Check( pparts ) )
         for ( unsigned short i = 0; i < PyTuple_Size( pparts ); ++i )
           params_.kinematics.minimum_final_state.emplace_back( (PDG)get<int>( PyTuple_GetItem( pparts, i ) ) );
 
-      PyObject* pcuts = getElement( kin, "cuts" ); // borrowed
+      PyObject* pcuts = element( kin, "cuts" ); // borrowed
       if ( pcuts )
         parseParticlesCuts( pcuts );
 
@@ -288,7 +288,7 @@ namespace cepgen
     {
       if ( !PyDict_Check( integr ) )
         throwPythonError( "Integrator object should be a dictionary!" );
-      PyObject* palgo = getElement( integr, MODULE_NAME ); // borrowed
+      PyObject* palgo = element( integr, MODULE_NAME ); // borrowed
       if ( !palgo )
         throwPythonError( "Failed to retrieve the integration algorithm name!" );
       std::string algo = get<std::string>( palgo );
@@ -360,7 +360,7 @@ namespace cepgen
           continue;
         if ( !PyDict_Check( pit ) )
           throwPythonError( Form( "Item %d has invalid type %s", i, pit->ob_type->tp_name ) );
-        PyObject* pvar = getElement( pit, "variable" ), *pexpr = getElement( pit, "expression" ); // borrowed
+        PyObject* pvar = element( pit, "variable" ), *pexpr = element( pit, "expression" ); // borrowed
         params_.taming_functions->add( get<std::string>( pvar ).c_str(), get<std::string>( pexpr ).c_str() );
       }
     }
@@ -371,7 +371,7 @@ namespace cepgen
       if ( !PyDict_Check( hadr ) )
         throwPythonError( "Hadroniser object should be a dictionary!" );
 
-      PyObject* pname = getElement( hadr, MODULE_NAME ); // borrowed
+      PyObject* pname = element( hadr, MODULE_NAME ); // borrowed
       if ( !pname )
         throwPythonError( "Hadroniser name is required!" );
       std::string hadr_name = get<std::string>( pname );

@@ -51,11 +51,11 @@ namespace cepgen
        * \param[in] role The role the particles have to play in the process
        * \return A vector of references to the requested Particle objects
        */
-      Particles& getByRole( Particle::Role role );
+      Particles& operator[]( Particle::Role role );
       /// Get a list of constant Particle objects corresponding to a certain role in the process kinematics
-      const Particles& getByRole( Particle::Role role ) const;
+      const Particles& operator[]( Particle::Role role ) const;
       /// Get a list of particle identifiers in Event corresponding to a certain role in the process kinematics
-      ParticlesIds getIdsByRole( Particle::Role role ) const;
+      ParticlesIds ids( Particle::Role role ) const;
       /** \brief Get the first Particle object in the particles list whose role corresponds to the given argument
        * \param[in] role The role the particle has to play in the event
        * \return A Particle object corresponding to the first particle with the role

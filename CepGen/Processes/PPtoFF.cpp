@@ -258,7 +258,7 @@ namespace cepgen
       //=================================================================
       //     first outgoing fermion
       //=================================================================
-      Particle& of1 = event_->getByRole( Particle::CentralSystem )[0];
+      Particle& of1 = event_->operator[]( Particle::CentralSystem )[0];
       of1.setPdgId( of1.pdgId(), sign );
       of1.setStatus( Particle::Status::FinalState );
       of1.setMomentum( p_f1_ );
@@ -266,7 +266,7 @@ namespace cepgen
       //=================================================================
       //     second outgoing fermion
       //=================================================================
-      Particle& of2 = event_->getByRole( Particle::CentralSystem )[1];
+      Particle& of2 = event_->operator[]( Particle::CentralSystem )[1];
       of2.setPdgId( of2.pdgId(), -sign );
       of2.setStatus( Particle::Status::FinalState );
       of2.setMomentum( p_f2_ );
@@ -370,9 +370,10 @@ namespace cepgen
 
       return 0.5*( imat1*amat2_1 + imat2*amat2_2 );
     }
-    // register process and define aliases
-    REGISTER_PROCESS( pptoll, PPtoFF )
-    REGISTER_PROCESS( pptoff, PPtoFF )
-    REGISTER_PROCESS( pptoqq, PPtoFF )
   }
 }
+// register process and define aliases
+REGISTER_PROCESS( pptoll, PPtoFF )
+REGISTER_PROCESS( pptoff, PPtoFF )
+REGISTER_PROCESS( pptoqq, PPtoFF )
+
