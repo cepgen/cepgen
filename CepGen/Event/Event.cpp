@@ -92,7 +92,7 @@ namespace cepgen
   Particle&
   Event::getOneByRole( Particle::Role role )
   {
-    //--- retrieve the first particle a the given role
+    //--- retrieve the first particle of a given role
     Particles& parts_by_role = operator[]( role );
     if ( parts_by_role.size() == 0 )
       throw CG_FATAL( "Event" ) << "No particle retrieved with " << role << " role.";
@@ -105,10 +105,8 @@ namespace cepgen
   const Particle&
   Event::getOneByRole( Particle::Role role ) const
   {
-    if ( particles_.count( role ) == 0 )
-      throw CG_FATAL( "Event" ) << "Failed to retrieve a particle with " << role << " role.";
-    //--- retrieve the first particle a the given role
-    const Particles& parts_by_role = particles_.at( role );
+    //--- retrieve the first particle of a given role
+    const Particles& parts_by_role = operator[]( role );
     if ( parts_by_role.size() == 0 )
       throw CG_FATAL( "Event" ) << "No particle retrieved with " << role << " role.";
     if ( parts_by_role.size() > 1 )
@@ -256,7 +254,7 @@ namespace cepgen
             ptot -= at( moth ).momentum();
       }
       const double mass_diff = ( ptot-part.momentum() ).mass();
-      if ( fabs( mass_diff ) > minimal_precision_ ) {
+      if ( fabs( mass_diff ) > MIN_PRECISION ) {
         dump();
         throw CG_FATAL( "Event" ) << "Error in momentum balance for particle " << part.id() << ": mdiff = " << mass_diff << ".";
       }
@@ -337,3 +335,4 @@ namespace cepgen
     cs( np.cs ), op1( np.op1 ), op2( np.op2 )
   {}
 }
+

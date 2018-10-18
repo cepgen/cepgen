@@ -46,12 +46,12 @@ namespace cepgen
 #ifdef LIBHEPMC
 #  ifdef HEPMC_VERSION3
       xs_->set_cross_section( xsect, xsect_err );
-      event_->add_attribute( "AlphaQCD", HepMC::make_shared<HepMC::DoubleAttribute>( constants::alphaQCD ) );
-      event_->add_attribute( "AlphaEM", HepMC::make_shared<HepMC::DoubleAttribute>( constants::alphaEM ) );
+      event_->add_attribute( "AlphaQCD", HepMC::make_shared<HepMC::DoubleAttribute>( constants::ALPHA_QCD ) );
+      event_->add_attribute( "AlphaEM", HepMC::make_shared<HepMC::DoubleAttribute>( constants::ALPHA_EM ) );
 #  else
       xs_.set_cross_section( xsect, xsect_err );
-      event_->set_alphaQCD( constants::alphaQCD );
-      event_->set_alphaQED( constants::alphaEM );
+      event_->set_alphaQCD( constants::ALPHA_QCD );
+      event_->set_alphaQED( constants::ALPHA_EM );
 #  endif
 #endif
     }

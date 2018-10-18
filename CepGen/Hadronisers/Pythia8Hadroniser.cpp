@@ -23,7 +23,7 @@ namespace cepgen
     Pythia8Hadroniser::Pythia8Hadroniser( const ParametersList& plist ) :
       GenericHadroniser( plist, "pythia8" ),
 #ifdef PYTHIA8
-      pythia_( new Pythia8::Pythia ),
+      pythia_( new Pythia8::Pythia ), cg_evt_( new Pythia8::CepGenEvent ),
 #endif
       full_evt_( false ), offset_( 0 ), first_evt_( true )
     {}
@@ -32,7 +32,7 @@ namespace cepgen
     Pythia8Hadroniser::setParameters( const Parameters& params )
     {
       params_ = &params;
-      cg_evt_.reset( new Pythia8::CepGenEvent( params_ ) );
+      cg_evt_->initialise( params );
 #ifdef PYTHIA8
       pythia_->setLHAupPtr( (Pythia8::LHAup*)cg_evt_.get() );
       pythia_->settings.parm( "Beams:idA", (short)params_->kinematics.incoming_beams.first.pdg );
@@ -128,7 +128,7 @@ namespace cepgen
       // convert our event into a custom LHA format
       //===========================================================================================
 
-      cg_evt_->feedEvent( ev, full, params_->kinematics.mode );
+      cg_evt_->feedEvent( ev, full );
       //if ( full ) cg_evt_->listEvent();
 
       //===========================================================================================
@@ -185,7 +185,7 @@ namespace cepgen
       for ( unsigned short i = 1+offset_; i < pythia_->event.size(); ++i ) {
         const Pythia8::Particle& p = pythia_->event[i];
         const unsigned short cg_id = cg_evt_->cepgenId( i-offset_ );
-        if ( cg_id != Pythia8::CepGenEvent::invalid_id ) {
+        if ( cg_id != Pythia8::CepGenEvent::INVALID_ID ) {
           //----- particle already in the event
           Particle& cg_part = ev[cg_id];
           //--- fragmentation result
@@ -238,7 +238,7 @@ namespace cepgen
             if ( moth_id <= offset_ )
               continue;
             const unsigned short moth_cg_id = cg_evt_->cepgenId( moth_id-offset_ );
-            if ( moth_cg_id != Pythia8::CepGenEvent::invalid_id )
+            if ( moth_cg_id != Pythia8::CepGenEvent::INVALID_ID )
               cg_part.addMother( ev[moth_cg_id] );
             else
               cg_part.addMother( addParticle( ev, pythia_->event[moth_id], p.p(), role ) );
@@ -262,7 +262,7 @@ namespace cepgen
         if ( par_id == 2 && offset_ > 0 )
           return (unsigned short)Particle::OutgoingBeam2;
         const unsigned short par_cg_id = cg_evt_->cepgenId( par_id-offset_ );
-        if ( par_cg_id != Pythia8::CepGenEvent::invalid_id )
+        if ( par_cg_id != Pythia8::CepGenEvent::INVALID_ID )
           return (unsigned short)ev.at( par_cg_id ).role();
         return findRole( ev, pythia_->event[par_id] );
       }

@@ -12,6 +12,7 @@
 # ifndef HEPMC_VERSION3
 #  ifdef PYTHIA8
 #   include "Pythia8/Pythia.h"
+namespace Pythia8 { class CepGenEvent; }
 #   define PYTHIA_LHEF 1
 #  else
 #   pragma message( "HepMC v3 or Pythia8 are required for the LHEF export!" )
@@ -51,17 +52,7 @@ namespace cepgen
         LHEF::HEPRUP run_;
 #elif defined ( PYTHIA_LHEF )
         std::unique_ptr<Pythia8::Pythia> pythia_;
-        struct LHAevent : Pythia8::LHAup
-        {
-          explicit LHAevent();
-          void initialise( const Parameters& );
-          void setCrossSection( unsigned short, double, double );
-          void feedEvent( unsigned short proc_id, const Event& ev, bool full_event = false );
-          bool setInit() override { return true; }
-          bool setEvent( int ) override { return true; }
-          void addComments( const std::string& );
-        };
-        std::unique_ptr<LHAevent> lhaevt_;
+        std::unique_ptr<Pythia8::CepGenEvent> lhaevt_;
 #endif
     };
   }

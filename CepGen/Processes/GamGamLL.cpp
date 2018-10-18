@@ -711,7 +711,7 @@ namespace cepgen
       const double ecm6 = w4_ / ( 2.*mc4_ ),
                    pp6cm = sqrt( ecm6*ecm6-masses_.Ml2_ );
 
-      jacobian_ *= dw4*pp6cm/( mc4_*constants::sconstb*s_ );
+      jacobian_ *= dw4*pp6cm/( mc4_*constants::SCONSTB*s_ );
 
       // Let the most obscure part of this code begin...
 
@@ -941,7 +941,7 @@ namespace cepgen
 
       //--- compute the event weight using the Jacobian
 
-      return constants::GeV2toBarn*jacobian_;
+      return constants::GEV2_TO_BARN*jacobian_;
     }
 
     //---------------------------------------------------------------------------------------------

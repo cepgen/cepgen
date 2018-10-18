@@ -42,7 +42,6 @@ namespace cepgen
         void setFullEvent( bool full = true ) { full_evt_ = full; }
 
       private:
-        static constexpr unsigned short invalid_idx_ = 999;
         std::vector<unsigned short> min_ids_;
         std::unordered_map<short,short> py_cg_corresp_;
 #ifdef PYTHIA8

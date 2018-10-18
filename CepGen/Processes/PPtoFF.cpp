@@ -238,11 +238,11 @@ namespace cepgen
       //       d^2 kappa_1 d^2 kappa_2 instead d kappa_1^2 d kappa_2^2
       //=================================================================
 
-      const double g_em = 4.*M_PI*constants::alphaEM*qf_*qf_;
+      const double g_em = 4.*M_PI*constants::ALPHA_EM*qf_*qf_;
       const double aintegral = amat2 * colf_ * ( g_em*g_em )
                              * 1. / pow( 4.*M_PI*( x1*x2*s_ ), 2 )
                              * fluxes.first*M_1_PI * fluxes.second*M_1_PI * 0.25
-                             * constants::GeV2toBarn;
+                             * constants::GEV2_TO_BARN;
 
       //=================================================================
       return aintegral*qt1_*qt2_*pt_diff_;

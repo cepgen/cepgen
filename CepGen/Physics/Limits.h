@@ -11,7 +11,7 @@ namespace cepgen
   {
     public:
       /// Define lower and upper limits on a quantity
-      Limits( double min = kInvalid, double max = kInvalid );
+      Limits( double min = INVALID, double max = INVALID );
       Limits( const Limits& );
 
       /// Lower limit to apply on the variable
@@ -43,7 +43,7 @@ namespace cepgen
       friend std::ostream& operator<<( std::ostream&, const Limits& );
 
     private:
-      static constexpr double kInvalid = -999.999;
+      static constexpr double INVALID = -999.999;
   };
 }
 

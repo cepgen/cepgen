@@ -12,7 +12,9 @@ namespace cepgen
    */
   class Event {
     public:
+      /// Build an empty event
       Event();
+      /// Copy constructor
       Event( const Event& );
       /// Empty the whole event content
       void clear();
@@ -101,17 +103,21 @@ namespace cepgen
       float time_total;
 
     private:
-      static constexpr double minimal_precision_ = 1.e-10;
+      static constexpr double MIN_PRECISION = 1.e-10;
       /// Check if the event kinematics is properly defined
       void checkKinematics() const;
       /// List of particles in the event, mapped to their role in the process
       ParticlesMap particles_;
-      /// Last particle in an "empty" event
-      struct NumParticles {
+      /// Typical event indices structure
+      struct NumParticles
+      {
         NumParticles();
         NumParticles( const NumParticles& np );
-        unsigned short cs, op1, op2;
+        unsigned short cs; ///< Index of the first central system particle
+        unsigned short op1; ///< Index of the first positive-z outgoing beam state
+        unsigned short op2; ///< Index of the first negative-z outgoing beam state
       };
+      /// Event indices structure
       NumParticles evtcontent_;
   };
 }

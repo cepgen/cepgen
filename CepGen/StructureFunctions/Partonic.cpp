@@ -6,7 +6,7 @@ namespace cepgen
 {
   namespace strfun
   {
-    constexpr std::array<short,6> Partonic::qtimes3_, Partonic::pdgid_;
+    constexpr std::array<short,6> Partonic::Q_TIMES_3, Partonic::QUARK_PDGS;
 
     Partonic::Parameters::Parameters() :
       num_flavours( 4 ), pdf_set( "cteq6" ), pdf_code( 0l ), pdf_member( 0 ), mode( Mode::full )
@@ -119,15 +119,15 @@ namespace cepgen
 #  endif
 
       for ( int i = 0; i < params.num_flavours; ++i ) {
-        const double prefactor = 1./9.*qtimes3_[i]*qtimes3_[i];
+        const double prefactor = 1./9.*Q_TIMES_3[i]*Q_TIMES_3[i];
 #  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION >= 6
-        if ( !pdfs_[params.pdf_member]->hasFlavor( pdgid_[i] ) )
-          throw CG_FATAL( "Partonic" ) << "Flavour " << pdgid_[i] << " is unsupported!";
-        const double xq = member.xfxQ2( pdgid_[i], xbj, q2 );
-        const double xqbar = member.xfxQ2( -pdgid_[i], xbj, q2 );
+        if ( !pdfs_[params.pdf_member]->hasFlavor( QUARK_PDGS[i] ) )
+          throw CG_FATAL( "Partonic" ) << "Flavour " << QUARK_PDGS[i] << " is unsupported!";
+        const double xq = member.xfxQ2( QUARK_PDGS[i], xbj, q2 );
+        const double xqbar = member.xfxQ2( -QUARK_PDGS[i], xbj, q2 );
 #  else
-        const double xq = LHAPDF::xfx( xbj, q, pdgid_[i] );
-        const double xqbar = LHAPDF::xfx( xbj, q, -pdgid_[i] );
+        const double xq = LHAPDF::xfx( xbj, q, QUARK_PDGS[i] );
+        const double xqbar = LHAPDF::xfx( xbj, q, -QUARK_PDGS[i] );
 #  endif
         switch ( params.mode ) {
           case Parameters::Mode::full:

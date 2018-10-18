@@ -25,14 +25,16 @@ namespace Pythia8
   const double CepGenEvent::mp_ = cepgen::particleproperties::mass( cepgen::PDG::proton );
   const double CepGenEvent::mp2_ = CepGenEvent::mp_*CepGenEvent::mp_;
 
-  CepGenEvent::CepGenEvent( const cepgen::Parameters* params ) :
-    LHAup( 3 ), params_( params )
+  CepGenEvent::CepGenEvent() :
+    LHAup( 3 )
+  {}
+
+  void
+  CepGenEvent::initialise( const cepgen::Parameters& params )
   {
-    addProcess( 0, 1., 1., 1.e3 );
-    if ( params_ ) {
-      setBeamA( (short)params_->kinematics.incoming_beams.first.pdg, params_->kinematics.incoming_beams.first.pz );
-      setBeamB( (short)params_->kinematics.incoming_beams.second.pdg, params_->kinematics.incoming_beams.second.pz );
-    }
+    setBeamA( (short)params.kinematics.incoming_beams.first.pdg, params.kinematics.incoming_beams.first.pz );
+    setBeamB( (short)params.kinematics.incoming_beams.second.pdg, params.kinematics.incoming_beams.second.pz );
+    addProcess( 0, params.integrator.result, params.integrator.err_result, 100. );
   }
 
   void
@@ -44,10 +46,10 @@ namespace Pythia8
   }
 
   void
-  CepGenEvent::feedEvent( const cepgen::Event& ev, bool full, const cepgen::KinematicsMode& mode )
+  CepGenEvent::feedEvent( const cepgen::Event& ev, bool full )
   {
     const double scale = ev.getOneByRole( cepgen::Particle::Intermediate ).mass();
-    setProcess( 0, 1., scale, cepgen::constants::alphaEM, cepgen::constants::alphaQCD );
+    setProcess( 0, 1., scale, cepgen::constants::ALPHA_EM, cepgen::constants::ALPHA_QCD );
 
     const auto& part1 = ev.getOneByRole( cepgen::Particle::Parton1 ), &part2 = ev.getOneByRole( cepgen::Particle::Parton2 );
     const auto& op1 = ev.getOneByRole( cepgen::Particle::OutgoingBeam1 ), &op2 = ev.getOneByRole( cepgen::Particle::OutgoingBeam2 );
@@ -71,6 +73,7 @@ namespace Pythia8
       addParticle( quark2_pdgid, -2, quark2_id, 0, 0, 0, mom_part2.px(), mom_part2.py(), mom_part2.pz(), mom_part2.e(), mom_part2.mCalc(), 0., 0. );
     }
     else { // full event content (with collinear partons)
+      const cepgen::KinematicsMode& mode = params_->kinematics.mode;
       const bool inel1 = ( mode == cepgen::KinematicsMode::InelasticElastic || mode == cepgen::KinematicsMode::InelasticInelastic );
       const bool inel2 = ( mode == cepgen::KinematicsMode::ElasticInelastic || mode == cepgen::KinematicsMode::InelasticInelastic );
 
@@ -129,7 +132,7 @@ namespace Pythia8
         if ( mothers.size() > 0 ) {
           const unsigned short moth1_cg_id = *mothers.begin();
           moth1_id = pythiaId( moth1_cg_id );
-          if ( moth1_id == invalid_id ) {
+          if ( moth1_id == INVALID_ID ) {
             const auto& moth = ev.at( moth1_cg_id );
             if ( moth.mothers().size() > 0 )
               moth1_id = pythiaId( *moth.mothers().begin() );
@@ -139,7 +142,7 @@ namespace Pythia8
           if ( mothers.size() > 1 ) {
             const unsigned short moth2_cg_id = *mothers.rbegin();
             moth2_id = pythiaId( moth2_cg_id );
-            if ( moth2_id == invalid_id ) {
+            if ( moth2_id == INVALID_ID ) {
               const auto& moth = ev.at( moth2_cg_id );
               moth.dump();
               moth2_id = pythiaId( *moth.mothers().rbegin() );
@@ -161,13 +164,19 @@ namespace Pythia8
     py_cg_corresp_.clear();
   }
 
+  void
+  CepGenEvent::addComments( const std::string& comments )
+  {
+    osLHEF << comments;
+  }
+
   unsigned short
   CepGenEvent::cepgenId( unsigned short py_id ) const
   {
     for ( const auto& py_cg : py_cg_corresp_ )
       if ( py_cg.first == py_id )
         return py_cg.second;
-    return invalid_id;
+    return INVALID_ID;
   }
 
   unsigned short
@@ -176,7 +185,7 @@ namespace Pythia8
     for ( const auto& py_cg : py_cg_corresp_ )
       if ( py_cg.second == cg_id )
         return py_cg.first;
-    return invalid_id;
+    return INVALID_ID;
   }
 
   void

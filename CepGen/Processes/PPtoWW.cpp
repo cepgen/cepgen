@@ -287,10 +287,10 @@ namespace cepgen
 
       const double aintegral = amat2 / ( 16.*M_PI*M_PI*( x1*x2*s_ )*( x1*x2*s_ ) )
                              * fluxes.first*M_1_PI * fluxes.second*M_1_PI * 0.25
-                             * constants::GeV2toBarn;
+                             * constants::GEV2_TO_BARN;
       /*const double aintegral = amat2 / ( 16.*M_PI*M_PI*x1*x1*x2*x2*s_*s_ )
                              * fluxes.first*M_1_PI * fluxes.second*M_1_PI
-                             * constants::GeV2toBarn * 0.25;*/
+                             * constants::GEV2_TO_BARN * 0.25;*/
 
       //=================================================================
       return aintegral*qt1_*qt2_*pt_diff_;
@@ -331,13 +331,13 @@ namespace cepgen
       const double auxil_gamgam = 1.-term1+term2;
       const double beta = sqrt( 1.-4.*mw2_/shat );
 
-      return 3.*constants::alphaEM*constants::alphaEM*beta / ( 2.*shat ) * auxil_gamgam / ( beta/( 64.*M_PI*M_PI*shat ) );
+      return 3.*constants::ALPHA_EM*constants::ALPHA_EM*beta / ( 2.*shat ) * auxil_gamgam / ( beta/( 64.*M_PI*M_PI*shat ) );
     }
 
     double
     PPtoWW::offShellME( double shat, double that, double uhat, double phi_sum, double phi_diff )
     {
-      const double e2 = 4.*M_PI*constants::alphaEM;
+      const double e2 = 4.*M_PI*constants::ALPHA_EM;
 
       double amat2_0 = 0., amat2_1 = 0., amat2_interf = 0.;
       for ( const auto lam3 : pol_w1_ )

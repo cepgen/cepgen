@@ -1,5 +1,9 @@
 #include "CepGen/IO/LHEFHandler.h"
 
+#if defined ( PYTHIA_LHEF )
+#include "CepGen/Hadronisers/PythiaEventInterface.h"
+#endif
+
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
@@ -16,7 +20,7 @@ namespace cepgen
 #if defined ( HEPMC_LHEF )
       , lhe_output_( new LHEF::Writer( filename ) )
 #elif defined ( PYTHIA_LHEF )
-      , pythia_( new Pythia8::Pythia ), lhaevt_( new LHAevent )
+      , pythia_( new Pythia8::Pythia ), lhaevt_( new Pythia8::CepGenEvent )
 #endif
     {
 #if defined ( PYTHIA_LHEF )
@@ -126,8 +130,8 @@ namespace cepgen
       out.XWGTUP = 1.;
       out.XPDWUP = std::pair<double,double>( 0., 0. );
       out.SCALUP = 0.;
-      out.AQEDUP = constants::alphaEM;
-      out.AQCDUP = constants::alphaQCD;
+      out.AQEDUP = constants::ALPHA_EM;
+      out.AQCDUP = constants::ALPHA_QCD;
       out.NUP = ev.numParticles();
       out.resize();
       for ( unsigned short ip = 0; ip < ev.numParticles(); ++ip ) {
@@ -144,7 +148,7 @@ namespace cepgen
       lhe_output_->hepeup = out;
       lhe_output_->writeEvent();
 #elif defined ( PYTHIA_LHEF )
-      lhaevt_->feedEvent( 0, ev );
+      lhaevt_->feedEvent( ev, false );
       pythia_->next();
       lhaevt_->eventLHEF();
 #endif
@@ -157,96 +161,5 @@ namespace cepgen
       lhaevt_->setCrossSection( 0, xsect, xsect_err );
 #endif
     }
-
-    //---------------------------------------------------------------------------------------------
-    // Define LHA event record if one uses Pythia to store the LHE
-    //---------------------------------------------------------------------------------------------
-
-#if defined ( PYTHIA_LHEF )
-    LHEFHandler::LHAevent::LHAevent() : LHAup( 3 )
-    {}
-
-    void
-    LHEFHandler::LHAevent::initialise( const Parameters& params )
-    {
-      setBeamA( (short)params.kinematics.incoming_beams.first.pdg, params.kinematics.incoming_beams.first.pz );
-      setBeamB( (short)params.kinematics.incoming_beams.second.pdg, params.kinematics.incoming_beams.second.pz );
-      addProcess( 0, params.integrator.result, params.integrator.err_result, 100. );
-    }
-
-    void
-    LHEFHandler::LHAevent::addComments( const std::string& comments )
-    {
-      osLHEF << comments;
-    }
-
-    void
-    LHEFHandler::LHAevent::setCrossSection( unsigned short proc_id, double xsect, double xsect_err )
-    {
-      setXSec( proc_id, xsect );
-      setXErr( proc_id, xsect_err );
-    }
-
-    void
-    LHEFHandler::LHAevent::feedEvent( unsigned short proc_id, const Event& ev, bool full_event )
-    {
-      const double scale = ev.getOneByRole( Particle::Intermediate ).mass();
-      setProcess( proc_id, 1., scale, constants::alphaEM, constants::alphaQCD );
-
-      const Particle& ip1 = ev.getOneByRole( Particle::IncomingBeam1 ), &ip2 = ev.getOneByRole( Particle::IncomingBeam2 );
-      const Particles& op1 = ev[Particle::OutgoingBeam1], &op2 = ev[Particle::OutgoingBeam2];
-      const double q2_1 = -( ip1.momentum()-op1[0].momentum() ).mass2(), q2_2 = -( ip2.momentum()-op2[0].momentum() ).mass2();
-      const double x1 = q2_1/( q2_1+op1[0].mass2()-ip1.mass2() ), x2 = q2_2/( q2_2+op2[0].mass2()-ip2.mass2() );
-      setIdX( ip1.integerPdgId(), ip2.integerPdgId(), x1, x2 );
-
-      short parton1_pdgid = 0, parton2_pdgid = 0;
-      for ( const auto& part : ev.particles() ) {
-        short pdg_id = part.integerPdgId(), status = 0, moth1 = 0, moth2 = 0;
-        switch ( part.role() ) {
-          case Particle::Parton1:
-          case Particle::Parton2: {
-            if ( part.role() == Particle::Parton1 )
-              parton1_pdgid = part.integerPdgId();
-            if ( part.role() == Particle::Parton2 )
-              parton2_pdgid = part.integerPdgId();
-            if ( !full_event )
-              continue;
-            status = -2; // conserving xbj/Q2
-          } break;
-          case Particle::Intermediate: {
-            if ( !full_event )
-              continue;
-            status = 2;
-            if ( pdg_id == 0 )
-              pdg_id = ev.at( *part.mothers().begin() ).integerPdgId();
-          } break;
-          case Particle::IncomingBeam1:
-          case Particle::IncomingBeam2: {
-            if ( !full_event )
-              continue;
-            status = -9;
-          } break;
-          case Particle::OutgoingBeam1:
-          case Particle::OutgoingBeam2:
-          case Particle::CentralSystem: {
-            status = (short)part.status();
-            if ( status != 1 )
-              continue;
-          } break;
-          default: break;
-        }
-        if ( full_event ) {
-          const auto& mothers = part.mothers();
-          if ( mothers.size() > 0 )
-            moth1 = *mothers.begin()+1;
-          if ( mothers.size() > 1 )
-            moth2 = *mothers.rbegin()+1;
-        }
-        const Particle::Momentum& mom = part.momentum();
-        addParticle( pdg_id, status, moth1, moth2, 0, 0, mom.px(), mom.py(), mom.pz(), mom.energy(), mom.mass(), 0. ,0., 0. );
-      }
-      setPdf( parton1_pdgid, parton2_pdgid, x1, x2, scale, 0., 0., true );
-    }
-#endif
   }
 }

@@ -31,13 +31,13 @@ namespace cepgen
   bool
   Limits::hasMin() const
   {
-    return first != kInvalid;
+    return first != INVALID;
   }
 
   bool
   Limits::hasMax() const
   {
-    return second != kInvalid;
+    return second != INVALID;
   }
 
   bool
@@ -78,7 +78,7 @@ namespace cepgen
       CG_ERROR( "Limits:shoot" )
         << "x must be comprised between 0 and 1; x value = " << v << ".";
     if ( !valid() )
-      return kInvalid;
+      return INVALID;
 
     return first + ( second-first ) * v;
   }

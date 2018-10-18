@@ -54,8 +54,8 @@ namespace cepgen
         std::vector<std::unique_ptr<LHAPDF::PDF> > pdfs_;
 #  endif
 #endif
-        static constexpr std::array<short,6> pdgid_ = { { 1, 2, 3, 4, 5, 6 } };
-        static constexpr std::array<short,6> qtimes3_ = { {
+        static constexpr std::array<short,6> QUARK_PDGS = { { 1, 2, 3, 4, 5, 6 } };
+        static constexpr std::array<short,6> Q_TIMES_3 = { {
           -1 /*d*/, 2 /*u*/,
           -1 /*s*/, 2 /*c*/,
           -1 /*b*/, 2 /*t*/

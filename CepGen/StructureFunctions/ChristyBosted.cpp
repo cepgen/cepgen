@@ -259,7 +259,7 @@ namespace cepgen
       const double q21 = 30., q20 = 8.;
       const double delq2 = q2 - q20;
       const double qq = q21 - q20;
-      const double prefac = 1./( 4.*M_PI*M_PI*constants::alphaEM ) * ( 1.-xbj );
+      const double prefac = 1./( 4.*M_PI*M_PI*constants::ALPHA_EM ) * ( 1.-xbj );
       //------------------------------
 
       double q2_eff = q2, w2_eff = w2;
@@ -271,7 +271,7 @@ namespace cepgen
       const double sigT = resmod507( 'T', w2_eff, q2_eff );
       const double sigL = resmod507( 'L', w2_eff, q2_eff );
 
-      F2 = prefac * q2_eff / ( 1+tau ) * ( sigT+sigL ) / constants::GeV2toBarn * 1.e6;
+      F2 = prefac * q2_eff / ( 1+tau ) * ( sigT+sigL ) / constants::GEV2_TO_BARN * 1.e6;
       if ( q2 > q20 )
         F2 *= q21/( q21 + delq2 );
 
