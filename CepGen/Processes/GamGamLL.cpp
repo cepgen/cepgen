@@ -1,8 +1,8 @@
 #include "CepGen/Processes/GamGamLL.h"
+#include "CepGen/Processes/ProcessesHandler.h"
 
 #include "CepGen/Event/Event.h"
 
-#include "CepGen/Core/ProcessesHandler.h"
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Physics/Constants.h"

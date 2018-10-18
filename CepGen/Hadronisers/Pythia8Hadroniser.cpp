@@ -1,12 +1,12 @@
 #include "CepGen/Hadronisers/Pythia8Hadroniser.h"
 #include "CepGen/Hadronisers/PythiaEventInterface.h"
+#include "CepGen/Hadronisers/HadronisersHandler.h"
 
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 
-#include "CepGen/Core/HadronisersHandler.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"

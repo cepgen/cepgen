@@ -2,25 +2,27 @@
 #define CepGen_Processes_TestProcess_h
 
 #include "CepGen/Processes/GenericProcess.h"
+#include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Core/Functional.h"
 
 namespace cepgen
 {
+  class ParametersList;
   namespace proc
   {
     /// Generic process to test the Vegas instance
-    template<size_t N>
+    template<size_t N=3>
     class TestProcess : public GenericProcess
     {
       public:
-        TestProcess() :
-          GenericProcess( "test", ".oO TEST PROCESS Oo.", false ),
+        TestProcess( const ParametersList& params = ParametersList() ) :
+          GenericProcess( params, "test", ".oO TEST PROCESS Oo.", false ),
           funct_( "1./(1.-cos(x*_pi)*cos(y*_pi)*cos(z*_pi))", { { "x", "y", "z" } } ) {}
         TestProcess( const char* formula, std::array<std::string,N> args ) :
-          GenericProcess( "test", Form( ".oO TEST PROCESS (%s) Oo.", formula ), false ),
+          GenericProcess( ParametersList(), "test", Form( ".oO TEST PROCESS (%s) Oo.", formula ), false ),
           funct_( formula, args ) {}
 
-        ProcessPtr clone() const override { return ProcessPtr( new TestProcess<N>( *this ) ); }
+        ProcessPtr clone( const ParametersList& params ) const override { return ProcessPtr( new TestProcess<N>( *this ) ); }
 
         void addEventContent() override {}
         /// Number of dimensions on which to perform the integration
@@ -35,8 +37,15 @@ namespace cepgen
         void fillKinematics( bool ) override { return; }
 
       private:
-        Functional<N> funct_;
+        utils::Functional<N> funct_;
     };
+    // register process and define aliases
+    typedef TestProcess<1> TestProcess1D;
+    typedef TestProcess<2> TestProcess2D;
+    typedef TestProcess<3> TestProcess3D;
+    REGISTER_PROCESS( test_1d_process, TestProcess1D )
+    REGISTER_PROCESS( test_2d_process, TestProcess2D )
+    REGISTER_PROCESS( test_3d_process, TestProcess3D )
   }
 }
 

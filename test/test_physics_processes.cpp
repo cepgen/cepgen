@@ -10,7 +10,7 @@
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Physics/PDG.h"
 
-#include "abort.h"
+#include "AbortHandler.h"
 
 #include <unordered_map>
 #include <assert.h>
@@ -26,7 +26,7 @@ main( int argc, char* argv[] )
   typedef vector<pair<const char*,pair<double,double> > > KinematicsMap;
   typedef vector<pair<float, KinematicsMap> > ValuesAtCutMap;
 
-  AbortHandler ctrl_c;
+  utils::AbortHandler ctrl_c;
 
   // values defined at pt(single lepton)>15 GeV, |eta(single lepton)|<2.5, mX<1000 GeV
   // process -> { pt cut -> { kinematics -> ( sigma, delta(sigma) ) } }
@@ -75,7 +75,7 @@ main( int argc, char* argv[] )
   const double num_sigma = 3.0;
 
   if ( argc < 3 || strcmp( argv[2], "debug" ) != 0 )
-    Logger::get().level = Logger::Level::nothing;
+    utils::Logger::get().level = utils::Logger::Level::nothing;
 
   utils::Timer tmr;
   Generator mg;

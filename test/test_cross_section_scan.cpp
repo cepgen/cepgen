@@ -4,7 +4,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
-#include "CepGen/Processes/GamGamLL.h"
+#include "CepGen/Processes/ProcessesHandler.h"
 
 #include <fstream>
 
@@ -15,13 +15,14 @@ int main( int argc, char* argv[] )
   if ( argc < 5 )
     throw CG_FATAL( "main" )
       << "Usage:\n"
-      << argv[0] << " <process mode=1..4> <num points> <min value> <max value> [output file=xsect.dat]";
+      << argv[0] << " <process name> <process mode=1..4> <num points> <min value> <max value> [output file=xsect.dat]";
 
-  const unsigned int proc_mode = atoi( argv[1] ),
-                     npoints = atoi( argv[2] );
-  const float min_value = atof( argv[3] ),
-              max_value = atof( argv[4] );
-  const char* output_file = ( argc>5 ) ? argv[5] : "xsect.dat";
+  const string proc_name = argv[1];
+  const unsigned int proc_mode = atoi( argv[2] ),
+                     npoints = atoi( argv[3] );
+  const float min_value = atof( argv[4] ),
+              max_value = atof( argv[5] );
+  const char* output_file = ( argc > 6 ) ? argv[6] : "xsect.dat";
 
   cepgen::Generator mg;
 
@@ -30,8 +31,8 @@ int main( int argc, char* argv[] )
   cepgen::Parameters* par = mg.parameters.get();
   par->kinematics.cuts.central.eta_single = { -2.5, 2.5 };
   par->kinematics.cuts.remnants.mass_single.max() = 1000.0;
-  par->setProcess( new cepgen::Process::GamGamLL );
-  par->kinematics.mode = static_cast<cepgen::Kinematics::Mode>( proc_mode );
+  par->setProcess( cepgen::proc::ProcessesHandler::get().build( proc_name ) );
+  par->kinematics.mode = static_cast<cepgen::KinematicsMode>( proc_mode );
   CG_INFO( "main" ) << par;
 
   double xsect, err_xsect;

@@ -6,8 +6,9 @@
 #include "CepGen/Core/TamingFunction.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
-#include "CepGen/Core/ProcessesHandler.h"
-#include "CepGen/Core/HadronisersHandler.h"
+
+#include "CepGen/Processes/ProcessesHandler.h"
+#include "CepGen/Hadronisers/HadronisersHandler.h"
 
 #include "CepGen/Physics/GluonGrid.h"
 
@@ -53,7 +54,7 @@ namespace cepgen
       if ( !Py_IsInitialized() )
         throw CG_FATAL( "PythonHandler" ) << "Failed to initialise the Python cards parser!";
 
-      CG_INFO( "PythonHandler" )
+      CG_DEBUG( "PythonHandler" )
         << "Initialised the Python cards parser\n\t"
         << "Python version: " << Py_GetVersion() << "\n\t"
         << "Platform: " << Py_GetPlatform() << ".";

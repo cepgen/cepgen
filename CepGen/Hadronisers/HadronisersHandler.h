@@ -1,5 +1,5 @@
-#ifndef CepGen_Processes_HadronisersHandler_h
-#define CepGen_Processes_HadronisersHandler_h
+#ifndef CepGen_Hadronisers_HadronisersHandler_h
+#define CepGen_Hadronisers_HadronisersHandler_h
 
 #include "CepGen/Core/ModuleFactory.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
@@ -15,6 +15,7 @@ namespace cepgen
 {
   namespace hadr
   {
+    /// A hadroniser modules factory
     typedef ModuleFactory<GenericHadroniser> HadronisersHandler;
   }
 }

@@ -8,7 +8,7 @@ table.directory { font: 400 120% serif; }
 .navpath li.navelem a { font-family: serif; }
 #projectname
 {
-	font: 500 italic 300% serif;
+	font: 500 300% serif;
   font-variant: small-caps;
 }
 #projectbrief { font: 110% serif; }

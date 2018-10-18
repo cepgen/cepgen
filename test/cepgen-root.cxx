@@ -7,7 +7,7 @@
 #include <iostream>
 
 #include "TreeInfo.h"
-#include "abort.h"
+#include "AbortHandler.h"
 
 // ROOT includes
 #include "TFile.h"
@@ -60,7 +60,7 @@ void fill_event_tree( const cepgen::Event& event, unsigned long ev_id )
  */
 int main( int argc, char* argv[] )
 {
-  AbortHandler ctrl_c;
+  cepgen::utils::AbortHandler ctrl_c;
 
   cepgen::Generator mg;
 

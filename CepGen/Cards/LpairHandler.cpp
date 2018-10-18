@@ -2,8 +2,9 @@
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ProcessesHandler.h"
-#include "CepGen/Core/HadronisersHandler.h"
+
+#include "CepGen/Processes/ProcessesHandler.h"
+#include "CepGen/Hadronisers/HadronisersHandler.h"
 
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/GluonGrid.h"

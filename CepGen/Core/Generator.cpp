@@ -15,7 +15,7 @@
 
 namespace cepgen
 {
-  volatile int gSignal;
+  namespace utils { volatile int gSignal; }
   Generator::Generator() :
     parameters( std::unique_ptr<Parameters>( new Parameters ) ), result_( -1. ), result_error_( -1. )
   {

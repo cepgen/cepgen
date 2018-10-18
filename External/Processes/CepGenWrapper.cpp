@@ -1,4 +1,4 @@
-#include "CepGen/Core/ProcessesHandler.h"
+#include "CepGen/Processes/ProcessesHandler.h"
 
 //=================================================================================================
 // START BY LISTING ALL FORTRAN SUBROUTINES                                                      //

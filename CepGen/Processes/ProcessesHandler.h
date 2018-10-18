@@ -1,10 +1,11 @@
-#ifndef CepGen_Core_ProcessesHandler_h
-#define CepGen_Core_ProcessesHandler_h
+#ifndef CepGen_Processes_ProcessesHandler_h
+#define CepGen_Processes_ProcessesHandler_h
 
 #include "CepGen/Core/ModuleFactory.h"
+#include "CepGen/Core/ParametersList.h"
+
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Processes/FortranKTProcess.h"
-#include "CepGen/Core/ParametersList.h"
 
 #define BUILDERNM( obj ) obj ## Builder
 #define STRINGIFY( name ) #name
@@ -24,6 +25,7 @@ namespace cepgen
 {
   namespace proc
   {
+    /// A processes factory
     typedef ModuleFactory<GenericProcess> ProcessesHandler;
   }
 }

@@ -10,7 +10,7 @@ int
 main( int argc, char* argv[] )
 {
   if ( argc < 3 || string( argv[2] ) != "debug" )
-    cepgen::Logger::get().level = cepgen::Logger::Level::nothing;
+    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::nothing;
 
   const double max_sigma = 3.0;
 
@@ -26,7 +26,7 @@ main( int argc, char* argv[] )
 
   { // test 1
     const double exact = 1.3932039296856768591842462603255;
-    mg.parameters->setProcess( new cepgen::Process::TestProcess<3> );
+    mg.parameters->setProcess( new cepgen::proc::TestProcess<3> );
     mg.computeXsection( result, error );
     if ( fabs( exact - result ) > max_sigma * error )
       throw CG_FATAL( "main" ) << "pull = " << fabs( exact-result )/error << ".";
@@ -34,7 +34,7 @@ main( int argc, char* argv[] )
   }
   { // test 2
     const double exact = 2./3.;
-    mg.parameters->setProcess( new cepgen::Process::TestProcess<2>( "x^2+y^2", { { "x", "y" } } ) );
+    mg.parameters->setProcess( new cepgen::proc::TestProcess<2>( "x^2+y^2", { { "x", "y" } } ) );
     mg.computeXsection( result, error );
     if ( fabs( exact - result ) > max_sigma * error )
       throw CG_FATAL( "main" ) << "pull = " << fabs( exact-result )/error << ".";
@@ -42,7 +42,7 @@ main( int argc, char* argv[] )
   }
   { // test 3
     const double exact = 13./12.;
-    mg.parameters->setProcess( new cepgen::Process::TestProcess<3>( "x+y^2+z^3", { { "x", "y", "z" } } ) );
+    mg.parameters->setProcess( new cepgen::proc::TestProcess<3>( "x+y^2+z^3", { { "x", "y", "z" } } ) );
     mg.computeXsection( result, error );
     if ( fabs( exact - result ) > max_sigma * error )
       throw CG_FATAL( "main" ) << "pull = " << fabs( exact-result )/error << ".";

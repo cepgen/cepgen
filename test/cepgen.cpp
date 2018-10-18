@@ -7,9 +7,9 @@
 
 //--- necessary include to build the default run
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Core/ProcessesHandler.h"
+#include "CepGen/Processes/ProcessesHandler.h"
 
-#include "abort.h"
+#include "AbortHandler.h"
 
 #include <iostream>
 
@@ -56,7 +56,7 @@ int main( int argc, char* argv[] )
   //--- list all parameters
   CG_INFO( "main" ) << gen.parameters.get();
 
-  AbortHandler ctrl_c;
+  cepgen::utils::AbortHandler ctrl_c;
 
   try {
     //--- let there be a cross-section...
@@ -67,7 +67,7 @@ int main( int argc, char* argv[] )
       //--- events generation starts here
       // (one may use a callback function)
       gen.generate();
-  } catch ( const cepgen::RunAbortedException& e ) {
+  } catch ( const cepgen::utils::RunAbortedException& e ) {
     CG_INFO( "main" ) << "Run aborted!";
   }
 
