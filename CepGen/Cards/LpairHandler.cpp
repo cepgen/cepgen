@@ -10,9 +10,9 @@
 #include "CepGen/Physics/GluonGrid.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
-#include "CepGen/StructureFunctions/Partonic.h"
 
 #include <fstream>
+#include <iomanip>
 
 namespace cepgen
 {

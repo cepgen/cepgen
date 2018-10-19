@@ -13,9 +13,7 @@
 #include "CepGen/Physics/GluonGrid.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
-#include "CepGen/StructureFunctions/Partonic.h"
 #include "CepGen/StructureFunctions/MSTWGrid.h"
-#include "CepGen/StructureFunctions/Schaefer.h"
 
 #include <algorithm>
 

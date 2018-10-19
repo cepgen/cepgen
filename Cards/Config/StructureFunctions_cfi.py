@@ -30,8 +30,8 @@ class StructureFunctions:
         id = 301,
         #Q2cut = 10.,
         #W2limits = (4.,1.),
-        continuumSF = GD11p,
-        resonancesSF = ChristyBosted,
+        #continuumSF = GD11p,
+        #resonancesSF = ChristyBosted,
     )
     Partonic = Parameters(
         id = 401,

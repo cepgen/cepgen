@@ -15,12 +15,7 @@ extern "C" {
   cepgen_structure_functions_( int& sfmode, double& xbj, double& q2, double& f2, double& fl )
   {
     using namespace cepgen;
-    ParametersList params;
-    params.set<int>( "mode", sfmode );
-
-    CG_DEBUG( "cepgen_structure_functions" ) << (strfun::Type)sfmode;
-
-    static auto& val = strfun::Parameterisation::build( params )->operator()( xbj, q2 );
+    static auto& val = ( *strfun::Parameterisation::build( ParametersList().set<int>( "id", sfmode ) ) )( xbj, q2 );
     f2 = val.F2;
     fl = val.FL;
   }
@@ -29,19 +24,15 @@ extern "C" {
   cepgen_kt_flux_( int& fmode, double& x, double& kt2, int& sfmode, double& mx )
   {
     using namespace cepgen;
-    ParametersList params;
-    params.set<int>( "mode", sfmode );
-    static auto sf = strfun::Parameterisation::build( params );
-    return ktFlux(
-      (KTFlux)fmode, x, kt2, *sf, mx );
+    static auto sf = strfun::Parameterisation::build( ParametersList().set<int>( "id", sfmode ) );
+    return ktFlux( (KTFlux)fmode, x, kt2, *sf, mx );
   }
 
   double
   cepgen_kt_flux_hi_( int& fmode, double& x, double& kt2, int& a, int& z )
   {
     using namespace cepgen;
-    return ktFlux(
-      (KTFlux)fmode, x, kt2, HeavyIon{ (unsigned short)a, (Element)z } );
+    return ktFlux( (KTFlux)fmode, x, kt2, HeavyIon{ (unsigned short)a, (Element)z } );
   }
 
   double

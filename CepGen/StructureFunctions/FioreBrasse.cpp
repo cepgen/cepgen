@@ -44,7 +44,7 @@ namespace cepgen
       const auto& model = params.get<std::string>( "model", "standard" );
       if ( model == "standard" )
         params_ = Parameters::standard();
-      if ( model == "alternative" )
+      else if ( model == "alternative" )
         params_ = Parameters::alternative();
       else
         throw CG_FATAL( "FioreBrasse" ) << "Invalid modelling selected: " << model << "!";
