@@ -21,7 +21,13 @@ namespace cepgen
       F2( f2 ), FL( fl ), old_vals_({ 0., 0. })
     {}
 
+    Parameterisation::Parameterisation( const Parameterisation& sf ) :
+      params_( sf.params_ ), type( sf.type ),
+      F2( sf.F2 ), FL( sf.FL ), old_vals_( sf.old_vals_ )
+    {}
+
     Parameterisation::Parameterisation( const ParametersList& params ) :
+      params_( params ),
       type( (Type)params.get<int>( "id" ) ),
       F2( 0. ), FL( 0. ), old_vals_({ 0., 0. })
     {}

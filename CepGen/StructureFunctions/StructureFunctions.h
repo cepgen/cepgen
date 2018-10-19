@@ -1,6 +1,7 @@
 #ifndef CepGen_StructureFunctions_StructureFunctions_h
 #define CepGen_StructureFunctions_StructureFunctions_h
 
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 
 #include <iostream>
@@ -39,8 +40,7 @@ namespace cepgen
         /// Standard SF parameterisation constructor
         Parameterisation( double f2 = 0., double fl = 0. );
         /// Copy constructor
-        Parameterisation( const Parameterisation& sf ) :
-          type( sf.type ), F2( sf.F2 ), FL( sf.FL ), old_vals_( sf.old_vals_ ) {}
+        Parameterisation( const Parameterisation& );
         Parameterisation( const ParametersList& );
         ~Parameterisation() {}
 
@@ -64,6 +64,10 @@ namespace cepgen
         /// Compute the \f$F_1\f$ structure function for a given point
         double F1( double xbj, double q2 ) const;
 
+      private:
+        ParametersList params_;
+
+      public:
         /// Interpolation type of structure functions
         Type type;
         double F2; ///< Last computed transverse structure function value

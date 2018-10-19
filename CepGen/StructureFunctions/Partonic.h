@@ -19,10 +19,8 @@ namespace cepgen
       public:
         /// Quarks types
         enum class Mode { full = 0, valence = 1, sea = 2 };
-        /// Build a calculator
-        explicit Partonic();
         /// Build a calculator from its Parameters object
-        explicit Partonic( const ParametersList& );
+        explicit Partonic( const ParametersList& params = ParametersList() );
         /// Build a calculator from a set, its member, and the contributing quarks
         explicit Partonic( const char* set, unsigned short member = 0, const Mode& mode = Mode::full );
         Partonic& operator()( double xbj, double q2 ) override;

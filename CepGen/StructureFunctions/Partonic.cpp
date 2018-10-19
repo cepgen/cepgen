@@ -1,6 +1,5 @@
 #include "CepGen/StructureFunctions/Partonic.h"
 
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
@@ -9,12 +8,6 @@ namespace cepgen
   namespace strfun
   {
     constexpr std::array<short,6> Partonic::Q_TIMES_3, Partonic::QUARK_PDGS;
-
-    Partonic::Partonic() :
-      Parameterisation( ParametersList().set<int>( "id", (int)Type::Partonic ) ),
-      pdf_set_( "" ), num_flavours_( 0 ), pdf_code_( 0 ), pdf_member_( 0 ), mode_( Mode::full ),
-      initialised_( false )
-    {}
 
     Partonic::Partonic( const ParametersList& params ) :
       Parameterisation( params ),

@@ -1,8 +1,6 @@
 #include "CepGen/StructureFunctions/SuriYennie.h"
 
 #include "CepGen/Physics/ParticleProperties.h"
-
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
 #include <math.h>
@@ -37,12 +35,6 @@ namespace cepgen
       return p;
     }
 
-    SuriYennie::SuriYennie() :
-      Parameterisation( ParametersList().set<int>( "id", (int)Type::SuriYennie ) ),
-      F1( 0. ), FE( 0. ), FM( 0. ),
-      params_( Parameters::standard() )
-    {}
-
     SuriYennie::SuriYennie( const ParametersList& params ) :
       Parameterisation( params ),
       F1( 0. ), FE( 0. ), FM( 0. )
@@ -50,7 +42,7 @@ namespace cepgen
       const auto& model = params.get<std::string>( "model", "standard" );
       if ( model == "standard" )
         params_ = Parameters::standard();
-      if ( model == "alternative" )
+      else if ( model == "alternative" )
         params_ = Parameters::alternative();
       else
         throw CG_FATAL( "SuriYennie" ) << "Invalid modelling selected: " << model << "!";

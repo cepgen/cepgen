@@ -112,11 +112,6 @@ namespace cepgen
       return params;
     }
 
-    CLAS::CLAS() :
-      Parameterisation( ParametersList().set<int>( "id", (int)Type::CLAS ) ),
-      params_( Parameters::standard_proton() )
-    {}
-
     CLAS::CLAS( const ParametersList& params ) :
       Parameterisation( params )
     {

@@ -27,9 +27,8 @@ namespace cepgen
           std::vector<Resonance> resonances;
           double s0, norm;
         };
-        explicit FioreBrasse();
         /// Fiore \cite Fiore:2002re and Brasse \cite Brasse:1976bf proton structure functions
-        explicit FioreBrasse( const ParametersList& );
+        explicit FioreBrasse( const ParametersList& params = ParametersList() );
         FioreBrasse& operator()( double xbj, double q2 ) override;
 
       private:

@@ -2,7 +2,6 @@
 #define CepGen_StructureFunctions_BlockDurandHa_h
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
-#include "CepGen/Core/ParametersList.h"
 #include <vector>
 
 namespace cepgen

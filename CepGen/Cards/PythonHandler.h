@@ -53,7 +53,6 @@ namespace cepgen
         void parseGenerator( PyObject* );
         void parseTamingFunctions( PyObject* );
         void parseHadroniser( PyObject* );
-        void parseStructureFunctions( PyObject*, std::shared_ptr<strfun::Parameterisation>& sf_handler );
     };
     template<> bool PythonHandler::is<int>( PyObject* obj ) const;
     template<> bool PythonHandler::is<bool>( PyObject* obj ) const;

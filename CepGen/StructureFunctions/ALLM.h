@@ -3,7 +3,6 @@
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
-#include "CepGen/Core/ParametersList.h"
 
 #include <vector>
 

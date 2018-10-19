@@ -157,8 +157,14 @@ namespace cepgen
       if ( sqrt_s != -1. )
         params_.kinematics.setSqrtS( sqrt_s );
       PyObject* psf = element( kin, "structureFunctions" ); // borrowed
-      if ( psf )
-        parseStructureFunctions( psf, params_.kinematics.structure_functions );
+      if ( psf ) {
+        ParametersList sf_params = get<ParametersList>( psf );
+        params_.kinematics.structure_functions = strfun::Parameterisation::build( sf_params );
+        if ( sf_params.get<int>( "id" ) == (int)strfun::Type::MSTWgrid ) {
+          auto sf = std::dynamic_pointer_cast<mstw::Grid>( params_.kinematics.structure_functions );
+          fillParameter( psf, "gridPath", sf->params.grid_path );
+        }
+      }
       std::vector<int> kt_fluxes;
       fillParameter( kin, "ktFluxes", kt_fluxes );
       if ( kt_fluxes.size() > 0 )
@@ -176,17 +182,6 @@ namespace cepgen
       fillParameter( kin, "heavyIonB", hi_beam2 );
       if ( hi_beam2.size() == 2 )
         params_.kinematics.incoming_beams.second.pdg = HeavyIon{ (unsigned short)hi_beam2[0], (Element)hi_beam2[1] };
-    }
-
-    void
-    PythonHandler::parseStructureFunctions( PyObject* psf, std::shared_ptr<strfun::Parameterisation>& sf_handler )
-    {
-      ParametersList sf_params = get<ParametersList>( psf );
-      sf_handler = strfun::Parameterisation::build( sf_params );
-      if ( sf_params.get<int>( "id" ) == (int)strfun::Type::MSTWgrid ) {
-        auto sf = std::dynamic_pointer_cast<mstw::Grid>( params_.kinematics.structure_functions );
-        fillParameter( psf, "gridPath", sf->params.grid_path );
-      }
     }
 
     void

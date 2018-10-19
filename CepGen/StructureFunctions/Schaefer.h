@@ -14,8 +14,7 @@ namespace cepgen
     class Schaefer : public Parameterisation
     {
       public:
-        Schaefer();
-        explicit Schaefer( const ParametersList& params );
+        explicit Schaefer( const ParametersList& params = ParametersList() );
         Schaefer& operator()( double xbj, double q2 ) override;
 
       private:

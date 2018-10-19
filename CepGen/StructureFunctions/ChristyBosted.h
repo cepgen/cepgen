@@ -4,8 +4,6 @@
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Physics/Constants.h"
 
-#include "CepGen/Core/ParametersList.h"
-
 #include <array>
 #include <vector>
 

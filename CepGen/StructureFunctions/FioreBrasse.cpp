@@ -1,6 +1,5 @@
 #include "CepGen/StructureFunctions/FioreBrasse.h"
 
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
@@ -38,11 +37,6 @@ namespace cepgen
       p.resonances.emplace_back( Resonance{ 0.5484, 0.1373, 1.3139, 14.7267, 4.6041, 1. } ); // exotic
       return p;
     }
-
-    FioreBrasse::FioreBrasse() :
-      Parameterisation( ParametersList().set<int>( "id", (int)Type::FioreBrasse ) ),
-      params_( Parameters::standard() )
-    {}
 
     FioreBrasse::FioreBrasse( const ParametersList& params ) :
       Parameterisation( params )

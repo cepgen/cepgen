@@ -1,7 +1,6 @@
 #include "CepGen/StructureFunctions/Schaefer.h"
 #include "CepGen/StructureFunctions/Partonic.h"
 
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Physics/Constants.h"
@@ -11,11 +10,6 @@ namespace cepgen
 {
   namespace strfun
   {
-    Schaefer::Schaefer() :
-      Parameterisation( ParametersList().set<int>( "id", (int)Type::Schaefer ) ),
-      q2_cut_( 0. ), w2_lim_( { 0., 0. } ), higher_twist_( false ), initialised_( false ), inv_omega_range_( -1. )
-    {}
-
     Schaefer::Schaefer( const ParametersList& params ) :
       Parameterisation( params ),
       q2_cut_( params.get<double>( "Q2cut", 9. ) ),

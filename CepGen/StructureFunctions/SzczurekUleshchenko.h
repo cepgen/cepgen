@@ -16,8 +16,7 @@ namespace cepgen
     class SzczurekUleshchenko : public Parameterisation
     {
       public:
-        SzczurekUleshchenko();
-        SzczurekUleshchenko( const ParametersList& );
+        SzczurekUleshchenko( const ParametersList& params = ParametersList() );
         SzczurekUleshchenko& operator()( double xbj, double q2 ) override;
 
         double F1;
