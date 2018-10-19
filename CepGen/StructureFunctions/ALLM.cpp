@@ -1,11 +1,17 @@
-#include "ALLM.h"
+#include "CepGen/StructureFunctions/ALLM.h"
 #include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Core/ParametersList.h"
+
 #include <cmath>
 
 namespace cepgen
 {
   namespace strfun
   {
+    ALLM::Parameters::Parameters() :
+      m02( 0. ), mp2( 0. ), mr2( 0. ), q02( 0. ), lambda2( 0. )
+    {}
+
     ALLM::Parameters
     ALLM::Parameters::allm91()
     {
@@ -132,9 +138,23 @@ namespace cepgen
       return p;
     }
 
-    ALLM::ALLM( const ALLM::Parameters& param ) :
-      Parameterisation( param.type ), params_( param )
-    {}
+    ALLM::ALLM( const ParametersList& params ) :
+      Parameterisation( params )
+    {
+      const auto& model = params.get<std::string>( "model" );
+      if ( model == "GD07p" )
+        params_ = Parameters::gd07p();
+      else if ( model == "GD11p" )
+        params_ = Parameters::gd11p();
+      else if ( model == "ALLM91" )
+        params_ = Parameters::allm91();
+      else if ( model == "ALLM97" )
+        params_ = Parameters::allm97();
+      else if ( model == "HHT_ALLM" )
+        params_ = Parameters::hht_allm();
+      else if ( model == "HHT_ALLM_FT" )
+        params_ = Parameters::hht_allm_ft();
+    }
 
     ALLM&
     ALLM::operator()( double xbj, double q2 )

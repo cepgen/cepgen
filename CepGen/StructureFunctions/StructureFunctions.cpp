@@ -3,6 +3,7 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/ParticleProperties.h"
 
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
@@ -14,6 +15,16 @@ namespace cepgen
   {
     const double Parameterisation::mp_ = particleproperties::mass( PDG::proton );
     const double Parameterisation::mp2_ = Parameterisation::mp_*Parameterisation::mp_;
+
+    Parameterisation::Parameterisation( double f2, double fl ) :
+      type( Type::Invalid ),
+      F2( f2 ), FL( fl ), old_vals_({ 0., 0. })
+    {}
+
+    Parameterisation::Parameterisation( const ParametersList& params ) :
+      type( (Type)params.get<int>( "id" ) ),
+      F2( 0. ), FL( 0. ), old_vals_({ 0., 0. })
+    {}
 
     double
     Parameterisation::F1( double xbj, double q2 ) const

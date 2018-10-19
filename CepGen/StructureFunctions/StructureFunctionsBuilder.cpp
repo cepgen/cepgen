@@ -1,3 +1,5 @@
+#include "CepGen/Core/ParametersList.h"
+
 #include "CepGen/StructureFunctions/ALLM.h"
 #include "CepGen/StructureFunctions/BlockDurandHa.h"
 #include "CepGen/StructureFunctions/FioreBrasse.h"
@@ -14,9 +16,9 @@ namespace cepgen
   namespace strfun
   {
     std::shared_ptr<Parameterisation>
-    Parameterisation::build( const Type& sf_type )
+    Parameterisation::build( const ParametersList& params )
     {
-      switch ( sf_type ) {
+      switch ( (Type)params.get<int>( "id" ) ) {
         case Type::Electron:
         case Type::ElasticProton:
         default:                        return std::make_shared<Parameterisation>();
@@ -26,10 +28,10 @@ namespace cepgen
         case Type::ChristyBosted:       return std::make_shared<ChristyBosted>();
         case Type::CLAS:                return std::make_shared<CLAS>();
         case Type::BlockDurandHa:       return std::make_shared<BlockDurandHa>();
-        case Type::ALLM91:              return std::make_shared<ALLM>( ALLM::Parameters::allm91() );
-        case Type::ALLM97:              return std::make_shared<ALLM>( ALLM::Parameters::allm97() );
-        case Type::GD07p:               return std::make_shared<ALLM>( ALLM::Parameters::gd07p() );
-        case Type::GD11p:               return std::make_shared<ALLM>( ALLM::Parameters::gd11p() );
+        case Type::ALLM91:              return std::make_shared<ALLM>( ParametersList().set<std::string>( "model", "ALLM91" ) );
+        case Type::ALLM97:              return std::make_shared<ALLM>( ParametersList().set<std::string>( "model", "ALLM97" ) );
+        case Type::GD07p:               return std::make_shared<ALLM>( ParametersList().set<std::string>( "model", "GD07p" ) );
+        case Type::GD11p:               return std::make_shared<ALLM>( ParametersList().set<std::string>( "model", "GD11p" ) );
         case Type::Schaefer:            return std::make_shared<Schaefer>();
         case Type::Partonic:            return std::make_shared<Partonic>();
         //--- particular case for the MSTW grid as we are dealing

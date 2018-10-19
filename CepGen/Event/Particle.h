@@ -4,7 +4,7 @@
 #include "CepGen/Physics/ParticleProperties.h"
 
 #include <set>
-#include <map>
+#include <unordered_map>
 #include <vector>
 
 namespace cepgen
@@ -344,7 +344,7 @@ namespace cepgen
   /// List of particles' roles
   typedef std::vector<Particle::Role> ParticleRoles;
   /// Map between a particle's role and its associated Particle object
-  typedef std::map<Particle::Role,Particles> ParticlesMap;
+  typedef std::unordered_map<Particle::Role,Particles> ParticlesMap;
 }
 
 #endif

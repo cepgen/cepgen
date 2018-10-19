@@ -181,46 +181,11 @@ namespace cepgen
     void
     PythonHandler::parseStructureFunctions( PyObject* psf, std::shared_ptr<strfun::Parameterisation>& sf_handler )
     {
-      int str_fun = 0;
-      fillParameter( psf, "id", str_fun );
-      sf_handler = strfun::Parameterisation::build( (strfun::Type)str_fun );
-      switch( (strfun::Type)str_fun ) {
-        case strfun::Type::Partonic: {
-          auto sf = std::dynamic_pointer_cast<strfun::Partonic>( params_.kinematics.structure_functions );
-          fillParameter( psf, "pdfSet", sf->params.pdf_set );
-          fillParameter( psf, "numFlavours", (unsigned int&)sf->params.num_flavours );
-          fillParameter( psf, "pdfMember", (unsigned int&)sf->params.pdf_member );
-          fillParameter( psf, "mode", (unsigned int&)sf->params.mode );
-        } break;
-        case strfun::Type::MSTWgrid: {
-          auto sf = std::dynamic_pointer_cast<mstw::Grid>( params_.kinematics.structure_functions );
-          fillParameter( psf, "gridPath", sf->params.grid_path );
-        } break;
-        case strfun::Type::Schaefer: {
-          auto sf = std::dynamic_pointer_cast<strfun::Schaefer>( params_.kinematics.structure_functions );
-          fillParameter( psf, "Q2cut", sf->params.q2_cut );
-          std::vector<double> w2_lims;
-          fillParameter( psf, "W2limits", w2_lims );
-          if ( w2_lims.size() != 0 ) {
-            if ( w2_lims.size() != 2 )
-              throwPythonError( Form( "Invalid size for W2limits attribute: %d != 2!", w2_lims.size() ) );
-            else {
-              sf->params.w2_lo = *std::min_element( w2_lims.begin(), w2_lims.end() );
-              sf->params.w2_hi = *std::max_element( w2_lims.begin(), w2_lims.end() );
-            }
-          }
-          PyObject* pcsf = element( psf, "continuumSF" ); // borrowed
-          if ( pcsf )
-            parseStructureFunctions( pcsf, sf->params.continuum_model );
-          PyObject* ppsf = element( psf, "perturbativeSF" ); // borrowed
-          if ( ppsf )
-            parseStructureFunctions( ppsf, sf->params.perturbative_model );
-          PyObject* prsf = element( psf, "resonancesSF" ); // borrowed
-          if ( prsf )
-            parseStructureFunctions( prsf, sf->params.resonances_model );
-          fillParameter( psf, "higherTwist", (bool&)sf->params.higher_twist );
-        } break;
-        default: break;
+      ParametersList sf_params = get<ParametersList>( psf );
+      sf_handler = strfun::Parameterisation::build( sf_params );
+      if ( sf_params.get<int>( "id" ) == (int)strfun::Type::MSTWgrid ) {
+        auto sf = std::dynamic_pointer_cast<mstw::Grid>( params_.kinematics.structure_functions );
+        fillParameter( psf, "gridPath", sf->params.grid_path );
       }
     }
 

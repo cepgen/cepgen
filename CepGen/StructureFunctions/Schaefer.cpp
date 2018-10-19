@@ -1,6 +1,7 @@
 #include "CepGen/StructureFunctions/Schaefer.h"
 #include "CepGen/StructureFunctions/Partonic.h"
 
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Physics/Constants.h"
@@ -10,51 +11,20 @@ namespace cepgen
 {
   namespace strfun
   {
-    Schaefer::Parameters
-    Schaefer::Parameters::mstwGrid()
-    {
-      Parameters par;
-      par.q2_cut = 9.;
-      par.w2_hi = 4.;
-      par.w2_lo = 3.;
-      par.resonances_model = Parameterisation::build( Type::ChristyBosted );
-      par.perturbative_model = Parameterisation::build( Type::MSTWgrid );
-      par.continuum_model = Parameterisation::build( Type::GD11p );
-      par.higher_twist = 0;
-      return par;
-    }
+    Schaefer::Schaefer() :
+      Parameterisation( ParametersList().set<int>( "id", (int)Type::Schaefer ) ),
+      q2_cut_( 0. ), w2_lim_( { 0., 0. } ), higher_twist_( false ), initialised_( false ), inv_omega_range_( -1. )
+    {}
 
-    Schaefer::Parameters
-    Schaefer::Parameters::mstwParton()
-    {
-      Parameters par;
-      par.q2_cut = 9.;
-      par.w2_hi = 4.;
-      par.w2_lo = 3.;
-      par.resonances_model = Parameterisation::build( Type::ChristyBosted );
-      par.perturbative_model = std::make_shared<strfun::Partonic>( "MSTW2008nnlo90cl" );
-      par.continuum_model = Parameterisation::build( Type::GD11p );
-      par.higher_twist = 1;
-      return par;
-    }
-
-    Schaefer::Parameters
-    Schaefer::Parameters::cteq()
-    {
-      Parameters par;
-      par.q2_cut = 9.;
-      par.w2_hi = 4.;
-      par.w2_lo = 3.;
-      par.resonances_model = Parameterisation::build( Type::ChristyBosted );
-      par.perturbative_model = std::make_shared<strfun::Partonic>( "cteq6l1" );
-      par.continuum_model = Parameterisation::build( strfun::Type::GD11p );
-      par.higher_twist = 0;
-      return par;
-    }
-
-    Schaefer::Schaefer( const Parameters& params ) :
-      Parameterisation( Type::Schaefer ),
-      params( params ), initialised_( false ), inv_omega_range_( -1. )
+    Schaefer::Schaefer( const ParametersList& params ) :
+      Parameterisation( params ),
+      q2_cut_( params.get<double>( "Q2cut", 9. ) ),
+      w2_lim_( params.get<std::vector<double> >( "W2limits", { 3., 4. } ) ),
+      higher_twist_( params.get<bool>( "higherTwist", true ) ),
+      resonances_model_  ( Parameterisation::build( params.get<ParametersList>( "resonancesSF", ParametersList().set<int>( "id", (int)Type::ChristyBosted ) ) ) ),
+      perturbative_model_( Parameterisation::build( params.get<ParametersList>( "perturbativeSF", ParametersList().set<int>( "id", (int)Type::MSTWgrid ) ) ) ),
+      continuum_model_   ( Parameterisation::build( params.get<ParametersList>( "continuumSF", ParametersList().set<int>( "id", (int)Type::GD11p ) ) ) ),
+      initialised_( false ), inv_omega_range_( -1. )
     {}
 
     std::string
@@ -62,10 +32,10 @@ namespace cepgen
     {
       std::ostringstream os;
       os << "LUXlike{"
-         << "r=" << *params.resonances_model << ","
-         << "p=" << *params.perturbative_model << ","
-         << "c=" << *params.continuum_model;
-      if ( params.higher_twist )
+         << "r=" << *resonances_model_ << ","
+         << "p=" << *perturbative_model_ << ","
+         << "c=" << *continuum_model_;
+      if ( higher_twist_ )
         os << ",HT";
       os << "}";
       return os.str();
@@ -75,13 +45,13 @@ namespace cepgen
     Schaefer::initialise()
     {
       CG_INFO( "LUXlike" ) << "LUXlike structure functions evaluator successfully initialised.\n"
-        << " * Q² cut:             " << params.q2_cut << " GeV²\n"
-        << " * W² ranges:          " << params.w2_lo << " GeV² / " << params.w2_hi << " GeV²\n"
-        << " * resonance model:    " << *params.resonances_model << "\n"
-        << " * perturbative model: " << *params.perturbative_model << "\n"
-        << " * continuum model:    " << *params.continuum_model << "\n"
-        << " * higher-twist?       " << std::boolalpha << params.higher_twist;
-      inv_omega_range_ = 1./( params.w2_hi-params.w2_lo );
+        << " * Q² cut:             " << q2_cut_ << " GeV²\n"
+        << " * W² ranges:          " << w2_lim_.at( 0 ) << " GeV² / " << w2_lim_.at( 1 ) << " GeV²\n"
+        << " * resonance model:    " << *resonances_model_ << "\n"
+        << " * perturbative model: " << *perturbative_model_ << "\n"
+        << " * continuum model:    " << *continuum_model_ << "\n"
+        << " * higher-twist?       " << std::boolalpha << higher_twist_;
+      inv_omega_range_ = 1./( w2_lim_.at( 1 )-w2_lim_.at( 0 ) );
       initialised_ = true;
     }
 
@@ -99,12 +69,12 @@ namespace cepgen
       const double w2 = mp2_+q2*( 1.-xbj )/xbj;
 
       strfun::Parameterisation sel_sf;
-      if ( q2 < params.q2_cut ) {
-        if ( w2 < params.w2_lo )
-          sel_sf = ( *params.resonances_model )( xbj, q2 );
-        else if ( w2 < params.w2_hi ) {
-          auto sf_r = ( *params.resonances_model )( xbj, q2 );
-          auto sf_c = ( *params.continuum_model )( xbj, q2 );
+      if ( q2 < q2_cut_ ) {
+        if ( w2 < w2_lim_.at( 0 ) )
+          sel_sf = ( *resonances_model_ )( xbj, q2 );
+        else if ( w2 < w2_lim_.at( 1 ) ) {
+          auto sf_r = ( *resonances_model_ )( xbj, q2 );
+          auto sf_c = ( *continuum_model_ )( xbj, q2 );
           sf_r.computeFL( xbj, q2 );
           sf_c.computeFL( xbj, q2 );
           const double r = rho( w2 );
@@ -113,17 +83,17 @@ namespace cepgen
           return *this;
         }
         else
-          sel_sf = ( *params.continuum_model )( xbj, q2 );
+          sel_sf = ( *continuum_model_ )( xbj, q2 );
       }
       else {
-        if ( w2 < params.w2_hi )
-          sel_sf = ( *params.continuum_model )( xbj, q2 );
+        if ( w2 < w2_lim_.at( 1 ) )
+          sel_sf = ( *continuum_model_ )( xbj, q2 );
         else {
-          auto sf_p = ( *params.perturbative_model )( xbj, q2 );
+          auto sf_p = ( *perturbative_model_ )( xbj, q2 );
           F2 = sf_p.F2;
           sf_p.computeFL( xbj, q2 );
           FL = sf_p.FL;
-          if ( params.higher_twist )
+          if ( higher_twist_ )
             F2 *= ( 1.+5.5/q2 );
           return *this;
         }
@@ -141,8 +111,8 @@ namespace cepgen
     {
       if ( inv_omega_range_ <= 0. )
         throw CG_FATAL( "LUXlike" ) << "Invalid W² limits: "
-          << params.w2_lo << " / " << params.w2_hi << " GeV²!";
-      const double omega = ( w2-params.w2_lo )*inv_omega_range_;
+          << w2_lim_.at( 0 ) << " / " << w2_lim_.at( 1 ) << " GeV²!";
+      const double omega = ( w2-w2_lim_.at( 0 ) )*inv_omega_range_;
       const double omega2 = omega*omega;
       return 2.*omega2-omega*omega;
     }

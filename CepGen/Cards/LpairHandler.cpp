@@ -52,16 +52,17 @@ namespace cepgen
       params_.setProcess( std::move( proc ) );
 
       //--- parse the structure functions code
+      ParametersList sf_params;
+      sf_params.set<int>( "id", str_fun_ );
       const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
       if ( str_fun_ / kLHAPDFCodeDec == 1 ) { // SF from parton
-        params_.kinematics.structure_functions = strfun::Parameterisation::build( strfun::Type::Partonic );
-        auto sf = dynamic_cast<strfun::Partonic*>( params_.kinematics.structure_functions.get() );
         const unsigned long icode = str_fun_ % kLHAPDFCodeDec;
-        sf->params.pdf_code = icode % kLHAPDFPartDec;
-        sf->params.mode = (strfun::Partonic::Parameters::Mode)( icode / kLHAPDFPartDec ); // 0, 1, 2
+        sf_params
+          .set<int>( "id", (int)strfun::Type::Partonic )
+          .set<int>( "pdfId", icode % kLHAPDFPartDec )
+          .set<int>( "mode", icode / kLHAPDFPartDec ); // 0, 1, 2
       }
-      else
-        params_.kinematics.structure_functions = strfun::Parameterisation::build( (strfun::Type)str_fun_ );
+      params_.kinematics.structure_functions = strfun::Parameterisation::build( sf_params );
 
       //--- parse the integration algorithm name
       if ( integr_type_ == "plain" )

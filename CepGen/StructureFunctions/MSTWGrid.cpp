@@ -1,7 +1,9 @@
 #include "CepGen/StructureFunctions/MSTWGrid.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
+
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
-#include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include <fstream>
 
@@ -19,7 +21,7 @@ namespace mstw
   }
 
   Grid::Grid( const Parameters& param ) :
-    cepgen::strfun::Parameterisation( cepgen::strfun::Type::MSTWgrid ),
+    cepgen::strfun::Parameterisation( cepgen::ParametersList().set<int>( "id", (int)cepgen::strfun::Type::MSTWgrid ) ),
     cepgen::GridHandler<2,2>( cepgen::GridType::logarithmic ),
     params( param )
   {

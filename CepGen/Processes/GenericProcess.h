@@ -39,13 +39,13 @@ namespace cepgen
         friend std::ostream& operator<<( std::ostream& os, const GenericProcess* proc );
 
         /// Generic map of particles with their role in the process
-        typedef std::map<Particle::Role,PDG> ParticlesRoleMap;
+        typedef std::unordered_map<Particle::Role,PDG> ParticlesRoleMap;
         /// Pair of particle with their associated role in the process
         typedef std::pair<Particle::Role,PDG> ParticleWithRole;
         /// Map of all incoming state particles in the process
         typedef ParticlesRoleMap IncomingState;
         /// Map of all outgoing particles in the process
-        typedef std::map<Particle::Role,std::vector<PDG> > OutgoingState;
+        typedef std::unordered_map<Particle::Role,std::vector<PDG> > OutgoingState;
 
         /// Copy all process attributes into a new object
         virtual std::unique_ptr<GenericProcess> clone( const ParametersList& ) const = 0;

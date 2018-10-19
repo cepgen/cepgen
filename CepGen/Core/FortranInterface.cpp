@@ -4,6 +4,7 @@
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/ParticleProperties.h"
 
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
 #ifdef __cplusplus
@@ -14,11 +15,12 @@ extern "C" {
   cepgen_structure_functions_( int& sfmode, double& xbj, double& q2, double& f2, double& fl )
   {
     using namespace cepgen;
-    strfun::Type sf_mode = (strfun::Type)sfmode;
+    ParametersList params;
+    params.set<int>( "mode", sfmode );
 
-    CG_DEBUG( "cepgen_structure_functions" ) << sf_mode;
+    CG_DEBUG( "cepgen_structure_functions" ) << (strfun::Type)sfmode;
 
-    static auto& val = strfun::Parameterisation::build( sf_mode )->operator()( xbj, q2 );
+    static auto& val = strfun::Parameterisation::build( params )->operator()( xbj, q2 );
     f2 = val.F2;
     fl = val.FL;
   }
@@ -27,7 +29,9 @@ extern "C" {
   cepgen_kt_flux_( int& fmode, double& x, double& kt2, int& sfmode, double& mx )
   {
     using namespace cepgen;
-    static auto sf = strfun::Parameterisation::build( (strfun::Type)sfmode );
+    ParametersList params;
+    params.set<int>( "mode", sfmode );
+    static auto sf = strfun::Parameterisation::build( params );
     return ktFlux(
       (KTFlux)fmode, x, kt2, *sf, mx );
   }

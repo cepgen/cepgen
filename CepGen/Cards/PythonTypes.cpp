@@ -19,15 +19,23 @@ namespace cepgen
     PythonHandler::is<int>( PyObject* obj ) const
     {
 #ifdef PYTHON2
-      return ( PyInt_Check( obj ) || PyBool_Check( obj ) );
+      return PyInt_Check( obj );
 #else
-      return ( PyLong_Check( obj ) || PyBool_Check( obj ) );
+      return PyLong_Check( obj );
 #endif
+    }
+
+    template<> bool
+    PythonHandler::is<bool>( PyObject* obj ) const
+    {
+      return PyBool_Check( obj );
     }
 
     template<> int
     PythonHandler::get<int>( PyObject* obj ) const
     {
+      if ( !is<int>( obj ) )
+        throwPythonError( Form( "Object has invalid type %s", obj->ob_type->tp_name ) );
 #ifdef PYTHON2
       return PyInt_AsLong( obj );
 #else
@@ -38,6 +46,8 @@ namespace cepgen
     template<> unsigned long
     PythonHandler::get<unsigned long>( PyObject* obj ) const
     {
+      if ( !is<int>( obj ) )
+        throwPythonError( Form( "Object has invalid type %s", obj->ob_type->tp_name ) );
 #ifdef PYTHON2
       return PyInt_AsUnsignedLongMask( obj );
 #else
@@ -50,6 +60,8 @@ namespace cepgen
     template<> long long
     PythonHandler::get<long long>( PyObject* obj ) const
     {
+      if ( !is<int>( obj ) )
+        throwPythonError( Form( "Object has invalid type %s", obj->ob_type->tp_name ) );
       return PyLong_AsLongLong( obj );
     }
 
@@ -62,6 +74,8 @@ namespace cepgen
     template<> double
     PythonHandler::get<double>( PyObject* obj ) const
     {
+      if ( !is<double>( obj ) )
+        throwPythonError( Form( "Object has invalid type %s", obj->ob_type->tp_name ) );
       return PyFloat_AsDouble( obj );
     }
 
@@ -78,6 +92,8 @@ namespace cepgen
     template<> std::string
     PythonHandler::get<std::string>( PyObject* obj ) const
     {
+      if ( !is<std::string>( obj ) )
+        throwPythonError( Form( "Object has invalid type %s", obj->ob_type->tp_name ) );
       std::string out;
 #ifdef PYTHON2
       out = PyString_AsString( obj ); // deprecated in python v3+
@@ -102,6 +118,8 @@ namespace cepgen
     template<> Limits
     PythonHandler::get<Limits>( PyObject* obj ) const
     {
+      if ( !is<Limits>( obj ) )
+        throwPythonError( Form( "Object has invalid type %s", obj->ob_type->tp_name ) );
       Limits out;
       double min = get<double>( PyTuple_GetItem( obj, 0 ) );
       out.min() = min;
@@ -122,6 +140,8 @@ namespace cepgen
     template<> ParametersList
     PythonHandler::get<ParametersList>( PyObject* obj ) const
     {
+      if ( !is<ParametersList>( obj ) )
+        throwPythonError( Form( "Object has invalid type %s", obj->ob_type->tp_name ) );
       ParametersList out;
       PyObject* pkey = nullptr, *pvalue = nullptr;
       Py_ssize_t pos = 0;

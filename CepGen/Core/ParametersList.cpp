@@ -74,7 +74,7 @@ namespace cepgen
     throw CG_FATAL( "ParametersList" ) << "Invalid type retrieved for key=" << key << "!";
   }
 
-  template<typename T> void
+  template<typename T> ParametersList&
   ParametersList::set( std::string key, const T& value )
   {
     throw CG_FATAL( "ParametersList" ) << "Invalid type to be set for key=" << key << "!";
@@ -103,10 +103,11 @@ namespace cepgen
     return param_values_[key];
   }
 
-  template<> void
+  template<> ParametersList&
   ParametersList::set<ParametersList>( std::string key, const ParametersList& value )
   {
     param_values_[key] = value;
+    return *this;
   }
 
   template<> std::vector<ParametersList>
@@ -128,10 +129,11 @@ namespace cepgen
     return vec_param_values_[key];
   }
 
-  template<> void
+  template<> ParametersList&
   ParametersList::set<std::vector<ParametersList> >( std::string key, const std::vector<ParametersList>& value )
   {
     vec_param_values_[key] = value;
+    return *this;
   }
 
   //------------------------------------------------------------------
@@ -157,10 +159,11 @@ namespace cepgen
     return int_values_[key];
   }
 
-  template<> void
+  template<> ParametersList&
   ParametersList::set<int>( std::string key, const int& value )
   {
     int_values_[key] = value;
+    return *this;
   }
 
   template<> std::vector<int>
@@ -182,9 +185,10 @@ namespace cepgen
     return vec_int_values_[key];
   }
 
-  template<> void
+  template<> ParametersList&
   ParametersList::set<std::vector<int> >( std::string key, const std::vector<int>& value )
   {
+    return *this;
     vec_int_values_[key] = value;
   }
 
@@ -211,10 +215,11 @@ namespace cepgen
     return dbl_values_[key];
   }
 
-  template<> void
+  template<> ParametersList&
   ParametersList::set<double>( std::string key, const double& value )
   {
     dbl_values_[key] = value;
+    return *this;
   }
 
   template<> std::vector<double>
@@ -236,10 +241,11 @@ namespace cepgen
     return vec_dbl_values_[key];
   }
 
-  template<> void
+  template<> ParametersList&
   ParametersList::set<std::vector<double> >( std::string key, const std::vector<double>& value )
   {
     vec_dbl_values_[key] = value;
+    return *this;
   }
 
   //------------------------------------------------------------------
@@ -265,10 +271,11 @@ namespace cepgen
     return str_values_[key];
   }
 
-  template<> void
+  template<> ParametersList&
   ParametersList::set<std::string>( std::string key, const std::string& value )
   {
     str_values_[key] = value;
+    return *this;
   }
 
   template<> std::vector<std::string>
@@ -290,10 +297,11 @@ namespace cepgen
     return vec_str_values_[key];
   }
 
-  template<> void
+  template<> ParametersList&
   ParametersList::set<std::vector<std::string> >( std::string key, const std::vector<std::string>& value )
   {
     vec_str_values_[key] = value;
+    return *this;
   }
 
   //------------------------------------------------------------------
@@ -319,10 +327,10 @@ namespace cepgen
     return lim_values_[key];
   }
 
-  template<> void
+  template<> ParametersList&
   ParametersList::set<Limits>( std::string key, const Limits& value )
   {
     lim_values_[key] = value;
+    return *this;
   }
 }
-

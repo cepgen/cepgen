@@ -1,7 +1,9 @@
 #include "CepGen/StructureFunctions/FioreBrasse.h"
 
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
+
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/Constants.h"
@@ -37,9 +39,22 @@ namespace cepgen
       return p;
     }
 
-    FioreBrasse::FioreBrasse( const Parameters& params ) :
-      Parameterisation( Type::FioreBrasse ), params( params )
+    FioreBrasse::FioreBrasse() :
+      Parameterisation( ParametersList().set<int>( "id", (int)Type::FioreBrasse ) ),
+      params_( Parameters::standard() )
     {}
+
+    FioreBrasse::FioreBrasse( const ParametersList& params ) :
+      Parameterisation( params )
+    {
+      const auto& model = params.get<std::string>( "model", "standard" );
+      if ( model == "standard" )
+        params_ = Parameters::standard();
+      if ( model == "alternative" )
+        params_ = Parameters::alternative();
+      else
+        throw CG_FATAL( "FioreBrasse" ) << "Invalid modelling selected: " << model << "!";
+    }
 
     FioreBrasse&
     FioreBrasse::operator()( double xbj, double q2 )
@@ -55,14 +70,14 @@ namespace cepgen
 
       double ampli_res = 0., ampli_bg = 0., ampli_tot = 0.;
       for ( unsigned short i = 0; i < 3; ++i ) { //FIXME 4??
-        const Parameters::Resonance& res = params.resonances[i];
-        const double sqrts0 = sqrt( params.s0 );
+        const Parameters::Resonance& res = params_.resonances[i];
+        const double sqrts0 = sqrt( params_.s0 );
 
         std::complex<double> alpha;
-        if ( s > params.s0 )
-          alpha = std::complex<double>( res.alpha0 + res.alpha2*sqrts0 + res.alpha1*s, res.alpha2*sqrt( s-params.s0 ) );
+        if ( s > params_.s0 )
+          alpha = std::complex<double>( res.alpha0 + res.alpha2*sqrts0 + res.alpha1*s, res.alpha2*sqrt( s-params_.s0 ) );
         else
-          alpha = std::complex<double>( res.alpha0 + res.alpha1*s + res.alpha2*( sqrts0 - sqrt( params.s0 - s ) ), 0. );
+          alpha = std::complex<double>( res.alpha0 + res.alpha1*s + res.alpha2*( sqrts0 - sqrt( params_.s0 - s ) ), 0. );
 
         double formfactor = 1./pow( 1. + q2/res.q02, 2 );
         double denom = pow( res.spin-std::real( alpha ), 2 ) + pow( std::imag( alpha ), 2 );
@@ -70,7 +85,7 @@ namespace cepgen
         ampli_res += ampli_imag;
       }
       {
-        const Parameters::Resonance& res = params.resonances[3];
+        const Parameters::Resonance& res = params_.resonances[3];
         double sE = res.alpha2, sqrtsE = sqrt( sE );
         std::complex<double> alpha;
         if ( s > sE )
@@ -82,7 +97,7 @@ namespace cepgen
         double denom = pow( sp-std::real( alpha ), 2 ) + pow( std::imag( alpha ), 2 );
         ampli_bg = res.a*formfactor*formfactor*std::imag( alpha )/denom;
       }
-      ampli_tot = params.norm*( ampli_res+ampli_bg );
+      ampli_tot = params_.norm*( ampli_res+ampli_bg );
 
       CG_DEBUG_LOOP( "FioreBrasse:amplitudes" )
         << "Amplitudes:\n\t"

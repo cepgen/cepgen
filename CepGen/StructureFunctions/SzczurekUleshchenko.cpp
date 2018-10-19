@@ -1,4 +1,6 @@
 #include "CepGen/StructureFunctions/SzczurekUleshchenko.h"
+
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
@@ -7,7 +9,11 @@ namespace cepgen
   namespace strfun
   {
     SzczurekUleshchenko::SzczurekUleshchenko() :
-      Parameterisation( Type::SzczurekUleshchenko ), F1( 0. )
+      Parameterisation( ParametersList().set<int>( "id", (int)Type::SzczurekUleshchenko ) ), F1( 0. )
+    {}
+
+    SzczurekUleshchenko::SzczurekUleshchenko( const ParametersList& params ) :
+      Parameterisation( params ), F1( 0. )
     {}
 
     SzczurekUleshchenko&

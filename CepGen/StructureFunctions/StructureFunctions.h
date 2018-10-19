@@ -8,6 +8,7 @@
 
 namespace cepgen
 {
+  class ParametersList;
   /// Structure functions modelling scope
   namespace strfun
   {
@@ -35,12 +36,12 @@ namespace cepgen
     class Parameterisation
     {
       public:
+        /// Standard SF parameterisation constructor
+        Parameterisation( double f2 = 0., double fl = 0. );
         /// Copy constructor
         Parameterisation( const Parameterisation& sf ) :
           type( sf.type ), F2( sf.F2 ), FL( sf.FL ), old_vals_( sf.old_vals_ ) {}
-        /// Standard SF parameterisation constructor
-        Parameterisation( const Type& type = Type::Invalid, double f2 = 0., double fl = 0. ) :
-          type( type ), F2( f2 ), FL( fl ), old_vals_({ 0., 0. }) {}
+        Parameterisation( const ParametersList& );
         ~Parameterisation() {}
 
         /// Assign from another SF parameterisation object
@@ -52,7 +53,7 @@ namespace cepgen
         friend std::ostream& operator<<( std::ostream&, const Parameterisation& );
 
         /// Build a SF parameterisation for a given type
-        static std::shared_ptr<Parameterisation> build( const Type& );
+        static std::shared_ptr<Parameterisation> build( const ParametersList& );
 
         /// Compute all relevant structure functions for a given \f$(x_{\rm Bj},Q^2)\f$ couple
         virtual Parameterisation& operator()( double xbj, double q2 ) { return *this; }

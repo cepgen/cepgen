@@ -3,6 +3,7 @@
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
+#include "CepGen/Core/ParametersList.h"
 
 #include <vector>
 
@@ -26,8 +27,7 @@ namespace cepgen
             };
 
           public:
-            Parameters() :
-              m02( 0. ), mp2( 0. ), mr2( 0. ), q02( 0. ), lambda2( 0. ) {}
+            Parameters();
             /// Pre-HERA data fit (694 data points)
             static Parameters allm91();
             /// Fixed target and HERA photoproduction total cross sections (1356 points)
@@ -50,7 +50,7 @@ namespace cepgen
             Type type;
         };
 
-        explicit ALLM( const ALLM::Parameters& param = ALLM::Parameters::allm97() );
+        explicit ALLM( const ParametersList& params = ParametersList() );
         ALLM& operator()( double xbj, double q2 ) override;
 
       private:

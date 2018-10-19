@@ -1,27 +1,28 @@
-#include "BlockDurandHa.h"
+#include "CepGen/StructureFunctions/BlockDurandHa.h"
+
+#include "CepGen/Core/Exception.h"
+
 #include <cmath>
+#include <cassert>
 
 namespace cepgen
 {
   namespace strfun
   {
-    BlockDurandHa::Parameters
-    BlockDurandHa::Parameters::standard()
+    BlockDurandHa::BlockDurandHa( const ParametersList& params ) :
+      Parameterisation( params ),
+      a_( params.get<std::vector<double> >( "a", { 8.205e-4, -5.148e-2, -4.725e-3 } ) ),
+      b_( params.get<std::vector<double> >( "b", { 2.217e-3,  1.244e-2,  5.958e-4 } ) ),
+      c_( params.get<std::vector<double> >( "c", { 0.255e0, 1.475e-1 } ) ),
+      n_     ( params.get<double>( "n", 11.49 ) ),
+      lambda_( params.get<double>( "lambda", 2.430 ) ),
+      mu2_   ( params.get<double>( "mu2", 2.82 ) ),
+      m2_    ( params.get<double>( "m2", 0.753 ) )
     {
-      Parameters p;
-      p.a = { { 8.205e-4, -5.148e-2, -4.725e-3 } };
-      p.b = { { 2.217e-3,  1.244e-2,  5.958e-4 } };
-      p.c = { { 0.255e0, 1.475e-1 } };
-      p.n = 11.49;
-      p.lambda = 2.430;
-      p.mu2 = 2.82;
-      p.m2 = 0.753;
-      return p;
+      assert( a_.size() == 3 );
+      assert( b_.size() == 3 );
+      assert( c_.size() == 2 );
     }
-
-    BlockDurandHa::BlockDurandHa( const Parameters& param ) :
-      Parameterisation( Type::BlockDurandHa ), params_( param )
-    {}
 
     BlockDurandHa&
     BlockDurandHa::operator()( double xbj, double q2 )
@@ -36,16 +37,16 @@ namespace cepgen
         return *this;
       }
 
-      const double tau = q2 / ( q2 + params_.mu2 );
-      const double xl = log1p( q2 / params_.mu2 );
+      const double tau = q2 / ( q2 + mu2_ );
+      const double xl = log1p( q2 / mu2_ );
       const double xlx = log( tau/xbj );
 
-      const double A = params_.a[0] + params_.a[1]*xl + params_.a[2]*xl*xl;
-      const double B = params_.b[0] + params_.b[1]*xl + params_.b[2]*xl*xl;
-      const double C = params_.c[0] + params_.c[1]*xl;
-      const double D = q2*( q2+params_.lambda*params_.m2 ) / pow( q2+params_.m2, 2 );
+      const double A = a_[0] + a_[1]*xl + a_[2]*xl*xl;
+      const double B = b_[0] + b_[1]*xl + b_[2]*xl*xl;
+      const double C = c_[0] + c_[1]*xl;
+      const double D = q2*( q2+lambda_*m2_ ) / pow( q2+m2_, 2 );
 
-      F2 = D*pow( 1.-xbj, params_.n ) * ( C + A*xlx + B*xlx*xlx );
+      F2 = D*pow( 1.-xbj, n_ ) * ( C + A*xlx + B*xlx*xlx );
 
       return *this;
     }

@@ -106,77 +106,56 @@ namespace cepgen
     PythonHandler::fillParameter( PyObject* parent, const char* key, bool& out )
     {
       PyObject* pobj = element( parent, key ); // borrowed
-      if ( !pobj )
-        return;
-      if ( !PyBool_Check( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
-      fillParameter( parent, key, (int&)out );
+      if ( pobj )
+        out = (bool)get<int>( pobj );
     }
 
     void
     PythonHandler::fillParameter( PyObject* parent, const char* key, int& out )
     {
       PyObject* pobj = element( parent, key ); // borrowed
-      if ( !pobj )
-        return;
-      if ( !is<int>( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
-      out = get<int>( pobj );
+      if ( pobj )
+        out = get<int>( pobj );
     }
 
     void
     PythonHandler::fillParameter( PyObject* parent, const char* key, unsigned long& out )
     {
       PyObject* pobj = element( parent, key ); // borrowed
-      if ( !pobj )
-        return;
-      if ( !is<int>( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
-      out = get<unsigned long>( pobj );
+      if ( pobj )
+        out = get<unsigned long>( pobj );
     }
 
     void
     PythonHandler::fillParameter( PyObject* parent, const char* key, unsigned int& out )
     {
       PyObject* pobj = element( parent, key ); // borrowed
-      if ( !pobj )
-        return;
-      if ( !is<int>( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
-      out = get<unsigned long>( pobj );
+      if ( pobj )
+        out = get<unsigned long>( pobj );
     }
 
     void
     PythonHandler::fillParameter( PyObject* parent, const char* key, double& out )
     {
       PyObject* pobj = element( parent, key ); // borrowed
-      if ( !pobj )
-        return;
-      if ( !is<double>( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
-      out = get<double>( pobj );
+      if ( pobj )
+        out = get<double>( pobj );
     }
 
     void
     PythonHandler::fillParameter( PyObject* parent, const char* key, std::string& out )
     {
       PyObject* pobj = element( parent, key ); // borrowed
-      if ( !pobj )
-        return;
-      if ( !is<std::string>( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
-      out = get<std::string>( pobj );
+      if ( pobj )
+        out = get<std::string>( pobj );
     }
 
     void
     PythonHandler::fillParameter( PyObject* obj, const char* key, Limits& out )
     {
       PyObject* pobj = element( obj, key ); // borrowed
-      if ( !pobj )
-        return;
-      if ( !is<Limits>( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
-      out = get<Limits>( pobj );
+      if ( pobj )
+        out = get<Limits>( pobj );
     }
 
     void
@@ -206,7 +185,8 @@ namespace cepgen
         throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
       for ( Py_ssize_t i = 0; i < PyTuple_Size( pobj ); ++i ) {
         PyObject* pit = PyTuple_GetItem( pobj, i ); // borrowed
-        out.emplace_back( get<std::string>( pit ) );
+        if ( is<std::string>( pit ) )
+          out.emplace_back( get<std::string>( PyTuple_GetItem( pobj, i ) ) );
       }
     }
 
@@ -231,11 +211,8 @@ namespace cepgen
     PythonHandler::fillParameter( PyObject* parent, const char* key, ParametersList& out )
     {
       PyObject* pobj = element( parent, key ); // borrowed
-      if ( !pobj )
-        return;
-      if ( !PyDict_Check( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
-      out += get<ParametersList>( pobj );
+      if ( pobj )
+        out += get<ParametersList>( pobj );
     }
   }
 }

@@ -1,15 +1,23 @@
 #include "CepGen/StructureFunctions/ChristyBosted.h"
+
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Event/Particle.h"
+
 #include "CepGen/Core/Exception.h"
 
 namespace cepgen
 {
   namespace strfun
   {
-    ChristyBosted::ChristyBosted( const Parameters& params ) :
-      Parameterisation( Type::ChristyBosted ), params_( params )
-    {}
+    ChristyBosted::ChristyBosted( const ParametersList& params ) :
+      Parameterisation( params )
+    {
+      const auto& model = params.get<std::string>( "model", "standard" );
+      if ( model == "standard" )
+        params_ = Parameters::standard();
+      else
+        throw CG_FATAL( "ChristyBosted" ) << "Invalid modelling selected: " << model << "!";
+    }
 
     double
     ChristyBosted::resmod507( char sf, double w2, double q2 ) const

@@ -46,7 +46,9 @@ namespace cepgen
         };
 
         /// Standard parameterisation interpolator constructor (photon from proton)
-        explicit CLAS( const Parameters& params = Parameters::standard_proton() );
+        explicit CLAS();
+        /// Standard parameterisation interpolator constructor (photon from proton)
+        explicit CLAS( const ParametersList& params );
 
         CLAS& operator()( double xbj, double q2 ) override;
 

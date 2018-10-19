@@ -20,7 +20,8 @@ namespace cepgen
           double C1, C2, D1, rho2, Cp, Bp;
         };
 
-        explicit SuriYennie( const Parameters& param = Parameters::standard() );
+        explicit SuriYennie();
+        explicit SuriYennie( const ParametersList& );
         SuriYennie& operator()( double xbj, double q2 ) override;
 
         double F1;

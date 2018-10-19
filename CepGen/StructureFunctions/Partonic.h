@@ -17,40 +17,34 @@ namespace cepgen
     class Partonic : public Parameterisation
     {
       public:
-        /// Model parameterisation
-        struct Parameters
-        {
-          /// Standard (usual CTEQ6) constructor
-          Parameters();
-          /// Number of quark flavours considered in the SF building
-          unsigned short num_flavours;
-          /// String-type PDF identifier (default)
-          std::string pdf_set;
-          /// Integer-type PDF identifier (if no string version is provided)
-          unsigned long pdf_code;
-          /// PDF set used
-          unsigned short pdf_member;
-          /// Quarks types
-          enum class Mode { full = 0, valence = 1, sea = 2 };
-          /// Quarks types considered in the SF building
-          Mode mode;
-        };
+        /// Quarks types
+        enum class Mode { full = 0, valence = 1, sea = 2 };
+        /// Build a calculator
+        explicit Partonic();
         /// Build a calculator from its Parameters object
-        explicit Partonic( const Parameters& param = Parameters() );
+        explicit Partonic( const ParametersList& );
         /// Build a calculator from a set, its member, and the contributing quarks
-        explicit Partonic( const char* set, unsigned short member = 0, const Parameters::Mode& mode = Parameters::Mode::full );
+        explicit Partonic( const char* set, unsigned short member = 0, const Mode& mode = Mode::full );
         Partonic& operator()( double xbj, double q2 ) override;
-        /// Parameterisation used in this SFs calculator
-        Parameters params;
 
       private:
         std::string description() const override;
         void initialise();
+        /// String-type PDF identifier (default)
+        std::string pdf_set_;
+        /// Number of quark flavours considered in the SF building
+        unsigned short num_flavours_;
+        /// Integer-type PDF identifier (if no string version is provided)
+        unsigned long pdf_code_;
+        /// PDF set used
+        unsigned short pdf_member_;
+        /// Quarks types considered in the SF building
+        Mode mode_;
         bool initialised_;
 
 #ifdef LIBLHAPDF
 #  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION >= 6
-        LHAPDF::PDFSet pdf_set_;
+        LHAPDF::PDFSet lha_pdf_set_;
         std::vector<std::unique_ptr<LHAPDF::PDF> > pdfs_;
 #  endif
 #endif
@@ -62,7 +56,7 @@ namespace cepgen
         } };
     };
   }
-  std::ostream& operator<<( std::ostream& os, const strfun::Partonic::Parameters::Mode& mode );
+  std::ostream& operator<<( std::ostream& os, const strfun::Partonic::Mode& mode );
 }
 
 #endif

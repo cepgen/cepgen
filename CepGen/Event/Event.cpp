@@ -163,10 +163,8 @@ namespace cepgen
   Event::roles() const
   {
     ParticleRoles out;
-    ParticlesMap::const_iterator it, end = particles_.end();
-    for ( it = particles_.begin(); it != end; it = particles_.upper_bound( it->first ) ) {
-      out.emplace_back( it->first );
-    }
+    for ( const auto& pr : particles_ )
+      out.emplace_back( pr.first );
     return out;
   }
 

@@ -4,6 +4,7 @@
 #include "CepGen/Physics/Constants.h"
 
 #include "CepGen/Event/Particle.h"
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
 namespace cepgen
@@ -111,9 +112,24 @@ namespace cepgen
       return params;
     }
 
-    CLAS::CLAS( const Parameters& params ) :
-      Parameterisation( Type::CLAS ), params_( params )
+    CLAS::CLAS() :
+      Parameterisation( ParametersList().set<int>( "id", (int)Type::CLAS ) ),
+      params_( Parameters::standard_proton() )
     {}
+
+    CLAS::CLAS( const ParametersList& params ) :
+      Parameterisation( params )
+    {
+      const auto& model = params.get<std::string>( "model", "proton" );
+      if ( model == "proton" )
+        params_ = Parameters::standard_proton();
+      else if ( model == "neutron" )
+        params_ = Parameters::standard_neutron();
+      else if ( model == "deuteron" )
+        params_ = Parameters::standard_deuteron();
+      else
+        throw CG_FATAL( "CLAS" ) << "Invalid modelling selected: " << model << "!";
+    }
 
     CLAS&
     CLAS::operator()( double xbj, double q2 )

@@ -3,6 +3,9 @@
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Physics/Constants.h"
+
+#include "CepGen/Core/ParametersList.h"
+
 #include <array>
 #include <vector>
 
@@ -68,7 +71,7 @@ namespace cepgen
           Continuum continuum;
         };
 
-        explicit ChristyBosted( const Parameters& params = Parameters::standard() );
+        explicit ChristyBosted( const ParametersList& params = ParametersList() );
         ChristyBosted& operator()( double xbj, double q2 ) override;
 
         //--- already computed internally during F2 computation

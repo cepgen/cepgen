@@ -2,7 +2,8 @@
 #define CepGen_StructureFunctions_BlockDurandHa_h
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
-#include <array>
+#include "CepGen/Core/ParametersList.h"
+#include <vector>
 
 namespace cepgen
 {
@@ -12,24 +13,18 @@ namespace cepgen
     class BlockDurandHa : public Parameterisation
     {
       public:
-        struct Parameters
-        {
-          std::array<double,3> a, b;
-          std::array<double,2> c;
-          double n;
-          /// Effective mass spread parameter
-          double lambda;
-          /// Asymptotic log-behaviour transition scale factor
-          double mu2;
-          /// Squared effective mass (~VM mass)
-          double m2;
-          static Parameters standard();
-        };
-        explicit BlockDurandHa( const Parameters& params = Parameters::standard() );
+        explicit BlockDurandHa( const ParametersList& params = ParametersList() );
         BlockDurandHa& operator()( double xbj, double q2 ) override;
 
       private:
-        Parameters params_;
+        std::vector<double> a_, b_, c_;
+        double n_;
+        /// Effective mass spread parameter
+        double lambda_;
+        /// Asymptotic log-behaviour transition scale factor
+        double mu2_;
+        /// Squared effective mass (~VM mass)
+        double m2_;
     };
   }
 }

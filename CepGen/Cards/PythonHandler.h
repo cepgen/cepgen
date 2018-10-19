@@ -56,6 +56,7 @@ namespace cepgen
         void parseStructureFunctions( PyObject*, std::shared_ptr<strfun::Parameterisation>& sf_handler );
     };
     template<> bool PythonHandler::is<int>( PyObject* obj ) const;
+    template<> bool PythonHandler::is<bool>( PyObject* obj ) const;
     template<> int PythonHandler::get<int>( PyObject* obj ) const;
     template<> unsigned long PythonHandler::get<unsigned long>( PyObject* obj ) const;
     template<> bool PythonHandler::is<ParametersList>( PyObject* obj ) const;

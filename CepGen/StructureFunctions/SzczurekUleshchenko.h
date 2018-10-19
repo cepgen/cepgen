@@ -17,6 +17,7 @@ namespace cepgen
     {
       public:
         SzczurekUleshchenko();
+        SzczurekUleshchenko( const ParametersList& );
         SzczurekUleshchenko& operator()( double xbj, double q2 ) override;
 
         double F1;
