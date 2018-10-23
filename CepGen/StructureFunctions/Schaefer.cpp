@@ -38,7 +38,7 @@ namespace cepgen
     void
     Schaefer::initialise()
     {
-      CG_INFO( "LUXlike" ) << "LUXlike structure functions evaluator successfully initialised.\n"
+      CG_DEBUG( "LUXlike" ) << "LUXlike structure functions evaluator successfully initialised.\n"
         << " * Q² cut:             " << q2_cut_ << " GeV²\n"
         << " * W² ranges:          " << w2_lim_.at( 0 ) << " GeV² / " << w2_lim_.at( 1 ) << " GeV²\n"
         << " * resonance model:    " << *resonances_model_ << "\n"

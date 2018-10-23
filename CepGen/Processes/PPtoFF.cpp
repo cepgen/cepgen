@@ -39,9 +39,9 @@ namespace cepgen
       qf_ = particleproperties::charge( pdg_f );
       colf_ = particleproperties::colours( pdg_f );
       CG_DEBUG( "PPtoFF:prepare" )
-        << "Produced particles (" << pdg_f << ") "
-        << "with mass = " << mf_ << " GeV, "
-        << "and charge = " << std::setprecision( 2 ) << qf_ << " e";
+        << "Produced particles: " << pdg_f << " ("
+        << "mass = " << mf_ << " GeV, "
+        << "charge = " << std::setprecision( 2 ) << qf_ << " e)";
       CG_DEBUG( "PPtoFF:mode" )
         << "matrix element computation method: " << method_ << ".";
     }

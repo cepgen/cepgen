@@ -1,6 +1,6 @@
-import Config.Core as cepgen
+from containers_cfi import Parameters
 
-generator = cepgen.Parameters(
+generator = Parameters(
     numEvents = 100000,
     numPoints = 100,
     printEvery = 10000,

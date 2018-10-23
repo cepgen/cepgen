@@ -58,7 +58,7 @@ namespace mstw
     init();
 
     const auto& bounds = boundaries();
-    CG_INFO( "MSTW" )
+    CG_DEBUG( "MSTW" )
       << "MSTW@" << header_.order << " grid evaluator built "
       << "for " << header_.nucleon << " structure functions (" << header_.cl << ")\n\t"
       << "xBj in range [" << pow( 10., bounds[0].first ) << ":" << pow( 10., bounds[0].second ) << "]\n\t"

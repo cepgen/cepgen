@@ -4,7 +4,7 @@ A collection of useful objects for the definition of a
 general kT-factorised process steering card
 """
 
-import Config.Core as cepgen
+from containers_cfi import Module, Parameters
 from math import pi
 
 class ProtonFlux:
@@ -17,8 +17,8 @@ class HeavyIonFlux:
     '''Type of parton (from heavy ion) flux modelling'''
     PhotonElastic         = 100
 
-process = cepgen.Module('ktProcess',
-    outKinematics = cepgen.Parameters(
+process = Module('ktProcess',
+    outKinematics = Parameters(
         #--- cuts on initial-state partons
         qt = (0., 50.),
         phiqt = (0., 2.*pi),

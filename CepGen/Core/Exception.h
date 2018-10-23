@@ -138,7 +138,7 @@ namespace cepgen
       inline std::string shortMessage() const {
         std::ostringstream os;
         os << "[" << typeString() << "]";
-        if ( type_ == Type::debug || type_ == Type::warning )
+        if ( type_ == Type::warning )
           os << " \033[30;4m" << from_ << "\033[0m\n";
         os << "\t" << message_.str();
         return os.str();
