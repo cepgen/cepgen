@@ -3,8 +3,6 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/ParticleProperties.h"
 
-#include "CepGen/Core/Exception.h"
-
 #include <iostream>
 #include <cmath>
 #include <cassert>
@@ -23,24 +21,6 @@ namespace cepgen
     Parameterisation::theta( double xbj, double q2 ) const
     {
       return 1.+12.*( q2/( q2+1. ) )*( 0.125*0.125/( 0.125*0.125+xbj*xbj ) );
-    }
-
-    std::shared_ptr<Parameterisation>
-    Parameterisation::build( const ParametersList& params )
-    {
-      const Type& type = (Type)params.get<int>( "id" );
-      switch ( type ) {
-        case Type::E143:
-          return std::make_shared<E143>( params );
-        case Type::R1990:
-          return std::make_shared<R1990>( params );
-        case Type::CLAS:
-          return std::make_shared<CLAS>( params );
-        case Type::SibirtsevBlunden:
-          return std::make_shared<SibirtsevBlunden>( params );
-        default:
-          throw CG_FATAL( "Rratio" ) << "Failed to build a R-ratio estimator with type=" << (int)type << "!";
-      }
     }
 
     //---------------------------------------------------------------------------------------------
