@@ -78,6 +78,8 @@ namespace cepgen
         double a_, b1_, b2_, c_;
     };
   }
+  /// Human-readable description of this R-ratio parameterisation type
+  std::ostream& operator<<( std::ostream&, const sigrat::Type& );
 }
 
 #endif

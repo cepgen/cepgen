@@ -17,11 +17,11 @@ class PDFMode:
     SeaQuarks     = 2
 
 class StructureFunctions:
+    '''Types of structure functions supported'''
     generic = Parameters(
         id = 0,
         sigmaRatio = SigmaRatio.E143
     )
-    '''Types of structure functions supported'''
     Electron            = generic.clone(id=1)
     ElasticProton       = generic.clone(id=2)
     SuriYennie          = generic.clone(id=11)

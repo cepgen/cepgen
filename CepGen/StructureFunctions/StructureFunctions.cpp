@@ -84,29 +84,4 @@ namespace cepgen
       return os;
     }
   }
-
-  /// Human-readable format of a structure function type
-  std::ostream&
-  operator<<( std::ostream& os, const strfun::Type& sf )
-  {
-    switch ( sf ) {
-      case strfun::Type::Invalid:             return os << "[INVALID]";
-      case strfun::Type::Electron:            return os << "electron";
-      case strfun::Type::ElasticProton:       return os << "elastic proton";
-      case strfun::Type::SuriYennie:          return os << "Suri-Yennie";
-      case strfun::Type::SzczurekUleshchenko: return os << "Szczurek-Uleshchenko";
-      case strfun::Type::FioreBrasse:         return os << "Fiore-Brasse";
-      case strfun::Type::ChristyBosted:       return os << "Christy-Bosted";
-      case strfun::Type::CLAS:                return os << "CLAS";
-      case strfun::Type::BlockDurandHa:       return os << "BDH";
-      case strfun::Type::ALLM91:              return os << "ALLM91";
-      case strfun::Type::ALLM97:              return os << "ALLM97";
-      case strfun::Type::GD07p:               return os << "GD07p";
-      case strfun::Type::GD11p:               return os << "GD11p";
-      case strfun::Type::Schaefer:            return os << "LUXlike";
-      case strfun::Type::MSTWgrid:            return os << "MSTW (grid)";
-      case strfun::Type::Partonic:            return os << "Partonic";
-    }
-    return os;
-  }
 }

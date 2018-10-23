@@ -23,5 +23,22 @@ namespace cepgen
       }
     }
   }
+
+  /// Human-readable format of a R-ratio computation method
+  std::ostream&
+  operator<<( std::ostream& os, const sigrat::Type& sf )
+  {
+    switch ( sf ) {
+      case sigrat::Type::E143:
+        return os << "E143";
+      case sigrat::Type::R1990:
+        return os << "R1990";
+      case sigrat::Type::CLAS:
+        return os << "CLAS";
+      case sigrat::Type::SibirtsevBlunden:
+        return os << "SibirtsevBlunden";
+    }
+    return os;
+  }
 }
 

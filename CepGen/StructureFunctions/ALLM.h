@@ -2,7 +2,6 @@
 #define CepGen_StructureFunctions_ALLM_h
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
-#include "CepGen/StructureFunctions/SigmaRatio.h"
 
 #include <vector>
 
