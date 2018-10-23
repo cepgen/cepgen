@@ -24,7 +24,7 @@ namespace cepgen
 
     LpairHandler::LpairHandler( const char* file ) :
       proc_params_( new ParametersList ),
-      str_fun_( 11 ), hi_1_( { 0, 0 } ), hi_2_( { 0, 0 } )
+      str_fun_( 11 ), sr_type_( 1 ), hi_1_( { 0, 0 } ), hi_2_( { 0, 0 } )
     {
       std::ifstream f( file, std::fstream::in );
       if ( !f.is_open() )
@@ -53,7 +53,9 @@ namespace cepgen
 
       //--- parse the structure functions code
       auto sf_params = ParametersList()
-        .set<int>( "id", str_fun_ );
+        .set<int>( "id", str_fun_ )
+        .set<ParametersList>( "sigmaRatio", ParametersList()
+          .set<int>( "id", sr_type_ ) );
       const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
       if ( str_fun_ / kLHAPDFCodeDec == 1 ) { // SF from parton
         const unsigned long icode = str_fun_ % kLHAPDFCodeDec;
@@ -141,6 +143,7 @@ namespace cepgen
       registerParameter<std::string>( "MGRD", "MSTW grid interpolation path", &mstw_grid_path_ );
       registerParameter<int>( "PMOD", "Outgoing primary particles' mode", &str_fun_ );
       registerParameter<int>( "EMOD", "Outgoing primary particles' mode", &str_fun_ );
+      registerParameter<int>( "RTYP", "R-ratio computation type", &sr_type_ );
       registerParameter<int>( "PAIR", "Outgoing particles' PDG id", (int*)&proc_params_->operator[]<int>( "pair" ) );
       registerParameter<int>( "INA1", "Heavy ion atomic weight (1st incoming beam)", (int*)&hi_1_.first );
       registerParameter<int>( "INZ1", "Heavy ion atomic number (1st incoming beam)", (int*)&hi_1_.second );
