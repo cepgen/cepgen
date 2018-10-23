@@ -1,7 +1,7 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
 from Config.Integration.vegas_cff import integrator
-#from Config.Hadronisation.pythia8_cff import pythia8 as hadroniser
+from Config.Hadronisation.pythia8_cff import pythia8 as hadroniser
 from Config.PDG_cfi import PDG
 
 from Config.logger_cfi import logger

@@ -17,16 +17,14 @@ namespace cepgen
         class Parameters
         {
           private:
-            struct Trajectory {
-              Trajectory() :
-                a( { 0., 0., 0. } ), b( { 0., 0., 0. } ), c( { 0., 0., 0. } ) {}
-              Trajectory( const std::vector<double>& c, const std::vector<double>& a, const std::vector<double>& b ) :
-                a( a ), b( b ), c( c ) {}
+            struct Trajectory
+            {
+              Trajectory( const ParametersList& params = ParametersList() );
               std::vector<double> a, b, c;
             };
 
           public:
-            Parameters();
+            Parameters( const ParametersList& params = ParametersList() );
             /// Pre-HERA data fit (694 data points)
             static Parameters allm91();
             /// Fixed target and HERA photoproduction total cross sections (1356 points)
