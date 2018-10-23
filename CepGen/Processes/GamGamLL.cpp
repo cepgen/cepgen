@@ -25,7 +25,7 @@ namespace cepgen
     GamGamLL::GamGamLL( const ParametersList& params ) :
       GenericProcess( params, "lpair", "pp → p(*) ( ɣɣ → l⁺l¯ ) p(*)" ),
       n_opt_( params.get<int>( "nopt", 0 ) ),
-      pair_ ( params.get<int>( "pair", 0 ) ),
+      pair_ ( (PDG)params.get<int>( "pair", 0 ) ),
       ep1_( 0. ), ep2_( 0. ), p_cm_( 0. ),
       ec4_( 0. ), pc4_( 0. ), mc4_( 0. ), w4_( 0. ),
       p12_( 0. ), p1k2_( 0. ), p2k1_( 0. ),
@@ -58,7 +58,7 @@ namespace cepgen
       }, {
         { Particle::OutgoingBeam1, { PDG::proton } },
         { Particle::OutgoingBeam2, { PDG::proton } },
-        { Particle::CentralSystem, { (PDG)pair_, (PDG)pair_ } }
+        { Particle::CentralSystem, { pair_, pair_ } }
       } );
     }
 
@@ -724,8 +724,8 @@ namespace cepgen
 
       CG_DEBUG_LOOP( "GamGamLL" ) << "pg = " << Particle::Momentum( pgx, pgy, pgz );
 
-      const double pgp = sqrt( pgx*pgx + pgy*pgy ), // outgoing proton (3)'s transverse momentum
-                   pgg = sqrt( pgp*pgp + pgz*pgz ); // outgoing proton (3)'s momentum
+      const double pgp = std::hypot( pgx, pgy ), // outgoing proton (3)'s transverse momentum
+                   pgg = std::hypot( pgp, pgz ); // outgoing proton (3)'s momentum
       if ( pgg > pgp*0.9 && pgg > pg )
         pg = pgg; //FIXME ???
 

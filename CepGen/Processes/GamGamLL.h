@@ -6,6 +6,7 @@
 
 namespace cepgen
 {
+  enum class PDG;
   namespace proc
   {
     /**
@@ -88,7 +89,7 @@ namespace cepgen
 
         /// Internal switch for the optimised code version (LPAIR legacy ; unimplemented here)
         int n_opt_;
-        int pair_;
+        PDG pair_;
 
         Limits w_limits_;
         Limits q2_limits_;

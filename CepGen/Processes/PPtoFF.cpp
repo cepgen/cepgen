@@ -17,7 +17,7 @@ namespace cepgen
   {
     PPtoFF::PPtoFF( const ParametersList& params ) :
       GenericKTProcess( params, "pptoff", "ɣɣ → f⁺f¯", { { PDG::photon, PDG::photon } }, { PDG::muon, PDG::muon } ),
-      pair_  ( params.get<int>( "pair", 0 ) ),
+      pair_  ( (PDG)params.get<int>( "pair", 0 ) ),
       method_( params.get<int>( "method", 1 ) ),
       y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )
     {}
@@ -30,16 +30,15 @@ namespace cepgen
       registerVariable( pt_diff_, Mapping::linear, cuts_.cuts.central.pt_diff, { 0., 50. }, "Fermions transverse momentum difference" );
       registerVariable( phi_pt_diff_, Mapping::linear, cuts_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Fermions azimuthal angle difference" );
 
-      if ( (PDG)pair_ == PDG::invalid )
+      if ( pair_ == PDG::invalid )
         throw CG_FATAL( "PPtoFF:prepare" )
-          << "Invalid fermion pair selected: " << pair_ << "!";
+          << "Invalid fermion pair selected: " << (int)pair_ << "!";
 
-      const PDG pdg_f = (PDG)pair_;
-      mf_ = particleproperties::mass( pdg_f ); mf2_ = mf_*mf_;
-      qf_ = particleproperties::charge( pdg_f );
-      colf_ = particleproperties::colours( pdg_f );
+      mf_ = particleproperties::mass( pair_ ); mf2_ = mf_*mf_;
+      qf_ = particleproperties::charge( pair_ );
+      colf_ = particleproperties::colours( pair_ );
       CG_DEBUG( "PPtoFF:prepare" )
-        << "Produced particles: " << pdg_f << " ("
+        << "Produced particles: " << pair_ << " ("
         << "mass = " << mf_ << " GeV, "
         << "charge = " << std::setprecision( 2 ) << qf_ << " e)";
       CG_DEBUG( "PPtoFF:mode" )
@@ -151,9 +150,9 @@ namespace cepgen
         << "First remnant:  " << PX_ << ", mass = " << PX_.mass() << "\n\t"
         << "Second remnant: " << PY_ << ", mass = " << PY_.mass() << ".";
 
-      if ( fabs( PX_.mass()-MX_ ) > 1.e-6 )
+      if ( fabs( PX_.mass()-MX_ ) > 1.e-4 )
         throw CG_FATAL( "PPtoFF" ) << "Invalid X system mass: " << PX_.mass() << "/" << MX_ << ".";
-      if ( fabs( PY_.mass()-MY_ ) > 1.e-6 )
+      if ( fabs( PY_.mass()-MY_ ) > 1.e-4 )
         throw CG_FATAL( "PPtoFF" ) << "Invalid Y system mass: " << PY_.mass() << "/" << MY_ << ".";
 
       //=================================================================
@@ -259,7 +258,7 @@ namespace cepgen
       //     first outgoing fermion
       //=================================================================
       Particle& of1 = event_->operator[]( Particle::CentralSystem )[0];
-      of1.setPdgId( of1.pdgId(), sign );
+      of1.setPdgId( pair_, sign );
       of1.setStatus( Particle::Status::FinalState );
       of1.setMomentum( p_f1_ );
 
@@ -267,7 +266,7 @@ namespace cepgen
       //     second outgoing fermion
       //=================================================================
       Particle& of2 = event_->operator[]( Particle::CentralSystem )[1];
-      of2.setPdgId( of2.pdgId(), -sign );
+      of2.setPdgId( pair_, -sign );
       of2.setStatus( Particle::Status::FinalState );
       of2.setMomentum( p_f2_ );
     }

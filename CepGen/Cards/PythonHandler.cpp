@@ -207,6 +207,7 @@ namespace cepgen
       fillParameter( kin, "invmass", params_.kinematics.cuts.central.mass_sum );
 
       fillParameter( kin, "mx", params_.kinematics.cuts.remnants.mass_single );
+      fillParameter( kin, "yj", params_.kinematics.cuts.remnants.rapidity_single );
     }
 
     void

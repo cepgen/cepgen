@@ -1,6 +1,7 @@
 from Config.Integration.plain_cff import integrator as plain
 
 class VegasIntegrationMode:
+    """Type of integration to be performed"""
     Stratified = -1
     ImportanceOnly = 0
     Importance = 1

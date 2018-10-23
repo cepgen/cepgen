@@ -18,7 +18,18 @@ class Parameters(dict):
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
     def __init__(self, *args, **kwargs):
-        '''Construct from dictionary arguments'''
+        """Construct a parameters set from dictionary arguments
+
+        Args:
+            args: list of arguments
+
+        Kwargs:
+            kwargs: list of named (keyworded) arguments
+
+        Examples:
+            >>> print dict(Parameters(foo = 'bar', foo2 = 42))
+            {'foo': 'bar', 'foo2': 42}
+        """
         self.update(*args, **kwargs)
         super(Parameters, self).__init__(*args, **kwargs)
     def __deepcopy__(self, memo):
@@ -56,9 +67,26 @@ class Parameters(dict):
         self.extend(sys.modules[mod])
 
 class Module(Parameters):
-    '''A named parameters set to steer a generic module'''
+    """A named parameters set to steer a generic module
+
+    Attributes:
+        mod_name: Name of this module
+    """
+
     def __init__(self, name, *args, **kwargs):
-        '''Construct from dictionary arguments'''
+        """Construct a module parameters set from dictionary arguments
+
+        Args:
+            name: module name
+            args: list of arguments
+
+        Kwargs:
+            kwargs: list of named (keyworded) arguments
+
+        Examples:
+            >>> print dict(Module('module1', foo = 'bar', foo2 = 42))
+            {'foo': 'bar', 'foo2': 42, 'mod_name': 'module1'}
+        """
         super(Module, self).__init__(*args, **kwargs)
         self.mod_name = name
     def __len__(self):

@@ -55,7 +55,7 @@ namespace cepgen
     double flux = 0.;
     switch ( type ) {
       case KTFlux::HI_Photon_Elastic: {
-        const double r_a = 1.1*std::pow( hi.A, 1./3 ), a0 = 0.7, m_a = hi.A*KTFluxParameters::kMP;
+        const double r_a = 1.1*cbrt( hi.A ), a0 = 0.7, m_a = hi.A*KTFluxParameters::kMP;
         const double q2_ela = ( kt2+x*x*m_a*m_a )/( 1.-x ), cons = sqrt( q2_ela )/0.1973;
         const double tau = cons*r_a, tau1 = cons*a0;
         // "Realistic nuclear form-factor" as used in STARLIGHT

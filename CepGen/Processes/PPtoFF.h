@@ -6,6 +6,7 @@
 
 namespace cepgen
 {
+  enum class PDG;
   namespace proc
   {
     /// Compute the matrix element for a CE \f$\gamma\gamma\rightarrow f\bar f\f$ process using \f$k_{\rm T}\f$-factorization approach
@@ -26,7 +27,7 @@ namespace cepgen
         double offShellME( double, double, double, double, double, double, const Particle::Momentum&, const Particle::Momentum& ) const;
 
         /// PDG id of the fermion pair produced
-        int pair_;
+        PDG pair_;
         int method_;
 
         Limits rap_limits_;

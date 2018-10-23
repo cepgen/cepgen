@@ -7,6 +7,7 @@ class PDG:
     bottom    = 5
     top       = 6
     electron  = 11
+    positron  = 11
     muon      = 13
     tau       = 15
     gluon     = 21

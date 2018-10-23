@@ -60,5 +60,4 @@ from Config.generator_cff import generator
 generator = generator.clone(
     numEvents = 1000,
     printEvery = 100,
-    treat = True, # smoothing of the integrand
 )

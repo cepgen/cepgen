@@ -110,7 +110,7 @@ namespace cepgen
 
           // build the kinematics of the central system
           Particle::Momentum central_system;
-          for ( const auto& part : ev->operator[]( Particle::CentralSystem ) )
+          for ( const auto& part : (*ev)[Particle::CentralSystem] )
             central_system += part.momentum();
 
           // tame the cross-section by the reweighting function
@@ -152,7 +152,7 @@ namespace cepgen
       //=============================================================================================
 
       if ( p->kinematics.cuts.central_particles.size() > 0 ) {
-        for ( const auto& part : ev->operator[]( Particle::CentralSystem ) ) {
+        for ( const auto& part : (*ev)[Particle::CentralSystem] ) {
           // retrieve all cuts associated to this final state particle
           if ( p->kinematics.cuts.central_particles.count( part.pdgId() ) == 0 )
             continue;
@@ -167,6 +167,17 @@ namespace cepgen
           if ( !cuts_pdgid.rapidity_single.passes( part.momentum().rapidity() ) )
             return 0.;
         }
+      }
+//      std::cout << (*ev)[Particle::OutgoingBeam1][0].momentum().eta() << std::endl;
+      if ( p->kinematics.cuts.remnants.rapidity_single.valid() ) {
+        for ( const auto& part : (*ev)[Particle::OutgoingBeam1] )
+          if ( !p->kinematics.cuts.remnants.rapidity_single.passes( fabs( part.momentum().rapidity() ) ) )
+          //if ( !p->kinematics.cuts.remnants.rapidity_single.passes( fabs( part.momentum().eta() ) ) )
+            return 0.;
+        for ( const auto& part : (*ev)[Particle::OutgoingBeam2] )
+          if ( !p->kinematics.cuts.remnants.rapidity_single.passes( fabs( part.momentum().rapidity() ) ) )
+          //if ( !p->kinematics.cuts.remnants.rapidity_single.passes( fabs( part.momentum().eta() ) ) )
+            return 0.;
       }
 
       //=============================================================================================
