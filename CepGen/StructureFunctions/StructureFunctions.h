@@ -2,7 +2,6 @@
 #define CepGen_StructureFunctions_StructureFunctions_h
 
 #include "CepGen/Core/ParametersList.h"
-#include "CepGen/StructureFunctions/SigmaRatio.h"
 
 #include <iostream>
 #include <memory>
@@ -10,6 +9,7 @@
 namespace cepgen
 {
   class ParametersList;
+  namespace sigrat { class Parameterisation; }
   /// Structure functions modelling scope
   namespace strfun
   {
@@ -58,14 +58,11 @@ namespace cepgen
         /// Compute all relevant structure functions for a given \f$(x_{\rm Bj},Q^2)\f$ couple
         virtual Parameterisation& operator()( double xbj, double q2 ) { return *this; }
         /// Compute the longitudinal structure function for a given point
-        virtual void computeFL( double xbj, double q2, const sigrat::Parameterisation& ratio = sigrat::E143() );
+        virtual void computeFL( double xbj, double q2 );
         /// Compute the longitudinal structure function for a given point
         virtual void computeFL( double xbj, double q2, double r );
         /// Compute the \f$F_1\f$ structure function for a given point
         double F1( double xbj, double q2 ) const;
-
-      private:
-        ParametersList params_;
 
       public:
         /// Interpolation type of structure functions
@@ -77,10 +74,9 @@ namespace cepgen
         virtual std::string description() const; ///< Human-readable description of this SF set
         static const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
         static const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
+        ParametersList params_; ///< List of parameters used for this builder definition
         std::pair<double,double> old_vals_; ///< Last \f$(x_{\rm Bj},Q^2)\f$ couple computed
-
-      private:
-        std::string name_;
+        std::shared_ptr<sigrat::Parameterisation> r_ratio_;
     };
   }
   /// Human-readable description of this SF parameterisation type

@@ -1,4 +1,5 @@
 #include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
 
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/ParticleProperties.h"
@@ -17,19 +18,20 @@ namespace cepgen
     const double Parameterisation::mp2_ = Parameterisation::mp_*Parameterisation::mp_;
 
     Parameterisation::Parameterisation( double f2, double fl ) :
-      type( Type::Invalid ),
-      F2( f2 ), FL( fl ), old_vals_({ 0., 0. })
+      type( Type::Invalid ), F2( f2 ), FL( fl ), old_vals_({ 0., 0. }),
+      r_ratio_( new sigrat::E143 )
     {}
 
     Parameterisation::Parameterisation( const Parameterisation& sf ) :
-      params_( sf.params_ ), type( sf.type ),
-      F2( sf.F2 ), FL( sf.FL ), old_vals_( sf.old_vals_ )
+      type( sf.type ), F2( sf.F2 ), FL( sf.FL ), params_( sf.params_ ), old_vals_( sf.old_vals_ ),
+      r_ratio_( sf.r_ratio_ )
     {}
 
     Parameterisation::Parameterisation( const ParametersList& params ) :
-      params_( params ),
-      type( (Type)params.get<int>( "id" ) ),
-      F2( 0. ), FL( 0. ), old_vals_({ 0., 0. })
+      type( (Type)params.get<int>( "id" ) ), F2( 0. ), FL( 0. ), params_( params ), old_vals_({ 0., 0. }),
+      r_ratio_( sigrat::Parameterisation::build(
+        params.get<ParametersList>( "sigmaRatio", ParametersList().set<int>( "id", (int)sigrat::Type::E143 ) )
+      ) )
     {}
 
     double
@@ -48,10 +50,13 @@ namespace cepgen
     }
 
     void
-    Parameterisation::computeFL( double xbj, double q2, const sigrat::Parameterisation& ratio )
+    Parameterisation::computeFL( double xbj, double q2 )
     {
+      if ( !r_ratio_ )
+        throw CG_FATAL( "StructureFunctions:FL" )
+          << "Failed to retrieve a R-ratio calculator!";
       double r_error = 0.;
-      computeFL( xbj, q2, ratio( xbj, q2, r_error ) );
+      computeFL( xbj, q2, (*r_ratio_)( xbj, q2, r_error ) );
     }
 
     void

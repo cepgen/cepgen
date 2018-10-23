@@ -35,26 +35,21 @@ namespace mstw
         double f2; ///< Transverse structure function value
         double fl; ///< Longitudinal structure function value
       };
-      /// List of parameters for this grid definition
-      struct Parameters {
-        Parameters() : grid_path( DEFAULT_MSTW_GRID_PATH ) {}
-        /// Location of the grid to be interpolated
-        std::string grid_path;
-      };
 
     public:
       /// Retrieve the grid interpolator (singleton)
       static Grid& get( const char* path = DEFAULT_MSTW_GRID_PATH );
+      /// Retrieve the grid interpolator (singleton)
+      static Grid& get( const cepgen::ParametersList& params = cepgen::ParametersList() );
 
       /// Compute the structure functions at a given \f$Q^2/x_{\rm Bj}\f$
       Grid& operator()( double xbj, double q2 ) override;
       /// Retrieve the grid's header information
       header_t header() const { return header_; }
       /// Grid parameterisation object
-      Parameters params;
 
         //--- already retrieved from grid, so no need to recompute it
-      void computeFL( double xbj, double q2, const cepgen::sigrat::Parameterisation& ) override {}
+      void computeFL( double xbj, double q2 ) override {}
       void computeFL( double xbj, double q2, double r ) override {}
 
     public:
@@ -62,7 +57,7 @@ namespace mstw
       void operator=( const GridHandler& ) = delete;
 
     private:
-      explicit Grid( const Parameters& = Parameters() );
+      explicit Grid( const cepgen::ParametersList& = cepgen::ParametersList() );
       std::string description() const override;
       static const unsigned int good_magic;
       static std::shared_ptr<Grid> singl_;
@@ -76,6 +71,5 @@ namespace mstw
   std::ostream& operator<<( std::ostream&, const Grid::header_t::nucleon_t& ); ///< Human-readable description of a nucleon type
 }
 
-#undef DEFAULT_MSTW_GRID_PATH
-
 #endif
+

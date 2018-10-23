@@ -9,11 +9,9 @@
 
 #include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Hadronisers/HadronisersHandler.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Physics/GluonGrid.h"
-
-#include "CepGen/StructureFunctions/StructureFunctions.h"
-#include "CepGen/StructureFunctions/MSTWGrid.h"
 
 #include <algorithm>
 
@@ -154,15 +152,11 @@ namespace cepgen
       fillParameter( kin, "cmEnergy", sqrt_s );
       if ( sqrt_s != -1. )
         params_.kinematics.setSqrtS( sqrt_s );
+
       PyObject* psf = element( kin, "structureFunctions" ); // borrowed
-      if ( psf ) {
-        ParametersList sf_params = get<ParametersList>( psf );
-        params_.kinematics.structure_functions = strfun::Parameterisation::build( sf_params );
-        if ( sf_params.get<int>( "id" ) == (int)strfun::Type::MSTWgrid ) {
-          auto sf = std::dynamic_pointer_cast<mstw::Grid>( params_.kinematics.structure_functions );
-          fillParameter( psf, "gridPath", sf->params.grid_path );
-        }
-      }
+      if ( psf )
+        params_.kinematics.structure_functions = strfun::Parameterisation::build( get<ParametersList>( psf ) );
+
       std::vector<int> kt_fluxes;
       fillParameter( kin, "ktFluxes", kt_fluxes );
       if ( kt_fluxes.size() > 0 )

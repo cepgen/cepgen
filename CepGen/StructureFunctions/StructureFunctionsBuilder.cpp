@@ -37,7 +37,7 @@ namespace cepgen
         case Type::Partonic:            return std::make_shared<Partonic>( params );
         //--- particular case for the MSTW grid as we are dealing
         //--- with a singleton ; hence, no deleter is needed!
-        case Type::MSTWgrid:            return std::shared_ptr<mstw::Grid>( &mstw::Grid::get(), [=]( mstw::Grid* ){} );
+        case Type::MSTWgrid:            return std::shared_ptr<mstw::Grid>( &mstw::Grid::get( params ), [=]( mstw::Grid* ){} );
       }
     }
   }

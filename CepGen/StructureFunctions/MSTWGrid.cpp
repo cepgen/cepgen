@@ -14,31 +14,38 @@ namespace mstw
   Grid&
   Grid::get( const char* filename )
   {
-    Parameters p;
-    p.grid_path = filename;
-    static Grid instance( p );
+    static Grid instance( cepgen::ParametersList()
+      .set<int>( "id", (int)cepgen::strfun::Type::MSTWgrid )
+      .set<std::string>( "gridPath", filename ) );
     return instance;
   }
 
-  Grid::Grid( const Parameters& param ) :
-    cepgen::strfun::Parameterisation( cepgen::ParametersList().set<int>( "id", (int)cepgen::strfun::Type::MSTWgrid ) ),
-    cepgen::GridHandler<2,2>( cepgen::GridType::logarithmic ),
-    params( param )
+  Grid&
+  Grid::get( const cepgen::ParametersList& params )
+  {
+    static Grid instance( params );
+    return instance;
+  }
+
+  Grid::Grid( const cepgen::ParametersList& params ) :
+    cepgen::strfun::Parameterisation( params ),
+    cepgen::GridHandler<2,2>( cepgen::GridType::logarithmic )
   {
     { // file readout part
-      std::ifstream file( params.grid_path, std::ios::binary | std::ios::in );
+      const std::string grid_path = params_.get<std::string>( "gridPath", DEFAULT_MSTW_GRID_PATH );
+      std::ifstream file( grid_path, std::ios::binary | std::ios::in );
       if ( !file.is_open() )
-        throw CG_FATAL( "Grid" ) << "Impossible to load grid file \"" << params.grid_path << "\"!";
+        throw CG_FATAL( "MSTW" ) << "Impossible to load grid file \"" << grid_path << "\"!";
 
       file.read( reinterpret_cast<char*>( &header_ ), sizeof( header_t ) );
 
       // first checks on the file header
 
       if ( header_.magic != good_magic )
-        throw CG_FATAL( "Grid" ) << "Wrong magic number retrieved: " << header_.magic << ", expecting " << good_magic << ".";
+        throw CG_FATAL( "MSTW" ) << "Wrong magic number retrieved: " << header_.magic << ", expecting " << good_magic << ".";
 
       if ( header_.nucleon != header_t::proton )
-        throw CG_FATAL( "Grid" ) << "Only proton structure function grids can be retrieved for this purpose!";
+        throw CG_FATAL( "MSTW" ) << "Only proton structure function grids can be retrieved for this purpose!";
 
       // retrieve all points and evaluate grid boundaries
 
@@ -51,7 +58,7 @@ namespace mstw
     init();
 
     const auto& bounds = boundaries();
-    CG_INFO( "Grid" )
+    CG_INFO( "MSTW" )
       << "MSTW@" << header_.order << " grid evaluator built "
       << "for " << header_.nucleon << " structure functions (" << header_.cl << ")\n\t"
       << "xBj in range [" << pow( 10., bounds[0].first ) << ":" << pow( 10., bounds[0].second ) << "]\n\t"
@@ -63,7 +70,7 @@ namespace mstw
   {
     std::ostringstream os;
     const auto& bounds = boundaries();
-    os << "MSTW grid{"
+    os << "MSTW(grid){"
        << pow( 10., bounds[0].first ) << "<xbj<" << pow( 10., bounds[0].second ) << ","
        << pow( 10., bounds[1].first ) << "<Q²/GeV²<" << pow( 10., bounds[1].second ) << "}";
     return os.str();

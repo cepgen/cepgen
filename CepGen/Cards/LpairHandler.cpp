@@ -52,8 +52,8 @@ namespace cepgen
       params_.setProcess( std::move( proc ) );
 
       //--- parse the structure functions code
-      ParametersList sf_params;
-      sf_params.set<int>( "id", str_fun_ );
+      auto sf_params = ParametersList()
+        .set<int>( "id", str_fun_ );
       const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
       if ( str_fun_ / kLHAPDFCodeDec == 1 ) { // SF from parton
         const unsigned long icode = str_fun_ % kLHAPDFCodeDec;
@@ -62,6 +62,9 @@ namespace cepgen
           .set<int>( "pdfId", icode % kLHAPDFPartDec )
           .set<int>( "mode", icode / kLHAPDFPartDec ); // 0, 1, 2
       }
+      else if ( str_fun_ == (int)strfun::Type::MSTWgrid )
+        sf_params
+          .set<std::string>( "gridPath", mstw_grid_path_ );
       params_.kinematics.structure_functions = strfun::Parameterisation::build( sf_params );
 
       //--- parse the integration algorithm name
@@ -135,10 +138,10 @@ namespace cepgen
       // Process kinematics parameters
       //-------------------------------------------------------------------------------------------
 
+      registerParameter<std::string>( "MGRD", "MSTW grid interpolation path", &mstw_grid_path_ );
       registerParameter<int>( "PMOD", "Outgoing primary particles' mode", &str_fun_ );
       registerParameter<int>( "EMOD", "Outgoing primary particles' mode", &str_fun_ );
       registerParameter<int>( "PAIR", "Outgoing particles' PDG id", (int*)&proc_params_->operator[]<int>( "pair" ) );
-
       registerParameter<int>( "INA1", "Heavy ion atomic weight (1st incoming beam)", (int*)&hi_1_.first );
       registerParameter<int>( "INZ1", "Heavy ion atomic number (1st incoming beam)", (int*)&hi_1_.second );
       registerParameter<int>( "INA2", "Heavy ion atomic weight (1st incoming beam)", (int*)&hi_2_.first );

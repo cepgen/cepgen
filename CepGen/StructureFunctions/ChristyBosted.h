@@ -73,7 +73,7 @@ namespace cepgen
         ChristyBosted& operator()( double xbj, double q2 ) override;
 
         //--- already computed internally during F2 computation
-        void computeFL( double xbj, double q2, const sigrat::Parameterisation& ) override {}
+        void computeFL( double xbj, double q2 ) override {}
         void computeFL( double xbj, double q2, double r ) override {}
 
       private:
