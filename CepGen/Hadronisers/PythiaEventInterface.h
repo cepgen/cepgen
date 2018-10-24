@@ -4,6 +4,8 @@
 #ifdef PYTHIA8
 
 #include <Pythia8/Pythia.h>
+#include <unordered_map>
+
 namespace cepgen {
   class Parameters;
   class Event;
@@ -12,7 +14,7 @@ namespace cepgen {
 namespace Pythia8
 {
   /// Interfacing between CepGen and Pythia8 event definitions
-  class CepGenEvent : public Pythia8::LHAup
+  class CepGenEvent : public LHAup
   {
     public:
       explicit CepGenEvent();
@@ -60,7 +62,7 @@ namespace Pythia8
 
     private:
       static const double mp_, mp2_;
-      std::vector<std::pair<unsigned short, unsigned short> > py_cg_corresp_;
+      std::unordered_map<unsigned short, unsigned short> py_cg_corresp_;
       const cepgen::Parameters* params_; // borrowed
   };
 }

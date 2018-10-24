@@ -48,18 +48,19 @@ namespace Pythia8
   void
   CepGenEvent::feedEvent( const cepgen::Event& ev, bool full )
   {
-    const double scale = ev.getOneByRole( cepgen::Particle::Intermediate ).mass();
+    const double scale = ev[cepgen::Particle::Intermediate][0].mass();
     setProcess( 0, 1., scale, cepgen::constants::ALPHA_EM, cepgen::constants::ALPHA_QCD );
 
-    const auto& part1 = ev.getOneByRole( cepgen::Particle::Parton1 ), &part2 = ev.getOneByRole( cepgen::Particle::Parton2 );
-    const auto& op1 = ev.getOneByRole( cepgen::Particle::OutgoingBeam1 ), &op2 = ev.getOneByRole( cepgen::Particle::OutgoingBeam2 );
+    const auto& part1 = ev[cepgen::Particle::Parton1][0], &part2 = ev[cepgen::Particle::Parton2][0];
+    const auto& op1 = ev[cepgen::Particle::OutgoingBeam1][0], &op2 = ev[cepgen::Particle::OutgoingBeam2][0];
     const double q2_1 = -part1.momentum().mass2(), q2_2 = -part2.momentum().mass2();
     const double x1 = q2_1/( q2_1+op1.mass2()-mp2_ ), x2 = q2_2/( q2_2+op2.mass2()-mp2_ );
 
     unsigned short quark1_id = 0, quark2_id = 0;
     unsigned short quark1_pdgid = part1.integerPdgId(), quark2_pdgid = part2.integerPdgId();
+    unsigned short colour_index = 501;
 
-    const Pythia8::Vec4 mom_part1( Pythia8::momToVec4( part1.momentum() ) ), mom_part2( Pythia8::momToVec4( part2.momentum() ) );
+    const Vec4 mom_part1( momToVec4( part1.momentum() ) ), mom_part2( momToVec4( part2.momentum() ) );
 
     if ( !full ) {
       //=============================================================================================
@@ -77,18 +78,18 @@ namespace Pythia8
       const bool inel1 = ( mode == cepgen::KinematicsMode::InelasticElastic || mode == cepgen::KinematicsMode::InelasticInelastic );
       const bool inel2 = ( mode == cepgen::KinematicsMode::ElasticInelastic || mode == cepgen::KinematicsMode::InelasticInelastic );
 
-      Pythia8::Vec4 mom_iq1 = mom_part1, mom_iq2 = mom_part2;
-      unsigned short colour_index = 501, quark1_colour = 0, quark2_colour = 0;
+      Vec4 mom_iq1 = mom_part1, mom_iq2 = mom_part2;
+      unsigned short quark1_colour = 0, quark2_colour = 0;
       //FIXME select quark flavours accordingly
       if ( inel1 ) {
         quark1_pdgid = 2;
         quark1_colour = colour_index++;
-        mom_iq1 = Pythia8::momToVec4( x1*ev.getOneByRole( cepgen::Particle::IncomingBeam1 ).momentum() );
+        mom_iq1 = momToVec4( x1*ev[cepgen::Particle::IncomingBeam1][0].momentum() );
       }
       if ( inel2 ) {
         quark2_pdgid = 2;
         quark2_colour = colour_index++;
-        mom_iq2 = Pythia8::momToVec4( x2*ev.getOneByRole( cepgen::Particle::IncomingBeam2 ).momentum() );
+        mom_iq2 = momToVec4( x2*ev[cepgen::Particle::IncomingBeam2][0].momentum() );
       }
 
       //--- flavour / x value of hard-process initiators
@@ -111,11 +112,11 @@ namespace Pythia8
       //===========================================================================================
 
       if ( inel1 ) {
-        const Pythia8::Vec4 mom_oq1 = mom_iq1-mom_part1;
+        const Vec4 mom_oq1 = mom_iq1-mom_part1;
         addParticle( quark1_pdgid, 1, quark1_id, quark2_id, quark1_colour, 0, mom_oq1.px(), mom_oq1.py(), mom_oq1.pz(), mom_oq1.e(), mom_oq1.mCalc(), 0., 1. );
       }
       if ( inel2 ) {
-        const Pythia8::Vec4 mom_oq2 = mom_iq2-mom_part2;
+        const Vec4 mom_oq2 = mom_iq2-mom_part2;
         addParticle( quark2_pdgid, 1, quark1_id, quark2_id, quark2_colour, 0, mom_oq2.px(), mom_oq2.py(), mom_oq2.pz(), mom_oq2.e(), mom_oq2.mCalc(), 0., 1. );
       }
     }
@@ -124,6 +125,8 @@ namespace Pythia8
     // central system
     //=============================================================================================
 
+    const unsigned short central_colour = colour_index++;
+    unsigned short cp_colour = 0, cp_anticolour = 0;
     for ( const auto& p : ev[cepgen::Particle::CentralSystem] ) {
       const auto mothers = p.mothers();
       unsigned short moth1_id = 1, moth2_id = 2;
@@ -150,9 +153,15 @@ namespace Pythia8
           }
         }
       }
-      const Pythia8::Vec4 mom_part( p.momentum().px(), p.momentum().py(), p.momentum().pz(), p.momentum().energy() );
+      if ( cepgen::particleproperties::colours( p.pdgId() ) > 1 ) {
+        if ( p.integerPdgId() > 0 )
+          cp_colour = central_colour;
+        else
+          cp_anticolour = central_colour;
+      }
+      const Vec4 mom_part( momToVec4( p.momentum() ) );
       addCorresp( sizePart(), p.id() );
-      addParticle( p.integerPdgId(), 1, moth1_id, moth2_id, 0, 0, mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), mom_part.mCalc(), 0., 0., 0. );
+      addParticle( p.integerPdgId(), 1, moth1_id, moth2_id, cp_colour, cp_anticolour, mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), mom_part.mCalc(), 0., 0., 0. );
     }
     setPdf( quark1_pdgid, quark2_pdgid, x1, x2, scale, 0., 0., false );
   }
@@ -173,10 +182,9 @@ namespace Pythia8
   unsigned short
   CepGenEvent::cepgenId( unsigned short py_id ) const
   {
-    for ( const auto& py_cg : py_cg_corresp_ )
-      if ( py_cg.first == py_id )
-        return py_cg.second;
-    return INVALID_ID;
+    if ( py_cg_corresp_.count( py_id ) == 0 )
+      return INVALID_ID;
+    return py_cg_corresp_.at( py_id );
   }
 
   unsigned short
@@ -191,7 +199,7 @@ namespace Pythia8
   void
   CepGenEvent::addCorresp( unsigned short py_id, unsigned short cg_id )
   {
-    py_cg_corresp_.emplace_back( py_id, cg_id );
+    py_cg_corresp_.emplace( py_id, cg_id );
   }
 
   void
