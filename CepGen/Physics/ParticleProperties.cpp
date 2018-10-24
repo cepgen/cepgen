@@ -80,14 +80,18 @@ namespace cepgen
     colours( const PDG& pdg_id )
     {
       switch ( pdg_id ) {
-        case PDG::top: return 3;
-        default: return 1;
+        //--- quarks
+        case PDG::down: case PDG::up: case PDG::strange: case PDG::charm: case PDG::bottom: case PDG::top:
+          return 3;
+        default:
+          return 1;
       }
     }
 
     double
     width( const PDG& pdg_id )
     {
+      //--- width in GeV
       switch ( pdg_id ) {
         case PDG::Jpsi:      return 92.9e-6; //FIXME
         case PDG::Z:         return 2.4952;

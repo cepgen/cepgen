@@ -169,7 +169,7 @@ namespace cepgen
     Pythia8Hadroniser::addParticle( Event& ev, const Pythia8::Particle& py_part, const Pythia8::Vec4& mom, unsigned short role ) const
     {
       Particle& op = ev.addParticle( (Particle::Role)role );
-      op.setPdgId( static_cast<PDG>( abs( py_part.id() ) ), py_part.charge() );
+      op.setPdgId( static_cast<PDG>( abs( py_part.id() ) ), (short)( py_part.charge()/fabs( py_part.charge() ) ) );
       op.setStatus( py_part.isFinal()
         ? Particle::Status::FinalState
         : Particle::Status::Propagator );
