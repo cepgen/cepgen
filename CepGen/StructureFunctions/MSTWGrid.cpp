@@ -10,21 +10,24 @@
 namespace mstw
 {
   const unsigned int Grid::good_magic = 0x5754534d; // MSTW in ASCII
+  std::shared_ptr<Grid> Grid::singl_;
 
-  Grid&
+  std::shared_ptr<Grid>
   Grid::get( const char* filename )
   {
-    static Grid instance( cepgen::ParametersList()
-      .set<int>( "id", (int)cepgen::strfun::Type::MSTWgrid )
-      .set<std::string>( "gridPath", filename ) );
-    return instance;
+    if ( !singl_ )
+      singl_.reset( new Grid( cepgen::ParametersList()
+        .set<int>( "id", (int)cepgen::strfun::Type::MSTWgrid )
+        .set<std::string>( "gridPath", filename ) ) );
+    return singl_;
   }
 
-  Grid&
+  std::shared_ptr<Grid>
   Grid::get( const cepgen::ParametersList& params )
   {
-    static Grid instance( params );
-    return instance;
+    if ( !singl_ )
+      singl_.reset( new Grid( params ) );
+    return singl_;
   }
 
   Grid::Grid( const cepgen::ParametersList& params ) :

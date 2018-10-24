@@ -4,8 +4,6 @@
 #include "CepGen/IO/GridHandler.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
-#define DEFAULT_MSTW_GRID_PATH "External/mstw_sf_scan_nnlo.dat"
-
 /// Martin-Stirling-Thorne-Watt PDFs structure functions
 namespace mstw
 {
@@ -35,12 +33,14 @@ namespace mstw
         double f2; ///< Transverse structure function value
         double fl; ///< Longitudinal structure function value
       };
+      static constexpr const char* DEFAULT_MSTW_GRID_PATH = "External/mstw_sf_scan_nnlo.dat";
+
 
     public:
       /// Retrieve the grid interpolator (singleton)
-      static Grid& get( const char* path = DEFAULT_MSTW_GRID_PATH );
+      static std::shared_ptr<Grid> get( const char* path = DEFAULT_MSTW_GRID_PATH );
       /// Retrieve the grid interpolator (singleton)
-      static Grid& get( const cepgen::ParametersList& params = cepgen::ParametersList() );
+      static std::shared_ptr<Grid> get( const cepgen::ParametersList& params = cepgen::ParametersList() );
 
       /// Compute the structure functions at a given \f$Q^2/x_{\rm Bj}\f$
       Grid& operator()( double xbj, double q2 ) override;

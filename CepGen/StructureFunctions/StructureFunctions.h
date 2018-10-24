@@ -54,6 +54,8 @@ namespace cepgen
 
         /// Build a SF parameterisation for a given type
         static std::shared_ptr<Parameterisation> build( const ParametersList& );
+        /// Build a SF parameterisation for a given type
+        static std::shared_ptr<Parameterisation> build( const Type& type, const ParametersList& params = ParametersList() );
 
         /// Compute all relevant structure functions for a given \f$(x_{\rm Bj},Q^2)\f$ couple
         virtual Parameterisation& operator()( double xbj, double q2 ) { return *this; }
