@@ -16,6 +16,13 @@ namespace cepgen
   namespace strfun
   {
     std::shared_ptr<Parameterisation>
+    Parameterisation::build( const Type& type, const ParametersList& params )
+    {
+      ParametersList pcopy = params;
+      return build( pcopy.set<int>( "id", (int)type ) );
+    }
+
+    std::shared_ptr<Parameterisation>
     Parameterisation::build( const ParametersList& params )
     {
       ParametersList pcopy = params;
