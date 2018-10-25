@@ -23,6 +23,7 @@ namespace cepgen
     {
       public:
         /// Default constructor for an undefined process
+        /// \param[in] params Process-level parameters
         /// \param[in] name Process name
         /// \param[in] description Human-readable description of the process
         /// \param[in] has_event Do we generate the associated event structure?

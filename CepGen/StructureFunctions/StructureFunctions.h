@@ -57,6 +57,9 @@ namespace cepgen
         /// Build a SF parameterisation for a given type
         static std::shared_ptr<Parameterisation> build( const Type& type, const ParametersList& params = ParametersList() );
 
+        /// Set of parameters used to build this parameterisation
+        const ParametersList& parameters() const { return params_; }
+
         /// Compute all relevant structure functions for a given \f$(x_{\rm Bj},Q^2)\f$ couple
         virtual Parameterisation& operator()( double xbj, double q2 ) { return *this; }
         /// Compute the longitudinal structure function for a given point
@@ -78,6 +81,8 @@ namespace cepgen
         static const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
         ParametersList params_; ///< List of parameters used for this builder definition
         std::pair<double,double> old_vals_; ///< Last \f$(x_{\rm Bj},Q^2)\f$ couple computed
+
+        /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
         std::shared_ptr<sigrat::Parameterisation> r_ratio_;
     };
   }
