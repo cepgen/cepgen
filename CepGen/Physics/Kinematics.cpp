@@ -1,5 +1,6 @@
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/KTFlux.h"
 
 #include "CepGen/Core/Exception.h"
@@ -27,7 +28,12 @@ namespace cepgen
   double
   Kinematics::sqrtS() const
   {
-    return incoming_beams.first.pz + incoming_beams.second.pz;
+    const HeavyIon hi1( incoming_beams.first.pdg ), hi2( incoming_beams.second.pdg );
+    const double m1 = hi1 ? particleproperties::mass( hi1 ) : particleproperties::mass( incoming_beams.first.pdg );
+    const double m2 = hi2 ? particleproperties::mass( hi2 ) : particleproperties::mass( incoming_beams.second.pdg );
+    const auto p1 = Particle::Momentum::fromPxPyPzM( 0., 0., +incoming_beams.first .pz, m1 );
+    const auto p2 = Particle::Momentum::fromPxPyPzM( 0., 0., -incoming_beams.second.pz, m2 );
+    return ( p1+p2 ).mass();
   }
 
   //--------------------------------------------------------------------

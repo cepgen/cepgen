@@ -4,28 +4,27 @@
 namespace cepgen
 {
   enum class PDG;
+  struct HeavyIon;
   /// All useful properties about particles
   namespace particleproperties
   {
-    /** \brief Mass of a particle, in GeV/c\f$^2\f$
-     * \param pdg_id PDG identifier
-     */
+    /// Mass of a particle, in GeV/c\f$^2\f$
+    /// \param pdg_id PDG identifier
     double mass( const PDG& pdg_id );
-    /** \brief Electric charge of a particle, in \f$e\f$
-     * \param[in] pdg_id PDG id
-     */
+    /// Mass of a heavy ion, in GeV/c\f$^2\f$
+    /// \param hi Heavy ion type
+    double mass( const HeavyIon& hi );
+    /// Electric charge of a particle, in \f$e\f$
+    /// \param[in] pdg_id PDG id
     double charge( const PDG& pdg_id );
-    /** \brief Electric charge of a particle, in \f$e\f$
-     * \param[in] id integer PDG id
-     */
+    /// Electric charge of a particle, in \f$e\f$
+    /// \param[in] id integer PDG id
     double charge( int id );
-    /** \brief Colour factor for a given particle
-     * \param[in] pdg_id PDG id
-     */
+    /// Colour factor for a given particle
+    /// \param[in] pdg_id PDG id
     unsigned short colours( const PDG& pdg_id );
-    /** \brief Total decay width of an unstable particle, in GeV
-     * \param[in] pdg_id PDG id
-     */
+    /// Total decay width of an unstable particle, in GeV
+    /// \param[in] pdg_id PDG id
     double width( const PDG& pdg_id );
   }
 }

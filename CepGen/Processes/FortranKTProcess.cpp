@@ -41,38 +41,38 @@ namespace cepgen
       mom_ip1_ = event_->getOneByRole( Particle::IncomingBeam1 ).momentum();
       mom_ip2_ = event_->getOneByRole( Particle::IncomingBeam2 ).momentum();
 
-      registerVariable( y1_, Mapping::linear, cuts_.cuts.central.rapidity_single, { -6., 6. }, "First central particle rapidity" );
-      registerVariable( y2_, Mapping::linear, cuts_.cuts.central.rapidity_single, { -6., 6. }, "Second central particle rapidity" );
-      registerVariable( pt_diff_, Mapping::linear, cuts_.cuts.central.pt_diff, { 0., 50. }, "Transverse momentum difference between central particles" );
-      registerVariable( phi_pt_diff_, Mapping::linear, cuts_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Central particles azimuthal angle difference" );
+      registerVariable( y1_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "First central particle rapidity" );
+      registerVariable( y2_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "Second central particle rapidity" );
+      registerVariable( pt_diff_, Mapping::linear, kin_.cuts.central.pt_diff, { 0., 50. }, "Transverse momentum difference between central particles" );
+      registerVariable( phi_pt_diff_, Mapping::linear, kin_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Central particles azimuthal angle difference" );
 
       //===========================================================================================
       // feed phase space cuts to the common block
       //===========================================================================================
 
-      cuts_.cuts.central.pt_single.save( (bool&)kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max );
-      cuts_.cuts.central.energy_single.save( (bool&)kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max );
-      cuts_.cuts.central.eta_single.save( (bool&)kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max );
-      cuts_.cuts.central.mass_sum.save( (bool&)kincuts_.iinvm, kincuts_.invm_min, kincuts_.invm_max );
-      cuts_.cuts.central.pt_sum.save( (bool&)kincuts_.iptsum, kincuts_.ptsum_min, kincuts_.ptsum_max );
-      cuts_.cuts.central.rapidity_diff.save( (bool&)kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max );
+      kin_.cuts.central.pt_single.save( (bool&)kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max );
+      kin_.cuts.central.energy_single.save( (bool&)kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max );
+      kin_.cuts.central.eta_single.save( (bool&)kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max );
+      kin_.cuts.central.mass_sum.save( (bool&)kincuts_.iinvm, kincuts_.invm_min, kincuts_.invm_max );
+      kin_.cuts.central.pt_sum.save( (bool&)kincuts_.iptsum, kincuts_.ptsum_min, kincuts_.ptsum_max );
+      kin_.cuts.central.rapidity_diff.save( (bool&)kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max );
 
       //===========================================================================================
       // feed run parameters to the common block
       //===========================================================================================
 
-      params_.icontri = (int)cuts_.mode;
+      params_.icontri = (int)kin_.mode;
       params_.imethod = method_;
-      params_.sfmod = (int)cuts_.structure_functions->type;
+      params_.sfmod = (int)kin_.structure_functions->type;
       params_.pdg_l = pair_;
 
       //-------------------------------------------------------------------------------------------
       // incoming beams information
       //-------------------------------------------------------------------------------------------
 
-      params_.inp1 = cuts_.incoming_beams.first.pz;
-      params_.inp2 = cuts_.incoming_beams.second.pz;
-      const HeavyIon in1 = (HeavyIon)cuts_.incoming_beams.first.pdg;
+      params_.inp1 = kin_.incoming_beams.first.pz;
+      params_.inp2 = kin_.incoming_beams.second.pz;
+      const HeavyIon in1 = (HeavyIon)kin_.incoming_beams.first.pdg;
       if ( in1 ) {
         params_.a_nuc1 = in1.A;
         params_.z_nuc1 = (unsigned short)in1.Z;
@@ -84,7 +84,7 @@ namespace cepgen
       else
         params_.a_nuc1 = params_.z_nuc1 = 1;
 
-      const HeavyIon in2 = (HeavyIon)cuts_.incoming_beams.second.pdg;
+      const HeavyIon in2 = (HeavyIon)kin_.incoming_beams.second.pdg;
       if ( in2 ) {
         params_.a_nuc2 = in2.A;
         params_.z_nuc2 = (unsigned short)in2.Z;
@@ -100,8 +100,8 @@ namespace cepgen
       // intermediate partons information
       //-------------------------------------------------------------------------------------------
 
-      params_.iflux1 = (int)cuts_.incoming_beams.first.kt_flux;
-      params_.iflux2 = (int)cuts_.incoming_beams.second.kt_flux;
+      params_.iflux1 = (int)kin_.incoming_beams.first.kt_flux;
+      params_.iflux2 = (int)kin_.incoming_beams.second.kt_flux;
       if ( (KTFlux)params_.iflux1 == KTFlux::P_Gluon_KMR )
         event_->getOneByRole( Particle::Parton1 ).setPdgId( PDG::gluon );
       if ( (KTFlux)params_.iflux2 == KTFlux::P_Gluon_KMR )

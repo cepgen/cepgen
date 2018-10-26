@@ -31,7 +31,7 @@ namespace cepgen
       first_run( proc.first_run ),
       s_( proc.s_ ), sqs_( proc.sqs_ ),
       MX_( proc.MX_ ), MY_( proc.MY_ ), w1_( proc.w1_ ), w2_( proc.w2_ ),
-      t1_( -1. ), t2_( -1. ), cuts_( proc.cuts_ ),
+      t1_( -1. ), t2_( -1. ), kin_( proc.kin_ ),
       has_event_( proc.has_event_ ), event_( new Event( *proc.event_.get() ) ),
       is_point_set_( false )
     {}
@@ -43,7 +43,7 @@ namespace cepgen
       first_run = proc.first_run;
       s_ = proc.s_; sqs_ = proc.sqs_;
       MX_ = proc.MX_; MY_ = proc.MY_; w1_ = proc.w1_; w2_ = proc.w2_;
-      cuts_ = proc.cuts_;
+      kin_ = proc.kin_;
       has_event_ = proc.has_event_; event_.reset( new Event( *proc.event_.get() ) );
       is_point_set_ = false;
       return *this;
@@ -74,9 +74,9 @@ namespace cepgen
     }
 
     void
-    GenericProcess::setKinematics( const Kinematics& cuts )
+    GenericProcess::setKinematics( const Kinematics& kin )
     {
-      cuts_ = cuts;
+      kin_ = kin;
       prepareKinematics();
     }
 
@@ -87,10 +87,10 @@ namespace cepgen
         throw CG_FATAL( "GenericProcess" ) << "Kinematics not properly defined for the process.";
 
       // at some point introduce non head-on colliding beams?
-      Particle::Momentum p1( 0., 0.,  cuts_.incoming_beams.first.pz ), p2( 0., 0., -cuts_.incoming_beams.second.pz );
+      Particle::Momentum p1( 0., 0.,  kin_.incoming_beams.first.pz ), p2( 0., 0., -kin_.incoming_beams.second.pz );
       // on-shell beam particles
-      p1.setMass( particleproperties::mass( cuts_.incoming_beams.first.pdg ) );
-      p2.setMass( particleproperties::mass( cuts_.incoming_beams.second.pdg ) );
+      p1.setMass( particleproperties::mass( kin_.incoming_beams.first.pdg ) );
+      p2.setMass( particleproperties::mass( kin_.incoming_beams.second.pdg ) );
       setIncomingKinematics( p1, p2 );
 
       sqs_ = CMEnergy( p1, p2 );

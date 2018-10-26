@@ -63,7 +63,7 @@ namespace cepgen
   Event::operator[]( Particle::Role role )
   {
     //--- retrieve all particles with a given role
-    return particles_.at( role );
+    return particles_[role];
   }
 
   const Particles&

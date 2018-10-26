@@ -55,6 +55,14 @@ namespace cepgen
   }
 
   Momentum
+  Momentum::fromPxPyPzM( double px, double py, double pz, double m )
+  {
+    Momentum mom( px, py, pz );
+    mom.setMass( m );
+    return mom;
+  }
+
+  Momentum
   Momentum::fromPxPyYM( double px, double py, double rap, double m )
   {
     const double pt = std::hypot( px, py ), et = std::hypot( pt, m );

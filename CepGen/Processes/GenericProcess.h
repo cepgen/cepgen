@@ -59,8 +59,8 @@ namespace cepgen
         /// Set the incoming and outgoing state to be expected in the process
         inline virtual void addEventContent() {}
         /// Set the list of kinematic cuts to apply on the outgoing particles' final state
-        /// \param[in] cuts The Cuts object containing the kinematic parameters
-        virtual void setKinematics( const Kinematics& cuts );
+        /// \param[in] kin The Kinematics object containing the kinematic parameters
+        virtual void setKinematics( const Kinematics& kin );
         /// Return the number of dimensions on which the integration has to be performed
         /// \return Number of dimensions on which to integrate
         virtual unsigned int numDimensions() const = 0;
@@ -140,7 +140,7 @@ namespace cepgen
         double t2_;
 
         /// Set of cuts to apply on the final phase space
-        Kinematics cuts_;
+        Kinematics kin_;
         /// Does the process contain (and hold) an event?
         bool has_event_;
         /// Event object containing all the information on the in- and outgoing particles
