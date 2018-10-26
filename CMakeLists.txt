@@ -14,11 +14,11 @@ include(UseEnvironment)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 
 set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/CepGen)
-set(CEPGEN_LIBRARIES CepGenCore CepGenEvent CepGenProcesses CepGenIO CepGenExternalHadronisers CepGenCards)
+set(CEPGEN_LIBRARIES CepGenCore CepGenEvent CepGenProcesses CepGenAddOns CepGenCards)
 
 #----- define all individual modules to be built beforehand
 
-set(CEPGEN_MODULES Processes Event IO Hadronisers Cards)
+set(CEPGEN_MODULES Processes Event Cards)
 
 #----- enable fortran for external libraries linking
 
