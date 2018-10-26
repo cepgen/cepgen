@@ -135,7 +135,7 @@ namespace cepgen
       out.NUP = ev.numParticles();
       out.resize();
       for ( unsigned short ip = 0; ip < ev.numParticles(); ++ip ) {
-        const Particle part = ev.at( ip );
+        const Particle part = ev[ip];
         out.IDUP[ip] = part.integerPdgId(); // PDG id
         out.ISTUP[ip] = (short)part.status(); // status code
         out.MOTHUP[ip] = std::pair<int,int>( ( part.mothers().size() > 0 ) ? *part.mothers().begin()+1 : 0, ( part.mothers().size() > 1 ) ? *part.mothers().rbegin()+1 : 0 ); // mothers

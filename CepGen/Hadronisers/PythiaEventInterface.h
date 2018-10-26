@@ -38,7 +38,7 @@ namespace Pythia8
       void setProcess( int id, double xsec, double q2_scale, double alpha_qed, double alpha_qcd );
 
       /// Feed comments to the LHEF block
-      void addComments( const std::string& );
+      void addComments( const std::string& comments ) { osLHEF << comments; }
 
       /// Retrieve the CepGen particle index given its Pythia8 event id
       /// \param[in] py_id Pythia8 particle id
@@ -62,6 +62,7 @@ namespace Pythia8
 
     private:
       static const double mp_, mp2_;
+      bool inel1_, inel2_;
       std::unordered_map<unsigned short, unsigned short> py_cg_corresp_;
       const cepgen::Parameters* params_; // borrowed
   };
