@@ -5,15 +5,20 @@
 namespace cepgen
 {
   HeavyIon::HeavyIon( const PDG& pdg ) :
-    A( (unsigned int)pdg % 1000 ),
     Z( (Element)( (unsigned int)pdg/1000000 == 0 ? 0
-                : ( (unsigned int)pdg/1000 ) % 1000 ) )
+                : ( (unsigned int)pdg/1000 ) % 1000 ) ),
+    A( ( Z != Element::invalid ) ? (unsigned int)pdg % 1000 : 0 )
   {}
 
   HeavyIon::operator PDG() const
   {
     // Pythia8 convention/10-1e10+1e6
     return (PDG)( 1000000+1000*(unsigned short)Z+A );
+  }
+
+  HeavyIon::operator bool() const
+  {
+    return Z != Element::invalid; // skip the proton
   }
 
   std::ostream&

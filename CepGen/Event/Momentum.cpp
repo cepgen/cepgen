@@ -57,9 +57,9 @@ namespace cepgen
   Momentum
   Momentum::fromPxPyPzM( double px, double py, double pz, double m )
   {
-    Momentum out( px, py, pz );
-    out.setMass( m );
-    return out;
+    Momentum mom( px, py, pz );
+    mom.setMass( m );
+    return mom;
   }
 
   Momentum

@@ -127,7 +127,7 @@ namespace cepgen
   }
 
   const Particle&
-  Event::at( int id ) const
+  Event::operator[]( int id ) const
   {
     for ( const auto& role_part : particles_ )
       for ( const auto& part : role_part.second )
@@ -142,7 +142,7 @@ namespace cepgen
   {
     Particles out;
     for ( const auto& id : ids )
-      out.emplace_back( at( id ) );
+      out.emplace_back( operator[]( id ) );
 
     return out;
   }
@@ -242,14 +242,14 @@ namespace cepgen
         continue;
       Particle::Momentum ptot;
       for ( const auto& daugh : daughters ) {
-        const Particle& d = at( daugh );
+        const Particle& d = operator[]( daugh );
         const ParticlesIds mothers = d.mothers();
         ptot += d.momentum();
         if ( mothers.size() < 2 )
           continue;
         for ( const auto& moth : mothers )
           if ( moth != part.id() )
-            ptot -= at( moth ).momentum();
+            ptot -= operator[]( moth ).momentum();
       }
       const double mass_diff = ( ptot-part.momentum() ).mass();
       if ( fabs( mass_diff ) > MIN_PRECISION ) {
@@ -273,7 +273,7 @@ namespace cepgen
         std::ostringstream oss_pdg;
         if ( part.pdgId() == PDG::invalid && mothers.size() > 0 ) {
           for ( unsigned short i = 0; i < mothers.size(); ++i )
-            oss_pdg << ( i > 0 ? "/" : "" ) << at( *std::next( mothers.begin(), i ) ).pdgId();
+            oss_pdg << ( i > 0 ? "/" : "" ) << operator[]( *std::next( mothers.begin(), i ) ).pdgId();
           os << Form( "\n %2d\t\t%-10s", part.id(), oss_pdg.str().c_str() );
         }
         else {

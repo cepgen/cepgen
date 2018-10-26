@@ -25,10 +25,10 @@ namespace cepgen
     void
     PPtoFF::preparePhaseSpace()
     {
-      registerVariable( y1_, Mapping::linear, cuts_.cuts.central.rapidity_single, { -6., 6. }, "First outgoing fermion rapidity" );
-      registerVariable( y2_, Mapping::linear, cuts_.cuts.central.rapidity_single, { -6., 6. }, "Second outgoing fermion rapidity" );
-      registerVariable( pt_diff_, Mapping::linear, cuts_.cuts.central.pt_diff, { 0., 50. }, "Fermions transverse momentum difference" );
-      registerVariable( phi_pt_diff_, Mapping::linear, cuts_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Fermions azimuthal angle difference" );
+      registerVariable( y1_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "First outgoing fermion rapidity" );
+      registerVariable( y2_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "Second outgoing fermion rapidity" );
+      registerVariable( pt_diff_, Mapping::linear, kin_.cuts.central.pt_diff, { 0., 50. }, "Fermions transverse momentum difference" );
+      registerVariable( phi_pt_diff_, Mapping::linear, kin_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Fermions azimuthal angle difference" );
 
       if ( pair_ == PDG::invalid )
         throw CG_FATAL( "PPtoFF:prepare" )
@@ -69,7 +69,7 @@ namespace cepgen
       //     a window in single particle transverse momentum
       //=================================================================
 
-      const Limits& pt_limits = cuts_.cuts.central.pt_single;
+      const Limits& pt_limits = kin_.cuts.central.pt_single;
       if ( !pt_limits.passes( p1_cm.pt() ) || !pt_limits.passes( p2_cm.pt() ) )
         return 0.;
 
@@ -77,14 +77,14 @@ namespace cepgen
       //     a window in transverse momentum difference
       //=================================================================
 
-      if ( !cuts_.cuts.central.pt_diff.passes( fabs( p1_cm.pt()-p2_cm.pt() ) ) )
+      if ( !kin_.cuts.central.pt_diff.passes( fabs( p1_cm.pt()-p2_cm.pt() ) ) )
         return 0.;
 
       //=================================================================
       //     a window in rapidity distance
       //=================================================================
 
-      if ( !cuts_.cuts.central.rapidity_diff.passes( fabs( y1_-y2_ ) ) )
+      if ( !kin_.cuts.central.rapidity_diff.passes( fabs( y1_-y2_ ) ) )
         return 0.;
 
       //=================================================================
@@ -115,12 +115,12 @@ namespace cepgen
         << "s(1/2)eff = " << s1_eff << ", " << s2_eff << " GeV²\n\t"
         << "central system's invariant mass = " << invm << " GeV.";
 
-      if ( ( cuts_.mode == KinematicsMode::ElasticInelastic
-          || cuts_.mode == KinematicsMode::InelasticInelastic )
+      if ( ( kin_.mode == KinematicsMode::ElasticInelastic
+          || kin_.mode == KinematicsMode::InelasticInelastic )
         && ( sqrt( s1_eff ) <= ( MY_+invm ) ) )
         return 0.;
-      if ( ( cuts_.mode == KinematicsMode::InelasticElastic
-          || cuts_.mode == KinematicsMode::InelasticInelastic )
+      if ( ( kin_.mode == KinematicsMode::InelasticElastic
+          || kin_.mode == KinematicsMode::InelasticInelastic )
         && ( sqrt( s2_eff ) <= ( MX_+invm ) ) )
         return 0.;
 

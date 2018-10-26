@@ -65,10 +65,10 @@ namespace cepgen
     unsigned int
     GamGamLL::numDimensions() const
     {
-      switch ( cuts_.mode ) {
+      switch ( kin_.mode ) {
         case KinematicsMode::ElectronProton: default:
           throw CG_FATAL( "GamGamLL" )
-            << "Process mode " << cuts_.mode << " not (yet) supported! "
+            << "Process mode " << kin_.mode << " not (yet) supported! "
             << "Please contact the developers to consider an implementation.";
         case KinematicsMode::ElasticElastic:
           return 7;
@@ -89,7 +89,7 @@ namespace cepgen
 
       masses_.Ml2_ = event_->operator[]( Particle::CentralSystem )[0].mass2();
 
-      w_limits_ = cuts_.cuts.central.mass_single;
+      w_limits_ = kin_.cuts.central.mass_single;
       if ( !w_limits_.hasMax() )
         w_limits_.max() = s_;
       // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
@@ -102,8 +102,8 @@ namespace cepgen
         << "w limits = " << w_limits_ << "\n\t"
         << "wmax/wmin = " << w_limits_.max()/w_limits_.min();
 
-      q2_limits_ = cuts_.cuts.initial.q2;
-      mx_limits_ = cuts_.cuts.remnants.mass_single;
+      q2_limits_ = kin_.cuts.initial.q2;
+      mx_limits_ = kin_.cuts.remnants.mass_single;
     }
 
     //---------------------------------------------------------------------------------------------
@@ -638,7 +638,7 @@ namespace cepgen
       ep2_ = p2.energy();
 
       //std::cout << __PRETTY_FUNCTION__ << ":" << w_limits_ << "|" << q2_limits_ << "|" << mx_limits_ << std::endl;
-      switch ( cuts_.mode ) {
+      switch ( kin_.mode ) {
         case KinematicsMode::ElectronProton: default:
           CG_ERROR( "GamGamLL" ) << "Case not yet supported!"; break;
         case KinematicsMode::ElasticElastic:
@@ -883,49 +883,49 @@ namespace cepgen
       //--- cut on mass of final hadronic system (MX/Y)
 
       if ( mx_limits_.valid() ) {
-        if ( ( cuts_.mode == KinematicsMode::InelasticElastic
-            || cuts_.mode == KinematicsMode::InelasticInelastic )
+        if ( ( kin_.mode == KinematicsMode::InelasticElastic
+            || kin_.mode == KinematicsMode::InelasticInelastic )
           && !mx_limits_.passes( MX_ ) )
           return 0.;
-        if ( ( cuts_.mode == KinematicsMode::ElasticInelastic
-            || cuts_.mode == KinematicsMode::InelasticInelastic )
+        if ( ( kin_.mode == KinematicsMode::ElasticInelastic
+            || kin_.mode == KinematicsMode::InelasticInelastic )
           && !mx_limits_.passes( MY_ ) )
           return 0.;
       }
 
       //--- cut on the proton's Q2 (first photon propagator T1)
 
-      if ( !cuts_.cuts.initial.q2.passes( -t1_ ) )
+      if ( !kin_.cuts.initial.q2.passes( -t1_ ) )
         return 0.;
 
       //--- cuts on outgoing leptons' kinematics
 
-      if ( !cuts_.cuts.central.mass_sum.passes( ( p6_cm_+p7_cm_ ).mass() ) )
+      if ( !kin_.cuts.central.mass_sum.passes( ( p6_cm_+p7_cm_ ).mass() ) )
         return 0.;
 
       //----- cuts on the individual leptons
 
-      if ( cuts_.cuts.central.pt_single.valid() ) {
-        const Limits& pt_limits = cuts_.cuts.central.pt_single;
+      if ( kin_.cuts.central.pt_single.valid() ) {
+        const Limits& pt_limits = kin_.cuts.central.pt_single;
         if ( !pt_limits.passes( p6_cm_.pt() ) || !pt_limits.passes( p7_cm_.pt() ) )
           return 0.;
       }
 
-      if ( cuts_.cuts.central.energy_single.valid() ) {
-        const Limits& energy_limits = cuts_.cuts.central.energy_single;
+      if ( kin_.cuts.central.energy_single.valid() ) {
+        const Limits& energy_limits = kin_.cuts.central.energy_single;
         if ( !energy_limits.passes( p6_cm_.energy() ) || !energy_limits.passes( p7_cm_.energy() ) )
           return 0.;
       }
 
-      if ( cuts_.cuts.central.eta_single.valid() ) {
-        const Limits& eta_limits = cuts_.cuts.central.eta_single;
+      if ( kin_.cuts.central.eta_single.valid() ) {
+        const Limits& eta_limits = kin_.cuts.central.eta_single;
         if ( !eta_limits.passes( p6_cm_.eta() ) || !eta_limits.passes( p7_cm_.eta() ) )
           return 0.;
       }
 
       //--- compute the structure functions factors
 
-      switch ( cuts_.mode ) { // inherited from CDF version
+      switch ( kin_.mode ) { // inherited from CDF version
         case KinematicsMode::ElectronProton: default: jacobian_ *= periPP( 1, 2 ); break; // ep case
         case KinematicsMode::ElasticElastic:          jacobian_ *= periPP( 2, 2 ); break; // elastic case
         case KinematicsMode::InelasticElastic:        jacobian_ *= periPP( 3, 2 )*( masses_.dw31_*masses_.dw31_ ); break;
@@ -978,7 +978,7 @@ namespace cepgen
       Particle& op1 = event_->getOneByRole( Particle::OutgoingBeam1 );
 
       op1.setMomentum( p3_lab_ );
-      switch ( cuts_.mode ) {
+      switch ( kin_.mode ) {
         case KinematicsMode::ElasticElastic:
         case KinematicsMode::ElasticInelastic:
         default:
@@ -994,7 +994,7 @@ namespace cepgen
       //----- second outgoing proton
       Particle& op2 = event_->getOneByRole( Particle::OutgoingBeam2 );
       op2.setMomentum( p5_lab_ );
-      switch ( cuts_.mode ) {
+      switch ( kin_.mode ) {
         case KinematicsMode::ElasticElastic:
         case KinematicsMode::InelasticElastic:
         default:
@@ -1104,7 +1104,7 @@ namespace cepgen
     {
       const double mx2 = MX_*MX_, my2 = MY_*MY_;
 
-      switch ( cuts_.mode ) {
+      switch ( kin_.mode ) {
         case KinematicsMode::ElectronElectron: default: {
           fp1 = FormFactors::trivial(); // electron (trivial) form factor
           fp2 = FormFactors::trivial(); // electron (trivial) form factor
@@ -1123,15 +1123,15 @@ namespace cepgen
         } break;
         case KinematicsMode::ElasticInelastic: {
           fp1 = FormFactors::protonElastic( -t1_ );
-          fp2 = FormFactors::protonInelastic( -t2_, w2_, my2, *cuts_.structure_functions );
+          fp2 = FormFactors::protonInelastic( -t2_, w2_, my2, *kin_.structure_functions );
         } break;
         case KinematicsMode::InelasticElastic: {
-          fp1 = FormFactors::protonInelastic( -t1_, w1_, mx2, *cuts_.structure_functions );
+          fp1 = FormFactors::protonInelastic( -t1_, w1_, mx2, *kin_.structure_functions );
           fp2 = FormFactors::protonElastic( -t2_ );
         } break;
         case KinematicsMode::InelasticInelastic: {
-          fp1 = FormFactors::protonInelastic( -t1_, w1_, mx2, *cuts_.structure_functions );
-          fp2 = FormFactors::protonInelastic( -t2_, w2_, my2, *cuts_.structure_functions );
+          fp1 = FormFactors::protonInelastic( -t1_, w1_, mx2, *kin_.structure_functions );
+          fp2 = FormFactors::protonInelastic( -t2_, w2_, my2, *kin_.structure_functions );
         } break;
       }
     }

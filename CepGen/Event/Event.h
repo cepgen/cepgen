@@ -73,7 +73,7 @@ namespace cepgen
        * \param[in] id Unique identifier of the particle in the event
        * \return Constant object to be retrieved
        */
-      const Particle& at( int id ) const;
+      const Particle& operator[]( int id ) const;
       /** \brief Get references to the Particle objects corresponding to the unique identifiers in the event
        * \param[in] ids_ The unique identifiers to the particles to be selected in the event
        * \return A vector of references to the requested Particle objects
