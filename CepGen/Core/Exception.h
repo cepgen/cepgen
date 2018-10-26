@@ -33,7 +33,7 @@
 #define CG_ERROR( mod ) \
   ( !CG_EXCEPT_MATCH( mod, error ) ) \
   ? cepgen::NullStream( mod ) \
-  : cepgen::Exception( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::warning )
+  : cepgen::Exception( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::error )
 #define CG_FATAL( mod ) \
   cepgen::Exception( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::fatal )
 
@@ -163,8 +163,9 @@ namespace cepgen
         os << "============================= Exception detected! =============================" << std::endl
            << " Class:       " << typeString() << std::endl;
         if ( !from_.empty() )
-          os << " Raised by:   " << from_ << std::endl;
-        os << " Description: \t" << message_.str() << std::endl;
+          os << " Raised by:   " << from_ << "\n"
+             << "         at " << now() << "\n"
+             << " Description: " << message_.str() << std::endl;
         if ( errorNumber() != 0 )
           os << "-------------------------------------------------------------------------------" << std::endl
              << " Error #" << error_num_ << std::endl;

@@ -38,10 +38,10 @@ int main( int argc, char* argv[] )
     throw CG_FATAL( "main" ) << "Usage: " << argv[0] << " [input card]";
   mg.setParameters( cepgen::card::PythonHandler( argv[1] ).parameters() );
 
-  h_mass = unique_ptr<TH1D>( new TH1D( "invm", ";Dilepton invariant mass;d#sigma/dM (pb/GeV)", 500, 0., 500. ) );
-  h_ptpair = unique_ptr<TH1D>( new TH1D( "ptpair", ";Dilepton p_{T};d#sigma/dp_{T} (pb/GeV)", 500, 0., 50. ) );
-  h_ptsingle = unique_ptr<TH1D>( new TH1D( "pt_single", ";Single lepton p_{T};d#sigma/dp_{T} (pb/GeV)", 100, 0., 100. ) );
-  h_etasingle = unique_ptr<TH1D>( new TH1D( "eta_single", ";Single lepton #eta;d#sigma/d#eta (pb)\\?.2f", 60, -3., 3. ) );
+  h_mass.reset( new TH1D( "invm", ";Dilepton invariant mass;d#sigma/dM (pb/GeV)", 500, 0., 500. ) );
+  h_ptpair.reset( new TH1D( "ptpair", ";Dilepton p_{T};d#sigma/dp_{T} (pb/GeV)", 500, 0., 50. ) );
+  h_ptsingle.reset( new TH1D( "pt_single", ";Single lepton p_{T};d#sigma/dp_{T} (pb/GeV)", 100, 0., 100. ) );
+  h_etasingle.reset( new TH1D( "eta_single", ";Single lepton #eta;d#sigma/d#eta (pb)\\?.2f", 60, -3., 3. ) );
 
   CG_INFO( "main" ) << "Process name: " << mg.parameters->processName() << ".";
   //mg.parameters->taming_functions.dump();

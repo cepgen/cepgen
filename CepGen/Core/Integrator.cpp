@@ -227,7 +227,7 @@ namespace cepgen
   }
 
   void
-  Integrator::generate( unsigned long num_events, std::function<void( const Event&, unsigned long )> callback, const utils::Timer* tmr )
+  Integrator::generate( unsigned long num_events, std::function<void( const Event&, unsigned long )> callback )
   {
     if ( num_events < 1 )
       num_events = input_params_->generation.maxgen;

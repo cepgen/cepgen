@@ -64,6 +64,8 @@ namespace cepgen
           static Momentum fromPThetaPhi( double p, double theta, double phi, double e = -1. );
           /// Build a 4-momentum from its four momentum and energy coordinates
           static Momentum fromPxPyPzE( double px, double py, double pz, double e );
+          /// Build a 4-momentum from its four momentum coordinates and mass
+          static Momentum fromPxPyPzM( double px, double py, double pz, double m );
           /// Build a 4-momentum from its transverse momentum, rapidity and mass
           static Momentum fromPxPyYM( double px, double py, double rap, double m );
 

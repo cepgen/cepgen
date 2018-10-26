@@ -51,7 +51,7 @@ namespace cepgen
       /// Dimensional size of the phase space
       unsigned short dimensions() const;
       void generateOne( std::function<void( const Event&, unsigned long )> callback = nullptr );
-      void generate( unsigned long num_events = 0, std::function<void( const Event&, unsigned long )> callback = nullptr, const utils::Timer* tmr = nullptr );
+      void generate( unsigned long num_events = 0, std::function<void( const Event&, unsigned long )> callback = nullptr );
 
     private:
       /**

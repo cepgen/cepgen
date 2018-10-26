@@ -159,7 +159,7 @@ namespace cepgen
     CG_INFO( "Generator" )
       << parameters->generation.maxgen << " events will be generated.";
 
-    integrator_->generate( parameters->generation.maxgen, callback, &tmr );
+    integrator_->generate( parameters->generation.maxgen, callback );
 
     const double gen_time_s = tmr.elapsed();
     CG_INFO( "Generator" )

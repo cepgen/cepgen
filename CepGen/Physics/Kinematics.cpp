@@ -8,6 +8,8 @@
 #include "CepGen/StructureFunctions/SuriYennie.h"
 #include "CepGen/Event/Particle.h"
 
+#include <cmath>
+
 namespace cepgen
 {
   Kinematics::Kinematics() :
@@ -27,7 +29,16 @@ namespace cepgen
   double
   Kinematics::sqrtS() const
   {
-    return incoming_beams.first.pz + incoming_beams.second.pz;
+    Particle::Momentum momA = Particle::Momentum::fromPxPyPzM( 0., 0., incoming_beams.first.pz, particleproperties::mass( incoming_beams.first.pdg ) );
+    Particle::Momentum momB = Particle::Momentum::fromPxPyPzM( 0., 0., -incoming_beams.first.pz, particleproperties::mass( incoming_beams.second.pdg ) );
+    std::cout << incoming_beams.second.pdg << "\t" << particleproperties::mass( incoming_beams.second.pdg ) << std::endl;
+    const HeavyIon hi1 = (HeavyIon)incoming_beams.first.pdg, hi2 = (HeavyIon)incoming_beams.second.pdg;
+    if ( hi1 || hi2 ) {
+      momA *= hi1.A;
+      momB *= hi2.A;
+    }
+      std::cout << momA << "\t" << momB << std::endl;
+    return ( momA+momB ).mass();
   }
 
   //--------------------------------------------------------------------

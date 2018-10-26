@@ -181,7 +181,8 @@ namespace cepgen
       << "_/¯¯EVENTS¯KINEMATICS¯¯\\_" << std::setfill( ' ' ) << "\n\n"
       << std::setw( wt ) << "Incoming particles"
       << p->kinematics.incoming_beams.first << ",\n" << std::setw( wt ) << ""
-      << p->kinematics.incoming_beams.second << "\n";
+      << p->kinematics.incoming_beams.second << "\n"
+      << std::setw( wt ) << "C.m. energy (GeV)" << p->kinematics.sqrtS() << "\n";
     if ( p->kinematics.mode != KinematicsMode::invalid )
       os << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << "\n";
     if ( p->kinematics.mode != KinematicsMode::ElasticElastic )
