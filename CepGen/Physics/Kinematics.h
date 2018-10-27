@@ -35,7 +35,7 @@ namespace cepgen
   {
     public:
       Kinematics();
-      ~Kinematics();
+      ~Kinematics() = default;
 
       /// Incoming beams characteristics
       struct Beam

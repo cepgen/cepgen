@@ -18,12 +18,13 @@ namespace cepgen
     mode( KinematicsMode::invalid ), structure_functions( new strfun::SuriYennie )
   {}
 
-  Kinematics::~Kinematics()
-  {}
-
   void
   Kinematics::setSqrtS( double sqrts )
   {
+    if ( incoming_beams.first.pdg != incoming_beams.second.pdg )
+      throw CG_FATAL( "Kinematics" )
+        << "Trying to set √s with asymmetric beams.\n"
+        << "Please fill incoming beams objects manually!";
     incoming_beams.first.pz = incoming_beams.second.pz = 0.5 * sqrts;
   }
 
