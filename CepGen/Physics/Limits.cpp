@@ -89,10 +89,10 @@ namespace cepgen
     if ( !lim.hasMin() && !lim.hasMax() )
       return os << "no cuts";
     if ( !lim.hasMin() )
-      return os << Form( "≤ %g", lim.max() );
+      return os << Form( "below %g", lim.max() );
     if ( !lim.hasMax() )
-      return os << Form( "≥ %g", lim.min() );
-    return os << Form( "%g → %g", lim.min(), lim.max() );
+      return os << Form( "above %g", lim.min() );
+    return os << Form( "%g to %g", lim.min(), lim.max() );
   }
 }
 
