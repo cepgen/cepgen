@@ -2,6 +2,7 @@
 #define CepGen_Event_Particle_h
 
 #include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Core/Hasher.h"
 
 #include <set>
 #include <unordered_map>
@@ -346,7 +347,7 @@ namespace cepgen
   /// List of particles' roles
   typedef std::vector<Particle::Role> ParticleRoles;
   /// Map between a particle's role and its associated Particle object
-  typedef std::unordered_map<Particle::Role,Particles> ParticlesMap;
+  typedef std::unordered_map<Particle::Role,Particles,utils::EnumHash<Particle::Role> > ParticlesMap;
 }
 
 #endif
