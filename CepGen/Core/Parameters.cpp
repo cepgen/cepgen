@@ -126,15 +126,18 @@ namespace cepgen
   {
     const bool pretty = true;
 
-    const int wb = 90, wt = 40;
+    const int wb = 90, wt = 33;
     os << std::left << "\n";
-    if ( p->process_ )
+    if ( p->process_ ) {
       os
         << std::setfill('_') << std::setw( wb+3 ) << "_/¯ PROCESS INFORMATION ¯\\_" << std::setfill( ' ' ) << "\n"
         << std::right << std::setw( wb ) << std::left << std::endl
         << std::setw( wt ) << "Process to generate"
         << ( pretty ? boldify( p->process_->name().c_str() ) : p->process_->name() ) << "\n"
         << std::setw( wt ) << "" << p->process_->description() << "\n";
+        for ( const auto& par : p->process_->parameters().keys() )
+          os << "    " << par << ": " << p->process_->parameters().getString( par ) << "\n";
+    }
     os
       << "\n"
       << std::setfill('_') << std::setw( wb+3 ) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill( ' ' ) << "\n"

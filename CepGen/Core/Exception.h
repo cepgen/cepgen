@@ -159,7 +159,7 @@ namespace cepgen
         if ( type_ == Type::verbatim )
           return message_.str();
         std::ostringstream os;
-        os << "====================== Exception detected at " << now() << "! ======================" << std::endl
+        os << "== " << now() << " ====================== Exception ==================================" << std::endl
            << " Class:       " << typeString() << std::endl;
         if ( !from_.empty() )
           os << " Raised by: " << from_ << "\n"

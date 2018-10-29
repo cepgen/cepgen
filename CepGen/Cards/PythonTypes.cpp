@@ -110,9 +110,10 @@ namespace cepgen
     template<> bool
     PythonHandler::is<Limits>( PyObject* obj ) const
     {
-      if ( !PyTuple_Check( obj ) || PyTuple_Size( obj ) < 1 || PyTuple_Size( obj ) > 2 )
+      if ( !isVector<double>( obj ) )
         return false;
-      return true;
+      const size_t size = getVector<double>( obj ).size();
+      return ( size == 1 || size == 2 );
     }
 
     template<> Limits
@@ -120,15 +121,10 @@ namespace cepgen
     {
       if ( !is<Limits>( obj ) )
         throwPythonError( Form( "Object has invalid type %s", obj->ob_type->tp_name ) );
-      Limits out;
-      double min = get<double>( PyTuple_GetItem( obj, 0 ) );
-      out.min() = min;
-      if ( PyTuple_Size( obj ) > 1 ) {
-        double max = get<double>( PyTuple_GetItem( obj, 1 ) );
-        if ( max != -1 )
-          out.max() = max;
-      }
-      return out;
+      const auto vec = getVector<double>( obj );
+      if ( vec.size() == 1 )
+        return Limits{ vec.at( 0 ) };
+      return Limits{ vec.at( 0 ), vec.at( 1 ) };
     }
 
     template<> bool
@@ -141,7 +137,7 @@ namespace cepgen
     PythonHandler::get<ParametersList>( PyObject* obj ) const
     {
       if ( !is<ParametersList>( obj ) )
-        throwPythonError( Form( "Object has invalid type %s", obj->ob_type->tp_name ) );
+        throwPythonError( Form( "Object \"%s\" has invalid type %s", obj->ob_type->tp_doc, obj->ob_type->tp_name ) );
       ParametersList out;
       PyObject* pkey = nullptr, *pvalue = nullptr;
       Py_ssize_t pos = 0;
@@ -158,55 +154,46 @@ namespace cepgen
         else if ( is<Limits>( pvalue ) )
           out.set<Limits>( skey, get<Limits>( pvalue ) );
         else if ( PyTuple_Check( pvalue ) || PyList_Check( pvalue ) ) { // vector
-          PyObject* pfirst = PyTuple_GetItem( pvalue, 0 );
-          PyObject* pit = nullptr;
-          const bool tuple = PyTuple_Check( pvalue );
-          const Py_ssize_t num_entries = ( tuple )
-            ? PyTuple_Size( pvalue )
-            : PyList_Size( pvalue );
-          if ( is<int>( pfirst ) ) {
-            std::vector<int> vec;
-            for ( Py_ssize_t i = 0; i < num_entries; ++i ) {
-              pit = ( tuple ) ? PyTuple_GetItem( pvalue, i ) : PyList_GetItem( pvalue, i );
-              if ( pit->ob_type != pfirst->ob_type )
-                throwPythonError( Form( "Mixed types detected in vector '%s'", skey.c_str() ) );
-              vec.emplace_back( get<int>( pit ) );
-            }
-            out.set<std::vector<int> >( skey, vec );
-          }
-          else if ( is<double>( pfirst ) ) {
-            std::vector<double> vec;
-            for ( Py_ssize_t i = 0; i < num_entries; ++i ) {
-              pit = ( tuple ) ? PyTuple_GetItem( pvalue, i ) : PyList_GetItem( pvalue, i );
-              if ( pit->ob_type != pfirst->ob_type )
-                throwPythonError( Form( "Mixed types detected in vector '%s'", skey.c_str() ) );
-              vec.emplace_back( get<double>( pit ) );
-            }
-            out.set<std::vector<double> >( skey, vec );
-          }
-          else if ( is<std::string>( pfirst ) ) {
-            std::vector<std::string> vec;
-            for ( Py_ssize_t i = 0; i < num_entries; ++i ) {
-              pit = ( tuple ) ? PyTuple_GetItem( pvalue, i ) : PyList_GetItem( pvalue, i );
-              if ( pit->ob_type != pfirst->ob_type )
-                throwPythonError( Form( "Mixed types detected in vector '%s'", skey.c_str() ) );
-              vec.emplace_back( get<std::string>( pit ) );
-            }
-            out.set<std::vector<std::string> >( skey, vec );
-          }
-          else if ( is<ParametersList>( pfirst ) ) {
-            std::vector<ParametersList> vec;
-            for ( Py_ssize_t i = 0; i < num_entries; ++i ) {
-              pit = ( tuple ) ? PyTuple_GetItem( pvalue, i ) : PyList_GetItem( pvalue, i );
-              if ( pit->ob_type != pfirst->ob_type )
-                throwPythonError( Form( "Mixed types detected in vector '%s'", skey.c_str() ) );
-              vec.emplace_back( get<ParametersList>( pit ) );
-            }
-            out.set<std::vector<ParametersList> >( skey, vec );
-          }
+          if ( isVector<int>( pvalue ) )
+            out.set<std::vector<int> >( skey, getVector<int>( pvalue ) );
+          else if ( isVector<double>( pvalue ) )
+            out.set<std::vector<double> >( skey, getVector<double>( pvalue ) );
+          else if ( isVector<std::string>( pvalue ) )
+            out.set<std::vector<std::string> >( skey, getVector<std::string>( pvalue ) );
+          else if ( isVector<ParametersList>( pvalue ) )
+            out.set<std::vector<ParametersList> >( skey, getVector<ParametersList>( pvalue ) );
         }
       }
       return out;
+    }
+
+    template<typename T> bool
+    PythonHandler::isVector( PyObject* obj ) const
+    {
+      if ( !PyTuple_Check( obj ) && !PyList_Check( obj ) )
+        return false;
+      PyObject* pfirst = PyTuple_Check( obj ) ? PyTuple_GetItem( obj, 0 ) : PyList_GetItem( obj, 0 );
+      if ( !is<T>( pfirst ) )
+        return false;
+      return true;
+    }
+
+    template<typename T> std::vector<T>
+    PythonHandler::getVector( PyObject* obj ) const
+    {
+      if ( !isVector<T>( obj ) )
+        throwPythonError( "Object has invalid type "+std::string( obj->ob_type->tp_name ) );
+      std::vector<T> vec;
+      const bool tuple = PyTuple_Check( obj );
+      const Py_ssize_t num_entries = tuple ? PyTuple_Size( obj ) : PyList_Size( obj );
+      //--- check every single element inside the list/tuple
+      for ( Py_ssize_t i = 0; i < num_entries; ++i ) {
+        PyObject* pit = tuple ? PyTuple_GetItem( obj, i ) : PyList_GetItem( obj, i );
+        if ( !is<T>( pit ) )
+          throwPythonError( "Mixed types detected in vector" );
+        vec.emplace_back( get<T>( pit ) );
+      }
+      return vec;
     }
   }
 }

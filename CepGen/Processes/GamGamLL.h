@@ -2,7 +2,6 @@
 #define CepGen_Processes_GamGamLL_h
 
 #include "CepGen/Processes/GenericProcess.h"
-#include "CepGen/Core/ParametersList.h"
 
 namespace cepgen
 {

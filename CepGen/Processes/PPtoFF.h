@@ -2,7 +2,6 @@
 #define CepGen_Processes_PPtoFF_h
 
 #include "CepGen/Processes/GenericKTProcess.h"
-#include "CepGen/Core/ParametersList.h"
 
 namespace cepgen
 {

@@ -17,7 +17,7 @@ namespace cepgen
     const double GenericProcess::mp2_ = GenericProcess::mp_*GenericProcess::mp_;
 
     GenericProcess::GenericProcess( const ParametersList& params, const std::string& name, const std::string& description, bool has_event ) :
-      name_( name ), description_( description ),
+      params_( params ), name_( name ), description_( description ),
       first_run( true ),
       s_( -1. ), sqs_( -1. ),
       MX_( -1. ), MY_( -1. ), w1_( -1. ), w2_( -1. ),
@@ -27,7 +27,7 @@ namespace cepgen
     {}
 
     GenericProcess::GenericProcess( const GenericProcess& proc ) :
-      name_( proc.name_ ), description_( proc.description_ ),
+      params_( proc.params_ ), name_( proc.name_ ), description_( proc.description_ ),
       first_run( proc.first_run ),
       s_( proc.s_ ), sqs_( proc.sqs_ ),
       MX_( proc.MX_ ), MY_( proc.MY_ ), w1_( proc.w1_ ), w2_( proc.w2_ ),
@@ -39,6 +39,7 @@ namespace cepgen
     GenericProcess&
     GenericProcess::operator=( const GenericProcess& proc )
     {
+      params_ = proc.params_;
       name_ = proc.name_; description_ = proc.description_;
       first_run = proc.first_run;
       s_ = proc.s_; sqs_ = proc.sqs_;

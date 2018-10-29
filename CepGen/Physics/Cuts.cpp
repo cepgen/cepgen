@@ -31,11 +31,11 @@ namespace cepgen
     if ( rapidity_diff.valid() )
      out.emplace_back( "System ΔY", rapidity_diff );
     if ( q2.valid() )
-     out.emplace_back( "Virtuality range (GeV²)", q2 );
+     out.emplace_back( "Virtuality (GeV²)", q2 );
     if ( qt.valid() )
-     out.emplace_back( "Transverse virtuality range (GeV)", qt );
+     out.emplace_back( "Transverse virtuality (GeV)", qt );
     if ( phi_qt.valid() )
-     out.emplace_back( "Partons Δɸ range", phi_qt );
+     out.emplace_back( "Partons Δɸ", phi_qt );
     return out;
   }
 }

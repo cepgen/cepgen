@@ -13,7 +13,7 @@
 extern "C"
 {
   extern cepgen::ktblock::Constants constants_;
-  extern cepgen::ktblock::Parameters params_;
+  extern cepgen::ktblock::Parameters genparams_;
   extern cepgen::ktblock::KTKinematics ktkin_;
   extern cepgen::ktblock::Cuts kincuts_;
   extern cepgen::ktblock::Event evtkin_;
@@ -61,50 +61,50 @@ namespace cepgen
       // feed run parameters to the common block
       //===========================================================================================
 
-      params_.icontri = (int)kin_.mode;
-      params_.imethod = method_;
-      params_.sfmod = (int)kin_.structure_functions->type;
-      params_.pdg_l = pair_;
+      genparams_.icontri = (int)kin_.mode;
+      genparams_.imethod = method_;
+      genparams_.sfmod = (int)kin_.structure_functions->type;
+      genparams_.pdg_l = pair_;
 
       //-------------------------------------------------------------------------------------------
       // incoming beams information
       //-------------------------------------------------------------------------------------------
 
-      params_.inp1 = kin_.incoming_beams.first.pz;
-      params_.inp2 = kin_.incoming_beams.second.pz;
+      genparams_.inp1 = kin_.incoming_beams.first.pz;
+      genparams_.inp2 = kin_.incoming_beams.second.pz;
       const HeavyIon in1 = (HeavyIon)kin_.incoming_beams.first.pdg;
       if ( in1 ) {
-        params_.a_nuc1 = in1.A;
-        params_.z_nuc1 = (unsigned short)in1.Z;
-        if ( params_.z_nuc1 > 1 ) {
+        genparams_.a_nuc1 = in1.A;
+        genparams_.z_nuc1 = (unsigned short)in1.Z;
+        if ( genparams_.z_nuc1 > 1 ) {
           event_->getOneByRole( Particle::IncomingBeam1 ).setPdgId( (PDG)in1 );
           event_->getOneByRole( Particle::OutgoingBeam1 ).setPdgId( (PDG)in1 );
         }
       }
       else
-        params_.a_nuc1 = params_.z_nuc1 = 1;
+        genparams_.a_nuc1 = genparams_.z_nuc1 = 1;
 
       const HeavyIon in2 = (HeavyIon)kin_.incoming_beams.second.pdg;
       if ( in2 ) {
-        params_.a_nuc2 = in2.A;
-        params_.z_nuc2 = (unsigned short)in2.Z;
-        if ( params_.z_nuc2 > 1 ) {
+        genparams_.a_nuc2 = in2.A;
+        genparams_.z_nuc2 = (unsigned short)in2.Z;
+        if ( genparams_.z_nuc2 > 1 ) {
           event_->getOneByRole( Particle::IncomingBeam2 ).setPdgId( (PDG)in2 );
           event_->getOneByRole( Particle::OutgoingBeam2 ).setPdgId( (PDG)in2 );
         }
       }
       else
-        params_.a_nuc2 = params_.z_nuc2 = 1;
+        genparams_.a_nuc2 = genparams_.z_nuc2 = 1;
 
       //-------------------------------------------------------------------------------------------
       // intermediate partons information
       //-------------------------------------------------------------------------------------------
 
-      params_.iflux1 = (int)kin_.incoming_beams.first.kt_flux;
-      params_.iflux2 = (int)kin_.incoming_beams.second.kt_flux;
-      if ( (KTFlux)params_.iflux1 == KTFlux::P_Gluon_KMR )
+      genparams_.iflux1 = (int)kin_.incoming_beams.first.kt_flux;
+      genparams_.iflux2 = (int)kin_.incoming_beams.second.kt_flux;
+      if ( (KTFlux)genparams_.iflux1 == KTFlux::P_Gluon_KMR )
         event_->getOneByRole( Particle::Parton1 ).setPdgId( PDG::gluon );
-      if ( (KTFlux)params_.iflux2 == KTFlux::P_Gluon_KMR )
+      if ( (KTFlux)genparams_.iflux2 == KTFlux::P_Gluon_KMR )
         event_->getOneByRole( Particle::Parton2 ).setPdgId( PDG::gluon );
     }
 
@@ -138,8 +138,8 @@ namespace cepgen
       PX_ = Particle::Momentum( evtkin_.px );
       PY_ = Particle::Momentum( evtkin_.py );
       // express these momenta per nucleon
-      PX_ *= 1./params_.a_nuc1;
-      PY_ *= 1./params_.a_nuc2;
+      PX_ *= 1./genparams_.a_nuc1;
+      PY_ *= 1./genparams_.a_nuc2;
 
       //===========================================================================================
       // intermediate partons

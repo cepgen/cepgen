@@ -1,7 +1,6 @@
 #include "CepGen/Processes/GenericKTProcess.h"
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
 
 #include "CepGen/Event/Event.h"
 

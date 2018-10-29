@@ -10,6 +10,7 @@ namespace cepgen
     int_values_.insert( oth.int_values_.begin(), oth.int_values_.end() );
     dbl_values_.insert( oth.dbl_values_.begin(), oth.dbl_values_.end() );
     str_values_.insert( oth.str_values_.begin(), oth.str_values_.end() );
+    lim_values_.insert( oth.lim_values_.begin(), oth.lim_values_.end() );
     vec_param_values_.insert( oth.vec_param_values_.begin(), oth.vec_param_values_.end() );
     vec_int_values_.insert( oth.vec_int_values_.begin(), oth.vec_int_values_.end() );
     vec_dbl_values_.insert( oth.vec_dbl_values_.begin(), oth.vec_dbl_values_.end() );
@@ -20,14 +21,11 @@ namespace cepgen
   std::ostream&
   operator<<( std::ostream& os, const ParametersList& params )
   {
-    for ( const auto& kv : params.int_values_ )
-      os << "\n" << kv.first << ": int(" << kv.second << ")";
-    for ( const auto& kv : params.dbl_values_ )
-      os << "\n" << kv.first << ": double(" << kv.second << ")";
-    for ( const auto& kv : params.str_values_ )
-      os << "\n" << kv.first << ": string(" << kv.second << ")";
-    for ( const auto& kv : params.param_values_ )
-      os << "\n" << kv.first << ": param({" << kv.second << "\n})";
+    for ( const auto& kv : params.int_values_ )   os << "\n" << kv.first << ": int(" << kv.second << ")";
+    for ( const auto& kv : params.dbl_values_ )   os << "\n" << kv.first << ": double(" << kv.second << ")";
+    for ( const auto& kv : params.str_values_ )   os << "\n" << kv.first << ": string(" << kv.second << ")";
+    for ( const auto& kv : params.param_values_ ) os << "\n" << kv.first << ": param({" << kv.second << "})";
+    for ( const auto& kv : params.lim_values_ )   os << "\n" << kv.first << ": limits(" << kv.second << ")";
     for ( const auto& kv : params.vec_int_values_ ) {
       os << "\n" << kv.first << ": vint(";
       bool first = true;
@@ -58,9 +56,55 @@ namespace cepgen
     return os;
   }
 
+  std::vector<std::string>
+  ParametersList::keys() const
+  {
+    std::vector<std::string> out;
+    for ( const auto& p : param_values_ )     out.emplace_back( p.first );
+    for ( const auto& p : int_values_ )       out.emplace_back( p.first );
+    for ( const auto& p : dbl_values_ )       out.emplace_back( p.first );
+    for ( const auto& p : str_values_ )       out.emplace_back( p.first );
+    for ( const auto& p : lim_values_ )       out.emplace_back( p.first );
+    for ( const auto& p : vec_param_values_ ) out.emplace_back( p.first );
+    for ( const auto& p : vec_int_values_ )   out.emplace_back( p.first );
+    for ( const auto& p : vec_dbl_values_ )   out.emplace_back( p.first );
+    for ( const auto& p : vec_str_values_ )   out.emplace_back( p.first );
+    return out;
+  }
+
+  std::string
+  ParametersList::getString( const std::string& key ) const
+  {
+    std::ostringstream os;
+    if ( has<ParametersList>( key ) )   os << "params{" << get<ParametersList>( key ) << "}";
+    else if ( has<int>( key ) )         os << get<int>( key );
+    else if ( has<double>( key ) )      os << get<double>( key );
+    else if ( has<std::string>( key ) ) os << get<std::string>( key );
+    else if ( has<Limits>( key ) )      os << get<Limits>( key );
+    else if ( has<std::vector<ParametersList> >( key ) )
+      for ( const auto& p : get<std::vector<ParametersList> >( key ) )
+        os << p << ",";
+    else if ( has<std::vector<int> >( key ) )
+      for ( const auto& p : get<std::vector<int> >( key ) )
+        os << p << ",";
+    else if ( has<std::vector<double> >( key ) )
+      for ( const auto& p : get<std::vector<double> >( key ) )
+        os << p << ",";
+    else if ( has<std::vector<std::string> >( key ) )
+      for ( const auto& p : get<std::vector<std::string> >( key ) )
+        os << p << ",";
+    return os.str();
+  }
+
   //------------------------------------------------------------------
   // default template (placeholders)
   //------------------------------------------------------------------
+
+  template<typename T> bool
+  ParametersList::has( std::string key ) const
+  {
+    throw CG_FATAL( "ParametersList" ) << "Invalid type for key=" << key << "!";
+  }
 
   template<typename T> T
   ParametersList::get( std::string key, T def ) const
@@ -188,8 +232,8 @@ namespace cepgen
   template<> ParametersList&
   ParametersList::set<std::vector<int> >( std::string key, const std::vector<int>& value )
   {
-    return *this;
     vec_int_values_[key] = value;
+    return *this;
   }
 
   //------------------------------------------------------------------
@@ -334,4 +378,3 @@ namespace cepgen
     return *this;
   }
 }
-

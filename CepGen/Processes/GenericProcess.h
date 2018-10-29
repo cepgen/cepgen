@@ -3,6 +3,7 @@
 
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Core/ParametersList.h"
 
 #include <map>
 #include <vector>
@@ -12,7 +13,6 @@ namespace cepgen
 {
   class Event;
   class FormFactors;
-  class ParametersList;
   /// Location for all physics processes to be generated
   namespace proc
   {
@@ -91,6 +91,8 @@ namespace cepgen
         inline const unsigned int ndim() const { return x_.size(); }
         /// Get the value of a component of the d-dimensional point considered
         double x( unsigned int idx ) const;
+        /// Process-specific parameters
+        inline const ParametersList& parameters() const { return params_; }
         /// Name of the process considered
         inline const std::string& name() const { return name_; }
         /// Human-readable description of the process
@@ -110,6 +112,8 @@ namespace cepgen
 
         // ---
 
+        /// Process-specific parameters
+        ParametersList params_;
         /// Name of the process
         std::string name_;
         /// Process human-readable description

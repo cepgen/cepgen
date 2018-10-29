@@ -32,6 +32,8 @@ namespace cepgen
 
         template<typename T> bool is( PyObject* obj ) const;
         template<typename T> T get( PyObject* obj ) const;
+        template<typename T> bool isVector( PyObject* obj ) const;
+        template<typename T> std::vector<T> getVector( PyObject* obj ) const;
 
         void fillParameter( PyObject* parent, const char* key, bool& out );
         void fillParameter( PyObject* parent, const char* key, int& out );
@@ -54,8 +56,8 @@ namespace cepgen
         void parseTamingFunctions( PyObject* );
         void parseHadroniser( PyObject* );
     };
-    template<> bool PythonHandler::is<int>( PyObject* obj ) const;
     template<> bool PythonHandler::is<bool>( PyObject* obj ) const;
+    template<> bool PythonHandler::is<int>( PyObject* obj ) const;
     template<> int PythonHandler::get<int>( PyObject* obj ) const;
     template<> unsigned long PythonHandler::get<unsigned long>( PyObject* obj ) const;
     template<> bool PythonHandler::is<ParametersList>( PyObject* obj ) const;
