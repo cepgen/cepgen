@@ -35,7 +35,7 @@ namespace cepgen
   {
     public:
       Kinematics();
-      ~Kinematics();
+      ~Kinematics() = default;
 
       /// Set the incoming particles' momenta (if the collision is symmetric)
       void setSqrtS( double sqrts );
