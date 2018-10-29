@@ -158,7 +158,8 @@ namespace cepgen
       // register the outgoing remnants' variables
       //============================================================================================
 
-      MX_ = MY_ = event_->getOneByRole( Particle::IncomingBeam1 ).mass();
+      MX_ = event_->getOneByRole( Particle::IncomingBeam1 ).mass();
+      MY_ = event_->getOneByRole( Particle::IncomingBeam2 ).mass();
       if ( kin_.mode == KinematicsMode::InelasticElastic || kin_.mode == KinematicsMode::InelasticInelastic )
         registerVariable( MX_, Mapping::square, kin_.cuts.remnants.mass_single, { 1.07, 1000. }, "Positive z proton remnant mass" );
       if ( kin_.mode == KinematicsMode::ElasticInelastic || kin_.mode == KinematicsMode::InelasticInelastic )

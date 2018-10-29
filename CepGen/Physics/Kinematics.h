@@ -37,6 +37,11 @@ namespace cepgen
       Kinematics();
       ~Kinematics();
 
+      /// Set the incoming particles' momenta (if the collision is symmetric)
+      void setSqrtS( double sqrts );
+      /// Process centre of mass energy
+      double sqrtS() const;
+
       /// Incoming beams characteristics
       struct Beam
       {
@@ -45,15 +50,11 @@ namespace cepgen
         KTFlux kt_flux; ///< Type of \f$k_{\rm T}\f$-factorised flux to be considered (if any)
       };
       friend std::ostream& operator<<( std::ostream&, const Beam& );
+
       /// Beam/primary particle's kinematics
       std::pair<Beam,Beam> incoming_beams;
-      /// Set the incoming particles' momenta (if the collision is symmetric)
-      void setSqrtS( double sqrts );
-      /// Process centre of mass energy
-      double sqrtS() const;
       /// Minimum list of central particles required
       std::vector<PDG> minimum_final_state;
-
       /// Type of kinematics to consider for the phase space
       KinematicsMode mode;
       /// Type of structure functions to consider

@@ -86,20 +86,24 @@ namespace cepgen
       if ( !isKinematicsDefined() )
         throw CG_FATAL( "GenericProcess" ) << "Kinematics not properly defined for the process.";
 
+      const HeavyIon hi1( kin_.incoming_beams.first.pdg ), hi2( kin_.incoming_beams.second.pdg );
+      const double m1 = hi1 ? particleproperties::mass( hi1 ) : particleproperties::mass( kin_.incoming_beams.first.pdg );
+      const double m2 = hi2 ? particleproperties::mass( hi2 ) : particleproperties::mass( kin_.incoming_beams.second.pdg );
       // at some point introduce non head-on colliding beams?
-      Particle::Momentum p1( 0., 0.,  kin_.incoming_beams.first.pz ), p2( 0., 0., -kin_.incoming_beams.second.pz );
-      // on-shell beam particles
-      p1.setMass( particleproperties::mass( kin_.incoming_beams.first.pdg ) );
-      p2.setMass( particleproperties::mass( kin_.incoming_beams.second.pdg ) );
+      const auto p1 = Particle::Momentum::fromPxPyPzM( 0., 0., +kin_.incoming_beams.first .pz, m1 );
+      const auto p2 = Particle::Momentum::fromPxPyPzM( 0., 0., -kin_.incoming_beams.second.pz, m2 );
       setIncomingKinematics( p1, p2 );
 
-      sqs_ = CMEnergy( p1, p2 );
-      s_ = sqs_*sqs_;
+      s_ = ( p1+p2 ).mass2();
+      sqs_ = sqrt( s_ );
 
       w1_ = p1.mass2();
       w2_ = p2.mass2();
 
-      CG_DEBUG( "GenericProcess" ) << "Kinematics successfully prepared! sqrt(s) = " << sqs_ << ".";
+      CG_DEBUG( "GenericProcess" ) << "Kinematics successfully prepared!\n"
+        << "  √s = " << sqs_*1.e-3 << " TeV,\n"
+        << "  p₁ = " << p1 << ", mass=" << p1.mass() << " GeV\n"
+        << "  p₂ = " << p1 << ", mass=" << p2.mass() << " GeV.";
     }
 
     void
