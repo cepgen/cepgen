@@ -32,8 +32,8 @@ namespace cepgen
     Pythia8Hadroniser::setParameters( const Parameters& params )
     {
       params_ = &params;
-      cg_evt_->initialise( params );
 #ifdef PYTHIA8
+      cg_evt_->initialise( params );
       pythia_->setLHAupPtr( (Pythia8::LHAup*)cg_evt_.get() );
       pythia_->settings.parm( "Beams:idA", (short)params_->kinematics.incoming_beams.first.pdg );
       pythia_->settings.parm( "Beams:idB", (short)params_->kinematics.incoming_beams.second.pdg );
