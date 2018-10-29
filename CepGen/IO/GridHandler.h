@@ -159,7 +159,7 @@ namespace cepgen
       /// Initialise the grid and all useful interpolators/accelerators
       void init() {
         if ( values_raw_.empty() )
-          CG_ERROR( "GridHandler" ) << "Empty grid.";
+          throw CG_ERROR( "GridHandler" ) << "Empty grid.";
         gsl_set_error_handler_off();
         //--- start by building grid coordinates from raw values
         for ( auto& c : coords_ )

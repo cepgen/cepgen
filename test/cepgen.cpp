@@ -54,7 +54,7 @@ int main( int argc, char* argv[] )
   }
 
   //--- list all parameters
-  CG_INFO( "main" ) << gen.parameters.get();
+  CG_LOG( "main" ) << gen.parameters.get();
 
   cepgen::utils::AbortHandler ctrl_c;
 

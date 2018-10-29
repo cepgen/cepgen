@@ -34,7 +34,7 @@ main( int argc, char* argv[] )
   }
   { // test 2
     const double exact = 2./3.;
-    mg.parameters->setProcess( new cepgen::proc::TestProcess<2>( "x^2+y^2", { { "x", "y" } } ) );
+    mg.parameters->setProcess( new cepgen::proc::TestProcess<2>( "x^2+y^2", { "x", "y" } ) );
     mg.computeXsection( result, error );
     if ( fabs( exact - result ) > max_sigma * error )
       throw CG_FATAL( "main" ) << "pull = " << fabs( exact-result )/error << ".";
@@ -42,7 +42,7 @@ main( int argc, char* argv[] )
   }
   { // test 3
     const double exact = 13./12.;
-    mg.parameters->setProcess( new cepgen::proc::TestProcess<3>( "x+y^2+z^3", { { "x", "y", "z" } } ) );
+    mg.parameters->setProcess( new cepgen::proc::TestProcess<3>( "x+y^2+z^3", { "x", "y", "z" } ) );
     mg.computeXsection( result, error );
     if ( fabs( exact - result ) > max_sigma * error )
       throw CG_FATAL( "main" ) << "pull = " << fabs( exact-result )/error << ".";

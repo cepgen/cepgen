@@ -170,9 +170,8 @@ namespace cepgen
     LpairHandler::store( const char* file )
     {
       std::ofstream f( file, std::fstream::out | std::fstream::trunc );
-      if ( !f.is_open() ) {
-        CG_ERROR( "LpairHandler" ) << "Failed to open file \"" << file << "%s\" for writing.";
-      }
+      if ( !f.is_open() )
+        throw CG_ERROR( "LpairHandler" ) << "Failed to open file \"" << file << "%s\" for writing.";
       for ( const auto& it : p_strings_ )
         if ( it.second.value )
           f << it.first << " = " << *it.second.value << "\n";

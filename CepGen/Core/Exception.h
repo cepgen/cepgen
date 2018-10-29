@@ -13,27 +13,25 @@
 #define CG_LOG( mod ) \
   ( !CG_EXCEPT_MATCH( mod, information ) ) \
   ? cepgen::NullStream( mod ) \
-  : cepgen::Exception( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::verbatim )
+  : cepgen::LoggedException( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::verbatim )
 #define CG_INFO( mod ) \
   ( !CG_EXCEPT_MATCH( mod, information ) ) \
   ? cepgen::NullStream( mod ) \
-  : cepgen::Exception( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::info )
+  : cepgen::LoggedException( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::info )
 #define CG_DEBUG( mod ) \
   ( !CG_EXCEPT_MATCH( mod, debug ) ) \
   ? cepgen::NullStream( mod ) \
-  : cepgen::Exception( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::debug )
+  : cepgen::LoggedException( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::debug )
 #define CG_DEBUG_LOOP( mod ) \
   ( !CG_EXCEPT_MATCH( mod, debugInsideLoop ) ) \
   ? cepgen::NullStream( mod ) \
-  : cepgen::Exception( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::debug )
+  : cepgen::LoggedException( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::debug )
 #define CG_WARNING( mod ) \
   ( !CG_EXCEPT_MATCH( mod, warning ) ) \
   ? cepgen::NullStream( mod ) \
-  : cepgen::Exception( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::warning )
+  : cepgen::LoggedException( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::warning )
 #define CG_ERROR( mod ) \
-  ( !CG_EXCEPT_MATCH( mod, error ) ) \
-  ? cepgen::NullStream( mod ) \
-  : cepgen::Exception( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::error )
+  cepgen::Exception( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::error )
 #define CG_FATAL( mod ) \
   cepgen::Exception( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::fatal )
 
@@ -83,11 +81,12 @@ namespace cepgen
         from_( rhs.from_ ), module_( rhs.module_ ), message_( rhs.message_.str() ), type_( rhs.type_ ), error_num_( rhs.error_num_ ) {}
       /// Default destructor (potentially killing the process)
       inline ~Exception() noexcept override {
-        do { dump(); } while ( 0 );
         // we stop this process' execution on fatal exception
-        if ( type_ == Type::fatal )
-          if ( raise( SIGINT ) != 0 )
-            exit( 0 );
+        if ( type_ >= Type::error )
+          do { dump(); } while ( 0 );
+        if ( type_ == Type::fatal && raise( SIGINT ) != 0 ) {
+          exit( 0 );
+        }
       }
 
       //----- Overloaded stream operators
@@ -160,12 +159,11 @@ namespace cepgen
         if ( type_ == Type::verbatim )
           return message_.str();
         std::ostringstream os;
-        os << "============================= Exception detected! =============================" << std::endl
+        os << "====================== Exception detected at " << now() << "! ======================" << std::endl
            << " Class:       " << typeString() << std::endl;
         if ( !from_.empty() )
-          os << " Raised by:   " << from_ << "\n"
-             << "         at " << now() << "\n"
-             << " Description: " << message_.str() << std::endl;
+          os << " Raised by: " << from_ << "\n"
+             << " " << message_.str() << std::endl;
         if ( errorNumber() != 0 )
           os << "-------------------------------------------------------------------------------" << std::endl
              << " Error #" << error_num_ << std::endl;
@@ -182,6 +180,13 @@ namespace cepgen
       Type type_;
       /// Integer exception number
       int error_num_;
+  };
+  struct LoggedException : Exception
+  {
+    using Exception::Exception;
+    ~LoggedException() noexcept override {
+      do { dump(); } while ( 0 );
+    }
   };
   /// \brief Placeholder for debugging messages if logging threshold is not reached
   /// \date Apr 2018

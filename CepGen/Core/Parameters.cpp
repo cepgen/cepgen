@@ -127,19 +127,18 @@ namespace cepgen
     const bool pretty = true;
 
     const int wb = 90, wt = 40;
-    os
-      << "Parameters dump" << std::left << "\n\n"
-      << std::setfill('_') << std::setw( wb+3 ) << "_/¯¯RUN¯INFORMATION¯¯\\_" << std::setfill( ' ' ) << "\n"
-      << std::right << std::setw( wb ) << std::left << std::endl
-      << std::setw( wt ) << "Process to generate";
-    if ( p->process_ ) {
-      os << ( pretty ? boldify( p->process_->name().c_str() ) : p->process_->name() ) << "\n"
-         << std::setw( wt ) << "" << p->process_->description();
-    }
-    else
-      os << ( pretty ? boldify( "no process!" ) : "no process!" );
+    os << std::left << "\n";
+    if ( p->process_ )
+      os
+        << std::setfill('_') << std::setw( wb+3 ) << "_/¯ PROCESS INFORMATION ¯\\_" << std::setfill( ' ' ) << "\n"
+        << std::right << std::setw( wb ) << std::left << std::endl
+        << std::setw( wt ) << "Process to generate"
+        << ( pretty ? boldify( p->process_->name().c_str() ) : p->process_->name() ) << "\n"
+        << std::setw( wt ) << "" << p->process_->description() << "\n";
     os
       << "\n"
+      << std::setfill('_') << std::setw( wb+3 ) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill( ' ' ) << "\n"
+      << std::right << std::setw( wb ) << std::left << std::endl
       << std::setw( wt ) << "Events generation? "
       << ( pretty ? yesno( p->generation.enabled ) : std::to_string( p->generation.enabled ) ) << "\n"
       << std::setw( wt ) << "Number of events to generate"
@@ -177,8 +176,7 @@ namespace cepgen
     std::ostringstream proc_mode; proc_mode << p->kinematics.mode;
     os
       << "\n"
-      << std::setfill('_') << std::setw( wb+3 )
-      << "_/¯¯EVENTS¯KINEMATICS¯¯\\_" << std::setfill( ' ' ) << "\n\n"
+      << std::setfill('_') << std::setw( wb+3 ) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill( ' ' ) << "\n\n"
       << std::setw( wt ) << "Incoming particles"
       << p->kinematics.incoming_beams.first << ",\n" << std::setw( wt ) << ""
       << p->kinematics.incoming_beams.second << "\n"

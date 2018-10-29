@@ -640,7 +640,7 @@ namespace cepgen
       //std::cout << __PRETTY_FUNCTION__ << ":" << w_limits_ << "|" << q2_limits_ << "|" << mx_limits_ << std::endl;
       switch ( kin_.mode ) {
         case KinematicsMode::ElectronProton: default:
-          CG_ERROR( "GamGamLL" ) << "Case not yet supported!"; break;
+          throw CG_FATAL( "GamGamLL" ) << "Case not yet supported!";
         case KinematicsMode::ElasticElastic:
           masses_.dw31_ = masses_.dw52_ = 0.; break;
         case KinematicsMode::InelasticElastic: {

@@ -30,9 +30,8 @@ namespace cepgen
         Functional( const Functional& rhs )
 #ifdef MUPARSER
           : values_( rhs.values_ ), vars_( rhs.vars_ ), expression_( rhs.expression_ ) {
-            for ( unsigned short i = 0; i < vars_.size(); ++i ) {
+          for ( unsigned short i = 0; i < vars_.size(); ++i )
             parser_.DefineVar( vars_[i], &values_[i] );
-          }
           parser_.SetExpr( expression_ );
         }
 #else
@@ -41,15 +40,16 @@ namespace cepgen
         /// \brief Build a parser from an expression and a variables list
         /// \param[in] expr Expression to parse
         /// \param[in] vars List of variables to parse
-        Functional( const std::string& expr, const std::array<std::string,N>& vars ) : vars_( vars ), expression_( expr ) {
+        Functional( const std::string& expr, const std::vector<std::string>& vars ) : vars_( vars ), expression_( expr ) {
 #ifdef MUPARSER
           try {
-            for ( unsigned short i = 0; i < vars_.size(); ++i ) {
+            for ( unsigned short i = 0; i < vars_.size(); ++i )
               parser_.DefineVar( vars_[i], &values_[i] );
-            }
             parser_.SetExpr( expr );
           } catch ( const mu::Parser::exception_type& e ) {
-            std::ostringstream os; for ( unsigned short i = 0; i < e.GetPos(); ++i ) os << "-"; os << "^";
+            std::ostringstream os;
+            for ( unsigned short i = 0; i < e.GetPos(); ++i )
+              os << "-"; os << "^";
             throw CG_ERROR( "Functional" )
               << "Failed to define the function\n\t"
               << expression_ << "\n\t"
@@ -64,7 +64,7 @@ namespace cepgen
         /// \param[in] x Variable value
         double eval( double x ) const {
           static_assert( N == 1, "This function only works with single-dimensional functions" );
-          return eval( std::array<double,1>{ { x } } );
+          return eval( std::array<double,1>{ x } );
         }
         /// \brief Compute the functional for a given value of the variables
         /// \param[in] x Variables values
@@ -73,7 +73,7 @@ namespace cepgen
 #ifdef MUPARSER
           values_ = x;
           try { ret = parser_.Eval(); } catch ( const mu::Parser::exception_type& e ) {
-            std::ostringstream os; for ( unsigned short i = 0; i < e.GetPos(); ++i ) os << "-"; os << "^";
+            std::ostringstream os; for ( unsigned short i = 0; i < e.GetPos(); ++i ) os << "-"; os << "*";
             throw CG_ERROR( "Functional" )
               << "Failed to evaluate the function\n\t"
               << expression_ << "\n\t"
@@ -91,7 +91,7 @@ namespace cepgen
         mu::Parser parser_;
         mutable std::array<double,N> values_;
 #endif
-        std::array<std::string,N> vars_;
+        std::vector<std::string> vars_;
         std::string expression_;
     };
   }

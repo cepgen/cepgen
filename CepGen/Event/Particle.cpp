@@ -137,7 +137,7 @@ namespace cepgen
     momentum_.setP( px, py, pz );
     setEnergy( e );
     if ( fabs( e-momentum_.energy() ) > 1.e-6 ) // more than 1 eV difference
-      CG_ERROR( Form( "Energy difference: %.5e", e-momentum_.energy() ) );
+      CG_WARNING( Form( "Energy difference: %.5e", e-momentum_.energy() ) );
   }
 
   double

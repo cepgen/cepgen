@@ -143,7 +143,7 @@ namespace cepgen
       &result, &abserr );
     // ensure the operation was successful
     if ( res != GSL_SUCCESS )
-      CG_ERROR( "Integrator:vegas" )
+      throw CG_ERROR( "Integrator:vegas" )
         << "Failed to warm-up the Vegas grid.\n\t"
         << "GSL error: " << gsl_strerror( res ) << ".";
     CG_INFO( "Integrator:vegas" )
@@ -329,7 +329,7 @@ namespace cepgen
       std::vector<double> x_low( function_->dim, 0. ), x_up( function_->dim, 1. );
       int res = warmupVegas( x_low, x_up, 25000 );
       if ( res != GSL_SUCCESS ) {
-        CG_ERROR( "Integrator::setGen" )
+        CG_WARNING( "Integrator::setGen" )
           << "Failed to perform a Vegas warm-up.\n\t"
           << "Disabling treat...";
         input_params_->generation.treat = false;

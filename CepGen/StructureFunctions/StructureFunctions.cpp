@@ -38,7 +38,7 @@ namespace cepgen
     Parameterisation::F1( double xbj, double q2 ) const
     {
       if ( xbj == 0. || q2 == 0. ) {
-        CG_ERROR( "StructureFunctions:F1" )
+        CG_WARNING( "StructureFunctions:F1" )
           << "Invalid range for Q² = " << q2 << " or xBj = " << xbj << ".";
         return 0.;
       }

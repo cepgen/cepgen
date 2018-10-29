@@ -37,10 +37,8 @@ namespace cepgen
         m0 = params_.m0;
         q20 = 0.125;
       }
-      else {
-        CG_ERROR( "ChristyBosted" ) << "Invalid direction retrieved! Aborting.";
-        return 0.;
-      }
+      else
+        throw CG_ERROR( "ChristyBosted" ) << "Invalid direction retrieved! Aborting.";
 
       const double norm_q2 = 1./0.330/0.330;
       const double t = log( log( ( q2+m0 )*norm_q2 )/log( m0*norm_q2 ) );

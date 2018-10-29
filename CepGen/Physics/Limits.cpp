@@ -75,7 +75,7 @@ namespace cepgen
   Limits::x( double v ) const
   {
     if ( v < 0. || v > 1. )
-      CG_ERROR( "Limits:shoot" )
+      throw CG_ERROR( "Limits:shoot" )
         << "x must be comprised between 0 and 1; x value = " << v << ".";
     if ( !valid() )
       return INVALID;
