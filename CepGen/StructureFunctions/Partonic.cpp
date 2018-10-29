@@ -3,6 +3,12 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
+#ifdef LIBLHAPDF
+#  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+#    define LHAPDF_GE_6 1
+#  endif
+#endif
+
 namespace cepgen
 {
   namespace strfun
@@ -40,7 +46,7 @@ namespace cepgen
         return;
 #ifdef LIBLHAPDF
       std::string lhapdf_version, pdf_description, pdf_type;
-#  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+#  ifdef LHAPDF_GE_6
       try {
         //--- check if PDF code is set
         if ( pdf_code_ != 0l ) {
@@ -67,16 +73,19 @@ namespace cepgen
       else
         LHAPDF::initPDFSet( pdf_set_, LHAPDF::LHGRID, pdf_member_ );
       lhapdf_version = LHAPDF::getVersion();
-      pdf_description = LHAPDF::getDescription();
 #  endif
       replace_all( pdf_description, ". ", ".\n  " );
       CG_INFO( "Partonic" ) << "Partonic structure functions evaluator successfully built.\n"
         << " * LHAPDF version: " << lhapdf_version << "\n"
         << " * number of flavours: " << num_flavours_ << "\n"
+        << " * quarks mode: " << mode_ << "\n"
         << " * PDF set: " << pdf_set_ << "\n"
-        << ( pdf_description.empty() ? "" : "  "+pdf_description+"\n" )
         << " * PDF member: " << pdf_member_ << ( pdf_type.empty() ? "" : " ("+pdf_type+")" ) << "\n"
-        << " * quarks mode: " << mode_;
+#  ifdef LHAPDF_GE_6
+        << ( pdf_description.empty() ? "" : "  "+pdf_description );
+#  else
+      ; LHAPDF::getDescription();
+#  endif
       initialised_ = true;
 #else
       throw CG_FATAL( "Partonic" ) << "LHAPDF is not liked to this instance!";
@@ -98,7 +107,7 @@ namespace cepgen
 
       if ( !initialised_ )
         initialise();
-#  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION >= 6
+#  ifdef LHAPDF_GE_6
       auto& member = *pdfs_[pdf_member_];
       if ( !member.inPhysicalRangeXQ2( xbj, q2 ) ) {
         CG_WARNING( "Partonic" ) << "(x=" << xbj << ", Q²=" << q2 << " GeV²) "
@@ -121,7 +130,7 @@ namespace cepgen
 
       for ( int i = 0; i < num_flavours_; ++i ) {
         const double prefactor = 1./9.*Q_TIMES_3[i]*Q_TIMES_3[i];
-#  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION >= 6
+#  ifdef LHAPDF_GE_6
         if ( !pdfs_[pdf_member_]->hasFlavor( QUARK_PDGS[i] ) )
           throw CG_FATAL( "Partonic" ) << "Flavour " << QUARK_PDGS[i] << " is unsupported!";
         const double xq = member.xfxQ2( QUARK_PDGS[i], xbj, q2 );
@@ -158,3 +167,8 @@ namespace cepgen
     return os;
   }
 }
+
+#ifdef LHAPDF_GE_6
+#undef LHAPDF_GE_6
+#endif
+
