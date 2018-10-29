@@ -82,10 +82,10 @@ namespace cepgen
       /// Default destructor (potentially killing the process)
       inline ~Exception() noexcept override {
         // we stop this process' execution on fatal exception
-        if ( type_ >= Type::error )
-          do { dump(); } while ( 0 );
-        if ( type_ == Type::fatal && raise( SIGINT ) != 0 ) {
-          exit( 0 );
+        if ( type_ == Type::fatal ) {
+          dump();
+          if ( raise( SIGINT ) != 0 )
+            exit( 0 );
         }
       }
 

@@ -38,7 +38,8 @@ namespace cepgen
         q20 = 0.125;
       }
       else
-        throw CG_ERROR( "ChristyBosted" ) << "Invalid direction retrieved! Aborting.";
+        throw CG_FATAL( "ChristyBosted" )
+          << "Invalid direction retrieved ('" << sf << "')! Aborting.";
 
       const double norm_q2 = 1./0.330/0.330;
       const double t = log( log( ( q2+m0 )*norm_q2 )/log( m0*norm_q2 ) );
@@ -80,7 +81,7 @@ namespace cepgen
 
         //--- resonance Q^2 dependence calculations
 
-        if ( sf == 'T' )      height[i] = res.A0_T*( 1.+res.fit_parameters[0]*q2/( 1.+res.fit_parameters[1]*q2 ) )/pow( 1.+q2/0.91, res.fit_parameters[2] );
+        if      ( sf == 'T' ) height[i] = res.A0_T*( 1.+res.fit_parameters[0]*q2/( 1.+res.fit_parameters[1]*q2 ) )/pow( 1.+q2/0.91, res.fit_parameters[2] );
         else if ( sf == 'L' ) height[i] = res.A0_L/( 1.+res.fit_parameters[3]*q2 )*q2*exp( -q2*res.fit_parameters[4] );
         height[i] = height[i]*height[i];
       }
@@ -98,11 +99,12 @@ namespace cepgen
 
       //--- non-resonant background calculation
       const double xpr = 1./( 1.+( w2-pow( mp_+mpi, 2 ) )/( q2+q20 ) );
-      if ( xpr > 1. ) return 0.; // FIXME
+      if ( xpr > 1. )
+        return 0.; // FIXME
 
       double sig_nr = 0.;
       if ( sf == 'T' ) { // transverse
-        const double wdif = w - ( mp_ + mpi );
+        const double wdif = w-( mp_+mpi );
         if ( wdif >= 0. ) {
           for ( unsigned short i = 0; i < 2; ++i ) {
             const double expo = params_.continuum.transverse[i].fit_parameters[1]
@@ -239,7 +241,8 @@ namespace cepgen
     double
     ChristyBosted::Parameters::Resonance::ecmr( double m2 ) const
     {
-      if ( mass == 0. ) return 0.;
+      if ( mass == 0. )
+        return 0.;
       return 0.5 * ( mass*mass+m2-mp2_ ) / mass;
     }
 
@@ -265,7 +268,7 @@ namespace cepgen
       const double q21 = 30., q20 = 8.;
       const double delq2 = q2 - q20;
       const double qq = q21 - q20;
-      const double prefac = 1./( 4.*M_PI*M_PI*constants::ALPHA_EM ) * ( 1.-xbj );
+      const double prefac = 0.25 * M_1_PI*M_1_PI/constants::ALPHA_EM * ( 1.-xbj );
       //------------------------------
 
       double q2_eff = q2, w2_eff = w2;
@@ -274,8 +277,7 @@ namespace cepgen
         w2_eff = mp2_ + q2_eff*( 1.-xbj )/xbj;
       }
       const double tau = 4.*xbj*xbj*mp2_/q2_eff;
-      const double sigT = resmod507( 'T', w2_eff, q2_eff );
-      const double sigL = resmod507( 'L', w2_eff, q2_eff );
+      const double sigT = resmod507( 'T', w2_eff, q2_eff ), sigL = resmod507( 'L', w2_eff, q2_eff );
 
       F2 = prefac * q2_eff / ( 1+tau ) * ( sigT+sigL ) / constants::GEV2_TO_BARN * 1.e6;
       if ( q2 > q20 )
