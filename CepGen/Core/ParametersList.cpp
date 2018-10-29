@@ -81,18 +81,34 @@ namespace cepgen
     else if ( has<double>( key ) )      os << get<double>( key );
     else if ( has<std::string>( key ) ) os << get<std::string>( key );
     else if ( has<Limits>( key ) )      os << get<Limits>( key );
-    else if ( has<std::vector<ParametersList> >( key ) )
-      for ( const auto& p : get<std::vector<ParametersList> >( key ) )
-        os << p << ",";
-    else if ( has<std::vector<int> >( key ) )
-      for ( const auto& p : get<std::vector<int> >( key ) )
-        os << p << ",";
-    else if ( has<std::vector<double> >( key ) )
-      for ( const auto& p : get<std::vector<double> >( key ) )
-        os << p << ",";
-    else if ( has<std::vector<std::string> >( key ) )
-      for ( const auto& p : get<std::vector<std::string> >( key ) )
-        os << p << ",";
+    else if ( has<std::vector<ParametersList> >( key ) ) {
+      bool first = true;
+      for ( const auto& p : get<std::vector<ParametersList> >( key ) ) {
+        os << ( first ? "" : ", " ) << p;
+        first = false;
+      }
+    }
+    else if ( has<std::vector<int> >( key ) ) {
+      bool first = true;
+      for ( const auto& p : get<std::vector<int> >( key ) ) {
+        os << ( first ? "" : ", " ) << p;
+        first = false;
+      }
+    }
+    else if ( has<std::vector<double> >( key ) ) {
+      bool first = true;
+      for ( const auto& p : get<std::vector<double> >( key ) ) {
+        os << ( first ? "" : ", " ) << p;
+        first = false;
+      }
+    }
+    else if ( has<std::vector<std::string> >( key ) ) {
+      bool first = true;
+      for ( const auto& p : get<std::vector<std::string> >( key ) ) {
+        os << ( first ? "" : ", " ) << p;
+        first = false;
+      }
+    }
     return os.str();
   }
 
@@ -107,7 +123,7 @@ namespace cepgen
   }
 
   template<typename T> T
-  ParametersList::get( std::string key, T def ) const
+  ParametersList::get( std::string key, const T& def ) const
   {
     throw CG_FATAL( "ParametersList" ) << "Invalid type retrieved for key=" << key << "!";
   }
@@ -129,7 +145,7 @@ namespace cepgen
   //------------------------------------------------------------------
 
   template<> ParametersList
-  ParametersList::get<ParametersList>( std::string key, ParametersList def ) const
+  ParametersList::get<ParametersList>( std::string key, const ParametersList& def ) const
   {
     for ( const auto& kv : param_values_ )
       if ( kv.first.compare( key ) == 0 )
@@ -155,7 +171,7 @@ namespace cepgen
   }
 
   template<> std::vector<ParametersList>
-  ParametersList::get<std::vector<ParametersList> >( std::string key, std::vector<ParametersList> def ) const
+  ParametersList::get<std::vector<ParametersList> >( std::string key, const std::vector<ParametersList>& def ) const
   {
     for ( const auto& kv : vec_param_values_ )
       if ( kv.first.compare( key ) == 0 )
@@ -185,7 +201,7 @@ namespace cepgen
   //------------------------------------------------------------------
 
   template<> int
-  ParametersList::get<int>( std::string key, int def ) const
+  ParametersList::get<int>( std::string key, const int& def ) const
   {
     for ( const auto& kv : int_values_ )
       if ( kv.first.compare( key ) == 0 )
@@ -211,7 +227,7 @@ namespace cepgen
   }
 
   template<> std::vector<int>
-  ParametersList::get<std::vector<int> >( std::string key, std::vector<int> def ) const
+  ParametersList::get<std::vector<int> >( std::string key, const std::vector<int>& def ) const
   {
     for ( const auto& kv : vec_int_values_ )
       if ( kv.first.compare( key ) == 0 )
@@ -241,7 +257,7 @@ namespace cepgen
   //------------------------------------------------------------------
 
   template<> double
-  ParametersList::get<double>( std::string key, double def ) const
+  ParametersList::get<double>( std::string key, const double& def ) const
   {
     for ( const auto& kv : dbl_values_ )
       if ( kv.first.compare( key ) == 0 )
@@ -267,7 +283,7 @@ namespace cepgen
   }
 
   template<> std::vector<double>
-  ParametersList::get<std::vector<double> >( std::string key, std::vector<double> def ) const
+  ParametersList::get<std::vector<double> >( std::string key, const std::vector<double>& def ) const
   {
     for ( const auto& kv : vec_dbl_values_ )
       if ( kv.first.compare( key ) == 0 )
@@ -297,7 +313,7 @@ namespace cepgen
   //------------------------------------------------------------------
 
   template<> std::string
-  ParametersList::get<std::string>( std::string key, std::string def ) const
+  ParametersList::get<std::string>( std::string key, const std::string& def ) const
   {
     for ( const auto& kv : str_values_ )
       if ( kv.first.compare( key ) == 0 )
@@ -323,7 +339,7 @@ namespace cepgen
   }
 
   template<> std::vector<std::string>
-  ParametersList::get<std::vector<std::string> >( std::string key, std::vector<std::string> def ) const
+  ParametersList::get<std::vector<std::string> >( std::string key, const std::vector<std::string>& def ) const
   {
     for ( const auto& kv : vec_str_values_ )
       if ( kv.first.compare( key ) == 0 )
@@ -353,7 +369,7 @@ namespace cepgen
   //------------------------------------------------------------------
 
   template<> Limits
-  ParametersList::get<Limits>( std::string key, Limits def ) const
+  ParametersList::get<Limits>( std::string key, const Limits& def ) const
   {
     for ( const auto& kv : lim_values_ )
       if ( kv.first.compare( key ) == 0 )
