@@ -106,56 +106,96 @@ namespace cepgen
     PythonHandler::fillParameter( PyObject* parent, const char* key, bool& out )
     {
       PyObject* pobj = element( parent, key ); // borrowed
-      if ( pobj )
-        out = (bool)get<int>( pobj );
+      if ( !pobj ) {
+        CG_DEBUG( "PythonHandler" ) << "Failed to retrieve boolean object \"" << key << "\".";
+        return;
+      }
+      try { out = (bool)get<int>( pobj ); } catch ( const Exception& e ) {
+        throw CG_FATAL( "PythonHandler" )
+          << "Failed to retrieve boolean object \"" << key << "\":\n\t" << e.message();
+      }
     }
 
     void
     PythonHandler::fillParameter( PyObject* parent, const char* key, int& out )
     {
       PyObject* pobj = element( parent, key ); // borrowed
-      if ( pobj )
-        out = get<int>( pobj );
+      if ( !pobj )
+        CG_DEBUG( "PythonHandler" ) << "Failed to retrieve integer object \"" << key << "\".";
+      try { out = get<int>( pobj ); } catch ( const Exception& e ) {
+        throw CG_FATAL( "PythonHandler" )
+          << "Failed to retrieve integer object \"" << key << "\":\n\t" << e.message();
+      }
     }
 
     void
     PythonHandler::fillParameter( PyObject* parent, const char* key, unsigned long& out )
     {
       PyObject* pobj = element( parent, key ); // borrowed
-      if ( pobj )
-        out = get<unsigned long>( pobj );
+      if ( !pobj ) {
+        CG_DEBUG( "PythonHandler" ) << "Failed to retrieve unsigned long integer object \"" << key << "\".";
+        return;
+      }
+      try { out = get<unsigned long>( pobj ); } catch ( const Exception& e ) {
+        throw CG_FATAL( "PythonHandler" )
+          << "Failed to retrieve unsigned long integer object \"" << key << "\":\n\t", e.message();
+      }
     }
 
     void
     PythonHandler::fillParameter( PyObject* parent, const char* key, unsigned int& out )
     {
       PyObject* pobj = element( parent, key ); // borrowed
-      if ( pobj )
-        out = get<unsigned long>( pobj );
+      if ( !pobj ) {
+        CG_DEBUG( "PythonHandler" ) << "Failed to retrieve unsigned integer object \"" << key << "\".";
+        return;
+      }
+      try { out = get<unsigned long>( pobj ); } catch ( const Exception& e ) {
+        throw CG_FATAL( "PythonHandler" )
+          << "Failed to retrieve unsigned integer object \"" << key << "\":\n\t", e.message();
+      }
     }
 
     void
     PythonHandler::fillParameter( PyObject* parent, const char* key, double& out )
     {
       PyObject* pobj = element( parent, key ); // borrowed
-      if ( pobj )
-        out = get<double>( pobj );
+      if ( !pobj ) {
+        CG_DEBUG( "PythonHandler" ) << "Failed to retrieve float object \"" << key << "\".";
+        return;
+      }
+      try { out = get<double>( pobj ); } catch ( const Exception& e ) {
+        throw CG_FATAL( "PythonHandler" )
+          << "Failed to retrieve float object \"" << key << "\":\n\t", e.message();
+      }
     }
 
     void
     PythonHandler::fillParameter( PyObject* parent, const char* key, std::string& out )
     {
       PyObject* pobj = element( parent, key ); // borrowed
-      if ( pobj )
-        out = get<std::string>( pobj );
+      if ( !pobj ) {
+        CG_DEBUG( "PythonHandler" ) << "Failed to retrieve string object \"" << key << "\".";
+        return;
+      }
+      try { out = get<std::string>( pobj ); } catch ( const Exception& e ) {
+        throw CG_FATAL( "PythonHandler" )
+          << "Failed to retrieve string object \"" << key << "\":\n\t", e.message();
+      }
     }
 
     void
     PythonHandler::fillParameter( PyObject* obj, const char* key, Limits& out )
     {
       PyObject* pobj = element( obj, key ); // borrowed
-      if ( pobj )
-        out = get<Limits>( pobj );
+      if ( !pobj ) {
+        CG_DEBUG( "PythonHandler" ) << "Failed to retrieve limits object \"" << key << "\".";
+        return;
+      }
+      try { out = get<Limits>( pobj ); } catch ( const Exception& e ) {
+        throw CG_FATAL( "PythonHandler" )
+          << "Failed to retrieve limits object \"" << key << "\":\n\t", e.message();
+      }
     }
 
     void
@@ -164,13 +204,10 @@ namespace cepgen
       out.clear();
       PyObject* pobj = element( parent, key ); // borrowed
       if ( !pobj )
-        return;
-      if ( !PyTuple_Check( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
-      for ( Py_ssize_t i = 0; i < PyTuple_Size( pobj ); ++i ) {
-        PyObject* pit = PyTuple_GetItem( pobj, i ); // borrowed
-        if ( is<double>( pit ) )
-          out.emplace_back( get<double>( pit ) );
+        CG_DEBUG( "PythonHandler" ) << "Failed to retrieve floats collection object \"" << key << "\".";
+      try { out = getVector<double>( pobj ); } catch ( const Exception& e ) {
+        throw CG_FATAL( "PythonHandler" )
+          << "Failed to retrieve floats collection object \"" << key << "\":\n\t", e.message();
       }
     }
 
@@ -179,14 +216,13 @@ namespace cepgen
     {
       out.clear();
       PyObject* pobj = element( parent, key ); // borrowed
-      if ( !pobj )
+      if ( !pobj ) {
+        CG_DEBUG( "PythonHandler" ) << "Failed to retrieve strings collection object \"" << key << "\".";
         return;
-      if ( !PyTuple_Check( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", key, pobj->ob_type->tp_name ) );
-      for ( Py_ssize_t i = 0; i < PyTuple_Size( pobj ); ++i ) {
-        PyObject* pit = PyTuple_GetItem( pobj, i ); // borrowed
-        if ( is<std::string>( pit ) )
-          out.emplace_back( get<std::string>( PyTuple_GetItem( pobj, i ) ) );
+      }
+      try { out = getVector<std::string>( pobj ); } catch ( const Exception& e ) {
+        throw CG_FATAL( "PythonHandler" )
+          << "Failed to retrieve strings collection object \"" << key << "\":\n\t", e.message();
       }
     }
 
@@ -195,15 +231,13 @@ namespace cepgen
     {
       out.clear();
       PyObject* pobj = element( parent, key ); // borrowed
-      if ( !pobj )
+      if ( !pobj ) {
+        CG_DEBUG( "PythonHandler" ) << "Failed to retrieve integers collection object \"" << key << "\".";
         return;
-      if ( !PyTuple_Check( pobj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type", key ) );
-      for ( Py_ssize_t i = 0; i < PyTuple_Size( pobj ); ++i ) {
-        PyObject* pit = PyTuple_GetItem( pobj, i );
-        if ( !is<int>( pit ) )
-          throwPythonError( Form( "Object %d has invalid type", i ) );
-        out.emplace_back( get<int>( pit ) );
+      }
+      try { out = getVector<int>( pobj ); } catch ( const Exception& e ) {
+        throw CG_FATAL( "PythonHandler" )
+          << "Failed to retrieve integers collection object \"" << key << "\":\n\t", e.message();
       }
     }
 
@@ -211,11 +245,16 @@ namespace cepgen
     PythonHandler::fillParameter( PyObject* parent, const char* key, ParametersList& out )
     {
       PyObject* pobj = element( parent, key ); // borrowed
-      if ( pobj )
-        out += get<ParametersList>( pobj );
+      if ( !pobj ) {
+        CG_DEBUG( "PythonHandler" ) << "Failed to retrieve parameters list object \"" << key << "\".";
+        return;
+      }
+      try { out += get<ParametersList>( pobj ); } catch ( const Exception& e ) {
+        throw CG_FATAL( "PythonHandler" )
+          << "Failed to retrieve parameters list object \"" << key << "\":\n\t", e.message();
+      }
     }
   }
 }
 
 #endif
-

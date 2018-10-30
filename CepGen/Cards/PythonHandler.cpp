@@ -91,7 +91,8 @@ namespace cepgen
       //--- taming functions
       PyObject* ptam = element( process, "tamingFunctions" ); // borrowed
       if ( ptam )
-        parseTamingFunctions( ptam );
+        for ( const auto& p : getVector<ParametersList>( ptam ) )
+          params_.taming_functions->add( p.get<std::string>( "variable" ), p.get<std::string>( "expression" ) );
 
       Py_CLEAR( process );
 
@@ -135,42 +136,48 @@ namespace cepgen
     PythonHandler::parseIncomingKinematics( PyObject* kin )
     {
       //--- retrieve the beams PDG ids
-      std::vector<double> beams_pz;
-      fillParameter( kin, "pz", beams_pz );
-      if ( beams_pz.size() == 2 ) {
-        params_.kinematics.incoming_beams.first.pz = beams_pz.at( 0 );
-        params_.kinematics.incoming_beams.second.pz = beams_pz.at( 1 );
-      }
-      //--- retrieve the beams longitudinal momentum
       std::vector<int> beams_pdg;
       fillParameter( kin, "pdgIds", beams_pdg );
-      if ( beams_pdg.size() == 2 ) {
-        params_.kinematics.incoming_beams.first.pdg = (PDG)beams_pdg.at( 0 );
+      if ( !beams_pdg.empty() ) {
+        if ( beams_pdg.size() != 2 )
+          throwPythonError( Form( "Invalid list of PDG ids retrieved for incoming beams:\n\t2 PDG ids are expected, %d provided!", beams_pdg.size() ) );
+        params_.kinematics.incoming_beams. first.pdg = (PDG)beams_pdg.at( 0 );
         params_.kinematics.incoming_beams.second.pdg = (PDG)beams_pdg.at( 1 );
+      }
+      //--- incoming beams kinematics
+      std::vector<double> beams_pz;
+      fillParameter( kin, "pz", beams_pz );
+      if ( !beams_pz.empty() ) {
+        if ( beams_pz.size() != 2 )
+          throwPythonError( Form( "Invalid list of pz's retrieved for incoming beams:\n\t2 pz's are expected, %d provided!", beams_pz.size() ) );
+        params_.kinematics.incoming_beams. first.pz = beams_pz.at( 0 );
+        params_.kinematics.incoming_beams.second.pz = beams_pz.at( 1 );
       }
       double sqrt_s = -1.;
       fillParameter( kin, "cmEnergy", sqrt_s );
       if ( sqrt_s != -1. )
         params_.kinematics.setSqrtS( sqrt_s );
-
+      //--- structure functions set for incoming beams
       PyObject* psf = element( kin, "structureFunctions" ); // borrowed
       if ( psf )
         params_.kinematics.structure_functions = strfun::Parameterisation::build( get<ParametersList>( psf ) );
-
+      //--- types of parton fluxes for kt-factorisation
       std::vector<int> kt_fluxes;
       fillParameter( kin, "ktFluxes", kt_fluxes );
       if ( kt_fluxes.size() > 0 )
-        params_.kinematics.incoming_beams.first.kt_flux = (KTFlux)kt_fluxes.at( 0 );
+        params_.kinematics.incoming_beams. first.kt_flux = (KTFlux)kt_fluxes.at( 0 );
       if ( kt_fluxes.size() > 1 )
         params_.kinematics.incoming_beams.second.kt_flux = (KTFlux)kt_fluxes.at( 1 );
+      //--- specify where to look for the grid path for gluon emission
       std::string kmr_grid_path;
       fillParameter( kin, "kmrGridPath", kmr_grid_path );
       if ( !kmr_grid_path.empty() )
         kmr::GluonGrid::get( kmr_grid_path.c_str() );
+      //--- parse heavy ions beams
       std::vector<int> hi_beam1, hi_beam2;
       fillParameter( kin, "heavyIonA", hi_beam1 );
       if ( hi_beam1.size() == 2 )
-        params_.kinematics.incoming_beams.first.pdg = HeavyIon{ (unsigned short)hi_beam1[0], (Element)hi_beam1[1] };
+        params_.kinematics.incoming_beams. first.pdg = HeavyIon{ (unsigned short)hi_beam1[0], (Element)hi_beam1[1] };
       fillParameter( kin, "heavyIonB", hi_beam2 );
       if ( hi_beam2.size() == 2 )
         params_.kinematics.incoming_beams.second.pdg = HeavyIon{ (unsigned short)hi_beam2[0], (Element)hi_beam2[1] };
@@ -179,10 +186,10 @@ namespace cepgen
     void
     PythonHandler::parseOutgoingKinematics( PyObject* kin )
     {
-      PyObject* pparts = element( kin, "minFinalState" ); // borrowed
-      if ( pparts && PyTuple_Check( pparts ) )
-        for ( unsigned short i = 0; i < PyTuple_Size( pparts ); ++i )
-          params_.kinematics.minimum_final_state.emplace_back( (PDG)get<int>( PyTuple_GetItem( pparts, i ) ) );
+      std::vector<int> parts;
+      fillParameter( kin, "minFinalState", parts );
+      for ( const auto& pdg : parts )
+        params_.kinematics.minimum_final_state.emplace_back( (PDG)pdg );
 
       PyObject* pcuts = element( kin, "cuts" ); // borrowed
       if ( pcuts )
@@ -213,6 +220,9 @@ namespace cepgen
     void
     PythonHandler::parseParticlesCuts( PyObject* cuts )
     {
+      for ( const auto& pcut : getVector<ParametersList>( cuts ) ) {
+        std::cout << pcut << std::endl;
+      }
       if ( !PyDict_Check( cuts ) )
         throwPythonError( "Particle cuts object should be a dictionary!" );
       PyObject* pkey = nullptr, *pvalue = nullptr;
@@ -299,23 +309,6 @@ namespace cepgen
       fillParameter( gen, "printEvery", params_.generation.gen_print_every );
       fillParameter( gen, "numThreads", params_.generation.num_threads );
       fillParameter( gen, "numPoints", params_.generation.num_points );
-    }
-
-    void
-    PythonHandler::parseTamingFunctions( PyObject* tf )
-    {
-      if ( !PyList_Check( tf ) )
-        throwPythonError( "Taming functions list should be a list!" );
-
-      for ( Py_ssize_t i = 0; i < PyList_Size( tf ); ++i ) {
-        PyObject* pit = PyList_GetItem( tf, i ); // borrowed
-        if ( !pit )
-          continue;
-        if ( !PyDict_Check( pit ) )
-          throwPythonError( Form( "Item %d has invalid type %s", i, pit->ob_type->tp_name ) );
-        PyObject* pvar = element( pit, "variable" ), *pexpr = element( pit, "expression" ); // borrowed
-        params_.taming_functions->add( get<std::string>( pvar ).c_str(), get<std::string>( pexpr ).c_str() );
-      }
     }
 
     void

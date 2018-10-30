@@ -1,5 +1,6 @@
 #include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
 #ifdef PYTHON
@@ -35,7 +36,7 @@ namespace cepgen
     PythonHandler::get<int>( PyObject* obj ) const
     {
       if ( !is<int>( obj ) )
-        throwPythonError( Form( "Object has invalid type %s", obj->ob_type->tp_name ) );
+        throw CG_ERROR( "PythonHandler:get" ) << "Object has invalid type " << obj->ob_type->tp_name << ".";
 #ifdef PYTHON2
       return PyInt_AsLong( obj );
 #else
@@ -47,7 +48,7 @@ namespace cepgen
     PythonHandler::get<unsigned long>( PyObject* obj ) const
     {
       if ( !is<int>( obj ) )
-        throwPythonError( Form( "Object has invalid type %s", obj->ob_type->tp_name ) );
+        throw CG_ERROR( "PythonHandler:get" ) << "Object has invalid type " << obj->ob_type->tp_name << ".";
 #ifdef PYTHON2
       return PyInt_AsUnsignedLongMask( obj );
 #else
@@ -61,7 +62,7 @@ namespace cepgen
     PythonHandler::get<long long>( PyObject* obj ) const
     {
       if ( !is<int>( obj ) )
-        throwPythonError( Form( "Object has invalid type %s", obj->ob_type->tp_name ) );
+        throw CG_ERROR( "PythonHandler:get" ) << "Object has invalid type " << obj->ob_type->tp_name << ".";
       return PyLong_AsLongLong( obj );
     }
 
@@ -75,7 +76,7 @@ namespace cepgen
     PythonHandler::get<double>( PyObject* obj ) const
     {
       if ( !is<double>( obj ) )
-        throwPythonError( Form( "Object has invalid type %s", obj->ob_type->tp_name ) );
+        throw CG_ERROR( "PythonHandler:get" ) << "Object has invalid type " << obj->ob_type->tp_name << ".";
       return PyFloat_AsDouble( obj );
     }
 
@@ -93,7 +94,7 @@ namespace cepgen
     PythonHandler::get<std::string>( PyObject* obj ) const
     {
       if ( !is<std::string>( obj ) )
-        throwPythonError( Form( "Object has invalid type %s", obj->ob_type->tp_name ) );
+        throw CG_ERROR( "PythonHandler:get" ) << "Object has invalid type " << obj->ob_type->tp_name << ".";
       std::string out;
 #ifdef PYTHON2
       out = PyString_AsString( obj ); // deprecated in python v3+
@@ -120,7 +121,7 @@ namespace cepgen
     PythonHandler::get<Limits>( PyObject* obj ) const
     {
       if ( !is<Limits>( obj ) )
-        throwPythonError( Form( "Object has invalid type %s", obj->ob_type->tp_name ) );
+        throw CG_ERROR( "PythonHandler:get" ) << "Object has invalid type " << obj->ob_type->tp_name << ".";
       const auto vec = getVector<double>( obj );
       if ( vec.size() == 1 )
         return Limits{ vec.at( 0 ) };
@@ -137,7 +138,7 @@ namespace cepgen
     PythonHandler::get<ParametersList>( PyObject* obj ) const
     {
       if ( !is<ParametersList>( obj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type %s", obj->ob_type->tp_doc, obj->ob_type->tp_name ) );
+        throw CG_ERROR( "PythonHandler:get" ) << "Object has invalid type " << obj->ob_type->tp_name << ".";
       ParametersList out;
       PyObject* pkey = nullptr, *pvalue = nullptr;
       Py_ssize_t pos = 0;
@@ -182,7 +183,7 @@ namespace cepgen
     PythonHandler::getVector( PyObject* obj ) const
     {
       if ( !isVector<T>( obj ) )
-        throwPythonError( "Object has invalid type "+std::string( obj->ob_type->tp_name ) );
+        throw CG_ERROR( "PythonHandler:get" ) << "Object has invalid type " << obj->ob_type->tp_name << ".";
       std::vector<T> vec;
       const bool tuple = PyTuple_Check( obj );
       const Py_ssize_t num_entries = tuple ? PyTuple_Size( obj ) : PyList_Size( obj );
@@ -199,4 +200,3 @@ namespace cepgen
 }
 
 #endif
-

@@ -53,7 +53,6 @@ namespace cepgen
         void parseLogging( PyObject* );
         void parseIntegrator( PyObject* );
         void parseGenerator( PyObject* );
-        void parseTamingFunctions( PyObject* );
         void parseHadroniser( PyObject* );
     };
     template<> bool PythonHandler::is<bool>( PyObject* obj ) const;
@@ -74,4 +73,3 @@ namespace cepgen
 #endif
 
 #endif
-

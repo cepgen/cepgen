@@ -106,9 +106,9 @@ namespace cepgen
       }
 
       /// Exception message
-      /*inline const char* what() const noexcept override {
-        return message_.str().c_str();
-      }*/
+      inline std::string message() const {
+        return message_.str();
+      }
 
       /// Extract the origin of the exception
       inline std::string from() const { return from_; }
