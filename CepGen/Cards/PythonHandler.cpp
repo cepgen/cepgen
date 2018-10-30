@@ -12,6 +12,7 @@
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Physics/GluonGrid.h"
+#include "CepGen/Physics/PDG.h"
 
 #include <algorithm>
 
@@ -191,9 +192,20 @@ namespace cepgen
       for ( const auto& pdg : parts )
         params_.kinematics.minimum_final_state.emplace_back( (PDG)pdg );
 
-      PyObject* pcuts = element( kin, "cuts" ); // borrowed
-      if ( pcuts )
-        parseParticlesCuts( pcuts );
+      ParametersList part_cuts;
+      fillParameter( kin, "cuts", part_cuts );
+      for ( const auto& part : part_cuts.keys() ) {
+        const PDG pdg = (PDG)stoi( part );
+        const ParametersList& cuts = part_cuts.get<ParametersList>( part );
+        if ( cuts.has<Limits>( "pt" ) )
+          params_.kinematics.cuts.central_particles[pdg].pt_single = cuts.get<Limits>( "pt" );
+        if ( cuts.has<Limits>( "energy" ) )
+          params_.kinematics.cuts.central_particles[pdg].energy_single = cuts.get<Limits>( "energy" );
+        if ( cuts.has<Limits>( "eta" ) )
+          params_.kinematics.cuts.central_particles[pdg].eta_single = cuts.get<Limits>( "eta" );
+        if ( cuts.has<Limits>( "rapidity" ) )
+          params_.kinematics.cuts.central_particles[pdg].rapidity_single = cuts.get<Limits>( "rapidity" );
+      }
 
       // for LPAIR/collinear matrix elements
       fillParameter( kin, "q2", params_.kinematics.cuts.initial.q2 );
@@ -215,25 +227,6 @@ namespace cepgen
 
       fillParameter( kin, "mx", params_.kinematics.cuts.remnants.mass_single );
       fillParameter( kin, "yj", params_.kinematics.cuts.remnants.rapidity_single );
-    }
-
-    void
-    PythonHandler::parseParticlesCuts( PyObject* cuts )
-    {
-      for ( const auto& pcut : getVector<ParametersList>( cuts ) ) {
-        std::cout << pcut << std::endl;
-      }
-      if ( !PyDict_Check( cuts ) )
-        throwPythonError( "Particle cuts object should be a dictionary!" );
-      PyObject* pkey = nullptr, *pvalue = nullptr;
-      Py_ssize_t pos = 0;
-      while ( PyDict_Next( cuts, &pos, &pkey, &pvalue ) ) {
-        const PDG pdg = (PDG)get<int>( pkey );
-        fillParameter( pvalue, "pt", params_.kinematics.cuts.central_particles[pdg].pt_single );
-        fillParameter( pvalue, "energy", params_.kinematics.cuts.central_particles[pdg].energy_single );
-        fillParameter( pvalue, "eta", params_.kinematics.cuts.central_particles[pdg].eta_single );
-        fillParameter( pvalue, "rapidity", params_.kinematics.cuts.central_particles[pdg].rapidity_single );
-      }
     }
 
     void

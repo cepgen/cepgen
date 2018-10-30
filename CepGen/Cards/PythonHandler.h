@@ -49,7 +49,6 @@ namespace cepgen
 
         void parseIncomingKinematics( PyObject* );
         void parseOutgoingKinematics( PyObject* );
-        void parseParticlesCuts( PyObject* );
         void parseLogging( PyObject* );
         void parseIntegrator( PyObject* );
         void parseGenerator( PyObject* );
@@ -57,6 +56,7 @@ namespace cepgen
     };
     template<> bool PythonHandler::is<bool>( PyObject* obj ) const;
     template<> bool PythonHandler::is<int>( PyObject* obj ) const;
+    template<> bool PythonHandler::is<long>( PyObject* obj ) const;
     template<> int PythonHandler::get<int>( PyObject* obj ) const;
     template<> unsigned long PythonHandler::get<unsigned long>( PyObject* obj ) const;
     template<> bool PythonHandler::is<ParametersList>( PyObject* obj ) const;

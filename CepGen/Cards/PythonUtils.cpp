@@ -111,8 +111,7 @@ namespace cepgen
         return;
       }
       try { out = (bool)get<int>( pobj ); } catch ( const Exception& e ) {
-        throw CG_FATAL( "PythonHandler" )
-          << "Failed to retrieve boolean object \"" << key << "\":\n\t" << e.message();
+        throwPythonError( Form ( "Failed to retrieve boolean object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -120,11 +119,12 @@ namespace cepgen
     PythonHandler::fillParameter( PyObject* parent, const char* key, int& out )
     {
       PyObject* pobj = element( parent, key ); // borrowed
-      if ( !pobj )
+      if ( !pobj ) {
         CG_DEBUG( "PythonHandler" ) << "Failed to retrieve integer object \"" << key << "\".";
+        return;
+      }
       try { out = get<int>( pobj ); } catch ( const Exception& e ) {
-        throw CG_FATAL( "PythonHandler" )
-          << "Failed to retrieve integer object \"" << key << "\":\n\t" << e.message();
+        throwPythonError( Form ( "Failed to retrieve integer object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -137,8 +137,7 @@ namespace cepgen
         return;
       }
       try { out = get<unsigned long>( pobj ); } catch ( const Exception& e ) {
-        throw CG_FATAL( "PythonHandler" )
-          << "Failed to retrieve unsigned long integer object \"" << key << "\":\n\t", e.message();
+        throwPythonError( Form ( "Failed to retrieve unsigned long integer object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -151,8 +150,7 @@ namespace cepgen
         return;
       }
       try { out = get<unsigned long>( pobj ); } catch ( const Exception& e ) {
-        throw CG_FATAL( "PythonHandler" )
-          << "Failed to retrieve unsigned integer object \"" << key << "\":\n\t", e.message();
+        throwPythonError( Form ( "Failed to retrieve unsigned integer object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -165,8 +163,7 @@ namespace cepgen
         return;
       }
       try { out = get<double>( pobj ); } catch ( const Exception& e ) {
-        throw CG_FATAL( "PythonHandler" )
-          << "Failed to retrieve float object \"" << key << "\":\n\t", e.message();
+        throwPythonError( Form ( "Failed to retrieve float object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -179,8 +176,7 @@ namespace cepgen
         return;
       }
       try { out = get<std::string>( pobj ); } catch ( const Exception& e ) {
-        throw CG_FATAL( "PythonHandler" )
-          << "Failed to retrieve string object \"" << key << "\":\n\t", e.message();
+        throwPythonError( Form ( "Failed to retrieve string object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -193,8 +189,7 @@ namespace cepgen
         return;
       }
       try { out = get<Limits>( pobj ); } catch ( const Exception& e ) {
-        throw CG_FATAL( "PythonHandler" )
-          << "Failed to retrieve limits object \"" << key << "\":\n\t", e.message();
+        throwPythonError( Form ( "Failed to retrieve limits object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -203,11 +198,12 @@ namespace cepgen
     {
       out.clear();
       PyObject* pobj = element( parent, key ); // borrowed
-      if ( !pobj )
+      if ( !pobj ) {
         CG_DEBUG( "PythonHandler" ) << "Failed to retrieve floats collection object \"" << key << "\".";
+        return;
+      }
       try { out = getVector<double>( pobj ); } catch ( const Exception& e ) {
-        throw CG_FATAL( "PythonHandler" )
-          << "Failed to retrieve floats collection object \"" << key << "\":\n\t", e.message();
+        throwPythonError( Form ( "Failed to retrieve floats collection object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -221,8 +217,7 @@ namespace cepgen
         return;
       }
       try { out = getVector<std::string>( pobj ); } catch ( const Exception& e ) {
-        throw CG_FATAL( "PythonHandler" )
-          << "Failed to retrieve strings collection object \"" << key << "\":\n\t", e.message();
+        throwPythonError( Form ( "Failed to retrieve strings collection object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -236,8 +231,7 @@ namespace cepgen
         return;
       }
       try { out = getVector<int>( pobj ); } catch ( const Exception& e ) {
-        throw CG_FATAL( "PythonHandler" )
-          << "Failed to retrieve integers collection object \"" << key << "\":\n\t", e.message();
+        throwPythonError( Form ( "Failed to retrieve integers collection object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -250,8 +244,7 @@ namespace cepgen
         return;
       }
       try { out += get<ParametersList>( pobj ); } catch ( const Exception& e ) {
-        throw CG_FATAL( "PythonHandler" )
-          << "Failed to retrieve parameters list object \"" << key << "\":\n\t", e.message();
+        throwPythonError( Form ( "Failed to retrieve parameters list object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
   }
