@@ -121,7 +121,7 @@ namespace cepgen
           double pt() const;
           /// Squared transverse momentum (in GeV\f$^2\f$)
           double pt2() const;
-          /// 4-vector of double precision floats (in GeV)
+          /// 5-vector of double precision floats (in GeV)
           const std::vector<double> pVector() const;
           /// 3-momentum norm (in GeV)
           inline double p() const { return p_; }

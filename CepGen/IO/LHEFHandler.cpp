@@ -45,58 +45,48 @@ namespace cepgen
         << "  ***** Sample generated with CepGen v" << version() << " *****\n"
         << "  * process: " << params.processName() << " (" << params.kinematics.mode << ")\n";
       if ( params.kinematics.mode != KinematicsMode::ElasticElastic ) {
-        oss_init
-          << "  * structure functions: " << params.kinematics.structure_functions->type << "\n";
+        oss_init << "  * structure functions: " << params.kinematics.structure_functions->type << "\n";
         if ( !params.hadroniserName().empty() )
-          oss_init
-            << "  * hadroniser: " << params.hadroniserName() << "\n";
+          oss_init << "  * hadroniser: " << params.hadroniserName() << "\n";
       }
       oss_init
         << "  *--- incoming state\n";
       if ( params.kinematics.cuts.initial.q2.valid() )
         oss_init
           << "  * Q2 range (GeV2): "
-          << params.kinematics.cuts.initial.q2.min() << ", "
-          << params.kinematics.cuts.initial.q2.max() << "\n";
+          << params.kinematics.cuts.initial.q2 << "\n";
       if ( params.kinematics.mode != KinematicsMode::ElasticElastic
         && params.kinematics.cuts.remnants.mass_single.valid() )
         oss_init
           << "  * remnants mass range (GeV/c2): "
-          << params.kinematics.cuts.remnants.mass_single.min() << ", "
-          << params.kinematics.cuts.remnants.mass_single.max() << "\n";
-      oss_init
-        << "  *--- central system\n";
+          << params.kinematics.cuts.remnants.mass_single << "\n";
+      oss_init << "  *--- central system\n";
       if ( params.kinematics.cuts.central.pt_single.valid() )
         oss_init
           << "  * single particle pt (GeV/c): "
-          << params.kinematics.cuts.central.pt_single.min() << ", "
-          << params.kinematics.cuts.central.pt_single.max() << "\n";
+          << params.kinematics.cuts.central.pt_single << "\n";
       if ( params.kinematics.cuts.central.energy_single.valid() )
         oss_init
           << "  * single particle energy (GeV): "
-          << params.kinematics.cuts.central.energy_single.min() << ", "
-          << params.kinematics.cuts.central.energy_single.max() << "\n";
+          << params.kinematics.cuts.central.energy_single << "\n";
       if ( params.kinematics.cuts.central.eta_single.valid() )
         oss_init
           << "  * single particle eta: "
-          << params.kinematics.cuts.central.eta_single.min() << ", "
-          << params.kinematics.cuts.central.eta_single.max() << "\n";
+          << params.kinematics.cuts.central.eta_single << "\n";
       if ( params.kinematics.cuts.central.pt_sum.valid() )
         oss_init
           << "  * total pt (GeV/c): "
-          << params.kinematics.cuts.central.mass_sum.min() << ", "
-          << params.kinematics.cuts.central.mass_sum.max() << "\n";
+          << params.kinematics.cuts.central.mass_sum << "\n";
       if ( params.kinematics.cuts.central.mass_sum.valid() )
         oss_init
           << "  * total invariant mass (GeV/c2): "
-          << params.kinematics.cuts.central.mass_sum.min() << ", "
-          << params.kinematics.cuts.central.mass_sum.max() << "\n";
+          << params.kinematics.cuts.central.mass_sum << "\n";
       oss_init
         << "  **************************************************\n"
         << "-->";
 #if defined ( HEPMC_LHEF )
       lhe_output_->headerBlock() << oss_init.str();
-      //params.dump( lhe_output_->initComments(), false );
+      //--- first specify information about the run
       LHEF::HEPRUP run = lhe_output_->heprup;
       run.IDBMUP = { (int)params.kinematics.incoming_beams.first.pdg, (int)params.kinematics.incoming_beams.second.pdg };
       run.EBMUP = { (double)params.kinematics.incoming_beams.first.pz, (double)params.kinematics.incoming_beams.second.pz };
@@ -107,12 +97,14 @@ namespace cepgen
       run.XMAXUP[0] = 1.;
       run.LPRUP[0] = 1;
       lhe_output_->heprup = run;
+      //--- ensure everything is properly parsed
       lhe_output_->init();
 #elif defined ( PYTHIA_LHEF )
-      oss_init << std::endl; // LHEF is usually not beautifully parsed as a standard XML...
+      oss_init << std::endl; // LHEF is usually not as beautifully parsed as a standard XML...
+                             // we're physicists, what do you expect?
       lhaevt_->addComments( oss_init.str() );
       lhaevt_->initialise( params );
-      pythia_->settings.mode( "Beams:frameType", 5 );
+      pythia_->settings.mode( "Beams:frameType", 5 ); // LHEF event readout
       pythia_->settings.mode( "Next:numberCount", 0 ); // remove some of the Pythia output
       pythia_->settings.flag( "ProcessLevel:all", false ); // we do not want Pythia to interfere...
       pythia_->setLHAupPtr( lhaevt_.get() );
@@ -138,13 +130,16 @@ namespace cepgen
         const Particle part = ev[ip];
         out.IDUP[ip] = part.integerPdgId(); // PDG id
         out.ISTUP[ip] = (short)part.status(); // status code
-        out.MOTHUP[ip] = std::pair<int,int>( ( part.mothers().size() > 0 ) ? *part.mothers().begin()+1 : 0, ( part.mothers().size() > 1 ) ? *part.mothers().rbegin()+1 : 0 ); // mothers
-        out.ICOLUP[ip] = std::pair<int,int>( 0, 0 );
-        out.PUP[ip] = std::vector<double>( { { part.momentum().px(), part.momentum().py(), part.momentum().pz(), part.energy(), part.mass() } } ); // momentum
+        out.PUP[ip] = part.momentum().pVector(); // momentum
+        out.MOTHUP[ip] = { // mothers
+          part.mothers().size() > 0 ? *part.mothers(). begin()+1 : 0,
+          part.mothers().size() > 1 ? *part.mothers().rbegin()+1 : 0
+        };
+        out.ICOLUP[ip] = { 0, 0 };
         out.VTIMUP[ip] = 0.; // invariant lifetime
         out.SPINUP[ip] = 0.;
       }
-      lhe_output_->eventComments() << "haha";
+      //lhe_output_->eventComments() << "haha";
       lhe_output_->hepeup = out;
       lhe_output_->writeEvent();
 #elif defined ( PYTHIA_LHEF )
