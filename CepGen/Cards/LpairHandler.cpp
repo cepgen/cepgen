@@ -1,6 +1,7 @@
 #include "CepGen/Cards/LpairHandler.h"
 
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Processes/ProcessesHandler.h"
@@ -71,11 +72,11 @@ namespace cepgen
 
       //--- parse the integration algorithm name
       if ( integr_type_ == "plain" )
-        params_.integrator.type = Integrator::Type::plain;
+        params_.integrator.type = IntegratorType::plain;
       else if ( integr_type_ == "Vegas" )
-        params_.integrator.type = Integrator::Type::Vegas;
+        params_.integrator.type = IntegratorType::Vegas;
       else if ( integr_type_ == "MISER" )
-        params_.integrator.type = Integrator::Type::MISER;
+        params_.integrator.type = IntegratorType::MISER;
       else if ( integr_type_ != "" )
         throw CG_FATAL( "LpairHandler" ) << "Unrecognized integrator type: " << integr_type_ << "!";
 

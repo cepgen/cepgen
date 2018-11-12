@@ -36,14 +36,14 @@ namespace cepgen
       << "Number of function calls:         " << input_params_->integrator.ncvg << ",\n\t"
       << "Random numbers generator:         " << gsl_rng_name( rng_.get() ) << ".";
     switch ( input_params_->integrator.type ) {
-      case Type::Vegas:
+      case IntegratorType::Vegas:
         CG_DEBUG( "Integrator:build" ) << "Vegas parameters:\n\t"
           << "Number of iterations in Vegas: " << input_params_->integrator.vegas.iterations << ",\n\t"
           << "α-value: " << input_params_->integrator.vegas.alpha << ",\n\t"
           << "Verbosity: " << input_params_->integrator.vegas.verbose << ",\n\t"
           << "Grid interpolation mode: " << (Integrator::VegasMode)input_params_->integrator.vegas.mode << ".";
         break;
-      case Type::MISER:
+      case IntegratorType::MISER:
         CG_DEBUG( "Integrator:build" ) << "MISER parameters:\n\t"
           << "Number of calls: " << input_params_->integrator.miser.min_calls << ", "
           << "per bisection: " << input_params_->integrator.miser.min_calls_per_bisection << ",\n\t"
@@ -51,7 +51,7 @@ namespace cepgen
           << "α-value: " << input_params_->integrator.miser.alpha << ",\n\t"
           << "Dither: " << input_params_->integrator.miser.dither << ".";
         break;
-      case Type::plain:
+      case IntegratorType::plain:
         break;
     }
   }
@@ -73,7 +73,7 @@ namespace cepgen
 
     //--- launch integration
     switch ( input_params_->integrator.type ) {
-      case Type::plain: {
+      case IntegratorType::plain: {
         std::unique_ptr<gsl_monte_plain_state,void(*)( gsl_monte_plain_state* )>
           pln_state( gsl_monte_plain_alloc( function_->dim ), gsl_monte_plain_free );
         res = gsl_monte_plain_integrate( function_.get(),
@@ -82,7 +82,7 @@ namespace cepgen
           rng_.get(), pln_state.get(),
           &result, &abserr );
       } break;
-      case Type::Vegas: {
+      case IntegratorType::Vegas: {
         //----- warmup (prepare the grid)
         res = warmupVegas( x_low, x_up, 25000 );
         //----- integration
@@ -107,7 +107,7 @@ namespace cepgen
           << "Integration volume: " << veg_state_->vol << ".";
         r_boxes_ = std::pow( veg_state_->bins, function_->dim );
       } break;
-      case Type::MISER: {
+      case IntegratorType::MISER: {
         std::unique_ptr<gsl_monte_miser_state,void(*)( gsl_monte_miser_state* )>
           mis_state( gsl_monte_miser_alloc( function_->dim ), gsl_monte_miser_free );
         gsl_monte_miser_params_set( mis_state.get(), &input_params_->integrator.miser );
@@ -323,7 +323,7 @@ namespace cepgen
     input_params_->setStorage( false );
 
     if ( input_params_->generation.treat
-      && input_params_->integrator.type != Type::Vegas ) {
+      && input_params_->integrator.type != IntegratorType::Vegas ) {
       CG_INFO( "Integrator:setGen" )
         << "Treat switched on without a proper Vegas grid; running a warm-up beforehand.";
       std::vector<double> x_low( function_->dim, 0. ), x_up( function_->dim, 1. );
@@ -472,14 +472,14 @@ namespace cepgen
   //------------------------------------------------------------------------------------------------
 
   std::ostream&
-  operator<<( std::ostream& os, const Integrator::Type& type )
+  operator<<( std::ostream& os, const IntegratorType& type )
   {
     switch ( type ) {
-      case Integrator::Type::plain:
+      case IntegratorType::plain:
         return os << "plain";
-      case Integrator::Type::Vegas:
+      case IntegratorType::Vegas:
         return os << "Vegas";
-      case Integrator::Type::MISER:
+      case IntegratorType::MISER:
         return os << "MISER";
     }
     return os;

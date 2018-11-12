@@ -1,5 +1,6 @@
 #include "CepGen/Parameters.h"
 
+#include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/TamingFunction.h"
@@ -225,7 +226,7 @@ namespace cepgen
   //-----------------------------------------------------------------------------------------------
 
   Parameters::Integration::Integration() :
-    type( Integrator::Type::Vegas ), ncvg( 500000 ),
+    type( IntegratorType::Vegas ), ncvg( 500000 ),
     rng_seed( 0 ), rng_engine( (gsl_rng_type*)gsl_rng_mt19937 ),
     vegas_chisq_cut( 1.5 ),
     result( -1. ), err_result( -1. )

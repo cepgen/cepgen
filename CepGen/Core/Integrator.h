@@ -17,15 +17,15 @@ namespace cepgen
   class Event;
   class GridParameters;
   namespace utils { class Timer; }
+  enum class IntegratorType {
+    plain = 0,
+    Vegas = 1, ///< VEGAS algorithm \cite Lepage:1977sw developed by G.P. Lepage
+    MISER = 2
+  };
   /// Monte-Carlo integrator instance
   class Integrator
   {
     public:
-      enum class Type {
-        plain = 0,
-        Vegas = 1, ///< VEGAS algorithm \cite Lepage:1977sw developed by G.P. Lepage
-        MISER = 2
-      };
       enum class VegasMode { importance = 1, importanceOnly = 0, stratified = -1 };
       /**
        * Book the memory slots and structures for the integrator
@@ -91,7 +91,7 @@ namespace cepgen
       std::unique_ptr<gsl_monte_vegas_state,gsl_monte_vegas_deleter> veg_state_;
       double r_boxes_;
   };
-  std::ostream& operator<<( std::ostream&, const Integrator::Type& );
+  std::ostream& operator<<( std::ostream&, const IntegratorType& );
   std::ostream& operator<<( std::ostream&, const Integrator::VegasMode& );
 }
 

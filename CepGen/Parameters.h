@@ -1,7 +1,6 @@
 #ifndef CepGen_Parameters_h
 #define CepGen_Parameters_h
 
-#include "CepGen/Core/Integrator.h"
 #include "CepGen/Physics/Kinematics.h"
 
 #include <memory>
@@ -16,6 +15,7 @@ namespace cepgen
   namespace proc { class GenericProcess; }
   namespace hadr { class GenericHadroniser; }
   namespace utils { class TamingFunctionsCollection; }
+  enum class IntegratorType;
   /// List of parameters used to start and run the simulation job
   class Parameters
   {
@@ -60,7 +60,7 @@ namespace cepgen
         Integration();
         Integration( const Integration& );
         ~Integration();
-        Integrator::Type type;
+        IntegratorType type;
         /// Number of function calls to be computed for each point
         unsigned int ncvg; // ??
         /// Random number generator seed

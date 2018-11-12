@@ -6,6 +6,7 @@
 #include "CepGen/Core/TamingFunction.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/Integrator.h"
 
 #include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Hadronisers/HadronisersHandler.h"
@@ -249,9 +250,9 @@ namespace cepgen
         throwPythonError( "Failed to retrieve the integration algorithm name!" );
       std::string algo = get<std::string>( palgo );
       if ( algo == "plain" )
-        params_.integrator.type = Integrator::Type::plain;
+        params_.integrator.type = IntegratorType::plain;
       else if ( algo == "Vegas" ) {
-        params_.integrator.type = Integrator::Type::Vegas;
+        params_.integrator.type = IntegratorType::Vegas;
         fillParameter( integr, "alpha", (double&)params_.integrator.vegas.alpha );
         fillParameter( integr, "iterations", params_.integrator.vegas.iterations );
         fillParameter( integr, "mode", (int&)params_.integrator.vegas.mode );
@@ -268,7 +269,7 @@ namespace cepgen
           params_.integrator.vegas.ostream = fopen( vegas_logging_output.c_str(), "w" );
       }
       else if ( algo == "MISER" ) {
-        params_.integrator.type = Integrator::Type::MISER;
+        params_.integrator.type = IntegratorType::MISER;
         fillParameter( integr, "estimateFraction", (double&)params_.integrator.miser.estimate_frac );
         fillParameter( integr, "minCalls", params_.integrator.miser.min_calls );
         fillParameter( integr, "minCallsPerBisection", params_.integrator.miser.min_calls_per_bisection );
