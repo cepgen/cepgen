@@ -87,7 +87,7 @@ namespace cepgen
     {
       GenericProcess::setKinematics( kin );
 
-      masses_.Ml2_ = event_->operator[]( Particle::CentralSystem )[0].mass2();
+      masses_.Ml2_ = (*event_)[Particle::CentralSystem][0].mass2();
 
       w_limits_ = kin_.cuts.central.mass_single;
       if ( !w_limits_.hasMax() )
@@ -943,7 +943,8 @@ namespace cepgen
     void
     GamGamLL::fillKinematics( bool )
     {
-      const Particle::Momentum cm = event_->getOneByRole( Particle::IncomingBeam1 ).momentum() + event_->getOneByRole( Particle::IncomingBeam2 ).momentum();
+      const Particle::Momentum cm = (*event_)[Particle::IncomingBeam1][0].momentum()
+                                  + (*event_)[Particle::IncomingBeam2][0].momentum();
 
       const double gamma  = cm.energy()/sqs_, betgam = cm.pz()/sqs_;
 
@@ -1015,7 +1016,7 @@ namespace cepgen
       Particle& ph2 = event_->getOneByRole( Particle::Parton2 );
       ph2.setMomentum( plab_ph2 );
 
-      Particles& central_system = event_->operator[]( Particle::CentralSystem );
+      Particles& central_system = (*event_)[Particle::CentralSystem];
 
       //----- first outgoing lepton
       Particle& ol1 = central_system[0];

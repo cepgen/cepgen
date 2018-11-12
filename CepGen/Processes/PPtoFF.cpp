@@ -257,7 +257,7 @@ namespace cepgen
       //=================================================================
       //     first outgoing fermion
       //=================================================================
-      Particle& of1 = event_->operator[]( Particle::CentralSystem )[0];
+      Particle& of1 = (*event_)[Particle::CentralSystem][0];
       of1.setPdgId( pair_, sign );
       of1.setStatus( Particle::Status::FinalState );
       of1.setMomentum( p_f1_ );
@@ -265,7 +265,7 @@ namespace cepgen
       //=================================================================
       //     second outgoing fermion
       //=================================================================
-      Particle& of2 = event_->operator[]( Particle::CentralSystem )[1];
+      Particle& of2 = (*event_)[Particle::CentralSystem][1];
       of2.setPdgId( pair_, -sign );
       of2.setStatus( Particle::Status::FinalState );
       of2.setMomentum( p_f2_ );

@@ -2,6 +2,7 @@
 #include "CepGen/Processes/Fortran/KTStructures.h"
 
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/Exception.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Event/Event.h"
@@ -102,10 +103,26 @@ namespace cepgen
 
       genparams_.iflux1 = (int)kin_.incoming_beams.first.kt_flux;
       genparams_.iflux2 = (int)kin_.incoming_beams.second.kt_flux;
-      if ( (KTFlux)genparams_.iflux1 == KTFlux::P_Gluon_KMR )
-        event_->getOneByRole( Particle::Parton1 ).setPdgId( PDG::gluon );
-      if ( (KTFlux)genparams_.iflux2 == KTFlux::P_Gluon_KMR )
-        event_->getOneByRole( Particle::Parton2 ).setPdgId( PDG::gluon );
+      switch ( (KTFlux)genparams_.iflux1 ) {
+        case KTFlux::P_Gluon_KMR:
+          event_->getOneByRole( Particle::Parton1 ).setPdgId( PDG::gluon ); break;
+        case KTFlux::P_Photon_Elastic: case KTFlux::P_Photon_Inelastic: case KTFlux::P_Photon_Inelastic_Budnev:
+        case KTFlux::HI_Photon_Elastic:
+          event_->getOneByRole( Particle::Parton2 ).setPdgId( PDG::photon ); break;
+        case KTFlux::invalid:
+          throw CG_FATAL( "FortranKTProcess" )
+            << "Invalid flux for 2nd incoming parton: " << genparams_.iflux2 << "!";
+      }
+      switch ( (KTFlux)genparams_.iflux2 ) {
+        case KTFlux::P_Gluon_KMR:
+          event_->getOneByRole( Particle::Parton2 ).setPdgId( PDG::gluon ); break;
+        case KTFlux::P_Photon_Elastic: case KTFlux::P_Photon_Inelastic: case KTFlux::P_Photon_Inelastic_Budnev:
+        case KTFlux::HI_Photon_Elastic:
+          event_->getOneByRole( Particle::Parton2 ).setPdgId( PDG::photon ); break;
+        case KTFlux::invalid:
+          throw CG_FATAL( "FortranKTProcess" )
+            << "Invalid flux for 2nd incoming parton: " << genparams_.iflux2 << "!";
+      }
     }
 
     double
@@ -152,7 +169,7 @@ namespace cepgen
       // central system
       //===========================================================================================
 
-      Particles& oc = event_->operator[]( Particle::CentralSystem );
+      Particles& oc = (*event_)[Particle::CentralSystem];
       for ( int i = 0; i < evtkin_.nout; ++i ) {
         Particle& p = oc[i];
         p.setPdgId( evtkin_.pdg[i] );

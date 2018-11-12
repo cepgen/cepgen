@@ -160,7 +160,7 @@ namespace cepgen
 
       const Particles parts = event_->particles();
       for ( const auto& p : parts ) {
-        Particle& part = event_->operator[]( p.id() );
+        Particle& part = (*event_)[p.id()];
         switch ( part.role() ) {
           case Particle::OutgoingBeam1:
           case Particle::Parton1:
@@ -205,14 +205,12 @@ namespace cepgen
 
       // check the incoming state
       bool is_incoming_state_set =
-        ( !event_->operator[]( Particle::IncomingBeam1 ).empty()
-       && !event_->operator[]( Particle::IncomingBeam2 ).empty() );
+        ( !(*event_)[Particle::IncomingBeam1].empty() && !(*event_)[Particle::IncomingBeam2].empty() );
 
       // check the outgoing state
       bool is_outgoing_state_set =
-        ( !event_->operator[]( Particle::OutgoingBeam1 ).empty()
-       && !event_->operator[]( Particle::OutgoingBeam2 ).empty()
-       && !event_->operator[]( Particle::CentralSystem ).empty() );
+        ( !(*event_)[Particle::OutgoingBeam1].empty() && !(*event_)[Particle::OutgoingBeam2].empty()
+       && !(*event_)[Particle::CentralSystem].empty() );
 
       // combine both states
       return is_incoming_state_set && is_outgoing_state_set;
