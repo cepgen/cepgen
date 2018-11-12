@@ -90,23 +90,27 @@ int main( int argc, char* argv[] )
   ev.reset( new ROOT::CepGenEvent );
   ev->create();
 
-  //----- start by computing the cross section for the list of parameters applied
-  double xsec, err;
-  mg.computeXsection( xsec, err );
-
-  //----- populate the run tree
-
-  run->xsect = xsec;
-  run->errxsect = err;
-  run->litigious_events = 0;
-  run->sqrt_s = mg.parameters->kinematics.sqrtS();
-
-  //----- launch the events generation
   try {
-    mg.generate( fill_event_tree );
-  } catch ( const cepgen::Exception& ) {}
+    //----- start by computing the cross section for the list of parameters applied
+    double xsec, err;
+    mg.computeXsection( xsec, err );
 
-  run->fill();
+    //----- populate the run tree
+
+    run->xsect = xsec;
+    run->errxsect = err;
+    run->litigious_events = 0;
+    run->sqrt_s = mg.parameters->kinematics.sqrtS();
+
+    //----- launch the events generation
+    mg.generate( fill_event_tree );
+    run->fill();
+  } catch ( const cepgen::utils::RunAbortedException& e ) {
+    e.dump();
+  } catch ( const cepgen::Exception& e ) {
+    e.dump();
+  }
+
   file.Write();
   CG_INFO( "main" )
     << run->num_events << " event" << cepgen::s( run->num_events )

@@ -12,7 +12,7 @@ namespace cepgen
     class FortranKTProcess : public GenericKTProcess
     {
       public:
-        FortranKTProcess( const ParametersList& params, const char* name, const char* descr, std::function<void(double&)> func );
+        FortranKTProcess( const ParametersList& params, const char* name, const char* descr, std::function<double(void)> func );
         ProcessPtr clone( const ParametersList& params ) const override { return ProcessPtr( new FortranKTProcess( *this ) ); }
 
       private:
@@ -22,7 +22,7 @@ namespace cepgen
 
         int pair_; ///< Outgoing particles type
         int method_; ///< Computation method for the process
-        std::function<void(double&)> func_; ///< Subroutine to be called for weight computation
+        std::function<double(void)> func_; ///< Subroutine to be called for weight computation
         double y1_; ///< First outgoing particle rapidity
         double y2_; ///< Second outgoing particle rapidity
         double pt_diff_; ///< Transverse momentum balance between outgoing particles

@@ -16,7 +16,7 @@
     static BUILDERNM( name ) g ## name; \
   } }
 #define DECLARE_FORTRAN_SUBROUTINE( method ) \
-  extern "C" { extern void method ## _( double& ); }
+  extern "C" { extern double method ## _(); }
 #define PROCESS_F77_NAME( name ) F77_ ## name
 #define REGISTER_FORTRAN_PROCESS( name, method, description ) \
   struct PROCESS_F77_NAME( name ) : public cepgen::proc::FortranKTProcess { \

@@ -1,6 +1,6 @@
-      subroutine nucl_to_ff(aintegrand)
+      function nucl_to_ff()
       implicit none
-      double precision aintegrand
+      double precision nucl_to_ff
 c     =================================================================
 c     CepGen common blocks for kinematics definition
 c     =================================================================
@@ -82,7 +82,7 @@ c     =================================================================
 c     FIXME
 c     =================================================================
 
-      aintegrand = 0.d0
+      nucl_to_ff = 0.d0
       q10 = 0.d0
       q1z = 0.d0
       q20 = 0.d0
@@ -483,10 +483,10 @@ c     =================================================================
 
 c     *****************************************************************
 c     =================================================================
-      aintegrand = aintegral*q1t*q2t*ptdiff
+      nucl_to_ff = aintegral*q1t*q2t*ptdiff
 c     =================================================================
 c     *****************************************************************
-c      print *,aintegrand,aintegral,coupling
+c      print *,nucl_to_ff,aintegral,coupling
 
       return
       end

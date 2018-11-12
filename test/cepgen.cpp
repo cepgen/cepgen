@@ -69,6 +69,8 @@ int main( int argc, char* argv[] )
       gen.generate();
   } catch ( const cepgen::utils::RunAbortedException& e ) {
     CG_INFO( "main" ) << "Run aborted!";
+  } catch ( const cepgen::Exception& e ) {
+    e.dump();
   }
 
   return 0;
