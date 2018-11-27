@@ -49,21 +49,22 @@ namespace cepgen
       return F1;
     }
 
-    void
+    Parameterisation&
     Parameterisation::computeFL( double xbj, double q2 )
     {
       if ( !r_ratio_ )
         throw CG_FATAL( "StructureFunctions:FL" )
           << "Failed to retrieve a R-ratio calculator!";
       double r_error = 0.;
-      computeFL( xbj, q2, (*r_ratio_)( xbj, q2, r_error ) );
+      return computeFL( xbj, q2, (*r_ratio_)( xbj, q2, r_error ) );
     }
 
-    void
+    Parameterisation&
     Parameterisation::computeFL( double xbj, double q2, double r )
     {
       const double tau = 4.*xbj*xbj*mp2_/q2;
       FL = F2 * ( 1.+tau ) * ( r/( 1.+r ) );
+      return *this;
     }
 
     std::string

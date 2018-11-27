@@ -168,15 +168,12 @@ namespace cepgen
             return 0.;
         }
       }
-//      std::cout << (*ev)[Particle::OutgoingBeam1][0].momentum().eta() << std::endl;
       if ( p->kinematics.cuts.remnants.rapidity_single.valid() ) {
         for ( const auto& part : (*ev)[Particle::OutgoingBeam1] )
           if ( !p->kinematics.cuts.remnants.rapidity_single.passes( fabs( part.momentum().rapidity() ) ) )
-          //if ( !p->kinematics.cuts.remnants.rapidity_single.passes( fabs( part.momentum().eta() ) ) )
             return 0.;
         for ( const auto& part : (*ev)[Particle::OutgoingBeam2] )
           if ( !p->kinematics.cuts.remnants.rapidity_single.passes( fabs( part.momentum().rapidity() ) ) )
-          //if ( !p->kinematics.cuts.remnants.rapidity_single.passes( fabs( part.momentum().eta() ) ) )
             return 0.;
       }
 

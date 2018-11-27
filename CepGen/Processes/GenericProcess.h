@@ -30,7 +30,7 @@ namespace cepgen
         GenericProcess( const ParametersList& params, const std::string& name = "<invalid name>", const std::string& description = "<invalid process>", bool has_event = true );
         /// Copy constructor for a user process
         GenericProcess( const GenericProcess& );
-        virtual ~GenericProcess() = default;
+        virtual ~GenericProcess() {}
 
         /// Assignment operator
         GenericProcess& operator=( const GenericProcess& );

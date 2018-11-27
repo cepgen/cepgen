@@ -16,8 +16,12 @@ namespace cepgen
     public:
       /// Initialise a collection of electric/magnetic form factors
       FormFactors( double fe = 0., double fm = 0. ) : FE( fe ), FM( fm ) {}
-      /// Trivial, spin-0 form factors (e.g. pion)
-      static FormFactors trivial();
+      /// Trivial, spin-0 form factors
+      static FormFactors pointlikeScalar();
+      /// Trivial, spin-1/2 form factors
+      static FormFactors pointlikeFermion();
+      /// Composite pion form factors
+      static FormFactors compositeScalar( double q2 );
       /// Elastic proton form factors
       static FormFactors protonElastic( double q2 );
       /// Generate the form factors according to the proton structure functions set

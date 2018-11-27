@@ -198,6 +198,8 @@ namespace cepgen
     explicit NullStream( const std::string& ) {}
     /// Copy constructor
     NullStream( const Exception& ) {}
+    /// Simple destructor
+    ~NullStream() = default;
     /// Stream operator (null and void)
     template<class T> NullStream& operator<<( const T& ) { return *this; }
   };

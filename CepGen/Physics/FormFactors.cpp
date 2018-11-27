@@ -13,9 +13,21 @@ namespace cepgen
   const double FormFactors::mp2_ = FormFactors::mp_*FormFactors::mp_;
 
   FormFactors
-  FormFactors::trivial()
+  FormFactors::pointlikeScalar()
+  {
+    return FormFactors( 1.0, 0.0 );
+  }
+
+  FormFactors
+  FormFactors::pointlikeFermion()
   {
     return FormFactors( 1.0, 1.0 );
+  }
+
+  FormFactors
+  FormFactors::compositeScalar( double q2 )
+  {
+    throw CG_FATAL( "FormFactors:compositeScalar" ) << "Not yet supported!";
   }
 
   FormFactors
@@ -35,12 +47,11 @@ namespace cepgen
         CG_WARNING( "FormFactors" ) << "Elastic proton form factors requested! Check your process definition!";
         return FormFactors::protonElastic( q2 );
       case strfun::Type::SuriYennie: {
-        strfun::SuriYennie suriyennie, sy = (strfun::SuriYennie)suriyennie( xbj, q2 );
+        strfun::SuriYennie sy = strfun::SuriYennie()( xbj, q2 );
         return FormFactors( sy.F2 * xbj * sqrt( mi2 ) / q2, sy.FM ); //FIXME
       } break;
       default: {
-        sf = sf( xbj, q2 );
-        sf.computeFL( xbj, q2 );
+        sf( xbj, q2 ).computeFL( xbj, q2 );
         return FormFactors( sf.F2 * xbj / q2, -2.*sf.F1( xbj, q2 ) / q2 );
       } break;
     }
@@ -49,7 +60,6 @@ namespace cepgen
   std::ostream&
   operator<<( std::ostream& os, const FormFactors& ff )
   {
-    os << Form( "Form factors: electric: Fe = %.3e ; magnetic: Fm = %.3e", ff.FE, ff.FM ).c_str();
-    return os;
+    return os << "FF{FE=" << ff.FE << ",FM=" << ff.FM << "}";
   }
 }

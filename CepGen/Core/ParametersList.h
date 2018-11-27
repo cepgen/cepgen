@@ -22,7 +22,9 @@ namespace cepgen
 
     public:
       ParametersList() = default;
-      ~ParametersList() = default; // required for unique_ptr initialisation!
+      /// Copy constructor
+      ParametersList( const ParametersList& );
+      ~ParametersList() {} // required for unique_ptr initialisation! avoids cleaning all individual objects
       /// Check if a given parameter is handled in this list
       template<typename T> bool has( std::string key ) const;
       /// Get a parameter value

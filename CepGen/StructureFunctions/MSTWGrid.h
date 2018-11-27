@@ -35,7 +35,6 @@ namespace mstw
       };
       static constexpr const char* DEFAULT_MSTW_GRID_PATH = "External/mstw_sf_scan_nnlo.dat";
 
-
     public:
       /// Retrieve the grid interpolator (singleton)
       static std::shared_ptr<Grid> get( const char* path = DEFAULT_MSTW_GRID_PATH );
@@ -49,8 +48,8 @@ namespace mstw
       /// Grid parameterisation object
 
         //--- already retrieved from grid, so no need to recompute it
-      void computeFL( double xbj, double q2 ) override {}
-      void computeFL( double xbj, double q2, double r ) override {}
+      Grid& computeFL( double xbj, double q2 ) override { return *this; }
+      Grid& computeFL( double xbj, double q2, double r ) override { return *this; }
 
     public:
       Grid( const Grid& ) = delete;

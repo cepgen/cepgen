@@ -63,9 +63,9 @@ namespace cepgen
         /// Compute all relevant structure functions for a given \f$(x_{\rm Bj},Q^2)\f$ couple
         virtual Parameterisation& operator()( double xbj, double q2 ) { return *this; }
         /// Compute the longitudinal structure function for a given point
-        virtual void computeFL( double xbj, double q2 );
+        virtual Parameterisation& computeFL( double xbj, double q2 );
         /// Compute the longitudinal structure function for a given point
-        virtual void computeFL( double xbj, double q2, double r );
+        virtual Parameterisation& computeFL( double xbj, double q2, double r );
         /// Compute the \f$F_1\f$ structure function for a given point
         double F1( double xbj, double q2 ) const;
 

@@ -1106,21 +1106,9 @@ namespace cepgen
       const double mx2 = MX_*MX_, my2 = MY_*MY_;
 
       switch ( kin_.mode ) {
-        case KinematicsMode::ElectronElectron: default: {
-          fp1 = FormFactors::trivial(); // electron (trivial) form factor
-          fp2 = FormFactors::trivial(); // electron (trivial) form factor
-        } break;
-        case KinematicsMode::ProtonElectron: {
-          fp1 = FormFactors::protonElastic( -t1_ ); // proton elastic form factor
-          fp2 = FormFactors::trivial(); // electron (trivial) form factor
-        } break;
-        case KinematicsMode::ElectronProton: {
-          fp1 = FormFactors::trivial(); // electron (trivial) form factor
-          fp2 = FormFactors::protonElastic( -t2_ ); // proton elastic form factor
-        } break;
-        case KinematicsMode::ElasticElastic: {
-          fp1 = FormFactors::protonElastic( -t1_ ); // proton elastic form factor
-          fp2 = FormFactors::protonElastic( -t2_ ); // proton elastic form factor
+        case KinematicsMode::ElasticElastic: default: {
+          fp1 = FormFactors::protonElastic( -t1_ );
+          fp2 = FormFactors::protonElastic( -t2_ );
         } break;
         case KinematicsMode::ElasticInelastic: {
           fp1 = FormFactors::protonElastic( -t1_ );

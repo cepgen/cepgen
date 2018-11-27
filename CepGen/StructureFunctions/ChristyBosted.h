@@ -73,8 +73,8 @@ namespace cepgen
         ChristyBosted& operator()( double xbj, double q2 ) override;
 
         //--- already computed internally during F2 computation
-        void computeFL( double xbj, double q2 ) override {}
-        void computeFL( double xbj, double q2, double r ) override {}
+        ChristyBosted& computeFL( double xbj, double q2 ) override { return *this; }
+        ChristyBosted& computeFL( double xbj, double q2, double r ) override { return *this; }
 
       private:
         double resmod507( char sf, double w2, double q2 ) const;

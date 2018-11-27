@@ -3,6 +3,14 @@
 
 namespace cepgen
 {
+  ParametersList::ParametersList( const ParametersList& oth ) :
+    param_values_( oth.param_values_ ), int_values_( oth.int_values_ ),
+    dbl_values_( oth.dbl_values_ ), str_values_( oth.str_values_ ),
+    lim_values_( oth.lim_values_ ),
+    vec_param_values_( oth.vec_param_values_ ), vec_int_values_( oth.vec_int_values_ ),
+    vec_dbl_values_( oth.vec_dbl_values_ ), vec_str_values_( oth.vec_str_values_ )
+  {}
+
   ParametersList&
   ParametersList::operator+=( const ParametersList& oth )
   {
@@ -21,11 +29,11 @@ namespace cepgen
   std::ostream&
   operator<<( std::ostream& os, const ParametersList& params )
   {
-    for ( const auto& kv : params.int_values_ )   os << "\n" << kv.first << ": int(" << kv.second << ")";
-    for ( const auto& kv : params.dbl_values_ )   os << "\n" << kv.first << ": double(" << kv.second << ")";
-    for ( const auto& kv : params.str_values_ )   os << "\n" << kv.first << ": string(" << kv.second << ")";
-    for ( const auto& kv : params.param_values_ ) os << "\n" << kv.first << ": param({" << kv.second << "})";
-    for ( const auto& kv : params.lim_values_ )   os << "\n" << kv.first << ": limits(" << kv.second << ")";
+    for ( const auto& kv :     params.int_values_ )   os << "\n" << kv.first << ": int(" << kv.second << ")";
+    for ( const auto& kv :     params.dbl_values_ )   os << "\n" << kv.first << ": double(" << kv.second << ")";
+    for ( const auto& kv :     params.str_values_ )   os << "\n" << kv.first << ": string(" << kv.second << ")";
+    for ( const auto& kv :   params.param_values_ ) os << "\n" << kv.first << ": param({" << kv.second << "})";
+    for ( const auto& kv :     params.lim_values_ )   os << "\n" << kv.first << ": limits(" << kv.second << ")";
     for ( const auto& kv : params.vec_int_values_ ) {
       os << "\n" << kv.first << ": vint(";
       bool first = true;
@@ -60,15 +68,15 @@ namespace cepgen
   ParametersList::keys() const
   {
     std::vector<std::string> out;
-    for ( const auto& p : param_values_ )     out.emplace_back( p.first );
-    for ( const auto& p : int_values_ )       out.emplace_back( p.first );
-    for ( const auto& p : dbl_values_ )       out.emplace_back( p.first );
-    for ( const auto& p : str_values_ )       out.emplace_back( p.first );
-    for ( const auto& p : lim_values_ )       out.emplace_back( p.first );
+    for ( const auto& p :     param_values_ ) out.emplace_back( p.first );
     for ( const auto& p : vec_param_values_ ) out.emplace_back( p.first );
-    for ( const auto& p : vec_int_values_ )   out.emplace_back( p.first );
-    for ( const auto& p : vec_dbl_values_ )   out.emplace_back( p.first );
-    for ( const auto& p : vec_str_values_ )   out.emplace_back( p.first );
+    for ( const auto& p :       int_values_ ) out.emplace_back( p.first );
+    for ( const auto& p :   vec_int_values_ ) out.emplace_back( p.first );
+    for ( const auto& p :       dbl_values_ ) out.emplace_back( p.first );
+    for ( const auto& p :   vec_dbl_values_ ) out.emplace_back( p.first );
+    for ( const auto& p :       str_values_ ) out.emplace_back( p.first );
+    for ( const auto& p :   vec_str_values_ ) out.emplace_back( p.first );
+    for ( const auto& p :       lim_values_ ) out.emplace_back( p.first );
     return out;
   }
 
@@ -148,7 +156,7 @@ namespace cepgen
   ParametersList::get<ParametersList>( std::string key, const ParametersList& def ) const
   {
     for ( const auto& kv : param_values_ )
-      if ( kv.first.compare( key ) == 0 )
+      if ( kv.first == key )
         return kv.second;
     CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
     return def;
@@ -158,7 +166,7 @@ namespace cepgen
   ParametersList::get<std::vector<ParametersList> >( std::string key, const std::vector<ParametersList>& def ) const
   {
     for ( const auto& kv : vec_param_values_ )
-      if ( kv.first.compare( key ) == 0 )
+      if ( kv.first == key )
         return kv.second;
     CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
     return def;
@@ -172,7 +180,7 @@ namespace cepgen
   ParametersList::get<int>( std::string key, const int& def ) const
   {
     for ( const auto& kv : int_values_ )
-      if ( kv.first.compare( key ) == 0 )
+      if ( kv.first == key )
         return kv.second;
     CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
     return def;
@@ -182,7 +190,7 @@ namespace cepgen
   ParametersList::get<std::vector<int> >( std::string key, const std::vector<int>& def ) const
   {
     for ( const auto& kv : vec_int_values_ )
-      if ( kv.first.compare( key ) == 0 )
+      if ( kv.first == key )
         return kv.second;
     CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
     return def;
@@ -196,7 +204,7 @@ namespace cepgen
   ParametersList::get<double>( std::string key, const double& def ) const
   {
     for ( const auto& kv : dbl_values_ )
-      if ( kv.first.compare( key ) == 0 )
+      if ( kv.first == key )
         return kv.second;
     CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
     return def;
@@ -206,7 +214,7 @@ namespace cepgen
   ParametersList::get<std::vector<double> >( std::string key, const std::vector<double>& def ) const
   {
     for ( const auto& kv : vec_dbl_values_ )
-      if ( kv.first.compare( key ) == 0 )
+      if ( kv.first == key )
         return kv.second;
     CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
     return def;
@@ -220,7 +228,7 @@ namespace cepgen
   ParametersList::get<std::string>( std::string key, const std::string& def ) const
   {
     for ( const auto& kv : str_values_ )
-      if ( kv.first.compare( key ) == 0 )
+      if ( kv.first == key )
         return kv.second;
     CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
     return def;
@@ -230,7 +238,7 @@ namespace cepgen
   ParametersList::get<std::vector<std::string> >( std::string key, const std::vector<std::string>& def ) const
   {
     for ( const auto& kv : vec_str_values_ )
-      if ( kv.first.compare( key ) == 0 )
+      if ( kv.first == key )
         return kv.second;
     CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
     return def;
@@ -244,10 +252,9 @@ namespace cepgen
   ParametersList::get<Limits>( std::string key, const Limits& def ) const
   {
     for ( const auto& kv : lim_values_ )
-      if ( kv.first.compare( key ) == 0 )
+      if ( kv.first == key )
         return kv.second;
     CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
     return def;
   }
 }
-
