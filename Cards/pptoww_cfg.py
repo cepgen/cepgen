@@ -20,13 +20,12 @@ hadroniser = pythia8.clone('pythia8',
     ),
     processConfiguration = pythia8.processConfiguration+('pythiaConfiguration',),
 )
-#from Config.logger_cfi import logger
-#logger.enabledModules += ('Hadroniser.configure',)
+logger.enabledModules += ('Hadroniser.configure', 'Generator.*',)
 
 import Config.ktProcess_cfi as kt
 process = kt.process.clone('pptoww',
     processParameters = cepgen.Parameters(
-        mode = cepgen.ProcessMode.ElasticElastic,
+        mode = cepgen.ProcessMode.InelasticElastic,
         polarisationStates = 0, # full
     ),
     inKinematics = cepgen.Parameters(

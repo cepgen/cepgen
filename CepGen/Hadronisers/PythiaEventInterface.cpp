@@ -62,8 +62,6 @@ namespace Pythia8
     const double q2_1 = -part1.momentum().mass2(), q2_2 = -part2.momentum().mass2();
     const double x1 = q2_1/( q2_1+op1.mass2()-mp2_ ), x2 = q2_2/( q2_2+op2.mass2()-mp2_ );
 
-    unsigned short parton1_id = 0, parton2_id = 0;
-    unsigned short parton1_pdgid = part1.integerPdgId(), parton2_pdgid = part2.integerPdgId();
     unsigned short colour_index = 501;
 
     const Vec4 mom_part1( momToVec4( part1.momentum() ) ), mom_part2( momToVec4( part2.momentum() ) );
@@ -74,13 +72,15 @@ namespace Pythia8
       //=============================================================================================
 
       addCorresp( sizePart(), part1.id() );
-      addParticle( parton1_pdgid, -2, parton1_id, 0, 0, 0, mom_part1.px(), mom_part1.py(), mom_part1.pz(), mom_part1.e(), mom_part1.mCalc(), 0., 0. );
+      addParticle( part1.integerPdgId(), -2, 0, 0, 0, 0, mom_part1.px(), mom_part1.py(), mom_part1.pz(), mom_part1.e(), mom_part1.mCalc(), 0., 0. );
 
       addCorresp( sizePart(), part2.id() );
-      addParticle( parton2_pdgid, -2, parton2_id, 0, 0, 0, mom_part2.px(), mom_part2.py(), mom_part2.pz(), mom_part2.e(), mom_part2.mCalc(), 0., 0. );
+      addParticle( part2.integerPdgId(), -2, 0, 0, 0, 0, mom_part2.px(), mom_part2.py(), mom_part2.pz(), mom_part2.e(), mom_part2.mCalc(), 0., 0. );
     }
     else { // full event content (with collinear partons)
       Vec4 mom_iq1 = mom_part1, mom_iq2 = mom_part2;
+      unsigned short parton1_id = 0, parton2_id = 0;
+      unsigned short parton1_pdgid = part1.integerPdgId(), parton2_pdgid = part2.integerPdgId();
       unsigned short parton1_colour = 0, parton2_colour = 0;
       //FIXME select quark flavours accordingly
       if ( inel1_ ) {
@@ -96,6 +96,7 @@ namespace Pythia8
 
       //--- flavour / x value of hard-process initiators
       setIdX( part1.integerPdgId(), part2.integerPdgId(), x1, x2 );
+      setPdf( parton1_pdgid, parton2_pdgid, x1, x2, scale, 0., 0., false );
 
       //===========================================================================================
       // incoming valence quarks
@@ -132,7 +133,7 @@ namespace Pythia8
     for ( const auto& p : ev[cepgen::Particle::CentralSystem] ) {
       const auto mothers = p.mothers();
       unsigned short moth1_id = 1, moth2_id = 2;
-      if ( !full || ( !inel1_ && !inel2_ ) ) {
+      if ( !full ) {
         moth1_id = moth2_id = 0;
         if ( !mothers.empty() ) {
           const unsigned short moth1_cg_id = *mothers.begin();
@@ -165,7 +166,6 @@ namespace Pythia8
       addCorresp( sizePart(), p.id() );
       addParticle( p.integerPdgId(), 1, moth1_id, moth2_id, cp_colour, cp_anticolour, mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), mom_part.mCalc(), 0., 0., 0. );
     }
-    setPdf( parton1_pdgid, parton2_pdgid, x1, x2, scale, 0., 0., false );
   }
 
   void
@@ -195,14 +195,14 @@ namespace Pythia8
   void
   CepGenEvent::addCorresp( unsigned short py_id, unsigned short cg_id )
   {
-    py_cg_corresp_.emplace( py_id, cg_id );
+    py_cg_corresp_[py_id] = cg_id;
   }
 
   void
   CepGenEvent::dumpCorresp() const
   {
     std::ostringstream oss;
-    oss << "List of Pythia <-> CepGen particle ids correspondance";
+    oss << "List of Pythia ←|→ CepGen particle ids correspondance";
     for ( const auto& py_cg : py_cg_corresp_ )
       oss << "\n\t" << py_cg.first << " <-> " << py_cg.second;
     CG_INFO( "CepGenEvent:dump" ) << oss.str();

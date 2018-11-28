@@ -46,7 +46,7 @@ namespace cepgen
         std::unordered_map<short,short> py_cg_corresp_;
 #ifdef PYTHIA8
         unsigned short findRole( const Event& ev, const Pythia8::Particle& p ) const;
-        void updateEvent( Event& ev, double& weight, bool full ) const;
+        void updateEvent( Event& ev, double& weight ) const;
         Particle& addParticle( Event& ev, const Pythia8::Particle&, const Pythia8::Vec4& mom, unsigned short ) const;
         /// A Pythia8 core to be wrapped
         std::unique_ptr<Pythia8::Pythia> pythia_;
