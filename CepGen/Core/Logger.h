@@ -47,7 +47,7 @@ namespace cepgen
 #if !defined(__CINT__) && !defined(__CLING__)
           if ( level >= lev )
             return true;
-          if ( allowed_exc_.size() == 0 )
+          if ( allowed_exc_.empty() )
             return false;
           for ( const auto& rule : allowed_exc_ )
             if ( std::regex_match( tmpl, rule ) )

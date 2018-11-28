@@ -207,8 +207,8 @@ namespace cepgen
 
       double f2resn = 0.;
 
-      for ( unsigned short i = 0; i < params_.resonances.size(); ++i ) {
-        const Parameters::Resonance& res = params_.resonances[i];
+      unsigned short i = 0;
+      for ( const auto& res : params_.resonances ) {
         const double ai = ( i == 0 )
           ? etad * ( res.amplitude + q2*std::min( 0., params_.alpha+params_.beta*q2 ) )
           : res.amplitude;
@@ -222,6 +222,7 @@ namespace cepgen
         int ji = 2*res.angular_momentum;
         const double dg = 0.5*res.width*pow( qs/qs0, ji+1 )*( 1.+pow( coef*qs0, ji ) )/( 1.+pow( coef*qs, ji ) );
         f2resn += ai*dg/( ( w-dmi )*( w-dmi )+dg*dg );
+        ++i;
       }
       f2resn *= 0.5*( 1.-params_.b[0] )*bkg2/params_.mp*M_1_PI;
 

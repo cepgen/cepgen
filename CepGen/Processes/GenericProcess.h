@@ -88,7 +88,7 @@ namespace cepgen
         inline std::shared_ptr<Event> event() const { return event_; }
 
         ///Get the number of dimensions on which the integration is performed
-        inline const unsigned int ndim() const { return x_.size(); }
+        inline size_t ndim() const { return x_.size(); }
         /// Get the value of a component of the d-dimensional point considered
         double x( unsigned int idx ) const;
         /// Process-specific parameters

@@ -243,7 +243,7 @@ namespace cepgen
             else
               cg_part.addMother( addParticle( ev, pythia_->event[moth_id], p.p(), role ) );
             if ( !p.isFinal() ) {
-              if ( p.isResonance() || p.daughterList().size() > 0 )
+              if ( p.isResonance() || !p.daughterList().empty() )
                 cg_part.setStatus( Particle::Status::Resonance );
               else
                 cg_part.setStatus( Particle::Status::Undefined );

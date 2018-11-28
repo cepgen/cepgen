@@ -61,7 +61,7 @@ namespace cepgen
         const ParametersList& parameters() const { return params_; }
 
         /// Compute all relevant structure functions for a given \f$(x_{\rm Bj},Q^2)\f$ couple
-        virtual Parameterisation& operator()( double xbj, double q2 ) { return *this; }
+        virtual Parameterisation& operator()( double /*xbj*/, double /*q2*/ ) { return *this; }
         /// Compute the longitudinal structure function for a given point
         virtual Parameterisation& computeFL( double xbj, double q2 );
         /// Compute the longitudinal structure function for a given point

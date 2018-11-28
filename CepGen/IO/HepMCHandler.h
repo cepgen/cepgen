@@ -34,7 +34,7 @@ namespace cepgen
         /// \param[in] filename Output file path
         /// \param[in] type Output type
         HepMCHandler( const char* filename, const ExportHandler::OutputType& type = ExportHandler::HepMC );
-        void initialise( const Parameters& params ) override {}
+        void initialise( const Parameters& /*params*/ ) override {}
         /// Writer operator
         void operator<<( const Event& ) override;
         void setCrossSection( double, double ) override;

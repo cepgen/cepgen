@@ -39,7 +39,7 @@ c     =================================================================
      &     pt_min,pt_max,ene_min,ene_max,eta_min,eta_max,
      &     invm_min,invm_max,ptsum_min,ptsum_max,
      &     dely_min,dely_max
-      integer ipt,iene,ieta,iinvm,iptsum,idely
+      logical ipt,iene,ieta,iinvm,iptsum,idely
       double precision pt_min,pt_max,ene_min,ene_max,eta_min,eta_max,
      &     invm_min,invm_max,ptsum_min,ptsum_max,
      &     dely_min,dely_max

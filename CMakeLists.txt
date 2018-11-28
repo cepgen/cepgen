@@ -2,17 +2,23 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(CepGen)
 set(PROJECT_VERSION 1)
 
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake)
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+#set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-pg") # for gprof
+#set(CMAKE_CXX_FLAGS_DEBUG "-fprofile-arcs -ftest-coverage") # for gcov
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 #----- include external paths
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake)
 set(CEPGEN_EXTERNAL_CORE_REQS "")
 set(CEPGEN_EXTERNAL_CARDS_REQS "")
 set(CEPGEN_EXTERNAL_IO_REQS "")
 set(CEPGEN_EXTERNAL_HADR_REQS "")
 set(CEPGEN_EXTERNAL_STRF_REQS "")
 include(UseEnvironment)
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg") # for gprof
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage") # for gcov
 
 set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/CepGen)
 set(CEPGEN_LIBRARIES CepGenCore CepGenEvent CepGenProcesses CepGenAddOns CepGenCards)

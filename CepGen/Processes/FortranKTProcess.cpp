@@ -51,12 +51,12 @@ namespace cepgen
       // feed phase space cuts to the common block
       //===========================================================================================
 
-      kin_.cuts.central.pt_single.save( (bool&)kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max );
-      kin_.cuts.central.energy_single.save( (bool&)kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max );
-      kin_.cuts.central.eta_single.save( (bool&)kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max );
-      kin_.cuts.central.mass_sum.save( (bool&)kincuts_.iinvm, kincuts_.invm_min, kincuts_.invm_max );
-      kin_.cuts.central.pt_sum.save( (bool&)kincuts_.iptsum, kincuts_.ptsum_min, kincuts_.ptsum_max );
-      kin_.cuts.central.rapidity_diff.save( (bool&)kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max );
+      kin_.cuts.central.pt_single.save( kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max );
+      kin_.cuts.central.energy_single.save( kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max );
+      kin_.cuts.central.eta_single.save( kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max );
+      kin_.cuts.central.mass_sum.save( kincuts_.iinvm, kincuts_.invm_min, kincuts_.invm_max );
+      kin_.cuts.central.pt_sum.save( kincuts_.iptsum, kincuts_.ptsum_min, kincuts_.ptsum_max );
+      kin_.cuts.central.rapidity_diff.save( kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max );
 
       //===========================================================================================
       // feed run parameters to the common block

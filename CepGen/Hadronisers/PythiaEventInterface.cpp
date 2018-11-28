@@ -134,7 +134,7 @@ namespace Pythia8
       unsigned short moth1_id = 1, moth2_id = 2;
       if ( !full || ( !inel1_ && !inel2_ ) ) {
         moth1_id = moth2_id = 0;
-        if ( mothers.size() > 0 ) {
+        if ( !mothers.empty() ) {
           const unsigned short moth1_cg_id = *mothers.begin();
           moth1_id = pythiaId( moth1_cg_id );
           if ( moth1_id == INVALID_ID ) {

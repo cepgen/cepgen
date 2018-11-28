@@ -375,4 +375,3 @@ namespace cepgen
 REGISTER_PROCESS( pptoll, PPtoFF )
 REGISTER_PROCESS( pptoff, PPtoFF )
 REGISTER_PROCESS( pptoqq, PPtoFF )
-

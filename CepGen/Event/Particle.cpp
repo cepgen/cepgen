@@ -137,7 +137,7 @@ namespace cepgen
     momentum_.setP( px, py, pz );
     setEnergy( e );
     if ( fabs( e-momentum_.energy() ) > 1.e-6 ) // more than 1 eV difference
-      CG_WARNING( Form( "Energy difference: %.5e", e-momentum_.energy() ) );
+      CG_WARNING( "Particle" ) << "Energy difference: " << e-momentum_.energy();
   }
 
   double
@@ -202,7 +202,7 @@ namespace cepgen
       }
     }
     const ParticlesIds daughters_list = daughters();
-    if ( daughters_list.size() > 0 ) {
+    if ( !daughters_list.empty() ) {
       osd << ": id = ";
       unsigned short i = 0;
       for ( const auto& daugh : daughters_list ) {

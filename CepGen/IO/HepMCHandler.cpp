@@ -107,7 +107,7 @@ namespace cepgen
           case Particle::Intermediate:  { cm_id = i; continue; } break;
           case Particle::CentralSystem:
           default: {
-            if ( moth.size() == 0 ) continue;
+            if ( moth.empty() ) continue;
             if ( *moth.begin() == cm_id ) vcm->add_particle_out( part );
             else
               throw CG_FATAL( "HepMCHandler:fillEvent" )

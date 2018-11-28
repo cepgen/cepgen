@@ -94,7 +94,7 @@ namespace cepgen
   {
     //--- retrieve the first particle of a given role
     Particles& parts_by_role = operator[]( role );
-    if ( parts_by_role.size() == 0 )
+    if ( parts_by_role.empty() )
       throw CG_FATAL( "Event" ) << "No particle retrieved with " << role << " role.";
     if ( parts_by_role.size() > 1 )
       throw CG_FATAL( "Event" ) << "More than one particle with " << role << " role: "
@@ -107,7 +107,7 @@ namespace cepgen
   {
     //--- retrieve the first particle of a given role
     const Particles& parts_by_role = operator[]( role );
-    if ( parts_by_role.size() == 0 )
+    if ( parts_by_role.empty() )
       throw CG_FATAL( "Event" ) << "No particle retrieved with " << role << " role.";
     if ( parts_by_role.size() > 1 )
       throw CG_FATAL( "Event" ) << "More than one particle with " << role << " role: "
@@ -260,7 +260,7 @@ namespace cepgen
   }
 
   void
-  Event::dump( std::ostream& out, bool stable ) const
+  Event::dump( bool stable ) const
   {
     const Particles parts = ( stable ) ? stableParticles() : particles();
 
@@ -271,7 +271,7 @@ namespace cepgen
       const ParticlesIds mothers = part.mothers();
       {
         std::ostringstream oss_pdg;
-        if ( part.pdgId() == PDG::invalid && mothers.size() > 0 ) {
+        if ( part.pdgId() == PDG::invalid && !mothers.empty() ) {
           for ( unsigned short i = 0; i < mothers.size(); ++i )
             oss_pdg << ( i > 0 ? "/" : "" ) << operator[]( *std::next( mothers.begin(), i ) ).pdgId();
           os << Form( "\n %2d\t\t%-10s", part.id(), oss_pdg.str().c_str() );

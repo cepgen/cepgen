@@ -166,7 +166,7 @@ namespace cepgen
       //--- types of parton fluxes for kt-factorisation
       std::vector<int> kt_fluxes;
       fillParameter( kin, "ktFluxes", kt_fluxes );
-      if ( kt_fluxes.size() > 0 )
+      if ( !kt_fluxes.empty() )
         params_.kinematics.incoming_beams. first.kt_flux = (KTFlux)kt_fluxes.at( 0 );
       if ( kt_fluxes.size() > 1 )
         params_.kinematics.incoming_beams.second.kt_flux = (KTFlux)kt_fluxes.at( 1 );

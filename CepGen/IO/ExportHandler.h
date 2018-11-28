@@ -41,7 +41,7 @@ namespace cepgen
         /// Initialise the handler and its inner parameterisation
         virtual void initialise( const Parameters& ) = 0;
         /// Set the process cross section and its associated error
-        virtual void setCrossSection( double xsec, double err_xsec ) {}
+        virtual void setCrossSection( double /*xsec*/, double /*err_xsec*/ ) {}
         /// Set the event number
         void setEventNumber( const unsigned int& ev_id ) { event_num_ = ev_id; }
         /// Writer operator

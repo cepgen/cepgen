@@ -155,7 +155,7 @@ c     =================================================================
 c     a window in final state transverse momentum
 c     =================================================================
 
-      if(iptsum.eq.1) then
+      if(iptsum) then
         if(ptsum.lt.ptsum_min.or.ptsum.gt.ptsum_max) return
       endif
 
@@ -175,7 +175,7 @@ c     =================================================================
       pt1 = sqrt(pt1x**2+pt1y**2)
       pt2 = sqrt(pt2x**2+pt2y**2)
 
-      if(ipt.eq.1) then
+      if(ipt) then
         if(pt1.lt.pt_min.or.pt2.lt.pt_min) return
         if(pt_max.gt.0d0.and.(pt2.gt.pt_max.or.pt2.gt.pt_max)) return
       endif
@@ -192,7 +192,7 @@ c     =================================================================
 c     a window in final state invariant mass
 c     =================================================================
 
-      if(iinvm.eq.1) then
+      if(iinvm) then
         if(invm.lt.invm_min) return
         if(invm_max.gt.0d0.and.invm.gt.invm_max) return
       endif
@@ -202,7 +202,7 @@ c     a window in rapidity distance
 c     =================================================================
 
       dely = dabs(y1-y2)
-      if(idely.eq.1) then
+      if(idely) then
         if(dely.lt.dely_min.or.dely.gt.dely_max) return
       endif
 
@@ -294,7 +294,7 @@ c     =================================================================
      2       amt2*dsinh(y2))/(dsqrt(amt2**2*(dcosh(y2))**2 - am_l**2)
      3     - amt2*dsinh(y2)))
 
-      if(ieta.eq.1) then
+      if(ieta) then
         if(eta1.lt.eta_min.or.eta1.gt.eta_max) return
         if(eta2.lt.eta_min.or.eta2.gt.eta_max) return
       endif

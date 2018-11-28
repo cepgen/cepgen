@@ -69,13 +69,6 @@ namespace cepgen
       /// \param[in] id exception code (useful for logging)
       explicit inline Exception( const char* from, const char* module, Type type = Type::undefined, const int id = 0 ) :
         from_( from ), module_( module ), type_( type ), error_num_( id ) {}
-      /// Generic constructor
-      /// \param[in] from method invoking the exception
-      /// \param[in] module exception classifier
-      /// \param[in] type exception type
-      /// \param[in] id exception code (useful for logging)
-      explicit inline Exception( const char* from, const std::string& module, Type type = Type::undefined, const int id = 0 ) :
-        from_( from ), module_( module ), type_( type ), error_num_( id ) {}
       /// Copy constructor
       inline Exception( const Exception& rhs ) :
         from_( rhs.from_ ), module_( rhs.module_ ), message_( rhs.message_.str() ), type_( rhs.type_ ), error_num_( rhs.error_num_ ) {}

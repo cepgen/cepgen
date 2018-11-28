@@ -43,12 +43,12 @@ namespace cepgen
     };
     /// Phase space cuts for event kinematics
     struct Cuts {
-      int ipt; ///< Switch for cut on single particle transverse momentum
-      int iene; ///< Switch for cut on single particle energy
-      int ieta; ///< Switch for cut on single particle pseudo-rapidity
-      int iinvm; ///< Switch for cut on central system invariant mass
-      int iptsum; ///< Switch for cut on central system transverse momentum
-      int idely; ///< Switch for cut on rapididty difference
+      bool ipt; ///< Switch for cut on single particle transverse momentum
+      bool iene; ///< Switch for cut on single particle energy
+      bool ieta; ///< Switch for cut on single particle pseudo-rapidity
+      bool iinvm; ///< Switch for cut on central system invariant mass
+      bool iptsum; ///< Switch for cut on central system transverse momentum
+      bool idely; ///< Switch for cut on rapididty difference
       double pt_min; ///< Minimal single particle transverse momentum
       double pt_max; ///< Maximal single particle transverse momentum
       double ene_min; ///< Minimal single particle energy

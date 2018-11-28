@@ -91,7 +91,7 @@ namespace cepgen
       if ( !p->storage()
         && !p->taming_functions
         && !p->hadroniser()
-        &&  p->kinematics.cuts.central_particles.size() == 0 )
+        &&  p->kinematics.cuts.central_particles.empty() )
         return integrand;
 
       //=============================================================================================
@@ -151,7 +151,7 @@ namespace cepgen
       // (watch out your cuts, as this might be extremely time-consuming...)
       //=============================================================================================
 
-      if ( p->kinematics.cuts.central_particles.size() > 0 ) {
+      if ( !p->kinematics.cuts.central_particles.empty() ) {
         for ( const auto& part : (*ev)[Particle::CentralSystem] ) {
           // retrieve all cuts associated to this final state particle
           if ( p->kinematics.cuts.central_particles.count( part.pdgId() ) == 0 )
