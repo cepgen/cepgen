@@ -1,5 +1,10 @@
 # Release notes
 
+## v0.9 (28 Nov 2018)
+* Lots of performance improvements in many parts of the code
+* New processes introduced: &gamma;&gamma; &rarr; W<sup>+</sup>W<sup>-</sup>, FORTRAN processes handler
+* Imported back the Pythia 8 hadroniser
+
 ## v0.8 (24 Aug 2017)
 * Major refactoring of the code
 * Dropped the hadronisers and other unfinished processes definition for clarity
