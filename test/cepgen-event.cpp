@@ -1,5 +1,4 @@
-#include "CepGen/Cards/PythonHandler.h"
-#include "CepGen/Cards/LpairHandler.h"
+#include "CepGen/Cards/Handler.h"
 
 #include "CepGen/IO/HepMCHandler.h"
 #include "CepGen/IO/LHEFHandler.h"
@@ -43,13 +42,7 @@ int main( int argc, char* argv[] ) {
   //-----------------------------------------------------------------------------------------------
 
   CG_DEBUG( "main" ) << "Reading config file stored in \"" << argv[1] << "\"";
-  const string extension = cepgen::card::Handler::getExtension( argv[1] );
-  if ( extension == "card" )
-    mg.setParameters( cepgen::card::LpairHandler( argv[1] ).parameters() );
-  else if ( extension == "py" )
-    mg.setParameters( cepgen::card::PythonHandler( argv[1] ).parameters() );
-  else
-    throw CG_FATAL( "main" ) << "Unrecognized card format: ." << extension;
+  mg.setParameters( cepgen::card::Handler::parse( argv[1] ) );
 
   //-----------------------------------------------------------------------------------------------
   // Output file writer definition

@@ -14,11 +14,13 @@ namespace cepgen
     {
       public:
         /// Build a configuration from an external steering card
-        Handler() {}
-        ~Handler() {}
+        Handler() = default;
+        ~Handler() = default;
 
-        /// Retrieve a configuration from a parsed steering cart
         Parameters& parameters() { return params_; }
+
+        /// Retrieve a configuration from a parsed steering card
+        static Parameters parse( const char* filename );
         /// Small utility to retrieve the extension of a filename
         ///  (naive approach)
         static std::string getExtension( const char* filename ) {

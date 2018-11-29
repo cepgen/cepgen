@@ -4,7 +4,6 @@
 #ifdef PYTHON
 
 #include "CepGen/Core/TamingFunction.h"
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Integrator.h"
 
@@ -78,8 +77,8 @@ namespace cepgen
       //--- process mode
       params_.kinematics.mode = (KinematicsMode)proc_params.get<int>( "mode", (int)KinematicsMode::invalid );
 
-      auto proc = cepgen::proc::ProcessesHandler::get().build( proc_name, proc_params );
-      params_.setProcess( std::move( proc ) );
+      auto pr = cepgen::proc::ProcessesHandler::get().build( proc_name, proc_params );
+      params_.setProcess( std::move( pr ) );
 
       //--- process kinematics
       PyObject* pin_kinematics = element( process, "inKinematics" ); // borrowed
@@ -232,7 +231,7 @@ namespace cepgen
       Limits lim_xi;
       fillParameter( kin, "xi", lim_xi );
       if ( lim_xi.valid() )
-        params_.kinematics.cuts.remnants.energy_single = ( lim_xi-1. )*( -params_.kinematics.incoming_beams.first.pz );
+        params_.kinematics.cuts.remnants.energy_single = ( lim_xi+(-1.) )*( -params_.kinematics.incoming_beams.first.pz );
     }
 
     void

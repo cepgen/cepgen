@@ -14,20 +14,20 @@ namespace cepgen
   {}
 
   Limits&
-  Limits::operator-( double c )
+  Limits::operator+=( double c )
   {
-    first -= c;
-    second -= c;
+    first += c;
+    second += c;
     return *this;
   }
 
   Limits&
-  Limits::operator*( double c )
+  Limits::operator*=( double c )
   {
     first *= c;
     second *= c;
     if ( c < 0. ) {
-      double tmp = first; // will be optimised by compiler anyway...
+      const double tmp = first; // will be optimised by compiler anyway...
       first = second;
       second = tmp;
     }
@@ -115,5 +115,18 @@ namespace cepgen
       return os << Form( "above %g", lim.min() );
     return os << Form( "%g to %g", lim.min(), lim.max() );
   }
-}
+  Limits
+  operator+( Limits lim, double c )
+  {
+    lim += c;
+    return lim;
+  }
 
+  Limits
+  operator*( Limits lim, double c )
+  {
+    lim *= c;
+    return lim;
+  }
+
+}

@@ -30,7 +30,7 @@ namespace cepgen
       /// Build one instance of a named module
       /// \param[in] name Module name to retrieve
       /// \param[in] params List of parameters to be invoked by the constructor
-      std::unique_ptr<T> build( const std::string& name, const ParametersList& params = ParametersList() ) const {
+      std::unique_ptr<T> build( std::string name, const ParametersList& params = ParametersList() ) const {
         if ( map_.count( name ) == 0 )
           throw std::runtime_error( "Failed to retrieve a module with name \""+name+"\" from factory!" );
         return map_.at( name )( params );

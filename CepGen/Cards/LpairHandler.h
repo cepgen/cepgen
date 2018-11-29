@@ -48,9 +48,10 @@ namespace cepgen
         std::unordered_map<std::string, Parameter<int> > p_ints_;
         std::unordered_map<std::string, Parameter<bool> > p_bools_;
 
-        void init( Parameters* );
+        void init();
         std::shared_ptr<ParametersList> proc_params_;
         int str_fun_, sr_type_;
+        double xi_min_, xi_max_;
         std::string proc_name_, hadr_name_, integr_type_, kmr_grid_path_, mstw_grid_path_;
         std::pair<unsigned short,unsigned short> hi_1_, hi_2_;
     };

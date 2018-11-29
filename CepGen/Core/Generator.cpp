@@ -71,9 +71,9 @@ namespace cepgen
   }
 
   void
-  Generator::setParameters( Parameters& ip )
+  Generator::setParameters( const Parameters& ip )
   {
-    parameters = std::unique_ptr<Parameters>( new Parameters( ip ) ); // copy constructor
+    parameters.reset( new Parameters( (Parameters&)ip ) ); // copy constructor
   }
 
   void
