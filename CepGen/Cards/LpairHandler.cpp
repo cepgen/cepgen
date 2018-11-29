@@ -49,10 +49,7 @@ namespace cepgen
       f.close();
 
       //--- parse the process name
-      for ( const auto& mod : proc::ProcessesHandler::get().modules() ) std::cout << mod << std::endl;
-      std::cout << proc_name_ << std::endl;
-      auto pr = proc::ProcessesHandler::get().build( proc_name_, *proc_params_ );
-      params_.setProcess( std::move( pr ) );
+      params_.setProcess( std::move( proc::ProcessesHandler::get().build( proc_name_, *proc_params_ ) ) );
 
       const Limits lim_xi{ xi_min_, xi_max_ };
       if ( lim_xi.valid() )
@@ -87,9 +84,10 @@ namespace cepgen
         throw CG_FATAL( "LpairHandler" ) << "Unrecognized integrator type: " << integr_type_ << "!";
 
       //--- parse the hadronisation algorithm name
-      auto hadr = cepgen::hadr::HadronisersHandler::get().build( hadr_name_, ParametersList() );
-      hadr->setParameters( params_ );
-      params_.setHadroniser( std::move( hadr ) );
+      if ( !hadr_name_.empty() ) {
+        params_.setHadroniser( std::move( cepgen::hadr::HadronisersHandler::get().build( hadr_name_, ParametersList() ) ) );
+        params_.hadroniser()->setParameters( params_ );
+      }
 
       if ( m_params.count( "IEND" ) )
         setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
