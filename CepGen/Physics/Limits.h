@@ -14,6 +14,11 @@ namespace cepgen
       Limits( double min = INVALID, double max = INVALID );
       Limits( const Limits& );
 
+      Limits& operator+=( double c );
+      Limits& operator*=( double c );
+      friend Limits operator+( Limits lim, double c );
+      friend Limits operator*( Limits lim, double c );
+
       /// Lower limit to apply on the variable
       double min() const { return first; }
       /// Lower limit to apply on the variable

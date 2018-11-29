@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <vector>
 #include <memory>
-
+#include <iostream>
 namespace cepgen
 {
   class ParametersList;
@@ -31,8 +31,8 @@ namespace cepgen
       /// \param[in] name Module name to retrieve
       /// \param[in] params List of parameters to be invoked by the constructor
       std::unique_ptr<T> build( const std::string& name, const ParametersList& params = ParametersList() ) const {
-        if ( map_.count( name ) == 0 )
-          throw std::runtime_error( "Failed to retrieve a module with name \""+name+"\" from factory!" );
+        if ( name.empty() || map_.count( name ) == 0 )
+          throw std::runtime_error( std::string( __PRETTY_FUNCTION__ )+" Failed to retrieve a module with name \""+name+"\" from factory!" );
         return map_.at( name )( params );
       }
       /// List of modules registred in the database

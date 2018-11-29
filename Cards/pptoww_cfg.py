@@ -51,12 +51,13 @@ process = kt.process.clone('pptoww',
             11: cepgen.Parameters(pt = (20.,), eta = (-2.5, 2.5)),
             13: cepgen.Parameters(pt = (20.,), eta = (-2.5, 2.5))
         },
+        #xi = (0.02, 0.15),
     )
 )
 
 #--- generation parameters
 from Config.generator_cff import generator
 generator = generator.clone(
-    numEvents = 1000,
-    printEvery = 100,
+    numEvents = 10000,
+    printEvery = 1000,
 )

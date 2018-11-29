@@ -77,7 +77,7 @@ namespace cepgen
       /// Dump this program's header into the standard output stream
       void printHeader();
       /// Feed the generator with a Parameters object
-      void setParameters( Parameters& ip );
+      void setParameters( const Parameters& ip );
       /// Remove all references to a previous generation/run
       void clearRun();
       /**

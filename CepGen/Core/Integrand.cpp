@@ -168,14 +168,15 @@ namespace cepgen
             return 0.;
         }
       }
-      if ( p->kinematics.cuts.remnants.rapidity_single.valid() ) {
-        for ( const auto& part : (*ev)[Particle::OutgoingBeam1] )
+      for ( const auto& system : { Particle::OutgoingBeam1, Particle::OutgoingBeam2 } )
+        for ( const auto& part : (*ev)[system] ) {
+          if ( part.status() != Particle::Status::FinalState )
+            continue;
+          if ( !p->kinematics.cuts.remnants.energy_single.passes( fabs( part.momentum().energy() ) ) )
+            return 0.;
           if ( !p->kinematics.cuts.remnants.rapidity_single.passes( fabs( part.momentum().rapidity() ) ) )
             return 0.;
-        for ( const auto& part : (*ev)[Particle::OutgoingBeam2] )
-          if ( !p->kinematics.cuts.remnants.rapidity_single.passes( fabs( part.momentum().rapidity() ) ) )
-            return 0.;
-      }
+        }
 
       //=============================================================================================
       // store the last event in the parameters for its usage by the end user

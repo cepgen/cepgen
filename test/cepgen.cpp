@@ -1,6 +1,5 @@
 //--- steering cards
-#include "CepGen/Cards/PythonHandler.h"
-#include "CepGen/Cards/LpairHandler.h"
+#include "CepGen/Cards/Handler.h"
 
 #include "CepGen/Generator.h"
 #include "CepGen/Core/Exception.h"
@@ -40,18 +39,8 @@ int main( int argc, char* argv[] )
     gen.parameters->generation.enabled = true;
     gen.parameters->generation.maxgen = 1e3;
   }
-  else {
-    CG_INFO( "main" ) << "Reading config file stored in " << argv[1] << ".";
-    const std::string extension = cepgen::card::Handler::getExtension( argv[1] );
-    if ( extension == "card" )
-      gen.setParameters( cepgen::card::LpairHandler( argv[1] ).parameters() );
-#ifdef PYTHON
-    else if ( extension == "py" )
-      gen.setParameters( cepgen::card::PythonHandler( argv[1] ).parameters() );
-#endif
-    else
-      throw CG_FATAL( "main" ) << "Unrecognized steering card extension: ." << extension << "!";
-  }
+  else
+    gen.setParameters( cepgen::card::Handler::parse( argv[1] ) );
 
   //--- list all parameters
   CG_LOG( "main" ) << gen.parameters.get();

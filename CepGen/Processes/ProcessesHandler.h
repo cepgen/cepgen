@@ -15,12 +15,13 @@
       BUILDERNM( name )() { ProcessesHandler::get().registerModule<obj>( STRINGIFY( name ) ); } }; \
     static BUILDERNM( name ) g ## name; \
   } }
-#define DECLARE_FORTRAN_SUBROUTINE( method ) \
+#define DECLARE_FORTRAN_FUNCTION( method ) \
   extern "C" { extern double method ## _(); }
 #define PROCESS_F77_NAME( name ) F77_ ## name
 #define REGISTER_FORTRAN_PROCESS( name, method, description ) \
   struct PROCESS_F77_NAME( name ) : public cepgen::proc::FortranKTProcess { \
-    PROCESS_F77_NAME( name )( const cepgen::ParametersList& params = cepgen::ParametersList() ) : cepgen::proc::FortranKTProcess( params, STRINGIFY( name ), description, method ## _ ) {} }; \
+    PROCESS_F77_NAME( name )( const cepgen::ParametersList& params = cepgen::ParametersList() ) : \
+      cepgen::proc::FortranKTProcess( params, STRINGIFY( name ), description, method ## _ ) {} }; \
   REGISTER_PROCESS( name, PROCESS_F77_NAME( name ) )
 
 namespace cepgen

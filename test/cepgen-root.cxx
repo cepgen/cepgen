@@ -1,5 +1,4 @@
-#include "CepGen/Cards/PythonHandler.h"
-#include "CepGen/Cards/LpairHandler.h"
+#include "CepGen/Cards/Handler.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Event/Event.h"
 
@@ -67,12 +66,7 @@ int main( int argc, char* argv[] )
   if ( argc < 2 )
     throw CG_FATAL( "main" ) << "Usage: " << argv[0] << " input-card [filename=events.root]";
 
-  const std::string extension = cepgen::card::Handler::getExtension( argv[1] );
-  if ( extension == "card" )
-    mg.setParameters( cepgen::card::LpairHandler( argv[1] ).parameters() );
-  else if ( extension == "py" )
-    mg.setParameters( cepgen::card::PythonHandler( argv[1] ).parameters() );
-
+  mg.setParameters( cepgen::card::Handler::parse( argv[1] ) );
   mg.parameters->generation.enabled = true;
   CG_INFO( "main" ) << mg.parameters.get();
 
