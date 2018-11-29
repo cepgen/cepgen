@@ -228,12 +228,19 @@ namespace cepgen
 
       fillParameter( kin, "mx", params_.kinematics.cuts.remnants.mass_single );
       fillParameter( kin, "yj", params_.kinematics.cuts.remnants.rapidity_single );
+
+      Limits lim_xi;
+      fillParameter( kin, "xi", lim_xi );
+      if ( lim_xi.valid() )
+        params_.kinematics.cuts.remnants.energy_single = ( lim_xi-1. )*( -params_.kinematics.incoming_beams.first.pz );
     }
 
     void
     PythonHandler::parseLogging( PyObject* log )
     {
-      fillParameter( log, "level", (int&)utils::Logger::get().level );
+      int log_level = 0;
+      fillParameter( log, "level", log_level );
+      utils::Logger::get().level = (utils::Logger::Level)log_level;
       std::vector<std::string> enabled_modules;
       fillParameter( log, "enabledModules", enabled_modules );
       for ( const auto& mod : enabled_modules )

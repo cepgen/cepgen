@@ -1,13 +1,13 @@
 #include "CepGen/Processes/ProcessesHandler.h"
 
 //=================================================================================================
-// START BY LISTING ALL FORTRAN SUBROUTINES                                                      //
+// START BY LISTING ALL FORTRAN FUNCTIONS                                                        //
 // usage:                                                                                        //
-//  DECLARE_FORTRAN_SUBROUTINE( subroutine_name )                                                //
-// with the Fortran subroutine name written in lowercase (no trailing '_' necessary)             //
+//  DECLARE_FORTRAN_FUNCTION( function_name )                                                    //
+// with the Fortran function name written in lowercase (no trailing '_' necessary)               //
 //=================================================================================================
 
-DECLARE_FORTRAN_SUBROUTINE( nucl_to_ff )
+DECLARE_FORTRAN_FUNCTION( nucl_to_ff )
 
 //=================================================================================================
 // START THE MAPPING name -> Fortran SUBROUTINE                                                  //

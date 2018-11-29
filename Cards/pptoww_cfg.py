@@ -2,7 +2,7 @@ import Config.Core as cepgen
 from Config.Integration.vegas_cff import integrator
 from Config.logger_cfi import logger
 
-from Config.Hadronisation.pythia8_cff import pythia8
+'''from Config.Hadronisation.pythia8_cff import pythia8
 hadroniser = pythia8.clone('pythia8',
     preConfiguration = pythia8.preConfiguration+(
         #'PartonLevel:MPI = on',
@@ -19,7 +19,7 @@ hadroniser = pythia8.clone('pythia8',
         '24:onNegIfAny = 13', # enable W+ -> mu+ + nu_mu decay
     ),
     processConfiguration = pythia8.processConfiguration+('pythiaConfiguration',),
-)
+)'''
 logger.enabledModules += ('Hadroniser.configure', 'Generator.*',)
 
 import Config.ktProcess_cfi as kt
@@ -51,12 +51,13 @@ process = kt.process.clone('pptoww',
             11: cepgen.Parameters(pt = (20.,), eta = (-2.5, 2.5)),
             13: cepgen.Parameters(pt = (20.,), eta = (-2.5, 2.5))
         },
+        #xi = (0.02, 0.15),
     )
 )
 
 #--- generation parameters
 from Config.generator_cff import generator
 generator = generator.clone(
-    numEvents = 1000,
-    printEvery = 100,
+    numEvents = 10000,
+    printEvery = 1000,
 )

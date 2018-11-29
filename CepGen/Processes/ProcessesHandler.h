@@ -15,7 +15,7 @@
       BUILDERNM( name )() { ProcessesHandler::get().registerModule<obj>( STRINGIFY( name ) ); } }; \
     static BUILDERNM( name ) g ## name; \
   } }
-#define DECLARE_FORTRAN_SUBROUTINE( method ) \
+#define DECLARE_FORTRAN_FUNCTION( method ) \
   extern "C" { extern double method ## _(); }
 #define PROCESS_F77_NAME( name ) F77_ ## name
 #define REGISTER_FORTRAN_PROCESS( name, method, description ) \

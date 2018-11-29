@@ -13,6 +13,27 @@ namespace cepgen
     std::pair<double,double>( rhs.first, rhs.second )
   {}
 
+  Limits&
+  Limits::operator-( double c )
+  {
+    first -= c;
+    second -= c;
+    return *this;
+  }
+
+  Limits&
+  Limits::operator*( double c )
+  {
+    first *= c;
+    second *= c;
+    if ( c < 0. ) {
+      double tmp = first; // will be optimised by compiler anyway...
+      first = second;
+      second = tmp;
+    }
+    return *this;
+  }
+
   void
   Limits::in( double low, double up )
   {

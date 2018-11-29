@@ -13,6 +13,8 @@ namespace cepgen
       /// Define lower and upper limits on a quantity
       Limits( double min = INVALID, double max = INVALID );
       Limits( const Limits& );
+      Limits& operator-( double c );
+      Limits& operator*( double c );
 
       /// Lower limit to apply on the variable
       double min() const { return first; }
