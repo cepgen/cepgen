@@ -1,5 +1,6 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Parameters.h"
+#include "CepGen/Core/Integrator.h"
 #include "TestProcess.h"
 
 #include <iostream>
@@ -16,11 +17,11 @@ main( int argc, char* argv[] )
 
   cepgen::Generator mg;
   if ( argc > 1 && string( argv[1] ) == "plain" )
-    mg.parameters->integrator.type = cepgen::Integrator::Type::plain;
+    mg.parameters->integrator.type = cepgen::IntegratorType::plain;
   if ( argc > 1 && string( argv[1] ) == "vegas" )
-    mg.parameters->integrator.type = cepgen::Integrator::Type::Vegas;
+    mg.parameters->integrator.type = cepgen::IntegratorType::Vegas;
   if ( argc > 1 && string( argv[1] ) == "miser" )
-    mg.parameters->integrator.type = cepgen::Integrator::Type::MISER;
+    mg.parameters->integrator.type = cepgen::IntegratorType::MISER;
 
   double result, error;
 

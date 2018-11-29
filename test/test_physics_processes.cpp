@@ -1,6 +1,7 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/Timer.h"
 
 #include "CepGen/Processes/GamGamLL.h"
@@ -81,11 +82,11 @@ main( int argc, char* argv[] )
   Generator mg;
 
   if ( argc > 1 && strcmp( argv[1], "plain" ) == 0 )
-    mg.parameters->integrator.type = Integrator::Type::plain;
+    mg.parameters->integrator.type = IntegratorType::plain;
   if ( argc > 1 && strcmp( argv[1], "vegas" ) == 0 )
-    mg.parameters->integrator.type = Integrator::Type::Vegas;
+    mg.parameters->integrator.type = IntegratorType::Vegas;
   if ( argc > 1 && strcmp( argv[1], "miser" ) == 0 )
-    mg.parameters->integrator.type = Integrator::Type::MISER;
+    mg.parameters->integrator.type = IntegratorType::MISER;
 
   { cout << "Testing with " << mg.parameters->integrator.type << " integrator" << endl; }
 

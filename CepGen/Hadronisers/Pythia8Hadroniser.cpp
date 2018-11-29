@@ -157,7 +157,7 @@ namespace cepgen
       // update the event content with Pythia's output
       //===========================================================================================
 
-      updateEvent( ev, weight, full );
+      updateEvent( ev, weight );
       return true;
 #else
       throw CG_FATAL( "Pythia8Hadroniser" ) << "Pythia8 is not linked to this instance!";
@@ -180,7 +180,7 @@ namespace cepgen
     }
 
     void
-    Pythia8Hadroniser::updateEvent( Event& ev, double& weight, bool full ) const
+    Pythia8Hadroniser::updateEvent( Event& ev, double& weight ) const
     {
       for ( unsigned short i = 1+offset_; i < pythia_->event.size(); ++i ) {
         const Pythia8::Particle& p = pythia_->event[i];
@@ -212,7 +212,7 @@ namespace cepgen
           }
           //--- resonance decayed; apply branching ratio for this decay
           if ( p.particleDataEntry().sizeChannels() > 0 ) {
-            weight *= p.particleDataEntry().pickChannel().bRatio();
+            //FIXME weight *= p.particleDataEntry().pickChannel().bRatio();
             cg_part.setStatus( Particle::Status::Resonance );
           }
         }
@@ -273,4 +273,3 @@ namespace cepgen
 }
 // register hadroniser and define alias
 REGISTER_HADRONISER( pythia8, Pythia8Hadroniser )
-

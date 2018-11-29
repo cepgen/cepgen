@@ -7,7 +7,7 @@
 #include "CepGen/Core/Timer.h"
 
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Processes/GenericProcess.h"
+#include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Event/Event.h"
 
 #include <fstream>
@@ -62,6 +62,12 @@ namespace cepgen
     integrator_.reset();
     parameters->process()->first_run = true;
     result_ = result_error_ = -1.;
+    {
+      std::ostringstream os;
+      for ( const auto& pr : cepgen::proc::ProcessesHandler::get().modules() )
+        os << " " << pr;
+      CG_DEBUG( "Generator:clearRun" ) << "Processes handled:" << os.str() << ".";
+    }
   }
 
   void
@@ -105,6 +111,7 @@ namespace cepgen
   {
     CG_INFO( "Generator" ) << "Starting the computation of the process cross-section.";
 
+    clearRun();
     integrate();
 
     xsec = result_;

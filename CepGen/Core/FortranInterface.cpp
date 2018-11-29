@@ -15,7 +15,8 @@ extern "C" {
   cepgen_structure_functions_( int& sfmode, double& xbj, double& q2, double& f2, double& fl )
   {
     using namespace cepgen;
-    static auto& val = ( *strfun::Parameterisation::build( ParametersList().set<int>( "id", sfmode ) ) )( xbj, q2 );
+    static auto sf = strfun::Parameterisation::build( ParametersList().set<int>( "id", sfmode ) );
+    const auto& val = ( *sf )( xbj, q2 );
     f2 = val.F2;
     fl = val.FL;
   }
