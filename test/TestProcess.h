@@ -18,7 +18,7 @@ namespace cepgen
         TestProcess( const ParametersList& params = ParametersList() ) :
           GenericProcess( params, "test", ".oO TEST PROCESS Oo.", false ),
           funct_( "1./(1.-cos(x*_pi)*cos(y*_pi)*cos(z*_pi))", { "x", "y", "z" } ) {}
-        TestProcess( const char* formula, std::vector<std::string> args ) :
+        TestProcess( const char* formula, const std::vector<std::string>& args ) :
           GenericProcess( ParametersList(), "test", Form( ".oO TEST PROCESS (%s) Oo.", formula ), false ),
           funct_( formula, args ) {}
 

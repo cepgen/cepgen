@@ -15,7 +15,7 @@ c      nsf=204 ! GD11p
 
       do i=1,niter
          xbj=min_xbj+(max_xbj-min_xbj)*(i-1)/(niter-1)
-         call CepGen_Structure_Functions(nsf,q2,xbj,f2,fl)
+         call CepGen_Structure_Functions(nsf,xbj,q2,f2,fl)
          print *,q2,xbj,f2,fl
       enddo
       end
