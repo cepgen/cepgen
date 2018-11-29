@@ -211,8 +211,14 @@ namespace cepgen
               << "got " << cg_part.integerPdgId() << "!";
           }
           //--- resonance decayed; apply branching ratio for this decay
-          if ( p.particleDataEntry().sizeChannels() > 0 ) {
-            //FIXME weight *= p.particleDataEntry().pickChannel().bRatio();
+          if ( p.status() < 0 && pythia_->settings.flag( "ProcessLevel:resonanceDecays" ) ) {
+            for ( unsigned short j = 0; j < p.particleDataEntry().sizeChannels(); ++j )
+              for ( const auto& d : p.daughterListRecursive() )
+                if ( p.particleDataEntry().channel( j ).contains( pythia_->event[d].id() ) ) {
+                  weight *= p.particleDataEntry().channel( j ).bRatio();
+                  break;
+                }
+            //weight *= p.particleDataEntry().pickChannel().bRatio();
             cg_part.setStatus( Particle::Status::Resonance );
           }
         }
