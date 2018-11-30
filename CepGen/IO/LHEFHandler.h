@@ -6,7 +6,7 @@
 
 #ifndef LIBHEPMC
 # ifndef PYTHIA8
-#  pragma message( "HepMC/Pythia8 are not linked to this instance!" )
+#  pragma message( "HepMC/Pythia8 are not linked to this instance! You will not able to export in LHEF." )
 # endif
 #else
 # ifndef HEPMC_VERSION3
