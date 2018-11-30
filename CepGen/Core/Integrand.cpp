@@ -11,6 +11,7 @@
 
 #include "CepGen/Parameters.h"
 
+#include <cmath>
 #include <sstream>
 #include <fstream>
 
