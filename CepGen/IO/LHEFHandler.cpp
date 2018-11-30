@@ -1,4 +1,5 @@
 #include "CepGen/IO/LHEFHandler.h"
+#include <sstream>
 
 #if defined ( PYTHIA_LHEF )
 #include "CepGen/Hadronisers/PythiaEventInterface.h"
