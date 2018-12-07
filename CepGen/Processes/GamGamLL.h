@@ -97,23 +97,23 @@ namespace cepgen
         {
           Masses();
           /// squared mass of the first proton-like outgoing particle
-          double MX2_;
+          double MX2;
           /// squared mass of the second proton-like outgoing particle
-          double MY2_;
+          double MY2;
           /// squared mass of the outgoing leptons
-          double Ml2_;
+          double Ml2;
           /// \f$\delta_2=m_1^2-m_2^2\f$ as defined in Vermaseren's paper
           /// \cite Vermaseren:1982cz for the full definition of this quantity
-          double w12_;
+          double w12;
 
           /// \f$\delta_1=m_3^2-m_1^2\f$ as defined in Vermaseren's paper
           /// \cite Vermaseren:1982cz for the full definition of this quantity
-          double w31_;
-          double dw31_;
+          double w31;
+          double dw31;
           /// \f$\delta_4=m_5^2-m_2^2\f$ as defined in Vermaseren's paper
           /// \cite Vermaseren:1982cz for the full definition of this quantity
-          double w52_;
-          double dw52_;
+          double w52;
+          double dw52;
         };
         Masses masses_;
 
