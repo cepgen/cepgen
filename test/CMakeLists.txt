@@ -47,3 +47,9 @@ else()
 endif()
 
 message(STATUS "list of available tests: ${tests}")
+
+file(GLOB_RECURSE test_input_cards RELATIVE ${PROJECT_SOURCE_DIR}/test test_processes/*)
+foreach(_files ${test_input_cards})
+  configure_file(${_files} ${_files} COPYONLY)
+endforeach()
+configure_file(${PROJECT_SOURCE_DIR}/test/test_processes.cfg test_processes.cfg COPYONLY)
