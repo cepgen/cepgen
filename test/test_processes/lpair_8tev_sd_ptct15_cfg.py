@@ -7,12 +7,12 @@ process = cepgen.Module('lpair',
         pair = 13,
     ),
     inKinematics = cepgen.Parameters(
-        cmEnergy = 8.e3
+        cmEnergy = 8.e3,
     ),
     outKinematics = cepgen.Parameters(
         pt = (15.,),
         eta = (-2.5, 2.5),
-        mx = (1.07, 1000.)
+        mx = (1.07, 1000.),
     )
 )
 

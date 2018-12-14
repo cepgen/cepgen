@@ -45,7 +45,7 @@ main( int argc, char* argv[] )
 
   { cout << "Testing with " << mg.parameters->integrator.type << " integrator" << endl; }
 
-  unsigned short num_tests = 0, num_tests_passed = 0;
+  unsigned short num_tests = 0;
   vector<string> failed_tests, passed_tests;
 
   CG_INFO( "main" ) << "Initial configuration time: " << tmr.elapsed()*1.e3 << " ms.";
@@ -63,7 +63,7 @@ main( int argc, char* argv[] )
     os >> config >> ref_cs >> err_ref_cs;
 
     try {
-      mg.setParameters( cepgen::card::Handler::parse( ( "test/test_processes/"+config+"_cfg.py" ).c_str() ) );
+      mg.setParameters( cepgen::card::Handler::parse( ( "test_processes/"+config+"_cfg.py" ).c_str() ) );
       //CG_INFO( "main" ) << mg.parameters.get();
       CG_INFO( "main" )
         << "Process: "<< mg.parameters->processName() << "\n\t"
@@ -86,14 +86,12 @@ main( int argc, char* argv[] )
       tmr.reset();
 
       const string test_res = Form( "%-16s\tref=%g\tgot=%g\tpull=%+g", config.c_str(), ref_cs, cg_cs, sigma );
-      if ( fabs( sigma ) < num_sigma ) {
+      if ( fabs( sigma ) < num_sigma )
         passed_tests.emplace_back( test_res );
-        num_tests_passed++;
-      }
       else
         failed_tests.emplace_back( test_res );
       num_tests++;
-      cout << "Test " << num_tests_passed << "/"
+      cout << "Test " << passed_tests.size() << "/"
                       << num_tests << " passed!" << endl;
     } catch ( Exception& e ) {}
   }

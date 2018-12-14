@@ -1,17 +1,16 @@
 import Config.Core as cepgen
 from Config.Integration.vegas_cff import integrator
 
-process = cepgen.Module('lpair',
+process = cepgen.Module('pptoww',
     processParameters = cepgen.Parameters(
-        mode = cepgen.ProcessMode.ElasticElastic,
-        pair = 13,
+        mode = cepgen.ProcessMode.InelasticInelastic,
     ),
     inKinematics = cepgen.Parameters(
-        cmEnergy = 8.e3,
+        cmEnergy = 13.e3,
+        structureFunctions = cepgen.StructureFunctions.ALLM97,
     ),
     outKinematics = cepgen.Parameters(
-        pt = (15.,),
-        eta = (-2.5, 2.5),
+        mx = (1.07, 1000.),
     )
 )
 
