@@ -1,16 +1,12 @@
 #include "CepGen/Generator.h"
-//#include "CepGen/Parameters.h"
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/Timer.h"
 
 #include "AbortHandler.h"
 
-#include <unordered_map>
 #include <fstream>
-#include <assert.h>
-#include <string.h>
-#include <math.h>
+#include <cmath>
 
 using namespace std;
 using namespace cepgen;
@@ -18,14 +14,12 @@ using namespace cepgen;
 int
 main( int argc, char* argv[] )
 {
-  utils::AbortHandler ctrl_c;
-
   const double num_sigma = 3.0;
 
   if ( argc < 2 )
-    throw CG_FATAL( "mail" ) << "Usage: " << argv[0] << " [config file] [integrator=vegas]";
+    throw CG_FATAL( "main" ) << "Usage: " << argv[0] << " [config file] [integrator=vegas]";
 
-    utils::Logger::get().level = utils::Logger::Level::nothing;
+  utils::Logger::get().level = utils::Logger::Level::info;
 
   utils::Timer tmr;
   Generator mg;
@@ -43,7 +37,7 @@ main( int argc, char* argv[] )
       throw CG_FATAL( "main" ) << "Unhandled integrator type: " << integrator << ".";
   }
 
-  { cout << "Testing with " << mg.parameters->integrator.type << " integrator" << endl; }
+  CG_LOG( "main" ) << "Testing with " << mg.parameters->integrator.type << " integrator.";
 
   unsigned short num_tests = 0;
   vector<string> failed_tests, passed_tests;
@@ -51,18 +45,20 @@ main( int argc, char* argv[] )
   CG_INFO( "main" ) << "Initial configuration time: " << tmr.elapsed()*1.e3 << " ms.";
   tmr.reset();
 
+  utils::AbortHandler ctrl_c;
+
   ifstream cfg( argv[1] );
   string line;
-  while ( !cfg.eof() ) {
-    getline( cfg, line );
-    if ( line[0] == '#' || line.empty() )
-      continue;
-    string config;
-    double ref_cs, err_ref_cs;
-    stringstream os( line );
-    os >> config >> ref_cs >> err_ref_cs;
+  try {
+    while ( !cfg.eof() ) {
+      getline( cfg, line );
+      if ( line[0] == '#' || line.empty() )
+        continue;
+      string config;
+      double ref_cs, err_ref_cs;
+      stringstream os( line );
+      os >> config >> ref_cs >> err_ref_cs;
 
-    try {
       mg.setParameters( cepgen::card::Handler::parse( ( "test_processes/"+config+"_cfg.py" ).c_str() ) );
       //CG_INFO( "main" ) << mg.parameters.get();
       CG_INFO( "main" )
@@ -85,16 +81,16 @@ main( int argc, char* argv[] )
       CG_INFO( "main" ) << "Computation time: " << tmr.elapsed()*1.e3 << " ms.";
       tmr.reset();
 
-      const string test_res = Form( "%-16s\tref=%g\tgot=%g\tpull=%+g", config.c_str(), ref_cs, cg_cs, sigma );
+      const string test_res = Form( "%-26s\tref=%g\tgot=%g\tpull=%+g", config.c_str(), ref_cs, cg_cs, sigma );
       if ( fabs( sigma ) < num_sigma )
         passed_tests.emplace_back( test_res );
       else
         failed_tests.emplace_back( test_res );
       num_tests++;
-      cout << "Test " << passed_tests.size() << "/"
-                      << num_tests << " passed!" << endl;
-    } catch ( Exception& e ) {}
-  }
+      CG_LOG( "main" )
+        << "Test " << passed_tests.size() << "/" << num_tests << " finished.";
+    }
+  } catch ( const Exception& e ) {}
   if ( failed_tests.size() != 0 ) {
     ostringstream os_failed, os_passed;
     for ( const auto& fail : failed_tests )
