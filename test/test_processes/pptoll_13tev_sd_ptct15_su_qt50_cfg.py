@@ -1,5 +1,4 @@
 import Config.Core as cepgen
-from Config.Integration.vegas_cff import integrator
 
 process = cepgen.Module('pptoll',
     processParameters = cepgen.Parameters(

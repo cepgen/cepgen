@@ -6,6 +6,7 @@
 #include "AbortHandler.h"
 
 #include <fstream>
+#include <iostream>
 #include <cmath>
 
 using namespace std;
@@ -19,14 +20,14 @@ main( int argc, char* argv[] )
   if ( argc < 2 )
     throw CG_FATAL( "main" ) << "Usage: " << argv[0] << " [config file] [integrator=vegas]";
 
-  utils::Logger::get().level = utils::Logger::Level::info;
+  utils::Logger::get().level = utils::Logger::Level::error;
 
   utils::Timer tmr;
   Generator mg;
 
   mg.parameters->integrator.type = IntegratorType::Vegas;
   if ( argc > 2 ) {
-    std::string integrator( argv[2] );
+    string integrator( argv[2] );
     if ( integrator == "plain" )
       mg.parameters->integrator.type = IntegratorType::plain;
     else if ( integrator == "vegas" )
@@ -67,28 +68,27 @@ main( int argc, char* argv[] )
 
       tmr.reset();
       mg.clearRun();
-      double cg_cs, err_cg_cs;
-      mg.computeXsection( cg_cs, err_cg_cs );
+      double new_cs, err_new_cs;
+      mg.computeXsection( new_cs, err_new_cs );
 
-      const double sigma = fabs( ref_cs-cg_cs ) / std::hypot( err_cg_cs, err_ref_cs );
+      const double sigma = ( new_cs-ref_cs ) / hypot( err_new_cs, err_ref_cs );
 
       CG_INFO( "main" )
         << "Computed cross section:\n\t"
         << "Ref.   = " << ref_cs << " +/- " << err_ref_cs << "\n\t"
-        << "CepGen = " << cg_cs << " +/- " << err_cg_cs << "\n\t"
+        << "CepGen = " << new_cs << " +/- " << err_new_cs << "\n\t"
         << "Pull: " << sigma << ".";
 
       CG_INFO( "main" ) << "Computation time: " << tmr.elapsed()*1.e3 << " ms.";
       tmr.reset();
 
-      const string test_res = Form( "%-26s\tref=%g\tgot=%g\tpull=%+g", config.c_str(), ref_cs, cg_cs, sigma );
+      const string test_res = Form( "%-26s\tref=%g\tgot=%g\tpull=%+g", config.c_str(), ref_cs, new_cs, sigma );
       if ( fabs( sigma ) < num_sigma )
         passed_tests.emplace_back( test_res );
       else
         failed_tests.emplace_back( test_res );
       num_tests++;
-      CG_LOG( "main" )
-        << "Test " << passed_tests.size() << "/" << num_tests << " finished.";
+      cout << "Test " << passed_tests.size() << "/" << num_tests << " finished." << endl;
     }
   } catch ( const Exception& e ) {}
   if ( failed_tests.size() != 0 ) {
@@ -108,4 +108,3 @@ main( int argc, char* argv[] )
 
   return 0;
 }
-

@@ -226,7 +226,7 @@ namespace cepgen
   //-----------------------------------------------------------------------------------------------
 
   Parameters::Integration::Integration() :
-    type( IntegratorType::Vegas ), ncvg( 500000 ),
+    type( IntegratorType::Vegas ), ncvg( 50000 ),
     rng_seed( 0 ), rng_engine( (gsl_rng_type*)gsl_rng_mt19937 ),
     vegas_chisq_cut( 1.5 ),
     result( -1. ), err_result( -1. )
@@ -235,6 +235,7 @@ namespace cepgen
     {
       std::shared_ptr<gsl_monte_vegas_state> tmp_state( gsl_monte_vegas_alloc( ndof ), gsl_monte_vegas_free );
       gsl_monte_vegas_params_get( tmp_state.get(), &vegas );
+      vegas.iterations = 10;
     }
     {
       std::shared_ptr<gsl_monte_miser_state> tmp_state( gsl_monte_miser_alloc( ndof ), gsl_monte_miser_free );

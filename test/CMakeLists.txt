@@ -48,7 +48,7 @@ endif()
 
 message(STATUS "list of available tests: ${tests}")
 
-file(GLOB_RECURSE test_input_cards RELATIVE ${PROJECT_SOURCE_DIR}/test test_processes/*)
+file(GLOB_RECURSE test_input_cards RELATIVE ${PROJECT_SOURCE_DIR}/test test_processes/* __init__.py)
 foreach(_files ${test_input_cards})
   configure_file(${_files} ${_files} COPYONLY)
 endforeach()
