@@ -334,17 +334,7 @@ namespace cepgen
       << "Preparing the grid (" << input_params_->generation.num_points << " points/bin) "
       << "for the generation of unweighted events.";
 
-    grid_->max = pow( GridParameters::M_BIN, function_->dim );
     const double inv_num_points = 1./input_params_->generation.num_points;
-
-    if ( function_->dim > GridParameters::MAX_DIM )
-      throw CG_FATAL( "Integrator:setGen" )
-        << "Number of dimensions to integrate exceeds the maximum number, "
-        << GridParameters::MAX_DIM << ".";
-
-    grid_->f_max = std::vector<double>( grid_->max, 0. );
-    grid_->num.reserve( grid_->max );
-
     std::vector<double> x( function_->dim, 0. );
     std::vector<unsigned short> n( function_->dim, 0 );;
 
