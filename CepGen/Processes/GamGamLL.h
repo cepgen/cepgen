@@ -37,7 +37,9 @@ namespace cepgen
         /// \brief Class constructor: set the mandatory parameters before integration and events generation
         /// \param[in] params General process parameters (nopt = Optimisation, legacy from LPAIR)
         explicit GamGamLL( const ParametersList& params = ParametersList() );
-        ProcessPtr clone( const ParametersList& params ) const override { return ProcessPtr( new GamGamLL( params ) ); }
+        ProcessPtr clone( const ParametersList& params ) const override {
+          return ProcessPtr( new GamGamLL( *this ) );
+        }
 
         void addEventContent() override;
         void beforeComputeWeight() override;

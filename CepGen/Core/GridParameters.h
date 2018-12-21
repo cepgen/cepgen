@@ -11,12 +11,12 @@ namespace cepgen
   {
     public:
       /// Maximal number of dimensions handled by this integrator instance
-      static const unsigned short max_dimensions_;
+      static constexpr unsigned short MAX_DIM = 15;
       /// Integration grid size parameter
-      static const unsigned short mbin_;
-      static const double inv_mbin_;
+      static constexpr unsigned short M_BIN = 3;
+      static constexpr double INV_M_BIN = 1./M_BIN;
 
-      GridParameters();
+      GridParameters( unsigned short ndim );
 
       std::map<unsigned int,std::vector<unsigned short> > n_map;
 
@@ -33,6 +33,7 @@ namespace cepgen
       double f_max_diff;
       double f_max_old;
       std::vector<unsigned int> num;
+      double r_boxes;
   };
 }
 

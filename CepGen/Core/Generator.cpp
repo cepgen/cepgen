@@ -12,10 +12,11 @@
 
 #include <fstream>
 #include <chrono>
+#include <atomic>
 
 namespace cepgen
 {
-  namespace utils { volatile int gSignal; }
+  namespace utils { std::atomic<int> gSignal; }
   Generator::Generator() :
     parameters( std::unique_ptr<Parameters>( new Parameters ) ), result_( -1. ), result_error_( -1. )
   {

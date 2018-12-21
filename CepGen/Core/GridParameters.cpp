@@ -1,15 +1,17 @@
 #include "CepGen/Core/GridParameters.h"
 #include "CepGen/Core/Exception.h"
+#include <cmath> // pow
 
 namespace cepgen
 {
-  const unsigned short GridParameters::max_dimensions_ = 15;
-  const unsigned short GridParameters::mbin_ = 3;
-  const double GridParameters::inv_mbin_ = 1./mbin_;
-
-  GridParameters::GridParameters() :
-    max( 0 ), gen_prepared( false ),
-    correc( 0. ), correc2( 0. ),
-    f_max_global( 0. ), f_max2( 0. ), f_max_diff( 0. ), f_max_old( 0. )
-  {}
+  GridParameters::GridParameters( unsigned short ndim ) :
+    max( pow( M_BIN, ndim ) ), gen_prepared( false ),
+    f_max( max, 0. ), f_max_global( 0. ), f_max_diff( 0. ),
+    num( max ), r_boxes( 0 )
+  {
+    if ( ndim > MAX_DIM )
+      throw CG_FATAL( "GridParameters" ) << "Phase space too large!\n\t"
+        << "Either reduce the number of integration dimensions, or\n\t"
+        << "increase the GridParameters::MAX_DIM parameter (not recommended).";
+  }
 }
