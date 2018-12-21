@@ -17,10 +17,10 @@
 namespace cepgen
 {
   Integrator::Integrator( unsigned int ndim, double integrand( double*, size_t, void* ), Parameters* params ) :
-    ps_bin_( 0 ), input_params_( params ),
+    ps_bin_( INVALID_BIN ), input_params_( params ),
     function_( new gsl_monte_function{ integrand, ndim, (void*)input_params_ } ),
     rng_( gsl_rng_alloc( input_params_->integrator.rng_engine ), gsl_rng_free ),
-    grid_( new GridParameters ), r_boxes_( 0 )
+    grid_( new GridParameters( ndim ) ), r_boxes_( 0 )
   {
     //--- initialise the random number generator
 
@@ -165,7 +165,7 @@ namespace cepgen
 
     //--- correction cycles
 
-    if ( ps_bin_ != 0 ) {
+    if ( ps_bin_ != INVALID_BIN ) {
       bool has_correction = false;
       while ( !correctionCycle( x, has_correction ) ) {}
       if ( has_correction ) {
@@ -192,7 +192,7 @@ namespace cepgen
       // shoot a point x in this bin
       std::vector<unsigned short> grid_n = grid_->n_map.at( ps_bin_ );
       for ( unsigned int i = 0; i < function_->dim; ++i )
-        x[i] = ( uniform() + grid_n[i] ) * GridParameters::inv_mbin_;
+        x[i] = ( uniform() + grid_n[i] ) * GridParameters::INV_M_BIN;
       // get weight for selected x value
       weight = eval( x );
       if ( weight <= 0. )
@@ -202,24 +202,19 @@ namespace cepgen
     }
 
     if ( weight <= grid_->f_max[ps_bin_] )
-      ps_bin_ = 0;
+      ps_bin_ = INVALID_BIN;
     // init correction cycle if weight is higher than fmax or ffmax
-    else if ( weight <= grid_->f_max_global ) {
-      grid_->f_max_old = grid_->f_max[ps_bin_];
-      grid_->f_max[ps_bin_] = weight;
-      grid_->f_max_diff = weight-grid_->f_max_old;
-      grid_->correc = ( grid_->num[ps_bin_]-1. ) * grid_->f_max_diff / grid_->f_max_global - 1.;
-    }
     else {
       grid_->f_max_old = grid_->f_max[ps_bin_];
       grid_->f_max[ps_bin_] = weight;
       grid_->f_max_diff = weight-grid_->f_max_old;
-      grid_->f_max_global = weight;
-      grid_->correc = ( grid_->num[ps_bin_] - 1. ) * grid_->f_max_diff / grid_->f_max_global * weight / grid_->f_max_global - 1.;
-    }
+      if ( weight <= grid_->f_max_global )
+        grid_->f_max_global = weight;
+      grid_->correc = ( grid_->num[ps_bin_]-1. ) * grid_->f_max_diff / grid_->f_max_global - 1.;
 
-    CG_DEBUG("Integrator::generateOne")
-      << "Correction " << grid_->correc << " will be applied for phase space bin " << ps_bin_ << ".";
+      CG_DEBUG("Integrator::generateOne")
+        << "Correction " << grid_->correc << " will be applied for phase space bin " << ps_bin_ << ".";
+    }
 
     // return with an accepted event
     if ( weight > 0. )
@@ -255,7 +250,7 @@ namespace cepgen
       // Select x values in phase space bin
       const std::vector<unsigned short> grid_n = grid_->n_map.at( ps_bin_ );
       for ( unsigned int k = 0; k < function_->dim; ++k )
-        xtmp[k] = ( uniform() + grid_n[k] ) * GridParameters::inv_mbin_;
+        xtmp[k] = ( uniform() + grid_n[k] ) * GridParameters::INV_M_BIN;
       const double weight = eval( xtmp );
       // Parameter for correction of correction
       if ( weight > grid_->f_max[ps_bin_] ) {
@@ -339,13 +334,13 @@ namespace cepgen
       << "Preparing the grid (" << input_params_->generation.num_points << " points/bin) "
       << "for the generation of unweighted events.";
 
-    grid_->max = pow( GridParameters::mbin_, function_->dim );
+    grid_->max = pow( GridParameters::M_BIN, function_->dim );
     const double inv_num_points = 1./input_params_->generation.num_points;
 
-    if ( function_->dim > GridParameters::max_dimensions_ )
+    if ( function_->dim > GridParameters::MAX_DIM )
       throw CG_FATAL( "Integrator:setGen" )
         << "Number of dimensions to integrate exceeds the maximum number, "
-        << GridParameters::max_dimensions_ << ".";
+        << GridParameters::MAX_DIM << ".";
 
     grid_->f_max = std::vector<double>( grid_->max, 0. );
     grid_->num.reserve( grid_->max );
@@ -360,8 +355,8 @@ namespace cepgen
     for ( unsigned int i = 0; i < grid_->max; ++i ) {
       unsigned int jj = i;
       for ( unsigned int j = 0; j < function_->dim; ++j ) {
-        unsigned int tmp = jj*GridParameters::inv_mbin_;
-        n[j] = jj-tmp*GridParameters::mbin_;
+        unsigned int tmp = jj*GridParameters::INV_M_BIN;
+        n[j] = jj-tmp*GridParameters::M_BIN;
         jj = tmp;
       }
       grid_->n_map[i] = n;
@@ -375,7 +370,7 @@ namespace cepgen
       double fsum = 0., fsum2 = 0.;
       for ( unsigned int j = 0; j < input_params_->generation.num_points; ++j ) {
         for ( unsigned int k = 0; k < function_->dim; ++k )
-          x[k] = ( uniform()+n[k] ) * GridParameters::inv_mbin_;
+          x[k] = ( uniform()+n[k] ) * GridParameters::INV_M_BIN;
         const double weight = eval( x );
         grid_->f_max[i] = std::max( grid_->f_max[i], weight );
         fsum += weight;
