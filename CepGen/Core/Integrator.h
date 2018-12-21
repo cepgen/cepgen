@@ -90,7 +90,6 @@ namespace cepgen
         }
       };
       std::unique_ptr<gsl_monte_vegas_state,gsl_monte_vegas_deleter> veg_state_;
-      double r_boxes_;
   };
   std::ostream& operator<<( std::ostream&, const IntegratorType& );
   std::ostream& operator<<( std::ostream&, const Integrator::VegasMode& );

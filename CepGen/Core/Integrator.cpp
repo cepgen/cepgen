@@ -20,7 +20,7 @@ namespace cepgen
     ps_bin_( INVALID_BIN ), input_params_( params ),
     function_( new gsl_monte_function{ integrand, ndim, (void*)input_params_ } ),
     rng_( gsl_rng_alloc( input_params_->integrator.rng_engine ), gsl_rng_free ),
-    grid_( new GridParameters( ndim ) ), r_boxes_( 0 )
+    grid_( new GridParameters( ndim ) )
   {
     //--- initialise the random number generator
 
@@ -105,7 +105,7 @@ namespace cepgen
           << "Vegas grid information:\n\t"
           << "ran for " << veg_state_->dim << " dimensions, and generated " << veg_state_->bins_max << " bins.\n\t"
           << "Integration volume: " << veg_state_->vol << ".";
-        r_boxes_ = std::pow( veg_state_->bins, function_->dim );
+        grid_->r_boxes = std::pow( veg_state_->bins, function_->dim );
       } break;
       case IntegratorType::MISER: {
         std::unique_ptr<gsl_monte_miser_state,void(*)( gsl_monte_miser_state* )>
@@ -203,12 +203,13 @@ namespace cepgen
 
     if ( weight <= grid_->f_max[ps_bin_] )
       ps_bin_ = INVALID_BIN;
-    // init correction cycle if weight is higher than fmax or ffmax
     else {
+      //--- if weight is higher than local or global maximum,
+      //    init correction cycle
       grid_->f_max_old = grid_->f_max[ps_bin_];
       grid_->f_max[ps_bin_] = weight;
       grid_->f_max_diff = weight-grid_->f_max_old;
-      if ( weight <= grid_->f_max_global )
+      if ( weight > grid_->f_max_global )
         grid_->f_max_global = weight;
       grid_->correc = ( grid_->num[ps_bin_]-1. ) * grid_->f_max_diff / grid_->f_max_global - 1.;
 
@@ -229,7 +230,7 @@ namespace cepgen
     try {
       while ( input_params_->generation.ngen < num_events )
         generateOne( callback );
-    } catch ( const Exception& e ) { throw; }
+    } catch ( const Exception& e ) { return; }
   }
 
   bool
@@ -288,19 +289,19 @@ namespace cepgen
   bool
   Integrator::storeEvent( const std::vector<double>& x, std::function<void( const Event&, unsigned long )> callback )
   {
+    //--- start by computing the matrix element for that point
     const double weight = eval( x );
 
+    //--- reject if unphysical
     if ( weight <= 0. )
       return false;
 
     {
-      if ( input_params_->generation.ngen % input_params_->generation.gen_print_every == 0 ) {
+      if ( ++input_params_->generation.ngen % input_params_->generation.gen_print_every == 0 ) {
         CG_INFO( "Integrator:store" )
           << "Generated events: " << input_params_->generation.ngen;
         input_params_->process()->last_event->dump();
       }
-      input_params_->generation.ngen += 1;
-
       if ( callback )
         callback( *input_params_->process()->last_event, input_params_->generation.ngen );
     }
@@ -432,20 +433,24 @@ namespace cepgen
   double
   Integrator::eval( const std::vector<double>& x )
   {
-    if ( input_params_->generation.treat ) {
-      double w = r_boxes_;
-      std::vector<double> x_new( x.size() );
-      for ( unsigned short j = 0; j < function_->dim; ++j ) {
-        const double z = x[j]*veg_state_->bins;
-        const unsigned int k = z;
-        const double y = z-k;
-        const double bin_width = ( k == 0. ? COORD( veg_state_, 1, j ) : COORD( veg_state_, k+1, j )-COORD( veg_state_, k, j ) );
-        x_new[j] = COORD( veg_state_, k+1, j )-bin_width*( 1.-y );
-        w *= bin_width;
-      }
-      return w*function_->f( (double*)&x_new[0], function_->dim, (void*)input_params_ );
+    if ( !input_params_->generation.treat )
+      return function_->f( (double*)&x[0], function_->dim, (void*)input_params_ );
+    //--- treatment of the integration grid
+    double w = grid_->r_boxes;
+    std::vector<double> x_new( x.size() );
+    for ( unsigned short j = 0; j < function_->dim; ++j ) {
+      //--- find surrounding coordinates and interpolate
+      const double z = x[j]*veg_state_->bins;
+      const unsigned int id = z; // coordinate of point before
+      const double rel_pos = z-id; // position between coordinates (norm.)
+      const double bin_width = ( id == 0 )
+        ? COORD( veg_state_, 1, j )
+        : COORD( veg_state_, id+1, j )-COORD( veg_state_, id, j );
+      //--- build new coordinate from linear interpolation
+      x_new[j] = COORD( veg_state_, id+1, j )-bin_width*( 1.-rel_pos );
+      w *= bin_width;
     }
-    return function_->f( (double*)&x[0], function_->dim, (void*)input_params_ );
+    return w*function_->f( (double*)&x_new[0], function_->dim, (void*)input_params_ );
   }
 
   double

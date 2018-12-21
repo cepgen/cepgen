@@ -33,6 +33,7 @@ namespace cepgen
       double f_max_diff;
       double f_max_old;
       std::vector<unsigned int> num;
+      double r_boxes;
   };
 }
 
