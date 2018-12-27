@@ -27,6 +27,8 @@ namespace cepgen
       std::string s_filename = file;
       s_filename = s_filename.substr( 0, s_filename.find_last_of( "." ) ); // remove the extension
       std::replace( s_filename.begin(), s_filename.end(), '/', '.' ); // replace all '/' by '.'
+      CG_DEBUG( "PythonHandler" )
+        << "Python path: " << s_filename;
       return s_filename;
     }
 

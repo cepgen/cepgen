@@ -1,22 +1,13 @@
 #include "CepGen/Generator.h"
-#include "CepGen/Parameters.h"
-#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/Timer.h"
 
-#include "CepGen/Processes/GamGamLL.h"
-#include "CepGen/Processes/PPtoFF.h"
-#include "CepGen/Processes/PPtoWW.h"
-
-#include "CepGen/StructureFunctions/StructureFunctions.h"
-#include "CepGen/Physics/PDG.h"
-
 #include "AbortHandler.h"
 
-#include <unordered_map>
-#include <assert.h>
-#include <string.h>
-#include <math.h>
+#include <fstream>
+#include <iostream>
+#include <cmath>
 
 using namespace std;
 using namespace cepgen;
@@ -24,175 +15,82 @@ using namespace cepgen;
 int
 main( int argc, char* argv[] )
 {
-  typedef vector<pair<const char*,pair<double,double> > > KinematicsMap;
-  typedef vector<pair<float, KinematicsMap> > ValuesAtCutMap;
-
-  utils::AbortHandler ctrl_c;
-
-  // values defined at pt(single lepton)>15 GeV, |eta(single lepton)|<2.5, mX<1000 GeV
-  // process -> { pt cut -> { kinematics -> ( sigma, delta(sigma) ) } }
-  vector<pair<const char*,ValuesAtCutMap> > values_map = {
-    //--- LPAIR values at sqrt(s) = 13 TeV
-    { "lpair", {
-      { 3.0, { // pt cut
-        { "elastic",    { 2.0871703e1, 3.542e-2 } },
-        { "singlediss", { 1.5042536e1, 3.256e-2 } },
-        { "doublediss", { 1.38835e1, 4.03018e-2 } }
-      } },
-      { 15.0, { // pt cut
-        { "elastic",    { 4.1994803e-1, 8.328e-4 } },
-        { "singlediss", { 4.8504819e-1, 1.171e-3 } },
-        { "doublediss", { 6.35650e-1, 1.93968e-3 } }
-      } },
-    } },
-    //--- PPtoLL values
-    { "pptoll", {
-      { 3.0, { // pt cut
-        { "elastic",       { 2.0936541e1, 1.4096e-2 } },
-        { "singlediss_su", { 1.4844881e1, 2.0723e-2 } }, // SU, qt<50
-        { "doublediss_su", { 1.3580637e1, 2.2497e-2 } }, // SU, qt<50
-      } },
-      { 15.0, { // pt cut
-        { "elastic",       { 4.2515888e-1, 3.0351e-4 } },
-        { "singlediss_su", { 4.4903253e-1, 5.8970e-4 } }, // SU, qt<50
-        { "doublediss_su", { 5.1923819e-1, 9.6549e-4 } }, // SU, qt<50
-        /*{ "2_singlediss", { 4.6710287e-1, 6.4842e-4 } }, // SU, qt<500
-        { "3_doublediss", { 5.6316353e-1, 1.1829e-3 } }, // SU, qt<500*/
-      } },
-    } },
-    //--- PPtoWW values
-    { "pptoww", {
-      { 0.0, { // pt cut
-        { "elastic",         { 0.273, 0.01 } },
-        { "elastic",         { 0.273, 0.01 } }, // FIXME
-        { "singlediss_lux",  { 0.409, 0.01 } },
-        { "doublediss_lux",  { 1.090, 0.01 } },
-        { "singlediss_allm", { 0.318, 0.01 } },
-        { "doublediss_allm", { 0.701, 0.01 } }
-      } }
-    } },
-  };
-
   const double num_sigma = 3.0;
 
-  if ( argc < 3 || strcmp( argv[2], "debug" ) != 0 )
-    utils::Logger::get().level = utils::Logger::Level::nothing;
+  if ( argc < 2 )
+    throw CG_FATAL( "main" ) << "Usage: " << argv[0] << " [config file] [integrator=vegas]";
+
+  utils::Logger::get().level = utils::Logger::Level::error;
 
   utils::Timer tmr;
   Generator mg;
 
-  if ( argc > 1 && strcmp( argv[1], "plain" ) == 0 )
-    mg.parameters->integrator.type = IntegratorType::plain;
-  if ( argc > 1 && strcmp( argv[1], "vegas" ) == 0 )
-    mg.parameters->integrator.type = IntegratorType::Vegas;
-  if ( argc > 1 && strcmp( argv[1], "miser" ) == 0 )
-    mg.parameters->integrator.type = IntegratorType::MISER;
+  mg.parameters->integrator.type = IntegratorType::Vegas;
+  if ( argc > 2 ) {
+    string integrator( argv[2] );
+    if ( integrator == "plain" )
+      mg.parameters->integrator.type = IntegratorType::plain;
+    else if ( integrator == "vegas" )
+      mg.parameters->integrator.type = IntegratorType::Vegas;
+    else if ( integrator == "miser" )
+      mg.parameters->integrator.type = IntegratorType::MISER;
+    else
+      throw CG_FATAL( "main" ) << "Unhandled integrator type: " << integrator << ".";
+  }
 
-  { cout << "Testing with " << mg.parameters->integrator.type << " integrator" << endl; }
+  CG_LOG( "main" ) << "Testing with " << mg.parameters->integrator.type << " integrator.";
 
-  mg.parameters->kinematics.setSqrtS( 13.e3 );
-  mg.parameters->kinematics.cuts.central.eta_single.in( -2.5, 2.5 );
-  mg.parameters->kinematics.cuts.remnants.mass_single.max() = 1000.;
-  //mg.parameters->integrator.ncvg = 50000;
+  unsigned short num_tests = 0;
+  vector<string> failed_tests, passed_tests;
 
   CG_INFO( "main" ) << "Initial configuration time: " << tmr.elapsed()*1.e3 << " ms.";
   tmr.reset();
 
-  unsigned short num_tests = 0, num_tests_passed = 0;
-  vector<string> failed_tests, passed_tests;
+  utils::AbortHandler ctrl_c;
 
+  ifstream cfg( argv[1] );
+  string line;
   try {
-    for ( const auto& values_vs_generator : values_map ) { // loop over all generators
-      ParametersList param;
-      const string generator = values_vs_generator.first;
-      if ( generator == "lpair"  ) {
-        param.set<int>( "pair", 13 );
-        mg.parameters->setProcess( new proc::GamGamLL( param ) );
-      }
-      else if ( generator == "pptoll" ) {
-        param.set<int>( "pair", 13 );
-        mg.parameters->setProcess( new proc::PPtoFF( param ) );
-        mg.parameters->kinematics.cuts.initial.qt = { 0., 50. };
-      }
-      else if ( generator == "pptoww" ) {
-        mg.parameters->setProcess( new proc::PPtoWW );
-        mg.parameters->kinematics.setSqrtS( 13.e3 );
-        //mg.parameters->kinematics.cuts.initial.qt = { 0., 50. };
-      }
-      else {
-        CG_ERROR( "main" ) << "Unrecognized generator mode: " << values_vs_generator.first << ".";
-        break;
-      }
+    while ( !cfg.eof() ) {
+      getline( cfg, line );
+      if ( line[0] == '#' || line.empty() )
+        continue;
+      string config;
+      double ref_cs, err_ref_cs;
+      stringstream os( line );
+      os >> config >> ref_cs >> err_ref_cs;
 
-      for ( const auto& values_vs_cut : values_vs_generator.second ) { // loop over the single lepton pT cut
-        mg.parameters->kinematics.cuts.central.pt_single.min() = values_vs_cut.first;
-        for ( const auto& values_vs_kin : values_vs_cut.second ) { // loop over all possible kinematics
-          const string kin_mode = values_vs_kin.first;
+      mg.setParameters( cepgen::card::Handler::parse( ( "test_processes/"+config+"_cfg.py" ).c_str() ) );
+      //CG_INFO( "main" ) << mg.parameters.get();
+      CG_INFO( "main" )
+        << "Process: "<< mg.parameters->processName() << "\n\t"
+        << "Configuration time: " << tmr.elapsed()*1.e3 << " ms.";
 
-          if ( kin_mode.find( "elastic"    ) != string::npos )
-            mg.parameters->kinematics.mode = KinematicsMode::ElasticElastic;
-          else if ( kin_mode.find( "singlediss" ) != string::npos )
-            mg.parameters->kinematics.mode = KinematicsMode::InelasticElastic;
-          else if ( kin_mode.find( "doublediss" ) != string::npos )
-            mg.parameters->kinematics.mode = KinematicsMode::InelasticInelastic;
-          else {
-            CG_ERROR( "main" ) << "Unrecognized kinematics mode: " << values_vs_kin.first << ".";
-            break;
-          }
+      tmr.reset();
+      mg.clearRun();
+      double new_cs, err_new_cs;
+      mg.computeXsection( new_cs, err_new_cs );
 
-          if ( kin_mode.find( "_su" ) != string::npos )
-            mg.parameters->kinematics.structure_functions = strfun::Parameterisation::build( strfun::Type::SzczurekUleshchenko );
-          else if ( kin_mode.find( "_lux" ) != string::npos )
-            mg.parameters->kinematics.structure_functions = strfun::Parameterisation::build( strfun::Type::Schaefer );
-          else if ( kin_mode.find( "_allm" ) != string::npos )
-            mg.parameters->kinematics.structure_functions = strfun::Parameterisation::build( strfun::Type::ALLM97 );
-          else
-            mg.parameters->kinematics.structure_functions = strfun::Parameterisation::build( strfun::Type::SuriYennie );
+      const double sigma = ( new_cs-ref_cs ) / hypot( err_new_cs, err_ref_cs );
 
-          //CG_INFO( "main" ) << mg.parameters.get();
-          CG_INFO( "main" )
-            << "Process: "<< values_vs_generator.first << "/" << values_vs_kin.first << "\n\t"
-            << "Configuration time: " << tmr.elapsed()*1.e3 << " ms.";
-          tmr.reset();
+      CG_INFO( "main" )
+        << "Computed cross section:\n\t"
+        << "Ref.   = " << ref_cs << " +/- " << err_ref_cs << "\n\t"
+        << "CepGen = " << new_cs << " +/- " << err_new_cs << "\n\t"
+        << "Pull: " << sigma << ".";
 
-          mg.clearRun();
-          const double xsec_ref = values_vs_kin.second.first;
-          const double err_xsec_ref = values_vs_kin.second.second;
-          double xsec_cepgen, err_xsec_cepgen;
-          mg.computeXsection( xsec_cepgen, err_xsec_cepgen );
+      CG_INFO( "main" ) << "Computation time: " << tmr.elapsed()*1.e3 << " ms.";
+      tmr.reset();
 
-          const double sigma = fabs( xsec_ref-xsec_cepgen ) / std::hypot( err_xsec_cepgen, err_xsec_ref );
-
-          CG_INFO( "main" )
-            << "Computed cross section:\n\t"
-            << "Ref.   = " << xsec_ref << " +/- " << err_xsec_ref << "\n\t"
-            << "CepGen = " << xsec_cepgen << " +/- " << err_xsec_cepgen << "\n\t"
-            << "Pull: " << sigma << ".";
-
-          CG_INFO( "main" ) << "Computation time: " << tmr.elapsed()*1.e3 << " ms.";
-          tmr.reset();
-
-          ostringstream oss; oss << values_vs_kin.first;
-          string test_res = Form( "%-10s", values_vs_generator.first )+"\t"+
-                            Form( "pt-gt-%.1f", values_vs_cut.first )+"\t"+
-                            Form( "%-16s", oss.str().c_str() )+"\t"
-                            "ref="+Form( "%g", xsec_ref )+"\t"
-                            "got="+Form( "%g", xsec_cepgen )+"\t"
-                            "pull="+Form( "%+g", sigma );
-          if ( fabs( sigma ) < num_sigma ) {
-            passed_tests.emplace_back( test_res );
-            num_tests_passed++;
-          }
-          else
-            failed_tests.emplace_back( test_res );
-
-          num_tests++;
-          cout << "Test " << num_tests_passed << "/"
-                          << num_tests << " passed!" << endl;
-        }
-      }
+      const string test_res = Form( "%-26s\tref=%g\tgot=%g\tpull=%+g", config.c_str(), ref_cs, new_cs, sigma );
+      if ( fabs( sigma ) < num_sigma )
+        passed_tests.emplace_back( test_res );
+      else
+        failed_tests.emplace_back( test_res );
+      num_tests++;
+      cout << "Test " << passed_tests.size() << "/" << num_tests << " finished." << endl;
     }
-  } catch ( Exception& e ) {}
+  } catch ( const Exception& e ) {}
   if ( failed_tests.size() != 0 ) {
     ostringstream os_failed, os_passed;
     for ( const auto& fail : failed_tests )
