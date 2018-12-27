@@ -49,7 +49,7 @@ namespace cepgen
       f.close();
 
       //--- parse the process name
-      params_.setProcess( std::move( proc::ProcessesHandler::get().build( proc_name_, *proc_params_ ) ) );
+      params_.setProcess( proc::ProcessesHandler::get().build( proc_name_, *proc_params_ ) );
 
       const Limits lim_xi{ xi_min_, xi_max_ };
       if ( lim_xi.valid() )
@@ -85,7 +85,7 @@ namespace cepgen
 
       //--- parse the hadronisation algorithm name
       if ( !hadr_name_.empty() ) {
-        params_.setHadroniser( std::move( cepgen::hadr::HadronisersHandler::get().build( hadr_name_, ParametersList() ) ) );
+        params_.setHadroniser( cepgen::hadr::HadronisersHandler::get().build( hadr_name_, ParametersList() ) );
         params_.hadroniser()->setParameters( params_ );
       }
 

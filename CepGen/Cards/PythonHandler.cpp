@@ -78,9 +78,7 @@ namespace cepgen
 
       //--- process mode
       params_.kinematics.mode = (KinematicsMode)proc_params.get<int>( "mode", (int)KinematicsMode::invalid );
-
-      auto pr = cepgen::proc::ProcessesHandler::get().build( proc_name, proc_params );
-      params_.setProcess( std::move( pr ) );
+      params_.setProcess( cepgen::proc::ProcessesHandler::get().build( proc_name, proc_params ) );
 
       //--- process kinematics
       PyObject* pin_kinematics = element( process, "inKinematics" ); // borrowed
@@ -351,4 +349,4 @@ namespace cepgen
   }
 }
 
-#endif
+#endif // ifdef PYTHON

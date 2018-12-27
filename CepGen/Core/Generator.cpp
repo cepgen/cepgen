@@ -121,12 +121,18 @@ namespace cepgen
     if ( xsec < 1.e-2 )
       CG_INFO( "Generator" )
         << "Total cross section: " << xsec*1.e3 << " +/- " << err*1.e3 << " fb.";
-    else if ( xsec > 5.e2 )
-      CG_INFO( "Generator" )
-        << "Total cross section: " << xsec*1.e-3 << " +/- " << err*1.e-3 << " nb.";
-    else
+    else if ( xsec < 5.e2 )
       CG_INFO( "Generator" )
         << "Total cross section: " << xsec << " +/- " << err << " pb.";
+    else if ( xsec < 5.e5 )
+      CG_INFO( "Generator" )
+        << "Total cross section: " << xsec*1.e-3 << " +/- " << err*1.e-3 << " nb.";
+    else if ( xsec < 5.e8 )
+      CG_INFO( "Generator" )
+        << "Total cross section: " << xsec*1.e-6 << " +/- " << err*1.e-6 << " µb.";
+    else
+      CG_INFO( "Generator" )
+        << "Total cross section: " << xsec*1.e-9 << " +/- " << err*1.e-9 << " mb.";
   }
 
   void
