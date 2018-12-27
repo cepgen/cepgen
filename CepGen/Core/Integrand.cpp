@@ -75,8 +75,8 @@ namespace cepgen
       // from this step on, the phase space point is supposed to be set
       //=============================================================================================
 
-      p->process()->beforeComputeWeight();
-      double integrand = p->process()->computeWeight();
+      proc->beforeComputeWeight();
+      double integrand = proc->computeWeight();
 
       //=============================================================================================
       // invalidate any unphysical behaviour
@@ -99,7 +99,7 @@ namespace cepgen
       // fill in the process' Event object
       //=============================================================================================
 
-      p->process()->fillKinematics();
+      proc->fillKinematics();
 
       //=============================================================================================
       // once the kinematics variables have been populated, can apply the collection of taming functions
@@ -184,12 +184,12 @@ namespace cepgen
       //=============================================================================================
 
       if ( p->storage() ) {
-        p->process()->last_event = ev;
-        p->process()->last_event->time_total = tmr.elapsed();
+        proc->last_event = ev;
+        proc->last_event->time_total = tmr.elapsed();
 
         CG_DEBUG( "Integrand" )
-          << "[process 0x" << std::hex << p->process() << std::dec << "] "
-          << "Individual time (gen+hadr+cuts): " << p->process()->last_event->time_total*1.e3 << " ms";
+          << "[process 0x" << std::hex << proc << std::dec << "] "
+          << "Individual time (gen+hadr+cuts): " << proc->last_event->time_total*1.e3 << " ms";
       }
 
       //=============================================================================================

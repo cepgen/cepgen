@@ -18,6 +18,7 @@ namespace cepgen
         }
 
       private:
+        enum class ME { onShell = 0, offShell = 1 };
         void preparePhaseSpace() override;
         /// \note IncQQbar in pptoll
         double computeKTFactorisedMatrixElement() override;
@@ -28,8 +29,13 @@ namespace cepgen
         double offShellME( double, double, double, double, double, double, const Particle::Momentum&, const Particle::Momentum& ) const;
 
         /// PDG id of the fermion pair produced
-        PDG pair_;
-        int method_;
+        const PDG pair_;
+        const ME method_;
+        //==============================================================
+        // six parameters for off-shell gamma gamma --> l^+ l^-
+        //==============================================================
+        unsigned short p_mat1_, p_mat2_;
+        unsigned short p_term_ll_, p_term_lt_, p_term_tt1_, p_term_tt2_;
 
         Limits rap_limits_;
         /// Rapidity of the first outgoing fermion
