@@ -6,6 +6,7 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/ParticleProperties.h"
 
 #include "CepGen/Core/Exception.h"
 

@@ -1,8 +1,11 @@
 #include "CepGen/Event/Particle.h"
+
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Physics/Constants.h"
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
-#include "CepGen/Physics/Constants.h"
 
 namespace cepgen
 {
@@ -57,6 +60,12 @@ namespace cepgen
     if ( momentum_.p() == 0. && mass_ == 0. )
       return false;
     return true;
+  }
+
+  float
+  Particle::charge() const
+  {
+    return charge_sign_ * particleproperties::charge( pdg_id_ );
   }
 
   void

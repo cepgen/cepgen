@@ -6,6 +6,7 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/ParticleProperties.h"
 
 #include "CepGen/Core/Exception.h"
 
@@ -30,9 +31,9 @@ namespace cepgen
       registerVariable( pt_diff_, Mapping::linear, kin_.cuts.central.pt_diff, { 0., 50. }, "Fermions transverse momentum difference" );
       registerVariable( phi_pt_diff_, Mapping::linear, kin_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Fermions azimuthal angle difference" );
 
-      if ( pair_ == PDG::invalid )
+      if ( !particleproperties::isFermion( pair_ ) || particleproperties::charge( pair_ ) == 0. )
         throw CG_FATAL( "PPtoFF:prepare" )
-          << "Invalid fermion pair selected: " << (int)pair_ << "!";
+          << "Invalid fermion pair selected: " << pair_ << " (" << (int)pair_ << ")!";
 
       mf_ = particleproperties::mass( pair_ ); mf2_ = mf_*mf_;
       qf_ = particleproperties::charge( pair_ );

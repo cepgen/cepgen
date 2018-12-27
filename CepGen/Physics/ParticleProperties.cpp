@@ -117,6 +117,20 @@ namespace cepgen
           return -1.;
       }
     }
+
+    bool
+    isFermion( const PDG& pdg_id )
+    {
+      switch ( pdg_id ) {
+        case PDG::electron: case PDG::muon: case PDG::tau:
+        case PDG::electronNeutrino: case PDG::muonNeutrino: case PDG::tauNeutrino:
+        case PDG::down: case PDG::strange: case PDG::bottom:
+        case PDG::up: case PDG::charm: case PDG::top:
+          return true;
+        default:
+          return false;
+      }
+    }
   }
 
   std::ostream&

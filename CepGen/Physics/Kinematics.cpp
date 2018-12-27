@@ -2,6 +2,7 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/KTFlux.h"
+#include "CepGen/Physics/ParticleProperties.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
