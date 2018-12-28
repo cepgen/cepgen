@@ -57,10 +57,10 @@ namespace cepgen
           try {
             return parser_.Eval();
           } catch ( const mu::Parser::exception_type& e ) {
-            throw CG_ERROR( "Functional" )
+            throw CG_WARNING( "Functional" )
               << "Failed to evaluate the function\n\t"
               << expression_ << "\n\t"
-              << std::string( e.GetPos()-1, '-' )+"^" << "\n\t"
+              << std::string( e.GetPos(), '-' )+"^" << "\n\t"
               << e.GetMsg();
           }
 #elif defined EXPRTK
@@ -87,10 +87,10 @@ namespace cepgen
             std::ostringstream os;
             for ( unsigned short i = 0; i < e.GetPos(); ++i )
               os << "-"; os << "^";
-            throw CG_ERROR( "Functional" )
+            throw CG_WARNING( "Functional" )
               << "Failed to define the function\n\t"
               << expression_ << "\n\t"
-              << std::string( e.GetPos()-1, '-' )+"^" << "\n\t"
+              << std::string( e.GetPos(), '-' )+"^" << "\n\t"
               << e.GetMsg();
           }
 #elif defined EXPRTK

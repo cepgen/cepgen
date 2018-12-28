@@ -13,9 +13,9 @@ namespace cepgen
   {
     extern std::atomic<int> gSignal;
     /// Exception raised when the user terminates the process
-    struct RunAbortedException : Exception
+    struct RunAbortedException : LoggedException
     {
-      using Exception::Exception;
+      using LoggedException::LoggedException;
       ~RunAbortedException() override {}
     };
 
