@@ -93,7 +93,7 @@ endif()
 set(ALPHAS_PATH ${PROJECT_SOURCE_DIR}/External)
 file(GLOB alphas_sources ${ALPHAS_PATH}/alphaS.f)
 if(alphas_sources)
-  message(STATUS "alpha(s) evolution found in ${alphas_sources}")
+  message(STATUS "αₛ evolution found in ${alphas_sources}")
   add_definitions(-DALPHA_S)
 endif()
 
