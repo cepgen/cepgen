@@ -165,10 +165,12 @@ namespace cepgen
       //--- types of parton fluxes for kt-factorisation
       std::vector<int> kt_fluxes;
       fillParameter( kin, "ktFluxes", kt_fluxes );
-      if ( !kt_fluxes.empty() )
-        params_.kinematics.incoming_beams. first.kt_flux = (KTFlux)kt_fluxes.at( 0 );
-      if ( kt_fluxes.size() > 1 )
-        params_.kinematics.incoming_beams.second.kt_flux = (KTFlux)kt_fluxes.at( 1 );
+      if ( !kt_fluxes.empty() ) {
+        params_.kinematics.incoming_beams.first.kt_flux = (KTFlux)kt_fluxes.at( 0 );
+        params_.kinematics.incoming_beams.second.kt_flux = ( kt_fluxes.size() > 1 )
+          ? (KTFlux)kt_fluxes.at( 1 )
+          : (KTFlux)kt_fluxes.at( 0 );
+      }
       //--- specify where to look for the grid path for gluon emission
       std::string kmr_grid_path;
       fillParameter( kin, "kmrGridPath", kmr_grid_path );

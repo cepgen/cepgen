@@ -38,22 +38,19 @@ namespace cepgen
   Generator::~Generator()
   {
     if ( parameters->generation.enabled
-      && parameters->process() && parameters->numGeneratedEvents() > 0 ) {
+      && parameters->process()
+      && parameters->numGeneratedEvents() > 0 )
       CG_INFO( "Generator" )
         << "Mean generation time / event: "
         << parameters->totalGenerationTime()*1.e3/parameters->numGeneratedEvents()
         << " ms.";
-    }
   }
 
   size_t
   Generator::numDimensions() const
   {
     if ( !parameters->process() )
-      return 0;
-
-    parameters->process()->addEventContent();
-    parameters->process()->setKinematics( parameters->kinematics );
+     return 0;
     return parameters->process()->numDimensions();
   }
 
@@ -61,7 +58,11 @@ namespace cepgen
   Generator::clearRun()
   {
     integrator_.reset();
-    parameters->process()->first_run = true;
+    if ( parameters->process() ) {
+      parameters->process()->first_run = true;
+      parameters->process()->addEventContent();
+      parameters->process()->setKinematics( parameters->kinematics );
+    }
     result_ = result_error_ = -1.;
     {
       std::ostringstream os;

@@ -23,91 +23,78 @@ namespace cepgen
     utils::Timer tmr;
 
     double
-    eval( double* x, size_t ndim, void* params )
+    eval( double* x, size_t ndim, void* func_params )
     {
       log_level = utils::Logger::get().level;
       std::shared_ptr<Event> ev;
 
-      Parameters* p = static_cast<Parameters*>( params );
-      if ( !p )
+      Parameters* params = nullptr;
+      if ( !func_params || !( params = static_cast<Parameters*>( func_params ) ) )
         throw CG_FATAL( "Integrand" ) << "Failed to retrieve the run parameters!";
 
-      proc::GenericProcess* proc = p->process();
+      proc::GenericProcess* proc = params->process();
       if ( !proc )
         throw CG_FATAL( "Integrand" ) << "Failed to retrieve the process!";
 
-      //=============================================================================================
+      //================================================================
       // start the timer
-      //=============================================================================================
+      //================================================================
 
       tmr.reset();
 
-      //=============================================================================================
+      //================================================================
       // prepare the event content prior to the process generation
-      //=============================================================================================
+      //================================================================
 
-      if ( proc->hasEvent() ) {
+      if ( proc->hasEvent() ) // event is not empty
         ev = proc->event();
 
-        if ( proc->first_run ) {
-          CG_DEBUG( "Integrand" )
-            << "Computation launched for " << p->processName() << " process "
-            << "0x" << std::hex << p->process() << std::dec << ".\n\t"
-            << "Process mode considered: " << p->kinematics.mode << "\n\t"
-            << "  pz(p1) = " << p->kinematics.incoming_beams.first.pz << "\n\t"
-            << "  pz(p2) = " << p->kinematics.incoming_beams.second.pz << "\n\t"
-            << "  structure functions: " << p->kinematics.structure_functions;
+      params->prepareRun();
 
-          p->clearRunStatistics();
-          proc->first_run = false;
-        } // passed the first-run preparation
-
-        proc->clearEvent();
-      } // event is not empty
-
-      //=============================================================================================
+      //================================================================
       // specify the phase space point to probe
-      //=============================================================================================
+      //================================================================
 
       proc->setPoint( ndim, x );
 
-      //=============================================================================================
+      //================================================================
       // from this step on, the phase space point is supposed to be set
-      //=============================================================================================
+      //================================================================
 
       proc->beforeComputeWeight();
-      double integrand = proc->computeWeight();
+      double weight = proc->computeWeight();
 
-      //=============================================================================================
+      //================================================================
       // invalidate any unphysical behaviour
-      //=============================================================================================
+      //================================================================
 
-      if ( integrand <= 0. )
+      if ( weight <= 0. )
         return 0.;
 
-      //=============================================================================================
-      // speed up the integration process if no event needs to be generated
-      //=============================================================================================
+      //================================================================
+      // speed up the integration process if no event is to be generated
+      //================================================================
 
-      if ( !p->storage()
-        && !p->taming_functions
-        && !p->hadroniser()
-        &&  p->kinematics.cuts.central_particles.empty() )
-        return integrand;
+      if ( !params->storage()
+        && !params->taming_functions
+        && !params->hadroniser()
+        &&  params->kinematics.cuts.central_particles.empty() )
+        return weight;
 
-      //=============================================================================================
+      //================================================================
       // fill in the process' Event object
-      //=============================================================================================
+      //================================================================
 
       proc->fillKinematics();
 
-      //=============================================================================================
-      // once the kinematics variables have been populated, can apply the collection of taming functions
-      //=============================================================================================
+      //================================================================
+      // once the kinematics variables have been populated, can apply
+      // the collection of taming functions
+      //================================================================
 
-      if ( p->taming_functions ) {
-        if ( p->taming_functions->has( "m_central" )
-          || p->taming_functions->has( "pt_central" ) ) {
+      if ( params->taming_functions ) {
+        if ( params->taming_functions->has( "m_central" )
+          || params->taming_functions->has( "pt_central" ) ) {
 
           // build the kinematics of the central system
           Particle::Momentum central_system;
@@ -115,49 +102,49 @@ namespace cepgen
             central_system += part.momentum();
 
           // tame the cross-section by the reweighting function
-          if ( p->taming_functions->has( "m_central" ) )
-            integrand *= p->taming_functions->eval( "m_central", central_system.mass() );
-          if ( p->taming_functions->has( "pt_central" ) )
-            integrand *= p->taming_functions->eval( "pt_central", central_system.pt() );
+          if ( params->taming_functions->has( "m_central" ) )
+            weight *= params->taming_functions->eval( "m_central", central_system.mass() );
+          if ( params->taming_functions->has( "pt_central" ) )
+            weight *= params->taming_functions->eval( "pt_central", central_system.pt() );
         }
-        if ( p->taming_functions->has( "q2" ) ) {
-          integrand *= p->taming_functions->eval( "q2", -ev->getOneByRole( Particle::Parton1 ).momentum().mass() );
-          integrand *= p->taming_functions->eval( "q2", -ev->getOneByRole( Particle::Parton2 ).momentum().mass() );
+        if ( params->taming_functions->has( "q2" ) ) {
+          weight *= params->taming_functions->eval( "q2", -ev->getOneByRole( Particle::Parton1 ).momentum().mass() );
+          weight *= params->taming_functions->eval( "q2", -ev->getOneByRole( Particle::Parton2 ).momentum().mass() );
         }
       }
 
-      if ( integrand <= 0. )
+      if ( weight <= 0. )
         return 0.;
 
-      //=============================================================================================
+      //================================================================
       // set the CepGen part of the event generation
-      //=============================================================================================
+      //================================================================
 
-      if ( p->storage() )
+      if ( params->storage() )
         ev->time_generation = tmr.elapsed();
 
-      //=============================================================================================
+      //================================================================
       // event hadronisation and resonances decay
-      //=============================================================================================
+      //================================================================
 
-      if ( p->hadroniser() ) {
+      if ( params->hadroniser() ) {
         double br = -1.;
-        if ( !p->hadroniser()->run( *ev, br, p->storage() ) || br == 0. )
+        if ( !params->hadroniser()->run( *ev, br, params->storage() ) || br == 0. )
           return 0.;
-        integrand *= br; // branching fraction for all decays
+        weight *= br; // branching fraction for all decays
       }
 
-      //=============================================================================================
+      //================================================================
       // apply cuts on final state system (after hadronisation!)
-      // (watch out your cuts, as this might be extremely time-consuming...)
-      //=============================================================================================
+      // (polish your cuts, as this might be very time-consuming...)
+      //================================================================
 
-      if ( !p->kinematics.cuts.central_particles.empty() ) {
+      if ( !params->kinematics.cuts.central_particles.empty() ) {
         for ( const auto& part : (*ev)[Particle::CentralSystem] ) {
           // retrieve all cuts associated to this final state particle
-          if ( p->kinematics.cuts.central_particles.count( part.pdgId() ) == 0 )
+          if ( params->kinematics.cuts.central_particles.count( part.pdgId() ) == 0 )
             continue;
-          const auto& cuts_pdgid = p->kinematics.cuts.central_particles.at( part.pdgId() );
+          const auto& cuts_pdgid = params->kinematics.cuts.central_particles.at( part.pdgId() );
           // apply these cuts on the given particle
           if ( !cuts_pdgid.pt_single.passes( part.momentum().pt() ) )
             return 0.;
@@ -173,17 +160,17 @@ namespace cepgen
         for ( const auto& part : (*ev)[system] ) {
           if ( part.status() != Particle::Status::FinalState )
             continue;
-          if ( !p->kinematics.cuts.remnants.energy_single.passes( fabs( part.momentum().energy() ) ) )
+          if ( !params->kinematics.cuts.remnants.energy_single.passes( fabs( part.momentum().energy() ) ) )
             return 0.;
-          if ( !p->kinematics.cuts.remnants.rapidity_single.passes( fabs( part.momentum().rapidity() ) ) )
+          if ( !params->kinematics.cuts.remnants.rapidity_single.passes( fabs( part.momentum().rapidity() ) ) )
             return 0.;
         }
 
-      //=============================================================================================
-      // store the last event in the parameters for its usage by the end user
-      //=============================================================================================
+      //================================================================
+      // store the last event in parameters block for a later usage
+      //================================================================
 
-      if ( p->storage() ) {
+      if ( params->storage() ) {
         proc->last_event = ev;
         proc->last_event->time_total = tmr.elapsed();
 
@@ -192,9 +179,9 @@ namespace cepgen
           << "Individual time (gen+hadr+cuts): " << proc->last_event->time_total*1.e3 << " ms";
       }
 
-      //=============================================================================================
+      //================================================================
       // a bit of useful debugging
-      //=============================================================================================
+      //================================================================
 
       if ( CG_EXCEPT_MATCH( "Integrand", debugInsideLoop ) ) {
         std::ostringstream oss;
@@ -202,10 +189,10 @@ namespace cepgen
           oss << Form( "%10.8f ", x[i] );
         CG_DEBUG( "Integrand" )
           << "f value for dim-" << ndim << " point ( " << oss.str() << "): "
-          << integrand;
+          << weight;
       }
 
-      return integrand;
+      return weight;
     }
   }
 }

@@ -122,10 +122,10 @@ namespace cepgen
       /// Functionals to be used to account for rescattering corrections (implemented within the process)
       std::shared_ptr<utils::TamingFunctionsCollection> taming_functions;
 
-      //----- run statistics
+      //----- run operations
 
-      /// Reset the total generation time and the number of events generated for this run
-      void clearRunStatistics();
+      /// Reset the total generation time and the number of events generated for this run, prepare kinematics
+      void prepareRun();
       /// Add a new timing into the total generation time
       /// \param[in] gen_time Time to add (in seconds)
       void addGenerationTime( double gen_time );
