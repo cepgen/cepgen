@@ -74,8 +74,11 @@ namespace cepgen
       /// \param[in] ip List of input parameters defining the phase space on which to perform the integration
       Generator( Parameters *ip );
       ~Generator();
+
       /// Dump this program's header into the standard output stream
       void printHeader();
+
+      const Parameters& parameters() const { return *parameters_; }
       /// Feed the generator with a Parameters object
       void setParameters( const Parameters& ip );
       /// Remove all references to a previous generation/run
@@ -88,8 +91,6 @@ namespace cepgen
        * \param[out] err The absolute integration error on the computed cross-section, in pb
        */
       void computeXsection( double& xsec, double& err );
-      /// Integrate the functional over the whole phase space
-      void integrate();
       /// Last cross section computed by the generator
       double crossSection() const { return result_; }
       /// Last error on the cross section computed by the generator
@@ -107,9 +108,12 @@ namespace cepgen
       /// \param[in] x the n-dimensional point to compute
       /// \return the function value for the given point
       double computePoint( double* x );
-      /// Physical Parameters used in the events generation and cross-section computation
-      std::unique_ptr<Parameters> parameters;
+
    private:
+      /// Integrate the functional over the whole phase space
+      void integrate();
+      /// Physical Parameters used in the events generation and cross-section computation
+      std::unique_ptr<Parameters> parameters_;
       /// Vegas instance which will integrate the function
       std::unique_ptr<Integrator> integrator_;
       /// Cross section value computed at the last integration

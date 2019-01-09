@@ -40,6 +40,21 @@ namespace cepgen
   Parameters::~Parameters() // required for unique_ptr initialisation!
   {}
 
+  Parameters&
+  Parameters::operator=( Parameters param )
+  {
+    general = param.general;
+    kinematics = param.kinematics;
+    integrator = param.integrator;
+    generation = param.generation;
+    taming_functions = param.taming_functions;
+    process_ = std::move( param.process_ );
+    hadroniser_ = std::move( param.hadroniser_ );
+    total_gen_time_ = param.total_gen_time_;
+    num_gen_events_ = param.num_gen_events_;
+    return *this;
+  }
+
   void
   Parameters::setThetaRange( float thetamin, float thetamax )
   {

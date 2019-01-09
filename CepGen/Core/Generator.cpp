@@ -18,7 +18,7 @@ namespace cepgen
 {
   namespace utils { std::atomic<int> gSignal; }
   Generator::Generator() :
-    parameters( std::unique_ptr<Parameters>( new Parameters ) ), result_( -1. ), result_error_( -1. )
+    parameters_( new Parameters ), result_( -1. ), result_error_( -1. )
   {
     CG_DEBUG( "Generator:init" ) << "Generator initialized";
     try {
@@ -32,36 +32,35 @@ namespace cepgen
   }
 
   Generator::Generator( Parameters* ip ) :
-    parameters( ip ), result_( -1. ), result_error_( -1. )
+    parameters_( ip ), result_( -1. ), result_error_( -1. )
   {}
 
   Generator::~Generator()
   {
-    if ( parameters->generation.enabled
-      && parameters->process()
-      && parameters->numGeneratedEvents() > 0 )
+    if ( parameters_->generation.enabled
+      && parameters_->process()
+      && parameters_->numGeneratedEvents() > 0 )
       CG_INFO( "Generator" )
         << "Mean generation time / event: "
-        << parameters->totalGenerationTime()*1.e3/parameters->numGeneratedEvents()
+        << parameters_->totalGenerationTime()*1.e3/parameters_->numGeneratedEvents()
         << " ms.";
   }
 
   size_t
   Generator::numDimensions() const
   {
-    if ( !parameters->process() )
+    if ( !parameters_->process() )
      return 0;
-    return parameters->process()->numDimensions();
+    return parameters_->process()->numDimensions();
   }
 
   void
   Generator::clearRun()
   {
-    integrator_.reset();
-    if ( parameters->process() ) {
-      parameters->process()->first_run = true;
-      parameters->process()->addEventContent();
-      parameters->process()->setKinematics( parameters->kinematics );
+    if ( parameters_->process() ) {
+      parameters_->process()->first_run = true;
+      parameters_->process()->addEventContent();
+      parameters_->process()->setKinematics( parameters_->kinematics );
     }
     result_ = result_error_ = -1.;
     {
@@ -75,7 +74,7 @@ namespace cepgen
   void
   Generator::setParameters( const Parameters& ip )
   {
-    parameters.reset( new Parameters( (Parameters&)ip ) ); // copy constructor
+    parameters_.reset( new Parameters( (Parameters&)ip ) ); // copy constructor
   }
 
   void
@@ -98,7 +97,7 @@ namespace cepgen
   double
   Generator::computePoint( double* x )
   {
-    double res = integrand::eval( x, numDimensions(), (void*)parameters.get() );
+    double res = integrand::eval( x, numDimensions(), (void*)parameters_.get() );
     std::ostringstream os;
     for ( unsigned int i = 0; i < numDimensions(); ++i )
       os << x[i] << " ";
@@ -113,7 +112,6 @@ namespace cepgen
   {
     CG_INFO( "Generator" ) << "Starting the computation of the process cross-section.";
 
-    clearRun();
     integrate();
 
     xsec = result_;
@@ -139,15 +137,17 @@ namespace cepgen
   void
   Generator::integrate()
   {
+    clearRun();
+
     // first destroy and recreate the integrator instance
     if ( !integrator_ )
-      integrator_ = std::unique_ptr<Integrator>( new Integrator( numDimensions(), integrand::eval, parameters.get() ) );
+      integrator_ = std::unique_ptr<Integrator>( new Integrator( numDimensions(), integrand::eval, parameters_.get() ) );
     else if ( integrator_->dimensions() != numDimensions() )
-      integrator_.reset( new Integrator( numDimensions(), integrand::eval, parameters.get() ) );
+      integrator_.reset( new Integrator( numDimensions(), integrand::eval, parameters_.get() ) );
 
     CG_DEBUG( "Generator:newInstance" )
       << "New integrator instance created\n\t"
-      << "Considered topology: " << parameters->kinematics.mode << " case\n\t"
+      << "Considered topology: " << parameters_->kinematics.mode << " case\n\t"
       << "Will proceed with " << numDimensions() << "-dimensional integration.";
 
     const int res = integrator_->integrate( result_, result_error_ );
@@ -162,8 +162,8 @@ namespace cepgen
   {
     integrator_->generateOne();
 
-    parameters->addGenerationTime( parameters->process()->last_event->time_total );
-    return parameters->process()->last_event;
+    parameters_->addGenerationTime( parameters_->process()->last_event->time_total );
+    return parameters_->process()->last_event;
   }
 
   void
@@ -172,14 +172,14 @@ namespace cepgen
     const utils::Timer tmr;
 
     CG_INFO( "Generator" )
-      << parameters->generation.maxgen << " events will be generated.";
+      << parameters_->generation.maxgen << " events will be generated.";
 
-    integrator_->generate( parameters->generation.maxgen, callback );
+    integrator_->generate( parameters_->generation.maxgen, callback );
 
     const double gen_time_s = tmr.elapsed();
     CG_INFO( "Generator" )
-      << parameters->generation.ngen << " events generated "
+      << parameters_->generation.ngen << " events generated "
       << "in " << gen_time_s << " s "
-      << "(" << gen_time_s/parameters->generation.ngen*1.e3 << " ms/event).";
+      << "(" << gen_time_s/parameters_->generation.ngen*1.e3 << " ms/event).";
   }
 }
