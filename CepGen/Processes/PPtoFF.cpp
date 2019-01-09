@@ -256,7 +256,7 @@ namespace cepgen
       const double aintegral = amat2 * colf_ * ( g_em*g_em )
                              * 1. / pow( 4.*M_PI*( x1*x2*s_ ), 2 )
                              * fluxes.first*M_1_PI * fluxes.second*M_1_PI * 0.25
-                             * constants::GEV2_TO_BARN;
+                             * constants::GEVM2_TO_PB;
 
       //=================================================================
       return aintegral*qt1_*qt2_*pt_diff_;

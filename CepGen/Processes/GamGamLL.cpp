@@ -933,7 +933,7 @@ namespace cepgen
 
       //--- compute the event weight using the Jacobian
 
-      return constants::GEV2_TO_BARN*jacobian_;
+      return constants::GEVM2_TO_PB*jacobian_;
     }
 
     //---------------------------------------------------------------------------------------------

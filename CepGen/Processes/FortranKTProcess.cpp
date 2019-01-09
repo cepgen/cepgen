@@ -31,7 +31,7 @@ namespace cepgen
       func_( func )
     {
       constants_.m_p = GenericProcess::mp_;
-      constants_.units = constants::GEV2_TO_BARN;
+      constants_.units = constants::GEVM2_TO_PB;
       constants_.pi = M_PI;
       constants_.alpha_em = constants::ALPHA_EM;
     }
