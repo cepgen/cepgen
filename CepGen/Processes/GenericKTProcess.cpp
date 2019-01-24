@@ -130,8 +130,6 @@ namespace cepgen
         }
       }
 
-std::cout << kin_.incoming_beams.first << "|" << kin_.incoming_beams.second << std::endl;
-
       //============================================================================================
       // initialise the "constant" (wrt x) part of the Jacobian
       //============================================================================================

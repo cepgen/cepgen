@@ -65,19 +65,20 @@ namespace cepgen
         Integration( const Integration& );
         ~Integration();
         IntegratorType type;
-        /// Number of function calls to be computed for each point
-        unsigned int ncvg; // ??
-        /// Random number generator seed
-        long rng_seed;
-        /// Random number generator engine
-        gsl_rng_type* rng_engine;
+        unsigned int ncvg; ///< Number of function calls to be computed for each point
+        long rng_seed; ///< Random number generator seed
+        gsl_rng_type* rng_engine; ///< Random number generator engine
         gsl_monte_vegas_params vegas;
         double vegas_chisq_cut;
         gsl_monte_miser_params miser;
         double result, err_result;
       };
-      /// Integrator parameters
-      Integration integrator;
+      Integration& integration() { return integration_; }
+      const Integration& integration() const { return integration_; }
+      /*void setResults( double res, double err_res ) {
+        integration_.result = res;
+        integration_.err_result = err_res;
+      }*/
 
       //----- events generation
 
@@ -85,25 +86,17 @@ namespace cepgen
       struct Generation
       {
         Generation();
-        /// Are we generating events ? (true) or are we only computing the cross-section ? (false)
-        bool enabled;
-        /// Maximal number of events to generate in this run
-        unsigned int maxgen;
-        /// Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?
-        bool symmetrise;
-        /// Is the integrand to be smoothed for events generation?
-        bool treat;
-        /// Number of events already generated in this run
-        unsigned int ngen;
-        /// Frequency at which the events are displayed to the end-user
-        unsigned int gen_print_every;
-        /// Number of threads to perform the integration
-        unsigned int num_threads;
-        /// Number of points to "shoot" in each integration bin by the algorithm
-        unsigned int num_points;
+        Generation( const Generation& );
+        bool enabled; ///< Are we generating events ? (true) or are we only computing the cross-section ? (false)
+        unsigned long maxgen; ///< Maximal number of events to generate in this run
+        bool symmetrise; ///< Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?
+        bool treat; ///< Is the integrand to be smoothed for events generation?
+        unsigned int gen_print_every; ///< Frequency at which the events are displayed to the end-user
+        unsigned int num_threads; ///< Number of threads to perform the integration
+        unsigned int num_points; ///< Number of points to "shoot" in each integration bin by the algorithm
       };
-      /// Events generation parameters
-      Generation generation;
+      Generation& generation() { return generation_; }
+      const Generation& generation() const { return generation_; }
 
       /// Specify if the generated events are to be stored
       void setStorage( bool store ) { store_ = store; }
@@ -146,7 +139,11 @@ namespace cepgen
       /// Total generation time (in seconds)
       double total_gen_time_;
       /// Number of events already generated
-      unsigned int num_gen_events_;
+      unsigned long num_gen_events_;
+      /// Integrator parameters
+      Integration integration_;
+      /// Events generation parameters
+      Generation generation_;
   };
 }
 

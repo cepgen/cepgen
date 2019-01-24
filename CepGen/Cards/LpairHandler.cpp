@@ -75,11 +75,11 @@ namespace cepgen
 
       //--- parse the integration algorithm name
       if ( integr_type_ == "plain" )
-        params_.integrator.type = IntegratorType::plain;
+        params_.integration().type = IntegratorType::plain;
       else if ( integr_type_ == "Vegas" )
-        params_.integrator.type = IntegratorType::Vegas;
+        params_.integration().type = IntegratorType::Vegas;
       else if ( integr_type_ == "MISER" )
-        params_.integrator.type = IntegratorType::MISER;
+        params_.integration().type = IntegratorType::MISER;
       else if ( integr_type_ != "" )
         throw CG_FATAL( "LpairHandler" ) << "Unrecognized integrator type: " << integr_type_ << "!";
 
@@ -122,17 +122,17 @@ namespace cepgen
       // General parameters
       //-------------------------------------------------------------------------------------------
 
-      registerParameter<bool>( "IEND", "Generation type", &params_.generation.enabled );
-      registerParameter<bool>( "NTRT", "Smoothen the integrand", &params_.generation.treat );
+      registerParameter<bool>( "IEND", "Generation type", &params_.generation().enabled );
+      registerParameter<bool>( "NTRT", "Smoothen the integrand", &params_.generation().treat );
       registerParameter<int>( "DEBG", "Debugging verbosity", (int*)&utils::Logger::get().level );
-      registerParameter<int>( "NCVG", "Number of function calls", (int*)&params_.integrator.ncvg );
-      registerParameter<int>( "ITVG", "Number of integration iterations", (int*)&params_.integrator.vegas.iterations );
-      registerParameter<int>( "SEED", "Random generator seed", (int*)&params_.integrator.rng_seed );
-      registerParameter<int>( "NTHR", "Number of threads to use for events generation", (int*)&params_.generation.num_threads );
+      registerParameter<int>( "NCVG", "Number of function calls", (int*)&params_.integration().ncvg );
+      registerParameter<int>( "ITVG", "Number of integration iterations", (int*)&params_.integration().vegas.iterations );
+      registerParameter<int>( "SEED", "Random generator seed", (int*)&params_.integration().rng_seed );
+      registerParameter<int>( "NTHR", "Number of threads to use for events generation", (int*)&params_.generation().num_threads );
       registerParameter<int>( "MODE", "Subprocess' mode", (int*)&params_.kinematics.mode );
-      registerParameter<int>( "NCSG", "Number of points to probe", (int*)&params_.generation.num_points );
-      registerParameter<int>( "NGEN", "Number of events to generate", (int*)&params_.generation.maxgen );
-      registerParameter<int>( "NPRN", "Number of events before printout", (int*)&params_.generation.gen_print_every );
+      registerParameter<int>( "NCSG", "Number of points to probe", (int*)&params_.generation().num_points );
+      registerParameter<int>( "NGEN", "Number of events to generate", (int*)&params_.generation().maxgen );
+      registerParameter<int>( "NPRN", "Number of events before printout", (int*)&params_.generation().gen_print_every );
 
       //-------------------------------------------------------------------------------------------
       // Process-specific parameters

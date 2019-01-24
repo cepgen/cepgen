@@ -483,9 +483,6 @@ namespace cepgen
         return false;
       }
 
-      const double pp3 = sqrt( ep3*ep3-masses_.MX2 ), pt3 = sqrt( dd1_/s_ )/p_cm_,
-                   pp5 = sqrt( ep5*ep5-masses_.MY2 ), pt5 = sqrt( dd3_/s_ )/p_cm_;
-
       CG_DEBUG_LOOP( "GamGamLL" )
         << "Central system's energy: E4 = " << ec4_ << "\n\t"
         << "               momentum: p4 = " << pc4_ << "\n\t"
@@ -493,33 +490,30 @@ namespace cepgen
         << "Outgoing particles' energy: E3 = " << ep3 << "\n\t"
         << "                            E5 = " << ep5;
 
-      const double sin_theta3 = pt3/pp3,
-                   sin_theta5 = pt5/pp5;
+      const double pp3 = sqrt( ep3*ep3-masses_.MX2 ), pt3 = sqrt( dd1_/s_ )/p_cm_;
+      const double pp5 = sqrt( ep5*ep5-masses_.MY2 ), pt5 = sqrt( dd3_/s_ )/p_cm_;
+
+      const double sin_theta3 = pt3/pp3, sin_theta5 = pt5/pp5;
 
       CG_DEBUG_LOOP( "GamGamLL" )
         << std::scientific
-        << "sin_theta3 = " << sin_theta3 << "\n\t"
-        << "sin_theta5 = " << sin_theta5
+        << "sin(theta3) = " << sin_theta3 << "\n\t"
+        << "sin(theta5) = " << sin_theta5
         << std::fixed;
 
       if ( sin_theta3 > 1. ) {
         CG_WARNING( "GamGamLL" )
-          << "sin_theta3 = " << sin_theta3 << " > 1";
+          << "sin(theta3) = " << sin_theta3 << " > 1";
         return false;
       }
       if ( sin_theta5 > 1. ) {
         CG_WARNING( "GamGamLL" )
-          << "sin_theta5 = " << sin_theta5 << " > 1";
+          << "sin(theta5) = " << sin_theta5 << " > 1";
         return false;
       }
 
-      double ct3 = sqrt( 1.-sin_theta3*sin_theta3 ),
-             ct5 = sqrt( 1.-sin_theta5*sin_theta5 );
-
-      if ( ep1_*ep3 < p13_ )
-        ct3 *= -1.;
-      if ( ep2_*ep5 > p25_ )
-        ct5 *= -1.;
+      const double ct3 = ( ep1_*ep3 < p13_ ? -1. : +1. )*sqrt( 1.-sin_theta3*sin_theta3 );
+      const double ct5 = ( ep2_*ep5 > p25_ ? -1. : +1. )*sqrt( 1.-sin_theta5*sin_theta5 );
 
       CG_DEBUG_LOOP( "GamGamLL" )
         << "ct3 = " << ct3 << "\n\t"
@@ -548,16 +542,17 @@ namespace cepgen
       al4_ = 1.-cos_theta4_;
       be4_ = 1.+cos_theta4_;
 
-      if ( cos_theta4_ < 0. ) be4_ = sin_theta4_*sin_theta4_/al4_;
-      else                    al4_ = sin_theta4_*sin_theta4_/be4_;
+      if ( cos_theta4_ < 0. )
+        be4_ = sin_theta4_*sin_theta4_/al4_;
+      else
+        al4_ = sin_theta4_*sin_theta4_/be4_;
 
       CG_DEBUG_LOOP( "GamGamLL" )
         << "ct4 = " << cos_theta4_ << "\n\t"
         << "al4 = " << al4_ << ", be4 = " << be4_;
 
       const double rr  = sqrt( -gram_/s_ )/( p_cm_*pt4_ );
-      const double sin_phi3 =  rr / pt3,
-                   sin_phi5 = -rr / pt5;
+      const double sin_phi3 =  rr / pt3, sin_phi5 = -rr / pt5;
 
       if ( fabs( sin_phi3 ) > 1. ) {
         CG_WARNING( "GamGamLL" )
@@ -570,8 +565,7 @@ namespace cepgen
         return false;
       }
 
-      const double cos_phi3 = -sqrt( 1.-sin_phi3*sin_phi3 ),
-                   cos_phi5 = -sqrt( 1.-sin_phi5*sin_phi5 );
+      const double cos_phi3 = -sqrt( 1.-sin_phi3*sin_phi3 ), cos_phi5 = -sqrt( 1.-sin_phi5*sin_phi5 );
 
       p3_lab_ = Particle::Momentum( pp3*sin_theta3*cos_phi3, pp3*sin_theta3*sin_phi3, pp3*ct3, ep3 );
       p5_lab_ = Particle::Momentum( pp5*sin_theta5*cos_phi5, pp5*sin_theta5*sin_phi5, pp5*ct5, ep5 );
@@ -597,8 +591,10 @@ namespace cepgen
           << "a1 = " << a1;
         return true;
       }
-      if ( a1 < 0. ) p5_lab_[0] = -p5_lab_.px();
-      else           p3_lab_[0] = -p3_lab_.px();
+      if ( a1 < 0. )
+        p5_lab_[0] = -p5_lab_.px();
+      else
+        p3_lab_[0] = -p3_lab_.px();
       return true;
     }
 

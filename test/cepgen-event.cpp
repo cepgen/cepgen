@@ -62,13 +62,13 @@ int main( int argc, char* argv[] ) {
   //-----------------------------------------------------------------------------------------------
 
   // We might want to cross-check visually the validity of our run
-  CG_INFO( "main" ) << mg.parameters.get();
+  CG_INFO( "main" ) << mg.parameters();
 
   // Let there be cross-section...
   double xsec = 0., err = 0.;
   mg.computeXsection( xsec, err );
 
-  writer->initialise( *mg.parameters );
+  writer->initialise( mg.parameters() );
   writer->setCrossSection( xsec, err );
 
   // The events generation starts here!

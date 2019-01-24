@@ -37,7 +37,7 @@ namespace cepgen
 
   Generator::~Generator()
   {
-    if ( parameters_->generation.enabled
+    if ( parameters_->generation().enabled
       && parameters_->process()
       && parameters_->numGeneratedEvents() > 0 )
       CG_INFO( "Generator" )
@@ -161,8 +161,6 @@ namespace cepgen
   Generator::generateOneEvent()
   {
     integrator_->generateOne();
-
-    parameters_->addGenerationTime( parameters_->process()->last_event->time_total );
     return parameters_->process()->last_event;
   }
 
@@ -172,14 +170,14 @@ namespace cepgen
     const utils::Timer tmr;
 
     CG_INFO( "Generator" )
-      << parameters_->generation.maxgen << " events will be generated.";
+      << parameters_->generation().maxgen << " events will be generated.";
 
-    integrator_->generate( parameters_->generation.maxgen, callback );
+    integrator_->generate( parameters_->generation().maxgen, callback );
 
     const double gen_time_s = tmr.elapsed();
     CG_INFO( "Generator" )
-      << parameters_->generation.ngen << " events generated "
+      << parameters_->numGeneratedEvents() << " events generated "
       << "in " << gen_time_s << " s "
-      << "(" << gen_time_s/parameters_->generation.ngen*1.e3 << " ms/event).";
+      << "(" << gen_time_s/parameters_->numGeneratedEvents()*1.e3 << " ms/event).";
   }
 }

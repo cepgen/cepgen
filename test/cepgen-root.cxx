@@ -67,8 +67,7 @@ int main( int argc, char* argv[] )
     throw CG_FATAL( "main" ) << "Usage: " << argv[0] << " input-card [filename=events.root]";
 
   mg.setParameters( cepgen::card::Handler::parse( argv[1] ) );
-  mg.parameters->generation.enabled = true;
-  CG_INFO( "main" ) << mg.parameters.get();
+  CG_INFO( "main" ) << mg.parameters();
 
   //----- open the output root file
 
@@ -94,7 +93,7 @@ int main( int argc, char* argv[] )
     run->xsect = xsec;
     run->errxsect = err;
     run->litigious_events = 0;
-    run->sqrt_s = mg.parameters->kinematics.sqrtS();
+    run->sqrt_s = mg.parameters().kinematics.sqrtS();
 
     //----- launch the events generation
     mg.generate( fill_event_tree );

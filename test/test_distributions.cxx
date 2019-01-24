@@ -22,8 +22,8 @@ void produce_plot( const char* name, TH1* hist )
 unique_ptr<TH1D> h_mass, h_ptpair, h_ptsingle, h_etasingle;
 void process_event( const cepgen::Event& ev, unsigned long event_id )
 {
-  const auto central_system = ev[cepgen::Particle::CentralSystem];
-  const auto pl1 = central_system[0].momentum(), pl2 = central_system[1].momentum();
+  const auto& central_system = ev[cepgen::Particle::CentralSystem];
+  const auto& pl1 = central_system[0].momentum(), pl2 = central_system[1].momentum();
   h_mass->Fill( ( pl1+pl2 ).mass() );
   h_ptpair->Fill( ( pl1+pl2 ).pt() );
   h_ptsingle->Fill( pl1.pt() );
@@ -43,12 +43,12 @@ int main( int argc, char* argv[] )
   h_ptsingle.reset( new TH1D( "pt_single", ";Single lepton p_{T};d#sigma/dp_{T} (pb/GeV)", 100, 0., 100. ) );
   h_etasingle.reset( new TH1D( "eta_single", ";Single lepton #eta;d#sigma/d#eta (pb)\\?.2f", 60, -3., 3. ) );
 
-  CG_INFO( "main" ) << "Process name: " << mg.parameters->processName() << ".";
+  CG_INFO( "main" ) << "Process name: " << mg.parameters().processName() << ".";
   //mg.parameters->taming_functions.dump();
 
   mg.generate( process_event );
 
-  const double weight = mg.crossSection()/mg.parameters->generation.maxgen;
+  const double weight = mg.crossSection()/mg.parameters().generation().maxgen;
   h_mass->Scale( weight, "width" );
   h_ptpair->Scale( weight, "width" );
   h_ptsingle->Scale( weight, "width" );

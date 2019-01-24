@@ -78,6 +78,9 @@ namespace cepgen
       /// Dump this program's header into the standard output stream
       void printHeader();
 
+      /// Getter to the run parameters block
+      Parameters& parametersRef() { return *parameters_; }
+      /// Constant getter to the run parameters block
       const Parameters& parameters() const { return *parameters_; }
       /// Feed the generator with a Parameters object
       void setParameters( const Parameters& ip );
@@ -124,3 +127,4 @@ namespace cepgen
 }
 
 #endif
+

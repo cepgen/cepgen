@@ -38,8 +38,8 @@ int main( int argc, char* argv[] )
     params.kinematics.mode = cepgen::KinematicsMode::ElasticElastic;
     params.kinematics.cuts.central.pt_single.min() = 15.;
     params.kinematics.cuts.central.eta_single = { -2.5, 2.5 };
-    params.generation.enabled = true;
-    params.generation.maxgen = 1e3;
+    params.generation().enabled = true;
+    params.generation().maxgen = 1e3;
     gen.setParameters( params );
   }
   else
@@ -56,7 +56,7 @@ int main( int argc, char* argv[] )
     double xsec = 0., err = 0.;
     gen.computeXsection( xsec, err );
 
-    if ( gen.parameters().generation.enabled )
+    if ( gen.parameters().generation().enabled )
       //--- events generation starts here
       // (one may use a callback function)
       gen.generate();

@@ -86,7 +86,8 @@ namespace cepgen
           } catch ( const mu::Parser::exception_type& e ) {
             std::ostringstream os;
             for ( unsigned short i = 0; i < e.GetPos(); ++i )
-              os << "-"; os << "^";
+              os << "-";
+            os << "^";
             throw CG_WARNING( "Functional" )
               << "Failed to define the function\n\t"
               << expression_ << "\n\t"
