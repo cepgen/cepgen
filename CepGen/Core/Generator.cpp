@@ -26,7 +26,7 @@ namespace cepgen
     } catch ( const Exception& e ) {
       e.dump();
     }
-    // Random number initialization
+    //--- random number initialization
     std::chrono::system_clock::time_point time = std::chrono::system_clock::now();
     srandom( time.time_since_epoch().count() );
   }
@@ -117,16 +117,17 @@ namespace cepgen
     xsec = result_;
     err = result_error_;
 
+    //CG_INFO( "Generator" ) << "Total cross section: "
     if ( xsec < 1.e-2 )
       CG_INFO( "Generator" )
         << "Total cross section: " << xsec*1.e3 << " +/- " << err*1.e3 << " fb.";
-    else if ( xsec < 5.e2 )
+    else if ( xsec < 0.5e3 )
       CG_INFO( "Generator" )
         << "Total cross section: " << xsec << " +/- " << err << " pb.";
-    else if ( xsec < 5.e5 )
+    else if ( xsec < 0.5e6 )
       CG_INFO( "Generator" )
         << "Total cross section: " << xsec*1.e-3 << " +/- " << err*1.e-3 << " nb.";
-    else if ( xsec < 5.e8 )
+    else if ( xsec < 0.5e9 )
       CG_INFO( "Generator" )
         << "Total cross section: " << xsec*1.e-6 << " +/- " << err*1.e-6 << " µb.";
     else

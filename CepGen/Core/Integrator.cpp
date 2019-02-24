@@ -17,8 +17,8 @@
 namespace cepgen
 {
   Integrator::Integrator( unsigned int ndim, double integrand( double*, size_t, void* ), Parameters* params ) :
-    ps_bin_( INVALID_BIN ), input_params_( params ),
-    function_( new gsl_monte_function{ integrand, ndim, (void*)input_params_ } ),
+    ps_bin_( INVALID_BIN ), input_params_( params, []( Parameters* ){} ),
+    function_( new gsl_monte_function{ integrand, ndim, (void*)input_params_.get() } ),
     rng_( gsl_rng_alloc( input_params_->integration().rng_engine ), gsl_rng_free ),
     grid_( new GridParameters( ndim ) )
   {
@@ -433,7 +433,7 @@ namespace cepgen
   Integrator::eval( const std::vector<double>& x )
   {
     if ( !input_params_->generation().treat )
-      return function_->f( (double*)&x[0], function_->dim, (void*)input_params_ );
+      return function_->f( (double*)&x[0], function_->dim, (void*)input_params_.get() );
     //--- treatment of the integration grid
     double w = grid_->r_boxes;
     std::vector<double> x_new( x.size() );
@@ -449,7 +449,7 @@ namespace cepgen
       x_new[j] = COORD( veg_state_, id+1, j )-bin_width*( 1.-rel_pos );
       w *= bin_width;
     }
-    return w*function_->f( (double*)&x_new[0], function_->dim, (void*)input_params_ );
+    return w*function_->f( (double*)&x_new[0], function_->dim, (void*)input_params_.get() );
   }
 
   double

@@ -78,7 +78,7 @@ namespace cepgen
       int ps_bin_;
       static constexpr int INVALID_BIN = -1;
       /// List of parameters to specify the integration range and the physics determining the phase space
-      Parameters* input_params_;
+      std::shared_ptr<Parameters> input_params_;
       /// GSL structure storing the function to be integrated by this integrator instance (along with its parameters)
       std::unique_ptr<gsl_monte_function> function_;
       std::unique_ptr<gsl_rng,void(*)( gsl_rng* )> rng_;
