@@ -44,6 +44,8 @@ namespace cepgen
 
       /// Process for which the cross-section will be computed and the events will be generated
       proc::GenericProcess* process();
+      /// Process for which the cross-section will be computed and the events will be generated
+      const proc::GenericProcess* process() const;
       /// Name of the process considered
       std::string processName() const;
       /// Set the process to study

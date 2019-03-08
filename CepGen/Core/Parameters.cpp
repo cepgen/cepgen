@@ -104,6 +104,12 @@ namespace cepgen
     return process_.get();
   }
 
+  const proc::GenericProcess*
+  Parameters::process() const
+  {
+    return process_.get();
+  }
+
   std::string
   Parameters::processName() const
   {
