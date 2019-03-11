@@ -162,15 +162,15 @@ namespace cepgen
     if ( !grid_->gen_prepared )
       computeGenerationParameters();
 
-    std::vector<double> x( function_->dim, 0. );
+    std::vector<double> xtmp;
 
     //--- correction cycles
 
     if ( ps_bin_ != INVALID_BIN ) {
       bool has_correction = false;
-      while ( !correctionCycle( x, has_correction ) ) {}
+      while ( !correctionCycle( xtmp, has_correction ) ) {}
       if ( has_correction ) {
-        storeEvent( x, callback );
+        storeEvent( xtmp, callback );
         return;
       }
     }
@@ -184,35 +184,31 @@ namespace cepgen
       //----- select a and reject if fmax is too small
       while ( true ) {
         // ...
-        ps_bin_ = uniform() * grid_->max;
-        y = uniform() * grid_->f_max_global;
+        ps_bin_ = uniform() * grid_->size();
+        y = uniform() * grid_->globalMax();
         grid_->num[ps_bin_] += 1;
-        if ( y <= grid_->f_max[ps_bin_] )
+        if ( y <= grid_->maxValue( ps_bin_ ) )
           break;
       }
       // shoot a point x in this bin
-      std::vector<unsigned short> grid_n = grid_->n_map.at( ps_bin_ );
-      for ( unsigned int i = 0; i < function_->dim; ++i )
-        x[i] = ( uniform() + grid_n[i] ) * GridParameters::INV_M_BIN;
+      grid_->shoot( rng_.get(), ps_bin_, xtmp );
       // get weight for selected x value
-      weight = eval( x );
+      weight = eval( xtmp );
       if ( weight <= 0. )
         continue;
       if ( weight > y )
         break;
     }
 
-    if ( weight <= grid_->f_max[ps_bin_] )
+    if ( weight <= grid_->maxValue( ps_bin_ ) )
       ps_bin_ = INVALID_BIN;
     else {
       //--- if weight is higher than local or global maximum,
       //    init correction cycle
-      grid_->f_max_old = grid_->f_max[ps_bin_];
-      grid_->f_max[ps_bin_] = weight;
+      grid_->f_max_old = grid_->maxValue( ps_bin_ );
       grid_->f_max_diff = weight-grid_->f_max_old;
-      if ( weight > grid_->f_max_global )
-        grid_->f_max_global = weight;
-      grid_->correc = ( grid_->num[ps_bin_]-1. ) * grid_->f_max_diff / grid_->f_max_global - 1.;
+      grid_->setValue( ps_bin_, weight );
+      grid_->correc = ( grid_->num[ps_bin_]-1. ) * grid_->f_max_diff / grid_->globalMax() - 1.;
 
       CG_DEBUG("Integrator::generateOne")
         << "Correction " << grid_->correc << " will be applied for phase space bin " << ps_bin_ << ".";
@@ -220,7 +216,7 @@ namespace cepgen
 
     // return with an accepted event
     if ( weight > 0. )
-      storeEvent( x, callback );
+      storeEvent( xtmp, callback );
   }
 
   void
@@ -250,12 +246,10 @@ namespace cepgen
       grid_->correc = -1.;
       std::vector<double> xtmp( function_->dim );
       // Select x values in phase space bin
-      const std::vector<unsigned short> grid_n = grid_->n_map.at( ps_bin_ );
-      for ( unsigned int k = 0; k < function_->dim; ++k )
-        xtmp[k] = ( uniform() + grid_n[k] ) * GridParameters::INV_M_BIN;
+      grid_->shoot( rng_.get(), ps_bin_, xtmp );
       const double weight = eval( xtmp );
       // Parameter for correction of correction
-      if ( weight > grid_->f_max[ps_bin_] ) {
+      if ( weight > grid_->maxValue( ps_bin_ ) ) {
         grid_->f_max2 = std::max( grid_->f_max2, weight );
         grid_->correc += 1.;
         grid_->correc2 -= 1.;
@@ -270,15 +264,13 @@ namespace cepgen
     }
     // Correction if too big weight is found while correction
     // (All your bases are belong to us...)
-    if ( grid_->f_max2 > grid_->f_max[ps_bin_] ) {
-      grid_->f_max_old = grid_->f_max[ps_bin_];
-      grid_->f_max[ps_bin_] = grid_->f_max2;
+    if ( grid_->f_max2 > grid_->maxValue( ps_bin_ ) ) {
+      grid_->f_max_old = grid_->maxValue( ps_bin_ );
       grid_->f_max_diff = grid_->f_max2-grid_->f_max_old;
-      grid_->correc = ( grid_->num[ps_bin_]-1. ) * grid_->f_max_diff / grid_->f_max_global;
-      if ( grid_->f_max2 >= grid_->f_max_global ) {
-        grid_->correc *= grid_->f_max2 / grid_->f_max_global;
-        grid_->f_max_global = grid_->f_max2;
-      }
+      grid_->correc = ( grid_->num[ps_bin_]-1. ) * grid_->f_max_diff / grid_->globalMax();
+      if ( grid_->f_max2 >= grid_->globalMax() )
+        grid_->correc *= grid_->f_max2 / grid_->globalMax();
+      grid_->setValue( ps_bin_, grid_->f_max2 );
       grid_->correc -= grid_->correc2;
       grid_->correc2 = 0.;
       grid_->f_max2 = 0.;
@@ -345,27 +337,12 @@ namespace cepgen
     double sum = 0., sum2 = 0., sum2p = 0.;
 
     //--- main loop
-    for ( unsigned int i = 0; i < grid_->max; ++i ) {
-      unsigned int jj = i;
-      for ( unsigned int j = 0; j < function_->dim; ++j ) {
-        unsigned int tmp = jj*GridParameters::INV_M_BIN;
-        n[j] = jj-tmp*GridParameters::M_BIN;
-        jj = tmp;
-      }
-      grid_->n_map[i] = n;
-      if ( CG_EXCEPT_MATCH( "Integrator:setGen", debugInsideLoop ) ) {
-        std::ostringstream os;
-        for ( const auto& ni : n )
-          os << ni << " ";
-        CG_DEBUG_LOOP( "Integrator:setGen" )
-          << "n-vector for bin " << i << ": " << os.str();
-      }
+    for ( unsigned int i = 0; i < grid_->size(); ++i ) {
       double fsum = 0., fsum2 = 0.;
       for ( unsigned int j = 0; j < input_params_.generation().num_points; ++j ) {
-        for ( unsigned int k = 0; k < function_->dim; ++k )
-          x[k] = ( uniform()+n[k] ) * GridParameters::INV_M_BIN;
+        grid_->shoot( rng_.get(), i, x );
         const double weight = eval( x );
-        grid_->f_max[i] = std::max( grid_->f_max[i], weight );
+        grid_->setValue( i, weight );
         fsum += weight;
         fsum2 += weight*weight;
       }
@@ -373,28 +350,23 @@ namespace cepgen
       sum += av;
       sum2 += av2;
       sum2p += sig2;
-      grid_->f_max_global = std::max( grid_->f_max_global, grid_->f_max[i] );
 
       // per-bin debugging loop
       if ( CG_EXCEPT_MATCH( "Integrator:setGen", debugInsideLoop ) ) {
         const double sig = sqrt( sig2 );
-        const double eff = ( grid_->f_max[i] != 0. )
-          ? grid_->f_max[i]/av
+        const double eff = ( grid_->maxValue( i ) != 0. )
+          ? grid_->maxValue( i )/av
           : 1.e4;
-        std::ostringstream os;
-        for ( unsigned int j = 0; j < function_->dim; ++j )
-          os << ( j != 0 ? ", " : "" ) << n[j];
         CG_DEBUG_LOOP( "Integrator:setGen" )
-          << "In iteration #" << i << ":\n\t"
+          << "n-vector for bin " << i << ": " << utils::repr( grid_->n( i ) ) << "\n\t"
           << "av   = " << av << "\n\t"
           << "sig  = " << sig << "\n\t"
-          << "fmax = " << grid_->f_max[i] << "\n\t"
-          << "eff  = " << eff << "\n\t"
-          << "n = (" << os.str() << ")";
+          << "fmax = " << grid_->maxValue( i ) << "\n\t"
+          << "eff  = " << eff;
       }
     } // end of main loop
 
-    const double inv_max = 1./grid_->max;
+    const double inv_max = 1./grid_->size();
     sum *= inv_max;
     sum2 *= inv_max;
     sum2p *= inv_max;
@@ -402,18 +374,18 @@ namespace cepgen
     const double sig = sqrt( sum2-sum*sum ), sigp = sqrt( sum2p );
 
     double eff1 = 0.;
-    for ( unsigned int i = 0; i < grid_->max; ++i )
-      eff1 += sum/grid_->max*grid_->f_max[i];
-    const double eff2 = sum/grid_->f_max_global;
+    for ( unsigned int i = 0; i < grid_->size(); ++i )
+      eff1 += sum/grid_->size()*grid_->maxValue( i );
+    const double eff2 = sum/grid_->globalMax();
 
     CG_DEBUG( "Integrator:setGen" )
-      << "Average function value         = sum   = " << sum << "\n\t"
-      << "Average squared function value = sum2  = " << sum2 << "\n\t"
-      << "Overall standard deviation     = sig   = " << sig << "\n\t"
-      << "Average standard deviation     = sigp  = " << sigp << "\n\t"
-      << "Maximum function value         = f_max = " << grid_->f_max_global << "\n\t"
-      << "Average inefficiency           = eff1  = " << eff1 << "\n\t"
-      << "Overall inefficiency           = eff2  = " << eff2;
+      << "Average function value         = " << sum << "\n\t"
+      << "Average squared function value = " << sum2 << "\n\t"
+      << "Overall standard deviation     = " << sig << "\n\t"
+      << "Average standard deviation     = " << sigp << "\n\t"
+      << "Maximum function value         = " << grid_->globalMax() << "\n\t"
+      << "Average inefficiency           = " << eff1 << "\n\t"
+      << "Overall inefficiency           = " << eff2;
 
     grid_->gen_prepared = true;
     input_params_.setStorage( true );

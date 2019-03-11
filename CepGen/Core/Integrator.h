@@ -82,7 +82,7 @@ namespace cepgen
       double eval( const std::vector<double>& x );
       /// Selected bin at which the function will be evaluated
       int ps_bin_;
-      static constexpr int INVALID_BIN = -1;
+      static constexpr int INVALID_BIN = -999;
       /// List of parameters to specify the integration range and the
       /// physics determining the phase space
       Parameters& input_params_;
