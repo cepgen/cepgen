@@ -38,7 +38,7 @@ namespace cepgen
        * \param[in] integrand Function to be integrated
        * \param[inout] params Run parameters to define the phase space on which this integration is performed (embedded in an Parameters object)
        */
-      Integrator( unsigned int ndim, double integrand(double*,size_t,void*), Parameters* params );
+      Integrator( unsigned int ndim, double integrand(double*,size_t,void*), Parameters& params );
       /// Class destructor
       ~Integrator();
       /**
@@ -46,9 +46,8 @@ namespace cepgen
        * \author This C++ implementation: GSL
        * \param[out] result_ The cross section as integrated for the given phase space restrictions
        * \param[out] abserr_ The error associated to the computed cross section
-       * \return 0 if the integration was performed successfully
        */
-      int integrate( double& result_, double& abserr_ );
+      void integrate( double& result_, double& abserr_ );
       /// Dimensional size of the phase space
       unsigned short dimensions() const;
       /// Generate a single event
@@ -70,7 +69,7 @@ namespace cepgen
       /// \param has_correction Correction cycle started?
       bool correctionCycle( std::vector<double>& x, bool& has_correction );
       /// Prepare Vegas for an integration/event generation cycle
-      int warmupVegas( std::vector<double>& x_low, std::vector<double>& x_up, unsigned int ncall );
+      void warmupVegas( std::vector<double>& x_low, std::vector<double>& x_up, unsigned int ncall );
       /**
        * Set all the generation mode variables and align them to the
        *  integration grid set while computing the cross-section
@@ -86,12 +85,16 @@ namespace cepgen
       static constexpr int INVALID_BIN = -1;
       /// List of parameters to specify the integration range and the
       /// physics determining the phase space
-      std::shared_ptr<Parameters> input_params_;
+      Parameters& input_params_;
       /// GSL structure storing the function to be integrated by this
       /// integrator instance (along with its parameters)
       std::unique_ptr<gsl_monte_function> function_;
+      struct gsl_rng_deleter
+      {
+        inline void operator()( gsl_rng* rng ) { gsl_rng_free( rng ); }
+      };
       /// Instance of random number generator service
-      std::unique_ptr<gsl_rng,void(*)( gsl_rng* )> rng_;
+      std::unique_ptr<gsl_rng,gsl_rng_deleter> rng_;
       /// Set of parameters for the integration/event generation grid
       std::unique_ptr<GridParameters> grid_;
       /// A trivial deleter for the Vegas integrator

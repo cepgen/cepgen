@@ -5,6 +5,7 @@
 #include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/Timer.h"
+#include "CepGen/Core/utils.h"
 
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Processes/ProcessesHandler.h"
@@ -99,7 +100,7 @@ namespace cepgen
   {
     double res = integrand::eval( x, numDimensions(), (void*)parameters_.get() );
     std::ostringstream os;
-    for ( unsigned int i = 0; i < numDimensions(); ++i )
+    for ( size_t i = 0; i < numDimensions(); ++i )
       os << x[i] << " ";
     CG_DEBUG( "Generator:computePoint" )
       << "Result for x[" << numDimensions() << "] = { " << os.str() << "}:\n\t"
@@ -117,7 +118,6 @@ namespace cepgen
     xsec = result_;
     err = result_error_;
 
-    //CG_INFO( "Generator" ) << "Total cross section: "
     if ( xsec < 1.e-2 )
       CG_INFO( "Generator" )
         << "Total cross section: " << xsec*1.e3 << " +/- " << err*1.e3 << " fb.";
@@ -141,21 +141,15 @@ namespace cepgen
     clearRun();
 
     // first destroy and recreate the integrator instance
-    if ( !integrator_ )
-      integrator_ = std::unique_ptr<Integrator>( new Integrator( numDimensions(), integrand::eval, parameters_.get() ) );
-    else if ( integrator_->dimensions() != numDimensions() )
-      integrator_.reset( new Integrator( numDimensions(), integrand::eval, parameters_.get() ) );
+    if ( !integrator_ || integrator_->dimensions() != numDimensions() )
+      integrator_.reset( new Integrator( numDimensions(), integrand::eval, *parameters_ ) );
 
     CG_DEBUG( "Generator:newInstance" )
       << "New integrator instance created\n\t"
       << "Considered topology: " << parameters_->kinematics.mode << " case\n\t"
       << "Will proceed with " << numDimensions() << "-dimensional integration.";
 
-    const int res = integrator_->integrate( result_, result_error_ );
-    if ( res != 0 )
-      throw CG_FATAL( "Generator" )
-        << "Error while computing the cross-section!\n\t"
-        << "GSL error: " << gsl_strerror( res ) << ".";
+    integrator_->integrate( result_, result_error_ );
   }
 
   std::shared_ptr<Event>
@@ -177,7 +171,8 @@ namespace cepgen
 
     const double gen_time_s = tmr.elapsed();
     CG_INFO( "Generator" )
-      << parameters_->numGeneratedEvents() << " events generated "
+      << parameters_->numGeneratedEvents() << " event" << utils::s( parameters_->numGeneratedEvents() )
+      << " generated "
       << "in " << gen_time_s << " s "
       << "(" << gen_time_s/parameters_->numGeneratedEvents()*1.e3 << " ms/event).";
   }

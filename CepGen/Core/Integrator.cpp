@@ -16,16 +16,16 @@
 
 namespace cepgen
 {
-  Integrator::Integrator( unsigned int ndim, double integrand( double*, size_t, void* ), Parameters* params ) :
-    ps_bin_( INVALID_BIN ), input_params_( params, []( Parameters* ){} ),
-    function_( new gsl_monte_function{ integrand, ndim, (void*)input_params_.get() } ),
-    rng_( gsl_rng_alloc( input_params_->integration().rng_engine ), gsl_rng_free ),
+  Integrator::Integrator( unsigned int ndim, double integrand( double*, size_t, void* ), Parameters& params ) :
+    ps_bin_( INVALID_BIN ), input_params_( params ),
+    function_( new gsl_monte_function{ integrand, ndim, (void*)&input_params_ } ),
+    rng_( gsl_rng_alloc( input_params_.integration().rng_engine ) ),
     grid_( new GridParameters( ndim ) )
   {
     //--- initialise the random number generator
 
-    unsigned long seed = ( input_params_->integration().rng_seed > 0 )
-      ? input_params_->integration().rng_seed
+    unsigned long seed = ( input_params_.integration().rng_seed > 0 )
+      ? input_params_.integration().rng_seed
       : time( nullptr ); // seed with time
     gsl_rng_set( rng_.get(), seed );
 
@@ -33,23 +33,23 @@ namespace cepgen
 
     CG_DEBUG( "Integrator:build" )
       << "Number of integration dimensions: " << function_->dim << ",\n\t"
-      << "Number of function calls:         " << input_params_->integration().ncvg << ",\n\t"
+      << "Number of function calls:         " << input_params_.integration().ncvg << ",\n\t"
       << "Random numbers generator:         " << gsl_rng_name( rng_.get() ) << ".";
-    switch ( input_params_->integration().type ) {
+    switch ( input_params_.integration().type ) {
       case IntegratorType::Vegas:
         CG_DEBUG( "Integrator:build" ) << "Vegas parameters:\n\t"
-          << "Number of iterations in Vegas: " << input_params_->integration().vegas.iterations << ",\n\t"
-          << "α-value: " << input_params_->integration().vegas.alpha << ",\n\t"
-          << "Verbosity: " << input_params_->integration().vegas.verbose << ",\n\t"
-          << "Grid interpolation mode: " << (Integrator::VegasMode)input_params_->integration().vegas.mode << ".";
+          << "Number of iterations in Vegas: " << input_params_.integration().vegas.iterations << ",\n\t"
+          << "α-value: " << input_params_.integration().vegas.alpha << ",\n\t"
+          << "Verbosity: " << input_params_.integration().vegas.verbose << ",\n\t"
+          << "Grid interpolation mode: " << (Integrator::VegasMode)input_params_.integration().vegas.mode << ".";
         break;
       case IntegratorType::MISER:
         CG_DEBUG( "Integrator:build" ) << "MISER parameters:\n\t"
-          << "Number of calls: " << input_params_->integration().miser.min_calls << ", "
-          << "per bisection: " << input_params_->integration().miser.min_calls_per_bisection << ",\n\t"
-          << "Estimate fraction: " << input_params_->integration().miser.estimate_frac << ",\n\t"
-          << "α-value: " << input_params_->integration().miser.alpha << ",\n\t"
-          << "Dither: " << input_params_->integration().miser.dither << ".";
+          << "Number of calls: " << input_params_.integration().miser.min_calls << ", "
+          << "per bisection: " << input_params_.integration().miser.min_calls_per_bisection << ",\n\t"
+          << "Estimate fraction: " << input_params_.integration().miser.estimate_frac << ",\n\t"
+          << "α-value: " << input_params_.integration().miser.alpha << ",\n\t"
+          << "Dither: " << input_params_.integration().miser.dither << ".";
         break;
       case IntegratorType::plain:
         break;
@@ -63,7 +63,7 @@ namespace cepgen
   // cross section computation part
   //-----------------------------------------------------------------------------------------------
 
-  int
+  void
   Integrator::integrate( double& result, double& abserr )
   {
     int res = -1;
@@ -72,25 +72,25 @@ namespace cepgen
     std::vector<double> x_low( function_->dim, 0. ), x_up( function_->dim, 1. );
 
     //--- launch integration
-    switch ( input_params_->integration().type ) {
+    switch ( input_params_.integration().type ) {
       case IntegratorType::plain: {
         std::unique_ptr<gsl_monte_plain_state,void(*)( gsl_monte_plain_state* )>
           pln_state( gsl_monte_plain_alloc( function_->dim ), gsl_monte_plain_free );
         res = gsl_monte_plain_integrate( function_.get(),
           &x_low[0], &x_up[0],
-          function_->dim, input_params_->integration().ncvg,
+          function_->dim, input_params_.integration().ncvg,
           rng_.get(), pln_state.get(),
           &result, &abserr );
       } break;
       case IntegratorType::Vegas: {
         //----- warmup (prepare the grid)
-        res = warmupVegas( x_low, x_up, 25000 );
+        warmupVegas( x_low, x_up, 25000 );
         //----- integration
         unsigned short it_chisq = 0;
         do {
           res = gsl_monte_vegas_integrate( function_.get(),
             &x_low[0], &x_up[0],
-            function_->dim, 0.2 * input_params_->integration().ncvg,
+            function_->dim, 0.2 * input_params_.integration().ncvg,
             rng_.get(), veg_state_.get(),
             &result, &abserr );
           CG_LOG( "Integrator:integrate" )
@@ -100,7 +100,7 @@ namespace cepgen
                      result, abserr,
                      gsl_monte_vegas_chisq( veg_state_.get() ) );
         } while ( fabs( gsl_monte_vegas_chisq( veg_state_.get() )-1. )
-                > input_params_->integration().vegas_chisq_cut-1. );
+                > input_params_.integration().vegas_chisq_cut-1. );
         CG_DEBUG( "Integrator:integrate" )
           << "Vegas grid information:\n\t"
           << "ran for " << veg_state_->dim << " dimensions, and generated " << veg_state_->bins_max << " bins.\n\t"
@@ -110,36 +110,38 @@ namespace cepgen
       case IntegratorType::MISER: {
         std::unique_ptr<gsl_monte_miser_state,void(*)( gsl_monte_miser_state* )>
           mis_state( gsl_monte_miser_alloc( function_->dim ), gsl_monte_miser_free );
-        gsl_monte_miser_params_set( mis_state.get(), &input_params_->integration().miser );
+        gsl_monte_miser_params_set( mis_state.get(), &input_params_.integration().miser );
         res = gsl_monte_miser_integrate( function_.get(),
           &x_low[0], &x_up[0],
-          function_->dim, input_params_->integration().ncvg,
+          function_->dim, input_params_.integration().ncvg,
           rng_.get(), mis_state.get(),
           &result, &abserr );
       } break;
     }
 
-    input_params_->integration().result = result;
-    input_params_->integration().err_result = abserr;
+    input_params_.integration().result = result;
+    input_params_.integration().err_result = abserr;
 
-    if ( input_params_->hadroniser() )
-      input_params_->hadroniser()->setCrossSection( result, abserr );
+    if ( input_params_.hadroniser() )
+      input_params_.hadroniser()->setCrossSection( result, abserr );
 
-    return res;
+    if ( res != GSL_SUCCESS )
+      throw CG_FATAL( "Integrator:integrate" )
+        << "Error while computing the cross-section!\n\t"
+        << "GSL error: " << gsl_strerror( res ) << ".";
   }
 
-  int
+  void
   Integrator::warmupVegas( std::vector<double>& x_low, std::vector<double>& x_up, unsigned int ncall )
   {
     // start by preparing the grid/state
     veg_state_.reset( gsl_monte_vegas_alloc( function_->dim ) );
-    gsl_monte_vegas_params_set( veg_state_.get(), &input_params_->integration().vegas );
+    gsl_monte_vegas_params_set( veg_state_.get(), &input_params_.integration().vegas );
     // then perform a first integration with the given calls count
     double result = 0., abserr = 0.;
-    int res = gsl_monte_vegas_integrate( function_.get(),
+    const int res = gsl_monte_vegas_integrate( function_.get(),
       &x_low[0], &x_up[0],
-      function_->dim, ncall,
-      rng_.get(), veg_state_.get(),
+      function_->dim, ncall, rng_.get(), veg_state_.get(),
       &result, &abserr );
     // ensure the operation was successful
     if ( res != GSL_SUCCESS )
@@ -148,7 +150,6 @@ namespace cepgen
         << "GSL error: " << gsl_strerror( res ) << ".";
     CG_INFO( "Integrator:vegas" )
       << "Finished the Vegas warm-up.";
-    return res;
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -226,9 +227,9 @@ namespace cepgen
   Integrator::generate( unsigned long num_events, std::function<void( const Event&, unsigned long )> callback )
   {
     if ( num_events < 1 )
-      num_events = input_params_->generation().maxgen;
+      num_events = input_params_.generation().maxgen;
     try {
-      while ( input_params_->numGeneratedEvents() < num_events )
+      while ( input_params_.numGeneratedEvents() < num_events )
         generateOne( callback );
     } catch ( const Exception& e ) { return; }
   }
@@ -297,15 +298,15 @@ namespace cepgen
       return false;
 
     {
-      if ( input_params_->numGeneratedEvents() % input_params_->generation().gen_print_every == 0 ) {
+      if ( input_params_.numGeneratedEvents() % input_params_.generation().gen_print_every == 0 ) {
         CG_INFO( "Integrator:store" )
-          << "Generated events: " << input_params_->numGeneratedEvents();
-        input_params_->process()->last_event->dump();
+          << "Generated events: " << input_params_.numGeneratedEvents();
+        input_params_.process()->last_event->dump();
       }
-      const Event& last_event = *input_params_->process()->last_event;
+      const Event& last_event = *input_params_.process()->last_event;
       if ( callback )
-        callback( last_event, input_params_->numGeneratedEvents() );
-      input_params_->addGenerationTime( last_event.time_total );
+        callback( last_event, input_params_.numGeneratedEvents() );
+      input_params_.addGenerationTime( last_event.time_total );
     }
     return true;
   }
@@ -317,24 +318,26 @@ namespace cepgen
   void
   Integrator::computeGenerationParameters()
   {
-    input_params_->setStorage( false );
+    input_params_.setStorage( false );
 
-    if ( input_params_->generation().treat
-      && input_params_->integration().type != IntegratorType::Vegas ) {
+    if ( input_params_.generation().treat
+      && input_params_.integration().type != IntegratorType::Vegas ) {
       CG_INFO( "Integrator:setGen" )
         << "Treat switched on without a proper Vegas grid; running a warm-up beforehand.";
       std::vector<double> x_low( function_->dim, 0. ), x_up( function_->dim, 1. );
-      int res = warmupVegas( x_low, x_up, 25000 );
-      if ( res != GSL_SUCCESS )
+      try {
+        warmupVegas( x_low, x_up, 25000 );
+      } catch ( const Exception& ) {
         throw CG_FATAL( "Integrator::setGen" )
           << "Failed to perform a Vegas warm-up.\n\t"
           << "Try to re-run while disabling integrand treatment...";
+      }
     }
     CG_INFO( "Integrator:setGen" )
-      << "Preparing the grid (" << input_params_->generation().num_points << " points/bin) "
+      << "Preparing the grid (" << input_params_.generation().num_points << " points/bin) "
       << "for the generation of unweighted events.";
 
-    const double inv_num_points = 1./input_params_->generation().num_points;
+    const double inv_num_points = 1./input_params_.generation().num_points;
     std::vector<double> x( function_->dim, 0. );
     std::vector<unsigned short> n( function_->dim, 0 );;
 
@@ -358,7 +361,7 @@ namespace cepgen
           << "n-vector for bin " << i << ": " << os.str();
       }
       double fsum = 0., fsum2 = 0.;
-      for ( unsigned int j = 0; j < input_params_->generation().num_points; ++j ) {
+      for ( unsigned int j = 0; j < input_params_.generation().num_points; ++j ) {
         for ( unsigned int k = 0; k < function_->dim; ++k )
           x[k] = ( uniform()+n[k] ) * GridParameters::INV_M_BIN;
         const double weight = eval( x );
@@ -413,7 +416,7 @@ namespace cepgen
       << "Overall inefficiency           = eff2  = " << eff2;
 
     grid_->gen_prepared = true;
-    input_params_->setStorage( true );
+    input_params_.setStorage( true );
     CG_INFO( "Integrator:setGen" ) << "Grid prepared! Now launching the production.";
   }
 
@@ -432,8 +435,8 @@ namespace cepgen
   double
   Integrator::eval( const std::vector<double>& x )
   {
-    if ( !input_params_->generation().treat )
-      return function_->f( (double*)&x[0], function_->dim, (void*)input_params_.get() );
+    if ( !input_params_.generation().treat )
+      return function_->f( (double*)&x[0], function_->dim, (void*)&input_params_ );
     //--- treatment of the integration grid
     double w = grid_->r_boxes;
     std::vector<double> x_new( x.size() );
@@ -449,7 +452,7 @@ namespace cepgen
       x_new[j] = COORD( veg_state_, id+1, j )-bin_width*( 1.-rel_pos );
       w *= bin_width;
     }
-    return w*function_->f( (double*)&x_new[0], function_->dim, (void*)input_params_.get() );
+    return w*function_->f( (double*)&x_new[0], function_->dim, (void*)&input_params_ );
   }
 
   double
