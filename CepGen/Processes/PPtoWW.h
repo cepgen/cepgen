@@ -33,6 +33,9 @@ namespace cepgen
         Polarisation pol_state_;
         std::vector<short> pol_w1_, pol_w2_;
 
+        /// Parameters for the EFT beyond-SM extension
+        ParametersList eft_ext_;
+
         /// Rapidity range for the outgoing W bosons
         Limits rap_limits_;
         /// Rapidity of the first outgoing W boson
