@@ -25,7 +25,12 @@ namespace cepgen
       pol_state_( (Polarisation)params.get<int>( "polarisationStates", 0 ) ),
       eft_ext_  ( params.get<ParametersList>( "eftExtension" ) ),
       y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )
-    {}
+    {
+      if ( !eft_ext_.keys().empty() ) {
+        CG_INFO( "PPtoWW" ) << "EFT extension enabled. Parameters: " << eft_ext_;
+        description_ += " (EFT extension)";
+      }
+    }
 
     void
     PPtoWW::preparePhaseSpace()
