@@ -10,9 +10,9 @@
 DECLARE_FORTRAN_FUNCTION( nucl_to_ff )
 
 //=================================================================================================
-// START THE MAPPING name -> Fortran SUBROUTINE                                                  //
+// START THE MAPPING name -> Fortran matrix element evaluation function                          //
 // usage:                                                                                        //
-//  REGISTER_FORTRAN_PROCESS( name, subroutine_name, "description )                              //
+//  REGISTER_FORTRAN_PROCESS( name, function_name, "description )                                //
 //=================================================================================================
 
 REGISTER_FORTRAN_PROCESS( patoff, nucl_to_ff, "pA ↝ (g/ɣ)ɣ → f⁺f¯" )

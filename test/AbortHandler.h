@@ -3,17 +3,19 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
+
 #include <csignal>
+#include <atomic>
 
 namespace cepgen
 {
   namespace utils
   {
-    extern volatile int gSignal;
+    extern std::atomic<int> gSignal;
     /// Exception raised when the user terminates the process
-    struct RunAbortedException : Exception
+    struct RunAbortedException : LoggedException
     {
-      using Exception::Exception;
+      using LoggedException::LoggedException;
       ~RunAbortedException() override {}
     };
 

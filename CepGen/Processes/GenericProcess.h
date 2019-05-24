@@ -46,7 +46,7 @@ namespace cepgen
         typedef std::map<Particle::Role,std::vector<PDG> > OutgoingState;
 
         /// Copy all process attributes into a new object
-        virtual std::unique_ptr<GenericProcess> clone( const ParametersList& ) const = 0;
+        virtual std::unique_ptr<GenericProcess> clone( const ParametersList& params = ParametersList() ) const = 0;
 
         /// Restore the Event object to its initial state
         void clearEvent();

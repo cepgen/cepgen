@@ -93,8 +93,8 @@ namespace cepgen
       run.EBMUP = { (double)params.kinematics.incoming_beams.first.pz, (double)params.kinematics.incoming_beams.second.pz };
       run.NPRUP = 1;
       run.resize();
-      run.XSECUP[0] = params.integrator.result;
-      run.XERRUP[0] = params.integrator.err_result;
+      run.XSECUP[0] = params.integration().result;
+      run.XERRUP[0] = params.integration().err_result;
       run.XMAXUP[0] = 1.;
       run.LPRUP[0] = 1;
       lhe_output_->heprup = run;

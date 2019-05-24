@@ -26,6 +26,9 @@ namespace cepgen
     /// Total decay width of an unstable particle, in GeV
     /// \param[in] pdg_id PDG id
     double width( const PDG& pdg_id );
+    /// Check if the particle type is a fermion
+    /// \param[in] pdg_id PDG id
+    bool isFermion( const PDG& pdg_id );
   }
 }
 

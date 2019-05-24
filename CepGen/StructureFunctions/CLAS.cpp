@@ -2,6 +2,7 @@
 
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/ParticleProperties.h"
 
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Core/ParametersList.h"

@@ -6,6 +6,7 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/ParticleProperties.h"
 
 #include "CepGen/Core/Exception.h"
 
@@ -68,7 +69,7 @@ namespace cepgen
       const double ptdiffx = pt_diff_*cos( phi_pt_diff_ ),
                    ptdiffy = pt_diff_*sin( phi_pt_diff_ );
 
-      // Outgoing leptons
+      //--- outgoing Ws
       const double pt1x = ( ptsumx+ptdiffx )*0.5, pt1y = ( ptsumy+ptdiffy )*0.5, pt1 = std::hypot( pt1x, pt1y ),
                    pt2x = ( ptsumx-ptdiffx )*0.5, pt2y = ( ptsumy-ptdiffy )*0.5, pt2 = std::hypot( pt2x, pt2y );
 
@@ -79,9 +80,8 @@ namespace cepgen
           return 0.;
       }
 
-      // transverse mass for the two leptons
-      const double amt1 = sqrt( pt1*pt1+mw2_ ),
-                   amt2 = sqrt( pt2*pt2+mw2_ );
+      //--- transverse mass for the two Ws
+      const double amt1 = std::hypot( pt1, mw_ ), amt2 = std::hypot( pt2, mw_ );
 
       //=================================================================
       //     a window in two-boson invariant mass
@@ -287,10 +287,10 @@ namespace cepgen
 
       const double aintegral = amat2 / ( 16.*M_PI*M_PI*( x1*x2*s_ )*( x1*x2*s_ ) )
                              * fluxes.first*M_1_PI * fluxes.second*M_1_PI * 0.25
-                             * constants::GEV2_TO_BARN;
+                             * constants::GEVM2_TO_PB;
       /*const double aintegral = amat2 / ( 16.*M_PI*M_PI*x1*x1*x2*x2*s_*s_ )
                              * fluxes.first*M_1_PI * fluxes.second*M_1_PI
-                             * constants::GEV2_TO_BARN * 0.25;*/
+                             * constants::GEVM2_TO_PB * 0.25;*/
 
       //=================================================================
       return aintegral*qt1_*qt2_*pt_diff_;

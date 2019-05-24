@@ -1,7 +1,7 @@
 #include "CepGen/StructureFunctions/ChristyBosted.h"
 
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Event/Particle.h"
+#include "CepGen/Physics/ParticleProperties.h"
 
 #include "CepGen/Core/Exception.h"
 
@@ -279,7 +279,7 @@ namespace cepgen
       const double tau = 4.*xbj*xbj*mp2_/q2_eff;
       const double sigT = resmod507( 'T', w2_eff, q2_eff ), sigL = resmod507( 'L', w2_eff, q2_eff );
 
-      F2 = prefac * q2_eff / ( 1+tau ) * ( sigT+sigL ) / constants::GEV2_TO_BARN * 1.e6;
+      F2 = prefac * q2_eff / ( 1+tau ) * ( sigT+sigL ) / constants::GEVM2_TO_PB * 1.e6;
       if ( q2 > q20 )
         F2 *= q21/( q21 + delq2 );
 

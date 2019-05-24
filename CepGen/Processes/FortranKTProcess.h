@@ -8,7 +8,7 @@ namespace cepgen
 {
   namespace proc
   {
-    /// Compute the matrix element for a generic \f$k_{\rm T}\f$-factorised process defined in a Fortran subroutine
+    /// Compute the matrix element for a generic \f$k_{\rm T}\f$-factorised process defined in a Fortran weighting function
     class FortranKTProcess : public GenericKTProcess
     {
       public:
@@ -22,7 +22,7 @@ namespace cepgen
 
         int pair_; ///< Outgoing particles type
         int method_; ///< Computation method for the process
-        std::function<double(void)> func_; ///< Subroutine to be called for weight computation
+        std::function<double(void)> func_; ///< Function to be called for weight computation
         double y1_; ///< First outgoing particle rapidity
         double y2_; ///< Second outgoing particle rapidity
         double pt_diff_; ///< Transverse momentum balance between outgoing particles
