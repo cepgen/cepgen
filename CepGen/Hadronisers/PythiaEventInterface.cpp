@@ -40,7 +40,7 @@ namespace Pythia8
 
     setBeamA( (short)params_->kinematics.incoming_beams.first.pdg, params_->kinematics.incoming_beams.first.pz );
     setBeamB( (short)params_->kinematics.incoming_beams.second.pdg, params_->kinematics.incoming_beams.second.pz );
-    addProcess( 0, params_->integrator.result, params_->integrator.err_result, 100. );
+    addProcess( 0, params_->integration().result, params_->integration().err_result, 100. );
   }
 
   void
