@@ -11,7 +11,7 @@ namespace cepgen
 {
   namespace sigrat
   {
-    const double Parameterisation::mp_ = particleproperties::mass( PDG::proton );
+    const double Parameterisation::mp_ = PDGInfo::get()( PDG::proton ).mass;
     const double Parameterisation::mp2_ = Parameterisation::mp_*Parameterisation::mp_;
 
     Parameterisation::Parameterisation( const ParametersList& params )

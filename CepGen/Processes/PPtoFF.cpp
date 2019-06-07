@@ -42,15 +42,16 @@ namespace cepgen
       registerVariable( pt_diff_, Mapping::linear, kin_.cuts.central.pt_diff, { 0., 50. }, "Fermions transverse momentum difference" );
       registerVariable( phi_pt_diff_, Mapping::linear, kin_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Fermions azimuthal angle difference" );
 
-      if ( !particleproperties::isFermion( pair_ )
-        || particleproperties::charge( pair_ ) == 0. )
+      const auto& pair_info = PDGInfo::get()( pair_ ); // all properties on the fermion pair
+      if ( !pair_info.isFermion
+        || pair_info.charge == 0. )
         throw CG_FATAL( "PPtoFF:prepare" )
           << "Invalid fermion pair selected: " << pair_
           << " (" << (int)pair_ << ")!";
 
-      mf_ = particleproperties::mass( pair_ ); mf2_ = mf_*mf_;
-      qf_ = particleproperties::charge( pair_ );
-      colf_ = particleproperties::colours( pair_ );
+      mf_ = pair_info.mass; mf2_ = mf_*mf_;
+      qf_ = pair_info.charge;
+      colf_ = pair_info.colours;
       CG_DEBUG( "PPtoFF:prepare" )
         << "Produced particles: " << pair_ << " ("
         << "mass = " << mf_ << " GeV, "

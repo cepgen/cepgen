@@ -131,8 +131,9 @@ namespace cepgen
       //--- incoming state
       for ( const auto& ip : ini ) {
         Particle& p = event_->addParticle( ip.first );
-        p.setPdgId( ip.second, particleproperties::charge( ip.second ) );
-        p.setMass( particleproperties::mass( ip.second ) );
+        const auto& part_info = PDGInfo::get()( ip.second );
+        p.setPdgId( ip.second, part_info.charge );
+        p.setMass( part_info.mass );
         if ( ip.first == Particle::IncomingBeam1
           || ip.first == Particle::IncomingBeam2 )
           p.setStatus( Particle::Status::PrimordialIncoming );
@@ -151,8 +152,9 @@ namespace cepgen
       for ( const auto& opl : fin ) { // pair(role, list of PDGids)
         for ( const auto& pdg : opl.second ) {
           Particle& p = event_->addParticle( opl.first );
-          p.setPdgId( pdg, particleproperties::charge( pdg ) );
-          p.setMass( particleproperties::mass( pdg ) );
+          const auto& part_info = PDGInfo::get()( pdg );
+          p.setPdgId( pdg, part_info.charge );
+          p.setMass( part_info.mass );
         }
       }
 

@@ -156,7 +156,7 @@ namespace Pythia8
           }
         }
       }
-      if ( cepgen::particleproperties::colours( p.pdgId() ) > 1 ) {
+      if ( cepgen::PDGInfo::get()( p.pdgId() ).colours > 1 ) {
         if ( p.integerPdgId() > 0 ) //--- particle
           cp_colour = central_colour;
         else //--- anti-particle

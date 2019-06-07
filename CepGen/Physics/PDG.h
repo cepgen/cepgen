@@ -47,8 +47,10 @@ namespace cepgen
       struct ParticleProperties
       {
         std::string name, human_name;
-        short colours;
-        double mass, width, charge;
+        short colours; ///< Colour factor
+        double mass; ///< Mass, in GeV/c\f$^2\f$
+        double width; ///< Decay width, in GeV/c\f$^2\f$
+        double charge; ///< Electric charge, in \f$e\f$
         bool isFermion;
       };
 

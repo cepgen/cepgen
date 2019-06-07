@@ -9,7 +9,7 @@
 
 namespace cepgen
 {
-  const double FormFactors::mp_ = particleproperties::mass( PDG::proton );
+  const double FormFactors::mp_ = PDGInfo::get()( PDG::proton ).mass;
   const double FormFactors::mp2_ = FormFactors::mp_*FormFactors::mp_;
 
   FormFactors

@@ -65,14 +65,14 @@ namespace cepgen
   float
   Particle::charge() const
   {
-    return charge_sign_ * particleproperties::charge( pdg_id_ );
+    return charge_sign_ * PDGInfo::get()( pdg_id_ ).charge;
   }
 
   void
   Particle::computeMass( bool off_shell )
   {
     if ( !off_shell && pdg_id_ != PDG::invalid ) { // retrieve the mass from the on-shell particle's properties
-      mass_ = particleproperties::mass( pdg_id_ );
+      mass_ = PDGInfo::get()( pdg_id_ ).mass;
     }
     else if ( momentum_.energy() >= 0. ) {
       mass_ = sqrt( energy2() - momentum_.p2() );
@@ -192,7 +192,7 @@ namespace cepgen
   int
   Particle::integerPdgId() const
   {
-    const float ch = particleproperties::charge( pdg_id_ );
+    const float ch = PDGInfo::get()( pdg_id_ ).charge; //FIXME retrieve once!!!
     if ( ch == 0 )
       return static_cast<int>( pdg_id_ );
     return static_cast<int>( pdg_id_ ) * charge_sign_ * ( ch/fabs( ch ) );
