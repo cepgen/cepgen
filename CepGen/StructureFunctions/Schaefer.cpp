@@ -4,7 +4,6 @@
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/ParticleProperties.h"
 
 namespace cepgen
 {

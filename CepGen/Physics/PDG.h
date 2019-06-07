@@ -1,7 +1,8 @@
 #ifndef CepGen_Physics_PDG_h
 #define CepGen_Physics_PDG_h
 
-#include <string>
+#include "CepGen/Physics/ParticleProperties.h"
+
 #include <unordered_map>
 
 namespace cepgen
@@ -34,25 +35,16 @@ namespace cepgen
   };
   std::ostream& operator<<( std::ostream& os, const PDG& pc );
 
+  /// A singleton holding all physics constants associated to particles
   class PDGInfo
   {
     public:
-      /// Retrieve a unique instance of this factory
-      static PDGInfo& get() {
-        static PDGInfo instance;
-        return instance;
-      }
+      /// Retrieve a unique instance of this particles info collection
+      static PDGInfo& get();
+      PDGInfo( const PDGInfo& ) = delete;
+      void operator=( const PDGInfo& ) = delete;
       /// Default destructor
       ~PDGInfo() = default;
-      struct ParticleProperties
-      {
-        std::string name, human_name;
-        short colours; ///< Colour factor
-        double mass; ///< Mass, in GeV/c\f$^2\f$
-        double width; ///< Decay width, in GeV/c\f$^2\f$
-        double charge; ///< Electric charge, in \f$e\f$
-        bool isFermion;
-      };
 
       void add( const PDG& id, const ParticleProperties& props );
       const ParticleProperties& operator()( const PDG& ) const;

@@ -1,9 +1,7 @@
 #include "CepGen/Physics/FormFactors.h"
+#include "CepGen/Physics/PDG.h"
 
 #include "CepGen/Core/Exception.h"
-
-#include "CepGen/Physics/ParticleProperties.h"
-#include "CepGen/Physics/PDG.h"
 
 #include "CepGen/StructureFunctions/SuriYennie.h"
 

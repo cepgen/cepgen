@@ -5,7 +5,6 @@
 #include "CepGen/Parameters.h"
 
 #include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Constants.h"
 
@@ -156,6 +155,7 @@ namespace Pythia8
           }
         }
       }
+      std::cout << (int)p.pdgId() << std::endl;
       if ( cepgen::PDGInfo::get()( p.pdgId() ).colours > 1 ) {
         if ( p.integerPdgId() > 0 ) //--- particle
           cp_colour = central_colour;

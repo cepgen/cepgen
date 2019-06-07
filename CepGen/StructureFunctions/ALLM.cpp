@@ -1,5 +1,4 @@
 #include "CepGen/StructureFunctions/ALLM.h"
-#include "CepGen/Physics/ParticleProperties.h"
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"

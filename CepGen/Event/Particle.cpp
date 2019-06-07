@@ -1,7 +1,6 @@
 #include "CepGen/Event/Particle.h"
 
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/Constants.h"
 
 #include "CepGen/Core/Exception.h"
@@ -12,13 +11,15 @@ namespace cepgen
   Particle::Particle() :
     id_( -1 ), charge_sign_( 1 ),
     mass_( -1. ), helicity_( 0. ),
-    role_( UnknownRole ), status_( Status::Undefined ), pdg_id_( PDG::invalid )
+    role_( UnknownRole ), status_( Status::Undefined ),
+    pdg_id_( PDG::invalid )
   {}
 
   Particle::Particle( Role role, PDG pdgId, Status st ) :
     id_( -1 ), charge_sign_( 1 ),
     mass_( -1. ), helicity_( 0. ),
-    role_( role ), status_( st ), pdg_id_( pdgId )
+    role_( role ), status_( st ),
+    pdg_id_( pdgId ), phys_prop_( PDGInfo::get()( pdg_id_ ) )
   {
     if ( pdg_id_ != PDG::invalid )
       computeMass();
@@ -29,7 +30,7 @@ namespace cepgen
     momentum_( part.momentum_ ), mass_( part.mass_ ), helicity_( part.helicity_ ),
     role_( part.role_ ), status_( part.status_ ),
     mothers_( part.mothers_ ), daughters_( part.daughters_ ),
-    pdg_id_( part.pdg_id_ )
+    pdg_id_( part.pdg_id_ ), phys_prop_( PDGInfo::get()( pdg_id_ ) )
   {}
 
   bool
@@ -65,14 +66,14 @@ namespace cepgen
   float
   Particle::charge() const
   {
-    return charge_sign_ * PDGInfo::get()( pdg_id_ ).charge;
+    return charge_sign_ * phys_prop_.charge/3.;
   }
 
   void
   Particle::computeMass( bool off_shell )
   {
     if ( !off_shell && pdg_id_ != PDG::invalid ) { // retrieve the mass from the on-shell particle's properties
-      mass_ = PDGInfo::get()( pdg_id_ ).mass;
+      mass_ = phys_prop_.mass;
     }
     else if ( momentum_.energy() >= 0. ) {
       mass_ = sqrt( energy2() - momentum_.p2() );
@@ -169,6 +170,7 @@ namespace cepgen
   Particle::setPdgId( short pdg )
   {
     pdg_id_ = (PDG)abs( pdg );
+    phys_prop_ = PDGInfo::get()( pdg_id_ );
     switch ( pdg_id_ ) {
       case PDG::electron: case PDG::muon: case PDG::tau:
         charge_sign_ = -pdg/abs( pdg ); break;
@@ -192,7 +194,7 @@ namespace cepgen
   int
   Particle::integerPdgId() const
   {
-    const float ch = PDGInfo::get()( pdg_id_ ).charge; //FIXME retrieve once!!!
+    const float ch = phys_prop_.charge/3.;
     if ( ch == 0 )
       return static_cast<int>( pdg_id_ );
     return static_cast<int>( pdg_id_ ) * charge_sign_ * ( ch/fabs( ch ) );

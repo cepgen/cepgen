@@ -4,7 +4,6 @@
 #include "CepGen/Core/utils.h"
 
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/Constants.h"
 
 #include <complex>

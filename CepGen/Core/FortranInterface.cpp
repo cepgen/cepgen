@@ -2,7 +2,7 @@
 
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/HeavyIon.h"
-#include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Physics/PDG.h"
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
@@ -51,7 +51,7 @@ extern "C" {
   cepgen_particle_charge_( int& pdg_id )
   {
     try {
-      return cepgen::PDGInfo::get()( (cepgen::PDG)pdg_id ).charge;
+      return cepgen::PDGInfo::get()( (cepgen::PDG)pdg_id ).charge/3.;
     } catch ( const cepgen::Exception& e ) {
       e.dump();
       exit( 0 );

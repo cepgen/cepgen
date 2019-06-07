@@ -2,6 +2,7 @@
 #define CepGen_Event_Particle_h
 
 #include "CepGen/Core/Hasher.h"
+#include "CepGen/Physics/ParticleProperties.h"
 
 #include <set>
 #include <unordered_map>
@@ -10,6 +11,7 @@
 namespace cepgen
 {
   enum class PDG;
+  struct ParticleProperties;
   /// A set of integer-type particle identifiers
   typedef std::set<int> ParticlesIds;
 
@@ -330,6 +332,8 @@ namespace cepgen
       ParticlesIds daughters_;
       /// PDG id
       PDG pdg_id_;
+      /// Collection of standard, bare-level physical properties
+      ParticleProperties phys_prop_;
   };
 
   /// Compute the centre of mass energy of two particles (incoming or outgoing states)
