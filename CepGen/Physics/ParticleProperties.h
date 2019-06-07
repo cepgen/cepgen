@@ -11,7 +11,7 @@ namespace cepgen
     short colours; ///< Colour factor
     double mass; ///< Mass, in GeV/c\f$^2\f$
     double width; ///< Decay width, in GeV/c\f$^2\f$
-    double charge; ///< Electric charge, in \f$e\f$/3
+    short charge; ///< Electric charge, in \f$e\f$/3
     bool fermion; ///< Is the particle a fermion?
   };
 }

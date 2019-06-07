@@ -46,6 +46,7 @@ namespace cepgen
         void fillParameter( PyObject* parent, const char* key, std::vector<double>& out );
         void fillParameter( PyObject* parent, const char* key, std::vector<std::string>& out );
         void fillParameter( PyObject* parent, const char* key, ParametersList& out );
+        void fillParameter( PyObject* parent, const char* key, std::vector<ParametersList>& out );
 
         void parseIncomingKinematics( PyObject* );
         void parseOutgoingKinematics( PyObject* );
@@ -53,6 +54,7 @@ namespace cepgen
         void parseIntegrator( PyObject* );
         void parseGenerator( PyObject* );
         void parseHadroniser( PyObject* );
+        void parseExtraParticles( PyObject* parts );
     };
     template<> bool PythonHandler::is<bool>( PyObject* obj ) const;
     template<> bool PythonHandler::is<int>( PyObject* obj ) const;

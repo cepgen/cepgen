@@ -17,7 +17,7 @@ namespace cepgen
   {
     PPtoFF::PPtoFF( const ParametersList& params ) :
       GenericKTProcess( params, "pptoff", "ɣɣ → f⁺f¯", { { PDG::photon, PDG::photon } }, { PDG::muon, PDG::muon } ),
-      pair_  ( params.get<int>( "pair", 0 ) ),
+      pair_  ( params.get<ParametersList>( "pair" ).get<int>( "pdgid" ) ),
       method_( (ME)params.get<int>( "method", (int)ME::offShell ) ),
       p_mat1_( 0 ), p_mat2_( 0 ), p_term_ll_( 0 ), p_term_lt_( 0 ), p_term_tt1_( 0 ), p_term_tt2_( 0 ),
       y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )
@@ -44,7 +44,7 @@ namespace cepgen
       const auto& pair_info = PDG::get()( pair_ ); // all properties on the fermion pair
       if ( !pair_info.fermion || pair_info.charge == 0. )
         throw CG_FATAL( "PPtoFF:prepare" )
-          << "Invalid fermion pair selected: " << pair_
+          << "Invalid fermion pair selected: " << PDG::get()( pair_ ).description
           << " (" << (int)pair_ << ")!";
 
       mf_ = pair_info.mass; mf2_ = mf_*mf_;

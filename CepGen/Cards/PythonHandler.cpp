@@ -62,6 +62,14 @@ namespace cepgen
       if ( !cfg )
         throwPythonError( Form( "Failed to parse the configuration card %s", file ) );
 
+      //--- additional particles definition
+      PyObject* pextp = PyObject_GetAttrString( cfg, "PDG" ); // new
+      if ( pextp ) {
+        parseExtraParticles( pextp );
+        Py_CLEAR( pextp );
+      }
+
+      //--- process definition
       PyObject* process = PyObject_GetAttrString( cfg, PROCESS_NAME ); // new
       if ( !process )
         throwPythonError( Form( "Failed to extract a \"%s\" keyword from the configuration card %s", PROCESS_NAME, file ) );
@@ -137,13 +145,13 @@ namespace cepgen
     PythonHandler::parseIncomingKinematics( PyObject* kin )
     {
       //--- retrieve the beams PDG ids
-      std::vector<int> beams_pdg;
+      std::vector<ParametersList> beams_pdg;
       fillParameter( kin, "pdgIds", beams_pdg );
       if ( !beams_pdg.empty() ) {
         if ( beams_pdg.size() != 2 )
           throwPythonError( Form( "Invalid list of PDG ids retrieved for incoming beams:\n\t2 PDG ids are expected, %d provided!", beams_pdg.size() ) );
-        params_.kinematics.incoming_beams. first.pdg = (pdgid_t)beams_pdg.at( 0 );
-        params_.kinematics.incoming_beams.second.pdg = (pdgid_t)beams_pdg.at( 1 );
+        params_.kinematics.incoming_beams. first.pdg = (pdgid_t)beams_pdg.at( 0 ).get<int>( "pdgid" );
+        params_.kinematics.incoming_beams.second.pdg = (pdgid_t)beams_pdg.at( 1 ).get<int>( "pdgid" );
       }
       //--- incoming beams kinematics
       std::vector<double> beams_pz;
@@ -346,6 +354,30 @@ namespace cepgen
           fillParameter( hadr, block.c_str(), config_blk );
           h->readStrings( config_blk );
         }
+      }
+    }
+
+    void
+    PythonHandler::parseExtraParticles( PyObject* pparts )
+    {
+      if ( !is<ParametersList>( pparts ) )
+        throwPythonError( "Extra particles definition object should be a parameters list!" );
+
+      const auto& parts = get<ParametersList>( pparts );
+      for ( const auto& k : parts.keys() ) {
+        const auto& part = parts.get<ParametersList>( k );
+        if ( !part.has<double>( "mass" ) || !part.has<std::string>( "name" ) )
+          continue;
+        PDG::get().define( part.get<int>( "pdgid" ),
+          ParticleProperties{
+            part.get<std::string>( "name" ).c_str(),
+            part.get<std::string>( "name" ).c_str(),
+            (short)part.get<int>( "colour", 1 ),
+            part.get<double>( "mass", 0. ),
+            part.get<double>( "width", 0. ),
+            (short)( part.get<double>( "charge", 0. )*3 ),
+            part.get<bool>( "fermion", false )
+          } );
       }
     }
   }

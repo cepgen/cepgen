@@ -156,7 +156,7 @@ namespace Pythia8
           }
         }
       }
-      std::cout << (int)p.pdgId() << std::endl;
+      //std::cout << (int)p.pdgId() << std::endl;
       if ( cepgen::PDG::get()( p.pdgId() ).colours > 1 ) {
         if ( p.integerPdgId() > 0 ) //--- particle
           cp_colour = central_colour;
