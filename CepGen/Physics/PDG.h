@@ -2,9 +2,21 @@
 #define CepGen_Physics_PDG_h
 
 #include <iostream>
+#include <vector>
 
 namespace cepgen
 {
+  struct pdginfo
+  {
+    struct ParticleProperties
+    {
+      const char* name;
+      int pdg, colours;
+      double mass, width, charge;
+      bool isFermion;
+    };
+    std::vector<ParticleProperties> particles;
+  };
   /** \brief PDG ids of all known particles
    * \note From \cite Beringer:1900zz :
    * `The Monte Carlo particle numbering scheme [...] is intended to facilitate interfacing between event generators, detector simulators, and analysis packages used in particle physics.`
