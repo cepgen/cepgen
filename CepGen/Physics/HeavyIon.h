@@ -37,6 +37,12 @@ namespace cepgen
     /// Mass number
     unsigned short A;
   };
+  namespace particleproperties
+  {
+    /// Mass of a heavy ion, in GeV/c\f$^2\f$
+    /// \param hi Heavy ion type
+    double mass( const HeavyIon& hi );
+  }
 }
 
 #endif

@@ -1,4 +1,6 @@
 #include "CepGen/Physics/HeavyIon.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/Core/Exception.h"
 
 #include <sstream>
 
@@ -47,5 +49,16 @@ namespace cepgen
       case Element::U:  return os << "U";
     }
     return os;
+  }
+
+  namespace particleproperties
+  {
+    double
+    mass( const HeavyIon& hi )
+    {
+      if ( !hi )
+        throw CG_FATAL( "mass" ) << "Invalid heavy ion: " << hi << "!";
+      return (short)hi.Z*PDGInfo::get()( PDG::proton ).mass;
+    }
   }
 }
