@@ -1,22 +1,11 @@
 #ifndef CepGen_Physics_PDG_h
 #define CepGen_Physics_PDG_h
 
-#include <iostream>
-#include <vector>
+#include <string>
+#include <unordered_map>
 
 namespace cepgen
 {
-  struct pdginfo
-  {
-    struct ParticleProperties
-    {
-      const char* name;
-      int pdg, colours;
-      double mass, width, charge;
-      bool isFermion;
-    };
-    std::vector<ParticleProperties> particles;
-  };
   /** \brief PDG ids of all known particles
    * \note From \cite Beringer:1900zz :
    * `The Monte Carlo particle numbering scheme [...] is intended to facilitate interfacing between event generators, detector simulators, and analysis packages used in particle physics.`
@@ -44,6 +33,33 @@ namespace cepgen
     diffractiveProton = 9902210
   };
   std::ostream& operator<<( std::ostream& os, const PDG& pc );
+
+  class PDGInfo
+  {
+    public:
+      /// Retrieve a unique instance of this factory
+      static PDGInfo& get() {
+        static PDGInfo instance;
+        return instance;
+      }
+      /// Default destructor
+      ~PDGInfo() = default;
+      struct ParticleProperties
+      {
+        std::string name, human_name;
+        short colours;
+        double mass, width, charge;
+        bool isFermion;
+      };
+
+      void add( const PDG& id, const ParticleProperties& props );
+      const ParticleProperties& operator()( const PDG& ) const;
+
+    private:
+      explicit PDGInfo();
+      /** \note Indexing variable: PDG id of particle */
+      std::unordered_map<PDG,ParticleProperties> particles_;
+  };
 }
 
 #endif

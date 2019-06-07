@@ -22,7 +22,7 @@ namespace Pythia8
     return Vec4( mom.px(), mom.py(), mom.pz(), mom.energy() );
   }
 
-  const double CepGenEvent::mp_ = cepgen::particleproperties::mass( cepgen::PDG::proton );
+  const double CepGenEvent::mp_ = cepgen::PDGInfo::get()( cepgen::PDG::proton ).mass;
   const double CepGenEvent::mp2_ = CepGenEvent::mp_*CepGenEvent::mp_;
 
   CepGenEvent::CepGenEvent() :
