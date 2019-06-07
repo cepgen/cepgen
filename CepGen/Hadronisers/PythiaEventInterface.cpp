@@ -1,3 +1,5 @@
+#ifdef PYTHIA8
+
 #include "CepGen/Hadronisers/PythiaEventInterface.h"
 
 #include "CepGen/Core/Exception.h"
@@ -11,7 +13,6 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
 
-#ifdef PYTHIA8
 namespace Pythia8
 {
   /// Convert a CepGen particle momentum into its Pythia8 counterpart
@@ -21,7 +22,7 @@ namespace Pythia8
     return Vec4( mom.px(), mom.py(), mom.pz(), mom.energy() );
   }
 
-  const double CepGenEvent::mp_ = cepgen::PDGInfo::get()( cepgen::PDG::proton ).mass;
+  const double CepGenEvent::mp_ = cepgen::PDG::get()( cepgen::PDG::proton ).mass;
   const double CepGenEvent::mp2_ = CepGenEvent::mp_*CepGenEvent::mp_;
 
   CepGenEvent::CepGenEvent() :
@@ -156,7 +157,7 @@ namespace Pythia8
         }
       }
       std::cout << (int)p.pdgId() << std::endl;
-      if ( cepgen::PDGInfo::get()( p.pdgId() ).colours > 1 ) {
+      if ( cepgen::PDG::get()( p.pdgId() ).colours > 1 ) {
         if ( p.integerPdgId() > 0 ) //--- particle
           cp_colour = central_colour;
         else //--- anti-particle
@@ -208,5 +209,5 @@ namespace Pythia8
     CG_INFO( "CepGenEvent:dump" ) << oss.str();
   }
 }
-#endif
 
+#endif

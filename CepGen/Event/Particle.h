@@ -2,6 +2,8 @@
 #define CepGen_Event_Particle_h
 
 #include "CepGen/Core/Hasher.h"
+
+#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/ParticleProperties.h"
 
 #include <set>
@@ -10,8 +12,6 @@
 
 namespace cepgen
 {
-  enum class PDG;
-  struct ParticleProperties;
   /// A set of integer-type particle identifiers
   typedef std::set<int> ParticlesIds;
 
@@ -166,8 +166,6 @@ namespace cepgen
           /// Energy (in GeV)
           double energy_;
       };
-      /// Human-readable format for a particle's PDG code
-      friend std::ostream& operator<<( std::ostream& os, const PDG& pc );
       /// Human-readable format for a particle's role in the event
       friend std::ostream& operator<<( std::ostream& os, const Particle::Role& rl );
       /// Compute the 4-vector sum of two 4-momenta
@@ -194,10 +192,10 @@ namespace cepgen
 
       Particle();
       /// Build using the role of the particle in the process and its PDG id
-      /// \param[in] pdgId PDG identifier
       /// \param[in] role Role of the particle in the process
+      /// \param[in] id PDG identifier
       /// \param[in] st Current status
-      Particle( Role role, PDG pdgId, Status st = Status::Undefined );
+      Particle( Role role, pdgid_t id, Status st = Status::Undefined );
       /// Copy constructor
       Particle( const Particle& );
       inline ~Particle() {}
@@ -232,12 +230,12 @@ namespace cepgen
       /// Set the PDG identifier (along with the particle's electric charge)
       /// \param[in] pdg PDG identifier
       /// \param[in] ch Electric charge (0, 1, or -1)
-      void setPdgId( const PDG& pdg, short ch = 0 );
+      void setPdgId( pdgid_t pdg, short ch = 0 );
       /// Set the PDG identifier (along with the particle's electric charge)
       /// \param[in] pdg_id PDG identifier (incl. electric charge in e)
       void setPdgId( short pdg_id );
       /// Retrieve the objectified PDG identifier
-      inline PDG pdgId() const { return pdg_id_; }
+      pdgid_t pdgId() const;
       /// Retrieve the integer value of the PDG identifier
       int integerPdgId() const;
       /// Particle's helicity
@@ -331,7 +329,7 @@ namespace cepgen
       /// List of daughter particles
       ParticlesIds daughters_;
       /// PDG id
-      PDG pdg_id_;
+      pdgid_t pdg_id_;
       /// Collection of standard, bare-level physical properties
       ParticleProperties phys_prop_;
   };

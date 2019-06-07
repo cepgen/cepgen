@@ -5,6 +5,7 @@
 
 namespace cepgen
 {
+  typedef unsigned int pdgid_t;
   /// List of physical constants useful that may be used for the matrix element definition
   namespace constants
   {

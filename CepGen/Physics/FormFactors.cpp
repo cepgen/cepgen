@@ -7,7 +7,7 @@
 
 namespace cepgen
 {
-  const double FormFactors::mp_ = PDGInfo::get()( PDG::proton ).mass;
+  const double FormFactors::mp_ = PDG::get()( PDG::proton ).mass;
   const double FormFactors::mp2_ = FormFactors::mp_*FormFactors::mp_;
 
   FormFactors

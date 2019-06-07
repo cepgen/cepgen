@@ -12,7 +12,7 @@ namespace cepgen
 {
   namespace proc
   {
-    const double GenericProcess::mp_ = PDGInfo::get()( PDG::proton ).mass;
+    const double GenericProcess::mp_ = PDG::get()( PDG::proton ).mass;
     const double GenericProcess::mp2_ = GenericProcess::mp_*GenericProcess::mp_;
 
     GenericProcess::GenericProcess( const ParametersList& params, const std::string& name, const std::string& description, bool has_event ) :
@@ -87,8 +87,8 @@ namespace cepgen
         throw CG_FATAL( "GenericProcess" ) << "Kinematics not properly defined for the process.";
 
       const HeavyIon hi1( kin_.incoming_beams.first.pdg ), hi2( kin_.incoming_beams.second.pdg );
-      const double m1 = hi1 ? particleproperties::mass( hi1 ) : PDGInfo::get()( kin_.incoming_beams.first.pdg ).mass;
-      const double m2 = hi2 ? particleproperties::mass( hi2 ) : PDGInfo::get()( kin_.incoming_beams.second.pdg ).mass;
+      const double m1 = hi1 ? particleproperties::mass( hi1 ) : PDG::get()( kin_.incoming_beams.first.pdg ).mass;
+      const double m2 = hi2 ? particleproperties::mass( hi2 ) : PDG::get()( kin_.incoming_beams.second.pdg ).mass;
       // at some point introduce non head-on colliding beams?
       const auto p1 = Particle::Momentum::fromPxPyPzM( 0., 0., +kin_.incoming_beams.first .pz, m1 );
       const auto p2 = Particle::Momentum::fromPxPyPzM( 0., 0., -kin_.incoming_beams.second.pz, m2 );
@@ -130,7 +130,7 @@ namespace cepgen
       //--- incoming state
       for ( const auto& ip : ini ) {
         Particle& p = event_->addParticle( ip.first );
-        const auto& part_info = PDGInfo::get()( ip.second );
+        const auto& part_info = PDG::get()( ip.second );
         p.setPdgId( ip.second, part_info.charge/3. );
         p.setMass( part_info.mass );
         if ( ip.first == Particle::IncomingBeam1
@@ -151,7 +151,7 @@ namespace cepgen
       for ( const auto& opl : fin ) { // pair(role, list of PDGids)
         for ( const auto& pdg : opl.second ) {
           Particle& p = event_->addParticle( opl.first );
-          const auto& part_info = PDGInfo::get()( pdg );
+          const auto& part_info = PDG::get()( pdg );
           p.setPdgId( pdg, part_info.charge/3. );
           p.setMass( part_info.mass );
         }

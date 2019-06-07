@@ -142,8 +142,8 @@ namespace cepgen
       if ( !beams_pdg.empty() ) {
         if ( beams_pdg.size() != 2 )
           throwPythonError( Form( "Invalid list of PDG ids retrieved for incoming beams:\n\t2 PDG ids are expected, %d provided!", beams_pdg.size() ) );
-        params_.kinematics.incoming_beams. first.pdg = (PDG)beams_pdg.at( 0 );
-        params_.kinematics.incoming_beams.second.pdg = (PDG)beams_pdg.at( 1 );
+        params_.kinematics.incoming_beams. first.pdg = (pdgid_t)beams_pdg.at( 0 );
+        params_.kinematics.incoming_beams.second.pdg = (pdgid_t)beams_pdg.at( 1 );
       }
       //--- incoming beams kinematics
       std::vector<double> beams_pz;
@@ -192,13 +192,13 @@ namespace cepgen
       std::vector<int> parts;
       fillParameter( kin, "minFinalState", parts );
       for ( const auto& pdg : parts )
-        params_.kinematics.minimum_final_state.emplace_back( (PDG)pdg );
+        params_.kinematics.minimum_final_state.emplace_back( (pdgid_t)pdg );
 
       ParametersList part_cuts;
       fillParameter( kin, "cuts", part_cuts );
       for ( const auto& part : part_cuts.keys() ) {
-        const PDG pdg = (PDG)stoi( part );
-        const ParametersList& cuts = part_cuts.get<ParametersList>( part );
+        const auto pdg = (pdgid_t)stoi( part );
+        const auto& cuts = part_cuts.get<ParametersList>( part );
         if ( cuts.has<Limits>( "pt" ) )
           params_.kinematics.cuts.central_particles[pdg].pt_single = cuts.get<Limits>( "pt" );
         if ( cuts.has<Limits>( "energy" ) )

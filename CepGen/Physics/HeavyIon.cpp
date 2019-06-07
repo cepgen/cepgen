@@ -1,21 +1,22 @@
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
+
 #include "CepGen/Core/Exception.h"
 
 #include <sstream>
 
 namespace cepgen
 {
-  HeavyIon::HeavyIon( const PDG& pdg ) :
-    Z( (Element)( (unsigned int)pdg/1000000 == 0 ? 0
-                : ( (unsigned int)pdg/1000 ) % 1000 ) ),
-    A( ( Z != Element::invalid ) ? (unsigned int)pdg % 1000 : 0 )
+  HeavyIon::HeavyIon( pdgid_t pdg ) :
+    Z( (Element)( pdg/1000000 == 0 ? 0
+                : ( pdg/1000 ) % 1000 ) ),
+    A( ( Z != Element::invalid ) ? pdg % 1000 : 0 )
   {}
 
-  HeavyIon::operator PDG() const
+  HeavyIon::operator pdgid_t() const
   {
     // Pythia8 convention/10-1e10+1e6
-    return (PDG)( 1000000+1000*(unsigned short)Z+A );
+    return (pdgid_t)( 1000000+1000*(unsigned short)Z+A );
   }
 
   HeavyIon::operator bool() const
@@ -58,7 +59,7 @@ namespace cepgen
     {
       if ( !hi )
         throw CG_FATAL( "mass" ) << "Invalid heavy ion: " << hi << "!";
-      return (short)hi.Z*PDGInfo::get()( PDG::proton ).mass;
+      return (short)hi.Z*PDG::get()( PDG::proton ).mass;
     }
   }
 }

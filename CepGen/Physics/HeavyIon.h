@@ -1,11 +1,12 @@
 #ifndef CepGen_Physics_HeavyIon_h
 #define CepGen_Physics_HeavyIon_h
 
+#include "CepGen/Physics/Constants.h"
+
 #include <ostream>
 
 namespace cepgen
 {
-  enum class PDG;
   /// Enumeration of chemical elements
   enum class Element
   {
@@ -23,11 +24,11 @@ namespace cepgen
     /// General constructor from mass and atomic number
     HeavyIon( unsigned short a, const Element& z ) : Z( z ), A( a ) {}
     /// Build from a custom PDG id
-    HeavyIon( const PDG& pdg );
+    HeavyIon( pdgid_t pdg );
     /// Simple proton
     static inline HeavyIon proton() { return HeavyIon( 1, Element::H ); }
     /// Convert the HI into a custom PDG id
-    operator PDG() const;
+    operator pdgid_t() const;
     /// Check the validity of the heavy ion
     operator bool() const;
     /// Human-readable expression of the ion

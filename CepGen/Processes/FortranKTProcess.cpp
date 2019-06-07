@@ -78,8 +78,8 @@ namespace cepgen
         genparams_.a_nuc1 = in1.A;
         genparams_.z_nuc1 = (unsigned short)in1.Z;
         if ( genparams_.z_nuc1 > 1 ) {
-          event_->getOneByRole( Particle::IncomingBeam1 ).setPdgId( (PDG)in1 );
-          event_->getOneByRole( Particle::OutgoingBeam1 ).setPdgId( (PDG)in1 );
+          event_->getOneByRole( Particle::IncomingBeam1 ).setPdgId( (pdgid_t)in1 );
+          event_->getOneByRole( Particle::OutgoingBeam1 ).setPdgId( (pdgid_t)in1 );
         }
       }
       else
@@ -90,8 +90,8 @@ namespace cepgen
         genparams_.a_nuc2 = in2.A;
         genparams_.z_nuc2 = (unsigned short)in2.Z;
         if ( genparams_.z_nuc2 > 1 ) {
-          event_->getOneByRole( Particle::IncomingBeam2 ).setPdgId( (PDG)in2 );
-          event_->getOneByRole( Particle::OutgoingBeam2 ).setPdgId( (PDG)in2 );
+          event_->getOneByRole( Particle::IncomingBeam2 ).setPdgId( (pdgid_t)in2 );
+          event_->getOneByRole( Particle::OutgoingBeam2 ).setPdgId( (pdgid_t)in2 );
         }
       }
       else
@@ -172,7 +172,7 @@ namespace cepgen
       Particles& oc = (*event_)[Particle::CentralSystem];
       for ( int i = 0; i < evtkin_.nout; ++i ) {
         Particle& p = oc[i];
-        p.setPdgId( evtkin_.pdg[i] );
+        p.setPdgId( (pdgid_t)evtkin_.pdg[i] );
         p.setStatus( Particle::Status::FinalState );
         p.setMomentum( Particle::Momentum( evtkin_.pc[i] ) );
       }
