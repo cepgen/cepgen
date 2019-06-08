@@ -26,7 +26,7 @@ namespace cepgen
   {
     FortranKTProcess::FortranKTProcess( const ParametersList& params, const char* name, const char* descr, std::function<double( void )> func ) :
       GenericKTProcess( params, name, descr, { { PDG::photon, PDG::photon } }, { PDG::muon, PDG::muon } ),
-      pair_( params.get<int>( "pair", 13 ) ),
+      pair_( params.get<ParametersList>( "pair" ).get<int>( "pdgid", 13 ) ),
       method_( params.get<int>( "method", 1 ) ),
       func_( func )
     {

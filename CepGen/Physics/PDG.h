@@ -16,7 +16,7 @@ namespace cepgen
        * \note From \cite Beringer:1900zz :
        * `The Monte Carlo particle numbering scheme [...] is intended to facilitate interfacing between event generators, detector simulators, and analysis packages used in particle physics.`
        */
-      enum Id : pdgid_t
+      enum PdgId : pdgid_t
       {
         invalid = 0,
         //--- fundamental particles
@@ -47,15 +47,15 @@ namespace cepgen
       ~PDG() = default;
 
       void define( pdgid_t id, const ParticleProperties& props );
-      const ParticleProperties& operator()( int ) const;
+      const ParticleProperties& operator()( pdgid_t ) const;
       void dump() const;
+      const char* name( pdgid_t ) const;
 
     private:
       explicit PDG();
       /** \note Indexing variable: PDG id of particle */
       std::unordered_map<pdgid_t,ParticleProperties> particles_;
   };
-  //std::ostream& operator<<( std::ostream& os, pdgid_t pc );
 }
 
 #endif

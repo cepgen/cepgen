@@ -19,12 +19,12 @@ PDG = Parameters( # named list of PDG identifiers
     neutron   = Parameters(pdgid = 2112),
 )
 
-def registerParticle(pdgId, name, mass=0., width=0., charge=0, fermion=False):
+def registerParticle(pdgId, name, mass=0., width=0., charge=0, colour=1, fermion=False):
     PDG[name] = Parameters(
         pdgid = pdgId,
-        name = name,
         mass = mass,
         charge = charge,
         width = width,
+        colour = colour,
         fermion = fermion
     )

@@ -44,7 +44,7 @@ namespace cepgen
       const auto& pair_info = PDG::get()( pair_ ); // all properties on the fermion pair
       if ( !pair_info.fermion || pair_info.charge == 0. )
         throw CG_FATAL( "PPtoFF:prepare" )
-          << "Invalid fermion pair selected: " << PDG::get()( pair_ ).description
+          << "Invalid fermion pair selected: " << PDG::get().name( pair_ )
           << " (" << (int)pair_ << ")!";
 
       mf_ = pair_info.mass; mf2_ = mf_*mf_;

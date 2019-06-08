@@ -366,12 +366,12 @@ namespace cepgen
       const auto& parts = get<ParametersList>( pparts );
       for ( const auto& k : parts.keys() ) {
         const auto& part = parts.get<ParametersList>( k );
-        if ( !part.has<double>( "mass" ) || !part.has<std::string>( "name" ) )
+        if ( !part.has<double>( "mass" ) || !part.has<double>( "charge" ) )
           continue;
         PDG::get().define( part.get<int>( "pdgid" ),
           ParticleProperties{
-            part.get<std::string>( "name" ).c_str(),
-            part.get<std::string>( "name" ).c_str(),
+            k.c_str(),
+            k.c_str(),
             (short)part.get<int>( "colour", 1 ),
             part.get<double>( "mass", 0. ),
             part.get<double>( "width", 0. ),

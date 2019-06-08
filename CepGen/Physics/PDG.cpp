@@ -5,12 +5,6 @@
 
 namespace cepgen
 {
-  /*std::ostream&
-  operator<<( std::ostream& os, pdgid_t pc )
-  {
-    return os << std::string( PDG::get()( pc ).description );
-  }*/
-
   PDG::PDG()
   {
     define( invalid, { "[...]", 0, -1, -1., -1., 0, false } );
@@ -22,39 +16,39 @@ namespace cepgen
     define( bottom, { "bottom", "b", 3, 4.18, 0., -1, true } );
     define( top, { "top", "t", 3, 172.44, 0., 2, true } );
     //--- SM leptons
-    define( electron, { "electron", "e± ", 1, 0.510998928e-3, 0., 3, true } );
-    define( electronNeutrino, { "nu_e", "ν_e ", 1, 0., 0., 0, true } );
-    define( muon, { "muon", "µ±  ", 1, 0.1056583715, 0., 3, true } );
-    define( muonNeutrino, { "nu_mu", "ν_µ  ", 1, 0., 0., 0, true } );
-    define( tau, { "tau", "τ±  ", 1, 1.77682, 0., 3, true } );
-    define( muonNeutrino, { "nu_mu", "ν_τ  ", 1, 0., 0., 0, true } );
+    define( electron, { "electron", "e\u00B1", 1, 0.510998928e-3, 0., 3, true } );
+    define( electronNeutrino, { "nu_e", "\u03BD_e", 1, 0., 0., 0, true } );
+    define( muon, { "muon", "\u03BC\u00B1", 1, 0.1056583715, 0., 3, true } );
+    define( muonNeutrino, { "nu_mu", "\u03BD_\u03BC", 1, 0., 0., 0, true } );
+    define( tau, { "tau", "\u03C4\u00B1", 1, 1.77682, 0., 3, true } );
+    define( tauNeutrino, { "nu_tau", "\u03BD_\u03C4", 1, 0., 0., 0, true } );
     //--- SM bosons
-    define( gluon, { "gluon", "gluon", 9, 0., 0., 0, false } );
-    define( photon, { "photon", "ɣ ", 0, 0., 0., 0, false } );
+    define( gluon, { "gluon", "g", 9, 0., 0., 0, false } );
+    define( photon, { "photon", "\u03B3", 0, 0., 0., 0, false } );
     define( Z, { "Z", "Z", 0, 91.1876, 2.4952, 0, false } );
-    define( W, { "W", "W± ", 0, 80.385, 2.085, 3, false } );
+    define( W, { "W", "W\u00B1", 0, 80.385, 2.085, 3, false } );
     //--- nucleons
-    define( proton, { "proton", "proton", 0, 0.938272046, 0., 3, false } );
-    define( diffractiveProton, { "diff_proton", "diffr.proton", 0, 0., 0., 3, false } );
+    define( proton, { "proton", "p", 0, 0.938272046, 0., 3, false } );
+    define( diffractiveProton, { "diff_proton", "p*", 0, 0., 0., 3, false } );
     define( neutron, { "neutron", "neutron", 0, 0.939565346, 0., 0, false } );
     //--- general mesons & baryons
-    define( piPlus, { "pi_plus", "π±  ", 1, 0.13957018, -1., 3, false } );
-    define( piZero, { "pi_zero", "π⁰  ", 1, 0.1349766, -1., 0, false } );
-    define( KPlus, { "K_plus", "K± ", 1, 0.493677, -1., 3, false } );
-    define( DPlus, { "D_plus", "D± ", 1, 1.86962, -1., 3, false } );
-    define( rho770_0, { "rho770_0", "ρ(770)₀  ", 1, 0.77526, 0.150, 0, false } );
-    define( rho1450_0, { "rho1450_0", "ρ(1450)₀  ", 1, 1.465, 0.400, 0, false } );
-    define( rho1700_0, { "rho1700_0", "ρ(1700)₀  ", 1, 1.720, 0.250, 0, false } );
-    define( h1380_1, { "h1380_1", "h(1380)₁ ", 1, 1.38619, 0, false } );
-    define( eta, { "eta", "η meson", 1, 0.547862, -1., 0, false } );
-    define( omega782, { "omega782", "ω(782) ", 1, -1., 0, false } );
-    define( Jpsi, { "Jpsi", "J/ψ ", 1, 3.0969, 92.9e-6 /* FIXME */, 0, false } );
-    define( phi1680, { "phi1680", "ɸ(1680) ", 1, -1., -1., 0, false } );
-    define( Upsilon1S, { "Upsilon1S", "Υ(1S) ", 1, 9.46030, 54.02e-6, 0, false } );
-    define( Upsilon2S, { "Upsilon2S", "Υ(2S) ", 1, 10.02326, 31.98e-6, 0, false } );
-    define( Upsilon3S, { "Upsilon3S", "Υ(3S) ", 1, 10.3552, 20.32e-6, 0, false } );
-    define( pomeron, { "pomeron", "IP", 0, 0., 0., 0, false } );
-    define( reggeon, { "reggeon", "IR", 0, 0., 0., 0, false } );
+    define( piPlus, { "pi_plus", "\u03C0\u00B1", 1, 0.13957018, -1., 3, false } );
+    define( piZero, { "pi_zero", "\u03C0\u2070", 1, 0.1349766, -1., 0, false } );
+    define( KPlus, { "K_plus", "K\u00B1", 1, 0.493677, -1., 3, false } );
+    define( DPlus, { "D_plus", "D\u00B1", 1, 1.86962, -1., 3, false } );
+    define( rho770_0, { "rho770_0", "\u03C1(770)\u2080", 1, 0.77526, 0.150, 0, false } );
+    define( rho1450_0, { "rho1450_0", "\u03C1(1450)\u2080", 1, 1.465, 0.400, 0, false } );
+    define( rho1700_0, { "rho1700_0", "\u03C1(1700)\u2080", 1, 1.720, 0.250, 0, false } );
+    define( h1380_1, { "h1380_1", "h(1380)\u2081", 1, 1.38619, 0, false } );
+    define( eta, { "eta", "\u03B7", 1, 0.547862, -1., 0, false } );
+    define( omega782, { "omega782", "\u03C9(782)", 1, -1., 0, false } );
+    define( Jpsi, { "Jpsi", "J/\u03C8", 1, 3.0969, 92.9e-6 /* FIXME */, 0, false } );
+    define( phi1680, { "phi1680", "\u03A6(1680)", 1, -1., -1., 0, false } );
+    define( Upsilon1S, { "Upsilon1S", "\u03A5(1S)", 1, 9.46030, 54.02e-6, 0, false } );
+    define( Upsilon2S, { "Upsilon2S", "\u03A5(2S)", 1, 10.02326, 31.98e-6, 0, false } );
+    define( Upsilon3S, { "Upsilon3S", "\u03A5(3S)", 1, 10.3552, 20.32e-6, 0, false } );
+    define( pomeron, { "pomeron", "\u2119", 0, 0., 0., 0, false } );
+    define( reggeon, { "reggeon", "\u211D", 0, 0., 0., 0, false } );
   }
 
   PDG&
@@ -65,9 +59,14 @@ namespace cepgen
   }
 
   const ParticleProperties&
-  PDG::operator()( int id ) const
+  PDG::operator()( pdgid_t id ) const
   {
-    return particles_.at( (pdgid_t)id );
+    try {
+      return particles_.at( id );
+    } catch ( const std::out_of_range& ) {
+      throw CG_FATAL( "PDG" )
+        << "Failed to retrieve particle properties for PDG id " << id << "!";
+    }
   }
 
   void
@@ -76,15 +75,22 @@ namespace cepgen
     particles_[id] = props;
   }
 
+  const char*
+  PDG::name( pdgid_t id ) const
+  {
+    return operator()( id ).description;
+  }
+
   void
   PDG::dump() const
   {
     //--- first build a sorted vector out of the (unsorted) map
-    std::vector<std::pair<int,ParticleProperties> > tmp;
+    std::vector<std::pair<pdgid_t,ParticleProperties> > tmp;
     for ( const auto& prt : particles_ )
       tmp.emplace_back( prt.first, prt.second );
     std::sort( tmp.begin(), tmp.end(),
-      []( const std::pair<int,ParticleProperties>& a, const std::pair<int,ParticleProperties>& b ) {
+      []( const std::pair<pdgid_t,ParticleProperties>& a,
+          const std::pair<pdgid_t,ParticleProperties>& b ) {
         return a.first < b.first;
       } );
     //--- then the proper dump begins

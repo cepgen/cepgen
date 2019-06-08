@@ -106,7 +106,7 @@ int main( int argc, char* argv[] )
 
   file.Write();
   CG_INFO( "main" )
-    << run->num_events << " event" << cepgen::s( run->num_events )
+    << run->num_events << " event" << cepgen::utils::s( run->num_events )
     << " written in \"" << filename << "\".";
 
   return 0;

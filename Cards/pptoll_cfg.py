@@ -9,9 +9,10 @@ registerParticle(1000001, 'sd_l', mass=100., charge=1., fermion=True)
 
 process = kt.process.clone('pptoll',
     processParameters = cepgen.Parameters(
-        mode = cepgen.ProcessMode.ElasticElastic,
+        mode = cepgen.ProcessMode.InelasticElastic,
         #pair = PDG.muon,
         pair = PDG.sd_l,
+        #pair = PDG.up,
     ),
     inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),
