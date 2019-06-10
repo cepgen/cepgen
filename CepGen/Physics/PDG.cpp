@@ -72,6 +72,9 @@ namespace cepgen
   void
   PDG::define( pdgid_t id, const ParticleProperties& props )
   {
+    CG_INFO( "PDG:define" ) << "Adding a new particle with "
+      << "PDG id=" << id << ", "
+      << "name=" << props.description << " (" << props.name << ")";
     particles_[id] = props;
   }
 

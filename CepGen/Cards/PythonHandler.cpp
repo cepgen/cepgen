@@ -368,12 +368,13 @@ namespace cepgen
         const auto& part = parts.get<ParametersList>( k );
         if ( !part.has<double>( "mass" ) || !part.has<double>( "charge" ) )
           continue;
-        CG_DEBUG( "PythonHandler" )
+        CG_DEBUG( "PythonHandler:particles" )
           << "Adding a new particle with name \"" << k << "\" to the PDG dictionary.";
-        const char* part_name = k.c_str();
+        const std::string desc = part.has<std::string>( "description" )
+          ? part.get<std::string>( "description" ) : k;
         PDG::get().define( part.get<int>( "pdgid" ),
           ParticleProperties{
-            part_name, part_name,
+            k.c_str(), desc.c_str(),
             (short)part.get<int>( "colour", 1 ),
             part.get<double>( "mass", 0. ),
             part.get<double>( "width", 0. ),
