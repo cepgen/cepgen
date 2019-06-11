@@ -13,7 +13,7 @@ namespace cepgen
 {
   namespace strfun
   {
-    const double Parameterisation::mp_ = PDG::get()( PDG::proton ).mass;
+    const double Parameterisation::mp_ = PDG::get().mass( PDG::proton );
     const double Parameterisation::mp2_ = Parameterisation::mp_*Parameterisation::mp_;
 
     Parameterisation::Parameterisation( double f2, double fl ) :

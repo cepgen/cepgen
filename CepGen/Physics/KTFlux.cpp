@@ -11,7 +11,7 @@
 namespace cepgen
 {
   const double KTFluxParameters::kMinKTFlux = 1.e-20;
-  const double KTFluxParameters::kMP = PDG::get()( PDG::proton ).mass;
+  const double KTFluxParameters::kMP = PDG::get().mass( PDG::proton );
   const double KTFluxParameters::kMP2 = KTFluxParameters::kMP*KTFluxParameters::kMP;
 
   double

@@ -15,7 +15,7 @@ namespace cepgen
 {
   namespace proc
   {
-    const double PPtoWW::mw_ = PDG::get()( PDG::W ).mass;
+    const double PPtoWW::mw_ = PDG::get().mass( PDG::W );
     const double PPtoWW::mw2_ = PPtoWW::mw_*PPtoWW::mw_;
 
     PPtoWW::PPtoWW( const ParametersList& params ) :

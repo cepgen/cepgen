@@ -94,10 +94,34 @@ namespace cepgen
     particles_[id] = props;
   }
 
-  std::string
+  const std::string&
   PDG::name( pdgid_t id ) const
   {
     return operator()( id ).description;
+  }
+
+  short
+  PDG::colours( pdgid_t id ) const
+  {
+    return operator()( id ).colours;
+  }
+
+  double
+  PDG::mass( pdgid_t id ) const
+  {
+    return operator()( id ).mass;
+  }
+
+  double
+  PDG::width( pdgid_t id ) const
+  {
+    return operator()( id ).width;
+  }
+
+  double
+  PDG::charge( pdgid_t id ) const
+  {
+    return operator()( id ).charge/3.;
   }
 
   void

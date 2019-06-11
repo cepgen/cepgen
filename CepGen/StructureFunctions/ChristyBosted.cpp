@@ -21,8 +21,8 @@ namespace cepgen
     double
     ChristyBosted::resmod507( char sf, double w2, double q2 ) const
     {
-      const double mpi = PDG::get()( PDG::piZero ).mass, mpi2 = mpi*mpi,
-                   meta = PDG::get()( PDG::eta ).mass, meta2 = meta*meta;
+      const double mpi = PDG::get().mass( PDG::piZero ), mpi2 = mpi*mpi,
+                   meta = PDG::get().mass( PDG::eta ), meta2 = meta*meta;
       const double w = sqrt( w2 );
 
       const double xb = q2/( q2+w2-mp2_ );
@@ -254,7 +254,7 @@ namespace cepgen
       old_vals_ = nv;
 
       const double w2 = mp2_ + q2*( 1.-xbj )/xbj;
-      const double w_min = mp_+PDG::get()( PDG::piZero ).mass;
+      const double w_min = mp_+PDG::get().mass( PDG::piZero );
 
       if ( sqrt( w2 ) < w_min ) {
         F2 = 0.;

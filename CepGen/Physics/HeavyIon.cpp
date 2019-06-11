@@ -59,7 +59,7 @@ namespace cepgen
     {
       if ( !hi )
         throw CG_FATAL( "mass" ) << "Invalid heavy ion: " << hi << "!";
-      return (short)hi.Z*PDG::get()( PDG::proton ).mass;
+      return (short)hi.Z*PDG::get().mass( PDG::proton );
     }
   }
 }

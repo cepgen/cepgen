@@ -12,7 +12,7 @@ namespace cepgen
 {
   namespace proc
   {
-    const double GenericProcess::mp_ = PDG::get()( PDG::proton ).mass;
+    const double GenericProcess::mp_ = PDG::get().mass( PDG::proton );
     const double GenericProcess::mp2_ = GenericProcess::mp_*GenericProcess::mp_;
 
     GenericProcess::GenericProcess( const ParametersList& params, const std::string& name, const std::string& description, bool has_event ) :
@@ -87,8 +87,8 @@ namespace cepgen
         throw CG_FATAL( "GenericProcess" ) << "Kinematics not properly defined for the process.";
 
       const HeavyIon hi1( kin_.incoming_beams.first.pdg ), hi2( kin_.incoming_beams.second.pdg );
-      const double m1 = hi1 ? particleproperties::mass( hi1 ) : PDG::get()( kin_.incoming_beams.first.pdg ).mass;
-      const double m2 = hi2 ? particleproperties::mass( hi2 ) : PDG::get()( kin_.incoming_beams.second.pdg ).mass;
+      const double m1 = hi1 ? particleproperties::mass( hi1 ) : PDG::get().mass( kin_.incoming_beams.first.pdg );
+      const double m2 = hi2 ? particleproperties::mass( hi2 ) : PDG::get().mass( kin_.incoming_beams.second.pdg );
       // at some point introduce non head-on colliding beams?
       const auto p1 = Particle::Momentum::fromPxPyPzM( 0., 0., +kin_.incoming_beams.first .pz, m1 );
       const auto p2 = Particle::Momentum::fromPxPyPzM( 0., 0., -kin_.incoming_beams.second.pz, m2 );
