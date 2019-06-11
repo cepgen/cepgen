@@ -365,22 +365,12 @@ namespace cepgen
 
       const auto& parts = get<ParametersList>( pparts );
       for ( const auto& k : parts.keys() ) {
-        const auto& part = parts.get<ParametersList>( k );
-        if ( !part.has<double>( "mass" ) || !part.has<double>( "charge" ) )
+        const auto& part = parts.get<ParticleProperties>( k );
+        if ( part.pdgid == 0 || part.mass < 0. )
           continue;
         CG_DEBUG( "PythonHandler:particles" )
-          << "Adding a new particle with name \"" << k << "\" to the PDG dictionary.";
-        const std::string desc = part.has<std::string>( "description" )
-          ? part.get<std::string>( "description" ) : k;
-        PDG::get().define( part.get<int>( "pdgid" ),
-          ParticleProperties{
-            k.c_str(), desc.c_str(),
-            (short)part.get<int>( "colour", 1 ),
-            part.get<double>( "mass", 0. ),
-            part.get<double>( "width", 0. ),
-            (short)( part.get<double>( "charge", 0. )*3 ),
-            part.get<bool>( "fermion", false )
-          } );
+          << "Adding a new particle with name \"" << part.name << "\" to the PDG dictionary.";
+        PDG::get().define( part );
       }
     }
   }

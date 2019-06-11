@@ -2,6 +2,7 @@
 #define CepGen_Core_ParametersList_h
 
 #include "CepGen/Physics/Limits.h"
+#include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Core/Hasher.h"
 
 #include <vector>
@@ -80,6 +81,13 @@ namespace cepgen
   template<> inline bool& ParametersList::operator[]<bool>( std::string key ) { return (bool&)operator[]<int>( key ); }
   /// Set a boolean parameter value
   template<> inline ParametersList& ParametersList::set<bool>( std::string key, const bool& value ) { return set<int>( key, static_cast<bool>( value ) ); }
+
+  /// Check if a boolean parameter is handled
+  template<> inline bool ParametersList::has<ParticleProperties>( std::string key ) const { return param_values_.count( key ) != 0; }
+  /// Get a boolean parameter value
+  template<> ParticleProperties ParametersList::get<ParticleProperties>( std::string key, const ParticleProperties& def ) const;
+  /// Set a boolean parameter value
+  template<> ParametersList& ParametersList::set<ParticleProperties>( std::string key, const ParticleProperties& value );
 
   /// Check if a double floating point parameter is handled
   template<> inline bool ParametersList::has<double>( std::string key ) const { return dbl_values_.count( key ) != 0; }

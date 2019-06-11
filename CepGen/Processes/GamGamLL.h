@@ -89,34 +89,28 @@ namespace cepgen
 
         /// Internal switch for the optimised code version (LPAIR legacy ; unimplemented here)
         int n_opt_;
-        int pair_;
+        pdgid_t pair_;
 
         Limits w_limits_;
         Limits q2_limits_;
         Limits mx_limits_;
         struct Masses
         {
-          Masses();
           /// squared mass of the first proton-like outgoing particle
-          double MX2;
+          double MX2 = 0.;
           /// squared mass of the second proton-like outgoing particle
-          double MY2;
+          double MY2 = 0.;
           /// squared mass of the outgoing leptons
-          double Ml2;
-          /// \f$\delta_2=m_1^2-m_2^2\f$ as defined in Vermaseren's paper
-          /// \cite Vermaseren:1982cz for the full definition of this quantity
-          double w12;
-
-          /// \f$\delta_1=m_3^2-m_1^2\f$ as defined in Vermaseren's paper
-          /// \cite Vermaseren:1982cz for the full definition of this quantity
-          double w31;
-          double dw31;
-          /// \f$\delta_4=m_5^2-m_2^2\f$ as defined in Vermaseren's paper
-          /// \cite Vermaseren:1982cz for the full definition of this quantity
-          double w52;
-          double dw52;
-        };
-        Masses masses_;
+          double Ml2 = 0.;
+          /// \f$\delta_2=m_1^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
+          double w12 = 0.;
+          /// \f$\delta_1=m_3^2-m_1^2\f$ as defined in \cite Vermaseren:1982cz
+          double w31 = 0.;
+          double dw31 = 0.;
+          /// \f$\delta_4=m_5^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
+          double w52 = 0.;
+          double dw52 = 0.;
+        } masses_;
 
         /// energy of the first proton-like incoming particle
         double ep1_;

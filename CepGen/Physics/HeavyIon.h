@@ -1,7 +1,7 @@
 #ifndef CepGen_Physics_HeavyIon_h
 #define CepGen_Physics_HeavyIon_h
 
-#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/ParticleProperties.h"
 
 #include <ostream>
 

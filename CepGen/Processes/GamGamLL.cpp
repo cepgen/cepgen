@@ -13,19 +13,10 @@ namespace cepgen
 {
   namespace proc
   {
-    //---------------------------------------------------------------------------------------------
-
-    GamGamLL::Masses::Masses() :
-      MX2( 0. ), MY2( 0. ), Ml2( 0. ),
-      w12( 0. ), w31( 0. ), dw31( 0. ), w52( 0. ), dw52( 0. )
-    {}
-
-    //---------------------------------------------------------------------------------------------
-
     GamGamLL::GamGamLL( const ParametersList& params ) :
       GenericProcess( params, "lpair", "pp → p(*) ( ɣɣ → l⁺l¯ ) p(*)" ),
       n_opt_( params.get<int>( "nopt", 0 ) ),
-      pair_ ( params.get<ParametersList>( "pair" ).get<int>( "pdgid" ) ),
+      pair_ ( params.get<ParticleProperties>( "pair" ).pdgid ),
       ep1_( 0. ), ep2_( 0. ), p_cm_( 0. ),
       ec4_( 0. ), pc4_( 0. ), mc4_( 0. ), w4_( 0. ),
       p12_( 0. ), p1k2_( 0. ), p2k1_( 0. ),
@@ -58,7 +49,7 @@ namespace cepgen
       }, {
         { Particle::OutgoingBeam1, { PDG::proton } },
         { Particle::OutgoingBeam2, { PDG::proton } },
-        { Particle::CentralSystem, { (pdgid_t)pair_, (pdgid_t)pair_ } }
+        { Particle::CentralSystem, { pair_, pair_ } }
       } );
     }
 

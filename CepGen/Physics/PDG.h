@@ -46,7 +46,7 @@ namespace cepgen
       /// Default destructor
       ~PDG() = default;
 
-      void define( pdgid_t id, const ParticleProperties& props );
+      void define( const ParticleProperties& props );
       const ParticleProperties& operator()( pdgid_t ) const;
       void dump() const;
       const std::string& name( pdgid_t ) const;

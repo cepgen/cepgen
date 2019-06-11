@@ -27,8 +27,8 @@ namespace cepgen
         double onShellME( double shat, double that, double uhat ) const;
         double offShellME( double, double, double, double, double, double, const Particle::Momentum&, const Particle::Momentum& ) const;
 
-        /// PDG id of the fermion pair produced
-        const pdgid_t pair_;
+        /// Particles info for the fermion pair produced
+        const ParticleProperties pair_info_;
         const ME method_;
         //==============================================================
         // six parameters for off-shell gamma gamma --> l^+ l^-

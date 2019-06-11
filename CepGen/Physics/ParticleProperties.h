@@ -5,9 +5,11 @@
 
 namespace cepgen
 {
+  typedef unsigned int pdgid_t;
   /// A collection of physics constants associated to a single particle
   struct ParticleProperties
   {
+    pdgid_t pdgid; ///< PDG identifier
     std::string name; ///< Particle name
     std::string description; ///< Human-readable name
     short colours; ///< Colour factor

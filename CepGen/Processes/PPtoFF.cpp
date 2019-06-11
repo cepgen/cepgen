@@ -17,8 +17,8 @@ namespace cepgen
   {
     PPtoFF::PPtoFF( const ParametersList& params ) :
       GenericKTProcess( params, "pptoff", "ɣɣ → f⁺f¯", { { PDG::photon, PDG::photon } }, { PDG::muon, PDG::muon } ),
-      pair_  ( params.get<ParametersList>( "pair" ).get<int>( "pdgid" ) ),
-      method_( (ME)params.get<int>( "method", (int)ME::offShell ) ),
+      pair_info_( params.get<ParticleProperties>( "pair" ) ),
+      method_   ( (ME)params.get<int>( "method", (int)ME::offShell ) ),
       p_mat1_( 0 ), p_mat2_( 0 ), p_term_ll_( 0 ), p_term_lt_( 0 ), p_term_tt1_( 0 ), p_term_tt2_( 0 ),
       y1_( 0. ), y2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. )
     {
@@ -41,17 +41,16 @@ namespace cepgen
       registerVariable( pt_diff_, Mapping::linear, kin_.cuts.central.pt_diff, { 0., 50. }, "Fermions transverse momentum difference" );
       registerVariable( phi_pt_diff_, Mapping::linear, kin_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Fermions azimuthal angle difference" );
 
-      const auto& pair_info = PDG::get()( pair_ ); // all properties on the fermion pair
-      if ( !pair_info.fermion || pair_info.charge == 0. )
+      if ( !pair_info_.fermion || pair_info_.charge == 0. )
         throw CG_FATAL( "PPtoFF:prepare" )
-          << "Invalid fermion pair selected: " << PDG::get().name( pair_ )
-          << " (" << (int)pair_ << ")!";
+          << "Invalid fermion pair selected: " << pair_info_.description
+          << " (" << (int)pair_info_.pdgid << ")!";
 
-      mf_ = pair_info.mass; mf2_ = mf_*mf_;
-      qf_ = pair_info.charge;
-      colf_ = pair_info.colours;
+      mf_ = pair_info_.mass; mf2_ = mf_*mf_;
+      qf_ = pair_info_.charge/3.;
+      colf_ = pair_info_.colours;
       CG_DEBUG( "PPtoFF:prepare" )
-        << "Produced particles: " << pair_ << " ("
+        << "Produced particles: " << pair_info_.description << " ("
         << "mass = " << mf_ << " GeV, "
         << "charge = " << std::setprecision( 2 ) << qf_ << " e)\n"
         << "matrix element computation method: " << (int)method_ << ".";
@@ -272,7 +271,7 @@ namespace cepgen
       //     first outgoing fermion
       //=================================================================
       Particle& of1 = (*event_)[Particle::CentralSystem][0];
-      of1.setPdgId( pair_, sign );
+      of1.setPdgId( pair_info_.pdgid, sign );
       of1.setStatus( Particle::Status::FinalState );
       of1.setMomentum( p_f1_ );
 
@@ -280,7 +279,7 @@ namespace cepgen
       //     second outgoing fermion
       //=================================================================
       Particle& of2 = (*event_)[Particle::CentralSystem][1];
-      of2.setPdgId( pair_, -sign );
+      of2.setPdgId( pair_info_.pdgid, -sign );
       of2.setStatus( Particle::Status::FinalState );
       of2.setMomentum( p_f2_ );
     }

@@ -257,4 +257,47 @@ namespace cepgen
     CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
     return def;
   }
+
+  //------------------------------------------------------------------
+  // particle properties-type attributes
+  //------------------------------------------------------------------
+
+  template<> ParticleProperties
+  ParametersList::get<ParticleProperties>( std::string key, const ParticleProperties& def ) const
+  {
+    if ( !has<ParametersList>( key ) ) {
+      CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+      return def;
+    }
+    const auto& plist = get<ParametersList>( key );
+    const std::string pname = plist.has<std::string>( "name" )
+      ? plist.get<std::string>( "name" )
+      : key;
+    const std::string pdesc = plist.has<std::string>( "description" )
+      ? plist.get<std::string>( "description" )
+      : pname;
+    return ParticleProperties{
+      (pdgid_t)plist.get<int>( "pdgid", 0 ),
+      pname, pdesc,
+      (short)plist.get<int>( "colours", 1 ),
+      plist.get<double>( "mass", -1. ),
+      plist.get<double>( "width", -1. ),
+      (short)( plist.get<double>( "charge", 0 )*3 ),
+      plist.get<bool>( "fermion", false )
+    };
+  }
+
+  template<> ParametersList&
+  ParametersList::set<ParticleProperties>( std::string key, const ParticleProperties& value )
+  {
+    return set<ParametersList>( key, ParametersList()
+      .set<int>( "pdgid", value.pdgid )
+      .set<std::string>( "name", value.name )
+      .set<std::string>( "description", value.description )
+      .set<int>( "colours", value.colours )
+      .set<double>( "mass", value.mass )
+      .set<double>( "width", value.width )
+      .set<double>( "charge", value.charge*1./3 )
+      .set<bool>( "fermion", value.fermion ) );
+  }
 }
