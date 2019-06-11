@@ -24,6 +24,14 @@ namespace cepgen
     return Z != Element::invalid; // skip the proton
   }
 
+  double
+  HeavyIon::mass( const HeavyIon& hi )
+  {
+    if ( !hi )
+      throw CG_FATAL( "mass" ) << "Invalid heavy ion: " << hi << "!";
+    return (short)hi.Z*PDG::get().mass( PDG::proton );
+  }
+
   std::ostream&
   operator<<( std::ostream& os, const HeavyIon& hi )
   {
@@ -50,16 +58,5 @@ namespace cepgen
       case Element::U:  return os << "U";
     }
     return os;
-  }
-
-  namespace particleproperties
-  {
-    double
-    mass( const HeavyIon& hi )
-    {
-      if ( !hi )
-        throw CG_FATAL( "mass" ) << "Invalid heavy ion: " << hi << "!";
-      return (short)hi.Z*PDG::get().mass( PDG::proton );
-    }
   }
 }

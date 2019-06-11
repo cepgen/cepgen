@@ -27,6 +27,9 @@ namespace cepgen
     HeavyIon( pdgid_t pdg );
     /// Simple proton
     static inline HeavyIon proton() { return HeavyIon( 1, Element::H ); }
+    /// Mass of a heavy ion, in GeV/c\f$^2\f$
+    /// \param hi Heavy ion type
+    static double mass( const HeavyIon& hi );
     /// Convert the HI into a custom PDG id
     operator pdgid_t() const;
     /// Check the validity of the heavy ion
@@ -38,12 +41,6 @@ namespace cepgen
     /// Mass number
     unsigned short A;
   };
-  namespace particleproperties
-  {
-    /// Mass of a heavy ion, in GeV/c\f$^2\f$
-    /// \param hi Heavy ion type
-    double mass( const HeavyIon& hi );
-  }
 }
 
 #endif
