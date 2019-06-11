@@ -63,7 +63,7 @@ namespace cepgen
         throwPythonError( Form( "Failed to parse the configuration card %s", file ) );
 
       //--- additional particles definition
-      PyObject* pextp = PyObject_GetAttrString( cfg, "PDG" ); // new
+      PyObject* pextp = PyObject_GetAttrString( cfg, PDGLIST_NAME ); // new
       if ( pextp ) {
         parseExtraParticles( pextp );
         Py_CLEAR( pextp );
@@ -105,27 +105,27 @@ namespace cepgen
 
       Py_CLEAR( process );
 
-      PyObject* plog = PyObject_GetAttrString( cfg, "logger" ); // new
+      PyObject* plog = PyObject_GetAttrString( cfg, LOGGER_NAME ); // new
       if ( plog ) {
         parseLogging( plog );
         Py_CLEAR( plog );
       }
 
       //--- hadroniser parameters
-      PyObject* phad = PyObject_GetAttrString( cfg, "hadroniser" ); // new
+      PyObject* phad = PyObject_GetAttrString( cfg, HADR_NAME ); // new
       if ( phad ) {
         parseHadroniser( phad );
         Py_CLEAR( phad );
       }
 
       //--- generation parameters
-      PyObject* pint = PyObject_GetAttrString( cfg, "integrator" ); // new
+      PyObject* pint = PyObject_GetAttrString( cfg, INTEGRATOR_NAME ); // new
       if ( pint ) {
         parseIntegrator( pint );
         Py_CLEAR( pint );
       }
 
-      PyObject* pgen = PyObject_GetAttrString( cfg, "generator" ); // new
+      PyObject* pgen = PyObject_GetAttrString( cfg, GENERATOR_NAME ); // new
       if ( pgen ) {
         parseGenerator( pgen );
         Py_CLEAR( pgen );

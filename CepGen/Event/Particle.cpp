@@ -122,7 +122,7 @@ namespace cepgen
     if ( ret.second ) {
       CG_DEBUG_LOOP( "Particle" )
         << "Particle " << part.role() << " (pdgId=" << part.integerPdgId() << ") "
-        << "is a new daughter of " << role_ << " (pdgId=" << pdg_id_ << "%4d).";
+        << "is a new daughter of " << role_ << " (pdgId=" << pdg_id_ << ").";
 
       if ( part.mothers().find( id_ ) == part.mothers().end() )
         part.addMother( *this );

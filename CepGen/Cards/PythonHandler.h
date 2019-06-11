@@ -23,7 +23,14 @@ namespace cepgen
 
       private:
         static constexpr const char* MODULE_NAME = "mod_name";
+
         static constexpr const char* PROCESS_NAME = "process";
+        static constexpr const char* HADR_NAME = "hadroniser";
+        static constexpr const char* LOGGER_NAME = "logger";
+        static constexpr const char* INTEGRATOR_NAME = "integrator";
+        static constexpr const char* GENERATOR_NAME = "generator";
+
+        static constexpr const char* PDGLIST_NAME = "PDG";
 
         static void throwPythonError( const std::string& message );
         static std::string pythonPath( const char* file );
