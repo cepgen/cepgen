@@ -298,7 +298,7 @@ namespace cepgen
           os << Form( "%-.2f", part.charge() );
       }
       else
-        os << part.charge();
+        os << Form( "%-g", part.charge() );
       os << "\t";
       { std::ostringstream oss; oss << part.role(); os << Form( "%-8s %6d\t", oss.str().c_str(), part.status() ); }
       if ( !mothers.empty() ) {
@@ -327,8 +327,8 @@ namespace cepgen
     //
     CG_INFO( "Event" )
      << Form( "Dump of event content:\n"
-              " Id\tPDG id \tName\t\tCharge\tRole\t Status\tMother\tpx            py            pz            E      \t M         \n"
-              " --\t------ \t----\t\t------\t----\t ------\t------\t----GeV/c---  ----GeV/c---  ----GeV/c---  ----GeV/c---\t --GeV/c²--"
+              " Id\tPDG id\t   Name\t\tCharge\tRole\t Status\tMother\tpx            py            pz            E      \t M         \n"
+              " --\t------\t   ----\t\t------\t----\t ------\t------\t----GeV/c---  ----GeV/c---  ----GeV/c---  ----GeV/c---\t --GeV/c²--"
               "%s\n"
               " ----------------------------------------------------------------------------------------------------------------------------------\n"
               "\t\t\t\t\t\t\tBalance% 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), p_total.px(), p_total.py(), p_total.pz(), p_total.energy() );

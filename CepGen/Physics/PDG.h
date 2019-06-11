@@ -49,7 +49,7 @@ namespace cepgen
       void define( pdgid_t id, const ParticleProperties& props );
       const ParticleProperties& operator()( pdgid_t ) const;
       void dump() const;
-      const char* name( pdgid_t ) const;
+      std::string name( pdgid_t ) const;
 
     private:
       explicit PDG();

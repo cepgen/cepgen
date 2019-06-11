@@ -7,7 +7,7 @@ namespace cepgen
 {
   PDG::PDG()
   {
-    define( invalid, { "[...]", 0, -1, -1., -1., 0, false } );
+    define( invalid, { "[...]", "", 0, -1, -1., 0, false } );
     //--- SM quarks
     define( down, { "down", "d", 3, 0.0048, 0., -1, true } );
     define( up, { "up", "u", 3, 0.0023, 0., 2, true } );
@@ -29,8 +29,8 @@ namespace cepgen
     define( W, { "W", "W\u00B1", 0, 80.385, 2.085, 3, false } );
     //--- nucleons
     define( proton, { "proton", "p", 0, 0.938272046, 0., 3, false } );
-    define( diffractiveProton, { "diff_proton", "p*", 0, 0., 0., 3, false } );
-    define( neutron, { "neutron", "neutron", 0, 0.939565346, 0., 0, false } );
+    define( diffractiveProton, { "diff_proton", "p\u002A", 0, 0., 0., 3, false } );
+    define( neutron, { "neutron", "n", 0, 0.939565346, 0., 0, false } );
     //--- general mesons & baryons
     define( piPlus, { "pi_plus", "\u03C0\u00B1", 1, 0.13957018, -1., 3, false } );
     define( piZero, { "pi_zero", "\u03C0\u2070", 1, 0.1349766, -1., 0, false } );
@@ -50,6 +50,23 @@ namespace cepgen
     define( pomeron, { "pomeron", "\u2119", 0, 0., 0., 0, false } );
     define( reggeon, { "reggeon", "\u211D", 0, 0., 0., 0, false } );
   }
+
+  //--------------------------------------------------------------------
+
+  std::ostream&
+  operator<<( std::ostream& os, const ParticleProperties& prop )
+  {
+    return os << prop.name << "{"
+      << "desc=" << prop.description
+      << ",colours=" << prop.colours
+      << ",mass=" << prop.mass
+      << ",width=" << prop.width
+      << ",charge=" << prop.charge
+      << ( prop.fermion ? ",fermion" : "" )
+      << "}";
+  }
+
+  //--------------------------------------------------------------------
 
   PDG&
   PDG::get()
@@ -72,13 +89,12 @@ namespace cepgen
   void
   PDG::define( pdgid_t id, const ParticleProperties& props )
   {
-    CG_INFO( "PDG:define" ) << "Adding a new particle with "
-      << "PDG id=" << id << ", "
-      << "name=" << props.description << " (" << props.name << ")";
+    CG_DEBUG( "PDG:define" ) << "Adding a new particle with "
+      << "PDG id=" << std::setw( 8 ) << id << ", " << props;
     particles_[id] = props;
   }
 
-  const char*
+  std::string
   PDG::name( pdgid_t id ) const
   {
     return operator()( id ).description;
@@ -100,10 +116,7 @@ namespace cepgen
     std::ostringstream oss;
     for ( const auto& prt : tmp )
       if ( prt.first != PDG::invalid )
-        oss
-          << "\n  [" << std::setw( 8 ) << prt.first << "] "
-          << std::setw( 12 ) << prt.second.name
-          << " (" << prt.second.description << ")";
+        oss << "\n" << prt.second;
     CG_INFO( "PDG" ) << "List of particles registered:" << oss.str();
   }
 }
