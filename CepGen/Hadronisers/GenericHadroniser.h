@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <memory>
-#include <iostream>
+#include <iosfwd>
 
 namespace cepgen
 {

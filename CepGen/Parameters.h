@@ -77,10 +77,6 @@ namespace cepgen
       };
       Integration& integration() { return integration_; }
       const Integration& integration() const { return integration_; }
-      /*void setResults( double res, double err_res ) {
-        integration_.result = res;
-        integration_.err_result = err_res;
-      }*/
 
       //----- events generation
 

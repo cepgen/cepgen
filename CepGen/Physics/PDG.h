@@ -1,7 +1,6 @@
 #ifndef CepGen_Physics_PDG_h
 #define CepGen_Physics_PDG_h
 
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/ParticleProperties.h"
 
 #include <unordered_map>

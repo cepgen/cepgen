@@ -1,7 +1,7 @@
-#ifndef CepGen_Export_ExportHandler_h
-#define CepGen_Export_ExportHandler_h
+#ifndef CepGen_IO_ExportHandler_h
+#define CepGen_IO_ExportHandler_h
 
-#include <iostream>
+#include <iosfwd>
 
 namespace cepgen
 {
@@ -24,20 +24,13 @@ namespace cepgen
           LHE ///< LHEF format
         };
         /// Human-readable output name
-        friend std::ostream& operator<<( std::ostream& os, const OutputType& type ) {
-          switch ( type ) {
-            case HepMC: return os << "HepMC ASCII";
-            case LHE: return os << "LHEF";
-          }
-          return os;
-        }
+        friend std::ostream& operator<<( std::ostream& os, const OutputType& type );
 
       public:
         /// \brief Class constructor
         /// \param[in] type Requested output type
-        explicit ExportHandler( const OutputType& type ) :
-          type_( type ), event_num_( 0. ) {}
-        virtual ~ExportHandler() {}
+        explicit ExportHandler( const OutputType& type );
+        virtual ~ExportHandler() = default;
         /// Initialise the handler and its inner parameterisation
         virtual void initialise( const Parameters& ) = 0;
         /// Set the process cross section and its associated error
@@ -57,3 +50,4 @@ namespace cepgen
 }
 
 #endif
+

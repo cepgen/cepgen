@@ -75,10 +75,11 @@ namespace cepgen
       // speed up the integration process if no event is to be generated
       //================================================================
 
-      if ( !params->storage()
-        && !params->taming_functions
-        && !params->hadroniser()
-        &&  params->kinematics.cuts.central_particles.empty() )
+      if ( ( !params->storage()
+          && !params->taming_functions
+          && !params->hadroniser()
+          &&  params->kinematics.cuts.central_particles.empty() )
+        || !proc->hasEvent() )
         return weight;
 
       //================================================================

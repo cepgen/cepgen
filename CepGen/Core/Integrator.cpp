@@ -60,7 +60,7 @@ namespace cepgen
   {}
 
   //-----------------------------------------------------------------------------------------------
-  // cross section computation part
+  // integration part
   //-----------------------------------------------------------------------------------------------
 
   void
@@ -127,7 +127,7 @@ namespace cepgen
 
     if ( res != GSL_SUCCESS )
       throw CG_FATAL( "Integrator:integrate" )
-        << "Error while computing the cross-section!\n\t"
+        << "Error while performing the integration!\n\t"
         << "GSL error: " << gsl_strerror( res ) << ".";
   }
 

@@ -20,7 +20,7 @@ namespace cepgen
 
       private:
         /// Initialize a logging object
-        Logger( std::ostream* os = &std::cout ) :
+        Logger( std::ostream* os ) :
           level( Level::information ), output( os ) {}
 
 #if !defined(__CINT__) && !defined(__CLING__)

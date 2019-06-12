@@ -4,7 +4,8 @@
 #include <unordered_map>
 #include <vector>
 #include <memory>
-#include <iostream>
+#include <iosfwd>
+
 namespace cepgen
 {
   class ParametersList;

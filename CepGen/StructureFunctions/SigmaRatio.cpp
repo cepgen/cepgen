@@ -2,7 +2,6 @@
 
 #include "CepGen/Physics/PDG.h"
 
-#include <iostream>
 #include <cmath>
 #include <cassert>
 
