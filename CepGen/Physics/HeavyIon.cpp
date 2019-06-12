@@ -8,8 +8,9 @@
 namespace cepgen
 {
   HeavyIon::HeavyIon( pdgid_t pdg ) :
-    Z( (Element)( pdg/1000000 == 0 ? 0
-                : ( pdg/1000 ) % 1000 ) ),
+    Z( pdg/1000000 == 0
+      ? Element::invalid
+      : (Element)( ( pdg/1000 ) % 1000 ) ),
     A( ( Z != Element::invalid ) ? pdg % 1000 : 0 )
   {}
 
