@@ -292,7 +292,7 @@ namespace cepgen
           } break;
         }
       }
-      if ( CG_EXCEPT_MATCH( "KtProcess:vars", debugInsideLoop ) ) {
+      if ( CG_LOG_MATCH( "KtProcess:vars", debugInsideLoop ) ) {
         std::ostringstream oss;
         for ( const auto& cut : mapped_variables_ ) {
           oss << "variable " << cut.index

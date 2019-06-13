@@ -55,7 +55,7 @@ namespace cepgen
       x_ = std::vector<double>( x, x+ndim );
       is_point_set_ = true;
 
-      if ( CG_EXCEPT_MATCH( "Process:dumpPoint", debugInsideLoop ) )
+      if ( CG_LOG_MATCH( "Process:dumpPoint", debugInsideLoop ) )
         dumpPoint();
     }
 
@@ -110,9 +110,8 @@ namespace cepgen
     GenericProcess::dumpPoint() const
     {
       std::ostringstream os;
-      for ( unsigned short i = 0; i < x_.size(); ++i ) {
+      for ( unsigned short i = 0; i < x_.size(); ++i )
         os << Form( "  x(%2d) = %8.6f\n\t", i, x_[i] );
-      }
       CG_INFO( "GenericProcess" )
         << "Number of integration parameters: " << x_.size() << "\n\t"
         << os.str() << ".";

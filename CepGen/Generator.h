@@ -1,7 +1,7 @@
 #ifndef CepGen_Generator_h
 #define CepGen_Generator_h
 
-#include <sstream>
+#include <iosfwd>
 #include <memory>
 #include <functional>
 

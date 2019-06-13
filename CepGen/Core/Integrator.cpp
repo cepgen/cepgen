@@ -352,7 +352,7 @@ namespace cepgen
       sum2p += sig2;
 
       // per-bin debugging loop
-      if ( CG_EXCEPT_MATCH( "Integrator:setGen", debugInsideLoop ) ) {
+      if ( CG_LOG_MATCH( "Integrator:setGen", debugInsideLoop ) ) {
         const double sig = sqrt( sig2 );
         const double eff = ( grid_->maxValue( i ) != 0. )
           ? grid_->maxValue( i )/av

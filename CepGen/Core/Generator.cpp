@@ -92,7 +92,7 @@ namespace cepgen
       os << "\n " << tmp;
     }
     hf.close();
-    CG_INFO( "Generator" ) << os.str();
+    CG_LOG( "Generator" ) << os.str();
   }
 
   double

@@ -82,5 +82,8 @@ namespace cepgen
   }
 }
 
+#define CG_LOG_MATCH( str, type ) \
+  cepgen::utils::Logger::get().passExceptionRule( str, cepgen::utils::Logger::Level::type )
+
 #endif
 

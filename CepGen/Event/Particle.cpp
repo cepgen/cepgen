@@ -109,7 +109,7 @@ namespace cepgen
   {
     const auto ret = daughters_.insert( part.id() );
 
-    if ( CG_EXCEPT_MATCH( "Particle", debugInsideLoop ) ) {
+    if ( CG_LOG_MATCH( "Particle", debugInsideLoop ) ) {
       std::ostringstream os;
       for ( const auto& daugh : daughters_ )
         os << Form( "\n\t * id=%d", daugh );

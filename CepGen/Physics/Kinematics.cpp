@@ -77,7 +77,7 @@ namespace cepgen
     if ( (HeavyIon)beam.pdg )
       os << (HeavyIon)beam.pdg;
     else
-      os << beam.pdg;
+      os << PDG::get().name( beam.pdg );
     os << " (" << beam.pz << " GeV/c)";
     if ( beam.kt_flux != KTFlux::invalid )
       os << " [unint.flux: " << beam.kt_flux << "]";
