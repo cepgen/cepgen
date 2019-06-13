@@ -67,12 +67,5 @@ add_subdirectory(test)
 
 #----- documentation
 
-find_package(Doxygen)
-if(DOXYGEN_FOUND)
-  set(DOXYGEN_IN ${CMAKE_SOURCE_DIR}/docs/Doxyfile.in)
-  set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-  configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
-  message(STATUS "Doxygen build started")
-  add_custom_target(doc_doxygen COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "Generating documentation with Doxygen" VERBATIM)
-endif()
+add_subdirectory(docs)
 
