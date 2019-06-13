@@ -1,0 +1,5 @@
+ErrorDocument 404 /404.html
+RedirectMatch 301 /processes/(.*)$ /processes-$1.html
+RedirectMatch 301 /steering-cards/(.*)$ /cards-$1.html
+Redirect 301 /steering-cards/ /
+Redirect 301 /structure-functions/allm /structure-functions.html

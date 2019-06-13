@@ -1,0 +1,11 @@
+:orphan:
+
+404 - not found
+###############
+
+.. figure:: /_static/diag_hidden_sq.png
+   :align: center
+   :width: 400px
+   :alt: 404 - not found
+
+   **No such thing as a monopolium**. Please double-check your path!
