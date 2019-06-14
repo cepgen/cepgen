@@ -24,9 +24,9 @@ copyright = u'2019, Laurent Forthomme'
 author = u'Laurent Forthomme'
 
 # The short X.Y version
-version = u''
+version = u'0.9'
 # The full version, including alpha/beta/rc tags
-release = u'0.9'
+release = u'0.9.4'
 
 
 # -- General configuration ---------------------------------------------------
@@ -38,7 +38,11 @@ release = u'0.9'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['breathe']
+extensions = [
+    'breathe',
+    #'sphinxemoji.sphinxemoji',
+    'sphinxcontrib.bibtex',
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -65,7 +69,7 @@ language = None
 exclude_patterns = [u'_build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = None
+pygments_style = 'default'
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -73,13 +77,17 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'classic'
+#html_theme = 'guzzle_sphinx_theme'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    'logo_only': True,
+    'display_version': True,
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -116,7 +124,7 @@ latex_elements = {
 
     # Additional stuff for the LaTeX preamble.
     #
-    # 'preamble': '',
+    # 'preamble': r'',
 
     # Latex figure (float) alignment
     #
@@ -130,6 +138,29 @@ latex_documents = [
     (master_doc, 'CepGen.tex', u'CepGen Documentation',
      u'Laurent Forthomme', 'manual'),
 ]
+
+mathjax_config = {
+  'tex2jax': {
+    'inlineMath': [ ['$','$'], ["\\(","\\)"] ],
+    'processEscapes': True,
+    'scale': 130,
+  },
+  'TeX': {
+    'Macros': {
+      'Pom': "{\\rm I\\!P}",
+      'Reg': "{\\rm I\\!R}",
+      'gg': ["{\\gamma\\gamma\\rightarrow #1}", 1],
+      'ggx': "{\\gg{X}}",
+      'ggll': "{\\gg{\ell^+\\ell^-}}",
+      'ggff': "{\\gg{{f\\bar f}}",
+      'ggww': "{\\gg{{W^+W^-}}",
+      'kt': "{k_{\\rm T}}",
+      'pt': "{p_{\\rm T}}",
+      'vecqt': "{\\bf q_{\\rm T}}",
+      'xbj': "{x_{\\rm Bj}}",
+    }
+  },
+}
 
 
 # -- Options for manual page output ------------------------------------------
@@ -173,3 +204,7 @@ epub_exclude_files = ['search.html']
 
 # Breathe Configuration
 breathe_default_project = "CepGen"
+breathe_implementation_filename_extensions = ['.cxx', '.C']
+
+#def setup(app):
+#    app.add_js_file('mathconf.js', type='text/x-mathjax-config')

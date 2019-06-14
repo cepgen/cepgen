@@ -1,5 +1,15 @@
 find_package(Doxygen)
+find_package(Sphinx)
 if(DOXYGEN_FOUND)
+  if(SPHINX_FOUND)
+    set(DOXYGEN_XML YES)
+    set(DOXYGEN_HTML NO)
+    set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/doxygen)
+  else()
+    set(DOXYGEN_XML NO)
+    set(DOXYGEN_HTML YES)
+    set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/docs)
+  endif()
   set(DOXYGEN_INPUT_DIR ${PROJECT_SOURCE_DIR}/CepGen)
   set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/doxygen)
   set(DOXYGEN_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/xml/index.xml)
@@ -16,14 +26,12 @@ if(DOXYGEN_FOUND)
                     MAIN_DEPENDENCY ${DOXYFILE_OUT} ${DOXYFILE_IN}
                     COMMENT "Generating documentation with Doxygen"
                     VERBATIM)
-  add_custom_target(Doxygen ALL DEPENDS ${DOXYGEN_INDEX_FILE})
-
-  find_package(Sphinx)
+  add_custom_target(Doxygen DEPENDS ${DOXYGEN_INDEX_FILE})
   if(SPHINX_FOUND)
     set(SPHINX_SOURCE ${CMAKE_CURRENT_SOURCE_DIR})
-    set(SPHINX_BUILD ${CMAKE_CURRENT_BINARY_DIR}/sphinx)
+    set(SPHINX_BUILD ${CMAKE_CURRENT_BINARY_DIR}/docs)
     set(SPHINX_INDEX_FILE ${SPHINX_BUILD}/index.html)
-    add_custom_target(Sphinx ALL
+    add_custom_target(Sphinx
                       COMMAND ${SPHINX_EXECUTABLE} -b html
                       # Tell Breathe where to find the Doxygen output
                       -Dbreathe_projects.CepGen=${DOXYGEN_OUTPUT_DIR}/xml

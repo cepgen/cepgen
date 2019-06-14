@@ -10,19 +10,15 @@ Welcome to CepGen's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   install
 
-
-Indices and tables
-==================
+   strfun
+   processes-devel
+   fullref
+   config-python
 
 * :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
-Docs
-====
+.. * :ref:`modindex`
+.. * :ref:`search`
 
-.. .. doxygenclass:: cepgen::Generator
-..    :members:
-.. doxygennamespace:: cepgen
-   :members:

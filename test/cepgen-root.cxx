@@ -54,8 +54,9 @@ void fill_event_tree( const cepgen::Event& event, unsigned long ev_id )
 
 /**
  * Generation of events and storage in a ROOT format
- * @author Laurent Forthomme <laurent.forthomme@cern.ch>
- * @date 27 jan 2014
+ * \author Laurent Forthomme <laurent.forthomme@cern.ch>
+ * \date 27 jan 2014
+ * \ingroup Executables
  */
 int main( int argc, char* argv[] )
 {
