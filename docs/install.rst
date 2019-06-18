@@ -11,8 +11,7 @@ You may check in parallel the latest upstream version from `the CepGen git repos
 General and usage-specific dependencies
 ---------------------------------------
 
-For successful build and operations, CepGen only requires a limited set
-of external dependencies.
+CepGen was designed to require only a limited set of external dependencies.
 
 Among the mandatory dependencies,
 
@@ -23,21 +22,21 @@ Among the mandatory dependencies,
 
 Depending on your system architecture and distribution, these dependencies may be installed the following way:
 
-* Debian/Ubuntu
+.. note:: Debian/Ubuntu
 
-.. code:: sh
+   .. code:: sh
 
-   sudo apt-get install cmake
-   sudo apt-get install g++ gfortran
-   sudo apt-get install libgsl2 libgsl-dev
+      sudo apt-get install cmake
+      sudo apt-get install g++ gfortran
+      sudo apt-get install libgsl2 libgsl-dev
 
-* RHEL/Fedora
+.. note:: RHEL/Fedora
 
-.. code:: sh
+   .. code:: sh
 
-   sudo dnf install cmake
-   sudo dnf install gcc-c++ gcc-gfortran
-   sudo dnf install gsl gsl-devel
+      sudo dnf install cmake
+      sudo dnf install gcc-c++ gcc-gfortran
+      sudo dnf install gsl gsl-devel
 
 A set of facultative libraries may also be linked against CepGen to extend its capabilities:
 

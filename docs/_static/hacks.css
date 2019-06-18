@@ -6,10 +6,26 @@
 
 body {
     background-color: #fff;
+    font-size: 11pt;
 }
 
 div.documentwrapper {
     min-width: 700px;
+}
+
+/* foldable blocks */
+
+.toggle .header {
+    display: block;
+    clear: both;
+}
+
+.toggle .header:after {
+    content: " ▶";
+}
+
+.toggle .header.open:after {
+    content: " ▼";
 }
 
 /* HEPforge hacks */
@@ -18,6 +34,8 @@ div.documentwrapper {
 .important, .important:before { content:""; background: none; }
 .warning, .warning:before { content:""; background: none; }
 .note, .note:before { content: ""; background: none }
+
+code, pre, tt { font-size: 90%; }
 
 code.pre, kbd.pre {
     display:block;
@@ -38,8 +56,41 @@ code.key, kbd.key {
     -moz-border-radius: 0;
 }
 
+li {
+    padding: 0;
+}
+
+.wy-side-nav-search {
+    background: #ddb;
+    border-bottom: #996 solid 2px;
+}
+
+.wy-side-nav-search > a, .wy-side-nav-search .wy-dropdown > a {
+    color: #333;
+}
+
+.wy-menu-vertical header, .wy-menu-vertical p.caption {
+    color: #ddb;
+}
+
+.todo, .important, .warning, .note {
+    padding: 0;
+    border: 0;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+p, li {
+    max-width: 200%;
+}
+
+
+/*div.body {
+    max-width: 900px;
+}*/
+
 div.highlight {
-    background: none;
+    background-color: #f8f8f8;
     border: 0;
     padding: 0;
     margin: 0;
@@ -50,130 +101,39 @@ div.highlight {
 /* Colors and text decoration.
  For example, :black:`text in black` or :blink:`text blinking` in rST. */
 
-.black {
-    color: black;
-}
+.black { color: black; }
+.gray { color: gray; }
+.grey { color: gray; }
+.silver { color: silver; }
+.white { color: white; }
+.maroon { color: maroon; }
+.red { color: red; }
+.magenta { color: magenta; }
+.fuchsia { color: fuchsia; }
+.pink { color: pink; }
+.orange { color: orange; }
+.yellow { color: yellow; }
+.lime { color: lime; }
+.green { color: green; }
+.olive { color: olive; }
+.teal { color: teal; }
+.cyan { color: cyan; }
+.aqua { color: aqua; }
+.blue { color: blue; }
+.navy { color: navy; }
+.purple { color: purple; }
 
-.gray {
-    color: gray;
-}
+.under { text-decoration: underline; }
+.over { text-decoration: overline; }
+.blink { text-decoration: blink; }
+.line { text-decoration: line-through; }
+.strike { text-decoration: line-through; }
 
-.grey {
-    color: gray;
-}
-
-.silver {
-    color: silver;
-}
-
-.white {
-    color: white;
-}
-
-.maroon {
-    color: maroon;
-}
-
-.red {
-    color: red;
-}
-
-.magenta {
-    color: magenta;
-}
-
-.fuchsia {
-    color: fuchsia;
-}
-
-.pink {
-    color: pink;
-}
-
-.orange {
-    color: orange;
-}
-
-.yellow {
-    color: yellow;
-}
-
-.lime {
-    color: lime;
-}
-
-.green {
-    color: green;
-}
-
-.olive {
-    color: olive;
-}
-
-.teal {
-    color: teal;
-}
-
-.cyan {
-    color: cyan;
-}
-
-.aqua {
-    color: aqua;
-}
-
-.blue {
-    color: blue;
-}
-
-.navy {
-    color: navy;
-}
-
-.purple {
-    color: purple;
-}
-
-.under {
-    text-decoration: underline;
-}
-
-.over {
-    text-decoration: overline;
-}
-
-.blink {
-    text-decoration: blink;
-}
-
-.line {
-    text-decoration: line-through;
-}
-
-.strike {
-    text-decoration: line-through;
-}
-
-.it {
-    font-style: italic;
-}
-
-.ob {
-    font-style: oblique;
-}
-
-.small {
-    font-size: small;
-}
-
-.large {
-    font-size: large;
-}
-
-.smallpar {
-    font-size: small;
-}
-
+.it { font-style: italic; }
+.ob { font-style: oblique; }
+.small { font-size: small; }
+.large { font-size: large; }
+.smallpar { font-size: small; }
 
 /* Style pour les badges en bas de la page. */
 
@@ -272,26 +232,23 @@ div.sphinxsidebar a {
 
 /* responsive for font-size. */
 
-@media (max-width: 875px) {
+/*@media (max-width: 875px) {
     body {
         font-size: 105%;
-        /* Increase font size for responsive theme */
     }
 }
 
 @media (max-width: 1480px) and (min-width: 876px) {
     body {
         font-size: 110%;
-        /* Increase font size for not-so-big screens */
     }
 }
 
 @media (min-width: 1481px) {
     body {
         font-size: 115%;
-        /* Increase even more font size for big screens */
     }
-}
+}*/
 
 
 /* Social Icons in the sidebar (available: twitter, facebook, linkedin, google+, bitbucket, github) */
