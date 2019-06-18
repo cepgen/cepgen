@@ -22,26 +22,15 @@ The parameterisation types handled in CepGen are listed in the following enumera
 
 Below, a semi-detailed review of a subset of the modellings handled in CepGen is presented.
 
-+--------------------------------------------------+----------+-------------+-------------+-------------------------------------------+
-| Name                                             | Code     | :math:`F_2` | :math:`F_L` | Description                               |
-+==================================================+==========+=============+=============+===========================================+
-| LHAPDF                                           | 1MSSSSSS | 🆗          | 🔢          | parton-level :math:`F_{2/L}`              |
-|                                                  |          |             |             |                                           |
-|                                                  |          |             |             | * M = 0 (all partons)                     |
-|                                                  |          |             |             | * M = 1 (valence)                         |
-|                                                  |          |             |             | * M = 2 (sea)                             |
-|                                                  |          |             |             |                                           |
-|                                                  |          |             |             | SSSSSS = integer LHAPDF ID code           |
-+--------------------------------------------------+----------+-------------+-------------+-------------------------------------------+
-
 .. _suriyennie:
 
 Suri-Yennie
-~~~~~~~~~~~
+-----------
 
 .. note::
-   * Legacy code: 11
+   * Legacy code: ``11``
    * Structure functions modelled: $F_E$, $F_M$
+   * Reference: :cite:`Suri:1971yx`
 
 .. doxygenclass:: cepgen::strfun::SuriYennie
    :outline:
@@ -57,48 +46,51 @@ It provides a reasonable description of SLAC data in the resonance and continuum
 .. _szczurekuleshchenko:
 
 Szczurek-Uleshchenko
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
 .. note::
-   * Legacy code: 12
+   * Legacy code: ``12``
    * Structure function modelled: $F_2$
+   * Reference: :cite:`Szczurek:1999wp`
 
 .. doxygenclass:: cepgen::strfun::SzczurekUleshchenko
    :outline:
 
-This set :cite:`Szczurek:1999wp` puts an emphasis on the low-to-intermediate $Q^2$ region and includes a smooth continuation to low-$Q^2$.
+This set puts an emphasis on the low-to-intermediate $Q^2$ region and includes a smooth continuation to low-$Q^2$.
 
 .. _bdh:
 
 Block-Durand-Ha
-~~~~~~~~~~~~~~~
+---------------
 
 .. note::
-   * Legacy code: 13
+   * Legacy code: ``13``
    * Structure function modelled: $F_2$
+   * Reference: :cite:`Block:2014kza`
 
 .. doxygenclass:: cepgen::strfun::BlockDurandHa
    :outline:
 
-.. This set :cite:`Szczurek:1999wp` puts an emphasis on the low-to-intermediate $Q^2$ region and includes a smooth continuation to low-$Q^2$.
+.. This set puts an emphasis on the low-to-intermediate $Q^2$ region and includes a smooth continuation to low-$Q^2$.
 
 Resonance models
-~~~~~~~~~~~~~~~~
+----------------
 
 .. _fiorebrasse:
 
 Fiore-Brasse
-^^^^^^^^^^^^
+~~~~~~~~~~~~
 
 .. note::
-   * Legacy code: 101
+   * Legacy code: ``101``
    * Structure function modelled: $F_2$
+   * References: :cite:`Fiore:2002re,Brasse:1976bf`
 
 .. doxygenclass:: cepgen::strfun::FioreBrasse
    :outline:
 
-This parameterisation (described in :cite:`Fiore:2002re` and :cite:`Brasse:1976bf`) gives a very good description of photoabsorption in the resonance region from low to large $Q^2$.
-Furthermore, it is extremely well reproducing JLAB data.
+This parameterisation gives a very good description of photoabsorption in the resonance region from low to large $Q^2$.
+It is designed to reproduce well JLAB and SLAC data.
 
 .. image:: _static/str-fun/fiorebrasse_f2.png
    :width: 48%
@@ -108,20 +100,21 @@ Furthermore, it is extremely well reproducing JLAB data.
 .. _christybosted:
 
 Christy-Bosted
-^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~
 
 .. note::
-   * Legacy code: 102
+   * Legacy code: ``102``
    * Structure functions modelled: $F_2$, $F_L$
+   * Reference: :cite:`Bosted:2007xd`
 
 .. doxygenclass:: cepgen::strfun::ChristyBosted
    :outline:
 
-The set developed by M.E. Christy and P.E. Bosted :cite:`Bosted:2007xd` is emphasised on the very-low :math:`Q^2` regime, with its particular use of JLAB's Hall-C data on:
+The set developed by M.E. Christy and P.E. Bosted is emphasised on the very-low $Q^2$ regime, with its particular use of JLAB's Hall-C data on:
 
-* inclusive inelastic (up to :math:`Q^2\simeq` 7.5 GeV²),
-* photoproduction at :math:`Q^2=` 0, and
-* DIS data at high-:math:`(Q^2,W)`.
+* inclusive inelastic (up to $Q^2\simeq$ 7.5 GeV²),
+* photoproduction at $Q^2$ = 0, and
+* DIS data at high-$(Q^2,W)$.
 
 .. image:: _static/str-fun/christybosted_f2.png
    :width: 48%
@@ -130,25 +123,35 @@ The set developed by M.E. Christy and P.E. Bosted :cite:`Bosted:2007xd` is empha
 
 .. .. doxygennamespace:: cepgen::strfun
 ..    :members:
-.. .. doxygennamespace:: mstw
-..    :members:
 
+CLAS
+~~~~
+
+.. note::
+   * Legacy code: ``103``
+   * Structure functions modelled: $F_2$
+   * Reference: :cite:`Osipenko:2003bu`
+
+.. doxygenclass:: cepgen::strfun::CLAS
+   :outline:
 
 Continuum models
-~~~~~~~~~~~~~~~~
+----------------
 
 ALLM parameterisation
-^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~
 
 .. note::
    * Legacy codes: ``201`` (ALLM91), ``202`` (ALLM97), ``203`` (GD07p), ``204`` (GD11p)
    * Structure function modelled: $F_2$ [#f1]_
+   * References:
+
+      A full reference of this parameterisation by *Abramowicz et al.* can be found in :cite:`Abramowicz:1991xz` (``ALLM91``) and :cite:`Abramowicz:1997ms` (``ALLM97``).
+      The HERMES Collaboration refits of this modelling, labelled ``GD07p`` and ``GD11p`` may be found in :cite:`Airapetian:2011nu`.
+
 
 .. doxygenclass:: cepgen::strfun::ALLM
    :outline:
-
-A full reference of this parameterisation by *Abramowicz et al.* can be found in :cite:`Abramowicz:1991xz` (``ALLM91``) and :cite:`Abramowicz:1997ms` (``ALLM97``).
-The HERMES Collaboration refits of this modelling, labelled ``GD07p`` and ``GD11p`` may be found in :cite:`Airapetian:2011nu`.
 
 In this continuum region modelling the $F_2$ proton structure function is parameterised as:
 
@@ -275,10 +278,45 @@ The ALLM91 tuning is fitted from all pre-HERA data points available.
    :width: 48%
 
 Perturbative models
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 MSTW grid
-^^^^^^^^^
+~~~~~~~~~
+
+.. doxygenclass:: mstw::Grid
+   :outline:
+
+LHAPDF interface
+~~~~~~~~~~~~~~~~
+
+.. note::
+   * Legacy code:
+      The legacy-equivalent signature follows the convention ``1MSSSSSS``, where:
+
+      * ``M`` specifies the set of partons included in the sum rule:
+         * ``0``: all partons,
+         * ``1``: valence quarks only, and
+         * ``2``: sea quarks only.
+
+      * ``SSSSSS`` is the integer LHAPDF ID code for the selected PDF set.
+
+   * Structure function modelled: $F_2$ [#f1]_
+   * Reference: :cite:`Whalley:2005nh`
+
+.. doxygenclass:: cepgen::strfun::Partonic
+   :outline:
+
+If linked to LHAPDF, CepGen may build the $F_2$ structure function from quark/gluon PDF content.
+
+It is computed as follows:
+
+.. math::
+
+   F_2^{\rm val}(\xbj,Q^2) = \sum_{i=1}^{n_q} e_i^2 \left[q_i(\xbj,Q^2)-\bar q_i(\xbj,Q^2)\right]\\
+   F_2^{\rm sea}(\xbj,Q^2) = 2 \sum_{i=1}^{n_q} e_i^2 \bar q_i(\xbj,Q^2)\\
+   F_2^{\rm tot}(\xbj,Q^2) = F_2^{\rm val}(\xbj,Q^2)+F_2^{\rm sea}(\xbj,Q^2)
+
+------------------------
 
 .. [#f1]
    This (set of) structure function(s) is/ar only defining :math:`F_2` and use the :math:`R` modelling-dependent relation:
@@ -287,8 +325,4 @@ MSTW grid
 
       F_L(\xbj,Q^2) = \left(1+\frac{4m_p^2\xbj^2}{Q^2}\right)\frac{R}{1+R}F_2(\xbj,Q^2).
 
-References
-~~~~~~~~~~
-
-.. bibliography:: _static/bibliography.bib
-   :cited:
+   Where this ratio can be evaluated for any $(\\xbj,Q^2)$ range of interest :cite:`Abe:1998ym,Beringer:1900zz,Sibirtsev:2013cga,Whitlow:1990gk`.

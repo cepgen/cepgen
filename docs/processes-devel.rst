@@ -12,14 +12,47 @@ In CepGen, all processes are defined as an object derivating from the following 
 :math:`k_{\rm T}`-factorised processes
 --------------------------------------
 
-Since its version 0.9, CepGen handles the transverse-momentum dependent factorisation of two-photon processes.
+.. versionadded:: 0.9
+
+The transverse-momentum dependent factorisation of two-photon processes can be simulated within CepGen.
 For this purpose, a :class:`cepgen::proc::GenericKTProcess` helper derivated-class of the earlier is introduced to allow the photon fluxes part to be transparent to the process developper.
 
 .. doxygenclass:: cepgen::proc::GenericKTProcess
    :outline:
 
+As described in `the reference papers <../bibliography#kt-factorisation>`__, the :math:`\kt`-factorisation approach allows a direct factorisation of any hard process (e.g. photon- or gluon-induced productions) while accounting for transverse components of parton virtualities.
+
+For instance, a :math:`pp\to p^{(\ast)}(\ggx)p^{(\ast)}` matrix element can be factorised through the following formalism:
+
+.. math::
+
+   \mathrm d\sigma = \int \frac{\mathrm d^2{\mathbf q_{\mathrm T}^2}_1}{\pi {\mathbf q_{\mathrm T}^2}_1}
+                       {\cal F}_{\gamma/p}^{\rm el/inel}(x_1,{\mathbf q_{\mathrm T}^2}_1)
+                       \int \frac{\mathrm d^2{\mathbf q_{\mathrm T}^2}_2}{\pi {\mathbf q_{\mathrm T}^2}_2}
+                       {\cal F}_{\gamma/p}^{\rm el/inel}(x_2,{\mathbf q_{\mathrm T}^2}_2) ~ \mathrm d\sigma^\ast,
+
+where :math:`\mathcal F_{\gamma/p}^{\rm el/inel}(x_i,\vecqt_i)` are unintegrated parton densities, and :math:`\mathrm d\sigma^\ast` the hard process factorised out of the total matrix element.
+
+Unintegrated photon fluxes
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Elastic unintegrated photon densities are expressed as functions of the proton electric and magnetic form factors :math:`G_E` and :math:`G_M`:
+
+.. math::
+
+   \mathcal F_{\gamma/p}^{\rm el}(\xi,\vecqt^2) = \frac{\alpha}{\pi}\left[(1-\xi)\left(\frac{\vecqt^2}{\vecqt^2+\xi^2 m_p^2}\right)^2 F_E(Q^2)+\frac{\xi^2}{4}\left(\frac{\vecqt^2}{\vecqt^2+\xi^2 m_p^2}\right) F_M(Q^2)\right].
+
+The inelastic contribution further requires both the diffractive state four-momentum norm :math:`M_X` and a `proton structure functions parameterisation <str-fun>`_ as an input:
+
+.. math::
+
+   \mathcal F_{\gamma/p}^{\rm inel}(\xi,\vecqt^2) = \frac{\alpha}{\pi}\Bigg[(1-\xi)\left(\frac{\vecqt^2}{\vecqt^2+\xi(M_X^2-m_p^2)+\xi^2 m_p^2}\right)^2\frac{F_2(\xbj,Q^2)}{Q^2+M_X^2-m_p^2}+{}\\
+     {}+\frac{\xi^2}{4}\frac{1}{\xbj^2} \left(\frac{\vecqt^2}{\vecqt^2+\xi(M_X^2-m_p^2)+\xi^2 m_p^2}\right) \frac{2\xbj F_1(\xbj,Q^2)}{Q^2+M_X^2-m_p^2}\Bigg],
+
+with :math:`\xbj = {Q^2}/({Q^2+M_X^2-m_p^2})` the Bjorken scaling variable.
+
 Fortran interface
------------------
+~~~~~~~~~~~~~~~~~
 
 For development or testing purposes (and increased flexibility in general), Fortran definitions of physics processes can be fed and used by CepGen for cross section computation and event generation.
 In this page a summary and hands-on example of such a Fortran implementation and linkage is described.
@@ -35,7 +68,7 @@ All these new processes are then linked to CepGen through the construction and a
 In a later paragraph, this linking recipe will be described.
 
 Output event kinematics
-~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
 
 This common block lets CepGen access the whole event structure and kinematics information.
 Beside the outgoing beam particles 4-momenta ``px`` and ``py``, it contains the PDG id and 4-momentum of all central system particles in ``pc``.
@@ -44,14 +77,14 @@ For this latter, a maximum multiplicity of 10 particles is handled by default in
 Should this maximal value not be sufficient for your implementation purposes, please get in touch with us.
 
 Process definition
-~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^
 
 This block specifies all useful run-level parameters, such as:
 
-* ``icontri``, the kinematics mode considered (1 = elastic, 2-3 = single-dissociative, 4 = double-dissociative),
-* ``iflux1``, ``iflux2``, the type of :math:`k_{\rm T}`-dependent flux used to parameterise the incoming partons’ kinematics,
+* ``icontri``, the kinematics mode considered (``1`` = elastic, ``2-3`` = single-dissociative, ``4`` = double-dissociative),
+* ``iflux1``, ``iflux2``, the type of :math:`\kt`-dependent flux used to parameterise the incoming partons’ kinematics,
 * ``imethod``, the type of matrix element considered (for flexibility),
-* ``sfmod``, the structure functions modelling used,
+* ``sfmod``, the structure functions modelling used [#f1]_,
 * ``pdg_l``, the PDG id of central particles,
 * ``inp1``, ``inp2``, the longitudinal beam momenta (in GeV/c).
 
@@ -61,34 +94,34 @@ Additionally, for heavy ions initial states, the following parameters are used:
 * ``z_nuc1``, ``z_nuc2``, the atomic numbers of positive- and negative-z incoming beam particles,
 
 :math:`k_{\rm T}`-factorisation kinematics
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This common block holds the following :math:`k_{\rm T}`-factorisation processes kinematics variables (generated and filled by the core CepGen instance):
 
 * ``q1t`` and ``q2t``, the 2-norm of transverse incoming parton virtualities,
-* ``phiq1t`` and ``phiq2t``, the equivalent azimutal angle of these virtualities,
+* ``phiq1t`` and ``phiq2t``, the equivalent azimutal angle :math:`\phi` of these virtualities,
 * ``y1`` and ``y2`` the outgoing system particles’ rapidities,
 * ``ptdiff`` and ``phiptdiff`` the 2-norm and azimutal angle of the outgoing system’s transverse momentum difference,
 * ``am_x`` and ``am_y`` the dissociative outgoing beams’ invariant masses (or :math:`m_p` for elastic parton emission from proton).
 
 Phase space cuts
-~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^
 
 A limited set of pre-registered phase space cuts (one boolean switch, a lower and an upper value to apply) may be found in this interfacing library, such as:
 
-* single particles :math:`p_{\rm T}`, energy, pseudo-rapidity :math:`\eta`,
-* central system invariant mass, :math:`p_{\rm T}`,
+* single particles :math:`\pt`, energy, pseudo-rapidity :math:`\eta`,
+* central system invariant mass, :math:`\pt`,
 * central system correlations: :math:`\Delta y`.
 
 Should this collection not be sufficient for your purposes, please contact us.
 
 Physics constants
-~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^
 
 This block introduces all useful and standard physical constants in double precision to help the process definition: :math:`m_p`, GeV²/barn, :math:`\pi`, :math:`\alpha_{\rm em}`.
 
 Matrix element definition
-~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The core definition of your process is to be implemented within a new ``.f`` file you will store in the ``External/Processes/`` directory of your local CepGen install.
 
@@ -130,7 +163,7 @@ This might get translated, for instance, into the following minimal working exam
 With the kinematics common blocks defined through the include statement described above.
 
 Helper tools
-~~~~~~~~~~~~
+^^^^^^^^^^^^
 
 To ease the work of the process developer, we provide utilitaries for the evaluation of unintegrated parton fluxes and other physics quantities through the CepGen core C++ library methods.
 The external methods exposed to the Fortran process through the include statement above are:
@@ -150,7 +183,7 @@ These can be translated in the following Fortran subroutines/functions definitio
   double precision CepGen_particle_charge,CepGen_particle_mass
 
 Overall linking
-~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^
 
 To interface your process to CepGen, edit the ``External/Processes/CepGenWrapper.cpp`` file to link your function implementation to the core processes module.
 
@@ -179,3 +212,6 @@ For this version, the following process is already registered:
 .. literalinclude:: ../External/Processes/CepGenWrapper.cpp
    :language: cpp
    :caption: List of registered external Fortran processes, as imported from ``External/Processes/CepGenWrapper.cpp``.
+
+.. [#f1]
+   See `this page <strfun>`_ for a complete list of integer-type structure functions definitions.

@@ -20,7 +20,7 @@
 # -- Project information -----------------------------------------------------
 
 project = u'CepGen'
-copyright = u'2019, Laurent Forthomme'
+copyright = u'2019, the CepGen Collaboration'
 author = u'Laurent Forthomme'
 
 # The short X.Y version
@@ -42,6 +42,8 @@ extensions = [
     'breathe',
     #'sphinxemoji.sphinxemoji',
     'sphinxcontrib.bibtex',
+    #'hachibee_sphinx_theme',
+    'sphinx.ext.mathjax',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -69,24 +71,41 @@ language = None
 exclude_patterns = [u'_build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'default'
+#pygments_style = 'colorful'
+pygments_style = None
 
 
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
-#html_theme = 'guzzle_sphinx_theme'
-html_theme = 'sphinx_rtd_theme'
+
+#import pietroalbini_sphinx_themes
+#html_theme_path = [pietroalbini_sphinx_themes.themes_path()]
+#html_theme = "pietroalbini"
+
+#import sphinx_redactor_theme
+#html_theme = 'sphinx_redactor_theme'
+#html_theme_path = [sphinx_redactor_theme.get_html_theme_path()]
+
+#html_theme = 'classic'
+#html_theme = 'sphinx_rtd_theme'
+#html_theme = 'agogo'
+html_theme = 'pyramid'
+#html_theme = 'haiku'
+#html_theme = 'traditional'
+#html_theme = 'alabaster'
+#html_theme = 'kotti_docs_theme'
+#html_theme = 'rex'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
 html_theme_options = {
-    'logo_only': True,
-    'display_version': True,
+#    'logo_only': True,
+    #'display_version': True,
+    'sidebarwidth': '300px',
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -143,7 +162,7 @@ mathjax_config = {
   'tex2jax': {
     'inlineMath': [ ['$','$'], ["\\(","\\)"] ],
     'processEscapes': True,
-    'scale': 130,
+    'scale': 80,
   },
   'TeX': {
     'Macros': {
@@ -152,8 +171,8 @@ mathjax_config = {
       'gg': ["{\\gamma\\gamma\\rightarrow #1}", 1],
       'ggx': "{\\gg{X}}",
       'ggll': "{\\gg{\ell^+\\ell^-}}",
-      'ggff': "{\\gg{{f\\bar f}}",
-      'ggww': "{\\gg{{W^+W^-}}",
+      'ggff': "{\\gg{f\\bar f}}",
+      'ggww': "{\\gg{W^+W^-}}",
       'kt': "{k_{\\rm T}}",
       'pt': "{p_{\\rm T}}",
       'vecqt': "{\\bf q_{\\rm T}}",
@@ -204,7 +223,9 @@ epub_exclude_files = ['search.html']
 
 # Breathe Configuration
 breathe_default_project = "CepGen"
-breathe_implementation_filename_extensions = ['.cxx', '.C']
+breathe_implementation_filename_extensions = ['.cxx', '.C', '.f']
 
-#def setup(app):
+def setup(app):
+    app.add_css_file('hacks.css')
 #    app.add_js_file('mathconf.js', type='text/x-mathjax-config')
+#    app.add_js_file('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML', async=True)
