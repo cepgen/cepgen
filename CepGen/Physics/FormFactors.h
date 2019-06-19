@@ -40,12 +40,6 @@ namespace cepgen
         /// Dumping operator for standard output streams
         friend std::ostream& operator<<( std::ostream&, const Parameterisation& );
 
-        double FE; ///< Electric form factor
-        double FM; ///< Magnetic form factor
-
-        double GE;
-        double GM;
-
       protected:
         virtual void compute( double q2 ) {}
         const Model model_;
@@ -54,6 +48,13 @@ namespace cepgen
         static const double mp_, mp2_;
         const Type type_;
         std::shared_ptr<strfun::Parameterisation> str_fun_;
+
+      public:
+        double FE; ///< Electric form factor
+        double FM; ///< Magnetic form factor
+
+        double GE;
+        double GM;
     };
 
     class StandardDipole : public Parameterisation

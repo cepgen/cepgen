@@ -28,7 +28,8 @@ namespace cepgen
     Parameterisation::Parameterisation( const ParametersList& params ) :
       model_( (Model)params.get<int>( "model", (int)Model::Invalid ) ),
       type_( (Type)params.get<int>( "type", (int)Type::Invalid ) ),
-      str_fun_( strfun::Parameterisation::build( params.get<ParametersList>( "structureFunctions" ) ) )
+      str_fun_( strfun::Parameterisation::build( params.get<ParametersList>( "structureFunctions" ) ) ),
+      FE( 0. ), FM( 0. ), GE( 0. ), GM( 0. )
     {}
 
     Parameterisation&
@@ -80,11 +81,11 @@ namespace cepgen
       GE = pow( 1.+q2/0.71, -2. );
       GM = MU*GE;
     }
-  }
 
-  std::ostream&
-  operator<<( std::ostream& os, const ff::Parameterisation& formfac )
-  {
-    return os << "FF{FE=" << formfac.FE << ",FM=" << formfac.FM << "}";
+    std::ostream&
+    operator<<( std::ostream& os, const ff::Parameterisation& formfac )
+    {
+      return os << "FF{FE=" << formfac.FE << ",FM=" << formfac.FM << "}";
+    }
   }
 }

@@ -1,6 +1,9 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
+
 #include "CepGen/Physics/PDG.h"
+
+#include <iomanip>
 
 namespace cepgen
 {
@@ -30,36 +33,36 @@ namespace cepgen
   std::ostream&
   operator<<( std::ostream& os, const ParametersList& params )
   {
-    for ( const auto& kv :     params.int_values_ )   os << "\n" << kv.first << ": int(" << kv.second << ")";
-    for ( const auto& kv :     params.dbl_values_ )   os << "\n" << kv.first << ": double(" << kv.second << ")";
-    for ( const auto& kv :     params.str_values_ )   os << "\n" << kv.first << ": string(" << kv.second << ")";
-    for ( const auto& kv :   params.param_values_ ) os << "\n" << kv.first << ": param({" << kv.second << "})";
-    for ( const auto& kv :     params.lim_values_ )   os << "\n" << kv.first << ": limits(" << kv.second << ")";
+    const auto beg = os.tellp();
+    for ( const auto& kv : params.int_values_ )
+      os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=int(" << kv.second << ")";
+    for ( const auto& kv : params.dbl_values_ )
+      os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=double(" << kv.second << ")";
+    for ( const auto& kv : params.str_values_ )
+      os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=string(" << kv.second << ")";
+    for ( const auto& kv : params.param_values_ )
+      os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=param({" << kv.second << "})";
+    for ( const auto& kv : params.lim_values_ )
+      os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=limits(" << kv.second << ")";
     for ( const auto& kv : params.vec_int_values_ ) {
-      os << "\n" << kv.first << ": vint(";
+      os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=vint(";
       bool first = true;
-      for ( const auto& v : kv.second ) {
-        os << ( first ? "" : ", " ) << v;
-        first = false;
-      }
+      for ( const auto& v : kv.second )
+        os << ( first ? "" : ", " ) << v, first = false;
       os << ")";
     }
     for ( const auto& kv : params.vec_dbl_values_ ) {
-      os << "\n" << kv.first << ": vdouble(";
+      os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=vdouble(";
       bool first = true;
-      for ( const auto& v : kv.second ) {
-        os << ( first ? "" : ", " ) << v;
-        first = false;
-      }
+      for ( const auto& v : kv.second )
+        os << ( first ? "" : ", " ) << v, first = false;
       os << ")";
     }
     for ( const auto& kv : params.vec_str_values_ ) {
-      os << "\n" << kv.first << ": vstring(";
+      os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=vstring(";
       bool first = true;
-      for ( const auto& v : kv.second ) {
-        os << ( first ? "" : ", " ) << v;
-        first = false;
-      }
+      for ( const auto& v : kv.second )
+        os << ( first ? "" : ", " ) << v, first = false;
       os << ")";
     }
     return os;

@@ -1029,11 +1029,14 @@ namespace cepgen
         << "Ndown = " << ndown_;
 
       //--- compute the electric/magnetic form factors for the two considered Q^2
-      ParametersList param_p1, param_p2;
+      ParametersList param_p1, param_p2, param_sf;
+      param_sf.set<int>( "id", (int)kin_.structure_functions->type );
       param_p1
-        .set<int>( "structureFunctions", (int)kin_.structure_functions->type );
+        .set<int>( "model", (int)ff::Model::StandardDipole )
+        .set<ParametersList>( "structureFunctions", param_sf );
       param_p2
-        .set<int>( "structureFunctions", (int)kin_.structure_functions->type );
+        .set<int>( "model", (int)ff::Model::StandardDipole )
+        .set<ParametersList>( "structureFunctions", param_sf );
       const double mx2 = MX_*MX_, my2 = MY_*MY_;
 
       switch ( kin_.mode ) {
@@ -1054,16 +1057,17 @@ namespace cepgen
           param_p2.set<int>( "type", (int)ff::Type::ProtonInelastic );
         } break;
       }
+      CG_DEBUG_LOOP( "GamGamLL:FormFactors" )
+        << "FF parameters: "
+        << "\n\tbeam 1: " << param_p1
+        << "\n\tbeam 2: " << param_p2;
 
-      ff::Parameterisation fp1( param_p1 ), fp2( param_p2 );
-      fp1( -t1_, w1_, mx2 );
-      fp1( -t2_, w2_, my2 );
+      auto fp1 = ff::Parameterisation::build( param_p1 )->operator()( -t1_, w1_, mx2 );
+      auto fp2 = ff::Parameterisation::build( param_p2 )->operator()( -t2_, w2_, my2 );
 
-      CG_DEBUG_LOOP( "GamGamLL" )
-        << "u1 = " << fp1.FM << "\n\t"
-        << "u2 = " << fp1.FE << "\n\t"
-        << "v1 = " << fp2.FM << "\n\t"
-        << "v2 = " << fp2.FE;
+      CG_DEBUG_LOOP( "GamGamLL:FormFactors" )
+        << "(u1,u2) = " << fp1 << "\n\t"
+        << "(v1,v2) = " << fp2;
 
       const double qqq = q1dq_*q1dq_,
                    qdq = 4.*masses_.Ml2-w4_;
@@ -1072,7 +1076,10 @@ namespace cepgen
                    t21 = 128.*( -bb_*( dd4_+g5_ )-2.*( t2_+2.*masses_.Ml2 )*( sa1_*qqq+a5_*a5_ ) ) * t2_, // magnetic-electric
                    t22 = 512.*(  bb_*( delta_*delta_-gram_ )-pow( epsi_-delta_*( qdq+q1dq2_ ), 2 )-sa1_*a6_*a6_-sa2_*a5_*a5_-sa1_*sa2_*qqq ); // electric-electric
 
-      const double peripp = ( fp1.FM*fp2.FM*t11 + fp1.FE*fp2.FM*t21 + fp1.FM*fp2.FE*t12 + fp1.FE*fp2.FE*t22 ) / pow( 2.*t1_*t2_*bb_, 2 );
+      const double peripp = ( fp1.FM*fp2.FM*t11
+                             +fp1.FE*fp2.FM*t21
+                             +fp1.FM*fp2.FE*t12
+                             +fp1.FE*fp2.FE*t22 ) / pow( 2.*t1_*t2_*bb_, 2 );
 
       CG_DEBUG_LOOP( "GamGamLL" )
         << "t11 = " << t11 << "\t" << "t12 = " << t12 << "\n\t"
