@@ -24,8 +24,12 @@ namespace cepgen
         const double x2 = x*x;
         const double q2min = x2*mp2/( 1.-x ), q2 = q2min + kt2/( 1.-x );
         //--- proton electromagnetic form factors
-        const auto& ff = FormFactors::protonElastic( q2 );
-        flux = constants::ALPHA_EM*M_1_PI/( 1.-x )/q2*( ( 1.-x )*( 1.-q2min/q2 )*ff.FE + 0.25*x2*ff.FM );
+        ParametersList params;
+        params
+          .set<int>( "type", (int)ff::Type::ProtonElastic )
+          .set<int>( "model", (int)ff::Model::StandardDipole );
+        const auto& formfac = ff::Parameterisation( params )( q2 );
+        flux = constants::ALPHA_EM*M_1_PI/( 1.-x )/q2*( ( 1.-x )*( 1.-q2min/q2 )*formfac.FE + 0.25*x2*formfac.FM );
       } break;
       case KTFlux::P_Photon_Inelastic_Budnev: {
         const double mx2 = mx*mx, x2 = x*x;

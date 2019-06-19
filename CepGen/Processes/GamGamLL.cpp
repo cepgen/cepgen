@@ -5,6 +5,7 @@
 
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
@@ -1027,8 +1028,36 @@ namespace cepgen
         << " Nup  = " << nup_ << "\n\t"
         << "Ndown = " << ndown_;
 
-      FormFactors fp1, fp2;
-      formFactors( -t1_, -t2_, fp1, fp2 );
+      //--- compute the electric/magnetic form factors for the two considered Q^2
+      ParametersList param_p1, param_p2;
+      param_p1
+        .set<int>( "structureFunctions", (int)kin_.structure_functions->type );
+      param_p2
+        .set<int>( "structureFunctions", (int)kin_.structure_functions->type );
+      const double mx2 = MX_*MX_, my2 = MY_*MY_;
+
+      switch ( kin_.mode ) {
+        case KinematicsMode::ElasticElastic: default: {
+          param_p1.set<int>( "type", (int)ff::Type::ProtonElastic );
+          param_p2.set<int>( "type", (int)ff::Type::ProtonElastic );
+        } break;
+        case KinematicsMode::ElasticInelastic: {
+          param_p1.set<int>( "type", (int)ff::Type::ProtonElastic );
+          param_p2.set<int>( "type", (int)ff::Type::ProtonInelastic );
+        } break;
+        case KinematicsMode::InelasticElastic: {
+          param_p1.set<int>( "type", (int)ff::Type::ProtonInelastic );
+          param_p2.set<int>( "type", (int)ff::Type::ProtonElastic );
+        } break;
+        case KinematicsMode::InelasticInelastic: {
+          param_p1.set<int>( "type", (int)ff::Type::ProtonInelastic );
+          param_p2.set<int>( "type", (int)ff::Type::ProtonInelastic );
+        } break;
+      }
+
+      ff::Parameterisation fp1( param_p1 ), fp2( param_p2 );
+      fp1( -t1_, w1_, mx2 );
+      fp1( -t2_, w2_, my2 );
 
       CG_DEBUG_LOOP( "GamGamLL" )
         << "u1 = " << fp1.FM << "\n\t"
@@ -1080,31 +1109,6 @@ namespace cepgen
       out = y+z+( am*zz - c / ( am*zz ) ) / 2.;
       const double ax = sqrt( pow( out-y-z, 2 )+c );
       dout = ax*log( yy );
-    }
-
-    void
-    GamGamLL::formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const
-    {
-      const double mx2 = MX_*MX_, my2 = MY_*MY_;
-
-      switch ( kin_.mode ) {
-        case KinematicsMode::ElasticElastic: default: {
-          fp1 = FormFactors::protonElastic( -t1_ );
-          fp2 = FormFactors::protonElastic( -t2_ );
-        } break;
-        case KinematicsMode::ElasticInelastic: {
-          fp1 = FormFactors::protonElastic( -t1_ );
-          fp2 = FormFactors::protonInelastic( -t2_, w2_, my2, *kin_.structure_functions );
-        } break;
-        case KinematicsMode::InelasticElastic: {
-          fp1 = FormFactors::protonInelastic( -t1_, w1_, mx2, *kin_.structure_functions );
-          fp2 = FormFactors::protonElastic( -t2_ );
-        } break;
-        case KinematicsMode::InelasticInelastic: {
-          fp1 = FormFactors::protonInelastic( -t1_, w1_, mx2, *kin_.structure_functions );
-          fp2 = FormFactors::protonInelastic( -t2_, w2_, my2, *kin_.structure_functions );
-        } break;
-      }
     }
   }
 }
