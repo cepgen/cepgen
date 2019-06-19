@@ -21,6 +21,12 @@ extern "C" {
     fl = val.FL;
   }
 
+  /// Compute a \f$k_{\rm T}\f$-dependent flux for single nucleons
+  /// \param[in] fmode Flux mode (see cepgen::KTFlux)
+  /// \param[in] x Fractional momentum loss
+  /// \param[in] kt2 The \f$k_{\rm T}\f$ transverse momentum norm
+  /// \param[in] sfmode Structure functions set for dissociative emission
+  /// \param[in] mx Diffractive state mass for dissociative emission
   double
   cepgen_kt_flux_( int& fmode, double& x, double& kt2, int& sfmode, double& mx )
   {
@@ -29,6 +35,12 @@ extern "C" {
     return ktFlux( (KTFlux)fmode, x, kt2, *sf, mx );
   }
 
+  /// Compute a \f$k_{\rm T}\f$-dependent flux for heavy ions
+  /// \param[in] fmode Flux mode (see cepgen::KTFlux)
+  /// \param[in] x Fractional momentum loss
+  /// \param[in] kt2 The \f$k_{\rm T}\f$ transverse momentum norm
+  /// \param[in] a Mass number for the heavy ion
+  /// \param[in] z Atomic number for the heavy ion
   double
   cepgen_kt_flux_hi_( int& fmode, double& x, double& kt2, int& a, int& z )
   {
@@ -36,6 +48,7 @@ extern "C" {
     return ktFlux( (KTFlux)fmode, x, kt2, HeavyIon{ (unsigned short)a, (Element)z } );
   }
 
+  /// Mass of a particle, in GeV/c^2
   double
   cepgen_particle_mass_( int& pdg_id )
   {
@@ -47,6 +60,7 @@ extern "C" {
     }
   }
 
+  /// Charge of a particle, in e
   double
   cepgen_particle_charge_( int& pdg_id )
   {

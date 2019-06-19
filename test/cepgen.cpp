@@ -12,6 +12,7 @@ using namespace std;
  * - loads the steering card variables into the environment,
  * - launches the cross-section computation and the events generation (if requested).
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
+ * \addtogroup Executables
  */
 int main( int argc, char* argv[] )
 {

@@ -1,6 +1,12 @@
+"""\file
+\brief Utilitaries for the PDG identifiers manipulation
+"""
+
 from Config.Core import Parameters
 
-PDG = Parameters( # named list of PDG identifiers
+## Named list of PDG identifiers
+# \note Minimal information required is the pdgid (unsigned int) attribute
+PDG = Parameters(
     down      = Parameters(pdgid = 1),
     up        = Parameters(pdgid = 2),
     strange   = Parameters(pdgid = 3),
@@ -19,6 +25,14 @@ PDG = Parameters( # named list of PDG identifiers
     neutron   = Parameters(pdgid = 2112),
 )
 
+## Define a new particle type into the PDG library
+# \param pdgId Integer-type PDG identifier
+# \param name Computer-safe (and preferably human-readable) particle name
+# \param mass Particle on-shell mass (in GeV/c^2)
+# \param width Decay width (in GeV)
+# \param charge Particle electric charge (in e)
+# \param colour Colour charge
+# \param fermion Is the particle following the fermion statistics?
 def registerParticle(pdgId, name, mass=0., width=0., charge=0, colour=1, fermion=False):
     PDG[name] = Parameters(
         pdgid = pdgId,
