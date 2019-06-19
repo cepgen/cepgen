@@ -47,10 +47,10 @@ Incoming state
     Second incoming particle’s momentum, in GeV
 
 * ``PMOD`` (default: ``2`` = elastic)
-    First incoming particle’s remnant mode or `structure functions modelling </strfun>`_
+    First incoming particle’s remnant mode or `structure functions modelling </structure-functions>`_
 
 * ``EMOD`` (default: ``2`` = elastic)
-    Second incoming particle’s remnant mode or `structure functions modelling </strfun>`_
+    Second incoming particle’s remnant mode or `structure functions modelling </structure-functions>`_
 
 * ``Q2MN``\ &\ ``Q2MX`` (default: ``0.0`` → ``1D5``)
     Q² range for the exchanged parton, in GeV²

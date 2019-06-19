@@ -60,12 +60,12 @@ li {
     padding: 0;
 }
 
-.wy-side-nav-search {
+.wy-nav-top, .wy-side-nav-search {
     background: #ddb;
     border-bottom: #996 solid 2px;
 }
 
-.wy-side-nav-search > a, .wy-side-nav-search .wy-dropdown > a {
+.wy-nav-top, .wy-nav-top a, .wy-side-nav-search > a, .wy-side-nav-search .wy-dropdown > a {
     color: #333;
 }
 

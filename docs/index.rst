@@ -39,6 +39,10 @@ This page is constantly evolving, but do not hesitate to contact us through the 
    pptoff/pptoll <processes-pptoff>
    pptoww <processes-pptoww>
    diffvm (𝛽) <processes-diffvm>
-   processes-devel
 
-   strfun
+.. toctree::
+   :maxdepth: 1
+   :caption: Advanced usage:
+
+   processes-devel
+   structure-functions

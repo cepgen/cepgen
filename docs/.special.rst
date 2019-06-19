@@ -1,3 +1,5 @@
+:orphan:
+
 .. Color profiles for Sphinx.
 .. Has to be used with hacks.css (bitbucket.org/lbesson/web-sphinx/src/master/.static/hacks.css)
 .. role:: black

@@ -220,4 +220,4 @@ For this version, the following process is already registered:
    :caption: List of registered external Fortran processes, as imported from ``External/Processes/CepGenWrapper.cpp``.
 
 .. [#f1]
-   See `this page <strfun>`_ for a complete list of integer-type structure functions definitions.
+   See `this page <structure-functions>`_ for a complete list of integer-type structure functions definitions.
