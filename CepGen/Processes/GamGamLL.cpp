@@ -1062,8 +1062,8 @@ namespace cepgen
         << "\n\tbeam 1: " << param_p1
         << "\n\tbeam 2: " << param_p2;
 
-      auto fp1 = ff::Parameterisation::build( param_p1 )->operator()( -t1_, w1_, mx2 );
-      auto fp2 = ff::Parameterisation::build( param_p2 )->operator()( -t2_, w2_, my2 );
+      const auto fp1 = ff::Parameterisation::build( param_p1 )->operator()( -t1_, w1_, mx2 );
+      const auto fp2 = ff::Parameterisation::build( param_p2 )->operator()( -t2_, w2_, my2 );
 
       CG_DEBUG_LOOP( "GamGamLL:FormFactors" )
         << "(u1,u2) = " << fp1 << "\n\t"

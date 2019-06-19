@@ -41,11 +41,12 @@ namespace cepgen
         friend std::ostream& operator<<( std::ostream&, const Parameterisation& );
 
       protected:
+        static const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
+        static const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
         virtual void compute( double q2 ) {}
         const Model model_;
 
       private:
-        static const double mp_, mp2_;
         const Type type_;
         std::shared_ptr<strfun::Parameterisation> str_fun_;
 
@@ -58,6 +59,29 @@ namespace cepgen
     };
 
     class StandardDipole : public Parameterisation
+    {
+      public:
+        using Parameterisation::Parameterisation;
+        void compute( double q2 ) override;
+
+      private:
+        static constexpr double MU = 2.79;
+    };
+
+    class ArringtonEtAl : public Parameterisation
+    {
+      public:
+        ArringtonEtAl( const ParametersList& );
+        void compute( double q2 ) override;
+
+      private:
+        static constexpr double MU = 2.79;
+        const int mode_;
+        std::vector<double> a_e_, b_e_;
+        std::vector<double> a_m_, b_m_;
+    };
+
+    class BrashEtAl : public Parameterisation
     {
       public:
         using Parameterisation::Parameterisation;
