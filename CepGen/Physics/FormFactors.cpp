@@ -7,6 +7,17 @@
 
 namespace cepgen
 {
+  namespace ff
+  {
+    StandardDipole&
+    StandardDipole::operator()( double q2 )
+    {
+      GE = pow( 1.+q2/0.71, -2. );
+      GM = MU*GE;
+      return *this;
+    }
+  }
+
   const double FormFactors::mp_ = PDG::get().mass( PDG::proton );
   const double FormFactors::mp2_ = FormFactors::mp_*FormFactors::mp_;
 
@@ -31,8 +42,8 @@ namespace cepgen
   FormFactors
   FormFactors::protonElastic( double q2 )
   {
-    const double GE = pow( 1.+q2/0.71, -2. ), GE2 = GE*GE;
-    const double GM = 2.79*GE, GM2 = GM*GM;
+    const auto& fac = ff::StandardDipole()( q2 );
+    const double GE2 = fac.GE*fac.GE, GM2 = fac.GM*fac.GM;
     return FormFactors( ( 4.*mp2_*GE2+q2*GM2 ) / ( 4.*mp2_+q2 ), GM2 );
   }
 

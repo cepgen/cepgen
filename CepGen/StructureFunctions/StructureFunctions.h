@@ -8,7 +8,6 @@
 
 namespace cepgen
 {
-  class ParametersList;
   namespace sigrat { class Parameterisation; }
   /// Structure functions modelling scope
   namespace strfun

@@ -1,15 +1,49 @@
 #ifndef CepGen_Physics_FormFactors_h
 #define CepGen_Physics_FormFactors_h
 
-#include <math.h>
-#include <array>
-
 #include "CepGen/Core/utils.h"
+#include "CepGen/Core/ParametersList.h"
+
 #include "CepGen/Physics/Constants.h"
+
+#include <memory>
 
 namespace cepgen
 {
   namespace strfun { class Parameterisation; }
+  namespace ff
+  {
+    /// Proton form factors to be used in the outgoing state description
+    enum struct Type {
+      StandardDipole = 0,
+      ArringtonEtAl  = 1, ///< \cite Arrington:2007ux
+      BrashEtAl      = 2, ///< \cite Brash:2001qq
+    };
+    class Parameterisation
+    {
+      public:
+        explicit Parameterisation( double q2 );
+
+        /// Build a SF parameterisation for a given type
+        static std::shared_ptr<Parameterisation> build( const Type& type, const ParametersList& params = ParametersList() );
+        /// Compute all relevant form factors functions for a given \f$Q^2\f$ value
+        virtual Parameterisation& operator()( double /*q2*/ ) { return *this; }
+
+        double GE;
+        double GM;
+    };
+
+    class StandardDipole : public Parameterisation
+    {
+      public:
+        explicit StandardDipole();
+        StandardDipole& operator()( double q2 );
+
+      private:
+        static constexpr double MU = 2.79;
+    };
+  }
+
   /// Form factors collection (electric and magnetic parts)
   class FormFactors
   {
