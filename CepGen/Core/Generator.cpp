@@ -72,10 +72,16 @@ namespace cepgen
     }
   }
 
-  void
-  Generator::setParameters( const Parameters& ip )
+  Parameters&
+  Generator::parameters()
   {
-    parameters_.reset( new Parameters( (Parameters&)ip ) ); // copy constructor
+    return *parameters_;
+  }
+
+  void
+  Generator::setParameters( Parameters& ip )
+  {
+    parameters_.reset( new Parameters( ip ) ); // copy constructor
   }
 
   void

@@ -1,6 +1,7 @@
 #include "CepGen/Processes/GenericProcess.h"
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/utils.h"
 
 #include "CepGen/Event/Event.h"
 
@@ -16,6 +17,7 @@ namespace cepgen
     const double GenericProcess::mp2_ = GenericProcess::mp_*GenericProcess::mp_;
 
     GenericProcess::GenericProcess( const ParametersList& params, const std::string& name, const std::string& description, bool has_event ) :
+      mode_( params.get<int>( "mode" ) ),
       params_( params ), name_( name ), description_( description ),
       first_run( true ),
       s_( -1. ), sqs_( -1. ),

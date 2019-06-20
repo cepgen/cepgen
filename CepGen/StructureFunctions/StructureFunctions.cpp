@@ -25,7 +25,7 @@ namespace cepgen
     {}
 
     Parameterisation::Parameterisation( const ParametersList& params ) :
-      type( (Type)params.get<int>( "id" ) ), F2( 0. ), FL( 0. ), params_( params ), old_vals_({ 0., 0. }),
+      type( (Type)params.get<int>( strfun::StructureFunctionsHandler::KEY ) ), F2( 0. ), FL( 0. ), params_( params ), old_vals_({ 0., 0. }),
       r_ratio_( sigrat::Parameterisation::build(
         params.get<ParametersList>( "sigmaRatio", ParametersList().set<int>( "id", (int)sigrat::Type::E143 ) )
       ) )

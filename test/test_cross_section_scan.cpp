@@ -26,12 +26,12 @@ int main( int argc, char* argv[] )
 
   //cepgen::Logger::get().level = cepgen::Logger::Level::error;
 
-  cepgen::Parameters& par = mg.parametersRef();
+  cepgen::Parameters& par = mg.parameters();
   par.kinematics.cuts.central.eta_single = { -2.5, 2.5 };
   par.kinematics.cuts.remnants.mass_single.max() = 1000.0;
   par.setProcess( cepgen::proc::ProcessesHandler::get().build( proc_name ) );
   par.kinematics.mode = static_cast<cepgen::KinematicsMode>( proc_mode );
-  CG_INFO( "main" ) << par;
+  CG_INFO( "main" ) << &par;
 
   double xsect, err_xsect;
 
@@ -41,7 +41,7 @@ int main( int argc, char* argv[] )
 
   for ( unsigned short i=0; i < npoints; i++ ) {
     par.kinematics.cuts.central.pt_single.min() = min_value+( max_value-min_value )*i/npoints;
-    //cout << par << endl;
+    cout << par.kinematics.cuts.central.pt_single << endl;
     mg.computeXsection( xsect, err_xsect );
     xsect_file << cepgen::Form( "%.2f\t%.5f\t%.5f\n", par.kinematics.cuts.central.pt_single.min(), xsect, err_xsect );
     cout << cepgen::Form( "%.2f\t%.5f\t%.5f\n", par.kinematics.cuts.central.pt_single.min(), xsect, err_xsect );

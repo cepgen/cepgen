@@ -1,8 +1,7 @@
 #ifndef CepGen_Physics_FormFactors_h
 #define CepGen_Physics_FormFactors_h
 
-#include "CepGen/Core/utils.h"
-#include "CepGen/Physics/Constants.h"
+#include "CepGen/Core/ModuleFactory.h"
 
 #include <memory>
 
@@ -34,8 +33,6 @@ namespace cepgen
         explicit Parameterisation();
         explicit Parameterisation( const ParametersList& );
 
-        /// Build a SF parameterisation for a given type
-        static std::shared_ptr<Parameterisation> build( const ParametersList& params );
         /// Dumping operator for standard output streams
         friend std::ostream& operator<<( std::ostream&, const Parameterisation& );
 
@@ -64,6 +61,9 @@ namespace cepgen
         double GE;
         double GM;
     };
+
+    /// A form factors parameterisations factory
+    typedef ModuleFactory<Parameterisation,int> FormFactorsHandler;
 
     class StandardDipole : public Parameterisation
     {
@@ -99,5 +99,13 @@ namespace cepgen
     };
   }
 }
+
+/// Add a structure functions definition to the list of handled parameterisation
+#define REGISTER_FF_MODEL( id, obj ) \
+  namespace cepgen { \
+    struct BUILDERNM( id ) { \
+      BUILDERNM( id )() { ff::FormFactorsHandler::get().registerModule<obj>( (int)ff::Model::id ); } }; \
+    static BUILDERNM( id ) g ## id; \
+  }
 
 #endif

@@ -50,8 +50,8 @@ namespace cepgen
       /// Build one instance of a named module
       /// \param[in] params List of parameters to be invoked by the constructor
       std::unique_ptr<T> build( ParametersList params = ParametersList() ) const {
-        if ( params.has<I>( "id" ) ) {
-          const I& idx = params.get<I>( "id" );
+        if ( params.has<I>( KEY ) ) {
+          const I& idx = params.get<I>( KEY );
           if ( map_.count( idx ) == 0 ) {
             std::ostringstream oss;
             oss << __PRETTY_FUNCTION__ << " Failed to retrieve a module with index \"" << idx << "\" from factory!";
@@ -71,6 +71,8 @@ namespace cepgen
           out.emplace_back( p.first );
         return out;
       }
+
+      static constexpr const char* KEY = "id";
 
     private:
       explicit ModuleFactory() = default;

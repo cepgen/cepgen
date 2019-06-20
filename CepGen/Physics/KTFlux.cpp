@@ -3,6 +3,7 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/GluonGrid.h"
+#include "CepGen/Physics/Constants.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
@@ -10,7 +11,6 @@
 
 namespace cepgen
 {
-  const double KTFluxParameters::kMinKTFlux = 1.e-20;
   const double KTFluxParameters::kMP = PDG::get().mass( PDG::proton );
   const double KTFluxParameters::kMP2 = KTFluxParameters::kMP*KTFluxParameters::kMP;
 
@@ -27,7 +27,7 @@ namespace cepgen
         ParametersList params;
         params
           .set<int>( "type", (int)ff::Type::ProtonElastic )
-          .set<int>( "model", (int)ff::Model::StandardDipole );
+          .set<int>( ff::FormFactorsHandler::KEY, (int)ff::Model::StandardDipole );
         const auto& formfac = ff::Parameterisation( params )( q2 );
         flux = constants::ALPHA_EM*M_1_PI/( 1.-x )/q2*( ( 1.-x )*( 1.-q2min/q2 )*formfac.FE + 0.25*x2*formfac.FM );
       } break;
@@ -48,9 +48,9 @@ namespace cepgen
       default:
         throw CG_FATAL( "GenericKTProcess:flux" ) << "Invalid flux type: " << type;
     }
-    if ( flux < KTFluxParameters::kMinKTFlux )
-      return 0.;
-    return flux;
+    if ( flux > KTFluxParameters::MIN_KT_FLUX )
+      return flux;
+    return 0.;
   }
 
   double
@@ -73,9 +73,9 @@ namespace cepgen
       default:
         throw CG_FATAL("GenericKTProcess:flux") << "Invalid flux type: " << type;
     }
-    if ( flux < KTFluxParameters::kMinKTFlux )
-      return 0.;
-    return flux;
+    if ( flux > KTFluxParameters::MIN_KT_FLUX )
+      return flux;
+    return 0.;
   }
 
   std::ostream&

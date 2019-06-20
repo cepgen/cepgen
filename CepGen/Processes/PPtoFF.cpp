@@ -8,6 +8,7 @@
 #include "CepGen/Physics/PDG.h"
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/utils.h"
 
 #include <iomanip>
 

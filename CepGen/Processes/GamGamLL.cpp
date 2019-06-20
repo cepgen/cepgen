@@ -625,9 +625,9 @@ namespace cepgen
 
       ParametersList param_p1, param_p2, param_sf;
       param_p1
-        .set<int>( "model", (int)ff::Model::StandardDipole );
+        .set<int>( ff::FormFactorsHandler::KEY, (int)ff::Model::StandardDipole );
       param_p2
-        .set<int>( "model", (int)ff::Model::StandardDipole );
+        .set<int>( ff::FormFactorsHandler::KEY, (int)ff::Model::StandardDipole );
 
       switch ( kin_.mode ) {
         case KinematicsMode::ElectronProton: default:
@@ -671,9 +671,9 @@ namespace cepgen
         << "\n\tbeam 1: " << param_p1
         << "\n\tbeam 2: " << param_p2;
 
-      ff_p1_ = ff::Parameterisation::build( param_p1 );
+      ff_p1_ = ff::FormFactorsHandler::get().build( param_p1 );
       ff_p1_->setStructureFunctions( kin_.structure_functions );
-      ff_p2_ = ff::Parameterisation::build( param_p2 );
+      ff_p2_ = ff::FormFactorsHandler::get().build( param_p2 );
       ff_p1_->setStructureFunctions( kin_.structure_functions );
     }
 

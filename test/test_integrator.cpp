@@ -50,7 +50,7 @@ main( int argc, char* argv[] )
   const double max_sigma = 3.0;
 
   cepgen::Generator mg;
-  auto& params = mg.parametersRef();
+  auto& params = mg.parameters();
   auto& integ = params.integration();
   if ( argc > 1 ) {
     const std::string int_type( argv[1] );

@@ -62,7 +62,7 @@ int main( int argc, char* argv[] ) {
   //-----------------------------------------------------------------------------------------------
 
   // We might want to cross-check visually the validity of our run
-  CG_INFO( "main" ) << mg.parameters();
+  CG_INFO( "main" ) << mg.parametersPtr();
 
   // Let there be cross-section...
   double xsec = 0., err = 0.;

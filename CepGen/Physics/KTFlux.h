@@ -11,7 +11,7 @@ namespace cepgen
   /// Collection of fundamental constants for \f$k_{\rm T}\f$ fluxes definition
   struct KTFluxParameters
   {
-    static const double kMinKTFlux; ///< Minimal value taken for a \f$\k_{\rm T}\f$-factorised flux
+    static constexpr double MIN_KT_FLUX = 1.e-20; ///< Minimal value taken for a \f$\k_{\rm T}\f$-factorised flux
     static const double kMP; ///< Proton mass, in GeV/c\f$^2\f$
     static const double kMP2; ///< Squared proton mass
   };

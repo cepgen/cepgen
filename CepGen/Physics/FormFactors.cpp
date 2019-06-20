@@ -2,8 +2,11 @@
 #include "CepGen/Physics/PDG.h"
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/utils.h"
 
 #include "CepGen/StructureFunctions/SuriYennie.h"
+
+#include <cmath>
 
 namespace cepgen
 {
@@ -12,26 +15,13 @@ namespace cepgen
     const double Parameterisation::mp_ = PDG::get().mass( PDG::proton );
     const double Parameterisation::mp2_ = Parameterisation::mp_*Parameterisation::mp_;
 
-    std::shared_ptr<Parameterisation>
-    Parameterisation::build( const ParametersList& params )
-    {
-      const auto model = (Model)params.get<int>( "model" );
-      switch ( model ) {
-        case Model::StandardDipole: return std::make_shared<StandardDipole>( params );
-        case Model::ArringtonEtAl: return std::make_shared<ArringtonEtAl>( params );
-        case Model::BrashEtAl: return std::make_shared<BrashEtAl>( params );
-        default:
-          throw CG_FATAL( "FormFactors" ) << "Invalid FF modelling requested: " << (int)model << "!";
-      }
-    }
-
     Parameterisation::Parameterisation() :
       model_( Model::Invalid ), type_( Type::Invalid ),
       FE( 0. ), FM( 0. ), GE( 0. ), GM( 0. )
     {}
 
     Parameterisation::Parameterisation( const ParametersList& params ) :
-      model_( (Model)params.get<int>( "model", (int)Model::Invalid ) ),
+      model_( (Model)params.get<int>( ff::FormFactorsHandler::KEY, (int)Model::Invalid ) ),
       type_( (Type)params.get<int>( "type", (int)Type::Invalid ) ),
       FE( 0. ), FM( 0. ), GE( 0. ), GM( 0. )
     {
@@ -73,7 +63,7 @@ namespace cepgen
               throw CG_FATAL( "FormFactors" )
                 << "Elastic proton form factors requested! Check your process definition!";
             case strfun::Type::SuriYennie: { //FIXME
-              strfun::SuriYennie sy = strfun::SuriYennie()( xbj, q2 );
+              const auto sy = strfun::SuriYennie()( xbj, q2 );
               FE = sy.F2 * xbj * sqrt( mi2 ) / q2;
               FM = sy.FM;
             } break;
@@ -168,3 +158,7 @@ namespace cepgen
     }
   }
 }
+
+REGISTER_FF_MODEL( StandardDipole, ff::StandardDipole )
+REGISTER_FF_MODEL( ArringtonEtAl, ff::ArringtonEtAl )
+REGISTER_FF_MODEL( BrashEtAl, ff::BrashEtAl )

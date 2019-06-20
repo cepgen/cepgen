@@ -8,7 +8,7 @@ using namespace std;
 int main()
 {
   cepgen::Generator gen;
-  auto& params = gen.parametersRef();
+  auto& params = gen.parameters();
   params.setProcess( cepgen::proc::ProcessesHandler::get().build( "lpair", cepgen::ParametersList()
     .set<int>( "mode", (int)cepgen::KinematicsMode::ElasticElastic )
   ) );
@@ -16,7 +16,7 @@ int main()
   params.kinematics.cuts.central.eta_single = { -2.5, 2.5 };
   params.kinematics.cuts.remnants.mass_single = { 1.07, 320. };
 
-  CG_INFO( "main" ) << params;
+  CG_INFO( "main" ) << &params;
   cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debugInsideLoop;
 
   double x[12];

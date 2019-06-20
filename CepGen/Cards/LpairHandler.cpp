@@ -57,14 +57,14 @@ namespace cepgen
 
       //--- parse the structure functions code
       auto sf_params = ParametersList()
-        .set<int>( "id", str_fun_ )
+        .set<int>( strfun::StructureFunctionsHandler::KEY, str_fun_ )
         .set<ParametersList>( "sigmaRatio", ParametersList()
           .set<int>( "id", sr_type_ ) );
       const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
       if ( str_fun_ / kLHAPDFCodeDec == 1 ) { // SF from parton
         const unsigned long icode = str_fun_ % kLHAPDFCodeDec;
         sf_params
-          .set<int>( "id", (int)strfun::Type::Partonic )
+          .set<int>( strfun::StructureFunctionsHandler::KEY, (int)strfun::Type::Partonic )
           .set<int>( "pdfId", icode % kLHAPDFPartDec )
           .set<int>( "mode", icode / kLHAPDFPartDec ); // 0, 1, 2
       }
