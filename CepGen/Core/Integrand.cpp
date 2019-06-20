@@ -79,7 +79,7 @@ namespace cepgen
           && !params->taming_functions
           && !params->hadroniser()
           &&  params->kinematics.cuts.central_particles.empty() )
-        || !proc->hasEvent() )
+        || !ev )
         return weight;
 
       //================================================================

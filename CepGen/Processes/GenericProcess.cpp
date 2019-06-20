@@ -57,6 +57,7 @@ namespace cepgen
 
       if ( CG_LOG_MATCH( "Process:dumpPoint", debugInsideLoop ) )
         dumpPoint();
+      clearEvent();
     }
 
     double

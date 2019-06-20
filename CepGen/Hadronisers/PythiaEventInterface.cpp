@@ -156,12 +156,15 @@ namespace Pythia8
           }
         }
       }
-      //std::cout << (int)p.pdgId() << std::endl;
-      if ( cepgen::PDG::get()( p.pdgId() ).colours > 1 ) {
-        if ( p.integerPdgId() > 0 ) //--- particle
-          cp_colour = central_colour;
-        else //--- anti-particle
-          cp_anticolour = central_colour;
+      try {
+        if ( cepgen::PDG::get()( p.pdgId() ).colours > 1 ) {
+          if ( p.integerPdgId() > 0 ) //--- particle
+            cp_colour = central_colour;
+          else //--- anti-particle
+            cp_anticolour = central_colour;
+        }
+      } catch ( const cepgen::Exception& ) {
+        cp_colour = cp_anticolour = central_colour;
       }
       const Vec4 mom_part( momToVec4( p.momentum() ) );
       addCorresp( sizePart(), p.id() );
