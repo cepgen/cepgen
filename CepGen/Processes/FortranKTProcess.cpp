@@ -62,7 +62,7 @@ namespace cepgen
       // feed run parameters to the common block
       //===========================================================================================
 
-      genparams_.icontri = (int)kin_.mode;
+      genparams_.icontri = (int)mode_;
       genparams_.imethod = method_;
       genparams_.sfmod = (int)kin_.structure_functions->type;
       genparams_.pdg_l = pair_;

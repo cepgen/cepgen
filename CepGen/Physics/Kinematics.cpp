@@ -15,7 +15,7 @@ namespace cepgen
 {
   Kinematics::Kinematics() :
     incoming_beams( { { 6500., PDG::proton, KTFlux::invalid }, { 6500., PDG::proton, KTFlux::invalid } } ),
-    mode( KinematicsMode::invalid ), structure_functions( new strfun::SuriYennie )
+    structure_functions( new strfun::SuriYennie )
   {}
 
   void
@@ -37,34 +37,6 @@ namespace cepgen
     const auto p1 = Particle::Momentum::fromPxPyPzM( 0., 0., +incoming_beams.first .pz, m1 );
     const auto p2 = Particle::Momentum::fromPxPyPzM( 0., 0., -incoming_beams.second.pz, m2 );
     return ( p1+p2 ).mass();
-  }
-
-  //--------------------------------------------------------------------
-  // User-friendly display of the kinematics mode
-  //--------------------------------------------------------------------
-
-  std::ostream&
-  operator<<( std::ostream& os, const KinematicsMode& pm )
-  {
-    switch ( pm ) {
-      case KinematicsMode::invalid:
-        return os << "invalid";
-      case KinematicsMode::ElectronElectron:
-        return os << "electron/electron";
-      case KinematicsMode::ElectronProton:
-        return os << "electron/proton";
-      case KinematicsMode::ProtonElectron:
-        return os << "proton/electron";
-      case KinematicsMode::ElasticElastic:
-        return os << "elastic/elastic";
-      case KinematicsMode::InelasticElastic:
-        return os << "inelastic/elastic";
-      case KinematicsMode::ElasticInelastic:
-        return os << "elastic/inelastic";
-      case KinematicsMode::InelasticInelastic:
-        return os << "inelastic/inelastic";
-    }
-    return os;
   }
 
   //--------------------------------------------------------------------

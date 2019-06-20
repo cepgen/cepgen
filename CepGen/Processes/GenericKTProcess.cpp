@@ -62,7 +62,7 @@ namespace cepgen
       const KTFlux flux1 = (KTFlux)kin_.incoming_beams.first.kt_flux,
                    flux2 = (KTFlux)kin_.incoming_beams.second.kt_flux;
 
-      if ( kin_.mode == KinematicsMode::invalid ) {
+      if ( mode_ == KinematicsMode::invalid ) {
         //--- try to extrapolate kinematics mode from unintegrated fluxes
         bool el1 = ( flux1 == KTFlux::P_Photon_Elastic
                   || flux1 == KTFlux::HI_Photon_Elastic
@@ -71,13 +71,13 @@ namespace cepgen
                   || flux2 == KTFlux::HI_Photon_Elastic
                   || flux2 == KTFlux::P_Gluon_KMR );
         if ( el1 && el2 )
-          kin_.mode = KinematicsMode::ElasticElastic;
+          mode_ = KinematicsMode::ElasticElastic;
         else if ( el1 )
-          kin_.mode = KinematicsMode::ElasticInelastic;
+          mode_ = KinematicsMode::ElasticInelastic;
         else if ( el2 )
-          kin_.mode = KinematicsMode::InelasticElastic;
+          mode_ = KinematicsMode::InelasticElastic;
         else
-          kin_.mode = KinematicsMode::InelasticInelastic;
+          mode_ = KinematicsMode::InelasticInelastic;
       }
       else {
         //--- try to extrapolate unintegrated fluxes from kinematics mode
@@ -85,8 +85,8 @@ namespace cepgen
         //==========================================================================================
         // ensure the first incoming flux is compatible with the kinematics mode
         //==========================================================================================
-        if ( ( kin_.mode == KinematicsMode::ElasticElastic
-            || kin_.mode == KinematicsMode::ElasticInelastic )
+        if ( ( mode_ == KinematicsMode::ElasticElastic
+            || mode_ == KinematicsMode::ElasticInelastic )
           && ( flux1 != KTFlux::P_Photon_Elastic ) ) {
           kin_.incoming_beams.first.kt_flux = hi1
             ? KTFlux::HI_Photon_Elastic
@@ -108,8 +108,8 @@ namespace cepgen
         //==========================================================================================
         // ensure the second incoming flux is compatible with the kinematics mode
         //==========================================================================================
-        if ( ( kin_.mode == KinematicsMode::ElasticElastic
-            || kin_.mode == KinematicsMode::InelasticElastic )
+        if ( ( mode_ == KinematicsMode::ElasticElastic
+            || mode_ == KinematicsMode::InelasticElastic )
           && ( flux2 != KTFlux::P_Photon_Elastic ) ) {
           kin_.incoming_beams.second.kt_flux = hi2
             ? KTFlux::HI_Photon_Elastic
@@ -159,9 +159,9 @@ namespace cepgen
 
       MX_ = event_->getOneByRole( Particle::IncomingBeam1 ).mass();
       MY_ = event_->getOneByRole( Particle::IncomingBeam2 ).mass();
-      if ( kin_.mode == KinematicsMode::InelasticElastic || kin_.mode == KinematicsMode::InelasticInelastic )
+      if ( mode_ == KinematicsMode::InelasticElastic || mode_ == KinematicsMode::InelasticInelastic )
         registerVariable( MX_, Mapping::square, kin_.cuts.remnants.mass_single, { 1.07, 1000. }, "Positive z proton remnant mass" );
-      if ( kin_.mode == KinematicsMode::ElasticInelastic || kin_.mode == KinematicsMode::InelasticInelastic )
+      if ( mode_ == KinematicsMode::ElasticInelastic || mode_ == KinematicsMode::InelasticInelastic )
         registerVariable( MY_, Mapping::square, kin_.cuts.remnants.mass_single, { 1.07, 1000. }, "Negative z proton remnant mass" );
 
       prepareKinematics();
@@ -324,7 +324,7 @@ namespace cepgen
       op1.setMomentum( PX_ );
       op2.setMomentum( PY_ );
 
-      switch ( kin_.mode ) {
+      switch ( mode_ ) {
         case KinematicsMode::ElasticElastic:
           op1.setStatus( Particle::Status::FinalState );
           op2.setStatus( Particle::Status::FinalState );

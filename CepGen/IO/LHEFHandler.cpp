@@ -9,6 +9,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
 
+#include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Version.h"
 
@@ -44,8 +45,8 @@ namespace cepgen
       oss_init
         << "<!--\n"
         << "  ***** Sample generated with CepGen v" << version() << " *****\n"
-        << "  * process: " << params.processName() << " (" << params.kinematics.mode << ")\n";
-      if ( params.kinematics.mode != KinematicsMode::ElasticElastic ) {
+        << "  * process: " << params.processName() << " (" << params.process()->mode() << ")\n";
+      if ( params.process()->mode() != KinematicsMode::ElasticElastic ) {
         oss_init << "  * structure functions: " << params.kinematics.structure_functions->type << "\n";
         if ( !params.hadroniserName().empty() )
           oss_init << "  * hadroniser: " << params.hadroniserName() << "\n";
@@ -56,7 +57,7 @@ namespace cepgen
         oss_init
           << "  * Q2 range (GeV2): "
           << params.kinematics.cuts.initial.q2 << "\n";
-      if ( params.kinematics.mode != KinematicsMode::ElasticElastic
+      if ( params.process()->mode() != KinematicsMode::ElasticElastic
         && params.kinematics.cuts.remnants.mass_single.valid() )
         oss_init
           << "  * remnants mass range (GeV/c2): "

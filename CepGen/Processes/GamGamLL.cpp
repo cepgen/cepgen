@@ -57,10 +57,10 @@ namespace cepgen
     unsigned int
     GamGamLL::numDimensions() const
     {
-      switch ( kin_.mode ) {
+      switch ( mode_ ) {
         case KinematicsMode::ElectronProton: default:
           throw CG_FATAL( "GamGamLL" )
-            << "Process mode " << kin_.mode << " not (yet) supported! "
+            << "Process mode " << mode_ << " not (yet) supported! "
             << "Please contact the developers to consider an implementation.";
         case KinematicsMode::ElasticElastic:
           return 7;
@@ -629,7 +629,7 @@ namespace cepgen
       param_p2
         .set<int>( ff::FormFactorsHandler::KEY, (int)ff::Model::StandardDipole );
 
-      switch ( kin_.mode ) {
+      switch ( mode_ ) {
         case KinematicsMode::ElectronProton: default:
           throw CG_FATAL( "GamGamLL" ) << "Case not yet supported!";
         case KinematicsMode::ElasticElastic:
@@ -894,12 +894,12 @@ namespace cepgen
       //--- cut on mass of final hadronic system (MX/Y)
 
       if ( mx_limits_.valid() ) {
-        if ( ( kin_.mode == KinematicsMode::InelasticElastic
-            || kin_.mode == KinematicsMode::InelasticInelastic )
+        if ( ( mode_ == KinematicsMode::InelasticElastic
+            || mode_ == KinematicsMode::InelasticInelastic )
           && !mx_limits_.passes( MX_ ) )
           return 0.;
-        if ( ( kin_.mode == KinematicsMode::ElasticInelastic
-            || kin_.mode == KinematicsMode::InelasticInelastic )
+        if ( ( mode_ == KinematicsMode::ElasticInelastic
+            || mode_ == KinematicsMode::InelasticInelastic )
           && !mx_limits_.passes( MY_ ) )
           return 0.;
       }
@@ -936,7 +936,7 @@ namespace cepgen
 
       //--- compute the structure functions factors
 
-      switch ( kin_.mode ) { // inherited from CDF version
+      switch ( mode_ ) { // inherited from CDF version
         case KinematicsMode::ElectronProton: default: jacobian_ *= periPP( 1, 2 ); break;
         case KinematicsMode::ElasticElastic:          jacobian_ *= periPP( 2, 2 ); break;
         case KinematicsMode::InelasticElastic:        jacobian_ *= periPP( 3, 2 )*pow( masses_.dw31, 2 ); break;
@@ -990,7 +990,7 @@ namespace cepgen
       Particle& op1 = event_->getOneByRole( Particle::OutgoingBeam1 );
 
       op1.setMomentum( p3_lab_ );
-      switch ( kin_.mode ) {
+      switch ( mode_ ) {
         case KinematicsMode::ElasticElastic:
         case KinematicsMode::ElasticInelastic:
         default:
@@ -1006,7 +1006,7 @@ namespace cepgen
       //----- second outgoing proton
       Particle& op2 = event_->getOneByRole( Particle::OutgoingBeam2 );
       op2.setMomentum( p5_lab_ );
-      switch ( kin_.mode ) {
+      switch ( mode_ ) {
         case KinematicsMode::ElasticElastic:
         case KinematicsMode::InelasticElastic:
         default:

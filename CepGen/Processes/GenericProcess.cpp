@@ -17,7 +17,7 @@ namespace cepgen
     const double GenericProcess::mp2_ = GenericProcess::mp_*GenericProcess::mp_;
 
     GenericProcess::GenericProcess( const ParametersList& params, const std::string& name, const std::string& description, bool has_event ) :
-      mode_( params.get<int>( "mode" ) ),
+      mode_( (KinematicsMode)params.get<int>( "mode" ) ),
       params_( params ), name_( name ), description_( description ),
       first_run( true ),
       s_( -1. ), sqs_( -1. ),
@@ -229,5 +229,33 @@ namespace cepgen
     {
       return os << proc->name().c_str();
     }
+  }
+
+  //--------------------------------------------------------------------
+  // User-friendly display of the kinematics mode
+  //--------------------------------------------------------------------
+
+  std::ostream&
+  operator<<( std::ostream& os, const KinematicsMode& pm )
+  {
+    switch ( pm ) {
+      case KinematicsMode::invalid:
+        return os << "invalid";
+      case KinematicsMode::ElectronElectron:
+        return os << "electron/electron";
+      case KinematicsMode::ElectronProton:
+        return os << "electron/proton";
+      case KinematicsMode::ProtonElectron:
+        return os << "proton/electron";
+      case KinematicsMode::ElasticElastic:
+        return os << "elastic/elastic";
+      case KinematicsMode::InelasticElastic:
+        return os << "inelastic/elastic";
+      case KinematicsMode::ElasticInelastic:
+        return os << "elastic/inelastic";
+      case KinematicsMode::InelasticInelastic:
+        return os << "inelastic/inelastic";
+    }
+    return os;
   }
 }

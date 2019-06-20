@@ -130,12 +130,12 @@ namespace cepgen
         << "s(1/2)eff = " << s1_eff << ", " << s2_eff << " GeV²\n\t"
         << "central system's invariant mass = " << invm << " GeV.";
 
-      if ( ( kin_.mode == KinematicsMode::ElasticInelastic
-          || kin_.mode == KinematicsMode::InelasticInelastic )
+      if ( ( mode_ == KinematicsMode::ElasticInelastic
+          || mode_ == KinematicsMode::InelasticInelastic )
         && ( sqrt( s1_eff ) <= ( MY_+invm ) ) )
         return 0.;
-      if ( ( kin_.mode == KinematicsMode::InelasticElastic
-          || kin_.mode == KinematicsMode::InelasticInelastic )
+      if ( ( mode_ == KinematicsMode::InelasticElastic
+          || mode_ == KinematicsMode::InelasticInelastic )
         && ( sqrt( s2_eff ) <= ( MX_+invm ) ) )
         return 0.;
 

@@ -29,8 +29,8 @@ int main( int argc, char* argv[] )
   cepgen::Parameters& par = mg.parameters();
   par.kinematics.cuts.central.eta_single = { -2.5, 2.5 };
   par.kinematics.cuts.remnants.mass_single.max() = 1000.0;
-  par.setProcess( cepgen::proc::ProcessesHandler::get().build( proc_name ) );
-  par.kinematics.mode = static_cast<cepgen::KinematicsMode>( proc_mode );
+  par.setProcess( cepgen::proc::ProcessesHandler::get().build( proc_name, cepgen::ParametersList()
+    .set<int>( "mode", proc_mode ) ) );
   CG_INFO( "main" ) << &par;
 
   double xsect, err_xsect;

@@ -13,6 +13,20 @@ namespace cepgen
 {
   class Event;
   class FormFactors;
+  /// Type of kinematics to consider for the process
+  enum class KinematicsMode
+  {
+    invalid = -1,
+    ElectronProton = 0,     ///< electron-proton elastic case
+    ElasticElastic = 1,     ///< proton-proton elastic case
+    ElasticInelastic = 2,   ///< proton-proton single-dissociative (or inelastic-elastic) case
+    InelasticElastic = 3,   ///< proton-proton single-dissociative (or elastic-inelastic) case
+    InelasticInelastic = 4, ///< proton-proton double-dissociative case
+    ProtonElectron,
+    ElectronElectron
+  };
+  /// Human-readable format of a process mode (elastic/dissociative parts)
+  std::ostream& operator<<( std::ostream&, const KinematicsMode& );
   /// Location for all physics processes to be generated
   namespace proc
   {
@@ -97,6 +111,8 @@ namespace cepgen
         inline const std::string& name() const { return name_; }
         /// Human-readable description of the process
         inline const std::string& description() const { return description_; }
+        /// Type of topology considered
+        inline const KinematicsMode& mode() const { return mode_; }
 
         /// Does the process contain (and hold) an event?
         bool hasEvent() const { return has_event_; }
@@ -143,6 +159,8 @@ namespace cepgen
         /// Virtuality of the second incoming photon
         double t2_;
 
+        /// Type of kinematics to consider for the phase space
+        KinematicsMode mode_;
         /// Set of cuts to apply on the final phase space
         Kinematics kin_;
         /// Does the process contain (and hold) an event?

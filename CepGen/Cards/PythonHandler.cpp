@@ -85,7 +85,6 @@ namespace cepgen
       const std::string proc_name = get<std::string>( pproc_name );
 
       //--- process mode
-      params_.kinematics.mode = (KinematicsMode)proc_params.get<int>( "mode", (int)KinematicsMode::invalid );
       params_.setProcess( cepgen::proc::ProcessesHandler::get().build( proc_name, proc_params ) );
 
       //--- process kinematics

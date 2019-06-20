@@ -129,7 +129,7 @@ namespace cepgen
       registerParameter<int>( "ITVG", "Number of integration iterations", (int*)&params_.integration().vegas.iterations );
       registerParameter<int>( "SEED", "Random generator seed", (int*)&params_.integration().rng_seed );
       registerParameter<int>( "NTHR", "Number of threads to use for events generation", (int*)&params_.generation().num_threads );
-      registerParameter<int>( "MODE", "Subprocess' mode", (int*)&params_.kinematics.mode );
+      registerParameter<int>( "MODE", "Subprocess' mode", (int*)&proc_params_->operator[]<int>( "mode" ) );
       registerParameter<int>( "NCSG", "Number of points to probe", (int*)&params_.generation().num_points );
       registerParameter<int>( "NGEN", "Number of events to generate", (int*)&params_.generation().maxgen );
       registerParameter<int>( "NPRN", "Number of events before printout", (int*)&params_.generation().gen_print_every );

@@ -152,7 +152,7 @@ namespace cepgen
 
     CG_DEBUG( "Generator:newInstance" )
       << "New integrator instance created\n\t"
-      << "Considered topology: " << parameters_->kinematics.mode << " case\n\t"
+      << "Considered topology: " << parameters_->process()->mode() << " case\n\t"
       << "Will proceed with " << numDimensions() << "-dimensional integration.";
 
     integrator_->integrate( result_, result_error_ );

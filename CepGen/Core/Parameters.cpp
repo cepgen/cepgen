@@ -80,7 +80,7 @@ namespace cepgen
     CG_DEBUG( "Parameters" )
       << "Run started for " << process_->name() << " process "
       << "0x" << std::hex << process_.get() << std::dec << ".\n\t"
-      << "Process mode considered: " << kinematics.mode << "\n\t"
+      << "Process mode considered: " << process_->mode() << "\n\t"
       << "   first beam: " << kinematics.incoming_beams.first << "\n\t"
       << "  second beam: " << kinematics.incoming_beams.second << "\n\t"
       << "  structure functions: " << kinematics.structure_functions;
@@ -173,11 +173,13 @@ namespace cepgen
        << std::setw( wt ) << "Process to generate"
        << ( pretty ? boldify( param->processName().c_str() ) : param->processName() );
     if ( param->process_ ) {
-      os
-        << "\n"
-        << std::setw( wt ) << "" << param->process_->description();
+      os << ", " << param->process_->description();
       for ( const auto& par : param->process()->parameters().keys() )
-        os << "\n" << std::setw( wt ) << "" << par << ": " << param->process_->parameters().getString( par ) << "\n";
+        if ( par != "mode" )
+          os << "\n" << std::setw( wt ) << "" << par << ": " << param->process_->parameters().getString( par );
+      std::ostringstream proc_mode; proc_mode << param->process_->mode();
+      if ( param->process_->mode() != KinematicsMode::invalid )
+        os << "\n" << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << "\n";
     }
     os
       << "\n"
@@ -217,7 +219,6 @@ namespace cepgen
       os
         << std::setw( wt ) << "Random number generator engine"
         << param->integration_.rng_engine->name << "\n";
-    std::ostringstream proc_mode; proc_mode << param->kinematics.mode;
     os
       << "\n"
       << std::setfill('_') << std::setw( wb+3 ) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill( ' ' ) << "\n\n"
@@ -225,9 +226,7 @@ namespace cepgen
       << param->kinematics.incoming_beams.first << ",\n" << std::setw( wt ) << ""
       << param->kinematics.incoming_beams.second << "\n"
       << std::setw( wt ) << "C.m. energy (GeV)" << param->kinematics.sqrtS() << "\n";
-    if ( param->kinematics.mode != KinematicsMode::invalid )
-      os << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << "\n";
-    if ( param->kinematics.mode != KinematicsMode::ElasticElastic )
+    if ( param->process_ && param->process_->mode() != KinematicsMode::ElasticElastic )
       os << std::setw( wt ) << "Structure functions" << *param->kinematics.structure_functions << "\n";
     os
       << "\n"
