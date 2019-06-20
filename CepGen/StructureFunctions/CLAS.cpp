@@ -230,3 +230,5 @@ namespace cepgen
     }
   }
 }
+
+REGISTER_STRFUN( CLAS, strfun::CLAS )

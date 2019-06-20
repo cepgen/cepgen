@@ -289,3 +289,5 @@ namespace cepgen
     }
   }
 }
+
+REGISTER_STRFUN( ChristyBosted, strfun::ChristyBosted )

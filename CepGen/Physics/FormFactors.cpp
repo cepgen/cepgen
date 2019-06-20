@@ -33,9 +33,17 @@ namespace cepgen
     Parameterisation::Parameterisation( const ParametersList& params ) :
       model_( (Model)params.get<int>( "model", (int)Model::Invalid ) ),
       type_( (Type)params.get<int>( "type", (int)Type::Invalid ) ),
-      str_fun_( strfun::Parameterisation::build( params.get<ParametersList>( "structureFunctions" ) ) ),
       FE( 0. ), FM( 0. ), GE( 0. ), GM( 0. )
-    {}
+    {
+      if ( params.has<ParametersList>( "structureFunctions" ) )
+        str_fun_ = strfun::StructureFunctionsHandler::get().build( params.get<ParametersList>( "structureFunctions" ) );
+    }
+
+    void
+    Parameterisation::setStructureFunctions( const std::shared_ptr<strfun::Parameterisation>& sfmod )
+    {
+      str_fun_ = sfmod;
+    }
 
     Parameterisation&
     Parameterisation::operator()( double q2, double mi2, double mf2 )
@@ -155,7 +163,8 @@ namespace cepgen
     std::ostream&
     operator<<( std::ostream& os, const ff::Parameterisation& formfac )
     {
-      return os << "FF{FE=" << formfac.FE << ",FM=" << formfac.FM << "}";
+      return os << "FF[" << (int)formfac.type_ << "|" << (int)formfac.model_
+        << "]{FE=" << formfac.FE << ",FM=" << formfac.FM << "}";
     }
   }
 }

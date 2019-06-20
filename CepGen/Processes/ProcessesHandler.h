@@ -2,15 +2,12 @@
 #define CepGen_Processes_ProcessesHandler_h
 
 #include "CepGen/Core/ModuleFactory.h"
-#include "CepGen/Core/ParametersList.h"
 
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Processes/FortranKTProcess.h"
 
 /** \file */
 
-#define BUILDERNM( obj ) obj ## Builder
-#define STRINGIFY( name ) #name
 /// Add a generic process definition to the list of handled processes
 #define REGISTER_PROCESS( name, obj ) \
   namespace cepgen { namespace proc { \

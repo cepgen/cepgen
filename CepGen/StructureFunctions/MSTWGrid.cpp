@@ -9,27 +9,6 @@
 
 namespace mstw
 {
-  const unsigned int Grid::good_magic = 0x5754534d; // MSTW in ASCII
-  std::shared_ptr<Grid> Grid::singl_;
-
-  std::shared_ptr<Grid>
-  Grid::get( const char* filename )
-  {
-    if ( !singl_ )
-      singl_.reset( new Grid( cepgen::ParametersList()
-        .set<int>( "id", (int)cepgen::strfun::Type::MSTWgrid )
-        .set<std::string>( "gridPath", filename ) ) );
-    return singl_;
-  }
-
-  std::shared_ptr<Grid>
-  Grid::get( const cepgen::ParametersList& params )
-  {
-    if ( !singl_ )
-      singl_.reset( new Grid( params ) );
-    return singl_;
-  }
-
   Grid::Grid( const cepgen::ParametersList& params ) :
     cepgen::strfun::Parameterisation( params ),
     cepgen::GridHandler<2,2>( cepgen::GridType::logarithmic )
@@ -44,8 +23,8 @@ namespace mstw
 
       // first checks on the file header
 
-      if ( header_.magic != good_magic )
-        throw CG_FATAL( "MSTW" ) << "Wrong magic number retrieved: " << header_.magic << ", expecting " << good_magic << ".";
+      if ( header_.magic != GOOD_MAGIC )
+        throw CG_FATAL( "MSTW" ) << "Wrong magic number retrieved: " << header_.magic << ", expecting " << GOOD_MAGIC << ".";
 
       if ( header_.nucleon != header_t::proton )
         throw CG_FATAL( "MSTW" ) << "Only proton structure function grids can be retrieved for this purpose!";
@@ -125,3 +104,5 @@ namespace mstw
     return os;
   }
 }
+
+REGISTER_STRFUN( MSTWgrid, mstw::Grid )

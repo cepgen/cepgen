@@ -169,7 +169,7 @@ namespace cepgen
       //--- structure functions set for incoming beams
       PyObject* psf = element( kin, "structureFunctions" ); // borrowed
       if ( psf )
-        params_.kinematics.structure_functions = strfun::Parameterisation::build( get<ParametersList>( psf ) );
+        params_.kinematics.structure_functions = strfun::StructureFunctionsHandler::get().build( get<ParametersList>( psf ) );
       //--- types of parton fluxes for kt-factorisation
       std::vector<int> kt_fluxes;
       fillParameter( kin, "ktFluxes", kt_fluxes );

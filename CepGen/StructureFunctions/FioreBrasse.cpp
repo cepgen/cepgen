@@ -103,3 +103,5 @@ namespace cepgen
     }
   }
 }
+
+REGISTER_STRFUN( FioreBrasse, strfun::FioreBrasse )

@@ -623,32 +623,58 @@ namespace cepgen
       ep1_ = p1.energy();
       ep2_ = p2.energy();
 
+      ParametersList param_p1, param_p2, param_sf;
+      param_p1
+        .set<int>( "model", (int)ff::Model::StandardDipole );
+      param_p2
+        .set<int>( "model", (int)ff::Model::StandardDipole );
+
       switch ( kin_.mode ) {
         case KinematicsMode::ElectronProton: default:
           throw CG_FATAL( "GamGamLL" ) << "Case not yet supported!";
         case KinematicsMode::ElasticElastic:
-          masses_.dw31 = masses_.dw52 = 0.; break;
+          masses_.dw31 = masses_.dw52 = 0.;
+          param_p1.set<int>( "type", (int)ff::Type::ProtonElastic );
+          param_p2.set<int>( "type", (int)ff::Type::ProtonElastic );
+          break;
         case KinematicsMode::InelasticElastic: {
           const double m = computeOutgoingPrimaryParticlesMasses( x( 7 ), p1.mass(), sqrt( masses_.Ml2 ), masses_.dw31 );
           event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( m );
           event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( PDG::get().mass( p2.pdgId() ) );
+          param_p1.set<int>( "type", (int)ff::Type::ProtonInelastic );
+          param_p2.set<int>( "type", (int)ff::Type::ProtonElastic );
         } break;
         case KinematicsMode::ElasticInelastic: {
           const double m = computeOutgoingPrimaryParticlesMasses( x( 7 ), p2.mass(), sqrt( masses_.Ml2 ), masses_.dw52 );
           event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( PDG::get().mass( p1.pdgId() ) );
           event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( m );
+          param_p1.set<int>( "type", (int)ff::Type::ProtonElastic );
+          param_p2.set<int>( "type", (int)ff::Type::ProtonInelastic );
         } break;
         case KinematicsMode::InelasticInelastic: {
           const double mx = computeOutgoingPrimaryParticlesMasses( x( 7 ), p2.mass(), sqrt( masses_.Ml2 ), masses_.dw31 );
           event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( mx );
           const double my = computeOutgoingPrimaryParticlesMasses( x( 8 ), p1.mass(), sqrt( masses_.Ml2 ), masses_.dw52 );
           event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( my );
+          param_p1.set<int>( "type", (int)ff::Type::ProtonInelastic );
+          param_p2.set<int>( "type", (int)ff::Type::ProtonInelastic );
         } break;
       }
+
       MX_ = event_->getOneByRole( Particle::OutgoingBeam1 ).mass();
       MY_ = event_->getOneByRole( Particle::OutgoingBeam2 ).mass();
       masses_.MX2 = MX_*MX_;
       masses_.MY2 = MY_*MY_;
+
+      CG_DEBUG_LOOP( "GamGamLL:FormFactors" )
+        << "FF parameters: "
+        << "\n\tbeam 1: " << param_p1
+        << "\n\tbeam 2: " << param_p2;
+
+      ff_p1_ = ff::Parameterisation::build( param_p1 );
+      ff_p1_->setStructureFunctions( kin_.structure_functions );
+      ff_p2_ = ff::Parameterisation::build( param_p2 );
+      ff_p1_->setStructureFunctions( kin_.structure_functions );
     }
 
     //---------------------------------------------------------------------------------------------
@@ -1029,41 +1055,9 @@ namespace cepgen
         << "Ndown = " << ndown_;
 
       //--- compute the electric/magnetic form factors for the two considered Q^2
-      ParametersList param_p1, param_p2, param_sf;
-      param_sf.set<int>( "id", (int)kin_.structure_functions->type );
-      param_p1
-        .set<int>( "model", (int)ff::Model::StandardDipole )
-        .set<ParametersList>( "structureFunctions", param_sf );
-      param_p2
-        .set<int>( "model", (int)ff::Model::StandardDipole )
-        .set<ParametersList>( "structureFunctions", param_sf );
       const double mx2 = MX_*MX_, my2 = MY_*MY_;
-
-      switch ( kin_.mode ) {
-        case KinematicsMode::ElasticElastic: default: {
-          param_p1.set<int>( "type", (int)ff::Type::ProtonElastic );
-          param_p2.set<int>( "type", (int)ff::Type::ProtonElastic );
-        } break;
-        case KinematicsMode::ElasticInelastic: {
-          param_p1.set<int>( "type", (int)ff::Type::ProtonElastic );
-          param_p2.set<int>( "type", (int)ff::Type::ProtonInelastic );
-        } break;
-        case KinematicsMode::InelasticElastic: {
-          param_p1.set<int>( "type", (int)ff::Type::ProtonInelastic );
-          param_p2.set<int>( "type", (int)ff::Type::ProtonElastic );
-        } break;
-        case KinematicsMode::InelasticInelastic: {
-          param_p1.set<int>( "type", (int)ff::Type::ProtonInelastic );
-          param_p2.set<int>( "type", (int)ff::Type::ProtonInelastic );
-        } break;
-      }
-      CG_DEBUG_LOOP( "GamGamLL:FormFactors" )
-        << "FF parameters: "
-        << "\n\tbeam 1: " << param_p1
-        << "\n\tbeam 2: " << param_p2;
-
-      const auto fp1 = ff::Parameterisation::build( param_p1 )->operator()( -t1_, w1_, mx2 );
-      const auto fp2 = ff::Parameterisation::build( param_p2 )->operator()( -t2_, w2_, my2 );
+      const auto fp1 = ff_p1_->operator()( -t1_, w1_, mx2 );
+      const auto fp2 = ff_p2_->operator()( -t2_, w2_, my2 );
 
       CG_DEBUG_LOOP( "GamGamLL:FormFactors" )
         << "(u1,u2) = " << fp1 << "\n\t"

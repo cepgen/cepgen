@@ -5,6 +5,7 @@
 
 namespace cepgen
 {
+  namespace ff { class Parameterisation; }
   namespace proc
   {
     /**
@@ -207,6 +208,7 @@ namespace cepgen
          */
         void map( double expo, const Limits& lim, double& out, double& dout, const std::string& var_name = "" );
         void mapla( double y, double z, int u, const Limits& lim, double& x, double& d );
+        std::shared_ptr<ff::Parameterisation> ff_p1_, ff_p2_;
     };
   }
 }

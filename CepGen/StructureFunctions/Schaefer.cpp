@@ -14,9 +14,9 @@ namespace cepgen
       q2_cut_( params.get<double>( "Q2cut", 9. ) ),
       w2_lim_( params.get<std::vector<double> >( "W2limits", { 3., 4. } ) ),
       higher_twist_( params.get<bool>( "higherTwist", true ) ),
-      resonances_model_  ( Parameterisation::build( params.get<ParametersList>( "resonancesSF", ParametersList().set<int>( "id", (int)Type::ChristyBosted ) ) ) ),
-      perturbative_model_( Parameterisation::build( params.get<ParametersList>( "perturbativeSF", ParametersList().set<int>( "id", (int)Type::MSTWgrid ) ) ) ),
-      continuum_model_   ( Parameterisation::build( params.get<ParametersList>( "continuumSF", ParametersList().set<int>( "id", (int)Type::GD11p ) ) ) ),
+      resonances_model_  ( StructureFunctionsHandler::get().build( params.get<ParametersList>( "resonancesSF", ParametersList().set<int>( "id", (int)Type::ChristyBosted ) ) ) ),
+      perturbative_model_( StructureFunctionsHandler::get().build( params.get<ParametersList>( "perturbativeSF", ParametersList().set<int>( "id", (int)Type::MSTWgrid ) ) ) ),
+      continuum_model_   ( StructureFunctionsHandler::get().build( params.get<ParametersList>( "continuumSF", ParametersList().set<int>( "id", (int)Type::GD11p ) ) ) ),
       initialised_( false ), inv_omega_range_( -1. )
     {}
 
@@ -111,3 +111,5 @@ namespace cepgen
     }
   }
 }
+
+REGISTER_STRFUN( Schaefer, strfun::Schaefer )

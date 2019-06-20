@@ -33,12 +33,19 @@ namespace cepgen
       public:
         explicit Parameterisation();
         explicit Parameterisation( const ParametersList& );
+
         /// Build a SF parameterisation for a given type
         static std::shared_ptr<Parameterisation> build( const ParametersList& params );
-        /// Compute all relevant form factors functions for a given \f$Q^2\f$ value
-        Parameterisation& operator()( double /*q2*/, double mi2 = 0., double mf2 = 0. );
         /// Dumping operator for standard output streams
         friend std::ostream& operator<<( std::ostream&, const Parameterisation& );
+
+        /// Specify the structure functions modelling where applicable
+        void setStructureFunctions( const std::shared_ptr<strfun::Parameterisation>& );
+        const Type& type() const { return type_; }
+        const Model& model() const { return model_; }
+
+        /// Compute all relevant form factors functions for a given \f$Q^2\f$ value
+        Parameterisation& operator()( double /*q2*/, double mi2 = 0., double mf2 = 0. );
 
       protected:
         static const double mp_; ///< Proton mass, in GeV/c\f$^2\f$

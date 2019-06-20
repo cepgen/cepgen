@@ -216,3 +216,7 @@ namespace cepgen
   }
 }
 
+REGISTER_STRFUN_PARAMS( ALLM91, strfun::ALLM, ParametersList().set<std::string>( "model", "ALLM91" ) )
+REGISTER_STRFUN_PARAMS( ALLM97, strfun::ALLM, ParametersList().set<std::string>( "model", "ALLM97" ) )
+REGISTER_STRFUN_PARAMS( GD07p, strfun::ALLM, ParametersList().set<std::string>( "model", "GD07p" ) )
+REGISTER_STRFUN_PARAMS( GD11p, strfun::ALLM, ParametersList().set<std::string>( "model", "GD11p" ) )
