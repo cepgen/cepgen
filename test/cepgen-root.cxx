@@ -69,7 +69,7 @@ int main( int argc, char* argv[] )
     throw CG_FATAL( "main" ) << "Usage: " << argv[0] << " input-card [filename=events.root]";
 
   mg.setParameters( cepgen::card::Handler::parse( argv[1] ) );
-  CG_INFO( "main" ) << mg.parameters();
+  CG_INFO( "main" ) << mg.parametersPtr();
 
   //----- open the output root file
 

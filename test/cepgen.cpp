@@ -26,7 +26,7 @@ int main( int argc, char* argv[] )
   gen.setParameters( cepgen::card::Handler::parse( argv[1] ) );
 
   //--- list all parameters
-  CG_LOG( "main" ) << gen.parameters();
+  CG_LOG( "main" ) << gen.parametersPtr();
 
   cepgen::utils::AbortHandler ctrl_c;
 

@@ -12,6 +12,7 @@ int main( int argc, char* argv[] )
 
   cepgen::Generator gen;
   gen.setParameters( cepgen::card::Handler::parse( argv[1] ) );
+  CG_INFO( "main" ) << gen.parametersPtr();
 
   cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debugInsideLoop;
 
