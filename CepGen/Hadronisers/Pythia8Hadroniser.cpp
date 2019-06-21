@@ -80,6 +80,7 @@ namespace cepgen
       switch ( params_->kinematics.mode ) {
         case KinematicsMode::ElasticElastic: {
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 3 );
+          pythia_->settings.flag( "PartonLevel:all", false );
         } break;
         case KinematicsMode::InelasticElastic: {
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 2 );
@@ -196,7 +197,9 @@ namespace cepgen
       op.setPdgId( (pdgid_t)abs( py_part.id() ), (short)( py_part.charge()/fabs( py_part.charge() ) ) );
       op.setStatus( py_part.isFinal()
         ? Particle::Status::FinalState
-        : Particle::Status::Propagator );
+        : (Particle::Role)role == Particle::Role::CentralSystem
+          ? Particle::Status::Propagator
+          : Particle::Status::Fragmented );
       op.setMomentum( Particle::Momentum( mom.px(), mom.py(), mom.pz(), mom.e() ) );
       op.setMass( mom.mCalc() );
       cg_evt_->addCorresp( py_part.index()-offset_, op.id() );
@@ -244,21 +247,22 @@ namespace cepgen
               << "got " << cg_part.integerPdgId() << "!";
           }
         }
+        //--- FIXME check for messed up particles parentage and discard incoming beam particles
+        /*else if ( p.mother1() > i || p.mother1() <= offset_ )
+          continue;
+        else if ( p.mother2() > i || p.mother2() <= offset_ )
+          continue;*/
         else {
           //----- new particle to be added
           const unsigned short role = findRole( ev, p );
           switch ( (Particle::Role)role ) {
-            default: break;
-            case Particle::OutgoingBeam1: {
+            case Particle::OutgoingBeam1:
               ev[Particle::OutgoingBeam1][0].setStatus( Particle::Status::Fragmented );
-              if ( abs( p.status() ) != PYTHIA_STATUS_IN_PARTON_KT )
-                break;
-            } // no break!
-            case Particle::OutgoingBeam2: {
+              break;
+            case Particle::OutgoingBeam2:
               ev[Particle::OutgoingBeam2][0].setStatus( Particle::Status::Fragmented );
-              if ( abs( p.status() ) != PYTHIA_STATUS_IN_PARTON_KT )
-                break;
-            } // no break!
+              break;
+            default: break;
           }
           // found the role ; now we can add the particle
           Particle& cg_part = addParticle( ev, p, p.p(), role );

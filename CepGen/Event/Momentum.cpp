@@ -378,10 +378,10 @@ namespace cepgen
   std::ostream&
   operator<<( std::ostream& os, const Momentum& mom )
   {
-    return os << "(E|p) = (" << std::fixed
+    return os << "(" << std::fixed
       << std::setw( 9 ) << mom.energy_ << "|"
       << std::setw( 9 ) << mom.px_ << " "
       << std::setw( 9 ) << mom.py_ << " "
-      << std::setw( 9 ) << mom.pz_ << ")";
+      << std::setw( 9 ) << mom.pz_ << ")" << std::defaultfloat;
   }
 }

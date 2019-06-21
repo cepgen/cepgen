@@ -57,7 +57,7 @@ namespace Pythia8
       /// \return Pythia8 particle id
       unsigned short pythiaId( unsigned short cg_id ) const;
       /// Add a CepGen particle to the event content
-      void addCepGenParticle( const cepgen::Particle& part, int status,
+      void addCepGenParticle( const cepgen::Particle& part, int status = INVALID_ID,
                               const std::pair<int,int>& mothers = { 0, 0 },
                               const std::pair<int,int>& colours = { 0, 0 } );
       /// Register a new Pythia8 / CepGen particle mapping
@@ -68,11 +68,13 @@ namespace Pythia8
       void dumpCorresp() const;
 
       static constexpr unsigned short INVALID_ID = 999; ///< Invalid id association
+      static constexpr unsigned short MIN_COLOUR_INDEX = 501; ///< Minimal colour indexing number
 
       inline bool setInit() override { return true; }
       inline bool setEvent( int ) override { return true; }
 
     private:
+      std::pair<int,int> findMothers( const cepgen::Event& ev, const cepgen::Particle& p ) const;
       static const double mp_, mp2_;
       bool inel1_, inel2_;
       std::unordered_map<unsigned short, unsigned short> py_cg_corresp_;
