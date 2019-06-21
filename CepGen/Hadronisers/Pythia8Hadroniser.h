@@ -52,6 +52,7 @@ namespace cepgen
         std::unique_ptr<Pythia8::Pythia> pythia_;
         std::unique_ptr<Pythia8::CepGenEvent> cg_evt_;
 #endif
+        bool correct_central_;
         bool full_evt_;
         unsigned short offset_;
         bool first_evt_;

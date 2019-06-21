@@ -25,6 +25,7 @@ namespace cepgen
 #ifdef PYTHIA8
       pythia_( new Pythia8::Pythia ), cg_evt_( new Pythia8::CepGenEvent ),
 #endif
+      correct_central_( plist.get<bool>( "correctCentralSystem", false ) ),
       full_evt_( false ), offset_( 0 ), first_evt_( true )
     {}
 
@@ -75,7 +76,7 @@ namespace cepgen
         pythia_->settings.mode( "Random:seed", seed_ );
       }
 
-#if defined( PYTHIA_VERSION_INTEGER ) && PYTHIA_VERSION_INTEGER >= 8226
+#  if defined( PYTHIA_VERSION_INTEGER ) && PYTHIA_VERSION_INTEGER >= 8226
       switch ( params_->kinematics.mode ) {
         case KinematicsMode::ElasticElastic: {
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 3 );
@@ -90,14 +91,14 @@ namespace cepgen
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 0 );
         } break;
       }
-#else
+#  else
       CG_WARNING( "Pythia8Hadroniser" )
         << "Beam remnants framework for this version of Pythia "
         << "(" << Form( "%.3f", PYTHIA_VERSION ) << ")\n\t"
         << "does not support mixing of unresolved hadron states.\n\t"
         << "The proton remnants output might hence be wrong.\n\t"
         << "Please update the Pythia version or disable this part.";
-#endif
+#  endif
 
       if ( !pythia_->init() )
         throw CG_FATAL( "Pythia8Hadroniser" )
@@ -192,7 +193,6 @@ namespace cepgen
     Pythia8Hadroniser::updateEvent( Event& ev, double& weight ) const
     {
       std::vector<unsigned short> central_parts;
-      const bool correct_central = false;
 
       for ( unsigned short i = 1+offset_; i < pythia_->event.size(); ++i ) {
         const Pythia8::Particle& p = pythia_->event[i];
@@ -248,7 +248,7 @@ namespace cepgen
           }
           // found the role ; now we can add the particle
           Particle& cg_part = addParticle( ev, p, p.p(), role );
-          if ( correct_central && (Particle::Role)role == Particle::CentralSystem ) {
+          if ( correct_central_ && (Particle::Role)role == Particle::CentralSystem ) {
             const auto& ip = std::find( central_parts.begin(), central_parts.end(), p.mother1() );
             if ( ip != central_parts.end() )
               cg_part.setMomentum( ev[cg_evt_->cepgenId( *ip-offset_ )].momentum() );
