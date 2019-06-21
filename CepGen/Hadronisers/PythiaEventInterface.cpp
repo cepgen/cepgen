@@ -52,7 +52,7 @@ namespace Pythia8
   }
 
   void
-  CepGenEvent::feedEvent( const cepgen::Event& ev, bool full )
+  CepGenEvent::feedEvent( const cepgen::Event& ev, const Type& type )
   {
     const double scale = ev[cepgen::Particle::Intermediate][0].mass();
     setProcess( 0, 1., scale, cepgen::constants::ALPHA_EM, cepgen::constants::ALPHA_QCD );
@@ -66,7 +66,7 @@ namespace Pythia8
 
     const Vec4 mom_part1( momToVec4( part1.momentum() ) ), mom_part2( momToVec4( part2.momentum() ) );
 
-    if ( !full ) {
+    if ( type == Type::centralAndPartons ) {
       //=============================================================================================
       // incoming partons
       //=============================================================================================
@@ -77,7 +77,7 @@ namespace Pythia8
       addCorresp( sizePart(), part2.id() );
       addParticle( part2.integerPdgId(), -2, 0, 0, 0, 0, mom_part2.px(), mom_part2.py(), mom_part2.pz(), mom_part2.e(), mom_part2.mCalc(), 0., 0. );
     }
-    else { // full event content (with collinear partons)
+    else if ( type == Type::centralAndBeamRemnants ) { // full event content (with collinear partons)
       Vec4 mom_iq1 = mom_part1, mom_iq2 = mom_part2;
       unsigned short parton1_id = 0, parton2_id = 0;
       unsigned short parton1_pdgid = part1.integerPdgId(), parton2_pdgid = part2.integerPdgId();
@@ -106,7 +106,7 @@ namespace Pythia8
       addCorresp( parton1_id, op1.id() );
       addParticle( parton1_pdgid, -1, 0, 0, parton1_colour, 0, mom_iq1.px(), mom_iq1.py(), mom_iq1.pz(), mom_iq1.e(), mom_iq1.mCalc(), 0., 1. );
 
-      parton2_id = sizePart();
+      parton2_id = sizePart()-1;
       addCorresp( parton2_id, op2.id() );
       addParticle( parton2_pdgid, -1, 0, 0, parton2_colour, 0, mom_iq2.px(), mom_iq2.py(), mom_iq2.pz(), mom_iq2.e(), mom_iq2.mCalc(), 0., 1. );
 
@@ -122,6 +122,12 @@ namespace Pythia8
         const Vec4 mom_oq2 = mom_iq2-mom_part2;
         addParticle( parton2_pdgid, 1, parton1_id, parton2_id, parton2_colour, 0, mom_oq2.px(), mom_oq2.py(), mom_oq2.pz(), mom_oq2.e(), mom_oq2.mCalc(), 0., 1. );
       }
+    } // full event content
+    else if ( type == Type::centralAndFullBeamRemnants ) {
+      for ( const auto& syst : { cepgen::Particle::OutgoingBeam1, cepgen::Particle::OutgoingBeam2 } ) {
+        for ( const auto& p : ev[syst] )
+          addCepGenParticle( p, 1 );
+      }
     }
 
     //=============================================================================================
@@ -133,7 +139,7 @@ namespace Pythia8
     for ( const auto& p : ev[cepgen::Particle::CentralSystem] ) {
       const auto mothers = p.mothers();
       unsigned short moth1_id = 1, moth2_id = 2;
-      if ( !full ) {
+      if ( type == Type::centralAndPartons ) {
         moth1_id = moth2_id = 0;
         if ( !mothers.empty() ) {
           const unsigned short moth1_cg_id = *mothers.begin();
@@ -166,9 +172,7 @@ namespace Pythia8
       } catch ( const cepgen::Exception& ) {
         cp_colour = cp_anticolour = central_colour;
       }
-      const Vec4 mom_part( momToVec4( p.momentum() ) );
-      addCorresp( sizePart(), p.id() );
-      addParticle( p.integerPdgId(), 1, moth1_id, moth2_id, cp_colour, cp_anticolour, mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), mom_part.mCalc(), 0., 0., 0. );
+      addCepGenParticle( p, 1, { moth1_id, moth2_id }, { cp_colour, cp_anticolour } );
     }
   }
 
@@ -194,6 +198,16 @@ namespace Pythia8
       if ( py_cg.second == cg_id )
         return py_cg.first;
     return INVALID_ID;
+  }
+
+  void
+  CepGenEvent::addCepGenParticle( const cepgen::Particle& part, int status, const std::pair<int,int>& mothers, const std::pair<int,int>& colours )
+  {
+    const Vec4 mom_part( momToVec4( part.momentum() ) );
+    addCorresp( sizePart(), part.id() );
+    addParticle( part.integerPdgId(), status, mothers.first, mothers.second, colours.first, colours.second,
+                 mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), mom_part.mCalc(),
+                 0., 0., 0. );
   }
 
   void

@@ -145,7 +145,8 @@ namespace cepgen
       // convert our event into a custom LHA format
       //===========================================================================================
 
-      cg_evt_->feedEvent( ev, full );
+      cg_evt_->feedEvent( ev, full ? Pythia8::CepGenEvent::Type::centralAndBeamRemnants
+                                   : Pythia8::CepGenEvent::Type::centralAndPartons );
       //if ( full ) cg_evt_->listEvent();
 
       //===========================================================================================

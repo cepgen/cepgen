@@ -9,6 +9,7 @@
 namespace cepgen {
   class Parameters;
   class Event;
+  class Particle;
 }
 
 namespace Pythia8
@@ -17,13 +18,20 @@ namespace Pythia8
   class CepGenEvent : public LHAup
   {
     public:
+      /// List of particles to be included to the event content
+      enum struct Type
+      {
+        centralAndPartons, ///< only include initiators and central system
+        centralAndBeamRemnants, ///< include undissociated beam remnants and central system
+        centralAndFullBeamRemnants ///< include dissociated beam remnants and central system
+      };
       explicit CepGenEvent();
       /// Initialise this conversion object with CepGen parameters
       void initialise( const cepgen::Parameters& );
       /// Feed a new CepGen event to this conversion object
       /// \param[in] ev CepGen event to be fed
-      /// \param[in] full Storing full event content?
-      void feedEvent( const cepgen::Event& ev, bool full );
+      /// \param[in] type Type of storage
+      void feedEvent( const cepgen::Event& ev, const Type& type );
       /// Set the cross section for a given process
       /// \param[in] id Process identifier
       /// \param[in] xsec Process cross section, in pb
@@ -48,6 +56,10 @@ namespace Pythia8
       /// \param[in] cg_id CepGen particle id
       /// \return Pythia8 particle id
       unsigned short pythiaId( unsigned short cg_id ) const;
+      /// Add a CepGen particle to the event content
+      void addCepGenParticle( const cepgen::Particle& part, int status,
+                              const std::pair<int,int>& mothers = { 0, 0 },
+                              const std::pair<int,int>& colours = { 0, 0 } );
       /// Register a new Pythia8 / CepGen particle mapping
       /// \param[in] py_id Pythia8 particle id
       /// \param[in] cg_id CepGen particle id
