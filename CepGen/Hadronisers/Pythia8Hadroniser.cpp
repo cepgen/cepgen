@@ -99,6 +99,10 @@ namespace cepgen
         << "The proton remnants output might hence be wrong.\n\t"
         << "Please update the Pythia version or disable this part.";
 #  endif
+      if ( correct_central_ && pythia_->settings.flag( "ProcessLevel:resonanceDecays" ) )
+        CG_WARNING( "Pythia8Hadroniser" )
+          << "Central system's kinematics correction enabled while resonances are\n\t"
+          << "expected to be decayed. Please check that this is fully intended.";
 
       if ( !pythia_->init() )
         throw CG_FATAL( "Pythia8Hadroniser" )
@@ -136,7 +140,6 @@ namespace cepgen
         enable_hadr_ = full;
         init();
       }
-      CG_INFO("") << full << "-->" << enable_hadr_;
 
       //===========================================================================================
       // convert our event into a custom LHA format
