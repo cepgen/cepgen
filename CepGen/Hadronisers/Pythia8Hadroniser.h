@@ -38,9 +38,6 @@ namespace cepgen
 
         void setCrossSection( double xsec, double xsec_err ) override;
 
-        bool fullEvent() const { return full_evt_; }
-        void setFullEvent( bool full = true ) { full_evt_ = full; }
-
       private:
         std::vector<unsigned short> min_ids_;
         std::unordered_map<short,short> py_cg_corresp_;
@@ -52,8 +49,10 @@ namespace cepgen
         std::unique_ptr<Pythia8::Pythia> pythia_;
         std::unique_ptr<Pythia8::CepGenEvent> cg_evt_;
 #endif
+        static constexpr unsigned short PYTHIA_STATUS_IN_BEAM = 12;
+        static constexpr unsigned short PYTHIA_STATUS_IN_PARTON_KT = 61;
         bool correct_central_;
-        bool full_evt_;
+        bool enable_hadr_;
         unsigned short offset_;
         bool first_evt_;
     };

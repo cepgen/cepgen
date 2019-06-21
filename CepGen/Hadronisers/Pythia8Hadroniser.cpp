@@ -26,7 +26,7 @@ namespace cepgen
       pythia_( new Pythia8::Pythia ), cg_evt_( new Pythia8::CepGenEvent ),
 #endif
       correct_central_( plist.get<bool>( "correctCentralSystem", false ) ),
-      full_evt_( false ), offset_( 0 ), first_evt_( true )
+      enable_hadr_( false ), offset_( 0 ), first_evt_( true )
     {}
 
     void
@@ -66,8 +66,8 @@ namespace cepgen
     Pythia8Hadroniser::init()
     {
 #ifdef PYTHIA8
-      if ( pythia_->settings.flag( "ProcessLevel:all" ) != full_evt_ )
-        pythia_->settings.flag( "ProcessLevel:all", full_evt_ );
+      if ( pythia_->settings.flag( "ProcessLevel:all" ) != enable_hadr_ )
+        pythia_->settings.flag( "ProcessLevel:all", enable_hadr_ );
 
       if ( seed_ == -1ll )
         pythia_->settings.flag( "Random:setSeed", false );
@@ -125,14 +125,18 @@ namespace cepgen
       weight = 1.;
 
 #ifdef PYTHIA8
+      //--- only launch Pythia if:
+      // 1) the full event kinematics (i.e. with remnants) is to be specified, or
+      // 2) the resonances are to be decayed.
       if ( !full && !pythia_->settings.flag( "ProcessLevel:resonanceDecays" ) )
         return true;
 
       //--- switch full <-> partial event
-      if ( full != full_evt_ ) {
-        full_evt_ = full;
+      if ( full != enable_hadr_ ) {
+        enable_hadr_ = full;
         init();
       }
+      CG_INFO("") << full << "-->" << enable_hadr_;
 
       //===========================================================================================
       // convert our event into a custom LHA format
@@ -155,13 +159,19 @@ namespace cepgen
           if ( first_evt_ && full ) {
             offset_ = 0;
             for ( unsigned short i = 1; i < pythia_->event.size(); ++i )
-              if ( pythia_->event[i].status() == -12 ) // skip the incoming particles
+              if ( pythia_->event[i].status() == -PYTHIA_STATUS_IN_BEAM )
+                //--- no incoming particles in further stages
                 offset_++;
             first_evt_ = false;
           }
           break;
         }
       }
+      CG_DEBUG( "Pythia8Hadroniser" )
+        << "Pythia8 hadronisation performed successfully.\n\t"
+        << "Number of trials: " << ev.num_hadronisation_trials << "/" << max_trials_ << ".\n\t"
+        << "Particles multiplicity: " << ev.particles().size() << " → " << pythia_->event.size() << ".\n\t"
+        << "  indices offset: " << offset_ << ".";
 
       //===========================================================================================
       // update the event content with Pythia's output
@@ -237,12 +247,12 @@ namespace cepgen
             default: break;
             case Particle::OutgoingBeam1: {
               ev[Particle::OutgoingBeam1][0].setStatus( Particle::Status::Fragmented );
-              if ( abs( p.status() ) != 61 )
+              if ( abs( p.status() ) != PYTHIA_STATUS_IN_PARTON_KT )
                 break;
             } // no break!
             case Particle::OutgoingBeam2: {
               ev[Particle::OutgoingBeam2][0].setStatus( Particle::Status::Fragmented );
-              if ( abs( p.status() ) != 61 )
+              if ( abs( p.status() ) != PYTHIA_STATUS_IN_PARTON_KT )
                 break;
             } // no break!
           }
