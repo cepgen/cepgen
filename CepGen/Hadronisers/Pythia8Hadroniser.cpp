@@ -75,6 +75,7 @@ namespace cepgen
         pythia_->settings.mode( "Random:seed", seed_ );
       }
 
+#if defined( PYTHIA_VERSION_INTEGER ) && PYTHIA_VERSION_INTEGER >= 8226
       switch ( params_->kinematics.mode ) {
         case KinematicsMode::ElasticElastic: {
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 3 );
@@ -89,6 +90,14 @@ namespace cepgen
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 0 );
         } break;
       }
+#else
+      CG_WARNING( "Pythia8Hadroniser" )
+        << "Beam remnants framework for this version of Pythia "
+        << "(" << Form( "%.3f", PYTHIA_VERSION ) << ")\n\t"
+        << "does not support mixing of unresolved hadron states.\n\t"
+        << "The proton remnants output might hence be wrong.\n\t"
+        << "Please update the Pythia version or disable this part.";
+#endif
 
       if ( !pythia_->init() )
         throw CG_FATAL( "Pythia8Hadroniser" )
@@ -182,6 +191,9 @@ namespace cepgen
     void
     Pythia8Hadroniser::updateEvent( Event& ev, double& weight ) const
     {
+      std::vector<unsigned short> central_parts;
+      const bool correct_central = false;
+
       for ( unsigned short i = 1+offset_; i < pythia_->event.size(); ++i ) {
         const Pythia8::Particle& p = pythia_->event[i];
         const unsigned short cg_id = cg_evt_->cepgenId( i-offset_ );
@@ -193,6 +205,13 @@ namespace cepgen
             || cg_part.role() == Particle::OutgoingBeam2 ) {
             cg_part.setStatus( Particle::Status::Fragmented );
             continue;
+          }
+          //--- resonance decayed; apply branching ratio for this decay
+          if ( cg_part.role() == Particle::CentralSystem && p.status() < 0 ) {
+            if ( pythia_->settings.flag( "ProcessLevel:resonanceDecays" ) )
+              weight *= p.particleDataEntry().pickChannel().bRatio();
+            cg_part.setStatus( Particle::Status::Resonance );
+            central_parts.emplace_back( i );
           }
           //--- particle is not what we expect
           if ( p.idAbs() != abs( cg_part.integerPdgId() ) ) {
@@ -209,11 +228,6 @@ namespace cepgen
               << "Event list corruption detected for (Pythia/CepGen) particle " << i << "/" << cg_id << ":\n\t"
               << "should be " << abs( p.id() ) << ", "
               << "got " << cg_part.integerPdgId() << "!";
-          }
-          //--- resonance decayed; apply branching ratio for this decay
-          if ( p.status() < 0 && pythia_->settings.flag( "ProcessLevel:resonanceDecays" ) ) {
-            weight *= p.particleDataEntry().pickChannel().bRatio();
-            cg_part.setStatus( Particle::Status::Resonance );
           }
         }
         else {
@@ -234,6 +248,11 @@ namespace cepgen
           }
           // found the role ; now we can add the particle
           Particle& cg_part = addParticle( ev, p, p.p(), role );
+          if ( correct_central && (Particle::Role)role == Particle::CentralSystem ) {
+            const auto& ip = std::find( central_parts.begin(), central_parts.end(), p.mother1() );
+            if ( ip != central_parts.end() )
+              cg_part.setMomentum( ev[cg_evt_->cepgenId( *ip-offset_ )].momentum() );
+          }
           for ( const auto& moth_id : p.motherList() ) {
             if ( moth_id <= offset_ )
               continue;

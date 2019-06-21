@@ -12,7 +12,7 @@
 using namespace std;
 
 // we use polymorphism here
-std::shared_ptr<cepgen::output::ExportHandler> writer;
+std::unique_ptr<cepgen::output::ExportHandler> writer;
 
 void storeEvent( const cepgen::Event& ev, unsigned long )
 {
@@ -51,9 +51,9 @@ int main( int argc, char* argv[] ) {
   const string format = ( argc > 2 ) ? argv[2] : "lhef";
   const char* filename = ( argc > 3 ) ? argv[3] : "example.dat";
   if ( format == "lhef" )
-    writer = std::make_shared<cepgen::output::LHEFHandler>( filename );
+    writer = std::make_unique<cepgen::output::LHEFHandler>( filename );
   else if ( format == "hepmc" )
-    writer = std::make_shared<cepgen::output::HepMCHandler>( filename );
+    writer = std::make_unique<cepgen::output::HepMCHandler>( filename );
   else
     throw CG_FATAL( "main" ) << "Unrecognized output format: " << format;
 
