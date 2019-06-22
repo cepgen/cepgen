@@ -1,6 +1,13 @@
 #include "CepGen/Hadronisers/GenericHadroniser.h"
+#include "CepGen/Hadronisers/HadronisersHandler.h"
+
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
+
+#include "CepGen/Physics/PDG.h"
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/utils.h"
 
 #include <algorithm>
 
@@ -91,10 +98,8 @@ namespace cepgen
          * \param[in] ijoin_ List of particles unique identifier to join in the colour flow
          */
         inline static void pyjoin( int njoin, int ijoin[2] ) { return pyjoin_( njoin, *ijoin ); }
-        bool prepareHadronisation( Event* );
+        bool prepareHadronisation( Event& );
     };
-
-#ifdef PYTHIA6
 
     Pythia6Hadroniser::Pythia6Hadroniser( const ParametersList& plist ) :
       GenericHadroniser( plist, "pythia6" )
@@ -121,11 +126,9 @@ namespace cepgen
       return true;
     }*/
 
-    void
+    bool
     Pythia6Hadroniser::run( Event& ev, double& weight, bool full )
     {
-      Particle::Status status;
-
       Particles::iterator p;
 
       const unsigned int max_part_in_str = 3, max_str_in_evt = 2;
@@ -134,9 +137,9 @@ namespace cepgen
       int jlrole[max_str_in_evt], jlpsf[max_str_in_evt][max_part_in_str];
       int criteria; //FIXME find an other name...
 
-      try { prepareHadronisation( ev ); } catch ( Exception& e ) { e.dump(); throw e; }
+      prepareHadronisation( ev );
 
-      ParticleRoles rl = ev->roles();
+      ParticleRoles rl = ev.roles();
 
       // First we initialise the string fragmentation variables
       for ( unsigned int i=0; i<max_str_in_evt; i++ ) {
@@ -145,8 +148,8 @@ namespace cepgen
         for ( unsigned int j=0; j<max_part_in_str; j++ ) jlpsf[i][j] = -1;
       }
 
-      if ( Logger::get().level >= Logger::Debug ) {
-        Debugging( "Dump of the event before the hadronisation" );
+      if ( utils::Logger::get().level >= utils::Logger::Level::debug ) {
+        CG_DEBUG( "Pythia6Hadroniser" ) << "Dump of the event before the hadronisation:";
         ev.dump();
       }
 
@@ -169,10 +172,10 @@ namespace cepgen
           pyjets_.p[4][np] = (double)part.mass();
           part.dump();
 
-          if ( part.status() <= 0 ) status = Particle::PythiaHIncoming;
-          else status = part.status();
           pylist(2);
-          pyjets_.k[0][np] = status;
+          pyjets_.k[0][np] = ( part.status() <= Particle::Status::Undefined )
+            ? 21 // incoming beam
+            : (int)part.status();
           pyjets_.k[1][np] = (int)part.pdgId();
 
           //if ( part.mother()!=-1 ) pyjets_.k[2][np] = part.mother()+1; // mother
@@ -193,7 +196,7 @@ namespace cepgen
             pyjets_.v[i][np] = 0.;
           }
 
-          if ( part.status() == Particle::DebugResonance ) {
+          if ( part.status() == Particle::Status::DebugResonance ) {
             pyjets_.k[0][np] = 1; //FIXME PYTHIA/JETSET workaround
             jlrole[str_in_evt] = part.role();
             jlpsf[str_in_evt][part_in_str] = part.id()+1;
@@ -231,7 +234,7 @@ namespace cepgen
       this->pylist( 2 );
       if ( pyjets_.k[1][criteria] == 2212 && pyjets_.k[0][criteria] == 1 ) {
         //this->pylist( 2 );
-        throw Exception( __PRETTY_FUNCTION__, "System is non-inelastic", JustWarning );
+        throw CG_WARNING( "Pythia6Hadroniser" ) << "System is non-inelastic.";
       }
 
       for ( unsigned int p=0; p<(unsigned int)pyjets_.n; p++ ) {
@@ -248,7 +251,7 @@ namespace cepgen
 
         Particle pa;
         pa.setId( p );
-        pa.setPdgId( static_cast<Particle::ParticleCode>( pyjets_.k[1][p] ) );
+        pa.setPdgId( (short)pyjets_.k[1][p] );
         if ( ev[pyjets_.k[2][p]-1].valid() ) {
           pa.setRole( ev[pyjets_.k[2][p]-1].role() ); // Child particle inherits its mother's role
         }
@@ -264,41 +267,43 @@ namespace cepgen
 
         ev.addParticle( pa );
       }
-      Debugging( Form( "Passed the string construction stage.\n\t %d string objects were identified and constructed",
-                       "%s", str_in_evt, dbg.str().c_str() ) );
+      CG_DEBUG( "Pythia6Hadroniser" )
+        << "Passed the string construction stage.\n\t"
+        << " " << str_in_evt << " string objects were identified and constructed:"
+        << dbg.str();
 
       return true;
     }
 
     bool
-    Pythia6Hadroniser::prepareHadronisation( Event* ev )
+    Pythia6Hadroniser::prepareHadronisation( Event& ev )
     {
-      Particle::ParticleCode singlet_id, doublet_id;
+      short singlet_id, doublet_id;
       double ranudq, ulmdq, ulmq;
       double ranmxp, ranmxt;
       double pmxp;
 
-      Debugging("Hadronisation preparation called!");
+      CG_DEBUG( "Pythia6Hadroniser" ) << "Hadronisation preparation called.";
 
-      Particles pp = ev->particles();
+      Particles pp = ev.particles();
       for ( Particles::iterator part_it=pp.begin(); part_it!=pp.end(); part_it++ ) {
 
         Particle& part = *part_it;
 
-        if ( part.status() != Particle::Undecayed ) continue;
+        if ( part.status() != Particle::Status::Undecayed ) continue;
         // One proton to be fragmented
         ranudq = drand();
         if ( ranudq < 1./9. ) {
-          singlet_id = Particle::dQuark;
-          doublet_id = Particle::uu1Diquark;
+          singlet_id = PDG::down;
+          doublet_id = 2203; // uu1 diquark
         }
         else if ( ranudq < 5./9. ) {
-          singlet_id = Particle::uQuark;
-          doublet_id = Particle::ud0Diquark;
+          singlet_id = PDG::up;
+          doublet_id = 2101; // ud0 diquark
         }
         else {
-          singlet_id = Particle::uQuark;
-          doublet_id = Particle::ud1Diquark;
+          singlet_id = PDG::up;
+          doublet_id = 2103; // ud1 diquark
         }
         ulmdq = pymass( doublet_id );
         ulmq = pymass( singlet_id );
@@ -320,7 +325,7 @@ namespace cepgen
         if ( !( part_mom.px() < 0 ) && !( part_mom.px() > 0 ) ) return false;
 
         Particle singlet( part.role(), singlet_id );
-        singlet.setStatus( Particle::DebugResonance );
+        singlet.setStatus( Particle::Status::DebugResonance );
         singlet.setMomentum( part_mom );
         //singlet.setMass(); //FIXME
 
@@ -330,48 +335,46 @@ namespace cepgen
         part_mom.lorentzBoost( pmxda );
 
         Particle doublet( part.role(), doublet_id );
-        doublet.setStatus( Particle::DebugResonance );
+        doublet.setStatus( Particle::Status::DebugResonance );
         doublet.setMomentum( part_mom );
         //std::cout << "doublet, mass = " << doublet.mass() << std::endl;
         //doublet.setMass(); //FIXME
 
         if ( part.numDaughters() == 0 ) {
-          singlet.addMother( ev->getById( part.id() ) );
-          doublet.addMother( ev->getById( part.id() ) );
+          singlet.addMother( ev[part.id()] );
+          doublet.addMother( ev[part.id()] );
 
-          ev->addParticle( singlet );
-          ev->addParticle( doublet );
+          ev.addParticle( singlet );
+          ev.addParticle( doublet );
 
-          Debugging( "Quark/diquark content succesfully added to the event!" );
+          CG_DEBUG( "Pythia6Hadroniser" ) << "Quark/diquark content succesfully added to the event.";
         }
         else { // Quark/diquark content already present in the event
-
-          Debugging( Form( "Quark/diquark content already present in the event!\n\tRole of these particles: %d", part.role() ) );
+          CG_DEBUG( "Pythia6Hadroniser" )
+            << "Quark/diquark content already present in the event!\n\t"
+            << "Role of these particles: " << part.role() << ".";
 
           ParticlesIds daugh = part.daughters();
           for ( ParticlesIds::const_iterator did=daugh.begin(); did!=daugh.end(); did++ ) {
-            if ( ev->getById( *did ).pdgId() == Particle::uQuark
-              || ev->getById( *did ).pdgId() == Particle::dQuark ) { // Quark
-              singlet.addMother( ev->getById( part.id() ) );
-              ev->getById( *did ) = singlet;
-              Debugging( "Singlet replaced" );
+            if ( ev[*did].pdgId() == PDG::up
+              || ev[*did].pdgId() == PDG::down ) { // Quark
+              singlet.addMother( ev[part.id()] );
+              ev[*did] = singlet;
+              CG_DEBUG( "Pythia6Hadroniser" ) << "Singlet replaced.";
             }
             else { // Diquark
-              doublet.addMother( ev->getById( part.id() ) );
-              ev->getById( *did ) = doublet;
-              Debugging( "Doublet replaced" );
+              doublet.addMother( ev[part.id()] );
+              ev[*did] = doublet;
+              CG_DEBUG( "Pythia6Hadroniser" ) << "Doublet replaced";
             }
           }
         }
       }
       return true;
     }
-#endif
   }
 }
 
-#ifdef PYTHIA6
 // register hadroniser and define alias
 REGISTER_HADRONISER( pythia6, Pythia6Hadroniser )
-#endif
 
