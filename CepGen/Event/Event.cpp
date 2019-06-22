@@ -148,13 +148,13 @@ namespace cepgen
   }
 
   Particles
-  Event::mothers( const Particle& part )
+  Event::mothers( const Particle& part ) const
   {
     return getByIds( part.mothers() );
   }
 
   Particles
-  Event::daughters( const Particle& part )
+  Event::daughters( const Particle& part ) const
   {
     return getByIds( part.daughters() );
   }

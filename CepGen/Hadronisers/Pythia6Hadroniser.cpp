@@ -75,6 +75,9 @@ namespace cepgen
         //bool hadronise( const Particle* );
 
       private:
+        static constexpr unsigned short MAX_PART_STRING = 3;
+        static constexpr unsigned short MAX_STRING_EVENT = 2;
+
         inline static double pymass(int pdgid_) { return pymass_(pdgid_); }
         //inline static double pywidt(int pdgid_) { return pywidt_(pdgid_); }
         inline static void pyexec() { pyexec_(); }
@@ -100,17 +103,19 @@ namespace cepgen
          */
         inline static void pyjoin( int njoin, int ijoin[2] ) { return pyjoin_( njoin, *ijoin ); }
         bool prepareHadronisation( Event& );
-
-        static constexpr unsigned short MAX_PART_STRING = 3;
-        static constexpr unsigned short MAX_STRING_EVENT = 2;
+        struct EventProperties
+        {
+          unsigned int str_in_evt = 0;
+          unsigned int num_part_in_str[MAX_STRING_EVENT] = { 0 };
+          int jlrole[MAX_STRING_EVENT] = { -1 };
+          int jlpsf[MAX_STRING_EVENT][MAX_PART_STRING] = { 0 };
+        };
+        EventProperties fillParticles( const Event& ) const;
     };
 
     Pythia6Hadroniser::Pythia6Hadroniser( const ParametersList& plist ) :
       GenericHadroniser( plist, "pythia6" )
-    {
-    CG_INFO("") << plist;
-      //pygive( "MSTU(21)=1" );
-    }
+    {}
 
     void
     Pythia6Hadroniser::readString( const char* param )
@@ -118,40 +123,12 @@ namespace cepgen
       pygive( param );
     }
 
-    /*void
-    Pythia6Hadroniser::run( Event& ev, double& weight, bool full )
-    {
-      pyjets_.p[0][0] = part->momentum().px();
-      pyjets_.p[1][0] = part->momentum().py();
-      pyjets_.p[2][0] = part->momentum().pz();
-      pyjets_.p[3][0] = part->energy();
-      pyjets_.p[4][0] = part->mass();
-
-      pyjets_.k[0][0] = 1; // status
-      pyjets_.k[1][0] = 2; // particle id
-      pyjets_.k[2][0] = 0; // mother
-      pyjets_.k[3][0] = 0; // daughter 1
-      pyjets_.k[4][0] = 0; // daughter 2
-
-      pyexec();
-      return true;
-    }*/
-
     bool
     Pythia6Hadroniser::run( Event& ev, double& weight, bool full )
     {
-      std::vector<unsigned int> num_part_in_str( MAX_STRING_EVENT, 0 );
-      std::vector<int> jlrole( MAX_STRING_EVENT, -1 );
-      int jlpsf[MAX_STRING_EVENT][MAX_PART_STRING];
-      int criteria; //FIXME find an other name...
-
-      prepareHadronisation( ev );
-
-    CG_WARNING("");
-      //--- initialising the string fragmentation variables
-      for ( unsigned short i = 0; i < MAX_STRING_EVENT; ++i )
-        for ( unsigned short j = 0; j < MAX_PART_STRING; ++j )
-          jlpsf[i][j] = -1;
+      weight = 1.;
+      if ( full )
+        prepareHadronisation( ev );
 
       if ( utils::Logger::get().level >= utils::Logger::Level::debug ) {
         CG_DEBUG( "Pythia6Hadroniser" ) << "Dump of the event before the hadronisation:";
@@ -159,98 +136,47 @@ namespace cepgen
       }
 
       //--- fill Pythia 6 common blocks
-      pyjets_.n = 0;
-      unsigned int str_in_evt = 0;
+      auto prop = fillParticles( ev );
 
-      for ( const auto& role : ev.roles() ) { // loop on roles
-        unsigned int part_in_str = 0;
-        for ( const auto& part : ev[role] ) {
-          unsigned int np = part.id();
+      CG_DEBUG( "Pythia6Hadroniser" )
+        << "Passed the string construction stage.\n\t"
+        << " " << prop.str_in_evt << " string objects were identified and constructed.";
 
-          pyjets_.p[0][np] = part.momentum().px();
-          pyjets_.p[1][np] = part.momentum().py();
-          pyjets_.p[2][np] = part.momentum().pz();
-          pyjets_.p[3][np] = part.energy();
-          pyjets_.p[4][np] = part.mass();
-          part.dump();
-
-          pyjets_.k[0][np] = part.status() <= Particle::Status::Undefined
-            ? 21 // incoming beam
-            : (int)part.status();
-          pyjets_.k[1][np] = (int)part.pdgId();
-
-          pyjets_.k[2][np] = !part.mothers().empty()
-            ? *( part.mothers().begin() )+1 // mother
-            : 0; // mother
-
-          const auto& daug = ev.daughters( part );
-          if ( !daug.empty() ) {
-            pyjets_.k[3][np] = *part.daughters().begin()+1; // daughter 1
-            pyjets_.k[4][np] = *part.daughters().end()+1; // daughter 2
-          }
-          else {
-            pyjets_.k[3][np] = 0; // daughter 1
-            pyjets_.k[4][np] = 0; // daughter 2
-          }
-
-          for ( int i = 0; i < 5; ++i )
-            pyjets_.v[i][np] = 0.;
-
-          if ( part.status() == Particle::Status::DebugResonance ) {
-            pyjets_.k[0][np] = 1; //FIXME PYTHIA/JETSET workaround
-            jlrole[str_in_evt] = part.role();
-            jlpsf[str_in_evt][part_in_str] = part.id()+1;
-            num_part_in_str[str_in_evt]++;
-            part_in_str++;
-          }
-          pyjets_.n++;
-        }
-        if ( jlrole[str_in_evt] > 0 )
-          str_in_evt++;
-      }
       unsigned int oldnpart = pyjets_.n;
 
-      std::ostringstream dbg;
-      for ( unsigned short i = 0; i < str_in_evt; ++i ) {
-        if ( num_part_in_str[i] < 2 )
+      for ( unsigned short i = 0; i < prop.str_in_evt; ++i ) {
+        if ( prop.num_part_in_str[i] < 2 )
           continue;
 
-        dbg
-          << "Joining " << num_part_in_str[i] << " particle" << utils::s( num_part_in_str[i] )
-          << " in a same string (" << i << ") with role " << jlrole[i];
-        for ( unsigned short j = 0; j < num_part_in_str[i]; ++j )
-          if ( jlpsf[i][j] != -1 )
-            dbg << Form( "\n\t * %2d (pdgId=%4d)", jlpsf[i][j], pyjets_.k[1][jlpsf[i][j]-1] );
+        std::ostringstream dbg;
+        for ( unsigned short j = 0; j < prop.num_part_in_str[i]; ++j )
+          if ( prop.jlpsf[i][j] != -1 )
+            dbg << Form( "\n\t * %2d (pdgId=%4d)", prop.jlpsf[i][j], pyjets_.k[1][prop.jlpsf[i][j]-1] );
 
-        pyjoin( num_part_in_str[i], jlpsf[i] );
-        pyexec();//FIXME FIXME FIXME
+        CG_INFO( "Pythia6Hadroniser" )
+          << "Joining " << prop.num_part_in_str[i] << " particle" << utils::s( prop.num_part_in_str[i] )
+          << " in a same string (" << i << ")"
+          << dbg.str();
+
+        pyjoin( prop.num_part_in_str[i], prop.jlpsf[i] );
       }
-      //pyexec();//FIXME FIXME FIXME
-      pylist( 2 );
+      pyexec();
 
-      criteria = oldnpart+1;
+      int criteria = oldnpart+1;
       for ( unsigned int i = 0; i < MAX_STRING_EVENT; ++i )
-        criteria += num_part_in_str[i];
+        criteria += prop.num_part_in_str[i];
 
-      pylist( 2 );
       if ( pyjets_.k[1][criteria] == 2212
-        && pyjets_.k[0][criteria] == 1 )
-        throw CG_WARNING( "Pythia6Hadroniser" ) << "System is non-inelastic.";
+        && pyjets_.k[0][criteria] == 1 ) {
+        CG_WARNING( "Pythia6Hadroniser" ) << "System is non-inelastic.";
+        return false;
+      }
 
-      for ( unsigned int p = 0; p < (unsigned int)pyjets_.n; ++p ) {
-
-        //FIXME FIXME FIXME FIXME need to reimplement this first filter under this philosophy
-        // First we filter the particles with status <= 0 :
-        //  Status code = -1: CepGen "internal" particles (not to be interacted with)
-        //                 0: Pythia6 empty lines
-        //if (pyjets_.k[0][p]<=0) continue;
-
-        Particle::Role role = ev[pyjets_.k[2][p]-1].valid()
+      // We filter the first particles already present in the event
+      for ( unsigned int p = oldnpart; p < (unsigned int)pyjets_.n; ++p ) {
+        const Particle::Role role = pyjets_.k[2][p] != 0
           ? ev[pyjets_.k[2][p]-1].role() // child particle inherits its mother's role
           : Particle::Role::UnknownRole;
-
-        // We filter the first particles already present in the event
-        if ( p < oldnpart ) continue;
 
         auto& pa = ev.addParticle( role );
         pa.setId( p );
@@ -259,17 +185,14 @@ namespace cepgen
         pa.setMomentum( Particle::Momentum( pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p] ) );
         pa.setMass( pyjets_.p[4][p] );
         //pa.setCharge( (float)pyp( p+1, 6 ) );
-
-        if ( pyjets_.k[2][p] != 0 ) {
-          dbg << Form( "\n\t%2d (pdgId=%4d) has mother %2d (pdgId=%4d)", pa.id(), pa.pdgId(), pyjets_.k[2][p], pyjets_.k[1][pyjets_.k[2][p]-1] );
-          pa.addMother( ev[pyjets_.k[2][p]-1] );
+        if ( role != Particle::Role::UnknownRole ) {
+          auto& moth = ev[pyjets_.k[2][p]-1];
+          moth.setStatus( role == Particle::Role::CentralSystem
+                          ? Particle::Status::Resonance
+                          : Particle::Status::Fragmented );
+          pa.addMother( moth );
         }
       }
-      CG_DEBUG( "Pythia6Hadroniser" )
-        << "Passed the string construction stage.\n\t"
-        << " " << str_in_evt << " string objects were identified and constructed:"
-        << dbg.str();
-
       return true;
     }
 
@@ -279,13 +202,13 @@ namespace cepgen
       CG_DEBUG( "Pythia6Hadroniser" ) << "Hadronisation preparation called.";
 
       for ( const auto& part : ev.particles() ) {
+        //--- loop over all undecayed particles
         if ( part.status() != Particle::Status::Undecayed )
           continue;
 
-        short singlet_id, doublet_id;
-
         //--- proton to be fragmented
         const double ranudq = drand();
+        short singlet_id = 0, doublet_id = 0;
         if ( ranudq < 1./9. ) {
           singlet_id = PDG::down;
           doublet_id = 2203; // uu1 diquark
@@ -300,6 +223,7 @@ namespace cepgen
         }
         const double ulmdq = pymass( doublet_id );
         const double ulmq = pymass( singlet_id );
+        CG_INFO("") <<ulmdq<<"|"<<ulmq;
 
         // Choose random direction in MX frame
         const double ranmxp = 2.*M_PI*drand();       // phi angle
@@ -327,12 +251,12 @@ namespace cepgen
         doubl_mom.lorentzBoost( pmxda_2 );
 
         auto& doublet = ev.addParticle( part.role() );
-    CG_WARNING("");
         doublet.setPdgId( doublet_id );
         doublet.setStatus( Particle::Status::DebugResonance );
         doublet.setMomentum( doubl_mom );
         //std::cout << "doublet, mass = " << doublet.mass() << std::endl;
         //doublet.setMass(); //FIXME
+        doublet.dump();
 
         if ( part.numDaughters() == 0 ) {
           singlet.addMother( ev[part.id()] );
@@ -362,6 +286,56 @@ namespace cepgen
         }
       }
       return true;
+    }
+
+    Pythia6Hadroniser::EventProperties
+    Pythia6Hadroniser::fillParticles( const Event& ev ) const
+    {
+      pyjets_.n = 0;
+
+      //--- initialising the string fragmentation variables
+      EventProperties out;
+      out.str_in_evt = 0;
+
+      for ( const auto& role : ev.roles() ) { // loop on roles
+        unsigned int part_in_str = 0;
+        for ( const auto& part : ev[role] ) {
+          unsigned int np = part.id();
+
+          pyjets_.p[0][np] = part.momentum().px();
+          pyjets_.p[1][np] = part.momentum().py();
+          pyjets_.p[2][np] = part.momentum().pz();
+          pyjets_.p[3][np] = part.energy();
+          pyjets_.p[4][np] = part.mass();
+          pyjets_.k[0][np] = part.status() <= Particle::Status::Undefined
+            ? 21 // incoming beam
+            : (int)part.status();
+          pyjets_.k[1][np] = part.integerPdgId();
+          pyjets_.k[2][np] = part.mothers().empty()
+            ? 0 // no mother
+            : *( part.mothers().begin() )+1; // mother
+          const auto& daug = part.daughters();
+          if ( daug.empty() )
+            pyjets_.k[3][np] = pyjets_.k[4][np] = 0; // no daughters
+          else {
+            pyjets_.k[3][np] = *daug.begin()+1; // daughter 1
+            pyjets_.k[4][np] = *daug.rbegin()+1; // daughter 2
+          }
+          for ( int i = 0; i < 5; ++i )
+            pyjets_.v[i][np] = 0.;
+
+          if ( part.status() == Particle::Status::DebugResonance ) {
+            pyjets_.k[0][np] = 1; //FIXME PYTHIA/JETSET workaround
+            out.jlpsf[out.str_in_evt][part_in_str] = part.id()+1;
+            out.num_part_in_str[out.str_in_evt]++;
+            part_in_str++;
+          }
+          pyjets_.n++;
+        }
+        if ( out.jlrole[out.str_in_evt] > 0 )
+          out.str_in_evt++;
+      }
+      return out;
     }
   }
 }
