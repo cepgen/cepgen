@@ -794,7 +794,7 @@ namespace cepgen
       CG_DEBUG_LOOP( "GamGamLL" )
         << "Outgoing kinematics\n\t"
         << " first outgoing lepton: p = " << p6_cm_.p() << ", E = " << p6_cm_.energy() << "\n\t"
-        << "second outgoing lepton: p = " << p7_cm_.p() << ", E = " << p7_cm_.energy();;
+        << "second outgoing lepton: p = " << p7_cm_.p() << ", E = " << p7_cm_.energy();
 
       // Second outgoing lepton's 3-momentum
       const double p7x = -p6x + pt4_,

@@ -104,6 +104,8 @@ namespace cepgen
   double
   Generator::computePoint( double* x )
   {
+    clearRun();
+
     double res = integrand::eval( x, numDimensions(), (void*)parameters_.get() );
     std::ostringstream os;
     for ( size_t i = 0; i < numDimensions(); ++i )
