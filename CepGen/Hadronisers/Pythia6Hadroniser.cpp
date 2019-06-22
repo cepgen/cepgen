@@ -36,6 +36,7 @@ extern "C"
   extern double pyp_( int&, int& );
   /// Store one parton/particle in the PYJETS common block
   extern void py1ent_( int&, int&, double&, double&, double& );
+  void pystop_() {}
 
   /// Particles content of the event
   extern struct

@@ -53,6 +53,7 @@ endif()
 #--- searching for Pythia 6
 set(PYTHIA6_DIRS $ENV{PYTHIA6_DIR} ${PYTHIA6_DIR} /usr /usr/local /opt/pythia6)
 find_library(PYTHIA6 pythia6 HINTS ${PYTHIA6_DIRS} PATH_SUFFIXES lib)
+find_library(PYTHIA6DUMMY pythia6_dummy HINTS ${PYTHIA6_DIRS} PATH_SUFFIXES lib)
 #--- searching for Pythia 8
 set(PYTHIA8_DIRS $ENV{PYTHIA8_DIR} ${PYTHIA8_DIR} /usr /usr/local /opt/pythia8)
 find_library(PYTHIA8 pythia8 HINTS ${PYTHIA8_DIRS} PATH_SUFFIXES lib)

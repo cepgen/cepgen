@@ -4,9 +4,8 @@
 #include "CepGen/Hadronisers/GenericHadroniser.h"
 
 #include <Pythia8/Pythia.h>
-#include <memory>
-#endif
 
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
