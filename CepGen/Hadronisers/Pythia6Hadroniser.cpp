@@ -63,14 +63,13 @@ namespace cepgen
     {
       public:
         Pythia6Hadroniser( const ParametersList& );
-        ~Pythia6Hadroniser() = default;
 
-        void setParameters( const Parameters& ) override;
+        void setParameters( const Parameters& ) override {}
         void readString( const char* param ) override;
-        void init() override;
+        void init() override {}
         bool run( Event& ev, double& weight, bool full ) override;
 
-        void setCrossSection( double xsec, double xsec_err ) override;
+        void setCrossSection( double xsec, double xsec_err ) override {}
         //bool hadronise( const Particle* );
 
       private:
@@ -104,7 +103,13 @@ namespace cepgen
     Pythia6Hadroniser::Pythia6Hadroniser( const ParametersList& plist ) :
       GenericHadroniser( plist, "pythia6" )
     {
-      //this->pygive("MSTU(21)=1");
+      //pygive( "MSTU(21)=1" );
+    }
+
+    void
+    Pythia6Hadroniser::readString( const char* param )
+    {
+      pygive( param );
     }
 
     /*void

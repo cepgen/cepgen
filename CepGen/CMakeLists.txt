@@ -24,6 +24,15 @@ if(alphas_sources)
   list(APPEND phys_sources ${alphas_sources})
 endif()
 
+#--- searching for Pythia 6
+if(EXISTS $ENV{PYTHIA6_SRC})
+  message(STATUS "Pythia 6 source found in $ENV{PYTHIA6_SRC}")
+  file(GLOB pythia6_src $ENV{PYTHIA6_SRC})
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wno-tabs -Wno-maybe-uninitialized -Wno-integer-division -Wno-unused-variable -Wno-unused-dummy-argument")
+  add_library(Pythia6 SHARED ${pythia6_src})
+  list(APPEND CEPGEN_EXTERNAL_HADR_REQS Pythia6)
+endif()
+
 #----- build the objects
 
 add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${sf_sources})
