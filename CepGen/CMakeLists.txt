@@ -2,7 +2,7 @@ file(GLOB core_sources Core/*.cpp *.cpp)
 file(GLOB phys_sources Physics/*.cpp)
 file(GLOB sf_sources StructureFunctions/*.cpp)
 file(GLOB io_sources IO/*.cpp)
-file(GLOB hadr_sources Hadronisers/*Hadroniser.cpp Hadronisers/PythiaEventInterface.cpp)
+file(GLOB hadr_sources Hadronisers/GenericHadroniser.cpp)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
@@ -24,13 +24,31 @@ if(alphas_sources)
   list(APPEND phys_sources ${alphas_sources})
 endif()
 
-#--- searching for Pythia 6
-if(EXISTS $ENV{PYTHIA6_SRC})
-  message(STATUS "Pythia 6 source found in $ENV{PYTHIA6_SRC}")
+#--- linking with Pythia 6
+
+if(PYTHIA6)
+  message(STATUS "Pythia 6 found in ${PYTHIA6}")
+  list(APPEND hadr_sources "Hadronisers/Pythia6Hadroniser.cpp")
+  list(APPEND CEPGEN_EXTERNAL_HADR_REQS pythia6)
+elseif(EXISTS $ENV{PYTHIA6_SRC})
   file(GLOB pythia6_src $ENV{PYTHIA6_SRC})
+  message(STATUS "Pythia 6 source found in ${pythia6_src}")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wno-tabs -Wno-maybe-uninitialized -Wno-integer-division -Wno-unused-variable -Wno-unused-dummy-argument")
-  add_library(Pythia6 SHARED ${pythia6_src})
-  list(APPEND CEPGEN_EXTERNAL_HADR_REQS Pythia6)
+  add_library(pythia6 SHARED ${pythia6_src})
+  list(APPEND hadr_sources "Hadronisers/Pythia6Hadroniser.cpp")
+  list(APPEND CEPGEN_EXTERNAL_HADR_REQS pythia6)
+endif()
+
+#--- linking with Pythia 8
+
+if(PYTHIA8)
+  message(STATUS "Pythia 8 found in ${PYTHIA8}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-misleading-indentation")
+  include_directories(${PYTHIA8_INCLUDE})
+  add_definitions(-DPYTHIA8)
+  list(APPEND hadr_sources "Hadronisers/Pythia6Hadroniser.cpp")
+  list(APPEND hadr_sources "Hadronisers/PythiaEventInterface.cpp")
+  list(APPEND CEPGEN_EXTERNAL_HADR_REQS ${PYTHIA8} dl)
 endif()
 
 #----- build the objects

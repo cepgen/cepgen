@@ -6,6 +6,7 @@
 
 #include "CepGen/Physics/PDG.h"
 
+#include "CepGen/Core/ParametersList.h" //FIXME
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
@@ -106,6 +107,7 @@ namespace cepgen
     Pythia6Hadroniser::Pythia6Hadroniser( const ParametersList& plist ) :
       GenericHadroniser( plist, "pythia6" )
     {
+    CG_INFO("") << plist;
       //pygive( "MSTU(21)=1" );
     }
 
@@ -137,21 +139,18 @@ namespace cepgen
     bool
     Pythia6Hadroniser::run( Event& ev, double& weight, bool full )
     {
-      Particles::iterator p;
-
-      unsigned int num_part_in_str[MAX_STRING_EVENT];
-      int jlrole[MAX_STRING_EVENT], jlpsf[MAX_STRING_EVENT][MAX_PART_STRING];
+      std::vector<unsigned int> num_part_in_str( MAX_STRING_EVENT, 0 );
+      std::vector<int> jlrole( MAX_STRING_EVENT, -1 );
+      int jlpsf[MAX_STRING_EVENT][MAX_PART_STRING];
       int criteria; //FIXME find an other name...
 
       prepareHadronisation( ev );
 
+    CG_WARNING("");
       //--- initialising the string fragmentation variables
-      for ( unsigned short i = 0; i < MAX_STRING_EVENT; ++i ) {
-        jlrole[i] = -1;
-        num_part_in_str[i] = 0;
+      for ( unsigned short i = 0; i < MAX_STRING_EVENT; ++i )
         for ( unsigned short j = 0; j < MAX_PART_STRING; ++j )
           jlpsf[i][j] = -1;
-      }
 
       if ( utils::Logger::get().level >= utils::Logger::Level::debug ) {
         CG_DEBUG( "Pythia6Hadroniser" ) << "Dump of the event before the hadronisation:";
@@ -174,7 +173,6 @@ namespace cepgen
           pyjets_.p[4][np] = part.mass();
           part.dump();
 
-          pylist(2);
           pyjets_.k[0][np] = part.status() <= Particle::Status::Undefined
             ? 21 // incoming beam
             : (int)part.status();
@@ -328,6 +326,7 @@ namespace cepgen
         doubl_mom.lorentzBoost( pmxda_2 );
 
         auto& doublet = ev.addParticle( part.role() );
+    CG_WARNING("");
         doublet.setPdgId( doublet_id );
         doublet.setStatus( Particle::Status::DebugResonance );
         doublet.setMomentum( doubl_mom );
