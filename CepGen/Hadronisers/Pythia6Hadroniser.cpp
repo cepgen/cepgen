@@ -1,26 +1,109 @@
-#include "Pythia6Hadroniser.h"
+#include "CepGen/Hadronisers/GenericHadroniser.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
 
-namespace CepGen
+#include <algorithm>
+
+/// Maximal number of characters to fetch for the particle's name
+#define NAME_CHR 16
+
+extern "C"
 {
-  namespace Hadroniser
+  /// Get the particle's mass in GeV from the Pythia6 module
+  extern double pymass_( int& );
+  /// Get the resonant particle's width in GeV from the Pythia6 module
+  //extern double pywidt_( int& );
+  /// Launch the Pythia6 fragmentation
+  extern void pyexec_();
+  /// Set a parameter value to the Pythia6 module
+  extern void pygive_( const char*, int );
+  extern void pyckbd_();
+  /// List all the particles in the event in a human-readable format
+  extern void pylist_( int& );
+  /// Join two coloured particles in a colour singlet
+  extern void pyjoin_( int&, int& );
+  /// Get a particle's human-readable name from the Pythia6 module
+  extern void pyname_( int&, char*, int );
+  /// Get kinematic information on a particle from the Pythia6 module
+  extern double pyp_( int&, int& );
+  /// Store one parton/particle in the PYJETS common block
+  extern void py1ent_( int&, int&, double&, double&, double& );
+
+  /// Particles content of the event
+  extern struct
   {
+    /// Number of particles in the event
+    int n;
+    int npad;
+    /// Particles' general information (status, PDG id, mother, daughter 1, daughter 2)
+    int k[5][4000];
+    /// Particles' kinematics, in GeV (px, py, pz, E, M)
+    double p[5][4000];
+    /// Primary vertex for the particles
+    double v[5][4000];
+  } pyjets_;
+}
+
+namespace cepgen
+{
+  namespace hadr
+  {
+    /**
+     * Full interface to the Pythia6 @cite Sjostrand:2006za algorithm. It can be used in a single particle decay mode as well as a full event hadronisation using the string model, as in Jetset.
+     * @brief Pythia6 hadronisation algorithm
+     */
+    class Pythia6Hadroniser : public GenericHadroniser
+    {
+      public:
+        Pythia6Hadroniser( const ParametersList& );
+        ~Pythia6Hadroniser() = default;
+
+        void setParameters( const Parameters& ) override;
+        void readString( const char* param ) override;
+        void init() override;
+        bool run( Event& ev, double& weight, bool full ) override;
+
+        void setCrossSection( double xsec, double xsec_err ) override;
+        //bool hadronise( const Particle* );
+
+      private:
+        inline static double pymass(int pdgid_) { return pymass_(pdgid_); }
+        //inline static double pywidt(int pdgid_) { return pywidt_(pdgid_); }
+        inline static void pyexec() { pyexec_(); }
+        inline static void pyckbd() { pyckbd_(); }
+        inline static void pygive( const std::string& line ) { pygive_( line.c_str(), line.length() ); }
+        inline static void pylist( int mlist ) { pylist_( mlist ); }
+        inline static double pyp( int role, int qty ) { return pyp_( role, qty ); }
+        //inline static void py1ent( int* kf, double* pe, double theta, double phi ) { int one=1; py1ent_( &one, kf, pe, theta, phi ); }
+        //inline static void py1ent( int* kf, double* pe, double theta, double phi ) { py1ent_( 1, kf, pe, theta, phi ); }
+        inline static std::string pyname( int pdgid ) {
+          char out[NAME_CHR];
+          std::string s;
+          pyname_( pdgid, out, NAME_CHR );
+          s = std::string( out, NAME_CHR );
+          //s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+          s.erase( remove( s.begin(), s.end(), ' ' ), s.end() );
+          return s;
+        }
+        /**
+         * \brief Connect entries with colour flow information
+         * \param[in] njoin_ Number of particles to join in the colour flow
+         * \param[in] ijoin_ List of particles unique identifier to join in the colour flow
+         */
+        inline static void pyjoin( int njoin, int ijoin[2] ) { return pyjoin_( njoin, *ijoin ); }
+        bool prepareHadronisation( Event* );
+    };
 
 #ifdef PYTHIA6
 
-    Pythia6Hadroniser::Pythia6Hadroniser() : GenericHadroniser( "Pythia6" )
+    Pythia6Hadroniser::Pythia6Hadroniser( const ParametersList& plist ) :
+      GenericHadroniser( plist, "pythia6" )
     {
       //this->pygive("MSTU(21)=1");
     }
 
-    Pythia6Hadroniser::~Pythia6Hadroniser()
-    {
-      //Debugging("Destructor called");
-    }
-
-    bool
-    Pythia6Hadroniser::hadronise( const Particle* part )
+    /*void
+    Pythia6Hadroniser::run( Event& ev, double& weight, bool full )
     {
       pyjets_.p[0][0] = part->momentum().px();
       pyjets_.p[1][0] = part->momentum().py();
@@ -36,10 +119,10 @@ namespace CepGen
 
       this->pyexec();
       return true;
-    }
+    }*/
 
-    bool
-    Pythia6Hadroniser::hadronise( Event* ev )
+    void
+    Pythia6Hadroniser::run( Event& ev, double& weight, bool full )
     {
       Particle::Status status;
 
@@ -64,7 +147,7 @@ namespace CepGen
 
       if ( Logger::get().level >= Logger::Debug ) {
         Debugging( "Dump of the event before the hadronisation" );
-        ev->dump();
+        ev.dump();
       }
 
       // Filling the common block to propagate to PYTHIA6
@@ -72,7 +155,7 @@ namespace CepGen
       unsigned int str_in_evt = 0;
 
       for ( ParticleRoles::iterator r=rl.begin(); r!=rl.end(); r++ ) {
-        Particles& pr = ev->getByRole( *r );
+        Particles& pr = ev[*r];
         unsigned int part_in_str = 0;
         for ( Particles::iterator part_it=pr.begin(); part_it!=pr.end(); ++part_it ) {
           Particle& part = *part_it;
@@ -96,7 +179,7 @@ namespace CepGen
           if ( part.mothers().size()>0 ) pyjets_.k[2][np] = *( part.mothers().begin() )+1; // mother
           else pyjets_.k[2][np] = 0; // mother
 
-          const Particles daug = ev->daughters( part );
+          const Particles daug = ev.daughters( part );
           if ( !daug.empty() ) {
             pyjets_.k[3][np] = *part.daughters().begin()+1; // daughter 1
             pyjets_.k[4][np] = *part.daughters().end()+1; // daughter 2
@@ -166,8 +249,8 @@ namespace CepGen
         Particle pa;
         pa.setId( p );
         pa.setPdgId( static_cast<Particle::ParticleCode>( pyjets_.k[1][p] ) );
-        if ( ev->getById( pyjets_.k[2][p]-1 ).valid() ) {
-          pa.setRole( ev->getById( pyjets_.k[2][p]-1 ).role() ); // Child particle inherits its mother's role
+        if ( ev[pyjets_.k[2][p]-1].valid() ) {
+          pa.setRole( ev[pyjets_.k[2][p]-1].role() ); // Child particle inherits its mother's role
         }
         pa.setStatus( static_cast<Particle::Status>( pyjets_.k[0][p] ) );
         pa.setMomentum( Particle::Momentum( pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p] ) );
@@ -176,10 +259,10 @@ namespace CepGen
 
         if ( pyjets_.k[2][p] != 0 ) {
           dbg << Form( "\n\t%2d (pdgId=%4d) has mother %2d (pdgId=%4d)", pa.id(), pa.pdgId(), pyjets_.k[2][p], pyjets_.k[1][pyjets_.k[2][p]-1] );
-          pa.addMother( ev->getById( pyjets_.k[2][p]-1 ) );
+          pa.addMother( ev[pyjets_.k[2][p]-1] );
         }
 
-        ev->addParticle( pa );
+        ev.addParticle( pa );
       }
       Debugging( Form( "Passed the string construction stage.\n\t %d string objects were identified and constructed",
                        "%s", str_in_evt, dbg.str().c_str() ) );
@@ -283,8 +366,12 @@ namespace CepGen
       }
       return true;
     }
-
 #endif
-
   }
 }
+
+#ifdef PYTHIA6
+// register hadroniser and define alias
+REGISTER_HADRONISER( pythia6, Pythia6Hadroniser )
+#endif
+
