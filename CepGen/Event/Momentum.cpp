@@ -323,25 +323,27 @@ namespace cepgen
   Momentum&
   Momentum::betaGammaBoost( double gamma, double betagamma )
   {
-    if ( gamma == 1. && betagamma == 0. ) return *this; // trivial case
+    if ( gamma == 1. && betagamma == 0. )
+      return *this; // trivial case
+
     const double pz = pz_, e = energy_;
-    pz_ = gamma*pz+betagamma*e;
+    pz_      = gamma*pz+betagamma*e;
     energy_  = gamma*e +betagamma*pz;
     computeP();
     return *this;
   }
 
   Momentum&
-  Momentum::lorentzBoost( const Momentum& p )
+  Momentum::lorentzBoost( const Momentum& p2 )
   {
     //--- do not boost on a system at rest
-    if ( p.p() == 0. )
+    if ( p2.p() == 0. )
       return *this;
 
-    const double m = p.mass();
-    const double pf4 = fourProduct( p )/m;
-    const double fn = ( pf4+energy_ )/( p.energy_+m );
-    *this -= p*fn;
+    const double m = p2.mass();
+    const double pf4 = ( px_*p2.px_+py_*p2.py_+pz_*p2.pz_+energy_*p2.energy_ )/m;
+    const double fn = ( pf4+energy_ )/( p2.energy_+m );
+    *this += p2*fn;
     energy_ = pf4;
     return *this;
   }
@@ -349,8 +351,9 @@ namespace cepgen
   Momentum&
   Momentum::rotatePhi( double phi, double sign )
   {
-    const double px = px_*cos( phi )+py_*sin( phi )*sign,
-                 py =-px_*sin( phi )+py_*cos( phi )*sign;
+    const double sphi = sin( phi ), cphi = cos( phi );
+    const double px =  px_*cphi + sign*py_*sphi,
+                 py = -px_*sphi + sign*py_*cphi;
     px_ = px;
     py_ = py;
     return *this;
@@ -359,10 +362,12 @@ namespace cepgen
   Momentum&
   Momentum::rotateThetaPhi( double theta, double phi )
   {
+    const double ctheta = cos( theta ), stheta = sin( theta );
+    const double cphi = cos( phi ), sphi = sin( phi );
     double rotmtx[3][3], mom[3]; //FIXME check this! cos(phi)->-sin(phi) & sin(phi)->cos(phi) --> phi->phi+pi/2 ?
-    rotmtx[0][0] = -sin( phi ); rotmtx[0][1] = -cos( theta )*cos( phi ); rotmtx[0][2] =  sin( theta )*cos( phi );
-    rotmtx[1][0] =  cos( phi ); rotmtx[1][1] = -cos( theta )*sin( phi ); rotmtx[1][2] =  sin( theta )*sin( phi );
-    rotmtx[2][0] =  0.;         rotmtx[2][1] =  sin( theta );            rotmtx[2][2] =  cos( theta );
+    rotmtx[0][0] = -sphi; rotmtx[0][1] = -ctheta*cphi; rotmtx[0][2] = stheta*cphi;
+    rotmtx[1][0] =  cphi; rotmtx[1][1] = -ctheta*sphi; rotmtx[1][2] = stheta*sphi;
+    rotmtx[2][0] =  0.;   rotmtx[2][1] =  stheta;      rotmtx[2][2] = ctheta;
 
     for ( unsigned short i = 0; i < 3; ++i ) {
       mom[i] = 0.;
