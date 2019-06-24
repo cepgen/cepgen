@@ -148,13 +148,13 @@ namespace cepgen
   }
 
   Particles
-  Event::mothers( const Particle& part )
+  Event::mothers( const Particle& part ) const
   {
     return getByIds( part.mothers() );
   }
 
   Particles
-  Event::daughters( const Particle& part )
+  Event::daughters( const Particle& part ) const
   {
     return getByIds( part.daughters() );
   }
@@ -273,10 +273,15 @@ namespace cepgen
         std::ostringstream oss_pdg;
         if ( part.pdgId() == PDG::invalid && !mothers.empty() ) {
           //--- if particles compound
+          std::string delim;
           for ( unsigned short i = 0; i < mothers.size(); ++i )
-            oss_pdg
-              << ( i > 0 ? "/" : "" )
-              << PDG::get().name( operator[]( *std::next( mothers.begin(), i ) ).pdgId() );
+            try {
+              oss_pdg << delim
+                << PDG::get().name( operator[]( *std::next( mothers.begin(), i ) ).pdgId() ), delim = "/";
+            } catch ( const Exception& ) {
+              oss_pdg << delim
+                << operator[]( *std::next( mothers.begin(), i ) ).pdgId(), delim = "/";
+            }
           os << Form( "\n %2d\t\t   %-7s", part.id(), oss_pdg.str().c_str() );
         }
         else {
@@ -284,7 +289,11 @@ namespace cepgen
           if ( (HeavyIon)part.pdgId() )
             oss_pdg << (HeavyIon)part.pdgId();
           else
-            oss_pdg << PDG::get().name( part.pdgId() );
+            try {
+              oss_pdg << PDG::get().name( part.pdgId() );
+            } catch ( const Exception& ) {
+              oss_pdg << "?";
+            }
           os << Form( "\n %2d\t%-+10d %-7s", part.id(), part.integerPdgId(), oss_pdg.str().c_str() );
         }
       }

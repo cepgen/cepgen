@@ -51,9 +51,9 @@ namespace cepgen
         /// \param[in] x A random number (between 0 and 1)
         /// \param[in] outmass The maximal outgoing particles' invariant mass
         /// \param[in] lepmass The outgoing leptons' mass
-        /// \param[out] dw The size of the integration bin
+        /// \param[out] dmx The size of the integration bin
         /// \return Mass of the outgoing proton remnant
-        double computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dw );
+        double computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dmx );
         /// Set all the kinematic variables for the outgoing proton remnants, and prepare the hadronisation
         /// \param[in] part Particle to "prepare" for the hadronisation to be performed
         void prepareHadronisation( Particle *part );
@@ -93,8 +93,6 @@ namespace cepgen
         pdgid_t pair_;
 
         Limits w_limits_;
-        Limits q2_limits_;
-        Limits mx_limits_;
         struct Masses
         {
           /// squared mass of the first proton-like outgoing particle
@@ -196,9 +194,8 @@ namespace cepgen
          * \brief Redefine the variables of integration in order to avoid the strong peaking of the integrant
          * \param[in] expo Exponant
          * \param[in] lim Min/maximal value of the variable
-         * \param[out] out The new variable definition
-         * \param[out] dout The bin width the new variable definition
          * \param[in] var_name The variable name
+         * \return A pair containing the value and the bin width the new variable definition
          * \note This method overrides the set of `mapxx` subroutines in ILPAIR, with a slight difference according to the sign of the
          *  \f$\mathrm dy_{out}\f$ parameter :
          *  - left unchanged :
@@ -206,8 +203,8 @@ namespace cepgen
          *  - opposite sign :
          * > `mapt1`, `mapt2`
          */
-        void map( double expo, const Limits& lim, double& out, double& dout, const std::string& var_name = "" );
-        void mapla( double y, double z, int u, const Limits& lim, double& x, double& d );
+        std::pair<double,double> map( double expo, const Limits& lim, const std::string& var_name = "" );
+        std::pair<double,double> mapla( double y, double z, int u, const Limits& lim );
         std::shared_ptr<ff::Parameterisation> ff_p1_, ff_p2_;
     };
   }

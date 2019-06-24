@@ -59,6 +59,7 @@ namespace cepgen
 
       if ( CG_LOG_MATCH( "Process:dumpPoint", debugInsideLoop ) )
         dumpPoint();
+      clearEvent();
     }
 
     double
@@ -105,7 +106,7 @@ namespace cepgen
       CG_DEBUG( "GenericProcess" ) << "Kinematics successfully prepared!\n"
         << "  √s = " << sqs_*1.e-3 << " TeV,\n"
         << "  p₁ = " << p1 << ", mass=" << p1.mass() << " GeV\n"
-        << "  p₂ = " << p1 << ", mass=" << p2.mass() << " GeV.";
+        << "  p₂ = " << p2 << ", mass=" << p2.mass() << " GeV.";
     }
 
     void
@@ -192,11 +193,16 @@ namespace cepgen
     void
     GenericProcess::setIncomingKinematics( const Particle::Momentum& p1, const Particle::Momentum& p2 )
     {
-      if ( !has_event_ )
+      if ( !has_event_ || !event_ )
         return;
 
-      event_->getOneByRole( Particle::IncomingBeam1 ).setMomentum( p1 );
-      event_->getOneByRole( Particle::IncomingBeam2 ).setMomentum( p2 );
+      CG_DEBUG( "GenericProcess:incomingBeams" )
+        << "Incoming primary particles:\n\t"
+        << p1 << "\n\t"
+        << p2;
+
+      (*event_)[Particle::IncomingBeam1][0].setMomentum( p1 );
+      (*event_)[Particle::IncomingBeam2][0].setMomentum( p2 );
     }
 
     bool

@@ -166,6 +166,7 @@ namespace cepgen
     const bool pretty = true;
 
     const int wb = 90, wt = 33;
+
     os << std::left
        << "\n"
        << std::setfill('_') << std::setw( wb+3 ) << "_/¯ PROCESS INFORMATION ¯\\_" << std::setfill( ' ' ) << "\n"
@@ -189,7 +190,7 @@ namespace cepgen
       << ( pretty ? yesno( param->generation_.enabled ) : std::to_string( param->generation_.enabled ) ) << "\n"
       << std::setw( wt ) << "Number of events to generate"
       << ( pretty ? boldify( param->generation_.maxgen ) : std::to_string( param->generation_.maxgen ) ) << "\n";
-    if ( param->generation().num_threads > 1 )
+    if ( param->generation_.num_threads > 1 )
       os
         << std::setw( wt ) << "Number of threads" << param->generation_.num_threads << "\n";
     os

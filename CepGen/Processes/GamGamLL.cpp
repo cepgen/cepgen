@@ -93,9 +93,6 @@ namespace cepgen
       CG_DEBUG_LOOP( "GamGamLL:setKinematics" )
         << "w limits = " << w_limits_ << "\n\t"
         << "wmax/wmin = " << w_limits_.max()/w_limits_.min();
-
-      q2_limits_ = kin_.cuts.initial.q2;
-      mx_limits_ = kin_.cuts.remnants.mass_single;
     }
 
     //---------------------------------------------------------------------------------------------
@@ -155,7 +152,9 @@ namespace cepgen
       double ds2 = 0.;
       if ( n_opt_ == 0 ) {
         const double smax = s_+masses_.MX2-2.*MX_*sqs_;
-        map( x(2), Limits( sig1, smax ), s2_, ds2, "s2" );
+        const auto s2 = map( x(2), Limits( sig1, smax ), "s2" );
+        s2_ = s2.first;
+        ds2 = s2.second;
         sig1 = s2_; //FIXME!!!!!!!!!!!!!!!!!!!!
       }
 
@@ -174,26 +173,24 @@ namespace cepgen
              t1_min = ( masses_.w31*d3+( d3-masses_.w31 )*( d3*w1_-masses_.w31*w2_ )/s_ )/t1_max; // definition from eq. (A.5) in [1]
 
       // FIXME dropped in CDF version
-      if ( t1_max > -q2_limits_.min() ) {
-        CG_WARNING( "GamGamLL" ) << "t1max = " << t1_max << " > -q2min = " << ( -q2_limits_.min() );
+      if ( t1_max > -kin_.cuts.initial.q2.min() ) {
+        CG_WARNING( "GamGamLL" ) << "t1max = " << t1_max << " > -q2min = " << -kin_.cuts.initial.q2.min();
         return false;
       }
-      if ( t1_min < -q2_limits_.max() && q2_limits_.hasMax() ) {
-        CG_DEBUG( "GamGamLL" ) << "t1min = " << t1_min << " < -q2max = " << -q2_limits_.max();
+      if ( t1_min < -kin_.cuts.initial.q2.max() && kin_.cuts.initial.q2.hasMax() ) {
+        CG_DEBUG( "GamGamLL" ) << "t1min = " << t1_min << " < -q2max = " << -kin_.cuts.initial.q2.max();
         return false;
       }
-      if ( t1_max < -q2_limits_.max() && q2_limits_.hasMax() )
-        t1_max = -q2_limits_.max();
-      if ( t1_min > -q2_limits_.min() && q2_limits_.hasMin() )
-        t1_min = -q2_limits_.min();
+      if ( t1_max < -kin_.cuts.initial.q2.max() && kin_.cuts.initial.q2.hasMax() )
+        t1_max = -kin_.cuts.initial.q2.max();
+      if ( t1_min > -kin_.cuts.initial.q2.min() && kin_.cuts.initial.q2.hasMin() )
+        t1_min = -kin_.cuts.initial.q2.min();
       /////
 
       // t1, the first photon propagator, is defined here
-      t1_ = 0.;
-      double dt1 = 0.;
-      map( x(0), Limits( t1_min, t1_max ), t1_, dt1, "t1" );
-      // changes wrt mapt1 : dx->-dx
-      dt1 *= -1.;
+      const auto t1 = map( x(0), Limits( t1_min, t1_max ), "t1" );
+      t1_ = t1.first;
+      const double dt1 = -t1.second; // changes wrt mapt1 : dx->-dx
 
       CG_DEBUG_LOOP( "GamGamLL" )
         << "Definition of t1 = " << t1_ << " according to\n\t"
@@ -246,10 +243,11 @@ namespace cepgen
           CG_DEBUG_LOOP( "GamGamLL" )
             << "min(sig2) truncated to splus = " << splus;
         }
-        if ( n_opt_ < -1 )
-          map( x(2), s2_lim, s2_, ds2, "s2" );
-        else
-          mapla( t1_, w2_, x(2), s2_lim, s2_, ds2 ); // n_opt_==-1
+        const auto s2 = n_opt_ < -1
+          ? map( x(2), s2_lim, "s2" )
+          : mapla( t1_, w2_, x(2), s2_lim ); // n_opt_==-1
+        s2_ = s2.first;
+        ds2 = s2.second;
         s2x = s2_;
       }
       else if ( n_opt_ == 0 )
@@ -274,12 +272,9 @@ namespace cepgen
                    t2_min = ( masses_.w52*dd4_+( dd4_-masses_.w52 )*( dd4_*w2_-masses_.w52*t1_ )/s2x )/t2_max;
 
       // t2, the second photon propagator, is defined here
-      t2_ = 0.;
-      double dt2 = 0.;
-      map( x(1), Limits( t2_min, t2_max ), t2_, dt2, "t2" );
-      // changes wrt mapt2 : dx->-dx
-
-      dt2 *= -1.;
+      const auto t2 = map( x(1), Limits( t2_min, t2_max ), "t2" );
+      t2_ = t2.first;
+      const double dt2 = -t2.second; // changes wrt mapt2 : dx->-dx
 
       // \f$\delta_6=m_4^2-m_5^2\f$ as defined in Vermaseren's paper
       const double tau = t1_-t2_,
@@ -287,6 +282,7 @@ namespace cepgen
                    r4 = masses_.w52-t2_;
 
       CG_DEBUG_LOOP( "GamGamLL" )
+        << "tau= " << tau << "\n\t"
         << "r1 = " << r1 << "\n\t"
         << "r2 = " << r2 << "\n\t"
         << "r3 = " << r3 << "\n\t"
@@ -299,8 +295,7 @@ namespace cepgen
 
       sa2_ = -0.25 * r4*r4 + w2_*t2_;
       if ( sa2_ >= 0. ) {
-        CG_WARNING( "GamGamLL" )
-          <<  "sa2_ = " << sa2_ << " >= 0";
+        CG_WARNING( "GamGamLL" ) <<  "sa2_ = " << sa2_ << " >= 0";
         return false;
       }
 
@@ -325,10 +320,13 @@ namespace cepgen
         s2p = c/( t2_*s2_lim.min() );
       }
       // 9
-      if ( n_opt_ > 1 )
-        map( x( 2 ), s2_lim, s2_, ds2, "s2" );
-      else if ( n_opt_ == 1 )
-        mapla( t1_, w2_, x( 2 ), s2_lim, s2_, ds2 );
+      if ( n_opt_ >= 1 ) {
+        const auto s2 = n_opt_ > 1
+          ? map( x( 2 ), s2_lim, "s2" )
+          : mapla( t1_, w2_, x( 2 ), s2_lim );
+        s2_ = s2.first;
+        ds2 = s2.second;
+      }
 
       const double ap = -0.25*pow( s2_+d8, 2 )+s2_*t1_;
 
@@ -340,8 +338,7 @@ namespace cepgen
         << "s2      = " << s2_ << "\n\t"
         << "s2p     = " << s2p << "\n\t"
         << "splus   = " << splus << "\n\t"
-        << "s2 range= " << s2_lim << "\n\t"
-        << "dd2     = " << dd2_;;
+        << "s2 range= " << s2_lim;
 
       const double yy4 = cos( M_PI*x( 3 ) );
       const double dd = dd1_*dd2_;
@@ -349,12 +346,14 @@ namespace cepgen
       const double st = s2_-t1_-w2_;
       const double delb = ( 2.*w2_*r3+r4*st )*( 4.*p12_*t1_-( t1_-masses_.w31 )*st )/( 16.*ap );
 
+      CG_DEBUG_LOOP( "GamGamLL" )
+        << std::scientific
+        << "dd = " << dd << ", "
+        << "dd1 = " << dd1_ << ", "
+        << "dd2 = " << dd2_ << std::fixed;
+
       if ( dd <= 0. ) {
-        CG_DEBUG_LOOP( "GamGamLL" )
-          << std::scientific
-          << "dd = " << dd << " <= 0\n\t"
-          << "dd1 = " << dd1_ << "\t"
-          << "dd2 = " << dd2_ << std::fixed;
+        CG_WARNING( "GamGamLL:pickin" ) << "dd = " << dd << " <= 0.";
         return false;
       }
 
@@ -362,15 +361,15 @@ namespace cepgen
       s1_ = t2_+w1_+( 2.*p12_*r3-4.*delta_ )/st;
 
       if ( ap >= 0. ) {
-        CG_DEBUG_LOOP( "GamGamLL" )
-          <<  "ap = " << ap << " >= 0";
+        CG_WARNING( "GamGamLL:pickin" ) <<  "ap = " << ap << " >= 0";
         return false;
       }
 
       jacobian_ = ds2 * dt1 * dt2 * 0.125 * M_PI*M_PI/( sl1_*sqrt( -ap ) );
 
       CG_DEBUG_LOOP( "GamGamLL" )
-        << "Jacobian = " << std::scientific << jacobian_ << std::fixed;
+        << "ds2=" << ds2 << ", dt1=" << dt1 << ", dt2=" << dt2 << "\n\t"
+        << "Jacobian=" << std::scientific << jacobian_ << std::fixed;
 
       gram_ = ( 1.-yy4*yy4 )*dd/ap;
 
@@ -547,12 +546,12 @@ namespace cepgen
 
       if ( fabs( sin_phi3 ) > 1. ) {
         CG_WARNING( "GamGamLL" )
-          << "sin(phi_3) = " << sin_phi3 << " while it must be in [-1 ; 1]";
+          << "sin(phi_3) = " << sin_phi3 << " while it must be in (" << Limits( -1., 1. ) << ")";
         return false;
       }
       if ( fabs( sin_phi5 ) > 1. ) {
         CG_WARNING( "GamGamLL" )
-          << "sin(phi_5) = " << sin_phi5 << " while it must be in [-1 ; 1]";
+          << "sin(phi_5) = " << sin_phi5 << " while it must be in (" << Limits( -1., 1. ) << ")";
         return false;
       }
 
@@ -583,31 +582,32 @@ namespace cepgen
         return true;
       }
       if ( a1 < 0. )
-        p5_lab_[0] = -p5_lab_.px();
+        p5_lab_[0] *= -1.;
       else
-        p3_lab_[0] = -p3_lab_.px();
+        p3_lab_[0] *= -1.;
       return true;
     }
 
     //---------------------------------------------------------------------------------------------
 
     double
-    GamGamLL::computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dw )
+    GamGamLL::computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dmx )
     {
-      const double mx0 = mp_+PDG::get().mass( PDG::piZero ); // 1.07
-      const double wx2min = pow( std::max( mx0, mx_limits_.min() ), 2 ),
-                   wx2max = pow( std::min( sqs_-outmass-2.*lepmass, mx_limits_.max() ), 2 );
+      const double mx0 = mp_+PDG::get().mass( PDG::piPlus ); // 1.07
+//      const double mx0 = 1.07;//FIXME
+      const Limits wx_lim( pow( std::max( mx0, kin_.cuts.remnants.mass_single.min() ), 2 ),
+                           pow( std::min( sqs_-outmass-2.*lepmass, kin_.cuts.remnants.mass_single.max() ), 2 ) );
 
-      double mx2 = 0., dmx2 = 0.;
-      map( x, Limits( wx2min, wx2max ), mx2, dmx2, "mx2" );
+      const auto w = map( x, wx_lim, "mx2" );
+      const double mx = sqrt( w.first );
+      dmx = sqrt( w.second );
 
       CG_DEBUG_LOOP( "GamGamLL" )
-        << "mX^2 in range (" << wx2min << ", " << wx2max << "), x = " << x << "\n\t"
-        << "mX^2 = " << mx2 << ", d(mX^2) = " << dmx2 << "\n\t"
-        << "mX = " << sqrt( mx2 ) << ", d(mX) = " << sqrt( dmx2 );
+        << "mX² in range " << wx_lim << ", x = " << x << "\n\t"
+        << "mX² = " << w.first << ", dmX² = " << w.second << "\n\t"
+        << "mX = " << mx << ", dmX = " << dmx;
 
-      dw = sqrt( dmx2 );
-      return sqrt( mx2 );
+      return mx;
     }
 
     //---------------------------------------------------------------------------------------------
@@ -688,9 +688,9 @@ namespace cepgen
         << "m(X2) = " << MY_ << " GeV";
 
       // compute the two-photon energy for this point
-      w4_ = 0.;
-      double dw4 = 0.;
-      map( x( 4 ), w_limits_, w4_, dw4, "w4" );
+      const auto w4 = map( x( 4 ), w_limits_, "w4" );
+      w4_ = w4.first;
+      const double dw4 = w4.second;
       mc4_ = sqrt( w4_ );
 
       CG_DEBUG_LOOP( "GamGamLL" )
@@ -821,7 +821,7 @@ namespace cepgen
       CG_DEBUG_LOOP( "GamGamLL" )
         << "Outgoing kinematics\n\t"
         << " first outgoing lepton: p = " << p6_cm_.p() << ", E = " << p6_cm_.energy() << "\n\t"
-        << "second outgoing lepton: p = " << p7_cm_.p() << ", E = " << p7_cm_.energy();;
+        << "second outgoing lepton: p = " << p7_cm_.p() << ", E = " << p7_cm_.energy();
 
       // Second outgoing lepton's 3-momentum
       const double p7x = -p6x + pt4_,
@@ -835,7 +835,13 @@ namespace cepgen
       //p7_cm_ = Particle::Momentum(pl7*st7*cp7, pl7*st7*sp7, pl7*ct7, el7);
 
       q1dq_ = eg*( 2.*ecm6-mc4_ )-2.*pg*p6cm.pz();
-      q1dq2_ = ( w4_-t1_-t2_ ) * 0.5;
+      q1dq2_ = 0.5*( w4_-t1_-t2_ );
+
+
+      CG_DEBUG_LOOP( "GamGamLL" )
+        << "ecm6 = " << ecm6 << ", mc4 = " << mc4_ << "\n\t"
+        << "eg = " << eg << ", pg = " << pg << "\n\t"
+        << "q1dq = " << q1dq_ << ", q1dq2 = " << q1dq2_;
 
       const double phi3 = p3_lab_.phi(), cos_phi3 = cos( phi3 ), sin_phi3 = sin( phi3 ),
                    phi5 = p5_lab_.phi(), cos_phi5 = cos( phi5 ), sin_phi5 = sin( phi5 );
@@ -888,19 +894,23 @@ namespace cepgen
 
       //--- kinematics computation for both leptons
 
+      CG_DEBUG_LOOP( "GamGamLL:gmufil" )
+        << "unboosted P(l1)=" << p6_cm_ << "\n\t"
+        << "unboosted P(l2)=" << p7_cm_;
+
       p6_cm_.betaGammaBoost( gamma, betgam );
       p7_cm_.betaGammaBoost( gamma, betgam );
 
       //--- cut on mass of final hadronic system (MX/Y)
 
-      if ( mx_limits_.valid() ) {
+      if ( kin_.cuts.remnants.mass_single.valid() ) {
         if ( ( mode_ == KinematicsMode::InelasticElastic
             || mode_ == KinematicsMode::InelasticInelastic )
-          && !mx_limits_.passes( MX_ ) )
+          && !kin_.cuts.remnants.mass_single.passes( MX_ ) )
           return 0.;
         if ( ( mode_ == KinematicsMode::ElasticInelastic
             || mode_ == KinematicsMode::InelasticInelastic )
-          && !mx_limits_.passes( MY_ ) )
+          && !kin_.cuts.remnants.mass_single.passes( MY_ ) )
           return 0.;
       }
 
@@ -944,6 +954,10 @@ namespace cepgen
         case KinematicsMode::InelasticInelastic:      jacobian_ *= periPP( 3, 3 )*pow( masses_.dw31*masses_.dw52, 2 ); break;
       }
 
+      CG_DEBUG_LOOP( "GamGamLL:f" )
+        << "kinematics mode: " << kin_.mode << "\n\t"
+        << "Jacobian: " << jacobian_;
+
       //--- compute the event weight using the Jacobian
 
       return constants::GEVM2_TO_PB*jacobian_;
@@ -959,23 +973,46 @@ namespace cepgen
 
       const double gamma  = cm.energy()/sqs_, betgam = cm.pz()/sqs_;
 
+      CG_DEBUG_LOOP( "GamGamLL:gmufil" )
+        << "sqrt(s)=" << sqs_ << " GeV, initial two-proton system: " << cm << "\n\t"
+        << "gamma=" << gamma << ", betgam=" << betgam;
+
       Particle::Momentum plab_ip1 = Particle::Momentum( 0., 0.,  p_cm_, ep1_ ).betaGammaBoost( gamma, betgam );
       Particle::Momentum plab_ip2 = Particle::Momentum( 0., 0., -p_cm_, ep2_ ).betaGammaBoost( gamma, betgam );
+
+      CG_DEBUG_LOOP( "GamGamLL:gmufil" )
+        << "unboosted PX=" << p3_lab_ << "\n\t"
+        << "unboosted PY=" << p5_lab_;
+
       p3_lab_.betaGammaBoost( gamma, betgam );
       p5_lab_.betaGammaBoost( gamma, betgam );
 
-      //----- parameterise a random rotation around z-axis
-      const int rany = ( rand() >= 0.5 * RAND_MAX ) ? 1 : -1,
-                ransign = ( rand() >= 0.5 * RAND_MAX ) ? 1 : -1;
-      const double ranphi = ( 0.5 * rand()/RAND_MAX )*2.*M_PI;
+      CG_DEBUG_LOOP( "GamGamLL:gmufil" )
+        << "boosted PX=" << p3_lab_ << "\n\t"
+        << "boosted PY=" << p5_lab_ << "\n\t"
+        << "boosted P(l1)=" << p6_cm_ << "\n\t"
+        << "boosted P(l2)=" << p7_cm_;
 
-      Particle::Momentum plab_ph1 = ( plab_ip1-p3_lab_ ).rotatePhi( ranphi, rany );
-      Particle::Momentum plab_ph2 = ( plab_ip2-p5_lab_ ).rotatePhi( ranphi, rany );
+      //----- parameterise a random rotation around z-axis
+      const short rany = drand() > 0.5 ? 1 : -1, ransign = drand() > 0.5 ? 1 : -1;
+      const double ranphi = 2*drand()*M_PI;
+
+      Particle::Momentum plab_ph1 = plab_ip1-p3_lab_;
+      plab_ph1.rotatePhi( ranphi, rany );
+
+      Particle::Momentum plab_ph2 = plab_ip2-p5_lab_;
+      plab_ph2.rotatePhi( ranphi, rany );
 
       p3_lab_.rotatePhi( ranphi, rany );
       p5_lab_.rotatePhi( ranphi, rany );
       p6_cm_.rotatePhi( ranphi, rany );
       p7_cm_.rotatePhi( ranphi, rany );
+
+      CG_DEBUG_LOOP( "GamGamLL:gmufil" )
+        << "boosted+rotated PX=" << p3_lab_ << "\n\t"
+        << "boosted+rotated PY=" << p5_lab_ << "\n\t"
+        << "boosted+rotated P(l1)=" << p6_cm_ << "\n\t"
+        << "boosted+rotated P(l2)=" << p7_cm_;
 
       /*if ( symmetrise_ && rand() >= .5*RAND_MAX ) {
         p6_cm_.mirrorZ();
@@ -987,7 +1024,7 @@ namespace cepgen
       event_->getOneByRole( Particle::IncomingBeam2 ).setMomentum( plab_ip2 );
 
       //----- first outgoing proton
-      Particle& op1 = event_->getOneByRole( Particle::OutgoingBeam1 );
+      auto& op1 = event_->getOneByRole( Particle::OutgoingBeam1 );
 
       op1.setMomentum( p3_lab_ );
       switch ( mode_ ) {
@@ -1004,7 +1041,7 @@ namespace cepgen
       }
 
       //----- second outgoing proton
-      Particle& op2 = event_->getOneByRole( Particle::OutgoingBeam2 );
+      auto& op2 = event_->getOneByRole( Particle::OutgoingBeam2 );
       op2.setMomentum( p5_lab_ );
       switch ( mode_ ) {
         case KinematicsMode::ElasticElastic:
@@ -1020,23 +1057,23 @@ namespace cepgen
       }
 
       //----- first incoming photon
-      Particle& ph1 = event_->getOneByRole( Particle::Parton1 );
+      auto& ph1 = event_->getOneByRole( Particle::Parton1 );
       ph1.setMomentum( plab_ph1 );
 
       //----- second incoming photon
-      Particle& ph2 = event_->getOneByRole( Particle::Parton2 );
+      auto& ph2 = event_->getOneByRole( Particle::Parton2 );
       ph2.setMomentum( plab_ph2 );
 
-      Particles& central_system = (*event_)[Particle::CentralSystem];
+      auto& central_system = (*event_)[Particle::CentralSystem];
 
       //----- first outgoing lepton
-      Particle& ol1 = central_system[0];
+      auto& ol1 = central_system[0];
       ol1.setPdgId( ol1.pdgId(), ransign );
       ol1.setMomentum( p6_cm_ );
       ol1.setStatus( Particle::Status::FinalState );
 
       //----- second outgoing lepton
-      Particle& ol2 = central_system[1];
+      auto& ol2 = central_system[1];
       ol2.setPdgId( ol2.pdgId(), -ransign );
       ol2.setMomentum( p7_cm_ );
       ol2.setStatus( Particle::Status::FinalState );
@@ -1050,7 +1087,7 @@ namespace cepgen
     double
     GamGamLL::periPP( int nup_, int ndown_ )
     {
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "GamGamLL:peripp" )
         << " Nup  = " << nup_ << "\n\t"
         << "Ndown = " << ndown_;
 
@@ -1059,7 +1096,7 @@ namespace cepgen
       const auto fp1 = ff_p1_->operator()( -t1_, w1_, mx2 );
       const auto fp2 = ff_p2_->operator()( -t2_, w2_, my2 );
 
-      CG_DEBUG_LOOP( "GamGamLL:FormFactors" )
+      CG_DEBUG_LOOP( "GamGamLL:peripp" )
         << "(u1,u2) = " << fp1 << "\n\t"
         << "(v1,v2) = " << fp2;
 
@@ -1075,41 +1112,39 @@ namespace cepgen
                              +fp1.FM*fp2.FE*t12
                              +fp1.FE*fp2.FE*t22 ) / pow( 2.*t1_*t2_*bb_, 2 );
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "GamGamLL:peripp" )
+        << "bb = " << bb_ << ", qqq = " << qqq << ", qdq = " << qdq << "\n\t"
         << "t11 = " << t11 << "\t" << "t12 = " << t12 << "\n\t"
         << "t21 = " << t21 << "\t" << "t22 = " << t22 << "\n\t"
-        << "⇒ PeriPP = " << peripp;
+        << "=> PeriPP = " << peripp;
 
       return peripp;
     }
 
-    void
-    GamGamLL::map( double expo, const Limits& lim, double& out, double& dout, const std::string& var_name_ )
+    std::pair<double,double>
+    GamGamLL::map( double expo, const Limits& lim, const std::string& var_name_ )
     {
-      const double y = lim.max()/lim.min();
-      out = lim.min()*pow( y, expo );
-      dout = out*log( y );
+      const double y = lim.max()/lim.min(), out = lim.min()*pow( y, expo ), dout = out*log( y );
       CG_DEBUG_LOOP( "GamGamLL:map" )
-        << "Mapping variable \"" << var_name_ << "\"\n\t"
-        << "limits = " << lim << "\n\t"
-        << "max/min = " << y << "\n\t"
-        << "exponent = " << expo << "\n\t"
-        << "output = " << out << "\n\t"
-        << "d(output) = " << dout;
+        << "Mapping variable \"" << var_name_ << "\" in range (" << lim << ")"
+        << " (max/min = " << y << ")\n\t"
+        << "exponent = " << expo << " => "
+        << "x = " << out << ", dx = " << dout;
+      return { out, dout };
     }
 
-    void
-    GamGamLL::mapla( double y, double z, int u, const Limits& lim, double& out, double& dout )
+    std::pair<double,double>
+    GamGamLL::mapla( double y, double z, int u, const Limits& lim )
     {
       const double xmb = lim.min()-y-z, xpb = lim.max()-y-z;
       const double c = -4.*y*z;
-      const double alp = sqrt( xpb*xpb + c ), alm = sqrt( xmb*xmb + c );
+      const double alp = sqrt( xpb*xpb+c ), alm = sqrt( xmb*xmb+c );
       const double am = xmb+alm, ap = xpb+alp;
       const double yy = ap/am, zz = pow( yy, u );
 
-      out = y+z+( am*zz - c / ( am*zz ) ) / 2.;
+      const double out = y+z+0.5*( am*zz-c / ( am*zz ) );
       const double ax = sqrt( pow( out-y-z, 2 )+c );
-      dout = ax*log( yy );
+      return { out, ax*log( yy ) };
     }
   }
 }

@@ -331,11 +331,7 @@ namespace cepgen
         throwPythonError( "Hadroniser name is required!" );
       std::string hadr_name = get<std::string>( pname );
 
-      //--- list of module-specific parameters
-      ParametersList mod_params;
-      fillParameter( hadr, "moduleParameters", mod_params );
-
-      params_.setHadroniser( cepgen::hadr::HadronisersHandler::get().build( hadr_name, mod_params ) );
+      params_.setHadroniser( cepgen::hadr::HadronisersHandler::get().build( hadr_name, get<ParametersList>( hadr ) ) );
 
       auto h = params_.hadroniser();
       h->setParameters( params_ );
