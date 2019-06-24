@@ -63,8 +63,6 @@ add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${sf_sources})
 target_link_libraries(CepGenCore ${CEPGEN_EXTERNAL_CORE_REQS})
 target_link_libraries(CepGenCore ${CEPGEN_EXTERNAL_STRF_REQS})
 
-message(STATUS ${hadr_libraries})
-
 add_library(CepGenAddOns SHARED ${io_sources} ${hadr_sources})
 target_link_libraries(CepGenAddOns ${hadr_libraries})
 target_link_libraries(CepGenAddOns ${CEPGEN_EXTERNAL_IO_REQS})
