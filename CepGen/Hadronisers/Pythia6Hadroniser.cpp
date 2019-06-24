@@ -108,8 +108,6 @@ namespace cepgen
         {
           unsigned int str_in_evt = 0;
           unsigned int num_part_in_str[MAX_STRING_EVENT] = { 0 };
-          int jlrole[MAX_STRING_EVENT] = { -1 };
-          int jlpsf[MAX_STRING_EVENT][MAX_PART_STRING] = { 0 };
         };
         EventProperties fillParticles( const Event& ) const;
     };
@@ -145,22 +143,6 @@ namespace cepgen
 
       unsigned int oldnpart = pyjets_.n;
 
-      for ( unsigned short i = 0; i < prop.str_in_evt; ++i ) {
-        if ( prop.num_part_in_str[i] < 2 )
-          continue;
-
-        std::ostringstream dbg;
-        for ( unsigned short j = 0; j < prop.num_part_in_str[i]; ++j )
-          if ( prop.jlpsf[i][j] != -1 )
-            dbg << Form( "\n\t * %2d (pdgId=%4d)", prop.jlpsf[i][j], pyjets_.k[1][prop.jlpsf[i][j]-1] );
-
-        CG_INFO( "Pythia6Hadroniser" )
-          << "Joining " << prop.num_part_in_str[i] << " particle" << utils::s( prop.num_part_in_str[i] )
-          << " in a same string (" << i << ")"
-          << dbg.str();
-
-        pyjoin( prop.num_part_in_str[i], prop.jlpsf[i] );
-      }
       pyexec();
 
       int criteria = oldnpart+1;
@@ -221,13 +203,15 @@ part.dump();
         const double px = std::sqrt( std::pow( mx2-mdq2+mq2, 2 ) / ( 4.*mx2 ) - mq2 );
 
         //--- build 4-vectors and boost decay particles
-        const auto pq = Particle::Momentum::fromPThetaPhi( px, theta, phi, std::hypot( px, mq ) );
+//        const auto pq = Particle::Momentum::fromPThetaPhi( px, theta, phi, std::hypot( px, mq ) );
+        const auto pq = Particle::Momentum::fromPThetaPhi( px, theta, phi, part.mass() );
 
         //--- singlet
         auto singl_mom = part.momentum();
         singl_mom.lorentzBoost( pq );
 
-        auto& quark = ev.addParticle( part.role(), false );
+        auto& quark = ev.addParticle( part.role() );
+        quark.addMother( ev[part.id()] );
         quark.setPdgId( partons.first );
         quark.setStatus( Particle::Status::DebugResonance );
         quark.setMomentum( singl_mom );
@@ -236,38 +220,13 @@ part.dump();
         auto doubl_mom = part.momentum();
         doubl_mom.lorentzBoost( -pq );
 
-        auto& diquark = ev.addParticle( part.role(), false );
+        auto& diquark = ev.addParticle( part.role() );
+        diquark.addMother( ev[part.id()] );
         diquark.setPdgId( partons.second );
         diquark.setStatus( Particle::Status::DebugResonance );
         diquark.setMomentum( doubl_mom );
 
-        std::cout << (singl_mom+doubl_mom)-part.momentum() << "|" << part.numDaughters() << std::endl;
-        /*if ( part.numDaughters() == 0 ) {
-          quark.addMother( ev[part.id()] );
-          diquark.addMother( ev[part.id()] );
-          CG_DEBUG( "Pythia6Hadroniser" )
-            << "Quark/diquark content succesfully added to the event.";
-        }
-        else { // Quark/diquark content already present in the event
-          CG_WARNING( "Pythia6Hadroniser" )
-            << "Quark/diquark content already present in the event!\n\t"
-            << "Role of these particles: " << part.role() << ".";
-
-          for ( const auto& daug : part.daughters() ) {
-            if ( ev[daug].pdgId() == PDG::up || ev[daug].pdgId() == PDG::down ) {
-              //--- quark
-              quark.addMother( ev[part.id()] );
-              ev[daug] = quark;
-              CG_DEBUG( "Pythia6Hadroniser" ) << "Singlet replaced.";
-            }
-            else {
-              //--- diquark
-              diquark.addMother( ev[part.id()] );
-              ev[daug] = diquark;
-              CG_DEBUG( "Pythia6Hadroniser" ) << "Doublet replaced";
-            }
-          }
-        }*/
+        std::cout << part.momentum()-(singl_mom+doubl_mom) << "|" << part.numDaughters() << std::endl;
         ev[part.id()].setStatus( Particle::Status::Fragmented );
       }
 ev.dump();
@@ -283,9 +242,11 @@ ev.dump();
       //--- initialising the string fragmentation variables
       EventProperties out;
       out.str_in_evt = 0;
+      int jlpsf[MAX_STRING_EVENT][MAX_PART_STRING] = { 0 };
 
       for ( const auto& role : ev.roles() ) { // loop on roles
         unsigned int part_in_str = 0;
+        bool role_has_string = false;
         for ( const auto& part : ev[role] ) {
           unsigned int np = part.id();
 
@@ -313,14 +274,36 @@ ev.dump();
 
           if ( part.status() == Particle::Status::DebugResonance ) {
             pyjets_.k[0][np] = 1; //FIXME PYTHIA/JETSET workaround
-            out.jlpsf[out.str_in_evt][part_in_str] = part.id()+1;
+            jlpsf[out.str_in_evt][part_in_str++] = part.id()+1;
             out.num_part_in_str[out.str_in_evt]++;
-            part_in_str++;
+            role_has_string = true;
           }
+          else if ( part.status() == Particle::Status::Undecayed )
+            pyjets_.k[0][np] = 2; // intermediate resonance
           pyjets_.n++;
         }
-        if ( out.jlrole[out.str_in_evt] > 0 )
+        //--- at most one string per role
+        if ( role_has_string )
           out.str_in_evt++;
+      }
+
+      //--- loop over the strings to bind everything together
+      for ( unsigned short i = 0; i < out.str_in_evt; ++i ) {
+        if ( out.num_part_in_str[i] < 2 )
+          continue;
+
+        std::ostringstream dbg;
+        for ( unsigned short j = 0; j < out.num_part_in_str[i]; ++j )
+          if ( jlpsf[i][j] != -1 )
+            dbg << Form( "\n\t * %2d (pdgId=%4d)", jlpsf[i][j], pyjets_.k[1][jlpsf[i][j]-1] );
+
+        CG_INFO( "Pythia6Hadroniser" )
+          << "Joining " << out.num_part_in_str[i] << " particle" << utils::s( out.num_part_in_str[i] )
+          << " with " << ev[jlpsf[i][0]].role() << " role"
+          << " in a same string (id=" << i << ")"
+          << dbg.str();
+
+        pyjoin( out.num_part_in_str[i], jlpsf[i] );
       }
       return out;
     }
