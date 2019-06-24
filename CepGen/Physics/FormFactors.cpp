@@ -17,12 +17,14 @@ namespace cepgen
 
     Parameterisation::Parameterisation() :
       model_( Model::Invalid ), type_( Type::Invalid ),
+      last_q2_( -1. ),
       FE( 0. ), FM( 0. ), GE( 0. ), GM( 0. )
     {}
 
     Parameterisation::Parameterisation( const ParametersList& params ) :
       model_( (Model)params.get<int>( ff::FormFactorsHandler::KEY, (int)Model::Invalid ) ),
       type_( (Type)params.get<int>( "type", (int)Type::Invalid ) ),
+      last_q2_( -1. ),
       FE( 0. ), FM( 0. ), GE( 0. ), GM( 0. )
     {
       if ( params.has<ParametersList>( "structureFunctions" ) )
@@ -35,9 +37,18 @@ namespace cepgen
       str_fun_ = sfmod;
     }
 
+    std::string
+    Parameterisation::description() const
+    {
+      std::ostringstream os;
+      os << "FF(" << (int)model_ << "," << (int)type_ << ")";
+      return os.str();
+    }
+
     Parameterisation&
     Parameterisation::operator()( double q2, double mi2, double mf2 )
     {
+      last_q2_ = q2;
       switch ( type_ ) {
         case Type::Invalid:
         case Type::CompositeScalar:
@@ -77,6 +88,10 @@ namespace cepgen
       }
       return *this;
     }
+
+    StandardDipole::StandardDipole( const ParametersList& params ) :
+      Parameterisation( params )
+    {}
 
     void
     StandardDipole::compute( double q2 )
@@ -153,8 +168,11 @@ namespace cepgen
     std::ostream&
     operator<<( std::ostream& os, const ff::Parameterisation& formfac )
     {
-      return os << "FF[" << (int)formfac.type_ << "|" << (int)formfac.model_
-        << "]{FE=" << formfac.FE << ",FM=" << formfac.FM << "}";
+      os << formfac.description();
+      if ( formfac.last_q2_ > 0. )
+        os << " at (" << formfac.last_q2_ << "): "
+           << "FE=" << formfac.FE << ",FM=" << formfac.FM;
+      return os;
     }
   }
 }

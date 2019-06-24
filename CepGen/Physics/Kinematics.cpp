@@ -2,6 +2,7 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/KTFlux.h"
+#include "CepGen/Physics/FormFactors.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
@@ -14,7 +15,6 @@
 namespace cepgen
 {
   Kinematics::Kinematics() :
-    incoming_beams( { { 6500., PDG::proton, KTFlux::invalid }, { 6500., PDG::proton, KTFlux::invalid } } ),
     structure_functions( new strfun::SuriYennie )
   {}
 
@@ -53,8 +53,19 @@ namespace cepgen
     os << " (" << beam.pz << " GeV/c)";
     if ( beam.kt_flux != KTFlux::invalid )
       os << " [unint.flux: " << beam.kt_flux << "]";
+    if ( beam.form_factors )
+      os << ", " << *beam.form_factors;
     return os;
   }
+
+  //--------------------------------------------------------------------
+  // Default beam parameters
+  //--------------------------------------------------------------------
+
+  Kinematics::Beam::Beam() :
+    pz( 0. ), pdg( PDG::proton ), kt_flux( KTFlux::invalid ),
+    form_factors( new ff::StandardDipole )
+  {}
 
   //--------------------------------------------------------------------
   // List of kinematics limits

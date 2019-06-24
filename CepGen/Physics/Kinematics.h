@@ -15,6 +15,7 @@
 namespace cepgen
 {
   enum class KTFlux;
+  namespace ff { class Parameterisation; }
   namespace strfun { class Parameterisation; }
   /// List of kinematic constraints to apply on the process phase space.
   class Kinematics
@@ -31,9 +32,11 @@ namespace cepgen
       /// Incoming beams characteristics
       struct Beam
       {
+        Beam(); ///< Default constructor
         double pz; ///< Incoming particle momentum, in GeV/c
         pdgid_t pdg; ///< PDG identifier for the beam
         KTFlux kt_flux; ///< Type of \f$k_{\rm T}\f$-factorised flux to be considered (if any)
+        std::shared_ptr<ff::Parameterisation> form_factors; ///< Type of form factors to consider
       };
       friend std::ostream& operator<<( std::ostream&, const Beam& );
 

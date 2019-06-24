@@ -39,6 +39,7 @@ namespace cepgen
         /// Specify the structure functions modelling where applicable
         void setStructureFunctions( const std::shared_ptr<strfun::Parameterisation>& );
         const Type& type() const { return type_; }
+        void setType( const Type& type ) { type_ = type; }
         const Model& model() const { return model_; }
 
         /// Compute all relevant form factors functions for a given \f$Q^2\f$ value
@@ -48,11 +49,13 @@ namespace cepgen
         static const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
         static const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
         virtual void compute( double q2 ) {}
+        virtual std::string description() const; ///< Human-readable description of this parameterisation
         const Model model_;
 
       private:
-        const Type type_;
+        Type type_;
         std::shared_ptr<strfun::Parameterisation> str_fun_;
+        double last_q2_;
 
       public:
         double FE; ///< Electric form factor
@@ -68,7 +71,7 @@ namespace cepgen
     class StandardDipole : public Parameterisation
     {
       public:
-        using Parameterisation::Parameterisation;
+        StandardDipole( const ParametersList& = ParametersList() );
         void compute( double q2 ) override;
 
       private:

@@ -205,7 +205,6 @@ namespace cepgen
          */
         std::pair<double,double> map( double expo, const Limits& lim, const std::string& var_name = "" );
         std::pair<double,double> mapla( double y, double z, int u, const Limits& lim );
-        std::shared_ptr<ff::Parameterisation> ff_p1_, ff_p2_;
     };
   }
 }
