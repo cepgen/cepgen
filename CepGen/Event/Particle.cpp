@@ -183,7 +183,9 @@ namespace cepgen
   Particle::setPdgId( short pdg )
   {
     pdg_id_ = abs( pdg );
-    phys_prop_ = PDG::get()( pdg_id_ );
+    try {
+      phys_prop_ = PDG::get()( pdg_id_ );
+    } catch ( const Exception& ) {}
     switch ( pdg_id_ ) {
       case PDG::electron: case PDG::muon: case PDG::tau:
         charge_sign_ = -pdg/abs( pdg ); break;

@@ -1,8 +1,6 @@
 #ifndef CepGen_Hadronisers_PythiaEventInterface_h
 #define CepGen_Hadronisers_PythiaEventInterface_h
 
-#ifdef PYTHIA8
-
 #include <Pythia8/Pythia.h>
 #include <unordered_map>
 
@@ -81,6 +79,5 @@ namespace Pythia8
       const cepgen::Parameters* params_; // borrowed
   };
 }
-#endif
 #endif
 

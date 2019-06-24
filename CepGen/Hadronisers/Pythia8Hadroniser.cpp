@@ -22,9 +22,7 @@ namespace cepgen
   {
     Pythia8Hadroniser::Pythia8Hadroniser( const ParametersList& plist ) :
       GenericHadroniser( plist, "pythia8" ),
-#ifdef PYTHIA8
       pythia_( new Pythia8::Pythia ), cg_evt_( new Pythia8::CepGenEvent ),
-#endif
       correct_central_( plist.get<bool>( "correctCentralSystem", false ) ),
       enable_hadr_( false ), offset_( 0 ), first_evt_( true )
     {}
@@ -33,7 +31,6 @@ namespace cepgen
     Pythia8Hadroniser::setParameters( const Parameters& params )
     {
       params_ = &params;
-#ifdef PYTHIA8
       cg_evt_->initialise( params );
       pythia_->setLHAupPtr( (Pythia8::LHAup*)cg_evt_.get() );
       pythia_->settings.parm( "Beams:idA", (short)params_->kinematics.incoming_beams.first.pdg );
@@ -41,31 +38,25 @@ namespace cepgen
       // specify we will be using a LHA input
       pythia_->settings.mode( "Beams:frameType", 5 );
       pythia_->settings.parm( "Beams:eCM", params_->kinematics.sqrtS() );
-#endif
       for ( const auto& pdgid : params_->kinematics.minimum_final_state )
         min_ids_.emplace_back( (unsigned short)pdgid );
     }
 
     Pythia8Hadroniser::~Pythia8Hadroniser()
     {
-#ifdef PYTHIA8
       pythia_->settings.writeFile( "last_pythia_config.cmd", false );
-#endif
     }
 
     void
     Pythia8Hadroniser::readString( const char* param )
     {
-#ifdef PYTHIA8
       if ( !pythia_->readString( param ) )
         throw CG_FATAL( "Pythia8Hadroniser" ) << "The Pythia8 core failed to parse the following setting:\n\t" << param;
-#endif
     }
 
     void
     Pythia8Hadroniser::init()
     {
-#ifdef PYTHIA8
       if ( pythia_->settings.flag( "ProcessLevel:all" ) != enable_hadr_ )
         pythia_->settings.flag( "ProcessLevel:all", enable_hadr_ );
 
@@ -76,7 +67,7 @@ namespace cepgen
         pythia_->settings.mode( "Random:seed", seed_ );
       }
 
-#  if defined( PYTHIA_VERSION_INTEGER ) && PYTHIA_VERSION_INTEGER >= 8226
+#if defined( PYTHIA_VERSION_INTEGER ) && PYTHIA_VERSION_INTEGER >= 8226
       switch ( params_->kinematics.mode ) {
         case KinematicsMode::ElasticElastic: {
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 3 );
@@ -92,14 +83,14 @@ namespace cepgen
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 0 );
         } break;
       }
-#  else
+#else
       CG_WARNING( "Pythia8Hadroniser" )
         << "Beam remnants framework for this version of Pythia "
         << "(" << Form( "%.3f", PYTHIA_VERSION ) << ")\n\t"
         << "does not support mixing of unresolved hadron states.\n\t"
         << "The proton remnants output might hence be wrong.\n\t"
         << "Please update the Pythia version or disable this part.";
-#  endif
+#endif
       if ( correct_central_ && pythia_->settings.flag( "ProcessLevel:resonanceDecays" ) )
         CG_WARNING( "Pythia8Hadroniser" )
           << "Central system's kinematics correction enabled while resonances are\n\t"
@@ -109,18 +100,12 @@ namespace cepgen
         throw CG_FATAL( "Pythia8Hadroniser" )
           << "Failed to initialise the Pythia8 core!\n\t"
           << "See the message above for more details.";
-#else
-      throw CG_FATAL( "Pythia8Hadroniser" )
-        << "Pythia8 is not linked to this instance!";
-#endif
     }
 
     void
     Pythia8Hadroniser::setCrossSection( double xsec, double xsec_err )
     {
-#ifdef PYTHIA8
       cg_evt_->setCrossSection( 0, xsec, xsec_err );
-#endif
     }
 
     bool
@@ -129,7 +114,6 @@ namespace cepgen
       //--- initialise the event weight before running any decay algorithm
       weight = 1.;
 
-#ifdef PYTHIA8
       //--- only launch Pythia if:
       // 1) the full event kinematics (i.e. with remnants) is to be specified, or
       // 2) the resonances are to be decayed.
@@ -184,12 +168,8 @@ namespace cepgen
 
       updateEvent( ev, weight );
       return true;
-#else
-      throw CG_FATAL( "Pythia8Hadroniser" ) << "Pythia8 is not linked to this instance!";
-#endif
     }
 
-#ifdef PYTHIA8
     Particle&
     Pythia8Hadroniser::addParticle( Event& ev, const Pythia8::Particle& py_part, const Pythia8::Vec4& mom, unsigned short role ) const
     {
@@ -305,7 +285,6 @@ namespace cepgen
       }
       return (unsigned short)Particle::UnknownRole;
     }
-#endif
   }
 }
 // register hadroniser and define alias

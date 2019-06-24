@@ -1,5 +1,3 @@
-#ifdef PYTHIA8
-
 #include "CepGen/Hadronisers/PythiaEventInterface.h"
 
 #include "CepGen/Core/Exception.h"
@@ -245,4 +243,3 @@ namespace Pythia8
   }
 }
 
-#endif
