@@ -103,6 +103,7 @@ namespace cepgen
          */
         inline static void pyjoin( int njoin, int ijoin[2] ) { return pyjoin_( njoin, *ijoin ); }
         bool prepareHadronisation( Event& );
+        std::pair<short,short> pickPartonsContent() const;
         struct EventProperties
         {
           unsigned int str_in_evt = 0;
@@ -127,7 +128,7 @@ namespace cepgen
     Pythia6Hadroniser::run( Event& ev, double& weight, bool full )
     {
       weight = 1.;
-      if ( full )
+      //if ( full )
         prepareHadronisation( ev );
 
       if ( utils::Logger::get().level >= utils::Logger::Level::debug ) {
@@ -202,65 +203,48 @@ namespace cepgen
       CG_DEBUG( "Pythia6Hadroniser" ) << "Hadronisation preparation called.";
 
       for ( const auto& part : ev.particles() ) {
-        //--- loop over all undecayed particles
-        if ( part.status() != Particle::Status::Undecayed )
+        if ( part.status() != Particle::Status::Unfragmented )
           continue;
+        //--- only loop over all protons to be fragmented
 
-        //--- proton to be fragmented
-        const double ranudq = drand();
-        short singlet_id = 0, doublet_id = 0;
-        if ( ranudq < 1./9. ) {
-          singlet_id = PDG::down;
-          doublet_id = 2203; // uu1 diquark
-        }
-        else if ( ranudq < 5./9. ) {
-          singlet_id = PDG::up;
-          doublet_id = 2101; // ud0 diquark
-        }
-        else {
-          singlet_id = PDG::up;
-          doublet_id = 2103; // ud1 diquark
-        }
-        const double ulmdq = pymass( doublet_id );
-        const double ulmq = pymass( singlet_id );
-        CG_INFO("") <<ulmdq<<"|"<<ulmq;
+part.dump();
 
-        // Choose random direction in MX frame
-        const double ranmxp = 2.*M_PI*drand();       // phi angle
-        const double ranmxt = acos( 2.*drand()-1. ); // theta angle
+        const auto partons = pickPartonsContent();
+        const double mx2 = part.mass2();
+        const double mq = pymass( partons.first ), mq2 = mq*mq;
+        const double mdq = pymass( partons.second ), mdq2 = mdq*mdq;
 
-        // Compute momentum of decay particles from MX
-        const double pmxp = std::sqrt( std::pow( part.mass2() - ulmdq*ulmdq + ulmq*ulmq, 2 ) / ( 4.*part.mass2() ) - ulmq*ulmq );
+        //--- choose random direction in MX frame
+        const double phi = 2.*M_PI*drand(), theta = acos( 2.*drand()-1. ); // theta angle
 
-        // Build 4-vectors and boost decay particles
+        //--- compute momentum of decay particles from MX
+        const double px = std::sqrt( std::pow( mx2-mdq2+mq2, 2 ) / ( 4.*mx2 ) - mq2 );
 
-        // Start with the singlet
-        const auto pmxda_1 = Particle::Momentum::fromPThetaPhi( pmxp, ranmxt, ranmxp, std::hypot( pmxp, ulmq ) ), pmxda_2 = -pmxda_1;
+        //--- build 4-vectors and boost decay particles
+        const auto pq = Particle::Momentum::fromPThetaPhi( px, theta, phi, std::hypot( px, mq ) );
 
+        //--- singlet
         auto singl_mom = part.momentum();
-        singl_mom.lorentzBoost( pmxda_1 );
+        singl_mom.lorentzBoost( pq );
 
-        auto& singlet = ev.addParticle( part.role() );
-        singlet.setPdgId( singlet_id );
-        singlet.setStatus( Particle::Status::DebugResonance );
-        singlet.setMomentum( singl_mom );
-        //singlet.setMass(); //FIXME
+        auto& quark = ev.addParticle( part.role(), false );
+        quark.setPdgId( partons.first );
+        quark.setStatus( Particle::Status::DebugResonance );
+        quark.setMomentum( singl_mom );
 
-        // Continue with the doublet
+        //--- doublet
         auto doubl_mom = part.momentum();
-        doubl_mom.lorentzBoost( pmxda_2 );
+        doubl_mom.lorentzBoost( -pq );
 
-        auto& doublet = ev.addParticle( part.role() );
-        doublet.setPdgId( doublet_id );
-        doublet.setStatus( Particle::Status::DebugResonance );
-        doublet.setMomentum( doubl_mom );
-        //std::cout << "doublet, mass = " << doublet.mass() << std::endl;
-        //doublet.setMass(); //FIXME
-        doublet.dump();
+        auto& diquark = ev.addParticle( part.role(), false );
+        diquark.setPdgId( partons.second );
+        diquark.setStatus( Particle::Status::DebugResonance );
+        diquark.setMomentum( doubl_mom );
 
-        if ( part.numDaughters() == 0 ) {
-          singlet.addMother( ev[part.id()] );
-          doublet.addMother( ev[part.id()] );
+        std::cout << (singl_mom+doubl_mom)-part.momentum() << "|" << part.numDaughters() << std::endl;
+        /*if ( part.numDaughters() == 0 ) {
+          quark.addMother( ev[part.id()] );
+          diquark.addMother( ev[part.id()] );
           CG_DEBUG( "Pythia6Hadroniser" )
             << "Quark/diquark content succesfully added to the event.";
         }
@@ -272,19 +256,22 @@ namespace cepgen
           for ( const auto& daug : part.daughters() ) {
             if ( ev[daug].pdgId() == PDG::up || ev[daug].pdgId() == PDG::down ) {
               //--- quark
-              singlet.addMother( ev[part.id()] );
-              ev[daug] = singlet;
+              quark.addMother( ev[part.id()] );
+              ev[daug] = quark;
               CG_DEBUG( "Pythia6Hadroniser" ) << "Singlet replaced.";
             }
             else {
               //--- diquark
-              doublet.addMother( ev[part.id()] );
-              ev[daug] = doublet;
+              diquark.addMother( ev[part.id()] );
+              ev[daug] = diquark;
               CG_DEBUG( "Pythia6Hadroniser" ) << "Doublet replaced";
             }
           }
-        }
+        }*/
+        ev[part.id()].setStatus( Particle::Status::Fragmented );
       }
+ev.dump();
+
       return true;
     }
 
@@ -337,6 +324,18 @@ namespace cepgen
       }
       return out;
     }
+
+    std::pair<short,short>
+    Pythia6Hadroniser::pickPartonsContent() const
+    {
+      const double ranudq = drand();
+      if ( ranudq < 1./9. )
+        return { PDG::down, 2203 }; // (d,uu1)
+      if ( ranudq < 5./9. )
+        return { PDG::up, 2101 };   // (u,ud0)
+      return { PDG::up, 2103 };     // (u,ud1)
+    }
+
   }
 }
 

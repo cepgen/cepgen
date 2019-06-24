@@ -16,7 +16,7 @@ int main( int argc, char* argv[] )
 
   cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debugInsideLoop;
 
-  vector<double> x( 12, 0.3 );
+  vector<double> x( 12, 0.6 );
 
   cout << "point: ";
   string delim;
