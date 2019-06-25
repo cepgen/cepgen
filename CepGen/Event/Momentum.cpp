@@ -189,7 +189,7 @@ namespace cepgen
   {
     setP( px, py, pz );
     setEnergy( e );
-    return *this
+    return *this;
   }
 
   Momentum&

@@ -157,7 +157,7 @@ namespace cepgen
           double eta() const;
           /// Rapidity
           double rapidity() const;
-          void truncate( double tolerance = 1.e-10 );
+          Momentum& truncate( double tolerance = 1.e-10 );
           /// Rotate the transverse components by an angle phi (and reflect the y coordinate)
           Momentum& rotatePhi( double phi, double sign );
           /// Rotate the particle's momentum by a polar/azimuthal angle
@@ -167,7 +167,7 @@ namespace cepgen
 
         private:
           /// Compute the 3-momentum's norm
-          void computeP();
+          Momentum& computeP();
           /// Momentum along the \f$x\f$-axis
           double px_;
           /// Momentum along the \f$y\f$-axis
