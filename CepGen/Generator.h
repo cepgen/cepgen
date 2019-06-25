@@ -1,7 +1,7 @@
 #ifndef CepGen_Generator_h
 #define CepGen_Generator_h
 
-#include <sstream>
+#include <iosfwd>
 #include <memory>
 #include <functional>
 
@@ -78,14 +78,15 @@ namespace cepgen
       /// Dump this program's header into the standard output stream
       void printHeader();
 
+      const Parameters* parametersPtr() const { return parameters_.get(); }
       /// Getter to the run parameters block
-      Parameters& parametersRef() { return *parameters_; }
-      /// Constant getter to the run parameters block
-      const Parameters& parameters() const { return *parameters_; }
+      Parameters& parameters();
       /// Feed the generator with a Parameters object
-      void setParameters( const Parameters& ip );
+      void setParameters( Parameters& ip );
       /// Remove all references to a previous generation/run
       void clearRun();
+      /// Integrate the functional over the whole phase space
+      void integrate();
       /**
        * Compute the cross section for the run parameters defined by this object.
        * This returns the cross section as well as the absolute error computed along.
@@ -113,8 +114,6 @@ namespace cepgen
       double computePoint( double* x );
 
    private:
-      /// Integrate the functional over the whole phase space
-      void integrate();
       /// Physical Parameters used in the events generation and cross-section computation
       std::unique_ptr<Parameters> parameters_;
       /// Vegas instance which will integrate the function

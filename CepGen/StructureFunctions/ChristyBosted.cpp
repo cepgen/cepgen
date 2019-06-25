@@ -1,7 +1,6 @@
 #include "CepGen/StructureFunctions/ChristyBosted.h"
 
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/ParticleProperties.h"
 
 #include "CepGen/Core/Exception.h"
 
@@ -22,8 +21,8 @@ namespace cepgen
     double
     ChristyBosted::resmod507( char sf, double w2, double q2 ) const
     {
-      const double mpi = particleproperties::mass( PDG::piZero ), mpi2 = mpi*mpi,
-                   meta = particleproperties::mass( PDG::eta ), meta2 = meta*meta;
+      const double mpi = PDG::get().mass( PDG::piZero ), mpi2 = mpi*mpi,
+                   meta = PDG::get().mass( PDG::eta ), meta2 = meta*meta;
       const double w = sqrt( w2 );
 
       const double xb = q2/( q2+w2-mp2_ );
@@ -255,7 +254,7 @@ namespace cepgen
       old_vals_ = nv;
 
       const double w2 = mp2_ + q2*( 1.-xbj )/xbj;
-      const double w_min = mp_+particleproperties::mass( PDG::piZero );
+      const double w_min = mp_+PDG::get().mass( PDG::piZero );
 
       if ( sqrt( w2 ) < w_min ) {
         F2 = 0.;

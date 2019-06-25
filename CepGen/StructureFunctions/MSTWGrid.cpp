@@ -38,7 +38,7 @@ namespace mstw
       const std::string grid_path = params_.get<std::string>( "gridPath", DEFAULT_MSTW_GRID_PATH );
       std::ifstream file( grid_path, std::ios::binary | std::ios::in );
       if ( !file.is_open() )
-        throw CG_FATAL( "MSTW" ) << "Impossible to load grid file \"" << grid_path << "\"!";
+        throw CG_FATAL( "MSTW" ) << "Failed to load grid file \"" << grid_path << "\"!";
 
       file.read( reinterpret_cast<char*>( &header_ ), sizeof( header_t ) );
 
@@ -91,7 +91,7 @@ namespace mstw
   std::ostream&
   operator<<( std::ostream& os, const Grid::sfval_t& val )
   {
-    return os << cepgen::Form( "xbj = %.4f\tQ² = %.5e GeV²\tF₂ = % .6e\tFL = % .6e", val.xbj, val.q2, val.f2, val.fl );
+    return os << cepgen::Form( "xbj = %.4f\tQ² = %.5e GeV²\tF₂ = % .6e\tFₗ = % .6e", val.xbj, val.q2, val.f2, val.fl );
   }
 
   std::ostream&

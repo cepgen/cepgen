@@ -35,8 +35,7 @@ namespace cepgen
       /// \param[in] thetamax The maximal value of \f$\theta\f$ for the outgoing leptons
       void setThetaRange( float thetamin, float thetamax );
       /// Dump the input parameters in the terminal
-      friend std::ostream& operator<<( std::ostream& os, const Parameters* );
-      friend std::ostream& operator<<( std::ostream& os, const Parameters& );
+      friend std::ostream& operator<<( std::ostream&, const Parameters* );
 
       std::shared_ptr<ParametersList> general;
 
@@ -77,10 +76,6 @@ namespace cepgen
       };
       Integration& integration() { return integration_; }
       const Integration& integration() const { return integration_; }
-      /*void setResults( double res, double err_res ) {
-        integration_.result = res;
-        integration_.err_result = err_res;
-      }*/
 
       //----- events generation
 

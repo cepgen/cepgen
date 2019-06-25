@@ -6,15 +6,19 @@ namespace cepgen
 {
   namespace card
   {
-    Parameters
+    Parameters&
     Handler::parse( const char* filename )
     {
       const std::string extension = getExtension( filename );
-      if ( extension == "card" )
-        return LpairHandler( filename ).parameters();
+      if ( extension == "card" ) {
+        static LpairHandler hnd( filename );
+        return hnd.parameters();
+      }
 #ifdef PYTHON
-      else if ( extension == "py" )
-        return PythonHandler( filename ).parameters();
+      else if ( extension == "py" ) {
+        static PythonHandler hnd( filename );
+        return hnd.parameters();
+      }
 #endif
       throw CG_FATAL( "Cards:handler" )
         << "Failed to determine the steering card type for \"" << filename << "\"!";

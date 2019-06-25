@@ -6,7 +6,6 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/ParticleProperties.h"
 
 #include "CepGen/Core/Exception.h"
 
@@ -16,7 +15,7 @@ namespace cepgen
 {
   namespace proc
   {
-    const double PPtoWW::mw_ = particleproperties::mass( PDG::W );
+    const double PPtoWW::mw_ = PDG::get().mass( PDG::W );
     const double PPtoWW::mw2_ = PPtoWW::mw_*PPtoWW::mw_;
 
     PPtoWW::PPtoWW( const ParametersList& params ) :

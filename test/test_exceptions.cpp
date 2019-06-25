@@ -7,7 +7,7 @@ int main()
   //--- try with a bit of unicode too
   const std::string test_string = "Haha, ceci est un test à géométrie variable! ☺";
   try {
-    throw Exception( "Test", Exception::Type::warning ) << test_string;
+    throw LoggedException( "Test", Exception::Type::warning ) << test_string;
   } catch ( const Exception& e ) {
     if ( e.message() == test_string )
       std::cout << "Test passed!" << std::endl;

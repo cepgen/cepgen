@@ -2,7 +2,6 @@
 
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/ParticleProperties.h"
 
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Core/ParametersList.h"
@@ -18,7 +17,7 @@ namespace cepgen
       Parameters params;
       params.mode = Parameters::proton;
       params.mp = mp_;
-      params.mpi0 = particleproperties::mass( PDG::piZero );
+      params.mpi0 = PDG::get().mass( PDG::piZero );
       // SLAC fit parameters
       params.c_slac = { { 0.25615, 2.1785, 0.89784, -6.7162, 3.7557, 1.6421, 0.37636 } };
       // CLAS parameterisation

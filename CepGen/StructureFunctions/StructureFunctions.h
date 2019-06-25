@@ -3,7 +3,7 @@
 
 #include "CepGen/Core/ParametersList.h"
 
-#include <iostream>
+#include <iosfwd>
 #include <memory>
 
 namespace cepgen

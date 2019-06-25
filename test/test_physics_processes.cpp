@@ -24,21 +24,22 @@ main( int argc, char* argv[] )
 
   utils::Timer tmr;
   Generator mg;
+  auto& params = mg.parameters();
 
-  mg.parameters->integrator.type = IntegratorType::Vegas;
+  params.integration().type = IntegratorType::Vegas;
   if ( argc > 2 ) {
     string integrator( argv[2] );
     if ( integrator == "plain" )
-      mg.parameters->integrator.type = IntegratorType::plain;
+      params.integration().type = IntegratorType::plain;
     else if ( integrator == "vegas" )
-      mg.parameters->integrator.type = IntegratorType::Vegas;
+      params.integration().type = IntegratorType::Vegas;
     else if ( integrator == "miser" )
-      mg.parameters->integrator.type = IntegratorType::MISER;
+      params.integration().type = IntegratorType::MISER;
     else
       throw CG_FATAL( "main" ) << "Unhandled integrator type: " << integrator << ".";
   }
 
-  CG_LOG( "main" ) << "Testing with " << mg.parameters->integrator.type << " integrator.";
+  CG_LOG( "main" ) << "Testing with " << params.integration().type << " integrator.";
 
   unsigned short num_tests = 0;
   vector<string> failed_tests, passed_tests;
@@ -61,9 +62,9 @@ main( int argc, char* argv[] )
       os >> config >> ref_cs >> err_ref_cs;
 
       mg.setParameters( cepgen::card::Handler::parse( ( "test_processes/"+config+"_cfg.py" ).c_str() ) );
-      //CG_INFO( "main" ) << mg.parameters.get();
+      cout << &params << endl;
       CG_INFO( "main" )
-        << "Process: "<< mg.parameters->processName() << "\n\t"
+        << "Process: "<< params.processName() << "\n\t"
         << "Configuration time: " << tmr.elapsed()*1.e3 << " ms.";
 
       tmr.reset();

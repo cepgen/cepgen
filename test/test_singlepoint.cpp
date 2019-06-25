@@ -1,32 +1,29 @@
+#include "CepGen/Cards/Handler.h"
 #include "CepGen/Generator.h"
-#include "CepGen/Parameters.h"
-#include "CepGen/Processes/GamGamLL.h"
+
 #include "CepGen/Core/Exception.h"
 
 using namespace std;
 
-int main()
+int main( int argc, char* argv[] )
 {
-  cepgen::Generator g;
-  cepgen::Parameters* p = g.parameters.get();
-  //p->setProcess( new GamGamLL );
-  p->setProcess( new cepgen::Process::GamGamLL );
-  p->kinematics.mode = cepgen::Kinematics::Mode::ElasticElastic;
-  //p->kinematics.mode = cepgen::Kinematics::Mode::InelasticElastic;
-  //p->kinematics.mode = cepgen::Kinematics::Mode::ElasticInelastic;
-  p->kinematics.cuts.central.pt_single = 5.;
-  p->kinematics.cuts.central.eta_single = { -2.5, 2.5 };
-  p->kinematics.cuts.remnants.mass_single = { 1.07, 320. };
+  if ( argc < 2 )
+    throw CG_FATAL( "main" ) << "Usage: " << argv[0] << " input-card";
 
-  CG_INFO( "main" ) << p;
-  cepgen::Logger::get().level = cepgen::Logger::Level::debugInsideLoop;
+  cepgen::Generator gen;
+  gen.setParameters( cepgen::card::Handler::parse( argv[1] ) );
+  CG_INFO( "main" ) << gen.parametersPtr();
 
-  const unsigned short ndim = g.numDimensions();
-  double x[12];
-  for ( unsigned int i = 0; i < ndim; ++i )
-    x[i] = 0.3;
+  cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debugInsideLoop;
 
-  cout << g.computePoint( x ) << endl;
+  vector<double> x( 12, 0.3 );
+
+  cout << "point: ";
+  string delim;
+  for ( const auto& v : x )
+    cout << delim << v, delim = ", ";
+  cout << endl;
+  cout << "weight: " << gen.computePoint( &x[0] ) << endl;
 
   return 0;
 }

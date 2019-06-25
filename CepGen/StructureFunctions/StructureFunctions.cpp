@@ -2,19 +2,16 @@
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/ParticleProperties.h"
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
-#include <iostream>
-
 namespace cepgen
 {
   namespace strfun
   {
-    const double Parameterisation::mp_ = particleproperties::mass( PDG::proton );
+    const double Parameterisation::mp_ = PDG::get().mass( PDG::proton );
     const double Parameterisation::mp2_ = Parameterisation::mp_*Parameterisation::mp_;
 
     Parameterisation::Parameterisation( double f2, double fl ) :

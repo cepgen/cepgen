@@ -1,6 +1,6 @@
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/FormFactors.h"
-#include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/GluonGrid.h"
 
@@ -11,7 +11,7 @@
 namespace cepgen
 {
   const double KTFluxParameters::kMinKTFlux = 1.e-20;
-  const double KTFluxParameters::kMP = particleproperties::mass( PDG::proton );
+  const double KTFluxParameters::kMP = PDG::get().mass( PDG::proton );
   const double KTFluxParameters::kMP2 = KTFluxParameters::kMP*KTFluxParameters::kMP;
 
   double

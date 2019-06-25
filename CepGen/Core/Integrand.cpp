@@ -75,6 +75,9 @@ namespace cepgen
       // speed up the integration process if no event is to be generated
       //================================================================
 
+      if ( !ev )
+        return weight;
+
       if ( !params->storage()
         && !params->taming_functions
         && !params->hadroniser()
@@ -183,7 +186,7 @@ namespace cepgen
       // a bit of useful debugging
       //================================================================
 
-      if ( CG_EXCEPT_MATCH( "Integrand", debugInsideLoop ) ) {
+      if ( CG_LOG_MATCH( "Integrand", debugInsideLoop ) ) {
         std::ostringstream oss;
         for ( unsigned short i = 0; i < ndim; ++i )
           oss << Form( "%10.8f ", x[i] );

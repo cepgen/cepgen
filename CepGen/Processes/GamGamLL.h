@@ -5,7 +5,6 @@
 
 namespace cepgen
 {
-  enum class PDG;
   namespace proc
   {
     /**
@@ -51,9 +50,9 @@ namespace cepgen
         /// \param[in] x A random number (between 0 and 1)
         /// \param[in] outmass The maximal outgoing particles' invariant mass
         /// \param[in] lepmass The outgoing leptons' mass
-        /// \param[out] dw The size of the integration bin
+        /// \param[out] dmx The size of the integration bin
         /// \return Mass of the outgoing proton remnant
-        double computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dw );
+        double computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dmx );
         /// Set all the kinematic variables for the outgoing proton remnants, and prepare the hadronisation
         /// \param[in] part Particle to "prepare" for the hadronisation to be performed
         void prepareHadronisation( Particle *part );
@@ -90,34 +89,26 @@ namespace cepgen
 
         /// Internal switch for the optimised code version (LPAIR legacy ; unimplemented here)
         int n_opt_;
-        PDG pair_;
+        pdgid_t pair_;
 
         Limits w_limits_;
-        Limits q2_limits_;
-        Limits mx_limits_;
         struct Masses
         {
-          Masses();
           /// squared mass of the first proton-like outgoing particle
-          double MX2;
+          double MX2 = 0.;
           /// squared mass of the second proton-like outgoing particle
-          double MY2;
+          double MY2 = 0.;
           /// squared mass of the outgoing leptons
-          double Ml2;
-          /// \f$\delta_2=m_1^2-m_2^2\f$ as defined in Vermaseren's paper
-          /// \cite Vermaseren:1982cz for the full definition of this quantity
-          double w12;
-
-          /// \f$\delta_1=m_3^2-m_1^2\f$ as defined in Vermaseren's paper
-          /// \cite Vermaseren:1982cz for the full definition of this quantity
-          double w31;
-          double dw31;
-          /// \f$\delta_4=m_5^2-m_2^2\f$ as defined in Vermaseren's paper
-          /// \cite Vermaseren:1982cz for the full definition of this quantity
-          double w52;
-          double dw52;
-        };
-        Masses masses_;
+          double Ml2 = 0.;
+          /// \f$\delta_2=m_1^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
+          double w12 = 0.;
+          /// \f$\delta_1=m_3^2-m_1^2\f$ as defined in \cite Vermaseren:1982cz
+          double w31 = 0.;
+          double dw31 = 0.;
+          /// \f$\delta_4=m_5^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
+          double w52 = 0.;
+          double dw52 = 0.;
+        } masses_;
 
         /// energy of the first proton-like incoming particle
         double ep1_;
@@ -202,9 +193,8 @@ namespace cepgen
          * \brief Redefine the variables of integration in order to avoid the strong peaking of the integrant
          * \param[in] expo Exponant
          * \param[in] lim Min/maximal value of the variable
-         * \param[out] out The new variable definition
-         * \param[out] dout The bin width the new variable definition
          * \param[in] var_name The variable name
+         * \return A pair containing the value and the bin width the new variable definition
          * \note This method overrides the set of `mapxx` subroutines in ILPAIR, with a slight difference according to the sign of the
          *  \f$\mathrm dy_{out}\f$ parameter :
          *  - left unchanged :
@@ -212,8 +202,8 @@ namespace cepgen
          *  - opposite sign :
          * > `mapt1`, `mapt2`
          */
-        void map( double expo, const Limits& lim, double& out, double& dout, const std::string& var_name = "" );
-        void mapla( double y, double z, int u, const Limits& lim, double& x, double& d );
+        std::pair<double,double> map( double expo, const Limits& lim, const std::string& var_name = "" );
+        std::pair<double,double> mapla( double y, double z, int u, const Limits& lim );
         /// Compute the electric/magnetic form factors for the two considered \f$Q^{2}\f$ momenta transfers
         void formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const;
     };

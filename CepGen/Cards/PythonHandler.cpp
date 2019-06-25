@@ -62,6 +62,14 @@ namespace cepgen
       if ( !cfg )
         throwPythonError( Form( "Failed to parse the configuration card %s", file ) );
 
+      //--- additional particles definition
+      PyObject* pextp = PyObject_GetAttrString( cfg, PDGLIST_NAME ); // new
+      if ( pextp ) {
+        parseExtraParticles( pextp );
+        Py_CLEAR( pextp );
+      }
+
+      //--- process definition
       PyObject* process = PyObject_GetAttrString( cfg, PROCESS_NAME ); // new
       if ( !process )
         throwPythonError( Form( "Failed to extract a \"%s\" keyword from the configuration card %s", PROCESS_NAME, file ) );
@@ -97,27 +105,27 @@ namespace cepgen
 
       Py_CLEAR( process );
 
-      PyObject* plog = PyObject_GetAttrString( cfg, "logger" ); // new
+      PyObject* plog = PyObject_GetAttrString( cfg, LOGGER_NAME ); // new
       if ( plog ) {
         parseLogging( plog );
         Py_CLEAR( plog );
       }
 
       //--- hadroniser parameters
-      PyObject* phad = PyObject_GetAttrString( cfg, "hadroniser" ); // new
+      PyObject* phad = PyObject_GetAttrString( cfg, HADR_NAME ); // new
       if ( phad ) {
         parseHadroniser( phad );
         Py_CLEAR( phad );
       }
 
       //--- generation parameters
-      PyObject* pint = PyObject_GetAttrString( cfg, "integrator" ); // new
+      PyObject* pint = PyObject_GetAttrString( cfg, INTEGRATOR_NAME ); // new
       if ( pint ) {
         parseIntegrator( pint );
         Py_CLEAR( pint );
       }
 
-      PyObject* pgen = PyObject_GetAttrString( cfg, "generator" ); // new
+      PyObject* pgen = PyObject_GetAttrString( cfg, GENERATOR_NAME ); // new
       if ( pgen ) {
         parseGenerator( pgen );
         Py_CLEAR( pgen );
@@ -137,13 +145,13 @@ namespace cepgen
     PythonHandler::parseIncomingKinematics( PyObject* kin )
     {
       //--- retrieve the beams PDG ids
-      std::vector<int> beams_pdg;
+      std::vector<ParametersList> beams_pdg;
       fillParameter( kin, "pdgIds", beams_pdg );
       if ( !beams_pdg.empty() ) {
         if ( beams_pdg.size() != 2 )
           throwPythonError( Form( "Invalid list of PDG ids retrieved for incoming beams:\n\t2 PDG ids are expected, %d provided!", beams_pdg.size() ) );
-        params_.kinematics.incoming_beams. first.pdg = (PDG)beams_pdg.at( 0 );
-        params_.kinematics.incoming_beams.second.pdg = (PDG)beams_pdg.at( 1 );
+        params_.kinematics.incoming_beams. first.pdg = (pdgid_t)beams_pdg.at( 0 ).get<int>( "pdgid" );
+        params_.kinematics.incoming_beams.second.pdg = (pdgid_t)beams_pdg.at( 1 ).get<int>( "pdgid" );
       }
       //--- incoming beams kinematics
       std::vector<double> beams_pz;
@@ -192,13 +200,13 @@ namespace cepgen
       std::vector<int> parts;
       fillParameter( kin, "minFinalState", parts );
       for ( const auto& pdg : parts )
-        params_.kinematics.minimum_final_state.emplace_back( (PDG)pdg );
+        params_.kinematics.minimum_final_state.emplace_back( (pdgid_t)pdg );
 
       ParametersList part_cuts;
       fillParameter( kin, "cuts", part_cuts );
       for ( const auto& part : part_cuts.keys() ) {
-        const PDG pdg = (PDG)stoi( part );
-        const ParametersList& cuts = part_cuts.get<ParametersList>( part );
+        const auto pdg = (pdgid_t)stoi( part );
+        const auto& cuts = part_cuts.get<ParametersList>( part );
         if ( cuts.has<Limits>( "pt" ) )
           params_.kinematics.cuts.central_particles[pdg].pt_single = cuts.get<Limits>( "pt" );
         if ( cuts.has<Limits>( "energy" ) )
@@ -324,11 +332,7 @@ namespace cepgen
         throwPythonError( "Hadroniser name is required!" );
       std::string hadr_name = get<std::string>( pname );
 
-      //--- list of module-specific parameters
-      ParametersList mod_params;
-      fillParameter( hadr, "moduleParameters", mod_params );
-
-      params_.setHadroniser( cepgen::hadr::HadronisersHandler::get().build( hadr_name, mod_params ) );
+      params_.setHadroniser( cepgen::hadr::HadronisersHandler::get().build( hadr_name, get<ParametersList>( hadr ) ) );
 
       auto h = params_.hadroniser();
       h->setParameters( params_ );
@@ -346,6 +350,23 @@ namespace cepgen
           fillParameter( hadr, block.c_str(), config_blk );
           h->readStrings( config_blk );
         }
+      }
+    }
+
+    void
+    PythonHandler::parseExtraParticles( PyObject* pparts )
+    {
+      if ( !is<ParametersList>( pparts ) )
+        throwPythonError( "Extra particles definition object should be a parameters list!" );
+
+      const auto& parts = get<ParametersList>( pparts );
+      for ( const auto& k : parts.keys() ) {
+        const auto& part = parts.get<ParticleProperties>( k );
+        if ( part.pdgid == 0 || part.mass < 0. )
+          continue;
+        CG_DEBUG( "PythonHandler:particles" )
+          << "Adding a new particle with name \"" << part.name << "\" to the PDG dictionary.";
+        PDG::get().define( part );
       }
     }
   }

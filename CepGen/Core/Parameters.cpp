@@ -160,87 +160,89 @@ namespace cepgen
   }
 
   std::ostream&
-  operator<<( std::ostream& os, const Parameters& param )
+  operator<<( std::ostream& os, const Parameters* param )
   {
     const bool pretty = true;
 
     const int wb = 90, wt = 33;
-    os << std::left << "\n";
-    if ( param.process_ ) {
-      os
-        << std::setfill('_') << std::setw( wb+3 ) << "_/¯ PROCESS INFORMATION ¯\\_" << std::setfill( ' ' ) << "\n"
-        << std::right << std::setw( wb ) << std::left << std::endl
-        << std::setw( wt ) << "Process to generate"
-        << ( pretty ? boldify( param.process_->name().c_str() ) : param.process_->name() ) << "\n"
-        << std::setw( wt ) << "" << param.process_->description() << "\n";
-        for ( const auto& par : param.process_->parameters().keys() )
-          os << "    " << par << ": " << param.process_->parameters().getString( par ) << "\n";
+
+    os << std::left
+       << "\n"
+       << std::setfill('_') << std::setw( wb+3 ) << "_/¯ PROCESS INFORMATION ¯\\_" << std::setfill( ' ' ) << "\n"
+       << std::right << std::setw( wb ) << std::left << std::endl
+       << std::setw( wt ) << "Process to generate"
+       << ( pretty ? boldify( param->processName().c_str() ) : param->processName() );
+    if ( param->process_ ) {
+      os << ", " << param->process_->description();
+      for ( const auto& par : param->process()->parameters().keys() )
+        if ( par != "mode" )
+          os << "\n" << std::setw( wt ) << "" << par << ": " << param->process_->parameters().getString( par );
+      std::ostringstream proc_mode; proc_mode << param->kinematics.mode;
+      if ( param->kinematics.mode != KinematicsMode::invalid )
+        os << "\n" << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << "\n";
     }
     os
       << "\n"
       << std::setfill('_') << std::setw( wb+3 ) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill( ' ' ) << "\n"
       << std::right << std::setw( wb ) << std::left << std::endl
       << std::setw( wt ) << "Events generation? "
-      << ( pretty ? yesno( param.generation().enabled ) : std::to_string( param.generation().enabled ) ) << "\n"
+      << ( pretty ? yesno( param->generation_.enabled ) : std::to_string( param->generation_.enabled ) ) << "\n"
       << std::setw( wt ) << "Number of events to generate"
-      << ( pretty ? boldify( param.generation().maxgen ) : std::to_string( param.generation().maxgen ) ) << "\n";
-    if ( param.generation().num_threads > 1 )
+      << ( pretty ? boldify( param->generation_.maxgen ) : std::to_string( param->generation_.maxgen ) ) << "\n";
+    if ( param->generation_.num_threads > 1 )
       os
-        << std::setw( wt ) << "Number of threads" << param.generation().num_threads << "\n";
+        << std::setw( wt ) << "Number of threads" << param->generation_.num_threads << "\n";
     os
-      << std::setw( wt ) << "Number of points to try per bin" << param.generation().num_points << "\n"
+      << std::setw( wt ) << "Number of points to try per bin" << param->generation_.num_points << "\n"
       << std::setw( wt ) << "Integrand treatment"
-      << ( pretty ? yesno( param.generation().treat ) : std::to_string( param.generation().treat ) ) << "\n"
+      << ( pretty ? yesno( param->generation_.treat ) : std::to_string( param->generation_.treat ) ) << "\n"
       << std::setw( wt ) << "Verbosity level " << utils::Logger::get().level << "\n";
-    if ( param.hadroniser_ ) {
+    if ( param->hadroniser_ ) {
       os
         << "\n"
         << std::setfill( '-' ) << std::setw( wb+6 )
         << ( pretty ? boldify( " Hadronisation algorithm " ) : "Hadronisation algorithm" ) << std::setfill( ' ' ) << "\n\n"
         << std::setw( wt ) << "Name"
-        << ( pretty ? boldify( param.hadroniser_->name().c_str() ) : param.hadroniser_->name() ) << "\n";
+        << ( pretty ? boldify( param->hadroniser_->name().c_str() ) : param->hadroniser_->name() ) << "\n";
     }
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 )
       << ( pretty ? boldify( " Integration parameters " ) : "Integration parameters" ) << std::setfill( ' ' ) << "\n\n";
-    std::ostringstream int_algo; int_algo << param.integration().type;
+    std::ostringstream int_algo; int_algo << param->integration_.type;
     os
       << std::setw( wt ) << "Integration algorithm"
       << ( pretty ? boldify( int_algo.str().c_str() ) : int_algo.str() ) << "\n"
-      << std::setw( wt ) << "Number of function calls" << param.integration().ncvg << "\n"
-      << std::setw( wt ) << "Random number generator seed" << param.integration().rng_seed << "\n";
-    if ( param.integration().rng_engine )
+      << std::setw( wt ) << "Number of function calls" << param->integration_.ncvg << "\n"
+      << std::setw( wt ) << "Random number generator seed" << param->integration_.rng_seed << "\n";
+    if ( param->integration_.rng_engine )
       os
         << std::setw( wt ) << "Random number generator engine"
-        << param.integration().rng_engine->name << "\n";
-    std::ostringstream proc_mode; proc_mode << param.kinematics.mode;
+        << param->integration_.rng_engine->name << "\n";
     os
       << "\n"
       << std::setfill('_') << std::setw( wb+3 ) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill( ' ' ) << "\n\n"
       << std::setw( wt ) << "Incoming particles"
-      << param.kinematics.incoming_beams.first << ",\n" << std::setw( wt ) << ""
-      << param.kinematics.incoming_beams.second << "\n"
-      << std::setw( wt ) << "C.m. energy (GeV)" << param.kinematics.sqrtS() << "\n";
-    if ( param.kinematics.mode != KinematicsMode::invalid )
-      os << std::setw( wt ) << "Subprocess mode" << ( pretty ? boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << "\n";
-    if ( param.kinematics.mode != KinematicsMode::ElasticElastic )
-      os << std::setw( wt ) << "Structure functions" << *param.kinematics.structure_functions << "\n";
+      << param->kinematics.incoming_beams.first << ",\n" << std::setw( wt ) << ""
+      << param->kinematics.incoming_beams.second << "\n"
+      << std::setw( wt ) << "C.m. energy (GeV)" << param->kinematics.sqrtS() << "\n";
+    if ( param->kinematics.mode != KinematicsMode::ElasticElastic )
+      os << std::setw( wt ) << "Structure functions" << *param->kinematics.structure_functions << "\n";
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << "\n\n";
-    for ( const auto& lim : param.kinematics.cuts.initial.list() ) // map(particles class, limits)
+    for ( const auto& lim : param->kinematics.cuts.initial.list() ) // map(particles class, limits)
       if ( lim.second.valid() )
         os << std::setw( wt ) << lim.first << lim.second << "\n";
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Outgoing central system " ) : "Outgoing central system" ) << std::setfill( ' ' ) << "\n\n";
-    for ( const auto& lim : param.kinematics.cuts.central.list() )
+    for ( const auto& lim : param->kinematics.cuts.central.list() )
       if ( lim.second.valid() )
         os << std::setw( wt ) << lim.first << lim.second << "\n";
-    if ( param.kinematics.cuts.central_particles.size() > 0 ) {
+    if ( param->kinematics.cuts.central_particles.size() > 0 ) {
       os << std::setw( wt ) << ( pretty ? boldify( ">>> per-particle cuts:" ) : ">>> per-particle cuts:" ) << "\n";
-      for ( const auto& part_per_lim : param.kinematics.cuts.central_particles ) {
+      for ( const auto& part_per_lim : param->kinematics.cuts.central_particles ) {
         os << " * all single " << std::setw( wt-3 ) << part_per_lim.first << "\n";
         for ( const auto& lim : part_per_lim.second.list() )
           if ( lim.second.valid() )
@@ -248,16 +250,11 @@ namespace cepgen
       }
     }
     os << "\n";
-    os << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Proton / remnants " ) : "Proton / remnants" ) << std::setfill( ' ' ) << "\n\n";
-    for ( const auto& lim : param.kinematics.cuts.remnants.list() )
-      os << std::setw( wt ) << lim.first << lim.second << "\n";
+    os << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Proton / remnants " ) : "Proton / remnants" ) << std::setfill( ' ' ) << "\n";
+    for ( const auto& lim : param->kinematics.cuts.remnants.list() )
+      os << "\n" << std::setw( wt ) << lim.first << lim.second;
+    os << "\n";
     return os;
-  }
-
-  std::ostream&
-  operator<<( std::ostream& os, const Parameters* p )
-  {
-    return os << *p;
   }
 
   //-----------------------------------------------------------------------------------------------

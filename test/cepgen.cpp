@@ -4,50 +4,29 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Core/Exception.h"
 
-//--- necessary include to build the default run
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Processes/ProcessesHandler.h"
-
 #include "AbortHandler.h"
-
-#include <iostream>
 
 using namespace std;
 
-/**
- * Main caller for this MC generator.
- *  * loads the configuration files' variables if passed as an argument,
- *    or a default LPAIR-like configuration,
- *  * launches the cross-section computation and the events generation.
+/** Example executable for CepGen
+ * - loads the steering card variables into the environment,
+ * - launches the cross-section computation and the events generation (if requested).
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
+ * \addtogroup Executables
  */
 int main( int argc, char* argv[] )
 {
+  if ( argc < 2 )
+    throw CG_FATAL( "main" )
+      << "No config file provided!\n\t"
+      << "Usage: " << argv[0] << " config-file";
+
   //--- first start by defining the generator object
   cepgen::Generator gen;
-
-  if ( argc < 2 ) {
-    CG_INFO( "main" ) << "No config file provided. Setting the default parameters.";
-
-    //--- default run: LPAIR elastic ɣɣ → µ⁺µ¯ at 13 TeV
-    cepgen::ParametersList pgen;
-    pgen.set<int>( "pair", (int)cepgen::PDG::muon );
-
-    cepgen::Parameters params;
-    params.setProcess( cepgen::proc::ProcessesHandler::get().build( "lpair", pgen ) );
-    params.kinematics.mode = cepgen::KinematicsMode::ElasticElastic;
-    params.kinematics.cuts.central.pt_single.min() = 15.;
-    params.kinematics.cuts.central.eta_single = { -2.5, 2.5 };
-    params.generation().enabled = true;
-    params.generation().maxgen = 1e3;
-    gen.setParameters( params );
-  }
-  else
-    gen.setParameters( cepgen::card::Handler::parse( argv[1] ) );
-
+  gen.setParameters( cepgen::card::Handler::parse( argv[1] ) );
 
   //--- list all parameters
-  CG_LOG( "main" ) << gen.parameters();
+  CG_LOG( "main" ) << gen.parametersPtr();
 
   cepgen::utils::AbortHandler ctrl_c;
 
@@ -61,7 +40,7 @@ int main( int argc, char* argv[] )
       // (one may use a callback function)
       gen.generate();
   } catch ( const cepgen::utils::RunAbortedException& e ) {
-    CG_INFO( "main" ) << "Run aborted!";
+    CG_DEBUG( "main" ) << "Run aborted!";
   } catch ( const cepgen::Exception& e ) {
     e.dump();
   }

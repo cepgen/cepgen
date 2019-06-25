@@ -144,7 +144,7 @@ namespace cepgen
       lhe_output_->hepeup = out;
       lhe_output_->writeEvent();
 #elif defined ( PYTHIA_LHEF )
-      lhaevt_->feedEvent( ev, false );
+      lhaevt_->feedEvent( ev, Pythia8::CepGenEvent::Type::centralAndFullBeamRemnants );
       pythia_->next();
       lhaevt_->eventLHEF();
 #endif

@@ -249,6 +249,20 @@ namespace cepgen
         throwPythonError( Form ( "Failed to retrieve parameters list object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
+
+    void
+    PythonHandler::fillParameter( PyObject* parent, const char* key, std::vector<ParametersList>& out )
+    {
+      out.clear();
+      PyObject* pobj = element( parent, key ); // borrowed
+      if ( !pobj ) {
+        CG_DEBUG( "PythonHandler" ) << "Failed to retrieve parameters list collection object \"" << key << "\".";
+        return;
+      }
+      try { out = getVector<ParametersList>( pobj ); } catch ( const Exception& e ) {
+        throwPythonError( Form ( "Failed to retrieve parameters list collection object \"%s\":\n\t%s", key, e.message().c_str() ) );
+      }
+    }
   }
 }
 

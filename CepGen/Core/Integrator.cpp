@@ -60,7 +60,7 @@ namespace cepgen
   {}
 
   //-----------------------------------------------------------------------------------------------
-  // cross section computation part
+  // integration part
   //-----------------------------------------------------------------------------------------------
 
   void
@@ -127,7 +127,7 @@ namespace cepgen
 
     if ( res != GSL_SUCCESS )
       throw CG_FATAL( "Integrator:integrate" )
-        << "Error while computing the cross-section!\n\t"
+        << "Error while performing the integration!\n\t"
         << "GSL error: " << gsl_strerror( res ) << ".";
   }
 
@@ -352,7 +352,7 @@ namespace cepgen
       sum2p += sig2;
 
       // per-bin debugging loop
-      if ( CG_EXCEPT_MATCH( "Integrator:setGen", debugInsideLoop ) ) {
+      if ( CG_LOG_MATCH( "Integrator:setGen", debugInsideLoop ) ) {
         const double sig = sqrt( sig2 );
         const double eff = ( grid_->maxValue( i ) != 0. )
           ? grid_->maxValue( i )/av

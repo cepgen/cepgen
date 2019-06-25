@@ -23,7 +23,14 @@ namespace cepgen
 
       private:
         static constexpr const char* MODULE_NAME = "mod_name";
+
         static constexpr const char* PROCESS_NAME = "process";
+        static constexpr const char* HADR_NAME = "hadroniser";
+        static constexpr const char* LOGGER_NAME = "logger";
+        static constexpr const char* INTEGRATOR_NAME = "integrator";
+        static constexpr const char* GENERATOR_NAME = "generator";
+
+        static constexpr const char* PDGLIST_NAME = "PDG";
 
         static void throwPythonError( const std::string& message );
         static std::string pythonPath( const char* file );
@@ -46,6 +53,7 @@ namespace cepgen
         void fillParameter( PyObject* parent, const char* key, std::vector<double>& out );
         void fillParameter( PyObject* parent, const char* key, std::vector<std::string>& out );
         void fillParameter( PyObject* parent, const char* key, ParametersList& out );
+        void fillParameter( PyObject* parent, const char* key, std::vector<ParametersList>& out );
 
         void parseIncomingKinematics( PyObject* );
         void parseOutgoingKinematics( PyObject* );
@@ -53,6 +61,7 @@ namespace cepgen
         void parseIntegrator( PyObject* );
         void parseGenerator( PyObject* );
         void parseHadroniser( PyObject* );
+        void parseExtraParticles( PyObject* parts );
     };
     template<> bool PythonHandler::is<bool>( PyObject* obj ) const;
     template<> bool PythonHandler::is<int>( PyObject* obj ) const;

@@ -1,11 +1,12 @@
 import Config.Core as cepgen
 from Config.Integration.vegas_cff import integrator
 #from Config.Hadronisation.pythia8_cff import pythia8 as hadroniser
+from Config.PDG_cfi import PDG
 
 process = cepgen.Module('lpair',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.InelasticElastic,
-        pair = 13,
+        pair = PDG.muon,
     ),
     inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),

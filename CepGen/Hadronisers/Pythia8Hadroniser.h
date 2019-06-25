@@ -3,11 +3,9 @@
 
 #include "CepGen/Hadronisers/GenericHadroniser.h"
 
-#ifdef PYTHIA8
 #include <Pythia8/Pythia.h>
-#include <memory>
-#endif
 
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
@@ -38,21 +36,20 @@ namespace cepgen
 
         void setCrossSection( double xsec, double xsec_err ) override;
 
-        bool fullEvent() const { return full_evt_; }
-        void setFullEvent( bool full = true ) { full_evt_ = full; }
-
       private:
+        static constexpr unsigned short PYTHIA_STATUS_IN_BEAM = 12;
+        static constexpr unsigned short PYTHIA_STATUS_IN_PARTON_KT = 61;
+
         std::vector<unsigned short> min_ids_;
         std::unordered_map<short,short> py_cg_corresp_;
-#ifdef PYTHIA8
         unsigned short findRole( const Event& ev, const Pythia8::Particle& p ) const;
         void updateEvent( Event& ev, double& weight ) const;
         Particle& addParticle( Event& ev, const Pythia8::Particle&, const Pythia8::Vec4& mom, unsigned short ) const;
         /// A Pythia8 core to be wrapped
         std::unique_ptr<Pythia8::Pythia> pythia_;
         std::unique_ptr<Pythia8::CepGenEvent> cg_evt_;
-#endif
-        bool full_evt_;
+        bool correct_central_;
+        bool enable_hadr_;
         unsigned short offset_;
         bool first_evt_;
     };

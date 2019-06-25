@@ -54,8 +54,10 @@ void fill_event_tree( const cepgen::Event& event, unsigned long ev_id )
 
 /**
  * Generation of events and storage in a ROOT format
- * @author Laurent Forthomme <laurent.forthomme@cern.ch>
- * @date 27 jan 2014
+ * \author Laurent Forthomme <laurent.forthomme@cern.ch>
+ * \date 27 jan 2014
+ * \defgroup Executables List of executables
+ * \addtogroup Executables
  */
 int main( int argc, char* argv[] )
 {
@@ -67,7 +69,7 @@ int main( int argc, char* argv[] )
     throw CG_FATAL( "main" ) << "Usage: " << argv[0] << " input-card [filename=events.root]";
 
   mg.setParameters( cepgen::card::Handler::parse( argv[1] ) );
-  CG_INFO( "main" ) << mg.parameters();
+  CG_INFO( "main" ) << mg.parametersPtr();
 
   //----- open the output root file
 
@@ -106,7 +108,7 @@ int main( int argc, char* argv[] )
 
   file.Write();
   CG_INFO( "main" )
-    << run->num_events << " event" << cepgen::s( run->num_events )
+    << run->num_events << " event" << cepgen::utils::s( run->num_events )
     << " written in \"" << filename << "\".";
 
   return 0;
