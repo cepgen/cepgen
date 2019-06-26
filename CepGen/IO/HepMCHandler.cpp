@@ -54,14 +54,12 @@ namespace cepgen
         void clearEvent();
         /// Populate the associated HepMC event with a Event object
         void fillEvent( const Event& );
-#ifdef HEPMC3
-        /// Writer object (from HepMC v3+)
+        /// Writer object
         std::unique_ptr<T> output_;
+#ifdef HEPMC3
         /// Generator cross section and error
         GenCrossSectionPtr xs_;
 #else
-        /// Writer object (from HepMC v<3)
-        std::unique_ptr<IO_GenEvent> output_;
         /// Generator cross section and error
         GenCrossSection xs_;
 #endif
@@ -71,11 +69,9 @@ namespace cepgen
 
     template<typename T>
     HepMCHandler<T>::HepMCHandler( const ParametersList& params ) :
-#ifdef HEPMC3
       output_( new T( params.get<std::string>( "filename", "output.hepmc" ) ) ),
+#ifdef HEPMC3
       xs_( new GenCrossSection ),
-#else
-      output_( new IO_GenEvent( params.get<std::string>( "filename", "output.hepmc" ) ) ),
 #endif
       event_( new GenEvent() )
     {}
@@ -175,14 +171,22 @@ namespace cepgen
 #endif
       event_num_++;
     }
+#ifdef HEPMC3
     typedef HepMCHandler<WriterAsciiHepMC2> HepMC2Handler;
     typedef HepMCHandler<WriterAscii> HepMC3Handler;
     typedef HepMCHandler<WriterHEPEVT> HEPEVTHandler;
+#else
+    typedef HepMCHandler<IO_GenEvent> HepMC2Handler;
+#endif
   }
 }
 
-REGISTER_IO_MODULE( hepmc2, HepMC2Handler )
-REGISTER_IO_MODULE( hepmc3, HepMC2Handler )
+#ifdef HEPMC3
+REGISTER_IO_MODULE( hepmc3, HepMC3Handler )
 REGISTER_IO_MODULE( hepmc, HepMC3Handler )
 REGISTER_IO_MODULE( hepevt, HEPEVTHandler )
+#else
+REGISTER_IO_MODULE( hepmc, HepMC2Handler )
+#endif
+REGISTER_IO_MODULE( hepmc2, HepMC2Handler )
 
