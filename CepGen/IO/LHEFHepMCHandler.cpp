@@ -10,25 +10,11 @@
 
 #include <sstream>
 
-#ifndef LIBHEPMC
-# ifndef PYTHIA8
-#  pragma message( "HepMC/Pythia8 are not linked to this instance! You will not able to export in LHEF." )
-# endif
-#else
-# ifndef HEPMC_VERSION3
-#  ifdef PYTHIA8
-#   include "CepGen/Hadronisers/PythiaEventInterface.h"
-#   include "Pythia8/Pythia.h"
-namespace Pythia8 { class CepGenEvent; }
-#   define PYTHIA_LHEF 1
-#  else
-#   pragma message( "HepMC v3 or Pythia8 are required for the LHEF export!" )
-#  endif
-# else
-#  include "CepGen/IO/HepMCHandler.h"
+#include "HepMC/Version.h"
+#ifndef HEPMC_VERSION_CODE // HepMC v2
+#  error "HepMC v3 is required for the LHEF export!"
+#else // HepMC v3+
 #  include "HepMC/LHEF.h"
-#  define HEPMC_LHEF 1
-# endif
 #endif
 
 namespace cepgen
@@ -40,67 +26,38 @@ namespace cepgen
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Sep 2016
      */
-    class LHEFHandler : public GenericExportHandler
+    class LHEFHepMCHandler : public GenericExportHandler
     {
       public:
         /// Class constructor
         /// \param[in] filename Output file path
-        explicit LHEFHandler( const char* filename );
-        explicit LHEFHandler( const ParametersList& );
-        ~LHEFHandler() override;
+        explicit LHEFHepMCHandler( const char* filename );
+        explicit LHEFHepMCHandler( const ParametersList& );
+        ~LHEFHepMCHandler() override;
 
         void initialise( const Parameters& ) override;
         /// Writer operator
         void operator<<( const Event& ) override;
-        void setCrossSection( double, double ) override;
+        void setCrossSection( double, double ) override {}
 
       private:
-#if defined ( HEPMC_LHEF )
         /// Writer object (from HepMC)
         std::unique_ptr<LHEF::Writer> lhe_output_;
         LHEF::HEPRUP run_;
-#elif defined ( PYTHIA_LHEF )
-        std::unique_ptr<Pythia8::Pythia> pythia_;
-        std::unique_ptr<Pythia8::CepGenEvent> lhaevt_;
-#endif
     };
 
-    LHEFHandler::LHEFHandler( const char* filename ) :
-      GenericExportHandler( GenericExportHandler::LHE )
-#if defined ( HEPMC_LHEF )
-      , lhe_output_( new LHEF::Writer( filename ) )
-#elif defined ( PYTHIA_LHEF )
-      , pythia_( new Pythia8::Pythia ), lhaevt_( new Pythia8::CepGenEvent )
-#endif
-    {
-#if defined ( PYTHIA_LHEF )
-      lhaevt_->openLHEF( filename );
-#endif
-    }
+    LHEFHepMCHandler::LHEFHepMCHandler( const char* filename ) :
+      GenericExportHandler( GenericExportHandler::LHE ),
+      lhe_output_( new LHEF::Writer( filename ) )
+    {}
 
-    LHEFHandler::LHEFHandler( const ParametersList& params ) :
-      GenericExportHandler( GenericExportHandler::LHE )
-#if defined ( HEPMC_LHEF )
-      , lhe_output_( new LHEF::Writer( params.get<std::string>( "filename" ) ) )
-#elif defined ( PYTHIA_LHEF )
-      , pythia_( new Pythia8::Pythia ), lhaevt_( new Pythia8::CepGenEvent )
-#endif
-    {
-#if defined ( PYTHIA_LHEF )
-      lhaevt_->openLHEF( params.get<std::string>( "filename" ) );
-#endif
-    }
-
-    LHEFHandler::~LHEFHandler()
-    {
-#if defined ( PYTHIA_LHEF )
-      if ( lhaevt_ )
-        lhaevt_->closeLHEF( false ); // we do not want to rewrite the init block
-#endif
-    }
+    LHEFHepMCHandler::LHEFHepMCHandler( const ParametersList& params ) :
+      GenericExportHandler( GenericExportHandler::LHE ),
+      lhe_output_( new LHEF::Writer( params.get<std::string>( "filename" ) ) )
+    {}
 
     void
-    LHEFHandler::initialise( const Parameters& params )
+    LHEFHepMCHandler::initialise( const Parameters& params )
     {
       std::ostringstream oss_init;
       oss_init
@@ -147,7 +104,6 @@ namespace cepgen
       oss_init
         << "  **************************************************\n"
         << "-->";
-#if defined ( HEPMC_LHEF )
       lhe_output_->headerBlock() << oss_init.str();
       //--- first specify information about the run
       LHEF::HEPRUP run = lhe_output_->heprup;
@@ -162,24 +118,11 @@ namespace cepgen
       lhe_output_->heprup = run;
       //--- ensure everything is properly parsed
       lhe_output_->init();
-#elif defined ( PYTHIA_LHEF )
-      oss_init << std::endl; // LHEF is usually not as beautifully parsed as a standard XML...
-                             // we're physicists, what do you expect?
-      lhaevt_->addComments( oss_init.str() );
-      lhaevt_->initialise( params );
-      pythia_->settings.mode( "Beams:frameType", 5 ); // LHEF event readout
-      pythia_->settings.mode( "Next:numberCount", 0 ); // remove some of the Pythia output
-      pythia_->settings.flag( "ProcessLevel:all", false ); // we do not want Pythia to interfere...
-      pythia_->setLHAupPtr( lhaevt_.get() );
-      pythia_->init();
-      lhaevt_->initLHEF();
-#endif
     }
 
     void
-    LHEFHandler::operator<<( const Event& ev )
+    LHEFHepMCHandler::operator<<( const Event& ev )
     {
-#if defined ( HEPMC_LHEF )
       LHEF::HEPEUP out;
       out.heprup = &lhe_output_->heprup;
       out.XWGTUP = 1.;
@@ -205,21 +148,8 @@ namespace cepgen
       //lhe_output_->eventComments() << "haha";
       lhe_output_->hepeup = out;
       lhe_output_->writeEvent();
-#elif defined ( PYTHIA_LHEF )
-      lhaevt_->feedEvent( ev, Pythia8::CepGenEvent::Type::centralAndFullBeamRemnants );
-      pythia_->next();
-      lhaevt_->eventLHEF();
-#endif
-    }
-
-    void
-    LHEFHandler::setCrossSection( double xsect, double xsect_err )
-    {
-#if defined ( PYTHIA_LHEF )
-      lhaevt_->setCrossSection( 0, xsect, xsect_err );
-#endif
     }
   }
 }
 
-REGISTER_IO_MODULE( lhef, LHEFHandler )
+REGISTER_IO_MODULE( lhef, LHEFHepMCHandler )

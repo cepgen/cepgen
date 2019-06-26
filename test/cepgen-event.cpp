@@ -1,10 +1,10 @@
 #include "CepGen/Cards/Handler.h"
 
-#include "CepGen/IO/HepMCHandler.h"
-#include "CepGen/IO/LHEFHandler.h"
+#include "CepGen/IO/ExportHandler.h"
 
 #include "CepGen/Generator.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
 
 #include <iostream>
@@ -12,7 +12,7 @@
 using namespace std;
 
 // we use polymorphism here
-std::unique_ptr<cepgen::output::ExportHandler> writer;
+std::unique_ptr<cepgen::output::GenericExportHandler> writer;
 
 void storeEvent( const cepgen::Event& ev, unsigned long )
 {
@@ -50,12 +50,8 @@ int main( int argc, char* argv[] ) {
 
   const string format = ( argc > 2 ) ? argv[2] : "lhef";
   const char* filename = ( argc > 3 ) ? argv[3] : "example.dat";
-  if ( format == "lhef" )
-    writer = std::make_unique<cepgen::output::LHEFHandler>( filename );
-  else if ( format == "hepmc" )
-    writer = std::make_unique<cepgen::output::HepMCHandler>( filename );
-  else
-    throw CG_FATAL( "main" ) << "Unrecognized output format: " << format;
+  writer = cepgen::output::ExportHandler::get().build( format, cepgen::ParametersList()
+    .set<std::string>( "filename", filename ) );
 
   //-----------------------------------------------------------------------------------------------
   // CepGen run part

@@ -1,6 +1,8 @@
 #ifndef CepGen_Core_ModuleFactory_h
 #define CepGen_Core_ModuleFactory_h
 
+#include "CepGen/Core/ParametersList.h"
+
 #include <unordered_map>
 #include <vector>
 #include <memory>
