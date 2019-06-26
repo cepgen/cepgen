@@ -5,7 +5,6 @@
 
 namespace cepgen
 {
-  namespace ff { class Parameterisation; }
   namespace proc
   {
     /**

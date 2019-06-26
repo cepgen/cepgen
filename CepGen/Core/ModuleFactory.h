@@ -11,9 +11,6 @@
 #define BUILDERNM( obj ) obj ## Builder
 #define STRINGIFY( name ) #name
 
-#define BUILDERNM( obj ) obj ## Builder
-#define STRINGIFY( name ) #name
-
 namespace cepgen
 {
   /// A generic factory to build modules
