@@ -2,6 +2,7 @@
 #define CepGen_Physics_ParticleProperties_h
 
 #include <string>
+#include <iosfwd>
 
 namespace cepgen
 {
@@ -17,6 +18,7 @@ namespace cepgen
     double width; ///< Decay width, in GeV/c\f$^2\f$
     short charge; ///< Electric charge, in \f$e\f$/3
     bool fermion; ///< Is the particle a fermion?
+    friend std::ostream& operator<<( std::ostream&, const ParticleProperties& );
   };
 }
 
