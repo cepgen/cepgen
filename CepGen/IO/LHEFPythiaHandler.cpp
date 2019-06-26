@@ -1,12 +1,7 @@
 #include "CepGen/IO/ExportHandler.h"
 
 #include "CepGen/Core/ParametersList.h"
-#include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Event/Event.h"
-#include "CepGen/Physics/Constants.h"
-
-#include "CepGen/Parameters.h"
-#include "CepGen/Version.h"
 
 #include "CepGen/Hadronisers/PythiaEventInterface.h"
 #include "Pythia8/Pythia.h"
@@ -66,49 +61,7 @@ namespace cepgen
     {
       std::ostringstream oss_init;
       oss_init
-        << "<!--\n"
-        << "  ***** Sample generated with CepGen v" << version() << " *****\n"
-        << "  * process: " << params.processName() << " (" << params.kinematics.mode << ")\n";
-      if ( params.kinematics.mode != KinematicsMode::ElasticElastic ) {
-        oss_init << "  * structure functions: " << params.kinematics.structure_functions->type << "\n";
-        if ( !params.hadroniserName().empty() )
-          oss_init << "  * hadroniser: " << params.hadroniserName() << "\n";
-      }
-      oss_init
-        << "  *--- incoming state\n";
-      if ( params.kinematics.cuts.initial.q2.valid() )
-        oss_init
-          << "  * Q2 range (GeV2): "
-          << params.kinematics.cuts.initial.q2 << "\n";
-      if ( params.kinematics.mode != KinematicsMode::ElasticElastic
-        && params.kinematics.cuts.remnants.mass_single.valid() )
-        oss_init
-          << "  * remnants mass range (GeV/c2): "
-          << params.kinematics.cuts.remnants.mass_single << "\n";
-      oss_init << "  *--- central system\n";
-      if ( params.kinematics.cuts.central.pt_single.valid() )
-        oss_init
-          << "  * single particle pt (GeV/c): "
-          << params.kinematics.cuts.central.pt_single << "\n";
-      if ( params.kinematics.cuts.central.energy_single.valid() )
-        oss_init
-          << "  * single particle energy (GeV): "
-          << params.kinematics.cuts.central.energy_single << "\n";
-      if ( params.kinematics.cuts.central.eta_single.valid() )
-        oss_init
-          << "  * single particle eta: "
-          << params.kinematics.cuts.central.eta_single << "\n";
-      if ( params.kinematics.cuts.central.pt_sum.valid() )
-        oss_init
-          << "  * total pt (GeV/c): "
-          << params.kinematics.cuts.central.mass_sum << "\n";
-      if ( params.kinematics.cuts.central.mass_sum.valid() )
-        oss_init
-          << "  * total invariant mass (GeV/c2): "
-          << params.kinematics.cuts.central.mass_sum << "\n";
-      oss_init
-        << "  **************************************************\n"
-        << "-->";
+        << "<!--\n" << banner( params ) << "\n-->";
       oss_init << std::endl; // LHEF is usually not as beautifully parsed as a standard XML...
                              // we're physicists, what do you expect?
       lhaevt_->addComments( oss_init.str() );

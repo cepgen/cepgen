@@ -42,6 +42,7 @@ namespace cepgen
         virtual void operator<<( const Event& ) = 0;
 
       protected:
+        static std::string banner( const Parameters& );
         /// Type of output requested
         OutputType type_;
         /// Event index
