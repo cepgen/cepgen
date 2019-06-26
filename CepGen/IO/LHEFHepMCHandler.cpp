@@ -10,11 +10,15 @@
 
 #include <sstream>
 
-#include "HepMC/Version.h"
-#ifndef HEPMC_VERSION_CODE // HepMC v2
-#  error "HepMC v3 is required for the LHEF export!"
+#if !defined( HEPMC3 )
+#  include "HepMC/Version.h"
+#  ifndef HEPMC_VERSION_CODE // HepMC v2
+#    error "HepMC v3 is required for the LHEF export!"
+#  else // HepMC v3+
+#    include "HepMC/LHEF.h"
+#  endif
 #else // HepMC v3+
-#  include "HepMC/LHEF.h"
+#  include "HepMC3/LHEF.h"
 #endif
 
 namespace cepgen

@@ -28,12 +28,17 @@ void storeEvent( const cepgen::Event& ev, unsigned long )
  * the events generation.
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
  */
-int main( int argc, char* argv[] ) {
+int main( int argc, char* argv[] )
+{
+  ostringstream os;
+  string delim;
+  for ( const auto& mod : cepgen::output::ExportHandler::get().modules() )
+    os << delim << mod, delim = ",";
 
   if ( argc < 2 )
     throw CG_FATAL( "main" )
       << "No config file provided!\n\t"
-      << "Usage: " << argv[0] << " config-file [format=lhef,hepmc] [filename=example.dat]";
+      << "Usage: " << argv[0] << " config-file [format=" << os.str() << "] [filename=example.dat]";
 
   cepgen::Generator mg;
 

@@ -30,7 +30,7 @@ namespace cepgen
       /// Register a named module in the database
       /// \tparam U Class to register (inherited from T base class)
       template <typename U> void registerModule( const std::string& name ) {
-        static_assert( std::is_base_of<T,U>::value, "Failed to register a class of non-base class template." );
+        static_assert( std::is_base_of<T,U>::value, "\n  Failed to register a class of non-base class template." );
         map_[name] = &create<U>;
       }
       /// Build one instance of a named module
@@ -38,7 +38,7 @@ namespace cepgen
       /// \param[in] params List of parameters to be invoked by the constructor
       std::unique_ptr<T> build( const std::string& name, const ParametersList& params = ParametersList() ) const {
         if ( name.empty() || map_.count( name ) == 0 )
-          throw std::runtime_error( std::string( __PRETTY_FUNCTION__ )+" Failed to retrieve a module with name \""+name+"\" from factory!" );
+          throw std::runtime_error( std::string( __PRETTY_FUNCTION__ )+"\n  Failed to retrieve a module with name \""+name+"\" from factory!" );
         return map_.at( name )( params );
       }
       /// List of modules registred in the database

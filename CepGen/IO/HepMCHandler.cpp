@@ -7,19 +7,23 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
 
-#ifdef LIBHEPMC
+#ifdef HEPMC3
+#  include "HepMC3/WriterAscii.h"
+#  include "HepMC3/FourVector.h"
+#  include "HepMC3/GenEvent.h"
+#  include "HepMC3/GenVertex.h"
+#  include "HepMC3/GenParticle.h"
+using namespace HepMC3;
+#else
 #  include "HepMC/Version.h"
-#  ifndef HEPMC_VERSION_CODE // HepMC v2
+#  if !defined( HEPMC_VERSION_CODE ) // HepMC v2
 #    include "HepMC/IO_GenEvent.h"
 #    include "HepMC/SimpleVector.h"
-#  else // HepMC v3+
-#    define HEPMC_VERSION3
-#    include "HepMC/WriterAscii.h"
-#    include "HepMC/FourVector.h"
+#    include "HepMC/GenEvent.h"
+#    include "HepMC/GenVertex.h"
+#    include "HepMC/GenParticle.h"
+using namespace HepMC;
 #  endif
-#  include "HepMC/GenEvent.h"
-#  include "HepMC/GenVertex.h"
-#  include "HepMC/GenParticle.h"
 #endif
 
 #include <memory>
@@ -52,80 +56,69 @@ namespace cepgen
         void clearEvent();
         /// Populate the associated HepMC event with a Event object
         void fillEvent( const Event& );
-#ifdef LIBHEPMC
-#  ifdef HEPMC_VERSION3
+#ifdef HEPMC3
         /// Writer object (from HepMC v3+)
-        std::unique_ptr<HepMC::WriterAscii> output_;
+        std::unique_ptr<WriterAscii> output_;
         /// Generator cross section and error
-        HepMC::GenCrossSectionPtr xs_;
-#  else
+        GenCrossSectionPtr xs_;
+#else
         /// Writer object (from HepMC v<3)
-        std::unique_ptr<HepMC::IO_GenEvent> output_;
+        std::unique_ptr<IO_GenEvent> output_;
         /// Generator cross section and error
-        HepMC::GenCrossSection xs_;
-#  endif
-        /// Associated HepMC event
-        std::shared_ptr<HepMC::GenEvent> event_;
+        GenCrossSection xs_;
 #endif
+        /// Associated HepMC event
+        std::shared_ptr<GenEvent> event_;
     };
 
     HepMCHandler::HepMCHandler( const char* filename, const GenericExportHandler::OutputType& type ) :
-      GenericExportHandler( type )
-#ifdef LIBHEPMC
-#  ifdef HEPMC_VERSION3
-      , output_( new HepMC::WriterAscii( filename ) ),
-#  else
-      , output_( new HepMC::IO_GenEvent( filename ) ),
-#  endif
-      event_( new HepMC::GenEvent() )
+      GenericExportHandler( type ),
+#ifdef HEPMC3
+      output_( new WriterAscii( filename ) ),
+#else
+      output_( new IO_GenEvent( filename ) ),
 #endif
+      event_( new GenEvent() )
     {}
 
     HepMCHandler::HepMCHandler( const ParametersList& params ) :
-      GenericExportHandler( (GenericExportHandler::OutputType)params.get<int>( "type" ) )
-#ifdef LIBHEPMC
-#  ifdef HEPMC_VERSION3
-      , output_( new HepMC::WriterAscii( params.get<std::string>( "filename" ) ) ),
-#  else
-      , output_( new HepMC::IO_GenEvent( params.get<std::string>( "filename" ) ) ),
-#  endif
-      event_( new HepMC::GenEvent() )
+      GenericExportHandler( (GenericExportHandler::OutputType)params.get<int>( "type" ) ),
+#ifdef HEPMC3
+      output_( new WriterAscii( params.get<std::string>( "filename" ) ) ),
+#else
+      output_( new IO_GenEvent( params.get<std::string>( "filename" ) ) ),
 #endif
+      event_( new GenEvent() )
     {}
 
     void
     HepMCHandler::operator<<( const Event& evt )
     {
       fillEvent( evt );
-#ifdef LIBHEPMC
-#  ifdef HEPMC_VERSION3
+#ifdef HEPMC3
       output_->write_event( *event_ );
-#  else
+#else
       output_->write_event( event_.get() );
-#  endif
 #endif
     }
 
     void
     HepMCHandler::setCrossSection( double xsect, double xsect_err )
     {
-#ifdef LIBHEPMC
-#  ifdef HEPMC_VERSION3
+#ifdef HEPMC3
       xs_->set_cross_section( xsect, xsect_err );
-      event_->add_attribute( "AlphaQCD", HepMC::make_shared<HepMC::DoubleAttribute>( constants::ALPHA_QCD ) );
-      event_->add_attribute( "AlphaEM", HepMC::make_shared<HepMC::DoubleAttribute>( constants::ALPHA_EM ) );
-#  else
+      event_->add_attribute( "AlphaQCD", make_shared<DoubleAttribute>( constants::ALPHA_QCD ) );
+      event_->add_attribute( "AlphaEM", make_shared<DoubleAttribute>( constants::ALPHA_EM ) );
+#else
       xs_.set_cross_section( xsect, xsect_err );
       event_->set_alphaQCD( constants::ALPHA_QCD );
       event_->set_alphaQED( constants::ALPHA_EM );
-#  endif
 #endif
     }
 
     void
     HepMCHandler::fillEvent( const Event& evt )
     {
-#ifdef LIBHEPMC
       event_->clear();
 
       // general information
@@ -135,32 +128,32 @@ namespace cepgen
       event_->weights().push_back( 1. ); // unweighted events
 
       // filling the particles content
-      const HepMC::FourVector origin( 0., 0., 0., 0. );
+      const FourVector origin( 0., 0., 0., 0. );
       Particles part_vec = evt.particles();
 
       int cm_id = 0, idx = 1;
 
-#  ifdef HEPMC_VERSION3
-      HepMC::GenVertexPtr v1 = HepMC::make_shared<HepMC::GenVertex>( origin ),
-                          v2 = HepMC::make_shared<HepMC::GenVertex>( origin ),
-                          vcm = HepMC::make_shared<HepMC::GenVertex>( origin );
-#  else
-      HepMC::GenVertex* v1 = new HepMC::GenVertex( origin ),
-                       *v2 = new HepMC::GenVertex( origin ),
-                       *vcm = new HepMC::GenVertex( origin );
-#  endif
+#ifdef HEPMC3
+      GenVertexPtr v1 = make_shared<GenVertex>( origin ),
+                   v2 = make_shared<GenVertex>( origin ),
+                   vcm = make_shared<GenVertex>( origin );
+#else
+      GenVertex* v1 = new GenVertex( origin ),
+                *v2 = new GenVertex( origin ),
+                *vcm = new GenVertex( origin );
+#endif
       for ( unsigned int i = 0; i < part_vec.size(); ++i ) {
         const Particle part_orig = part_vec.at( i );
-        HepMC::FourVector pmom( part_orig.momentum().px(),
+        FourVector pmom( part_orig.momentum().px(),
                                 part_orig.momentum().py(),
                                 part_orig.momentum().pz(),
                                 part_orig.energy() );
-#  ifdef HEPMC_VERSION3
-        HepMC::GenParticlePtr part = HepMC::make_shared<HepMC::GenParticle>( pmom, part_orig.integerPdgId(), (int)part_orig.status() );
-#  else
-        HepMC::GenParticle* part = new HepMC::GenParticle( pmom, part_orig.integerPdgId(), (int)part_orig.status() );
+#ifdef HEPMC3
+        GenParticlePtr part = make_shared<GenParticle>( pmom, part_orig.integerPdgId(), (int)part_orig.status() );
+#else
+        GenParticle* part = new GenParticle( pmom, part_orig.integerPdgId(), (int)part_orig.status() );
         part->suggest_barcode( idx++ );
-#  endif
+#endif
         const ParticlesIds moth = part_orig.mothers();
 
         switch ( part_orig.role() ) {
@@ -186,11 +179,10 @@ namespace cepgen
       event_->add_vertex( v2 );
       event_->add_vertex( vcm );
 
-#  ifndef HEPMC_VERSION3
+#ifndef HEPMC3
       event_->set_beam_particles( *v1->particles_in_const_begin(), *v2->particles_in_const_begin() );
       event_->set_signal_process_vertex( *v1->vertices_begin() );
       event_->set_beam_particles( *v1->particles_in_const_begin(), *v2->particles_in_const_end() );
-#  endif
 #endif
       event_num_++;
     }
