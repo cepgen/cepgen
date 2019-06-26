@@ -12,9 +12,6 @@
 
 #include <algorithm>
 
-/// Maximal number of characters to fetch for the particle's name
-#define NAME_CHR 16
-
 extern "C"
 {
   /// Get the particle's mass in GeV from the Pythia6 module
@@ -32,11 +29,12 @@ extern "C"
   extern void pyjoin_( int&, int& );
   /// Get a particle's human-readable name from the Pythia6 module
   extern void pyname_( int&, char*, int );
-  /// Get kinematic information on a particle from the Pythia6 module
+  /// Get integer-valued event information from the Pythia6 module
+  extern int pyk_( int&, int& );
+  /// Get real-valued event information from the Pythia6 module
   extern double pyp_( int&, int& );
-  /// Store one parton/particle in the PYJETS common block
-  extern void py1ent_( int&, int&, double&, double&, double& );
-  void pystop_() {}
+  /// Purely virtual method to call at the end of the run
+  void pystop_() { CG_INFO( "Pythia6Hadroniser" ) << "End of run"; }
 
   /// Particles content of the event
   extern struct
@@ -77,22 +75,21 @@ namespace cepgen
       private:
         static constexpr unsigned short MAX_PART_STRING = 3;
         static constexpr unsigned short MAX_STRING_EVENT = 2;
+        /// Maximal number of characters to fetch for the particle's name
+        static constexpr unsigned short NAME_CHR = 16;
 
         inline static double pymass(int pdgid_) { return pymass_(pdgid_); }
         //inline static double pywidt(int pdgid_) { return pywidt_(pdgid_); }
-        inline static void pyexec() { pyexec_(); }
         inline static void pyckbd() { pyckbd_(); }
         inline static void pygive( const std::string& line ) { pygive_( line.c_str(), line.length() ); }
         inline static void pylist( int mlist ) { pylist_( mlist ); }
-        inline static double pyp( int role, int qty ) { return pyp_( role, qty ); }
-        //inline static void py1ent( int* kf, double* pe, double theta, double phi ) { int one=1; py1ent_( &one, kf, pe, theta, phi ); }
-        //inline static void py1ent( int* kf, double* pe, double theta, double phi ) { py1ent_( 1, kf, pe, theta, phi ); }
+        inline static int pyk( int id, int qty ) { return pyk_( id, qty ); }
+        inline static double pyp( int id, int qty ) { return pyp_( id, qty ); }
         inline static std::string pyname( int pdgid ) {
           char out[NAME_CHR];
           std::string s;
           pyname_( pdgid, out, NAME_CHR );
           s = std::string( out, NAME_CHR );
-          //s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
           s.erase( remove( s.begin(), s.end(), ' ' ), s.end() );
           return s;
         }
@@ -125,8 +122,10 @@ namespace cepgen
     bool
     Pythia6Hadroniser::run( Event& ev, double& weight, bool full )
     {
+      full = true; //FIXME
+
       weight = 1.;
-      //if ( full )
+      if ( full )
         prepareHadronisation( ev );
 
       if ( utils::Logger::get().level >= utils::Logger::Level::debug ) {
@@ -143,7 +142,7 @@ namespace cepgen
 
       unsigned int oldnpart = pyjets_.n;
 
-      pyexec();
+      pyexec_();
 
       int criteria = oldnpart+1;
       for ( unsigned int i = 0; i < MAX_STRING_EVENT; ++i )
@@ -157,22 +156,36 @@ namespace cepgen
 
       // We filter the first particles already present in the event
       for ( unsigned int p = oldnpart; p < (unsigned int)pyjets_.n; ++p ) {
+        const pdgid_t pdg_id = abs( pyjets_.k[1][p] );
+        const short charge = pyjets_.k[1][p]/(short)pdg_id;
+        ParticleProperties prop;
+        if ( full )
+          try { prop = PDG::get()( pdg_id ); } catch ( const Exception& ) {
+            prop = ParticleProperties{ pdg_id,
+              pyname( pdg_id ), pyname( pdg_id ),
+              (short)pyk( p+1, 12 ), // colour factor
+              pymass( pdg_id ), -1., //pmas( pdg_id, 2 ),
+              (short)pyk( p+1, 6 ), // charge
+              false
+            };
+            PDG::get().define( prop );
+          }
+
         const Particle::Role role = pyjets_.k[2][p] != 0
           ? ev[pyjets_.k[2][p]-1].role() // child particle inherits its mother's role
           : Particle::Role::UnknownRole;
 
         auto& pa = ev.addParticle( role );
         pa.setId( p );
-        pa.setPdgId( (short)pyjets_.k[1][p] );
-        pa.setStatus( static_cast<Particle::Status>( pyjets_.k[0][p] ) );
+        pa.setPdgId( pdg_id, charge );
+        pa.setStatus( (Particle::Status)pyjets_.k[0][p] );
         pa.setMomentum( Particle::Momentum( pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p] ) );
         pa.setMass( pyjets_.p[4][p] );
-        //pa.setCharge( (float)pyp( p+1, 6 ) );
         if ( role != Particle::Role::UnknownRole ) {
           auto& moth = ev[pyjets_.k[2][p]-1];
           moth.setStatus( role == Particle::Role::CentralSystem
-                          ? Particle::Status::Resonance
-                          : Particle::Status::Fragmented );
+            ? Particle::Status::Resonance
+            : Particle::Status::Fragmented );
           pa.addMother( moth );
         }
       }
@@ -205,6 +218,7 @@ part.dump();
         //--- build 4-vectors and boost decay particles
 //        const auto pq = Particle::Momentum::fromPThetaPhi( px, theta, phi, std::hypot( px, mq ) );
         const auto pq = Particle::Momentum::fromPThetaPhi( px, theta, phi, part.mass() );
+        CG_INFO("")<<pq << "|" << -pq;
 
         //--- singlet
         auto singl_mom = part.momentum();
@@ -213,7 +227,7 @@ part.dump();
         auto& quark = ev.addParticle( part.role() );
         quark.addMother( ev[part.id()] );
         quark.setPdgId( partons.first );
-        quark.setStatus( Particle::Status::DebugResonance );
+        quark.setStatus( Particle::Status::FinalState );
         quark.setMomentum( singl_mom );
 
         //--- doublet
@@ -223,7 +237,7 @@ part.dump();
         auto& diquark = ev.addParticle( part.role() );
         diquark.addMother( ev[part.id()] );
         diquark.setPdgId( partons.second );
-        diquark.setStatus( Particle::Status::DebugResonance );
+        diquark.setStatus( Particle::Status::FinalState );
         diquark.setMomentum( doubl_mom );
 
         std::cout << part.momentum()-(singl_mom+doubl_mom) << "|" << part.numDaughters() << std::endl;
