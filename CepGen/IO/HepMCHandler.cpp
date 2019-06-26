@@ -10,6 +10,7 @@
 #ifdef HEPMC3
 #  include "HepMC3/WriterAscii.h"
 #  include "HepMC3/WriterAsciiHepMC2.h"
+#  include "HepMC3/WriterHEPEVT.h"
 #  include "HepMC3/FourVector.h"
 #  include "HepMC3/GenEvent.h"
 #  include "HepMC3/GenVertex.h"
@@ -176,10 +177,12 @@ namespace cepgen
     }
     typedef HepMCHandler<WriterAsciiHepMC2> HepMC2Handler;
     typedef HepMCHandler<WriterAscii> HepMC3Handler;
+    typedef HepMCHandler<WriterHEPEVT> HEPEVTHandler;
   }
 }
 
 REGISTER_IO_MODULE( hepmc2, HepMC2Handler )
 REGISTER_IO_MODULE( hepmc3, HepMC2Handler )
 REGISTER_IO_MODULE( hepmc, HepMC3Handler )
+REGISTER_IO_MODULE( hepevt, HEPEVTHandler )
 
