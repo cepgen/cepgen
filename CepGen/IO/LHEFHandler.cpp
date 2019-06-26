@@ -1,10 +1,6 @@
-#include "CepGen/IO/LHEFHandler.h"
-#include <sstream>
+#include "CepGen/IO/ExportHandler.h"
 
-#if defined ( PYTHIA_LHEF )
-#include "CepGen/Hadronisers/PythiaEventInterface.h"
-#endif
-
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
@@ -12,12 +8,65 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Version.h"
 
+#include <sstream>
+
+#ifndef LIBHEPMC
+# ifndef PYTHIA8
+#  pragma message( "HepMC/Pythia8 are not linked to this instance! You will not able to export in LHEF." )
+# endif
+#else
+# ifndef HEPMC_VERSION3
+#  ifdef PYTHIA8
+#   include "CepGen/Hadronisers/PythiaEventInterface.h"
+#   include "Pythia8/Pythia.h"
+namespace Pythia8 { class CepGenEvent; }
+#   define PYTHIA_LHEF 1
+#  else
+#   pragma message( "HepMC v3 or Pythia8 are required for the LHEF export!" )
+#  endif
+# else
+#  include "CepGen/IO/HepMCHandler.h"
+#  include "HepMC/LHEF.h"
+#  define HEPMC_LHEF 1
+# endif
+#endif
+
 namespace cepgen
 {
   namespace output
   {
+    /**
+     * \brief Handler for the LHE file output
+     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
+     * \date Sep 2016
+     */
+    class LHEFHandler : public GenericExportHandler
+    {
+      public:
+        /// Class constructor
+        /// \param[in] filename Output file path
+        explicit LHEFHandler( const char* filename );
+        explicit LHEFHandler( const ParametersList& );
+        ~LHEFHandler() override;
+
+        void initialise( const Parameters& ) override;
+        /// Writer operator
+        void operator<<( const Event& ) override;
+        void setCrossSection( double, double ) override;
+
+      private:
+#if defined ( HEPMC_LHEF )
+        /// Writer object (from HepMC)
+        std::unique_ptr<LHEF::Writer> lhe_output_;
+        LHEF::HEPRUP run_;
+#elif defined ( PYTHIA_LHEF )
+        std::unique_ptr<Pythia8::Pythia> pythia_;
+        std::unique_ptr<Pythia8::CepGenEvent> lhaevt_;
+#endif
+    };
+
     LHEFHandler::LHEFHandler( const char* filename ) :
-      ExportHandler( ExportHandler::LHE )
+      GenericExportHandler( GenericExportHandler::LHE )
 #if defined ( HEPMC_LHEF )
       , lhe_output_( new LHEF::Writer( filename ) )
 #elif defined ( PYTHIA_LHEF )
@@ -26,6 +75,19 @@ namespace cepgen
     {
 #if defined ( PYTHIA_LHEF )
       lhaevt_->openLHEF( filename );
+#endif
+    }
+
+    LHEFHandler::LHEFHandler( const ParametersList& params ) :
+      GenericExportHandler( GenericExportHandler::LHE )
+#if defined ( HEPMC_LHEF )
+      , lhe_output_( new LHEF::Writer( params.get<std::string>( "filename" ) ) )
+#elif defined ( PYTHIA_LHEF )
+      , pythia_( new Pythia8::Pythia ), lhaevt_( new Pythia8::CepGenEvent )
+#endif
+    {
+#if defined ( PYTHIA_LHEF )
+      lhaevt_->openLHEF( params.get<std::string>( "filename" ) );
 #endif
     }
 
@@ -159,3 +221,5 @@ namespace cepgen
     }
   }
 }
+
+REGISTER_IO_MODULE( lhef, LHEFHandler )

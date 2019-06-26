@@ -6,6 +6,9 @@
 #include <memory>
 #include <iosfwd>
 
+#define BUILDERNM( obj ) obj ## Builder
+#define STRINGIFY( name ) #name
+
 namespace cepgen
 {
   class ParametersList;

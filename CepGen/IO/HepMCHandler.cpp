@@ -1,27 +1,93 @@
-#include "CepGen/IO/HepMCHandler.h"
+#include "CepGen/IO/ExportHandler.h"
 
 #include "CepGen/Parameters.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersList.h"
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
 
 #ifdef LIBHEPMC
+#  include "HepMC/Version.h"
+#  ifndef HEPMC_VERSION_CODE // HepMC v2
+#    include "HepMC/IO_GenEvent.h"
+#    include "HepMC/SimpleVector.h"
+#  else // HepMC v3+
+#    define HEPMC_VERSION3
+#    include "HepMC/WriterAscii.h"
+#    include "HepMC/FourVector.h"
+#  endif
+#  include "HepMC/GenEvent.h"
 #  include "HepMC/GenVertex.h"
 #  include "HepMC/GenParticle.h"
 #endif
+
+#include <memory>
 
 namespace cepgen
 {
   namespace output
   {
-    HepMCHandler::HepMCHandler( const char* filename, const ExportHandler::OutputType& type ) :
-      ExportHandler( type )
+    /**
+     * \brief Handler for the HepMC file output
+     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
+     * \date Sep 2016
+     */
+    class HepMCHandler : public GenericExportHandler
+    {
+      public:
+        /// Class constructor
+        /// \param[in] filename Output file path
+        /// \param[in] type Output type
+        HepMCHandler( const char* filename, const GenericExportHandler::OutputType& type = GenericExportHandler::HepMC );
+        /// Class constructor
+        HepMCHandler( const ParametersList& );
+        void initialise( const Parameters& /*params*/ ) override {}
+        /// Writer operator
+        void operator<<( const Event& ) override;
+        void setCrossSection( double, double ) override;
+
+      private:
+        /// Clear the associated HepMC event content
+        void clearEvent();
+        /// Populate the associated HepMC event with a Event object
+        void fillEvent( const Event& );
+#ifdef LIBHEPMC
+#  ifdef HEPMC_VERSION3
+        /// Writer object (from HepMC v3+)
+        std::unique_ptr<HepMC::WriterAscii> output_;
+        /// Generator cross section and error
+        HepMC::GenCrossSectionPtr xs_;
+#  else
+        /// Writer object (from HepMC v<3)
+        std::unique_ptr<HepMC::IO_GenEvent> output_;
+        /// Generator cross section and error
+        HepMC::GenCrossSection xs_;
+#  endif
+        /// Associated HepMC event
+        std::shared_ptr<HepMC::GenEvent> event_;
+#endif
+    };
+
+    HepMCHandler::HepMCHandler( const char* filename, const GenericExportHandler::OutputType& type ) :
+      GenericExportHandler( type )
 #ifdef LIBHEPMC
 #  ifdef HEPMC_VERSION3
       , output_( new HepMC::WriterAscii( filename ) ),
 #  else
       , output_( new HepMC::IO_GenEvent( filename ) ),
+#  endif
+      event_( new HepMC::GenEvent() )
+#endif
+    {}
+
+    HepMCHandler::HepMCHandler( const ParametersList& params ) :
+      GenericExportHandler( (GenericExportHandler::OutputType)params.get<int>( "type" ) )
+#ifdef LIBHEPMC
+#  ifdef HEPMC_VERSION3
+      , output_( new HepMC::WriterAscii( params.get<std::string>( "filename" ) ) ),
+#  else
+      , output_( new HepMC::IO_GenEvent( params.get<std::string>( "filename" ) ) ),
 #  endif
       event_( new HepMC::GenEvent() )
 #endif
@@ -130,3 +196,5 @@ namespace cepgen
     }
   }
 }
+
+REGISTER_IO_MODULE( hepmc, HepMCHandler )

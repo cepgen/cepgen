@@ -4,8 +4,6 @@
 #include "CepGen/Core/ModuleFactory.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
 
-#define BUILDERNM( obj ) obj ## Builder
-#define STRINGIFY( name ) #name
 #define REGISTER_HADRONISER( name, obj ) \
   namespace cepgen { namespace hadr { \
     struct BUILDERNM( name ) { \

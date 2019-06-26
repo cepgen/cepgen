@@ -9,8 +9,6 @@
 
 /** \file */
 
-#define BUILDERNM( obj ) obj ## Builder
-#define STRINGIFY( name ) #name
 /// Add a generic process definition to the list of handled processes
 #define REGISTER_PROCESS( name, obj ) \
   namespace cepgen { namespace proc { \
