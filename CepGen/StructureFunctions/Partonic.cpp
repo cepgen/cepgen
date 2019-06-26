@@ -169,6 +169,6 @@ namespace cepgen
 }
 
 #ifdef LHAPDF_GE_6
-#undef LHAPDF_GE_6
+#  undef LHAPDF_GE_6
 #endif
 
