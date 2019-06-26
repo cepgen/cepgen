@@ -11,6 +11,9 @@
 #define BUILDERNM( obj ) obj ## Builder
 #define STRINGIFY( name ) #name
 
+#define BUILDERNM( obj ) obj ## Builder
+#define STRINGIFY( name ) #name
+
 namespace cepgen
 {
   /// A generic factory to build modules
@@ -30,7 +33,7 @@ namespace cepgen
       /// Register a named module in the database
       /// \tparam U Class to register (inherited from T base class)
       template <typename U> void registerModule( const I& name, const ParametersList& def_params = ParametersList() ) {
-        static_assert( std::is_base_of<T,U>::value, "Failed to register an object with improper inheritance into the factory." );
+        static_assert( std::is_base_of<T,U>::value, "\n  Failed to register an object with improper inheritance into the factory." );
         map_[name] = &create<U>;
         params_map_[name] = def_params;
       }
@@ -40,7 +43,7 @@ namespace cepgen
       std::unique_ptr<T> build( const I& name, ParametersList params = ParametersList() ) const {
         if ( name == I() || map_.count( name ) == 0 ) {
           std::ostringstream oss;
-          oss << __PRETTY_FUNCTION__ << " Failed to retrieve a module with index \"" << name << "\" from factory!";
+          oss << __PRETTY_FUNCTION__ << "\n  Failed to retrieve a module with index \"" << name << "\" from factory!";
           throw std::runtime_error( oss.str() );
         }
         if ( params_map_.count( name ) > 0 )

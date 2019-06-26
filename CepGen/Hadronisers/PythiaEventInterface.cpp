@@ -3,6 +3,7 @@
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Parameters.h"
+#include "CepGen/Processes/GenericProcess.h"
 
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/PDG.h"
@@ -32,7 +33,7 @@ namespace Pythia8
   CepGenEvent::initialise( const cepgen::Parameters& params )
   {
     params_ = &params;
-    const cepgen::KinematicsMode& mode = params_->kinematics.mode;
+    const cepgen::KinematicsMode& mode = params_->process()->mode();
     inel1_ = ( mode == cepgen::KinematicsMode::InelasticElastic || mode == cepgen::KinematicsMode::InelasticInelastic );
     inel2_ = ( mode == cepgen::KinematicsMode::ElasticInelastic || mode == cepgen::KinematicsMode::InelasticInelastic );
 

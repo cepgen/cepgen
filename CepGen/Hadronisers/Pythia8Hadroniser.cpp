@@ -3,6 +3,7 @@
 #include "CepGen/Hadronisers/HadronisersHandler.h"
 
 #include "CepGen/Parameters.h"
+#include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
@@ -68,7 +69,7 @@ namespace cepgen
       }
 
 #if defined( PYTHIA_VERSION_INTEGER ) && PYTHIA_VERSION_INTEGER >= 8226
-      switch ( params_->kinematics.mode ) {
+      switch ( params_->process()->mode() ) {
         case KinematicsMode::ElasticElastic: {
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 3 );
           pythia_->settings.flag( "PartonLevel:all", false );
