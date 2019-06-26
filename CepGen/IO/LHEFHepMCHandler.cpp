@@ -29,8 +29,6 @@ namespace cepgen
     {
       public:
         /// Class constructor
-        /// \param[in] filename Output file path
-        explicit LHEFHepMCHandler( const char* filename );
         explicit LHEFHepMCHandler( const ParametersList& );
         ~LHEFHepMCHandler() override;
 
@@ -45,14 +43,9 @@ namespace cepgen
         LHEF::HEPRUP run_;
     };
 
-    LHEFHepMCHandler::LHEFHepMCHandler( const char* filename ) :
-      GenericExportHandler( GenericExportHandler::LHE ),
-      lhe_output_( new LHEF::Writer( filename ) )
-    {}
-
     LHEFHepMCHandler::LHEFHepMCHandler( const ParametersList& params ) :
       GenericExportHandler( GenericExportHandler::LHE ),
-      lhe_output_( new LHEF::Writer( params.get<std::string>( "filename" ) ) )
+      lhe_output_( new LHEF::Writer( params.get<std::string>( "filename", "output.lhe" ) ) )
     {}
 
     void

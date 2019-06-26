@@ -21,8 +21,6 @@ namespace cepgen
     {
       public:
         /// Class constructor
-        /// \param[in] filename Output file path
-        explicit LHEFPythiaHandler( const char* filename );
         explicit LHEFPythiaHandler( const ParametersList& );
         ~LHEFPythiaHandler() override;
 
@@ -36,18 +34,11 @@ namespace cepgen
         std::unique_ptr<Pythia8::CepGenEvent> lhaevt_;
     };
 
-    LHEFPythiaHandler::LHEFPythiaHandler( const char* filename ) :
-      GenericExportHandler( GenericExportHandler::LHE ),
-      pythia_( new Pythia8::Pythia ), lhaevt_( new Pythia8::CepGenEvent )
-    {
-      lhaevt_->openLHEF( filename );
-    }
-
     LHEFPythiaHandler::LHEFPythiaHandler( const ParametersList& params ) :
       GenericExportHandler( GenericExportHandler::LHE ),
       pythia_( new Pythia8::Pythia ), lhaevt_( new Pythia8::CepGenEvent )
     {
-      lhaevt_->openLHEF( params.get<std::string>( "filename" ) );
+      lhaevt_->openLHEF( params.get<std::string>( "filename", "output.lhe" ) );
     }
 
     LHEFPythiaHandler::~LHEFPythiaHandler()

@@ -41,10 +41,6 @@ namespace cepgen
     {
       public:
         /// Class constructor
-        /// \param[in] filename Output file path
-        /// \param[in] type Output type
-        HepMCHandler( const char* filename, const GenericExportHandler::OutputType& type = GenericExportHandler::HepMC );
-        /// Class constructor
         HepMCHandler( const ParametersList& );
         void initialise( const Parameters& /*params*/ ) override {}
         /// Writer operator
@@ -71,22 +67,13 @@ namespace cepgen
         std::shared_ptr<GenEvent> event_;
     };
 
-    HepMCHandler::HepMCHandler( const char* filename, const GenericExportHandler::OutputType& type ) :
-      GenericExportHandler( type ),
-#ifdef HEPMC3
-      output_( new WriterAscii( filename ) ),
-#else
-      output_( new IO_GenEvent( filename ) ),
-#endif
-      event_( new GenEvent() )
-    {}
-
     HepMCHandler::HepMCHandler( const ParametersList& params ) :
       GenericExportHandler( (GenericExportHandler::OutputType)params.get<int>( "type" ) ),
 #ifdef HEPMC3
-      output_( new WriterAscii( params.get<std::string>( "filename" ) ) ),
+      output_( new WriterAscii( params.get<std::string>( "filename", "output.hepmc" ) ) ),
+      xs_( new GenCrossSection ),
 #else
-      output_( new IO_GenEvent( params.get<std::string>( "filename" ) ) ),
+      output_( new IO_GenEvent( params.get<std::string>( "filename", "output.hepmc" ) ) ),
 #endif
       event_( new GenEvent() )
     {}

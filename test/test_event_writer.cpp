@@ -5,10 +5,10 @@
 using namespace std;
 using namespace cepgen;
 
-int main() {
-
+int main()
+{
   auto writer = output::ExportHandler::get().build( "hepmc" );
-  writer->setCrossSection(1., 2.);
+  writer->setCrossSection( 1., 2. );
 
   Event ev;
 
