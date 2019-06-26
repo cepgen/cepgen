@@ -68,7 +68,6 @@ namespace cepgen
     };
 
     HepMCHandler::HepMCHandler( const ParametersList& params ) :
-      GenericExportHandler( (GenericExportHandler::OutputType)params.get<int>( "type" ) ),
 #ifdef HEPMC3
       output_( new WriterAscii( params.get<std::string>( "filename", "output.hepmc" ) ) ),
       xs_( new GenCrossSection ),

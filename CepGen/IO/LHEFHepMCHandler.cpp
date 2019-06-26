@@ -30,7 +30,6 @@ namespace cepgen
       public:
         /// Class constructor
         explicit LHEFHepMCHandler( const ParametersList& );
-        ~LHEFHepMCHandler() override;
 
         void initialise( const Parameters& ) override;
         /// Writer operator
@@ -44,7 +43,6 @@ namespace cepgen
     };
 
     LHEFHepMCHandler::LHEFHepMCHandler( const ParametersList& params ) :
-      GenericExportHandler( GenericExportHandler::LHE ),
       lhe_output_( new LHEF::Writer( params.get<std::string>( "filename", "output.lhe" ) ) )
     {}
 

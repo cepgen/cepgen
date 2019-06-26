@@ -18,20 +18,8 @@ namespace cepgen
     class GenericExportHandler
     {
       public:
-        /// All types of output available for export
-        enum OutputType {
-          HepMC, ///< HepMC ASCII format
-          LHE, ///< LHEF format
-          DOT ///< DOT graphics format
-        };
-        /// Human-readable output name
-        friend std::ostream& operator<<( std::ostream& os, const OutputType& type );
-
-      public:
-        /// \brief Class constructor
-        /// \param[in] type Requested output type
-        explicit GenericExportHandler( const OutputType& type );
-        virtual ~GenericExportHandler() = default;
+        /// Class constructor
+        explicit GenericExportHandler();
         /// Initialise the handler and its inner parameterisation
         virtual void initialise( const Parameters& ) = 0;
         /// Set the process cross section and its associated error
@@ -43,8 +31,6 @@ namespace cepgen
 
       protected:
         static std::string banner( const Parameters& );
-        /// Type of output requested
-        OutputType type_;
         /// Event index
         unsigned int event_num_;
     };

@@ -22,7 +22,7 @@ namespace cepgen
       public:
         /// Class constructor
         explicit LHEFPythiaHandler( const ParametersList& );
-        ~LHEFPythiaHandler() override;
+        ~LHEFPythiaHandler();
 
         void initialise( const Parameters& ) override;
         /// Writer operator
@@ -35,7 +35,6 @@ namespace cepgen
     };
 
     LHEFPythiaHandler::LHEFPythiaHandler( const ParametersList& params ) :
-      GenericExportHandler( GenericExportHandler::LHE ),
       pythia_( new Pythia8::Pythia ), lhaevt_( new Pythia8::CepGenEvent )
     {
       lhaevt_->openLHEF( params.get<std::string>( "filename", "output.lhe" ) );
