@@ -9,6 +9,7 @@
 
 #ifdef HEPMC3
 #  include "HepMC3/WriterAscii.h"
+#  include "HepMC3/WriterAsciiHepMC2.h"
 #  include "HepMC3/FourVector.h"
 #  include "HepMC3/GenEvent.h"
 #  include "HepMC3/GenVertex.h"
@@ -32,11 +33,11 @@ namespace cepgen
 {
   namespace output
   {
-    /**
-     * \brief Handler for the HepMC file output
-     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-     * \date Sep 2016
-     */
+    /// Handler for the HepMC file output
+    /// \tparam T HepMC writer handler (format-dependent)
+    /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+    /// \date Sep 2016
+    template<typename T>
     class HepMCHandler : public GenericExportHandler
     {
       public:
@@ -54,7 +55,7 @@ namespace cepgen
         void fillEvent( const Event& );
 #ifdef HEPMC3
         /// Writer object (from HepMC v3+)
-        std::unique_ptr<WriterAscii> output_;
+        std::unique_ptr<T> output_;
         /// Generator cross section and error
         GenCrossSectionPtr xs_;
 #else
@@ -67,9 +68,10 @@ namespace cepgen
         std::shared_ptr<GenEvent> event_;
     };
 
-    HepMCHandler::HepMCHandler( const ParametersList& params ) :
+    template<typename T>
+    HepMCHandler<T>::HepMCHandler( const ParametersList& params ) :
 #ifdef HEPMC3
-      output_( new WriterAscii( params.get<std::string>( "filename", "output.hepmc" ) ) ),
+      output_( new T( params.get<std::string>( "filename", "output.hepmc" ) ) ),
       xs_( new GenCrossSection ),
 #else
       output_( new IO_GenEvent( params.get<std::string>( "filename", "output.hepmc" ) ) ),
@@ -77,8 +79,8 @@ namespace cepgen
       event_( new GenEvent() )
     {}
 
-    void
-    HepMCHandler::operator<<( const Event& evt )
+    template<typename T> void
+    HepMCHandler<T>::operator<<( const Event& evt )
     {
       fillEvent( evt );
 #ifdef HEPMC3
@@ -88,8 +90,8 @@ namespace cepgen
 #endif
     }
 
-    void
-    HepMCHandler::setCrossSection( double xsect, double xsect_err )
+    template<typename T> void
+    HepMCHandler<T>::setCrossSection( double xsect, double xsect_err )
     {
 #ifdef HEPMC3
       xs_->set_cross_section( xsect, xsect_err );
@@ -102,8 +104,8 @@ namespace cepgen
 #endif
     }
 
-    void
-    HepMCHandler::fillEvent( const Event& evt )
+    template<typename T> void
+    HepMCHandler<T>::fillEvent( const Event& evt )
     {
       event_->clear();
 
@@ -172,7 +174,12 @@ namespace cepgen
 #endif
       event_num_++;
     }
+    typedef HepMCHandler<WriterAsciiHepMC2> HepMC2Handler;
+    typedef HepMCHandler<WriterAscii> HepMC3Handler;
   }
 }
 
-REGISTER_IO_MODULE( hepmc, HepMCHandler )
+REGISTER_IO_MODULE( hepmc2, HepMC2Handler )
+REGISTER_IO_MODULE( hepmc3, HepMC2Handler )
+REGISTER_IO_MODULE( hepmc, HepMC3Handler )
+
