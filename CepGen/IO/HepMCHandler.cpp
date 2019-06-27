@@ -11,6 +11,9 @@
 #  include "HepMC3/WriterAscii.h"
 #  include "HepMC3/WriterAsciiHepMC2.h"
 #  include "HepMC3/WriterHEPEVT.h"
+#  ifdef HEPMC3_ROOTIO
+#    include "HepMC3/WriterRoot.h"
+#  endif
 #  include "HepMC3/FourVector.h"
 #  include "HepMC3/GenEvent.h"
 #  include "HepMC3/GenVertex.h"
@@ -175,6 +178,9 @@ namespace cepgen
     typedef HepMCHandler<WriterAsciiHepMC2> HepMC2Handler;
     typedef HepMCHandler<WriterAscii> HepMC3Handler;
     typedef HepMCHandler<WriterHEPEVT> HEPEVTHandler;
+#  ifdef HEPMC3_ROOTIO
+    typedef HepMCHandler<WriterRoot> RootHandler;
+#  endif
 #else
     typedef HepMCHandler<IO_GenEvent> HepMC2Handler;
 #endif
@@ -185,6 +191,9 @@ namespace cepgen
 REGISTER_IO_MODULE( hepmc3, HepMC3Handler )
 REGISTER_IO_MODULE( hepmc, HepMC3Handler )
 REGISTER_IO_MODULE( hepevt, HEPEVTHandler )
+#  ifdef HEPMC3_ROOTIO
+REGISTER_IO_MODULE( hepmc-root, RootHandler )
+#  endif
 #else
 REGISTER_IO_MODULE( hepmc, HepMC2Handler )
 #endif
