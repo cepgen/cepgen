@@ -7,6 +7,8 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
 
+#include "AbortHandler.h"
+
 #include <iostream>
 
 using namespace std;
@@ -64,8 +66,9 @@ int main( int argc, char* argv[] )
 
   // We might want to cross-check visually the validity of our run
   CG_INFO( "main" ) << mg.parametersPtr();
+  cepgen::utils::AbortHandler ctrl_c;
 
-  // Let there be cross-section...
+  //--- let there be cross-section...
   double xsec = 0., err = 0.;
   mg.computeXsection( xsec, err );
 
