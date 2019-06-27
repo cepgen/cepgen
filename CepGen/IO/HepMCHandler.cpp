@@ -13,9 +13,11 @@
 #  include "HepMC3/WriterHEPEVT.h"
 #  ifdef HEPMC3_ROOTIO
 #    include "HepMC3/WriterRoot.h"
+#    include "HepMC3/WriterRootTree.h"
 #  endif
 #  include "HepMC3/FourVector.h"
 #  include "HepMC3/GenEvent.h"
+#  include "HepMC3/GenRunInfo.h"
 #  include "HepMC3/GenVertex.h"
 #  include "HepMC3/GenParticle.h"
 using namespace HepMC3;
@@ -24,6 +26,7 @@ using namespace HepMC3;
 #  if !defined( HEPMC_VERSION_CODE ) // HepMC v2
 #    include "HepMC/IO_GenEvent.h"
 #    include "HepMC/SimpleVector.h"
+#    include "HepMC/GenRunInfo.h"
 #    include "HepMC/GenEvent.h"
 #    include "HepMC/GenVertex.h"
 #    include "HepMC/GenParticle.h"
@@ -47,7 +50,7 @@ namespace cepgen
       public:
         /// Class constructor
         HepMCHandler( const ParametersList& );
-        void initialise( const Parameters& /*params*/ ) override {}
+        void initialise( const Parameters& /*params*/ ) override;
         /// Writer operator
         void operator<<( const Event& ) override;
         void setCrossSection( double, double ) override;
@@ -57,15 +60,13 @@ namespace cepgen
         void clearEvent();
         /// Populate the associated HepMC event with a Event object
         void fillEvent( const Event& );
+
         /// Writer object
         std::unique_ptr<T> output_;
-#ifdef HEPMC3
         /// Generator cross section and error
-        GenCrossSectionPtr xs_;
-#else
-        /// Generator cross section and error
-        GenCrossSection xs_;
-#endif
+        std::shared_ptr<GenCrossSection> xs_;
+        /// Auxiliary information on run
+        std::shared_ptr<GenRunInfo> runinfo_;
         /// Associated HepMC event
         std::shared_ptr<GenEvent> event_;
     };
@@ -73,11 +74,14 @@ namespace cepgen
     template<typename T>
     HepMCHandler<T>::HepMCHandler( const ParametersList& params ) :
       output_( new T( params.get<std::string>( "filename", "output.hepmc" ) ) ),
+      xs_( new GenCrossSection ), runinfo_( new GenRunInfo ),
+      event_( new GenEvent( runinfo_, Units::GEV, Units::MM ) )
+    {
 #ifdef HEPMC3
-      xs_( new GenCrossSection ),
+      output_->set_run_info( runinfo_ );
+      runinfo_->set_weight_names( { "Default" } );
 #endif
-      event_( new GenEvent() )
-    {}
+    }
 
     template<typename T> void
     HepMCHandler<T>::operator<<( const Event& evt )
@@ -91,17 +95,21 @@ namespace cepgen
     }
 
     template<typename T> void
-    HepMCHandler<T>::setCrossSection( double xsect, double xsect_err )
+    HepMCHandler<T>::initialise( const Parameters& )
     {
 #ifdef HEPMC3
-      xs_->set_cross_section( xsect, xsect_err );
       event_->add_attribute( "AlphaQCD", make_shared<DoubleAttribute>( constants::ALPHA_QCD ) );
       event_->add_attribute( "AlphaEM", make_shared<DoubleAttribute>( constants::ALPHA_EM ) );
 #else
-      xs_.set_cross_section( xsect, xsect_err );
       event_->set_alphaQCD( constants::ALPHA_QCD );
       event_->set_alphaQED( constants::ALPHA_EM );
 #endif
+    }
+
+    template<typename T> void
+    HepMCHandler<T>::setCrossSection( double xsect, double xsect_err )
+    {
+      xs_->set_cross_section( xsect, xsect_err );
     }
 
     template<typename T> void
@@ -111,6 +119,7 @@ namespace cepgen
 
       // general information
       event_->set_cross_section( xs_ );
+      event_->set_run_info( runinfo_ );
 
       event_->set_event_number( event_num_ );
       event_->weights().push_back( 1. ); // unweighted events
@@ -180,6 +189,7 @@ namespace cepgen
     typedef HepMCHandler<WriterHEPEVT> HEPEVTHandler;
 #  ifdef HEPMC3_ROOTIO
     typedef HepMCHandler<WriterRoot> RootHandler;
+    typedef HepMCHandler<WriterRootTree> RootTreeHandler;
 #  endif
 #else
     typedef HepMCHandler<IO_GenEvent> HepMC2Handler;
@@ -192,7 +202,8 @@ REGISTER_IO_MODULE( hepmc3, HepMC3Handler )
 REGISTER_IO_MODULE( hepmc, HepMC3Handler )
 REGISTER_IO_MODULE( hepevt, HEPEVTHandler )
 #  ifdef HEPMC3_ROOTIO
-REGISTER_IO_MODULE( hepmc-root, RootHandler )
+REGISTER_IO_MODULE( hepmc_root, RootHandler )
+REGISTER_IO_MODULE( hepmc_root_tree, RootTreeHandler )
 #  endif
 #else
 REGISTER_IO_MODULE( hepmc, HepMC2Handler )
