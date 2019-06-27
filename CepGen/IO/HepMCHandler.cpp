@@ -26,7 +26,6 @@ using namespace HepMC3;
 #  if !defined( HEPMC_VERSION_CODE ) // HepMC v2
 #    include "HepMC/IO_GenEvent.h"
 #    include "HepMC/SimpleVector.h"
-#    include "HepMC/GenRunInfo.h"
 #    include "HepMC/GenEvent.h"
 #    include "HepMC/GenVertex.h"
 #    include "HepMC/GenParticle.h"
@@ -65,8 +64,10 @@ namespace cepgen
         std::unique_ptr<T> output_;
         /// Generator cross section and error
         std::shared_ptr<GenCrossSection> xs_;
+#ifdef HEPMC3
         /// Auxiliary information on run
         std::shared_ptr<GenRunInfo> runinfo_;
+#endif
         /// Associated HepMC event
         std::shared_ptr<GenEvent> event_;
     };
@@ -74,8 +75,11 @@ namespace cepgen
     template<typename T>
     HepMCHandler<T>::HepMCHandler( const ParametersList& params ) :
       output_( new T( params.get<std::string>( "filename", "output.hepmc" ) ) ),
-      xs_( new GenCrossSection ), runinfo_( new GenRunInfo ),
-      event_( new GenEvent( runinfo_, Units::GEV, Units::MM ) )
+      xs_( new GenCrossSection ),
+#ifdef HEPMC3
+      runinfo_( new GenRunInfo ),
+#endif
+      event_( new GenEvent( Units::GEV, Units::MM ) )
     {
 #ifdef HEPMC3
       output_->set_run_info( runinfo_ );
@@ -118,8 +122,12 @@ namespace cepgen
       event_->clear();
 
       // general information
+#ifdef HEPMC3
       event_->set_cross_section( xs_ );
       event_->set_run_info( runinfo_ );
+#else
+      event_->set_cross_section( *xs_ );
+#endif
 
       event_->set_event_number( event_num_ );
       event_->weights().push_back( 1. ); // unweighted events
