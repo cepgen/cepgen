@@ -32,23 +32,27 @@ if(IS_LXPLUS)
 
   message(STATUS "Compiling on LXPLUS. Do not forget to source the environment variables!")
   message(STATUS "e.g. `${LXPLUS_GCC_ENV}`")
-  #--- searching for GSL
-  find_library(GSL_LIB gsl HINTS ${GSL_DIR} PATH_SUFFIXES lib REQUIRED)
-  find_library(GSL_CBLAS_LIB gslcblas HINTS ${GSL_DIR} PATH_SUFFIXES lib)
-  #--- searching for LHAPDF
-  find_library(LHAPDF LHAPDF HINTS ${LHAPDF_DIR} PATH_SUFFIXES lib)
-  find_path(LHAPDF_INCLUDE LHAPDF HINTS ${LHAPDF_DIR} PATH_SUFFIXES include)
-  #--- searching for HepMC
-  find_library(HEPMC_LIB HepMC HINTS ${HEPMC_DIR} PATH_SUFFIXES lib)
-  find_path(HEPMC_INCLUDE HepMC HINTS ${HEPMC_DIR} PATH_SUFFIXES include)
-else()
-  find_library(GSL_LIB gsl REQUIRED)
-  find_library(GSL_CBLAS_LIB gslcblas)
-  find_library(LHAPDF LHAPDF)
-  find_path(LHAPDF_INCLUDE LHAPDF)
-  find_library(HEPMC_LIB NAMES HepMC3 HepMC)
-  find_path(HEPMC_INCLUDE NAMES HepMC3 HepMC)
 endif()
+#--- searching for GSL
+find_library(GSL_LIB gsl HINTS ${GSL_DIR} PATH_SUFFIXES lib REQUIRED)
+find_library(GSL_CBLAS_LIB gslcblas HINTS ${GSL_DIR} PATH_SUFFIXES lib)
+#--- searching for LHAPDF
+find_library(LHAPDF LHAPDF HINTS ${LHAPDF_DIR} PATH_SUFFIXES lib)
+find_path(LHAPDF_INCLUDE LHAPDF HINTS ${LHAPDF_DIR} PATH_SUFFIXES include)
+#--- searching for HepMC
+find_library(HEPMC_LIB HepMC HINTS ${HEPMC_DIR} PATH_SUFFIXES lib)
+find_path(HEPMC_INCLUDE HepMC HINTS ${HEPMC_DIR} PATH_SUFFIXES include)
+#--- searching for GSL
+find_library(GSL_LIB gsl HINTS ${GSL_DIR} PATH_SUFFIXES lib REQUIRED)
+find_library(GSL_CBLAS_LIB gslcblas HINTS ${GSL_DIR} PATH_SUFFIXES lib)
+find_path(GSL_INCLUDE gsl HINTS ${GSL_DIR} PATH_SUFFIXES include)
+include_directories(${GSL_INCLUDE})
+#--- searching for LHAPDF
+find_library(LHAPDF LHAPDF HINTS ${LHAPDF_DIR} PATH_SUFFIXES lib)
+find_path(LHAPDF_INCLUDE LHAPDF HINTS ${LHAPDF_DIR} PATH_SUFFIXES include)
+#--- searching for HepMC
+find_library(HEPMC_LIB NAMES HepMC3 HepMC HINTS ${HEPMC_DIR} PATH_SUFFIXES lib)
+find_path(HEPMC_INCLUDE NAMES HepMC3 HepMC HINTS ${HEPMC_DIR} PATH_SUFFIXES include)
 #--- searching for Pythia 8
 set(PYTHIA8_DIRS $ENV{PYTHIA8_DIR} ${PYTHIA8_DIR} /usr /usr/local /opt/pythia8)
 find_library(PYTHIA8 pythia8 HINTS ${PYTHIA8_DIRS} PATH_SUFFIXES lib)
