@@ -1,5 +1,6 @@
 #include "CepGen/IO/ExportHandler.h"
 
+#include "CepGen/Parameters.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
 
@@ -13,6 +14,7 @@
 #    include "HepMC/LHEF.h"
 #  endif
 #else // HepMC v3+
+using namespace std;
 #  include "HepMC3/LHEF.h"
 #endif
 

@@ -36,15 +36,6 @@ endif()
 #--- searching for GSL
 find_library(GSL_LIB gsl HINTS ${GSL_DIR} PATH_SUFFIXES lib REQUIRED)
 find_library(GSL_CBLAS_LIB gslcblas HINTS ${GSL_DIR} PATH_SUFFIXES lib)
-#--- searching for LHAPDF
-find_library(LHAPDF LHAPDF HINTS ${LHAPDF_DIR} PATH_SUFFIXES lib)
-find_path(LHAPDF_INCLUDE LHAPDF HINTS ${LHAPDF_DIR} PATH_SUFFIXES include)
-#--- searching for HepMC
-find_library(HEPMC_LIB HepMC HINTS ${HEPMC_DIR} PATH_SUFFIXES lib)
-find_path(HEPMC_INCLUDE HepMC HINTS ${HEPMC_DIR} PATH_SUFFIXES include)
-#--- searching for GSL
-find_library(GSL_LIB gsl HINTS ${GSL_DIR} PATH_SUFFIXES lib REQUIRED)
-find_library(GSL_CBLAS_LIB gslcblas HINTS ${GSL_DIR} PATH_SUFFIXES lib)
 find_path(GSL_INCLUDE gsl HINTS ${GSL_DIR} PATH_SUFFIXES include)
 include_directories(${GSL_INCLUDE})
 #--- searching for LHAPDF
@@ -69,12 +60,6 @@ if(LHAPDF)
   include_directories(${LHAPDF_INCLUDE})
 endif()
 find_package(PythonLibs 2.7)
-if(PYTHONLIBS_FOUND)
-  list(APPEND CEPGEN_EXTERNAL_CARDS_REQS ${PYTHON_LIBRARIES})
-  add_definitions(-DPYTHON)
-  message(STATUS "Python v${PYTHONLIBS_VERSION_STRING} found")
-  include_directories(${PYTHON_INCLUDE_DIRS})
-endif()
 find_library(MUPARSER muparser)
 if(MUPARSER)
   message(STATUS "muParser found in ${MUPARSER}")
