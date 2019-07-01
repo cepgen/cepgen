@@ -62,6 +62,7 @@ namespace cepgen
         /// \return \f$F_{2}^{N}\f$
         double f2slac( double xbj, double q2 ) const;
         Parameters params_;
+        static constexpr double COEFF = 6.08974;
     };
   }
 }

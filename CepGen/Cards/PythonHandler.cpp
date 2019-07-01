@@ -1,8 +1,6 @@
 #include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Core/Exception.h"
 
-#ifdef PYTHON
-
 #include "CepGen/Core/TamingFunction.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Integrator.h"
@@ -372,4 +370,3 @@ namespace cepgen
   }
 }
 
-#endif // ifdef PYTHON

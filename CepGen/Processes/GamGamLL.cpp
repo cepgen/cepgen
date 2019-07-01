@@ -1120,8 +1120,6 @@ namespace cepgen
     void
     GamGamLL::formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const
     {
-      const double mx2 = MX_*MX_, my2 = MY_*MY_;
-
       switch ( kin_.mode ) {
         case KinematicsMode::ElasticElastic: default: {
           fp1 = FormFactors::protonElastic( -t1_ );
@@ -1129,15 +1127,15 @@ namespace cepgen
         } break;
         case KinematicsMode::ElasticInelastic: {
           fp1 = FormFactors::protonElastic( -t1_ );
-          fp2 = FormFactors::protonInelastic( -t2_, w2_, my2, *kin_.structure_functions );
+          fp2 = FormFactors::protonInelastic( -t2_, w2_, masses_.MY2, *kin_.structure_functions );
         } break;
         case KinematicsMode::InelasticElastic: {
-          fp1 = FormFactors::protonInelastic( -t1_, w1_, mx2, *kin_.structure_functions );
+          fp1 = FormFactors::protonInelastic( -t1_, w1_, masses_.MX2, *kin_.structure_functions );
           fp2 = FormFactors::protonElastic( -t2_ );
         } break;
         case KinematicsMode::InelasticInelastic: {
-          fp1 = FormFactors::protonInelastic( -t1_, w1_, mx2, *kin_.structure_functions );
-          fp2 = FormFactors::protonInelastic( -t2_, w2_, my2, *kin_.structure_functions );
+          fp1 = FormFactors::protonInelastic( -t1_, w1_, masses_.MX2, *kin_.structure_functions );
+          fp2 = FormFactors::protonInelastic( -t2_, w2_, masses_.MY2, *kin_.structure_functions );
         } break;
       }
     }

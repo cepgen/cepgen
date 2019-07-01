@@ -24,8 +24,7 @@ namespace cepgen
         return *this;
       old_vals_ = nv;
 
-      const float q02 = 0.8;
-      float amu2 = q2+q02; // shift the overall scale
+      float amu2 = q2+Q2_SHIFT; // shift the overall scale
       float xuv, xdv, xus, xds, xss, xg;
       float xbj_arg = xbj;
 
