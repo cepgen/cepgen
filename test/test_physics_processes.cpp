@@ -24,7 +24,7 @@ main( int argc, char* argv[] )
 
   utils::Timer tmr;
   Generator mg;
-  auto& params = mg.parametersRef();
+  auto& params = mg.parameters();
 
   params.integration().type = IntegratorType::Vegas;
   if ( argc > 2 ) {
@@ -62,7 +62,7 @@ main( int argc, char* argv[] )
       os >> config >> ref_cs >> err_ref_cs;
 
       mg.setParameters( cepgen::card::Handler::parse( ( "test_processes/"+config+"_cfg.py" ).c_str() ) );
-      cout << params << endl;
+      cout << &params << endl;
       CG_INFO( "main" )
         << "Process: "<< params.processName() << "\n\t"
         << "Configuration time: " << tmr.elapsed()*1.e3 << " ms.";

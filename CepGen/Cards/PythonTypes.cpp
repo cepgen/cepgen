@@ -4,7 +4,6 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
-#ifdef PYTHON
 #if PY_MAJOR_VERSION < 3
 #  define PYTHON2
 #endif
@@ -245,4 +244,3 @@ namespace cepgen
   }
 }
 
-#endif

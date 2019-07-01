@@ -79,12 +79,10 @@ namespace cepgen
   const ParticleProperties&
   PDG::operator()( pdgid_t id ) const
   {
-    try {
+    if ( particles_.count( id ) > 0 )
       return particles_.at( id );
-    } catch ( const std::out_of_range& ) {
-      throw CG_FATAL( "PDG" )
-        << "Failed to retrieve particle properties for PDG id " << id << "!";
-    }
+    throw CG_DEBUG( "PDG" )
+      << "Failed to retrieve particle properties for PDG id " << id << "!";
   }
 
   void

@@ -79,35 +79,47 @@ namespace cepgen
           double fourProduct( const Momentum& ) const;
           /// Vector product of the 3-momentum with another 3-momentum
           double crossProduct( const Momentum& ) const;
+          /// Compute the 4-vector sum of two 4-momenta
+          Momentum operator+( const Momentum& ) const;
           /// Add a 4-momentum through a 4-vector sum
           Momentum& operator+=( const Momentum& );
+          /// Unary inverse operator
+          Momentum operator-() const;
+          /// Compute the inverse per-coordinate 4-vector
+          Momentum operator-( const Momentum& ) const;
           /// Subtract a 4-momentum through a 4-vector sum
           Momentum& operator-=( const Momentum& );
+          /// Scalar product of two 3-momenta
+          double operator*( const Momentum& ) const;
           /// Scalar product of the 3-momentum with another 3-momentum
           double operator*=( const Momentum& );
+          /// Multiply all components of a 4-momentum by a scalar
+          Momentum operator*( double c ) const;
           /// Multiply all 4-momentum coordinates by a scalar
           Momentum& operator*=( double c );
+          /// Left-multiply all 4-momentum coordinates by a scalar
+          friend Momentum operator*( double, const Momentum& );
           /// Equality operator
           bool operator==( const Momentum& ) const;
           /// Human-readable format for a particle's momentum
-          friend std::ostream& operator<<( std::ostream& os, const Particle::Momentum& mom );
+          friend std::ostream& operator<<( std::ostream&, const Momentum& );
 
           Momentum& betaGammaBoost( double gamma, double betagamma );
           /// Forward Lorentz boost
-          Momentum& lorentzBoost( const Particle::Momentum& p );
+          Momentum& lorentzBoost( const Momentum& p );
 
           // --- setters and getters
 
           /// Set all the components of the 4-momentum (in GeV)
-          void setP( double px, double py, double pz, double e );
+          Momentum& setP( double px, double py, double pz, double e );
           /// Set all the components of the 3-momentum (in GeV)
-          void setP( double px, double py, double pz );
+          Momentum& setP( double px, double py, double pz );
           /// Set the energy (in GeV)
-          inline void setEnergy( double e ) { energy_ = e; }
+          inline Momentum& setEnergy( double e ) { energy_ = e; return *this; }
           /// Compute the energy from the mass
-          inline void setMass( double m ) { setMass2( m*m ); }
+          inline Momentum& setMass( double m ) { return setMass2( m*m ); }
           /// Compute the energy from the mass
-          void setMass2( double m2 );
+          Momentum& setMass2( double m2 );
           /// Get one component of the 4-momentum (in GeV)
           double operator[]( const unsigned int i ) const;
           /// Get one component of the 4-momentum (in GeV)
@@ -145,16 +157,17 @@ namespace cepgen
           double eta() const;
           /// Rapidity
           double rapidity() const;
-          void truncate( double tolerance = 1.e-10 );
+          Momentum& truncate( double tolerance = 1.e-10 );
           /// Rotate the transverse components by an angle phi (and reflect the y coordinate)
           Momentum& rotatePhi( double phi, double sign );
           /// Rotate the particle's momentum by a polar/azimuthal angle
           Momentum& rotateThetaPhi( double theta_, double phi_ );
           /// Apply a \f$ z\rightarrow -z\f$ transformation
           inline Momentum& mirrorZ() { pz_ = -pz_; return *this; }
+
         private:
           /// Compute the 3-momentum's norm
-          void computeP();
+          Momentum& computeP();
           /// Momentum along the \f$x\f$-axis
           double px_;
           /// Momentum along the \f$y\f$-axis
@@ -167,19 +180,7 @@ namespace cepgen
           double energy_;
       };
       /// Human-readable format for a particle's role in the event
-      friend std::ostream& operator<<( std::ostream& os, const Particle::Role& rl );
-      /// Compute the 4-vector sum of two 4-momenta
-      friend Particle::Momentum operator+( const Particle::Momentum& mom1, const Particle::Momentum& mom2 );
-      /// Compute the 4-vector difference of two 4-momenta
-      friend Particle::Momentum operator-( const Particle::Momentum& mom1, const Particle::Momentum& mom2 );
-      /// Compute the inverse per-coordinate 4-vector
-      friend Particle::Momentum operator-( const Particle::Momentum& mom );
-      /// Scalar product of two 3-momenta
-      friend double operator*( const Particle::Momentum& mom1, const Particle::Momentum& mom2 );
-      /// Multiply all components of a 4-momentum by a scalar
-      friend Particle::Momentum operator*( const Particle::Momentum& mom, double c );
-      /// Multiply all components of a 4-momentum by a scalar
-      friend Particle::Momentum operator*( double c, const Particle::Momentum& mom );
+      friend std::ostream& operator<<( std::ostream& os, const Role& rl );
 
       //----- static getters
 

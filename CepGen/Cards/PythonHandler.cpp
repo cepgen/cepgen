@@ -1,8 +1,6 @@
 #include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Core/Exception.h"
 
-#ifdef PYTHON
-
 #include "CepGen/Core/TamingFunction.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Integrator.h"
@@ -332,11 +330,7 @@ namespace cepgen
         throwPythonError( "Hadroniser name is required!" );
       std::string hadr_name = get<std::string>( pname );
 
-      //--- list of module-specific parameters
-      ParametersList mod_params;
-      fillParameter( hadr, "moduleParameters", mod_params );
-
-      params_.setHadroniser( cepgen::hadr::HadronisersHandler::get().build( hadr_name, mod_params ) );
+      params_.setHadroniser( cepgen::hadr::HadronisersHandler::get().build( hadr_name, get<ParametersList>( hadr ) ) );
 
       auto h = params_.hadroniser();
       h->setParameters( params_ );
@@ -376,4 +370,3 @@ namespace cepgen
   }
 }
 
-#endif // ifdef PYTHON

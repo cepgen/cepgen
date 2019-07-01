@@ -78,12 +78,11 @@ namespace cepgen
       /// Dump this program's header into the standard output stream
       void printHeader();
 
+      const Parameters* parametersPtr() const { return parameters_.get(); }
       /// Getter to the run parameters block
-      Parameters& parametersRef() { return *parameters_; }
-      /// Constant getter to the run parameters block
-      const Parameters& parameters() const { return *parameters_; }
+      Parameters& parameters();
       /// Feed the generator with a Parameters object
-      void setParameters( const Parameters& ip );
+      void setParameters( Parameters& ip );
       /// Remove all references to a previous generation/run
       void clearRun();
       /// Integrate the functional over the whole phase space

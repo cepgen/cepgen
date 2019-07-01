@@ -173,7 +173,6 @@ namespace cepgen
     CLAS::resbkg( double q2, double w ) const
     {
       const double mp2 = params_.mp*params_.mp, mpi02 = params_.mpi0*params_.mpi0;
-      const double coef = 6.08974;
 
       double wth = params_.mp+params_.mpi0;
       if ( w < wth )
@@ -220,7 +219,7 @@ namespace cepgen
           break;
         qs0 = 0.5*sqrt( qs0 )/dmi;
         int ji = 2*res.angular_momentum;
-        const double dg = 0.5*res.width*pow( qs/qs0, ji+1 )*( 1.+pow( coef*qs0, ji ) )/( 1.+pow( coef*qs, ji ) );
+        const double dg = 0.5*res.width*pow( qs/qs0, ji+1 )*( 1.+pow( COEFF*qs0, ji ) )/( 1.+pow( COEFF*qs, ji ) );
         f2resn += ai*dg/( ( w-dmi )*( w-dmi )+dg*dg );
         ++i;
       }

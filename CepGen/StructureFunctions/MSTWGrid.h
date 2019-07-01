@@ -58,7 +58,7 @@ namespace mstw
     private:
       explicit Grid( const cepgen::ParametersList& = cepgen::ParametersList() );
       std::string description() const override;
-      static const unsigned int good_magic;
+      static constexpr unsigned int GOOD_MAGIC = 0x5754534d; // MSTW in ASCII
       static std::shared_ptr<Grid> singl_;
 
       header_t header_;

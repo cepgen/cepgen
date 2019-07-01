@@ -35,8 +35,7 @@ namespace cepgen
       /// \param[in] thetamax The maximal value of \f$\theta\f$ for the outgoing leptons
       void setThetaRange( float thetamin, float thetamax );
       /// Dump the input parameters in the terminal
-      friend std::ostream& operator<<( std::ostream& os, const Parameters* );
-      friend std::ostream& operator<<( std::ostream& os, const Parameters& );
+      friend std::ostream& operator<<( std::ostream&, const Parameters* );
 
       std::shared_ptr<ParametersList> general;
 

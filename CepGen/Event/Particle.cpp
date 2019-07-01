@@ -5,6 +5,8 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
+#include <iomanip>
+
 namespace cepgen
 {
   Particle::Particle() :
@@ -17,8 +19,11 @@ namespace cepgen
     id_( -1 ), charge_sign_( 1 ),
     mass_( -1. ), helicity_( 0. ),
     role_( role ), status_( st ),
-    pdg_id_( pdgId ), phys_prop_( PDG::get()( pdg_id_ ) )
+    pdg_id_( pdgId )
   {
+    try {
+      phys_prop_ = PDG::get()( pdg_id_ );
+    } catch ( const Exception& ) {}
     if ( pdg_id_ != PDG::invalid )
       computeMass();
   }
@@ -28,8 +33,12 @@ namespace cepgen
     momentum_( part.momentum_ ), mass_( part.mass_ ), helicity_( part.helicity_ ),
     role_( part.role_ ), status_( part.status_ ),
     mothers_( part.mothers_ ), daughters_( part.daughters_ ),
-    pdg_id_( part.pdg_id_ ), phys_prop_( PDG::get()( pdg_id_ ) )
-  {}
+    pdg_id_( part.pdg_id_ )
+  {
+    try {
+      phys_prop_ = PDG::get()( pdg_id_ );
+    } catch ( const Exception& ) {}
+  }
 
   bool
   Particle::operator<( const Particle& rhs ) const
@@ -174,7 +183,9 @@ namespace cepgen
   Particle::setPdgId( short pdg )
   {
     pdg_id_ = abs( pdg );
-    phys_prop_ = PDG::get()( pdg_id_ );
+    try {
+      phys_prop_ = PDG::get()( pdg_id_ );
+    } catch ( const Exception& ) {}
     switch ( pdg_id_ ) {
       case PDG::electron: case PDG::muon: case PDG::tau:
         charge_sign_ = -pdg/abs( pdg ); break;
@@ -207,31 +218,28 @@ namespace cepgen
   void
   Particle::dump() const
   {
-    std::ostringstream osm, osd;
-    if ( !primary() ) {
-      osm << ": mother(s): ";
-      unsigned short i = 0;
-      for ( const auto& moth : mothers_ ) {
-        osm << ( i > 0 ? ", " : "" ) << moth;
-        ++i;
-      }
+    std::ostringstream os;
+    os << std::resetiosflags( std::ios::showbase )
+      << "Particle[" << id_ << "]{role=" << role_ << ", status=" << (int)status_ << ", "
+      << "pdg=" << pdg_id_ << ", p4=" << momentum_ << " GeV, m=" << mass_ << " GeV, "
+      << "p⟂=" << momentum_.pt() << " GeV, eta=" << momentum_.eta() << ", phi=" << momentum_.phi();
+    if ( primary() )
+      os << ", primary";
+    else {
+      os << ", mother" << utils::s( mothers_.size() ) << "=";
+      std::string delim;
+      for ( const auto& moth : mothers_ )
+        os << delim << moth, delim = ",";
     }
-    const ParticlesIds daughters_list = daughters();
+    const auto& daughters_list = daughters();
     if ( !daughters_list.empty() ) {
-      osd << ": id = ";
-      unsigned short i = 0;
-      for ( const auto& daugh : daughters_list ) {
-        osm << ( i > 0 ? ", " : "" ) << daugh;
-        ++i;
-      }
+      os << ", daughter" << utils::s( daughters_list.size() ) << "=";
+      std::string delim;
+      for ( const auto& daugh : daughters_list )
+        os << delim << daugh, delim = ",";
     }
-    CG_INFO( "Particle" )
-      << "Dumping a particle with id=" << id_ << ", role=" << role_ << ", status=" << (int)status_ << "\n\t"
-      << "Particle id: " << integerPdgId() << " (" << pdg_id_ << "), mass = " << mass_ << " GeV\n\t"
-      << "Momentum: " << momentum_ << " GeV\t" << "(|P| = p = " << momentum_.p() << " GeV)\n\t"
-      << " p⟂ = " << momentum_.pt() << " GeV, eta = " << momentum_.eta() << ", phi = " << momentum_.phi() << "\n\t"
-      << "Primary? " << yesno( primary() ) << osm.str() << "\n\t"
-      << numDaughters() << " daughter(s)" << osd.str();
+    os << "}";
+    CG_INFO( "Particle" ) << os.str();
   }
 
   double

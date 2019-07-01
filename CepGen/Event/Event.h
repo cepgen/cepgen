@@ -85,11 +85,11 @@ namespace cepgen
 
       //----- general particles information retriever
 
-      Particles mothers( const Particle& part );
+      Particles mothers( const Particle& part ) const;
       /// Get a vector containing all the daughters from a particle
       /// \param[in] part The particle for which the daughter particles have to be retrieved
       /// \return Vector of Particle objects containing all the daughters' kinematic information
-      Particles daughters( const Particle& part );
+      Particles daughters( const Particle& part ) const;
       /// Get a list of roles for the given event (really process-dependant for the central system)
       /// \return Vector of integers corresponding to all the roles the particles can play in the event
       ParticleRoles roles() const;

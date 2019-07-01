@@ -1,5 +1,11 @@
 # Release notes
 
+## v0.9.5 (25 Jun 2019)
+* Increased flexibility in particles (and their associated properties) definitions
+* Small corrections in the LPAIR process definition of the output kinematics
+* Improved Pythia8 interfacing, better handling of the LHEF output format when remnants dissociation is triggered
+* Better exceptions handling
+
 ## v0.9.4 (9 May 2019)
 * pptoff polarisation terms may be steered for off-shell ME
 * Functional is now handling exprtk in addition to &mu;Parser
