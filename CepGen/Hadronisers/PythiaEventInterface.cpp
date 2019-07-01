@@ -234,10 +234,8 @@ namespace Pythia8
     if ( mothers.size() > 1 ) {
       const unsigned short moth2_cg_id = *mothers.rbegin();
       out.second = pythiaId( moth2_cg_id );
-      if ( out.second == INVALID_ID ) {
-        const auto& moth = ev[moth2_cg_id];
-        out.second = pythiaId( *moth.mothers().rbegin() );
-      }
+      if ( out.second == INVALID_ID )
+        out.second = 0;
     }
     return out;
   }
