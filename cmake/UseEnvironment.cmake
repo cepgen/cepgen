@@ -47,6 +47,7 @@ else()
   find_library(LHAPDF LHAPDF)
   find_path(LHAPDF_INCLUDE LHAPDF)
   find_library(HEPMC_LIB NAMES HepMC3 HepMC)
+  find_library(HEPMC_ROOT_LIB NAMES HepMC3rootIO PATH_SUFFIXES root)
   find_path(HEPMC_INCLUDE NAMES HepMC3 HepMC)
 endif()
 #--- searching for Pythia 8
