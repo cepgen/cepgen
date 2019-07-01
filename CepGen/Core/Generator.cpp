@@ -37,15 +37,7 @@ namespace cepgen
   {}
 
   Generator::~Generator()
-  {
-    if ( parameters_->generation().enabled
-      && parameters_->process()
-      && parameters_->numGeneratedEvents() > 0 )
-      CG_INFO( "Generator" )
-        << "Mean generation time / event: "
-        << parameters_->totalGenerationTime()*1.e3/parameters_->numGeneratedEvents()
-        << " ms.";
-  }
+  {}
 
   size_t
   Generator::numDimensions() const
@@ -180,8 +172,7 @@ namespace cepgen
     const double gen_time_s = tmr.elapsed();
     CG_INFO( "Generator" )
       << parameters_->numGeneratedEvents() << " event" << utils::s( parameters_->numGeneratedEvents() )
-      << " generated "
-      << "in " << gen_time_s << " s "
+      << " generated in " << gen_time_s << " s "
       << "(" << gen_time_s/parameters_->numGeneratedEvents()*1.e3 << " ms/event).";
   }
 }

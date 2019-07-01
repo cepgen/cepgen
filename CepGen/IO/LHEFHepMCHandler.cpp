@@ -1,10 +1,12 @@
 #include "CepGen/IO/ExportHandler.h"
 
+#include "CepGen/Parameters.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
 
 #include <sstream>
 
+using namespace std; // account for improper scoping in following includes
 #if !defined( HEPMC3 )
 #  include "HepMC/Version.h"
 #  ifndef HEPMC_VERSION_CODE // HepMC v2
@@ -13,6 +15,7 @@
 #    include "HepMC/LHEF.h"
 #  endif
 #else // HepMC v3+
+using namespace std;
 #  include "HepMC3/LHEF.h"
 #endif
 

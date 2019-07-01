@@ -3,8 +3,6 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
-#ifdef PYTHON
-
 #include <string>
 #include <algorithm>
 #include <frameobject.h>
@@ -266,4 +264,3 @@ namespace cepgen
   }
 }
 
-#endif

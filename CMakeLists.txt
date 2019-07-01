@@ -14,7 +14,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 #----- include external paths
 
 set(CEPGEN_EXTERNAL_CORE_REQS "")
-set(CEPGEN_EXTERNAL_CARDS_REQS "")
 set(CEPGEN_EXTERNAL_STRF_REQS "")
 include(UseEnvironment)
 

@@ -1077,9 +1077,8 @@ namespace cepgen
         << "Ndown = " << ndown_;
 
       //--- compute the electric/magnetic form factors for the two considered Q^2
-      const double mx2 = MX_*MX_, my2 = MY_*MY_;
-      const auto fp1 = kin_.incoming_beams.first.form_factors->operator()( -t1_, w1_, mx2 );
-      const auto fp2 = kin_.incoming_beams.second.form_factors->operator()( -t2_, w2_, my2 );
+      const auto fp1 = kin_.incoming_beams.first.form_factors->operator()( -t1_, w1_, masses_.MX2 );
+      const auto fp2 = kin_.incoming_beams.second.form_factors->operator()( -t2_, w2_, masses_.MY2 );
 
       CG_DEBUG_LOOP( "GamGamLL:peripp" )
         << "(u1,u2) = " << fp1 << "\n\t"
