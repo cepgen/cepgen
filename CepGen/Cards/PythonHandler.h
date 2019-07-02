@@ -1,7 +1,6 @@
 #ifndef CepGen_Cards_PythonHandler_h
 #define CepGen_Cards_PythonHandler_h
 
-#ifdef PYTHON
 #include <Python.h>
 
 #include "Handler.h"
@@ -81,4 +80,3 @@ namespace cepgen
 
 #endif
 
-#endif

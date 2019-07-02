@@ -20,6 +20,9 @@ namespace cepgen
         SzczurekUleshchenko& operator()( double xbj, double q2 ) override;
 
         double F1;
+
+      private:
+        static constexpr float Q2_SHIFT = 0.8;
     };
   }
 }

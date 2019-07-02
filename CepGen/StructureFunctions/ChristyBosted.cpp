@@ -28,14 +28,10 @@ namespace cepgen
       const double xb = q2/( q2+w2-mp2_ );
       double m0 = 0., q20 = 0.;
 
-      if ( sf == 'T' ) { // transverse
-        m0 = 0.125;
-        q20 = 0.05;
-      }
-      else if ( sf == 'L' ) {
-        m0 = params_.m0;
-        q20 = 0.125;
-      }
+      if ( sf == 'T' ) // transverse
+        m0 = 0.125, q20 = 0.05;
+      else if ( sf == 'L' ) // longitudinal
+        m0 = params_.m0, q20 = 0.125;
       else
         throw CG_FATAL( "ChristyBosted" )
           << "Invalid direction retrieved ('" << sf << "')! Aborting.";
@@ -99,7 +95,7 @@ namespace cepgen
       //--- non-resonant background calculation
       const double xpr = 1./( 1.+( w2-pow( mp_+mpi, 2 ) )/( q2+q20 ) );
       if ( xpr > 1. )
-        return 0.; // FIXME
+        return 0.;
 
       double sig_nr = 0.;
       if ( sf == 'T' ) { // transverse

@@ -9,7 +9,6 @@
 
 namespace mstw
 {
-  const unsigned int Grid::good_magic = 0x5754534d; // MSTW in ASCII
   std::shared_ptr<Grid> Grid::singl_;
 
   std::shared_ptr<Grid>
@@ -44,8 +43,8 @@ namespace mstw
 
       // first checks on the file header
 
-      if ( header_.magic != good_magic )
-        throw CG_FATAL( "MSTW" ) << "Wrong magic number retrieved: " << header_.magic << ", expecting " << good_magic << ".";
+      if ( header_.magic != GOOD_MAGIC )
+        throw CG_FATAL( "MSTW" ) << "Wrong magic number retrieved: " << header_.magic << ", expecting " << GOOD_MAGIC << ".";
 
       if ( header_.nucleon != header_t::proton )
         throw CG_FATAL( "MSTW" ) << "Only proton structure function grids can be retrieved for this purpose!";
@@ -75,7 +74,7 @@ namespace mstw
     const auto& bounds = boundaries();
     os << "MSTW(grid){"
        << pow( 10., bounds[0].first ) << "<xbj<" << pow( 10., bounds[0].second ) << ","
-       << pow( 10., bounds[1].first ) << "<Q²/GeV²<" << pow( 10., bounds[1].second ) << "}";
+       << pow( 10., bounds[1].first ) << "<Q^2/GeV^2<" << pow( 10., bounds[1].second ) << "}";
     return os.str();
   }
 

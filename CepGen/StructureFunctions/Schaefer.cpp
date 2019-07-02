@@ -25,9 +25,9 @@ namespace cepgen
     {
       std::ostringstream os;
       os << "LUXlike{"
-         << "r=" << *resonances_model_ << ","
-         << "p=" << *perturbative_model_ << ","
-         << "c=" << *continuum_model_;
+         << "r=" << resonances_model_->description() << ","
+         << "p=" << perturbative_model_->description() << ","
+         << "c=" << continuum_model_->description();
       if ( higher_twist_ )
         os << ",HT";
       os << "}";
