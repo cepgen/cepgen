@@ -91,7 +91,6 @@ namespace cepgen
     template<> double
     PythonHandler::get<double>( PyObject* obj ) const
     {
-      CG_WARNING("");
       if ( !is<double>( obj ) )
         throw CG_ERROR( "PythonHandler:get" ) << "Object has invalid type: double != \"" << obj->ob_type->tp_name << "\".";
       return PyFloat_AsDouble( obj );

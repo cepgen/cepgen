@@ -111,7 +111,7 @@ namespace cepgen
 
     Pythia6Hadroniser::Pythia6Hadroniser( const ParametersList& plist ) :
       GenericHadroniser( plist, "pythia6" )
-    {CG_INFO("");}
+    {}
 
     bool
     Pythia6Hadroniser::run( Event& ev, double& weight, bool full )
