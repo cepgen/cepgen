@@ -4,12 +4,14 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
-#include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Event/Event.h"
 
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/FormFactors.h"
+
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 
 extern "C"
 {
@@ -64,7 +66,7 @@ namespace cepgen
 
       genparams_.icontri = (int)mode_;
       genparams_.imethod = method_;
-      genparams_.sfmod = (int)kin_.structure_functions->type;
+      genparams_.sfmod = (int)kin_.incoming_beams.first.form_factors->structureFunctions()->type;
       genparams_.pdg_l = pair_;
 
       //-------------------------------------------------------------------------------------------

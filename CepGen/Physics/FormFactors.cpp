@@ -39,9 +39,9 @@ namespace cepgen
     }
 
     void
-    Parameterisation::setStructureFunctions( const std::shared_ptr<strfun::Parameterisation>& sfmod )
+    Parameterisation::setStructureFunctions( std::unique_ptr<strfun::Parameterisation> sfmod )
     {
-      str_fun_ = sfmod;
+      str_fun_ = std::move( sfmod );
     }
 
     double
@@ -54,7 +54,10 @@ namespace cepgen
     Parameterisation::description() const
     {
       std::ostringstream os;
-      os << "FF{" << model_ << "," << type_ << "}";
+      os << "FF{" << model_ << "," << type_;
+      if ( str_fun_ )
+        os << ",str.fun.=" << *str_fun_;
+      os << "}";
       return os.str();
     }
 
@@ -68,13 +71,9 @@ namespace cepgen
           throw CG_FATAL( "FormFactors" )
             << type_ << " mode is not yet supported!";
         case Type::PointLikeScalar:
-          FE = 1.;
-          FM = 0.;
-          break;
+          FE = 1., FM = 0.; break;
         case Type::PointLikeFermion:
-          FE = 1.;
-          FM = 1.;
-          break;
+          FE = FM = 1.; break;
         case Type::ProtonElastic: {
           compute( q2 );
           const double GE2 = GE*GE, GM2 = GM*GM;
@@ -82,7 +81,11 @@ namespace cepgen
           FM = GM2;
         } break;
         case Type::ProtonInelastic: {
-          const double xbj = q2 / ( q2 + mf2 - mi2 );
+          const double xbj = q2/( q2+mf2-mi2 );
+          if ( !str_fun_ )
+            throw CG_FATAL( "FormFactors" )
+              << "Inelastic proton form factors computation requires "
+              << "a structure functions definition!";
           switch ( str_fun_->type ) {
             case strfun::Type::ElasticProton:
               throw CG_FATAL( "FormFactors" )

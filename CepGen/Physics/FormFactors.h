@@ -41,7 +41,8 @@ namespace cepgen
         friend std::ostream& operator<<( std::ostream&, const Parameterisation& );
 
         /// Specify the structure functions modelling where applicable
-        void setStructureFunctions( const std::shared_ptr<strfun::Parameterisation>& );
+        void setStructureFunctions( std::unique_ptr<strfun::Parameterisation> );
+        const std::unique_ptr<strfun::Parameterisation>& structureFunctions() const { return str_fun_; }
         const Type& type() const { return type_; }
         void setType( const Type& type ) { type_ = type; }
         const Model& model() const { return model_; }
@@ -61,7 +62,7 @@ namespace cepgen
         Type type_;
 
       private:
-        std::shared_ptr<strfun::Parameterisation> str_fun_;
+        std::unique_ptr<strfun::Parameterisation> str_fun_;
         double last_q2_;
 
       public:

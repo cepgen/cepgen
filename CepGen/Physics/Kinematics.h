@@ -16,7 +16,6 @@ namespace cepgen
 {
   enum class KTFlux;
   namespace ff { class Parameterisation; }
-  namespace strfun { class Parameterisation; }
   /// List of kinematic constraints to apply on the process phase space.
   class Kinematics
   {
@@ -44,8 +43,6 @@ namespace cepgen
       std::pair<Beam,Beam> incoming_beams;
       /// Minimum list of central particles required
       std::vector<pdgid_t> minimum_final_state;
-      /// Type of structure functions to consider
-      std::shared_ptr<strfun::Parameterisation> structure_functions;
 
       /// A collection of cuts to apply on the physical phase space
       struct CutsList

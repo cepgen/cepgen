@@ -9,8 +9,8 @@
 
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/KTFlux.h"
-#include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/FormFactors.h"
 
 #include <iomanip>
 
@@ -215,10 +215,10 @@ namespace cepgen
       std::pair<double,double> fluxes = {
         hi1
           ? ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, hi1 )
-          : ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, *kin_.structure_functions, MX_ ),
+          : ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, *kin_.incoming_beams.first.form_factors->structureFunctions(), MX_ ),
         hi2
           ? ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, hi2 )
-          : ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, *kin_.structure_functions, MY_ )
+          : ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, *kin_.incoming_beams.second.form_factors->structureFunctions(), MY_ )
       };
 
       CG_DEBUG_LOOP( "GenericKTProcess:fluxes" )

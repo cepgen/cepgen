@@ -2,7 +2,9 @@
 
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
+
 #include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/FormFactors.h"
 
 #include "CepGen/Parameters.h"
 #include "CepGen/Version.h"
@@ -25,7 +27,7 @@ namespace cepgen
         << "  ***** Sample generated with CepGen v" << version() << " *****\n"
         << "  * process: " << params.processName() << " (" << params.process()->mode() << ")\n";
       if ( params.process()->mode() != KinematicsMode::ElasticElastic ) {
-        os << "  * structure functions: " << params.kinematics.structure_functions->type << "\n";
+        os << "  * structure functions: " << params.kinematics.incoming_beams.first.form_factors->structureFunctions()->type << "\n";
         if ( !params.hadroniserName().empty() )
           os << "  * hadroniser: " << params.hadroniserName() << "\n";
       }

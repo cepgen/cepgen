@@ -11,6 +11,7 @@
 
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/FormFactors.h"
 
 #include <algorithm>
 
@@ -165,8 +166,10 @@ namespace cepgen
         params_.kinematics.setSqrtS( sqrt_s );
       //--- structure functions set for incoming beams
       PyObject* psf = element( kin, "structureFunctions" ); // borrowed
-      if ( psf )
-        params_.kinematics.structure_functions = strfun::StructureFunctionsHandler::get().build( get<ParametersList>( psf ) );
+      if ( psf ) {
+        params_.kinematics.incoming_beams.first.form_factors->setStructureFunctions( strfun::StructureFunctionsHandler::get().build( get<ParametersList>( psf ) ) );
+        params_.kinematics.incoming_beams.second.form_factors->setStructureFunctions( strfun::StructureFunctionsHandler::get().build( get<ParametersList>( psf ) ) );
+      }
       //--- types of parton fluxes for kt-factorisation
       std::vector<int> kt_fluxes;
       fillParameter( kin, "ktFluxes", kt_fluxes );

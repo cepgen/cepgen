@@ -14,8 +14,7 @@
 
 namespace cepgen
 {
-  Kinematics::Kinematics() :
-    structure_functions( new strfun::SuriYennie )
+  Kinematics::Kinematics()
   {}
 
   void

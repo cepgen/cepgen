@@ -10,6 +10,7 @@
 
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/FormFactors.h"
 
 #include <fstream>
 #include <iomanip>
@@ -71,7 +72,8 @@ namespace cepgen
       else if ( str_fun_ == (int)strfun::Type::MSTWgrid )
         sf_params
           .set<std::string>( "gridPath", mstw_grid_path_ );
-      params_.kinematics.structure_functions = strfun::StructureFunctionsHandler::get().build( sf_params );
+      params_.kinematics.incoming_beams.first.form_factors->setStructureFunctions( strfun::StructureFunctionsHandler::get().build( sf_params ) );
+      params_.kinematics.incoming_beams.second.form_factors->setStructureFunctions( strfun::StructureFunctionsHandler::get().build( sf_params ) );
 
       //--- parse the integration algorithm name
       if ( integr_type_ == "plain" )
