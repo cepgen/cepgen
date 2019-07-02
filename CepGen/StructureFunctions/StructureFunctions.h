@@ -48,8 +48,10 @@ namespace cepgen
           type = sf.type, F2 = sf.F2, FL = sf.FL, old_vals_ = sf.old_vals_;
           return *this;
         }
-        /// Human-readable description of this SF parameterisation
+        /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
         friend std::ostream& operator<<( std::ostream&, const Parameterisation& );
+        /// Human-readable description of this SF parameterisation
+        virtual std::string description() const; ///< Human-readable description of this SF set
 
         /// Set of parameters used to build this parameterisation
         const ParametersList& parameters() const { return params_; }
@@ -70,7 +72,6 @@ namespace cepgen
         double FL; ///< Last computed longitudinal structure function value
 
       protected:
-        virtual std::string description() const; ///< Human-readable description of this SF set
         static const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
         static const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
         ParametersList params_; ///< List of parameters used for this builder definition
