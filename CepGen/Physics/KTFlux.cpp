@@ -30,11 +30,12 @@ namespace cepgen
       case KTFlux::P_Photon_Inelastic_Budnev: {
         const double mx2 = mx*mx, x2 = x*x;
         const double q2min = ( x2*mp2+x*( mx2-mp2 ) )/( 1.-x ), q2 = q2min + kt2/( 1.-x );
-        const double xbj = q2 / ( q2+mx2-mp2 );
+        const double denom = 1./( q2+mx2-mp2 );
+        const double xbj = denom*q2;
         //--- proton structure functions
         auto& str_fun = sf( xbj, q2 );
         str_fun.computeFL( xbj, q2 );
-        const double f_D = str_fun.F2/( q2+mx2-mp2 )*( 1.-x )*( 1.-q2min/q2 );
+        const double f_D = str_fun.F2*denom*( 1.-x )*( 1.-q2min/q2 );
         const double f_C = str_fun.F1( xbj, q2 ) * 2./q2;
         flux = constants::ALPHA_EM*M_1_PI*( 1.-x )/q2*( f_D+0.5*x2*f_C );
       } break;
