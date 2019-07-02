@@ -218,7 +218,7 @@ namespace cepgen
     }
 
     std::ostream&
-    operator<<( std::ostream& os, const ff::Parameterisation& formfac )
+    operator<<( std::ostream& os, const Parameterisation& formfac )
     {
       os << formfac.description();
       if ( formfac.last_q2_ >= 0. )
@@ -226,33 +226,33 @@ namespace cepgen
            << "FE=" << formfac.FE << ",FM=" << formfac.FM;
       return os;
     }
-  }
 
-  std::ostream&
-  operator<<( std::ostream& os, const ff::Type& type )
-  {
-    switch ( type ) {
-      case ff::Type::Invalid: return os << "{invalid}";
-      case ff::Type::ProtonElastic: return os << "el.proton";
-      case ff::Type::PointLikeScalar: return os << "gen.scalar";
-      case ff::Type::PointLikeFermion: return os << "gen.fermion";
-      case ff::Type::CompositeScalar: return os << "comp.scalar";
-      case ff::Type::ProtonInelastic: return os << "inel.proton";
+    std::ostream&
+    operator<<( std::ostream& os, const Type& type )
+    {
+      switch ( type ) {
+        case Type::Invalid: return os << "{invalid}";
+        case Type::ProtonElastic: return os << "el.proton";
+        case Type::PointLikeScalar: return os << "gen.scalar";
+        case Type::PointLikeFermion: return os << "gen.fermion";
+        case Type::CompositeScalar: return os << "comp.scalar";
+        case Type::ProtonInelastic: return os << "inel.proton";
+      }
+      return os;
     }
-    return os;
-  }
 
-  std::ostream&
-  operator<<( std::ostream& os, const ff::Model& mod )
-  {
-    switch ( mod ) {
-      case ff::Model::Invalid: return os << "{invalid}";
-      case ff::Model::StandardDipole: return os << "std.dipole";
-      case ff::Model::ArringtonEtAl: return os << "Arrington etc.";
-      case ff::Model::BrashEtAl: return os << "Brash etc.";
-      case ff::Model::MergellEtAl: return os << "Mergell etc.";
+    std::ostream&
+    operator<<( std::ostream& os, const Model& mod )
+    {
+      switch ( mod ) {
+        case Model::Invalid: return os << "{invalid}";
+        case Model::StandardDipole: return os << "std.dipole";
+        case Model::ArringtonEtAl: return os << "Arrington etc.";
+        case Model::BrashEtAl: return os << "Brash etc.";
+        case Model::MergellEtAl: return os << "Mergell etc.";
+      }
+      return os;
     }
-    return os;
   }
 }
 

@@ -19,6 +19,7 @@ namespace cepgen
       CompositeScalar  = 4, ///< Composite pion form factors
       ProtonInelastic  = 5, ///< Inelastic proton form factors (according to the proton structure functions set)
     };
+    std::ostream& operator<<( std::ostream&, const Type& );
     /// Proton form factors to be used in the outgoing state description
     enum struct Model {
       Invalid        = 0,
@@ -27,6 +28,7 @@ namespace cepgen
       BrashEtAl      = 3, ///< \cite Brash:2001qq
       MergellEtAl    = 4, ///< \cite Mergell:1995bf
     };
+    std::ostream& operator<<( std::ostream&, const Model& );
     /// Form factors parameterisation (electric and magnetic parts)
     class Parameterisation
     {
@@ -71,7 +73,7 @@ namespace cepgen
     };
 
     /// A form factors parameterisations factory
-    typedef ModuleFactory<Parameterisation,int> FormFactorsHandler;
+    typedef ModuleFactory<Parameterisation,ff::Model> FormFactorsHandler;
 
     class StandardDipole : public Parameterisation
     {
@@ -117,15 +119,13 @@ namespace cepgen
     };
 
   }
-  std::ostream& operator<<( std::ostream&, const ff::Type& );
-  std::ostream& operator<<( std::ostream&, const ff::Model& );
 }
 
 /// Add a structure functions definition to the list of handled parameterisation
 #define REGISTER_FF_MODEL( id, obj ) \
   namespace cepgen { \
     struct BUILDERNM( id ) { \
-      BUILDERNM( id )() { ff::FormFactorsHandler::get().registerModule<obj>( (int)ff::Model::id ); } }; \
+      BUILDERNM( id )() { ff::FormFactorsHandler::get().registerModule<obj>( ff::Model::id ); } }; \
     static BUILDERNM( id ) g ## id; \
   }
 
