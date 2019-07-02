@@ -609,6 +609,8 @@ C        (MODE = 1: Algorithm M;    MODE = 2: Algorithm R)
       DIMENSION IM1(2),IM2(2),LMT(2)
       PARAMETER (Z1 = 1, HALF = Z1/2)
       DATA IM1 /2,3/, IM2 /-1,3/
+      D=0.D0
+      FD=0.D0
       DZEROX = 0.D0             ! G.W. to prevent compiler warning
       IF(MODE .NE. 1 .AND. MODE .NE. 2) THEN
        C=0
