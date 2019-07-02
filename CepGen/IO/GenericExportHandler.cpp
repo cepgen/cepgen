@@ -24,7 +24,7 @@ namespace cepgen
         << "  ***** Sample generated with CepGen v" << version() << " *****\n"
         << "  * process: " << params.processName() << " (" << params.kinematics.mode << ")\n";
       if ( params.kinematics.mode != KinematicsMode::ElasticElastic ) {
-        os << "  * structure functions: " << params.kinematics.structure_functions->type << "\n";
+        os << "  * structure functions: " << params.kinematics.structure_functions->description() << "\n";
         if ( !params.hadroniserName().empty() )
           os << "  * hadroniser: " << params.hadroniserName() << "\n";
       }

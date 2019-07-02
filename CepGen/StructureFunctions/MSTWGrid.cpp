@@ -74,7 +74,7 @@ namespace mstw
     const auto& bounds = boundaries();
     os << "MSTW(grid){"
        << pow( 10., bounds[0].first ) << "<xbj<" << pow( 10., bounds[0].second ) << ","
-       << pow( 10., bounds[1].first ) << "<Q²/GeV²<" << pow( 10., bounds[1].second ) << "}";
+       << pow( 10., bounds[1].first ) << "<Q^2/GeV^2<" << pow( 10., bounds[1].second ) << "}";
     return os.str();
   }
 
