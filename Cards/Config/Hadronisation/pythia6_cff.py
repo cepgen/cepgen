@@ -6,8 +6,11 @@ pythia6 = Module('pythia6',
     preConfiguration = (
         'MSTU(21)=1',
     ),
+    tuningSettings = (
+        'MSEL=0', # user-defined process
+    ),
     processConfiguration = (
-        #'commonSettings', 'tuningSettings',
+        'tuningSettings',
     ),
 
 )

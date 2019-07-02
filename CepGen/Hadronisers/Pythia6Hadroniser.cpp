@@ -65,7 +65,7 @@ namespace cepgen
         Pythia6Hadroniser( const ParametersList& );
 
         void setParameters( const Parameters& ) override {}
-        void readString( const char* param ) override;
+        inline void readString( const char* param ) override { pygive( param ); }
         void init() override {}
         bool run( Event& ev, double& weight, bool full ) override;
 
@@ -95,8 +95,8 @@ namespace cepgen
         }
         /**
          * \brief Connect entries with colour flow information
-         * \param[in] njoin_ Number of particles to join in the colour flow
-         * \param[in] ijoin_ List of particles unique identifier to join in the colour flow
+         * \param[in] njoin Number of particles to join in the colour flow
+         * \param[in] ijoin List of particles unique identifier to join in the colour flow
          */
         inline static void pyjoin( int njoin, int ijoin[2] ) { return pyjoin_( njoin, *ijoin ); }
         bool prepareHadronisation( Event& );
@@ -111,13 +111,7 @@ namespace cepgen
 
     Pythia6Hadroniser::Pythia6Hadroniser( const ParametersList& plist ) :
       GenericHadroniser( plist, "pythia6" )
-    {}
-
-    void
-    Pythia6Hadroniser::readString( const char* param )
-    {
-      pygive( param );
-    }
+    {CG_INFO("");}
 
     bool
     Pythia6Hadroniser::run( Event& ev, double& weight, bool full )
