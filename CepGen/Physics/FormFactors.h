@@ -25,6 +25,7 @@ namespace cepgen
       StandardDipole = 1,
       ArringtonEtAl  = 2, ///< \cite Arrington:2007ux
       BrashEtAl      = 3, ///< \cite Brash:2001qq
+      MergellEtAl    = 4, ///< \cite Mergell:1995bf
     };
     /// Form factors parameterisation (electric and magnetic parts)
     class Parameterisation
@@ -42,6 +43,8 @@ namespace cepgen
         const Type& type() const { return type_; }
         void setType( const Type& type ) { type_ = type; }
         const Model& model() const { return model_; }
+
+        static double tau( double q2 );
 
         /// Compute all relevant form factors functions for a given \f$Q^2\f$ value
         Parameterisation& operator()( double /*q2*/, double mi2 = 0., double mf2 = 0. );
@@ -100,6 +103,19 @@ namespace cepgen
         static constexpr float MAX_Q2 = 7.7;
         void compute( double q2 ) override;
     };
+
+    class MergellEtAl : public Parameterisation
+    {
+      public:
+        MergellEtAl( const ParametersList& );
+
+      private:
+        void compute( double q2 ) override;
+        static constexpr double Q2_RESCL = 9.733, INV_DENUM = 1./0.350;
+        static constexpr double EXPO = 2.148;
+        const std::vector<double> par1_, par2_;
+    };
+
   }
   std::ostream& operator<<( std::ostream&, const ff::Type& );
   std::ostream& operator<<( std::ostream&, const ff::Model& );

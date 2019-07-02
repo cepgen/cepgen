@@ -7,6 +7,7 @@
 #include "CepGen/StructureFunctions/SuriYennie.h"
 
 #include <cmath>
+#include <cassert>
 
 namespace cepgen
 {
@@ -41,6 +42,12 @@ namespace cepgen
     Parameterisation::setStructureFunctions( const std::shared_ptr<strfun::Parameterisation>& sfmod )
     {
       str_fun_ = sfmod;
+    }
+
+    double
+    Parameterisation::tau( double q2 )
+    {
+      return 0.25*q2/mp2_;
     }
 
     std::string
@@ -143,20 +150,20 @@ namespace cepgen
     void
     ArringtonEtAl::compute( double q2 )
     {
-      const double tau = 0.25*q2/mp2_;
+      const double tau_val = tau( q2 );
 
       double num_e = 1., den_e = 1.;
       for ( unsigned short i = 0; i < a_e_.size(); ++i )
-        num_e += a_e_.at( i )*pow( tau, i+1 );
+        num_e += a_e_.at( i )*pow( tau_val, i+1 );
       for ( unsigned short i = 0; i < b_e_.size(); ++i )
-        den_e += b_e_.at( i )*pow( tau, i+1 );
+        den_e += b_e_.at( i )*pow( tau_val, i+1 );
       GE = num_e/den_e;
 
       double num_m = 1., den_m = 1.;
       for ( unsigned short i = 0; i < a_m_.size(); ++i )
-        num_m += a_m_.at( i )*pow( tau, i+1 );
+        num_m += a_m_.at( i )*pow( tau_val, i+1 );
       for ( unsigned short i = 0; i < b_m_.size(); ++i )
-        den_m += b_m_.at( i )*pow( tau, i+1 );
+        den_m += b_m_.at( i )*pow( tau_val, i+1 );
       GM = MU*num_m/den_m;
     }
 
@@ -177,6 +184,37 @@ namespace cepgen
       }
       GE = r*GM;
       GM *= MU;
+    }
+
+    MergellEtAl::MergellEtAl( const ParametersList& params ) :
+      Parameterisation( params ),
+      par1_( params.get<std::vector<double> >( "par1", { 1.0317, 0.0875, 0.3176, 0.5496 } ) ),
+      par2_( params.get<std::vector<double> >( "par2", { 5.7824, 0.3907, 0.1422, 0.5362 } ) )
+    {
+      assert( par1_.size() == 4 );
+      assert( par2_.size() == 4 );
+    }
+
+    void
+    MergellEtAl::compute( double q2 )
+    {
+      const double log1 = std::pow( log( ( Q2_RESCL+q2 )*INV_DENUM ), -EXPO );
+      const double d1_1 = 0.611+q2, d2_1 = 1.039+q2, d3_1 = 2.560+q2;
+
+      const double Fs1 = (  9.464/d1_1-9.054/d2_1-0.410/d3_1 )*log1;
+      const double Fs2 = ( -1.549/d1_1+1.985/d2_1-0.436/d3_1 )*log1;
+
+      const double log2 = std::pow( log( ( Q2_RESCL-0.500 )*INV_DENUM ), +EXPO );
+      const double log3 = std::pow( log( ( Q2_RESCL-0.400 )*INV_DENUM ), +EXPO );
+      const double d1_2 = 2.103+q2, d2_2 = 2.734+q2, d3_2 = 2.835+q2;
+
+      const double Fv1= ( 0.5*( par1_.at(0)*log2+par1_.at(1)*log3*std::pow( 1.+q2/par1_.at(2), -2 ) )/( 1.+q2/par1_.at(3) )-38.885/d1_2+425.007/d2_2-389.742/d3_2 )*log1;
+      const double Fv2= ( 0.5*( par2_.at(0)*log2+par2_.at(1)*log3/        ( 1.+q2/par2_.at(2)     ) )/( 1.+q2/par2_.at(3) )-73.535/d1_2+ 83.211/d2_2- 29.467/d3_2 )*log1;
+
+      const double F1 = Fv1+Fs1, F2 = Fv2+Fs2;
+
+      GE = F1-tau( q2 )*F2;
+      GM = F1+F2;
     }
 
     std::ostream&
@@ -212,6 +250,7 @@ namespace cepgen
       case ff::Model::StandardDipole: return os << "std.dipole";
       case ff::Model::ArringtonEtAl: return os << "Arrington etc.";
       case ff::Model::BrashEtAl: return os << "Brash etc.";
+      case ff::Model::MergellEtAl: return os << "Mergell etc.";
     }
     return os;
   }
@@ -220,3 +259,4 @@ namespace cepgen
 REGISTER_FF_MODEL( StandardDipole, ff::StandardDipole )
 REGISTER_FF_MODEL( ArringtonEtAl, ff::ArringtonEtAl )
 REGISTER_FF_MODEL( BrashEtAl, ff::BrashEtAl )
+REGISTER_FF_MODEL( MergellEtAl, ff::MergellEtAl )
