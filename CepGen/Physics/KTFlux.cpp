@@ -15,7 +15,7 @@ namespace cepgen
   const double KTFluxParameters::kMP2 = KTFluxParameters::kMP*KTFluxParameters::kMP;
 
   double
-  ktFlux( const KTFlux& type, double x, double kt2, strfun::Parameterisation& sf, double mx )
+  ktFlux( const KTFlux& type, double x, double kt2, ff::Parameterisation& ff, double mx )
   {
     double flux = 0.;
     const double mp2 = KTFluxParameters::kMP2;
@@ -24,21 +24,18 @@ namespace cepgen
         const double x2 = x*x;
         const double q2min = x2*mp2/( 1.-x ), q2 = q2min + kt2/( 1.-x );
         //--- proton electromagnetic form factors
-        ParametersList params;
-        params
-          .set<int>( "type", (int)ff::Type::ProtonElastic )
-          .set<int>( ff::FormFactorsHandler::KEY, (int)ff::Model::StandardDipole );
-        const auto& formfac = ff::Parameterisation( params )( q2 );
+        const auto& formfac = ff( q2 );
         flux = constants::ALPHA_EM*M_1_PI/( 1.-x )/q2*( ( 1.-x )*( 1.-q2min/q2 )*formfac.FE + 0.25*x2*formfac.FM );
       } break;
       case KTFlux::P_Photon_Inelastic_Budnev: {
         const double mx2 = mx*mx, x2 = x*x;
         const double q2min = ( x2*mp2+x*( mx2-mp2 ) )/( 1.-x ), q2 = q2min + kt2/( 1.-x );
-        const double xbj = q2 / ( q2+mx2-mp2 );
+        const double denom = 1./( q2+mx2-mp2 );
+        const double xbj = denom*q2;
         //--- proton structure functions
-        auto& str_fun = sf( xbj, q2 );
+        auto& str_fun = ( *ff.structureFunctions() )( xbj, q2 );
         str_fun.computeFL( xbj, q2 );
-        const double f_D = str_fun.F2/( q2+mx2-mp2 )*( 1.-x )*( 1.-q2min/q2 );
+        const double f_D = str_fun.F2*denom*( 1.-x )*( 1.-q2min/q2 );
         const double f_C = str_fun.F1( xbj, q2 ) * 2./q2;
         flux = constants::ALPHA_EM*M_1_PI*( 1.-x )/q2*( f_D+0.5*x2*f_C );
       } break;

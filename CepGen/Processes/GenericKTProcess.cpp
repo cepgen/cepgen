@@ -215,10 +215,10 @@ namespace cepgen
       std::pair<double,double> fluxes = {
         hi1
           ? ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, hi1 )
-          : ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, *kin_.incoming_beams.first.form_factors->structureFunctions(), MX_ ),
+          : ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, *kin_.incoming_beams.first.form_factors, MX_ ),
         hi2
           ? ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, hi2 )
-          : ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, *kin_.incoming_beams.second.form_factors->structureFunctions(), MY_ )
+          : ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, *kin_.incoming_beams.second.form_factors, MY_ )
       };
 
       CG_DEBUG_LOOP( "GenericKTProcess:fluxes" )

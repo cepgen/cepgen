@@ -3,6 +3,7 @@
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/FormFactors.h"
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
@@ -31,8 +32,9 @@ extern "C" {
   cepgen_kt_flux_( int& fmode, double& x, double& kt2, int& sfmode, double& mx )
   {
     using namespace cepgen;
-    static auto sf = strfun::StructureFunctionsHandler::get().build( sfmode, ParametersList() );
-    return ktFlux( (KTFlux)fmode, x, kt2, *sf, mx );
+    static auto ff = ff::FormFactorsHandler::get().build( ff::Model::StandardDipole ); // use another argument for the modelling?
+    ff->setStructureFunctions( strfun::StructureFunctionsHandler::get().build( sfmode, ParametersList() ) );
+    return ktFlux( (KTFlux)fmode, x, kt2, *ff, mx );
   }
 
   /// Compute a \f$k_{\rm T}\f$-dependent flux for heavy ions
