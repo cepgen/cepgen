@@ -9,6 +9,8 @@ pythia8 = Module('pythia8',
         # printout properties
         # start by disabling some unnecessary output
         'Next:numberCount = 0',
+        # disable the decay of resonances by default
+        'ProcessLevel:resonanceDecays = off',
         # parameterise the fragmentation part
         #'PartonLevel:Remnants = off',
         # disable all Bremsstrahlung/FSR photon production
