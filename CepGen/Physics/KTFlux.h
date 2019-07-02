@@ -2,7 +2,6 @@
 #define CepGen_Physics_KTFlux_h
 
 #include "CepGen/Physics/PDG.h"
-#include <ostream>
 
 namespace cepgen
 {

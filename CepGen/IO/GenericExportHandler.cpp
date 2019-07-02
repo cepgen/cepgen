@@ -25,12 +25,12 @@ namespace cepgen
       std::ostringstream os;
       os
         << "  ***** Sample generated with CepGen v" << version() << " *****\n"
-        << "  * process: " << params.processName() << " (" << params.process()->mode() << ")\n";
-      if ( params.process()->mode() != KinematicsMode::ElasticElastic ) {
-        os << "  * structure functions: " << params.kinematics.incoming_beams.first.form_factors->structureFunctions()->type << "\n";
-        if ( !params.hadroniserName().empty() )
-          os << "  * hadroniser: " << params.hadroniserName() << "\n";
-      }
+        << "  * process: " << params.processName() << " (" << params.process()->mode() << ")\n"
+        << "  * beams:\n"
+        << "  *   - " << params.kinematics.incoming_beams.first << "\n"
+        << "  *   - " << params.kinematics.incoming_beams.second << "\n";
+      if ( params.process()->mode() != KinematicsMode::ElasticElastic && !params.hadroniserName().empty() )
+        os << "  * hadroniser: " << params.hadroniserName() << "\n";
       os
         << "  *--- incoming state\n";
       if ( params.kinematics.cuts.initial.q2.valid() )

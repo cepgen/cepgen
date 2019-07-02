@@ -82,8 +82,7 @@ namespace cepgen
       << "0x" << std::hex << process_.get() << std::dec << ".\n\t"
       << "Process mode considered: " << process_->mode() << "\n\t"
       << "   first beam: " << kinematics.incoming_beams.first << "\n\t"
-      << "  second beam: " << kinematics.incoming_beams.second << "\n\t"
-      << "  structure functions: " << kinematics.incoming_beams.first.form_factors->structureFunctions()->type;
+      << "  second beam: " << kinematics.incoming_beams.second;
     if ( process_->hasEvent() )
       process_->clearEvent();
     //--- clear the run statistics
@@ -226,10 +225,7 @@ namespace cepgen
       << std::setw( wt ) << "Incoming particles"
       << param->kinematics.incoming_beams.first << ",\n" << std::setw( wt ) << ""
       << param->kinematics.incoming_beams.second << "\n"
-      << std::setw( wt ) << "C.m. energy (GeV)" << param->kinematics.sqrtS() << "\n";
-    if ( param->process_ && param->process_->mode() != KinematicsMode::ElasticElastic )
-      os << std::setw( wt ) << "Structure functions" << *param->kinematics.incoming_beams.first.form_factors->structureFunctions() << "\n";
-    os
+      << std::setw( wt ) << "C.m. energy (GeV)" << param->kinematics.sqrtS() << "\n"
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << "\n\n";
     for ( const auto& lim : param->kinematics.cuts.initial.list() ) // map(particles class, limits)
