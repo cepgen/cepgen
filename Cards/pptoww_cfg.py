@@ -1,6 +1,6 @@
 import Config.Core as cepgen
 from Config.Integration.vegas_cff import integrator
-from Config.logger_cfi import logger
+#from Config.logger_cfi import logger
 
 from Config.Hadronisation.pythia8_cff import pythia8
 hadroniser = pythia8.clone('pythia8',
@@ -20,7 +20,7 @@ hadroniser = pythia8.clone('pythia8',
     ),
     processConfiguration = pythia8.processConfiguration+('pythiaConfiguration',),
 )
-logger.enabledModules += ('Hadroniser.configure', 'Generator.*',)
+#logger.enabledModules += ('Hadroniser.configure', 'Generator.*',)
 
 import Config.ktProcess_cfi as kt
 process = kt.process.clone('pptoww',
