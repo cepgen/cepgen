@@ -31,7 +31,8 @@ namespace cepgen
     {
       public:
         explicit Parameterisation();
-        explicit Parameterisation( const ParametersList& );
+        Parameterisation( const ParametersList& );
+        Parameterisation( const Parameterisation& );
 
         /// Dumping operator for standard output streams
         friend std::ostream& operator<<( std::ostream&, const Parameterisation& );
@@ -46,14 +47,15 @@ namespace cepgen
         Parameterisation& operator()( double /*q2*/, double mi2 = 0., double mf2 = 0. );
 
       protected:
+        static constexpr double MU = 2.79;
         static const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
         static const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
         virtual void compute( double q2 ) {}
         virtual std::string description() const; ///< Human-readable description of this parameterisation
         const Model model_;
+        Type type_;
 
       private:
-        Type type_;
         std::shared_ptr<strfun::Parameterisation> str_fun_;
         double last_q2_;
 
@@ -72,20 +74,18 @@ namespace cepgen
     {
       public:
         StandardDipole( const ParametersList& = ParametersList() );
-        void compute( double q2 ) override;
 
       private:
-        static constexpr double MU = 2.79;
+        void compute( double q2 ) override;
     };
 
     class ArringtonEtAl : public Parameterisation
     {
       public:
         ArringtonEtAl( const ParametersList& );
-        void compute( double q2 ) override;
 
       private:
-        static constexpr double MU = 2.79;
+        void compute( double q2 ) override;
         const int mode_;
         std::vector<double> a_e_, b_e_;
         std::vector<double> a_m_, b_m_;
@@ -95,12 +95,14 @@ namespace cepgen
     {
       public:
         using Parameterisation::Parameterisation;
-        void compute( double q2 ) override;
 
       private:
-        static constexpr double MU = 2.79;
+        static constexpr float MAX_Q2 = 7.7;
+        void compute( double q2 ) override;
     };
   }
+  std::ostream& operator<<( std::ostream&, const ff::Type& );
+  std::ostream& operator<<( std::ostream&, const ff::Model& );
 }
 
 /// Add a structure functions definition to the list of handled parameterisation

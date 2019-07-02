@@ -21,6 +21,12 @@ namespace cepgen
       FE( 0. ), FM( 0. ), GE( 0. ), GM( 0. )
     {}
 
+    Parameterisation::Parameterisation( const Parameterisation& param ) :
+      model_( param.model_ ), type_( param.type_ ),
+      last_q2_( -1. ),
+      FE( param.FE ), FM( param.FM ), GE( param.GE ), GM( param.GM )
+    {}
+
     Parameterisation::Parameterisation( const ParametersList& params ) :
       model_( (Model)params.get<int>( ff::FormFactorsHandler::KEY, (int)Model::Invalid ) ),
       type_( (Type)params.get<int>( "type", (int)Type::Invalid ) ),
@@ -41,7 +47,7 @@ namespace cepgen
     Parameterisation::description() const
     {
       std::ostringstream os;
-      os << "FF(" << (int)model_ << "," << (int)type_ << ")";
+      os << "FF{" << model_ << "," << type_ << "}";
       return os.str();
     }
 
@@ -52,7 +58,8 @@ namespace cepgen
       switch ( type_ ) {
         case Type::Invalid:
         case Type::CompositeScalar:
-          throw CG_FATAL( "FormFactors" ) << "Not yet supported!";
+          throw CG_FATAL( "FormFactors" )
+            << type_ << " mode is not yet supported!";
         case Type::PointLikeScalar:
           FE = 1.;
           FM = 0.;
@@ -72,7 +79,8 @@ namespace cepgen
           switch ( str_fun_->type ) {
             case strfun::Type::ElasticProton:
               throw CG_FATAL( "FormFactors" )
-                << "Elastic proton form factors requested! Check your process definition!";
+                << "Elastic proton form factors requested!\n"
+                << "Check your process definition!";
             case strfun::Type::SuriYennie: { //FIXME
               const auto sy = strfun::SuriYennie()( xbj, q2 );
               FE = sy.F2 * xbj * sqrt( mi2 ) / q2;
@@ -101,6 +109,7 @@ namespace cepgen
     }
 
     ArringtonEtAl::ArringtonEtAl( const ParametersList& params ) :
+      Parameterisation( params ),
       mode_( params.get<int>( "mode" ) )
     {
       switch ( mode_ ) {
@@ -148,12 +157,16 @@ namespace cepgen
         num_m += a_m_.at( i )*pow( tau, i+1 );
       for ( unsigned short i = 0; i < b_m_.size(); ++i )
         den_m += b_m_.at( i )*pow( tau, i+1 );
-      GM = num_m/den_m;
+      GM = MU*num_m/den_m;
     }
 
     void
     BrashEtAl::compute( double q2 )
     {
+      if ( q2 > MAX_Q2 )
+        CG_WARNING( "BrashEtAl" )
+          << "Q² = " << q2 << " > " << MAX_Q2 << " GeV² = max(Q²).\n\t"
+          << "Brash et al. FF parameterisation not designed for high-Q² values.";
       const double q = sqrt( q2 );
       GM = 1./( 1.+q*( 0.116+q*( 2.874+q*( 0.241+q*( 1.006+q*0.345 ) ) ) ) );
 
@@ -163,17 +176,44 @@ namespace cepgen
         return;
       }
       GE = r*GM;
+      GM *= MU;
     }
 
     std::ostream&
     operator<<( std::ostream& os, const ff::Parameterisation& formfac )
     {
       os << formfac.description();
-      if ( formfac.last_q2_ > 0. )
-        os << " at (" << formfac.last_q2_ << "): "
+      if ( formfac.last_q2_ >= 0. )
+        os << "(Q²=" << formfac.last_q2_ << " GeV²): "
            << "FE=" << formfac.FE << ",FM=" << formfac.FM;
       return os;
     }
+  }
+
+  std::ostream&
+  operator<<( std::ostream& os, const ff::Type& type )
+  {
+    switch ( type ) {
+      case ff::Type::Invalid: return os << "{invalid}";
+      case ff::Type::ProtonElastic: return os << "el.proton";
+      case ff::Type::PointLikeScalar: return os << "gen.scalar";
+      case ff::Type::PointLikeFermion: return os << "gen.fermion";
+      case ff::Type::CompositeScalar: return os << "comp.scalar";
+      case ff::Type::ProtonInelastic: return os << "inel.proton";
+    }
+    return os;
+  }
+
+  std::ostream&
+  operator<<( std::ostream& os, const ff::Model& mod )
+  {
+    switch ( mod ) {
+      case ff::Model::Invalid: return os << "{invalid}";
+      case ff::Model::StandardDipole: return os << "std.dipole";
+      case ff::Model::ArringtonEtAl: return os << "Arrington etc.";
+      case ff::Model::BrashEtAl: return os << "Brash etc.";
+    }
+    return os;
   }
 }
 
