@@ -25,6 +25,7 @@ if(IS_LXPLUS)
   set(LHAPDF_DIR "${BASE_DIR}/releases/MCGenerators/lhapdf/6.2.2-8a3e6/x86_64-centos7-gcc62-opt")
   set(PYTHIA8_DIR "${BASE_DIR}/releases/MCGenerators/pythia8/240p1-ecd34/x86_64-centos7-gcc62-opt")
   set(DELPHES_DIR "${BASE_DIR}/releases/delphes/3.4.0-03b2c/x86_64-centos7-gcc62-opt")
+  set(TBB_DIR "${BASE_DIR}/releases/tbb/2019_U7-ba3eb/x86_64-centos7-gcc62-opt")
   set(PYTHON_DIR "${BASE_DIR}/releases/Python/2.7.15-075d4/x86_64-centos7-gcc62-opt")
   set(PYTHON_LIBRARY "${PYTHON_DIR}/lib/libpython2.7.so")
   set(PYTHON_EXECUTABLE "${PYTHON_DIR}/bin/python")
@@ -51,6 +52,8 @@ find_path(PYTHIA8_INCLUDE Pythia8 HINTS ${PYTHIA8_DIRS} PATH_SUFFIXES include in
 #--- searching for Delphes
 find_library(DELPHES Delphes HINTS ${DELPHES_DIR} PATH_SUFFIXES lib)
 find_path(DELPHES_INCLUDE NAMES modules classes HINTS ${DELPHES_DIR} PATH_SUFFIXES include)
+#--- searching for tbb
+find_library(TBB tbb HINTS ${TBB_DIR} PATH_SUFFIXES lib)
 
 message(STATUS "GSL found in ${GSL_LIB}")
 list(APPEND CEPGEN_EXTERNAL_CORE_REQS ${GSL_LIB} ${GSL_CBLAS_LIB})
