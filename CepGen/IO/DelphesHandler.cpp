@@ -24,6 +24,11 @@ namespace cepgen
     class DelphesHandler : public GenericExportHandler
     {
       public:
+        struct CepGenConfReader : public ExRootConfReader
+        {
+          using ExRootConfReader::ExRootConfReader;
+          void feedParameters( const Parameters& );
+        };
         /// Class constructor
         explicit DelphesHandler( const ParametersList& );
         ~DelphesHandler();
@@ -35,16 +40,11 @@ namespace cepgen
 
       private:
         std::unique_ptr<Delphes> delphes_;
-        //std::unique_ptr<ExRootTreeWriter> tree_writer_;
     };
 
     DelphesHandler::DelphesHandler( const ParametersList& params ) :
       delphes_( new Delphes )
-      //tree_writer_( new ExRootTreeWriter( params.get<std::string>( "filename", "output_delphes.root" ), "Delphes" ) )
-    {
-      ExRootConfReader conf;
-      delphes_->SetConfReader( &conf );
-    }
+    {}
 
     DelphesHandler::~DelphesHandler()
     {
@@ -54,6 +54,9 @@ namespace cepgen
     void
     DelphesHandler::initialise( const Parameters& params )
     {
+      CepGenConfReader conf;
+      conf.feedParameters( params );
+      delphes_->SetConfReader( &conf );
       delphes_->InitTask();
     }
 
@@ -78,6 +81,11 @@ namespace cepgen
       }
       //...
       delphes_->ProcessTask();
+    }
+
+    void
+    DelphesHandler::CepGenConfReader::feedParameters( const Parameters& params )
+    {
     }
   }
 }
