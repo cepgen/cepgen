@@ -103,10 +103,8 @@ namespace cepgen
         std::pair<short,short> pickPartonsContent() const;
         struct EventProperties
         {
-          unsigned int str_in_evt = 0;
-          unsigned int num_part_in_str[MAX_STRING_EVENT] = { 0 };
         };
-        EventProperties fillParticles( const Event& ) const;
+        unsigned int fillParticles( const Event& ) const;
     };
 
     Pythia6Hadroniser::Pythia6Hadroniser( const ParametersList& plist ) :
@@ -126,27 +124,15 @@ namespace cepgen
       }
 
       //--- fill Pythia 6 common blocks
-      auto prop = fillParticles( ev );
+      auto str_in_evt = fillParticles( ev );
 
       CG_DEBUG( "Pythia6Hadroniser" )
         << "Passed the string construction stage.\n\t"
-        << " " << prop.str_in_evt << " string objects were identified and constructed.";
+        << " " << str_in_evt << " string objects were identified and constructed.";
 
       unsigned int oldnpart = pyjets_.n;
 
       pyexec_();
-
-      int criteria = oldnpart+1;
-      for ( unsigned int i = 0; i < MAX_STRING_EVENT; ++i )
-        criteria += prop.num_part_in_str[i];
-
-      //FIXME FIXME
-      /*if ( pyjets_.k[1][criteria] == 2212
-        && pyjets_.k[0][criteria] == 1 ) {
-        CG_WARNING( "Pythia6Hadroniser" ) << "System is non-inelastic.";
-        return false;
-      }*/
-      //FIXME FIXME
 
       // We filter the first particles already present in the event
       for ( unsigned int p = oldnpart; p < (unsigned int)pyjets_.n; ++p ) {
@@ -231,14 +217,14 @@ namespace cepgen
       return true;
     }
 
-    Pythia6Hadroniser::EventProperties
+    unsigned int
     Pythia6Hadroniser::fillParticles( const Event& ev ) const
     {
       pyjets_.n = 0;
 
       //--- initialising the string fragmentation variables
-      EventProperties out;
-      out.str_in_evt = 0;
+      unsigned int str_in_evt = 0;
+      unsigned int num_part_in_str[MAX_STRING_EVENT] = { 0 };
       int jlpsf[MAX_STRING_EVENT][MAX_PART_STRING] = { 0 };
 
       for ( const auto& role : ev.roles() ) { // loop on roles
@@ -271,8 +257,8 @@ namespace cepgen
 
           if ( part.status() == Particle::Status::DebugResonance ) {
             pyjets_.k[0][np] = 1; //FIXME PYTHIA/JETSET workaround
-            jlpsf[out.str_in_evt][part_in_str++] = part.id()+1;
-            out.num_part_in_str[out.str_in_evt]++;
+            jlpsf[str_in_evt][part_in_str++] = part.id()+1;
+            num_part_in_str[str_in_evt]++;
             role_has_string = true;
           }
           else if ( part.status() == Particle::Status::Undecayed )
@@ -281,28 +267,28 @@ namespace cepgen
         }
         //--- at most one string per role
         if ( role_has_string )
-          out.str_in_evt++;
+          str_in_evt++;
       }
 
       //--- loop over the strings to bind everything together
-      for ( unsigned short i = 0; i < out.str_in_evt; ++i ) {
-        if ( out.num_part_in_str[i] < 2 )
+      for ( unsigned short i = 0; i < str_in_evt; ++i ) {
+        if ( num_part_in_str[i] < 2 )
           continue;
 
         std::ostringstream dbg;
-        for ( unsigned short j = 0; j < out.num_part_in_str[i]; ++j )
+        for ( unsigned short j = 0; j < num_part_in_str[i]; ++j )
           if ( jlpsf[i][j] != -1 )
             dbg << Form( "\n\t * %2d (pdgId=%4d)", jlpsf[i][j], pyjets_.k[1][jlpsf[i][j]-1] );
 
         CG_INFO( "Pythia6Hadroniser" )
-          << "Joining " << out.num_part_in_str[i] << " particle" << utils::s( out.num_part_in_str[i] )
+          << "Joining " << num_part_in_str[i] << " particle" << utils::s( num_part_in_str[i] )
           << " with " << ev[jlpsf[i][0]].role() << " role"
           << " in a same string (id=" << i << ")"
           << dbg.str();
 
-        pyjoin( out.num_part_in_str[i], jlpsf[i] );
+        pyjoin( num_part_in_str[i], jlpsf[i] );
       }
-      return out;
+      return str_in_evt;
     }
 
     std::pair<short,short>
