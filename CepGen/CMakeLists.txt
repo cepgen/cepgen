@@ -66,8 +66,16 @@ endif()
 
 if(DELPHES)
   message(STATUS "Delphes found in ${DELPHES}")
-  list(APPEND addons_libraries ${DELPHES_LIB})
-  list(APPEND io_sources "IO/DelphesHandler.cpp")
+  find_package(ROOT COMPONENTS Core QUIET)
+  if(ROOT_FOUND)
+    message(STATUS "ROOT found in ${ROOT_INCLUDE_DIRS}")
+    list(APPEND addons_libraries ${DELPHES_LIB} ${ROOT_LIBRARIES} lzma)
+    list(APPEND io_sources "IO/DelphesHandler.cpp")
+    include_directories(${DELPHES_INCLUDE})
+    include_directories(${ROOT_INCLUDE_DIRS})
+  else()
+    message(STATUS "ROOT not found! Disabling Delphes module.")
+  endif()
 endif()
 
 #----- build the objects

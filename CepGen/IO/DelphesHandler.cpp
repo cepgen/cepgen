@@ -4,6 +4,8 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
 
+#include "modules/Delphes.h"
+
 #include <sstream>
 
 namespace cepgen
