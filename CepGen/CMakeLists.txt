@@ -62,6 +62,14 @@ if(HEPMC_LIB)
   include_directories(${HEPMC_INCLUDE})
 endif()
 
+#--- linking with Delphes
+
+if(DELPHES)
+  message(STATUS "Delphes found in ${DELPHES}")
+  list(APPEND addons_libraries ${DELPHES_LIB})
+  list(APPEND io_sources "IO/DelphesHandler.cpp")
+endif()
+
 #----- build the objects
 
 add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${sf_sources})

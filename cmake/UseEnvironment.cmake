@@ -24,6 +24,7 @@ if(IS_LXPLUS)
   set(HEPMC_DIR "${BASE_DIR}/releases/HepMC/2.06.09-0a23a/x86_64-centos7-gcc62-opt")
   set(LHAPDF_DIR "${BASE_DIR}/releases/MCGenerators/lhapdf/6.2.2-8a3e6/x86_64-centos7-gcc62-opt")
   set(PYTHIA8_DIR "${BASE_DIR}/releases/MCGenerators/pythia8/240p1-ecd34/x86_64-centos7-gcc62-opt")
+  set(DELPHES_DIR "${BASE_DIR}/releases/delphes/3.4.0-03b2c/x86_64-centos7-gcc62-opt")
   set(PYTHON_DIR "${BASE_DIR}/releases/Python/2.7.15-075d4/x86_64-centos7-gcc62-opt")
   set(PYTHON_LIBRARY "${PYTHON_DIR}/lib/libpython2.7.so")
   set(PYTHON_EXECUTABLE "${PYTHON_DIR}/bin/python")
@@ -47,6 +48,9 @@ find_path(HEPMC_INCLUDE NAMES HepMC3 HepMC HINTS ${HEPMC_DIR} PATH_SUFFIXES incl
 set(PYTHIA8_DIRS $ENV{PYTHIA8_DIR} ${PYTHIA8_DIR} /usr /usr/local /opt/pythia8)
 find_library(PYTHIA8 pythia8 HINTS ${PYTHIA8_DIRS} PATH_SUFFIXES lib)
 find_path(PYTHIA8_INCLUDE Pythia8 HINTS ${PYTHIA8_DIRS} PATH_SUFFIXES include include/Pythia8 include/pythia8)
+#--- searching for Delphes
+find_library(DELPHES Delphes HINTS ${DELPHES_DIR} PATH_SUFFIXES lib)
+find_path(DELPHES_INCLUDE NAMES modules classes HINTS ${DELPHES_DIR} PATH_SUFFIXES include)
 
 message(STATUS "GSL found in ${GSL_LIB}")
 list(APPEND CEPGEN_EXTERNAL_CORE_REQS ${GSL_LIB} ${GSL_CBLAS_LIB})
