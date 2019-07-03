@@ -91,7 +91,7 @@ namespace cepgen
   Momentum
   Momentum::operator-() const
   {
-    return Momentum( -px_, -py_, pz_, energy_ );
+    return Momentum( -px_, -py_, -pz_, energy_ );
   }
 
   Momentum
@@ -324,16 +324,16 @@ namespace cepgen
   }
 
   Momentum&
-  Momentum::lorentzBoost( const Momentum& p2 )
+  Momentum::lorentzBoost( const Momentum& mom )
   {
     //--- do not boost on a system at rest
-    if ( p2.p() == 0. )
+    if ( mom.p() == 0. )
       return *this;
 
-    const double m = p2.mass();
-    const double pf4 = ( px_*p2.px_+py_*p2.py_+pz_*p2.pz_+energy_*p2.energy_ )/m;
-    const double fn = ( pf4+energy_ )/( p2.energy_+m );
-    *this += fn*p2;
+    const double mass = mom.mass();
+    const double pf4 = ( px_*mom.px_+py_*mom.py_+pz_*mom.pz_+energy_*mom.energy_ )/mass;
+    const double fn = ( pf4+energy_ )/( mom.energy_+mass );
+    *this += fn*mom;
     energy_ = pf4;
     return *this;
   }

@@ -116,8 +116,6 @@ namespace cepgen
     bool
     Pythia6Hadroniser::run( Event& ev, double& weight, bool full )
     {
-      full = true; //FIXME
-
       weight = 1.;
       if ( full )
         prepareHadronisation( ev );
@@ -142,11 +140,13 @@ namespace cepgen
       for ( unsigned int i = 0; i < MAX_STRING_EVENT; ++i )
         criteria += prop.num_part_in_str[i];
 
-      if ( pyjets_.k[1][criteria] == 2212
+      //FIXME FIXME
+      /*if ( pyjets_.k[1][criteria] == 2212
         && pyjets_.k[0][criteria] == 1 ) {
         CG_WARNING( "Pythia6Hadroniser" ) << "System is non-inelastic.";
         return false;
-      }
+      }*/
+      //FIXME FIXME
 
       // We filter the first particles already present in the event
       for ( unsigned int p = oldnpart; p < (unsigned int)pyjets_.n; ++p ) {
@@ -196,8 +196,6 @@ namespace cepgen
           continue;
         //--- only loop over all protons to be fragmented
 
-part.dump();
-
         const auto partons = pickPartonsContent();
         const double mx2 = part.mass2();
         const double mq = pymass( partons.first ), mq2 = mq*mq;
@@ -207,37 +205,28 @@ part.dump();
         const double phi = 2.*M_PI*drand(), theta = acos( 2.*drand()-1. ); // theta angle
 
         //--- compute momentum of decay particles from MX
-        const double px = std::sqrt( std::pow( mx2-mdq2+mq2, 2 ) / ( 4.*mx2 ) - mq2 );
+        const double px = std::sqrt( 0.25*std::pow( mx2-mdq2+mq2, 2 )/mx2-mq2 );
 
         //--- build 4-vectors and boost decay particles
-//        const auto pq = Particle::Momentum::fromPThetaPhi( px, theta, phi, std::hypot( px, mq ) );
-        const auto pq = Particle::Momentum::fromPThetaPhi( px, theta, phi, part.mass() );
-        CG_INFO("")<<pq << "|" << -pq;
+        auto pdq = Particle::Momentum::fromPThetaPhi( px, theta, phi, std::hypot( px, mdq ) );
+        auto pq = -pdq; pq.setEnergy( std::hypot( px, mq ) );
 
         //--- singlet
-        auto singl_mom = part.momentum();
-        singl_mom.lorentzBoost( pq );
-
         auto& quark = ev.addParticle( part.role() );
         quark.addMother( ev[part.id()] );
         quark.setPdgId( partons.first );
         quark.setStatus( Particle::Status::FinalState );
-        quark.setMomentum( singl_mom );
+        quark.setMomentum( pq.lorentzBoost( part.momentum() ) );
 
         //--- doublet
-        auto doubl_mom = part.momentum();
-        doubl_mom.lorentzBoost( -pq );
-
         auto& diquark = ev.addParticle( part.role() );
         diquark.addMother( ev[part.id()] );
         diquark.setPdgId( partons.second );
         diquark.setStatus( Particle::Status::FinalState );
-        diquark.setMomentum( doubl_mom );
+        diquark.setMomentum( pdq.lorentzBoost( part.momentum() ) );
 
-        std::cout << part.momentum()-(singl_mom+doubl_mom) << "|" << part.numDaughters() << std::endl;
         ev[part.id()].setStatus( Particle::Status::Fragmented );
       }
-ev.dump();
 
       return true;
     }
