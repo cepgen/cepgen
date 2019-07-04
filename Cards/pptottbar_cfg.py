@@ -1,11 +1,11 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
 from Config.Integration.vegas_cff import integrator
-from Config.Hadronisation.pythia8_cff import pythia8 as hadroniser
+#from Config.Hadronisation.pythia6_cff import pythia6 as hadroniser
+#from Config.Hadronisation.pythia8_cff import pythia8 as hadroniser
 from Config.PDG_cfi import PDG
-
-from Config.logger_cfi import logger
-logger.enabledModules += ('PPtoFF.prepare',)
+#from Config.logger_cfi import logger
+#logger.enabledModules += ('PPtoFF.prepare',)
 
 process = kt.process.clone('pptoff',
     processParameters = cepgen.Parameters(
@@ -16,7 +16,6 @@ process = kt.process.clone('pptoff',
         pz = (6500., 6500.),
         #structureFunctions = cepgen.StructureFunctions.SuriYennie,
         structureFunctions = cepgen.StructureFunctions.LUXlike,
-        #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
     ),
     outKinematics = kt.process.outKinematics.clone(
         pair = 6,
