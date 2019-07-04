@@ -122,7 +122,7 @@ namespace cepgen
       if ( full )
         prepareHadronisation( ev );
 
-      if ( CG_LOG_MATCH( "Pythia6Hadroniser", debug ) ) {
+      if ( CG_LOG_MATCH( "Pythia6Hadroniser:dump", debug ) ) {
         CG_DEBUG( "Pythia6Hadroniser" )
           << "Dump of the event before the hadronisation:";
         ev.dump();
@@ -131,13 +131,10 @@ namespace cepgen
       //--- fill Pythia 6 common blocks
       const unsigned short str_in_evt = fillParticles( ev );
 
-      if ( CG_LOG_MATCH( "Pythia6Hadroniser", debug ) ) {
-        CG_DEBUG( "Pythia6Hadroniser" )
-          << "Passed the string construction stage.\n\t"
-          << str_in_evt << " string object" << utils::s( str_in_evt )
-          << " identified and constructed.";
-        ev.dump();
-      }
+      CG_DEBUG( "Pythia6Hadroniser" )
+        << "Passed the string construction stage.\n\t"
+        << str_in_evt << " string object" << utils::s( str_in_evt )
+        << " identified and constructed.";
 
       const int oldnpart = pyjets_.n;
 
