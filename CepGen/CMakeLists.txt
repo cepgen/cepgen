@@ -26,6 +26,25 @@ endif()
 
 set(addons_libraries "")
 
+#--- linking with Pythia 6
+
+if(PYTHIA6)
+  message(STATUS "Pythia 6 found in ${PYTHIA6}")
+  list(APPEND hadr_sources "Hadronisers/Pythia6Hadroniser.cpp")
+  list(APPEND addons_libraries ${PYTHIA6})
+  if(PYTHIA6DUMMY)
+    message(STATUS "Pythia 6 addons found in ${PYTHIA6DUMMY}")
+    list(APPEND addons_libraries ${PYTHIA6DUMMY})
+  endif()
+elseif(EXISTS $ENV{PYTHIA6_SRC})
+  file(GLOB pythia6_src $ENV{PYTHIA6_SRC})
+  message(STATUS "Pythia 6 source found in ${pythia6_src}")
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wno-tabs -Wno-maybe-uninitialized -Wno-integer-division -Wno-unused-variable -Wno-unused-dummy-argument")
+  add_library(pythia6 SHARED ${pythia6_src})
+  list(APPEND hadr_sources "Hadronisers/Pythia6Hadroniser.cpp")
+  list(APPEND addons_libraries pythia6)
+endif()
+
 #--- linking with Pythia 8
 
 if(PYTHIA8)

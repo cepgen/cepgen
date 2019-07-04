@@ -42,12 +42,12 @@ namespace cepgen
   std::ostream&
   operator<<( std::ostream& os, const hadr::GenericHadroniser& hadr )
   {
-    return os << hadr.name().c_str();
+    return os << hadr.name();
   }
 
   std::ostream&
   operator<<( std::ostream& os, const hadr::GenericHadroniser* hadr )
   {
-    return os << hadr->name().c_str();
+    return os << hadr->name();
   }
 }

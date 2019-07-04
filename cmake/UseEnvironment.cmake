@@ -23,6 +23,7 @@ if(IS_LXPLUS)
   set(GSL_DIR "${BASE_DIR}/releases/GSL/2.5-32fc5/x86_64-centos7-gcc62-opt")
   set(HEPMC_DIR "${BASE_DIR}/releases/HepMC/2.06.09-0a23a/x86_64-centos7-gcc62-opt")
   set(LHAPDF_DIR "${BASE_DIR}/releases/MCGenerators/lhapdf/6.2.2-8a3e6/x86_64-centos7-gcc62-opt")
+  set(PYTHIA6_DIR "${BASE_DIR}/releases/MCGenerators/pythia6/429.2-c4089/x86_64-centos7-gcc62-opt")
   set(PYTHIA8_DIR "${BASE_DIR}/releases/MCGenerators/pythia8/240p1-ecd34/x86_64-centos7-gcc62-opt")
   set(DELPHES_DIR "${BASE_DIR}/releases/delphes/3.4.0-03b2c/x86_64-centos7-gcc62-opt")
   set(TBB_DIR "${BASE_DIR}/releases/tbb/2019_U7-ba3eb/x86_64-centos7-gcc62-opt")
@@ -45,6 +46,10 @@ find_path(LHAPDF_INCLUDE LHAPDF HINTS ${LHAPDF_DIR} PATH_SUFFIXES include)
 #--- searching for HepMC
 find_library(HEPMC_LIB NAMES HepMC3 HepMC HINTS ${HEPMC_DIR} PATH_SUFFIXES lib)
 find_path(HEPMC_INCLUDE NAMES HepMC3 HepMC HINTS ${HEPMC_DIR} PATH_SUFFIXES include)
+#--- searching for Pythia 6
+set(PYTHIA6_DIRS $ENV{PYTHIA6_DIR} ${PYTHIA6_DIR} /usr /usr/local /opt/pythia6)
+find_library(PYTHIA6 pythia6 HINTS ${PYTHIA6_DIRS} PATH_SUFFIXES lib)
+find_library(PYTHIA6DUMMY pythia6_dummy HINTS ${PYTHIA6_DIRS} PATH_SUFFIXES lib)
 #--- searching for Pythia 8
 set(PYTHIA8_DIRS $ENV{PYTHIA8_DIR} ${PYTHIA8_DIR} /usr /usr/local /opt/pythia8)
 find_library(PYTHIA8 pythia8 HINTS ${PYTHIA8_DIRS} PATH_SUFFIXES lib)
