@@ -1,9 +1,9 @@
 #include "CepGen/IO/ExportHandler.h"
+#include "CepGen/IO/PythiaEventInterface.h"
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
 
-#include "CepGen/Hadronisers/PythiaEventInterface.h"
 #include "Pythia8/Pythia.h"
 
 #include <sstream>
@@ -56,11 +56,13 @@ namespace cepgen
                              // we're physicists, what do you expect?
       lhaevt_->addComments( oss_init.str() );
       lhaevt_->initialise( params );
+      pythia_->setLHAupPtr( lhaevt_.get() );
+      pythia_->settings.flag( "ProcessLevel:all", false ); // we do not want Pythia to interfere...
+      pythia_->settings.flag( "PartonLevel:all", false ); // we do not want Pythia to interfere...
+      pythia_->settings.flag( "HadronLevel:all", false ); // we do not want Pythia to interfere...
       pythia_->settings.mode( "Beams:frameType", 5 ); // LHEF event readout
       pythia_->settings.mode( "Next:numberCount", 0 ); // remove some of the Pythia output
-      pythia_->settings.flag( "ProcessLevel:all", false ); // we do not want Pythia to interfere...
-      pythia_->settings.flag( "Check:event", false );
-      pythia_->setLHAupPtr( lhaevt_.get() );
+      //pythia_->settings.flag( "Check:event", false );
       pythia_->init();
       lhaevt_->initLHEF();
     }
