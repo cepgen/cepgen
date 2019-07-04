@@ -108,6 +108,7 @@ namespace cepgen
       { Particle::Status::PrimordialIncoming, 21 },
       { Particle::Status::FinalState, 1 },
       { Particle::Status::Unfragmented, 3 },
+      { Particle::Status::Undecayed, 1 },
       { Particle::Status::Fragmented, 11 },
       { Particle::Status::Propagator, 11 },
       { Particle::Status::Incoming, 11 },
@@ -173,7 +174,7 @@ namespace cepgen
         pa.setId( p );
         pa.setPdgId( pdg_id, charge );
         int status = pyjets_.k[0][p];
-        if ( status == 11 )
+        if ( status == 11 || status == 14 )
           status = -3;
         pa.setStatus( (Particle::Status)status );
         pa.setMomentum( Particle::Momentum( pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p] ) );
@@ -257,6 +258,7 @@ namespace cepgen
           try {
             pyjets_.k[0][np] = kStatusMatchMap.at( part.status() );
           } catch ( const std::out_of_range& ) {
+            ev.dump();
             throw CG_FATAL( "Pythia6Hadroniser" )
               << "Failed to retrieve a Pythia 6 particle status translation for "
               << "CepGen status " << (int)part.status() << "!";
