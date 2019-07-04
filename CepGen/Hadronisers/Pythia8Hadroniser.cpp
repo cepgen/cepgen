@@ -1,4 +1,4 @@
-#include "CepGen/Hadronisers/Pythia8Hadroniser.h"
+#include "CepGen/Hadronisers/GenericHadroniser.h"
 #include "CepGen/Hadronisers/HadronisersHandler.h"
 
 #include "CepGen/IO/PythiaEventInterface.h"
@@ -15,12 +15,51 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
 
-#include "CepGen/Version.h"
+#include <Pythia8/Pythia.h>
+
+#include <memory>
+#include <unordered_map>
+#include <vector>
 
 namespace cepgen
 {
   namespace hadr
   {
+    /**
+     * Full interface to the Pythia8 hadronisation algorithm. It can be used in a single particle decay mode as well as a full event hadronisation using the string model, as in Jetset.
+     * \brief Pythia8 hadronisation algorithm
+     */
+    class Pythia8Hadroniser : public GenericHadroniser
+    {
+      public:
+        explicit Pythia8Hadroniser( const ParametersList& );
+        ~Pythia8Hadroniser();
+
+        void setParameters( const Parameters& ) override;
+        void readString( const char* param ) override;
+        void init() override;
+        bool run( Event& ev, double& weight, bool full ) override;
+
+        void setCrossSection( double xsec, double xsec_err ) override;
+
+      private:
+        static constexpr unsigned short PYTHIA_STATUS_IN_BEAM = 12;
+        static constexpr unsigned short PYTHIA_STATUS_IN_PARTON_KT = 61;
+
+        std::vector<unsigned short> min_ids_;
+        std::unordered_map<short,short> py_cg_corresp_;
+        unsigned short findRole( const Event& ev, const Pythia8::Particle& p ) const;
+        void updateEvent( Event& ev, double& weight ) const;
+        Particle& addParticle( Event& ev, const Pythia8::Particle&, const Pythia8::Vec4& mom, unsigned short ) const;
+        /// A Pythia8 core to be wrapped
+        std::unique_ptr<Pythia8::Pythia> pythia_;
+        std::unique_ptr<Pythia8::CepGenEvent> cg_evt_;
+        bool correct_central_;
+        bool enable_hadr_;
+        unsigned short offset_;
+        bool first_evt_;
+    };
+
     Pythia8Hadroniser::Pythia8Hadroniser( const ParametersList& plist ) :
       GenericHadroniser( plist, "pythia8" ),
       pythia_( new Pythia8::Pythia ), cg_evt_( new Pythia8::CepGenEvent ),
@@ -228,7 +267,7 @@ namespace cepgen
               << "got " << cg_part.integerPdgId() << "!";
           }
         }
-        //--- FIXME check for messed up particles parentage and discard incoming beam particles
+        //--- check for messed up particles parentage and discard incoming beam particles
         /*else if ( p.mother1() > i || p.mother1() <= offset_ )
           continue;
         else if ( p.mother2() > i || p.mother2() <= offset_ )
