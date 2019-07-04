@@ -59,6 +59,7 @@ namespace cepgen
       pythia_->settings.mode( "Beams:frameType", 5 ); // LHEF event readout
       pythia_->settings.mode( "Next:numberCount", 0 ); // remove some of the Pythia output
       pythia_->settings.flag( "ProcessLevel:all", false ); // we do not want Pythia to interfere...
+      pythia_->settings.flag( "Check:event", false );
       pythia_->setLHAupPtr( lhaevt_.get() );
       pythia_->init();
       lhaevt_->initLHEF();
