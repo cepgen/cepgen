@@ -3,6 +3,8 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
+#include <math.h>
+
 #ifdef LIBLHAPDF
 #  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
 #    define LHAPDF_GE_6 1
