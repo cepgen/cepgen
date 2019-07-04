@@ -30,8 +30,7 @@ endforeach()
 
 find_package(ROOT QUIET)
 if(ROOT_FOUND)
-  set(CMAKE_CXX_STANDARD 14)
-  include_directories(${ROOT_INCLUDE_DIR})
+  include_directories(${ROOT_INCLUDE_DIRS})
   link_directories(${ROOT_LIBRARY_DIR})
 
   foreach(exec_src ${executables_root})
