@@ -26,6 +26,7 @@ namespace cepgen
     PythonHandler::PythonHandler( const char* file )
     {
       setenv( "PYTHONPATH", ".:Cards:test:../Cards", 1 );
+      setenv( "PYTHONDONTWRITEBYTECODE", "1", 1 );
       CG_DEBUG( "PythonHandler" )
         << "Python PATH: " << getenv( "PYTHONPATH" ) << ".";
       std::string filename = pythonPath( file );
