@@ -14,24 +14,22 @@
 
 extern "C"
 {
-  /// Get the particle's mass in GeV from the Pythia6 module
+  /// Get the particle's mass in GeV from Pythia
   extern double pymass_( int& );
-  /// Get the resonant particle's width in GeV from the Pythia6 module
-  //extern double pywidt_( int& );
   /// Launch the Pythia6 fragmentation
   extern void pyexec_();
-  /// Set a parameter value to the Pythia6 module
+  /// Set a parameter value to the Pythia module
   extern void pygive_( const char*, int );
   extern void pyckbd_();
   /// List all the particles in the event in a human-readable format
   extern void pylist_( int& );
   /// Join two coloured particles in a colour singlet
   extern void pyjoin_( int&, int& );
-  /// Get a particle's human-readable name from the Pythia6 module
+  /// Get a particle's human-readable name from Pythia
   extern void pyname_( int&, char*, int );
-  /// Get integer-valued event information from the Pythia6 module
+  /// Get integer-valued event information from Pythia
   extern int pyk_( int&, int& );
-  /// Get real-valued event information from the Pythia6 module
+  /// Get real-valued event information from Pythia
   extern double pyp_( int&, int& );
   /// Purely virtual method to call at the end of the run
   void pystop_() { CG_INFO( "Pythia6Hadroniser" ) << "End of run"; }
@@ -56,8 +54,8 @@ namespace cepgen
   namespace hadr
   {
     /**
-     * Full interface to the Pythia6 @cite Sjostrand:2006za algorithm. It can be used in a single particle decay mode as well as a full event hadronisation using the string model, as in Jetset.
-     * @brief Pythia6 hadronisation algorithm
+     * Full interface to the Pythia 6 algorithm. It can be used in a single particle decay mode as well as a full event hadronisation using the string model, as in Jetset.
+     * \brief Pythia 6 hadronisation algorithm
      */
     class Pythia6Hadroniser : public GenericHadroniser
     {
@@ -70,16 +68,15 @@ namespace cepgen
         bool run( Event& ev, double& weight, bool full ) override;
 
         void setCrossSection( double xsec, double xsec_err ) override {}
-        //bool hadronise( const Particle* );
 
       private:
         static constexpr unsigned short MAX_PART_STRING = 3;
         static constexpr unsigned short MAX_STRING_EVENT = 2;
         /// Maximal number of characters to fetch for the particle's name
         static constexpr unsigned short NAME_CHR = 16;
+        static const std::unordered_map<Particle::Status,int> kStatusMatchMap;
 
         inline static double pymass(int pdgid_) { return pymass_(pdgid_); }
-        //inline static double pywidt(int pdgid_) { return pywidt_(pdgid_); }
         inline static void pyckbd() { pyckbd_(); }
         inline static void pygive( const std::string& line ) { pygive_( line.c_str(), line.length() ); }
         inline static void pylist( int mlist ) { pylist_( mlist ); }
@@ -93,17 +90,12 @@ namespace cepgen
           s.erase( remove( s.begin(), s.end(), ' ' ), s.end() );
           return s;
         }
-        /**
-         * \brief Connect entries with colour flow information
-         * \param[in] njoin Number of particles to join in the colour flow
-         * \param[in] ijoin List of particles unique identifier to join in the colour flow
-         */
+        /// Connect entries with colour flow information
+        /// \param[in] njoin Number of particles to join in the colour flow
+        /// \param[in] ijoin List of particles unique identifier to join in the colour flow
         inline static void pyjoin( int njoin, int ijoin[2] ) { return pyjoin_( njoin, *ijoin ); }
         bool prepareHadronisation( Event& );
         std::pair<short,short> pickPartonsContent() const;
-        struct EventProperties
-        {
-        };
         unsigned int fillParticles( const Event& ) const;
     };
 
@@ -111,31 +103,52 @@ namespace cepgen
       GenericHadroniser( plist, "pythia6" )
     {}
 
+    const std::unordered_map<Particle::Status,int>
+    Pythia6Hadroniser::kStatusMatchMap = {
+      { Particle::Status::PrimordialIncoming, 21 },
+      { Particle::Status::FinalState, 1 },
+      { Particle::Status::Unfragmented, 3 },
+      { Particle::Status::Fragmented, 11 },
+      { Particle::Status::Propagator, 11 },
+      { Particle::Status::Incoming, 11 },
+    };
+
     bool
     Pythia6Hadroniser::run( Event& ev, double& weight, bool full )
     {
       weight = 1.;
+
       if ( full )
         prepareHadronisation( ev );
 
-      if ( utils::Logger::get().level >= utils::Logger::Level::debug ) {
-        CG_DEBUG( "Pythia6Hadroniser" ) << "Dump of the event before the hadronisation:";
+      if ( CG_LOG_MATCH( "Pythia6Hadroniser", debug ) ) {
+        CG_DEBUG( "Pythia6Hadroniser" )
+          << "Dump of the event before the hadronisation:";
         ev.dump();
       }
 
       //--- fill Pythia 6 common blocks
-      auto str_in_evt = fillParticles( ev );
+      const unsigned short str_in_evt = fillParticles( ev );
 
-      CG_DEBUG( "Pythia6Hadroniser" )
-        << "Passed the string construction stage.\n\t"
-        << " " << str_in_evt << " string objects were identified and constructed.";
+      if ( CG_LOG_MATCH( "Pythia6Hadroniser", debug ) ) {
+        CG_DEBUG( "Pythia6Hadroniser" )
+          << "Passed the string construction stage.\n\t"
+          << str_in_evt << " string object" << utils::s( str_in_evt )
+          << " identified and constructed.";
+        ev.dump();
+      }
 
-      unsigned int oldnpart = pyjets_.n;
+      const int oldnpart = pyjets_.n;
 
+      //--- run the algorithm
       pyexec_();
 
-      // We filter the first particles already present in the event
-      for ( unsigned int p = oldnpart; p < (unsigned int)pyjets_.n; ++p ) {
+      if ( full && pyjets_.n == oldnpart )
+        return false; // hadronisation failed
+
+      //--- update the event
+      for ( int p = oldnpart; p < pyjets_.n; ++p ) {
+        // filter the first particles already present in the event
         const pdgid_t pdg_id = abs( pyjets_.k[1][p] );
         const short charge = pyjets_.k[1][p]/(short)pdg_id;
         ParticleProperties prop;
@@ -151,18 +164,22 @@ namespace cepgen
             PDG::get().define( prop );
           }
 
+        const unsigned short moth_id = pyjets_.k[2][p]-1;
         const Particle::Role role = pyjets_.k[2][p] != 0
-          ? ev[pyjets_.k[2][p]-1].role() // child particle inherits its mother's role
+          ? ev[moth_id].role() // child particle inherits its mother's role
           : Particle::Role::UnknownRole;
 
         auto& pa = ev.addParticle( role );
         pa.setId( p );
         pa.setPdgId( pdg_id, charge );
-        pa.setStatus( (Particle::Status)pyjets_.k[0][p] );
+        int status = pyjets_.k[0][p];
+        if ( status == 11 )
+          status = -3;
+        pa.setStatus( (Particle::Status)status );
         pa.setMomentum( Particle::Momentum( pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p] ) );
         pa.setMass( pyjets_.p[4][p] );
         if ( role != Particle::Role::UnknownRole ) {
-          auto& moth = ev[pyjets_.k[2][p]-1];
+          auto& moth = ev[moth_id];
           moth.setStatus( role == Particle::Role::CentralSystem
             ? Particle::Status::Resonance
             : Particle::Status::Fragmented );
@@ -200,20 +217,19 @@ namespace cepgen
         //--- singlet
         auto& quark = ev.addParticle( part.role() );
         quark.addMother( ev[part.id()] );
-        quark.setPdgId( partons.first );
-        quark.setStatus( Particle::Status::FinalState );
+        quark.setPdgId( partons.first, +1 );
+        quark.setStatus( Particle::Status::Unfragmented );
         quark.setMomentum( pq.lorentzBoost( part.momentum() ) );
 
         //--- doublet
         auto& diquark = ev.addParticle( part.role() );
         diquark.addMother( ev[part.id()] );
-        diquark.setPdgId( partons.second );
-        diquark.setStatus( Particle::Status::FinalState );
+        diquark.setPdgId( partons.second, +1 );
+        diquark.setStatus( Particle::Status::Unfragmented );
         diquark.setMomentum( pdq.lorentzBoost( part.momentum() ) );
 
         ev[part.id()].setStatus( Particle::Status::Fragmented );
       }
-
       return true;
     }
 
@@ -238,13 +254,18 @@ namespace cepgen
           pyjets_.p[2][np] = part.momentum().pz();
           pyjets_.p[3][np] = part.energy();
           pyjets_.p[4][np] = part.mass();
-          pyjets_.k[0][np] = part.status() <= Particle::Status::Undefined
-            ? 21 // incoming beam
-            : (int)part.status();
+          try {
+            pyjets_.k[0][np] = kStatusMatchMap.at( part.status() );
+          } catch ( const std::out_of_range& ) {
+            throw CG_FATAL( "Pythia6Hadroniser" )
+              << "Failed to retrieve a Pythia 6 particle status translation for "
+              << "CepGen status " << (int)part.status() << "!";
+          }
           pyjets_.k[1][np] = part.integerPdgId();
-          pyjets_.k[2][np] = part.mothers().empty()
+          const auto& moth = part.mothers();
+          pyjets_.k[2][np] = moth.empty()
             ? 0 // no mother
-            : *( part.mothers().begin() )+1; // mother
+            : *moth.begin()+1; // mother
           const auto& daug = part.daughters();
           if ( daug.empty() )
             pyjets_.k[3][np] = pyjets_.k[4][np] = 0; // no daughters
@@ -253,10 +274,10 @@ namespace cepgen
             pyjets_.k[4][np] = *daug.rbegin()+1; // daughter 2
           }
           for ( int i = 0; i < 5; ++i )
-            pyjets_.v[i][np] = 0.;
+            pyjets_.v[i][np] = 0.; // vertex position
 
-          if ( part.status() == Particle::Status::DebugResonance ) {
-            pyjets_.k[0][np] = 1; //FIXME PYTHIA/JETSET workaround
+          if ( part.status() == Particle::Status::Unfragmented ) {
+            pyjets_.k[0][np] = 1; // PYTHIA/JETSET workaround
             jlpsf[str_in_evt][part_in_str++] = part.id()+1;
             num_part_in_str[str_in_evt]++;
             role_has_string = true;
@@ -275,17 +296,17 @@ namespace cepgen
         if ( num_part_in_str[i] < 2 )
           continue;
 
-        std::ostringstream dbg;
-        for ( unsigned short j = 0; j < num_part_in_str[i]; ++j )
-          if ( jlpsf[i][j] != -1 )
-            dbg << Form( "\n\t * %2d (pdgId=%4d)", jlpsf[i][j], pyjets_.k[1][jlpsf[i][j]-1] );
-
-        CG_INFO( "Pythia6Hadroniser" )
-          << "Joining " << num_part_in_str[i] << " particle" << utils::s( num_part_in_str[i] )
-          << " with " << ev[jlpsf[i][0]].role() << " role"
-          << " in a same string (id=" << i << ")"
-          << dbg.str();
-
+        if ( CG_LOG_MATCH( "Pythia6Hadroniser", debug ) ) {
+          std::ostringstream dbg;
+          for ( unsigned short j = 0; j < num_part_in_str[i]; ++j )
+            if ( jlpsf[i][j] != -1 )
+              dbg << Form( "\n\t * %2d (pdgId=%4d)", jlpsf[i][j], pyjets_.k[1][jlpsf[i][j]-1] );
+          CG_DEBUG( "Pythia6Hadroniser" )
+            << "Joining " << num_part_in_str[i] << " particle" << utils::s( num_part_in_str[i] )
+            << " with " << ev[jlpsf[i][0]].role() << " role"
+            << " in a same string (id=" << i << ")"
+            << dbg.str();
+        }
         pyjoin( num_part_in_str[i], jlpsf[i] );
       }
       return str_in_evt;
