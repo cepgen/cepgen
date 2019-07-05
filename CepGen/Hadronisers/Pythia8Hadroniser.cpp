@@ -55,6 +55,7 @@ namespace cepgen
         std::unique_ptr<Pythia8::Pythia> pythia_;
         std::unique_ptr<Pythia8::CepGenEvent> cg_evt_;
         bool correct_central_;
+        bool res_decay_;
         bool enable_hadr_;
         unsigned short offset_;
         bool first_evt_;
@@ -64,7 +65,8 @@ namespace cepgen
       GenericHadroniser( plist, "pythia8" ),
       pythia_( new Pythia8::Pythia ), cg_evt_( new Pythia8::CepGenEvent ),
       correct_central_( plist.get<bool>( "correctCentralSystem", false ) ),
-      enable_hadr_( false ), offset_( 0 ), first_evt_( true )
+      res_decay_( true ), enable_hadr_( false ),
+      offset_( 0 ), first_evt_( true )
     {}
 
     void
@@ -97,6 +99,7 @@ namespace cepgen
     void
     Pythia8Hadroniser::init()
     {
+      pythia_->settings.flag( "ProcessLevel:resonanceDecays", res_decay_ );
       if ( pythia_->settings.flag( "ProcessLevel:all" ) != enable_hadr_ )
         pythia_->settings.flag( "ProcessLevel:all", enable_hadr_ );
 
@@ -131,7 +134,7 @@ namespace cepgen
         << "The proton remnants output might hence be wrong.\n\t"
         << "Please update the Pythia version or disable this part.";
 #endif
-      if ( correct_central_ && pythia_->settings.flag( "ProcessLevel:resonanceDecays" ) )
+      if ( correct_central_ && res_decay_ )
         CG_WARNING( "Pythia8Hadroniser" )
           << "Central system's kinematics correction enabled while resonances are\n\t"
           << "expected to be decayed. Please check that this is fully intended.";
@@ -155,9 +158,12 @@ namespace cepgen
       weight = 1.;
 
       //--- only launch Pythia if:
-      // 1) the full event kinematics (i.e. with remnants) is to be specified, or
-      // 2) the resonances are to be decayed.
-      if ( !full && !pythia_->settings.flag( "ProcessLevel:resonanceDecays" ) )
+      // 1) the full event kinematics (i.e. with remnants) is to be specified,
+      // 2) the remnants are to be fragmented, or
+      // 3) the resonances are to be decayed.
+      if ( full && !remn_fragm_ && !res_decay_ )
+        return true;
+      if ( !full && !res_decay_ )
         return true;
 
       //--- switch full <-> partial event
@@ -226,7 +232,7 @@ namespace cepgen
         };
         PDG::get().define( prop );
       }
-      op.setPdgId( pdg_id, (short)( py_part.charge()/fabs( py_part.charge() ) ) );
+      op.setPdgId( (short)py_part.id() );
       op.setStatus( py_part.isFinal()
         ? Particle::Status::FinalState
         : (Particle::Role)role == Particle::Role::CentralSystem
@@ -257,7 +263,7 @@ namespace cepgen
           }
           //--- resonance decayed; apply branching ratio for this decay
           if ( cg_part.role() == Particle::CentralSystem && p.status() < 0 ) {
-            if ( pythia_->settings.flag( "ProcessLevel:resonanceDecays" ) )
+            if ( res_decay_ )
               weight *= p.particleDataEntry().pickChannel().bRatio();
             cg_part.setStatus( Particle::Status::Resonance );
             central_parts.emplace_back( i );

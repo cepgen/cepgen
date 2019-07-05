@@ -65,6 +65,8 @@ namespace cepgen
         /// Maximal number of trials for the hadronisation of the proton(s) remnants
         unsigned short max_trials_;
         const Parameters* params_; // not owning
+        /// Switch on/off the remnants fragmentation where applicable
+        const bool remn_fragm_;
     };
   }
 }

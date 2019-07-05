@@ -128,7 +128,8 @@ namespace cepgen
     {
       weight = 1.;
 
-      if ( full )
+      //--- only prepare remnants for fragmentation in full (event builder) mode
+      if ( full && remn_fragm_ )
         prepareHadronisation( ev );
 
       if ( CG_LOG_MATCH( "Pythia6Hadroniser:dump", debug ) ) {
@@ -157,7 +158,6 @@ namespace cepgen
       for ( int p = old_npart; p < pyjets_.n; ++p ) {
         // filter the first particles already present in the event
         const pdgid_t pdg_id = abs( pyjets_.k[1][p] );
-        const short charge = pyjets_.k[1][p]/(short)pdg_id;
         ParticleProperties prop;
         if ( full )
           try { prop = PDG::get()( pdg_id ); } catch ( const Exception& ) {
@@ -178,7 +178,7 @@ namespace cepgen
 
         auto& pa = ev.addParticle( role );
         pa.setId( p );
-        pa.setPdgId( pdg_id, charge );
+        pa.setPdgId( (short)pyjets_.k[1][p] );
         int status = pyjets_.k[0][p];
         if ( status == 11 || status == 14 )
           status = -3;

@@ -9,6 +9,7 @@ from Config.Integration.vegas_cff import integrator
 #from Config.Hadronisation.pythia6Defaults_cfi import WDecayToEMu
 #hadroniser.wDecays = WDecayToEMu
 #hadroniser.processConfiguration += ('wDecays',)
+#hadroniser.remnantsFragmentation = False
 #--------------------------------------------------------------------
 # Pythia 8 example (with fully leptonic WW decay)
 #--------------------------------------------------------------------
