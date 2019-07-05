@@ -336,7 +336,7 @@ namespace cepgen
     // ...
     double sum = 0., sum2 = 0., sum2p = 0.;
 
-    utils::ProgressBar prog_bar( grid_->size() );
+    utils::ProgressBar prog_bar( grid_->size(), 5 );
 
     //--- main loop
     for ( unsigned int i = 0; i < grid_->size(); ++i ) {

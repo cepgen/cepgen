@@ -52,8 +52,8 @@ process = kt.process.clone('pptoww',
             24: cepgen.Parameters(pt = (0.,)), # no pt cut on Ws
             # cuts on the W decay products
             # (mimicking LHC-like experimental cuts)
-            11: cepgen.Parameters(pt = (20.,), eta = (-2.5, 2.5)),
-            13: cepgen.Parameters(pt = (20.,), eta = (-2.5, 2.5))
+            #11: cepgen.Parameters(pt = (20.,), eta = (-2.5, 2.5)),
+            #13: cepgen.Parameters(pt = (20.,), eta = (-2.5, 2.5))
         },
         #xi = (0.02, 0.15),
     )

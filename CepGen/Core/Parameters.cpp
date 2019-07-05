@@ -203,7 +203,9 @@ namespace cepgen
         << std::setfill( '-' ) << std::setw( wb+6 )
         << ( pretty ? boldify( " Hadronisation algorithm " ) : "Hadronisation algorithm" ) << std::setfill( ' ' ) << "\n\n"
         << std::setw( wt ) << "Name"
-        << ( pretty ? boldify( param->hadroniser_->name().c_str() ) : param->hadroniser_->name() ) << "\n";
+        << ( pretty ? boldify( param->hadroniser_->name().c_str() ) : param->hadroniser_->name() ) << "\n"
+        << std::setw( wt ) << "Remnants fragmentation? "
+        << ( pretty ? yesno( param->hadroniser_->fragmentRemnants() ) : std::to_string( param->hadroniser_->fragmentRemnants() ) ) << "\n";
     }
     os
       << "\n"

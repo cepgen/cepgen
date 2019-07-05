@@ -53,6 +53,8 @@ namespace cepgen
         /// \brief Specify a random numbers generator seed for the hadroniser
         /// \param[in] seed A RNG seed
         void setSeed( long long seed ) { seed_ = seed; }
+        /// Specify whether the beam remnants are to be fragmented
+        bool fragmentRemnants() const { return remn_fragm_; }
 
         /// Return a human-readable name for this hadroniser
         std::string name() const;
