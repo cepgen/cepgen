@@ -214,7 +214,19 @@ namespace cepgen
     Pythia8Hadroniser::addParticle( Event& ev, const Pythia8::Particle& py_part, const Pythia8::Vec4& mom, unsigned short role ) const
     {
       Particle& op = ev.addParticle( (Particle::Role)role );
-      op.setPdgId( (pdgid_t)abs( py_part.id() ), (short)( py_part.charge()/fabs( py_part.charge() ) ) );
+      ParticleProperties prop;
+      const pdgid_t pdg_id = abs( py_part.id() );
+      try { prop = PDG::get()( pdg_id ); } catch ( const Exception& ) {
+        prop = ParticleProperties{ pdg_id,
+          py_part.name(), py_part.name(),
+          (short)py_part.col(), // colour factor
+          py_part.m0(), py_part.mWidth(),
+          (short)py_part.charge(), // charge
+          py_part.isLepton()
+        };
+        PDG::get().define( prop );
+      }
+      op.setPdgId( pdg_id, (short)( py_part.charge()/fabs( py_part.charge() ) ) );
       op.setStatus( py_part.isFinal()
         ? Particle::Status::FinalState
         : (Particle::Role)role == Particle::Role::CentralSystem

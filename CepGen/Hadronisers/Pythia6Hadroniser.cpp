@@ -254,42 +254,43 @@ namespace cepgen
         unsigned int part_in_str = 0;
         bool role_has_string = false;
         for ( const auto& part : ev[role] ) {
-          pyjets_.p[0][pyjets_.n] = part.momentum().px();
-          pyjets_.p[1][pyjets_.n] = part.momentum().py();
-          pyjets_.p[2][pyjets_.n] = part.momentum().pz();
-          pyjets_.p[3][pyjets_.n] = part.energy();
-          pyjets_.p[4][pyjets_.n] = part.mass();
+          const unsigned short i = part.id();
+          pyjets_.p[0][i] = part.momentum().px();
+          pyjets_.p[1][i] = part.momentum().py();
+          pyjets_.p[2][i] = part.momentum().pz();
+          pyjets_.p[3][i] = part.energy();
+          pyjets_.p[4][i] = part.mass();
           try {
-            pyjets_.k[0][pyjets_.n] = kStatusMatchMap.at( part.status() );
+            pyjets_.k[0][i] = kStatusMatchMap.at( part.status() );
           } catch ( const std::out_of_range& ) {
             ev.dump();
             throw CG_FATAL( "Pythia6Hadroniser" )
               << "Failed to retrieve a Pythia 6 particle status translation for "
               << "CepGen status " << (int)part.status() << "!";
           }
-          pyjets_.k[1][pyjets_.n] = part.integerPdgId();
+          pyjets_.k[1][i] = part.integerPdgId();
           const auto& moth = part.mothers();
-          pyjets_.k[2][pyjets_.n] = moth.empty()
+          pyjets_.k[2][i] = moth.empty()
             ? 0 // no mother
             : *moth.begin()+1; // mother
           const auto& daug = part.daughters();
           if ( daug.empty() ) // no daughters
-            pyjets_.k[3][pyjets_.n] = pyjets_.k[4][pyjets_.n] = 0;
+            pyjets_.k[3][i] = pyjets_.k[4][i] = 0;
           else {
-            pyjets_.k[3][pyjets_.n] = *daug.begin()+1; // daughter 1
-            pyjets_.k[4][pyjets_.n] = *daug.rbegin()+1; // daughter 2
+            pyjets_.k[3][i] = *daug.begin()+1; // daughter 1
+            pyjets_.k[4][i] = *daug.rbegin()+1; // daughter 2
           }
           for ( int i = 0; i < 5; ++i )
-            pyjets_.v[i][pyjets_.n] = 0.; // vertex position
+            pyjets_.v[i][i] = 0.; // vertex position
 
           if ( part.status() == Particle::Status::Unfragmented ) {
-            pyjets_.k[0][pyjets_.n] = 1; // PYTHIA/JETSET workaround
+            pyjets_.k[0][i] = 1; // PYTHIA/JETSET workaround
             jlpsf[str_in_evt][part_in_str++] = part.id()+1;
             num_part_in_str[str_in_evt]++;
             role_has_string = true;
           }
           else if ( part.status() == Particle::Status::Undecayed )
-            pyjets_.k[0][pyjets_.n] = 2; // intermediate resonance
+            pyjets_.k[0][i] = 2; // intermediate resonance
           pyjets_.n++;
         }
         //--- at most one string per role
