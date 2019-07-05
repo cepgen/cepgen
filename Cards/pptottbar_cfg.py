@@ -4,8 +4,6 @@ from Config.Integration.vegas_cff import integrator
 #from Config.Hadronisation.pythia6_cff import pythia6 as hadroniser
 #from Config.Hadronisation.pythia8_cff import pythia8 as hadroniser
 from Config.PDG_cfi import PDG
-#from Config.logger_cfi import logger
-#logger.enabledModules += ('PPtoFF.prepare',)
 
 process = kt.process.clone('pptoff',
     processParameters = cepgen.Parameters(

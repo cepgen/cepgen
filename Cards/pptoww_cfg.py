@@ -1,5 +1,8 @@
 import Config.Core as cepgen
 from Config.Integration.vegas_cff import integrator
+#--------------------------------------------------------------------
+# Logging/debugging example
+#--------------------------------------------------------------------
 #from Config.logger_cfi import logger
 #logger.enabledModules += ('Hadroniser.configure', 'Generator.*',)
 #--------------------------------------------------------------------
@@ -49,7 +52,7 @@ process = kt.process.clone('pptoww',
         #--- cuts on single particles' level
         cuts = {
             # cuts on the single W level
-            24: cepgen.Parameters(pt = (0.,)), # no pt cut on Ws
+            #24: cepgen.Parameters(pt = (0.,)), # no pt cut on Ws
             # cuts on the W decay products
             # (mimicking LHC-like experimental cuts)
             #11: cepgen.Parameters(pt = (20.,), eta = (-2.5, 2.5)),

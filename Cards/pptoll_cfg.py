@@ -5,7 +5,7 @@ from Config.Integration.vegas_cff import integrator
 #from Config.Hadronisation.pythia8_cff import pythia8 as hadroniser
 from Config.PDG_cfi import PDG, registerParticle
 
-#--- auxiliary particles definition
+#--- example of an auxiliary particles definition
 #registerParticle(1000001, 'sd_l', mass=100., charge=1., fermion=True)
 
 process = kt.process.clone('pptoll',
@@ -32,7 +32,6 @@ process = kt.process.clone('pptoll',
         #dely = (4., 5.),
     ),
 )
-#print PDG
 
 #--- events generation
 from Config.generator_cff import generator
