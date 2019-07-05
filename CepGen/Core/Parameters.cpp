@@ -243,7 +243,7 @@ namespace cepgen
     if ( param->kinematics.cuts.central_particles.size() > 0 ) {
       os << std::setw( wt ) << ( pretty ? boldify( ">>> per-particle cuts:" ) : ">>> per-particle cuts:" ) << "\n";
       for ( const auto& part_per_lim : param->kinematics.cuts.central_particles ) {
-        os << " * all single " << std::setw( wt-3 ) << part_per_lim.first << "\n";
+        os << " * all single " << std::setw( wt-3 ) << PDG::get().name( part_per_lim.first ) << "\n";
         for ( const auto& lim : part_per_lim.second.list() )
           if ( lim.second.valid() )
             os << "   - " << std::setw( wt-5 ) << lim.first << lim.second << "\n";
