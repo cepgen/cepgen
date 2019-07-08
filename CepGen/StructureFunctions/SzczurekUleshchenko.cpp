@@ -8,7 +8,9 @@ namespace cepgen
   namespace strfun
   {
     SzczurekUleshchenko::SzczurekUleshchenko( const ParametersList& params ) :
-      Parameterisation( params ), F1( 0. )
+      Parameterisation( params ),
+      q2_shift_( params.get<double>( "q2shift", 0.8 ) ),
+      F1( 0. )
     {}
 
     SzczurekUleshchenko&
@@ -24,7 +26,7 @@ namespace cepgen
         return *this;
       old_vals_ = nv;
 
-      float amu2 = q2+Q2_SHIFT; // shift the overall scale
+      float amu2 = q2+q2_shift_; // shift the overall scale
       float xuv, xdv, xus, xds, xss, xg;
       float xbj_arg = xbj;
 

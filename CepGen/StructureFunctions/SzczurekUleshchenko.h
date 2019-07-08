@@ -22,7 +22,8 @@ namespace cepgen
         double F1;
 
       private:
-        static constexpr float Q2_SHIFT = 0.8;
+        /// \f$Q^2\f$ scale shift
+        const float q2_shift_;
     };
   }
 }
