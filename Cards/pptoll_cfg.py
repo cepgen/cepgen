@@ -1,18 +1,19 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
 from Config.Integration.vegas_cff import integrator
+#from Config.Hadronisation.pythia6_cff import pythia6 as hadroniser
 #from Config.Hadronisation.pythia8_cff import pythia8 as hadroniser
 from Config.PDG_cfi import PDG, registerParticle
 
-#--- auxiliary particles definition
-registerParticle(1000001, 'sd_l', mass=100., charge=1., fermion=True)
+#--- example of an auxiliary particles definition
+#registerParticle(1000001, 'sd_l', mass=100., charge=1., fermion=True)
 
 process = kt.process.clone('pptoll',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.InelasticElastic,
-        #pair = PDG.muon,
-        pair = PDG.sd_l,
+        pair = PDG.muon,
         #pair = PDG.up,
+        #pair = PDG.sd_l, # whatever was defined above as "new" particle
     ),
     inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),
@@ -31,7 +32,6 @@ process = kt.process.clone('pptoll',
         #dely = (4., 5.),
     ),
 )
-#print PDG
 
 #--- events generation
 from Config.generator_cff import generator

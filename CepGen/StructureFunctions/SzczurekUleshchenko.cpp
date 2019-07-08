@@ -1,14 +1,36 @@
-#include "CepGen/StructureFunctions/SzczurekUleshchenko.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
+
+extern "C"
+{
+  extern void grv95lo_( float&, float&, float&, float&, float&, float&, float&, float& );
+}
 
 namespace cepgen
 {
   namespace strfun
   {
+    /// Szcurek and Uleshchenko modelling of \f$F_{1,2}\f$ \cite Szczurek:1999wp
+    class SzczurekUleshchenko : public Parameterisation
+    {
+      public:
+        SzczurekUleshchenko( const ParametersList& params = ParametersList() );
+        SzczurekUleshchenko& operator()( double xbj, double q2 ) override;
+
+      private:
+        /// \f$Q^2\f$ scale shift
+        const float q2_shift_;
+
+      public:
+        double F1;
+    };
+
     SzczurekUleshchenko::SzczurekUleshchenko( const ParametersList& params ) :
-      Parameterisation( params ), F1( 0. )
+      Parameterisation( params ),
+      q2_shift_( params.get<double>( "q2shift", 0.8 ) ),
+      F1( 0. )
     {}
 
     SzczurekUleshchenko&
@@ -24,7 +46,7 @@ namespace cepgen
         return *this;
       old_vals_ = nv;
 
-      float amu2 = q2+Q2_SHIFT; // shift the overall scale
+      float amu2 = q2+q2_shift_; // shift the overall scale
       float xuv, xdv, xus, xds, xss, xg;
       float xbj_arg = xbj;
 

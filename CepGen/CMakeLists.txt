@@ -25,6 +25,37 @@ if(alphas_sources)
 endif()
 
 set(addons_libraries "")
+set(strf_libraries ${GSL_LIB} ${GSL_CBLAS_LIB})
+
+#--- linking with LHAPDF
+
+if(LHAPDF)
+  message(STATUS "LHAPDF found in ${LHAPDF}")
+  list(APPEND strf_libraries ${LHAPDF})
+  include_directories(${LHAPDF_INCLUDE})
+else()
+  file(GLOB partonic_sf StructureFunctions/Partonic.cpp)
+  list(REMOVE_ITEM sf_sources ${partonic_sf})
+endif()
+
+#--- linking with Pythia 6
+
+if(PYTHIA6)
+  message(STATUS "Pythia 6 found in ${PYTHIA6}")
+  list(APPEND hadr_sources "Hadronisers/Pythia6Hadroniser.cpp")
+  list(APPEND addons_libraries ${PYTHIA6})
+  if(PYTHIA6DUMMY)
+    message(STATUS "Pythia 6 addons found in ${PYTHIA6DUMMY}")
+    list(APPEND addons_libraries ${PYTHIA6DUMMY})
+  endif()
+elseif(EXISTS $ENV{PYTHIA6_SRC})
+  file(GLOB pythia6_src $ENV{PYTHIA6_SRC})
+  message(STATUS "Pythia 6 source found in ${pythia6_src}")
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wno-tabs -Wno-maybe-uninitialized -Wno-integer-division -Wno-unused-variable -Wno-unused-dummy-argument")
+  add_library(pythia6 SHARED ${pythia6_src})
+  list(APPEND hadr_sources "Hadronisers/Pythia6Hadroniser.cpp")
+  list(APPEND addons_libraries pythia6)
+endif()
 
 #--- linking with Pythia 8
 
@@ -35,7 +66,7 @@ if(PYTHIA8)
   include_directories(${PYTHIA8_INCLUDE})
   add_definitions(-DPYTHIA8)
   list(APPEND hadr_sources "Hadronisers/Pythia8Hadroniser.cpp")
-  list(APPEND hadr_sources "Hadronisers/PythiaEventInterface.cpp")
+  list(APPEND io_sources "IO/PythiaEventInterface.cpp")
   list(APPEND io_sources "IO/LHEFPythiaHandler.cpp")
   list(APPEND addons_libraries ${PYTHIA8} dl)
 endif()
@@ -66,7 +97,7 @@ endif()
 
 add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${sf_sources})
 target_link_libraries(CepGenCore ${CEPGEN_EXTERNAL_CORE_REQS})
-target_link_libraries(CepGenCore ${CEPGEN_EXTERNAL_STRF_REQS})
+target_link_libraries(CepGenCore ${strf_libraries})
 
 add_library(CepGenAddOns SHARED ${io_sources} ${hadr_sources})
 target_link_libraries(CepGenAddOns ${addons_libraries})

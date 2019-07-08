@@ -336,6 +336,8 @@ namespace cepgen
     // ...
     double sum = 0., sum2 = 0., sum2p = 0.;
 
+    utils::ProgressBar prog_bar( grid_->size(), 5 );
+
     //--- main loop
     for ( unsigned int i = 0; i < grid_->size(); ++i ) {
       double fsum = 0., fsum2 = 0.;
@@ -364,6 +366,7 @@ namespace cepgen
           << "fmax = " << grid_->maxValue( i ) << "\n\t"
           << "eff  = " << eff;
       }
+      prog_bar.update( i+1 );
     } // end of main loop
 
     const double inv_max = 1./grid_->size();
