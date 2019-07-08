@@ -48,7 +48,7 @@ namespace cepgen
 #ifdef LHAPDF_GE_6
       try {
         //--- check if PDF code is set
-        if ( pdf_code_ != 0l ) {
+        if ( pdf_code_ != 0 ) {
           auto pdf = LHAPDF::lookupPDF( pdf_code_ );
           if ( pdf.second != 0 )
             throw CG_FATAL( "Partonic" ) << "Failed to retrieve PDFset with id=" << pdf_code_ << "!";
@@ -67,8 +67,8 @@ namespace cepgen
           << e.what();
       }
 #else
-      if ( pdf_code_ != 0l )
-        LHAPDF::initPDFSet( (int)pdf_code_, pdf_member_ );
+      if ( pdf_code_ != 0 )
+        LHAPDF::initPDFSet( pdf_code_, pdf_member_ );
       else
         LHAPDF::initPDFSet( pdf_set_, LHAPDF::LHGRID, pdf_member_ );
       lhapdf_version = LHAPDF::getVersion();
@@ -151,9 +151,12 @@ namespace cepgen
   operator<<( std::ostream& os, const strfun::Partonic::Mode& mode )
   {
     switch ( mode ) {
-      case strfun::Partonic::Mode::full: return os << "all quarks";
-      case strfun::Partonic::Mode::valence: return os << "valence quarks";
-      case strfun::Partonic::Mode::sea: return os << "sea quarks";
+      case strfun::Partonic::Mode::full:
+        return os << "all quarks";
+      case strfun::Partonic::Mode::valence:
+        return os << "valence quarks";
+      case strfun::Partonic::Mode::sea:
+        return os << "sea quarks";
     }
     return os;
   }

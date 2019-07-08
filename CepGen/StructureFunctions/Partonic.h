@@ -31,9 +31,9 @@ namespace cepgen
         /// Number of quark flavours considered in the SF building
         unsigned short num_flavours_;
         /// Integer-type PDF identifier (if no string version is provided)
-        unsigned long pdf_code_;
+        int pdf_code_;
         /// PDF set used
-        unsigned short pdf_member_;
+        int pdf_member_;
         /// Quarks types considered in the SF building
         Mode mode_;
         bool initialised_;
