@@ -13,7 +13,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 #----- include external paths
 
 set(CEPGEN_EXTERNAL_CORE_REQS "")
-set(CEPGEN_EXTERNAL_STRF_REQS "")
 include(UseEnvironment)
 
 set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/CepGen)

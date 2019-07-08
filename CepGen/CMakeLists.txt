@@ -25,6 +25,18 @@ if(alphas_sources)
 endif()
 
 set(addons_libraries "")
+set(strf_libraries ${GSL_LIB} ${GSL_CBLAS_LIB})
+
+#--- linking with LHAPDF
+
+if(LHAPDF)
+  message(STATUS "LHAPDF found in ${LHAPDF}")
+  list(APPEND strf_libraries ${LHAPDF})
+  include_directories(${LHAPDF_INCLUDE})
+else()
+  file(GLOB partonic_sf StructureFunctions/Partonic.cpp)
+  list(REMOVE_ITEM sf_sources ${partonic_sf})
+endif()
 
 #--- linking with Pythia 6
 
@@ -85,7 +97,7 @@ endif()
 
 add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${sf_sources})
 target_link_libraries(CepGenCore ${CEPGEN_EXTERNAL_CORE_REQS})
-target_link_libraries(CepGenCore ${CEPGEN_EXTERNAL_STRF_REQS})
+target_link_libraries(CepGenCore ${strf_libraries})
 
 add_library(CepGenAddOns SHARED ${io_sources} ${hadr_sources})
 target_link_libraries(CepGenAddOns ${addons_libraries})

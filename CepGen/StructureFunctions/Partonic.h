@@ -3,9 +3,7 @@
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
-#ifdef LIBLHAPDF
 #include "LHAPDF/LHAPDF.h"
-#endif
 
 #include <array>
 
@@ -40,11 +38,9 @@ namespace cepgen
         Mode mode_;
         bool initialised_;
 
-#ifdef LIBLHAPDF
-#  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION >= 6
+#if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION >= 6
         LHAPDF::PDFSet lha_pdf_set_;
         std::vector<std::unique_ptr<LHAPDF::PDF> > pdfs_;
-#  endif
 #endif
         static constexpr std::array<short,6> QUARK_PDGS = { { 1, 2, 3, 4, 5, 6 } };
         static constexpr std::array<short,6> Q_TIMES_3 = { {

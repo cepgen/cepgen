@@ -60,7 +60,7 @@ namespace cepgen
     class Pythia6Hadroniser : public GenericHadroniser
     {
       public:
-        Pythia6Hadroniser( const ParametersList& );
+        explicit Pythia6Hadroniser( const ParametersList& );
 
         void setParameters( const Parameters& ) override {}
         inline void readString( const char* param ) override { pygive( param ); }
@@ -280,8 +280,8 @@ namespace cepgen
             pyjets_.k[3][i] = *daug.begin()+1; // daughter 1
             pyjets_.k[4][i] = *daug.rbegin()+1; // daughter 2
           }
-          for ( int i = 0; i < 5; ++i )
-            pyjets_.v[i][i] = 0.; // vertex position
+          for ( int j = 0; j < 5; ++j )
+            pyjets_.v[j][i] = 0.; // vertex position
 
           if ( part.status() == Particle::Status::Unfragmented ) {
             pyjets_.k[0][i] = 1; // PYTHIA/JETSET workaround

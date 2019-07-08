@@ -57,7 +57,7 @@ namespace cepgen
     {
       public:
         /// Class constructor
-        HepMCHandler( const ParametersList& );
+        explicit HepMCHandler( const ParametersList& );
         void initialise( const Parameters& /*params*/ ) override;
         /// Writer operator
         void operator<<( const Event& ) override;
