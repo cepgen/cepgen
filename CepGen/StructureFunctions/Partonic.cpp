@@ -166,3 +166,4 @@ namespace cepgen
 #  undef LHAPDF_GE_6
 #endif
 
+REGISTER_STRFUN( Partonic, strfun::Partonic )

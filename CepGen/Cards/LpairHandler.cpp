@@ -71,7 +71,7 @@ namespace cepgen
       else if ( str_fun_ == (int)strfun::Type::MSTWgrid )
         sf_params
           .set<std::string>( "gridPath", mstw_grid_path_ );
-      params_.kinematics.structure_functions = strfun::Parameterisation::build( sf_params );
+      params_.kinematics.structure_functions = strfun::StructureFunctionsHandler::get().build( sf_params );
 
       //--- parse the integration algorithm name
       if ( integr_type_ == "plain" )

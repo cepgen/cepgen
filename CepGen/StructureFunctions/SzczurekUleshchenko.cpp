@@ -50,3 +50,5 @@ namespace cepgen
     }
   }
 }
+
+REGISTER_STRFUN( SzczurekUleshchenko, strfun::SzczurekUleshchenko )

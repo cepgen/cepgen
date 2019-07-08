@@ -11,6 +11,8 @@ namespace mstw
   class Grid : public cepgen::strfun::Parameterisation, private cepgen::GridHandler<2,2>
   {
     public:
+      Grid( const cepgen::ParametersList& params = cepgen::ParametersList() );
+
       /// Grid header information as parsed from the file
       struct header_t
       {
@@ -33,13 +35,6 @@ namespace mstw
         double f2; ///< Transverse structure function value
         double fl; ///< Longitudinal structure function value
       };
-      static constexpr const char* DEFAULT_MSTW_GRID_PATH = "External/mstw_sf_scan_nnlo.dat";
-
-    public:
-      /// Retrieve the grid interpolator (singleton)
-      static std::shared_ptr<Grid> get( const char* path = DEFAULT_MSTW_GRID_PATH );
-      /// Retrieve the grid interpolator (singleton)
-      static std::shared_ptr<Grid> get( const cepgen::ParametersList& params = cepgen::ParametersList() );
 
       /// Compute the structure functions at a given \f$Q^2/x_{\rm Bj}\f$
       Grid& operator()( double xbj, double q2 ) override;
@@ -51,15 +46,11 @@ namespace mstw
       Grid& computeFL( double xbj, double q2 ) override { return *this; }
       Grid& computeFL( double xbj, double q2, double r ) override { return *this; }
 
-    public:
-      Grid( const Grid& ) = delete;
-      void operator=( const GridHandler& ) = delete;
+      static constexpr const char* DEFAULT_MSTW_GRID_PATH = "External/mstw_sf_scan_nnlo.dat";
 
     private:
-      explicit Grid( const cepgen::ParametersList& = cepgen::ParametersList() );
       std::string description() const override;
       static constexpr unsigned int GOOD_MAGIC = 0x5754534d; // MSTW in ASCII
-      static std::shared_ptr<Grid> singl_;
 
       header_t header_;
   };

@@ -52,3 +52,5 @@ namespace cepgen
     }
   }
 }
+
+REGISTER_STRFUN( BlockDurandHa, strfun::BlockDurandHa )

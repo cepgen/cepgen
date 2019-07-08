@@ -9,26 +9,6 @@
 
 namespace mstw
 {
-  std::shared_ptr<Grid> Grid::singl_;
-
-  std::shared_ptr<Grid>
-  Grid::get( const char* filename )
-  {
-    if ( !singl_ )
-      singl_.reset( new Grid( cepgen::ParametersList()
-        .set<int>( "id", (int)cepgen::strfun::Type::MSTWgrid )
-        .set<std::string>( "gridPath", filename ) ) );
-    return singl_;
-  }
-
-  std::shared_ptr<Grid>
-  Grid::get( const cepgen::ParametersList& params )
-  {
-    if ( !singl_ )
-      singl_.reset( new Grid( params ) );
-    return singl_;
-  }
-
   Grid::Grid( const cepgen::ParametersList& params ) :
     cepgen::strfun::Parameterisation( params ),
     cepgen::GridHandler<2,2>( cepgen::GridType::logarithmic )
@@ -124,3 +104,5 @@ namespace mstw
     return os;
   }
 }
+
+REGISTER_STRFUN( MSTWgrid, mstw::Grid )
