@@ -81,7 +81,7 @@ namespace cepgen
         std::shared_ptr<sigrat::Parameterisation> r_ratio_;
     };
     /// A structure functions parameterisations factory
-    typedef ModuleFactory<Parameterisation,Type> StructureFunctionsHandler;
+    typedef ModuleFactory<Parameterisation,int> StructureFunctionsHandler;
   }
   /// Human-readable description of this SF parameterisation type
   std::ostream& operator<<( std::ostream&, const strfun::Type& );
@@ -91,14 +91,14 @@ namespace cepgen
 #define REGISTER_STRFUN( id, obj ) \
   namespace cepgen { \
     struct BUILDERNM( id ) { \
-      BUILDERNM( id )() { strfun::StructureFunctionsHandler::get().registerModule<obj>( strfun::Type::id ); } }; \
+      BUILDERNM( id )() { strfun::StructureFunctionsHandler::get().registerModule<obj>( (int)strfun::Type::id ); } }; \
     static BUILDERNM( id ) g ## id; \
   }
 /// Add a structure functions definition (with its associated default parameters) to the list of handled parameterisation
 #define REGISTER_STRFUN_PARAMS( id, obj, params ) \
   namespace cepgen { \
     struct BUILDERNM( id ) { \
-      BUILDERNM( id )() { strfun::StructureFunctionsHandler::get().registerModule<obj>( strfun::Type::id, params ); } }; \
+      BUILDERNM( id )() { strfun::StructureFunctionsHandler::get().registerModule<obj>( (int)strfun::Type::id, params ); } }; \
     static BUILDERNM( id ) g ## id; \
   }
 
