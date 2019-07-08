@@ -19,11 +19,12 @@ namespace cepgen
         SzczurekUleshchenko( const ParametersList& params = ParametersList() );
         SzczurekUleshchenko& operator()( double xbj, double q2 ) override;
 
-        double F1;
-
       private:
         /// \f$Q^2\f$ scale shift
         const float q2_shift_;
+
+      public:
+        double F1;
     };
   }
 }
