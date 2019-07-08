@@ -15,7 +15,7 @@ extern "C" {
   cepgen_structure_functions_( int& sfmode, double& xbj, double& q2, double& f2, double& fl )
   {
     using namespace cepgen;
-    static auto sf = strfun::StructureFunctionsHandler::get().build( sfmode );
+    static auto sf = strfun::StructureFunctionsHandler::get().build( (strfun::Type)sfmode );
     const auto& val = ( *sf )( xbj, q2 );
     f2 = val.F2;
     fl = val.FL;
@@ -31,7 +31,7 @@ extern "C" {
   cepgen_kt_flux_( int& fmode, double& x, double& kt2, int& sfmode, double& mx )
   {
     using namespace cepgen;
-    static auto sf = strfun::StructureFunctionsHandler::get().build( sfmode );
+    static auto sf = strfun::StructureFunctionsHandler::get().build( (strfun::Type)sfmode );
     return ktFlux( (KTFlux)fmode, x, kt2, *sf, mx );
   }
 
