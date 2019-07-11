@@ -7,17 +7,20 @@
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Processes/FortranKTProcess.h"
 
-#define BUILDERNM( obj ) obj ## Builder
-#define STRINGIFY( name ) #name
+/** \file */
+
+/// Add a generic process definition to the list of handled processes
 #define REGISTER_PROCESS( name, obj ) \
   namespace cepgen { namespace proc { \
     struct BUILDERNM( name ) { \
       BUILDERNM( name )() { ProcessesHandler::get().registerModule<obj>( STRINGIFY( name ) ); } }; \
     static BUILDERNM( name ) g ## name; \
   } }
+/// Declare a Fortran process function name
 #define DECLARE_FORTRAN_FUNCTION( method ) \
   extern "C" { extern double method ## _(); }
 #define PROCESS_F77_NAME( name ) F77_ ## name
+/// Add the Fortran process definition to the list of handled processes
 #define REGISTER_FORTRAN_PROCESS( name, method, description ) \
   struct PROCESS_F77_NAME( name ) : public cepgen::proc::FortranKTProcess { \
     PROCESS_F77_NAME( name )( const cepgen::ParametersList& params = cepgen::ParametersList() ) : \

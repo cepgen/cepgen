@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''@package cepgen
+'''@package Cards
 A collection of tools for Python steering cards definition
 '''
 

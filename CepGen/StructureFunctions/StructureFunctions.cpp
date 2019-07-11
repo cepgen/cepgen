@@ -2,19 +2,16 @@
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/ParticleProperties.h"
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
-#include <iostream>
-
 namespace cepgen
 {
   namespace strfun
   {
-    const double Parameterisation::mp_ = particleproperties::mass( PDG::proton );
+    const double Parameterisation::mp_ = PDG::get().mass( PDG::proton );
     const double Parameterisation::mp2_ = Parameterisation::mp_*Parameterisation::mp_;
 
     Parameterisation::Parameterisation( double f2, double fl ) :
@@ -84,5 +81,29 @@ namespace cepgen
            << "F2 = " << sf.F2 << ", FL = " << sf.FL;
       return os;
     }
+  }
+  /// Human-readable format of a structure function type
+  std::ostream&
+  operator<<( std::ostream& os, const strfun::Type& sf )
+  {
+    switch ( sf ) {
+      case strfun::Type::Invalid:             return os << "[INVALID]";
+      case strfun::Type::Electron:            return os << "electron";
+      case strfun::Type::ElasticProton:       return os << "elastic proton";
+      case strfun::Type::SuriYennie:          return os << "Suri-Yennie";
+      case strfun::Type::SzczurekUleshchenko: return os << "Szczurek-Uleshchenko";
+      case strfun::Type::FioreBrasse:         return os << "Fiore-Brasse";
+      case strfun::Type::ChristyBosted:       return os << "Christy-Bosted";
+      case strfun::Type::CLAS:                return os << "CLAS";
+      case strfun::Type::BlockDurandHa:       return os << "BDH";
+      case strfun::Type::ALLM91:              return os << "ALLM91";
+      case strfun::Type::ALLM97:              return os << "ALLM97";
+      case strfun::Type::GD07p:               return os << "GD07p";
+      case strfun::Type::GD11p:               return os << "GD11p";
+      case strfun::Type::Schaefer:            return os << "LUXlike";
+      case strfun::Type::MSTWgrid:            return os << "MSTW (grid)";
+      case strfun::Type::Partonic:            return os << "Partonic";
+    }
+    return os;
   }
 }

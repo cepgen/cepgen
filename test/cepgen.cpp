@@ -4,46 +4,29 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Core/Exception.h"
 
-//--- necessary include to build the default run
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Processes/ProcessesHandler.h"
-
 #include "AbortHandler.h"
-
-#include <iostream>
 
 using namespace std;
 
-/**
- * Main caller for this MC generator.
- *  * loads the configuration files' variables if passed as an argument,
- *    or a default LPAIR-like configuration,
- *  * launches the cross-section computation and the events generation.
+/** Example executable for CepGen
+ * - loads the steering card variables into the environment,
+ * - launches the cross-section computation and the events generation (if requested).
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
+ * \addtogroup Executables
  */
 int main( int argc, char* argv[] )
 {
+  if ( argc < 2 )
+    throw CG_FATAL( "main" )
+      << "No config file provided!\n\t"
+      << "Usage: " << argv[0] << " config-file";
+
   //--- first start by defining the generator object
   cepgen::Generator gen;
-
-  if ( argc < 2 ) {
-    CG_INFO( "main" ) << "No config file provided. Setting the default parameters.";
-
-    //--- default run: LPAIR elastic ɣɣ → µ⁺µ¯ at 13 TeV
-    cepgen::ParametersList pgen;
-    pgen.set<int>( "pair", (int)cepgen::PDG::muon );
-    gen.parameters->setProcess( cepgen::proc::ProcessesHandler::get().build( "lpair", pgen ) );
-    gen.parameters->kinematics.mode = cepgen::KinematicsMode::ElasticElastic;
-    gen.parameters->kinematics.cuts.central.pt_single.min() = 15.;
-    gen.parameters->kinematics.cuts.central.eta_single = { -2.5, 2.5 };
-    gen.parameters->generation.enabled = true;
-    gen.parameters->generation.maxgen = 1e3;
-  }
-  else
-    gen.setParameters( cepgen::card::Handler::parse( argv[1] ) );
+  gen.setParameters( cepgen::card::Handler::parse( argv[1] ) );
 
   //--- list all parameters
-  CG_LOG( "main" ) << gen.parameters.get();
+  CG_LOG( "main" ) << gen.parametersPtr();
 
   cepgen::utils::AbortHandler ctrl_c;
 
@@ -52,12 +35,12 @@ int main( int argc, char* argv[] )
     double xsec = 0., err = 0.;
     gen.computeXsection( xsec, err );
 
-    if ( gen.parameters->generation.enabled )
+    if ( gen.parameters().generation().enabled )
       //--- events generation starts here
       // (one may use a callback function)
       gen.generate();
   } catch ( const cepgen::utils::RunAbortedException& e ) {
-    CG_INFO( "main" ) << "Run aborted!";
+    CG_DEBUG( "main" ) << "Run aborted!";
   } catch ( const cepgen::Exception& e ) {
     e.dump();
   }

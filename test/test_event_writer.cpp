@@ -1,14 +1,14 @@
-#include "CepGen/IO/HepMCHandler.h"
+#include "CepGen/IO/ExportHandler.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Event/Event.h"
 
 using namespace std;
 using namespace cepgen;
 
-int main() {
-
-  output::HepMCHandler writer( "example.dat" );
-  writer.setCrossSection(1., 2.);
+int main()
+{
+  auto writer = output::ExportHandler::get().build( "hepmc" );
+  writer->setCrossSection( 1., 2. );
 
   Event ev;
 
@@ -24,7 +24,7 @@ int main() {
 
   ev.dump();
 
-  writer << ev;
+  *writer << ev;
 
   return 0;
 }

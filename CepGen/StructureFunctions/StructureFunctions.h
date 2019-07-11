@@ -1,14 +1,13 @@
 #ifndef CepGen_StructureFunctions_StructureFunctions_h
 #define CepGen_StructureFunctions_StructureFunctions_h
 
-#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/ModuleFactory.h"
 
-#include <iostream>
+#include <iosfwd>
 #include <memory>
 
 namespace cepgen
 {
-  class ParametersList;
   namespace sigrat { class Parameterisation; }
   /// Structure functions modelling scope
   namespace strfun
@@ -49,13 +48,10 @@ namespace cepgen
           type = sf.type, F2 = sf.F2, FL = sf.FL, old_vals_ = sf.old_vals_;
           return *this;
         }
-        /// Human-readable description of this SF parameterisation
+        /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
         friend std::ostream& operator<<( std::ostream&, const Parameterisation& );
-
-        /// Build a SF parameterisation for a given type
-        static std::shared_ptr<Parameterisation> build( const ParametersList& );
-        /// Build a SF parameterisation for a given type
-        static std::shared_ptr<Parameterisation> build( const Type& type, const ParametersList& params = ParametersList() );
+        /// Human-readable description of this SF parameterisation
+        virtual std::string description() const; ///< Human-readable description of this SF set
 
         /// Set of parameters used to build this parameterisation
         const ParametersList& parameters() const { return params_; }
@@ -76,7 +72,6 @@ namespace cepgen
         double FL; ///< Last computed longitudinal structure function value
 
       protected:
-        virtual std::string description() const; ///< Human-readable description of this SF set
         static const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
         static const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
         ParametersList params_; ///< List of parameters used for this builder definition
@@ -85,9 +80,26 @@ namespace cepgen
         /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
         std::shared_ptr<sigrat::Parameterisation> r_ratio_;
     };
+    /// A structure functions parameterisations factory
+    typedef ModuleFactory<Parameterisation,int> StructureFunctionsHandler;
   }
   /// Human-readable description of this SF parameterisation type
   std::ostream& operator<<( std::ostream&, const strfun::Type& );
 }
+
+/// Add a structure functions definition to the list of handled parameterisation
+#define REGISTER_STRFUN( id, obj ) \
+  namespace cepgen { \
+    struct BUILDERNM( id ) { \
+      BUILDERNM( id )() { strfun::StructureFunctionsHandler::get().registerModule<obj>( (int)strfun::Type::id ); } }; \
+    static BUILDERNM( id ) g ## id; \
+  }
+/// Add a structure functions definition (with its associated default parameters) to the list of handled parameterisation
+#define REGISTER_STRFUN_PARAMS( id, obj, params ) \
+  namespace cepgen { \
+    struct BUILDERNM( id ) { \
+      BUILDERNM( id )() { strfun::StructureFunctionsHandler::get().registerModule<obj>( (int)strfun::Type::id, params ); } }; \
+    static BUILDERNM( id ) g ## id; \
+  }
 
 #endif

@@ -15,7 +15,7 @@ namespace cepgen
 {
   namespace proc
   {
-    const double PPtoWW::mw_ = particleproperties::mass( PDG::W );
+    const double PPtoWW::mw_ = PDG::get().mass( PDG::W );
     const double PPtoWW::mw2_ = PPtoWW::mw_*PPtoWW::mw_;
 
     PPtoWW::PPtoWW( const ParametersList& params ) :
@@ -68,7 +68,7 @@ namespace cepgen
       const double ptdiffx = pt_diff_*cos( phi_pt_diff_ ),
                    ptdiffy = pt_diff_*sin( phi_pt_diff_ );
 
-      // Outgoing leptons
+      //--- outgoing Ws
       const double pt1x = ( ptsumx+ptdiffx )*0.5, pt1y = ( ptsumy+ptdiffy )*0.5, pt1 = std::hypot( pt1x, pt1y ),
                    pt2x = ( ptsumx-ptdiffx )*0.5, pt2y = ( ptsumy-ptdiffy )*0.5, pt2 = std::hypot( pt2x, pt2y );
 
@@ -79,9 +79,8 @@ namespace cepgen
           return 0.;
       }
 
-      // transverse mass for the two leptons
-      const double amt1 = sqrt( pt1*pt1+mw2_ ),
-                   amt2 = sqrt( pt2*pt2+mw2_ );
+      //--- transverse mass for the two Ws
+      const double amt1 = std::hypot( pt1, mw_ ), amt2 = std::hypot( pt2, mw_ );
 
       //=================================================================
       //     a window in two-boson invariant mass
@@ -130,11 +129,10 @@ namespace cepgen
       if ( x1 > 1. || x2 > 1. )
         return 0.; // sanity check
 
-      // FIXME FIXME FIXME
-      const double ak10 = event_->getOneByRole( Particle::IncomingBeam1 ).energy(),
-                   ak1z = event_->getOneByRole( Particle::IncomingBeam1 ).momentum().pz(),
-                   ak20 = event_->getOneByRole( Particle::IncomingBeam2 ).energy(),
-                   ak2z = event_->getOneByRole( Particle::IncomingBeam2 ).momentum().pz();
+      const auto& ib1 = event_->getOneByRole( Particle::IncomingBeam1 ),
+                 &ib2 = event_->getOneByRole( Particle::IncomingBeam2 );
+      const double ak10 = ib1.energy(), ak1z = ib1.momentum().pz(),
+                   ak20 = ib2.energy(), ak2z = ib2.momentum().pz();
       CG_DEBUG_LOOP( "PPtoWW:incoming" )
         << "incoming particles: p1: " << ak1z << " / " << ak10 << "\n\t"
         << "                    p2: " << ak2z << " / " << ak20 << ".";
@@ -287,10 +285,10 @@ namespace cepgen
 
       const double aintegral = amat2 / ( 16.*M_PI*M_PI*( x1*x2*s_ )*( x1*x2*s_ ) )
                              * fluxes.first*M_1_PI * fluxes.second*M_1_PI * 0.25
-                             * constants::GEV2_TO_BARN;
+                             * constants::GEVM2_TO_PB;
       /*const double aintegral = amat2 / ( 16.*M_PI*M_PI*x1*x1*x2*x2*s_*s_ )
                              * fluxes.first*M_1_PI * fluxes.second*M_1_PI
-                             * constants::GEV2_TO_BARN * 0.25;*/
+                             * constants::GEVM2_TO_PB * 0.25;*/
 
       //=================================================================
       return aintegral*qt1_*qt2_*pt_diff_;

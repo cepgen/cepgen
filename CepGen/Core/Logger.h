@@ -20,7 +20,7 @@ namespace cepgen
 
       private:
         /// Initialize a logging object
-        Logger( std::ostream* os = &std::cout ) :
+        Logger( std::ostream* os ) :
           level( Level::information ), output( os ) {}
 
 #if !defined(__CINT__) && !defined(__CLING__)
@@ -81,6 +81,9 @@ namespace cepgen
     };
   }
 }
+
+#define CG_LOG_MATCH( str, type ) \
+  cepgen::utils::Logger::get().passExceptionRule( str, cepgen::utils::Logger::Level::type )
 
 #endif
 

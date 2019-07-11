@@ -1,7 +1,7 @@
 #ifndef CepGen_Processes_GenericKTProcess_h
 #define CepGen_Processes_GenericKTProcess_h
 
-#include "GenericProcess.h"
+#include "CepGen/Processes/GenericProcess.h"
 
 namespace cepgen
 {
@@ -31,8 +31,8 @@ namespace cepgen
         GenericKTProcess( const ParametersList& params,
                           const std::string& name,
                           const std::string& description,
-                          const std::array<PDG,2>& partons,
-                          const std::vector<PDG>& output );
+                          const std::array<pdgid_t,2>& partons,
+                          const std::vector<pdgid_t>& output );
 
         /// Populate the event content with the generated process' topology
         void addEventContent() override;
@@ -132,9 +132,9 @@ namespace cepgen
 
       private:
         /// First and second intermediate parton (photon, pomeron, ...)
-        std::array<PDG,2> kIntermediateParts;
+        std::array<pdgid_t,2> kIntermediateParts;
         /// Type of particles produced in the final state
-        std::vector<PDG> kProducedParts;
+        std::vector<pdgid_t> kProducedParts;
     };
   }
 }

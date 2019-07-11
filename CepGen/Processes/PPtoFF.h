@@ -5,7 +5,6 @@
 
 namespace cepgen
 {
-  enum class PDG;
   namespace proc
   {
     /// Compute the matrix element for a CE \f$\gamma\gamma\rightarrow f\bar f\f$ process using \f$k_{\rm T}\f$-factorization approach
@@ -13,9 +12,12 @@ namespace cepgen
     {
       public:
         PPtoFF( const ParametersList& params = ParametersList() );
-        ProcessPtr clone( const ParametersList& params ) const override { return ProcessPtr( new PPtoFF( params ) ); }
+        ProcessPtr clone( const ParametersList& params ) const override {
+          return ProcessPtr( new PPtoFF( *this ) );
+        }
 
       private:
+        enum class ME { onShell = 0, offShell = 1 };
         void preparePhaseSpace() override;
         /// \note IncQQbar in pptoll
         double computeKTFactorisedMatrixElement() override;
@@ -25,9 +27,14 @@ namespace cepgen
         double onShellME( double shat, double that, double uhat ) const;
         double offShellME( double, double, double, double, double, double, const Particle::Momentum&, const Particle::Momentum& ) const;
 
-        /// PDG id of the fermion pair produced
-        PDG pair_;
-        int method_;
+        /// Particles info for the fermion pair produced
+        const ParticleProperties pair_info_;
+        const ME method_;
+        //==============================================================
+        // six parameters for off-shell gamma gamma --> l^+ l^-
+        //==============================================================
+        unsigned short p_mat1_, p_mat2_;
+        unsigned short p_term_ll_, p_term_lt_, p_term_tt1_, p_term_tt2_;
 
         Limits rap_limits_;
         /// Rapidity of the first outgoing fermion

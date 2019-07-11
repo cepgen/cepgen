@@ -21,8 +21,8 @@ namespace cepgen
     GenericKTProcess::GenericKTProcess( const ParametersList& params,
                                         const std::string& name,
                                         const std::string& description,
-                                        const std::array<PDG,2>& partons,
-                                        const std::vector<PDG>& central ) :
+                                        const std::array<pdgid_t,2>& partons,
+                                        const std::vector<pdgid_t>& central ) :
       GenericProcess( params, name, description+" (kT-factorisation approach)" ),
       num_dimensions_( 0 ), kt_jacobian_( 0. ),
       qt1_( 0. ), phi_qt1_( 0. ), qt2_( 0. ), phi_qt2_( 0. ),
@@ -292,7 +292,7 @@ namespace cepgen
           } break;
         }
       }
-      if ( CG_EXCEPT_MATCH( "KtProcess:vars", debugInsideLoop ) ) {
+      if ( CG_LOG_MATCH( "KtProcess:vars", debugInsideLoop ) ) {
         std::ostringstream oss;
         for ( const auto& cut : mapped_variables_ ) {
           oss << "variable " << cut.index

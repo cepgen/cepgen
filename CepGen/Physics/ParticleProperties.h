@@ -1,32 +1,25 @@
 #ifndef CepGen_Physics_ParticleProperties_h
 #define CepGen_Physics_ParticleProperties_h
 
+#include <string>
+#include <iosfwd>
+
 namespace cepgen
 {
-  enum class PDG;
-  struct HeavyIon;
-  /// All useful properties about particles
-  namespace particleproperties
+  typedef unsigned int pdgid_t;
+  /// A collection of physics constants associated to a single particle
+  struct ParticleProperties
   {
-    /// Mass of a particle, in GeV/c\f$^2\f$
-    /// \param pdg_id PDG identifier
-    double mass( const PDG& pdg_id );
-    /// Mass of a heavy ion, in GeV/c\f$^2\f$
-    /// \param hi Heavy ion type
-    double mass( const HeavyIon& hi );
-    /// Electric charge of a particle, in \f$e\f$
-    /// \param[in] pdg_id PDG id
-    double charge( const PDG& pdg_id );
-    /// Electric charge of a particle, in \f$e\f$
-    /// \param[in] id integer PDG id
-    double charge( int id );
-    /// Colour factor for a given particle
-    /// \param[in] pdg_id PDG id
-    unsigned short colours( const PDG& pdg_id );
-    /// Total decay width of an unstable particle, in GeV
-    /// \param[in] pdg_id PDG id
-    double width( const PDG& pdg_id );
-  }
+    pdgid_t pdgid; ///< PDG identifier
+    std::string name; ///< Particle name
+    std::string description; ///< Human-readable name
+    short colours; ///< Colour factor
+    double mass; ///< Mass, in GeV/c\f$^2\f$
+    double width; ///< Decay width, in GeV/c\f$^2\f$
+    short charge; ///< Electric charge, in \f$e\f$/3
+    bool fermion; ///< Is the particle a fermion?
+    friend std::ostream& operator<<( std::ostream&, const ParticleProperties& );
+  };
 }
 
 #endif

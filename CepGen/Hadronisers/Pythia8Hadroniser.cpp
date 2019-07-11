@@ -1,6 +1,7 @@
-#include "CepGen/Hadronisers/Pythia8Hadroniser.h"
-#include "CepGen/Hadronisers/PythiaEventInterface.h"
+#include "CepGen/Hadronisers/GenericHadroniser.h"
 #include "CepGen/Hadronisers/HadronisersHandler.h"
+
+#include "CepGen/IO/PythiaEventInterface.h"
 
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/Kinematics.h"
@@ -14,25 +15,64 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
 
-#include "CepGen/Version.h"
+#include <Pythia8/Pythia.h>
+
+#include <memory>
+#include <unordered_map>
+#include <vector>
 
 namespace cepgen
 {
   namespace hadr
   {
+    /**
+     * Full interface to the Pythia8 hadronisation algorithm. It can be used in a single particle decay mode as well as a full event hadronisation using the string model, as in Jetset.
+     * \brief Pythia8 hadronisation algorithm
+     */
+    class Pythia8Hadroniser : public GenericHadroniser
+    {
+      public:
+        explicit Pythia8Hadroniser( const ParametersList& );
+        ~Pythia8Hadroniser();
+
+        void setParameters( const Parameters& ) override;
+        void readString( const char* param ) override;
+        void init() override;
+        bool run( Event& ev, double& weight, bool full ) override;
+
+        void setCrossSection( double xsec, double xsec_err ) override;
+
+      private:
+        static constexpr unsigned short PYTHIA_STATUS_IN_BEAM = 12;
+        static constexpr unsigned short PYTHIA_STATUS_IN_PARTON_KT = 61;
+
+        std::vector<unsigned int> min_ids_;
+        std::unordered_map<short,short> py_cg_corresp_;
+        unsigned short findRole( const Event& ev, const Pythia8::Particle& p ) const;
+        void updateEvent( Event& ev, double& weight ) const;
+        Particle& addParticle( Event& ev, const Pythia8::Particle&, const Pythia8::Vec4& mom, unsigned short ) const;
+        /// A Pythia8 core to be wrapped
+        std::unique_ptr<Pythia8::Pythia> pythia_;
+        std::unique_ptr<Pythia8::CepGenEvent> cg_evt_;
+        bool correct_central_;
+        bool res_decay_;
+        bool enable_hadr_;
+        unsigned short offset_;
+        bool first_evt_;
+    };
+
     Pythia8Hadroniser::Pythia8Hadroniser( const ParametersList& plist ) :
       GenericHadroniser( plist, "pythia8" ),
-#ifdef PYTHIA8
       pythia_( new Pythia8::Pythia ), cg_evt_( new Pythia8::CepGenEvent ),
-#endif
-      full_evt_( false ), offset_( 0 ), first_evt_( true )
+      correct_central_( plist.get<bool>( "correctCentralSystem", false ) ),
+      res_decay_( true ), enable_hadr_( false ),
+      offset_( 0 ), first_evt_( true )
     {}
 
     void
     Pythia8Hadroniser::setParameters( const Parameters& params )
     {
       params_ = &params;
-#ifdef PYTHIA8
       cg_evt_->initialise( params );
       pythia_->setLHAupPtr( (Pythia8::LHAup*)cg_evt_.get() );
       pythia_->settings.parm( "Beams:idA", (short)params_->kinematics.incoming_beams.first.pdg );
@@ -40,33 +80,27 @@ namespace cepgen
       // specify we will be using a LHA input
       pythia_->settings.mode( "Beams:frameType", 5 );
       pythia_->settings.parm( "Beams:eCM", params_->kinematics.sqrtS() );
-#endif
-      for ( const auto& pdgid : params_->kinematics.minimum_final_state )
-        min_ids_.emplace_back( (unsigned short)pdgid );
+      min_ids_ = params_->kinematics.minimum_final_state;
     }
 
     Pythia8Hadroniser::~Pythia8Hadroniser()
     {
-#ifdef PYTHIA8
       pythia_->settings.writeFile( "last_pythia_config.cmd", false );
-#endif
     }
 
     void
     Pythia8Hadroniser::readString( const char* param )
     {
-#ifdef PYTHIA8
       if ( !pythia_->readString( param ) )
         throw CG_FATAL( "Pythia8Hadroniser" ) << "The Pythia8 core failed to parse the following setting:\n\t" << param;
-#endif
     }
 
     void
     Pythia8Hadroniser::init()
     {
-#ifdef PYTHIA8
-      if ( pythia_->settings.flag( "ProcessLevel:all" ) != full_evt_ )
-        pythia_->settings.flag( "ProcessLevel:all", full_evt_ );
+      pythia_->settings.flag( "ProcessLevel:resonanceDecays", res_decay_ );
+      if ( pythia_->settings.flag( "ProcessLevel:all" ) != enable_hadr_ )
+        pythia_->settings.flag( "ProcessLevel:all", enable_hadr_ );
 
       if ( seed_ == -1ll )
         pythia_->settings.flag( "Random:setSeed", false );
@@ -75,9 +109,11 @@ namespace cepgen
         pythia_->settings.mode( "Random:seed", seed_ );
       }
 
+#if defined( PYTHIA_VERSION_INTEGER ) && PYTHIA_VERSION_INTEGER >= 8226
       switch ( params_->kinematics.mode ) {
         case KinematicsMode::ElasticElastic: {
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 3 );
+          pythia_->settings.flag( "PartonLevel:all", false );
         } break;
         case KinematicsMode::InelasticElastic: {
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 2 );
@@ -89,23 +125,29 @@ namespace cepgen
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 0 );
         } break;
       }
+#else
+      CG_WARNING( "Pythia8Hadroniser" )
+        << "Beam remnants framework for this version of Pythia "
+        << "(" << Form( "%.3f", PYTHIA_VERSION ) << ")\n\t"
+        << "does not support mixing of unresolved hadron states.\n\t"
+        << "The proton remnants output might hence be wrong.\n\t"
+        << "Please update the Pythia version or disable this part.";
+#endif
+      if ( correct_central_ && res_decay_ )
+        CG_WARNING( "Pythia8Hadroniser" )
+          << "Central system's kinematics correction enabled while resonances are\n\t"
+          << "expected to be decayed. Please check that this is fully intended.";
 
       if ( !pythia_->init() )
         throw CG_FATAL( "Pythia8Hadroniser" )
           << "Failed to initialise the Pythia8 core!\n\t"
           << "See the message above for more details.";
-#else
-      throw CG_FATAL( "Pythia8Hadroniser" )
-        << "Pythia8 is not linked to this instance!";
-#endif
     }
 
     void
     Pythia8Hadroniser::setCrossSection( double xsec, double xsec_err )
     {
-#ifdef PYTHIA8
       cg_evt_->setCrossSection( 0, xsec, xsec_err );
-#endif
     }
 
     bool
@@ -114,13 +156,18 @@ namespace cepgen
       //--- initialise the event weight before running any decay algorithm
       weight = 1.;
 
-#ifdef PYTHIA8
-      if ( !full && !pythia_->settings.flag( "ProcessLevel:resonanceDecays" ) )
+      //--- only launch Pythia if:
+      // 1) the full event kinematics (i.e. with remnants) is to be specified,
+      // 2) the remnants are to be fragmented, or
+      // 3) the resonances are to be decayed.
+      if ( full && !remn_fragm_ && !res_decay_ )
+        return true;
+      if ( !full && !res_decay_ )
         return true;
 
       //--- switch full <-> partial event
-      if ( full != full_evt_ ) {
-        full_evt_ = full;
+      if ( full != enable_hadr_ ) {
+        enable_hadr_ = full;
         init();
       }
 
@@ -128,7 +175,8 @@ namespace cepgen
       // convert our event into a custom LHA format
       //===========================================================================================
 
-      cg_evt_->feedEvent( ev, full );
+      cg_evt_->feedEvent( ev, full ? Pythia8::CepGenEvent::Type::centralAndBeamRemnants
+                                   : Pythia8::CepGenEvent::Type::centralAndPartons );
       //if ( full ) cg_evt_->listEvent();
 
       //===========================================================================================
@@ -145,13 +193,19 @@ namespace cepgen
           if ( first_evt_ && full ) {
             offset_ = 0;
             for ( unsigned short i = 1; i < pythia_->event.size(); ++i )
-              if ( pythia_->event[i].status() == -12 ) // skip the incoming particles
+              if ( pythia_->event[i].status() == -PYTHIA_STATUS_IN_BEAM )
+                //--- no incoming particles in further stages
                 offset_++;
             first_evt_ = false;
           }
           break;
         }
       }
+      CG_DEBUG( "Pythia8Hadroniser" )
+        << "Pythia8 hadronisation performed successfully.\n\t"
+        << "Number of trials: " << ev.num_hadronisation_trials << "/" << max_trials_ << ".\n\t"
+        << "Particles multiplicity: " << ev.particles().size() << " → " << pythia_->event.size() << ".\n\t"
+        << "  indices offset: " << offset_ << ".";
 
       //===========================================================================================
       // update the event content with Pythia's output
@@ -159,20 +213,30 @@ namespace cepgen
 
       updateEvent( ev, weight );
       return true;
-#else
-      throw CG_FATAL( "Pythia8Hadroniser" ) << "Pythia8 is not linked to this instance!";
-#endif
     }
 
-#ifdef PYTHIA8
     Particle&
     Pythia8Hadroniser::addParticle( Event& ev, const Pythia8::Particle& py_part, const Pythia8::Vec4& mom, unsigned short role ) const
     {
       Particle& op = ev.addParticle( (Particle::Role)role );
-      op.setPdgId( static_cast<PDG>( abs( py_part.id() ) ), (short)( py_part.charge()/fabs( py_part.charge() ) ) );
+      ParticleProperties prop;
+      const pdgid_t pdg_id = abs( py_part.id() );
+      try { prop = PDG::get()( pdg_id ); } catch ( const Exception& ) {
+        prop = ParticleProperties{ pdg_id,
+          py_part.name(), py_part.name(),
+          (short)py_part.col(), // colour factor
+          py_part.m0(), py_part.mWidth(),
+          (short)py_part.charge(), // charge
+          py_part.isLepton()
+        };
+        PDG::get().define( prop );
+      }
+      op.setPdgId( (short)py_part.id() );
       op.setStatus( py_part.isFinal()
         ? Particle::Status::FinalState
-        : Particle::Status::Propagator );
+        : (Particle::Role)role == Particle::Role::CentralSystem
+          ? Particle::Status::Propagator
+          : Particle::Status::Fragmented );
       op.setMomentum( Particle::Momentum( mom.px(), mom.py(), mom.pz(), mom.e() ) );
       op.setMass( mom.mCalc() );
       cg_evt_->addCorresp( py_part.index()-offset_, op.id() );
@@ -182,6 +246,8 @@ namespace cepgen
     void
     Pythia8Hadroniser::updateEvent( Event& ev, double& weight ) const
     {
+      std::vector<unsigned short> central_parts;
+
       for ( unsigned short i = 1+offset_; i < pythia_->event.size(); ++i ) {
         const Pythia8::Particle& p = pythia_->event[i];
         const unsigned short cg_id = cg_evt_->cepgenId( i-offset_ );
@@ -193,6 +259,13 @@ namespace cepgen
             || cg_part.role() == Particle::OutgoingBeam2 ) {
             cg_part.setStatus( Particle::Status::Fragmented );
             continue;
+          }
+          //--- resonance decayed; apply branching ratio for this decay
+          if ( cg_part.role() == Particle::CentralSystem && p.status() < 0 ) {
+            if ( res_decay_ )
+              weight *= p.particleDataEntry().pickChannel().bRatio();
+            cg_part.setStatus( Particle::Status::Resonance );
+            central_parts.emplace_back( i );
           }
           //--- particle is not what we expect
           if ( p.idAbs() != abs( cg_part.integerPdgId() ) ) {
@@ -210,30 +283,31 @@ namespace cepgen
               << "should be " << abs( p.id() ) << ", "
               << "got " << cg_part.integerPdgId() << "!";
           }
-          //--- resonance decayed; apply branching ratio for this decay
-          if ( p.status() < 0 && pythia_->settings.flag( "ProcessLevel:resonanceDecays" ) ) {
-            weight *= p.particleDataEntry().pickChannel().bRatio();
-            cg_part.setStatus( Particle::Status::Resonance );
-          }
         }
+        //--- check for messed up particles parentage and discard incoming beam particles
+        /*else if ( p.mother1() > i || p.mother1() <= offset_ )
+          continue;
+        else if ( p.mother2() > i || p.mother2() <= offset_ )
+          continue;*/
         else {
           //----- new particle to be added
           const unsigned short role = findRole( ev, p );
           switch ( (Particle::Role)role ) {
-            default: break;
-            case Particle::OutgoingBeam1: {
+            case Particle::OutgoingBeam1:
               ev[Particle::OutgoingBeam1][0].setStatus( Particle::Status::Fragmented );
-              if ( abs( p.status() ) != 61 )
-                break;
-            } // no break!
-            case Particle::OutgoingBeam2: {
+              break;
+            case Particle::OutgoingBeam2:
               ev[Particle::OutgoingBeam2][0].setStatus( Particle::Status::Fragmented );
-              if ( abs( p.status() ) != 61 )
-                break;
-            } // no break!
+              break;
+            default: break;
           }
           // found the role ; now we can add the particle
           Particle& cg_part = addParticle( ev, p, p.p(), role );
+          if ( correct_central_ && (Particle::Role)role == Particle::CentralSystem ) {
+            const auto& ip = std::find( central_parts.begin(), central_parts.end(), p.mother1() );
+            if ( ip != central_parts.end() )
+              cg_part.setMomentum( ev[cg_evt_->cepgenId( *ip-offset_ )].momentum() );
+          }
           for ( const auto& moth_id : p.motherList() ) {
             if ( moth_id <= offset_ )
               continue;
@@ -268,7 +342,6 @@ namespace cepgen
       }
       return (unsigned short)Particle::UnknownRole;
     }
-#endif
   }
 }
 // register hadroniser and define alias

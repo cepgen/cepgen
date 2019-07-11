@@ -3,8 +3,6 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
-#ifdef PYTHON
-
 #include <string>
 #include <algorithm>
 #include <frameobject.h>
@@ -27,6 +25,8 @@ namespace cepgen
       std::string s_filename = file;
       s_filename = s_filename.substr( 0, s_filename.find_last_of( "." ) ); // remove the extension
       std::replace( s_filename.begin(), s_filename.end(), '/', '.' ); // replace all '/' by '.'
+      CG_DEBUG( "PythonHandler" )
+        << "Python path: " << s_filename;
       return s_filename;
     }
 
@@ -247,7 +247,20 @@ namespace cepgen
         throwPythonError( Form ( "Failed to retrieve parameters list object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
+
+    void
+    PythonHandler::fillParameter( PyObject* parent, const char* key, std::vector<ParametersList>& out )
+    {
+      out.clear();
+      PyObject* pobj = element( parent, key ); // borrowed
+      if ( !pobj ) {
+        CG_DEBUG( "PythonHandler" ) << "Failed to retrieve parameters list collection object \"" << key << "\".";
+        return;
+      }
+      try { out = getVector<ParametersList>( pobj ); } catch ( const Exception& e ) {
+        throwPythonError( Form ( "Failed to retrieve parameters list collection object \"%s\":\n\t%s", key, e.message().c_str() ) );
+      }
+    }
   }
 }
 
-#endif

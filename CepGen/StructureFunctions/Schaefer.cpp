@@ -1,23 +1,52 @@
-#include "CepGen/StructureFunctions/Schaefer.h"
-#include "CepGen/StructureFunctions/Partonic.h"
-
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Core/Exception.h"
-
 #include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/ParticleProperties.h"
+
+#include <vector>
+#include <memory>
 
 namespace cepgen
 {
   namespace strfun
   {
+    /// LUX-like hybrid modelling of \f$F_{2,L}\f$ structure functions
+    class Schaefer : public Parameterisation
+    {
+      public:
+        explicit Schaefer( const ParametersList& params = ParametersList() );
+        Schaefer& operator()( double xbj, double q2 ) override;
+
+      private:
+        std::string description() const override;
+        double rho( double w2 ) const;
+        void initialise();
+        /// Transition \f$Q^2\f$ before reaching the continuum/perturbative regions
+        double q2_cut_;
+        /// Transition \f$W^2\f$ between:
+        /// - resonances and hybrid continuum/resonances low-\f$Q^2\f$ regions,
+        /// - hybrid continuum/resonances and continuum low-\f$Q^2\f$ regions, or
+        /// - continuum and perturbative high-\f$Q^2\f$ regions
+        std::vector<double> w2_lim_;
+        /// Enable/disable the HT correction
+        bool higher_twist_;
+        /// Resonances-dominated region (low-\f$Q^2/W^2\f$) modelling
+        std::shared_ptr<Parameterisation> resonances_model_;
+        /// Perturbative region (high-\f$Q^2/W^2\f$) modelling
+        std::shared_ptr<Parameterisation> perturbative_model_;
+        /// Continuum regions modelling
+        std::shared_ptr<Parameterisation> continuum_model_;
+        bool initialised_;
+        double inv_omega_range_;
+    };
+
     Schaefer::Schaefer( const ParametersList& params ) :
       Parameterisation( params ),
       q2_cut_( params.get<double>( "Q2cut", 9. ) ),
       w2_lim_( params.get<std::vector<double> >( "W2limits", { 3., 4. } ) ),
       higher_twist_( params.get<bool>( "higherTwist", true ) ),
-      resonances_model_  ( Parameterisation::build( params.get<ParametersList>( "resonancesSF", ParametersList().set<int>( "id", (int)Type::ChristyBosted ) ) ) ),
-      perturbative_model_( Parameterisation::build( params.get<ParametersList>( "perturbativeSF", ParametersList().set<int>( "id", (int)Type::MSTWgrid ) ) ) ),
-      continuum_model_   ( Parameterisation::build( params.get<ParametersList>( "continuumSF", ParametersList().set<int>( "id", (int)Type::GD11p ) ) ) ),
+      resonances_model_  ( StructureFunctionsHandler::get().build( params.get<ParametersList>( "resonancesSF", ParametersList().set<int>( "id", (int)Type::ChristyBosted ) ) ) ),
+      perturbative_model_( StructureFunctionsHandler::get().build( params.get<ParametersList>( "perturbativeSF", ParametersList().set<int>( "id", (int)Type::MSTWgrid ) ) ) ),
+      continuum_model_   ( StructureFunctionsHandler::get().build( params.get<ParametersList>( "continuumSF", ParametersList().set<int>( "id", (int)Type::GD11p ) ) ) ),
       initialised_( false ), inv_omega_range_( -1. )
     {}
 
@@ -26,9 +55,9 @@ namespace cepgen
     {
       std::ostringstream os;
       os << "LUXlike{"
-         << "r=" << *resonances_model_ << ","
-         << "p=" << *perturbative_model_ << ","
-         << "c=" << *continuum_model_;
+         << "r=" << resonances_model_->description() << ","
+         << "p=" << perturbative_model_->description() << ","
+         << "c=" << continuum_model_->description();
       if ( higher_twist_ )
         os << ",HT";
       os << "}";
@@ -112,3 +141,5 @@ namespace cepgen
     }
   }
 }
+
+REGISTER_STRFUN( Schaefer, strfun::Schaefer )

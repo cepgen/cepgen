@@ -1,9 +1,7 @@
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/ParticleProperties.h"
 
-#include <iostream>
 #include <cmath>
 #include <cassert>
 
@@ -11,7 +9,7 @@ namespace cepgen
 {
   namespace sigrat
   {
-    const double Parameterisation::mp_ = particleproperties::mass( PDG::proton );
+    const double Parameterisation::mp_ = PDG::get().mass( PDG::proton );
     const double Parameterisation::mp2_ = Parameterisation::mp_*Parameterisation::mp_;
 
     Parameterisation::Parameterisation( const ParametersList& params )

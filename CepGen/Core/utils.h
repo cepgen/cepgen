@@ -2,11 +2,11 @@
 #define CepGen_Core_utils_h
 
 #include <string>
+#include <vector>
+#include <numeric>
 
 namespace cepgen
 {
-  /// Add a closing "s" when needed
-  inline const char* s( unsigned short num ) { return ( num > 1 ) ? "s" : ""; }
   /// Format a string using a printf style format descriptor.
   std::string Form( const std::string fmt, ... );
   /// Human-readable boolean printout
@@ -30,9 +30,32 @@ namespace cepgen
   inline std::string colourise( const std::string& str, const Colour& col ) { return Form( "\033[%d%s\033[0m", (int)col, str.c_str() ); }
   /// Replace all occurences of a text by another
   size_t replace_all( std::string& str, const std::string& from, const std::string& to );
+  namespace utils
+  {
+    /// Add a trailing "s" when needed
+    inline const char* s( unsigned short num ) { return ( num > 1 ) ? "s" : ""; }
+    /// Helper to print a vector
+    template<class T> std::string repr( const std::vector<T>& vec, const std::string& sep = "," ) {
+      return std::accumulate( std::next( vec.begin() ), vec.end(),
+        std::to_string( *vec.begin() ), [&sep]( std::string str, T xv ) {
+          return std::move( str )+sep+std::to_string( xv );
+        } );
+    }
+    class ProgressBar
+    {
+      public:
+        ProgressBar( size_t tot, size_t freq = 10 );
+        void update( size_t iter ) const;
+
+      private:
+        static constexpr size_t BAR_LENGTH = 50;
+        const std::string bar_pattern_;
+        size_t total_, frequency_;
+    };
+  }
 }
 
 /// Provide a random number generated along a uniform distribution between 0 and 1
-#define drand() static_cast<double>( rand()/RAND_MAX )
+#define drand() (double)rand()/RAND_MAX
 
 #endif

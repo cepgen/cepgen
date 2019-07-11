@@ -1,15 +1,13 @@
 #include "CepGen/Physics/FormFactors.h"
+#include "CepGen/Physics/PDG.h"
 
 #include "CepGen/Core/Exception.h"
-
-#include "CepGen/Physics/ParticleProperties.h"
-#include "CepGen/Physics/PDG.h"
 
 #include "CepGen/StructureFunctions/SuriYennie.h"
 
 namespace cepgen
 {
-  const double FormFactors::mp_ = particleproperties::mass( PDG::proton );
+  const double FormFactors::mp_ = PDG::get().mass( PDG::proton );
   const double FormFactors::mp2_ = FormFactors::mp_*FormFactors::mp_;
 
   FormFactors

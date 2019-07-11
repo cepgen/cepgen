@@ -41,12 +41,12 @@ namespace cepgen
         friend std::ostream& operator<<( std::ostream& os, const GenericProcess* proc );
 
         /// Map of all incoming state particles in the process
-        typedef std::map<Particle::Role,PDG> IncomingState;
+        typedef std::map<Particle::Role,pdgid_t> IncomingState;
         /// Map of all outgoing particles in the process
-        typedef std::map<Particle::Role,std::vector<PDG> > OutgoingState;
+        typedef std::map<Particle::Role,std::vector<pdgid_t> > OutgoingState;
 
         /// Copy all process attributes into a new object
-        virtual std::unique_ptr<GenericProcess> clone( const ParametersList& ) const = 0;
+        virtual std::unique_ptr<GenericProcess> clone( const ParametersList& params = ParametersList() ) const = 0;
 
         /// Restore the Event object to its initial state
         void clearEvent();

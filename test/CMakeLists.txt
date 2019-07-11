@@ -30,9 +30,7 @@ endforeach()
 
 find_package(ROOT QUIET)
 if(ROOT_FOUND)
-  set(CMAKE_CXX_STANDARD 14)
   include_directories(${ROOT_INCLUDE_DIRS})
-  include_directories(${ROOT_INCLUDE_DIR})
   link_directories(${ROOT_LIBRARY_DIR})
 
   foreach(exec_src ${executables_root})
@@ -46,4 +44,10 @@ else()
   message(STATUS "ROOT not found! skipping these tests!")
 endif()
 
-message(STATUS "list of available tests: ${tests}")
+message(STATUS "The following tests/executables are available:\n${tests}")
+
+file(GLOB_RECURSE test_input_cards RELATIVE ${PROJECT_SOURCE_DIR}/test test_processes/* __init__.py)
+foreach(_files ${test_input_cards})
+  configure_file(${_files} ${_files} COPYONLY)
+endforeach()
+configure_file(${PROJECT_SOURCE_DIR}/test/test_processes.cfg test_processes.cfg COPYONLY)

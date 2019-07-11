@@ -1,7 +1,7 @@
 #ifndef CepGen_Generator_h
 #define CepGen_Generator_h
 
-#include <sstream>
+#include <iosfwd>
 #include <memory>
 #include <functional>
 
@@ -74,12 +74,19 @@ namespace cepgen
       /// \param[in] ip List of input parameters defining the phase space on which to perform the integration
       Generator( Parameters *ip );
       ~Generator();
+
       /// Dump this program's header into the standard output stream
       void printHeader();
+
+      const Parameters* parametersPtr() const { return parameters_.get(); }
+      /// Getter to the run parameters block
+      Parameters& parameters();
       /// Feed the generator with a Parameters object
-      void setParameters( const Parameters& ip );
+      void setParameters( Parameters& ip );
       /// Remove all references to a previous generation/run
       void clearRun();
+      /// Integrate the functional over the whole phase space
+      void integrate();
       /**
        * Compute the cross section for the run parameters defined by this object.
        * This returns the cross section as well as the absolute error computed along.
@@ -88,8 +95,6 @@ namespace cepgen
        * \param[out] err The absolute integration error on the computed cross-section, in pb
        */
       void computeXsection( double& xsec, double& err );
-      /// Integrate the functional over the whole phase space
-      void integrate();
       /// Last cross section computed by the generator
       double crossSection() const { return result_; }
       /// Last error on the cross section computed by the generator
@@ -100,16 +105,17 @@ namespace cepgen
       /// \return A pointer to the Event object generated in this run
       std::shared_ptr<Event> generateOneEvent();
       /// Launch the generation of events
-      void generate( std::function<void( const Event&, unsigned long )> callback = {} );
+      void generate( std::function<void( const Event&, unsigned long )> callback = nullptr );
       /// Number of dimensions on which the integration is performed
       size_t numDimensions() const;
       /// Compute one single point from the total phase space
       /// \param[in] x the n-dimensional point to compute
       /// \return the function value for the given point
       double computePoint( double* x );
-      /// Physical Parameters used in the events generation and cross-section computation
-      std::unique_ptr<Parameters> parameters;
+
    private:
+      /// Physical Parameters used in the events generation and cross-section computation
+      std::unique_ptr<Parameters> parameters_;
       /// Vegas instance which will integrate the function
       std::unique_ptr<Integrator> integrator_;
       /// Cross section value computed at the last integration
@@ -120,3 +126,4 @@ namespace cepgen
 }
 
 #endif
+

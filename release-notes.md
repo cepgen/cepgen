@@ -1,9 +1,38 @@
 # Release notes
 
-## v0.9 (28 Nov 2018)
-* Lots of performance improvements in many parts of the code
-* New processes introduced: &gamma;&gamma; &rarr; W<sup>+</sup>W<sup>-</sup>, FORTRAN processes handler
-* Imported back the Pythia 8 hadroniser
+## v0.9.6 (11 Jul 2019)
+* Added support of Pythia6 hadronisation/fragmentation algorithm for legacy tests
+* Structure functions parameterisation objects polished
+* New output modes handled for HepMC interfacing module
+
+## v0.9.5 (25 Jun 2019)
+* Increased flexibility in particles (and their associated properties) definitions
+* Small corrections in the LPAIR process definition of the output kinematics
+* Improved Pythia8 interfacing, better handling of the LHEF output format when remnants dissociation is triggered
+* Better exceptions handling
+
+## v0.9.4 (9 May 2019)
+* pptoff polarisation terms may be steered for off-shell ME
+* Functional is now handling exprtk in addition to &mu;Parser
+* Refactored exceptions and tests
+* Improved accessors for integrator/grid definition
+* Better memory management for parameters/processes/hadronisers definition
+
+## v0.9.1-3 (29-30 Nov 2018)
+* Fixes in includes chain
+* Fix in LPAIR cards parser, simplified cards handler interface
+* External Fortran processes now defined through a function instead of a subroutine
+* Fix in Pythia8 interface parton colours definition and resonances decay
+* Structure functions interface modified
+
+## v0.9 (28-29 Nov 2018)
+* Fixed memory leaks in Python configuration files handler
+* First HI process! (and first Fortran process interfaced)
+* Polarisation states may be specified for the off-shell &gamma;&gamma; &rarr; W<sup>+</sup>W<sup>-</sup> ME
+* New structure functions definitions: ALLM (+subsequent), MSTW grid, CLAS, LUXlike, LHAPDF
+* Introduced R-ratio definitions for F<sub>L</sub> calculation from F<sub>2</sub>
+* New cuts definition
+* Better memory management
 
 ## v0.8 (24 Aug 2017)
 * Major refactoring of the code

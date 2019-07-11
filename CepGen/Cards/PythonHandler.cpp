@@ -1,8 +1,6 @@
 #include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Core/Exception.h"
 
-#ifdef PYTHON
-
 #include "CepGen/Core/TamingFunction.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Integrator.h"
@@ -27,7 +25,10 @@ namespace cepgen
     //----- specialization for CepGen input cards
     PythonHandler::PythonHandler( const char* file )
     {
-      setenv( "PYTHONPATH", ".:..:Cards", 1 );
+      setenv( "PYTHONPATH", ".:Cards:test:../Cards", 1 );
+      setenv( "PYTHONDONTWRITEBYTECODE", "1", 1 );
+      CG_DEBUG( "PythonHandler" )
+        << "Python PATH: " << getenv( "PYTHONPATH" ) << ".";
       std::string filename = pythonPath( file );
       const size_t fn_len = filename.length()+1;
 
@@ -60,6 +61,14 @@ namespace cepgen
       if ( !cfg )
         throwPythonError( Form( "Failed to parse the configuration card %s", file ) );
 
+      //--- additional particles definition
+      PyObject* pextp = PyObject_GetAttrString( cfg, PDGLIST_NAME ); // new
+      if ( pextp ) {
+        parseExtraParticles( pextp );
+        Py_CLEAR( pextp );
+      }
+
+      //--- process definition
       PyObject* process = PyObject_GetAttrString( cfg, PROCESS_NAME ); // new
       if ( !process )
         throwPythonError( Form( "Failed to extract a \"%s\" keyword from the configuration card %s", PROCESS_NAME, file ) );
@@ -76,9 +85,7 @@ namespace cepgen
 
       //--- process mode
       params_.kinematics.mode = (KinematicsMode)proc_params.get<int>( "mode", (int)KinematicsMode::invalid );
-
-      auto pr = cepgen::proc::ProcessesHandler::get().build( proc_name, proc_params );
-      params_.setProcess( std::move( pr ) );
+      params_.setProcess( cepgen::proc::ProcessesHandler::get().build( proc_name, proc_params ) );
 
       //--- process kinematics
       PyObject* pin_kinematics = element( process, "inKinematics" ); // borrowed
@@ -97,27 +104,27 @@ namespace cepgen
 
       Py_CLEAR( process );
 
-      PyObject* plog = PyObject_GetAttrString( cfg, "logger" ); // new
+      PyObject* plog = PyObject_GetAttrString( cfg, LOGGER_NAME ); // new
       if ( plog ) {
         parseLogging( plog );
         Py_CLEAR( plog );
       }
 
       //--- hadroniser parameters
-      PyObject* phad = PyObject_GetAttrString( cfg, "hadroniser" ); // new
+      PyObject* phad = PyObject_GetAttrString( cfg, HADR_NAME ); // new
       if ( phad ) {
         parseHadroniser( phad );
         Py_CLEAR( phad );
       }
 
       //--- generation parameters
-      PyObject* pint = PyObject_GetAttrString( cfg, "integrator" ); // new
+      PyObject* pint = PyObject_GetAttrString( cfg, INTEGRATOR_NAME ); // new
       if ( pint ) {
         parseIntegrator( pint );
         Py_CLEAR( pint );
       }
 
-      PyObject* pgen = PyObject_GetAttrString( cfg, "generator" ); // new
+      PyObject* pgen = PyObject_GetAttrString( cfg, GENERATOR_NAME ); // new
       if ( pgen ) {
         parseGenerator( pgen );
         Py_CLEAR( pgen );
@@ -137,13 +144,13 @@ namespace cepgen
     PythonHandler::parseIncomingKinematics( PyObject* kin )
     {
       //--- retrieve the beams PDG ids
-      std::vector<int> beams_pdg;
+      std::vector<ParametersList> beams_pdg;
       fillParameter( kin, "pdgIds", beams_pdg );
       if ( !beams_pdg.empty() ) {
         if ( beams_pdg.size() != 2 )
           throwPythonError( Form( "Invalid list of PDG ids retrieved for incoming beams:\n\t2 PDG ids are expected, %d provided!", beams_pdg.size() ) );
-        params_.kinematics.incoming_beams. first.pdg = (PDG)beams_pdg.at( 0 );
-        params_.kinematics.incoming_beams.second.pdg = (PDG)beams_pdg.at( 1 );
+        params_.kinematics.incoming_beams. first.pdg = (pdgid_t)beams_pdg.at( 0 ).get<int>( "pdgid" );
+        params_.kinematics.incoming_beams.second.pdg = (pdgid_t)beams_pdg.at( 1 ).get<int>( "pdgid" );
       }
       //--- incoming beams kinematics
       std::vector<double> beams_pz;
@@ -161,14 +168,16 @@ namespace cepgen
       //--- structure functions set for incoming beams
       PyObject* psf = element( kin, "structureFunctions" ); // borrowed
       if ( psf )
-        params_.kinematics.structure_functions = strfun::Parameterisation::build( get<ParametersList>( psf ) );
+        params_.kinematics.structure_functions = strfun::StructureFunctionsHandler::get().build( get<ParametersList>( psf ) );
       //--- types of parton fluxes for kt-factorisation
       std::vector<int> kt_fluxes;
       fillParameter( kin, "ktFluxes", kt_fluxes );
-      if ( !kt_fluxes.empty() )
-        params_.kinematics.incoming_beams. first.kt_flux = (KTFlux)kt_fluxes.at( 0 );
-      if ( kt_fluxes.size() > 1 )
-        params_.kinematics.incoming_beams.second.kt_flux = (KTFlux)kt_fluxes.at( 1 );
+      if ( !kt_fluxes.empty() ) {
+        params_.kinematics.incoming_beams.first.kt_flux = (KTFlux)kt_fluxes.at( 0 );
+        params_.kinematics.incoming_beams.second.kt_flux = ( kt_fluxes.size() > 1 )
+          ? (KTFlux)kt_fluxes.at( 1 )
+          : (KTFlux)kt_fluxes.at( 0 );
+      }
       //--- specify where to look for the grid path for gluon emission
       std::string kmr_grid_path;
       fillParameter( kin, "kmrGridPath", kmr_grid_path );
@@ -190,13 +199,13 @@ namespace cepgen
       std::vector<int> parts;
       fillParameter( kin, "minFinalState", parts );
       for ( const auto& pdg : parts )
-        params_.kinematics.minimum_final_state.emplace_back( (PDG)pdg );
+        params_.kinematics.minimum_final_state.emplace_back( (pdgid_t)pdg );
 
       ParametersList part_cuts;
       fillParameter( kin, "cuts", part_cuts );
       for ( const auto& part : part_cuts.keys() ) {
-        const PDG pdg = (PDG)stoi( part );
-        const ParametersList& cuts = part_cuts.get<ParametersList>( part );
+        const auto pdg = (pdgid_t)stoi( part );
+        const auto& cuts = part_cuts.get<ParametersList>( part );
         if ( cuts.has<Limits>( "pt" ) )
           params_.kinematics.cuts.central_particles[pdg].pt_single = cuts.get<Limits>( "pt" );
         if ( cuts.has<Limits>( "energy" ) )
@@ -256,46 +265,46 @@ namespace cepgen
         throwPythonError( "Failed to retrieve the integration algorithm name!" );
       std::string algo = get<std::string>( palgo );
       if ( algo == "plain" )
-        params_.integrator.type = IntegratorType::plain;
+        params_.integration().type = IntegratorType::plain;
       else if ( algo == "Vegas" ) {
-        params_.integrator.type = IntegratorType::Vegas;
-        fillParameter( integr, "alpha", (double&)params_.integrator.vegas.alpha );
-        fillParameter( integr, "iterations", params_.integrator.vegas.iterations );
-        fillParameter( integr, "mode", (int&)params_.integrator.vegas.mode );
-        fillParameter( integr, "verbosity", (int&)params_.integrator.vegas.verbose );
+        params_.integration().type = IntegratorType::Vegas;
+        fillParameter( integr, "alpha", (double&)params_.integration().vegas.alpha );
+        fillParameter( integr, "iterations", params_.integration().vegas.iterations );
+        fillParameter( integr, "mode", (int&)params_.integration().vegas.mode );
+        fillParameter( integr, "verbosity", (int&)params_.integration().vegas.verbose );
         std::string vegas_logging_output = "cerr";
         fillParameter( integr, "loggingOutput", vegas_logging_output );
         if ( vegas_logging_output == "cerr" )
           // redirect all debugging information to the error stream
-          params_.integrator.vegas.ostream = stderr;
+          params_.integration().vegas.ostream = stderr;
         else if ( vegas_logging_output == "cout" )
           // redirect all debugging information to the standard stream
-          params_.integrator.vegas.ostream = stdout;
+          params_.integration().vegas.ostream = stdout;
         else
-          params_.integrator.vegas.ostream = fopen( vegas_logging_output.c_str(), "w" );
+          params_.integration().vegas.ostream = fopen( vegas_logging_output.c_str(), "w" );
       }
       else if ( algo == "MISER" ) {
-        params_.integrator.type = IntegratorType::MISER;
-        fillParameter( integr, "estimateFraction", (double&)params_.integrator.miser.estimate_frac );
-        fillParameter( integr, "minCalls", params_.integrator.miser.min_calls );
-        fillParameter( integr, "minCallsPerBisection", params_.integrator.miser.min_calls_per_bisection );
-        fillParameter( integr, "alpha", (double&)params_.integrator.miser.alpha );
-        fillParameter( integr, "dither", (double&)params_.integrator.miser.dither );
+        params_.integration().type = IntegratorType::MISER;
+        fillParameter( integr, "estimateFraction", (double&)params_.integration().miser.estimate_frac );
+        fillParameter( integr, "minCalls", params_.integration().miser.min_calls );
+        fillParameter( integr, "minCallsPerBisection", params_.integration().miser.min_calls_per_bisection );
+        fillParameter( integr, "alpha", (double&)params_.integration().miser.alpha );
+        fillParameter( integr, "dither", (double&)params_.integration().miser.dither );
       }
       else
-        throwPythonError( Form( "Invalid integration algorithm: %s", algo.c_str() ) );
+        throwPythonError( Form( "Invalid integration() algorithm: %s", algo.c_str() ) );
 
-      fillParameter( integr, "numFunctionCalls", params_.integrator.ncvg );
-      fillParameter( integr, "seed", (unsigned long&)params_.integrator.rng_seed );
+      fillParameter( integr, "numFunctionCalls", params_.integration().ncvg );
+      fillParameter( integr, "seed", (unsigned long&)params_.integration().rng_seed );
       unsigned int rng_engine;
       fillParameter( integr, "rngEngine", rng_engine );
       switch ( rng_engine ) {
-        case 0: default: params_.integrator.rng_engine = (gsl_rng_type*)gsl_rng_mt19937; break;
-        case 1: params_.integrator.rng_engine = (gsl_rng_type*)gsl_rng_taus2; break;
-        case 2: params_.integrator.rng_engine = (gsl_rng_type*)gsl_rng_gfsr4; break;
-        case 3: params_.integrator.rng_engine = (gsl_rng_type*)gsl_rng_ranlxs0; break;
+        case 0: default: params_.integration().rng_engine = (gsl_rng_type*)gsl_rng_mt19937; break;
+        case 1: params_.integration().rng_engine = (gsl_rng_type*)gsl_rng_taus2; break;
+        case 2: params_.integration().rng_engine = (gsl_rng_type*)gsl_rng_gfsr4; break;
+        case 3: params_.integration().rng_engine = (gsl_rng_type*)gsl_rng_ranlxs0; break;
       }
-      fillParameter( integr, "chiSqCut", params_.integrator.vegas_chisq_cut );
+      fillParameter( integr, "chiSqCut", params_.integration().vegas_chisq_cut );
     }
 
     void
@@ -303,12 +312,12 @@ namespace cepgen
     {
       if ( !PyDict_Check( gen ) )
         throwPythonError( "Generation information object should be a dictionary!" );
-      params_.generation.enabled = true;
-      fillParameter( gen, "treat", params_.generation.treat );
-      fillParameter( gen, "numEvents", params_.generation.maxgen );
-      fillParameter( gen, "printEvery", params_.generation.gen_print_every );
-      fillParameter( gen, "numThreads", params_.generation.num_threads );
-      fillParameter( gen, "numPoints", params_.generation.num_points );
+      params_.generation().enabled = true;
+      fillParameter( gen, "treat", params_.generation().treat );
+      fillParameter( gen, "numEvents", params_.generation().maxgen );
+      fillParameter( gen, "printEvery", params_.generation().gen_print_every );
+      fillParameter( gen, "numThreads", params_.generation().num_threads );
+      fillParameter( gen, "numPoints", params_.generation().num_points );
     }
 
     void
@@ -322,11 +331,7 @@ namespace cepgen
         throwPythonError( "Hadroniser name is required!" );
       std::string hadr_name = get<std::string>( pname );
 
-      //--- list of module-specific parameters
-      ParametersList mod_params;
-      fillParameter( hadr, "moduleParameters", mod_params );
-
-      params_.setHadroniser( cepgen::hadr::HadronisersHandler::get().build( hadr_name, mod_params ) );
+      params_.setHadroniser( cepgen::hadr::HadronisersHandler::get().build( hadr_name, get<ParametersList>( hadr ) ) );
 
       auto h = params_.hadroniser();
       h->setParameters( params_ );
@@ -346,7 +351,23 @@ namespace cepgen
         }
       }
     }
+
+    void
+    PythonHandler::parseExtraParticles( PyObject* pparts )
+    {
+      if ( !is<ParametersList>( pparts ) )
+        throwPythonError( "Extra particles definition object should be a parameters list!" );
+
+      const auto& parts = get<ParametersList>( pparts );
+      for ( const auto& k : parts.keys() ) {
+        const auto& part = parts.get<ParticleProperties>( k );
+        if ( part.pdgid == 0 || part.mass < 0. )
+          continue;
+        CG_DEBUG( "PythonHandler:particles" )
+          << "Adding a new particle with name \"" << part.name << "\" to the PDG dictionary.";
+        PDG::get().define( part );
+      }
+    }
   }
 }
 
-#endif

@@ -1,6 +1,5 @@
 #include "CepGen/StructureFunctions/SuriYennie.h"
 
-#include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Core/Exception.h"
 
 #include <math.h>
@@ -75,3 +74,5 @@ namespace cepgen
     }
   }
 }
+
+REGISTER_STRFUN( SuriYennie, strfun::SuriYennie )

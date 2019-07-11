@@ -4,7 +4,6 @@
 
 #include "CepGen/Event/Event.h"
 
-#include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
@@ -13,7 +12,7 @@ namespace cepgen
 {
   namespace proc
   {
-    const double GenericProcess::mp_ = particleproperties::mass( PDG::proton );
+    const double GenericProcess::mp_ = PDG::get().mass( PDG::proton );
     const double GenericProcess::mp2_ = GenericProcess::mp_*GenericProcess::mp_;
 
     GenericProcess::GenericProcess( const ParametersList& params, const std::string& name, const std::string& description, bool has_event ) :
@@ -56,8 +55,9 @@ namespace cepgen
       x_ = std::vector<double>( x, x+ndim );
       is_point_set_ = true;
 
-      if ( CG_EXCEPT_MATCH( "Process:dumpPoint", debugInsideLoop ) )
+      if ( CG_LOG_MATCH( "Process:dumpPoint", debugInsideLoop ) )
         dumpPoint();
+      clearEvent();
     }
 
     double
@@ -88,8 +88,8 @@ namespace cepgen
         throw CG_FATAL( "GenericProcess" ) << "Kinematics not properly defined for the process.";
 
       const HeavyIon hi1( kin_.incoming_beams.first.pdg ), hi2( kin_.incoming_beams.second.pdg );
-      const double m1 = hi1 ? particleproperties::mass( hi1 ) : particleproperties::mass( kin_.incoming_beams.first.pdg );
-      const double m2 = hi2 ? particleproperties::mass( hi2 ) : particleproperties::mass( kin_.incoming_beams.second.pdg );
+      const double m1 = hi1 ? HeavyIon::mass( hi1 ) : PDG::get().mass( kin_.incoming_beams.first.pdg );
+      const double m2 = hi2 ? HeavyIon::mass( hi2 ) : PDG::get().mass( kin_.incoming_beams.second.pdg );
       // at some point introduce non head-on colliding beams?
       const auto p1 = Particle::Momentum::fromPxPyPzM( 0., 0., +kin_.incoming_beams.first .pz, m1 );
       const auto p2 = Particle::Momentum::fromPxPyPzM( 0., 0., -kin_.incoming_beams.second.pz, m2 );
@@ -104,16 +104,15 @@ namespace cepgen
       CG_DEBUG( "GenericProcess" ) << "Kinematics successfully prepared!\n"
         << "  √s = " << sqs_*1.e-3 << " TeV,\n"
         << "  p₁ = " << p1 << ", mass=" << p1.mass() << " GeV\n"
-        << "  p₂ = " << p1 << ", mass=" << p2.mass() << " GeV.";
+        << "  p₂ = " << p2 << ", mass=" << p2.mass() << " GeV.";
     }
 
     void
     GenericProcess::dumpPoint() const
     {
       std::ostringstream os;
-      for ( unsigned short i = 0; i < x_.size(); ++i ) {
+      for ( unsigned short i = 0; i < x_.size(); ++i )
         os << Form( "  x(%2d) = %8.6f\n\t", i, x_[i] );
-      }
       CG_INFO( "GenericProcess" )
         << "Number of integration parameters: " << x_.size() << "\n\t"
         << os.str() << ".";
@@ -131,8 +130,9 @@ namespace cepgen
       //--- incoming state
       for ( const auto& ip : ini ) {
         Particle& p = event_->addParticle( ip.first );
-        p.setPdgId( ip.second, particleproperties::charge( ip.second ) );
-        p.setMass( particleproperties::mass( ip.second ) );
+        const auto& part_info = PDG::get()( ip.second );
+        p.setPdgId( ip.second, part_info.charge/3. );
+        p.setMass( part_info.mass );
         if ( ip.first == Particle::IncomingBeam1
           || ip.first == Particle::IncomingBeam2 )
           p.setStatus( Particle::Status::PrimordialIncoming );
@@ -151,8 +151,9 @@ namespace cepgen
       for ( const auto& opl : fin ) { // pair(role, list of PDGids)
         for ( const auto& pdg : opl.second ) {
           Particle& p = event_->addParticle( opl.first );
-          p.setPdgId( pdg, particleproperties::charge( pdg ) );
-          p.setMass( particleproperties::mass( pdg ) );
+          const auto& part_info = PDG::get()( pdg );
+          p.setPdgId( pdg, part_info.charge/3. );
+          p.setMass( part_info.mass );
         }
       }
 
@@ -190,11 +191,16 @@ namespace cepgen
     void
     GenericProcess::setIncomingKinematics( const Particle::Momentum& p1, const Particle::Momentum& p2 )
     {
-      if ( !has_event_ )
+      if ( !has_event_ || !event_ )
         return;
 
-      event_->getOneByRole( Particle::IncomingBeam1 ).setMomentum( p1 );
-      event_->getOneByRole( Particle::IncomingBeam2 ).setMomentum( p2 );
+      CG_DEBUG( "GenericProcess:incomingBeams" )
+        << "Incoming primary particles:\n\t"
+        << p1 << "\n\t"
+        << p2;
+
+      (*event_)[Particle::IncomingBeam1][0].setMomentum( p1 );
+      (*event_)[Particle::IncomingBeam2][0].setMomentum( p2 );
     }
 
     bool
