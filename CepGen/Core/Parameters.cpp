@@ -28,7 +28,8 @@ namespace cepgen
     process_( std::move( param.process_ ) ),
     hadroniser_( std::move( param.hadroniser_ ) ),
     store_( false ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ ),
-    integration_( param.integration_ ), generation_( param.generation_ )
+    integration_( param.integration_ ), generation_( param.generation_ ),
+    out_params_( param.out_params_ )
   {}
 
   Parameters::Parameters( const Parameters& param ) :
@@ -36,7 +37,8 @@ namespace cepgen
     kinematics( param.kinematics ),
     taming_functions( param.taming_functions ),
     store_( false ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ ),
-    integration_( param.integration_ ), generation_( param.generation_ )
+    integration_( param.integration_ ), generation_( param.generation_ ),
+    out_params_( param.out_params_ )
   {}
 
   Parameters::~Parameters() // required for unique_ptr initialisation!
@@ -54,6 +56,7 @@ namespace cepgen
     num_gen_events_ = param.num_gen_events_;
     integration_ = param.integration_;
     generation_ = param.generation_;
+    out_params_ = param.out_params_;
     return *this;
   }
 
