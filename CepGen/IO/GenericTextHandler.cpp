@@ -9,7 +9,7 @@
 
 namespace cepgen
 {
-  namespace output
+  namespace io
   {
     /**
      * \brief Handler for the generic text file output
@@ -36,6 +36,7 @@ namespace cepgen
     const std::regex GenericTextHandler::rgx_select_role_( "\\w\\(([a-z]+\\d?)\\)" );
 
     GenericTextHandler::GenericTextHandler( const ParametersList& params ) :
+      GenericExportHandler( "text" ),
       file_( params.get<std::string>( "filename", "output.txt" ) ),
       variables_( params.get<std::vector<std::string> >( "variables" ) )
     {

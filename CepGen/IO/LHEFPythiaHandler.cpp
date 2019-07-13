@@ -10,7 +10,7 @@
 
 namespace cepgen
 {
-  namespace output
+  namespace io
   {
     /**
      * \brief Handler for the LHE file output
@@ -35,6 +35,7 @@ namespace cepgen
     };
 
     LHEFPythiaHandler::LHEFPythiaHandler( const ParametersList& params ) :
+      GenericExportHandler( "lhef" ),
       pythia_( new Pythia8::Pythia ), lhaevt_( new Pythia8::CepGenEvent )
     {
       lhaevt_->openLHEF( params.get<std::string>( "filename", "output.lhe" ) );

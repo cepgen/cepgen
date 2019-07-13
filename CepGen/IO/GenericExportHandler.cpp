@@ -10,10 +10,13 @@
 
 namespace cepgen
 {
-  namespace output
+  namespace io
   {
-    GenericExportHandler::GenericExportHandler() :
-      event_num_( 0. )
+    GenericExportHandler::GenericExportHandler( const std::string& name ) :
+      name_( name ), event_num_( 0. )
+    {}
+
+    GenericExportHandler::~GenericExportHandler()
     {}
 
     std::string

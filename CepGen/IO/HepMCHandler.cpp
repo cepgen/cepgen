@@ -46,7 +46,7 @@ using namespace HepMC;
 
 namespace cepgen
 {
-  namespace output
+  namespace io
   {
     /// Handler for the HepMC file output
     /// \tparam T HepMC writer handler (format-dependent)
@@ -83,6 +83,7 @@ namespace cepgen
 
     template<typename T>
     HepMCHandler<T>::HepMCHandler( const ParametersList& params ) :
+      GenericExportHandler( "hepmc" ),
       output_( new T( params.get<std::string>( "filename", "output.hepmc" ) ) ),
       xs_( new GenCrossSection ),
 #ifdef HEPMC3

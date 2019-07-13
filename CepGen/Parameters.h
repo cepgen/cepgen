@@ -2,7 +2,6 @@
 #define CepGen_Parameters_h
 
 #include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Core/ParametersList.h"
 
 #include <memory>
 
@@ -12,8 +11,10 @@
 namespace cepgen
 {
   class Event;
+  class ParametersList;
   namespace proc { class GenericProcess; }
   namespace hadr { class GenericHadroniser; }
+  namespace io { class GenericExportHandler; }
   namespace utils { class TamingFunctionsCollection; }
   enum class IntegratorType;
   /// List of parameters used to start and run the simulation job
@@ -95,15 +96,17 @@ namespace cepgen
       Generation& generation() { return generation_; }
       const Generation& generation() const { return generation_; }
 
-      /// Set parameters for the output format definition
-      void setOutputParameters( const ParametersList& params ) { out_params_ = params; }
-      /// List of steering parameters for the output format definition
-      const ParametersList& outputParameters() const { return out_params_; }
-
       /// Specify if the generated events are to be stored
       void setStorage( bool store ) { store_ = store; }
       /// Are the events generated in this run to be stored in the output file ?
       bool storage() const { return store_; }
+
+      /// Set a new output module definition
+      void setOutputModule( std::unique_ptr<io::GenericExportHandler> mod );
+      /// Set the pointer to a output module
+      void setOutputModule( io::GenericExportHandler* mod );
+      /// Output module definition
+      io::GenericExportHandler* outputModule();
 
       //----- hadronisation algorithm
 
@@ -136,6 +139,8 @@ namespace cepgen
     private:
       std::unique_ptr<proc::GenericProcess> process_;
       std::unique_ptr<hadr::GenericHadroniser> hadroniser_;
+      /// Storage object
+      std::unique_ptr<io::GenericExportHandler> out_module_;
 
       bool store_;
       /// Total generation time (in seconds)
@@ -146,8 +151,6 @@ namespace cepgen
       Integration integration_;
       /// Events generation parameters
       Generation generation_;
-      /// Storage parameters
-      ParametersList out_params_;
   };
 }
 

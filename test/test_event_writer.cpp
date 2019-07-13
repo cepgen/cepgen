@@ -7,7 +7,7 @@ using namespace cepgen;
 
 int main()
 {
-  auto writer = output::ExportHandler::get().build( "hepmc" );
+  auto writer = io::ExportHandler::get().build( "hepmc" );
   writer->setCrossSection( 1., 2. );
 
   Event ev;

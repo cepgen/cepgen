@@ -28,6 +28,7 @@ namespace cepgen
         static constexpr const char* LOGGER_NAME = "logger";
         static constexpr const char* INTEGRATOR_NAME = "integrator";
         static constexpr const char* GENERATOR_NAME = "generator";
+        static constexpr const char* OUTPUT_NAME = "output";
 
         static constexpr const char* PDGLIST_NAME = "PDG";
 
@@ -60,7 +61,8 @@ namespace cepgen
         void parseIntegrator( PyObject* );
         void parseGenerator( PyObject* );
         void parseHadroniser( PyObject* );
-        void parseExtraParticles( PyObject* parts );
+        void parseOutputModule( PyObject* );
+        void parseExtraParticles( PyObject* );
     };
     template<> bool PythonHandler::is<bool>( PyObject* obj ) const;
     template<> bool PythonHandler::is<int>( PyObject* obj ) const;
