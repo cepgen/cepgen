@@ -1,7 +1,7 @@
 file(GLOB core_sources Core/*.cpp *.cpp)
 file(GLOB phys_sources Physics/*.cpp)
 file(GLOB sf_sources StructureFunctions/*.cpp)
-file(GLOB io_sources IO/GenericExportHandler.cpp)
+file(GLOB io_sources IO/GenericExportHandler.cpp IO/GenericTextHandler.cpp)
 file(GLOB hadr_sources Hadronisers/GenericHadroniser.cpp)
 
 include_directories(${PROJECT_SOURCE_DIR})

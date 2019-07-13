@@ -2,6 +2,7 @@
 #define CepGen_Parameters_h
 
 #include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Core/ParametersList.h"
 
 #include <memory>
 
@@ -11,7 +12,6 @@
 namespace cepgen
 {
   class Event;
-  class ParametersList;
   namespace proc { class GenericProcess; }
   namespace hadr { class GenericHadroniser; }
   namespace utils { class TamingFunctionsCollection; }
@@ -95,6 +95,11 @@ namespace cepgen
       Generation& generation() { return generation_; }
       const Generation& generation() const { return generation_; }
 
+      /// Set parameters for the output format definition
+      void setOutputParameters( const ParametersList& params ) { out_params_ = params; }
+      /// List of steering parameters for the output format definition
+      const ParametersList& outputParameters() const { return out_params_; }
+
       /// Specify if the generated events are to be stored
       void setStorage( bool store ) { store_ = store; }
       /// Are the events generated in this run to be stored in the output file ?
@@ -141,6 +146,8 @@ namespace cepgen
       Integration integration_;
       /// Events generation parameters
       Generation generation_;
+      /// Storage parameters
+      ParametersList out_params_;
   };
 }
 
