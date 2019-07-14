@@ -106,6 +106,11 @@ The kinematics phase space to be used in the integration and events production c
 This block is a generic placeholder for all process-dependent parameters.
 See the description page of each process to get a list of supported parameters to include in this collection.
 
+``output`` module block
+---------------------------
+
+.. warning:: Under construction
+
 .. _configuration-card-example:
 
 Configuration card example
@@ -144,6 +149,10 @@ can be steered using the following card:
 
    generator = gentmpl.clone(
        numEvents = 1e5,
+   )
+
+   output = cepgen.Module('lhef',
+       filename = 'lpair-example.lhef',
    )
 
 This configuration is equivalent to the *LPAIR card* shown `here <cards-lpair#configuration-card-example>`_.

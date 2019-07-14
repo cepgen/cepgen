@@ -34,6 +34,14 @@ Vegas integration parameters
 * ``ITVG`` (default: ``10``)
     Number of iterations for the integration
 
+Output module parameters
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* ``OUTP`` (default: ``none``)
+    Type of `output module </output-formats>`_ to configure
+* ``OUTF`` (default: ``none``, module-dependent)
+    Output file name
+
 Kinematics parameters
 ---------------------
 
@@ -117,5 +125,7 @@ can be steered using the following card:
    MXMN 1.07
    MXMX 1000.
    NGEN 100000 ! generate 100k events
+   OUTP lhef
+   OUTF lpair-example.lhe
 
 This configuration is equivalent to the *Python card* shown `here <cards-python#configuration-card-example>`_.

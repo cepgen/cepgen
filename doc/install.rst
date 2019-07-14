@@ -94,15 +94,7 @@ This compilation will build a collection of required sub-libraries to be linked 
 
    This will copy all required headers into the local includes directory (e.g. ``/usr/local/include``), and copy the shared objects into the library path (e.g. ``/usr/local/lib64`` or ``/usr/local/lib``).
 
-Currently, several test executables can be linked against the CepGen libraries, for instance:
-
-- ``cepgen``, for a simple run computing the process cross section and
-  launching a generation without any events storage. It might be useful
-  for e.g. steering cards (or local installation) testing;
-- ``cepgen-root`` like the previous, but storing events in a ROOT tree
-  structure;
-- ``cepgen-event``, generating events in to be stored as an ASCII
-  format (HepMC, LHEF, …).
+As described `here </usage>`_, several test executables can be linked against the CepGen libraries.
 
 .. note::
    You may build these executables using the ``make`` command.
@@ -113,4 +105,4 @@ Currently, several test executables can be linked against the CepGen libraries, 
 
       ./test/cepgen <path to your steering card>
 
-.. doxygengroup:: Executables
+.. .. doxygengroup:: Executables
