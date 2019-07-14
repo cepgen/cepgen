@@ -38,7 +38,7 @@ namespace cepgen
 
         std::ofstream file_;
         const std::vector<std::string> variables_;
-        const bool print_banner_;
+        const bool print_banner_, print_variables_;
 
         //--- variables definition
         typedef std::pair<unsigned short,std::string> IndexedVariable;
@@ -82,15 +82,15 @@ namespace cepgen
 
     TextHandler::TextHandler( const ParametersList& params ) :
       GenericExportHandler( "text" ),
-      file_        ( params.get<std::string>( "filename", "output.txt" ) ),
-      variables_   ( params.get<std::vector<std::string> >( "variables" ) ),
-      print_banner_( params.get<bool>( "saveBanner", true ) ),
+      file_           ( params.get<std::string>( "filename", "output.txt" ) ),
+      variables_      ( params.get<std::vector<std::string> >( "variables" ) ),
+      print_banner_   ( params.get<bool>( "saveBanner", true ) ),
+      print_variables_( params.get<bool>( "saveVariables", true ) ),
       num_vars_( 0 )
     {
       std::smatch sm;
       oss_vars_.clear();
       std::string sep;
-      oss_vars_ << "# ";
       for ( const auto& var : variables_ ) {
         if ( std::regex_match( var, sm, rgx_select_id_ ) )
           variables_per_id_[stod( sm[2].str() )].emplace_back( std::make_pair( num_vars_, sm[1].str() ) );
@@ -109,7 +109,6 @@ namespace cepgen
         oss_vars_ << sep << var, sep = "\t";
         ++num_vars_;
       }
-      oss_vars_ << "\n";
     }
 
     TextHandler::~TextHandler()
@@ -123,7 +122,8 @@ namespace cepgen
       sqrts_ = params.kinematics.sqrtS();
       if ( print_banner_ )
         file_ << banner( params, "#" ) << "\n";
-      file_ << oss_vars_.str();
+      if ( print_variables_ )
+        file_ << "# " << oss_vars_.str() << "\n";
     }
 
     void
