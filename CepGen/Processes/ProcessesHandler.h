@@ -17,15 +17,15 @@
     static BUILDERNM( name ) g ## name; \
   } }
 /// Declare a Fortran process function name
-#define DECLARE_FORTRAN_FUNCTION( method ) \
-  extern "C" { extern double method ## _(); }
+#define DECLARE_FORTRAN_FUNCTION( fort_func ) \
+  extern "C" { extern double fort_func ## _(); }
 #define PROCESS_F77_NAME( name ) F77_ ## name
 /// Add the Fortran process definition to the list of handled processes
-#define REGISTER_FORTRAN_PROCESS( name, method, description ) \
+#define REGISTER_FORTRAN_PROCESS( name, fort_func, description ) \
   struct PROCESS_F77_NAME( name ) : public cepgen::proc::FortranKTProcess { \
     PROCESS_F77_NAME( name )( const cepgen::ParametersList& params = cepgen::ParametersList() ) : \
-      cepgen::proc::FortranKTProcess( params, STRINGIFY( name ), description, method ## _ ) { \
-      cepgen::proc::FortranKTProcess::kProcParameters[STRINGIFY( method )] = params; \
+      cepgen::proc::FortranKTProcess( params, STRINGIFY( name ), description, fort_func ## _ ) { \
+      cepgen::proc::FortranKTProcess::kProcParameters[STRINGIFY( fort_func )] = params; \
     } }; \
   REGISTER_PROCESS( name, PROCESS_F77_NAME( name ) )
 

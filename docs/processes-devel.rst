@@ -100,8 +100,16 @@ Additionally, for heavy ions initial states, the following parameters are used:
 For increased modularity, a set of process parameters directly parsed from the input cards (see e.g. `the processParameters block </cards-python#process-processparameters-parameters-block>`_) may also be introduced.
 At the Fortran process definition level, all parameters may be accessed through a set of interfacing functions:
 
-* .. doxygenfunction:: cepgen_param_int_
-* .. doxygenfunction:: cepgen_param_real_
+.. doxygenfunction:: cepgen_param_int_
+.. doxygenfunction:: cepgen_param_real_
+
+.. note:: These latter may be translated into the following Fortran signature:
+
+   .. code-block:: fortran
+
+      external CepGen_param_int,CepGen_param_real
+      integer CepGen_param_int
+      double precision CepGen_param_real
 
 A prior operation is to call the parameters list retrieval using the following subroutine:
 
@@ -115,8 +123,8 @@ Those two can be called from Fortran using e.g.
    real*8 rval
    ! [...]
    call CepGen_set_process('my_process')           ! same name as the function
-   ival = CepGen_param_int('int_parameter', 0)     ! first argument is parameter name
-   rval = CepGen_param_real('real_parameter', 0d0) ! second argument is default value
+   ival = CepGen_param_int('int_parameter', 0)      ! first argument is parameter name
+   rval = CepGen_param_real('real_parameter', 0.d0) ! second argument is default value
 
 :math:`k_{\rm T}`-factorisation kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
