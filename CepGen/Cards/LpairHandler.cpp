@@ -6,6 +6,7 @@
 
 #include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Hadronisers/HadronisersHandler.h"
+#include "CepGen/IO/ExportHandler.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Physics/GluonGrid.h"
@@ -89,6 +90,14 @@ namespace cepgen
         params_.hadroniser()->setParameters( params_ );
       }
 
+      //--- parse the output module name
+      if ( !out_mod_name_.empty() ) {
+        ParametersList outm;
+        if ( !out_file_name_.empty() )
+          outm.set<std::string>( "filename", out_file_name_ );
+        params_.setOutputModule( cepgen::io::ExportHandler::get().build( out_mod_name_, outm ) );
+      }
+
       if ( m_params.count( "IEND" ) )
         setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
 
@@ -116,6 +125,8 @@ namespace cepgen
       registerParameter<std::string>( "PROC", "Process name to simulate", &proc_name_ );
       registerParameter<std::string>( "ITYP", "Integration algorithm", &integr_type_ );
       registerParameter<std::string>( "HADR", "Hadronisation algorithm", &hadr_name_ );
+      registerParameter<std::string>( "OUTP", "Output module", &out_mod_name_ );
+      registerParameter<std::string>( "OUTF", "Output file name", &out_file_name_ );
       registerParameter<std::string>( "KMRG", "KMR grid interpolation path", &kmr_grid_path_ );
 
       //-------------------------------------------------------------------------------------------

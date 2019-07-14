@@ -33,7 +33,7 @@ namespace cepgen
         virtual void operator<<( const Event& ) = 0;
 
       protected:
-        static std::string banner( const Parameters& );
+        static std::string banner( const Parameters&, const std::string& prep = "" );
         /// Module unique name
         const std::string name_;
         /// Event index

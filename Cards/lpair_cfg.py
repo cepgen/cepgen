@@ -27,7 +27,9 @@ process = cepgen.Module('lpair',
     #),
 )
 
-output = cepgen.Module('text', variables = ['m(4)', 'pt(4)', 'xi(ob1)'])
+#--- example of an output module parameterisation
+#output = cepgen.Module('text', variables = ['m(4)'])
+#output = cepgen.Module('lhef', output = 'test.lhe')
 
 #--- let the user specify the run conditions
 from Config.generator_cff import generator

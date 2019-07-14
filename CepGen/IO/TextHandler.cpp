@@ -4,6 +4,7 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Parameters.h"
+#include "CepGen/Version.h"
 
 #include <fstream>
 #include <regex>
@@ -36,7 +37,8 @@ namespace cepgen
         static constexpr double INVALID_OUTPUT = -999.;
 
         std::ofstream file_;
-        std::vector<std::string> variables_;
+        const std::vector<std::string> variables_;
+        const bool print_banner_;
 
         //--- variables definition
         typedef std::pair<unsigned short,std::string> IndexedVariable;
@@ -44,6 +46,7 @@ namespace cepgen
         std::unordered_map<Particle::Role,std::vector<IndexedVariable> > variables_per_role_;
         std::vector<IndexedVariable> variables_for_event_;
         unsigned short num_vars_;
+        std::ostringstream oss_vars_;
 
         //--- auxiliary helper maps
         const std::unordered_map<std::string,Particle::Role> role_str_ = {
@@ -79,13 +82,15 @@ namespace cepgen
 
     TextHandler::TextHandler( const ParametersList& params ) :
       GenericExportHandler( "text" ),
-      file_( params.get<std::string>( "filename", "output.txt" ) ),
-      variables_( params.get<std::vector<std::string> >( "variables" ) ),
+      file_        ( params.get<std::string>( "filename", "output.txt" ) ),
+      variables_   ( params.get<std::vector<std::string> >( "variables" ) ),
+      print_banner_( params.get<bool>( "saveBanner", true ) ),
       num_vars_( 0 )
     {
       std::smatch sm;
+      oss_vars_.clear();
       std::string sep;
-      file_ << "# ";
+      oss_vars_ << "# ";
       for ( const auto& var : variables_ ) {
         if ( std::regex_match( var, sm, rgx_select_id_ ) )
           variables_per_id_[stod( sm[2].str() )].emplace_back( std::make_pair( num_vars_, sm[1].str() ) );
@@ -101,10 +106,10 @@ namespace cepgen
         }
         else // event-level variables
           variables_for_event_.emplace_back( std::make_pair( num_vars_, var ) );
-        file_ << sep << var, sep = "\t";
+        oss_vars_ << sep << var, sep = "\t";
         ++num_vars_;
       }
-      file_ << "\n";
+      oss_vars_ << "\n";
     }
 
     TextHandler::~TextHandler()
@@ -116,6 +121,9 @@ namespace cepgen
     TextHandler::initialise( const Parameters& params )
     {
       sqrts_ = params.kinematics.sqrtS();
+      if ( print_banner_ )
+        file_ << banner( params, "#" ) << "\n";
+      file_ << oss_vars_.str();
     }
 
     void
