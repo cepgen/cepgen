@@ -179,10 +179,10 @@ namespace cepgen
     Particles& part_with_same_role = operator[]( part.role() );
 
     //--- specify the id
-    if ( part_with_same_role.empty() && part.id() < 0 ) part.setId( numParticles() ); // set the id if previously invalid/inexistent
+    if ( part_with_same_role.empty() && part.id() < 0 ) part.setId( size() ); // set the id if previously invalid/inexistent
     if ( !part_with_same_role.empty() ) {
       if ( replace ) part.setId( part_with_same_role[0].id() ); // set the previous id if replacing a particle
-      else part.setId( numParticles() );
+      else part.setId( size() );
     }
 
     //--- add the particle to the collection
@@ -200,7 +200,7 @@ namespace cepgen
   }
 
   size_t
-  Event::numParticles() const
+  Event::size() const
   {
     size_t out = 0;
     for ( const auto& role_part : particles_ )

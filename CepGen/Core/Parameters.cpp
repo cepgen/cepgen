@@ -8,6 +8,7 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
+#include "CepGen/IO/GenericExportHandler.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
@@ -27,6 +28,7 @@ namespace cepgen
     taming_functions( param.taming_functions ),
     process_( std::move( param.process_ ) ),
     hadroniser_( std::move( param.hadroniser_ ) ),
+    out_module_( std::move( param.out_module_ ) ),
     store_( false ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ ),
     integration_( param.integration_ ), generation_( param.generation_ )
   {}
@@ -50,6 +52,7 @@ namespace cepgen
     taming_functions = param.taming_functions;
     process_ = std::move( param.process_ );
     hadroniser_ = std::move( param.hadroniser_ );
+    out_module_ = std::move( param.out_module_ );
     total_gen_time_ = param.total_gen_time_;
     num_gen_events_ = param.num_gen_events_;
     integration_ = param.integration_;
@@ -159,6 +162,24 @@ namespace cepgen
     hadroniser_.reset( hadr );
   }
 
+  io::GenericExportHandler*
+  Parameters::outputModule()
+  {
+    return out_module_.get();
+  }
+
+  void
+  Parameters::setOutputModule( std::unique_ptr<io::GenericExportHandler> mod )
+  {
+    out_module_ = std::move( mod );
+  }
+
+  void
+  Parameters::setOutputModule( io::GenericExportHandler* mod )
+  {
+    out_module_.reset( mod );
+  }
+
   std::ostream&
   operator<<( std::ostream& os, const Parameters* param )
   {
@@ -189,6 +210,8 @@ namespace cepgen
       << ( pretty ? yesno( param->generation_.enabled ) : std::to_string( param->generation_.enabled ) ) << "\n"
       << std::setw( wt ) << "Number of events to generate"
       << ( pretty ? boldify( param->generation_.maxgen ) : std::to_string( param->generation_.maxgen ) ) << "\n";
+    if ( param->out_module_ )
+      os << std::setw( wt ) << "Output module" << param->out_module_->name() << "\n";
     if ( param->generation_.num_threads > 1 )
       os
         << std::setw( wt ) << "Number of threads" << param->generation_.num_threads << "\n";
@@ -203,7 +226,9 @@ namespace cepgen
         << std::setfill( '-' ) << std::setw( wb+6 )
         << ( pretty ? boldify( " Hadronisation algorithm " ) : "Hadronisation algorithm" ) << std::setfill( ' ' ) << "\n\n"
         << std::setw( wt ) << "Name"
-        << ( pretty ? boldify( param->hadroniser_->name().c_str() ) : param->hadroniser_->name() ) << "\n";
+        << ( pretty ? boldify( param->hadroniser_->name().c_str() ) : param->hadroniser_->name() ) << "\n"
+        << std::setw( wt ) << "Remnants fragmentation? "
+        << ( pretty ? yesno( param->hadroniser_->fragmentRemnants() ) : std::to_string( param->hadroniser_->fragmentRemnants() ) ) << "\n";
     }
     os
       << "\n"
@@ -243,7 +268,7 @@ namespace cepgen
     if ( param->kinematics.cuts.central_particles.size() > 0 ) {
       os << std::setw( wt ) << ( pretty ? boldify( ">>> per-particle cuts:" ) : ">>> per-particle cuts:" ) << "\n";
       for ( const auto& part_per_lim : param->kinematics.cuts.central_particles ) {
-        os << " * all single " << std::setw( wt-3 ) << part_per_lim.first << "\n";
+        os << " * all single " << std::setw( wt-3 ) << PDG::get().name( part_per_lim.first ) << "\n";
         for ( const auto& lim : part_per_lim.second.list() )
           if ( lim.second.valid() )
             os << "   - " << std::setw( wt-5 ) << lim.first << lim.second << "\n";

@@ -1,14 +1,13 @@
 #ifndef CepGen_StructureFunctions_StructureFunctions_h
 #define CepGen_StructureFunctions_StructureFunctions_h
 
-#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/ModuleFactory.h"
 
 #include <iosfwd>
 #include <memory>
 
 namespace cepgen
 {
-  class ParametersList;
   namespace sigrat { class Parameterisation; }
   /// Structure functions modelling scope
   namespace strfun
@@ -54,11 +53,6 @@ namespace cepgen
         /// Human-readable description of this SF parameterisation
         virtual std::string description() const; ///< Human-readable description of this SF set
 
-        /// Build a SF parameterisation for a given type
-        static std::shared_ptr<Parameterisation> build( const ParametersList& );
-        /// Build a SF parameterisation for a given type
-        static std::shared_ptr<Parameterisation> build( const Type& type, const ParametersList& params = ParametersList() );
-
         /// Set of parameters used to build this parameterisation
         const ParametersList& parameters() const { return params_; }
 
@@ -86,10 +80,26 @@ namespace cepgen
         /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
         std::shared_ptr<sigrat::Parameterisation> r_ratio_;
     };
+    /// A structure functions parameterisations factory
+    typedef ModuleFactory<Parameterisation,int> StructureFunctionsHandler;
   }
   /// Human-readable description of this SF parameterisation type
   std::ostream& operator<<( std::ostream&, const strfun::Type& );
 }
 
-#endif
+/// Add a structure functions definition to the list of handled parameterisation
+#define REGISTER_STRFUN( id, obj ) \
+  namespace cepgen { \
+    struct BUILDERNM( id ) { \
+      BUILDERNM( id )() { strfun::StructureFunctionsHandler::get().registerModule<obj>( (int)strfun::Type::id ); } }; \
+    static BUILDERNM( id ) g ## id; \
+  }
+/// Add a structure functions definition (with its associated default parameters) to the list of handled parameterisation
+#define REGISTER_STRFUN_PARAMS( id, obj, params ) \
+  namespace cepgen { \
+    struct BUILDERNM( id ) { \
+      BUILDERNM( id )() { strfun::StructureFunctionsHandler::get().registerModule<obj>( (int)strfun::Type::id, params ); } }; \
+    static BUILDERNM( id ) g ## id; \
+  }
 
+#endif

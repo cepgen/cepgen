@@ -6,22 +6,22 @@
 
 #include <sstream>
 
+#ifdef HEPMC3
 using namespace std; // account for improper scoping in following includes
-#if !defined( HEPMC3 )
-#  include "HepMC/Version.h"
-#  ifndef HEPMC_VERSION_CODE // HepMC v2
-#    error "HepMC v3 is required for the LHEF export!"
-#  else // HepMC v3+
-#    include "HepMC/LHEF.h"
-#  endif
-#else // HepMC v3+
-using namespace std;
 #  include "HepMC3/LHEF.h"
+#else
+#  include "HepMC/Version.h"
+#  ifdef HEPMC_VERSION_CODE // HepMC v3+
+#    include "HepMC/LHEF.h"
+#  else
+#    define NO_LHEF
+#  endif
 #endif
+#ifndef NO_LHEF
 
 namespace cepgen
 {
-  namespace output
+  namespace io
   {
     /**
      * \brief Handler for the LHE file output
@@ -46,6 +46,7 @@ namespace cepgen
     };
 
     LHEFHepMCHandler::LHEFHepMCHandler( const ParametersList& params ) :
+      GenericExportHandler( "lhef" ),
       lhe_output_( new LHEF::Writer( params.get<std::string>( "filename", "output.lhe" ) ) )
     {}
 
@@ -102,3 +103,4 @@ namespace cepgen
 }
 
 REGISTER_IO_MODULE( lhef, LHEFHepMCHandler )
+#endif

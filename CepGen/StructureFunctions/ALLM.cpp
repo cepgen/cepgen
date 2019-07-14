@@ -1,15 +1,60 @@
-#include "CepGen/StructureFunctions/ALLM.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
-#include <cmath>
-#include <cassert>
+#include <math.h>
+#include <assert.h>
+#include <vector>
 
 namespace cepgen
 {
   namespace strfun
   {
+    /// \f$F_{2,L}\f$ parameterisation by Abramowicz, Levin, Levy, and Maor \cite Abramowicz:1991xz\cite Abramowicz:1997ms
+    class ALLM : public Parameterisation
+    {
+      public:
+        class Parameters
+        {
+          private:
+            struct Trajectory
+            {
+              Trajectory( const ParametersList& params = ParametersList() );
+              std::vector<double> a, b, c;
+            };
+
+          public:
+            Parameters( const ParametersList& params = ParametersList() );
+            /// Pre-HERA data fit (694 data points)
+            static Parameters allm91();
+            /// Fixed target and HERA photoproduction total cross sections (1356 points)
+            static Parameters allm97();
+            static Parameters hht_allm();
+            static Parameters hht_allm_ft();
+            static Parameters gd07p();
+            static Parameters gd11p();
+
+            Trajectory pomeron, reggeon;
+            /// Effective photon squared mass
+            double m02;
+            /// Effective pomeron squared mass
+            double mp2;
+            /// Effective reggeon squared mass
+            double mr2;
+            double q02;
+            /// Squared QCD scale
+            double lambda2;
+            Type type;
+        };
+
+        explicit ALLM( const ParametersList& params = ParametersList() );
+        ALLM& operator()( double xbj, double q2 ) override;
+
+      private:
+        Parameters params_;
+    };
+
     ALLM::ALLM( const ParametersList& params ) :
       Parameterisation( params ),
       params_( params.get<ParametersList>( "parameterisation" ) )
@@ -216,3 +261,7 @@ namespace cepgen
   }
 }
 
+REGISTER_STRFUN_PARAMS( ALLM91, strfun::ALLM, ParametersList().set<std::string>( "model", "ALLM91" ) )
+REGISTER_STRFUN_PARAMS( ALLM97, strfun::ALLM, ParametersList().set<std::string>( "model", "ALLM97" ) )
+REGISTER_STRFUN_PARAMS( GD07p, strfun::ALLM, ParametersList().set<std::string>( "model", "GD07p" ) )
+REGISTER_STRFUN_PARAMS( GD11p, strfun::ALLM, ParametersList().set<std::string>( "model", "GD11p" ) )

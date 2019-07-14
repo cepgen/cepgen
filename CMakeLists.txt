@@ -6,15 +6,13 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake $ENV{ROOTSYS
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
-#set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-pg") # for gprof
 #set(CMAKE_CXX_FLAGS_DEBUG "-fprofile-arcs -ftest-coverage") # for gcov
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 
 #----- include external paths
 
 set(CEPGEN_EXTERNAL_CORE_REQS "")
-set(CEPGEN_EXTERNAL_STRF_REQS "")
 include(UseEnvironment)
 
 set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/CepGen)
@@ -35,11 +33,6 @@ add_subdirectory(${CEPGEN_SOURCE_DIR})
 foreach(_module ${CEPGEN_MODULES})
   add_subdirectory(${CEPGEN_SOURCE_DIR}/${_module})
 endforeach()
-if(NOT DEFINED ENV{PYTHONHOME})
-  message(STATUS "No default PYTHONHOME path set. You might need to define it for Python steering cards parsing.")
-  message(STATUS "e.g. `export PYTHONHOME=${PYTHON_DIR}` (bash-like)")
-  message(STATUS " or, `setenv PYTHONHOME ${PYTHON_DIR}` (csh)")
-endif()
 
 #----- copy the input cards and other files
 

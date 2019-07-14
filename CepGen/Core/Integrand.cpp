@@ -8,6 +8,7 @@
 
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
+#include "CepGen/IO/GenericExportHandler.h"
 
 #include "CepGen/Parameters.h"
 
