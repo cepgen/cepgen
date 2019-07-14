@@ -15,7 +15,7 @@ namespace cepgen
         FortranKTProcess( const ParametersList& params, const char* name, const char* descr, std::function<double(void)> func );
         ProcessPtr clone( const ParametersList& /*params*/ ) const override { return ProcessPtr( new FortranKTProcess( *this ) ); }
 
-        static std::unordered_map<std::string,ParametersList> kProcParameters;
+        static ParametersList kProcParameters;
 
       private:
         void preparePhaseSpace() override;

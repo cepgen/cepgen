@@ -61,7 +61,6 @@ c     =================================================================
 c     =================================================================
 c     helpers for the retrieval of input parameters from the process
 c     =================================================================
-      external CepGen_set_process
       external CepGen_param_int,CepGen_param_real
       integer CepGen_param_int
       double precision CepGen_param_real
