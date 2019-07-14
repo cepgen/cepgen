@@ -13,9 +13,7 @@
       print *,'Parameter                                  value(s)'
       print *,'--------------------------------------------------------'
       print 101,'Process mode:',icontri
-      print 101,'Computation method:',imethod
       print 101,'Structure functions:',sfmod
-      print 101,'Central system PDG:',pdg_l
       print 103,'Beams momenta:',inp1,inp2
       print 102,'Fluxes modes:',iflux1,iflux2
       print 104,'Beams (A,Z):',a_nuc1,z_nuc1,a_nuc2,z_nuc2
@@ -28,6 +26,9 @@
       print 100,'m(sum)',iinvm,invm_min,invm_max
       print 100,'pt(sum)',iptsum,ptsum_min,ptsum_max
       print 100,'delta(y)',idely,dely_min,dely_max
+      print *,'========================================================'
+      print *,'Process-specific parameters'
+      call cepgen_list_params
       print *,'========================================================'
 
       params_shown=.true.
