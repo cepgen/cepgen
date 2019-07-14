@@ -3,6 +3,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/Parameters.h"
 
 #include <fstream>
 #include <regex>
@@ -16,11 +17,11 @@ namespace cepgen
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Jul 2019
      */
-    class GenericTextHandler : public GenericExportHandler
+    class TextHandler : public GenericExportHandler
     {
       public:
-        explicit GenericTextHandler( const ParametersList& );
-        ~GenericTextHandler();
+        explicit TextHandler( const ParametersList& );
+        ~TextHandler();
 
         void initialise( const Parameters& ) override;
         void operator<<( const Event& ) override;
@@ -30,17 +31,22 @@ namespace cepgen
         double variable( const Particle&, const std::string& ) const;
 
         static const std::regex rgx_select_id_, rgx_select_role_;
+        static constexpr double INVALID_OUTPUT = -999.;
+
         std::ofstream file_;
         std::vector<std::string> variables_;
         std::unordered_map<short,std::vector<std::pair<unsigned short,std::string> > > variables_per_id_;
         std::unordered_map<Particle::Role,std::vector<std::pair<unsigned short,std::string> > > variables_per_role_;
         unsigned short num_vars_;
+
+        //--- kinematic variables
+        double sqrts_;
     };
 
-    const std::regex GenericTextHandler::rgx_select_id_( "(\\w)\\((\\d+)\\)" );
-    const std::regex GenericTextHandler::rgx_select_role_( "(\\w)\\(([a-z]+\\d?)\\)" );
+    const std::regex TextHandler::rgx_select_id_( "(\\w+)\\((\\d+)\\)" );
+    const std::regex TextHandler::rgx_select_role_( "(\\w+)\\(([a-z]+\\d?)\\)" );
 
-    GenericTextHandler::GenericTextHandler( const ParametersList& params ) :
+    TextHandler::TextHandler( const ParametersList& params ) :
       GenericExportHandler( "text" ),
       file_( params.get<std::string>( "filename", "output.txt" ) ),
       variables_( params.get<std::vector<std::string> >( "variables" ) ),
@@ -66,7 +72,7 @@ namespace cepgen
           else if ( str_role == "pa1" ) role = Particle::Role::Parton1;
           else if ( str_role == "pa2" ) role = Particle::Role::Parton2;
           else {
-            CG_WARNING( "GenericTextHandler" )
+            CG_WARNING( "TextHandler" )
               << "Invalid particle role retrieved from configuration: \"" << str_role << "\".\n\t"
               << "Skipping the variable \"" << var << "\" in the output module.";
             continue;
@@ -74,7 +80,7 @@ namespace cepgen
           variables_per_role_[role].emplace_back( std::make_pair( num_vars_, sm[1].str() ) );
         }
         else {
-          CG_WARNING( "GenericTextHandler" )
+          CG_WARNING( "TextHandler" )
             << "Generic variables retrieval not yet supported.\n\t"
             << "Skipping the variable \"" << var << "\" in the output module.";
           variables_.emplace_back( var );
@@ -85,28 +91,33 @@ namespace cepgen
       file_ << "\n";
     }
 
-    GenericTextHandler::~GenericTextHandler()
+    TextHandler::~TextHandler()
     {
       file_.close();
     }
 
     void
-    GenericTextHandler::initialise( const Parameters& params )
+    TextHandler::initialise( const Parameters& params )
     {
+      sqrts_ = params.kinematics.sqrtS();
     }
 
     void
-    GenericTextHandler::operator<<( const Event& ev )
+    TextHandler::operator<<( const Event& ev )
     {
       std::vector<double> vars( num_vars_ );
       //--- extract and order the variables to be retrieved
       for ( const auto& id_vars : variables_per_id_ ) {
+        //--- first get the particle
         const auto& part = ev[id_vars.first];
+        //--- then loop on the variables
         for ( const auto& var : id_vars.second )
           vars[var.first] = variable( part, var.second );
       }
       for ( const auto& role_vars : variables_per_role_ ) {
+        //--- first get the particle
         const auto& part = ev[role_vars.first][0];
+        //--- then loop on the variables
         for ( const auto& var : role_vars.second )
           vars[var.first] = variable( part, var.second );
       }
@@ -118,7 +129,7 @@ namespace cepgen
     }
 
     double
-    GenericTextHandler::variable( const Particle& part, const std::string& var ) const
+    TextHandler::variable( const Particle& part, const std::string& var ) const
     {
       if      ( var == "px"  ) return part.momentum().px();
       else if ( var == "py"  ) return part.momentum().py();
@@ -126,12 +137,15 @@ namespace cepgen
       else if ( var == "pt"  ) return part.momentum().pt();
       else if ( var == "m"   ) return part.mass();
       else if ( var == "e"   ) return part.energy();
+      else if ( var == "xi"  ) return 1.-part.energy()*2./sqrts_;
       else if ( var == "eta" ) return part.momentum().eta();
       else if ( var == "phi" ) return part.momentum().phi();
       else if ( var == "status" ) return (double)part.status();
-      return -999.;
+      CG_WARNING( "TextHandler" )
+        << "Failed to retrieve variable \"" << var << "\".";
+      return INVALID_OUTPUT;
     }
   }
 }
 
-REGISTER_IO_MODULE( text, GenericTextHandler )
+REGISTER_IO_MODULE( text, TextHandler )
