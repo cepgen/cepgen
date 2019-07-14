@@ -8,6 +8,8 @@
 #include "CepGen/Physics/Constants.h"
 
 #ifdef HEPMC3
+#  include "HepMC3/Version.h"
+#  define HEPMC_VERSION HEPMC3_VERSION
 #  include "HepMC3/WriterAscii.h"
 #  include "HepMC3/WriterAsciiHepMC2.h"
 #  include "HepMC3/WriterHEPEVT.h"
@@ -95,6 +97,9 @@ namespace cepgen
       output_->set_run_info( runinfo_ );
       runinfo_->set_weight_names( { "Default" } );
 #endif
+      CG_INFO( "HepMC" )
+        << "Interfacing module initialised "
+        << "for HepMC version " << HEPMC_VERSION << ".";
     }
 
     template<typename T> void
@@ -164,9 +169,9 @@ namespace cepgen
                                 part_orig.momentum().pz(),
                                 part_orig.energy() );
 #ifdef HEPMC3
-        GenParticlePtr part = make_shared<GenParticle>( pmom, part_orig.integerPdgId(), (int)part_orig.status() );
+        auto part = make_shared<GenParticle>( pmom, part_orig.integerPdgId(), (int)part_orig.status() );
 #else
-        GenParticle* part = new GenParticle( pmom, part_orig.integerPdgId(), (int)part_orig.status() );
+        auto part = new GenParticle( pmom, part_orig.integerPdgId(), (int)part_orig.status() );
         part->suggest_barcode( idx++ );
 #endif
         const ParticlesIds moth = part_orig.mothers();
