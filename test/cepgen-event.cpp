@@ -14,7 +14,7 @@
 using namespace std;
 
 // we use polymorphism here
-std::unique_ptr<cepgen::output::GenericExportHandler> writer;
+std::unique_ptr<cepgen::io::GenericExportHandler> writer;
 
 void storeEvent( const cepgen::Event& ev, unsigned long )
 {
@@ -34,7 +34,7 @@ int main( int argc, char* argv[] )
 {
   ostringstream os;
   string delim;
-  for ( const auto& mod : cepgen::output::ExportHandler::get().modules() )
+  for ( const auto& mod : cepgen::io::ExportHandler::get().modules() )
     os << delim << mod, delim = ",";
 
   if ( argc < 2 )
@@ -57,7 +57,7 @@ int main( int argc, char* argv[] )
 
   const string format = ( argc > 2 ) ? argv[2] : "lhef";
   const char* filename = ( argc > 3 ) ? argv[3] : "example.dat";
-  writer = cepgen::output::ExportHandler::get().build( format, cepgen::ParametersList()
+  writer = cepgen::io::ExportHandler::get().build( format, cepgen::ParametersList()
     .set<std::string>( "filename", filename ) );
 
   //-----------------------------------------------------------------------------------------------

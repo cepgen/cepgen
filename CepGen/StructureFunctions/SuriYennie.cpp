@@ -74,3 +74,5 @@ namespace cepgen
     }
   }
 }
+
+REGISTER_STRFUN( SuriYennie, strfun::SuriYennie )

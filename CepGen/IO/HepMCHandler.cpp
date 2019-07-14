@@ -29,15 +29,24 @@ using namespace HepMC3;
 #    include "HepMC/GenEvent.h"
 #    include "HepMC/GenVertex.h"
 #    include "HepMC/GenParticle.h"
-using namespace HepMC;
+#  else
+#    include "HepMC/WriterAscii.h"
+#    include "HepMC/WriterHEPEVT.h"
+#    include "HepMC/FourVector.h"
+#    include "HepMC/GenEvent.h"
+#    include "HepMC/GenRunInfo.h"
+#    include "HepMC/GenVertex.h"
+#    include "HepMC/GenParticle.h"
+#    define HEPMC3
 #  endif
+using namespace HepMC;
 #endif
 
 #include <memory>
 
 namespace cepgen
 {
-  namespace output
+  namespace io
   {
     /// Handler for the HepMC file output
     /// \tparam T HepMC writer handler (format-dependent)
@@ -48,7 +57,7 @@ namespace cepgen
     {
       public:
         /// Class constructor
-        HepMCHandler( const ParametersList& );
+        explicit HepMCHandler( const ParametersList& );
         void initialise( const Parameters& /*params*/ ) override;
         /// Writer operator
         void operator<<( const Event& ) override;
@@ -74,6 +83,7 @@ namespace cepgen
 
     template<typename T>
     HepMCHandler<T>::HepMCHandler( const ParametersList& params ) :
+      GenericExportHandler( "hepmc" ),
       output_( new T( params.get<std::string>( "filename", "output.hepmc" ) ) ),
       xs_( new GenCrossSection ),
 #ifdef HEPMC3
@@ -192,7 +202,9 @@ namespace cepgen
       event_num_++;
     }
 #ifdef HEPMC3
+#  if HEPMC_VERSION_CODE >= 3001000
     typedef HepMCHandler<WriterAsciiHepMC2> HepMC2Handler;
+#  endif
     typedef HepMCHandler<WriterAscii> HepMC3Handler;
     typedef HepMCHandler<WriterHEPEVT> HEPEVTHandler;
 #  ifdef HEPMC3_ROOTIO
@@ -216,5 +228,7 @@ REGISTER_IO_MODULE( hepmc_root_tree, RootTreeHandler )
 #else
 REGISTER_IO_MODULE( hepmc, HepMC2Handler )
 #endif
+#if defined( HEPMC3 ) && HEPMC_VERSION_CODE >= 3001000
 REGISTER_IO_MODULE( hepmc2, HepMC2Handler )
+#endif
 

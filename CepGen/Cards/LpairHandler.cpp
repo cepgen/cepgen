@@ -6,6 +6,7 @@
 
 #include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Hadronisers/HadronisersHandler.h"
+#include "CepGen/IO/ExportHandler.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Physics/GluonGrid.h"
@@ -71,7 +72,7 @@ namespace cepgen
       else if ( str_fun_ == (int)strfun::Type::MSTWgrid )
         sf_params
           .set<std::string>( "gridPath", mstw_grid_path_ );
-      params_.kinematics.structure_functions = strfun::Parameterisation::build( sf_params );
+      params_.kinematics.structure_functions = strfun::StructureFunctionsHandler::get().build( sf_params );
 
       //--- parse the integration algorithm name
       if ( integr_type_ == "plain" )
@@ -87,6 +88,14 @@ namespace cepgen
       if ( !hadr_name_.empty() ) {
         params_.setHadroniser( cepgen::hadr::HadronisersHandler::get().build( hadr_name_, ParametersList() ) );
         params_.hadroniser()->setParameters( params_ );
+      }
+
+      //--- parse the output module name
+      if ( !out_mod_name_.empty() ) {
+        ParametersList outm;
+        if ( !out_file_name_.empty() )
+          outm.set<std::string>( "filename", out_file_name_ );
+        params_.setOutputModule( cepgen::io::ExportHandler::get().build( out_mod_name_, outm ) );
       }
 
       if ( m_params.count( "IEND" ) )
@@ -116,6 +125,8 @@ namespace cepgen
       registerParameter<std::string>( "PROC", "Process name to simulate", &proc_name_ );
       registerParameter<std::string>( "ITYP", "Integration algorithm", &integr_type_ );
       registerParameter<std::string>( "HADR", "Hadronisation algorithm", &hadr_name_ );
+      registerParameter<std::string>( "OUTP", "Output module", &out_mod_name_ );
+      registerParameter<std::string>( "OUTF", "Output file name", &out_file_name_ );
       registerParameter<std::string>( "KMRG", "KMR grid interpolation path", &kmr_grid_path_ );
 
       //-------------------------------------------------------------------------------------------

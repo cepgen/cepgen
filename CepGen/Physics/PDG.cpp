@@ -33,7 +33,7 @@ namespace cepgen
     define( { neutron, "neutron", "n", 0, 0.939565346, 0., 0, false } );
     //--- general mesons & baryons
     define( { piPlus, "pi_plus", "\u03C0\u00B1", 1, 0.13957018, -1., 3, false } );
-    define( { piZero, "pi_zero", "\u03C0\u2070", 1, 0.1349766, -1., 0, false } );
+    define( { piZero, "pi_zero", "\u03C0\u2070\t", 1, 0.1349766, -1., 0, false } );
     define( { KPlus, "K_plus", "K\u00B1", 1, 0.493677, -1., 3, false } );
     define( { DPlus, "D_plus", "D\u00B1", 1, 1.86962, -1., 3, false } );
     define( { rho770_0, "rho770_0", "\u03C1(770)\u2080", 1, 0.77526, 0.150, 0, false } );
@@ -42,7 +42,7 @@ namespace cepgen
     define( { h1380_1, "h1380_1", "h(1380)\u2081", 1, 1.38619, 0, false } );
     define( { eta, "eta", "\u03B7", 1, 0.547862, -1., 0, false } );
     define( { omega782, "omega782", "\u03C9(782)", 1, -1., 0, false } );
-    define( { Jpsi, "Jpsi", "J/\u03C8", 1, 3.0969, 92.9e-6 /* FIXME */, 0, false } );
+    define( { Jpsi, "Jpsi", "J/\u03C8", 1, 3.0969, 93.2e-6, 0, false } );
     define( { phi1680, "phi1680", "\u03A6(1680)", 1, -1., -1., 0, false } );
     define( { Upsilon1S, "Upsilon1S", "\u03A5(1S)", 1, 9.46030, 54.02e-6, 0, false } );
     define( { Upsilon2S, "Upsilon2S", "\u03A5(2S)", 1, 10.02326, 31.98e-6, 0, false } );

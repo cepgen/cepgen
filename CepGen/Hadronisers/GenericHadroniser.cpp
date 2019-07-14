@@ -10,7 +10,8 @@ namespace cepgen
     GenericHadroniser::GenericHadroniser( const ParametersList& plist, const std::string& name ) :
       name_( name ),
       seed_      ( plist.get<int>( "seed", -1ll ) ),
-      max_trials_( plist.get<int>( "maxTrials", 1 ) )
+      max_trials_( plist.get<int>( "maxTrials", 1 ) ),
+      remn_fragm_( plist.get<bool>( "remnantsFragmentation", true ) )
     {
       CG_DEBUG( "Hadroniser:init" )
         << "\"" << name_ << "\"-type hadroniser built with:\n\t"
@@ -42,12 +43,12 @@ namespace cepgen
   std::ostream&
   operator<<( std::ostream& os, const hadr::GenericHadroniser& hadr )
   {
-    return os << hadr.name().c_str();
+    return os << hadr.name();
   }
 
   std::ostream&
   operator<<( std::ostream& os, const hadr::GenericHadroniser* hadr )
   {
-    return os << hadr->name().c_str();
+    return os << hadr->name();
   }
 }

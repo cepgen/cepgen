@@ -129,11 +129,10 @@ namespace cepgen
       if ( x1 > 1. || x2 > 1. )
         return 0.; // sanity check
 
-      // FIXME FIXME FIXME
-      const double ak10 = event_->getOneByRole( Particle::IncomingBeam1 ).energy(),
-                   ak1z = event_->getOneByRole( Particle::IncomingBeam1 ).momentum().pz(),
-                   ak20 = event_->getOneByRole( Particle::IncomingBeam2 ).energy(),
-                   ak2z = event_->getOneByRole( Particle::IncomingBeam2 ).momentum().pz();
+      const auto& ib1 = event_->getOneByRole( Particle::IncomingBeam1 ),
+                 &ib2 = event_->getOneByRole( Particle::IncomingBeam2 );
+      const double ak10 = ib1.energy(), ak1z = ib1.momentum().pz(),
+                   ak20 = ib2.energy(), ak2z = ib2.momentum().pz();
       CG_DEBUG_LOOP( "PPtoWW:incoming" )
         << "incoming particles: p1: " << ak1z << " / " << ak10 << "\n\t"
         << "                    p2: " << ak2z << " / " << ak20 << ".";

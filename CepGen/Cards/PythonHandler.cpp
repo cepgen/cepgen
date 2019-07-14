@@ -7,6 +7,7 @@
 
 #include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Hadronisers/HadronisersHandler.h"
+#include "CepGen/IO/ExportHandler.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Physics/GluonGrid.h"
@@ -26,6 +27,7 @@ namespace cepgen
     PythonHandler::PythonHandler( const char* file )
     {
       setenv( "PYTHONPATH", ".:Cards:test:../Cards", 1 );
+      setenv( "PYTHONDONTWRITEBYTECODE", "1", 1 );
       CG_DEBUG( "PythonHandler" )
         << "Python PATH: " << getenv( "PYTHONPATH" ) << ".";
       std::string filename = pythonPath( file );
@@ -129,6 +131,12 @@ namespace cepgen
         Py_CLEAR( pgen );
       }
 
+      PyObject* pout = PyObject_GetAttrString( cfg, OUTPUT_NAME ); // new
+      if ( pout ) {
+        parseOutputModule( pout );
+        Py_CLEAR( pout );
+      }
+
       //--- finalisation
       Py_CLEAR( cfg );
     }
@@ -167,7 +175,7 @@ namespace cepgen
       //--- structure functions set for incoming beams
       PyObject* psf = element( kin, "structureFunctions" ); // borrowed
       if ( psf )
-        params_.kinematics.structure_functions = strfun::Parameterisation::build( get<ParametersList>( psf ) );
+        params_.kinematics.structure_functions = strfun::StructureFunctionsHandler::get().build( get<ParametersList>( psf ) );
       //--- types of parton fluxes for kt-factorisation
       std::vector<int> kt_fluxes;
       fillParameter( kin, "ktFluxes", kt_fluxes );
@@ -349,6 +357,18 @@ namespace cepgen
           h->readStrings( config_blk );
         }
       }
+    }
+
+    void
+    PythonHandler::parseOutputModule( PyObject* pout )
+    {
+      if ( !is<ParametersList>( pout ) )
+        throwPythonError( "Invalid type for output parameters list!" );
+
+      PyObject* pname = element( pout, MODULE_NAME ); // borrowed
+      if ( !pname )
+        throwPythonError( "Output module name is required!" );
+      params_.setOutputModule( io::ExportHandler::get().build( get<std::string>( pname ), get<ParametersList>( pout ) ) );
     }
 
     void
