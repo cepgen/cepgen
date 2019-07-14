@@ -1,13 +1,7 @@
 Output formats
 ==============
 
-Internal event record
----------------------
-
-In CepGen, the event (particles, their parentage and kinematics) is handled through the ``cepgen::Event`` object:
-
-.. doxygenclass:: cepgen::Event
-   :members:
+In CepGen, the event (particles, their parentage and kinematics) is handled through the ``cepgen::Event`` object described `in the dedicated event format page </event>`_.
 
 To ease the user interaction with this object, a few output writers (defined here as "handlers") are given as examples.
 All handlers are defined as modules derivating from the following abstract base class:
