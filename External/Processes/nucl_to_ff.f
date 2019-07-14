@@ -55,14 +55,13 @@ c     =================================================================
 #endif
       logical first_init
       data first_init/.true./
-      save first_init,am_l,q_l
-
-      call CepGen_set_process('nucl_to_ff')
-      call CepGen_print
-      imethod = CepGen_param_int('method', 1)
-      pdg_l = CepGen_param_int('pair', 13)
+      save first_init,imethod,pdg_l,am_l,q_l
 
       if(first_init) then
+        call CepGen_set_process('nucl_to_ff')
+        call CepGen_print
+        imethod = CepGen_param_int('method', 1)
+        pdg_l = CepGen_param_int('pair', 13)
         am_l = CepGen_particle_mass(pdg_l) ! central particles mass
         q_l = CepGen_particle_charge(pdg_l) ! central particles charge
         if(iflux1.ge.20.and.iflux1.lt.40) then
