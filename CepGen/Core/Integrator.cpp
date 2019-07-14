@@ -303,6 +303,8 @@ namespace cepgen
       if ( callback )
         callback( last_event, input_params_.numGeneratedEvents() );
       input_params_.addGenerationTime( last_event.time_total );
+      if ( input_params_.outputModule() )
+        *input_params_.outputModule() << last_event;
     }
     return true;
   }

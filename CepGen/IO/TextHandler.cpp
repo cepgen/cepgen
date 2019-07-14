@@ -39,6 +39,7 @@ namespace cepgen
         std::ofstream file_;
         const std::vector<std::string> variables_;
         const bool print_banner_, print_variables_;
+        const std::string separator_;
 
         //--- variables definition
         typedef std::pair<unsigned short,std::string> IndexedVariable;
@@ -75,6 +76,7 @@ namespace cepgen
 
         //--- kinematic variables
         double sqrts_;
+        unsigned long num_evts_;
     };
 
     const std::regex TextHandler::rgx_select_id_( "(\\w+)\\((\\d+)\\)" );
@@ -86,6 +88,7 @@ namespace cepgen
       variables_      ( params.get<std::vector<std::string> >( "variables" ) ),
       print_banner_   ( params.get<bool>( "saveBanner", true ) ),
       print_variables_( params.get<bool>( "saveVariables", true ) ),
+      separator_      ( params.get<std::string>( "separator", "\t" ) ),
       num_vars_( 0 )
     {
       std::smatch sm;
@@ -106,7 +109,7 @@ namespace cepgen
         }
         else // event-level variables
           variables_for_event_.emplace_back( std::make_pair( num_vars_, var ) );
-        oss_vars_ << sep << var, sep = "\t";
+        oss_vars_ << sep << var, sep = separator_;
         ++num_vars_;
       }
     }
@@ -120,6 +123,7 @@ namespace cepgen
     TextHandler::initialise( const Parameters& params )
     {
       sqrts_ = params.kinematics.sqrtS();
+      num_evts_ = 0ul;
       if ( print_banner_ )
         file_ << banner( params, "#" ) << "\n";
       if ( print_variables_ )
@@ -149,10 +153,11 @@ namespace cepgen
       for ( const auto& var : variables_for_event_ )
         vars[var.first] = variable( ev, var.second );
       //--- write down the variables list in the file
-      std::string separator;
+      std::string sep;
       for ( const auto& var : vars )
-        file_ << separator << var, separator = "\t";
+        file_ << sep << var, sep = separator_;
       file_ << "\n";
+      ++num_evts_;
     }
 
     double
@@ -162,10 +167,10 @@ namespace cepgen
         auto meth = m_mom_str_.at( var );
         return ( part.momentum().*meth )();
       }
-      else if ( var == "xi"  ) return 1.-part.energy()*2./sqrts_;
-      else if ( var == "pdg" ) return (double)part.integerPdgId();
-      else if ( var == "charge" ) return part.charge();
-      else if ( var == "status" ) return (double)part.status();
+      if ( var == "xi"  ) return 1.-part.energy()*2./sqrts_;
+      if ( var == "pdg" ) return (double)part.integerPdgId();
+      if ( var == "charge" ) return part.charge();
+      if ( var == "status" ) return (double)part.status();
       CG_WARNING( "TextHandler" )
         << "Failed to retrieve variable \"" << var << "\".";
       return INVALID_OUTPUT;
@@ -174,6 +179,10 @@ namespace cepgen
     double
     TextHandler::variable( const Event& ev, const std::string& var ) const
     {
+      if ( var == "np" )
+        return (double)ev.size();
+      if ( var == "nev" )
+        return (double)num_evts_+1;
       if ( var == "nob1" || var == "nob2" ) {
         unsigned short out = 0.;
         for ( const auto& part : ev[
@@ -185,6 +194,10 @@ namespace cepgen
             out++;
         return (double)out;
       }
+      if ( var == "tgen" )
+        return ev.time_generation;
+      if ( var == "ttot" )
+        return ev.time_total;
       CG_WARNING( "TextHandler" )
         << "Failed to retrieve the event-level variable \"" << var << "\".";
       return INVALID_OUTPUT;

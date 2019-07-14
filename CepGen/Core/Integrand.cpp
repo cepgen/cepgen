@@ -178,9 +178,6 @@ namespace cepgen
         proc->last_event = ev;
         proc->last_event->time_total = tmr.elapsed();
 
-        if ( params->outputModule() )
-          *params->outputModule() << *ev;
-
         CG_DEBUG( "Integrand" )
           << "[process 0x" << std::hex << proc << std::dec << "] "
           << "Individual time (gen+hadr+cuts): " << proc->last_event->time_total*1.e3 << " ms";

@@ -43,7 +43,7 @@ namespace cepgen
       //----- particles retrievers
 
       /// Number of particles in the event
-      size_t numParticles() const;
+      size_t size() const;
       /// Vector of all particles in the event
       const Particles particles() const;
       /// Vector of all stable particles in the event
