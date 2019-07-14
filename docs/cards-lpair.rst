@@ -34,6 +34,14 @@ Vegas integration parameters
 * ``ITVG`` (default: ``10``)
     Number of iterations for the integration
 
+Output module parameters
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* ``OUTP`` (default: ``none``)
+    Type of output module to configure
+* ``OUTF`` (default: ``none``, module-dependent)
+    Output file name
+
 Kinematics parameters
 ---------------------
 

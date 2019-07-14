@@ -106,6 +106,11 @@ The kinematics phase space to be used in the integration and events production c
 This block is a generic placeholder for all process-dependent parameters.
 See the description page of each process to get a list of supported parameters to include in this collection.
 
+``output`` module block
+---------------------------
+
+.. warning:: Under construction
+
 .. _configuration-card-example:
 
 Configuration card example
