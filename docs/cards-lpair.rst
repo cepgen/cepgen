@@ -38,7 +38,7 @@ Output module parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 * ``OUTP`` (default: ``none``)
-    Type of output module to configure
+    Type of `output module </output-formats>`_ to configure
 * ``OUTF`` (default: ``none``, module-dependent)
     Output file name
 
@@ -125,5 +125,7 @@ can be steered using the following card:
    MXMN 1.07
    MXMX 1000.
    NGEN 100000 ! generate 100k events
+   OUTP lhef
+   OUTF lpair-example.lhe
 
 This configuration is equivalent to the *Python card* shown `here <cards-python#configuration-card-example>`_.

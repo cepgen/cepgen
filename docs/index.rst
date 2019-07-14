@@ -30,6 +30,7 @@ This page is constantly evolving, but do not hesitate to contact us through the 
 
    cards-lpair
    cards-python
+   output-formats
 
 .. toctree::
    :maxdepth: 1

@@ -1,6 +1,7 @@
 #Look for an executable called sphinx-build
 find_program(SPHINX_EXECUTABLE
              NAMES sphinx-build
+             HINTS /usr/bin
              DOC "Path to sphinx-build executable")
 
 include(FindPackageHandleStandardArgs)

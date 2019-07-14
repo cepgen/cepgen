@@ -151,4 +151,8 @@ can be steered using the following card:
        numEvents = 1e5,
    )
 
+   output = cepgen.Module('lhef',
+       filename = 'lpair-example.lhef',
+   )
+
 This configuration is equivalent to the *LPAIR card* shown `here <cards-lpair#configuration-card-example>`_.
