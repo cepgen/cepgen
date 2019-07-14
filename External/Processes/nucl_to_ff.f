@@ -32,7 +32,7 @@ c     =================================================================
       double precision Phi11_dot_e,Phi11_cross_e
       double precision Phi21_dot_e,Phi21_cross_e
       double precision aintegral
-      integer imat1,imat2
+      integer imethod,pdg_l,imat1,imat2
 
       double precision px_plus,px_minus,py_plus,py_minus
       double precision r1,r2
@@ -57,7 +57,10 @@ c     =================================================================
       data first_init/.true./
       save first_init,am_l,q_l
 
+      call CepGen_set_process('nucl_to_ff')
       call CepGen_print
+      imethod = CepGen_param_int('method', 1)
+      pdg_l = CepGen_param_int('pair', 13)
 
       if(first_init) then
         am_l = CepGen_particle_mass(pdg_l) ! central particles mass

@@ -38,8 +38,8 @@ namespace cepgen
         template<typename T> T getValue( const char* key ) const {}
 
         void setParameter( const std::string& key, const std::string& value );
-        std::string getParameter( std::string key ) const;
-        std::string getDescription( std::string key ) const;
+        std::string parameter( std::string key ) const;
+        std::string description( std::string key ) const;
 
         static const int kInvalid;
 

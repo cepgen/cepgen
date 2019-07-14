@@ -24,7 +24,9 @@
 #define REGISTER_FORTRAN_PROCESS( name, method, description ) \
   struct PROCESS_F77_NAME( name ) : public cepgen::proc::FortranKTProcess { \
     PROCESS_F77_NAME( name )( const cepgen::ParametersList& params = cepgen::ParametersList() ) : \
-      cepgen::proc::FortranKTProcess( params, STRINGIFY( name ), description, method ## _ ) {} }; \
+      cepgen::proc::FortranKTProcess( params, STRINGIFY( name ), description, method ## _ ) { \
+      cepgen::proc::FortranKTProcess::kProcParameters[STRINGIFY( method )] = params; \
+    } }; \
   REGISTER_PROCESS( name, PROCESS_F77_NAME( name ) )
 
 namespace cepgen
