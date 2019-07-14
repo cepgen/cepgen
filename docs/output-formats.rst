@@ -54,6 +54,7 @@ Alternatively, as from this version ``3.1.0`` of ``HepMC``, the following output
 
 This last module allows to generate a generic (ASCII) output format, fully configurable by the user.
 Using the Python steering cards definition, a list of variables to be stored is defined through the ``variables`` list/array of string-typed definition.
+The default behaviour is storing one event per line with variables separated with an user-parameterisable separator (``separator`` string parameter, default is the standard tabulation ``\t``).
 
 The variable (here, ``var`` is used as an example) may be defined using the three following conventions:
 
@@ -71,6 +72,11 @@ As from version ``0.9.7`` of CepGen, the following variables are handled for the
 
 .. doxygenvariable:: cepgen::io::TextHandler::m_mom_str_
 
+Two extra boolean parameters may also be fed to the module configuration:
+
+- ``saveBanner``, to enable/disable the CepGen banner printout (containing useful information about the process and cuts definition), and
+- ``saveVariables``, to show/hide the list of variables used in this file.
+
 As an example, the following ``output`` block may be used for the ``lpair`` process:
 
 .. code:: python
@@ -80,5 +86,8 @@ As an example, the following ``output`` block may be used for the ``lpair`` proc
        variables = [
            'm(4)', 'pt(cs)', 'pt(6)'
        ],
+       saveBanner = False,
+       saveVariables = True,
+       separator = ' ', # single space
    )
 
