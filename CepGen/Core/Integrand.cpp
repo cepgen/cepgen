@@ -8,6 +8,7 @@
 
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
+#include "CepGen/IO/GenericExportHandler.h"
 
 #include "CepGen/Parameters.h"
 
@@ -176,6 +177,9 @@ namespace cepgen
       if ( params->storage() ) {
         proc->last_event = ev;
         proc->last_event->time_total = tmr.elapsed();
+
+        if ( params->outputModule() )
+          *params->outputModule() << *ev;
 
         CG_DEBUG( "Integrand" )
           << "[process 0x" << std::hex << proc << std::dec << "] "

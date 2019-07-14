@@ -27,6 +27,8 @@ process = cepgen.Module('lpair',
     #),
 )
 
+output = cepgen.Module('text', variables = ['m(4)', 'pt(4)'])
+
 #--- let the user specify the run conditions
 from Config.generator_cff import generator
 generator = generator.clone(
