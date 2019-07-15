@@ -9,10 +9,11 @@
 
 #include "CepGen/Version.h"
 
+#include <gsl/gsl_histogram.h>
+
+#include <iomanip>
 #include <fstream>
 #include <regex>
-
-#include <gsl/gsl_histogram.h>
 
 namespace cepgen
 {
@@ -41,6 +42,7 @@ namespace cepgen
 
         static const std::regex rgx_select_id_, rgx_select_role_;
         static constexpr double INVALID_OUTPUT = -999.;
+        static constexpr size_t PLOT_WIDTH = 50;
 
         std::ofstream file_;
         const std::vector<std::string> variables_;
@@ -49,6 +51,7 @@ namespace cepgen
         const std::string separator_;
 
         //--- variables definition
+        std::unordered_map<short,std::string> variables_name_;
         typedef std::pair<unsigned short,std::string> IndexedVariable;
         std::unordered_map<short,std::vector<IndexedVariable> > variables_per_id_;
         std::unordered_map<Particle::Role,std::vector<IndexedVariable> > variables_per_role_;
@@ -137,6 +140,7 @@ namespace cepgen
             << "Booking a histogram with " << nbins << " bin" << utils::s( nbins )
             << " between " << min << " and " << max << " for \"" << var << "\".";
         }
+        variables_name_[num_vars_] = var;
         ++num_vars_;
       }
     }
@@ -146,7 +150,25 @@ namespace cepgen
       for ( const auto& hs : hists_ ) {
         const auto& hist = hs.second.get();
         gsl_histogram_scale( hist, xsec_/( num_evts_+1 ) );
-        gsl_histogram_fprintf( stdout, hist, "%g", "%g" );
+        const double inv_max_bin = 1./gsl_histogram_max_val( hist );
+        CG_INFO( "TextHandler" )
+          << "plot of \"" << variables_name_.at( hs.first ) << "\"\n"
+          << std::string( 11, ' ' )
+          << Form( "%-5.2f", gsl_histogram_min_val( hist ) )
+          << std::string( PLOT_WIDTH-12, ' ' )
+          << Form( "%5.2f", gsl_histogram_max_val( hist ) ) << " pb\n"
+          << std::string( 11, ' ' )
+          << std::string( PLOT_WIDTH+1, '.' );
+        for ( size_t i = 0; i < gsl_histogram_bins( hist ); ++i ) {
+          double min, max;
+          gsl_histogram_get_range( hist, i, &min, &max );
+          const int val = gsl_histogram_get( hist, i )*PLOT_WIDTH*inv_max_bin;
+          CG_LOG( "TextHandler" ) << "["
+            << std::setw( 4 ) << std::setprecision( 4 ) << min << ","
+            << std::setw( 4 ) << std::setprecision( 4 ) << max << "):"
+            << std::string( val, '*' );
+        }
+        //gsl_histogram_fprintf( stdout, hist, "%g", "%g" );
       }
       file_.close();
     }
