@@ -46,9 +46,16 @@ Alternatively, as from this version ``3.1.0`` of ``HepMC``, the following output
 .. doxygenclass:: cepgen::io::TextHandler
    :outline:
 
-This last module allows to generate a generic (ASCII) output format, fully configurable by the user.
+This last module allows to generate a **generic (ASCII) output format** along with **raw text histograms** of kinematic variables, fully configurable by the user.
 Using the Python steering cards definition, a list of variables to be stored is defined through the ``variables`` list/array of string-typed definition.
-The default behaviour is storing one event per line with variables separated with an user-parameterisable separator (``separator`` string parameter, default is the standard tabulation ``\t``).
+
+For **histograms definition**, a dictionary ``histVariables`` of variable-indexed ``cepgen.Parameters`` objects is fed to the ``output`` module.
+A valid implementation of such objects may handle the following attributes for each variable:
+
+- a number of bins ``nbins``, and
+- a range (``low`` and ``high``) of interest for the variable.
+
+For the **text output format**, the default behaviour is storing one event per line with variables separated with an user-parameterisable separator (``separator`` string parameter, default is the standard tabulation ``\t``).
 
 The variable (here, ``var`` is used as an example) may be defined using the three following conventions:
 
@@ -80,6 +87,12 @@ As an example, the following ``output`` block may be used for the ``lpair`` proc
        variables = [
            'm(4)', 'pt(cs)', 'pt(6)'
        ],
+       histVariables = {
+          'pt(4)': cepgen.Parameters(nbins=10, low=0., high=20.),
+          'm(5)': cepgen.Parameters(nbins=10, low=0., high=100.),
+          'y(cs)': cepgen.Parameters(nbins=10, low=-10., high=10.),
+          'tgen': cepgen.Parameters(nbins=100, low=0., high=1.e-5),
+       },
        saveBanner = False,
        saveVariables = True,
        separator = ' ', # single space
