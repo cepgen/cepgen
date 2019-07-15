@@ -36,6 +36,7 @@ namespace cepgen
 
       private:
         short extractVariableProperties( const std::string& );
+        std::string writeHistogram( const std::string&, const gsl_histogram* ) const;
         /// Retrieve a named variable from a particle
         double variable( const Particle&, const std::string& ) const;
         /// Retrieve a named variable from the whole event
@@ -152,29 +153,9 @@ namespace cepgen
           continue;
         }
         const auto& hist = hists_.at( vn->first ).get();
-        const size_t nbins = gsl_histogram_bins( hist );
         gsl_histogram_scale( hist, xsec_/( num_evts_+1 ) );
-        const double max_bin = gsl_histogram_max_val( hist );
-        const double inv_max_bin = max_bin > 0. ? 1./max_bin : 0.;
         CG_INFO( "TextHandler" )
-          << "plot of \"" << var << "\"\n\t("
-          << "bin width=" << ( gsl_histogram_max( hist )-gsl_histogram_min( hist ) )/nbins << ", "
-          << "mean=" << gsl_histogram_mean( hist ) << ", "
-          << "st.dev.=" << gsl_histogram_sigma( hist ) << ")\n"
-          << std::string( 15, ' ' )
-          << Form( "%-5.2f", gsl_histogram_min_val( hist ) )
-          << std::string( PLOT_WIDTH-12, ' ' )
-          << Form( "%5.2f", gsl_histogram_max_val( hist ) ) << " pb\n"
-          << std::string( 15, ' ' )
-          << std::string( PLOT_WIDTH+1, '.' );
-        for ( size_t i = 0; i < nbins; ++i ) {
-          double min, max;
-          gsl_histogram_get_range( hist, i, &min, &max );
-          const int val = gsl_histogram_get( hist, i )*PLOT_WIDTH*inv_max_bin;
-          CG_LOG( "TextHandler" )
-            << Form( "[%6.2f,%6.2f):", min, max )
-            << std::string( val, '*' );
-        }
+          << writeHistogram( var, hist );
       }
       //--- finalisation of the output file
       file_.close();
@@ -296,6 +277,34 @@ namespace cepgen
       return num_vars_++;
     }
 
+    std::string
+    TextHandler::writeHistogram( const std::string& var, const gsl_histogram* hist ) const
+    {
+      std::ostringstream os;
+      const size_t nbins = gsl_histogram_bins( hist );
+      const double max_bin = gsl_histogram_max_val( hist );
+      const double inv_max_bin = max_bin > 0. ? 1./max_bin : 0.;
+      os
+        << "plot of \"" << var << "\"\n\t("
+        << "bin width=" << ( gsl_histogram_max( hist )-gsl_histogram_min( hist ) )/nbins << ", "
+        << "mean=" << gsl_histogram_mean( hist ) << ", "
+        << "st.dev.=" << gsl_histogram_sigma( hist ) << ")\n"
+        << std::string( 15, ' ' )
+        << Form( "%-5.2f", gsl_histogram_min_val( hist ) )
+        << std::string( PLOT_WIDTH-12, ' ' )
+        << Form( "%5.2f", gsl_histogram_max_val( hist ) ) << " pb\n"
+        << std::string( 15, ' ' )
+        << std::string( PLOT_WIDTH+1, '.' );
+      for ( size_t i = 0; i < nbins; ++i ) {
+        double min, max;
+        gsl_histogram_get_range( hist, i, &min, &max );
+        const int val = gsl_histogram_get( hist, i )*PLOT_WIDTH*inv_max_bin;
+        os
+          << "\n" << Form( "[%6.2f,%6.2f):", min, max )
+          << std::string( val, '*' );
+      }
+      return os.str();
+    }
   }
 }
 
