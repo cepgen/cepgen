@@ -160,7 +160,7 @@ namespace cepgen
           << "plot of \"" << var << "\" ("
           << "bin width=" << ( gsl_histogram_max( hist )-gsl_histogram_min( hist ) )/nbins << ", "
           << "mean=" << gsl_histogram_mean( hist ) << ", "
-          << "st.err=" << gsl_histogram_sigma( hist ) << ")\n"
+          << "st.dev=" << gsl_histogram_sigma( hist ) << ")\n"
           << std::string( 15, ' ' )
           << Form( "%-5.2f", gsl_histogram_min_val( hist ) )
           << std::string( PLOT_WIDTH-12, ' ' )
