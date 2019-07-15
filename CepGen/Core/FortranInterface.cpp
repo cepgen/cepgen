@@ -73,36 +73,24 @@ extern "C" {
     }
   }
 
-  static cepgen::ParametersList kParameters;
-
-  void
-  cepgen_set_process_( char* prname, int prlen )
-  {
-    const std::string proc( prname, prlen );
-    if ( cepgen::proc::FortranKTProcess::kProcParameters.count( proc ) == 0 )
-      throw CG_FATAL( "cepgen_set_process" )
-        << "Failed to retrieve a process named \"" << proc << "\" from the database!";
-    kParameters = cepgen::proc::FortranKTProcess::kProcParameters.at( proc );
-  }
-
   void
   cepgen_list_params_()
   {
-    CG_LOG( "cepgen_list_params" ) << "\t" << kParameters;
+    CG_LOG( "cepgen_list_params" ) << "\t" << cepgen::proc::FortranKTProcess::kProcParameters;
   }
 
   int
   cepgen_param_int_( char* pname, int& def )
   {
-    if ( kParameters.has<cepgen::ParticleProperties>( pname ) )
-      return kParameters.get<cepgen::ParticleProperties>( pname ).pdgid;
-    return kParameters.get<int>( pname, def );
+    if ( cepgen::proc::FortranKTProcess::kProcParameters.has<cepgen::ParticleProperties>( pname ) )
+      return cepgen::proc::FortranKTProcess::kProcParameters.get<cepgen::ParticleProperties>( pname ).pdgid;
+    return cepgen::proc::FortranKTProcess::kProcParameters.get<int>( pname, def );
   }
 
   double
   cepgen_param_real_( char* pname, double& def )
   {
-    return kParameters.get<double>( pname, def );
+    return cepgen::proc::FortranKTProcess::kProcParameters.get<double>( pname, def );
   }
 
 #ifdef __cplusplus

@@ -126,6 +126,8 @@ namespace cepgen
 
     if ( input_params_.hadroniser() )
       input_params_.hadroniser()->setCrossSection( result, abserr );
+    if ( input_params_.outputModule() )
+      input_params_.outputModule()->setCrossSection( result, abserr );
 
     if ( res != GSL_SUCCESS )
       throw CG_FATAL( "Integrator:integrate" )

@@ -24,7 +24,7 @@ namespace cepgen
 {
   namespace proc
   {
-    std::unordered_map<std::string,ParametersList>
+    ParametersList
     FortranKTProcess::kProcParameters;
 
     FortranKTProcess::FortranKTProcess( const ParametersList& params, const char* name, const char* descr, std::function<double( void )> func ) :

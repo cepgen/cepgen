@@ -58,7 +58,6 @@ c     =================================================================
       save first_init,imethod,pdg_l,am_l,q_l
 
       if(first_init) then
-        call CepGen_set_process('nucl_to_ff')
         call CepGen_print
         imethod = CepGen_param_int('method', 1)
         pdg_l = CepGen_param_int('pair', 13)
