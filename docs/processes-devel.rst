@@ -111,10 +111,6 @@ At the Fortran process definition level, all parameters may be accessed through 
       integer CepGen_param_int
       double precision CepGen_param_real
 
-A prior operation is to call the parameters list retrieval using the following subroutine:
-
-* .. doxygenfunction:: cepgen_set_process_
-
 Those two can be called from Fortran using e.g.
 
 .. code-block:: fortran
@@ -122,7 +118,6 @@ Those two can be called from Fortran using e.g.
    integer ival
    real*8 rval
    ! [...]
-   call CepGen_set_process('my_process')           ! same name as the function
    ival = CepGen_param_int('int_parameter', 0)      ! first argument is parameter name
    rval = CepGen_param_real('real_parameter', 0.d0) ! second argument is default value
 
