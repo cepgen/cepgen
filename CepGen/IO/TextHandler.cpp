@@ -2,12 +2,17 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/utils.h"
+
 #include "CepGen/Event/Event.h"
 #include "CepGen/Parameters.h"
+
 #include "CepGen/Version.h"
 
 #include <fstream>
 #include <regex>
+
+#include <gsl/gsl_histogram.h>
 
 namespace cepgen
 {
@@ -25,6 +30,7 @@ namespace cepgen
         ~TextHandler();
 
         void initialise( const Parameters& ) override;
+        void setCrossSection( double xsec, double ) override { xsec_ = xsec; }
         void operator<<( const Event& ) override;
 
       private:
@@ -39,6 +45,7 @@ namespace cepgen
         std::ofstream file_;
         const std::vector<std::string> variables_;
         const bool print_banner_, print_variables_;
+        const ParametersList hist_variables_;
         const std::string separator_;
 
         //--- variables definition
@@ -48,6 +55,8 @@ namespace cepgen
         std::vector<IndexedVariable> variables_for_event_;
         unsigned short num_vars_;
         std::ostringstream oss_vars_;
+
+        double xsec_;
 
         //--- auxiliary helper maps
         const std::unordered_map<std::string,Particle::Role> role_str_ = {
@@ -77,6 +86,13 @@ namespace cepgen
         //--- kinematic variables
         double sqrts_;
         unsigned long num_evts_;
+        struct gsl_histogram_deleter
+        {
+          void operator()( gsl_histogram* h ) {
+            gsl_histogram_free( h );
+          }
+        };
+        std::unordered_map<short,std::unique_ptr<gsl_histogram,gsl_histogram_deleter> > hists_;
     };
 
     const std::regex TextHandler::rgx_select_id_( "(\\w+)\\((\\d+)\\)" );
@@ -88,8 +104,9 @@ namespace cepgen
       variables_      ( params.get<std::vector<std::string> >( "variables" ) ),
       print_banner_   ( params.get<bool>( "saveBanner", true ) ),
       print_variables_( params.get<bool>( "saveVariables", true ) ),
+      hist_variables_ ( params.get<ParametersList>( "histVariables" ) ),
       separator_      ( params.get<std::string>( "separator", "\t" ) ),
-      num_vars_( 0 )
+      num_vars_( 0 ), xsec_( 1. )
     {
       std::smatch sm;
       oss_vars_.clear();
@@ -110,12 +127,27 @@ namespace cepgen
         else // event-level variables
           variables_for_event_.emplace_back( std::make_pair( num_vars_, var ) );
         oss_vars_ << sep << var, sep = separator_;
+        if ( hist_variables_.has<ParametersList>( var ) ) {
+          const auto& hvar = hist_variables_.get<ParametersList>( var );
+          const int nbins = hvar.get<int>( "nbins" );
+          const double min = hvar.get<double>( "low" ), max = hvar.get<double>( "high" );
+          hists_[num_vars_].reset( gsl_histogram_alloc( nbins ) );
+          gsl_histogram_set_ranges_uniform( hists_[num_vars_].get(), min, max );
+          CG_INFO( "TextHandler" )
+            << "Booking a histogram with " << nbins << " bin" << utils::s( nbins )
+            << " between " << min << " and " << max << " for \"" << var << "\".";
+        }
         ++num_vars_;
       }
     }
 
     TextHandler::~TextHandler()
     {
+      for ( const auto& hs : hists_ ) {
+        const auto& hist = hs.second.get();
+        gsl_histogram_scale( hist, xsec_/( num_evts_+1 ) );
+        gsl_histogram_fprintf( stdout, hist, "%g", "%g" );
+      }
       file_.close();
     }
 
@@ -154,8 +186,13 @@ namespace cepgen
         vars[var.first] = variable( ev, var.second );
       //--- write down the variables list in the file
       std::string sep;
-      for ( const auto& var : vars )
+      unsigned short i = 0;
+      for ( const auto& var : vars ) {
         file_ << sep << var, sep = separator_;
+        if ( hists_.count( i ) > 0 )
+          gsl_histogram_increment( hists_.at( i ).get(), var );
+        ++i;
+      }
       file_ << "\n";
       ++num_evts_;
     }
