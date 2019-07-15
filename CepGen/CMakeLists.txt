@@ -93,6 +93,16 @@ if(HEPMC_LIB)
   include_directories(${HEPMC_INCLUDE})
 endif()
 
+#--- linking with ROOT
+
+if(ROOT_FOUND)
+  message(STATUS "ROOT found in ${ROOT_LIBRARY_DIR}")
+  list(APPEND addons_libraries ${ROOT_LIBRARIES})
+  list(APPEND io_sources "IO/ROOTTreeHandler.cpp")
+  include_directories(${ROOT_INCLUDE_DIRS})
+  link_directories(${ROOT_LIBRARY_DIR})
+endif()
+
 #----- build the objects
 
 add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${sf_sources})

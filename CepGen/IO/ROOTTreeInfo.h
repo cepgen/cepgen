@@ -1,13 +1,12 @@
-#ifndef Test_TreeInfo_h
-#define Test_TreeInfo_h
+#ifndef CepGen_IO_ROOTTreeInfo_h
+#define CepGen_IO_ROOTTreeInfo_h
 
 #include "TFile.h"
 #include "TTree.h"
-#include "Math/Vector3D.h"
-#include "Math/Vector4D.h"
 
 #include <exception>
 #include <string>
+#include <iostream>
 
 namespace ROOT
 {
