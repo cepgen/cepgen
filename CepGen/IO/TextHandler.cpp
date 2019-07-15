@@ -114,6 +114,7 @@ namespace cepgen
       separator_      ( params.get<std::string>( "separator", "\t" ) ),
       num_vars_( 0 ), xsec_( 1. )
     {
+      //--- first extract list of variables to store in output file
       oss_vars_.clear();
       std::string sep;
       for ( const auto& var : variables_ ) {
@@ -123,6 +124,7 @@ namespace cepgen
           variable_stored_[id] = true;
         }
       }
+      //--- then extract list of variables to be plotted in histogram
       for ( const auto& var : hist_variables_.keys() ) {
         auto id = extractVariableProperties( var );
         if ( id < 0 )
@@ -140,30 +142,41 @@ namespace cepgen
 
     TextHandler::~TextHandler()
     {
-      for ( const auto& hs : hists_ ) {
-        const auto& hist = hs.second.get();
+      //--- histograms printout
+      for ( const auto& var : hist_variables_.keys() ) {
+        const auto& vn = std::find_if( variables_name_.begin(), variables_name_.end(),
+          [&var]( auto&& p ) { return p.second == var; } );
+        if ( vn == variables_name_.end() ) {
+          CG_WARNING( "TextHandler" )
+            << "Failed to retrieve variable \"" << var << "\" for plotting.";
+          continue;
+        }
+        const auto& hist = hists_.at( vn->first ).get();
+        const size_t nbins = gsl_histogram_bins( hist );
         gsl_histogram_scale( hist, xsec_/( num_evts_+1 ) );
         const double max_bin = gsl_histogram_max_val( hist );
         const double inv_max_bin = max_bin > 0. ? 1./max_bin : 0.;
         CG_INFO( "TextHandler" )
-          << "plot of \"" << variables_name_.at( hs.first ) << "\"\n"
-          << std::string( 11, ' ' )
+          << "plot of \"" << var << "\" ("
+          << "bin width=" << ( gsl_histogram_max( hist )-gsl_histogram_min( hist ) )/nbins << ", "
+          << "mean=" << gsl_histogram_mean( hist ) << ", "
+          << "st.err=" << gsl_histogram_sigma( hist ) << ")\n"
+          << std::string( 15, ' ' )
           << Form( "%-5.2f", gsl_histogram_min_val( hist ) )
           << std::string( PLOT_WIDTH-12, ' ' )
           << Form( "%5.2f", gsl_histogram_max_val( hist ) ) << " pb\n"
-          << std::string( 11, ' ' )
+          << std::string( 15, ' ' )
           << std::string( PLOT_WIDTH+1, '.' );
-        for ( size_t i = 0; i < gsl_histogram_bins( hist ); ++i ) {
+        for ( size_t i = 0; i < nbins; ++i ) {
           double min, max;
           gsl_histogram_get_range( hist, i, &min, &max );
           const int val = gsl_histogram_get( hist, i )*PLOT_WIDTH*inv_max_bin;
-          CG_LOG( "TextHandler" ) << "["
-            << std::setw( 4 ) << std::setprecision( 4 ) << min << ","
-            << std::setw( 4 ) << std::setprecision( 4 ) << max << "):"
+          CG_LOG( "TextHandler" )
+            << Form( "[%6.2f,%6.2f):", min, max )
             << std::string( val, '*' );
         }
-        //gsl_histogram_fprintf( stdout, hist, "%g", "%g" );
       }
+      //--- finalisation of the output file
       file_.close();
     }
 
