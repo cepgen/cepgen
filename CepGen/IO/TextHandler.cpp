@@ -157,10 +157,10 @@ namespace cepgen
         const double max_bin = gsl_histogram_max_val( hist );
         const double inv_max_bin = max_bin > 0. ? 1./max_bin : 0.;
         CG_INFO( "TextHandler" )
-          << "plot of \"" << var << "\" ("
+          << "plot of \"" << var << "\"\n\t("
           << "bin width=" << ( gsl_histogram_max( hist )-gsl_histogram_min( hist ) )/nbins << ", "
           << "mean=" << gsl_histogram_mean( hist ) << ", "
-          << "st.dev=" << gsl_histogram_sigma( hist ) << ")\n"
+          << "st.dev.=" << gsl_histogram_sigma( hist ) << ")\n"
           << std::string( 15, ' ' )
           << Form( "%-5.2f", gsl_histogram_min_val( hist ) )
           << std::string( PLOT_WIDTH-12, ' ' )
