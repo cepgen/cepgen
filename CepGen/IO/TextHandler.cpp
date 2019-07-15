@@ -35,6 +35,7 @@ namespace cepgen
         void operator<<( const Event& ) override;
 
       private:
+        short extractVariableProperties( const std::string& );
         /// Retrieve a named variable from a particle
         double variable( const Particle&, const std::string& ) const;
         /// Retrieve a named variable from the whole event
@@ -52,6 +53,8 @@ namespace cepgen
 
         //--- variables definition
         std::unordered_map<short,std::string> variables_name_;
+        std::unordered_map<short,bool> variable_stored_;
+
         typedef std::pair<unsigned short,std::string> IndexedVariable;
         std::unordered_map<short,std::vector<IndexedVariable> > variables_per_id_;
         std::unordered_map<Particle::Role,std::vector<IndexedVariable> > variables_per_role_;
@@ -111,37 +114,27 @@ namespace cepgen
       separator_      ( params.get<std::string>( "separator", "\t" ) ),
       num_vars_( 0 ), xsec_( 1. )
     {
-      std::smatch sm;
       oss_vars_.clear();
       std::string sep;
       for ( const auto& var : variables_ ) {
-        if ( std::regex_match( var, sm, rgx_select_id_ ) )
-          variables_per_id_[stod( sm[2].str() )].emplace_back( std::make_pair( num_vars_, sm[1].str() ) );
-        else if ( std::regex_match( var, sm, rgx_select_role_ ) ) {
-          const auto& str_role = sm[2].str();
-          if ( role_str_.count( str_role ) == 0 ) {
-            CG_WARNING( "TextHandler" )
-              << "Invalid particle role retrieved from configuration: \"" << str_role << "\".\n\t"
-              << "Skipping the variable \"" << var << "\" in the output module.";
-            continue;
-          }
-          variables_per_role_[role_str_.at( str_role )].emplace_back( std::make_pair( num_vars_, sm[1].str() ) );
+        auto id = extractVariableProperties( var );
+        if ( id >= 0 ) {
+          oss_vars_ << sep << var, sep = separator_;
+          variable_stored_[id] = true;
         }
-        else // event-level variables
-          variables_for_event_.emplace_back( std::make_pair( num_vars_, var ) );
-        oss_vars_ << sep << var, sep = separator_;
-        if ( hist_variables_.has<ParametersList>( var ) ) {
-          const auto& hvar = hist_variables_.get<ParametersList>( var );
-          const int nbins = hvar.get<int>( "nbins" );
-          const double min = hvar.get<double>( "low" ), max = hvar.get<double>( "high" );
-          hists_[num_vars_].reset( gsl_histogram_alloc( nbins ) );
-          gsl_histogram_set_ranges_uniform( hists_[num_vars_].get(), min, max );
-          CG_INFO( "TextHandler" )
-            << "Booking a histogram with " << nbins << " bin" << utils::s( nbins )
-            << " between " << min << " and " << max << " for \"" << var << "\".";
-        }
-        variables_name_[num_vars_] = var;
-        ++num_vars_;
+      }
+      for ( const auto& var : hist_variables_.keys() ) {
+        auto id = extractVariableProperties( var );
+        if ( id < 0 )
+          continue;
+        const auto& hvar = hist_variables_.get<ParametersList>( var );
+        const int nbins = hvar.get<int>( "nbins", 10 );
+        const double min = hvar.get<double>( "low", 0. ), max = hvar.get<double>( "high", 1. );
+        hists_[id].reset( gsl_histogram_alloc( nbins ) );
+        gsl_histogram_set_ranges_uniform( hists_[id].get(), min, max );
+        CG_INFO( "TextHandler" )
+          << "Booking a histogram with " << nbins << " bin" << utils::s( nbins )
+          << " between " << min << " and " << max << " for \"" << var << "\".";
       }
     }
 
@@ -150,7 +143,8 @@ namespace cepgen
       for ( const auto& hs : hists_ ) {
         const auto& hist = hs.second.get();
         gsl_histogram_scale( hist, xsec_/( num_evts_+1 ) );
-        const double inv_max_bin = 1./gsl_histogram_max_val( hist );
+        const double max_bin = gsl_histogram_max_val( hist );
+        const double inv_max_bin = max_bin > 0. ? 1./max_bin : 0.;
         CG_INFO( "TextHandler" )
           << "plot of \"" << variables_name_.at( hs.first ) << "\"\n"
           << std::string( 11, ' ' )
@@ -210,7 +204,8 @@ namespace cepgen
       std::string sep;
       unsigned short i = 0;
       for ( const auto& var : vars ) {
-        file_ << sep << var, sep = separator_;
+        if ( variable_stored_.count( i ) > 0 && variable_stored_.at( i ) )
+          file_ << sep << var, sep = separator_;
         if ( hists_.count( i ) > 0 )
           gsl_histogram_increment( hists_.at( i ).get(), var );
         ++i;
@@ -261,6 +256,33 @@ namespace cepgen
         << "Failed to retrieve the event-level variable \"" << var << "\".";
       return INVALID_OUTPUT;
     }
+
+    short
+    TextHandler::extractVariableProperties( const std::string& var )
+    {
+      const auto& vn = std::find_if( variables_name_.begin(), variables_name_.end(),
+        [&var]( auto&& p ) { return p.second == var; } );
+      if ( vn != variables_name_.end() )
+        return vn->first;
+      std::smatch sm;
+      if ( std::regex_match( var, sm, rgx_select_id_ ) )
+        variables_per_id_[std::stod( sm[2].str() )].emplace_back( std::make_pair( num_vars_, sm[1].str() ) );
+      else if ( std::regex_match( var, sm, rgx_select_role_ ) ) {
+        const auto& str_role = sm[2].str();
+        if ( role_str_.count( str_role ) == 0 ) {
+          CG_WARNING( "TextHandler" )
+            << "Invalid particle role retrieved from configuration: \"" << str_role << "\".\n\t"
+            << "Skipping the variable \"" << var << "\" in the output module.";
+          return -1;
+        }
+        variables_per_role_[role_str_.at( str_role )].emplace_back( std::make_pair( num_vars_, sm[1].str() ) );
+      }
+      else // event-level variables
+        variables_for_event_.emplace_back( std::make_pair( num_vars_, var ) );
+      variables_name_[num_vars_] = var;
+      return num_vars_++;
+    }
+
   }
 }
 
