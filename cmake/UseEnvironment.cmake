@@ -63,6 +63,8 @@ find_library(DELPHES Delphes HINTS ${DELPHES_DIR} PATH_SUFFIXES lib)
 find_path(DELPHES_INCLUDE NAMES modules classes HINTS ${DELPHES_DIR} PATH_SUFFIXES include)
 #--- searching for tbb
 find_library(TBB tbb HINTS ${TBB_DIR} PATH_SUFFIXES lib)
+#--- searching for ROOT
+find_package(ROOT QUIET)
 
 message(STATUS "GSL found in ${GSL_LIB}")
 list(APPEND CEPGEN_EXTERNAL_CORE_REQS ${GSL_LIB} ${GSL_CBLAS_LIB})

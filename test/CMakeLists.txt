@@ -28,7 +28,6 @@ endforeach()
 
 #----- specify the tests requiring ROOT
 
-find_package(ROOT QUIET)
 if(ROOT_FOUND)
   include_directories(${ROOT_INCLUDE_DIRS})
   link_directories(${ROOT_LIBRARY_DIR})
