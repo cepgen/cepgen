@@ -10,11 +10,15 @@
 #include "classes/DelphesFactory.h"
 #include "classes/DelphesClasses.h"
 
+#include "ExRootAnalysis/ExRootTreeWriter.h"
+
+#include "TFile.h"
+
 #include <sstream>
 
 namespace cepgen
 {
-  namespace output
+  namespace io
   {
     /**
      * \brief Export handler for Delphes
@@ -39,24 +43,46 @@ namespace cepgen
         void setCrossSection( double, double ) override {}
 
       private:
+        std::unique_ptr<TFile> output_;
+        const std::string input_card_;
         std::unique_ptr<Delphes> delphes_;
+        std::unique_ptr<ExRootConfReader> conf_reader_;
+        std::unique_ptr<ExRootTreeWriter> tree_writer_;
+        TObjArray* out_all_parts_, *out_stab_parts_, *out_partons_;
+        DelphesFactory* factory_;
     };
 
     DelphesHandler::DelphesHandler( const ParametersList& params ) :
-      delphes_( new Delphes )
-    {}
+      GenericExportHandler( "delphes" ),
+      output_( new TFile( params.get<std::string>( "filename", "output.delphes.root" ).c_str(), "recreate" ) ),
+      input_card_( params.get<std::string>( "inputCard", "input.tcl" ) ),
+      delphes_( new Delphes ),
+      conf_reader_( new ExRootConfReader ),
+      tree_writer_( new ExRootTreeWriter( output_.get(), "Delphes") ),
+      out_all_parts_( nullptr ), out_stab_parts_( nullptr ), out_partons_( nullptr ),
+      factory_( nullptr )
+    {
+      conf_reader_->ReadFile( input_card_.c_str() );
+      delphes_->SetTreeWriter( tree_writer_.get() );
+      delphes_->SetConfReader( conf_reader_.get() );
+    }
 
     DelphesHandler::~DelphesHandler()
     {
       delphes_->FinishTask();
+      tree_writer_->Write();
     }
 
     void
     DelphesHandler::initialise( const Parameters& params )
     {
-      CepGenConfReader conf;
+      /*CepGenConfReader conf;
       conf.feedParameters( params );
-      delphes_->SetConfReader( &conf );
+      delphes_->SetConfReader( &conf );*/
+      factory_ = delphes_->GetFactory();
+      out_all_parts_ = delphes_->ExportArray( "allParticles" );
+      out_stab_parts_ = delphes_->ExportArray( "stableParticles" );
+      out_partons_ = delphes_->ExportArray( "partons" );
       delphes_->InitTask();
     }
 
@@ -64,10 +90,10 @@ namespace cepgen
     DelphesHandler::operator<<( const Event& ev )
     {
       delphes_->Clear();
-      auto factory = delphes_->GetFactory();
+      tree_writer_->Clear();
       //...
       for ( const auto& part : ev.particles() ) {
-        auto cand = factory->NewCandidate();
+        auto cand = factory_->NewCandidate();
         cand->PID = part.integerPdgId();
         cand->Status = (int)part.status();
         cand->Charge = part.charge();
@@ -78,9 +104,13 @@ namespace cepgen
         cand->M2 = part.mothers().size() < 2 ? 0 : *part.mothers().rbegin();
         cand->D1 = part.daughters().empty() ? -1 : *part.daughters().begin();
         cand->D2 = part.daughters().size() < 2 ? -1 : *part.daughters().rbegin();
+        out_all_parts_->Add( cand );
+        if ( cand->Status == 1 )
+          out_stab_parts_->Add( cand );
       }
       //...
       delphes_->ProcessTask();
+      tree_writer_->Fill();
     }
 
     void

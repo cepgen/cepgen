@@ -59,8 +59,8 @@ set(PYTHIA8_DIRS $ENV{PYTHIA8_DIR} ${PYTHIA8_DIR} /usr /usr/local /opt/pythia8)
 find_library(PYTHIA8 pythia8 HINTS ${PYTHIA8_DIRS} PATH_SUFFIXES lib)
 find_path(PYTHIA8_INCLUDE Pythia8 HINTS ${PYTHIA8_DIRS} PATH_SUFFIXES include include/Pythia8 include/pythia8)
 #--- searching for Delphes
-find_library(DELPHES Delphes HINTS ${DELPHES_DIR} PATH_SUFFIXES lib)
-find_path(DELPHES_INCLUDE NAMES modules classes HINTS ${DELPHES_DIR} PATH_SUFFIXES include)
+find_library(DELPHES Delphes HINTS $ENV{DELPHES_DIR} ${DELPHES_DIR} PATH_SUFFIXES lib)
+find_path(DELPHES_INCLUDE NAMES modules classes HINTS $ENV{DELPHES_DIR} ${DELPHES_DIR} PATH_SUFFIXES include)
 #--- searching for tbb
 find_library(TBB tbb HINTS ${TBB_DIR} PATH_SUFFIXES lib)
 #--- searching for ROOT
