@@ -93,6 +93,24 @@ if(HEPMC_LIB)
   include_directories(${HEPMC_INCLUDE})
 endif()
 
+#--- linking with ROOT/Delphes
+
+if(ROOT_FOUND)
+  message(STATUS "ROOT found in ${ROOT_LIBRARY_DIR}")
+  list(APPEND addons_libraries ${ROOT_LIBRARIES})
+  list(APPEND io_sources "IO/ROOTTreeHandler.cpp")
+  include_directories(${ROOT_INCLUDE_DIRS})
+  link_directories(${ROOT_LIBRARY_DIR})
+  if(DELPHES)
+    message(STATUS "Delphes found in ${DELPHES}")
+    list(APPEND addons_libraries ${DELPHES} ${TBB})
+    list(APPEND io_sources "IO/DelphesHandler.cpp")
+    include_directories(${DELPHES_INCLUDE})
+    include_directories(${DELPHES_INCLUDE}/external)
+    message(STATUS ${DELPHES_INCLUDE})
+  endif()
+endif()
+
 #----- build the objects
 
 add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${sf_sources})

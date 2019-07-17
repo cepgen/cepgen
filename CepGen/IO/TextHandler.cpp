@@ -36,6 +36,7 @@ namespace cepgen
 
       private:
         short extractVariableProperties( const std::string& );
+        std::string textHistogram( const std::string&, const gsl_histogram* ) const;
         /// Retrieve a named variable from a particle
         double variable( const Particle&, const std::string& ) const;
         /// Retrieve a named variable from the whole event
@@ -44,10 +45,12 @@ namespace cepgen
         static const std::regex rgx_select_id_, rgx_select_role_;
         static constexpr double INVALID_OUTPUT = -999.;
         static constexpr size_t PLOT_WIDTH = 50;
+        static constexpr char PLOT_CHAR = '#';
 
-        std::ofstream file_;
+        std::ofstream file_, hist_file_;
         const std::vector<std::string> variables_;
-        const bool print_banner_, print_variables_;
+        const bool save_banner_, save_variables_;
+        const bool show_hists_, save_hists_;
         const ParametersList hist_variables_;
         const std::string separator_;
 
@@ -106,12 +109,14 @@ namespace cepgen
 
     TextHandler::TextHandler( const ParametersList& params ) :
       GenericExportHandler( "text" ),
-      file_           ( params.get<std::string>( "filename", "output.txt" ) ),
-      variables_      ( params.get<std::vector<std::string> >( "variables" ) ),
-      print_banner_   ( params.get<bool>( "saveBanner", true ) ),
-      print_variables_( params.get<bool>( "saveVariables", true ) ),
-      hist_variables_ ( params.get<ParametersList>( "histVariables" ) ),
-      separator_      ( params.get<std::string>( "separator", "\t" ) ),
+      file_          ( params.get<std::string>( "filename", "output.txt" ) ),
+      variables_     ( params.get<std::vector<std::string> >( "variables" ) ),
+      save_banner_   ( params.get<bool>( "saveBanner", true ) ),
+      save_variables_( params.get<bool>( "saveVariables", true ) ),
+      show_hists_    ( params.get<bool>( "showHistograms", true ) ),
+      save_hists_    ( params.get<bool>( "saveHistograms", false ) ),
+      hist_variables_( params.get<ParametersList>( "histVariables" ) ),
+      separator_     ( params.get<std::string>( "separator", "\t" ) ),
       num_vars_( 0 ), xsec_( 1. )
     {
       //--- first extract list of variables to store in output file
@@ -138,6 +143,8 @@ namespace cepgen
           << "Booking a histogram with " << nbins << " bin" << utils::s( nbins )
           << " between " << min << " and " << max << " for \"" << var << "\".";
       }
+      if ( save_hists_ && !hists_.empty() )
+        hist_file_.open( "lastrun.hists.txt" );
     }
 
     TextHandler::~TextHandler()
@@ -152,29 +159,12 @@ namespace cepgen
           continue;
         }
         const auto& hist = hists_.at( vn->first ).get();
-        const size_t nbins = gsl_histogram_bins( hist );
         gsl_histogram_scale( hist, xsec_/( num_evts_+1 ) );
-        const double max_bin = gsl_histogram_max_val( hist );
-        const double inv_max_bin = max_bin > 0. ? 1./max_bin : 0.;
-        CG_INFO( "TextHandler" )
-          << "plot of \"" << var << "\"\n\t("
-          << "bin width=" << ( gsl_histogram_max( hist )-gsl_histogram_min( hist ) )/nbins << ", "
-          << "mean=" << gsl_histogram_mean( hist ) << ", "
-          << "st.dev.=" << gsl_histogram_sigma( hist ) << ")\n"
-          << std::string( 15, ' ' )
-          << Form( "%-5.2f", gsl_histogram_min_val( hist ) )
-          << std::string( PLOT_WIDTH-12, ' ' )
-          << Form( "%5.2f", gsl_histogram_max_val( hist ) ) << " pb\n"
-          << std::string( 15, ' ' )
-          << std::string( PLOT_WIDTH+1, '.' );
-        for ( size_t i = 0; i < nbins; ++i ) {
-          double min, max;
-          gsl_histogram_get_range( hist, i, &min, &max );
-          const int val = gsl_histogram_get( hist, i )*PLOT_WIDTH*inv_max_bin;
-          CG_LOG( "TextHandler" )
-            << Form( "[%6.2f,%6.2f):", min, max )
-            << std::string( val, '*' );
-        }
+        if ( show_hists_ )
+          CG_INFO( "TextHandler" )
+            << textHistogram( var, hist );
+        if ( save_hists_ )
+          hist_file_ << "\n" << textHistogram( var, hist ) << "\n";
       }
       //--- finalisation of the output file
       file_.close();
@@ -185,10 +175,12 @@ namespace cepgen
     {
       sqrts_ = params.kinematics.sqrtS();
       num_evts_ = 0ul;
-      if ( print_banner_ )
+      if ( save_banner_ )
         file_ << banner( params, "#" ) << "\n";
-      if ( print_variables_ )
+      if ( save_variables_ )
         file_ << "# " << oss_vars_.str() << "\n";
+      if ( save_hists_ && !hists_.empty() )
+        hist_file_ << banner( params, "#" ) << "\n";
     }
 
     void
@@ -234,7 +226,7 @@ namespace cepgen
         auto meth = m_mom_str_.at( var );
         return ( part.momentum().*meth )();
       }
-      if ( var == "xi"  ) return 1.-part.energy()*2./sqrts_;
+      if ( var == "xi"  ) return 1.-part.momentum().energy()*2./sqrts_;
       if ( var == "pdg" ) return (double)part.integerPdgId();
       if ( var == "charge" ) return part.charge();
       if ( var == "status" ) return (double)part.status();
@@ -296,6 +288,42 @@ namespace cepgen
       return num_vars_++;
     }
 
+    std::string
+    TextHandler::textHistogram( const std::string& var, const gsl_histogram* hist ) const
+    {
+      std::ostringstream os;
+      const size_t nbins = gsl_histogram_bins( hist );
+      const double max_bin = gsl_histogram_max_val( hist );
+      const double inv_max_bin = max_bin > 0. ? 1./max_bin : 0.;
+      const std::string sep( 15, ' ' );
+      os
+        << "plot of \"" << var << "\"\n"
+        << sep << std::string( PLOT_WIDTH-16-var.size(), ' ' )
+        << "d(sig)/d" << var << " (pb/bin)\n"
+        << sep << Form( "%-5.2f", gsl_histogram_min_val( hist ) )
+        << std::string( PLOT_WIDTH-9, ' ' )
+        << Form( "%5.2f", gsl_histogram_max_val( hist ) ) << "\n"
+        << sep << std::string( PLOT_WIDTH+2, '.' ); // abscissa axis
+      for ( size_t i = 0; i < nbins; ++i ) {
+        double min, max;
+        gsl_histogram_get_range( hist, i, &min, &max );
+        const double value = gsl_histogram_get( hist, i );
+        const int val = value*PLOT_WIDTH*inv_max_bin;
+        os
+          << "\n" << Form( "[%6.2f,%6.2f):", min, max )
+          << std::string( val, PLOT_CHAR ) << std::string( PLOT_WIDTH-val, ' ' )
+          << ": " << Form( "%6.2f", value );
+      }
+      os
+        << "\n"
+        << Form( "%15s", var.c_str() ) << ":" << std::string( PLOT_WIDTH, '.' ) << ":\n" // 2nd abscissa axis
+        << "\t("
+        << "bin width=" << ( gsl_histogram_max( hist )-gsl_histogram_min( hist ) )/nbins << ", "
+        << "mean=" << gsl_histogram_mean( hist ) << ", "
+        << "st.dev.=" << gsl_histogram_sigma( hist )
+        << ")";
+      return os.str();
+    }
   }
 }
 
