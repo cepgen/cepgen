@@ -98,3 +98,24 @@ As an example, the following ``output`` block may be used for the ``lpair`` proc
        separator = ' ', # single space
    )
 
+``root``
+--------
+
+.. note:: Previously used in a dedicated executable, i.e. ``cepgen-root``.
+
+This mode generates a **ROOT file** with **events** and **run information** (stored as ROOT :cpp:class:`TTree`).
+This latter may be used in parallel to the two :cpp:class:`ROOT::CepGenRun` and :cpp:class:`ROOT::CepGenEvent` helper reader objects for a compact analysis workflow:
+
+.. doxygenclass:: ROOT::CepGenRun
+   :members:
+.. doxygenclass:: ROOT::CepGenEvent
+   :members:
+
+``delphes``
+-----------
+
+An interface to the `Delphes <https://cp3.irmp.ucl.ac.be/projects/delphes>`_ fast simulation framework is provided if the library is installed on the system.
+
+Beside the usual ``filename`` flag specifying the file name Delphes will use for its output, a path to the ``TCL`` configuration card is also required to steer the output module through the ``inputCard`` string parameter.
+Please refer to the Delphes manual and comprehensive list of examples for more information on the steering of the detector simulation.
+
