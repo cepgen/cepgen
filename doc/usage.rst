@@ -14,8 +14,6 @@ These tools are:
   Additionally, the per-event callback function dumps events in the terminal at a frequency defined by the steering card.
   This tool may be used to validate a configuration file and modified to fit the user’s needs.
 * ``cepgen-event`` (``test/cepgen-event.cpp>``) to **compute the cross section** and **store events** in one of the supported ASCII output format.
-* ``cepgen-root`` (``test/cepgen-root.cxx>``), generating a **ROOT file** with **events** and **run information**.
-  This latter may be used in parallel to the two ``ROOT::CepGenRun`` and ``ROOT::CepGenEvent`` helper reader objects for a compact analysis workflow.
 
 CepGen may either be steered through the modification of its **internal parameters definition**, or using the various **steering modules** available.
 For the latter, two types of cards are currently supported for the run parameterisation.
