@@ -27,6 +27,11 @@ process = cepgen.Module('lpair',
     #),
 )
 
+#--- example of an output module parameterisation
+#output = cepgen.Module('text', variables = ['nev', 'm(4)', 'tgen'])
+#output = cepgen.Module('lhef', output = 'test.lhe')
+#output = cepgen.Module('hepmc', output = 'test.hepmc')
+
 #--- let the user specify the run conditions
 from Config.generator_cff import generator
 generator = generator.clone(

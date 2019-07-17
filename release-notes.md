@@ -1,5 +1,10 @@
 # Release notes
 
+## v0.9.6 (11 Jul 2019)
+* Added support of Pythia6 hadronisation/fragmentation algorithm for legacy tests
+* Structure functions parameterisation objects polished
+* New output modes handled for HepMC interfacing module
+
 ## v0.9.5 (25 Jun 2019)
 * Increased flexibility in particles (and their associated properties) definitions
 * Small corrections in the LPAIR process definition of the output kinematics

@@ -6,6 +6,7 @@
 
 #include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Hadronisers/HadronisersHandler.h"
+#include "CepGen/IO/ExportHandler.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Physics/GluonGrid.h"
@@ -43,9 +44,9 @@ namespace cepgen
           continue;
         setParameter( key, value );
         m_params.insert( { key, value } );
-        if ( getDescription( key ) != "null" )
-          os << "\n>> " << key << " = " << std::setw( 15 ) << getParameter( key )
-             << " (" << getDescription( key ) << ")";
+        if ( description( key ) != "null" )
+          os << "\n>> " << key << " = " << std::setw( 15 ) << parameter( key )
+             << " (" << description( key ) << ")";
       }
       f.close();
 
@@ -91,6 +92,14 @@ namespace cepgen
         params_.hadroniser()->setParameters( params_ );
       }
 
+      //--- parse the output module name
+      if ( !out_mod_name_.empty() ) {
+        ParametersList outm;
+        if ( !out_file_name_.empty() )
+          outm.set<std::string>( "filename", out_file_name_ );
+        params_.setOutputModule( cepgen::io::ExportHandler::get().build( out_mod_name_, outm ) );
+      }
+
       if ( m_params.count( "IEND" ) )
         setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
 
@@ -118,7 +127,8 @@ namespace cepgen
       registerParameter<std::string>( "PROC", "Process name to simulate", &proc_name_ );
       registerParameter<std::string>( "ITYP", "Integration algorithm", &integr_type_ );
       registerParameter<std::string>( "HADR", "Hadronisation algorithm", &hadr_name_ );
-      registerParameter<std::string>( "KMRG", "KMR grid interpolation path", &kmr_grid_path_ );
+      registerParameter<std::string>( "OUTP", "Output module", &out_mod_name_ );
+      registerParameter<std::string>( "OUTF", "Output file name", &out_file_name_ );
 
       //-------------------------------------------------------------------------------------------
       // General parameters
@@ -147,6 +157,7 @@ namespace cepgen
       // Process kinematics parameters
       //-------------------------------------------------------------------------------------------
 
+      registerParameter<std::string>( "KMRG", "KMR grid interpolation path", &kmr_grid_path_ );
       registerParameter<std::string>( "MGRD", "MSTW grid interpolation path", &mstw_grid_path_ );
       registerParameter<int>( "PMOD", "Outgoing primary particles' mode", &str_fun_ );
       registerParameter<int>( "EMOD", "Outgoing primary particles' mode", &str_fun_ );
@@ -199,16 +210,18 @@ namespace cepgen
     void
     LpairHandler::setParameter( const std::string& key, const std::string& value )
     {
-      try { setValue<double>( key.c_str(), std::stod( value ) ); } catch ( const std::invalid_argument& ) {}
-      try { setValue<int>( key.c_str(), std::stoi( value ) ); } catch ( const std::invalid_argument& ) {}
-      try { setValue<std::string>( key.c_str(), value ); } catch ( const std::invalid_argument& ) {
-        throw CG_FATAL( "LpairHandler:setParameter" )
-          << "Failed to add the parameter \"" << key << "\" → \"" << value << "\"!";
+      try { setValue<double>( key.c_str(), std::stod( value ) ); } catch ( const std::invalid_argument& ) {
+        try { setValue<int>( key.c_str(), std::stoi( value ) ); } catch ( const std::invalid_argument& ) {
+          try { setValue<std::string>( key.c_str(), value ); } catch ( const std::invalid_argument& ) {
+            throw CG_FATAL( "LpairHandler:setParameter" )
+              << "Failed to add the parameter \"" << key << "\" → \"" << value << "\"!";
+          }
+        }
       }
     }
 
     std::string
-    LpairHandler::getParameter( std::string key ) const
+    LpairHandler::parameter( std::string key ) const
     {
       double dd = getValue<double>( key.c_str() );
       if ( dd != -999. )
@@ -224,7 +237,7 @@ namespace cepgen
     }
 
     std::string
-    LpairHandler::getDescription( std::string key ) const
+    LpairHandler::description( std::string key ) const
     {
       if ( p_strings_.count( key ) )
         return p_strings_.find( key )->second.description;

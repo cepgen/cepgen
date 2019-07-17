@@ -21,7 +21,7 @@ using namespace std; // account for improper scoping in following includes
 
 namespace cepgen
 {
-  namespace output
+  namespace io
   {
     /**
      * \brief Handler for the LHE file output
@@ -46,6 +46,7 @@ namespace cepgen
     };
 
     LHEFHepMCHandler::LHEFHepMCHandler( const ParametersList& params ) :
+      GenericExportHandler( "lhef" ),
       lhe_output_( new LHEF::Writer( params.get<std::string>( "filename", "output.lhe" ) ) )
     {}
 

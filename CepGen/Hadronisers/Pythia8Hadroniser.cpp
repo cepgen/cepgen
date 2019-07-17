@@ -55,7 +55,8 @@ namespace cepgen
         /// A Pythia8 core to be wrapped
         std::unique_ptr<Pythia8::Pythia> pythia_;
         std::unique_ptr<Pythia8::CepGenEvent> cg_evt_;
-        bool correct_central_;
+        const bool correct_central_;
+        const bool debug_lhef_;
         bool res_decay_;
         bool enable_hadr_;
         unsigned short offset_;
@@ -66,6 +67,7 @@ namespace cepgen
       GenericHadroniser( plist, "pythia8" ),
       pythia_( new Pythia8::Pythia ), cg_evt_( new Pythia8::CepGenEvent ),
       correct_central_( plist.get<bool>( "correctCentralSystem", false ) ),
+      debug_lhef_( plist.get<bool>( "debugLHEF", false ) ),
       res_decay_( true ), enable_hadr_( false ),
       offset_( 0 ), first_evt_( true )
     {}
@@ -82,11 +84,15 @@ namespace cepgen
       pythia_->settings.mode( "Beams:frameType", 5 );
       pythia_->settings.parm( "Beams:eCM", params_->kinematics.sqrtS() );
       min_ids_ = params_->kinematics.minimum_final_state;
+      if ( debug_lhef_ )
+        cg_evt_->openLHEF( "debug.lhe" );
     }
 
     Pythia8Hadroniser::~Pythia8Hadroniser()
     {
       pythia_->settings.writeFile( "last_pythia_config.cmd", false );
+      if ( debug_lhef_ )
+        cg_evt_->closeLHEF( true );
     }
 
     void
@@ -143,6 +149,9 @@ namespace cepgen
         throw CG_FATAL( "Pythia8Hadroniser" )
           << "Failed to initialise the Pythia8 core!\n\t"
           << "See the message above for more details.";
+
+      if ( debug_lhef_ )
+        cg_evt_->initLHEF();
     }
 
     void
@@ -179,6 +188,8 @@ namespace cepgen
       cg_evt_->feedEvent( ev, full ? Pythia8::CepGenEvent::Type::centralAndBeamRemnants
                                    : Pythia8::CepGenEvent::Type::centralAndPartons );
       //if ( full ) cg_evt_->listEvent();
+      if ( debug_lhef_ && full )
+        cg_evt_->eventLHEF();
 
       //===========================================================================================
       // launch the hadronisation / resonances decays, and update the event accordingly
