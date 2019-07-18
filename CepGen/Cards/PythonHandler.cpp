@@ -247,7 +247,8 @@ namespace cepgen
       Limits lim_xi;
       fillParameter( kin, "xi", lim_xi );
       if ( lim_xi.valid() )
-        params_.kinematics.cuts.remnants.energy_single = ( lim_xi+(-1.) )*( -params_.kinematics.incoming_beams.first.pz );
+        //params_.kinematics.cuts.remnants.energy_single = ( lim_xi+(-1.) )*( -params_.kinematics.incoming_beams.first.pz );
+        params_.kinematics.cuts.remnants.energy_single = -( lim_xi-1. )*params_.kinematics.incoming_beams.first.pz;
     }
 
     void
