@@ -295,13 +295,13 @@ namespace cepgen
       const size_t nbins = gsl_histogram_bins( hist );
       const double max_bin = gsl_histogram_max_val( hist );
       const double inv_max_bin = max_bin > 0. ? 1./max_bin : 0.;
-      const std::string sep( 15, ' ' );
+      const std::string sep( 17, ' ' );
       os
         << "plot of \"" << var << "\"\n"
-        << sep << std::string( PLOT_WIDTH-16-var.size(), ' ' )
+        << sep << std::string( PLOT_WIDTH-15-var.size(), ' ' )
         << "d(sig)/d" << var << " (pb/bin)\n"
         << sep << Form( "%-5.2f", gsl_histogram_min_val( hist ) )
-        << std::string( PLOT_WIDTH-9, ' ' )
+        << std::string( PLOT_WIDTH-8, ' ' )
         << Form( "%5.2f", gsl_histogram_max_val( hist ) ) << "\n"
         << sep << std::string( PLOT_WIDTH+2, '.' ); // abscissa axis
       for ( size_t i = 0; i < nbins; ++i ) {
@@ -310,15 +310,16 @@ namespace cepgen
         const double value = gsl_histogram_get( hist, i );
         const int val = value*PLOT_WIDTH*inv_max_bin;
         os
-          << "\n" << Form( "[%6.2f,%6.2f):", min, max )
+          << "\n" << Form( "[%7.2f,%7.2f):", min, max )
           << std::string( val, PLOT_CHAR ) << std::string( PLOT_WIDTH-val, ' ' )
           << ": " << Form( "%6.2f", value );
       }
+      const double bin_width = ( gsl_histogram_max( hist )-gsl_histogram_min( hist ) )/nbins;
       os
         << "\n"
         << Form( "%15s", var.c_str() ) << ":" << std::string( PLOT_WIDTH, '.' ) << ":\n" // 2nd abscissa axis
         << "\t("
-        << "bin width=" << ( gsl_histogram_max( hist )-gsl_histogram_min( hist ) )/nbins << ", "
+        << "bin width=" << bin_width << " unit" << utils::s( (int)bin_width ) << ", "
         << "mean=" << gsl_histogram_mean( hist ) << ", "
         << "st.dev.=" << gsl_histogram_sigma( hist )
         << ")";

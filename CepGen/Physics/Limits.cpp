@@ -13,11 +13,25 @@ namespace cepgen
     std::pair<double,double>( rhs.first, rhs.second )
   {}
 
+  Limits
+  Limits::operator-() const
+  {
+    return Limits( -second, -first );
+  }
+
   Limits&
   Limits::operator+=( double c )
   {
     first += c;
     second += c;
+    return *this;
+  }
+
+  Limits&
+  Limits::operator-=( double c )
+  {
+    first -= c;
+    second -= c;
     return *this;
   }
 
@@ -115,10 +129,18 @@ namespace cepgen
       return os << Form( "above %g", lim.min() );
     return os << Form( "%g to %g", lim.min(), lim.max() );
   }
+
   Limits
   operator+( Limits lim, double c )
   {
     lim += c;
+    return lim;
+  }
+
+  Limits
+  operator-( Limits lim, double c )
+  {
+    lim -= c;
     return lim;
   }
 
