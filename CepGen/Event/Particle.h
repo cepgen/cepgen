@@ -310,7 +310,7 @@ namespace cepgen
       /// Dump all the information on this particle into the standard output stream
       void dump() const;
 
-    private:
+    protected:
       /// Unique identifier in an event
       int id_;
       /// Electric charge (+-1 or 0)
