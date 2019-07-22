@@ -57,40 +57,57 @@ namespace HepMC
     int cm_id = 0, idx = 1;
 
 #ifdef HEPMC3
-    GenVertexPtr v1 = make_shared<GenVertex>( origin ),
-                 v2 = make_shared<GenVertex>( origin ),
-                 vcm = make_shared<GenVertex>( origin );
+    GenVertexPtr v1 = make_shared<GenVertex>( origin ), v2 = make_shared<GenVertex>( origin );
+    GenVertexPtr vcm = make_shared<GenVertex>( origin );
 #else
-    GenVertex* v1 = new GenVertex( origin ),
-              *v2 = new GenVertex( origin ),
-              *vcm = new GenVertex( origin );
+    GenVertex* v1 = new GenVertex( origin ), *v2 = new GenVertex( origin );
+    GenVertex* vcm = new GenVertex( origin );
 #endif
     for ( unsigned int i = 0; i < part_vec.size(); ++i ) {
       const auto& part_orig = part_vec.at( i );
-      FourVector pmom( part_orig.momentum().px(),
-                       part_orig.momentum().py(),
-                       part_orig.momentum().pz(),
-                       part_orig.energy() );
+      const auto& mom_orig = part_orig.momentum();
+      FourVector pmom( mom_orig.px(), mom_orig.py(), mom_orig.pz(), part_orig.energy() );
 #ifdef HEPMC3
       auto part = make_shared<GenParticle>( pmom, part_orig.integerPdgId(), (int)part_orig.status() );
 #else
       auto part = new GenParticle( pmom, part_orig.integerPdgId(), (int)part_orig.status() );
       part->suggest_barcode( idx++ );
 #endif
-      const auto& moth = part_orig.mothers();
 
       switch ( part_orig.role() ) {
-        case cepgen::Particle::IncomingBeam1: { v1->add_particle_in( part ); } break;
-        case cepgen::Particle::IncomingBeam2: { v2->add_particle_in( part ); } break;
-        case cepgen::Particle::OutgoingBeam1: { v1->add_particle_out( part ); } break;
-        case cepgen::Particle::OutgoingBeam2: { v2->add_particle_out( part ); } break;
-        case cepgen::Particle::Parton1:       { v1->add_particle_out( part ); vcm->add_particle_in( part ); } break;
-        case cepgen::Particle::Parton2:       { v2->add_particle_out( part ); vcm->add_particle_in( part ); } break;
-        case cepgen::Particle::Intermediate:  { cm_id = i; continue; } break;
-        case cepgen::Particle::CentralSystem:
-        default: {
-          if ( moth.empty() ) continue;
-          if ( *moth.begin() == cm_id ) vcm->add_particle_out( part );
+        case cepgen::Particle::IncomingBeam1:
+          v1->add_particle_in( part );
+          break;
+        case cepgen::Particle::IncomingBeam2:
+          v2->add_particle_in( part );
+          break;
+        case cepgen::Particle::OutgoingBeam1:
+          v1->add_particle_out( part );
+          break;
+        case cepgen::Particle::OutgoingBeam2:
+          v2->add_particle_out( part );
+          break;
+        case cepgen::Particle::Parton1:
+          v1->add_particle_out( part );
+          vcm->add_particle_in( part );
+          break;
+        case cepgen::Particle::Parton2:
+          v2->add_particle_out( part );
+          vcm->add_particle_in( part );
+          break;
+        case cepgen::Particle::Intermediate:
+          // skip the two-parton system and propagate the parentage
+          cm_id = i;
+          continue;
+        case cepgen::Particle::CentralSystem: default: {
+          const auto& moth = part_orig.mothers();
+          if ( moth.empty() )
+            // skip disconnected lines
+            continue;
+          short m1 = *moth.begin(), m2 = moth.size() > 1 ? *moth.rbegin() : -1;
+          if ( m1 == cm_id || ( m2 >= 0 && ( m1 < cm_id && m2 >= cm_id ) ) )
+            // if connected to the central system
+            vcm->add_particle_out( part );
           else
             throw CG_FATAL( "HepMCHandler:fillEvent" )
               << "Other particle requested! Not yet implemented!";
