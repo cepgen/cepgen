@@ -7,6 +7,7 @@
 
 #include <Tauola/Tauola.h>
 #include <Tauola/TauolaHepMCEvent.h>
+#include <Tauola/Log.h>
 
 using namespace Tauolapp;
 
@@ -19,6 +20,7 @@ namespace cepgen
     {
       public:
         explicit TauolaFilter( const ParametersList& );
+        ~TauolaFilter();
 
         void setParameters( const Parameters& ) override {}
         inline void readString( const char* param ) override {}
@@ -38,6 +40,11 @@ namespace cepgen
       rad_states_( params.get<ParametersList>( "radiations" ) ),
       event_( new HepMC::CepGenEvent )
     {}
+
+    TauolaFilter::~TauolaFilter()
+    {
+      Log::SummaryAtExit();
+    }
 
     void
     TauolaFilter::init()
