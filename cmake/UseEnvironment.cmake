@@ -48,9 +48,9 @@ include_directories(${GSL_INCLUDE})
 find_library(LHAPDF LHAPDF HINTS ${LHAPDF_DIR} PATH_SUFFIXES lib)
 find_path(LHAPDF_INCLUDE LHAPDF HINTS ${LHAPDF_DIR} PATH_SUFFIXES include)
 #--- searching for HepMC
-find_library(HEPMC_LIB NAMES HepMC3 HepMC HINTS ${HEPMC_DIR} PATH_SUFFIXES lib)
-find_library(HEPMC_ROOT_LIB NAMES HepMC3rootIO PATH_SUFFIXES root)
-find_path(HEPMC_INCLUDE NAMES HepMC3 HepMC HINTS ${HEPMC_DIR} PATH_SUFFIXES include)
+find_library(HEPMC_LIB NAMES HepMC3 HepMC HINTS $ENV{HEPMC_DIR} ${HEPMC_DIR} PATH_SUFFIXES lib64 lib)
+find_library(HEPMC_ROOT_LIB NAMES HepMC3rootIO HepMCrootIO PATH_SUFFIXES root)
+find_path(HEPMC_INCLUDE NAMES HepMC3 HepMC HINTS $ENV{HEPMC_DIR} ${HEPMC_DIR} PATH_SUFFIXES include)
 #--- searching for Pythia 6
 set(PYTHIA6_DIRS $ENV{PYTHIA6_DIR} ${PYTHIA6_DIR} /usr /usr/local /opt/pythia6)
 find_library(PYTHIA6 pythia6 HINTS ${PYTHIA6_DIRS} PATH_SUFFIXES lib)
