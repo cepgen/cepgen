@@ -9,7 +9,6 @@
 #include "CepGen/Physics/Constants.h"
 
 #ifdef HEPMC3
-#  include "HepMC3/Version.h"
 #  define HEPMC_VERSION HEPMC3_VERSION
 #  include "HepMC3/WriterAscii.h"
 #  include "HepMC3/WriterAsciiHepMC2.h"
@@ -18,20 +17,17 @@
 #    include "HepMC3/WriterRoot.h"
 #    include "HepMC3/WriterRootTree.h"
 #  endif
-using namespace HepMC3;
+#elif !defined( HEPMC_VERSION_CODE ) // HepMC v2
+#  include "HepMC/IO_GenEvent.h"
 #else
-#  include "HepMC/Version.h"
-#  if !defined( HEPMC_VERSION_CODE ) // HepMC v2
-#    include "HepMC/IO_GenEvent.h"
-#  else
-#    include "HepMC/WriterAscii.h"
-#    include "HepMC/WriterHEPEVT.h"
-#    define HEPMC3
-#  endif
-using namespace HepMC;
+#  include "HepMC/WriterAscii.h"
+#  include "HepMC/WriterHEPEVT.h"
+#  define HEPMC3
 #endif
 
 #include <memory>
+
+using namespace HepMC;
 
 namespace cepgen
 {

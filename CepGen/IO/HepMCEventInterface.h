@@ -10,8 +10,7 @@ namespace cepgen {
 #ifdef HEPMC3
 #  include "HepMC3/Version.h"
 #  include "HepMC3/GenEvent.h"
-namespace HepMC3
-{
+#  define HepMC HepMC3
 #else
 #  include "HepMC/Version.h"
 #  if !defined( HEPMC_VERSION_CODE ) // HepMC v2
@@ -20,10 +19,10 @@ namespace HepMC3
 #    include "HepMC/GenEvent.h"
 #    define HEPMC3
 #  endif
-namespace HepMC
-{
 #endif
 
+namespace HepMC
+{
   /// Interfacing between CepGen and HepMC event definitions
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Jul 2019
