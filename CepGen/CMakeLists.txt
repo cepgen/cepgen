@@ -71,6 +71,15 @@ if(PYTHIA8)
   list(APPEND addons_libraries ${PYTHIA8} dl)
 endif()
 
+#--- linking with Tauola++
+
+if(TAUOLAPP)
+  message(STATUS "Tauola++ found in ${TAUOLAPP}")
+  include_directories(${TAUOLAPP_INCLUDE})
+  list(APPEND hadr_sources "Hadronisers/TauolaFilter.cpp")
+  list(APPEND addons_libraries ${TAUOLAPP})
+endif()
+
 #--- linking with HepMC
 
 if(HEPMC_LIB)
