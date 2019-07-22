@@ -13,12 +13,7 @@ namespace cepgen {
 #  define HepMC HepMC3
 #else
 #  include "HepMC/Version.h"
-#  if !defined( HEPMC_VERSION_CODE ) // HepMC v2
-#    include "HepMC/GenEvent.h"
-#  else
-#    include "HepMC/GenEvent.h"
-#    define HEPMC3
-#  endif
+#  include "HepMC/GenEvent.h"
 #endif
 
 namespace HepMC

@@ -13,8 +13,6 @@
 #  include "HepMC3/GenRunInfo.h"
 #  include "HepMC3/GenVertex.h"
 #  include "HepMC3/GenParticle.h"
-namespace HepMC3
-{
 #else
 #  include "HepMC/Version.h"
 #  if !defined( HEPMC_VERSION_CODE ) // HepMC v2
@@ -30,10 +28,10 @@ namespace HepMC3
 #    include "HepMC/GenParticle.h"
 #    define HEPMC3
 #  endif
-namespace HepMC
-{
 #endif
 
+namespace HepMC
+{
   CepGenEvent::CepGenEvent() :
     GenEvent( Units::GEV, Units::MM )
   {
@@ -106,8 +104,7 @@ namespace HepMC
 
 #ifndef HEPMC3
     GenEvent::set_beam_particles( *v1->particles_in_const_begin(), *v2->particles_in_const_begin() );
-    GenEvent::set_signal_process_vertex( *v1->vertices_begin() );
-    GenEvent::set_beam_particles( *v1->particles_in_const_begin(), *v2->particles_in_const_end() );
+    GenEvent::set_signal_process_vertex( vcm );
 #endif
   }
 }

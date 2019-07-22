@@ -49,7 +49,7 @@ namespace cepgen
     void
     TauolaFilter::init()
     {
-      Tauola::setUnits( Tauola::GEV, Tauola::CM );
+      Tauola::setUnits( Tauola::GEV, Tauola::MM );
       //Tauola::setSeed( seed_ );
       Tauola::initialize();
       //--- spin correlations
@@ -76,6 +76,7 @@ namespace cepgen
       weight = 1.;
 
       event_->feedEvent( ev );
+      event_->print();
       TauolaHepMCEvent evt( event_.get() );
       //evt.undecayTaus();
       evt.decayTaus();
