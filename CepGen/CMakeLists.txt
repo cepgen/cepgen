@@ -1,7 +1,7 @@
 file(GLOB core_sources Core/*.cpp *.cpp)
 file(GLOB phys_sources Physics/*.cpp)
 file(GLOB sf_sources StructureFunctions/*.cpp)
-file(GLOB io_sources IO/GenericExportHandler.cpp)
+file(GLOB io_sources IO/GenericExportHandler.cpp IO/TextHandler.cpp)
 file(GLOB hadr_sources Hadronisers/GenericHadroniser.cpp)
 
 include_directories(${PROJECT_SOURCE_DIR})
@@ -25,6 +25,18 @@ if(alphas_sources)
 endif()
 
 set(addons_libraries "")
+set(strf_libraries ${GSL_LIB} ${GSL_CBLAS_LIB})
+
+#--- linking with LHAPDF
+
+if(LHAPDF)
+  message(STATUS "LHAPDF found in ${LHAPDF}")
+  list(APPEND strf_libraries ${LHAPDF})
+  include_directories(${LHAPDF_INCLUDE})
+else()
+  file(GLOB partonic_sf StructureFunctions/Partonic.cpp)
+  list(REMOVE_ITEM sf_sources ${partonic_sf})
+endif()
 
 #--- linking with Pythia 6
 
@@ -54,7 +66,7 @@ if(PYTHIA8)
   include_directories(${PYTHIA8_INCLUDE})
   add_definitions(-DPYTHIA8)
   list(APPEND hadr_sources "Hadronisers/Pythia8Hadroniser.cpp")
-  list(APPEND hadr_sources "Hadronisers/PythiaEventInterface.cpp")
+  list(APPEND io_sources "IO/PythiaEventInterface.cpp")
   list(APPEND io_sources "IO/LHEFPythiaHandler.cpp")
   list(APPEND addons_libraries ${PYTHIA8} dl)
 endif()
@@ -81,11 +93,27 @@ if(HEPMC_LIB)
   include_directories(${HEPMC_INCLUDE})
 endif()
 
+#--- linking with ROOT/Delphes
+
+if(ROOT_FOUND)
+  message(STATUS "ROOT found in ${ROOT_LIBRARY_DIR}")
+  list(APPEND addons_libraries ${ROOT_LIBRARIES})
+  list(APPEND io_sources "IO/ROOTTreeHandler.cpp")
+  include_directories(${ROOT_INCLUDE_DIRS})
+  link_directories(${ROOT_LIBRARY_DIR})
+  if(DELPHES)
+    message(STATUS "Delphes found in ${DELPHES}")
+    list(APPEND addons_libraries ${DELPHES})
+    list(APPEND io_sources "IO/DelphesHandler.cpp")
+    include_directories(${DELPHES_INCLUDE} ${DELPHES_INCLUDE}/external)
+  endif()
+endif()
+
 #----- build the objects
 
 add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${sf_sources})
 target_link_libraries(CepGenCore ${CEPGEN_EXTERNAL_CORE_REQS})
-target_link_libraries(CepGenCore ${CEPGEN_EXTERNAL_STRF_REQS})
+target_link_libraries(CepGenCore ${strf_libraries})
 
 add_library(CepGenAddOns SHARED ${io_sources} ${hadr_sources})
 target_link_libraries(CepGenAddOns ${addons_libraries})

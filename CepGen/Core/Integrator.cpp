@@ -6,6 +6,8 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
+#include "CepGen/IO/GenericExportHandler.h"
+
 #include "CepGen/Event/Event.h"
 
 #include <thread>
@@ -124,6 +126,8 @@ namespace cepgen
 
     if ( input_params_.hadroniser() )
       input_params_.hadroniser()->setCrossSection( result, abserr );
+    if ( input_params_.outputModule() )
+      input_params_.outputModule()->setCrossSection( result, abserr );
 
     if ( res != GSL_SUCCESS )
       throw CG_FATAL( "Integrator:integrate" )
@@ -224,10 +228,12 @@ namespace cepgen
   {
     if ( num_events < 1 )
       num_events = input_params_.generation().maxgen;
+    if ( input_params_.outputModule() )
+      input_params_.outputModule()->initialise( input_params_ );
     try {
       while ( input_params_.numGeneratedEvents() < num_events )
         generateOne( callback );
-    } catch ( const Exception& e ) { return; }
+    } catch ( const Exception& ) { return; }
   }
 
   bool
@@ -299,6 +305,8 @@ namespace cepgen
       if ( callback )
         callback( last_event, input_params_.numGeneratedEvents() );
       input_params_.addGenerationTime( last_event.time_total );
+      if ( input_params_.outputModule() )
+        *input_params_.outputModule() << last_event;
     }
     return true;
   }
@@ -336,6 +344,8 @@ namespace cepgen
     // ...
     double sum = 0., sum2 = 0., sum2p = 0.;
 
+    utils::ProgressBar prog_bar( grid_->size(), 5 );
+
     //--- main loop
     for ( unsigned int i = 0; i < grid_->size(); ++i ) {
       double fsum = 0., fsum2 = 0.;
@@ -364,6 +374,7 @@ namespace cepgen
           << "fmax = " << grid_->maxValue( i ) << "\n\t"
           << "eff  = " << eff;
       }
+      prog_bar.update( i+1 );
     } // end of main loop
 
     const double inv_max = 1./grid_->size();

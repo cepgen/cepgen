@@ -32,7 +32,7 @@ c     =================================================================
       double precision Phi11_dot_e,Phi11_cross_e
       double precision Phi21_dot_e,Phi21_cross_e
       double precision aintegral
-      integer imat1,imat2
+      integer imethod,pdg_l,imat1,imat2
 
       double precision px_plus,px_minus,py_plus,py_minus
       double precision r1,r2
@@ -55,11 +55,12 @@ c     =================================================================
 #endif
       logical first_init
       data first_init/.true./
-      save first_init,am_l,q_l
-
-      call CepGen_print
+      save first_init,imethod,pdg_l,am_l,q_l
 
       if(first_init) then
+        call CepGen_print
+        imethod = CepGen_param_int('method', 1)
+        pdg_l = CepGen_param_int('pair', 13)
         am_l = CepGen_particle_mass(pdg_l) ! central particles mass
         q_l = CepGen_particle_charge(pdg_l) ! central particles charge
         if(iflux1.ge.20.and.iflux1.lt.40) then
@@ -83,6 +84,9 @@ c     FIXME
 c     =================================================================
 
       nucl_to_ff = 0.d0
+      amat2 = 0.d0
+      eps12 = 0.d0
+      eps22 = 0.d0
       q10 = 0.d0
       q1z = 0.d0
       q20 = 0.d0

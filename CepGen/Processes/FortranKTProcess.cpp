@@ -26,10 +26,11 @@ namespace cepgen
 {
   namespace proc
   {
+    ParametersList
+    FortranKTProcess::kProcParameters;
+
     FortranKTProcess::FortranKTProcess( const ParametersList& params, const char* name, const char* descr, std::function<double( void )> func ) :
       GenericKTProcess( params, name, descr, { { PDG::photon, PDG::photon } }, { PDG::muon, PDG::muon } ),
-      pair_( params.get<ParticleProperties>( "pair" ).pdgid ),
-      method_( params.get<int>( "method", 1 ) ),
       func_( func )
     {
       constants_.m_p = GenericProcess::mp_;
@@ -65,9 +66,7 @@ namespace cepgen
       //===========================================================================================
 
       genparams_.icontri = (int)mode_;
-      genparams_.imethod = method_;
       genparams_.sfmod = (int)kin_.incoming_beams.first.form_factors->structureFunctions()->type;
-      genparams_.pdg_l = pair_;
 
       //-------------------------------------------------------------------------------------------
       // incoming beams information

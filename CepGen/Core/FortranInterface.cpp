@@ -1,4 +1,5 @@
 #include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/Processes/FortranKTProcess.h"
 
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/HeavyIon.h"
@@ -16,7 +17,7 @@ extern "C" {
   cepgen_structure_functions_( int& sfmode, double& xbj, double& q2, double& f2, double& fl )
   {
     using namespace cepgen;
-    static auto sf = strfun::StructureFunctionsHandler::get().build( sfmode, ParametersList() );
+    static auto sf = strfun::StructureFunctionsHandler::get().build( sfmode );
     const auto& val = ( *sf )( xbj, q2 );
     f2 = val.F2;
     fl = val.FL;
@@ -33,7 +34,7 @@ extern "C" {
   {
     using namespace cepgen;
     static auto ff = ff::FormFactorsHandler::get().build( ff::Model::StandardDipole ); // use another argument for the modelling?
-    ff->setStructureFunctions( strfun::StructureFunctionsHandler::get().build( sfmode, ParametersList() ) );
+    ff->setStructureFunctions( strfun::StructureFunctionsHandler::get().build( sfmode ) );
     return ktFlux( (KTFlux)fmode, x, kt2, *ff, mx );
   }
 
@@ -73,6 +74,27 @@ extern "C" {
       exit( 0 );
     }
   }
+
+  void
+  cepgen_list_params_()
+  {
+    CG_LOG( "cepgen_list_params" ) << "\t" << cepgen::proc::FortranKTProcess::kProcParameters;
+  }
+
+  int
+  cepgen_param_int_( char* pname, int& def )
+  {
+    if ( cepgen::proc::FortranKTProcess::kProcParameters.has<cepgen::ParticleProperties>( pname ) )
+      return cepgen::proc::FortranKTProcess::kProcParameters.get<cepgen::ParticleProperties>( pname ).pdgid;
+    return cepgen::proc::FortranKTProcess::kProcParameters.get<int>( pname, def );
+  }
+
+  double
+  cepgen_param_real_( char* pname, double& def )
+  {
+    return cepgen::proc::FortranKTProcess::kProcParameters.get<double>( pname, def );
+  }
+
 #ifdef __cplusplus
 }
 #endif

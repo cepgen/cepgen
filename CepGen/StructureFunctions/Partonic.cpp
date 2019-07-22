@@ -1,19 +1,75 @@
-#include "CepGen/StructureFunctions/Partonic.h"
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
-#ifdef LIBLHAPDF
-#  if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
-#    define LHAPDF_GE_6 1
-#  endif
+#include "LHAPDF/LHAPDF.h"
+
+#if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+#  define LHAPDF_GE_6 1
 #endif
+
+#include <array>
+#include <math.h>
 
 namespace cepgen
 {
   namespace strfun
   {
+    /// Generic partonic level perturbative structure functions built from an external PDFs grid
+    class Partonic : public Parameterisation
+    {
+      public:
+        /// Quarks types
+        enum class Mode { full = 0, valence = 1, sea = 2 };
+        /// Build a calculator from its Parameters object
+        explicit Partonic( const ParametersList& params = ParametersList() );
+        /// Build a calculator from a set, its member, and the contributing quarks
+        explicit Partonic( const char* set, unsigned short member = 0, const Mode& mode = Mode::full );
+        Partonic& operator()( double xbj, double q2 ) override;
+
+      private:
+        std::string description() const override;
+        void initialise();
+        /// String-type PDF identifier (default)
+        std::string pdf_set_;
+        /// Number of quark flavours considered in the SF building
+        unsigned short num_flavours_;
+        /// Integer-type PDF identifier (if no string version is provided)
+        int pdf_code_;
+        /// PDF set used
+        int pdf_member_;
+        /// Quarks types considered in the SF building
+        Mode mode_;
+        bool initialised_;
+
+#if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION >= 6
+        LHAPDF::PDFSet lha_pdf_set_;
+        std::vector<std::unique_ptr<LHAPDF::PDF> > pdfs_;
+#endif
+        static constexpr std::array<short,6> QUARK_PDGS = { { 1, 2, 3, 4, 5, 6 } };
+        static constexpr std::array<short,6> Q_TIMES_3 = { {
+          -1 /*d*/, 2 /*u*/,
+          -1 /*s*/, 2 /*c*/,
+          -1 /*b*/, 2 /*t*/
+        } };
+    };
+
     constexpr std::array<short,6> Partonic::Q_TIMES_3, Partonic::QUARK_PDGS;
+
+    std::ostream&
+    operator<<( std::ostream& os, const strfun::Partonic::Mode& mode )
+    {
+      switch ( mode ) {
+        case strfun::Partonic::Mode::full:
+          return os << "all quarks";
+        case strfun::Partonic::Mode::valence:
+          return os << "valence quarks";
+        case strfun::Partonic::Mode::sea:
+          return os << "sea quarks";
+      }
+      return os;
+    }
 
     Partonic::Partonic( const ParametersList& params ) :
       Parameterisation( params ),
@@ -44,12 +100,11 @@ namespace cepgen
     {
       if ( initialised_ )
         return;
-#ifdef LIBLHAPDF
       std::string lhapdf_version, pdf_description, pdf_type;
-#  ifdef LHAPDF_GE_6
+#ifdef LHAPDF_GE_6
       try {
         //--- check if PDF code is set
-        if ( pdf_code_ != 0l ) {
+        if ( pdf_code_ != 0 ) {
           auto pdf = LHAPDF::lookupPDF( pdf_code_ );
           if ( pdf.second != 0 )
             throw CG_FATAL( "Partonic" ) << "Failed to retrieve PDFset with id=" << pdf_code_ << "!";
@@ -67,13 +122,13 @@ namespace cepgen
           << "Caught LHAPDF exception:\n\t"
           << e.what();
       }
-#  else
-      if ( pdf_code_ != 0l )
-        LHAPDF::initPDFSet( (int)pdf_code_, pdf_member_ );
+#else
+      if ( pdf_code_ != 0 )
+        LHAPDF::initPDFSet( pdf_code_, pdf_member_ );
       else
         LHAPDF::initPDFSet( pdf_set_, LHAPDF::LHGRID, pdf_member_ );
       lhapdf_version = LHAPDF::getVersion();
-#  endif
+#endif
       replace_all( pdf_description, ". ", ".\n  " );
       CG_INFO( "Partonic" ) << "Partonic structure functions evaluator successfully built.\n"
         << " * LHAPDF version: " << lhapdf_version << "\n"
@@ -81,21 +136,17 @@ namespace cepgen
         << " * quarks mode: " << mode_ << "\n"
         << " * PDF set: " << pdf_set_ << "\n"
         << " * PDF member: " << pdf_member_ << ( pdf_type.empty() ? "" : " ("+pdf_type+")" ) << "\n"
-#  ifdef LHAPDF_GE_6
+#ifdef LHAPDF_GE_6
         << ( pdf_description.empty() ? "" : "  "+pdf_description );
-#  else
-      ; LHAPDF::getDescription();
-#  endif
-      initialised_ = true;
 #else
-      throw CG_FATAL( "Partonic" ) << "LHAPDF is not liked to this instance!";
+      ; LHAPDF::getDescription();
 #endif
+      initialised_ = true;
     }
 
     Partonic&
     Partonic::operator()( double xbj, double q2 )
     {
-#ifdef LIBLHAPDF
       std::pair<double,double> nv = { xbj, q2 };
       if ( nv == old_vals_ )
         return *this;
@@ -107,7 +158,7 @@ namespace cepgen
 
       if ( !initialised_ )
         initialise();
-#  ifdef LHAPDF_GE_6
+#ifdef LHAPDF_GE_6
       auto& member = *pdfs_[pdf_member_];
       if ( !member.inPhysicalRangeXQ2( xbj, q2 ) ) {
         CG_WARNING( "Partonic" ) << "(x=" << xbj << ", Q²=" << q2 << " GeV²) "
@@ -116,7 +167,7 @@ namespace cepgen
           << "  max: (x=" << member.xMax() << ", Q²=" << member.q2Max() << ").";
         return *this;
       }
-#  else
+#else
       if ( q2 < LHAPDF::getQ2min( pdf_member_ ) || q2 > LHAPDF::getQ2max( pdf_member_ )
         || xbj < LHAPDF::getXmin( pdf_member_ ) || xbj > LHAPDF::getXmax( pdf_member_ ) ) {
         CG_WARNING( "Partonic" ) << "(x=" << xbj << "/Q²=" << q2 << " GeV²) "
@@ -126,19 +177,19 @@ namespace cepgen
         return *this;
       }
       const double q = sqrt( q2 );
-#  endif
+#endif
 
       for ( int i = 0; i < num_flavours_; ++i ) {
         const double prefactor = 1./9.*Q_TIMES_3[i]*Q_TIMES_3[i];
-#  ifdef LHAPDF_GE_6
+#ifdef LHAPDF_GE_6
         if ( !pdfs_[pdf_member_]->hasFlavor( QUARK_PDGS[i] ) )
           throw CG_FATAL( "Partonic" ) << "Flavour " << QUARK_PDGS[i] << " is unsupported!";
         const double xq = member.xfxQ2( QUARK_PDGS[i], xbj, q2 );
         const double xqbar = member.xfxQ2( -QUARK_PDGS[i], xbj, q2 );
-#  else
+#else
         const double xq = LHAPDF::xfx( xbj, q, QUARK_PDGS[i] );
         const double xqbar = LHAPDF::xfx( xbj, q, -QUARK_PDGS[i] );
-#  endif
+#endif
         switch ( mode_ ) {
           case Mode::full:
             F2 += prefactor*( xq+xqbar ); break;
@@ -148,23 +199,8 @@ namespace cepgen
             F2 += prefactor*( 2.*xqbar ); break;
         }
       }
-#else
-      throw CG_FATAL( "Partonic" ) << "LHAPDF is not liked to this instance!";
-#endif
-
       return *this;
     }
-  }
-
-  std::ostream&
-  operator<<( std::ostream& os, const strfun::Partonic::Mode& mode )
-  {
-    switch ( mode ) {
-      case strfun::Partonic::Mode::full: return os << "all quarks";
-      case strfun::Partonic::Mode::valence: return os << "valence quarks";
-      case strfun::Partonic::Mode::sea: return os << "sea quarks";
-    }
-    return os;
   }
 }
 

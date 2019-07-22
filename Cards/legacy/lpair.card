@@ -19,4 +19,6 @@ MXMX 1000.0
 #THMX 180.
 XIMN 0.02
 XIMX 0.15
+#OUTP lhef
+OUTP text
 

@@ -271,21 +271,28 @@ namespace cepgen
   {
     if ( has<ParametersList>( key ) ) {
       const auto& plist = get<ParametersList>( key );
-      const std::string pname = plist.has<std::string>( "name" )
-        ? plist.get<std::string>( "name" )
-        : key;
-      const std::string pdesc = plist.has<std::string>( "description" )
-        ? plist.get<std::string>( "description" )
-        : pname;
-      return ParticleProperties{
-        (pdgid_t)plist.get<int>( "pdgid", 0 ),
-        pname, pdesc,
-        (short)plist.get<int>( "colours", 1 ),
-        plist.get<double>( "mass", -1. ),
-        plist.get<double>( "width", -1. ),
-        (short)( plist.get<double>( "charge", 0 )*3 ),
-        plist.get<bool>( "fermion", false )
-      };
+      ParticleProperties out;
+      try {
+        out = PDG::get()( plist.get<int>( "pdgid", 0 ) );
+      } catch ( const Exception& ) {}
+      bool modified = false;
+      if ( plist.has<std::string>( "name" ) )
+        out.name = plist.get<std::string>( "name" ), modified = true;
+      if ( plist.has<std::string>( "description" ) )
+        out.description = plist.get<std::string>( "description" ), modified = true;
+      if ( plist.has<int>( "colours" ) )
+        out.colours = plist.get<int>( "colours" ), modified = true;
+      if ( plist.has<double>( "mass" ) )
+        out.mass = plist.get<double>( "mass" ), modified = true;
+      if ( plist.has<double>( "width" ) )
+        out.width = plist.get<double>( "width" ), modified = true;
+      if ( plist.has<double>( "charge" ) )
+        out.charge = short( plist.get<double>( "charge" )*3 ), modified = true;
+      if ( plist.has<bool>( "fermion" ) )
+        out.fermion = plist.get<bool>( "fermion" ), modified = true;
+      if ( modified )
+        PDG::get().define( out );
+      return out;
     }
     else if ( has<int>( key ) )
       return PDG::get()( get<int>( key ) );

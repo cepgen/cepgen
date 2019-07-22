@@ -4,10 +4,11 @@
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/FormFactors.h"
 
+#include "CepGen/StructureFunctions/StructureFunctions.h"
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
-#include "CepGen/StructureFunctions/SuriYennie.h"
 #include "CepGen/Event/Particle.h"
 
 #include <cmath>
