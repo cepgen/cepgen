@@ -47,15 +47,15 @@ namespace cepgen
       Tauola::initialize();
       //--- spin correlations
       Tauola::spin_correlation.setAll( pol_states_.get<bool>( "all", true ) );
-      Tauola::spin_correlation.GAMMA = pol_states_.get<bool>( "gamma", true );
+      Tauola::spin_correlation.GAMMA = pol_states_.get<bool>( "GAMMA", true );
       Tauola::spin_correlation.Z0 = pol_states_.get<bool>( "Z0", true );
-      Tauola::spin_correlation.HIGGS = pol_states_.get<bool>( "H", true );
-      Tauola::spin_correlation.HIGGS_H = pol_states_.get<bool>( "H_H", true );
-      Tauola::spin_correlation.HIGGS_A = pol_states_.get<bool>( "H_A", true );
-      Tauola::spin_correlation.HIGGS_PLUS = pol_states_.get<bool>( "H_p", true );
-      Tauola::spin_correlation.HIGGS_MINUS = pol_states_.get<bool>( "H_m", true );
-      Tauola::spin_correlation.W_PLUS = pol_states_.get<bool>( "W_p", true );
-      Tauola::spin_correlation.W_MINUS = pol_states_.get<bool>( "W_m", true );
+      Tauola::spin_correlation.HIGGS = pol_states_.get<bool>( "HIGGS", true );
+      Tauola::spin_correlation.HIGGS_H = pol_states_.get<bool>( "HIGGS_H", true );
+      Tauola::spin_correlation.HIGGS_A = pol_states_.get<bool>( "HIGGS_A", true );
+      Tauola::spin_correlation.HIGGS_PLUS = pol_states_.get<bool>( "HIGGS_PLUS", true );
+      Tauola::spin_correlation.HIGGS_MINUS = pol_states_.get<bool>( "HIGGS_MINUS", true );
+      Tauola::spin_correlation.W_PLUS = pol_states_.get<bool>( "W_PLUS", true );
+      Tauola::spin_correlation.W_MINUS = pol_states_.get<bool>( "W_MINUS", true );
       //--- radiation states
       Tauola::setRadiation( rad_states_.get<bool>( "enable", true ) );
       const auto rad_cutoff = rad_states_.get<double>( "cutoff", -1. );
