@@ -104,8 +104,8 @@ namespace HepMC
           if ( moth.empty() )
             // skip disconnected lines
             continue;
-          short m1 = *moth.begin(), m2 = moth.size() > 1 ? *moth.rbegin() : -1;
-          if ( m1 == cm_id || ( m2 >= 0 && ( m1 < cm_id && m2 >= cm_id ) ) )
+          const short m1 = *moth.begin(), m2 = moth.size() > 1 ? *moth.rbegin() : -1;
+          if ( cm_id == m1 || ( m2 >= 0 && ( m1 < cm_id && cm_id <= m2 ) ) ) // also supports range
             // if connected to the central system
             vcm->add_particle_out( part );
           else
