@@ -10,6 +10,7 @@
 
 #ifdef HEPMC3
 #  define HEPMC_VERSION HEPMC3_VERSION
+#  define HEPMC_VERSION_CODE HEPMC3_VERSION_CODE
 #  include "HepMC3/WriterAscii.h"
 #  include "HepMC3/WriterAsciiHepMC2.h"
 #  include "HepMC3/WriterHEPEVT.h"
@@ -17,12 +18,15 @@
 #    include "HepMC3/WriterRoot.h"
 #    include "HepMC3/WriterRootTree.h"
 #  endif
-#elif !defined( HEPMC_VERSION_CODE ) // HepMC v2
-#  include "HepMC/IO_GenEvent.h"
 #else
-#  include "HepMC/WriterAscii.h"
-#  include "HepMC/WriterHEPEVT.h"
-#  define HEPMC3
+#  include "HepMC/Version.h"
+#  if !defined( HEPMC_VERSION_CODE ) // HepMC v2
+#    include "HepMC/IO_GenEvent.h"
+#  else
+#    include "HepMC/WriterAscii.h"
+#    include "HepMC/WriterHEPEVT.h"
+#    define HEPMC3
+#  endif
 #endif
 
 #include <memory>
@@ -115,34 +119,21 @@ namespace cepgen
 #endif
       event_->set_event_number( event_num_++ );
     }
-#ifdef HEPMC3
-#  if HEPMC_VERSION_CODE >= 3001000
-    typedef HepMCHandler<WriterAsciiHepMC2> HepMC2Handler;
-#  endif
-    typedef HepMCHandler<WriterAscii> HepMC3Handler;
-    typedef HepMCHandler<WriterHEPEVT> HEPEVTHandler;
-#  ifdef HEPMC3_ROOTIO
-    typedef HepMCHandler<WriterRoot> RootHandler;
-    typedef HepMCHandler<WriterRootTree> RootTreeHandler;
-#  endif
-#else
-    typedef HepMCHandler<IO_GenEvent> HepMC2Handler;
-#endif
   }
 }
 
 #ifdef HEPMC3
-REGISTER_IO_MODULE( hepmc3, HepMC3Handler )
-REGISTER_IO_MODULE( hepmc, HepMC3Handler )
-REGISTER_IO_MODULE( hepevt, HEPEVTHandler )
+REGISTER_IO_MODULE( hepmc, HepMCHandler<WriterAscii> )
+REGISTER_IO_MODULE( hepmc3, HepMCHandler<WriterAscii> )
+REGISTER_IO_MODULE( hepevt, HepMCHandler<WriterHEPEVT> )
+#  if HEPMC_VERSION_CODE >= 3001000
+REGISTER_IO_MODULE( hepmc2, HepMCHandler<WriterAsciiHepMC2> )
+#  endif
 #  ifdef HEPMC3_ROOTIO
-REGISTER_IO_MODULE( hepmc_root, RootHandler )
-REGISTER_IO_MODULE( hepmc_root_tree, RootTreeHandler )
+REGISTER_IO_MODULE( hepmc_root, HepMCHandler<WriterRoot> )
+REGISTER_IO_MODULE( hepmc_root_tree, HepMCHandler<WriterRootTree> )
 #  endif
 #else
-REGISTER_IO_MODULE( hepmc, HepMC2Handler )
-#endif
-#if defined( HEPMC3 ) && HEPMC_VERSION_CODE >= 3001000
-REGISTER_IO_MODULE( hepmc2, HepMC2Handler )
+REGISTER_IO_MODULE( hepmc, HepMCHandler<IO_GenEvent> )
 #endif
 
