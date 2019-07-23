@@ -9,6 +9,7 @@
 #include "CepGen/Physics/Constants.h"
 
 #ifdef HEPMC3
+#  include "HepMC3/Version.h"
 #  define HEPMC_VERSION HEPMC3_VERSION
 #  define HEPMC_VERSION_CODE HEPMC3_VERSION_CODE
 #  include "HepMC3/WriterAscii.h"

@@ -1,5 +1,8 @@
 from Config.containers_cfi import Module, Parameters
 
 tauola = Module('tauola',
-    enablePolarisation = True,
+    polarisations = Parameters(
+        full = True,
+        GAMMA = False,
+    ),
 )

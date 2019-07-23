@@ -9,6 +9,7 @@
 #include <Tauola/Tauola.h>
 #ifdef HEPMC3
 #  include "CepGen/Event/Event.h"
+#  include "CepGen/Core/utils.h"
 #  include <Tauola/TauolaEvent.h>
 #else
 #  include <Tauola/TauolaHepMCEvent.h>
@@ -113,7 +114,7 @@ namespace cepgen
       //Tauola::setSeed( seed_ );
       Tauola::initialize();
       //--- spin correlations
-      Tauola::spin_correlation.setAll( pol_states_.get<bool>( "all", true ) );
+      Tauola::spin_correlation.setAll( pol_states_.get<bool>( "full", true ) );
       Tauola::spin_correlation.GAMMA = pol_states_.get<bool>( "GAMMA", true );
       Tauola::spin_correlation.Z0 = pol_states_.get<bool>( "Z0", true );
       Tauola::spin_correlation.HIGGS = pol_states_.get<bool>( "HIGGS", true );
@@ -170,10 +171,14 @@ namespace cepgen
         const auto& moth = part.mothers();
         if ( !moth.empty() ) {
           std::vector<TauolaParticle*> ml;
-          for ( const auto& mt_id : moth )
+          for ( const auto& mt_id : moth ) {
             ml.emplace_back( particles_[mt_id] );
+            if ( part.role() == Particle::Role::Intermediate )
+              particles_[i]->setPdgID( particles_[mt_id]->getPdgID() );
+          }
           particles_[i]->setMothers( ml );
         }
+        particles_[i]->print();
       }
     }
 
@@ -225,6 +230,7 @@ namespace cepgen
       Particle part( Particle::Role::UnknownRole, pdg, (Particle::Status)status );
       part.setChargeSign( pdg/(unsigned int)pdg );
       part.setMomentum( Particle::Momentum::fromPxPyPzE( px, py, pz, e ) );
+      part.setMass( mass );
       return new CepGenTauolaParticle( part );
     }
 
@@ -233,7 +239,11 @@ namespace cepgen
     {
       CG_INFO( "TauolaParticle" )
         << "TauolaParticle{pdg=" << getPdgID()
-        << ",momentum=(" << getPx() << "," << getPy() << "," << getPz() << ";" << getE() << ")"
+        << ",status=" << getStatus()
+        << ",mom=(" << getPx() << "," << getPy() << "," << getPz() << ";" << getE() << ")"
+        << ",m=" << getMass()
+        << "," << utils::s( "mother", getMothers().size() )
+        << "," << utils::s( "daughter", getDaughters().size() )
         << "}";
     }
 #endif
