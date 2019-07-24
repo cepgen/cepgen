@@ -54,11 +54,6 @@ namespace cepgen
         void setCrossSection( double, double ) override;
 
       private:
-        /// Clear the associated HepMC event content
-        void clearEvent();
-        /// Populate the associated HepMC event with a Event object
-        void fillEvent( const Event& );
-
         /// Writer object
         std::unique_ptr<T> output_;
         /// Generator cross section and error
@@ -93,7 +88,15 @@ namespace cepgen
     template<typename T> void
     HepMCHandler<T>::operator<<( const Event& evt )
     {
-      fillEvent( evt );
+      event_->feedEvent( evt );
+      // general information
+#ifdef HEPMC3
+      event_->set_cross_section( xs_ );
+      event_->set_run_info( runinfo_ );
+#else
+      event_->set_cross_section( *xs_ );
+#endif
+      event_->set_event_number( event_num_++ );
 #ifdef HEPMC3
       output_->write_event( *event_ );
 #else
@@ -105,20 +108,6 @@ namespace cepgen
     HepMCHandler<T>::setCrossSection( double xsect, double xsect_err )
     {
       xs_->set_cross_section( xsect, xsect_err );
-    }
-
-    template<typename T> void
-    HepMCHandler<T>::fillEvent( const Event& evt )
-    {
-      event_->feedEvent( evt );
-      // general information
-#ifdef HEPMC3
-      event_->set_cross_section( xs_ );
-      event_->set_run_info( runinfo_ );
-#else
-      event_->set_cross_section( *xs_ );
-#endif
-      event_->set_event_number( event_num_++ );
     }
   }
 }
