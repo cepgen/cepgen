@@ -16,7 +16,8 @@ div.documentwrapper {
 /* foldable blocks */
 
 .toggle .header {
-    display: block;
+    display: inline-block;
+    font-weight: bold;
     clear: both;
 }
 

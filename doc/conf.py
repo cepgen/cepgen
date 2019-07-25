@@ -26,7 +26,7 @@ author = u'Laurent Forthomme'
 # The short X.Y version
 version = u'0.9'
 # The full version, including alpha/beta/rc tags
-release = u'0.9.6'
+release = u'0.9.7'
 
 
 # -- General configuration ---------------------------------------------------
@@ -234,6 +234,7 @@ breathe_default_project = "CepGen"
 breathe_implementation_filename_extensions = ['.cxx', '.C', '.f']
 
 def setup(app):
-    app.add_css_file('hacks.css')
+#    app.add_css_file('hacks.css')
+    app.add_stylesheet('hacks.css')
 #    app.add_js_file('mathconf.js', type='text/x-mathjax-config')
 #    app.add_js_file('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML', async=True)
