@@ -22,7 +22,7 @@ namespace cepgen
 
       private:
         /// Retrieve a named variable from a particle
-        double variable( const Particle&, const std::string& ) const;
+        double variable( const Event&, const Particle&, const std::string& ) const;
         /// Retrieve a named variable from the whole event
         double variable( const Event&, const std::string& ) const;
 

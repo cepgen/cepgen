@@ -308,7 +308,7 @@ namespace cepgen
       // --- global particle information extraction
 
       /// Dump all the information on this particle into the standard output stream
-      void dump() const;
+      friend std::ostream& operator<<( std::ostream&, const Particle& );
 
     protected:
       /// Unique identifier in an event

@@ -19,7 +19,7 @@ namespace cepgen
       if ( std::regex_match( var, sm, rgx_select_id_ ) ) {
         const auto& var_name = sm[1].str();
         const auto& part = ev[std::stod( sm[2].str() )];
-        return variable( part, var_name );
+        return variable( ev, part, var_name );
       }
       //--- particle-level variables (indexed by role)
       else if ( std::regex_match( var, sm, rgx_select_role_ ) ) {
@@ -32,7 +32,7 @@ namespace cepgen
           return INVALID_OUTPUT;
         }
         const auto& part = ev[role_str_.at( str_role )][0];
-        return variable( part, var_name );
+        return variable( ev, part, var_name );
       }
       //--- event-level variables
       else
@@ -40,13 +40,23 @@ namespace cepgen
     }
 
     double
-    EventBrowser::variable( const Particle& part, const std::string& var ) const
+    EventBrowser::variable( const Event& ev, const Particle& part, const std::string& var ) const
     {
       if ( m_mom_str_.count( var ) ) {
         auto meth = m_mom_str_.at( var );
         return ( part.momentum().*meth )();
       }
-      //if ( var == "xi"  ) return 1.-part.momentum().energy()*2./sqrts_;
+      if ( var == "xi"  ) {
+        const auto& moth = part.mothers();
+        if ( moth.empty() ) {
+          CG_WARNING( "EventBrowser" )
+            << "Failed to retrieve parent particle to compute xi "
+            << "for the following particle:\n"
+            << part;
+          return INVALID_OUTPUT;
+        }
+        return 1.-part.energy()/ev[*moth.begin()].energy();
+      }
       if ( var == "pdg" ) return (double)part.integerPdgId();
       if ( var == "charge" ) return part.charge();
       if ( var == "status" ) return (double)part.status();
