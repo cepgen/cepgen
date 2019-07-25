@@ -1,5 +1,14 @@
 # Release notes
 
+## v0.9.7 (25 Jul 2019)
+* Fortran processes can now be fed a generic set of parameters, thanks to additional getter functions
+* Output handlers may now be constructed directly from steering cards, thus enhancing overall modularity.
+* Added a helper for the retrieval of events properties through human-readable getters
+* New output handlers: text (raw text output, and ASCII histograms), HepMC ASCII output (for HepMC v<3),
+  ROOT histogram collections and ntuple files writers
+* In addition, added an interface to Delphes for the simulation of detectors effects
+* Refactored HepMC event builder in preparation for future developments
+
 ## v0.9.6 (11 Jul 2019)
 * Added support of Pythia6 hadronisation/fragmentation algorithm for legacy tests
 * Structure functions parameterisation objects polished
