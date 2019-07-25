@@ -31,6 +31,11 @@ namespace cepgen
       /// \tparam U Class to register (inherited from T base class)
       template <typename U> void registerModule( const I& name, const ParametersList& def_params = ParametersList() ) {
         static_assert( std::is_base_of<T,U>::value, "\n\n  *** Failed to register an object with improper inheritance into the factory. ***\n" );
+        if ( map_.count( name ) > 0 || params_map_.count( name ) > 0 ) {
+          std::ostringstream oss;
+          oss << __PRETTY_FUNCTION__ << "\n\n  *** Duplicate module registration detected for index/name \"" << name << "\"! ***\n";
+          throw std::invalid_argument( oss.str() );
+        }
         map_[name] = &build<U>;
         params_map_[name] = def_params;
       }
