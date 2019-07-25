@@ -42,6 +42,7 @@ namespace cepgen
         static constexpr char PLOT_CHAR = '#';
 
         std::ofstream file_, hist_file_;
+        std::string hist_filename_;
         //--- variables definition
         const std::vector<std::string> variables_;
         const bool save_banner_, save_variables_;
@@ -63,12 +64,13 @@ namespace cepgen
             gsl_histogram_free( h );
           }
         };
-        std::unordered_map<std::string,std::unique_ptr<gsl_histogram,gsl_histogram_deleter> > hists_;
+        std::vector<std::pair<std::string,std::unique_ptr<gsl_histogram,gsl_histogram_deleter> > > hists_;
     };
 
     TextHandler::TextHandler( const ParametersList& params ) :
       GenericExportHandler( "text" ),
       file_          ( params.get<std::string>( "filename", "output.txt" ) ),
+      hist_filename_ ( params.get<std::string>( "histFilename", "output.hists.txt" ) ),
       variables_     ( params.get<std::vector<std::string> >( "variables" ) ),
       save_banner_   ( params.get<bool>( "saveBanner", true ) ),
       save_variables_( params.get<bool>( "saveVariables", true ) ),
@@ -88,14 +90,15 @@ namespace cepgen
         const auto& hvar = hist_vars.get<ParametersList>( var );
         const int nbins = hvar.get<int>( "nbins", 10 );
         const double min = hvar.get<double>( "low", 0. ), max = hvar.get<double>( "high", 1. );
-        hists_[var].reset( gsl_histogram_alloc( nbins ) );
-        gsl_histogram_set_ranges_uniform( hists_[var].get(), min, max );
+        auto hist = gsl_histogram_alloc( nbins );
+        gsl_histogram_set_ranges_uniform( hist, min, max );
+        hists_.emplace_back( std::make_pair( var, hist ) );
         CG_INFO( "TextHandler" )
           << "Booking a histogram with " << nbins << " bin" << utils::s( nbins )
           << " between " << min << " and " << max << " for \"" << var << "\".";
       }
       if ( save_hists_ && !hists_.empty() )
-        hist_file_.open( "lastrun.hists.txt" );
+        hist_file_.open( hist_filename_ );
     }
 
     TextHandler::~TextHandler()
@@ -114,6 +117,10 @@ namespace cepgen
         if ( save_hists_ )
           hist_file_ << "\n" << h_out << "\n";
       }
+      if ( save_hists_ )
+        CG_INFO( "TextHandler" )
+          << "Saved " << utils::s( "histogram", hists_.size() )
+          << " into \"" << hist_filename_ << "\".";
     }
 
     void
