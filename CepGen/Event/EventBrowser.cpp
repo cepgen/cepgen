@@ -15,12 +15,14 @@ namespace cepgen
     EventBrowser::get( const Event& ev, const std::string& var ) const
     {
       std::smatch sm;
-      if ( std::regex_match( var, sm, rgx_select_id_ ) ) { // per-id variable
+      //--- particle-level variables (indexed by integer id)
+      if ( std::regex_match( var, sm, rgx_select_id_ ) ) {
         const auto& var_name = sm[1].str();
         const auto& part = ev[std::stod( sm[2].str() )];
         return variable( part, var_name );
       }
-      else if ( std::regex_match( var, sm, rgx_select_role_ ) ) { // per-role variable
+      //--- particle-level variables (indexed by role)
+      else if ( std::regex_match( var, sm, rgx_select_role_ ) ) {
         const auto& var_name = sm[1].str();
         const auto& str_role = sm[2].str();
         if ( role_str_.count( str_role ) == 0 ) {
@@ -32,7 +34,8 @@ namespace cepgen
         const auto& part = ev[role_str_.at( str_role )][0];
         return variable( part, var_name );
       }
-      else // event-level variable
+      //--- event-level variables
+      else
         return variable( ev, var );
     }
 

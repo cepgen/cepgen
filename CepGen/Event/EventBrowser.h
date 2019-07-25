@@ -17,7 +17,7 @@ namespace cepgen
     class EventBrowser
     {
       public:
-        explicit EventBrowser();
+        EventBrowser() = default;
         double get( const Event& ev, const std::string& var ) const;
 
       private:
