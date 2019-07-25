@@ -179,7 +179,7 @@ namespace cepgen
       const double bin_width = ( gsl_histogram_max( hist )-gsl_histogram_min( hist ) )/nbins;
       os
         << "\n"
-        << Form( "%15s", var.c_str() ) << ":" << std::string( PLOT_WIDTH, '.' ) << ":\n" // 2nd abscissa axis
+        << Form( "%17s", var.c_str() ) << ":" << std::string( PLOT_WIDTH, '.' ) << ":\n" // 2nd abscissa axis
         << "\t("
         << "bin width=" << bin_width << " unit" << utils::s( (int)bin_width ) << ", "
         << "mean=" << gsl_histogram_mean( hist ) << ", "
