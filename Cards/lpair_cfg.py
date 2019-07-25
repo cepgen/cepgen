@@ -1,8 +1,10 @@
 import Config.Core as cepgen
 from Config.Integration.vegas_cff import integrator
+from Config.PDG_cfi import PDG
+
+#--- example of a hadronisation algorithm steering
 #from Config.Hadronisation.pythia6_cff import pythia6 as hadroniser
 #from Config.Hadronisation.pythia8_cff import pythia8 as hadroniser
-from Config.PDG_cfi import PDG
 
 process = cepgen.Module('lpair',
     processParameters = cepgen.Parameters(
@@ -21,18 +23,18 @@ process = cepgen.Module('lpair',
         eta = (-2.5, 2.5),
         mx = (1.07, 1000.),
     ),
+    #--- example of a complex taming function definition
     #tamingFunctions = cepgen.Parameters(
-    #    # example of a complex taming function
     #    cepgen.Parameters(variable = "m_ll", expression = "(m_ll>80.) ? exp(-(m_ll-80)/10) : 1.0"),
     #),
 )
 
 #--- example of an output module parameterisation
-#output = cepgen.Module('text', variables = ['nev', 'm(4)', 'tgen'])
-#output = cepgen.Module('lhef', output = 'test.lhe')
-#output = cepgen.Module('hepmc', output = 'test.hepmc')
+#output = cepgen.Module('text', variables = ['nev', 'm(4)', 'tgen'], histVariables={'m(4)': cepgen.Parameters(low=0., high=250.)})
+#output = cepgen.Module('lhef', filename='test.lhe')
+#output = cepgen.Module('hepmc', filename='test.hepmc')
 
-#--- let the user specify the run conditions
+#--- let the user specify the events generation parameters
 from Config.generator_cff import generator
 generator = generator.clone(
     numEvents = 100000,

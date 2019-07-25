@@ -33,7 +33,9 @@ namespace cepgen
   namespace utils
   {
     /// Add a trailing "s" when needed
-    inline const char* s( unsigned short num ) { return ( num > 1 ) ? "s" : ""; }
+    inline const char* s( size_t num ) { return ( num > 1 ) ? "s" : ""; }
+    /// Add a trailing "s" when needed
+    inline std::string s( const std::string& word, size_t num ) { return Form( "%i %s%s", num, word.c_str(), ( num > 1 ) ? "s" : "" ); }
     /// Helper to print a vector
     template<class T> std::string repr( const std::vector<T>& vec, const std::string& sep = "," ) {
       return std::accumulate( std::next( vec.begin() ), vec.end(),

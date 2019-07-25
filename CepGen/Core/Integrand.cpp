@@ -164,7 +164,7 @@ namespace cepgen
         for ( const auto& part : (*ev)[system] ) {
           if ( part.status() != Particle::Status::FinalState )
             continue;
-          if ( !params->kinematics.cuts.remnants.energy_single.passes( fabs( part.momentum().energy() ) ) )
+          if ( !params->kinematics.cuts.remnants.energy_single.passes( part.momentum().energy() ) )
             return 0.;
           if ( !params->kinematics.cuts.remnants.rapidity_single.passes( fabs( part.momentum().rapidity() ) ) )
             return 0.;

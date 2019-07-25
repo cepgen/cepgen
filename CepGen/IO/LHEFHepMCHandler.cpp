@@ -80,9 +80,9 @@ namespace cepgen
       out.SCALUP = 0.;
       out.AQEDUP = constants::ALPHA_EM;
       out.AQCDUP = constants::ALPHA_QCD;
-      out.NUP = ev.numParticles();
+      out.NUP = ev.size();
       out.resize();
-      for ( unsigned short ip = 0; ip < ev.numParticles(); ++ip ) {
+      for ( unsigned short ip = 0; ip < ev.size(); ++ip ) {
         const Particle part = ev[ip];
         out.IDUP[ip] = part.integerPdgId(); // PDG id
         out.ISTUP[ip] = (short)part.status(); // status code
