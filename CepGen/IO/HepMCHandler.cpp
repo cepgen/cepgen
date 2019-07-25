@@ -23,6 +23,7 @@
 #  include "HepMC/Version.h"
 #  if !defined( HEPMC_VERSION_CODE ) // HepMC v2
 #    include "HepMC/IO_GenEvent.h"
+#    include "HepMC/IO_AsciiParticles.h"
 #  else
 #    include "HepMC/WriterAscii.h"
 #    include "HepMC/WriterHEPEVT.h"
@@ -71,7 +72,7 @@ namespace cepgen
     template<typename T>
     HepMCHandler<T>::HepMCHandler( const ParametersList& params ) :
       GenericExportHandler( "hepmc" ),
-      output_( new T( params.get<std::string>( "filename", "output.hepmc" ) ) ),
+      output_( new T( params.get<std::string>( "filename", "output.hepmc" ).c_str() ) ),
       xs_( new GenCrossSection ),
 #ifdef HEPMC3
       runinfo_( new GenRunInfo ),
@@ -90,7 +91,9 @@ namespace cepgen
     template<typename T>
     HepMCHandler<T>::~HepMCHandler()
     {
+#ifdef HEPMC3
       output_->close();
+#endif
     }
 
     template<typename T> void
@@ -131,7 +134,8 @@ REGISTER_IO_MODULE( hepmc2, HepMCHandler<WriterAsciiHepMC2> )
 REGISTER_IO_MODULE( hepmc_root, HepMCHandler<WriterRoot> )
 REGISTER_IO_MODULE( hepmc_root_tree, HepMCHandler<WriterRootTree> )
 #  endif
-#else
+#else // HepMC version 2 and below
 REGISTER_IO_MODULE( hepmc, HepMCHandler<IO_GenEvent> )
+REGISTER_IO_MODULE( hepmc_ascii, HepMCHandler<IO_AsciiParticles> )
 #endif
 
