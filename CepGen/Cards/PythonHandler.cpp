@@ -7,6 +7,7 @@
 
 #include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Hadronisers/HadronisersHandler.h"
+#include "CepGen/IO/ExportHandler.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Physics/GluonGrid.h"
@@ -130,6 +131,12 @@ namespace cepgen
         Py_CLEAR( pgen );
       }
 
+      PyObject* pout = PyObject_GetAttrString( cfg, OUTPUT_NAME ); // new
+      if ( pout ) {
+        parseOutputModule( pout );
+        Py_CLEAR( pout );
+      }
+
       //--- finalisation
       Py_CLEAR( cfg );
     }
@@ -240,7 +247,8 @@ namespace cepgen
       Limits lim_xi;
       fillParameter( kin, "xi", lim_xi );
       if ( lim_xi.valid() )
-        params_.kinematics.cuts.remnants.energy_single = ( lim_xi+(-1.) )*( -params_.kinematics.incoming_beams.first.pz );
+        //params_.kinematics.cuts.remnants.energy_single = ( lim_xi+(-1.) )*( -params_.kinematics.incoming_beams.first.pz );
+        params_.kinematics.cuts.remnants.energy_single = -( lim_xi-1. )*params_.kinematics.incoming_beams.first.pz;
     }
 
     void
@@ -350,6 +358,18 @@ namespace cepgen
           h->readStrings( config_blk );
         }
       }
+    }
+
+    void
+    PythonHandler::parseOutputModule( PyObject* pout )
+    {
+      if ( !is<ParametersList>( pout ) )
+        throwPythonError( "Invalid type for output parameters list!" );
+
+      PyObject* pname = element( pout, MODULE_NAME ); // borrowed
+      if ( !pname )
+        throwPythonError( "Output module name is required!" );
+      params_.setOutputModule( io::ExportHandler::get().build( get<std::string>( pname ), get<ParametersList>( pout ) ) );
     }
 
     void

@@ -8,6 +8,7 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Hadronisers/GenericHadroniser.h"
+#include "CepGen/IO/GenericExportHandler.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
@@ -27,6 +28,7 @@ namespace cepgen
     taming_functions( param.taming_functions ),
     process_( std::move( param.process_ ) ),
     hadroniser_( std::move( param.hadroniser_ ) ),
+    out_module_( std::move( param.out_module_ ) ),
     store_( false ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ ),
     integration_( param.integration_ ), generation_( param.generation_ )
   {}
@@ -50,6 +52,7 @@ namespace cepgen
     taming_functions = param.taming_functions;
     process_ = std::move( param.process_ );
     hadroniser_ = std::move( param.hadroniser_ );
+    out_module_ = std::move( param.out_module_ );
     total_gen_time_ = param.total_gen_time_;
     num_gen_events_ = param.num_gen_events_;
     integration_ = param.integration_;
@@ -159,6 +162,24 @@ namespace cepgen
     hadroniser_.reset( hadr );
   }
 
+  io::GenericExportHandler*
+  Parameters::outputModule()
+  {
+    return out_module_.get();
+  }
+
+  void
+  Parameters::setOutputModule( std::unique_ptr<io::GenericExportHandler> mod )
+  {
+    out_module_ = std::move( mod );
+  }
+
+  void
+  Parameters::setOutputModule( io::GenericExportHandler* mod )
+  {
+    out_module_.reset( mod );
+  }
+
   std::ostream&
   operator<<( std::ostream& os, const Parameters* param )
   {
@@ -189,6 +210,8 @@ namespace cepgen
       << ( pretty ? yesno( param->generation_.enabled ) : std::to_string( param->generation_.enabled ) ) << "\n"
       << std::setw( wt ) << "Number of events to generate"
       << ( pretty ? boldify( param->generation_.maxgen ) : std::to_string( param->generation_.maxgen ) ) << "\n";
+    if ( param->out_module_ )
+      os << std::setw( wt ) << "Output module" << param->out_module_->name() << "\n";
     if ( param->generation_.num_threads > 1 )
       os
         << std::setw( wt ) << "Number of threads" << param->generation_.num_threads << "\n";

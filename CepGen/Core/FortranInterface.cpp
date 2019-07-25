@@ -1,4 +1,5 @@
 #include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/Processes/FortranKTProcess.h"
 
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/HeavyIon.h"
@@ -71,6 +72,27 @@ extern "C" {
       exit( 0 );
     }
   }
+
+  void
+  cepgen_list_params_()
+  {
+    CG_LOG( "cepgen_list_params" ) << "\t" << cepgen::proc::FortranKTProcess::kProcParameters;
+  }
+
+  int
+  cepgen_param_int_( char* pname, int& def )
+  {
+    if ( cepgen::proc::FortranKTProcess::kProcParameters.has<cepgen::ParticleProperties>( pname ) )
+      return cepgen::proc::FortranKTProcess::kProcParameters.get<cepgen::ParticleProperties>( pname ).pdgid;
+    return cepgen::proc::FortranKTProcess::kProcParameters.get<int>( pname, def );
+  }
+
+  double
+  cepgen_param_real_( char* pname, double& def )
+  {
+    return cepgen::proc::FortranKTProcess::kProcParameters.get<double>( pname, def );
+  }
+
 #ifdef __cplusplus
 }
 #endif

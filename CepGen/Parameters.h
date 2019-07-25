@@ -14,6 +14,7 @@ namespace cepgen
   class ParametersList;
   namespace proc { class GenericProcess; }
   namespace hadr { class GenericHadroniser; }
+  namespace io { class GenericExportHandler; }
   namespace utils { class TamingFunctionsCollection; }
   enum class IntegratorType;
   /// List of parameters used to start and run the simulation job
@@ -100,6 +101,13 @@ namespace cepgen
       /// Are the events generated in this run to be stored in the output file ?
       bool storage() const { return store_; }
 
+      /// Set a new output module definition
+      void setOutputModule( std::unique_ptr<io::GenericExportHandler> mod );
+      /// Set the pointer to a output module
+      void setOutputModule( io::GenericExportHandler* mod );
+      /// Output module definition
+      io::GenericExportHandler* outputModule();
+
       //----- hadronisation algorithm
 
       /// Hadronisation algorithm to use for the proton(s) fragmentation
@@ -131,6 +139,8 @@ namespace cepgen
     private:
       std::unique_ptr<proc::GenericProcess> process_;
       std::unique_ptr<hadr::GenericHadroniser> hadroniser_;
+      /// Storage object
+      std::unique_ptr<io::GenericExportHandler> out_module_;
 
       bool store_;
       /// Total generation time (in seconds)

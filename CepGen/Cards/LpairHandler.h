@@ -38,8 +38,8 @@ namespace cepgen
         template<typename T> T getValue( const char* key ) const {}
 
         void setParameter( const std::string& key, const std::string& value );
-        std::string getParameter( std::string key ) const;
-        std::string getDescription( std::string key ) const;
+        std::string parameter( std::string key ) const;
+        std::string description( std::string key ) const;
 
         static const int kInvalid;
 
@@ -52,7 +52,10 @@ namespace cepgen
         std::shared_ptr<ParametersList> proc_params_;
         int str_fun_, sr_type_;
         double xi_min_, xi_max_;
-        std::string proc_name_, hadr_name_, integr_type_, kmr_grid_path_, mstw_grid_path_;
+        std::string proc_name_, hadr_name_, out_mod_name_;
+        std::string out_file_name_;
+        std::string integr_type_;
+        std::string kmr_grid_path_, mstw_grid_path_;
         std::pair<unsigned short,unsigned short> hi_1_, hi_2_;
     };
 

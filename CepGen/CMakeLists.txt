@@ -1,7 +1,7 @@
 file(GLOB core_sources Core/*.cpp *.cpp)
 file(GLOB phys_sources Physics/*.cpp)
 file(GLOB sf_sources StructureFunctions/*.cpp)
-file(GLOB io_sources IO/GenericExportHandler.cpp)
+file(GLOB io_sources IO/GenericExportHandler.cpp IO/TextHandler.cpp)
 file(GLOB hadr_sources Hadronisers/GenericHadroniser.cpp)
 
 include_directories(${PROJECT_SOURCE_DIR})
@@ -85,12 +85,29 @@ if(HEPMC_LIB)
     add_definitions(-DHEPMC3)
   endif()
   list(APPEND io_sources "IO/HepMCHandler.cpp")
+  list(APPEND io_sources "IO/HepMCEventInterface.cpp")
   if(NOT PYTHIA8)
     message(STATUS "HepMC will be used for LHEF output")
     list(APPEND io_sources "IO/LHEFHepMCHandler.cpp")
   endif()
   list(APPEND addons_libraries ${HEPMC_LIB})
   include_directories(${HEPMC_INCLUDE})
+endif()
+
+#--- linking with ROOT/Delphes
+
+if(ROOT_FOUND)
+  message(STATUS "ROOT found in ${ROOT_LIBRARY_DIR}")
+  list(APPEND addons_libraries ${ROOT_LIBRARIES})
+  list(APPEND io_sources "IO/ROOTHandler.cpp" "IO/ROOTTreeHandler.cpp")
+  include_directories(${ROOT_INCLUDE_DIRS})
+  link_directories(${ROOT_LIBRARY_DIR})
+  if(DELPHES)
+    message(STATUS "Delphes found in ${DELPHES}")
+    list(APPEND addons_libraries ${DELPHES})
+    list(APPEND io_sources "IO/DelphesHandler.cpp")
+    include_directories(${DELPHES_INCLUDE} ${DELPHES_INCLUDE}/external)
+  endif()
 endif()
 
 #----- build the objects

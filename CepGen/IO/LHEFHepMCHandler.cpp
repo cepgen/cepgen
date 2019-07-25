@@ -21,7 +21,7 @@ using namespace std; // account for improper scoping in following includes
 
 namespace cepgen
 {
-  namespace output
+  namespace io
   {
     /**
      * \brief Handler for the LHE file output
@@ -46,6 +46,7 @@ namespace cepgen
     };
 
     LHEFHepMCHandler::LHEFHepMCHandler( const ParametersList& params ) :
+      GenericExportHandler( "lhef" ),
       lhe_output_( new LHEF::Writer( params.get<std::string>( "filename", "output.lhe" ) ) )
     {}
 
@@ -79,9 +80,9 @@ namespace cepgen
       out.SCALUP = 0.;
       out.AQEDUP = constants::ALPHA_EM;
       out.AQCDUP = constants::ALPHA_QCD;
-      out.NUP = ev.numParticles();
+      out.NUP = ev.size();
       out.resize();
-      for ( unsigned short ip = 0; ip < ev.numParticles(); ++ip ) {
+      for ( unsigned short ip = 0; ip < ev.size(); ++ip ) {
         const Particle part = ev[ip];
         out.IDUP[ip] = part.integerPdgId(); // PDG id
         out.ISTUP[ip] = (short)part.status(); // status code

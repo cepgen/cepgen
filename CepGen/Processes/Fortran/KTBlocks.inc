@@ -17,10 +17,9 @@ c       inp1 = proton energy in lab frame
 c       inp2 = nucleus energy **per nucleon** in LAB frame
 c       Collision is along z-axis
 c     =================================================================
-      common/genparams/icontri,iflux1,iflux2,imethod,sfmod,pdg_l,
-     &     a_nuc1,z_nuc1,a_nuc2,z_nuc2,
-     &     inp1,inp2
-      integer icontri,iflux1,iflux2,imethod,sfmod,pdg_l,
+      common/genparams/icontri,iflux1,iflux2,sfmod,
+     &     a_nuc1,z_nuc1,a_nuc2,z_nuc2,inp1,inp2
+      integer icontri,iflux1,iflux2,sfmod,
      &     a_nuc1,z_nuc1,a_nuc2,z_nuc2
       double precision inp1,inp2
 
@@ -58,4 +57,11 @@ c     =================================================================
       double precision CepGen_kT_flux,CepGen_kT_flux_HI
       external CepGen_particle_charge,CepGen_particle_mass
       double precision CepGen_particle_charge,CepGen_particle_mass
+
+c     =================================================================
+c     helpers for the retrieval of input parameters from the process
+c     =================================================================
+      external CepGen_param_int,CepGen_param_real
+      integer CepGen_param_int
+      double precision CepGen_param_real
 
