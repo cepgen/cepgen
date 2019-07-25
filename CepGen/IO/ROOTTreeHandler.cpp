@@ -100,4 +100,4 @@ namespace cepgen
   }
 }
 
-REGISTER_IO_MODULE( root, ROOTTreeHandler )
+REGISTER_IO_MODULE( root_tree, ROOTTreeHandler )
