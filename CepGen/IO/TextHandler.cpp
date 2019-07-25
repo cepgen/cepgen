@@ -163,8 +163,8 @@ namespace cepgen
         << sep << std::string( PLOT_WIDTH-15-var.size(), ' ' )
         << "d(sig)/d" << var << " (pb/bin)\n"
         << sep << Form( "%-5.2f", gsl_histogram_min_val( hist ) )
-        << std::string( PLOT_WIDTH-8, ' ' )
-        << Form( "%5.2f", gsl_histogram_max_val( hist ) ) << "\n"
+        << std::string( PLOT_WIDTH-11, ' ' )
+        << Form( "%5.2e", gsl_histogram_max_val( hist ) ) << "\n"
         << sep << std::string( PLOT_WIDTH+2, '.' ); // abscissa axis
       for ( size_t i = 0; i < nbins; ++i ) {
         double min, max;
@@ -174,7 +174,7 @@ namespace cepgen
         os
           << "\n" << Form( "[%7.2f,%7.2f):", min, max )
           << std::string( val, PLOT_CHAR ) << std::string( PLOT_WIDTH-val, ' ' )
-          << ": " << Form( "%6.2f", value );
+          << ": " << Form( "%6.2e", value );
       }
       const double bin_width = ( gsl_histogram_max( hist )-gsl_histogram_min( hist ) )/nbins;
       os
