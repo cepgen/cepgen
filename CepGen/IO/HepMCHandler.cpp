@@ -48,6 +48,8 @@ namespace cepgen
       public:
         /// Class constructor
         explicit HepMCHandler( const ParametersList& );
+        ~HepMCHandler();
+
         void initialise( const Parameters& /*params*/ ) override {}
         /// Writer operator
         void operator<<( const Event& ) override;
@@ -83,6 +85,12 @@ namespace cepgen
       CG_INFO( "HepMC" )
         << "Interfacing module initialised "
         << "for HepMC version " << HEPMC_VERSION << ".";
+    }
+
+    template<typename T>
+    HepMCHandler<T>::~HepMCHandler()
+    {
+      output_->close();
     }
 
     template<typename T> void
