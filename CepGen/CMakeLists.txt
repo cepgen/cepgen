@@ -94,6 +94,15 @@ if(HEPMC_LIB)
   include_directories(${HEPMC_INCLUDE})
 endif()
 
+#--- linking with ProMC
+
+if(PROMC_LIB)
+  message(STATUS "ProMC found in ${PROMC_LIB}")
+  list(APPEND addons_libraries ${PROMC_LIB})
+  list(APPEND io_sources "IO/ProMCHandler.cpp")
+  include_directories(${PROMC_INCLUDE} ${PROMC_EXT_INCLUDE})
+endif()
+
 #--- linking with ROOT/Delphes
 
 if(ROOT_FOUND)

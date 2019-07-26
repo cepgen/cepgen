@@ -4,6 +4,7 @@
 #include "CepGen/Physics/ParticleProperties.h"
 
 #include <unordered_map>
+#include <vector>
 
 namespace cepgen
 {
@@ -47,6 +48,7 @@ namespace cepgen
 
       void define( const ParticleProperties& props );
       const ParticleProperties& operator()( pdgid_t ) const;
+      const std::vector<pdgid_t> particles() const;
       void dump() const;
       const std::string& name( pdgid_t ) const;
       short colours( pdgid_t ) const;
