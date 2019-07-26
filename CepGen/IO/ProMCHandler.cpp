@@ -11,12 +11,14 @@
 
 #include "promc/ProMCBook.h"
 
+#include <stdio.h>
+
 namespace cepgen
 {
   namespace io
   {
     /**
-     * \brief Handler for the generic ROOT file output
+     * \brief Handler for the ProMC file output
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Jul 2019
      */
@@ -54,6 +56,8 @@ namespace cepgen
       stat.set_naccepted( event_num_ );
       file_->setStatistics( stat );
       file_->close();
+      //--- delete the log file once attached
+      remove( "logfile.txt" );
     }
 
     void
