@@ -556,8 +556,8 @@ namespace cepgen
 
       const double cos_phi3 = -sqrt( 1.-sin_phi3*sin_phi3 ), cos_phi5 = -sqrt( 1.-sin_phi5*sin_phi5 );
 
-      p3_lab_ = Particle::Momentum( pp3*sin_theta3*cos_phi3, pp3*sin_theta3*sin_phi3, pp3*ct3, ep3 );
-      p5_lab_ = Particle::Momentum( pp5*sin_theta5*cos_phi5, pp5*sin_theta5*sin_phi5, pp5*ct5, ep5 );
+      p3_lab_ = Momentum( pp3*sin_theta3*cos_phi3, pp3*sin_theta3*sin_phi3, pp3*ct3, ep3 );
+      p5_lab_ = Momentum( pp5*sin_theta5*cos_phi5, pp5*sin_theta5*sin_phi5, pp5*ct5, ep5 );
 
       const double a1 = p3_lab_.px()-p5_lab_.px();
 
@@ -706,7 +706,7 @@ namespace cepgen
                    pgy = -p3_lab_.py(),
                    pgz = mc4_*de3_/( ec4_+pc4_ )-ec4_*de3_*al4_/mc4_-p3_lab_.px()*ec4_*sin_theta4_/mc4_+ec4_*cos_theta4_/mc4_*( p3_lab_.p()*al3+e3mp3-e1mp1 );
 
-      CG_DEBUG_LOOP( "GamGamLL" ) << "pg = " << Particle::Momentum( pgx, pgy, pgz );
+      CG_DEBUG_LOOP( "GamGamLL" ) << "pg = " << Momentum( pgx, pgy, pgz );
 
       const double pgp = std::hypot( pgx, pgy ), // outgoing proton (3)'s transverse momentum
                    pgg = std::hypot( pgp, pgz ); // outgoing proton (3)'s momentum
@@ -755,7 +755,7 @@ namespace cepgen
       const double phi6cm = 2.*M_PI*x( 6 );
 
       // First outgoing lepton's 3-momentum in the centre of mass system
-      Particle::Momentum p6cm = Particle::Momentum::fromPThetaPhi( pp6cm, theta6cm, phi6cm );
+      auto p6cm = Momentum::fromPThetaPhi( pp6cm, theta6cm, phi6cm );
 
       CG_DEBUG_LOOP( "GamGamLL" ) << "p3cm6 = " << p6cm;
 
@@ -776,12 +776,12 @@ namespace cepgen
                    p6z = cos_theta4_*h2-sin_theta4_*pc6x;
 
       // first outgoing lepton's kinematics
-      p6_cm_ = Particle::Momentum( p6x, p6y, p6z, el6 );
+      p6_cm_ = Momentum( p6x, p6y, p6z, el6 );
       CG_DEBUG_LOOP( "GamGamLL" ) << "p6(cm) = " << p6_cm_;
 
       const double hq = ec4_*qcz/mc4_;
 
-      const Particle::Momentum qve(
+      const Momentum qve(
         cos_theta4_*qcx+sin_theta4_*hq,
         2.*p6y,
         cos_theta4_*hq-sin_theta4_*qcx,
@@ -802,10 +802,10 @@ namespace cepgen
                    p7z = -p6z + pc4_*cos_theta4_;
 
       // second outgoing lepton's kinematics
-      p7_cm_ = Particle::Momentum( p7x, p7y, p7z, el7 );
+      p7_cm_ = Momentum( p7x, p7y, p7z, el7 );
 
-      //p6_cm_ = Particle::Momentum(pl6*st6*cp6, pl6*st6*sp6, pl6*ct6, el6);
-      //p7_cm_ = Particle::Momentum(pl7*st7*cp7, pl7*st7*sp7, pl7*ct7, el7);
+      //p6_cm_ = Momentum(pl6*st6*cp6, pl6*st6*sp6, pl6*ct6, el6);
+      //p7_cm_ = Momentum(pl7*st7*cp7, pl7*st7*sp7, pl7*ct7, el7);
 
       q1dq_ = eg*( 2.*ecm6-mc4_ )-2.*pg*p6cm.pz();
       q1dq2_ = 0.5*( w4_-t1_-t2_ );
@@ -856,8 +856,8 @@ namespace cepgen
       // END of GAMGAMLL subroutine in the FORTRAN version
       ////////////////////////////////////////////////////////////////
 
-      const Particle::Momentum cm = event_->getOneByRole( Particle::IncomingBeam1 ).momentum()
-                                  + event_->getOneByRole( Particle::IncomingBeam2 ).momentum();
+      const Momentum cm = event_->getOneByRole( Particle::IncomingBeam1 ).momentum()
+                        + event_->getOneByRole( Particle::IncomingBeam2 ).momentum();
 
       ////////////////////////////////////////////////////////////////
       // INFO from f.f
@@ -941,8 +941,8 @@ namespace cepgen
     void
     GamGamLL::fillKinematics( bool )
     {
-      const Particle::Momentum cm = (*event_)[Particle::IncomingBeam1][0].momentum()
-                                  + (*event_)[Particle::IncomingBeam2][0].momentum();
+      const Momentum cm = (*event_)[Particle::IncomingBeam1][0].momentum()
+                        + (*event_)[Particle::IncomingBeam2][0].momentum();
 
       const double gamma  = cm.energy()/sqs_, betgam = cm.pz()/sqs_;
 
@@ -950,8 +950,8 @@ namespace cepgen
         << "sqrt(s)=" << sqs_ << " GeV, initial two-proton system: " << cm << "\n\t"
         << "gamma=" << gamma << ", betgam=" << betgam;
 
-      Particle::Momentum plab_ip1 = Particle::Momentum( 0., 0.,  p_cm_, ep1_ ).betaGammaBoost( gamma, betgam );
-      Particle::Momentum plab_ip2 = Particle::Momentum( 0., 0., -p_cm_, ep2_ ).betaGammaBoost( gamma, betgam );
+      auto plab_ip1 = Momentum( 0., 0.,  p_cm_, ep1_ ).betaGammaBoost( gamma, betgam );
+      auto plab_ip2 = Momentum( 0., 0., -p_cm_, ep2_ ).betaGammaBoost( gamma, betgam );
 
       CG_DEBUG_LOOP( "GamGamLL:gmufil" )
         << "unboosted PX=" << p3_lab_ << "\n\t"
@@ -970,10 +970,10 @@ namespace cepgen
       const short rany = drand() > 0.5 ? 1 : -1, ransign = drand() > 0.5 ? 1 : -1;
       const double ranphi = 2*drand()*M_PI;
 
-      Particle::Momentum plab_ph1 = plab_ip1-p3_lab_;
+      Momentum plab_ph1 = plab_ip1-p3_lab_;
       plab_ph1.rotatePhi( ranphi, rany );
 
-      Particle::Momentum plab_ph2 = plab_ip2-p5_lab_;
+      Momentum plab_ph2 = plab_ip2-p5_lab_;
       plab_ph2.rotatePhi( ranphi, rany );
 
       p3_lab_.rotatePhi( ranphi, rany );

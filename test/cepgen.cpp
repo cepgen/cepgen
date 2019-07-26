@@ -43,6 +43,9 @@ int main( int argc, char* argv[] )
     CG_DEBUG( "main" ) << "Run aborted!";
   } catch ( const cepgen::Exception& e ) {
     e.dump();
+  } catch ( ... ) {
+    CG_FATAL( "main" ) << "Other exception caught!";
+    throw;
   }
 
   return 0;

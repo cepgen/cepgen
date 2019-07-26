@@ -5,6 +5,7 @@
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/PDG.h"
 
 #ifdef HEPMC3
 #  include "HepMC3/Version.h"
@@ -73,6 +74,7 @@ namespace HepMC
       auto part = new GenParticle( pmom, part_orig.integerPdgId(), (int)part_orig.status() );
       part->suggest_barcode( idx++ );
 #endif
+      part->set_generated_mass( cepgen::PDG::get().mass( part_orig.pdgId() ) );
 
       switch ( part_orig.role() ) {
         case cepgen::Particle::IncomingBeam1:

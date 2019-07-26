@@ -5,6 +5,7 @@
 #include "CepGen/Core/utils.h"
 
 #include "CepGen/Event/Event.h"
+#include "CepGen/Event/EventBrowser.h"
 #include "CepGen/Parameters.h"
 
 #include "CepGen/Version.h"
@@ -35,62 +36,24 @@ namespace cepgen
         void operator<<( const Event& ) override;
 
       private:
-        short extractVariableProperties( const std::string& );
         std::string textHistogram( const std::string&, const gsl_histogram* ) const;
-        /// Retrieve a named variable from a particle
-        double variable( const Particle&, const std::string& ) const;
-        /// Retrieve a named variable from the whole event
-        double variable( const Event&, const std::string& ) const;
 
-        static const std::regex rgx_select_id_, rgx_select_role_;
-        static constexpr double INVALID_OUTPUT = -999.;
         static constexpr size_t PLOT_WIDTH = 50;
         static constexpr char PLOT_CHAR = '#';
 
         std::ofstream file_, hist_file_;
+        std::string hist_filename_;
+        //--- variables definition
         const std::vector<std::string> variables_;
         const bool save_banner_, save_variables_;
         const bool show_hists_, save_hists_;
-        const ParametersList hist_variables_;
         const std::string separator_;
 
-        //--- variables definition
-        std::unordered_map<short,std::string> variables_name_;
-        std::unordered_map<short,bool> variable_stored_;
+        const utils::EventBrowser browser_;
 
-        typedef std::pair<unsigned short,std::string> IndexedVariable;
-        std::unordered_map<short,std::vector<IndexedVariable> > variables_per_id_;
-        std::unordered_map<Particle::Role,std::vector<IndexedVariable> > variables_per_role_;
-        std::vector<IndexedVariable> variables_for_event_;
-        unsigned short num_vars_;
         std::ostringstream oss_vars_;
 
         double xsec_;
-
-        //--- auxiliary helper maps
-        const std::unordered_map<std::string,Particle::Role> role_str_ = {
-          { "ib1", Particle::Role::IncomingBeam1 }, { "ib2", Particle::Role::IncomingBeam2 },
-          { "ob1", Particle::Role::OutgoingBeam1 }, { "ob2", Particle::Role::OutgoingBeam2 },
-          { "pa1", Particle::Role::Parton1 }, { "pa2", Particle::Role::Parton2 },
-          { "cs",  Particle::Role::CentralSystem },
-          { "int", Particle::Role::Intermediate }
-        };
-        typedef double( Particle::Momentum::*pMethod )(void) const;
-        /// Mapping of string variables to momentum getter methods
-        const std::unordered_map<std::string,pMethod> m_mom_str_ = {
-          { "px",  &Particle::Momentum::px },
-          { "py",  &Particle::Momentum::py },
-          { "pz",  &Particle::Momentum::pz },
-          { "pt",  &Particle::Momentum::pt },
-          { "eta", &Particle::Momentum::eta },
-          { "phi", &Particle::Momentum::phi },
-          { "m",   &Particle::Momentum::mass },
-          { "e",   &Particle::Momentum::energy },
-          { "p",   &Particle::Momentum::p },
-          { "pt2", &Particle::Momentum::pt2 },
-          { "th",  &Particle::Momentum::theta },
-          { "y",   &Particle::Momentum::rapidity }
-        };
 
         //--- kinematic variables
         double sqrts_;
@@ -101,73 +64,63 @@ namespace cepgen
             gsl_histogram_free( h );
           }
         };
-        std::unordered_map<short,std::unique_ptr<gsl_histogram,gsl_histogram_deleter> > hists_;
+        std::vector<std::pair<std::string,std::unique_ptr<gsl_histogram,gsl_histogram_deleter> > > hists_;
     };
-
-    const std::regex TextHandler::rgx_select_id_( "(\\w+)\\((\\d+)\\)" );
-    const std::regex TextHandler::rgx_select_role_( "(\\w+)\\(([a-z]+\\d?)\\)" );
 
     TextHandler::TextHandler( const ParametersList& params ) :
       GenericExportHandler( "text" ),
       file_          ( params.get<std::string>( "filename", "output.txt" ) ),
+      hist_filename_ ( params.get<std::string>( "histFilename", "output.hists.txt" ) ),
       variables_     ( params.get<std::vector<std::string> >( "variables" ) ),
       save_banner_   ( params.get<bool>( "saveBanner", true ) ),
       save_variables_( params.get<bool>( "saveVariables", true ) ),
       show_hists_    ( params.get<bool>( "showHistograms", true ) ),
       save_hists_    ( params.get<bool>( "saveHistograms", false ) ),
-      hist_variables_( params.get<ParametersList>( "histVariables" ) ),
       separator_     ( params.get<std::string>( "separator", "\t" ) ),
-      num_vars_( 0 ), xsec_( 1. )
+      xsec_( 1. )
     {
       //--- first extract list of variables to store in output file
       oss_vars_.clear();
       std::string sep;
-      for ( const auto& var : variables_ ) {
-        auto id = extractVariableProperties( var );
-        if ( id >= 0 ) {
-          oss_vars_ << sep << var, sep = separator_;
-          variable_stored_[id] = true;
-        }
-      }
+      for ( const auto& var : variables_ )
+        oss_vars_ << sep << var, sep = separator_;
       //--- then extract list of variables to be plotted in histogram
-      for ( const auto& var : hist_variables_.keys() ) {
-        auto id = extractVariableProperties( var );
-        if ( id < 0 )
-          continue;
-        const auto& hvar = hist_variables_.get<ParametersList>( var );
+      const auto& hist_vars = params.get<ParametersList>( "histVariables" );
+      for ( const auto& var : hist_vars.keys() ) {
+        const auto& hvar = hist_vars.get<ParametersList>( var );
         const int nbins = hvar.get<int>( "nbins", 10 );
         const double min = hvar.get<double>( "low", 0. ), max = hvar.get<double>( "high", 1. );
-        hists_[id].reset( gsl_histogram_alloc( nbins ) );
-        gsl_histogram_set_ranges_uniform( hists_[id].get(), min, max );
+        auto hist = gsl_histogram_alloc( nbins );
+        gsl_histogram_set_ranges_uniform( hist, min, max );
+        hists_.emplace_back( std::make_pair( var, hist ) );
         CG_INFO( "TextHandler" )
           << "Booking a histogram with " << nbins << " bin" << utils::s( nbins )
           << " between " << min << " and " << max << " for \"" << var << "\".";
       }
       if ( save_hists_ && !hists_.empty() )
-        hist_file_.open( "lastrun.hists.txt" );
+        hist_file_.open( hist_filename_ );
     }
 
     TextHandler::~TextHandler()
     {
-      //--- histograms printout
-      for ( const auto& var : hist_variables_.keys() ) {
-        const auto& vn = std::find_if( variables_name_.begin(), variables_name_.end(),
-          [&var]( auto&& p ) { return p.second == var; } );
-        if ( vn == variables_name_.end() ) {
-          CG_WARNING( "TextHandler" )
-            << "Failed to retrieve variable \"" << var << "\" for plotting.";
-          continue;
-        }
-        const auto& hist = hists_.at( vn->first ).get();
-        gsl_histogram_scale( hist, xsec_/( num_evts_+1 ) );
-        if ( show_hists_ )
-          CG_INFO( "TextHandler" )
-            << textHistogram( var, hist );
-        if ( save_hists_ )
-          hist_file_ << "\n" << textHistogram( var, hist ) << "\n";
-      }
       //--- finalisation of the output file
       file_.close();
+      //--- histograms printout
+      if ( !show_hists_ && !save_hists_ )
+        return;
+      for ( const auto& h_var : hists_ ) {
+        const auto& hist = h_var.second.get();
+        gsl_histogram_scale( hist, xsec_/( num_evts_+1 ) );
+        const auto& h_out = textHistogram( h_var.first, hist );
+        if ( show_hists_ )
+          CG_INFO( "TextHandler" ) << h_out;
+        if ( save_hists_ )
+          hist_file_ << "\n" << h_out << "\n";
+      }
+      if ( save_hists_ )
+        CG_INFO( "TextHandler" )
+          << "Saved " << utils::s( "histogram", hists_.size() )
+          << " into \"" << hist_filename_ << "\".";
     }
 
     void
@@ -186,106 +139,15 @@ namespace cepgen
     void
     TextHandler::operator<<( const Event& ev )
     {
-      std::vector<double> vars( num_vars_ );
-      //--- extract and order the variables to be retrieved
-      //--- particle-level variables (indexed by integer id)
-      for ( const auto& id_vars : variables_per_id_ ) {
-        const auto& part = ev[id_vars.first];
-        //--- loop over the list of variables for this particle
-        for ( const auto& var : id_vars.second )
-          vars[var.first] = variable( part, var.second );
-      }
-      //--- particle-level variables (indexed by role)
-      for ( const auto& role_vars : variables_per_role_ ) {
-        const auto& part = ev[role_vars.first][0];
-        //--- loop over the list of variables for this particle
-        for ( const auto& var : role_vars.second )
-          vars[var.first] = variable( part, var.second );
-      }
-      //--- event-level variables
-      for ( const auto& var : variables_for_event_ )
-        vars[var.first] = variable( ev, var.second );
       //--- write down the variables list in the file
       std::string sep;
-      unsigned short i = 0;
-      for ( const auto& var : vars ) {
-        if ( variable_stored_.count( i ) > 0 && variable_stored_.at( i ) )
-          file_ << sep << var, sep = separator_;
-        if ( hists_.count( i ) > 0 )
-          gsl_histogram_increment( hists_.at( i ).get(), var );
-        ++i;
-      }
+      for ( const auto& var : variables_ )
+        file_ << sep << browser_.get( ev, var ), sep = separator_;
       file_ << "\n";
+      //--- increment the corresponding histograms
+      for ( const auto& h_var : hists_ )
+        gsl_histogram_increment( h_var.second.get(), browser_.get( ev, h_var.first ) );
       ++num_evts_;
-    }
-
-    double
-    TextHandler::variable( const Particle& part, const std::string& var ) const
-    {
-      if ( m_mom_str_.count( var ) ) {
-        auto meth = m_mom_str_.at( var );
-        return ( part.momentum().*meth )();
-      }
-      if ( var == "xi"  ) return 1.-part.momentum().energy()*2./sqrts_;
-      if ( var == "pdg" ) return (double)part.integerPdgId();
-      if ( var == "charge" ) return part.charge();
-      if ( var == "status" ) return (double)part.status();
-      CG_WARNING( "TextHandler" )
-        << "Failed to retrieve variable \"" << var << "\".";
-      return INVALID_OUTPUT;
-    }
-
-    double
-    TextHandler::variable( const Event& ev, const std::string& var ) const
-    {
-      if ( var == "np" )
-        return (double)ev.size();
-      if ( var == "nev" )
-        return (double)num_evts_+1;
-      if ( var == "nob1" || var == "nob2" ) {
-        unsigned short out = 0.;
-        for ( const auto& part : ev[
-          var == "nob1"
-          ? Particle::Role::OutgoingBeam1
-          : Particle::Role::OutgoingBeam2
-        ] )
-          if ( (int)part.status() > 0 )
-            out++;
-        return (double)out;
-      }
-      if ( var == "tgen" )
-        return ev.time_generation;
-      if ( var == "ttot" )
-        return ev.time_total;
-      CG_WARNING( "TextHandler" )
-        << "Failed to retrieve the event-level variable \"" << var << "\".";
-      return INVALID_OUTPUT;
-    }
-
-    short
-    TextHandler::extractVariableProperties( const std::string& var )
-    {
-      const auto& vn = std::find_if( variables_name_.begin(), variables_name_.end(),
-        [&var]( auto&& p ) { return p.second == var; } );
-      if ( vn != variables_name_.end() )
-        return vn->first;
-      std::smatch sm;
-      if ( std::regex_match( var, sm, rgx_select_id_ ) )
-        variables_per_id_[std::stod( sm[2].str() )].emplace_back( std::make_pair( num_vars_, sm[1].str() ) );
-      else if ( std::regex_match( var, sm, rgx_select_role_ ) ) {
-        const auto& str_role = sm[2].str();
-        if ( role_str_.count( str_role ) == 0 ) {
-          CG_WARNING( "TextHandler" )
-            << "Invalid particle role retrieved from configuration: \"" << str_role << "\".\n\t"
-            << "Skipping the variable \"" << var << "\" in the output module.";
-          return -1;
-        }
-        variables_per_role_[role_str_.at( str_role )].emplace_back( std::make_pair( num_vars_, sm[1].str() ) );
-      }
-      else // event-level variables
-        variables_for_event_.emplace_back( std::make_pair( num_vars_, var ) );
-      variables_name_[num_vars_] = var;
-      return num_vars_++;
     }
 
     std::string
@@ -301,8 +163,8 @@ namespace cepgen
         << sep << std::string( PLOT_WIDTH-15-var.size(), ' ' )
         << "d(sig)/d" << var << " (pb/bin)\n"
         << sep << Form( "%-5.2f", gsl_histogram_min_val( hist ) )
-        << std::string( PLOT_WIDTH-8, ' ' )
-        << Form( "%5.2f", gsl_histogram_max_val( hist ) ) << "\n"
+        << std::string( PLOT_WIDTH-11, ' ' )
+        << Form( "%5.2e", gsl_histogram_max_val( hist ) ) << "\n"
         << sep << std::string( PLOT_WIDTH+2, '.' ); // abscissa axis
       for ( size_t i = 0; i < nbins; ++i ) {
         double min, max;
@@ -312,12 +174,12 @@ namespace cepgen
         os
           << "\n" << Form( "[%7.2f,%7.2f):", min, max )
           << std::string( val, PLOT_CHAR ) << std::string( PLOT_WIDTH-val, ' ' )
-          << ": " << Form( "%6.2f", value );
+          << ": " << Form( "%6.2e", value );
       }
       const double bin_width = ( gsl_histogram_max( hist )-gsl_histogram_min( hist ) )/nbins;
       os
         << "\n"
-        << Form( "%15s", var.c_str() ) << ":" << std::string( PLOT_WIDTH, '.' ) << ":\n" // 2nd abscissa axis
+        << Form( "%17s", var.c_str() ) << ":" << std::string( PLOT_WIDTH, '.' ) << ":\n" // 2nd abscissa axis
         << "\t("
         << "bin width=" << bin_width << " unit" << utils::s( (int)bin_width ) << ", "
         << "mean=" << gsl_histogram_mean( hist ) << ", "
