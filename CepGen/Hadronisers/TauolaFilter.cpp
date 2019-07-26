@@ -202,9 +202,20 @@ namespace cepgen
     CepGenTauolaEvent::findStableParticles( int pdg )
     {
       std::vector<TauolaParticle*> out;
-      for ( auto& part : findParticles( pdg ) )
-        if ( part->getStatus() == TauolaParticle::STABLE )
+      for ( auto& part : findParticles( pdg ) ) {
+        if ( !part->hasDaughters() )
           out.emplace_back( part );
+        else {
+          const auto& daugh = part->getDaughters();
+          if ( daugh.size() == 1 )
+            continue;
+          if ( daugh.size() == 2 && ( abs( daugh.at( 0 )->getPdgID() ) == 15
+                                   || abs( daugh.at( 1 )->getPdgID() ) == 15) )
+            continue;
+          CG_WARNING( "CepGenTauolaEvent" ) << "Particle with pdg code " << part->getPdgID()
+            <<" has already daughters.";
+        }
+      }
       return out;
     }
 
@@ -229,7 +240,7 @@ namespace cepgen
     {
       Particle part( Particle::Role::UnknownRole, pdg, (Particle::Status)status );
       part.setChargeSign( pdg/(unsigned int)pdg );
-      part.setMomentum( Particle::Momentum::fromPxPyPzE( px, py, pz, e ) );
+      part.setMomentum( Momentum::fromPxPyPzE( px, py, pz, e ) );
       part.setMass( mass );
       return new CepGenTauolaParticle( part );
     }
@@ -237,14 +248,7 @@ namespace cepgen
     void
     CepGenTauolaParticle::print()
     {
-      CG_INFO( "TauolaParticle" )
-        << "TauolaParticle{pdg=" << getPdgID()
-        << ",status=" << getStatus()
-        << ",mom=(" << getPx() << "," << getPy() << "," << getPz() << ";" << getE() << ")"
-        << ",m=" << getMass()
-        << "," << utils::s( "mother", getMothers().size() )
-        << "," << utils::s( "daughter", getDaughters().size() )
-        << "}";
+      CG_INFO( "TauolaParticle" ) << *this;
     }
 #endif
   }
