@@ -1,20 +1,15 @@
 #include "CepGen/Hadronisers/GenericHadroniser.h"
 #include "CepGen/Hadronisers/HadronisersHandler.h"
 
-#include "CepGen/IO/HepMCEventInterface.h"
-
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/utils.h"
 
+#include "CepGen/Event/Event.h"
+#include "CepGen/Physics/PDG.h"
+
+#include <Tauola/TauolaEvent.h>
 #include <Tauola/Tauola.h>
-#ifdef HEPMC3
-#  include "CepGen/Event/Event.h"
-#  include "CepGen/Physics/PDG.h"
-#  include "CepGen/Core/utils.h"
-#  include <Tauola/TauolaEvent.h>
-#else
-#  include <Tauola/TauolaHepMCEvent.h>
-#endif
 #include <Tauola/Log.h>
 
 using namespace Tauolapp;
@@ -39,12 +34,8 @@ namespace cepgen
 
       private:
         const ParametersList pol_states_, rad_states_;
-#ifndef HEPMC3
-        std::unique_ptr<HepMC::CepGenEvent> event_;
-#endif
     };
 
-#ifdef HEPMC3
     class CepGenTauolaEvent : public TauolaEvent, public Event
     {
       public:
@@ -92,15 +83,11 @@ namespace cepgen
       private:
         std::vector<TauolaParticle*> mothers_, daughters_;
     };
-#endif
 
     TauolaFilter::TauolaFilter( const ParametersList& params ) :
       GenericHadroniser( params, "tauola" ),
       pol_states_( params.get<ParametersList>( "polarisations" ) ),
       rad_states_( params.get<ParametersList>( "radiations" ) )
-#ifndef HEPMC3
-      , event_( new HepMC::CepGenEvent )
-#endif
     {}
 
     TauolaFilter::~TauolaFilter()
@@ -137,20 +124,13 @@ namespace cepgen
     {
       weight = 1.;
 
-#ifndef HEPMC3
-      event_->feedEvent( ev );
-      event_->print();
-      TauolaHepMCEvent evt( event_.get() );
-#else
       CepGenTauolaEvent evt( ev );
-#endif
       //evt.undecayTaus();
       evt.decayTaus();
 
       return true;
     }
 
-#ifdef HEPMC3
     //----- Event interface
 
     CepGenTauolaEvent::CepGenTauolaEvent( const Event& evt ) :
@@ -251,7 +231,6 @@ namespace cepgen
     {
       CG_INFO( "TauolaParticle" ) << *this;
     }
-#endif
   }
 }
 
