@@ -7,6 +7,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Parameters.h"
+#include "CepGen/Version.h"
 
 #include "promc/ProMCBook.h"
 
@@ -31,12 +32,14 @@ namespace cepgen
 
       private:
         std::unique_ptr<ProMCBook> file_;
+        std::ofstream log_file_;
         double xsec_, xsec_err_;
     };
 
     ProMCHandler::ProMCHandler( const ParametersList& params ) :
       GenericExportHandler( "promc" ),
       file_( new ProMCBook( params.get<std::string>( "filename", "output.promc" ).c_str(), "w" ) ),
+      log_file_( "logfile.txt" ),
       xsec_( -1. ), xsec_err_( -1. )
     {}
 
@@ -45,6 +48,10 @@ namespace cepgen
       ProMCStat stat;
       stat.set_cross_section_accumulated( xsec_ );
       stat.set_cross_section_error_accumulated( xsec_err_ );
+      stat.set_luminosity_accumulated( event_num_/xsec_ );
+      stat.set_ntried( event_num_ );
+      stat.set_nselected( event_num_ );
+      stat.set_naccepted( event_num_ );
       file_->setStatistics( stat );
       file_->close();
     }
@@ -52,17 +59,19 @@ namespace cepgen
     void
     ProMCHandler::initialise( const Parameters& params )
     {
-      file_->setDescription( params.generation().maxgen, banner( params ) );
+      file_->setDescription( params.generation().maxgen, "Sample generated using CepGen v"+version() );
+      log_file_ << banner( params ) << "\n";
       ProMCHeader hdr;
       hdr.set_momentumunit( 1.e6 ); // in units of keV -> GeV
       hdr.set_lengthunit( 1.e3 ); //FIXME
       for ( const auto& pdg : PDG::get().particles() ) {
         auto data = hdr.add_particledata();
+        const auto& desc = PDG::get()( pdg );
         data->set_id( (int)pdg );
-        data->set_mass( PDG::get().mass( pdg ) );
-        data->set_name( PDG::get().name( pdg ) );
-        data->set_width( PDG::get().width( pdg ) );
-        data->set_charge( PDG::get().charge( pdg ) );
+        data->set_mass( desc.mass );
+        data->set_name( desc.name );
+        data->set_width( desc.width );
+        data->set_charge( desc.charge*1./3. );
       }
       hdr.set_id1( params.kinematics.incoming_beams.first.pdg );
       hdr.set_id2( params.kinematics.incoming_beams.second.pdg );
@@ -86,9 +95,11 @@ namespace cepgen
       evt->set_alpha_qcd( constants::ALPHA_QCD );
       evt->set_weight( 1. );
 
+      unsigned short i = 0;
       for ( const auto& par : ev.particles() ) {
         auto part = event.mutable_particles();
-        part->add_id( par.integerPdgId() );
+        part->add_id( i++ );
+        part->add_pdg_id( par.integerPdgId() );
         part->add_status( (unsigned int)par.status() );
         //--- kinematics
         part->add_px( int( par.momentum().px()*1e6 ) );
@@ -99,10 +110,10 @@ namespace cepgen
         part->add_barcode( 0 );
         //--- parentage
         const auto& daugh = par.daughters(), &moth = par.mothers();
-        part->add_daughter1( daugh.empty() ? 0 : *daugh.begin() );
-        part->add_daughter2( daugh.size() > 1 ? *daugh.rbegin() : 0 );
-        part->add_mother1( moth.empty() ? 0 : *moth.begin() );
-        part->add_mother2( moth.size() > 1 ? *moth.rbegin() : 0 );
+        part->add_daughter1( daugh.empty() ? 0 : *daugh.begin()+1 );
+        part->add_daughter2( daugh.size() > 1 ? *daugh.rbegin()+1 : 0 );
+        part->add_mother1( moth.empty() ? 0 : *moth.begin()+1 );
+        part->add_mother2( moth.size() > 1 ? *moth.rbegin()+1 : 0 );
         //--- vertex
         part->add_x( 0 );
         part->add_y( 0 );
