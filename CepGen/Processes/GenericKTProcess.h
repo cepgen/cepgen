@@ -109,9 +109,9 @@ namespace cepgen
         double phi_qt2_;
 
         /// First outgoing proton
-        Particle::Momentum PX_;
+        Momentum PX_;
         /// Second outgoing proton
-        Particle::Momentum PY_;
+        Momentum PY_;
 
         /// Handler to a variable mapped by this process
         struct MappingVariable

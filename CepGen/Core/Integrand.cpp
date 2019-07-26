@@ -101,7 +101,7 @@ namespace cepgen
           || params->taming_functions->has( "pt_central" ) ) {
 
           // build the kinematics of the central system
-          Particle::Momentum central_system;
+          Momentum central_system;
           for ( const auto& part : (*ev)[Particle::CentralSystem] )
             central_system += part.momentum();
 

@@ -272,13 +272,4 @@ namespace cepgen
       return 0.;
     return sqrt( p1.mass2()+p2.mass2() + 2.*p1.energy()*p2.energy() - 2.*( p1.momentum()*p2.momentum() ) );
   }
-
-  double
-  CMEnergy( const Particle::Momentum& m1, const Particle::Momentum& m2 )
-  {
-    if ( m1.mass()*m2.mass() < 0.
-      || m1.energy()*m2.energy() < 0. )
-      return 0.;
-    return sqrt( m1.mass2()+m2.mass2() + 2.*m1.energy()*m2.energy() - 2.*( m1*m2 ) );
-  }
 }

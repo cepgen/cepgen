@@ -4,6 +4,7 @@
 #include "CepGen/Core/Hasher.h"
 
 #include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/ParticleProperties.h"
 
 #include <set>
@@ -42,142 +43,6 @@ namespace cepgen
         Intermediate = 4, ///< Intermediate two-parton system
         Parton1 = 41, ///< \f$z>0\f$ beam incoming parton
         Parton2 = 42 ///< \f$z<0\f$ beam incoming parton
-      };
-      /**
-       * Container for a particle's 4-momentum, along with useful methods to ease the development of any matrix element level generator
-       * \brief 4-momentum for a particle
-       * \date Dec 2015
-       * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-       */
-      class Momentum {
-        public:
-          /// Build a 4-momentum at rest with an invalid energy (no mass information known)
-          Momentum();
-          /// Build a 4-momentum using its 3-momentum coordinates and its energy
-          Momentum( double x, double y, double z, double t = -1. );
-          /// Build a 4-momentum using its 3-momentum coordinates and its energy
-          Momentum( double* p );
-
-          // --- static definitions
-
-          /// Build a 3-momentum from its three pseudo-cylindric coordinates
-          static Momentum fromPtEtaPhi( double pt, double eta, double phi, double e = -1. );
-          /// Build a 4-momentum from its scalar momentum, and its polar and azimuthal angles
-          static Momentum fromPThetaPhi( double p, double theta, double phi, double e = -1. );
-          /// Build a 4-momentum from its four momentum and energy coordinates
-          static Momentum fromPxPyPzE( double px, double py, double pz, double e );
-          /// Build a 4-momentum from its three momentum coordinates and mass
-          static Momentum fromPxPyPzM( double px, double py, double pz, double m );
-          /// Build a 4-momentum from its transverse momentum, rapidity and mass
-          static Momentum fromPxPyYM( double px, double py, double rap, double m );
-
-          // --- vector and scalar operators
-
-          /// Scalar product of the 3-momentum with another 3-momentum
-          double threeProduct( const Momentum& ) const;
-          /// Scalar product of the 4-momentum with another 4-momentum
-          double fourProduct( const Momentum& ) const;
-          /// Vector product of the 3-momentum with another 3-momentum
-          double crossProduct( const Momentum& ) const;
-          /// Compute the 4-vector sum of two 4-momenta
-          Momentum operator+( const Momentum& ) const;
-          /// Add a 4-momentum through a 4-vector sum
-          Momentum& operator+=( const Momentum& );
-          /// Unary inverse operator
-          Momentum operator-() const;
-          /// Compute the inverse per-coordinate 4-vector
-          Momentum operator-( const Momentum& ) const;
-          /// Subtract a 4-momentum through a 4-vector sum
-          Momentum& operator-=( const Momentum& );
-          /// Scalar product of two 3-momenta
-          double operator*( const Momentum& ) const;
-          /// Scalar product of the 3-momentum with another 3-momentum
-          double operator*=( const Momentum& );
-          /// Multiply all components of a 4-momentum by a scalar
-          Momentum operator*( double c ) const;
-          /// Multiply all 4-momentum coordinates by a scalar
-          Momentum& operator*=( double c );
-          /// Left-multiply all 4-momentum coordinates by a scalar
-          friend Momentum operator*( double, const Momentum& );
-          /// Equality operator
-          bool operator==( const Momentum& ) const;
-          /// Human-readable format for a particle's momentum
-          friend std::ostream& operator<<( std::ostream&, const Momentum& );
-
-          Momentum& betaGammaBoost( double gamma, double betagamma );
-          /// Forward Lorentz boost
-          Momentum& lorentzBoost( const Momentum& p );
-
-          // --- setters and getters
-
-          /// Set all the components of the 4-momentum (in GeV)
-          Momentum& setP( double px, double py, double pz, double e );
-          /// Set all the components of the 3-momentum (in GeV)
-          Momentum& setP( double px, double py, double pz );
-          /// Set the energy (in GeV)
-          inline Momentum& setEnergy( double e ) { energy_ = e; return *this; }
-          /// Compute the energy from the mass
-          inline Momentum& setMass( double m ) { return setMass2( m*m ); }
-          /// Compute the energy from the mass
-          Momentum& setMass2( double m2 );
-          /// Get one component of the 4-momentum (in GeV)
-          double operator[]( const unsigned int i ) const;
-          /// Get one component of the 4-momentum (in GeV)
-          double& operator[]( const unsigned int i );
-          /// Momentum along the \f$x\f$-axis (in GeV)
-          inline double px() const { return px_; }
-          /// Momentum along the \f$y\f$-axis (in GeV)
-          inline double py() const { return py_; }
-          /// Longitudinal momentum (in GeV)
-          inline double pz() const { return pz_; }
-          /// Transverse momentum (in GeV)
-          double pt() const;
-          /// Squared transverse momentum (in GeV\f$^2\f$)
-          double pt2() const;
-          /// 5-vector of double precision floats (in GeV)
-          const std::vector<double> pVector() const;
-          /// 3-momentum norm (in GeV)
-          inline double p() const { return p_; }
-          /// Squared 3-momentum norm (in GeV\f$^2\f$)
-          inline double p2() const { return p_*p_; }
-          /// Energy (in GeV)
-          inline double energy() const { return energy_; }
-          /// Squared energy (in GeV\f$^2\f$)
-          inline double energy2() const { return energy_*energy_; }
-          /// Squared mass (in GeV\f$^2\f$) as computed from its energy and momentum
-          inline double mass2() const { return energy2()-p2(); }
-          /// Mass (in GeV) as computed from its energy and momentum
-          /// \note Returns \f$-\sqrt{|E^2-\mathbf{p}^2|}<0\f$ if \f$\mathbf{p}^2>E^2\f$
-          double mass() const;
-          /// Polar angle (angle with respect to the longitudinal direction)
-          double theta() const;
-          /// Azimutal angle (angle in the transverse plane)
-          double phi() const;
-          /// Pseudo-rapidity
-          double eta() const;
-          /// Rapidity
-          double rapidity() const;
-          Momentum& truncate( double tolerance = 1.e-10 );
-          /// Rotate the transverse components by an angle phi (and reflect the y coordinate)
-          Momentum& rotatePhi( double phi, double sign );
-          /// Rotate the particle's momentum by a polar/azimuthal angle
-          Momentum& rotateThetaPhi( double theta_, double phi_ );
-          /// Apply a \f$ z\rightarrow -z\f$ transformation
-          inline Momentum& mirrorZ() { pz_ = -pz_; return *this; }
-
-        private:
-          /// Compute the 3-momentum's norm
-          Momentum& computeP();
-          /// Momentum along the \f$x\f$-axis
-          double px_;
-          /// Momentum along the \f$y\f$-axis
-          double py_;
-          /// Momentum along the \f$z\f$-axis
-          double pz_;
-          /// 3-momentum's norm (in GeV/c)
-          double p_;
-          /// Energy (in GeV)
-          double energy_;
       };
       /// Human-readable format for a particle's role in the event
       friend std::ostream& operator<<( std::ostream& os, const Role& rl );
@@ -337,8 +202,6 @@ namespace cepgen
 
   /// Compute the centre of mass energy of two particles (incoming or outgoing states)
   double CMEnergy( const Particle& p1, const Particle& p2 );
-  /// Compute the centre of mass energy of two particles (incoming or outgoing states)
-  double CMEnergy( const Particle::Momentum& m1, const Particle::Momentum& m2 );
 
   //bool operator<( const Particle& a, const Particle& b ) { return a.id<b.id; }
 

@@ -183,7 +183,7 @@ namespace cepgen
         if ( status == 11 || status == 14 )
           status = -3;
         pa.setStatus( (Particle::Status)status );
-        pa.setMomentum( Particle::Momentum( pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p] ) );
+        pa.setMomentum( Momentum( pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p] ) );
         pa.setMass( pyjets_.p[4][p] );
         if ( role != Particle::Role::UnknownRole ) {
           auto& moth = ev[moth_id];
@@ -218,7 +218,7 @@ namespace cepgen
         const double px = std::sqrt( 0.25*std::pow( mx2-mdq2+mq2, 2 )/mx2-mq2 );
 
         //--- build 4-vectors and boost decay particles
-        auto pdq = Particle::Momentum::fromPThetaPhi( px, theta, phi, std::hypot( px, mdq ) );
+        auto pdq = Momentum::fromPThetaPhi( px, theta, phi, std::hypot( px, mdq ) );
         auto pq = -pdq; pq.setEnergy( std::hypot( px, mq ) );
 
         //--- singlet
