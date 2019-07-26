@@ -38,8 +38,9 @@ namespace cepgen
         std::unique_ptr<TFile> output_;
         const std::string input_card_;
         std::unique_ptr<Delphes> delphes_;
-        std::unique_ptr<ExRootConfReader> conf_reader_;
-        std::unique_ptr<ExRootTreeWriter> tree_writer_;
+        //--- initialised here, but deleted elsewhere
+        ExRootConfReader* conf_reader_; // deleted at destructor
+        ExRootTreeWriter* tree_writer_; // deleted at destructor
         //--- non-owning
         DelphesFactory* factory_;
         ExRootTreeBranch* evt_branch_;
@@ -65,8 +66,8 @@ namespace cepgen
           << "Failed to parse the Delphes configuration card!\n\t"
           << err.what();
       }
-      delphes_->SetTreeWriter( tree_writer_.get() );
-      delphes_->SetConfReader( conf_reader_.get() );
+      delphes_->SetTreeWriter( tree_writer_ );
+      delphes_->SetConfReader( conf_reader_ );
     }
 
     DelphesHandler::~DelphesHandler()
