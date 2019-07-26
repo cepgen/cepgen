@@ -9,6 +9,7 @@
 #include <Tauola/Tauola.h>
 #ifdef HEPMC3
 #  include "CepGen/Event/Event.h"
+#  include "CepGen/Physics/PDG.h"
 #  include "CepGen/Core/utils.h"
 #  include <Tauola/TauolaEvent.h>
 #else
@@ -209,8 +210,8 @@ namespace cepgen
           const auto& daugh = part->getDaughters();
           if ( daugh.size() == 1 )
             continue;
-          if ( daugh.size() == 2 && ( abs( daugh.at( 0 )->getPdgID() ) == 15
-                                   || abs( daugh.at( 1 )->getPdgID() ) == 15) )
+          if ( daugh.size() == 2 && ( abs( daugh.at( 0 )->getPdgID() ) == PDG::tau
+                                   || abs( daugh.at( 1 )->getPdgID() ) == PDG::tau ) )
             continue;
           CG_WARNING( "CepGenTauolaEvent" ) << "Particle with pdg code " << part->getPdgID()
             <<" has already daughters.";
