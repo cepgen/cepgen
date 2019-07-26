@@ -9,7 +9,7 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Version.h"
 
-#include "promc/ProMCBook.h"
+#include "ProMCBook.h"
 
 #include <stdio.h>
 
