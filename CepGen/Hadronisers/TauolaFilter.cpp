@@ -8,7 +8,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/PDG.h"
 
-#include "CepGen/IO/CepGenPTInterface.h"
+#include "CepGen/IO/PhotosTauolaInterface.h"
 
 #include <Tauola/TauolaEvent.h>
 #include <Tauola/Tauola.h>
@@ -36,7 +36,7 @@ namespace cepgen
 
       private:
         const ParametersList pol_states_, rad_states_;
-        typedef io::CepGenPTEvent<TauolaEvent,TauolaParticle> CepGenTauolaEvent;
+        typedef io::PhotosTauolaEvent<TauolaEvent,TauolaParticle> CepGenTauolaEvent;
     };
 
     TauolaFilter::TauolaFilter( const ParametersList& params ) :
@@ -79,7 +79,7 @@ namespace cepgen
     {
       weight = 1.;
 
-      CepGenTauolaEvent evt( ev );
+      CepGenTauolaEvent evt( ev, PDG::tau );
       //evt.undecayTaus();
       evt.decayTaus();
 

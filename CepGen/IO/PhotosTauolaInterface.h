@@ -1,5 +1,5 @@
-#ifndef CepGen_IO_CepGenPTInterface_h
-#define CepGen_IO_CepGenPTInterface_h
+#ifndef CepGen_IO_PhotosTauolaInterface_h
+#define CepGen_IO_PhotosTauolaInterface_h
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/PDG.h"
@@ -10,11 +10,11 @@ namespace cepgen
   namespace io
   {
     template<typename P>
-    class CepGenPTParticle : public P, public Particle
+    class PhotosTauolaParticle : public P, public Particle
     {
       public:
-        CepGenPTParticle() = default;
-        CepGenPTParticle( const Particle& part ) :
+        PhotosTauolaParticle() = default;
+        PhotosTauolaParticle( const Particle& part ) :
           Particle( part ) {
           setBarcode( part.id() );
           setPdgID( part.integerPdgId() );
@@ -27,14 +27,14 @@ namespace cepgen
           setMass( part.mass() );
         }
 
-        CepGenPTParticle* createNewParticle( int pdg, int status, double mass, double px, double py, double pz, double e ) override {
+        PhotosTauolaParticle* createNewParticle( int pdg, int status, double mass, double px, double py, double pz, double e ) override {
           Particle part( Particle::Role::UnknownRole, pdg, (Particle::Status)status );
           part.setChargeSign( pdg/(unsigned int)pdg );
           part.setMomentum( Momentum::fromPxPyPzE( px, py, pz, e ) );
           part.setMass( mass );
-          return new CepGenPTParticle<P>( part );
+          return new PhotosTauolaParticle<P>( part );
         }
-        void print() override { CG_INFO( "CepGenPTParticle" ) << *this; }
+        void print() override { CG_INFO( "PhotosTauolaParticle" ) << *this; }
 
         void setBarcode( int id ) { id_ = id; }
         int getBarcode() override { return id_; }
@@ -63,14 +63,14 @@ namespace cepgen
     };
 
     template<typename E, typename P>
-    class CepGenPTEvent : public E, public Event
+    class PhotosTauolaEvent : public E, public Event
     {
       public:
-        inline CepGenPTEvent( const Event& evt ) :
-          Event( evt ) {
+        inline PhotosTauolaEvent( const Event& evt, const pdgid_t pdg = PDG::invalid ) :
+          Event( evt ), spec_pdg_id_( pdg ) {
           //--- first loop to add particles
           for ( size_t i = 0; i < evt.size(); ++i )
-            particles_.emplace_back( new CepGenPTParticle<P>( evt[i] ) );
+            particles_.emplace_back( new PhotosTauolaParticle<P>( evt[i] ) );
           //--- second loop to associate parentages
           for ( size_t i = 0; i < evt.size(); ++i ) {
             const auto& part = evt[i];
@@ -94,7 +94,7 @@ namespace cepgen
             particles_[i]->print();
           }
         }
-        inline ~CepGenPTEvent() {
+        inline ~PhotosTauolaEvent() {
           for ( size_t i = 0; i < particles_.size(); ++i )
             delete particles_[i];
         }
@@ -115,10 +115,10 @@ namespace cepgen
               const auto& daugh = part->getDaughters();
               if ( daugh.size() == 1 )
                 continue;
-              if ( daugh.size() == 2 && ( abs( daugh.at( 0 )->getPdgID() ) == PDG::tau
-                                       || abs( daugh.at( 1 )->getPdgID() ) == PDG::tau ) )
+              if ( daugh.size() == 2 && ( abs( daugh.at( 0 )->getPdgID() ) == spec_pdg_id_
+                                       || abs( daugh.at( 1 )->getPdgID() ) == spec_pdg_id_ ) )
                 continue;
-              CG_WARNING( "CepGenPTEvent" ) << "Particle with pdg code " << part->getPdgID()
+              CG_WARNING( "PhotosTauolaEvent" ) << "Particle with pdg code " << part->getPdgID()
                 <<" has already daughters.";
             }
           }
@@ -127,6 +127,7 @@ namespace cepgen
 
       private:
         std::vector<P*> particles_;
+        pdgid_t spec_pdg_id_;
     };
   }
 }
