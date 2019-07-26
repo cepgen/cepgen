@@ -8,6 +8,8 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/PDG.h"
 
+#include "CepGen/IO/CepGenPTInterface.h"
+
 #include <Tauola/TauolaEvent.h>
 #include <Tauola/Tauola.h>
 #include <Tauola/Log.h>
@@ -34,54 +36,7 @@ namespace cepgen
 
       private:
         const ParametersList pol_states_, rad_states_;
-    };
-
-    class CepGenTauolaEvent : public TauolaEvent, public Event
-    {
-      public:
-        CepGenTauolaEvent( const Event& );
-        ~CepGenTauolaEvent();
-
-        std::vector<TauolaParticle*> findParticles( int ) override;
-        std::vector<TauolaParticle*> findStableParticles( int ) override;
-
-      private:
-        std::vector<TauolaParticle*> particles_;
-    };
-
-    class CepGenTauolaParticle : public TauolaParticle, public Particle
-    {
-      public:
-        CepGenTauolaParticle() = default;
-        CepGenTauolaParticle( const Particle& );
-
-        CepGenTauolaParticle* createNewParticle( int, int, double, double, double, double, double ) override;
-        void print() override;
-
-        void setBarcode( int id ) { id_ = id; }
-        int getBarcode() override { return id_; }
-        void setPdgID( int pdg ) override { pdg_id_ = (pdgid_t)pdg; }
-        int getPdgID() override { return (int)pdg_id_; }
-        void setStatus( int status ) override { status_ = (Particle::Status)status; }
-        int getStatus() override { return (int)status_; }
-
-        void setPx( double px ) override { momentum_[0] = px; }
-        double getPx() override { return momentum_.px(); }
-        void setPy( double py ) override { momentum_[1] = py; }
-        double getPy() override { return momentum_.py(); }
-        void setPz( double pz ) override { momentum_[2] = pz; }
-        double getPz() override { return momentum_.pz(); }
-        void setE( double e ) override { momentum_[3] = e; }
-        double getE() override { return energy(); }
-        void setMass( double m ) override { mass_ = m; }
-
-        void setMothers( std::vector<TauolaParticle*> moth ) override { mothers_ = moth; }
-        std::vector<TauolaParticle*> getMothers() override { return mothers_; }
-        void setDaughters( std::vector<TauolaParticle*> daugh ) override { daughters_ = daugh; }
-        std::vector<TauolaParticle*> getDaughters() override { return daughters_; }
-
-      private:
-        std::vector<TauolaParticle*> mothers_, daughters_;
+        typedef io::CepGenPTEvent<TauolaEvent,TauolaParticle> CepGenTauolaEvent;
     };
 
     TauolaFilter::TauolaFilter( const ParametersList& params ) :
@@ -129,107 +84,6 @@ namespace cepgen
       evt.decayTaus();
 
       return true;
-    }
-
-    //----- Event interface
-
-    CepGenTauolaEvent::CepGenTauolaEvent( const Event& evt ) :
-      Event( evt )
-    {
-      //--- first loop to add particles
-      for ( size_t i = 0; i < evt.size(); ++i )
-        particles_.emplace_back( new CepGenTauolaParticle( evt[i] ) );
-      //--- second loop to associate parentages
-      for ( size_t i = 0; i < evt.size(); ++i ) {
-        const auto& part = evt[i];
-        const auto& daugh = part.daughters();
-        if ( !daugh.empty() ) {
-          std::vector<TauolaParticle*> dl;
-          for ( const auto& dg_id : daugh )
-            dl.emplace_back( particles_[dg_id] );
-          particles_[i]->setDaughters( dl );
-        }
-        const auto& moth = part.mothers();
-        if ( !moth.empty() ) {
-          std::vector<TauolaParticle*> ml;
-          for ( const auto& mt_id : moth ) {
-            ml.emplace_back( particles_[mt_id] );
-            if ( part.role() == Particle::Role::Intermediate )
-              particles_[i]->setPdgID( particles_[mt_id]->getPdgID() );
-          }
-          particles_[i]->setMothers( ml );
-        }
-        particles_[i]->print();
-      }
-    }
-
-    CepGenTauolaEvent::~CepGenTauolaEvent()
-    {
-      for ( size_t i = 0; i < particles_.size(); ++i )
-        delete particles_[i];
-    }
-
-    std::vector<TauolaParticle*>
-    CepGenTauolaEvent::findParticles( int pdg )
-    {
-      std::vector<TauolaParticle*> out;
-      for ( auto& part : particles_ )
-        if ( part->getPdgID() == pdg )
-          out.emplace_back( part );
-      return out;
-    }
-
-    std::vector<TauolaParticle*>
-    CepGenTauolaEvent::findStableParticles( int pdg )
-    {
-      std::vector<TauolaParticle*> out;
-      for ( auto& part : findParticles( pdg ) ) {
-        if ( !part->hasDaughters() )
-          out.emplace_back( part );
-        else {
-          const auto& daugh = part->getDaughters();
-          if ( daugh.size() == 1 )
-            continue;
-          if ( daugh.size() == 2 && ( abs( daugh.at( 0 )->getPdgID() ) == PDG::tau
-                                   || abs( daugh.at( 1 )->getPdgID() ) == PDG::tau ) )
-            continue;
-          CG_WARNING( "CepGenTauolaEvent" ) << "Particle with pdg code " << part->getPdgID()
-            <<" has already daughters.";
-        }
-      }
-      return out;
-    }
-
-    //----- Particle interface
-
-    CepGenTauolaParticle::CepGenTauolaParticle( const Particle& part ) :
-      Particle( part )
-    {
-      setBarcode( part.id() );
-      setPdgID( part.integerPdgId() );
-      setStatus( (int)part.status() );
-      const auto& mom = part.momentum();
-      setPx( mom.px() );
-      setPy( mom.py() );
-      setPz( mom.pz() );
-      setEnergy( mom.energy() );
-      setMass( part.mass() );
-    }
-
-    CepGenTauolaParticle*
-    CepGenTauolaParticle::createNewParticle( int pdg, int status, double mass, double px, double py, double pz, double e )
-    {
-      Particle part( Particle::Role::UnknownRole, pdg, (Particle::Status)status );
-      part.setChargeSign( pdg/(unsigned int)pdg );
-      part.setMomentum( Momentum::fromPxPyPzE( px, py, pz, e ) );
-      part.setMass( mass );
-      return new CepGenTauolaParticle( part );
-    }
-
-    void
-    CepGenTauolaParticle::print()
-    {
-      CG_INFO( "TauolaParticle" ) << *this;
     }
   }
 }
