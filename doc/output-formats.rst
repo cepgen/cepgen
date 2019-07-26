@@ -19,7 +19,10 @@ All handlers are defined as modules derivating from the following abstract base 
       :members:
       :no-link:
 
-In this page you will find a list of all currently supported output formats.
+----
+
+In this page you will find a list of all currently supported output formats, covering a broad spectrum of usages, both in the phenomenological and experimental communities.
+Please note that this list is under constant evolution, you may contact us with requests for additional interfacing capabilities.
 
 ``lhef``
 --------
@@ -27,8 +30,12 @@ In this page you will find a list of all currently supported output formats.
 This output format handles the conversion into the `Les Houches standard definition <https://en.wikipedia.org/wiki/Les_Houches_Accords>`_.
 Currently, two implementations of this export module exist:
 
-- a ``Pythia 8`` LHEF output module (described `here <http://home.thep.lu.se/~torbjorn/pythia82html/LesHouchesAccord.html>`_) as the default handler, :cpp:class:`cepgen::io::Pythia8LHEFHandler`,
-- a ``HepMC (v≥3)`` implementation, if the earlier is not found in the standard libraries path: :cpp:class:`cepgen::io::HepMCLHEFHandler`.
+- a ``Pythia 8`` LHEF output module (described `here <http://home.thep.lu.se/~torbjorn/pythia82html/LesHouchesAccord.html>`_) as the default handler, :cpp:class:`cepgen::io::LHEFPythiaHandler`,
+
+  .. doxygenclass:: cepgen::io::LHEFPythiaHandler
+     :outline:
+
+- a ``HepMC (v≥3)`` implementation, if the earlier is not found in the standard libraries path: :cpp:class:`cepgen::io::LHEFHepMCHandler`.
 
 ``hepmc``, ``hepmc_root``, ``hepevt``, ...
 ------------------------------------------
@@ -48,6 +55,16 @@ Alternatively, as from this version ``3.1.0`` of ``HepMC``, the following output
 - a ``hepmc_root`` format using the :cpp:class:`HepMC3::WriterRoot` export module,
 - a ``hepmc_root_tree`` using the :cpp:class:`HepMC3::WriterRootTree` module.
 
+``promc``
+---------
+
+.. versionadded:: 0.9.8
+
+.. doxygenclass:: cepgen::io::ProMCHandler
+   :outline:
+
+The support has been added for the `ProMC <http://jwork.org/wiki/PROMC>`_ highly compressed output format.
+
 ``text``
 --------
 
@@ -56,7 +73,7 @@ Alternatively, as from this version ``3.1.0`` of ``HepMC``, the following output
 .. doxygenclass:: cepgen::io::TextHandler
    :outline:
 
-This last module allows to generate a **generic (ASCII) output format** along with **raw text histograms** of kinematic variables, fully configurable by the user.
+This simplest case of an output module allows to generate a **generic (ASCII) output format** along with **raw text histograms** of kinematic variables, fully configurable by the user.
 Using the Python steering cards definition, a list of variables to be stored is defined through the ``variables`` list/array of string-typed definition.
 
 For **histograms definition**, a dictionary ``histVariables`` of variable-indexed ``cepgen.Parameters`` objects is fed to the ``output`` module.
