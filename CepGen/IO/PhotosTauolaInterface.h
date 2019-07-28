@@ -9,12 +9,14 @@ namespace cepgen
 {
   namespace io
   {
+    /// Interface to particles objects for Photos++ and Tauola++
+    /// \tparam P Photos/Tauola particle base object
     template<typename P>
     class PhotosTauolaParticle : public P, public Particle
     {
       public:
         PhotosTauolaParticle() = default;
-        PhotosTauolaParticle( const Particle& part ) :
+        inline PhotosTauolaParticle( const Particle& part ) :
           Particle( part ) {
           setBarcode( part.id() );
           setPdgID( part.integerPdgId() );
@@ -27,14 +29,15 @@ namespace cepgen
           setMass( part.mass() );
         }
 
-        PhotosTauolaParticle* createNewParticle( int pdg, int status, double mass, double px, double py, double pz, double e ) override {
+        inline PhotosTauolaParticle* createNewParticle( int pdg, int status, double mass,
+                                                        double px, double py, double pz, double e ) override {
           Particle part( Particle::Role::UnknownRole, pdg, (Particle::Status)status );
           part.setChargeSign( pdg/(unsigned int)pdg );
           part.setMomentum( Momentum::fromPxPyPzE( px, py, pz, e ) );
           part.setMass( mass );
           return new PhotosTauolaParticle<P>( part );
         }
-        void print() override { CG_INFO( "PhotosTauolaParticle" ) << *this; }
+        inline void print() override { CG_INFO( "PhotosTauolaParticle" ) << *this; }
 
         void setBarcode( int id ) { id_ = id; }
         int getBarcode() override { return id_; }
@@ -62,6 +65,9 @@ namespace cepgen
         std::vector<P*> mothers_, daughters_;
     };
 
+    /// Interface to events objects for Photos++ and Tauola++
+    /// \tparam E Photos/Tauola event base object
+    /// \tparam P Photos/Tauola particle base object
     template<typename E, typename P>
     class PhotosTauolaEvent : public E, public Event
     {
@@ -99,14 +105,14 @@ namespace cepgen
             delete particles_[i];
         }
 
-        std::vector<P*> findParticles( int pdg ) override {
+        inline std::vector<P*> findParticles( int pdg ) override {
           std::vector<P*> out;
           for ( auto& part : particles_ )
             if ( part->getPdgID() == pdg )
               out.emplace_back( part );
           return out;
         }
-        std::vector<P*> findStableParticles( int pdg ) override {
+        inline std::vector<P*> findStableParticles( int pdg ) override {
           std::vector<P*> out;
           for ( auto& part : findParticles( pdg ) ) {
             if ( !part->hasDaughters() )

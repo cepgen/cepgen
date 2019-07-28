@@ -28,7 +28,7 @@ namespace cepgen
         ~TauolaFilter();
 
         void setParameters( const Parameters& ) override {}
-        inline void readString( const char* param ) override {}
+        void readString( const char* param ) override {}
         void init() override;
         bool run( Event& ev, double& weight, bool full ) override;
 
@@ -55,7 +55,6 @@ namespace cepgen
     {
       Tauola::setUnits( Tauola::GEV, Tauola::MM );
       //Tauola::setSeed( seed_ );
-      Tauola::initialize();
       //--- spin correlations
       Tauola::spin_correlation.setAll( pol_states_.get<bool>( "full", true ) );
       Tauola::spin_correlation.GAMMA = pol_states_.get<bool>( "GAMMA", true );
@@ -72,6 +71,11 @@ namespace cepgen
       const auto rad_cutoff = rad_states_.get<double>( "cutoff", -1. );
       if ( rad_cutoff > 0. )
         Tauola::setRadiationCutOff( rad_cutoff );
+      //--- default parameters
+      Tauola::setDecayingParticle( 15 );
+      Tauola::setSameParticleDecayMode( 0 );
+      Tauola::setOppositeParticleDecayMode( 0 );
+      Tauola::initialize();
     }
 
     bool
