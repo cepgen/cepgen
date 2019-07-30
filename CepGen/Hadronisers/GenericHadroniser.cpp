@@ -10,16 +10,4 @@ namespace cepgen
       remn_fragm_( plist.get<bool>( "remnantsFragmentation", true ) )
     {}
   }
-
-  std::ostream&
-  operator<<( std::ostream& os, const hadr::GenericHadroniser& hadr )
-  {
-    return os << hadr.name();
-  }
-
-  std::ostream&
-  operator<<( std::ostream& os, const hadr::GenericHadroniser* hadr )
-  {
-    return os << hadr->name();
-  }
 }
