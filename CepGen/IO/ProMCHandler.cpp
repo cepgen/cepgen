@@ -129,4 +129,4 @@ namespace cepgen
   }
 }
 
-REGISTER_IO_MODULE( promc, ProMCHandler )
+REGISTER_IO_MODULE( "promc", ProMCHandler )

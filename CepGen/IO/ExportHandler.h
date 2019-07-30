@@ -6,9 +6,9 @@
 
 #define REGISTER_IO_MODULE( name, obj ) \
   namespace cepgen { namespace io { \
-    struct BUILDERNM( name ) { \
-      BUILDERNM( name )() { ExportHandler::get().registerModule<obj>( STRINGIFY( name ) ); } }; \
-    static BUILDERNM( name ) g ## name; \
+    struct BUILDERNM( obj ) { \
+      BUILDERNM( obj )() { ExportHandler::get().registerModule<obj>( name ); } }; \
+    static BUILDERNM( obj ) g ## obj; \
   } }
 
 namespace cepgen

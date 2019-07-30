@@ -134,4 +134,4 @@ namespace cepgen
   }
 }
 
-REGISTER_IO_MODULE( delphes, DelphesHandler )
+REGISTER_IO_MODULE( "delphes", DelphesHandler )

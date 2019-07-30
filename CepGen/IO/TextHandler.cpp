@@ -190,4 +190,4 @@ namespace cepgen
   }
 }
 
-REGISTER_IO_MODULE( text, TextHandler )
+REGISTER_IO_MODULE( "text", TextHandler )

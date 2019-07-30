@@ -375,7 +375,5 @@ namespace cepgen
     }
   }
 }
-// register process and define aliases
-REGISTER_PROCESS( pptoll, PPtoFF )
-REGISTER_PROCESS( pptoff, PPtoFF )
-REGISTER_PROCESS( pptoqq, PPtoFF )
+// register process
+REGISTER_PROCESS( "pptoff", PPtoFF )

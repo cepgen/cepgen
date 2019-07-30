@@ -356,4 +356,4 @@ namespace cepgen
   }
 }
 // register hadroniser and define alias
-REGISTER_HADRONISER( pythia8, Pythia8Hadroniser )
+REGISTER_HADRONISER( "pythia8", Pythia8Hadroniser )
