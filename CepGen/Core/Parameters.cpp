@@ -210,8 +210,6 @@ namespace cepgen
       << ( pretty ? yesno( param->generation_.enabled ) : std::to_string( param->generation_.enabled ) ) << "\n"
       << std::setw( wt ) << "Number of events to generate"
       << ( pretty ? boldify( param->generation_.maxgen ) : std::to_string( param->generation_.maxgen ) ) << "\n";
-    if ( param->out_module_ )
-      os << std::setw( wt ) << "Output module" << param->out_module_->name() << "\n";
     if ( param->generation_.num_threads > 1 )
       os
         << std::setw( wt ) << "Number of threads" << param->generation_.num_threads << "\n";
@@ -220,19 +218,22 @@ namespace cepgen
       << std::setw( wt ) << "Integrand treatment"
       << ( pretty ? yesno( param->generation_.treat ) : std::to_string( param->generation_.treat ) ) << "\n"
       << std::setw( wt ) << "Verbosity level " << utils::Logger::get().level << "\n";
-    if ( !param->evt_modifiers_.empty() ) {
+    if ( !param->evt_modifiers_.empty() )
       os
         << "\n"
         << std::setfill( '-' ) << std::setw( wb+6 )
-        << ( pretty ? boldify( " Event modifier sequence " ) : "Event modifier sequence" ) << std::setfill( ' ' ) << "\n\n"
-        << std::setw( wt ) << "Name";
-      std::ostringstream seq;
-      std::string sep;
+        << ( pretty ? boldify( " Event treatment " ) : "Event treatment" ) << std::setfill( ' ' ) << "\n\n";
+    if ( !param->evt_modifiers_.empty() ) {
+      std::string sep, mod_name = utils::s( "Event modifier", param->evt_modifiers_.size() );
       for ( const auto& mod : param->evt_modifiers_ )
-        seq << sep << mod->name(), sep = ", ";
-      os
-        << ( pretty ? boldify( seq.str().c_str() ) : seq.str() ) << "\n";
+        os
+          << std::setw( wt ) << mod_name
+          << sep << ( pretty ? boldify( mod->name().c_str() ) : mod->name() ) << "\n", sep = "+ ", mod_name.clear();
     }
+    if ( param->out_module_ )
+      os
+        << std::setw( wt ) << "Output module"
+        << ( pretty ? boldify( param->out_module_->name().c_str() ) : param->out_module_->name() ) << "\n";
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 )
