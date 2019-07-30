@@ -25,7 +25,7 @@ namespace cepgen
 
         /// Rapidity range for the outgoing fermions
         double onShellME( double shat, double that, double uhat ) const;
-        double offShellME( double, double, double, double, double, double, const Particle::Momentum&, const Particle::Momentum& ) const;
+        double offShellME( double, double, double, double, double, double, const Momentum&, const Momentum& ) const;
 
         /// Particles info for the fermion pair produced
         const ParticleProperties pair_info_;
@@ -51,9 +51,9 @@ namespace cepgen
         double mf_, mf2_, qf_;
         unsigned short colf_;
         /// First outgoing fermion's momentum
-        Particle::Momentum p_f1_;
+        Momentum p_f1_;
         /// Second outgoing fermion's momentum
-        Particle::Momentum p_f2_;
+        Momentum p_f2_;
     };
   }
 }

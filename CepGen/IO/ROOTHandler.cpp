@@ -42,7 +42,7 @@ namespace cepgen
     };
 
     ROOTHandler::ROOTHandler( const ParametersList& params ) :
-      GenericExportHandler( "text" ),
+      GenericExportHandler( "root" ),
       file_     ( TFile::Open( params.get<std::string>( "filename", "output.root" ).c_str(), "recreate" ) ),
       variables_( params.get<ParametersList>( "variables" ) ),
       xsec_( 1. )
@@ -79,4 +79,4 @@ namespace cepgen
   }
 }
 
-REGISTER_IO_MODULE( root, ROOTHandler )
+REGISTER_IO_MODULE( "root", ROOTHandler )

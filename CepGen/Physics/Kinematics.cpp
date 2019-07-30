@@ -2,13 +2,12 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/KTFlux.h"
+#include "CepGen/Physics/Momentum.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
-
-#include "CepGen/Event/Particle.h"
 
 #include <cmath>
 
@@ -36,8 +35,8 @@ namespace cepgen
     const HeavyIon hi1( incoming_beams.first.pdg ), hi2( incoming_beams.second.pdg );
     const double m1 = hi1 ? HeavyIon::mass( hi1 ) : PDG::get().mass( incoming_beams.first .pdg );
     const double m2 = hi2 ? HeavyIon::mass( hi2 ) : PDG::get().mass( incoming_beams.second.pdg );
-    const auto p1 = Particle::Momentum::fromPxPyPzM( 0., 0., +incoming_beams.first .pz, m1 );
-    const auto p2 = Particle::Momentum::fromPxPyPzM( 0., 0., -incoming_beams.second.pz, m2 );
+    const auto p1 = Momentum::fromPxPyPzM( 0., 0., +incoming_beams.first .pz, m1 );
+    const auto p2 = Momentum::fromPxPyPzM( 0., 0., -incoming_beams.second.pz, m2 );
     return ( p1+p2 ).mass();
   }
 

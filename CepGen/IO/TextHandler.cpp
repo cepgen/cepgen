@@ -94,7 +94,7 @@ namespace cepgen
         gsl_histogram_set_ranges_uniform( hist, min, max );
         hists_.emplace_back( std::make_pair( var, hist ) );
         CG_INFO( "TextHandler" )
-          << "Booking a histogram with " << nbins << " bin" << utils::s( nbins )
+          << "Booking a histogram with " << utils::s( "bin", nbins, true )
           << " between " << min << " and " << max << " for \"" << var << "\".";
       }
       if ( save_hists_ && !hists_.empty() )
@@ -119,7 +119,7 @@ namespace cepgen
       }
       if ( save_hists_ )
         CG_INFO( "TextHandler" )
-          << "Saved " << utils::s( "histogram", hists_.size() )
+          << "Saved " << utils::s( "histogram", hists_.size(), true )
           << " into \"" << hist_filename_ << "\".";
     }
 
@@ -190,4 +190,4 @@ namespace cepgen
   }
 }
 
-REGISTER_IO_MODULE( text, TextHandler )
+REGISTER_IO_MODULE( "text", TextHandler )

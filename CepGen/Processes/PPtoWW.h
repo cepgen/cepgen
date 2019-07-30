@@ -49,9 +49,9 @@ namespace cepgen
         double phi_pt_diff_;
 
         /// First outgoing W boson's momentum
-        Particle::Momentum p_w1_;
+        Momentum p_w1_;
         /// Second outgoing W boson's momentum
-        Particle::Momentum p_w2_;
+        Momentum p_w2_;
     };
   }
 }

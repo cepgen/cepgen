@@ -1,10 +1,12 @@
 #include "CepGen/IO/GenericExportHandler.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/Core/EventModifier.h"
 #include "CepGen/Physics/Constants.h"
 
 #include "CepGen/Parameters.h"
 #include "CepGen/Version.h"
+#include "CepGen/Core/utils.h"
 
 #include <sstream>
 
@@ -28,8 +30,13 @@ namespace cepgen
         << prep << "  * process: " << params.processName() << " (" << params.kinematics.mode << ")\n";
       if ( params.kinematics.mode != KinematicsMode::ElasticElastic ) {
         os << prep << "  * structure functions: " << params.kinematics.structure_functions->description() << "\n";
-        if ( !params.hadroniserName().empty() )
-          os << prep << "  * hadroniser: " << params.hadroniserName() << "\n";
+        if ( !params.eventModifiersSequence().empty() ) {
+          os << prep << "  * " << utils::s( "event modifier", params.eventModifiersSequence().size() ) << ": ";
+          std::string sep;
+          for ( const auto& mod : params.eventModifiersSequence() )
+            os << sep << mod->name(), sep = ", ";
+          os << "\n";
+        }
       }
       os
         << prep << "  *--- incoming state\n";

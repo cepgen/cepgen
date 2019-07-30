@@ -1,5 +1,4 @@
 #include "CepGen/Hadronisers/GenericHadroniser.h"
-#include "CepGen/Hadronisers/HadronisersHandler.h"
 
 #include "CepGen/IO/PythiaEventInterface.h"
 
@@ -8,6 +7,7 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 
+#include "CepGen/Core/EventModifierHandler.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
@@ -248,7 +248,7 @@ namespace cepgen
         : (Particle::Role)role == Particle::Role::CentralSystem
           ? Particle::Status::Propagator
           : Particle::Status::Fragmented );
-      op.setMomentum( Particle::Momentum( mom.px(), mom.py(), mom.pz(), mom.e() ) );
+      op.setMomentum( Momentum( mom.px(), mom.py(), mom.pz(), mom.e() ) );
       op.setMass( mom.mCalc() );
       cg_evt_->addCorresp( py_part.index()-offset_, op.id() );
       return op;
@@ -355,5 +355,5 @@ namespace cepgen
     }
   }
 }
-// register hadroniser and define alias
-REGISTER_HADRONISER( pythia8, Pythia8Hadroniser )
+// register hadroniser
+REGISTER_MODIFIER( "pythia8", Pythia8Hadroniser )
