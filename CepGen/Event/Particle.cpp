@@ -102,6 +102,12 @@ namespace cepgen
   }
 
   void
+  Particle::clearMothers()
+  {
+    mothers_.clear();
+  }
+
+  void
   Particle::addMother( Particle& part )
   {
     mothers_.insert( part.id() );
@@ -111,6 +117,12 @@ namespace cepgen
       << "is the new mother of " << id_ << " (pdgId=" << (int)pdg_id_ << ").";
 
     part.addDaughter( *this );
+  }
+
+  void
+  Particle::clearDaughters()
+  {
+    daughters_.clear();
   }
 
   void
@@ -227,7 +239,7 @@ namespace cepgen
   {
     os << std::resetiosflags( std::ios::showbase )
       << "Particle[" << part.id_ << "]{role=" << part.role_ << ", status=" << (int)part.status_ << ", "
-      << "pdg=" << part.pdg_id_ << ", p4=" << part.momentum_ << " GeV, m=" << part.mass_ << " GeV, "
+      << "pdg=" << part.integerPdgId() << ", p4=" << part.momentum_ << " GeV, m=" << part.mass_ << " GeV, "
       << "p⟂=" << part.momentum_.pt() << " GeV, eta=" << part.momentum_.eta() << ", phi=" << part.momentum_.phi();
     if ( part.primary() )
       os << ", primary";

@@ -21,6 +21,8 @@ namespace cepgen
       void freeze();
       /// Restore the event to its "empty" state
       void restore();
+      /// Compress the event record
+      Event compressed() const;
 
       /// Dump all the known information on every Particle object contained in this Event container in the output stream
       /// \param[out] os Output stream where to dump the information

@@ -41,8 +41,8 @@ namespace cepgen
 
         void setBarcode( int id ) { id_ = id; }
         int getBarcode() override { return id_; }
-        void setPdgID( int pdg ) override { pdg_id_ = (pdgid_t)pdg; }
-        int getPdgID() override { return (int)pdg_id_; }
+        void setPdgID( int pdg ) override { setPdgId( (short)pdg ); }
+        int getPdgID() override { return integerPdgId(); }
         void setStatus( int status ) override { status_ = (Particle::Status)status; }
         int getStatus() override { return (int)status_; }
 
@@ -73,30 +73,19 @@ namespace cepgen
     {
       public:
         inline PhotosTauolaEvent( const Event& evt, const pdgid_t pdg = PDG::invalid ) :
-          Event( evt ), spec_pdg_id_( pdg ) {
-          //--- first loop to add particles
-          for ( size_t i = 0; i < evt.size(); ++i )
-            particles_.emplace_back( new PhotosTauolaParticle<P>( evt[i] ) );
-          //--- second loop to associate parentages
-          for ( size_t i = 0; i < evt.size(); ++i ) {
-            const auto& part = evt[i];
-            const auto& daugh = part.daughters();
-            if ( !daugh.empty() ) {
-              std::vector<P*> dl;
-              for ( const auto& dg_id : daugh )
-                dl.emplace_back( particles_[dg_id] );
-              particles_[i]->setDaughters( dl );
-            }
-            const auto& moth = part.mothers();
-            if ( !moth.empty() ) {
-              std::vector<P*> ml;
-              for ( const auto& mt_id : moth ) {
-                ml.emplace_back( particles_[mt_id] );
-                if ( part.role() == Particle::Role::Intermediate )
-                  particles_[i]->setPdgID( particles_[mt_id]->getPdgID() );
-              }
-              particles_[i]->setMothers( ml );
-            }
+          Event( evt.compressed() ), spec_pdg_id_( pdg ) {
+          //--- loop to add particles and associate parentage
+          for ( size_t i = 0; i < size(); ++i ) {
+            const auto& part = operator[]( i );
+            particles_.emplace_back( new PhotosTauolaParticle<P>( part ) );
+            const auto& moth = part.mothers(), &daugh = part.daughters();
+            std::vector<P*> dl, ml;
+            for ( const auto& dg_id : daugh )
+              dl.emplace_back( particles_[dg_id] );
+            for ( const auto& mt_id : moth )
+              ml.emplace_back( particles_[mt_id] );
+            particles_[i]->setMothers( ml );
+            particles_[i]->setDaughters( dl );
             particles_[i]->print();
           }
         }
