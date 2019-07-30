@@ -63,12 +63,12 @@ namespace cepgen
                                Particle::OutgoingBeam1, Particle::OutgoingBeam2,
                                Particle::Parton1, Particle::Parton2,
                                Particle::CentralSystem } ) {
-      for ( const auto& part : operator[]( role ) ) {
-        auto& np = out.addParticle( role );
-        np = part;
-        np.setId( i++ );
-        np.clearMothers();
-        np.clearDaughters();
+      for ( const auto& old_part : operator[]( role ) ) {
+        auto& new_part = out.addParticle( role );
+        new_part = old_part; // copy all attributes
+        new_part.setId( i++ );
+        new_part.clearMothers();
+        new_part.clearDaughters();
       }
     }
     //--- fix parentage for outgoing beam particles
