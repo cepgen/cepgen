@@ -1,11 +1,11 @@
 #include "CepGen/Hadronisers/GenericHadroniser.h"
-#include "CepGen/Hadronisers/HadronisersHandler.h"
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
 
 #include "CepGen/Physics/PDG.h"
 
+#include "CepGen/Core/EventModifierHandler.h"
 #include "CepGen/Core/ParametersList.h" //FIXME
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
@@ -332,6 +332,6 @@ namespace cepgen
   }
 }
 
-// register hadroniser and define alias
-REGISTER_HADRONISER( "pythia6", Pythia6Hadroniser )
+// register hadroniser
+REGISTER_MODIFIER( "pythia6", Pythia6Hadroniser )
 

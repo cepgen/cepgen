@@ -232,14 +232,14 @@ namespace cepgen
     if ( part.primary() )
       os << ", primary";
     else {
-      os << ", " << utils::s( "mother", part.mothers_.size() ) << "=";
+      os << ", " << utils::s( "mother", part.mothers_.size(), true ) << "=";
       std::string delim;
       for ( const auto& moth : part.mothers_ )
         os << delim << moth, delim = ",";
     }
     const auto& daughters_list = part.daughters();
     if ( !daughters_list.empty() ) {
-      os << ", " << utils::s( "daughter", daughters_list.size() ) << "=";
+      os << ", " << utils::s( "daughter", daughters_list.size(), true ) << "=";
       std::string delim;
       for ( const auto& daugh : daughters_list )
         os << delim << daugh, delim = ",";

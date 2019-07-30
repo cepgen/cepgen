@@ -15,7 +15,7 @@ namespace cepgen
 {
   namespace io
   {
-    /// A hadroniser modules factory
+    /// An output modules factory
     typedef ModuleFactory<GenericExportHandler> ExportHandler;
   }
 }

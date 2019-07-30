@@ -7,7 +7,7 @@
 #include "CepGen/Physics/PDG.h"
 
 #include "CepGen/Processes/GenericProcess.h"
-#include "CepGen/Hadronisers/GenericHadroniser.h"
+#include "CepGen/Core/EventModifier.h"
 #include "CepGen/IO/GenericExportHandler.h"
 
 #include "CepGen/Parameters.h"
@@ -81,7 +81,7 @@ namespace cepgen
 
       if ( !params->storage()
         && !params->taming_functions
-        && !params->hadroniser()
+        && !params->eventModifiersSequence().empty()
         &&  params->kinematics.cuts.central_particles.empty() )
         return weight;
 
@@ -131,11 +131,13 @@ namespace cepgen
       // event hadronisation and resonances decay
       //================================================================
 
-      if ( params->hadroniser() ) {
+      if ( !params->eventModifiersSequence().empty() ) {
         double br = -1.;
-        if ( !params->hadroniser()->run( *ev, br, params->storage() ) || br == 0. )
-          return 0.;
-        weight *= br; // branching fraction for all decays
+        for ( auto& mod : params->eventModifiersSequence() ) {
+          if ( !mod->run( *ev, br, params->storage() ) || br == 0. )
+            return 0.;
+          weight *= br; // branching fraction for all decays
+        }
       }
 
       //================================================================
