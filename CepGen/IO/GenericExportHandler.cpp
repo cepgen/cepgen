@@ -31,7 +31,7 @@ namespace cepgen
       if ( params.kinematics.mode != KinematicsMode::ElasticElastic ) {
         os << prep << "  * structure functions: " << params.kinematics.structure_functions->description() << "\n";
         if ( !params.eventModifiersSequence().empty() ) {
-          os << prep << "  * " << utils::s( "hadroniser", params.eventModifiersSequence().size() ) << ": ";
+          os << prep << "  * " << utils::s( "event modifier", params.eventModifiersSequence().size() ) << ": ";
           std::string sep;
           for ( const auto& mod : params.eventModifiersSequence() )
             os << sep << mod->name(), sep = ", ";

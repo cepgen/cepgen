@@ -7,7 +7,7 @@
 
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Processes/GenericProcess.h"
-#include "CepGen/Hadronisers/GenericHadroniser.h"
+#include "CepGen/Core/EventModifier.h"
 #include "CepGen/IO/GenericExportHandler.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
