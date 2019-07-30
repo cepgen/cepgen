@@ -1,4 +1,4 @@
-#include "CepGen/Hadronisers/GenericHadroniser.h"
+#include "CepGen/Core/EventModifier.h"
 #include "CepGen/Hadronisers/HadronisersHandler.h"
 
 #include "CepGen/Core/Exception.h"
@@ -21,14 +21,13 @@ namespace cepgen
   namespace hadr
   {
     /// Interface to the Tauola decay routine
-    class TauolaFilter : public GenericHadroniser
+    class TauolaFilter : public EventModifier
     {
       public:
         explicit TauolaFilter( const ParametersList& );
         ~TauolaFilter();
 
         void setParameters( const Parameters& ) override {}
-        void readString( const char* param ) override {}
         void init() override;
         bool run( Event& ev, double& weight, bool full ) override;
 
@@ -40,7 +39,7 @@ namespace cepgen
     };
 
     TauolaFilter::TauolaFilter( const ParametersList& params ) :
-      GenericHadroniser( params, "tauola" ),
+      EventModifier( params, "tauola" ),
       pol_states_( params.get<ParametersList>( "polarisations" ) ),
       rad_states_( params.get<ParametersList>( "radiations" ) )
     {}
@@ -93,5 +92,5 @@ namespace cepgen
 }
 
 // register hadroniser and define alias
-REGISTER_HADRONISER( tauola, TauolaFilter )
+REGISTER_HADRONISER( "tauola", TauolaFilter )
 
