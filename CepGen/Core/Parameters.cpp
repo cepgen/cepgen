@@ -137,13 +137,13 @@ namespace cepgen
   }
 
   EventModifier*
-  Parameters::hadroniser( size_t i )
+  Parameters::eventModifier( size_t i )
   {
     return evt_modifiers_.at( i ).get();
   }
 
   std::string
-  Parameters::hadroniserName( size_t i ) const
+  Parameters::eventModifierName( size_t i ) const
   {
     if ( i >= evt_modifiers_.size() )
       return "";

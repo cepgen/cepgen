@@ -112,11 +112,13 @@ namespace cepgen
       //----- event modification (e.g. hadronisation, decay) algorithm
 
       /// Event modification algorithm to use
-      EventModifier* hadroniser( size_t );
+      EventModifier* eventModifier( size_t );
       /// Retrieve the list of event modification algorithms to run
       EventModifiersSequence& eventModifiersSequence() { return evt_modifiers_; }
+      /// Retrieve the list of event modification algorithms to run
+      const EventModifiersSequence& eventModifiersSequence() const { return evt_modifiers_; }
       /// Name of the modification algorithm (if applicable)
-      std::string hadroniserName( size_t ) const;
+      std::string eventModifierName( size_t ) const;
       /// Add a new event modification algorithm to the sequence
       void addModifier( std::unique_ptr<EventModifier> );
       /// Add a new event modification algorithm to the sequence
