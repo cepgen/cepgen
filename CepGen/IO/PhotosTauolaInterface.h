@@ -9,15 +9,17 @@ namespace cepgen
 {
   namespace io
   {
+    template<typename E, typename P> class PhotosTauolaEvent;
     /// Interface to particles objects for Photos++ and Tauola++
+    /// \tparam E Photos/Tauola event base object
     /// \tparam P Photos/Tauola particle base object
-    template<typename P>
+    template<typename E, typename P>
     class PhotosTauolaParticle : public P, public Particle
     {
       public:
         PhotosTauolaParticle() = default;
-        inline PhotosTauolaParticle( const Particle& part ) :
-          Particle( part ) {
+        inline PhotosTauolaParticle( PhotosTauolaEvent<E,P>* event, const Particle& part ) :
+          Particle( part ), event_( event ) {
           setBarcode( part.id() );
           setPdgID( part.integerPdgId() );
           setStatus( (int)part.status() );
@@ -28,6 +30,11 @@ namespace cepgen
           setEnergy( mom.energy() );
           setMass( part.mass() );
         }
+        inline ~PhotosTauolaParticle() {
+          for ( auto& coll : { mothers_, daughters_, secondary_parts_ } )
+            for ( auto& part : coll )
+              delete part;
+        }
 
         inline PhotosTauolaParticle* createNewParticle( int pdg, int status, double mass,
                                                         double px, double py, double pz, double e ) override {
@@ -35,13 +42,16 @@ namespace cepgen
           part.setChargeSign( pdg/(unsigned int)pdg );
           part.setMomentum( Momentum::fromPxPyPzE( px, py, pz, e ) );
           part.setMass( mass );
-          return new PhotosTauolaParticle<P>( part );
+          //event_->addParticle( Particle::CentralSystem ) = part;
+          auto out = new PhotosTauolaParticle<E,P>( event_, part );
+          secondary_parts_.emplace_back( out );
+          return out;
         }
         inline void print() override { CG_INFO( "PhotosTauolaParticle" ) << *this; }
 
         void setBarcode( int id ) { id_ = id; }
         int getBarcode() override { return id_; }
-        void setPdgID( int pdg ) override { setPdgId( (short)pdg ); }
+        void setPdgID( int pdg ) override { setPdgId( (short)abs( pdg ) ); }
         int getPdgID() override { return integerPdgId(); }
         void setStatus( int status ) override { status_ = (Particle::Status)status; }
         int getStatus() override { return (int)status_; }
@@ -56,13 +66,33 @@ namespace cepgen
         double getE() override { return energy(); }
         void setMass( double m ) override { mass_ = m; }
 
-        void setMothers( std::vector<P*> moth ) override { mothers_ = moth; }
-        std::vector<P*> getMothers() override { return mothers_; }
-        void setDaughters( std::vector<P*> daugh ) override { daughters_ = daugh; }
-        std::vector<P*> getDaughters() override { return daughters_; }
+        void setMothers( std::vector<P*> mothers ) override {
+          for ( const auto& moth : mothers )
+            addMother( *dynamic_cast<PhotosTauolaParticle*>( moth ) );
+        }
+        std::vector<P*> getMothers() override {
+          if ( !mothers_.empty() )
+            return mothers_;
+          for ( const auto& moth : mothers() )
+            mothers_.emplace_back( new PhotosTauolaParticle( event_, event_->operator[]( moth ) ) );
+          return mothers_;
+        }
+        void setDaughters( std::vector<P*> daughters ) override {
+          for ( const auto& daugh : daughters )
+            addDaughter( *dynamic_cast<PhotosTauolaParticle*>( daugh ) );
+        }
+        std::vector<P*> getDaughters() override {
+          if ( !daughters_.empty() )
+            return daughters_;
+          for ( const auto& daugh : daughters() )
+            daughters_.emplace_back( new PhotosTauolaParticle( event_, event_->operator[]( daugh ) ) );
+          return daughters_;
+        }
 
       private:
         std::vector<P*> mothers_, daughters_;
+        std::vector<P*> secondary_parts_;
+        PhotosTauolaEvent<E,P>* event_;
     };
 
     /// Interface to events objects for Photos++ and Tauola++
@@ -77,16 +107,19 @@ namespace cepgen
           //--- loop to add particles and associate parentage
           for ( size_t i = 0; i < size(); ++i ) {
             const auto& part = operator[]( i );
-            particles_.emplace_back( new PhotosTauolaParticle<P>( part ) );
+            particles_.emplace_back( new PhotosTauolaParticle<E,P>( this, part ) );
             const auto& moth = part.mothers(), &daugh = part.daughters();
-            std::vector<P*> dl, ml;
-            for ( const auto& dg_id : daugh )
-              dl.emplace_back( particles_[dg_id] );
+            std::vector<P*> ml;
             for ( const auto& mt_id : moth )
               ml.emplace_back( particles_[mt_id] );
             particles_[i]->setMothers( ml );
+          }
+          //--- second loop to associate daughters (needs the full event to be filled)
+          for ( size_t i = 0; i < size(); ++i ) {
+            std::vector<P*> dl;
+            for ( const auto& dg_id : operator[]( i ).daughters() )
+              dl.emplace_back( particles_[dg_id] );
             particles_[i]->setDaughters( dl );
-            particles_[i]->print();
           }
         }
         inline ~PhotosTauolaEvent() {

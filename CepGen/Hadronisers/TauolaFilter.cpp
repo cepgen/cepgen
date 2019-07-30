@@ -10,6 +10,8 @@
 
 #include "CepGen/IO/PhotosTauolaInterface.h"
 
+//#define _LOG_DEBUG_MODE_
+
 #include <Tauola/TauolaEvent.h>
 #include <Tauola/Tauola.h>
 #include <Tauola/Log.h>
@@ -42,7 +44,9 @@ namespace cepgen
       EventModifier( params, "tauola" ),
       pol_states_( params.get<ParametersList>( "polarisations" ) ),
       rad_states_( params.get<ParametersList>( "radiations" ) )
-    {}
+    {
+      Log::LogAll( true );
+    }
 
     TauolaFilter::~TauolaFilter()
     {
@@ -71,9 +75,9 @@ namespace cepgen
       if ( rad_cutoff > 0. )
         Tauola::setRadiationCutOff( rad_cutoff );
       //--- default parameters
-      Tauola::setDecayingParticle( 15 );
-      Tauola::setSameParticleDecayMode( 0 );
-      Tauola::setOppositeParticleDecayMode( 0 );
+      //Tauola::setDecayingParticle( 15 );
+      //Tauola::setSameParticleDecayMode( 0 );
+      //Tauola::setOppositeParticleDecayMode( 0 );
       Tauola::initialize();
     }
 
@@ -83,8 +87,11 @@ namespace cepgen
       weight = 1.;
 
       CepGenTauolaEvent evt( ev, PDG::tau );
-      //evt.undecayTaus();
+      evt.undecayTaus();
       evt.decayTaus();
+      evt.dump();
+      //const auto& pairs = evt[Particle::CentralSystem][0];
+      //CG_WARNING("")<<pairs;
 
       return true;
     }
