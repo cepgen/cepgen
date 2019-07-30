@@ -1,5 +1,5 @@
 #include "CepGen/Core/EventModifier.h"
-#include "CepGen/Hadronisers/HadronisersHandler.h"
+#include "CepGen/Core/EventModifierHandler.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
@@ -91,6 +91,6 @@ namespace cepgen
   }
 }
 
-// register hadroniser and define alias
-REGISTER_HADRONISER( "tauola", TauolaFilter )
+// register event modifier
+REGISTER_MODIFIER( "tauola", TauolaFilter )
 
