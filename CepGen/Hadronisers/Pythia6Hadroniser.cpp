@@ -333,5 +333,5 @@ namespace cepgen
 }
 
 // register hadroniser and define alias
-REGISTER_HADRONISER( pythia6, Pythia6Hadroniser )
+REGISTER_HADRONISER( "pythia6", Pythia6Hadroniser )
 

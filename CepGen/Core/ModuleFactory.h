@@ -9,7 +9,6 @@
 #include <sstream>
 
 #define BUILDERNM( obj ) obj ## Builder
-#define STRINGIFY( name ) #name
 
 namespace cepgen
 {

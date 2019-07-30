@@ -8,16 +8,9 @@ namespace cepgen
   namespace hadr
   {
     GenericHadroniser::GenericHadroniser( const ParametersList& plist, const std::string& name ) :
-      name_( name ),
-      seed_      ( plist.get<int>( "seed", -1ll ) ),
-      max_trials_( plist.get<int>( "maxTrials", 1 ) ),
+      EventModifier( plist, name ),
       remn_fragm_( plist.get<bool>( "remnantsFragmentation", true ) )
-    {
-      CG_DEBUG( "Hadroniser:init" )
-        << "\"" << name_ << "\"-type hadroniser built with:\n\t"
-        << "* seed = " << seed_ << "\n\t"
-        << "* maximum trials: " << max_trials_;
-    }
+    {}
 
     void
     GenericHadroniser::readStrings( const std::vector<std::string>& params ) {
@@ -31,12 +24,6 @@ namespace cepgen
       CG_DEBUG( "Hadroniser:configure" )
         << "Feeding \"" << name_ << "\" hadroniser with:"
         << os.str();
-    }
-
-    std::string
-    GenericHadroniser::name() const
-    {
-      return name_;
     }
   }
 

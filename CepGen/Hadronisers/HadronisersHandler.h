@@ -6,9 +6,9 @@
 
 #define REGISTER_HADRONISER( name, obj ) \
   namespace cepgen { namespace hadr { \
-    struct BUILDERNM( name ) { \
-      BUILDERNM( name )() { HadronisersHandler::get().registerModule<obj>( STRINGIFY( name ) ); } }; \
-    static BUILDERNM( name ) g ## name; \
+    struct BUILDERNM( obj ) { \
+      BUILDERNM( obj )() { HadronisersHandler::get().registerModule<obj>( name ); } }; \
+    static BUILDERNM( obj ) g ## obj; \
   } }
 
 namespace cepgen

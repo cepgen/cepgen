@@ -1141,6 +1141,5 @@ namespace cepgen
     }
   }
 }
-// register process and define aliases
-REGISTER_PROCESS( lpair, GamGamLL )
-REGISTER_PROCESS( gamgamll, GamGamLL )
+// register process
+REGISTER_PROCESS( "lpair", GamGamLL )

@@ -124,18 +124,24 @@ namespace cepgen
 }
 
 #ifdef HEPMC3
-REGISTER_IO_MODULE( hepmc, HepMCHandler<WriterAscii> )
-REGISTER_IO_MODULE( hepmc3, HepMCHandler<WriterAscii> )
-REGISTER_IO_MODULE( hepevt, HepMCHandler<WriterHEPEVT> )
+typedef cepgen::io::HepMCHandler<WriterAscii> HepMC3Handler;
+typedef cepgen::io::HepMCHandler<WriterHEPEVT> HepMC3HEPEVTHandler;
+REGISTER_IO_MODULE( "hepmc", HepMC3Handler )
+REGISTER_IO_MODULE( "hepevt", HepMC3HEPEVTHandler )
 #  if HEPMC_VERSION_CODE >= 3001000
-REGISTER_IO_MODULE( hepmc2, HepMCHandler<WriterAsciiHepMC2> )
+typedef cepgen::io::HepMCHandler<WriterAsciiHepMC2> HepMC3HepMC2Handler;
+REGISTER_IO_MODULE( "hepmc2", HepMC3HepMC2Handler )
 #  endif
 #  ifdef HEPMC3_ROOTIO
-REGISTER_IO_MODULE( hepmc_root, HepMCHandler<WriterRoot> )
-REGISTER_IO_MODULE( hepmc_root_tree, HepMCHandler<WriterRootTree> )
+typedef cepgen::io::HepMCHandler<WriterRoot> HepMC3RootHandler;
+typedef cepgen::io::HepMCHandler<WriterRootTree> HepMC3RootTreeHandler;
+REGISTER_IO_MODULE( "hepmc_root", HepMC3RootHandler )
+REGISTER_IO_MODULE( "hepmc_root_tree", HepMC3RootTreeHandler )
 #  endif
 #else // HepMC version 2 and below
-REGISTER_IO_MODULE( hepmc, HepMCHandler<IO_GenEvent> )
-REGISTER_IO_MODULE( hepmc_ascii, HepMCHandler<IO_AsciiParticles> )
+typedef cepgen::io::HepMCHandler<IO_GenEvent> HepMC2Handler;
+typedef cepgen::io::HepMCHandler<IO_AsciiParticles> HepMC2AsciiHandler;
+REGISTER_IO_MODULE( "hepmc", HepMC2Handler )
+REGISTER_IO_MODULE( "hepmc_ascii", HepMC2AsciiHandler )
 #endif
 

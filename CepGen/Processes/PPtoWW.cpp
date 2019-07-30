@@ -386,6 +386,6 @@ namespace cepgen
     }
   }
 }
-// register process and define aliases
-REGISTER_PROCESS( pptoww, PPtoWW )
+// register process
+REGISTER_PROCESS( "pptoww", PPtoWW )
 
