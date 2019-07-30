@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace cepgen
 {
@@ -55,6 +56,7 @@ namespace cepgen
       unsigned short max_trials_;
       const Parameters* params_; // not owning
   };
+  typedef std::vector<std::unique_ptr<EventModifier> > EventModifiersSequence;
 }
 
 #endif
