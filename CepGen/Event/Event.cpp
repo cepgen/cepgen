@@ -72,11 +72,20 @@ namespace cepgen
       }
     }
     //--- fix parentage for outgoing beam particles
-    out[Particle::OutgoingBeam1][0].addMother( out[Particle::IncomingBeam1][0] );
-    out[Particle::OutgoingBeam2][0].addMother( out[Particle::IncomingBeam2][0] );
+    if ( out[Particle::OutgoingBeam1].size() > 1
+      || out[Particle::OutgoingBeam2].size() > 1 )
+      CG_WARNING( "Event:compressed" )
+        << "Event compression not designed for already fragmented beam remnants!\n\t"
+        << "Particles parentage is not guaranteed to be conserved.";
+    for ( auto& part : out[Particle::OutgoingBeam1] )
+      part.addMother( out[Particle::IncomingBeam1][0] );
+    for ( auto& part : out[Particle::OutgoingBeam2] )
+      part.addMother( out[Particle::IncomingBeam2][0] );
     //--- fix parentage for incoming partons
-    out[Particle::Parton1][0].addMother( out[Particle::IncomingBeam1][0] );
-    out[Particle::Parton2][0].addMother( out[Particle::IncomingBeam2][0] );
+    for ( auto& part : out[Particle::Parton1] )
+      part.addMother( out[Particle::IncomingBeam1][0] );
+    for ( auto& part : out[Particle::Parton2] )
+      part.addMother( out[Particle::IncomingBeam2][0] );
     //--- fix parentage for central system
     for ( auto& part : out[Particle::CentralSystem] ) {
       part.addMother( out[Particle::Parton1][0] );
