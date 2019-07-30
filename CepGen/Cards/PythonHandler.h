@@ -62,6 +62,7 @@ namespace cepgen
         void parseIntegrator( PyObject* );
         void parseGenerator( PyObject* );
         void parseHadroniser( PyObject* );
+        void parseEventModifiers( PyObject* );
         void parseOutputModule( PyObject* );
         void parseExtraParticles( PyObject* );
     };

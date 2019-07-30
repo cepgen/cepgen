@@ -120,6 +120,7 @@ namespace cepgen
 
       PyObject* pmod_seq = PyObject_GetAttrString( cfg, EVT_MOD_SEQ_NAME ); // new
       if ( pmod_seq ) {
+        parseEventModifiers( pmod_seq );
         Py_CLEAR( pmod_seq );
       }
 
@@ -331,6 +332,16 @@ namespace cepgen
       fillParameter( gen, "printEvery", params_.generation().gen_print_every );
       fillParameter( gen, "numThreads", params_.generation().num_threads );
       fillParameter( gen, "numPoints", params_.generation().num_points );
+    }
+
+    void
+    PythonHandler::parseEventModifiers( PyObject* mod )
+    {
+      if ( !PyList_Check( mod ) )
+        throwPythonError( "Event modification definition object should be a list/Sequence!" );
+
+      for ( Py_ssize_t i = 0; i < PyList_Size( mod ); ++i )
+        parseHadroniser( PyList_GetItem( mod, i ) );
     }
 
     void
