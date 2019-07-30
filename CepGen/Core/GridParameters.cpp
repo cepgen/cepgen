@@ -8,7 +8,8 @@ namespace cepgen
     gen_prepared( false ),
     f_max_diff( 0. ),
     r_boxes( 0 ),
-    max_( pow( M_BIN, ndim ) ), f_max_( max_, 0. ), f_max_global_( 0. )
+    max_( pow( M_BIN, ndim ) ), num_points_( max_, 0ul ),
+    f_max_( max_, 0. ), f_max_global_( 0. )
   {
     if ( ndim > MAX_DIM )
       throw CG_FATAL( "GridParameters" ) << "Phase space too large!\n\t"
@@ -26,7 +27,6 @@ namespace cepgen
       }
       n_map_.emplace_back( coord );
     }
-    num.reserve( max_ );
   }
 
   const GridParameters::coord_t&
@@ -47,6 +47,18 @@ namespace cepgen
   GridParameters::maxValue( size_t coord ) const
   {
     return f_max_.at( coord );
+  }
+
+  size_t
+  GridParameters::numPoints( size_t coord ) const
+  {
+    return num_points_.at( coord );
+  }
+
+  void
+  GridParameters::setTrial( size_t coord )
+  {
+    num_points_[coord]++;
   }
 
   void

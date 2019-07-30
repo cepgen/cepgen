@@ -191,7 +191,7 @@ namespace cepgen
         // ...
         ps_bin_ = uniform() * grid_->size();
         y = uniform() * grid_->globalMax();
-        grid_->num[ps_bin_] += 1;
+        grid_->setTrial( ps_bin_ );
         if ( y <= grid_->maxValue( ps_bin_ ) )
           break;
       }
@@ -213,7 +213,7 @@ namespace cepgen
       grid_->f_max_old = grid_->maxValue( ps_bin_ );
       grid_->f_max_diff = weight-grid_->f_max_old;
       grid_->setValue( ps_bin_, weight );
-      grid_->correc = ( grid_->num[ps_bin_]-1. ) * grid_->f_max_diff / grid_->globalMax() - 1.;
+      grid_->correc = ( grid_->numPoints( ps_bin_ )-1. ) * grid_->f_max_diff / grid_->globalMax() - 1.;
 
       CG_DEBUG("Integrator::generateOne")
         << "Correction " << grid_->correc << " will be applied for phase space bin " << ps_bin_ << ".";
@@ -274,7 +274,7 @@ namespace cepgen
     if ( grid_->f_max2 > grid_->maxValue( ps_bin_ ) ) {
       grid_->f_max_old = grid_->maxValue( ps_bin_ );
       grid_->f_max_diff = grid_->f_max2-grid_->f_max_old;
-      grid_->correc = ( grid_->num[ps_bin_]-1. ) * grid_->f_max_diff / grid_->globalMax();
+      grid_->correc = ( grid_->numPoints( ps_bin_ )-1. ) * grid_->f_max_diff / grid_->globalMax();
       if ( grid_->f_max2 >= grid_->globalMax() )
         grid_->correc *= grid_->f_max2 / grid_->globalMax();
       grid_->setValue( ps_bin_, grid_->f_max2 );
