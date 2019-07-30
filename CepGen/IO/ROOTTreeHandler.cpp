@@ -35,6 +35,7 @@ namespace cepgen
 
       private:
         std::unique_ptr<TFile> file_;
+        const bool compress_;
         std::unique_ptr<ROOT::CepGenRun> run_tree_;
         std::unique_ptr<ROOT::CepGenEvent> evt_tree_;
     };
@@ -42,6 +43,7 @@ namespace cepgen
     ROOTTreeHandler::ROOTTreeHandler( const ParametersList& params ) :
       GenericExportHandler( "root" ),
       file_( TFile::Open( params.get<std::string>( "filename", "output.root" ).c_str(), "recreate" ) ),
+      compress_( params.get<bool>( "compress", false ) ),
       run_tree_( new ROOT::CepGenRun ), evt_tree_( new ROOT::CepGenEvent )
     {
       if ( !file_->IsOpen() )
@@ -69,7 +71,10 @@ namespace cepgen
       evt_tree_->gen_time = ev.time_generation;
       evt_tree_->tot_time = ev.time_total;
       evt_tree_->np = 0;
-      for ( const auto& p : ev.particles() ) {
+      const auto& parts = compress_
+        ? ev.compressed().particles()
+        : ev.particles();
+      for ( const auto& p : parts ) {
         const auto& m = p.momentum();
         evt_tree_->rapidity[evt_tree_->np] = m.rapidity();
         evt_tree_->pt[evt_tree_->np] = m.pt();
