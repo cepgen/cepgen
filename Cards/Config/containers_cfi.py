@@ -117,13 +117,10 @@ class Module(Parameters):
         out.mod_name = name
         return out
 
-class Sequence(Parameters):
+class Sequence(list):
     MODULE = object()
     def __init__(self, *args):
-        params = Parameters()
-        for mod in args:
-            params[mod.mod_name] = mod
-        super(Sequence, self).__init__(params)
+        super(Sequence, self).__init__(args)
     def __delitem__(self, index):
         self[index] = self.MODULE
     def __iter__(self):
@@ -132,6 +129,8 @@ class Sequence(Parameters):
         if isinstance(other, Sequence):
             return all(x == y for x, y in zip(self, other))
         return super().__eq__(other)
+    def __repr__(self):
+        return type(self).__name__+'('+super(Sequence, self).__repr__()+')'
 
 if __name__ == '__main__':
     import unittest
