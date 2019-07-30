@@ -53,6 +53,38 @@ namespace cepgen
       particles_[Particle::OutgoingBeam2].resize( evtcontent_.op2 );
   }
 
+  Event
+  Event::compressed() const
+  {
+    Event out;
+    size_t i = 0;
+    //--- add all necessary particles
+    for ( const auto& role : { Particle::IncomingBeam1, Particle::IncomingBeam2,
+                               Particle::OutgoingBeam1, Particle::OutgoingBeam2,
+                               Particle::Parton1, Particle::Parton2,
+                               Particle::CentralSystem } ) {
+      for ( const auto& part : operator[]( role ) ) {
+        auto& np = out.addParticle( role );
+        np = part;
+        np.setId( i++ );
+        np.clearMothers();
+        np.clearDaughters();
+      }
+    }
+    //--- fix parentage for outgoing beam particles
+    out[Particle::OutgoingBeam1][0].addMother( out[Particle::IncomingBeam1][0] );
+    out[Particle::OutgoingBeam2][0].addMother( out[Particle::IncomingBeam2][0] );
+    //--- fix parentage for incoming partons
+    out[Particle::Parton1][0].addMother( out[Particle::IncomingBeam1][0] );
+    out[Particle::Parton2][0].addMother( out[Particle::IncomingBeam2][0] );
+    //--- fix parentage for central system
+    for ( auto& part : out[Particle::CentralSystem] ) {
+      part.addMother( out[Particle::Parton1][0] );
+      part.addMother( out[Particle::Parton2][0] );
+    }
+    return out;
+  }
+
   double
   Event::cmEnergy() const
   {
