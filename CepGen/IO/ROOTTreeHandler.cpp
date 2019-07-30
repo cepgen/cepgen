@@ -70,7 +70,7 @@ namespace cepgen
       evt_tree_->tot_time = ev.time_total;
       evt_tree_->np = 0;
       for ( const auto& p : ev.particles() ) {
-        const cepgen::Particle::Momentum m = p.momentum();
+        const auto& m = p.momentum();
         evt_tree_->rapidity[evt_tree_->np] = m.rapidity();
         evt_tree_->pt[evt_tree_->np] = m.pt();
         evt_tree_->eta[evt_tree_->np] = m.eta();
@@ -100,4 +100,4 @@ namespace cepgen
   }
 }
 
-REGISTER_IO_MODULE( root, ROOTTreeHandler )
+REGISTER_IO_MODULE( "root_tree", ROOTTreeHandler )

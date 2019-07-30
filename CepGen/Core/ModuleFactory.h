@@ -9,7 +9,6 @@
 #include <sstream>
 
 #define BUILDERNM( obj ) obj ## Builder
-#define STRINGIFY( name ) #name
 
 namespace cepgen
 {
@@ -30,8 +29,13 @@ namespace cepgen
       /// Register a named module in the database
       /// \tparam U Class to register (inherited from T base class)
       template <typename U> void registerModule( const I& name, const ParametersList& def_params = ParametersList() ) {
-        static_assert( std::is_base_of<T,U>::value, "\n  Failed to register an object with improper inheritance into the factory." );
-        map_[name] = &create<U>;
+        static_assert( std::is_base_of<T,U>::value, "\n\n  *** Failed to register an object with improper inheritance into the factory. ***\n" );
+        if ( map_.count( name ) > 0 || params_map_.count( name ) > 0 ) {
+          std::ostringstream oss;
+          oss << __PRETTY_FUNCTION__ << "\n\n  *** Duplicate module registration detected for index/name \"" << name << "\"! ***\n";
+          throw std::invalid_argument( oss.str() );
+        }
+        map_[name] = &build<U>;
         params_map_[name] = def_params;
       }
       /// Build one instance of a named module
@@ -40,8 +44,8 @@ namespace cepgen
       std::unique_ptr<T> build( const I& name, ParametersList params = ParametersList() ) const {
         if ( name == I() || map_.count( name ) == 0 ) {
           std::ostringstream oss;
-          oss << __PRETTY_FUNCTION__ << "\n  Failed to retrieve a module with index \"" << name << "\" from factory!";
-          throw std::runtime_error( oss.str() );
+          oss << __PRETTY_FUNCTION__ << "\n\n  *** Failed to build a module with index/name \"" << name << "\" from factory! ***\n";
+          throw std::invalid_argument( oss.str() );
         }
         if ( params_map_.count( name ) > 0 )
           params += params_map_.at( name );
@@ -52,17 +56,14 @@ namespace cepgen
       std::unique_ptr<T> build( ParametersList params = ParametersList() ) const {
         if ( params.has<I>( KEY ) ) {
           const I& idx = params.get<I>( KEY );
-          if ( map_.count( idx ) == 0 ) {
-            std::ostringstream oss;
-            oss << __PRETTY_FUNCTION__ << " Failed to retrieve a module with index \"" << idx << "\" from factory!";
-            throw std::runtime_error( oss.str() );
-          }
+          if ( map_.count( idx ) == 0 )
+            throw std::invalid_argument( std::string( __PRETTY_FUNCTION__ )+"\n\n  *** Failed to build a module with index/name \""+std::to_string( idx )+"\" from factory! ***\n" );
           if ( params_map_.count( idx ) > 0 )
             params += params_map_.at( idx );
           return map_.at( idx )( params );
         }
         else
-          throw std::runtime_error( std::string( __PRETTY_FUNCTION__ )+" Failed to retrieve an indexing key from parameters to build from factory!" );
+          throw std::invalid_argument( std::string( __PRETTY_FUNCTION__ )+"\n\n  *** Failed to retrieve an indexing key from parameters to build from factory! ***\n" );
       }
       /// List of modules registred in the database
       std::vector<I> modules() const {
@@ -77,7 +78,7 @@ namespace cepgen
     private:
       explicit ModuleFactory() = default;
       /// Construct a module with its parameters set
-      template<typename U> static std::unique_ptr<T> create( const ParametersList& params ) {
+      template<typename U> static std::unique_ptr<T> build( const ParametersList& params ) {
         return std::unique_ptr<T>( new U( params ) );
       }
 

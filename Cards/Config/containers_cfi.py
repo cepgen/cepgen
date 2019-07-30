@@ -117,6 +117,21 @@ class Module(Parameters):
         out.mod_name = name
         return out
 
+class Sequence(list):
+    MODULE = object()
+    def __init__(self, *args):
+        super(Sequence, self).__init__(args)
+    def __delitem__(self, index):
+        self[index] = self.MODULE
+    def __iter__(self):
+        return (item for item in super().__iter__() if item is not self.MODULE)
+    def __eq__(self, other):
+        if isinstance(other, Sequence):
+            return all(x == y for x, y in zip(self, other))
+        return super().__eq__(other)
+    def __repr__(self):
+        return type(self).__name__+'('+super(Sequence, self).__repr__()+')'
+
 if __name__ == '__main__':
     import unittest
     class TestTypes(unittest.TestCase):

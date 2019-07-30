@@ -1,4 +1,4 @@
-#include "CepGen/Event/Particle.h"
+#include "CepGen/Physics/Momentum.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
@@ -8,10 +8,6 @@
 
 namespace cepgen
 {
-  using Momentum = Particle::Momentum;
-
-  //----- Particle momentum methods
-
   Momentum::Momentum() :
     px_( 0. ), py_( 0. ), pz_( 0. ), p_( 0. ), energy_( 0. )
   {}
@@ -378,5 +374,14 @@ namespace cepgen
       << std::setw( 9 ) << mom.px_ << " "
       << std::setw( 9 ) << mom.py_ << " "
       << std::setw( 9 ) << mom.pz_ << ")" << std::defaultfloat;
+  }
+
+  double
+  CMEnergy( const Momentum& m1, const Momentum& m2 )
+  {
+    if ( m1.mass()*m2.mass() < 0.
+      || m1.energy()*m2.energy() < 0. )
+      return 0.;
+    return sqrt( m1.mass2()+m2.mass2() + 2.*m1.energy()*m2.energy() - 2.*( m1*m2 ) );
   }
 }

@@ -172,8 +172,8 @@ namespace cepgen
         << "px± = " << px_plus << " / " << px_minus << "\n\t"
         << "py± = " << py_plus << " / " << py_minus << ".";
 
-      PX_ = Particle::Momentum( -q1tx, -q1ty, ( px_plus-px_minus )*M_SQRT1_2, ( px_plus+px_minus )*M_SQRT1_2 );
-      PY_ = Particle::Momentum( -q2tx, -q2ty, ( py_plus-py_minus )*M_SQRT1_2, ( py_plus+py_minus )*M_SQRT1_2 );
+      PX_ = Momentum( -q1tx, -q1ty, ( px_plus-px_minus )*M_SQRT1_2, ( px_plus+px_minus )*M_SQRT1_2 );
+      PY_ = Momentum( -q2tx, -q2ty, ( py_plus-py_minus )*M_SQRT1_2, ( py_plus+py_minus )*M_SQRT1_2 );
 
       CG_DEBUG_LOOP( "PPtoWW:remnants" )
         << "First remnant:  " << PX_ << ", mass = " << PX_.mass() << "\n\t"
@@ -189,11 +189,11 @@ namespace cepgen
       const double ww = 0.5 * ( 1.+sqrt( 1.-4.*mp2_/s_ ) );
 
       // FIXME FIXME FIXME /////////////////////
-      const Particle::Momentum q1(
+      const Momentum q1(
         q1tx, q1ty,
         +0.5 * x1*ww*sqs_*( 1.-q1t2/x1/x1/ww/ww/s_ ),
         +0.5 * x1*ww*sqs_*( 1.+q1t2/x1/x1/ww/ww/s_ ) );
-      const Particle::Momentum q2(
+      const Momentum q2(
         q2tx, q2ty,
         -0.5 * x2*ww*sqs_*( 1.-q2t2/x2/x2/ww/ww/s_ ),
         +0.5 * x2*ww*sqs_*( 1.+q2t2/x2/x2/ww/ww/s_ ) );
@@ -208,8 +208,8 @@ namespace cepgen
       //     four-momenta of the outgoing W^+ and W^-
       //=================================================================
 
-      p_w1_ = Particle::Momentum( pt1x, pt1y, alpha1*ak1z + beta1*ak2z, alpha1*ak10 + beta1*ak20 );
-      p_w2_ = Particle::Momentum( pt2x, pt2y, alpha2*ak1z + beta2*ak2z, alpha2*ak10 + beta2*ak20 );
+      p_w1_ = Momentum( pt1x, pt1y, alpha1*ak1z + beta1*ak2z, alpha1*ak10 + beta1*ak20 );
+      p_w2_ = Momentum( pt2x, pt2y, alpha2*ak1z + beta2*ak2z, alpha2*ak10 + beta2*ak20 );
 
       CG_DEBUG_LOOP( "PPtoWW:central" )
         << "First W:  " << p_w1_ << ", mass = " << p_w1_.mass() << "\n\t"
@@ -387,6 +387,6 @@ namespace cepgen
     }
   }
 }
-// register process and define aliases
-REGISTER_PROCESS( pptoww, PPtoWW )
+// register process
+REGISTER_PROCESS( "pptoww", PPtoWW )
 

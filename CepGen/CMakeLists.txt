@@ -85,6 +85,7 @@ if(HEPMC_LIB)
     add_definitions(-DHEPMC3)
   endif()
   list(APPEND io_sources "IO/HepMCHandler.cpp")
+  list(APPEND io_sources "IO/HepMCEventInterface.cpp")
   if(NOT PYTHIA8)
     message(STATUS "HepMC will be used for LHEF output")
     list(APPEND io_sources "IO/LHEFHepMCHandler.cpp")
@@ -93,12 +94,21 @@ if(HEPMC_LIB)
   include_directories(${HEPMC_INCLUDE})
 endif()
 
+#--- linking with ProMC
+
+if(PROMC_LIB)
+  message(STATUS "ProMC found in ${PROMC_LIB}")
+  list(APPEND addons_libraries ${PROMC_LIB})
+  list(APPEND io_sources "IO/ProMCHandler.cpp")
+  include_directories(${PROMC_INCLUDE} ${PROMC_EXT_INCLUDE})
+endif()
+
 #--- linking with ROOT/Delphes
 
 if(ROOT_FOUND)
   message(STATUS "ROOT found in ${ROOT_LIBRARY_DIR}")
   list(APPEND addons_libraries ${ROOT_LIBRARIES})
-  list(APPEND io_sources "IO/ROOTTreeHandler.cpp")
+  list(APPEND io_sources "IO/ROOTHandler.cpp" "IO/ROOTTreeHandler.cpp")
   include_directories(${ROOT_INCLUDE_DIRS})
   link_directories(${ROOT_LIBRARY_DIR})
   if(DELPHES)

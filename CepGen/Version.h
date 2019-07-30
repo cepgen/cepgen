@@ -10,7 +10,7 @@ namespace cepgen
   ///  - MM = major version
   ///  - mm = minor version
   ///  - ff = feature(s) release
-  const unsigned int cepgen_version = 0x000906;
+  const unsigned int cepgen_version = 0x000907;
   /// Human-readable version number
   const std::string version();
 }

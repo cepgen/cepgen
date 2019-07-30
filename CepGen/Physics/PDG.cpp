@@ -93,6 +93,15 @@ namespace cepgen
     particles_[props.pdgid] = props;
   }
 
+  const std::vector<pdgid_t>
+  PDG::particles() const
+  {
+    std::vector<pdgid_t> out;
+    for ( const auto& pt : particles_ )
+      out.emplace_back( pt.first );
+    return out;
+  }
+
   const std::string&
   PDG::name( pdgid_t id ) const
   {

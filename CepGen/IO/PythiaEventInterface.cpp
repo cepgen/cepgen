@@ -16,7 +16,7 @@ namespace Pythia8
 {
   /// Convert a CepGen particle momentum into its Pythia8 counterpart
   Vec4
-  momToVec4( const cepgen::Particle::Momentum& mom )
+  momToVec4( const cepgen::Momentum& mom )
   {
     return Vec4( mom.px(), mom.py(), mom.pz(), mom.energy() );
   }

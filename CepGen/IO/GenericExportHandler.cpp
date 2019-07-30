@@ -2,12 +2,14 @@
 
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/Core/EventModifier.h"
 
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
 
 #include "CepGen/Parameters.h"
 #include "CepGen/Version.h"
+#include "CepGen/Core/utils.h"
 
 #include <sstream>
 
@@ -32,8 +34,13 @@ namespace cepgen
         << prep << "  * beams:\n"
         << prep << "  *   - " << params.kinematics.incoming_beams.first << "\n"
         << prep << "  *   - " << params.kinematics.incoming_beams.second << "\n";
-      if ( params.process()->mode() != KinematicsMode::ElasticElastic && !params.hadroniserName().empty() )
-        os << prep << "  * hadroniser: " << params.hadroniserName() << "\n";
+      if ( !params.eventModifiersSequence().empty() ) {
+        os << prep << "  * " << utils::s( "event modifier", params.eventModifiersSequence().size() ) << ": ";
+        std::string sep;
+        for ( const auto& mod : params.eventModifiersSequence() )
+          os << sep << mod->name(), sep = ", ";
+        os << "\n";
+      }
       os
         << prep << "  *--- incoming state\n";
       if ( params.kinematics.cuts.initial.q2.valid() )

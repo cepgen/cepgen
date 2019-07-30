@@ -5,7 +5,7 @@
 #include "CepGen/Core/Integrator.h"
 
 #include "CepGen/Processes/ProcessesHandler.h"
-#include "CepGen/Hadronisers/HadronisersHandler.h"
+#include "CepGen/Core/EventModifierHandler.h"
 #include "CepGen/IO/ExportHandler.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
@@ -87,10 +87,11 @@ namespace cepgen
         throw CG_FATAL( "LpairHandler" ) << "Unrecognized integrator type: " << integr_type_ << "!";
 
       //--- parse the hadronisation algorithm name
-      if ( !hadr_name_.empty() ) {
-        params_.setHadroniser( cepgen::hadr::HadronisersHandler::get().build( hadr_name_, ParametersList() ) );
-        params_.hadroniser()->setParameters( params_ );
-      }
+      if ( !evt_mod_name_.empty() )
+        for ( const auto& mod : split( evt_mod_name_, ',' ) ) {
+          params_.addModifier( cepgen::EventModifierHandler::get().build( mod, ParametersList() ) );
+          (*params_.eventModifiersSequence().rbegin())->setParameters( params_ );
+        }
 
       //--- parse the output module name
       if ( !out_mod_name_.empty() ) {
@@ -126,7 +127,8 @@ namespace cepgen
 
       registerParameter<std::string>( "PROC", "Process name to simulate", &proc_name_ );
       registerParameter<std::string>( "ITYP", "Integration algorithm", &integr_type_ );
-      registerParameter<std::string>( "HADR", "Hadronisation algorithm", &hadr_name_ );
+      registerParameter<std::string>( "HADR", "Hadronisation algorithm", &evt_mod_name_ );
+      registerParameter<std::string>( "EVMD", "Events modification algorithms", &evt_mod_name_ );
       registerParameter<std::string>( "OUTP", "Output module", &out_mod_name_ );
       registerParameter<std::string>( "OUTF", "Output file name", &out_file_name_ );
 
@@ -248,6 +250,17 @@ namespace cepgen
       if ( p_bools_.count( key ) )
         return p_bools_.find( key )->second.description;
       return "null";
+    }
+
+    std::vector<std::string>
+    LpairHandler::split( const std::string& str, char delim )
+    {
+      std::vector<std::string> out;
+      std::string token;
+      std::istringstream iss( str );
+      while ( std::getline( iss, token, delim ) )
+        out.emplace_back( token );
+      return out;
     }
   }
 }

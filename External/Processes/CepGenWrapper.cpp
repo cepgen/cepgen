@@ -1,4 +1,5 @@
 #include "CepGen/Processes/ProcessesHandler.h"
+#include "CepGen/Processes/FortranKTProcess.h"
 
 //=============================================================================
 // START BY LISTING ALL FORTRAN FUNCTIONS

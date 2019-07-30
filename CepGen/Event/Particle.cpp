@@ -215,38 +215,36 @@ namespace cepgen
     return static_cast<int>( pdg_id_ ) * charge_sign_ * ( ch/fabs( ch ) );
   }
 
-  void
-  Particle::dump() const
-  {
-    std::ostringstream os;
-    os << std::resetiosflags( std::ios::showbase )
-      << "Particle[" << id_ << "]{role=" << role_ << ", status=" << (int)status_ << ", "
-      << "pdg=" << pdg_id_ << ", p4=" << momentum_ << " GeV, m=" << mass_ << " GeV, "
-      << "p⟂=" << momentum_.pt() << " GeV, eta=" << momentum_.eta() << ", phi=" << momentum_.phi();
-    if ( primary() )
-      os << ", primary";
-    else {
-      os << ", mother" << utils::s( mothers_.size() ) << "=";
-      std::string delim;
-      for ( const auto& moth : mothers_ )
-        os << delim << moth, delim = ",";
-    }
-    const auto& daughters_list = daughters();
-    if ( !daughters_list.empty() ) {
-      os << ", daughter" << utils::s( daughters_list.size() ) << "=";
-      std::string delim;
-      for ( const auto& daugh : daughters_list )
-        os << delim << daugh, delim = ",";
-    }
-    os << "}";
-    CG_INFO( "Particle" ) << os.str();
-  }
-
   double
   Particle::etaToY( double eta_, double m_, double pt_ )
   {
     const double m2 = m_*m_, mt = std::hypot( m_, pt_ );
     return asinh( sqrt( ( ( mt*mt-m2 )*cosh( 2.*eta_ )+m2 )/ mt*mt - 1. )*M_SQRT1_2 );
+  }
+
+  std::ostream&
+  operator<<( std::ostream& os, const Particle& part )
+  {
+    os << std::resetiosflags( std::ios::showbase )
+      << "Particle[" << part.id_ << "]{role=" << part.role_ << ", status=" << (int)part.status_ << ", "
+      << "pdg=" << part.pdg_id_ << ", p4=" << part.momentum_ << " GeV, m=" << part.mass_ << " GeV, "
+      << "p⟂=" << part.momentum_.pt() << " GeV, eta=" << part.momentum_.eta() << ", phi=" << part.momentum_.phi();
+    if ( part.primary() )
+      os << ", primary";
+    else {
+      os << ", " << utils::s( "mother", part.mothers_.size(), true ) << "=";
+      std::string delim;
+      for ( const auto& moth : part.mothers_ )
+        os << delim << moth, delim = ",";
+    }
+    const auto& daughters_list = part.daughters();
+    if ( !daughters_list.empty() ) {
+      os << ", " << utils::s( "daughter", daughters_list.size(), true ) << "=";
+      std::string delim;
+      for ( const auto& daugh : daughters_list )
+        os << delim << daugh, delim = ",";
+    }
+    return os << "}";
   }
 
   std::ostream&
@@ -273,14 +271,5 @@ namespace cepgen
       || p1.energy()*p2.energy() < 0. )
       return 0.;
     return sqrt( p1.mass2()+p2.mass2() + 2.*p1.energy()*p2.energy() - 2.*( p1.momentum()*p2.momentum() ) );
-  }
-
-  double
-  CMEnergy( const Particle::Momentum& m1, const Particle::Momentum& m2 )
-  {
-    if ( m1.mass()*m2.mass() < 0.
-      || m1.energy()*m2.energy() < 0. )
-      return 0.;
-    return sqrt( m1.mass2()+m2.mass2() + 2.*m1.energy()*m2.energy() - 2.*( m1*m2 ) );
   }
 }

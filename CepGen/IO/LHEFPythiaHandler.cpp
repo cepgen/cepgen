@@ -84,4 +84,4 @@ namespace cepgen
   }
 }
 
-REGISTER_IO_MODULE( lhef, LHEFPythiaHandler )
+REGISTER_IO_MODULE( "lhef", LHEFPythiaHandler )

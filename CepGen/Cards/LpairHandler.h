@@ -20,6 +20,7 @@ namespace cepgen
 
         /// Store a configuration into a LPAIR steering card
         void store( const char* file );
+        static std::vector<std::string> split( const std::string&, char );
 
       private:
         /// Single parameter handler
@@ -52,7 +53,7 @@ namespace cepgen
         std::shared_ptr<ParametersList> proc_params_;
         int str_fun_, sr_type_;
         double xi_min_, xi_max_;
-        std::string proc_name_, hadr_name_, out_mod_name_;
+        std::string proc_name_, evt_mod_name_, out_mod_name_;
         std::string out_file_name_;
         std::string integr_type_;
         std::string kmr_grid_path_, mstw_grid_path_;

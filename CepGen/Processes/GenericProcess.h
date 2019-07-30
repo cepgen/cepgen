@@ -65,7 +65,7 @@ namespace cepgen
         /// Restore the Event object to its initial state
         void clearEvent();
         /// Set the kinematics of the incoming state particles
-        void setIncomingKinematics( const Particle::Momentum& p1, const Particle::Momentum& p2 );
+        void setIncomingKinematics( const Momentum& p1, const Momentum& p2 );
         /// Compute the incoming state kinematics
         void prepareKinematics();
 
