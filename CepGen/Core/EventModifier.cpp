@@ -14,4 +14,19 @@ namespace cepgen
       << "* seed = " << seed_ << "\n\t"
       << "* maximum trials: " << max_trials_;
   }
+
+  void
+  EventModifier::readStrings( const std::vector<std::string>& params )
+  {
+    if ( params.empty() )
+      return;
+    std::ostringstream os;
+    for ( const auto& p : params ) {
+      readString( p );
+      os << "\n\t  '" << p << "'";
+    }
+    CG_DEBUG( "EventModifier:configure" )
+      << "Feeding \"" << name_ << "\" event modifier algorithm with:"
+      << os.str();
+  }
 }

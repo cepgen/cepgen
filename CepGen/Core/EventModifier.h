@@ -2,6 +2,7 @@
 #define CepGen_Core_EventModifier_h
 
 #include <string>
+#include <vector>
 
 namespace cepgen
 {
@@ -17,6 +18,13 @@ namespace cepgen
       /// Default constructor for an undefined modifier
       explicit EventModifier( const ParametersList&, const std::string& name = "<invalid modifier>" );
       virtual ~EventModifier() {}
+
+      /// Parse a configuration string
+      virtual void readString( const char* ) {}
+      /// Parse a configuration string
+      virtual void readString( const std::string& param ) { readString( param.c_str() ); }
+      /// Parse a list of configuration strings
+      virtual void readStrings( const std::vector<std::string>& params );
 
       /// Initialise the event modifier before its running
       virtual void init() = 0;

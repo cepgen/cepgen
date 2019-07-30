@@ -3,7 +3,6 @@
 
 #include "CepGen/Core/EventModifier.h"
 
-#include <vector>
 #include <iosfwd>
 
 namespace cepgen
@@ -30,13 +29,6 @@ namespace cepgen
 
         /// Default constructor for an undefined hadroniser
         explicit GenericHadroniser( const ParametersList&, const std::string& name = "<invalid hadroniser>" );
-
-        /// Parse a configuration string
-        virtual void readString( const char* ) {}
-        /// Parse a configuration string
-        virtual void readString( const std::string& param ) { readString( param.c_str() ); }
-        /// Parse a list of configuration strings
-        virtual void readStrings( const std::vector<std::string>& params );
 
         /// Specify whether the beam remnants are to be fragmented
         bool fragmentRemnants() const { return remn_fragm_; }

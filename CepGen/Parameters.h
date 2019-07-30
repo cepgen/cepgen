@@ -12,8 +12,8 @@ namespace cepgen
 {
   class Event;
   class ParametersList;
+  class EventModifier;
   namespace proc { class GenericProcess; }
-  namespace hadr { class GenericHadroniser; }
   namespace io { class GenericExportHandler; }
   namespace utils { class TamingFunctionsCollection; }
   enum class IntegratorType;
@@ -22,9 +22,9 @@ namespace cepgen
   {
     public:
       Parameters();
-      /// Copy constructor (transfers ownership to the process/hadroniser!)
+      /// Copy constructor (transfers ownership to the process/event modification algorithm!)
       Parameters( Parameters& );
-      /// Const copy constructor (all but the process and the hadroniser)
+      /// Const copy constructor (all but the process and the event modification algorithm)
       Parameters( const Parameters& );
       ~Parameters(); // required for unique_ptr initialisation!
 
@@ -108,16 +108,16 @@ namespace cepgen
       /// Output module definition
       io::GenericExportHandler* outputModule();
 
-      //----- hadronisation algorithm
+      //----- event modification (e.g. hadronisation, decay) algorithm
 
-      /// Hadronisation algorithm to use for the proton(s) fragmentation
-      hadr::GenericHadroniser* hadroniser();
-      /// Name of the hadroniser (if applicable)
+      /// Event modification algorithm to use
+      EventModifier* hadroniser();
+      /// Name of the modification algorithm (if applicable)
       std::string hadroniserName() const;
-      /// Set the hadronisation algorithm
-      void setHadroniser( std::unique_ptr<hadr::GenericHadroniser> hadr );
-      /// Set the hadronisation algorithm
-      void setHadroniser( hadr::GenericHadroniser* hadr );
+      /// Set the event modification algorithm
+      void setHadroniser( std::unique_ptr<EventModifier> );
+      /// Set the event modification algorithm
+      void setHadroniser( EventModifier* );
 
       //----- taming functions
 
@@ -138,7 +138,7 @@ namespace cepgen
 
     private:
       std::unique_ptr<proc::GenericProcess> process_;
-      std::unique_ptr<hadr::GenericHadroniser> hadroniser_;
+      std::unique_ptr<EventModifier> evt_modifier_;
       /// Storage object
       std::unique_ptr<io::GenericExportHandler> out_module_;
 

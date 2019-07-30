@@ -27,7 +27,7 @@ namespace cepgen
     kinematics( param.kinematics ),
     taming_functions( param.taming_functions ),
     process_( std::move( param.process_ ) ),
-    hadroniser_( std::move( param.hadroniser_ ) ),
+    evt_modifier_( std::move( param.evt_modifier_ ) ),
     out_module_( std::move( param.out_module_ ) ),
     store_( false ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ ),
     integration_( param.integration_ ), generation_( param.generation_ )
@@ -51,7 +51,7 @@ namespace cepgen
     kinematics = param.kinematics;
     taming_functions = param.taming_functions;
     process_ = std::move( param.process_ );
-    hadroniser_ = std::move( param.hadroniser_ );
+    evt_modifier_ = std::move( param.evt_modifier_ );
     out_module_ = std::move( param.out_module_ );
     total_gen_time_ = param.total_gen_time_;
     num_gen_events_ = param.num_gen_events_;
@@ -136,30 +136,30 @@ namespace cepgen
     process_.reset( proc );
   }
 
-  hadr::GenericHadroniser*
+  EventModifier*
   Parameters::hadroniser()
   {
-    return hadroniser_.get();
+    return evt_modifier_.get();
   }
 
   std::string
   Parameters::hadroniserName() const
   {
-    if ( !hadroniser_ )
+    if ( !evt_modifier_ )
       return "";
-    return hadroniser_->name();
+    return evt_modifier_->name();
   }
 
   void
-  Parameters::setHadroniser( std::unique_ptr<hadr::GenericHadroniser> hadr )
+  Parameters::setHadroniser( std::unique_ptr<EventModifier> mod )
   {
-    hadroniser_ = std::move( hadr );
+    evt_modifier_ = std::move( mod );
   }
 
   void
-  Parameters::setHadroniser( hadr::GenericHadroniser* hadr )
+  Parameters::setHadroniser( EventModifier* mod )
   {
-    hadroniser_.reset( hadr );
+    evt_modifier_.reset( mod );
   }
 
   io::GenericExportHandler*
@@ -220,15 +220,13 @@ namespace cepgen
       << std::setw( wt ) << "Integrand treatment"
       << ( pretty ? yesno( param->generation_.treat ) : std::to_string( param->generation_.treat ) ) << "\n"
       << std::setw( wt ) << "Verbosity level " << utils::Logger::get().level << "\n";
-    if ( param->hadroniser_ ) {
+    if ( param->evt_modifier_ ) {
       os
         << "\n"
         << std::setfill( '-' ) << std::setw( wb+6 )
         << ( pretty ? boldify( " Hadronisation algorithm " ) : "Hadronisation algorithm" ) << std::setfill( ' ' ) << "\n\n"
         << std::setw( wt ) << "Name"
-        << ( pretty ? boldify( param->hadroniser_->name().c_str() ) : param->hadroniser_->name() ) << "\n"
-        << std::setw( wt ) << "Remnants fragmentation? "
-        << ( pretty ? yesno( param->hadroniser_->fragmentRemnants() ) : std::to_string( param->hadroniser_->fragmentRemnants() ) ) << "\n";
+        << ( pretty ? boldify( param->evt_modifier_->name().c_str() ) : param->evt_modifier_->name() ) << "\n";
     }
     os
       << "\n"

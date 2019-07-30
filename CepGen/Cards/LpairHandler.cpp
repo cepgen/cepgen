@@ -5,7 +5,7 @@
 #include "CepGen/Core/Integrator.h"
 
 #include "CepGen/Processes/ProcessesHandler.h"
-#include "CepGen/Hadronisers/HadronisersHandler.h"
+#include "CepGen/Core/EventModifierHandler.h"
 #include "CepGen/IO/ExportHandler.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
@@ -86,7 +86,7 @@ namespace cepgen
 
       //--- parse the hadronisation algorithm name
       if ( !hadr_name_.empty() ) {
-        params_.setHadroniser( cepgen::hadr::HadronisersHandler::get().build( hadr_name_, ParametersList() ) );
+        params_.setHadroniser( cepgen::EventModifierHandler::get().build( hadr_name_, ParametersList() ) );
         params_.hadroniser()->setParameters( params_ );
       }
 

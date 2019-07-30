@@ -6,7 +6,7 @@
 #include "CepGen/Core/Integrator.h"
 
 #include "CepGen/Processes/ProcessesHandler.h"
-#include "CepGen/Hadronisers/HadronisersHandler.h"
+#include "CepGen/Core/EventModifierHandler.h"
 #include "CepGen/IO/ExportHandler.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
@@ -329,32 +329,32 @@ namespace cepgen
     }
 
     void
-    PythonHandler::parseHadroniser( PyObject* hadr )
+    PythonHandler::parseHadroniser( PyObject* mod )
     {
-      if ( !PyDict_Check( hadr ) )
-        throwPythonError( "Hadroniser object should be a dictionary!" );
+      if ( !PyDict_Check( mod ) )
+        throwPythonError( "Event modification definition object should be a dictionary!" );
 
-      PyObject* pname = element( hadr, MODULE_NAME ); // borrowed
+      PyObject* pname = element( mod, MODULE_NAME ); // borrowed
       if ( !pname )
-        throwPythonError( "Hadroniser name is required!" );
-      std::string hadr_name = get<std::string>( pname );
+        throwPythonError( "Event modification algorithm name is required!" );
+      std::string mod_name = get<std::string>( pname );
 
-      params_.setHadroniser( cepgen::hadr::HadronisersHandler::get().build( hadr_name, get<ParametersList>( hadr ) ) );
+      params_.setHadroniser( cepgen::EventModifierHandler::get().build( mod_name, get<ParametersList>( mod ) ) );
 
       auto h = params_.hadroniser();
       h->setParameters( params_ );
       { //--- before calling the init() method
         std::vector<std::string> config;
-        fillParameter( hadr, "preConfiguration", config );
+        fillParameter( mod, "preConfiguration", config );
         h->readStrings( config );
       }
       h->init();
       { //--- after init() has been called
         std::vector<std::string> config;
-        fillParameter( hadr, "processConfiguration", config );
+        fillParameter( mod, "processConfiguration", config );
         for ( const auto& block : config ) {
           std::vector<std::string> config_blk;
-          fillParameter( hadr, block.c_str(), config_blk );
+          fillParameter( mod, block.c_str(), config_blk );
           h->readStrings( config_blk );
         }
       }
