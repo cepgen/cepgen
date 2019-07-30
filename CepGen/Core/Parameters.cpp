@@ -27,7 +27,7 @@ namespace cepgen
     kinematics( param.kinematics ),
     taming_functions( param.taming_functions ),
     process_( std::move( param.process_ ) ),
-    evt_modifier_( std::move( param.evt_modifier_ ) ),
+    evt_modifiers_( std::move( param.evt_modifiers_ ) ),
     out_module_( std::move( param.out_module_ ) ),
     store_( false ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ ),
     integration_( param.integration_ ), generation_( param.generation_ )
@@ -51,7 +51,7 @@ namespace cepgen
     kinematics = param.kinematics;
     taming_functions = param.taming_functions;
     process_ = std::move( param.process_ );
-    evt_modifier_ = std::move( param.evt_modifier_ );
+    evt_modifiers_ = std::move( param.evt_modifiers_ );
     out_module_ = std::move( param.out_module_ );
     total_gen_time_ = param.total_gen_time_;
     num_gen_events_ = param.num_gen_events_;
@@ -137,29 +137,29 @@ namespace cepgen
   }
 
   EventModifier*
-  Parameters::hadroniser()
+  Parameters::hadroniser( size_t i )
   {
-    return evt_modifier_.get();
+    return evt_modifiers_.at( i ).get();
   }
 
   std::string
-  Parameters::hadroniserName() const
+  Parameters::hadroniserName( size_t i ) const
   {
-    if ( !evt_modifier_ )
+    if ( i >= evt_modifiers_.size() )
       return "";
-    return evt_modifier_->name();
+    return evt_modifiers_.at( i )->name();
   }
 
   void
-  Parameters::setHadroniser( std::unique_ptr<EventModifier> mod )
+  Parameters::addModifier( std::unique_ptr<EventModifier> mod )
   {
-    evt_modifier_ = std::move( mod );
+    evt_modifiers_.emplace_back( std::move( mod ) );
   }
 
   void
-  Parameters::setHadroniser( EventModifier* mod )
+  Parameters::addModifier( EventModifier* mod )
   {
-    evt_modifier_.reset( mod );
+    evt_modifiers_.emplace_back( std::unique_ptr<EventModifier>( mod ) );
   }
 
   io::GenericExportHandler*
@@ -220,13 +220,18 @@ namespace cepgen
       << std::setw( wt ) << "Integrand treatment"
       << ( pretty ? yesno( param->generation_.treat ) : std::to_string( param->generation_.treat ) ) << "\n"
       << std::setw( wt ) << "Verbosity level " << utils::Logger::get().level << "\n";
-    if ( param->evt_modifier_ ) {
+    if ( !param->evt_modifiers_.empty() ) {
       os
         << "\n"
         << std::setfill( '-' ) << std::setw( wb+6 )
-        << ( pretty ? boldify( " Hadronisation algorithm " ) : "Hadronisation algorithm" ) << std::setfill( ' ' ) << "\n\n"
-        << std::setw( wt ) << "Name"
-        << ( pretty ? boldify( param->evt_modifier_->name().c_str() ) : param->evt_modifier_->name() ) << "\n";
+        << ( pretty ? boldify( " Event modifier sequence " ) : "Event modifier sequence" ) << std::setfill( ' ' ) << "\n\n"
+        << std::setw( wt ) << "Name";
+      std::ostringstream seq;
+      std::string sep;
+      for ( const auto& mod : param->evt_modifiers_ )
+        seq << sep << mod->name(), sep = ", ";
+      os
+        << ( pretty ? boldify( seq.str().c_str() ) : seq.str() ) << "\n";
     }
     os
       << "\n"

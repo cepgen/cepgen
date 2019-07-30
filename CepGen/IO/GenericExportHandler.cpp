@@ -28,8 +28,8 @@ namespace cepgen
         << prep << "  * process: " << params.processName() << " (" << params.kinematics.mode << ")\n";
       if ( params.kinematics.mode != KinematicsMode::ElasticElastic ) {
         os << prep << "  * structure functions: " << params.kinematics.structure_functions->description() << "\n";
-        if ( !params.hadroniserName().empty() )
-          os << prep << "  * hadroniser: " << params.hadroniserName() << "\n";
+        if ( !params.hadroniserName( 0 ).empty() )
+          os << prep << "  * hadroniser: " << params.hadroniserName( 0 ) << "\n";
       }
       os
         << prep << "  *--- incoming state\n";

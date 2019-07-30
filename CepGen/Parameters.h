@@ -11,12 +11,13 @@
 namespace cepgen
 {
   class Event;
-  class ParametersList;
   class EventModifier;
+  class ParametersList;
   namespace proc { class GenericProcess; }
   namespace io { class GenericExportHandler; }
   namespace utils { class TamingFunctionsCollection; }
   enum class IntegratorType;
+  typedef std::vector<std::unique_ptr<EventModifier> > EventModifiersSequence;
   /// List of parameters used to start and run the simulation job
   class Parameters
   {
@@ -111,13 +112,17 @@ namespace cepgen
       //----- event modification (e.g. hadronisation, decay) algorithm
 
       /// Event modification algorithm to use
-      EventModifier* hadroniser();
+      EventModifier* hadroniser( size_t );
+      /// Retrieve the list of event modification algorithms to run
+      EventModifiersSequence& eventModifiersSequence() { return evt_modifiers_; }
       /// Name of the modification algorithm (if applicable)
-      std::string hadroniserName() const;
-      /// Set the event modification algorithm
-      void setHadroniser( std::unique_ptr<EventModifier> );
-      /// Set the event modification algorithm
-      void setHadroniser( EventModifier* );
+      std::string hadroniserName( size_t ) const;
+      /// Add a new event modification algorithm to the sequence
+      void addModifier( std::unique_ptr<EventModifier> );
+      /// Add a new event modification algorithm to the sequence
+      void addModifier( EventModifier* );
+      /// Set the event modification algorithms sequence
+      void setModifiersSequence( EventModifiersSequence& );
 
       //----- taming functions
 
@@ -138,7 +143,7 @@ namespace cepgen
 
     private:
       std::unique_ptr<proc::GenericProcess> process_;
-      std::unique_ptr<EventModifier> evt_modifier_;
+      EventModifiersSequence evt_modifiers_;
       /// Storage object
       std::unique_ptr<io::GenericExportHandler> out_module_;
 

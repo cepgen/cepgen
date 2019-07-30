@@ -86,8 +86,8 @@ namespace cepgen
 
       //--- parse the hadronisation algorithm name
       if ( !hadr_name_.empty() ) {
-        params_.setHadroniser( cepgen::EventModifierHandler::get().build( hadr_name_, ParametersList() ) );
-        params_.hadroniser()->setParameters( params_ );
+        params_.addModifier( cepgen::EventModifierHandler::get().build( hadr_name_, ParametersList() ) );
+        (*params_.eventModifiersSequence().rbegin())->setParameters( params_ );
       }
 
       //--- parse the output module name

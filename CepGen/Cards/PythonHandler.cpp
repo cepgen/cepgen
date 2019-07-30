@@ -339,9 +339,9 @@ namespace cepgen
         throwPythonError( "Event modification algorithm name is required!" );
       std::string mod_name = get<std::string>( pname );
 
-      params_.setHadroniser( cepgen::EventModifierHandler::get().build( mod_name, get<ParametersList>( mod ) ) );
+      params_.addModifier( cepgen::EventModifierHandler::get().build( mod_name, get<ParametersList>( mod ) ) );
 
-      auto h = params_.hadroniser();
+      auto h = params_.eventModifiersSequence().rbegin()->get();
       h->setParameters( params_ );
       { //--- before calling the init() method
         std::vector<std::string> config;
