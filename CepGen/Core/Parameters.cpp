@@ -218,7 +218,7 @@ namespace cepgen
       << std::setw( wt ) << "Integrand treatment"
       << ( pretty ? yesno( param->generation_.treat ) : std::to_string( param->generation_.treat ) ) << "\n"
       << std::setw( wt ) << "Verbosity level " << utils::Logger::get().level << "\n";
-    if ( !param->evt_modifiers_.empty() )
+    if ( !param->evt_modifiers_.empty() || param->out_module_ )
       os
         << "\n"
         << std::setfill( '-' ) << std::setw( wb+6 )
@@ -282,8 +282,10 @@ namespace cepgen
     os << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Proton / remnants " ) : "Proton / remnants" ) << std::setfill( ' ' ) << "\n";
     for ( const auto& lim : param->kinematics.cuts.remnants.list() )
       os << "\n" << std::setw( wt ) << lim.first << lim.second;
-    os << "\n";
-    return os;
+    return os
+      << "\n"
+      << std::setfill('_') << std::setw( wb ) << ""
+      << "\n";
   }
 
   //-----------------------------------------------------------------------------------------------

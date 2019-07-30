@@ -3,14 +3,8 @@
 
 #include "CepGen/Core/EventModifier.h"
 
-#include <iosfwd>
-
 namespace cepgen
 {
-  class Event;
-  class Particle;
-  class Parameters;
-  class ParametersList;
   /// Location for all hadronisers to be run downstream to the events generation
   namespace hadr
   {
@@ -22,11 +16,6 @@ namespace cepgen
     class GenericHadroniser : public EventModifier
     {
       public:
-        /// Write out all hadroniser attributes in output stream
-        friend std::ostream& operator<<( std::ostream& os, const GenericHadroniser& hadr );
-        /// Write out all hadroniser attributes in output stream
-        friend std::ostream& operator<<( std::ostream& os, const GenericHadroniser* hadr );
-
         /// Default constructor for an undefined hadroniser
         explicit GenericHadroniser( const ParametersList&, const std::string& name = "<invalid hadroniser>" );
 
