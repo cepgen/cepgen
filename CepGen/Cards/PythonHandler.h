@@ -25,6 +25,7 @@ namespace cepgen
 
         static constexpr const char* PROCESS_NAME = "process";
         static constexpr const char* HADR_NAME = "hadroniser";
+        static constexpr const char* EVT_MOD_SEQ_NAME = "eventSequence";
         static constexpr const char* LOGGER_NAME = "logger";
         static constexpr const char* INTEGRATOR_NAME = "integrator";
         static constexpr const char* GENERATOR_NAME = "generator";

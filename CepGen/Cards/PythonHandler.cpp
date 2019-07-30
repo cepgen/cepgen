@@ -111,11 +111,16 @@ namespace cepgen
         Py_CLEAR( plog );
       }
 
-      //--- hadroniser parameters
+      //--- hadroniser parameters (legacy)
       PyObject* phad = PyObject_GetAttrString( cfg, HADR_NAME ); // new
       if ( phad ) {
         parseHadroniser( phad );
         Py_CLEAR( phad );
+      }
+
+      PyObject* pmod_seq = PyObject_GetAttrString( cfg, EVT_MOD_SEQ_NAME ); // new
+      if ( pmod_seq ) {
+        Py_CLEAR( pmod_seq );
       }
 
       //--- generation parameters
