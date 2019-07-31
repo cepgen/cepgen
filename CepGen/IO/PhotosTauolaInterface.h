@@ -19,29 +19,20 @@ namespace cepgen
       public:
         PhotosTauolaParticle() = default;
         inline PhotosTauolaParticle( PhotosTauolaEvent<E,P>* event, const Particle& part ) :
-          Particle( part ), event_( event ) {
-          setBarcode( part.id() );
-          setPdgID( part.integerPdgId() );
-          setStatus( (int)part.status() );
-          const auto& mom = part.momentum();
-          setPx( mom.px() );
-          setPy( mom.py() );
-          setPz( mom.pz() );
-          setEnergy( mom.energy() );
-          setMass( part.mass() );
-        }
+          Particle( part ), event_( event ) {}
         /// Remove all secondary particles instances created
         inline ~PhotosTauolaParticle() {
+          //--- clean all collections
           for ( auto& coll : { mothers_, daughters_, secondary_parts_ } )
-            for ( auto& part : coll )
-              delete part;
+            for ( size_t i = 0; i < coll.size(); ++i )
+              delete coll[i];
         }
 
         /// Create a new instance of a particle, disconnected from the event history
         inline PhotosTauolaParticle* createNewParticle( int pdg, int status, double mass,
                                                         double px, double py, double pz, double e ) override {
           Particle part( Particle::Role::UnknownRole, pdg, (Particle::Status)status );
-          part.setChargeSign( pdg/(unsigned int)pdg );
+          part.setChargeSign( pdg/abs( pdg ) );
           part.setMomentum( Momentum::fromPxPyPzE( px, py, pz, e ) );
           part.setMass( mass );
           auto out = new PhotosTauolaParticle<E,P>( event_, part );
@@ -56,7 +47,7 @@ namespace cepgen
         /// Particle unique identifier in the event
         int getBarcode() override { return id_; }
         /// Set the particle ID
-        void setPdgID( int pdg ) override { setPdgId( (short)abs( pdg ) ); }
+        void setPdgID( int pdg ) override { setPdgId( (long)pdg ); }
         /// Particle ID
         int getPdgID() override { return integerPdgId(); }
         void setStatus( int status ) override { status_ = (Particle::Status)status; }
@@ -78,30 +69,34 @@ namespace cepgen
         /// Specify a list of pointers to the parents
         void setMothers( std::vector<P*> mothers ) override {
           for ( const auto& moth : mothers ) {
-            auto&& int_moth = dynamic_cast<PhotosTauolaParticle*>( moth );
-            addMother( *int_moth );
-            int_moth->setStatus( (int)Particle::Status::Propagator );
+            auto&& part = dynamic_cast<PhotosTauolaParticle*>( moth );
+            part->setStatus( (int)Particle::Status::Propagator );
+            addMother( *part );
           }
         }
         /// Retrieve a list of parents from the event content
         std::vector<P*> getMothers() override {
-          if ( !mothers_.empty() )
-            return mothers_;
-          for ( const auto& moth : mothers() )
-            mothers_.emplace_back( new PhotosTauolaParticle( event_, event_->operator[]( moth ) ) );
+          if ( mothers_.empty() )
+            for ( const auto& moth : mothers() )
+              if ( moth >= 0 )
+                mothers_.emplace_back( new PhotosTauolaParticle( event_, event_->operator[]( moth ) ) );
           return mothers_;
         }
         /// Specify a list of pointers to the secondary products
         void setDaughters( std::vector<P*> daughters ) override {
-          for ( const auto& daugh : daughters )
-            addDaughter( *dynamic_cast<PhotosTauolaParticle*>( daugh ) );
+          for ( const auto& daugh : daughters ) {
+            auto&& part = dynamic_cast<PhotosTauolaParticle*>( daugh );
+            part->setRole( role() ); // child inherits its mother's role
+            addDaughter( *part );
+          }
         }
         /// Retrieve a list of pointers to secondary products from the event content
         std::vector<P*> getDaughters() override {
-          if ( !daughters_.empty() )
-            return daughters_;
-          for ( const auto& daugh : daughters() )
-            daughters_.emplace_back( new PhotosTauolaParticle( event_, event_->operator[]( daugh ) ) );
+          if ( daughters_.empty() )
+            for ( const auto& daugh : daughters() )
+              if ( daugh >= 0 )
+                daughters_.emplace_back( new PhotosTauolaParticle( event_, event_->operator[]( daugh ) ) );
+          //CG_INFO("")<<getBarcode();for(const auto& p : daughters_)p->print();
           return daughters_;
         }
 
@@ -119,36 +114,19 @@ namespace cepgen
     {
       public:
         inline PhotosTauolaEvent( const Event& evt, const pdgid_t pdg = PDG::invalid ) :
-          Event( evt.compressed() ), spec_pdg_id_( pdg ) {
-          //--- loop to add particles and associate parentage
-          for ( size_t i = 0; i < size(); ++i ) {
-            const auto& part = operator[]( i );
-            particles_.emplace_back( new PhotosTauolaParticle<E,P>( this, part ) );
-            const auto& moth = part.mothers(), &daugh = part.daughters();
-            std::vector<P*> ml;
-            for ( const auto& mt_id : moth )
-              ml.emplace_back( particles_[mt_id] );
-            particles_[i]->setMothers( ml );
-          }
-          //--- second loop to associate daughters (needs the full event to be filled)
-          for ( size_t i = 0; i < size(); ++i ) {
-            std::vector<P*> dl;
-            for ( const auto& dg_id : operator[]( i ).daughters() )
-              dl.emplace_back( particles_[dg_id] );
-            particles_[i]->setDaughters( dl );
-          }
-        }
+          Event( evt.compressed() ), spec_pdg_id_( pdg ) {}
         inline ~PhotosTauolaEvent() {
-          for ( size_t i = 0; i < particles_.size(); ++i )
-            delete particles_[i];
+          for ( size_t i = 0; i < decay_particles_.size(); ++i )
+            delete decay_particles_[i];
         }
 
         inline std::vector<P*> findParticles( int pdg ) override {
-          std::vector<P*> out;
-          for ( auto& part : particles_ )
-            if ( abs( part->getPdgID() ) == pdg )
-              out.emplace_back( part );
-          return out;
+          //--- fill list of particles of interest if not already done
+          if ( decay_particles_.empty() )
+            for ( auto& part : particles() )
+              if ( abs( part.integerPdgId() ) == pdg )
+                decay_particles_.emplace_back( new PhotosTauolaParticle<E,P>( this, part ) );
+          return decay_particles_;
         }
         inline std::vector<P*> findStableParticles( int pdg ) override {
           std::vector<P*> out;
@@ -158,19 +136,20 @@ namespace cepgen
             else {
               const auto& daugh = part->getDaughters();
               if ( daugh.size() == 1 )
-                continue;
+                continue; // weird parentage, particle will not be decayed
               if ( daugh.size() == 2 && ( abs( daugh.at( 0 )->getPdgID() ) == spec_pdg_id_
                                        || abs( daugh.at( 1 )->getPdgID() ) == spec_pdg_id_ ) )
-                continue;
-              CG_WARNING( "PhotosTauolaEvent" ) << "Particle with pdg code " << part->getPdgID()
-                <<" has already daughters.";
+                continue; // already decayed into a pair of particles of interest; skip it
+              CG_WARNING( "PhotosTauolaEvent" )
+                << "Particle with pdg code " << part->getPdgID() << " has already "
+                << utils::s( "daughter", daugh.size(), true ) << ".";
             }
           }
           return out;
         }
 
       private:
-        std::vector<P*> particles_;
+        std::vector<P*> decay_particles_;
         pdgid_t spec_pdg_id_;
     };
   }

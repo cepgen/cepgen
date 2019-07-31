@@ -87,6 +87,7 @@ namespace cepgen
       weight = 1.;
 
       CepGenTauolaEvent evt( ev, PDG::tau );
+      evt.dump();
       //evt.undecayTaus();
       evt.decayTaus();
       evt.dump();
