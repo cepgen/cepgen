@@ -30,46 +30,60 @@ namespace cepgen
           setEnergy( mom.energy() );
           setMass( part.mass() );
         }
+        /// Remove all secondary particles instances created
         inline ~PhotosTauolaParticle() {
           for ( auto& coll : { mothers_, daughters_, secondary_parts_ } )
             for ( auto& part : coll )
               delete part;
         }
 
+        /// Create a new instance of a particle, disconnected from the event history
         inline PhotosTauolaParticle* createNewParticle( int pdg, int status, double mass,
                                                         double px, double py, double pz, double e ) override {
           Particle part( Particle::Role::UnknownRole, pdg, (Particle::Status)status );
           part.setChargeSign( pdg/(unsigned int)pdg );
           part.setMomentum( Momentum::fromPxPyPzE( px, py, pz, e ) );
           part.setMass( mass );
-          //event_->addParticle( Particle::CentralSystem ) = part;
           auto out = new PhotosTauolaParticle<E,P>( event_, part );
           secondary_parts_.emplace_back( out );
           return out;
         }
+        /// Dump the particle attributes
         inline void print() override { CG_INFO( "PhotosTauolaParticle" ) << *this; }
 
+        /// Specify the particle unique identifier
         void setBarcode( int id ) { id_ = id; }
+        /// Particle unique identifier in the event
         int getBarcode() override { return id_; }
+        /// Set the particle ID
         void setPdgID( int pdg ) override { setPdgId( (short)abs( pdg ) ); }
+        /// Particle ID
         int getPdgID() override { return integerPdgId(); }
         void setStatus( int status ) override { status_ = (Particle::Status)status; }
+        /// Particle status
         int getStatus() override { return (int)status_; }
-
         void setPx( double px ) override { momentum_[0] = px; }
+        /// Horizontal component of the momentum
         double getPx() override { return momentum_.px(); }
         void setPy( double py ) override { momentum_[1] = py; }
+        /// Vertical component of the momentum
         double getPy() override { return momentum_.py(); }
         void setPz( double pz ) override { momentum_[2] = pz; }
+        /// Longitudinal component of the momentum
         double getPz() override { return momentum_.pz(); }
         void setE( double e ) override { momentum_[3] = e; }
+        /// Particle energy
         double getE() override { return energy(); }
         void setMass( double m ) override { mass_ = m; }
-
+        /// Specify a list of pointers to the parents
         void setMothers( std::vector<P*> mothers ) override {
-          for ( const auto& moth : mothers )
-            addMother( *dynamic_cast<PhotosTauolaParticle*>( moth ) );
+          for ( const auto& moth : mothers ) {
+            auto&& int_moth = dynamic_cast<PhotosTauolaParticle*>( moth );
+            addMother( *int_moth );
+            int_moth->setStatus( (int)Particle::Status::Propagator );
+          }
         }
+        /// Retrieve a list of parents from the event content
         std::vector<P*> getMothers() override {
           if ( !mothers_.empty() )
             return mothers_;
@@ -77,10 +91,12 @@ namespace cepgen
             mothers_.emplace_back( new PhotosTauolaParticle( event_, event_->operator[]( moth ) ) );
           return mothers_;
         }
+        /// Specify a list of pointers to the secondary products
         void setDaughters( std::vector<P*> daughters ) override {
           for ( const auto& daugh : daughters )
             addDaughter( *dynamic_cast<PhotosTauolaParticle*>( daugh ) );
         }
+        /// Retrieve a list of pointers to secondary products from the event content
         std::vector<P*> getDaughters() override {
           if ( !daughters_.empty() )
             return daughters_;
@@ -130,7 +146,7 @@ namespace cepgen
         inline std::vector<P*> findParticles( int pdg ) override {
           std::vector<P*> out;
           for ( auto& part : particles_ )
-            if ( part->getPdgID() == pdg )
+            if ( abs( part->getPdgID() ) == pdg )
               out.emplace_back( part );
           return out;
         }

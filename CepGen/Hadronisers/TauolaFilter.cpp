@@ -87,7 +87,7 @@ namespace cepgen
       weight = 1.;
 
       CepGenTauolaEvent evt( ev, PDG::tau );
-      evt.undecayTaus();
+      //evt.undecayTaus();
       evt.decayTaus();
       evt.dump();
       //const auto& pairs = evt[Particle::CentralSystem][0];
