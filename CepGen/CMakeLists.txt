@@ -71,6 +71,15 @@ if(PYTHIA8)
   list(APPEND addons_libraries ${PYTHIA8} dl)
 endif()
 
+#--- linking with Photos++
+
+if(PHOTOSPP)
+  message(STATUS "Photos++ found in ${PHOTOSPP}")
+  include_directories(${PHOTOSPP_INCLUDE})
+  list(APPEND hadr_sources "Hadronisers/PhotosFilter.cpp")
+  list(APPEND addons_libraries ${PHOTOSPP})
+endif()
+
 #--- linking with HepMC
 
 if(HEPMC_LIB)
