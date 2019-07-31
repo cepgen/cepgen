@@ -96,6 +96,30 @@ extern "C" {
     return cepgen::proc::FortranKTProcess::kProcParameters.get<double>( pname, def );
   }
 
+  void
+  cepgen_debug_( char* str, int size )
+  {
+    CG_DEBUG( "fortran_process" ) << std::string( str, size );
+  }
+
+  void
+  cepgen_warning_( char* str, int size )
+  {
+    CG_WARNING( "fortran_process" ) << std::string( str, size );
+  }
+
+  void
+  cepgen_error_( char* str, int size )
+  {
+    CG_ERROR( "fortran_process" ) << std::string( str, size );
+  }
+
+  void
+  cepgen_fatal_( char* str, int size )
+  {
+    throw CG_FATAL( "fortran_process" ) << std::string( str, size );
+  }
+
 #ifdef __cplusplus
 }
 #endif
