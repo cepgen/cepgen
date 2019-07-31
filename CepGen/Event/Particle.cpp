@@ -192,7 +192,7 @@ namespace cepgen
   }
 
   void
-  Particle::setPdgId( short pdg )
+  Particle::setPdgId( long pdg )
   {
     pdg_id_ = abs( pdg );
     try {

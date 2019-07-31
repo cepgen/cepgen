@@ -79,6 +79,8 @@ namespace cepgen
       if ( !ev )
         return weight;
 
+      ev->dump();
+
       if ( !params->storage()
         && !params->taming_functions
         && !params->eventModifiersSequence().empty()
