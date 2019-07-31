@@ -103,7 +103,7 @@ namespace cepgen
       private:
         std::vector<P*> mothers_, daughters_;
         std::vector<P*> secondary_parts_;
-        PhotosTauolaEvent<E,P>* event_;
+        PhotosTauolaEvent<E,P>* event_; // non-owning, only treated as reference
     };
 
     /// Interface to events objects for Photos++ and Tauola++
