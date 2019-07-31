@@ -76,14 +76,17 @@ extern "C" {
   void
   cepgen_list_params_()
   {
-    CG_LOG( "cepgen_list_params" ) << "\t" << cepgen::proc::FortranKTProcess::kProcParameters;
+    CG_LOG( "cepgen_list_params" )
+      << "\t" << cepgen::proc::FortranKTProcess::kProcParameters;
   }
 
   int
   cepgen_param_int_( char* pname, int& def )
   {
+    //--- first check if the "integer" is a particle id
     if ( cepgen::proc::FortranKTProcess::kProcParameters.has<cepgen::ParticleProperties>( pname ) )
       return cepgen::proc::FortranKTProcess::kProcParameters.get<cepgen::ParticleProperties>( pname ).pdgid;
+    //--- if not, proceed with retrieving the integer value
     return cepgen::proc::FortranKTProcess::kProcParameters.get<int>( pname, def );
   }
 
@@ -91,6 +94,30 @@ extern "C" {
   cepgen_param_real_( char* pname, double& def )
   {
     return cepgen::proc::FortranKTProcess::kProcParameters.get<double>( pname, def );
+  }
+
+  void
+  cepgen_debug_( char* str, int size )
+  {
+    CG_DEBUG( "fortran_process" ) << std::string( str, size );
+  }
+
+  void
+  cepgen_warning_( char* str, int size )
+  {
+    CG_WARNING( "fortran_process" ) << std::string( str, size );
+  }
+
+  void
+  cepgen_error_( char* str, int size )
+  {
+    CG_ERROR( "fortran_process" ) << std::string( str, size );
+  }
+
+  void
+  cepgen_fatal_( char* str, int size )
+  {
+    throw CG_FATAL( "fortran_process" ) << std::string( str, size );
   }
 
 #ifdef __cplusplus

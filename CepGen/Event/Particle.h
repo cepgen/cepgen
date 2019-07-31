@@ -99,7 +99,7 @@ namespace cepgen
       void setPdgId( pdgid_t pdg, short ch = 0 );
       /// Set the PDG identifier (along with the particle's electric charge)
       /// \param[in] pdg_id PDG identifier (incl. electric charge in e)
-      void setPdgId( short pdg_id );
+      void setPdgId( long pdg_id );
       /// Retrieve the objectified PDG identifier
       pdgid_t pdgId() const;
       /// Retrieve the integer value of the PDG identifier
