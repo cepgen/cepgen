@@ -23,7 +23,7 @@ namespace cepgen
         /// Remove all secondary particles instances created
         inline ~PhotosTauolaParticle() {
           //--- clean all collections
-          for ( auto& coll : { mothers_, daughters_, secondary_parts_ } )
+          for ( auto& coll : { mothers_, secondary_parts_ } )
             for ( size_t i = 0; i < coll.size(); ++i )
               delete coll[i];
         }
@@ -96,15 +96,22 @@ namespace cepgen
         }
         /// Retrieve a list of pointers to secondary products from the event content
         std::vector<P*> getDaughters() override {
-          if ( daughters_.empty() )
-            for ( const auto& daugh : daughters() )
-              if ( daugh >= 0 )
-                daughters_.emplace_back( new PhotosTauolaParticle( event_, event_->operator[]( daugh ) ) );
-          //CG_INFO("")<<getBarcode();for(const auto& p : daughters_)p->print();
-          return daughters_;
+          std::vector<P*> out;
+          for ( const auto& daugh : daughters() ) {
+            if ( daugh >= 0 )
+              out.emplace_back( new PhotosTauolaParticle( event_, event_->operator[]( daugh ) ) );
+          }
+          return out;
         }
         std::vector<P*> getAllDecayProducts() {
-          return getDaughters(); //FIXME
+          auto out = getDaughters();
+          for ( size_t i = 0; i < out.size(); ++i ) {
+            for ( auto& part : out[i]->getAllDecayProducts() )
+              if ( std::find( out.begin(), out.end(), part ) == out.end() )
+                out.emplace_back( part );
+          }
+          CG_INFO("")<<getBarcode()<<"."<<out.size();
+          return out;
         }
         bool checkMomentumConservation() {
           return true; //FIXME
@@ -112,12 +119,15 @@ namespace cepgen
         void createHistoryEntry() {
           //FIXME
         }
-        void createSelfDecayVertex( P* ) {
+        void createSelfDecayVertex( P* out ) {
+          auto& ev_part = event_->addParticle( role() );
+          ev_part = *dynamic_cast<PhotosTauolaParticle<E,P>*>( out );
+          secondary_parts_.emplace_back( out );
           //FIXME
         }
 
       private:
-        std::vector<P*> mothers_, daughters_;
+        std::vector<P*> mothers_;
         std::vector<P*> secondary_parts_;
         PhotosTauolaEvent<E,P>* event_; // non-owning, only treated as reference
     };
