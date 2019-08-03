@@ -70,8 +70,9 @@ namespace cepgen
       // incoming beams information
       //-------------------------------------------------------------------------------------------
 
+      //--- positive-z incoming beam
       genparams_.inp1 = kin_.incoming_beams.first.pz;
-      genparams_.inp2 = kin_.incoming_beams.second.pz;
+      //--- check if first incoming beam is a heavy ion
       const HeavyIon in1 = (HeavyIon)kin_.incoming_beams.first.pdg;
       if ( in1 ) {
         genparams_.a_nuc1 = in1.A;
@@ -84,6 +85,9 @@ namespace cepgen
       else
         genparams_.a_nuc1 = genparams_.z_nuc1 = 1;
 
+      //--- negative-z incoming beam
+      genparams_.inp2 = kin_.incoming_beams.second.pz;
+      //--- check if second incoming beam is a heavy ion
       const HeavyIon in2 = (HeavyIon)kin_.incoming_beams.second.pdg;
       if ( in2 ) {
         genparams_.a_nuc2 = in2.A;
@@ -100,22 +104,28 @@ namespace cepgen
       // intermediate partons information
       //-------------------------------------------------------------------------------------------
 
+      //--- positive-z parton
       genparams_.iflux1 = (int)kin_.incoming_beams.first.kt_flux;
-      genparams_.iflux2 = (int)kin_.incoming_beams.second.kt_flux;
       switch ( (KTFlux)genparams_.iflux1 ) {
         case KTFlux::P_Gluon_KMR:
           event_->getOneByRole( Particle::Parton1 ).setPdgId( PDG::gluon ); break;
-        case KTFlux::P_Photon_Elastic: case KTFlux::P_Photon_Inelastic: case KTFlux::P_Photon_Inelastic_Budnev:
+        case KTFlux::P_Photon_Elastic:
+        case KTFlux::P_Photon_Inelastic:
+        case KTFlux::P_Photon_Inelastic_Budnev:
         case KTFlux::HI_Photon_Elastic:
-          event_->getOneByRole( Particle::Parton2 ).setPdgId( PDG::photon ); break;
+          event_->getOneByRole( Particle::Parton1 ).setPdgId( PDG::photon ); break;
         case KTFlux::invalid:
           throw CG_FATAL( "FortranKTProcess" )
             << "Invalid flux for 2nd incoming parton: " << genparams_.iflux2 << "!";
       }
+      //--- negative-z parton
+      genparams_.iflux2 = (int)kin_.incoming_beams.second.kt_flux;
       switch ( (KTFlux)genparams_.iflux2 ) {
         case KTFlux::P_Gluon_KMR:
           event_->getOneByRole( Particle::Parton2 ).setPdgId( PDG::gluon ); break;
-        case KTFlux::P_Photon_Elastic: case KTFlux::P_Photon_Inelastic: case KTFlux::P_Photon_Inelastic_Budnev:
+        case KTFlux::P_Photon_Elastic:
+        case KTFlux::P_Photon_Inelastic:
+        case KTFlux::P_Photon_Inelastic_Budnev:
         case KTFlux::HI_Photon_Elastic:
           event_->getOneByRole( Particle::Parton2 ).setPdgId( PDG::photon ); break;
         case KTFlux::invalid:
@@ -127,6 +137,7 @@ namespace cepgen
     double
     FortranKTProcess::computeKTFactorisedMatrixElement()
     {
+      //--- set all kinematics variables for this phase space point
       ktkin_.q1t = qt1_;
       ktkin_.q2t = qt2_;
       ktkin_.phiq1t = phi_qt1_;
@@ -168,10 +179,11 @@ namespace cepgen
       // central system
       //===========================================================================================
 
-      Particles& oc = (*event_)[Particle::CentralSystem];
+      auto& oc = (*event_)[Particle::CentralSystem]; // retrieve all references
+                                                     // to central system particles
       for ( int i = 0; i < evtkin_.nout; ++i ) {
-        Particle& p = oc[i];
-        p.setPdgId( (pdgid_t)evtkin_.pdg[i] );
+        auto& p = oc[i]; // retrieve a reference to the specific particle
+        p.setPdgId( (long)evtkin_.pdg[i] );
         p.setStatus( Particle::Status::FinalState );
         p.setMomentum( Momentum( evtkin_.pc[i] ) );
       }

@@ -34,6 +34,7 @@ namespace cepgen
 
       private:
         std::unique_ptr<ProMCBook> file_;
+        const bool compress_evt_;
         std::ofstream log_file_;
         double xsec_, xsec_err_;
     };
@@ -41,6 +42,7 @@ namespace cepgen
     ProMCHandler::ProMCHandler( const ParametersList& params ) :
       GenericExportHandler( "promc" ),
       file_( new ProMCBook( params.get<std::string>( "filename", "output.promc" ).c_str(), "w" ) ),
+      compress_evt_( params.get<bool>( "compress", false ) ),
       log_file_( "logfile.txt" ),
       xsec_( -1. ), xsec_err_( -1. )
     {}
@@ -100,7 +102,10 @@ namespace cepgen
       evt->set_weight( 1. );
 
       unsigned short i = 0;
-      for ( const auto& par : ev.particles() ) {
+      const auto& parts = compress_evt_
+        ? ev.compressed().particles()
+        : ev.particles();
+      for ( const auto& par : parts ) {
         auto part = event.mutable_particles();
         part->add_id( i++ );
         part->add_pdg_id( par.integerPdgId() );

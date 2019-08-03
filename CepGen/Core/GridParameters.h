@@ -22,6 +22,8 @@ namespace cepgen
       void setValue( size_t coord, double val );
 
       void shoot( const gsl_rng* rng, size_t coord, std::vector<double>& out ) const;
+      void setTrial( size_t coord );
+      size_t numPoints( size_t coord ) const;
 
       /// Maximal number of dimensions handled by this integrator instance
       static constexpr unsigned short MAX_DIM = 15;
@@ -36,13 +38,14 @@ namespace cepgen
       double f_max2;
       double f_max_diff;
       double f_max_old;
-      std::vector<unsigned int> num;
       double r_boxes;
 
     private:
       size_t max_;
       /// List of grid coordinates
       std::vector<coord_t> n_map_;
+      /// Number of functions values evaluated for this point
+      std::vector<size_t> num_points_;
       /// Maximal value of the function at one given point
       std::vector<double> f_max_;
       /// Maximal value of the function in the considered integration range

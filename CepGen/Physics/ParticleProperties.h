@@ -6,7 +6,7 @@
 
 namespace cepgen
 {
-  typedef unsigned int pdgid_t;
+  typedef unsigned long pdgid_t;
   /// A collection of physics constants associated to a single particle
   struct ParticleProperties
   {
