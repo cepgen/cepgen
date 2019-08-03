@@ -102,7 +102,7 @@ namespace cepgen
       evt_aux->Number = event_num_++;
       evt_aux->ProcessID = 0;
       evt_aux->Weight = 1.; // events are unweighted in CepGen
-      evt_aux->CrossSection = xsec_;
+      //evt_aux->CrossSection = xsec_; // not yet fully supported
       evt_aux->ScalePDF = 0.; // for the time being
       evt_aux->AlphaQED = constants::ALPHA_EM;
       evt_aux->AlphaQCD = constants::ALPHA_QCD;
