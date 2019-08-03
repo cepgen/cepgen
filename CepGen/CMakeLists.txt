@@ -124,7 +124,7 @@ if(ROOT_FOUND)
     message(STATUS "Delphes found in ${DELPHES}")
     list(APPEND addons_libraries ${DELPHES})
     list(APPEND io_sources "IO/DelphesHandler.cpp")
-    include_directories(${DELPHES_INCLUDE})
+    include_directories(${DELPHES_INCLUDE} ${DELPHES_EXT_INCLUDE})
   endif()
 endif()
 

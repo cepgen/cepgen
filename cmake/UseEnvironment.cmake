@@ -68,6 +68,7 @@ find_path(PYTHIA8_INCLUDE Pythia8 HINTS ${PYTHIA8_DIRS} PATH_SUFFIXES include in
 #--- searching for Delphes
 find_library(DELPHES Delphes HINTS $ENV{DELPHES_DIR} ${DELPHES_DIR} PATH_SUFFIXES lib)
 find_path(DELPHES_INCLUDE NAMES modules classes HINTS $ENV{DELPHES_DIR} ${DELPHES_DIR} PATH_SUFFIXES include)
+find_path(DELPHES_EXT_INCLUDE NAMES ExRootAnalysis HINTS $ENV{DELPHES_DIR} ${DELPHES_DIR} PATH_SUFFIXES external)
 #--- searching for tbb
 find_library(TBB tbb HINTS ${TBB_DIR} PATH_SUFFIXES lib)
 find_library(DAVIX davix HINTS ${DAVIX_DIR} PATH_SUFFIXES lib64)
