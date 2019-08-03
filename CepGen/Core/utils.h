@@ -35,7 +35,11 @@ namespace cepgen
     /// Add a trailing "s" when needed
     inline const char* s( size_t num ) { return ( num > 1 ) ? "s" : ""; }
     /// Add a trailing "s" when needed
-    inline std::string s( const std::string& word, size_t num ) { return Form( "%i %s%s", num, word.c_str(), ( num > 1 ) ? "s" : "" ); }
+    inline std::string s( const std::string& word, size_t num, bool show_number = false ) {
+      return show_number
+        ? Form( "%i %s%s", num, word.c_str(), ( num > 1 ) ? "s" : "" )
+        : Form( "%s%s", word.c_str(), ( num > 1 ) ? "s" : "" );
+    }
     /// Helper to print a vector
     template<class T> std::string repr( const std::vector<T>& vec, const std::string& sep = "," ) {
       return std::accumulate( std::next( vec.begin() ), vec.end(),

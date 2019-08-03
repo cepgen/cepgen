@@ -169,19 +169,19 @@ namespace cepgen
         double pt4_;
 
         /// Kinematics of the first incoming proton
-        Particle::Momentum p1_lab_;
+        Momentum p1_lab_;
         /// Kinematics of the second incoming proton
-        Particle::Momentum p2_lab_;
+        Momentum p2_lab_;
         /// Kinematics of the first outgoing proton
-        Particle::Momentum p3_lab_;
+        Momentum p3_lab_;
         /// Kinematics of the two-photon system (in the two-proton CM)
-        Particle::Momentum p4_lab_;
+        Momentum p4_lab_;
         /// Kinematics of the second outgoing proton
-        Particle::Momentum p5_lab_;
+        Momentum p5_lab_;
         /// Kinematics of the first outgoing lepton (in the two-proton CM)
-        Particle::Momentum p6_cm_;
+        Momentum p6_cm_;
         /// Kinematics of the second outgoing lepton (in the two-proton CM)
-        Particle::Momentum p7_cm_;
+        Momentum p7_cm_;
         double jacobian_;
 
       private:

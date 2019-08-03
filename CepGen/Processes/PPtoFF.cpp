@@ -64,17 +64,17 @@ namespace cepgen
       //=================================================================
 
       //--- incoming photons (in two-photon frame, hence fully transverse)
-      const auto q1t = Particle::Momentum::fromPThetaPhi( qt1_, M_PI_2, phi_qt1_ );
-      const auto q2t = Particle::Momentum::fromPThetaPhi( qt2_, M_PI_2, phi_qt2_ );
+      const auto q1t = Momentum::fromPThetaPhi( qt1_, M_PI_2, phi_qt1_ );
+      const auto q2t = Momentum::fromPThetaPhi( qt2_, M_PI_2, phi_qt2_ );
 
       CG_DEBUG_LOOP( "PPtoFF" ) << "q(1/2)t = " << q1t << ", " << q2t << ".";
 
       //--- two-photon system
-      const Particle::Momentum ptsum = q1t+q2t;
-      const auto ptdiff = Particle::Momentum::fromPThetaPhi( pt_diff_, M_PI_2, phi_pt_diff_ );
+      const Momentum ptsum = q1t+q2t;
+      const auto ptdiff = Momentum::fromPThetaPhi( pt_diff_, M_PI_2, phi_pt_diff_ );
 
       //--- outgoing fermions
-      const Particle::Momentum p1_cm = 0.5*( ptsum+ptdiff ), p2_cm = 0.5*( ptsum-ptdiff );
+      const Momentum p1_cm = 0.5*( ptsum+ptdiff ), p2_cm = 0.5*( ptsum-ptdiff );
 
       //=================================================================
       //     a window in single particle transverse momentum
@@ -142,8 +142,8 @@ namespace cepgen
       //     four-momenta of the outgoing protons (or remnants)
       //=================================================================
 
-      const Particle::Momentum& ak1 = event_->getOneByRole( Particle::IncomingBeam1 ).momentum(),
-                               &ak2 = event_->getOneByRole( Particle::IncomingBeam2 ).momentum();
+      const Momentum& ak1 = event_->getOneByRole( Particle::IncomingBeam1 ).momentum(),
+                     &ak2 = event_->getOneByRole( Particle::IncomingBeam2 ).momentum();
       CG_DEBUG_LOOP( "PPtoFF" )
         << "incoming particles: p(1/2) = " << ak1 << ", " << ak2 << ".";
 
@@ -157,8 +157,8 @@ namespace cepgen
         << "px± = " << px_plus << ", " << px_minus << "\n\t"
         << "py± = " << py_plus << ", " << py_minus << ".";
 
-      PX_ = Particle::Momentum( -q1t.px(), -q1t.py(), ( px_plus-px_minus )*M_SQRT1_2, ( px_plus+px_minus )*M_SQRT1_2 );
-      PY_ = Particle::Momentum( -q2t.px(), -q2t.py(), ( py_plus-py_minus )*M_SQRT1_2, ( py_plus+py_minus )*M_SQRT1_2 );
+      PX_ = Momentum( -q1t.px(), -q1t.py(), ( px_plus-px_minus )*M_SQRT1_2, ( px_plus+px_minus )*M_SQRT1_2 );
+      PY_ = Momentum( -q2t.px(), -q2t.py(), ( py_plus-py_minus )*M_SQRT1_2, ( py_plus+py_minus )*M_SQRT1_2 );
 
       CG_DEBUG_LOOP( "PPtoFF" )
         << "First remnant:  " << PX_ << ", mass = " << PX_.mass() << "\n\t"
@@ -173,14 +173,14 @@ namespace cepgen
       //     four-momenta of the outgoing l^+ and l^-
       //=================================================================
 
-      const Particle::Momentum p1 = p1_cm + alpha1*ak1 + beta1*ak2;
-      const Particle::Momentum p2 = p2_cm + alpha2*ak1 + beta2*ak2;
+      const Momentum p1 = p1_cm + alpha1*ak1 + beta1*ak2;
+      const Momentum p2 = p2_cm + alpha2*ak1 + beta2*ak2;
       CG_DEBUG_LOOP( "PPtoFF" )
         << "unboosted first fermion:  " << p1 << ", mass = " << p1.mass() << "\n\t"
         << "          second fermion: " << p2 << ", mass = " << p2.mass() << ".";
 
-      p_f1_ = Particle::Momentum::fromPxPyYM( p1_cm.px(), p1_cm.py(), y2_, mf_ );
-      p_f2_ = Particle::Momentum::fromPxPyYM( p2_cm.px(), p2_cm.py(), y1_, mf_ );
+      p_f1_ = Momentum::fromPxPyYM( p1_cm.px(), p1_cm.py(), y2_, mf_ );
+      p_f2_ = Momentum::fromPxPyYM( p2_cm.px(), p2_cm.py(), y1_, mf_ );
 
       CG_DEBUG_LOOP( "PPtoFF" )
         << "First fermion:  " << p_f1_ << ", mass = " << p_f1_.mass() << "\n\t"
@@ -313,23 +313,23 @@ namespace cepgen
     double
     PPtoFF::offShellME( double t1abs, double t2abs,
                         double z1m, double z1p, double z2m, double z2p,
-                        const Particle::Momentum& q1, const Particle::Momentum& q2 ) const
+                        const Momentum& q1, const Momentum& q2 ) const
     {
       const double z1 = z1p*z1m, z2 = z2p*z2m;
       const double eps12 = mf2_+z1*t1abs, eps22 = mf2_+z2*t2abs;
 
-      const Particle::Momentum ak1 = ( z1m*p_f1_-z1p*p_f2_ ), ak2 = ( z2m*p_f1_-z2p*p_f2_ );
-      const Particle::Momentum ph_p1 = ak1+z1p*q2, ph_m1 = ak1-z1m*q2;
-      const Particle::Momentum ph_p2 = ak2+z2p*q1, ph_m2 = ak2-z2m*q1;
+      const Momentum ak1 = ( z1m*p_f1_-z1p*p_f2_ ), ak2 = ( z2m*p_f1_-z2p*p_f2_ );
+      const Momentum ph_p1 = ak1+z1p*q2, ph_m1 = ak1-z1m*q2;
+      const Momentum ph_p2 = ak2+z2p*q1, ph_m2 = ak2-z2m*q1;
 
-      const Particle::Momentum phi1(
+      const Momentum phi1(
         ph_p1.px()/( ph_p1.pt2()+eps12 )-ph_m1.px()/( ph_m1.pt2()+eps12 ),
         ph_p1.py()/( ph_p1.pt2()+eps12 )-ph_m1.py()/( ph_m1.pt2()+eps12 ),
         0.,
         1./( ph_p1.pt2()+eps12 )-1./( ph_m1.pt2()+eps12 )
       );
 
-      const Particle::Momentum phi2(
+      const Momentum phi2(
         ph_p2.px()/( ph_p2.pt2()+eps22 )-ph_m2.px()/( ph_m2.pt2()+eps22 ),
         ph_p2.py()/( ph_p2.pt2()+eps22 )-ph_m2.py()/( ph_m2.pt2()+eps22 ),
         0.,
@@ -375,7 +375,5 @@ namespace cepgen
     }
   }
 }
-// register process and define aliases
-REGISTER_PROCESS( pptoll, PPtoFF )
-REGISTER_PROCESS( pptoff, PPtoFF )
-REGISTER_PROCESS( pptoqq, PPtoFF )
+// register process
+REGISTER_PROCESS( "pptoff", PPtoFF )

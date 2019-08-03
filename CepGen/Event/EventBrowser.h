@@ -37,21 +37,21 @@ namespace cepgen
           { "cs",  Particle::Role::CentralSystem },
           { "int", Particle::Role::Intermediate }
         };
-        typedef double( Particle::Momentum::*pMethod )(void) const;
+        typedef double( Momentum::*pMethod )(void) const;
         /// Mapping of string variables to momentum getter methods
         const std::unordered_map<std::string,pMethod> m_mom_str_ = {
-          { "px",  &Particle::Momentum::px },
-          { "py",  &Particle::Momentum::py },
-          { "pz",  &Particle::Momentum::pz },
-          { "pt",  &Particle::Momentum::pt },
-          { "eta", &Particle::Momentum::eta },
-          { "phi", &Particle::Momentum::phi },
-          { "m",   &Particle::Momentum::mass },
-          { "e",   &Particle::Momentum::energy },
-          { "p",   &Particle::Momentum::p },
-          { "pt2", &Particle::Momentum::pt2 },
-          { "th",  &Particle::Momentum::theta },
-          { "y",   &Particle::Momentum::rapidity }
+          { "px",  &Momentum::px },
+          { "py",  &Momentum::py },
+          { "pz",  &Momentum::pz },
+          { "pt",  &Momentum::pt },
+          { "eta", &Momentum::eta },
+          { "phi", &Momentum::phi },
+          { "m",   &Momentum::mass },
+          { "e",   &Momentum::energy },
+          { "p",   &Momentum::p },
+          { "pt2", &Momentum::pt2 },
+          { "th",  &Momentum::theta },
+          { "y",   &Momentum::rapidity }
         };
     };
   }

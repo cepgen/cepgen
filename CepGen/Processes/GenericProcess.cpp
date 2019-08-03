@@ -91,8 +91,8 @@ namespace cepgen
       const double m1 = hi1 ? HeavyIon::mass( hi1 ) : PDG::get().mass( kin_.incoming_beams.first.pdg );
       const double m2 = hi2 ? HeavyIon::mass( hi2 ) : PDG::get().mass( kin_.incoming_beams.second.pdg );
       // at some point introduce non head-on colliding beams?
-      const auto p1 = Particle::Momentum::fromPxPyPzM( 0., 0., +kin_.incoming_beams.first .pz, m1 );
-      const auto p2 = Particle::Momentum::fromPxPyPzM( 0., 0., -kin_.incoming_beams.second.pz, m2 );
+      const auto p1 = Momentum::fromPxPyPzM( 0., 0., +kin_.incoming_beams.first .pz, m1 );
+      const auto p2 = Momentum::fromPxPyPzM( 0., 0., -kin_.incoming_beams.second.pz, m2 );
       setIncomingKinematics( p1, p2 );
 
       s_ = ( p1+p2 ).mass2();
@@ -189,7 +189,7 @@ namespace cepgen
     }
 
     void
-    GenericProcess::setIncomingKinematics( const Particle::Momentum& p1, const Particle::Momentum& p2 )
+    GenericProcess::setIncomingKinematics( const Momentum& p1, const Momentum& p2 )
     {
       if ( !has_event_ || !event_ )
         return;

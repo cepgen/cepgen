@@ -232,14 +232,14 @@ namespace cepgen
     if ( part.primary() )
       os << ", primary";
     else {
-      os << ", " << utils::s( "mother", part.mothers_.size() ) << "=";
+      os << ", " << utils::s( "mother", part.mothers_.size(), true ) << "=";
       std::string delim;
       for ( const auto& moth : part.mothers_ )
         os << delim << moth, delim = ",";
     }
     const auto& daughters_list = part.daughters();
     if ( !daughters_list.empty() ) {
-      os << ", " << utils::s( "daughter", daughters_list.size() ) << "=";
+      os << ", " << utils::s( "daughter", daughters_list.size(), true ) << "=";
       std::string delim;
       for ( const auto& daugh : daughters_list )
         os << delim << daugh, delim = ",";
@@ -271,14 +271,5 @@ namespace cepgen
       || p1.energy()*p2.energy() < 0. )
       return 0.;
     return sqrt( p1.mass2()+p2.mass2() + 2.*p1.energy()*p2.energy() - 2.*( p1.momentum()*p2.momentum() ) );
-  }
-
-  double
-  CMEnergy( const Particle::Momentum& m1, const Particle::Momentum& m2 )
-  {
-    if ( m1.mass()*m2.mass() < 0.
-      || m1.energy()*m2.energy() < 0. )
-      return 0.;
-    return sqrt( m1.mass2()+m2.mass2() + 2.*m1.energy()*m2.energy() - 2.*( m1*m2 ) );
   }
 }

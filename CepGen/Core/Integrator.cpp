@@ -5,7 +5,7 @@
 
 #include "CepGen/Parameters.h"
 #include "CepGen/Processes/GenericProcess.h"
-#include "CepGen/Hadronisers/GenericHadroniser.h"
+#include "CepGen/Core/EventModifier.h"
 #include "CepGen/IO/GenericExportHandler.h"
 
 #include "CepGen/Event/Event.h"
@@ -124,8 +124,9 @@ namespace cepgen
     input_params_.integration().result = result;
     input_params_.integration().err_result = abserr;
 
-    if ( input_params_.hadroniser() )
-      input_params_.hadroniser()->setCrossSection( result, abserr );
+    if ( !input_params_.eventModifiersSequence().empty() )
+      for ( auto& mod : input_params_.eventModifiersSequence() )
+        mod->setCrossSection( result, abserr );
     if ( input_params_.outputModule() )
       input_params_.outputModule()->setCrossSection( result, abserr );
 

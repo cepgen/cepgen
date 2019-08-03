@@ -102,5 +102,5 @@ namespace cepgen
   }
 }
 
-REGISTER_IO_MODULE( lhef, LHEFHepMCHandler )
+REGISTER_IO_MODULE( "lhef", LHEFHepMCHandler )
 #endif

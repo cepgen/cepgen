@@ -240,7 +240,7 @@ namespace cepgen
       ParticlesIds daughters = part.daughters();
       if ( daughters.empty() )
         continue;
-      Particle::Momentum ptot;
+      Momentum ptot;
       for ( const auto& daugh : daughters ) {
         const Particle& d = operator[]( daugh );
         const ParticlesIds mothers = d.mothers();
@@ -266,7 +266,7 @@ namespace cepgen
 
     std::ostringstream os;
 
-    Particle::Momentum p_total;
+    Momentum p_total;
     for ( const auto& part : parts ) {
       const ParticlesIds mothers = part.mothers();
       {
@@ -320,7 +320,7 @@ namespace cepgen
         os << Form( "%6s ", oss.str().c_str() );
       }
       else os << "       ";
-      const Particle::Momentum mom = part.momentum();
+      const auto& mom = part.momentum();
       os << Form( "% 9.6e % 9.6e % 9.6e % 9.6e % 12.5f", mom.px(), mom.py(), mom.pz(), part.energy(), part.mass() );
 
       // discard non-primary, decayed particles

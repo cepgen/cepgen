@@ -7,7 +7,7 @@
 
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Processes/GenericProcess.h"
-#include "CepGen/Hadronisers/GenericHadroniser.h"
+#include "CepGen/Core/EventModifier.h"
 #include "CepGen/IO/GenericExportHandler.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
@@ -27,7 +27,7 @@ namespace cepgen
     kinematics( param.kinematics ),
     taming_functions( param.taming_functions ),
     process_( std::move( param.process_ ) ),
-    hadroniser_( std::move( param.hadroniser_ ) ),
+    evt_modifiers_( std::move( param.evt_modifiers_ ) ),
     out_module_( std::move( param.out_module_ ) ),
     store_( false ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ ),
     integration_( param.integration_ ), generation_( param.generation_ )
@@ -51,7 +51,7 @@ namespace cepgen
     kinematics = param.kinematics;
     taming_functions = param.taming_functions;
     process_ = std::move( param.process_ );
-    hadroniser_ = std::move( param.hadroniser_ );
+    evt_modifiers_ = std::move( param.evt_modifiers_ );
     out_module_ = std::move( param.out_module_ );
     total_gen_time_ = param.total_gen_time_;
     num_gen_events_ = param.num_gen_events_;
@@ -136,30 +136,30 @@ namespace cepgen
     process_.reset( proc );
   }
 
-  hadr::GenericHadroniser*
-  Parameters::hadroniser()
+  EventModifier*
+  Parameters::eventModifier( size_t i )
   {
-    return hadroniser_.get();
+    return evt_modifiers_.at( i ).get();
   }
 
   std::string
-  Parameters::hadroniserName() const
+  Parameters::eventModifierName( size_t i ) const
   {
-    if ( !hadroniser_ )
+    if ( i >= evt_modifiers_.size() )
       return "";
-    return hadroniser_->name();
+    return evt_modifiers_.at( i )->name();
   }
 
   void
-  Parameters::setHadroniser( std::unique_ptr<hadr::GenericHadroniser> hadr )
+  Parameters::addModifier( std::unique_ptr<EventModifier> mod )
   {
-    hadroniser_ = std::move( hadr );
+    evt_modifiers_.emplace_back( std::move( mod ) );
   }
 
   void
-  Parameters::setHadroniser( hadr::GenericHadroniser* hadr )
+  Parameters::addModifier( EventModifier* mod )
   {
-    hadroniser_.reset( hadr );
+    evt_modifiers_.emplace_back( std::unique_ptr<EventModifier>( mod ) );
   }
 
   io::GenericExportHandler*
@@ -210,8 +210,6 @@ namespace cepgen
       << ( pretty ? yesno( param->generation_.enabled ) : std::to_string( param->generation_.enabled ) ) << "\n"
       << std::setw( wt ) << "Number of events to generate"
       << ( pretty ? boldify( param->generation_.maxgen ) : std::to_string( param->generation_.maxgen ) ) << "\n";
-    if ( param->out_module_ )
-      os << std::setw( wt ) << "Output module" << param->out_module_->name() << "\n";
     if ( param->generation_.num_threads > 1 )
       os
         << std::setw( wt ) << "Number of threads" << param->generation_.num_threads << "\n";
@@ -220,16 +218,22 @@ namespace cepgen
       << std::setw( wt ) << "Integrand treatment"
       << ( pretty ? yesno( param->generation_.treat ) : std::to_string( param->generation_.treat ) ) << "\n"
       << std::setw( wt ) << "Verbosity level " << utils::Logger::get().level << "\n";
-    if ( param->hadroniser_ ) {
+    if ( !param->evt_modifiers_.empty() )
       os
         << "\n"
         << std::setfill( '-' ) << std::setw( wb+6 )
-        << ( pretty ? boldify( " Hadronisation algorithm " ) : "Hadronisation algorithm" ) << std::setfill( ' ' ) << "\n\n"
-        << std::setw( wt ) << "Name"
-        << ( pretty ? boldify( param->hadroniser_->name().c_str() ) : param->hadroniser_->name() ) << "\n"
-        << std::setw( wt ) << "Remnants fragmentation? "
-        << ( pretty ? yesno( param->hadroniser_->fragmentRemnants() ) : std::to_string( param->hadroniser_->fragmentRemnants() ) ) << "\n";
+        << ( pretty ? boldify( " Event treatment " ) : "Event treatment" ) << std::setfill( ' ' ) << "\n\n";
+    if ( !param->evt_modifiers_.empty() ) {
+      std::string sep, mod_name = utils::s( "Event modifier", param->evt_modifiers_.size() );
+      for ( const auto& mod : param->evt_modifiers_ )
+        os
+          << std::setw( wt ) << mod_name
+          << sep << ( pretty ? boldify( mod->name().c_str() ) : mod->name() ) << "\n", sep = "+ ", mod_name.clear();
     }
+    if ( param->out_module_ )
+      os
+        << std::setw( wt ) << "Output module"
+        << ( pretty ? boldify( param->out_module_->name().c_str() ) : param->out_module_->name() ) << "\n";
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 )
