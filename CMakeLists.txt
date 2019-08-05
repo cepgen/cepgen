@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(CepGen)
 set(PROJECT_VERSION 1)
+set(VERSION 0.9.7)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake $ENV{ROOTSYS}/cmake)
 if(NOT CMAKE_BUILD_TYPE)
@@ -14,6 +15,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 
 set(CEPGEN_EXTERNAL_CORE_REQS "")
 include(UseEnvironment)
+include(BuildRPM)
 
 set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/CepGen)
 set(CEPGEN_LIBRARIES CepGenCore CepGenEvent CepGenProcesses CepGenAddOns CepGenCards)
