@@ -22,11 +22,11 @@ namespace cepgen
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Jul 2019
      */
-    class ROOTHandler : public GenericExportHandler
+    class ROOTHistsHandler : public GenericExportHandler
     {
       public:
-        explicit ROOTHandler( const ParametersList& );
-        ~ROOTHandler();
+        explicit ROOTHistsHandler( const ParametersList& );
+        ~ROOTHistsHandler();
 
         void initialise( const Parameters& ) override {}
         void setCrossSection( double xsec, double ) override { xsec_ = xsec; }
@@ -41,7 +41,7 @@ namespace cepgen
         const utils::EventBrowser browser_;
     };
 
-    ROOTHandler::ROOTHandler( const ParametersList& params ) :
+    ROOTHistsHandler::ROOTHistsHandler( const ParametersList& params ) :
       GenericExportHandler( "root" ),
       file_     ( TFile::Open( params.get<std::string>( "filename", "output.root" ).c_str(), "recreate" ) ),
       variables_( params.get<ParametersList>( "variables" ) ),
@@ -54,13 +54,13 @@ namespace cepgen
         const double min = hvar.get<double>( "low", 0. ), max = hvar.get<double>( "high", 1. );
         const auto title = Form( "%s;%s;d#sigma/d(%s) (pb/bin)", var.c_str(), var.c_str(), var.c_str() );
         hists_.emplace_back( std::make_pair( var, new TH1D( var.c_str(), title.c_str(), nbins, min, max ) ) );
-        CG_INFO( "ROOTHandler" )
+        CG_INFO( "ROOTHistsHandler" )
           << "Booking a histogram with " << nbins << " bin" << utils::s( nbins )
           << " between " << min << " and " << max << " for \"" << var << "\".";
       }
     }
 
-    ROOTHandler::~ROOTHandler()
+    ROOTHistsHandler::~ROOTHistsHandler()
     {
       //--- finalisation of the output file
       for ( const auto& hist : hists_ )
@@ -70,7 +70,7 @@ namespace cepgen
     }
 
     void
-    ROOTHandler::operator<<( const Event& ev )
+    ROOTHistsHandler::operator<<( const Event& ev )
     {
       //--- increment the corresponding histograms
       for ( const auto& h_var : hists_ )
@@ -79,4 +79,4 @@ namespace cepgen
   }
 }
 
-REGISTER_IO_MODULE( "root", ROOTHandler )
+REGISTER_IO_MODULE( "root", ROOTHistsHandler )
