@@ -8,7 +8,14 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   return()
 endif()
 
-file(GLOB root_sources ROOT*.cpp)
+include(${ROOT_USE_FILE})
+file(GLOB ev_headers classes.h)
+REFLEX_GENERATE_DICTIONARY(CepGenEventDict ${ev_headers} SELECTION classes_def.xml)
+
+file(GLOB root_sources ROOT*.cpp CepGenEventDict.cxx)
+#add_dependencies(CepGenEvent CepGenEventDict-dictgen)
+
+string(REPLACE "-Qunused-arguments" "" ROOT_CXX_FLAGS ${ROOT_CXX_FLAGS})
 
 #--- FOAM integrator
 if(CMAKE_BUILD_FOAM)
