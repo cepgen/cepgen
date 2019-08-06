@@ -138,6 +138,6 @@ target_link_libraries(CepGenAddOns CepGenEvent)
 
 #----- installation rules
 
-install(TARGETS CepGenCore DESTINATION lib)
-install(TARGETS CepGenAddOns DESTINATION lib)
+install(TARGETS CepGenCore DESTINATION ${LIB_INSTALL_DIR} COMPONENT lib)
+install(TARGETS CepGenAddOns DESTINATION ${LIB_INSTALL_DIR} COMPONENT lib)
 

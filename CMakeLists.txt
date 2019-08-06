@@ -1,3 +1,4 @@
+set(CPACK_RPM_COMPONENT_INSTALL ON)
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(CepGen)
 set(PROJECT_VERSION 1)
@@ -51,7 +52,7 @@ set(MODS "")
 foreach(_module ${CEPGEN_MODULES})
   list(APPEND MODS CepGen/${module})
 endforeach()
-install(DIRECTORY ${MODS} DESTINATION include/CepGen FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY ${MODS} DESTINATION lib COMPONENT devel FILES_MATCHING PATTERN "*.h")
 
 #----- set the tests/utils directory
 
