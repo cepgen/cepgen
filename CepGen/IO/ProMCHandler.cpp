@@ -9,7 +9,7 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Version.h"
 
-#include "promc/ProMCBook.h"
+#include "ProMCBook.h"
 
 #include <stdio.h>
 
@@ -33,7 +33,12 @@ namespace cepgen
         void operator<<( const Event& ) override;
 
       private:
+        static constexpr double GEV_UNIT = 1.e6; // base unit in GEV_UNIT^-1 GeV = keV
+        static constexpr double M_UNIT = 1.e3; // base unit in M^-1 m = mm
+        static int inGeV( double val ) { return int( val*GEV_UNIT ); }
+
         std::unique_ptr<ProMCBook> file_;
+        const bool compress_evt_;
         std::ofstream log_file_;
         double xsec_, xsec_err_;
     };
@@ -41,6 +46,7 @@ namespace cepgen
     ProMCHandler::ProMCHandler( const ParametersList& params ) :
       GenericExportHandler( "promc" ),
       file_( new ProMCBook( params.get<std::string>( "filename", "output.promc" ).c_str(), "w" ) ),
+      compress_evt_( params.get<bool>( "compress", false ) ),
       log_file_( "logfile.txt" ),
       xsec_( -1. ), xsec_err_( -1. )
     {}
@@ -66,8 +72,8 @@ namespace cepgen
       file_->setDescription( params.generation().maxgen, "Sample generated using CepGen v"+version() );
       log_file_ << banner( params ) << "\n";
       ProMCHeader hdr;
-      hdr.set_momentumunit( 1.e6 ); // in units of keV -> GeV
-      hdr.set_lengthunit( 1.e3 ); //FIXME
+      hdr.set_momentumunit( GEV_UNIT );
+      hdr.set_lengthunit( M_UNIT ); // unused as for now
       for ( const auto& pdg : PDG::get().particles() ) {
         auto data = hdr.add_particledata();
         const auto& desc = PDG::get()( pdg );
@@ -100,17 +106,20 @@ namespace cepgen
       evt->set_weight( 1. );
 
       unsigned short i = 0;
-      for ( const auto& par : ev.particles() ) {
+      const auto& parts = compress_evt_
+        ? ev.compressed().particles()
+        : ev.particles();
+      for ( const auto& par : parts ) {
         auto part = event.mutable_particles();
         part->add_id( i++ );
         part->add_pdg_id( par.integerPdgId() );
         part->add_status( (unsigned int)par.status() );
         //--- kinematics
-        part->add_px( int( par.momentum().px()*1e6 ) );
-        part->add_py( int( par.momentum().py()*1e6 ) );
-        part->add_pz( int( par.momentum().pz()*1e6 ) );
-        part->add_energy( int( par.energy()*1e6 ) );
-        part->add_mass( int( par.mass()*1e6 ) );
+        part->add_px( inGeV( par.momentum().px() ) );
+        part->add_py( inGeV( par.momentum().py() ) );
+        part->add_pz( inGeV( par.momentum().pz() ) );
+        part->add_energy( inGeV( par.energy() ) );
+        part->add_mass( inGeV( par.mass() ) );
         part->add_barcode( 0 );
         //--- parentage
         const auto& daugh = par.daughters(), &moth = par.mothers();

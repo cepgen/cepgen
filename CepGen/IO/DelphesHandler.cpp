@@ -37,6 +37,7 @@ namespace cepgen
       private:
         std::unique_ptr<TFile> output_;
         const std::string input_card_;
+        const bool compress_;
         std::unique_ptr<Delphes> delphes_;
         //--- initialised here, but deleted elsewhere
         ExRootConfReader* conf_reader_; // deleted at destructor
@@ -52,6 +53,7 @@ namespace cepgen
       GenericExportHandler( "delphes" ),
       output_( new TFile( params.get<std::string>( "filename", "output.delphes.root" ).c_str(), "recreate" ) ),
       input_card_( params.get<std::string>( "inputCard", "input.tcl" ) ),
+      compress_( params.get<bool>( "compress", false ) ),
       delphes_( new Delphes ),
       conf_reader_( new ExRootConfReader ),
       tree_writer_( new ExRootTreeWriter( output_.get(), "Delphes") ),
@@ -100,13 +102,16 @@ namespace cepgen
       evt_aux->Number = event_num_++;
       evt_aux->ProcessID = 0;
       evt_aux->Weight = 1.; // events are unweighted in CepGen
-      evt_aux->CrossSection = xsec_;
+      //evt_aux->CrossSection = xsec_; // not yet fully supported
       evt_aux->ScalePDF = 0.; // for the time being
       evt_aux->AlphaQED = constants::ALPHA_EM;
       evt_aux->AlphaQCD = constants::ALPHA_QCD;
       evt_aux->ProcTime = ev.time_generation;
+      const auto& parts = compress_
+        ? ev.compressed().particles()
+        : ev.particles();
       //--- particles content
-      for ( const auto& part : ev.particles() ) {
+      for ( const auto& part : parts ) {
         auto cand = factory_->NewCandidate();
         cand->PID = part.integerPdgId();
         cand->Status = (int)part.status();

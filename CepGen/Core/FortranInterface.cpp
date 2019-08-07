@@ -76,23 +76,27 @@ extern "C" {
   }
 
   void
-  cepgen_list_params_()
+  cepgen_debug_( char* str, int size )
   {
-    CG_LOG( "cepgen_list_params" ) << "\t" << cepgen::proc::FortranKTProcess::kProcParameters;
+    CG_DEBUG( "fortran_process" ) << std::string( str, size );
   }
 
-  int
-  cepgen_param_int_( char* pname, int& def )
+  void
+  cepgen_warning_( char* str, int size )
   {
-    if ( cepgen::proc::FortranKTProcess::kProcParameters.has<cepgen::ParticleProperties>( pname ) )
-      return cepgen::proc::FortranKTProcess::kProcParameters.get<cepgen::ParticleProperties>( pname ).pdgid;
-    return cepgen::proc::FortranKTProcess::kProcParameters.get<int>( pname, def );
+    CG_WARNING( "fortran_process" ) << std::string( str, size );
   }
 
-  double
-  cepgen_param_real_( char* pname, double& def )
+  void
+  cepgen_error_( char* str, int size )
   {
-    return cepgen::proc::FortranKTProcess::kProcParameters.get<double>( pname, def );
+    CG_ERROR( "fortran_process" ) << std::string( str, size );
+  }
+
+  void
+  cepgen_fatal_( char* str, int size )
+  {
+    throw CG_FATAL( "fortran_process" ) << std::string( str, size );
   }
 
 #ifdef __cplusplus

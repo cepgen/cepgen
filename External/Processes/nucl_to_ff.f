@@ -9,6 +9,14 @@ c     =================================================================
       data a_nuc1,z_nuc1,a_nuc2,z_nuc2/1,1,208,82/
 
 c     =================================================================
+c     input parameters
+c     =================================================================
+      double precision am_l,q_l
+      integer imethod,pdg_l
+      integer iterm11,iterm22,iterm12,itermtt
+      integer imat1,imat2
+
+c     =================================================================
 c     local variables
 c     =================================================================
       double precision s,s12
@@ -32,20 +40,24 @@ c     =================================================================
       double precision Phi11_dot_e,Phi11_cross_e
       double precision Phi21_dot_e,Phi21_cross_e
       double precision aintegral
-      integer imethod,pdg_l,imat1,imat2
 
       double precision px_plus,px_minus,py_plus,py_minus
       double precision r1,r2
       double precision ptdiffx,ptsumx,ptdiffy,ptsumy
       double precision invm,invm2,s1_eff,s2_eff
       double precision t1abs,t2abs
-      double precision am_l,q_l
       double precision inp_A,inp_B,am_A,am_B
       double precision p1_plus, p2_minus
       double precision amat2_1,amat2_2
-      integer iterm11,iterm22,iterm12,itermtt
 
       double precision coupling
+
+      logical first_init
+      data first_init/.true./
+      save first_init,imethod
+      save iterm11,iterm22,iterm12,itermtt
+      save imat1,imat2
+      save pdg_l,am_l,q_l
 
 c     =================================================================
 c     quarks production
@@ -53,16 +65,27 @@ c     =================================================================
 #ifdef ALPHA_S
       double precision t_max,amu2,alphas
 #endif
-      logical first_init
-      data first_init/.true./
-      save first_init,imethod,pdg_l,am_l,q_l
+
+c     =================================================================
+c     at initialisation, retrieve a few user-defined parameters
+c     and initialise the alpha(s) algorithm if necessary
+c     =================================================================
 
       if(first_init) then
         call CepGen_print
-        imethod = CepGen_param_int('method', 1)
-        pdg_l = CepGen_param_int('pair', 13)
-        am_l = CepGen_particle_mass(pdg_l) ! central particles mass
-        q_l = CepGen_particle_charge(pdg_l) ! central particles charge
+        imethod = CepGen_param_int('method', 1) ! kinematics mode
+        pdg_l = CepGen_param_int('pair', 13)    ! central particles PDG
+c       polarisation terms to consider in the matrix element
+        iterm11 = CepGen_param_int('term11', 1) ! LL
+        iterm22 = CepGen_param_int('term22', 1) ! TT
+        iterm12 = CepGen_param_int('term12', 1) ! LT
+        itermtt = CepGen_param_int('termtt', 1) ! TT'
+c       two terms in the Wolfgang's formula for off-shell gamma gamma --> l^+ l^-
+        imat1 = CepGen_param_int('mat1', 1)
+        imat2 = CepGen_param_int('mat2', 1)
+c       central particles properties
+        am_l = CepGen_particle_mass(pdg_l)      ! central particles mass
+        q_l = CepGen_particle_charge(pdg_l)     ! central particles charge
         if(iflux1.ge.20.and.iflux1.lt.40) then
           if(icontri.eq.3.or.icontri.eq.4) then
             print *,'Invalid process mode for collinear gluon emission!'
@@ -80,7 +103,7 @@ c     =================================================================
       endif
 
 c     =================================================================
-c     FIXME
+c     start by initialising a few variables
 c     =================================================================
 
       nucl_to_ff = 0.d0
@@ -125,19 +148,6 @@ c     =================================================================
       p1_plus = (ak10+ak1z)/dsqrt(2.d0)
       p2_minus = (ak20-ak2z)/dsqrt(2.d0)
 
-c     terms in the matrix element
-c
-      iterm11 = 1         ! LL
-      iterm22 = 1         ! TT
-      iterm12 = 1         ! LT
-      itermtt = 1         ! TT'
-
-c     =================================================================
-c     two terms in the Wolfgang's formula for
-c     off-shell gamma gamma --> l^+ l^-
-c     =================================================================
-      imat1 = 1
-      imat2 = 1
 c     =================================================================
 c     Outgoing proton final state's mass
 c     =================================================================
@@ -231,7 +241,10 @@ c     =================================================================
       z2m = beta2/x2
 
 c     -----------------------------------------------------------------
-      if(x1.gt.1.0.or.x2.gt.1.0) return
+      if(x1.gt.1.0.or.x2.gt.1.0) then
+c         call CepGen_warning('Unphysical x1/x2')
+         return
+      endif
 c     -----------------------------------------------------------------
 
       s1_eff = x1*s - q1t**2
@@ -490,7 +503,6 @@ c     =================================================================
       nucl_to_ff = aintegral*q1t*q2t*ptdiff
 c     =================================================================
 c     *****************************************************************
-c      print *,nucl_to_ff,aintegral,coupling
 
       return
       end

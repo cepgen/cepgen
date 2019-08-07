@@ -178,7 +178,7 @@ namespace cepgen
 
         auto& pa = ev.addParticle( role );
         pa.setId( p );
-        pa.setPdgId( (short)pyjets_.k[1][p] );
+        pa.setPdgId( (long)pyjets_.k[1][p] );
         int status = pyjets_.k[0][p];
         if ( status == 11 || status == 14 )
           status = -3;

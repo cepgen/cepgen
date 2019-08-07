@@ -99,7 +99,7 @@ namespace cepgen
       void setPdgId( pdgid_t pdg, short ch = 0 );
       /// Set the PDG identifier (along with the particle's electric charge)
       /// \param[in] pdg_id PDG identifier (incl. electric charge in e)
-      void setPdgId( short pdg_id );
+      void setPdgId( long pdg_id );
       /// Retrieve the objectified PDG identifier
       pdgid_t pdgId() const;
       /// Retrieve the integer value of the PDG identifier
@@ -152,12 +152,16 @@ namespace cepgen
 
       /// Is this particle a primary particle?
       inline bool primary() const { return mothers_.empty(); }
+      /// Clear the particle parentage
+      void clearMothers();
       /// Set the mother particle
       /// \param[in] part A Particle object containing all the information on the mother particle
       void addMother( Particle& part );
       /// Get the unique identifier to the mother particle from which this particle arises
       /// \return An integer representing the unique identifier to the mother of this particle in the event
       inline ParticlesIds mothers() const { return mothers_; }
+      /// Remove the decay products linking
+      void clearDaughters();
       /**
        * \brief Add a decay product
        * \param[in] part The Particle object in which this particle will desintegrate or convert

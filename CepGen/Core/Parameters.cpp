@@ -221,7 +221,7 @@ namespace cepgen
       << std::setw( wt ) << "Integrand treatment"
       << ( pretty ? yesno( param->generation_.treat ) : std::to_string( param->generation_.treat ) ) << "\n"
       << std::setw( wt ) << "Verbosity level " << utils::Logger::get().level << "\n";
-    if ( !param->evt_modifiers_.empty() )
+    if ( !param->evt_modifiers_.empty() || param->out_module_ )
       os
         << "\n"
         << std::setfill( '-' ) << std::setw( wb+6 )
@@ -282,24 +282,28 @@ namespace cepgen
     os << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? boldify( " Proton / remnants " ) : "Proton / remnants" ) << std::setfill( ' ' ) << "\n";
     for ( const auto& lim : param->kinematics.cuts.remnants.list() )
       os << "\n" << std::setw( wt ) << lim.first << lim.second;
-    os << "\n";
 
-    std::ostringstream ff_oss, sf_oss, proc_oss;
-    std::string sep;
-    for ( const auto& mod : ff::FormFactorsHandler::get().modules() )
-      ff_oss << sep << mod, sep = ", ";
-    sep.clear();
-    for ( const auto& mod : strfun::StructureFunctionsHandler::get().modules() )
-      sf_oss << sep << (strfun::Type)mod, sep = ", ";
-    sep.clear();
-    for ( const auto& mod : proc::ProcessesHandler::get().modules() )
-      proc_oss << sep << mod, sep = ", ";
-    CG_INFO( "Parameters:factories" ) << "Dump of factories"
-      << "\n  List of form factors modellings:\n\t" << ff_oss.str()
-      << "\n  List of structure functions modellings:\n\t" << sf_oss.str()
-      << "\n  List of processes:\n\t" << proc_oss.str();
+    {
+      std::ostringstream ff_oss, sf_oss, proc_oss;
+      std::string sep;
+      for ( const auto& mod : ff::FormFactorsHandler::get().modules() )
+        ff_oss << sep << mod, sep = ", ";
+      sep.clear();
+      for ( const auto& mod : strfun::StructureFunctionsHandler::get().modules() )
+        sf_oss << sep << (strfun::Type)mod, sep = ", ";
+      sep.clear();
+      for ( const auto& mod : proc::ProcessesHandler::get().modules() )
+        proc_oss << sep << mod, sep = ", ";
+      CG_INFO( "Parameters:factories" ) << "Dump of factories"
+        << "\n  List of form factors modellings:\n\t" << ff_oss.str()
+        << "\n  List of structure functions modellings:\n\t" << sf_oss.str()
+        << "\n  List of processes:\n\t" << proc_oss.str();
+    }
 
-    return os;
+    return os
+      << "\n"
+      << std::setfill('_') << std::setw( wb ) << ""
+      << "\n";
   }
 
   //-----------------------------------------------------------------------------------------------
