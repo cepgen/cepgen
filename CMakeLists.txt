@@ -52,7 +52,7 @@ set(MODS "")
 foreach(_module ${CEPGEN_MODULES})
   list(APPEND MODS CepGen/${module})
 endforeach()
-install(DIRECTORY ${MODS} DESTINATION lib COMPONENT devel FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY ${MODS} DESTINATION include/CepGen COMPONENT devel FILES_MATCHING PATTERN "*.h")
 
 #----- set the tests/utils directory
 
