@@ -8,5 +8,5 @@ add_library(CepGenEvent SHARED ${ev_sources})
 
 #----- installation recipes
 
-install(TARGETS CepGenEvent DESTINATION lib)
+install(TARGETS CepGenEvent DESTINATION ${LIB_INSTALL_DIR} COMPONENT lib)
 
