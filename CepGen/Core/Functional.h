@@ -87,10 +87,6 @@ namespace cepgen
               parser_.DefineVar( vars_[i], &values_[i] );
             parser_.SetExpr( expression_ );
           } catch ( const mu::Parser::exception_type& e ) {
-            std::ostringstream os;
-            for ( size_t i = 0; i < e.GetPos(); ++i )
-              os << "-";
-            os << "^";
             throw CG_WARNING( "Functional" )
               << "Failed to define the function\n\t"
               << expression_ << "\n\t"
