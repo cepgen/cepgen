@@ -82,7 +82,7 @@ namespace cepgen
         return weight;
 
       if ( !params->storage()
-        && !params->taming_functions
+        && !params->taming_functions.empty()
         && !params->eventModifiersSequence().empty()
         &&  params->kinematics.cuts.central_particles.empty() )
         return weight;
@@ -100,7 +100,7 @@ namespace cepgen
 
       try {
         utils::EventBrowser bws;
-        for ( const auto& tam : *params->taming_functions )
+        for ( const auto& tam : params->taming_functions )
           weight *= tam.function.eval( bws.get( *ev, tam.var_orig ) );
       } catch ( const Exception& ) {
         throw CG_FATAL( "Integrand" )

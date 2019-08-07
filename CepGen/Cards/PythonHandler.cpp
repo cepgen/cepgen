@@ -101,7 +101,7 @@ namespace cepgen
       PyObject* ptam = element( process, "tamingFunctions" ); // borrowed
       if ( ptam )
         for ( const auto& p : getVector<ParametersList>( ptam ) )
-          params_.taming_functions->emplace_back( p.get<std::string>( "variable" ), p.get<std::string>( "expression" ) );
+          params_.taming_functions.emplace_back( p.get<std::string>( "variable" ), p.get<std::string>( "expression" ) );
 
       Py_CLEAR( process );
 

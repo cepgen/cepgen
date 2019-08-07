@@ -8,7 +8,7 @@ namespace cepgen
 {
   namespace utils
   {
-    /// A collection of expression/variable with the associated functional
+    /// A pair of expression/variable with the associated functional
     struct TamingFunction
     {
       TamingFunction() {}
@@ -22,8 +22,6 @@ namespace cepgen
       std::string var_orig, expr_orig, var_safe, expr_safe;
       Functional<1> function;
     };
-    /// A collection of taming functions evaluator with helper classes
-    class TamingFunctionsCollection : public std::vector<TamingFunction> {};
   }
 }
 
