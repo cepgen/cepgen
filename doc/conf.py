@@ -40,6 +40,7 @@ release = u'0.9.7'
 # ones.
 extensions = [
     'breathe',
+    'changelog',
     #'sphinxemoji.sphinxemoji',
     'sphinxcontrib.bibtex',
     #'hachibee_sphinx_theme',
@@ -232,6 +233,10 @@ epub_exclude_files = ['search.html']
 # Breathe Configuration
 breathe_default_project = "CepGen"
 breathe_implementation_filename_extensions = ['.cxx', '.C', '.f']
+
+# Changelog configuration
+changelog_render_changeset = "https://phab.hepforge.org/rCEPGEN%s"
+changelog_render_pullreq = "https://phab.hepforge.org/D%s"
 
 def setup(app):
 #    app.add_css_file('hacks.css')

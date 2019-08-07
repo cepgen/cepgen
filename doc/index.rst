@@ -20,6 +20,7 @@ This page is constantly evolving, but do not hesitate to contact us through the 
    :caption: Contents:
 
    downloads
+   changelog
    install
    usage
    zz-bibliography
