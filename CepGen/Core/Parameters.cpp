@@ -3,9 +3,10 @@
 #include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/TamingFunction.h"
 
+#include "CepGen/Physics/TamingFunction.h"
 #include "CepGen/Physics/PDG.h"
+
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/IO/GenericExportHandler.h"
