@@ -15,7 +15,6 @@ set(LIB_INSTALL_DIR lib)
 
 #----- include external paths
 
-set(CEPGEN_EXTERNAL_CORE_REQS "")
 include(UseEnvironment)
 include(BuildRPM)
 
