@@ -6,10 +6,12 @@
 #include "CepGen/Core/utils.h"
 #include "CepGen/Core/Exception.h"
 
-#if defined MUPARSER
+#if defined FUNC_MUPARSER
 # include <muParser.h>
-#elif defined EXPRTK
+#elif defined FUNC_EXPRTK
 # include <exprtk.hpp>
+#elif defined FUNC_ROOT
+# include "TFormula.h"
 #endif
 
 using std::string;
@@ -30,7 +32,7 @@ namespace cepgen
         Functional() = default;
         /// Copy constructor
         Functional( const Functional& rhs ) :
-#ifdef EXPRTK
+#ifdef FUNC_EXPRTK
           symbols_( rhs.symbols_ ), expr_( rhs.expr_ ),
 #endif
           values_( rhs.values_ ), vars_( rhs.vars_ ), expression_( rhs.expression_ ) {
@@ -52,8 +54,8 @@ namespace cepgen
         /// \brief Compute the functional for a given value of the variables
         /// \param[in] x Variables values
         double eval( const std::array<double,N>& x ) const {
-#if defined MUPARSER
           values_ = x;
+#if defined FUNC_MUPARSER
           try {
             return parser_.Eval();
           } catch ( const mu::Parser::exception_type& e ) {
@@ -63,13 +65,14 @@ namespace cepgen
               << std::string( e.GetPos(), '-' )+"^" << "\n\t"
               << e.GetMsg();
           }
-#elif defined EXPRTK
-          values_ = x;
+#elif defined FUNC_EXPRTK
           return expr_.value();
+#elif defined FUNC_ROOT
+          return func_.EvalPar( values_.data() );
 #else
           throw CG_FATAL( "Functional" )
-            << "Neither exprtk nor muParser are linked to this program.\n\t"
-            << "The math evaluator is hence disabled!";
+            << "Neither exprtk, muParser nor ROOT are linked to this program.\n\t"
+            << "The formulas evaluator is hence disabled!";
 #endif
         }
 
@@ -78,40 +81,48 @@ namespace cepgen
           if ( vars_.size() != values_.size() )
             throw CG_FATAL( "Functional" )
               << "Number of values should match exactly the number of variables!";
-#if defined MUPARSER
+#if defined FUNC_MUPARSER
           try {
-            for ( unsigned short i = 0; i < vars_.size(); ++i )
+            for ( size_t i = 0; i < vars_.size(); ++i )
               parser_.DefineVar( vars_[i], &values_[i] );
             parser_.SetExpr( expression_ );
           } catch ( const mu::Parser::exception_type& e ) {
-            std::ostringstream os;
-            for ( unsigned short i = 0; i < e.GetPos(); ++i )
-              os << "-";
-            os << "^";
             throw CG_WARNING( "Functional" )
               << "Failed to define the function\n\t"
               << expression_ << "\n\t"
               << std::string( e.GetPos(), '-' )+"^" << "\n\t"
               << e.GetMsg();
           }
-#elif defined EXPRTK
-          for ( unsigned short i = 0; i < vars_.size(); ++i )
+#elif defined FUNC_EXPRTK
+          for ( size_t i = 0; i < vars_.size(); ++i )
             symbols_.add_variable( vars_[i], values_[i] );
           symbols_.add_constants();
           expr_.register_symbol_table( symbols_ );
           parser_.compile( expression_, expr_ );
+#elif defined FUNC_ROOT
+          /*for ( size_t i = 0; i < vars_.size(); ++i )
+            replace_all( expression_, vars_[i], Form( "[%d]", i ) );
+          func_ = TFormula( "functional", expression_.c_str(), vars_.size() );*/
+          for ( size_t i = 0; i < vars_.size(); ++i )
+            func_.AddVariable( vars_[i], 0. );
+          if ( func_.Compile( expression_.c_str() ) != 0 )
+            throw CG_WARNING( "Functional" )
+              << "Failed to define the function\n\t"
+              << expression_;
 #else
           throw CG_FATAL( "Functional" )
-            << "Neither exprtk nor muParser are linked to this program.\n\t"
-            << "The math evaluator is hence disabled!";
+            << "Neither exprtk, muParser nor ROOT are linked to this program.\n\t"
+            << "The formulas evaluator is hence disabled!";
 #endif
         }
-#if defined MUPARSER
+#if defined FUNC_MUPARSER
         mu::Parser parser_;
-#elif defined EXPRTK
+#elif defined FUNC_EXPRTK
         exprtk::symbol_table<double> symbols_;
         exprtk::expression<double> expr_;
         exprtk::parser<double> parser_;
+#elif defined FUNC_ROOT
+        TFormula func_;
 #endif
         mutable std::array<double,N> values_;
         std::vector<std::string> vars_;

@@ -3,10 +3,11 @@
 #include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/TamingFunction.h"
 
+#include "CepGen/Physics/TamingFunction.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/FormFactors.h"
+
 #include "CepGen/Processes/GenericProcess.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/IO/GenericExportHandler.h"
@@ -22,7 +23,6 @@ namespace cepgen
 {
   Parameters::Parameters() :
     general( new ParametersList ),
-    taming_functions( new utils::TamingFunctionsCollection ),
     store_( false ), total_gen_time_( 0. ), num_gen_events_( 0ul )
   {}
 
@@ -221,7 +221,7 @@ namespace cepgen
       << std::setw( wt ) << "Integrand treatment"
       << ( pretty ? yesno( param->generation_.treat ) : std::to_string( param->generation_.treat ) ) << "\n"
       << std::setw( wt ) << "Verbosity level " << utils::Logger::get().level << "\n";
-    if ( !param->evt_modifiers_.empty() || param->out_module_ )
+    if ( !param->evt_modifiers_.empty() || param->out_module_ || !param->taming_functions.empty() )
       os
         << "\n"
         << std::setfill( '-' ) << std::setw( wb+6 )
@@ -232,11 +232,19 @@ namespace cepgen
         os
           << std::setw( wt ) << mod_name
           << sep << ( pretty ? boldify( mod->name().c_str() ) : mod->name() ) << "\n", sep = "+ ", mod_name.clear();
+      os << "\n";
     }
     if ( param->out_module_ )
       os
         << std::setw( wt ) << "Output module"
         << ( pretty ? boldify( param->out_module_->name().c_str() ) : param->out_module_->name() ) << "\n";
+    if ( !param->taming_functions.empty() ) {
+      os << std::setw( wt ) << utils::s( "Taming function", param->taming_functions.size() ) << "\n";
+      for ( const auto& tf : param->taming_functions )
+        os << std::setw( wt ) << ""
+          << ( pretty ? boldify( tf.var_orig.c_str() ) : tf.var_orig ) << ": "
+          << tf.expr_orig << "\n";
+    }
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 )

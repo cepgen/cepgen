@@ -6,26 +6,36 @@ file(GLOB hadr_sources Hadronisers/GenericHadroniser.cpp)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
+message(STATUS "GSL found in ${GSL_LIB}")
+
+set(core_libraries ${GSL_LIB} ${GSL_CBLAS_LIB})
+set(strf_libraries ${GSL_LIB} ${GSL_CBLAS_LIB})
+set(addons_libraries)
+
 #----- check the external dependencies for SFs
 
-set(GRV_PATH ${PROJECT_SOURCE_DIR}/External)
-file(GLOB grv_sources ${GRV_PATH}/grv_*.f)
-if(grv_sources)
-  message(STATUS "GRV PDFset found in ${grv_sources}!")
+if(GRV_SRC)
+  message(STATUS "GRV PDFset found in ${GRV_SRC}!")
+  list(APPEND sf_sources ${GRV_SRC})
   add_definitions(-DGRVPDF)
-  list(APPEND sf_sources ${grv_sources})
-else()
-  message(STATUS "GRV PDFset not found. Will proceed without it")
 endif()
 
 #----- check the external dependencies for physics utilities
 
-if(alphas_sources)
-  list(APPEND phys_sources ${alphas_sources})
+if(ALPHAS_SRC)
+  message(STATUS "alphaS evolution algorithm found in ${ALPHAS_SRC}")
+  list(APPEND phys_sources ${ALPHAS_SRC})
+  add_definitions(-DALPHA_S)
 endif()
-
-set(addons_libraries "")
-set(strf_libraries ${GSL_LIB} ${GSL_CBLAS_LIB})
+if(MUPARSER)
+  message(STATUS "Formulas parsing will use muParser found in ${MUPARSER}")
+  list(APPEND core_libraries ${MUPARSER})
+elseif(EXPRTK)
+  message(STATUS "Formulas parsing will use exprtk found in ${EXPRTK}")
+elseif(ROOT_FOUND)
+  message(STATUS "Formulas parsing will use ROOT")
+  list(APPEND core_libraries ${ROOT_LIBRARIES})
+endif()
 
 #--- linking with LHAPDF
 
@@ -106,15 +116,6 @@ endif()
 if(ROOT_FOUND)
   message(STATUS "ROOT found in ${ROOT_LIBRARY_DIR}")
   list(APPEND addons_libraries ${ROOT_LIBRARIES})
-  if(TBB)
-    list(APPEND addons_libraries ${TBB})
-  endif()
-  if(DAVIX)
-    list(APPEND addons_libraries ${DAVIX})
-  endif()
-  if(VDT)
-    list(APPEND addons_libraries ${VDT})
-  endif()
   list(APPEND io_sources IO/ROOTHistsHandler.cpp IO/ROOTTreeHandler.cpp)
   include_directories(${ROOT_INCLUDE_DIRS})
   link_directories(${ROOT_LIBRARY_DIR})
@@ -129,7 +130,7 @@ endif()
 #----- build the objects
 
 add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${sf_sources})
-target_link_libraries(CepGenCore ${CEPGEN_EXTERNAL_CORE_REQS})
+target_link_libraries(CepGenCore ${core_libraries})
 target_link_libraries(CepGenCore ${strf_libraries})
 
 add_library(CepGenAddOns SHARED ${io_sources} ${hadr_sources})

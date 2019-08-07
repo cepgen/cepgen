@@ -24,9 +24,9 @@ process = cepgen.Module('lpair',
         mx = (1.07, 1000.),
     ),
     #--- example of a complex taming function definition
-    #tamingFunctions = cepgen.Parameters(
-    #    cepgen.Parameters(variable = "m_ll", expression = "(m_ll>80.) ? exp(-(m_ll-80)/10) : 1.0"),
-    #),
+    #tamingFunctions = [
+    #    cepgen.Parameters(variable = "m(4)", expression = "(m(4)>80.) ? exp(-(m(4)-80)/10) : 1.0"),
+    #],
 )
 
 #--- example of an output module parameterisation

@@ -1,7 +1,6 @@
 #include "CepGen/Cards/PythonHandler.h"
-#include "CepGen/Core/Exception.h"
 
-#include "CepGen/Core/TamingFunction.h"
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Integrator.h"
 
@@ -10,6 +9,7 @@
 #include "CepGen/IO/ExportHandler.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
+#include "CepGen/Physics/TamingFunction.h"
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/FormFactors.h"
@@ -101,7 +101,7 @@ namespace cepgen
       PyObject* ptam = element( process, "tamingFunctions" ); // borrowed
       if ( ptam )
         for ( const auto& p : getVector<ParametersList>( ptam ) )
-          params_.taming_functions->add( p.get<std::string>( "variable" ), p.get<std::string>( "expression" ) );
+          params_.taming_functions.emplace_back( p.get<std::string>( "variable" ), p.get<std::string>( "expression" ) );
 
       Py_CLEAR( process );
 

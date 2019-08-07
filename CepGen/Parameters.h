@@ -15,7 +15,7 @@ namespace cepgen
   class ParametersList;
   namespace proc { class GenericProcess; }
   namespace io { class GenericExportHandler; }
-  namespace utils { class TamingFunctionsCollection; }
+  namespace utils { class TamingFunction; }
   enum class IntegratorType;
   typedef std::vector<std::unique_ptr<EventModifier> > EventModifiersSequence;
   /// List of parameters used to start and run the simulation job
@@ -129,7 +129,7 @@ namespace cepgen
       //----- taming functions
 
       /// Functionals to be used to account for rescattering corrections (implemented within the process)
-      std::shared_ptr<utils::TamingFunctionsCollection> taming_functions;
+      std::vector<utils::TamingFunction> taming_functions;
 
       //----- run operations
 

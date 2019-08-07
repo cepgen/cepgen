@@ -60,9 +60,8 @@ namespace cepgen
       if ( var == "pdg" ) return (double)part.integerPdgId();
       if ( var == "charge" ) return part.charge();
       if ( var == "status" ) return (double)part.status();
-      CG_WARNING( "EventBrowser" )
+      throw CG_ERROR( "EventBrowser" )
         << "Failed to retrieve variable \"" << var << "\".";
-      return INVALID_OUTPUT;
     }
 
     double
@@ -87,9 +86,8 @@ namespace cepgen
         return ev.time_generation;
       if ( var == "ttot" )
         return ev.time_total;
-      CG_WARNING( "EventBrowser" )
+      throw CG_ERROR( "EventBrowser" )
         << "Failed to retrieve the event-level variable \"" << var << "\".";
-      return INVALID_OUTPUT;
     }
   }
 }
