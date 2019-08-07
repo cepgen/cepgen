@@ -11,6 +11,7 @@ endif()
 set(CMAKE_CXX_FLAGS_DEBUG "-pg") # for gprof
 #set(CMAKE_CXX_FLAGS_DEBUG "-fprofile-arcs -ftest-coverage") # for gcov
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+set(LIB_INSTALL_DIR lib)
 
 #----- include external paths
 
