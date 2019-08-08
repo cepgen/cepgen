@@ -2,6 +2,7 @@
 #define CepGen_Processes_PPtoWW_h
 
 #include "CepGen/Processes/GenericKTProcess.h"
+#include "CepGen/Processes/Process2to4.h"
 
 namespace cepgen
 {
@@ -9,7 +10,7 @@ namespace cepgen
   {
     /// \brief Compute the matrix element for a CE \f$\gamma\gamma\rightarrow W^+W^-\f$ process using \f$k_{\rm T}\f$-factorization approach
     /// \note The full theoretical description of this process definition may be found in \cite Luszczak:2018ntp.
-    class PPtoWW : public GenericKTProcess
+    class PPtoWW : public Process2to4
     {
       public:
         PPtoWW( const ParametersList& params = ParametersList() );
@@ -22,36 +23,15 @@ namespace cepgen
         static const double mw_, mw2_;
 
         void preparePhaseSpace() override;
-        double computeKTFactorisedMatrixElement() override;
-        void fillCentralParticlesKinematics() override;
+        double computeCentralMatrixElement() const override;
 
-        double amplitudeWW( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 );
-        double onShellME( double shat, double that, double uhat );
-        double offShellME( double shat, double that, double uhat, double phi_sum, double phi_diff );
+        double amplitudeWW( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 ) const;
+        double onShellME( double shat, double that, double uhat ) const;
+        double offShellME( double shat, double that, double uhat, double phi_sum, double phi_diff ) const;
 
         int method_;
         Polarisation pol_state_;
         std::vector<short> pol_w1_, pol_w2_;
-
-        /// Rapidity range for the outgoing W bosons
-        Limits rap_limits_;
-        /// Rapidity of the first outgoing W boson
-        double y1_;
-        /// Rapidity of the first outgoing W boson
-        double y2_;
-
-        Limits ptdiff_limits_;
-        /// Transverse momentum difference for the two outgoing W bosons
-        double pt_diff_;
-
-        Limits phi_pt_diff_limits_;
-        /// Azimuthal angle difference for the two outgoing W bosons
-        double phi_pt_diff_;
-
-        /// First outgoing W boson's momentum
-        Momentum p_w1_;
-        /// Second outgoing W boson's momentum
-        Momentum p_w2_;
     };
   }
 }
