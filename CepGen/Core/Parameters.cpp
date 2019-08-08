@@ -7,7 +7,7 @@
 #include "CepGen/Physics/TamingFunction.h"
 #include "CepGen/Physics/PDG.h"
 
-#include "CepGen/Processes/GenericProcess.h"
+#include "CepGen/Core/GenericProcess.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/IO/GenericExportHandler.h"
 

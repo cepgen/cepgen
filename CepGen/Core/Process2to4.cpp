@@ -1,12 +1,11 @@
-#include "CepGen/Processes/Process2to4.h"
+#include "CepGen/Core/Process2to4.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/utils.h"
 
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/KTFlux.h"
 
 #include "CepGen/Event/Event.h"
-
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
 
 #include <assert.h>
 #include <math.h>

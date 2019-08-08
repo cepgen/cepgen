@@ -1,10 +1,10 @@
-#include "CepGen/Processes/Process2to4.h"
+#include "CepGen/Core/Process2to4.h"
+#include "CepGen/Core/Exception.h"
+
 #include "CepGen/Processes/ProcessesHandler.h"
 
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
-
-#include "CepGen/Core/Exception.h"
 
 #include <assert.h>
 

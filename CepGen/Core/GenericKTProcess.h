@@ -1,7 +1,7 @@
-#ifndef CepGen_Processes_GenericKTProcess_h
-#define CepGen_Processes_GenericKTProcess_h
+#ifndef CepGen_Core_GenericKTProcess_h
+#define CepGen_Core_GenericKTProcess_h
 
-#include "CepGen/Processes/GenericProcess.h"
+#include "CepGen/Core/GenericProcess.h"
 
 namespace cepgen
 {
