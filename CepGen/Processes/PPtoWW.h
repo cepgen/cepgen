@@ -1,7 +1,6 @@
 #ifndef CepGen_Processes_PPtoWW_h
 #define CepGen_Processes_PPtoWW_h
 
-#include "CepGen/Processes/GenericKTProcess.h"
 #include "CepGen/Processes/Process2to4.h"
 
 namespace cepgen
@@ -22,18 +21,19 @@ namespace cepgen
       private:
         static const double mw_, mw2_;
 
-        void preparePhaseSpace() override;
+        void prepareKinematics() override;
         double computeCentralMatrixElement() const override;
 
         double amplitudeWW( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 ) const;
         double onShellME( double shat, double that, double uhat ) const;
         double offShellME( double shat, double that, double uhat, double phi_sum, double phi_diff ) const;
 
-        int method_;
-        Polarisation pol_state_;
+        const int method_;
+
         std::vector<short> pol_w1_, pol_w2_;
     };
   }
 }
 
 #endif
+

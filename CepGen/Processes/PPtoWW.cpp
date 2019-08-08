@@ -17,19 +17,9 @@ namespace cepgen
 
     PPtoWW::PPtoWW( const ParametersList& params ) :
       Process2to4( params, "pptoww", "ɣɣ → W⁺W¯", { PDG::photon, PDG::photon }, PDG::W ),
-      method_   ( params.get<int>( "method", 1 ) ),
-      pol_state_( (Polarisation)params.get<int>( "polarisationStates", 0 ) )
-    {}
-
-    void
-    PPtoWW::preparePhaseSpace()
+      method_( params.get<int>( "method", 1 ) )
     {
-      registerVariable( y_c1_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "First outgoing W rapidity" );
-      registerVariable( y_c2_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "Second outgoing W rapidity" );
-      registerVariable( pt_diff_, Mapping::linear, kin_.cuts.central.pt_diff, { 0., 500. }, "Ws transverse momentum difference" );
-      registerVariable( phi_pt_diff_, Mapping::linear, kin_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Ws azimuthal angle difference" );
-
-      switch ( pol_state_ ) {
+      switch ( (Polarisation)params.get<int>( "polarisationStates", 0 ) ) {
         case Polarisation::LL: pol_w1_ = pol_w2_ = { 0 }; break;
         case Polarisation::LT: pol_w1_ = { 0 }; pol_w2_ = { -1, 1 }; break;
         case Polarisation::TL: pol_w1_ = { -1, 1 }; pol_w2_ = { 0 }; break;
@@ -39,7 +29,11 @@ namespace cepgen
       }
       CG_DEBUG( "PPtoWW:mode" )
         << "matrix element computation method: " << method_ << ".";
+    }
 
+    void
+    PPtoWW::prepareKinematics()
+    {
       Cuts single_w_cuts;
       if ( kin_.cuts.central_particles.count( PDG::W ) > 0 )
         single_w_cuts = kin_.cuts.central_particles.at( PDG::W );
@@ -72,6 +66,7 @@ namespace cepgen
       else if ( method_ == 1 ) // off-shell Nachtmann formulae
         amat2 = offShellME( shat, that, uhat, phi_qt1_+phi_qt2_, phi_qt1_-phi_qt2_ );
 
+//CG_WARNING("")<<shat<<"|"<<that<<"|"<<uhat<<"|"<<amat2<<"|"<<phi_qt1_<<"|"<<phi_qt2_;
       return std::max( amat2, 0. );
     }
 

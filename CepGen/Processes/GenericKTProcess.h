@@ -56,7 +56,7 @@ namespace cepgen
         /// \return Weight of the point in the phase space to the integral
         virtual double computeKTFactorisedMatrixElement() = 0;
         /// Compute the unintegrated photon fluxes (for inelastic distributions, interpolation on double logarithmic grid)
-        std::pair<double,double> incomingFluxes( double, double, double, double ) const;
+        std::pair<double,double> incomingFluxes( double, double, double, double ) const {return std::pair<double,double>{};} //FIXME DELETE ME!!!
         /// Set the kinematics of the incoming and outgoing protons (or remnants)
         void fillPrimaryParticlesKinematics();
         /// Set the kinematics of the outgoing central system

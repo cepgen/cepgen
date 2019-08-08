@@ -16,10 +16,12 @@ namespace cepgen
         void setKinematics( const Kinematics& kin ) override;
         void setCuts( const Cuts& single );
 
-        bool computeKinematics();
+        void preparePhaseSpace() override;
         void fillCentralParticlesKinematics() override;
         double computeKTFactorisedMatrixElement() override;
+
         virtual double computeCentralMatrixElement() const = 0;
+        virtual void prepareKinematics() = 0;
 
         ParticleProperties cs_prop_; ///< PDG id of the central particles
 
