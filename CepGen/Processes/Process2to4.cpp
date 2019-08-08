@@ -65,24 +65,26 @@ namespace cepgen
       const auto pt_c1 = 0.5*( qt_sum+pt_diff );
       const auto pt_c2 = 0.5*( qt_sum-pt_diff );
 
-      //--- apply the pt cut already at this stage (remains unchanged)
-      if ( !single_limits_.pt_single.passes( pt_c1.pt() ) || !single_limits_.pt_single.passes( pt_c2.pt() ) )
+      //--- window in rapidity distance
+      if ( !kin_.cuts.central.rapidity_diff.passes( fabs( y_c1_-y_c2_ ) ) )
         return 0.;
 
-      //--- transverse mass for the two central particles
-      const double amt1 = std::hypot( pt_c1.pt(), cs_prop_.mass ), amt2 = std::hypot( pt_c2.pt(), cs_prop_.mass );
-
-      //--- window in central system invariant mass
-      const double invm = sqrt( amt1*amt1 + amt2*amt2 + 2.*amt1*amt2*cosh( y_c1_-y_c2_ ) - qt_sum.p2() );
-      if ( !kin_.cuts.central.mass_sum.passes( invm ) )
+      //--- apply the pt cut already at this stage (remains unchanged)
+      if ( !kin_.cuts.central.pt_single.passes( pt_c1.pt() ) || !kin_.cuts.central.pt_single.passes( pt_c2.pt() ) )
+        return 0.;
+      if ( !single_limits_.pt_single.passes( pt_c1.pt() ) || !single_limits_.pt_single.passes( pt_c2.pt() ) )
         return 0.;
 
       //--- window in transverse momentum difference
       if ( !kin_.cuts.central.pt_diff.passes( fabs( pt_c1.pt()-pt_c2.pt() ) ) )
         return 0.;
 
-      //--- window in rapidity distance
-      if ( !kin_.cuts.central.rapidity_diff.passes( fabs( y_c1_-y_c2_ ) ) )
+      //--- transverse mass for the two central particles
+      const double amt1 = std::hypot( pt_c1.pt(), cs_prop_.mass ), amt2 = std::hypot( pt_c2.pt(), cs_prop_.mass );
+
+      //--- window in central system invariant mass
+      const double invm = sqrt( amt1*amt1 + amt2*amt2 + 2.*amt1*amt2*cosh( y_c1_-y_c2_ ) - qt_sum.pt2() );
+      if ( !kin_.cuts.central.mass_sum.passes( invm ) )
         return 0.;
 
       //--- auxiliary quantities
@@ -98,15 +100,11 @@ namespace cepgen
       const double q1t2 = qt_1.pt2(), q2t2 = qt_2.pt2();
       const double x1 = alpha1+alpha2, x2 = beta1+beta2;
 
-      if ( x1 > 1. || x2 > 1. )
-        return 0.; // sanity check
-
-      const double z1p = alpha1/x1, z1m = alpha2/x1,
-                   z2p = beta1 /x2, z2m = beta2 /x2;
-
-      CG_DEBUG_LOOP( "2to4:zeta" )
-        << "z(1/2)p = " << z1p << " / " << z2p << "\n\t"
-        << "z(1/2)m = " << z1m << " / " << z2m << ".";
+      { // sanity check for x_i values
+        const Limits x_limits{ 0., 1. };
+        if ( !x_limits.passes( x1 ) || !x_limits.passes( x2 ) )
+          return 0.;
+      }
 
       //--- additional conditions for energy-momentum conservation
 
@@ -127,8 +125,8 @@ namespace cepgen
 
       //--- four-momenta of the outgoing protons (or remnants)
 
-      const double px_plus  = ( 1.-x1 )*fabs( p1_.pz() )*M_SQRT2, px_minus = ( MX_*MX_+q1t2 )*0.5/px_plus;
-      const double py_minus = ( 1.-x2 )*fabs( p2_.pz() )*M_SQRT2, py_plus  = ( MY_*MY_+q2t2 )*0.5/py_minus;
+      const double px_plus  = ( 1.-x1 )*p1_.p()*M_SQRT2, px_minus = ( MX_*MX_+q1t2 )*0.5/px_plus;
+      const double py_minus = ( 1.-x2 )*p2_.p()*M_SQRT2, py_plus  = ( MY_*MY_+q2t2 )*0.5/py_minus;
       // warning! sign of pz??
 
       CG_DEBUG_LOOP( "2to4:pxy" )
@@ -147,6 +145,10 @@ namespace cepgen
 
       //assert( fabs( p_x_.mass()-MX_ ) < 1.e-6 );
       //assert( fabs( p_y_.mass()-MY_ ) < 1.e-6 );
+      if ( fabs( p_x_.mass()-MX_ ) > 1.e-4 )
+        throw CG_FATAL( "PPtoFF" ) << "Invalid X system mass: " << p_x_.mass() << "/" << MX_ << ".";
+      if ( fabs( p_y_.mass()-MY_ ) > 1.e-4 )
+        throw CG_FATAL( "PPtoFF" ) << "Invalid Y system mass: " << p_y_.mass() << "/" << MY_ << ".";
 
       //--- four-momenta of the intermediate partons
 
@@ -168,6 +170,18 @@ namespace cepgen
       CG_DEBUG_LOOP( "2to4:central" )
         << "First central particle:  " << p_c1_ << ", mass = " << p_c1_.mass() << "\n\t"
         << "Second central particle: " << p_c2_ << ", mass = " << p_c2_.mass() << ".";
+
+/*
+      p_c1_ = Momentum::fromPxPyYM( p1_cm.px(), p1_cm.py(), y2_, mf_ );
+      p_c2_ = Momentum::fromPxPyYM( p2_cm.px(), p2_cm.py(), y1_, mf_ );
+
+      if ( fabs( p_c1_.mass()-mf_ ) > 1.e-4 )
+        throw CG_FATAL( "PPtoFF" ) << "Invalid fermion 1 mass: "
+          << p_c1_.mass() << "/" << mf_ << ".";
+      if ( fabs( p_f2_.mass()-mf_ ) > 1.e-4 )
+        throw CG_FATAL( "PPtoFF" ) << "Invalid fermion 2 mass: "
+          << p_f2_.mass() << "/" << mf_ << ".";
+ */
 
       //assert( fabs( p_c1_.mass()-(*event_)[Particle::CentralSystem][0].mass() ) < 1.e-6 );
       //assert( fabs( p_c2_.mass()-(*event_)[Particle::CentralSystem][1].mass() ) < 1.e-6 );
@@ -216,13 +230,13 @@ namespace cepgen
 
       //--- first outgoing central particle
       auto& oc1 = (*event_)[Particle::CentralSystem][0];
-      oc1.setPdgId( oc1.pdgId(), sign );
+      oc1.setPdgId( cs_prop_.pdgid, sign );
       oc1.setStatus( Particle::Status::Undecayed );
       oc1.setMomentum( p_c1_ );
 
       //--- second outgoing central particle
       auto& oc2 = (*event_)[Particle::CentralSystem][1];
-      oc2.setPdgId( oc2.pdgId(), -sign );
+      oc2.setPdgId( cs_prop_.pdgid, -sign );
       oc2.setStatus( Particle::Status::Undecayed );
       oc2.setMomentum( p_c2_ );
     }

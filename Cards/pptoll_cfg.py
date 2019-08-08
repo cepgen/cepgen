@@ -8,7 +8,7 @@ from Config.PDG_cfi import PDG, registerParticle
 #--- example of an auxiliary particles definition
 #registerParticle(1000001, 'sd_l', mass=100., charge=1., fermion=True) # right now, only fermionic coupling handled
 
-process = kt.process.clone('pptoll',
+process = kt.process.clone('pptoff',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.InelasticElastic,
         pair = PDG.muon,
