@@ -22,5 +22,5 @@ target_link_libraries(CepGenCards ${cards_libraries})
 
 #----- installation rules
 
-install(TARGETS CepGenCards DESTINATION ${LIB_INSTALL_DIR} COMPONENT lib)
+install(TARGETS CepGenCards DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT lib)
 
