@@ -76,10 +76,6 @@ namespace cepgen
       const double that1 = ( q1_-p_c1_ ).mass2(), that2 = ( q2_-p_c2_ ).mass2(), that = 0.5*( that1+that2 );
       const double uhat1 = ( q1_-p_c2_ ).mass2(), uhat2 = ( q2_-p_c1_ ).mass2(), uhat = 0.5*( uhat1+uhat2 );
 
-      CG_DEBUG_LOOP( "PPtoWW" )
-        << "that(1/2) = " << that1 << " / " << that2 << "\n\t"
-        << "uhat(1/2) = " << uhat1 << " / " << uhat2 << ".";
-
       //--- matrix element computation
 
       CG_DEBUG_LOOP( "PPtoWW" )
@@ -92,8 +88,8 @@ namespace cepgen
       else if ( method_ == 1 ) // off-shell Nachtmann formulae
         amat2 = offShellME( shat, that, uhat, phi_qt1_+phi_qt2_, phi_qt1_-phi_qt2_ );
 
-//CG_WARNING("")<<shat<<"|"<<that<<"|"<<uhat<<"|"<<amat2<<"|"<<phi_qt1_<<"|"<<phi_qt2_;
-      return std::max( amat2, 0. );
+      const double g_em = 4.*M_PI*constants::ALPHA_EM;
+      return std::max( g_em*g_em*amat2, 0. );
     }
 
     double
@@ -104,18 +100,14 @@ namespace cepgen
       const double term1 = 2.*shat * ( 2.*shat+3.*mw2_ ) / ( 3.*( mw2_-that )*( mw2_-uhat ) );
       const double term2 = 2.*shat*shat * ( shat*shat + 3.*mw4 ) / ( 3.*pow( mw2_-that, 2 )*pow( mw2_-uhat, 2 ) );
 
-      const double auxil_gamgam = 1.-term1+term2;
-      const double beta = sqrt( 1.-4.*mw2_/shat );
-
-      return 3.*constants::ALPHA_EM*constants::ALPHA_EM*beta / ( 2.*shat ) * auxil_gamgam / ( beta/( 64.*M_PI*M_PI*shat ) );
+      return 6.*( 1.-term1+term2 );
     }
 
     double
     PPtoWW::offShellME( double shat, double that, double uhat, double phi_sum, double phi_diff ) const
     {
-      const double e2 = 4.*M_PI*constants::ALPHA_EM;
-
       double amat2_0 = 0., amat2_1 = 0., amat2_interf = 0.;
+//      CG_INFO("")<<"::" << pol_w1_.size() << "|" << pol_w2_.size();
       for ( const auto lam3 : pol_w1_ )
         for ( const auto lam4 : pol_w2_ ) {
           double ampli_pp = amplitudeWW( shat, that, uhat, +1, +1, lam3, lam4 );
@@ -128,7 +120,7 @@ namespace cepgen
           amat2_interf -= 2.*( cos( phi_sum+phi_diff )*( ampli_pp*ampli_pm+ampli_mm*ampli_mp )
                               +cos( phi_sum-phi_diff )*( ampli_pp*ampli_mp+ampli_mm*ampli_pm ) );
         }
-      return e2*e2*( amat2_0+amat2_1+amat2_interf );
+      return amat2_0+amat2_1+amat2_interf;
     }
 
     double
@@ -143,6 +135,9 @@ namespace cepgen
       const double inv_gamma = sqrt( 1.-beta2 ), gamma = 1./inv_gamma,
                    gamma2 = gamma*gamma, inv_gamma2 = inv_gamma*inv_gamma;
       const double invA = 1./( 1.-beta2*cos_theta2 );
+
+      if(std::isnan(sin_theta))CG_WARNING("")<<sin_theta<<"|"<<cos_theta << "|" << (that-uhat)/shat<<"|"<<sqrt( 1.+1.e-10-4.*mw2_/shat )<<"|"<<shat<<"|"<<that<<"|"<<uhat;
+      else CG_INFO("")<<sin_theta<<"|"<<cos_theta << "|" << (that-uhat)/shat<<"|"<<sqrt( 1.+1.e-10-4.*mw2_/shat )<<"|"<<shat<<"|"<<that<<"|"<<uhat;
 
       //--- per-helicity amplitude
 

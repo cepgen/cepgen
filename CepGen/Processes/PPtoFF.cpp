@@ -95,13 +95,7 @@ namespace cepgen
           const double shat = ( q1_+q2_ ).mass2();
           const double that1 = ( q1_-p_c1_ ).mass2(), that2 = ( q2_-p_c2_ ).mass2(), that = 0.5*( that1+that2 );
           const double uhat1 = ( q1_-p_c2_ ).mass2(), uhat2 = ( q2_-p_c1_ ).mass2(), uhat = 0.5*( uhat1+uhat2 );
-
           amat2 = onShellME( shat, that, uhat );
-
-          CG_DEBUG_LOOP( "PPtoFF:onShell" )
-            << "that(1/2) = " << that1 << " / " << that2 << "\n\t"
-            << "uhat(1/2) = " << uhat1 << " / " << uhat2 << "\n\t"
-            << "squared matrix element: " << amat2 << ".";
         } break;
         case ME::offShell: {
           amat2 = offShellME();
@@ -121,12 +115,12 @@ namespace cepgen
       //=================================================================
       //     on-shell formula for M^2
       //=================================================================
-      const double ml4 = mf2_*mf2_, ml8 = ml4*ml4;
+      const double mf4 = mf2_*mf2_, mf8 = mf4*mf4;
 
-      const double term1  =  6. *ml8,
-                   term2  = -3. *ml4 *that*that,
-                   term3  = -14.*ml4 *that*uhat,
-                   term4  = -3. *ml4 *uhat*uhat,
+      const double term1  =  6. *mf8,
+                   term2  = -3. *mf4 *that*that,
+                   term3  = -14.*mf4 *that*uhat,
+                   term4  = -3. *mf4 *uhat*uhat,
                    term5  =      mf2_*that*that*that,
                    term6  =  7.* mf2_*that*that*uhat,
                    term7  =  7.* mf2_*that*uhat*uhat,

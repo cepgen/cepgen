@@ -29,8 +29,7 @@ namespace cepgen
       p1_ = (*event_)[Particle::IncomingBeam1][0].momentum();
       p2_ = (*event_)[Particle::IncomingBeam2][0].momentum();
       CG_DEBUG_LOOP( "2to4:incoming" )
-        << "incoming particles: p1: " << p1_ << "\n\t"
-        << "                    p2: " << p2_ << ".";
+        << "incoming particles:\n" << " p1 = " << p1_ << "\n" << " p2 = " << p2_ << ".";
 
       ww_ = 0.5 * ( 1.+sqrt( 1.-4.*p1_.mass()*p2_.mass()/s_ ) );
     }
@@ -69,9 +68,13 @@ namespace cepgen
         return 0.;
 
       //--- apply the pt cut already at this stage (remains unchanged)
-      if ( !kin_.cuts.central.pt_single.passes( pt_c1.pt() ) || !kin_.cuts.central.pt_single.passes( pt_c2.pt() ) )
+      if ( !kin_.cuts.central.pt_single.passes( pt_c1.pt() ) )
         return 0.;
-      if ( !single_limits_.pt_single.passes( pt_c1.pt() ) || !single_limits_.pt_single.passes( pt_c2.pt() ) )
+      if ( !kin_.cuts.central.pt_single.passes( pt_c2.pt() ) )
+        return 0.;
+      if ( !single_limits_.pt_single.passes( pt_c1.pt() ) )
+        return 0.;
+      if ( !single_limits_.pt_single.passes( pt_c2.pt() ) )
         return 0.;
 
       //--- window in transverse momentum difference
@@ -79,10 +82,11 @@ namespace cepgen
         return 0.;
 
       //--- transverse mass for the two central particles
-      const double amt1 = std::hypot( pt_c1.pt(), cs_prop_.mass ), amt2 = std::hypot( pt_c2.pt(), cs_prop_.mass );
+      const double amt1 = std::hypot( pt_c1.pt(), cs_prop_.mass );
+      const double amt2 = std::hypot( pt_c2.pt(), cs_prop_.mass );
 
       //--- window in central system invariant mass
-      const double invm = sqrt( amt1*amt1 + amt2*amt2 + 2.*amt1*amt2*cosh( y_c1_-y_c2_ ) - qt_sum.pt2() );
+      const double invm = sqrt( amt1*amt1+amt2*amt2+2.*amt1*amt2*cosh( y_c1_-y_c2_ )-qt_sum.pt2() );
       if ( !kin_.cuts.central.mass_sum.passes( invm ) )
         return 0.;
 
@@ -124,8 +128,10 @@ namespace cepgen
 
       //--- four-momenta of the outgoing protons (or remnants)
 
-      const double px_plus  = ( 1.-x1 )*p1_.p()*M_SQRT2, px_minus = ( MX_*MX_+q1t2 )*0.5/px_plus;
-      const double py_minus = ( 1.-x2 )*p2_.p()*M_SQRT2, py_plus  = ( MY_*MY_+q2t2 )*0.5/py_minus;
+      const double px_plus  = ( 1.-x1 )*p1_.p()*M_SQRT2;
+      const double py_minus = ( 1.-x2 )*p2_.p()*M_SQRT2;
+      const double px_minus = ( MX_*MX_+q1t2 )*0.5/px_plus;
+      const double py_plus  = ( MY_*MY_+q2t2 )*0.5/py_minus;
       // warning! sign of pz??
 
       CG_DEBUG_LOOP( "2to4:pxy" )
@@ -229,7 +235,7 @@ namespace cepgen
 
       //--- first outgoing central particle
       auto& oc1 = (*event_)[Particle::CentralSystem][0];
-      oc1.setPdgId( cs_prop_.pdgid, sign );
+      oc1.setPdgId( cs_prop_.pdgid, +sign );
       oc1.setStatus( Particle::Status::Undecayed );
       oc1.setMomentum( p_c1_ );
 
