@@ -14,7 +14,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 set(LIB_INSTALL_DIR lib)
 
 #----- include external paths
-
+include(GNUInstallDirs)
 include(UseEnvironment)
 include(BuildRPM)
 
@@ -52,7 +52,7 @@ set(MODS "")
 foreach(_module ${CEPGEN_MODULES})
   list(APPEND MODS CepGen/${module})
 endforeach()
-install(DIRECTORY ${MODS} DESTINATION include/CepGen COMPONENT devel FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY ${MODS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/CepGen COMPONENT devel FILES_MATCHING PATTERN "*.h")
 
 #----- set the tests/utils directory
 

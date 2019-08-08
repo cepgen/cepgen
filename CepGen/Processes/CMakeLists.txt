@@ -12,4 +12,4 @@ endif()
 
 add_library(CepGenProcesses SHARED ${sources})
 
-install(TARGETS CepGenProcesses DESTINATION ${LIB_INSTALL_DIR} COMPONENT lib)
+install(TARGETS CepGenProcesses DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT lib)
