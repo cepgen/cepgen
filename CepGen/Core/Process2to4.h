@@ -28,8 +28,6 @@ namespace cepgen
         Cuts single_limits_;
 
         Momentum p1_, p2_, q1_, q2_;
-        Momentum p_x_; ///< Momentum of the first beam particle
-        Momentum p_y_; ///< Momentum of the second beam particle
         Momentum p_c1_; ///< Momentum of the first central particle
         Momentum p_c2_; ///< Momentum of the second central particle
         double y_c1_; ///< Rapidity of the first central particle

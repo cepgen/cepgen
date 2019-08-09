@@ -139,22 +139,22 @@ namespace cepgen
         << "px± = " << px_plus << " / " << px_minus << "\n\t"
         << "py± = " << py_plus << " / " << py_minus << ".";
 
-      p_x_ = Momentum( 0., 0., ( px_plus-px_minus )*M_SQRT1_2 )-qt_1;
-      p_x_.setEnergy( ( px_plus+px_minus )*M_SQRT1_2 );
+      PX_ = Momentum( 0., 0., ( px_plus-px_minus )*M_SQRT1_2 )-qt_1;
+      PX_.setEnergy( ( px_plus+px_minus )*M_SQRT1_2 );
 
-      p_y_ = Momentum( 0., 0., ( py_plus-py_minus )*M_SQRT1_2 )-qt_2;
-      p_y_.setEnergy( ( py_plus+py_minus )*M_SQRT1_2 );
+      PY_ = Momentum( 0., 0., ( py_plus-py_minus )*M_SQRT1_2 )-qt_2;
+      PY_.setEnergy( ( py_plus+py_minus )*M_SQRT1_2 );
 
       CG_DEBUG_LOOP( "2to4:remnants" )
-        << "First remnant:  " << p_x_ << ", mass = " << p_x_.mass() << "\n\t"
-        << "Second remnant: " << p_y_ << ", mass = " << p_y_.mass() << ".";
+        << "First remnant:  " << PX_ << ", mass = " << PX_.mass() << "\n\t"
+        << "Second remnant: " << PY_ << ", mass = " << PY_.mass() << ".";
 
-      //assert( fabs( p_x_.mass()-MX_ ) < 1.e-6 );
-      //assert( fabs( p_y_.mass()-MY_ ) < 1.e-6 );
-      if ( fabs( p_x_.mass()-MX_ ) > 1.e-4 )
-        throw CG_FATAL( "PPtoFF" ) << "Invalid X system mass: " << p_x_.mass() << "/" << MX_ << ".";
-      if ( fabs( p_y_.mass()-MY_ ) > 1.e-4 )
-        throw CG_FATAL( "PPtoFF" ) << "Invalid Y system mass: " << p_y_.mass() << "/" << MY_ << ".";
+      //assert( fabs( PX_.mass()-MX_ ) < 1.e-6 );
+      //assert( fabs( PY_.mass()-MY_ ) < 1.e-6 );
+      if ( fabs( PX_.mass()-MX_ ) > 1.e-4 )
+        throw CG_FATAL( "PPtoFF" ) << "Invalid X system mass: " << PX_.mass() << "/" << MX_ << ".";
+      if ( fabs( PY_.mass()-MY_ ) > 1.e-4 )
+        throw CG_FATAL( "PPtoFF" ) << "Invalid Y system mass: " << PY_.mass() << "/" << MY_ << ".";
 
       //--- four-momenta of the intermediate partons
 
