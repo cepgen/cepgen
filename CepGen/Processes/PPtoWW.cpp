@@ -25,6 +25,7 @@ namespace cepgen
 
       private:
         static const double mw_, mw2_;
+        static constexpr double g_em_ = 4.*M_PI*constants::ALPHA_EM;
 
         void prepareKinematics() override;
         double computeCentralMatrixElement() const override;
@@ -88,8 +89,7 @@ namespace cepgen
       else if ( method_ == 1 ) // off-shell Nachtmann formulae
         amat2 = offShellME( shat, that, uhat, phi_qt1_+phi_qt2_, phi_qt1_-phi_qt2_ );
 
-      const double g_em = 4.*M_PI*constants::ALPHA_EM;
-      return std::max( g_em*g_em*amat2, 0. );
+      return std::max( g_em_*g_em_*amat2, 0. );
     }
 
     double
