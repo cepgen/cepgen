@@ -10,13 +10,22 @@ int main( int argc, char* argv[] )
   if ( argc < 2 )
     throw CG_FATAL( "main" ) << "Usage: " << argv[0] << " input-card";
 
+  vector<double> x;
+  if ( argc > 2 ) {
+    stringstream iss( argv[2] );
+    double buf;
+    while ( iss >> buf )
+      x.emplace_back( buf );
+    x.resize( 12 );
+  }
+  else
+    x = vector<double>( 12, 0.3 );
+
   cepgen::Generator gen;
   gen.setParameters( cepgen::card::Handler::parse( argv[1] ) );
   CG_INFO( "main" ) << gen.parametersPtr();
 
   cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debugInsideLoop;
-
-  vector<double> x( 12, 0.3 );
 
   cout << "point: ";
   string delim;

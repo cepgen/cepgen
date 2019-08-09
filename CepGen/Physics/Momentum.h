@@ -54,6 +54,8 @@ namespace cepgen
       Momentum& operator-=( const Momentum& );
       /// Scalar product of two 3-momenta
       double operator*( const Momentum& ) const;
+      /// Vector product of two 3-momenta
+      Momentum operator%( const Momentum& ) const;
       /// Scalar product of the 3-momentum with another 3-momentum
       double operator*=( const Momentum& );
       /// Multiply all components of a 4-momentum by a scalar
@@ -77,20 +79,20 @@ namespace cepgen
       Momentum& setP( double px, double py, double pz, double e );
       /// Set all the components of the 3-momentum (in GeV)
       Momentum& setP( double px, double py, double pz );
-      /// Set the energy (in GeV)
-      inline Momentum& setEnergy( double e ) { energy_ = e; return *this; }
-      /// Compute the energy from the mass
-      inline Momentum& setMass( double m ) { return setMass2( m*m ); }
-      /// Compute the energy from the mass
-      Momentum& setMass2( double m2 );
       /// Get one component of the 4-momentum (in GeV)
       double operator[]( const unsigned int i ) const;
       /// Get one component of the 4-momentum (in GeV)
       double& operator[]( const unsigned int i );
+      /// Set the momentum along the \f$x\f$-axis (in GeV)
+      inline void setPx( double px ) { px_ = px; }
       /// Momentum along the \f$x\f$-axis (in GeV)
       inline double px() const { return px_; }
+      /// Set the momentum along the \f$y\f$-axis (in GeV)
+      inline void setPy( double py ) { py_ = py; }
       /// Momentum along the \f$y\f$-axis (in GeV)
       inline double py() const { return py_; }
+      /// Set the longitudinal momentum (in GeV)
+      inline void setPz( double pz ) { pz_ = pz; }
       /// Longitudinal momentum (in GeV)
       inline double pz() const { return pz_; }
       /// Transverse momentum (in GeV)
@@ -103,12 +105,18 @@ namespace cepgen
       inline double p() const { return p_; }
       /// Squared 3-momentum norm (in GeV\f$^2\f$)
       inline double p2() const { return p_*p_; }
+      /// Set the energy (in GeV)
+      inline Momentum& setEnergy( double e ) { energy_ = e; return *this; }
       /// Energy (in GeV)
       inline double energy() const { return energy_; }
       /// Squared energy (in GeV\f$^2\f$)
       inline double energy2() const { return energy_*energy_; }
+      /// Compute the energy from the mass
+      Momentum& setMass2( double m2 );
       /// Squared mass (in GeV\f$^2\f$) as computed from its energy and momentum
       inline double mass2() const { return energy2()-p2(); }
+      /// Compute the energy from the mass
+      inline Momentum& setMass( double m ) { return setMass2( m*m ); }
       /// Mass (in GeV) as computed from its energy and momentum
       /// \note Returns \f$-\sqrt{|E^2-\mathbf{p}^2|}<0\f$ if \f$\mathbf{p}^2>E^2\f$
       double mass() const;

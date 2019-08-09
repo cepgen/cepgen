@@ -62,28 +62,29 @@ namespace cepgen
       const auto pt_diff = Momentum::fromPtEtaPhi( pt_diff_, 0., phi_pt_diff_ );
       const auto pt_c1 = 0.5*( qt_sum+pt_diff );
       const auto pt_c2 = 0.5*( qt_sum-pt_diff );
+      const double p1t = pt_c1.pt(), p2t = pt_c2.pt();
 
       //--- window in rapidity distance
       if ( !kin_.cuts.central.rapidity_diff.passes( fabs( y_c1_-y_c2_ ) ) )
         return 0.;
 
       //--- apply the pt cut already at this stage (remains unchanged)
-      if ( !kin_.cuts.central.pt_single.passes( pt_c1.pt() ) )
+      if ( !kin_.cuts.central.pt_single.passes( p1t ) )
         return 0.;
-      if ( !kin_.cuts.central.pt_single.passes( pt_c2.pt() ) )
+      if ( !kin_.cuts.central.pt_single.passes( p2t ) )
         return 0.;
-      if ( !single_limits_.pt_single.passes( pt_c1.pt() ) )
+      if ( !single_limits_.pt_single.passes( p1t ) )
         return 0.;
-      if ( !single_limits_.pt_single.passes( pt_c2.pt() ) )
+      if ( !single_limits_.pt_single.passes( p2t ) )
         return 0.;
 
       //--- window in transverse momentum difference
-      if ( !kin_.cuts.central.pt_diff.passes( fabs( pt_c1.pt()-pt_c2.pt() ) ) )
+      if ( !kin_.cuts.central.pt_diff.passes( fabs( p1t-p2t ) ) )
         return 0.;
 
       //--- transverse mass for the two central particles
-      const double amt1 = std::hypot( pt_c1.pt(), cs_prop_.mass );
-      const double amt2 = std::hypot( pt_c2.pt(), cs_prop_.mass );
+      const double amt1 = std::hypot( p1t, cs_prop_.mass );
+      const double amt2 = std::hypot( p2t, cs_prop_.mass );
 
       //--- window in central system invariant mass
       const double invm = sqrt( amt1*amt1+amt2*amt2+2.*amt1*amt2*cosh( y_c1_-y_c2_ )-qt_sum.pt2() );
@@ -92,8 +93,8 @@ namespace cepgen
 
       //--- auxiliary quantities
 
-      const double alpha1 = amt1/sqs_*exp( y_c1_ ), beta1  = amt1/sqs_*exp( -y_c1_ );
-      const double alpha2 = amt2/sqs_*exp( y_c2_ ), beta2  = amt2/sqs_*exp( -y_c2_ );
+      const double alpha1 = amt1/sqs_*exp( y_c1_ ), beta1 = amt1/sqs_*exp( -y_c1_ );
+      const double alpha2 = amt2/sqs_*exp( y_c2_ ), beta2 = amt2/sqs_*exp( -y_c2_ );
 
       CG_DEBUG_LOOP( "2to4:sudakov" )
         << "Sudakov parameters:\n\t"
@@ -160,7 +161,7 @@ namespace cepgen
       q1_ = qt_1+Momentum( 0., 0., +0.5 * x1*ww_*sqs_*( 1.-q1t2/x1/x1/ww_/ww_/s_ ) );
       q1_.setEnergy( 0.5 * x1*ww_*sqs_*( 1.+q1t2/x1/x1/ww_/ww_/s_ ) );
 
-      q2_ = qt_1+Momentum( 0., 0., -0.5 * x2*ww_*sqs_*( 1.-q2t2/x2/x2/ww_/ww_/s_ ) );
+      q2_ = qt_2+Momentum( 0., 0., -0.5 * x2*ww_*sqs_*( 1.-q2t2/x2/x2/ww_/ww_/s_ ) );
       q2_.setEnergy( 0.5 * x2*ww_*sqs_*( 1.+q2t2/x2/x2/ww_/ww_/s_ ) );
 
       CG_DEBUG_LOOP( "2to4:partons" )
@@ -170,16 +171,15 @@ namespace cepgen
       //--- four-momenta of the outgoing central particles
 
       p_c1_ = pt_c1+alpha1*p1_+beta1*p2_;
+      p_c1_.setEnergy( alpha1*p1_.energy()+beta1*p2_.energy() );
       p_c2_ = pt_c2+alpha2*p1_+beta2*p2_;
+      p_c2_.setEnergy( alpha2*p1_.energy()+beta2*p2_.energy() );
 
       CG_DEBUG_LOOP( "2to4:central" )
         << "First central particle:  " << p_c1_ << ", mass = " << p_c1_.mass() << "\n\t"
         << "Second central particle: " << p_c2_ << ", mass = " << p_c2_.mass() << ".";
 
 /*
-      p_c1_ = Momentum::fromPxPyYM( p1_cm.px(), p1_cm.py(), y2_, mf_ );
-      p_c2_ = Momentum::fromPxPyYM( p2_cm.px(), p2_cm.py(), y1_, mf_ );
-
       if ( fabs( p_c1_.mass()-mf_ ) > 1.e-4 )
         throw CG_FATAL( "PPtoFF" ) << "Invalid fermion 1 mass: "
           << p_c1_.mass() << "/" << mf_ << ".";

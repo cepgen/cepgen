@@ -149,6 +149,12 @@ namespace cepgen
       //--- photon virtualities
       const double t1abs = ( q1_.pt2() + x1*( MX_*MX_-mA2_ )+x1*x1*mA2_ )/( 1.-x1 );
       const double t2abs = ( q2_.pt2() + x2*( MY_*MY_-mB2_ )+x2*x2*mB2_ )/( 1.-x2 );
+
+      CG_DEBUG_LOOP( "2to4:q2abs" ) << "Photon kinematics:\n\t"
+        << "q1t2/q2t2 = " << q1_.pt2() << "/" << q2_.pt2() << "\n\t"
+        << "t1/t2 = " << t1abs << "/" << t2abs << "\n\t"
+        << "x1/x2 = " << x1 << "/" << x2 << ".";
+
       //--- epsilon-squared variable
       const double eps12 = mf2_+z1*t1abs, eps22 = mf2_+z2*t2abs;
 
@@ -158,37 +164,43 @@ namespace cepgen
 
       const double kp1 = 1./( ph_p1.pt2()+eps12 ), km1 = 1./( ph_m1.pt2()+eps12 );
       Momentum phi1 = kp1*ph_p1-km1*ph_m1;
+      phi1.setPz( 0. );
       phi1.setEnergy( kp1-km1 );
 
       const double kp2 = 1./( ph_p2.pt2()+eps22 ), km2 = 1./( ph_m2.pt2()+eps22 );
       Momentum phi2 = kp2*ph_p2-km2*ph_m2;
+      phi2.setPz( 0. );
       phi2.setEnergy( kp2-km2 );
 
       const double dot1 = phi1.threeProduct( q1_ )/qt1_, cross1 = phi1.crossProduct( q1_ )/qt1_;
       const double dot2 = phi2.threeProduct( q2_ )/qt2_, cross2 = phi2.crossProduct( q2_ )/qt2_;
+
       CG_DEBUG_LOOP( "PPtoFF:offShell" )
+        << "q1 = " << q1_ << ", q1t = " << qt1_ << "\n\t"
+        << "q2 = " << q2_ << ", q2t = " << qt2_ << "\n\t"
         << "phi1 = " << phi1 << "\n\t"
         << "phi2 = " << phi2 << "\n\t"
         << "(dot):   " << dot1 << " / " << dot2 << "\n\t"
         << "(cross): " << cross1 << " / " << cross2 << ".";
 
       const double aux2_1 = p_term_ll_ * ( mf2_ + 4.*z1*z1*t1abs ) * phi1.energy2()
-                          + p_term_tt1_* ( ( z1p*z1p + z1m*z1m )*( dot1*dot1 + cross1*cross1 ) )
-                          + p_term_tt2_* ( cross1*cross1 - dot1*dot1 )
-                          - p_term_lt_ * 4.*z1*( z1p-z1m ) * phi1.energy() * q1_.threeProduct( phi1 );
+                          + p_term_tt1_* ( ( z1p*z1p + z1m*z1m )*( dot1*dot1+cross1*cross1 ) )
+                          + p_term_tt2_* ( cross1*cross1-dot1*dot1 )
+                          - p_term_lt_ * 4.*z1*( z1p-z1m ) * phi1.energy() * qt1_*dot1;
 
       const double aux2_2 = p_term_ll_ * ( mf2_ + 4.*z2*z2*t2abs ) * phi2.energy2()
-                          + p_term_tt1_* ( ( z2p*z2p + z2m*z2m )*( dot2*dot2 + cross2*cross2 ) )
-                          + p_term_tt2_* ( cross2*cross2 - dot2*dot2 )
-                          - p_term_lt_ * 4.*z2*( z2p-z2m ) * phi2.energy() * q2_.threeProduct( phi2 );
+                          + p_term_tt1_* ( ( z2p*z2p + z2m*z2m )*( dot2*dot2+cross2*cross2 ) )
+                          + p_term_tt2_* ( cross2*cross2-dot2*dot2 )
+                          - p_term_lt_ * 4.*z2*( z2p-z2m ) * phi2.energy() * qt2_*dot2;
 
       //=================================================================
       //     convention of matrix element as in our kt-factorization
       //     for heavy flavours
       //=================================================================
 
-      const double amat2_1 = aux2_1*2.*z1*q1_.pt2()/( q1_.pt2()*q2_.pt2() ),
-                   amat2_2 = aux2_2*2.*z2*q2_.pt2()/( q1_.pt2()*q2_.pt2() );
+      const double aux = 1./( q1_.pt2()*q2_.pt2() );
+      const double amat2_1 = aux2_1*2.*z1*q1_.pt2()*aux,
+                   amat2_2 = aux2_2*2.*z2*q2_.pt2()*aux;
 
       //=================================================================
       //     symmetrization

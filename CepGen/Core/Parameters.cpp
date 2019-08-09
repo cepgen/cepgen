@@ -85,7 +85,7 @@ namespace cepgen
       << "Process mode considered: " << kinematics.mode << "\n\t"
       << "   first beam: " << kinematics.incoming_beams.first << "\n\t"
       << "  second beam: " << kinematics.incoming_beams.second << "\n\t"
-      << "  structure functions: " << kinematics.structure_functions;
+      << "  structure functions: " << *kinematics.structure_functions;
     if ( process_->hasEvent() )
       process_->clearEvent();
     //--- clear the run statistics
