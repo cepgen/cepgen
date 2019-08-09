@@ -47,12 +47,26 @@ namespace cepgen
       method_( params.get<int>( "method", 1 ) )
     {
       switch ( (Polarisation)params.get<int>( "polarisationStates", 0 ) ) {
-        case Polarisation::LL: pol_w1_ = pol_w2_ = { 0 }; break;
-        case Polarisation::LT: pol_w1_ = { 0 }; pol_w2_ = { -1, 1 }; break;
-        case Polarisation::TL: pol_w1_ = { -1, 1 }; pol_w2_ = { 0 }; break;
-        case Polarisation::TT: pol_w1_ = pol_w2_ = { -1, 1 }; break;
-        default:
-        case Polarisation::full: pol_w1_ = pol_w2_ = { -1, 0, 1 }; break;
+        case Polarisation::LL:
+          pol_w1_ = { 0 };
+          pol_w2_ = { 0 };
+          break;
+        case Polarisation::LT:
+          pol_w1_ = { 0 };
+          pol_w2_ = { -1, 1 };
+          break;
+        case Polarisation::TL:
+          pol_w1_ = { -1, 1 };
+          pol_w2_ = { 0 };
+          break;
+        case Polarisation::TT:
+          pol_w1_ = { -1, 1 };
+          pol_w2_ = { -1, 1 };
+          break;
+        case Polarisation::full: default:
+          pol_w1_ = { -1, 0, 1 };
+          pol_w2_ = { -1, 0, 1 };
+          break;
       }
       CG_DEBUG( "PPtoWW:mode" )
         << "matrix element computation method: " << method_ << ".";
