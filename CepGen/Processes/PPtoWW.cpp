@@ -107,7 +107,6 @@ namespace cepgen
     PPtoWW::offShellME( double shat, double that, double uhat, double phi_sum, double phi_diff ) const
     {
       double amat2_0 = 0., amat2_1 = 0., amat2_interf = 0.;
-//      CG_INFO("")<<"::" << pol_w1_.size() << "|" << pol_w2_.size();
       for ( const auto lam3 : pol_w1_ )
         for ( const auto lam4 : pol_w2_ ) {
           double ampli_pp = amplitudeWW( shat, that, uhat, +1, +1, lam3, lam4 );
@@ -135,9 +134,6 @@ namespace cepgen
       const double inv_gamma = sqrt( 1.-beta2 ), gamma = 1./inv_gamma,
                    gamma2 = gamma*gamma, inv_gamma2 = inv_gamma*inv_gamma;
       const double invA = 1./( 1.-beta2*cos_theta2 );
-
-      if(std::isnan(sin_theta))CG_WARNING("")<<sin_theta<<"|"<<cos_theta << "|" << (that-uhat)/shat<<"|"<<sqrt( 1.+1.e-10-4.*mw2_/shat )<<"|"<<shat<<"|"<<that<<"|"<<uhat;
-      else CG_INFO("")<<sin_theta<<"|"<<cos_theta << "|" << (that-uhat)/shat<<"|"<<sqrt( 1.+1.e-10-4.*mw2_/shat )<<"|"<<shat<<"|"<<that<<"|"<<uhat;
 
       //--- per-helicity amplitude
 

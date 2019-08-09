@@ -16,6 +16,8 @@ int main( int argc, char* argv[] )
     double buf;
     while ( iss >> buf )
       x.emplace_back( buf );
+    if ( x.size() < 2 )
+      x = vector<double>( 12, x[0] );
     x.resize( 12 );
   }
   else
