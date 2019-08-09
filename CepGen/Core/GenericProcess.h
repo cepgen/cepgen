@@ -1,5 +1,5 @@
-#ifndef CepGen_Processes_GenericProcess_h
-#define CepGen_Processes_GenericProcess_h
+#ifndef CepGen_Core_GenericProcess_h
+#define CepGen_Core_GenericProcess_h
 
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/Kinematics.h"

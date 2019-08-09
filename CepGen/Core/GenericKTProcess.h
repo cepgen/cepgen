@@ -1,7 +1,7 @@
-#ifndef CepGen_Processes_GenericKTProcess_h
-#define CepGen_Processes_GenericKTProcess_h
+#ifndef CepGen_Core_GenericKTProcess_h
+#define CepGen_Core_GenericKTProcess_h
 
-#include "CepGen/Processes/GenericProcess.h"
+#include "CepGen/Core/GenericProcess.h"
 
 namespace cepgen
 {
@@ -55,8 +55,6 @@ namespace cepgen
         /// \f$k_{\rm T}\f$-factorised matrix element (event weight)
         /// \return Weight of the point in the phase space to the integral
         virtual double computeKTFactorisedMatrixElement() = 0;
-        /// Compute the unintegrated photon fluxes (for inelastic distributions, interpolation on double logarithmic grid)
-        std::pair<double,double> incomingFluxes( double, double, double, double ) const;
         /// Set the kinematics of the incoming and outgoing protons (or remnants)
         void fillPrimaryParticlesKinematics();
         /// Set the kinematics of the outgoing central system

@@ -1,5 +1,4 @@
-#include "CepGen/Processes/GenericKTProcess.h"
-
+#include "CepGen/Core/GenericKTProcess.h"
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Event/Event.h"
@@ -205,25 +204,6 @@ namespace cepgen
         << "dW = " << weight << ".";
 
       return weight;
-    }
-
-    std::pair<double,double>
-    GenericKTProcess::incomingFluxes( double x1, double q1t2, double x2, double q2t2 ) const
-    {
-      const HeavyIon hi1( kin_.incoming_beams.first.pdg ), hi2( kin_.incoming_beams.second.pdg );
-      //--- compute fluxes according to modelling specified in parameters card
-      std::pair<double,double> fluxes = {
-        hi1
-          ? ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, hi1 )
-          : ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, *kin_.structure_functions, MX_ ),
-        hi2
-          ? ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, hi2 )
-          : ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, *kin_.structure_functions, MY_ )
-      };
-
-      CG_DEBUG_LOOP( "GenericKTProcess:fluxes" )
-        << "KT fluxes: " << fluxes.first << " / " << fluxes.second << ".";
-      return fluxes;
     }
 
     void

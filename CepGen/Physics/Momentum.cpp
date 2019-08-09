@@ -114,6 +114,16 @@ namespace cepgen
   }
 
   Momentum
+  Momentum::operator%( const Momentum& mom ) const
+  {
+    return Momentum(
+      py_*mom.pz_-pz_*mom.py_,
+      pz_*mom.px_-px_*mom.pz_,
+      px_*mom.py_-py_*mom.px_
+    );
+  }
+
+  Momentum
   Momentum::operator*( double c ) const
   {
     return Momentum( c*px_, c*py_, c*pz_, c*energy_ );
@@ -369,11 +379,11 @@ namespace cepgen
   std::ostream&
   operator<<( std::ostream& os, const Momentum& mom )
   {
-    return os << "(" << std::fixed
-      << std::setw( 9 ) << mom.energy_ << "|"
-      << std::setw( 9 ) << mom.px_ << " "
-      << std::setw( 9 ) << mom.py_ << " "
-      << std::setw( 9 ) << mom.pz_ << ")" << std::defaultfloat;
+    return os << "("
+      << mom.energy_ << "|"
+      << mom.px_ << " "
+      << mom.py_ << " "
+      << mom.pz_ << ")";
   }
 
   double

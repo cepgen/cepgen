@@ -1,5 +1,4 @@
-#include "CepGen/Processes/GenericProcess.h"
-
+#include "CepGen/Core/GenericProcess.h"
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Event/Event.h"

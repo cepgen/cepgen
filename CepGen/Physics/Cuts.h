@@ -2,7 +2,10 @@
 #define CepGen_Physics_Cuts_h
 
 #include "CepGen/Physics/Limits.h"
+#include "CepGen/Physics/ParticleProperties.h"
+
 #include <vector>
+#include <unordered_map>
 
 namespace cepgen
 {
@@ -27,6 +30,7 @@ namespace cepgen
     /// A collection of name -> limits
     std::vector<std::pair<std::string,Limits> > list() const;
   };
+  typedef std::unordered_map<pdgid_t,Cuts> PerIdCuts;
 }
 
 #endif

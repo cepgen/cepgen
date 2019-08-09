@@ -4,7 +4,7 @@
 
 #include "CepGen/Parameters.h"
 
-#include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Physics/KinematicsMode.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Constants.h"
 

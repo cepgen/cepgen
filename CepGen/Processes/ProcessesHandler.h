@@ -1,10 +1,9 @@
 #ifndef CepGen_Processes_ProcessesHandler_h
 #define CepGen_Processes_ProcessesHandler_h
 
+#include "CepGen/Core/GenericProcess.h"
 #include "CepGen/Core/ModuleFactory.h"
 #include "CepGen/Core/ParametersList.h"
-
-#include "CepGen/Processes/GenericProcess.h"
 
 /** \file */
 
