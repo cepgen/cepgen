@@ -86,7 +86,10 @@ if(ROOT_FOUND)
   find_path(DELPHES_INCLUDE NAMES modules classes HINTS $ENV{DELPHES_DIR} ${DELPHES_DIR} PATH_SUFFIXES include)
   find_path(DELPHES_EXT_INCLUDE NAMES ExRootAnalysis HINTS $ENV{DELPHES_DIR} ${DELPHES_DIR} PATH_SUFFIXES external include)
 endif()
-
+#--- searching for YODA
+find_library(YODA YODA HINTS $ENV{YODA_DIR} PATH_SUFFIXES lib)
+find_path(YODA_INCLUDE YODA HINTS $ENV{YODA_DIR} PATH_SUFFIXES include)
+#--- other utilitaries
 find_package(PythonLibs 2.7)
 find_library(MUPARSER muparser)
 find_path(EXPRTK exprtk.hpp PATH_SUFFIXES include)

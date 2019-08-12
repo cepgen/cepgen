@@ -129,6 +129,15 @@ if(ROOT_FOUND)
   endif()
 endif()
 
+#--- linking with YODA
+
+if(YODA)
+  message(STATUS "YODA found in ${YODA}")
+  list(APPEND addons_libraries ${YODA})
+  list(APPEND addons_includes ${YODA_INCLUDE})
+  list(APPEND io_sources IO/YODAHistsHandler.cpp)
+endif()
+
 #----- build the objects
 
 add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${sf_sources})
