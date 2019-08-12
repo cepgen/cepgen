@@ -1064,8 +1064,27 @@ namespace cepgen
         << " Nup  = " << nup_ << "\n\t"
         << "Ndown = " << ndown_;
 
+      //--- compute the electric/magnetic form factors for the two
+      //    considered parton momenta transfers
       FormFactors fp1, fp2;
-      formFactors( -t1_, -t2_, fp1, fp2 );
+      switch ( kin_.mode ) {
+        case KinematicsMode::ElasticElastic: default: {
+          fp1 = FormFactors::protonElastic( -t1_ );
+          fp2 = FormFactors::protonElastic( -t2_ );
+        } break;
+        case KinematicsMode::ElasticInelastic: {
+          fp1 = FormFactors::protonElastic( -t1_ );
+          fp2 = FormFactors::protonInelastic( -t2_, w2_, masses_.MY2, *kin_.structure_functions );
+        } break;
+        case KinematicsMode::InelasticElastic: {
+          fp1 = FormFactors::protonInelastic( -t1_, w1_, masses_.MX2, *kin_.structure_functions );
+          fp2 = FormFactors::protonElastic( -t2_ );
+        } break;
+        case KinematicsMode::InelasticInelastic: {
+          fp1 = FormFactors::protonInelastic( -t1_, w1_, masses_.MX2, *kin_.structure_functions );
+          fp2 = FormFactors::protonInelastic( -t2_, w2_, masses_.MY2, *kin_.structure_functions );
+        } break;
+      }
 
       CG_DEBUG_LOOP( "GamGamLL:peripp" )
         << "u1 = " << fp1.FM << "\n\t"
@@ -1115,29 +1134,6 @@ namespace cepgen
       const double out = y+z+0.5*( am*zz-c / ( am*zz ) );
       const double ax = sqrt( pow( out-y-z, 2 )+c );
       return { out, ax*log( yy ) };
-    }
-
-    void
-    GamGamLL::formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const
-    {
-      switch ( kin_.mode ) {
-        case KinematicsMode::ElasticElastic: default: {
-          fp1 = FormFactors::protonElastic( -t1_ );
-          fp2 = FormFactors::protonElastic( -t2_ );
-        } break;
-        case KinematicsMode::ElasticInelastic: {
-          fp1 = FormFactors::protonElastic( -t1_ );
-          fp2 = FormFactors::protonInelastic( -t2_, w2_, masses_.MY2, *kin_.structure_functions );
-        } break;
-        case KinematicsMode::InelasticElastic: {
-          fp1 = FormFactors::protonInelastic( -t1_, w1_, masses_.MX2, *kin_.structure_functions );
-          fp2 = FormFactors::protonElastic( -t2_ );
-        } break;
-        case KinematicsMode::InelasticInelastic: {
-          fp1 = FormFactors::protonInelastic( -t1_, w1_, masses_.MX2, *kin_.structure_functions );
-          fp2 = FormFactors::protonInelastic( -t2_, w2_, masses_.MY2, *kin_.structure_functions );
-        } break;
-      }
     }
   }
 }

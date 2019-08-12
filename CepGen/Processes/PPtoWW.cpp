@@ -146,13 +146,13 @@ namespace cepgen
                    sin_theta = sqrt( sin_theta2 );
       const double beta = sqrt( 1.-4.*mw2_/shat ), beta2 = beta*beta;
       const double inv_gamma = sqrt( 1.-beta2 ), gamma = 1./inv_gamma,
-                   gamma2 = gamma*gamma, inv_gamma2 = inv_gamma*inv_gamma;
+                   inv_gamma2 = inv_gamma*inv_gamma;
       const double invA = 1./( 1.-beta2*cos_theta2 );
 
       //--- per-helicity amplitude
 
       if ( lam3 == 0 && lam4 == 0 ) // longitudinal-longitudinal
-        return invA*inv_gamma2*( ( gamma2+1. )*( 1.-lam1*lam2 )*sin_theta2 - ( 1.+lam1*lam2 ) );
+        return invA*inv_gamma2*( ( gamma*gamma+1. )*( 1.-lam1*lam2 )*sin_theta2 - ( 1.+lam1*lam2 ) );
 
       if ( lam4 == 0 )              // transverse-longitudinal
         return invA*( -M_SQRT2*inv_gamma*( lam1-lam2 )*( 1.+lam1*lam3*cos_theta )*sin_theta );

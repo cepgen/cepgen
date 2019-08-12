@@ -229,9 +229,9 @@ namespace cepgen
     Particle&
     Pythia8Hadroniser::addParticle( Event& ev, const Pythia8::Particle& py_part, const Pythia8::Vec4& mom, unsigned short role ) const
     {
-      Particle& op = ev.addParticle( (Particle::Role)role );
       ParticleProperties prop;
-      const pdgid_t pdg_id = abs( py_part.id() );
+      const pdgid_t pdg_id = py_part.idAbs();
+      //--- define the particle if not already in the list of handled PDGs
       try { prop = PDG::get()( pdg_id ); } catch ( const Exception& ) {
         prop = ParticleProperties{ pdg_id,
           py_part.name(), py_part.name(),
@@ -242,6 +242,8 @@ namespace cepgen
         };
         PDG::get().define( prop );
       }
+      //--- add the particle to the event content
+      Particle& op = ev.addParticle( (Particle::Role)role );
       op.setPdgId( (long)py_part.id() );
       op.setStatus( py_part.isFinal()
         ? Particle::Status::FinalState

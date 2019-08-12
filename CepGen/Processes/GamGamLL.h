@@ -204,8 +204,6 @@ namespace cepgen
          */
         std::pair<double,double> map( double expo, const Limits& lim, const std::string& var_name = "" );
         std::pair<double,double> mapla( double y, double z, int u, const Limits& lim );
-        /// Compute the electric/magnetic form factors for the two considered \f$Q^{2}\f$ momenta transfers
-        void formFactors( double q1, double q2, FormFactors& fp1, FormFactors& fp2 ) const;
     };
   }
 }
