@@ -8,6 +8,7 @@
 #include "CepGen/Event/EventBrowser.h"
 
 #include "YODA/Histo1D.h"
+
 #include "YODA/WriterYODA.h"
 #include "YODA/WriterAIDA.h"
 #include "YODA/WriterFLAT.h"
@@ -20,7 +21,9 @@ namespace cepgen
      * \brief Handler for the generic YODA file output
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Jul 2019
+     * \tparam T YODA writer type
      */
+    template<typename T>
     class YODAHistsHandler : public GenericExportHandler
     {
       public:
@@ -41,10 +44,10 @@ namespace cepgen
         const utils::EventBrowser browser_;
     };
 
-    YODAHistsHandler::YODAHistsHandler( const ParametersList& params ) :
+    template<typename T>
+    YODAHistsHandler<T>::YODAHistsHandler( const ParametersList& params ) :
       GenericExportHandler( "yoda" ),
       file_( params.get<std::string>( "filename", "output.yoda" ) ),
-      type_( params.get<std::string>( "type", "yoda" ) ),
       variables_( params.get<ParametersList>( "variables" ) ),
       xsec_( 1. )
     {
@@ -61,20 +64,16 @@ namespace cepgen
       }
     }
 
-    YODAHistsHandler::~YODAHistsHandler()
+    template<typename T>
+    YODAHistsHandler<T>::~YODAHistsHandler()
     {
       //--- finalisation of the output file
       for ( const auto& hist : hists_ )
-        if ( type_ == "yoda" )
-          YODA::WriterYODA::create().write( file_, hist.second );
-        else if ( type_ == "aida" )
-          YODA::WriterAIDA::create().write( file_, hist.second );
-        else if ( type_ == "flat" )
-          YODA::WriterFLAT::create().write( file_, hist.second );
+        T::create().write( file_, hist.second );
     }
 
-    void
-    YODAHistsHandler::operator<<( const Event& ev )
+    template<typename T> void
+    YODAHistsHandler<T>::operator<<( const Event& ev )
     {
       //--- increment the corresponding histograms
       for ( auto& h_var : hists_ )
@@ -83,4 +82,9 @@ namespace cepgen
   }
 }
 
-REGISTER_IO_MODULE( "yoda", YODAHistsHandler )
+typedef cepgen::io::YODAHistsHandler<YODA::WriterYODA> YodaOutputHandler;
+typedef cepgen::io::YODAHistsHandler<YODA::WriterAIDA> YodaAidaOutputHandler;
+typedef cepgen::io::YODAHistsHandler<YODA::WriterFLAT> YodaFlatOutputHandler;
+REGISTER_IO_MODULE( "yoda", YodaOutputHandler )
+REGISTER_IO_MODULE( "yoda_aida", YodaAidaOutputHandler )
+REGISTER_IO_MODULE( "yoda_flat", YodaFlatOutputHandler )
