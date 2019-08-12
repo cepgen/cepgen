@@ -9,6 +9,8 @@
 
 #include "YODA/Histo1D.h"
 #include "YODA/WriterYODA.h"
+#include "YODA/WriterAIDA.h"
+#include "YODA/WriterFLAT.h"
 
 namespace cepgen
 {
@@ -32,6 +34,7 @@ namespace cepgen
       private:
         std::ofstream file_;
         std::vector<std::pair<std::string,YODA::Histo1D> > hists_;
+        const std::string type_;
         const ParametersList variables_;
 
         double xsec_;
@@ -41,6 +44,7 @@ namespace cepgen
     YODAHistsHandler::YODAHistsHandler( const ParametersList& params ) :
       GenericExportHandler( "yoda" ),
       file_( params.get<std::string>( "filename", "output.yoda" ) ),
+      type_( params.get<std::string>( "type", "yoda" ) ),
       variables_( params.get<ParametersList>( "variables" ) ),
       xsec_( 1. )
     {
@@ -61,7 +65,12 @@ namespace cepgen
     {
       //--- finalisation of the output file
       for ( const auto& hist : hists_ )
-        YODA::WriterYODA::create().write( file_, hist.second );
+        if ( type_ == "yoda" )
+          YODA::WriterYODA::create().write( file_, hist.second );
+        else if ( type_ == "aida" )
+          YODA::WriterAIDA::create().write( file_, hist.second );
+        else if ( type_ == "flat" )
+          YODA::WriterFLAT::create().write( file_, hist.second );
     }
 
     void
