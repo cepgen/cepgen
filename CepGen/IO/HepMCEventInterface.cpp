@@ -45,6 +45,19 @@ namespace HepMC
 #endif
   }
 
+  CepGenEvent::CepGenEvent( const cepgen::Event& evt ) :
+    GenEvent( Units::GEV, Units::MM )
+  {
+#ifdef HEPMC3
+    GenEvent::add_attribute( "AlphaQCD", make_shared<DoubleAttribute>( cepgen::constants::ALPHA_QCD ) );
+    GenEvent::add_attribute( "AlphaEM", make_shared<DoubleAttribute>( cepgen::constants::ALPHA_EM ) );
+#else
+    GenEvent::set_alphaQCD( cepgen::constants::ALPHA_QCD );
+    GenEvent::set_alphaQED( cepgen::constants::ALPHA_EM );
+#endif
+    feedEvent( evt );
+  }
+
   void
   CepGenEvent::feedEvent( const cepgen::Event& evt )
   {

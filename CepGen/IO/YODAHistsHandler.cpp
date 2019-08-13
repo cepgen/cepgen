@@ -37,7 +37,6 @@ namespace cepgen
       private:
         std::ofstream file_;
         std::vector<std::pair<std::string,YODA::Histo1D> > hists_;
-        const std::string type_;
         const ParametersList variables_;
 
         double xsec_;

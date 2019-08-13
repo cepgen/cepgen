@@ -20,6 +20,7 @@ namespace HepMC
   {
     public:
       explicit CepGenEvent();
+      CepGenEvent( const cepgen::Event& ev );
       /// Feed a new CepGen event to this conversion object
       /// \param[in] ev CepGen event to be fed
       void feedEvent( const cepgen::Event& ev );
