@@ -67,9 +67,11 @@ namespace cepgen
     template<typename T>
     YODAHistsHandler<T>::~YODAHistsHandler()
     {
+      std::vector<const YODA::AnalysisObject*> obj;
       //--- finalisation of the output file
       for ( const auto& hist : hists_ )
-        T::create().write( file_, hist.second );
+        obj.emplace_back( &hist.second );
+      T::write( file_, obj );
     }
 
     template<typename T> void
