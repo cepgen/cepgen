@@ -65,19 +65,16 @@ namespace cepgen
         /// Auxiliary information on run
         std::shared_ptr<GenRunInfo> runinfo_;
 #endif
-        /// Associated HepMC event
-        std::shared_ptr<CepGenEvent> event_;
     };
 
     template<typename T>
     HepMCHandler<T>::HepMCHandler( const ParametersList& params ) :
       GenericExportHandler( "hepmc" ),
       output_( new T( params.get<std::string>( "filename", "output.hepmc" ).c_str() ) ),
-      xs_( new GenCrossSection ),
+      xs_( new GenCrossSection )
 #ifdef HEPMC3
-      runinfo_( new GenRunInfo ),
+      , runinfo_( new GenRunInfo )
 #endif
-      event_( new CepGenEvent )
     {
 #ifdef HEPMC3
       output_->set_run_info( runinfo_ );
@@ -99,19 +96,19 @@ namespace cepgen
     template<typename T> void
     HepMCHandler<T>::operator<<( const Event& evt )
     {
-      event_->feedEvent( evt );
+      CepGenEvent event( evt );
       // general information
 #ifdef HEPMC3
-      event_->set_cross_section( xs_ );
-      event_->set_run_info( runinfo_ );
+      event.set_cross_section( xs_ );
+      event.set_run_info( runinfo_ );
 #else
-      event_->set_cross_section( *xs_ );
+      event.set_cross_section( *xs_ );
 #endif
-      event_->set_event_number( event_num_++ );
+      event.set_event_number( event_num_++ );
 #ifdef HEPMC3
-      output_->write_event( *event_ );
+      output_->write_event( event );
 #else
-      output_->write_event( event_.get() );
+      output_->write_event( &event );
 #endif
     }
 

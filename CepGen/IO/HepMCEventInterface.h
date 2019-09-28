@@ -2,12 +2,12 @@
 #define CepGen_IO_HepMCEventInterface_h
 
 #ifdef HEPMC3
-#  include "HepMC3/GenEvent.h"
-#  define HepMC HepMC3
+# include "HepMC3/GenEvent.h"
+# define HepMC HepMC3
 #else
-#  include "HepMC/GenEvent.h"
+# include "HepMC/GenEvent.h"
 #endif
-
+#include <unordered_map>
 
 namespace cepgen { class Event; }
 
@@ -19,12 +19,14 @@ namespace HepMC
   class CepGenEvent : public GenEvent
   {
     public:
-      explicit CepGenEvent();
       CepGenEvent( const cepgen::Event& ev );
-      /// Feed a new CepGen event to this conversion object
-      /// \param[in] ev CepGen event to be fed
-      void feedEvent( const cepgen::Event& ev );
+
+    private:
+#ifdef HEPMC3
+      std::unordered_map<unsigned short,std::shared_ptr<GenParticle> > assoc_map_;
+#else
+      std::unordered_map<unsigned short,GenParticle*> assoc_map_;
+#endif
   };
 }
 #endif
-
