@@ -24,6 +24,7 @@ namespace pdg
       { // pdg ids
         std::istringstream ss( line.substr( 1, 32 ) );
         std::string buf;
+        // split for each PDG id
         while ( ss >> buf )
           pdg_ids.emplace_back( std::stoi( buf ) );
       }
@@ -43,6 +44,7 @@ namespace pdg
           >> part_name >> part_charge_int;
         std::istringstream oss_ch( part_charge_int );
         std::string charge_int;
+        // split by ','
         while ( std::getline( oss_ch, charge_int, ',' ) ) {
           short charge = 0;
           if ( charge_int == "-" )
@@ -63,14 +65,30 @@ namespace pdg
         }
       }
       if ( pdg_ids.size() != charges.size() )
-        CG_FATAL( "MCDFileParser" )
-          << "Error while parsing the MCD file \"" << path << "\".";
+        throw CG_FATAL( "MCDFileParser" )
+          << "Error while parsing the MCD file \"" << path << "\".\n\t"
+          << "Invalid PDG ids / charges vectors sizes: "
+          << pdg_ids.size() << " != " << charges.size() << ".";
       for ( size_t i = 0; i < pdg_ids.size(); ++i ) {
+        bool is_fermion;
+        short colour_ch;
+        switch ( pdg_ids.at( i ) ) {
+          case 1: case 2: case 3: case 4: case 5: case 6:
+            colour_ch = 3;
+          case 11: case 12:
+          case 13: case 14:
+          case 15: case 16:
+            colour_ch = 0;
+            is_fermion = true; break;
+          default:
+            colour_ch = 0;
+            is_fermion = false; break;
+        }
         cepgen::ParticleProperties prop{
           (cepgen::pdgid_t)pdg_ids.at( i ),
-          part_name, part_name, 0,
+          part_name, part_name, colour_ch,
           mass, width,
-          charges.at( i ), true //FIXME
+          charges.at( i ), is_fermion
         };
         cepgen::PDG::get().define( prop );
         ++i;
