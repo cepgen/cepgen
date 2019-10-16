@@ -94,6 +94,7 @@ namespace pdg
         ++i;
       }
     }
-    cepgen::PDG::get().dump();
+    CG_INFO( "MCDFileParser" ) << "File \"" << path << "\" successfully parsed. "
+      << cepgen::PDG::get().size() << " particles defined.";
   }
 }

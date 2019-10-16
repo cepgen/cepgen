@@ -11,21 +11,26 @@ namespace cepgen
 {
   namespace strfun
   {
-    const double Parameterisation::mp_ = PDG::get().mass( PDG::proton );
-    const double Parameterisation::mp2_ = Parameterisation::mp_*Parameterisation::mp_;
-
     Parameterisation::Parameterisation( double f2, double fl ) :
-      type( Type::Invalid ), F2( f2 ), FL( fl ), old_vals_({ 0., 0. }),
+      type( Type::Invalid ),
+      F2( f2 ), FL( fl ),
+      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
+      old_vals_({ 0., 0. }),
       r_ratio_( new sigrat::E143 )
     {}
 
     Parameterisation::Parameterisation( const Parameterisation& sf ) :
-      type( sf.type ), F2( sf.F2 ), FL( sf.FL ), params_( sf.params_ ), old_vals_( sf.old_vals_ ),
+      type( sf.type ), F2( sf.F2 ), FL( sf.FL ),
+      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
+      params_( sf.params_ ),
+      old_vals_( sf.old_vals_ ),
       r_ratio_( sf.r_ratio_ )
     {}
 
     Parameterisation::Parameterisation( const ParametersList& params ) :
-      type( (Type)params.get<int>( "id" ) ), F2( 0. ), FL( 0. ), params_( params ), old_vals_({ 0., 0. }),
+      type( (Type)params.get<int>( "id" ) ), F2( 0. ), FL( 0. ),
+      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
+      params_( params ), old_vals_({ 0., 0. }),
       r_ratio_( sigrat::Parameterisation::build(
         params.get<ParametersList>( "sigmaRatio", ParametersList().set<int>( "id", (int)sigrat::Type::E143 ) )
       ) )

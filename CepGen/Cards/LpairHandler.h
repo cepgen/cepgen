@@ -56,7 +56,7 @@ namespace cepgen
         std::string proc_name_, evt_mod_name_, out_mod_name_;
         std::string out_file_name_;
         std::string integr_type_;
-        std::string kmr_grid_path_, mstw_grid_path_;
+        std::string kmr_grid_path_, mstw_grid_path_, pdg_input_path_;
         std::pair<unsigned short,unsigned short> hi_1_, hi_2_;
     };
 

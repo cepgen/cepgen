@@ -12,8 +12,6 @@ namespace cepgen
   struct KTFluxParameters
   {
     static const double kMinKTFlux; ///< Minimal value taken for a \f$\k_{\rm T}\f$-factorised flux
-    static const double kMP; ///< Proton mass, in GeV/c\f$^2\f$
-    static const double kMP2; ///< Squared proton mass
   };
   /// Type of incoming partons fluxes
   enum class KTFlux
@@ -33,7 +31,7 @@ namespace cepgen
   /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\rm T}^2\f$ of the incoming parton
   /// \param[in] sf Structure functions evaluator
   /// \param[in] mx Outgoing diffractive proton mass
-  double ktFlux( const KTFlux& type, double x, double kt2, strfun::Parameterisation& sf, double mx = KTFluxParameters::kMP );
+  double ktFlux( const KTFlux& type, double x, double kt2, strfun::Parameterisation& sf, double mx );
   /// \brief Compute the flux (from heavy ion) for a given parton \f$(x,k_{\rm T})\f$
   /// \param[in] type Flux modelling
   /// \param[in] x Parton momentum fraction

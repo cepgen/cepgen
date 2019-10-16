@@ -32,6 +32,7 @@ namespace cepgen
         static constexpr const char* OUTPUT_NAME = "output";
 
         static constexpr const char* PDGLIST_NAME = "PDG";
+        static constexpr const char* MCD_NAME = "mcdFile";
 
         static void throwPythonError( const std::string& message );
         static std::string pythonPath( const char* file );

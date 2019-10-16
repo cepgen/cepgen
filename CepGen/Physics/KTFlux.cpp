@@ -11,14 +11,12 @@
 namespace cepgen
 {
   const double KTFluxParameters::kMinKTFlux = 1.e-20;
-  const double KTFluxParameters::kMP = PDG::get().mass( PDG::proton );
-  const double KTFluxParameters::kMP2 = KTFluxParameters::kMP*KTFluxParameters::kMP;
 
   double
   ktFlux( const KTFlux& type, double x, double kt2, strfun::Parameterisation& sf, double mx )
   {
     double flux = 0.;
-    const double mp2 = KTFluxParameters::kMP2;
+    const double& mp = PDG::get().mass( PDG::proton ), mp2 = mp*mp;
     switch ( type ) {
       case KTFlux::P_Photon_Elastic: {
         const double x2 = x*x;
@@ -53,10 +51,11 @@ namespace cepgen
   double
   ktFlux( const KTFlux& type, double x, double kt2, const HeavyIon& hi )
   {
+    const double& mp = PDG::get().mass( PDG::proton );
     double flux = 0.;
     switch ( type ) {
       case KTFlux::HI_Photon_Elastic: {
-        const double r_a = 1.1*cbrt( hi.A ), a0 = 0.7, m_a = hi.A*KTFluxParameters::kMP;
+        const double r_a = 1.1*cbrt( hi.A ), a0 = 0.7, m_a = hi.A*mp;
         const double q2_ela = ( kt2+x*x*m_a*m_a )/( 1.-x ), cons = sqrt( q2_ela )/0.1973;
         const double tau = cons*r_a, tau1 = cons*a0;
         // "Realistic nuclear form-factor" as used in STARLIGHT

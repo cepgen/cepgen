@@ -7,6 +7,7 @@
 #include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Core/EventModifierHandler.h"
 #include "CepGen/IO/ExportHandler.h"
+#include "CepGen/IO/MCDFileParser.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Physics/TamingFunction.h"
@@ -62,6 +63,12 @@ namespace cepgen
       if ( !cfg )
         throwPythonError( Form( "Failed to parse the configuration card %s", file ) );
 
+      //--- general particles definition
+      PyObject* ppdg = PyObject_GetAttrString( cfg, MCD_NAME ); // new
+      if ( ppdg ) {
+        pdg::MCDFileParser::parse( get<std::string>( ppdg ).c_str() );
+        Py_CLEAR( ppdg );
+      }
       //--- additional particles definition
       PyObject* pextp = PyObject_GetAttrString( cfg, PDGLIST_NAME ); // new
       if ( pextp ) {

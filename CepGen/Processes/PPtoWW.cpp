@@ -24,7 +24,7 @@ namespace cepgen
         enum class Polarisation { full = 0, LL = 1, LT = 2, TL = 3, TT = 4 };
 
       private:
-        static const double mw_, mw2_;
+        const double mw_, mw2_;
         static constexpr double g_em_ = 4.*M_PI*constants::ALPHA_EM;
 
         void prepareKinematics() override;
@@ -39,11 +39,10 @@ namespace cepgen
         std::vector<short> pol_w1_, pol_w2_;
     };
 
-    const double PPtoWW::mw_ = PDG::get().mass( PDG::W );
-    const double PPtoWW::mw2_ = PPtoWW::mw_*PPtoWW::mw_;
 
     PPtoWW::PPtoWW( const ParametersList& params ) :
       Process2to4( params, "pptoww", "ɣɣ → W⁺W¯", { PDG::photon, PDG::photon }, PDG::W ),
+      mw_( PDG::get().mass( PDG::W ) ), mw2_( mw_*mw_ ),
       method_( params.get<int>( "method", 1 ) )
     {
       switch ( (Polarisation)params.get<int>( "polarisationStates", 0 ) ) {

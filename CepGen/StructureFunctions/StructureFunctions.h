@@ -72,8 +72,8 @@ namespace cepgen
         double FL; ///< Last computed longitudinal structure function value
 
       protected:
-        static const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
-        static const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
+        const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
+        const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
         ParametersList params_; ///< List of parameters used for this builder definition
         std::pair<double,double> old_vals_; ///< Last \f$(x_{\rm Bj},Q^2)\f$ couple computed
 

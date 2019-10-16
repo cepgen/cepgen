@@ -26,8 +26,8 @@ namespace cepgen
       protected:
         /// \f$x_{\rm Bj}\f$ dependence for QCD-matching of R at high-\f$Q^2\f$
         double theta( double xbj, double q2 ) const;
-        static const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
-        static const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
+        const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
+        const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
     };
 
     /// E143 experimental R measurement \cite Abe:1998ym

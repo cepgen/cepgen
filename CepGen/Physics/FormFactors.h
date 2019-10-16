@@ -15,7 +15,7 @@ namespace cepgen
   {
     public:
       /// Initialise a collection of electric/magnetic form factors
-      FormFactors( double fe = 0., double fm = 0. ) : FE( fe ), FM( fm ) {}
+      FormFactors( double fe = 0., double fm = 0. );
       /// Trivial, spin-0 form factors
       static FormFactors pointlikeScalar();
       /// Trivial, spin-1/2 form factors
@@ -33,9 +33,6 @@ namespace cepgen
       double FM;
       /// Dumping operator for standard output streams
       friend std::ostream& operator<<( std::ostream&, const FormFactors& );
-
-    private:
-      static const double mp_, mp2_;
   };
 }
 
