@@ -8,7 +8,7 @@
 
 namespace pdg
 {
-  const std::unordered_map<std::string,short> MCDFileParser::m_charge_str_ = {
+  const std::unordered_map<std::string,short> MCDFileParser::MAP_CHARGE_STR = {
     { "-", -3 }, { "--", -6 },
     { "+", +3 }, { "++", +6 },
     { "0", 0 },
@@ -22,7 +22,7 @@ namespace pdg
     std::ifstream ifile( path );
     std::string line;
     while ( std::getline( ifile, line ) ) {
-      if ( line[0] == '*' )
+      if ( line[0] == '*' ) // skip comments
         continue;
       std::vector<int> pdg_ids;
       std::vector<short> charges;
@@ -35,18 +35,15 @@ namespace pdg
         // split for each PDG id
         while ( ss >> buf )
           pdg_ids.emplace_back( std::stoi( buf ) );
-      }
-      { // mass + error(s)
+      }{ // mass + error(s)
         std::istringstream oss( line.substr( MASS_BEG, MASS_END ) );
         oss
           >> mass >> mass_err_low >> mass_err_high;
-      }
-      { // width + error(s)
+      }{ // width + error(s)
         std::istringstream oss( line.substr( WIDTH_BEG, WIDTH_END ) );
         oss
           >> width >> width_err_low >> width_err_high;
-      }
-      { // name + charge
+      }{ // name + charge
         std::istringstream oss( line.substr( AUX_BEG ) );
         oss
           >> part_name >> part_charge_int;
@@ -54,11 +51,11 @@ namespace pdg
         std::string charge_int;
         // split by ','
         while ( std::getline( oss_ch, charge_int, ',' ) ) {
-          if ( m_charge_str_.count( charge_int ) == 0 )
+          if ( MAP_CHARGE_STR.count( charge_int ) == 0 )
             throw CG_FATAL( "MCDFileParser" )
               << "Failed to retrieve an integer charge "
               << "for string \"" << charge_int << "\"!";
-          charges.emplace_back( m_charge_str_.at( charge_int ) );
+          charges.emplace_back( MAP_CHARGE_STR.at( charge_int ) );
         }
       }
       if ( pdg_ids.size() != charges.size() )
@@ -72,14 +69,19 @@ namespace pdg
         switch ( pdg_ids.at( i ) ) {
           case 1: case 2: case 3: case 4: case 5: case 6:
             colour_ch = 3;
-          case 11: case 12:
-          case 13: case 14:
-          case 15: case 16:
+            is_fermion = true;
+            break;
+          case 11: case 12: case 13: case 14: case 15: case 16:
             colour_ch = 0;
-            is_fermion = true; break;
+            is_fermion = true;
+            break;
+          case 21:
+            colour_ch = 9;
+            is_fermion = false;
           default:
             colour_ch = 0;
-            is_fermion = false; break;
+            is_fermion = false;
+            break;
         }
         cepgen::ParticleProperties prop{
           (cepgen::pdgid_t)pdg_ids.at( i ),

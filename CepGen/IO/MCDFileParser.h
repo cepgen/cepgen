@@ -13,6 +13,6 @@ namespace pdg
       static constexpr size_t MASS_BEG = 33, MASS_END = 70;
       static constexpr size_t WIDTH_BEG = 70, WIDTH_END = 107;
       static constexpr size_t AUX_BEG = 107;
-      static const std::unordered_map<std::string,short> m_charge_str_;
+      static const std::unordered_map<std::string,short> MAP_CHARGE_STR;
   };
 }
