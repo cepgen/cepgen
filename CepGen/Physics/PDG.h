@@ -19,6 +19,7 @@ namespace cepgen
       enum PdgId : pdgid_t
       {
         invalid = 0,
+        down = 1, up = 2,
         electron = 11, muon = 13, tau = 15,
         gluon = 21, photon = 22, W = 23,
         pomeron = 990, reggeon = 110, piZero = 111, piPlus = 211, eta = 221,
