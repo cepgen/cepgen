@@ -102,6 +102,8 @@ namespace cepgen
       float time_generation;
       /// Time needed to generate the hadronised (if needed) event (in seconds)
       float time_total;
+      /// Event weight
+      float weight;
 
     private:
       static constexpr double MIN_PRECISION = 1.e-10;

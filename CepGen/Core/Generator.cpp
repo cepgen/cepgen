@@ -7,7 +7,9 @@
 #include "CepGen/Core/Timer.h"
 #include "CepGen/Core/utils.h"
 
+#include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
+
 #include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Event/Event.h"
 
@@ -21,6 +23,8 @@ namespace cepgen
   Generator::Generator() :
     parameters_( new Parameters ), result_( -1. ), result_error_( -1. )
   {
+    static const std::string pdg_file = "External/mass_width_2019.mcd";
+    pdg::MCDFileParser::parse( pdg_file.c_str() );
     CG_DEBUG( "Generator:init" ) << "Generator initialized";
     try {
       printHeader();

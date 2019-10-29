@@ -11,12 +11,13 @@ namespace cepgen
 {
   Event::Event() :
     num_hadronisation_trials( 0 ),
-    time_generation( -1. ), time_total( -1. )
+    time_generation( -1. ), time_total( -1. ), weight( 0. )
   {}
 
   Event::Event( const Event& rhs ) :
     num_hadronisation_trials( rhs.num_hadronisation_trials ),
     time_generation( rhs.time_generation ), time_total( rhs.time_total ),
+    weight( rhs.weight ),
     particles_( rhs.particles_ ),
     evtcontent_( rhs.evtcontent_ )
   {}
@@ -27,6 +28,7 @@ namespace cepgen
     particles_.clear();
     time_generation = -1.;
     time_total = -1.;
+    weight = 0.;
   }
 
   void

@@ -1,4 +1,4 @@
-#include "CepGen/IO/PythiaEventInterface.h"
+#include "CepGenAddOns/EventInterfaces/PythiaEventInterface.h"
 
 #include "CepGen/Core/Exception.h"
 
@@ -20,11 +20,9 @@ namespace Pythia8
     return Vec4( mom.px(), mom.py(), mom.pz(), mom.energy() );
   }
 
-  const double CepGenEvent::mp_ = cepgen::PDG::get().mass( cepgen::PDG::proton );
-  const double CepGenEvent::mp2_ = CepGenEvent::mp_*CepGenEvent::mp_;
-
   CepGenEvent::CepGenEvent() :
     LHAup( 3 ),
+    mp_( cepgen::PDG::get().mass( cepgen::PDG::proton ) ), mp2_( mp_*mp_ ),
     inel1_( false ), inel2_( false ), params_( nullptr )
   {}
 

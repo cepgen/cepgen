@@ -9,7 +9,7 @@
 
 #include "CepGen/Core/GenericProcess.h"
 #include "CepGen/Core/EventModifier.h"
-#include "CepGen/IO/GenericExportHandler.h"
+#include "CepGen/Core/GenericExportHandler.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
@@ -58,19 +58,6 @@ namespace cepgen
     integration_ = param.integration_;
     generation_ = param.generation_;
     return *this;
-  }
-
-  void
-  Parameters::setThetaRange( float thetamin, float thetamax )
-  {
-    kinematics.cuts.central.eta_single = {
-      Particle::thetaToEta( thetamax ),
-      Particle::thetaToEta( thetamin )
-    };
-
-    CG_DEBUG( "Parameters" )
-      << "eta in range: " << kinematics.cuts.central.eta_single
-      << " => theta(min) = " << thetamin << ", theta(max) = " << thetamax << ".";
   }
 
   void

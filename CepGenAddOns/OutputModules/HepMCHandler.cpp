@@ -1,7 +1,8 @@
-#include "CepGen/IO/ExportHandler.h"
-#include "CepGen/IO/HepMCEventInterface.h"
+#include "CepGenAddOns/EventInterfaces/HepMCEventInterface.h"
 
 #include "CepGen/Parameters.h"
+
+#include "CepGen/Core/ExportHandler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 

@@ -9,10 +9,8 @@ namespace cepgen
 {
   namespace sigrat
   {
-    const double Parameterisation::mp_ = PDG::get().mass( PDG::proton );
-    const double Parameterisation::mp2_ = Parameterisation::mp_*Parameterisation::mp_;
-
-    Parameterisation::Parameterisation( const ParametersList& params )
+    Parameterisation::Parameterisation( const ParametersList& params ) :
+      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ )
     {}
 
     double

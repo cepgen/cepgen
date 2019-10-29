@@ -3,12 +3,14 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Integrator.h"
+#include "CepGen/Core/utils.h"
 
 #include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Core/EventModifierHandler.h"
-#include "CepGen/IO/ExportHandler.h"
+#include "CepGen/Core/ExportHandler.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
+#include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/PDG.h"
 
@@ -26,6 +28,7 @@ namespace cepgen
     LpairHandler::LpairHandler( const char* file ) :
       proc_params_( new ParametersList ),
       str_fun_( 11 ), sr_type_( 1 ), xi_min_( 0. ), xi_max_( 1. ),
+      pdg_input_path_( "External/mass_width_2019.mcd" ),
       hi_1_( { 0, 0 } ), hi_2_( { 0, 0 } )
     {
       std::ifstream f( file, std::fstream::in );
@@ -48,6 +51,10 @@ namespace cepgen
              << " (" << description( key ) << ")";
       }
       f.close();
+
+      //--- parse the PDG library
+      if ( !pdg_input_path_.empty() )
+        pdg::MCDFileParser::parse( pdg_input_path_.c_str() );
 
       //--- parse the process name
       params_.setProcess( proc::ProcessesHandler::get().build( proc_name_, *proc_params_ ) );
@@ -159,6 +166,7 @@ namespace cepgen
 
       registerParameter<std::string>( "KMRG", "KMR grid interpolation path", &kmr_grid_path_ );
       registerParameter<std::string>( "MGRD", "MSTW grid interpolation path", &mstw_grid_path_ );
+      registerParameter<std::string>( "PDGI", "Input file for PDG information", &pdg_input_path_ );
       registerParameter<int>( "PMOD", "Outgoing primary particles' mode", &str_fun_ );
       registerParameter<int>( "EMOD", "Outgoing primary particles' mode", &str_fun_ );
       registerParameter<int>( "RTYP", "R-ratio computation type", &sr_type_ );
@@ -248,17 +256,6 @@ namespace cepgen
       if ( p_bools_.count( key ) )
         return p_bools_.find( key )->second.description;
       return "null";
-    }
-
-    std::vector<std::string>
-    LpairHandler::split( const std::string& str, char delim )
-    {
-      std::vector<std::string> out;
-      std::string token;
-      std::istringstream iss( str );
-      while ( std::getline( iss, token, delim ) )
-        out.emplace_back( token );
-      return out;
     }
   }
 }

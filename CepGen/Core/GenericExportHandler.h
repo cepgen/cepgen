@@ -1,5 +1,5 @@
-#ifndef CepGen_IO_GenericExportHandler_h
-#define CepGen_IO_GenericExportHandler_h
+#ifndef CepGen_Core_GenericExportHandler_h
+#define CepGen_Core_GenericExportHandler_h
 
 #include <iosfwd>
 #include <string>

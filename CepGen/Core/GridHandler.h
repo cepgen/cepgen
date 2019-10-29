@@ -1,5 +1,5 @@
-#ifndef CepGen_IO_GridHandler_h
-#define CepGen_IO_GridHandler_h
+#ifndef CepGen_Core_GridHandler_h
+#define CepGen_Core_GridHandler_h
 
 #include <gsl/gsl_version.h>
 #ifdef GSL_MAJOR_VERSION

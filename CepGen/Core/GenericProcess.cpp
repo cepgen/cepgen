@@ -11,10 +11,8 @@ namespace cepgen
 {
   namespace proc
   {
-    const double GenericProcess::mp_ = PDG::get().mass( PDG::proton );
-    const double GenericProcess::mp2_ = GenericProcess::mp_*GenericProcess::mp_;
-
     GenericProcess::GenericProcess( const ParametersList& params, const std::string& name, const std::string& description, bool has_event ) :
+      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       params_( params ), name_( name ), description_( description ),
       first_run( true ),
       s_( -1. ), sqs_( -1. ),
@@ -25,6 +23,7 @@ namespace cepgen
     {}
 
     GenericProcess::GenericProcess( const GenericProcess& proc ) :
+      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       params_( proc.params_ ), name_( proc.name_ ), description_( proc.description_ ),
       first_run( proc.first_run ),
       s_( proc.s_ ), sqs_( proc.sqs_ ),

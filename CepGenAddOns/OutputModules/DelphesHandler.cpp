@@ -1,8 +1,8 @@
-#include "CepGen/IO/ExportHandler.h"
-
-#include "CepGen/Parameters.h"
+#include "CepGen/Core/ExportHandler.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
+
+#include "CepGen/Parameters.h"
 
 #include "CepGen/Event/Event.h"
 
@@ -14,6 +14,7 @@
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 
 #include "TFile.h"
+#include <chrono>
 
 namespace cepgen
 {
@@ -101,12 +102,13 @@ namespace cepgen
       auto evt_aux = static_cast<LHEFEvent*>( evt_branch_->NewEntry() );
       evt_aux->Number = event_num_++;
       evt_aux->ProcessID = 0;
-      evt_aux->Weight = 1.; // events are unweighted in CepGen
+      evt_aux->Weight = ev.weight; // events are normally unweighted in CepGen
       //evt_aux->CrossSection = xsec_; // not yet fully supported
       evt_aux->ScalePDF = 0.; // for the time being
       evt_aux->AlphaQED = constants::ALPHA_EM;
       evt_aux->AlphaQCD = constants::ALPHA_QCD;
-      evt_aux->ProcTime = ev.time_generation;
+      evt_aux->ReadTime = ev.time_generation;
+      auto start = std::chrono::system_clock::now();
       const auto& parts = compress_
         ? ev.compressed().particles()
         : ev.particles();
@@ -134,6 +136,7 @@ namespace cepgen
           out_partons_->Add( cand );
       }
       delphes_->ProcessTask();
+      evt_aux->ProcTime = std::chrono::duration<double>( std::chrono::system_clock::now()-start ).count();
       tree_writer_->Fill();
     }
   }

@@ -1,5 +1,5 @@
-#ifndef CepGen_IO_PythiaEventInterface_h
-#define CepGen_IO_PythiaEventInterface_h
+#ifndef CepGenAddOns_EventInterfaces_PythiaEventInterface_h
+#define CepGenAddOns_EventInterfaces_PythiaEventInterface_h
 
 #include <Pythia8/Pythia.h>
 #include <unordered_map>
@@ -73,7 +73,7 @@ namespace Pythia8
 
     private:
       std::pair<int,int> findMothers( const cepgen::Event& ev, const cepgen::Particle& p ) const;
-      static const double mp_, mp2_;
+      const double mp_, mp2_;
       bool inel1_, inel2_;
       std::unordered_map<unsigned short, unsigned short> py_cg_corresp_;
       const cepgen::Parameters* params_; // borrowed

@@ -1,5 +1,9 @@
 #include "CepGen/Core/utils.h"
 
+#include <iomanip>
+#include <iterator>
+#include <algorithm>
+
 #include <math.h>
 #include <stdarg.h>  // For va_start, etc.
 
@@ -37,6 +41,29 @@ namespace cepgen
       ++count;
     }
     return count;
+  }
+
+  std::vector<std::string>
+  split( const std::string& str, char delim )
+  {
+    std::vector<std::string> out;
+    std::string token;
+    std::istringstream iss( str );
+    while ( std::getline( iss, token, delim ) )
+      out.emplace_back( token );
+    return out;
+  }
+
+  std::string
+  merge( const std::vector<std::string>& vec, const std::string& delim )
+  {
+    if ( vec.empty() )
+      return std::string();
+    if ( vec.size() == 1 )
+      return vec.at( 0 );
+    std::ostringstream oss;
+    std::copy( vec.begin(), std::prev( vec.end() ), std::ostream_iterator<std::string>( oss, delim.c_str() ) );
+    return oss.str()+*vec.rbegin();
   }
 
   namespace utils
