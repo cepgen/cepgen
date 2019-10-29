@@ -48,7 +48,7 @@ namespace ROOT
           << err.what();
       }
 
-    if ( tree_->GetEntry() <= 0 )
+    if ( tree_->GetEntry( num_read_events_++ ) <= 0 )
       return false;
 
     ev.clear();

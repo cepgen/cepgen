@@ -103,7 +103,7 @@ namespace ROOT
       int role[MAX_PART]; ///< Particles role in the event
       int status[MAX_PART]; ///< Integer status code
 
-      CepGenEvent() : tree_attached_( false ) {
+      CepGenEvent() : tree_attached_( false ), num_read_events_( 0ull ) {
         clear();
       }
       /// Reinitialise the event content
@@ -201,6 +201,7 @@ namespace ROOT
       std::shared_ptr<TTree> tree_;
       std::unique_ptr<TFile> file_;
       bool tree_attached_;
+      unsigned long long num_read_events_;
   };
 }
 
