@@ -11,6 +11,7 @@ namespace ROOT
     clear();
     gen_time = ev.time_generation;
     tot_time = ev.time_total;
+    weight = ev.weight;
     np = 0;
     const auto& parts = compress
       ? ev.compressed().particles()
@@ -54,6 +55,7 @@ namespace ROOT
     ev.clear();
     ev.time_generation = gen_time;
     ev.time_total = tot_time;
+    ev.weight = weight;
     //--- first loop to populate the particles content
     for ( unsigned short i = 0; i < np; ++i ) {
       auto& part = ev[i];

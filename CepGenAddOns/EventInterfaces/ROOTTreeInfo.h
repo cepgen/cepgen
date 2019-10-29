@@ -87,6 +87,7 @@ namespace ROOT
 
       float gen_time; ///< Event generation time
       float tot_time; ///< Total event generation time
+      float weight; ///< Event weight
       int nremn_ch[2], nremn_nt[2];
       int np; ///< Number of particles in the event
       double pt[MAX_PART]; ///< Particles transverse momentum
@@ -150,6 +151,7 @@ namespace ROOT
         tree_->Branch( "parent2", parent2, "parent2[npart]/I" );
         tree_->Branch( "stable", stable, "stable[npart]/I" );
         tree_->Branch( "status", status, "status[npart]/I" );
+        tree_->Branch( "weight", &weight, "weight/F" );
         tree_->Branch( "generation_time", &gen_time, "generation_time/F" );
         tree_->Branch( "total_time", &tot_time, "total_time/F" );
       }
@@ -184,6 +186,7 @@ namespace ROOT
         tree_->SetBranchAddress( "parent2", parent2 );
         tree_->SetBranchAddress( "stable", stable );
         tree_->SetBranchAddress( "status", status );
+        tree_->SetBranchAddress( "weight", &weight );
         tree_->SetBranchAddress( "generation_time", &gen_time );
         tree_->SetBranchAddress( "total_time", &tot_time );
         tree_attached_ = true;
