@@ -25,7 +25,6 @@ namespace cepgen
   {
     static const std::string pdg_file = "External/mass_width_2019.mcd";
     pdg::MCDFileParser::parse( pdg_file.c_str() );
-    PDG::get().dump();
     CG_DEBUG( "Generator:init" ) << "Generator initialized";
     try {
       printHeader();
