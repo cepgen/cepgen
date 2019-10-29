@@ -1,6 +1,6 @@
-#include "CepGen/IO/ExportHandler.h"
-#include "CepGen/IO/PythiaEventInterface.h"
+#include "CepGenAddOns/IO/PythiaEventInterface.h"
 
+#include "CepGen/Core/ExportHandler.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
 

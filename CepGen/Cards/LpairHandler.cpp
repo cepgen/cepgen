@@ -7,10 +7,10 @@
 
 #include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Core/EventModifierHandler.h"
-#include "CepGen/IO/ExportHandler.h"
-#include "CepGen/IO/MCDFileParser.h"
+#include "CepGen/Core/ExportHandler.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
+#include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/PDG.h"
 

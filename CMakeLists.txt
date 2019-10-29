@@ -32,7 +32,8 @@ enable_language(Fortran)
 #----- build all the intermediate objects
 
 include_directories(${PROJECT_SOURCE_DIR})
-add_subdirectory(${CEPGEN_SOURCE_DIR})
+add_subdirectory(CepGen)
+add_subdirectory(CepGenAddOns)
 foreach(_module ${CEPGEN_MODULES})
   add_subdirectory(${CEPGEN_SOURCE_DIR}/${_module})
 endforeach()

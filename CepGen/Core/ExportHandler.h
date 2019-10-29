@@ -2,7 +2,7 @@
 #define CepGen_IO_ExportHandler_h
 
 #include "CepGen/Core/ModuleFactory.h"
-#include "CepGen/IO/GenericExportHandler.h"
+#include "CepGen/Core/GenericExportHandler.h"
 
 #define REGISTER_IO_MODULE( name, obj ) \
   namespace cepgen { namespace io { \

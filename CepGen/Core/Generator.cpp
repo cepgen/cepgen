@@ -7,7 +7,7 @@
 #include "CepGen/Core/Timer.h"
 #include "CepGen/Core/utils.h"
 
-#include "CepGen/IO/MCDFileParser.h"
+#include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
 
 #include "CepGen/Processes/ProcessesHandler.h"

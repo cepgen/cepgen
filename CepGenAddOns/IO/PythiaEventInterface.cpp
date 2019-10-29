@@ -1,4 +1,4 @@
-#include "CepGen/IO/PythiaEventInterface.h"
+#include "CepGenAddOns/IO/PythiaEventInterface.h"
 
 #include "CepGen/Core/Exception.h"
 

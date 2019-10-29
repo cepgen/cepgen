@@ -10,7 +10,7 @@
 
 #include "CepGen/Core/GenericProcess.h"
 #include "CepGen/Core/EventModifier.h"
-#include "CepGen/IO/GenericExportHandler.h"
+#include "CepGen/Core/GenericExportHandler.h"
 
 #include "CepGen/Parameters.h"
 

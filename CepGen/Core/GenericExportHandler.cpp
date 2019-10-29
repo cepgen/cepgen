@@ -1,7 +1,7 @@
-#include "CepGen/IO/GenericExportHandler.h"
+#include "CepGen/Core/GenericExportHandler.h"
+#include "CepGen/Core/EventModifier.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
-#include "CepGen/Core/EventModifier.h"
 #include "CepGen/Physics/Constants.h"
 
 #include "CepGen/Parameters.h"

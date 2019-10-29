@@ -1,4 +1,4 @@
-#include "CepGen/Hadronisers/GenericHadroniser.h"
+#include "CepGen/Core/GenericHadroniser.h"
 #include "CepGen/Core/ParametersList.h"
 
 namespace cepgen

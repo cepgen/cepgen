@@ -1,9 +1,9 @@
-#include "CepGen/IO/GridHandler.h"
-#include "CepGen/StructureFunctions/StructureFunctions.h"
-
+#include "CepGen/Core/GridHandler.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
+
+#include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include <fstream>
 
