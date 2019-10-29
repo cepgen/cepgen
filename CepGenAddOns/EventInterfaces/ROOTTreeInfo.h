@@ -8,6 +8,8 @@
 #include <string>
 #include <iostream>
 
+namespace cepgen { class Event; }
+
 namespace ROOT
 {
   /// All useful information about a generation run
@@ -80,28 +82,28 @@ namespace ROOT
     public:
       // book a sufficienly large number to allow the large multiplicity
       // of excited proton fragmentation products
-      static constexpr unsigned short maxpart = 5000; ///< Maximal number of particles in event
+      static constexpr size_t MAX_PART = 5000; ///< Maximal number of particles in event
       static constexpr const char* TREE_NAME = "events"; ///< Output tree name
 
       float gen_time; ///< Event generation time
       float tot_time; ///< Total event generation time
       int nremn_ch[2], nremn_nt[2];
       int np; ///< Number of particles in the event
-      double pt[maxpart]; ///< Particles transverse momentum
-      double eta[maxpart]; ///< Particles pseudo-rapidity
-      double phi[maxpart]; ///< Particles azimutal angle
-      double rapidity[maxpart]; ///< Particles rapidity
-      double E[maxpart]; ///< Particles energy, in GeV
-      double m[maxpart]; ///< Particles mass, in GeV/c\f${}^2\f$
-      double charge[maxpart]; ///< Particles charges, in e
-      int pdg_id[maxpart]; ///< Integer particles PDG id
-      int parent1[maxpart]; ///< First particles mother
-      int parent2[maxpart]; ///< Last particles mother
-      int stable[maxpart]; ///< Whether the particle must decay or not
-      int role[maxpart]; ///< Particles role in the event
-      int status[maxpart]; ///< Integer status code
+      double pt[MAX_PART]; ///< Particles transverse momentum
+      double eta[MAX_PART]; ///< Particles pseudo-rapidity
+      double phi[MAX_PART]; ///< Particles azimutal angle
+      double rapidity[MAX_PART]; ///< Particles rapidity
+      double E[MAX_PART]; ///< Particles energy, in GeV
+      double m[MAX_PART]; ///< Particles mass, in GeV/c\f${}^2\f$
+      double charge[MAX_PART]; ///< Particles charges, in e
+      int pdg_id[MAX_PART]; ///< Integer particles PDG id
+      int parent1[MAX_PART]; ///< First particles mother
+      int parent2[MAX_PART]; ///< Last particles mother
+      int stable[MAX_PART]; ///< Whether the particle must decay or not
+      int role[MAX_PART]; ///< Particles role in the event
+      int status[MAX_PART]; ///< Integer status code
 
-      CepGenEvent() {
+      CepGenEvent() : tree_attached_( false ) {
         clear();
       }
       /// Reinitialise the event content
@@ -110,7 +112,7 @@ namespace ROOT
         for ( unsigned short i = 0; i < 2; ++i )
           nremn_ch[i] = nremn_nt[i] = 0;
         np = 0;
-        for ( unsigned short i = 0; i < maxpart; ++i ) {
+        for ( size_t i = 0; i < MAX_PART; ++i ) {
           pt[i] = eta[i] = phi[i] = rapidity[i] = E[i] = m[i] = charge[i] = 0.;
           pdg_id[i] = parent1[i] = parent2[i] = stable[i] = role[i] = status[i] = 0;
         }
@@ -184,17 +186,23 @@ namespace ROOT
         tree_->SetBranchAddress( "status", status );
         tree_->SetBranchAddress( "generation_time", &gen_time );
         tree_->SetBranchAddress( "total_time", &tot_time );
+        tree_attached_ = true;
       }
+
+      //--- direct cepgen::Event I/O helpers
+
+      /// Fill the tree with a new event
+      void fill( const cepgen::Event&, bool compress = false );
+      /// Read the next event in the file
+      bool next( cepgen::Event& );
 
     private:
       /// Tree for which the event is booked
       std::shared_ptr<TTree> tree_;
       std::unique_ptr<TFile> file_;
+      bool tree_attached_;
   };
 }
-
-constexpr const char* ROOT::CepGenRun::TREE_NAME;
-constexpr const char* ROOT::CepGenEvent::TREE_NAME;
 
 #endif
 

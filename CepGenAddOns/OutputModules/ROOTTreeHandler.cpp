@@ -41,7 +41,7 @@ namespace cepgen
     };
 
     ROOTTreeHandler::ROOTTreeHandler( const ParametersList& params ) :
-      GenericExportHandler( "root" ),
+      GenericExportHandler( "root_tree" ),
       file_( TFile::Open( params.get<std::string>( "filename", "output.root" ).c_str(), "recreate" ) ),
       compress_( params.get<bool>( "compress", false ) ),
       run_tree_( new ROOT::CepGenRun ), evt_tree_( new ROOT::CepGenEvent )
@@ -68,32 +68,8 @@ namespace cepgen
     void
     ROOTTreeHandler::operator<<( const Event& ev )
     {
-      evt_tree_->gen_time = ev.time_generation;
-      evt_tree_->tot_time = ev.time_total;
-      evt_tree_->np = 0;
-      const auto& parts = compress_
-        ? ev.compressed().particles()
-        : ev.particles();
-      for ( const auto& p : parts ) {
-        const auto& m = p.momentum();
-        evt_tree_->rapidity[evt_tree_->np] = m.rapidity();
-        evt_tree_->pt[evt_tree_->np] = m.pt();
-        evt_tree_->eta[evt_tree_->np] = m.eta();
-        evt_tree_->phi[evt_tree_->np] = m.phi();
-        evt_tree_->E[evt_tree_->np] = p.energy();
-        evt_tree_->m[evt_tree_->np] = p.mass();
-        evt_tree_->pdg_id[evt_tree_->np] = p.integerPdgId();
-        evt_tree_->parent1[evt_tree_->np] = ( p.mothers().size() > 0 ) ? *p.mothers().begin() : -1;
-        evt_tree_->parent2[evt_tree_->np] = ( p.mothers().size() > 1 ) ? *p.mothers().rbegin() : -1;
-        evt_tree_->status[evt_tree_->np] = (int)p.status();
-        evt_tree_->stable[evt_tree_->np] = ( (short)p.status() > 0 );
-        evt_tree_->charge[evt_tree_->np] = p.charge();
-        evt_tree_->role[evt_tree_->np] = p.role();
-
-        evt_tree_->np++;
-      }
+      evt_tree_->fill( ev, compress_ );
       run_tree_->num_events += 1;
-      evt_tree_->fill();
     }
 
     void
