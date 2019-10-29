@@ -15,6 +15,7 @@
 #include "TH2.h"
 #include "TH3.h"
 #include "TProfile.h"
+#include "TProfile2D.h"
 
 namespace cepgen
 {
@@ -38,9 +39,10 @@ namespace cepgen
       private:
         std::unique_ptr<TFile> file_;
         std::vector<std::pair<std::string,TH1*> > hists1d_;
-        std::vector<std::pair<std::vector<std::string>,TProfile*> > profiles1d_;
         std::vector<std::pair<std::vector<std::string>,TH2*> > hists2d_;
         std::vector<std::pair<std::vector<std::string>,TH3*> > hists3d_;
+        std::vector<std::pair<std::vector<std::string>,TProfile*> > profiles1d_;
+        std::vector<std::pair<std::vector<std::string>,TProfile2D*> > profiles2d_;
 
         const ParametersList variables_;
 
@@ -105,10 +107,16 @@ namespace cepgen
             vars[0].c_str(), vars[1].c_str(), vars[2].c_str(),
             vars[0].c_str(), vars[1].c_str(), vars[2].c_str(),
             vars[0].c_str(), vars[1].c_str(), vars[2].c_str() );
-          hists3d_.emplace_back( std::make_pair( vars,
-            new TH3D( key.c_str(), title.c_str(), nbins_x, min_x, max_x, nbins_y, min_y, max_y, nbins_z, min_z, max_z ) ) );
+          if ( profile )
+            profiles2d_.emplace_back( std::make_pair( vars,
+              new TProfile2D( key.c_str(), title.c_str(), nbins_x, min_x, max_x, nbins_y, min_y, max_y ) ) );
+          else
+            hists3d_.emplace_back( std::make_pair( vars,
+              new TH3D( key.c_str(), title.c_str(), nbins_x, min_x, max_x, nbins_y, min_y, max_y, nbins_z, min_z, max_z ) ) );
           CG_INFO( "ROOTHistsHandler" )
-            << "Booking a 3D correlation plot with " << utils::s( "bin", nbins_x+nbins_y+nbins_z )
+            << "Booking a "
+            << ( profile ? "2D profile" : "3D correlation plot" )
+            << " with " << utils::s( "bin", nbins_x+nbins_y+nbins_z )
             << " between (" << min_x << ", " << min_y << ", " << min_z << ")"
             << " and (" << max_x << ", " << max_y << ", " << max_z << ") "
             << "for \"" << merge( vars, " / " ) << "\".";
@@ -122,12 +130,14 @@ namespace cepgen
       //--- finalisation of the output file
       for ( const auto& hist : hists1d_ )
         hist.second->Write( hist.first.c_str() );
-      for ( const auto& hist : profiles1d_ )
-        hist.second->Write( merge( hist.first, "vs" ).c_str() );
       for ( const auto& hist : hists2d_ )
-        hist.second->Write( merge( hist.first, "_" ).c_str() );
+        hist.second->Write( merge( hist.first, "_vs_" ).c_str() );
       for ( const auto& hist : hists3d_ )
-        hist.second->Write( merge( hist.first, "_" ).c_str() );
+        hist.second->Write( merge( hist.first, "_vs_" ).c_str() );
+      for ( const auto& hist : profiles1d_ )
+        hist.second->Write( merge( hist.first, "_vs_" ).c_str() );
+      for ( const auto& hist : profiles2d_ )
+        hist.second->Write( merge( hist.first, "_vs_" ).c_str() );
       // ROOT and its sumptuous memory management disallows the "delete" here
       file_->Close();
     }
@@ -139,15 +149,20 @@ namespace cepgen
       for ( const auto& h_var : hists1d_ )
         h_var.second->Fill(
           browser_.get( ev, h_var.first ), xsec_ );
-      for ( const auto& h_var : profiles1d_ )
-        h_var.second->Fill(
-          browser_.get( ev, h_var.first[0] ),
-          browser_.get( ev, h_var.first[1] ), xsec_ );
       for ( const auto& h_var : hists2d_ )
         h_var.second->Fill(
           browser_.get( ev, h_var.first[0] ),
           browser_.get( ev, h_var.first[1] ), xsec_ );
       for ( const auto& h_var : hists3d_ )
+        h_var.second->Fill(
+          browser_.get( ev, h_var.first[0] ),
+          browser_.get( ev, h_var.first[1] ),
+          browser_.get( ev, h_var.first[2] ), xsec_ );
+      for ( const auto& h_var : profiles1d_ )
+        h_var.second->Fill(
+          browser_.get( ev, h_var.first[0] ),
+          browser_.get( ev, h_var.first[1] ), xsec_ );
+      for ( const auto& h_var : profiles2d_ )
         h_var.second->Fill(
           browser_.get( ev, h_var.first[0] ),
           browser_.get( ev, h_var.first[1] ),
