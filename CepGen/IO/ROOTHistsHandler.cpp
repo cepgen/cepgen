@@ -118,8 +118,8 @@ namespace cepgen
             << ( profile ? "2D profile" : "3D correlation plot" )
             << " with " << utils::s( "bin", nbins_x+nbins_y+nbins_z )
             << " between (" << min_x << ", " << min_y << ", " << min_z << ")"
-            << " and (" << max_x << ", " << max_y << ", " << max_z << ") "
-            << "for \"" << merge( vars, " / " ) << "\".";
+            << " and (" << max_x << ", " << max_y << ", " << max_z << ")"
+            << " for \"" << merge( vars, " / " ) << "\".";
           continue;
         }
       }

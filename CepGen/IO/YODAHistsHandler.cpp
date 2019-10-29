@@ -9,6 +9,8 @@
 
 #include "YODA/Histo1D.h"
 #include "YODA/Histo2D.h"
+#include "YODA/Profile1D.h"
+#include "YODA/Profile2D.h"
 
 #include "YODA/WriterYODA.h"
 #include "YODA/WriterAIDA.h"
@@ -39,6 +41,8 @@ namespace cepgen
         std::ofstream file_;
         std::vector<std::pair<std::string,YODA::Histo1D> > hists1d_;
         std::vector<std::pair<std::vector<std::string>,YODA::Histo2D> > hists2d_;
+        std::vector<std::pair<std::vector<std::string>,YODA::Profile1D> > profiles1d_;
+        std::vector<std::pair<std::vector<std::string>,YODA::Profile2D> > profiles2d_;
         const ParametersList variables_;
 
         double xsec_;
@@ -64,6 +68,7 @@ namespace cepgen
         nbins_x = hvars.get<int>( "nbins", nbins_x );
         double min_x = hvars.get<double>( "lowX", 0. ), max_x = hvars.get<double>( "highX", 1. );
         min_x = hvars.get<double>( "low", min_x ), max_x = hvars.get<double>( "high", max_x );
+        const bool profile = hvars.get<bool>( "profile", false );
         if ( vars.size() == 1 ) { // 1D histogram
           const auto title = Form( "d(sigma)/d(%s) (pb/bin)", key.c_str() );
           hists1d_.emplace_back( std::make_pair( key, YODA::Histo1D( nbins_x, min_x, max_x, key, title ) ) );
@@ -76,11 +81,30 @@ namespace cepgen
         const double min_y = hvars.get<double>( "lowY", 0. ), max_y = hvars.get<double>( "highY", 1. );
         if ( vars.size() == 2 ) { // 2D histogram
           const auto title = Form( "d^2(sigma)/d(%s)/d(%s) (pb/bin)", vars[0].c_str(), vars[1].c_str() );
-          hists2d_.emplace_back( std::make_pair( vars, YODA::Histo2D( nbins_x, min_x, max_x, nbins_y, min_y, max_y, key, title ) ) );
+          if ( profile )
+            profiles1d_.emplace_back( std::make_pair( vars, YODA::Profile1D( nbins_x, min_x, max_x, key, title ) ) );
+          else
+            hists2d_.emplace_back( std::make_pair( vars, YODA::Histo2D( nbins_x, min_x, max_x, nbins_y, min_y, max_y, key, title ) ) );
           CG_INFO( "YODAHistsHandler" )
-            << "Booking a 2D correlation plot with " << utils::s( "bin", nbins_x+nbins_y )
-            << " between (" << min_x << ", " << min_y << ") and (" << max_x << ", " << max_y << ") "
-            << "for \"" << merge( vars, " / " ) << "\".";
+            << "Booking a "
+            << ( profile ? "1D profile" : "2D correlation plot" )
+            << " with " << utils::s( "bin", nbins_x+nbins_y )
+            << " between (" << min_x << ", " << min_y << ") and (" << max_x << ", " << max_y << ")"
+            << " for \"" << merge( vars, " / " ) << "\".";
+          continue;
+        }
+        if ( vars.size() == 3 && profile ) {
+          const auto title = Form( "(%s / %s / %s) correlation;%s;%s;%s;d^{3}#sigma/d(%s)/d(%s)/d(%s) (pb/bin)",
+            vars[0].c_str(), vars[1].c_str(), vars[2].c_str(),
+            vars[0].c_str(), vars[1].c_str(), vars[2].c_str(),
+            vars[0].c_str(), vars[1].c_str(), vars[2].c_str() );
+          profiles2d_.emplace_back( std::make_pair( vars, YODA::Profile2D( nbins_x, min_x, max_x, nbins_y, min_y, max_y, key, title ) ) );
+          CG_INFO( "YODAHistsHandler" )
+            << "Booking a 2D profile"
+            << " with " << utils::s( "bin", nbins_x+nbins_y )
+            << " between (" << min_x << ", " << min_y << ")"
+            << " and (" << max_x << ", " << max_y << ")"
+            << " for \"" << merge( vars, " / " ) << "\".";
           continue;
         }
       }
@@ -95,6 +119,10 @@ namespace cepgen
         obj.emplace_back( &hist.second );
       for ( const auto& hist : hists2d_ )
         obj.emplace_back( &hist.second );
+      for ( const auto& hist : profiles1d_ )
+        obj.emplace_back( &hist.second );
+      for ( const auto& hist : profiles2d_ )
+        obj.emplace_back( &hist.second );
       T::write( file_, obj );
     }
 
@@ -108,6 +136,15 @@ namespace cepgen
         h_var.second.fillBin(
           browser_.get( ev, h_var.first[0] ),
           browser_.get( ev, h_var.first[1] ), xsec_ );
+      for ( auto& h_var : profiles1d_ )
+        h_var.second.fill(
+          browser_.get( ev, h_var.first[0] ),
+          browser_.get( ev, h_var.first[1] ), xsec_ );
+      for ( auto& h_var : profiles2d_ )
+        h_var.second.fill(
+          browser_.get( ev, h_var.first[0] ),
+          browser_.get( ev, h_var.first[1] ),
+          browser_.get( ev, h_var.first[2] ), xsec_ );
     }
   }
 }
