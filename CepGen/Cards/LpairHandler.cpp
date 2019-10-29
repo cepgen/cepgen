@@ -3,6 +3,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Integrator.h"
+#include "CepGen/Core/utils.h"
 
 #include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/Core/EventModifierHandler.h"
@@ -255,17 +256,6 @@ namespace cepgen
       if ( p_bools_.count( key ) )
         return p_bools_.find( key )->second.description;
       return "null";
-    }
-
-    std::vector<std::string>
-    LpairHandler::split( const std::string& str, char delim )
-    {
-      std::vector<std::string> out;
-      std::string token;
-      std::istringstream iss( str );
-      while ( std::getline( iss, token, delim ) )
-        out.emplace_back( token );
-      return out;
     }
   }
 }

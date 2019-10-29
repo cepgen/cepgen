@@ -30,6 +30,8 @@ namespace cepgen
   inline std::string colourise( const std::string& str, const Colour& col ) { return Form( "\033[%d%s\033[0m", (int)col, str.c_str() ); }
   /// Replace all occurences of a text by another
   size_t replace_all( std::string& str, const std::string& from, const std::string& to );
+  std::vector<std::string> split( const std::string&, char );
+  std::string merge( const std::vector<std::string>&, const std::string& );
   namespace utils
   {
     /// Add a trailing "s" when needed

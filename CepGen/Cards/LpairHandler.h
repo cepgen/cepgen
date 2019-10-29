@@ -20,7 +20,6 @@ namespace cepgen
 
         /// Store a configuration into a LPAIR steering card
         void store( const char* file );
-        static std::vector<std::string> split( const std::string&, char );
 
       private:
         /// Single parameter handler
