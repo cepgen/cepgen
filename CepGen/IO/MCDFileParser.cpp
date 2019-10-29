@@ -1,4 +1,5 @@
 #include "CepGen/IO/MCDFileParser.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Core/Exception.h"
 
 #include <iostream>

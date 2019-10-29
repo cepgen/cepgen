@@ -69,6 +69,7 @@ namespace cepgen
         pdg::MCDFileParser::parse( get<std::string>( ppdg ).c_str() );
         Py_CLEAR( ppdg );
       }
+
       //--- additional particles definition
       PyObject* pextp = PyObject_GetAttrString( cfg, PDGLIST_NAME ); // new
       if ( pextp ) {
