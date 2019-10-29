@@ -1,5 +1,5 @@
-#ifndef CepGenAddOns_IO_HepMCEventInterface_h
-#define CepGenAddOns_IO_HepMCEventInterface_h
+#ifndef CepGenAddOns_EventInterfaces_HepMCEventInterface_h
+#define CepGenAddOns_EventInterfaces_HepMCEventInterface_h
 
 #ifdef HEPMC3
 # include "HepMC3/GenEvent.h"

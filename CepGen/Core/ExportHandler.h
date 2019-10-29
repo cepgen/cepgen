@@ -1,5 +1,5 @@
-#ifndef CepGen_IO_ExportHandler_h
-#define CepGen_IO_ExportHandler_h
+#ifndef CepGen_Core_ExportHandler_h
+#define CepGen_Core_ExportHandler_h
 
 #include "CepGen/Core/ModuleFactory.h"
 #include "CepGen/Core/GenericExportHandler.h"

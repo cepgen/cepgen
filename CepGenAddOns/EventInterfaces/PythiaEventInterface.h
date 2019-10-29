@@ -1,5 +1,5 @@
-#ifndef CepGenAddOns_IO_PythiaEventInterface_h
-#define CepGenAddOns_IO_PythiaEventInterface_h
+#ifndef CepGenAddOns_EventInterfaces_PythiaEventInterface_h
+#define CepGenAddOns_EventInterfaces_PythiaEventInterface_h
 
 #include <Pythia8/Pythia.h>
 #include <unordered_map>

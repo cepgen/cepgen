@@ -1,5 +1,5 @@
-#ifndef CepGen_IO_ROOTTreeInfo_h
-#define CepGen_IO_ROOTTreeInfo_h
+#ifndef CepGen_EventInterfaces_ROOTTreeInfo_h
+#define CepGen_EventInterfaces_ROOTTreeInfo_h
 
 #include "TFile.h"
 #include "TTree.h"

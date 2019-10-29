@@ -1,4 +1,4 @@
-#include "CepGenAddOns/IO/PythiaEventInterface.h"
+#include "CepGenAddOns/EventInterfaces/PythiaEventInterface.h"
 
 #include "CepGen/Core/GenericHadroniser.h"
 #include "CepGen/Core/EventModifierHandler.h"
