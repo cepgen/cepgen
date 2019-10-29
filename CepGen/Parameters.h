@@ -31,11 +31,6 @@ namespace cepgen
 
       /// Assignment operator
       Parameters& operator=( Parameters );
-
-      /// Set the polar angle range for the produced leptons
-      /// \param[in] thetamin The minimal value of \f$\theta\f$ for the outgoing leptons
-      /// \param[in] thetamax The maximal value of \f$\theta\f$ for the outgoing leptons
-      void setThetaRange( float thetamin, float thetamax );
       /// Dump the input parameters in the terminal
       friend std::ostream& operator<<( std::ostream&, const Parameters* );
 

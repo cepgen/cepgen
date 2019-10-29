@@ -61,19 +61,6 @@ namespace cepgen
   }
 
   void
-  Parameters::setThetaRange( float thetamin, float thetamax )
-  {
-    kinematics.cuts.central.eta_single = {
-      Particle::thetaToEta( thetamax ),
-      Particle::thetaToEta( thetamin )
-    };
-
-    CG_DEBUG( "Parameters" )
-      << "eta in range: " << kinematics.cuts.central.eta_single
-      << " => theta(min) = " << thetamin << ", theta(max) = " << thetamax << ".";
-  }
-
-  void
   Parameters::prepareRun()
   {
     //--- first-run preparation
