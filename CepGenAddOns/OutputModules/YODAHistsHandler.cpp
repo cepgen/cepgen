@@ -10,6 +10,7 @@
 #include "YODA/Histo2D.h"
 #include "YODA/Profile1D.h"
 #include "YODA/Profile2D.h"
+#include "YODA/Counter.h"
 
 #include "YODA/WriterYODA.h"
 #include "YODA/WriterAIDA.h"
@@ -42,6 +43,7 @@ namespace cepgen
         std::vector<std::pair<std::vector<std::string>,YODA::Histo2D> > hists2d_;
         std::vector<std::pair<std::vector<std::string>,YODA::Profile1D> > profiles1d_;
         std::vector<std::pair<std::vector<std::string>,YODA::Profile2D> > profiles2d_;
+        YODA::Counter weight_cnt_;
         const ParametersList variables_;
 
         double xsec_;
@@ -122,6 +124,7 @@ namespace cepgen
         obj.emplace_back( &hist.second );
       for ( const auto& hist : profiles2d_ )
         obj.emplace_back( &hist.second );
+      obj.emplace_back( &weight_cnt_ );
       T::write( file_, obj );
     }
 
@@ -144,6 +147,7 @@ namespace cepgen
           browser_.get( ev, h_var.first[0] ),
           browser_.get( ev, h_var.first[1] ),
           browser_.get( ev, h_var.first[2] ), xsec_ );
+      weight_cnt_.fill( ev.weight );
     }
   }
 }

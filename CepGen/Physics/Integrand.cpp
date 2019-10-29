@@ -167,6 +167,7 @@ namespace cepgen
       //================================================================
 
       if ( params->storage() ) {
+        ev->weight = weight;
         proc->last_event = ev;
         proc->last_event->time_total = tmr.elapsed();
 
