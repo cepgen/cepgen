@@ -57,6 +57,10 @@ namespace cepgen
   std::string
   merge( const std::vector<std::string>& vec, const std::string& delim )
   {
+    if ( vec.empty() )
+      return std::string();
+    if ( vec.size() == 1 )
+      return vec.at( 0 );
     std::ostringstream oss;
     std::copy( vec.begin(), std::prev( vec.end() ), std::ostream_iterator<std::string>( oss, delim.c_str() ) );
     return oss.str()+*vec.rbegin();
