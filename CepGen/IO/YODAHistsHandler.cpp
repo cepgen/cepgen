@@ -8,6 +8,7 @@
 #include "CepGen/Event/EventBrowser.h"
 
 #include "YODA/Histo1D.h"
+#include "YODA/Histo2D.h"
 
 #include "YODA/WriterYODA.h"
 #include "YODA/WriterAIDA.h"
@@ -36,7 +37,8 @@ namespace cepgen
 
       private:
         std::ofstream file_;
-        std::vector<std::pair<std::string,YODA::Histo1D> > hists_;
+        std::vector<std::pair<std::string,YODA::Histo1D> > hists1d_;
+        std::vector<std::pair<std::vector<std::string>,YODA::Histo2D> > hists2d_;
         const ParametersList variables_;
 
         double xsec_;
@@ -50,16 +52,37 @@ namespace cepgen
       variables_( params.get<ParametersList>( "variables" ) ),
       xsec_( 1. )
     {
-      //--- extract list of variables to be plotted in histograms
-      for ( const auto& var : variables_.keys() ) {
-        const auto& hvar = variables_.get<ParametersList>( var );
-        const int nbins = hvar.get<int>( "nbins", 10 );
-        const double min = hvar.get<double>( "low", 0. ), max = hvar.get<double>( "high", 1. );
-        const auto title = Form( "d(sigma)/d(%s) (pb/bin)", var.c_str() );
-        hists_.emplace_back( std::make_pair( var, YODA::Histo1D( nbins, min, max, var, title ) ) );
-        CG_DEBUG( "YODAHistsHandler" )
-          << "Booking a histogram with " << nbins << " bin" << utils::s( nbins )
-          << " between " << min << " and " << max << " for \"" << var << "\".";
+      //--- extract list of variables/correlations to be plotted in histograms
+      for ( const auto& key : variables_.keys() ) {
+        const auto& vars = split( key, ':' );
+        if ( vars.size() < 1 || vars.size() > 3 )
+          throw CG_FATAL( "YODAHistsHandler" )
+            << "Invalid number of variables to correlate for '" << key << "'!";
+
+        const auto& hvars = variables_.get<ParametersList>( key );
+        int nbins_x = hvars.get<int>( "nbinsX", 10 );
+        nbins_x = hvars.get<int>( "nbins", nbins_x );
+        double min_x = hvars.get<double>( "lowX", 0. ), max_x = hvars.get<double>( "highX", 1. );
+        min_x = hvars.get<double>( "low", min_x ), max_x = hvars.get<double>( "high", max_x );
+        if ( vars.size() == 1 ) { // 1D histogram
+          const auto title = Form( "d(sigma)/d(%s) (pb/bin)", key.c_str() );
+          hists1d_.emplace_back( std::make_pair( key, YODA::Histo1D( nbins_x, min_x, max_x, key, title ) ) );
+          CG_INFO( "YODAHistsHandler" )
+            << "Booking a histogram with " << utils::s( "bin", nbins_x )
+            << " between " << min_x << " and " << max_x << " for \"" << vars[0] << "\".";
+          continue;
+        }
+        const int nbins_y = hvars.get<int>( "nbinsY", 10 );
+        const double min_y = hvars.get<double>( "lowY", 0. ), max_y = hvars.get<double>( "highY", 1. );
+        if ( vars.size() == 2 ) { // 2D histogram
+          const auto title = Form( "d^2(sigma)/d(%s)/d(%s) (pb/bin)", vars[0].c_str(), vars[1].c_str() );
+          hists2d_.emplace_back( std::make_pair( vars, YODA::Histo2D( nbins_x, min_x, max_x, nbins_y, min_y, max_y, key, title ) ) );
+          CG_INFO( "YODAHistsHandler" )
+            << "Booking a 2D correlation plot with " << utils::s( "bin", nbins_x+nbins_y )
+            << " between (" << min_x << ", " << min_y << ") and (" << max_x << ", " << max_y << ") "
+            << "for \"" << merge( vars, " / " ) << "\".";
+          continue;
+        }
       }
     }
 
@@ -68,7 +91,9 @@ namespace cepgen
     {
       std::vector<const YODA::AnalysisObject*> obj;
       //--- finalisation of the output file
-      for ( const auto& hist : hists_ )
+      for ( const auto& hist : hists1d_ )
+        obj.emplace_back( &hist.second );
+      for ( const auto& hist : hists2d_ )
         obj.emplace_back( &hist.second );
       T::write( file_, obj );
     }
@@ -77,8 +102,12 @@ namespace cepgen
     YODAHistsHandler<T>::operator<<( const Event& ev )
     {
       //--- increment the corresponding histograms
-      for ( auto& h_var : hists_ )
+      for ( auto& h_var : hists1d_ )
         h_var.second.fillBin( browser_.get( ev, h_var.first ), xsec_ );
+      for ( auto& h_var : hists2d_ )
+        h_var.second.fillBin(
+          browser_.get( ev, h_var.first[0] ),
+          browser_.get( ev, h_var.first[1] ), xsec_ );
     }
   }
 }

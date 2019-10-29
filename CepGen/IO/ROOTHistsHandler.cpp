@@ -65,7 +65,7 @@ namespace cepgen
         double min_x = hvars.get<double>( "lowX", 0. ), max_x = hvars.get<double>( "highX", 1. );
         min_x = hvars.get<double>( "low", min_x ), max_x = hvars.get<double>( "high", max_x );
         if ( vars.size() == 1 ) { // 1D histogram
-          const auto title = Form( "%s;%s;d#sigma/d(%s) (pb/bin)", vars[0].c_str(), vars[0].c_str(), vars[0].c_str() );
+          const auto title = Form( "%s;%s;d#sigma/d(%s) (pb/bin)", key.c_str(), key.c_str(), key.c_str() );
           hists1d_.emplace_back( std::make_pair( vars[0], new TH1D( key.c_str(), title.c_str(),
             nbins_x, min_x, max_x ) ) );
           CG_INFO( "ROOTHistsHandler" )
@@ -76,7 +76,7 @@ namespace cepgen
         const int nbins_y = hvars.get<int>( "nbinsY", 10 );
         const double min_y = hvars.get<double>( "lowY", 0. ), max_y = hvars.get<double>( "highY", 1. );
         if ( vars.size() == 2 ) { // 2D histogram
-          const auto title = Form( "(%s / %s) correlation;%s;%s;d^{2}#sigma/d(%s)d(%s) (pb/bin)",
+          const auto title = Form( "(%s / %s) correlation;%s;%s;d^{2}#sigma/d(%s)/d(%s) (pb/bin)",
             vars[0].c_str(), vars[1].c_str(),
             vars[0].c_str(), vars[1].c_str(),
             vars[0].c_str(), vars[1].c_str() );
@@ -91,7 +91,7 @@ namespace cepgen
         const int nbins_z = hvars.get<int>( "nbinsZ", 10 );
         const double min_z = hvars.get<double>( "lowZ", 0. ), max_z = hvars.get<double>( "highZ", 1. );
         if ( vars.size() == 3 ) { // 3D histogram
-          const auto title = Form( "(%s / %s / %s) correlation;%s;%s;%s;d^{3}#sigma/d(%s)d(%s)d(%s) (pb/bin)",
+          const auto title = Form( "(%s / %s / %s) correlation;%s;%s;%s;d^{3}#sigma/d(%s)/d(%s)/d(%s) (pb/bin)",
             vars[0].c_str(), vars[1].c_str(), vars[2].c_str(),
             vars[0].c_str(), vars[1].c_str(), vars[2].c_str(),
             vars[0].c_str(), vars[1].c_str(), vars[2].c_str() );
