@@ -9,30 +9,15 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
 
-#ifdef HEPMC3
+#if defined( HEPMC3 ) || defined( HEPMC_VERSION_CODE )
 #  include "HepMC3/Version.h"
 #  define HEPMC_VERSION HEPMC3_VERSION
 #  define HEPMC_VERSION_CODE HEPMC3_VERSION_CODE
-#  include "HepMC3/WriterAscii.h"
-#  include "HepMC3/WriterAsciiHepMC2.h"
-#  include "HepMC3/WriterHEPEVT.h"
-#  ifdef HEPMC3_ROOTIO
-#    include "HepMC3/WriterRoot.h"
-#    include "HepMC3/WriterRootTree.h"
-#  endif
-#  ifdef HEPMC3_EXTRA_PLUGINS
-#    include "ConvertExample/include/WriterDOT.h"
+#  if !defined( HEPMC3 )
+#    define HEPMC3
 #  endif
 #else
 #  include "HepMC/Version.h"
-#  if !defined( HEPMC_VERSION_CODE ) // HepMC v2
-#    include "HepMC/IO_GenEvent.h"
-#    include "HepMC/IO_AsciiParticles.h"
-#  else
-#    include "HepMC/WriterAscii.h"
-#    include "HepMC/WriterHEPEVT.h"
-#    define HEPMC3
-#  endif
 #endif
 
 #include <memory>
@@ -124,26 +109,43 @@ namespace cepgen
   }
 }
 
+//----------------------------------------------------------------------
+// Defining the various templated plugins made available by this
+// specific version of HepMC
+//----------------------------------------------------------------------
+
+//--- HepMC version 3 and above
 #ifdef HEPMC3
+#  include "HepMC3/WriterAscii.h"
+#  include "HepMC3/WriterHEPEVT.h"
 typedef cepgen::io::HepMCHandler<WriterAscii> HepMC3Handler;
 typedef cepgen::io::HepMCHandler<WriterHEPEVT> HepMC3HEPEVTHandler;
 REGISTER_IO_MODULE( "hepmc", HepMC3Handler )
 REGISTER_IO_MODULE( "hepevt", HepMC3HEPEVTHandler )
 #  if HEPMC_VERSION_CODE >= 3001000
+#  include "HepMC3/WriterAsciiHepMC2.h"
 typedef cepgen::io::HepMCHandler<WriterAsciiHepMC2> HepMC3HepMC2Handler;
 REGISTER_IO_MODULE( "hepmc2", HepMC3HepMC2Handler )
 #  endif
 #  ifdef HEPMC3_ROOTIO
+#    include "HepMC3/WriterRoot.h"
+#    include "HepMC3/WriterRootTree.h"
 typedef cepgen::io::HepMCHandler<WriterRoot> HepMC3RootHandler;
 typedef cepgen::io::HepMCHandler<WriterRootTree> HepMC3RootTreeHandler;
 REGISTER_IO_MODULE( "hepmc_root", HepMC3RootHandler )
 REGISTER_IO_MODULE( "hepmc_root_tree", HepMC3RootTreeHandler )
 #  endif
 #  ifdef HEPMC3_EXTRA_PLUGINS
-typedef cepgen::io::HepMCHandler<HepMC3::WriterDOT> HepMC3DOTHandler;
-REGISTER_IO_MODULE( "hepmc_dot", HepMC3DOTHandler )
+#    include "ConvertExample/include/WriterDOT.h"
+#    include "ConvertExample/include/WriterRootTreeOPAL.h"
+typedef cepgen::io::HepMCHandler<WriterDOT> HepMC3DOTHandler;
+typedef cepgen::io::HepMCHandler<WriterRootTreeOPAL> HepMC3RootTreeOPALHandler;
+REGISTER_IO_MODULE( "hepmc_root_tree_opal", HepMC3RootTreeOPALHandler )
 #  endif
-#else // HepMC version 2 and below
+//--- HepMC version 2 and below
+#else
+#  include "HepMC/IO_GenEvent.h"
+#  include "HepMC/IO_AsciiParticles.h"
 typedef cepgen::io::HepMCHandler<IO_GenEvent> HepMC2Handler;
 typedef cepgen::io::HepMCHandler<IO_AsciiParticles> HepMC2AsciiHandler;
 REGISTER_IO_MODULE( "hepmc", HepMC2Handler )
