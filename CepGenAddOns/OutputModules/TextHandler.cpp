@@ -13,7 +13,6 @@
 
 #include <iomanip>
 #include <fstream>
-#include <regex>
 
 namespace cepgen
 {

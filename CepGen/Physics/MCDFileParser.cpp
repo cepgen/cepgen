@@ -2,7 +2,6 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Core/Exception.h"
 
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>

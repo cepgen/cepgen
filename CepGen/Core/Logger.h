@@ -37,7 +37,7 @@ namespace cepgen
         /// \param[in] rule Regex rule to handle
         void addExceptionRule( const std::string& rule ) {
 #if !defined(__CINT__) && !defined(__CLING__)
-          allowed_exc_.emplace_back( rule );
+          allowed_exc_.emplace_back( rule, std::regex_constants::basic );
 #endif
         }
         /// \brief Is the module set to be displayed/logged?
@@ -50,8 +50,12 @@ namespace cepgen
           if ( allowed_exc_.empty() )
             return false;
           for ( const auto& rule : allowed_exc_ )
-            if ( std::regex_match( tmpl, rule ) )
-              return true;
+            try {
+              if ( std::regex_match( tmpl, rule ) )
+                return true;
+            } catch ( const std::regex_error& err ) {
+              throw std::runtime_error( "Failed to evaluate regex for logging tool.\n"+std::string( err.what() ) );
+            }
 #endif
           return false;
         }
