@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <iterator>
 #include <algorithm>
+#include <sstream>
 
 #include <math.h>
 #include <stdarg.h>  // For va_start, etc.

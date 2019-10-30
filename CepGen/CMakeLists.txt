@@ -5,6 +5,7 @@ file(GLOB sf_sources StructureFunctions/*.cpp)
 include_directories(${PROJECT_SOURCE_DIR})
 
 message(STATUS "GSL found in ${GSL_LIB}")
+message(STATUS "GSL CBLAS found in ${GSL_CBLAS_LIB}")
 
 set(core_libraries ${GSL_LIB} ${GSL_CBLAS_LIB})
 set(core_definitions)
