@@ -36,7 +36,7 @@ elseif(EXPRTK)
 elseif(ROOT_FOUND)
   message(STATUS "Formulas parsing will use ROOT")
   add_definitions(-DFUNC_ROOT)
-  list(APPEND core_include ${ROOT_INCLUDE_DIRS})
+  list(APPEND core_includes ${ROOT_INCLUDE_DIRS})
   list(APPEND core_libraries ${ROOT_LIBRARIES})
 endif()
 
