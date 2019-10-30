@@ -20,6 +20,9 @@
 #    include "HepMC3/WriterRoot.h"
 #    include "HepMC3/WriterRootTree.h"
 #  endif
+#  ifdef HEPMC3_EXTRA_PLUGINS
+#    include "ConvertExample/include/WriterDOT.h"
+#  endif
 #else
 #  include "HepMC/Version.h"
 #  if !defined( HEPMC_VERSION_CODE ) // HepMC v2
@@ -136,10 +139,13 @@ typedef cepgen::io::HepMCHandler<WriterRootTree> HepMC3RootTreeHandler;
 REGISTER_IO_MODULE( "hepmc_root", HepMC3RootHandler )
 REGISTER_IO_MODULE( "hepmc_root_tree", HepMC3RootTreeHandler )
 #  endif
+#  ifdef HEPMC3_EXTRA_PLUGINS
+typedef cepgen::io::HepMCHandler<HepMC3::WriterDOT> HepMC3DOTHandler;
+REGISTER_IO_MODULE( "hepmc_dot", HepMC3DOTHandler )
+#  endif
 #else // HepMC version 2 and below
 typedef cepgen::io::HepMCHandler<IO_GenEvent> HepMC2Handler;
 typedef cepgen::io::HepMCHandler<IO_AsciiParticles> HepMC2AsciiHandler;
 REGISTER_IO_MODULE( "hepmc", HepMC2Handler )
 REGISTER_IO_MODULE( "hepmc_ascii", HepMC2AsciiHandler )
 #endif
-
