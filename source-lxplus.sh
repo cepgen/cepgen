@@ -26,6 +26,7 @@ export PYTHONHOME=${LCG_DIR}/Python/3.9.12/${ARCH}
 export PATH=${PYTHONHOME}/bin:${PATH}
 #--- extra utilities
 export APFEL_DIR=${LCG_DIR}/MCGenerators/apfel/3.0.6/${ARCH}
+export CERNLIB_DIR=/cvmfs/sft.cern.ch/lcg/external/cernlib/2006b/i686-centos8-gcc8-opt
 export HEPMC_DIR=${LCG_DIR}/HepMC/2.06.11/${ARCH}
 export HEPMC3_DIR=${LCG_DIR}/hepmc3/3.2.6/${ARCH}
 export LHAPDF_PATH=${LCG_DIR}/MCGenerators/lhapdf/6.5.3/${ARCH}
