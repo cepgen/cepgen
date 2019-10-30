@@ -1,7 +1,7 @@
 #include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Core/EventModifierHandler.h"
-#include "CepGen/IO/ExportHandler.h"
+#include "CepGen/Core/ExportHandler.h"
 
 #include "CepGen/Version.h"
 
