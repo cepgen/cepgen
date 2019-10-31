@@ -3,8 +3,8 @@ from Config.Integration.vegas_cff import integrator
 from Config.PDG_cfi import PDG
 
 #--- example of a hadronisation algorithm steering
-#from Config.Hadronisation.pythia6_cff import pythia6 as hadroniser
-#from Config.Hadronisation.pythia8_cff import pythia8 as hadroniser
+#from Config.Hadronisation.pythia6_cff import pythia6
+#from Config.Hadronisation.pythia8_cff import pythia8
 
 process = cepgen.Module('lpair',
     processParameters = cepgen.Parameters(
@@ -28,6 +28,11 @@ process = cepgen.Module('lpair',
     #    cepgen.Parameters(variable = "m(4)", expression = "(m(4)>80.) ? exp(-(m(4)-80)/10) : 1.0"),
     #],
 )
+
+#--- example of an events modification procedure
+#eventSequence = cepgen.Sequence(
+#    pythia8
+#)
 
 #--- example of an output module parameterisation
 #output = cepgen.Module('text', variables = ['nev', 'm(4)', 'tgen'], histVariables={'m(4)': cepgen.Parameters(low=0., high=250.)})
