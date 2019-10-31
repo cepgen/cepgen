@@ -72,14 +72,14 @@ namespace pdg
             is_fermion = true;
             break;
           case 11: case 12: case 13: case 14: case 15: case 16:
-            colour_ch = 0;
+            colour_ch = 1;
             is_fermion = true;
             break;
           case 21:
             colour_ch = 9;
             is_fermion = false;
           default:
-            colour_ch = 0;
+            colour_ch = 1;
             is_fermion = false;
             break;
         }

@@ -191,16 +191,16 @@ namespace cepgen
       // compute the integrand and combine together into a single weight for the phase space point.
       //============================================================================================
 
-      const double integrand = computeKTFactorisedMatrixElement();
-      if ( integrand <= 0. )
+      const double me_integrand = computeKTFactorisedMatrixElement();
+      if ( me_integrand <= 0. )
         return 0.;
 
-      const double weight = ( kt_jacobian_*aux_jacobian ) * integrand;
+      const double weight = ( kt_jacobian_*aux_jacobian ) * me_integrand;
 
       CG_DEBUG_LOOP( "GenericKTProcess:weight" )
         << "Jacobian: " << kt_jacobian_ << " * " << aux_jacobian
         << " = " << ( kt_jacobian_*aux_jacobian ) << ".\n\t"
-        << "Integrand = " << integrand << "\n\t"
+        << "Integrand = " << me_integrand << "\n\t"
         << "dW = " << weight << ".";
 
       return weight;
