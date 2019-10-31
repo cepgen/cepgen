@@ -1,7 +1,7 @@
 #ifndef CepGen_Processes_GamGamLL_h
 #define CepGen_Processes_GamGamLL_h
 
-#include "CepGen/Core/GenericProcess.h"
+#include "CepGen/Modules/Process.h"
 
 namespace cepgen
 {
@@ -30,7 +30,7 @@ namespace cepgen
      * \brief Compute the matrix element for a CE \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
      *  process
      */
-    class GamGamLL : public GenericProcess
+    class GamGamLL : public Process
     {
       public:
         /// \brief Class constructor: set the mandatory parameters before integration and events generation

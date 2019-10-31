@@ -1,9 +1,8 @@
 #include "CepGenAddOns/EventInterfaces/HepMCEventInterface.h"
+#include "CepGen/Core/ExportModuleHandler.h"
+#include "CepGen/Core/Exception.h"
 
 #include "CepGen/Parameters.h"
-
-#include "CepGen/Core/ExportHandler.h"
-#include "CepGen/Core/Exception.h"
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
@@ -32,7 +31,7 @@ namespace cepgen
     /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
     /// \date Sep 2016
     template<typename T>
-    class HepMCHandler : public GenericExportHandler
+      class HepMCHandler : public ExportModule
     {
       public:
         /// Class constructor
@@ -57,7 +56,7 @@ namespace cepgen
 
     template<typename T>
     HepMCHandler<T>::HepMCHandler( const ParametersList& params ) :
-      GenericExportHandler( params ),
+      ExportModule( params ),
       output_( new T( params.get<std::string>( "filename", "output.hepmc" ).c_str() ) ),
       xs_( new GenCrossSection )
 #ifdef HEPMC3

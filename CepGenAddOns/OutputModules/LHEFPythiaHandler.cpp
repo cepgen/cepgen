@@ -1,6 +1,6 @@
 #include "CepGenAddOns/EventInterfaces/PythiaEventInterface.h"
+#include "CepGen/Core/ExportModuleHandler.h"
 
-#include "CepGen/Core/ExportHandler.h"
 #include "CepGen/Event/Event.h"
 
 #include "Pythia8/Pythia.h"
@@ -16,7 +16,7 @@ namespace cepgen
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Sep 2016
      */
-    class LHEFPythiaHandler : public GenericExportHandler
+    class LHEFPythiaHandler : public ExportModule
     {
       public:
         /// Class constructor
@@ -35,7 +35,7 @@ namespace cepgen
     };
 
     LHEFPythiaHandler::LHEFPythiaHandler( const ParametersList& params ) :
-      GenericExportHandler( params ),
+      ExportModule( params ),
       pythia_( new Pythia8::Pythia ), lhaevt_( new Pythia8::CepGenEvent ),
       compress_( params.get<bool>( "compress", true ) )
     {

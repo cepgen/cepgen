@@ -17,7 +17,7 @@
  * Soon after the integration of its matrix element, it was extended as a tool to compute and
  * generate events for any generic 2\f$\rightarrow\f$ 3 central exclusive process.
  * To do so, the main operation performed here is the integration of the matrix element (given as a
- * subset of a GenericProcess object) over the full available phase space.
+ * subset of a Process object) over the full available phase space.
  *
  */
 
@@ -57,7 +57,7 @@ namespace cepgen
    * value of the array \f${\bf x}\f$ are computed in the \a f-function defined
    * outside (but populated inside) this object.
    *
-   * This f-function embeds a GenericProcess-inherited object which defines all the
+   * This f-function embeds a Process-inherited object which defines all the
    * methods to compute this differential cross-section as well as the in- and outgoing
    * kinematics associated to each particle.
    *

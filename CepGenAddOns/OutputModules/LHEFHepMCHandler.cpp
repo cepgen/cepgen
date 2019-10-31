@@ -1,4 +1,4 @@
-#include "CepGen/Core/ExportHandler.h"
+#include "CepGen/Core/ExportModuleHandler.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Parameters.h"
 
@@ -26,7 +26,7 @@ namespace cepgen
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Sep 2016
      */
-    class LHEFHepMCHandler : public GenericExportHandler
+    class LHEFHepMCHandler : public ExportModule
     {
       public:
         /// Class constructor
@@ -45,7 +45,7 @@ namespace cepgen
     };
 
     LHEFHepMCHandler::LHEFHepMCHandler( const ParametersList& params ) :
-      GenericExportHandler( params ),
+      ExportModule( params ),
       lhe_output_( new LHEF::Writer( params.get<std::string>( "filename", "output.lhe" ) ) ),
       compress_( params.get<bool>( "compress", true ) )
     {}

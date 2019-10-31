@@ -8,9 +8,9 @@
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/PDG.h"
 
-#include "CepGen/Core/GenericProcess.h"
-#include "CepGen/Core/EventModifier.h"
-#include "CepGen/Core/GenericExportHandler.h"
+#include "CepGen/Modules/Process.h"
+#include "CepGen/Modules/EventModifier.h"
+#include "CepGen/Modules/ExportModule.h"
 
 #include "CepGen/Parameters.h"
 
@@ -35,7 +35,7 @@ namespace cepgen
       if ( !func_params || !( params = static_cast<Parameters*>( func_params ) ) )
         throw CG_FATAL( "Integrand" ) << "Failed to retrieve the run parameters!";
 
-      proc::GenericProcess* proc = params->process();
+      proc::Process* proc = params->process();
       if ( !proc )
         throw CG_FATAL( "Integrand" ) << "Failed to retrieve the process!";
 

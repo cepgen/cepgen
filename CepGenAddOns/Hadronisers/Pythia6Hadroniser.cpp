@@ -1,4 +1,5 @@
-#include "CepGen/Core/GenericHadroniser.h"
+#include "CepGen/Modules/Hadroniser.h"
+
 #include "CepGen/Core/EventModifierHandler.h"
 #include "CepGen/Core/ParametersList.h" //FIXME
 #include "CepGen/Core/Exception.h"
@@ -56,10 +57,10 @@ namespace cepgen
      * Full interface to the Pythia 6 algorithm. It can be used in a single particle decay mode as well as a full event hadronisation using the string model, as in Jetset.
      * \brief Pythia 6 hadronisation algorithm
      */
-    class Pythia6Hadroniser : public GenericHadroniser
+    class Pythia6Hadroniser : public Hadroniser
     {
       public:
-        explicit Pythia6Hadroniser( const ParametersList& );
+        using Hadroniser::Hadroniser;
 
         void setParameters( const Parameters& ) override {}
         inline void readString( const char* param ) override { pygive( param ); }
@@ -97,10 +98,6 @@ namespace cepgen
         std::pair<short,short> pickPartonsContent() const;
         unsigned int fillParticles( const Event& ) const;
     };
-
-    Pythia6Hadroniser::Pythia6Hadroniser( const ParametersList& plist ) :
-      GenericHadroniser( plist, "pythia6" )
-    {}
 
     const std::unordered_map<Particle::Status,int>
     Pythia6Hadroniser::kStatusMatchMap = {
@@ -308,7 +305,7 @@ namespace cepgen
             if ( jlpsf[i][j] != -1 )
               dbg << Form( "\n\t * %2d (pdgId=%4d)", jlpsf[i][j], pyjets_.k[1][jlpsf[i][j]-1] );
           CG_DEBUG( "Pythia6Hadroniser" )
-            << "Joining " << num_part_in_str[i] << " particle" << utils::s( num_part_in_str[i] )
+            << "Joining " << utils::s( "particle", num_part_in_str[i] )
             << " with " << ev[jlpsf[i][0]].role() << " role"
             << " in a same string (id=" << i << ")"
             << dbg.str();

@@ -1,4 +1,4 @@
-#include "CepGen/Core/ExportHandler.h"
+#include "CepGen/Core/ExportModuleHandler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
@@ -22,7 +22,7 @@ namespace cepgen
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Jul 2019
      */
-    class TextHandler : public GenericExportHandler
+    class TextHandler : public ExportModule
     {
       public:
         explicit TextHandler( const ParametersList& );
@@ -66,7 +66,7 @@ namespace cepgen
     };
 
     TextHandler::TextHandler( const ParametersList& params ) :
-      GenericExportHandler( params ),
+      ExportModule( params ),
       file_          ( params.get<std::string>( "filename", "output.txt" ) ),
       hist_filename_ ( params.get<std::string>( "histFilename", "output.hists.txt" ) ),
       variables_     ( params.get<std::vector<std::string> >( "variables" ) ),

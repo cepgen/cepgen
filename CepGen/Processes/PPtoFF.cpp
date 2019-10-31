@@ -1,7 +1,7 @@
-#include "CepGen/Core/Process2to4.h"
-#include "CepGen/Core/Exception.h"
-
+#include "CepGen/Processes/Process2to4.h"
 #include "CepGen/Processes/ProcessesHandler.h"
+
+#include "CepGen/Core/Exception.h"
 
 #include "CepGen/Event/Event.h"
 

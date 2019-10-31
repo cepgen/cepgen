@@ -7,9 +7,9 @@
 #include "CepGen/Physics/TamingFunction.h"
 #include "CepGen/Physics/PDG.h"
 
-#include "CepGen/Core/GenericProcess.h"
-#include "CepGen/Core/EventModifier.h"
-#include "CepGen/Core/GenericExportHandler.h"
+#include "CepGen/Modules/Process.h"
+#include "CepGen/Modules/EventModifier.h"
+#include "CepGen/Modules/ExportModule.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
@@ -88,13 +88,13 @@ namespace cepgen
     num_gen_events_++;
   }
 
-  proc::GenericProcess*
+  proc::Process*
   Parameters::process()
   {
     return process_.get();
   }
 
-  const proc::GenericProcess*
+  const proc::Process*
   Parameters::process() const
   {
     return process_.get();
@@ -109,13 +109,13 @@ namespace cepgen
   }
 
   void
-  Parameters::setProcess( std::unique_ptr<proc::GenericProcess> proc )
+  Parameters::setProcess( std::unique_ptr<proc::Process> proc )
   {
     process_ = std::move( proc );
   }
 
   void
-  Parameters::setProcess( proc::GenericProcess* proc )
+  Parameters::setProcess( proc::Process* proc )
   {
     if ( !proc )
       throw CG_FATAL( "Parameters" )
@@ -149,20 +149,20 @@ namespace cepgen
     evt_modifiers_.emplace_back( std::unique_ptr<EventModifier>( mod ) );
   }
 
-  io::GenericExportHandler*
+  io::ExportModule*
   Parameters::outputModule()
   {
     return out_module_.get();
   }
 
   void
-  Parameters::setOutputModule( std::unique_ptr<io::GenericExportHandler> mod )
+  Parameters::setOutputModule( std::unique_ptr<io::ExportModule> mod )
   {
     out_module_ = std::move( mod );
   }
 
   void
-  Parameters::setOutputModule( io::GenericExportHandler* mod )
+  Parameters::setOutputModule( io::ExportModule* mod )
   {
     out_module_.reset( mod );
   }

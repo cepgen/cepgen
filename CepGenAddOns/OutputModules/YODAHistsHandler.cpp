@@ -1,4 +1,4 @@
-#include "CepGen/Core/ExportHandler.h"
+#include "CepGen/Core/ExportModuleHandler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
@@ -26,7 +26,7 @@ namespace cepgen
      * \tparam T YODA writer type
      */
     template<typename T>
-    class YODAHistsHandler : public GenericExportHandler
+    class YODAHistsHandler : public ExportModule
     {
       public:
         explicit YODAHistsHandler( const ParametersList& );
@@ -51,7 +51,7 @@ namespace cepgen
 
     template<typename T>
     YODAHistsHandler<T>::YODAHistsHandler( const ParametersList& params ) :
-      GenericExportHandler( params ),
+      ExportModule( params ),
       file_( params.get<std::string>( "filename", "output.yoda" ) ),
       variables_( params.get<ParametersList>( "variables" ) ),
       xsec_( 1. )

@@ -1,7 +1,7 @@
-#ifndef CepGen_Hadronisers_GenericHadroniser_h
-#define CepGen_Hadronisers_GenericHadroniser_h
+#ifndef CepGen_Modules_Hadroniser_h
+#define CepGen_Modules_Hadroniser_h
 
-#include "CepGen/Core/EventModifier.h"
+#include "CepGen/Modules/EventModifier.h"
 
 namespace cepgen
 {
@@ -13,11 +13,11 @@ namespace cepgen
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date January 2014
      */
-    class GenericHadroniser : public EventModifier
+    class Hadroniser : public EventModifier
     {
       public:
         /// Default constructor for an undefined hadroniser
-        explicit GenericHadroniser( const ParametersList&, const std::string& name = "<invalid hadroniser>" );
+        explicit Hadroniser( const ParametersList& );
 
         /// Specify whether the beam remnants are to be fragmented
         bool fragmentRemnants() const { return remn_fragm_; }

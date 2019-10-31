@@ -1,12 +1,13 @@
 #include "CepGen/Cards/PythonHandler.h"
 
+#include "CepGen/Core/EventModifierHandler.h"
+#include "CepGen/Core/ExportModuleHandler.h"
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Integrator.h"
 
 #include "CepGen/Processes/ProcessesHandler.h"
-#include "CepGen/Core/EventModifierHandler.h"
-#include "CepGen/Core/ExportHandler.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Physics/MCDFileParser.h"
@@ -393,7 +394,7 @@ namespace cepgen
       PyObject* pname = element( pout, ParametersList::MODULE_NAME ); // borrowed
       if ( !pname )
         throwPythonError( "Output module name is required!" );
-      params_.setOutputModule( io::ExportHandler::get().build( get<std::string>( pname ), get<ParametersList>( pout ) ) );
+      params_.setOutputModule( io::ExportModuleHandler::get().build( get<std::string>( pname ), get<ParametersList>( pout ) ) );
     }
 
     void

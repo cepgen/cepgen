@@ -1,13 +1,15 @@
 #include "CepGen/Cards/LpairHandler.h"
 
+#include "CepGen/Core/EventModifierHandler.h"
+#include "CepGen/Core/ExportModuleHandler.h"
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/utils.h"
 
 #include "CepGen/Processes/ProcessesHandler.h"
-#include "CepGen/Core/EventModifierHandler.h"
-#include "CepGen/Core/ExportHandler.h"
+
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Physics/MCDFileParser.h"
@@ -104,7 +106,7 @@ namespace cepgen
         if ( !out_file_name_.empty() )
           outm.set<std::string>( "filename", out_file_name_ );
         for ( const auto& mod : split( out_mod_name_, ',' ) )
-          params_.setOutputModule( cepgen::io::ExportHandler::get().build( mod, outm ) );
+          params_.setOutputModule( cepgen::io::ExportModuleHandler::get().build( mod, outm ) );
       }
 
       if ( m_params.count( "IEND" ) )

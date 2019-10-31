@@ -1,4 +1,5 @@
-#include "CepGen/Core/GenericKTProcess.h"
+#include "CepGen/Processes/KTProcess.h"
+
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Event/Event.h"
@@ -17,21 +18,21 @@ namespace cepgen
 {
   namespace proc
   {
-    GenericKTProcess::GenericKTProcess( const ParametersList& params,
-                                        const std::string& name,
-                                        const std::string& description,
-                                        const std::array<pdgid_t,2>& partons,
-                                        const std::vector<pdgid_t>& central ) :
-      GenericProcess( params, name, description+" (kT-factorisation approach)" ),
+    KTProcess::KTProcess( const ParametersList& params,
+                          const std::string& name,
+                          const std::string& description,
+                          const std::array<pdgid_t,2>& partons,
+                          const std::vector<pdgid_t>& central ) :
+      Process( params, name, description+" (kT-factorisation approach)" ),
       num_dimensions_( 0 ), kt_jacobian_( 0. ),
       qt1_( 0. ), phi_qt1_( 0. ), qt2_( 0. ), phi_qt2_( 0. ),
       kIntermediateParts( partons ), kProducedParts( central )
     {}
 
     void
-    GenericKTProcess::addEventContent()
+    KTProcess::addEventContent()
     {
-      GenericProcess::setEventContent(
+      Process::setEventContent(
         { // incoming state
           { Particle::IncomingBeam1, PDG::proton },
           { Particle::IncomingBeam2, PDG::proton },
@@ -48,13 +49,13 @@ namespace cepgen
     }
 
     unsigned int
-    GenericKTProcess::numDimensions() const
+    KTProcess::numDimensions() const
     {
       return num_dimensions_;
     }
 
     void
-    GenericKTProcess::setKinematics( const Kinematics& kin )
+    KTProcess::setKinematics( const Kinematics& kin )
     {
       kin_ = kin;
 
@@ -90,17 +91,17 @@ namespace cepgen
           kin_.incoming_beams.first.kt_flux = hi1
             ? KTFlux::HI_Photon_Elastic
             : KTFlux::P_Photon_Elastic;
-          CG_DEBUG( "GenericKTProcess:kinematics" )
+          CG_DEBUG( "KTProcess:kinematics" )
             << "Set the kt flux for first incoming photon to \""
             << kin_.incoming_beams.first.kt_flux << "\".";
         }
         else if ( flux1 != KTFlux::P_Photon_Inelastic
                && flux1 != KTFlux::P_Photon_Inelastic_Budnev ) {
           if ( hi1 )
-            throw CG_FATAL( "GenericKTProcess:kinematics" )
+            throw CG_FATAL( "KTProcess:kinematics" )
               << "Inelastic photon emission from HI not yet supported!";
           kin_.incoming_beams.first.kt_flux = KTFlux::P_Photon_Inelastic_Budnev;
-          CG_DEBUG( "GenericKTProcess:kinematics" )
+          CG_DEBUG( "KTProcess:kinematics" )
             << "Set the kt flux for first incoming photon to \""
             << kin_.incoming_beams.first.kt_flux << "\".";
         }
@@ -113,17 +114,17 @@ namespace cepgen
           kin_.incoming_beams.second.kt_flux = hi2
             ? KTFlux::HI_Photon_Elastic
             : KTFlux::P_Photon_Elastic;
-          CG_DEBUG( "GenericKTProcess:kinematics" )
+          CG_DEBUG( "KTProcess:kinematics" )
             << "Set the kt flux for second incoming photon to \""
             << kin_.incoming_beams.second.kt_flux << "\".";
         }
         else if ( flux2 != KTFlux::P_Photon_Inelastic
                && flux2 != KTFlux::P_Photon_Inelastic_Budnev ) {
           if ( hi2 )
-            throw CG_FATAL( "GenericKTProcess:kinematics" )
+            throw CG_FATAL( "KTProcess:kinematics" )
               << "Inelastic photon emission from HI not yet supported!";
           kin_.incoming_beams.second.kt_flux = KTFlux::P_Photon_Inelastic_Budnev;
-          CG_DEBUG( "GenericKTProcess:kinematics" )
+          CG_DEBUG( "KTProcess:kinematics" )
             << "Set the kt flux for second incoming photon to \""
             << kin_.incoming_beams.second.kt_flux << "\".";
         }
@@ -167,13 +168,13 @@ namespace cepgen
     }
 
     double
-    GenericKTProcess::computeWeight()
+    KTProcess::computeWeight()
     {
       if ( mapped_variables_.size() == 0 )
-        throw CG_FATAL( "GenericKTProcess:weight" )
+        throw CG_FATAL( "KTProcess:weight" )
           << "No variables are mapped with this process!";
       if ( kt_jacobian_ == 0. )
-        throw CG_FATAL( "GenericKTProcess:weight" )
+        throw CG_FATAL( "KTProcess:weight" )
           << "Point-independant component of the Jacobian for this "
           << "kt-factorised process is null.\n\t"
           << "Please check the validity of the phase space!";
@@ -197,7 +198,7 @@ namespace cepgen
 
       const double weight = ( kt_jacobian_*aux_jacobian ) * me_integrand;
 
-      CG_DEBUG_LOOP( "GenericKTProcess:weight" )
+      CG_DEBUG_LOOP( "KTProcess:weight" )
         << "Jacobian: " << kt_jacobian_ << " * " << aux_jacobian
         << " = " << ( kt_jacobian_*aux_jacobian ) << ".\n\t"
         << "Integrand = " << me_integrand << "\n\t"
@@ -207,14 +208,14 @@ namespace cepgen
     }
 
     void
-    GenericKTProcess::registerVariable( double& out, const Mapping& type,
-                                        const Limits& in, Limits default_limits,
-                                        const char* description )
+    KTProcess::registerVariable( double& out, const Mapping& type,
+                                 const Limits& in, Limits default_limits,
+                                 const char* description )
     {
       Limits lim = in;
       out = 0.; // reset the variable
       if ( !in.valid() ) {
-        CG_DEBUG( "GenericKTProcess:registerVariable" )
+        CG_DEBUG( "KTProcess:registerVariable" )
           << description << " could not be retrieved from the user configuration!\n\t"
           << "Setting it to the default value: " << default_limits << ".";
         lim = default_limits;
@@ -233,25 +234,25 @@ namespace cepgen
           kt_jacobian_ *= lim.range();
           break;
       }
-      CG_DEBUG( "GenericKTProcess:registerVariable" )
+      CG_DEBUG( "KTProcess:registerVariable" )
         << description << " has been mapped to variable " << num_dimensions_ << ".\n\t"
         << "Allowed range for integration: " << lim << ".\n\t"
         << "Variable integration mode: " << type << ".";
     }
 
     void
-    GenericKTProcess::dumpVariables() const
+    KTProcess::dumpVariables() const
     {
       std::ostringstream os;
       for ( const auto& var : mapped_variables_ )
         os << "\n\t(" << var.index << ") " << var.type << " mapping (" << var.description << ") in range " << var.limits;
-      CG_INFO( "GenericKTProcess:dumpVariables" )
+      CG_INFO( "KTProcess:dumpVariables" )
         << "List of variables handled by this kt-factorised process:"
         << os.str();
     }
 
     double
-    GenericKTProcess::generateVariables() const
+    KTProcess::generateVariables() const
     {
       double jacobian = 1.;
       for ( const auto& cut : mapped_variables_ ) {
@@ -285,14 +286,14 @@ namespace cepgen
     }
 
     void
-    GenericKTProcess::fillKinematics( bool )
+    KTProcess::fillKinematics( bool )
     {
       fillCentralParticlesKinematics(); // process-dependent!
       fillPrimaryParticlesKinematics();
     }
 
     void
-    GenericKTProcess::fillPrimaryParticlesKinematics()
+    KTProcess::fillPrimaryParticlesKinematics()
     {
       //============================================================================================
       //     outgoing protons
@@ -322,7 +323,7 @@ namespace cepgen
           op2.setStatus( Particle::Status::Unfragmented ); op2.setMass( MY_ );
           break;
         default: {
-          throw CG_FATAL( "GenericKTProcess" )
+          throw CG_FATAL( "KTProcess" )
             << "This kT factorisation process is intended for p-on-p collisions! Aborting.";
         } break;
       }
@@ -345,12 +346,12 @@ namespace cepgen
     }
 
     std::ostream&
-    operator<<( std::ostream& os, const GenericKTProcess::Mapping& type )
+    operator<<( std::ostream& os, const KTProcess::Mapping& type )
     {
       switch ( type ) {
-        case GenericKTProcess::Mapping::linear: return os << "linear";
-        case GenericKTProcess::Mapping::logarithmic: return os << "logarithmic";
-        case GenericKTProcess::Mapping::square: return os << "squared";
+        case KTProcess::Mapping::linear: return os << "linear";
+        case KTProcess::Mapping::logarithmic: return os << "logarithmic";
+        case KTProcess::Mapping::square: return os << "squared";
       }
       return os;
     }

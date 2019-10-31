@@ -1,4 +1,4 @@
-#include "CepGen/Core/ExportHandler.h"
+#include "CepGen/Core/ExportModuleHandler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
@@ -24,7 +24,7 @@ namespace cepgen
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Jul 2019
      */
-    class ROOTHistsHandler : public GenericExportHandler
+    class ROOTHistsHandler : public ExportModule
     {
       public:
         explicit ROOTHistsHandler( const ParametersList& );
@@ -49,7 +49,7 @@ namespace cepgen
     };
 
     ROOTHistsHandler::ROOTHistsHandler( const ParametersList& params ) :
-      GenericExportHandler( params ),
+      ExportModule( params ),
       file_( TFile::Open( params.get<std::string>( "filename", "output.root" ).c_str(), "recreate" ) ),
       variables_( params.get<ParametersList>( "variables" ) ),
       xsec_( 1. )

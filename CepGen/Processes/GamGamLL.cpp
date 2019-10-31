@@ -14,7 +14,7 @@ namespace cepgen
   namespace proc
   {
     GamGamLL::GamGamLL( const ParametersList& params ) :
-      GenericProcess( params, "lpair", "pp → p(*) ( ɣɣ → l⁺l¯ ) p(*)" ),
+      Process( params, "lpair", "pp → p(*) ( ɣɣ → l⁺l¯ ) p(*)" ),
       n_opt_( params.get<int>( "nopt", 0 ) ),
       pair_ ( params.get<ParticleProperties>( "pair" ).pdgid ),
       ep1_( 0. ), ep2_( 0. ), p_cm_( 0. ),
@@ -41,7 +41,7 @@ namespace cepgen
     void
     GamGamLL::addEventContent()
     {
-      GenericProcess::setEventContent( {
+      Process::setEventContent( {
         { Particle::IncomingBeam1, PDG::proton },
         { Particle::IncomingBeam2, PDG::proton },
         { Particle::Parton1, PDG::photon },
@@ -76,7 +76,7 @@ namespace cepgen
     void
     GamGamLL::setKinematics( const Kinematics& kin )
     {
-      GenericProcess::setKinematics( kin );
+      Process::setKinematics( kin );
 
       masses_.Ml2 = (*event_)[Particle::CentralSystem][0].mass2();
 
@@ -614,7 +614,7 @@ namespace cepgen
     void
     GamGamLL::beforeComputeWeight()
     {
-      if ( !GenericProcess::is_point_set_ ) return;
+      if ( !Process::is_point_set_ ) return;
 
       const Particle& p1 = event_->getOneByRole( Particle::IncomingBeam1 ),
                      &p2 = event_->getOneByRole( Particle::IncomingBeam2 );

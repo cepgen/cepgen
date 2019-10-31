@@ -1,7 +1,7 @@
-#ifndef CepGen_Core_GenericKTProcess_h
-#define CepGen_Core_GenericKTProcess_h
+#ifndef CepGen_Modules_KTProcess_h
+#define CepGen_Modules_KTProcess_h
 
-#include "CepGen/Core/GenericProcess.h"
+#include "CepGen/Modules/Process.h"
 
 namespace cepgen
 {
@@ -19,7 +19,7 @@ namespace cepgen
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Apr 2016
      */
-    class GenericKTProcess : public GenericProcess
+    class KTProcess : public Process
     {
       public:
         /// Class constructor
@@ -28,11 +28,11 @@ namespace cepgen
         /// \param[in] description Human-readable \f$k_{\rm T}\f$-factorised process name
         /// \param[in] partons First and second incoming parton
         /// \param[in] output Produced final state particles
-        GenericKTProcess( const ParametersList& params,
-                          const std::string& name,
-                          const std::string& description,
-                          const std::array<pdgid_t,2>& partons,
-                          const std::vector<pdgid_t>& output );
+        KTProcess( const ParametersList& params,
+                   const std::string& name,
+                   const std::string& description,
+                   const std::array<pdgid_t,2>& partons,
+                   const std::vector<pdgid_t>& output );
 
         /// Populate the event content with the generated process' topology
         void addEventContent() override;

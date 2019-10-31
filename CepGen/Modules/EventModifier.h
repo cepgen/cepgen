@@ -1,5 +1,5 @@
-#ifndef CepGen_Core_EventModifier_h
-#define CepGen_Core_EventModifier_h
+#ifndef CepGen_Modules_EventModifier_h
+#define CepGen_Modules_EventModifier_h
 
 #include <string>
 #include <vector>
@@ -16,7 +16,7 @@ namespace cepgen
   {
     public:
       /// Default constructor for an undefined modifier
-      explicit EventModifier( const ParametersList&, const std::string& name = "<invalid modifier>" );
+      explicit EventModifier( const ParametersList& );
       virtual ~EventModifier() {}
 
       /// Parse a configuration string

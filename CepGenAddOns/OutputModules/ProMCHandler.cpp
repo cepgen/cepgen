@@ -1,4 +1,4 @@
-#include "CepGen/Core/ExportHandler.h"
+#include "CepGen/Modules/ExportModule.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
@@ -20,7 +20,7 @@ namespace cepgen
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Jul 2019
      */
-    class ProMCHandler : public GenericExportHandler
+    class ProMCHandler : public ExportModule
     {
       public:
         explicit ProMCHandler( const ParametersList& );

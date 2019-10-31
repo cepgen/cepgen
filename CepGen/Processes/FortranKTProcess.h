@@ -1,7 +1,7 @@
 #ifndef CepGen_Processes_FortranKTProcess_h
 #define CepGen_Processes_FortranKTProcess_h
 
-#include "CepGen/Core/GenericKTProcess.h"
+#include "CepGen/Processes/KTProcess.h"
 #include <functional>
 
 namespace cepgen
@@ -9,7 +9,7 @@ namespace cepgen
   namespace proc
   {
     /// Compute the matrix element for a generic \f$k_{\rm T}\f$-factorised process defined in a Fortran weighting function
-    class FortranKTProcess : public GenericKTProcess
+    class FortranKTProcess : public KTProcess
     {
       public:
         FortranKTProcess( const ParametersList& params, const char* name, const char* descr, std::function<double(void)> func );

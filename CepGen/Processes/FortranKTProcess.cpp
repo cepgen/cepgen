@@ -51,10 +51,10 @@ namespace cepgen
     FortranKTProcess::kProcParameters;
 
     FortranKTProcess::FortranKTProcess( const ParametersList& params, const char* name, const char* descr, std::function<double( void )> func ) :
-      GenericKTProcess( params, name, descr, { { PDG::photon, PDG::photon } }, { PDG::muon, PDG::muon } ),
+      KTProcess( params, name, descr, { { PDG::photon, PDG::photon } }, { PDG::muon, PDG::muon } ),
       func_( func )
     {
-      constants_.m_p = GenericProcess::mp_;
+      constants_.m_p = Process::mp_;
       constants_.units = constants::GEVM2_TO_PB;
       constants_.pi = M_PI;
       constants_.alpha_em = constants::ALPHA_EM;

@@ -1,6 +1,6 @@
 #include "CepGenAddOns/EventInterfaces/ROOTTreeInfo.h"
 
-#include "CepGen/Core/ExportHandler.h"
+#include "CepGen/Core/ExportModuleHandler.h"
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Event/Event.h"
@@ -20,7 +20,7 @@ namespace cepgen
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date 27 Jan 2014
      */
-    class ROOTTreeHandler : public GenericExportHandler
+    class ROOTTreeHandler : public ExportModule
     {
       public:
         /// Class constructor
@@ -40,7 +40,7 @@ namespace cepgen
     };
 
     ROOTTreeHandler::ROOTTreeHandler( const ParametersList& params ) :
-      GenericExportHandler( params ),
+      ExportModule( params ),
       file_( TFile::Open( params.get<std::string>( "filename", "output.root" ).c_str(), "recreate" ) ),
       compress_( params.get<bool>( "compress", false ) ),
       run_tree_( new ROOT::CepGenRun ), evt_tree_( new ROOT::CepGenEvent )

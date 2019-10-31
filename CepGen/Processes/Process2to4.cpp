@@ -1,4 +1,4 @@
-#include "CepGen/Core/Process2to4.h"
+#include "CepGen/Processes/Process2to4.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/utils.h"
 
@@ -15,7 +15,7 @@ namespace cepgen
   namespace proc
   {
     Process2to4::Process2to4( const ParametersList& params, const std::string& name, const std::string& desc, std::array<pdgid_t,2> partons, pdgid_t cs_id ) :
-      GenericKTProcess( params, name, desc, partons, { cs_id, cs_id } ),
+      KTProcess( params, name, desc, partons, { cs_id, cs_id } ),
       cs_prop_( PDG::get()( cs_id ) ),
       y_c1_( 0. ), y_c2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. ),
       ww_( 0. )
@@ -24,7 +24,7 @@ namespace cepgen
     void
     Process2to4::setKinematics( const Kinematics& kin )
     {
-      GenericKTProcess::setKinematics( kin );
+      KTProcess::setKinematics( kin );
 
       p1_ = (*event_)[Particle::IncomingBeam1][0].momentum();
       p2_ = (*event_)[Particle::IncomingBeam2][0].momentum();

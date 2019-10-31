@@ -1,5 +1,5 @@
-#ifndef CepGen_Core_GenericExportHandler_h
-#define CepGen_Core_GenericExportHandler_h
+#ifndef CepGen_Modules_ExportModule_h
+#define CepGen_Modules_ExportModule_h
 
 #include "CepGen/Core/ParametersList.h"
 
@@ -18,12 +18,12 @@ namespace cepgen
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Sep 2016
      */
-    class GenericExportHandler
+    class ExportModule
     {
       public:
         /// Class constructor
-        explicit GenericExportHandler( const ParametersList& );
-        virtual ~GenericExportHandler();
+        explicit ExportModule( const ParametersList& );
+        virtual ~ExportModule();
         const std::string& name() const { return name_; }
         /// Initialise the handler and its inner parameterisation
         virtual void initialise( const Parameters& ) = 0;

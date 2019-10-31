@@ -1,4 +1,5 @@
-#include "CepGen/Core/GenericProcess.h"
+#include "CepGen/Modules/Process.h"
+
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Event/Event.h"
@@ -11,7 +12,7 @@ namespace cepgen
 {
   namespace proc
   {
-    GenericProcess::GenericProcess( const ParametersList& params, const std::string& name, const std::string& description, bool has_event ) :
+    Process::Process( const ParametersList& params, const std::string& name, const std::string& description, bool has_event ) :
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       params_( params ), name_( name ), description_( description ),
       first_run( true ),
@@ -22,7 +23,7 @@ namespace cepgen
       is_point_set_( false )
     {}
 
-    GenericProcess::GenericProcess( const GenericProcess& proc ) :
+    Process::Process( const Process& proc ) :
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       params_( proc.params_ ), name_( proc.name_ ), description_( proc.description_ ),
       first_run( proc.first_run ),
@@ -33,8 +34,8 @@ namespace cepgen
       is_point_set_( false )
     {}
 
-    GenericProcess&
-    GenericProcess::operator=( const GenericProcess& proc )
+    Process&
+    Process::operator=( const Process& proc )
     {
       params_ = proc.params_;
       name_ = proc.name_; description_ = proc.description_;
@@ -48,7 +49,7 @@ namespace cepgen
     }
 
     void
-    GenericProcess::setPoint( const unsigned int ndim, double* x )
+    Process::setPoint( const unsigned int ndim, double* x )
     {
       x_ = std::vector<double>( x, x+ndim );
       is_point_set_ = true;
@@ -59,7 +60,7 @@ namespace cepgen
     }
 
     double
-    GenericProcess::x( unsigned int idx ) const
+    Process::x( unsigned int idx ) const
     {
       if ( idx >= x_.size() )
         return -1.;
@@ -67,23 +68,23 @@ namespace cepgen
     }
 
     void
-    GenericProcess::clearEvent()
+    Process::clearEvent()
     {
       event_->restore();
     }
 
     void
-    GenericProcess::setKinematics( const Kinematics& kin )
+    Process::setKinematics( const Kinematics& kin )
     {
       kin_ = kin;
       prepareKinematics();
     }
 
     void
-    GenericProcess::prepareKinematics()
+    Process::prepareKinematics()
     {
       if ( !isKinematicsDefined() )
-        throw CG_FATAL( "GenericProcess" ) << "Kinematics not properly defined for the process.";
+        throw CG_FATAL( "Process" ) << "Kinematics not properly defined for the process.";
 
       const HeavyIon hi1( kin_.incoming_beams.first.pdg ), hi2( kin_.incoming_beams.second.pdg );
       const double m1 = hi1 ? HeavyIon::mass( hi1 ) : PDG::get().mass( kin_.incoming_beams.first.pdg );
@@ -99,25 +100,25 @@ namespace cepgen
       w1_ = p1.mass2();
       w2_ = p2.mass2();
 
-      CG_DEBUG( "GenericProcess" ) << "Kinematics successfully prepared!\n"
+      CG_DEBUG( "Process" ) << "Kinematics successfully prepared!\n"
         << "  √s = " << sqs_*1.e-3 << " TeV,\n"
         << "  p₁ = " << p1 << ", mass=" << p1.mass() << " GeV\n"
         << "  p₂ = " << p2 << ", mass=" << p2.mass() << " GeV.";
     }
 
     void
-    GenericProcess::dumpPoint() const
+    Process::dumpPoint() const
     {
       std::ostringstream os;
       for ( unsigned short i = 0; i < x_.size(); ++i )
         os << Form( "  x(%2d) = %8.6f\n\t", i, x_[i] );
-      CG_INFO( "GenericProcess" )
+      CG_INFO( "Process" )
         << "Number of integration parameters: " << x_.size() << "\n\t"
         << os.str() << ".";
     }
 
     void
-    GenericProcess::setEventContent( const IncomingState& ini, const OutgoingState& fin )
+    Process::setEventContent( const IncomingState& ini, const OutgoingState& fin )
     {
       if ( !has_event_ )
         return;
@@ -187,12 +188,12 @@ namespace cepgen
     }
 
     void
-    GenericProcess::setIncomingKinematics( const Momentum& p1, const Momentum& p2 )
+    Process::setIncomingKinematics( const Momentum& p1, const Momentum& p2 )
     {
       if ( !has_event_ || !event_ )
         return;
 
-      CG_DEBUG( "GenericProcess:incomingBeams" )
+      CG_DEBUG( "Process:incomingBeams" )
         << "Incoming primary particles:\n\t"
         << p1 << "\n\t"
         << p2;
@@ -202,7 +203,7 @@ namespace cepgen
     }
 
     bool
-    GenericProcess::isKinematicsDefined()
+    Process::isKinematicsDefined()
     {
       if ( !has_event_ )
         return true;
@@ -221,13 +222,13 @@ namespace cepgen
     }
 
     std::ostream&
-    operator<<( std::ostream& os, const GenericProcess& proc )
+    operator<<( std::ostream& os, const Process& proc )
     {
       return os << proc.name().c_str();
     }
 
     std::ostream&
-    operator<<( std::ostream& os, const GenericProcess* proc )
+    operator<<( std::ostream& os, const Process* proc )
     {
       return os << proc->name().c_str();
     }

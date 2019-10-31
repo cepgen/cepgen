@@ -1,4 +1,4 @@
-#include "CepGen/Core/ExportHandler.h"
+#include "CepGen/Modules/ExportModule.h"
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Parameters.h"
@@ -24,7 +24,7 @@ namespace cepgen
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Jul 2019
      */
-    class DelphesHandler : public GenericExportHandler
+    class DelphesHandler : public ExportModule
     {
       public:
         explicit DelphesHandler( const ParametersList& );

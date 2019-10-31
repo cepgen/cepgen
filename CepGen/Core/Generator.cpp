@@ -175,7 +175,7 @@ namespace cepgen
 
     const double gen_time_s = tmr.elapsed();
     CG_INFO( "Generator" )
-      << parameters_->numGeneratedEvents() << " event" << utils::s( parameters_->numGeneratedEvents() )
+      << utils::s( "event", parameters_->numGeneratedEvents() )
       << " generated in " << gen_time_s << " s "
       << "(" << gen_time_s/parameters_->numGeneratedEvents()*1.e3 << " ms/event).";
   }

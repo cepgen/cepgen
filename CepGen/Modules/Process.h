@@ -1,5 +1,5 @@
-#ifndef CepGen_Core_GenericProcess_h
-#define CepGen_Core_GenericProcess_h
+#ifndef CepGen_Core_Process_h
+#define CepGen_Core_Process_h
 
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/Kinematics.h"
@@ -19,7 +19,7 @@ namespace cepgen
     /// \brief Class template to define any process to compute using this MC integrator/events generator
     /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
     /// \date Jan 2014
-    class GenericProcess
+    class Process
     {
       public:
         /// Default constructor for an undefined process
@@ -27,18 +27,18 @@ namespace cepgen
         /// \param[in] name Process name
         /// \param[in] description Human-readable description of the process
         /// \param[in] has_event Do we generate the associated event structure?
-        GenericProcess( const ParametersList& params, const std::string& name = "<invalid name>", const std::string& description = "<invalid process>", bool has_event = true );
+        Process( const ParametersList& params, const std::string& name = "<invalid name>", const std::string& description = "<invalid process>", bool has_event = true );
         /// Copy constructor for a user process
-        GenericProcess( const GenericProcess& );
-        virtual ~GenericProcess() {}
+        Process( const Process& );
+        virtual ~Process() {}
 
         /// Assignment operator
-        GenericProcess& operator=( const GenericProcess& );
+        Process& operator=( const Process& );
 
-        /// Human-readable format dump of a GenericProcess object
-        friend std::ostream& operator<<( std::ostream& os, const GenericProcess& proc );
-        /// Human-readable format dump of a pointer to a GenericProcess object
-        friend std::ostream& operator<<( std::ostream& os, const GenericProcess* proc );
+        /// Human-readable format dump of a Process object
+        friend std::ostream& operator<<( std::ostream& os, const Process& proc );
+        /// Human-readable format dump of a pointer to a Process object
+        friend std::ostream& operator<<( std::ostream& os, const Process* proc );
 
         /// Map of all incoming state particles in the process
         typedef std::map<Particle::Role,pdgid_t> IncomingState;
@@ -46,7 +46,7 @@ namespace cepgen
         typedef std::map<Particle::Role,std::vector<pdgid_t> > OutgoingState;
 
         /// Copy all process attributes into a new object
-        virtual std::unique_ptr<GenericProcess> clone( const ParametersList& params = ParametersList() ) const = 0;
+        virtual std::unique_ptr<Process> clone( const ParametersList& params = ParametersList() ) const = 0;
 
         /// Restore the Event object to its initial state
         void clearEvent();
@@ -162,7 +162,7 @@ namespace cepgen
         bool isKinematicsDefined();
     };
     /// Helper typedef for a Process unique pointer
-    typedef std::unique_ptr<GenericProcess> ProcessPtr;
+    typedef std::unique_ptr<Process> ProcessPtr;
   }
 }
 

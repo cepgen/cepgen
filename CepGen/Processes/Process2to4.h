@@ -1,13 +1,13 @@
-#ifndef CepGen_Core_Process2to4_h
-#define CepGen_Core_Process2to4_h
+#ifndef CepGen_Processes_Process2to4_h
+#define CepGen_Processes_Process2to4_h
 
-#include "CepGen/Core/GenericKTProcess.h"
+#include "CepGen/Processes/KTProcess.h"
 
 namespace cepgen
 {
   namespace proc
   {
-    class Process2to4 : public GenericKTProcess
+    class Process2to4 : public KTProcess
     {
       public:
         Process2to4( const ParametersList& params, const std::string& name, const std::string& desc, std::array<pdgid_t,2> partons, pdgid_t cs_id );

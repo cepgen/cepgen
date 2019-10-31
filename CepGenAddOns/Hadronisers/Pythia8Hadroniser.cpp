@@ -1,6 +1,7 @@
 #include "CepGenAddOns/EventInterfaces/PythiaEventInterface.h"
 
-#include "CepGen/Core/GenericHadroniser.h"
+#include "CepGen/Modules/Hadroniser.h"
+
 #include "CepGen/Core/EventModifierHandler.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
@@ -28,7 +29,7 @@ namespace cepgen
      * Full interface to the Pythia8 hadronisation algorithm. It can be used in a single particle decay mode as well as a full event hadronisation using the string model, as in Jetset.
      * \brief Pythia8 hadronisation algorithm
      */
-    class Pythia8Hadroniser : public GenericHadroniser
+    class Pythia8Hadroniser : public Hadroniser
     {
       public:
         explicit Pythia8Hadroniser( const ParametersList& );
@@ -62,7 +63,7 @@ namespace cepgen
     };
 
     Pythia8Hadroniser::Pythia8Hadroniser( const ParametersList& plist ) :
-      GenericHadroniser( plist, "pythia8" ),
+      Hadroniser( plist ),
       pythia_( new Pythia8::Pythia ), cg_evt_( new Pythia8::CepGenEvent ),
       correct_central_( plist.get<bool>( "correctCentralSystem", false ) ),
       debug_lhef_( plist.get<bool>( "debugLHEF", false ) ),
