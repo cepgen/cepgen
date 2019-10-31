@@ -1,5 +1,4 @@
 #include "CepGen/Core/ExportHandler.h"
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Parameters.h"
@@ -51,7 +50,7 @@ namespace cepgen
     };
 
     DelphesHandler::DelphesHandler( const ParametersList& params ) :
-      GenericExportHandler( "delphes" ),
+      GenericExportHandler( params ),
       output_( new TFile( params.get<std::string>( "filename", "output.delphes.root" ).c_str(), "recreate" ) ),
       input_card_( params.get<std::string>( "inputCard", "input.tcl" ) ),
       compress_( params.get<bool>( "compress", false ) ),

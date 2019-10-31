@@ -218,10 +218,14 @@ namespace cepgen
           << sep << ( pretty ? boldify( mod->name().c_str() ) : mod->name() ) << "\n", sep = "+ ", mod_name.clear();
       os << "\n";
     }
-    if ( param->out_module_ )
+    if ( param->out_module_ ) {
       os
         << std::setw( wt ) << "Output module"
         << ( pretty ? boldify( param->out_module_->name().c_str() ) : param->out_module_->name() ) << "\n";
+      for ( const auto& par : param->out_module_->parameters().keys() )
+        if ( par != "mod_name" )
+          os << std::setw( wt ) << "" << par << ": " << param->out_module_->parameters().getString( par ) << "\n";
+    }
     if ( !param->taming_functions.empty() ) {
       os << std::setw( wt ) << utils::s( "Taming function", param->taming_functions.size() ) << "\n";
       for ( const auto& tf : param->taming_functions )

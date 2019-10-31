@@ -1,6 +1,8 @@
 #ifndef CepGen_Core_GenericExportHandler_h
 #define CepGen_Core_GenericExportHandler_h
 
+#include "CepGen/Core/ParametersList.h"
+
 #include <iosfwd>
 #include <string>
 
@@ -20,11 +22,13 @@ namespace cepgen
     {
       public:
         /// Class constructor
-        explicit GenericExportHandler( const std::string& );
+        explicit GenericExportHandler( const ParametersList& );
         virtual ~GenericExportHandler();
         const std::string& name() const { return name_; }
         /// Initialise the handler and its inner parameterisation
         virtual void initialise( const Parameters& ) = 0;
+        /// Global list of steering parameters
+        const ParametersList& parameters() { return params_; }
         /// Set the process cross section and its associated error
         virtual void setCrossSection( double /*xsec*/, double /*err_xsec*/ ) {}
         /// Set the event number
@@ -34,6 +38,8 @@ namespace cepgen
 
       protected:
         static std::string banner( const Parameters&, const std::string& prep = "" );
+        /// Set of parameters to steer this output module
+        const ParametersList params_;
         /// Module unique name
         const std::string name_;
         /// Event index

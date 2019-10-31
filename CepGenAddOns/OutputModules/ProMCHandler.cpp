@@ -1,6 +1,5 @@
 #include "CepGen/Core/ExportHandler.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/utils.h"
 
 #include "CepGen/Event/Event.h"
@@ -43,7 +42,7 @@ namespace cepgen
     };
 
     ProMCHandler::ProMCHandler( const ParametersList& params ) :
-      GenericExportHandler( "promc" ),
+      GenericExportHandler( params ),
       file_( new ProMCBook( params.get<std::string>( "filename", "output.promc" ).c_str(), "w" ) ),
       compress_evt_( params.get<bool>( "compress", false ) ),
       log_file_( "logfile.txt" ),

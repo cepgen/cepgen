@@ -1,6 +1,5 @@
 #include "CepGen/Core/ExportHandler.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/utils.h"
 
 #include "CepGen/Event/Event.h"
@@ -52,7 +51,7 @@ namespace cepgen
 
     template<typename T>
     YODAHistsHandler<T>::YODAHistsHandler( const ParametersList& params ) :
-      GenericExportHandler( "yoda" ),
+      GenericExportHandler( params ),
       file_( params.get<std::string>( "filename", "output.yoda" ) ),
       variables_( params.get<ParametersList>( "variables" ) ),
       xsec_( 1. )

@@ -1,12 +1,13 @@
 #include "CepGen/Core/GenericExportHandler.h"
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/EventModifier.h"
+#include "CepGen/Core/utils.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Physics/Constants.h"
 
 #include "CepGen/Parameters.h"
 #include "CepGen/Version.h"
-#include "CepGen/Core/utils.h"
 
 #include <sstream>
 
@@ -14,8 +15,10 @@ namespace cepgen
 {
   namespace io
   {
-    GenericExportHandler::GenericExportHandler( const std::string& name ) :
-      name_( name ), event_num_( 0. )
+    GenericExportHandler::GenericExportHandler( const ParametersList& params ) :
+      params_( params ),
+      name_( params_.get<std::string>( "mod_name" ) ),
+      event_num_( 0. )
     {}
 
     GenericExportHandler::~GenericExportHandler()

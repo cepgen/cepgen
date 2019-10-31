@@ -1,6 +1,5 @@
 #include "CepGen/Core/ExportHandler.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/utils.h"
 
 #include "CepGen/Event/Event.h"
@@ -50,7 +49,7 @@ namespace cepgen
     };
 
     ROOTHistsHandler::ROOTHistsHandler( const ParametersList& params ) :
-      GenericExportHandler( "root-hist" ),
+      GenericExportHandler( params ),
       file_( TFile::Open( params.get<std::string>( "filename", "output.root" ).c_str(), "recreate" ) ),
       variables_( params.get<ParametersList>( "variables" ) ),
       xsec_( 1. )

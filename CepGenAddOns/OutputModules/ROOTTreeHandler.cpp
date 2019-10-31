@@ -2,7 +2,6 @@
 
 #include "CepGen/Core/ExportHandler.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Parameters.h"
@@ -41,7 +40,7 @@ namespace cepgen
     };
 
     ROOTTreeHandler::ROOTTreeHandler( const ParametersList& params ) :
-      GenericExportHandler( "root_tree" ),
+      GenericExportHandler( params ),
       file_( TFile::Open( params.get<std::string>( "filename", "output.root" ).c_str(), "recreate" ) ),
       compress_( params.get<bool>( "compress", false ) ),
       run_tree_( new ROOT::CepGenRun ), evt_tree_( new ROOT::CepGenEvent )

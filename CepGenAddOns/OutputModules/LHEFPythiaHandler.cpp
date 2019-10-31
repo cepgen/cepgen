@@ -1,7 +1,6 @@
 #include "CepGenAddOns/EventInterfaces/PythiaEventInterface.h"
 
 #include "CepGen/Core/ExportHandler.h"
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
 
 #include "Pythia8/Pythia.h"
@@ -32,11 +31,13 @@ namespace cepgen
       private:
         std::unique_ptr<Pythia8::Pythia> pythia_;
         std::unique_ptr<Pythia8::CepGenEvent> lhaevt_;
+        bool compress_;
     };
 
     LHEFPythiaHandler::LHEFPythiaHandler( const ParametersList& params ) :
-      GenericExportHandler( "lhef" ),
-      pythia_( new Pythia8::Pythia ), lhaevt_( new Pythia8::CepGenEvent )
+      GenericExportHandler( params ),
+      pythia_( new Pythia8::Pythia ), lhaevt_( new Pythia8::CepGenEvent ),
+      compress_( params.get<bool>( "compress", true ) )
     {
       lhaevt_->openLHEF( params.get<std::string>( "filename", "output.lhe" ) );
     }
@@ -63,7 +64,6 @@ namespace cepgen
       pythia_->settings.flag( "HadronLevel:all", false ); // we do not want Pythia to interfere...
       pythia_->settings.mode( "Beams:frameType", 5 ); // LHEF event readout
       pythia_->settings.mode( "Next:numberCount", 0 ); // remove some of the Pythia output
-      //pythia_->settings.flag( "Check:event", false );
       pythia_->init();
       lhaevt_->initLHEF();
     }
@@ -71,7 +71,7 @@ namespace cepgen
     void
     LHEFPythiaHandler::operator<<( const Event& ev )
     {
-      lhaevt_->feedEvent( ev, Pythia8::CepGenEvent::Type::centralAndFullBeamRemnants );
+      lhaevt_->feedEvent( compress_ ? ev : ev.compressed(), Pythia8::CepGenEvent::Type::centralAndFullBeamRemnants );
       pythia_->next();
       lhaevt_->eventLHEF();
     }
