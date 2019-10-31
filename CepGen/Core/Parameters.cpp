@@ -223,7 +223,7 @@ namespace cepgen
         << std::setw( wt ) << "Output module"
         << ( pretty ? boldify( param->out_module_->name().c_str() ) : param->out_module_->name() ) << "\n";
       for ( const auto& par : param->out_module_->parameters().keys() )
-        if ( par != "mod_name" )
+        if ( par != ParametersList::MODULE_NAME )
           os << std::setw( wt ) << "" << par << ": " << param->out_module_->parameters().getString( par ) << "\n";
     }
     if ( !param->taming_functions.empty() ) {

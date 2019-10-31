@@ -44,6 +44,7 @@ namespace cepgen
 
       /// Human-readable version of a parameters container
       friend std::ostream& operator<<( std::ostream& os, const ParametersList& );
+      static constexpr const char* MODULE_NAME = "mod_name";
 
     private:
       std::map<std::string,ParametersList> param_values_;

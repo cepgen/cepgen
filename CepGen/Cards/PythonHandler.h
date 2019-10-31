@@ -21,8 +21,6 @@ namespace cepgen
         ~PythonHandler();
 
       private:
-        static constexpr const char* MODULE_NAME = "mod_name";
-
         static constexpr const char* PROCESS_NAME = "process";
         static constexpr const char* HADR_NAME = "hadroniser";
         static constexpr const char* EVT_MOD_SEQ_NAME = "eventSequence";

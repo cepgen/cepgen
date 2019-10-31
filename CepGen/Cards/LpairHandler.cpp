@@ -103,7 +103,8 @@ namespace cepgen
         ParametersList outm;
         if ( !out_file_name_.empty() )
           outm.set<std::string>( "filename", out_file_name_ );
-        params_.setOutputModule( cepgen::io::ExportHandler::get().build( out_mod_name_, outm ) );
+        for ( const auto& mod : split( out_mod_name_, ',' ) )
+          params_.setOutputModule( cepgen::io::ExportHandler::get().build( mod, outm ) );
       }
 
       if ( m_params.count( "IEND" ) )

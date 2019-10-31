@@ -44,7 +44,7 @@ namespace cepgen
     };
 
     PPtoFF::PPtoFF( const ParametersList& params ) :
-      Process2to4( params, "pptoff", "ɣɣ → f⁺f¯", { PDG::photon, PDG::photon }, params.get<ParticleProperties>( "pair", PDG::get()( PDG::invalid ) ).pdgid ),
+      Process2to4( params, "pptoff", "ɣɣ → f⁺f¯", { PDG::photon, PDG::photon }, params.get<ParticleProperties>( "pair", PDG::get()( PDG::muon ) ).pdgid ),
       method_ ( (ME)params.get<int>( "method", (int)ME::offShell ) ),
       p_mat1_( 0 ), p_mat2_( 0 ), p_term_ll_( 0 ), p_term_lt_( 0 ), p_term_tt1_( 0 ), p_term_tt2_( 0 ),
       mA2_( 0. ), mB2_( 0. )

@@ -17,7 +17,7 @@ namespace cepgen
   {
     GenericExportHandler::GenericExportHandler( const ParametersList& params ) :
       params_( params ),
-      name_( params_.get<std::string>( "mod_name" ) ),
+      name_( params_.get<std::string>( ParametersList::MODULE_NAME ) ),
       event_num_( 0. )
     {}
 

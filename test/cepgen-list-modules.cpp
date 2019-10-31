@@ -3,6 +3,7 @@
 #include "CepGen/Core/EventModifierHandler.h"
 #include "CepGen/Core/ExportHandler.h"
 
+#include "CepGen/Generator.h"
 #include "CepGen/Version.h"
 
 #include <iostream>
@@ -12,6 +13,8 @@ using namespace cepgen;
 
 int main( int argc, const char* argv[] )
 {
+  cepgen::Generator gen;
+
   cout
     << "============================================================\n"
     << "CepGen v" << version() << "\n"
@@ -21,6 +24,8 @@ int main( int argc, const char* argv[] )
       << "============================================================\n"
       << "Processes definitions\n"
       << "------------------------------------------------------------\n";
+    if ( proc::ProcessesHandler::get().modules().empty() )
+      cout << ">>> none found <<<" << endl;
     for ( const auto& mod : proc::ProcessesHandler::get().modules() )
       cout << mod << " > " << proc::ProcessesHandler::get().build( mod )->description() << "\n";
   }
@@ -29,6 +34,8 @@ int main( int argc, const char* argv[] )
       << "------------------------------------------------------------\n"
       << "Structure functions definitions\n"
       << "------------------------------------------------------------\n";
+    if ( strfun::StructureFunctionsHandler::get().modules().empty() )
+      cout << ">>> none found <<<" << endl;
     for ( const auto& mod : strfun::StructureFunctionsHandler::get().modules() )
       cout << mod << " > " << (strfun::Type)mod << "\n";
   }
@@ -37,6 +44,8 @@ int main( int argc, const char* argv[] )
       << "------------------------------------------------------------\n"
       << "Event modification modules definitions\n"
       << "------------------------------------------------------------\n";
+    if ( EventModifierHandler::get().modules().empty() )
+      cout << ">>> none found <<<" << endl;
     for ( const auto& mod : EventModifierHandler::get().modules() )
       cout << mod << "\n";
   }
@@ -45,6 +54,8 @@ int main( int argc, const char* argv[] )
       << "------------------------------------------------------------\n"
       << "Export modules definitions\n"
       << "------------------------------------------------------------\n";
+    if ( io::ExportHandler::get().modules().empty() )
+      cout << ">>> none found <<<" << endl;
     for ( const auto& mod : io::ExportHandler::get().modules() )
       cout << mod << "\n";
   }

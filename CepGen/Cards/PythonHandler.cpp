@@ -87,7 +87,7 @@ namespace cepgen
       fillParameter( process, "processParameters", proc_params );
 
       //--- type of process to consider
-      PyObject* pproc_name = element( process, MODULE_NAME ); // borrowed
+      PyObject* pproc_name = element( process, ParametersList::MODULE_NAME ); // borrowed
       if ( !pproc_name )
         throwPythonError( Form( "Failed to extract the process name from the configuration card %s", file ) );
       const std::string proc_name = get<std::string>( pproc_name );
@@ -282,7 +282,7 @@ namespace cepgen
     {
       if ( !PyDict_Check( integr ) )
         throwPythonError( "Integrator object should be a dictionary!" );
-      PyObject* palgo = element( integr, MODULE_NAME ); // borrowed
+      PyObject* palgo = element( integr, ParametersList::MODULE_NAME ); // borrowed
       if ( !palgo )
         throwPythonError( "Failed to retrieve the integration algorithm name!" );
       std::string algo = get<std::string>( palgo );
@@ -358,7 +358,7 @@ namespace cepgen
       if ( !PyDict_Check( mod ) )
         throwPythonError( "Event modification definition object should be a dictionary!" );
 
-      PyObject* pname = element( mod, MODULE_NAME ); // borrowed
+      PyObject* pname = element( mod, ParametersList::MODULE_NAME ); // borrowed
       if ( !pname )
         throwPythonError( "Event modification algorithm name is required!" );
       std::string mod_name = get<std::string>( pname );
@@ -390,7 +390,7 @@ namespace cepgen
       if ( !is<ParametersList>( pout ) )
         throwPythonError( "Invalid type for output parameters list!" );
 
-      PyObject* pname = element( pout, MODULE_NAME ); // borrowed
+      PyObject* pname = element( pout, ParametersList::MODULE_NAME ); // borrowed
       if ( !pname )
         throwPythonError( "Output module name is required!" );
       params_.setOutputModule( io::ExportHandler::get().build( get<std::string>( pname ), get<ParametersList>( pout ) ) );
