@@ -179,15 +179,6 @@ namespace cepgen
         << "First central particle:  " << p_c1_ << ", mass = " << p_c1_.mass() << "\n\t"
         << "Second central particle: " << p_c2_ << ", mass = " << p_c2_.mass() << ".";
 
-/*
-      if ( fabs( p_c1_.mass()-mf_ ) > 1.e-4 )
-        throw CG_FATAL( "PPtoFF" ) << "Invalid fermion 1 mass: "
-          << p_c1_.mass() << "/" << mf_ << ".";
-      if ( fabs( p_f2_.mass()-mf_ ) > 1.e-4 )
-        throw CG_FATAL( "PPtoFF" ) << "Invalid fermion 2 mass: "
-          << p_f2_.mass() << "/" << mf_ << ".";
- */
-
       //assert( fabs( p_c1_.mass()-(*event_)[Particle::CentralSystem][0].mass() ) < 1.e-6 );
       //assert( fabs( p_c2_.mass()-(*event_)[Particle::CentralSystem][1].mass() ) < 1.e-6 );
 
