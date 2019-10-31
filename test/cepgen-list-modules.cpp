@@ -1,7 +1,7 @@
 #include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Core/EventModifierHandler.h"
-#include "CepGen/Core/ExportHandler.h"
+#include "CepGen/Core/ExportModuleHandler.h"
 
 #include "CepGen/Generator.h"
 #include "CepGen/Version.h"
@@ -54,9 +54,9 @@ int main( int argc, const char* argv[] )
       << "------------------------------------------------------------\n"
       << "Export modules definitions\n"
       << "------------------------------------------------------------\n";
-    if ( io::ExportHandler::get().modules().empty() )
+    if ( io::ExportModuleHandler::get().modules().empty() )
       cout << ">>> none found <<<" << endl;
-    for ( const auto& mod : io::ExportHandler::get().modules() )
+    for ( const auto& mod : io::ExportModuleHandler::get().modules() )
       cout << mod << "\n";
   }
   cout
