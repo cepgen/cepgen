@@ -2,7 +2,7 @@ file(GLOB cards_sources Handler.cpp LpairHandler.cpp)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
-set(cards_libraries "")
+set(cards_libraries)
 
 #----- add Python parser if found
 

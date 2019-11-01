@@ -1,3 +1,4 @@
+#include "CepGen/Cards/CardsHandler.h"
 #include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Core/EventModifierHandler.h"
@@ -22,6 +23,16 @@ int main( int argc, const char* argv[] )
   {
     cout
       << "============================================================\n"
+      << "Steering cards parsers definitions\n"
+      << "------------------------------------------------------------\n";
+    if ( card::CardsHandler::get().modules().empty() )
+      cout << ">>> none found <<<" << endl;
+    for ( const auto& mod : card::CardsHandler::get().modules() )
+      cout << mod << "\n";
+  }
+  {
+    cout
+      << "------------------------------------------------------------\n"
       << "Processes definitions\n"
       << "------------------------------------------------------------\n";
     if ( proc::ProcessesHandler::get().modules().empty() )

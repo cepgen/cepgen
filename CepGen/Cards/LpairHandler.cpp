@@ -1,4 +1,5 @@
 #include "CepGen/Cards/LpairHandler.h"
+#include "CepGen/Cards/CardsHandler.h"
 
 #include "CepGen/Core/EventModifierHandler.h"
 #include "CepGen/Core/ExportModuleHandler.h"
@@ -27,12 +28,13 @@ namespace cepgen
 
     //----- specialization for LPAIR input cards
 
-    LpairHandler::LpairHandler( const char* file ) :
+    LpairHandler::LpairHandler( const ParametersList& params ) :
       proc_params_( new ParametersList ),
       str_fun_( 11 ), sr_type_( 1 ), xi_min_( 0. ), xi_max_( 1. ),
       pdg_input_path_( "External/mass_width_2019.mcd" ),
       hi_1_( { 0, 0 } ), hi_2_( { 0, 0 } )
     {
+      const auto file = params.get<std::string>( FILENAME_KEY );
       std::ifstream f( file, std::fstream::in );
       if ( !f.is_open() )
         throw CG_FATAL( "LpairHandler" ) << "Failed to parse file \"" << file << "%s\".";
@@ -40,23 +42,27 @@ namespace cepgen
       init();
 
       //--- parse all fields
-      std::unordered_map<std::string, std::string> m_params;
       std::string key, value;
       std::ostringstream os;
       while ( f >> key >> value ) {
         if ( key[0] == '#' ) // FIXME need to ensure there is no extra space before!
           continue;
         setParameter( key, value );
-        m_params.insert( { key, value } );
         if ( description( key ) != "null" )
-          os << "\n>> " << key << " = " << std::setw( 15 ) << parameter( key )
+          os << "\n>> " << key << " = " << std::setw( 25 ) << parameter( key )
              << " (" << description( key ) << ")";
       }
       f.close();
 
+      CG_INFO( "LpairHandler" ) << "File '" << file << "' succesfully opened!\n\t"
+        << "The following parameters are set:" << os.str() << "\n\t"
+        << "Now parsing the configuration.";
+
       //--- parse the PDG library
       if ( !pdg_input_path_.empty() )
         pdg::MCDFileParser::parse( pdg_input_path_.c_str() );
+      if ( !kmr_grid_path_.empty() )
+        kmr::GluonGrid::get( kmr_grid_path_.c_str() );
 
       //--- parse the process name
       params_.setProcess( proc::ProcessesHandler::get().build( proc_name_, *proc_params_ ) );
@@ -109,21 +115,12 @@ namespace cepgen
           params_.setOutputModule( cepgen::io::ExportModuleHandler::get().build( mod, outm ) );
       }
 
-      if ( m_params.count( "IEND" ) )
-        setValue<bool>( "IEND", ( std::stoi( m_params["IEND"] ) > 1 ) );
-
-      if ( m_params.count( "KMRG" ) && !kmr_grid_path_.empty() )
-        kmr::GluonGrid::get( kmr_grid_path_.c_str() );
-
       //--- check if we are dealing with heavy ions for incoming states
       HeavyIon hi1{ hi_1_.first, (Element)hi_1_.second }, hi2{ hi_2_.first, (Element)hi_2_.second };
       if ( hi1 )
         params_.kinematics.incoming_beams.first.pdg = hi1;
       if ( hi2 )
         params_.kinematics.incoming_beams.second.pdg = hi2;
-
-      CG_INFO( "LpairHandler" ) << "File '" << file << "' succesfully opened!\n\t"
-        << "The following parameters are set:" << os.str();
     }
 
     void
@@ -212,21 +209,25 @@ namespace cepgen
       for ( const auto& it : p_doubles_ )
         if ( it.second.value )
           f << it.first << " = " << *it.second.value << "\n";
-      for ( const auto& it : p_bools_ )
-        if ( it.second.value )
-          f << it.first << " = " << *it.second.value << "\n";
       f.close();
     }
 
     void
     LpairHandler::setParameter( const std::string& key, const std::string& value )
     {
-      try { setValue<double>( key.c_str(), std::stod( value ) ); } catch ( const std::invalid_argument& ) {
-        try { setValue<int>( key.c_str(), std::stoi( value ) ); } catch ( const std::invalid_argument& ) {
-          try { setValue<std::string>( key.c_str(), value ); } catch ( const std::invalid_argument& ) {
-            throw CG_FATAL( "LpairHandler:setParameter" )
-              << "Failed to add the parameter \"" << key << "\" → \"" << value << "\"!";
-          }
+      // particular case for the double as we cannot rely on casting exceptions
+      if ( value.find( '.' ) != std::string::npos )
+        try {
+          setValue<double>( key.c_str(), std::stod( value ) );
+          return;
+        } catch ( const std::logic_error& ) {
+          throw CG_FATAL( "LpairHandler:setParameter" )
+            << "Failed to parse a floating-point parameter \"" << key << "\" → \"" << value << "\"!";
+        }
+      try { setValue<int>( key.c_str(), std::stoi( value ) ); } catch ( const std::logic_error& ) {
+        try { setValue<std::string>( key.c_str(), value ); } catch ( const std::logic_error& ) {
+          throw CG_FATAL( "LpairHandler:setParameter" )
+            << "Failed to add the parameter \"" << key << "\" → \"" << value << "\"!";
         }
       }
     }
@@ -234,16 +235,15 @@ namespace cepgen
     std::string
     LpairHandler::parameter( std::string key ) const
     {
-      double dd = getValue<double>( key.c_str() );
-      if ( dd != -999. )
-        return std::to_string( dd );
-
-      int ui = getValue<int>( key.c_str() );
-      if ( ui != 999 )
-        return std::to_string( ui );
-
-      //if ( out = getValue<bool>( key.c_str() )  );
-
+      {
+        auto var = getValue<double>( key.c_str() );
+        if ( var != -999. )
+          return std::to_string( var );
+      }{
+        auto var = getValue<int>( key.c_str() );
+        if ( var != -999999 )
+          return std::to_string( var );
+      }
       return getValue<std::string>( key.c_str() );
     }
 
@@ -256,9 +256,9 @@ namespace cepgen
         return p_ints_.find( key )->second.description;
       if ( p_doubles_.count( key ) )
         return p_doubles_.find( key )->second.description;
-      if ( p_bools_.count( key ) )
-        return p_bools_.find( key )->second.description;
       return "null";
     }
   }
 }
+
+REGISTER_CARD_HANDLER( "card", LpairHandler )

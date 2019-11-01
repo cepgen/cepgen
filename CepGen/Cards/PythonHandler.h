@@ -17,7 +17,7 @@ namespace cepgen
     {
       public:
         /// Read a standard configuration card
-        explicit PythonHandler( const char* file );
+        explicit PythonHandler( const ParametersList& );
         ~PythonHandler();
 
       private:

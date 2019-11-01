@@ -1,4 +1,5 @@
 #include "CepGen/Cards/PythonHandler.h"
+#include "CepGen/Cards/CardsHandler.h"
 
 #include "CepGen/Core/EventModifierHandler.h"
 #include "CepGen/Core/ExportModuleHandler.h"
@@ -26,13 +27,14 @@ namespace cepgen
   namespace card
   {
     //----- specialization for CepGen input cards
-    PythonHandler::PythonHandler( const char* file )
+    PythonHandler::PythonHandler( const ParametersList& params )
     {
+      const auto file = params.get<std::string>( FILENAME_KEY );
       setenv( "PYTHONPATH", ".:Cards:test:../Cards", 1 );
       setenv( "PYTHONDONTWRITEBYTECODE", "1", 1 );
       CG_DEBUG( "PythonHandler" )
         << "Python PATH: " << getenv( "PYTHONPATH" ) << ".";
-      std::string filename = pythonPath( file );
+      std::string filename = pythonPath( file.c_str() );
       const size_t fn_len = filename.length()+1;
 
       //Py_DebugFlag = 1;
@@ -62,7 +64,7 @@ namespace cepgen
 
       PyObject* cfg = PyImport_ImportModule( filename.c_str() ); // new
       if ( !cfg )
-        throwPythonError( Form( "Failed to parse the configuration card %s", file ) );
+        throwPythonError( Form( "Failed to parse the configuration card %s", file.c_str() ) );
 
       //--- general particles definition
       PyObject* ppdg = PyObject_GetAttrString( cfg, MCD_NAME ); // new
@@ -81,7 +83,7 @@ namespace cepgen
       //--- process definition
       PyObject* process = PyObject_GetAttrString( cfg, PROCESS_NAME ); // new
       if ( !process )
-        throwPythonError( Form( "Failed to extract a \"%s\" keyword from the configuration card %s", PROCESS_NAME, file ) );
+        throwPythonError( Form( "Failed to extract a \"%s\" keyword from the configuration card %s", PROCESS_NAME, file.c_str() ) );
 
       //--- list of process-specific parameters
       ParametersList proc_params;
@@ -415,4 +417,6 @@ namespace cepgen
     }
   }
 }
+
+REGISTER_CARD_HANDLER( "py", PythonHandler )
 
