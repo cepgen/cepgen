@@ -47,6 +47,7 @@ namespace cepgen
           oss << __PRETTY_FUNCTION__ << "\n\n  *** Failed to build a module with index/name \"" << name << "\" from factory! ***\n";
           throw std::invalid_argument( oss.str() );
         }
+        params.set<I>( ParametersList::MODULE_NAME, name );
         if ( params_map_.count( name ) > 0 )
           params += params_map_.at( name );
         return map_.at( name )( params );
