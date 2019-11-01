@@ -23,7 +23,7 @@ int main( int argc, char* argv[] )
   cepgen::ArgumentsParser( argc, argv )
     .addArgument( "", "path to the configuration file", &input_card, 'i' )
     .addOptionalArgument( "num-events", "number of events to generate", -1, &num_events, 'n' )
-    .parse().dump();
+    .parse();
 
   //--- first start by defining the generator object
   cepgen::Generator gen;

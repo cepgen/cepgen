@@ -64,20 +64,13 @@ namespace cepgen
     //--- loop over all parameters
     size_t i = 0;
     for ( auto& par : params_ ) {
-      /*if ( !par.optional && args_.empty() )
-        //--- if no arguments provided while at least one is required
-        throw CG_FATAL( "ArgumentsParser" )
-          << help_message()
-          << " The following parameter was not set: '"
-          << ( !par.name.empty() ? par.name : "<arg"+std::to_string( i )+">" )
-          << "'.";*/
       if ( par.name.empty() ) {
         //--- no argument name ; fetching by index
         if ( i >= args_.size() )
           throw CG_FATAL( "ArgumentsParser" )
             << help_message()
-            << " Failed to retrieve argument " << ( i+1 ) << " while required.";
-        par.value = par.bool_variable ? "1" : args_.at( i );
+            << " Failed to retrieve required <arg" << i << ">.";
+        par.value = !par.bool_variable ? args_.at( i ) : "1";
       }
       else {
         const auto it_key = find( args_.begin(), args_.end(), "--"+par.name );
@@ -88,16 +81,18 @@ namespace cepgen
               << help_message()
               << " The following parameter was not set: '" << par.name << "'.";
         }
-        const auto it_value = ( it_key != args_.end() )
-          ? std::next( it_key )
-          : std::next( it_skey );
-        if ( it_value != args_.end() )
-          par.value = *it_value;
-        else if ( par.bool_variable )
-          par.value = "1"; // if the flag is set, enabled by default
-        else
-          throw CG_FATAL( "ArgumentsParser" )
-            << "Invalid value for parameter: " << par.name << ".";
+        else {
+          const auto it_value = ( it_key != args_.end() )
+            ? std::next( it_key )
+            : std::next( it_skey );
+          if ( it_value != args_.end() )
+            par.value = *it_value;
+          else if ( par.bool_variable )
+            par.value = "1"; // if the flag is set, enabled by default
+          else
+            throw CG_FATAL( "ArgumentsParser" )
+              << "Invalid value for parameter: " << par.name << ".";
+        }
       }
       par.parse();
       ++i;
@@ -128,7 +123,7 @@ namespace cepgen
     for ( const auto& par : params_ ) {
       if ( par.optional ) {
         opt_params.emplace_back( std::make_pair( par, i ) );
-        oss << "[";
+        oss << " [";
       }
       else
         req_params.emplace_back( std::make_pair( par, i ) );
