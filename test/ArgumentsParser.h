@@ -105,9 +105,15 @@ namespace cepgen
       /// \param[in] argv[] List of argument words (key + value) to be parsed
       ArgumentsParser( int argc, char* argv[] );
       /// Add a parameter required for the parser
-      ArgumentsParser& addArgument( const Parameter& );
+      template<typename... Args> ArgumentsParser& addArgument( Args&&... args ) {
+        required_params_.emplace_back( std::forward<Args>( args )... );
+        return *this;
+      }
       /// Add a non-mandatory parameters that can be parsed
-      ArgumentsParser& addOptionalArgument( const Parameter& );
+      template<typename... Args> ArgumentsParser& addOptionalArgument( Args&&... args ) {
+        optional_params_.emplace_back( std::forward<Args>( args )... );
+        return *this;
+      }
       /// Associate the command-line arguments to parameters
       void parse();
       /// Read required and optional parameters

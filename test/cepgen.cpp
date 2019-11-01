@@ -20,8 +20,8 @@ int main( int argc, char* argv[] )
   std::string input_card;
 
   cepgen::ArgumentsParser( argc, argv )
-    .addArgument( cepgen::ArgumentsParser::Parameter{ "", "configuration file", &input_card, 'i' } )
-    .addOptionalArgument( cepgen::ArgumentsParser::Parameter{ "test", "testig", "prout", &input_card, 't' } )
+    .addArgument( "", "configuration file", &input_card, 'i' )
+    .addOptionalArgument( "test", "testig", "prout", &input_card, 't' )
     .parse();
 
   //--- first start by defining the generator object
