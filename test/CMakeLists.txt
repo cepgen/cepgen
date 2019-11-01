@@ -10,7 +10,7 @@ set(tests)
 set(tests_libraries ${CEPGEN_LIBRARIES})
 
 file(GLOB tests_utils_sources ArgumentsParser.cpp)
-add_library(CepGenTestUtils OBJECT ${tests_utils_sources})
+add_library(CepGenTestUtils SHARED ${tests_utils_sources})
 list(APPEND tests_libraries CepGenTestUtils)
 
 #----- build all tests and link them to the core library
