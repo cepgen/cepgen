@@ -4,6 +4,7 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Core/Exception.h"
 
+#include "ArgumentsParser.h"
 #include "AbortHandler.h"
 
 using namespace std;
@@ -16,10 +17,12 @@ using namespace std;
  */
 int main( int argc, char* argv[] )
 {
-  if ( argc < 2 )
-    throw CG_FATAL( "main" )
-      << "No config file provided!\n\t"
-      << "Usage: " << argv[0] << " config-file";
+  std::string input_card;
+
+  cepgen::ArgumentsParser( argc, argv )
+    .addArgument( cepgen::ArgumentsParser::Parameter{ "", "configuration file", &input_card, 'i' } )
+    .addOptionalArgument( cepgen::ArgumentsParser::Parameter{ "test", "testig", "prout", &input_card, 't' } )
+    .parse();
 
   //--- first start by defining the generator object
   cepgen::Generator gen;
