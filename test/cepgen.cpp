@@ -18,14 +18,21 @@ using namespace std;
 int main( int argc, char* argv[] )
 {
   std::string input_card;
+  int num_events;
 
   cepgen::ArgumentsParser( argc, argv )
-    .addArgument( "", "configuration file", &input_card, 'i' )
+    .addArgument( "", "path to the configuration file", &input_card, 'i' )
+    .addOptionalArgument( "num-events", "number of events to generate", -1, &num_events, 'n' )
     .parse().dump();
 
   //--- first start by defining the generator object
   cepgen::Generator gen;
   gen.setParameters( cepgen::card::Handler::parse( input_card.c_str() ) );
+
+  if ( num_events >= 0 ) { // user specified a number of events to generate
+    gen.parameters().generation().maxgen = num_events;
+    gen.parameters().generation().enabled = num_events > 0;
+  }
 
   //--- list all parameters
   CG_LOG( "main" ) << gen.parametersPtr();

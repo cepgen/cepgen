@@ -19,7 +19,6 @@ namespace cepgen
         //----- parameters constructors
 
         //--- string
-
         /// An optional string parameter
         Parameter( std::string name, std::string description = "", std::string default_value = "", std::string* var = nullptr, char sname = '\0' );
         /// A string parameter
@@ -28,7 +27,6 @@ namespace cepgen
         Parameter( std::string name, char sname = '\0' ) : Parameter( name, "", ( std::string* )nullptr, sname ) {}
 
         //----- unsigned/signed integers
-
         /// An optional unsigned integer parameter
         Parameter( std::string name, std::string description, unsigned int default_value, unsigned int* var = nullptr, char sname = '\0' );
         /// An unsigned integer parameter
@@ -43,14 +41,12 @@ namespace cepgen
         Parameter( std::string name, std::string description, bool* var = nullptr, char sname = '\0' );
 
         //--- floats
-
         /// An optional double-precision floating point parameter
         Parameter( std::string name, std::string description, double default_value, double* var = nullptr, char sname = '\0' );
         /// A double-precision floating point parameter
         Parameter( std::string name, std::string description, double* var = nullptr, char sname = '\0' );
 
         //--- complex formats
-
         /// An optional vector of strings parameter
         Parameter( std::string name, std::string description, std::vector<std::string> default_value, std::vector<std::string>* var = nullptr, char sname = '\0');
         /// A vector of strings parameter
@@ -68,14 +64,11 @@ namespace cepgen
 
         //----- parameters attributes
 
-        /// Computer-readable name
-        std::string name;
-        /// Short computer-readable name
-        char sname;
-        /// User-friendly parameter description
-        std::string description;
-        /// Value (or default value)
-        std::string value;
+        std::string name; ///< Computer-readable name
+        char sname; ///< Short computer-readable name
+        std::string description; ///< User-friendly parameter description
+        std::string value; ///< Value (or default value)
+        bool optional;
 
         //----- parameters containers
 
@@ -96,8 +89,6 @@ namespace cepgen
         /// Pointer to a vector of floating point variables possibly handled by this parameter
         std::vector<double>* vec_float_variable;
       };
-      /// A collection of parameters
-      typedef std::vector<Parameter> ParametersCollection;
 
     public:
       /// Arguments parser constructor
@@ -106,12 +97,14 @@ namespace cepgen
       ArgumentsParser( int argc, char* argv[] );
       /// Add a parameter required for the parser
       template<typename... Args> ArgumentsParser& addArgument( Args&&... args ) {
-        required_params_.emplace_back( std::forward<Args>( args )... );
+        params_.emplace_back( std::forward<Args>( args )... );
+        params_.rbegin()->optional = false;
         return *this;
       }
       /// Add a non-mandatory parameters that can be parsed
       template<typename... Args> ArgumentsParser& addOptionalArgument( Args&&... args ) {
-        optional_params_.emplace_back( std::forward<Args>( args )... );
+        params_.emplace_back( std::forward<Args>( args )... );
+        params_.rbegin()->optional = true;
         return *this;
       }
       /// Associate the command-line arguments to parameters
@@ -126,9 +119,12 @@ namespace cepgen
       std::string help_message() const;
 
     private:
+      /// A collection of parameters
+      typedef std::vector<Parameter> ParametersCollection;
+
       std::string command_name_;
       const ParametersCollection help_str_;
-      ParametersCollection required_params_, optional_params_;
+      ParametersCollection params_;
       std::vector<std::string> args_;
   };
 }
