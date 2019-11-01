@@ -1,10 +1,12 @@
 #include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Parameters.h"
 
 #include <string>
 #include <iostream>
 
 using namespace std;
+using namespace cepgen;
 
 int
 main( int argc, char* argv[] )
@@ -13,9 +15,9 @@ main( int argc, char* argv[] )
     throw CG_FATAL( "main" ) << "One argument required!";
 
   try {
-    cepgen::card::PythonHandler py( argv[1] );
-    CG_INFO( "main" ) << py.parametersPtr();
-  } catch ( cepgen::Exception& e ) {
+    CG_INFO( "main" )
+      << &card::PythonHandler( argv[1] ).parameters();
+  } catch ( const Exception& e ) {
     e.dump();
   }
   return 0;

@@ -18,6 +18,7 @@ namespace cepgen
       public:
         /// Read a standard configuration card
         explicit PythonHandler( const ParametersList& );
+        PythonHandler( const char* );
         ~PythonHandler();
 
       private:
@@ -55,6 +56,7 @@ namespace cepgen
         void fillParameter( PyObject* parent, const char* key, ParametersList& out );
         void fillParameter( PyObject* parent, const char* key, std::vector<ParametersList>& out );
 
+        void parse( const char* );
         void parseIncomingKinematics( PyObject* );
         void parseOutgoingKinematics( PyObject* );
         void parseLogging( PyObject* );

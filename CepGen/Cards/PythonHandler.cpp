@@ -26,15 +26,30 @@ namespace cepgen
 {
   namespace card
   {
-    //----- specialization for CepGen input cards
     PythonHandler::PythonHandler( const ParametersList& params )
     {
-      const auto file = params.get<std::string>( FILENAME_KEY );
+      parse( params.get<std::string>( FILENAME_KEY ).c_str() );
+    }
+
+    PythonHandler::PythonHandler( const char* file )
+    {
+      parse( file );
+    }
+
+    PythonHandler::~PythonHandler()
+    {
+      if ( Py_IsInitialized() )
+        Py_Finalize();
+    }
+
+    void
+    PythonHandler::parse( const char* file )
+    {
       setenv( "PYTHONPATH", ".:Cards:test:../Cards", 1 );
       setenv( "PYTHONDONTWRITEBYTECODE", "1", 1 );
       CG_DEBUG( "PythonHandler" )
         << "Python PATH: " << getenv( "PYTHONPATH" ) << ".";
-      std::string filename = pythonPath( file.c_str() );
+      std::string filename = pythonPath( file );
       const size_t fn_len = filename.length()+1;
 
       //Py_DebugFlag = 1;
@@ -64,7 +79,7 @@ namespace cepgen
 
       PyObject* cfg = PyImport_ImportModule( filename.c_str() ); // new
       if ( !cfg )
-        throwPythonError( Form( "Failed to parse the configuration card %s", file.c_str() ) );
+        throwPythonError( Form( "Failed to parse the configuration card %s", file ) );
 
       //--- general particles definition
       PyObject* ppdg = PyObject_GetAttrString( cfg, MCD_NAME ); // new
@@ -83,7 +98,7 @@ namespace cepgen
       //--- process definition
       PyObject* process = PyObject_GetAttrString( cfg, PROCESS_NAME ); // new
       if ( !process )
-        throwPythonError( Form( "Failed to extract a \"%s\" keyword from the configuration card %s", PROCESS_NAME, file.c_str() ) );
+        throwPythonError( Form( "Failed to extract a \"%s\" keyword from the configuration card %s", PROCESS_NAME, file ) );
 
       //--- list of process-specific parameters
       ParametersList proc_params;
@@ -156,12 +171,6 @@ namespace cepgen
 
       //--- finalisation
       Py_CLEAR( cfg );
-    }
-
-    PythonHandler::~PythonHandler()
-    {
-      if ( Py_IsInitialized() )
-        Py_Finalize();
     }
 
     void
