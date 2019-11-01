@@ -20,63 +20,92 @@ namespace cepgen
     }
     //--- then build the arguments list
     for ( const auto& arg : args_tmp ) {
+      //--- skip the '='
       const auto eq_pos = arg.find( '=' );
-      if ( eq_pos == std::string::npos ) {
-        args_.emplace_back( arg );
+      if ( eq_pos != std::string::npos ) {
+        args_.emplace_back( arg.substr( 0, eq_pos ) );
+        args_.emplace_back( arg.substr( eq_pos+1 ) );
         continue;
       }
-      //--- skip the '='
-      args_.emplace_back( arg.substr( 0, eq_pos ) );
-      args_.emplace_back( arg.substr( eq_pos+1 ) );
+      args_.emplace_back( arg );
     }
   }
 
   void
+  ArgumentsParser::print_help() const
+  {
+    CG_INFO( "ArgumentsParser" ) << help_message();
+    exit( 0 );
+  }
+
+  void
+  ArgumentsParser::dump() const
+  {
+    std::ostringstream os;
+    os
+      << "List of parameters retrieved from command-line:\n"
+      << "Required parameters:";
+    for ( const auto& par : required_params_ )
+      os
+        << "\n[" << par.name
+        << ( par.sname != '\0' ? "|"+std::string( 1, par.sname ) : "" )
+        << "] = " << par.value;
+    os << "\nOptional parameters:";
+    for ( const auto& par : optional_params_ )
+      os
+        << "\n[" << par.name
+        << ( par.sname != '\0' ? "|"+std::string( 1, par.sname ) : "" )
+        << "] = " << par.value;
+    CG_INFO( "ArgumentsParser" ) << os.str();
+  }
+
+  ArgumentsParser&
   ArgumentsParser::parse()
   {
     //--- check if help message is requested
-    for ( const auto& str : help_str_ ) {
+    for ( const auto& str : help_str_ )
       if ( find( args_.begin(), args_.end(), "--"+str.name ) != args_.end()
-        || find( args_.begin(), args_.end(), "-"+std::string( 1, str.sname ) ) != args_.end() ) {
-        CG_INFO( "ArgumentsParser" ) << help_message();
-        exit( 0 );
-      }
-    }
+        || find( args_.begin(), args_.end(), "-"+std::string( 1, str.sname ) ) != args_.end() )
+        print_help();
     //--- first loop over all required parameters
     for ( auto& par : required_params_ ) {
-      const auto key = find( args_.begin(), args_.end(),
-        par.name.empty() ? par.name : "--"+par.name );
-      const auto skey = find( args_.begin(), args_.end(),
-        "-"+std::string( 1, par.sname ) );
-      if ( key == args_.end() && skey == args_.end() ) {
+      const auto it_key = find( args_.begin(), args_.end(), par.name.empty()
+        ? par.name
+        : "--"+par.name );
+      const auto it_skey = find( args_.begin(), args_.end(), "-"+std::string( 1, par.sname ) );
+      if ( it_key == args_.end() && it_skey == args_.end() ) {
         throw CG_FATAL( "ArgumentsParser" )
-          << help_message() << "\n\t"
+          << help_message() << " "
           << "The following parameter was not set: '" << par.name << "'.";
       }
-      const auto value = ( key != args_.end() ) ? key+1 : skey+1;
-      if ( value == args_.end() )
+      const auto it_value = ( it_key != args_.end() )
+        ? std::next( it_key )
+        : std::next( it_skey );
+      if ( it_value == args_.end() )
         throw CG_FATAL( "ArgumentsParser" )
           << "Invalid value for parameter: " << par.name << ".";
 
-      par.value = *value;
+      par.value = *it_value;
       par.parse();
     }
     //--- then loop over the optional parameters and assign the value
     //    for the variable with default value if not found from the
     //    arguments list
     for ( auto& par : optional_params_ ) {
-      const auto key = find( args_.begin(), args_.end(),
+      const auto it_key = find( args_.begin(), args_.end(),
         "--"+par.name );
-      const auto skey = find( args_.begin(), args_.end(),
+      const auto it_skey = find( args_.begin(), args_.end(),
         "-"+std::string( 1, par.sname ) );
-      if ( key != args_.end() || skey != args_.end() ) { // Parameter set
-        const auto value = ( key != args_.end() ) ? key + 1 : skey + 1;
-        if ( value != args_.end() ) {
+      if ( it_key != args_.end() || it_skey != args_.end() ) { // Parameter set
+        const auto it_value = it_key != args_.end()
+          ? std::next( it_key )
+          : std::next( it_skey );
+        if ( it_value != args_.end() ) {
           for ( const auto& par2 : optional_params_ )
-            if ( *value == "--"+par2.name || *value == "-"+std::string( 1, par.sname ) )
+            if ( *it_value == "--"+par2.name || *it_value == "-"+std::string( 1, par.sname ) )
               throw CG_FATAL( "ArgumentsParser" )
                 << "Invalid value for parameter: " << par.name << ".";
-          par.value = *value;
+          par.value = *it_value;
         }
         else if ( par.bool_variable )
           par.value = "1"; // if the flag is set, enabled by default
@@ -86,6 +115,7 @@ namespace cepgen
       }
       par.parse();
     }
+    return *this;
   }
 
   std::string
@@ -269,7 +299,9 @@ namespace cepgen
         *bool_variable = ( std::stoi( value ) != 0 );
       } catch ( const std::invalid_argument& ) {
         *bool_variable = ( strcasecmp( "true", value.c_str() ) == 0
-                        && strcasecmp( "false", value.c_str() ) != 0 );
+                        || strcasecmp( "yes", value.c_str() ) == 0 )
+                        && strcasecmp( "false", value.c_str() ) != 0
+                        && strcasecmp( "no", value.c_str() ) != 0;
       }
     }
     else if ( vec_str_variable != nullptr ) {

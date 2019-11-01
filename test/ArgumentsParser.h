@@ -115,10 +115,14 @@ namespace cepgen
         return *this;
       }
       /// Associate the command-line arguments to parameters
-      void parse();
+      ArgumentsParser& parse();
       /// Read required and optional parameters
       std::string operator[]( std::string name ) const;
+      /// Dump the list of arguments into the terminal
+      void dump() const;
       /// Show usage
+      void print_help() const;
+      /// Return usage message
       std::string help_message() const;
 
     private:

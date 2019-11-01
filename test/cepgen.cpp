@@ -21,12 +21,11 @@ int main( int argc, char* argv[] )
 
   cepgen::ArgumentsParser( argc, argv )
     .addArgument( "", "configuration file", &input_card, 'i' )
-    .addOptionalArgument( "test", "testig", "prout", &input_card, 't' )
-    .parse();
+    .parse().dump();
 
   //--- first start by defining the generator object
   cepgen::Generator gen;
-  gen.setParameters( cepgen::card::Handler::parse( argv[1] ) );
+  gen.setParameters( cepgen::card::Handler::parse( input_card.c_str() ) );
 
   //--- list all parameters
   CG_LOG( "main" ) << gen.parametersPtr();
