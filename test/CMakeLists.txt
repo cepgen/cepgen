@@ -1,8 +1,8 @@
 #----- list all test executables
 
-file(GLOB executables_noroot RELATIVE ${PROJECT_SOURCE_DIR}/test *.cpp)
-file(GLOB executables_root RELATIVE ${PROJECT_SOURCE_DIR}/test *.cxx)
-file(GLOB executables_fortran RELATIVE ${PROJECT_SOURCE_DIR}/test *.f)
+file(GLOB tests_noroot RELATIVE ${PROJECT_SOURCE_DIR}/test *.cc)
+file(GLOB tests_root RELATIVE ${PROJECT_SOURCE_DIR}/test *.cxx)
+file(GLOB tests_fortran RELATIVE ${PROJECT_SOURCE_DIR}/test *.f)
 
 #----- include the utilitaries
 
@@ -15,15 +15,15 @@ list(APPEND tests_libraries CepGenTestUtils)
 
 #----- build all tests and link them to the core library
 
-foreach(exec_src ${executables_noroot})
-  string(REPLACE ".cpp" "" exec_bin ${exec_src})
+foreach(exec_src ${tests_noroot})
+  string(REPLACE ".cc" "" exec_bin ${exec_src})
   add_executable(${exec_bin} ${exec_src})
   set_target_properties(${exec_bin} PROPERTIES EXCLUDE_FROM_ALL true)
   target_link_libraries(${exec_bin} ${tests_libraries})
   list(APPEND tests ${exec_bin})
 endforeach()
 
-foreach(exec_src ${executables_fortran})
+foreach(exec_src ${tests_fortran})
   string(REPLACE ".f" "" exec_bin ${exec_src})
   add_executable(${exec_bin} ${exec_src})
   set_target_properties(${exec_bin} PROPERTIES EXCLUDE_FROM_ALL true)
@@ -37,7 +37,7 @@ if(ROOT_FOUND)
   include_directories(${ROOT_INCLUDE_DIRS})
   link_directories(${ROOT_LIBRARY_DIR})
 
-  foreach(exec_src ${executables_root})
+  foreach(exec_src ${tests_root})
     string(REPLACE ".cxx" "" exec_bin ${exec_src})
     add_executable(${exec_bin} ${exec_src})
     set_target_properties(${exec_bin} PROPERTIES EXCLUDE_FROM_ALL true)
@@ -49,7 +49,7 @@ else()
   message(STATUS "ROOT not found! skipping these tests!")
 endif()
 
-message(STATUS "The following tests/executables are available:\n${tests}")
+message(STATUS "The following tests are available:\n${tests}")
 
 file(GLOB_RECURSE test_input_cards RELATIVE ${PROJECT_SOURCE_DIR}/test test_processes/* __init__.py)
 foreach(_files ${test_input_cards})
