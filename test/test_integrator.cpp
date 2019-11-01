@@ -4,21 +4,21 @@
 #include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/Functional.h"
 
-#include "CepGen/Processes/GenericProcess.h"
+#include "CepGen/Modules/Process.h"
 
 #include <iostream>
 
 using namespace std;
 
 /// Generic process to test the integrator instance
-template<size_t N=3> class TestProcess : public cepgen::proc::GenericProcess
+template<size_t N=3> class TestProcess : public cepgen::proc::Process
 {
   public:
     TestProcess( const cepgen::ParametersList& params = cepgen::ParametersList() ) :
-      cepgen::proc::GenericProcess( params, "test", ".oO TEST PROCESS Oo.", false ),
+      cepgen::proc::Process( params, "test", ".oO TEST PROCESS Oo.", false ),
       funct_( "1./(1.-cos(x*_pi)*cos(y*_pi)*cos(z*_pi))", { "x", "y", "z" } ) {}
     TestProcess( const char* formula, const std::vector<std::string>& args ) :
-      cepgen::proc::GenericProcess( cepgen::ParametersList(), "test", cepgen::Form( ".oO TEST PROCESS (%s) Oo.", formula ), false ),
+      cepgen::proc::Process( cepgen::ParametersList(), "test", cepgen::Form( ".oO TEST PROCESS (%s) Oo.", formula ), false ),
       funct_( formula, args ) {}
 
     cepgen::proc::ProcessPtr clone( const cepgen::ParametersList& params ) const override {

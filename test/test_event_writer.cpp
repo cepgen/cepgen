@@ -1,13 +1,14 @@
-#include "CepGen/Core/ExportHandler.h"
+#include "CepGen/Core/ExportModuleHandler.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Event/Event.h"
 
 using namespace std;
 using namespace cepgen;
 
-int main()
+int main( int argc, char* argv[] )
 {
-  auto writer = io::ExportHandler::get().build( "hepmc" );
+  const string type = argc > 1 ? argv[1] : "hepmc";
+  auto writer = io::ExportModuleHandler::get().build( type );
   writer->setCrossSection( 1., 2. );
 
   Event ev;
