@@ -47,7 +47,6 @@ namespace cepgen
       defineVariable( y_c2_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "Second outgoing particle rapidity" );
       defineVariable( pt_diff_, Mapping::linear, kin_.cuts.central.pt_diff, { 0., 500. }, "Final state particles transverse momentum difference" );
       defineVariable( phi_pt_diff_, Mapping::linear, kin_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Final state particles azimuthal angle difference" );
-      prepareKinematics();
     }
 
     double

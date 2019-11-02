@@ -65,7 +65,7 @@ namespace cepgen
       //================================================================
 
       proc->beforeComputeWeight();
-      double weight = proc->computeWeight();
+      double weight = proc->weight();
 
       //================================================================
       // invalidate any unphysical behaviour

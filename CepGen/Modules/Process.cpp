@@ -100,7 +100,7 @@ namespace cepgen
     {
       if ( mapped_variables_.size() == 0 )
         throw CG_FATAL( "Process:vars" )
-          << "No variables are mapped with this process!";
+          << "No variables are mapped for this process!";
       if ( base_jacobian_ == 0. )
         throw CG_FATAL( "Process:vars" )
           << "Point-independant component of the Jacobian for this "
@@ -158,6 +158,32 @@ namespace cepgen
       return mapped_variables_[idx].value;
     }
 
+    double
+    Process::weight()
+    {
+      //--- generate and initialise all variables, and auxiliary
+      //    (x-dependent) part of the Jacobian for this phase space point.
+      const double aux_jacobian = generateVariables();
+      if ( aux_jacobian <= 0. )
+        return 0.;
+
+      //--- compute the integrand and combine together into a single
+      //    weight for the phase space point.
+      const double me_integrand = computeWeight();
+      if ( me_integrand <= 0. )
+        return 0.;
+
+      const double weight = ( base_jacobian_*aux_jacobian ) * me_integrand;
+
+      CG_DEBUG_LOOP( "Process:weight" )
+        << "Jacobian: " << base_jacobian_ << " * " << aux_jacobian
+        << " = " << ( base_jacobian_*aux_jacobian ) << ".\n\t"
+        << "Integrand = " << me_integrand << "\n\t"
+        << "dW = " << weight << ".";
+
+      return weight;
+    }
+
     void
     Process::clearEvent()
     {
@@ -189,8 +215,8 @@ namespace cepgen
 
       CG_DEBUG( "Process" ) << "Kinematics successfully set!\n"
         << "  √s = " << sqs_*1.e-3 << " TeV,\n"
-        << "  p₁ = " << p1 << ", mass=" << p1.mass() << " GeV\n"
-        << "  p₂ = " << p2 << ", mass=" << p2.mass() << " GeV.";
+        << "  p1=" << p1 << ",\tmass=" << p1.mass() << " GeV\n"
+        << "  p2=" << p2 << ",\tmass=" << p2.mass() << " GeV.";
 
       //--- process-specific phase space definition
       prepareKinematics();

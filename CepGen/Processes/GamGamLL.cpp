@@ -74,10 +74,8 @@ namespace cepgen
     //---------------------------------------------------------------------------------------------
 
     void
-    GamGamLL::setKinematics( const Kinematics& kin )
+    GamGamLL::prepareKinematics()
     {
-      Process::setKinematics( kin );
-
       masses_.Ml2 = (*event_)[Particle::CentralSystem][0].mass2();
 
       w_limits_ = kin_.cuts.central.mass_single;

@@ -149,32 +149,7 @@ namespace cepgen
     double
     KTProcess::computeWeight()
     {
-      //============================================================================================
-      // generate and initialise all variables, and auxiliary (x-dependent) part of the Jacobian
-      // for this phase space point.
-      //============================================================================================
-
-      const double aux_jacobian = generateVariables();
-      if ( aux_jacobian <= 0. )
-        return 0.;
-
-      //============================================================================================
-      // compute the integrand and combine together into a single weight for the phase space point.
-      //============================================================================================
-
-      const double me_integrand = computeKTFactorisedMatrixElement();
-      if ( me_integrand <= 0. )
-        return 0.;
-
-      const double weight = ( base_jacobian_*aux_jacobian ) * me_integrand;
-
-      CG_DEBUG_LOOP( "KTProcess:weight" )
-        << "Jacobian: " << base_jacobian_ << " * " << aux_jacobian
-        << " = " << ( base_jacobian_*aux_jacobian ) << ".\n\t"
-        << "Integrand = " << me_integrand << "\n\t"
-        << "dW = " << weight << ".";
-
-      return weight;
+      return std::max( 0., computeKTFactorisedMatrixElement() );
     }
 
     void
@@ -204,15 +179,19 @@ namespace cepgen
           break;
         case KinematicsMode::ElasticInelastic:
           op1.setStatus( Particle::Status::FinalState );
-          op2.setStatus( Particle::Status::Unfragmented ); op2.setMass( MY_ );
+          op2.setStatus( Particle::Status::Unfragmented );
+          op2.setMass( MY_ );
           break;
         case KinematicsMode::InelasticElastic:
-          op1.setStatus( Particle::Status::Unfragmented ); op1.setMass( MX_ );
+          op1.setStatus( Particle::Status::Unfragmented );
+          op1.setMass( MX_ );
           op2.setStatus( Particle::Status::FinalState );
           break;
         case KinematicsMode::InelasticInelastic:
-          op1.setStatus( Particle::Status::Unfragmented ); op1.setMass( MX_ );
-          op2.setStatus( Particle::Status::Unfragmented ); op2.setMass( MY_ );
+          op1.setStatus( Particle::Status::Unfragmented );
+          op1.setMass( MX_ );
+          op2.setStatus( Particle::Status::Unfragmented );
+          op2.setMass( MY_ );
           break;
         default: {
           throw CG_FATAL( "KTProcess" )

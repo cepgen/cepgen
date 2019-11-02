@@ -44,7 +44,7 @@ namespace cepgen
         void beforeComputeWeight() override;
         double computeWeight() override;
         unsigned int numDimensions() const override;
-        void setKinematics( const Kinematics& cuts ) override;
+        void prepareKinematics() override;
         void fillKinematics( bool ) override;
         /// Compute the ougoing proton remnant mass
         /// \param[in] x A random number (between 0 and 1)
@@ -53,9 +53,6 @@ namespace cepgen
         /// \param[out] dmx The size of the integration bin
         /// \return Mass of the outgoing proton remnant
         double computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dmx );
-        /// Set all the kinematic variables for the outgoing proton remnants, and prepare the hadronisation
-        /// \param[in] part Particle to "prepare" for the hadronisation to be performed
-        void prepareHadronisation( Particle *part );
 
       private:
         /**

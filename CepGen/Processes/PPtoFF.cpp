@@ -26,7 +26,7 @@ namespace cepgen
 
       private:
         enum class ME { onShell = 0, offShell = 1 };
-        void prepareKinematics() override;
+        void prepareProcessKinematics() override;
         double computeCentralMatrixElement() const override;
 
         /// Rapidity range for the outgoing fermions
@@ -76,7 +76,7 @@ namespace cepgen
     }
 
     void
-    PPtoFF::prepareKinematics()
+    PPtoFF::prepareProcessKinematics()
     {
       if ( !kin_.cuts.central.pt_diff.valid() )
         kin_.cuts.central.pt_diff = { 0., 50. }; // tighter cut for fermions

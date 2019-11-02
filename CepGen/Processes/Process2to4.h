@@ -20,8 +20,8 @@ namespace cepgen
         void fillCentralParticlesKinematics() override;
         double computeKTFactorisedMatrixElement() override;
 
+        virtual void prepareProcessKinematics() = 0;
         virtual double computeCentralMatrixElement() const = 0;
-        virtual void prepareKinematics() = 0;
 
         ParticleProperties cs_prop_; ///< PDG id of the central particles
 

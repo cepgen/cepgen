@@ -27,7 +27,7 @@ namespace cepgen
         const double mw_, mw2_;
         static constexpr double g_em_ = 4.*M_PI*constants::ALPHA_EM;
 
-        void prepareKinematics() override;
+        void prepareProcessKinematics() override;
         double computeCentralMatrixElement() const override;
 
         double amplitudeWW( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 ) const;
@@ -72,7 +72,7 @@ namespace cepgen
     }
 
     void
-    PPtoWW::prepareKinematics()
+    PPtoWW::prepareProcessKinematics()
     {
       Cuts single_w_cuts;
       if ( kin_.cuts.central_particles.count( PDG::W ) > 0 )

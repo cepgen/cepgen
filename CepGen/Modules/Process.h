@@ -53,7 +53,7 @@ namespace cepgen
         /// Set the kinematics of the incoming state particles
         void setIncomingKinematics( const Momentum& p1, const Momentum& p2 );
         /// Compute the incoming state kinematics
-        virtual void prepareKinematics() {}
+        virtual void prepareKinematics() = 0;
 
       public:
         /// Set the incoming and outgoing state to be expected in the process
@@ -68,7 +68,7 @@ namespace cepgen
         /// Prepare the process for its integration over the whole phase space
         inline virtual void beforeComputeWeight() {}
         /// Compute the weight for this point in the phase-space
-        virtual double computeWeight() = 0;
+        double weight();
         /// Fill the Event object with the particles' kinematics
         /// \param[in] symmetrise Symmetrise the event? (randomise the production of positively- and negatively-charged outgoing central particles)
         virtual void fillKinematics( bool symmetrise = false ) = 0;
@@ -132,6 +132,7 @@ namespace cepgen
         /// \return Phase space point-dependent component of the Jacobian weight of the point in the phase space for integration
         /// \note To be run at each point computation (therefore, to be optimised!)
         double generateVariables() const;
+        virtual double computeWeight() = 0;
 
         /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
         void setEventContent( const IncomingState& ini, const OutgoingState& fin );
