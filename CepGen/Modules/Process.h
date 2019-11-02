@@ -53,7 +53,7 @@ namespace cepgen
         /// Set the kinematics of the incoming state particles
         void setIncomingKinematics( const Momentum& p1, const Momentum& p2 );
         /// Compute the incoming state kinematics
-        void prepareKinematics();
+        virtual void prepareKinematics() {}
 
       public:
         /// Set the incoming and outgoing state to be expected in the process
@@ -63,7 +63,7 @@ namespace cepgen
         virtual void setKinematics( const Kinematics& kin );
         /// Return the number of dimensions on which the integration has to be performed
         /// \return Number of dimensions on which to integrate
-        virtual unsigned int numDimensions() const = 0;
+        virtual unsigned int numDimensions() const { return mapped_variables_.size(); }
 
         /// Prepare the process for its integration over the whole phase space
         inline virtual void beforeComputeWeight() {}
@@ -83,12 +83,14 @@ namespace cepgen
         void setPoint( const unsigned int ndim, double* x );
         /// Dump the evaluated point's coordinates in the standard output stream
         void dumpPoint() const;
+        /// List all variables handled by this generic process
+        void dumpVariables() const;
         /// Complete list of Particle with their role in the process for the point considered in the phase space, returned as an Event object.
         /// \return Event object containing all the generated Particle objects
         inline std::shared_ptr<Event> event() const { return event_; }
 
         ///Get the number of dimensions on which the integration is performed
-        inline size_t ndim() const { return x_.size(); }
+        inline size_t ndim() const { return mapped_variables_.size(); }
         /// Get the value of a component of the d-dimensional point considered
         double x( unsigned int idx ) const;
         /// Process-specific parameters
@@ -106,6 +108,30 @@ namespace cepgen
       protected:
         const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
         const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
+        /// Type of mapping to apply on the variable
+        enum class Mapping
+        {
+          /// a linear \f${\rm d}x\f$ mapping
+          linear = 0,
+          /// a logarithmic \f$\frac{{\rm d}x}{x} = {\rm d}(\log x)\f$ mapping
+          logarithmic,
+          /// a square \f${\rm d}x^2=2x\cdot{\rm d}x\f$ mapping
+          square
+        };
+        friend std::ostream& operator<<( std::ostream&, const Mapping& );
+        /// Register a variable to be handled and populated whenever
+        ///  a new phase space point weight is to be calculated.
+        /// \note To be run once per generation (before any point computation)
+        /// \param[out] out Reference to the variable to be mapped
+        /// \param[in] type Type of mapping to apply
+        /// \param[in] in Integration limits
+        /// \param[in] default_limits Limits to apply if none retrieved from the user configuration
+        /// \param[in] description Human-readable description of the variable
+        Process& defineVariable( double& out, const Mapping& type, const Limits& in, Limits default_limits, const char* description );
+        /// Generate and initialise all variables handled by this process
+        /// \return Phase space point-dependent component of the Jacobian weight of the point in the phase space for integration
+        /// \note To be run at each point computation (therefore, to be optimised!)
+        double generateVariables() const;
 
         /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
         void setEventContent( const IncomingState& ini, const OutgoingState& fin );
@@ -124,8 +150,24 @@ namespace cepgen
         bool first_run;
 
       protected:
-        /// Array of double precision floats representing the point on which the weight in the cross-section is computed
-        std::vector<double> x_;
+        /// Handler to a variable mapped by this process
+        struct MappingVariable
+        {
+          /// Human-readable description of the variable
+          std::string description;
+          /// Kinematic limits to apply on the variable
+          Limits limits;
+          /// Reference to the process variable to generate/map
+          double& value;
+          /// Interpolation type
+          Mapping type;
+          /// Corresponding integration variable
+          unsigned short index;
+        };
+        /// Collection of variables to be mapped at the weight generation stage
+        std::vector<MappingVariable> mapped_variables_;
+        /// Phase space point-independant component of the Jacobian weight of the point in the phase space for integration
+        double base_jacobian_;
         /// \f$s\f$, squared centre of mass energy of the incoming particles' system, in \f$\mathrm{GeV}^2\f$
         double s_;
         /// \f$\sqrt s\f$, centre of mass energy of the incoming particles' system (in GeV)

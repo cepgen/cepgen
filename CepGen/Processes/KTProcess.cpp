@@ -12,8 +12,6 @@
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
 
-#include <iomanip>
-
 namespace cepgen
 {
   namespace proc
@@ -24,7 +22,6 @@ namespace cepgen
                           const std::array<pdgid_t,2>& partons,
                           const std::vector<pdgid_t>& central ) :
       Process( params, name, description+" (kT-factorisation approach)" ),
-      num_dimensions_( 0 ), kt_jacobian_( 0. ),
       qt1_( 0. ), phi_qt1_( 0. ), qt2_( 0. ), phi_qt2_( 0. ),
       kIntermediateParts( partons ), kProducedParts( central )
     {}
@@ -48,17 +45,9 @@ namespace cepgen
       setExtraContent();
     }
 
-    unsigned int
-    KTProcess::numDimensions() const
-    {
-      return num_dimensions_;
-    }
-
     void
-    KTProcess::setKinematics( const Kinematics& kin )
+    KTProcess::prepareKinematics()
     {
-      kin_ = kin;
-
       const KTFlux flux1 = (KTFlux)kin_.incoming_beams.first.kt_flux,
                    flux2 = (KTFlux)kin_.incoming_beams.second.kt_flux;
 
@@ -131,21 +120,13 @@ namespace cepgen
       }
 
       //============================================================================================
-      // initialise the "constant" (wrt x) part of the Jacobian
-      //============================================================================================
-
-      kt_jacobian_ = 1.;
-      num_dimensions_ = 0;
-      mapped_variables_.clear();
-
-      //============================================================================================
       // register the incoming partons' variables
       //============================================================================================
 
-      registerVariable( qt1_, Mapping::logarithmic, kin_.cuts.initial.qt, { 1.e-10, 500. }, "First incoming parton virtuality" );
-      registerVariable( qt2_, Mapping::logarithmic, kin_.cuts.initial.qt, { 1.e-10, 500. }, "Second incoming parton virtuality" );
-      registerVariable( phi_qt1_, Mapping::linear, kin_.cuts.initial.phi_qt, { 0., 2.*M_PI }, "First incoming parton azimuthal angle" );
-      registerVariable( phi_qt2_, Mapping::linear, kin_.cuts.initial.phi_qt, { 0., 2.*M_PI }, "Second incoming parton azimuthal angle" );
+      defineVariable( qt1_, Mapping::logarithmic, kin_.cuts.initial.qt, { 1.e-10, 500. }, "First incoming parton virtuality" );
+      defineVariable( qt2_, Mapping::logarithmic, kin_.cuts.initial.qt, { 1.e-10, 500. }, "Second incoming parton virtuality" );
+      defineVariable( phi_qt1_, Mapping::linear, kin_.cuts.initial.phi_qt, { 0., 2.*M_PI }, "First incoming parton azimuthal angle" );
+      defineVariable( phi_qt2_, Mapping::linear, kin_.cuts.initial.phi_qt, { 0., 2.*M_PI }, "Second incoming parton azimuthal angle" );
 
       //============================================================================================
       // register all process-dependent variables
@@ -160,25 +141,14 @@ namespace cepgen
       MX_ = event_->getOneByRole( Particle::IncomingBeam1 ).mass();
       MY_ = event_->getOneByRole( Particle::IncomingBeam2 ).mass();
       if ( kin_.mode == KinematicsMode::InelasticElastic || kin_.mode == KinematicsMode::InelasticInelastic )
-        registerVariable( MX_, Mapping::square, kin_.cuts.remnants.mass_single, { 1.07, 1000. }, "Positive z proton remnant mass" );
+        defineVariable( MX_, Mapping::square, kin_.cuts.remnants.mass_single, { 1.07, 1000. }, "Positive z proton remnant mass" );
       if ( kin_.mode == KinematicsMode::ElasticInelastic || kin_.mode == KinematicsMode::InelasticInelastic )
-        registerVariable( MY_, Mapping::square, kin_.cuts.remnants.mass_single, { 1.07, 1000. }, "Negative z proton remnant mass" );
-
-      prepareKinematics();
+        defineVariable( MY_, Mapping::square, kin_.cuts.remnants.mass_single, { 1.07, 1000. }, "Negative z proton remnant mass" );
     }
 
     double
     KTProcess::computeWeight()
     {
-      if ( mapped_variables_.size() == 0 )
-        throw CG_FATAL( "KTProcess:weight" )
-          << "No variables are mapped with this process!";
-      if ( kt_jacobian_ == 0. )
-        throw CG_FATAL( "KTProcess:weight" )
-          << "Point-independant component of the Jacobian for this "
-          << "kt-factorised process is null.\n\t"
-          << "Please check the validity of the phase space!";
-
       //============================================================================================
       // generate and initialise all variables, and auxiliary (x-dependent) part of the Jacobian
       // for this phase space point.
@@ -196,93 +166,15 @@ namespace cepgen
       if ( me_integrand <= 0. )
         return 0.;
 
-      const double weight = ( kt_jacobian_*aux_jacobian ) * me_integrand;
+      const double weight = ( base_jacobian_*aux_jacobian ) * me_integrand;
 
       CG_DEBUG_LOOP( "KTProcess:weight" )
-        << "Jacobian: " << kt_jacobian_ << " * " << aux_jacobian
-        << " = " << ( kt_jacobian_*aux_jacobian ) << ".\n\t"
+        << "Jacobian: " << base_jacobian_ << " * " << aux_jacobian
+        << " = " << ( base_jacobian_*aux_jacobian ) << ".\n\t"
         << "Integrand = " << me_integrand << "\n\t"
         << "dW = " << weight << ".";
 
       return weight;
-    }
-
-    void
-    KTProcess::registerVariable( double& out, const Mapping& type,
-                                 const Limits& in, Limits default_limits,
-                                 const char* description )
-    {
-      Limits lim = in;
-      out = 0.; // reset the variable
-      if ( !in.valid() ) {
-        CG_DEBUG( "KTProcess:registerVariable" )
-          << description << " could not be retrieved from the user configuration!\n\t"
-          << "Setting it to the default value: " << default_limits << ".";
-        lim = default_limits;
-      }
-      if ( type == Mapping::logarithmic )
-        lim = {
-          std::max( log( lim.min() ), -10. ),
-          std::min( log( lim.max() ), +10. )
-        };
-      mapped_variables_.emplace_back( MappingVariable{ description, lim, out, type, num_dimensions_++ } );
-      switch ( type ) {
-        case Mapping::square:
-          kt_jacobian_ *= 2.*lim.range();
-          break;
-        default:
-          kt_jacobian_ *= lim.range();
-          break;
-      }
-      CG_DEBUG( "KTProcess:registerVariable" )
-        << description << " has been mapped to variable " << num_dimensions_ << ".\n\t"
-        << "Allowed range for integration: " << lim << ".\n\t"
-        << "Variable integration mode: " << type << ".";
-    }
-
-    void
-    KTProcess::dumpVariables() const
-    {
-      std::ostringstream os;
-      for ( const auto& var : mapped_variables_ )
-        os << "\n\t(" << var.index << ") " << var.type << " mapping (" << var.description << ") in range " << var.limits;
-      CG_INFO( "KTProcess:dumpVariables" )
-        << "List of variables handled by this kt-factorised process:"
-        << os.str();
-    }
-
-    double
-    KTProcess::generateVariables() const
-    {
-      double jacobian = 1.;
-      for ( const auto& cut : mapped_variables_ ) {
-        if ( !cut.limits.valid() )
-          continue;
-        const double xv = x( cut.index ); // between 0 and 1
-        switch ( cut.type ) {
-          case Mapping::linear: {
-            cut.variable = cut.limits.x( xv );
-          } break;
-          case Mapping::logarithmic: {
-            cut.variable = exp( cut.limits.x( xv ) );
-            jacobian *= cut.variable;
-          } break;
-          case Mapping::square: {
-            cut.variable = cut.limits.x( xv );
-            jacobian *= cut.variable;
-          } break;
-        }
-      }
-      if ( CG_LOG_MATCH( "KtProcess:vars", debugInsideLoop ) ) {
-        std::ostringstream oss;
-        for ( const auto& cut : mapped_variables_ ) {
-          oss << "variable " << cut.index
-              << " in range " << std::left << std::setw( 20 ) << cut.limits << std::right
-              << " has value " << cut.variable << "\n\t";
-        }
-        CG_DEBUG_LOOP( "KtProcess:vars" ) << oss.str();
-      }
-      return jacobian;
     }
 
     void
@@ -343,17 +235,6 @@ namespace cepgen
       //============================================================================================
 
       event_->getOneByRole( Particle::Intermediate ).setMomentum( g1.momentum()+g2.momentum() );
-    }
-
-    std::ostream&
-    operator<<( std::ostream& os, const KTProcess::Mapping& type )
-    {
-      switch ( type ) {
-        case KTProcess::Mapping::linear: return os << "linear";
-        case KTProcess::Mapping::logarithmic: return os << "logarithmic";
-        case KTProcess::Mapping::square: return os << "squared";
-      }
-      return os;
     }
   }
 }

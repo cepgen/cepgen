@@ -36,18 +36,14 @@ namespace cepgen
 
         /// Populate the event content with the generated process' topology
         void addEventContent() override;
-        /// Retrieve the total number of dimensions on which the integration is being performet
-        unsigned int numDimensions() const override;
         /// Retrieve the event weight in the phase space
         double computeWeight() override;
         /// Populate the event content with the generated process' kinematics
         void fillKinematics( bool ) override;
-        /// List all variables handled by this generic process
-        void dumpVariables() const;
 
       protected:
         /// Set the kinematics associated to the phase space definition
-        void setKinematics( const Kinematics& kin ) override;
+        void prepareKinematics() override;
         /// Set the kinematics of the central system before any point computation
         virtual void setExtraContent() {}
         /// Prepare the central part of the Jacobian (only done once, as soon as the kinematics is set)
@@ -59,36 +55,6 @@ namespace cepgen
         void fillPrimaryParticlesKinematics();
         /// Set the kinematics of the outgoing central system
         virtual void fillCentralParticlesKinematics() = 0;
-
-        /// Type of mapping to apply on the variable
-        enum class Mapping
-        {
-          /// a linear \f${\rm d}x\f$ mapping
-          linear = 0,
-          /// a logarithmic \f$\frac{{\rm d}x}{x} = {\rm d}(\log x)\f$ mapping
-          logarithmic,
-          /// a square \f${\rm d}x^2=2x\cdot{\rm d}x\f$ mapping
-          square
-        };
-        friend std::ostream& operator<<( std::ostream&, const Mapping& );
-        /// Register a variable to be handled and populated whenever
-        ///  a new phase space point weight is to be calculated.
-        /// \note To be run once per generation (before any point computation)
-        /// \param[out] out Reference to the variable to be mapped
-        /// \param[in] type Type of mapping to apply
-        /// \param[in] in Integration limits
-        /// \param[in] default_limits Limits to apply if none retrieved from the user configuration
-        /// \param[in] description Human-readable description of the variable
-        void registerVariable( double& out, const Mapping& type, const Limits& in, Limits default_limits, const char* description );
-        /// Generate and initialise all variables handled by this process
-        /// \return Phase space point-dependent component of the Jacobian weight of the point in the phase space for integration
-        /// \note To be run at each point computation (therefore, to be optimised!)
-        double generateVariables() const;
-        /// Number of dimensions on which to perform the integration
-        unsigned short num_dimensions_;
-
-        /// Phase space point-independant component of the Jacobian weight of the point in the phase space for integration
-        double kt_jacobian_;
 
         /// Log-virtuality range of the intermediate parton
         Limits log_qt_limits_;
@@ -110,23 +76,6 @@ namespace cepgen
         Momentum PX_;
         /// Second outgoing proton
         Momentum PY_;
-
-        /// Handler to a variable mapped by this process
-        struct MappingVariable
-        {
-          /// Human-readable description of the variable
-          std::string description;
-          /// Kinematic limits to apply on the variable
-          Limits limits;
-          /// Reference to the process variable to generate/map
-          double& variable;
-          /// Interpolation type
-          Mapping type;
-          /// Corresponding integration variable
-          unsigned short index;
-        };
-        /// Collection of variables to be mapped at the weight generation stage
-        std::vector<MappingVariable> mapped_variables_;
 
       private:
         /// First and second intermediate parton (photon, pomeron, ...)
