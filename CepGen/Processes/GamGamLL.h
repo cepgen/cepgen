@@ -43,7 +43,6 @@ namespace cepgen
         void addEventContent() override;
         void beforeComputeWeight() override;
         double computeWeight() override;
-        unsigned int numDimensions() const override;
         void prepareKinematics() override;
         void fillKinematics( bool ) override;
         /// Compute the ougoing proton remnant mass
@@ -88,6 +87,7 @@ namespace cepgen
         int n_opt_;
         pdgid_t pair_;
 
+        std::vector<double> x_tmp_;
         Limits w_limits_;
         struct Masses
         {

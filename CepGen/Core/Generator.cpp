@@ -48,7 +48,7 @@ namespace cepgen
   {
     if ( !parameters_->process() )
      return 0;
-    return parameters_->process()->numDimensions();
+    return parameters_->process()->ndim();
   }
 
   void

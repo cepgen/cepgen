@@ -53,24 +53,6 @@ namespace cepgen
       } );
     }
 
-    unsigned int
-    GamGamLL::numDimensions() const
-    {
-      switch ( kin_.mode ) {
-        case KinematicsMode::ElectronProton: default:
-          throw CG_FATAL( "GamGamLL" )
-            << "Process mode " << kin_.mode << " not (yet) supported! "
-            << "Please contact the developers to consider an implementation.";
-        case KinematicsMode::ElasticElastic:
-          return 7;
-        case KinematicsMode::ElasticInelastic:
-        case KinematicsMode::InelasticElastic:
-          return 8;
-        case KinematicsMode::InelasticInelastic:
-          return 9;
-      }
-    }
-
     //---------------------------------------------------------------------------------------------
 
     void
@@ -86,6 +68,25 @@ namespace cepgen
         w_limits_.min() = 4.*masses_.Ml2;
       // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or wmax if specified)
       w_limits_.max() = std::min( pow( sqs_-MX_-MY_, 2 ), w_limits_.max() );
+
+      size_t num_dimensions = 0;
+      switch ( kin_.mode ) {
+        case KinematicsMode::ElectronProton: default:
+          throw CG_FATAL( "GamGamLL" )
+            << "Process mode " << kin_.mode << " not (yet) supported! "
+            << "Please contact the developers to consider an implementation.";
+        case KinematicsMode::ElasticElastic:
+          num_dimensions = 7;
+        case KinematicsMode::ElasticInelastic:
+        case KinematicsMode::InelasticElastic:
+          num_dimensions = 8;
+        case KinematicsMode::InelasticInelastic:
+          num_dimensions = 9;
+      }
+
+      x_tmp_.resize( num_dimensions );
+      for ( size_t i = 0; i < num_dimensions; ++i )
+        defineVariable( x_tmp_[i], Mapping::linear, { 0., 1. }, { 0., 1. }, ( "variable"+std::to_string( i ) ).c_str() );
 
       CG_DEBUG_LOOP( "GamGamLL:setKinematics" )
         << "w limits = " << w_limits_ << "\n\t"
