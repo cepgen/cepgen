@@ -76,6 +76,9 @@ namespace cepgen
         case Mapping::linear: case Mapping::logarithmic:
           base_jacobian_ *= lim.range();
           break;
+        case Mapping::exponential:
+          base_jacobian_ *= log( lim.max()/lim.min() );
+          break;
       }
       CG_DEBUG( "Process:defineVariable" )
         << description << " has been mapped to variable " << mapped_variables_.size() << ".\n\t"
@@ -124,6 +127,11 @@ namespace cepgen
             cut.value = cut.limits.x( xv );
             jacobian *= cut.value;
           } break;
+          case Mapping::exponential: {
+            const double y = cut.limits.max()/cut.limits.min();
+            cut.value = cut.limits.min()*pow( y, xv );
+            jacobian *= cut.value;
+          } break;
         }
       }
       if ( CG_LOG_MATCH( "Process:vars", debugInsideLoop ) ) {
@@ -161,6 +169,13 @@ namespace cepgen
     double
     Process::weight()
     {
+      if ( !is_point_set_ )
+        throw CG_FATAL( "Process:weight" )
+          << "Trying to evaluate weight while phase space point\n\t"
+          << "coordinates are not set!";
+
+      beforeComputeWeight();
+
       //--- generate and initialise all variables, and auxiliary
       //    (x-dependent) part of the Jacobian for this phase space point.
       const double aux_jacobian = generateVariables();
@@ -356,6 +371,7 @@ namespace cepgen
         case Process::Mapping::linear: return os << "linear";
         case Process::Mapping::logarithmic: return os << "logarithmic";
         case Process::Mapping::square: return os << "squared";
+        case Process::Mapping::exponential: return os << "exponential";
       }
       return os;
     }

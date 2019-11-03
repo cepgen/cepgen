@@ -64,7 +64,6 @@ namespace cepgen
       // from this step on, the phase space point is supposed to be set
       //================================================================
 
-      proc->beforeComputeWeight();
       double weight = proc->weight();
 
       //================================================================

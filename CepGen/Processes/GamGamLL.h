@@ -45,13 +45,6 @@ namespace cepgen
         double computeWeight() override;
         void prepareKinematics() override;
         void fillKinematics( bool ) override;
-        /// Compute the ougoing proton remnant mass
-        /// \param[in] x A random number (between 0 and 1)
-        /// \param[in] outmass The maximal outgoing particles' invariant mass
-        /// \param[in] lepmass The outgoing leptons' mass
-        /// \param[out] dmx The size of the integration bin
-        /// \return Mass of the outgoing proton remnant
-        double computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dmx );
 
       private:
         /**
@@ -75,7 +68,7 @@ namespace cepgen
          *  b = t_1 t_2+\left(w_{\gamma\gamma}\sin^2{\theta^{\rm CM}_6}+4m_\ell\cos^2{\theta^{\rm CM}_6}\right) p_g^2
          * \f]
          */
-        double periPP( int, int );
+        double periPP() const;
         /**
          * Describe the kinematics of the process \f$p_1+p_2\to p_3+p_4+p_5\f$ in terms of Lorentz-invariant variables.
          * These variables (along with others) will then be fed into the \a PeriPP method (thus are essential for the evaluation of the full matrix element).
@@ -101,10 +94,8 @@ namespace cepgen
           double w12 = 0.;
           /// \f$\delta_1=m_3^2-m_1^2\f$ as defined in \cite Vermaseren:1982cz
           double w31 = 0.;
-          double dw31 = 0.;
           /// \f$\delta_4=m_5^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
           double w52 = 0.;
-          double dw52 = 0.;
         } masses_;
 
         /// energy of the first proton-like incoming particle

@@ -61,10 +61,6 @@ namespace cepgen
         /// Set the list of kinematic cuts to apply on the outgoing particles' final state
         /// \param[in] kin The Kinematics object containing the kinematic parameters
         virtual void setKinematics( const Kinematics& kin );
-        /// Return the number of dimensions on which the integration has to be performed
-        /// \return Number of dimensions on which to integrate
-        virtual unsigned int numDimensions() const { return mapped_variables_.size(); }
-
         /// Prepare the process for its integration over the whole phase space
         inline virtual void beforeComputeWeight() {}
         /// Compute the weight for this point in the phase-space
@@ -116,7 +112,20 @@ namespace cepgen
           /// a logarithmic \f$\frac{{\rm d}x}{x} = {\rm d}(\log x)\f$ mapping
           logarithmic,
           /// a square \f${\rm d}x^2=2x\cdot{\rm d}x\f$ mapping
-          square
+          square,
+          /// an exponential mapping inherited from LPAIR
+          /**
+           * Define modified variables of integration to avoid peaks integrations (see \cite Vermaseren:1982cz for details):
+           * - \f$y_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\f$ the new variable
+           * - \f$\mathrm dy_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\log\frac{x_{min}}{x_{max}}\f$, the new variable's differential form
+           * \note This method overrides the set of `mapxx` subroutines in ILPAIR, with a slight difference according to the sign of the
+           *  \f$\mathrm dy_{out}\f$ parameter :
+           *  - left unchanged :
+           * > `mapw2`, `mapxq`, `mapwx`, `maps2`
+           *  - opposite sign :
+           * > `mapt1`, `mapt2`
+           */
+          exponential
         };
         friend std::ostream& operator<<( std::ostream&, const Mapping& );
         /// Register a variable to be handled and populated whenever

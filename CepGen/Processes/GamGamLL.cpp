@@ -66,31 +66,35 @@ namespace cepgen
       // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
       if ( !w_limits_.hasMin() )
         w_limits_.min() = 4.*masses_.Ml2;
-      // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or wmax if specified)
-      w_limits_.max() = std::min( pow( sqs_-MX_-MY_, 2 ), w_limits_.max() );
-
-      size_t num_dimensions = 0;
-      switch ( kin_.mode ) {
-        case KinematicsMode::ElectronProton: default:
-          throw CG_FATAL( "GamGamLL" )
-            << "Process mode " << kin_.mode << " not (yet) supported! "
-            << "Please contact the developers to consider an implementation.";
-        case KinematicsMode::ElasticElastic:
-          num_dimensions = 7;
-        case KinematicsMode::ElasticInelastic:
-        case KinematicsMode::InelasticElastic:
-          num_dimensions = 8;
-        case KinematicsMode::InelasticInelastic:
-          num_dimensions = 9;
-      }
-
-      x_tmp_.resize( num_dimensions );
-      for ( size_t i = 0; i < num_dimensions; ++i )
-        defineVariable( x_tmp_[i], Mapping::linear, { 0., 1. }, { 0., 1. }, ( "variable"+std::to_string( i ) ).c_str() );
 
       CG_DEBUG_LOOP( "GamGamLL:setKinematics" )
         << "w limits = " << w_limits_ << "\n\t"
         << "wmax/wmin = " << w_limits_.max()/w_limits_.min();
+
+      x_tmp_.resize( 7 );
+      for ( size_t i = 0; i < 7; ++i )
+        defineVariable( x_tmp_[i], Mapping::linear, { 0., 1. }, { 0., 1. }, ( "variable"+std::to_string( i ) ).c_str() );
+
+      p1_lab_ = (*event_)[Particle::IncomingBeam1][0].momentum();
+      p2_lab_ = (*event_)[Particle::IncomingBeam2][0].momentum();
+
+      const double mx0 = mp_+PDG::get().mass( PDG::piPlus ); // 1.07
+      const double min_wx = pow( std::max( mx0, kin_.cuts.remnants.mass_single.min() ), 2 );
+      const Limits wx_lim_ob1( min_wx, pow( std::min( sqs_-p1_lab_.mass()-2.*sqrt( masses_.Ml2 ), kin_.cuts.remnants.mass_single.max() ), 2 ) );
+      const Limits wx_lim_ob2( min_wx, pow( std::min( sqs_-p2_lab_.mass()-2.*sqrt( masses_.Ml2 ), kin_.cuts.remnants.mass_single.max() ), 2 ) );
+
+      //--- first outgoing beam particle or remnant mass
+      if ( kin_.mode == KinematicsMode::InelasticElastic
+        || kin_.mode == KinematicsMode::InelasticInelastic )
+        defineVariable( masses_.MX2, Mapping::exponential, wx_lim_ob1, wx_lim_ob1, "MX2" );
+      else
+        masses_.MX2 = pow( p1_lab_.mass(), 2 );
+      //--- second outgoing beam particle or remnant mass
+      if ( kin_.mode == KinematicsMode::ElasticInelastic
+        || kin_.mode == KinematicsMode::InelasticInelastic )
+        defineVariable( masses_.MY2, Mapping::exponential, wx_lim_ob2, wx_lim_ob2, "MY2" );
+      else
+        masses_.MY2 = pow( p2_lab_.mass(), 2 );
     }
 
     //---------------------------------------------------------------------------------------------
@@ -281,10 +285,7 @@ namespace cepgen
 
       CG_DEBUG_LOOP( "GamGamLL" )
         << "tau= " << tau << "\n\t"
-        << "r1 = " << r1 << "\n\t"
-        << "r2 = " << r2 << "\n\t"
-        << "r3 = " << r3 << "\n\t"
-        << "r4 = " << r4;
+        << "r1-4 = " << r1 << ", " << r2 << "," << r3 << ", " << r4;
 
       const double b = r3*r4-2.*( t1_+w2_ )*t2_;
       const double c = t2_*d6*d8+( d6-d8 )*( d6*w2_-d8*masses_.MY2 );
@@ -588,65 +589,11 @@ namespace cepgen
 
     //---------------------------------------------------------------------------------------------
 
-    double
-    GamGamLL::computeOutgoingPrimaryParticlesMasses( double x, double outmass, double lepmass, double& dmx )
-    {
-      const double mx0 = mp_+PDG::get().mass( PDG::piPlus ); // 1.07
-//      const double mx0 = 1.07;//FIXME
-      const Limits wx_lim( pow( std::max( mx0, kin_.cuts.remnants.mass_single.min() ), 2 ),
-                           pow( std::min( sqs_-outmass-2.*lepmass, kin_.cuts.remnants.mass_single.max() ), 2 ) );
-
-      const auto w = map( x, wx_lim, "mx2" );
-      const double mx = sqrt( w.first );
-      dmx = sqrt( w.second );
-
-      CG_DEBUG_LOOP( "GamGamLL" )
-        << "mX² in range " << wx_lim << ", x = " << x << "\n\t"
-        << "mX² = " << w.first << ", dmX² = " << w.second << "\n\t"
-        << "mX = " << mx << ", dmX = " << dmx;
-
-      return mx;
-    }
-
-    //---------------------------------------------------------------------------------------------
-
     void
     GamGamLL::beforeComputeWeight()
     {
-      if ( !Process::is_point_set_ ) return;
-
-      const Particle& p1 = event_->getOneByRole( Particle::IncomingBeam1 ),
-                     &p2 = event_->getOneByRole( Particle::IncomingBeam2 );
-
-      ep1_ = p1.energy();
-      ep2_ = p2.energy();
-
-      switch ( kin_.mode ) {
-        case KinematicsMode::ElectronProton: default:
-          throw CG_FATAL( "GamGamLL" ) << "Case not yet supported!";
-        case KinematicsMode::ElasticElastic:
-          masses_.dw31 = masses_.dw52 = 0.; break;
-        case KinematicsMode::InelasticElastic: {
-          const double m = computeOutgoingPrimaryParticlesMasses( x( 7 ), p1.mass(), sqrt( masses_.Ml2 ), masses_.dw31 );
-          event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( m );
-          event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( PDG::get().mass( p2.pdgId() ) );
-        } break;
-        case KinematicsMode::ElasticInelastic: {
-          const double m = computeOutgoingPrimaryParticlesMasses( x( 7 ), p2.mass(), sqrt( masses_.Ml2 ), masses_.dw52 );
-          event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( PDG::get().mass( p1.pdgId() ) );
-          event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( m );
-        } break;
-        case KinematicsMode::InelasticInelastic: {
-          const double mx = computeOutgoingPrimaryParticlesMasses( x( 7 ), p2.mass(), sqrt( masses_.Ml2 ), masses_.dw31 );
-          event_->getOneByRole( Particle::OutgoingBeam1 ).setMass( mx );
-          const double my = computeOutgoingPrimaryParticlesMasses( x( 8 ), p1.mass(), sqrt( masses_.Ml2 ), masses_.dw52 );
-          event_->getOneByRole( Particle::OutgoingBeam2 ).setMass( my );
-        } break;
-      }
-      MX_ = event_->getOneByRole( Particle::OutgoingBeam1 ).mass();
-      MY_ = event_->getOneByRole( Particle::OutgoingBeam2 ).mass();
-      masses_.MX2 = MX_*MX_;
-      masses_.MY2 = MY_*MY_;
+      ep1_ = (*event_)[Particle::IncomingBeam1][0].energy();
+      ep2_ = (*event_)[Particle::IncomingBeam2][0].energy();
     }
 
     //---------------------------------------------------------------------------------------------
@@ -654,10 +601,16 @@ namespace cepgen
     double
     GamGamLL::computeWeight()
     {
+      MX_ = sqrt( masses_.MX2 );
+      MY_ = sqrt( masses_.MY2 );
+
       CG_DEBUG_LOOP( "GamGamLL" )
         << "sqrt(s) = " << sqs_ << " GeV\n\t"
         << "m(X1) = " << MX_ << " GeV\t"
         << "m(X2) = " << MY_ << " GeV";
+
+      // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or wmax if specified)
+      w_limits_.max() = std::min( pow( sqs_-MX_-MY_, 2 ), w_limits_.max() );
 
       // compute the two-photon energy for this point
       const auto w4 = map( x( 4 ), w_limits_, "w4" );
@@ -918,13 +871,7 @@ namespace cepgen
 
       //--- compute the structure functions factors
 
-      switch ( kin_.mode ) { // inherited from CDF version
-        case KinematicsMode::ElectronProton: default: jacobian_ *= periPP( 1, 2 ); break;
-        case KinematicsMode::ElasticElastic:          jacobian_ *= periPP( 2, 2 ); break;
-        case KinematicsMode::InelasticElastic:        jacobian_ *= periPP( 3, 2 )*pow( masses_.dw31, 2 ); break;
-        case KinematicsMode::ElasticInelastic:        jacobian_ *= periPP( 3, 2 )*pow( masses_.dw52, 2 ); break;
-        case KinematicsMode::InelasticInelastic:      jacobian_ *= periPP( 3, 3 )*pow( masses_.dw31*masses_.dw52, 2 ); break;
-      }
+      jacobian_ *= periPP();
 
       CG_DEBUG_LOOP( "GamGamLL:f" )
         << "kinematics mode: " << kin_.mode << "\n\t"
@@ -1057,12 +1004,8 @@ namespace cepgen
     //---------------------------------------------------------------------------------------------
 
     double
-    GamGamLL::periPP( int nup_, int ndown_ )
+    GamGamLL::periPP() const
     {
-      CG_DEBUG_LOOP( "GamGamLL:peripp" )
-        << " Nup  = " << nup_ << "\n\t"
-        << "Ndown = " << ndown_;
-
       //--- compute the electric/magnetic form factors for the two
       //    considered parton momenta transfers
       FormFactors fp1, fp2;
