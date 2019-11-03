@@ -13,6 +13,7 @@ compile:
     - cmake ..
     - make -j 4
   artifacts:
+    expire_in: 2 hrs
     paths:
       - build/
 
@@ -22,9 +23,8 @@ test_cepgen:
   stage: test
   dependencies:
     - compile
-  before_script:
-    - cd build
   script:
+    - cd build
     - make -j 4 cepgen
     - ./cepgen Cards/lpair_cfg.py
     - ./cepgen Cards/legacy/lpair.card
@@ -35,9 +35,8 @@ test_integrator:
   stage: test
   dependencies:
     - compile
-  before_script:
-    - cd build
   script:
+    - cd build
     - make test_integrator
     - test/test_integrator -i vegas
     - test/test_integrator -i miser
@@ -48,9 +47,8 @@ test_cross_sections:
   stage: test
   dependencies:
     - compile
-  before_script:
-    - cd build
   script:
+    - cd build
     - make test_physics_processes
     - test/test_physics_processes -i vegas
     - test/test_physics_processes -i miser
@@ -61,9 +59,8 @@ test_function_parser:
   stage: test
   dependencies:
     - compile
-  before_script:
-    - cd build
   script:
+    - cd build
     - make test_function_parser test_function_parser_rootcomp
     - test/test_function_parser
     - test/test_function_parser_rootcomp
