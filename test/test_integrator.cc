@@ -6,6 +6,8 @@
 
 #include "CepGen/Modules/Process.h"
 
+#include "ArgumentsParser.h"
+
 #include <iostream>
 
 using namespace std;
@@ -46,23 +48,28 @@ template<size_t N=3> class TestProcess : public cepgen::proc::Process
 int
 main( int argc, char* argv[] )
 {
-  const bool debug = ( argc > 2 && string( argv[2] ) == "debug" );
+  bool debug;
+  double num_sigma;
+  string integrator;
+
+  cepgen::ArgumentsParser( argc, argv )
+    .addOptionalArgument( "num-sigma", "max. number of std.dev.", 3., &num_sigma, 'n' )
+    .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
+    .addOptionalArgument( "integrator", "type of integrator used", "vegas", &integrator, 'i' )
+    .parse();
+
   if ( !debug )
     cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::nothing;
-  const double max_sigma = 3.0;
 
   cepgen::Generator mg;
   auto& params = mg.parameters();
   auto& integ = params.integration();
-  if ( argc > 1 ) {
-    const std::string int_type( argv[1] );
-    if ( int_type == "plain" )
-      integ.type = cepgen::IntegratorType::plain;
-    if ( int_type == "vegas" )
-      integ.type = cepgen::IntegratorType::Vegas;
-    if ( int_type == "miser" )
-      integ.type = cepgen::IntegratorType::MISER;
-  }
+  if ( integrator == "plain" )
+    integ.type = cepgen::IntegratorType::plain;
+  else if ( integrator == "vegas" )
+    integ.type = cepgen::IntegratorType::Vegas;
+  else if ( integrator == "miser" )
+    integ.type = cepgen::IntegratorType::MISER;
 
   { // test 1
     const char* test = "Test 1";
@@ -70,7 +77,7 @@ main( int argc, char* argv[] )
     params.setProcess( new TestProcess<3> );
     mg.integrate();
     const double result = mg.crossSection(), error = mg.crossSectionError();
-    if ( fabs( exact - result ) > max_sigma * error )
+    if ( fabs( exact - result ) > num_sigma * error )
       throw CG_FATAL( "main" ) << test << ": pull = " << fabs( exact-result )/error << ".";
     cout << test << " passed!" << endl;
     if ( debug )
@@ -82,7 +89,7 @@ main( int argc, char* argv[] )
     params.setProcess( new TestProcess<2>( "x^2+y^2", { "x", "y" } ) );
     mg.integrate();
     const double result = mg.crossSection(), error = mg.crossSectionError();
-    if ( fabs( exact - result ) > max_sigma * error )
+    if ( fabs( exact - result ) > num_sigma * error )
       throw CG_FATAL( "main" ) << test << ": pull = " << fabs( exact-result )/error << ".";
     cout << test << " passed!" << endl;
     if ( debug )
@@ -94,7 +101,7 @@ main( int argc, char* argv[] )
     params.setProcess( new TestProcess<3>( "x+y^2+z^3", { "x", "y", "z" } ) );
     mg.integrate();
     const double result = mg.crossSection(), error = mg.crossSectionError();
-    if ( fabs( exact - result ) > max_sigma * error )
+    if ( fabs( exact - result ) > num_sigma * error )
       throw CG_FATAL( "main" ) << test << ": pull = " << fabs( exact-result )/error << ".";
     cout << test << " passed!" << endl;
     if ( debug )

@@ -1,13 +1,24 @@
 #include "CepGen/Processes/ProcessesHandler.h"
+#include "CepGen/Generator.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Core/ParametersList.h"
+
+#include "ArgumentsParser.h"
+
 #include <iostream>
 
 using namespace std;
 
-int main( int argc, const char* argv[] )
+int main( int argc, char* argv[] )
 {
-  const char* proc_name = ( argc > 1 ) ? argv[1] : "lpair";
+  string proc_name;
+
+  cepgen::ArgumentsParser( argc, argv )
+    .addArgument( "proc-name", "name of the process", &proc_name, 'p' )
+    .parse();
+
+  cepgen::Generator gen;
+
   cout << "Will build a process named \"" << proc_name << "\"." << endl;
 
   cout << "List of modules registered in the database:";

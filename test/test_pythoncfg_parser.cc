@@ -5,18 +5,23 @@
 #include <string>
 #include <iostream>
 
+#include "ArgumentsParser.h"
+
 using namespace std;
 using namespace cepgen;
 
 int
 main( int argc, char* argv[] )
 {
-  if ( argc < 2 )
-    throw CG_FATAL( "main" ) << "One argument required!";
+  string card;
+
+  ArgumentsParser( argc, argv )
+    .addArgument( "card", "input card", &card, 'i' )
+    .parse();
 
   try {
     CG_INFO( "main" )
-      << &card::PythonHandler( argv[1] ).parameters();
+      << &card::PythonHandler( card.c_str() ).parameters();
   } catch ( const Exception& e ) {
     e.dump();
   }

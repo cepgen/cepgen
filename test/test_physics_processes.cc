@@ -4,6 +4,7 @@
 #include "CepGen/Core/Timer.h"
 
 #include "AbortHandler.h"
+#include "ArgumentsParser.h"
 
 #include <fstream>
 #include <iostream>
@@ -15,10 +16,15 @@ using namespace cepgen;
 int
 main( int argc, char* argv[] )
 {
-  const double num_sigma = 3.0;
+  double num_sigma;
+  string cfg_filename;
+  string integrator;
 
-  if ( argc < 2 )
-    throw CG_FATAL( "main" ) << "Usage: " << argv[0] << " [config file] [integrator=vegas]";
+  ArgumentsParser( argc, argv )
+    .addArgument( "cfg", "configuration file", &cfg_filename, 'c' )
+    .addOptionalArgument( "num-sigma", "max. number of std.dev.", 3., &num_sigma, 'n' )
+    .addOptionalArgument( "integrator", "type of integrator used", "vegas", &integrator, 'i' )
+    .parse();
 
   utils::Logger::get().level = utils::Logger::Level::error;
 
@@ -27,17 +33,14 @@ main( int argc, char* argv[] )
   auto& params = mg.parameters();
 
   params.integration().type = IntegratorType::Vegas;
-  if ( argc > 2 ) {
-    string integrator( argv[2] );
-    if ( integrator == "plain" )
-      params.integration().type = IntegratorType::plain;
-    else if ( integrator == "vegas" )
-      params.integration().type = IntegratorType::Vegas;
-    else if ( integrator == "miser" )
-      params.integration().type = IntegratorType::MISER;
-    else
-      throw CG_FATAL( "main" ) << "Unhandled integrator type: " << integrator << ".";
-  }
+  if ( integrator == "plain" )
+    params.integration().type = IntegratorType::plain;
+  else if ( integrator == "vegas" )
+    params.integration().type = IntegratorType::Vegas;
+  else if ( integrator == "miser" )
+    params.integration().type = IntegratorType::MISER;
+  else
+    throw CG_FATAL( "main" ) << "Unhandled integrator type: " << integrator << ".";
 
   CG_LOG( "main" ) << "Testing with " << params.integration().type << " integrator.";
 
@@ -49,7 +52,7 @@ main( int argc, char* argv[] )
 
   utils::AbortHandler ctrl_c;
 
-  ifstream cfg( argv[1] );
+  ifstream cfg( cfg_filename );
   string line;
   try {
     while ( !cfg.eof() ) {

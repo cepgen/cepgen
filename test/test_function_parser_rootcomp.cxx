@@ -6,13 +6,23 @@
 #include <iostream>
 
 #include "CepGen/Core/Functional.h"
+#include "ArgumentsParser.h"
 
 using namespace std;
 
 int main( int argc, char* argv[] )
 {
-  const unsigned short num_points = 100;
-  const double min_x = -1., max_x = 10.;
+  bool draw;
+  int num_points;
+  double min_x, max_x;
+
+  cepgen::ArgumentsParser( argc, argv )
+    .addOptionalArgument( "draw", "do draw the canvas?", false, &draw, 'd' )
+    .addOptionalArgument( "num-points", "number of points to consider", 100, &num_points, 'n' )
+    .addOptionalArgument( "min-x", "minimal range", -1., &min_x, 'l' )
+    .addOptionalArgument( "max-x", "maximal range", 1., &max_x, 'H' )
+    .parse();
+
   TGraph gr_fb, gr_rt;
   TF1 f_rt( "f_rt", "TMath::Min(1.,TMath::Exp(-x/10))", min_x, max_x );
 
@@ -35,20 +45,23 @@ int main( int argc, char* argv[] )
     throw CG_FATAL( "main" ) << "Test failed with chi2 = " << chi2 << "!";
   cout << "Test passed!" << endl;
 
-  if ( argc > 1 && !strcmp( argv[1], "draw" ) ) {
-    cepgen::Canvas c( "test_graph", "CepGen validation" );
+  if ( draw ) {
+    cepgen::Canvas c( "test_graph", "CepGen validation", true );
     TMultiGraph mg;
     mg.Add( &gr_fb );
     mg.Add( &gr_rt );
-    mg.Add( &gr_diff );
     mg.Draw( "al" );
     c.AddLegendEntry( &gr_fb, "Functional", "l" );
     c.AddLegendEntry( &gr_rt, "ROOT", "l" );
-    c.AddLegendEntry( &gr_diff, "Difference", "l" );
     gr_fb.SetLineWidth( 3 );
     gr_fb.SetLineStyle( 2 );
-    gr_diff.SetLineColor( kRed );
     c.Prettify( mg.GetHistogram() );
+    auto ratio = c.RatioPlot( gr_fb.GetHistogram(), gr_rt.GetHistogram(), -1., 1., "l" );
+    ratio->SetLineColor( kRed );
+    ratio->SetLineWidth( 3 );
+    gr_diff.SetLineStyle( 2 );
+    gr_diff.SetLineColor( kBlue );
+    gr_diff.Draw( "same" );
     c.Save( "pdf" );
   }
   return 0;

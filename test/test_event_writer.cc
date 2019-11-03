@@ -1,13 +1,36 @@
 #include "CepGen/Core/ExportModuleHandler.h"
+#include "CepGen/Generator.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Event/Event.h"
+
+#include "ArgumentsParser.h"
+
+#include <iostream>
 
 using namespace std;
 using namespace cepgen;
 
 int main( int argc, char* argv[] )
 {
-  const string type = argc > 1 ? argv[1] : "hepmc";
+  Generator gen;
+
+  string type;
+  bool list;
+
+  ArgumentsParser( argc, argv )
+    .addOptionalArgument( "format", "type of format to build", "hepmc", &type )
+    .addOptionalArgument( "list", "list all formats", false, &list, 'l' )
+    .parse();
+
+  if ( list ) {
+    cout
+      << "List of export modules available:\n"
+      << "=================================\n";
+    for ( const auto& mod : io::ExportModuleHandler::get().modules() )
+      cout << mod << std::endl;
+    return 0;
+  }
+
   auto writer = io::ExportModuleHandler::get().build( type );
   writer->setCrossSection( 1., 2. );
 

@@ -3,16 +3,27 @@
 
 #include "CepGen/Core/Exception.h"
 
+#include "ArgumentsParser.h"
+
 using namespace std;
 
 int main( int argc, char* argv[] )
 {
-  if ( argc < 2 )
-    throw CG_FATAL( "main" ) << "Usage: " << argv[0] << " input-card";
+  string input_card, point;
+  bool debug;
+
+  cepgen::ArgumentsParser( argc, argv )
+    .addArgument( "input", "input card", &input_card, 'i' )
+    .addOptionalArgument( "point", "point to test", "", &point, 'p' )
+    .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
+    .parse();
+
+  if ( !debug )
+    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debugInsideLoop;
 
   vector<double> x;
-  if ( argc > 2 ) {
-    stringstream iss( argv[2] );
+  if ( !point.empty() ) {
+    stringstream iss( point );
     double buf;
     while ( iss >> buf )
       x.emplace_back( buf );
@@ -24,10 +35,8 @@ int main( int argc, char* argv[] )
     x = vector<double>( 12, 0.3 );
 
   cepgen::Generator gen;
-  gen.setParameters( cepgen::card::Handler::parse( argv[1] ) );
+  gen.setParameters( cepgen::card::Handler::parse( input_card.c_str() ) );
   CG_INFO( "main" ) << gen.parametersPtr();
-
-  cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debugInsideLoop;
 
   cout << "point: ";
   string delim;

@@ -6,27 +6,34 @@
 
 #include "CepGen/Processes/ProcessesHandler.h"
 
+#include "ArgumentsParser.h"
+
 #include <fstream>
 
 using namespace std;
 
 int main( int argc, char* argv[] )
 {
-  if ( argc < 6 )
-    throw CG_FATAL( "main" )
-      << "Usage:\n"
-      << argv[0] << " <process name> <process mode=1..4> <num points> <min value> <max value> [output file=xsect.dat]";
+  string proc_name, output_file;
+  int proc_mode, npoints;
+  double min_value, max_value, sqrts;
 
-  const string proc_name = argv[1];
-  const unsigned int proc_mode = atoi( argv[2] ), npoints = atoi( argv[3] );
-  const float min_value = atof( argv[4] ), max_value = atof( argv[5] );
-  const char* output_file = ( argc > 6 ) ? argv[6] : "xsect.dat";
+  cepgen::ArgumentsParser( argc, argv )
+    .addArgument( "proc-name", "name of the process to scan", &proc_name, 'p' )
+    .addArgument( "proc-mode", "kin. mode to consider", &proc_mode, 'm' )
+    .addArgument( "num-points", "number of points to consider", &npoints, 'n' )
+    .addArgument( "min-value", "minimum value of scan", &min_value, 'l' )
+    .addArgument( "max-value", "maximum value of scan", &max_value, 'H' )
+    .addOptionalArgument( "output", "output file", "xsect.dat", &output_file, 'o' )
+    .addOptionalArgument( "sqrts", "c.o.m. energy", 13.e3, &sqrts, 'w' )
+    .parse();
 
   cepgen::Generator mg;
 
   //cepgen::Logger::get().level = cepgen::Logger::Level::error;
 
   cepgen::Parameters& par = mg.parameters();
+  par.kinematics.setSqrtS( sqrts );
   par.kinematics.cuts.central.eta_single = { -2.5, 2.5 };
   par.kinematics.cuts.remnants.mass_single.max() = 1000.0;
   par.setProcess( cepgen::proc::ProcessesHandler::get().build( proc_name ) );
@@ -39,12 +46,13 @@ int main( int argc, char* argv[] )
   if ( !xsect_file.is_open() )
     throw CG_FATAL( "main" ) << "Output file \"" << output_file << "\" cannot be opened!";
 
-  for ( unsigned short i=0; i < npoints; i++ ) {
+  for ( int i = 0; i < npoints; i++ ) {
     par.kinematics.cuts.central.pt_single.min() = min_value+( max_value-min_value )*i/npoints;
     //cout << par << endl;
     mg.computeXsection( xsect, err_xsect );
-    xsect_file << cepgen::Form( "%.2f\t%.5f\t%.5f\n", par.kinematics.cuts.central.pt_single.min(), xsect, err_xsect );
-    cout << cepgen::Form( "%.2f\t%.5f\t%.5f\n", par.kinematics.cuts.central.pt_single.min(), xsect, err_xsect );
+    string out_line = cepgen::Form( "%.2f\t%.5f\t%.5f\n", par.kinematics.cuts.central.pt_single.min(), xsect, err_xsect );
+    xsect_file << out_line;
+    cout << out_line;
     xsect_file.flush();
   }
 
