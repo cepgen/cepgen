@@ -7,6 +7,7 @@
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Generator.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,6 +72,12 @@ extern "C" {
       e.dump();
       exit( 0 );
     }
+  }
+
+  void
+  cepgen_init_()
+  {
+    cepgen::Generator gen;
   }
 
   void

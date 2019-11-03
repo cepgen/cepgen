@@ -10,7 +10,7 @@ compile:
     - mkdir build
     - cd build
   script:
-    - cmake ..
+    - cmake -DCMAKE_BUILD_TESTS=1 ..
     - make -j 4
   artifacts:
     expire_in: 2 hrs
@@ -18,6 +18,16 @@ compile:
       - build/
 
 # define all tests
+
+test:
+  stage: test
+  dependencies:
+    - compile
+  script:
+    - cd build
+    - make test
+  when: on_success
+  allow_failure: false
 
 test_cepgen:
   stage: test
