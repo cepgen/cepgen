@@ -3,9 +3,9 @@ stages:
   - test
   - run
 
-image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
+#######################################
 
-compile:
+.build_template: &build_definition
   stage: compile
   before_script:
     - mkdir build
@@ -18,22 +18,40 @@ compile:
     paths:
       - build/
 
-# define all tests
+compile:slc6:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:slc6
+  <<: *build_definition
 
-test:
+compile:cc7:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
+  <<: *build_definition
+
+#######################################
+# define all tests
+#######################################
+
+.test_template: &test_definition
   stage: test
-  dependencies:
-    - compile
   script:
     - cd build
     - make test
   when: on_success
   allow_failure: false
 
-test_integrator:
+test:slc6:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:slc6
+  dependencies: compile:slc6
+  <<: *test_definition
+
+test:cc7:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
+  dependencies: compile:cc7
+  <<: *test_definition
+
+#######################################
+
+.test_integrator_template: &test_integrator_definition
   stage: test
-  dependencies:
-    - compile
   script:
     - cd build
     - make test_integrator
@@ -42,10 +60,20 @@ test_integrator:
   when: on_success
   allow_failure: false
 
-test_cross_sections:
+test_integrator:slc6:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:slc6
+  dependencies: compile:slc6
+  <<: *test_integrator_definition
+
+test_integrator:cc7:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
+  dependencies: compile:cc7
+  <<: *test_integrator_definition
+
+#######################################
+
+.test_cross_sections_template: &test_cross_sections_definition
   stage: test
-  dependencies:
-    - compile
   script:
     - cd build
     - make test_physics_processes
@@ -54,10 +82,20 @@ test_cross_sections:
   when: on_success
   allow_failure: true
 
-test_function_parser:
+test_cross_sections:slc6:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:slc6
+  dependencies: compile:slc6
+  <<: *test_cross_sections_definition
+
+test_cross_sections:cc7:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
+  dependencies: compile:cc7
+  <<: *test_cross_sections_definition
+
+#######################################
+
+.test_function_parser_template: &test_function_parser_definition
   stage: test
-  dependencies:
-    - compile
   script:
     - cd build
     - make test_function_parser test_function_parser_rootcomp
@@ -66,10 +104,20 @@ test_function_parser:
   when: on_success
   allow_failure: false
 
-run_cepgen:
+test_function_parser:slc6:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:slc6
+  dependencies: compile:slc6
+  <<: *test_function_parser_definition
+
+test_function_parser:cc7:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
+  dependencies: compile:cc7
+  <<: *test_function_parser_definition
+
+#######################################
+
+.run_cepgen_template: &run_cepgen_definition
   stage: run
-  dependencies:
-    - compile
   script:
     - cd build
     - make -j 4 cepgen
@@ -77,4 +125,14 @@ run_cepgen:
     - ./cepgen Cards/legacy/lpair.card
   when: on_success
   allow_failure: false
+
+run_cepgen:slc6:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:slc6
+  dependencies: compile:slc6
+  <<: *run_cepgen_definition
+
+run_cepgen:cc7:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
+  dependencies: compile:cc7
+  <<: *run_cepgen_definition
 
