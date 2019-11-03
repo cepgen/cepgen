@@ -170,8 +170,8 @@ namespace cepgen
       }
       const double sl2 = sqrt( rl2 );
 
-      double t1_max = w1_+masses_.MX2-( ss*sp+sl1_*sl2 )/( 2.*s_ ), // definition from eq. (A.4) in [1]
-             t1_min = ( masses_.w31*d3+( d3-masses_.w31 )*( d3*w1_-masses_.w31*w2_ )/s_ )/t1_max; // definition from eq. (A.5) in [1]
+      double t1_max = w1_+masses_.MX2-( ss*sp+sl1_*sl2 )/( 2.*s_ ); // definition from eq. (A.4) in [1]
+      double t1_min = ( masses_.w31*d3+( d3-masses_.w31 )*( d3*w1_-masses_.w31*w2_ )/s_ )/t1_max; // definition from eq. (A.5) in [1]
 
       // FIXME dropped in CDF version
       if ( t1_max > -kin_.cuts.initial.q2.min() ) {
@@ -719,47 +719,36 @@ namespace cepgen
       const double qcx = 2.*pc6x, qcz = 2.*pc6z;
       // qcy == QCY is never defined
 
-      const double el6 = ( ec4_*ecm6+pc4_*pc6z ) / mc4_,
-                   h2  = ( ec4_*pc6z+pc4_*ecm6 ) / mc4_;
+      const double el6 = ( ec4_*ecm6+pc4_*pc6z ) / mc4_;
+      const double h2  = ( ec4_*pc6z+pc4_*ecm6 ) / mc4_;
 
       CG_DEBUG_LOOP( "GamGamLL" ) << "h1 = " << h1 << "\n\th2 = " << h2;
 
-      // first outgoing lepton's 3-momentum
-      const double p6x = cos_theta4_*pc6x+sin_theta4_*h2,
-                   p6y = cpg*p6cm.py()+spg*h1,
-                   p6z = cos_theta4_*h2-sin_theta4_*pc6x;
-
       // first outgoing lepton's kinematics
-      p6_cm_ = Momentum( p6x, p6y, p6z, el6 );
+      p6_cm_ = Momentum(
+        cos_theta4_*pc6x+sin_theta4_*h2,
+        cpg*p6cm.py()+spg*h1,
+        cos_theta4_*h2-sin_theta4_*pc6x,
+        el6 );
+
       CG_DEBUG_LOOP( "GamGamLL" ) << "p6(cm) = " << p6_cm_;
 
       const double hq = ec4_*qcz/mc4_;
 
       const Momentum qve(
         cos_theta4_*qcx+sin_theta4_*hq,
-        2.*p6y,
+        2.*p6_cm_.py(),
         cos_theta4_*hq-sin_theta4_*qcx,
         pc4_*qcz/mc4_ // energy
       );
 
-      // Available energy for the second lepton is the 2-photon system's energy with the first lepton's energy removed
-      const double el7 = ec4_-el6;
+      // second outgoing lepton's kinematics
+      p7_cm_ = Momentum( pt4_, 0., pc4_*cos_theta4_, ec4_ )-p6_cm_;
 
       CG_DEBUG_LOOP( "GamGamLL" )
         << "Outgoing kinematics\n\t"
         << " first outgoing lepton: p = " << p6_cm_.p() << ", E = " << p6_cm_.energy() << "\n\t"
         << "second outgoing lepton: p = " << p7_cm_.p() << ", E = " << p7_cm_.energy();
-
-      // Second outgoing lepton's 3-momentum
-      const double p7x = -p6x + pt4_,
-                   p7y = -p6y,
-                   p7z = -p6z + pc4_*cos_theta4_;
-
-      // second outgoing lepton's kinematics
-      p7_cm_ = Momentum( p7x, p7y, p7z, el7 );
-
-      //p6_cm_ = Momentum(pl6*st6*cp6, pl6*st6*sp6, pl6*ct6, el6);
-      //p7_cm_ = Momentum(pl7*st7*cp7, pl7*st7*sp7, pl7*ct7, el7);
 
       q1dq_ = eg*( 2.*ecm6-mc4_ )-2.*pg*p6cm.pz();
       q1dq2_ = 0.5*( w4_-t1_-t2_ );
@@ -809,13 +798,11 @@ namespace cepgen
       // END of GAMGAMLL subroutine in the FORTRAN version
       ////////////////////////////////////////////////////////////////
 
-      const Momentum cm = event_->getOneByRole( Particle::IncomingBeam1 ).momentum()
-                        + event_->getOneByRole( Particle::IncomingBeam2 ).momentum();
-
       ////////////////////////////////////////////////////////////////
       // INFO from f.f
       ////////////////////////////////////////////////////////////////
 
+      const Momentum cm = p1_lab_+p2_lab_;
       const double gamma = cm.energy() / sqs_, betgam = cm.pz() / sqs_;
 
       //--- kinematics computation for both leptons
