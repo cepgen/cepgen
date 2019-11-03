@@ -115,7 +115,8 @@ namespace cepgen
   void
   Generator::computeXsection( double& xsec, double& err )
   {
-    CG_INFO( "Generator" ) << "Starting the computation of the process cross-section.";
+    CG_INFO( "Generator" )
+      << "Starting the computation of the process cross-section.";
 
     integrate();
 
@@ -124,19 +125,24 @@ namespace cepgen
 
     if ( xsec < 1.e-2 )
       CG_INFO( "Generator" )
-        << "Total cross section: " << xsec*1.e3 << " +/- " << err*1.e3 << " fb.";
+        << "Total cross section: " << xsec*1.e3
+        << " +/- " << err*1.e3 << " fb.";
     else if ( xsec < 0.5e3 )
       CG_INFO( "Generator" )
-        << "Total cross section: " << xsec << " +/- " << err << " pb.";
+        << "Total cross section: " << xsec
+        << " +/- " << err << " pb.";
     else if ( xsec < 0.5e6 )
       CG_INFO( "Generator" )
-        << "Total cross section: " << xsec*1.e-3 << " +/- " << err*1.e-3 << " nb.";
+        << "Total cross section: " << xsec*1.e-3
+        << " +/- " << err*1.e-3 << " nb.";
     else if ( xsec < 0.5e9 )
       CG_INFO( "Generator" )
-        << "Total cross section: " << xsec*1.e-6 << " +/- " << err*1.e-6 << " µb.";
+        << "Total cross section: " << xsec*1.e-6
+        << " +/- " << err*1.e-6 << " µb.";
     else
       CG_INFO( "Generator" )
-        << "Total cross section: " << xsec*1.e-9 << " +/- " << err*1.e-9 << " mb.";
+        << "Total cross section: " << xsec*1.e-9
+        << " +/- " << err*1.e-9 << " mb.";
   }
 
   void

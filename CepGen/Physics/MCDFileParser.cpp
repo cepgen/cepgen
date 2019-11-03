@@ -78,6 +78,7 @@ namespace pdg
           case 21:
             colour_factor = 9;
             is_fermion = false;
+            break;
           default:
             colour_factor = 1;
             is_fermion = false;
