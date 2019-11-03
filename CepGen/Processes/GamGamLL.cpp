@@ -116,8 +116,6 @@ namespace cepgen
 
       jacobian_ = 0.;
 
-      w4_ = mc4_*mc4_;
-
       // sig1 = sigma and sig2 = sigma' in [1]
       const double sig = mc4_+MY_;
       double sig1 = sig*sig;
