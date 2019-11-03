@@ -52,7 +52,7 @@ namespace cepgen
     }
 
     Process&
-    Process::defineVariable( double& out, const Mapping& type, const Limits& in, Limits default_limits, const char* description )
+    Process::defineVariable( double& out, const Mapping& type, const Limits& in, Limits default_limits, const std::string& description )
     {
       Limits lim = in;
       out = 0.; // reset the variable
@@ -68,7 +68,8 @@ namespace cepgen
           std::min( log( lim.max() ), +10. )
         };
       mapped_variables_.emplace_back(
-        MappingVariable{ description, lim, out, type, (unsigned short)mapped_variables_.size() } );
+        MappingVariable{ description.empty() ? Form( "var%z", mapped_variables_.size() ) : description.c_str(),
+          lim, out, type, (unsigned short)mapped_variables_.size() } );
       switch ( type ) {
         case Mapping::square:
           base_jacobian_ *= 2.*lim.range();

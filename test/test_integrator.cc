@@ -25,19 +25,21 @@ template<size_t N=3> class TestProcess : public cepgen::proc::Process
       return cepgen::proc::ProcessPtr( new TestProcess<N>( *this ) );
     }
 
-    void addEventContent() override {}
-    /// Number of dimensions on which to perform the integration
-    unsigned int numDimensions() const override { return N; }
+    void prepareKinematics() override {
+      for ( auto& var : variables_ )
+        defineVariable( var, cepgen::proc::Process::Mapping::linear );
+    }
     /// Generic formula to compute a weight out of a point in the phase space
     double computeWeight() override {
       std::array<double,N> args;
-      std::copy_n( x_.begin(), N, args.begin() );
+      std::copy_n( variables_.begin(), N, args.begin() );
       return funct_.eval( args );
     }
     /// Dummy function to be called on events generation
     void fillKinematics( bool ) override {}
 
   private:
+    std::array<double,N> variables_;
     cepgen::utils::Functional<N> funct_;
 };
 

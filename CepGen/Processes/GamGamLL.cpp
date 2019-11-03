@@ -83,7 +83,7 @@ namespace cepgen
       //--- variables mapping
 
       x_tmp_.resize( 3 );
-      std::vector<const char*> var_names = { "u_t1", "u_t2", "u_s2" };
+      std::vector<std::string> var_names = { "u_t1", "u_t2", "u_s2" };
       for ( size_t i = 0; i < x_tmp_.size(); ++i )
         defineVariable( x_tmp_[i], Mapping::linear, { 0., 1. }, { 0., 1. }, var_names[i] );
 

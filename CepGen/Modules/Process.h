@@ -136,7 +136,7 @@ namespace cepgen
         /// \param[in] in Integration limits
         /// \param[in] default_limits Limits to apply if none retrieved from the user configuration
         /// \param[in] description Human-readable description of the variable
-        Process& defineVariable( double& out, const Mapping& type, const Limits& in, Limits default_limits, const char* description );
+        Process& defineVariable( double& out, const Mapping& type, const Limits& in = { 0., 1. }, Limits default_limits = { 0., 1. }, const std::string& description = "" );
         /// Generate and initialise all variables handled by this process
         /// \return Phase space point-dependent component of the Jacobian weight of the point in the phase space for integration
         /// \note To be run at each point computation (therefore, to be optimised!)
