@@ -81,6 +81,10 @@ namespace cepgen
         pdgid_t pair_;
 
         std::vector<double> x_tmp_;
+        double theta4_;
+        double phi6_cm_;
+        double x6_;
+
         Limits w_limits_;
         struct Masses
         {

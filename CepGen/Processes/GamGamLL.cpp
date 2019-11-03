@@ -16,7 +16,8 @@ namespace cepgen
     GamGamLL::GamGamLL( const ParametersList& params ) :
       Process( params, "lpair", "pp → p(*) ( ɣɣ → l⁺l¯ ) p(*)" ),
       n_opt_( params.get<int>( "nopt", 0 ) ),
-      pair_ ( params.get<ParticleProperties>( "pair" ).pdgid ),
+      pair_( params.get<ParticleProperties>( "pair" ).pdgid ),
+      theta4_( 0. ), phi6_cm_( 0. ), x6_( 0. ),
       ep1_( 0. ), ep2_( 0. ), p_cm_( 0. ),
       ec4_( 0. ), pc4_( 0. ), mc4_( 0. ), w4_( 0. ),
       p12_( 0. ), p1k2_( 0. ), p2k1_( 0. ),
@@ -71,10 +72,6 @@ namespace cepgen
         << "w limits = " << w_limits_ << "\n\t"
         << "wmax/wmin = " << w_limits_.max()/w_limits_.min();
 
-      x_tmp_.resize( 7 );
-      for ( size_t i = 0; i < 7; ++i )
-        defineVariable( x_tmp_[i], Mapping::linear, { 0., 1. }, { 0., 1. }, ( "variable"+std::to_string( i ) ).c_str() );
-
       p1_lab_ = (*event_)[Particle::IncomingBeam1][0].momentum();
       p2_lab_ = (*event_)[Particle::IncomingBeam2][0].momentum();
 
@@ -82,6 +79,18 @@ namespace cepgen
       const double min_wx = pow( std::max( mx0, kin_.cuts.remnants.mass_single.min() ), 2 );
       const Limits wx_lim_ob1( min_wx, pow( std::min( sqs_-p1_lab_.mass()-2.*sqrt( masses_.Ml2 ), kin_.cuts.remnants.mass_single.max() ), 2 ) );
       const Limits wx_lim_ob2( min_wx, pow( std::min( sqs_-p2_lab_.mass()-2.*sqrt( masses_.Ml2 ), kin_.cuts.remnants.mass_single.max() ), 2 ) );
+
+      //--- variables mapping
+
+      x_tmp_.resize( 3 );
+      std::vector<const char*> var_names = { "u_t1", "u_t2", "u_s2" };
+      for ( size_t i = 0; i < x_tmp_.size(); ++i )
+        defineVariable( x_tmp_[i], Mapping::linear, { 0., 1. }, { 0., 1. }, var_names[i] );
+
+      defineVariable( w4_, Mapping::exponential, w_limits_, w_limits_, "w4" );
+      defineVariable( theta4_, Mapping::linear, { 0., M_PI }, { 0., M_PI }, "theta4" );
+      defineVariable( phi6_cm_, Mapping::linear, { 0., 2.*M_PI }, { 0., 2.*M_PI }, "phi6cm" );
+      defineVariable( x6_, Mapping::linear, { 0., 1. }, { 0., 1. }, "x6" );
 
       //--- first outgoing beam particle or remnant mass
       if ( kin_.mode == KinematicsMode::InelasticElastic
@@ -117,16 +126,6 @@ namespace cepgen
         << "mc4 = " << mc4_ << "\n\t"
         << "sig1 = " << sig1 << ".";
 
-      // Mass difference between the first outgoing particle
-      // and the first incoming particle
-      masses_.w31 = masses_.MX2-w1_;
-      // Mass difference between the second outgoing particle
-      // and the second incoming particle
-      masses_.w52 = masses_.MY2-w2_;
-      // Mass difference between the two incoming particles
-      masses_.w12 = w1_-w2_;
-      // Mass difference between the central two-photons system
-      // and the second outgoing particle
       const double d6 = w4_-masses_.MY2;
 
       CG_DEBUG_LOOP( "GamGamLL" )
@@ -321,8 +320,8 @@ namespace cepgen
       // 9
       if ( n_opt_ >= 1 ) {
         const auto s2 = n_opt_ > 1
-          ? map( x( 2 ), s2_lim, "s2" )
-          : mapla( t1_, w2_, x( 2 ), s2_lim );
+          ? map( x(2), s2_lim, "s2" )
+          : mapla( t1_, w2_, x(2), s2_lim );
         s2_ = s2.first;
         ds2 = s2.second;
       }
@@ -339,7 +338,7 @@ namespace cepgen
         << "splus   = " << splus << "\n\t"
         << "s2 range= " << s2_lim;
 
-      const double yy4 = cos( M_PI*x( 3 ) );
+      const double yy4 = cos( theta4_ );
       const double dd = dd1_*dd2_;
       p12_ = 0.5 * ( s_-w1_-w2_ );
       const double st = s2_-t1_-w2_;
@@ -364,7 +363,7 @@ namespace cepgen
         return false;
       }
 
-      jacobian_ = ds2 * dt1 * dt2 * 0.125 * M_PI*M_PI/( sl1_*sqrt( -ap ) );
+      jacobian_ = ds2 * dt1 * dt2 * 0.125 * 0.5/( sl1_*sqrt( -ap ) );
 
       CG_DEBUG_LOOP( "GamGamLL" )
         << "ds2=" << ds2 << ", dt1=" << dt1 << ", dt2=" << dt2 << "\n\t"
@@ -603,6 +602,16 @@ namespace cepgen
     {
       MX_ = sqrt( masses_.MX2 );
       MY_ = sqrt( masses_.MY2 );
+      // Mass difference between the first outgoing particle
+      // and the first incoming particle
+      masses_.w31 = masses_.MX2-w1_;
+      // Mass difference between the second outgoing particle
+      // and the second incoming particle
+      masses_.w52 = masses_.MY2-w2_;
+      // Mass difference between the two incoming particles
+      masses_.w12 = w1_-w2_;
+      // Mass difference between the central two-photons system
+      // and the second outgoing particle
 
       CG_DEBUG_LOOP( "GamGamLL" )
         << "sqrt(s) = " << sqs_ << " GeV\n\t"
@@ -613,9 +622,6 @@ namespace cepgen
       w_limits_.max() = std::min( pow( sqs_-MX_-MY_, 2 ), w_limits_.max() );
 
       // compute the two-photon energy for this point
-      const auto w4 = map( x( 4 ), w_limits_, "w4" );
-      w4_ = w4.first;
-      const double dw4 = w4.second;
       mc4_ = sqrt( w4_ );
 
       CG_DEBUG_LOOP( "GamGamLL" )
@@ -641,7 +647,7 @@ namespace cepgen
       const double ecm6 = w4_ / ( 2.*mc4_ ),
                    pp6cm = sqrt( ecm6*ecm6-masses_.Ml2 );
 
-      jacobian_ *= dw4*pp6cm/( mc4_*constants::SCONSTB*s_ );
+      jacobian_ *= pp6cm/( mc4_*constants::SCONSTB*s_ );
 
       // Let the most obscure part of this code begin...
 
@@ -672,13 +678,11 @@ namespace cepgen
       const int theta_sign = ( pgz>0. ) ? 1 : -1;
       const double ctg = theta_sign*sqrt( 1.-stg*stg );
 
-      double xx6 = x( 5 );
-
       const double amap = 0.5 * ( w4_-t1_-t2_ ),
                    bmap = 0.5 * sqrt( ( pow( w4_-t1_-t2_, 2 )-4.*t1_*t2_ )*( 1.-4.*masses_.Ml2/w4_ ) ),
                    ymap = ( amap+bmap )/( amap-bmap ),
-                   beta = pow( ymap, 2.*xx6-1. );
-      xx6 = 0.5 * ( 1. + amap/bmap*( beta-1. )/( beta+1. ) );
+                   beta = pow( ymap, 2.*x6_-1. );
+      double xx6 = 0.5 * ( 1. + amap/bmap*( beta-1. )/( beta+1. ) );
       xx6 = std::max( 0., std::min( xx6, 1. ) ); // xx6 in [0., 1.]
 
       CG_DEBUG_LOOP( "GamGamLL" )
@@ -704,10 +708,8 @@ namespace cepgen
         << "ctcm6 = " << cos( theta6cm ) << "\n\t"
         << "stcm6 = " << sin( theta6cm );
 
-      const double phi6cm = 2.*M_PI*x( 6 );
-
       // First outgoing lepton's 3-momentum in the centre of mass system
-      auto p6cm = Momentum::fromPThetaPhi( pp6cm, theta6cm, phi6cm );
+      auto p6cm = Momentum::fromPThetaPhi( pp6cm, theta6cm, phi6_cm_ );
 
       CG_DEBUG_LOOP( "GamGamLL" ) << "p3cm6 = " << p6cm;
 
@@ -761,7 +763,6 @@ namespace cepgen
 
       q1dq_ = eg*( 2.*ecm6-mc4_ )-2.*pg*p6cm.pz();
       q1dq2_ = 0.5*( w4_-t1_-t2_ );
-
 
       CG_DEBUG_LOOP( "GamGamLL" )
         << "ecm6 = " << ecm6 << ", mc4 = " << mc4_ << "\n\t"
