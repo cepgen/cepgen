@@ -1,6 +1,7 @@
 stages:
   - compile
   - test
+  - run
 
 image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
 
@@ -26,18 +27,6 @@ test:
   script:
     - cd build
     - make test
-  when: on_success
-  allow_failure: false
-
-test_cepgen:
-  stage: test
-  dependencies:
-    - compile
-  script:
-    - cd build
-    - make -j 4 cepgen
-    - ./cepgen Cards/lpair_cfg.py
-    - ./cepgen Cards/legacy/lpair.card
   when: on_success
   allow_failure: false
 
@@ -74,6 +63,18 @@ test_function_parser:
     - make test_function_parser test_function_parser_rootcomp
     - test/test_function_parser
     - test/test_function_parser_rootcomp
+  when: on_success
+  allow_failure: false
+
+run_cepgen:
+  stage: run
+  dependencies:
+    - compile
+  script:
+    - cd build
+    - make -j 4 cepgen
+    - ./cepgen Cards/lpair_cfg.py
+    - ./cepgen Cards/legacy/lpair.card
   when: on_success
   allow_failure: false
 
