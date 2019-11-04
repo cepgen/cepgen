@@ -134,7 +134,7 @@ namespace cepgen
 #else
       CG_WARNING( "Pythia8Hadroniser" )
         << "Beam remnants framework for this version of Pythia "
-        << "(" << Form( "%.3f", PYTHIA_VERSION ) << ")\n\t"
+        << "(" << utils::format( "%.3f", PYTHIA_VERSION ) << ")\n\t"
         << "does not support mixing of unresolved hadron states.\n\t"
         << "The proton remnants output might hence be wrong.\n\t"
         << "Please update the Pythia version or disable this part.";

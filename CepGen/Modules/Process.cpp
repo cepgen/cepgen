@@ -69,7 +69,7 @@ namespace cepgen
           std::min( log( lim.max() ), +10. )
         };
       mapped_variables_.emplace_back(
-        MappingVariable{ description.empty() ? Form( "var%z", mapped_variables_.size() ) : description.c_str(),
+        MappingVariable{ description.empty() ? utils::format( "var%z", mapped_variables_.size() ) : description.c_str(),
           lim, out, type, (unsigned short)mapped_variables_.size() } );
       switch ( type ) {
         case Mapping::square:
@@ -244,7 +244,7 @@ namespace cepgen
     {
       std::ostringstream os;
       for ( unsigned short i = 0; i < mapped_variables_.size(); ++i )
-        os << Form( "  x(%2d) = %8.6f\n\t", i, mapped_variables_[i].value );
+        os << utils::format( "  x(%2d) = %8.6f\n\t", i, mapped_variables_[i].value );
       CG_INFO( "Process" )
         << "Number of integration parameters: " << mapped_variables_.size() << "\n\t"
         << os.str() << ".";

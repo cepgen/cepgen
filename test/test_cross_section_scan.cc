@@ -49,7 +49,7 @@ int main( int argc, char* argv[] )
     par.kinematics.cuts.central.pt_single.min() = min_value+( max_value-min_value )*i/npoints;
     //cout << par << endl;
     mg.computeXsection( xsect, err_xsect );
-    string out_line = cepgen::Form( "%.2f\t%.5f\t%.5f\n", par.kinematics.cuts.central.pt_single.min(), xsect, err_xsect );
+    string out_line = cepgen::utils::format( "%.2f\t%.5f\t%.5f\n", par.kinematics.cuts.central.pt_single.min(), xsect, err_xsect );
     xsect_file << out_line;
     cout << out_line;
     xsect_file.flush();

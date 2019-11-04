@@ -92,7 +92,7 @@ namespace cepgen
         gsl_histogram_set_ranges_uniform( hist, min, max );
         hists_.emplace_back( std::make_pair( var, gsl_histogram_up( hist ) ) );
         CG_INFO( "TextHandler" )
-          << "Booking a histogram with " << utils::s( "bin", nbins, true )
+          << "Booking a histogram with " << utils::s( "bin", nbins )
           << " between " << min << " and " << max << " for \"" << var << "\".";
       }
       if ( save_hists_ && !hists_.empty() )
@@ -117,7 +117,7 @@ namespace cepgen
       }
       if ( save_hists_ )
         CG_INFO( "TextHandler" )
-          << "Saved " << utils::s( "histogram", hists_.size(), true )
+          << "Saved " << utils::s( "histogram", hists_.size() )
           << " into \"" << hist_filename_ << "\".";
     }
 
@@ -160,9 +160,9 @@ namespace cepgen
         << "plot of \"" << var << "\"\n"
         << sep << std::string( PLOT_WIDTH-15-var.size(), ' ' )
         << "d(sig)/d" << var << " (pb/bin)\n"
-        << sep << Form( "%-5.2f", gsl_histogram_min_val( hist ) )
+        << sep << utils::format( "%-5.2f", gsl_histogram_min_val( hist ) )
         << std::string( PLOT_WIDTH-11, ' ' )
-        << Form( "%5.2e", gsl_histogram_max_val( hist ) ) << "\n"
+        << utils::format( "%5.2e", gsl_histogram_max_val( hist ) ) << "\n"
         << sep << std::string( PLOT_WIDTH+2, '.' ); // abscissa axis
       for ( size_t i = 0; i < nbins; ++i ) {
         double min, max;
@@ -170,16 +170,16 @@ namespace cepgen
         const double value = gsl_histogram_get( hist, i );
         const int val = value*PLOT_WIDTH*inv_max_bin;
         os
-          << "\n" << Form( "[%7.2f,%7.2f):", min, max )
+          << "\n" << utils::format( "[%7.2f,%7.2f):", min, max )
           << std::string( val, PLOT_CHAR ) << std::string( PLOT_WIDTH-val, ' ' )
-          << ": " << Form( "%6.2e", value );
+          << ": " << utils::format( "%6.2e", value );
       }
       const double bin_width = ( gsl_histogram_max( hist )-gsl_histogram_min( hist ) )/nbins;
       os
         << "\n"
-        << Form( "%17s", var.c_str() ) << ":" << std::string( PLOT_WIDTH, '.' ) << ":\n" // 2nd abscissa axis
+        << utils::format( "%17s", var.c_str() ) << ":" << std::string( PLOT_WIDTH, '.' ) << ":\n" // 2nd abscissa axis
         << "\t("
-        << "bin width=" << bin_width << " unit" << utils::s( (int)bin_width ) << ", "
+        << "bin width=" << utils::s( "unit", (int)bin_width ) << ", "
         << "mean=" << gsl_histogram_mean( hist ) << ", "
         << "st.dev.=" << gsl_histogram_sigma( hist )
         << ")";

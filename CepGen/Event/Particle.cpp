@@ -133,7 +133,7 @@ namespace cepgen
     if ( CG_LOG_MATCH( "Particle", debugInsideLoop ) ) {
       std::ostringstream os;
       for ( const auto& daugh : daughters_ )
-        os << Form( "\n\t * id=%d", daugh );
+        os << utils::format( "\n\t * id=%d", daugh );
       CG_DEBUG_LOOP( "Particle" )
         << "Particle " << role_ << " (pdgId=" << (int)pdg_id_ << ") "
         << "has now " << daughters_.size() << " daughter(s):"
@@ -244,14 +244,14 @@ namespace cepgen
     if ( part.primary() )
       os << ", primary";
     else {
-      os << ", " << utils::s( "mother", part.mothers_.size(), true ) << "=";
+      os << ", " << utils::s( "mother", part.mothers_.size() ) << "=";
       std::string delim;
       for ( const auto& moth : part.mothers_ )
         os << delim << moth, delim = ",";
     }
     const auto& daughters_list = part.daughters();
     if ( !daughters_list.empty() ) {
-      os << ", " << utils::s( "daughter", daughters_list.size(), true ) << "=";
+      os << ", " << utils::s( "daughter", daughters_list.size() ) << "=";
       std::string delim;
       for ( const auto& daugh : daughters_list )
         os << delim << daugh, delim = ",";

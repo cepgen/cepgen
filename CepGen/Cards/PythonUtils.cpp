@@ -61,10 +61,10 @@ namespace cepgen
               const char* filename = PyUnicode_AsUTF8( pframe->f_code->co_filename );
               const char* funcname = PyUnicode_AsUTF8( pframe->f_code->co_name );
 #endif
-              oss << Form( "\n\t%s%s on %s (line %d)", tabul.c_str(), boldify( funcname ).c_str(), filename, line );
+              oss << utils::format( "\n\t%s%s on %s (line %d)", tabul.c_str(), utils::boldify( funcname ).c_str(), filename, line );
             }
             else
-              oss << Form( "\n\t%s issue in line %d", tabul.c_str(), ptraceback->tb_lineno );
+              oss << utils::format( "\n\t%s issue in line %d", tabul.c_str(), ptraceback->tb_lineno );
             tabul = std::string( "  " )+tabul;
             ptraceback = ptraceback->tb_next;
           }
@@ -79,7 +79,7 @@ namespace cepgen
     {
       PyObject* obj = PyUnicode_FromString( str ); // new
       if ( !obj )
-        throwPythonError( Form( "Failed to encode the following string:\n\t%s", str ) );
+        throwPythonError( utils::format( "Failed to encode the following string:\n\t%s", str ) );
       return obj;
     }
 
@@ -111,7 +111,7 @@ namespace cepgen
         return;
       }
       try { out = (bool)get<int>( pobj ); } catch ( const Exception& e ) {
-        throwPythonError( Form ( "Failed to retrieve boolean object \"%s\":\n\t%s", key, e.message().c_str() ) );
+        throwPythonError( utils::format ( "Failed to retrieve boolean object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -124,7 +124,7 @@ namespace cepgen
         return;
       }
       try { out = get<int>( pobj ); } catch ( const Exception& e ) {
-        throwPythonError( Form ( "Failed to retrieve integer object \"%s\":\n\t%s", key, e.message().c_str() ) );
+        throwPythonError( utils::format ( "Failed to retrieve integer object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -137,7 +137,7 @@ namespace cepgen
         return;
       }
       try { out = get<unsigned long>( pobj ); } catch ( const Exception& e ) {
-        throwPythonError( Form ( "Failed to retrieve unsigned long integer object \"%s\":\n\t%s", key, e.message().c_str() ) );
+        throwPythonError( utils::format ( "Failed to retrieve unsigned long integer object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -150,7 +150,7 @@ namespace cepgen
         return;
       }
       try { out = get<unsigned long>( pobj ); } catch ( const Exception& e ) {
-        throwPythonError( Form ( "Failed to retrieve unsigned integer object \"%s\":\n\t%s", key, e.message().c_str() ) );
+        throwPythonError( utils::format ( "Failed to retrieve unsigned integer object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -163,7 +163,7 @@ namespace cepgen
         return;
       }
       try { out = get<double>( pobj ); } catch ( const Exception& e ) {
-        throwPythonError( Form ( "Failed to retrieve float object \"%s\":\n\t%s", key, e.message().c_str() ) );
+        throwPythonError( utils::format ( "Failed to retrieve float object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -176,7 +176,7 @@ namespace cepgen
         return;
       }
       try { out = get<std::string>( pobj ); } catch ( const Exception& e ) {
-        throwPythonError( Form ( "Failed to retrieve string object \"%s\":\n\t%s", key, e.message().c_str() ) );
+        throwPythonError( utils::format ( "Failed to retrieve string object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -189,7 +189,7 @@ namespace cepgen
         return;
       }
       try { out = get<Limits>( pobj ); } catch ( const Exception& e ) {
-        throwPythonError( Form ( "Failed to retrieve limits object \"%s\":\n\t%s", key, e.message().c_str() ) );
+        throwPythonError( utils::format ( "Failed to retrieve limits object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -203,7 +203,7 @@ namespace cepgen
         return;
       }
       try { out = getVector<double>( pobj ); } catch ( const Exception& e ) {
-        throwPythonError( Form ( "Failed to retrieve floats collection object \"%s\":\n\t%s", key, e.message().c_str() ) );
+        throwPythonError( utils::format ( "Failed to retrieve floats collection object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -217,7 +217,7 @@ namespace cepgen
         return;
       }
       try { out = getVector<std::string>( pobj ); } catch ( const Exception& e ) {
-        throwPythonError( Form ( "Failed to retrieve strings collection object \"%s\":\n\t%s", key, e.message().c_str() ) );
+        throwPythonError( utils::format ( "Failed to retrieve strings collection object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -231,7 +231,7 @@ namespace cepgen
         return;
       }
       try { out = getVector<int>( pobj ); } catch ( const Exception& e ) {
-        throwPythonError( Form ( "Failed to retrieve integers collection object \"%s\":\n\t%s", key, e.message().c_str() ) );
+        throwPythonError( utils::format ( "Failed to retrieve integers collection object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -244,7 +244,7 @@ namespace cepgen
         return;
       }
       try { out += get<ParametersList>( pobj ); } catch ( const Exception& e ) {
-        throwPythonError( Form ( "Failed to retrieve parameters list object \"%s\":\n\t%s", key, e.message().c_str() ) );
+        throwPythonError( utils::format ( "Failed to retrieve parameters list object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
 
@@ -258,7 +258,7 @@ namespace cepgen
         return;
       }
       try { out = getVector<ParametersList>( pobj ); } catch ( const Exception& e ) {
-        throwPythonError( Form ( "Failed to retrieve parameters list collection object \"%s\":\n\t%s", key, e.message().c_str() ) );
+        throwPythonError( utils::format ( "Failed to retrieve parameters list collection object \"%s\":\n\t%s", key, e.message().c_str() ) );
       }
     }
   }

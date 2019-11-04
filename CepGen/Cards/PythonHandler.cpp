@@ -79,7 +79,7 @@ namespace cepgen
 
       PyObject* cfg = PyImport_ImportModule( filename.c_str() ); // new
       if ( !cfg )
-        throwPythonError( Form( "Failed to parse the configuration card %s", file ) );
+        throwPythonError( utils::format( "Failed to parse the configuration card %s", file ) );
 
       //--- general particles definition
       PyObject* ppdg = PyObject_GetAttrString( cfg, MCD_NAME ); // new
@@ -98,7 +98,7 @@ namespace cepgen
       //--- process definition
       PyObject* process = PyObject_GetAttrString( cfg, PROCESS_NAME ); // new
       if ( !process )
-        throwPythonError( Form( "Failed to extract a \"%s\" keyword from the configuration card %s", PROCESS_NAME, file ) );
+        throwPythonError( utils::format( "Failed to extract a \"%s\" keyword from the configuration card %s", PROCESS_NAME, file ) );
 
       //--- list of process-specific parameters
       ParametersList proc_params;
@@ -107,7 +107,7 @@ namespace cepgen
       //--- type of process to consider
       PyObject* pproc_name = element( process, ParametersList::MODULE_NAME ); // borrowed
       if ( !pproc_name )
-        throwPythonError( Form( "Failed to extract the process name from the configuration card %s", file ) );
+        throwPythonError( utils::format( "Failed to extract the process name from the configuration card %s", file ) );
       const std::string proc_name = get<std::string>( pproc_name );
 
       //--- process mode
@@ -181,7 +181,7 @@ namespace cepgen
       fillParameter( kin, "pdgIds", beams_pdg );
       if ( !beams_pdg.empty() ) {
         if ( beams_pdg.size() != 2 )
-          throwPythonError( Form( "Invalid list of PDG ids retrieved for incoming beams:\n\t2 PDG ids are expected, %d provided!", beams_pdg.size() ) );
+          throwPythonError( utils::format( "Invalid list of PDG ids retrieved for incoming beams:\n\t2 PDG ids are expected, %d provided!", beams_pdg.size() ) );
         params_.kinematics.incoming_beams. first.pdg = (pdgid_t)beams_pdg.at( 0 ).get<int>( "pdgid" );
         params_.kinematics.incoming_beams.second.pdg = (pdgid_t)beams_pdg.at( 1 ).get<int>( "pdgid" );
       }
@@ -190,7 +190,7 @@ namespace cepgen
       fillParameter( kin, "pz", beams_pz );
       if ( !beams_pz.empty() ) {
         if ( beams_pz.size() != 2 )
-          throwPythonError( Form( "Invalid list of pz's retrieved for incoming beams:\n\t2 pz's are expected, %d provided!", beams_pz.size() ) );
+          throwPythonError( utils::format( "Invalid list of pz's retrieved for incoming beams:\n\t2 pz's are expected, %d provided!", beams_pz.size() ) );
         params_.kinematics.incoming_beams. first.pz = beams_pz.at( 0 );
         params_.kinematics.incoming_beams.second.pz = beams_pz.at( 1 );
       }
@@ -326,7 +326,7 @@ namespace cepgen
         fillParameter( integr, "dither", (double&)params_.integration().miser.dither );
       }
       else
-        throwPythonError( Form( "Invalid integration() algorithm: %s", algo.c_str() ) );
+        throwPythonError( utils::format( "Invalid integration() algorithm: %s", algo.c_str() ) );
 
       fillParameter( integr, "numFunctionCalls", params_.integration().ncvg );
       fillParameter( integr, "seed", (unsigned long&)params_.integration().rng_seed );

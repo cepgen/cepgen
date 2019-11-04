@@ -100,10 +100,10 @@ namespace cepgen
             &result, &abserr );
           CG_LOG( "Integrator:integrate" )
             << "\t>> at call " << ( ++it_chisq ) << ": "
-            << Form( "average = %10.6f   "
-                     "sigma = %10.6f   chi2 = %4.3f.",
-                     result, abserr,
-                     gsl_monte_vegas_chisq( veg_state_.get() ) );
+            << utils::format( "average = %10.6f   "
+                              "sigma = %10.6f   chi2 = %4.3f.",
+                              result, abserr,
+                              gsl_monte_vegas_chisq( veg_state_.get() ) );
         } while ( fabs( gsl_monte_vegas_chisq( veg_state_.get() )-1. )
                 > input_params_.integration().vegas_chisq_cut-1. );
         CG_DEBUG( "Integrator:integrate" )

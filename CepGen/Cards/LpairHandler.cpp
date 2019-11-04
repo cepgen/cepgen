@@ -102,7 +102,7 @@ namespace cepgen
 
       //--- parse the hadronisation algorithm name
       if ( !evt_mod_name_.empty() )
-        for ( const auto& mod : split( evt_mod_name_, ',' ) ) {
+        for ( const auto& mod : utils::split( evt_mod_name_, ',' ) ) {
           params_.addModifier( cepgen::EventModifierHandler::get().build( mod, ParametersList() ) );
           (*params_.eventModifiersSequence().rbegin())->setParameters( params_ );
         }
@@ -112,7 +112,7 @@ namespace cepgen
         ParametersList outm;
         if ( !out_file_name_.empty() )
           outm.set<std::string>( "filename", out_file_name_ );
-        for ( const auto& mod : split( out_mod_name_, ',' ) )
+        for ( const auto& mod : utils::split( out_mod_name_, ',' ) )
           params_.setOutputModule( cepgen::io::ExportModuleHandler::get().build( mod, outm ) );
       }
 

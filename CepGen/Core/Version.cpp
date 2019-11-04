@@ -5,8 +5,9 @@ namespace cepgen
 {
   const std::string version()
   {
-    return Form( "%u.%u.%u", ( cepgen_version >> 16 ) & 0xff,
-                             ( cepgen_version >>  8 ) & 0xff,
-                               cepgen_version         & 0xff );
+    return utils::format( "%u.%u.%u",
+      ( cepgen_version >> 16 ) & 0xff,
+      ( cepgen_version >>  8 ) & 0xff,
+        cepgen_version         & 0xff );
   }
 }

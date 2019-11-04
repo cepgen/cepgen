@@ -182,7 +182,7 @@ namespace cepgen
       if ( CG_LOG_MATCH( "Integrand", debugInsideLoop ) ) {
         std::ostringstream oss;
         for ( unsigned short i = 0; i < ndim; ++i )
-          oss << Form( "%10.8f ", x[i] );
+          oss << utils::format( "%10.8f ", x[i] );
         CG_DEBUG( "Integrand" )
           << "f value for dim-" << ndim << " point ( " << oss.str() << "): "
           << weight;

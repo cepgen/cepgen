@@ -125,7 +125,7 @@ namespace mstw
   std::ostream&
   operator<<( std::ostream& os, const Grid::sfval_t& val )
   {
-    return os << cepgen::Form( "xbj = %.4f\tQ² = %.5e GeV²\tF₂ = % .6e\tFₗ = % .6e", val.xbj, val.q2, val.f2, val.fl );
+    return os << cepgen::utils::format( "xbj = %.4f\tQ² = %.5e GeV²\tF₂ = % .6e\tFₗ = % .6e", val.xbj, val.q2, val.f2, val.fl );
   }
 
   std::ostream&

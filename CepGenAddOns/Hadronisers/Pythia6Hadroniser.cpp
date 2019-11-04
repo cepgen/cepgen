@@ -138,9 +138,8 @@ namespace cepgen
       const unsigned short str_in_evt = fillParticles( ev );
 
       CG_DEBUG( "Pythia6Hadroniser" )
-        << "Passed the string construction stage.\n\t"
-        << str_in_evt << " string object" << utils::s( str_in_evt )
-        << " identified and constructed.";
+        << "Passed the string construction stage.\n\t "
+        << utils::s( "string object", str_in_evt ) << " identified and constructed.";
 
       const int old_npart = pyjets_.n;
 
@@ -303,7 +302,7 @@ namespace cepgen
           std::ostringstream dbg;
           for ( unsigned short j = 0; j < num_part_in_str[i]; ++j )
             if ( jlpsf[i][j] != -1 )
-              dbg << Form( "\n\t * %2d (pdgId=%4d)", jlpsf[i][j], pyjets_.k[1][jlpsf[i][j]-1] );
+              dbg << utils::format( "\n\t * %2d (pdgId=%4d)", jlpsf[i][j], pyjets_.k[1][jlpsf[i][j]-1] );
           CG_DEBUG( "Pythia6Hadroniser" )
             << "Joining " << utils::s( "particle", num_part_in_str[i] )
             << " with " << ev[jlpsf[i][0]].role() << " role"

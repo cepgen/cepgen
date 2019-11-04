@@ -129,7 +129,7 @@ namespace cepgen
         LHAPDF::initPDFSet( pdf_set_, LHAPDF::LHGRID, pdf_member_ );
       lhapdf_version = LHAPDF::getVersion();
 #endif
-      replace_all( pdf_description, ". ", ".\n  " );
+      utils::replace_all( pdf_description, ". ", ".\n  " );
       CG_INFO( "Partonic" ) << "Partonic structure functions evaluator successfully built.\n"
         << " * LHAPDF version: " << lhapdf_version << "\n"
         << " * number of flavours: " << num_flavours_ << "\n"

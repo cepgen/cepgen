@@ -67,7 +67,7 @@ namespace cepgen
       return PyInt_AsUnsignedLongMask( obj );
 #else
       if ( !PyLong_Check( obj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type: unsigned long != %s", key, obj->ob_type->tp_name ) );
+        throwPythonError( utils::format( "Object \"%s\" has invalid type: unsigned long != %s", key, obj->ob_type->tp_name ) );
       return PyLong_AsUnsignedLong( obj );
 #endif
     }

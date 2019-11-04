@@ -5,6 +5,7 @@
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/Timer.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/ProgressBar.h"
 
 #include "AbortHandler.h"
 
@@ -21,14 +22,17 @@ main( int argc, char* argv[] )
   double num_sigma;
   string cfg_filename;
   string integrator;
+  bool debug;
 
   ArgumentsParser( argc, argv )
     .addArgument( "cfg", "configuration file", &cfg_filename, 'c' )
+    .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
     .addOptionalArgument( "num-sigma", "max. number of std.dev.", 3., &num_sigma, 'n' )
     .addOptionalArgument( "integrator", "type of integrator used", "vegas", &integrator, 'i' )
     .parse();
 
-  utils::Logger::get().level = utils::Logger::Level::error;
+  if ( !debug )
+    utils::Logger::get().level = utils::Logger::Level::error;
 
   utils::Timer tmr;
   Generator mg;
@@ -53,20 +57,35 @@ main( int argc, char* argv[] )
 
   utils::AbortHandler ctrl_c;
 
+  struct Test
+  {
+    string filename;
+    double ref_cs, err_ref_cs;
+  };
+  vector<Test> tests;
+
   ifstream cfg( cfg_filename );
   string line;
+  while ( !cfg.eof() ) {
+    getline( cfg, line );
+    if ( line[0] == '#' || line.empty() )
+      continue;
+    stringstream os( line );
+    Test test;
+    os >> test.filename >> test.ref_cs >> test.err_ref_cs;
+    tests.emplace_back( test );
+  }
+
+  CG_INFO( "main" )
+    << "Will run " << utils::s( "test", tests.size() ) << ".";
+
+  utils::ProgressBar progress( tests.size() );
+
   try {
     unsigned short num_tests = 0;
-    while ( !cfg.eof() ) {
-      getline( cfg, line );
-      if ( line[0] == '#' || line.empty() )
-        continue;
-      string config;
-      double ref_cs, err_ref_cs;
-      stringstream os( line );
-      os >> config >> ref_cs >> err_ref_cs;
-
-      mg.setParameters( cepgen::card::Handler::parse( ( "test_processes/"+config+"_cfg.py" ).c_str() ) );
+    for ( const auto& test : tests ) {
+      params = cepgen::card::Handler::parse( ( "test_processes/"+test.filename+"_cfg.py" ).c_str() );
+      mg.setParameters( params );
       cout << &params << endl;
       CG_INFO( "main" )
         << "Process: "<< params.processName() << "\n\t"
@@ -77,24 +96,27 @@ main( int argc, char* argv[] )
       double new_cs, err_new_cs;
       mg.computeXsection( new_cs, err_new_cs );
 
-      const double sigma = ( new_cs-ref_cs ) / hypot( err_new_cs, err_ref_cs );
+      const double sigma = ( new_cs-test.ref_cs ) / hypot( err_new_cs, test.err_ref_cs );
 
       CG_INFO( "main" )
         << "Computed cross section:\n\t"
-        << "Ref.   = " << ref_cs << " +/- " << err_ref_cs << "\n\t"
+        << "Ref.   = " << test.ref_cs << " +/- " << test.err_ref_cs << "\n\t"
         << "CepGen = " << new_cs << " +/- " << err_new_cs << "\n\t"
         << "Pull: " << sigma << ".";
 
       CG_INFO( "main" ) << "Computation time: " << tmr.elapsed()*1.e3 << " ms.";
       tmr.reset();
 
-      const string test_res = Form( "%-26s\tref=%g\tgot=%g\tpull=%+g", config.c_str(), ref_cs, new_cs, sigma );
-      if ( fabs( sigma ) < num_sigma )
+      const string test_res = utils::format( "%-26s\tref=%g\tgot=%g\tpull=%+g", test.filename.c_str(), test.ref_cs, new_cs, sigma );
+      bool success = fabs( sigma ) < num_sigma;
+      if ( success )
         passed_tests.emplace_back( test_res );
       else
         failed_tests.emplace_back( test_res );
-      num_tests++;
-      cout << "Test " << passed_tests.size() << "/" << num_tests << " finished." << endl;
+      progress.update( num_tests++ );
+      CG_LOG( "main" )
+        << "Test " << passed_tests.size() << "/" << num_tests << " finished. Success:"
+        << utils::yesno( success );
     }
   } catch ( const Exception& e ) {}
   if ( failed_tests.size() != 0 ) {

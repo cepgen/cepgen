@@ -326,7 +326,7 @@ namespace cepgen
               oss_pdg << delim
                 << operator[]( *std::next( mothers.begin(), i ) ).pdgId(), delim = "/";
             }
-          os << Form( "\n %2d\t\t   %-7s", part.id(), oss_pdg.str().c_str() );
+          os << utils::format( "\n %2d\t\t   %-7s", part.id(), oss_pdg.str().c_str() );
         }
         else {
           //--- if single particle/HI
@@ -338,22 +338,22 @@ namespace cepgen
             } catch ( const Exception& ) {
               oss_pdg << "?";
             }
-          os << Form( "\n %2d\t%-+10d %-7s", part.id(), part.integerPdgId(), oss_pdg.str().c_str() );
+          os << utils::format( "\n %2d\t%-+10d %-7s", part.id(), part.integerPdgId(), oss_pdg.str().c_str() );
         }
       }
       os << "\t";
       if ( part.charge() != (int)part.charge() ) {
         if ( part.charge()*2 == (int)( part.charge()*2 ) )
-          os << Form( "%-d/2", (int)( part.charge()*2 ) );
+          os << utils::format( "%-d/2", (int)( part.charge()*2 ) );
         else if ( part.charge()*3 == (int)( part.charge()*3 ) )
-          os << Form( "%-d/3", (int)( part.charge()*3 ) );
+          os << utils::format( "%-d/3", (int)( part.charge()*3 ) );
         else
-          os << Form( "%-.2f", part.charge() );
+          os << utils::format( "%-.2f", part.charge() );
       }
       else
-        os << Form( "%-g", part.charge() );
+        os << utils::format( "%-g", part.charge() );
       os << "\t";
-      { std::ostringstream oss; oss << part.role(); os << Form( "%-8s %6d\t", oss.str().c_str(), part.status() ); }
+      { std::ostringstream oss; oss << part.role(); os << utils::format( "%-8s %6d\t", oss.str().c_str(), part.status() ); }
       if ( !mothers.empty() ) {
         std::ostringstream oss;
         unsigned short i = 0;
@@ -361,11 +361,11 @@ namespace cepgen
           oss << ( i > 0 ? "+" : "" ) << moth;
           ++i;
         }
-        os << Form( "%6s ", oss.str().c_str() );
+        os << utils::format( "%6s ", oss.str().c_str() );
       }
       else os << "       ";
       const auto& mom = part.momentum();
-      os << Form( "% 9.6e % 9.6e % 9.6e % 9.6e % 12.5f", mom.px(), mom.py(), mom.pz(), part.energy(), part.mass() );
+      os << utils::format( "% 9.6e % 9.6e % 9.6e % 9.6e % 12.5f", mom.px(), mom.py(), mom.pz(), part.energy(), part.mass() );
 
       // discard non-primary, decayed particles
       if ( part.status() >= Particle::Status::Undefined ) {
@@ -379,12 +379,13 @@ namespace cepgen
     p_total.truncate();
     //
     CG_INFO( "Event" )
-     << Form( "Dump of event content:\n"
-              " Id\tPDG id\t   Name\t\tCharge\tRole\t Status\tMother\tpx            py            pz            E      \t M         \n"
-              " --\t------\t   ----\t\t------\t----\t ------\t------\t----GeV/c---  ----GeV/c---  ----GeV/c---  ----GeV/c---\t --GeV/c²--"
-              "%s\n"
-              " ----------------------------------------------------------------------------------------------------------------------------------\n"
-              "\t\t\t\t\t\t\tBalance% 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), p_total.px(), p_total.py(), p_total.pz(), p_total.energy() );
+     << utils::format(
+       "Dump of event content:\n"
+       " Id\tPDG id\t   Name\t\tCharge\tRole\t Status\tMother\tpx            py            pz            E      \t M         \n"
+       " --\t------\t   ----\t\t------\t----\t ------\t------\t----GeV/c---  ----GeV/c---  ----GeV/c---  ----GeV/c---\t --GeV/c²--"
+       "%s\n"
+       " ----------------------------------------------------------------------------------------------------------------------------------\n"
+       "\t\t\t\t\t\t\tBalance% 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), p_total.px(), p_total.py(), p_total.pz(), p_total.energy() );
   }
 
   //------------------------------------------------------------------------------------------------

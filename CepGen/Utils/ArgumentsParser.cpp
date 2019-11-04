@@ -147,7 +147,7 @@ namespace cepgen
     if ( req_params.size() > 0 ) {
       oss << "\n    " << utils::s( "required argument", req_params.size() ) << ":";
       for ( const auto& par : req_params )
-        oss << Form( ( par.first.sname != '\0' )
+        oss << utils::format( ( par.first.sname != '\0' )
           ? "\n\t-%1s/%-18s\t%-28s"
           : "\n\t%d/%-18s\t%-28s",
           &par.first.sname,
@@ -157,7 +157,7 @@ namespace cepgen
     if ( opt_params.size() > 0 ) {
       oss << "\n    " << utils::s( "optional argument", opt_params.size() ) << ":";
       for ( const auto& par : opt_params )
-        oss << Form( ( par.first.sname != '\0' )
+        oss << utils::format( ( par.first.sname != '\0' )
           ? "\n\t-%1s/%-18s\t%-28s\tdefault = '%s'"
           : "\n\t%d/%-18s\t%-28s\tdefault = '%s'",
           &par.first.sname, par.first.description.c_str(),
@@ -200,7 +200,7 @@ namespace cepgen
 
   ArgumentsParser::Parameter::Parameter( std::string name, std::string description, int default_value, int* var, char sname ) :
     name( name ), sname( sname ), description( description ),
-    value( Form( "%+i", default_value ) ), optional( true ),
+    value( utils::format( "%+i", default_value ) ), optional( true ),
     str_variable( nullptr ), float_variable( nullptr ),
     int_variable( var ), uint_variable( nullptr ), bool_variable( nullptr ),
     vec_str_variable( nullptr ), vec_int_variable( nullptr ), vec_float_variable( nullptr )
@@ -214,7 +214,7 @@ namespace cepgen
 
   ArgumentsParser::Parameter::Parameter( std::string name, std::string description, bool default_value, bool* var, char sname ) :
     name( name ), sname( sname ), description( description ),
-    value( Form( "%d", default_value ) ), optional( true ),
+    value( utils::format( "%d", default_value ) ), optional( true ),
     str_variable( nullptr ), float_variable( nullptr ),
     int_variable( nullptr ), uint_variable( nullptr ), bool_variable( var ),
     vec_str_variable( nullptr ), vec_int_variable( nullptr ), vec_float_variable( nullptr )
@@ -228,7 +228,7 @@ namespace cepgen
 
   ArgumentsParser::Parameter::Parameter( std::string name, std::string description, double default_value, double* var, char sname ) :
     name( name ), sname( sname ), description( description ),
-    value( Form( "%g", default_value ) ), optional( true ),
+    value( utils::format( "%g", default_value ) ), optional( true ),
     str_variable( nullptr ), float_variable( var ),
     int_variable( nullptr ), uint_variable( nullptr ), bool_variable( nullptr ),
     vec_str_variable( nullptr ), vec_int_variable( nullptr ), vec_float_variable( nullptr )
@@ -269,7 +269,7 @@ namespace cepgen
   {
     unsigned short i = 0;
     for ( const auto& var : default_value )
-      value += ( ( ( i++ > 0 ) ? "," : "" )+Form( "%d", var ) );
+      value += ( ( ( i++ > 0 ) ? "," : "" )+utils::format( "%d", var ) );
   }
 
   ArgumentsParser::Parameter::Parameter( std::string name, std::string description, std::vector<int>* var, char sname ) :
@@ -287,7 +287,7 @@ namespace cepgen
   {
     unsigned short i = 0;
     for ( const auto& flt : default_value )
-      value += ( ( ( i++ > 0 ) ? "," : "" )+Form( "%g", flt ) );
+      value += ( ( ( i++ > 0 ) ? "," : "" )+utils::format( "%g", flt ) );
   }
 
   ArgumentsParser::Parameter::Parameter( std::string name, std::string description, std::vector<double>* var, char sname ) :
