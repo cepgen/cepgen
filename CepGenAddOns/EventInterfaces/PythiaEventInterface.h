@@ -70,9 +70,9 @@ namespace Pythia8
 
       inline bool setInit() override { return true; }
 #if PYTHIA_VERSION_INTEGER >= 8200
-      bool setEvent( int ) override;
+      bool setEvent( int ) override { return true; }
 #else
-      bool setEvent( int );
+      bool setEvent( int, double ) override { return true; }
 #endif
 
     private:

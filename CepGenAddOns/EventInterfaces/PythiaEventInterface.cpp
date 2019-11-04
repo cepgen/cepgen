@@ -55,12 +55,6 @@ namespace Pythia8
     //listInit();
   }
 
-  bool
-  CepGenEvent::setEvent( int )
-  {
-    return true;
-  }
-
   void
   CepGenEvent::feedEvent( const cepgen::Event& ev, const Type& type )
   {
