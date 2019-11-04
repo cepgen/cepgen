@@ -25,7 +25,7 @@ stages:
   stage: test
   script:
     - cd build
-    - make test
+    - ctest --output-on-failure
   when: on_success
   allow_failure: false
 
