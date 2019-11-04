@@ -69,7 +69,7 @@ namespace Pythia8
       static constexpr unsigned short MIN_COLOUR_INDEX = 501; ///< Minimal colour indexing number
 
       inline bool setInit() override { return true; }
-#if PYTHIA_VERSION_INTEGER >= 8200
+#if defined( PYTHIA_VERSION_INTEGER ) && PYTHIA_VERSION_INTEGER >= 8200
       bool setEvent( int ) override { return true; }
 #else
       bool setEvent( int, double ) override { return true; }
