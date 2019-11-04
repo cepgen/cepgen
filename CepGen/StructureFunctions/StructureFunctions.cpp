@@ -86,6 +86,7 @@ namespace cepgen
       return os;
     }
   }
+
   /// Human-readable format of a structure function type
   std::ostream&
   operator<<( std::ostream& os, const strfun::Type& sf )
