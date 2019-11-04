@@ -102,7 +102,7 @@ namespace cepgen
       //--- process definition
       PyObject* process = PyObject_GetAttrString( cfg, PROCESS_NAME ); // new
       if ( !process )
-        throwPythonError( utils::format( "Failed to extract a \"%s\" keyword from the configuration card %s", PROCESS_NAME, file ) );
+        throwPythonError( "Failed to extract a '"+std::string( PROCESS_NAME )+"' keyword from the configuration card '"+file+"'!" );
 
       //--- list of process-specific parameters
       ParametersList proc_params;
@@ -111,7 +111,7 @@ namespace cepgen
       //--- type of process to consider
       PyObject* pproc_name = element( process, ParametersList::MODULE_NAME ); // borrowed
       if ( !pproc_name )
-        throwPythonError( utils::format( "Failed to extract the process name from the configuration card %s", file ) );
+        throwPythonError( "Failed to extract the process name from the configuration card '"+file+"'!" );
       const std::string proc_name = get<std::string>( pproc_name );
 
       //--- process mode
