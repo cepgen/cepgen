@@ -1,7 +1,7 @@
 stages:
   - compile
-  - test
   - run
+  - test
 
 #######################################
 # define all build, tests, and
@@ -20,6 +20,15 @@ stages:
     expire_in: 2 hrs
     paths:
       - build/
+
+.run_cepgen_template: &run_cepgen_definition
+  stage: run
+  script:
+    - cd build
+    - ./cepgen Cards/lpair_cfg.py
+    - ./cepgen Cards/legacy/lpair.card
+  when: on_success
+  allow_failure: false
 
 .test_template: &test_definition
   stage: test
@@ -56,15 +65,6 @@ stages:
   artifacts:
     paths:
       - build/test_graph.pdf
-  when: on_success
-  allow_failure: false
-
-.run_cepgen_template: &run_cepgen_definition
-  stage: run
-  script:
-    - cd build
-    - ./cepgen Cards/lpair_cfg.py
-    - ./cepgen Cards/legacy/lpair.card
   when: on_success
   allow_failure: false
 
@@ -116,6 +116,12 @@ compile:cc7:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
   <<: *build_definition
 
+run_cepgen:cc7:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
+  dependencies:
+    - compile:cc7
+  <<: *run_cepgen_definition
+
 test:cc7:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
   dependencies:
@@ -140,12 +146,6 @@ test_function_parser:cc7:
     - compile:cc7
   <<: *test_function_parser_definition
 
-run_cepgen:cc7:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
-  dependencies:
-    - compile:cc7
-  <<: *run_cepgen_definition
-
 #######################################
 # Fedora 30 jobs
 #######################################
@@ -153,6 +153,12 @@ run_cepgen:cc7:
 compile:f30:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f30
   <<: *build_definition
+
+run_cepgen:f30:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f30
+  dependencies:
+    - compile:f30
+  <<: *run_cepgen_definition
 
 test:f30:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f30
@@ -178,12 +184,6 @@ test_function_parser:f30:
     - compile:f30
   <<: *test_function_parser_definition
 
-run_cepgen:f30:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f30
-  dependencies:
-    - compile:f30
-  <<: *run_cepgen_definition
-
 #######################################
 # Ubuntu Trusty (14.04) jobs
 #######################################
@@ -191,6 +191,12 @@ run_cepgen:f30:
 compile:ubuntu_trusty:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_trusty
   <<: *build_definition
+
+run_cepgen:ubuntu_trusty:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_trusty
+  dependencies:
+    - compile:ubuntu_trusty
+  <<: *run_cepgen_definition
 
 test:ubuntu_trusty:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_trusty
@@ -215,10 +221,4 @@ test_function_parser:ubuntu_trusty:
   dependencies:
     - compile:ubuntu_trusty
   <<: *test_function_parser_definition
-
-run_cepgen:ubuntu_trusty:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_trusty
-  dependencies:
-    - compile:ubuntu_trusty
-  <<: *run_cepgen_definition
 
