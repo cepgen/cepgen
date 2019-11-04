@@ -1,5 +1,5 @@
-#ifndef CepGen_Core_Logger_h
-#define CepGen_Core_Logger_h
+#ifndef CepGen_Utils_Logger_h
+#define CepGen_Utils_Logger_h
 
 #include <iostream>
 #include <vector>

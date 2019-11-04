@@ -26,14 +26,18 @@ namespace cepgen
 {
   namespace card
   {
-    PythonHandler::PythonHandler( const ParametersList& params )
+    PythonHandler::PythonHandler( const ParametersList& params ) :
+      filename_( params.get<std::string>( FILENAME_KEY ) )
     {
-      parse( params.get<std::string>( FILENAME_KEY ).c_str() );
+      if ( !filename_.empty() )
+        parse( filename_ );
     }
 
-    PythonHandler::PythonHandler( const char* file )
+    PythonHandler::PythonHandler( const std::string& file ) :
+      filename_( file )
     {
-      parse( file );
+      if ( !filename_.empty() )
+        parse( file );
     }
 
     PythonHandler::~PythonHandler()
@@ -42,8 +46,8 @@ namespace cepgen
         Py_Finalize();
     }
 
-    void
-    PythonHandler::parse( const char* file )
+    PythonHandler&
+    PythonHandler::parse( const std::string& file )
     {
       setenv( "PYTHONPATH", ".:Cards:test:../Cards", 1 );
       setenv( "PYTHONDONTWRITEBYTECODE", "1", 1 );
@@ -79,7 +83,7 @@ namespace cepgen
 
       PyObject* cfg = PyImport_ImportModule( filename.c_str() ); // new
       if ( !cfg )
-        throwPythonError( utils::format( "Failed to parse the configuration card %s", file ) );
+        throwPythonError( "Failed to import the configuration card '"+file+"'" );
 
       //--- general particles definition
       PyObject* ppdg = PyObject_GetAttrString( cfg, MCD_NAME ); // new
@@ -171,6 +175,8 @@ namespace cepgen
 
       //--- finalisation
       Py_CLEAR( cfg );
+
+      return *this;
     }
 
     void

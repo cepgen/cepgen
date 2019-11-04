@@ -1,6 +1,8 @@
+#include "CepGen/Cards/PythonHandler.h"
+
 #include "CepGen/Generator.h"
-#include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Integrator.h"
+#include "CepGen/Core/ParametersList.h"
 
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/Timer.h"
@@ -31,24 +33,24 @@ main( int argc, char* argv[] )
     .addOptionalArgument( "integrator", "type of integrator used", "vegas", &integrator, 'i' )
     .parse();
 
-  if ( !debug )
+  if ( debug )
+    utils::Logger::get().level = utils::Logger::Level::information;
+  else
     utils::Logger::get().level = utils::Logger::Level::error;
 
   utils::Timer tmr;
   Generator mg;
-  auto& params = mg.parameters();
 
-  params.integration().type = IntegratorType::Vegas;
   if ( integrator == "plain" )
-    params.integration().type = IntegratorType::plain;
+    mg.parameters().integration().type = IntegratorType::plain;
   else if ( integrator == "vegas" )
-    params.integration().type = IntegratorType::Vegas;
+    mg.parameters().integration().type = IntegratorType::Vegas;
   else if ( integrator == "miser" )
-    params.integration().type = IntegratorType::MISER;
+    mg.parameters().integration().type = IntegratorType::MISER;
   else
     throw CG_FATAL( "main" ) << "Unhandled integrator type: " << integrator << ".";
 
-  CG_LOG( "main" ) << "Testing with " << params.integration().type << " integrator.";
+  CG_LOG( "main" ) << "Testing with " << mg.parameters().integration().type << " integrator.";
 
   vector<string> failed_tests, passed_tests;
 
@@ -82,17 +84,20 @@ main( int argc, char* argv[] )
   utils::ProgressBar progress( tests.size() );
 
   try {
+    auto pyhnd = cepgen::card::PythonHandler( cepgen::ParametersList() );
     unsigned short num_tests = 0;
     for ( const auto& test : tests ) {
-      params = cepgen::card::Handler::parse( ( "test_processes/"+test.filename+"_cfg.py" ).c_str() );
-      mg.setParameters( params );
-      cout << &params << endl;
+      mg.clearRun();
+      const std::string filename = "test_processes/"+test.filename+"_cfg.py";
+      mg.setParameters( pyhnd.parse( filename ).parameters() );
+      //CG_LOG( "main" ) << mg.parametersPtr();
       CG_INFO( "main" )
-        << "Process: "<< params.processName() << "\n\t"
+        << "Process: "<< mg.parameters().processName() << "\n\t"
+        << "File: " << filename << "\n\t"
         << "Configuration time: " << tmr.elapsed()*1.e3 << " ms.";
 
       tmr.reset();
-      mg.clearRun();
+
       double new_cs, err_new_cs;
       mg.computeXsection( new_cs, err_new_cs );
 

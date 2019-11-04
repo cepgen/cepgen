@@ -28,7 +28,7 @@ int main( int argc, char* argv[] )
 
   //--- first start by defining the generator object
   cepgen::Generator gen;
-  gen.setParameters( cepgen::card::Handler::parse( input_card.c_str() ) );
+  gen.setParameters( cepgen::card::Handler::parse( input_card )->parameters() );
 
   if ( num_events >= 0 ) { // user specified a number of events to generate
     gen.parameters().generation().maxgen = num_events;

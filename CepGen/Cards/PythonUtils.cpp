@@ -20,7 +20,7 @@ namespace cepgen
     //------------------------------------------------------------------
 
     std::string
-    PythonHandler::pythonPath( const char* file )
+    PythonHandler::pythonPath( const std::string& file ) const
     {
       std::string s_filename = file;
       s_filename = s_filename.substr( 0, s_filename.find_last_of( "." ) ); // remove the extension
@@ -31,7 +31,7 @@ namespace cepgen
     }
 
     void
-    PythonHandler::throwPythonError( const std::string& message )
+    PythonHandler::throwPythonError( const std::string& message ) const
     {
       PyObject* ptype = nullptr, *pvalue = nullptr, *ptraceback_obj = nullptr;
       // retrieve error indicator and clear it to handle ourself the error
@@ -75,7 +75,7 @@ namespace cepgen
     }
 
     PyObject*
-    PythonHandler::encode( const char* str )
+    PythonHandler::encode( const char* str ) const
     {
       PyObject* obj = PyUnicode_FromString( str ); // new
       if ( !obj )
@@ -84,7 +84,7 @@ namespace cepgen
     }
 
     PyObject*
-    PythonHandler::element( PyObject* obj, const char* key )
+    PythonHandler::element( PyObject* obj, const char* key ) const
     {
       PyObject* pout = nullptr, *nink = encode( key );
       if ( !nink )

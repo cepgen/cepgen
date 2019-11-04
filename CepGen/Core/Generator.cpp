@@ -72,7 +72,7 @@ namespace cepgen
   Parameters&
   Generator::parameters()
   {
-    return *parameters_;
+    return *parameters_.get();
   }
 
   void

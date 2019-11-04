@@ -26,15 +26,15 @@ int main( int argc, char* argv[] )
 {
   cepgen::Generator mg;
 
-  string card;
+  string input_card;
   int num_events;
 
   cepgen::ArgumentsParser( argc, argv )
-    .addArgument( "input", "input card", &card, 'i' )
+    .addArgument( "input", "input card", &input_card, 'i' )
     .addOptionalArgument( "num-events", "number of events to generate", -1, &num_events, 'n' )
     .parse();
 
-  mg.setParameters( cepgen::card::Handler::parse( card.c_str() ) );
+  mg.setParameters( cepgen::card::Handler::parse( input_card )->parameters() );
   if ( num_events >= 0 ) { // user specified a number of events to generate
     mg.parameters().generation().maxgen = num_events;
     mg.parameters().generation().enabled = num_events > 0;

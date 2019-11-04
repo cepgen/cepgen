@@ -3,7 +3,7 @@
 
 #include <csignal>
 
-#include "CepGen/Core/Logger.h"
+#include "CepGen/Utils/Logger.h"
 
 namespace cepgen
 {

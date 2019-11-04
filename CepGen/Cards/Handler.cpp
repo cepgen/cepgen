@@ -6,14 +6,12 @@ namespace cepgen
 {
   namespace card
   {
-    Parameters&
-    Handler::parse( const char* filename )
+    std::unique_ptr<Handler>
+    Handler::parse( const std::string& filename )
     {
       try {
-        static auto hnd = CardsHandler::get().build(
-          extension( filename ),
+        return CardsHandler::get().build( extension( filename ),
           ParametersList().set<std::string>( FILENAME_KEY, filename ) );
-        return hnd->parameters();
       } catch ( const std::invalid_argument& err ) {
         throw CG_FATAL( "Cards:handler" )
           << "Failed to parse the steering card at \"" << filename << "\"!\n"

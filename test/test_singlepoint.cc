@@ -35,7 +35,7 @@ int main( int argc, char* argv[] )
     x = vector<double>( 12, 0.3 );
 
   cepgen::Generator gen;
-  gen.setParameters( cepgen::card::Handler::parse( input_card.c_str() ) );
+  gen.setParameters( cepgen::card::Handler::parse( input_card )->parameters() );
   CG_INFO( "main" ) << gen.parametersPtr();
 
   cout << "point: ";
