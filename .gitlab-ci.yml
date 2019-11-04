@@ -25,8 +25,9 @@ stages:
   stage: run
   script:
     - cd build
-    - ./cepgen Cards/lpair_cfg.py
-    - ./cepgen Cards/legacy/lpair.card
+    - ./cepgen -l
+    - ./cepgen Cards/lpair_cfg.py -n 10000
+    - ./cepgen Cards/legacy/lpair.card -n 10000
   when: on_success
   allow_failure: false
 
