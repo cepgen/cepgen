@@ -26,8 +26,7 @@ namespace pdg
         continue;
       std::vector<int> pdg_ids;
       std::vector<short> charges;
-      double mass, mass_err_low, mass_err_high;
-      double width, width_err_low, width_err_high;
+      double mass, width;
       std::string part_name, part_charge_int;
       { // pdg ids
         std::istringstream ss( line.substr( PDG_BEG, PDG_END ) );
@@ -36,10 +35,12 @@ namespace pdg
         while ( ss >> buf )
           pdg_ids.emplace_back( std::stoi( buf ) );
       }{ // mass + error(s)
+        double mass_err_low, mass_err_high; // unused
         std::istringstream oss( line.substr( MASS_BEG, MASS_END ) );
         oss
           >> mass >> mass_err_low >> mass_err_high;
       }{ // width + error(s)
+        double width_err_low, width_err_high; // unused
         std::istringstream oss( line.substr( WIDTH_BEG, WIDTH_END ) );
         oss
           >> width >> width_err_low >> width_err_high;

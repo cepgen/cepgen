@@ -46,7 +46,6 @@ main( int argc, char* argv[] )
 
   CG_LOG( "main" ) << "Testing with " << params.integration().type << " integrator.";
 
-  unsigned short num_tests = 0;
   vector<string> failed_tests, passed_tests;
 
   CG_INFO( "main" ) << "Initial configuration time: " << tmr.elapsed()*1.e3 << " ms.";
@@ -57,6 +56,7 @@ main( int argc, char* argv[] )
   ifstream cfg( cfg_filename );
   string line;
   try {
+    unsigned short num_tests = 0;
     while ( !cfg.eof() ) {
       getline( cfg, line );
       if ( line[0] == '#' || line.empty() )

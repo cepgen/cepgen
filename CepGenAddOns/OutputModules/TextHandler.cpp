@@ -75,7 +75,7 @@ namespace cepgen
       show_hists_    ( params.get<bool>( "showHistograms", true ) ),
       save_hists_    ( params.get<bool>( "saveHistograms", false ) ),
       separator_     ( params.get<std::string>( "separator", "\t" ) ),
-      xsec_( 1. )
+      xsec_( 1. ), sqrts_( 0. ), num_evts_( 0ul )
     {
       //--- first extract list of variables to store in output file
       oss_vars_.clear();

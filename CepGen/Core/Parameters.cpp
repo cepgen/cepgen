@@ -254,7 +254,8 @@ namespace cepgen
       << param->kinematics.incoming_beams.first << ",\n" << std::setw( wt ) << ""
       << param->kinematics.incoming_beams.second << "\n"
       << std::setw( wt ) << "C.m. energy (GeV)" << param->kinematics.sqrtS() << "\n";
-    if ( param->kinematics.mode != KinematicsMode::ElasticElastic )
+    if ( param->kinematics.mode != KinematicsMode::ElasticElastic
+      && param->kinematics.structure_functions )
       os << std::setw( wt ) << "Structure functions" << *param->kinematics.structure_functions << "\n";
     os
       << "\n"
