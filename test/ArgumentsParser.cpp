@@ -73,16 +73,14 @@ namespace cepgen
         par.value = !par.bool_variable ? args_.at( i ) : "1";
       }
       else {
-        const auto it_key = find( args_.begin(), args_.end(), "--"+par.name );
+        auto it_key = find( args_.begin(), args_.end(), "--"+par.name );
+        if ( it_key == args_.end() ) // allow for '-param' instead of '--param'
+          it_key = find( args_.begin(), args_.end(), "-"+par.name );
         const auto it_skey = find( args_.begin(), args_.end(), "-"+std::string( 1, par.sname ) );
-        if ( it_key == args_.end() && it_skey == args_.end() ) { // not found
-          if ( !par.optional )
-            throw CG_FATAL( "ArgumentsParser" )
-              << help_message()
-              << " The following parameter was not set: '" << par.name << "'.";
-        }
-        else {
-          const auto it_value = ( it_key != args_.end() )
+        //--- check if at least one match is found for a long/short argument
+        if ( it_key != args_.end() || it_skey != args_.end() ) {
+          // matched a long/short argument
+          const auto it_value = it_key != args_.end()
             ? std::next( it_key )
             : std::next( it_skey );
           if ( it_value != args_.end() )
@@ -92,8 +90,18 @@ namespace cepgen
           else
             throw CG_FATAL( "ArgumentsParser" )
               << "Invalid value for parameter: " << par.name << ".";
+          ++i;
         }
+        else if ( args_.size() > i && args_.at( i )[0] != '-' )
+          par.value = args_.at( i );
+        else if ( !par.optional ) // no match
+          throw CG_FATAL( "ArgumentsParser" )
+            << help_message()
+            << " The following parameter was not set: '" << par.name << "'.";
       }
+      CG_DEBUG( "ArgumentsParser" )
+        << "Parameter '" << i << "|--" << par.name << "|-" << par.sname << "'"
+        << " has value '" << par.value << "'.";
       par.parse();
       ++i;
     }
@@ -125,10 +133,13 @@ namespace cepgen
         opt_params.emplace_back( std::make_pair( par, i ) );
         oss << " [";
       }
-      else
+      else {
         req_params.emplace_back( std::make_pair( par, i ) );
-      oss << ( !par.name.empty() ? " --" : " <arg"+std::to_string( i )+">" ) << par.name;
-      if ( par.sname != '\0' ) oss << "|-" << par.sname;
+        oss << " ";
+      }
+      oss << ( !par.name.empty() ? "--" : " <arg"+std::to_string( i )+">" ) << par.name;
+      if ( par.sname != '\0' )
+        oss << ( !par.name.empty() ? "|" : "" ) << "-" << par.sname;
       if ( par.optional )
         oss << "]";
       ++i;
@@ -138,7 +149,7 @@ namespace cepgen
       for ( const auto& par : req_params )
         oss << Form( ( par.first.sname != '\0' )
           ? "\n\t-%1s/%-18s\t%-28s"
-          : "\n\t%2s/%-18s\t%-28s",
+          : "\n\t%d/%-18s\t%-28s",
           &par.first.sname,
           ( !par.first.name.empty() ? "--"+par.first.name : "<arg"+std::to_string( par.second )+">" ).c_str(),
           par.first.description.c_str() );
@@ -148,7 +159,7 @@ namespace cepgen
       for ( const auto& par : opt_params )
         oss << Form( ( par.first.sname != '\0' )
           ? "\n\t-%1s/%-18s\t%-28s\tdefault = '%s'"
-          : "\n\t%2s/%-18s\t%-28s\tdefault = '%s'",
+          : "\n\t%d/%-18s\t%-28s\tdefault = '%s'",
           &par.first.sname, par.first.description.c_str(),
           ( !par.first.name.empty() ? "--"+par.first.name : "<arg"+std::to_string( par.second )+">" ).c_str(),
           par.first.value.c_str() );
@@ -291,11 +302,26 @@ namespace cepgen
     if ( str_variable != nullptr )
       *str_variable = value;
     else if ( float_variable != nullptr )
-      *float_variable = std::stod( value );
+      try {
+        *float_variable = std::stod( value );
+      } catch ( const std::invalid_argument& ) {
+        throw CG_FATAL( "ArgumentsParser:Parameter:parse" )
+          << "Failed to parse variable '" << name << "' as float!";
+      }
     else if ( int_variable != nullptr )
-      *int_variable = std::stoi( value );
+      try {
+        *int_variable = std::stoi( value );
+      } catch ( const std::invalid_argument& ) {
+        throw CG_FATAL( "ArgumentsParser:Parameter:parse" )
+          << "Failed to parse variable '" << name << "' as integer!";
+      }
     else if ( uint_variable != nullptr )
-      *uint_variable = std::stoi( value );
+      try {
+        *uint_variable = std::stoi( value );
+      } catch ( const std::invalid_argument& ) {
+        throw CG_FATAL( "ArgumentsParser:Parameter:parse" )
+          << "Failed to parse variable '" << name << "' as unsigned integer!";
+      }
     else if ( bool_variable != nullptr ) {
       try {
         *bool_variable = ( std::stoi( value ) != 0 );
