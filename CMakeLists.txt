@@ -18,7 +18,8 @@ include(GNUInstallDirs)
 include(UseEnvironment)
 include(BuildRPM)
 
-set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/CepGen)
+set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
+set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
 set(CEPGEN_LIBRARIES CepGenCore CepGenEvent CepGenProcesses CepGenAddOns CepGenCards)
 
 #----- define all individual modules to be built beforehand
@@ -35,7 +36,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 add_subdirectory(CepGen)
 add_subdirectory(CepGenAddOns)
 foreach(_module ${CEPGEN_MODULES})
-  add_subdirectory(${CEPGEN_SOURCE_DIR}/${_module})
+  add_subdirectory(${CEPGEN_LIB_DIR}/${_module})
 endforeach()
 
 #----- copy the input cards and other files
@@ -62,10 +63,10 @@ install(DIRECTORY ${MODS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/CepGen COMPONE
 enable_testing()
 include(CTest)
 add_subdirectory(test)
-file(GLOB_RECURSE exec_sources RELATIVE ${PROJECT_SOURCE_DIR}/exe exe/*.cpp)
+file(GLOB_RECURSE exec_sources RELATIVE ${CEPGEN_SOURCE_DIR} ${CEPGEN_SOURCE_DIR}/*.cpp)
 foreach(exec_src ${exec_sources})
   string(REPLACE ".cpp" "" exec_bin ${exec_src})
-  add_executable(${exec_bin} ${PROJECT_SOURCE_DIR}/exe/${exec_src})
+  add_executable(${exec_bin} ${CEPGEN_SOURCE_DIR}/${exec_src})
   target_link_libraries(${exec_bin} ${CEPGEN_LIBRARIES} CepGenTestUtils)
 endforeach()
 
@@ -73,7 +74,7 @@ endforeach()
 
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
-  set(DOXYGEN_IN ${CMAKE_SOURCE_DIR}/docs/Doxyfile.in)
+  set(DOXYGEN_IN ${CMAKE_SOURCE_DIR}/doc/Doxyfile.in)
   set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
   configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
   message(STATUS "Doxygen build started")
