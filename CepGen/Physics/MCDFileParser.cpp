@@ -1,6 +1,8 @@
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
+
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/String.h"
 
 #include <fstream>
 #include <sstream>
@@ -95,7 +97,8 @@ namespace pdg
         ++i;
       }
     }
-    CG_INFO( "MCDFileParser" ) << "File \"" << path << "\" successfully parsed. "
-      << cepgen::PDG::get().size() << " particles defined.";
+    CG_DEBUG( "MCDFileParser" )
+      << "File \"" << path << "\" successfully parsed. "
+      << cepgen::utils::s( "particle", cepgen::PDG::get().size() ) << " defined.";
   }
 }

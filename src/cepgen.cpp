@@ -88,7 +88,7 @@ void list_modules()
     if ( cepgen::card::CardsHandler::get().modules().empty() )
       cout << ">>> none found <<<" << endl;
     for ( const auto& mod : cepgen::card::CardsHandler::get().modules() )
-      cout << mod << "\n";
+      cout << "." << mod << " extension\n";
   }
   {
     cout << sep_mid << "Processes definitions\n" << sep_mid;
