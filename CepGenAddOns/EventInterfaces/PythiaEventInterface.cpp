@@ -40,11 +40,25 @@ namespace Pythia8
   }
 
   void
+  CepGenEvent::addComments( const std::string& comments )
+  {
+#if PYTHIA_VERSION_INTEGER >= 8200
+    osLHEF << comments;
+#endif
+  }
+
+  void
   CepGenEvent::setCrossSection( int id, double xsec, double xsec_err )
   {
     setXSec( id, xsec );
     setXErr( id, xsec_err );
     //listInit();
+  }
+
+  bool
+  CepGenEvent::setEvent( int )
+  {
+    return true;
   }
 
   void

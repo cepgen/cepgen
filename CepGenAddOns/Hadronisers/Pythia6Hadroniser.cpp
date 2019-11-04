@@ -2,13 +2,13 @@
 
 #include "CepGen/Core/EventModifierHandler.h"
 #include "CepGen/Core/ParametersList.h" //FIXME
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
-
 #include "CepGen/Physics/PDG.h"
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/String.h"
 
 #include <algorithm>
 

@@ -44,7 +44,7 @@ namespace Pythia8
       void setProcess( int id, double xsec, double q2_scale, double alpha_qed, double alpha_qcd );
 
       /// Feed comments to the LHEF block
-      void addComments( const std::string& comments ) { osLHEF << comments; }
+      void addComments( const std::string& comments );
 
       /// Retrieve the CepGen particle index given its Pythia8 event id
       /// \param[in] py_id Pythia8 particle id
@@ -69,7 +69,11 @@ namespace Pythia8
       static constexpr unsigned short MIN_COLOUR_INDEX = 501; ///< Minimal colour indexing number
 
       inline bool setInit() override { return true; }
-      inline bool setEvent( int ) override { return true; }
+#if PYTHIA_VERSION_INTEGER >= 8200
+      bool setEvent( int ) override;
+#else
+      bool setEvent( int );
+#endif
 
     private:
       std::pair<int,int> findMothers( const cepgen::Event& ev, const cepgen::Particle& p ) const;
