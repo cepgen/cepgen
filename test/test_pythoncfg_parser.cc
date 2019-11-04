@@ -2,10 +2,10 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Parameters.h"
 
+#include "CepGen/Utils/ArgumentsParser.h"
+
 #include <string>
 #include <iostream>
-
-#include "ArgumentsParser.h"
 
 using namespace std;
 using namespace cepgen;

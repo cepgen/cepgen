@@ -60,14 +60,17 @@ install(DIRECTORY ${MODS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/CepGen COMPONE
 
 #----- set the tests/utils directory
 
-enable_testing()
-include(CTest)
-add_subdirectory(test)
+if(${CMAKE_BUILD_TESTS})
+  enable_testing()
+  include(CTest)
+  add_subdirectory(test)
+endif()
+
 file(GLOB_RECURSE exec_sources RELATIVE ${CEPGEN_SOURCE_DIR} ${CEPGEN_SOURCE_DIR}/*.cpp)
 foreach(exec_src ${exec_sources})
   string(REPLACE ".cpp" "" exec_bin ${exec_src})
   add_executable(${exec_bin} ${CEPGEN_SOURCE_DIR}/${exec_src})
-  target_link_libraries(${exec_bin} ${CEPGEN_LIBRARIES} CepGenTestUtils)
+  target_link_libraries(${exec_bin} ${CEPGEN_LIBRARIES})
 endforeach()
 
 #----- documentation

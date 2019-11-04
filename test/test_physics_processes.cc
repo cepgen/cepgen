@@ -3,8 +3,9 @@
 #include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/Timer.h"
 
+#include "CepGen/Utils/ArgumentsParser.h"
+
 #include "AbortHandler.h"
-#include "ArgumentsParser.h"
 
 #include <fstream>
 #include <iostream>

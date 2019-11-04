@@ -9,10 +9,6 @@ file(GLOB tests_fortran RELATIVE ${PROJECT_SOURCE_DIR}/test *.f)
 set(tests)
 set(tests_libraries ${CEPGEN_LIBRARIES})
 
-file(GLOB tests_utils_sources ArgumentsParser.cpp)
-add_library(CepGenTestUtils SHARED ${tests_utils_sources})
-list(APPEND tests_libraries CepGenTestUtils)
-
 #----- build all tests and link them to the core library
 
 foreach(exec_src ${tests_noroot})
@@ -52,12 +48,8 @@ foreach(_files ${test_input_cards})
 endforeach()
 configure_file(${PROJECT_SOURCE_DIR}/test/test_processes.cfg test_processes.cfg COPYONLY)
 
+#cmake_dependent_option(CMAKE_BUILD_TESTS "Build tests" FALSE)
 foreach(test ${tests})
-  if(${CMAKE_BUILD_TESTS})
-    set_target_properties(${test} PROPERTIES EXCLUDE_FROM_ALL false)
-  else()
-    set_target_properties(${test} PROPERTIES EXCLUDE_FROM_ALL true)
-  endif()
-  add_test(NAME ${test} COMMAND ${test} -h)
   message(STATUS "Added test ${test}")
+  add_test(NAME ${test} COMMAND ${test} -h)
 endforeach()

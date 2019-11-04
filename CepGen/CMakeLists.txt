@@ -1,4 +1,4 @@
-file(GLOB core_sources Core/*.cpp Modules/*.cpp *.cpp)
+file(GLOB core_sources Core/*.cpp Modules/*.cpp Utils/*.cpp *.cpp)
 file(GLOB phys_sources Physics/*.cpp)
 file(GLOB sf_sources StructureFunctions/*.cpp)
 

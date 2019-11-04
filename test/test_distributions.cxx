@@ -3,10 +3,10 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Utils/ArgumentsParser.h"
+
 #include "Canvas.h"
 #include "TH1.h"
-
-#include "ArgumentsParser.h"
 
 using namespace std;
 

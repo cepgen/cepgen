@@ -6,7 +6,7 @@
 
 #include "CepGen/Modules/Process.h"
 
-#include "ArgumentsParser.h"
+#include "CepGen/Utils/ArgumentsParser.h"
 
 #include <iostream>
 

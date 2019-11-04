@@ -4,7 +4,8 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Core/Exception.h"
 
-#include "test/ArgumentsParser.h"
+#include "CepGen/Utils/ArgumentsParser.h"
+
 #include "test/AbortHandler.h"
 
 using namespace std;
