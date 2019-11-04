@@ -1,11 +1,11 @@
 #ifndef CepGen_Event_Particle_h
 #define CepGen_Event_Particle_h
 
-#include "CepGen/Core/Hasher.h"
-
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/ParticleProperties.h"
+
+#include "CepGen/Utils/Hasher.h"
 
 #include <set>
 #include <unordered_map>

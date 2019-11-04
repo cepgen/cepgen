@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <array>
-#include "CepGen/Core/utils.h"
+#include "CepGen/Utils/String.h"
 #include "CepGen/Core/Exception.h"
 
 #if defined FUNC_MUPARSER

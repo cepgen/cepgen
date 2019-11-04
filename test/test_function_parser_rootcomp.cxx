@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-#include "CepGen/Core/Functional.h"
+#include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 
 using namespace std;

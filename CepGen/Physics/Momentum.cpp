@@ -1,7 +1,5 @@
 #include "CepGen/Physics/Momentum.h"
-
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
 
 #include <math.h>
 #include <iomanip>

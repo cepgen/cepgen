@@ -3,7 +3,6 @@
 
 #include "CepGen/Physics/Limits.h"
 #include "CepGen/Physics/ParticleProperties.h"
-#include "CepGen/Core/Hasher.h"
 
 #include <vector>
 #include <map>

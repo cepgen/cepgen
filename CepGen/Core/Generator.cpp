@@ -4,8 +4,9 @@
 
 #include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/Timer.h"
-#include "CepGen/Core/utils.h"
+
+#include "CepGen/Utils/Timer.h"
+#include "CepGen/Utils/String.h"
 
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"

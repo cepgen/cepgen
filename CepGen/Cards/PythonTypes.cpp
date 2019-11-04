@@ -2,7 +2,7 @@
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
+#include "CepGen/Utils/String.h"
 
 #if PY_MAJOR_VERSION < 3
 #  define PYTHON2

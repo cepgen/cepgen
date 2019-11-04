@@ -1,7 +1,7 @@
 #include "CepGen/Physics/Limits.h"
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen
 {

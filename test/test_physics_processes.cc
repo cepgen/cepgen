@@ -1,8 +1,9 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Integrator.h"
-#include "CepGen/Core/Timer.h"
 
+#include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Timer.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 
 #include "AbortHandler.h"

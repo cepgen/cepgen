@@ -2,11 +2,11 @@
 #include "CepGen/Modules/EventModifier.h"
 
 #include "CepGen/Core/ParametersList.h"
-#include "CepGen/Core/utils.h"
 
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 #include "CepGen/Physics/Constants.h"
 
+#include "CepGen/Utils/String.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Version.h"
 

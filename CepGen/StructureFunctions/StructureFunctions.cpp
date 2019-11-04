@@ -5,7 +5,6 @@
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
 
 namespace cepgen
 {

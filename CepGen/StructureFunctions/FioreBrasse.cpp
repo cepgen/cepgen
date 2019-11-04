@@ -1,7 +1,6 @@
 #include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
 
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Constants.h"

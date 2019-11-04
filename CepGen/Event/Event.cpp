@@ -1,8 +1,9 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/HeavyIon.h"
+
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
+#include "CepGen/Utils/String.h"
 
 #include <algorithm>
 #include <math.h>

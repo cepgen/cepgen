@@ -1,7 +1,7 @@
 #include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
+#include "CepGen/Utils/String.h"
 
 #include <string>
 #include <algorithm>

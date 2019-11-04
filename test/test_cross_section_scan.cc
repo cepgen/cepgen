@@ -1,11 +1,10 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Parameters.h"
 
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
-
 #include "CepGen/Processes/ProcessesHandler.h"
 
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/String.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 
 #include <fstream>

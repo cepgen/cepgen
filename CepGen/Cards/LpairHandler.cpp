@@ -7,7 +7,8 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Integrator.h"
-#include "CepGen/Core/utils.h"
+
+#include "CepGen/Utils/String.h"
 
 #include "CepGen/Processes/ProcessesHandler.h"
 

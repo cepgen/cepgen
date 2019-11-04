@@ -1,6 +1,5 @@
 #include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/GridParameters.h"
-#include "CepGen/Core/utils.h"
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Modules/Process.h"
@@ -10,6 +9,9 @@
 #include "CepGen/Parameters.h"
 
 #include "CepGen/Event/Event.h"
+
+#include "CepGen/Utils/String.h"
+#include "CepGen/Utils/ProgressBar.h"
 
 #include <thread>
 #include <math.h>

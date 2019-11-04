@@ -1,8 +1,6 @@
 #ifndef CepGen_Physics_Kinematics_h
 #define CepGen_Physics_Kinematics_h
 
-#include "CepGen/Core/Hasher.h"
-
 #include "CepGen/Physics/KinematicsMode.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Cuts.h"

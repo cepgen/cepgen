@@ -1,4 +1,4 @@
-#include "CepGen/Core/Functional.h"
+#include "CepGen/Utils/Functional.h"
 #include "CepGen/Core/Exception.h"
 
 #include <math.h>

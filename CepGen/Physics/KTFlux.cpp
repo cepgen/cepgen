@@ -1,4 +1,5 @@
 #include "CepGen/Physics/KTFlux.h"
+#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/HeavyIon.h"

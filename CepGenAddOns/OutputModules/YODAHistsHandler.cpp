@@ -1,9 +1,10 @@
 #include "CepGen/Core/ExportModuleHandler.h"
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/EventBrowser.h"
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/String.h"
 
 #include "YODA/Histo1D.h"
 #include "YODA/Histo2D.h"

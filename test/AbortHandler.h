@@ -2,7 +2,6 @@
 #define CepGen_test_AbortHandler_h
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
 
 #include <csignal>
 #include <atomic>
