@@ -192,41 +192,40 @@ test_function_parser:f30:
 
 compile:ubuntu_trusty:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_trusty
-  allow_failure: true # quite instable as it is...
   <<: *build_definition
 
 run_cepgen:ubuntu_trusty:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_trusty
   dependencies: ["compile:ubuntu_trusty"]
   needs: ["compile:ubuntu_trusty"]
-  allow_failure: true # quite instable as it is...
   <<: *run_cepgen_definition
+  allow_failure: true # quite instable as it is...
 
 test:ubuntu_trusty:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_trusty
   dependencies: ["compile:ubuntu_trusty"]
   needs: ["compile:ubuntu_trusty"]
-  allow_failure: true # quite instable as it is...
   <<: *test_definition
+  allow_failure: true # quite instable as it is...
 
 test_integrator:ubuntu_trusty:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_trusty
   dependencies: ["compile:ubuntu_trusty"]
   needs: ["compile:ubuntu_trusty"]
-  allow_failure: true # quite instable as it is...
   <<: *test_integrator_definition
+  allow_failure: true # quite instable as it is...
 
 test_cross_sections:ubuntu_trusty:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_trusty
   dependencies: ["compile:ubuntu_trusty"]
   needs: ["compile:ubuntu_trusty"]
-  allow_failure: true # quite instable as it is...
   <<: *test_cross_sections_definition
+  allow_failure: true # quite instable as it is...
 
 test_function_parser:ubuntu_trusty:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_trusty
   dependencies: ["compile:ubuntu_trusty"]
   needs: ["compile:ubuntu_trusty"]
-  allow_failure: true # quite instable as it is...
   <<: *test_function_parser_definition
+  allow_failure: true # quite instable as it is...
 
