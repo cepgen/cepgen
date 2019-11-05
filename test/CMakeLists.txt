@@ -28,18 +28,15 @@ endforeach()
 #----- specify the tests requiring ROOT
 
 if(ROOT_FOUND)
-  include_directories(${ROOT_INCLUDE_DIRS})
-  link_directories(${ROOT_LIBRARY_DIR})
-
   foreach(exec_src ${tests_root})
     string(REPLACE ".cxx" "" exec_bin ${exec_src})
     add_executable(${exec_bin} ${exec_src})
     set_property(TARGET ${exec_bin} PROPERTY CXX_STANDARD 14)
+    target_link_directories(${exec_bin} PUBLIC ${ROOT_LIBRARY_DIR})
+    target_include_directories(${exec_bin} PUBLIC ${ROOT_INCLUDE_DIRS})
     target_link_libraries(${exec_bin} ${tests_libraries} ${ROOT_LIBRARIES})
     list(APPEND tests ${exec_bin})
   endforeach()
-else()
-  message(STATUS "ROOT not found! skipping these tests!")
 endif()
 
 file(GLOB_RECURSE test_input_cards RELATIVE ${PROJECT_SOURCE_DIR}/test test_processes/* __init__.py)
@@ -48,7 +45,6 @@ foreach(_files ${test_input_cards})
 endforeach()
 configure_file(${PROJECT_SOURCE_DIR}/test/test_processes.cfg test_processes.cfg COPYONLY)
 
-#cmake_dependent_option(CMAKE_BUILD_TESTS "Build tests" FALSE)
 foreach(test ${tests})
   message(STATUS "Added test ${test}")
   add_test(NAME ${test} COMMAND ${test} -h)

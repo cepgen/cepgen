@@ -119,7 +119,7 @@ endif()
 #----- build the objects
 
 add_library(CepGenAddOns SHARED ${io_sources} ${hadr_sources})
-target_link_libraries(CepGenAddOns ${addons_libraries} CepGenEvent)
+target_link_libraries(CepGenAddOns ${addons_libraries})
 target_compile_definitions(CepGenAddOns PUBLIC ${addons_definitions})
 target_include_directories(CepGenAddOns PUBLIC ${addons_includes})
 if(ROOT_FOUND)
