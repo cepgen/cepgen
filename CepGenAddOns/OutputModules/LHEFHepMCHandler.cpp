@@ -81,7 +81,7 @@ namespace cepgen
       out.AQEDUP = constants::ALPHA_EM;
       out.AQCDUP = constants::ALPHA_QCD;
       const auto& particles = compress_
-        ? ev.compressed().particles()
+        ? ev.compress().particles()
         : ev.particles();
       out.NUP = particles.size();
       out.resize();

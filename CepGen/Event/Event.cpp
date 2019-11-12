@@ -10,9 +10,10 @@
 
 namespace cepgen
 {
-  Event::Event() :
+  Event::Event( bool compressed ) :
     num_hadronisation_trials( 0 ),
-    time_generation( -1. ), time_total( -1. ), weight( 0. )
+    time_generation( -1. ), time_total( -1. ), weight( 0. ),
+    compressed_( compressed )
   {}
 
   Event::Event( const Event& rhs ) :
@@ -20,7 +21,8 @@ namespace cepgen
     time_generation( rhs.time_generation ), time_total( rhs.time_total ),
     weight( rhs.weight ),
     particles_( rhs.particles_ ),
-    evtcontent_( rhs.evtcontent_ )
+    evtcontent_( rhs.evtcontent_ ),
+    compressed_( rhs.compressed_ )
   {}
 
   void
@@ -56,10 +58,18 @@ namespace cepgen
       particles_[Particle::OutgoingBeam2].resize( evtcontent_.op2 );
   }
 
-  Event
+  bool
   Event::compressed() const
   {
-    Event out;
+    return compressed_;
+  }
+
+  Event
+  Event::compress() const
+  {
+    if ( compressed_ )
+      return *this;
+    Event out( true );
     size_t i = 0;
     //--- add all necessary particles
     for ( const auto& role : { Particle::IncomingBeam1, Particle::IncomingBeam2,
@@ -77,7 +87,7 @@ namespace cepgen
     //--- fix parentage for outgoing beam particles
     if ( out[Particle::OutgoingBeam1].size() > 1
       || out[Particle::OutgoingBeam2].size() > 1 )
-      CG_WARNING( "Event:compressed" )
+      CG_WARNING( "Event:compress" )
         << "Event compression not designed for already fragmented beam remnants!\n\t"
         << "Particles parentage is not guaranteed to be conserved.";
     for ( auto& part : out[Particle::OutgoingBeam1] )

@@ -12,7 +12,7 @@ namespace cepgen
   class Event {
     public:
       /// Build an empty event
-      Event();
+      Event( bool compressed = false );
       /// Copy constructor
       Event( const Event& );
       /// Empty the whole event content
@@ -21,8 +21,9 @@ namespace cepgen
       void freeze();
       /// Restore the event to its "empty" state
       void restore();
+      bool compressed() const;
       /// Compress the event record
-      Event compressed() const;
+      Event compress() const;
 
       /// Dump all the known information on every Particle object contained in this Event container in the output stream
       /// \param[out] os Output stream where to dump the information
@@ -122,6 +123,8 @@ namespace cepgen
       };
       /// Event indices structure
       NumParticles evtcontent_;
+      /// Is the event "compressed"? (without t-channel information)
+      bool compressed_;
   };
 }
 

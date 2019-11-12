@@ -106,7 +106,7 @@ namespace cepgen
 
       unsigned short i = 0;
       const auto& parts = compress_evt_
-        ? ev.compressed().particles()
+        ? ev.compress().particles()
         : ev.particles();
       for ( const auto& par : parts ) {
         auto part = event.mutable_particles();

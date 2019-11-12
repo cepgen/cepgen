@@ -71,7 +71,7 @@ namespace cepgen
     void
     LHEFPythiaHandler::operator<<( const Event& ev )
     {
-      lhaevt_->feedEvent( compress_ ? ev : ev.compressed(), Pythia8::CepGenEvent::Type::centralAndFullBeamRemnants );
+      lhaevt_->feedEvent( compress_ ? ev : ev.compress(), Pythia8::CepGenEvent::Type::centralAndFullBeamRemnants );
       pythia_->next();
       lhaevt_->eventLHEF();
     }

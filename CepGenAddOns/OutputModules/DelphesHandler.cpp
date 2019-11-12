@@ -110,7 +110,7 @@ namespace cepgen
       evt_aux->ReadTime = ev.time_generation;
       auto start = std::chrono::system_clock::now();
       const auto& parts = compress_
-        ? ev.compressed().particles()
+        ? ev.compress().particles()
         : ev.particles();
       //--- particles content
       for ( const auto& part : parts ) {
