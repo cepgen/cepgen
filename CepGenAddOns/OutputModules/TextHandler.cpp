@@ -179,7 +179,7 @@ namespace cepgen
         << "\n"
         << utils::format( "%17s", var.c_str() ) << ":" << std::string( PLOT_WIDTH, '.' ) << ":\n" // 2nd abscissa axis
         << "\t("
-        << "bin width=" << utils::s( "unit", (int)bin_width ) << ", "
+        << "bin width=" << bin_width << utils::s( " unit", (int)bin_width, false ) << ", "
         << "mean=" << gsl_histogram_mean( hist ) << ", "
         << "st.dev.=" << gsl_histogram_sigma( hist )
         << ")";
