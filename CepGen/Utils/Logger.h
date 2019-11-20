@@ -37,7 +37,7 @@ namespace cepgen
         /// \param[in] rule Regex rule to handle
         void addExceptionRule( const std::string& rule ) {
 #if !defined(__CINT__) && !defined(__CLING__)
-          allowed_exc_.emplace_back( rule, std::regex_constants::basic );
+          allowed_exc_.emplace_back( rule, std::regex_constants::extended );
 #endif
         }
         /// \brief Is the module set to be displayed/logged?
