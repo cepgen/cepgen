@@ -152,6 +152,8 @@ namespace cepgen
   io::ExportModule*
   Parameters::outputModule()
   {
+    if ( !out_module_ )
+      return nullptr;
     return out_module_.get();
   }
 

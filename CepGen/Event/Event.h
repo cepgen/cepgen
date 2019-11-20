@@ -2,6 +2,7 @@
 #define CepGen_Event_Event_h
 
 #include "CepGen/Event/Particle.h"
+#include <memory>
 
 namespace cepgen
 {
@@ -21,6 +22,7 @@ namespace cepgen
       void freeze();
       /// Restore the event to its "empty" state
       void restore();
+      /// Is the event already without intermediate-channel information?
       bool compressed() const;
       /// Compress the event record
       Event compress() const;
@@ -123,9 +125,10 @@ namespace cepgen
       };
       /// Event indices structure
       NumParticles evtcontent_;
-      /// Is the event "compressed"? (without t-channel information)
+      /// Is the event "compressed"?
       bool compressed_;
   };
+  typedef std::unique_ptr<Event> EventPtr;
 }
 
 #endif

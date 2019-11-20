@@ -67,18 +67,19 @@ namespace cepgen
     }
 
     Process&
-    Process::defineVariable( double& out, const Mapping& type, const Limits& in, Limits default_limits, const std::string& description )
+    Process::defineVariable( double& out, const Mapping& type, Limits in, const Limits& default_limits, const std::string& description )
     {
-      Limits lim = in;
-      out = 0.; // reset the variable
       if ( !in.valid() ) {
         CG_DEBUG( "Process:defineVariable" )
           << description << " could not be retrieved from the user configuration!\n\t"
           << "Setting it to the default value: " << default_limits << ".";
-        lim = default_limits;
+        in = default_limits;
       }
-      if ( type == Mapping::logarithmic )
-        lim = {
+
+      Limits lim = in;
+      out = 0.; // reset the variable
+      if ( type == Mapping::exponential )
+        lim = { // limits already stored as log(limits)
           std::max( log( lim.min() ), -10. ),
           std::min( log( lim.max() ), +10. )
         };
@@ -89,16 +90,18 @@ namespace cepgen
       switch ( type ) {
         case Mapping::square:
         case Mapping::linear:
-        case Mapping::logarithmic:
           base_jacobian_ *= lim.range();
           break;
         case Mapping::exponential:
+          base_jacobian_ *= in.range(); // use the linear version
+          break;
+        case Mapping::power_law:
           base_jacobian_ *= log( lim.max()/lim.min() );
           break;
       }
       CG_DEBUG( "Process:defineVariable" )
         << description << " has been mapped to variable " << mapped_variables_.size() << ".\n\t"
-        << "Allowed range for integration: " << lim << ".\n\t"
+        << "Allowed range for integration: " << in << ".\n\t"
         << "Variable integration mode: " << type << ".";
       return *this;
     }
@@ -123,13 +126,13 @@ namespace cepgen
           case Mapping::linear: {
             var.value = var.limits.x( xv );
           } break;
-          case Mapping::logarithmic: {
-            var.value = exp( var.limits.x( xv ) );
+          case Mapping::exponential: { // limits aleady logarithmic
+            var.value = exp( var.limits.x( xv ) ); // transform back to linear
           } break;
           case Mapping::square: {
             var.value = var.limits.x( xv );
           } break;
-          case Mapping::exponential: {
+          case Mapping::power_law: {
             const double y = var.limits.max()/var.limits.min();
             var.value = var.limits.min()*pow( y, xv );
           } break;
@@ -159,13 +162,13 @@ namespace cepgen
           continue;
         switch ( var.type ) {
           case Mapping::linear: break;
-          case Mapping::logarithmic: {
-            jac *= var.value*var.value;
+          case Mapping::exponential: {
+            jac *= var.value;
           } break;
           case Mapping::square: {
             jac *= 2.*var.value;
           } break;
-          case Mapping::exponential: {
+          case Mapping::power_law: {
             jac *= var.value;
           } break;
         }
@@ -404,9 +407,9 @@ namespace cepgen
     {
       switch ( type ) {
         case Process::Mapping::linear: return os << "linear";
-        case Process::Mapping::logarithmic: return os << "logarithmic";
-        case Process::Mapping::square: return os << "squared";
         case Process::Mapping::exponential: return os << "exponential";
+        case Process::Mapping::square: return os << "squared";
+        case Process::Mapping::power_law: return os << "power law";
       }
       return os;
     }

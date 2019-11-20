@@ -107,11 +107,11 @@ namespace cepgen
         {
           /// a linear \f${\rm d}x\f$ mapping
           linear = 0,
-          /// a logarithmic \f$\frac{{\rm d}x}{x} = {\rm d}(\log x)\f$ mapping
-          logarithmic,
-          /// a square \f${\rm d}x^2=2x\cdot{\rm d}x\f$ mapping
+          /// an exponential \f$\frac{\dot{x}}{x} = \dot{\log x}\f$ mapping
+          exponential,
+          /// a square \f${\rm d}x^2=2x\cdot\dot{x}\f$ mapping
           square,
-          /// an exponential mapping inherited from LPAIR
+          /// a power-law mapping inherited from LPAIR
           /**
            * Define modified variables of integration to avoid peaks integrations (see \cite Vermaseren:1982cz for details):
            * - \f$y_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\f$ the new variable
@@ -123,7 +123,7 @@ namespace cepgen
            *  - opposite sign :
            * > `mapt1`, `mapt2`
            */
-          exponential
+          power_law
         };
         friend std::ostream& operator<<( std::ostream&, const Mapping& );
         /// Register a variable to be handled and populated whenever
@@ -134,7 +134,7 @@ namespace cepgen
         /// \param[in] in Integration limits
         /// \param[in] default_limits Limits to apply if none retrieved from the user configuration
         /// \param[in] description Human-readable description of the variable
-        Process& defineVariable( double& out, const Mapping& type, const Limits& in = { 0., 1. }, Limits default_limits = { 0., 1. }, const std::string& description = "" );
+        Process& defineVariable( double& out, const Mapping& type, Limits in = { 0., 1. }, const Limits& default_limits = { 0., 1. }, const std::string& description = "" );
         /// Generate and initialise all variables handled by this process
         /// \note To be run at each point computation (therefore, to be optimised!)
         void generateVariables() const;
@@ -200,7 +200,7 @@ namespace cepgen
         /// Set of cuts to apply on the final phase space
         Kinematics kin_;
         /// Event object containing all the information on the in- and outgoing particles
-        std::unique_ptr<Event> event_;
+        EventPtr event_;
         /// Is the phase space point set?
         bool is_point_set_;
 

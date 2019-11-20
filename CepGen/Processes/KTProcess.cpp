@@ -123,8 +123,8 @@ namespace cepgen
       // register the incoming partons' variables
       //============================================================================================
 
-      defineVariable( qt1_, Mapping::logarithmic, kin_.cuts.initial.qt, { 1.e-10, 500. }, "First incoming parton virtuality" );
-      defineVariable( qt2_, Mapping::logarithmic, kin_.cuts.initial.qt, { 1.e-10, 500. }, "Second incoming parton virtuality" );
+      defineVariable( qt1_, Mapping::exponential, kin_.cuts.initial.qt, { 1.e-10, 500. }, "First incoming parton virtuality" );
+      defineVariable( qt2_, Mapping::exponential, kin_.cuts.initial.qt, { 1.e-10, 500. }, "Second incoming parton virtuality" );
       defineVariable( phi_qt1_, Mapping::linear, kin_.cuts.initial.phi_qt, { 0., 2.*M_PI }, "First incoming parton azimuthal angle" );
       defineVariable( phi_qt2_, Mapping::linear, kin_.cuts.initial.phi_qt, { 0., 2.*M_PI }, "Second incoming parton azimuthal angle" );
 

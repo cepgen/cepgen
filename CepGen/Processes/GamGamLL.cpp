@@ -88,7 +88,7 @@ namespace cepgen
       for ( size_t i = 0; i < x_tmp_.size(); ++i )
         defineVariable( x_tmp_[i], Mapping::linear, { 0., 1. }, { 0., 1. }, var_names[i] );
 
-      defineVariable( w4_, Mapping::exponential, w_limits_, w_limits_, "w4" );
+      defineVariable( w4_, Mapping::power_law, w_limits_, w_limits_, "w4" );
       defineVariable( theta4_, Mapping::linear, { 0., M_PI }, { 0., M_PI }, "theta4" );
       defineVariable( phi6_cm_, Mapping::linear, { 0., 2.*M_PI }, { 0., 2.*M_PI }, "phi6cm" );
       defineVariable( x6_, Mapping::linear, { 0., 1. }, { 0., 1. }, "x6" );
@@ -96,13 +96,13 @@ namespace cepgen
       //--- first outgoing beam particle or remnant mass
       if ( kin_.mode == KinematicsMode::InelasticElastic
         || kin_.mode == KinematicsMode::InelasticInelastic )
-        defineVariable( masses_.MX2, Mapping::exponential, wx_lim_ob1, wx_lim_ob1, "MX2" );
+        defineVariable( masses_.MX2, Mapping::power_law, wx_lim_ob1, wx_lim_ob1, "MX2" );
       else
         masses_.MX2 = pow( p1_lab_.mass(), 2 );
       //--- second outgoing beam particle or remnant mass
       if ( kin_.mode == KinematicsMode::ElasticInelastic
         || kin_.mode == KinematicsMode::InelasticInelastic )
-        defineVariable( masses_.MY2, Mapping::exponential, wx_lim_ob2, wx_lim_ob2, "MY2" );
+        defineVariable( masses_.MY2, Mapping::power_law, wx_lim_ob2, wx_lim_ob2, "MY2" );
       else
         masses_.MY2 = pow( p2_lab_.mass(), 2 );
     }
