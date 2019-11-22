@@ -34,7 +34,7 @@ namespace cepgen
       p1_ = (*event_)[Particle::IncomingBeam1][0].momentum();
       p2_ = (*event_)[Particle::IncomingBeam2][0].momentum();
       CG_DEBUG_LOOP( "2to4:incoming" )
-        << "incoming particles:\n" << " p1 = " << p1_ << "\n" << " p2 = " << p2_ << ".";
+        << "incoming particles: p1 = " << p1_ << ", p2 = " << p2_ << ".";
 
       ww_ = 0.5 * ( 1.+sqrt( 1.-4.*p1_.mass()*p2_.mass()/s_ ) );
 

@@ -68,7 +68,7 @@ namespace cepgen
       return;
     CG_DEBUG( "Parameters" )
       << "Run started for " << process_->name() << " process "
-      << "0x" << std::hex << process_.get() << std::dec << ".\n\t"
+      << std::hex << (void*)process_.get() << std::dec << ".\n\t"
       << "Process mode considered: " << kinematics.mode << "\n\t"
       << "   first beam: " << kinematics.incoming_beams.first << "\n\t"
       << "  second beam: " << kinematics.incoming_beams.second << "\n\t"
