@@ -4,12 +4,11 @@
 #include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/ParametersList.h"
 
+#include "CepGen/Utils/AbortHandler.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/Timer.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/ProgressBar.h"
-
-#include "AbortHandler.h"
 
 #include <fstream>
 #include <iostream>
@@ -18,8 +17,7 @@
 using namespace std;
 using namespace cepgen;
 
-int
-main( int argc, char* argv[] )
+int main( int argc, char* argv[] )
 {
   double num_sigma;
   string cfg_filename;

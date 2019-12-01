@@ -3,13 +3,14 @@
 #include "CepGen/Cards/CardsHandler.h"
 #include "CepGen/Processes/ProcessesHandler.h"
 #include "CepGen/StructureFunctions/StructureFunctions.h"
-#include "CepGen/Core/EventModifierHandler.h"
-#include "CepGen/Core/ExportModuleHandler.h"
+
+#include "CepGen/Modules/EventModifierHandler.h"
+#include "CepGen/Modules/ExportModuleHandler.h"
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/ArgumentsParser.h"
 
-#include "test/AbortHandler.h"
+#include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/AbortHandler.h"
 
 using namespace std;
 
@@ -19,7 +20,6 @@ void list_modules();
  * - loads the steering card variables into the environment,
  * - launches the cross-section computation and the events generation (if requested).
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
- * \addtogroup Executables
  */
 int main( int argc, char* argv[] )
 {

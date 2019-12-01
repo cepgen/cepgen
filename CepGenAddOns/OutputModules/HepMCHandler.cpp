@@ -1,11 +1,11 @@
 #include "CepGenAddOns/EventInterfaces/HepMCEventInterface.h"
-#include "CepGen/Core/ExportModuleHandler.h"
+
+#include "CepGen/Modules/ExportModuleHandler.h"
+
 #include "CepGen/Core/Exception.h"
-
-#include "CepGen/Parameters.h"
-
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
+#include "CepGen/Parameters.h"
 
 #if defined( HEPMC3 ) || defined( HEPMC_VERSION_CODE )
 #  include "HepMC3/Version.h"

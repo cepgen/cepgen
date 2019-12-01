@@ -1,8 +1,8 @@
 #include "CepGenAddOns/EventInterfaces/PythiaEventInterface.h"
 
 #include "CepGen/Modules/Hadroniser.h"
+#include "CepGen/Modules/EventModifierHandler.h"
 
-#include "CepGen/Core/EventModifierHandler.h"
 #include "CepGen/Core/ParametersList.h"
 
 #include "CepGen/Parameters.h"

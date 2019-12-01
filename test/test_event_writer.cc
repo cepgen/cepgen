@@ -3,7 +3,7 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Event/Event.h"
 
-#include "CepGen/Core/ExportModuleHandler.h"
+#include "CepGen/Modules/ExportModuleHandler.h"
 
 #include "CepGen/Utils/ArgumentsParser.h"
 

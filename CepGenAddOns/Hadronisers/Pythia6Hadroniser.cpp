@@ -1,6 +1,6 @@
 #include "CepGen/Modules/Hadroniser.h"
+#include "CepGen/Modules/EventModifierHandler.h"
 
-#include "CepGen/Core/EventModifierHandler.h"
 #include "CepGen/Core/ParametersList.h" //FIXME
 
 #include "CepGen/Event/Event.h"

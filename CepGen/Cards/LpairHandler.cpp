@@ -1,8 +1,8 @@
 #include "CepGen/Cards/LpairHandler.h"
 #include "CepGen/Cards/CardsHandler.h"
 
-#include "CepGen/Core/EventModifierHandler.h"
-#include "CepGen/Core/ExportModuleHandler.h"
+#include "CepGen/Modules/EventModifierHandler.h"
+#include "CepGen/Modules/ExportModuleHandler.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"

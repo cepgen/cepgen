@@ -1,5 +1,5 @@
 #include "CepGenAddOns/EventInterfaces/PythiaEventInterface.h"
-#include "CepGen/Core/ExportModuleHandler.h"
+#include "CepGen/Modules/ExportModuleHandler.h"
 
 #include "CepGen/Event/Event.h"
 

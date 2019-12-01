@@ -1,5 +1,5 @@
-#ifndef CepGen_test_AbortHandler_h
-#define CepGen_test_AbortHandler_h
+#ifndef CepGen_Utils_AbortHandler_h
+#define CepGen_Utils_AbortHandler_h
 
 #include "CepGen/Core/Exception.h"
 
