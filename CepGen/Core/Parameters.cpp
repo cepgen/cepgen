@@ -185,7 +185,7 @@ namespace cepgen
     if ( param->process_ ) {
       os << ", " << param->process_->description();
       for ( const auto& par : param->process()->parameters().keys() )
-        if ( par != "mode" )
+        if ( par != "mode" && par != ParametersList::MODULE_NAME )
           os << "\n" << std::setw( wt ) << "" << par << ": " << param->process_->parameters().getString( par );
       std::ostringstream proc_mode; proc_mode << param->kinematics.mode;
       if ( param->kinematics.mode != KinematicsMode::invalid )

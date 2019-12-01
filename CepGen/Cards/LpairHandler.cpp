@@ -189,6 +189,8 @@ namespace cepgen
       registerParameter<double>( "YMAX", "Maximal rapidity (central outgoing particles)", &params_.kinematics.cuts.central.rapidity_single.max() );
       registerParameter<double>( "Q2MN", "Minimal Q² = -q² (exchanged parton)", &params_.kinematics.cuts.initial.q2.min() );
       registerParameter<double>( "Q2MX", "Maximal Q² = -q² (exchanged parton)", &params_.kinematics.cuts.initial.q2.max() );
+      registerParameter<double>( "QTMN", "Minimal Q_T (exchanged parton)", &params_.kinematics.cuts.initial.qt.min() );
+      registerParameter<double>( "QTMX", "Maximal Q_T (exchanged parton)", &params_.kinematics.cuts.initial.qt.max() );
       registerParameter<double>( "MXMN", "Minimal invariant mass of proton remnants", &params_.kinematics.cuts.remnants.mass_single.min() );
       registerParameter<double>( "MXMX", "Maximal invariant mass of proton remnants", &params_.kinematics.cuts.remnants.mass_single.max() );
       registerParameter<double>( "XIMN", "Minimal fractional momentum loss of outgoing proton (ξ)", &xi_min_ );

@@ -280,10 +280,10 @@ namespace cepgen
     Process::dumpPoint() const
     {
       std::ostringstream os;
-      for ( unsigned short i = 0; i < mapped_variables_.size(); ++i )
-        os << utils::format( "  x(%2d) = %8.6f\n\t", i, mapped_variables_[i].value );
+      for ( unsigned short i = 0; i < point_coord_.size(); ++i )
+        os << utils::format( "\n\t  x(%2d) = %8.6f", i, point_coord_[i] );
       CG_INFO( "Process" )
-        << "Number of integration parameters: " << mapped_variables_.size() << "\n\t"
+        << "Number of integration parameters: " << mapped_variables_.size()
         << os.str() << ".";
     }
 
