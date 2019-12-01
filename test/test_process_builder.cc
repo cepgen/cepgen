@@ -1,4 +1,5 @@
-#include "CepGen/Processes/ProcessesHandler.h"
+#include "CepGen/Modules/ProcessesFactory.h"
+
 #include "CepGen/Generator.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Core/ParametersList.h"
@@ -12,29 +13,36 @@ using namespace std;
 int main( int argc, char* argv[] )
 {
   string proc_name;
+  bool list;
 
   cepgen::ArgumentsParser( argc, argv )
-    .addArgument( "proc-name", "name of the process", &proc_name, 'p' )
+    .addOptionalArgument( "proc-name", "name of the process", "", &proc_name, 'p' )
+    .addOptionalArgument( "list", "list all processes", false, &list, 'l' )
     .parse();
 
   cepgen::Generator gen;
 
-  cout << "Will build a process named \"" << proc_name << "\"." << endl;
+  if ( list ) {
+    cout << "List of modules registered in the database:";
+    for ( const auto& mod : cepgen::proc::ProcessesFactory::get().modules() )
+      cout << " " << mod;
+    cout << endl;
+    return 0;
+  }
 
-  cout << "List of modules registered in the database:";
-  for ( const auto& mod : cepgen::proc::ProcessesHandler::get().modules() )
-    cout << " " << mod;
-  cout << endl;
+  if ( !proc_name.empty() ) {
+    cout << "Will build a process named \"" << proc_name << "\"." << endl;
 
-  auto proc = cepgen::proc::ProcessesHandler::get().build( proc_name, cepgen::ParametersList() );
-  //--- at this point, the process has been found
-  std::cout << "Successfully built the process \"" << proc->name() << "\"!\n"
-    << " *) description: " << proc->description() << "\n"
-    << " *) has event? " << proc->hasEvent() << "\n";
-  if ( proc->hasEvent() ) { //--- dump a typical event content
-    std::cout << "    event content (invalid kinematics, only check the parentage):\n";
-    proc->addEventContent();
-    proc->event().dump();
+    auto proc = cepgen::proc::ProcessesFactory::get().build( proc_name, cepgen::ParametersList() );
+    //--- at this point, the process has been found
+    std::cout << "Successfully built the process \"" << proc->name() << "\"!\n"
+      << " *) description: " << proc->description() << "\n"
+      << " *) has event? " << proc->hasEvent() << "\n";
+    if ( proc->hasEvent() ) { //--- dump a typical event content
+      std::cout << "    event content (invalid kinematics, only check the parentage):\n";
+      proc->addEventContent();
+      proc->event().dump();
+    }
   }
 
   return 0;

@@ -1,7 +1,7 @@
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Processes/Process2to4.h"
-#include "CepGen/Processes/ProcessesHandler.h"
+#include "CepGen/Modules/ProcessesFactory.h"
 
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"

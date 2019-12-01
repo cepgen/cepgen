@@ -1,5 +1,5 @@
-#ifndef CepGen_Modules_EventModifierHandler_h
-#define CepGen_Modules_EventModifierHandler_h
+#ifndef CepGen_Modules_EventModifierFactory_h
+#define CepGen_Modules_EventModifierFactory_h
 
 #include "CepGen/Core/ModuleFactory.h"
 #include "CepGen/Modules/EventModifier.h"
@@ -7,14 +7,14 @@
 #define REGISTER_MODIFIER( name, obj ) \
   namespace cepgen { namespace hadr { \
     struct BUILDERNM( obj ) { \
-      BUILDERNM( obj )() { EventModifierHandler::get().registerModule<obj>( name ); } }; \
+      BUILDERNM( obj )() { EventModifierFactory::get().registerModule<obj>( name ); } }; \
     static BUILDERNM( obj ) g ## obj; \
   } }
 
 namespace cepgen
 {
   /// A event modifier algorithms factory
-  typedef ModuleFactory<EventModifier> EventModifierHandler;
+  typedef ModuleFactory<EventModifier> EventModifierFactory;
 }
 
 #endif

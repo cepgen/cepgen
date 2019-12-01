@@ -1,13 +1,8 @@
 #include "CepGen/Generator.h"
 
-#include "CepGen/Cards/CardsHandler.h"
-#include "CepGen/Processes/ProcessesHandler.h"
-#include "CepGen/StructureFunctions/StructureFunctions.h"
-
-#include "CepGen/Modules/EventModifierHandler.h"
-#include "CepGen/Modules/ExportModuleHandler.h"
-
 #include "CepGen/Core/Exception.h"
+
+#include "CepGen/Modules/CardsHandlerFactory.h"
 
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/AbortHandler.h"
@@ -74,6 +69,11 @@ int main( int argc, char* argv[] )
   return 0;
 }
 
+#include "CepGen/Modules/ProcessesFactory.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+
 void list_modules()
 {
   using namespace cepgen;
@@ -85,37 +85,37 @@ void list_modules()
     << "List of modules registered in the runtime database:\n";
   {
     cout << sep_big << "Steering cards parsers definitions\n" << sep_mid;
-    if ( cepgen::card::CardsHandler::get().modules().empty() )
+    if ( cepgen::card::CardsHandlerFactory::get().modules().empty() )
       cout << ">>> none found <<<" << endl;
-    for ( const auto& mod : cepgen::card::CardsHandler::get().modules() )
+    for ( const auto& mod : cepgen::card::CardsHandlerFactory::get().modules() )
       cout << "." << mod << " extension\n";
   }
   {
     cout << sep_mid << "Processes definitions\n" << sep_mid;
-    if ( cepgen::proc::ProcessesHandler::get().modules().empty() )
+    if ( cepgen::proc::ProcessesFactory::get().modules().empty() )
       cout << ">>> none found <<<" << endl;
-    for ( const auto& mod : cepgen::proc::ProcessesHandler::get().modules() )
-      cout << mod << " > " << cepgen::proc::ProcessesHandler::get().build( mod )->description() << "\n";
+    for ( const auto& mod : cepgen::proc::ProcessesFactory::get().modules() )
+      cout << mod << " > " << cepgen::proc::ProcessesFactory::get().build( mod )->description() << "\n";
   }
   {
     cout << sep_mid << "Structure functions definitions\n" << sep_mid;
-    if ( cepgen::strfun::StructureFunctionsHandler::get().modules().empty() )
+    if ( cepgen::strfun::StructureFunctionsFactory::get().modules().empty() )
       cout << ">>> none found <<<" << endl;
-    for ( const auto& mod : cepgen::strfun::StructureFunctionsHandler::get().modules() )
+    for ( const auto& mod : cepgen::strfun::StructureFunctionsFactory::get().modules() )
       cout << mod << " > " << (cepgen::strfun::Type)mod << "\n";
   }
   {
     cout << sep_mid << "Event modification modules definitions\n" << sep_mid;
-    if ( cepgen::EventModifierHandler::get().modules().empty() )
+    if ( cepgen::EventModifierFactory::get().modules().empty() )
       cout << ">>> none found <<<" << endl;
-    for ( const auto& mod : cepgen::EventModifierHandler::get().modules() )
+    for ( const auto& mod : cepgen::EventModifierFactory::get().modules() )
       cout << mod << "\n";
   }
   {
     cout << sep_mid << "Export modules definitions\n" << sep_mid;
-    if ( cepgen::io::ExportModuleHandler::get().modules().empty() )
+    if ( cepgen::io::ExportModuleFactory::get().modules().empty() )
       cout << ">>> none found <<<" << endl;
-    for ( const auto& mod : cepgen::io::ExportModuleHandler::get().modules() )
+    for ( const auto& mod : cepgen::io::ExportModuleFactory::get().modules() )
       cout << mod << "\n";
   }
   cout << sep_big;

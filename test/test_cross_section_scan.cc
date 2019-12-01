@@ -1,7 +1,7 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Parameters.h"
 
-#include "CepGen/Processes/ProcessesHandler.h"
+#include "CepGen/Modules/ProcessesFactory.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/String.h"
@@ -35,7 +35,7 @@ int main( int argc, char* argv[] )
   par.kinematics.setSqrtS( sqrts );
   par.kinematics.cuts.central.eta_single = { -2.5, 2.5 };
   par.kinematics.cuts.remnants.mass_single.max() = 1000.0;
-  par.setProcess( cepgen::proc::ProcessesHandler::get().build( proc_name ) );
+  par.setProcess( cepgen::proc::ProcessesFactory::get().build( proc_name ) );
   par.kinematics.mode = static_cast<cepgen::KinematicsMode>( proc_mode );
   CG_INFO( "main" ) << &par;
 

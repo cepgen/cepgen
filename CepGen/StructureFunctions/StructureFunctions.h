@@ -1,7 +1,7 @@
 #ifndef CepGen_StructureFunctions_StructureFunctions_h
 #define CepGen_StructureFunctions_StructureFunctions_h
 
-#include "CepGen/Core/ModuleFactory.h"
+#include "CepGen/Core/ParametersList.h"
 
 #include <iosfwd>
 #include <memory>
@@ -80,26 +80,9 @@ namespace cepgen
         /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
         std::shared_ptr<sigrat::Parameterisation> r_ratio_;
     };
-    /// A structure functions parameterisations factory
-    typedef ModuleFactory<Parameterisation,int> StructureFunctionsHandler;
   }
   /// Human-readable description of this SF parameterisation type
   std::ostream& operator<<( std::ostream&, const strfun::Type& );
 }
-
-/// Add a structure functions definition to the list of handled parameterisation
-#define REGISTER_STRFUN( id, obj ) \
-  namespace cepgen { \
-    struct BUILDERNM( id ) { \
-      BUILDERNM( id )() { strfun::StructureFunctionsHandler::get().registerModule<obj>( (int)strfun::Type::id ); } }; \
-    static BUILDERNM( id ) g ## id; \
-  }
-/// Add a structure functions definition (with its associated default parameters) to the list of handled parameterisation
-#define REGISTER_STRFUN_PARAMS( id, obj, params ) \
-  namespace cepgen { \
-    struct BUILDERNM( id ) { \
-      BUILDERNM( id )() { strfun::StructureFunctionsHandler::get().registerModule<obj>( (int)strfun::Type::id, params ); } }; \
-    static BUILDERNM( id ) g ## id; \
-  }
 
 #endif

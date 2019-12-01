@@ -3,7 +3,7 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Event/Event.h"
 
-#include "CepGen/Modules/ExportModuleHandler.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
 
 #include "CepGen/Utils/ArgumentsParser.h"
 
@@ -28,12 +28,12 @@ int main( int argc, char* argv[] )
     cout
       << "List of export modules available:\n"
       << "=================================\n";
-    for ( const auto& mod : io::ExportModuleHandler::get().modules() )
+    for ( const auto& mod : io::ExportModuleFactory::get().modules() )
       cout << mod << std::endl;
     return 0;
   }
 
-  auto writer = io::ExportModuleHandler::get().build( type );
+  auto writer = io::ExportModuleFactory::get().build( type );
   writer->setCrossSection( 1., 2. );
 
   Event ev;

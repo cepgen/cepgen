@@ -1,5 +1,5 @@
 #include "CepGen/Processes/Process2to4.h"
-#include "CepGen/Processes/ProcessesHandler.h"
+#include "CepGen/Modules/ProcessesFactory.h"
 
 #include "CepGen/Core/Exception.h"
 

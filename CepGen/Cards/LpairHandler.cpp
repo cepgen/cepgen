@@ -1,18 +1,16 @@
 #include "CepGen/Cards/LpairHandler.h"
-#include "CepGen/Cards/CardsHandler.h"
 
-#include "CepGen/Modules/EventModifierHandler.h"
-#include "CepGen/Modules/ExportModuleHandler.h"
+#include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Modules/ProcessesFactory.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Integrator.h"
 
 #include "CepGen/Utils/String.h"
-
-#include "CepGen/Processes/ProcessesHandler.h"
-
-#include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/GluonGrid.h"
@@ -66,7 +64,7 @@ namespace cepgen
         kmr::GluonGrid::get( kmr_grid_path_.c_str() );
 
       //--- parse the process name
-      params_.setProcess( proc::ProcessesHandler::get().build( proc_name_, *proc_params_ ) );
+      params_.setProcess( proc::ProcessesFactory::get().build( proc_name_, *proc_params_ ) );
 
       const Limits lim_xi{ xi_min_, xi_max_ };
       if ( lim_xi.valid() )
@@ -88,7 +86,7 @@ namespace cepgen
       else if ( str_fun_ == (int)strfun::Type::MSTWgrid )
         sf_params
           .set<std::string>( "gridPath", mstw_grid_path_ );
-      params_.kinematics.structure_functions = strfun::StructureFunctionsHandler::get().build( sf_params );
+      params_.kinematics.structure_functions = strfun::StructureFunctionsFactory::get().build( sf_params );
 
       //--- parse the integration algorithm name
       if ( integr_type_ == "plain" )
@@ -103,7 +101,7 @@ namespace cepgen
       //--- parse the hadronisation algorithm name
       if ( !evt_mod_name_.empty() )
         for ( const auto& mod : utils::split( evt_mod_name_, ',' ) ) {
-          params_.addModifier( cepgen::EventModifierHandler::get().build( mod, ParametersList() ) );
+          params_.addModifier( cepgen::EventModifierFactory::get().build( mod, ParametersList() ) );
           (*params_.eventModifiersSequence().rbegin())->setParameters( params_ );
         }
 
@@ -113,7 +111,7 @@ namespace cepgen
         if ( !out_file_name_.empty() )
           outm.set<std::string>( "filename", out_file_name_ );
         for ( const auto& mod : utils::split( out_mod_name_, ',' ) )
-          params_.setOutputModule( cepgen::io::ExportModuleHandler::get().build( mod, outm ) );
+          params_.setOutputModule( cepgen::io::ExportModuleFactory::get().build( mod, outm ) );
       }
 
       //--- check if we are dealing with heavy ions for incoming states

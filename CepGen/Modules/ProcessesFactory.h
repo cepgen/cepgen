@@ -1,5 +1,5 @@
-#ifndef CepGen_Processes_ProcessesHandler_h
-#define CepGen_Processes_ProcessesHandler_h
+#ifndef CepGen_Processes_ProcessesFactory_h
+#define CepGen_Processes_ProcessesFactory_h
 
 #include "CepGen/Modules/Process.h"
 #include "CepGen/Core/ModuleFactory.h"
@@ -11,7 +11,7 @@
 #define REGISTER_PROCESS( name, obj ) \
   namespace cepgen { namespace proc { \
     struct BUILDERNM( obj ) { \
-      BUILDERNM( obj )() { ProcessesHandler::get().registerModule<obj>( name ); } }; \
+      BUILDERNM( obj )() { ProcessesFactory::get().registerModule<obj>( name ); } }; \
     static BUILDERNM( obj ) g ## obj; \
   } }
 /// Declare a Fortran process function name
@@ -33,7 +33,7 @@ namespace cepgen
   namespace proc
   {
     /// A processes factory
-    typedef ModuleFactory<Process> ProcessesHandler;
+    typedef ModuleFactory<Process> ProcessesFactory;
   }
 }
 

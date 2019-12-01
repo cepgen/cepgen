@@ -1,4 +1,4 @@
-#include "CepGen/Processes/ProcessesHandler.h"
+#include "CepGen/Modules/ProcessesFactory.h"
 #include "CepGen/Processes/FortranKTProcess.h"
 
 //=============================================================================

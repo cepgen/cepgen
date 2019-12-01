@@ -1,4 +1,5 @@
 #include "CepGen/StructureFunctions/SuriYennie.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include "CepGen/Core/Exception.h"
 

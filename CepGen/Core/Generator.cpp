@@ -11,7 +11,7 @@
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
 
-#include "CepGen/Processes/ProcessesHandler.h"
+#include "CepGen/Modules/ProcessesFactory.h"
 #include "CepGen/Event/Event.h"
 
 #include <fstream>
@@ -63,7 +63,7 @@ namespace cepgen
     result_ = result_error_ = -1.;
     {
       std::ostringstream os;
-      for ( const auto& pr : cepgen::proc::ProcessesHandler::get().modules() )
+      for ( const auto& pr : cepgen::proc::ProcessesFactory::get().modules() )
         os << " " << pr;
       CG_DEBUG( "Generator:clearRun" ) << "Processes handled:" << os.str() << ".";
     }

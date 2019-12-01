@@ -1,15 +1,14 @@
 #include "CepGen/Cards/PythonHandler.h"
-#include "CepGen/Cards/CardsHandler.h"
 
-#include "CepGen/Modules/EventModifierHandler.h"
-#include "CepGen/Modules/ExportModuleHandler.h"
+#include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Modules/ProcessesFactory.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Integrator.h"
-
-#include "CepGen/Processes/ProcessesHandler.h"
-#include "CepGen/StructureFunctions/StructureFunctions.h"
 
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/TamingFunction.h"
@@ -118,7 +117,7 @@ namespace cepgen
 
       //--- process mode
       params_.kinematics.mode = (KinematicsMode)proc_params.get<int>( "mode", (int)KinematicsMode::invalid );
-      params_.setProcess( cepgen::proc::ProcessesHandler::get().build( proc_name, proc_params ) );
+      params_.setProcess( cepgen::proc::ProcessesFactory::get().build( proc_name, proc_params ) );
 
       //--- process kinematics
       PyObject* pin_kinematics = element( process, "inKinematics" ); // borrowed
@@ -212,7 +211,7 @@ namespace cepgen
       //--- structure functions set for incoming beams
       PyObject* psf = element( kin, "structureFunctions" ); // borrowed
       if ( psf )
-        params_.kinematics.structure_functions = strfun::StructureFunctionsHandler::get().build( get<ParametersList>( psf ) );
+        params_.kinematics.structure_functions = strfun::StructureFunctionsFactory::get().build( get<ParametersList>( psf ) );
       //--- types of parton fluxes for kt-factorisation
       std::vector<int> kt_fluxes;
       fillParameter( kin, "ktFluxes", kt_fluxes );
@@ -386,7 +385,7 @@ namespace cepgen
         throwPythonError( "Event modification algorithm name is required!" );
       std::string mod_name = get<std::string>( pname );
 
-      params_.addModifier( cepgen::EventModifierHandler::get().build( mod_name, get<ParametersList>( mod ) ) );
+      params_.addModifier( cepgen::EventModifierFactory::get().build( mod_name, get<ParametersList>( mod ) ) );
 
       auto h = params_.eventModifiersSequence().rbegin()->get();
       h->setParameters( params_ );
@@ -416,7 +415,7 @@ namespace cepgen
       PyObject* pname = element( pout, ParametersList::MODULE_NAME ); // borrowed
       if ( !pname )
         throwPythonError( "Output module name is required!" );
-      params_.setOutputModule( io::ExportModuleHandler::get().build( get<std::string>( pname ), get<ParametersList>( pout ) ) );
+      params_.setOutputModule( io::ExportModuleFactory::get().build( get<std::string>( pname ), get<ParametersList>( pout ) ) );
     }
 
     void

@@ -3,7 +3,7 @@
 
 #include <Python.h>
 
-#include "Handler.h"
+#include "CepGen/Cards/Handler.h"
 
 namespace cepgen
 {

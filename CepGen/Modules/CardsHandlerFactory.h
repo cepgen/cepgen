@@ -1,5 +1,5 @@
-#ifndef CepGen_Cards_CardsHandler_h
-#define CepGen_Cards_CardsHandler_h
+#ifndef CepGen_Modules_CardsHandlerFactory_h
+#define CepGen_Modules_CardsHandlerFactory_h
 
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/ModuleFactory.h"
@@ -10,7 +10,7 @@
 #define REGISTER_CARD_HANDLER( name, obj ) \
   namespace cepgen { namespace card { \
     struct BUILDERNM( obj ) { \
-      BUILDERNM( obj )() { CardsHandler::get().registerModule<obj>( name ); } }; \
+      BUILDERNM( obj )() { CardsHandlerFactory::get().registerModule<obj>( name ); } }; \
     static BUILDERNM( obj ) g ## obj; \
   } }
 
@@ -19,7 +19,7 @@ namespace cepgen
   namespace card
   {
     /// A cards handler factory
-    typedef ModuleFactory<Handler> CardsHandler;
+    typedef ModuleFactory<Handler> CardsHandlerFactory;
   }
 }
 
