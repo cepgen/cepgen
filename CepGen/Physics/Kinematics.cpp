@@ -4,7 +4,7 @@
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/Momentum.h"
 
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/String.h"

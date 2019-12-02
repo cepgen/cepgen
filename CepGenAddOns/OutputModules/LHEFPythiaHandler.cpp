@@ -1,4 +1,6 @@
 #include "CepGenAddOns/EventInterfaces/PythiaEventInterface.h"
+
+#include "CepGen/Modules/ExportModule.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 
 #include "CepGen/Event/Event.h"

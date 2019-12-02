@@ -1,4 +1,6 @@
+#include "CepGen/Modules/ExportModule.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
+
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Event/Event.h"

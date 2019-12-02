@@ -1,4 +1,5 @@
 #include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Processes/FortranKTProcess.h"
 
 #include "CepGen/Physics/KTFlux.h"

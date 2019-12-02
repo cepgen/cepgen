@@ -1,7 +1,6 @@
 #ifndef CepGen_Modules_CardsHandlerFactory_h
 #define CepGen_Modules_CardsHandlerFactory_h
 
-#include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/ModuleFactory.h"
 
 /** \file */
@@ -18,6 +17,7 @@ namespace cepgen
 {
   namespace card
   {
+    class Handler;
     /// A cards handler factory
     typedef ModuleFactory<Handler> CardsHandlerFactory;
   }

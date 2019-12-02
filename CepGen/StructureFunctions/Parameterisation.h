@@ -1,5 +1,5 @@
-#ifndef CepGen_StructureFunctions_StructureFunctions_h
-#define CepGen_StructureFunctions_StructureFunctions_h
+#ifndef CepGen_StructureFunctions_Parameterisation_h
+#define CepGen_StructureFunctions_Parameterisation_h
 
 #include "CepGen/Core/ParametersList.h"
 

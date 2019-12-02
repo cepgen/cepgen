@@ -1,3 +1,4 @@
+#include "CepGen/Modules/ExportModule.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 
 #include "CepGen/Parameters.h"

@@ -2,7 +2,6 @@
 #define CepGen_Modules_EventModifierFactory_h
 
 #include "CepGen/Core/ModuleFactory.h"
-#include "CepGen/Modules/EventModifier.h"
 
 #define REGISTER_MODIFIER( name, obj ) \
   namespace cepgen { namespace hadr { \
@@ -13,6 +12,7 @@
 
 namespace cepgen
 {
+  class EventModifier;
   /// A event modifier algorithms factory
   typedef ModuleFactory<EventModifier> EventModifierFactory;
 }

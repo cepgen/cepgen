@@ -4,7 +4,7 @@
 
 #include "CepGen/Event/Event.h"
 
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 
 #include "CepGen/Physics/Constants.h"

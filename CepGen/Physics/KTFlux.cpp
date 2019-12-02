@@ -5,7 +5,7 @@
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/GluonGrid.h"
 
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 
 #include "CepGen/Core/Exception.h"
 

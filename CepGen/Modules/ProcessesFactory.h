@@ -1,9 +1,7 @@
 #ifndef CepGen_Processes_ProcessesFactory_h
 #define CepGen_Processes_ProcessesFactory_h
 
-#include "CepGen/Modules/Process.h"
 #include "CepGen/Core/ModuleFactory.h"
-#include "CepGen/Core/ParametersList.h"
 
 /** \file */
 
@@ -32,6 +30,7 @@ namespace cepgen
 {
   namespace proc
   {
+    class Process;
     /// A processes factory
     typedef ModuleFactory<Process> ProcessesFactory;
   }

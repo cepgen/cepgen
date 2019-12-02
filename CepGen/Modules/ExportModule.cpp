@@ -3,7 +3,7 @@
 
 #include "CepGen/Core/ParametersList.h"
 
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Physics/Constants.h"
 
 #include "CepGen/Utils/String.h"

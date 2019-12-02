@@ -2,7 +2,6 @@
 #define CepGen_Core_ExportFactory_h
 
 #include "CepGen/Core/ModuleFactory.h"
-#include "CepGen/Modules/ExportModule.h"
 
 #define REGISTER_IO_MODULE( name, obj ) \
   namespace cepgen { namespace io { \
@@ -15,6 +14,7 @@ namespace cepgen
 {
   namespace io
   {
+    class ExportModule;
     /// An output modules factory
     typedef ModuleFactory<ExportModule> ExportModuleFactory;
   }

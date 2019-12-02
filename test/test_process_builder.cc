@@ -1,4 +1,5 @@
 #include "CepGen/Modules/ProcessesFactory.h"
+#include "CepGen/Modules/Process.h"
 
 #include "CepGen/Generator.h"
 #include "CepGen/Event/Event.h"

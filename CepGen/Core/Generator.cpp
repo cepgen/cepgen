@@ -12,6 +12,8 @@
 #include "CepGen/Physics/PDG.h"
 
 #include "CepGen/Modules/ProcessesFactory.h"
+#include "CepGen/Modules/Process.h"
+
 #include "CepGen/Event/Event.h"
 
 #include <fstream>

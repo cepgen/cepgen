@@ -1,8 +1,7 @@
 #include "CepGen/Generator.h"
 
 #include "CepGen/Core/Exception.h"
-
-#include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Cards/Handler.h"
 
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/AbortHandler.h"
@@ -69,8 +68,14 @@ int main( int argc, char* argv[] )
   return 0;
 }
 
+#include "CepGen/Modules/CardsHandlerFactory.h"
+
 #include "CepGen/Modules/ProcessesFactory.h"
+#include "CepGen/Modules/Process.h"
+
 #include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 
