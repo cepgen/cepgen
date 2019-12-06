@@ -75,6 +75,7 @@ int main( int argc, char* argv[] )
 
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
 
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
@@ -108,6 +109,13 @@ void list_modules()
       cout << ">>> none found <<<" << endl;
     for ( const auto& mod : cepgen::strfun::StructureFunctionsFactory::get().modules() )
       cout << mod << " > " << (cepgen::strfun::Type)mod << "\n";
+  }
+  {
+    cout << sep_mid << "Cross section ratios definitions\n" << sep_mid;
+    if ( cepgen::sigrat::SigmaRatiosFactory::get().modules().empty() )
+      cout << ">>> none found <<<" << endl;
+    for ( const auto& mod : cepgen::sigrat::SigmaRatiosFactory::get().modules() )
+      cout << mod << " > " << (cepgen::sigrat::Type)mod << "\n";
   }
   {
     cout << sep_mid << "Event modification modules definitions\n" << sep_mid;
