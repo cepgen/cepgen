@@ -57,6 +57,7 @@ namespace cepgen
         std::unique_ptr<Pythia8::CepGenEvent> cg_evt_;
         const bool correct_central_;
         const bool debug_lhef_;
+        const std::string output_config_;
         bool res_decay_;
         bool enable_hadr_;
         unsigned short offset_;
@@ -68,6 +69,7 @@ namespace cepgen
       pythia_( new Pythia8::Pythia ), cg_evt_( new Pythia8::CepGenEvent ),
       correct_central_( plist.get<bool>( "correctCentralSystem", false ) ),
       debug_lhef_( plist.get<bool>( "debugLHEF", false ) ),
+      output_config_( plist.get<std::string>( "outputConfig", "last_pythia_config.cmd" ) ),
       res_decay_( true ), enable_hadr_( false ),
       offset_( 0 ), first_evt_( true )
     {}
@@ -90,7 +92,8 @@ namespace cepgen
 
     Pythia8Hadroniser::~Pythia8Hadroniser()
     {
-      pythia_->settings.writeFile( "last_pythia_config.cmd", false );
+      if ( !output_config_.empty() )
+        pythia_->settings.writeFile( output_config_, false );
       if ( debug_lhef_ )
         cg_evt_->closeLHEF( true );
     }
