@@ -24,7 +24,15 @@ namespace cepgen
     {
       std::string s_filename = file;
       s_filename = s_filename.substr( 0, s_filename.find_last_of( "." ) ); // remove the extension
-      std::replace( s_filename.begin(), s_filename.end(), '/', '.' ); // replace all '/' by '.'
+      auto path = utils::split( s_filename, '/' );
+      if ( path.size() > 1 ) {
+        s_filename = *path.rbegin();
+        path.pop_back();
+        auto dir = utils::merge( path, "/" );
+        CG_DEBUG( "PythonHandler" )
+          << "Adding \"" << dir << "\" to the default search paths.";
+        setenv( "PYTHONPATH", dir.c_str(), 1 );
+      }
       CG_DEBUG( "PythonHandler" )
         << "Python path: " << s_filename;
       return s_filename;
