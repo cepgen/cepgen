@@ -5,7 +5,6 @@
 
 namespace cepgen
 {
-  class ParametersList;
   namespace proc
   {
     /**

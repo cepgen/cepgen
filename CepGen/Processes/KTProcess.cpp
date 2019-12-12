@@ -21,7 +21,7 @@ namespace cepgen
                           const std::string& description,
                           const std::array<pdgid_t,2>& partons,
                           const std::vector<pdgid_t>& central ) :
-      Process( params, name, description+" (kT-factorisation approach)" ),
+      Process( params, name, description+" (kT-factor.)" ),
       qt1_( 0. ), phi_qt1_( 0. ), qt2_( 0. ), phi_qt2_( 0. ),
       kIntermediateParts( partons ), kProducedParts( central )
     {}
@@ -138,12 +138,12 @@ namespace cepgen
       // register the outgoing remnants' variables
       //============================================================================================
 
-      MX_ = event_->getOneByRole( Particle::IncomingBeam1 ).mass();
-      MY_ = event_->getOneByRole( Particle::IncomingBeam2 ).mass();
+      mX2_ = event_->getOneByRole( Particle::IncomingBeam1 ).mass2();
+      mY2_ = event_->getOneByRole( Particle::IncomingBeam2 ).mass2();
       if ( kin_.mode == KinematicsMode::InelasticElastic || kin_.mode == KinematicsMode::InelasticInelastic )
-        defineVariable( MX_, Mapping::square, kin_.cuts.remnants.mass_single, { 1.07, 1000. }, "Positive z proton remnant mass" );
+        defineVariable( mX2_, Mapping::square, kin_.cuts.remnants.mass_single, { 1.07, 1000. }, "Positive z proton remnant squared mass" );
       if ( kin_.mode == KinematicsMode::ElasticInelastic || kin_.mode == KinematicsMode::InelasticInelastic )
-        defineVariable( MY_, Mapping::square, kin_.cuts.remnants.mass_single, { 1.07, 1000. }, "Negative z proton remnant mass" );
+        defineVariable( mY2_, Mapping::square, kin_.cuts.remnants.mass_single, { 1.07, 1000. }, "Negative z proton remnant squared mass" );
     }
 
     double
@@ -180,18 +180,18 @@ namespace cepgen
         case KinematicsMode::ElasticInelastic:
           op1.setStatus( Particle::Status::FinalState );
           op2.setStatus( Particle::Status::Unfragmented );
-          op2.setMass( MY_ );
+          op2.setMass( sqrt( mY2_ ) );
           break;
         case KinematicsMode::InelasticElastic:
           op1.setStatus( Particle::Status::Unfragmented );
-          op1.setMass( MX_ );
+          op1.setMass( sqrt( mX2_ ) );
           op2.setStatus( Particle::Status::FinalState );
           break;
         case KinematicsMode::InelasticInelastic:
           op1.setStatus( Particle::Status::Unfragmented );
-          op1.setMass( MX_ );
+          op1.setMass( sqrt( mX2_ ) );
           op2.setStatus( Particle::Status::Unfragmented );
-          op2.setMass( MY_ );
+          op2.setMass( sqrt( mY2_ ) );
           break;
         default: {
           throw CG_FATAL( "KTProcess" )

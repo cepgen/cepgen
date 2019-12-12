@@ -1,5 +1,5 @@
-#ifndef CepGen_Core_Process_h
-#define CepGen_Core_Process_h
+#ifndef CepGen_Modules_Process_h
+#define CepGen_Modules_Process_h
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Kinematics.h"
@@ -159,7 +159,7 @@ namespace cepgen
 
       protected:
         /// Numerical limits for sanity comparisons
-        static constexpr double NUM_LIMITS = 1.e-6;
+        static constexpr double NUM_LIMITS = 1.e-4;
         /// Handler to a variable mapped by this process
         struct MappingVariable
         {
@@ -184,17 +184,17 @@ namespace cepgen
         double s_;
         /// \f$\sqrt s\f$, centre of mass energy of the incoming particles' system (in GeV)
         double sqs_;
-        /// Invariant mass of the first proton-like outgoing particle (or remnant)
-        double MX_;
-        /// Invariant mass of the second proton-like outgoing particle (or remnant)
-        double MY_;
-        /// \f$m_1^2\f$, squared mass of the first proton-like incoming particle
-        double w1_;
-        /// \f$m_2^2\f$, squared mass of the second proton-like incoming particle
-        double w2_;
-        /// Virtuality of the first incoming photon
+        /// first incoming beam particle squared mass
+        double mA2_;
+        /// second incoming beam particle squared mass
+        double mB2_;
+        /// First diffractive state squared mass
+        double mX2_;
+        /// Second diffractive state squared mass
+        double mY2_;
+        /// First parton virtuality
         double t1_;
-        /// Virtuality of the second incoming photon
+        /// Second parton virtuality
         double t2_;
 
         /// Set of cuts to apply on the final phase space

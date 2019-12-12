@@ -16,9 +16,9 @@ namespace cepgen
     Process::Process( const ParametersList& params, const std::string& name, const std::string& description, bool has_event ) :
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       params_( params ), name_( name ), description_( description ),
-      first_run( true ), base_jacobian_( 0. ),
+      first_run( true ), base_jacobian_( 1. ),
       s_( -1. ), sqs_( -1. ),
-      MX_( -1. ), MY_( -1. ), w1_( -1. ), w2_( -1. ),
+      mA2_( -1. ), mB2_( -1. ), mX2_( -1. ), mY2_( -1. ),
       t1_( -1. ), t2_( -1. ),
       is_point_set_( false )
     {
@@ -31,7 +31,7 @@ namespace cepgen
       params_( proc.params_ ), name_( proc.name_ ), description_( proc.description_ ),
       first_run( proc.first_run ), base_jacobian_( proc.base_jacobian_ ),
       s_( proc.s_ ), sqs_( proc.sqs_ ),
-      MX_( proc.MX_ ), MY_( proc.MY_ ), w1_( proc.w1_ ), w2_( proc.w2_ ),
+      mA2_( proc.mA2_ ), mB2_( proc.mB2_ ), mX2_( proc.mX2_ ), mY2_( proc.mY2_ ),
       t1_( -1. ), t2_( -1. ), kin_( proc.kin_ ),
       is_point_set_( false )
     {
@@ -47,7 +47,8 @@ namespace cepgen
       first_run = proc.first_run;
       base_jacobian_ = proc.base_jacobian_;
       s_ = proc.s_; sqs_ = proc.sqs_;
-      MX_ = proc.MX_; MY_ = proc.MY_; w1_ = proc.w1_; w2_ = proc.w2_;
+      mA2_ = proc.mA2_; mB2_ = proc.mB2_;
+      mX2_ = proc.mX2_; mY2_ = proc.mY2_;
       kin_ = proc.kin_;
       if ( proc.event_ )
         event_.reset( new Event( *proc.event_.get() ) );
@@ -67,42 +68,47 @@ namespace cepgen
     }
 
     Process&
-    Process::defineVariable( double& out, const Mapping& type, Limits in, const Limits& default_limits, const std::string& description )
+    Process::defineVariable( double& out, const Mapping& type, Limits in, const Limits& default_limits, const std::string& descr )
     {
       if ( !in.valid() ) {
         CG_DEBUG( "Process:defineVariable" )
-          << description << " could not be retrieved from the user configuration!\n\t"
+          << descr << " could not be retrieved from the user configuration!\n\t"
           << "Setting it to the default value: " << default_limits << ".";
         in = default_limits;
       }
 
       Limits lim = in;
       out = 0.; // reset the variable
-      if ( type == Mapping::exponential )
-        lim = { // limits already stored as log(limits)
-          std::max( log( lim.min() ), -10. ),
-          std::min( log( lim.max() ), +10. )
-        };
-      mapped_variables_.emplace_back(
-        MappingVariable{ description.empty() ? utils::format( "var%z", mapped_variables_.size() ) : description.c_str(),
-          lim, out, type, (unsigned short)mapped_variables_.size() } );
-      point_coord_.emplace_back( 0. );
+      double jacob_weight = 1.; // initialise the local weight for this variable
+
       switch ( type ) {
-        case Mapping::square:
         case Mapping::linear:
-          base_jacobian_ *= lim.range();
+          jacob_weight = lim.range();
           break;
-        case Mapping::exponential:
-          base_jacobian_ *= in.range(); // use the linear version
+        case Mapping::square:
+          jacob_weight = 2.*lim.range();
           break;
+        case Mapping::exponential: {
+          lim = { // limits already stored as log(limits)
+            ( !lim.hasMin() || lim.min() == 0. ) ? -10. : std::max( log( lim.min() ), -10. ),
+            ( !lim.hasMax() || lim.max() == 0. ) ? +10. : std::min( log( lim.max() ), +10. )
+          };
+          jacob_weight = lim.range(); // use the linear version
+        } break;
         case Mapping::power_law:
-          base_jacobian_ *= log( lim.max()/lim.min() );
+          jacob_weight = log( lim.max()/lim.min() );
           break;
       }
+      mapped_variables_.emplace_back(
+        MappingVariable{ descr.empty() ? utils::format( "var%z", mapped_variables_.size() ) : descr,
+          lim, out, type, (unsigned short)mapped_variables_.size() } );
+      point_coord_.emplace_back( 0. );
+      base_jacobian_ *= jacob_weight;
       CG_DEBUG( "Process:defineVariable" )
-        << description << " has been mapped to variable " << mapped_variables_.size() << ".\n\t"
-        << "Allowed range for integration: " << in << ".\n\t"
-        << "Variable integration mode: " << type << ".";
+        << descr << " has been mapped to variable " << mapped_variables_.size() << ".\n\t"
+        << "Allowed range for integration: " << in << " (" << lim << ").\n\t"
+        << "Variable integration mode: " << type << ".\n\t"
+        << "Weight in the Jacobian: " << jacob_weight << ".";
       return *this;
     }
 
@@ -130,7 +136,7 @@ namespace cepgen
             var.value = exp( var.limits.x( xv ) ); // transform back to linear
           } break;
           case Mapping::square: {
-            var.value = var.limits.x( xv );
+            var.value = pow( var.limits.x( xv ), 2 );
           } break;
           case Mapping::power_law: {
             const double y = var.limits.max()/var.limits.min();
@@ -140,14 +146,26 @@ namespace cepgen
       }
       if ( CG_LOG_MATCH( "Process:vars", debugInsideLoop ) ) {
         std::ostringstream oss;
+        std::string sep;
         for ( const auto& var : mapped_variables_ ) {
-          oss
+          double value = 0.;
+          switch ( var.type ) {
+            case Mapping::linear:
+            case Mapping::exponential:
+            case Mapping::power_law:
+              value = var.value;
+              break;
+            case Mapping::square:
+              value = sqrt( var.value );
+              break;
+          }
+          oss << sep
             << "variable " << var.index
             << std::left << std::setw( 60 )
             << ( !var.description.empty() ? " ("+var.description+")" : "" )
             << " in range " << std::setw( 20 ) << var.limits
-            << " has value " << std::setw( 20 ) << var.value
-            << " (x=" << x( var.index ) << std::right << ")\n\t";
+            << " has value " << std::setw( 20 ) << value
+            << " (x=" << x( var.index ) << std::right << ")", sep = "\n\t";
         }
         CG_DEBUG_LOOP( "Process:vars" ) << oss.str();
       }
@@ -161,16 +179,15 @@ namespace cepgen
         if ( !var.limits.valid() )
           continue;
         switch ( var.type ) {
-          case Mapping::linear: break;
-          case Mapping::exponential: {
+          case Mapping::linear:
+            break;
+          case Mapping::square:
+            jac *= sqrt( var.value );
+            break;
+          case Mapping::exponential:
+          case Mapping::power_law:
             jac *= var.value;
-          } break;
-          case Mapping::square: {
-            jac *= 2.*var.value;
-          } break;
-          case Mapping::power_law: {
-            jac *= var.value;
-          } break;
+            break;
         }
       }
       return jac;
@@ -215,8 +232,8 @@ namespace cepgen
 
       //--- compute the integrand
       const double me_integrand = computeWeight();
-      if ( me_integrand <= 0. )
-        return 0.;
+      //if ( me_integrand <= 0. )
+      //  return 0.;
 
       //--- generate auxiliary (x-dependent) part of the Jacobian for
       //    this phase space point.
@@ -264,8 +281,8 @@ namespace cepgen
       s_ = ( p1+p2 ).mass2();
       sqs_ = sqrt( s_ );
 
-      w1_ = p1.mass2();
-      w2_ = p2.mass2();
+      mA2_ = p1.mass2();
+      mB2_ = p2.mass2();
 
       CG_DEBUG( "Process" ) << "Kinematics successfully set!\n"
         << "  √s = " << sqs_*1.e-3 << " TeV,\n"

@@ -83,8 +83,8 @@ namespace cepgen
 
       //--- variables mapping
 
-      x_tmp_.resize( 3 );
       std::vector<std::string> var_names = { "u_t1", "u_t2", "u_s2" };
+      x_tmp_.resize( var_names.size() );
       for ( size_t i = 0; i < x_tmp_.size(); ++i )
         defineVariable( x_tmp_[i], Mapping::linear, { 0., 1. }, { 0., 1. }, var_names[i] );
 
@@ -96,15 +96,15 @@ namespace cepgen
       //--- first outgoing beam particle or remnant mass
       if ( kin_.mode == KinematicsMode::InelasticElastic
         || kin_.mode == KinematicsMode::InelasticInelastic )
-        defineVariable( masses_.MX2, Mapping::power_law, wx_lim_ob1, wx_lim_ob1, "MX2" );
+        defineVariable( mX2_, Mapping::power_law, wx_lim_ob1, wx_lim_ob1, "MX2" );
       else
-        masses_.MX2 = pow( p1_lab_.mass(), 2 );
+        mX2_ = p1_lab_.mass2();
       //--- second outgoing beam particle or remnant mass
       if ( kin_.mode == KinematicsMode::ElasticInelastic
         || kin_.mode == KinematicsMode::InelasticInelastic )
-        defineVariable( masses_.MY2, Mapping::power_law, wx_lim_ob2, wx_lim_ob2, "MY2" );
+        defineVariable( mY2_, Mapping::power_law, wx_lim_ob2, wx_lim_ob2, "MY2" );
       else
-        masses_.MY2 = pow( p2_lab_.mass(), 2 );
+        mY2_ = p2_lab_.mass2();
     }
 
     //---------------------------------------------------------------------------------------------
@@ -118,30 +118,30 @@ namespace cepgen
       jacobian_ = 0.;
 
       // sig1 = sigma and sig2 = sigma' in [1]
-      const double sig = mc4_+MY_;
+      const double sig = mc4_+sqrt( mY2_ );
       double sig1 = sig*sig;
 
       CG_DEBUG_LOOP( "GamGamLL" )
         << "mc4 = " << mc4_ << "\n\t"
         << "sig1 = " << sig1 << ".";
 
-      const double d6 = w4_-masses_.MY2;
+      const double d6 = w4_-mY2_;
 
       CG_DEBUG_LOOP( "GamGamLL" )
-        << "w1 = " << w1_ << "\n\t"
-        << "w2 = " << w2_ << "\n\t"
-        << "w3 = " << masses_.MX2 << "\n\t"
+        << "w1 = " << mA2_ << "\n\t"
+        << "w2 = " << mB2_ << "\n\t"
+        << "w3 = " << mX2_ << "\n\t"
         << "w4 = " << w4_ << "\n\t"
-        << "w5 = " << masses_.MY2;;
+        << "w5 = " << mY2_;
 
       CG_DEBUG_LOOP( "GamGamLL" )
         << "w31 = " << masses_.w31 << "\n\t"
         << "w52 = " << masses_.w52 << "\n\t"
-        << "w12 = " << masses_.w12;;
+        << "w12 = " << masses_.w12;
 
       const double ss = s_+masses_.w12;
 
-      const double rl1 = ss*ss-4.*w1_*s_; // lambda(s, m1**2, m2**2)
+      const double rl1 = ss*ss-4.*mA2_*s_; // lambda(s, m1**2, m2**2)
       if ( rl1 <= 0. ) {
         CG_WARNING( "GamGamLL" ) << "rl1 = " << rl1 << " <= 0";
         return false;
@@ -151,7 +151,7 @@ namespace cepgen
       s2_ = 0.;
       double ds2 = 0.;
       if ( n_opt_ == 0 ) {
-        const double smax = s_+masses_.MX2-2.*MX_*sqs_;
+        const double smax = s_+mX2_-2.*sqrt( mX2_ )*sqs_;
         const auto s2 = map( x(2), Limits( sig1, smax ), "s2" );
         s2_ = s2.first;
         ds2 = s2.second;
@@ -161,16 +161,16 @@ namespace cepgen
       CG_DEBUG_LOOP( "GamGamLL" )
         << "s2 = " << s2_;
 
-      const double sp = s_+masses_.MX2-sig1, d3 = sig1-w2_;
-      const double rl2 = sp*sp-4.*s_*masses_.MX2; // lambda(s, m3**2, sigma)
+      const double sp = s_+mX2_-sig1, d3 = sig1-mB2_;
+      const double rl2 = sp*sp-4.*s_*mX2_; // lambda(s, m3**2, sigma)
       if ( rl2 <= 0. ) {
         CG_DEBUG( "GamGamLL" ) << "rl2 = " << rl2 << " <= 0";
         return false;
       }
       const double sl2 = sqrt( rl2 );
 
-      double t1_max = w1_+masses_.MX2-( ss*sp+sl1_*sl2 )/( 2.*s_ ); // definition from eq. (A.4) in [1]
-      double t1_min = ( masses_.w31*d3+( d3-masses_.w31 )*( d3*w1_-masses_.w31*w2_ )/s_ )/t1_max; // definition from eq. (A.5) in [1]
+      double t1_max = mA2_+mX2_-( ss*sp+sl1_*sl2 )/( 2.*s_ ); // definition from eq. (A.4) in [1]
+      double t1_min = ( masses_.w31*d3+( d3-masses_.w31 )*( d3*mA2_-masses_.w31*mB2_ )/s_ )/t1_max; // definition from eq. (A.5) in [1]
 
       // FIXME dropped in CDF version
       if ( t1_max > -kin_.cuts.initial.q2.min() ) {
@@ -198,9 +198,10 @@ namespace cepgen
 
       dd4_ = w4_-t1_;
 
-      const double d8 = t1_-w2_, t13 = t1_-w1_-masses_.MX2;
+      const double d8 = t1_-mB2_;
+      const double t13 = t1_-mA2_-mX2_;
 
-      sa1_ = -pow( t1_-masses_.w31, 2 )/4.+w1_*t1_;
+      sa1_ = -pow( t1_-masses_.w31, 2 )/4.+mA2_*t1_;
       if ( sa1_ >= 0. ) {
         CG_WARNING( "GamGamLL" ) << "sa1_ = " << sa1_ << " >= 0";
         return false;
@@ -212,11 +213,11 @@ namespace cepgen
       s2_lim.min() = sig*sig;
       // one computes splus and (s2x=s2max)
       double splus;
-      if ( w1_ != 0. ) {
-        const double inv_w1 = 1./w1_;
-        const double sb = masses_.MX2 + 0.5 * ( s_*( t1_-masses_.w31 )+masses_.w12*t13 )*inv_w1,
-                     sd = sl1_*sl3*inv_w1,
-                     se =( s_*( t1_*( s_+t13-w2_ )-w2_*masses_.w31 )+masses_.MX2*( masses_.w12*d8+w2_*masses_.MX2 ) )*inv_w1;
+      if ( mA2_ != 0. ) {
+        const double inv_w1 = 1./mA2_;
+        const double sb = mX2_ + 0.5 * ( s_*( t1_-masses_.w31 )+masses_.w12*t13 )*inv_w1;
+        const double sd = sl1_*sl3*inv_w1;
+        const double se =( s_*( t1_*( s_+t13-mB2_ )-mB2_*masses_.w31 )+mX2_*( masses_.w12*d8+mB2_*mX2_ ) )*inv_w1;
 
         if ( fabs( ( sb-sd )/sd ) >= 1. ) {
           splus = sb-sd;
@@ -228,7 +229,7 @@ namespace cepgen
         }
       }
       else { // 3
-        s2_lim.max() = ( s_*( t1_*( s_+d8-masses_.MX2 )-w2_*masses_.MX2 )+w2_*masses_.MX2*( w2_+masses_.MX2-t1_ ) )/( ss*t13 );
+        s2_lim.max() = ( s_*( t1_*( s_+d8-mX2_ )-mB2_*mX2_ )+mB2_*mX2_*( mB2_+mX2_-t1_ ) )/( ss*t13 );
         splus = s2_lim.min();
       }
       // 4
@@ -245,7 +246,7 @@ namespace cepgen
         }
         const auto s2 = n_opt_ < -1
           ? map( x(2), s2_lim, "s2" )
-          : mapla( t1_, w2_, x(2), s2_lim ); // n_opt_==-1
+          : mapla( t1_, mB2_, x(2), s2_lim ); // n_opt_==-1
         s2_ = s2.first;
         ds2 = s2.second;
         s2x = s2_;
@@ -259,7 +260,7 @@ namespace cepgen
       // 7
       const double r1 = s2x-d8, r2 = s2x-d6;
 
-      const double rl4 = ( r1*r1-4.*w2_*s2x )*( r2*r2-4.*masses_.MY2*s2x );
+      const double rl4 = ( r1*r1-4.*mB2_*s2x )*( r2*r2-4.*mY2_*s2x );
       if ( rl4 <= 0. ) {
         CG_DEBUG_LOOP( "GamGamLL" )
           << "rl4 = " << rl4 << " <= 0";
@@ -268,8 +269,8 @@ namespace cepgen
       const double sl4 = sqrt( rl4 );
 
       // t2max, t2min definitions from eq. (A.12) and (A.13) in [1]
-      const double t2_max = w2_+masses_.MY2-( r1*r2+sl4 )/s2x * 0.5,
-                   t2_min = ( masses_.w52*dd4_+( dd4_-masses_.w52 )*( dd4_*w2_-masses_.w52*t1_ )/s2x )/t2_max;
+      const double t2_max = mB2_+mY2_-( r1*r2+sl4 )/s2x * 0.5,
+                   t2_min = ( masses_.w52*dd4_+( dd4_-masses_.w52 )*( dd4_*mB2_-masses_.w52*t1_ )/s2x )/t2_max;
 
       // t2, the second photon propagator, is defined here
       const auto t2 = map( x(1), Limits( t2_min, t2_max ), "t2" );
@@ -285,12 +286,12 @@ namespace cepgen
         << "tau= " << tau << "\n\t"
         << "r1-4 = " << r1 << ", " << r2 << "," << r3 << ", " << r4;
 
-      const double b = r3*r4-2.*( t1_+w2_ )*t2_;
-      const double c = t2_*d6*d8+( d6-d8 )*( d6*w2_-d8*masses_.MY2 );
+      const double b = r3*r4-2.*( t1_+mB2_ )*t2_;
+      const double c = t2_*d6*d8+( d6-d8 )*( d6*mB2_-d8*mY2_ );
 
-      const double t25 = t2_-w2_-masses_.MY2;
+      const double t25 = t2_-mB2_-mY2_;
 
-      sa2_ = -0.25 * r4*r4 + w2_*t2_;
+      sa2_ = -0.25 * r4*r4 + mB2_*t2_;
       if ( sa2_ >= 0. ) {
         CG_WARNING( "GamGamLL" ) <<  "sa2_ = " << sa2_ << " >= 0";
         return false;
@@ -304,8 +305,8 @@ namespace cepgen
         return false;
       }
 
-      const double sl7 = 2.*sqrt( -g4_ ),
-                   sl5 = sl6*sl7;
+      const double sl7 = 2.*sqrt( -g4_ );
+      const double sl5 = sl6*sl7;
 
       double s2p;
       if ( fabs( ( sl5-b )/sl5 ) >= 1. ) {
@@ -320,14 +321,14 @@ namespace cepgen
       if ( n_opt_ >= 1 ) {
         const auto s2 = n_opt_ > 1
           ? map( x(2), s2_lim, "s2" )
-          : mapla( t1_, w2_, x(2), s2_lim );
+          : mapla( t1_, mB2_, x(2), s2_lim );
         s2_ = s2.first;
         ds2 = s2.second;
       }
 
       const double ap = -0.25*pow( s2_+d8, 2 )+s2_*t1_;
 
-      dd1_ = 0.25 * ( s2_-s2_lim.max() ) * ( w1_ != 0. ? ( splus-s2_ ) * w1_ : ss * t13 );
+      dd1_ = 0.25 * ( s2_-s2_lim.max() ) * ( mA2_ != 0. ? ( splus-s2_ ) * mA2_ : ss * t13 );
       dd2_ = 0.25 * ( s2_-s2_lim.min() ) * ( s2p-s2_ ) * t2_;
 
       CG_DEBUG_LOOP( "GamGamLL" )
@@ -339,9 +340,9 @@ namespace cepgen
 
       const double yy4 = cos( theta4_ );
       const double dd = dd1_*dd2_;
-      p12_ = 0.5 * ( s_-w1_-w2_ );
-      const double st = s2_-t1_-w2_;
-      const double delb = ( 2.*w2_*r3+r4*st )*( 4.*p12_*t1_-( t1_-masses_.w31 )*st )/( 16.*ap );
+      p12_ = 0.5 * ( s_-mA2_-mB2_ );
+      const double st = s2_-t1_-mB2_;
+      const double delb = ( 2.*mB2_*r3+r4*st )*( 4.*p12_*t1_-( t1_-masses_.w31 )*st )/( 16.*ap );
 
       CG_DEBUG_LOOP( "GamGamLL" )
         << std::scientific
@@ -355,7 +356,7 @@ namespace cepgen
       }
 
       delta_ = delb - yy4*st*sqrt( dd )/ ap * 0.5;
-      s1_ = t2_+w1_+( 2.*p12_*r3-4.*delta_ )/st;
+      s1_ = t2_+mA2_+( 2.*p12_*r3-4.*delta_ )/st;
 
       if ( ap >= 0. ) {
         CG_WARNING( "GamGamLL:pickin" ) <<  "ap = " << ap << " >= 0";
@@ -371,17 +372,17 @@ namespace cepgen
       gram_ = ( 1.-yy4*yy4 )*dd/ap;
 
       p13_ = -0.5 * t13;
-      p14_ =  0.5 * ( tau+s1_-masses_.MX2 );
+      p14_ =  0.5 * ( tau+s1_-mX2_ );
       p25_ = -0.5 * t25;
 
-      p1k2_ = 0.5 * ( s1_-t2_-w1_ );
+      p1k2_ = 0.5 * ( s1_-t2_-mA2_ );
       p2k1_ = 0.5 * st;
 
-      if ( w2_ != 0. ) {
-        const double inv_w2 = 1./w2_;
-        const double sbb = 0.5 * ( s_*( t2_-masses_.w52 )-masses_.w12*t25 )*inv_w2 + masses_.MY2,
+      if ( mB2_ != 0. ) {
+        const double inv_w2 = 1./mB2_;
+        const double sbb = 0.5 * ( s_*( t2_-masses_.w52 )-masses_.w12*t25 )*inv_w2 + mY2_,
                      sdd = 0.5 * sl1_*sl6*inv_w2,
-                     see = ( s_*( t2_*( s_+t25-w1_ )-w1_*masses_.w52 )+masses_.MY2*( w1_*masses_.MY2-masses_.w12*( t2_-w1_ ) ) )*inv_w2;
+                     see = ( s_*( t2_*( s_+t25-mA2_ )-mA2_*masses_.w52 )+mY2_*( mA2_*mY2_-masses_.w12*( t2_-mA2_ ) ) )*inv_w2;
         double s1m = 0., s1p = 0.;
         if ( sbb/sdd >= 0. ) {
           s1p = sbb+sdd;
@@ -391,18 +392,18 @@ namespace cepgen
           s1m = sbb-sdd;
           s1p = see/s1m;
         } // 12
-        dd3_ = -0.25 * w2_*( s1p-s1_ )*( s1m-s1_ ); // 13
+        dd3_ = -0.25 * mB2_*( s1p-s1_ )*( s1m-s1_ ); // 13
       }
       else { // 14
-        const double s1p = ( s_*( t2_*( s_-masses_.MY2+t2_-w1_ )-w1_*masses_.MY2 )+w1_*masses_.MY2*( w1_+masses_.MY2-t2_ ) )/( t25*( s_-masses_.w12 ) );
+        const double s1p = ( s_*( t2_*( s_-mY2_+t2_-mA2_ )-mA2_*mY2_ )+mA2_*mY2_*( mA2_+mY2_-t2_ ) )/( t25*( s_-masses_.w12 ) );
         dd3_ = -0.25 * t25*( s_-masses_.w12 )*( s1p-s1_ );
       }
       // 15
       //const double acc3 = (s1p-s1_)/(s1p+s1_);
 
-      const double ssb = t2_+0.5 * w1_-r3*( masses_.w31-t1_ )/t1_,
+      const double ssb = t2_+0.5 * mA2_-r3*( masses_.w31-t1_ )/t1_,
                    ssd = sl3*sl7/t1_,
-                   sse = ( t2_-w1_ )*( w4_-masses_.MX2 )+( t2_-w4_+masses_.w31 )*( ( t2_-w1_)*masses_.MX2-(w4_-masses_.MX2)*w1_)/t1_;
+                   sse = ( t2_-mA2_ )*( w4_-mX2_ )+( t2_-w4_+masses_.w31 )*( ( t2_-mA2_ )*mX2_-( w4_-mX2_ )*mA2_ )/t1_;
 
       double s1pp, s1pm;
       if ( ssb/ssd >= 0. ) {
@@ -416,8 +417,8 @@ namespace cepgen
       // 17
       dd4_ = -0.25 * t1_*( s1_-s1pp )*( s1_-s1pm );
       //const double acc4 = ( s1_-s1pm )/( s1_+s1pm );
-      dd5_ = dd1_+dd3_+( ( p12_*( t1_-masses_.w31 )*0.5-w1_*p2k1_ )*( p2k1_*( t2_-masses_.w52 )-w2_*r3 )
-                        -delta_*( 2.*p12_*p2k1_-w2_*( t1_-masses_.w31 ) ) ) / p2k1_;
+      dd5_ = dd1_+dd3_+( ( p12_*( t1_-masses_.w31 )*0.5-mA2_*p2k1_ )*( p2k1_*( t2_-masses_.w52 )-mB2_*r3 )
+                        -delta_*( 2.*p12_*p2k1_-mB2_*( t1_-masses_.w31 ) ) ) / p2k1_;
 
       return true;
     }
@@ -447,8 +448,8 @@ namespace cepgen
 
       p_cm_ = re*sl1_;
 
-      de3_ = re*( s2_-masses_.MX2+masses_.w12 );
-      de5_ = re*( s1_-masses_.MY2-masses_.w12 );
+      de3_ = re*( s2_-mX2_+masses_.w12 );
+      de5_ = re*( s1_-mY2_-masses_.w12 );
 
       // Final state energies
       const double ep3 = ep1_-de3_,
@@ -477,8 +478,8 @@ namespace cepgen
         << "Outgoing particles' energy: E3 = " << ep3 << "\n\t"
         << "                            E5 = " << ep5;
 
-      const double pp3 = sqrt( ep3*ep3-masses_.MX2 ), pt3 = sqrt( dd1_/s_ )/p_cm_;
-      const double pp5 = sqrt( ep5*ep5-masses_.MY2 ), pt5 = sqrt( dd3_/s_ )/p_cm_;
+      const double pp3 = sqrt( ep3*ep3-mX2_ ), pt3 = sqrt( dd1_/s_ )/p_cm_;
+      const double pp5 = sqrt( ep5*ep5-mY2_ ), pt5 = sqrt( dd3_/s_ )/p_cm_;
 
       const double sin_theta3 = pt3/pp3, sin_theta5 = pt5/pp5;
 
@@ -599,26 +600,25 @@ namespace cepgen
     double
     GamGamLL::computeWeight()
     {
-      MX_ = sqrt( masses_.MX2 );
-      MY_ = sqrt( masses_.MY2 );
       // Mass difference between the first outgoing particle
       // and the first incoming particle
-      masses_.w31 = masses_.MX2-w1_;
+      masses_.w31 = mX2_-mA2_;
       // Mass difference between the second outgoing particle
       // and the second incoming particle
-      masses_.w52 = masses_.MY2-w2_;
+      masses_.w52 = mY2_-mB2_;
       // Mass difference between the two incoming particles
-      masses_.w12 = w1_-w2_;
+      masses_.w12 = mA2_-mB2_;
       // Mass difference between the central two-photons system
       // and the second outgoing particle
 
+      const double mx = sqrt( mX2_ ), my = sqrt( mY2_ );
       CG_DEBUG_LOOP( "GamGamLL" )
         << "sqrt(s) = " << sqs_ << " GeV\n\t"
-        << "m(X1) = " << MX_ << " GeV\t"
-        << "m(X2) = " << MY_ << " GeV";
+        << "m(X1) = " << mx << " GeV\t"
+        << "m(X2) = " << my << " GeV";
 
       // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or wmax if specified)
-      w_limits_.max() = std::min( pow( sqs_-MX_-MY_, 2 ), w_limits_.max() );
+      w_limits_.max() = std::min( pow( sqs_-mx-my, 2 ), w_limits_.max() );
 
       // compute the two-photon energy for this point
       mc4_ = sqrt( w4_ );
@@ -650,8 +650,8 @@ namespace cepgen
 
       // Let the most obscure part of this code begin...
 
-      const double e1mp1 = w1_ / ( ep1_+p_cm_ ),
-                   e3mp3 = masses_.MX2 / ( p3_lab_.energy()+p3_lab_.p() );
+      const double e1mp1 = mA2_ / ( ep1_+p_cm_ );
+      const double e3mp3 = mX2_ / ( p3_lab_.energy()+p3_lab_.p() );
 
       const double al3 = pow( sin( p3_lab_.theta() ), 2 )/( 1.+( p3_lab_.theta() ) );
 
@@ -764,11 +764,11 @@ namespace cepgen
 
       const double c1 = p3_lab_.pt() * ( qve.px()*sin_phi3  - qve.py()*cos_phi3   ),
                    c2 = p3_lab_.pt() * ( qve.pz()*ep1_ - qve.energy() *p_cm_ ),
-                   c3 = ( masses_.w31*ep1_*ep1_ + 2.*w1_*de3_*ep1_ - w1_*de3_*de3_ + p3_lab_.pt2()*ep1_*ep1_ ) / ( p3_lab_.energy()*p_cm_ + p3_lab_.pz()*ep1_ );
+                   c3 = ( masses_.w31*ep1_*ep1_ + 2.*mA2_*de3_*ep1_ - mA2_*de3_*de3_ + p3_lab_.pt2()*ep1_*ep1_ ) / ( p3_lab_.energy()*p_cm_ + p3_lab_.pz()*ep1_ );
 
       const double b1 = p5_lab_.pt() * ( qve.px()*sin_phi5  - qve.py()*cos_phi5   ),
                    b2 = p5_lab_.pt() * ( qve.pz()*ep2_ + qve.energy() *p_cm_ ),
-                   b3 = ( masses_.w52*ep2_*ep2_ + 2.*w2_*de5_*ep2_ - w2_*de5_*de5_ + p5_lab_.pt2()*ep2_*ep2_ ) / ( ep2_*p5_lab_.pz() - p5_lab_.energy()*p_cm_ );
+                   b3 = ( masses_.w52*ep2_*ep2_ + 2.*mB2_*de5_*ep2_ - mB2_*de5_*de5_ + p5_lab_.pt2()*ep2_*ep2_ ) / ( ep2_*p5_lab_.pz() - p5_lab_.energy()*p_cm_ );
 
       const double r12 =  c2*sin_phi3 + qve.py()*c3,
                    r13 = -c2*cos_phi3 - qve.px()*c3;
@@ -778,8 +778,8 @@ namespace cepgen
 
       epsi_ = p12_*c1*b1 + r12*r22 + r13*r23;
 
-      g5_ = w1_*c1*c1 + r12*r12 + r13*r13;
-      g6_ = w2_*b1*b1 + r22*r22 + r23*r23;
+      g5_ = mA2_*c1*c1 + r12*r12 + r13*r13;
+      g6_ = mB2_*b1*b1 + r22*r22 + r23*r23;
 
       const double pt3 = p3_lab_.pt(), pt5 = p5_lab_.pt();
       a5_ = -( qve.px()*cos_phi3 + qve.py()*sin_phi3 )*pt3*p1k2_
@@ -818,11 +818,11 @@ namespace cepgen
       if ( kin_.cuts.remnants.mass_single.valid() ) {
         if ( ( kin_.mode == KinematicsMode::InelasticElastic
             || kin_.mode == KinematicsMode::InelasticInelastic )
-          && !kin_.cuts.remnants.mass_single.passes( MX_ ) )
+          && !kin_.cuts.remnants.mass_single.passes( mx ) )
           return 0.;
         if ( ( kin_.mode == KinematicsMode::ElasticInelastic
             || kin_.mode == KinematicsMode::InelasticInelastic )
-          && !kin_.cuts.remnants.mass_single.passes( MY_ ) )
+          && !kin_.cuts.remnants.mass_single.passes( my ) )
           return 0.;
       }
 
@@ -942,7 +942,7 @@ namespace cepgen
         case KinematicsMode::InelasticElastic:
         case KinematicsMode::InelasticInelastic:
           op1.setStatus( Particle::Status::Unfragmented ); // fragmenting remnants
-          op1.setMass( MX_ );
+          op1.setMass( sqrt( mX2_ ) );
           break;
       }
 
@@ -958,7 +958,7 @@ namespace cepgen
         case KinematicsMode::ElasticInelastic:
         case KinematicsMode::InelasticInelastic:
           op2.setStatus( Particle::Status::Unfragmented ); // fragmenting remnants
-          op2.setMass( MY_ );
+          op2.setMass( sqrt( mY2_ ) );
           break;
       }
 
@@ -1003,15 +1003,15 @@ namespace cepgen
         } break;
         case KinematicsMode::ElasticInelastic: {
           fp1 = FormFactors::protonElastic( -t1_ );
-          fp2 = FormFactors::protonInelastic( -t2_, w2_, masses_.MY2, *kin_.structure_functions );
+          fp2 = FormFactors::protonInelastic( -t2_, mB2_, mY2_, *kin_.structure_functions );
         } break;
         case KinematicsMode::InelasticElastic: {
-          fp1 = FormFactors::protonInelastic( -t1_, w1_, masses_.MX2, *kin_.structure_functions );
+          fp1 = FormFactors::protonInelastic( -t1_, mA2_, mX2_, *kin_.structure_functions );
           fp2 = FormFactors::protonElastic( -t2_ );
         } break;
         case KinematicsMode::InelasticInelastic: {
-          fp1 = FormFactors::protonInelastic( -t1_, w1_, masses_.MX2, *kin_.structure_functions );
-          fp2 = FormFactors::protonInelastic( -t2_, w2_, masses_.MY2, *kin_.structure_functions );
+          fp1 = FormFactors::protonInelastic( -t1_, mA2_, mX2_, *kin_.structure_functions );
+          fp2 = FormFactors::protonInelastic( -t2_, mB2_, mY2_, *kin_.structure_functions );
         } break;
       }
 

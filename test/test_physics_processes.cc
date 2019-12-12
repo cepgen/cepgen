@@ -65,16 +65,18 @@ int main( int argc, char* argv[] )
   };
   vector<Test> tests;
 
-  ifstream cfg( cfg_filename );
-  string line;
-  while ( !cfg.eof() ) {
-    getline( cfg, line );
-    if ( line[0] == '#' || line.empty() )
-      continue;
-    stringstream os( line );
-    Test test;
-    os >> test.filename >> test.ref_cs >> test.err_ref_cs;
-    tests.emplace_back( test );
+  { // parse the various tests to be performed
+    ifstream cfg( cfg_filename );
+    string line;
+    while ( !cfg.eof() ) {
+      getline( cfg, line );
+      if ( line[0] == '#' || line.empty() )
+        continue;
+      stringstream os( line );
+      Test test;
+      os >> test.filename >> test.ref_cs >> test.err_ref_cs;
+      tests.emplace_back( test );
+    }
   }
 
   CG_INFO( "main" )
@@ -122,10 +124,11 @@ int main( int argc, char* argv[] )
         passed_tests.emplace_back( test_res );
       else
         failed_tests.emplace_back( test_res );
+      num_tests++;
       if ( debug )
-        progress->update( num_tests++ );
+        progress->update( num_tests );
       CG_LOG( "main" )
-        << "Test " << passed_tests.size() << "/" << tests.size() << " finished. "
+        << "Test " << num_tests << "/" << tests.size() << " finished. "
         << "Success: " << utils::yesno( success ) << ".";
     }
   } catch ( const Exception& e ) {}

@@ -37,7 +37,7 @@ namespace cepgen
         void operator<<( const Event& ) override;
 
       private:
-        std::unique_ptr<TFile> file_;
+        TFile file_;
         std::vector<std::pair<std::string,TH1*> > hists1d_;
         std::vector<std::pair<std::vector<std::string>,TH2*> > hists2d_;
         std::vector<std::pair<std::vector<std::string>,TH3*> > hists3d_;
@@ -52,7 +52,7 @@ namespace cepgen
 
     ROOTHistsHandler::ROOTHistsHandler( const ParametersList& params ) :
       ExportModule( params ),
-      file_( TFile::Open( params.get<std::string>( "filename", "output.root" ).c_str(), "recreate" ) ),
+      file_( params.get<std::string>( "filename", "output.root" ).c_str(), "recreate" ),
       variables_( params.get<ParametersList>( "variables" ) ),
       xsec_( 1. )
     {
@@ -70,7 +70,8 @@ namespace cepgen
         min_x = hvars.get<double>( "low", min_x ), max_x = hvars.get<double>( "high", max_x );
         const bool profile = hvars.get<bool>( "profile", false );
         if ( vars.size() == 1 ) { // 1D histogram
-          const auto title = utils::format( "%s;%s;d#sigma/d(%s) (pb/bin)", key.c_str(), key.c_str(), key.c_str() );
+          const auto title = hvars.get<std::string>( "title",
+            utils::format( "%s;%s;d#sigma/d(%s) (pb/bin)", key.c_str(), key.c_str(), key.c_str() ) );
           hists1d_.emplace_back( std::make_pair( key,
             new TH1D( key.c_str(), title.c_str(), nbins_x, min_x, max_x ) ) );
           CG_INFO( "ROOTHistsHandler" )
@@ -82,10 +83,11 @@ namespace cepgen
         const int nbins_y = hvars.get<int>( "nbinsY", 10 );
         const double min_y = hvars.get<double>( "lowY", 0. ), max_y = hvars.get<double>( "highY", 1. );
         if ( vars.size() == 2 ) { // 2D histogram / 1D profile
-          const auto title = utils::format( "(%s / %s) correlation;%s;%s;d^{2}#sigma/d(%s)/d(%s) (pb/bin)",
-            vars[0].c_str(), vars[1].c_str(),
-            vars[0].c_str(), vars[1].c_str(),
-            vars[0].c_str(), vars[1].c_str() );
+          const auto title = hvars.get<std::string>( "title",
+            utils::format( "(%s / %s) correlation;%s;%s;d^{2}#sigma/d(%s)/d(%s) (pb/bin)",
+              vars[0].c_str(), vars[1].c_str(),
+              vars[0].c_str(), vars[1].c_str(),
+              vars[0].c_str(), vars[1].c_str() ) );
           if ( profile )
             profiles1d_.emplace_back( std::make_pair( vars,
               new TProfile( key.c_str(), title.c_str(), nbins_x, min_x, max_x ) ) );
@@ -103,10 +105,11 @@ namespace cepgen
         const int nbins_z = hvars.get<int>( "nbinsZ", 10 );
         const double min_z = hvars.get<double>( "lowZ", 0. ), max_z = hvars.get<double>( "highZ", 1. );
         if ( vars.size() == 3 ) { // 3D histogram
-          const auto title = utils::format( "(%s / %s / %s) correlation;%s;%s;%s;d^{3}#sigma/d(%s)/d(%s)/d(%s) (pb/bin)",
-            vars[0].c_str(), vars[1].c_str(), vars[2].c_str(),
-            vars[0].c_str(), vars[1].c_str(), vars[2].c_str(),
-            vars[0].c_str(), vars[1].c_str(), vars[2].c_str() );
+          const auto title = hvars.get<std::string>( "title",
+            utils::format( "(%s / %s / %s) correlation;%s;%s;%s;d^{3}#sigma/d(%s)/d(%s)/d(%s) (pb/bin)",
+              vars[0].c_str(), vars[1].c_str(), vars[2].c_str(),
+              vars[0].c_str(), vars[1].c_str(), vars[2].c_str(),
+              vars[0].c_str(), vars[1].c_str(), vars[2].c_str() ) );
           if ( profile )
             profiles2d_.emplace_back( std::make_pair( vars,
               new TProfile2D( key.c_str(), title.c_str(), nbins_x, min_x, max_x, nbins_y, min_y, max_y ) ) );
@@ -139,7 +142,7 @@ namespace cepgen
       for ( const auto& hist : profiles2d_ )
         hist.second->Write( utils::merge( hist.first, "_vs_" ).c_str() );
       // ROOT and its sumptuous memory management disallows the "delete" here
-      file_->Close();
+      file_.Close();
     }
 
     void

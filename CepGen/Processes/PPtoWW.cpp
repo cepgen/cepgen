@@ -24,8 +24,6 @@ namespace cepgen
         enum class Polarisation { full = 0, LL = 1, LT = 2, TL = 3, TT = 4 };
 
       private:
-        const double mw_, mw2_;
-
         void prepareProcessKinematics() override;
         double computeCentralMatrixElement() const override;
 
@@ -34,6 +32,9 @@ namespace cepgen
 
         double amplitudeWW( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 ) const;
 
+        static constexpr double prefactor_ = pow( constants::G_EM, 4 );
+
+        const double mW_, mW2_;
         const int method_;
 
         std::vector<short> pol_w1_, pol_w2_;
@@ -42,7 +43,7 @@ namespace cepgen
 
     PPtoWW::PPtoWW( const ParametersList& params ) :
       Process2to4( params, "pptoww", "ɣɣ → W⁺W¯", { PDG::photon, PDG::photon }, PDG::W ),
-      mw_( PDG::get().mass( PDG::W ) ), mw2_( mw_*mw_ ),
+      mW_( PDG::get().mass( PDG::W ) ), mW2_( mW_*mW_ ),
       method_( params.get<int>( "method", 1 ) )
     {
       switch ( (Polarisation)params.get<int>( "polarisationStates", 0 ) ) {
@@ -83,22 +84,25 @@ namespace cepgen
     double
     PPtoWW::computeCentralMatrixElement() const
     {
-      //const double stild = s_/2.*(1+sqrt(1.-(4*pow(mp2_, 2))/s_*s_));
-      const double prefactor = constants::G_EM*constants::G_EM;
-
-      CG_DEBUG_LOOP( "PPtoWW" )
+      CG_DEBUG_LOOP( "PPtoWW:ME" )
         << "matrix element mode: " << method_ << ".";
 
+      double mat_el = prefactor_;
       switch ( method_ ) {
         case 0: { // on-shell matrix element
           // (Denner+Dittmaier+Schuster, + work in collaboration with C. Royon)
-          return prefactor * onShellME();
+          mat_el *= onShellME();
         } break;
         case 1: {
-          return prefactor * offShellME( phi_qt1_+phi_qt2_, phi_qt1_-phi_qt2_ );
+          mat_el *= offShellME( phi_qt1_+phi_qt2_, phi_qt1_-phi_qt2_ );
         } break;
       }
-      throw CG_FATAL( "PPtoFF" )
+      CG_DEBUG_LOOP( "PPtoWW:ME" )
+        << "prefactor: " << prefactor_ << "\n\t"
+        << "matrix element: " << mat_el << ".";
+      return mat_el;
+
+      throw CG_FATAL( "PPtoWW:ME" )
         << "Invalid ME calculation method (" << method_ << ")!";
     }
 
@@ -106,10 +110,9 @@ namespace cepgen
     PPtoWW::onShellME() const
     {
       const double s_hat = shat(), t_hat = that(), u_hat = uhat();
-      const double mw4 = mw2_*mw2_;
 
-      const double term1 = 2.*s_hat * ( 2.*s_hat+3.*mw2_ ) / ( 3.*( mw2_-t_hat )*( mw2_-u_hat ) );
-      const double term2 = 2.*s_hat*s_hat * ( s_hat*s_hat + 3.*mw4 ) / ( 3.*pow( mw2_-t_hat, 2 )*pow( mw2_-u_hat, 2 ) );
+      const double term1 = 2.*s_hat * ( 2.*s_hat+3.*mW2_ ) / ( 3.*( mW2_-t_hat )*( mW2_-u_hat ) );
+      const double term2 = 2.*s_hat*s_hat * ( s_hat*s_hat + 3.*mW2_*mW2_ ) / ( 3.*pow( mW2_-t_hat, 2 )*pow( mW2_-u_hat, 2 ) );
 
       return 6.*( 1.-term1+term2 );
     }
@@ -138,11 +141,11 @@ namespace cepgen
     PPtoWW::amplitudeWW( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 ) const
     {
       //--- first compute some kinematic variables
-      const double cos_theta = ( that-uhat ) / shat / sqrt( 1.+1.e-10-4.*mw2_/shat ),
+      const double cos_theta = ( that-uhat ) / shat / sqrt( 1.+1.e-10-4.*mW2_/shat ),
                    cos_theta2 = cos_theta*cos_theta;
       const double sin_theta2 = 1.-cos_theta2,
                    sin_theta = sqrt( sin_theta2 );
-      const double beta = sqrt( 1.-4.*mw2_/shat ), beta2 = beta*beta;
+      const double beta = sqrt( 1.-4.*mW2_/shat ), beta2 = beta*beta;
       const double inv_gamma = sqrt( 1.-beta2 ), gamma = 1./inv_gamma,
                    inv_gamma2 = inv_gamma*inv_gamma;
       const double invA = 1./( 1.-beta2*cos_theta2 );
@@ -164,7 +167,9 @@ namespace cepgen
                           +( 1.+lam1*lam2*lam3*lam4 )*( 3.+lam1*lam2 )
                           +2.*( lam1-lam2 )*( lam3-lam4 )*cos_theta
                           +( 1.-lam1*lam2 )*( 1.-lam3*lam4 )*cos_theta2 );
-      return 0.;
+
+      throw CG_FATAL( "PPtoWW:ampl" ) << "Invalid helicities mixing:"
+        << " (" << lam1 << "/" << lam2 << "/" << lam3 << "/" << lam4 << ").";
     }
   }
 }

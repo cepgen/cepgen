@@ -14,7 +14,7 @@ namespace cepgen
   const double KTFluxParameters::kMinKTFlux = 1.e-20;
 
   double
-  ktFlux( const KTFlux& type, double x, double kt2, strfun::Parameterisation& sf, double mx )
+  ktFlux( const KTFlux& type, double x, double kt2, strfun::Parameterisation& sf, double mx2 )
   {
     double flux = 0.;
     const double& mp = PDG::get().mass( PDG::proton ), mp2 = mp*mp;
@@ -27,7 +27,7 @@ namespace cepgen
         flux = constants::ALPHA_EM*M_1_PI/( 1.-x )/q2*( ( 1.-x )*( 1.-q2min/q2 )*ff.FE + 0.25*x2*ff.FM );
       } break;
       case KTFlux::P_Photon_Inelastic_Budnev: {
-        const double mx2 = mx*mx, x2 = x*x;
+        const double x2 = x*x;
         const double q2min = ( x2*mp2+x*( mx2-mp2 ) )/( 1.-x ), q2 = q2min + kt2/( 1.-x );
         const double denom = 1./( q2+mx2-mp2 );
         const double xbj = denom*q2;
@@ -39,7 +39,7 @@ namespace cepgen
         flux = constants::ALPHA_EM*M_1_PI*( 1.-x )/q2*( f_D+0.5*x2*f_C );
       } break;
       case KTFlux::P_Gluon_KMR: {
-        flux = kmr::GluonGrid::get()( log10( x ), log10( kt2 ), 2.*log10( mx ) );
+        flux = kmr::GluonGrid::get()( log10( x ), log10( kt2 ), log10( mx2 ) );
       } break;
       default:
         throw CG_FATAL( "GenericKTProcess:flux" ) << "Invalid flux type: " << type;

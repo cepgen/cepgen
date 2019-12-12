@@ -34,49 +34,48 @@ namespace cepgen
         void setCrossSection( double, double ) override;
 
       private:
-        std::unique_ptr<TFile> file_;
+        TFile file_;
         const bool compress_;
-        std::unique_ptr<ROOT::CepGenRun> run_tree_;
-        std::unique_ptr<ROOT::CepGenEvent> evt_tree_;
+        ROOT::CepGenRun run_tree_;
+        ROOT::CepGenEvent evt_tree_;
     };
 
     ROOTTreeHandler::ROOTTreeHandler( const ParametersList& params ) :
       ExportModule( params ),
-      file_( TFile::Open( params.get<std::string>( "filename", "output.root" ).c_str(), "recreate" ) ),
-      compress_( params.get<bool>( "compress", false ) ),
-      run_tree_( new ROOT::CepGenRun ), evt_tree_( new ROOT::CepGenEvent )
+      file_( params.get<std::string>( "filename", "output.root" ).c_str(), "recreate" ),
+      compress_( params.get<bool>( "compress", false ) )
     {
-      if ( !file_->IsOpen() )
+      if ( !file_.IsOpen() )
         throw CG_FATAL( "ROOTTreeHandler" ) << "Failed to create the output file!";
-      run_tree_->create();
-      evt_tree_->create();
+      run_tree_.create();
+      evt_tree_.create();
     }
 
     ROOTTreeHandler::~ROOTTreeHandler()
     {
-      run_tree_->fill();
-      file_->Write();
+      run_tree_.fill();
+      file_.Write();
     }
 
     void
     ROOTTreeHandler::initialise( const Parameters& params )
     {
-      run_tree_->litigious_events = 0;
-      run_tree_->sqrt_s = params.kinematics.sqrtS();
+      run_tree_.litigious_events = 0;
+      run_tree_.sqrt_s = params.kinematics.sqrtS();
     }
 
     void
     ROOTTreeHandler::operator<<( const Event& ev )
     {
-      evt_tree_->fill( ev, compress_ );
-      run_tree_->num_events += 1;
+      evt_tree_.fill( ev, compress_ );
+      run_tree_.num_events += 1;
     }
 
     void
     ROOTTreeHandler::setCrossSection( double xsect, double xsect_err )
     {
-      run_tree_->xsect = xsect;
-      run_tree_->errxsect = xsect_err;
+      run_tree_.xsect = xsect;
+      run_tree_.errxsect = xsect_err;
     }
   }
 }

@@ -169,8 +169,8 @@ namespace cepgen
       ktkin_.y2 = y2_;
       ktkin_.ptdiff = pt_diff_;
       ktkin_.phiptdiff = phi_pt_diff_;
-      ktkin_.m_x = MX_;
-      ktkin_.m_y = MY_;
+      ktkin_.m_x = sqrt( mX2_ );
+      ktkin_.m_y = sqrt( mY2_ );
 
       //--- compute the event weight
       return func_();

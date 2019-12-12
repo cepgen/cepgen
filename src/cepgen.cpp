@@ -89,43 +89,37 @@ void list_modules()
 
   cout << sep_big
     << "List of modules registered in the runtime database:\n";
-  {
-    cout << sep_big << "Steering cards parsers definitions\n" << sep_mid;
+  { cout << sep_big << "Steering cards parsers definitions\n" << sep_mid;
     if ( cepgen::card::CardsHandlerFactory::get().modules().empty() )
       cout << ">>> none found <<<" << endl;
     for ( const auto& mod : cepgen::card::CardsHandlerFactory::get().modules() )
       cout << "." << mod << " extension\n";
   }
-  {
-    cout << sep_mid << "Processes definitions\n" << sep_mid;
+  { cout << sep_mid << "Processes definitions\n" << sep_mid;
     if ( cepgen::proc::ProcessesFactory::get().modules().empty() )
       cout << ">>> none found <<<" << endl;
     for ( const auto& mod : cepgen::proc::ProcessesFactory::get().modules() )
       cout << mod << " > " << cepgen::proc::ProcessesFactory::get().build( mod )->description() << "\n";
   }
-  {
-    cout << sep_mid << "Structure functions definitions\n" << sep_mid;
+  { cout << sep_mid << "Structure functions definitions\n" << sep_mid;
     if ( cepgen::strfun::StructureFunctionsFactory::get().modules().empty() )
       cout << ">>> none found <<<" << endl;
     for ( const auto& mod : cepgen::strfun::StructureFunctionsFactory::get().modules() )
       cout << mod << " > " << (cepgen::strfun::Type)mod << "\n";
   }
-  {
-    cout << sep_mid << "Cross section ratios definitions\n" << sep_mid;
+  { cout << sep_mid << "Cross section ratios definitions\n" << sep_mid;
     if ( cepgen::sigrat::SigmaRatiosFactory::get().modules().empty() )
       cout << ">>> none found <<<" << endl;
     for ( const auto& mod : cepgen::sigrat::SigmaRatiosFactory::get().modules() )
       cout << mod << " > " << (cepgen::sigrat::Type)mod << "\n";
   }
-  {
-    cout << sep_mid << "Event modification modules definitions\n" << sep_mid;
+  { cout << sep_mid << "Event modification modules definitions\n" << sep_mid;
     if ( cepgen::EventModifierFactory::get().modules().empty() )
       cout << ">>> none found <<<" << endl;
     for ( const auto& mod : cepgen::EventModifierFactory::get().modules() )
       cout << mod << "\n";
   }
-  {
-    cout << sep_mid << "Export modules definitions\n" << sep_mid;
+  { cout << sep_mid << "Export modules definitions\n" << sep_mid;
     if ( cepgen::io::ExportModuleFactory::get().modules().empty() )
       cout << ">>> none found <<<" << endl;
     for ( const auto& mod : cepgen::io::ExportModuleFactory::get().modules() )

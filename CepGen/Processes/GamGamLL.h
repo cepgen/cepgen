@@ -88,10 +88,6 @@ namespace cepgen
         Limits w_limits_;
         struct Masses
         {
-          /// squared mass of the first proton-like outgoing particle
-          double MX2 = 0.;
-          /// squared mass of the second proton-like outgoing particle
-          double MY2 = 0.;
           /// squared mass of the outgoing leptons
           double Ml2 = 0.;
           /// \f$\delta_2=m_1^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
