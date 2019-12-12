@@ -68,8 +68,8 @@ namespace cepgen
 
       if ( method_ == Mode::offShell ) { // off-shell matrix element
         const auto& ofp = params.get<ParametersList>( "offShellParameters" );
-        p_mat1_ = ofp.get<int>( "mat1", 2 );
-        p_mat2_ = ofp.get<int>( "mat2", 0 );
+        p_mat1_ = ofp.get<int>( "mat1", 1 );
+        p_mat2_ = ofp.get<int>( "mat2", 1 );
         p_term_ll_ = ofp.get<int>( "termLL", 1 );
         p_term_lt_ = ofp.get<int>( "termLT", 1 );
         p_term_tt1_ = ofp.get<int>( "termTT", 1 );
@@ -201,10 +201,8 @@ namespace cepgen
       //=================================================================
 
       const double aux = 1./q1_.pt2()/q2_.pt2();
-      /*const double amat2_1 = aux2_1*2.*z1*q1_.pt2()*aux;
-      const double amat2_2 = aux2_2*2.*z2*q2_.pt2()*aux;*/
-      const double amat2_1 = aux2_1*2.*z1*aux * t1abs * t2abs/q2_.pt2();
-      const double amat2_2 = aux2_2*2.*z2*aux * t2abs;
+      const double amat2_1 = aux2_1*2.*z1*q1_.pt2()*aux;
+      const double amat2_2 = aux2_2*2.*z2*q2_.pt2()*aux;
 
       //=================================================================
       //     symmetrization
