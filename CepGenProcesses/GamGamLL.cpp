@@ -1,4 +1,5 @@
-#include "CepGen/Processes/GamGamLL.h"
+#include "CepGenProcesses/GamGamLL.h"
+
 #include "CepGen/Modules/ProcessesFactory.h"
 
 #include "CepGen/Event/Event.h"
