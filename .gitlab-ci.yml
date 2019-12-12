@@ -61,9 +61,9 @@ stages:
   script:
     - cd build
     - echo "VEGAS test"
-    - test/test_physics_processes -i vegas -q
+    - test/test_physics_processes -i vegas -q -cfg test/test_processes.cfg
     - echo "MISER test"
-    - test/test_physics_processes -i miser -q
+    - test/test_physics_processes -i miser -q -cfg test/test_processes.cfg
   when: on_success
   allow_failure: true
 
