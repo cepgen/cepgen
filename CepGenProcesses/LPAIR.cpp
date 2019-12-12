@@ -1,4 +1,4 @@
-#include "CepGenProcesses/GamGamLL.h"
+#include "CepGenProcesses/LPAIR.h"
 
 #include "CepGen/Modules/ProcessesFactory.h"
 
@@ -15,7 +15,7 @@ namespace cepgen
 {
   namespace proc
   {
-    GamGamLL::GamGamLL( const ParametersList& params ) :
+    LPAIR::LPAIR( const ParametersList& params ) :
       Process( params, "lpair", "pp → p(*) ( ɣɣ → l⁺l¯ ) p(*)" ),
       n_opt_( params.get<int>( "nopt", 0 ) ),
       pair_( params.get<ParticleProperties>( "pair" ).pdgid ),
@@ -42,7 +42,7 @@ namespace cepgen
     //---------------------------------------------------------------------------------------------
 
     void
-    GamGamLL::addEventContent()
+    LPAIR::addEventContent()
     {
       Process::setEventContent( {
         { Particle::IncomingBeam1, PDG::proton },
@@ -59,7 +59,7 @@ namespace cepgen
     //---------------------------------------------------------------------------------------------
 
     void
-    GamGamLL::prepareKinematics()
+    LPAIR::prepareKinematics()
     {
       masses_.Ml2 = (*event_)[Particle::CentralSystem][0].mass2();
 
@@ -70,7 +70,7 @@ namespace cepgen
       if ( !w_limits_.hasMin() )
         w_limits_.min() = 4.*masses_.Ml2;
 
-      CG_DEBUG_LOOP( "GamGamLL:setKinematics" )
+      CG_DEBUG_LOOP( "LPAIR:setKinematics" )
         << "w limits = " << w_limits_ << "\n\t"
         << "wmax/wmin = " << w_limits_.max()/w_limits_.min();
 
@@ -111,9 +111,9 @@ namespace cepgen
     //---------------------------------------------------------------------------------------------
 
     bool
-    GamGamLL::pickin()
+    LPAIR::pickin()
     {
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "Optimised mode? " << n_opt_;
 
       jacobian_ = 0.;
@@ -122,20 +122,20 @@ namespace cepgen
       const double sig = mc4_+sqrt( mY2_ );
       double sig1 = sig*sig;
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "mc4 = " << mc4_ << "\n\t"
         << "sig1 = " << sig1 << ".";
 
       const double d6 = w4_-mY2_;
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "w1 = " << mA2_ << "\n\t"
         << "w2 = " << mB2_ << "\n\t"
         << "w3 = " << mX2_ << "\n\t"
         << "w4 = " << w4_ << "\n\t"
         << "w5 = " << mY2_;
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "w31 = " << masses_.w31 << "\n\t"
         << "w52 = " << masses_.w52 << "\n\t"
         << "w12 = " << masses_.w12;
@@ -144,7 +144,7 @@ namespace cepgen
 
       const double rl1 = ss*ss-4.*mA2_*s_; // lambda(s, m1**2, m2**2)
       if ( rl1 <= 0. ) {
-        CG_WARNING( "GamGamLL" ) << "rl1 = " << rl1 << " <= 0";
+        CG_WARNING( "LPAIR" ) << "rl1 = " << rl1 << " <= 0";
         return false;
       }
       sl1_ = sqrt( rl1 );
@@ -159,13 +159,13 @@ namespace cepgen
         sig1 = s2_; //FIXME!!!!!!!!!!!!!!!!!!!!
       }
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "s2 = " << s2_;
 
       const double sp = s_+mX2_-sig1, d3 = sig1-mB2_;
       const double rl2 = sp*sp-4.*s_*mX2_; // lambda(s, m3**2, sigma)
       if ( rl2 <= 0. ) {
-        CG_DEBUG( "GamGamLL" ) << "rl2 = " << rl2 << " <= 0";
+        CG_DEBUG( "LPAIR" ) << "rl2 = " << rl2 << " <= 0";
         return false;
       }
       const double sl2 = sqrt( rl2 );
@@ -175,11 +175,11 @@ namespace cepgen
 
       // FIXME dropped in CDF version
       if ( t1_max > -kin_.cuts.initial.q2.min() ) {
-        CG_DEBUG( "GamGamLL" ) << "t1max = " << t1_max << " > -q2min = " << -kin_.cuts.initial.q2.min();
+        CG_DEBUG( "LPAIR" ) << "t1max = " << t1_max << " > -q2min = " << -kin_.cuts.initial.q2.min();
         return false;
       }
       if ( t1_min < -kin_.cuts.initial.q2.max() && kin_.cuts.initial.q2.hasMax() ) {
-        CG_DEBUG( "GamGamLL" ) << "t1min = " << t1_min << " < -q2max = " << -kin_.cuts.initial.q2.max();
+        CG_DEBUG( "LPAIR" ) << "t1min = " << t1_min << " < -q2max = " << -kin_.cuts.initial.q2.max();
         return false;
       }
       if ( t1_max < -kin_.cuts.initial.q2.max() && kin_.cuts.initial.q2.hasMax() )
@@ -193,7 +193,7 @@ namespace cepgen
       t1_ = t1.first;
       const double dt1 = -t1.second; // changes wrt mapt1 : dx->-dx
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "Definition of t1 = " << t1_ << " according to\n\t"
         << "(t1min, t1max) = (" << t1_min << ", " << t1_max << ")";
 
@@ -204,7 +204,7 @@ namespace cepgen
 
       sa1_ = -pow( t1_-masses_.w31, 2 )/4.+mA2_*t1_;
       if ( sa1_ >= 0. ) {
-        CG_WARNING( "GamGamLL" ) << "sa1_ = " << sa1_ << " >= 0";
+        CG_WARNING( "LPAIR" ) << "sa1_ = " << sa1_ << " >= 0";
         return false;
       }
 
@@ -236,13 +236,13 @@ namespace cepgen
       // 4
       double s2x = s2_lim.max();
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "s2x = s2max = " << s2x;
 
       if ( n_opt_ < 0 ) { // 5
         if ( splus > s2_lim.min() ) {
           s2_lim.min() = splus;
-          CG_DEBUG_LOOP( "GamGamLL" )
+          CG_DEBUG_LOOP( "LPAIR" )
             << "min(sig2) truncated to splus = " << splus;
         }
         const auto s2 = n_opt_ < -1
@@ -255,7 +255,7 @@ namespace cepgen
       else if ( n_opt_ == 0 )
         s2x = s2_; // 6
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "s2x = " << s2x;
 
       // 7
@@ -263,7 +263,7 @@ namespace cepgen
 
       const double rl4 = ( r1*r1-4.*mB2_*s2x )*( r2*r2-4.*mY2_*s2x );
       if ( rl4 <= 0. ) {
-        CG_DEBUG_LOOP( "GamGamLL" )
+        CG_DEBUG_LOOP( "LPAIR" )
           << "rl4 = " << rl4 << " <= 0";
         return false;
       }
@@ -283,7 +283,7 @@ namespace cepgen
                    r3 = dd4_-t2_,
                    r4 = masses_.w52-t2_;
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "tau= " << tau << "\n\t"
         << "r1-4 = " << r1 << ", " << r2 << "," << r3 << ", " << r4;
 
@@ -294,7 +294,7 @@ namespace cepgen
 
       sa2_ = -0.25 * r4*r4 + mB2_*t2_;
       if ( sa2_ >= 0. ) {
-        CG_WARNING( "GamGamLL" ) <<  "sa2_ = " << sa2_ << " >= 0";
+        CG_WARNING( "LPAIR" ) <<  "sa2_ = " << sa2_ << " >= 0";
         return false;
       }
 
@@ -302,7 +302,7 @@ namespace cepgen
 
       g4_ = -r3*r3/4.+t1_*t2_;
       if ( g4_ >= 0. ) {
-        CG_WARNING( "GamGamLL" ) << "g4_ = " << g4_ << " >= 0";
+        CG_WARNING( "LPAIR" ) << "g4_ = " << g4_ << " >= 0";
         return false;
       }
 
@@ -332,7 +332,7 @@ namespace cepgen
       dd1_ = 0.25 * ( s2_-s2_lim.max() ) * ( mA2_ != 0. ? ( splus-s2_ ) * mA2_ : ss * t13 );
       dd2_ = 0.25 * ( s2_-s2_lim.min() ) * ( s2p-s2_ ) * t2_;
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "t2      = " << t2_ << "\n\t"
         << "s2      = " << s2_ << "\n\t"
         << "s2p     = " << s2p << "\n\t"
@@ -345,14 +345,14 @@ namespace cepgen
       const double st = s2_-t1_-mB2_;
       const double delb = ( 2.*mB2_*r3+r4*st )*( 4.*p12_*t1_-( t1_-masses_.w31 )*st )/( 16.*ap );
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << std::scientific
         << "dd = " << dd << ", "
         << "dd1 = " << dd1_ << ", "
         << "dd2 = " << dd2_ << std::fixed;
 
       if ( dd <= 0. ) {
-        CG_WARNING( "GamGamLL:pickin" ) << "dd = " << dd << " <= 0.";
+        CG_WARNING( "LPAIR:pickin" ) << "dd = " << dd << " <= 0.";
         return false;
       }
 
@@ -360,13 +360,13 @@ namespace cepgen
       s1_ = t2_+mA2_+( 2.*p12_*r3-4.*delta_ )/st;
 
       if ( ap >= 0. ) {
-        CG_WARNING( "GamGamLL:pickin" ) <<  "ap = " << ap << " >= 0";
+        CG_WARNING( "LPAIR:pickin" ) <<  "ap = " << ap << " >= 0";
         return false;
       }
 
       jacobian_ = ds2 * dt1 * dt2 * 0.125 * 0.5/( sl1_*sqrt( -ap ) );
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "ds2=" << ds2 << ", dt1=" << dt1 << ", dt2=" << dt2 << "\n\t"
         << "Jacobian=" << std::scientific << jacobian_ << std::fixed;
 
@@ -427,10 +427,10 @@ namespace cepgen
     //---------------------------------------------------------------------------------------------
 
     bool
-    GamGamLL::orient()
+    LPAIR::orient()
     {
       if ( !pickin() || jacobian_ == 0. ) {
-        CG_DEBUG_LOOP( "GamGamLL" )
+        CG_DEBUG_LOOP( "LPAIR" )
           << "Pickin failed! Jacobian = " << jacobian_;
         return false;
       }
@@ -439,12 +439,12 @@ namespace cepgen
       ep1_ = re*( s_+masses_.w12 );
       ep2_ = re*( s_-masses_.w12 );
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << std::scientific
         << " re = " << re << "\n\t"
         << "w12 = " << masses_.w12
         << std::fixed;
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "Incoming particles' energy = " << ep1_ << ", " << ep2_;
 
       p_cm_ = re*sl1_;
@@ -458,7 +458,7 @@ namespace cepgen
       ec4_ = de3_+de5_;
 
       if ( ec4_ < mc4_ ) {
-        CG_WARNING( "GamGamLL" )
+        CG_WARNING( "LPAIR" )
           << "ec4_ = " << ec4_ << " < mc4_ = " << mc4_ << "\n\t"
           << "==> de3 = " << de3_ << ", de5 = " << de5_;
         return false;
@@ -468,11 +468,11 @@ namespace cepgen
       pc4_ = sqrt( ec4_*ec4_-mc4_*mc4_ );
 
       if ( pc4_ == 0. ) {
-        CG_WARNING( "GamGamLL" ) << "pzc4 is null and should not be...";
+        CG_WARNING( "LPAIR" ) << "pzc4 is null and should not be...";
         return false;
       }
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "Central system's energy: E4 = " << ec4_ << "\n\t"
         << "               momentum: p4 = " << pc4_ << "\n\t"
         << "         invariant mass: m4 = " << mc4_ << "\n\t"
@@ -484,19 +484,19 @@ namespace cepgen
 
       const double sin_theta3 = pt3/pp3, sin_theta5 = pt5/pp5;
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << std::scientific
         << "sin(theta3) = " << sin_theta3 << "\n\t"
         << "sin(theta5) = " << sin_theta5
         << std::fixed;
 
       if ( sin_theta3 > 1. ) {
-        CG_WARNING( "GamGamLL" )
+        CG_WARNING( "LPAIR" )
           << "sin(theta3) = " << sin_theta3 << " > 1";
         return false;
       }
       if ( sin_theta5 > 1. ) {
-        CG_WARNING( "GamGamLL" )
+        CG_WARNING( "LPAIR" )
           << "sin(theta5) = " << sin_theta5 << " > 1";
         return false;
       }
@@ -504,12 +504,12 @@ namespace cepgen
       const double ct3 = ( ep1_*ep3 < p13_ ? -1. : +1. )*sqrt( 1.-sin_theta3*sin_theta3 );
       const double ct5 = ( ep2_*ep5 > p25_ ? -1. : +1. )*sqrt( 1.-sin_theta5*sin_theta5 );
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "ct3 = " << ct3 << "\n\t"
         << "ct5 = " << ct5;
 
       if ( dd5_ < 0. ) {
-        CG_WARNING( "GamGamLL" )
+        CG_WARNING( "LPAIR" )
           <<  "dd5 = " << dd5_ << " < 0";
         return false;
       }
@@ -519,7 +519,7 @@ namespace cepgen
       sin_theta4_ = pt4_/pc4_;
 
       if ( sin_theta4_ > 1. ) {
-        CG_WARNING( "GamGamLL" )
+        CG_WARNING( "LPAIR" )
           << "st4 = " << sin_theta4_ << " > 1";
         return false;
       }
@@ -536,7 +536,7 @@ namespace cepgen
       else
         al4_ = sin_theta4_*sin_theta4_/be4_;
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "ct4 = " << cos_theta4_ << "\n\t"
         << "al4 = " << al4_ << ", be4 = " << be4_;
 
@@ -544,12 +544,12 @@ namespace cepgen
       const double sin_phi3 =  rr / pt3, sin_phi5 = -rr / pt5;
 
       if ( fabs( sin_phi3 ) > 1. ) {
-        CG_WARNING( "GamGamLL" )
+        CG_WARNING( "LPAIR" )
           << "sin(phi_3) = " << sin_phi3 << " while it must be in (" << Limits( -1., 1. ) << ")";
         return false;
       }
       if ( fabs( sin_phi5 ) > 1. ) {
-        CG_WARNING( "GamGamLL" )
+        CG_WARNING( "LPAIR" )
           << "sin(phi_5) = " << sin_phi5 << " while it must be in (" << Limits( -1., 1. ) << ")";
         return false;
       }
@@ -561,7 +561,7 @@ namespace cepgen
 
       const double a1 = p3_lab_.px()-p5_lab_.px();
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "Kinematic quantities\n\t"
         << "cos(theta3) = " << ct3 << "\t" << "sin(theta3) = " << sin_theta3 << "\n\t"
         << "cos( phi3 ) = " << cos_phi3 << "\t" << "sin( phi3 ) = " << sin_phi3 << "\n\t"
@@ -571,7 +571,7 @@ namespace cepgen
         << "a1 = " << a1;
 
       if ( fabs( pt4_+p3_lab_.px()+p5_lab_.px() ) < fabs( fabs( a1 )-pt4_ ) ) {
-        CG_DEBUG_LOOP( "GamGamLL" )
+        CG_DEBUG_LOOP( "LPAIR" )
           << "|pt4+pt3*cos(phi3)+pt5*cos(phi5)| < | |a1|-pt4 |\n\t"
           << "pt4 = " << pt4_ << "\t"
           << "pt5 = " << pt5 << "\n\t"
@@ -590,7 +590,7 @@ namespace cepgen
     //---------------------------------------------------------------------------------------------
 
     void
-    GamGamLL::beforeComputeWeight()
+    LPAIR::beforeComputeWeight()
     {
       ep1_ = (*event_)[Particle::IncomingBeam1][0].energy();
       ep2_ = (*event_)[Particle::IncomingBeam2][0].energy();
@@ -599,7 +599,7 @@ namespace cepgen
     //---------------------------------------------------------------------------------------------
 
     double
-    GamGamLL::computeWeight()
+    LPAIR::computeWeight()
     {
       // Mass difference between the first outgoing particle
       // and the first incoming particle
@@ -613,7 +613,7 @@ namespace cepgen
       // and the second outgoing particle
 
       const double mx = sqrt( mX2_ ), my = sqrt( mY2_ );
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "sqrt(s) = " << sqs_ << " GeV\n\t"
         << "m(X1) = " << mx << " GeV\t"
         << "m(X2) = " << my << " GeV";
@@ -624,23 +624,23 @@ namespace cepgen
       // compute the two-photon energy for this point
       mc4_ = sqrt( w4_ );
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "Computed value for w4 = " << w4_ << " → mc4 = " << mc4_;
 
       if ( !orient() )
         return 0.;
 
       if ( jacobian_ == 0. ) {
-        CG_WARNING( "GamGamLL" ) << "dj = " << jacobian_;
+        CG_WARNING( "LPAIR" ) << "dj = " << jacobian_;
         return 0.;
       }
 
       if ( t1_ > 0. ) {
-        CG_WARNING( "GamGamLL" ) << "t1 = " << t1_ << " > 0";
+        CG_WARNING( "LPAIR" ) << "t1 = " << t1_ << " > 0";
         return 0.;
       }
       if ( t2_ > 0. ) {
-        CG_WARNING( "GamGamLL" ) << "t2 = " << t2_ << " > 0";
+        CG_WARNING( "LPAIR" ) << "t2 = " << t2_ << " > 0";
         return 0.;
       }
 
@@ -664,7 +664,7 @@ namespace cepgen
                    pgy = -p3_lab_.py(),
                    pgz = mc4_*de3_/( ec4_+pc4_ )-ec4_*de3_*al4_/mc4_-p3_lab_.px()*ec4_*sin_theta4_/mc4_+ec4_*cos_theta4_/mc4_*( p3_lab_.p()*al3+e3mp3-e1mp1 );
 
-      CG_DEBUG_LOOP( "GamGamLL" ) << "pg = " << Momentum( pgx, pgy, pgz );
+      CG_DEBUG_LOOP( "LPAIR" ) << "pg = " << Momentum( pgx, pgy, pgz );
 
       const double pgp = std::hypot( pgx, pgy ), // outgoing proton (3)'s transverse momentum
                    pgg = std::hypot( pgp, pgz ); // outgoing proton (3)'s momentum
@@ -685,7 +685,7 @@ namespace cepgen
       double xx6 = 0.5 * ( 1. + amap/bmap*( beta-1. )/( beta+1. ) );
       xx6 = std::max( 0., std::min( xx6, 1. ) ); // xx6 in [0., 1.]
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "amap = " << amap << "\n\t"
         << "bmap = " << bmap << "\n\t"
         << "ymap = " << ymap << "\n\t"
@@ -702,16 +702,16 @@ namespace cepgen
       jacobian_ *= log( ymap );
       jacobian_ *= 0.5;
 
-      CG_DEBUG_LOOP( "GamGamLL" ) << "Jacobian = " << jacobian_;
+      CG_DEBUG_LOOP( "LPAIR" ) << "Jacobian = " << jacobian_;
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "ctcm6 = " << cos( theta6cm ) << "\n\t"
         << "stcm6 = " << sin( theta6cm );
 
       // First outgoing lepton's 3-momentum in the centre of mass system
       auto p6cm = Momentum::fromPThetaPhi( pp6cm, theta6cm, phi6_cm_ );
 
-      CG_DEBUG_LOOP( "GamGamLL" ) << "p3cm6 = " << p6cm;
+      CG_DEBUG_LOOP( "LPAIR" ) << "p3cm6 = " << p6cm;
 
       const double h1 = stg*p6cm.pz()+ctg*p6cm.px();
       const double pc6z = ctg*p6cm.pz()-stg*p6cm.px(), pc6x = cpg*h1-spg*p6cm.py();
@@ -722,7 +722,7 @@ namespace cepgen
       const double el6 = ( ec4_*ecm6+pc4_*pc6z ) / mc4_;
       const double h2  = ( ec4_*pc6z+pc4_*ecm6 ) / mc4_;
 
-      CG_DEBUG_LOOP( "GamGamLL" ) << "h1 = " << h1 << "\n\th2 = " << h2;
+      CG_DEBUG_LOOP( "LPAIR" ) << "h1 = " << h1 << "\n\th2 = " << h2;
 
       // first outgoing lepton's kinematics
       p6_cm_ = Momentum(
@@ -731,7 +731,7 @@ namespace cepgen
         cos_theta4_*h2-sin_theta4_*pc6x,
         el6 );
 
-      CG_DEBUG_LOOP( "GamGamLL" ) << "p6(cm) = " << p6_cm_;
+      CG_DEBUG_LOOP( "LPAIR" ) << "p6(cm) = " << p6_cm_;
 
       const double hq = ec4_*qcz/mc4_;
 
@@ -745,7 +745,7 @@ namespace cepgen
       // second outgoing lepton's kinematics
       p7_cm_ = Momentum( pt4_, 0., pc4_*cos_theta4_, ec4_ )-p6_cm_;
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "Outgoing kinematics\n\t"
         << " first outgoing lepton: p = " << p6_cm_.p() << ", E = " << p6_cm_.energy() << "\n\t"
         << "second outgoing lepton: p = " << p7_cm_.p() << ", E = " << p7_cm_.energy();
@@ -753,7 +753,7 @@ namespace cepgen
       q1dq_ = eg*( 2.*ecm6-mc4_ )-2.*pg*p6cm.pz();
       q1dq2_ = 0.5*( w4_-t1_-t2_ );
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "ecm6 = " << ecm6 << ", mc4 = " << mc4_ << "\n\t"
         << "eg = " << eg << ", pg = " << pg << "\n\t"
         << "q1dq = " << q1dq_ << ", q1dq2 = " << q1dq2_;
@@ -790,7 +790,7 @@ namespace cepgen
             -( ep2_*qve.energy()+p_cm_*qve.pz() )*( cos_phi3*cos_phi5 + sin_phi3*sin_phi5 )*pt3*pt5
             +( de3_*qve.pz()-qve.energy()*( p_cm_-p3_lab_.pz() ) )*b3;
 
-      CG_DEBUG_LOOP( "GamGamLL" )
+      CG_DEBUG_LOOP( "LPAIR" )
         << "a5 = " << a5_ << "\n\t"
         << "a6 = " << a6_;
 
@@ -807,7 +807,7 @@ namespace cepgen
 
       //--- kinematics computation for both leptons
 
-      CG_DEBUG_LOOP( "GamGamLL:gmufil" )
+      CG_DEBUG_LOOP( "LPAIR:gmufil" )
         << "unboosted P(l1)=" << p6_cm_ << "\n\t"
         << "unboosted P(l2)=" << p7_cm_;
 
@@ -861,7 +861,7 @@ namespace cepgen
 
       jacobian_ *= periPP();
 
-      CG_DEBUG_LOOP( "GamGamLL:f" )
+      CG_DEBUG_LOOP( "LPAIR:f" )
         << "kinematics mode: " << kin_.mode << "\n\t"
         << "Jacobian: " << jacobian_;
 
@@ -873,28 +873,28 @@ namespace cepgen
     //---------------------------------------------------------------------------------------------
 
     void
-    GamGamLL::fillKinematics( bool )
+    LPAIR::fillKinematics( bool )
     {
       const Momentum cm = (*event_)[Particle::IncomingBeam1][0].momentum()
                         + (*event_)[Particle::IncomingBeam2][0].momentum();
 
       const double gamma  = cm.energy()/sqs_, betgam = cm.pz()/sqs_;
 
-      CG_DEBUG_LOOP( "GamGamLL:gmufil" )
+      CG_DEBUG_LOOP( "LPAIR:gmufil" )
         << "sqrt(s)=" << sqs_ << " GeV, initial two-proton system: " << cm << "\n\t"
         << "gamma=" << gamma << ", betgam=" << betgam;
 
       auto plab_ip1 = Momentum( 0., 0.,  p_cm_, ep1_ ).betaGammaBoost( gamma, betgam );
       auto plab_ip2 = Momentum( 0., 0., -p_cm_, ep2_ ).betaGammaBoost( gamma, betgam );
 
-      CG_DEBUG_LOOP( "GamGamLL:gmufil" )
+      CG_DEBUG_LOOP( "LPAIR:gmufil" )
         << "unboosted PX=" << p3_lab_ << "\n\t"
         << "unboosted PY=" << p5_lab_;
 
       p3_lab_.betaGammaBoost( gamma, betgam );
       p5_lab_.betaGammaBoost( gamma, betgam );
 
-      CG_DEBUG_LOOP( "GamGamLL:gmufil" )
+      CG_DEBUG_LOOP( "LPAIR:gmufil" )
         << "boosted PX=" << p3_lab_ << "\n\t"
         << "boosted PY=" << p5_lab_ << "\n\t"
         << "boosted P(l1)=" << p6_cm_ << "\n\t"
@@ -915,7 +915,7 @@ namespace cepgen
       p6_cm_.rotatePhi( ranphi, rany );
       p7_cm_.rotatePhi( ranphi, rany );
 
-      CG_DEBUG_LOOP( "GamGamLL:gmufil" )
+      CG_DEBUG_LOOP( "LPAIR:gmufil" )
         << "boosted+rotated PX=" << p3_lab_ << "\n\t"
         << "boosted+rotated PY=" << p5_lab_ << "\n\t"
         << "boosted+rotated P(l1)=" << p6_cm_ << "\n\t"
@@ -992,7 +992,7 @@ namespace cepgen
     //---------------------------------------------------------------------------------------------
 
     double
-    GamGamLL::periPP() const
+    LPAIR::periPP() const
     {
       //--- compute the electric/magnetic form factors for the two
       //    considered parton momenta transfers
@@ -1016,7 +1016,7 @@ namespace cepgen
         } break;
       }
 
-      CG_DEBUG_LOOP( "GamGamLL:peripp" )
+      CG_DEBUG_LOOP( "LPAIR:peripp" )
         << "u1 = " << fp1.FM << "\n\t"
         << "u2 = " << fp1.FE << "\n\t"
         << "v1 = " << fp2.FM << "\n\t"
@@ -1031,7 +1031,7 @@ namespace cepgen
 
       const double peripp = ( fp1.FM*fp2.FM*t11 + fp1.FE*fp2.FM*t21 + fp1.FM*fp2.FE*t12 + fp1.FE*fp2.FE*t22 ) / pow( 2.*t1_*t2_*bb_, 2 );
 
-      CG_DEBUG_LOOP( "GamGamLL:peripp" )
+      CG_DEBUG_LOOP( "LPAIR:peripp" )
         << "bb = " << bb_ << ", qqq = " << qqq << ", qdq = " << qdq << "\n\t"
         << "t11 = " << t11 << "\t" << "t12 = " << t12 << "\n\t"
         << "t21 = " << t21 << "\t" << "t22 = " << t22 << "\n\t"
@@ -1041,10 +1041,10 @@ namespace cepgen
     }
 
     std::pair<double,double>
-    GamGamLL::map( double expo, const Limits& lim, const std::string& var_name_ )
+    LPAIR::map( double expo, const Limits& lim, const std::string& var_name_ )
     {
       const double y = lim.max()/lim.min(), out = lim.min()*pow( y, expo ), dout = out*log( y );
-      CG_DEBUG_LOOP( "GamGamLL:map" )
+      CG_DEBUG_LOOP( "LPAIR:map" )
         << "Mapping variable \"" << var_name_ << "\" in range (" << lim << ")"
         << " (max/min = " << y << ")\n\t"
         << "exponent = " << expo << " => "
@@ -1053,7 +1053,7 @@ namespace cepgen
     }
 
     std::pair<double,double>
-    GamGamLL::mapla( double y, double z, int u, const Limits& lim )
+    LPAIR::mapla( double y, double z, int u, const Limits& lim )
     {
       const double xmb = lim.min()-y-z, xpb = lim.max()-y-z;
       const double c = -4.*y*z;
@@ -1068,4 +1068,4 @@ namespace cepgen
   }
 }
 // register process
-REGISTER_PROCESS( "lpair", GamGamLL )
+REGISTER_PROCESS( "lpair", LPAIR )

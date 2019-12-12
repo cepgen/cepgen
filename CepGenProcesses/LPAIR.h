@@ -1,5 +1,5 @@
-#ifndef CepGen_Processes_GamGamLL_h
-#define CepGen_Processes_GamGamLL_h
+#ifndef CepGen_Processes_LPAIR_h
+#define CepGen_Processes_LPAIR_h
 
 #include "CepGen/Modules/Process.h"
 
@@ -30,14 +30,14 @@ namespace cepgen
      * \brief Compute the matrix element for a CE \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
      *  process
      */
-    class GamGamLL : public Process
+    class LPAIR : public Process
     {
       public:
         /// \brief Class constructor: set the mandatory parameters before integration and events generation
         /// \param[in] params General process parameters (nopt = Optimisation, legacy from LPAIR)
-        explicit GamGamLL( const ParametersList& params = ParametersList() );
+        explicit LPAIR( const ParametersList& params = ParametersList() );
         ProcessPtr clone( const ParametersList& params ) const override {
-          return ProcessPtr( new GamGamLL( *this ) );
+          return ProcessPtr( new LPAIR( *this ) );
         }
 
         void addEventContent() override;
