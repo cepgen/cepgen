@@ -30,6 +30,13 @@ namespace cepgen
     return *this;
   }
 
+  bool
+  ParametersList::empty() const
+  {
+    return keys().empty()
+      || keys() == std::vector<std::string>{ MODULE_NAME };
+  }
+
   std::ostream&
   operator<<( std::ostream& os, const ParametersList& params )
   {

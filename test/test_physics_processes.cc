@@ -24,18 +24,19 @@ main( int argc, char* argv[] )
   double num_sigma;
   string cfg_filename;
   string integrator;
-  bool debug;
+  bool debug, quiet;
 
   ArgumentsParser( argc, argv )
     .addArgument( "cfg", "configuration file", &cfg_filename, 'c' )
     .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
+    .addOptionalArgument( "quiet", "quiet mode", false, &quiet, 'q' )
     .addOptionalArgument( "num-sigma", "max. number of std.dev.", 3., &num_sigma, 'n' )
     .addOptionalArgument( "integrator", "type of integrator used", "vegas", &integrator, 'i' )
     .parse();
 
   if ( debug )
     utils::Logger::get().level = utils::Logger::Level::information;
-  else
+  else if ( quiet )
     utils::Logger::get().level = utils::Logger::Level::error;
 
   utils::Timer tmr;
@@ -81,16 +82,16 @@ main( int argc, char* argv[] )
   CG_INFO( "main" )
     << "Will run " << utils::s( "test", tests.size() ) << ".";
 
-  utils::ProgressBar progress( tests.size() );
+  std::unique_ptr<utils::ProgressBar> progress;
+  if ( debug )
+    progress.reset( new utils::ProgressBar( tests.size() ) );
 
   try {
-    auto pyhnd = cepgen::card::PythonHandler( cepgen::ParametersList() );
     unsigned short num_tests = 0;
     for ( const auto& test : tests ) {
       mg.clearRun();
       const std::string filename = "test_processes/"+test.filename+"_cfg.py";
-      mg.setParameters( pyhnd.parse( filename ).parameters() );
-      //CG_LOG( "main" ) << mg.parametersPtr();
+      mg.setParameters( cepgen::card::PythonHandler( filename ).parameters() );
       CG_INFO( "main" )
         << "Process: "<< mg.parameters().processName() << "\n\t"
         << "File: " << filename << "\n\t"
@@ -101,27 +102,33 @@ main( int argc, char* argv[] )
       double new_cs, err_new_cs;
       mg.computeXsection( new_cs, err_new_cs );
 
+      const double ratio = new_cs/test.ref_cs;
+      const double err_ratio = ratio * hypot( err_new_cs/new_cs, test.err_ref_cs/test.ref_cs );
       const double sigma = ( new_cs-test.ref_cs ) / hypot( err_new_cs, test.err_ref_cs );
+
+      const bool success = fabs( sigma ) < num_sigma;
 
       CG_INFO( "main" )
         << "Computed cross section:\n\t"
         << "Ref.   = " << test.ref_cs << " +/- " << test.err_ref_cs << "\n\t"
         << "CepGen = " << new_cs << " +/- " << err_new_cs << "\n\t"
-        << "Pull: " << sigma << ".";
+        << "Ratio: " << ratio << " +/- " << err_ratio << "\n\t"
+        << "Pull: " << sigma << " (abs(pull) "
+        << ( success ? "<" : ">" ) << " " << num_sigma << ").";
 
       CG_INFO( "main" ) << "Computation time: " << tmr.elapsed()*1.e3 << " ms.";
       tmr.reset();
 
       const string test_res = utils::format( "%-26s\tref=%g\tgot=%g\tpull=%+g", test.filename.c_str(), test.ref_cs, new_cs, sigma );
-      bool success = fabs( sigma ) < num_sigma;
       if ( success )
         passed_tests.emplace_back( test_res );
       else
         failed_tests.emplace_back( test_res );
-      progress.update( num_tests++ );
+      if ( debug )
+        progress->update( num_tests++ );
       CG_LOG( "main" )
-        << "Test " << passed_tests.size() << "/" << num_tests << " finished. Success:"
-        << utils::yesno( success );
+        << "Test " << passed_tests.size() << "/" << tests.size() << " finished. "
+        << "Success: " << utils::yesno( success ) << ".";
     }
   } catch ( const Exception& e ) {}
   if ( failed_tests.size() != 0 ) {

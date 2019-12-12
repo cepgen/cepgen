@@ -32,8 +32,9 @@ from Config.Integration.vegas_cff import integrator
 import Config.ktProcess_cfi as kt
 process = kt.process.clone('pptoww',
     processParameters = cepgen.Parameters(
-        mode = cepgen.ProcessMode.InelasticInelastic,
-        method = 0, # on-shell (0) or off-shell (1) formula
+        mode = cepgen.ProcessMode.ElasticElastic,
+        #mode = cepgen.ProcessMode.InelasticInelastic,
+        method = 1, # on-shell (0) or off-shell (1) formula
         polarisationStates = 0, # full
     ),
     inKinematics = cepgen.Parameters(

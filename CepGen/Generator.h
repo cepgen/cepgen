@@ -101,9 +101,8 @@ namespace cepgen
       double crossSectionError() const { return result_error_; }
 
       //void terminate();
-      /// Generate one single event given the phase space computed by Vegas in the integration step
-      /// \return A pointer to the Event object generated in this run
-      std::shared_ptr<Event> generateOneEvent();
+      /// Generate a new event and return its reference
+      const Event& generateOneEvent();
       /// Launch the generation of events
       void generate( std::function<void( const Event&, unsigned long )> callback = nullptr );
       /// Number of dimensions on which the integration is performed

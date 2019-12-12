@@ -34,7 +34,7 @@ int main( int argc, char* argv[] )
   if ( proc->hasEvent() ) { //--- dump a typical event content
     std::cout << "    event content (invalid kinematics, only check the parentage):\n";
     proc->addEventContent();
-    proc->event()->dump();
+    proc->event().dump();
   }
 
   return 0;

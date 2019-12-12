@@ -30,7 +30,7 @@ namespace cepgen
         double computeCentralMatrixElement() const override;
 
         /// Rapidity range for the outgoing fermions
-        double onShellME( double shat, double that, double uhat ) const;
+        double onShellME() const;
         double offShellME() const;
 
         const ME method_;
@@ -49,7 +49,7 @@ namespace cepgen
       p_mat1_( 0 ), p_mat2_( 0 ), p_term_ll_( 0 ), p_term_lt_( 0 ), p_term_tt1_( 0 ), p_term_tt2_( 0 ),
       mA2_( 0. ), mB2_( 0. )
     {
-      if ( !cs_prop_.fermion || cs_prop_.charge == 0. )
+      if ( !params.empty() && ( !cs_prop_.fermion || cs_prop_.charge == 0. ) )
         throw CG_FATAL( "PPtoFF:prepare" )
           << "Invalid fermion pair selected: " << cs_prop_.description
           << " (" << (int)cs_prop_.pdgid << ")!";
@@ -87,49 +87,40 @@ namespace cepgen
     double
     PPtoFF::computeCentralMatrixElement() const
     {
-      double amat2 = 0.;
+      const double prefactor = constants::G_EM*constants::G_EM * colf_;
 
       switch ( method_ ) {
         case ME::onShell: {
-          //--- first compute Mendelstam variables
-          const double shat = ( q1_+q2_ ).mass2();
-          const double that1 = ( q1_-p_c1_ ).mass2(), that2 = ( q2_-p_c2_ ).mass2(), that = 0.5*( that1+that2 );
-          const double uhat1 = ( q1_-p_c2_ ).mass2(), uhat2 = ( q2_-p_c1_ ).mass2(), uhat = 0.5*( uhat1+uhat2 );
-          amat2 = onShellME( shat, that, uhat );
+          return prefactor * onShellME();
         } break;
         case ME::offShell: {
-          amat2 = offShellME();
+          return prefactor * offShellME();
         } break;
       }
-
-      const double g_em = 4.*M_PI*constants::ALPHA_EM*qf_*qf_;
-      return amat2 * colf_ * ( g_em*g_em );
+      throw CG_FATAL( "PPtoFF" )
+        << "Invalid ME calculation method (" << (int)method_ << ")!";
     }
 
     double
-    PPtoFF::onShellME( double shat, double that, double uhat ) const
+    PPtoFF::onShellME() const
     {
+      const double s_hat = shat(), t_hat = that(), u_hat = uhat();
       CG_DEBUG_LOOP( "PPtoFF:onShell" )
-        << "shat: " << shat << ", that: " << that << ", uhat: " << uhat << ".";
+        << "shat: " << s_hat << ", that: " << t_hat << ", uhat: " << u_hat << ".";
 
-      //=================================================================
-      //     on-shell formula for M^2
-      //=================================================================
       const double mf4 = mf2_*mf2_, mf8 = mf4*mf4;
 
-      const double term1  =  6. *mf8,
-                   term2  = -3. *mf4 *that*that,
-                   term3  = -14.*mf4 *that*uhat,
-                   term4  = -3. *mf4 *uhat*uhat,
-                   term5  =      mf2_*that*that*that,
-                   term6  =  7.* mf2_*that*that*uhat,
-                   term7  =  7.* mf2_*that*uhat*uhat,
-                   term8  =      mf2_*uhat*uhat*uhat,
-                   term9  =          -that*that*that*uhat,
-                   term10 =          -that*uhat*uhat*uhat;
-
-      return -2.*( term1+term2+term3+term4+term5
-                  +term6+term7+term8+term9+term10 )/( pow( ( mf2_-that )*( mf2_-uhat ), 2) );
+      double out = 6.*mf8;
+      out += -3. *mf4 *t_hat*t_hat;
+      out += -14.*mf4 *t_hat*u_hat;
+      out += -3. *mf4 *u_hat*u_hat;
+      out +=  1.* mf2_*t_hat*t_hat*t_hat;
+      out +=  7.* mf2_*t_hat*t_hat*u_hat;
+      out +=  7.* mf2_*t_hat*u_hat*u_hat;
+      out +=  1.* mf2_*u_hat*u_hat*u_hat;
+      out += -1.*      t_hat*t_hat*t_hat*u_hat;
+      out += -1.*      t_hat*u_hat*u_hat*u_hat;
+      return -2.* out /( pow( ( mf2_-t_hat )*( mf2_-u_hat ), 2) );
     }
 
     double

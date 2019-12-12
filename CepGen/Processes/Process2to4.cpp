@@ -23,19 +23,6 @@ namespace cepgen
     {}
 
     void
-    Process2to4::setKinematics( const Kinematics& kin )
-    {
-      KTProcess::setKinematics( kin );
-
-      p1_ = (*event_)[Particle::IncomingBeam1][0].momentum();
-      p2_ = (*event_)[Particle::IncomingBeam2][0].momentum();
-      CG_DEBUG_LOOP( "2to4:incoming" )
-        << "incoming particles:\n" << " p1 = " << p1_ << "\n" << " p2 = " << p2_ << ".";
-
-      ww_ = 0.5 * ( 1.+sqrt( 1.-4.*p1_.mass()*p2_.mass()/s_ ) );
-    }
-
-    void
     Process2to4::setCuts( const Cuts& single )
     {
       single_limits_ = single;
@@ -44,6 +31,13 @@ namespace cepgen
     void
     Process2to4::preparePhaseSpace()
     {
+      p1_ = (*event_)[Particle::IncomingBeam1][0].momentum();
+      p2_ = (*event_)[Particle::IncomingBeam2][0].momentum();
+      CG_DEBUG_LOOP( "2to4:incoming" )
+        << "incoming particles:\n" << " p1 = " << p1_ << "\n" << " p2 = " << p2_ << ".";
+
+      ww_ = 0.5 * ( 1.+sqrt( 1.-4.*p1_.mass()*p2_.mass()/s_ ) );
+
       defineVariable( y_c1_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "First outgoing particle rapidity" );
       defineVariable( y_c2_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "Second outgoing particle rapidity" );
       defineVariable( pt_diff_, Mapping::linear, kin_.cuts.central.pt_diff, { 0., 500. }, "Final state particles transverse momentum difference" );
@@ -55,11 +49,24 @@ namespace cepgen
     {
       //--- transverse kinematics of initial partons
       const auto qt_1 = Momentum::fromPtEtaPhi( qt1_, 0., phi_qt1_ );
+      if ( fabs( qt_1.pt()-qt1_ ) > NUM_LIMITS )
+        throw CG_FATAL( "Process2to4" )
+          << "|qt1|=" << qt1_ << " != qt1.pt()=" << qt_1.pt() << ", qt1=" << qt_1 << ".";
+
       const auto qt_2 = Momentum::fromPtEtaPhi( qt2_, 0., phi_qt2_ );
+      if ( fabs( qt_2.pt()-qt2_ ) > NUM_LIMITS )
+        throw CG_FATAL( "Process2to4" )
+          << "|qt2|=" << qt1_ << " != qt2.pt()=" << qt_2.pt() << ", qt2=" << qt_2 << ".";
+
+      //--- two-parton system (in transverse plane)
       const auto qt_sum = qt_1+qt_2;
 
       //--- transverse kinematics of outgoing central system
       const auto pt_diff = Momentum::fromPtEtaPhi( pt_diff_, 0., phi_pt_diff_ );
+      if ( fabs( pt_diff.pt()-pt_diff_ ) > NUM_LIMITS )
+        throw CG_FATAL( "Process2to4" )
+          << "|dpt|=" << pt_diff_ << " != dpt.pt()=" << pt_diff.pt() << ", dpt=" << pt_diff << ".";
+
       const auto pt_c1 = 0.5*( qt_sum+pt_diff );
       const auto pt_c2 = 0.5*( qt_sum-pt_diff );
       const double p1t = pt_c1.pt(), p2t = pt_c2.pt();
@@ -151,9 +158,9 @@ namespace cepgen
 
       //assert( fabs( PX_.mass()-MX_ ) < 1.e-6 );
       //assert( fabs( PY_.mass()-MY_ ) < 1.e-6 );
-      if ( fabs( PX_.mass()-MX_ ) > 1.e-4 )
+      if ( fabs( PX_.mass()-MX_ ) > NUM_LIMITS )
         throw CG_FATAL( "PPtoFF" ) << "Invalid X system mass: " << PX_.mass() << "/" << MX_ << ".";
-      if ( fabs( PY_.mass()-MY_ ) > 1.e-4 )
+      if ( fabs( PY_.mass()-MY_ ) > NUM_LIMITS )
         throw CG_FATAL( "PPtoFF" ) << "Invalid Y system mass: " << PY_.mass() << "/" << MY_ << ".";
 
       //--- four-momenta of the intermediate partons
@@ -205,17 +212,16 @@ namespace cepgen
         << f1 << ", " << f2 << ".";
 
       //=================================================================
-      // factor 2.*pi from integration over phi_sum
       // factor 1/4 from jacobian of transformations
       // factors 1/pi and 1/pi due to integration over
       //     d^2(kappa_1)d^2(kappa_2) instead of d(kappa_1^2)d(kappa_2^2)
       //=================================================================
 
-      const double aintegral = amat2 / ( 16.*M_PI*M_PI*( x1*x2*s_ )*( x1*x2*s_ ) )
-                             * f1*M_1_PI * f2*M_1_PI * 0.25
-                             * constants::GEVM2_TO_PB;
-
-      return aintegral*qt1_*qt2_*pt_diff_;
+      return amat2
+        * M_1_PI*M_1_PI / ( 16.*( x1*x2*s_ )*( x1*x2*s_ ) )
+        * f1*M_1_PI * f2*M_1_PI * 0.25
+        * constants::GEVM2_TO_PB
+        * pt_diff_;
     }
 
     void
@@ -235,6 +241,30 @@ namespace cepgen
       oc2.setPdgId( cs_prop_.pdgid, -sign );
       oc2.setStatus( Particle::Status::Undecayed );
       oc2.setMomentum( p_c2_ );
+    }
+
+    //----- utilitaries
+
+    double
+    Process2to4::shat() const
+    {
+      return ( q1_+q2_ ).mass2();
+    }
+
+    double
+    Process2to4::that() const
+    {
+      const double that1 = ( q1_-p_c1_ ).mass2();
+      const double that2 = ( q2_-p_c2_ ).mass2();
+      return 0.5*( that1+that2 );
+    }
+
+    double
+    Process2to4::uhat() const
+    {
+      const double uhat1 = ( q1_-p_c2_ ).mass2();
+      const double uhat2 = ( q2_-p_c1_ ).mass2();
+      return 0.5*( uhat1+uhat2 );
     }
   }
 }

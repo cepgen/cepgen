@@ -13,7 +13,6 @@ namespace cepgen
         Process2to4( const ParametersList& params, const std::string& name, const std::string& desc, std::array<pdgid_t,2> partons, pdgid_t cs_id );
 
       protected:
-        void setKinematics( const Kinematics& kin ) override;
         void setCuts( const Cuts& single );
 
         void preparePhaseSpace() override;
@@ -22,6 +21,11 @@ namespace cepgen
 
         virtual void prepareProcessKinematics() = 0;
         virtual double computeCentralMatrixElement() const = 0;
+
+        //--- Mandelstam variables
+        double shat() const;
+        double that() const;
+        double uhat() const;
 
         ParticleProperties cs_prop_; ///< PDG id of the central particles
 

@@ -25,14 +25,14 @@ namespace cepgen
 
       private:
         const double mw_, mw2_;
-        static constexpr double g_em_ = 4.*M_PI*constants::ALPHA_EM;
 
         void prepareProcessKinematics() override;
         double computeCentralMatrixElement() const override;
 
+        double onShellME() const;
+        double offShellME( double phi_sum, double phi_diff ) const;
+
         double amplitudeWW( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 ) const;
-        double onShellME( double shat, double that, double uhat ) const;
-        double offShellME( double shat, double that, double uhat, double phi_sum, double phi_diff ) const;
 
         const int method_;
 
@@ -84,48 +84,47 @@ namespace cepgen
     PPtoWW::computeCentralMatrixElement() const
     {
       //const double stild = s_/2.*(1+sqrt(1.-(4*pow(mp2_, 2))/s_*s_));
-
-      //--- first compute a few Mendelstam variables
-      const double shat = ( q1_+q2_ ).mass2();
-      const double that1 = ( q1_-p_c1_ ).mass2(), that2 = ( q2_-p_c2_ ).mass2(), that = 0.5*( that1+that2 );
-      const double uhat1 = ( q1_-p_c2_ ).mass2(), uhat2 = ( q2_-p_c1_ ).mass2(), uhat = 0.5*( uhat1+uhat2 );
-
-      //--- matrix element computation
+      const double prefactor = constants::G_EM*constants::G_EM;
 
       CG_DEBUG_LOOP( "PPtoWW" )
         << "matrix element mode: " << method_ << ".";
 
-      double amat2 = 0.;
-      if ( method_ == 0 ) // on-shell matrix element
-        // (Denner+Dittmaier+Schuster, + work in collaboration with C. Royon)
-        amat2 = onShellME( shat, that, uhat );
-      else if ( method_ == 1 ) // off-shell Nachtmann formulae
-        amat2 = offShellME( shat, that, uhat, phi_qt1_+phi_qt2_, phi_qt1_-phi_qt2_ );
-
-      return std::max( g_em_*g_em_*amat2, 0. );
+      switch ( method_ ) {
+        case 0: { // on-shell matrix element
+          // (Denner+Dittmaier+Schuster, + work in collaboration with C. Royon)
+          return prefactor * onShellME();
+        } break;
+        case 1: {
+          return prefactor * offShellME( phi_qt1_+phi_qt2_, phi_qt1_-phi_qt2_ );
+        } break;
+      }
+      throw CG_FATAL( "PPtoFF" )
+        << "Invalid ME calculation method (" << method_ << ")!";
     }
 
     double
-    PPtoWW::onShellME( double shat, double that, double uhat ) const
+    PPtoWW::onShellME() const
     {
+      const double s_hat = shat(), t_hat = that(), u_hat = uhat();
       const double mw4 = mw2_*mw2_;
 
-      const double term1 = 2.*shat * ( 2.*shat+3.*mw2_ ) / ( 3.*( mw2_-that )*( mw2_-uhat ) );
-      const double term2 = 2.*shat*shat * ( shat*shat + 3.*mw4 ) / ( 3.*pow( mw2_-that, 2 )*pow( mw2_-uhat, 2 ) );
+      const double term1 = 2.*s_hat * ( 2.*s_hat+3.*mw2_ ) / ( 3.*( mw2_-t_hat )*( mw2_-u_hat ) );
+      const double term2 = 2.*s_hat*s_hat * ( s_hat*s_hat + 3.*mw4 ) / ( 3.*pow( mw2_-t_hat, 2 )*pow( mw2_-u_hat, 2 ) );
 
       return 6.*( 1.-term1+term2 );
     }
 
     double
-    PPtoWW::offShellME( double shat, double that, double uhat, double phi_sum, double phi_diff ) const
+    PPtoWW::offShellME( double phi_sum, double phi_diff ) const
     {
-      double amat2_0 = 0., amat2_1 = 0., amat2_interf = 0.;
+     const double s_hat = shat(), t_hat = that(), u_hat = uhat();
+     double amat2_0 = 0., amat2_1 = 0., amat2_interf = 0.;
       for ( const auto lam3 : pol_w1_ )
         for ( const auto lam4 : pol_w2_ ) {
-          double ampli_pp = amplitudeWW( shat, that, uhat, +1, +1, lam3, lam4 );
-          double ampli_mm = amplitudeWW( shat, that, uhat, -1, -1, lam3, lam4 );
-          double ampli_pm = amplitudeWW( shat, that, uhat, +1, -1, lam3, lam4 );
-          double ampli_mp = amplitudeWW( shat, that, uhat, -1, +1, lam3, lam4 );
+          double ampli_pp = amplitudeWW( s_hat, t_hat, u_hat, +1, +1, lam3, lam4 );
+          double ampli_mm = amplitudeWW( s_hat, t_hat, u_hat, -1, -1, lam3, lam4 );
+          double ampli_pm = amplitudeWW( s_hat, t_hat, u_hat, +1, -1, lam3, lam4 );
+          double ampli_mp = amplitudeWW( s_hat, t_hat, u_hat, -1, +1, lam3, lam4 );
 
           amat2_0 += ampli_pp*ampli_pp + ampli_mm*ampli_mm + 2.*cos( 2.*phi_diff )*ampli_pp*ampli_mm;
           amat2_1 += ampli_pm*ampli_pm + ampli_mp*ampli_mp + 2.*cos( 2.*phi_sum  )*ampli_pm*ampli_mp;

@@ -89,7 +89,7 @@ namespace cepgen
             par.value = "1"; // if the flag is set, enabled by default
           else
             throw CG_FATAL( "ArgumentsParser" )
-              << "Invalid value for parameter: " << par.name << ".";
+              << "Invalid value for parameter: '" << par.name << "'.";
           ++i;
         }
         else if ( args_.size() > i && args_.at( i )[0] != '-' )
@@ -145,24 +145,20 @@ namespace cepgen
       ++i;
     }
     if ( req_params.size() > 0 ) {
-      oss << "\n    " << utils::s( "required argument", req_params.size() ) << ":";
+      oss << "\n    " << utils::s( "required argument", req_params.size(), false ) << ":";
       for ( const auto& par : req_params )
-        oss << utils::format( ( par.first.sname != '\0' )
-          ? "\n\t-%1s/%-18s\t%-28s"
-          : "\n\t%d/%-18s\t%-28s",
-          &par.first.sname,
+        oss << utils::format( "\n\t%s%-18s\t%-28s",
+          ( par.first.sname != '\0' ? "-"+std::string( 1, par.first.sname )+"|" : "" ).c_str(),
           ( !par.first.name.empty() ? "--"+par.first.name : "<arg"+std::to_string( par.second )+">" ).c_str(),
           par.first.description.c_str() );
     }
     if ( opt_params.size() > 0 ) {
-      oss << "\n    " << utils::s( "optional argument", opt_params.size() ) << ":";
+      oss << "\n    " << utils::s( "optional argument", opt_params.size(), false ) << ":";
       for ( const auto& par : opt_params )
-        oss << utils::format( ( par.first.sname != '\0' )
-          ? "\n\t-%1s/%-18s\t%-28s\tdefault = '%s'"
-          : "\n\t%d/%-18s\t%-28s\tdefault = '%s'",
-          &par.first.sname, par.first.description.c_str(),
+        oss << utils::format( "\n\t%s%-18s\t%-28s\tdefault = '%s'",
+          ( par.first.sname != '\0' ? "-"+std::string( 1, par.first.sname )+"|" : "" ).c_str(),
           ( !par.first.name.empty() ? "--"+par.first.name : "<arg"+std::to_string( par.second )+">" ).c_str(),
-          par.first.value.c_str() );
+          par.first.description.c_str(), par.first.value.c_str() );
     }
     oss << std::endl;
     return oss.str();

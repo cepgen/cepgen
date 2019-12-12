@@ -303,9 +303,9 @@ namespace cepgen
       if ( input_params_.numGeneratedEvents() % input_params_.generation().gen_print_every == 0 ) {
         CG_INFO( "Integrator:store" )
           << "Generated events: " << input_params_.numGeneratedEvents();
-        input_params_.process()->last_event->dump();
+        input_params_.process()->event().dump();
       }
-      const Event& last_event = *input_params_.process()->last_event;
+      const auto& last_event = input_params_.process()->event();
       if ( callback )
         callback( last_event, input_params_.numGeneratedEvents() );
       input_params_.addGenerationTime( last_event.time_total );

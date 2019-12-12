@@ -163,11 +163,11 @@ namespace cepgen
     integrator_->integrate( result_, result_error_ );
   }
 
-  std::shared_ptr<Event>
+  const Event&
   Generator::generateOneEvent()
   {
     integrator_->generateOne();
-    return parameters_->process()->last_event;
+    return parameters_->process()->event();
   }
 
   void

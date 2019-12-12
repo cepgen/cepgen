@@ -174,7 +174,7 @@ namespace cepgen
 
       // FIXME dropped in CDF version
       if ( t1_max > -kin_.cuts.initial.q2.min() ) {
-        CG_WARNING( "GamGamLL" ) << "t1max = " << t1_max << " > -q2min = " << -kin_.cuts.initial.q2.min();
+        CG_DEBUG( "GamGamLL" ) << "t1max = " << t1_max << " > -q2min = " << -kin_.cuts.initial.q2.min();
         return false;
       }
       if ( t1_min < -kin_.cuts.initial.q2.max() && kin_.cuts.initial.q2.hasMax() ) {

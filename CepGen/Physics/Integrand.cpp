@@ -29,7 +29,7 @@ namespace cepgen
     eval( double* x, size_t ndim, void* func_params )
     {
       log_level = utils::Logger::get().level;
-      std::shared_ptr<Event> ev;
+      Event* ev = nullptr;
 
       Parameters* params = nullptr;
       if ( !func_params || !( params = static_cast<Parameters*>( func_params ) ) )
@@ -50,7 +50,7 @@ namespace cepgen
       //================================================================
 
       if ( proc->hasEvent() ) // event is not empty
-        ev = proc->event();
+        ev = &proc->event();
 
       params->prepareRun();
 
@@ -167,12 +167,11 @@ namespace cepgen
 
       if ( params->storage() ) {
         ev->weight = weight;
-        proc->last_event = ev;
-        proc->last_event->time_total = tmr.elapsed();
+        proc->event().time_total = tmr.elapsed();
 
         CG_DEBUG( "Integrand" )
           << "[process 0x" << std::hex << proc << std::dec << "] "
-          << "Individual time (gen+hadr+cuts): " << proc->last_event->time_total*1.e3 << " ms";
+          << "Individual time (gen+hadr+cuts): " << proc->event().time_total*1.e3 << " ms";
       }
 
       //================================================================

@@ -35,6 +35,8 @@ namespace cepgen
       template<typename T> ParametersList& set( std::string key, const T& value );
       /// Concatenate two parameters containers
       ParametersList& operator+=( const ParametersList& oth );
+      /// Is the list empty?
+      bool empty() const;
 
       /// List of keys handled in this list of parameters
       std::vector<std::string> keys() const;

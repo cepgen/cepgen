@@ -29,6 +29,10 @@ namespace cepgen
     PythonHandler::PythonHandler( const ParametersList& params ) :
       filename_( params.get<std::string>( FILENAME_KEY ) )
     {
+      setenv( "PYTHONPATH", ".:Cards:test:../Cards", 1 );
+      setenv( "PYTHONDONTWRITEBYTECODE", "1", 1 );
+      CG_DEBUG( "PythonHandler" )
+        << "Python PATH: " << getenv( "PYTHONPATH" ) << ".";
       if ( !filename_.empty() )
         parse( filename_ );
     }
@@ -36,45 +40,43 @@ namespace cepgen
     PythonHandler::PythonHandler( const std::string& file ) :
       filename_( file )
     {
-      if ( !filename_.empty() )
-        parse( file );
-    }
-
-    PythonHandler::~PythonHandler()
-    {
-      if ( Py_IsInitialized() )
-        Py_Finalize();
-    }
-
-    PythonHandler&
-    PythonHandler::parse( const std::string& file )
-    {
       setenv( "PYTHONPATH", ".:Cards:test:../Cards", 1 );
       setenv( "PYTHONDONTWRITEBYTECODE", "1", 1 );
       CG_DEBUG( "PythonHandler" )
         << "Python PATH: " << getenv( "PYTHONPATH" ) << ".";
+      if ( !filename_.empty() )
+        parse( file );
+    }
+
+    Parameters&
+    PythonHandler::parse( const std::string& file )
+    {
       std::string filename = pythonPath( file );
       const size_t fn_len = filename.length()+1;
 
       //Py_DebugFlag = 1;
       //Py_VerboseFlag = 1;
 
+      { // scope of the filename definition
 #ifdef PYTHON2
-      char* sfilename = new char[fn_len];
-      snprintf( sfilename, fn_len, "%s", filename.c_str() );
+        char* sfilename = new char[fn_len];
+        snprintf( sfilename, fn_len, "%s", filename.c_str() );
 #else
-      wchar_t* sfilename = new wchar_t[fn_len];
-      swprintf( sfilename, fn_len, L"%s", filename.c_str() );
+        wchar_t* sfilename = new wchar_t[fn_len];
+        swprintf( sfilename, fn_len, L"%s", filename.c_str() );
 #endif
-      if ( sfilename )
+        if ( !sfilename )
+          throw CG_FATAL( "PythonHandler" )
+            << "Invalid filename provided to the Python cards parser!";
         Py_SetProgramName( sfilename );
+        delete [] sfilename;
+      }
 
       Py_InitializeEx( 1 );
 
-      if ( sfilename )
-        delete [] sfilename;
       if ( !Py_IsInitialized() )
-        throw CG_FATAL( "PythonHandler" ) << "Failed to initialise the Python cards parser!";
+        throw CG_FATAL( "PythonHandler" )
+          << "Failed to initialise the Python cards parser!";
 
       CG_DEBUG( "PythonHandler" )
         << "Initialised the Python cards parser\n\t"
@@ -176,7 +178,10 @@ namespace cepgen
       //--- finalisation
       Py_CLEAR( cfg );
 
-      return *this;
+      if ( Py_IsInitialized() )
+        Py_Finalize();
+
+      return params_;
     }
 
     void

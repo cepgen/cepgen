@@ -19,9 +19,8 @@ namespace cepgen
         /// Read a standard configuration card
         explicit PythonHandler( const ParametersList& );
         PythonHandler( const std::string& );
-        ~PythonHandler();
 
-        PythonHandler& parse( const std::string& );
+        Parameters& parse( const std::string& );
 
       private:
         static constexpr const char* PROCESS_NAME = "process";
