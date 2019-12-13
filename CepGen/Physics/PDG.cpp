@@ -38,13 +38,19 @@ namespace cepgen
     return instance;
   }
 
+  bool
+  PDG::has( pdgid_t id ) const
+  {
+    return particles_.count( id ) > 0;
+  }
+
   const ParticleProperties&
   PDG::operator()( pdgid_t id ) const
   {
     if ( particles_.count( id ) > 0 )
       return particles_.at( id );
     throw CG_WARNING( "PDG" )
-      << "Failed to retrieve particle properties for PDG id " << id << "!";
+      << "No particle with PDG id " << id << " in the catalogue.";
   }
 
   void

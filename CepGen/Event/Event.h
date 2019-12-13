@@ -66,8 +66,8 @@ namespace cepgen
        * \param[in] role The role the particle has to play in the event
        * \return A Particle object corresponding to the first particle with the role
        */
-      Particle& getOneByRole( Particle::Role role );
-      const Particle& getOneByRole( Particle::Role role ) const;
+      Particle& oneWithRole( Particle::Role role );
+      const Particle& oneWithRole( Particle::Role role ) const;
       /** \brief Get the reference to the Particle object corresponding to a unique identifier in the event
        * \param[in] id The unique identifier to this particle in the event
        * \return A reference to the requested Particle object
@@ -82,7 +82,7 @@ namespace cepgen
        * \param[in] ids_ The unique identifiers to the particles to be selected in the event
        * \return A vector of references to the requested Particle objects
        */
-      Particles getByIds( const ParticlesIds& ids_ ) const;
+      Particles operator[]( const ParticlesIds& ids_ ) const;
       /** \brief Get the list of mother particles of any given Particle object in this event
        * \param[in] part The reference to the Particle object from which we want to extract the mother particles
        * \return A list of parenting Particle object
@@ -119,12 +119,10 @@ namespace cepgen
       {
         NumParticles();
         NumParticles( const NumParticles& np );
-        unsigned short cs; ///< Index of the first central system particle
-        unsigned short op1; ///< Index of the first positive-z outgoing beam state
-        unsigned short op2; ///< Index of the first negative-z outgoing beam state
-      };
-      /// Event indices structure
-      NumParticles evtcontent_;
+        size_t cs; ///< Index of the first central system particle
+        size_t op1; ///< Index of the first positive-z outgoing beam state
+        size_t op2; ///< Index of the first negative-z outgoing beam state
+      } evtcontent_;
       /// Is the event "compressed"?
       bool compressed_;
   };

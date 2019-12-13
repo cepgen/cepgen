@@ -63,8 +63,8 @@ namespace cepgen
     void
     FortranKTProcess::preparePhaseSpace()
     {
-      mom_ip1_ = event_->getOneByRole( Particle::IncomingBeam1 ).momentum();
-      mom_ip2_ = event_->getOneByRole( Particle::IncomingBeam2 ).momentum();
+      mom_ip1_ = event_->oneWithRole( Particle::IncomingBeam1 ).momentum();
+      mom_ip2_ = event_->oneWithRole( Particle::IncomingBeam2 ).momentum();
 
       defineVariable( y1_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "First central particle rapidity" );
       defineVariable( y2_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "Second central particle rapidity" );
@@ -101,8 +101,8 @@ namespace cepgen
         genparams_.a_nuc1 = in1.A;
         genparams_.z_nuc1 = (unsigned short)in1.Z;
         if ( genparams_.z_nuc1 > 1 ) {
-          event_->getOneByRole( Particle::IncomingBeam1 ).setPdgId( (pdgid_t)in1 );
-          event_->getOneByRole( Particle::OutgoingBeam1 ).setPdgId( (pdgid_t)in1 );
+          event_->oneWithRole( Particle::IncomingBeam1 ).setPdgId( (pdgid_t)in1 );
+          event_->oneWithRole( Particle::OutgoingBeam1 ).setPdgId( (pdgid_t)in1 );
         }
       }
       else
@@ -116,8 +116,8 @@ namespace cepgen
         genparams_.a_nuc2 = in2.A;
         genparams_.z_nuc2 = (unsigned short)in2.Z;
         if ( genparams_.z_nuc2 > 1 ) {
-          event_->getOneByRole( Particle::IncomingBeam2 ).setPdgId( (pdgid_t)in2 );
-          event_->getOneByRole( Particle::OutgoingBeam2 ).setPdgId( (pdgid_t)in2 );
+          event_->oneWithRole( Particle::IncomingBeam2 ).setPdgId( (pdgid_t)in2 );
+          event_->oneWithRole( Particle::OutgoingBeam2 ).setPdgId( (pdgid_t)in2 );
         }
       }
       else
@@ -131,12 +131,12 @@ namespace cepgen
       genparams_.iflux1 = (int)kin_.incoming_beams.first.kt_flux;
       switch ( (KTFlux)genparams_.iflux1 ) {
         case KTFlux::P_Gluon_KMR:
-          event_->getOneByRole( Particle::Parton1 ).setPdgId( PDG::gluon ); break;
+          event_->oneWithRole( Particle::Parton1 ).setPdgId( PDG::gluon ); break;
         case KTFlux::P_Photon_Elastic:
         case KTFlux::P_Photon_Inelastic:
         case KTFlux::P_Photon_Inelastic_Budnev:
         case KTFlux::HI_Photon_Elastic:
-          event_->getOneByRole( Particle::Parton1 ).setPdgId( PDG::photon ); break;
+          event_->oneWithRole( Particle::Parton1 ).setPdgId( PDG::photon ); break;
         case KTFlux::invalid:
           throw CG_FATAL( "FortranKTProcess" )
             << "Invalid flux for 2nd incoming parton: " << genparams_.iflux2 << "!";
@@ -145,12 +145,12 @@ namespace cepgen
       genparams_.iflux2 = (int)kin_.incoming_beams.second.kt_flux;
       switch ( (KTFlux)genparams_.iflux2 ) {
         case KTFlux::P_Gluon_KMR:
-          event_->getOneByRole( Particle::Parton2 ).setPdgId( PDG::gluon ); break;
+          event_->oneWithRole( Particle::Parton2 ).setPdgId( PDG::gluon ); break;
         case KTFlux::P_Photon_Elastic:
         case KTFlux::P_Photon_Inelastic:
         case KTFlux::P_Photon_Inelastic_Budnev:
         case KTFlux::HI_Photon_Elastic:
-          event_->getOneByRole( Particle::Parton2 ).setPdgId( PDG::photon ); break;
+          event_->oneWithRole( Particle::Parton2 ).setPdgId( PDG::photon ); break;
         case KTFlux::invalid:
           throw CG_FATAL( "FortranKTProcess" )
             << "Invalid flux for 2nd incoming parton: " << genparams_.iflux2 << "!";
@@ -194,9 +194,9 @@ namespace cepgen
       //===========================================================================================
 
       const Momentum mom_par1 = mom_ip1_-PX_, mom_par2 = mom_ip2_-PY_;
-      event_->getOneByRole( Particle::Parton1 ).setMomentum( mom_par1 );
-      event_->getOneByRole( Particle::Parton2 ).setMomentum( mom_par2 );
-      event_->getOneByRole( Particle::Intermediate ).setMomentum( mom_par1+mom_par2 );
+      event_->oneWithRole( Particle::Parton1 ).setMomentum( mom_par1 );
+      event_->oneWithRole( Particle::Parton2 ).setMomentum( mom_par2 );
+      event_->oneWithRole( Particle::Intermediate ).setMomentum( mom_par1+mom_par2 );
 
       //===========================================================================================
       // central system

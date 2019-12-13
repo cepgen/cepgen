@@ -927,11 +927,11 @@ namespace cepgen
       }*/
 
       //----- incoming protons
-      event_->getOneByRole( Particle::IncomingBeam1 ).setMomentum( plab_ip1 );
-      event_->getOneByRole( Particle::IncomingBeam2 ).setMomentum( plab_ip2 );
+      event_->oneWithRole( Particle::IncomingBeam1 ).setMomentum( plab_ip1 );
+      event_->oneWithRole( Particle::IncomingBeam2 ).setMomentum( plab_ip2 );
 
       //----- first outgoing proton
-      auto& op1 = event_->getOneByRole( Particle::OutgoingBeam1 );
+      auto& op1 = event_->oneWithRole( Particle::OutgoingBeam1 );
 
       op1.setMomentum( p3_lab_ );
       switch ( kin_.mode ) {
@@ -948,7 +948,7 @@ namespace cepgen
       }
 
       //----- second outgoing proton
-      auto& op2 = event_->getOneByRole( Particle::OutgoingBeam2 );
+      auto& op2 = event_->oneWithRole( Particle::OutgoingBeam2 );
       op2.setMomentum( p5_lab_ );
       switch ( kin_.mode ) {
         case KinematicsMode::ElasticElastic:
@@ -964,11 +964,11 @@ namespace cepgen
       }
 
       //----- first incoming photon
-      auto& ph1 = event_->getOneByRole( Particle::Parton1 );
+      auto& ph1 = event_->oneWithRole( Particle::Parton1 );
       ph1.setMomentum( plab_ph1 );
 
       //----- second incoming photon
-      auto& ph2 = event_->getOneByRole( Particle::Parton2 );
+      auto& ph2 = event_->oneWithRole( Particle::Parton2 );
       ph2.setMomentum( plab_ph2 );
 
       auto& central_system = (*event_)[Particle::CentralSystem];
@@ -986,7 +986,7 @@ namespace cepgen
       ol2.setStatus( Particle::Status::FinalState );
 
       //----- intermediate two-lepton system
-      event_->getOneByRole( Particle::Intermediate ).setMomentum( p6_cm_+p7_cm_ );
+      event_->oneWithRole( Particle::Intermediate ).setMomentum( p6_cm_+p7_cm_ );
     }
 
     //---------------------------------------------------------------------------------------------

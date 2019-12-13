@@ -138,8 +138,8 @@ namespace cepgen
       // register the outgoing remnants' variables
       //============================================================================================
 
-      mX2_ = event_->getOneByRole( Particle::IncomingBeam1 ).mass2();
-      mY2_ = event_->getOneByRole( Particle::IncomingBeam2 ).mass2();
+      mX2_ = event_->oneWithRole( Particle::IncomingBeam1 ).mass2();
+      mY2_ = event_->oneWithRole( Particle::IncomingBeam2 ).mass2();
       if ( kin_.mode == KinematicsMode::InelasticElastic || kin_.mode == KinematicsMode::InelasticInelastic )
         defineVariable( mX2_, Mapping::square, kin_.cuts.remnants.mass_single, { 1.07, 1000. }, "Positive z proton remnant squared mass" );
       if ( kin_.mode == KinematicsMode::ElasticInelastic || kin_.mode == KinematicsMode::InelasticInelastic )
@@ -166,8 +166,8 @@ namespace cepgen
       //     outgoing protons
       //============================================================================================
 
-      Particle& op1 = event_->getOneByRole( Particle::OutgoingBeam1 ),
-               &op2 = event_->getOneByRole( Particle::OutgoingBeam2 );
+      Particle& op1 = event_->oneWithRole( Particle::OutgoingBeam1 ),
+               &op2 = event_->oneWithRole( Particle::OutgoingBeam2 );
 
       op1.setMomentum( PX_ );
       op2.setMomentum( PY_ );
@@ -203,17 +203,17 @@ namespace cepgen
       //     incoming partons (photons, pomerons, ...)
       //============================================================================================
 
-      Particle& g1 = event_->getOneByRole( Particle::Parton1 );
-      g1.setMomentum( event_->getOneByRole( Particle::IncomingBeam1 ).momentum()-PX_, true );
+      Particle& g1 = event_->oneWithRole( Particle::Parton1 );
+      g1.setMomentum( event_->oneWithRole( Particle::IncomingBeam1 ).momentum()-PX_, true );
 
-      Particle& g2 = event_->getOneByRole( Particle::Parton2 );
-      g2.setMomentum( event_->getOneByRole( Particle::IncomingBeam2 ).momentum()-PY_, true );
+      Particle& g2 = event_->oneWithRole( Particle::Parton2 );
+      g2.setMomentum( event_->oneWithRole( Particle::IncomingBeam2 ).momentum()-PY_, true );
 
       //============================================================================================
       //     two-parton system
       //============================================================================================
 
-      event_->getOneByRole( Particle::Intermediate ).setMomentum( g1.momentum()+g2.momentum() );
+      event_->oneWithRole( Particle::Intermediate ).setMomentum( g1.momentum()+g2.momentum() );
     }
   }
 }

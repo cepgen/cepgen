@@ -35,6 +35,7 @@ namespace cepgen
       ~PDG() = default;
 
       void define( const ParticleProperties& props );
+      bool has( pdgid_t ) const;
       const ParticleProperties& operator()( pdgid_t ) const;
       const std::vector<pdgid_t> particles() const;
       void dump() const;
