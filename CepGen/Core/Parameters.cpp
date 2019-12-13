@@ -109,6 +109,12 @@ namespace cepgen
   }
 
   void
+  Parameters::clearProcess()
+  {
+    process_.release();
+  }
+
+  void
   Parameters::setProcess( std::unique_ptr<proc::Process> proc )
   {
     process_ = std::move( proc );

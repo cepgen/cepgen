@@ -38,18 +38,19 @@ int main( int argc, char* argv[] )
     utils::Logger::get().level = utils::Logger::Level::error;
 
   utils::Timer tmr;
-  Generator mg;
+  Generator gen;
+  IntegratorType integr;
 
   if ( integrator == "plain" )
-    mg.parameters().integration().type = IntegratorType::plain;
+    integr = IntegratorType::plain;
   else if ( integrator == "vegas" )
-    mg.parameters().integration().type = IntegratorType::Vegas;
+    integr = IntegratorType::Vegas;
   else if ( integrator == "miser" )
-    mg.parameters().integration().type = IntegratorType::MISER;
+    integr = IntegratorType::MISER;
   else
     throw CG_FATAL( "main" ) << "Unhandled integrator type: " << integrator << ".";
 
-  CG_LOG( "main" ) << "Testing with " << mg.parameters().integration().type << " integrator.";
+  CG_LOG( "main" ) << "Testing with " << integr << " integrator.";
 
   vector<string> failed_tests, passed_tests;
 
@@ -89,37 +90,42 @@ int main( int argc, char* argv[] )
   try {
     unsigned short num_tests = 0;
     for ( const auto& test : tests ) {
-      mg.clearRun();
+      gen.clearRun( true );
+
       const std::string filename = "test_processes/"+test.filename+"_cfg.py";
-      mg.setParameters( cepgen::card::PythonHandler( filename ).parameters() );
+      gen.setParameters( cepgen::card::PythonHandler( filename ).parameters() );
+      gen.parameters().integration().type = integr;
       CG_INFO( "main" )
-        << "Process: "<< mg.parameters().processName() << "\n\t"
+        << "Process: "<< gen.parameters().processName() << "\n\t"
         << "File: " << filename << "\n\t"
         << "Configuration time: " << tmr.elapsed()*1.e3 << " ms.";
 
       tmr.reset();
 
       double new_cs, err_new_cs;
-      mg.computeXsection( new_cs, err_new_cs );
+      gen.computeXsection( new_cs, err_new_cs );
 
       const double ratio = new_cs/test.ref_cs;
       const double err_ratio = ratio * hypot( err_new_cs/new_cs, test.err_ref_cs/test.ref_cs );
-      const double sigma = ( new_cs-test.ref_cs ) / hypot( err_new_cs, test.err_ref_cs );
+      const double pull = ( new_cs-test.ref_cs ) / hypot( err_new_cs, test.err_ref_cs );
 
-      const bool success = fabs( sigma ) < num_sigma;
+      const bool success = fabs( pull ) < num_sigma;
 
       CG_INFO( "main" )
         << "Computed cross section:\n\t"
         << "Ref.   = " << test.ref_cs << " +/- " << test.err_ref_cs << "\n\t"
         << "CepGen = " << new_cs << " +/- " << err_new_cs << "\n\t"
         << "Ratio: " << ratio << " +/- " << err_ratio << "\n\t"
-        << "Pull: " << sigma << " (abs(pull) "
+        << "Pull: " << pull << " (abs(pull) "
         << ( success ? "<" : ">" ) << " " << num_sigma << ").";
 
-      CG_INFO( "main" ) << "Computation time: " << tmr.elapsed()*1.e3 << " ms.";
+      CG_INFO( "main" )
+        << "Computation time: " << tmr.elapsed()*1.e3 << " ms.";
       tmr.reset();
 
-      const string test_res = utils::format( "%-26s\tref=%g\tgot=%g\tpull=%+g", test.filename.c_str(), test.ref_cs, new_cs, sigma );
+      const string test_res = utils::format(
+        "%-26s\tref=%g\tgot=%g\tpull=%+g",
+        test.filename.c_str(), test.ref_cs, new_cs, pull );
       if ( success )
         passed_tests.emplace_back( test_res );
       else

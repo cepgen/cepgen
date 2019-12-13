@@ -105,7 +105,7 @@ namespace cepgen
                               result, abserr,
                               gsl_monte_vegas_chisq( veg_state_.get() ) );
         } while ( fabs( gsl_monte_vegas_chisq( veg_state_.get() )-1. )
-                > input_params_.integration().vegas_chisq_cut-1. );
+                  > input_params_.integration().vegas_chisq_cut-1. );
         CG_DEBUG( "Integrator:integrate" )
           << "Vegas grid information:\n\t"
           << "ran for " << veg_state_->dim << " dimensions, and generated " << veg_state_->bins_max << " bins.\n\t"
@@ -342,8 +342,7 @@ namespace cepgen
       << "for the generation of unweighted events.";
 
     const double inv_num_points = 1./input_params_.generation().num_points;
-    std::vector<double> x( function_->dim, 0. );
-    std::vector<unsigned short> n( function_->dim, 0 );;
+    std::vector<double> point_coord( function_->dim, 0. );
 
     // ...
     double sum = 0., sum2 = 0., sum2p = 0.;
@@ -354,8 +353,8 @@ namespace cepgen
     for ( unsigned int i = 0; i < grid_->size(); ++i ) {
       double fsum = 0., fsum2 = 0.;
       for ( unsigned int j = 0; j < input_params_.generation().num_points; ++j ) {
-        grid_->shoot( rng_.get(), i, x );
-        const double weight = eval( x );
+        grid_->shoot( rng_.get(), i, point_coord );
+        const double weight = eval( point_coord);
         grid_->setValue( i, weight );
         fsum += weight;
         fsum2 += weight*weight;
@@ -369,8 +368,8 @@ namespace cepgen
       if ( CG_LOG_MATCH( "Integrator:setGen", debugInsideLoop ) ) {
         const double sig = sqrt( sig2 );
         const double eff = ( grid_->maxValue( i ) != 0. )
-          ? grid_->maxValue( i )/av
-          : 1.e4;
+          ? av/grid_->maxValue( i )
+          : 0.;
         CG_DEBUG_LOOP( "Integrator:setGen" )
           << "n-vector for bin " << i << ": " << utils::repr( grid_->n( i ) ) << "\n\t"
           << "av   = " << av << "\n\t"
