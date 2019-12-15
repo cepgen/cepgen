@@ -1,6 +1,3 @@
-#include "CepGen/Core/Timer.h"
-#include "CepGen/Core/Exception.h"
-
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/EventBrowser.h"
 
@@ -8,9 +5,12 @@
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/PDG.h"
 
-#include "CepGen/Core/GenericProcess.h"
-#include "CepGen/Core/EventModifier.h"
-#include "CepGen/Core/GenericExportHandler.h"
+#include "CepGen/Modules/Process.h"
+#include "CepGen/Modules/EventModifier.h"
+#include "CepGen/Modules/ExportModule.h"
+
+#include "CepGen/Utils/Timer.h"
+#include "CepGen/Core/Exception.h"
 
 #include "CepGen/Parameters.h"
 
@@ -29,13 +29,13 @@ namespace cepgen
     eval( double* x, size_t ndim, void* func_params )
     {
       log_level = utils::Logger::get().level;
-      std::shared_ptr<Event> ev;
+      Event* ev = nullptr;
 
       Parameters* params = nullptr;
       if ( !func_params || !( params = static_cast<Parameters*>( func_params ) ) )
         throw CG_FATAL( "Integrand" ) << "Failed to retrieve the run parameters!";
 
-      proc::GenericProcess* proc = params->process();
+      proc::Process* proc = params->process();
       if ( !proc )
         throw CG_FATAL( "Integrand" ) << "Failed to retrieve the process!";
 
@@ -50,7 +50,7 @@ namespace cepgen
       //================================================================
 
       if ( proc->hasEvent() ) // event is not empty
-        ev = proc->event();
+        ev = &proc->event();
 
       params->prepareRun();
 
@@ -64,8 +64,7 @@ namespace cepgen
       // from this step on, the phase space point is supposed to be set
       //================================================================
 
-      proc->beforeComputeWeight();
-      double weight = proc->computeWeight();
+      double weight = proc->weight();
 
       //================================================================
       // invalidate any unphysical behaviour
@@ -168,12 +167,11 @@ namespace cepgen
 
       if ( params->storage() ) {
         ev->weight = weight;
-        proc->last_event = ev;
-        proc->last_event->time_total = tmr.elapsed();
+        proc->event().time_total = tmr.elapsed();
 
         CG_DEBUG( "Integrand" )
           << "[process 0x" << std::hex << proc << std::dec << "] "
-          << "Individual time (gen+hadr+cuts): " << proc->last_event->time_total*1.e3 << " ms";
+          << "Individual time (gen+hadr+cuts): " << proc->event().time_total*1.e3 << " ms";
       }
 
       //================================================================
@@ -183,7 +181,7 @@ namespace cepgen
       if ( CG_LOG_MATCH( "Integrand", debugInsideLoop ) ) {
         std::ostringstream oss;
         for ( unsigned short i = 0; i < ndim; ++i )
-          oss << Form( "%10.8f ", x[i] );
+          oss << utils::format( "%10.8f ", x[i] );
         CG_DEBUG( "Integrand" )
           << "f value for dim-" << ndim << " point ( " << oss.str() << "): "
           << weight;

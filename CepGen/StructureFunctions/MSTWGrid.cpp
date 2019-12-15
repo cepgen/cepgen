@@ -1,9 +1,11 @@
-#include "CepGen/Core/GridHandler.h"
+#include "CepGen/Utils/GridHandler.h"
+#include "CepGen/Utils/String.h"
+
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
 
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include <fstream>
 
@@ -124,7 +126,7 @@ namespace mstw
   std::ostream&
   operator<<( std::ostream& os, const Grid::sfval_t& val )
   {
-    return os << cepgen::Form( "xbj = %.4f\tQ² = %.5e GeV²\tF₂ = % .6e\tFₗ = % .6e", val.xbj, val.q2, val.f2, val.fl );
+    return os << cepgen::utils::format( "xbj = %.4f\tQ² = %.5e GeV²\tF₂ = % .6e\tFₗ = % .6e", val.xbj, val.q2, val.f2, val.fl );
   }
 
   std::ostream&

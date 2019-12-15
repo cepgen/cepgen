@@ -2,7 +2,6 @@
 #include "CepGen/Event/Event.h"
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
 
 namespace cepgen
 {

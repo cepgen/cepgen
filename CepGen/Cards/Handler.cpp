@@ -1,27 +1,24 @@
-#include "CepGen/Cards/PythonHandler.h"
-#include "CepGen/Cards/LpairHandler.h"
+#include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Cards/Handler.h"
+
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
 namespace cepgen
 {
   namespace card
   {
-    Parameters&
-    Handler::parse( const char* filename )
+    std::unique_ptr<Handler>
+    Handler::parse( const std::string& filename )
     {
-      const std::string extension = getExtension( filename );
-      if ( extension == "card" ) {
-        static LpairHandler hnd( filename );
-        return hnd.parameters();
+      try {
+        return CardsHandlerFactory::get().build( extension( filename ),
+          ParametersList().set<std::string>( FILENAME_KEY, filename ) );
+      } catch ( const std::invalid_argument& err ) {
+        throw CG_FATAL( "Cards:handler" )
+          << "Failed to parse the steering card at \"" << filename << "\"!\n"
+          << err.what();
       }
-#ifdef PYTHON
-      else if ( extension == "py" ) {
-        static PythonHandler hnd( filename );
-        return hnd.parameters();
-      }
-#endif
-      throw CG_FATAL( "Cards:handler" )
-        << "Failed to determine the steering card type for \"" << filename << "\"!";
     }
   }
 }

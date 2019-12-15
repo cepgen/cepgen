@@ -1,7 +1,7 @@
 #ifndef CepGen_StructureFunctions_SuriYennie_h
 #define CepGen_StructureFunctions_SuriYennie_h
 
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 
 namespace cepgen
 {

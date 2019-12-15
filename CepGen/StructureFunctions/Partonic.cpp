@@ -1,7 +1,8 @@
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
+#include "CepGen/Utils/String.h"
 
 #include "LHAPDF/LHAPDF.h"
 
@@ -129,7 +130,7 @@ namespace cepgen
         LHAPDF::initPDFSet( pdf_set_, LHAPDF::LHGRID, pdf_member_ );
       lhapdf_version = LHAPDF::getVersion();
 #endif
-      replace_all( pdf_description, ". ", ".\n  " );
+      utils::replace_all( pdf_description, ". ", ".\n  " );
       CG_INFO( "Partonic" ) << "Partonic structure functions evaluator successfully built.\n"
         << " * LHAPDF version: " << lhapdf_version << "\n"
         << " * number of flavours: " << num_flavours_ << "\n"

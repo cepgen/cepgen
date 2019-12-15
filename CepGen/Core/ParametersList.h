@@ -3,7 +3,6 @@
 
 #include "CepGen/Physics/Limits.h"
 #include "CepGen/Physics/ParticleProperties.h"
-#include "CepGen/Core/Hasher.h"
 
 #include <vector>
 #include <map>
@@ -36,6 +35,8 @@ namespace cepgen
       template<typename T> ParametersList& set( std::string key, const T& value );
       /// Concatenate two parameters containers
       ParametersList& operator+=( const ParametersList& oth );
+      /// Is the list empty?
+      bool empty() const;
 
       /// List of keys handled in this list of parameters
       std::vector<std::string> keys() const;
@@ -44,6 +45,7 @@ namespace cepgen
 
       /// Human-readable version of a parameters container
       friend std::ostream& operator<<( std::ostream& os, const ParametersList& );
+      static constexpr const char* MODULE_NAME = "mod_name";
 
     private:
       std::map<std::string,ParametersList> param_values_;

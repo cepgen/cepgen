@@ -1,8 +1,7 @@
-#include "CepGen/Core/ExportHandler.h"
-#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Modules/ExportModule.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
 
 #include "CepGen/Event/Event.h"
-
 #include "CepGen/Parameters.h"
 
 #include <sstream>
@@ -29,7 +28,7 @@ namespace cepgen
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Sep 2016
      */
-    class LHEFHepMCHandler : public GenericExportHandler
+    class LHEFHepMCHandler : public ExportModule
     {
       public:
         /// Class constructor
@@ -44,11 +43,13 @@ namespace cepgen
         /// Writer object (from HepMC)
         std::unique_ptr<LHEF::Writer> lhe_output_;
         LHEF::HEPRUP run_;
+        bool compress_;
     };
 
     LHEFHepMCHandler::LHEFHepMCHandler( const ParametersList& params ) :
-      GenericExportHandler( "lhef" ),
-      lhe_output_( new LHEF::Writer( params.get<std::string>( "filename", "output.lhe" ) ) )
+      ExportModule( params ),
+      lhe_output_( new LHEF::Writer( params.get<std::string>( "filename", "output.lhe" ) ) ),
+      compress_( params.get<bool>( "compress", true ) )
     {}
 
     void
@@ -81,10 +82,13 @@ namespace cepgen
       out.SCALUP = 0.;
       out.AQEDUP = constants::ALPHA_EM;
       out.AQCDUP = constants::ALPHA_QCD;
-      out.NUP = ev.size();
+      const auto& particles = compress_
+        ? ev.compress().particles()
+        : ev.particles();
+      out.NUP = particles.size();
       out.resize();
-      for ( unsigned short ip = 0; ip < ev.size(); ++ip ) {
-        const Particle part = ev[ip];
+      for ( unsigned short ip = 0; ip < particles.size(); ++ip ) {
+        const Particle& part = particles[ip];
         out.IDUP[ip] = part.integerPdgId(); // PDG id
         out.ISTUP[ip] = (short)part.status(); // status code
         out.PUP[ip] = part.momentum().pVector(); // momentum

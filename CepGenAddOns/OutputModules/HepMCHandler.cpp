@@ -1,13 +1,12 @@
 #include "CepGenAddOns/EventInterfaces/HepMCEventInterface.h"
 
-#include "CepGen/Parameters.h"
+#include "CepGen/Modules/ExportModule.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
 
-#include "CepGen/Core/ExportHandler.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
-
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
+#include "CepGen/Parameters.h"
 
 #if defined( HEPMC3 ) || defined( HEPMC_VERSION_CODE )
 #  include "HepMC3/Version.h"
@@ -33,7 +32,7 @@ namespace cepgen
     /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
     /// \date Sep 2016
     template<typename T>
-    class HepMCHandler : public GenericExportHandler
+      class HepMCHandler : public ExportModule
     {
       public:
         /// Class constructor
@@ -58,7 +57,7 @@ namespace cepgen
 
     template<typename T>
     HepMCHandler<T>::HepMCHandler( const ParametersList& params ) :
-      GenericExportHandler( "hepmc" ),
+      ExportModule( params ),
       output_( new T( params.get<std::string>( "filename", "output.hepmc" ).c_str() ) ),
       xs_( new GenCrossSection )
 #ifdef HEPMC3
@@ -140,6 +139,7 @@ REGISTER_IO_MODULE( "hepmc_root_tree", HepMC3RootTreeHandler )
 #    include "ConvertExample/include/WriterRootTreeOPAL.h"
 typedef cepgen::io::HepMCHandler<WriterDOT> HepMC3DOTHandler;
 typedef cepgen::io::HepMCHandler<WriterRootTreeOPAL> HepMC3RootTreeOPALHandler;
+REGISTER_IO_MODULE( "hepmc_dot", HepMC3DOTHandler )
 REGISTER_IO_MODULE( "hepmc_root_tree_opal", HepMC3RootTreeOPALHandler )
 #  endif
 //--- HepMC version 2 and below

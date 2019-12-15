@@ -1,14 +1,17 @@
 #include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/GridParameters.h"
-#include "CepGen/Core/utils.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/GenericProcess.h"
-#include "CepGen/Core/EventModifier.h"
-#include "CepGen/Core/GenericExportHandler.h"
+
+#include "CepGen/Modules/Process.h"
+#include "CepGen/Modules/EventModifier.h"
+#include "CepGen/Modules/ExportModule.h"
 
 #include "CepGen/Parameters.h"
 
 #include "CepGen/Event/Event.h"
+
+#include "CepGen/Utils/String.h"
+#include "CepGen/Utils/ProgressBar.h"
 
 #include <thread>
 #include <math.h>
@@ -97,10 +100,10 @@ namespace cepgen
             &result, &abserr );
           CG_LOG( "Integrator:integrate" )
             << "\t>> at call " << ( ++it_chisq ) << ": "
-            << Form( "average = %10.6f   "
-                     "sigma = %10.6f   chi2 = %4.3f.",
-                     result, abserr,
-                     gsl_monte_vegas_chisq( veg_state_.get() ) );
+            << utils::format( "average = %10.6f   "
+                              "sigma = %10.6f   chi2 = %4.3f.",
+                              result, abserr,
+                              gsl_monte_vegas_chisq( veg_state_.get() ) );
         } while ( fabs( gsl_monte_vegas_chisq( veg_state_.get() )-1. )
                 > input_params_.integration().vegas_chisq_cut-1. );
         CG_DEBUG( "Integrator:integrate" )
@@ -300,9 +303,9 @@ namespace cepgen
       if ( input_params_.numGeneratedEvents() % input_params_.generation().gen_print_every == 0 ) {
         CG_INFO( "Integrator:store" )
           << "Generated events: " << input_params_.numGeneratedEvents();
-        input_params_.process()->last_event->dump();
+        input_params_.process()->event().dump();
       }
-      const Event& last_event = *input_params_.process()->last_event;
+      const auto& last_event = input_params_.process()->event();
       if ( callback )
         callback( last_event, input_params_.numGeneratedEvents() );
       input_params_.addGenerationTime( last_event.time_total );

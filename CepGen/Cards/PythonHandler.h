@@ -3,7 +3,7 @@
 
 #include <Python.h>
 
-#include "Handler.h"
+#include "CepGen/Cards/Handler.h"
 
 namespace cepgen
 {
@@ -17,12 +17,12 @@ namespace cepgen
     {
       public:
         /// Read a standard configuration card
-        explicit PythonHandler( const char* file );
-        ~PythonHandler();
+        explicit PythonHandler( const ParametersList& );
+        PythonHandler( const std::string& );
+
+        Parameters& parse( const std::string& );
 
       private:
-        static constexpr const char* MODULE_NAME = "mod_name";
-
         static constexpr const char* PROCESS_NAME = "process";
         static constexpr const char* HADR_NAME = "hadroniser";
         static constexpr const char* EVT_MOD_SEQ_NAME = "eventSequence";
@@ -34,10 +34,10 @@ namespace cepgen
         static constexpr const char* PDGLIST_NAME = "PDG";
         static constexpr const char* MCD_NAME = "mcdFile";
 
-        static void throwPythonError( const std::string& message );
-        static std::string pythonPath( const char* file );
-        static PyObject* element( PyObject* obj, const char* key );
-        static PyObject* encode( const char* str );
+        void throwPythonError( const std::string& ) const;
+        std::string pythonPath( const std::string& ) const;
+        PyObject* element( PyObject*, const char* ) const;
+        PyObject* encode( const char* str ) const;
 
         template<typename T> bool is( PyObject* obj ) const;
         template<typename T> T get( PyObject* obj ) const;
@@ -66,6 +66,8 @@ namespace cepgen
         void parseEventModifiers( PyObject* );
         void parseOutputModule( PyObject* );
         void parseExtraParticles( PyObject* );
+
+        std::string filename_;
     };
     template<> bool PythonHandler::is<bool>( PyObject* obj ) const;
     template<> bool PythonHandler::is<int>( PyObject* obj ) const;

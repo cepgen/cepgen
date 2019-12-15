@@ -4,9 +4,6 @@
 #include <math.h>
 #include <array>
 
-#include "CepGen/Core/utils.h"
-#include "CepGen/Physics/Constants.h"
-
 namespace cepgen
 {
   namespace strfun { class Parameterisation; }

@@ -1,12 +1,12 @@
-#include "CepGen/Core/ExportHandler.h"
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
-#include "CepGen/Core/utils.h"
+#include "CepGen/Modules/ExportModule.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Version.h"
+
+#include "CepGen/Core/Exception.h"
 
 #include "ProMCBook.h"
 
@@ -21,7 +21,7 @@ namespace cepgen
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Jul 2019
      */
-    class ProMCHandler : public GenericExportHandler
+    class ProMCHandler : public ExportModule
     {
       public:
         explicit ProMCHandler( const ParametersList& );
@@ -43,7 +43,7 @@ namespace cepgen
     };
 
     ProMCHandler::ProMCHandler( const ParametersList& params ) :
-      GenericExportHandler( "promc" ),
+      ExportModule( params ),
       file_( new ProMCBook( params.get<std::string>( "filename", "output.promc" ).c_str(), "w" ) ),
       compress_evt_( params.get<bool>( "compress", false ) ),
       log_file_( "logfile.txt" ),
@@ -106,7 +106,7 @@ namespace cepgen
 
       unsigned short i = 0;
       const auto& parts = compress_evt_
-        ? ev.compressed().particles()
+        ? ev.compress().particles()
         : ev.particles();
       for ( const auto& par : parts ) {
         auto part = event.mutable_particles();

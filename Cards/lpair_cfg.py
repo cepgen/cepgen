@@ -35,7 +35,10 @@ process = cepgen.Module('lpair',
 #)
 
 #--- example of an output module parameterisation
-#output = cepgen.Module('text', variables = ['nev', 'm(4)', 'tgen'], histVariables={'m(4)': cepgen.Parameters(low=0., high=250.)})
+output = cepgen.Module('text',
+    #variables = ['nev', 'm(4)', 'tgen'],
+    histVariables={'m(4)': cepgen.Parameters(low=0., high=250., nbins=20)}
+)
 #output = cepgen.Module('lhef', filename='test.lhe')
 #output = cepgen.Module('hepmc', filename='test.hepmc')
 

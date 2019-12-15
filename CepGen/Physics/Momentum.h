@@ -84,15 +84,15 @@ namespace cepgen
       /// Get one component of the 4-momentum (in GeV)
       double& operator[]( const unsigned int i );
       /// Set the momentum along the \f$x\f$-axis (in GeV)
-      inline void setPx( double px ) { px_ = px; }
+      inline Momentum& setPx( double px ) { px_ = px; return *this; }
       /// Momentum along the \f$x\f$-axis (in GeV)
       inline double px() const { return px_; }
       /// Set the momentum along the \f$y\f$-axis (in GeV)
-      inline void setPy( double py ) { py_ = py; }
+      inline Momentum& setPy( double py ) { py_ = py; return *this; }
       /// Momentum along the \f$y\f$-axis (in GeV)
       inline double py() const { return py_; }
       /// Set the longitudinal momentum (in GeV)
-      inline void setPz( double pz ) { pz_ = pz; }
+      inline Momentum& setPz( double pz ) { pz_ = pz; return *this; }
       /// Longitudinal momentum (in GeV)
       inline double pz() const { return pz_; }
       /// Transverse momentum (in GeV)

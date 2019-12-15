@@ -4,26 +4,42 @@ project(CepGen)
 set(PROJECT_VERSION 1)
 set(VERSION 0.9.7)
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake $ENV{ROOTSYS}/cmake)
+option(CMAKE_BUILD_CORE "Build Core library" ON)
+option(CMAKE_BUILD_ADDONS "Build AddOns" ON)
+option(CMAKE_BUILD_TESTS "Build tests" OFF)
+
+#----- release build by default
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
+
+#----- check that at least one target is to be built
+
+if(NOT CMAKE_BUILD_CORE AND NOT CMAKE_BUILD_ADDONS)
+  message(FATAL_ERROR "Nothing to be built!")
+endif()
+
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake $ENV{ROOTSYS}/cmake)
 set(CMAKE_CXX_FLAGS_DEBUG "-pg") # for gprof
 #set(CMAKE_CXX_FLAGS_DEBUG "-fprofile-arcs -ftest-coverage") # for gcov
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 set(LIB_INSTALL_DIR lib)
 
 #----- include external paths
+
 include(GNUInstallDirs)
 include(UseEnvironment)
 include(BuildRPM)
 
-set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/CepGen)
-set(CEPGEN_LIBRARIES CepGenCore CepGenEvent CepGenProcesses CepGenAddOns CepGenCards)
+set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
+set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
+set(CEPGEN_LIBRARIES)
 
-#----- define all individual modules to be built beforehand
+#----- define all individual modules/libraries to be built beforehand
 
 set(CEPGEN_MODULES Processes Event Cards)
+set(CEPGEN_LIBRARIES_NAMES CepGenCore CepGenEvent CepGenProcesses CepGenCards)
 
 #----- enable fortran for external libraries linking
 
@@ -32,11 +48,17 @@ enable_language(Fortran)
 #----- build all the intermediate objects
 
 include_directories(${PROJECT_SOURCE_DIR})
-add_subdirectory(CepGen)
-add_subdirectory(CepGenAddOns)
-foreach(_module ${CEPGEN_MODULES})
-  add_subdirectory(${CEPGEN_SOURCE_DIR}/${_module})
-endforeach()
+if(CMAKE_BUILD_CORE)
+  add_subdirectory(CepGen)
+  foreach(_module ${CEPGEN_MODULES})
+    add_subdirectory(${CEPGEN_LIB_DIR}/${_module})
+  endforeach()
+  list(APPEND CEPGEN_LIBRARIES ${CEPGEN_LIBRARIES_NAMES})
+endif()
+if(CMAKE_BUILD_ADDONS)
+  add_subdirectory(CepGenAddOns)
+  list(APPEND CEPGEN_LIBRARIES CepGenAddOns)
+endif()
 
 #----- copy the input cards and other files
 
@@ -59,13 +81,27 @@ install(DIRECTORY ${MODS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/CepGen COMPONE
 
 #----- set the tests/utils directory
 
-add_subdirectory(test)
+if(CMAKE_BUILD_CORE)
+  #--- build the executables
+  file(GLOB_RECURSE exec_sources RELATIVE ${CEPGEN_SOURCE_DIR} ${CEPGEN_SOURCE_DIR}/*.cpp)
+  foreach(exec_src ${exec_sources})
+    string(REPLACE ".cpp" "" exec_bin ${exec_src})
+    add_executable(${exec_bin} ${CEPGEN_SOURCE_DIR}/${exec_src})
+    target_link_libraries(${exec_bin} ${CEPGEN_LIBRARIES})
+  endforeach()
+  #--- build the tests
+  if(CMAKE_BUILD_TESTS)
+    enable_testing()
+    include(CTest)
+    add_subdirectory(test)
+  endif()
+endif()
 
 #----- documentation
 
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
-  set(DOXYGEN_IN ${CMAKE_SOURCE_DIR}/docs/Doxyfile.in)
+  set(DOXYGEN_IN ${CMAKE_SOURCE_DIR}/doc/Doxyfile.in)
   set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
   configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
   message(STATUS "Doxygen build started")

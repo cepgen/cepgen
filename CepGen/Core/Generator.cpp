@@ -4,13 +4,16 @@
 
 #include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/Timer.h"
-#include "CepGen/Core/utils.h"
+
+#include "CepGen/Utils/Timer.h"
+#include "CepGen/Utils/String.h"
 
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
 
-#include "CepGen/Processes/ProcessesHandler.h"
+#include "CepGen/Modules/ProcessesFactory.h"
+#include "CepGen/Modules/Process.h"
+
 #include "CepGen/Event/Event.h"
 
 #include <fstream>
@@ -48,7 +51,7 @@ namespace cepgen
   {
     if ( !parameters_->process() )
      return 0;
-    return parameters_->process()->numDimensions();
+    return parameters_->process()->ndim();
   }
 
   void
@@ -62,7 +65,7 @@ namespace cepgen
     result_ = result_error_ = -1.;
     {
       std::ostringstream os;
-      for ( const auto& pr : cepgen::proc::ProcessesHandler::get().modules() )
+      for ( const auto& pr : cepgen::proc::ProcessesFactory::get().modules() )
         os << " " << pr;
       CG_DEBUG( "Generator:clearRun" ) << "Processes handled:" << os.str() << ".";
     }
@@ -71,7 +74,7 @@ namespace cepgen
   Parameters&
   Generator::parameters()
   {
-    return *parameters_;
+    return *parameters_.get();
   }
 
   void
@@ -115,7 +118,8 @@ namespace cepgen
   void
   Generator::computeXsection( double& xsec, double& err )
   {
-    CG_INFO( "Generator" ) << "Starting the computation of the process cross-section.";
+    CG_INFO( "Generator" )
+      << "Starting the computation of the process cross-section.";
 
     integrate();
 
@@ -124,19 +128,24 @@ namespace cepgen
 
     if ( xsec < 1.e-2 )
       CG_INFO( "Generator" )
-        << "Total cross section: " << xsec*1.e3 << " +/- " << err*1.e3 << " fb.";
+        << "Total cross section: " << xsec*1.e3
+        << " +/- " << err*1.e3 << " fb.";
     else if ( xsec < 0.5e3 )
       CG_INFO( "Generator" )
-        << "Total cross section: " << xsec << " +/- " << err << " pb.";
+        << "Total cross section: " << xsec
+        << " +/- " << err << " pb.";
     else if ( xsec < 0.5e6 )
       CG_INFO( "Generator" )
-        << "Total cross section: " << xsec*1.e-3 << " +/- " << err*1.e-3 << " nb.";
+        << "Total cross section: " << xsec*1.e-3
+        << " +/- " << err*1.e-3 << " nb.";
     else if ( xsec < 0.5e9 )
       CG_INFO( "Generator" )
-        << "Total cross section: " << xsec*1.e-6 << " +/- " << err*1.e-6 << " µb.";
+        << "Total cross section: " << xsec*1.e-6
+        << " +/- " << err*1.e-6 << " µb.";
     else
       CG_INFO( "Generator" )
-        << "Total cross section: " << xsec*1.e-9 << " +/- " << err*1.e-9 << " mb.";
+        << "Total cross section: " << xsec*1.e-9
+        << " +/- " << err*1.e-9 << " mb.";
   }
 
   void
@@ -156,11 +165,11 @@ namespace cepgen
     integrator_->integrate( result_, result_error_ );
   }
 
-  std::shared_ptr<Event>
+  const Event&
   Generator::generateOneEvent()
   {
     integrator_->generateOne();
-    return parameters_->process()->last_event;
+    return parameters_->process()->event();
   }
 
   void
@@ -175,7 +184,7 @@ namespace cepgen
 
     const double gen_time_s = tmr.elapsed();
     CG_INFO( "Generator" )
-      << parameters_->numGeneratedEvents() << " event" << utils::s( parameters_->numGeneratedEvents() )
+      << utils::s( "event", parameters_->numGeneratedEvents() )
       << " generated in " << gen_time_s << " s "
       << "(" << gen_time_s/parameters_->numGeneratedEvents()*1.e3 << " ms/event).";
   }

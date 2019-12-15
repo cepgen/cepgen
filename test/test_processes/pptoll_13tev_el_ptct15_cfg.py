@@ -1,7 +1,7 @@
 import Config.Core as cepgen
 from Config.Integration.vegas_cff import integrator
 
-process = cepgen.Module('pptoll',
+process = cepgen.Module('pptoff',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.ElasticElastic,
         pair = 13,

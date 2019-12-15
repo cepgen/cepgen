@@ -2,6 +2,7 @@
 #define CepGen_Event_Event_h
 
 #include "CepGen/Event/Particle.h"
+#include <memory>
 
 namespace cepgen
 {
@@ -12,7 +13,7 @@ namespace cepgen
   class Event {
     public:
       /// Build an empty event
-      Event();
+      Event( bool compressed = false );
       /// Copy constructor
       Event( const Event& );
       /// Empty the whole event content
@@ -21,8 +22,10 @@ namespace cepgen
       void freeze();
       /// Restore the event to its "empty" state
       void restore();
+      /// Is the event already without intermediate-channel information?
+      bool compressed() const;
       /// Compress the event record
-      Event compressed() const;
+      Event compress() const;
 
       /// Dump all the known information on every Particle object contained in this Event container in the output stream
       /// \param[out] os Output stream where to dump the information
@@ -122,7 +125,10 @@ namespace cepgen
       };
       /// Event indices structure
       NumParticles evtcontent_;
+      /// Is the event "compressed"?
+      bool compressed_;
   };
+  typedef std::unique_ptr<Event> EventPtr;
 }
 
 #endif

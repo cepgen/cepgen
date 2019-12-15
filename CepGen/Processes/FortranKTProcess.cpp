@@ -4,7 +4,7 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Event/Event.h"
 
 #include "CepGen/Physics/KTFlux.h"
@@ -51,10 +51,10 @@ namespace cepgen
     FortranKTProcess::kProcParameters;
 
     FortranKTProcess::FortranKTProcess( const ParametersList& params, const char* name, const char* descr, std::function<double( void )> func ) :
-      GenericKTProcess( params, name, descr, { { PDG::photon, PDG::photon } }, { PDG::muon, PDG::muon } ),
+      KTProcess( params, name, descr, { { PDG::photon, PDG::photon } }, { PDG::muon, PDG::muon } ),
       func_( func )
     {
-      constants_.m_p = GenericProcess::mp_;
+      constants_.m_p = Process::mp_;
       constants_.units = constants::GEVM2_TO_PB;
       constants_.pi = M_PI;
       constants_.alpha_em = constants::ALPHA_EM;
@@ -66,10 +66,10 @@ namespace cepgen
       mom_ip1_ = event_->getOneByRole( Particle::IncomingBeam1 ).momentum();
       mom_ip2_ = event_->getOneByRole( Particle::IncomingBeam2 ).momentum();
 
-      registerVariable( y1_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "First central particle rapidity" );
-      registerVariable( y2_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "Second central particle rapidity" );
-      registerVariable( pt_diff_, Mapping::linear, kin_.cuts.central.pt_diff, { 0., 50. }, "Transverse momentum difference between central particles" );
-      registerVariable( phi_pt_diff_, Mapping::linear, kin_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Central particles azimuthal angle difference" );
+      defineVariable( y1_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "First central particle rapidity" );
+      defineVariable( y2_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "Second central particle rapidity" );
+      defineVariable( pt_diff_, Mapping::linear, kin_.cuts.central.pt_diff, { 0., 50. }, "Transverse momentum difference between central particles" );
+      defineVariable( phi_pt_diff_, Mapping::linear, kin_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Central particles azimuthal angle difference" );
 
       //===========================================================================================
       // feed phase space cuts to the common block
@@ -169,8 +169,8 @@ namespace cepgen
       ktkin_.y2 = y2_;
       ktkin_.ptdiff = pt_diff_;
       ktkin_.phiptdiff = phi_pt_diff_;
-      ktkin_.m_x = MX_;
-      ktkin_.m_y = MY_;
+      ktkin_.m_x = sqrt( mX2_ );
+      ktkin_.m_y = sqrt( mY2_ );
 
       //--- compute the event weight
       return func_();

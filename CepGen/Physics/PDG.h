@@ -21,7 +21,7 @@ namespace cepgen
         invalid = 0,
         down = 1, up = 2,
         electron = 11, muon = 13, tau = 15,
-        gluon = 21, photon = 22, W = 23,
+        gluon = 21, photon = 22, W = 24,
         pomeron = 990, reggeon = 110, piZero = 111, piPlus = 211, eta = 221,
         phi1680 = 100333,
         proton = 2212, diffractiveProton = 9902210
