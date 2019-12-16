@@ -224,9 +224,6 @@ namespace cepgen
           << "Trying to evaluate weight while phase space point\n\t"
           << "coordinates are not set!";
 
-      //--- process-specific preparation
-      beforeComputeWeight();
-
       //--- generate and initialise all variables
       generateVariables();
 

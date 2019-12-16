@@ -42,12 +42,12 @@ int main( int argc, char* argv[] )
     gen.parameters().generation().enabled = num_events > 0;
   }
 
-  //--- list all parameters
-  CG_LOG( "main" ) << gen.parametersPtr();
-
   cepgen::utils::AbortHandler ctrl_c;
 
   try {
+    //--- list all parameters
+    CG_LOG( "main" ) << gen.parametersPtr();
+
     //--- let there be a cross-section...
     double xsec = 0., err = 0.;
     gen.computeXsection( xsec, err );

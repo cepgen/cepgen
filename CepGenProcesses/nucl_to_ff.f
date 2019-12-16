@@ -293,15 +293,15 @@ c     =================================================================
 
       ipdg(1) = pdg_l
       pc(1,1) = pt1x
-      pc(1,2) = pt1y
-      pc(1,3) = alpha1*ak1z + beta1*ak2z
-      pc(1,4) = alpha1*ak10 + beta1*ak20
+      pc(2,1) = pt1y
+      pc(3,1) = alpha1*ak1z + beta1*ak2z
+      pc(4,1) = alpha1*ak10 + beta1*ak20
 
       ipdg(2) = -pdg_l
-      pc(2,1) = pt2x
+      pc(1,2) = pt2x
       pc(2,2) = pt2y
-      pc(2,3) = alpha2*ak1z + beta2*ak2z
-      pc(2,4) = alpha2*ak10 + beta2*ak20
+      pc(3,2) = alpha2*ak1z + beta2*ak2z
+      pc(4,2) = alpha2*ak10 + beta2*ak20
 
       eta1 = 0.5d0*dlog((dsqrt(amt1**2*(dcosh(y1))**2 - am_l**2) +
      2       amt1*dsinh(y1))/(dsqrt(amt1**2*(dcosh(y1))**2 - am_l**2)
@@ -476,12 +476,12 @@ c     unintegrated parton distributions
 c     ============================================
 
       if(a_nuc1.le.1) then
-        f1 = CepGen_kT_flux(iflux1,x1,q1t2,sfmod,am_x)
+        f1 = CepGen_kT_flux(iflux1,x1,q1t2,sfmod,am_p,am_x)
       else
         f1 = CepGen_kT_flux_HI(iflux1,x1,q1t2,a_nuc1,z_nuc1)
       endif
       if(a_nuc2.le.1) then
-        f2 = CepGen_kT_flux(iflux2,x2,q2t2,sfmod,am_y)
+        f2 = CepGen_kT_flux(iflux2,x2,q2t2,sfmod,am_p,am_y)
       else
         f2 = CepGen_kT_flux_HI(iflux2,x2,q2t2,a_nuc2,z_nuc2)
       endif

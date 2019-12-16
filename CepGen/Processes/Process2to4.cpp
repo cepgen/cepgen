@@ -206,12 +206,12 @@ namespace cepgen
       const HeavyIon hi1( kin_.incoming_beams.first.pdg );
       const double f1 = ( hi1 ) // check if we are in heavy ion mode
         ? ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, hi1 )
-        : ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, *kin_.structure_functions, mX2_ );
+        : ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, *kin_.structure_functions, mA2_, mX2_ );
 
       const HeavyIon hi2( kin_.incoming_beams.second.pdg );
       const double f2 = ( hi2 ) // check if we are in heavy ion mode
         ? ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, hi2 )
-        : ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, *kin_.structure_functions, mY2_ );
+        : ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, *kin_.structure_functions, mB2_, mY2_ );
 
       CG_DEBUG_LOOP( "2to4:fluxes" )
         << "Incoming fluxes for (x/kt2) = "

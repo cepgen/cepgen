@@ -589,18 +589,11 @@ namespace cepgen
 
     //---------------------------------------------------------------------------------------------
 
-    void
-    LPAIR::beforeComputeWeight()
-    {
-      ep1_ = (*event_)[Particle::IncomingBeam1][0].energy();
-      ep2_ = (*event_)[Particle::IncomingBeam2][0].energy();
-    }
-
-    //---------------------------------------------------------------------------------------------
-
     double
     LPAIR::computeWeight()
     {
+      ep1_ = (*event_)[Particle::IncomingBeam1][0].energy();
+      ep2_ = (*event_)[Particle::IncomingBeam2][0].energy();
       // Mass difference between the first outgoing particle
       // and the first incoming particle
       masses_.w31 = mX2_-mA2_;

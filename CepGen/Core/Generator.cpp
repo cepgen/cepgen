@@ -148,6 +148,7 @@ namespace cepgen
   Generator::integrate()
   {
     clearRun();
+    result_ = result_error_ = 0.;
 
     // first destroy and recreate the integrator instance
     if ( !parameters_->process() )

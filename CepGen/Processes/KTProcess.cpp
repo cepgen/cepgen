@@ -81,7 +81,7 @@ namespace cepgen
             ? KTFlux::HI_Photon_Elastic
             : KTFlux::P_Photon_Elastic;
           CG_DEBUG( "KTProcess:kinematics" )
-            << "Set the kt flux for first incoming photon to \""
+            << "KT flux for first incoming parton set to \""
             << kin_.incoming_beams.first.kt_flux << "\".";
         }
         else if ( flux1 != KTFlux::P_Photon_Inelastic
@@ -90,8 +90,8 @@ namespace cepgen
             throw CG_FATAL( "KTProcess:kinematics" )
               << "Inelastic photon emission from HI not yet supported!";
           kin_.incoming_beams.first.kt_flux = KTFlux::P_Photon_Inelastic_Budnev;
-          CG_DEBUG( "KTProcess:kinematics" )
-            << "Set the kt flux for first incoming photon to \""
+          CG_INFO( "KTProcess:kinematics" )
+            << "KT flux for first incoming parton set to \""
             << kin_.incoming_beams.first.kt_flux << "\".";
         }
         //==========================================================================================
@@ -104,7 +104,7 @@ namespace cepgen
             ? KTFlux::HI_Photon_Elastic
             : KTFlux::P_Photon_Elastic;
           CG_DEBUG( "KTProcess:kinematics" )
-            << "Set the kt flux for second incoming photon to \""
+            << "KT flux for second incoming parton set to \""
             << kin_.incoming_beams.second.kt_flux << "\".";
         }
         else if ( flux2 != KTFlux::P_Photon_Inelastic
@@ -113,8 +113,8 @@ namespace cepgen
             throw CG_FATAL( "KTProcess:kinematics" )
               << "Inelastic photon emission from HI not yet supported!";
           kin_.incoming_beams.second.kt_flux = KTFlux::P_Photon_Inelastic_Budnev;
-          CG_DEBUG( "KTProcess:kinematics" )
-            << "Set the kt flux for second incoming photon to \""
+          CG_INFO( "KTProcess:kinematics" )
+            << "KT flux for second incoming parton set to \""
             << kin_.incoming_beams.second.kt_flux << "\".";
         }
       }
@@ -179,19 +179,15 @@ namespace cepgen
           break;
         case KinematicsMode::ElasticInelastic:
           op1.setStatus( Particle::Status::FinalState );
-          op2.setStatus( Particle::Status::Unfragmented );
-          op2.setMass( sqrt( mY2_ ) );
+          op2.setStatus( Particle::Status::Unfragmented ).setMass( sqrt( mY2_ ) );
           break;
         case KinematicsMode::InelasticElastic:
-          op1.setStatus( Particle::Status::Unfragmented );
-          op1.setMass( sqrt( mX2_ ) );
+          op1.setStatus( Particle::Status::Unfragmented ).setMass( sqrt( mX2_ ) );
           op2.setStatus( Particle::Status::FinalState );
           break;
         case KinematicsMode::InelasticInelastic:
-          op1.setStatus( Particle::Status::Unfragmented );
-          op1.setMass( sqrt( mX2_ ) );
-          op2.setStatus( Particle::Status::Unfragmented );
-          op2.setMass( sqrt( mY2_ ) );
+          op1.setStatus( Particle::Status::Unfragmented ).setMass( sqrt( mX2_ ) );
+          op2.setStatus( Particle::Status::Unfragmented ).setMass( sqrt( mY2_ ) );
           break;
         default: {
           throw CG_FATAL( "KTProcess" )

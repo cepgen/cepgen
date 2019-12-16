@@ -30,8 +30,9 @@ namespace cepgen
   /// \param[in] x Parton momentum fraction
   /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\rm T}^2\f$ of the incoming parton
   /// \param[in] sf Structure functions evaluator
-  /// \param[in] mx2 Outgoing diffractive proton squared mass
-  double ktFlux( const KTFlux& type, double x, double kt2, strfun::Parameterisation& sf, double mx2 );
+  /// \param[in] mi2 Incoming particle squared mass
+  /// \param[in] mf2 Outgoing diffractive squared mass
+  double ktFlux( const KTFlux& type, double x, double kt2, strfun::Parameterisation& sf, double mi2, double mf2 );
   /// \brief Compute the flux (from heavy ion) for a given parton \f$(x,k_{\rm T})\f$
   /// \param[in] type Flux modelling
   /// \param[in] x Parton momentum fraction

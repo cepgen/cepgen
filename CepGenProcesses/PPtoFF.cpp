@@ -155,8 +155,7 @@ namespace cepgen
       const double km1 = 1./( ph_m1.pt2()+eps12 );
 
       Momentum phi1 = kp1*ph_p1-km1*ph_m1;
-      phi1.setPz( 0. );
-      phi1.setEnergy( kp1-km1 );
+      phi1.setPz( 0. ).setEnergy( kp1-km1 );
       const double dot1 = phi1.threeProduct( q1_ )/qt1_;
       const double cross1 = phi1.crossProduct( q1_ )/qt1_;
 
@@ -169,8 +168,7 @@ namespace cepgen
       const double km2 = 1./( ph_m2.pt2()+eps22 );
 
       Momentum phi2 = kp2*ph_p2-km2*ph_m2;
-      phi2.setPz( 0. );
-      phi2.setEnergy( kp2-km2 );
+      phi2.setPz( 0. ).setEnergy( kp2-km2 );
       const double dot2 = phi2.threeProduct( q2_ )/qt2_;
       const double cross2 = phi2.crossProduct( q2_ )/qt2_;
 

@@ -29,13 +29,14 @@ extern "C" {
   /// \param[in] x Fractional momentum loss
   /// \param[in] kt2 The \f$k_{\rm T}\f$ transverse momentum norm
   /// \param[in] sfmode Structure functions set for dissociative emission
-  /// \param[in] mx Diffractive state mass for dissociative emission
+  /// \param[in] min Incoming particle mass
+  /// \param[in] mout Diffractive state mass for dissociative emission
   double
-  cepgen_kt_flux_( int& fmode, double& x, double& kt2, int& sfmode, double& mx )
+  cepgen_kt_flux_( int& fmode, double& x, double& kt2, int& sfmode, double& min, double& mout )
   {
     using namespace cepgen;
     static auto sf = strfun::StructureFunctionsFactory::get().build( sfmode );
-    return ktFlux( (KTFlux)fmode, x, kt2, *sf, mx );
+    return ktFlux( (KTFlux)fmode, x, kt2, *sf, min*min, mout*mout );
   }
 
   /// Compute a \f$k_{\rm T}\f$-dependent flux for heavy ions
