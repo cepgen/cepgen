@@ -100,7 +100,7 @@ c       central particles properties
      &       CepGen_particle_mass(6)) ! top
 #else
           print *,'alpha(S) evolution algorithm not linked!'
-          exit
+          stop
 #endif
         endif
         first_init = .false.

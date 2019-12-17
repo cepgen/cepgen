@@ -32,6 +32,8 @@ namespace cepgen
       Schaefer            = 301,
       Partonic            = 401,
     };
+    /// Human-readable description of this SF parameterisation type
+    std::ostream& operator<<( std::ostream&, const strfun::Type& );
     /// Generic placeholder for the parameterisation of nucleon structure functions
     class Parameterisation
     {
@@ -84,8 +86,6 @@ namespace cepgen
         std::shared_ptr<sigrat::Parameterisation> r_ratio_;
     };
   }
-  /// Human-readable description of this SF parameterisation type
-  std::ostream& operator<<( std::ostream&, const strfun::Type& );
 }
 
 #endif
