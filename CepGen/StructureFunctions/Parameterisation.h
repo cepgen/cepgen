@@ -49,6 +49,8 @@ namespace cepgen
           return *this;
         }
         /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
+        friend std::ostream& operator<<( std::ostream&, const Parameterisation* );
+        /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
         friend std::ostream& operator<<( std::ostream&, const Parameterisation& );
         /// Human-readable description of this SF parameterisation
         virtual std::string description() const; ///< Human-readable description of this SF set

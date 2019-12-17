@@ -127,34 +127,8 @@ namespace cepgen
       // intermediate partons information
       //-------------------------------------------------------------------------------------------
 
-      //--- positive-z parton
       genparams_.iflux1 = (int)kin_.incoming_beams.first.kt_flux;
-      switch ( (KTFlux)genparams_.iflux1 ) {
-        case KTFlux::P_Gluon_KMR:
-          event_->oneWithRole( Particle::Parton1 ).setPdgId( PDG::gluon ); break;
-        case KTFlux::P_Photon_Elastic:
-        case KTFlux::P_Photon_Inelastic:
-        case KTFlux::P_Photon_Inelastic_Budnev:
-        case KTFlux::HI_Photon_Elastic:
-          event_->oneWithRole( Particle::Parton1 ).setPdgId( PDG::photon ); break;
-        case KTFlux::invalid:
-          throw CG_FATAL( "FortranKTProcess" )
-            << "Invalid flux for 2nd incoming parton: " << genparams_.iflux2 << "!";
-      }
-      //--- negative-z parton
       genparams_.iflux2 = (int)kin_.incoming_beams.second.kt_flux;
-      switch ( (KTFlux)genparams_.iflux2 ) {
-        case KTFlux::P_Gluon_KMR:
-          event_->oneWithRole( Particle::Parton2 ).setPdgId( PDG::gluon ); break;
-        case KTFlux::P_Photon_Elastic:
-        case KTFlux::P_Photon_Inelastic:
-        case KTFlux::P_Photon_Inelastic_Budnev:
-        case KTFlux::HI_Photon_Elastic:
-          event_->oneWithRole( Particle::Parton2 ).setPdgId( PDG::photon ); break;
-        case KTFlux::invalid:
-          throw CG_FATAL( "FortranKTProcess" )
-            << "Invalid flux for 2nd incoming parton: " << genparams_.iflux2 << "!";
-      }
     }
 
     double

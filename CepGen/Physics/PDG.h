@@ -41,7 +41,7 @@ namespace cepgen
       void dump() const;
       size_t size() const;
       const std::string& name( pdgid_t ) const;
-      short colours( pdgid_t ) const;
+      double colours( pdgid_t ) const;
       double mass( pdgid_t ) const;
       double width( pdgid_t ) const;
       double charge( pdgid_t ) const;

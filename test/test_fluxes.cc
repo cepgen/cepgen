@@ -39,7 +39,8 @@ int main( int argc, char* argv[] )
     out << x
       << "\t" << cepgen::ktFlux( cepgen::KTFlux::P_Photon_Elastic, x, kt2, *sf, mi2, mx2 )
       << "\t" << cepgen::ktFlux( cepgen::KTFlux::P_Photon_Inelastic_Budnev, x, kt2, *sf, mi2, mx2 )
-      << "\t" << cepgen::ktFlux( cepgen::KTFlux::P_Gluon_KMR, x, kt2, *sf, mi2, mx2 )
+      //<< "\t" << cepgen::ktFlux( cepgen::KTFlux::P_Gluon_KMR, x, kt2, *sf, mi2, mx2 )
+      //<< "\t" << cepgen::ktFlux( cepgen::KTFlux::P_Gluon_KMR_alt, x, kt2, *sf, mi2, mx2 )
       << "\n";
   }
   CG_INFO( "main" )

@@ -89,7 +89,7 @@ c       central particles properties
         q_l = CepGen_particle_charge(pdg_l)     ! central particles charge
         if(iflux1.ge.20.and.iflux1.lt.40) then
           if(icontri.eq.3.or.icontri.eq.4) then
-            print *,'Invalid process mode for collinear gluon emission!'
+            print *,'Invalid process mode for gluon emission!'
             stop
           endif
 #ifdef ALPHA_S
@@ -98,6 +98,9 @@ c       central particles properties
      &       CepGen_particle_mass(4), ! charm
      &       CepGen_particle_mass(5), ! bottom
      &       CepGen_particle_mass(6)) ! top
+#else
+          print *,'alpha(S) evolution algorithm not linked!'
+          exit
 #endif
         endif
         first_init = .false.
@@ -455,10 +458,9 @@ c     first parton coupling
 c     =================================================================
       if(iflux1.ge.20.and.iflux1.lt.40) then ! at least one gluon exchanged
 #ifdef ALPHA_S
-        t_max = max(amt1**2,amt2**2)
+        t_max = max(amt1,amt2)**2
         amu2 = max(eps12,t_max)
-        am_x = dsqrt(amu2)
-        coupling = coupling * 4.d0*pi*alphaS(am_x)/2.d0 ! colour flow
+        coupling = coupling * 4.d0*pi*alphaS(dsqrt(amu2))/2.d0
 #else
         print *,'alphaS not linked to this instance!'
         stop
@@ -470,7 +472,6 @@ c     =================================================================
 c     second parton coupling
 c     =================================================================
       coupling = coupling * 4.d0*pi*alpha_em*q_l**2 ! photon exchange
-      coupling = coupling * 3.d0
 
 c     ============================================
 c     unintegrated parton distributions

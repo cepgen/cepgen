@@ -51,9 +51,11 @@ namespace cepgen
 
         explicit ALLM( const ParametersList& params = ParametersList() );
         ALLM& operator()( double xbj, double q2 ) override;
+        std::string description() const override { return descr_; }
 
       private:
         Parameters params_;
+        std::string descr_;
     };
 
     ALLM::ALLM( const ParametersList& params ) :
@@ -61,18 +63,30 @@ namespace cepgen
       params_( params.get<ParametersList>( "parameterisation" ) )
     {
       const auto& model = params.get<std::string>( "model" );
-      if ( model == "GD07p" )
+      if ( model == "GD07p" ) {
         params_ = Parameters::gd07p();
-      else if ( model == "GD11p" )
+        descr_ = "ALLM{GD07p}";
+      }
+      else if ( model == "GD11p" ) {
         params_ = Parameters::gd11p();
-      else if ( model == "ALLM91" )
+        descr_ = "ALLM{GD11p}";
+      }
+      else if ( model == "ALLM91" ) {
         params_ = Parameters::allm91();
-      else if ( model == "ALLM97" )
+        descr_ = "ALLM{91}";
+      }
+      else if ( model == "ALLM97" ) {
         params_ = Parameters::allm97();
-      else if ( model == "HHT_ALLM" )
+        descr_ = "ALLM{97}";
+      }
+      else if ( model == "HHT_ALLM" ) {
         params_ = Parameters::hht_allm();
-      else if ( model == "HHT_ALLM_FT" )
+        descr_ = "ALLM{HHT}";
+      }
+      else if ( model == "HHT_ALLM_FT" ) {
         params_ = Parameters::hht_allm_ft();
+        descr_ = "ALLM{HHT_FT}";
+      }
       CG_DEBUG( "ALLM" ) << "ALLM structure functions builder initialised.\n"
         << "Parameterisation (" << params_.type << "):\n"
         << " *) Pomeron trajectory:\n"

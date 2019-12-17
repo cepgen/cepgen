@@ -76,6 +76,18 @@ extern "C" {
     }
   }
 
+  /// Colour factor of a particle
+  double
+  cepgen_particle_colour_( int& pdg_id )
+  {
+    try {
+      return cepgen::PDG::get().colours( (cepgen::pdgid_t)pdg_id );
+    } catch ( const cepgen::Exception& e ) {
+      e.dump();
+      exit( 0 );
+    }
+  }
+
   void
   cepgen_init_()
   {

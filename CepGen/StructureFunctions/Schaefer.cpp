@@ -17,9 +17,9 @@ namespace cepgen
       public:
         explicit Schaefer( const ParametersList& params = ParametersList() );
         Schaefer& operator()( double xbj, double q2 ) override;
+        std::string description() const override;
 
       private:
-        std::string description() const override;
         double rho( double w2 ) const;
         void initialise();
         /// Transition \f$Q^2\f$ before reaching the continuum/perturbative regions

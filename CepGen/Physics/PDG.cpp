@@ -76,7 +76,7 @@ namespace cepgen
     return operator()( id ).description;
   }
 
-  short
+  double
   PDG::colours( pdgid_t id ) const
   {
     return operator()( id ).colours;

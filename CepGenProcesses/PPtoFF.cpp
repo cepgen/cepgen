@@ -11,6 +11,15 @@
 
 #include <iomanip>
 
+namespace
+{
+  extern "C"
+  {
+    void initalphas_( int& iord, double& fr2, double& mur, double& asmur, double& mc, double& mb, double& mt );
+    double alphas_( double& mur );
+  }
+}
+
 namespace cepgen
 {
   namespace proc
@@ -32,7 +41,7 @@ namespace cepgen
         double onShellME() const;
         double offShellME() const;
 
-        static constexpr double prefactor_ = pow( constants::G_EM, 4 );
+        double prefactor_;
 
         const enum class Mode { onShell = 0, offShell = 1 } method_;
 
@@ -41,15 +50,16 @@ namespace cepgen
         unsigned short p_term_ll_, p_term_lt_, p_term_tt1_, p_term_tt2_;
 
         double mf2_, qf_;
-        double mA2_, mB2_;
         unsigned short colf_;
+        bool gluon1_, gluon2_;
     };
 
     PPtoFF::PPtoFF( const ParametersList& params ) :
       Process2to4( params, "pptoff", "ɣɣ → f⁺f¯", { PDG::photon, PDG::photon }, params.get<ParticleProperties>( "pair" ).pdgid ),
+      prefactor_( pow( constants::G_EM, 4 ) ),
       method_ ( (Mode)params.get<int>( "method", (int)Mode::offShell ) ),
       p_mat1_( 0 ), p_mat2_( 0 ), p_term_ll_( 0 ), p_term_lt_( 0 ), p_term_tt1_( 0 ), p_term_tt2_( 0 ),
-      mA2_( 0. ), mB2_( 0. )
+      gluon1_( false ), gluon2_( false )
     {
       if ( !params.empty() && ( !cs_prop_.fermion || cs_prop_.charge == 0. ) )
         throw CG_FATAL( "PPtoFF:prepare" )
@@ -86,6 +96,33 @@ namespace cepgen
       mB2_ = (*event_)[Particle::IncomingBeam2][0].mass2();
       CG_DEBUG( "PPtoFF:prepare" ) << "Incoming state:\n\t"
         << "mp(1/2) = " << sqrt( mA2_ ) << "/" << sqrt( mB2_ ) << ".";
+
+      if ( (*event_)[Particle::Parton1][0].pdgId() == PDG::gluon ) {
+        prefactor_ /= constants::ALPHA_EM;
+        gluon1_ = true;
+      }
+      if ( (*event_)[Particle::Parton2][0].pdgId() == PDG::gluon ) {
+        prefactor_ /= constants::ALPHA_EM;
+        gluon2_ = true;
+      }
+      if ( gluon1_ || gluon2_ ) {
+#ifdef ALPHA_S
+          int iord = 2;
+          double fr2 = 1., mur = 1., asmur = 0.68183;
+          double mc = PDG::get().mass( 4 ), mb = PDG::get().mass( 5 ), mt = PDG::get().mass( 6 );
+          CG_INFO( "PPtoFF:prepare" )
+            << "Initialisation of the alpha(S) evolution algorithm with parameters:\n\t"
+            << "order: " << iord << ", fr2: " << fr2 << ", "
+            << "mur: " << mur << ", asmur: " << asmur << "\n\t"
+            << "quark masses (GeV): charm: " << mc << ", bottom: " << mb << ", top: " << mt << ".";
+          initalphas_( iord, fr2, mur, asmur, mc, mb, mt );
+          CG_INFO( "PPtoFF:prepare" )
+            << "alpha(S) evolution algorithm initialised.";
+#else
+        throw CG_FATAL( "PPtoFF:prepare" )
+          << "alpha(S) evolution algorithm not linked to this instance!";
+#endif
+      }
     }
 
     double
@@ -97,15 +134,15 @@ namespace cepgen
           mat_el *= onShellME(); break;
         case Mode::offShell:
           mat_el *= offShellME(); break;
+        default:
+          throw CG_FATAL( "PPtoFF" )
+            << "Invalid ME calculation method (" << (int)method_ << ")!";
       }
       CG_DEBUG_LOOP( "PPtoFF:ME" )
-        << "colour factor: " << colf_ << "\n\t"
         << "prefactor: " << prefactor_ << "\n\t"
         << "matrix element: " << mat_el << ".";
-      return mat_el;
 
-      throw CG_FATAL( "PPtoFF" )
-        << "Invalid ME calculation method (" << (int)method_ << ")!";
+      return mat_el;
     }
 
     double
@@ -206,7 +243,17 @@ namespace cepgen
       //     symmetrization
       //=================================================================
 
-      const double amat2 = 0.5*( p_mat1_*amat2_1+p_mat2_*amat2_2 ) * pow( x1*x2*s_, 2 );
+      double amat2 = 0.5*( p_mat1_*amat2_1+p_mat2_*amat2_2 ) * pow( x1*x2*s_, 2 );
+
+      const double tmax = pow( std::max( amt1, amt2 ), 2 );
+      if ( gluon1_ ) {
+        double amu = sqrt( std::max( eps12, tmax ) );
+        amat2 *= alphas_( amu );
+      }
+      if ( gluon2_ ) {
+        double amu = sqrt( std::max( eps12, tmax ) );
+        amat2 *= alphas_( amu );
+      }
 
       CG_DEBUG_LOOP( "PPtoFF:offShell" )
         << "aux2(1/2) = " << aux2_1 << " / " << aux2_2 << "\n\t"

@@ -125,6 +125,35 @@ namespace cepgen
       defineVariable( phi_qt2_, Mapping::linear, kin_.cuts.initial.phi_qt, { 0., 2.*M_PI }, "Second incoming parton azimuthal angle" );
 
       //============================================================================================
+      // register the incoming partons
+      //============================================================================================
+
+      switch ( kin_.incoming_beams.first.kt_flux ) {
+        case KTFlux::P_Gluon_KMR:
+          event_->oneWithRole( Particle::Parton1 ).setPdgId( PDG::gluon ); break;
+        case KTFlux::P_Photon_Elastic:
+        case KTFlux::P_Photon_Inelastic:
+        case KTFlux::P_Photon_Inelastic_Budnev:
+        case KTFlux::HI_Photon_Elastic:
+          event_->oneWithRole( Particle::Parton1 ).setPdgId( PDG::photon ); break;
+        case KTFlux::invalid: default:
+          throw CG_FATAL( "KTProcess:kinematics" )
+            << "Invalid flux for 2nd incoming parton: " << kin_.incoming_beams.first.kt_flux << "!";
+      }
+      switch ( kin_.incoming_beams.second.kt_flux ) {
+        case KTFlux::P_Gluon_KMR:
+          event_->oneWithRole( Particle::Parton2 ).setPdgId( PDG::gluon ); break;
+        case KTFlux::P_Photon_Elastic:
+        case KTFlux::P_Photon_Inelastic:
+        case KTFlux::P_Photon_Inelastic_Budnev:
+        case KTFlux::HI_Photon_Elastic:
+          event_->oneWithRole( Particle::Parton2 ).setPdgId( PDG::photon ); break;
+        case KTFlux::invalid: default:
+          throw CG_FATAL( "KTProcess:kinematics" )
+            << "Invalid flux for 2nd incoming parton: " << kin_.incoming_beams.second.kt_flux << "!";
+      }
+
+      //============================================================================================
       // register all process-dependent variables
       //============================================================================================
 

@@ -34,6 +34,7 @@ namespace cepgen
         /// Fiore \cite Fiore:2002re and Brasse \cite Brasse:1976bf proton structure functions
         explicit FioreBrasse( const ParametersList& params = ParametersList() );
         FioreBrasse& operator()( double xbj, double q2 ) override;
+        std::string description() const override { return "Fiore-Brasse"; }
 
       private:
         Parameters params_;

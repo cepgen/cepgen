@@ -83,13 +83,19 @@ namespace cepgen
     }
 
     std::ostream&
+    operator<<( std::ostream& os, const Parameterisation* sf )
+    {
+      os << sf->description();
+      if ( sf->old_vals_ != std::pair<double,double>{ 0., 0. } )
+        os << " at (" << sf->old_vals_.first << ", " << sf->old_vals_.second << "): "
+           << "F2 = " << sf->F2 << ", FL = " << sf->FL;
+      return os;
+    }
+
+    std::ostream&
     operator<<( std::ostream& os, const Parameterisation& sf )
     {
-      os << sf.description();
-      if ( sf.old_vals_ != std::pair<double,double>{ 0., 0. } )
-        os << " at (" << sf.old_vals_.first << ", " << sf.old_vals_.second << "): "
-           << "F2 = " << sf.F2 << ", FL = " << sf.FL;
-      return os;
+      return os << &sf;
     }
   }
 

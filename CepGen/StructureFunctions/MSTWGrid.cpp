@@ -45,7 +45,7 @@ namespace mstw
       Grid& operator()( double xbj, double q2 ) override;
       /// Retrieve the grid's header information
       header_t header() const { return header_; }
-      /// Grid parameterisation object
+      std::string description() const override;
 
         //--- already retrieved from grid, so no need to recompute it
       Grid& computeFL( double xbj, double q2 ) override { return *this; }
@@ -54,7 +54,6 @@ namespace mstw
       static constexpr const char* DEFAULT_MSTW_GRID_PATH = "External/mstw_sf_scan_nnlo.dat";
 
     private:
-      std::string description() const override;
       static constexpr unsigned int GOOD_MAGIC = 0x5754534d; // MSTW in ASCII
 
       header_t header_;

@@ -56,7 +56,9 @@ c     =================================================================
       external CepGen_kT_flux,CepGen_kT_flux_HI
       double precision CepGen_kT_flux,CepGen_kT_flux_HI
       external CepGen_particle_charge,CepGen_particle_mass
+      external CepGen_particle_colour
       double precision CepGen_particle_charge,CepGen_particle_mass
+      double precision CepGen_particle_colour
 
 c     =================================================================
 c     helpers for the retrieval of input parameters from the process

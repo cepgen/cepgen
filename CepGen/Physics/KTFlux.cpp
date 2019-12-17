@@ -9,6 +9,14 @@
 
 #include "CepGen/Core/Exception.h"
 
+namespace
+{
+  extern "C"
+  {
+    void f_inter_kmr_fg_( double& logx, double& logkt2, double& logmu2, int& mode, double& fg );
+  }
+}
+
 namespace cepgen
 {
   const double KTFluxParameters::kMinKTFlux = 1.e-20;
@@ -47,10 +55,30 @@ namespace cepgen
         }
       } break;
       case KTFlux::P_Gluon_KMR: {
+        static bool built = false;
+        double fg;
+        int zero = 0, one = 1;
+        double lx = log10( x ), lkt2 = log10( kt2 ), lmx2 = log10( mf2 );
+        if ( !built ) {
+          CG_INFO( "KTFlux:KMR_alt" )
+            << "Building the legacy KMR interpolation grid.";
+          f_inter_kmr_fg_( lx, lkt2, lmx2, zero, fg );
+          CG_INFO( "KTFlux:KMR_alt" )
+            << "Legacy KMR interpolation grid built.";
+          f_inter_kmr_fg_( lx, lkt2, lmx2, one, fg );
+          built = true;
+          return fg;
+        }
+        else {
+          f_inter_kmr_fg_( lx, lkt2, lmx2, one, fg );
+          return fg;
+        }
+      }
+      case KTFlux::P_Gluon_KMR_alt: {
         return kmr::GluonGrid::get()( log10( x ), log10( kt2 ), log10( mf2 ) );
       } break;
       default:
-        throw CG_FATAL( "GenericKTProcess:flux" ) << "Invalid flux type: " << type;
+        throw CG_FATAL( "KTFlux" ) << "Invalid flux type: " << type;
     }
   }
 
@@ -73,7 +101,7 @@ namespace cepgen
         flux = constants::ALPHA_EM*M_1_PI*z*z*ela1*ela2/q2_ela;
       } break;
       default:
-        throw CG_FATAL("GenericKTProcess:flux") << "Invalid flux type: " << type;
+        throw CG_FATAL("KTFlux") << "Invalid flux type: " << type;
     }
     if ( flux < KTFluxParameters::kMinKTFlux )
       return 0.;

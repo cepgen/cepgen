@@ -48,6 +48,7 @@ namespace cepgen
           throw std::invalid_argument( oss.str() );
         }
         params.set<I>( ParametersList::MODULE_NAME, name );
+        params.set<I>( "id", name );
         if ( params_map_.count( name ) > 0 )
           params += params_map_.at( name );
         return map_.at( name )( params );

@@ -21,10 +21,9 @@ endif()
 
 #----- check the external dependencies for physics utilities
 
-if(ALPHAS_SRC)
-  message(STATUS "alphaS evolution algorithm found in ${ALPHAS_SRC}")
-  list(APPEND phys_sources ${ALPHAS_SRC})
-  list(APPEND core_definitions -DALPHA_S)
+if(KMR_INTERP)
+  message(STATUS "KMR interpolation algorithm found in ${KMR_INTERP}")
+  list(APPEND phys_sources ${KMR_INTERP})
 endif()
 if(MUPARSER)
   message(STATUS "Formulas parsing will use muParser found in ${MUPARSER}")
