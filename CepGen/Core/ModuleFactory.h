@@ -3,8 +3,6 @@
 
 #include "CepGen/Core/ParametersList.h"
 
-#include <iostream>
-
 #include <unordered_map>
 #include <vector>
 #include <memory>
@@ -37,7 +35,6 @@ namespace cepgen
           oss << __PRETTY_FUNCTION__ << "\n\n  *** Duplicate module registration detected for index/name \"" << name << "\"! ***\n";
           throw std::invalid_argument( oss.str() );
         }
-std::cout << "tttttest>>>" << name << std::endl;
         map_[name] = &build<U>;
         params_map_[name] = def_params;
       }
@@ -51,7 +48,6 @@ std::cout << "tttttest>>>" << name << std::endl;
           throw std::invalid_argument( oss.str() );
         }
         params.set<I>( ParametersList::MODULE_NAME, name );
-        params.set<I>( "id", name );
         if ( params_map_.count( name ) > 0 )
           params += params_map_.at( name );
         return map_.at( name )( params );
@@ -59,8 +55,8 @@ std::cout << "tttttest>>>" << name << std::endl;
       /// Build one instance of a named module
       /// \param[in] params List of parameters to be invoked by the constructor
       std::unique_ptr<T> build( ParametersList params = ParametersList() ) const {
-        if ( params.has<I>( KEY ) ) {
-          const I& idx = params.get<I>( KEY );
+        if ( params.has<I>( ParametersList::MODULE_NAME ) ) {
+          const I& idx = params.get<I>( ParametersList::MODULE_NAME );
           if ( map_.count( idx ) == 0 )
             throw std::invalid_argument( std::string( __PRETTY_FUNCTION__ )+"\n\n  *** Failed to build a module with index/name \""+std::to_string( idx )+"\" from factory! ***\n" );
           if ( params_map_.count( idx ) > 0 )
@@ -77,8 +73,6 @@ std::cout << "tttttest>>>" << name << std::endl;
           out.emplace_back( p.first );
         return out;
       }
-
-      static constexpr const char* KEY = "id";
 
     private:
       explicit ModuleFactory() = default;
