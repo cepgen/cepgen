@@ -170,42 +170,38 @@ namespace cepgen
     double
     PPtoFF::offShellME() const
     {
-      const double amt1 = std::hypot( p_c1_.pt(), cs_prop_.mass );
-      const double amt2 = std::hypot( p_c2_.pt(), cs_prop_.mass );
-      const double alpha1 = amt1/sqs_*exp( y_c1_ ), beta1 = amt1/sqs_*exp( -y_c1_ );
-      const double alpha2 = amt2/sqs_*exp( y_c2_ ), beta2 = amt2/sqs_*exp( -y_c2_ );
+      const double alpha1 = amt1_/sqs_*exp( y_c1_ ), beta1 = amt1_/sqs_*exp( -y_c1_ );
+      const double alpha2 = amt2_/sqs_*exp( y_c2_ ), beta2 = amt2_/sqs_*exp( -y_c2_ );
       const double x1 = alpha1+alpha2, x2 = beta1+beta2;
       const double z1p = alpha1/x1, z1m = alpha2/x1, z1 = z1p*z1m;
       const double z2p = beta1/x2, z2m = beta2/x2, z2 = z2p*z2m;
 
       CG_DEBUG_LOOP( "2to4:zeta" )
-        << "amt(1/2) = " << amt1 << " / " << amt2 << "\n\t"
+        << "amt(1/2) = " << amt1_ << " / " << amt2_ << "\n\t"
         << "z(1/2)p = " << z1p << " / " << z2p << ", z1 = " << z1 << "\n\t"
         << "z(1/2)m = " << z1m << " / " << z2m << ", z2 = " << z2 << ".";
 
       //--- positive-z photon kinematics
+      const Momentum ak1 = ( z1m*p_c1_-z1p*p_c2_ ).setPz( 0. );
+      const Momentum ph_p1 = ak1+z1p*q2_, ph_m1 = ak1-z1m*q2_;
       const double t1abs = ( q1_.pt2() + x1*( mX2_-mA2_ )+x1*x1*mA2_ )/( 1.-x1 );
       const double eps12 = mf2_+z1*t1abs;
-      const Momentum ak1 = ( z1m*p_c1_-z1p*p_c2_ );
-      const Momentum ph_p1 = ak1+z1p*q2_, ph_m1 = ak1-z1m*q2_;
       const double kp1 = 1./( ph_p1.pt2()+eps12 );
       const double km1 = 1./( ph_m1.pt2()+eps12 );
 
-      Momentum phi1 = kp1*ph_p1-km1*ph_m1;
-      phi1.setPz( 0. ).setEnergy( kp1-km1 );
+      const Momentum phi1 = ( kp1*ph_p1-km1*ph_m1 ).setPz( 0. ).setEnergy( kp1-km1 );
       const double dot1 = phi1.threeProduct( q1_ )/qt1_;
       const double cross1 = phi1.crossProduct( q1_ )/qt1_;
 
       //--- negative-z photon kinematics
+      const Momentum ak2 = ( z2m*p_c1_-z2p*p_c2_ ).setPz( 0. );
+      const Momentum ph_p2 = ak2+z2p*q1_, ph_m2 = ak2-z2m*q1_;
       const double t2abs = ( q2_.pt2() + x2*( mY2_-mB2_ )+x2*x2*mB2_ )/( 1.-x2 );
       const double eps22 = mf2_+z2*t2abs;
-      const Momentum ak2 = ( z2m*p_c1_-z2p*p_c2_ );
-      const Momentum ph_p2 = ak2+z2p*q1_, ph_m2 = ak2-z2m*q1_;
       const double kp2 = 1./( ph_p2.pt2()+eps22 );
       const double km2 = 1./( ph_m2.pt2()+eps22 );
 
-      Momentum phi2 = kp2*ph_p2-km2*ph_m2;
-      phi2.setPz( 0. ).setEnergy( kp2-km2 );
+      const Momentum phi2 = ( kp2*ph_p2-km2*ph_m2 ).setPz( 0. ).setEnergy( kp2-km2 );
       const double dot2 = phi2.threeProduct( q2_ )/qt2_;
       const double cross2 = phi2.crossProduct( q2_ )/qt2_;
 
@@ -245,14 +241,14 @@ namespace cepgen
 
       double amat2 = 0.5*( p_mat1_*amat2_1+p_mat2_*amat2_2 ) * pow( x1*x2*s_, 2 );
 
-      const double tmax = pow( std::max( amt1, amt2 ), 2 );
+      const double tmax = pow( std::max( amt1_, amt2_ ), 2 );
       if ( gluon1_ ) {
         double amu = sqrt( std::max( eps12, tmax ) );
-        amat2 *= alphas_( amu );
+        amat2 *= alphas_( amu )/2.;
       }
       if ( gluon2_ ) {
-        double amu = sqrt( std::max( eps12, tmax ) );
-        amat2 *= alphas_( amu );
+        double amu = sqrt( std::max( eps22, tmax ) );
+        amat2 *= alphas_( amu )/2.;
       }
 
       CG_DEBUG_LOOP( "PPtoFF:offShell" )

@@ -34,12 +34,12 @@ namespace cepgen
     void
     Process2to4::preparePhaseSpace()
     {
-      p1_ = (*event_)[Particle::IncomingBeam1][0].momentum();
-      p2_ = (*event_)[Particle::IncomingBeam2][0].momentum();
+      pA_ = event_->oneWithRole( Particle::IncomingBeam1 ).momentum();
+      pB_ = event_->oneWithRole( Particle::IncomingBeam2 ).momentum();
       CG_DEBUG_LOOP( "2to4:incoming" )
-        << "incoming particles: p1 = " << p1_ << ", p2 = " << p2_ << ".";
+        << "incoming particles: p1 = " << pA_ << ", p2 = " << pB_ << ".";
 
-      ww_ = 0.5 * ( 1.+sqrt( 1.-4.*p1_.mass()*p2_.mass()/s_ ) );
+      ww_ = 0.5 * ( 1.+sqrt( 1.-4.*pA_.mass()*pB_.mass()/s_ ) );
 
       defineVariable( y_c1_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "First outgoing particle rapidity" );
       defineVariable( y_c2_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "Second outgoing particle rapidity" );
@@ -106,18 +106,18 @@ namespace cepgen
         return 0.;
 
       //--- transverse mass for the two central particles
-      const double amt1 = std::hypot( p1t, cs_prop_.mass );
-      const double amt2 = std::hypot( p2t, cs_prop_.mass );
+      amt1_ = std::hypot( p1t, cs_prop_.mass );
+      amt2_ = std::hypot( p2t, cs_prop_.mass );
 
       //--- window in central system invariant mass
-      const double invm = sqrt( amt1*amt1+amt2*amt2+2.*amt1*amt2*cosh( y_c1_-y_c2_ )-qt_sum.pt2() );
+      const double invm = sqrt( amt1_*amt1_+amt2_*amt2_+2.*amt1_*amt2_*cosh( y_c1_-y_c2_ )-qt_sum.pt2() );
       if ( !kin_.cuts.central.mass_sum.passes( invm ) )
         return 0.;
 
       //--- auxiliary quantities
 
-      const double alpha1 = amt1/sqs_*exp( y_c1_ ), beta1 = amt1/sqs_*exp( -y_c1_ );
-      const double alpha2 = amt2/sqs_*exp( y_c2_ ), beta2 = amt2/sqs_*exp( -y_c2_ );
+      const double alpha1 = amt1_/sqs_*exp( y_c1_ ), beta1 = amt1_/sqs_*exp( -y_c1_ );
+      const double alpha2 = amt2_/sqs_*exp( y_c2_ ), beta2 = amt2_/sqs_*exp( -y_c2_ );
 
       CG_DEBUG_LOOP( "2to4:sudakov" )
         << "Sudakov parameters:\n\t"
@@ -150,8 +150,8 @@ namespace cepgen
 
       //--- four-momenta of the outgoing protons (or remnants)
 
-      const double px_plus  = ( 1.-x1 )*p1_.p()*M_SQRT2;
-      const double py_minus = ( 1.-x2 )*p2_.p()*M_SQRT2;
+      const double px_plus  = ( 1.-x1 )*pA_.p()*M_SQRT2;
+      const double py_minus = ( 1.-x2 )*pB_.p()*M_SQRT2;
       const double px_minus = ( mX2_+q1t2 )*0.5/px_plus;
       const double py_plus  = ( mY2_+q2t2 )*0.5/py_minus;
       // warning! sign of pz??
@@ -189,10 +189,10 @@ namespace cepgen
 
       //--- four-momenta of the outgoing central particles
 
-      p_c1_ = pt_c1+alpha1*p1_+beta1*p2_;
-      p_c1_.setEnergy( alpha1*p1_.energy()+beta1*p2_.energy() );
-      p_c2_ = pt_c2+alpha2*p1_+beta2*p2_;
-      p_c2_.setEnergy( alpha2*p1_.energy()+beta2*p2_.energy() );
+      p_c1_ = pt_c1+alpha1*pA_+beta1*pB_;
+      p_c1_.setEnergy( alpha1*pA_.energy()+beta1*pB_.energy() );
+      p_c2_ = pt_c2+alpha2*pA_+beta2*pB_;
+      p_c2_.setEnergy( alpha2*pA_.energy()+beta2*pB_.energy() );
 
       CG_DEBUG_LOOP( "2to4:central" )
         << "First central particle:  " << p_c1_ << ", mass = " << p_c1_.mass() << "\n\t"
