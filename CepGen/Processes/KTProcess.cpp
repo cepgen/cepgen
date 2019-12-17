@@ -4,12 +4,8 @@
 
 #include "CepGen/Event/Event.h"
 
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/StructureFunctions/SigmaRatio.h"
-
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/KTFlux.h"
-#include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
 
 namespace cepgen
@@ -169,8 +165,8 @@ namespace cepgen
       Particle& op1 = event_->oneWithRole( Particle::OutgoingBeam1 ),
                &op2 = event_->oneWithRole( Particle::OutgoingBeam2 );
 
-      op1.setMomentum( PX_ );
-      op2.setMomentum( PY_ );
+      op1.setMomentum( pX_ );
+      op2.setMomentum( pY_ );
 
       switch ( kin_.mode ) {
         case KinematicsMode::ElasticElastic:
@@ -200,10 +196,10 @@ namespace cepgen
       //============================================================================================
 
       Particle& g1 = event_->oneWithRole( Particle::Parton1 );
-      g1.setMomentum( event_->oneWithRole( Particle::IncomingBeam1 ).momentum()-PX_, true );
+      g1.setMomentum( event_->oneWithRole( Particle::IncomingBeam1 ).momentum()-pX_, true );
 
       Particle& g2 = event_->oneWithRole( Particle::Parton2 );
-      g2.setMomentum( event_->oneWithRole( Particle::IncomingBeam2 ).momentum()-PY_, true );
+      g2.setMomentum( event_->oneWithRole( Particle::IncomingBeam2 ).momentum()-pY_, true );
 
       //============================================================================================
       //     two-parton system

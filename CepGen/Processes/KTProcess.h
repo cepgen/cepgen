@@ -72,9 +72,9 @@ namespace cepgen
         double phi_qt2_;
 
         /// First outgoing proton
-        Momentum PX_;
+        Momentum pX_;
         /// Second outgoing proton
-        Momentum PY_;
+        Momentum pY_;
 
       private:
         /// First and second intermediate parton (photon, pomeron, ...)

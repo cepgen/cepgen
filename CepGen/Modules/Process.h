@@ -157,7 +157,7 @@ namespace cepgen
 
       protected:
         /// Numerical limits for sanity comparisons
-        static constexpr double NUM_LIMITS = 1.e-4;
+        static constexpr double NUM_LIMITS = 1.e-3; // MeV/mm-level
         /// Handler to a variable mapped by this process
         struct MappingVariable
         {

@@ -185,9 +185,11 @@ namespace cepgen
     integrator_->generate( parameters_->generation().maxgen, callback );
 
     const double gen_time_s = tmr.elapsed();
+    const double rate_ms = ( parameters_->numGeneratedEvents() > 0 )
+      ? gen_time_s/parameters_->numGeneratedEvents()*1.e3 : 0.;
     CG_INFO( "Generator" )
       << utils::s( "event", parameters_->numGeneratedEvents() )
       << " generated in " << gen_time_s << " s "
-      << "(" << gen_time_s/parameters_->numGeneratedEvents()*1.e3 << " ms/event).";
+      << "(" << rate_ms << " ms/event).";
   }
 }

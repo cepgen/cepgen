@@ -64,6 +64,7 @@ namespace cepgen
         virtual Parameterisation& computeFL( double xbj, double q2, double r );
         /// Compute the \f$F_1\f$ structure function for a given point
         double F1( double xbj, double q2 ) const;
+        double tau( double xbj, double q2 ) const;
 
       public:
         /// Interpolation type of structure functions

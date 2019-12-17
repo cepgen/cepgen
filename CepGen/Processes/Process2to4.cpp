@@ -15,6 +15,9 @@ namespace cepgen
 {
   namespace proc
   {
+    const Limits
+    Process2to4::x_limits_{ 0., 1. };
+
     Process2to4::Process2to4( const ParametersList& params, const std::string& name, const std::string& desc, std::array<pdgid_t,2> partons, pdgid_t cs_id ) :
       KTProcess( params, name, desc, partons, { cs_id, cs_id } ),
       cs_prop_( PDG::get()( cs_id ) ),
@@ -124,11 +127,9 @@ namespace cepgen
       const double q1t2 = qt_1.pt2(), q2t2 = qt_2.pt2();
       const double x1 = alpha1+alpha2, x2 = beta1+beta2;
 
-      { // sanity check for x_i values
-        const Limits x_limits{ 0., 1. };
-        if ( !x_limits.passes( x1 ) || !x_limits.passes( x2 ) )
-          return 0.;
-      }
+      //--- sanity check for x_i values
+      if ( !x_limits_.passes( x1 ) || !x_limits_.passes( x2 ) )
+        return 0.;
 
       //--- additional conditions for energy-momentum conservation
 
@@ -159,20 +160,20 @@ namespace cepgen
         << "px± = " << px_plus << " / " << px_minus << "\n\t"
         << "py± = " << py_plus << " / " << py_minus << ".";
 
-      PX_ = Momentum( 0., 0., ( px_plus-px_minus )*M_SQRT1_2 )-qt_1;
-      PX_.setEnergy( ( px_plus+px_minus )*M_SQRT1_2 );
+      pX_ = Momentum( 0., 0., ( px_plus-px_minus )*M_SQRT1_2 )-qt_1;
+      pX_.setEnergy( ( px_plus+px_minus )*M_SQRT1_2 );
 
-      PY_ = Momentum( 0., 0., ( py_plus-py_minus )*M_SQRT1_2 )-qt_2;
-      PY_.setEnergy( ( py_plus+py_minus )*M_SQRT1_2 );
+      pY_ = Momentum( 0., 0., ( py_plus-py_minus )*M_SQRT1_2 )-qt_2;
+      pY_.setEnergy( ( py_plus+py_minus )*M_SQRT1_2 );
 
       CG_DEBUG_LOOP( "2to4:remnants" )
-        << "First remnant:  " << PX_ << ", mass = " << PX_.mass() << "\n\t"
-        << "Second remnant: " << PY_ << ", mass = " << PY_.mass() << ".";
+        << "First remnant:  " << pX_ << ", mass = " << pX_.mass() << "\n\t"
+        << "Second remnant: " << pY_ << ", mass = " << pY_.mass() << ".";
 
-      if ( fabs( PX_.mass2()-mX2_ ) > NUM_LIMITS )
-        throw CG_FATAL( "PPtoFF" ) << "Invalid X system squared mass: " << PX_.mass2() << "/" << mX2_ << ".";
-      if ( fabs( PY_.mass2()-mY2_ ) > NUM_LIMITS )
-        throw CG_FATAL( "PPtoFF" ) << "Invalid Y system squared mass: " << PY_.mass2() << "/" << mY2_ << ".";
+      if ( fabs( pX_.mass2()-mX2_ ) > NUM_LIMITS )
+        throw CG_FATAL( "PPtoFF" ) << "Invalid X system squared mass: " << pX_.mass2() << "/" << mX2_ << ".";
+      if ( fabs( pY_.mass2()-mY2_ ) > NUM_LIMITS )
+        throw CG_FATAL( "PPtoFF" ) << "Invalid Y system squared mass: " << pY_.mass2() << "/" << mY2_ << ".";
 
       //--- four-momenta of the intermediate partons
 
@@ -200,6 +201,8 @@ namespace cepgen
       //--- compute the central 2-to-2 matrix element
 
       const double amat2 = computeCentralMatrixElement();
+      if ( amat2 <= 0. ) // skip computing the fluxes if no contribution
+        return 0.;
 
       //--- compute fluxes according to modelling specified in parameters card
 
@@ -235,7 +238,7 @@ namespace cepgen
     void
     Process2to4::fillCentralParticlesKinematics()
     {
-      // randomise the charge of the outgoing leptons
+      //--- randomise the charge of outgoing system
       short sign = ( drand() > 0.5 ) ? +1 : -1;
 
       //--- first outgoing central particle

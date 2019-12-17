@@ -15,6 +15,7 @@ c     =================================================================
       integer imethod,pdg_l
       integer iterm11,iterm22,iterm12,itermtt
       integer imat1,imat2
+      integer i
 
 c     =================================================================
 c     local variables
@@ -269,16 +270,16 @@ c     =================================================================
       px_plus = (1.d0-x1) * p1_plus
       px_minus = ((a_nuc1*am_x)**2 + q1tx**2 + q1ty**2)/2.d0/px_plus
 
-      px(1) = - q1tx
-      px(2) = - q1ty
+      px(1) = -q1tx
+      px(2) = -q1ty
       px(3) = (px_plus - px_minus)/dsqrt(2.d0)
       px(4) = (px_plus + px_minus)/dsqrt(2.d0)
 
       py_minus = (1.d0-x2) * p2_minus
       py_plus =  ((a_nuc2*am_y)**2 + q2tx**2 + q2ty**2)/2.d0/py_minus
 
-      py(1) = - q2tx
-      py(2) = - q2ty
+      py(1) = -q2tx
+      py(2) = -q2ty
       py(3) = (py_plus - py_minus)/dsqrt(2.d0)
       py(4) = (py_plus + py_minus)/dsqrt(2.d0)
 
@@ -303,12 +304,12 @@ c     =================================================================
       pc(3,2) = alpha2*ak1z + beta2*ak2z
       pc(4,2) = alpha2*ak10 + beta2*ak20
 
-      eta1 = 0.5d0*dlog((dsqrt(amt1**2*(dcosh(y1))**2 - am_l**2) +
-     2       amt1*dsinh(y1))/(dsqrt(amt1**2*(dcosh(y1))**2 - am_l**2)
+      eta1 = 0.5d0*dlog((dsqrt(amt1**2*(dcosh(y1))**2 - am_l**2)
+     2     + amt1*dsinh(y1))/(dsqrt(amt1**2*(dcosh(y1))**2 - am_l**2)
      3     - amt1*dsinh(y1)))
 
-      eta2 = 0.5d0*dlog((dsqrt(amt2**2*(dcosh(y2))**2 - am_l**2) +
-     2       amt2*dsinh(y2))/(dsqrt(amt2**2*(dcosh(y2))**2 - am_l**2)
+      eta2 = 0.5d0*dlog((dsqrt(amt2**2*(dcosh(y2))**2 - am_l**2)
+     2     + amt2*dsinh(y2))/(dsqrt(amt2**2*(dcosh(y2))**2 - am_l**2)
      3     - amt2*dsinh(y2)))
 
       if(ieta) then
@@ -327,13 +328,13 @@ c     =================================================================
 c     Mendelstam variables
 c     =================================================================
 
-      that1 = (q10-pc(1,4))**2
+      that1 = (q10-pc(4,1))**2
      &       -(q1tx-pc(1,1))**2-(q1ty-pc(2,1))**2-(q1z-pc(3,1))**2
-      uhat1 = (q10-pc(2,4))**2
+      uhat1 = (q10-pc(4,2))**2
      &       -(q1tx-pc(1,2))**2-(q1ty-pc(2,2))**2-(q1z-pc(3,2))**2
-      that2 = (q20-pc(2,4))**2
+      that2 = (q20-pc(4,2))**2
      &       -(q2tx-pc(1,2))**2-(q2ty-pc(2,2))**2-(q2z-pc(3,2))**2
-      uhat2 = (q20-pc(1,4))**2
+      uhat2 = (q20-pc(4,1))**2
      &       -(q2tx-pc(1,1))**2-(q2ty-pc(2,1))**2-(q2z-pc(3,1))**2
 
       that = (that1+that2)/2.d0
@@ -361,8 +362,8 @@ c     =================================================================
       term9  = -that**3*uhat
       term10 = -that*uhat**3
 
-      amat2 = -2.d0*(  term1+term2+term3+term4+term5
-     2                    +term6+term7+term8+term9+term10 )
+      amat2 = -2.d0*(term1+term2+term3+term4+term5
+     2              +term6+term7+term8+term9+term10)
      3             / ( (am_l**2-that)**2 * (am_l**2-uhat)**2 )
 
       elseif(imethod.eq.1)then

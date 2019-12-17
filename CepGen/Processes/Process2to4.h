@@ -27,6 +27,7 @@ namespace cepgen
         double that() const;
         double uhat() const;
 
+        static const Limits x_limits_;
         ParticleProperties cs_prop_; ///< PDG id of the central particles
 
         Cuts single_limits_;

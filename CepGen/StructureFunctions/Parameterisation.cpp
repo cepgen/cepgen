@@ -32,9 +32,15 @@ namespace cepgen
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       params_( params ), old_vals_({ 0., 0. }),
       r_ratio_( sigrat::SigmaRatiosFactory::get().build(
-        params.get<ParametersList>( "sigmaRatio", ParametersList().set<int>( "id", (int)sigrat::Type::E143 ) )
+        params.get<ParametersList>( "sigmaRatio", ParametersList().set<int>( "id", (int)sigrat::Type::SibirtsevBlunden ) )
       ) )
     {}
+
+    double
+    Parameterisation::tau( double xbj, double q2 ) const
+    {
+      return 4.*xbj*xbj*mp2_/q2;
+    }
 
     double
     Parameterisation::F1( double xbj, double q2 ) const
@@ -44,7 +50,7 @@ namespace cepgen
           << "Invalid range for Q² = " << q2 << " or xBj = " << xbj << ".";
         return 0.;
       }
-      const double F1 = 0.5*( ( 1+4.*xbj*xbj*mp2_/q2 )*F2 - FL )/xbj;
+      const double F1 = 0.5*( ( 1+tau( xbj, q2 ) )*F2 - FL )/xbj;
       CG_DEBUG_LOOP( "StructureFunctions:F1" )
         << "F1 for Q² = " << q2 << ", xBj = " << xbj << ": " << F1 << "\n\t"
         << "(F2 = " << F2 << ", FL = " << FL << ").";
@@ -57,15 +63,14 @@ namespace cepgen
       if ( !r_ratio_ )
         throw CG_FATAL( "StructureFunctions:FL" )
           << "Failed to retrieve a R-ratio calculator!";
-      double r_error = 0.;
+      double r_error;
       return computeFL( xbj, q2, (*r_ratio_)( xbj, q2, r_error ) );
     }
 
     Parameterisation&
     Parameterisation::computeFL( double xbj, double q2, double r )
     {
-      const double tau = 4.*xbj*xbj*mp2_/q2;
-      FL = F2 * ( 1.+tau ) * ( r/( 1.+r ) );
+      FL = F2 * ( 1.+tau( xbj, q2 ) ) * ( r/( 1.+r ) );
       return *this;
     }
 
@@ -81,7 +86,7 @@ namespace cepgen
     operator<<( std::ostream& os, const Parameterisation& sf )
     {
       os << sf.description();
-      if ( sf.old_vals_ != std::pair<double,double>() )
+      if ( sf.old_vals_ != std::pair<double,double>{ 0., 0. } )
         os << " at (" << sf.old_vals_.first << ", " << sf.old_vals_.second << "): "
            << "F2 = " << sf.F2 << ", FL = " << sf.FL;
       return os;
