@@ -3,6 +3,8 @@
 
 #include "CepGen/Core/ParametersList.h"
 
+#include <iostream>
+
 #include <unordered_map>
 #include <vector>
 #include <memory>
@@ -35,6 +37,7 @@ namespace cepgen
           oss << __PRETTY_FUNCTION__ << "\n\n  *** Duplicate module registration detected for index/name \"" << name << "\"! ***\n";
           throw std::invalid_argument( oss.str() );
         }
+std::cout << "tttttest>>>" << name << std::endl;
         map_[name] = &build<U>;
         params_map_[name] = def_params;
       }

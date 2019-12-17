@@ -6,6 +6,18 @@
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/AbortHandler.h"
 
+#include "CepGen/Modules/CardsHandlerFactory.h"
+
+#include "CepGen/Modules/ProcessesFactory.h"
+#include "CepGen/Modules/Process.h"
+
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
+
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+
 using namespace std;
 
 void list_modules();
@@ -67,18 +79,6 @@ int main( int argc, char* argv[] )
 
   return 0;
 }
-
-#include "CepGen/Modules/CardsHandlerFactory.h"
-
-#include "CepGen/Modules/ProcessesFactory.h"
-#include "CepGen/Modules/Process.h"
-
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/StructureFunctions/SigmaRatio.h"
-
-#include "CepGen/Modules/EventModifierFactory.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
 
 void list_modules()
 {
