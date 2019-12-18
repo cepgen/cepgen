@@ -35,8 +35,10 @@ namespace cepgen
 
         const enum class Mode { onShell = 0, offShell = 1 } method_;
 
-        double prefactor_;
+        ParametersList alphas_params_;
         std::shared_ptr<AlphaS> alphas_;
+
+        double prefactor_;
         bool gluon1_, gluon2_;
 
         //--- parameters for off-shell matrix element
@@ -50,6 +52,8 @@ namespace cepgen
     PPtoFF::PPtoFF( const ParametersList& params ) :
       Process2to4( params, "pptoff", "ɣɣ → f⁺f¯", { PDG::photon, PDG::photon }, params.get<ParticleProperties>( "pair" ).pdgid ),
       method_ ( (Mode)params.get<int>( "method", (int)Mode::offShell ) ),
+      alphas_params_( params.get<ParametersList>( "alphaS", ParametersList()
+        .set<std::string>( ParametersList::MODULE_NAME, "pegasus" ) ) ),
       prefactor_( 1. ), gluon1_( false ), gluon2_( false ),
       p_mat1_( 0 ), p_mat2_( 0 ),
       p_term_ll_( 0 ), p_term_lt_( 0 ), p_term_tt1_( 0 ), p_term_tt2_( 0 )
@@ -116,7 +120,7 @@ namespace cepgen
       }
       if ( gluon1_ || gluon2_ )
         // at least one gluon; need to initialise the alpha(s) evolution algorithm
-        alphas_ = AlphaSFactory::get().build( "pegasus" );
+        alphas_ = AlphaSFactory::get().build( alphas_params_ );
     }
 
     double
