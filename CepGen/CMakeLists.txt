@@ -34,6 +34,13 @@ if(ALPHAS_SRC)
 else()
   file(REMOVE_ITEM phys_sources Physics/AlphaSPEGASUS.cpp)
 endif()
+if(APFEL)
+  message(STATUS "APFEL found in ${APFEL}")
+  list(APPEND core_includes ${APFEL_INCLUDE})
+  list(APPEND core_libraries ${APFEL})
+else()
+  list(REMOVE_ITEM phys_sources Physics/AlphaSAPFEL.cpp)
+endif()
 
 #----- check the external dependencies for physics utilities
 

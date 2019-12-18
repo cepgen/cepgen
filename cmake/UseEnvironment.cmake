@@ -52,6 +52,9 @@ include_directories(${GSL_INCLUDE})
 #--- searching for LHAPDF
 find_library(LHAPDF LHAPDF HINTS ${LHAPDF_DIR} PATH_SUFFIXES lib)
 find_path(LHAPDF_INCLUDE LHAPDF HINTS ${LHAPDF_DIR} PATH_SUFFIXES include)
+#--- searching for APFEL
+find_library(APFEL APFEL HINTS ${APFEL_DIR} PATH_SUFFIXES lib)
+find_path(APFEL_INCLUDE APFEL HINTS ${APFEL_DIR} PATH_SUFFIXES include)
 #--- searching for HepMC
 set(HEPMC_DIRS $ENV{HEPMC_DIR} ${HEPMC_DIR} /usr /usr/local)
 find_library(HEPMC_LIB NAMES HepMC3 HepMC HINTS ${HEPMC_DIRS} PATH_SUFFIXES lib64 lib)
