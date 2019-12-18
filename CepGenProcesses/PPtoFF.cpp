@@ -97,7 +97,7 @@ namespace cepgen
       CG_DEBUG( "PPtoFF:prepare" ) << "Incoming state:\n\t"
         << "mp(1/2) = " << sqrt( mA2_ ) << "/" << sqrt( mB2_ ) << ".";
 
-      switch ( (*event_)[Particle::Parton1][0].pdgId() ) {
+      switch ( event_->oneWithRole( Particle::Parton1 ).pdgId() ) {
         case PDG::gluon:
           gluon1_ = true;
           prefactor_ *= 4.*M_PI;
@@ -109,7 +109,7 @@ namespace cepgen
           throw CG_FATAL( "PPtoFF:prepare" )
             << "Only photon & gluon partons are supported!";
       }
-      switch ( (*event_)[Particle::Parton2][0].pdgId() ) {
+      switch ( event_->oneWithRole( Particle::Parton2 ).pdgId() ) {
         case PDG::gluon:
           gluon2_ = true;
           prefactor_ *= 4.*M_PI;
@@ -247,9 +247,8 @@ namespace cepgen
       //     for heavy flavours
       //=================================================================
 
-      const double aux = 1./q1_.pt2()/q2_.pt2();
-      const double amat2_1 = aux2_1*2.*z1*q1_.pt2()*aux;
-      const double amat2_2 = aux2_2*2.*z2*q2_.pt2()*aux;
+      const double amat2_1 = aux2_1*2.*z1/q2_.pt2();
+      const double amat2_2 = aux2_2*2.*z2/q1_.pt2();
 
       //=================================================================
       //     symmetrization
@@ -269,7 +268,7 @@ namespace cepgen
 
       CG_DEBUG_LOOP( "PPtoFF:offShell" )
         << "aux2(1/2) = " << aux2_1 << " / " << aux2_2 << "\n\t"
-        << "aux,z(1/2) = " << aux << " / " << z1 << " / " << z2 << "\n\t"
+        << "z(1/2) = " << z1 << " / " << z2 << "\n\t"
         << "q(1/2)t2 = " << q1_.pt2() << " / " << q2_.pt2() << "\n\t"
         << "amat2(1/2) = " << amat2_1 << " / " << amat2_2 << "\n\t"
         << "amat2 = " << amat2 << ".";
