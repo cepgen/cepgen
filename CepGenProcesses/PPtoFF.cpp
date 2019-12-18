@@ -41,9 +41,10 @@ namespace cepgen
         double onShellME() const;
         double offShellME() const;
 
-        double prefactor_;
-
         const enum class Mode { onShell = 0, offShell = 1 } method_;
+
+        double prefactor_;
+        bool gluon1_, gluon2_;
 
         //--- parameters for off-shell matrix element
         unsigned short p_mat1_, p_mat2_;
@@ -51,15 +52,14 @@ namespace cepgen
 
         double mf2_, qf_;
         unsigned short colf_;
-        bool gluon1_, gluon2_;
     };
 
     PPtoFF::PPtoFF( const ParametersList& params ) :
       Process2to4( params, "pptoff", "ɣɣ → f⁺f¯", { PDG::photon, PDG::photon }, params.get<ParticleProperties>( "pair" ).pdgid ),
-      prefactor_( pow( constants::G_EM, 4 ) ),
       method_ ( (Mode)params.get<int>( "method", (int)Mode::offShell ) ),
-      p_mat1_( 0 ), p_mat2_( 0 ), p_term_ll_( 0 ), p_term_lt_( 0 ), p_term_tt1_( 0 ), p_term_tt2_( 0 ),
-      gluon1_( false ), gluon2_( false )
+      prefactor_( 1. ), gluon1_( false ), gluon2_( false ),
+      p_mat1_( 0 ), p_mat2_( 0 ),
+      p_term_ll_( 0 ), p_term_lt_( 0 ), p_term_tt1_( 0 ), p_term_tt2_( 0 )
     {
       if ( !params.empty() && ( !cs_prop_.fermion || cs_prop_.charge == 0. ) )
         throw CG_FATAL( "PPtoFF:prepare" )
@@ -97,13 +97,29 @@ namespace cepgen
       CG_DEBUG( "PPtoFF:prepare" ) << "Incoming state:\n\t"
         << "mp(1/2) = " << sqrt( mA2_ ) << "/" << sqrt( mB2_ ) << ".";
 
-      if ( (*event_)[Particle::Parton1][0].pdgId() == PDG::gluon ) {
-        prefactor_ /= constants::ALPHA_EM;
-        gluon1_ = true;
+      switch ( (*event_)[Particle::Parton1][0].pdgId() ) {
+        case PDG::gluon:
+          gluon1_ = true;
+          prefactor_ *= 4.*M_PI;
+          break;
+        case PDG::photon:
+          prefactor_ *= pow( constants::G_EM*qf_, 2 );
+          break;
+        default:
+          throw CG_FATAL( "PPtoFF:prepare" )
+            << "Only photon & gluon partons are supported!";
       }
-      if ( (*event_)[Particle::Parton2][0].pdgId() == PDG::gluon ) {
-        prefactor_ /= constants::ALPHA_EM;
-        gluon2_ = true;
+      switch ( (*event_)[Particle::Parton2][0].pdgId() ) {
+        case PDG::gluon:
+          gluon2_ = true;
+          prefactor_ *= 4.*M_PI;
+          break;
+        case PDG::photon:
+          prefactor_ *= pow( constants::G_EM*qf_, 2 );
+          break;
+        default:
+          throw CG_FATAL( "PPtoFF:prepare" )
+            << "Only photon & gluon partons are supported!";
       }
       if ( gluon1_ || gluon2_ ) {
 #ifdef ALPHA_S
