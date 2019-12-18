@@ -17,7 +17,7 @@ DECLARE_FORTRAN_FUNCTION( nucl_to_ff )
 //  REGISTER_FORTRAN_PROCESS( name, function_name, "description )
 //=============================================================================
 
+REGISTER_FORTRAN_PROCESS( pptoff_f77, nucl_to_ff, "pp ↝ (g/ɣ)ɣ → f⁺f¯" )
 REGISTER_FORTRAN_PROCESS( patoff, nucl_to_ff, "pA ↝ (g/ɣ)ɣ → f⁺f¯" )
 REGISTER_FORTRAN_PROCESS( aptoff, nucl_to_ff, "Ap ↝ ɣ(g/ɣ) → f⁺f¯" )
 REGISTER_FORTRAN_PROCESS( aatoff, nucl_to_ff, "AA ↝ ɣɣ → f⁺f¯" )
-

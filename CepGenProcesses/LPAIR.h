@@ -41,7 +41,6 @@ namespace cepgen
         }
 
         void addEventContent() override;
-        void beforeComputeWeight() override;
         double computeWeight() override;
         void prepareKinematics() override;
         void fillKinematics( bool ) override;

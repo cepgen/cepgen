@@ -110,7 +110,7 @@ namespace cepgen
   double
   Event::cmEnergy() const
   {
-    return CMEnergy( getOneByRole( Particle::IncomingBeam1 ), getOneByRole( Particle::IncomingBeam2 ) );
+    return CMEnergy( oneWithRole( Particle::IncomingBeam1 ), oneWithRole( Particle::IncomingBeam2 ) );
   }
 
   Particles&
@@ -144,7 +144,7 @@ namespace cepgen
   }
 
   Particle&
-  Event::getOneByRole( Particle::Role role )
+  Event::oneWithRole( Particle::Role role )
   {
     //--- retrieve the first particle of a given role
     Particles& parts_by_role = operator[]( role );
@@ -157,7 +157,7 @@ namespace cepgen
   }
 
   const Particle&
-  Event::getOneByRole( Particle::Role role ) const
+  Event::oneWithRole( Particle::Role role ) const
   {
     //--- retrieve the first particle of a given role
     const Particles& parts_by_role = operator[]( role );
@@ -192,7 +192,7 @@ namespace cepgen
   }
 
   Particles
-  Event::getByIds( const ParticlesIds& ids ) const
+  Event::operator[]( const ParticlesIds& ids ) const
   {
     Particles out;
     for ( const auto& id : ids )
@@ -204,13 +204,13 @@ namespace cepgen
   Particles
   Event::mothers( const Particle& part ) const
   {
-    return getByIds( part.mothers() );
+    return operator[]( part.mothers() );
   }
 
   Particles
   Event::daughters( const Particle& part ) const
   {
-    return getByIds( part.daughters() );
+    return operator[]( part.daughters() );
   }
 
   ParticleRoles
@@ -390,7 +390,7 @@ namespace cepgen
     //
     CG_INFO( "Event" )
      << utils::format(
-       "Dump of event content:\n"
+       "Event content:\n"
        " Id\tPDG id\t   Name\t\tCharge\tRole\t Status\tMother\tpx            py            pz            E      \t M         \n"
        " --\t------\t   ----\t\t------\t----\t ------\t------\t----GeV/c---  ----GeV/c---  ----GeV/c---  ----GeV/c---\t --GeV/c²--"
        "%s\n"

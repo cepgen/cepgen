@@ -109,6 +109,12 @@ namespace cepgen
   }
 
   void
+  Parameters::clearProcess()
+  {
+    process_.release();
+  }
+
+  void
   Parameters::setProcess( std::unique_ptr<proc::Process> proc )
   {
     process_ = std::move( proc );
@@ -258,7 +264,7 @@ namespace cepgen
       << std::setw( wt ) << "C.m. energy (GeV)" << param->kinematics.sqrtS() << "\n";
     if ( param->kinematics.mode != KinematicsMode::ElasticElastic
       && param->kinematics.structure_functions )
-      os << std::setw( wt ) << "Structure functions" << *param->kinematics.structure_functions << "\n";
+      os << std::setw( wt ) << "Structure functions" << param->kinematics.structure_functions.get() << "\n";
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? utils::boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << "\n\n";

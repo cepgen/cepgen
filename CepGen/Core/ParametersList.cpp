@@ -279,9 +279,11 @@ namespace cepgen
     if ( has<ParametersList>( key ) ) {
       const auto& plist = get<ParametersList>( key );
       ParticleProperties out;
-      try {
-        out = PDG::get()( plist.get<int>( "pdgid", 0 ) );
-      } catch ( const Exception& ) {}
+      const auto& pdgid = plist.get<int>( "pdgid", 0 );
+      if ( PDG::get().has( pdgid ) )
+        out = PDG::get()( pdgid );
+      else
+        out.pdgid = pdgid;
       bool modified = false;
       if ( plist.has<std::string>( "name" ) )
         out.name = plist.get<std::string>( "name" ), modified = true;

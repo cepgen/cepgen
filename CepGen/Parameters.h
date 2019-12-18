@@ -44,9 +44,11 @@ namespace cepgen
       const proc::Process* process() const;
       /// Name of the process considered
       std::string processName() const;
-      /// Set the process to study
+      /// Remove the process pointer
+      void clearProcess();
+      /// Copy a process configuration
       void setProcess( std::unique_ptr<proc::Process> proc );
-      /// Set the process to study
+      /// Set a process configuration
       void setProcess( proc::Process* proc );
 
       //----- events kinematics

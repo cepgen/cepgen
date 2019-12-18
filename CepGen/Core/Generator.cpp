@@ -11,7 +11,6 @@
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
 
-#include "CepGen/Modules/ProcessesFactory.h"
 #include "CepGen/Modules/Process.h"
 
 #include "CepGen/Event/Event.h"
@@ -46,29 +45,19 @@ namespace cepgen
   Generator::~Generator()
   {}
 
-  size_t
-  Generator::numDimensions() const
-  {
-    if ( !parameters_->process() )
-     return 0;
-    return parameters_->process()->ndim();
-  }
-
   void
-  Generator::clearRun()
+  Generator::clearRun( bool clear_proc )
   {
     if ( parameters_->process() ) {
-      parameters_->process()->first_run = true;
-      parameters_->process()->addEventContent();
-      parameters_->process()->setKinematics( parameters_->kinematics );
+      if ( clear_proc )
+        parameters_->clearProcess();
+      else {
+        parameters_->process()->first_run = true;
+        parameters_->process()->addEventContent();
+        parameters_->process()->setKinematics( parameters_->kinematics );
+      }
     }
     result_ = result_error_ = -1.;
-    {
-      std::ostringstream os;
-      for ( const auto& pr : cepgen::proc::ProcessesFactory::get().modules() )
-        os << " " << pr;
-      CG_DEBUG( "Generator:clearRun" ) << "Processes handled:" << os.str() << ".";
-    }
   }
 
   Parameters&
@@ -105,12 +94,17 @@ namespace cepgen
   {
     clearRun();
 
-    double res = integrand::eval( x, numDimensions(), (void*)parameters_.get() );
+    if ( !parameters_->process() )
+      throw CG_FATAL( "Generator:computePoint" )
+        << "Trying to compute a point with no process specified!";
+    const size_t ndim = parameters_->process()->ndim();
+    double res = integrand::eval( x, ndim, (void*)parameters_.get() );
     std::ostringstream os;
-    for ( size_t i = 0; i < numDimensions(); ++i )
-      os << x[i] << " ";
+    std::string sep;
+    for ( size_t i = 0; i < ndim; ++i )
+      os << sep << x[i], sep = ", ";
     CG_DEBUG( "Generator:computePoint" )
-      << "Result for x[" << numDimensions() << "] = { " << os.str() << "}:\n\t"
+      << "Result for x[" << ndim << "] = {" << os.str() << "}:\n\t"
       << res << ".";
     return res;
   }
@@ -127,40 +121,41 @@ namespace cepgen
     err = result_error_;
 
     if ( xsec < 1.e-2 )
-      CG_INFO( "Generator" )
-        << "Total cross section: " << xsec*1.e3
-        << " +/- " << err*1.e3 << " fb.";
+      CG_INFO( "Generator" ) << "Total cross section: "
+        << xsec*1.e3 << " +/- " << err*1.e3 << " fb.";
     else if ( xsec < 0.5e3 )
-      CG_INFO( "Generator" )
-        << "Total cross section: " << xsec
-        << " +/- " << err << " pb.";
+      CG_INFO( "Generator" ) << "Total cross section: "
+        << xsec << " +/- " << err << " pb.";
     else if ( xsec < 0.5e6 )
-      CG_INFO( "Generator" )
-        << "Total cross section: " << xsec*1.e-3
-        << " +/- " << err*1.e-3 << " nb.";
+      CG_INFO( "Generator" ) << "Total cross section: "
+        << xsec*1.e-3 << " +/- " << err*1.e-3 << " nb.";
     else if ( xsec < 0.5e9 )
-      CG_INFO( "Generator" )
-        << "Total cross section: " << xsec*1.e-6
-        << " +/- " << err*1.e-6 << " µb.";
+      CG_INFO( "Generator" ) << "Total cross section: "
+        << xsec*1.e-6 << " +/- " << err*1.e-6 << " µb.";
     else
-      CG_INFO( "Generator" )
-        << "Total cross section: " << xsec*1.e-9
-        << " +/- " << err*1.e-9 << " mb.";
+      CG_INFO( "Generator" ) << "Total cross section: "
+        << xsec*1.e-9 << " +/- " << err*1.e-9 << " mb.";
   }
 
   void
   Generator::integrate()
   {
     clearRun();
+    result_ = result_error_ = 0.;
 
     // first destroy and recreate the integrator instance
-    if ( !integrator_ || integrator_->dimensions() != numDimensions() )
-      integrator_.reset( new Integrator( numDimensions(), integrand::eval, *parameters_ ) );
+    if ( !parameters_->process() )
+      throw CG_FATAL( "Generator:integrate" )
+        << "Trying to integrate while no process is specified!";
 
-    CG_DEBUG( "Generator:newInstance" )
+    const size_t ndim = parameters_->process()->ndim();
+    if ( !integrator_ || integrator_->dimensions() != ndim )
+      integrator_.reset( new Integrator( ndim, integrand::eval, *parameters_ ) );
+
+    CG_DEBUG( "Generator:integrate" )
       << "New integrator instance created\n\t"
       << "Considered topology: " << parameters_->kinematics.mode << " case\n\t"
-      << "Will proceed with " << numDimensions() << "-dimensional integration.";
+      << "Will proceed with " << ndim << "-dimensional integration.";
 
     integrator_->integrate( result_, result_error_ );
   }
@@ -183,9 +178,11 @@ namespace cepgen
     integrator_->generate( parameters_->generation().maxgen, callback );
 
     const double gen_time_s = tmr.elapsed();
+    const double rate_ms = ( parameters_->numGeneratedEvents() > 0 )
+      ? gen_time_s/parameters_->numGeneratedEvents()*1.e3 : 0.;
     CG_INFO( "Generator" )
       << utils::s( "event", parameters_->numGeneratedEvents() )
       << " generated in " << gen_time_s << " s "
-      << "(" << gen_time_s/parameters_->numGeneratedEvents()*1.e3 << " ms/event).";
+      << "(" << rate_ms << " ms/event).";
   }
 }

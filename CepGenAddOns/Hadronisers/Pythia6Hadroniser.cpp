@@ -9,6 +9,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Hasher.h"
 
 #include <algorithm>
 
@@ -74,7 +75,9 @@ namespace cepgen
         static constexpr unsigned short MAX_STRING_EVENT = 2;
         /// Maximal number of characters to fetch for the particle's name
         static constexpr unsigned short NAME_CHR = 16;
-        static const std::unordered_map<Particle::Status,int> kStatusMatchMap;
+
+        typedef std::unordered_map<Particle::Status,int,utils::EnumHash<Particle::Status> > ParticlesStatusMap;
+        static const ParticlesStatusMap kStatusMatchMap;
 
         inline static double pymass(int pdgid_) { return pymass_(pdgid_); }
         inline static void pyckbd() { pyckbd_(); }
@@ -99,7 +102,7 @@ namespace cepgen
         unsigned int fillParticles( const Event& ) const;
     };
 
-    const std::unordered_map<Particle::Status,int>
+    const Pythia6Hadroniser::ParticlesStatusMap
     Pythia6Hadroniser::kStatusMatchMap = {
       { Particle::Status::PrimordialIncoming, 21 },
       { Particle::Status::FinalState, 1 },

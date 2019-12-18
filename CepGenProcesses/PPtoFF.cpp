@@ -8,6 +8,7 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/AlphaS.h"
 
 #include <iomanip>
 
@@ -32,24 +33,30 @@ namespace cepgen
         double onShellME() const;
         double offShellME() const;
 
-        static constexpr double prefactor_ = pow( constants::G_EM, 4 );
-
         const enum class Mode { onShell = 0, offShell = 1 } method_;
+
+        ParametersList alphas_params_;
+        std::shared_ptr<AlphaS> alphas_;
+
+        double prefactor_;
+        bool gluon1_, gluon2_;
 
         //--- parameters for off-shell matrix element
         unsigned short p_mat1_, p_mat2_;
         unsigned short p_term_ll_, p_term_lt_, p_term_tt1_, p_term_tt2_;
 
         double mf2_, qf_;
-        double mA2_, mB2_;
         unsigned short colf_;
     };
 
     PPtoFF::PPtoFF( const ParametersList& params ) :
       Process2to4( params, "pptoff", "ɣɣ → f⁺f¯", { PDG::photon, PDG::photon }, params.get<ParticleProperties>( "pair" ).pdgid ),
       method_ ( (Mode)params.get<int>( "method", (int)Mode::offShell ) ),
-      p_mat1_( 0 ), p_mat2_( 0 ), p_term_ll_( 0 ), p_term_lt_( 0 ), p_term_tt1_( 0 ), p_term_tt2_( 0 ),
-      mA2_( 0. ), mB2_( 0. )
+      alphas_params_( params.get<ParametersList>( "alphaS", ParametersList()
+        .set<std::string>( ParametersList::MODULE_NAME, "pegasus" ) ) ),
+      prefactor_( 1. ), gluon1_( false ), gluon2_( false ),
+      p_mat1_( 0 ), p_mat2_( 0 ),
+      p_term_ll_( 0 ), p_term_lt_( 0 ), p_term_tt1_( 0 ), p_term_tt2_( 0 )
     {
       if ( !params.empty() && ( !cs_prop_.fermion || cs_prop_.charge == 0. ) )
         throw CG_FATAL( "PPtoFF:prepare" )
@@ -86,6 +93,34 @@ namespace cepgen
       mB2_ = (*event_)[Particle::IncomingBeam2][0].mass2();
       CG_DEBUG( "PPtoFF:prepare" ) << "Incoming state:\n\t"
         << "mp(1/2) = " << sqrt( mA2_ ) << "/" << sqrt( mB2_ ) << ".";
+
+      switch ( event_->oneWithRole( Particle::Parton1 ).pdgId() ) {
+        case PDG::gluon:
+          gluon1_ = true;
+          prefactor_ *= 4.*M_PI;
+          break;
+        case PDG::photon:
+          prefactor_ *= pow( constants::G_EM*qf_, 2 );
+          break;
+        default:
+          throw CG_FATAL( "PPtoFF:prepare" )
+            << "Only photon & gluon partons are supported!";
+      }
+      switch ( event_->oneWithRole( Particle::Parton2 ).pdgId() ) {
+        case PDG::gluon:
+          gluon2_ = true;
+          prefactor_ *= 4.*M_PI;
+          break;
+        case PDG::photon:
+          prefactor_ *= pow( constants::G_EM*qf_, 2 );
+          break;
+        default:
+          throw CG_FATAL( "PPtoFF:prepare" )
+            << "Only photon & gluon partons are supported!";
+      }
+      if ( gluon1_ || gluon2_ )
+        // at least one gluon; need to initialise the alpha(s) evolution algorithm
+        alphas_ = AlphaSFactory::get().build( alphas_params_ );
     }
 
     double
@@ -97,15 +132,15 @@ namespace cepgen
           mat_el *= onShellME(); break;
         case Mode::offShell:
           mat_el *= offShellME(); break;
+        default:
+          throw CG_FATAL( "PPtoFF" )
+            << "Invalid ME calculation method (" << (int)method_ << ")!";
       }
       CG_DEBUG_LOOP( "PPtoFF:ME" )
-        << "colour factor: " << colf_ << "\n\t"
         << "prefactor: " << prefactor_ << "\n\t"
         << "matrix element: " << mat_el << ".";
-      return mat_el;
 
-      throw CG_FATAL( "PPtoFF" )
-        << "Invalid ME calculation method (" << (int)method_ << ")!";
+      return mat_el;
     }
 
     double
@@ -133,44 +168,38 @@ namespace cepgen
     double
     PPtoFF::offShellME() const
     {
-      const double amt1 = std::hypot( p_c1_.pt(), cs_prop_.mass );
-      const double amt2 = std::hypot( p_c2_.pt(), cs_prop_.mass );
-      const double alpha1 = amt1/sqs_*exp( y_c1_ ), beta1 = amt1/sqs_*exp( -y_c1_ );
-      const double alpha2 = amt2/sqs_*exp( y_c2_ ), beta2 = amt2/sqs_*exp( -y_c2_ );
+      const double alpha1 = amt1_/sqs_*exp( y_c1_ ), beta1 = amt1_/sqs_*exp( -y_c1_ );
+      const double alpha2 = amt2_/sqs_*exp( y_c2_ ), beta2 = amt2_/sqs_*exp( -y_c2_ );
       const double x1 = alpha1+alpha2, x2 = beta1+beta2;
       const double z1p = alpha1/x1, z1m = alpha2/x1, z1 = z1p*z1m;
       const double z2p = beta1/x2, z2m = beta2/x2, z2 = z2p*z2m;
 
       CG_DEBUG_LOOP( "2to4:zeta" )
-        << "amt(1/2) = " << amt1 << " / " << amt2 << "\n\t"
+        << "amt(1/2) = " << amt1_ << " / " << amt2_ << "\n\t"
         << "z(1/2)p = " << z1p << " / " << z2p << ", z1 = " << z1 << "\n\t"
         << "z(1/2)m = " << z1m << " / " << z2m << ", z2 = " << z2 << ".";
 
       //--- positive-z photon kinematics
+      const Momentum ak1 = ( z1m*p_c1_-z1p*p_c2_ ).setPz( 0. );
+      const Momentum ph_p1 = ak1+z1p*q2_, ph_m1 = ak1-z1m*q2_;
       const double t1abs = ( q1_.pt2() + x1*( mX2_-mA2_ )+x1*x1*mA2_ )/( 1.-x1 );
       const double eps12 = mf2_+z1*t1abs;
-      const Momentum ak1 = ( z1m*p_c1_-z1p*p_c2_ );
-      const Momentum ph_p1 = ak1+z1p*q2_, ph_m1 = ak1-z1m*q2_;
       const double kp1 = 1./( ph_p1.pt2()+eps12 );
       const double km1 = 1./( ph_m1.pt2()+eps12 );
 
-      Momentum phi1 = kp1*ph_p1-km1*ph_m1;
-      phi1.setPz( 0. );
-      phi1.setEnergy( kp1-km1 );
+      const Momentum phi1 = ( kp1*ph_p1-km1*ph_m1 ).setPz( 0. ).setEnergy( kp1-km1 );
       const double dot1 = phi1.threeProduct( q1_ )/qt1_;
       const double cross1 = phi1.crossProduct( q1_ )/qt1_;
 
       //--- negative-z photon kinematics
+      const Momentum ak2 = ( z2m*p_c1_-z2p*p_c2_ ).setPz( 0. );
+      const Momentum ph_p2 = ak2+z2p*q1_, ph_m2 = ak2-z2m*q1_;
       const double t2abs = ( q2_.pt2() + x2*( mY2_-mB2_ )+x2*x2*mB2_ )/( 1.-x2 );
       const double eps22 = mf2_+z2*t2abs;
-      const Momentum ak2 = ( z2m*p_c1_-z2p*p_c2_ );
-      const Momentum ph_p2 = ak2+z2p*q1_, ph_m2 = ak2-z2m*q1_;
       const double kp2 = 1./( ph_p2.pt2()+eps22 );
       const double km2 = 1./( ph_m2.pt2()+eps22 );
 
-      Momentum phi2 = kp2*ph_p2-km2*ph_m2;
-      phi2.setPz( 0. );
-      phi2.setEnergy( kp2-km2 );
+      const Momentum phi2 = ( kp2*ph_p2-km2*ph_m2 ).setPz( 0. ).setEnergy( kp2-km2 );
       const double dot2 = phi2.threeProduct( q2_ )/qt2_;
       const double cross2 = phi2.crossProduct( q2_ )/qt2_;
 
@@ -200,19 +229,28 @@ namespace cepgen
       //     for heavy flavours
       //=================================================================
 
-      const double aux = 1./q1_.pt2()/q2_.pt2();
-      const double amat2_1 = aux2_1*2.*z1*q1_.pt2()*aux;
-      const double amat2_2 = aux2_2*2.*z2*q2_.pt2()*aux;
+      const double amat2_1 = aux2_1*2.*z1/q2_.pt2();
+      const double amat2_2 = aux2_2*2.*z2/q1_.pt2();
 
       //=================================================================
       //     symmetrization
       //=================================================================
 
-      const double amat2 = 0.5*( p_mat1_*amat2_1+p_mat2_*amat2_2 ) * pow( x1*x2*s_, 2 );
+      double amat2 = 0.5*( p_mat1_*amat2_1+p_mat2_*amat2_2 ) * pow( x1*x2*s_, 2 );
+
+      const double tmax = pow( std::max( amt1_, amt2_ ), 2 );
+      if ( gluon1_ ) {
+        double amu = sqrt( std::max( eps12, tmax ) );
+        amat2 *= (*alphas_)( amu )/2.;
+      }
+      if ( gluon2_ ) {
+        double amu = sqrt( std::max( eps22, tmax ) );
+        amat2 *= (*alphas_)( amu )/2.;
+      }
 
       CG_DEBUG_LOOP( "PPtoFF:offShell" )
         << "aux2(1/2) = " << aux2_1 << " / " << aux2_2 << "\n\t"
-        << "aux,z(1/2) = " << aux << " / " << z1 << " / " << z2 << "\n\t"
+        << "z(1/2) = " << z1 << " / " << z2 << "\n\t"
         << "q(1/2)t2 = " << q1_.pt2() << " / " << q2_.pt2() << "\n\t"
         << "amat2(1/2) = " << amat2_1 << " / " << amat2_2 << "\n\t"
         << "amat2 = " << amat2 << ".";

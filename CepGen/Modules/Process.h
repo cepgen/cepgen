@@ -49,8 +49,6 @@ namespace cepgen
         virtual std::unique_ptr<Process> clone( const ParametersList& params = ParametersList() ) const = 0;
         /// Set the incoming and outgoing state to be expected in the process
         inline virtual void addEventContent() {}
-        /// Prepare the process for its integration over the whole phase space
-        inline virtual void beforeComputeWeight() {}
         /// Compute the phase space point weight
         virtual double computeWeight() = 0;
         /// Compute the incoming state kinematics
@@ -159,7 +157,7 @@ namespace cepgen
 
       protected:
         /// Numerical limits for sanity comparisons
-        static constexpr double NUM_LIMITS = 1.e-4;
+        static constexpr double NUM_LIMITS = 1.e-3; // MeV/mm-level
         /// Handler to a variable mapped by this process
         struct MappingVariable
         {

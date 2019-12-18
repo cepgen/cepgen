@@ -44,11 +44,17 @@ find_library(GSL_CBLAS_LIB gslcblas HINTS ${GSL_DIR} PATH_SUFFIXES lib)
 find_path(GSL_INCLUDE gsl HINTS ${GSL_DIR} PATH_SUFFIXES include)
 if(NOT GSL_LIB OR NOT GSL_CBLAS_LIB)
   message(FATAL_ERROR "GSL with CBLAS bindings was not found!")
+else()
+  message(STATUS "GSL found in ${GSL_LIB}")
+  message(STATUS "GSL CBLAS found in ${GSL_CBLAS_LIB}")
 endif()
 include_directories(${GSL_INCLUDE})
 #--- searching for LHAPDF
 find_library(LHAPDF LHAPDF HINTS ${LHAPDF_DIR} PATH_SUFFIXES lib)
 find_path(LHAPDF_INCLUDE LHAPDF HINTS ${LHAPDF_DIR} PATH_SUFFIXES include)
+#--- searching for APFEL
+find_library(APFEL APFEL HINTS ${APFEL_DIR} PATH_SUFFIXES lib)
+find_path(APFEL_INCLUDE APFEL HINTS ${APFEL_DIR} PATH_SUFFIXES include)
 #--- searching for HepMC
 set(HEPMC_DIRS $ENV{HEPMC_DIR} ${HEPMC_DIR} /usr /usr/local)
 find_library(HEPMC_LIB NAMES HepMC3 HepMC HINTS ${HEPMC_DIRS} PATH_SUFFIXES lib64 lib)
@@ -101,4 +107,4 @@ find_path(EXPRTK exprtk.hpp PATH_SUFFIXES include)
 #--- semi-external dependencies
 file(GLOB ALPHAS_SRC ${PROJECT_SOURCE_DIR}/External/alphaS.f)
 file(GLOB GRV_SRC ${PROJECT_SOURCE_DIR}/External/grv_*.f)
-
+file(GLOB KMR_INTERP ${PROJECT_SOURCE_DIR}/External/f_inter_kmr_fg.f)

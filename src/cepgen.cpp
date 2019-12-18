@@ -6,6 +6,20 @@
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/AbortHandler.h"
 
+#include "CepGen/Modules/CardsHandlerFactory.h"
+
+#include "CepGen/Modules/ProcessesFactory.h"
+#include "CepGen/Modules/Process.h"
+
+#include "CepGen/Physics/AlphaS.h"
+
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
+
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+
 using namespace std;
 
 void list_modules();
@@ -42,12 +56,12 @@ int main( int argc, char* argv[] )
     gen.parameters().generation().enabled = num_events > 0;
   }
 
-  //--- list all parameters
-  CG_LOG( "main" ) << gen.parametersPtr();
-
   cepgen::utils::AbortHandler ctrl_c;
 
   try {
+    //--- list all parameters
+    CG_LOG( "main" ) << gen.parametersPtr();
+
     //--- let there be a cross-section...
     double xsec = 0., err = 0.;
     gen.computeXsection( xsec, err );
@@ -67,18 +81,6 @@ int main( int argc, char* argv[] )
 
   return 0;
 }
-
-#include "CepGen/Modules/CardsHandlerFactory.h"
-
-#include "CepGen/Modules/ProcessesFactory.h"
-#include "CepGen/Modules/Process.h"
-
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/StructureFunctions/SigmaRatio.h"
-
-#include "CepGen/Modules/EventModifierFactory.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
 
 void list_modules()
 {
@@ -123,6 +125,12 @@ void list_modules()
     if ( cepgen::io::ExportModuleFactory::get().modules().empty() )
       cout << ">>> none found <<<" << endl;
     for ( const auto& mod : cepgen::io::ExportModuleFactory::get().modules() )
+      cout << mod << "\n";
+  }
+  { cout << sep_mid << "alpha(s) evolution algorithms definitions\n" << sep_mid;
+    if ( cepgen::AlphaSFactory::get().modules().empty() )
+      cout << ">>> none found <<<" << endl;
+    for ( const auto& mod : cepgen::AlphaSFactory::get().modules() )
       cout << mod << "\n";
   }
   cout << sep_big;

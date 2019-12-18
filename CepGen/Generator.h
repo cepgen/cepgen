@@ -84,7 +84,8 @@ namespace cepgen
       /// Feed the generator with a Parameters object
       void setParameters( Parameters& ip );
       /// Remove all references to a previous generation/run
-      void clearRun();
+      /// \param[in] clear_proc Also remove the process
+      void clearRun( bool clear_proc = false );
       /// Integrate the functional over the whole phase space
       void integrate();
       /**
@@ -105,8 +106,6 @@ namespace cepgen
       const Event& generateOneEvent();
       /// Launch the generation of events
       void generate( std::function<void( const Event&, unsigned long )> callback = nullptr );
-      /// Number of dimensions on which the integration is performed
-      size_t numDimensions() const;
       /// Compute one single point from the total phase space
       /// \param[in] x the n-dimensional point to compute
       /// \return the function value for the given point

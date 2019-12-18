@@ -32,6 +32,8 @@ namespace cepgen
       Schaefer            = 301,
       Partonic            = 401,
     };
+    /// Human-readable description of this SF parameterisation type
+    std::ostream& operator<<( std::ostream&, const strfun::Type& );
     /// Generic placeholder for the parameterisation of nucleon structure functions
     class Parameterisation
     {
@@ -49,6 +51,8 @@ namespace cepgen
           return *this;
         }
         /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
+        friend std::ostream& operator<<( std::ostream&, const Parameterisation* );
+        /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
         friend std::ostream& operator<<( std::ostream&, const Parameterisation& );
         /// Human-readable description of this SF parameterisation
         virtual std::string description() const; ///< Human-readable description of this SF set
@@ -64,6 +68,7 @@ namespace cepgen
         virtual Parameterisation& computeFL( double xbj, double q2, double r );
         /// Compute the \f$F_1\f$ structure function for a given point
         double F1( double xbj, double q2 ) const;
+        double tau( double xbj, double q2 ) const;
 
       public:
         /// Interpolation type of structure functions
@@ -81,8 +86,6 @@ namespace cepgen
         std::shared_ptr<sigrat::Parameterisation> r_ratio_;
     };
   }
-  /// Human-readable description of this SF parameterisation type
-  std::ostream& operator<<( std::ostream&, const strfun::Type& );
 }
 
 #endif

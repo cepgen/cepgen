@@ -32,14 +32,13 @@ include(GNUInstallDirs)
 include(UseEnvironment)
 include(BuildRPM)
 
+set(CEPGEN_LIBRARIES)
 set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
 set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
-set(CEPGEN_LIBRARIES)
 
 #----- define all individual modules/libraries to be built beforehand
 
-set(CEPGEN_MODULES Processes Event Cards)
-set(CEPGEN_LIBRARIES_NAMES CepGenCore CepGenEvent CepGenProcesses CepGenCards)
+set(CEPGEN_MODULES Event Cards)
 
 #----- enable fortran for external libraries linking
 
@@ -53,7 +52,7 @@ if(CMAKE_BUILD_CORE)
   foreach(_module ${CEPGEN_MODULES})
     add_subdirectory(${CEPGEN_LIB_DIR}/${_module})
   endforeach()
-  list(APPEND CEPGEN_LIBRARIES ${CEPGEN_LIBRARIES_NAMES})
+  list(APPEND CEPGEN_LIBRARIES CepGenCore CepGenProcesses CepGenEvent CepGenCards)
 endif()
 if(CMAKE_BUILD_ADDONS)
   add_subdirectory(CepGenAddOns)
@@ -104,7 +103,7 @@ if(DOXYGEN_FOUND)
   set(DOXYGEN_IN ${CMAKE_SOURCE_DIR}/doc/Doxyfile.in)
   set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
   configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
-  message(STATUS "Doxygen build started")
+  message(STATUS "Doxygen found")
   add_custom_target(doc_doxygen COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "Generating documentation with Doxygen" VERBATIM)
 endif()
 

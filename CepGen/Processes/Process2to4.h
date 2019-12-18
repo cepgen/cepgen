@@ -27,17 +27,19 @@ namespace cepgen
         double that() const;
         double uhat() const;
 
+        static const Limits x_limits_;
         ParticleProperties cs_prop_; ///< PDG id of the central particles
 
         Cuts single_limits_;
 
-        Momentum p1_, p2_, q1_, q2_;
+        Momentum pA_, pB_, q1_, q2_;
         Momentum p_c1_; ///< Momentum of the first central particle
         Momentum p_c2_; ///< Momentum of the second central particle
         double y_c1_; ///< Rapidity of the first central particle
         double y_c2_; ///< Rapidity of the second central particle
         double pt_diff_; ///< Transverse momentum difference for the two central particle
         double phi_pt_diff_; ///< Azimuthal angle difference for the two central particles
+        double amt1_, amt2_;
 
       private:
         double ww_;

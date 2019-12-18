@@ -224,9 +224,6 @@ namespace cepgen
           << "Trying to evaluate weight while phase space point\n\t"
           << "coordinates are not set!";
 
-      //--- process-specific preparation
-      beforeComputeWeight();
-
       //--- generate and initialise all variables
       generateVariables();
 
@@ -351,18 +348,18 @@ namespace cepgen
         switch ( part.role() ) {
           case Particle::OutgoingBeam1:
           case Particle::Parton1:
-            part.addMother( event_->getOneByRole( Particle::IncomingBeam1 ) );
+            part.addMother( event_->oneWithRole( Particle::IncomingBeam1 ) );
             break;
           case Particle::OutgoingBeam2:
           case Particle::Parton2:
-            part.addMother( event_->getOneByRole( Particle::IncomingBeam2 ) );
+            part.addMother( event_->oneWithRole( Particle::IncomingBeam2 ) );
             break;
           case Particle::Intermediate:
-            part.addMother( event_->getOneByRole( Particle::Parton1 ) );
-            part.addMother( event_->getOneByRole( Particle::Parton2 ) );
+            part.addMother( event_->oneWithRole( Particle::Parton1 ) );
+            part.addMother( event_->oneWithRole( Particle::Parton2 ) );
             break;
           case Particle::CentralSystem:
-            part.addMother( event_->getOneByRole( Particle::Intermediate ) );
+            part.addMother( event_->oneWithRole( Particle::Intermediate ) );
             break;
           default: break;
         }
