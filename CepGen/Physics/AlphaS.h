@@ -18,7 +18,7 @@ namespace cepgen
       AlphaS() = default;
       virtual double operator()( double q ) const = 0;
   };
-  /// An output modules factory
+  /// An alpha(S) evolution algorithms factory
   typedef ModuleFactory<AlphaS> AlphaSFactory;
 }
 
