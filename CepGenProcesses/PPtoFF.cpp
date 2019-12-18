@@ -8,17 +8,9 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/AlphaS.h"
 
 #include <iomanip>
-
-namespace
-{
-  extern "C"
-  {
-    void initalphas_( int& iord, double& fr2, double& mur, double& asmur, double& mc, double& mb, double& mt );
-    double alphas_( double& mur );
-  }
-}
 
 namespace cepgen
 {
@@ -44,6 +36,7 @@ namespace cepgen
         const enum class Mode { onShell = 0, offShell = 1 } method_;
 
         double prefactor_;
+        std::shared_ptr<AlphaS> alphas_;
         bool gluon1_, gluon2_;
 
         //--- parameters for off-shell matrix element
@@ -121,24 +114,9 @@ namespace cepgen
           throw CG_FATAL( "PPtoFF:prepare" )
             << "Only photon & gluon partons are supported!";
       }
-      if ( gluon1_ || gluon2_ ) {
-#ifdef ALPHA_S
-          int iord = 2;
-          double fr2 = 1., mur = 1., asmur = 0.68183;
-          double mc = PDG::get().mass( 4 ), mb = PDG::get().mass( 5 ), mt = PDG::get().mass( 6 );
-          CG_INFO( "PPtoFF:prepare" )
-            << "Initialisation of the alpha(S) evolution algorithm with parameters:\n\t"
-            << "order: " << iord << ", fr2: " << fr2 << ", "
-            << "mur: " << mur << ", asmur: " << asmur << "\n\t"
-            << "quark masses (GeV): charm: " << mc << ", bottom: " << mb << ", top: " << mt << ".";
-          initalphas_( iord, fr2, mur, asmur, mc, mb, mt );
-          CG_INFO( "PPtoFF:prepare" )
-            << "alpha(S) evolution algorithm initialised.";
-#else
-        throw CG_FATAL( "PPtoFF:prepare" )
-          << "alpha(S) evolution algorithm not linked to this instance!";
-#endif
-      }
+      if ( gluon1_ || gluon2_ )
+        // at least one gluon; need to initialise the alpha(s) evolution algorithm
+        alphas_ = AlphaSFactory::get().build( "pegasus" );
     }
 
     double
@@ -259,11 +237,11 @@ namespace cepgen
       const double tmax = pow( std::max( amt1_, amt2_ ), 2 );
       if ( gluon1_ ) {
         double amu = sqrt( std::max( eps12, tmax ) );
-        amat2 *= alphas_( amu )/2.;
+        amat2 *= (*alphas_)( amu )/2.;
       }
       if ( gluon2_ ) {
         double amu = sqrt( std::max( eps22, tmax ) );
-        amat2 *= alphas_( amu )/2.;
+        amat2 *= (*alphas_)( amu )/2.;
       }
 
       CG_DEBUG_LOOP( "PPtoFF:offShell" )

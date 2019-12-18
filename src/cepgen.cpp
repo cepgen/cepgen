@@ -11,6 +11,8 @@
 #include "CepGen/Modules/ProcessesFactory.h"
 #include "CepGen/Modules/Process.h"
 
+#include "CepGen/Physics/AlphaS.h"
+
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
@@ -123,6 +125,12 @@ void list_modules()
     if ( cepgen::io::ExportModuleFactory::get().modules().empty() )
       cout << ">>> none found <<<" << endl;
     for ( const auto& mod : cepgen::io::ExportModuleFactory::get().modules() )
+      cout << mod << "\n";
+  }
+  { cout << sep_mid << "alpha(s) evolution algorithms definitions\n" << sep_mid;
+    if ( cepgen::AlphaSFactory::get().modules().empty() )
+      cout << ">>> none found <<<" << endl;
+    for ( const auto& mod : cepgen::AlphaSFactory::get().modules() )
       cout << mod << "\n";
   }
   cout << sep_big;
