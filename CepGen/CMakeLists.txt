@@ -12,7 +12,7 @@ set(core_definitions)
 set(core_includes)
 set(proc_definitions)
 
-#----- check the external dependencies for SFs
+#----- check the external dependencies for SFs/alphaS
 
 if(GRV_SRC)
   message(STATUS "GRV PDFset found in ${GRV_SRC}!")
@@ -26,6 +26,13 @@ if(LHAPDF)
 else()
   file(GLOB partonic_sf StructureFunctions/Partonic.cpp)
   list(REMOVE_ITEM sf_sources ${partonic_sf})
+  list(REMOVE_ITEM phys_sources Physics/AlphaSLHAPDF.cpp)
+endif()
+if(ALPHAS_SRC)
+  message(STATUS "alphaS evolution algorithm found in ${ALPHAS_SRC}")
+  list(APPEND phys_sources ${ALPHAS_SRC})
+else()
+  file(REMOVE_ITEM phys_sources Physics/AlphaSPEGASUS.cpp)
 endif()
 
 #----- check the external dependencies for physics utilities
@@ -47,14 +54,6 @@ elseif(ROOT_FOUND)
   list(APPEND core_definitions -DFUNC_ROOT)
   list(APPEND core_includes ${ROOT_INCLUDE_DIRS})
   list(APPEND core_libraries ${ROOT_LIBRARIES})
-endif()
-
-#--- check the external dependencies for processes
-
-if(ALPHAS_SRC)
-  message(STATUS "alphaS evolution algorithm found in ${ALPHAS_SRC}")
-  list(APPEND proc_sources ${ALPHAS_SRC})
-  list(APPEND proc_definitions -DALPHA_S)
 endif()
 
 #----- build the objects
