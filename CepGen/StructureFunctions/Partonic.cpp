@@ -7,7 +7,7 @@
 #include "LHAPDF/LHAPDF.h"
 
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
-#  define LHAPDF_GE_6 1
+# define LHAPDF_GE_6 1
 #endif
 
 #include <array>
@@ -44,7 +44,7 @@ namespace cepgen
         Mode mode_;
         bool initialised_;
 
-#if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION >= 6
+#ifdef LHAPDF_GE_6
         LHAPDF::PDFSet lha_pdf_set_;
         std::vector<std::unique_ptr<LHAPDF::PDF> > pdfs_;
 #endif
@@ -206,7 +206,7 @@ namespace cepgen
 }
 
 #ifdef LHAPDF_GE_6
-#  undef LHAPDF_GE_6
+# undef LHAPDF_GE_6
 #endif
 
 REGISTER_STRFUN( Partonic, strfun::Partonic )
