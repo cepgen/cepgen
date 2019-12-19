@@ -2,14 +2,13 @@
 #include "CepGen/Event/Event.h"
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
 
 namespace cepgen
 {
   namespace utils
   {
-    const std::regex EventBrowser::rgx_select_id_( "(\\w+)\\((\\d+)\\)" );
-    const std::regex EventBrowser::rgx_select_role_( "(\\w+)\\(([a-z]+\\d?)\\)" );
+    const std::regex EventBrowser::rgx_select_id_( "([a-zA-Z]w+)\\(([0-9]+)\\)", std::regex_constants::basic );
+    const std::regex EventBrowser::rgx_select_role_( "([a-zA-Z]+)\\(([a-z]+[0-9]?)\\)", std::regex_constants::basic );
 
     double
     EventBrowser::get( const Event& ev, const std::string& var ) const
@@ -60,9 +59,8 @@ namespace cepgen
       if ( var == "pdg" ) return (double)part.integerPdgId();
       if ( var == "charge" ) return part.charge();
       if ( var == "status" ) return (double)part.status();
-      CG_WARNING( "EventBrowser" )
+      throw CG_ERROR( "EventBrowser" )
         << "Failed to retrieve variable \"" << var << "\".";
-      return INVALID_OUTPUT;
     }
 
     double
@@ -87,9 +85,8 @@ namespace cepgen
         return ev.time_generation;
       if ( var == "ttot" )
         return ev.time_total;
-      CG_WARNING( "EventBrowser" )
+      throw CG_ERROR( "EventBrowser" )
         << "Failed to retrieve the event-level variable \"" << var << "\".";
-      return INVALID_OUTPUT;
     }
   }
 }

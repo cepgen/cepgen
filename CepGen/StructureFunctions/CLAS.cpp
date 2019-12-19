@@ -1,4 +1,5 @@
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Constants.h"
@@ -74,7 +75,7 @@ namespace cepgen
     {
       Parameters params;
       params.mode = Parameters::proton;
-      params.mp = mp_;
+      params.mp = PDG::get().mass( PDG::proton );
       params.mpi0 = PDG::get().mass( PDG::piZero );
       // SLAC fit parameters
       params.c_slac = { { 0.25615, 2.1785, 0.89784, -6.7162, 3.7557, 1.6421, 0.37636 } };

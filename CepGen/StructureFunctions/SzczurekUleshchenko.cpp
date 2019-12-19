@@ -1,7 +1,7 @@
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
 
 extern "C"
 {

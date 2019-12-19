@@ -24,13 +24,16 @@ process = cepgen.Module('lpair',
         mx = (1.07, 1000.),
     ),
     #--- example of a complex taming function definition
-    #tamingFunctions = cepgen.Parameters(
-    #    cepgen.Parameters(variable = "m_ll", expression = "(m_ll>80.) ? exp(-(m_ll-80)/10) : 1.0"),
-    #),
+    #tamingFunctions = [
+    #    cepgen.Parameters(variable = "m(4)", expression = "(m(4)>80.) ? exp(-(m(4)-80)/10) : 1.0"),
+    #],
 )
 
 #--- example of an output module parameterisation
-#output = cepgen.Module('text', variables = ['nev', 'm(4)', 'tgen'], histVariables={'m(4)': cepgen.Parameters(low=0., high=250.)})
+output = cepgen.Module('text',
+    #variables = ['nev', 'm(4)', 'tgen'],
+    histVariables={'m(4)': cepgen.Parameters(low=0., high=250., nbins=20)}
+)
 #output = cepgen.Module('lhef', filename='test.lhe')
 #output = cepgen.Module('hepmc', filename='test.hepmc')
 

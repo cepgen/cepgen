@@ -1,6 +1,6 @@
 import Config.Core as cepgen
 
-process = cepgen.Module('pptoll',
+process = cepgen.Module('pptoff',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.InelasticElastic,
         pair = 13,

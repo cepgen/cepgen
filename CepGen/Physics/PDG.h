@@ -4,6 +4,7 @@
 #include "CepGen/Physics/ParticleProperties.h"
 
 #include <unordered_map>
+#include <vector>
 
 namespace cepgen
 {
@@ -18,24 +19,12 @@ namespace cepgen
       enum PdgId : pdgid_t
       {
         invalid = 0,
-        //--- fundamental particles
-        down = 1, up = 2, strange = 3, charm = 4, bottom = 5, top = 6,
-        electron = 11, electronNeutrino = 12,
-        muon = 13, muonNeutrino = 14,
-        tau = 15, tauNeutrino = 16,
-        gluon = 21, photon = 22, Z = 23, W = 24,
-        //--- composite particles
-        piPlus = 211, piZero = 111,
-        KPlus = 321, DPlus = 411,
-        rho770_0 = 113, rho1450_0 = 100113, rho1700_0 = 30113,
-        eta = 221, omega782 = 223,
-        h1380_1 = 10333,
-        Jpsi= 443,
+        down = 1, up = 2,
+        electron = 11, muon = 13, tau = 15,
+        gluon = 21, photon = 22, W = 24,
+        pomeron = 990, reggeon = 110, piZero = 111, piPlus = 211, eta = 221,
         phi1680 = 100333,
-        Upsilon1S = 553, Upsilon2S = 100553, Upsilon3S = 200553,
-        proton = 2212, neutron = 2112,
-        pomeron = 990, reggeon = 110,
-        diffractiveProton = 9902210
+        proton = 2212, diffractiveProton = 9902210
       };
 
       /// Retrieve a unique instance of this particles info collection
@@ -46,10 +35,13 @@ namespace cepgen
       ~PDG() = default;
 
       void define( const ParticleProperties& props );
+      bool has( pdgid_t ) const;
       const ParticleProperties& operator()( pdgid_t ) const;
+      const std::vector<pdgid_t> particles() const;
       void dump() const;
+      size_t size() const;
       const std::string& name( pdgid_t ) const;
-      short colours( pdgid_t ) const;
+      double colours( pdgid_t ) const;
       double mass( pdgid_t ) const;
       double width( pdgid_t ) const;
       double charge( pdgid_t ) const;

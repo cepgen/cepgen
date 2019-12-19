@@ -9,7 +9,6 @@
 #include <sstream>
 
 #define BUILDERNM( obj ) obj ## Builder
-#define STRINGIFY( name ) #name
 
 namespace cepgen
 {
@@ -48,6 +47,7 @@ namespace cepgen
           oss << __PRETTY_FUNCTION__ << "\n\n  *** Failed to build a module with index/name \"" << name << "\" from factory! ***\n";
           throw std::invalid_argument( oss.str() );
         }
+        params.set<I>( ParametersList::MODULE_NAME, name );
         if ( params_map_.count( name ) > 0 )
           params += params_map_.at( name );
         return map_.at( name )( params );
@@ -55,10 +55,13 @@ namespace cepgen
       /// Build one instance of a named module
       /// \param[in] params List of parameters to be invoked by the constructor
       std::unique_ptr<T> build( ParametersList params = ParametersList() ) const {
-        if ( params.has<I>( KEY ) ) {
-          const I& idx = params.get<I>( KEY );
-          if ( map_.count( idx ) == 0 )
-            throw std::invalid_argument( std::string( __PRETTY_FUNCTION__ )+"\n\n  *** Failed to build a module with index/name \""+std::to_string( idx )+"\" from factory! ***\n" );
+        if ( params.has<I>( ParametersList::MODULE_NAME ) ) {
+          const I& idx = params.get<I>( ParametersList::MODULE_NAME );
+          if ( map_.count( idx ) == 0 ) {
+            std::ostringstream oss;
+            oss << __PRETTY_FUNCTION__ << "\n\n  *** Failed to build a module with index/name \"" << idx << "\" from factory! ***\n";
+            throw std::invalid_argument( oss.str() );
+          }
           if ( params_map_.count( idx ) > 0 )
             params += params_map_.at( idx );
           return map_.at( idx )( params );
@@ -73,8 +76,6 @@ namespace cepgen
           out.emplace_back( p.first );
         return out;
       }
-
-      static constexpr const char* KEY = "id";
 
     private:
       explicit ModuleFactory() = default;

@@ -1,7 +1,7 @@
 #include "CepGen/Physics/Limits.h"
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen
 {
@@ -58,6 +58,8 @@ namespace cepgen
   double
   Limits::range() const
   {
+    if ( !hasMin() && hasMax() ) // if no lower limit, assume 0
+      return second;
     if ( !hasMin() || !hasMax() )
       return 0.;
     return second-first;
@@ -112,6 +114,10 @@ namespace cepgen
     if ( v < 0. || v > 1. )
       throw CG_ERROR( "Limits:shoot" )
         << "x must be comprised between 0 and 1; x value = " << v << ".";
+
+    if ( !hasMin() && hasMax() ) // if no lower limit, assume 0
+      return second * v;
+
     if ( !valid() )
       return INVALID;
 
@@ -124,10 +130,10 @@ namespace cepgen
     if ( !lim.hasMin() && !lim.hasMax() )
       return os << "no cuts";
     if ( !lim.hasMin() )
-      return os << Form( "below %g", lim.max() );
+      return os << utils::format( "below %g", lim.max() );
     if ( !lim.hasMax() )
-      return os << Form( "above %g", lim.min() );
-    return os << Form( "%g to %g", lim.min(), lim.max() );
+      return os << utils::format( "above %g", lim.min() );
+    return os << utils::format( "%g to %g", lim.min(), lim.max() );
   }
 
   Limits

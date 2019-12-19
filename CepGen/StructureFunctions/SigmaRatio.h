@@ -3,8 +3,6 @@
 
 #include "CepGen/Core/ParametersList.h"
 
-#include <memory>
-
 namespace cepgen
 {
   /// A collector namespace for modellings of the \f$R=\sigma_L/\sigma_T\f$ ratio
@@ -20,14 +18,11 @@ namespace cepgen
         /// Extract the longitudinal/transverse cross section ratio and associated error for a given \f$(x_{\rm Bj},Q^2)\f$ couple.
         virtual double operator()( double xbj, double q2, double& err ) const = 0;
 
-        /// Build a R-ratio parameterisation for a given type
-        static std::shared_ptr<Parameterisation> build( const ParametersList& );
-
       protected:
         /// \f$x_{\rm Bj}\f$ dependence for QCD-matching of R at high-\f$Q^2\f$
         double theta( double xbj, double q2 ) const;
-        static const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
-        static const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
+        const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
+        const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
     };
 
     /// E143 experimental R measurement \cite Abe:1998ym

@@ -5,7 +5,7 @@ A collection of tools for Python steering cards definition
 '''
 
 #--- core components includes
-from containers_cfi import Module, Parameters
+from containers_cfi import Module, Parameters, Sequence
 from logger_cfi import Logging
 
 #--- physics-level includes

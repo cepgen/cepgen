@@ -1,4 +1,5 @@
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Constants.h"
@@ -35,11 +36,12 @@ namespace cepgen
               /// eta meson branching ratio
               double eta;
             };
-            Resonance() : angular_momentum( 0. ), x0( 0. ), mass( 0. ), width( 0. ), A0_T( 0. ), A0_L( 0. ) {}
+            Resonance();
             double kr() const;
             double ecmr( double m2 ) const;
             double kcmr() const { return ecmr( 0. ); }
             double pcmr( double m2 ) const { return sqrt( std::max( 0., ecmr( m2 )*ecmr( m2 )-m2 ) ); }
+            double mp;
             BR br;
             /// meson angular momentum
             double angular_momentum;
@@ -301,10 +303,15 @@ namespace cepgen
       return params;
     }
 
+    ChristyBosted::Parameters::Resonance::Resonance() :
+      mp( PDG::get().mass( PDG::proton ) ),
+      angular_momentum( 0. ), x0( 0. ), mass( 0. ), width( 0. ), A0_T( 0. ), A0_L( 0. )
+    {}
+
     double
     ChristyBosted::Parameters::Resonance::kr() const
     {
-      return 0.5 * ( mass*mass-mp2_ ) / mp_;
+      return 0.5 * ( mass*mass-mp*mp ) / mp;
     }
 
     double
@@ -312,7 +319,7 @@ namespace cepgen
     {
       if ( mass == 0. )
         return 0.;
-      return 0.5 * ( mass*mass+m2-mp2_ ) / mass;
+      return 0.5 * ( mass*mass+m2-mp*mp ) / mass;
     }
 
     ChristyBosted&
@@ -345,10 +352,9 @@ namespace cepgen
         q2_eff = q20 + delq2/( 1.+delq2/qq );
         w2_eff = mp2_ + q2_eff*( 1.-xbj )/xbj;
       }
-      const double tau = 4.*xbj*xbj*mp2_/q2_eff;
       const double sigT = resmod507( 'T', w2_eff, q2_eff ), sigL = resmod507( 'L', w2_eff, q2_eff );
 
-      F2 = prefac * q2_eff / ( 1+tau ) * ( sigT+sigL ) / constants::GEVM2_TO_PB * 1.e6;
+      F2 = prefac * q2_eff / ( 1+tau( xbj, q2_eff ) ) * ( sigT+sigL ) / constants::GEVM2_TO_PB * 1.e6;
       if ( q2 > q20 )
         F2 *= q21/( q21 + delq2 );
 

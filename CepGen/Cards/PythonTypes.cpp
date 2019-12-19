@@ -2,7 +2,7 @@
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
+#include "CepGen/Utils/String.h"
 
 #if PY_MAJOR_VERSION < 3
 #  define PYTHON2
@@ -67,7 +67,7 @@ namespace cepgen
       return PyInt_AsUnsignedLongMask( obj );
 #else
       if ( !PyLong_Check( obj ) )
-        throwPythonError( Form( "Object \"%s\" has invalid type: unsigned long != %s", key, obj->ob_type->tp_name ) );
+        throwPythonError( utils::format( "Object \"%s\" has invalid type: unsigned long != %s", key, obj->ob_type->tp_name ) );
       return PyLong_AsUnsignedLong( obj );
 #endif
     }
@@ -202,7 +202,10 @@ namespace cepgen
         return false;
       if ( !PyTuple_Check( obj ) && !PyList_Check( obj ) )
         return false;
-      PyObject* pfirst = PyTuple_Check( obj ) ? PyTuple_GetItem( obj, 0 ) : PyList_GetItem( obj, 0 );
+      const bool tuple = PyTuple_Check( obj );
+      if ( ( tuple ? PyTuple_Size( obj ) : PyList_Size( obj ) ) == 0 )
+        return true;
+      PyObject* pfirst = tuple ? PyTuple_GetItem( obj, 0 ) : PyList_GetItem( obj, 0 );
       if ( !is<T>( pfirst ) )
         return false;
       return true;

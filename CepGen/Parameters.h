@@ -11,30 +11,26 @@
 namespace cepgen
 {
   class Event;
+  class EventModifier;
   class ParametersList;
-  namespace proc { class GenericProcess; }
-  namespace hadr { class GenericHadroniser; }
-  namespace io { class GenericExportHandler; }
-  namespace utils { class TamingFunctionsCollection; }
+  namespace proc { class Process; }
+  namespace io { class ExportModule; }
+  namespace utils { class TamingFunction; }
   enum class IntegratorType;
+  typedef std::vector<std::unique_ptr<EventModifier> > EventModifiersSequence;
   /// List of parameters used to start and run the simulation job
   class Parameters
   {
     public:
       Parameters();
-      /// Copy constructor (transfers ownership to the process/hadroniser!)
+      /// Copy constructor (transfers ownership to the process/event modification algorithm!)
       Parameters( Parameters& );
-      /// Const copy constructor (all but the process and the hadroniser)
+      /// Const copy constructor (all but the process and the event modification algorithm)
       Parameters( const Parameters& );
       ~Parameters(); // required for unique_ptr initialisation!
 
       /// Assignment operator
       Parameters& operator=( Parameters );
-
-      /// Set the polar angle range for the produced leptons
-      /// \param[in] thetamin The minimal value of \f$\theta\f$ for the outgoing leptons
-      /// \param[in] thetamax The maximal value of \f$\theta\f$ for the outgoing leptons
-      void setThetaRange( float thetamin, float thetamax );
       /// Dump the input parameters in the terminal
       friend std::ostream& operator<<( std::ostream&, const Parameters* );
 
@@ -43,15 +39,17 @@ namespace cepgen
       //----- process to compute
 
       /// Process for which the cross-section will be computed and the events will be generated
-      proc::GenericProcess* process();
+      proc::Process* process();
       /// Process for which the cross-section will be computed and the events will be generated
-      const proc::GenericProcess* process() const;
+      const proc::Process* process() const;
       /// Name of the process considered
       std::string processName() const;
-      /// Set the process to study
-      void setProcess( std::unique_ptr<proc::GenericProcess> proc );
-      /// Set the process to study
-      void setProcess( proc::GenericProcess* proc );
+      /// Remove the process pointer
+      void clearProcess();
+      /// Copy a process configuration
+      void setProcess( std::unique_ptr<proc::Process> proc );
+      /// Set a process configuration
+      void setProcess( proc::Process* proc );
 
       //----- events kinematics
 
@@ -102,27 +100,33 @@ namespace cepgen
       bool storage() const { return store_; }
 
       /// Set a new output module definition
-      void setOutputModule( std::unique_ptr<io::GenericExportHandler> mod );
+      void setOutputModule( std::unique_ptr<io::ExportModule> mod );
       /// Set the pointer to a output module
-      void setOutputModule( io::GenericExportHandler* mod );
+      void setOutputModule( io::ExportModule* mod );
       /// Output module definition
-      io::GenericExportHandler* outputModule();
+      io::ExportModule* outputModule();
 
-      //----- hadronisation algorithm
+      //----- event modification (e.g. hadronisation, decay) algorithm
 
-      /// Hadronisation algorithm to use for the proton(s) fragmentation
-      hadr::GenericHadroniser* hadroniser();
-      /// Name of the hadroniser (if applicable)
-      std::string hadroniserName() const;
-      /// Set the hadronisation algorithm
-      void setHadroniser( std::unique_ptr<hadr::GenericHadroniser> hadr );
-      /// Set the hadronisation algorithm
-      void setHadroniser( hadr::GenericHadroniser* hadr );
+      /// Event modification algorithm to use
+      EventModifier* eventModifier( size_t );
+      /// Retrieve the list of event modification algorithms to run
+      EventModifiersSequence& eventModifiersSequence() { return evt_modifiers_; }
+      /// Retrieve the list of event modification algorithms to run
+      const EventModifiersSequence& eventModifiersSequence() const { return evt_modifiers_; }
+      /// Name of the modification algorithm (if applicable)
+      std::string eventModifierName( size_t ) const;
+      /// Add a new event modification algorithm to the sequence
+      void addModifier( std::unique_ptr<EventModifier> );
+      /// Add a new event modification algorithm to the sequence
+      void addModifier( EventModifier* );
+      /// Set the event modification algorithms sequence
+      void setModifiersSequence( EventModifiersSequence& );
 
       //----- taming functions
 
       /// Functionals to be used to account for rescattering corrections (implemented within the process)
-      std::shared_ptr<utils::TamingFunctionsCollection> taming_functions;
+      std::vector<utils::TamingFunction> taming_functions;
 
       //----- run operations
 
@@ -137,11 +141,10 @@ namespace cepgen
       inline unsigned int numGeneratedEvents() const { return num_gen_events_; }
 
     private:
-      std::unique_ptr<proc::GenericProcess> process_;
-      std::unique_ptr<hadr::GenericHadroniser> hadroniser_;
+      std::unique_ptr<proc::Process> process_;
+      EventModifiersSequence evt_modifiers_;
       /// Storage object
-      std::unique_ptr<io::GenericExportHandler> out_module_;
-
+      std::unique_ptr<io::ExportModule> out_module_;
       bool store_;
       /// Total generation time (in seconds)
       double total_gen_time_;

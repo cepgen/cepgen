@@ -1,4 +1,5 @@
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Processes/FortranKTProcess.h"
 
 #include "CepGen/Physics/KTFlux.h"
@@ -7,6 +8,7 @@
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Generator.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,7 +18,7 @@ extern "C" {
   cepgen_structure_functions_( int& sfmode, double& xbj, double& q2, double& f2, double& fl )
   {
     using namespace cepgen;
-    static auto sf = strfun::StructureFunctionsHandler::get().build( sfmode );
+    static auto sf = strfun::StructureFunctionsFactory::get().build( sfmode );
     const auto& val = ( *sf )( xbj, q2 );
     f2 = val.F2;
     fl = val.FL;
@@ -27,13 +29,14 @@ extern "C" {
   /// \param[in] x Fractional momentum loss
   /// \param[in] kt2 The \f$k_{\rm T}\f$ transverse momentum norm
   /// \param[in] sfmode Structure functions set for dissociative emission
-  /// \param[in] mx Diffractive state mass for dissociative emission
+  /// \param[in] min Incoming particle mass
+  /// \param[in] mout Diffractive state mass for dissociative emission
   double
-  cepgen_kt_flux_( int& fmode, double& x, double& kt2, int& sfmode, double& mx )
+  cepgen_kt_flux_( int& fmode, double& x, double& kt2, int& sfmode, double& min, double& mout )
   {
     using namespace cepgen;
-    static auto sf = strfun::StructureFunctionsHandler::get().build( sfmode );
-    return ktFlux( (KTFlux)fmode, x, kt2, *sf, mx );
+    static auto sf = strfun::StructureFunctionsFactory::get().build( sfmode );
+    return ktFlux( (KTFlux)fmode, x, kt2, *sf, min*min, mout*mout );
   }
 
   /// Compute a \f$k_{\rm T}\f$-dependent flux for heavy ions
@@ -73,24 +76,46 @@ extern "C" {
     }
   }
 
-  void
-  cepgen_list_params_()
-  {
-    CG_LOG( "cepgen_list_params" ) << "\t" << cepgen::proc::FortranKTProcess::kProcParameters;
-  }
-
-  int
-  cepgen_param_int_( char* pname, int& def )
-  {
-    if ( cepgen::proc::FortranKTProcess::kProcParameters.has<cepgen::ParticleProperties>( pname ) )
-      return cepgen::proc::FortranKTProcess::kProcParameters.get<cepgen::ParticleProperties>( pname ).pdgid;
-    return cepgen::proc::FortranKTProcess::kProcParameters.get<int>( pname, def );
-  }
-
+  /// Colour factor of a particle
   double
-  cepgen_param_real_( char* pname, double& def )
+  cepgen_particle_colour_( int& pdg_id )
   {
-    return cepgen::proc::FortranKTProcess::kProcParameters.get<double>( pname, def );
+    try {
+      return cepgen::PDG::get().colours( (cepgen::pdgid_t)pdg_id );
+    } catch ( const cepgen::Exception& e ) {
+      e.dump();
+      exit( 0 );
+    }
+  }
+
+  void
+  cepgen_init_()
+  {
+    cepgen::Generator gen;
+  }
+
+  void
+  cepgen_debug_( char* str, int size )
+  {
+    CG_DEBUG( "fortran_process" ) << std::string( str, size );
+  }
+
+  void
+  cepgen_warning_( char* str, int size )
+  {
+    CG_WARNING( "fortran_process" ) << std::string( str, size );
+  }
+
+  void
+  cepgen_error_( char* str, int size )
+  {
+    CG_ERROR( "fortran_process" ) << std::string( str, size );
+  }
+
+  void
+  cepgen_fatal_( char* str, int size )
+  {
+    throw CG_FATAL( "fortran_process" ) << std::string( str, size );
   }
 
 #ifdef __cplusplus
