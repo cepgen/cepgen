@@ -77,6 +77,7 @@ find_path(PYTHIA8_INCLUDE Pythia8 HINTS ${PYTHIA8_DIRS} PATH_SUFFIXES include/Py
 #--- searching for ROOT
 find_package(ROOT QUIET)
 if(ROOT_FOUND)
+  message(STATUS "ROOT found in ${ROOT_LIBRARIES}")
   if(IS_LXPLUS)
     #--- LXPLUS/CVMFS tweak for missing dependencies
     find_library(TBB tbb HINTS ${TBB_DIR} PATH_SUFFIXES lib QUIET)

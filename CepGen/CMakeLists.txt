@@ -2,7 +2,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 
 file(GLOB core_sources Core/*.cpp Modules/*.cpp Utils/*.cpp *.cpp)
 file(GLOB phys_sources Physics/*.cpp)
-file(GLOB procdef_sources Processes/*.cpp Processes/Fortran/*.f)
+file(GLOB proc_sources Processes/*.cpp Processes/Fortran/*.f)
 file(GLOB sf_sources StructureFunctions/*.cpp)
 
 set(core_libraries ${GSL_LIB} ${GSL_CBLAS_LIB})
@@ -21,7 +21,10 @@ endif()
 if(GRV_SRC)
   message(STATUS "GRV PDFset found in ${GRV_SRC}!")
   list(APPEND sf_sources ${GRV_SRC})
-  list(APPEND core_definitions -DGRVPDF)
+else()
+  message(STATUS "GRV PDFset not found. Will not build Szczurek-Uleshchenko SFs")
+  file(GLOB su_sf StructureFunctions/SzczurekUleshchenko.cpp)
+  list(REMOVE_ITEM sf_sources ${su_sf})
 endif()
 if(LHAPDF)
   message(STATUS "LHAPDF found in ${LHAPDF}")
@@ -72,9 +75,9 @@ endif()
 
 #----- build the objects
 
-add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${procdef_sources} ${sf_sources})
-target_link_libraries(CepGenCore PUBLIC ${core_libraries})
+add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${proc_sources} ${sf_sources})
 target_compile_definitions(CepGenCore PUBLIC ${core_definitions})
+target_link_libraries(CepGenCore PUBLIC ${core_libraries})
 
 #----- installation rules
 

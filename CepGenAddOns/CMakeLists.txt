@@ -119,9 +119,9 @@ endif()
 #----- build the objects
 
 add_library(CepGenAddOns SHARED ${io_sources} ${hadr_sources})
-target_link_libraries(CepGenAddOns ${addons_libraries})
 target_compile_definitions(CepGenAddOns PUBLIC ${addons_definitions})
 target_include_directories(CepGenAddOns PUBLIC ${addons_includes})
+target_link_libraries(CepGenAddOns ${addons_libraries})
 if(ROOT_FOUND)
   set_property(TARGET CepGenAddOns PROPERTY CXX_STANDARD 14)
 endif()
