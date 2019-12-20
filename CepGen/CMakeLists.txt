@@ -1,16 +1,20 @@
 include_directories(${PROJECT_SOURCE_DIR})
-set(PROC_PATH ${PROJECT_SOURCE_DIR}/CepGenProcesses)
 
 file(GLOB core_sources Core/*.cpp Modules/*.cpp Utils/*.cpp *.cpp)
 file(GLOB phys_sources Physics/*.cpp)
 file(GLOB procdef_sources Processes/*.cpp Processes/Fortran/*.f)
 file(GLOB sf_sources StructureFunctions/*.cpp)
-file(GLOB proc_sources ${PROC_PATH}/*.cpp ${PROC_PATH}/*.f)
 
 set(core_libraries ${GSL_LIB} ${GSL_CBLAS_LIB})
 set(core_definitions)
 set(core_includes)
-set(proc_definitions)
+
+if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.2)
+  list(APPEND core_libraries CepGenProcesses)
+  if(CMAKE_BUILD_ADDONS)
+    list(APPEND core_libraries CepGenAddOns)
+  endif()
+endif()
 
 #----- check the external dependencies for SFs/alphaS
 
@@ -69,16 +73,10 @@ endif()
 #----- build the objects
 
 add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${procdef_sources} ${sf_sources})
-target_link_libraries(CepGenCore ${core_libraries})
+target_link_libraries(CepGenCore PUBLIC ${core_libraries})
 target_compile_definitions(CepGenCore PUBLIC ${core_definitions})
-target_include_directories(CepGenCore PUBLIC ${core_includes} Processes/Fortran)
-
-add_library(CepGenProcesses SHARED ${proc_sources})
-target_compile_definitions(CepGenProcesses PUBLIC ${proc_definitions})
-target_include_directories(CepGenProcesses PUBLIC Processes/Fortran)
 
 #----- installation rules
 
 install(TARGETS CepGenCore DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT lib)
-install(TARGETS CepGenProcesses DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT lib)
 

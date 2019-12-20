@@ -26,7 +26,7 @@
 #include <algorithm>
 
 #if PY_MAJOR_VERSION < 3
-#  define PYTHON2
+# define PYTHON2
 #endif
 
 namespace cepgen

@@ -1,10 +1,10 @@
 #include "CepGen/Modules/ExportModule.h"
 #include "CepGen/Modules/EventModifier.h"
 
-#include "CepGen/Core/ParametersList.h"
-
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Physics/Constants.h"
+
+#include "CepGen/Core/ParametersList.h"
 
 #include "CepGen/Utils/String.h"
 #include "CepGen/Parameters.h"
