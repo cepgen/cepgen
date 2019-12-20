@@ -327,7 +327,7 @@ namespace cepgen
       const auto& central_system = ini.find( Particle::CentralSystem );
       if ( central_system == ini.end() ) {
         Particle& p = event_->addParticle( Particle::Intermediate );
-        p.setPdgId( PDG::invalid );
+        p.setPdgId( (pdgid_t)PDG::invalid );
         p.setStatus( Particle::Status::Propagator );
       }
       //--- outgoing state
