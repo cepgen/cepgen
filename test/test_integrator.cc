@@ -3,7 +3,7 @@
 
 #include "CepGen/Core/Integrator.h"
 
-#include "CepGen/Modules/Process.h"
+#include "CepGen/Processes/Process.h"
 
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/ArgumentsParser.h"
