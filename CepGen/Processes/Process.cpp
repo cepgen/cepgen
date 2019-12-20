@@ -1,4 +1,4 @@
-#include "CepGen/Modules/Process.h"
+#include "CepGen/Processes/Process.h"
 
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"

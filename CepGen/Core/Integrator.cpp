@@ -2,7 +2,8 @@
 #include "CepGen/Core/GridParameters.h"
 #include "CepGen/Core/Exception.h"
 
-#include "CepGen/Modules/Process.h"
+#include "CepGen/Processes/Process.h"
+
 #include "CepGen/Modules/EventModifier.h"
 #include "CepGen/Modules/ExportModule.h"
 

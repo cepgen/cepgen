@@ -1,7 +1,7 @@
-#ifndef CepGen_Modules_KTProcess_h
-#define CepGen_Modules_KTProcess_h
+#ifndef CepGen_Processes_KTProcess_h
+#define CepGen_Processes_KTProcess_h
 
-#include "CepGen/Modules/Process.h"
+#include "CepGen/Processes/Process.h"
 
 namespace cepgen
 {

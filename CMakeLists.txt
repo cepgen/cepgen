@@ -58,6 +58,7 @@ if(CMAKE_BUILD_ADDONS)
   add_subdirectory(CepGenAddOns)
   list(APPEND CEPGEN_LIBRARIES CepGenAddOns)
 endif()
+export(PACKAGE cepgen)
 
 #----- copy the input cards and other files
 
@@ -74,7 +75,10 @@ file(COPY ${readme_file} DESTINATION ${PROJECT_BINARY_DIR})
 
 set(MODS)
 foreach(_module ${CEPGEN_MODULES})
-  list(APPEND MODS CepGen/${module})
+  list(APPEND MODS CepGen/${_module})
+endforeach()
+foreach(_module ${CEPGEN_LIBRARIES})
+  message(STATUS ">> ${_module}")
 endforeach()
 install(DIRECTORY ${MODS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/CepGen COMPONENT devel FILES_MATCHING PATTERN "*.h")
 

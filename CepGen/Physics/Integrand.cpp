@@ -1,11 +1,12 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/EventBrowser.h"
 
+#include "CepGen/Processes/Process.h"
+
 #include "CepGen/Physics/TamingFunction.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/PDG.h"
 
-#include "CepGen/Modules/Process.h"
 #include "CepGen/Modules/EventModifier.h"
 #include "CepGen/Modules/ExportModule.h"
 

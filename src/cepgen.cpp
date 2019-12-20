@@ -1,5 +1,3 @@
-#include "CepGen/Generator.h"
-
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Cards/Handler.h"
 
@@ -7,18 +5,17 @@
 #include "CepGen/Utils/AbortHandler.h"
 
 #include "CepGen/Modules/CardsHandlerFactory.h"
-
 #include "CepGen/Modules/ProcessesFactory.h"
-#include "CepGen/Modules/Process.h"
-
-#include "CepGen/Physics/AlphaS.h"
-
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/StructureFunctions/SigmaRatio.h"
-
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
+
+#include "CepGen/Processes/Process.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
+#include "CepGen/Physics/AlphaS.h"
+
+#include "CepGen/Generator.h"
 
 using namespace std;
 
@@ -34,6 +31,8 @@ int main( int argc, char* argv[] )
   std::string input_card;
   int num_events;
   bool list_mods;
+
+  cepgen::proc::ProcessesFactory::get();
 
   cepgen::ArgumentsParser( argc, argv )
     .addArgument( "", "path to the configuration file", &input_card, 'i' )
