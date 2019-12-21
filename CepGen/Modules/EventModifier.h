@@ -17,7 +17,7 @@ namespace cepgen
     public:
       /// Default constructor for an undefined modifier
       explicit EventModifier( const ParametersList& );
-      virtual ~EventModifier() {}
+      virtual ~EventModifier() = default;
 
       /// Parse a configuration string
       virtual void readString( const char* ) {}

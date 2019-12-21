@@ -23,7 +23,7 @@ namespace cepgen
       public:
         /// Class constructor
         explicit ExportModule( const ParametersList& );
-        virtual ~ExportModule();
+        virtual ~ExportModule() = default;
         const std::string& name() const { return name_; }
         /// Initialise the handler and its inner parameterisation
         virtual void initialise( const Parameters& ) = 0;
@@ -43,7 +43,7 @@ namespace cepgen
         /// Module unique name
         const std::string name_;
         /// Event index
-        unsigned int event_num_;
+        unsigned long long event_num_;
     };
   }
 }

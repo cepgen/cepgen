@@ -5,6 +5,7 @@ set(PROJECT_VERSION 1)
 set(VERSION 0.9.7)
 
 option(CMAKE_BUILD_CORE "Build Core library" ON)
+option(CMAKE_BUILD_PROCESSES "Build physics processes" ON)
 option(CMAKE_BUILD_ADDONS "Build AddOns" ON)
 option(CMAKE_BUILD_TESTS "Build tests" OFF)
 
@@ -16,7 +17,7 @@ endif()
 
 #----- check that at least one target is to be built
 
-if(NOT CMAKE_BUILD_CORE AND NOT CMAKE_BUILD_ADDONS)
+if(NOT CMAKE_BUILD_CORE AND NOT CMAKE_BUILD_PROCESSES AND NOT CMAKE_BUILD_ADDONS)
   message(FATAL_ERROR "Nothing to be built!")
 endif()
 
@@ -36,10 +37,6 @@ set(CEPGEN_LIBRARIES)
 set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
 set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
 
-#----- define all individual modules/libraries to be built beforehand
-
-set(CEPGEN_MODULES Event Cards)
-
 #----- enable fortran for external libraries linking
 
 enable_language(Fortran)
@@ -49,11 +46,13 @@ enable_language(Fortran)
 include_directories(${PROJECT_SOURCE_DIR})
 if(CMAKE_BUILD_CORE)
   add_subdirectory(CepGen)
+  add_subdirectory(CepGen/Event)
+  add_subdirectory(CepGen/Cards)
+  list(APPEND CEPGEN_LIBRARIES CepGenCore CepGenEvent CepGenCards)
+endif()
+if(CMAKE_BUILD_PROCESSES)
   add_subdirectory(CepGenProcesses)
-  foreach(_module ${CEPGEN_MODULES})
-    add_subdirectory(${CEPGEN_LIB_DIR}/${_module})
-  endforeach()
-  list(APPEND CEPGEN_LIBRARIES CepGenCore CepGenProcesses CepGenEvent CepGenCards)
+  list(APPEND CEPGEN_LIBRARIES CepGenProcesses)
 endif()
 if(CMAKE_BUILD_ADDONS)
   add_subdirectory(CepGenAddOns)
