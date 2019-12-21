@@ -219,7 +219,7 @@ namespace cepgen
       grid_->setValue( ps_bin_, weight );
       grid_->correc = ( grid_->numPoints( ps_bin_ )-1. ) * grid_->f_max_diff / grid_->globalMax() - 1.;
 
-      CG_DEBUG("Integrator::generateOne")
+      CG_DEBUG("Integrator:generateOne")
         << "Correction " << grid_->correc << " will be applied for phase space bin " << ps_bin_ << ".";
     }
 
@@ -344,6 +344,9 @@ namespace cepgen
 
     const double inv_num_points = 1./input_params_.generation().num_points;
     std::vector<double> point_coord( function_->dim, 0. );
+    if ( point_coord.size() < grid_->n( 0 ).size() )
+      throw CG_FATAL( "GridParameters:shoot" )
+        << "Coordinates vector multiplicity is insufficient!";
 
     // ...
     double sum = 0., sum2 = 0., sum2p = 0.;
@@ -355,12 +358,13 @@ namespace cepgen
       double fsum = 0., fsum2 = 0.;
       for ( unsigned int j = 0; j < input_params_.generation().num_points; ++j ) {
         grid_->shoot( rng_.get(), i, point_coord );
-        const double weight = eval( point_coord);
+        const double weight = eval( point_coord );
         grid_->setValue( i, weight );
         fsum += weight;
         fsum2 += weight*weight;
       }
-      const double av = fsum*inv_num_points, av2 = fsum2*inv_num_points, sig2 = av2-av*av;
+      const double av = fsum*inv_num_points, av2 = fsum2*inv_num_points;
+      const double sig2 = av2-av*av;
       sum += av;
       sum2 += av2;
       sum2p += sig2;

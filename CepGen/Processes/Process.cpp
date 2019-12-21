@@ -194,7 +194,7 @@ namespace cepgen
     }
 
     void
-    Process::setPoint( const unsigned int ndim, double* x )
+    Process::setPoint( double* x, const size_t ndim )
     {
       std::copy( x, x+ndim, point_coord_.begin() );
       is_point_set_ = true;

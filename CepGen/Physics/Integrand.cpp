@@ -59,7 +59,7 @@ namespace cepgen
       // specify the phase space point to probe
       //================================================================
 
-      proc->setPoint( ndim, x );
+      proc->setPoint( x, ndim );
 
       //================================================================
       // from this step on, the phase space point is supposed to be set

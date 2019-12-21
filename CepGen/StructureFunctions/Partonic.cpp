@@ -83,7 +83,7 @@ namespace cepgen
     {}
 
     Partonic::Partonic( const char* set, unsigned short member, const Mode& mode ) :
-      Parameterisation( ParametersList().set<int>( ParametersList::MODULE_NAME, (int)Type::Partonic ) ),
+      Parameterisation( ParametersList().setName<int>( (int)Type::Partonic ) ),
       pdf_set_( set ), num_flavours_( 4 ), pdf_code_( 0 ), pdf_member_( member ), mode_( mode ),
       initialised_( false )
     {}

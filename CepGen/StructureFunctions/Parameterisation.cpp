@@ -28,13 +28,13 @@ namespace cepgen
     {}
 
     Parameterisation::Parameterisation( const ParametersList& params ) :
-      type( (Type)params.get<int>( ParametersList::MODULE_NAME ) ),
+      type( (Type)params.name<int>() ),
       F2( 0. ), FL( 0. ),
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       params_( params ), old_vals_({ 0., 0. }),
       r_ratio_( sigrat::SigmaRatiosFactory::get().build(
         params.get<ParametersList>( "sigmaRatio", ParametersList()
-          .set<int>( ParametersList::MODULE_NAME, (int)sigrat::Type::SibirtsevBlunden ) )
+          .setName<int>( (int)sigrat::Type::SibirtsevBlunden ) )
       ) )
     {}
 

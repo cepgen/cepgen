@@ -69,9 +69,9 @@ namespace cepgen
          * Sets the phase space point to compute the weight associated to it.
          * \brief Sets the phase space point to compute
          * \param[in] ndim The number of dimensions of the point in the phase space
-         * \param[in] x[] The (\a ndim_)-dimensional point in the phase space on which the kinematics and the cross-section are computed
+         * \param[in] x The (\a ndim_)-dimensional point in the phase space on which the kinematics and the cross-section are computed
          */
-        void setPoint( const unsigned int ndim, double* x );
+        void setPoint( double* x, const size_t ndim );
         /// Compute the weight for this point in the phase-space
         double weight();
         /// Dump the evaluated point's coordinates in the standard output stream
