@@ -171,7 +171,7 @@ namespace cepgen
     if ( !grid_->gen_prepared )
       computeGenerationParameters();
 
-    std::vector<double> xtmp;
+    std::vector<double> xtmp( function_->dim );
 
     //--- correction cycles
 
