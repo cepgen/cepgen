@@ -31,9 +31,9 @@ endif()
 #--- linking with Pythia 8
 
 if(PYTHIA8)
-  message(STATUS "Pythia 8 found in ${PYTHIA8}")
-  message(STATUS "Pythia 8 will be used for LHEF output")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-misleading-indentation")
+  message(STATUS "Pythia 8 found in ${PYTHIA8}; will be used for LHEF output")
+  #set_property(TARGET CepGenAddOns PROPERTY CXX_FLAGS "-Wno-misleading-indentation")
+  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-misleading-indentation")
   list(APPEND addons_libraries ${PYTHIA8} dl)
   list(APPEND addons_includes ${PYTHIA8_INCLUDE})
   list(APPEND addons_definitions -DPYTHIA8)
@@ -119,9 +119,9 @@ endif()
 #----- build the objects
 
 add_library(CepGenAddOns SHARED ${io_sources} ${hadr_sources})
-target_compile_definitions(CepGenAddOns PUBLIC ${addons_definitions})
-target_include_directories(CepGenAddOns PUBLIC ${addons_includes})
-target_link_libraries(CepGenAddOns ${addons_libraries})
+target_compile_definitions(CepGenAddOns PRIVATE ${addons_definitions})
+target_include_directories(CepGenAddOns PRIVATE ${addons_includes})
+target_link_libraries(CepGenAddOns PRIVATE ${addons_libraries})
 if(ROOT_FOUND)
   set_property(TARGET CepGenAddOns PROPERTY CXX_STANDARD 14)
 endif()
@@ -129,4 +129,3 @@ endif()
 #----- installation rules
 
 install(TARGETS CepGenAddOns DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT lib)
-

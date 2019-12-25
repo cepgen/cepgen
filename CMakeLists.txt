@@ -34,6 +34,7 @@ include(UseEnvironment)
 include(BuildRPM)
 
 set(CEPGEN_LIBRARIES)
+set(CEPGEN_HAS_FUNCTIONALS OFF)
 set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
 set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
 
@@ -107,4 +108,3 @@ if(DOXYGEN_FOUND)
   message(STATUS "Doxygen found")
   add_custom_target(doc_doxygen COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "Generating documentation with Doxygen" VERBATIM)
 endif()
-

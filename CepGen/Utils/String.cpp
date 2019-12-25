@@ -34,6 +34,38 @@ namespace cepgen
       return str;
     }
 
+    std::string
+    yesno( bool test )
+    {
+      return test
+        ? "\033[32;1myes\033[0m"
+        : "\033[31;1mno\033[0m";
+    }
+
+    template<> std::string
+    boldify<std::string>( std::string str )
+    {
+      return format( "\033[1m%s\033[0m", str.c_str() );
+    }
+
+    template<> std::string
+    boldify<const char*>( const char* str )
+    {
+      return boldify( std::string( str ) );
+    }
+
+    template<> std::string
+    boldify( unsigned long ui )
+    {
+      return boldify( std::to_string( ui ) );
+    }
+
+    std::string
+    colourise( const std::string& str, const Colour& col )
+    {
+      return format( "\033[0;%dm%s\033[0m", (int)col, str.c_str() );
+    }
+
     size_t
     replace_all( std::string& str, const std::string& from, const std::string& to )
     {

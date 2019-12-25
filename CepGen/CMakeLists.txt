@@ -64,15 +64,18 @@ if(MUPARSER)
   message(STATUS "Formulas parsing will use muParser found in ${MUPARSER}")
   list(APPEND core_definitions -DFUNC_MUPARSER)
   list(APPEND core_libraries ${MUPARSER})
+  set(CEPGEN_HAS_FUNCTIONALS ON)
 elseif(EXPRTK)
   message(STATUS "Formulas parsing will use exprtk found in ${EXPRTK}")
   list(APPEND core_definitions -DFUNC_EXPRTK)
   list(APPEND core_includes ${EXPRTK}) # header-only
+  set(CEPGEN_HAS_FUNCTIONALS ON)
 elseif(ROOT_FOUND)
   message(STATUS "Formulas parsing will use ROOT")
   list(APPEND core_definitions -DFUNC_ROOT)
   list(APPEND core_includes ${ROOT_INCLUDE_DIRS})
   list(APPEND core_libraries ${ROOT_LIBRARIES})
+  set(CEPGEN_HAS_FUNCTIONALS ON)
 endif()
 
 #----- build the objects
