@@ -20,9 +20,7 @@ template<size_t N=3> class TestProcess : public cepgen::proc::Process
       cepgen::proc::Process( params, false ),
       funct_( "1./(1.-cos(x*_pi)*cos(y*_pi)*cos(z*_pi))", { "x", "y", "z" } ) {}
     TestProcess( const char* formula, const std::vector<std::string>& args ) :
-      cepgen::proc::Process( cepgen::ParametersList()
-        .setName<std::string>( "test" )
-        .set<std::string>( "description", cepgen::utils::format( ".oO TEST PROCESS (%s) Oo.", formula ) ), false ),
+      cepgen::proc::Process( cepgen::ParametersList(), false ),
       funct_( formula, args ) {}
 
     cepgen::proc::ProcessPtr clone( const cepgen::ParametersList& params ) const override {
