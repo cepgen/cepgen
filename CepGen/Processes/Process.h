@@ -26,7 +26,7 @@ namespace cepgen
         /// \param[in] name Process name
         /// \param[in] description Human-readable description of the process
         /// \param[in] has_event Do we generate the associated event structure?
-        Process( const ParametersList& params, const std::string& name = "<invalid name>", const std::string& description = "<invalid process>", bool has_event = true );
+        explicit Process( const ParametersList& params, bool has_event = true );
         /// Copy constructor for a user process
         Process( const Process& );
         virtual ~Process() = default;

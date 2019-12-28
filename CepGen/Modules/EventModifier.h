@@ -19,6 +19,13 @@ namespace cepgen
       explicit EventModifier( const ParametersList& );
       virtual ~EventModifier() = default;
 
+      virtual void setParameters( const Parameters& params ) { params_ = &params; }
+      /// \brief Specify a random numbers generator seed for the external module
+      /// \param[in] seed A RNG seed
+      void setSeed( long long seed ) { seed_ = seed; }
+      /// Return a human-readable name for this modifier
+      const std::string& name() const { return name_; }
+
       /// Parse a configuration string
       virtual void readString( const char* ) {}
       /// Parse a configuration string
@@ -37,14 +44,6 @@ namespace cepgen
       virtual bool run( Event& ev, double& weight, bool full ) = 0;
       /// Specify the process cross section, in pb
       virtual void setCrossSection( double xsec, double xsec_err ) {}
-
-      virtual void setParameters( const Parameters& params ) { params_ = &params; }
-      /// \brief Specify a random numbers generator seed for the external module
-      /// \param[in] seed A RNG seed
-      void setSeed( long long seed ) { seed_ = seed; }
-
-      /// Return a human-readable name for this modifier
-      const std::string& name() const { return name_; }
 
     protected:
       /// Name of the algorithm

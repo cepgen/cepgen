@@ -60,8 +60,7 @@ int main( int argc, char* argv[] )
   } catch ( const cepgen::Exception& e ) {
     e.dump();
   } catch ( const std::exception& e ) {
-    CG_FATAL( "main" ) << "Other exception caught!\n\t"
-      << e.what();
+    CG_FATAL( "main" ) << "Other exception caught!\n\t" << e.what();
   }
 
   return 0;

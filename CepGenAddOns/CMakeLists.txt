@@ -1,8 +1,7 @@
-file(GLOB io_sources OutputModules/TextHandler.cpp)
-set(hadr_sources)
-
 include_directories(${PROJECT_SOURCE_DIR})
 
+file(GLOB io_sources OutputModules/TextHandler.cpp)
+set(hadr_sources)
 set(addons_libraries)
 set(addons_definitions)
 set(addons_includes)
@@ -119,9 +118,9 @@ endif()
 #----- build the objects
 
 add_library(CepGenAddOns SHARED ${io_sources} ${hadr_sources})
-target_compile_definitions(CepGenAddOns PRIVATE ${addons_definitions})
-target_include_directories(CepGenAddOns PRIVATE ${addons_includes})
-target_link_libraries(CepGenAddOns PRIVATE ${addons_libraries})
+target_compile_definitions(CepGenAddOns PUBLIC ${addons_definitions})
+target_include_directories(CepGenAddOns PUBLIC ${addons_includes})
+target_link_libraries(CepGenAddOns PUBLIC ${addons_libraries})
 if(ROOT_FOUND)
   set_property(TARGET CepGenAddOns PROPERTY CXX_STANDARD 14)
 endif()

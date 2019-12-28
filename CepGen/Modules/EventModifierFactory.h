@@ -7,7 +7,7 @@
   namespace cepgen { namespace hadr { \
     struct BUILDERNM( obj ) { \
       BUILDERNM( obj )() { EventModifierFactory::get().registerModule<obj>( name ); } }; \
-    static BUILDERNM( obj ) g ## obj; \
+    static BUILDERNM( obj ) gEveMod ## obj; \
   } }
 
 namespace cepgen

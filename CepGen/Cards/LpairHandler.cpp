@@ -109,7 +109,7 @@ namespace cepgen
       //--- parse the hadronisation algorithm name
       if ( !evt_mod_name_.empty() )
         for ( const auto& mod : utils::split( evt_mod_name_, ',' ) ) {
-          params_.addModifier( cepgen::EventModifierFactory::get().build( mod, ParametersList() ) );
+          params_.addModifier( EventModifierFactory::get().build( mod, ParametersList() ) );
           (*params_.eventModifiersSequence().rbegin())->setParameters( params_ );
         }
 
@@ -119,7 +119,7 @@ namespace cepgen
         if ( !out_file_name_.empty() )
           outm.set<std::string>( "filename", out_file_name_ );
         for ( const auto& mod : utils::split( out_mod_name_, ',' ) )
-          params_.setOutputModule( cepgen::io::ExportModuleFactory::get().build( mod, outm ) );
+          params_.setOutputModule( io::ExportModuleFactory::get().build( mod, outm ) );
       }
 
       //--- check if we are dealing with heavy ions for incoming states

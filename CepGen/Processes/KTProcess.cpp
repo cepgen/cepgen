@@ -13,11 +13,9 @@ namespace cepgen
   namespace proc
   {
     KTProcess::KTProcess( const ParametersList& params,
-                          const std::string& name,
-                          const std::string& description,
                           const std::array<pdgid_t,2>& partons,
                           const std::vector<pdgid_t>& central ) :
-      Process( params, name, description+" (kT-factor.)" ),
+      Process( params ),
       qt1_( 0. ), phi_qt1_( 0. ), qt2_( 0. ), phi_qt2_( 0. ),
       kIntermediateParts( partons ), kProducedParts( central )
     {}

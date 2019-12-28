@@ -37,6 +37,7 @@ set(CEPGEN_LIBRARIES)
 set(CEPGEN_HAS_FUNCTIONALS OFF)
 set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
 set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
+set(CEPGEN_CORE_EXT ${GSL_LIB} ${GSL_CBLAS_LIB})
 
 #----- enable fortran for external libraries linking
 
@@ -45,12 +46,6 @@ enable_language(Fortran)
 #----- build all the intermediate objects
 
 include_directories(${PROJECT_SOURCE_DIR})
-if(CMAKE_BUILD_CORE)
-  add_subdirectory(CepGen)
-  add_subdirectory(CepGen/Event)
-  add_subdirectory(CepGen/Cards)
-  list(APPEND CEPGEN_LIBRARIES CepGenCore CepGenEvent CepGenCards)
-endif()
 if(CMAKE_BUILD_PROCESSES)
   add_subdirectory(CepGenProcesses)
   list(APPEND CEPGEN_LIBRARIES CepGenProcesses)
@@ -59,7 +54,16 @@ if(CMAKE_BUILD_ADDONS)
   add_subdirectory(CepGenAddOns)
   list(APPEND CEPGEN_LIBRARIES CepGenAddOns)
 endif()
-export(PACKAGE cepgen)
+if(CMAKE_BUILD_CORE)
+  add_subdirectory(CepGen/Event)
+  add_subdirectory(CepGen/Cards)
+  list(APPEND CEPGEN_LIBRARIES CepGenEvent CepGenCards)
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.2)
+    list(APPEND CEPGEN_CORE_EXT ${CEPGEN_LIBRARIES})
+  endif()
+  add_subdirectory(CepGen)
+  list(APPEND CEPGEN_LIBRARIES CepGenCore)
+endif()
 
 #----- copy the input cards and other files
 
@@ -74,11 +78,11 @@ file(COPY ${readme_file} DESTINATION ${PROJECT_BINARY_DIR})
 
 #----- installation rules
 
-set(MODS)
-foreach(_module ${CEPGEN_MODULES})
-  list(APPEND MODS CepGen/${_module})
-endforeach()
-install(DIRECTORY ${MODS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/CepGen COMPONENT devel FILES_MATCHING PATTERN "*.h")
+set(modules CepGen CepGenAddOns CepGenProcesses)
+install(DIRECTORY ${modules}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  COMPONENT devel FILES_MATCHING PATTERN "*.h")
+export(PACKAGE cepgen)
 
 #----- set the tests/utils directory
 
@@ -106,5 +110,8 @@ if(DOXYGEN_FOUND)
   set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
   configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
   message(STATUS "Doxygen found")
-  add_custom_target(doc_doxygen COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "Generating documentation with Doxygen" VERBATIM)
+  add_custom_target(doc_doxygen
+    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "Generating documentation with Doxygen" VERBATIM)
 endif()

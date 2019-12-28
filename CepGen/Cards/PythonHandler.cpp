@@ -125,7 +125,7 @@ namespace cepgen
 
       //--- process mode
       params_.kinematics.mode = (KinematicsMode)proc_params.get<int>( "mode", (int)KinematicsMode::invalid );
-      params_.setProcess( cepgen::proc::ProcessesFactory::get().build( proc_name, proc_params ) );
+      params_.setProcess( proc::ProcessesFactory::get().build( proc_name, proc_params ) );
 
       //--- process kinematics
       PyObject* pin_kinematics = element( process, "inKinematics" ); // borrowed
@@ -393,7 +393,7 @@ namespace cepgen
         throwPythonError( "Event modification algorithm name is required!" );
       std::string mod_name = get<std::string>( pname );
 
-      params_.addModifier( cepgen::EventModifierFactory::get().build( mod_name, get<ParametersList>( mod ) ) );
+      params_.addModifier( EventModifierFactory::get().build( mod_name, get<ParametersList>( mod ) ) );
 
       auto h = params_.eventModifiersSequence().rbegin()->get();
       h->setParameters( params_ );

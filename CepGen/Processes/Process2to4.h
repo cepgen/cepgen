@@ -10,7 +10,7 @@ namespace cepgen
     class Process2to4 : public KTProcess
     {
       public:
-        Process2to4( const ParametersList& params, const std::string& name, const std::string& desc, std::array<pdgid_t,2> partons, pdgid_t cs_id );
+        Process2to4( const ParametersList& params, std::array<pdgid_t,2> partons, pdgid_t cs_id );
 
       protected:
         void setCuts( const Cuts& single );

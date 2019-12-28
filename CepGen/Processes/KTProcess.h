@@ -23,13 +23,9 @@ namespace cepgen
       public:
         /// Class constructor
         /// \param[in] params Parameters list
-        /// \param[in] name Generic process name
-        /// \param[in] description Human-readable \f$k_{\rm T}\f$-factorised process name
         /// \param[in] partons First and second incoming parton
         /// \param[in] output Produced final state particles
         KTProcess( const ParametersList& params,
-                   const std::string& name,
-                   const std::string& description,
                    const std::array<pdgid_t,2>& partons,
                    const std::vector<pdgid_t>& output );
 

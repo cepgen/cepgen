@@ -32,7 +32,11 @@
 
 namespace cepgen
 {
-  namespace utils { std::atomic<int> gSignal; }
+  namespace utils
+  {
+    std::atomic<int> gSignal;
+  }
+
   Generator::Generator() :
     parameters_( new Parameters ), result_( -1. ), result_error_( -1. )
   {
@@ -204,50 +208,57 @@ namespace cepgen
     std::ostringstream oss;
     oss
       << "List of modules registered in the runtime database:\n";
-    { oss << sep_mid << utils::boldify( "\nSteering cards parsers" );
-      if ( cepgen::card::CardsHandlerFactory::get().modules().empty() )
+    { oss << sep_mid << "\n"
+        << utils::boldify( "Steering cards parsers" );
+      if ( card::CardsHandlerFactory::get().modules().empty() )
         oss << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
-      for ( const auto& mod : cepgen::card::CardsHandlerFactory::get().modules() )
+      for ( const auto& mod : card::CardsHandlerFactory::get().modules() )
         oss << "\n> ." << utils::colourise( mod, utils::Colour::green )
           << " extension";
     }
-    { oss << "\n" << sep_mid << utils::boldify( "\nPhysics processes" );
-      if ( cepgen::proc::ProcessesFactory::get().modules().empty() )
+    { oss << "\n" << sep_mid << "\n"
+        << utils::boldify( "Physics processes" );
+      if ( proc::ProcessesFactory::get().modules().empty() )
         oss << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
-      for ( const auto& mod : cepgen::proc::ProcessesFactory::get().modules() )
+      for ( const auto& mod : proc::ProcessesFactory::get().modules() )
         oss << "\n> " << utils::colourise( mod, utils::Colour::green )
-          << ": " << cepgen::proc::ProcessesFactory::get().build( mod )->description();
+          << ": " << proc::ProcessesFactory::get().build( mod )->description();
     }
-    { oss << "\n" << sep_mid << utils::boldify( "\nStructure functions modellings" );
-      if ( cepgen::strfun::StructureFunctionsFactory::get().modules().empty() )
+    { oss << "\n" << sep_mid << "\n"
+        << utils::boldify( "Structure functions modellings" );
+      if ( strfun::StructureFunctionsFactory::get().modules().empty() )
         oss << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
-      for ( const auto& mod : cepgen::strfun::StructureFunctionsFactory::get().modules() )
+      for ( const auto& mod : strfun::StructureFunctionsFactory::get().modules() )
         oss << "\n> " << utils::colourise( std::to_string( mod ), utils::Colour::green )
-          << ": " << (cepgen::strfun::Type)mod;
+          << ": " << (strfun::Type)mod;
     }
-    { oss << "\n" << sep_mid << utils::boldify( "\nCross section ratios modellings" );
-      if ( cepgen::sigrat::SigmaRatiosFactory::get().modules().empty() )
+    { oss << "\n" << sep_mid << "\n"
+        << utils::boldify( "Cross section ratios modellings" );
+      if ( sigrat::SigmaRatiosFactory::get().modules().empty() )
         oss << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
-      for ( const auto& mod : cepgen::sigrat::SigmaRatiosFactory::get().modules() )
+      for ( const auto& mod : sigrat::SigmaRatiosFactory::get().modules() )
         oss << "\n> " << utils::colourise( std::to_string( mod ), utils::Colour::green )
-          << ": " << (cepgen::sigrat::Type)mod;
+          << ": " << (sigrat::Type)mod;
     }
-    { oss << "\n" << sep_mid << utils::boldify( "\nEvent modification modules" );
-      if ( cepgen::EventModifierFactory::get().modules().empty() )
+    { oss << "\n" << sep_mid << "\n"
+        << utils::boldify( "Event modification modules" );
+      if ( EventModifierFactory::get().modules().empty() )
         oss << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
-      for ( const auto& mod : cepgen::EventModifierFactory::get().modules() )
+      for ( const auto& mod : EventModifierFactory::get().modules() )
         oss << "\n> " << utils::colourise( mod, utils::Colour::green );
     }
-    { oss << "\n" << sep_mid << utils::boldify( "\nExport modules" );
-      if ( cepgen::io::ExportModuleFactory::get().modules().empty() )
+    { oss << "\n" << sep_mid << "\n"
+        << utils::boldify( "Export modules" );
+      if ( io::ExportModuleFactory::get().modules().empty() )
         oss << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
-      for ( const auto& mod : cepgen::io::ExportModuleFactory::get().modules() )
+      for ( const auto& mod : io::ExportModuleFactory::get().modules() )
         oss << "\n> " << utils::colourise( mod, utils::Colour::green );
     }
-    { oss << "\n" << sep_mid << utils::boldify( "\nalpha(s) evolution algorithms" );
-      if ( cepgen::AlphaSFactory::get().modules().empty() )
+    { oss << "\n" << sep_mid << "\n"
+        << utils::boldify( "alpha(s) evolution algorithms" );
+      if ( AlphaSFactory::get().modules().empty() )
         oss << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
-      for ( const auto& mod : cepgen::AlphaSFactory::get().modules() )
+      for ( const auto& mod : AlphaSFactory::get().modules() )
         oss << "\n> " << utils::colourise( mod, utils::Colour::green );
     }
     CG_INFO( "Generator:dumpModules" ) << oss.str();

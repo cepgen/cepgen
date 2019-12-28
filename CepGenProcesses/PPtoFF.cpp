@@ -50,7 +50,7 @@ namespace cepgen
     };
 
     PPtoFF::PPtoFF( const ParametersList& params ) :
-      Process2to4( params, "pptoff", "ɣɣ → f⁺f¯", { PDG::photon, PDG::photon }, params.get<ParticleProperties>( "pair" ).pdgid ),
+      Process2to4( params, { PDG::photon, PDG::photon }, params.get<ParticleProperties>( "pair" ).pdgid ),
       method_ ( (Mode)params.get<int>( "method", (int)Mode::offShell ) ),
       alphas_params_( params.get<ParametersList>( "alphaS", ParametersList()
         .set<std::string>( ParametersList::MODULE_NAME, "pegasus" ) ) ),
@@ -58,21 +58,6 @@ namespace cepgen
       p_mat1_( 0 ), p_mat2_( 0 ),
       p_term_ll_( 0 ), p_term_lt_( 0 ), p_term_tt1_( 0 ), p_term_tt2_( 0 )
     {
-      if ( !params.empty() && ( !cs_prop_.fermion || cs_prop_.charge == 0. ) )
-        throw CG_FATAL( "PPtoFF:prepare" )
-          << "Invalid fermion pair selected: " << cs_prop_.description
-          << " (" << (int)cs_prop_.pdgid << ")!";
-
-      mf2_ = cs_prop_.mass*cs_prop_.mass;
-      qf_ = cs_prop_.charge/3.;
-      colf_ = cs_prop_.colours;
-
-      CG_DEBUG( "PPtoFF:prepare" )
-        << "Produced particles: " << cs_prop_.description << " ("
-        << "mass = " << cs_prop_.mass << " GeV, "
-        << "charge = " << std::setprecision( 2 ) << qf_ << " e)\n\t"
-        << "matrix element computation method: " << (int)method_ << ".";
-
       if ( method_ == Mode::offShell ) { // off-shell matrix element
         const auto& ofp = params.get<ParametersList>( "offShellParameters" );
         p_mat1_ = ofp.get<int>( "mat1", 1 );
@@ -87,6 +72,21 @@ namespace cepgen
     void
     PPtoFF::prepareProcessKinematics()
     {
+      if ( !cs_prop_.fermion || cs_prop_.charge == 0. )
+        throw CG_FATAL( "PPtoFF:prepare" )
+          << "Invalid fermion pair selected: " << cs_prop_.description
+          << " (" << (int)cs_prop_.pdgid << ")!";
+
+      mf2_ = cs_prop_.mass*cs_prop_.mass;
+      qf_ = cs_prop_.charge/3.;
+      colf_ = cs_prop_.colours;
+
+      CG_DEBUG( "PPtoFF:prepare" )
+        << "Produced particles: " << cs_prop_.description << " ("
+        << "mass = " << cs_prop_.mass << " GeV, "
+        << "charge = " << std::setprecision( 2 ) << qf_ << " e)\n\t"
+        << "matrix element computation method: " << (int)method_ << ".";
+
       if ( !kin_.cuts.central.pt_diff.valid() )
         kin_.cuts.central.pt_diff = { 0., 50. }; // tighter cut for fermions
       mA2_ = (*event_)[Particle::IncomingBeam1][0].mass2();
@@ -260,4 +260,4 @@ namespace cepgen
   }
 }
 // register process
-REGISTER_PROCESS( "pptoff", PPtoFF )
+REGISTER_PROCESS( "pptoff", "ɣɣ → f⁺f¯ (kt-factor.)", PPtoFF )

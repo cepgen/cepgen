@@ -18,8 +18,8 @@ namespace cepgen
     const Limits
     Process2to4::x_limits_{ 0., 1. };
 
-    Process2to4::Process2to4( const ParametersList& params, const std::string& name, const std::string& desc, std::array<pdgid_t,2> partons, pdgid_t cs_id ) :
-      KTProcess( params, name, desc, partons, { cs_id, cs_id } ),
+    Process2to4::Process2to4( const ParametersList& params, std::array<pdgid_t,2> partons, pdgid_t cs_id ) :
+      KTProcess( params, partons, { cs_id, cs_id } ),
       cs_prop_( PDG::get()( cs_id ) ),
       y_c1_( 0. ), y_c2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. ),
       ww_( 0. )

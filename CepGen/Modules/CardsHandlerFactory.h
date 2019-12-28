@@ -10,7 +10,7 @@
   namespace cepgen { namespace card { \
     struct BUILDERNM( obj ) { \
       BUILDERNM( obj )() { CardsHandlerFactory::get().registerModule<obj>( name ); } }; \
-    static BUILDERNM( obj ) g ## obj; \
+    static BUILDERNM( obj ) gCard ## obj; \
   } }
 
 namespace cepgen
