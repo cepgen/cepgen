@@ -3,6 +3,9 @@
 
 #include "CepGen/Core/ModuleFactory.h"
 
+/** \file */
+
+/// Add a generic event modification module definition to the factory
 #define REGISTER_MODIFIER( name, obj ) \
   namespace cepgen { namespace hadr { \
     struct BUILDERNM( obj ) { \

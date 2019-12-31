@@ -3,6 +3,9 @@
 
 #include "CepGen/Core/ModuleFactory.h"
 
+/** \file */
+
+/// Add a generic export module definition to the factory
 #define REGISTER_IO_MODULE( name, obj ) \
   namespace cepgen { namespace io { \
     struct BUILDERNM( obj ) { \
