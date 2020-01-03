@@ -76,14 +76,6 @@ file(COPY ${external_files} DESTINATION ${PROJECT_BINARY_DIR}/External)
 file(GLOB readme_file ${PROJECT_SOURCE_DIR}/CepGen/README)
 file(COPY ${readme_file} DESTINATION ${PROJECT_BINARY_DIR})
 
-#----- installation rules
-
-set(modules CepGen CepGenAddOns CepGenProcesses)
-install(DIRECTORY ${modules}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  COMPONENT devel FILES_MATCHING PATTERN "*.h")
-export(PACKAGE cepgen)
-
 #----- set the tests/utils directory
 
 if(CMAKE_BUILD_CORE)
@@ -101,6 +93,13 @@ if(CMAKE_BUILD_CORE)
     add_subdirectory(test)
   endif()
 endif()
+
+#----- installation rules
+
+install(DIRECTORY CepGen CepGenAddOns CepGenProcesses
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  COMPONENT devel FILES_MATCHING PATTERN "*.h")
+export(PACKAGE cepgen)
 
 #----- documentation
 

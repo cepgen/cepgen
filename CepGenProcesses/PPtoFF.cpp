@@ -45,7 +45,8 @@ namespace cepgen
         unsigned short p_mat1_, p_mat2_;
         unsigned short p_term_ll_, p_term_lt_, p_term_tt1_, p_term_tt2_;
 
-        double mf2_, qf_;
+        double mf2_;
+        short qf3_;
         unsigned short colf_;
     };
 
@@ -78,13 +79,14 @@ namespace cepgen
           << " (" << (int)cs_prop_.pdgid << ")!";
 
       mf2_ = cs_prop_.mass*cs_prop_.mass;
-      qf_ = cs_prop_.charge/3.;
+      qf3_ = cs_prop_.charge;
       colf_ = cs_prop_.colours;
+      prefactor_ = 1.;
 
       CG_DEBUG( "PPtoFF:prepare" )
         << "Produced particles: " << cs_prop_.description << " ("
         << "mass = " << cs_prop_.mass << " GeV, "
-        << "charge = " << std::setprecision( 2 ) << qf_ << " e)\n\t"
+        << "charge = " << std::setprecision( 2 ) << qf3_/3. << " e)\n\t"
         << "matrix element computation method: " << (int)method_ << ".";
 
       if ( !kin_.cuts.central.pt_diff.valid() )
@@ -100,7 +102,7 @@ namespace cepgen
           prefactor_ *= 4.*M_PI;
           break;
         case PDG::photon:
-          prefactor_ *= pow( constants::G_EM*qf_, 2 );
+          prefactor_ *= pow( constants::G_EM*qf3_, 2 )/9.;
           break;
         default:
           throw CG_FATAL( "PPtoFF:prepare" )
@@ -112,7 +114,7 @@ namespace cepgen
           prefactor_ *= 4.*M_PI;
           break;
         case PDG::photon:
-          prefactor_ *= pow( constants::G_EM*qf_, 2 );
+          prefactor_ *= pow( constants::G_EM*qf3_, 2 )/9.;
           break;
         default:
           throw CG_FATAL( "PPtoFF:prepare" )
@@ -146,6 +148,10 @@ namespace cepgen
     double
     PPtoFF::onShellME() const
     {
+      if ( gluon1_ || gluon2_ )
+        throw CG_FATAL( "PPtoFF:onShell" )
+          << "On-shell matrix element only compatible with photon-photon mode!";
+
       const double s_hat = shat(), t_hat = that(), u_hat = uhat();
       CG_DEBUG_LOOP( "PPtoFF:onShell" )
         << "shat: " << s_hat << ", that: " << t_hat << ", uhat: " << u_hat << ".";
