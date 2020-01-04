@@ -314,10 +314,15 @@ namespace cepgen
   }
 
   void
-  Event::dump( bool stable ) const
+  Event::dump() const
   {
-    const Particles parts = ( stable ) ? stableParticles() : particles();
+    CG_INFO( "Event" ) << *this;
+  }
 
+  std::ostream&
+  operator<<( std::ostream& out, const Event& ev )
+  {
+    const Particles parts = ev.particles();
     std::ostringstream os;
 
     Momentum p_total;
@@ -331,10 +336,10 @@ namespace cepgen
           for ( unsigned short i = 0; i < mothers.size(); ++i )
             try {
               oss_pdg << delim
-                << PDG::get().name( operator[]( *std::next( mothers.begin(), i ) ).pdgId() ), delim = "/";
+                << PDG::get().name( ev[*std::next( mothers.begin(), i )].pdgId() ), delim = "/";
             } catch ( const Exception& ) {
               oss_pdg << delim
-                << operator[]( *std::next( mothers.begin(), i ) ).pdgId(), delim = "/";
+                << ev[*std::next( mothers.begin(), i )].pdgId(), delim = "/";
             }
           os << utils::format( "\n %2d\t\t   %-7s", part.id(), oss_pdg.str().c_str() );
         }
@@ -388,8 +393,7 @@ namespace cepgen
     //--- set a threshold to the computation precision
     p_total.truncate();
     //
-    CG_INFO( "Event" )
-     << utils::format(
+    return out << utils::format(
        "Event content:\n"
        " Id\tPDG id\t   Name\t\tCharge\tRole\t Status\tMother\tpx            py            pz            E      \t M         \n"
        " --\t------\t   ----\t\t------\t----\t ------\t------\t----GeV/c---  ----GeV/c---  ----GeV/c---  ----GeV/c---\t --GeV/c²--"

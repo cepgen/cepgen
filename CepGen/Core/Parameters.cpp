@@ -189,7 +189,6 @@ namespace cepgen
        << std::setw( wt ) << "Process to generate"
        << ( pretty ? utils::boldify( param->processName() ) : param->processName() );
     if ( param->process_ ) {
-      os << ", " << param->process_->description();
       for ( const auto& par : param->process()->parameters().keys() )
         if ( par != "mode" && par != ParametersList::MODULE_NAME )
           os << "\n" << std::setw( wt ) << "" << par << ": " << param->process_->parameters().getString( par );

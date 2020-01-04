@@ -38,8 +38,8 @@ namespace cepgen
         ParametersList alphas_params_;
         std::shared_ptr<AlphaS> alphas_;
 
-        double prefactor_;
         bool gluon1_, gluon2_;
+        double prefactor_;
 
         //--- parameters for off-shell matrix element
         unsigned short p_mat1_, p_mat2_;
@@ -53,10 +53,9 @@ namespace cepgen
     PPtoFF::PPtoFF( const ParametersList& params ) :
       Process2to4( params, { PDG::photon, PDG::photon }, params.get<ParticleProperties>( "pair" ).pdgid ),
       method_ ( (Mode)params.get<int>( "method", (int)Mode::offShell ) ),
-      alphas_params_( params.get<ParametersList>( "alphaS", ParametersList()
-        .set<std::string>( ParametersList::MODULE_NAME, "pegasus" ) ) ),
-      prefactor_( 1. ), gluon1_( false ), gluon2_( false ),
-      p_mat1_( 0 ), p_mat2_( 0 ),
+      alphas_params_( params.get<ParametersList>( "alphaS", ParametersList().setName<std::string>( "pegasus" ) ) ),
+      gluon1_( false ), gluon2_( false ),
+      prefactor_( 1. ), p_mat1_( 0 ), p_mat2_( 0 ),
       p_term_ll_( 0 ), p_term_lt_( 0 ), p_term_tt1_( 0 ), p_term_tt2_( 0 )
     {
       if ( method_ == Mode::offShell ) { // off-shell matrix element
@@ -91,8 +90,7 @@ namespace cepgen
 
       if ( !kin_.cuts.central.pt_diff.valid() )
         kin_.cuts.central.pt_diff = { 0., 50. }; // tighter cut for fermions
-      mA2_ = (*event_)[Particle::IncomingBeam1][0].mass2();
-      mB2_ = (*event_)[Particle::IncomingBeam2][0].mass2();
+
       CG_DEBUG( "PPtoFF:prepare" ) << "Incoming state:\n\t"
         << "mp(1/2) = " << sqrt( mA2_ ) << "/" << sqrt( mB2_ ) << ".";
 
@@ -245,14 +243,10 @@ namespace cepgen
       double amat2 = 0.5*( p_mat1_*amat2_1+p_mat2_*amat2_2 ) * pow( x1*x2*s_, 2 );
 
       const double tmax = pow( std::max( amt1_, amt2_ ), 2 );
-      if ( gluon1_ ) {
-        double amu = sqrt( std::max( eps12, tmax ) );
-        amat2 *= (*alphas_)( amu )/2.;
-      }
-      if ( gluon2_ ) {
-        double amu = sqrt( std::max( eps22, tmax ) );
-        amat2 *= (*alphas_)( amu )/2.;
-      }
+      if ( gluon1_ )
+        amat2 *= 0.5*(*alphas_)( sqrt( std::max( eps12, tmax ) ) );
+      if ( gluon2_ )
+        amat2 *= 0.5*(*alphas_)( sqrt( std::max( eps22, tmax ) ) );
 
       CG_DEBUG_LOOP( "PPtoFF:offShell" )
         << "aux2(1/2) = " << aux2_1 << " / " << aux2_2 << "\n\t"

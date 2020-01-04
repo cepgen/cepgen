@@ -27,10 +27,9 @@ namespace cepgen
       /// Compress the event record
       Event compress() const;
 
+      friend std::ostream& operator<<( std::ostream&, const Event& );
       /// Dump all the known information on every Particle object contained in this Event container in the output stream
-      /// \param[out] os Output stream where to dump the information
-      /// \param[in] stable_ Do we only show the stable particles in this event?
-      void dump( bool stable_ = false ) const;
+      void dump() const;
       /// Incoming beams centre-of-mass energy, in GeV
       double cmEnergy() const;
 

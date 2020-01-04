@@ -1,6 +1,6 @@
 include_directories(${PROJECT_SOURCE_DIR})
 
-file(GLOB output_sources OutputModules/TextHandler.cpp)
+file(GLOB output_sources OutputModules/EventDump.cpp OutputModules/TextHandler.cpp)
 set(modif_sources)
 set(addons_libraries)
 set(addons_definitions)
@@ -57,8 +57,7 @@ endif()
 #--- linking with HepMC
 
 if(HEPMC_LIB)
-  message(STATUS "HepMC found in ${HEPMC_LIB}")
-  message(STATUS "HepMC headers found in ${HEPMC_INCLUDE}")
+  message(STATUS "HepMC found in ${HEPMC_LIB}; headers found in ${HEPMC_INCLUDE}")
   if(HEPMC_LIB MATCHES ".*HepMC3.?.so")
     message(STATUS "HepMC version 3 found")
     if(HEPMC_ROOT_LIB)
