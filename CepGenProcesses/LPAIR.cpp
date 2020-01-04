@@ -812,41 +812,41 @@ namespace cepgen
       if ( kin_.cuts.remnants.mass_single.valid() ) {
         if ( ( kin_.mode == KinematicsMode::InelasticElastic
             || kin_.mode == KinematicsMode::InelasticInelastic )
-          && !kin_.cuts.remnants.mass_single.passes( mx ) )
+          && !kin_.cuts.remnants.mass_single.contains( mx ) )
           return 0.;
         if ( ( kin_.mode == KinematicsMode::ElasticInelastic
             || kin_.mode == KinematicsMode::InelasticInelastic )
-          && !kin_.cuts.remnants.mass_single.passes( my ) )
+          && !kin_.cuts.remnants.mass_single.contains( my ) )
           return 0.;
       }
 
       //--- cut on the proton's Q2 (first photon propagator T1)
 
-      if ( !kin_.cuts.initial.q2.passes( -t1_ ) )
+      if ( !kin_.cuts.initial.q2.contains( -t1_ ) )
         return 0.;
 
       //--- cuts on outgoing leptons' kinematics
 
-      if ( !kin_.cuts.central.mass_sum.passes( ( p6_cm_+p7_cm_ ).mass() ) )
+      if ( !kin_.cuts.central.mass_sum.contains( ( p6_cm_+p7_cm_ ).mass() ) )
         return 0.;
 
       //----- cuts on the individual leptons
 
       if ( kin_.cuts.central.pt_single.valid() ) {
         const Limits& pt_limits = kin_.cuts.central.pt_single;
-        if ( !pt_limits.passes( p6_cm_.pt() ) || !pt_limits.passes( p7_cm_.pt() ) )
+        if ( !pt_limits.contains( p6_cm_.pt() ) || !pt_limits.contains( p7_cm_.pt() ) )
           return 0.;
       }
 
       if ( kin_.cuts.central.energy_single.valid() ) {
         const Limits& energy_limits = kin_.cuts.central.energy_single;
-        if ( !energy_limits.passes( p6_cm_.energy() ) || !energy_limits.passes( p7_cm_.energy() ) )
+        if ( !energy_limits.contains( p6_cm_.energy() ) || !energy_limits.contains( p7_cm_.energy() ) )
           return 0.;
       }
 
       if ( kin_.cuts.central.eta_single.valid() ) {
         const Limits& eta_limits = kin_.cuts.central.eta_single;
-        if ( !eta_limits.passes( p6_cm_.eta() ) || !eta_limits.passes( p7_cm_.eta() ) )
+        if ( !eta_limits.contains( p6_cm_.eta() ) || !eta_limits.contains( p7_cm_.eta() ) )
           return 0.;
       }
 
