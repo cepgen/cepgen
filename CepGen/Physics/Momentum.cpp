@@ -161,7 +161,8 @@ namespace cepgen
   Momentum&
   Momentum::setMass2( double m2 )
   {
-    return setEnergy( sqrt( p2()+m2 ) );
+    return setEnergy( sqrt( p2()+m2 ) )
+      .computeP();
   }
 
   Momentum&

@@ -12,9 +12,8 @@ namespace cepgen
    * \date Dec 2015
    * \author Laurent Forthomme <laurent.forthomme@cern.ch>
    */
-  class Momentum : public std::array<double,4> {
+  class Momentum : private std::array<double,4> {
     public:
-      enum coord_t { X = 0, Y = 1, Z = 2, E = 3 };
       /// Build a 4-momentum at rest with an invalid energy (no mass information known)
       Momentum();
       /// Build a 4-momentum using its 3-momentum coordinates and its energy
@@ -128,10 +127,15 @@ namespace cepgen
       Momentum& rotatePhi( double phi, double sign );
       /// Rotate the particle's momentum by a polar/azimuthal angle
       Momentum& rotateThetaPhi( double theta_, double phi_ );
+      /// Apply a \f$ x\rightarrow -x\f$ transformation
+      inline Momentum& mirrorX() { (*this)[X] *= -1.; return *this; }
+      /// Apply a \f$ y\rightarrow -y\f$ transformation
+      inline Momentum& mirrorY() { (*this)[Y] *= -1.; return *this; }
       /// Apply a \f$ z\rightarrow -z\f$ transformation
       inline Momentum& mirrorZ() { (*this)[Z] *= -1.; return *this; }
 
     private:
+      enum coord_t { X = 0, Y = 1, Z = 2, E = 3 };
       /// Compute the 3-momentum's norm
       Momentum& computeP();
       /// 3-momentum's norm (in GeV/c)

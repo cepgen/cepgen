@@ -581,9 +581,9 @@ namespace cepgen
         return true;
       }
       if ( a1 < 0. )
-        p5_lab_[0] *= -1.;
+        p5_lab_.mirrorX();
       else
-        p3_lab_[0] *= -1.;
+        p3_lab_.mirrorX();
       return true;
     }
 
