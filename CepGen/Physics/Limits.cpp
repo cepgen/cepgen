@@ -78,7 +78,7 @@ namespace cepgen
   }
 
   bool
-  Limits::passes( double val ) const
+  Limits::contains( double val ) const
   {
     if ( hasMin() && val < min() )
       return false;

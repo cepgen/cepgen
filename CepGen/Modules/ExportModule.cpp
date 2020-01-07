@@ -1,10 +1,10 @@
 #include "CepGen/Modules/ExportModule.h"
 #include "CepGen/Modules/EventModifier.h"
 
-#include "CepGen/Core/ParametersList.h"
-
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Physics/Constants.h"
+
+#include "CepGen/Core/ParametersList.h"
 
 #include "CepGen/Utils/String.h"
 #include "CepGen/Parameters.h"
@@ -18,11 +18,8 @@ namespace cepgen
   {
     ExportModule::ExportModule( const ParametersList& params ) :
       params_( params ),
-      name_( params_.get<std::string>( ParametersList::MODULE_NAME ) ),
-      event_num_( 0. )
-    {}
-
-    ExportModule::~ExportModule()
+      name_( params_.name<std::string>() ),
+      event_num_( 0ull )
     {}
 
     std::string

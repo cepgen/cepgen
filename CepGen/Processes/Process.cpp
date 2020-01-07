@@ -1,4 +1,4 @@
-#include "CepGen/Modules/Process.h"
+#include "CepGen/Processes/Process.h"
 
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
@@ -13,9 +13,11 @@ namespace cepgen
 {
   namespace proc
   {
-    Process::Process( const ParametersList& params, const std::string& name, const std::string& description, bool has_event ) :
+    Process::Process( const ParametersList& params, bool has_event ) :
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
-      params_( params ), name_( name ), description_( description ),
+      params_( params ),
+      name_( params.name<std::string>( "<invalid>" ) ),
+      description_( params.get<std::string>( "description" ) ),
       first_run( true ), base_jacobian_( 1. ),
       s_( -1. ), sqs_( -1. ),
       mA2_( -1. ), mB2_( -1. ), mX2_( -1. ), mY2_( -1. ),
@@ -63,7 +65,7 @@ namespace cepgen
       for ( const auto& var : mapped_variables_ )
         os << "\n\t(" << var.index << ") " << var.type << " mapping (" << var.description << ") in range " << var.limits;
       CG_INFO( "Process:dumpVariables" )
-        << "List of variables handled by this kt-factorised process:"
+        << "List of variables handled by this process:"
         << os.str();
     }
 
@@ -194,7 +196,7 @@ namespace cepgen
     }
 
     void
-    Process::setPoint( const unsigned int ndim, double* x )
+    Process::setPoint( double* x, const size_t ndim )
     {
       std::copy( x, x+ndim, point_coord_.begin() );
       is_point_set_ = true;
@@ -327,7 +329,7 @@ namespace cepgen
       const auto& central_system = ini.find( Particle::CentralSystem );
       if ( central_system == ini.end() ) {
         Particle& p = event_->addParticle( Particle::Intermediate );
-        p.setPdgId( PDG::invalid );
+        p.setPdgId( (pdgid_t)PDG::invalid );
         p.setStatus( Particle::Status::Propagator );
       }
       //--- outgoing state

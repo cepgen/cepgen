@@ -8,11 +8,11 @@
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/ExportModule.h"
 
+#include "CepGen/Processes/Process.h"
 #include "CepGen/Modules/ProcessesFactory.h"
-#include "CepGen/Modules/Process.h"
 
-#include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
@@ -80,14 +80,14 @@ namespace cepgen
 
       //--- parse the structure functions code
       auto sf_params = ParametersList()
-        .set<int>( ParametersList::MODULE_NAME, str_fun_ )
+        .setName<int>( str_fun_ )
         .set<ParametersList>( "sigmaRatio", ParametersList()
-          .set<int>( ParametersList::MODULE_NAME, sr_type_ ) );
+          .setName<int>( sr_type_ ) );
       const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
       if ( str_fun_ / kLHAPDFCodeDec == 1 ) { // SF from parton
         const unsigned long icode = str_fun_ % kLHAPDFCodeDec;
         sf_params
-          .set<int>( ParametersList::MODULE_NAME, (int)strfun::Type::Partonic )
+          .setName<int>( (int)strfun::Type::Partonic )
           .set<int>( "pdfId", icode % kLHAPDFPartDec )
           .set<int>( "mode", icode / kLHAPDFPartDec ); // 0, 1, 2
       }
@@ -109,7 +109,7 @@ namespace cepgen
       //--- parse the hadronisation algorithm name
       if ( !evt_mod_name_.empty() )
         for ( const auto& mod : utils::split( evt_mod_name_, ',' ) ) {
-          params_.addModifier( cepgen::EventModifierFactory::get().build( mod, ParametersList() ) );
+          params_.addModifier( EventModifierFactory::get().build( mod, ParametersList() ) );
           (*params_.eventModifiersSequence().rbegin())->setParameters( params_ );
         }
 
@@ -119,7 +119,7 @@ namespace cepgen
         if ( !out_file_name_.empty() )
           outm.set<std::string>( "filename", out_file_name_ );
         for ( const auto& mod : utils::split( out_mod_name_, ',' ) )
-          params_.setOutputModule( cepgen::io::ExportModuleFactory::get().build( mod, outm ) );
+          params_.setOutputModule( io::ExportModuleFactory::get().build( mod, outm ) );
       }
 
       //--- check if we are dealing with heavy ions for incoming states

@@ -75,8 +75,9 @@ set(PYTHIA8_DIRS $ENV{PYTHIA8_DIR} ${PYTHIA8_DIR} /usr /usr/local /opt/pythia8)
 find_library(PYTHIA8 pythia8 HINTS ${PYTHIA8_DIRS} PATH_SUFFIXES lib)
 find_path(PYTHIA8_INCLUDE Pythia8 HINTS ${PYTHIA8_DIRS} PATH_SUFFIXES include/Pythia8 include/pythia8 include)
 #--- searching for ROOT
-find_package(ROOT)
+find_package(ROOT QUIET)
 if(ROOT_FOUND)
+  message(STATUS "ROOT found in ${ROOT_LIBRARIES}")
   if(IS_LXPLUS)
     #--- LXPLUS/CVMFS tweak for missing dependencies
     find_library(TBB tbb HINTS ${TBB_DIR} PATH_SUFFIXES lib QUIET)

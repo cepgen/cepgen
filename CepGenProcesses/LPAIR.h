@@ -1,7 +1,7 @@
-#ifndef CepGen_Processes_LPAIR_h
-#define CepGen_Processes_LPAIR_h
+#ifndef CepGenProcesses_LPAIR_h
+#define CepGenProcesses_LPAIR_h
 
-#include "CepGen/Modules/Process.h"
+#include "CepGen/Processes/Process.h"
 
 namespace cepgen
 {

@@ -50,8 +50,8 @@ namespace cepgen
     ParametersList
     FortranKTProcess::kProcParameters;
 
-    FortranKTProcess::FortranKTProcess( const ParametersList& params, const char* name, const char* descr, std::function<double( void )> func ) :
-      KTProcess( params, name, descr, { { PDG::photon, PDG::photon } }, { PDG::muon, PDG::muon } ),
+    FortranKTProcess::FortranKTProcess( const ParametersList& params, std::function<double( void )> func ) :
+      KTProcess( params, { { PDG::photon, PDG::photon } }, { PDG::muon, PDG::muon } ),
       func_( func )
     {
       constants_.m_p = Process::mp_;

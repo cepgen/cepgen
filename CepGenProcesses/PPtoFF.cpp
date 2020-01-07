@@ -38,41 +38,26 @@ namespace cepgen
         ParametersList alphas_params_;
         std::shared_ptr<AlphaS> alphas_;
 
-        double prefactor_;
         bool gluon1_, gluon2_;
+        double prefactor_;
 
         //--- parameters for off-shell matrix element
         unsigned short p_mat1_, p_mat2_;
         unsigned short p_term_ll_, p_term_lt_, p_term_tt1_, p_term_tt2_;
 
-        double mf2_, qf_;
+        double mf2_;
+        short qf3_;
         unsigned short colf_;
     };
 
     PPtoFF::PPtoFF( const ParametersList& params ) :
-      Process2to4( params, "pptoff", "ɣɣ → f⁺f¯", { PDG::photon, PDG::photon }, params.get<ParticleProperties>( "pair" ).pdgid ),
+      Process2to4( params, { PDG::photon, PDG::photon }, params.get<ParticleProperties>( "pair" ).pdgid ),
       method_ ( (Mode)params.get<int>( "method", (int)Mode::offShell ) ),
-      alphas_params_( params.get<ParametersList>( "alphaS", ParametersList()
-        .set<std::string>( ParametersList::MODULE_NAME, "pegasus" ) ) ),
-      prefactor_( 1. ), gluon1_( false ), gluon2_( false ),
-      p_mat1_( 0 ), p_mat2_( 0 ),
+      alphas_params_( params.get<ParametersList>( "alphaS", ParametersList().setName<std::string>( "pegasus" ) ) ),
+      gluon1_( false ), gluon2_( false ),
+      prefactor_( 1. ), p_mat1_( 0 ), p_mat2_( 0 ),
       p_term_ll_( 0 ), p_term_lt_( 0 ), p_term_tt1_( 0 ), p_term_tt2_( 0 )
     {
-      if ( !params.empty() && ( !cs_prop_.fermion || cs_prop_.charge == 0. ) )
-        throw CG_FATAL( "PPtoFF:prepare" )
-          << "Invalid fermion pair selected: " << cs_prop_.description
-          << " (" << (int)cs_prop_.pdgid << ")!";
-
-      mf2_ = cs_prop_.mass*cs_prop_.mass;
-      qf_ = cs_prop_.charge/3.;
-      colf_ = cs_prop_.colours;
-
-      CG_DEBUG( "PPtoFF:prepare" )
-        << "Produced particles: " << cs_prop_.description << " ("
-        << "mass = " << cs_prop_.mass << " GeV, "
-        << "charge = " << std::setprecision( 2 ) << qf_ << " e)\n\t"
-        << "matrix element computation method: " << (int)method_ << ".";
-
       if ( method_ == Mode::offShell ) { // off-shell matrix element
         const auto& ofp = params.get<ParametersList>( "offShellParameters" );
         p_mat1_ = ofp.get<int>( "mat1", 1 );
@@ -87,10 +72,25 @@ namespace cepgen
     void
     PPtoFF::prepareProcessKinematics()
     {
+      if ( !cs_prop_.fermion || cs_prop_.charge == 0. )
+        throw CG_FATAL( "PPtoFF:prepare" )
+          << "Invalid fermion pair selected: " << cs_prop_.description
+          << " (" << (int)cs_prop_.pdgid << ")!";
+
+      mf2_ = cs_prop_.mass*cs_prop_.mass;
+      qf3_ = cs_prop_.charge;
+      colf_ = cs_prop_.colours;
+      prefactor_ = 1.;
+
+      CG_DEBUG( "PPtoFF:prepare" )
+        << "Produced particles: " << cs_prop_.description << " ("
+        << "mass = " << cs_prop_.mass << " GeV, "
+        << "charge = " << std::setprecision( 2 ) << qf3_/3. << " e)\n\t"
+        << "matrix element computation method: " << (int)method_ << ".";
+
       if ( !kin_.cuts.central.pt_diff.valid() )
         kin_.cuts.central.pt_diff = { 0., 50. }; // tighter cut for fermions
-      mA2_ = (*event_)[Particle::IncomingBeam1][0].mass2();
-      mB2_ = (*event_)[Particle::IncomingBeam2][0].mass2();
+
       CG_DEBUG( "PPtoFF:prepare" ) << "Incoming state:\n\t"
         << "mp(1/2) = " << sqrt( mA2_ ) << "/" << sqrt( mB2_ ) << ".";
 
@@ -100,7 +100,7 @@ namespace cepgen
           prefactor_ *= 4.*M_PI;
           break;
         case PDG::photon:
-          prefactor_ *= pow( constants::G_EM*qf_, 2 );
+          prefactor_ *= pow( constants::G_EM*qf3_, 2 )/9.;
           break;
         default:
           throw CG_FATAL( "PPtoFF:prepare" )
@@ -112,7 +112,7 @@ namespace cepgen
           prefactor_ *= 4.*M_PI;
           break;
         case PDG::photon:
-          prefactor_ *= pow( constants::G_EM*qf_, 2 );
+          prefactor_ *= pow( constants::G_EM*qf3_, 2 )/9.;
           break;
         default:
           throw CG_FATAL( "PPtoFF:prepare" )
@@ -146,6 +146,10 @@ namespace cepgen
     double
     PPtoFF::onShellME() const
     {
+      if ( gluon1_ || gluon2_ )
+        throw CG_FATAL( "PPtoFF:onShell" )
+          << "On-shell matrix element only compatible with photon-photon mode!";
+
       const double s_hat = shat(), t_hat = that(), u_hat = uhat();
       CG_DEBUG_LOOP( "PPtoFF:onShell" )
         << "shat: " << s_hat << ", that: " << t_hat << ", uhat: " << u_hat << ".";
@@ -239,14 +243,10 @@ namespace cepgen
       double amat2 = 0.5*( p_mat1_*amat2_1+p_mat2_*amat2_2 ) * pow( x1*x2*s_, 2 );
 
       const double tmax = pow( std::max( amt1_, amt2_ ), 2 );
-      if ( gluon1_ ) {
-        double amu = sqrt( std::max( eps12, tmax ) );
-        amat2 *= (*alphas_)( amu )/2.;
-      }
-      if ( gluon2_ ) {
-        double amu = sqrt( std::max( eps22, tmax ) );
-        amat2 *= (*alphas_)( amu )/2.;
-      }
+      if ( gluon1_ )
+        amat2 *= 0.5*(*alphas_)( sqrt( std::max( eps12, tmax ) ) );
+      if ( gluon2_ )
+        amat2 *= 0.5*(*alphas_)( sqrt( std::max( eps22, tmax ) ) );
 
       CG_DEBUG_LOOP( "PPtoFF:offShell" )
         << "aux2(1/2) = " << aux2_1 << " / " << aux2_2 << "\n\t"
@@ -260,4 +260,4 @@ namespace cepgen
   }
 }
 // register process
-REGISTER_PROCESS( "pptoff", PPtoFF )
+REGISTER_PROCESS( "pptoff", "ɣɣ → f⁺f¯ (kt-factor.)", PPtoFF )

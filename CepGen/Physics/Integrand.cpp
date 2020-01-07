@@ -1,11 +1,12 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/EventBrowser.h"
 
+#include "CepGen/Processes/Process.h"
+
 #include "CepGen/Physics/TamingFunction.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/PDG.h"
 
-#include "CepGen/Modules/Process.h"
 #include "CepGen/Modules/EventModifier.h"
 #include "CepGen/Modules/ExportModule.h"
 
@@ -58,7 +59,7 @@ namespace cepgen
       // specify the phase space point to probe
       //================================================================
 
-      proc->setPoint( ndim, x );
+      proc->setPoint( x, ndim );
 
       //================================================================
       // from this step on, the phase space point is supposed to be set
@@ -141,13 +142,13 @@ namespace cepgen
             continue;
           const auto& cuts_pdgid = params->kinematics.cuts.central_particles.at( part.pdgId() );
           // apply these cuts on the given particle
-          if ( !cuts_pdgid.pt_single.passes( part.momentum().pt() ) )
+          if ( !cuts_pdgid.pt_single.contains( part.momentum().pt() ) )
             return 0.;
-          if ( !cuts_pdgid.energy_single.passes( part.momentum().energy() ) )
+          if ( !cuts_pdgid.energy_single.contains( part.momentum().energy() ) )
             return 0.;
-          if ( !cuts_pdgid.eta_single.passes( part.momentum().eta() ) )
+          if ( !cuts_pdgid.eta_single.contains( part.momentum().eta() ) )
             return 0.;
-          if ( !cuts_pdgid.rapidity_single.passes( part.momentum().rapidity() ) )
+          if ( !cuts_pdgid.rapidity_single.contains( part.momentum().rapidity() ) )
             return 0.;
         }
       }
@@ -155,9 +156,9 @@ namespace cepgen
         for ( const auto& part : (*ev)[system] ) {
           if ( part.status() != Particle::Status::FinalState )
             continue;
-          if ( !params->kinematics.cuts.remnants.energy_single.passes( part.momentum().energy() ) )
+          if ( !params->kinematics.cuts.remnants.energy_single.contains( part.momentum().energy() ) )
             return 0.;
-          if ( !params->kinematics.cuts.remnants.rapidity_single.passes( fabs( part.momentum().rapidity() ) ) )
+          if ( !params->kinematics.cuts.remnants.rapidity_single.contains( fabs( part.momentum().rapidity() ) ) )
             return 0.;
         }
 

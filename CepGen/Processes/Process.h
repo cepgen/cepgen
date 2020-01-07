@@ -1,5 +1,5 @@
-#ifndef CepGen_Modules_Process_h
-#define CepGen_Modules_Process_h
+#ifndef CepGen_Processes_Process_h
+#define CepGen_Processes_Process_h
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Kinematics.h"
@@ -26,7 +26,7 @@ namespace cepgen
         /// \param[in] name Process name
         /// \param[in] description Human-readable description of the process
         /// \param[in] has_event Do we generate the associated event structure?
-        Process( const ParametersList& params, const std::string& name = "<invalid name>", const std::string& description = "<invalid process>", bool has_event = true );
+        explicit Process( const ParametersList& params, bool has_event = true );
         /// Copy constructor for a user process
         Process( const Process& );
         virtual ~Process() = default;
@@ -69,9 +69,9 @@ namespace cepgen
          * Sets the phase space point to compute the weight associated to it.
          * \brief Sets the phase space point to compute
          * \param[in] ndim The number of dimensions of the point in the phase space
-         * \param[in] x[] The (\a ndim_)-dimensional point in the phase space on which the kinematics and the cross-section are computed
+         * \param[in] x The (\a ndim_)-dimensional point in the phase space on which the kinematics and the cross-section are computed
          */
-        void setPoint( const unsigned int ndim, double* x );
+        void setPoint( double* x, const size_t ndim );
         /// Compute the weight for this point in the phase-space
         double weight();
         /// Dump the evaluated point's coordinates in the standard output stream

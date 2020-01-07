@@ -5,11 +5,11 @@
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Processes/Process.h"
 
 #include "CepGen/Physics/TamingFunction.h"
 #include "CepGen/Physics/PDG.h"
 
-#include "CepGen/Modules/Process.h"
 #include "CepGen/Modules/EventModifier.h"
 #include "CepGen/Modules/ExportModule.h"
 
@@ -187,15 +187,14 @@ namespace cepgen
        << std::setfill('_') << std::setw( wb+3 ) << "_/¯ PROCESS INFORMATION ¯\\_" << std::setfill( ' ' ) << "\n"
        << std::right << std::setw( wb ) << std::left << std::endl
        << std::setw( wt ) << "Process to generate"
-       << ( pretty ? utils::boldify( param->processName().c_str() ) : param->processName() );
+       << ( pretty ? utils::boldify( param->processName() ) : param->processName() );
     if ( param->process_ ) {
-      os << ", " << param->process_->description();
       for ( const auto& par : param->process()->parameters().keys() )
         if ( par != "mode" && par != ParametersList::MODULE_NAME )
           os << "\n" << std::setw( wt ) << "" << par << ": " << param->process_->parameters().getString( par );
       std::ostringstream proc_mode; proc_mode << param->kinematics.mode;
       if ( param->kinematics.mode != KinematicsMode::invalid )
-        os << "\n" << std::setw( wt ) << "Subprocess mode" << ( pretty ? utils::boldify( proc_mode.str().c_str() ) : proc_mode.str() ) << "\n";
+        os << "\n" << std::setw( wt ) << "Subprocess mode" << ( pretty ? utils::boldify( proc_mode.str() ) : proc_mode.str() ) << "\n";
     }
     os
       << "\n"
@@ -223,13 +222,13 @@ namespace cepgen
       for ( const auto& mod : param->evt_modifiers_ )
         os
           << std::setw( wt ) << mod_name
-          << sep << ( pretty ? utils::boldify( mod->name().c_str() ) : mod->name() ) << "\n", sep = "+ ", mod_name.clear();
+          << sep << ( pretty ? utils::boldify( mod->name() ) : mod->name() ) << "\n", sep = "+ ", mod_name.clear();
       os << "\n";
     }
     if ( param->out_module_ ) {
       os
         << std::setw( wt ) << "Output module"
-        << ( pretty ? utils::boldify( param->out_module_->name().c_str() ) : param->out_module_->name() ) << "\n";
+        << ( pretty ? utils::boldify( param->out_module_->name() ) : param->out_module_->name() ) << "\n";
       for ( const auto& par : param->out_module_->parameters().keys() )
         if ( par != ParametersList::MODULE_NAME )
           os << std::setw( wt ) << "" << par << ": " << param->out_module_->parameters().getString( par ) << "\n";
@@ -238,7 +237,7 @@ namespace cepgen
       os << std::setw( wt ) << utils::s( "Taming function", param->taming_functions.size(), false ) << "\n";
       for ( const auto& tf : param->taming_functions )
         os << std::setw( wt ) << ""
-          << ( pretty ? utils::boldify( tf.var_orig.c_str() ) : tf.var_orig ) << ": "
+          << ( pretty ? utils::boldify( tf.var_orig ) : tf.var_orig ) << ": "
           << tf.expr_orig << "\n";
     }
     os
@@ -248,7 +247,7 @@ namespace cepgen
     std::ostringstream int_algo; int_algo << param->integration_.type;
     os
       << std::setw( wt ) << "Integration algorithm"
-      << ( pretty ? utils::boldify( int_algo.str().c_str() ) : int_algo.str() ) << "\n"
+      << ( pretty ? utils::boldify( int_algo.str() ) : int_algo.str() ) << "\n"
       << std::setw( wt ) << "Number of function calls" << param->integration_.ncvg << "\n"
       << std::setw( wt ) << "Random number generator seed" << param->integration_.rng_seed << "\n";
     if ( param->integration_.rng_engine )

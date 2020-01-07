@@ -48,13 +48,13 @@ namespace cepgen
       higher_twist_( params.get<bool>( "higherTwist", true ) ),
       resonances_model_( StructureFunctionsFactory::get().build(
         params.get<ParametersList>( "resonancesSF", ParametersList()
-          .set<int>( ParametersList::MODULE_NAME, (int)Type::ChristyBosted ) ) ) ),
+          .setName<int>( (int)Type::ChristyBosted ) ) ) ),
       perturbative_model_( StructureFunctionsFactory::get().build(
         params.get<ParametersList>( "perturbativeSF", ParametersList()
-          .set<int>( ParametersList::MODULE_NAME, (int)Type::MSTWgrid ) ) ) ),
+          .setName<int>( (int)Type::MSTWgrid ) ) ) ),
       continuum_model_( StructureFunctionsFactory::get().build(
         params.get<ParametersList>( "continuumSF", ParametersList()
-          .set<int>( ParametersList::MODULE_NAME, (int)Type::GD11p ) ) ) ),
+          .setName<int>( (int)Type::GD11p ) ) ) ),
       initialised_( false ), inv_omega_range_( -1. )
     {}
 

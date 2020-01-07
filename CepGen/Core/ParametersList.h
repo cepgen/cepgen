@@ -27,12 +27,22 @@ namespace cepgen
       ~ParametersList() {} // required for unique_ptr initialisation! avoids cleaning all individual objects
       /// Check if a given parameter is handled in this list
       template<typename T> bool has( std::string key ) const;
+      /// Retrieve the module name if any
+      template<typename T> T name( const T& def = default_arg<T>::get() ) const {
+        if ( !has<T>( MODULE_NAME ) )
+          return def;
+        return get<T>( MODULE_NAME );
+      }
       /// Get a parameter value
       template<typename T> T get( std::string key, const T& def = default_arg<T>::get() ) const;
       /// Reference to a parameter value
       template<typename T> T& operator[]( std::string key );
       /// Set a parameter value
       template<typename T> ParametersList& set( std::string key, const T& value );
+      /// Set the module name
+      template<typename T> ParametersList& setName( const T& value ) {
+        return set<T>( MODULE_NAME, value );
+      }
       /// Concatenate two parameters containers
       ParametersList& operator+=( const ParametersList& oth );
       /// Is the list empty?

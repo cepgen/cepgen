@@ -70,11 +70,12 @@ namespace cepgen
 #elif defined FUNC_ROOT
           return func_.EvalPar( values_.data() );
 #else
-          throw CG_FATAL( "Functional" )
+          throw CG_WARNING( "Functional" )
             << "Neither exprtk, muParser nor ROOT are linked to this program.\n\t"
             << "The formulas evaluator is hence disabled!";
 #endif
         }
+        const std::string& expression() const { return expression_; }
 
       private:
         void initialise() {
@@ -110,7 +111,7 @@ namespace cepgen
               << "Failed to define the function\n\t"
               << expression_;
 #else
-          throw CG_FATAL( "Functional" )
+          throw CG_WARNING( "Functional" )
             << "Neither exprtk, muParser nor ROOT are linked to this program.\n\t"
             << "The formulas evaluator is hence disabled!";
 #endif

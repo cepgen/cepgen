@@ -12,24 +12,13 @@ namespace cepgen
     /// Format a string using a printf style format descriptor.
     std::string format( const std::string fmt, ... );
     /// Human-readable boolean printout
-    inline const char* yesno( const bool& test ) { return ( test ) ? "\033[32;1myes\033[0m" : "\033[31;1mno\033[0m"; }
-    //inline const char* boldify( const char* str ) { const std::string out = std::string( "\033[33;1m" ) + std::string( str ) + std::string( "\033[0m" ); return out.c_str(); }
+    std::string yesno( bool test );
     /// Boldify a string for TTY-type output streams
-    inline std::string boldify( const std::string& str ) { return format( "\033[1m%s\033[0m", str.c_str() ); }
-    /// Boldify a string for TTY-type output streams
-    inline std::string boldify( const char* str ) { return boldify( std::string( str ) ); }
-    /// Boldify a double floating point number for TTY-type output streams
-    inline std::string boldify( const double& dbl ) { return boldify( format("%.2f", dbl ) ); }
-    /// Boldify an integer for TTY-type output streams
-    inline std::string boldify( const int& i ) { return boldify( format("% d", i ) ); }
-    /// Boldify an unsigned integer for TTY-type output streams
-    inline std::string boldify( const unsigned int& ui ) { return boldify( format("%d", ui ) ); }
-    /// Boldify an unsigned long integer for TTY-type output streams
-    inline std::string boldify( const unsigned long& ui ) { return boldify( format("%lu", ui ) ); }
+    template<typename T> std::string boldify( T str );
     /// TTY-type enumeration of colours
     enum class Colour { gray = 30, red = 31, green = 32, yellow = 33, blue = 34, purple = 35 };
     /// Colourise a string for TTY-type output streams
-    inline std::string colourise( const std::string& str, const Colour& col ) { return format( "\033[%d%s\033[0m", (int)col, str.c_str() ); }
+    std::string colourise( const std::string& str, const Colour& col );
     /// Replace all occurences of a text by another
     size_t replace_all( std::string& str, const std::string& from, const std::string& to );
     std::vector<std::string> split( const std::string&, char );

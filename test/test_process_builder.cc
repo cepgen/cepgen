@@ -1,11 +1,12 @@
 #include "CepGen/Modules/ProcessesFactory.h"
-#include "CepGen/Modules/Process.h"
+#include "CepGen/Processes/Process.h"
 
 #include "CepGen/Generator.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Core/ParametersList.h"
 
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/String.h"
 
 #include <iostream>
 
@@ -24,9 +25,9 @@ int main( int argc, char* argv[] )
   cepgen::Generator gen;
 
   if ( list ) {
-    cout << "List of modules registered in the database:";
+    cout << "List of modules registered in the runtime database:";
     for ( const auto& mod : cepgen::proc::ProcessesFactory::get().modules() )
-      cout << " " << mod;
+      cout << "\n> " << cepgen::utils::boldify( mod );
     cout << endl;
     return 0;
   }

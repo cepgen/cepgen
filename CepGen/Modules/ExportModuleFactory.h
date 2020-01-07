@@ -1,13 +1,16 @@
-#ifndef CepGen_Core_ExportFactory_h
-#define CepGen_Core_ExportFactory_h
+#ifndef CepGen_Module_ExportModuleFactory_h
+#define CepGen_Module_ExportModuleFactory_h
 
 #include "CepGen/Core/ModuleFactory.h"
 
+/** \file */
+
+/// Add a generic export module definition to the factory
 #define REGISTER_IO_MODULE( name, obj ) \
   namespace cepgen { namespace io { \
     struct BUILDERNM( obj ) { \
       BUILDERNM( obj )() { ExportModuleFactory::get().registerModule<obj>( name ); } }; \
-    static BUILDERNM( obj ) g ## obj; \
+    static BUILDERNM( obj ) gIO ## obj; \
   } }
 
 namespace cepgen

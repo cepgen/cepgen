@@ -91,7 +91,8 @@ namespace cepgen
         const Particle& part = particles[ip];
         out.IDUP[ip] = part.integerPdgId(); // PDG id
         out.ISTUP[ip] = (short)part.status(); // status code
-        out.PUP[ip] = part.momentum().pVector(); // momentum
+        std::copy( part.momentum().pVector().begin(), part.momentum().pVector().end(),
+          out.PUP[ip].begin() ); // momentum
         out.MOTHUP[ip] = { // mothers
           part.mothers().size() > 0 ? *part.mothers(). begin()+1 : 0,
           part.mothers().size() > 1 ? *part.mothers().rbegin()+1 : 0

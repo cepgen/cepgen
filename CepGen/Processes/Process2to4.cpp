@@ -18,8 +18,8 @@ namespace cepgen
     const Limits
     Process2to4::x_limits_{ 0., 1. };
 
-    Process2to4::Process2to4( const ParametersList& params, const std::string& name, const std::string& desc, std::array<pdgid_t,2> partons, pdgid_t cs_id ) :
-      KTProcess( params, name, desc, partons, { cs_id, cs_id } ),
+    Process2to4::Process2to4( const ParametersList& params, std::array<pdgid_t,2> partons, pdgid_t cs_id ) :
+      KTProcess( params, partons, { cs_id, cs_id } ),
       cs_prop_( PDG::get()( cs_id ) ),
       y_c1_( 0. ), y_c2_( 0. ), pt_diff_( 0. ), phi_pt_diff_( 0. ),
       ww_( 0. )
@@ -34,12 +34,20 @@ namespace cepgen
     void
     Process2to4::preparePhaseSpace()
     {
-      pA_ = event_->oneWithRole( Particle::IncomingBeam1 ).momentum();
-      pB_ = event_->oneWithRole( Particle::IncomingBeam2 ).momentum();
+      { auto beamA = event_->oneWithRole( Particle::IncomingBeam1 );
+        pA_ = beamA.momentum();
+        mA2_ = beamA.mass2();
+      }
+      { auto beamB = event_->oneWithRole( Particle::IncomingBeam2 );
+        pB_ = beamB.momentum();
+        mB2_ = beamB.mass2();
+      }
       CG_DEBUG_LOOP( "2to4:incoming" )
-        << "incoming particles: p1 = " << pA_ << ", p2 = " << pB_ << ".";
+        << "incoming particles:\n"
+        << "  pA = " << pA_ << ", mA2 = " << mA2_ << "\n"
+        << "  pB = " << pB_ << ", mB2 = " << mB2_ << ".";
 
-      ww_ = 0.5 * ( 1.+sqrt( 1.-4.*pA_.mass()*pB_.mass()/s_ ) );
+      ww_ = 0.5 * ( 1.+sqrt( 1.-4.*sqrt( mA2_*mB2_ )/s_ ) );
 
       defineVariable( y_c1_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "First outgoing particle rapidity" );
       defineVariable( y_c2_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "Second outgoing particle rapidity" );
@@ -88,21 +96,21 @@ namespace cepgen
         << "p(1/2)t = " << p1t << " / " << p2t;
 
       //--- window in rapidity distance
-      if ( !kin_.cuts.central.rapidity_diff.passes( fabs( y_c1_-y_c2_ ) ) )
+      if ( !kin_.cuts.central.rapidity_diff.contains( fabs( y_c1_-y_c2_ ) ) )
         return 0.;
 
       //--- apply the pt cut already at this stage (remains unchanged)
-      if ( !kin_.cuts.central.pt_single.passes( p1t ) )
+      if ( !kin_.cuts.central.pt_single.contains( p1t ) )
         return 0.;
-      if ( !kin_.cuts.central.pt_single.passes( p2t ) )
+      if ( !kin_.cuts.central.pt_single.contains( p2t ) )
         return 0.;
-      if ( !single_limits_.pt_single.passes( p1t ) )
+      if ( !single_limits_.pt_single.contains( p1t ) )
         return 0.;
-      if ( !single_limits_.pt_single.passes( p2t ) )
+      if ( !single_limits_.pt_single.contains( p2t ) )
         return 0.;
 
       //--- window in transverse momentum difference
-      if ( !kin_.cuts.central.pt_diff.passes( fabs( p1t-p2t ) ) )
+      if ( !kin_.cuts.central.pt_diff.contains( fabs( p1t-p2t ) ) )
         return 0.;
 
       //--- transverse mass for the two central particles
@@ -111,7 +119,7 @@ namespace cepgen
 
       //--- window in central system invariant mass
       const double invm = sqrt( amt1_*amt1_+amt2_*amt2_+2.*amt1_*amt2_*cosh( y_c1_-y_c2_ )-qt_sum.pt2() );
-      if ( !kin_.cuts.central.mass_sum.passes( invm ) )
+      if ( !kin_.cuts.central.mass_sum.contains( invm ) )
         return 0.;
 
       //--- auxiliary quantities
@@ -128,7 +136,7 @@ namespace cepgen
       const double x1 = alpha1+alpha2, x2 = beta1+beta2;
 
       //--- sanity check for x_i values
-      if ( !x_limits_.passes( x1 ) || !x_limits_.passes( x2 ) )
+      if ( !x_limits_.contains( x1 ) || !x_limits_.contains( x2 ) )
         return 0.;
 
       //--- additional conditions for energy-momentum conservation
@@ -160,28 +168,34 @@ namespace cepgen
         << "px± = " << px_plus << " / " << px_minus << "\n\t"
         << "py± = " << py_plus << " / " << py_minus << ".";
 
-      pX_ = Momentum( 0., 0., ( px_plus-px_minus )*M_SQRT1_2 )-qt_1;
-      pX_.setEnergy( ( px_plus+px_minus )*M_SQRT1_2 );
+      pX_ = -Momentum( qt_1 )
+        .setPz    ( ( px_plus-px_minus )*M_SQRT1_2 )
+        .setEnergy( ( px_plus+px_minus )*M_SQRT1_2 );
 
-      pY_ = Momentum( 0., 0., ( py_plus-py_minus )*M_SQRT1_2 )-qt_2;
-      pY_.setEnergy( ( py_plus+py_minus )*M_SQRT1_2 );
+      pY_ = -Momentum( qt_2 )
+        .setPz    ( ( py_plus-py_minus )*M_SQRT1_2 )
+        .setEnergy( ( py_plus+py_minus )*M_SQRT1_2 );
 
       CG_DEBUG_LOOP( "2to4:remnants" )
         << "First remnant:  " << pX_ << ", mass = " << pX_.mass() << "\n\t"
         << "Second remnant: " << pY_ << ", mass = " << pY_.mass() << ".";
 
       if ( fabs( pX_.mass2()-mX2_ ) > NUM_LIMITS )
-        throw CG_FATAL( "PPtoFF" ) << "Invalid X system squared mass: " << pX_.mass2() << "/" << mX2_ << ".";
+        throw CG_FATAL( "PPtoFF" )
+          << "Invalid X system squared mass: " << pX_.mass2() << "/" << mX2_ << ".";
       if ( fabs( pY_.mass2()-mY2_ ) > NUM_LIMITS )
-        throw CG_FATAL( "PPtoFF" ) << "Invalid Y system squared mass: " << pY_.mass2() << "/" << mY2_ << ".";
+        throw CG_FATAL( "PPtoFF" )
+          << "Invalid Y system squared mass: " << pY_.mass2() << "/" << mY2_ << ".";
 
       //--- four-momenta of the intermediate partons
 
-      q1_ = qt_1+Momentum( 0., 0., +0.5 * x1*ww_*sqs_*( 1.-q1t2/x1/x1/ww_/ww_/s_ ) );
-      q1_.setEnergy( 0.5 * x1*ww_*sqs_*( 1.+q1t2/x1/x1/ww_/ww_/s_ ) );
+      q1_ = Momentum( qt_1 )
+        .setPz    ( +0.5 * x1*ww_*sqs_*( 1.-q1t2/x1/x1/ww_/ww_/s_ ) )
+        .setEnergy( +0.5 * x1*ww_*sqs_*( 1.+q1t2/x1/x1/ww_/ww_/s_ ) );
 
-      q2_ = qt_2+Momentum( 0., 0., -0.5 * x2*ww_*sqs_*( 1.-q2t2/x2/x2/ww_/ww_/s_ ) );
-      q2_.setEnergy( 0.5 * x2*ww_*sqs_*( 1.+q2t2/x2/x2/ww_/ww_/s_ ) );
+      q2_ = Momentum( qt_2 )
+        .setPz    ( -0.5 * x2*ww_*sqs_*( 1.-q2t2/x2/x2/ww_/ww_/s_ ) )
+        .setEnergy( +0.5 * x2*ww_*sqs_*( 1.+q2t2/x2/x2/ww_/ww_/s_ ) );
 
       CG_DEBUG_LOOP( "2to4:partons" )
         << "First parton:  " << q1_ << ", mass2 = " << q1_.mass2() << "\n\t"
@@ -189,10 +203,10 @@ namespace cepgen
 
       //--- four-momenta of the outgoing central particles
 
-      p_c1_ = pt_c1+alpha1*pA_+beta1*pB_;
-      p_c1_.setEnergy( alpha1*pA_.energy()+beta1*pB_.energy() );
-      p_c2_ = pt_c2+alpha2*pA_+beta2*pB_;
-      p_c2_.setEnergy( alpha2*pA_.energy()+beta2*pB_.energy() );
+      p_c1_ = ( pt_c1+alpha1*pA_+beta1*pB_ )
+        .setEnergy( alpha1*pA_.energy()+beta1*pB_.energy() );
+      p_c2_ = ( pt_c2+alpha2*pA_+beta2*pB_ )
+        .setEnergy( alpha2*pA_.energy()+beta2*pB_.energy() );
 
       CG_DEBUG_LOOP( "2to4:central" )
         << "First central particle:  " << p_c1_ << ", mass = " << p_c1_.mass() << "\n\t"

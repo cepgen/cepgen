@@ -13,11 +13,9 @@ namespace cepgen
   namespace proc
   {
     KTProcess::KTProcess( const ParametersList& params,
-                          const std::string& name,
-                          const std::string& description,
                           const std::array<pdgid_t,2>& partons,
                           const std::vector<pdgid_t>& central ) :
-      Process( params, name, description+" (kT-factor.)" ),
+      Process( params ),
       qt1_( 0. ), phi_qt1_( 0. ), qt2_( 0. ), phi_qt2_( 0. ),
       kIntermediateParts( partons ), kProducedParts( central )
     {}
@@ -130,24 +128,24 @@ namespace cepgen
 
       switch ( kin_.incoming_beams.first.kt_flux ) {
         case KTFlux::P_Gluon_KMR:
-          event_->oneWithRole( Particle::Parton1 ).setPdgId( PDG::gluon ); break;
+          event_->oneWithRole( Particle::Parton1 ).setPdgId( (pdgid_t)PDG::gluon ); break;
         case KTFlux::P_Photon_Elastic:
         case KTFlux::P_Photon_Inelastic:
         case KTFlux::P_Photon_Inelastic_Budnev:
         case KTFlux::HI_Photon_Elastic:
-          event_->oneWithRole( Particle::Parton1 ).setPdgId( PDG::photon ); break;
+          event_->oneWithRole( Particle::Parton1 ).setPdgId( (pdgid_t)PDG::photon ); break;
         case KTFlux::invalid: default:
           throw CG_FATAL( "KTProcess:kinematics" )
             << "Invalid flux for 2nd incoming parton: " << kin_.incoming_beams.first.kt_flux << "!";
       }
       switch ( kin_.incoming_beams.second.kt_flux ) {
         case KTFlux::P_Gluon_KMR:
-          event_->oneWithRole( Particle::Parton2 ).setPdgId( PDG::gluon ); break;
+          event_->oneWithRole( Particle::Parton2 ).setPdgId( (pdgid_t)PDG::gluon ); break;
         case KTFlux::P_Photon_Elastic:
         case KTFlux::P_Photon_Inelastic:
         case KTFlux::P_Photon_Inelastic_Budnev:
         case KTFlux::HI_Photon_Elastic:
-          event_->oneWithRole( Particle::Parton2 ).setPdgId( PDG::photon ); break;
+          event_->oneWithRole( Particle::Parton2 ).setPdgId( (pdgid_t)PDG::photon ); break;
         case KTFlux::invalid: default:
           throw CG_FATAL( "KTProcess:kinematics" )
             << "Invalid flux for 2nd incoming parton: " << kin_.incoming_beams.second.kt_flux << "!";

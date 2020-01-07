@@ -13,7 +13,9 @@ namespace cepgen
     public:
       typedef std::vector<unsigned short> coord_t;
 
-      GridParameters( unsigned short ndim );
+      GridParameters( size_t ndim );
+
+      void dump() const;
 
       size_t size() const { return max_; }
       const coord_t& n( size_t coord ) const;
@@ -29,7 +31,7 @@ namespace cepgen
       static constexpr unsigned short MAX_DIM = 15;
       /// Integration grid size parameter
       static constexpr unsigned short M_BIN = 3;
-      static constexpr double INV_M_BIN = 1./M_BIN;
+      static constexpr float INV_M_BIN = 1./M_BIN;
 
       /// Has the generation been prepared?
       bool gen_prepared;

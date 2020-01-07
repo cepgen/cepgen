@@ -63,8 +63,8 @@ namespace cepgen
             gsl_histogram_free( h );
           }
         };
-        typedef std::unique_ptr<gsl_histogram,gsl_histogram_deleter> gsl_histogram_up;
-        std::vector<std::pair<std::string,gsl_histogram_up> > hists_;
+        typedef std::unique_ptr<gsl_histogram,gsl_histogram_deleter> gsl_histogram_ptr;
+        std::vector<std::pair<std::string,gsl_histogram_ptr> > hists_;
     };
 
     TextHandler::TextHandler( const ParametersList& params ) :
@@ -92,7 +92,7 @@ namespace cepgen
         const double min = hvar.get<double>( "low", 0. ), max = hvar.get<double>( "high", 1. );
         auto hist = gsl_histogram_alloc( nbins );
         gsl_histogram_set_ranges_uniform( hist, min, max );
-        hists_.emplace_back( std::make_pair( var, gsl_histogram_up( hist ) ) );
+        hists_.emplace_back( std::make_pair( var, gsl_histogram_ptr( hist ) ) );
         CG_INFO( "TextHandler" )
           << "Booking a histogram with " << utils::s( "bin", nbins )
           << " between " << min << " and " << max << " for \"" << var << "\".";

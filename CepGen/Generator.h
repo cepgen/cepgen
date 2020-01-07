@@ -76,7 +76,9 @@ namespace cepgen
       ~Generator();
 
       /// Dump this program's header into the standard output stream
-      void printHeader();
+      void printHeader() const;
+      /// List the modules registered in the runtime database
+      void dumpModules() const;
 
       const Parameters* parametersPtr() const { return parameters_.get(); }
       /// Getter to the run parameters block

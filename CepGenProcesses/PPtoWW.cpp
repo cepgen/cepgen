@@ -42,7 +42,7 @@ namespace cepgen
 
 
     PPtoWW::PPtoWW( const ParametersList& params ) :
-      Process2to4( params, "pptoww", "ɣɣ → W⁺W¯", { PDG::photon, PDG::photon }, PDG::W ),
+      Process2to4( params, { PDG::photon, PDG::photon }, PDG::W ),
       mW_( PDG::get().mass( PDG::W ) ), mW2_( mW_*mW_ ),
       method_( params.get<int>( "method", 1 ) )
     {
@@ -174,5 +174,5 @@ namespace cepgen
   }
 }
 // register process
-REGISTER_PROCESS( "pptoww", PPtoWW )
+REGISTER_PROCESS( "pptoww", "ɣɣ → W⁺W¯ (kt-factor.)", PPtoWW )
 

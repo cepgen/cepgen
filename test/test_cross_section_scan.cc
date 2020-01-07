@@ -2,7 +2,7 @@
 #include "CepGen/Parameters.h"
 
 #include "CepGen/Modules/ProcessesFactory.h"
-#include "CepGen/Modules/Process.h"
+#include "CepGen/Processes/Process.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/String.h"

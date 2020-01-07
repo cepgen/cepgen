@@ -23,16 +23,18 @@ namespace cepgen
       public:
         /// Class constructor
         explicit ExportModule( const ParametersList& );
-        virtual ~ExportModule();
+        virtual ~ExportModule() = default;
+
         const std::string& name() const { return name_; }
-        /// Initialise the handler and its inner parameterisation
-        virtual void initialise( const Parameters& ) = 0;
         /// Global list of steering parameters
         const ParametersList& parameters() { return params_; }
         /// Set the process cross section and its associated error
         virtual void setCrossSection( double /*xsec*/, double /*err_xsec*/ ) {}
         /// Set the event number
         void setEventNumber( const unsigned int& ev_id ) { event_num_ = ev_id; }
+
+        /// Initialise the handler and its inner parameterisation
+        virtual void initialise( const Parameters& ) = 0;
         /// Writer operator
         virtual void operator<<( const Event& ) = 0;
 
@@ -43,7 +45,7 @@ namespace cepgen
         /// Module unique name
         const std::string name_;
         /// Event index
-        unsigned int event_num_;
+        unsigned long long event_num_;
     };
   }
 }

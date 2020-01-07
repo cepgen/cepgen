@@ -8,10 +8,21 @@
 #include "CepGen/Utils/Timer.h"
 #include "CepGen/Utils/String.h"
 
+#include "CepGen/Processes/Process.h"
+#include "CepGen/Modules/ExportModule.h"
+
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/AlphaS.h"
 
-#include "CepGen/Modules/Process.h"
+#include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/ProcessesFactory.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
 
 #include "CepGen/Event/Event.h"
 
@@ -21,7 +32,11 @@
 
 namespace cepgen
 {
-  namespace utils { std::atomic<int> gSignal; }
+  namespace utils
+  {
+    std::atomic<int> gSignal;
+  }
+
   Generator::Generator() :
     parameters_( new Parameters ), result_( -1. ), result_error_( -1. )
   {
@@ -73,7 +88,7 @@ namespace cepgen
   }
 
   void
-  Generator::printHeader()
+  Generator::printHeader() const
   {
     std::string tmp;
     std::ostringstream os; os << "version " << version() << std::endl;
@@ -184,5 +199,68 @@ namespace cepgen
       << utils::s( "event", parameters_->numGeneratedEvents() )
       << " generated in " << gen_time_s << " s "
       << "(" << rate_ms << " ms/event).";
+  }
+
+  void
+  Generator::dumpModules() const
+  {
+    const std::string sep_mid( 80, '-' );
+    std::ostringstream oss;
+    oss
+      << "List of modules registered in the runtime database:\n";
+    { oss << sep_mid << "\n"
+        << utils::boldify( "Steering cards parsers" );
+      if ( card::CardsHandlerFactory::get().modules().empty() )
+        oss << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
+      for ( const auto& mod : card::CardsHandlerFactory::get().modules() )
+        oss << "\n> ." << utils::colourise( mod, utils::Colour::green )
+          << " extension";
+    }
+    { oss << "\n" << sep_mid << "\n"
+        << utils::boldify( "Physics processes" );
+      if ( proc::ProcessesFactory::get().modules().empty() )
+        oss << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
+      for ( const auto& mod : proc::ProcessesFactory::get().modules() )
+        oss << "\n> " << utils::colourise( mod, utils::Colour::green )
+          << ": " << proc::ProcessesFactory::get().build( mod )->description();
+    }
+    { oss << "\n" << sep_mid << "\n"
+        << utils::boldify( "Structure functions modellings" );
+      if ( strfun::StructureFunctionsFactory::get().modules().empty() )
+        oss << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
+      for ( const auto& mod : strfun::StructureFunctionsFactory::get().modules() )
+        oss << "\n> " << utils::colourise( std::to_string( mod ), utils::Colour::green )
+          << ": " << (strfun::Type)mod;
+    }
+    { oss << "\n" << sep_mid << "\n"
+        << utils::boldify( "Cross section ratios modellings" );
+      if ( sigrat::SigmaRatiosFactory::get().modules().empty() )
+        oss << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
+      for ( const auto& mod : sigrat::SigmaRatiosFactory::get().modules() )
+        oss << "\n> " << utils::colourise( std::to_string( mod ), utils::Colour::green )
+          << ": " << (sigrat::Type)mod;
+    }
+    { oss << "\n" << sep_mid << "\n"
+        << utils::boldify( "Event modification modules" );
+      if ( EventModifierFactory::get().modules().empty() )
+        oss << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
+      for ( const auto& mod : EventModifierFactory::get().modules() )
+        oss << "\n> " << utils::colourise( mod, utils::Colour::green );
+    }
+    { oss << "\n" << sep_mid << "\n"
+        << utils::boldify( "Export modules" );
+      if ( io::ExportModuleFactory::get().modules().empty() )
+        oss << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
+      for ( const auto& mod : io::ExportModuleFactory::get().modules() )
+        oss << "\n> " << utils::colourise( mod, utils::Colour::green );
+    }
+    { oss << "\n" << sep_mid << "\n"
+        << utils::boldify( "alpha(s) evolution algorithms" );
+      if ( AlphaSFactory::get().modules().empty() )
+        oss << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
+      for ( const auto& mod : AlphaSFactory::get().modules() )
+        oss << "\n> " << utils::colourise( mod, utils::Colour::green );
+    }
+    CG_INFO( "Generator:dumpModules" ) << oss.str();
   }
 }
