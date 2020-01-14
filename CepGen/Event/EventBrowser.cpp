@@ -2,14 +2,13 @@
 #include "CepGen/Event/Event.h"
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
 
 namespace cepgen
 {
   namespace utils
   {
-    const std::regex EventBrowser::rgx_select_id_( "(\\w+)\\((\\d+)\\)" );
-    const std::regex EventBrowser::rgx_select_role_( "(\\w+)\\(([a-z]+\\d?)\\)" );
+    const std::regex EventBrowser::rgx_select_id_( "([a-zA-Z]w+)\\(([0-9]+)\\)", std::regex_constants::basic );
+    const std::regex EventBrowser::rgx_select_role_( "([a-zA-Z]+)\\(([a-z]+[0-9]?)\\)", std::regex_constants::basic );
 
     double
     EventBrowser::get( const Event& ev, const std::string& var ) const

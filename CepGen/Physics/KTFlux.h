@@ -2,6 +2,7 @@
 #define CepGen_Physics_KTFlux_h
 
 #include "CepGen/Physics/PDG.h"
+#include <iosfwd>
 
 namespace cepgen
 {
@@ -10,9 +11,7 @@ namespace cepgen
   /// Collection of fundamental constants for \f$k_{\rm T}\f$ fluxes definition
   struct KTFluxParameters
   {
-    static constexpr double MIN_KT_FLUX = 1.e-20; ///< Minimal value taken for a \f$\k_{\rm T}\f$-factorised flux
-    static const double kMP; ///< Proton mass, in GeV/c\f$^2\f$
-    static const double kMP2; ///< Squared proton mass
+    static const double kMinKTFlux; ///< Minimal value taken for a \f$\k_{\rm T}\f$-factorised flux
   };
   /// Type of incoming partons fluxes
   enum class KTFlux
@@ -22,6 +21,7 @@ namespace cepgen
     P_Photon_Inelastic = 1, ///< Inelastic photon emission from proton
     P_Photon_Inelastic_Budnev = 11, ///< Inelastic photon emission from proton (Budnev flux approximation)
     P_Gluon_KMR = 20, ///< Inelastic gluon emission from proton (KMR flux modelling)
+    P_Gluon_KMR_alt = 21,
     HI_Photon_Elastic = 100 ///< Elastic photon emission from heavy ion (from Starlight \cite Klein:2016yzr)
   };
   /// Human version of the flux name
@@ -30,9 +30,10 @@ namespace cepgen
   /// \param[in] type Flux modelling
   /// \param[in] x Parton momentum fraction
   /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\rm T}^2\f$ of the incoming parton
-  /// \param[in] sf Structure functions evaluator
-  /// \param[in] mx Outgoing diffractive proton mass
-  double ktFlux( const KTFlux& type, double x, double kt2, ff::Parameterisation& sf, double mx = KTFluxParameters::kMP );
+  /// \param[in] ff Form factors evaluator
+  /// \param[in] mi2 Incoming particle squared mass
+  /// \param[in] mf2 Outgoing diffractive squared mass
+  double ktFlux( const KTFlux& type, double x, double kt2, ff::Parameterisation& sf, double mi2, double mf2 );
   /// \brief Compute the flux (from heavy ion) for a given parton \f$(x,k_{\rm T})\f$
   /// \param[in] type Flux modelling
   /// \param[in] x Parton momentum fraction

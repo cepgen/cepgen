@@ -47,19 +47,22 @@ namespace cepgen
         void setType( const Type& type ) { type_ = type; }
         const Model& model() const { return model_; }
 
-        static double tau( double q2 );
+        double tau( double q2 ) const;
 
         /// Compute all relevant form factors functions for a given \f$Q^2\f$ value
         Parameterisation& operator()( double /*q2*/, double mi2 = 0., double mf2 = 0. );
 
       protected:
         static constexpr double MU = 2.79;
-        static const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
-        static const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
+
         virtual void compute( double q2 ) {}
         virtual std::string description() const; ///< Human-readable description of this parameterisation
+
         const Model model_;
         Type type_;
+
+        const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
+        const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
 
       private:
         std::unique_ptr<strfun::Parameterisation> str_fun_;
@@ -74,7 +77,7 @@ namespace cepgen
     };
 
     /// A form factors parameterisations factory
-    typedef ModuleFactory<Parameterisation,ff::Model> FormFactorsHandler;
+    typedef ModuleFactory<Parameterisation,int> FormFactorsFactory;
 
     class StandardDipole : public Parameterisation
     {
@@ -126,8 +129,8 @@ namespace cepgen
 #define REGISTER_FF_MODEL( id, obj ) \
   namespace cepgen { \
     struct BUILDERNM( id ) { \
-      BUILDERNM( id )() { ff::FormFactorsHandler::get().registerModule<obj>( ff::Model::id ); } }; \
-    static BUILDERNM( id ) g ## id; \
+      BUILDERNM( id )() { ff::FormFactorsFactory::get().registerModule<obj>( (int)ff::Model::id ); } }; \
+    static BUILDERNM( id ) gFF ## id; \
   }
 
 #endif

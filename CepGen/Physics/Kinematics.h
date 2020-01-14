@@ -1,8 +1,7 @@
 #ifndef CepGen_Physics_Kinematics_h
 #define CepGen_Physics_Kinematics_h
 
-#include "CepGen/Core/Hasher.h"
-
+#include "CepGen/Physics/KinematicsMode.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Cuts.h"
 #include "CepGen/Physics/HeavyIon.h"
@@ -43,6 +42,8 @@ namespace cepgen
       std::pair<Beam,Beam> incoming_beams;
       /// Minimum list of central particles required
       std::vector<pdgid_t> minimum_final_state;
+      /// Type of kinematics to consider for the phase space
+      KinematicsMode mode;
 
       /// A collection of cuts to apply on the physical phase space
       struct CutsList
@@ -52,11 +53,10 @@ namespace cepgen
         Cuts initial;
         /// Cuts on the central system produced
         Cuts central;
-        std::unordered_map<pdgid_t,Cuts> central_particles;
+        PerIdCuts central_particles;
         /// Cuts on the beam remnants system
         Cuts remnants;
-      };
-      CutsList cuts;
+      } cuts;
   };
 }
 

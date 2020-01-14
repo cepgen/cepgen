@@ -1,9 +1,11 @@
 #include "CepGen/Physics/FormFactors.h"
+#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
+#include "CepGen/Utils/String.h"
 
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/StructureFunctions/SuriYennie.h"
 
 #include <cmath>
@@ -13,29 +15,29 @@ namespace cepgen
 {
   namespace ff
   {
-    const double Parameterisation::mp_ = PDG::get().mass( PDG::proton );
-    const double Parameterisation::mp2_ = Parameterisation::mp_*Parameterisation::mp_;
-
     Parameterisation::Parameterisation() :
       model_( Model::Invalid ), type_( Type::Invalid ),
+      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       last_q2_( -1. ),
       FE( 0. ), FM( 0. ), GE( 0. ), GM( 0. )
     {}
 
     Parameterisation::Parameterisation( const Parameterisation& param ) :
       model_( param.model_ ), type_( param.type_ ),
+      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       last_q2_( -1. ),
       FE( param.FE ), FM( param.FM ), GE( param.GE ), GM( param.GM )
     {}
 
     Parameterisation::Parameterisation( const ParametersList& params ) :
-      model_( (Model)params.get<int>( ff::FormFactorsHandler::KEY, (int)Model::Invalid ) ),
+      model_( (Model)params.name<int>( (int)Model::Invalid ) ),
       type_( (Type)params.get<int>( "type", (int)Type::Invalid ) ),
+      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       last_q2_( -1. ),
       FE( 0. ), FM( 0. ), GE( 0. ), GM( 0. )
     {
       if ( params.has<ParametersList>( "structureFunctions" ) )
-        str_fun_ = strfun::StructureFunctionsHandler::get().build( params.get<ParametersList>( "structureFunctions" ) );
+        str_fun_ = strfun::StructureFunctionsFactory::get().build( params.get<ParametersList>( "structureFunctions" ) );
     }
 
     void
@@ -45,8 +47,11 @@ namespace cepgen
     }
 
     double
-    Parameterisation::tau( double q2 )
+    Parameterisation::tau( double q2 ) const
     {
+      if ( mp2_ <= 0. )
+        throw CG_FATAL( "FormFactors:tau" )
+          << "Invalid proton mass! check the form factors constructor!";
       return 0.25*q2/mp2_;
     }
 

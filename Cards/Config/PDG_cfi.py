@@ -35,6 +35,8 @@ PDG = Parameters(
 # \param fermion Is the particle following the fermion statistics?
 def registerParticle(pdgId, name, mass=0., width=0., charge=0, colour=1, fermion=False):
     PDG[name] = Parameters(
+        name = name,
+        description = name,
         pdgid = pdgId,
         mass = mass,
         charge = charge,

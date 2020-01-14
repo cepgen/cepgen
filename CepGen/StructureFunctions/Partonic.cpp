@@ -1,12 +1,13 @@
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
+#include "CepGen/Utils/String.h"
 
 #include "LHAPDF/LHAPDF.h"
 
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
-#  define LHAPDF_GE_6 1
+# define LHAPDF_GE_6 1
 #endif
 
 #include <array>
@@ -27,9 +28,9 @@ namespace cepgen
         /// Build a calculator from a set, its member, and the contributing quarks
         explicit Partonic( const char* set, unsigned short member = 0, const Mode& mode = Mode::full );
         Partonic& operator()( double xbj, double q2 ) override;
+        std::string description() const override;
 
       private:
-        std::string description() const override;
         void initialise();
         /// String-type PDF identifier (default)
         std::string pdf_set_;
@@ -43,7 +44,7 @@ namespace cepgen
         Mode mode_;
         bool initialised_;
 
-#if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION >= 6
+#ifdef LHAPDF_GE_6
         LHAPDF::PDFSet lha_pdf_set_;
         std::vector<std::unique_ptr<LHAPDF::PDF> > pdfs_;
 #endif
@@ -82,7 +83,7 @@ namespace cepgen
     {}
 
     Partonic::Partonic( const char* set, unsigned short member, const Mode& mode ) :
-      Parameterisation( ParametersList().set<int>( "id", (int)Type::Partonic ) ),
+      Parameterisation( ParametersList().setName<int>( (int)Type::Partonic ) ),
       pdf_set_( set ), num_flavours_( 4 ), pdf_code_( 0 ), pdf_member_( member ), mode_( mode ),
       initialised_( false )
     {}
@@ -129,7 +130,7 @@ namespace cepgen
         LHAPDF::initPDFSet( pdf_set_, LHAPDF::LHGRID, pdf_member_ );
       lhapdf_version = LHAPDF::getVersion();
 #endif
-      replace_all( pdf_description, ". ", ".\n  " );
+      utils::replace_all( pdf_description, ". ", ".\n  " );
       CG_INFO( "Partonic" ) << "Partonic structure functions evaluator successfully built.\n"
         << " * LHAPDF version: " << lhapdf_version << "\n"
         << " * number of flavours: " << num_flavours_ << "\n"
@@ -205,7 +206,7 @@ namespace cepgen
 }
 
 #ifdef LHAPDF_GE_6
-#  undef LHAPDF_GE_6
+# undef LHAPDF_GE_6
 #endif
 
 REGISTER_STRFUN( Partonic, strfun::Partonic )

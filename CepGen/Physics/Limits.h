@@ -2,7 +2,7 @@
 #define CepGen_Physics_Limits_h
 
 #include <utility>
-#include <ostream>
+#include <iosfwd>
 
 namespace cepgen
 {
@@ -43,7 +43,7 @@ namespace cepgen
       /// Have an upper limit?
       bool hasMax() const;
       /// Check if the value is inside limits' boundaries
-      bool passes( double val ) const;
+      bool contains( double val ) const;
       /// Is there a lower and upper limit?
       bool valid() const;
 

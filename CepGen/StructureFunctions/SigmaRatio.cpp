@@ -1,18 +1,18 @@
 #include "CepGen/StructureFunctions/SigmaRatio.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include "CepGen/Physics/PDG.h"
 
 #include <cmath>
 #include <cassert>
+#include <iostream>
 
 namespace cepgen
 {
   namespace sigrat
   {
-    const double Parameterisation::mp_ = PDG::get().mass( PDG::proton );
-    const double Parameterisation::mp2_ = Parameterisation::mp_*Parameterisation::mp_;
-
-    Parameterisation::Parameterisation( const ParametersList& params )
+    Parameterisation::Parameterisation( const ParametersList& params ) :
+      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ )
     {}
 
     double
@@ -114,5 +114,26 @@ namespace cepgen
       return a_*q2*( exp( b1_*q2 )+c_*exp( b2_*q2 ) );
     }
   }
+
+  /// Human-readable format of a R-ratio computation method
+  std::ostream&
+  operator<<( std::ostream& os, const sigrat::Type& sf )
+  {
+    switch ( sf ) {
+      case sigrat::Type::E143:
+        return os << "E143";
+      case sigrat::Type::R1990:
+        return os << "R1990";
+      case sigrat::Type::CLAS:
+        return os << "CLAS";
+      case sigrat::Type::SibirtsevBlunden:
+        return os << "SibirtsevBlunden";
+    }
+    return os;
+  }
 }
 
+REGISTER_SIGRAT( E143, sigrat::E143 )
+REGISTER_SIGRAT( R1990, sigrat::R1990 )
+REGISTER_SIGRAT( CLAS, sigrat::CLAS )
+REGISTER_SIGRAT( SibirtsevBlunden, sigrat::SibirtsevBlunden )

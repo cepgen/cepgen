@@ -13,8 +13,8 @@ namespace cepgen
   class Event;
   class EventModifier;
   class ParametersList;
-  namespace proc { class GenericProcess; }
-  namespace io { class GenericExportHandler; }
+  namespace proc { class Process; }
+  namespace io { class ExportModule; }
   namespace utils { class TamingFunction; }
   enum class IntegratorType;
   typedef std::vector<std::unique_ptr<EventModifier> > EventModifiersSequence;
@@ -31,11 +31,6 @@ namespace cepgen
 
       /// Assignment operator
       Parameters& operator=( Parameters );
-
-      /// Set the polar angle range for the produced leptons
-      /// \param[in] thetamin The minimal value of \f$\theta\f$ for the outgoing leptons
-      /// \param[in] thetamax The maximal value of \f$\theta\f$ for the outgoing leptons
-      void setThetaRange( float thetamin, float thetamax );
       /// Dump the input parameters in the terminal
       friend std::ostream& operator<<( std::ostream&, const Parameters* );
 
@@ -44,15 +39,17 @@ namespace cepgen
       //----- process to compute
 
       /// Process for which the cross-section will be computed and the events will be generated
-      proc::GenericProcess* process();
+      proc::Process* process();
       /// Process for which the cross-section will be computed and the events will be generated
-      const proc::GenericProcess* process() const;
+      const proc::Process* process() const;
       /// Name of the process considered
       std::string processName() const;
-      /// Set the process to study
-      void setProcess( std::unique_ptr<proc::GenericProcess> proc );
-      /// Set the process to study
-      void setProcess( proc::GenericProcess* proc );
+      /// Remove the process pointer
+      void clearProcess();
+      /// Copy a process configuration
+      void setProcess( std::unique_ptr<proc::Process> proc );
+      /// Set a process configuration
+      void setProcess( proc::Process* proc );
 
       //----- events kinematics
 
@@ -103,11 +100,11 @@ namespace cepgen
       bool storage() const { return store_; }
 
       /// Set a new output module definition
-      void setOutputModule( std::unique_ptr<io::GenericExportHandler> mod );
+      void setOutputModule( std::unique_ptr<io::ExportModule> mod );
       /// Set the pointer to a output module
-      void setOutputModule( io::GenericExportHandler* mod );
+      void setOutputModule( io::ExportModule* mod );
       /// Output module definition
-      io::GenericExportHandler* outputModule();
+      io::ExportModule* outputModule();
 
       //----- event modification (e.g. hadronisation, decay) algorithm
 
@@ -144,11 +141,10 @@ namespace cepgen
       inline unsigned int numGeneratedEvents() const { return num_gen_events_; }
 
     private:
-      std::unique_ptr<proc::GenericProcess> process_;
+      std::unique_ptr<proc::Process> process_;
       EventModifiersSequence evt_modifiers_;
       /// Storage object
-      std::unique_ptr<io::GenericExportHandler> out_module_;
-
+      std::unique_ptr<io::ExportModule> out_module_;
       bool store_;
       /// Total generation time (in seconds)
       double total_gen_time_;

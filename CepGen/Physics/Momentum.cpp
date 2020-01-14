@@ -1,7 +1,5 @@
 #include "CepGen/Physics/Momentum.h"
-
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
 
 #include <math.h>
 #include <iomanip>
@@ -9,17 +7,17 @@
 namespace cepgen
 {
   Momentum::Momentum() :
-    px_( 0. ), py_( 0. ), pz_( 0. ), p_( 0. ), energy_( 0. )
+    p_( 0. )
   {}
 
   Momentum::Momentum( double x, double y, double z, double t ) :
-    px_( x ), py_( y ), pz_( z ), energy_( t )
+    std::array<double,4>{ x, y, z, t }
   {
     computeP();
   }
 
   Momentum::Momentum( double* p ) :
-    px_( p[0] ), py_( p[1] ), pz_( p[2] ), energy_( p[3] )
+    std::array<double,4>{ *p }
   {
     computeP();
   }
@@ -53,9 +51,7 @@ namespace cepgen
   Momentum
   Momentum::fromPxPyPzM( double px, double py, double pz, double m )
   {
-    Momentum mom( px, py, pz );
-    mom.setMass( m );
-    return mom;
+    return Momentum( px, py, pz ).setMass( m ).computeP();
   }
 
   Momentum
@@ -70,41 +66,33 @@ namespace cepgen
   Momentum
   Momentum::operator+( const Momentum& mom ) const
   {
-    return Momentum( px_+mom.px_, py_+mom.py_, pz_+mom.pz_, energy_+mom.energy_ );
+    return Momentum( px()+mom.px(), py()+mom.py(), pz()+mom.pz(), energy()+mom.energy() );
   }
 
   Momentum&
   Momentum::operator+=( const Momentum& mom )
   {
-    px_ += mom.px_;
-    py_ += mom.py_;
-    pz_ += mom.pz_;
-    energy_ += mom.energy_;
-    computeP();
-    return *this;
+    (*this) += mom;
+    return computeP();
   }
 
   Momentum
   Momentum::operator-() const
   {
-    return Momentum( -px_, -py_, -pz_, energy_ );
+    return Momentum( -px(), -py(), -pz(), energy() );
   }
 
   Momentum
   Momentum::operator-( const Momentum& mom ) const
   {
-    return Momentum( px_-mom.px_, py_-mom.py_, pz_-mom.pz_, energy_-mom.energy_ );
+    return Momentum( px()-mom.px(), py()-mom.py(), pz()-mom.pz(), energy()-mom.energy() );
   }
 
   Momentum&
   Momentum::operator-=( const Momentum& mom )
   {
-    px_ -= mom.px_;
-    py_ -= mom.py_;
-    pz_ -= mom.pz_;
-    energy_ -= mom.energy_;
-    computeP();
-    return *this;
+    (*this) -= mom;
+    return computeP();
   }
 
   double
@@ -114,61 +102,58 @@ namespace cepgen
   }
 
   Momentum
+  Momentum::operator%( const Momentum& mom ) const
+  {
+    return Momentum(
+      py()*mom.pz()-pz()*mom.py(),
+      pz()*mom.px()-px()*mom.pz(),
+      px()*mom.py()-py()*mom.px()
+    );
+  }
+
+  Momentum
   Momentum::operator*( double c ) const
   {
-    return Momentum( c*px_, c*py_, c*pz_, c*energy_ );
+    return Momentum( c*px(), c*py(), c*pz(), c*energy() );
   }
 
   Momentum&
   Momentum::operator*=( double c )
   {
-    px_ *= c;
-    py_ *= c;
-    pz_ *= c;
-    energy_ *= c;
-    computeP();
-    return *this;
+    (*this) *= c;
+    return computeP();
   }
 
   Momentum
   operator*( double c, const Momentum& mom )
   {
-    return Momentum( c*mom.px_, c*mom.py_, c*mom.pz_, c*mom.energy_ );
-  }
-
-  bool
-  Momentum::operator==( const Momentum& mom ) const
-  {
-    return ( px_ == mom.px_
-          && py_ == mom.py_
-          && pz_ == mom.pz_
-          && energy_ == mom.energy_ );
+    return Momentum( c*mom.px(), c*mom.py(), c*mom.pz(), c*mom.energy() );
   }
 
   double
   Momentum::threeProduct( const Momentum& mom ) const
   {
     CG_DEBUG_LOOP( "Momentum" )
-      << "  (" << px_ << ", " << py_ << ", " << pz_ << ")\n\t"
-      << "* (" << mom.px_ << ", " << mom.py_ << ", " << mom.pz_ << ")\n\t"
-      << "= " << px_*mom.px_+py_*mom.py_+pz_*mom.pz_;
-    return px_*mom.px_+py_*mom.py_+pz_*mom.pz_;
+      << "  (" << px() << ", " << py() << ", " << pz() << ")\n\t"
+      << "* (" << mom.px() << ", " << mom.py() << ", " << mom.pz() << ")\n\t"
+      << "= " << px()*mom.px()+py()*mom.py()+pz()*mom.pz();
+    return px()*mom.px()+py()*mom.py()+pz()*mom.pz();
   }
 
   double
   Momentum::fourProduct( const Momentum& mom ) const
   {
     CG_DEBUG_LOOP( "Momentum" )
-      << "  (" << px_ << ", " << py_ << ", " << pz_ << ", " << energy_ << ")\n\t"
-      << "* (" << mom.px_ << ", " << mom.py_ << ", " << mom.pz_ << ", " << mom.energy_ << ")\n\t"
-      << "= " << energy_*mom.energy_-threeProduct(mom);
-    return energy_*mom.energy_-threeProduct(mom);
+      << "  (" << px() << ", " << py() << ", " << pz() << ", " << energy() << ")\n\t"
+      << "* (" << mom.px() << ", " << mom.py() << ", " << mom.pz() << ", " << mom.energy() << ")\n\t"
+      << "= " << energy()*mom.energy()-threeProduct( mom );
+    return energy()*mom.energy()-threeProduct( mom );
   }
 
   double
   Momentum::crossProduct( const Momentum& mom ) const
   {
-    return px_*mom.py_-py_*mom.px_;
+    return px()*mom.py()-py()*mom.px();
   }
 
   //--- various setters
@@ -176,82 +161,51 @@ namespace cepgen
   Momentum&
   Momentum::setMass2( double m2 )
   {
-    energy_ = sqrt( p2()+m2 );
-    return *this;
+    return setEnergy( sqrt( p2()+m2 ) )
+      .computeP();
   }
 
   Momentum&
   Momentum::setP( double px, double py, double pz, double e )
   {
-    setP( px, py, pz );
-    setEnergy( e );
-    return *this;
+    return setP( px, py, pz )
+      .setEnergy( e );
   }
 
   Momentum&
   Momentum::setP( double px, double py, double pz )
   {
-    px_ = px;
-    py_ = py;
-    pz_ = pz;
-    computeP();
-    return *this;
+    return setPx( px )
+      .setPy( py )
+      .setPz( pz )
+      .computeP();
   }
 
   Momentum&
   Momentum::computeP()
   {
-    p_ = std::hypot( pt(), pz_ );
+    p_ = std::hypot( pt(), pz() );
     return *this;
   }
 
   Momentum&
   Momentum::truncate( double tolerance )
   {
-    if ( px_ <= tolerance )
-      px_ = 0.;
-    if ( py_ <= tolerance )
-      py_ = 0.;
-    if ( pz_ <= tolerance )
-      pz_ = 0.;
-    if ( energy_ <= tolerance )
-      energy_ = 0.;
-    computeP();
-    return *this;
+    for ( auto& p : *this )
+      if ( p <= tolerance )
+        p = 0.;
+    return computeP();
   }
 
   //--- various getters
 
-  double
-  Momentum::operator[]( unsigned int i ) const
-  {
-    switch ( i ) {
-      case 0: return px_;
-      case 1: return py_;
-      case 2: return pz_;
-      case 3: return energy_;
-      default:
-        throw CG_FATAL( "Momentum" ) << "Failed to retrieve the component " << i << "!";
-    }
-  }
-
-  double&
-  Momentum::operator[]( const unsigned int i )
-  {
-    switch ( i ) {
-      case 0: return px_;
-      case 1: return py_;
-      case 2: return pz_;
-      case 3: return energy_;
-      default:
-        throw CG_FATAL( "Momentum" ) << "Failed to retrieve the component " << i << "!";
-    }
-  }
-
-  const std::vector<double>
+  std::array<double,5>
   Momentum::pVector() const
   {
-    return std::vector<double>{ px(), py(), pz(), energy(), mass() };
+    std::array<double,5> out;
+    std::copy( begin(), end(), out.begin() );
+    out[4] = mass();
+    return out;
   }
 
   double
@@ -277,13 +231,13 @@ namespace cepgen
   double
   Momentum::pt() const
   {
-    return std::hypot( px_, py_ );
+    return std::hypot( px(), py() );
   }
 
   double
   Momentum::pt2() const
   {
-    return px_*px_+py_*py_;
+    return px()*px()+py()*py();
   }
 
   double
@@ -312,11 +266,11 @@ namespace cepgen
     if ( gamma == 1. && betagamma == 0. )
       return *this; // trivial case
 
-    const double pz = pz_, e = energy_;
-    pz_      = gamma*pz+betagamma*e;
-    energy_  = gamma*e +betagamma*pz;
-    computeP();
-    return *this;
+    const double apz = pz(), ae = energy();
+
+    return setPz( gamma*apz+betagamma*ae )
+      .setEnergy( gamma*ae +betagamma*apz )
+      .computeP();
   }
 
   Momentum&
@@ -327,22 +281,19 @@ namespace cepgen
       return *this;
 
     const double mass = mom.mass();
-    const double pf4 = ( px_*mom.px_+py_*mom.py_+pz_*mom.pz_+energy_*mom.energy_ )/mass;
-    const double fn = ( pf4+energy_ )/( mom.energy_+mass );
-    *this += fn*mom;
-    energy_ = pf4;
-    return *this;
+    const double pf4 = ( (*this)[X]*mom[X]+(*this)[Y]*mom[Y]+(*this)[Z]*mom[Z]+(*this)[E]*mom[E] )/mass;
+    const double fn = ( pf4+(*this)[E] )/( mom[E]+mass );
+    (*this) += fn*mom;
+    return setEnergy( pf4 );
   }
 
   Momentum&
   Momentum::rotatePhi( double phi, double sign )
   {
     const double sphi = sin( phi ), cphi = cos( phi );
-    const double px =  px_*cphi + sign*py_*sphi,
-                 py = -px_*sphi + sign*py_*cphi;
-    px_ = px;
-    py_ = py;
-    return *this;
+    const double px =  (*this)[X]*cphi + sign*(*this)[Y]*sphi,
+                 py = -(*this)[X]*sphi + sign*(*this)[Y]*cphi;
+    return setPx( px ).setPy( py );
   }
 
   Momentum&
@@ -351,17 +302,16 @@ namespace cepgen
     const double ctheta = cos( theta ), stheta = sin( theta );
     const double cphi = cos( phi ), sphi = sin( phi );
     double rotmtx[3][3], mom[3]; //FIXME check this! cos(phi)->-sin(phi) & sin(phi)->cos(phi) --> phi->phi+pi/2 ?
-    rotmtx[0][0] = -sphi; rotmtx[0][1] = -ctheta*cphi; rotmtx[0][2] = stheta*cphi;
-    rotmtx[1][0] =  cphi; rotmtx[1][1] = -ctheta*sphi; rotmtx[1][2] = stheta*sphi;
-    rotmtx[2][0] =  0.;   rotmtx[2][1] =  stheta;      rotmtx[2][2] = ctheta;
+    rotmtx[X][X] = -sphi; rotmtx[X][Y] = -ctheta*cphi; rotmtx[X][Z] = stheta*cphi;
+    rotmtx[Y][X] =  cphi; rotmtx[Y][Y] = -ctheta*sphi; rotmtx[Y][Z] = stheta*sphi;
+    rotmtx[Z][X] =  0.;   rotmtx[Z][Y] =  stheta;      rotmtx[Z][Z] = ctheta;
 
-    for ( unsigned short i = 0; i < 3; ++i ) {
+    for ( size_t i = X; i <= Z; ++i ) {
       mom[i] = 0.;
-      for ( unsigned short j = 0; j < 3; ++j )
-        mom[i] += rotmtx[i][j]*operator[]( j );
+      for ( size_t j = X; j <= Z; ++j )
+        mom[i] += rotmtx[i][j]*(*this)[j];
     }
-    setP( mom[0], mom[1], mom[2] );
-    return *this;
+    return setP( mom[X], mom[Y], mom[Z] );
   }
 
   //--- printout
@@ -369,11 +319,9 @@ namespace cepgen
   std::ostream&
   operator<<( std::ostream& os, const Momentum& mom )
   {
-    return os << "(" << std::fixed
-      << std::setw( 9 ) << mom.energy_ << "|"
-      << std::setw( 9 ) << mom.px_ << " "
-      << std::setw( 9 ) << mom.py_ << " "
-      << std::setw( 9 ) << mom.pz_ << ")" << std::defaultfloat;
+    return os << "("
+      << mom.energy() << "|"
+      << mom.px() << " " << mom.py() << " " << mom.pz() << ")";
   }
 
   double

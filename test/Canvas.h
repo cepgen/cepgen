@@ -45,7 +45,7 @@ namespace cepgen
   class Canvas : public TCanvas
   {
     public:
-      inline Canvas( const char* name, const char* title="", bool ratio=false ) :
+      explicit inline Canvas( const char* name, const char* title="", bool ratio=false ) :
         //TCanvas( name, "", 450, 450 ),
         TCanvas( name, "", 600, 600 ),
         fTitle( title ), fTopLabel( 0 ),

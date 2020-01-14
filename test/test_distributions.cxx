@@ -3,6 +3,8 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Utils/ArgumentsParser.h"
+
 #include "Canvas.h"
 #include "TH1.h"
 
@@ -24,9 +26,19 @@ int main( int argc, char* argv[] )
 {
   cepgen::Generator mg;
 
-  if ( argc < 2 )
-    throw CG_FATAL( "main" ) << "Usage: " << argv[0] << " [input card]";
-  mg.setParameters( cepgen::card::Handler::parse( argv[1] ) );
+  string input_card;
+  int num_events;
+
+  cepgen::ArgumentsParser( argc, argv )
+    .addArgument( "input", "input card", &input_card, 'i' )
+    .addOptionalArgument( "num-events", "number of events to generate", -1, &num_events, 'n' )
+    .parse();
+
+  mg.setParameters( cepgen::card::Handler::parse( input_card )->parameters() );
+  if ( num_events >= 0 ) { // user specified a number of events to generate
+    mg.parameters().generation().maxgen = num_events;
+    mg.parameters().generation().enabled = num_events > 0;
+  }
 
   h_mass.reset( new TH1D( "invm", ";Dilepton invariant mass;d#sigma/dM (pb/GeV)", 500, 0., 500. ) );
   h_ptpair.reset( new TH1D( "ptpair", ";Dilepton p_{T};d#sigma/dp_{T} (pb/GeV)", 500, 0., 50. ) );
