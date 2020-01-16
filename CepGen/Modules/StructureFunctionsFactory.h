@@ -27,6 +27,14 @@
     static SRBUILDERNM( id ) gSigRat ## id; \
   }
 
+/// Add a form factors definition to the list of handled parameterisation
+#define REGISTER_FF_MODEL( id, obj ) \
+  namespace cepgen { \
+    struct BUILDERNM( id ) { \
+      BUILDERNM( id )() { ff::FormFactorsFactory::get().registerModule<obj>( (int)ff::Model::id ); } }; \
+    static BUILDERNM( id ) gFF ## id; \
+  }
+
 namespace cepgen
 {
   namespace strfun
@@ -40,6 +48,12 @@ namespace cepgen
     class Parameterisation;
     /// A sigma ratio parameterisations factory
     typedef ModuleFactory<Parameterisation,int> SigmaRatiosFactory;
+  }
+  namespace ff
+  {
+    class Parameterisation;
+    /// A form factors parameterisations factory
+    typedef ModuleFactory<Parameterisation,int> FormFactorsFactory;
   }
 }
 

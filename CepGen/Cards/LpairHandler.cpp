@@ -23,7 +23,6 @@
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/FormFactors.h"
 
 #include <fstream>
 #include <iomanip>

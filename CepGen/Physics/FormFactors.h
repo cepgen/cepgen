@@ -76,9 +76,6 @@ namespace cepgen
         double GM;
     };
 
-    /// A form factors parameterisations factory
-    typedef ModuleFactory<Parameterisation,int> FormFactorsFactory;
-
     class StandardDipole : public Parameterisation
     {
       public:
@@ -124,13 +121,5 @@ namespace cepgen
 
   }
 }
-
-/// Add a structure functions definition to the list of handled parameterisation
-#define REGISTER_FF_MODEL( id, obj ) \
-  namespace cepgen { \
-    struct BUILDERNM( id ) { \
-      BUILDERNM( id )() { ff::FormFactorsFactory::get().registerModule<obj>( (int)ff::Model::id ); } }; \
-    static BUILDERNM( id ) gFF ## id; \
-  }
 
 #endif

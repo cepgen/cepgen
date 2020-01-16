@@ -1,6 +1,6 @@
 #include "CepGen/Physics/FormFactors.h"
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/Constants.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/String.h"
@@ -24,7 +24,7 @@ namespace cepgen
 
     Parameterisation::Parameterisation( const Parameterisation& param ) :
       model_( param.model_ ), type_( param.type_ ),
-      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
+      mp_( param.mp_ ), mp2_( param.mp2_ ),
       last_q2_( -1. ),
       FE( param.FE ), FM( param.FM ), GE( param.GE ), GM( param.GM )
     {}
@@ -102,7 +102,7 @@ namespace cepgen
               FM = sy.FM;
             } break;
             default: {
-              str_fun_->operator()( xbj, q2 ).computeFL( xbj, q2 );
+              ( *str_fun_ )( xbj, q2 ).computeFL( xbj, q2 );
               FE = str_fun_->F2 * xbj / q2;
               FM = -2.*str_fun_->F1( xbj, q2 ) / q2;
             } break;
@@ -111,6 +111,8 @@ namespace cepgen
       }
       return *this;
     }
+
+    //------------------------------------------------------------------
 
     StandardDipole::StandardDipole( const ParametersList& params ) :
       Parameterisation( params )
@@ -122,6 +124,8 @@ namespace cepgen
       GE = pow( 1.+q2/0.71, -2. );
       GM = MU*GE;
     }
+
+    //------------------------------------------------------------------
 
     ArringtonEtAl::ArringtonEtAl( const ParametersList& params ) :
       Parameterisation( params ),
@@ -175,6 +179,8 @@ namespace cepgen
       GM = MU*num_m/den_m;
     }
 
+    //------------------------------------------------------------------
+
     void
     BrashEtAl::compute( double q2 )
     {
@@ -193,6 +199,8 @@ namespace cepgen
       GE = r*GM;
       GM *= MU;
     }
+
+    //------------------------------------------------------------------
 
     MergellEtAl::MergellEtAl( const ParametersList& params ) :
       Parameterisation( params ),
@@ -224,6 +232,8 @@ namespace cepgen
       GE = F1-tau( q2 )*F2;
       GM = F1+F2;
     }
+
+    //------------------------------------------------------------------
 
     std::ostream&
     operator<<( std::ostream& os, const Parameterisation& formfac )
