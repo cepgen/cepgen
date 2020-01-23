@@ -275,7 +275,16 @@ namespace cepgen
       // at some point introduce non head-on colliding beams?
       const auto p1 = Momentum::fromPxPyPzM( 0., 0., +kin_.incoming_beams.first .pz, m1 );
       const auto p2 = Momentum::fromPxPyPzM( 0., 0., -kin_.incoming_beams.second.pz, m2 );
-      setIncomingKinematics( p1, p2 );
+
+      if ( event_ ) {
+        CG_DEBUG( "Process:incomingBeams" )
+          << "Incoming primary particles:\n"
+          << "  " << p1 << "\n"
+          << "  " << p2;
+
+        event_->oneWithRole( Particle::IncomingBeam1 ).setMomentum( p1 );
+        event_->oneWithRole( Particle::IncomingBeam2 ).setMomentum( p2 );
+      }
 
       s_ = ( p1+p2 ).mass2();
       sqs_ = sqrt( s_ );
@@ -370,21 +379,6 @@ namespace cepgen
       //----- freeze the event as it is
 
       event_->freeze();
-    }
-
-    void
-    Process::setIncomingKinematics( const Momentum& p1, const Momentum& p2 )
-    {
-      if ( !event_ )
-        return;
-
-      CG_DEBUG( "Process:incomingBeams" )
-        << "Incoming primary particles:\n\t"
-        << p1 << "\n\t"
-        << p2;
-
-      (*event_)[Particle::IncomingBeam1][0].setMomentum( p1 );
-      (*event_)[Particle::IncomingBeam2][0].setMomentum( p2 );
     }
 
     bool

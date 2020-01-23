@@ -60,8 +60,6 @@ namespace cepgen
       public:
         /// Restore the Event object to its initial state
         void clearEvent();
-        /// Set the kinematics of the incoming state particles
-        void setIncomingKinematics( const Momentum& p1, const Momentum& p2 );
         /// Set the list of kinematic cuts to apply on the outgoing particles' final state
         /// \param[in] kin The Kinematics object containing the kinematic parameters
         void setKinematics( const Kinematics& kin );
