@@ -38,7 +38,7 @@ namespace cepgen
     LpairHandler::LpairHandler( const ParametersList& params ) :
       proc_params_( new ParametersList ),
       str_fun_( 11 ), sr_type_( 1 ), xi_min_( 0. ), xi_max_( 1. ),
-      pdg_input_path_( "External/mass_width_2019.mcd" ),
+      pdg_input_path_( "External/mass_width_2019.mcd" ), iend_( 1 ),
       hi_1_( { 0, 0 } ), hi_2_( { 0, 0 } )
     {
       const auto file = params.get<std::string>( FILENAME_KEY );
@@ -106,6 +106,9 @@ namespace cepgen
       else if ( integr_type_ != "" )
         throw CG_FATAL( "LpairHandler" ) << "Unrecognized integrator type: " << integr_type_ << "!";
 
+      //--- check if event generation is required
+      params_.generation().enabled = iend_ > 1;
+
       //--- parse the hadronisation algorithm name
       if ( !evt_mod_name_.empty() )
         for ( const auto& mod : utils::split( evt_mod_name_, ',' ) ) {
@@ -148,8 +151,8 @@ namespace cepgen
       // General parameters
       //-------------------------------------------------------------------------------------------
 
-      registerParameter<bool>( "IEND", "Generation type", &params_.generation().enabled );
       registerParameter<bool>( "NTRT", "Smoothen the integrand", &params_.generation().treat );
+      registerParameter<int>( "IEND", "Generation type", &iend_ );
       registerParameter<int>( "DEBG", "Debugging verbosity", (int*)&utils::Logger::get().level );
       registerParameter<int>( "NCVG", "Number of function calls", (int*)&params_.integration().ncvg );
       registerParameter<int>( "ITVG", "Number of integration iterations", (int*)&params_.integration().vegas.iterations );

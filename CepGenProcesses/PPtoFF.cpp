@@ -233,9 +233,9 @@ namespace cepgen
       //     for heavy flavours
       //=================================================================
 
-      const double q_ratio = 1./q1_.pt2()/q2_.pt2();
-      const double amat2_1 = aux2_1*2.*z1 * q_ratio * t2abs/q2_.pt2();
-      const double amat2_2 = aux2_2*2.*z2 * q_ratio;
+      // Marta's version
+      const double amat2_1 = aux2_1*2.*z1 / q2_.pt2();
+      const double amat2_2 = aux2_2*2.*z2 / q1_.pt2();
 
       //=================================================================
       //     symmetrization
