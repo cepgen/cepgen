@@ -423,7 +423,7 @@ namespace cepgen
       PyObject* pname = element( pout, ParametersList::MODULE_NAME ); // borrowed
       if ( !pname )
         throwPythonError( "Output module name is required!" );
-      params_.setOutputModule( io::ExportModuleFactory::get().build( get<std::string>( pname ), get<ParametersList>( pout ) ) );
+      params_.addOutputModule( io::ExportModuleFactory::get().build( get<std::string>( pname ), get<ParametersList>( pout ) ) );
     }
 
     void

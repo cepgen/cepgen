@@ -128,11 +128,10 @@ namespace cepgen
     input_params_.integration().result = result;
     input_params_.integration().err_result = abserr;
 
-    if ( !input_params_.eventModifiersSequence().empty() )
-      for ( auto& mod : input_params_.eventModifiersSequence() )
-        mod->setCrossSection( result, abserr );
-    if ( input_params_.outputModule() )
-      input_params_.outputModule()->setCrossSection( result, abserr );
+    for ( auto& mod : input_params_.eventModifiersSequence() )
+      mod->setCrossSection( result, abserr );
+    for ( auto& mod : input_params_.outputModulesSequence() )
+      mod->setCrossSection( result, abserr );
 
     if ( res != GSL_SUCCESS )
       throw CG_FATAL( "Integrator:integrate" )
@@ -233,8 +232,8 @@ namespace cepgen
   {
     if ( num_events < 1 )
       num_events = input_params_.generation().maxgen;
-    if ( input_params_.outputModule() )
-      input_params_.outputModule()->initialise( input_params_ );
+    for ( auto& mod : input_params_.outputModulesSequence() )
+      mod->initialise( input_params_ );
     try {
       while ( input_params_.numGeneratedEvents() < num_events )
         generateOne( callback );
@@ -305,14 +304,14 @@ namespace cepgen
 //      if ( input_params_.numGeneratedEvents() % input_params_.generation().gen_print_every == 0 ) {
         CG_INFO( "Integrator:store" )
           << "Generated events: " << input_params_.numGeneratedEvents()+1;
-        input_params_.process()->event().dump();
+        input_params_.process().event().dump();
 //      }
-      const auto& last_event = input_params_.process()->event();
+      const auto& last_event = input_params_.process().event();
       if ( callback )
         callback( last_event, input_params_.numGeneratedEvents() );
       input_params_.addGenerationTime( last_event.time_total );
-      if ( input_params_.outputModule() )
-        *input_params_.outputModule() << last_event;
+      for ( auto& mod : input_params_.outputModulesSequence() )
+        *mod << last_event;
     }
     return true;
   }

@@ -18,6 +18,7 @@ namespace cepgen
   namespace utils { class TamingFunction; }
   enum class IntegratorType;
   typedef std::vector<std::unique_ptr<EventModifier> > EventModifiersSequence;
+  typedef std::vector<std::unique_ptr<io::ExportModule> > ExportModulesSequence;
   /// List of parameters used to start and run the simulation job
   class Parameters
   {
@@ -100,13 +101,6 @@ namespace cepgen
       /// Are the events generated in this run to be stored in the output file ?
       bool storage() const { return store_; }
 
-      /// Set a new output module definition
-      void setOutputModule( std::unique_ptr<io::ExportModule> mod );
-      /// Set the pointer to a output module
-      void setOutputModule( io::ExportModule* mod );
-      /// Output module definition
-      io::ExportModule& outputModule();
-
       //----- event modification (e.g. hadronisation, decay) algorithm
 
       /// Event modification algorithm to use
@@ -123,6 +117,19 @@ namespace cepgen
       void addModifier( EventModifier* );
       /// Set the event modification algorithms sequence
       void setModifiersSequence( EventModifiersSequence& );
+
+      //----- event output algorithms
+
+      /// Output module
+      io::ExportModule& outputModule( size_t );
+      /// Retrieve the list of output modules to run
+      ExportModulesSequence& outputModulesSequence() { return out_modules_; }
+      /// Retrieve the list of output modules to run
+      const ExportModulesSequence& outputModulesSequence() const { return out_modules_; }
+      /// Set a new output module definition
+      void addOutputModule( std::unique_ptr<io::ExportModule> mod );
+      /// Set the pointer to a output module
+      void addOutputModule( io::ExportModule* mod );
 
       //----- taming functions
 
@@ -145,7 +152,7 @@ namespace cepgen
       std::unique_ptr<proc::Process> process_;
       EventModifiersSequence evt_modifiers_;
       /// Storage object
-      std::unique_ptr<io::ExportModule> out_module_;
+      ExportModulesSequence out_modules_;
       bool store_;
       /// Total generation time (in seconds)
       double total_gen_time_;

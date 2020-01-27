@@ -122,7 +122,7 @@ namespace cepgen
         if ( !out_file_name_.empty() )
           outm.set<std::string>( "filename", out_file_name_ );
         for ( const auto& mod : utils::split( out_mod_name_, ',' ) )
-          params_.setOutputModule( io::ExportModuleFactory::get().build( mod, outm ) );
+          params_.addOutputModule( io::ExportModuleFactory::get().build( mod, outm ) );
       }
 
       //--- check if we are dealing with heavy ions for incoming states

@@ -28,7 +28,7 @@ namespace cepgen
     taming_functions( param.taming_functions ),
     process_( std::move( param.process_ ) ),
     evt_modifiers_( std::move( param.evt_modifiers_ ) ),
-    out_module_( std::move( param.out_module_ ) ),
+    out_modules_( std::move( param.out_modules_ ) ),
     store_( false ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ ),
     integration_( param.integration_ ), generation_( param.generation_ )
   {}
@@ -52,7 +52,7 @@ namespace cepgen
     taming_functions = param.taming_functions;
     process_ = std::move( param.process_ );
     evt_modifiers_ = std::move( param.evt_modifiers_ );
-    out_module_ = std::move( param.out_module_ );
+    out_modules_ = std::move( param.out_modules_ );
     total_gen_time_ = param.total_gen_time_;
     num_gen_events_ = param.num_gen_events_;
     integration_ = param.integration_;
@@ -156,23 +156,21 @@ namespace cepgen
   }
 
   io::ExportModule&
-  Parameters::outputModule()
+  Parameters::outputModule( size_t i )
   {
-    if ( !out_module_ )
-      throw CG_ERROR( "Parameters" ) << "No output module registered.";
-    return *out_module_;
+    return *out_modules_.at( i );
   }
 
   void
-  Parameters::setOutputModule( std::unique_ptr<io::ExportModule> mod )
+  Parameters::addOutputModule( std::unique_ptr<io::ExportModule> mod )
   {
-    out_module_ = std::move( mod );
+    out_modules_.emplace_back( std::move( mod ) );
   }
 
   void
-  Parameters::setOutputModule( io::ExportModule* mod )
+  Parameters::addOutputModule( io::ExportModule* mod )
   {
-    out_module_.reset( mod );
+    out_modules_.emplace_back( std::unique_ptr<io::ExportModule>( mod ) );
   }
 
   std::ostream&
@@ -212,7 +210,7 @@ namespace cepgen
       << std::setw( wt ) << "Integrand treatment"
       << ( pretty ? utils::yesno( param->generation_.treat ) : std::to_string( param->generation_.treat ) ) << "\n"
       << std::setw( wt ) << "Verbosity level " << utils::Logger::get().level << "\n";
-    if ( !param->evt_modifiers_.empty() || param->out_module_ || !param->taming_functions.empty() )
+    if ( !param->evt_modifiers_.empty() || param->out_modules_.empty() || !param->taming_functions.empty() )
       os
         << "\n"
         << std::setfill( '-' ) << std::setw( wb+6 )
@@ -225,13 +223,17 @@ namespace cepgen
           << sep << ( pretty ? utils::boldify( mod->name() ) : mod->name() ) << "\n", sep = "+ ", mod_name.clear();
       os << "\n";
     }
-    if ( param->out_module_ ) {
-      os
-        << std::setw( wt ) << "Output module"
-        << ( pretty ? utils::boldify( param->out_module_->name() ) : param->out_module_->name() ) << "\n";
-      for ( const auto& par : param->out_module_->parameters().keys() )
-        if ( par != ParametersList::MODULE_NAME )
-          os << std::setw( wt ) << "" << par << ": " << param->out_module_->parameters().getString( par ) << "\n";
+    if ( param->out_modules_.empty() ) {
+      std::string mod_name = utils::s( "Output module", param->out_modules_.size(), false );
+      for ( const auto& mod : param->out_modules_ ) {
+        os
+          << std::setw( wt ) << mod_name
+          << ( pretty ? utils::boldify( mod->name() ) : mod->name() ) << "\n", mod_name.clear();
+        for ( const auto& par : mod->parameters().keys() )
+          if ( par != ParametersList::MODULE_NAME )
+            os << std::setw( wt ) << "" << par << ": " << mod->parameters().getString( par ) << "\n";
+      }
+      os << "\n";
     }
     if ( !param->taming_functions.empty() ) {
       os << std::setw( wt ) << utils::s( "Taming function", param->taming_functions.size(), false ) << "\n";
