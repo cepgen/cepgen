@@ -88,16 +88,16 @@ namespace cepgen
     num_gen_events_++;
   }
 
-  proc::Process*
+  proc::Process&
   Parameters::process()
   {
-    return process_.get();
+    return *process_;
   }
 
-  const proc::Process*
+  const proc::Process&
   Parameters::process() const
   {
-    return process_.get();
+    return *process_;
   }
 
   std::string
@@ -129,10 +129,10 @@ namespace cepgen
     process_.reset( proc );
   }
 
-  EventModifier*
+  EventModifier&
   Parameters::eventModifier( size_t i )
   {
-    return evt_modifiers_.at( i ).get();
+    return *evt_modifiers_.at( i );
   }
 
   std::string
@@ -155,12 +155,12 @@ namespace cepgen
     evt_modifiers_.emplace_back( std::unique_ptr<EventModifier>( mod ) );
   }
 
-  io::ExportModule*
+  io::ExportModule&
   Parameters::outputModule()
   {
     if ( !out_module_ )
-      return nullptr;
-    return out_module_.get();
+      throw CG_ERROR( "Parameters" ) << "No output module registered.";
+    return *out_module_;
   }
 
   void
@@ -189,7 +189,7 @@ namespace cepgen
        << std::setw( wt ) << "Process to generate"
        << ( pretty ? utils::boldify( param->processName() ) : param->processName() );
     if ( param->process_ ) {
-      for ( const auto& par : param->process()->parameters().keys() )
+      for ( const auto& par : param->process().parameters().keys() )
         if ( par != "mode" && par != ParametersList::MODULE_NAME )
           os << "\n" << std::setw( wt ) << "" << par << ": " << param->process_->parameters().getString( par );
       std::ostringstream proc_mode; proc_mode << param->kinematics.mode;

@@ -22,8 +22,9 @@ namespace cepgen
     for ( size_t i = 0; i < max_; ++i ) {
       size_t jj = i;
       for ( size_t j = 0; j < ndim; ++j ) {
-        unsigned short tmp = jj*INV_M_BIN;
-        coord[j] = roundf( jj-tmp*M_BIN );
+        unsigned int tmp = jj*INV_M_BIN;
+        //coord[j] = roundf( jj-tmp*M_BIN );
+        coord[j] = jj-tmp*M_BIN;
         jj = tmp;
       }
       n_map_.emplace_back( coord );

@@ -38,10 +38,11 @@ namespace cepgen
 
       //----- process to compute
 
+      bool hasProcess() const { return !( !process_ ); }
       /// Process for which the cross-section will be computed and the events will be generated
-      proc::Process* process();
+      proc::Process& process();
       /// Process for which the cross-section will be computed and the events will be generated
-      const proc::Process* process() const;
+      const proc::Process& process() const;
       /// Name of the process considered
       std::string processName() const;
       /// Remove the process pointer
@@ -104,12 +105,12 @@ namespace cepgen
       /// Set the pointer to a output module
       void setOutputModule( io::ExportModule* mod );
       /// Output module definition
-      io::ExportModule* outputModule();
+      io::ExportModule& outputModule();
 
       //----- event modification (e.g. hadronisation, decay) algorithm
 
       /// Event modification algorithm to use
-      EventModifier* eventModifier( size_t );
+      EventModifier& eventModifier( size_t );
       /// Retrieve the list of event modification algorithms to run
       EventModifiersSequence& eventModifiersSequence() { return evt_modifiers_; }
       /// Retrieve the list of event modification algorithms to run

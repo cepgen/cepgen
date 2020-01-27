@@ -43,9 +43,8 @@ namespace cepgen
       ~Integrator();
       /**
        * Algorithm to perform the n-dimensional Monte Carlo integration of a given function.
-       * \author This C++ implementation: GSL
        * \param[out] result_ The cross section as integrated for the given phase space restrictions
-       * \param[out] abserr_ The error associated to the computed cross section
+       * \param[out] abserr_ The uncertainty associated to the computed cross section
        */
       void integrate( double& result_, double& abserr_ );
       /// Dimensional size of the phase space
@@ -100,9 +99,7 @@ namespace cepgen
       /// A trivial deleter for the Vegas integrator
       struct gsl_monte_vegas_deleter
       {
-        void operator()( gsl_monte_vegas_state* state ) {
-          gsl_monte_vegas_free( state );
-        }
+        inline void operator()( gsl_monte_vegas_state* state ) { gsl_monte_vegas_free( state ); }
       };
       /// A Vegas integrator state for integration (optional) and/or
       /// "treated" event generation

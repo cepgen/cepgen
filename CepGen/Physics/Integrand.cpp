@@ -36,9 +36,9 @@ namespace cepgen
       if ( !func_params || !( params = static_cast<Parameters*>( func_params ) ) )
         throw CG_FATAL( "Integrand" ) << "Failed to retrieve the run parameters!";
 
-      proc::Process* proc = params->process();
-      if ( !proc )
+      if ( !params->hasProcess() )
         throw CG_FATAL( "Integrand" ) << "Failed to retrieve the process!";
+      auto& proc = params->process();
 
       //================================================================
       // start the timer
@@ -50,8 +50,8 @@ namespace cepgen
       // prepare the event content prior to the process generation
       //================================================================
 
-      if ( proc->hasEvent() ) // event is not empty
-        ev = &proc->event();
+      if ( proc.hasEvent() ) // event is not empty
+        ev = &proc.event();
 
       params->prepareRun();
 
@@ -59,13 +59,13 @@ namespace cepgen
       // specify the phase space point to probe
       //================================================================
 
-      proc->setPoint( x, ndim );
+      proc.setPoint( x, ndim );
 
       //================================================================
       // from this step on, the phase space point is supposed to be set
       //================================================================
 
-      double weight = proc->weight();
+      double weight = proc.weight();
 
       //================================================================
       // invalidate any unphysical behaviour
@@ -91,7 +91,7 @@ namespace cepgen
       // fill in the process' Event object
       //================================================================
 
-      proc->fillKinematics();
+      proc.fillKinematics();
 
       //================================================================
       // once the kinematics variables have been populated, can apply
@@ -168,11 +168,11 @@ namespace cepgen
 
       if ( params->storage() ) {
         ev->weight = weight;
-        proc->event().time_total = tmr.elapsed();
+        proc.event().time_total = tmr.elapsed();
 
         CG_DEBUG( "Integrand" )
-          << "[process 0x" << std::hex << proc << std::dec << "] "
-          << "Individual time (gen+hadr+cuts): " << proc->event().time_total*1.e3 << " ms";
+          << "[process 0x" << std::hex << &proc << std::dec << "] "
+          << "Individual time (gen+hadr+cuts): " << proc.event().time_total*1.e3 << " ms";
       }
 
       //================================================================

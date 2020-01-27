@@ -63,13 +63,13 @@ namespace cepgen
   void
   Generator::clearRun( bool clear_proc )
   {
-    if ( parameters_->process() ) {
+    if ( parameters_->hasProcess() ) {
       if ( clear_proc )
         parameters_->clearProcess();
       else {
-        parameters_->process()->first_run = true;
-        parameters_->process()->addEventContent();
-        parameters_->process()->setKinematics( parameters_->kinematics );
+        parameters_->process().first_run = true;
+        parameters_->process().addEventContent();
+        parameters_->process().setKinematics( parameters_->kinematics );
       }
     }
     result_ = result_error_ = -1.;
@@ -109,10 +109,10 @@ namespace cepgen
   {
     clearRun();
 
-    if ( !parameters_->process() )
+    if ( !parameters_->hasProcess() )
       throw CG_FATAL( "Generator:computePoint" )
         << "Trying to compute a point with no process specified!";
-    const size_t ndim = parameters_->process()->ndim();
+    const size_t ndim = parameters_->process().ndim();
     double res = integrand::eval( x, ndim, (void*)parameters_.get() );
     std::ostringstream os;
     std::string sep;
@@ -159,11 +159,11 @@ namespace cepgen
     result_ = result_error_ = 0.;
 
     // first destroy and recreate the integrator instance
-    if ( !parameters_->process() )
+    if ( !parameters_->hasProcess() )
       throw CG_FATAL( "Generator:integrate" )
         << "Trying to integrate while no process is specified!";
 
-    const size_t ndim = parameters_->process()->ndim();
+    const size_t ndim = parameters_->process().ndim();
     if ( !integrator_ || integrator_->dimensions() != ndim )
       integrator_.reset( new Integrator( ndim, integrand::eval, *parameters_ ) );
 
@@ -179,7 +179,7 @@ namespace cepgen
   Generator::generateOneEvent()
   {
     integrator_->generateOne();
-    return parameters_->process()->event();
+    return parameters_->process().event();
   }
 
   void
