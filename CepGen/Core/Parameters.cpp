@@ -216,14 +216,14 @@ namespace cepgen
         << std::setfill( '-' ) << std::setw( wb+6 )
         << ( pretty ? utils::boldify( " Event treatment " ) : "Event treatment" ) << std::setfill( ' ' ) << "\n\n";
     if ( !param->evt_modifiers_.empty() ) {
-      std::string sep, mod_name = utils::s( "Event modifier", param->evt_modifiers_.size(), false );
+      std::string mod_name = utils::s( "Event modifier", param->evt_modifiers_.size(), false ), sep;
       for ( const auto& mod : param->evt_modifiers_ )
         os
           << std::setw( wt ) << mod_name
           << sep << ( pretty ? utils::boldify( mod->name() ) : mod->name() ) << "\n", sep = "+ ", mod_name.clear();
       os << "\n";
     }
-    if ( param->out_modules_.empty() ) {
+    if ( !param->out_modules_.empty() ) {
       std::string mod_name = utils::s( "Output module", param->out_modules_.size(), false );
       for ( const auto& mod : param->out_modules_ ) {
         os
@@ -233,7 +233,6 @@ namespace cepgen
           if ( par != ParametersList::MODULE_NAME )
             os << std::setw( wt ) << "" << par << ": " << mod->parameters().getString( par ) << "\n";
       }
-      os << "\n";
     }
     if ( !param->taming_functions.empty() ) {
       os << std::setw( wt ) << utils::s( "Taming function", param->taming_functions.size(), false ) << "\n";

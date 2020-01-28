@@ -178,7 +178,10 @@ namespace cepgen
 
       PyObject* pout = PyObject_GetAttrString( cfg, OUTPUT_NAME ); // new
       if ( pout ) {
-        parseOutputModule( pout );
+        if ( isVector<ParametersList>( pout ) )
+          parseOutputModules( pout );
+        else
+          parseOutputModule( pout );
         Py_CLEAR( pout );
       }
 
@@ -412,6 +415,16 @@ namespace cepgen
           h->readStrings( config_blk );
         }
       }
+    }
+
+    void
+    PythonHandler::parseOutputModules( PyObject* mod )
+    {
+      if ( !PyList_Check( mod ) )
+        throwPythonError( "Output modules definition object should be a list/Sequence!" );
+
+      for ( Py_ssize_t i = 0; i < PyList_Size( mod ); ++i )
+        parseOutputModule( PyList_GetItem( mod, i ) );
     }
 
     void

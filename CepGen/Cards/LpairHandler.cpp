@@ -118,11 +118,15 @@ namespace cepgen
 
       //--- parse the output module name
       if ( !out_mod_name_.empty() ) {
-        ParametersList outm;
-        if ( !out_file_name_.empty() )
-          outm.set<std::string>( "filename", out_file_name_ );
-        for ( const auto& mod : utils::split( out_mod_name_, ',' ) )
+        const auto& out_files = utils::split( out_file_name_, ',' );
+        size_t i = 0;
+        for ( const auto& mod : utils::split( out_mod_name_, ',' ) ) {
+          ParametersList outm;
+          if ( out_files.size() > i && !out_files.at( i ).empty() )
+            outm.set<std::string>( "filename", out_files.at( i ) );
           params_.addOutputModule( io::ExportModuleFactory::get().build( mod, outm ) );
+          ++i;
+        }
       }
 
       //--- check if we are dealing with heavy ions for incoming states
