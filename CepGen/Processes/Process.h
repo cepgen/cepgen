@@ -92,8 +92,8 @@ namespace cepgen
         bool hasEvent() const { return !( !event_ ); }
         /// Complete list of Particle with their role in the process for the point considered in the phase space, returned as an Event object.
         /// \return Event object containing all the generated Particle objects
-        inline const Event& event() const { return *event_; }
-        inline Event& event() { return *event_; }
+        inline const Event* event() const { return event_.get(); }
+        inline Event* event() { return event_.get(); }
 
       protected:
         const double mp_; ///< Proton mass, in GeV/c\f$^2\f$

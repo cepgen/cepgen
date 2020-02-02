@@ -135,14 +135,6 @@ namespace cepgen
     return *evt_modifiers_.at( i );
   }
 
-  std::string
-  Parameters::eventModifierName( size_t i ) const
-  {
-    if ( i >= evt_modifiers_.size() )
-      return "";
-    return evt_modifiers_.at( i )->name();
-  }
-
   void
   Parameters::addModifier( std::unique_ptr<EventModifier> mod )
   {

@@ -30,7 +30,6 @@ namespace cepgen
     eval( double* x, size_t ndim, void* func_params )
     {
       log_level = utils::Logger::get().level;
-      Event* ev = nullptr;
 
       Parameters* params = nullptr;
       if ( !func_params || !( params = static_cast<Parameters*>( func_params ) ) )
@@ -50,8 +49,9 @@ namespace cepgen
       // prepare the event content prior to the process generation
       //================================================================
 
+      Event* ev = nullptr;
       if ( proc.hasEvent() ) // event is not empty
-        ev = &proc.event();
+        ev = proc.event();
 
       params->prepareRun();
 
@@ -114,11 +114,11 @@ namespace cepgen
       // set the CepGen part of the event generation
       //================================================================
 
-      if ( params->storage() )
+      if ( params->storage() && ev )
         ev->time_generation = tmr.elapsed();
 
       //================================================================
-      // event hadronisation and resonances decay
+      // trigger all event modification algorithms
       //================================================================
 
       if ( !params->eventModifiersSequence().empty() ) {
@@ -135,9 +135,9 @@ namespace cepgen
       // (polish your cuts, as this might be very time-consuming...)
       //================================================================
 
-      if ( !params->kinematics.cuts.central_particles.empty() ) {
+      if ( !params->kinematics.cuts.central_particles.empty() )
         for ( const auto& part : (*ev)[Particle::CentralSystem] ) {
-          // retrieve all cuts associated to this final state particle
+          // retrieve all cuts associated to this final state particle in the central system
           if ( params->kinematics.cuts.central_particles.count( part.pdgId() ) == 0 )
             continue;
           const auto& cuts_pdgid = params->kinematics.cuts.central_particles.at( part.pdgId() );
@@ -151,14 +151,14 @@ namespace cepgen
           if ( !cuts_pdgid.rapidity_single.contains( part.momentum().rapidity() ) )
             return 0.;
         }
-      }
+      const auto& remn_cut = params->kinematics.cuts.remnants;
       for ( const auto& system : { Particle::OutgoingBeam1, Particle::OutgoingBeam2 } )
         for ( const auto& part : (*ev)[system] ) {
           if ( part.status() != Particle::Status::FinalState )
             continue;
-          if ( !params->kinematics.cuts.remnants.energy_single.contains( part.momentum().energy() ) )
+          if ( !remn_cut.energy_single.contains( part.momentum().energy() ) )
             return 0.;
-          if ( !params->kinematics.cuts.remnants.rapidity_single.contains( fabs( part.momentum().rapidity() ) ) )
+          if ( !remn_cut.rapidity_single.contains( fabs( part.momentum().rapidity() ) ) )
             return 0.;
         }
 
@@ -166,13 +166,13 @@ namespace cepgen
       // store the last event in parameters block for a later usage
       //================================================================
 
-      if ( params->storage() ) {
+      if ( params->storage() && ev ) {
         ev->weight = weight;
-        proc.event().time_total = tmr.elapsed();
+        ev->time_total = tmr.elapsed();
 
         CG_DEBUG( "Integrand" )
           << "[process 0x" << std::hex << &proc << std::dec << "] "
-          << "Individual time (gen+hadr+cuts): " << proc.event().time_total*1.e3 << " ms";
+          << "Individual time (gen+hadr+cuts): " << ev->time_total*1.e3 << " ms";
       }
 
       //================================================================

@@ -29,23 +29,22 @@ process = cepgen.Module('lpair',
     #],
 )
 
-#--- example of an events modification procedure
-#eventSequence = cepgen.Sequence(
-#    pythia8
-#)
-
-#--- example of an output module parameterisation
-output = cepgen.Module('text',
-    #variables = ['nev', 'm(4)', 'tgen'],
-    histVariables={'m(4)': cepgen.Parameters(low=0., high=250., nbins=20)}
-)
-#output = cepgen.Module('lhef', filename='test.lhe')
-#output = cepgen.Module('hepmc', filename='test.hepmc')
-
 #--- let the user specify the events generation parameters
 from Config.generator_cff import generator
 generator = generator.clone(
     numEvents = 100000,
     printEvery = 10000,
 )
+
+#--- example of an events modification procedure
+#eventSequence = cepgen.Sequence(pythia8)
+
+#--- example of an output module(s) procedure
+text = cepgen.Module('text',
+    #variables = ['nev', 'm(4)', 'tgen'],
+    histVariables={'m(4)': cepgen.Parameters(low=0., high=250., nbins=20)}
+)
+#lhef = cepgen.Module('lhef', filename='test.lhe')
+#hepmc = cepgen.Module('hepmc', filename='test.hepmc')
+output = cepgen.Sequence(text)
 
