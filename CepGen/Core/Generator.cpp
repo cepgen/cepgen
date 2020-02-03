@@ -179,7 +179,7 @@ namespace cepgen
   Generator::generateOneEvent()
   {
     integrator_->generateOne();
-    return *parameters_->process().event();
+    return parameters_->process().event();
   }
 
   void

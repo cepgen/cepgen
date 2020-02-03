@@ -10,7 +10,6 @@
 
 namespace cepgen
 {
-  class Event;
   class EventModifier;
   class ParametersList;
   namespace proc { class Process; }

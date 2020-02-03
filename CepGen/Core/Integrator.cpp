@@ -299,14 +299,17 @@ namespace cepgen
     if ( weight <= 0. )
       return false;
 
-    auto last_event = input_params_.process().event();
+    auto& last_event = input_params_.process().event();
+    const auto ngen = input_params_.numGeneratedEvents();
     {
-      if ( ( input_params_.numGeneratedEvents()+1 ) % input_params_.generation().gen_print_every == 0 )
+      //if ( ( ngen+1 ) % input_params_.generation().gen_print_every == 0 ) {
         CG_INFO( "Integrator:store" )
-          << "Generated events: " << input_params_.numGeneratedEvents()+1;
+          << "Generated events: " << ngen+1;
+        last_event.dump();
+      //}
       if ( callback )
-        callback( *last_event, input_params_.numGeneratedEvents() );
-      input_params_.addGenerationTime( last_event->time_total );
+        callback( last_event, ngen );
+      input_params_.addGenerationTime( last_event.time_total );
     }
     return true;
   }

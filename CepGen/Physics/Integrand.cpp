@@ -51,7 +51,7 @@ namespace cepgen
 
       Event* ev = nullptr;
       if ( proc.hasEvent() ) // event is not empty
-        ev = proc.event();
+        ev = &proc.event();
 
       params->prepareRun();
 
