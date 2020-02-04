@@ -49,9 +49,9 @@ namespace cepgen
       // prepare the event content prior to the process generation
       //================================================================
 
-      Event* ev = nullptr;
+      Event* event = nullptr;
       if ( proc.hasEvent() ) // event is not empty
-        ev = &proc.event();
+        event = &proc.event();
 
       params->prepareRun();
 
@@ -78,7 +78,7 @@ namespace cepgen
       // speed up the integration process if no event is to be generated
       //================================================================
 
-      if ( !ev )
+      if ( !event )
         return weight;
 
       if ( !params->storage()
@@ -101,7 +101,7 @@ namespace cepgen
       try {
         utils::EventBrowser bws;
         for ( const auto& tam : params->taming_functions )
-          weight *= tam.function.eval( bws.get( *ev, tam.var_orig ) );
+          weight *= tam.function.eval( bws.get( *event, tam.var_orig ) );
       } catch ( const Exception& ) {
         throw CG_FATAL( "Integrand" )
           << "Failed to apply taming function(s) taming!";
@@ -114,8 +114,8 @@ namespace cepgen
       // set the CepGen part of the event generation
       //================================================================
 
-      if ( params->storage() && ev )
-        ev->time_generation = tmr.elapsed();
+      if ( event && params->storage() )
+        event->time_generation = tmr.elapsed();
 
       //================================================================
       // trigger all event modification algorithms
@@ -124,7 +124,7 @@ namespace cepgen
       if ( !params->eventModifiersSequence().empty() ) {
         double br = -1.;
         for ( auto& mod : params->eventModifiersSequence() ) {
-          if ( !mod->run( *ev, br, params->storage() ) || br == 0. )
+          if ( !mod->run( *event, br, params->storage() ) || br == 0. )
             return 0.;
           weight *= br; // branching fraction for all decays
         }
@@ -136,7 +136,7 @@ namespace cepgen
       //================================================================
 
       if ( !params->kinematics.cuts.central_particles.empty() )
-        for ( const auto& part : (*ev)[Particle::CentralSystem] ) {
+        for ( const auto& part : (*event)[Particle::CentralSystem] ) {
           // retrieve all cuts associated to this final state particle in the central system
           if ( params->kinematics.cuts.central_particles.count( part.pdgId() ) == 0 )
             continue;
@@ -153,7 +153,7 @@ namespace cepgen
         }
       const auto& remn_cut = params->kinematics.cuts.remnants;
       for ( const auto& system : { Particle::OutgoingBeam1, Particle::OutgoingBeam2 } )
-        for ( const auto& part : (*ev)[system] ) {
+        for ( const auto& part : (*event)[system] ) {
           if ( part.status() != Particle::Status::FinalState )
             continue;
           if ( !remn_cut.energy_single.contains( part.momentum().energy() ) )
@@ -166,13 +166,13 @@ namespace cepgen
       // store the last event in parameters block for a later usage
       //================================================================
 
-      if ( params->storage() && ev ) {
-        ev->weight = weight;
-        ev->time_total = tmr.elapsed();
+      if ( event && params->storage() ) {
+        event->weight = weight;
+        event->time_total = tmr.elapsed();
 
         CG_DEBUG( "Integrand" )
           << "[process 0x" << std::hex << &proc << std::dec << "] "
-          << "Individual time (gen+hadr+cuts): " << ev->time_total*1.e3 << " ms";
+          << "Individual time (gen+hadr+cuts): " << event->time_total*1.e3 << " ms";
       }
 
       //================================================================

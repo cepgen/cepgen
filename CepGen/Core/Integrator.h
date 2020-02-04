@@ -1,6 +1,8 @@
 #ifndef CepGen_Core_Integrator_h
 #define CepGen_Core_Integrator_h
 
+#include "CepGen/Event/Event.h"
+
 #include <vector>
 #include <memory>
 #include <functional>
@@ -38,7 +40,7 @@ namespace cepgen
        * \param[in] integrand Function to be integrated
        * \param[inout] params Run parameters to define the phase space on which this integration is performed (embedded in an Parameters object)
        */
-      Integrator( unsigned int ndim, double integrand(double*,size_t,void*), Parameters& params );
+      Integrator( unsigned int ndim, double integrand( double*, size_t, void* ), Parameters& params );
       /// Class destructor
       ~Integrator();
       /**
@@ -50,9 +52,11 @@ namespace cepgen
       /// Dimensional size of the phase space
       unsigned short dimensions() const;
       /// Generate a single event
-      void generateOne( std::function<void( const Event&, unsigned long )> callback = nullptr );
+      /// \param[in] callback The callback function applied on every event generated
+      void generateOne( Event::callback callback = nullptr );
       /// Launch the event generation for a given number of events
-      void generate( unsigned long num_events = 0, std::function<void( const Event&, unsigned long )> callback = nullptr );
+      /// \param[in] callback The callback function applied on every event generated
+      void generate( unsigned long num_events = 0, Event::callback callback = nullptr );
 
     private:
       /**
@@ -60,9 +64,10 @@ namespace cepgen
        * the phase space to the output file
        * \brief Store the event in the output file
        * \param[in] x The d-dimensional point in the phase space defining the unique event to store
+       * \param[in] callback The callback function for every event generated
        * \return A boolean stating whether or not the event could be saved
        */
-      bool storeEvent( const std::vector<double>& x, std::function<void( const Event&, unsigned long )> callback = nullptr );
+      bool storeEvent( const std::vector<double>& x, Event::callback callback = nullptr );
       /// Start the correction cycle on the grid
       /// \param x Point in the phase space considered
       /// \param has_correction Correction cycle started?

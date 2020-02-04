@@ -15,7 +15,7 @@ namespace cepgen
     KTProcess::KTProcess( const ParametersList& params,
                           const std::array<pdgid_t,2>& partons,
                           const std::vector<pdgid_t>& central ) :
-      Process( params ),
+      Process( params, true ),
       qt1_( 0. ), phi_qt1_( 0. ), qt2_( 0. ), phi_qt2_( 0. ),
       kIntermediateParts( partons ), kProducedParts( central )
     {}

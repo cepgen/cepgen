@@ -165,7 +165,7 @@ namespace cepgen
   //-----------------------------------------------------------------------------------------------
 
   void
-  Integrator::generateOne( std::function<void( const Event&, unsigned long )> callback )
+  Integrator::generateOne( Event::callback callback )
   {
     if ( !grid_->gen_prepared )
       computeGenerationParameters();
@@ -228,7 +228,7 @@ namespace cepgen
   }
 
   void
-  Integrator::generate( unsigned long num_events, std::function<void( const Event&, unsigned long )> callback )
+  Integrator::generate( unsigned long num_events, Event::callback callback )
   {
     if ( num_events < 1 )
       num_events = input_params_.generation().maxgen;
@@ -290,7 +290,7 @@ namespace cepgen
   }
 
   bool
-  Integrator::storeEvent( const std::vector<double>& x, std::function<void( const Event&, unsigned long )> callback )
+  Integrator::storeEvent( const std::vector<double>& x, Event::callback callback )
   {
     //--- start by computing the matrix element for that point
     const double weight = eval( x );
@@ -299,14 +299,13 @@ namespace cepgen
     if ( weight <= 0. )
       return false;
 
-    auto& last_event = input_params_.process().event();
+    const auto& last_event = input_params_.process().event();
     const auto ngen = input_params_.numGeneratedEvents();
     {
-      //if ( ( ngen+1 ) % input_params_.generation().gen_print_every == 0 ) {
+      //if ( ( ngen+1 ) % input_params_.generation().gen_print_every == 0 )
         CG_INFO( "Integrator:store" )
-          << "Generated events: " << ngen+1;
-        last_event.dump();
-      //}
+          << "Generated events: " << ngen+1 << "\n"
+          << last_event;
       if ( callback )
         callback( last_event, ngen );
       input_params_.addGenerationTime( last_event.time_total );

@@ -1,6 +1,8 @@
 #include "CepGen/Modules/ProcessesFactory.h"
 #include "CepGen/Processes/FortranKTProcess.h"
 
+#include "CepGen/Event/Event.h"
+
 //=============================================================================
 // START BY LISTING ALL FORTRAN FUNCTIONS
 // usage:

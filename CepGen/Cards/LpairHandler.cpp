@@ -8,6 +8,8 @@
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/ExportModule.h"
 
+#include "CepGen/Event/Event.h"
+
 #include "CepGen/Processes/Process.h"
 #include "CepGen/Modules/ProcessesFactory.h"
 

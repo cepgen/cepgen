@@ -183,7 +183,7 @@ namespace cepgen
   }
 
   void
-  Generator::generate( std::function<void( const Event&, unsigned long )> callback )
+  Generator::generate( Event::callback callback )
   {
     const utils::Timer tmr;
 

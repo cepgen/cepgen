@@ -1,9 +1,10 @@
 #ifndef CepGen_Processes_Process_h
 #define CepGen_Processes_Process_h
 
-#include "CepGen/Event/Event.h"
-#include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Core/ParametersList.h"
+
+#include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Event/Particle.h"
 
 #include <map>
 #include <vector>
@@ -12,6 +13,7 @@
 namespace cepgen
 {
   class FormFactors;
+  class Event;
   /// Location for all physics processes to be generated
   namespace proc
   {
@@ -94,6 +96,7 @@ namespace cepgen
         /// \return Event object containing all the generated Particle objects
         inline const Event& event() const { return *event_; }
         inline Event& event() { return *event_; }
+        inline Event* eventPtr() { return event_.get(); }
 
       protected:
         const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
@@ -196,7 +199,7 @@ namespace cepgen
         /// Set of cuts to apply on the final phase space
         Kinematics kin_;
         /// Event object containing all the information on the in- and outgoing particles
-        EventPtr event_;
+        std::unique_ptr<Event> event_;
         /// Is the phase space point set?
         bool is_point_set_;
 

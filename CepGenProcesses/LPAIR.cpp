@@ -16,7 +16,7 @@ namespace cepgen
   namespace proc
   {
     LPAIR::LPAIR( const ParametersList& params ) :
-      Process( params ),
+      Process( params, true ),
       n_opt_( params.get<int>( "nopt", 0 ) ),
       pair_( params.get<ParticleProperties>( "pair" ).pdgid ),
       theta4_( 0. ), phi6_cm_( 0. ), x6_( 0. ),

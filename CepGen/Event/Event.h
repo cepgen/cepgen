@@ -27,6 +27,8 @@ namespace cepgen
       /// Compress the event record
       Event compress() const;
 
+      typedef std::function<void( const Event&, unsigned long long )> callback;
+
       friend std::ostream& operator<<( std::ostream&, const Event& );
       /// Dump all the known information on every Particle object contained in this Event container in the output stream
       void dump() const;
@@ -125,7 +127,6 @@ namespace cepgen
       /// Is the event "compressed"?
       bool compressed_;
   };
-  typedef std::unique_ptr<Event> EventPtr;
 }
 
 #endif

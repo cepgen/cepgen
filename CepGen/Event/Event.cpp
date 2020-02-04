@@ -69,7 +69,7 @@ namespace cepgen
   {
     if ( compressed_ )
       return *this;
-    Event out( true );
+    Event out( /*compressed=*/true );
     size_t i = 0;
     //--- add all necessary particles
     for ( const auto& role : { Particle::IncomingBeam1, Particle::IncomingBeam2,

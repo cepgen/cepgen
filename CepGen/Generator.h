@@ -1,6 +1,8 @@
 #ifndef CepGen_Generator_h
 #define CepGen_Generator_h
 
+#include "CepGen/Event/Event.h"
+
 #include <iosfwd>
 #include <memory>
 #include <functional>
@@ -107,7 +109,7 @@ namespace cepgen
       /// Generate a new event and return its reference
       const Event& generateOneEvent();
       /// Launch the generation of events
-      void generate( std::function<void( const Event&, unsigned long )> callback = nullptr );
+      void generate( Event::callback callback = nullptr );
       /// Compute one single point from the total phase space
       /// \param[in] x the n-dimensional point to compute
       /// \return the function value for the given point
