@@ -40,11 +40,12 @@ generator = generator.clone(
 #eventSequence = cepgen.Sequence(pythia8)
 
 #--- example of an output module(s) procedure
+from Config.OutputModule.ROOTTree_cfi import rootTree
 text = cepgen.Module('text',
     #variables = ['nev', 'm(4)', 'tgen'],
     histVariables={'m(4)': cepgen.Parameters(low=0., high=250., nbins=20)}
 )
 #lhef = cepgen.Module('lhef', filename='test.lhe')
 #hepmc = cepgen.Module('hepmc', filename='test.hepmc')
-output = cepgen.Sequence(text)
+output = cepgen.Sequence(rootTree)
 
