@@ -198,7 +198,7 @@ namespace cepgen
 
         /// Set of cuts to apply on the final phase space
         Kinematics kin_;
-        /// Event object containing all the information on the in- and outgoing particles
+        /// Event object containing all the information on all particles in the system
         std::unique_ptr<Event> event_;
         /// Is the phase space point set?
         bool is_point_set_;

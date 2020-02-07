@@ -72,7 +72,7 @@ namespace cepgen
   Momentum&
   Momentum::operator+=( const Momentum& mom )
   {
-    (*this) += mom;
+    *this = *this + mom;
     return computeP();
   }
 
@@ -91,7 +91,7 @@ namespace cepgen
   Momentum&
   Momentum::operator-=( const Momentum& mom )
   {
-    (*this) -= mom;
+    *this = *this - mom;
     return computeP();
   }
 
@@ -120,7 +120,7 @@ namespace cepgen
   Momentum&
   Momentum::operator*=( double c )
   {
-    (*this) *= c;
+    *this = *this * c;
     return computeP();
   }
 

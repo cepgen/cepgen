@@ -118,8 +118,6 @@ namespace cepgen
       /// Typical event indices structure
       struct NumParticles
       {
-        NumParticles();
-        NumParticles( const NumParticles& np );
         size_t cs; ///< Index of the first central system particle
         size_t op1; ///< Index of the first positive-z outgoing beam state
         size_t op2; ///< Index of the first negative-z outgoing beam state
