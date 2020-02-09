@@ -170,9 +170,6 @@ namespace cepgen
         event->weight = weight;
         event->time_total = tmr.elapsed();
 
-        for ( auto& mod : params->outputModulesSequence() )
-          *mod << *event;
-
         CG_DEBUG( "Integrand" )
           << "[process 0x" << std::hex << &proc << std::dec << "] "
           << "Individual time (gen+hadr+cuts): " << event->time_total*1.e3 << " ms";

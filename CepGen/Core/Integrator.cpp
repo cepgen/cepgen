@@ -308,6 +308,8 @@ namespace cepgen
           << event;
       if ( callback )
         callback( event, ngen );
+      for ( auto& mod : input_params_.outputModulesSequence() )
+        *mod << event;
       input_params_.addGenerationTime( event.time_total );
     }
     return true;
