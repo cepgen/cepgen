@@ -97,22 +97,27 @@ namespace cepgen
         throwPythonError( "Failed to import the configuration card '"+file+"'" );
 
       //--- general particles definition
-      PyObject* ppdg = PyObject_GetAttrString( cfg, MCD_NAME ); // new
-      if ( ppdg ) {
-        pdg::MCDFileParser::parse( get<std::string>( ppdg ).c_str() );
-        Py_CLEAR( ppdg );
+      if ( PyObject_HasAttrString( cfg, MCD_NAME ) == 1 ) {
+        PyObject* ppdg = PyObject_GetAttrString( cfg, MCD_NAME ); // new
+        if ( ppdg ) {
+          pdg::MCDFileParser::parse( get<std::string>( ppdg ).c_str() );
+          Py_CLEAR( ppdg );
+        }
       }
 
       //--- additional particles definition
-      PyObject* pextp = PyObject_GetAttrString( cfg, PDGLIST_NAME ); // new
-      if ( pextp ) {
-        parseExtraParticles( pextp );
-        Py_CLEAR( pextp );
+      if ( PyObject_HasAttrString( cfg, PDGLIST_NAME ) == 1 ) {
+        PyObject* pextp = PyObject_GetAttrString( cfg, PDGLIST_NAME ); // new
+        if ( pextp ) {
+          parseExtraParticles( pextp );
+          Py_CLEAR( pextp );
+        }
       }
 
       //--- process definition
-      PyObject* process = PyObject_GetAttrString( cfg, PROCESS_NAME ); // new
-      if ( !process )
+      PyObject* process = nullptr;
+      if ( PyObject_HasAttrString( cfg, PROCESS_NAME ) == 1
+        || !( process = PyObject_GetAttrString( cfg, PROCESS_NAME ) ) ) // new
         throwPythonError( "Failed to extract a '"+std::string( PROCESS_NAME )+"' keyword from the configuration card '"+file+"'!" );
 
       //--- list of process-specific parameters
@@ -146,45 +151,57 @@ namespace cepgen
 
       Py_CLEAR( process );
 
-      PyObject* plog = PyObject_GetAttrString( cfg, LOGGER_NAME ); // new
-      if ( plog ) {
-        parseLogging( plog );
-        Py_CLEAR( plog );
+      if ( PyObject_HasAttrString( cfg, LOGGER_NAME ) == 1 ) {
+        PyObject* plog = PyObject_GetAttrString( cfg, LOGGER_NAME ); // new
+        if ( plog ) {
+          parseLogging( plog );
+          Py_CLEAR( plog );
+        }
       }
 
       //--- hadroniser parameters (legacy)
-      PyObject* phad = PyObject_GetAttrString( cfg, HADR_NAME ); // new
-      if ( phad ) {
-        parseHadroniser( phad );
-        Py_CLEAR( phad );
+      if ( PyObject_HasAttrString( cfg, HADR_NAME ) == 1 ) {
+        PyObject* phad = PyObject_GetAttrString( cfg, HADR_NAME ); // new
+        if ( phad ) {
+          parseHadroniser( phad );
+          Py_CLEAR( phad );
+        }
       }
 
-      PyObject* pmod_seq = PyObject_GetAttrString( cfg, EVT_MOD_SEQ_NAME ); // new
-      if ( pmod_seq ) {
-        parseEventModifiers( pmod_seq );
-        Py_CLEAR( pmod_seq );
+      if ( PyObject_HasAttrString( cfg, EVT_MOD_SEQ_NAME ) == 1 ) {
+        PyObject* pmod_seq = PyObject_GetAttrString( cfg, EVT_MOD_SEQ_NAME ); // new
+        if ( pmod_seq ) {
+          parseEventModifiers( pmod_seq );
+          Py_CLEAR( pmod_seq );
+        }
       }
 
       //--- generation parameters
-      PyObject* pint = PyObject_GetAttrString( cfg, INTEGRATOR_NAME ); // new
-      if ( pint ) {
-        parseIntegrator( pint );
-        Py_CLEAR( pint );
+      if ( PyObject_HasAttrString( cfg, INTEGRATOR_NAME ) == 1 ) {
+        PyObject* pint = PyObject_GetAttrString( cfg, INTEGRATOR_NAME ); // new
+        if ( pint ) {
+          parseIntegrator( pint );
+          Py_CLEAR( pint );
+        }
       }
 
-      PyObject* pgen = PyObject_GetAttrString( cfg, GENERATOR_NAME ); // new
-      if ( pgen ) {
-        parseGenerator( pgen );
-        Py_CLEAR( pgen );
+      if ( PyObject_HasAttrString( cfg, GENERATOR_NAME ) == 1 ) {
+        PyObject* pgen = PyObject_GetAttrString( cfg, GENERATOR_NAME ); // new
+        if ( pgen ) {
+          parseGenerator( pgen );
+          Py_CLEAR( pgen );
+        }
       }
 
-      PyObject* pout = PyObject_GetAttrString( cfg, OUTPUT_NAME ); // new
-      if ( pout ) {
-        if ( isVector<ParametersList>( pout ) )
-          parseOutputModules( pout );
-        else
-          parseOutputModule( pout );
-        Py_CLEAR( pout );
+      if ( PyObject_HasAttrString( cfg, OUTPUT_NAME ) == 1 ) {
+        PyObject* pout = PyObject_GetAttrString( cfg, OUTPUT_NAME ); // new
+        if ( pout ) {
+          if ( isVector<ParametersList>( pout ) )
+            parseOutputModules( pout );
+          else
+            parseOutputModule( pout );
+          Py_CLEAR( pout );
+        }
       }
 
       //--- finalisation
