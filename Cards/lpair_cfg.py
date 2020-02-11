@@ -41,11 +41,15 @@ generator = generator.clone(
 
 #--- example of an output module(s) procedure
 from Config.OutputModule.ROOTTree_cfi import rootTree
-text = cepgen.Module('text',
-    #variables = ['nev', 'm(4)', 'tgen'],
-    histVariables={'m(4)': cepgen.Parameters(low=0., high=250., nbins=20)}
-)
+#text = cepgen.Module('text',
+#    #variables = ['nev', 'm(4)', 'tgen'],
+#    histVariables={'m(4)': cepgen.Parameters(low=0., high=250., nbins=20)}
+#)
 #lhef = cepgen.Module('lhef', filename='test.lhe')
 #hepmc = cepgen.Module('hepmc', filename='test.hepmc')
-output = cepgen.Sequence(rootTree)
+dump = cepgen.Module('dump', printEvery = 5000)
+output = cepgen.Sequence(
+    dump,
+    #rootTree
+)
 

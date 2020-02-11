@@ -67,8 +67,8 @@ namespace cepgen
     void
     EventDump::operator<<( const Event& ev )
     {
-      if ( print_every_ < 0 || event_num_ % print_every_ == 0 )
-        *out_ << ev;
+      if ( print_every_ < 0 || event_num_++ % print_every_ == 0 )
+        *out_ << ev << "\n";
     }
   }
 }
