@@ -9,7 +9,7 @@ int main()
   utils::Logger::get().output = nullptr;
   //--- try with a bit of unicode too
   const std::string test_string = "Haha, ceci est un test à géométrie variable! ☺";
-  for ( int type = (int)Exception::Type::undefined; type <= (int)Exception::Type::fatal; ++type ) {
+  for ( int type = (int)Exception::Type::undefined; type < (int)Exception::Type::fatal; ++type ) {
     try {
       throw LoggedException( "Test", (Exception::Type)type ) << test_string;
       std::cout << "Test failed for type " << type << "!" << std::endl;
