@@ -116,7 +116,7 @@ namespace cepgen
 
       //--- process definition
       PyObject* process = nullptr;
-      if ( PyObject_HasAttrString( cfg, PROCESS_NAME ) == 1
+      if ( PyObject_HasAttrString( cfg, PROCESS_NAME ) != 1
         || !( process = PyObject_GetAttrString( cfg, PROCESS_NAME ) ) ) // new
         throwPythonError( "Failed to extract a '"+std::string( PROCESS_NAME )+"' keyword from the configuration card '"+file+"'!" );
 
