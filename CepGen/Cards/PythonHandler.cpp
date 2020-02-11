@@ -244,23 +244,25 @@ namespace cepgen
         params_.kinematics.structure_functions = strfun::StructureFunctionsFactory::get().build( get<ParametersList>( psf ) );
       //--- types of parton fluxes for kt-factorisation
       PyObject* pktf = element( kin, "ktFluxes" ); // borrowed
-      if ( isVector<int>( pktf ) ) {
-        std::vector<int> kt_fluxes;
-        fillParameter( kin, "ktFluxes", kt_fluxes );
-        if ( !kt_fluxes.empty() ) {
-          params_.kinematics.incoming_beams.first.kt_flux = (KTFlux)kt_fluxes.at( 0 );
-          params_.kinematics.incoming_beams.second.kt_flux = ( kt_fluxes.size() > 1 )
-            ? (KTFlux)kt_fluxes.at( 1 )
-            : (KTFlux)kt_fluxes.at( 0 );
+      if ( pktf ) {
+        if ( isVector<int>( pktf ) ) {
+          std::vector<int> kt_fluxes;
+          fillParameter( kin, "ktFluxes", kt_fluxes );
+          if ( !kt_fluxes.empty() ) {
+            params_.kinematics.incoming_beams.first.kt_flux = (KTFlux)kt_fluxes.at( 0 );
+            params_.kinematics.incoming_beams.second.kt_flux = ( kt_fluxes.size() > 1 )
+              ? (KTFlux)kt_fluxes.at( 1 )
+              : (KTFlux)kt_fluxes.at( 0 );
+          }
         }
+        else if ( is<int>( pktf ) ) {
+          int kt_fluxes;
+          fillParameter( kin, "ktFluxes", kt_fluxes );
+          params_.kinematics.incoming_beams.first.kt_flux = params_.kinematics.incoming_beams.second.kt_flux = (KTFlux)kt_fluxes;
+        }
+        else
+          throwPythonError( "Unsupported format for the ktFluxes definition!" );
       }
-      else if ( is<int>( pktf ) ) {
-        int kt_fluxes;
-        fillParameter( kin, "ktFluxes", kt_fluxes );
-        params_.kinematics.incoming_beams.first.kt_flux = params_.kinematics.incoming_beams.second.kt_flux = (KTFlux)kt_fluxes;
-      }
-      else
-        throwPythonError( "Unsupported format for the ktFluxes definition!" );
       //--- specify where to look for the grid path for gluon emission
       std::string kmr_grid_path;
       fillParameter( kin, "kmrGridPath", kmr_grid_path );
