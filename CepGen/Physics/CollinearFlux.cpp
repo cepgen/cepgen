@@ -4,7 +4,7 @@
 #include "CepGen/Physics/Limits.h"
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 
 #include <gsl/gsl_errno.h>
 
