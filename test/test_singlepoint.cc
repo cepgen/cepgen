@@ -37,7 +37,8 @@ int main( int argc, char* argv[] )
   for ( const auto& v : point )
     cout << delim << v, delim = ", ";
   cout << endl;
-  cout << "weight: " << gen.computePoint( &point[0] ) << endl;
+  const double weight = gen.computePoint( &point[0] );
+  cout << "weight: " << weight << endl;
 
   return 0;
 }

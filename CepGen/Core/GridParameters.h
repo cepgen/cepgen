@@ -31,7 +31,7 @@ namespace cepgen
       static constexpr unsigned short MAX_DIM = 15;
       /// Integration grid size parameter
       static constexpr unsigned short M_BIN = 3;
-      static constexpr float INV_M_BIN = 1./M_BIN;
+      static constexpr double INV_M_BIN = 1./M_BIN;
 
       /// Has the generation been prepared?
       bool gen_prepared;

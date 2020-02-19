@@ -243,9 +243,9 @@ namespace cepgen
       //=================================================================
 
       return amat2
-        * M_1_PI*M_1_PI / ( 16.*x1*x1*x2*x2*s_*s_ )
-        * f1*M_1_PI * f2*M_1_PI * 0.25
-        * constants::GEVM2_TO_PB
+        * pow( 4.*x1*x2*s_*M_PI, -2 )
+        * f1*M_1_PI * f2*M_1_PI
+        * 0.25 * constants::GEVM2_TO_PB
         * pt_diff_ * qt1_ * qt2_;
     }
 

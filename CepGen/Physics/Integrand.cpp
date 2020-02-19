@@ -30,15 +30,14 @@ namespace cepgen
     eval( double* x, size_t ndim, void* func_params )
     {
       log_level = utils::Logger::get().level;
-      Event* ev = nullptr;
 
       Parameters* params = nullptr;
       if ( !func_params || !( params = static_cast<Parameters*>( func_params ) ) )
         throw CG_FATAL( "Integrand" ) << "Failed to retrieve the run parameters!";
 
-      proc::Process* proc = params->process();
-      if ( !proc )
+      if ( !params->hasProcess() )
         throw CG_FATAL( "Integrand" ) << "Failed to retrieve the process!";
+      auto& proc = params->process();
 
       //================================================================
       // start the timer
@@ -50,8 +49,9 @@ namespace cepgen
       // prepare the event content prior to the process generation
       //================================================================
 
-      if ( proc->hasEvent() ) // event is not empty
-        ev = &proc->event();
+      Event* event = nullptr;
+      if ( proc.hasEvent() ) // event is not empty
+        event = &proc.event();
 
       params->prepareRun();
 
@@ -59,13 +59,13 @@ namespace cepgen
       // specify the phase space point to probe
       //================================================================
 
-      proc->setPoint( x, ndim );
+      proc.setPoint( x, ndim );
 
       //================================================================
       // from this step on, the phase space point is supposed to be set
       //================================================================
 
-      double weight = proc->weight();
+      double weight = proc.weight();
 
       //================================================================
       // invalidate any unphysical behaviour
@@ -78,7 +78,7 @@ namespace cepgen
       // speed up the integration process if no event is to be generated
       //================================================================
 
-      if ( !ev )
+      if ( !event )
         return weight;
 
       if ( !params->storage()
@@ -91,7 +91,7 @@ namespace cepgen
       // fill in the process' Event object
       //================================================================
 
-      proc->fillKinematics();
+      proc.fillKinematics();
 
       //================================================================
       // once the kinematics variables have been populated, can apply
@@ -101,7 +101,7 @@ namespace cepgen
       try {
         utils::EventBrowser bws;
         for ( const auto& tam : params->taming_functions )
-          weight *= tam.function.eval( bws.get( *ev, tam.var_orig ) );
+          weight *= tam.function.eval( bws.get( *event, tam.var_orig ) );
       } catch ( const Exception& ) {
         throw CG_FATAL( "Integrand" )
           << "Failed to apply taming function(s) taming!";
@@ -114,17 +114,17 @@ namespace cepgen
       // set the CepGen part of the event generation
       //================================================================
 
-      if ( params->storage() )
-        ev->time_generation = tmr.elapsed();
+      if ( event && params->storage() )
+        event->time_generation = tmr.elapsed();
 
       //================================================================
-      // event hadronisation and resonances decay
+      // trigger all event modification algorithms
       //================================================================
 
       if ( !params->eventModifiersSequence().empty() ) {
         double br = -1.;
         for ( auto& mod : params->eventModifiersSequence() ) {
-          if ( !mod->run( *ev, br, params->storage() ) || br == 0. )
+          if ( !mod->run( *event, br, params->storage() ) || br == 0. )
             return 0.;
           weight *= br; // branching fraction for all decays
         }
@@ -135,9 +135,9 @@ namespace cepgen
       // (polish your cuts, as this might be very time-consuming...)
       //================================================================
 
-      if ( !params->kinematics.cuts.central_particles.empty() ) {
-        for ( const auto& part : (*ev)[Particle::CentralSystem] ) {
-          // retrieve all cuts associated to this final state particle
+      if ( !params->kinematics.cuts.central_particles.empty() )
+        for ( const auto& part : (*event)[Particle::CentralSystem] ) {
+          // retrieve all cuts associated to this final state particle in the central system
           if ( params->kinematics.cuts.central_particles.count( part.pdgId() ) == 0 )
             continue;
           const auto& cuts_pdgid = params->kinematics.cuts.central_particles.at( part.pdgId() );
@@ -151,14 +151,14 @@ namespace cepgen
           if ( !cuts_pdgid.rapidity_single.contains( part.momentum().rapidity() ) )
             return 0.;
         }
-      }
+      const auto& remn_cut = params->kinematics.cuts.remnants;
       for ( const auto& system : { Particle::OutgoingBeam1, Particle::OutgoingBeam2 } )
-        for ( const auto& part : (*ev)[system] ) {
+        for ( const auto& part : (*event)[system] ) {
           if ( part.status() != Particle::Status::FinalState )
             continue;
-          if ( !params->kinematics.cuts.remnants.energy_single.contains( part.momentum().energy() ) )
+          if ( !remn_cut.energy_single.contains( part.momentum().energy() ) )
             return 0.;
-          if ( !params->kinematics.cuts.remnants.rapidity_single.contains( fabs( part.momentum().rapidity() ) ) )
+          if ( !remn_cut.rapidity_single.contains( fabs( part.momentum().rapidity() ) ) )
             return 0.;
         }
 
@@ -166,13 +166,13 @@ namespace cepgen
       // store the last event in parameters block for a later usage
       //================================================================
 
-      if ( params->storage() ) {
-        ev->weight = weight;
-        proc->event().time_total = tmr.elapsed();
+      if ( event && params->storage() ) {
+        event->weight = weight;
+        event->time_total = tmr.elapsed();
 
         CG_DEBUG( "Integrand" )
-          << "[process 0x" << std::hex << proc << std::dec << "] "
-          << "Individual time (gen+hadr+cuts): " << proc->event().time_total*1.e3 << " ms";
+          << "[process 0x" << std::hex << &proc << std::dec << "] "
+          << "Individual time (gen+hadr+cuts): " << event->time_total*1.e3 << " ms";
       }
 
       //================================================================

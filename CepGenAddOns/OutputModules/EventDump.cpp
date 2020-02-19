@@ -30,12 +30,14 @@ namespace cepgen
 
       private:
         bool save_banner_;
+        int print_every_;
         std::ostream* out_;
     };
 
     EventDump::EventDump( const ParametersList& params ) :
       ExportModule( params ),
       save_banner_( params.get<bool>( "saveBanner", true ) ),
+      print_every_( params.get<int>( "printEvery", 1 ) ),
       out_( nullptr )
     {
       if ( params.has<std::string>( "filename" ) )
@@ -53,19 +55,20 @@ namespace cepgen
     EventDump::initialise( const Parameters& params )
     {
       if ( save_banner_ )
-        ( *out_ ) << banner( params, "#" ) << "\n";
+        *out_ << banner( params, "#" ) << "\n";
     }
 
     void
     EventDump::setCrossSection( double xsec, double xsec_err )
     {
-      ( *out_ ) << "Total cross-section: " << xsec << " +/- " << xsec_err << " pb.\n";
+      *out_ << "Total cross-section: " << xsec << " +/- " << xsec_err << " pb.\n";
     }
 
     void
     EventDump::operator<<( const Event& ev )
     {
-      ( *out_ ) << ev;
+      if ( print_every_ < 0 || event_num_++ % print_every_ == 0 )
+        *out_ << ev << "\n";
     }
   }
 }

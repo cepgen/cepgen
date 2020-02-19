@@ -65,6 +65,7 @@ namespace cepgen
         void parseHadroniser( PyObject* );
         void parseEventModifiers( PyObject* );
         void parseOutputModule( PyObject* );
+        void parseOutputModules( PyObject* );
         void parseExtraParticles( PyObject* );
 
         std::string filename_;

@@ -3,8 +3,8 @@ from Config.Integration.vegas_cff import integrator
 from Config.PDG_cfi import PDG
 
 #--- example of a hadronisation algorithm steering
-#from Config.Hadronisation.pythia6_cff import pythia6 as hadroniser
-#from Config.Hadronisation.pythia8_cff import pythia8 as hadroniser
+#from Config.Hadronisation.pythia6_cff import pythia6
+#from Config.Hadronisation.pythia8_cff import pythia8
 
 process = cepgen.Module('lpair',
     processParameters = cepgen.Parameters(
@@ -29,18 +29,27 @@ process = cepgen.Module('lpair',
     #],
 )
 
-#--- example of an output module parameterisation
-output = cepgen.Module('text',
-    #variables = ['nev', 'm(4)', 'tgen'],
-    histVariables={'m(4)': cepgen.Parameters(low=0., high=250., nbins=20)}
-)
-#output = cepgen.Module('lhef', filename='test.lhe')
-#output = cepgen.Module('hepmc', filename='test.hepmc')
-
 #--- let the user specify the events generation parameters
 from Config.generator_cff import generator
 generator = generator.clone(
     numEvents = 100000,
     printEvery = 10000,
+)
+
+#--- example of an events modification procedure
+#eventSequence = cepgen.Sequence(pythia8)
+
+#--- example of an output module(s) procedure
+from Config.OutputModule.ROOTTree_cfi import rootTree
+#text = cepgen.Module('text',
+#    #variables = ['nev', 'm(4)', 'tgen'],
+#    histVariables={'m(4)': cepgen.Parameters(low=0., high=250., nbins=20)}
+#)
+#lhef = cepgen.Module('lhef', filename='test.lhe')
+#hepmc = cepgen.Module('hepmc', filename='test.hepmc')
+dump = cepgen.Module('dump', printEvery = 5000)
+output = cepgen.Sequence(
+    dump,
+    #rootTree
 )
 

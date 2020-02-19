@@ -69,7 +69,7 @@ namespace cepgen
   {
     if ( compressed_ )
       return *this;
-    Event out( true );
+    Event out( /*compressed=*/true );
     size_t i = 0;
     //--- add all necessary particles
     for ( const auto& role : { Particle::IncomingBeam1, Particle::IncomingBeam2,
@@ -401,15 +401,5 @@ namespace cepgen
        " ----------------------------------------------------------------------------------------------------------------------------------\n"
        "\t\t\t\t\t\t\tBalance% 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), p_total.px(), p_total.py(), p_total.pz(), p_total.energy() );
   }
-
-  //------------------------------------------------------------------------------------------------
-
-  Event::NumParticles::NumParticles() :
-    cs( 0 ), op1( 0 ), op2( 0 )
-  {}
-
-  Event::NumParticles::NumParticles( const NumParticles& np ) :
-    cs( np.cs ), op1( np.op1 ), op2( np.op2 )
-  {}
 }
 

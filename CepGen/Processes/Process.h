@@ -1,9 +1,10 @@
 #ifndef CepGen_Processes_Process_h
 #define CepGen_Processes_Process_h
 
-#include "CepGen/Event/Event.h"
-#include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Core/ParametersList.h"
+
+#include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Event/Particle.h"
 
 #include <map>
 #include <vector>
@@ -12,6 +13,7 @@
 namespace cepgen
 {
   class FormFactors;
+  class Event;
   /// Location for all physics processes to be generated
   namespace proc
   {
@@ -60,8 +62,6 @@ namespace cepgen
       public:
         /// Restore the Event object to its initial state
         void clearEvent();
-        /// Set the kinematics of the incoming state particles
-        void setIncomingKinematics( const Momentum& p1, const Momentum& p2 );
         /// Set the list of kinematic cuts to apply on the outgoing particles' final state
         /// \param[in] kin The Kinematics object containing the kinematic parameters
         void setKinematics( const Kinematics& kin );
@@ -96,6 +96,7 @@ namespace cepgen
         /// \return Event object containing all the generated Particle objects
         inline const Event& event() const { return *event_; }
         inline Event& event() { return *event_; }
+        inline Event* eventPtr() { return event_.get(); }
 
       protected:
         const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
@@ -197,8 +198,8 @@ namespace cepgen
 
         /// Set of cuts to apply on the final phase space
         Kinematics kin_;
-        /// Event object containing all the information on the in- and outgoing particles
-        EventPtr event_;
+        /// Event object containing all the information on all particles in the system
+        std::unique_ptr<Event> event_;
         /// Is the phase space point set?
         bool is_point_set_;
 

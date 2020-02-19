@@ -8,11 +8,14 @@
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/ExportModule.h"
 
+#include "CepGen/Event/Event.h"
+
 #include "CepGen/Processes/Process.h"
 #include "CepGen/Modules/ProcessesFactory.h"
 
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Physics/FormFactors.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
@@ -38,7 +41,7 @@ namespace cepgen
     LpairHandler::LpairHandler( const ParametersList& params ) :
       proc_params_( new ParametersList ),
       str_fun_( 11 ), sr_type_( 1 ), xi_min_( 0. ), xi_max_( 1. ),
-      pdg_input_path_( "External/mass_width_2019.mcd" ),
+      pdg_input_path_( "External/mass_width_2019.mcd" ), iend_( 1 ),
       hi_1_( { 0, 0 } ), hi_2_( { 0, 0 } )
     {
       const auto file = params.get<std::string>( FILENAME_KEY );
@@ -107,6 +110,9 @@ namespace cepgen
       else if ( integr_type_ != "" )
         throw CG_FATAL( "LpairHandler" ) << "Unrecognized integrator type: " << integr_type_ << "!";
 
+      //--- check if event generation is required
+      params_.generation().enabled = iend_ > 1;
+
       //--- parse the hadronisation algorithm name
       if ( !evt_mod_name_.empty() )
         for ( const auto& mod : utils::split( evt_mod_name_, ',' ) ) {
@@ -116,11 +122,15 @@ namespace cepgen
 
       //--- parse the output module name
       if ( !out_mod_name_.empty() ) {
-        ParametersList outm;
-        if ( !out_file_name_.empty() )
-          outm.set<std::string>( "filename", out_file_name_ );
-        for ( const auto& mod : utils::split( out_mod_name_, ',' ) )
-          params_.setOutputModule( io::ExportModuleFactory::get().build( mod, outm ) );
+        const auto& out_files = utils::split( out_file_name_, ',' );
+        size_t i = 0;
+        for ( const auto& mod : utils::split( out_mod_name_, ',' ) ) {
+          ParametersList outm;
+          if ( out_files.size() > i && !out_files.at( i ).empty() )
+            outm.set<std::string>( "filename", out_files.at( i ) );
+          params_.addOutputModule( io::ExportModuleFactory::get().build( mod, outm ) );
+          ++i;
+        }
       }
 
       //--- check if we are dealing with heavy ions for incoming states
@@ -149,8 +159,8 @@ namespace cepgen
       // General parameters
       //-------------------------------------------------------------------------------------------
 
-      registerParameter<bool>( "IEND", "Generation type", &params_.generation().enabled );
       registerParameter<bool>( "NTRT", "Smoothen the integrand", &params_.generation().treat );
+      registerParameter<int>( "IEND", "Generation type", &iend_ );
       registerParameter<int>( "DEBG", "Debugging verbosity", (int*)&utils::Logger::get().level );
       registerParameter<int>( "NCVG", "Number of function calls", (int*)&params_.integration().ncvg );
       registerParameter<int>( "ITVG", "Number of integration iterations", (int*)&params_.integration().vegas.iterations );

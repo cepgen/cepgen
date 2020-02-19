@@ -8,6 +8,8 @@
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/ExportModule.h"
 
+#include "CepGen/Event/Event.h"
+
 #include "CepGen/Processes/Process.h"
 #include "CepGen/Modules/ProcessesFactory.h"
 
@@ -96,22 +98,27 @@ namespace cepgen
         throwPythonError( "Failed to import the configuration card '"+file+"'" );
 
       //--- general particles definition
-      PyObject* ppdg = PyObject_GetAttrString( cfg, MCD_NAME ); // new
-      if ( ppdg ) {
-        pdg::MCDFileParser::parse( get<std::string>( ppdg ).c_str() );
-        Py_CLEAR( ppdg );
+      if ( PyObject_HasAttrString( cfg, MCD_NAME ) == 1 ) {
+        PyObject* ppdg = PyObject_GetAttrString( cfg, MCD_NAME ); // new
+        if ( ppdg ) {
+          pdg::MCDFileParser::parse( get<std::string>( ppdg ).c_str() );
+          Py_CLEAR( ppdg );
+        }
       }
 
       //--- additional particles definition
-      PyObject* pextp = PyObject_GetAttrString( cfg, PDGLIST_NAME ); // new
-      if ( pextp ) {
-        parseExtraParticles( pextp );
-        Py_CLEAR( pextp );
+      if ( PyObject_HasAttrString( cfg, PDGLIST_NAME ) == 1 ) {
+        PyObject* pextp = PyObject_GetAttrString( cfg, PDGLIST_NAME ); // new
+        if ( pextp ) {
+          parseExtraParticles( pextp );
+          Py_CLEAR( pextp );
+        }
       }
 
       //--- process definition
-      PyObject* process = PyObject_GetAttrString( cfg, PROCESS_NAME ); // new
-      if ( !process )
+      PyObject* process = nullptr;
+      if ( PyObject_HasAttrString( cfg, PROCESS_NAME ) != 1
+        || !( process = PyObject_GetAttrString( cfg, PROCESS_NAME ) ) ) // new
         throwPythonError( "Failed to extract a '"+std::string( PROCESS_NAME )+"' keyword from the configuration card '"+file+"'!" );
 
       //--- list of process-specific parameters
@@ -145,42 +152,57 @@ namespace cepgen
 
       Py_CLEAR( process );
 
-      PyObject* plog = PyObject_GetAttrString( cfg, LOGGER_NAME ); // new
-      if ( plog ) {
-        parseLogging( plog );
-        Py_CLEAR( plog );
+      if ( PyObject_HasAttrString( cfg, LOGGER_NAME ) == 1 ) {
+        PyObject* plog = PyObject_GetAttrString( cfg, LOGGER_NAME ); // new
+        if ( plog ) {
+          parseLogging( plog );
+          Py_CLEAR( plog );
+        }
       }
 
       //--- hadroniser parameters (legacy)
-      PyObject* phad = PyObject_GetAttrString( cfg, HADR_NAME ); // new
-      if ( phad ) {
-        parseHadroniser( phad );
-        Py_CLEAR( phad );
+      if ( PyObject_HasAttrString( cfg, HADR_NAME ) == 1 ) {
+        PyObject* phad = PyObject_GetAttrString( cfg, HADR_NAME ); // new
+        if ( phad ) {
+          parseHadroniser( phad );
+          Py_CLEAR( phad );
+        }
       }
 
-      PyObject* pmod_seq = PyObject_GetAttrString( cfg, EVT_MOD_SEQ_NAME ); // new
-      if ( pmod_seq ) {
-        parseEventModifiers( pmod_seq );
-        Py_CLEAR( pmod_seq );
+      if ( PyObject_HasAttrString( cfg, EVT_MOD_SEQ_NAME ) == 1 ) {
+        PyObject* pmod_seq = PyObject_GetAttrString( cfg, EVT_MOD_SEQ_NAME ); // new
+        if ( pmod_seq ) {
+          parseEventModifiers( pmod_seq );
+          Py_CLEAR( pmod_seq );
+        }
       }
 
       //--- generation parameters
-      PyObject* pint = PyObject_GetAttrString( cfg, INTEGRATOR_NAME ); // new
-      if ( pint ) {
-        parseIntegrator( pint );
-        Py_CLEAR( pint );
+      if ( PyObject_HasAttrString( cfg, INTEGRATOR_NAME ) == 1 ) {
+        PyObject* pint = PyObject_GetAttrString( cfg, INTEGRATOR_NAME ); // new
+        if ( pint ) {
+          parseIntegrator( pint );
+          Py_CLEAR( pint );
+        }
       }
 
-      PyObject* pgen = PyObject_GetAttrString( cfg, GENERATOR_NAME ); // new
-      if ( pgen ) {
-        parseGenerator( pgen );
-        Py_CLEAR( pgen );
+      if ( PyObject_HasAttrString( cfg, GENERATOR_NAME ) == 1 ) {
+        PyObject* pgen = PyObject_GetAttrString( cfg, GENERATOR_NAME ); // new
+        if ( pgen ) {
+          parseGenerator( pgen );
+          Py_CLEAR( pgen );
+        }
       }
 
-      PyObject* pout = PyObject_GetAttrString( cfg, OUTPUT_NAME ); // new
-      if ( pout ) {
-        parseOutputModule( pout );
-        Py_CLEAR( pout );
+      if ( PyObject_HasAttrString( cfg, OUTPUT_NAME ) == 1 ) {
+        PyObject* pout = PyObject_GetAttrString( cfg, OUTPUT_NAME ); // new
+        if ( pout ) {
+          if ( isVector<ParametersList>( pout ) )
+            parseOutputModules( pout );
+          else
+            parseOutputModule( pout );
+          Py_CLEAR( pout );
+        }
       }
 
       //--- finalisation
@@ -224,13 +246,25 @@ namespace cepgen
         params_.kinematics.incoming_beams.second.form_factors->setStructureFunctions( strfun::StructureFunctionsFactory::get().build( get<ParametersList>( psf ) ) );
       }
       //--- types of parton fluxes for kt-factorisation
-      std::vector<int> kt_fluxes;
-      fillParameter( kin, "ktFluxes", kt_fluxes );
-      if ( !kt_fluxes.empty() ) {
-        params_.kinematics.incoming_beams.first.kt_flux = (KTFlux)kt_fluxes.at( 0 );
-        params_.kinematics.incoming_beams.second.kt_flux = ( kt_fluxes.size() > 1 )
-          ? (KTFlux)kt_fluxes.at( 1 )
-          : (KTFlux)kt_fluxes.at( 0 );
+      PyObject* pktf = element( kin, "ktFluxes" ); // borrowed
+      if ( pktf ) {
+        if ( isVector<int>( pktf ) ) {
+          std::vector<int> kt_fluxes;
+          fillParameter( kin, "ktFluxes", kt_fluxes );
+          if ( !kt_fluxes.empty() ) {
+            params_.kinematics.incoming_beams.first.kt_flux = (KTFlux)kt_fluxes.at( 0 );
+            params_.kinematics.incoming_beams.second.kt_flux = ( kt_fluxes.size() > 1 )
+              ? (KTFlux)kt_fluxes.at( 1 )
+              : (KTFlux)kt_fluxes.at( 0 );
+          }
+        }
+        else if ( is<int>( pktf ) ) {
+          int kt_fluxes;
+          fillParameter( kin, "ktFluxes", kt_fluxes );
+          params_.kinematics.incoming_beams.first.kt_flux = params_.kinematics.incoming_beams.second.kt_flux = (KTFlux)kt_fluxes;
+        }
+        else
+          throwPythonError( "Unsupported format for the ktFluxes definition!" );
       }
       //--- specify where to look for the grid path for gluon emission
       std::string kmr_grid_path;
@@ -418,6 +452,16 @@ namespace cepgen
     }
 
     void
+    PythonHandler::parseOutputModules( PyObject* mod )
+    {
+      if ( !PyList_Check( mod ) )
+        throwPythonError( "Output modules definition object should be a list/Sequence!" );
+
+      for ( Py_ssize_t i = 0; i < PyList_Size( mod ); ++i )
+        parseOutputModule( PyList_GetItem( mod, i ) );
+    }
+
+    void
     PythonHandler::parseOutputModule( PyObject* pout )
     {
       if ( !is<ParametersList>( pout ) )
@@ -426,7 +470,7 @@ namespace cepgen
       PyObject* pname = element( pout, ParametersList::MODULE_NAME ); // borrowed
       if ( !pname )
         throwPythonError( "Output module name is required!" );
-      params_.setOutputModule( io::ExportModuleFactory::get().build( get<std::string>( pname ), get<ParametersList>( pout ) ) );
+      params_.addOutputModule( io::ExportModuleFactory::get().build( get<std::string>( pname ), get<ParametersList>( pout ) ) );
     }
 
     void

@@ -95,14 +95,16 @@ namespace cepgen
         switch ( type() ) {
           case Type::warning: return "\033[34;1mWarning\033[0m";
           case Type::info: return "\033[32;1mInfo.\033[0m";
-          case Type::debug: return "\033[33;1mDebug\033[0m";
-          case Type::error: return "\033[31;1mError\033[0m";
-          case Type::fatal: return "\033[31;1mFatal\033[0m";
+          case Type::debug: return "\033[33;1m Debug \033[0m";
+          case Type::error: return "\033[31;1m Error \033[0m";
+          case Type::fatal: return "\033[31;1m Fatal \033[0m";
           case Type::undefined: default: return "\33[7;1mUndefined\033[0m";
         }
       }
 
       inline void dump( std::ostream& os = *utils::Logger::get().output ) const override {
+        if ( !utils::Logger::get().output )
+          return;
         os << fullMessage() << std::endl;
       }
       /// Extract a one-line summary of the exception
@@ -135,15 +137,15 @@ namespace cepgen
             return message_.str();
           default: {
             std::ostringstream os;
-            os << "================================== Exception ========================= " << now()
-               << "\n Class:       " << typeString() << std::endl;
+            os << "=============================== " << typeString() << " =============================== "
+               << now() << std::endl;
             if ( !from_.empty() )
               os << " Raised by: " << from_ << "\n"
                  << " " << message_.str() << std::endl;
             if ( errorNumber() != 0 )
-              os << "-------------------------------------------------------------------------------"
+              os << "--------------------------------------------------------------------------------"
                  << "\n Error #" << error_num_ << std::endl;
-            os << "===============================================================================";
+            os << "================================================================================";
             return os.str();
           }
         }
@@ -174,29 +176,35 @@ namespace cepgen
   };
 }
 
+#ifdef _WIN32
+# define __FUNC__ __FUNCSIG__
+#else
+# define __FUNC__ __PRETTY_FUNCTION__
+#endif
+
 #define CG_LOG( mod ) \
   ( !CG_LOG_MATCH( mod, information ) ) \
   ? cepgen::NullStream() \
-  : cepgen::LoggedException( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::verbatim )
+  : cepgen::LoggedException( __FUNC__, mod, cepgen::Exception::Type::verbatim )
 #define CG_INFO( mod ) \
   ( !CG_LOG_MATCH( mod, information ) ) \
   ? cepgen::NullStream() \
-  : cepgen::LoggedException( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::info )
+  : cepgen::LoggedException( __FUNC__, mod, cepgen::Exception::Type::info )
 #define CG_DEBUG( mod ) \
   ( !CG_LOG_MATCH( mod, debug ) ) \
   ? cepgen::NullStream() \
-  : cepgen::LoggedException( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::debug )
+  : cepgen::LoggedException( __FUNC__, mod, cepgen::Exception::Type::debug )
 #define CG_DEBUG_LOOP( mod ) \
   ( !CG_LOG_MATCH( mod, debugInsideLoop ) ) \
   ? cepgen::NullStream() \
-  : cepgen::LoggedException( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::debug )
+  : cepgen::LoggedException( __FUNC__, mod, cepgen::Exception::Type::debug )
 #define CG_WARNING( mod ) \
   ( !CG_LOG_MATCH( mod, warning ) ) \
   ? cepgen::NullStream() \
-  : cepgen::LoggedException( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::warning )
+  : cepgen::LoggedException( __FUNC__, mod, cepgen::Exception::Type::warning )
 #define CG_ERROR( mod ) \
-  cepgen::LoggedException( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::error )
+  cepgen::LoggedException( __FUNC__, mod, cepgen::Exception::Type::error )
 #define CG_FATAL( mod ) \
-  cepgen::LoggedException( __PRETTY_FUNCTION__, mod, cepgen::Exception::Type::fatal )
+  cepgen::LoggedException( __FUNC__, mod, cepgen::Exception::Type::fatal )
 
 #endif

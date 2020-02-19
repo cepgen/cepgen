@@ -81,7 +81,7 @@ namespace cepgen
                 out[i] = 0.;
                 CG_WARNING( "GridHandler" )
                   << "Failed to evaluate the grid value (N=" << i << ") "
-                  << "for x = " << in_coords.at( 0 ) << " / y = " << in_coords.at( 1 ) << ". "
+                  << "for x = " << x << " / y = " << y << ". "
                   << "GSL error: " << gsl_strerror( res );
               }
             }

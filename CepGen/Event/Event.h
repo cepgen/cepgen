@@ -27,6 +27,8 @@ namespace cepgen
       /// Compress the event record
       Event compress() const;
 
+      typedef std::function<void( const Event&, unsigned long long )> callback;
+
       friend std::ostream& operator<<( std::ostream&, const Event& );
       /// Dump all the known information on every Particle object contained in this Event container in the output stream
       void dump() const;
@@ -116,8 +118,6 @@ namespace cepgen
       /// Typical event indices structure
       struct NumParticles
       {
-        NumParticles();
-        NumParticles( const NumParticles& np );
         size_t cs; ///< Index of the first central system particle
         size_t op1; ///< Index of the first positive-z outgoing beam state
         size_t op2; ///< Index of the first negative-z outgoing beam state
@@ -125,7 +125,6 @@ namespace cepgen
       /// Is the event "compressed"?
       bool compressed_;
   };
-  typedef std::unique_ptr<Event> EventPtr;
 }
 
 #endif

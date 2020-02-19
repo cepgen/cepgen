@@ -1,5 +1,6 @@
 #include "CepGen/Processes/Process.h"
 
+#include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
@@ -39,23 +40,6 @@ namespace cepgen
     {
       if ( proc.event_ )
         event_.reset( new Event( *proc.event_.get() ) );
-    }
-
-    Process&
-    Process::operator=( const Process& proc )
-    {
-      params_ = proc.params_;
-      name_ = proc.name_; description_ = proc.description_;
-      first_run = proc.first_run;
-      base_jacobian_ = proc.base_jacobian_;
-      s_ = proc.s_; sqs_ = proc.sqs_;
-      mA2_ = proc.mA2_; mB2_ = proc.mB2_;
-      mX2_ = proc.mX2_; mY2_ = proc.mY2_;
-      kin_ = proc.kin_;
-      if ( proc.event_ )
-        event_.reset( new Event( *proc.event_.get() ) );
-      is_point_set_ = false;
-      return *this;
     }
 
     void
@@ -269,13 +253,29 @@ namespace cepgen
       mapped_variables_.clear();
 
       //--- define incoming system
-      const HeavyIon hi1( kin_.incoming_beams.first.pdg ), hi2( kin_.incoming_beams.second.pdg );
-      const double m1 = hi1 ? HeavyIon::mass( hi1 ) : PDG::get().mass( kin_.incoming_beams.first.pdg );
-      const double m2 = hi2 ? HeavyIon::mass( hi2 ) : PDG::get().mass( kin_.incoming_beams.second.pdg );
       // at some point introduce non head-on colliding beams?
+
+      const HeavyIon hi1( kin_.incoming_beams.first.pdg );
+      const double m1 = hi1
+        ? HeavyIon::mass( hi1 )
+        : PDG::get().mass( kin_.incoming_beams.first.pdg );
       const auto p1 = Momentum::fromPxPyPzM( 0., 0., +kin_.incoming_beams.first .pz, m1 );
+
+      const HeavyIon hi2( kin_.incoming_beams.second.pdg );
+      const double m2 = hi2
+        ? HeavyIon::mass( hi2 )
+        : PDG::get().mass( kin_.incoming_beams.second.pdg );
       const auto p2 = Momentum::fromPxPyPzM( 0., 0., -kin_.incoming_beams.second.pz, m2 );
-      setIncomingKinematics( p1, p2 );
+
+      if ( event_ ) {
+        CG_DEBUG( "Process:incomingBeams" )
+          << "Incoming primary particles:\n"
+          << "  " << p1 << "\n"
+          << "  " << p2;
+
+        event_->oneWithRole( Particle::IncomingBeam1 ).setMomentum( p1 );
+        event_->oneWithRole( Particle::IncomingBeam2 ).setMomentum( p2 );
+      }
 
       s_ = ( p1+p2 ).mass2();
       sqs_ = sqrt( s_ );
@@ -372,21 +372,6 @@ namespace cepgen
       event_->freeze();
     }
 
-    void
-    Process::setIncomingKinematics( const Momentum& p1, const Momentum& p2 )
-    {
-      if ( !event_ )
-        return;
-
-      CG_DEBUG( "Process:incomingBeams" )
-        << "Incoming primary particles:\n\t"
-        << p1 << "\n\t"
-        << p2;
-
-      (*event_)[Particle::IncomingBeam1][0].setMomentum( p1 );
-      (*event_)[Particle::IncomingBeam2][0].setMomentum( p2 );
-    }
-
     bool
     Process::isKinematicsDefined()
     {
@@ -395,11 +380,13 @@ namespace cepgen
 
       // check the incoming state
       bool is_incoming_state_set =
-        ( !(*event_)[Particle::IncomingBeam1].empty() && !(*event_)[Particle::IncomingBeam2].empty() );
+        ( !(*event_)[Particle::IncomingBeam1].empty()
+       && !(*event_)[Particle::IncomingBeam2].empty() );
 
       // check the outgoing state
       bool is_outgoing_state_set =
-        ( !(*event_)[Particle::OutgoingBeam1].empty() && !(*event_)[Particle::OutgoingBeam2].empty()
+        ( !(*event_)[Particle::OutgoingBeam1].empty()
+       && !(*event_)[Particle::OutgoingBeam2].empty()
        && !(*event_)[Particle::CentralSystem].empty() );
 
       // combine both states

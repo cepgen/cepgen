@@ -128,11 +128,10 @@ namespace cepgen
     input_params_.integration().result = result;
     input_params_.integration().err_result = abserr;
 
-    if ( !input_params_.eventModifiersSequence().empty() )
-      for ( auto& mod : input_params_.eventModifiersSequence() )
-        mod->setCrossSection( result, abserr );
-    if ( input_params_.outputModule() )
-      input_params_.outputModule()->setCrossSection( result, abserr );
+    for ( auto& mod : input_params_.eventModifiersSequence() )
+      mod->setCrossSection( result, abserr );
+    for ( auto& mod : input_params_.outputModulesSequence() )
+      mod->setCrossSection( result, abserr );
 
     if ( res != GSL_SUCCESS )
       throw CG_FATAL( "Integrator:integrate" )
@@ -166,7 +165,7 @@ namespace cepgen
   //-----------------------------------------------------------------------------------------------
 
   void
-  Integrator::generateOne( std::function<void( const Event&, unsigned long )> callback )
+  Integrator::generateOne( Event::callback callback )
   {
     if ( !grid_->gen_prepared )
       computeGenerationParameters();
@@ -229,12 +228,12 @@ namespace cepgen
   }
 
   void
-  Integrator::generate( unsigned long num_events, std::function<void( const Event&, unsigned long )> callback )
+  Integrator::generate( unsigned long num_events, Event::callback callback )
   {
     if ( num_events < 1 )
       num_events = input_params_.generation().maxgen;
-    if ( input_params_.outputModule() )
-      input_params_.outputModule()->initialise( input_params_ );
+    for ( auto& mod : input_params_.outputModulesSequence() )
+      mod->initialise( input_params_ );
     try {
       while ( input_params_.numGeneratedEvents() < num_events )
         generateOne( callback );
@@ -291,7 +290,7 @@ namespace cepgen
   }
 
   bool
-  Integrator::storeEvent( const std::vector<double>& x, std::function<void( const Event&, unsigned long )> callback )
+  Integrator::storeEvent( const std::vector<double>& x, Event::callback callback )
   {
     //--- start by computing the matrix element for that point
     const double weight = eval( x );
@@ -300,18 +299,18 @@ namespace cepgen
     if ( weight <= 0. )
       return false;
 
-    {
-      if ( input_params_.numGeneratedEvents() % input_params_.generation().gen_print_every == 0 ) {
+    const auto ngen = input_params_.numGeneratedEvents();
+    if ( input_params_.process().hasEvent() ) {
+      auto& event = input_params_.process().event();
+      if ( ( ngen+1 ) % input_params_.generation().gen_print_every == 0 )
         CG_INFO( "Integrator:store" )
-          << "Generated events: " << input_params_.numGeneratedEvents();
-        input_params_.process()->event().dump();
-      }
-      const auto& last_event = input_params_.process()->event();
+          << "Generated events: " << ngen+1 << "\n"
+          << event;
       if ( callback )
-        callback( last_event, input_params_.numGeneratedEvents() );
-      input_params_.addGenerationTime( last_event.time_total );
-      if ( input_params_.outputModule() )
-        *input_params_.outputModule() << last_event;
+        callback( event, ngen );
+      for ( auto& mod : input_params_.outputModulesSequence() )
+        *mod << event;
+      input_params_.addGenerationTime( event.time_total );
     }
     return true;
   }

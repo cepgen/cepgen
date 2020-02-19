@@ -125,12 +125,12 @@ namespace cepgen
     double
     PPtoFF::computeCentralMatrixElement() const
     {
-      double mat_el = prefactor_;
+      double mat_el = 0.;
       switch ( method_ ) {
         case Mode::onShell:
-          mat_el *= onShellME(); break;
+          mat_el = onShellME(); break;
         case Mode::offShell:
-          mat_el *= offShellME(); break;
+          mat_el = offShellME(); break;
         default:
           throw CG_FATAL( "PPtoFF" )
             << "Invalid ME calculation method (" << (int)method_ << ")!";
@@ -232,14 +232,16 @@ namespace cepgen
       //     for heavy flavours
       //=================================================================
 
-      const double amat2_1 = aux2_1*2.*z1/q2_.pt2();
-      const double amat2_2 = aux2_2*2.*z2/q1_.pt2();
+      // Marta's version
+      const double amat2_1 = aux2_1*2.*z1 / q2_.pt2();
+      const double amat2_2 = aux2_2*2.*z2 / q1_.pt2();
 
       //=================================================================
       //     symmetrization
       //=================================================================
 
-      double amat2 = 0.5*( p_mat1_*amat2_1+p_mat2_*amat2_2 ) * pow( x1*x2*s_, 2 );
+      double amat2 = 0.5 * prefactor_ * pow( x1*x2*s_, 2 )
+        * ( p_mat1_*amat2_1+p_mat2_*amat2_2 );
 
       const double tmax = pow( std::max( amt1_, amt2_ ), 2 );
       if ( gluon1_ )

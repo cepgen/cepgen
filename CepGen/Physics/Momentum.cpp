@@ -11,14 +11,14 @@ namespace cepgen
   {}
 
   Momentum::Momentum( double x, double y, double z, double t ) :
-    std::array<double,4>{ x, y, z, t }
+    std::array<double,4>{ { x, y, z, t } }
   {
     computeP();
   }
 
-  Momentum::Momentum( double* p ) :
-    std::array<double,4>{ *p }
+  Momentum::Momentum( double* p )
   {
+    std::copy( p, p+4, begin() );
     computeP();
   }
 
@@ -72,7 +72,7 @@ namespace cepgen
   Momentum&
   Momentum::operator+=( const Momentum& mom )
   {
-    (*this) += mom;
+    *this = *this + mom;
     return computeP();
   }
 
@@ -91,7 +91,7 @@ namespace cepgen
   Momentum&
   Momentum::operator-=( const Momentum& mom )
   {
-    (*this) -= mom;
+    *this = *this - mom;
     return computeP();
   }
 
@@ -120,7 +120,7 @@ namespace cepgen
   Momentum&
   Momentum::operator*=( double c )
   {
-    (*this) *= c;
+    *this = *this * c;
     return computeP();
   }
 
