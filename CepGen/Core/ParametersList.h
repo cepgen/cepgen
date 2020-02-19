@@ -2,7 +2,7 @@
 #define CepGen_Core_ParametersList_h
 
 #include "CepGen/Physics/Limits.h"
-#include "CepGen/Core/Hasher.h"
+#include "CepGen/Physics/ParticleProperties.h"
 
 #include <vector>
 #include <map>
@@ -27,14 +27,26 @@ namespace cepgen
       ~ParametersList() {} // required for unique_ptr initialisation! avoids cleaning all individual objects
       /// Check if a given parameter is handled in this list
       template<typename T> bool has( std::string key ) const;
+      /// Retrieve the module name if any
+      template<typename T> T name( const T& def = default_arg<T>::get() ) const {
+        if ( !has<T>( MODULE_NAME ) )
+          return def;
+        return get<T>( MODULE_NAME );
+      }
       /// Get a parameter value
       template<typename T> T get( std::string key, const T& def = default_arg<T>::get() ) const;
       /// Reference to a parameter value
       template<typename T> T& operator[]( std::string key );
       /// Set a parameter value
       template<typename T> ParametersList& set( std::string key, const T& value );
+      /// Set the module name
+      template<typename T> ParametersList& setName( const T& value ) {
+        return set<T>( MODULE_NAME, value );
+      }
       /// Concatenate two parameters containers
       ParametersList& operator+=( const ParametersList& oth );
+      /// Is the list empty?
+      bool empty() const;
 
       /// List of keys handled in this list of parameters
       std::vector<std::string> keys() const;
@@ -43,6 +55,7 @@ namespace cepgen
 
       /// Human-readable version of a parameters container
       friend std::ostream& operator<<( std::ostream& os, const ParametersList& );
+      static constexpr const char* MODULE_NAME = "mod_name";
 
     private:
       std::map<std::string,ParametersList> param_values_;
@@ -80,6 +93,13 @@ namespace cepgen
   template<> inline bool& ParametersList::operator[]<bool>( std::string key ) { return (bool&)operator[]<int>( key ); }
   /// Set a boolean parameter value
   template<> inline ParametersList& ParametersList::set<bool>( std::string key, const bool& value ) { return set<int>( key, static_cast<bool>( value ) ); }
+
+  /// Check if a boolean parameter is handled
+  template<> inline bool ParametersList::has<ParticleProperties>( std::string key ) const { return param_values_.count( key ) != 0; }
+  /// Get a boolean parameter value
+  template<> ParticleProperties ParametersList::get<ParticleProperties>( std::string key, const ParticleProperties& def ) const;
+  /// Set a boolean parameter value
+  template<> ParametersList& ParametersList::set<ParticleProperties>( std::string key, const ParticleProperties& value );
 
   /// Check if a double floating point parameter is handled
   template<> inline bool ParametersList::has<double>( std::string key ) const { return dbl_values_.count( key ) != 0; }

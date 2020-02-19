@@ -1,3 +1,10 @@
-[![build status](https://gitlab.cern.ch/lforthom/cepgen/badges/master/build.svg)](https://gitlab.cern.ch/lforthom/cepgen/commits/master) [![coverage report](https://gitlab.cern.ch/lforthom/cepgen/badges/master/coverage.svg)](https://gitlab.cern.ch/lforthom/cepgen/commits/master)
+CepGen
+======
+A generic central exclusive processes event generator
+-----------------------------------------------------
 
-* See [release notes](release-notes.md)
+The complete manual (including instructions for installation) may be found at <https://cepgen.hepforge.org>.
+
+You may find a reference paper at: [arXiv:1808.06059 [hep-ph]](https://arxiv.org/abs/1808.06059).
+
+See CHANGELOG (also available [here](https://cepgen.hepforge.org/changelog.html)) for a complete list of new features and fixes introduced in each version.

@@ -1,14 +1,33 @@
-#include "CepGen/StructureFunctions/BlockDurandHa.h"
-
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Core/Exception.h"
 
-#include <cmath>
-#include <cassert>
+#include <math.h>
+#include <assert.h>
+#include <vector>
 
 namespace cepgen
 {
   namespace strfun
   {
+    /// \f$F_2\f$ parameterisation from Block, Durand, and Ha \cite Block:2014kza
+    class BlockDurandHa : public Parameterisation
+    {
+      public:
+        explicit BlockDurandHa( const ParametersList& params = ParametersList() );
+        BlockDurandHa& operator()( double xbj, double q2 ) override;
+
+      private:
+        std::vector<double> a_, b_, c_;
+        double n_;
+        /// Effective mass spread parameter
+        double lambda_;
+        /// Asymptotic log-behaviour transition scale factor
+        double mu2_;
+        /// Squared effective mass (~VM mass)
+        double m2_;
+    };
+
     BlockDurandHa::BlockDurandHa( const ParametersList& params ) :
       Parameterisation( params ),
       a_( params.get<std::vector<double> >( "a", { 8.205e-4, -5.148e-2, -4.725e-3 } ) ),
@@ -52,3 +71,5 @@ namespace cepgen
     }
   }
 }
+
+REGISTER_STRFUN( BlockDurandHa, strfun::BlockDurandHa )

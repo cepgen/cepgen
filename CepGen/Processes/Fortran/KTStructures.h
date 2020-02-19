@@ -18,9 +18,7 @@ namespace cepgen
       int icontri; ///< Kinematics mode
       int iflux1; ///< Type of \f$k_{\rm T}\f$-factorised flux for first incoming parton
       int iflux2; ///< Type of \f$k_{\rm T}\f$-factorised flux for second incoming parton
-      int imethod; ///< Computation method for matrix element
       int sfmod; ///< Structure functions modelling
-      int pdg_l; ///< Central system PDG id
       int a_nuc1; ///< First beam mass number
       int z_nuc1; ///< First beam atomic number
       int a_nuc2; ///< Second beam mass number
@@ -67,7 +65,7 @@ namespace cepgen
       int nout; ///< Number of particles in central system
       int pdg[10]; ///< PDG ids of all particles in central system
       int idum; ///< Padding
-      double pc[4][10]; ///< 4-momenta of all particles in central system
+      double pc[10][4]; ///< 4-momenta of all particles in central system
       double px[4]; ///< 4-momentum of first outgoing proton state
       double py[4]; ///< 4-momentum of second outgoing proton state
     };

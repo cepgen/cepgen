@@ -1,7 +1,7 @@
 #ifndef CepGen_Physics_GluonGrid_h
 #define CepGen_Physics_GluonGrid_h
 
-#include "CepGen/IO/GridHandler.h"
+#include "CepGen/Utils/GridHandler.h"
 
 #define DEFAULT_KMR_GRID_PATH "gluon_mmht2014nlo_Watt.dat"
 

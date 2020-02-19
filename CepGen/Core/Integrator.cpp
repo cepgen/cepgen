@@ -1,12 +1,18 @@
 #include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/GridParameters.h"
-#include "CepGen/Core/utils.h"
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Processes/Process.h"
+
+#include "CepGen/Modules/EventModifier.h"
+#include "CepGen/Modules/ExportModule.h"
+
 #include "CepGen/Parameters.h"
-#include "CepGen/Processes/GenericProcess.h"
-#include "CepGen/Hadronisers/GenericHadroniser.h"
+
 #include "CepGen/Event/Event.h"
+
+#include "CepGen/Utils/String.h"
+#include "CepGen/Utils/ProgressBar.h"
 
 #include <thread>
 #include <math.h>
@@ -60,7 +66,7 @@ namespace cepgen
   {}
 
   //-----------------------------------------------------------------------------------------------
-  // cross section computation part
+  // integration part
   //-----------------------------------------------------------------------------------------------
 
   void
@@ -95,12 +101,12 @@ namespace cepgen
             &result, &abserr );
           CG_LOG( "Integrator:integrate" )
             << "\t>> at call " << ( ++it_chisq ) << ": "
-            << Form( "average = %10.6f   "
-                     "sigma = %10.6f   chi2 = %4.3f.",
-                     result, abserr,
-                     gsl_monte_vegas_chisq( veg_state_.get() ) );
+            << utils::format( "average = %10.6f   "
+                              "sigma = %10.6f   chi2 = %4.3f.",
+                              result, abserr,
+                              gsl_monte_vegas_chisq( veg_state_.get() ) );
         } while ( fabs( gsl_monte_vegas_chisq( veg_state_.get() )-1. )
-                > input_params_.integration().vegas_chisq_cut-1. );
+                  > input_params_.integration().vegas_chisq_cut-1. );
         CG_DEBUG( "Integrator:integrate" )
           << "Vegas grid information:\n\t"
           << "ran for " << veg_state_->dim << " dimensions, and generated " << veg_state_->bins_max << " bins.\n\t"
@@ -122,12 +128,14 @@ namespace cepgen
     input_params_.integration().result = result;
     input_params_.integration().err_result = abserr;
 
-    if ( input_params_.hadroniser() )
-      input_params_.hadroniser()->setCrossSection( result, abserr );
+    for ( auto& mod : input_params_.eventModifiersSequence() )
+      mod->setCrossSection( result, abserr );
+    for ( auto& mod : input_params_.outputModulesSequence() )
+      mod->setCrossSection( result, abserr );
 
     if ( res != GSL_SUCCESS )
       throw CG_FATAL( "Integrator:integrate" )
-        << "Error while computing the cross-section!\n\t"
+        << "Error while performing the integration!\n\t"
         << "GSL error: " << gsl_strerror( res ) << ".";
   }
 
@@ -157,12 +165,12 @@ namespace cepgen
   //-----------------------------------------------------------------------------------------------
 
   void
-  Integrator::generateOne( std::function<void( const Event&, unsigned long )> callback )
+  Integrator::generateOne( Event::callback callback )
   {
     if ( !grid_->gen_prepared )
       computeGenerationParameters();
 
-    std::vector<double> xtmp;
+    std::vector<double> xtmp( function_->dim );
 
     //--- correction cycles
 
@@ -186,7 +194,7 @@ namespace cepgen
         // ...
         ps_bin_ = uniform() * grid_->size();
         y = uniform() * grid_->globalMax();
-        grid_->num[ps_bin_] += 1;
+        grid_->setTrial( ps_bin_ );
         if ( y <= grid_->maxValue( ps_bin_ ) )
           break;
       }
@@ -208,9 +216,9 @@ namespace cepgen
       grid_->f_max_old = grid_->maxValue( ps_bin_ );
       grid_->f_max_diff = weight-grid_->f_max_old;
       grid_->setValue( ps_bin_, weight );
-      grid_->correc = ( grid_->num[ps_bin_]-1. ) * grid_->f_max_diff / grid_->globalMax() - 1.;
+      grid_->correc = ( grid_->numPoints( ps_bin_ )-1. ) * grid_->f_max_diff / grid_->globalMax() - 1.;
 
-      CG_DEBUG("Integrator::generateOne")
+      CG_DEBUG("Integrator:generateOne")
         << "Correction " << grid_->correc << " will be applied for phase space bin " << ps_bin_ << ".";
     }
 
@@ -220,14 +228,16 @@ namespace cepgen
   }
 
   void
-  Integrator::generate( unsigned long num_events, std::function<void( const Event&, unsigned long )> callback )
+  Integrator::generate( unsigned long num_events, Event::callback callback )
   {
     if ( num_events < 1 )
       num_events = input_params_.generation().maxgen;
+    for ( auto& mod : input_params_.outputModulesSequence() )
+      mod->initialise( input_params_ );
     try {
       while ( input_params_.numGeneratedEvents() < num_events )
         generateOne( callback );
-    } catch ( const Exception& e ) { return; }
+    } catch ( const Exception& ) { return; }
   }
 
   bool
@@ -267,7 +277,7 @@ namespace cepgen
     if ( grid_->f_max2 > grid_->maxValue( ps_bin_ ) ) {
       grid_->f_max_old = grid_->maxValue( ps_bin_ );
       grid_->f_max_diff = grid_->f_max2-grid_->f_max_old;
-      grid_->correc = ( grid_->num[ps_bin_]-1. ) * grid_->f_max_diff / grid_->globalMax();
+      grid_->correc = ( grid_->numPoints( ps_bin_ )-1. ) * grid_->f_max_diff / grid_->globalMax();
       if ( grid_->f_max2 >= grid_->globalMax() )
         grid_->correc *= grid_->f_max2 / grid_->globalMax();
       grid_->setValue( ps_bin_, grid_->f_max2 );
@@ -280,7 +290,7 @@ namespace cepgen
   }
 
   bool
-  Integrator::storeEvent( const std::vector<double>& x, std::function<void( const Event&, unsigned long )> callback )
+  Integrator::storeEvent( const std::vector<double>& x, Event::callback callback )
   {
     //--- start by computing the matrix element for that point
     const double weight = eval( x );
@@ -289,16 +299,18 @@ namespace cepgen
     if ( weight <= 0. )
       return false;
 
-    {
-      if ( input_params_.numGeneratedEvents() % input_params_.generation().gen_print_every == 0 ) {
+    const auto ngen = input_params_.numGeneratedEvents();
+    if ( input_params_.process().hasEvent() ) {
+      auto& event = input_params_.process().event();
+      if ( ( ngen+1 ) % input_params_.generation().gen_print_every == 0 )
         CG_INFO( "Integrator:store" )
-          << "Generated events: " << input_params_.numGeneratedEvents();
-        input_params_.process()->last_event->dump();
-      }
-      const Event& last_event = *input_params_.process()->last_event;
+          << "Generated events: " << ngen+1 << "\n"
+          << event;
       if ( callback )
-        callback( last_event, input_params_.numGeneratedEvents() );
-      input_params_.addGenerationTime( last_event.time_total );
+        callback( event, ngen );
+      for ( auto& mod : input_params_.outputModulesSequence() )
+        *mod << event;
+      input_params_.addGenerationTime( event.time_total );
     }
     return true;
   }
@@ -330,33 +342,38 @@ namespace cepgen
       << "for the generation of unweighted events.";
 
     const double inv_num_points = 1./input_params_.generation().num_points;
-    std::vector<double> x( function_->dim, 0. );
-    std::vector<unsigned short> n( function_->dim, 0 );;
+    std::vector<double> point_coord( function_->dim, 0. );
+    if ( point_coord.size() < grid_->n( 0 ).size() )
+      throw CG_FATAL( "GridParameters:shoot" )
+        << "Coordinates vector multiplicity is insufficient!";
 
     // ...
     double sum = 0., sum2 = 0., sum2p = 0.;
+
+    utils::ProgressBar prog_bar( grid_->size(), 5 );
 
     //--- main loop
     for ( unsigned int i = 0; i < grid_->size(); ++i ) {
       double fsum = 0., fsum2 = 0.;
       for ( unsigned int j = 0; j < input_params_.generation().num_points; ++j ) {
-        grid_->shoot( rng_.get(), i, x );
-        const double weight = eval( x );
+        grid_->shoot( rng_.get(), i, point_coord );
+        const double weight = eval( point_coord );
         grid_->setValue( i, weight );
         fsum += weight;
         fsum2 += weight*weight;
       }
-      const double av = fsum*inv_num_points, av2 = fsum2*inv_num_points, sig2 = av2-av*av;
+      const double av = fsum*inv_num_points, av2 = fsum2*inv_num_points;
+      const double sig2 = av2-av*av;
       sum += av;
       sum2 += av2;
       sum2p += sig2;
 
       // per-bin debugging loop
-      if ( CG_EXCEPT_MATCH( "Integrator:setGen", debugInsideLoop ) ) {
+      if ( CG_LOG_MATCH( "Integrator:setGen", debugInsideLoop ) ) {
         const double sig = sqrt( sig2 );
         const double eff = ( grid_->maxValue( i ) != 0. )
-          ? grid_->maxValue( i )/av
-          : 1.e4;
+          ? av/grid_->maxValue( i )
+          : 0.;
         CG_DEBUG_LOOP( "Integrator:setGen" )
           << "n-vector for bin " << i << ": " << utils::repr( grid_->n( i ) ) << "\n\t"
           << "av   = " << av << "\n\t"
@@ -364,6 +381,7 @@ namespace cepgen
           << "fmax = " << grid_->maxValue( i ) << "\n\t"
           << "eff  = " << eff;
       }
+      prog_bar.update( i+1 );
     } // end of main loop
 
     const double inv_max = 1./grid_->size();

@@ -1,24 +1,28 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/HeavyIon.h"
+
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
+#include "CepGen/Utils/String.h"
 
 #include <algorithm>
 #include <math.h>
 
 namespace cepgen
 {
-  Event::Event() :
+  Event::Event( bool compressed ) :
     num_hadronisation_trials( 0 ),
-    time_generation( -1. ), time_total( -1. )
+    time_generation( -1. ), time_total( -1. ), weight( 0. ),
+    compressed_( compressed )
   {}
 
   Event::Event( const Event& rhs ) :
     num_hadronisation_trials( rhs.num_hadronisation_trials ),
     time_generation( rhs.time_generation ), time_total( rhs.time_total ),
+    weight( rhs.weight ),
     particles_( rhs.particles_ ),
-    evtcontent_( rhs.evtcontent_ )
+    evtcontent_( rhs.evtcontent_ ),
+    compressed_( rhs.compressed_ )
   {}
 
   void
@@ -27,6 +31,7 @@ namespace cepgen
     particles_.clear();
     time_generation = -1.;
     time_total = -1.;
+    weight = 0.;
   }
 
   void
@@ -53,10 +58,59 @@ namespace cepgen
       particles_[Particle::OutgoingBeam2].resize( evtcontent_.op2 );
   }
 
+  bool
+  Event::compressed() const
+  {
+    return compressed_;
+  }
+
+  Event
+  Event::compress() const
+  {
+    if ( compressed_ )
+      return *this;
+    Event out( /*compressed=*/true );
+    size_t i = 0;
+    //--- add all necessary particles
+    for ( const auto& role : { Particle::IncomingBeam1, Particle::IncomingBeam2,
+                               Particle::OutgoingBeam1, Particle::OutgoingBeam2,
+                               Particle::Parton1, Particle::Parton2,
+                               Particle::CentralSystem } ) {
+      for ( const auto& old_part : operator[]( role ) ) {
+        auto& new_part = out.addParticle( role );
+        new_part = old_part; // copy all attributes
+        new_part.setId( i++ );
+        new_part.clearMothers();
+        new_part.clearDaughters();
+      }
+    }
+    //--- fix parentage for outgoing beam particles
+    if ( out[Particle::OutgoingBeam1].size() > 1
+      || out[Particle::OutgoingBeam2].size() > 1 )
+      CG_WARNING( "Event:compress" )
+        << "Event compression not designed for already fragmented beam remnants!\n\t"
+        << "Particles parentage is not guaranteed to be conserved.";
+    for ( auto& part : out[Particle::OutgoingBeam1] )
+      part.addMother( out[Particle::IncomingBeam1][0] );
+    for ( auto& part : out[Particle::OutgoingBeam2] )
+      part.addMother( out[Particle::IncomingBeam2][0] );
+    //--- fix parentage for incoming partons
+    for ( auto& part : out[Particle::Parton1] )
+      part.addMother( out[Particle::IncomingBeam1][0] );
+    for ( auto& part : out[Particle::Parton2] )
+      part.addMother( out[Particle::IncomingBeam2][0] );
+    //--- fix parentage for central system
+    for ( auto& part : out[Particle::CentralSystem] ) {
+      part.addMother( out[Particle::Parton1][0] );
+      part.addMother( out[Particle::Parton2][0] );
+    }
+    return out;
+  }
+
   double
   Event::cmEnergy() const
   {
-    return CMEnergy( getOneByRole( Particle::IncomingBeam1 ), getOneByRole( Particle::IncomingBeam2 ) );
+    return CMEnergy( oneWithRole( Particle::IncomingBeam1 ), oneWithRole( Particle::IncomingBeam2 ) );
   }
 
   Particles&
@@ -90,7 +144,7 @@ namespace cepgen
   }
 
   Particle&
-  Event::getOneByRole( Particle::Role role )
+  Event::oneWithRole( Particle::Role role )
   {
     //--- retrieve the first particle of a given role
     Particles& parts_by_role = operator[]( role );
@@ -103,7 +157,7 @@ namespace cepgen
   }
 
   const Particle&
-  Event::getOneByRole( Particle::Role role ) const
+  Event::oneWithRole( Particle::Role role ) const
   {
     //--- retrieve the first particle of a given role
     const Particles& parts_by_role = operator[]( role );
@@ -138,7 +192,7 @@ namespace cepgen
   }
 
   Particles
-  Event::getByIds( const ParticlesIds& ids ) const
+  Event::operator[]( const ParticlesIds& ids ) const
   {
     Particles out;
     for ( const auto& id : ids )
@@ -148,15 +202,15 @@ namespace cepgen
   }
 
   Particles
-  Event::mothers( const Particle& part )
+  Event::mothers( const Particle& part ) const
   {
-    return getByIds( part.mothers() );
+    return operator[]( part.mothers() );
   }
 
   Particles
-  Event::daughters( const Particle& part )
+  Event::daughters( const Particle& part ) const
   {
-    return getByIds( part.daughters() );
+    return operator[]( part.daughters() );
   }
 
   ParticleRoles
@@ -179,10 +233,10 @@ namespace cepgen
     Particles& part_with_same_role = operator[]( part.role() );
 
     //--- specify the id
-    if ( part_with_same_role.empty() && part.id() < 0 ) part.setId( numParticles() ); // set the id if previously invalid/inexistent
+    if ( part_with_same_role.empty() && part.id() < 0 ) part.setId( size() ); // set the id if previously invalid/inexistent
     if ( !part_with_same_role.empty() ) {
       if ( replace ) part.setId( part_with_same_role[0].id() ); // set the previous id if replacing a particle
-      else part.setId( numParticles() );
+      else part.setId( size() );
     }
 
     //--- add the particle to the collection
@@ -200,7 +254,7 @@ namespace cepgen
   }
 
   size_t
-  Event::numParticles() const
+  Event::size() const
   {
     size_t out = 0;
     for ( const auto& role_part : particles_ )
@@ -240,7 +294,7 @@ namespace cepgen
       ParticlesIds daughters = part.daughters();
       if ( daughters.empty() )
         continue;
-      Particle::Momentum ptot;
+      Momentum ptot;
       for ( const auto& daugh : daughters ) {
         const Particle& d = operator[]( daugh );
         const ParticlesIds mothers = d.mothers();
@@ -260,36 +314,61 @@ namespace cepgen
   }
 
   void
-  Event::dump( bool stable ) const
+  Event::dump() const
   {
-    const Particles parts = ( stable ) ? stableParticles() : particles();
+    CG_INFO( "Event" ) << *this;
+  }
 
+  std::ostream&
+  operator<<( std::ostream& out, const Event& ev )
+  {
+    const Particles parts = ev.particles();
     std::ostringstream os;
 
-    Particle::Momentum p_total;
+    Momentum p_total;
     for ( const auto& part : parts ) {
       const ParticlesIds mothers = part.mothers();
       {
         std::ostringstream oss_pdg;
         if ( part.pdgId() == PDG::invalid && !mothers.empty() ) {
+          //--- if particles compound
+          std::string delim;
           for ( unsigned short i = 0; i < mothers.size(); ++i )
-            oss_pdg << ( i > 0 ? "/" : "" ) << operator[]( *std::next( mothers.begin(), i ) ).pdgId();
-          os << Form( "\n %2d\t\t%-10s", part.id(), oss_pdg.str().c_str() );
+            try {
+              oss_pdg << delim
+                << PDG::get().name( ev[*std::next( mothers.begin(), i )].pdgId() ), delim = "/";
+            } catch ( const Exception& ) {
+              oss_pdg << delim
+                << ev[*std::next( mothers.begin(), i )].pdgId(), delim = "/";
+            }
+          os << utils::format( "\n %2d\t\t   %-7s", part.id(), oss_pdg.str().c_str() );
         }
         else {
+          //--- if single particle/HI
           if ( (HeavyIon)part.pdgId() )
             oss_pdg << (HeavyIon)part.pdgId();
           else
-            oss_pdg << part.pdgId();
-          os << Form( "\n %2d\t%-+7d %-10s", part.id(), part.integerPdgId(), oss_pdg.str().c_str() );
+            try {
+              oss_pdg << PDG::get().name( part.pdgId() );
+            } catch ( const Exception& ) {
+              oss_pdg << "?";
+            }
+          os << utils::format( "\n %2d\t%-+10d %-7s", part.id(), part.integerPdgId(), oss_pdg.str().c_str() );
         }
       }
       os << "\t";
-      if ( part.charge() != 999. )
-        os << Form( "%-.2f\t", part.charge() );
+      if ( part.charge() != (int)part.charge() ) {
+        if ( part.charge()*2 == (int)( part.charge()*2 ) )
+          os << utils::format( "%-d/2", (int)( part.charge()*2 ) );
+        else if ( part.charge()*3 == (int)( part.charge()*3 ) )
+          os << utils::format( "%-d/3", (int)( part.charge()*3 ) );
+        else
+          os << utils::format( "%-.2f", part.charge() );
+      }
       else
-        os << "\t";
-      { std::ostringstream oss; oss << part.role(); os << Form( "%-8s %6d\t", oss.str().c_str(), part.status() ); }
+        os << utils::format( "%-g", part.charge() );
+      os << "\t";
+      { std::ostringstream oss; oss << part.role(); os << utils::format( "%-8s %6d\t", oss.str().c_str(), part.status() ); }
       if ( !mothers.empty() ) {
         std::ostringstream oss;
         unsigned short i = 0;
@@ -297,11 +376,11 @@ namespace cepgen
           oss << ( i > 0 ? "+" : "" ) << moth;
           ++i;
         }
-        os << Form( "%6s ", oss.str().c_str() );
+        os << utils::format( "%6s ", oss.str().c_str() );
       }
       else os << "       ";
-      const Particle::Momentum mom = part.momentum();
-      os << Form( "% 9.6e % 9.6e % 9.6e % 9.6e % 12.5f", mom.px(), mom.py(), mom.pz(), part.energy(), part.mass() );
+      const auto& mom = part.momentum();
+      os << utils::format( "% 9.6e % 9.6e % 9.6e % 9.6e % 12.5f", mom.px(), mom.py(), mom.pz(), part.energy(), part.mass() );
 
       // discard non-primary, decayed particles
       if ( part.status() >= Particle::Status::Undefined ) {
@@ -314,23 +393,13 @@ namespace cepgen
     //--- set a threshold to the computation precision
     p_total.truncate();
     //
-    CG_INFO( "Event" )
-     << Form( "Dump of event content:\n"
-              " Id\tPDG id\tName\t\tCharge\tRole\t Status\tMother\tpx            py            pz            E      \t M         \n"
-              " --\t------\t----\t\t------\t----\t ------\t------\t----GeV/c---  ----GeV/c---  ----GeV/c---  ----GeV/c---\t --GeV/c²--"
-              "%s\n"
-              " ----------------------------------------------------------------------------------------------------------------------------------\n"
-              "\t\t\t\t\t\t\tBalance% 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), p_total.px(), p_total.py(), p_total.pz(), p_total.energy() );
+    return out << utils::format(
+       "Event content:\n"
+       " Id\tPDG id\t   Name\t\tCharge\tRole\t Status\tMother\tpx            py            pz            E      \t M         \n"
+       " --\t------\t   ----\t\t------\t----\t ------\t------\t----GeV/c---  ----GeV/c---  ----GeV/c---  ----GeV/c---\t --GeV/c²--"
+       "%s\n"
+       " ----------------------------------------------------------------------------------------------------------------------------------\n"
+       "\t\t\t\t\t\t\tBalance% 9.6e % 9.6e % 9.6e % 9.6e", os.str().c_str(), p_total.px(), p_total.py(), p_total.pz(), p_total.energy() );
   }
-
-  //------------------------------------------------------------------------------------------------
-
-  Event::NumParticles::NumParticles() :
-    cs( 0 ), op1( 0 ), op2( 0 )
-  {}
-
-  Event::NumParticles::NumParticles( const NumParticles& np ) :
-    cs( np.cs ), op1( np.op1 ), op2( np.op2 )
-  {}
 }
 

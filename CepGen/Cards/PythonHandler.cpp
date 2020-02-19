@@ -1,57 +1,91 @@
 #include "CepGen/Cards/PythonHandler.h"
+
+#include "CepGen/Modules/CardsHandlerFactory.h"
+
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/EventModifier.h"
+
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Modules/ExportModule.h"
+
+#include "CepGen/Event/Event.h"
+
+#include "CepGen/Processes/Process.h"
+#include "CepGen/Modules/ProcessesFactory.h"
+
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+
 #include "CepGen/Core/Exception.h"
-
-#ifdef PYTHON
-
-#include "CepGen/Core/TamingFunction.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Integrator.h"
 
-#include "CepGen/Processes/ProcessesHandler.h"
-#include "CepGen/Hadronisers/HadronisersHandler.h"
-#include "CepGen/StructureFunctions/StructureFunctions.h"
-
+#include "CepGen/Physics/MCDFileParser.h"
+#include "CepGen/Physics/TamingFunction.h"
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/PDG.h"
 
 #include <algorithm>
 
 #if PY_MAJOR_VERSION < 3
-#  define PYTHON2
+# define PYTHON2
 #endif
 
 namespace cepgen
 {
   namespace card
   {
-    //----- specialization for CepGen input cards
-    PythonHandler::PythonHandler( const char* file )
+    PythonHandler::PythonHandler( const ParametersList& params ) :
+      filename_( params.get<std::string>( FILENAME_KEY ) )
     {
       setenv( "PYTHONPATH", ".:Cards:test:../Cards", 1 );
+      setenv( "PYTHONDONTWRITEBYTECODE", "1", 1 );
       CG_DEBUG( "PythonHandler" )
         << "Python PATH: " << getenv( "PYTHONPATH" ) << ".";
+      if ( !filename_.empty() )
+        parse( filename_ );
+    }
+
+    PythonHandler::PythonHandler( const std::string& file ) :
+      filename_( file )
+    {
+      setenv( "PYTHONPATH", ".:Cards:test:../Cards", 1 );
+      setenv( "PYTHONDONTWRITEBYTECODE", "1", 1 );
+      CG_DEBUG( "PythonHandler" )
+        << "Python PATH: " << getenv( "PYTHONPATH" ) << ".";
+      if ( !filename_.empty() )
+        parse( file );
+    }
+
+    Parameters&
+    PythonHandler::parse( const std::string& file )
+    {
       std::string filename = pythonPath( file );
       const size_t fn_len = filename.length()+1;
 
       //Py_DebugFlag = 1;
       //Py_VerboseFlag = 1;
 
+      { // scope of the filename definition
 #ifdef PYTHON2
-      char* sfilename = new char[fn_len];
-      snprintf( sfilename, fn_len, "%s", filename.c_str() );
+        char* sfilename = new char[fn_len];
+        snprintf( sfilename, fn_len, "%s", filename.c_str() );
 #else
-      wchar_t* sfilename = new wchar_t[fn_len];
-      swprintf( sfilename, fn_len, L"%s", filename.c_str() );
+        wchar_t* sfilename = new wchar_t[fn_len];
+        swprintf( sfilename, fn_len, L"%s", filename.c_str() );
 #endif
-      if ( sfilename )
+        if ( !sfilename )
+          throw CG_FATAL( "PythonHandler" )
+            << "Invalid filename provided to the Python cards parser!";
         Py_SetProgramName( sfilename );
+        delete [] sfilename;
+      }
 
       Py_InitializeEx( 1 );
 
-      if ( sfilename )
-        delete [] sfilename;
       if ( !Py_IsInitialized() )
-        throw CG_FATAL( "PythonHandler" ) << "Failed to initialise the Python cards parser!";
+        throw CG_FATAL( "PythonHandler" )
+          << "Failed to initialise the Python cards parser!";
 
       CG_DEBUG( "PythonHandler" )
         << "Initialised the Python cards parser\n\t"
@@ -60,25 +94,45 @@ namespace cepgen
 
       PyObject* cfg = PyImport_ImportModule( filename.c_str() ); // new
       if ( !cfg )
-        throwPythonError( Form( "Failed to parse the configuration card %s", file ) );
+        throwPythonError( "Failed to import the configuration card '"+file+"'" );
 
-      PyObject* process = PyObject_GetAttrString( cfg, PROCESS_NAME ); // new
-      if ( !process )
-        throwPythonError( Form( "Failed to extract a \"%s\" keyword from the configuration card %s", PROCESS_NAME, file ) );
+      //--- general particles definition
+      if ( PyObject_HasAttrString( cfg, MCD_NAME ) == 1 ) {
+        PyObject* ppdg = PyObject_GetAttrString( cfg, MCD_NAME ); // new
+        if ( ppdg ) {
+          pdg::MCDFileParser::parse( get<std::string>( ppdg ).c_str() );
+          Py_CLEAR( ppdg );
+        }
+      }
+
+      //--- additional particles definition
+      if ( PyObject_HasAttrString( cfg, PDGLIST_NAME ) == 1 ) {
+        PyObject* pextp = PyObject_GetAttrString( cfg, PDGLIST_NAME ); // new
+        if ( pextp ) {
+          parseExtraParticles( pextp );
+          Py_CLEAR( pextp );
+        }
+      }
+
+      //--- process definition
+      PyObject* process = nullptr;
+      if ( PyObject_HasAttrString( cfg, PROCESS_NAME ) != 1
+        || !( process = PyObject_GetAttrString( cfg, PROCESS_NAME ) ) ) // new
+        throwPythonError( "Failed to extract a '"+std::string( PROCESS_NAME )+"' keyword from the configuration card '"+file+"'!" );
 
       //--- list of process-specific parameters
       ParametersList proc_params;
       fillParameter( process, "processParameters", proc_params );
 
       //--- type of process to consider
-      PyObject* pproc_name = element( process, MODULE_NAME ); // borrowed
+      PyObject* pproc_name = element( process, ParametersList::MODULE_NAME ); // borrowed
       if ( !pproc_name )
-        throwPythonError( Form( "Failed to extract the process name from the configuration card %s", file ) );
+        throwPythonError( "Failed to extract the process name from the configuration card '"+file+"'!" );
       const std::string proc_name = get<std::string>( pproc_name );
 
       //--- process mode
       params_.kinematics.mode = (KinematicsMode)proc_params.get<int>( "mode", (int)KinematicsMode::invalid );
-      params_.setProcess( cepgen::proc::ProcessesHandler::get().build( proc_name, proc_params ) );
+      params_.setProcess( proc::ProcessesFactory::get().build( proc_name, proc_params ) );
 
       //--- process kinematics
       PyObject* pin_kinematics = element( process, "inKinematics" ); // borrowed
@@ -93,64 +147,90 @@ namespace cepgen
       PyObject* ptam = element( process, "tamingFunctions" ); // borrowed
       if ( ptam )
         for ( const auto& p : getVector<ParametersList>( ptam ) )
-          params_.taming_functions->add( p.get<std::string>( "variable" ), p.get<std::string>( "expression" ) );
+          params_.taming_functions.emplace_back( p.get<std::string>( "variable" ), p.get<std::string>( "expression" ) );
 
       Py_CLEAR( process );
 
-      PyObject* plog = PyObject_GetAttrString( cfg, "logger" ); // new
-      if ( plog ) {
-        parseLogging( plog );
-        Py_CLEAR( plog );
+      if ( PyObject_HasAttrString( cfg, LOGGER_NAME ) == 1 ) {
+        PyObject* plog = PyObject_GetAttrString( cfg, LOGGER_NAME ); // new
+        if ( plog ) {
+          parseLogging( plog );
+          Py_CLEAR( plog );
+        }
       }
 
-      //--- hadroniser parameters
-      PyObject* phad = PyObject_GetAttrString( cfg, "hadroniser" ); // new
-      if ( phad ) {
-        parseHadroniser( phad );
-        Py_CLEAR( phad );
+      //--- hadroniser parameters (legacy)
+      if ( PyObject_HasAttrString( cfg, HADR_NAME ) == 1 ) {
+        PyObject* phad = PyObject_GetAttrString( cfg, HADR_NAME ); // new
+        if ( phad ) {
+          parseHadroniser( phad );
+          Py_CLEAR( phad );
+        }
+      }
+
+      if ( PyObject_HasAttrString( cfg, EVT_MOD_SEQ_NAME ) == 1 ) {
+        PyObject* pmod_seq = PyObject_GetAttrString( cfg, EVT_MOD_SEQ_NAME ); // new
+        if ( pmod_seq ) {
+          parseEventModifiers( pmod_seq );
+          Py_CLEAR( pmod_seq );
+        }
       }
 
       //--- generation parameters
-      PyObject* pint = PyObject_GetAttrString( cfg, "integrator" ); // new
-      if ( pint ) {
-        parseIntegrator( pint );
-        Py_CLEAR( pint );
+      if ( PyObject_HasAttrString( cfg, INTEGRATOR_NAME ) == 1 ) {
+        PyObject* pint = PyObject_GetAttrString( cfg, INTEGRATOR_NAME ); // new
+        if ( pint ) {
+          parseIntegrator( pint );
+          Py_CLEAR( pint );
+        }
       }
 
-      PyObject* pgen = PyObject_GetAttrString( cfg, "generator" ); // new
-      if ( pgen ) {
-        parseGenerator( pgen );
-        Py_CLEAR( pgen );
+      if ( PyObject_HasAttrString( cfg, GENERATOR_NAME ) == 1 ) {
+        PyObject* pgen = PyObject_GetAttrString( cfg, GENERATOR_NAME ); // new
+        if ( pgen ) {
+          parseGenerator( pgen );
+          Py_CLEAR( pgen );
+        }
+      }
+
+      if ( PyObject_HasAttrString( cfg, OUTPUT_NAME ) == 1 ) {
+        PyObject* pout = PyObject_GetAttrString( cfg, OUTPUT_NAME ); // new
+        if ( pout ) {
+          if ( isVector<ParametersList>( pout ) )
+            parseOutputModules( pout );
+          else
+            parseOutputModule( pout );
+          Py_CLEAR( pout );
+        }
       }
 
       //--- finalisation
       Py_CLEAR( cfg );
-    }
 
-    PythonHandler::~PythonHandler()
-    {
       if ( Py_IsInitialized() )
         Py_Finalize();
+
+      return params_;
     }
 
     void
     PythonHandler::parseIncomingKinematics( PyObject* kin )
     {
       //--- retrieve the beams PDG ids
-      std::vector<int> beams_pdg;
+      std::vector<ParametersList> beams_pdg;
       fillParameter( kin, "pdgIds", beams_pdg );
       if ( !beams_pdg.empty() ) {
         if ( beams_pdg.size() != 2 )
-          throwPythonError( Form( "Invalid list of PDG ids retrieved for incoming beams:\n\t2 PDG ids are expected, %d provided!", beams_pdg.size() ) );
-        params_.kinematics.incoming_beams. first.pdg = (PDG)beams_pdg.at( 0 );
-        params_.kinematics.incoming_beams.second.pdg = (PDG)beams_pdg.at( 1 );
+          throwPythonError( utils::format( "Invalid list of PDG ids retrieved for incoming beams:\n\t2 PDG ids are expected, %d provided!", beams_pdg.size() ) );
+        params_.kinematics.incoming_beams. first.pdg = (pdgid_t)beams_pdg.at( 0 ).get<int>( "pdgid" );
+        params_.kinematics.incoming_beams.second.pdg = (pdgid_t)beams_pdg.at( 1 ).get<int>( "pdgid" );
       }
       //--- incoming beams kinematics
       std::vector<double> beams_pz;
       fillParameter( kin, "pz", beams_pz );
       if ( !beams_pz.empty() ) {
         if ( beams_pz.size() != 2 )
-          throwPythonError( Form( "Invalid list of pz's retrieved for incoming beams:\n\t2 pz's are expected, %d provided!", beams_pz.size() ) );
+          throwPythonError( utils::format( "Invalid list of pz's retrieved for incoming beams:\n\t2 pz's are expected, %d provided!", beams_pz.size() ) );
         params_.kinematics.incoming_beams. first.pz = beams_pz.at( 0 );
         params_.kinematics.incoming_beams.second.pz = beams_pz.at( 1 );
       }
@@ -161,15 +241,27 @@ namespace cepgen
       //--- structure functions set for incoming beams
       PyObject* psf = element( kin, "structureFunctions" ); // borrowed
       if ( psf )
-        params_.kinematics.structure_functions = strfun::Parameterisation::build( get<ParametersList>( psf ) );
+        params_.kinematics.structure_functions = strfun::StructureFunctionsFactory::get().build( get<ParametersList>( psf ) );
       //--- types of parton fluxes for kt-factorisation
-      std::vector<int> kt_fluxes;
-      fillParameter( kin, "ktFluxes", kt_fluxes );
-      if ( !kt_fluxes.empty() ) {
-        params_.kinematics.incoming_beams.first.kt_flux = (KTFlux)kt_fluxes.at( 0 );
-        params_.kinematics.incoming_beams.second.kt_flux = ( kt_fluxes.size() > 1 )
-          ? (KTFlux)kt_fluxes.at( 1 )
-          : (KTFlux)kt_fluxes.at( 0 );
+      PyObject* pktf = element( kin, "ktFluxes" ); // borrowed
+      if ( pktf ) {
+        if ( isVector<int>( pktf ) ) {
+          std::vector<int> kt_fluxes;
+          fillParameter( kin, "ktFluxes", kt_fluxes );
+          if ( !kt_fluxes.empty() ) {
+            params_.kinematics.incoming_beams.first.kt_flux = (KTFlux)kt_fluxes.at( 0 );
+            params_.kinematics.incoming_beams.second.kt_flux = ( kt_fluxes.size() > 1 )
+              ? (KTFlux)kt_fluxes.at( 1 )
+              : (KTFlux)kt_fluxes.at( 0 );
+          }
+        }
+        else if ( is<int>( pktf ) ) {
+          int kt_fluxes;
+          fillParameter( kin, "ktFluxes", kt_fluxes );
+          params_.kinematics.incoming_beams.first.kt_flux = params_.kinematics.incoming_beams.second.kt_flux = (KTFlux)kt_fluxes;
+        }
+        else
+          throwPythonError( "Unsupported format for the ktFluxes definition!" );
       }
       //--- specify where to look for the grid path for gluon emission
       std::string kmr_grid_path;
@@ -192,13 +284,13 @@ namespace cepgen
       std::vector<int> parts;
       fillParameter( kin, "minFinalState", parts );
       for ( const auto& pdg : parts )
-        params_.kinematics.minimum_final_state.emplace_back( (PDG)pdg );
+        params_.kinematics.minimum_final_state.emplace_back( (pdgid_t)pdg );
 
       ParametersList part_cuts;
       fillParameter( kin, "cuts", part_cuts );
       for ( const auto& part : part_cuts.keys() ) {
-        const PDG pdg = (PDG)stoi( part );
-        const ParametersList& cuts = part_cuts.get<ParametersList>( part );
+        const auto pdg = (pdgid_t)stoi( part );
+        const auto& cuts = part_cuts.get<ParametersList>( part );
         if ( cuts.has<Limits>( "pt" ) )
           params_.kinematics.cuts.central_particles[pdg].pt_single = cuts.get<Limits>( "pt" );
         if ( cuts.has<Limits>( "energy" ) )
@@ -233,7 +325,8 @@ namespace cepgen
       Limits lim_xi;
       fillParameter( kin, "xi", lim_xi );
       if ( lim_xi.valid() )
-        params_.kinematics.cuts.remnants.energy_single = ( lim_xi+(-1.) )*( -params_.kinematics.incoming_beams.first.pz );
+        //params_.kinematics.cuts.remnants.energy_single = ( lim_xi+(-1.) )*( -params_.kinematics.incoming_beams.first.pz );
+        params_.kinematics.cuts.remnants.energy_single = -( lim_xi-1. )*params_.kinematics.incoming_beams.first.pz;
     }
 
     void
@@ -253,7 +346,7 @@ namespace cepgen
     {
       if ( !PyDict_Check( integr ) )
         throwPythonError( "Integrator object should be a dictionary!" );
-      PyObject* palgo = element( integr, MODULE_NAME ); // borrowed
+      PyObject* palgo = element( integr, ParametersList::MODULE_NAME ); // borrowed
       if ( !palgo )
         throwPythonError( "Failed to retrieve the integration algorithm name!" );
       std::string algo = get<std::string>( palgo );
@@ -285,7 +378,7 @@ namespace cepgen
         fillParameter( integr, "dither", (double&)params_.integration().miser.dither );
       }
       else
-        throwPythonError( Form( "Invalid integration() algorithm: %s", algo.c_str() ) );
+        throwPythonError( utils::format( "Invalid integration() algorithm: %s", algo.c_str() ) );
 
       fillParameter( integr, "numFunctionCalls", params_.integration().ncvg );
       fillParameter( integr, "seed", (unsigned long&)params_.integration().rng_seed );
@@ -314,41 +407,87 @@ namespace cepgen
     }
 
     void
-    PythonHandler::parseHadroniser( PyObject* hadr )
+    PythonHandler::parseEventModifiers( PyObject* mod )
     {
-      if ( !PyDict_Check( hadr ) )
-        throwPythonError( "Hadroniser object should be a dictionary!" );
+      if ( !PyList_Check( mod ) )
+        throwPythonError( "Event modification definition object should be a list/Sequence!" );
 
-      PyObject* pname = element( hadr, MODULE_NAME ); // borrowed
+      for ( Py_ssize_t i = 0; i < PyList_Size( mod ); ++i )
+        parseHadroniser( PyList_GetItem( mod, i ) );
+    }
+
+    void
+    PythonHandler::parseHadroniser( PyObject* mod )
+    {
+      if ( !PyDict_Check( mod ) )
+        throwPythonError( "Event modification definition object should be a dictionary!" );
+
+      PyObject* pname = element( mod, ParametersList::MODULE_NAME ); // borrowed
       if ( !pname )
-        throwPythonError( "Hadroniser name is required!" );
-      std::string hadr_name = get<std::string>( pname );
+        throwPythonError( "Event modification algorithm name is required!" );
+      std::string mod_name = get<std::string>( pname );
 
-      //--- list of module-specific parameters
-      ParametersList mod_params;
-      fillParameter( hadr, "moduleParameters", mod_params );
+      params_.addModifier( EventModifierFactory::get().build( mod_name, get<ParametersList>( mod ) ) );
 
-      params_.setHadroniser( cepgen::hadr::HadronisersHandler::get().build( hadr_name, mod_params ) );
-
-      auto h = params_.hadroniser();
+      auto h = params_.eventModifiersSequence().rbegin()->get();
       h->setParameters( params_ );
       { //--- before calling the init() method
         std::vector<std::string> config;
-        fillParameter( hadr, "preConfiguration", config );
+        fillParameter( mod, "preConfiguration", config );
         h->readStrings( config );
       }
       h->init();
       { //--- after init() has been called
         std::vector<std::string> config;
-        fillParameter( hadr, "processConfiguration", config );
+        fillParameter( mod, "processConfiguration", config );
         for ( const auto& block : config ) {
           std::vector<std::string> config_blk;
-          fillParameter( hadr, block.c_str(), config_blk );
+          fillParameter( mod, block.c_str(), config_blk );
           h->readStrings( config_blk );
         }
+      }
+    }
+
+    void
+    PythonHandler::parseOutputModules( PyObject* mod )
+    {
+      if ( !PyList_Check( mod ) )
+        throwPythonError( "Output modules definition object should be a list/Sequence!" );
+
+      for ( Py_ssize_t i = 0; i < PyList_Size( mod ); ++i )
+        parseOutputModule( PyList_GetItem( mod, i ) );
+    }
+
+    void
+    PythonHandler::parseOutputModule( PyObject* pout )
+    {
+      if ( !is<ParametersList>( pout ) )
+        throwPythonError( "Invalid type for output parameters list!" );
+
+      PyObject* pname = element( pout, ParametersList::MODULE_NAME ); // borrowed
+      if ( !pname )
+        throwPythonError( "Output module name is required!" );
+      params_.addOutputModule( io::ExportModuleFactory::get().build( get<std::string>( pname ), get<ParametersList>( pout ) ) );
+    }
+
+    void
+    PythonHandler::parseExtraParticles( PyObject* pparts )
+    {
+      if ( !is<ParametersList>( pparts ) )
+        throwPythonError( "Extra particles definition object should be a parameters list!" );
+
+      const auto& parts = get<ParametersList>( pparts );
+      for ( const auto& k : parts.keys() ) {
+        const auto& part = parts.get<ParticleProperties>( k );
+        if ( part.pdgid == 0 || part.mass < 0. )
+          continue;
+        CG_DEBUG( "PythonHandler:particles" )
+          << "Adding a new particle with name \"" << part.name << "\" to the PDG dictionary.";
+        PDG::get().define( part );
       }
     }
   }
 }
 
-#endif // ifdef PYTHON
+REGISTER_CARD_HANDLER( "py", PythonHandler )
+

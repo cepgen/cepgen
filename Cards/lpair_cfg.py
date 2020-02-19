@@ -1,17 +1,21 @@
 import Config.Core as cepgen
 from Config.Integration.vegas_cff import integrator
-#from Config.Hadronisation.pythia8_cff import pythia8 as hadroniser
+from Config.PDG_cfi import PDG
+
+#--- example of a hadronisation algorithm steering
+#from Config.Hadronisation.pythia6_cff import pythia6
+#from Config.Hadronisation.pythia8_cff import pythia8
 
 process = cepgen.Module('lpair',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.InelasticElastic,
-        pair = 13,
+        pair = PDG.muon,
     ),
     inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),
-        #structureFunctions = cepgen.StructureFunctions.SuriYennie,
+        structureFunctions = cepgen.StructureFunctions.SuriYennie,
         #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
-        structureFunctions = cepgen.StructureFunctions.LUXlike,
+        #structureFunctions = cepgen.StructureFunctions.LUXlike,
     ),
     outKinematics = cepgen.Parameters(
         pt = (25.,),
@@ -19,19 +23,33 @@ process = cepgen.Module('lpair',
         eta = (-2.5, 2.5),
         mx = (1.07, 1000.),
     ),
-    #tamingFunctions = cepgen.Parameters(
-    #    # example of a complex taming function
-    #    cepgen.Parameters(
-    #        variable = "m_central",
-    #        expression = "(m_central>80.) ? exp(-(m_central-80)/10) : 1.0",
-    #    ),
-    #),
+    #--- example of a complex taming function definition
+    #tamingFunctions = [
+    #    cepgen.Parameters(variable = "m(4)", expression = "(m(4)>80.) ? exp(-(m(4)-80)/10) : 1.0"),
+    #],
 )
 
-#--- let the user specify the run conditions
+#--- let the user specify the events generation parameters
 from Config.generator_cff import generator
 generator = generator.clone(
     numEvents = 100000,
     printEvery = 10000,
+)
+
+#--- example of an events modification procedure
+#eventSequence = cepgen.Sequence(pythia8)
+
+#--- example of an output module(s) procedure
+from Config.OutputModule.ROOTTree_cfi import rootTree
+#text = cepgen.Module('text',
+#    #variables = ['nev', 'm(4)', 'tgen'],
+#    histVariables={'m(4)': cepgen.Parameters(low=0., high=250., nbins=20)}
+#)
+#lhef = cepgen.Module('lhef', filename='test.lhe')
+#hepmc = cepgen.Module('hepmc', filename='test.hepmc')
+dump = cepgen.Module('dump', printEvery = 5000)
+output = cepgen.Sequence(
+    dump,
+    #rootTree
 )
 

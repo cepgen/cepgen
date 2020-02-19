@@ -19,12 +19,13 @@ namespace kmr
     cepgen::GridHandler<3,1>( cepgen::GridType::linear ),
     params( param )
   {
-    std::set<double> kt2_vals, x_vals, mu2_vals;
+    CG_INFO( "GluonGrid" ) << "Building the KMR grid evaluator.";
 
+    std::set<double> kt2_vals, x_vals, mu2_vals;
     { // file readout part
       std::ifstream file( params.grid_path, std::ios::in );
       if ( !file.is_open() )
-        throw CG_FATAL( "GluonGrid" ) << "Impossible to load grid file \"" << params.grid_path << "\"!";
+        throw CG_FATAL( "GluonGrid" ) << "Failed to load grid file \"" << params.grid_path << "\"!";
 
       std::string x_tmp, kt2_tmp, mu2_tmp, fg_tmp;
       while ( file >> x_tmp >> kt2_tmp >> mu2_tmp >> fg_tmp ) {

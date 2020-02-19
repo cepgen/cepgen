@@ -1,6 +1,10 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Physics/PDG.h"
+
+#include <iomanip>
+
 namespace cepgen
 {
   ParametersList::ParametersList( const ParametersList& oth ) :
@@ -26,39 +30,46 @@ namespace cepgen
     return *this;
   }
 
+  bool
+  ParametersList::empty() const
+  {
+    return keys().empty()
+      || keys() == std::vector<std::string>{ MODULE_NAME };
+  }
+
   std::ostream&
   operator<<( std::ostream& os, const ParametersList& params )
   {
-    for ( const auto& kv :     params.int_values_ )   os << "\n" << kv.first << ": int(" << kv.second << ")";
-    for ( const auto& kv :     params.dbl_values_ )   os << "\n" << kv.first << ": double(" << kv.second << ")";
-    for ( const auto& kv :     params.str_values_ )   os << "\n" << kv.first << ": string(" << kv.second << ")";
-    for ( const auto& kv :   params.param_values_ ) os << "\n" << kv.first << ": param({" << kv.second << "})";
-    for ( const auto& kv :     params.lim_values_ )   os << "\n" << kv.first << ": limits(" << kv.second << ")";
+    const auto beg = os.tellp();
+    for ( const auto& kv : params.int_values_ )
+      os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=int(" << kv.second << ")";
+    for ( const auto& kv : params.dbl_values_ )
+      os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=double(" << kv.second << ")";
+    for ( const auto& kv : params.str_values_ )
+      os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=string(" << kv.second << ")";
+    for ( const auto& kv : params.param_values_ )
+      os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=param({" << kv.second << "})";
+    for ( const auto& kv : params.lim_values_ )
+      os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=limits(" << kv.second << ")";
     for ( const auto& kv : params.vec_int_values_ ) {
-      os << "\n" << kv.first << ": vint(";
+      os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=vint(";
       bool first = true;
-      for ( const auto& v : kv.second ) {
-        os << ( first ? "" : ", " ) << v;
-        first = false;
-      }
+      for ( const auto& v : kv.second )
+        os << ( first ? "" : ", " ) << v, first = false;
       os << ")";
     }
     for ( const auto& kv : params.vec_dbl_values_ ) {
-      os << "\n" << kv.first << ": vdouble(";
+      os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=vdouble(";
       bool first = true;
-      for ( const auto& v : kv.second ) {
-        os << ( first ? "" : ", " ) << v;
-        first = false;
-      }
+      for ( const auto& v : kv.second )
+        os << ( first ? "" : ", " ) << v, first = false;
       os << ")";
     }
     for ( const auto& kv : params.vec_str_values_ ) {
-      os << "\n" << kv.first << ": vstring(";
+      os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=vstring(";
       bool first = true;
-      for ( const auto& v : kv.second ) {
-        os << ( first ? "" : ", " ) << v;
-        first = false;
-      }
+      for ( const auto& v : kv.second )
+        os << ( first ? "" : ", " ) << v, first = false;
       os << ")";
     }
     return os;
@@ -256,5 +267,61 @@ namespace cepgen
         return kv.second;
     CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
     return def;
+  }
+
+  //------------------------------------------------------------------
+  // particle properties-type attributes
+  //------------------------------------------------------------------
+
+  template<> ParticleProperties
+  ParametersList::get<ParticleProperties>( std::string key, const ParticleProperties& def ) const
+  {
+    if ( has<ParametersList>( key ) ) {
+      const auto& plist = get<ParametersList>( key );
+      ParticleProperties out;
+      const auto& pdgid = plist.get<int>( "pdgid", 0 );
+      if ( PDG::get().has( pdgid ) )
+        out = PDG::get()( pdgid );
+      else
+        out.pdgid = pdgid;
+      bool modified = false;
+      if ( plist.has<std::string>( "name" ) )
+        out.name = plist.get<std::string>( "name" ), modified = true;
+      if ( plist.has<std::string>( "description" ) )
+        out.description = plist.get<std::string>( "description" ), modified = true;
+      if ( plist.has<int>( "colours" ) )
+        out.colours = plist.get<int>( "colours" ), modified = true;
+      if ( plist.has<double>( "mass" ) )
+        out.mass = plist.get<double>( "mass" ), modified = true;
+      if ( plist.has<double>( "width" ) )
+        out.width = plist.get<double>( "width" ), modified = true;
+      if ( plist.has<double>( "charge" ) )
+        out.charge = short( plist.get<double>( "charge" )*3 ), modified = true;
+      if ( plist.has<bool>( "fermion" ) )
+        out.fermion = plist.get<bool>( "fermion" ), modified = true;
+      if ( modified )
+        PDG::get().define( out );
+      return out;
+    }
+    else if ( has<int>( key ) )
+      return PDG::get()( get<int>( key ) );
+    else {
+      CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+      return def;
+    }
+  }
+
+  template<> ParametersList&
+  ParametersList::set<ParticleProperties>( std::string key, const ParticleProperties& value )
+  {
+    return set<ParametersList>( key, ParametersList()
+      .set<int>( "pdgid", value.pdgid )
+      .set<std::string>( "name", value.name )
+      .set<std::string>( "description", value.description )
+      .set<int>( "colours", value.colours )
+      .set<double>( "mass", value.mass )
+      .set<double>( "width", value.width )
+      .set<double>( "charge", value.charge*1./3 )
+      .set<bool>( "fermion", value.fermion ) );
   }
 }

@@ -1,8 +1,8 @@
 #ifndef CepGen_Physics_Kinematics_h
 #define CepGen_Physics_Kinematics_h
 
-#include "CepGen/Core/Hasher.h"
-
+#include "CepGen/Physics/KinematicsMode.h"
+#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Cuts.h"
 #include "CepGen/Physics/HeavyIon.h"
 
@@ -13,23 +13,8 @@
 
 namespace cepgen
 {
-  enum class PDG;
   enum class KTFlux;
   namespace strfun { class Parameterisation; }
-  /// Type of kinematics to consider for the process
-  enum class KinematicsMode
-  {
-    invalid = -1,
-    ElectronProton = 0,     ///< electron-proton elastic case
-    ElasticElastic = 1,     ///< proton-proton elastic case
-    ElasticInelastic = 2,   ///< proton-proton single-dissociative (or inelastic-elastic) case
-    InelasticElastic = 3,   ///< proton-proton single-dissociative (or elastic-inelastic) case
-    InelasticInelastic = 4, ///< proton-proton double-dissociative case
-    ProtonElectron,
-    ElectronElectron
-  };
-  /// Human-readable format of a process mode (elastic/dissociative parts)
-  std::ostream& operator<<( std::ostream&, const KinematicsMode& );
   /// List of kinematic constraints to apply on the process phase space.
   class Kinematics
   {
@@ -46,7 +31,7 @@ namespace cepgen
       struct Beam
       {
         double pz; ///< Incoming particle momentum, in GeV/c
-        PDG pdg; ///< PDG identifier for the beam
+        pdgid_t pdg; ///< PDG identifier for the beam
         KTFlux kt_flux; ///< Type of \f$k_{\rm T}\f$-factorised flux to be considered (if any)
       };
       friend std::ostream& operator<<( std::ostream&, const Beam& );
@@ -54,7 +39,7 @@ namespace cepgen
       /// Beam/primary particle's kinematics
       std::pair<Beam,Beam> incoming_beams;
       /// Minimum list of central particles required
-      std::vector<PDG> minimum_final_state;
+      std::vector<pdgid_t> minimum_final_state;
       /// Type of kinematics to consider for the phase space
       KinematicsMode mode;
       /// Type of structure functions to consider
@@ -68,7 +53,7 @@ namespace cepgen
         Cuts initial;
         /// Cuts on the central system produced
         Cuts central;
-        std::unordered_map<PDG,Cuts,utils::EnumHash<PDG> > central_particles;
+        PerIdCuts central_particles;
         /// Cuts on the beam remnants system
         Cuts remnants;
       };

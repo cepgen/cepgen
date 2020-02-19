@@ -2,7 +2,7 @@
 #define CepGen_Physics_Limits_h
 
 #include <utility>
-#include <ostream>
+#include <iosfwd>
 
 namespace cepgen
 {
@@ -14,9 +14,12 @@ namespace cepgen
       Limits( double min = INVALID, double max = INVALID );
       Limits( const Limits& );
 
+      Limits operator-() const;
       Limits& operator+=( double c );
+      Limits& operator-=( double c );
       Limits& operator*=( double c );
       friend Limits operator+( Limits lim, double c );
+      friend Limits operator-( Limits lim, double c );
       friend Limits operator*( Limits lim, double c );
 
       /// Lower limit to apply on the variable
@@ -40,7 +43,7 @@ namespace cepgen
       /// Have an upper limit?
       bool hasMax() const;
       /// Check if the value is inside limits' boundaries
-      bool passes( double val ) const;
+      bool contains( double val ) const;
       /// Is there a lower and upper limit?
       bool valid() const;
 
