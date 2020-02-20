@@ -1,10 +1,11 @@
 #include "CepGen/Core/GridParameters.h"
 #include "CepGen/Core/Exception.h"
+
 #include <cmath> // pow
 
 namespace cepgen
 {
-  GridParameters::GridParameters( unsigned short ndim ) :
+  GridParameters::GridParameters( size_t ndim ) :
     gen_prepared( false ),
     f_max_diff( 0. ),
     r_boxes( 0 ),
@@ -18,10 +19,11 @@ namespace cepgen
 
     //--- build and populate the grid
     coord_t coord( ndim );
-    for ( unsigned int i = 0; i < max_; ++i ) {
-      unsigned int jj = i;
-      for ( unsigned int j = 0; j < ndim; ++j ) {
-        unsigned int tmp = jj*INV_M_BIN;
+    for ( size_t i = 0; i < max_; ++i ) {
+      size_t jj = i;
+      for ( size_t j = 0; j < ndim; ++j ) {
+        size_t tmp = jj*INV_M_BIN;
+        //coord[j] = roundf( jj-tmp*M_BIN );
         coord[j] = jj-tmp*M_BIN;
         jj = tmp;
       }
@@ -64,8 +66,23 @@ namespace cepgen
   void
   GridParameters::shoot( const gsl_rng* rng, size_t coord, std::vector<double>& out ) const
   {
-    out.resize( 0 );
-    for ( const auto& nv : n( coord ) )
-      out.emplace_back( ( gsl_rng_uniform( rng )+nv ) * INV_M_BIN );
+    const auto& nv = n_map_.at( coord );
+    for ( size_t i = 0; i < nv.size(); ++i )
+      out[i] = ( gsl_rng_uniform( rng )+nv.at( i ) ) * INV_M_BIN;
+  }
+
+  void
+  GridParameters::dump() const
+  {
+    std::ostringstream os;
+    size_t i = 0;
+    for ( const auto& n : n_map_ ) {
+      os << "n[" << i++ << "] = {";
+      std::string sep;
+      for ( const auto& v : n )
+        os << sep << v, sep = ", ";
+      os << "}" << std::endl;
+    }
+    CG_INFO( "GridParameters:dump" ) << os.str();
   }
 }

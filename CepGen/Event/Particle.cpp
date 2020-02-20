@@ -3,7 +3,7 @@
 #include "CepGen/Physics/PDG.h"
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
+#include "CepGen/Utils/String.h"
 
 #include <iomanip>
 
@@ -76,38 +76,37 @@ namespace cepgen
     return charge_sign_ * phys_prop_.charge/3.;
   }
 
-  void
+  Particle&
   Particle::computeMass( bool off_shell )
   {
-    if ( !off_shell && pdg_id_ != PDG::invalid ) { // retrieve the mass from the on-shell particle's properties
+    if ( !off_shell && pdg_id_ != PDG::invalid ) // retrieve the mass from the on-shell particle's properties
       mass_ = phys_prop_.mass;
-    }
-    else if ( momentum_.energy() >= 0. ) {
+    else if ( momentum_.energy() >= 0. )
       mass_ = sqrt( energy2() - momentum_.p2() );
-    }
-
     //--- finish by setting the energy accordingly
-    if ( momentum_.energy() < 0. ) { // invalid energy
+    if ( momentum_.energy() < 0. ) // invalid energy
       momentum_.setEnergy( sqrt( momentum_.p2() + mass2() ) );
-    }
+
+    return *this;
   }
 
-  void
+  Particle&
   Particle::setMass( double m )
   {
-    if ( m >= 0. )
-      mass_ = m;
-    else
-      computeMass();
+    if ( m < 0. )
+      return computeMass();
+    mass_ = m;
+    return *this;
   }
 
-  void
+  Particle&
   Particle::clearMothers()
   {
     mothers_.clear();
+    return *this;
   }
 
-  void
+  Particle&
   Particle::addMother( Particle& part )
   {
     mothers_.insert( part.id() );
@@ -117,15 +116,17 @@ namespace cepgen
       << "is the new mother of " << id_ << " (pdgId=" << (int)pdg_id_ << ").";
 
     part.addDaughter( *this );
+    return *this;
   }
 
-  void
+  Particle&
   Particle::clearDaughters()
   {
     daughters_.clear();
+    return *this;
   }
 
-  void
+  Particle&
   Particle::addDaughter( Particle& part )
   {
     const auto ret = daughters_.insert( part.id() );
@@ -133,7 +134,7 @@ namespace cepgen
     if ( CG_LOG_MATCH( "Particle", debugInsideLoop ) ) {
       std::ostringstream os;
       for ( const auto& daugh : daughters_ )
-        os << Form( "\n\t * id=%d", daugh );
+        os << utils::format( "\n\t * id=%d", daugh );
       CG_DEBUG_LOOP( "Particle" )
         << "Particle " << role_ << " (pdgId=" << (int)pdg_id_ << ") "
         << "has now " << daughters_.size() << " daughter(s):"
@@ -148,25 +149,27 @@ namespace cepgen
       if ( part.mothers().find( id_ ) == part.mothers().end() )
         part.addMother( *this );
     }
+    return *this;
   }
 
-  void
+  Particle&
   Particle::setMomentum( const Momentum& mom, bool offshell )
   {
     momentum_ = mom;
-    if ( !offshell && mom.mass() > 0. )
-      mass_ = momentum_.mass();
-    else
-      computeMass();
+    if ( offshell || mom.mass() <= 0. )
+      return computeMass();
+    mass_ = momentum_.mass();
+    return *this;
   }
 
-  void
+  Particle&
   Particle::setMomentum( double px, double py, double pz, double e )
   {
     momentum_.setP( px, py, pz );
     setEnergy( e );
     if ( fabs( e-momentum_.energy() ) > 1.e-6 ) // more than 1 eV difference
       CG_WARNING( "Particle" ) << "Energy difference: " << e-momentum_.energy();
+    return *this;
   }
 
   double
@@ -177,12 +180,13 @@ namespace cepgen
       : momentum_.energy() );
   }
 
-  void
+  Particle&
   Particle::setEnergy( double e )
   {
     if ( e < 0. && mass_ >= 0. )
       e = std::hypot( mass_, momentum_.p() );
     momentum_.setEnergy( e );
+    return *this;
   }
 
   pdgid_t
@@ -191,7 +195,7 @@ namespace cepgen
     return pdg_id_;
   }
 
-  void
+  Particle&
   Particle::setPdgId( long pdg )
   {
     pdg_id_ = abs( pdg );
@@ -204,9 +208,10 @@ namespace cepgen
       default:
         charge_sign_ = pdg/abs( pdg ); break;
     }
+    return *this;
   }
 
-  void
+  Particle&
   Particle::setPdgId( pdgid_t pdg, short ch )
   {
     pdg_id_ = pdg;
@@ -216,6 +221,7 @@ namespace cepgen
       default:
         charge_sign_ = ch; break;
     }
+    return *this;
   }
 
   int
@@ -244,14 +250,14 @@ namespace cepgen
     if ( part.primary() )
       os << ", primary";
     else {
-      os << ", " << utils::s( "mother", part.mothers_.size(), true ) << "=";
+      os << ", " << utils::s( "mother", part.mothers_.size() ) << "=";
       std::string delim;
       for ( const auto& moth : part.mothers_ )
         os << delim << moth, delim = ",";
     }
     const auto& daughters_list = part.daughters();
     if ( !daughters_list.empty() ) {
-      os << ", " << utils::s( "daughter", daughters_list.size(), true ) << "=";
+      os << ", " << utils::s( "daughter", daughters_list.size() ) << "=";
       std::string delim;
       for ( const auto& daugh : daughters_list )
         os << delim << daugh, delim = ",";

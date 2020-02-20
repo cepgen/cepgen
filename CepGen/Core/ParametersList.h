@@ -3,7 +3,6 @@
 
 #include "CepGen/Physics/Limits.h"
 #include "CepGen/Physics/ParticleProperties.h"
-#include "CepGen/Core/Hasher.h"
 
 #include <vector>
 #include <map>
@@ -28,14 +27,26 @@ namespace cepgen
       ~ParametersList() {} // required for unique_ptr initialisation! avoids cleaning all individual objects
       /// Check if a given parameter is handled in this list
       template<typename T> bool has( std::string key ) const;
+      /// Retrieve the module name if any
+      template<typename T> T name( const T& def = default_arg<T>::get() ) const {
+        if ( !has<T>( MODULE_NAME ) )
+          return def;
+        return get<T>( MODULE_NAME );
+      }
       /// Get a parameter value
       template<typename T> T get( std::string key, const T& def = default_arg<T>::get() ) const;
       /// Reference to a parameter value
       template<typename T> T& operator[]( std::string key );
       /// Set a parameter value
       template<typename T> ParametersList& set( std::string key, const T& value );
+      /// Set the module name
+      template<typename T> ParametersList& setName( const T& value ) {
+        return set<T>( MODULE_NAME, value );
+      }
       /// Concatenate two parameters containers
       ParametersList& operator+=( const ParametersList& oth );
+      /// Is the list empty?
+      bool empty() const;
 
       /// List of keys handled in this list of parameters
       std::vector<std::string> keys() const;
@@ -44,6 +55,7 @@ namespace cepgen
 
       /// Human-readable version of a parameters container
       friend std::ostream& operator<<( std::ostream& os, const ParametersList& );
+      static constexpr const char* MODULE_NAME = "mod_name";
 
     private:
       std::map<std::string,ParametersList> param_values_;

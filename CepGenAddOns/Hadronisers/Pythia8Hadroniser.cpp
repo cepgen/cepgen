@@ -1,10 +1,9 @@
 #include "CepGenAddOns/EventInterfaces/PythiaEventInterface.h"
 
-#include "CepGen/Core/GenericHadroniser.h"
-#include "CepGen/Core/EventModifierHandler.h"
+#include "CepGen/Modules/Hadroniser.h"
+#include "CepGen/Modules/EventModifierFactory.h"
+
 #include "CepGen/Core/ParametersList.h"
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
 
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/Kinematics.h"
@@ -13,6 +12,9 @@
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/String.h"
 
 #include <Pythia8/Pythia.h>
 
@@ -28,7 +30,7 @@ namespace cepgen
      * Full interface to the Pythia8 hadronisation algorithm. It can be used in a single particle decay mode as well as a full event hadronisation using the string model, as in Jetset.
      * \brief Pythia8 hadronisation algorithm
      */
-    class Pythia8Hadroniser : public GenericHadroniser
+    class Pythia8Hadroniser : public Hadroniser
     {
       public:
         explicit Pythia8Hadroniser( const ParametersList& );
@@ -55,6 +57,7 @@ namespace cepgen
         std::unique_ptr<Pythia8::CepGenEvent> cg_evt_;
         const bool correct_central_;
         const bool debug_lhef_;
+        const std::string output_config_;
         bool res_decay_;
         bool enable_hadr_;
         unsigned short offset_;
@@ -62,10 +65,11 @@ namespace cepgen
     };
 
     Pythia8Hadroniser::Pythia8Hadroniser( const ParametersList& plist ) :
-      GenericHadroniser( plist, "pythia8" ),
+      Hadroniser( plist ),
       pythia_( new Pythia8::Pythia ), cg_evt_( new Pythia8::CepGenEvent ),
       correct_central_( plist.get<bool>( "correctCentralSystem", false ) ),
       debug_lhef_( plist.get<bool>( "debugLHEF", false ) ),
+      output_config_( plist.get<std::string>( "outputConfig", "last_pythia_config.cmd" ) ),
       res_decay_( true ), enable_hadr_( false ),
       offset_( 0 ), first_evt_( true )
     {}
@@ -88,7 +92,8 @@ namespace cepgen
 
     Pythia8Hadroniser::~Pythia8Hadroniser()
     {
-      pythia_->settings.writeFile( "last_pythia_config.cmd", false );
+      if ( !output_config_.empty() )
+        pythia_->settings.writeFile( output_config_, false );
       if ( debug_lhef_ )
         cg_evt_->closeLHEF( true );
     }
@@ -133,7 +138,7 @@ namespace cepgen
 #else
       CG_WARNING( "Pythia8Hadroniser" )
         << "Beam remnants framework for this version of Pythia "
-        << "(" << Form( "%.3f", PYTHIA_VERSION ) << ")\n\t"
+        << "(" << utils::format( "%.3f", pythia_->settings.parm("Pythia:versionNumber") ) << ")\n\t"
         << "does not support mixing of unresolved hadron states.\n\t"
         << "The proton remnants output might hence be wrong.\n\t"
         << "Please update the Pythia version or disable this part.";

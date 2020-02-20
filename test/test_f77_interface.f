@@ -6,6 +6,8 @@
       double precision xbj,min_xbj,max_xbj
       double precision q2
 
+      call CepGen_init
+
 c      nsf=204 ! GD11p
       nsf=301 ! LUXlike
       q2=10.225
@@ -18,4 +20,5 @@ c      nsf=204 ! GD11p
          call CepGen_Structure_Functions(nsf,xbj,q2,f2,fl)
          print *,q2,xbj,f2,fl
       enddo
+      call exit(0)
       end

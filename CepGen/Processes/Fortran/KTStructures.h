@@ -65,7 +65,7 @@ namespace cepgen
       int nout; ///< Number of particles in central system
       int pdg[10]; ///< PDG ids of all particles in central system
       int idum; ///< Padding
-      double pc[4][10]; ///< 4-momenta of all particles in central system
+      double pc[10][4]; ///< 4-momenta of all particles in central system
       double px[4]; ///< 4-momentum of first outgoing proton state
       double py[4]; ///< 4-momentum of second outgoing proton state
     };

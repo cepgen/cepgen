@@ -1,10 +1,10 @@
-#include "CepGen/Core/ExportHandler.h"
-#include "CepGen/Core/ParametersList.h"
-#include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/ExportModule.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
 
 #include "CepGen/Parameters.h"
-
 #include "CepGen/Event/Event.h"
+
+#include "CepGen/Core/Exception.h"
 
 #include "modules/Delphes.h"
 #include "classes/DelphesFactory.h"
@@ -25,7 +25,7 @@ namespace cepgen
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Jul 2019
      */
-    class DelphesHandler : public GenericExportHandler
+    class DelphesHandler : public ExportModule
     {
       public:
         explicit DelphesHandler( const ParametersList& );
@@ -51,7 +51,7 @@ namespace cepgen
     };
 
     DelphesHandler::DelphesHandler( const ParametersList& params ) :
-      GenericExportHandler( "delphes" ),
+      ExportModule( params ),
       output_( new TFile( params.get<std::string>( "filename", "output.delphes.root" ).c_str(), "recreate" ) ),
       input_card_( params.get<std::string>( "inputCard", "input.tcl" ) ),
       compress_( params.get<bool>( "compress", false ) ),
@@ -110,7 +110,7 @@ namespace cepgen
       evt_aux->ReadTime = ev.time_generation;
       auto start = std::chrono::system_clock::now();
       const auto& parts = compress_
-        ? ev.compressed().particles()
+        ? ev.compress().particles()
         : ev.particles();
       //--- particles content
       for ( const auto& part : parts ) {

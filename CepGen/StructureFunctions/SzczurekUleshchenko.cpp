@@ -1,11 +1,15 @@
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
 
-extern "C"
+namespace
 {
-  extern void grv95lo_( float&, float&, float&, float&, float&, float&, float&, float& );
+  extern "C"
+  {
+    extern void grv95lo_( float&, float&, float&, float&,
+                          float&, float&, float&, float& );
+  }
 }
 
 namespace cepgen
@@ -36,11 +40,6 @@ namespace cepgen
     SzczurekUleshchenko&
     SzczurekUleshchenko::operator()( double xbj, double q2 )
     {
-#ifndef GRVPDF
-      throw CG_FATAL( "SzczurekUleshchenko" )
-        << "Szczurek-Uleshchenko structure functions cannot be computed"
-        << " as GRV PDF set is not linked to this instance!";
-#else
       std::pair<double,double> nv = { xbj, q2 };
       if ( nv == old_vals_ )
         return *this;
@@ -66,7 +65,6 @@ namespace cepgen
       F2 = F2_aux * q2 / amu2; // F2 corrected for low Q^2 behaviour
 
       return *this;
-#endif
     }
   }
 }

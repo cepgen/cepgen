@@ -1,62 +1,78 @@
-file(GLOB core_sources Core/*.cpp *.cpp)
-file(GLOB phys_sources Physics/*.cpp)
-file(GLOB sf_sources StructureFunctions/*.cpp)
-
 include_directories(${PROJECT_SOURCE_DIR})
 
-message(STATUS "GSL found in ${GSL_LIB}")
+file(GLOB core_sources Core/*.cpp Modules/*.cpp Utils/*.cpp *.cpp)
+file(GLOB phys_sources Physics/*.cpp)
+file(GLOB proc_sources Processes/*.cpp Processes/Fortran/*.f)
+file(GLOB sf_sources StructureFunctions/*.cpp)
 
-set(core_libraries ${GSL_LIB} ${GSL_CBLAS_LIB})
 set(core_definitions)
 set(core_includes)
 
-#----- check the external dependencies for SFs
+#----- check the external dependencies for SFs/alphaS
 
 if(GRV_SRC)
   message(STATUS "GRV PDFset found in ${GRV_SRC}!")
   list(APPEND sf_sources ${GRV_SRC})
-  list(APPEND core_definitions -DGRVPDF)
+else()
+  message(STATUS "GRV PDFset not found. Will not build Szczurek-Uleshchenko SFs")
+  file(GLOB su_sf StructureFunctions/SzczurekUleshchenko.cpp)
+  list(REMOVE_ITEM sf_sources ${su_sf})
 endif()
-
-#----- check the external dependencies for physics utilities
-
-if(ALPHAS_SRC)
-  message(STATUS "alphaS evolution algorithm found in ${ALPHAS_SRC}")
-  list(APPEND phys_sources ${ALPHAS_SRC})
-  list(APPEND core_definitions -DALPHA_S)
-endif()
-if(MUPARSER)
-  message(STATUS "Formulas parsing will use muParser found in ${MUPARSER}")
-  add_definitions(-DFUNC_MUPARSER)
-  list(APPEND core_libraries ${MUPARSER})
-elseif(EXPRTK)
-  message(STATUS "Formulas parsing will use exprtk found in ${EXPRTK}")
-  add_definitions(-DFUNC_EXPRTK)
-  list(APPEND core_includes ${EXPRTK}) # header-only
-elseif(ROOT_FOUND)
-  message(STATUS "Formulas parsing will use ROOT")
-  add_definitions(-DFUNC_ROOT)
-  list(APPEND core_include ${ROOT_INCLUDE_DIRS})
-  list(APPEND core_libraries ${ROOT_LIBRARIES})
-endif()
-
-#--- linking with LHAPDF
-
 if(LHAPDF)
   message(STATUS "LHAPDF found in ${LHAPDF}")
-  list(APPEND core_libraries ${LHAPDF})
+  list(APPEND CEPGEN_CORE_EXT ${LHAPDF})
   list(APPEND core_includes ${LHAPDF_INCLUDE})
 else()
   file(GLOB partonic_sf StructureFunctions/Partonic.cpp)
   list(REMOVE_ITEM sf_sources ${partonic_sf})
+  file(GLOB lhapdf_alphas Physics/AlphaSLHAPDF.cpp)
+  list(REMOVE_ITEM phys_sources ${lhapdf_alphas})
+endif()
+if(ALPHAS_SRC)
+  message(STATUS "alphaS evolution algorithm found in ${ALPHAS_SRC}")
+  list(APPEND phys_sources ${ALPHAS_SRC})
+else()
+  file(GLOB pegasus_alphas Physics/AlphaSPEGASUS.cpp)
+  file(REMOVE_ITEM phys_sources ${pegasus_alphas})
+endif()
+if(APFEL)
+  message(STATUS "APFEL found in ${APFEL}")
+  list(APPEND core_includes ${APFEL_INCLUDE})
+  list(APPEND CEPGEN_CORE_EXT ${APFEL})
+else()
+  file(GLOB apfel_alphas Physics/AlphaSAPFEL.cpp)
+  list(REMOVE_ITEM phys_sources ${apfel_alphas})
+endif()
+
+#----- check the external dependencies for physics utilities
+
+if(KMR_INTERP)
+  message(STATUS "KMR interpolation algorithm found in ${KMR_INTERP}")
+  list(APPEND phys_sources ${KMR_INTERP})
+endif()
+if(MUPARSER)
+  message(STATUS "Formulas parsing will use muParser found in ${MUPARSER}")
+  list(APPEND core_definitions -DFUNC_MUPARSER)
+  list(APPEND CEPGEN_CORE_EXT ${MUPARSER})
+  set(CEPGEN_HAS_FUNCTIONALS ON)
+elseif(EXPRTK)
+  message(STATUS "Formulas parsing will use exprtk found in ${EXPRTK}")
+  list(APPEND core_definitions -DFUNC_EXPRTK)
+  list(APPEND core_includes ${EXPRTK}) # header-only
+  set(CEPGEN_HAS_FUNCTIONALS ON)
+elseif(ROOT_FOUND)
+  message(STATUS "Formulas parsing will use ROOT")
+  list(APPEND core_definitions -DFUNC_ROOT)
+  list(APPEND core_includes ${ROOT_INCLUDE_DIRS})
+  list(APPEND CEPGEN_CORE_EXT ${ROOT_LIBRARIES})
+  set(CEPGEN_HAS_FUNCTIONALS ON)
 endif()
 
 #----- build the objects
 
-add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${sf_sources})
-target_link_libraries(CepGenCore ${core_libraries})
+add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${proc_sources} ${sf_sources})
 target_compile_definitions(CepGenCore PUBLIC ${core_definitions})
-target_include_directories(CepGenCore PUBLIC ${core_includes})
+target_link_libraries(CepGenCore PUBLIC ${CEPGEN_CORE_EXT})
 
 #----- installation rules
 

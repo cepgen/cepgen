@@ -1,9 +1,11 @@
-#include "CepGen/Core/GridHandler.h"
+#include "CepGen/Utils/GridHandler.h"
+#include "CepGen/Utils/String.h"
+
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
 
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include <fstream>
 
@@ -43,7 +45,7 @@ namespace mstw
       Grid& operator()( double xbj, double q2 ) override;
       /// Retrieve the grid's header information
       header_t header() const { return header_; }
-      /// Grid parameterisation object
+      std::string description() const override;
 
         //--- already retrieved from grid, so no need to recompute it
       Grid& computeFL( double xbj, double q2 ) override { return *this; }
@@ -52,7 +54,6 @@ namespace mstw
       static constexpr const char* DEFAULT_MSTW_GRID_PATH = "External/mstw_sf_scan_nnlo.dat";
 
     private:
-      std::string description() const override;
       static constexpr unsigned int GOOD_MAGIC = 0x5754534d; // MSTW in ASCII
 
       header_t header_;
@@ -124,7 +125,7 @@ namespace mstw
   std::ostream&
   operator<<( std::ostream& os, const Grid::sfval_t& val )
   {
-    return os << cepgen::Form( "xbj = %.4f\tQ² = %.5e GeV²\tF₂ = % .6e\tFₗ = % .6e", val.xbj, val.q2, val.f2, val.fl );
+    return os << cepgen::utils::format( "xbj = %.4f\tQ² = %.5e GeV²\tF₂ = % .6e\tFₗ = % .6e", val.xbj, val.q2, val.f2, val.fl );
   }
 
   std::ostream&

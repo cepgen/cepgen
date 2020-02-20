@@ -1,4 +1,5 @@
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Constants.h"
@@ -351,10 +352,9 @@ namespace cepgen
         q2_eff = q20 + delq2/( 1.+delq2/qq );
         w2_eff = mp2_ + q2_eff*( 1.-xbj )/xbj;
       }
-      const double tau = 4.*xbj*xbj*mp2_/q2_eff;
       const double sigT = resmod507( 'T', w2_eff, q2_eff ), sigL = resmod507( 'L', w2_eff, q2_eff );
 
-      F2 = prefac * q2_eff / ( 1+tau ) * ( sigT+sigL ) / constants::GEVM2_TO_PB * 1.e6;
+      F2 = prefac * q2_eff / ( 1+tau( xbj, q2_eff ) ) * ( sigT+sigL ) / constants::GEVM2_TO_PB * 1.e6;
       if ( q2 > q20 )
         F2 *= q21/( q21 + delq2 );
 

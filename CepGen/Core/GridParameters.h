@@ -13,7 +13,9 @@ namespace cepgen
     public:
       typedef std::vector<unsigned short> coord_t;
 
-      GridParameters( unsigned short ndim );
+      GridParameters( size_t ndim );
+
+      void dump() const;
 
       size_t size() const { return max_; }
       const coord_t& n( size_t coord ) const;

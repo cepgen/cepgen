@@ -14,7 +14,7 @@ namespace ROOT
     weight = ev.weight;
     np = 0;
     const auto& parts = compress
-      ? ev.compressed().particles()
+      ? ev.compress().particles()
       : ev.particles();
     //--- loop over all particles in event
     for ( const auto& part : parts ) {

@@ -10,14 +10,14 @@
 
 namespace cepgen
 {
-  class Event;
   class EventModifier;
   class ParametersList;
-  namespace proc { class GenericProcess; }
-  namespace io { class GenericExportHandler; }
+  namespace proc { class Process; }
+  namespace io { class ExportModule; }
   namespace utils { class TamingFunction; }
   enum class IntegratorType;
   typedef std::vector<std::unique_ptr<EventModifier> > EventModifiersSequence;
+  typedef std::vector<std::unique_ptr<io::ExportModule> > ExportModulesSequence;
   /// List of parameters used to start and run the simulation job
   class Parameters
   {
@@ -38,16 +38,19 @@ namespace cepgen
 
       //----- process to compute
 
+      bool hasProcess() const { return !( !process_ ); }
       /// Process for which the cross-section will be computed and the events will be generated
-      proc::GenericProcess* process();
+      proc::Process& process();
       /// Process for which the cross-section will be computed and the events will be generated
-      const proc::GenericProcess* process() const;
+      const proc::Process& process() const;
       /// Name of the process considered
       std::string processName() const;
-      /// Set the process to study
-      void setProcess( std::unique_ptr<proc::GenericProcess> proc );
-      /// Set the process to study
-      void setProcess( proc::GenericProcess* proc );
+      /// Remove the process pointer
+      void clearProcess();
+      /// Copy a process configuration
+      void setProcess( std::unique_ptr<proc::Process> proc );
+      /// Set a process configuration
+      void setProcess( proc::Process* proc );
 
       //----- events kinematics
 
@@ -97,29 +100,31 @@ namespace cepgen
       /// Are the events generated in this run to be stored in the output file ?
       bool storage() const { return store_; }
 
-      /// Set a new output module definition
-      void setOutputModule( std::unique_ptr<io::GenericExportHandler> mod );
-      /// Set the pointer to a output module
-      void setOutputModule( io::GenericExportHandler* mod );
-      /// Output module definition
-      io::GenericExportHandler* outputModule();
-
       //----- event modification (e.g. hadronisation, decay) algorithm
 
       /// Event modification algorithm to use
-      EventModifier* eventModifier( size_t );
+      EventModifier& eventModifier( size_t );
       /// Retrieve the list of event modification algorithms to run
       EventModifiersSequence& eventModifiersSequence() { return evt_modifiers_; }
       /// Retrieve the list of event modification algorithms to run
       const EventModifiersSequence& eventModifiersSequence() const { return evt_modifiers_; }
-      /// Name of the modification algorithm (if applicable)
-      std::string eventModifierName( size_t ) const;
       /// Add a new event modification algorithm to the sequence
       void addModifier( std::unique_ptr<EventModifier> );
       /// Add a new event modification algorithm to the sequence
       void addModifier( EventModifier* );
-      /// Set the event modification algorithms sequence
-      void setModifiersSequence( EventModifiersSequence& );
+
+      //----- event output algorithms
+
+      /// Output module
+      io::ExportModule& outputModule( size_t );
+      /// Retrieve the list of output modules to run
+      ExportModulesSequence& outputModulesSequence() { return out_modules_; }
+      /// Retrieve the list of output modules to run
+      const ExportModulesSequence& outputModulesSequence() const { return out_modules_; }
+      /// Set a new output module definition
+      void addOutputModule( std::unique_ptr<io::ExportModule> mod );
+      /// Set the pointer to a output module
+      void addOutputModule( io::ExportModule* mod );
 
       //----- taming functions
 
@@ -139,11 +144,10 @@ namespace cepgen
       inline unsigned int numGeneratedEvents() const { return num_gen_events_; }
 
     private:
-      std::unique_ptr<proc::GenericProcess> process_;
+      std::unique_ptr<proc::Process> process_;
       EventModifiersSequence evt_modifiers_;
       /// Storage object
-      std::unique_ptr<io::GenericExportHandler> out_module_;
-
+      ExportModulesSequence out_modules_;
       bool store_;
       /// Total generation time (in seconds)
       double total_gen_time_;

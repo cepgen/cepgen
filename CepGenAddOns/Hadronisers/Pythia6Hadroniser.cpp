@@ -1,14 +1,15 @@
-#include "CepGen/Hadronisers/GenericHadroniser.h"
+#include "CepGen/Modules/Hadroniser.h"
+#include "CepGen/Modules/EventModifierFactory.h"
+
+#include "CepGen/Core/ParametersList.h" //FIXME
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
-
 #include "CepGen/Physics/PDG.h"
 
-#include "CepGen/Core/EventModifierHandler.h"
-#include "CepGen/Core/ParametersList.h" //FIXME
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
+#include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Hasher.h"
 
 #include <algorithm>
 
@@ -57,10 +58,10 @@ namespace cepgen
      * Full interface to the Pythia 6 algorithm. It can be used in a single particle decay mode as well as a full event hadronisation using the string model, as in Jetset.
      * \brief Pythia 6 hadronisation algorithm
      */
-    class Pythia6Hadroniser : public GenericHadroniser
+    class Pythia6Hadroniser : public Hadroniser
     {
       public:
-        explicit Pythia6Hadroniser( const ParametersList& );
+        using Hadroniser::Hadroniser;
 
         void setParameters( const Parameters& ) override {}
         inline void readString( const char* param ) override { pygive( param ); }
@@ -74,7 +75,9 @@ namespace cepgen
         static constexpr unsigned short MAX_STRING_EVENT = 2;
         /// Maximal number of characters to fetch for the particle's name
         static constexpr unsigned short NAME_CHR = 16;
-        static const std::unordered_map<Particle::Status,int> kStatusMatchMap;
+
+        typedef std::unordered_map<Particle::Status,int,utils::EnumHash<Particle::Status> > ParticlesStatusMap;
+        static const ParticlesStatusMap kStatusMatchMap;
 
         inline static double pymass(int pdgid_) { return pymass_(pdgid_); }
         inline static void pyckbd() { pyckbd_(); }
@@ -99,11 +102,7 @@ namespace cepgen
         unsigned int fillParticles( const Event& ) const;
     };
 
-    Pythia6Hadroniser::Pythia6Hadroniser( const ParametersList& plist ) :
-      GenericHadroniser( plist, "pythia6" )
-    {}
-
-    const std::unordered_map<Particle::Status,int>
+    const Pythia6Hadroniser::ParticlesStatusMap
     Pythia6Hadroniser::kStatusMatchMap = {
       { Particle::Status::PrimordialIncoming, 21 },
       { Particle::Status::FinalState, 1 },
@@ -142,9 +141,8 @@ namespace cepgen
       const unsigned short str_in_evt = fillParticles( ev );
 
       CG_DEBUG( "Pythia6Hadroniser" )
-        << "Passed the string construction stage.\n\t"
-        << str_in_evt << " string object" << utils::s( str_in_evt )
-        << " identified and constructed.";
+        << "Passed the string construction stage.\n\t "
+        << utils::s( "string object", str_in_evt ) << " identified and constructed.";
 
       const int old_npart = pyjets_.n;
 
@@ -307,9 +305,9 @@ namespace cepgen
           std::ostringstream dbg;
           for ( unsigned short j = 0; j < num_part_in_str[i]; ++j )
             if ( jlpsf[i][j] != -1 )
-              dbg << Form( "\n\t * %2d (pdgId=%4d)", jlpsf[i][j], pyjets_.k[1][jlpsf[i][j]-1] );
+              dbg << utils::format( "\n\t * %2d (pdgId=%4d)", jlpsf[i][j], pyjets_.k[1][jlpsf[i][j]-1] );
           CG_DEBUG( "Pythia6Hadroniser" )
-            << "Joining " << num_part_in_str[i] << " particle" << utils::s( num_part_in_str[i] )
+            << "Joining " << utils::s( "particle", num_part_in_str[i] )
             << " with " << ev[jlpsf[i][0]].role() << " role"
             << " in a same string (id=" << i << ")"
             << dbg.str();

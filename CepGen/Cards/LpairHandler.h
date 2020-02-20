@@ -16,7 +16,7 @@ namespace cepgen
     {
       public:
         /// Read a LPAIR steering card
-        explicit LpairHandler( const char* file );
+        explicit LpairHandler( const ParametersList& );
 
         /// Store a configuration into a LPAIR steering card
         void store( const char* file );
@@ -46,7 +46,6 @@ namespace cepgen
         std::unordered_map<std::string, Parameter<std::string> > p_strings_;
         std::unordered_map<std::string, Parameter<double> > p_doubles_;
         std::unordered_map<std::string, Parameter<int> > p_ints_;
-        std::unordered_map<std::string, Parameter<bool> > p_bools_;
 
         void init();
         std::shared_ptr<ParametersList> proc_params_;
@@ -56,6 +55,7 @@ namespace cepgen
         std::string out_file_name_;
         std::string integr_type_;
         std::string kmr_grid_path_, mstw_grid_path_, pdg_input_path_;
+        int iend_;
         std::pair<unsigned short,unsigned short> hi_1_, hi_2_;
     };
 
@@ -68,7 +68,7 @@ namespace cepgen
     /// Register an integer parameter
     template<> inline void LpairHandler::registerParameter<int>( const char* key, const char* description, int* def ) { p_ints_.insert( std::make_pair( key, Parameter<int>( key, description, def ) ) ); }
     /// Register a boolean parameter
-    template<> inline void LpairHandler::registerParameter<bool>( const char* key, const char* description, bool* def ) { p_bools_.insert( std::make_pair( key, Parameter<bool>( key, description, def ) ) ); }
+    template<> inline void LpairHandler::registerParameter<bool>( const char* key, const char* description, bool* def ) { registerParameter<int>( key, description, (int*)def ); }
 
     //----- specialised setters
 
@@ -84,10 +84,7 @@ namespace cepgen
       auto it = p_ints_.find( key );
       if ( it != p_ints_.end() ) *it->second.value = value;
     }
-    template<> inline void LpairHandler::setValue<bool>( const char* key, const bool& value ) {
-      auto it = p_bools_.find( key );
-      if ( it != p_bools_.end() ) *it->second.value = value;
-    }
+    template<> inline void LpairHandler::setValue<bool>( const char* key, const bool& value ) { setValue<int>( key, (int)value ); }
 
     //----- specialised getters
 
@@ -107,14 +104,10 @@ namespace cepgen
     template<> inline int LpairHandler::getValue( const char* key ) const {
       const auto& it = p_ints_.find( key );
       if ( it != p_ints_.end() ) return *it->second.value;
-      return 999;
+      return -999999;
     }
     /// Retrieve a boolean parameter value
-    template<> inline bool LpairHandler::getValue( const char* key ) const {
-      const auto& it = p_bools_.find( key );
-      if ( it != p_bools_.end() ) return *it->second.value;
-      return true;
-    }
+    template<> inline bool LpairHandler::getValue( const char* key ) const { return (bool)getValue<int>( key ); }
   }
 }
 

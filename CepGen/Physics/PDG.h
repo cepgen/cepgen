@@ -21,7 +21,7 @@ namespace cepgen
         invalid = 0,
         down = 1, up = 2,
         electron = 11, muon = 13, tau = 15,
-        gluon = 21, photon = 22, W = 23,
+        gluon = 21, photon = 22, W = 24,
         pomeron = 990, reggeon = 110, piZero = 111, piPlus = 211, eta = 221,
         phi1680 = 100333,
         proton = 2212, diffractiveProton = 9902210
@@ -35,12 +35,13 @@ namespace cepgen
       ~PDG() = default;
 
       void define( const ParticleProperties& props );
+      bool has( pdgid_t ) const;
       const ParticleProperties& operator()( pdgid_t ) const;
       const std::vector<pdgid_t> particles() const;
       void dump() const;
       size_t size() const;
       const std::string& name( pdgid_t ) const;
-      short colours( pdgid_t ) const;
+      double colours( pdgid_t ) const;
       double mass( pdgid_t ) const;
       double width( pdgid_t ) const;
       double charge( pdgid_t ) const;

@@ -1,19 +1,19 @@
-#include "CepGen/Core/ExportHandler.h"
+#include "CepGen/Modules/ExportModule.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
-#include "CepGen/Core/utils.h"
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/EventBrowser.h"
 #include "CepGen/Parameters.h"
 
+#include "CepGen/Utils/String.h"
 #include "CepGen/Version.h"
 
 #include <gsl/gsl_histogram.h>
 
 #include <iomanip>
 #include <fstream>
-#include <regex>
 
 namespace cepgen
 {
@@ -24,7 +24,7 @@ namespace cepgen
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Jul 2019
      */
-    class TextHandler : public GenericExportHandler
+    class TextHandler : public ExportModule
     {
       public:
         explicit TextHandler( const ParametersList& );
@@ -63,11 +63,12 @@ namespace cepgen
             gsl_histogram_free( h );
           }
         };
-        std::vector<std::pair<std::string,std::unique_ptr<gsl_histogram,gsl_histogram_deleter> > > hists_;
+        typedef std::unique_ptr<gsl_histogram,gsl_histogram_deleter> gsl_histogram_ptr;
+        std::vector<std::pair<std::string,gsl_histogram_ptr> > hists_;
     };
 
     TextHandler::TextHandler( const ParametersList& params ) :
-      GenericExportHandler( "text" ),
+      ExportModule( params ),
       file_          ( params.get<std::string>( "filename", "output.txt" ) ),
       hist_filename_ ( params.get<std::string>( "histFilename", "output.hists.txt" ) ),
       variables_     ( params.get<std::vector<std::string> >( "variables" ) ),
@@ -76,7 +77,7 @@ namespace cepgen
       show_hists_    ( params.get<bool>( "showHistograms", true ) ),
       save_hists_    ( params.get<bool>( "saveHistograms", false ) ),
       separator_     ( params.get<std::string>( "separator", "\t" ) ),
-      xsec_( 1. )
+      xsec_( 1. ), sqrts_( 0. ), num_evts_( 0ul )
     {
       //--- first extract list of variables to store in output file
       oss_vars_.clear();
@@ -91,9 +92,9 @@ namespace cepgen
         const double min = hvar.get<double>( "low", 0. ), max = hvar.get<double>( "high", 1. );
         auto hist = gsl_histogram_alloc( nbins );
         gsl_histogram_set_ranges_uniform( hist, min, max );
-        hists_.emplace_back( std::make_pair( var, hist ) );
+        hists_.emplace_back( std::make_pair( var, gsl_histogram_ptr( hist ) ) );
         CG_INFO( "TextHandler" )
-          << "Booking a histogram with " << utils::s( "bin", nbins, true )
+          << "Booking a histogram with " << utils::s( "bin", nbins )
           << " between " << min << " and " << max << " for \"" << var << "\".";
       }
       if ( save_hists_ && !hists_.empty() )
@@ -118,7 +119,7 @@ namespace cepgen
       }
       if ( save_hists_ )
         CG_INFO( "TextHandler" )
-          << "Saved " << utils::s( "histogram", hists_.size(), true )
+          << "Saved " << utils::s( "histogram", hists_.size() )
           << " into \"" << hist_filename_ << "\".";
     }
 
@@ -161,9 +162,9 @@ namespace cepgen
         << "plot of \"" << var << "\"\n"
         << sep << std::string( PLOT_WIDTH-15-var.size(), ' ' )
         << "d(sig)/d" << var << " (pb/bin)\n"
-        << sep << Form( "%-5.2f", gsl_histogram_min_val( hist ) )
+        << sep << utils::format( "%-5.2f", gsl_histogram_min_val( hist ) )
         << std::string( PLOT_WIDTH-11, ' ' )
-        << Form( "%5.2e", gsl_histogram_max_val( hist ) ) << "\n"
+        << utils::format( "%5.2e", gsl_histogram_max_val( hist ) ) << "\n"
         << sep << std::string( PLOT_WIDTH+2, '.' ); // abscissa axis
       for ( size_t i = 0; i < nbins; ++i ) {
         double min, max;
@@ -171,16 +172,16 @@ namespace cepgen
         const double value = gsl_histogram_get( hist, i );
         const int val = value*PLOT_WIDTH*inv_max_bin;
         os
-          << "\n" << Form( "[%7.2f,%7.2f):", min, max )
+          << "\n" << utils::format( "[%7.2f,%7.2f):", min, max )
           << std::string( val, PLOT_CHAR ) << std::string( PLOT_WIDTH-val, ' ' )
-          << ": " << Form( "%6.2e", value );
+          << ": " << utils::format( "%6.2e", value );
       }
       const double bin_width = ( gsl_histogram_max( hist )-gsl_histogram_min( hist ) )/nbins;
       os
         << "\n"
-        << Form( "%17s", var.c_str() ) << ":" << std::string( PLOT_WIDTH, '.' ) << ":\n" // 2nd abscissa axis
+        << utils::format( "%17s", var.c_str() ) << ":" << std::string( PLOT_WIDTH, '.' ) << ":\n" // 2nd abscissa axis
         << "\t("
-        << "bin width=" << bin_width << " unit" << utils::s( (int)bin_width ) << ", "
+        << "bin width=" << bin_width << utils::s( " unit", (int)bin_width, false ) << ", "
         << "mean=" << gsl_histogram_mean( hist ) << ", "
         << "st.dev.=" << gsl_histogram_sigma( hist )
         << ")";

@@ -1,10 +1,11 @@
-#include "CepGen/Core/ExportHandler.h"
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
-#include "CepGen/Core/utils.h"
+#include "CepGen/Modules/ExportModule.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/EventBrowser.h"
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/String.h"
 
 #include "YODA/Histo1D.h"
 #include "YODA/Histo2D.h"
@@ -27,7 +28,7 @@ namespace cepgen
      * \tparam T YODA writer type
      */
     template<typename T>
-    class YODAHistsHandler : public GenericExportHandler
+    class YODAHistsHandler : public ExportModule
     {
       public:
         explicit YODAHistsHandler( const ParametersList& );
@@ -52,14 +53,14 @@ namespace cepgen
 
     template<typename T>
     YODAHistsHandler<T>::YODAHistsHandler( const ParametersList& params ) :
-      GenericExportHandler( "yoda" ),
+      ExportModule( params ),
       file_( params.get<std::string>( "filename", "output.yoda" ) ),
       variables_( params.get<ParametersList>( "variables" ) ),
       xsec_( 1. )
     {
       //--- extract list of variables/correlations to be plotted in histograms
       for ( const auto& key : variables_.keys() ) {
-        const auto& vars = split( key, ':' );
+        const auto& vars = utils::split( key, ':' );
         if ( vars.size() < 1 || vars.size() > 3 )
           throw CG_FATAL( "YODAHistsHandler" )
             << "Invalid number of variables to correlate for '" << key << "'!";
@@ -71,7 +72,7 @@ namespace cepgen
         min_x = hvars.get<double>( "low", min_x ), max_x = hvars.get<double>( "high", max_x );
         const bool profile = hvars.get<bool>( "profile", false );
         if ( vars.size() == 1 ) { // 1D histogram
-          const auto title = Form( "d(sigma)/d(%s) (pb/bin)", key.c_str() );
+          const auto title = utils::format( "d(sigma)/d(%s) (pb/bin)", key.c_str() );
           hists1d_.emplace_back( std::make_pair( key, YODA::Histo1D( nbins_x, min_x, max_x, key, title ) ) );
           CG_INFO( "YODAHistsHandler" )
             << "Booking a histogram with " << utils::s( "bin", nbins_x )
@@ -81,7 +82,7 @@ namespace cepgen
         const int nbins_y = hvars.get<int>( "nbinsY", 10 );
         const double min_y = hvars.get<double>( "lowY", 0. ), max_y = hvars.get<double>( "highY", 1. );
         if ( vars.size() == 2 ) { // 2D histogram
-          const auto title = Form( "d^2(sigma)/d(%s)/d(%s) (pb/bin)", vars[0].c_str(), vars[1].c_str() );
+          const auto title = utils::format( "d^2(sigma)/d(%s)/d(%s) (pb/bin)", vars[0].c_str(), vars[1].c_str() );
           if ( profile )
             profiles1d_.emplace_back( std::make_pair( vars, YODA::Profile1D( nbins_x, min_x, max_x, key, title ) ) );
           else
@@ -91,11 +92,11 @@ namespace cepgen
             << ( profile ? "1D profile" : "2D correlation plot" )
             << " with " << utils::s( "bin", nbins_x+nbins_y )
             << " between (" << min_x << ", " << min_y << ") and (" << max_x << ", " << max_y << ")"
-            << " for \"" << merge( vars, " / " ) << "\".";
+            << " for \"" << utils::merge( vars, " / " ) << "\".";
           continue;
         }
         if ( vars.size() == 3 && profile ) {
-          const auto title = Form( "(%s / %s / %s) correlation;%s;%s;%s;d^{3}#sigma/d(%s)/d(%s)/d(%s) (pb/bin)",
+          const auto title = utils::format( "(%s / %s / %s) correlation;%s;%s;%s;d^{3}#sigma/d(%s)/d(%s)/d(%s) (pb/bin)",
             vars[0].c_str(), vars[1].c_str(), vars[2].c_str(),
             vars[0].c_str(), vars[1].c_str(), vars[2].c_str(),
             vars[0].c_str(), vars[1].c_str(), vars[2].c_str() );
@@ -105,7 +106,7 @@ namespace cepgen
             << " with " << utils::s( "bin", nbins_x+nbins_y )
             << " between (" << min_x << ", " << min_y << ")"
             << " and (" << max_x << ", " << max_y << ")"
-            << " for \"" << merge( vars, " / " ) << "\".";
+            << " for \"" << utils::merge( vars, " / " ) << "\".";
           continue;
         }
       }

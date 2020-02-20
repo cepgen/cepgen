@@ -1,8 +1,8 @@
 #ifndef CepGen_Physics_TamingFunction_h
 #define CepGen_Physics_TamingFunction_h
 
-#include "CepGen/Core/Functional.h"
-#include "CepGen/Core/utils.h"
+#include "CepGen/Utils/Functional.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen
 {
