@@ -9,14 +9,6 @@ namespace cepgen
 {
   namespace io
   {
-    inline std::string GetRandomString(int nLetters_)
-    {
-      std::stringstream out;
-      for (int i=0; i<nLetters_; i++)
-        out << (char)('a'+rand()%(('z'-'a')+1));
-      return out.str();
-    }
-
     typedef enum {
       GP_CLASSIC = 0,
       GP_HISTOGRAM = 1,
@@ -32,7 +24,7 @@ namespace cepgen
     class Gnuplot {
       public:
         /// Class constructor
-        Gnuplot(std::string outFile_="");
+        Gnuplot( std::string out_file = "" );
         /// Class destructor
         ~Gnuplot();
         /**

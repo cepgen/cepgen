@@ -100,5 +100,14 @@ namespace cepgen
       std::copy( vec.begin(), std::prev( vec.end() ), std::ostream_iterator<std::string>( oss, delim.c_str() ) );
       return oss.str()+*vec.rbegin();
     }
+
+    std::string
+    randomString( size_t size )
+    {
+      std::stringstream out;
+      for ( size_t i = 0; i < size; ++i )
+        out << (char)( 'a'+rand() % ( ( 'z'-'a' )+1 ) );
+      return out.str();
+    }
   }
 }

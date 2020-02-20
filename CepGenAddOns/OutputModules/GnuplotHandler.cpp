@@ -1,4 +1,5 @@
 #include "CepGen/IO/ExportHandler.h"
+#include "CepGen/Utils/String.h"
 
 #include <string>
 #include <sstream>
@@ -11,14 +12,6 @@ namespace cepgen
 {
   namespace io
   {
-    std::string GetRandomString(int nLetters_)
-    {
-      std::stringstream out;
-      for (int i=0; i<nLetters_; i++)
-        out << (char)('a'+rand()%(('z'-'a')+1));
-      return out.str();
-    }
-
     Gnuplot::Gnuplot(std::string outFile_) :
       _type(GP_CLASSIC),
       _isPlottable(false),
@@ -35,7 +28,7 @@ namespace cepgen
         std::cerr << "Gnuplot not found !" << std::endl;
       if (outFile_!="")
         this->SetOutputFile(outFile_);
-      of.str(""); of << "/tmp/" << GetRandomString(5) << ".tmp";
+      of.str(""); of << "/tmp/" << utils::randomString( 5 ) << ".tmp";
       _tmpFile = of.str();
     }
 
