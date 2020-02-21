@@ -7,6 +7,7 @@ file(GLOB sf_sources StructureFunctions/*.cpp)
 
 set(core_definitions)
 set(core_includes)
+set(root_functionals OFF)
 
 #----- check the external dependencies for SFs/alphaS
 
@@ -66,6 +67,7 @@ elseif(ROOT_FOUND)
   list(APPEND core_includes ${ROOT_INCLUDE_DIRS})
   list(APPEND CEPGEN_CORE_EXT ${ROOT_LIBRARIES})
   set(CEPGEN_HAS_FUNCTIONALS ON)
+  set(root_functionals ON)
 endif()
 
 #----- build the objects
@@ -73,6 +75,10 @@ endif()
 add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${proc_sources} ${sf_sources})
 target_compile_definitions(CepGenCore PUBLIC ${core_definitions})
 target_link_libraries(CepGenCore PUBLIC ${CEPGEN_CORE_EXT})
+target_include_directories(CepGenCore PRIVATE ${core_includes})
+if(root_functionals)
+  set_property(TARGET CepGenCore PROPERTY CXX_STANDARD 14)
+endif()
 
 #----- installation rules
 
