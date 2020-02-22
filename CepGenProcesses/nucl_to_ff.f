@@ -15,7 +15,6 @@ c     =================================================================
       integer imethod,pdg_l
       integer iterm11,iterm22,iterm12,itermtt
       integer imat1,imat2
-      integer i
 
 c     =================================================================
 c     local variables
