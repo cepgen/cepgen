@@ -7,7 +7,6 @@ file(GLOB sf_sources StructureFunctions/*.cpp)
 
 set(core_definitions)
 set(core_includes)
-set(root_functionals OFF)
 
 #----- check the external dependencies for SFs/alphaS
 
@@ -55,19 +54,19 @@ if(MUPARSER)
   message(STATUS "Formulas parsing will use muParser found in ${MUPARSER}")
   list(APPEND core_definitions -DFUNC_MUPARSER)
   list(APPEND CEPGEN_CORE_EXT ${MUPARSER})
-  set(CEPGEN_HAS_FUNCTIONALS ON)
+  set(CEPGEN_HAS_FUNCTIONALS ON PARENT_SCOPE)
 elseif(EXPRTK)
   message(STATUS "Formulas parsing will use exprtk found in ${EXPRTK}")
   list(APPEND core_definitions -DFUNC_EXPRTK)
   list(APPEND core_includes ${EXPRTK}) # header-only
-  set(CEPGEN_HAS_FUNCTIONALS ON)
+  set(CEPGEN_HAS_FUNCTIONALS ON PARENT_SCOPE)
 elseif(ROOT_FOUND)
   message(STATUS "Formulas parsing will use ROOT")
-  list(APPEND core_definitions -DFUNC_ROOT)
+  list(APPEND core_definitions -DFUNC_ROOT ${ROOT_DEFINITIONS})
   list(APPEND core_includes ${ROOT_INCLUDE_DIRS})
   list(APPEND CEPGEN_CORE_EXT ${ROOT_LIBRARIES})
-  set(CEPGEN_HAS_FUNCTIONALS ON)
-  set(root_functionals ON)
+  set(CEPGEN_HAS_FUNCTIONALS ON PARENT_SCOPE)
+  set(CEPGEN_ROOT_FUNCTIONALS ON PARENT_SCOPE)
 endif()
 
 #----- build the objects
@@ -75,9 +74,11 @@ endif()
 add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${proc_sources} ${sf_sources})
 target_compile_definitions(CepGenCore PUBLIC ${core_definitions})
 target_link_libraries(CepGenCore PUBLIC ${CEPGEN_CORE_EXT})
-target_include_directories(CepGenCore PRIVATE ${core_includes})
-if(root_functionals)
+target_include_directories(CepGenCore PUBLIC ${core_includes})
+if(CEPGEN_ROOT_FUNCTIONALS)
   set_property(TARGET CepGenCore PROPERTY CXX_STANDARD 14)
+  #set_target_properties(CepGenCore PROPERTIES COMPILE_FLAGS ${ROOT_CXX_FLAGS})
+  #target_compile_options(CepGenCore PRIVATE ${ROOT_CXX_FLAGS})
 endif()
 
 #----- installation rules

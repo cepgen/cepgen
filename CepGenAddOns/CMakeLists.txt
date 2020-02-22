@@ -41,7 +41,6 @@ endif()
 #--- linking with ROOT/Delphes
 
 if(ROOT_FOUND)
-  message(STATUS "ROOT found in ${ROOT_LIBRARY_DIR}")
   list(APPEND addons_libraries ${ROOT_LIBRARIES})
   list(APPEND addons_definitions ${ROOT_DEFINITIONS})
   list(APPEND addons_includes ${ROOT_INCLUDE_DIRS})
