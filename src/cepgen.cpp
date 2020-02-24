@@ -1,6 +1,7 @@
 #include "CepGen/Generator.h"
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Cards/Handler.h"
 
 #include "CepGen/Utils/ArgumentsParser.h"
@@ -17,13 +18,19 @@ int main( int argc, char* argv[] )
 {
   std::string input_card;
   int num_events;
-  bool list_mods;
+  bool list_mods = false, cmd_line = false;
 
-  cepgen::ArgumentsParser( argc, argv )
-    .addArgument( "", "path to the configuration file", &input_card, 'i' )
-    .addOptionalArgument( "num-events", "number of events to generate", -1, &num_events, 'n' )
-    .addOptionalArgument( "list-modules", "list all runtime modules", false, &list_mods, 'l' )
-    .parse();
+  const std::string first_arg( argv[1] );
+  if ( first_arg == "--cmd" || first_arg == "-c" )
+    cmd_line = true;
+
+  if ( !cmd_line )
+    cepgen::ArgumentsParser( argc, argv )
+      .addArgument( "", "path to the configuration file", &input_card, 'i' )
+      .addOptionalArgument( "num-events", "number of events to generate", -1, &num_events, 'n' )
+      .addOptionalArgument( "list-modules", "list all runtime modules", false, &list_mods, 'l' )
+      //.addOptionalArgument( "cmd", "command-line steering mode", false, &cmd_line, 'c' )
+      .parse();
 
   cepgen::utils::AbortHandler ctrl_c;
 
@@ -37,7 +44,12 @@ int main( int argc, char* argv[] )
 
   try {
     //--- parse the steering card
-    gen.setParameters( cepgen::card::Handler::parse( input_card )->parameters() );
+    if ( cmd_line )
+      gen.setParameters( cepgen::card::CardsHandlerFactory::get().build( "cmd", cepgen::ParametersList()
+        .set<std::vector<std::string> >( "args", std::vector<std::string>( argv+1, argv+argc ) ) )
+        ->parameters() );
+    else
+      gen.setParameters( cepgen::card::Handler::parse( input_card )->parameters() );
 
     if ( num_events >= 0 ) { // user specified a number of events to generate
       gen.parameters().generation().maxgen = num_events;
