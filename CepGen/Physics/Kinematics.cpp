@@ -23,7 +23,8 @@ namespace cepgen
   {
     if ( incoming_beams.first.pdg != incoming_beams.second.pdg )
       throw CG_FATAL( "Kinematics" )
-        << "Trying to set √s with asymmetric beams.\n"
+        << "Trying to set √s with asymmetric beams"
+        << " (" << incoming_beams.first.pdg << "/" << incoming_beams.second.pdg << ").\n"
         << "Please fill incoming beams objects manually!";
     incoming_beams.first.pz = incoming_beams.second.pz = 0.5 * sqrts;
   }

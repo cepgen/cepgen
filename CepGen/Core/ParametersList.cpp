@@ -18,7 +18,6 @@ namespace cepgen
   ParametersList&
   ParametersList::operator+=( const ParametersList& oth )
   {
-    param_values_.insert( oth.param_values_.begin(), oth.param_values_.end() );
     int_values_.insert( oth.int_values_.begin(), oth.int_values_.end() );
     dbl_values_.insert( oth.dbl_values_.begin(), oth.dbl_values_.end() );
     str_values_.insert( oth.str_values_.begin(), oth.str_values_.end() );
@@ -27,6 +26,8 @@ namespace cepgen
     vec_int_values_.insert( oth.vec_int_values_.begin(), oth.vec_int_values_.end() );
     vec_dbl_values_.insert( oth.vec_dbl_values_.begin(), oth.vec_dbl_values_.end() );
     vec_str_values_.insert( oth.vec_str_values_.begin(), oth.vec_str_values_.end() );
+    for ( const auto& par : oth.param_values_ )
+      param_values_[par.first] += par.second;
     return *this;
   }
 
