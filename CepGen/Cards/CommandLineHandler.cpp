@@ -16,6 +16,8 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/String.h"
 
+#include <fstream>
+
 namespace cepgen
 {
   namespace card
@@ -32,15 +34,24 @@ namespace cepgen
         static ParametersList vectorise( const Args& );
         static const double INVALID;
 
-        const Args argv_;
+        const std::string filename_;
+        Args argv_;
     };
 
     const double CommandLineHandler::INVALID = -999.999;
 
     CommandLineHandler::CommandLineHandler( const ParametersList& params ) :
+      filename_( params.get<std::string>( FILENAME_KEY ) ),
       argv_( params.get<std::vector<std::string> >( "args" ) )
     {
-      auto pars = vectorise( argv_ );
+      if ( !filename_.empty() ) {
+        std::ifstream file( filename_ );
+        std::string line;
+        while ( getline( file, line ) )
+          argv_.emplace_back( line );
+        file.close();
+      }
+      const auto pars = vectorise( argv_ );
 
       //----- process definition
       const auto& proc = pars.get<ParametersList>( "process" );

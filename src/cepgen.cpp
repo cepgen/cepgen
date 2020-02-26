@@ -29,7 +29,6 @@ int main( int argc, char* argv[] )
       .addArgument( "", "path to the configuration file", &input_card, 'i' )
       .addOptionalArgument( "num-events", "number of events to generate", -1, &num_events, 'n' )
       .addOptionalArgument( "list-modules", "list all runtime modules", false, &list_mods, 'l' )
-      //.addOptionalArgument( "cmd", "command-line steering mode", false, &cmd_line, 'c' )
       .parse();
 
   cepgen::utils::AbortHandler ctrl_c;
@@ -45,8 +44,9 @@ int main( int argc, char* argv[] )
   try {
     //--- parse the steering card
     if ( cmd_line )
-      gen.setParameters( cepgen::card::CardsHandlerFactory::get().build( "cmd", cepgen::ParametersList()
-        .set<std::vector<std::string> >( "args", std::vector<std::string>( argv+1, argv+argc ) ) )
+      gen.setParameters( cepgen::card::CardsHandlerFactory::get().build( "cmd",
+        cepgen::ParametersList().set<std::vector<std::string> >( "args",
+          std::vector<std::string>( argv+1, argv+argc ) ) )
         ->parameters() );
     else
       gen.setParameters( cepgen::card::Handler::parse( input_card )->parameters() );
