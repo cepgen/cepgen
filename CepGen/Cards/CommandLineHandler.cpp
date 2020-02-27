@@ -69,7 +69,7 @@ namespace cepgen
       //----- structure functions
       auto strfun = pars.get<ParametersList>( "strfun" ); // copy
       if ( strfun.name<int>( -999 ) == -999 )
-        strfun.setName<int>( 11 );
+        strfun.setName<int>( 11 ); // default is Suri-Yennie
       params_.kinematics.structure_functions = strfun::StructureFunctionsFactory::get().build( strfun );
 
       //----- phase space definition
