@@ -4,8 +4,14 @@
 #include "CepGen/Processes/Process.h"
 #include "CepGen/Modules/ProcessesFactory.h"
 
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/ExportModule.h"
+
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/EventModifier.h"
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Limits.h"
@@ -59,6 +65,12 @@ namespace cepgen
         throw CG_FATAL( "CommandLineHandler" )
           << "Failed to retrieve a process in the configuration!";
       params_.setProcess( proc::ProcessesFactory::get().build( proc ) );
+
+      //----- structure functions
+      auto strfun = pars.get<ParametersList>( "strfun" ); // copy
+      if ( strfun.name<int>( -999 ) == -999 )
+        strfun.setName<int>( 11 );
+      params_.kinematics.structure_functions = strfun::StructureFunctionsFactory::get().build( strfun );
 
       //----- phase space definition
       const auto& kin = pars.get<ParametersList>( "kinematics" );
@@ -118,6 +130,13 @@ namespace cepgen
       params_.generation().gen_print_every = gen.get<int>( "nprn", 1000 );
       params_.generation().treat = gen.get<bool>( "treat", true );
       params_.integration().rng_seed = gen.get<int>( "seed" );
+
+      //----- event modification modules
+      const auto& mod = pars.get<ParametersList>( "eventmod" );
+      if ( !mod.keys().empty() ) {
+        params_.addModifier( EventModifierFactory::get().build( mod ) );
+        (*params_.eventModifiersSequence().rbegin())->setParameters( params_ );
+      }
 
       //----- output modules definition
       const auto& out = pars.get<ParametersList>( "output" );
