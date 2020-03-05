@@ -4,9 +4,9 @@ Hadronisation/fragmentation
 The decay of secondary products and fragmentation of outgoing dissociative proton states may be triggered directly at the CepGen level.
 
 Several interfaces to external algorithms are therefore provided in the ``CepGenAddOns`` library, and easily steerable through the ``hadroniser`` block (in `Python </cards-python>`_ cards) or ``HADR`` variable (in `LPAIR-like </cards-lpair>`_ cards).
-All modules are derived from a common :cpp:class:`cepgen::hadr::GenericHadroniser` class described below:
+All modules are derived from a common :cpp:class:`cepgen::hadr::Hadroniser` class described below:
 
-.. doxygenclass:: cepgen::hadr::GenericHadroniser
+.. doxygenclass:: cepgen::hadr::Hadroniser
    :outline:
 
 .. container:: toggle
@@ -15,7 +15,7 @@ All modules are derived from a common :cpp:class:`cepgen::hadr::GenericHadronise
 
       Detailed description
 
-   .. doxygenclass:: cepgen::hadr::GenericHadroniser
+   .. doxygenclass:: cepgen::hadr::Hadroniser
       :members:
       :no-link:
 

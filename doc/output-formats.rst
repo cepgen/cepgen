@@ -6,7 +6,7 @@ In CepGen, the event (particles, their parentage and kinematics) is handled thro
 To ease the user interaction with this object, a few output writers (defined here as "handlers") are given as examples.
 All handlers are defined as modules derivating from the following abstract base class:
 
-.. doxygenclass:: cepgen::io::GenericExportHandler
+.. doxygenclass:: cepgen::io::ExportModule
    :outline:
 
 .. container:: toggle
@@ -15,7 +15,7 @@ All handlers are defined as modules derivating from the following abstract base 
 
       Detailed description
 
-   .. doxygenclass:: cepgen::io::GenericExportHandler
+   .. doxygenclass:: cepgen::io::ExportModule
       :members:
       :no-link:
 
@@ -135,7 +135,7 @@ These two modules module allow to produce a **ROOT** :cite:`Brun:1997pa` **file*
 
 - a list of histograms (stored as ROOT :cpp:class:`TH1D` objects) provided as an input for the earlier:
 
-  .. doxygenclass:: cepgen::io::ROOTHandler
+  .. doxygenclass:: cepgen::io::ROOTHistsHandler
      :outline:
 
 - or a set of **events** and **run information** (stored as ROOT :cpp:class:`TTree` objects) for the latter:

@@ -29,4 +29,4 @@ It can hence take the following values:
 * ``PDG.muon := 13`` for the :math:`\mu^+\mu^-` pair production, and
 * ``PDG.tau := 15`` for the :math:`\tau^+\tau^-` pair production.
 
-.. doxygenclass:: cepgen::proc::GamGamLL
+.. doxygenclass:: cepgen::proc::LPAIR

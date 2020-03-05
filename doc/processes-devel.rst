@@ -12,7 +12,7 @@ In CepGen, all processes are defined as an object derivating from the following 
 
       **Show/Hide Code**
 
-   .. doxygenclass:: cepgen::proc::GenericProcess
+   .. doxygenclass:: cepgen::proc::Process
       :members:
 
 :math:`k_{\rm T}`-factorised processes
@@ -21,9 +21,9 @@ In CepGen, all processes are defined as an object derivating from the following 
 .. versionadded:: 0.9
 
 The transverse-momentum dependent factorisation of two-photon processes can be simulated within CepGen.
-For this purpose, a :class:`cepgen::proc::GenericKTProcess` helper derivated-class of the earlier is introduced to allow the photon fluxes part to be transparent to the process developper.
+For this purpose, a :class:`cepgen::proc::KTProcess` helper derivated-class of the earlier is introduced to allow the photon fluxes part to be transparent to the process developper.
 
-.. doxygenclass:: cepgen::proc::GenericKTProcess
+.. doxygenclass:: cepgen::proc::KTProcess
    :outline:
 
 As described in `the reference papers <../bibliography#kt-factorisation>`__, the :math:`\kt`-factorisation approach allows a direct factorisation of any hard process (e.g. photon- or gluon-induced productions) while accounting for transverse components of parton virtualities.
@@ -213,7 +213,7 @@ These can be translated in the following Fortran subroutines/functions definitio
 Overall linking
 ^^^^^^^^^^^^^^^
 
-To interface your process to CepGen, edit the ``External/Processes/CepGenWrapper.cpp`` file to link your function implementation to the core processes module.
+To interface your process to CepGen, edit the ``CepGenProcesses/ProcessesWrapper.cpp`` file to link your function implementation to the core processes module.
 
 The following macros are used to declare the function name and link it to CepGen.
 
@@ -237,9 +237,9 @@ Or, following this nomenclature:
 
 For this version, the following process is already registered:
 
-.. literalinclude:: ../External/Processes/CepGenWrapper.cpp
+.. literalinclude:: ../CepGenProcesses/ProcessesWrapper.cpp
    :language: cpp
-   :caption: List of registered external Fortran processes, as imported from ``External/Processes/CepGenWrapper.cpp``.
+   :caption: List of registered external Fortran processes, as imported from ``CepGenProcesses/ProcessesWrapper.cpp``.
 
 .. [#f1]
    See `this page <structure-functions>`_ for a complete list of integer-type structure functions definitions.
