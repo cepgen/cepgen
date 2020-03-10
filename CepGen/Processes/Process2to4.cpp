@@ -221,14 +221,18 @@ namespace cepgen
       //--- compute fluxes according to modelling specified in parameters card
 
       const HeavyIon hi1( kin_.incoming_beams.first.pdg );
-      const double f1 = ( hi1 ) // check if we are in heavy ion mode
-        ? ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, hi1 )
-        : ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, *kin_.structure_functions, mA2_, mX2_ );
+      double f1 = 0;
+      if ( hi1 ) // check if we are in heavy ion mode
+        f1 = ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, hi1 );
+      else if ( kin_.structure_functions )
+        f1 = ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, *kin_.structure_functions, mA2_, mX2_ );
 
+      double f2 = 0.;
       const HeavyIon hi2( kin_.incoming_beams.second.pdg );
-      const double f2 = ( hi2 ) // check if we are in heavy ion mode
-        ? ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, hi2 )
-        : ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, *kin_.structure_functions, mB2_, mY2_ );
+      if ( hi2 ) // check if we are in heavy ion mode
+        f2 = ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, hi2 );
+      else if ( kin_.structure_functions )
+        f2 = ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, *kin_.structure_functions, mB2_, mY2_ );
 
       CG_DEBUG_LOOP( "2to4:fluxes" )
         << "Incoming fluxes for (x/kt2) = "

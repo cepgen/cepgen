@@ -87,7 +87,8 @@ namespace cepgen
       //===========================================================================================
 
       genparams_.icontri = (int)kin_.mode;
-      genparams_.sfmod = (int)kin_.structure_functions->type;
+      if ( kin_.structure_functions )
+        genparams_.sfmod = (int)kin_.structure_functions->type;
 
       //-------------------------------------------------------------------------------------------
       // incoming beams information

@@ -88,8 +88,7 @@ namespace cepgen
       /// Feed the generator with a Parameters object
       void setParameters( Parameters& ip );
       /// Remove all references to a previous generation/run
-      /// \param[in] clear_proc Also remove the process
-      void clearRun( bool clear_proc = false );
+      void clearRun();
       /// Integrate the functional over the whole phase space
       void integrate();
       /**

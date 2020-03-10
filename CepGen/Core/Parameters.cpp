@@ -73,8 +73,10 @@ namespace cepgen
       << std::hex << (void*)process_.get() << std::dec << ".\n\t"
       << "Process mode considered: " << kinematics.mode << "\n\t"
       << "   first beam: " << kinematics.incoming_beams.first << "\n\t"
-      << "  second beam: " << kinematics.incoming_beams.second << "\n\t"
-      << "  structure functions: " << *kinematics.structure_functions;
+      << "  second beam: " << kinematics.incoming_beams.second;
+    if ( kinematics.structure_functions )
+      CG_DEBUG( "Parameters" )
+        << "  structure functions: " << *kinematics.structure_functions;
     if ( process_->hasEvent() )
       process_->clearEvent();
     //--- clear the run statistics

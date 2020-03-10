@@ -42,6 +42,23 @@ namespace cepgen
         event_.reset( new Event( *proc.event_.get() ) );
     }
 
+    std::unique_ptr<Process>
+    Process::clone( const ParametersList& ) const
+    {
+      throw CG_FATAL( "Process:clone" )
+        << "Process \"" << name_ << "\" has no cloning method implementation!";
+    }
+
+    void
+    Process::clear()
+    {
+      first_run = true;
+      addEventContent();
+      //--- initialise the "constant" (wrt x) part of the Jacobian
+      base_jacobian_ = 1.;
+      mapped_variables_.clear();
+    }
+
     void
     Process::dumpVariables() const
     {
@@ -241,16 +258,15 @@ namespace cepgen
     void
     Process::clearEvent()
     {
-      event_->restore();
+      if ( event_ )
+        event_->restore();
     }
 
     void
     Process::setKinematics( const Kinematics& kin )
     {
+      clear();
       kin_ = kin;
-      //--- initialise the "constant" (wrt x) part of the Jacobian
-      base_jacobian_ = 1.;
-      mapped_variables_.clear();
 
       //--- define incoming system
       // at some point introduce non head-on colliding beams?

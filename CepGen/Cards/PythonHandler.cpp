@@ -242,6 +242,8 @@ namespace cepgen
       PyObject* psf = element( kin, "structureFunctions" ); // borrowed
       if ( psf )
         params_.kinematics.structure_functions = strfun::StructureFunctionsFactory::get().build( get<ParametersList>( psf ) );
+      else
+        params_.kinematics.structure_functions = strfun::StructureFunctionsFactory::get().build( (int)strfun::Type::SuriYennie );
       //--- types of parton fluxes for kt-factorisation
       PyObject* pktf = element( kin, "ktFluxes" ); // borrowed
       if ( pktf ) {

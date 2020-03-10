@@ -90,7 +90,7 @@ int main( int argc, char* argv[] )
   try {
     unsigned short num_tests = 0;
     for ( const auto& test : tests ) {
-      gen.clearRun( true );
+      gen.parameters().clearProcess();
 
       const std::string filename = "test_processes/"+test.filename+"_cfg.py";
       gen.setParameters( cepgen::card::PythonHandler( filename ).parameters() );

@@ -61,17 +61,10 @@ namespace cepgen
   {}
 
   void
-  Generator::clearRun( bool clear_proc )
+  Generator::clearRun()
   {
-    if ( parameters_->hasProcess() ) {
-      if ( clear_proc )
-        parameters_->clearProcess();
-      else {
-        parameters_->process().first_run = true;
-        parameters_->process().addEventContent();
-        parameters_->process().setKinematics( parameters_->kinematics );
-      }
-    }
+    if ( parameters_->hasProcess() )
+      parameters_->process().setKinematics( parameters_->kinematics );
     result_ = result_error_ = -1.;
   }
 
@@ -85,6 +78,8 @@ namespace cepgen
   Generator::setParameters( Parameters& ip )
   {
     parameters_.reset( new Parameters( ip ) ); // copy constructor
+    if ( parameters_->hasProcess() )
+      parameters_->process().setKinematics( parameters_->kinematics );
   }
 
   void
@@ -108,11 +103,13 @@ namespace cepgen
   Generator::computePoint( double* x )
   {
     clearRun();
-
     if ( !parameters_->hasProcess() )
       throw CG_FATAL( "Generator:computePoint" )
         << "Trying to compute a point with no process specified!";
     const size_t ndim = parameters_->process().ndim();
+    if ( ndim < 1 )
+      throw CG_FATAL( "Generator:computePoint" )
+        << "Invalid phase space dimension (ndim=" << ndim << ")!";
     double res = integrand::eval( x, ndim, (void*)parameters_.get() );
     std::ostringstream os;
     std::string sep;
@@ -156,14 +153,14 @@ namespace cepgen
   Generator::integrate()
   {
     clearRun();
-    result_ = result_error_ = 0.;
-
-    // first destroy and recreate the integrator instance
     if ( !parameters_->hasProcess() )
       throw CG_FATAL( "Generator:integrate" )
         << "Trying to integrate while no process is specified!";
-
     const size_t ndim = parameters_->process().ndim();
+    if ( ndim < 1 )
+      throw CG_FATAL( "Generator:computePoint" )
+        << "Invalid phase space dimension (ndim=" << ndim << ")!";
+    // first destroy and recreate the integrator instance
     if ( !integrator_ || integrator_->dimensions() != ndim )
       integrator_.reset( new Integrator( ndim, integrand::eval, *parameters_ ) );
 

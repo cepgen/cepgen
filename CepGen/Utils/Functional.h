@@ -81,7 +81,9 @@ namespace cepgen
         void initialise() {
           if ( vars_.size() != values_.size() )
             throw CG_FATAL( "Functional" )
-              << "Number of values should match exactly the number of variables!";
+              << "Number of arguments (" << values_.size() << ") "
+              << "should match exactly the number of variables\n"
+              << "registered for this function " << "(" << vars_.size() << ")!";
 #if defined FUNC_MUPARSER
           try {
             for ( size_t i = 0; i < vars_.size(); ++i )
@@ -101,9 +103,6 @@ namespace cepgen
           expr_.register_symbol_table( symbols_ );
           parser_.compile( expression_, expr_ );
 #elif defined FUNC_ROOT
-          /*for ( size_t i = 0; i < vars_.size(); ++i )
-            replace_all( expression_, vars_[i], utils::format( "[%d]", i ) );
-          func_ = TFormula( "functional", expression_.c_str(), vars_.size() );*/
           for ( size_t i = 0; i < vars_.size(); ++i )
             func_.AddVariable( vars_[i], 0. );
           if ( func_.Compile( expression_.c_str() ) != 0 )

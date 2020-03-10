@@ -13,56 +13,54 @@
 using namespace std;
 
 /// Generic process to test the integrator instance
-template<size_t N=3> class TestProcess : public cepgen::proc::Process
+template<size_t N> class TestProcess : public cepgen::proc::Process
 {
   public:
-    TestProcess( const cepgen::ParametersList& params = cepgen::ParametersList() ) :
-      cepgen::proc::Process( params, false ),
-      funct_( "1./(1.-cos(x*_pi)*cos(y*_pi)*cos(z*_pi))", { "x", "y", "z" } ) {}
-    TestProcess( const char* formula, const std::vector<std::string>& args ) :
-      cepgen::proc::Process( cepgen::ParametersList(), false ),
+    inline explicit TestProcess( const string& formula, const vector<string>& args ) :
+      cepgen::proc::Process( cepgen::ParametersList().set<string>( "description", formula ), false ),
       funct_( formula, args ) {}
-
-    cepgen::proc::ProcessPtr clone( const cepgen::ParametersList& params ) const override {
-      return cepgen::proc::ProcessPtr( new TestProcess<N>( *this ) );
-    }
-
+    /// Dummy function to be called on phase space definition
     void prepareKinematics() override {
       for ( auto& var : variables_ )
         defineVariable( var, cepgen::proc::Process::Mapping::linear );
     }
-    /// Generic formula to compute a weight out of a point in the phase space
-    double computeWeight() override {
-      std::array<double,N> args;
-      std::copy_n( variables_.begin(), N, args.begin() );
-      return funct_.eval( args );
-    }
     /// Dummy function to be called on events generation
     void fillKinematics( bool ) override {}
+    /// Generic formula to compute a weight out of a point in the phase space
+    double computeWeight() override {
+      array<double,N> args;
+      copy_n( variables_.begin(), N, args.begin() );
+      return funct_.eval( args );
+    }
 
   private:
-    std::array<double,N> variables_;
+    array<double,N> variables_;
     cepgen::utils::Functional<N> funct_;
 };
 
 int
 main( int argc, char* argv[] )
 {
-  bool debug;
+  int debug;
   double num_sigma;
   string integrator;
 
   cepgen::ArgumentsParser( argc, argv )
     .addOptionalArgument( "num-sigma", "max. number of std.dev.", 3., &num_sigma, 'n' )
-    .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
+    .addOptionalArgument( "debug", "debugging mode", 0, &debug, 'd' )
     .addOptionalArgument( "integrator", "type of integrator used", "vegas", &integrator, 'i' )
     .parse();
 
-  if ( !debug )
+  if ( debug > 1 )
+    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debug;
+  else if ( debug > 0 )
+    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::information;
+  else
     cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::nothing;
 
-  cepgen::Generator mg;
-  auto& params = mg.parameters();
+  //--- integrator definition
+  cepgen::Generator gen;
+  auto& params = gen.parameters();
   auto& integ = params.integration();
   if ( integrator == "plain" )
     integ.type = cepgen::IntegratorType::plain;
@@ -71,41 +69,30 @@ main( int argc, char* argv[] )
   else if ( integrator == "miser" )
     integ.type = cepgen::IntegratorType::MISER;
 
-  { // test 1
-    const char* test = "Test 1";
-    const double exact = 1.3932039296856768591842462603255;
-    params.setProcess( new TestProcess<3> );
-    mg.integrate();
-    const double result = mg.crossSection(), error = mg.crossSectionError();
-    if ( fabs( exact - result ) > num_sigma * error )
-      throw CG_FATAL( "main" ) << test << ": pull = " << fabs( exact-result )/error << ".";
-    cout << test << " passed!" << endl;
+  //--- tests definition
+  struct test_t
+  {
+    cepgen::proc::Process* process;
+    double result;
+  };
+  vector<test_t> tests = {
+    { new TestProcess<2>( "x^2+y^2", { "x", "y" } ), 2./3 },
+    { new TestProcess<3>( "x+y^2+z^3", { "x", "y", "z" } ), 13./12. },
+    { new TestProcess<3>( "1./(1.-cos(x*3.141592654)*cos(y*3.141592654)*cos(z*3.141592654))", { "x", "y", "z" } ), 1.3932039296856768591842462603255 },
+  };
+
+  //--- integration part
+  size_t i = 0;
+  for ( const auto& test : tests ) {
+    params.setProcess( test.process );
+    gen.integrate();
+    const double result = gen.crossSection(), error = gen.crossSectionError();
+    if ( fabs( test.result - result ) > num_sigma * error )
+      throw CG_FATAL( "main" ) << "Test " << i << ": pull = " << fabs( test.result-result )/error << ".";
+    cout << "Test " << i << " passed!" << endl;
     if ( debug )
-      CG_INFO( "main" ) << test << ": ref.: " << exact << ", result: " << result << " +/- " << error << ".";
-  }
-  { // test 2
-    const char* test = "Test 2";
-    const double exact = 2./3.;
-    params.setProcess( new TestProcess<2>( "x^2+y^2", { "x", "y" } ) );
-    mg.integrate();
-    const double result = mg.crossSection(), error = mg.crossSectionError();
-    if ( fabs( exact - result ) > num_sigma * error )
-      throw CG_FATAL( "main" ) << test << ": pull = " << fabs( exact-result )/error << ".";
-    cout << test << " passed!" << endl;
-    if ( debug )
-      CG_INFO( "main" ) << test << ": ref.: " << exact << ", result: " << result << " +/- " << error << ".";
-  }
-  { // test 3
-    const char* test = "Test 3";
-    const double exact = 13./12.;
-    params.setProcess( new TestProcess<3>( "x+y^2+z^3", { "x", "y", "z" } ) );
-    mg.integrate();
-    const double result = mg.crossSection(), error = mg.crossSectionError();
-    if ( fabs( exact - result ) > num_sigma * error )
-      throw CG_FATAL( "main" ) << test << ": pull = " << fabs( exact-result )/error << ".";
-    cout << test << " passed!" << endl;
-    if ( debug )
-      CG_INFO( "main" ) << test << ": ref.: " << exact << ", result: " << result << " +/- " << error << ".";
+      CG_INFO( "main" ) << "Test " << i << ": ref.: " << test.result << ", result: " << result << " +/- " << error << ".";
+    ++i;
   }
 
   return 0;
