@@ -41,20 +41,18 @@ template<size_t N> class TestProcess : public cepgen::proc::Process
 int
 main( int argc, char* argv[] )
 {
-  int debug;
+  bool debug;
   double num_sigma;
   string integrator;
 
   cepgen::ArgumentsParser( argc, argv )
     .addOptionalArgument( "num-sigma", "max. number of std.dev.", 3., &num_sigma, 'n' )
-    .addOptionalArgument( "debug", "debugging mode", 0, &debug, 'd' )
+    .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
     .addOptionalArgument( "integrator", "type of integrator used", "vegas", &integrator, 'i' )
     .parse();
 
-  if ( debug > 1 )
+  if ( debug )
     cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debug;
-  else if ( debug > 0 )
-    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::information;
   else
     cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::nothing;
 
