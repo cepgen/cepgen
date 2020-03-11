@@ -2,8 +2,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/GridParameters.h"
 
-#include "CepGen/Modules/EventModifier.h"
-#include "CepGen/Modules/ExportModule.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 
 #include "CepGen/Parameters.h"
 #include "CepGen/Utils/String.h"
@@ -35,7 +34,7 @@ namespace cepgen
       };
       /// A Vegas integrator state for integration (optional) and/or
       /// "treated" event generation
-      std::unique_ptr<gsl_monte_vegas_state,gsl_monte_vegas_deleter> veg_state_;
+      std::unique_ptr<gsl_monte_vegas_state,gsl_monte_vegas_deleter> vegas_state_;
       gsl_monte_vegas_params vegas_params_;
       double chisq_cut_;
 
@@ -49,12 +48,12 @@ namespace cepgen
 
   IntegratorVegas::IntegratorVegas( const ParametersList& params ) :
     Integrator( params ),
-    chisq_cut_( params.get<double>( "chiSquaredCut" ) )
+    chisq_cut_( params.get<double>( "chiSqCut", 1.5 ) )
   {
-    vegas_params_.iterations = params.get<int>( "iterations" );
-    vegas_params_.alpha = params.get<double>( "alpha" );
-    vegas_params_.verbose = params.get<int>( "verbose" );
-    vegas_params_.mode = params.get<int>( "mode" );
+    vegas_params_.iterations = params.get<int>( "iterations", 10 );
+    vegas_params_.alpha = params.get<double>( "alpha", 1.5 );
+    vegas_params_.verbose = params.get<int>( "verbose", 0 );
+    vegas_params_.mode = params.get<int>( "mode", (int)Mode::importance );
 
     //--- output logging
     const auto& log = params.get<std::string>( "loggingOutput", "cerr" );
@@ -78,61 +77,55 @@ namespace cepgen
   void
   IntegratorVegas::integrate( double& result, double& abserr )
   {
-    int res = -1;
-
     //--- integration bounds
     std::vector<double> x_low( function_->dim, 0. ), x_up( function_->dim, 1. );
 
     //--- launch integration
+
     //----- warmup (prepare the grid)
     warmup( x_low, x_up, 25000 );
     //----- integration
     unsigned short it_chisq = 0;
     do {
-      res = gsl_monte_vegas_integrate( function_.get(),
+      int res = gsl_monte_vegas_integrate( function_.get(),
         &x_low[0], &x_up[0],
         function_->dim, 0.2 * ncvg_,
-        rng_.get(), veg_state_.get(),
+        rng_.get(), vegas_state_.get(),
         &result, &abserr );
       CG_LOG( "Integrator:integrate" )
         << "\t>> at call " << ( ++it_chisq ) << ": "
         << utils::format( "average = %10.6f   "
                           "sigma = %10.6f   chi2 = %4.3f.",
                           result, abserr,
-                          gsl_monte_vegas_chisq( veg_state_.get() ) );
-    } while ( fabs( gsl_monte_vegas_chisq( veg_state_.get() )-1. )
-              > chisq_cut_-1. );
+                          gsl_monte_vegas_chisq( vegas_state_.get() ) );
+      if ( res != GSL_SUCCESS )
+        throw CG_FATAL( "Integrator:integrate" )
+          << "Error at iteration #" << it_chisq
+          << " while performing the integration!\n\t"
+          << "GSL error: " << gsl_strerror( res ) << ".";
+    } while ( fabs( gsl_monte_vegas_chisq( vegas_state_.get() )-1. ) > chisq_cut_-1. );
     CG_DEBUG( "Integrator:integrate" )
       << "Vegas grid information:\n\t"
-      << "ran for " << veg_state_->dim << " dimensions, and generated " << veg_state_->bins_max << " bins.\n\t"
-      << "Integration volume: " << veg_state_->vol << ".";
-    grid_->r_boxes = std::pow( veg_state_->bins, function_->dim );
+      << "ran for " << vegas_state_->dim << " dimensions, "
+      << "and generated " << vegas_state_->bins_max << " bins.\n\t"
+      << "Integration volume: " << vegas_state_->vol << ".";
+    grid_->r_boxes = std::pow( vegas_state_->bins, function_->dim );
 
     result_ = result;
     err_result_ = abserr;
-
-    for ( auto& mod : input_params_->eventModifiersSequence() )
-      mod->setCrossSection( result, abserr );
-    for ( auto& mod : input_params_->outputModulesSequence() )
-      mod->setCrossSection( result, abserr );
-
-    if ( res != GSL_SUCCESS )
-      throw CG_FATAL( "Integrator:integrate" )
-        << "Error while performing the integration!\n\t"
-        << "GSL error: " << gsl_strerror( res ) << ".";
   }
 
   void
   IntegratorVegas::warmup( std::vector<double>& x_low, std::vector<double>& x_up, unsigned int ncall )
   {
     // start by preparing the grid/state
-    veg_state_.reset( gsl_monte_vegas_alloc( function_->dim ) );
-    gsl_monte_vegas_params_set( veg_state_.get(), &vegas_params_ );
+    vegas_state_.reset( gsl_monte_vegas_alloc( function_->dim ) );
+    gsl_monte_vegas_params_set( vegas_state_.get(), &vegas_params_ );
     // then perform a first integration with the given calls count
     double result = 0., abserr = 0.;
     const int res = gsl_monte_vegas_integrate( function_.get(),
       &x_low[0], &x_up[0],
-      function_->dim, ncall, rng_.get(), veg_state_.get(),
+      function_->dim, ncall, rng_.get(), vegas_state_.get(),
       &result, &abserr );
     // ensure the operation was successful
     if ( res != GSL_SUCCESS )
@@ -153,14 +146,14 @@ namespace cepgen
     std::vector<double> x_new( x.size() );
     for ( unsigned short j = 0; j < function_->dim; ++j ) {
       //--- find surrounding coordinates and interpolate
-      const double z = x[j]*veg_state_->bins;
+      const double z = x[j]*vegas_state_->bins;
       const unsigned int id = z; // coordinate of point before
       const double rel_pos = z-id; // position between coordinates (norm.)
       const double bin_width = ( id == 0 )
-        ? COORD( veg_state_, 1, j )
-        : COORD( veg_state_, id+1, j )-COORD( veg_state_, id, j );
+        ? COORD( vegas_state_, 1, j )
+        : COORD( vegas_state_, id+1, j )-COORD( vegas_state_, id, j );
       //--- build new coordinate from linear interpolation
-      x_new[j] = COORD( veg_state_, id+1, j )-bin_width*( 1.-rel_pos );
+      x_new[j] = COORD( vegas_state_, id+1, j )-bin_width*( 1.-rel_pos );
       w *= bin_width;
     }
     return w*function_->f( (double*)&x_new[0], function_->dim, (void*)&input_params_ );
@@ -181,3 +174,4 @@ namespace cepgen
   }
 }
 
+REGISTER_INTEGRATOR( "Vegas", IntegratorVegas )

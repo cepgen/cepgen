@@ -98,16 +98,6 @@ namespace cepgen
           .set<std::string>( "gridPath", mstw_grid_path_ );
       params_.kinematics.structure_functions = strfun::StructureFunctionsFactory::get().build( sf_params );
 
-      //--- parse the integration algorithm name
-      if ( integr_type_ == "plain" )
-        params_.integrator->setName<int>( (int)IntegratorType::plain );
-      else if ( integr_type_ == "vegas" )
-        params_.integrator->setName<int>( (int)IntegratorType::Vegas );
-      else if ( integr_type_ == "miser" )
-        params_.integrator->setName<int>( (int)IntegratorType::MISER );
-      else if ( integr_type_ != "" )
-        throw CG_FATAL( "LpairHandler" ) << "Unrecognized integrator type: " << integr_type_ << "!";
-
       //--- check if event generation is required
       params_.generation().enabled = iend_ > 1;
 
@@ -147,7 +137,7 @@ namespace cepgen
       //-------------------------------------------------------------------------------------------
 
       registerParameter<std::string>( "PROC", "Process name to simulate", &proc_name_ );
-      registerParameter<std::string>( "ITYP", "Integration algorithm", &integr_type_ );
+      registerParameter<std::string>( "ITYP", "Integration algorithm", &params_.integrator->operator[]<std::string>( ParametersList::MODULE_NAME ) );
       registerParameter<std::string>( "HADR", "Hadronisation algorithm", &evt_mod_name_ );
       registerParameter<std::string>( "EVMD", "Events modification algorithms", &evt_mod_name_ );
       registerParameter<std::string>( "OUTP", "Output module", &out_mod_name_ );

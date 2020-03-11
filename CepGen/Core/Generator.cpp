@@ -22,6 +22,9 @@
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 
+#include "CepGen/Modules/EventModifier.h"
+#include "CepGen/Modules/ExportModule.h"
+
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 
@@ -151,6 +154,12 @@ namespace cepgen
   }
 
   void
+  Generator::setIntegrator( std::unique_ptr<Integrator> integ )
+  {
+    integrator_ = std::move( integ );
+  }
+
+  void
   Generator::integrate()
   {
     clearRun();
@@ -162,7 +171,7 @@ namespace cepgen
       throw CG_FATAL( "Generator:computePoint" )
         << "Invalid phase space dimension (ndim=" << ndim << ")!";
     // first destroy and recreate the integrator instance
-    if ( !integrator_ || integrator_->dimensions() != ndim ) {
+    if ( !integrator_ ) {
       if ( !parameters_->integrator )
         throw CG_FATAL( "Generator:integrate" ) << "No integrator parameters found!";
       integrator_ = IntegratorFactory::get().build( *parameters_->integrator );
@@ -175,6 +184,11 @@ namespace cepgen
       << "Will proceed with " << ndim << "-dimensional integration.";
 
     integrator_->integrate( result_, result_error_ );
+
+    for ( auto& mod : parameters_->eventModifiersSequence() )
+      mod->setCrossSection( result_, result_error_ );
+    for ( auto& mod : parameters_->outputModulesSequence() )
+      mod->setCrossSection( result_, result_error_ );
   }
 
   const Event&
@@ -217,6 +231,13 @@ namespace cepgen
       for ( const auto& mod : card::CardsHandlerFactory::get().modules() )
         oss << "\n> ." << utils::colourise( mod, utils::Colour::green )
           << " extension";
+    }
+    { oss << "\n" << sep_mid << "\n"
+        << utils::boldify( "Integration algorithms" );
+      if ( IntegratorFactory::get().modules().empty() )
+        oss << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
+      for ( const auto& mod : IntegratorFactory::get().modules() )
+        oss << "\n> " << utils::colourise( mod, utils::Colour::green );
     }
     { oss << "\n" << sep_mid << "\n"
         << utils::boldify( "Physics processes" );

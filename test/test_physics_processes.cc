@@ -39,18 +39,8 @@ int main( int argc, char* argv[] )
 
   utils::Timer tmr;
   Generator gen;
-  IntegratorType integr;
 
-  if ( integrator == "plain" )
-    integr = IntegratorType::plain;
-  else if ( integrator == "vegas" )
-    integr = IntegratorType::Vegas;
-  else if ( integrator == "miser" )
-    integr = IntegratorType::MISER;
-  else
-    throw CG_FATAL( "main" ) << "Unhandled integrator type: " << integrator << ".";
-
-  CG_LOG( "main" ) << "Testing with " << integr << " integrator.";
+  CG_LOG( "main" ) << "Testing with " << integrator << " integrator.";
 
   vector<string> failed_tests, passed_tests;
 
@@ -94,7 +84,7 @@ int main( int argc, char* argv[] )
 
       const std::string filename = "test_processes/"+test.filename+"_cfg.py";
       gen.setParameters( cepgen::card::PythonHandler( filename ).parameters() );
-      gen.parameters().integrator->setName<int>( (int)integr );
+      gen.parameters().integrator->setName<std::string>( integrator );
       CG_INFO( "main" )
         << "Process: "<< gen.parameters().processName() << "\n\t"
         << "File: " << filename << "\n\t"

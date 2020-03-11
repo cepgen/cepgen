@@ -13,7 +13,7 @@ integrator = plain.clone('Vegas',
     iterations = 10,
     alpha = 1.5,
     mode = VegasIntegrationMode.Importance,
-    verbosity = -1,
+    verbose = -1,
     loggingOutput = 'cerr',
 )
 

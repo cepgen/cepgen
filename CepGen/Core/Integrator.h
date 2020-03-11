@@ -19,12 +19,6 @@ namespace cepgen
   class Event;
   class GridParameters;
   namespace utils { class Timer; }
-  /// Flavour of integration algorithm
-  enum class IntegratorType {
-    plain = 0, ///< Simple trial-and-error algorithm
-    Vegas = 1, ///< Vegas algorithm (G.P. Lepage, 1977 \cite Lepage:1977sw)
-    MISER = 2  ///< MISER stratified sampling algorithm
-  };
   /// Monte-Carlo integrator instance
   class Integrator
   {
@@ -54,10 +48,13 @@ namespace cepgen
       /// Launch the event generation for a given number of events
       /// \param[in] callback The callback function applied on every event generated
       void generate( unsigned long num_events = 0, Event::callback callback = nullptr );
+      /// Generate a uniformly distributed (between 0 and 1) random number
+      double uniform() const;
 
     protected:
       /// Compute the function value at the given phase space point
       virtual double eval( const std::vector<double>& x );
+      const std::string name_; ///< Integration algorithm name
       unsigned int ncvg_; ///< Number of function calls to be computed for each point
       unsigned long seed_; ///< Random number generator seed
       struct gsl_rng_deleter
@@ -68,7 +65,6 @@ namespace cepgen
       std::unique_ptr<gsl_rng,gsl_rng_deleter> rng_;
       /// Set of parameters for the integration/event generation grid
       std::unique_ptr<GridParameters> grid_;
-      IntegratorType type_; ///< Integration algorithm
       /// List of parameters to specify the integration range and the
       /// physics determining the phase space
       Parameters* input_params_;
@@ -97,13 +93,10 @@ namespace cepgen
        * \brief Prepare the class for events generation
        */
       void computeGenerationParameters();
-      /// Generate a uniformly distributed (between 0 and 1) random number
-      double uniform() const;
       /// Selected bin at which the function will be evaluated
       int ps_bin_;
       static constexpr int INVALID_BIN = -999;
   };
-  std::ostream& operator<<( std::ostream&, const IntegratorType& );
 }
 
 #endif

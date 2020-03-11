@@ -1,6 +1,7 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Parameters.h"
 
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Core/Integrator.h"
 
 #include "CepGen/Processes/Process.h"
@@ -48,7 +49,7 @@ main( int argc, char* argv[] )
   cepgen::ArgumentsParser( argc, argv )
     .addOptionalArgument( "num-sigma", "max. number of std.dev.", 3., &num_sigma, 'n' )
     .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
-    .addOptionalArgument( "integrator", "type of integrator used", "vegas", &integrator, 'i' )
+    .addOptionalArgument( "integrator", "type of integrator used", "Vegas", &integrator, 'i' )
     .parse();
 
   if ( debug )
@@ -58,13 +59,7 @@ main( int argc, char* argv[] )
 
   //--- integrator definition
   cepgen::Generator gen;
-  auto& params = gen.parameters();
-  if ( integrator == "plain" )
-    params.integrator->setName<int>( (int)cepgen::IntegratorType::plain );
-  else if ( integrator == "vegas" )
-    params.integrator->setName<int>( (int)cepgen::IntegratorType::Vegas );
-  else if ( integrator == "miser" )
-    params.integrator->setName<int>( (int)cepgen::IntegratorType::MISER );
+  gen.setIntegrator( cepgen::IntegratorFactory::get().build( integrator ) );
 
   //--- tests definition
   struct test_t
@@ -81,7 +76,7 @@ main( int argc, char* argv[] )
   //--- integration part
   size_t i = 0;
   for ( const auto& test : tests ) {
-    params.setProcess( test.process );
+    gen.parameters().setProcess( test.process );
     gen.integrate();
     const double result = gen.crossSection(), error = gen.crossSectionError();
     if ( fabs( test.result - result ) > num_sigma * error )

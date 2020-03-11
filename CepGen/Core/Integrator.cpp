@@ -3,26 +3,22 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Parameters.h"
 #include "CepGen/Processes/Process.h"
+#include "CepGen/Event/Event.h"
 
 #include "CepGen/Modules/EventModifier.h"
 #include "CepGen/Modules/ExportModule.h"
 
-#include "CepGen/Parameters.h"
-
-#include "CepGen/Event/Event.h"
-
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/ProgressBar.h"
-
-#include <math.h>
 
 namespace cepgen
 {
   Integrator::Integrator( const ParametersList& params ) :
+    name_( params.name<std::string>() ),
     ncvg_( params.get<int>( "numFunctionCalls", 50000 ) ),
     seed_( params.get<int>( "seed", time( nullptr ) ) ),
-    type_( (IntegratorType)params.name<int>() ),
     ps_bin_( INVALID_BIN )
   {
     //--- initialise the random number generator
@@ -34,9 +30,11 @@ namespace cepgen
       case 2: rng_engine = (gsl_rng_type*)gsl_rng_gfsr4; break;
       case 3: rng_engine = (gsl_rng_type*)gsl_rng_ranlxs0; break;
     }
-    if ( rng_engine  )
-      rng_.reset( gsl_rng_alloc( rng_engine ) );
+    if ( !rng_engine  )
+      throw CG_FATAL( "Integrator:build" )
+        << "Random number generator engine not set!";
 
+    rng_.reset( gsl_rng_alloc( rng_engine ) );
     gsl_rng_set( rng_.get(), seed_ );
 
     //--- a bit of printout for debugging
@@ -224,8 +222,7 @@ namespace cepgen
   {
     input_params_->setStorage( false );
 
-    if ( input_params_->generation().treat
-      && type_ != IntegratorType::Vegas ) {
+    if ( input_params_->generation().treat && name_ != "Vegas" ) {
       throw CG_FATAL( "Integrator:setGen" )
         << "Treat switched on without a proper Vegas grid!\n\t"
         << "Try to re-run while disabling integrand treatment...";
@@ -326,22 +323,6 @@ namespace cepgen
   Integrator::uniform() const
   {
     return gsl_rng_uniform( rng_.get() );
-  }
-
-  //------------------------------------------------------------------------------------------------
-
-  std::ostream&
-  operator<<( std::ostream& os, const IntegratorType& type )
-  {
-    switch ( type ) {
-      case IntegratorType::plain:
-        return os << "plain";
-      case IntegratorType::Vegas:
-        return os << "Vegas";
-      case IntegratorType::MISER:
-        return os << "MISER";
-    }
-    return os;
   }
 }
 

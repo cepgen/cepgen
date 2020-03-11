@@ -113,14 +113,7 @@ namespace cepgen
       params_.kinematics.cuts.central.mass_sum.max() = kin.get<double>( "msummax", INVALID );
 
       //----- integration
-      const auto& integ = pars.get<ParametersList>( "integrator" );
-      const std::string integ_name = integ.name<std::string>( "vegas" );
-      if ( integ_name == "plain" )
-        params_.integrator->setName<int>( (int)IntegratorType::plain );
-      else if ( integ_name == "vegas" )
-        params_.integrator->setName<int>( (int)IntegratorType::Vegas );
-      else if ( integ_name == "miser" )
-        params_.integrator->setName<int>( (int)IntegratorType::MISER );
+      *params_.integrator = pars.get<ParametersList>( "integrator" );
 
       //----- events generation
       const auto& gen = pars.get<ParametersList>( "generation" );

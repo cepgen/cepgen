@@ -87,6 +87,8 @@ namespace cepgen
       Parameters& parameters();
       /// Feed the generator with a Parameters object
       void setParameters( Parameters& ip );
+      /// Specify an integrator algorithm configuration
+      void setIntegrator( std::unique_ptr<Integrator> );
       /// Remove all references to a previous generation/run
       void clearRun();
       /// Integrate the functional over the whole phase space
