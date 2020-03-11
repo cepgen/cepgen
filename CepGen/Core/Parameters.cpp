@@ -20,27 +20,27 @@
 namespace cepgen
 {
   Parameters::Parameters() :
-    general( new ParametersList ),
+    general( new ParametersList ), integrator( new ParametersList ),
     store_( false ), total_gen_time_( 0. ), num_gen_events_( 0ul )
   {}
 
   Parameters::Parameters( Parameters& param ) :
-    general( param.general ),
+    general( param.general ), integrator( param.integrator ),
     kinematics( param.kinematics ),
     taming_functions( param.taming_functions ),
     process_( std::move( param.process_ ) ),
     evt_modifiers_( std::move( param.evt_modifiers_ ) ),
     out_modules_( std::move( param.out_modules_ ) ),
     store_( false ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ ),
-    integration_( param.integration_ ), generation_( param.generation_ )
+    generation_( param.generation_ )
   {}
 
   Parameters::Parameters( const Parameters& param ) :
-    general( param.general ),
+    general( param.general ), integrator( param.integrator ),
     kinematics( param.kinematics ),
     taming_functions( param.taming_functions ),
     store_( false ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ ),
-    integration_( param.integration_ ), generation_( param.generation_ )
+    generation_( param.generation_ )
   {}
 
   Parameters::~Parameters() // required for unique_ptr initialisation!
@@ -50,6 +50,7 @@ namespace cepgen
   Parameters::operator=( Parameters param )
   {
     general = param.general;
+    integrator = param.integrator;
     kinematics = param.kinematics;
     taming_functions = param.taming_functions;
     process_ = std::move( param.process_ );
@@ -57,7 +58,6 @@ namespace cepgen
     out_modules_ = std::move( param.out_modules_ );
     total_gen_time_ = param.total_gen_time_;
     num_gen_events_ = param.num_gen_events_;
-    integration_ = param.integration_;
     generation_ = param.generation_;
     return *this;
   }
@@ -241,7 +241,10 @@ namespace cepgen
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 )
       << ( pretty ? utils::boldify( " Integration parameters " ) : "Integration parameters" ) << std::setfill( ' ' ) << "\n\n";
-    std::ostringstream int_algo; int_algo << param->integration_.type;
+    os
+      << std::setw( wt ) << "Integration"
+      << *param->integrator << "\n";
+    /*std::ostringstream int_algo; int_algo << param->integration_.type;
     os
       << std::setw( wt ) << "Integration algorithm"
       << ( pretty ? utils::boldify( int_algo.str() ) : int_algo.str() ) << "\n"
@@ -250,7 +253,7 @@ namespace cepgen
     if ( param->integration_.rng_engine )
       os
         << std::setw( wt ) << "Random number generator engine"
-        << param->integration_.rng_engine->name << "\n";
+        << param->integration_.rng_engine->name << "\n";*/
     os
       << "\n"
       << std::setfill('_') << std::setw( wb+3 ) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill( ' ' ) << "\n\n"
@@ -290,39 +293,6 @@ namespace cepgen
       << "\n"
       << std::setfill('_') << std::setw( wb ) << ""
       << "\n";
-  }
-
-  //-----------------------------------------------------------------------------------------------
-
-  Parameters::Integration::Integration() :
-    type( IntegratorType::Vegas ), ncvg( 50000 ),
-    rng_seed( 0 ), rng_engine( (gsl_rng_type*)gsl_rng_mt19937 ),
-    vegas_chisq_cut( 1.5 ),
-    result( -1. ), err_result( -1. )
-  {
-    const size_t ndof = 10; // random number of dimensions for VEGAS parameters retrieval
-    {
-      std::shared_ptr<gsl_monte_vegas_state> tmp_state( gsl_monte_vegas_alloc( ndof ), gsl_monte_vegas_free );
-      gsl_monte_vegas_params_get( tmp_state.get(), &vegas );
-      vegas.iterations = 10;
-    } {
-      std::shared_ptr<gsl_monte_miser_state> tmp_state( gsl_monte_miser_alloc( ndof ), gsl_monte_miser_free );
-      gsl_monte_miser_params_get( tmp_state.get(), &miser );
-    }
-  }
-
-  Parameters::Integration::Integration( const Integration& rhs ) :
-    type( rhs.type ), ncvg( rhs.ncvg ),
-    rng_seed( rhs.rng_seed ), rng_engine( rhs.rng_engine ),
-    vegas( rhs.vegas ), vegas_chisq_cut( rhs.vegas_chisq_cut ),
-    miser( rhs.miser ),
-    result( -1. ), err_result( -1. )
-  {}
-
-  Parameters::Integration::~Integration()
-  {
-    //if ( vegas.ostream && vegas.ostream != stdout && vegas.ostream != stderr )
-    //  fclose( vegas.ostream );
   }
 
   //-----------------------------------------------------------------------------------------------

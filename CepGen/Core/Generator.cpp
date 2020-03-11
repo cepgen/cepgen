@@ -16,6 +16,7 @@
 #include "CepGen/Physics/AlphaS.h"
 
 #include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/ProcessesFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
@@ -161,8 +162,12 @@ namespace cepgen
       throw CG_FATAL( "Generator:computePoint" )
         << "Invalid phase space dimension (ndim=" << ndim << ")!";
     // first destroy and recreate the integrator instance
-    if ( !integrator_ || integrator_->dimensions() != ndim )
-      integrator_.reset( new Integrator( ndim, integrand::eval, *parameters_ ) );
+    if ( !integrator_ || integrator_->dimensions() != ndim ) {
+      if ( !parameters_->integrator )
+        throw CG_FATAL( "Generator:integrate" ) << "No integrator parameters found!";
+      integrator_ = IntegratorFactory::get().build( *parameters_->integrator );
+    }
+    integrator_->setFunction( ndim, integrand::eval, *parameters_ );
 
     CG_DEBUG( "Generator:integrate" )
       << "New integrator instance created\n\t"

@@ -35,6 +35,7 @@ namespace cepgen
       friend std::ostream& operator<<( std::ostream&, const Parameters* );
 
       std::shared_ptr<ParametersList> general;
+      std::shared_ptr<ParametersList> integrator;
 
       //----- process to compute
 
@@ -56,26 +57,6 @@ namespace cepgen
 
       /// Events kinematics for phase space definition
       Kinematics kinematics;
-
-      //----- VEGAS
-
-      /// Collection of integrator parameters
-      struct Integration
-      {
-        Integration();
-        Integration( const Integration& );
-        ~Integration();
-        IntegratorType type;
-        unsigned int ncvg; ///< Number of function calls to be computed for each point
-        long rng_seed; ///< Random number generator seed
-        gsl_rng_type* rng_engine; ///< Random number generator engine
-        gsl_monte_vegas_params vegas;
-        double vegas_chisq_cut;
-        gsl_monte_miser_params miser;
-        double result, err_result;
-      };
-      Integration& integration() { return integration_; }
-      const Integration& integration() const { return integration_; }
 
       //----- events generation
 
@@ -153,8 +134,6 @@ namespace cepgen
       double total_gen_time_;
       /// Number of events already generated
       unsigned long num_gen_events_;
-      /// Integrator parameters
-      Integration integration_;
       /// Events generation parameters
       Generation generation_;
   };

@@ -100,11 +100,11 @@ namespace cepgen
 
       //--- parse the integration algorithm name
       if ( integr_type_ == "plain" )
-        params_.integration().type = IntegratorType::plain;
-      else if ( integr_type_ == "Vegas" )
-        params_.integration().type = IntegratorType::Vegas;
-      else if ( integr_type_ == "MISER" )
-        params_.integration().type = IntegratorType::MISER;
+        params_.integrator->setName<int>( (int)IntegratorType::plain );
+      else if ( integr_type_ == "vegas" )
+        params_.integrator->setName<int>( (int)IntegratorType::Vegas );
+      else if ( integr_type_ == "miser" )
+        params_.integrator->setName<int>( (int)IntegratorType::MISER );
       else if ( integr_type_ != "" )
         throw CG_FATAL( "LpairHandler" ) << "Unrecognized integrator type: " << integr_type_ << "!";
 
@@ -160,9 +160,9 @@ namespace cepgen
       registerParameter<bool>( "NTRT", "Smoothen the integrand", &params_.generation().treat );
       registerParameter<int>( "IEND", "Generation type", &iend_ );
       registerParameter<int>( "DEBG", "Debugging verbosity", (int*)&utils::Logger::get().level );
-      registerParameter<int>( "NCVG", "Number of function calls", (int*)&params_.integration().ncvg );
-      registerParameter<int>( "ITVG", "Number of integration iterations", (int*)&params_.integration().vegas.iterations );
-      registerParameter<int>( "SEED", "Random generator seed", (int*)&params_.integration().rng_seed );
+      registerParameter<int>( "NCVG", "Number of function calls", (int*)&params_.integrator->operator[]<int>( "numFunctionCalls" ) );
+      registerParameter<int>( "ITVG", "Number of integration iterations", (int*)&params_.integrator->operator[]<int>( "iterations" ) );
+      registerParameter<int>( "SEED", "Random generator seed", (int*)&params_.integrator->operator[]<int>( "seed" ) );
       registerParameter<int>( "NTHR", "Number of threads to use for events generation", (int*)&params_.generation().num_threads );
       registerParameter<int>( "MODE", "Subprocess' mode", (int*)&params_.kinematics.mode );
       registerParameter<int>( "NCSG", "Number of points to probe", (int*)&params_.generation().num_points );

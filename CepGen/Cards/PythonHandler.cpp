@@ -348,51 +348,7 @@ namespace cepgen
     {
       if ( !PyDict_Check( integr ) )
         throwPythonError( "Integrator object should be a dictionary!" );
-      PyObject* palgo = element( integr, ParametersList::MODULE_NAME ); // borrowed
-      if ( !palgo )
-        throwPythonError( "Failed to retrieve the integration algorithm name!" );
-      std::string algo = get<std::string>( palgo );
-      if ( algo == "plain" )
-        params_.integration().type = IntegratorType::plain;
-      else if ( algo == "Vegas" ) {
-        params_.integration().type = IntegratorType::Vegas;
-        fillParameter( integr, "alpha", (double&)params_.integration().vegas.alpha );
-        fillParameter( integr, "iterations", params_.integration().vegas.iterations );
-        fillParameter( integr, "mode", (int&)params_.integration().vegas.mode );
-        fillParameter( integr, "verbosity", (int&)params_.integration().vegas.verbose );
-        std::string vegas_logging_output = "cerr";
-        fillParameter( integr, "loggingOutput", vegas_logging_output );
-        if ( vegas_logging_output == "cerr" )
-          // redirect all debugging information to the error stream
-          params_.integration().vegas.ostream = stderr;
-        else if ( vegas_logging_output == "cout" )
-          // redirect all debugging information to the standard stream
-          params_.integration().vegas.ostream = stdout;
-        else
-          params_.integration().vegas.ostream = fopen( vegas_logging_output.c_str(), "w" );
-      }
-      else if ( algo == "MISER" ) {
-        params_.integration().type = IntegratorType::MISER;
-        fillParameter( integr, "estimateFraction", (double&)params_.integration().miser.estimate_frac );
-        fillParameter( integr, "minCalls", params_.integration().miser.min_calls );
-        fillParameter( integr, "minCallsPerBisection", params_.integration().miser.min_calls_per_bisection );
-        fillParameter( integr, "alpha", (double&)params_.integration().miser.alpha );
-        fillParameter( integr, "dither", (double&)params_.integration().miser.dither );
-      }
-      else
-        throwPythonError( utils::format( "Invalid integration() algorithm: %s", algo.c_str() ) );
-
-      fillParameter( integr, "numFunctionCalls", params_.integration().ncvg );
-      fillParameter( integr, "seed", (unsigned long&)params_.integration().rng_seed );
-      unsigned int rng_engine;
-      fillParameter( integr, "rngEngine", rng_engine );
-      switch ( rng_engine ) {
-        case 0: default: params_.integration().rng_engine = (gsl_rng_type*)gsl_rng_mt19937; break;
-        case 1: params_.integration().rng_engine = (gsl_rng_type*)gsl_rng_taus2; break;
-        case 2: params_.integration().rng_engine = (gsl_rng_type*)gsl_rng_gfsr4; break;
-        case 3: params_.integration().rng_engine = (gsl_rng_type*)gsl_rng_ranlxs0; break;
-      }
-      fillParameter( integr, "chiSqCut", params_.integration().vegas_chisq_cut );
+      *params_.integrator = get<ParametersList>( integr );
     }
 
     void

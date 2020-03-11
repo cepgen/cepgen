@@ -59,13 +59,12 @@ main( int argc, char* argv[] )
   //--- integrator definition
   cepgen::Generator gen;
   auto& params = gen.parameters();
-  auto& integ = params.integration();
   if ( integrator == "plain" )
-    integ.type = cepgen::IntegratorType::plain;
+    params.integrator->setName<int>( (int)cepgen::IntegratorType::plain );
   else if ( integrator == "vegas" )
-    integ.type = cepgen::IntegratorType::Vegas;
+    params.integrator->setName<int>( (int)cepgen::IntegratorType::Vegas );
   else if ( integrator == "miser" )
-    integ.type = cepgen::IntegratorType::MISER;
+    params.integrator->setName<int>( (int)cepgen::IntegratorType::MISER );
 
   //--- tests definition
   struct test_t

@@ -36,7 +36,7 @@ namespace Pythia8
 
     setBeamA( (short)params_->kinematics.incoming_beams.first.pdg, params_->kinematics.incoming_beams.first.pz );
     setBeamB( (short)params_->kinematics.incoming_beams.second.pdg, params_->kinematics.incoming_beams.second.pz );
-    addProcess( 0, params_->integration().result, params_->integration().err_result, 100. );
+    //addProcess( 0, params_->integration().result, params_->integration().err_result, 100. );
   }
 
   void
@@ -50,6 +50,7 @@ namespace Pythia8
   void
   CepGenEvent::setCrossSection( int id, double xsec, double xsec_err )
   {
+    addProcess( 0, xsec, xsec_err, 100. );
     setXSec( id, xsec );
     setXErr( id, xsec_err );
     //listInit();

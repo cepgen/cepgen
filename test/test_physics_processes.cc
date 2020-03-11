@@ -94,7 +94,7 @@ int main( int argc, char* argv[] )
 
       const std::string filename = "test_processes/"+test.filename+"_cfg.py";
       gen.setParameters( cepgen::card::PythonHandler( filename ).parameters() );
-      gen.parameters().integration().type = integr;
+      gen.parameters().integrator->setName<int>( (int)integr );
       CG_INFO( "main" )
         << "Process: "<< gen.parameters().processName() << "\n\t"
         << "File: " << filename << "\n\t"

@@ -116,11 +116,11 @@ namespace cepgen
       const auto& integ = pars.get<ParametersList>( "integrator" );
       const std::string integ_name = integ.name<std::string>( "vegas" );
       if ( integ_name == "plain" )
-        params_.integration().type = IntegratorType::plain;
+        params_.integrator->setName<int>( (int)IntegratorType::plain );
       else if ( integ_name == "vegas" )
-        params_.integration().type = IntegratorType::Vegas;
+        params_.integrator->setName<int>( (int)IntegratorType::Vegas );
       else if ( integ_name == "miser" )
-        params_.integration().type = IntegratorType::MISER;
+        params_.integrator->setName<int>( (int)IntegratorType::MISER );
 
       //----- events generation
       const auto& gen = pars.get<ParametersList>( "generation" );
@@ -129,7 +129,7 @@ namespace cepgen
       params_.generation().num_threads = gen.get<int>( "nthreads", 2 );
       params_.generation().gen_print_every = gen.get<int>( "nprn", 1000 );
       params_.generation().treat = gen.get<bool>( "treat", true );
-      params_.integration().rng_seed = gen.get<int>( "seed" );
+      params_.integrator->set<int>( "seed", gen.get<int>( "seed" ) );
 
       //----- event modification modules
       const auto& mod = pars.get<ParametersList>( "eventmod" );
