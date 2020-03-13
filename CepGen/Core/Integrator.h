@@ -72,6 +72,7 @@ namespace cepgen
       /// integrator instance (along with its parameters)
       std::unique_ptr<gsl_monte_function> function_;
       double result_, err_result_;
+      bool initialised_ = false;
 
     private:
       /**

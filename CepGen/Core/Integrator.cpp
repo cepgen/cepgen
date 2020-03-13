@@ -19,7 +19,7 @@ namespace cepgen
     name_( params.name<std::string>() ),
     ncvg_( params.get<int>( "numFunctionCalls", 50000 ) ),
     seed_( params.get<int>( "seed", time( nullptr ) ) ),
-    ps_bin_( INVALID_BIN )
+    initialised_( false ), ps_bin_( INVALID_BIN )
   {
     //--- initialise the random number generator
     const auto& rng_type = params.get<int>( "rngEngine" );
@@ -53,6 +53,8 @@ namespace cepgen
 
     CG_DEBUG( "Integrator:function" )
       << "Number of integration dimensions: " << function_->dim << ".";
+
+    initialised_ = false;
   }
 
   Integrator::~Integrator()

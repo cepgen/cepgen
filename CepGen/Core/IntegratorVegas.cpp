@@ -27,6 +27,9 @@ namespace cepgen
       void warmup( std::vector<double>&, std::vector<double>&, unsigned int );
       double eval( const std::vector<double>& ) override;
 
+      ParametersList params_;
+      double chisq_cut_;
+      gsl_monte_vegas_params vegas_params_;
       /// A trivial deleter for the Vegas integrator
       struct gsl_monte_vegas_deleter
       {
@@ -35,48 +38,49 @@ namespace cepgen
       /// A Vegas integrator state for integration (optional) and/or
       /// "treated" event generation
       std::unique_ptr<gsl_monte_vegas_state,gsl_monte_vegas_deleter> vegas_state_;
-      gsl_monte_vegas_params vegas_params_;
-      double chisq_cut_;
-
-      /// Collection of integrator parameters
-      struct Integration
-      {
-        gsl_rng_type* rng_engine; ///< Random number generator engine
-      };
   };
   std::ostream& operator<<( std::ostream&, const IntegratorVegas::Mode& );
 
   IntegratorVegas::IntegratorVegas( const ParametersList& params ) :
-    Integrator( params ),
+    Integrator( params ), params_( params ),
     chisq_cut_( params.get<double>( "chiSqCut", 1.5 ) )
-  {
-    vegas_params_.iterations = params.get<int>( "iterations", 10 );
-    vegas_params_.alpha = params.get<double>( "alpha", 1.5 );
-    vegas_params_.verbose = params.get<int>( "verbose", 0 );
-    vegas_params_.mode = params.get<int>( "mode", (int)Mode::importance );
-
-    //--- output logging
-    const auto& log = params.get<std::string>( "loggingOutput", "cerr" );
-    if ( log == "cerr" )
-      // redirect all debugging information to the error stream
-      vegas_params_.ostream = stderr;
-    else if ( log == "cout" )
-      // redirect all debugging information to the standard stream
-      vegas_params_.ostream = stdout;
-    else
-      vegas_params_.ostream = fopen( log.c_str(), "w" );
-
-    //--- a bit of printout for debugging
-    CG_DEBUG( "Integrator:build" ) << "Vegas parameters:\n\t"
-      << "Number of iterations in Vegas: " << vegas_params_.iterations << ",\n\t"
-      << "α-value: " << vegas_params_.alpha << ",\n\t"
-      << "Verbosity: " << vegas_params_.verbose << ",\n\t"
-      << "Grid interpolation mode: " << (IntegratorVegas::Mode)vegas_params_.mode << ".";
-  }
+  {}
 
   void
   IntegratorVegas::integrate( double& result, double& abserr )
   {
+    if ( !initialised_ ) {
+      //--- start by preparing the grid/state
+      vegas_state_.reset( gsl_monte_vegas_alloc( function_->dim ) );
+      gsl_monte_vegas_params_get( vegas_state_.get(), &vegas_params_ );
+      vegas_params_.iterations = params_.get<int>( "iterations", 10 );
+      vegas_params_.alpha = params_.get<double>( "alpha", 1.5 );
+      vegas_params_.verbose = params_.get<int>( "verbose", -1 );
+      vegas_params_.mode = params_.get<int>( "mode", (int)Mode::importance );
+      //--- output logging
+      const auto& log = params_.get<std::string>( "loggingOutput", "cerr" );
+      if ( log == "cerr" )
+        // redirect all debugging information to the error stream
+        vegas_params_.ostream = stderr;
+      else if ( log == "cout" )
+        // redirect all debugging information to the standard stream
+        vegas_params_.ostream = stdout;
+      else
+        vegas_params_.ostream = fopen( log.c_str(), "w" );
+      gsl_monte_vegas_params_set( vegas_state_.get(), &vegas_params_ );
+
+      //--- a bit of printout for debugging
+      CG_DEBUG( "Integrator:build" ) << "Vegas parameters:\n\t"
+        << "Number of iterations in Vegas: " << vegas_params_.iterations << ",\n\t"
+        << "α-value: " << vegas_params_.alpha << ",\n\t"
+        << "Verbosity: " << vegas_params_.verbose << ",\n\t"
+        << "Grid interpolation mode: " << (IntegratorVegas::Mode)vegas_params_.mode << ".";
+      initialised_ = true;
+    }
+    if ( !vegas_state_ )
+      throw CG_FATAL( "Integrator:integrate" )
+        << "Vegas state not initialised!";
+
     //--- integration bounds
     std::vector<double> x_low( function_->dim, 0. ), x_up( function_->dim, 1. );
 
@@ -84,13 +88,12 @@ namespace cepgen
 
     //----- warmup (prepare the grid)
     warmup( x_low, x_up, 25000 );
+
     //----- integration
     unsigned short it_chisq = 0;
     do {
       int res = gsl_monte_vegas_integrate( function_.get(),
-        &x_low[0], &x_up[0],
-        function_->dim, 0.2 * ncvg_,
-        rng_.get(), vegas_state_.get(),
+        &x_low[0], &x_up[0], function_->dim, 0.2 * ncvg_, rng_.get(), vegas_state_.get(),
         &result, &abserr );
       CG_LOG( "Integrator:integrate" )
         << "\t>> at call " << ( ++it_chisq ) << ": "
@@ -118,20 +121,21 @@ namespace cepgen
   void
   IntegratorVegas::warmup( std::vector<double>& x_low, std::vector<double>& x_up, unsigned int ncall )
   {
-    // start by preparing the grid/state
-    vegas_state_.reset( gsl_monte_vegas_alloc( function_->dim ) );
-    gsl_monte_vegas_params_set( vegas_state_.get(), &vegas_params_ );
-    // then perform a first integration with the given calls count
+    if ( !vegas_state_ )
+      throw CG_FATAL( "Integrator:warmup" ) << "Vegas state not initialised!";
+
+    // perform a first integration to warm up the grid
     double result = 0., abserr = 0.;
-    const int res = gsl_monte_vegas_integrate( function_.get(),
-      &x_low[0], &x_up[0],
-      function_->dim, ncall, rng_.get(), vegas_state_.get(),
+    int res = gsl_monte_vegas_integrate( function_.get(),
+      &x_low[0], &x_up[0], function_->dim, ncall, rng_.get(), vegas_state_.get(),
       &result, &abserr );
+
     // ensure the operation was successful
     if ( res != GSL_SUCCESS )
       throw CG_ERROR( "Integrator:vegas" )
         << "Failed to warm-up the Vegas grid.\n\t"
         << "GSL error: " << gsl_strerror( res ) << ".";
+
     CG_INFO( "Integrator:vegas" )
       << "Finished the Vegas warm-up.";
   }

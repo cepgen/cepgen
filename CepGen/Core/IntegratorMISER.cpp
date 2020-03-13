@@ -20,34 +20,42 @@ namespace cepgen
       void integrate( double&, double& ) override;
 
     private:
-      std::unique_ptr<gsl_monte_miser_state,void(*)( gsl_monte_miser_state* )> miser_state_;
+      ParametersList params_;
+      gsl_monte_miser_params miser_params_;
+      /// A trivial deleter for the MISER integrator
+      struct gsl_monte_miser_deleter
+      {
+        inline void operator()( gsl_monte_miser_state* state ) { gsl_monte_miser_free( state ); }
+      };
+      std::unique_ptr<gsl_monte_miser_state,gsl_monte_miser_deleter> miser_state_;
   };
 
   IntegratorMISER::IntegratorMISER( const ParametersList& params ) :
-    Integrator( params ),
-    miser_state_( gsl_monte_miser_alloc( function_->dim ), gsl_monte_miser_free )
-  {
-    gsl_monte_miser_params miser_params;
-    miser_params.estimate_frac = params.get<double>( "estimateFraction", miser_params.estimate_frac );
-    miser_params.min_calls = params.get<int>( "minCalls", miser_params.min_calls );
-    miser_params.min_calls_per_bisection = params.get<int>( "minCallsPerBisection", miser_params.min_calls_per_bisection );
-    miser_params.alpha = params.get<double>( "alpha", miser_params.alpha );
-    miser_params.dither = params.get<double>( "dither", miser_params.dither );
-    gsl_monte_miser_params_set( miser_state_.get(), &miser_params );
-
-    //--- a bit of printout for debugging
-
-    CG_DEBUG( "Integrator:build" ) << "MISER parameters:\n\t"
-      << "Number of calls: " << miser_params.min_calls << ", "
-      << "per bisection: " << miser_params.min_calls_per_bisection << ",\n\t"
-      << "Estimate fraction: " << miser_params.estimate_frac << ",\n\t"
-      << "α-value: " << miser_params.alpha << ",\n\t"
-      << "Dither: " << miser_params.dither << ".";
-  }
+    Integrator( params ), params_( params )
+  {}
 
   void
   IntegratorMISER::integrate( double& result, double& abserr )
   {
+    if ( !initialised_ ) {
+      miser_state_.reset( gsl_monte_miser_alloc( function_->dim ) );
+      gsl_monte_miser_params_get( miser_state_.get(), &miser_params_ );
+      miser_params_.estimate_frac = params_.get<double>( "estimateFraction", 0.1 );
+      miser_params_.min_calls = params_.get<int>( "minCalls", 16*10 );
+      miser_params_.min_calls_per_bisection = params_.get<int>( "minCallsPerBisection", 32*16*10 );
+      miser_params_.alpha = params_.get<double>( "alpha", 2. );
+      miser_params_.dither = params_.get<double>( "dither", 0.1 );
+      gsl_monte_miser_params_set( miser_state_.get(), &miser_params_ );
+
+      //--- a bit of printout for debugging
+      CG_DEBUG( "Integrator:build" ) << "MISER parameters:\n\t"
+        << "Number of calls: " << miser_params_.min_calls << ", "
+        << "per bisection: " << miser_params_.min_calls_per_bisection << ",\n\t"
+        << "Estimate fraction: " << miser_params_.estimate_frac << ",\n\t"
+        << "α-value: " << miser_params_.alpha << ",\n\t"
+        << "Dither: " << miser_params_.dither << ".";
+      initialised_ = true;
+    }
     //--- integration bounds
     std::vector<double> x_low( function_->dim, 0. ), x_up( function_->dim, 1. );
 
