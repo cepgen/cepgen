@@ -2,6 +2,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 
 file(GLOB core_sources Core/*.cpp Modules/*.cpp Utils/*.cpp *.cpp)
 file(GLOB phys_sources Physics/*.cpp)
+file(GLOB int_sources Integration/*.cpp)
 file(GLOB proc_sources Processes/*.cpp Processes/Fortran/*.f)
 file(GLOB sf_sources StructureFunctions/*.cpp)
 
@@ -71,7 +72,7 @@ endif()
 
 #----- build the objects
 
-add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${proc_sources} ${sf_sources})
+add_library(CepGenCore SHARED ${core_sources} ${int_sources} ${phys_sources} ${proc_sources} ${sf_sources})
 target_compile_definitions(CepGenCore PUBLIC ${core_definitions})
 target_link_libraries(CepGenCore PUBLIC ${CEPGEN_CORE_EXT})
 target_include_directories(CepGenCore PUBLIC ${core_includes})

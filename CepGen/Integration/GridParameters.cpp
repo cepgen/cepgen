@@ -1,4 +1,4 @@
-#include "CepGen/Core/GridParameters.h"
+#include "CepGen/Integration/GridParameters.h"
 #include "CepGen/Core/Exception.h"
 
 #include <cmath> // pow

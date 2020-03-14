@@ -2,11 +2,7 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Version.h"
 
-#include "CepGen/Core/Integrator.h"
-#include "CepGen/Core/Exception.h"
-
-#include "CepGen/Utils/Timer.h"
-#include "CepGen/Utils/String.h"
+#include "CepGen/Integration/Integrator.h"
 
 #include "CepGen/Processes/Process.h"
 #include "CepGen/Modules/ExportModule.h"
@@ -29,6 +25,9 @@
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 
 #include "CepGen/Event/Event.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/Timer.h"
+#include "CepGen/Utils/String.h"
 
 #include <fstream>
 #include <chrono>

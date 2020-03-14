@@ -16,7 +16,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Limits.h"
 
-#include "CepGen/Core/Integrator.h"
+#include "CepGen/Integration/Integrator.h"
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"

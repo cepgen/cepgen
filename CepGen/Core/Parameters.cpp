@@ -1,8 +1,8 @@
 #include "CepGen/Parameters.h"
 
-#include "CepGen/Event/Event.h"
+#include "CepGen/Integration/Integrator.h"
 
-#include "CepGen/Core/Integrator.h"
+#include "CepGen/Event/Event.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
