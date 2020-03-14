@@ -56,6 +56,14 @@ endif()
 
 #----- check the external dependencies for physics utilities
 
+if(CMAKE_BUILD_FOAM AND ROOT_FOUND)
+  message(STATUS "FOAM integrator will be built")
+  list(APPEND core_includes ${ROOT_INCLUDE_DIRS})
+  list(APPEND CEPGEN_COR_EXT ${ROOT_LIBRARIES})
+else()
+  file(GLOB int_foam Integration/IntegratorFoam.cpp)
+  list(REMOVE_ITEM int_sources ${int_foam})
+endif()
 if(KMR_INTERP)
   message(STATUS "KMR interpolation algorithm found in ${KMR_INTERP}")
   list(APPEND phys_sources ${KMR_INTERP})
