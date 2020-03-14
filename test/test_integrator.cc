@@ -2,7 +2,7 @@
 #include "CepGen/Parameters.h"
 
 #include "CepGen/Modules/IntegratorFactory.h"
-#include "CepGen/Core/Integrator.h"
+#include "CepGen/Integration/Integrator.h"
 
 #include "CepGen/Processes/Process.h"
 

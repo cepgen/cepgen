@@ -1,5 +1,6 @@
-#include "CepGen/Core/Integrator.h"
-#include "CepGen/Core/GridParameters.h"
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Integration/GridParameters.h"
+
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 

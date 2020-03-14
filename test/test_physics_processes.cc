@@ -1,7 +1,6 @@
 #include "CepGen/Cards/PythonHandler.h"
 
 #include "CepGen/Generator.h"
-#include "CepGen/Core/Integrator.h"
 #include "CepGen/Core/ParametersList.h"
 
 #include "CepGen/Utils/AbortHandler.h"

@@ -1,7 +1,7 @@
-#include "CepGen/Core/Integrator.h"
-#include "CepGen/Core/Exception.h"
-
+#include "CepGen/Integration/Integrator.h"
 #include "CepGen/Modules/IntegratorFactory.h"
+
+#include "CepGen/Core/Exception.h"
 
 #include <gsl/gsl_monte_plain.h>
 
