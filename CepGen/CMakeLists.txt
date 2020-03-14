@@ -8,6 +8,15 @@ file(GLOB sf_sources StructureFunctions/*.cpp)
 set(core_definitions)
 set(core_includes)
 
+if(CUBA)
+  message(STATUS "CUBA found in ${CUBA}")
+  list(APPEND CEPGEN_CORE_EXT ${CUBA})
+  list(APPEND core_includes ${CUBA_INCLUDE})
+else()
+  file(GLOB cuba Core/IntegratorCuba.cpp)
+  list(REMOVE_ITEM core_sources ${cuba})
+endif()
+
 #----- check the external dependencies for SFs/alphaS
 
 if(GRV_SRC)

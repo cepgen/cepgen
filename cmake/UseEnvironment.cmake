@@ -101,6 +101,9 @@ endif()
 #--- searching for YODA
 find_library(YODA YODA HINTS $ENV{YODA_DIR} PATH_SUFFIXES lib)
 find_path(YODA_INCLUDE YODA HINTS $ENV{YODA_DIR} PATH_SUFFIXES include)
+#--- searching for CUBA
+find_path(CUBA_INCLUDE tools HINTS $ENV{CUBA_DIR})
+find_library(CUBA cuba HINTS $ENV{CUBA_DIR})
 #--- other utilitaries
 find_package(PythonLibs 2.7)
 find_library(MUPARSER muparser)
