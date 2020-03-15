@@ -36,7 +36,7 @@ namespace cepgen
 
         void throwPythonError( const std::string& ) const;
         std::string pythonPath( const std::string& ) const;
-        PyObject* element( PyObject*, const char* ) const;
+        PyObject* element( PyObject*, const std::string& ) const;
         PyObject* encode( const char* str ) const;
 
         template<typename T> bool is( PyObject* obj ) const;

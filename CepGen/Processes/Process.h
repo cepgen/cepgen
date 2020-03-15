@@ -94,7 +94,7 @@ namespace cepgen
         inline const std::string& description() const { return description_; }
 
         /// Does the process contain (and hold) an event?
-        bool hasEvent() const { return !( !event_ ); }
+        bool hasEvent() const { return (bool)event_; }
         /// Complete list of Particle with their role in the process for the point considered in the phase space, returned as an Event object.
         /// \return Event object containing all the generated Particle objects
         inline const Event& event() const { return *event_; }

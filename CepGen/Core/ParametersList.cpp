@@ -7,6 +7,8 @@
 
 namespace cepgen
 {
+  const std::string ParametersList::MODULE_NAME = "mod_name";
+
   ParametersList::ParametersList( const ParametersList& oth ) :
     param_values_( oth.param_values_ ), int_values_( oth.int_values_ ),
     dbl_values_( oth.dbl_values_ ), str_values_( oth.str_values_ ),
@@ -77,7 +79,7 @@ namespace cepgen
   }
 
   std::vector<std::string>
-  ParametersList::keys() const
+  ParametersList::keys( bool name_key ) const
   {
     std::vector<std::string> out;
     for ( const auto& p :     param_values_ ) out.emplace_back( p.first );
@@ -89,6 +91,9 @@ namespace cepgen
     for ( const auto& p :       str_values_ ) out.emplace_back( p.first );
     for ( const auto& p :   vec_str_values_ ) out.emplace_back( p.first );
     for ( const auto& p :       lim_values_ ) out.emplace_back( p.first );
+    const auto it_name = std::find( out.begin(), out.end(), MODULE_NAME );
+    if ( it_name != out.end() )
+      out.erase( it_name );
     return out;
   }
 
