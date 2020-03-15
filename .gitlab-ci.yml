@@ -25,8 +25,11 @@ stages:
   stage: run
   script:
     - cd build
+    - echo "Modules dump"
     - ./cepgen -l
+    - echo "Python card test"
     - ./cepgen Cards/lpair_cfg.py -n 10000
+    - echo "LPAIR card test"
     - ./cepgen Cards/legacy/lpair.card -n 10000
   when: on_success
   allow_failure: false
@@ -51,8 +54,9 @@ stages:
   stage: test
   script:
     - cd build
-    - test/test_integrator -i vegas
-    - test/test_integrator -i miser
+    - test/test_integrator -i Vegas
+    - test/test_integrator -i MISER
+    - test/test_integrator -i plain
   when: on_success
   allow_failure: false
 
@@ -61,9 +65,9 @@ stages:
   script:
     - cd build
     - echo "VEGAS test"
-    - test/test_physics_processes -i vegas -q -cfg test/test_processes.cfg
+    - test/test_physics_processes -i Vegas -q -cfg test/test_processes.cfg
     - echo "MISER test"
-    - test/test_physics_processes -i miser -q -cfg test/test_processes.cfg
+    - test/test_physics_processes -i MISER -q -cfg test/test_processes.cfg
   when: on_success
   allow_failure: true
 
