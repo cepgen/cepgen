@@ -126,14 +126,14 @@ namespace cepgen
 
       //----- event modification modules
       const auto& mod = pars.get<ParametersList>( "eventmod" );
-      if ( !mod.keys().empty() ) {
+      if ( !mod.keys( true ).empty() ) {
         params_.addModifier( EventModifierFactory::get().build( mod ) );
         (*params_.eventModifiersSequence().rbegin())->setParameters( params_ );
       }
 
       //----- output modules definition
       const auto& out = pars.get<ParametersList>( "output" );
-      if ( !out.keys().empty() )
+      if ( !out.keys( true ).empty() )
         params_.addOutputModule( io::ExportModuleFactory::get().build( out ) );
     }
 

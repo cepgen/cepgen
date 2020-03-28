@@ -11,11 +11,18 @@ namespace cepgen
   class IntegratorPlain : public Integrator
   {
     public:
-      inline explicit IntegratorPlain( const ParametersList& params ) :
-        Integrator( params ) {}
+      explicit IntegratorPlain( const ParametersList& params );
 
       void integrate( double&, double& ) override;
+
+    private:
+      int ncvg_;
   };
+
+  IntegratorPlain::IntegratorPlain( const ParametersList& params ) :
+    Integrator( params ),
+    ncvg_( params.get<int>( "numFunctionCalls", 50000 ) )
+  {}
 
   void
   IntegratorPlain::integrate( double& result, double& abserr )

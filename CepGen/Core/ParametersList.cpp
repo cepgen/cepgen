@@ -36,8 +36,7 @@ namespace cepgen
   bool
   ParametersList::empty() const
   {
-    return keys().empty()
-      || keys() == std::vector<std::string>{ MODULE_NAME };
+    return keys( false ).empty();
   }
 
   std::ostream&
@@ -91,9 +90,11 @@ namespace cepgen
     for ( const auto& p :       str_values_ ) out.emplace_back( p.first );
     for ( const auto& p :   vec_str_values_ ) out.emplace_back( p.first );
     for ( const auto& p :       lim_values_ ) out.emplace_back( p.first );
-    const auto it_name = std::find( out.begin(), out.end(), MODULE_NAME );
-    if ( it_name != out.end() )
-      out.erase( it_name );
+    if ( !name_key ) {
+     const auto it_name = std::find( out.begin(), out.end(), MODULE_NAME );
+     if ( it_name != out.end() )
+       out.erase( it_name );
+    }
     return out;
   }
 

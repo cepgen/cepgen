@@ -23,7 +23,7 @@ namespace cepgen
       public:
         /// Class constructor
         explicit ExportModule( const ParametersList& );
-        virtual ~ExportModule() = default;
+        virtual ~ExportModule();
 
         const std::string& name() const { return name_; }
         /// Global list of steering parameters

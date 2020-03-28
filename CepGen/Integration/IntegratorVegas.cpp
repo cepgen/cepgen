@@ -26,7 +26,7 @@ namespace cepgen
       void warmup( std::vector<double>&, std::vector<double>&, unsigned int );
       double eval( const std::vector<double>& ) override;
 
-      ParametersList params_;
+      int ncvg_;
       double chisq_cut_;
       gsl_monte_vegas_params vegas_params_;
       /// A trivial deleter for the Vegas integrator
@@ -37,12 +37,15 @@ namespace cepgen
       /// A Vegas integrator state for integration (optional) and/or
       /// "treated" event generation
       std::unique_ptr<gsl_monte_vegas_state,gsl_monte_vegas_deleter> vegas_state_;
+      unsigned long long r_boxes_;
   };
   std::ostream& operator<<( std::ostream&, const IntegratorVegas::Mode& );
 
   IntegratorVegas::IntegratorVegas( const ParametersList& params ) :
-    Integrator( params ), params_( params ),
-    chisq_cut_( params.get<double>( "chiSqCut", 1.5 ) )
+    Integrator( params ),
+    ncvg_( params.get<int>( "numFunctionCalls", 50000 ) ),
+    chisq_cut_( params.get<double>( "chiSqCut", 1.5 ) ),
+    r_boxes_( 0ull )
   {}
 
   void
@@ -111,7 +114,6 @@ namespace cepgen
       << "ran for " << vegas_state_->dim << " dimensions, "
       << "and generated " << vegas_state_->bins_max << " bins.\n\t"
       << "Integration volume: " << vegas_state_->vol << ".";
-    grid_->r_boxes = std::pow( vegas_state_->bins, function_->dim );
 
     result_ = result;
     err_result_ = abserr;
@@ -145,7 +147,9 @@ namespace cepgen
     if ( !input_params_->generation().treat )
       return function_->f( (double*)&x[0], function_->dim, (void*)&input_params_ );
     //--- treatment of the integration grid
-    double w = grid_->r_boxes;
+    if ( r_boxes_ == 0ull )
+      r_boxes_ = std::pow( vegas_state_->bins, function_->dim );
+    double w = r_boxes_;
     std::vector<double> x_new( x.size() );
     for ( unsigned short j = 0; j < function_->dim; ++j ) {
       //--- find surrounding coordinates and interpolate
@@ -159,7 +163,7 @@ namespace cepgen
       x_new[j] = COORD( vegas_state_, id+1, j )-bin_width*( 1.-rel_pos );
       w *= bin_width;
     }
-    return w*function_->f( (double*)&x_new[0], function_->dim, (void*)&input_params_ );
+    return w*function_->f( (double*)&x_new[0], function_->dim, (void*)input_params_ );
   }
 
   std::ostream&

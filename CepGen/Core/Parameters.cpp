@@ -44,7 +44,9 @@ namespace cepgen
   {}
 
   Parameters::~Parameters() // required for unique_ptr initialisation!
-  {}
+  {
+    CG_DEBUG( "Parameters" ) << "Destructor called.";
+  }
 
   Parameters&
   Parameters::operator=( Parameters param )

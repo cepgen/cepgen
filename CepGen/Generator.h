@@ -41,8 +41,8 @@ namespace cepgen
     double eval( double*, size_t, void* );
   }
 
-  class Event;
   class Integrator;
+  class GeneratorWorker;
   class Parameters;
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -119,7 +119,9 @@ namespace cepgen
    private:
       /// Physical Parameters used in the events generation and cross-section computation
       std::unique_ptr<Parameters> parameters_;
-      /// Vegas instance which will integrate the function
+      /// Generator worker instance
+      std::unique_ptr<GeneratorWorker> generator_;
+      /// Integration algorithm
       std::unique_ptr<Integrator> integrator_;
       /// Cross section value computed at the last integration
       double result_;

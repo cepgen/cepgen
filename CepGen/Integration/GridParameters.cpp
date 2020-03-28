@@ -8,7 +8,6 @@ namespace cepgen
   GridParameters::GridParameters( size_t ndim ) :
     gen_prepared( false ),
     f_max_diff( 0. ),
-    r_boxes( 0 ),
     max_( pow( M_BIN, ndim ) ), num_points_( max_, 0ul ),
     f_max_( max_, 0. ), f_max_global_( 0. )
   {

@@ -290,7 +290,7 @@ namespace cepgen
 
       ParametersList part_cuts;
       fillParameter( kin, "cuts", part_cuts );
-      for ( const auto& part : part_cuts.keys() ) {
+      for ( const auto& part : part_cuts.keys( true ) ) {
         const auto pdg = (pdgid_t)stoi( part );
         const auto& cuts = part_cuts.get<ParametersList>( part );
         if ( cuts.has<Limits>( "pt" ) )
@@ -435,7 +435,7 @@ namespace cepgen
         throwPythonError( "Extra particles definition object should be a parameters list!" );
 
       const auto& parts = get<ParametersList>( pparts );
-      for ( const auto& k : parts.keys() ) {
+      for ( const auto& k : parts.keys( true ) ) {
         const auto& part = parts.get<ParticleProperties>( k );
         if ( part.pdgid == 0 || part.mass < 0. )
           continue;
