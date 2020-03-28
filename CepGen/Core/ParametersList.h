@@ -49,13 +49,14 @@ namespace cepgen
       bool empty() const;
 
       /// List of keys handled in this list of parameters
-      std::vector<std::string> keys() const;
+      /// \param[in] name_key Include the name variable?
+      std::vector<std::string> keys( bool name_key = true ) const;
       /// Get a string-converted version of a value
       std::string getString( const std::string& key ) const;
 
       /// Human-readable version of a parameters container
       friend std::ostream& operator<<( std::ostream& os, const ParametersList& );
-      static constexpr const char* MODULE_NAME = "mod_name";
+      static const std::string MODULE_NAME;
 
     private:
       std::map<std::string,ParametersList> param_values_;

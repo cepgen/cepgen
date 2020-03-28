@@ -18,7 +18,7 @@ namespace cepgen
       void integrate( double&, double& ) override;
 
     private:
-      ParametersList params_;
+      int ncvg_;
       gsl_monte_miser_params miser_params_;
       /// A trivial deleter for the MISER integrator
       struct gsl_monte_miser_deleter
@@ -29,7 +29,8 @@ namespace cepgen
   };
 
   IntegratorMISER::IntegratorMISER( const ParametersList& params ) :
-    Integrator( params ), params_( params )
+    Integrator( params ),
+    ncvg_( params.get<int>( "numFunctionCalls", 50000 ) )
   {}
 
   void

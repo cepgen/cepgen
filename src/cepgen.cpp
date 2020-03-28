@@ -18,7 +18,7 @@ int main( int argc, char* argv[] )
 {
   std::string input_card;
   int num_events;
-  bool list_mods = false, cmd_line = false;
+  bool list_mods = false, cmd_line = false, debug = false;
 
   const std::string first_arg( argv[1] );
   if ( first_arg == "--cmd" || first_arg == "-c" )
@@ -29,7 +29,11 @@ int main( int argc, char* argv[] )
       .addArgument( "", "path to the configuration file", &input_card, 'i' )
       .addOptionalArgument( "num-events", "number of events to generate", -1, &num_events, 'n' )
       .addOptionalArgument( "list-modules", "list all runtime modules", false, &list_mods, 'l' )
+      .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
       .parse();
+
+  if ( debug )
+    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debug;
 
   cepgen::utils::AbortHandler ctrl_c;
 

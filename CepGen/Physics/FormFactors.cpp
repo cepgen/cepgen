@@ -48,7 +48,8 @@ namespace cepgen
         CG_WARNING( "FormFactors" ) << "Elastic proton form factors requested! Check your process definition!";
         return FormFactors::protonElastic( q2 );
       case strfun::Type::SuriYennie: {
-        strfun::SuriYennie sy = strfun::SuriYennie()( xbj, q2 );
+        static strfun::SuriYennie sy;
+        sy = sy( xbj, q2 );
         return FormFactors( sy.F2 * xbj * sqrt( mi2 ) / q2, sy.FM ); //FIXME
       } break;
       default: {

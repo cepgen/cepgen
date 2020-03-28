@@ -2,7 +2,9 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Version.h"
 
+#include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Integration/Integrator.h"
+#include "CepGen/Integration/GridParameters.h"
 
 #include "CepGen/Processes/Process.h"
 #include "CepGen/Modules/ExportModule.h"
@@ -41,7 +43,9 @@ namespace cepgen
   }
 
   Generator::Generator() :
-    parameters_( new Parameters ), result_( -1. ), result_error_( -1. )
+    parameters_( new Parameters ),
+    generator_( new GeneratorWorker( parameters_.get() ) ),
+    result_( -1. ), result_error_( -1. )
   {
     static const std::string pdg_file = "External/mass_width_2019.mcd";
     pdg::MCDFileParser::parse( pdg_file.c_str() );
@@ -57,7 +61,9 @@ namespace cepgen
   }
 
   Generator::Generator( Parameters* ip ) :
-    parameters_( ip ), result_( -1. ), result_error_( -1. )
+    parameters_( ip ),
+    generator_( new GeneratorWorker( parameters_.get() ) ),
+    result_( -1. ), result_error_( -1. )
   {}
 
   Generator::~Generator()
@@ -66,6 +72,7 @@ namespace cepgen
   void
   Generator::clearRun()
   {
+    generator_.reset( new GeneratorWorker( parameters_.get() ) );
     if ( parameters_->hasProcess() )
       parameters_->process().setKinematics( parameters_->kinematics );
     result_ = result_error_ = -1.;
@@ -74,7 +81,7 @@ namespace cepgen
   Parameters&
   Generator::parameters()
   {
-    return *parameters_.get();
+    return *parameters_;
   }
 
   void
@@ -156,6 +163,8 @@ namespace cepgen
   Generator::setIntegrator( std::unique_ptr<Integrator> integ )
   {
     integrator_ = std::move( integ );
+    CG_INFO( "Generator:integrator" )
+      << "Generator will use a " << integrator_->name() << "-type integrator.";
   }
 
   void
@@ -176,11 +185,10 @@ namespace cepgen
       integrator_ = IntegratorFactory::get().build( *parameters_->integrator );
     }
     integrator_->setFunction( ndim, integrand::eval, *parameters_ );
+    generator_->setIntegrator( integrator_.get() );
 
     CG_DEBUG( "Generator:integrate" )
-      << "New integrator instance created\n\t"
-      << "Considered topology: " << parameters_->kinematics.mode << " case\n\t"
-      << "Will proceed with " << ndim << "-dimensional integration.";
+      << "New integrator instance created for " << ndim << "-dimensional integration.";
 
     integrator_->integrate( result_, result_error_ );
 
@@ -193,7 +201,7 @@ namespace cepgen
   const Event&
   Generator::generateOneEvent()
   {
-    integrator_->generateOne();
+    generator_->generate( 1 );
     return parameters_->process().event();
   }
 
@@ -205,7 +213,10 @@ namespace cepgen
     CG_INFO( "Generator" )
       << parameters_->generation().maxgen << " events will be generated.";
 
-    integrator_->generate( parameters_->generation().maxgen, callback );
+    for ( auto& mod : parameters_->outputModulesSequence() )
+      mod->initialise( *parameters_ );
+
+    generator_->generate( parameters_->generation().maxgen, callback );
 
     const double gen_time_s = tmr.elapsed();
     const double rate_ms = ( parameters_->numGeneratedEvents() > 0 )

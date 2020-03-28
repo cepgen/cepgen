@@ -40,7 +40,6 @@ namespace cepgen
       double f_max2;
       double f_max_diff;
       double f_max_old;
-      double r_boxes;
 
     private:
       size_t max_;

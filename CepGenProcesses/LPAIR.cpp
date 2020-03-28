@@ -165,7 +165,7 @@ namespace cepgen
       const double sp = s_+mX2_-sig1, d3 = sig1-mB2_;
       const double rl2 = sp*sp-4.*s_*mX2_; // lambda(s, m3**2, sigma)
       if ( rl2 <= 0. ) {
-        CG_DEBUG( "LPAIR" ) << "rl2 = " << rl2 << " <= 0";
+        CG_DEBUG_LOOP( "LPAIR" ) << "rl2 = " << rl2 << " <= 0";
         return false;
       }
       const double sl2 = sqrt( rl2 );
@@ -175,11 +175,11 @@ namespace cepgen
 
       // FIXME dropped in CDF version
       if ( t1_max > -kin_.cuts.initial.q2.min() ) {
-        CG_DEBUG( "LPAIR" ) << "t1max = " << t1_max << " > -q2min = " << -kin_.cuts.initial.q2.min();
+        CG_DEBUG_LOOP( "LPAIR" ) << "t1max = " << t1_max << " > -q2min = " << -kin_.cuts.initial.q2.min();
         return false;
       }
       if ( t1_min < -kin_.cuts.initial.q2.max() && kin_.cuts.initial.q2.hasMax() ) {
-        CG_DEBUG( "LPAIR" ) << "t1min = " << t1_min << " < -q2max = " << -kin_.cuts.initial.q2.max();
+        CG_DEBUG_LOOP( "LPAIR" ) << "t1min = " << t1_min << " < -q2max = " << -kin_.cuts.initial.q2.max();
         return false;
       }
       if ( t1_max < -kin_.cuts.initial.q2.max() && kin_.cuts.initial.q2.hasMax() )

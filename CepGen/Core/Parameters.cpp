@@ -44,7 +44,9 @@ namespace cepgen
   {}
 
   Parameters::~Parameters() // required for unique_ptr initialisation!
-  {}
+  {
+    CG_DEBUG( "Parameters" ) << "Destructor called.";
+  }
 
   Parameters&
   Parameters::operator=( Parameters param )
@@ -183,8 +185,8 @@ namespace cepgen
        << std::setw( wt ) << "Process to generate"
        << ( pretty ? utils::boldify( param->processName() ) : param->processName() );
     if ( param->process_ ) {
-      for ( const auto& par : param->process().parameters().keys() )
-        if ( par != "mode" && par != ParametersList::MODULE_NAME )
+      for ( const auto& par : param->process().parameters().keys( false ) )
+        if ( par != "mode" )
           os << "\n" << std::setw( wt ) << "" << par << ": " << param->process_->parameters().getString( par );
       std::ostringstream proc_mode; proc_mode << param->kinematics.mode;
       if ( param->kinematics.mode != KinematicsMode::invalid )
@@ -225,9 +227,8 @@ namespace cepgen
         os
           << std::setw( wt ) << mod_name
           << ( pretty ? utils::boldify( mod->name() ) : mod->name() ) << "\n", mod_name.clear();
-        for ( const auto& par : mod->parameters().keys() )
-          if ( par != ParametersList::MODULE_NAME )
-            os << std::setw( wt ) << "" << par << ": " << mod->parameters().getString( par ) << "\n";
+        for ( const auto& par : mod->parameters().keys( false ) )
+          os << std::setw( wt ) << "" << par << ": " << mod->parameters().getString( par ) << "\n";
       }
     }
     if ( !param->taming_functions.empty() ) {
@@ -240,20 +241,11 @@ namespace cepgen
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 )
-      << ( pretty ? utils::boldify( " Integration parameters " ) : "Integration parameters" ) << std::setfill( ' ' ) << "\n\n";
-    os
+      << ( pretty ? utils::boldify( " Integration parameters " ) : "Integration parameters" ) << std::setfill( ' ' ) << "\n\n"
       << std::setw( wt ) << "Integration"
-      << *param->integrator << "\n";
-    /*std::ostringstream int_algo; int_algo << param->integration_.type;
-    os
-      << std::setw( wt ) << "Integration algorithm"
-      << ( pretty ? utils::boldify( int_algo.str() ) : int_algo.str() ) << "\n"
-      << std::setw( wt ) << "Number of function calls" << param->integration_.ncvg << "\n"
-      << std::setw( wt ) << "Random number generator seed" << param->integration_.rng_seed << "\n";
-    if ( param->integration_.rng_engine )
-      os
-        << std::setw( wt ) << "Random number generator engine"
-        << param->integration_.rng_engine->name << "\n";*/
+      << ( pretty ? utils::boldify( param->integrator->name<std::string>() ) : param->integrator->name<std::string>() ) << "\n";
+    for ( const auto& key : param->integrator->keys( false ) )
+      os << std::setw( wt ) << "" << key << ": " << param->integrator->getString( key ) << "\n";
     os
       << "\n"
       << std::setfill('_') << std::setw( wb+3 ) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill( ' ' ) << "\n\n"

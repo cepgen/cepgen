@@ -5,6 +5,7 @@
 #include "CepGen/Physics/Constants.h"
 
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/Exception.h"
 
 #include "CepGen/Utils/String.h"
 #include "CepGen/Parameters.h"
@@ -21,6 +22,12 @@ namespace cepgen
       name_( params_.name<std::string>() ),
       event_num_( 0ull )
     {}
+
+    ExportModule::~ExportModule()
+    {
+      CG_DEBUG( "ExportModule" )
+        << "Destructor called for output module \"" << name_ << "\".";
+    }
 
     std::string
     ExportModule::banner( const Parameters& params, const std::string& prep )

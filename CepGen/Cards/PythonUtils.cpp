@@ -84,9 +84,9 @@ namespace cepgen
     }
 
     PyObject*
-    PythonHandler::element( PyObject* obj, const char* key ) const
+    PythonHandler::element( PyObject* obj, const std::string& key ) const
     {
-      PyObject* pout = nullptr, *nink = encode( key );
+      PyObject* pout = nullptr, *nink = encode( key.c_str() );
       if ( !nink )
         return pout;
       pout = PyDict_GetItem( obj, nink ); // borrowed

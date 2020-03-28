@@ -284,11 +284,6 @@ namespace cepgen
       const auto p2 = Momentum::fromPxPyPzM( 0., 0., -kin_.incoming_beams.second.pz, m2 );
 
       if ( event_ ) {
-        CG_DEBUG( "Process:incomingBeams" )
-          << "Incoming primary particles:\n"
-          << "  " << p1 << "\n"
-          << "  " << p2;
-
         event_->oneWithRole( Particle::IncomingBeam1 ).setMomentum( p1 );
         event_->oneWithRole( Particle::IncomingBeam2 ).setMomentum( p2 );
       }
@@ -299,10 +294,11 @@ namespace cepgen
       mA2_ = p1.mass2();
       mB2_ = p2.mass2();
 
-      CG_DEBUG( "Process" ) << "Kinematics successfully set!\n"
-        << "  √s = " << sqs_*1.e-3 << " TeV,\n"
-        << "  p1=" << p1 << ",\tmass=" << p1.mass() << " GeV\n"
-        << "  p2=" << p2 << ",\tmass=" << p2.mass() << " GeV.";
+      if ( event_ )
+        CG_DEBUG( "Process" ) << "Kinematics successfully set!\n"
+          << "  √s = " << sqs_*1.e-3 << " TeV,\n"
+          << "  p1=" << p1 << ",\tmass=" << p1.mass() << " GeV\n"
+          << "  p2=" << p2 << ",\tmass=" << p2.mass() << " GeV.";
 
       //--- process-specific phase space definition
       prepareKinematics();
