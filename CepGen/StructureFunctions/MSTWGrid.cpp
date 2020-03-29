@@ -8,6 +8,7 @@
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include <fstream>
+#include <cmath>
 
 /// Martin-Stirling-Thorne-Watt PDFs structure functions
 namespace mstw
@@ -98,8 +99,8 @@ namespace mstw
     CG_DEBUG( "MSTW" )
       << "MSTW@" << header_.order << " grid evaluator built "
       << "for " << header_.nucleon << " structure functions (" << header_.cl << ")\n\t"
-      << "xBj in range [" << pow( 10., bounds[0].first ) << ":" << pow( 10., bounds[0].second ) << "]\n\t"
-      << " Q² in range [" << pow( 10., bounds[1].first ) << ":" << pow( 10., bounds[1].second ) << "].";
+      << "xBj in range [" << std::pow( 10., bounds[0].first ) << ":" << std::pow( 10., bounds[0].second ) << "]\n\t"
+      << " Q² in range [" << std::pow( 10., bounds[1].first ) << ":" << std::pow( 10., bounds[1].second ) << "].";
   }
 
   std::string
