@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <set>
+#include <cmath>
 
 namespace kmr
 {
@@ -16,7 +17,7 @@ namespace kmr
   }
 
   GluonGrid::GluonGrid( const cepgen::ParametersList& params ) :
-    cepgen::GridHandler<3,1>( cepgen::GridType::linear ),
+    cepgen::GridHandler<3,1>( cepgen::GridType::linear ), // grid is already logarithmic
     grid_path_( params.get<std::string>( "path", DEFAULT_KMR_GRID_PATH ) )
   {
     CG_INFO( "GluonGrid" ) << "Building the KMR grid evaluator.";
@@ -52,6 +53,6 @@ namespace kmr
   double
   GluonGrid::operator()( double x, double kt2, double mu2 ) const
   {
-    return cepgen::GridHandler<3,1>::eval( { x, kt2, mu2 } ).at( 0 );
+    return cepgen::GridHandler<3,1>::eval( { log( x ), log( kt2 ), log( mu2 ) } ).at( 0 );
   }
 }

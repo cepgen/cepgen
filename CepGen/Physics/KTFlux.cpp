@@ -73,7 +73,7 @@ namespace cepgen
         return fg;
       }
       case KTFlux::P_Gluon_KMR_alt: {
-        return kmr::GluonGrid::get()( log10( x ), log10( kt2 ), log10( mf2 ) );
+        return kmr::GluonGrid::get()( x, kt2, mf2 );
       } break;
       default:
         throw CG_FATAL( "KTFlux" ) << "Invalid flux type: " << type;
