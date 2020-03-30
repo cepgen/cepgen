@@ -182,6 +182,9 @@ namespace cepgen
     if ( !integrator_ ) {
       if ( !parameters_->integrator )
         throw CG_FATAL( "Generator:integrate" ) << "No integrator parameters found!";
+      if ( parameters_->integrator->name<std::string>().empty() )
+        parameters_->integrator->setName<std::string>( "Vegas" );
+      CG_INFO("")<<*parameters_->integrator;
       integrator_ = IntegratorFactory::get().build( *parameters_->integrator );
     }
     integrator_->setFunction( ndim, integrand::eval, *parameters_ );

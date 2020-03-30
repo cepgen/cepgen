@@ -6,7 +6,7 @@
 
 namespace cepgen
 {
-  template <size_t D,size_t N>
+  template<size_t D,size_t N>
   GridHandler<D,N>::GridHandler( const GridType& grid_type ) :
     grid_type_( grid_type ), accel_{}
   {
@@ -14,7 +14,7 @@ namespace cepgen
       accel_.emplace_back( gsl_interp_accel_alloc(), gsl_interp_accel_free );
   }
 
-  template <size_t D,size_t N>
+  template<size_t D,size_t N>
   typename GridHandler<D,N>::values_t
   GridHandler<D,N>::eval( coord_t in_coords ) const
   {
@@ -112,7 +112,7 @@ namespace cepgen
     return out;
   }
 
-  template <size_t D,size_t N> void
+  template<size_t D,size_t N> void
   GridHandler<D,N>::insert( coord_t coord, values_t value )
   {
     auto mod_coord = coord;
@@ -128,7 +128,7 @@ namespace cepgen
     values_raw_[mod_coord] = value;
   }
 
-  template <size_t D,size_t N> void
+  template<size_t D,size_t N> void
   GridHandler<D,N>::init()
   {
     if ( values_raw_.empty() )
@@ -147,7 +147,7 @@ namespace cepgen
     }
     for ( auto& c : coords_ )
       std::sort( c.begin(), c.end() );
-    { //--- debugging of the grid coordinates
+    if ( CG_LOG_MATCH( "GridHandler", debug ) ) { // debugging of the grid coordinates
       std::ostringstream os;
       unsigned short i = 0;
       for ( const auto& cs : coords_ ) {
@@ -220,7 +220,7 @@ namespace cepgen
     }
   }
 
-  template <size_t D,size_t N> std::array<std::pair<double,double>,D>
+  template<size_t D,size_t N> std::array<std::pair<double,double>,D>
   GridHandler<D,N>::boundaries() const
   {
     std::array<std::pair<double,double>,D> out;
@@ -235,21 +235,21 @@ namespace cepgen
     return out;
   }
 
-  template <size_t D,size_t N> void
+  template<size_t D,size_t N> void
   GridHandler<D,N>::findIndices( const coord_t& coord, coord_t& min, coord_t& max ) const
   {
     for ( size_t i = 0; i < D; ++i ) {
       const auto& c = coords_.at( i ); // extract all coordinates registered for this dimension
       if ( coord.at( i ) < c.front() ) { // under the range
-        CG_DEBUG( "GridHandler:indices" )
+        CG_DEBUG_LOOP( "GridHandler:indices" )
           << "Coordinate " << i << " in underflow range "
-          << "(" << coord.at( i ) << " < " << c.front() << ".";
+          << "(" << coord.at( i ) << " < " << c.front() << ").";
         min[i] = max[i] = c.front();
       }
       else if ( coord.at( i ) > c.back() ) { // over the range
-        CG_DEBUG( "GridHandler:indices" )
+        CG_DEBUG_LOOP( "GridHandler:indices" )
           << "Coordinate " << i << " in overflow range "
-          << "(" << coord.at( i ) << " > " << c.back() << ".";
+          << "(" << coord.at( i ) << " > " << c.back() << ").";
         min[i] = max[i] = c.back();
       }
       else { // in between two coordinates
@@ -258,6 +258,30 @@ namespace cepgen
         max[i] = ( it_coord != c.end() ) ? *( it_coord++ ) : *it_coord;
       }
     }
+  }
+
+  //----------------------------------------------------------------------------
+  // grid manipulation utilitary
+  //----------------------------------------------------------------------------
+
+  template<size_t D,size_t N>
+  typename GridHandler<D,N>::gridpoint_t
+  GridHandler<D,N>::gridpoint_t::operator*( double c ) const
+  {
+    gridpoint_t out = *this;
+    for ( auto& a : out )
+      a *= c;
+    return out;
+  }
+
+  template<size_t D,size_t N>
+  typename GridHandler<D,N>::gridpoint_t
+  GridHandler<D,N>::gridpoint_t::operator+( const gridpoint_t& rhs ) const
+  {
+    gridpoint_t out = *this;
+    for ( size_t i = 0; i < out.size(); ++i )
+      out[i] += rhs[i];
+    return out;
   }
 }
 

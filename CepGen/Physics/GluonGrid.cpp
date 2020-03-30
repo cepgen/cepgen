@@ -10,15 +10,14 @@ namespace kmr
   GluonGrid&
   GluonGrid::get( const char* filename )
   {
-    Parameters p;
-    p.grid_path = filename;
-    static GluonGrid instance( p );
+    static GluonGrid instance( cepgen::ParametersList()
+      .set<std::string>( "path", filename ) );
     return instance;
   }
 
-  GluonGrid::GluonGrid( const Parameters& param ) :
+  GluonGrid::GluonGrid( const cepgen::ParametersList& params ) :
     cepgen::GridHandler<3,1>( cepgen::GridType::linear ),
-    params( param )
+    grid_path_( params.get<std::string>( "path", DEFAULT_KMR_GRID_PATH ) )
   {
     CG_INFO( "GluonGrid" ) << "Building the KMR grid evaluator.";
 
@@ -26,11 +25,11 @@ namespace kmr
 
     std::set<double> kt2_vals, x_vals, mu2_vals;
     { // file readout part
-      std::ifstream file( params.grid_path, std::ios::in );
+      std::ifstream file( grid_path_, std::ios::in );
       if ( !file.is_open() )
-        throw CG_FATAL( "GluonGrid" ) << "Failed to load grid file \"" << params.grid_path << "\"!";
+        throw CG_FATAL( "GluonGrid" ) << "Failed to load grid file \"" << grid_path_ << "\"!";
 
-      std::string x_tmp, kt2_tmp, mu2_tmp, fg_tmp;
+      std::string line, x_tmp, kt2_tmp, mu2_tmp, fg_tmp;
       while ( file >> x_tmp >> kt2_tmp >> mu2_tmp >> fg_tmp ) {
         const double x = stod( x_tmp ), kt2 = stod( kt2_tmp ), mu2 = stod( mu2_tmp ), fg = stod( fg_tmp );
         x_vals.insert( x );

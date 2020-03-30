@@ -57,18 +57,18 @@ namespace cepgen
       } break;
       case KTFlux::P_Gluon_KMR: {
         static bool built = false;
-        double fg;
-        int zero = 0, one = 1;
-        double lx = log10( x ), lkt2 = log10( kt2 ), lmx2 = log10( mf2 );
+        double lx = log10( x ), lkt2 = log10( kt2 ), lmx2 = log10( mf2 ), fg;
         if ( !built ) {
           utils::Timer tmr;
           CG_INFO( "KTFlux:KMR_alt" )
             << "Building the legacy KMR interpolation grid.";
+          int zero = 0;
           f_inter_kmr_fg_( lx, lkt2, lmx2, zero, fg );
           CG_INFO( "KTFlux:KMR_alt" )
             << "Legacy KMR interpolation grid built in " << tmr.elapsed() << " s.";
           built = true;
         }
+        int one = 1;
         f_inter_kmr_fg_( lx, lkt2, lmx2, one, fg );
         return fg;
       }

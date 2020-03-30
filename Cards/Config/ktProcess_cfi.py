@@ -13,6 +13,7 @@ class ProtonFlux:
     PhotonInelastic       = 1
     PhotonInelasticBudnev = 11
     GluonKMR              = 20
+    GluonKMRalt           = 21
 class HeavyIonFlux:
     '''Type of parton (from heavy ion) flux modelling'''
     PhotonElastic         = 100

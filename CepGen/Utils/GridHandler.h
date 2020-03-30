@@ -19,7 +19,7 @@ namespace cepgen
   namespace strfun { class Parameterisation; }
   /// Interpolation type for the grid coordinates
   enum struct GridType { linear, logarithmic, square };
-  /// A generic class for \f${\bb R}^D\mapsto{\bb R}^N grid interpolation
+  /// A generic class for \f$\mathbb{R}^D\mapsto\mathbb{R}^N\f$ grid interpolation
   /// \tparam D Number of variables in the grid (dimension)
   /// \tparam N Number of values handled per point
   template <size_t D,size_t N=1>
@@ -71,20 +71,9 @@ namespace cepgen
       /// A single value in grid coordinates
       struct gridpoint_t : values_t
       {
-        gridpoint_t() : values_t() {}
         gridpoint_t( const values_t& arr ) : values_t( arr ) {}
-        gridpoint_t operator*( double c ) const {
-          gridpoint_t out = *this;
-          for ( auto& a : out )
-            a *= c;
-          return out;
-        }
-        gridpoint_t operator+( const gridpoint_t& rhs ) const {
-          gridpoint_t out = *this;
-          for ( size_t i = 0; i < out.size(); ++i )
-            out[i] += rhs[i];
-          return out;
-        }
+        gridpoint_t operator*( double c ) const;
+        gridpoint_t operator+( const gridpoint_t& rhs ) const;
       };
   };
   template class GridHandler<1,1>;
