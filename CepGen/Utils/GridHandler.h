@@ -1,18 +1,16 @@
-#ifndef CepGen_Core_GridHandler_h
-#define CepGen_Core_GridHandler_h
+#ifndef CepGen_Utils_GridHandler_h
+#define CepGen_Utils_GridHandler_h
 
 #include <gsl/gsl_version.h>
-#ifdef GSL_MAJOR_VERSION
-#  if GSL_MAJOR_VERSION > 2 || ( GSL_MAJOR_VERSION == 2 && GSL_MINOR_VERSION >= 1 )
-#    include <gsl/gsl_interp2d.h>
-#    include <gsl/gsl_spline2d.h>
-#    define GOOD_GSL 1
-#  endif
-#endif
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
+#if defined( GSL_MAJOR_VERSION ) && ( GSL_MAJOR_VERSION > 2 || ( GSL_MAJOR_VERSION == 2 && GSL_MINOR_VERSION >= 1 ) )
+#  include <gsl/gsl_interp2d.h>
+#  include <gsl/gsl_spline2d.h>
+#  define GOOD_GSL 1
+#endif
 
-#include "CepGen/Core/Exception.h"
+#include <memory>
 #include <vector>
 #include <map>
 
@@ -21,7 +19,7 @@ namespace cepgen
   namespace strfun { class Parameterisation; }
   /// Interpolation type for the grid coordinates
   enum struct GridType { linear, logarithmic, square };
-  /// \brief A generic class for D-dimensional grid interpolation
+  /// A generic class for \f${\bb R}^D\mapsto{\bb R}^N grid interpolation
   /// \tparam D Number of variables in the grid (dimension)
   /// \tparam N Number of values handled per point
   template <size_t D,size_t N=1>
@@ -89,8 +87,9 @@ namespace cepgen
         }
       };
   };
-  template class GridHandler<3,1>;
+  template class GridHandler<1,1>;
   template class GridHandler<2,2>;
+  template class GridHandler<3,1>;
 }
 
 #endif

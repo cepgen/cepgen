@@ -60,7 +60,7 @@ namespace cepgen
         }
 #else
         //--- retrieve the indices of the bin in the set
-        coord_t before, after;
+        coord_t before( D ), after( D );
         findIndices( coord, before, after );
         //--- find boundaries values
         const gridpoint_t& ext_11 = values_raw_.at( { before[0], before[1] } ),
@@ -80,7 +80,7 @@ namespace cepgen
       } break;
       case 3: {
         //--- retrieve the indices of the bin in the set
-        coord_t before, after;
+        coord_t before( D ), after( D );
         findIndices( coord, before, after );
         //--- find boundaries values
         const gridpoint_t& ext_111 = values_raw_.at( { before[0], before[1], before[2] } ),
@@ -169,7 +169,8 @@ namespace cepgen
         const unsigned short min_size = type->min_size;
 #endif
         if ( min_size >= values_raw_.size() )
-          throw CG_FATAL( "GridHandler" ) << "Not enough points for \"" << type->name << "\" type of interpolation.\n\t"
+          throw CG_FATAL( "GridHandler" )
+            << "Not enough points for \"" << type->name << "\" type of interpolation.\n\t"
             << "Minimum required: " << min_size << ", got " << values_raw_.size() << "!";
         for ( size_t i = 0; i < N; ++i ) {
           values_[i].reset( new double[values_raw_.size()] );
@@ -224,8 +225,9 @@ namespace cepgen
   {
     std::array<std::pair<double,double>,D> out;
     unsigned short i = 0;
-    for ( const auto& c : coords_ ) {
-      const auto& min = std::min_element( c.begin(), c.end() ), &max = std::max_element( c.begin(), c.end() );
+    for ( const auto& c : coords_ ) { // loop over all dimensions
+      const auto& min = std::min_element( c.begin(), c.end() );
+      const auto& max = std::max_element( c.begin(), c.end() );
       out[i++] = {
         ( min != c.end() ) ? *min : std::numeric_limits<double>::infinity(),
         ( max != c.end() ) ? *max : std::numeric_limits<double>::infinity() };
@@ -236,15 +238,21 @@ namespace cepgen
   template <size_t D,size_t N> void
   GridHandler<D,N>::findIndices( const coord_t& coord, coord_t& min, coord_t& max ) const
   {
-    min.reserve( D );
-    max.reserve( D );
     for ( size_t i = 0; i < D; ++i ) {
-      const auto& c = coords_.at( i );
-      if ( coord.at( i ) < c.front() )
+      const auto& c = coords_.at( i ); // extract all coordinates registered for this dimension
+      if ( coord.at( i ) < c.front() ) { // under the range
+        CG_DEBUG( "GridHandler:indices" )
+          << "Coordinate " << i << " in underflow range "
+          << "(" << coord.at( i ) << " < " << c.front() << ".";
         min[i] = max[i] = c.front();
-      else if ( coord.at( i ) > c.back() )
+      }
+      else if ( coord.at( i ) > c.back() ) { // over the range
+        CG_DEBUG( "GridHandler:indices" )
+          << "Coordinate " << i << " in overflow range "
+          << "(" << coord.at( i ) << " > " << c.back() << ".";
         min[i] = max[i] = c.back();
-      else {
+      }
+      else { // in between two coordinates
         auto it_coord = std::lower_bound( c.begin(), c.end(), coord.at( i ) );
         min[i] = *it_coord;
         max[i] = ( it_coord != c.end() ) ? *( it_coord++ ) : *it_coord;

@@ -1,5 +1,6 @@
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/Timer.h"
 
 #include <fstream>
 #include <set>
@@ -21,6 +22,8 @@ namespace kmr
   {
     CG_INFO( "GluonGrid" ) << "Building the KMR grid evaluator.";
 
+    cepgen::utils::Timer tmr;
+
     std::set<double> kt2_vals, x_vals, mu2_vals;
     { // file readout part
       std::ifstream file( params.grid_path, std::ios::in );
@@ -41,7 +44,7 @@ namespace kmr
     init();
 
     CG_INFO( "GluonGrid" )
-      << "KMR grid evaluator built!\n\t"
+      << "KMR grid evaluator built in " << tmr.elapsed() << " s.\n\t"
       << " kt² in range [" << *kt2_vals.begin() << ":" << *kt2_vals.rbegin() << "]\n\t"
       << " x in range [" << *x_vals.begin() << ":" << *x_vals.rbegin() << "]\n\t"
       << " µ² in range ["  << *mu2_vals.begin() << ":" << *mu2_vals.rbegin() << "].";

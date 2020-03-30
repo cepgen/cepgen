@@ -8,6 +8,7 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/Timer.h"
 
 namespace
 {
@@ -60,19 +61,16 @@ namespace cepgen
         int zero = 0, one = 1;
         double lx = log10( x ), lkt2 = log10( kt2 ), lmx2 = log10( mf2 );
         if ( !built ) {
+          utils::Timer tmr;
           CG_INFO( "KTFlux:KMR_alt" )
             << "Building the legacy KMR interpolation grid.";
           f_inter_kmr_fg_( lx, lkt2, lmx2, zero, fg );
           CG_INFO( "KTFlux:KMR_alt" )
-            << "Legacy KMR interpolation grid built.";
-          f_inter_kmr_fg_( lx, lkt2, lmx2, one, fg );
+            << "Legacy KMR interpolation grid built in " << tmr.elapsed() << " s.";
           built = true;
-          return fg;
         }
-        else {
-          f_inter_kmr_fg_( lx, lkt2, lmx2, one, fg );
-          return fg;
-        }
+        f_inter_kmr_fg_( lx, lkt2, lmx2, one, fg );
+        return fg;
       }
       case KTFlux::P_Gluon_KMR_alt: {
         return kmr::GluonGrid::get()( log10( x ), log10( kt2 ), log10( mf2 ) );
