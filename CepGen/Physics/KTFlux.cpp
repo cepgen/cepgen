@@ -55,16 +55,16 @@ namespace cepgen
           return constants::ALPHA_EM*M_1_PI*( 1.-x )/q2*( f_D+0.5*x2*f_C );
         }
       } break;
-      case KTFlux::P_Gluon_KMR: {
+      case KTFlux::P_Gluon_KMR_legacy: {
         static bool built = false;
         double lx = log10( x ), lkt2 = log10( kt2 ), lmx2 = log10( mf2 ), fg;
         if ( !built ) {
           utils::Timer tmr;
-          CG_INFO( "KTFlux:KMR_alt" )
+          CG_INFO( "KTFlux:KMR_legacy" )
             << "Building the legacy KMR interpolation grid.";
           int zero = 0;
           f_inter_kmr_fg_( lx, lkt2, lmx2, zero, fg );
-          CG_INFO( "KTFlux:KMR_alt" )
+          CG_INFO( "KTFlux:KMR_legacy" )
             << "Legacy KMR interpolation grid built in " << tmr.elapsed() << " s.";
           built = true;
         }
@@ -72,7 +72,7 @@ namespace cepgen
         f_inter_kmr_fg_( lx, lkt2, lmx2, one, fg );
         return fg;
       }
-      case KTFlux::P_Gluon_KMR_alt: {
+      case KTFlux::P_Gluon_KMR: {
         return kmr::GluonGrid::get()( x, kt2, mf2 );
       } break;
       default:

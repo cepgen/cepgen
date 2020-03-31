@@ -21,7 +21,7 @@ namespace cepgen
     P_Photon_Inelastic = 1, ///< Inelastic photon emission from proton
     P_Photon_Inelastic_Budnev = 11, ///< Inelastic photon emission from proton (Budnev flux approximation)
     P_Gluon_KMR = 20, ///< Inelastic gluon emission from proton (KMR flux modelling)
-    P_Gluon_KMR_alt = 21,
+    P_Gluon_KMR_legacy = 21,
     HI_Photon_Elastic = 100 ///< Elastic photon emission from heavy ion (from Starlight \cite Klein:2016yzr)
   };
   /// Human version of the flux name
