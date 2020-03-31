@@ -8,6 +8,7 @@
 
 namespace cepgen
 {
+  /// A perturbative PDF-oriented \f$\alpha_S(Q^2)\f$ evaluator
   class AlphaSLHAPDF : public AlphaS
   {
     public:

@@ -9,7 +9,7 @@ namespace cepgen
   /// Location for all steering card parsers/writers
   namespace card
   {
-    /// Generic steering card handler
+    /// Base steering card module
     class Handler
     {
       public:
@@ -17,8 +17,8 @@ namespace cepgen
         Handler() = default;
         ~Handler() = default;
 
+        /// Get the list of runtime parameters parsed
         Parameters& parameters() { return params_; }
-
         /// Retrieve a configuration from a parsed steering card
         static std::unique_ptr<Handler> parse( const std::string& filename );
 

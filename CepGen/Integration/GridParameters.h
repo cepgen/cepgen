@@ -11,30 +11,35 @@ namespace cepgen
   class GridParameters
   {
     public:
-      typedef std::vector<unsigned short> coord_t;
-
       GridParameters( size_t ndim );
 
+      /// Coordinates definition
+      typedef std::vector<unsigned short> coord_t;
+
+      /// Dump the grid coordinates
       void dump() const;
 
+      /// Grid multiplicity
       size_t size() const { return max_; }
       const coord_t& n( size_t coord ) const;
+      /// Global function maximum
       double globalMax() const { return f_max_global_; }
+      /// Maximal function value for a given grid coordinate
       double maxValue( size_t coord ) const;
+      /// Set the function value for a given grid coordinate
       void setValue( size_t coord, double val );
-
+      /// Shoot a phase space point for a grid coordinate
       void shoot( const gsl_rng* rng, size_t coord, std::vector<double>& out ) const;
       void setTrial( size_t coord );
+      /// Number of points already shot for a given grid coordinate
       size_t numPoints( size_t coord ) const;
 
       /// Maximal number of dimensions handled by this integrator instance
       static constexpr unsigned short MAX_DIM = 15;
-      /// Integration grid size parameter
-      static constexpr unsigned short M_BIN = 3;
-      static constexpr double INV_M_BIN = 1./M_BIN;
+      static constexpr unsigned short M_BIN = 3; ///< Integration grid size parameter
+      static constexpr double INV_M_BIN = 1./M_BIN; ///< Weight of each grid coordinate
 
-      /// Has the generation been prepared?
-      bool gen_prepared;
+      bool gen_prepared; ///< Has the grid been already prepared?
       double correc;
       double correc2;
       double f_max2;

@@ -16,7 +16,8 @@ namespace cepgen
   {
     public:
       /// Default constructor for an undefined modifier
-      explicit EventModifier( const ParametersList& );
+        /// \param[in] params User-controlled steering parameters for this module
+      explicit EventModifier( const ParametersList& params );
       /// Virtual destructor
       virtual ~EventModifier() = default;
 

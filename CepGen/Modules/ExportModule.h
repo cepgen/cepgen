@@ -22,7 +22,8 @@ namespace cepgen
     {
       public:
         /// Class constructor
-        explicit ExportModule( const ParametersList& );
+        /// \param[in] params User-controlled steering parameters for this module
+        explicit ExportModule( const ParametersList& params );
         virtual ~ExportModule();
 
         /// Unique name of the output module
