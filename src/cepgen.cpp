@@ -30,7 +30,6 @@ int main( int argc, char* argv[] )
 
   //--- first start by defining the generator object
   cepgen::Generator gen;
-  auto& params = gen.parameters();
 
   //--- if modules listing is requested
   if ( list_mods ) {
@@ -46,17 +45,18 @@ int main( int argc, char* argv[] )
   else {
     //--- parse the steering card
     if ( !input_card.empty() )
-      params = cepgen::card::Handler::parse( input_card );
+      gen.setParameters( cepgen::card::Handler::parse( input_card ) );
     //--- parse the additional flags
     if ( !parser.extra_config().empty() )
-      params = cepgen::card::CardsHandlerFactory::get().build( "cmd",
+      gen.setParameters( cepgen::card::CardsHandlerFactory::get().build( "cmd",
         cepgen::ParametersList().set<std::vector<std::string> >( "args", parser.extra_config() ) )
-        ->parse( "", params );
+        ->parse( "", gen.parameters() ) );
   }
 
   cepgen::utils::AbortHandler ctrl_c;
 
   try {
+    auto& params = gen.parameters();
     if ( num_events >= 0 ) { // user specified a number of events to generate
       params.generation().maxgen = num_events;
       params.generation().enabled = num_events > 0;

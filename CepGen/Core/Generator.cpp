@@ -85,7 +85,7 @@ namespace cepgen
   }
 
   void
-  Generator::setParameters( Parameters& ip )
+  Generator::setParameters( Parameters ip )
   {
     parameters_.reset( new Parameters( ip ) ); // copy constructor
     if ( parameters_->hasProcess() )
