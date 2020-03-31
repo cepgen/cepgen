@@ -25,8 +25,8 @@ namespace cepgen
         /// Get the list of runtime parameters parsed
         Parameters& parameters() { return params_; }
         /// Retrieve a configuration from a parsed steering card
-        virtual Parameters& parse( const std::string& filename, Parameters& params ) = 0;
-        static Parameters& parse( const std::string& filename );
+        virtual Parameters parse( const std::string& filename, Parameters& params ) = 0;
+        static Parameters parse( const std::string& filename );
 
       protected:
         static constexpr const char* FILENAME_KEY = "filename";

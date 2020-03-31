@@ -47,7 +47,7 @@ namespace cepgen
         parse( file, params_ );
     }
 
-    Parameters&
+    Parameters
     LpairHandler::parse( const std::string& file, Parameters& params )
     {
       std::ifstream f( file, std::fstream::in );

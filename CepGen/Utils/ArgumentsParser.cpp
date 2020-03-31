@@ -63,7 +63,6 @@ namespace cepgen
           print_help();
           exit(0);
         }
-      for ( const auto& arg:args_)CG_WARNING("")<<arg;
       for ( const auto& str : config_str_ ) {
         auto cfg_long = find( args_.begin(), args_.end(), "--"+str.name );
         if ( cfg_long != args_.end() )

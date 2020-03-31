@@ -8,7 +8,7 @@ namespace cepgen
 {
   namespace card
   {
-    Parameters&
+    Parameters
     Handler::parse( const std::string& filename )
     {
       try {

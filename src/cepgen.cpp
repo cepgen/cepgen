@@ -30,6 +30,7 @@ int main( int argc, char* argv[] )
 
   //--- first start by defining the generator object
   cepgen::Generator gen;
+  auto& params = gen.parameters();
 
   //--- if modules listing is requested
   if ( list_mods ) {
@@ -39,18 +40,19 @@ int main( int argc, char* argv[] )
   if ( debug )
     cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debug;
 
-  auto& params = gen.parameters();
   //--- no steering card nor additional flags found
   if ( input_card.empty() && parser.extra_config().empty() )
     throw CG_FATAL( "main" ) << "Neither input card nor configuration word provided!";
-  //--- parse the steering card
-  else if ( !input_card.empty() )
-    params = cepgen::card::Handler::parse( input_card );
-  //--- parse the additional flags
-  else if ( !parser.extra_config().empty() )
-    params = cepgen::card::CardsHandlerFactory::get().build( "cmd",
-      cepgen::ParametersList().set<std::vector<std::string> >( "args", parser.extra_config() ) )
-      ->parse( "", params );
+  else {
+    //--- parse the steering card
+    if ( !input_card.empty() )
+      params = cepgen::card::Handler::parse( input_card );
+    //--- parse the additional flags
+    if ( !parser.extra_config().empty() )
+      params = cepgen::card::CardsHandlerFactory::get().build( "cmd",
+        cepgen::ParametersList().set<std::vector<std::string> >( "args", parser.extra_config() ) )
+        ->parse( "", params );
+  }
 
   cepgen::utils::AbortHandler ctrl_c;
 

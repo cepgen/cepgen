@@ -39,7 +39,7 @@ namespace cepgen
       is_point_set_( false )
     {
       if ( proc.event_ )
-        event_.reset( new Event( *proc.event_.get() ) );
+        event_.reset( new Event( *proc.event_ ) );
     }
 
     std::unique_ptr<Process>

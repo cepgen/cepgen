@@ -34,7 +34,7 @@ namespace cepgen
       public:
         explicit CommandLineHandler( const ParametersList& );
 
-        Parameters& parse( const std::string&, Parameters& ) override;
+        Parameters parse( const std::string&, Parameters& ) override;
 
       private:
         typedef std::vector<std::string> Args;
@@ -42,21 +42,20 @@ namespace cepgen
         static ParametersList vectorise( const Args& );
         static const double INVALID;
 
-        const std::string filename_;
         Args argv_;
     };
 
     const double CommandLineHandler::INVALID = -999.999;
 
     CommandLineHandler::CommandLineHandler( const ParametersList& params ) :
-      filename_( params.get<std::string>( FILENAME_KEY ) ),
       argv_( params.get<std::vector<std::string> >( "args" ) )
     {
-      if ( !filename_.empty() )
-        parse( filename_, params_ );
+      const auto filename = params.get<std::string>( FILENAME_KEY );
+      if ( !filename.empty() )
+        parse( filename, params_ );
     }
 
-    Parameters&
+    Parameters
     CommandLineHandler::parse( const std::string& filename, Parameters& params )
     {
       if ( !filename.empty() ) {
@@ -73,7 +72,6 @@ namespace cepgen
 
       //----- process definition
       const auto& proc = pars.get<ParametersList>( "process" );
-      CG_WARNING("")<<proc;
       if ( !proc.empty() || !params_.hasProcess() )
         params_.setProcess( proc::ProcessesFactory::get().build( proc ) );
 
@@ -191,7 +189,12 @@ namespace cepgen
             else
               plist.set<int>( key, std::stod( value ) );
           } catch ( const std::invalid_argument& ) {
-            plist.set<std::string>( key, value );
+            if ( value == "off" || value == "no" )
+              plist.set<bool>( key, false );
+            else if ( value == "on" || value == "yes" )
+              plist.set<bool>( key, true );
+            else
+              plist.set<std::string>( key, value );
           }
         }
       }

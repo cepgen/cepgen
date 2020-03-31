@@ -57,7 +57,7 @@ namespace cepgen
         parse( file, params_ );
     }
 
-    Parameters&
+    Parameters
     PythonHandler::parse( const std::string& file, Parameters& params )
     {
       params_ = params;
