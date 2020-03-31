@@ -43,7 +43,7 @@ namespace cepgen
       CG_DEBUG( "PythonHandler" )
         << "Python PATH: " << getenv( "PYTHONPATH" ) << ".";
       if ( !filename_.empty() )
-        parse( filename_ );
+        parse( filename_, params_ );
     }
 
     PythonHandler::PythonHandler( const std::string& file ) :
@@ -54,12 +54,13 @@ namespace cepgen
       CG_DEBUG( "PythonHandler" )
         << "Python PATH: " << getenv( "PYTHONPATH" ) << ".";
       if ( !filename_.empty() )
-        parse( file );
+        parse( file, params_ );
     }
 
     Parameters&
-    PythonHandler::parse( const std::string& file )
+    PythonHandler::parse( const std::string& file, Parameters& params )
     {
+      params_ = params;
       std::string filename = pythonPath( file );
       const size_t fn_len = filename.length()+1;
 

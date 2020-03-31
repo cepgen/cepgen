@@ -117,6 +117,8 @@ namespace cepgen
       void print_help() const;
       /// Return usage message
       std::string help_message() const;
+      /// Are extra configuration flags found in arguments list?
+      const std::vector<std::string>& extra_config() const { return extra_config_; }
 
     private:
       /// A collection of parameters
@@ -124,8 +126,10 @@ namespace cepgen
 
       std::string command_name_;
       const ParametersCollection help_str_;
+      const ParametersCollection config_str_;
       ParametersCollection params_;
       std::vector<std::string> args_;
+      std::vector<std::string> extra_config_;
   };
 }
 

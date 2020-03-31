@@ -34,7 +34,7 @@ int main( int argc, char* argv[] )
     .addOptionalArgument( "num-events", "number of events to generate", -1, &num_events, 'n' )
     .parse();
 
-  mg.setParameters( cepgen::card::Handler::parse( input_card )->parameters() );
+  mg.setParameters( cepgen::card::Handler::parse( input_card ) );
   if ( num_events >= 0 ) { // user specified a number of events to generate
     mg.parameters().generation().maxgen = num_events;
     mg.parameters().generation().enabled = num_events > 0;

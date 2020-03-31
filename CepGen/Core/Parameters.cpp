@@ -243,7 +243,7 @@ namespace cepgen
       << std::setfill( '-' ) << std::setw( wb+6 )
       << ( pretty ? utils::boldify( " Integration parameters " ) : "Integration parameters" ) << std::setfill( ' ' ) << "\n\n"
       << std::setw( wt ) << "Integration"
-      << ( pretty ? utils::boldify( param->integrator->name<std::string>() ) : param->integrator->name<std::string>() ) << "\n";
+      << ( pretty ? utils::boldify( param->integrator->name<std::string>( "N/A" ) ) : param->integrator->name<std::string>( "N/A" ) ) << "\n";
     for ( const auto& key : param->integrator->keys( false ) )
       os << std::setw( wt ) << "" << key << ": " << param->integrator->getString( key ) << "\n";
     os

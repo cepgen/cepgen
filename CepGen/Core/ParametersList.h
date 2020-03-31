@@ -35,6 +35,11 @@ namespace cepgen
           return def;
         return get<T>( MODULE_NAME );
       }
+      template<typename T> const ParametersList& fill( std::string key, T& value ) const {
+        if ( has<T>( key ) )
+          value = get<T>( key );
+        return *this;
+      }
       /// Get a parameter value
       template<typename T> T get( std::string key, const T& def = default_arg<T>::get() ) const;
       /// Reference to a parameter value

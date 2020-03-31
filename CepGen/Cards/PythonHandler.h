@@ -20,7 +20,7 @@ namespace cepgen
         explicit PythonHandler( const ParametersList& );
         PythonHandler( const std::string& );
 
-        Parameters& parse( const std::string& );
+        Parameters& parse( const std::string&, Parameters& ) override;
 
       private:
         static constexpr const char* PROCESS_NAME = "process";

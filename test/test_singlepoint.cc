@@ -26,7 +26,7 @@ int main( int argc, char* argv[] )
   }
 
   cepgen::Generator gen;
-  gen.setParameters( cepgen::card::Handler::parse( input_card )->parameters() );
+  gen.setParameters( cepgen::card::Handler::parse( input_card ) );
   CG_INFO( "main" ) << gen.parametersPtr();
 
   if ( !debug )

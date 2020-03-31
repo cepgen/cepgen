@@ -18,6 +18,7 @@ namespace cepgen
         /// Read a LPAIR steering card
         explicit LpairHandler( const ParametersList& );
 
+        Parameters& parse( const std::string&, Parameters& ) override;
         /// Store a configuration into a LPAIR steering card
         void store( const char* file );
 

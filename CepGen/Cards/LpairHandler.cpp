@@ -43,6 +43,13 @@ namespace cepgen
       hi_1_( { 0, 0 } ), hi_2_( { 0, 0 } )
     {
       const auto file = params.get<std::string>( FILENAME_KEY );
+      if ( !file.empty() )
+        parse( file, params_ );
+    }
+
+    Parameters&
+    LpairHandler::parse( const std::string& file, Parameters& params )
+    {
       std::ifstream f( file, std::fstream::in );
       if ( !f.is_open() )
         throw CG_FATAL( "LpairHandler" ) << "Failed to parse file \"" << file << "%s\".";
@@ -61,6 +68,7 @@ namespace cepgen
              << " (" << description( key ) << ")";
       }
       f.close();
+      params_ = params;
 
       CG_INFO( "LpairHandler" ) << "File '" << file << "' succesfully opened!\n\t"
         << "The following parameters are set:" << os.str() << "\n\t"
@@ -126,6 +134,8 @@ namespace cepgen
         params_.kinematics.incoming_beams.first.pdg = hi1;
       if ( hi2 )
         params_.kinematics.incoming_beams.second.pdg = hi2;
+
+      return params_;
     }
 
     void

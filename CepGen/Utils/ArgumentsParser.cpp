@@ -9,7 +9,8 @@
 namespace cepgen
 {
   ArgumentsParser::ArgumentsParser( int argc, char* argv[] ) :
-    help_str_( { { "help", 'h' } } )
+    help_str_( { { "help", 'h' } } ),
+    config_str_( { { "cmd", 'c' } } )
   {
     command_name_ = argv[0];
     //--- first remove the program name
@@ -35,7 +36,6 @@ namespace cepgen
   ArgumentsParser::print_help() const
   {
     CG_INFO( "ArgumentsParser" ) << help_message();
-    exit( 0 );
   }
 
   void
@@ -55,12 +55,26 @@ namespace cepgen
   ArgumentsParser&
   ArgumentsParser::parse()
   {
-    if ( !args_.empty() )
+    if ( !args_.empty() ) {
       //--- check if help message is requested
       for ( const auto& str : help_str_ )
         if ( find( args_.begin(), args_.end(), "--"+str.name ) != args_.end()
-          || find( args_.begin(), args_.end(), "-"+std::string( 1, str.sname ) ) != args_.end() )
+          || find( args_.begin(), args_.end(), "-"+std::string( 1, str.sname ) ) != args_.end() ) {
           print_help();
+          exit(0);
+        }
+      for ( const auto& arg:args_)CG_WARNING("")<<arg;
+      for ( const auto& str : config_str_ ) {
+        auto cfg_long = find( args_.begin(), args_.end(), "--"+str.name );
+        if ( cfg_long != args_.end() )
+          extra_config_ = std::vector<std::string>( cfg_long+1, args_.end() );
+        auto cfg_short = find( args_.begin(), args_.end(), "-"+std::string( 1, str.sname ) );
+        if ( cfg_short != args_.end() )
+          extra_config_ = std::vector<std::string>( cfg_short+1, args_.end() );
+      }
+      if ( !extra_config_.empty() )
+        args_.resize( args_.size()-extra_config_.size()-1 );
+    }
     //--- loop over all parameters
     size_t i = 0;
     for ( auto& par : params_ ) {

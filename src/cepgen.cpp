@@ -18,46 +18,46 @@ int main( int argc, char* argv[] )
 {
   std::string input_card;
   int num_events;
-  bool list_mods = false, cmd_line = false, debug = false;
+  bool list_mods = false, debug = false;
 
-  const std::string first_arg( argv[1] );
-  if ( first_arg == "--cmd" || first_arg == "-c" )
-    cmd_line = true;
-
-  if ( !cmd_line )
-    cepgen::ArgumentsParser( argc, argv )
-      .addArgument( "", "path to the configuration file", &input_card, 'i' )
-      .addOptionalArgument( "num-events", "number of events to generate", -1, &num_events, 'n' )
-      .addOptionalArgument( "list-modules", "list all runtime modules", false, &list_mods, 'l' )
-      .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
-      .parse();
-
-  if ( debug )
-    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debug;
-
-  cepgen::utils::AbortHandler ctrl_c;
+  cepgen::ArgumentsParser parser( argc, argv );
+  parser
+    .addArgument( "", "path to the configuration file", &input_card, 'i' )
+    .addOptionalArgument( "num-events", "number of events to generate", -1, &num_events, 'n' )
+    .addOptionalArgument( "list-modules", "list all runtime modules", false, &list_mods, 'l' )
+    .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
+    .parse();
 
   //--- first start by defining the generator object
   cepgen::Generator gen;
 
+  //--- if modules listing is requested
   if ( list_mods ) {
     gen.dumpModules();
     return 0;
   }
+  if ( debug )
+    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debug;
+
+  auto& params = gen.parameters();
+  //--- no steering card nor additional flags found
+  if ( input_card.empty() && parser.extra_config().empty() )
+    throw CG_FATAL( "main" ) << "Neither input card nor configuration word provided!";
+  //--- parse the steering card
+  else if ( !input_card.empty() )
+    params = cepgen::card::Handler::parse( input_card );
+  //--- parse the additional flags
+  else if ( !parser.extra_config().empty() )
+    params = cepgen::card::CardsHandlerFactory::get().build( "cmd",
+      cepgen::ParametersList().set<std::vector<std::string> >( "args", parser.extra_config() ) )
+      ->parse( "", params );
+
+  cepgen::utils::AbortHandler ctrl_c;
 
   try {
-    //--- parse the steering card
-    if ( cmd_line )
-      gen.setParameters( cepgen::card::CardsHandlerFactory::get().build( "cmd",
-        cepgen::ParametersList().set<std::vector<std::string> >( "args",
-          std::vector<std::string>( argv+1, argv+argc ) ) )
-        ->parameters() );
-    else
-      gen.setParameters( cepgen::card::Handler::parse( input_card )->parameters() );
-
     if ( num_events >= 0 ) { // user specified a number of events to generate
-      gen.parameters().generation().maxgen = num_events;
-      gen.parameters().generation().enabled = num_events > 0;
+      params.generation().maxgen = num_events;
+      params.generation().enabled = num_events > 0;
     }
 
     //--- list all parameters
@@ -67,7 +67,7 @@ int main( int argc, char* argv[] )
     double xsec = 0., err = 0.;
     gen.computeXsection( xsec, err );
 
-    if ( gen.parameters().generation().enabled )
+    if ( params.generation().enabled )
       //--- events generation starts here
       // (one may use a callback function)
       gen.generate();
