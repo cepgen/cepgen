@@ -95,10 +95,11 @@ namespace cepgen
 
         /// Does the process contain (and hold) an event?
         bool hasEvent() const { return (bool)event_; }
-        /// Complete list of Particle with their role in the process for the point considered in the phase space, returned as an Event object.
-        /// \return Event object containing all the generated Particle objects
+        /// Event object containing all the generated Particle objects and their relationships
         inline const Event& event() const { return *event_; }
+        /// Non-const event retrieval method
         inline Event& event() { return *event_; }
+        /// Event pointer retrieval method
         inline Event* eventPtr() { return event_.get(); }
 
       protected:
@@ -107,26 +108,24 @@ namespace cepgen
         /// Type of mapping to apply on the variable
         enum class Mapping
         {
-          /// a linear \f${\rm d}x\f$ mapping
-          linear = 0,
-          /// an exponential \f$\frac{\dot{x}}{x} = \dot{\log x}\f$ mapping
-          exponential,
-          /// a square \f${\rm d}x^2=2x\cdot\dot{x}\f$ mapping
-          square,
+          linear = 0, ///< a linear \f${\rm d}x\f$ mapping
+          exponential, ///< an exponential \f$\frac{\dot{x}}{x} = \dot{\log x}\f$ mapping
+          square, ///< a square \f${\rm d}x^2=2x\cdot\dot{x}\f$ mapping
           /// a power-law mapping inherited from LPAIR
+          power_law
           /**
            * Define modified variables of integration to avoid peaks integrations (see \cite Vermaseren:1982cz for details):
-           * - \f$y_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\f$ the new variable
-           * - \f$\mathrm dy_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\log\frac{x_{min}}{x_{max}}\f$, the new variable's differential form
+           * - \f$y_{\rm out} = x_{\rm min}\left(\frac{x_{\rm max}}{x_{\rm min}}\right)^{\rm exp}\f$ the new variable
+           * - \f${\rm d}y_{\rm out} = x_{\rm min}\left(\frac{x_{\rm max}}{x_{\rm min}}\right)^{\rm exp}\log\frac{x_{\rm min}}{x_{\rm max}}\f$, the new variable's differential form
            * \note This method overrides the set of `mapxx` subroutines in ILPAIR, with a slight difference according to the sign of the
-           *  \f$\mathrm dy_{out}\f$ parameter :
+           *  \f${\rm d}y_{\rm out}\f$ parameter :
            *  - left unchanged :
            * > `mapw2`, `mapxq`, `mapwx`, `maps2`
            *  - opposite sign :
            * > `mapt1`, `mapt2`
            */
-          power_law
         };
+        /// Human-friendly printout of the mapping type
         friend std::ostream& operator<<( std::ostream&, const Mapping& );
         /// Register a variable to be handled and populated whenever
         ///  a new phase space point weight is to be calculated.
@@ -165,16 +164,11 @@ namespace cepgen
         /// Handler to a variable mapped by this process
         struct MappingVariable
         {
-          /// Human-readable description of the variable
-          std::string description;
-          /// Kinematic limits to apply on the variable
-          Limits limits;
-          /// Reference to the process variable to generate/map
-          double& value;
-          /// Interpolation type
-          Mapping type;
-          /// Corresponding integration variable
-          unsigned short index;
+          std::string description; ///< Human-readable description of the variable
+          Limits limits; ///< Kinematic limits to apply on the variable
+          double& value; ///< Reference to the process variable to generate/map
+          Mapping type; ///< Interpolation type
+          unsigned short index; ///< Corresponding integration variable
         };
         /// Collection of variables to be mapped at the weight generation stage
         std::vector<MappingVariable> mapped_variables_;

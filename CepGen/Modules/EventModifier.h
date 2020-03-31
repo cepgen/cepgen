@@ -17,8 +17,10 @@ namespace cepgen
     public:
       /// Default constructor for an undefined modifier
       explicit EventModifier( const ParametersList& );
+      /// Virtual destructor
       virtual ~EventModifier() = default;
 
+      /// Set all runtime parameters steering this module
       virtual void setParameters( const Parameters& params ) { params_ = &params; }
       /// \brief Specify a random numbers generator seed for the external module
       /// \param[in] seed A RNG seed
@@ -52,6 +54,7 @@ namespace cepgen
       long long seed_;
       /// Maximal number of trials for the algorithm
       unsigned short max_trials_;
+      /// List of runtime parameters steering this module
       const Parameters* params_; // not owning
   };
 }

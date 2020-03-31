@@ -16,7 +16,9 @@ namespace cepgen
   namespace io { class ExportModule; }
   namespace utils { class TamingFunction; }
   enum class IntegratorType;
+  /// An ordered collection of event modification algorithms
   typedef std::vector<std::unique_ptr<EventModifier> > EventModifiersSequence;
+  /// An ordered collection of event export modules
   typedef std::vector<std::unique_ptr<io::ExportModule> > ExportModulesSequence;
   /// List of parameters used to start and run the simulation job
   class Parameters
@@ -34,11 +36,14 @@ namespace cepgen
       /// Dump the input parameters in the terminal
       friend std::ostream& operator<<( std::ostream&, const Parameters* );
 
+      /// Common user-defined parameters
       std::shared_ptr<ParametersList> general;
+      /// Integrator specific user-defined parameters
       std::shared_ptr<ParametersList> integrator;
 
       //----- process to compute
 
+      /// Is this parameters collection holding any physics process?
       bool hasProcess() const { return !( !process_ ); }
       /// Process for which the cross-section will be computed and the events will be generated
       proc::Process& process();
@@ -73,7 +78,9 @@ namespace cepgen
         unsigned int num_threads; ///< Number of threads to perform the integration
         unsigned int num_points; ///< Number of points to "shoot" in each integration bin by the algorithm
       };
+      /// Get the events generation parameters
       Generation& generation() { return generation_; }
+      /// Get the events generation parameters
       const Generation& generation() const { return generation_; }
 
       /// Specify if the generated events are to be stored
@@ -125,10 +132,13 @@ namespace cepgen
       inline unsigned int numGeneratedEvents() const { return num_gen_events_; }
 
     private:
+      /// Physics process held by these parameters
       std::unique_ptr<proc::Process> process_;
+      /// Collection of event modification algorithms to be applied
       EventModifiersSequence evt_modifiers_;
-      /// Storage object
+      /// Collection of event output modules to be applied
       ExportModulesSequence out_modules_;
+      /// Is the next event to be generated to be stored?
       bool store_;
       /// Total generation time (in seconds)
       double total_gen_time_;

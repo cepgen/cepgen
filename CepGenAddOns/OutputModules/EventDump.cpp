@@ -13,11 +13,9 @@ namespace cepgen
 {
   namespace io
   {
-    /**
-     * \brief Simple event dump module
-     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-     * \date Jan 2020
-     */
+    /// Simple event dump module
+    /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+    /// \date Jan 2020
     class EventDump : public ExportModule
     {
       public:
@@ -48,7 +46,8 @@ namespace cepgen
 
     EventDump::~EventDump()
     {
-      //file_.close();
+      if ( out_ != &std::cout )
+        dynamic_cast<std::ofstream*>( out_ )->close();
     }
 
     void

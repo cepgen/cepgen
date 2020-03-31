@@ -14,7 +14,8 @@ namespace cepgen
     class Parameterisation
     {
       public:
-        Parameterisation( const ParametersList& params = ParametersList() );
+        /// \f$R=\sigma_L/\sigma_T\f$ ratio computation algorithm constructor
+        explicit Parameterisation( const ParametersList& params = ParametersList() );
         /// Extract the longitudinal/transverse cross section ratio and associated error for a given \f$(x_{\rm Bj},Q^2)\f$ couple.
         virtual double operator()( double xbj, double q2, double& err ) const = 0;
 
