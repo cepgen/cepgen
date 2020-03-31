@@ -50,6 +50,7 @@ namespace cepgen
       const ParametersList params_; ///< Steering parameters for this algorithm
       const std::string name_; ///< Integration algorithm name
       unsigned long seed_; ///< Random number generator seed
+      /// A deleter object for GSL's random number generator
       struct gsl_rng_deleter
       {
         /// Destructor method for the random number generator service

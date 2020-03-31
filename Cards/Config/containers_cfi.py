@@ -27,7 +27,7 @@ class Parameters(dict):
             kwargs: list of named (keyworded) arguments
 
         Examples:
-            >>> print dict(Parameters(foo = 'bar', foo2 = 42))
+            >>> print(dict(Parameters(foo = 'bar', foo2 = 42)))
             {'foo': 'bar', 'foo2': 42}
         """
         self.update(*args, **kwargs)
@@ -84,7 +84,7 @@ class Module(Parameters):
             kwargs: list of named (keyworded) arguments
 
         Examples:
-            >>> print dict(Module('module1', foo = 'bar', foo2 = 42))
+            >>> print(dict(Module('module1', foo = 'bar', foo2 = 42)))
             {'foo': 'bar', 'foo2': 42, 'mod_name': 'module1'}
         """
         super(Module, self).__init__(*args, **kwargs)
@@ -94,7 +94,7 @@ class Module(Parameters):
         return dict.__len__(self)-1 # discard the name key
     def dump(self, printer=PrintHelper()):
         '''Human-readable dump of this object'''
-        out = self.__class__.__name__+'('+self.mod_name.__repr__()+'\n'
+        out = self.__class__.__name__+'('+self.mod_name.__repr__()+',\n'
         mod_repr = self.clone('')
         mod_repr.pop('mod_name', None)
         for k, v in mod_repr.items():
@@ -111,6 +111,8 @@ class Module(Parameters):
     def __repr__(self):
         '''Human-readable version of this object'''
         return self.dump()
+    def name(self):
+        return self.mod_name
     def clone(self, name, **kwargs):
         '''Return a deep copy of this object'''
         out = Parameters(self).clone(**kwargs)
@@ -118,18 +120,38 @@ class Module(Parameters):
         return out
 
 class Sequence(list):
+    '''An ordered modules sequence'''
     MODULE = object()
     def __init__(self, *args):
+        """Construct an ordered sequence of modules from a list
+
+        Args:
+            args: list of modules
+
+        Examples:
+            >>> module1 = Module('test1', foo = 'bar')
+            >>> module2 = Module('test2', foo2 = 42)
+            >>> print(Sequence(module1, module2))
+            Sequence([Module('test1',
+                foo = 'bar',
+            ), Module('test2',
+                foo2 = 42,
+            )])
+        """
         super(Sequence, self).__init__(args)
     def __delitem__(self, index):
+        '''Remove an element from the sequence'''
         self[index] = self.MODULE
     def __iter__(self):
+        '''Iterator definition for the sequence'''
         return (item for item in super().__iter__() if item is not self.MODULE)
     def __eq__(self, other):
+        '''Equality operator '''
         if isinstance(other, Sequence):
             return all(x == y for x, y in zip(self, other))
         return super().__eq__(other)
     def __repr__(self):
+        '''Human-readable representation of this sequence'''
         return type(self).__name__+'('+super(Sequence, self).__repr__()+')'
 
 if __name__ == '__main__':
@@ -172,6 +194,25 @@ if __name__ == '__main__':
             params.third = 43
             self.assertEqual(params.third, 43)
             self.assertEqual(params_copy.third, 42)
+        def testSequences(self):
+            '''Test the Sequence object'''
+            mod1 = Module('module1',
+                foo = 'bar',
+                foo2 = 42
+            )
+            mod2 = Module('module2',
+                foo = [i for i in range(4)]
+            )
+            seq = Sequence(mod1, mod2)
+            self.assertEqual(len(seq), 2)
+            # check that all sequence modules have their attributes
+            # conserved in the sequence construction
+            self.assertEqual(len(seq[0]), 2)
+            self.assertEqual(seq[0].foo, 'bar')
+            self.assertEqual(seq[0].name(), 'module1')
+            self.assertEqual(len(seq[1]), 1)
+            self.assertEqual(seq[1].name(), 'module2')
+            self.assertEqual(len(seq[1].foo), 4)
 
     unittest.main()
 

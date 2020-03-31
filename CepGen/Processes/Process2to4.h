@@ -7,10 +7,11 @@ namespace cepgen
 {
   namespace proc
   {
+    /// A 2-to-4 (or 2-to-2 central) process
     class Process2to4 : public KTProcess
     {
       public:
-        /// Initialise a 2-to-4 (or 2-to-2 central) process
+        /// Initialise a 2-to-4 process
         /// \param[in] params Collection of user-defined steering parameters
         /// \param[in] partons Incoming hard scattering particles
         /// \param[in] cs_id Central particles PDG id

@@ -1,4 +1,4 @@
-from containers_cfi import Parameters
+from .containers_cfi import Parameters
 
 class Logging:
     '''Logging verbosity'''
