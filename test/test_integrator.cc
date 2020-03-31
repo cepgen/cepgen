@@ -17,6 +17,7 @@ using namespace std;
 template<size_t N> class TestProcess : public cepgen::proc::Process
 {
   public:
+    /// Test process constructor
     inline explicit TestProcess( const string& formula, const vector<string>& args ) :
       cepgen::proc::Process( cepgen::ParametersList().set<string>( "description", formula ), false ),
       funct_( formula, args ) {}

@@ -51,7 +51,7 @@ PROJECT_BRIEF          = "A generic central exclusive processes event generator"
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-PROJECT_LOGO           = @CMAKE_CURRENT_SOURCE_DIR@/docs/small-cepgen-logo.png
+PROJECT_LOGO           = @CMAKE_CURRENT_SOURCE_DIR@/doc/small-cepgen-logo.png
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is
@@ -107,7 +107,7 @@ BRIEF_MEMBER_DESC      = YES
 # brief descriptions will be completely suppressed.
 # The default value is: YES.
 
-REPEAT_BRIEF           = NO
+REPEAT_BRIEF           = YES
 
 # This tag implements a quasi-intelligent brief description abbreviator that is
 # used to form the text in various listings. Each string in this list, if found
@@ -440,7 +440,7 @@ LOOKUP_CACHE_SIZE      = 0
 # normally produced when WARNINGS is set to YES.
 # The default value is: NO.
 
-EXTRACT_ALL            = YES
+EXTRACT_ALL            = NO
 
 # If the EXTRACT_PRIVATE tag is set to YES, all private members of a class will
 # be included in the documentation.
@@ -452,7 +452,7 @@ EXTRACT_PRIVATE        = NO
 # scope will be included in the documentation.
 # The default value is: NO.
 
-EXTRACT_PACKAGE        = NO
+EXTRACT_PACKAGE        = YES
 
 # If the EXTRACT_STATIC tag is set to YES, all static members of a file will be
 # included in the documentation.
@@ -718,7 +718,7 @@ LAYOUT_FILE            =
 # LATEX_BIB_STYLE. To use this feature you need bibtex and perl available in the
 # search path. See also \cite for info how to create references.
 
-CITE_BIB_FILES         = @CMAKE_CURRENT_SOURCE_DIR@/docs/bibliography.bib
+CITE_BIB_FILES         = @CMAKE_CURRENT_SOURCE_DIR@/doc/bibliography.bib
 
 #---------------------------------------------------------------------------
 # Configuration options related to warning and progress messages
@@ -965,7 +965,7 @@ INPUT_FILTER           =
 # need to set EXTENSION_MAPPING for the extension otherwise the files are not
 # properly processed by doxygen.
 
-FILTER_PATTERNS        = *.py=@CMAKE_CURRENT_SOURCE_DIR@/docs/py_filter
+FILTER_PATTERNS        = *.py=@CMAKE_CURRENT_SOURCE_DIR@/doc/py_filter
 
 # If the FILTER_SOURCE_FILES tag is set to YES, the input filter (if set using
 # INPUT_FILTER) will also be used to filter the input files that are used for
@@ -1178,7 +1178,7 @@ HTML_STYLESHEET        =
 # list). For an example see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_STYLESHEET        = @CMAKE_CURRENT_SOURCE_DIR@/docs/customdoxygen.css
+HTML_EXTRA_STYLESHEET        = @CMAKE_CURRENT_SOURCE_DIR@/doc/customdoxygen.css
 
 # The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the HTML output directory. Note

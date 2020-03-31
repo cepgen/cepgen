@@ -22,9 +22,11 @@ namespace cepgen
     {
       public:
         /// Class constructor
-        explicit ExportModule( const ParametersList& );
+        /// \param[in] params User-controlled steering parameters for this module
+        explicit ExportModule( const ParametersList& params );
         virtual ~ExportModule();
 
+        /// Unique name of the output module
         const std::string& name() const { return name_; }
         /// Global list of steering parameters
         const ParametersList& parameters() { return params_; }
@@ -39,6 +41,7 @@ namespace cepgen
         virtual void operator<<( const Event& ) = 0;
 
       protected:
+        /// Print a banner containing all runtime parameters information
         static std::string banner( const Parameters&, const std::string& prep = "" );
         /// Set of parameters to steer this output module
         const ParametersList params_;

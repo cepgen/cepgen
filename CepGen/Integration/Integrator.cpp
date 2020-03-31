@@ -19,7 +19,7 @@ namespace cepgen
     params_( params ),
     name_( params.name<std::string>() ),
     seed_( params.get<int>( "seed", time( nullptr ) ) ),
-    initialised_( false ), ps_bin_( INVALID_BIN )
+    initialised_( false )
   {
     //--- initialise the random number generator
     const auto& rng_type = params.get<int>( "rngEngine" );
@@ -40,8 +40,8 @@ namespace cepgen
     //--- a bit of printout for debugging
 
     CG_DEBUG( "Integrator:build" )
-      << "Number of function calls: " << ncvg_ << ",\n\t"
-      << "Random numbers generator: " << gsl_rng_name( rng_.get() ) << ".";
+      << "Random numbers generator: " << gsl_rng_name( rng_.get() ) << "."
+      << "Seed: " << seed_ << ".";
   }
 
   void
@@ -53,6 +53,7 @@ namespace cepgen
     CG_DEBUG( "Integrator:function" )
       << "Number of integration dimensions: " << function_->dim << ".";
 
+    //--- force the reinitialisation
     initialised_ = false;
   }
 
@@ -64,13 +65,18 @@ namespace cepgen
   Integrator::size() const
   {
     if ( !function_ )
-      return 0;
+      throw CG_FATAL( "Integrator:size" )
+        << "Trying to retrieve phase space size on an unitialised integrand!";
     return function_->dim;
   }
 
   double
   Integrator::eval( const std::vector<double>& x )
   {
+    if ( !function_ )
+      throw CG_FATAL( "Integrator:eval" )
+        << "Trying to evaluate the weight on a phase space point "
+        << "on an unitialised integrand!";
     //--- by default, no grid treatment
     return function_->f( (double*)&x[0], function_->dim, (void*)input_params_ );
   }
@@ -78,6 +84,9 @@ namespace cepgen
   double
   Integrator::uniform() const
   {
+    if ( !rng_ )
+      throw CG_FATAL( "Integrator:uniform" )
+        << "Random number generator has not been initialised!";
     return gsl_rng_uniform( rng_.get() );
   }
 }
