@@ -19,7 +19,7 @@ namespace cepgen
     params_( params ),
     name_( params.name<std::string>() ),
     seed_( params.get<int>( "seed", time( nullptr ) ) ),
-    initialised_( false ), ps_bin_( INVALID_BIN )
+    initialised_( false )
   {
     //--- initialise the random number generator
     const auto& rng_type = params.get<int>( "rngEngine" );
