@@ -239,23 +239,25 @@ namespace cepgen
   GridHandler<D,N>::findIndices( const coord_t& coord, coord_t& min, coord_t& max ) const
   {
     for ( size_t i = 0; i < D; ++i ) {
-      const auto& c = coords_.at( i ); // extract all coordinates registered for this dimension
-      if ( coord.at( i ) < c.front() ) { // under the range
+      const auto& c_i = coords_.at( i ); // extract all coordinates registered for this dimension
+      if ( coord.at( i ) < *c_i.begin() ) { // under the range
         CG_DEBUG_LOOP( "GridHandler:indices" )
           << "Coordinate " << i << " in underflow range "
-          << "(" << coord.at( i ) << " < " << c.front() << ").";
-        min[i] = max[i] = c.front();
+          << "(" << coord.at( i ) << " < " << *c_i.begin() << ").";
+        min[i] = max[i] = *c_i.begin();
       }
-      else if ( coord.at( i ) > c.back() ) { // over the range
+      else if ( coord.at( i ) > *c_i.rbegin() ) { // over the range
         CG_DEBUG_LOOP( "GridHandler:indices" )
           << "Coordinate " << i << " in overflow range "
-          << "(" << coord.at( i ) << " > " << c.back() << ").";
-        min[i] = max[i] = c.back();
+          << "(" << coord.at( i ) << " > " << *c_i.rbegin() << ").";
+        min[i] = max[i] = *c_i.rbegin();
       }
       else { // in between two coordinates
-        auto it_coord = std::lower_bound( c.begin(), c.end(), coord.at( i ) );
+        auto it_coord = std::lower_bound( c_i.begin(), c_i.end(), coord.at( i ) );
+        max[i] = *it_coord;
+        if ( it_coord != c_i.begin() )
+          it_coord--;
         min[i] = *it_coord;
-        max[i] = ( it_coord != c.end() ) ? *( it_coord++ ) : *it_coord;
       }
     }
   }

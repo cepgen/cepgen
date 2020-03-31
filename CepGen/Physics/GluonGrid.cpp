@@ -53,6 +53,6 @@ namespace kmr
   double
   GluonGrid::operator()( double x, double kt2, double mu2 ) const
   {
-    return cepgen::GridHandler<3,1>::eval( { log( x ), log( kt2 ), log( mu2 ) } ).at( 0 );
+    return cepgen::GridHandler<3,1>::eval( { log10( x ), log10( kt2 ), log10( mu2 ) } ).at( 0 );
   }
 }
