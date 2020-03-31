@@ -1,10 +1,26 @@
-Hadronisation/fragmentation
-===========================
+Event modification algorithms
+=============================
 
-The decay of secondary products and fragmentation of outgoing dissociative proton states may be triggered directly at the CepGen level.
+The user's needs may sometimes require the modification on an event-by-event basis of the process-generated particles kinematics and relationships,
+for instance in the scope of a beam particles remnants (dissociative proton states, for instance) hadronisation/fragmentation or unstable particles decays.
 
-Several interfaces to external algorithms are therefore provided in the ``CepGenAddOns`` library, and easily steerable through the ``hadroniser`` block (in `Python </cards-python>`_ cards) or ``HADR`` variable (in `LPAIR-like </cards-lpair>`_ cards).
-All modules are derived from a common :cpp:class:`cepgen::hadr::Hadroniser` class described below:
+Several interfaces to external algorithms are therefore provided in the ``CepGenAddOns`` library, and easily steerable through the ``eventSequence`` sequential block (in `Python </cards-python>`_ cards) or ``HADR`` variable (in `LPAIR-like </cards-lpair>`_ cards).
+All modules are derived from a common :cpp:class:`cepgen::hadr::Hadroniser` class itself derived from a :cpp:class:`cepgen::EventModifier` object, both described below:
+
+.. doxygenclass:: cepgen::EventModifier
+   :outline:
+
+.. container:: toggle
+
+   .. container:: header
+
+      Detailed description
+
+   .. doxygenclass:: cepgen::EventModifier
+      :members:
+      :no-link:
+
+----
 
 .. doxygenclass:: cepgen::hadr::Hadroniser
    :outline:

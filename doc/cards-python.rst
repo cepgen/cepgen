@@ -22,7 +22,11 @@ The common usage for such a module definition is, for instance:
    import Config.Core as cepgen
    module = cepgen.Module('my_first_module', foo = 'bar')
 
-In `this page <python-containers>`_, one can see an illustrated example of this ``Module``/``Parameters``/``dict`` relation.
+Additionally, as of CepGen version 0.9.7, sequences of modules (inherited from Python's ``list`` containers) are introduced.
+These allow to define an ordered chain of modules to launch, for instance to modify the events content according to an external library
+or trigger a chain of output modules at each event generation.
+
+In `this page <python-containers>`_, one can see an illustrated example of this ``Module``/``Parameters``/``dict`` and ``Sequence``/``list`` relations.
 
 Several blocks are required to be defined in a CepGen steering card.
 In the following sections, you may find a nonexhaustive (and evolving) list of such attributes.
@@ -56,10 +60,35 @@ As of version 0.8 of CepGen, the three GSL implementations of the following inte
 
 .. warning:: Under construction
 
-``hadroniser`` module block
----------------------------
+``eventSequence`` sequence block
+--------------------------------
 
-.. warning:: Under construction
+As of version 0.9.7 of CepGen, an ordered collection of modification algorithms can be triggered on an event-by-event basis
+for the modification, hadronisation, correction, ... of the full event kinematics.
+
+The full list and description of algorithms with an interfacing already implemented in CepGen `may be found here <hadronisers>`_.
+
+Being sequential, this block acts on a `first-come, first-served` basis, hence if two hadronisers/decay modules are to be triggered
+one after the other, the first defined in this sequence will act the first.
+
+.. important:: Prior to version 0.9.7, this sequence was defined as a single ``hadroniser`` module.
+   This latter is still properly parsed for legacy configurations, but we encourage you to update your scripts
+   accordingly.
+
+   For instance:
+
+   .. code:: python
+
+      hadroniser = cepgen.Module('pythia8')
+
+   should become
+
+   .. code:: python
+
+      pythia = cepgen.Module('pythia8')
+      eventSequence = cepgen.Sequence(
+          pythia,
+      )
 
 ``process`` module block
 ------------------------
@@ -106,8 +135,8 @@ The kinematics phase space to be used in the integration and events production c
 This block is a generic placeholder for all process-dependent parameters.
 See the description page of each process to get a list of supported parameters to include in this collection.
 
-``output`` module block
----------------------------
+``output`` module/sequence block
+--------------------------------
 
 .. warning:: Under construction
 
