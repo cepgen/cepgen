@@ -12,6 +12,9 @@ namespace cepgen
     struct TamingFunction
     {
       TamingFunction() {}
+      /// Constructor for a taming function evaluator
+      /// \param[in] var Variable to be tamed
+      /// \param[in] expr String expression to define the taming
       TamingFunction( const std::string& var, const std::string& expr ) :
         var_orig( var ), expr_orig( expr ), var_safe( var ), expr_safe( expr ) {
         replace_all( var_safe, "(", "_" );
@@ -19,8 +22,11 @@ namespace cepgen
         replace_all( expr_safe, var_orig, var_safe );
         function = Functional<1>( expr_safe, { { var_safe } } );
       }
-      std::string var_orig, expr_orig, var_safe, expr_safe;
-      Functional<1> function;
+      std::string var_orig; ///< User-defined variable to be tamed
+      std::string expr_orig; ///< User-defined taming expression
+      std::string var_safe; ///< Computer-readable variable to be tamed
+      std::string expr_safe; ///< Computer-readable taming expression
+      Functional<1> function; ///< Taming expression
     };
   }
 }

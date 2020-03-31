@@ -75,6 +75,7 @@ namespace cepgen
             << "The formulas evaluator is hence disabled!";
 #endif
         }
+        /// String expression held by this functional parser
         const std::string& expression() const { return expression_; }
 
       private:

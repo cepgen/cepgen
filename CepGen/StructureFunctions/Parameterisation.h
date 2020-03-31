@@ -42,6 +42,7 @@ namespace cepgen
         Parameterisation( double f2 = 0., double fl = 0. );
         /// Copy constructor
         Parameterisation( const Parameterisation& );
+        /// User-steered parameterisation object constructor
         Parameterisation( const ParametersList& );
         ~Parameterisation() {}
 
@@ -68,6 +69,7 @@ namespace cepgen
         virtual Parameterisation& computeFL( double xbj, double q2, double r );
         /// Compute the \f$F_1\f$ structure function for a given point
         double F1( double xbj, double q2 ) const;
+        /// Compute the dimensionless variable \f$\tau=\frac{4x_{\rm Bj}^2m_p^2}{Q^2}\f$
         double tau( double xbj, double q2 ) const;
 
       public:

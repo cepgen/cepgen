@@ -17,6 +17,7 @@ namespace mstw
   class Grid : public cepgen::strfun::Parameterisation, private cepgen::GridHandler<2,2>
   {
     public:
+      /// Grid MSTW structure functions evaluator
       Grid( const cepgen::ParametersList& params = cepgen::ParametersList() );
 
       /// Grid header information as parsed from the file
@@ -52,6 +53,7 @@ namespace mstw
       Grid& computeFL( double xbj, double q2 ) override { return *this; }
       Grid& computeFL( double xbj, double q2, double r ) override { return *this; }
 
+      /// Default location for the MSTW grid values
       static constexpr const char* DEFAULT_MSTW_GRID_PATH = "External/mstw_sf_scan_nnlo.dat";
 
     private:

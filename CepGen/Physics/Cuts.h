@@ -27,9 +27,10 @@ namespace cepgen
     Limits q2;              ///< parton virtuality
     Limits qt;              ///< parton transverse virtuality
     Limits phi_qt;          ///< parton azimuthal angle difference
-    /// A collection of name -> limits
+    /// A collection of limits human readable names
     std::vector<std::pair<std::string,Limits> > list() const;
   };
+  /// Collection of cuts to be applied on all particle with a given PDG id
   typedef std::unordered_map<pdgid_t,Cuts> PerIdCuts;
 }
 

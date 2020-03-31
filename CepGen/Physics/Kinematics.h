@@ -34,6 +34,7 @@ namespace cepgen
         pdgid_t pdg; ///< PDG identifier for the beam
         KTFlux kt_flux; ///< Type of \f$k_{\rm T}\f$-factorised flux to be considered (if any)
       };
+      /// Human-readable description of a beam particle/system
       friend std::ostream& operator<<( std::ostream&, const Beam& );
 
       /// Beam/primary particle's kinematics
@@ -49,15 +50,11 @@ namespace cepgen
       struct CutsList
       {
         CutsList();
-        /// Cuts on the initial particles kinematics
-        Cuts initial;
-        /// Cuts on the central system produced
-        Cuts central;
-        PerIdCuts central_particles;
-        /// Cuts on the beam remnants system
-        Cuts remnants;
-      };
-      CutsList cuts;
+        Cuts initial; ///< Cuts on the initial particles kinematics
+        Cuts central; ///< Cuts on the central system produced
+        PerIdCuts central_particles; ///< Cuts on the central individual particles
+        Cuts remnants; ///< Cuts on the beam remnants system
+      } cuts; ///< Phase space cuts
   };
 }
 

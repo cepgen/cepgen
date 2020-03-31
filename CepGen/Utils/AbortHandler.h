@@ -22,6 +22,7 @@ namespace cepgen
     class AbortHandler
     {
       public:
+        /// Define a process abortion procedure
         AbortHandler( int flags = SA_SIGINFO ) {
           action_.sa_sigaction = handle_ctrl_c;
           sigemptyset( &action_.sa_mask );

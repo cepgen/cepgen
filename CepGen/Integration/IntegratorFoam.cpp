@@ -15,19 +15,22 @@ namespace cepgen
   {
     public:
       explicit FoamDensity() = default;
+      /// Specify the runtime parameters for the integrand steering
       void setParameters( Parameters* params ) {
         params_.reset( params );
       }
+      /// Specify the integrand functional
       inline void setFunction( double(*func)( double*, unsigned long, void* ) ) {
         function_ = func;
       }
+      /// Compute the weight for a given phase space point
       inline double Density( int ndim, double* x ) override {
         return function_( x, ndim, (void*)params_.get() );
       }
 
     private:
-      std::shared_ptr<Parameters> params_;
-      std::function<double( double*, size_t, void* )> function_;
+      std::shared_ptr<Parameters> params_; ///< Runtime parameters
+      std::function<double( double*, size_t, void* )> function_; ///< Integrand
   };
 
   /// FOAM general-purpose integration algorithm

@@ -39,7 +39,7 @@ namespace cepgen
 {
   namespace utils
   {
-    std::atomic<int> gSignal;
+    std::atomic<int> gSignal; ///< Abort signal handler
   }
 
   Generator::Generator() :

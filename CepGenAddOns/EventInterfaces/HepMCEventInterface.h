@@ -19,6 +19,7 @@ namespace HepMC
   class CepGenEvent : public GenEvent
   {
     public:
+      /// Construct an event interface from a CepGen Event object
       CepGenEvent( const cepgen::Event& ev );
 
     private:

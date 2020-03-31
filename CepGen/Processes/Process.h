@@ -25,8 +25,6 @@ namespace cepgen
       public:
         /// Default constructor for an undefined process
         /// \param[in] params Process-level parameters
-        /// \param[in] name Process name
-        /// \param[in] description Human-readable description of the process
         /// \param[in] has_event Do we generate the associated event structure?
         explicit Process( const ParametersList& params, bool has_event = true );
         /// Copy constructor for a user process
@@ -111,8 +109,7 @@ namespace cepgen
           linear = 0, ///< a linear \f${\rm d}x\f$ mapping
           exponential, ///< an exponential \f$\frac{\dot{x}}{x} = \dot{\log x}\f$ mapping
           square, ///< a square \f${\rm d}x^2=2x\cdot\dot{x}\f$ mapping
-          /// a power-law mapping inherited from LPAIR
-          power_law
+          power_law ///< a power-law mapping inherited from LPAIR
           /**
            * Define modified variables of integration to avoid peaks integrations (see \cite Vermaseren:1982cz for details):
            * - \f$y_{\rm out} = x_{\rm min}\left(\frac{x_{\rm max}}{x_{\rm min}}\right)^{\rm exp}\f$ the new variable

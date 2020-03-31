@@ -42,18 +42,21 @@ namespace cepgen
         : "\033[31;1mno\033[0m";
     }
 
+    /// String implementation of the boldification procedure
     template<> std::string
     boldify<std::string>( std::string str )
     {
       return format( "\033[1m%s\033[0m", str.c_str() );
     }
 
+    /// C-style character array implementation of the boldification procedure
     template<> std::string
     boldify<const char*>( const char* str )
     {
       return boldify( std::string( str ) );
     }
 
+    /// Unsigned long integer implementation of the boldification procedure
     template<> std::string
     boldify( unsigned long ui )
     {

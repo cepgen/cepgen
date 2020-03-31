@@ -88,7 +88,6 @@ namespace ROOT
       float gen_time; ///< Event generation time
       float tot_time; ///< Total event generation time
       float weight; ///< Event weight
-      int nremn_ch[2], nremn_nt[2];
       int np; ///< Number of particles in the event
       double pt[MAX_PART]; ///< Particles transverse momentum
       double eta[MAX_PART]; ///< Particles pseudo-rapidity
@@ -110,8 +109,6 @@ namespace ROOT
       /// Reinitialise the event content
       void clear() {
         gen_time = tot_time = 0.;
-        for ( unsigned short i = 0; i < 2; ++i )
-          nremn_ch[i] = nremn_nt[i] = 0;
         np = 0;
         for ( size_t i = 0; i < MAX_PART; ++i ) {
           pt[i] = eta[i] = phi[i] = rapidity[i] = E[i] = m[i] = charge[i] = 0.;
@@ -136,8 +133,6 @@ namespace ROOT
         if ( !tree_ )
           throw std::runtime_error( "Failed to create the events TTree!" );
         tree_->Branch( "npart", &np, "npart/I" );
-        tree_->Branch( "nremn_charged", nremn_ch, "nremn_charged[2]/I" );
-        tree_->Branch( "nremn_neutral", nremn_nt, "nremn_neutral[2]/I" );
         tree_->Branch( "role", role, "role[npart]/I" );
         tree_->Branch( "pt", pt, "pt[npart]/D" );
         tree_->Branch( "eta", eta, "eta[npart]/D" );
@@ -171,8 +166,6 @@ namespace ROOT
         if ( !tree_ )
           throw std::runtime_error( "Failed to attach to the events TTree!" );
         tree_->SetBranchAddress( "npart", &np );
-        tree_->SetBranchAddress( "nremn_charged", nremn_ch );
-        tree_->SetBranchAddress( "nremn_neutral", nremn_ch );
         tree_->SetBranchAddress( "role", role );
         tree_->SetBranchAddress( "pt", pt );
         tree_->SetBranchAddress( "eta", eta );

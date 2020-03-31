@@ -15,6 +15,7 @@ namespace cepgen
     class Schaefer : public Parameterisation
     {
       public:
+        /// User-steered Schäfer hybrid structure functions calculator
         explicit Schaefer( const ParametersList& params = ParametersList() );
         Schaefer& operator()( double xbj, double q2 ) override;
         std::string description() const override;

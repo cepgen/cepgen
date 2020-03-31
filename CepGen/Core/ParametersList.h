@@ -15,8 +15,10 @@ namespace cepgen
   class ParametersList
   {
     private:
+      /// Retrieve the default argument for a given variable type
       template<typename T> struct default_arg
       {
+        /// Default variable argument
         static T get() { return T(); }
       };
 
@@ -56,6 +58,7 @@ namespace cepgen
 
       /// Human-readable version of a parameters container
       friend std::ostream& operator<<( std::ostream& os, const ParametersList& );
+      /// Indexing key for the module name
       static const std::string MODULE_NAME;
 
     private:

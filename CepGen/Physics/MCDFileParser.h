@@ -2,10 +2,12 @@
 
 namespace pdg
 {
+  /// A MCD files parsing module
   class MCDFileParser
   {
     public:
       MCDFileParser() = default;
+      /// Parse an external MCD file and retrieve all particles definition
       static void parse( const char* path );
 
     private:
