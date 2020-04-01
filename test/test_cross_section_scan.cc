@@ -1,6 +1,7 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Parameters.h"
 
+#include "CepGen/Modules/ExportModule.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Modules/ProcessesFactory.h"
@@ -21,32 +22,37 @@ using namespace std;
 int main( int argc, char* argv[] )
 {
   string input_config, output_file, scan;
-  int proc_mode, npoints;
+  int npoints;
   double min_value, max_value;
+  vector<double> points;
+  bool debug;
 
   cepgen::ArgumentsParser parser( argc, argv );
   parser
     .addArgument( "config", "base configuration", &input_config, 'i' )
-    .addArgument( "min-value", "minimum value of scan", &min_value, 'l' )
-    .addArgument( "max-value", "maximum value of scan", &max_value, 'H' )
-    .addOptionalArgument( "proc-mode", "kin. mode to consider", 0, &proc_mode, 'm' )
     .addOptionalArgument( "scan", "type of scan to perform", "ptmin", &scan, 's' )
+    .addOptionalArgument( "min", "minimum value of scan", 1., &min_value, 'l' )
+    .addOptionalArgument( "max", "maximum value of scan", 11., &max_value, 'H' )
     .addOptionalArgument( "num-points", "number of points to consider", 10, &npoints, 'n' )
+    .addOptionalArgument( "points", "list of points to consider", vector<double>{}, &points, 'p' )
     .addOptionalArgument( "output", "output file", "xsect.dat", &output_file, 'o' )
+    .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
     .parse();
+
+  if ( debug )
+    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debug;
+  else
+    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::nothing;
 
   cepgen::Generator mg;
   mg.setParameters( cepgen::card::Handler::parse( input_config ) );
 
-  cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::error;
-
-  auto& par = mg.parameters();
-  if ( proc_mode > 0 )
-    par.kinematics.mode = static_cast<cepgen::KinematicsMode>( proc_mode );
   if ( !parser.extra_config().empty() )
-    par = cepgen::card::CardsHandlerFactory::get().build( "cmd",
-      cepgen::ParametersList().set<std::vector<std::string> >( "args", parser.extra_config() ) )->parse( "", par );
-  CG_INFO( "main" ) << &par;
+    mg.setParameters( cepgen::card::CardsHandlerFactory::get().build( "cmd",
+      cepgen::ParametersList().set<std::vector<std::string> >( "args", parser.extra_config() ) )
+      ->parse( "", mg.parameters() ) );
+
+  CG_INFO( "main" ) << mg.parametersPtr();
 
   double xsect, err_xsect;
 
@@ -55,8 +61,15 @@ int main( int argc, char* argv[] )
     throw CG_FATAL( "main" ) << "Output file \"" << output_file << "\" cannot be opened!";
   xsect_file << "# " << scan << "\txsect (pb)\td(xsect) (pb)\n";
 
-  for ( int i = 0; i < npoints; i++ ) {
-    const double value = min_value+( max_value-min_value )*i/npoints;
+  auto& par = mg.parameters();
+  //--- ensure nothing is written in the output sequence
+  par.outputModulesSequence().clear();
+
+  if ( points.empty() )
+    for ( int i = 0; i <= npoints; ++i )
+      points.emplace_back( min_value+( max_value-min_value )*i/npoints );
+
+  for ( const auto& value : points ) {
     if ( scan == "ptmin" )
       par.kinematics.cuts.central.pt_single.min() = value;
     else if ( scan == "ptmax" )

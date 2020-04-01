@@ -71,9 +71,12 @@ namespace cepgen
       params_ = params;
 
       //----- process definition
-      const auto& proc = pars.get<ParametersList>( "process" );
-      if ( !proc.empty() || !params_.hasProcess() )
+      auto proc = pars.get<ParametersList>( "process" );
+      if ( !proc.empty() ) {
+        if ( params_.hasProcess() )
+          proc = ParametersList( params_.process().parameters() )+proc;
         params_.setProcess( proc::ProcessesFactory::get().build( proc ) );
+      }
 
       //----- structure functions
       auto strfun = pars.get<ParametersList>( "strfun" ); // copy

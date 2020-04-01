@@ -52,6 +52,8 @@ namespace cepgen
       }
       /// Concatenate two parameters containers
       ParametersList& operator+=( const ParametersList& oth );
+      /// Concatenation of two parameters containers
+      ParametersList operator+( const ParametersList& oth ) const;
       /// Is the list empty?
       bool empty() const;
 

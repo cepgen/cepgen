@@ -81,7 +81,13 @@ namespace cepgen
         kmr::GluonGrid::get( kmr_grid_path_.c_str() );
 
       //--- parse the process name
-      params_.setProcess( proc::ProcessesFactory::get().build( proc_name_, *proc_params_ ) );
+      if ( !proc_name_.empty() || !proc_params_->empty() ) {
+        if ( !params.hasProcess() && proc_name_.empty() )
+          throw CG_FATAL( "LpairHandler" ) << "Process name not specified!";
+        if ( params_.hasProcess() && params_.process().name() == proc_name_ )
+          *proc_params_ = ParametersList( params_.process().parameters() )+*proc_params_;
+        params_.setProcess( proc::ProcessesFactory::get().build( proc_name_, *proc_params_ ) );
+      }
 
       const Limits lim_xi{ xi_min_, xi_max_ };
       if ( lim_xi.valid() )
