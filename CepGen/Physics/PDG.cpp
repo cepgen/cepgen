@@ -49,7 +49,7 @@ namespace cepgen
   {
     if ( particles_.count( id ) > 0 )
       return particles_.at( id );
-    throw CG_ERROR( "PDG" )
+    throw CG_WARNING( "PDG" )
       << "No particle with PDG id " << id << " in the catalogue.";
   }
 

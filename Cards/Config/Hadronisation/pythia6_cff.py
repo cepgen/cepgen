@@ -1,5 +1,5 @@
 from Config.containers_cfi import Module
-from pythia6Tunes_cfi import pythia6CUEP6S1Settings
+from pythia6Tunes_cfi import *
 
 pythia6 = Module('pythia6',
     seed = 1000,
@@ -8,7 +8,8 @@ pythia6 = Module('pythia6',
         'MSTU(21)=1',
     ),
     processConfiguration = (
-        'pythia6CUEP6S1Settings',
+        #'pythia6CUEP6S1Settings',
+        'pythia6UEZ2starSettings',
     ),
 
 )

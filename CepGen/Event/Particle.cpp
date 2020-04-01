@@ -12,13 +12,13 @@ namespace cepgen
   Particle::Particle() :
     id_( -1 ), charge_sign_( 1 ),
     mass_( -1. ), helicity_( 0. ),
-    role_( UnknownRole ), status_( Status::Undefined ), pdg_id_( PDG::invalid )
+    role_( UnknownRole ), status_( (int)Status::Undefined ), pdg_id_( PDG::invalid )
   {}
 
   Particle::Particle( Role role, pdgid_t pdgId, Status st ) :
     id_( -1 ), charge_sign_( 1 ),
     mass_( -1. ), helicity_( 0. ),
-    role_( role ), status_( st ),
+    role_( role ), status_( (int)st ),
     pdg_id_( pdgId )
   {
     try {
