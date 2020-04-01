@@ -186,8 +186,10 @@ namespace cepgen
             throw CG_FATAL( "CommandLineHandler" ) << "Invalid syntax for key \"" << key << "\"!";
           const auto value = words.at( 0 );
           try {
-            if ( value.find( '.' ) != std::string::npos )
-              // double if contains a '.'
+            if ( value.find( '.' ) != std::string::npos
+              || value.find( 'e' ) != std::string::npos
+              || value.find( 'E' ) != std::string::npos )
+              // double if contains a '.'/'e'
               plist.set<double>( key, std::stod( value ) );
             else
               plist.set<int>( key, std::stod( value ) );
