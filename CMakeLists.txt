@@ -7,6 +7,7 @@ set(VERSION 0.9.7)
 option(CMAKE_BUILD_CORE "Build Core library" ON)
 option(CMAKE_BUILD_PROCESSES "Build physics processes" ON)
 option(CMAKE_BUILD_ADDONS "Build AddOns" ON)
+option(CMAKE_BUILD_SCAN "Build cross-section scan utilitary" OFF)
 option(CMAKE_BUILD_TESTS "Build tests" OFF)
 option(CMAKE_BUILD_FOAM "Build FOAM integrator" OFF)
 
@@ -38,7 +39,6 @@ set(CEPGEN_LIBRARIES)
 set(CEPGEN_HAS_FUNCTIONALS OFF)
 set(CEPGEN_ROOT_FUNCTIONALS OFF CACHE_INTERNAL "Are functionals parsed using ROOT?")
 set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
-set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
 set(CEPGEN_CORE_EXT ${GSL_LIB} ${GSL_CBLAS_LIB})
 
 #----- enable fortran for external libraries linking
@@ -82,12 +82,7 @@ file(COPY ${readme_file} DESTINATION ${PROJECT_BINARY_DIR})
 
 if(CMAKE_BUILD_CORE)
   #--- build the executables
-  file(GLOB_RECURSE exec_sources RELATIVE ${CEPGEN_SOURCE_DIR} ${CEPGEN_SOURCE_DIR}/*.cpp)
-  foreach(exec_src ${exec_sources})
-    string(REPLACE ".cpp" "" exec_bin ${exec_src})
-    add_executable(${exec_bin} ${CEPGEN_SOURCE_DIR}/${exec_src})
-    target_link_libraries(${exec_bin} ${CEPGEN_LIBRARIES})
-  endforeach()
+  add_subdirectory(src)
   #--- build the tests
   if(CMAKE_BUILD_TESTS)
     enable_testing()
