@@ -4,7 +4,7 @@ pythia6noUESettings = (
     'PARJ(71)=10 .  ! for which ctau  10 mm',
     'MSTP(33)=0     ! no K factors in hard cross sections',
     'MSTP(2)=1      ! which order running alphaS',
-    'MSTP(81)=0    ! multiple parton interactions 1 is Pythia default',
+    'MSTP(81)=0     ! multiple parton interactions 1 is Pythia default'
 )
 
 pythia6CUEP6S1Settings = (
@@ -64,5 +64,5 @@ pythiaUEZ2starSettings = (
     'MSTP(91)=1     ! Gaussian primordial kT',
     'PARP(93)=10.0  ! primordial kT-max',
     'MSTP(81)=21    ! multiple parton interactions 1 is Pythia default',
-    'MSTP(82)=4     ! Defines the multi-parton model',
+    'MSTP(82)=4     ! Defines the multi-parton model'
 )

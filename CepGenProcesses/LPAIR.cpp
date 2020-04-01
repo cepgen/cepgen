@@ -19,6 +19,7 @@ namespace cepgen
       Process( params, true ),
       n_opt_( params.get<int>( "nopt", 0 ) ),
       pair_( params.get<ParticleProperties>( "pair" ).pdgid ),
+      symmetrise_( params.get<bool>( "symmetrise", false ) ),
       theta4_( 0. ), phi6_cm_( 0. ), x6_( 0. ),
       ep1_( 0. ), ep2_( 0. ), p_cm_( 0. ),
       ec4_( 0. ), pc4_( 0. ), mc4_( 0. ), w4_( 0. ),
@@ -896,6 +897,9 @@ namespace cepgen
       //----- parameterise a random rotation around z-axis
       const short rany = drand() > 0.5 ? 1 : -1, ransign = drand() > 0.5 ? 1 : -1;
       const double ranphi = 2*drand()*M_PI;
+      const short ranz = symmetrise_
+        ? ( drand() > 0.5 ? 1 : -1 )
+        : 1;
 
       Momentum plab_ph1 = plab_ip1-p3_lab_;
       plab_ph1.rotatePhi( ranphi, rany );
@@ -914,11 +918,6 @@ namespace cepgen
         << "boosted+rotated P(l1)=" << p6_cm_ << "\n\t"
         << "boosted+rotated P(l2)=" << p7_cm_;
 
-      /*if ( symmetrise_ && rand() >= .5*RAND_MAX ) {
-        p6_cm_.mirrorZ();
-        p7_cm_.mirrorZ();
-      }*/
-
       //----- incoming protons
       event_->oneWithRole( Particle::IncomingBeam1 ).setMomentum( plab_ip1 );
       event_->oneWithRole( Particle::IncomingBeam2 ).setMomentum( plab_ip2 );
@@ -926,6 +925,7 @@ namespace cepgen
       //----- first outgoing proton
       auto& op1 = event_->oneWithRole( Particle::OutgoingBeam1 );
 
+      p3_lab_.setPz( p3_lab_.pz()*ranz );
       op1.setMomentum( p3_lab_ );
       switch ( kin_.mode ) {
         case KinematicsMode::ElasticElastic:
@@ -942,6 +942,8 @@ namespace cepgen
 
       //----- second outgoing proton
       auto& op2 = event_->oneWithRole( Particle::OutgoingBeam2 );
+
+      p5_lab_.setPz( p5_lab_.pz()*ranz );
       op2.setMomentum( p5_lab_ );
       switch ( kin_.mode ) {
         case KinematicsMode::ElasticElastic:
@@ -958,10 +960,12 @@ namespace cepgen
 
       //----- first incoming photon
       auto& ph1 = event_->oneWithRole( Particle::Parton1 );
+      plab_ph1.setPz( plab_ph1.pz()*ranz );
       ph1.setMomentum( plab_ph1 );
 
       //----- second incoming photon
       auto& ph2 = event_->oneWithRole( Particle::Parton2 );
+      plab_ph2.setPz( plab_ph2.pz()*ranz );
       ph2.setMomentum( plab_ph2 );
 
       auto& central_system = (*event_)[Particle::CentralSystem];
@@ -969,12 +973,14 @@ namespace cepgen
       //----- first outgoing lepton
       auto& ol1 = central_system[0];
       ol1.setPdgId( ol1.pdgId(), ransign );
+      p6_cm_.setPz( p6_cm_.pz()*ranz );
       ol1.setMomentum( p6_cm_ );
       ol1.setStatus( Particle::Status::FinalState );
 
       //----- second outgoing lepton
       auto& ol2 = central_system[1];
       ol2.setPdgId( ol2.pdgId(), -ransign );
+      p7_cm_.setPz( p7_cm_.pz()*ranz );
       ol2.setMomentum( p7_cm_ );
       ol2.setStatus( Particle::Status::FinalState );
 

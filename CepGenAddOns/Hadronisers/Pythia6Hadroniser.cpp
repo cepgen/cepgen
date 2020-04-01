@@ -177,17 +177,16 @@ namespace cepgen
 
         auto& pa = ev.addParticle( role );
         pa.setId( p );
-        pa.setPdgId( (long)pyjets_.k[1][p] );
         pa.setStatus( pyjets_.k[0][p] );
+        pa.setPdgId( (long)pyjets_.k[1][p] );
         pa.setMomentum( Momentum( pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p] ) );
         pa.setMass( pyjets_.p[4][p] );
-        if ( role != Particle::Role::UnknownRole ) {
-          auto& moth = ev[moth_id];
-          /*moth.setStatus( role == Particle::Role::CentralSystem
+        auto& moth = ev[moth_id];
+        if ( role != Particle::Role::UnknownRole )
+          moth.setStatus( role == Particle::Role::CentralSystem
             ? Particle::Status::Resonance
-            : Particle::Status::Fragmented );*/
-          pa.addMother( moth );
-        }
+            : Particle::Status::Fragmented );
+        pa.addMother( moth );
       }
       return true;
     }

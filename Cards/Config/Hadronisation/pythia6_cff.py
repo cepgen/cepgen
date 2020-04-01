@@ -7,9 +7,11 @@ pythia6 = Module('pythia6',
     preConfiguration = (
         'MSTU(21)=1',
     ),
+    tuningSettings = pythia6noUESettings,
+    #tuningSettings = pythia6CUEP6S1Settings,
+    #tuningSettings = pythia6UEZ2starSettings,
     processConfiguration = (
-        #'pythia6CUEP6S1Settings',
-        'pythia6UEZ2starSettings',
+        'tuningSettings',
     ),
 
 )

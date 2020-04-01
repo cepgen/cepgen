@@ -194,16 +194,22 @@ namespace Pythia8
   CepGenEvent::addCepGenParticle( const cepgen::Particle& part, int status, const std::pair<int,int>& mothers, const std::pair<int,int>& colours )
   {
     const Vec4 mom_part( momToVec4( part.momentum() ) );
+    int pdg_id = part.integerPdgId();
     if ( status == INVALID_ID )
       switch ( part.status() ) {
         case cepgen::Particle::Status::Resonance:
         case cepgen::Particle::Status::Fragmented:
           status = 2;
           break;
-        default: status = 1; break;
+        default: {
+          if ( part.pdgId() == 21 && (int)part.status() == 12 )
+            pdg_id = -21; // workaround for HepMC2 interface
+          else
+            status = 1;
+        } break;
       }
     addCorresp( sizePart(), part.id() );
-    addParticle( part.integerPdgId(), status, mothers.first, mothers.second, colours.first, colours.second,
+    addParticle( pdg_id, status, mothers.first, mothers.second, colours.first, colours.second,
                  mom_part.px(), mom_part.py(), mom_part.pz(), mom_part.e(), mom_part.mCalc(), 0., 0., 0. );
   }
 

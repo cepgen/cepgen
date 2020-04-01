@@ -76,8 +76,9 @@ namespace cepgen
         bool pickin();
 
         /// Internal switch for the optimised code version (LPAIR legacy ; unimplemented here)
-        int n_opt_;
-        pdgid_t pair_;
+        const int n_opt_;
+        const pdgid_t pair_;
+        const bool symmetrise_;
 
         std::vector<double> x_tmp_;
         double theta4_;
