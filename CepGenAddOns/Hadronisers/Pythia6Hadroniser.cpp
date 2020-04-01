@@ -129,7 +129,8 @@ namespace cepgen
 
       //--- only prepare remnants for fragmentation in full (event builder) mode
       if ( full && remn_fragm_ )
-        prepareHadronisation( ev );
+        if ( !prepareHadronisation( ev ) )
+          return false;
 
       if ( CG_LOG_MATCH( "Pythia6Hadroniser:dump", debug ) ) {
         CG_DEBUG( "Pythia6Hadroniser" )
@@ -213,7 +214,13 @@ namespace cepgen
         const double phi = 2.*M_PI*drand(), theta = acos( 2.*drand()-1. ); // theta angle
 
         //--- compute momentum of decay particles from MX
-        const double px = std::sqrt( 0.25*std::pow( mx2-mdq2+mq2, 2 )/mx2-mq2 );
+        const double px2 = 0.25*std::pow( mx2-mdq2+mq2, 2 )/mx2-mq2;
+        if ( px2 < 0. ) {
+          CG_WARNING( "Pythia6Hadroniser" )
+            << "Invalid remnants kinematics for " << part.role() << ".";
+          return false;
+        }
+        const double px = std::sqrt( px2 );
 
         //--- build 4-vectors and boost decay particles
         auto pdq = Momentum::fromPThetaPhi( px, theta, phi, std::hypot( px, mdq ) );

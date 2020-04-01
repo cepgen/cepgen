@@ -47,7 +47,7 @@ namespace cepgen
         }
       }
       os
-        << prep << "  *--- incoming state\n";
+        << prep << "  **** incoming state\n";
       if ( params.kinematics.cuts.initial.q2.valid() )
         os
           << prep << "  * Q2 range (GeV2): "
@@ -57,7 +57,7 @@ namespace cepgen
         os
           << prep << "  * remnants mass range (GeV/c2): "
           << params.kinematics.cuts.remnants.mass_single << "\n";
-      os << prep << "  *--- central system\n";
+      os << prep << "  **** central system\n";
       if ( params.kinematics.cuts.central.pt_single.valid() )
         os
           << prep << "  * single particle pt (GeV/c): "
