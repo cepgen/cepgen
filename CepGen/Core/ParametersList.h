@@ -29,12 +29,16 @@ namespace cepgen
       ~ParametersList() {} // required for unique_ptr initialisation! avoids cleaning all individual objects
       /// Check if a given parameter is handled in this list
       template<typename T> bool has( std::string key ) const;
+      /// Erase a parameter with key
+      /// \return Number of key-indexed values erased
+      size_t erase( std::string key );
       /// Retrieve the module name if any
       template<typename T> T name( const T& def = default_arg<T>::get() ) const {
         if ( !has<T>( MODULE_NAME ) )
           return def;
         return get<T>( MODULE_NAME );
       }
+      /// Fill a variable with the key content if exists
       template<typename T> const ParametersList& fill( std::string key, T& value ) const {
         if ( has<T>( key ) )
           value = get<T>( key );

@@ -20,17 +20,10 @@ namespace cepgen
   ParametersList&
   ParametersList::operator+=( const ParametersList& oth )
   {
-    for ( const auto& key : oth.keys() ) {
-      if ( int_values_.count( key ) != 0 ) int_values_.erase( key );
-      if ( dbl_values_.count( key ) != 0 ) dbl_values_.erase( key );
-      if ( str_values_.count( key ) != 0 ) str_values_.erase( key );
-      if ( lim_values_.count( key ) != 0 ) lim_values_.erase( key );
-      if ( vec_param_values_.count( key ) != 0 ) vec_param_values_.erase( key );
-      if ( vec_int_values_.count( key ) != 0 ) vec_int_values_.erase( key );
-      if ( vec_dbl_values_.count( key ) != 0 ) vec_dbl_values_.erase( key );
-      if ( vec_str_values_.count( key ) != 0 ) vec_str_values_.erase( key );
-      if ( param_values_.count( key ) != 0 ) param_values_.erase( key );
-    }
+    //--- first ensure no key is not already present in the list
+    for ( const auto& key : oth.keys() )
+      erase( key );
+    //--- concatenate all typed lists
     int_values_.insert( oth.int_values_.begin(), oth.int_values_.end() );
     dbl_values_.insert( oth.dbl_values_.begin(), oth.dbl_values_.end() );
     str_values_.insert( oth.str_values_.begin(), oth.str_values_.end() );
@@ -49,6 +42,31 @@ namespace cepgen
   {
     ParametersList out = *this;
     out += oth;
+    return out;
+  }
+
+  size_t
+  ParametersList::erase( std::string key )
+  {
+    size_t out = 0ull;
+    if ( int_values_.count( key ) != 0 )
+      out += int_values_.erase( key );
+    if ( dbl_values_.count( key ) != 0 )
+      out += dbl_values_.erase( key );
+    if ( str_values_.count( key ) != 0 )
+      out += str_values_.erase( key );
+    if ( lim_values_.count( key ) != 0 )
+      out += lim_values_.erase( key );
+    if ( vec_param_values_.count( key ) != 0 )
+      out += vec_param_values_.erase( key );
+    if ( vec_int_values_.count( key ) != 0 )
+      out += vec_int_values_.erase( key );
+    if ( vec_dbl_values_.count( key ) != 0 )
+      out += vec_dbl_values_.erase( key );
+    if ( vec_str_values_.count( key ) != 0 )
+      out += vec_str_values_.erase( key );
+    if ( param_values_.count( key ) != 0 )
+      out += param_values_.erase( key );
     return out;
   }
 
