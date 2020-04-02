@@ -1,6 +1,6 @@
 #include "CepGenAddOns/EventInterfaces/ROOTTreeInfo.h"
 
-#include "CepGen/Modules/ExportModule.h"
+#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Core/Exception.h"
 

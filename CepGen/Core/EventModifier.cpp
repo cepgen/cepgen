@@ -1,5 +1,4 @@
-#include "CepGen/Modules/EventModifier.h"
-
+#include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 

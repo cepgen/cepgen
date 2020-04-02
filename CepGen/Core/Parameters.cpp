@@ -2,18 +2,17 @@
 
 #include "CepGen/Integration/Integrator.h"
 
-#include "CepGen/Event/Event.h"
+#include "CepGen/Core/EventModifier.h"
+#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Event/Event.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Processes/Process.h"
 
 #include "CepGen/Physics/TamingFunction.h"
 #include "CepGen/Physics/PDG.h"
-
-#include "CepGen/Modules/EventModifier.h"
-#include "CepGen/Modules/ExportModule.h"
 
 #include <iomanip>
 

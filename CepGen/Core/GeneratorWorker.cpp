@@ -3,15 +3,14 @@
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Integration/GridParameters.h"
 
+#include "CepGen/Core/EventModifier.h"
+#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Parameters.h"
 #include "CepGen/Processes/Process.h"
 #include "CepGen/Event/Event.h"
-
-#include "CepGen/Modules/EventModifier.h"
-#include "CepGen/Modules/ExportModule.h"
 
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/ProgressBar.h"

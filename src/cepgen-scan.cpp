@@ -1,15 +1,15 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Parameters.h"
 
-#include "CepGen/Modules/ExportModule.h"
-#include "CepGen/Modules/CardsHandlerFactory.h"
-#include "CepGen/Cards/Handler.h"
-#include "CepGen/Modules/ProcessesFactory.h"
-#include "CepGen/Processes/Process.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Core/Exception.h"
 
+#include "CepGen/Cards/Handler.h"
+#include "CepGen/Processes/Process.h"
 #include "CepGen/Physics/PDG.h"
 
-#include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/ProcessesFactory.h"
 
 #include "CepGen/Utils/Logger.h"
 #include "CepGen/Utils/String.h"

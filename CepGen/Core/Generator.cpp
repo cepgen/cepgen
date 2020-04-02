@@ -3,15 +3,22 @@
 #include "CepGen/Version.h"
 
 #include "CepGen/Core/GeneratorWorker.h"
+#include "CepGen/Processes/Process.h"
+#include "CepGen/Core/EventModifier.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/Timer.h"
+#include "CepGen/Utils/String.h"
+
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Integration/GridParameters.h"
-
-#include "CepGen/Processes/Process.h"
-#include "CepGen/Modules/ExportModule.h"
 
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/AlphaS.h"
+
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
 
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
@@ -20,16 +27,7 @@
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 
-#include "CepGen/Modules/EventModifier.h"
-#include "CepGen/Modules/ExportModule.h"
-
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/StructureFunctions/SigmaRatio.h"
-
 #include "CepGen/Event/Event.h"
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/Timer.h"
-#include "CepGen/Utils/String.h"
 
 #include <fstream>
 #include <chrono>

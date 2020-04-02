@@ -7,11 +7,11 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 
+#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
-#include "CepGen/Modules/ExportModule.h"
 
+#include "CepGen/Core/EventModifier.h"
 #include "CepGen/Modules/EventModifierFactory.h"
-#include "CepGen/Modules/EventModifier.h"
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Limits.h"

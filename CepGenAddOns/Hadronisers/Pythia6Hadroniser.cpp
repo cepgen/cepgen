@@ -1,4 +1,4 @@
-#include "CepGen/Modules/Hadroniser.h"
+#include "CepGen/Physics/Hadroniser.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 
 #include "CepGen/Core/ParametersList.h" //FIXME

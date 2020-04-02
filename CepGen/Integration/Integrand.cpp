@@ -7,11 +7,10 @@
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/PDG.h"
 
-#include "CepGen/Modules/EventModifier.h"
-#include "CepGen/Modules/ExportModule.h"
-
-#include "CepGen/Utils/Timer.h"
+#include "CepGen/Core/EventModifier.h"
+#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/Timer.h"
 
 #include "CepGen/Parameters.h"
 

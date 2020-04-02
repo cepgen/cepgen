@@ -2,13 +2,11 @@
 
 #include "CepGen/Modules/CardsHandlerFactory.h"
 
-#include "CepGen/Integration/Integrator.h"
-
+#include "CepGen/Core/EventModifier.h"
 #include "CepGen/Modules/EventModifierFactory.h"
-#include "CepGen/Modules/EventModifier.h"
 
+#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
-#include "CepGen/Modules/ExportModule.h"
 
 #include "CepGen/Processes/Process.h"
 #include "CepGen/Modules/ProcessesFactory.h"
@@ -16,6 +14,7 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 
+#include "CepGen/Integration/Integrator.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"

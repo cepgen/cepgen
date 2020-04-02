@@ -1,7 +1,7 @@
-#ifndef CepGen_Modules_Hadroniser_h
-#define CepGen_Modules_Hadroniser_h
+#ifndef CepGen_Physics_Hadroniser_h
+#define CepGen_Physics_Hadroniser_h
 
-#include "CepGen/Modules/EventModifier.h"
+#include "CepGen/Core/EventModifier.h"
 
 namespace cepgen
 {

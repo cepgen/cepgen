@@ -1,5 +1,5 @@
-#ifndef CepGen_Modules_EventModifier_h
-#define CepGen_Modules_EventModifier_h
+#ifndef CepGen_Core_EventModifier_h
+#define CepGen_Core_EventModifier_h
 
 #include <string>
 #include <vector>
