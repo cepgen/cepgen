@@ -66,15 +66,9 @@ namespace cepgen
         /// Set the list of kinematic cuts to apply on the outgoing particles' final state
         /// \param[in] kin The Kinematics object containing the kinematic parameters
         void setKinematics( const Kinematics& kin );
-        /**
-         * Sets the phase space point to compute the weight associated to it.
-         * \brief Sets the phase space point to compute
-         * \param[in] ndim The number of dimensions of the point in the phase space
-         * \param[in] x The (\a ndim_)-dimensional point in the phase space on which the kinematics and the cross-section are computed
-         */
-        void setPoint( double* x, const size_t ndim );
-        /// Compute the weight for this point in the phase-space
-        double weight();
+        /// Compute the weight for a phase-space point
+        /// \param[in] x The phase space point
+        double weight( const std::vector<double>& x );
         /// Dump the evaluated point's coordinates in the standard output stream
         void dumpPoint() const;
         /// List all variables handled by this generic process

@@ -15,7 +15,7 @@
 
 namespace cepgen
 {
-  class Parameters;
+  class Integrand;
   /// Monte-Carlo integration algorithm
   class Integrator
   {
@@ -24,32 +24,27 @@ namespace cepgen
       Integrator( const ParametersList& params );
 
       /// Specify the function to be integrated
-      /// \param[in] ndim Number of dimensions on which the function will be integrated
-      /// \param[in] integrand Function to be integrated
-      /// \param[inout] params Run parameters to define the phase space on which this integration is performed (embedded in an Parameters object)
-      void setFunction( unsigned int ndim, double integrand( double*, size_t, void* ), Parameters& params );
+      /// \param[in] integr Integrand object to be evaluated
+      void setIntegrand( Integrand& integr );
       /// Dimensional size of the phase space
       size_t size() const;
+      /// Integration algorithm name
+      const std::string& name() const { return name_; }
       /// Compute the function value at the given phase space point
-      virtual double eval( const std::vector<double>& x );
+      virtual double eval( const std::vector<double>& x ) const;
+      /// Generate a uniformly distributed (between 0 and 1) random number
+      virtual double uniform() const;
 
       /// Perform the multidimensional Monte Carlo integration
       /// \param[out] result_ The cross section as integrated for the given phase space restrictions
       /// \param[out] abserr_ The uncertainty associated to the computed cross section
       virtual void integrate( double& result_, double& abserr_ ) = 0;
 
-      /// Integration algorithm name
-      const std::string& name() const { return name_; }
-
-      /// Random number generator instance
-      const gsl_rng& rng() const { return *rng_; }
-      /// Generate a uniformly distributed (between 0 and 1) random number
-      double uniform() const;
-
     protected:
       const ParametersList params_; ///< Steering parameters for this algorithm
       const std::string name_; ///< Integration algorithm name
-      unsigned long seed_; ///< Random number generator seed
+      const unsigned long seed_; ///< Random number generator seed
+      const int verbosity_; ///< Integrator verbosity
       /// A deleter object for GSL's random number generator
       struct gsl_rng_deleter
       {
@@ -58,15 +53,38 @@ namespace cepgen
       };
       /// Instance of random number generator service
       std::unique_ptr<gsl_rng,gsl_rng_deleter> rng_;
-      /// List of parameters to specify the integration range and the
-      /// physics determining the phase space
-      Parameters* input_params_;
+      Integrand* integrand_; ///< Integrand to be evaluated
       /// GSL structure storing the function to be integrated by this
       /// integrator instance (along with its parameters)
       std::unique_ptr<gsl_monte_function> function_;
       double result_; ///< Result of the last integration
       double err_result_; ///< Standard deviation for the last integration
       bool initialised_; ///< Has the algorithm alreay been initialised?
+
+    private:
+      /**
+       * \brief A GSL wrapper to define a functor as an integrable functional
+       * \tparam F Class member signature
+       */
+      template<typename F>
+      class gsl_monte_function_wrapper : public gsl_monte_function
+      {
+        public:
+          gsl_monte_function_wrapper( const F& func, size_t ndim ) :
+            func_( func ) {
+            f = &gsl_monte_function_wrapper::eval;
+            dim = ndim;
+            params = this;
+          }
+
+        private:
+          /// Static integrable functional
+          static double eval( double* x, size_t ndim, void* params ) {
+            return static_cast<gsl_monte_function_wrapper*>( params )->func_( x, ndim, params );
+          }
+          /// Reference to the functor
+          const F& func_;
+      };
   };
 }
 

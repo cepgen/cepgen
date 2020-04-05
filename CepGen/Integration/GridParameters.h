@@ -7,6 +7,7 @@
 
 namespace cepgen
 {
+  class Integrator;
   /// A parameters placeholder for the grid integration helper
   class GridParameters
   {
@@ -29,7 +30,7 @@ namespace cepgen
       /// Set the function value for a given grid coordinate
       void setValue( size_t coord, double val );
       /// Shoot a phase space point for a grid coordinate
-      void shoot( const gsl_rng* rng, size_t coord, std::vector<double>& out ) const;
+      void shoot( const Integrator* integ, size_t coord, std::vector<double>& out ) const;
       void setTrial( size_t coord );
       /// Number of points already shot for a given grid coordinate
       size_t numPoints( size_t coord ) const;
@@ -48,14 +49,10 @@ namespace cepgen
 
     private:
       size_t max_;
-      /// List of grid coordinates
-      std::vector<coord_t> n_map_;
-      /// Number of functions values evaluated for this point
-      std::vector<size_t> num_points_;
-      /// Maximal value of the function at one given point
-      std::vector<double> f_max_;
-      /// Maximal value of the function in the considered integration range
-      double f_max_global_;
+      std::vector<coord_t> n_map_; ///< List of grid coordinates
+      std::vector<size_t> num_points_; ///< Number of functions values evaluated for this point
+      std::vector<double> f_max_; ///< Maximal value of the function at one given point
+      double f_max_global_; ///< Maximal value of the function in the considered integration range
   };
 }
 

@@ -11,6 +11,7 @@
 #include "CepGen/Utils/String.h"
 
 #include "CepGen/Integration/Integrator.h"
+#include "CepGen/Integration/Integrand.h"
 #include "CepGen/Integration/GridParameters.h"
 
 #include "CepGen/Physics/MCDFileParser.h"
@@ -42,7 +43,6 @@ namespace cepgen
 
   Generator::Generator() :
     parameters_( new Parameters ),
-    generator_( new GeneratorWorker( parameters_.get() ) ),
     result_( -1. ), result_error_( -1. )
   {
     static const std::string pdg_file = "External/mass_width_2019.mcd";
@@ -60,7 +60,6 @@ namespace cepgen
 
   Generator::Generator( Parameters* ip ) :
     parameters_( ip ),
-    generator_( new GeneratorWorker( parameters_.get() ) ),
     result_( -1. ), result_error_( -1. )
   {}
 
@@ -74,6 +73,7 @@ namespace cepgen
     if ( parameters_->hasProcess() )
       parameters_->process().setKinematics( parameters_->kinematics );
     result_ = result_error_ = -1.;
+    parameters_->prepareRun();
   }
 
   Parameters&
@@ -118,14 +118,10 @@ namespace cepgen
     if ( ndim < 1 )
       throw CG_FATAL( "Generator:computePoint" )
         << "Invalid phase space dimension (ndim=" << ndim << ")!";
-    double res = integrand::eval( x, ndim, (void*)parameters_.get() );
-    std::ostringstream os;
-    std::string sep;
-    for ( size_t i = 0; i < ndim; ++i )
-      os << sep << x[i], sep = ", ";
+    std::vector<double> coord( x, x+ndim );
+    double res = generator_->integrand().eval( coord );
     CG_DEBUG( "Generator:computePoint" )
-      << "Result for x[" << ndim << "] = {" << os.str() << "}:\n\t"
-      << res << ".";
+      << "Result for x[" << ndim << "] = " << coord << ":\n\t" << res << ".";
     return res;
   }
 
@@ -184,8 +180,7 @@ namespace cepgen
         parameters_->integrator->setName<std::string>( "Vegas" );
       integrator_ = IntegratorFactory::get().build( *parameters_->integrator );
     }
-    integrator_->setFunction( ndim, integrand::eval, *parameters_ );
-    generator_->setIntegrator( integrator_.get() );
+    integrator_->setIntegrand( generator_->integrand() );
 
     CG_DEBUG( "Generator:integrate" )
       << "New integrator instance created for " << ndim << "-dimensional integration.";
@@ -199,32 +194,43 @@ namespace cepgen
   }
 
   const Event&
-  Generator::generateOneEvent()
+  Generator::generateOneEvent( Event::callback callback )
   {
-    generator_->generate( 1 );
+    generate( 1, callback );
     return parameters_->process().event();
   }
 
   void
-  Generator::generate( Event::callback callback )
+  Generator::generate( size_t num_events, Event::callback callback )
   {
-    const utils::Timer tmr;
-
-    CG_INFO( "Generator" )
-      << parameters_->generation().maxgen << " events will be generated.";
+    if ( !parameters_ )
+      throw CG_FATAL( "Generator:generate" ) << "No steering parameters specified!";
 
     for ( auto& mod : parameters_->outputModulesSequence() )
       mod->initialise( *parameters_ );
 
-    generator_->generate( parameters_->generation().maxgen, callback );
+    //--- if invalid argument, retrieve from runtime parameters
+    if ( num_events < 1 )
+      num_events = parameters_->generation().maxgen;
+
+    CG_INFO( "Generator" )
+      << utils::s( "event", num_events, true ) << " will be generated.";
+
+    const utils::Timer tmr;
+
+    //--- launch the event generation
+
+    generator_->generate( num_events, callback );
 
     const double gen_time_s = tmr.elapsed();
     const double rate_ms = ( parameters_->numGeneratedEvents() > 0 )
       ? gen_time_s/parameters_->numGeneratedEvents()*1.e3 : 0.;
+    const double equiv_lumi = parameters_->numGeneratedEvents()/crossSection();
     CG_INFO( "Generator" )
       << utils::s( "event", parameters_->numGeneratedEvents() )
       << " generated in " << gen_time_s << " s "
-      << "(" << rate_ms << " ms/event).";
+      << "(" << rate_ms << " ms/event).\n\t"
+      << "Equivalent luminosity: " << utils::format( "%g", equiv_lumi ) << " pb^-1.";
   }
 
   void

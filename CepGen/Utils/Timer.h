@@ -15,6 +15,7 @@ namespace cepgen
     {
       public:
         inline Timer() { reset(); }
+        ~Timer() = default;
         /** \brief Time elapsed since the last @a reset call (or class construction)
          * \return Elapsed time (since the last reset), in seconds
          */

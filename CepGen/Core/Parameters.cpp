@@ -20,7 +20,7 @@ namespace cepgen
 {
   Parameters::Parameters() :
     general( new ParametersList ), integrator( new ParametersList ),
-    store_( false ), total_gen_time_( 0. ), num_gen_events_( 0ul )
+    total_gen_time_( 0. ), num_gen_events_( 0ul )
   {}
 
   Parameters::Parameters( Parameters& param ) :
@@ -30,7 +30,7 @@ namespace cepgen
     process_( std::move( param.process_ ) ),
     evt_modifiers_( std::move( param.evt_modifiers_ ) ),
     out_modules_( std::move( param.out_modules_ ) ),
-    store_( false ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ ),
+    total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ ),
     generation_( param.generation_ )
   {}
 
@@ -38,7 +38,7 @@ namespace cepgen
     general( param.general ), integrator( param.integrator ),
     kinematics( param.kinematics ),
     taming_functions( param.taming_functions ),
-    store_( false ), total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ ),
+    total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ ),
     generation_( param.generation_ )
   {}
 
@@ -69,15 +69,19 @@ namespace cepgen
     //--- first-run preparation
     if ( !process_ || !process_->first_run )
       return;
-    CG_DEBUG( "Parameters" )
-      << "Run started for " << process_->name() << " process "
-      << std::hex << (void*)process_.get() << std::dec << ".\n\t"
-      << "Process mode considered: " << kinematics.mode << "\n\t"
-      << "   first beam: " << kinematics.incoming_beams.first << "\n\t"
-      << "  second beam: " << kinematics.incoming_beams.second;
-    if ( kinematics.structure_functions )
-      CG_DEBUG( "Parameters" )
-        << "  structure functions: " << *kinematics.structure_functions;
+    {
+      std::ostringstream oss;
+      oss
+        << "Run started for " << process_->name() << " process "
+        << std::hex << (void*)process_.get() << std::dec << ".\n\t"
+        << "Process mode considered: " << kinematics.mode << "\n\t"
+        << "   first beam: " << kinematics.incoming_beams.first << "\n\t"
+        << "  second beam: " << kinematics.incoming_beams.second;
+      if ( kinematics.structure_functions )
+        oss
+          << "  structure functions: " << *kinematics.structure_functions;
+      CG_DEBUG( "Parameters" ) << oss.str();
+    }
     if ( process_->hasEvent() )
       process_->clearEvent();
     //--- clear the run statistics
@@ -204,8 +208,6 @@ namespace cepgen
         << std::setw( wt ) << "Number of threads" << param->generation_.num_threads << "\n";
     os
       << std::setw( wt ) << "Number of points to try per bin" << param->generation_.num_points << "\n"
-      << std::setw( wt ) << "Integrand treatment"
-      << ( pretty ? utils::yesno( param->generation_.treat ) : std::to_string( param->generation_.treat ) ) << "\n"
       << std::setw( wt ) << "Verbosity level " << utils::Logger::get().level << "\n";
     if ( !param->evt_modifiers_.empty() || param->out_modules_.empty() || !param->taming_functions.empty() )
       os
@@ -290,13 +292,13 @@ namespace cepgen
 
   Parameters::Generation::Generation() :
     enabled( false ), maxgen( 0 ),
-    symmetrise( false ), treat( true ), gen_print_every( 10000 ),
+    symmetrise( false ), gen_print_every( 10000 ),
     num_threads( 2 ), num_points( 100 )
   {}
 
   Parameters::Generation::Generation( const Generation& rhs ) :
     enabled( rhs.enabled ), maxgen( rhs.maxgen ),
-    symmetrise( rhs.symmetrise ), treat( rhs.treat ), gen_print_every( rhs.gen_print_every ),
+    symmetrise( rhs.symmetrise ), gen_print_every( rhs.gen_print_every ),
     num_threads( rhs.num_threads ), num_points( rhs.num_points )
   {}
 }

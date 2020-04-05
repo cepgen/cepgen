@@ -73,6 +73,16 @@ namespace cepgen
         nc_except.message_ << var;
         return exc;
       }
+      /// Generic templated vector-variables feeder operator
+      template<typename T>
+      inline friend const LoggedException& operator<<( const LoggedException& exc, std::vector<T> vec_var ) {
+        LoggedException& nc_except = const_cast<LoggedException&>( exc );
+        std::string sep( "{" );
+        for ( const auto& var : vec_var )
+          nc_except.message_ << sep << var, sep = ", ";
+        nc_except.message_ << "}";
+        return exc;
+      }
       /// Pipe modifier operator
       inline friend const LoggedException& operator<<( const LoggedException& exc, std::ios_base&( *f )( std::ios_base& ) ) {
         LoggedException& nc_except = const_cast<LoggedException&>( exc );

@@ -73,7 +73,6 @@ namespace cepgen
         bool enabled; ///< Are we generating events ? (true) or are we only computing the cross-section ? (false)
         unsigned long maxgen; ///< Maximal number of events to generate in this run
         bool symmetrise; ///< Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?
-        bool treat; ///< Is the integrand to be smoothed for events generation?
         unsigned int gen_print_every; ///< Frequency at which the events are displayed to the end-user
         unsigned int num_threads; ///< Number of threads to perform the integration
         unsigned int num_points; ///< Number of points to "shoot" in each integration bin by the algorithm
@@ -82,11 +81,6 @@ namespace cepgen
       Generation& generation() { return generation_; }
       /// Get the events generation parameters
       const Generation& generation() const { return generation_; }
-
-      /// Specify if the generated events are to be stored
-      void setStorage( bool store ) { store_ = store; }
-      /// Are the events generated in this run to be stored in the output file ?
-      bool storage() const { return store_; }
 
       //----- event modification (e.g. hadronisation, decay) algorithm
 
@@ -138,8 +132,6 @@ namespace cepgen
       EventModifiersSequence evt_modifiers_;
       /// Collection of event output modules to be applied
       ExportModulesSequence out_modules_;
-      /// Is the next event to be generated to be stored?
-      bool store_;
       /// Total generation time (in seconds)
       double total_gen_time_;
       /// Number of events already generated

@@ -5,5 +5,4 @@ generator = Parameters(
     numPoints = 100,
     printEvery = 10000,
     numThreads = 2,
-    treat = True, # smoothing of the integrand
 )

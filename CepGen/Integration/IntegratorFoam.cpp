@@ -4,7 +4,10 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Parameters.h"
 
+#include "TRandom1.h"
+#include "TRandom2.h"
 #include "TRandom3.h"
+
 #include "TFoam.h"
 #include "TFoamIntegrand.h"
 
@@ -40,6 +43,7 @@ namespace cepgen
       explicit IntegratorFoam( const ParametersList& );
 
       void integrate( double&, double& ) override;
+      inline double uniform() const override { return rnd_->Rndm(); }
 
     private:
       std::unique_ptr<TFoam> foam_;
@@ -49,14 +53,26 @@ namespace cepgen
 
   IntegratorFoam::IntegratorFoam( const ParametersList& params ) :
     Integrator( params ),
-    foam_( new TFoam( "Foam" ) ), rnd_( new TRandom3 ), density_( new FoamDensity )
+    foam_( new TFoam( "Foam" ) ), density_( new FoamDensity )
   {
+    const auto& rnd_mode = params.get<std::string>( "rngEngine", "MersenneTwister" );
+    if ( rnd_mode == "Ranlux" )
+      rnd_.reset( new TRandom1 );
+    else if ( rnd_mode == "generic" )
+      rnd_.reset( new TRandom2 );
+    else if ( rnd_mode == "MersenneTwister" )
+      rnd_.reset( new TRandom3 );
+    else
+      throw CG_FATAL( "IntegratorFoam" )
+        << "Unrecognised random generator: \"" << rnd_mode << "\".";
+    rnd_->SetSeed( seed_ );
+
     foam_->SetPseRan( rnd_.get() );
     foam_->SetnCells( params.get<int>( "nCells", 1000 ) );
     foam_->SetnSampl( params.get<int>( "nSampl", 200 ) );
     foam_->SetnBin( params.get<int>( "nBin", 8 ) );
     foam_->SetEvPerBin( params.get<int>( "EvPerBin", 25 ) );
-    foam_->SetChat( params.get<int>( "verbose", 1 ) );
+    foam_->SetChat( verbosity_ );
     //--- a bit of printout for debugging
     CG_DEBUG( "Integrator:build" ) << "FOAM integrator built\n\t"
       << "Version: " << foam_->GetVersion() << ".";

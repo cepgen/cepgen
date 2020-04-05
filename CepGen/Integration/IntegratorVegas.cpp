@@ -1,4 +1,5 @@
 #include "CepGen/Integration/Integrator.h"
+#include "CepGen/Integration/Integrand.h"
 #include "CepGen/Integration/GridParameters.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 
@@ -24,10 +25,11 @@ namespace cepgen
 
     private:
       void warmup( std::vector<double>&, std::vector<double>&, unsigned int );
-      double eval( const std::vector<double>& ) override;
+      double eval( const std::vector<double>& ) const override;
 
-      int ncvg_;
-      double chisq_cut_;
+      const int ncvg_;
+      const double chisq_cut_;
+      const bool treat_; ///< Is the integrand to be smoothed for events generation?
       gsl_monte_vegas_params vegas_params_;
       /// A trivial deleter for the Vegas integrator
       struct gsl_monte_vegas_deleter
@@ -37,7 +39,8 @@ namespace cepgen
       /// A Vegas integrator state for integration (optional) and/or
       /// "treated" event generation
       std::unique_ptr<gsl_monte_vegas_state,gsl_monte_vegas_deleter> vegas_state_;
-      unsigned long long r_boxes_;
+      mutable unsigned long long r_boxes_;
+      mutable std::vector<double> x_new_;
   };
   std::ostream& operator<<( std::ostream&, const IntegratorVegas::Mode& );
 
@@ -45,6 +48,7 @@ namespace cepgen
     Integrator( params ),
     ncvg_( params.get<int>( "numFunctionCalls", 50000 ) ),
     chisq_cut_( params.get<double>( "chiSqCut", 1.5 ) ),
+    treat_( params.get<bool>( "treat", true ) ),
     r_boxes_( 0ull )
   {}
 
@@ -57,7 +61,7 @@ namespace cepgen
       gsl_monte_vegas_params_get( vegas_state_.get(), &vegas_params_ );
       vegas_params_.iterations = params_.get<int>( "iterations", 10 );
       vegas_params_.alpha = params_.get<double>( "alpha", 1.5 );
-      vegas_params_.verbose = params_.get<int>( "verbose", -1 );
+      vegas_params_.verbose = verbosity_;
       vegas_params_.mode = params_.get<int>( "mode", (int)Mode::importance );
       //--- output logging
       const auto& log = params_.get<std::string>( "loggingOutput", "cerr" );
@@ -142,28 +146,32 @@ namespace cepgen
   }
 
   double
-  IntegratorVegas::eval( const std::vector<double>& x )
+  IntegratorVegas::eval( const std::vector<double>& x ) const
   {
-    if ( !input_params_->generation().treat )
-      return function_->f( (double*)&x[0], function_->dim, (void*)&input_params_ );
+    if ( !integrand_ )
+      throw CG_FATAL( "Integrator:vegas" ) << "Invalid integrand specified!";
+    //--- by default, no grid treatment
+    if ( !treat_ )
+      return integrand_->eval( x );
     //--- treatment of the integration grid
-    if ( r_boxes_ == 0ull )
-      r_boxes_ = std::pow( vegas_state_->bins, function_->dim );
+    if ( r_boxes_ == 0ull ) {
+      r_boxes_ = std::pow( vegas_state_->bins, integrand_->size() );
+      x_new_.resize( integrand_->size() );
+    }
     double w = r_boxes_;
-    std::vector<double> x_new( x.size() );
-    for ( unsigned short j = 0; j < function_->dim; ++j ) {
+    for ( size_t j = 0; j < integrand_->size(); ++j ) {
       //--- find surrounding coordinates and interpolate
-      const double z = x[j]*vegas_state_->bins;
+      const double z = x.at( j )*vegas_state_->bins;
       const unsigned int id = z; // coordinate of point before
       const double rel_pos = z-id; // position between coordinates (norm.)
       const double bin_width = ( id == 0 )
         ? COORD( vegas_state_, 1, j )
         : COORD( vegas_state_, id+1, j )-COORD( vegas_state_, id, j );
       //--- build new coordinate from linear interpolation
-      x_new[j] = COORD( vegas_state_, id+1, j )-bin_width*( 1.-rel_pos );
+      x_new_[j] = COORD( vegas_state_, id+1, j )-bin_width*( 1.-rel_pos );
       w *= bin_width;
     }
-    return w*function_->f( (double*)&x_new[0], function_->dim, (void*)input_params_ );
+    return w*integrand_->eval( x_new_ );
   }
 
   std::ostream&

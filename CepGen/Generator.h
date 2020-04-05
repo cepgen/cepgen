@@ -28,19 +28,6 @@
 /// Common namespace for this Monte Carlo generator
 namespace cepgen
 {
-  namespace integrand
-  {
-    /**
-     * Function to be integrated. It returns the value of the weight for one point
-     * of the full phase space (or "event"). This weights includes the matrix element
-     * of the process considered, along with all the kinematic factors, and the cut
-     * restrictions imposed on this phase space. \f$x\f$ is therefore an array of random
-     * numbers defined inside its boundaries (as normalised so that \f$\forall i<\mathrm{ndim}\f$,
-     * \f$0<x_i<1\f$.
-     */
-    double eval( double*, size_t, void* );
-  }
-
   class Integrator;
   class GeneratorWorker;
   class Parameters;
@@ -107,10 +94,11 @@ namespace cepgen
       double crossSectionError() const { return result_error_; }
 
       //void terminate();
-      /// Generate a new event and return its reference
-      const Event& generateOneEvent();
+      /// \deprecated Replaced by the generic method \a generate.
+      [[deprecated("Please use generate instead")]]
+      const Event& generateOneEvent( Event::callback callback = nullptr );
       /// Launch the generation of events
-      void generate( Event::callback callback = nullptr );
+      void generate( size_t num_events = 0, Event::callback callback = nullptr );
       /// Compute one single point from the total phase space
       /// \param[in] x the n-dimensional point to compute
       /// \return the function value for the given point

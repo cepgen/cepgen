@@ -1,4 +1,5 @@
 #include "CepGen/Integration/Integrator.h"
+#include "CepGen/Integration/Integrand.h"
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/EventModifier.h"
@@ -18,6 +19,7 @@ namespace cepgen
     params_( params ),
     name_( params.name<std::string>() ),
     seed_( params.get<int>( "seed", time( nullptr ) ) ),
+    verbosity_( params.get<int>( "verbose", 1 ) ),
     initialised_( false )
   {
     //--- initialise the random number generator
@@ -39,17 +41,21 @@ namespace cepgen
     //--- a bit of printout for debugging
 
     CG_DEBUG( "Integrator:build" )
-      << "Random numbers generator: " << gsl_rng_name( rng_.get() ) << "."
+      << "Random numbers generator: " << gsl_rng_name( rng_.get() ) << ".\n\t"
       << "Seed: " << seed_ << ".";
   }
 
   void
-  Integrator::setFunction( unsigned int ndim, double integrand( double*, size_t, void* ), Parameters& params )
+  Integrator::setIntegrand( Integrand& integr )
   {
-    input_params_ = &params;
-    function_.reset( new gsl_monte_function{ integrand, ndim, (void*)input_params_ } );
+    integrand_ = &integr;
+    //--- specify the integrand through the GSL wrapper
+    auto func = [=]( double* x, size_t ndim, void* ) -> double {
+      return integrand_->eval( std::vector<double>( x, x+ndim ) );
+    };
+    function_.reset( new gsl_monte_function_wrapper<decltype( func )>( func, integrand_->size() ) );
 
-    CG_DEBUG( "Integrator:function" )
+    CG_DEBUG( "Integrator:integrand" )
       << "Number of integration dimensions: " << function_->dim << ".";
 
     //--- force the reinitialisation
@@ -70,14 +76,13 @@ namespace cepgen
   }
 
   double
-  Integrator::eval( const std::vector<double>& x )
+  Integrator::eval( const std::vector<double>& x ) const
   {
     if ( !function_ )
       throw CG_FATAL( "Integrator:eval" )
         << "Trying to evaluate the weight on a phase space point "
         << "on an unitialised integrand!";
-    //--- by default, no grid treatment
-    return function_->f( (double*)&x[0], function_->dim, (void*)input_params_ );
+    return integrand_->eval( x );
   }
 
   double

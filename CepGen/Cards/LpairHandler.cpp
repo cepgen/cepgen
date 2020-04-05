@@ -161,7 +161,7 @@ namespace cepgen
       // General parameters
       //-------------------------------------------------------------------------------------------
 
-      registerParameter<bool>( "NTRT", "Smoothen the integrand", &params_.generation().treat );
+      registerParameter<bool>( "NTRT", "Smoothen the integrand", &params_.integrator->operator[]<bool>( "treat" ) );
       registerParameter<int>( "IEND", "Generation type", &iend_ );
       registerParameter<int>( "DEBG", "Debugging verbosity", (int*)&utils::Logger::get().level );
       registerParameter<int>( "NCVG", "Number of function calls", (int*)&params_.integrator->operator[]<int>( "numFunctionCalls" ) );

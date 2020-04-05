@@ -357,7 +357,6 @@ namespace cepgen
       if ( !PyDict_Check( gen ) )
         throwPythonError( "Generation information object should be a dictionary!" );
       params_.generation().enabled = true;
-      fillParameter( gen, "treat", params_.generation().treat );
       fillParameter( gen, "numEvents", params_.generation().maxgen );
       fillParameter( gen, "printEvery", params_.generation().gen_print_every );
       fillParameter( gen, "numThreads", params_.generation().num_threads );
