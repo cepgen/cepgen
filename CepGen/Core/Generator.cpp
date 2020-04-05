@@ -70,8 +70,6 @@ namespace cepgen
   Generator::clearRun()
   {
     generator_.reset( new GeneratorWorker( parameters_.get() ) );
-    if ( parameters_->hasProcess() )
-      parameters_->process().setKinematics( parameters_->kinematics );
     result_ = result_error_ = -1.;
     parameters_->prepareRun();
   }
@@ -156,7 +154,16 @@ namespace cepgen
   void
   Generator::setIntegrator( std::unique_ptr<Integrator> integ )
   {
+    if ( !integ ) {
+      if ( !parameters_->integrator )
+        throw CG_FATAL( "Generator:integrate" ) << "No integrator parameters found!";
+      if ( parameters_->integrator->name<std::string>().empty() )
+        parameters_->integrator->setName<std::string>( "Vegas" );
+      integ = IntegratorFactory::get().build( *parameters_->integrator );
+    }
     integrator_ = std::move( integ );
+    integrator_->setIntegrand( generator_->integrand() );
+    generator_->setIntegrator( integrator_.get() );
     CG_INFO( "Generator:integrator" )
       << "Generator will use a " << integrator_->name() << "-type integrator.";
   }
@@ -172,15 +179,9 @@ namespace cepgen
     if ( ndim < 1 )
       throw CG_FATAL( "Generator:computePoint" )
         << "Invalid phase space dimension (ndim=" << ndim << ")!";
+
     // first destroy and recreate the integrator instance
-    if ( !integrator_ ) {
-      if ( !parameters_->integrator )
-        throw CG_FATAL( "Generator:integrate" ) << "No integrator parameters found!";
-      if ( parameters_->integrator->name<std::string>().empty() )
-        parameters_->integrator->setName<std::string>( "Vegas" );
-      integrator_ = IntegratorFactory::get().build( *parameters_->integrator );
-    }
-    integrator_->setIntegrand( generator_->integrand() );
+    setIntegrator( nullptr );
 
     CG_DEBUG( "Generator:integrate" )
       << "New integrator instance created for " << ndim << "-dimensional integration.";

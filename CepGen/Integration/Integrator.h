@@ -30,6 +30,7 @@ namespace cepgen
       size_t size() const;
       /// Integration algorithm name
       const std::string& name() const { return name_; }
+
       /// Compute the function value at the given phase space point
       virtual double eval( const std::vector<double>& x ) const;
       /// Generate a uniformly distributed (between 0 and 1) random number

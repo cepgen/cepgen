@@ -50,7 +50,7 @@ namespace cepgen
   {
     integrand_ = &integr;
     //--- specify the integrand through the GSL wrapper
-    auto func = [=]( double* x, size_t ndim, void* ) -> double {
+    static auto func = [=]( double* x, size_t ndim, void* ) -> double {
       return integrand_->eval( std::vector<double>( x, x+ndim ) );
     };
     function_.reset( new gsl_monte_function_wrapper<decltype( func )>( func, integrand_->size() ) );

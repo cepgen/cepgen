@@ -22,7 +22,7 @@ namespace cepgen
     integrand_( new Integrand( params ) ), integrator_( nullptr ), params_( params ),
     ps_bin_( INVALID_BIN )
   {
-    CG_INFO( "GeneratorWorker" )
+    CG_DEBUG( "GeneratorWorker" )
       << "New generator worker initialised for integration/event generation.\n\t"
       << "Parameters at " << (void*)params_ << ".";
   }
