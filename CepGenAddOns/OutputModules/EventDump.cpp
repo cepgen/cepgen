@@ -35,7 +35,7 @@ namespace cepgen
     EventDump::EventDump( const ParametersList& params ) :
       ExportModule( params ),
       save_banner_( params.get<bool>( "saveBanner", true ) ),
-      print_every_( params.get<int>( "printEvery", 1 ) ),
+      print_every_( params.get<int>( "printEvery", 10 ) ),
       out_( nullptr )
     {
       if ( params.has<std::string>( "filename" ) )
