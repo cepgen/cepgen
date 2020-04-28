@@ -4,7 +4,7 @@ A collection of useful objects for the definition of a
 general kT-factorised process steering card
 """
 
-from containers_cfi import Module, Parameters
+from .containers_cfi import Module, Parameters
 from math import pi
 
 class ProtonFlux:
