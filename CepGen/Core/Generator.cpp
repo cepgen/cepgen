@@ -64,7 +64,10 @@ namespace cepgen
   {}
 
   Generator::~Generator()
-  {}
+  {
+    CG_INFO( "Generator:destructor" )
+     << parameters_->timeKeeeper().summary();
+  }
 
   void
   Generator::clearRun()
@@ -72,7 +75,6 @@ namespace cepgen
     generator_.reset( new GeneratorWorker( parameters_.get() ) );
     result_ = result_error_ = -1.;
     parameters_->prepareRun();
-    tmr_.clear();
   }
 
   Parameters&
@@ -172,6 +174,8 @@ namespace cepgen
   void
   Generator::integrate()
   {
+    CG_TICKER( parameters_->timeKeeeper() );
+
     clearRun();
     if ( !parameters_->hasProcess() )
       throw CG_FATAL( "Generator:integrate" )
@@ -205,6 +209,8 @@ namespace cepgen
   void
   Generator::generate( size_t num_events, Event::callback callback )
   {
+    CG_TICKER( parameters_->timeKeeeper() );
+
     if ( !parameters_ )
       throw CG_FATAL( "Generator:generate" ) << "No steering parameters specified!";
 

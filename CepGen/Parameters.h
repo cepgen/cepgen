@@ -2,6 +2,7 @@
 #define CepGen_Parameters_h
 
 #include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Utils/TimeKeeper.h"
 
 #include <memory>
 
@@ -35,6 +36,9 @@ namespace cepgen
       Parameters& operator=( Parameters );
       /// Dump the input parameters in the terminal
       friend std::ostream& operator<<( std::ostream&, const Parameters* );
+
+      /// Set the reference to a timekeeper instance
+      utils::TimeKeeper& timeKeeeper() { return tmr_; }
 
       /// Common user-defined parameters
       std::shared_ptr<ParametersList> general;
@@ -138,6 +142,8 @@ namespace cepgen
       unsigned long num_gen_events_;
       /// Events generation parameters
       Generation generation_;
+      /// A collection of stopwatches for timing
+      utils::TimeKeeper tmr_;
   };
 }
 

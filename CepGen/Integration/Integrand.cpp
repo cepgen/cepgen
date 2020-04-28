@@ -53,6 +53,8 @@ namespace cepgen
   double
   Integrand::eval( const std::vector<double>& x )
   {
+    CG_TICKER( const_cast<Parameters*>( params_ )->timeKeeeper() );
+
     //--- start the timer
     tmr_->reset();
 

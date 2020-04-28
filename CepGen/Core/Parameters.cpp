@@ -66,6 +66,9 @@ namespace cepgen
   void
   Parameters::prepareRun()
   {
+    CG_TICKER( tmr_ );
+
+    tmr_.clear();
     //--- first-run preparation
     if ( !process_ || !process_->first_run )
       return;
