@@ -72,6 +72,7 @@ namespace cepgen
     generator_.reset( new GeneratorWorker( parameters_.get() ) );
     result_ = result_error_ = -1.;
     parameters_->prepareRun();
+    tmr_.clear();
   }
 
   Parameters&

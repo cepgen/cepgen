@@ -1,6 +1,7 @@
 #ifndef CepGen_Generator_h
 #define CepGen_Generator_h
 
+#include "CepGen/Utils/TimeKeeper.h"
 #include "CepGen/Event/Event.h"
 
 #include <iosfwd>
@@ -105,6 +106,8 @@ namespace cepgen
       double computePoint( double* x );
 
    private:
+      /// A collection of stopwatches for timing
+      utils::TimeKeeper tmr_;
       /// Physical Parameters used in the events generation and cross-section computation
       std::unique_ptr<Parameters> parameters_;
       /// Generator worker instance
