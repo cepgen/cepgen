@@ -398,7 +398,6 @@ namespace cepgen
       params_->addModifier( EventModifierFactory::get().build( mod_name, get<ParametersList>( mod ) ) );
 
       auto h = params_->eventModifiersSequence().rbegin()->get();
-      h->setParameters( *params_ );
       { //--- before calling the init() method
         std::vector<std::string> config;
         fillParameter( mod, "preConfiguration", config );

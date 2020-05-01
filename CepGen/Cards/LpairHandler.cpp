@@ -122,10 +122,8 @@ namespace cepgen
 
       //--- parse the hadronisation algorithm name
       if ( !evt_mod_name_.empty() )
-        for ( const auto& mod : utils::split( evt_mod_name_, ',' ) ) {
+        for ( const auto& mod : utils::split( evt_mod_name_, ',' ) )
           params_->addModifier( EventModifierFactory::get().build( mod, ParametersList() ) );
-          (*params_->eventModifiersSequence().rbegin())->setParameters( *params_ );
-        }
 
       //--- parse the output module name
       if ( !out_mod_name_.empty() ) {

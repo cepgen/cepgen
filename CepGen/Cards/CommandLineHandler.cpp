@@ -151,10 +151,8 @@ namespace cepgen
 
       //----- event modification modules
       const auto& mod = pars.get<ParametersList>( "eventmod" );
-      if ( !mod.keys( true ).empty() ) {
+      if ( !mod.keys( true ).empty() )
         params_->addModifier( EventModifierFactory::get().build( mod ) );
-        (*params_->eventModifiersSequence().rbegin())->setParameters( *params_ );
-      }
 
       //----- output modules definition
       const auto& out = pars.get<ParametersList>( "output" );

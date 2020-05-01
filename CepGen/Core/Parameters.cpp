@@ -161,12 +161,14 @@ namespace cepgen
   Parameters::addModifier( std::unique_ptr<EventModifier> mod )
   {
     evt_modifiers_.emplace_back( std::move( mod ) );
+    ( *evt_modifiers_.rbegin() )->setParameters( *this );
   }
 
   void
   Parameters::addModifier( EventModifier* mod )
   {
     evt_modifiers_.emplace_back( std::unique_ptr<EventModifier>( mod ) );
+    ( *evt_modifiers_.rbegin() )->setParameters( *this );
   }
 
   io::ExportModule&
