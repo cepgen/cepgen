@@ -2,7 +2,6 @@
 #define CepGen_Parameters_h
 
 #include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Utils/TimeKeeper.h"
 
 #include <memory>
 
@@ -15,7 +14,10 @@ namespace cepgen
   class ParametersList;
   namespace proc { class Process; }
   namespace io { class ExportModule; }
-  namespace utils { class TamingFunction; }
+  namespace utils {
+    class TamingFunction;
+    class TimeKeeper;
+  }
   enum class IntegratorType;
   /// An ordered collection of event modification algorithms
   typedef std::vector<std::unique_ptr<EventModifier> > EventModifiersSequence;
@@ -38,7 +40,7 @@ namespace cepgen
       friend std::ostream& operator<<( std::ostream&, const Parameters* );
 
       /// Set the reference to a timekeeper instance
-      utils::TimeKeeper& timeKeeeper() { return tmr_; }
+      utils::TimeKeeper* timeKeeeper() { return tmr_.get(); }
 
       /// Common user-defined parameters
       std::shared_ptr<ParametersList> general;
@@ -143,7 +145,7 @@ namespace cepgen
       /// Events generation parameters
       Generation generation_;
       /// A collection of stopwatches for timing
-      utils::TimeKeeper tmr_;
+      std::unique_ptr<utils::TimeKeeper> tmr_;
   };
 }
 

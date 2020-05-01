@@ -33,6 +33,8 @@ namespace cepgen
       if ( monitors_.empty() )
         return std::string();
 
+      //--- a bit of arithmetics
+
       struct Monitor
       {
         std::string name;
@@ -42,6 +44,7 @@ namespace cepgen
       };
 
       std::vector<Monitor> mons;
+      double total_time = 0.;
       for ( const auto& mon : monitors_ ) {
         const auto& tm = mon.second;
         const double total = tm.empty()
@@ -52,25 +55,36 @@ namespace cepgen
           std::inner_product( tm.begin(), tm.end(), tm.begin(), 0. )
             / tm.size() - mean*mean ) );
         mons.emplace_back( Monitor{ mon.first, tm.size(), total, mean, rms } );
+        total_time += total;
       }
+
+      //--- sort by total clock time (desc.)
+
       std::sort( mons.rbegin(), mons.rend() );
 
+      //--- displaying the various probes
+
       std::ostringstream oss;
-      oss << utils::format( "%5s  %-100s   %12s\t%10s   %10s", "ncalls", "caller", "total (s)", "average (s)", "rms (s)" );
+      oss << utils::format( "%7s | %-100s  %12s %6s  %10s   %10s",
+                            "ncalls", "caller", "total (ms)",
+                            "time/tot.", "average (ms)", "rms (ms)" );
       for ( const auto& mon : mons )
         oss
-          << utils::format( "\n* [%10u | %-100s] %12.6f\t%10e +/- %10e", mon.size, mon.name.c_str(), mon.total, mon.mean, mon.rms );
+          << utils::format( "\n* [%12u | %-100s] %12.6f\t%5.2f%%\t%10e +/- %10e",
+                            mon.size, mon.name.c_str(), mon.total*1.e3,
+                            mon.total/total_time*100., mon.mean*1.e3, mon.rms*1.e3 );
 
       return oss.str();
     }
 
-    TimeKeeper::Ticker::Ticker( TimeKeeper& tk, const std::string& name ) :
+    TimeKeeper::Ticker::Ticker( TimeKeeper* tk, const std::string& name ) :
       tk_( tk ), name_( name )
     {}
 
     TimeKeeper::Ticker::~Ticker()
     {
-      tk_.tick( name_, tmr_.elapsed() );
+      if ( tk_ )
+        tk_->tick( name_, tmr_.elapsed() );
     }
   }
 }

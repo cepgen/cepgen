@@ -7,8 +7,9 @@
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/Timer.h"
+
 #include "CepGen/Utils/String.h"
+#include "CepGen/Utils/TimeKeeper.h"
 
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Integration/Integrand.h"
@@ -65,8 +66,9 @@ namespace cepgen
 
   Generator::~Generator()
   {
-    CG_INFO( "Generator:destructor" )
-     << parameters_->timeKeeeper().summary();
+    if ( parameters_->timeKeeeper() && !parameters_->timeKeeeper()->empty() )
+      CG_INFO( "Generator:destructor" )
+        << parameters_->timeKeeeper()->summary();
   }
 
   void
@@ -157,6 +159,8 @@ namespace cepgen
   void
   Generator::setIntegrator( std::unique_ptr<Integrator> integ )
   {
+    CG_TICKER( parameters_->timeKeeeper() );
+
     if ( !integ ) {
       if ( !parameters_->integrator )
         throw CG_FATAL( "Generator:integrate" ) << "No integrator parameters found!";

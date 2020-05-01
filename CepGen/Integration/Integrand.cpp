@@ -13,7 +13,7 @@
 #include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/Exception.h"
 
-#include "CepGen/Utils/Timer.h"
+#include "CepGen/Utils/TimeKeeper.h"
 
 #include "CepGen/Parameters.h"
 

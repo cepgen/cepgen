@@ -13,6 +13,7 @@
 
 #include "CepGen/Physics/TamingFunction.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/TimeKeeper.h"
 
 #include <iomanip>
 
@@ -66,9 +67,10 @@ namespace cepgen
   void
   Parameters::prepareRun()
   {
-    CG_TICKER( tmr_ );
+    if ( tmr_ )
+      tmr_->clear();
+    CG_TICKER( tmr_.get() );
 
-    tmr_.clear();
     //--- first-run preparation
     if ( !process_ || !process_->first_run )
       return;
