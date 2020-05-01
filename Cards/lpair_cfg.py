@@ -1,6 +1,8 @@
 import Config.Core as cepgen
 from Config.Integration.vegas_cff import integrator
 from Config.PDG_cfi import PDG
+#--- enable timing framework
+#from Config.Timer_cfi import timer
 
 process = cepgen.Module('lpair',
     processParameters = cepgen.Parameters(
