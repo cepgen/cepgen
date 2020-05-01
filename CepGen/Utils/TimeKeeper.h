@@ -3,6 +3,7 @@
 
 #include "CepGen/Utils/Timer.h"
 
+#include <string>
 #include <unordered_map>
 #include <vector>
 

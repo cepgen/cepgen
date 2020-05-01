@@ -1,4 +1,8 @@
+#ifndef CepGen_Physics_MCDFileParser_h
+#define CepGen_Physics_MCDFileParser_h
+
 #include <unordered_map>
+#include <string>
 
 namespace pdg
 {
@@ -18,3 +22,5 @@ namespace pdg
       static const std::unordered_map<std::string,short> MAP_CHARGE_STR;
   };
 }
+
+#endif
