@@ -32,7 +32,8 @@ namespace cepgen
     evt_modifiers_( std::move( param.evt_modifiers_ ) ),
     out_modules_( std::move( param.out_modules_ ) ),
     total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ ),
-    generation_( param.generation_ )
+    generation_( param.generation_ ),
+    tmr_( std::move( param.tmr_ ) )
   {}
 
   Parameters::Parameters( const Parameters& param ) :
@@ -61,6 +62,7 @@ namespace cepgen
     total_gen_time_ = param.total_gen_time_;
     num_gen_events_ = param.num_gen_events_;
     generation_ = param.generation_;
+    tmr_ = std::move( param.tmr_ );
     return *this;
   }
 
@@ -93,6 +95,12 @@ namespace cepgen
     total_gen_time_ = 0.;
     num_gen_events_ = 0ul;
     process_->first_run = false;
+  }
+
+  void
+  Parameters::setTimeKeeper( utils::TimeKeeper* kpr )
+  {
+    tmr_.reset( kpr );
   }
 
   void

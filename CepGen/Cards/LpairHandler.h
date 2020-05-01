@@ -18,7 +18,7 @@ namespace cepgen
         /// Read a LPAIR steering card
         explicit LpairHandler( const ParametersList& );
 
-        Parameters parse( const std::string&, Parameters& ) override;
+        Parameters* parse( const std::string&, Parameters* ) override;
         /// Store a configuration into a LPAIR steering card
         void store( const char* file );
 
@@ -50,6 +50,7 @@ namespace cepgen
 
         void init();
         std::shared_ptr<ParametersList> proc_params_;
+        bool timer_;
         int str_fun_, sr_type_;
         double xi_min_, xi_max_;
         std::string proc_name_, evt_mod_name_, out_mod_name_;

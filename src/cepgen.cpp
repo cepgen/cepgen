@@ -50,7 +50,7 @@ int main( int argc, char* argv[] )
     if ( !parser.extra_config().empty() )
       gen.setParameters( cepgen::card::CardsHandlerFactory::get().build( "cmd",
         cepgen::ParametersList().set<std::vector<std::string> >( "args", parser.extra_config() ) )
-        ->parse( "", gen.parameters() ) );
+        ->parse( "", &gen.parameters() ) );
   }
 
   cepgen::utils::AbortHandler ctrl_c;

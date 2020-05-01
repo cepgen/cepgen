@@ -66,7 +66,7 @@ namespace cepgen
 
   Generator::~Generator()
   {
-    if ( parameters_->timeKeeeper() && !parameters_->timeKeeeper()->empty() )
+    if ( parameters_->timeKeeeper() )
       CG_INFO( "Generator:destructor" )
         << parameters_->timeKeeeper()->summary();
   }
@@ -86,9 +86,9 @@ namespace cepgen
   }
 
   void
-  Generator::setParameters( Parameters ip )
+  Generator::setParameters( Parameters* ip )
   {
-    parameters_.reset( new Parameters( ip ) ); // copy constructor
+    parameters_.reset( ip );
     if ( parameters_->hasProcess() )
       parameters_->process().setKinematics( parameters_->kinematics );
   }

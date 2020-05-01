@@ -39,7 +39,9 @@ namespace cepgen
       /// Dump the input parameters in the terminal
       friend std::ostream& operator<<( std::ostream&, const Parameters* );
 
-      /// Set the reference to a timekeeper instance
+      /// Initialise the timekeeper instance
+      void setTimeKeeper( utils::TimeKeeper* );
+      /// Pointer to a timekeeper instance
       utils::TimeKeeper* timeKeeeper() { return tmr_.get(); }
 
       /// Common user-defined parameters

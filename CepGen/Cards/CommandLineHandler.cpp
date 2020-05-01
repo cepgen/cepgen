@@ -20,7 +20,9 @@
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
+
 #include "CepGen/Utils/String.h"
+#include "CepGen/Utils/TimeKeeper.h"
 
 #include <fstream>
 
@@ -34,7 +36,7 @@ namespace cepgen
       public:
         explicit CommandLineHandler( const ParametersList& );
 
-        Parameters parse( const std::string&, Parameters& ) override;
+        Parameters* parse( const std::string&, Parameters* ) override;
 
       private:
         typedef std::vector<std::string> Args;
@@ -55,8 +57,8 @@ namespace cepgen
         parse( filename, params_ );
     }
 
-    Parameters
-    CommandLineHandler::parse( const std::string& filename, Parameters& params )
+    Parameters*
+    CommandLineHandler::parse( const std::string& filename, Parameters* params )
     {
       if ( !filename.empty() ) {
         std::ifstream file( filename );
@@ -70,90 +72,94 @@ namespace cepgen
 
       params_ = params;
 
+      //----- timer definition
+      if ( pars.get<bool>( "timer", false ) )
+        params_->setTimeKeeper( new utils::TimeKeeper );
+
       //----- process definition
       auto proc = pars.get<ParametersList>( "process" );
       if ( !proc.empty() ) {
-        if ( params_.hasProcess() )
-          proc = ParametersList( params_.process().parameters() )+proc;
-        params_.setProcess( proc::ProcessesFactory::get().build( proc ) );
+        if ( params_->hasProcess() )
+          proc = ParametersList( params_->process().parameters() )+proc;
+        params_->setProcess( proc::ProcessesFactory::get().build( proc ) );
       }
 
       //----- structure functions
       auto strfun = pars.get<ParametersList>( "strfun" ); // copy
-      if ( !strfun.empty() || !params_.kinematics.structure_functions ) {
+      if ( !strfun.empty() || !params_->kinematics.structure_functions ) {
         if ( strfun.name<int>( -999 ) == -999 )
           strfun.setName<int>( 11 ); // default is Suri-Yennie
-        params_.kinematics.structure_functions = strfun::StructureFunctionsFactory::get().build( strfun );
+        params_->kinematics.structure_functions = strfun::StructureFunctionsFactory::get().build( strfun );
       }
 
       //----- phase space definition
       const auto& kin = pars.get<ParametersList>( "kinematics" );
       if ( kin.has<int>( "mode" ) )
-        params_.kinematics.mode = (KinematicsMode)kin.get<int>( "mode" );
+        params_->kinematics.mode = (KinematicsMode)kin.get<int>( "mode" );
       //--- incoming beams
       if ( kin.has<int>( "beam1id" ) )
-        params_.kinematics.incoming_beams.first.pdg = kin.get<int>( "beam1id", 2212 );
-      kin.fill<double>( "beam1pz", params_.kinematics.incoming_beams.first.pz );
+        params_->kinematics.incoming_beams.first.pdg = kin.get<int>( "beam1id", 2212 );
+      kin.fill<double>( "beam1pz", params_->kinematics.incoming_beams.first.pz );
       const int hi_A1 = kin.get<int>( "beam1A", 1 ), hi_Z1 = kin.get<int>( "beam1Z", 0 );
       if ( hi_Z1 != 0 )
-        params_.kinematics.incoming_beams.first.pdg = HeavyIon( hi_A1, (Element)hi_Z1 );
+        params_->kinematics.incoming_beams.first.pdg = HeavyIon( hi_A1, (Element)hi_Z1 );
       if ( kin.has<int>( "beam2id" ) )
-        params_.kinematics.incoming_beams.second.pdg = kin.get<int>( "beam2id", 2212 );
-      kin.fill<double>( "beam2pz", params_.kinematics.incoming_beams.second.pz );
+        params_->kinematics.incoming_beams.second.pdg = kin.get<int>( "beam2id", 2212 );
+      kin.fill<double>( "beam2pz", params_->kinematics.incoming_beams.second.pz );
       const int hi_A2 = kin.get<int>( "beam2A", 1 ), hi_Z2 = kin.get<int>( "beam2Z", 0 );
       if ( hi_Z2 != 0 )
-        params_.kinematics.incoming_beams.second.pdg = HeavyIon( hi_A2, (Element)hi_Z2 );
+        params_->kinematics.incoming_beams.second.pdg = HeavyIon( hi_A2, (Element)hi_Z2 );
       const double sqrt_s = kin.get<double>( "sqrts", INVALID );
       if ( sqrt_s != INVALID )
-        params_.kinematics.setSqrtS( sqrt_s );
+        params_->kinematics.setSqrtS( sqrt_s );
       //--- incoming partons
-      kin.fill<double>( "q2min", params_.kinematics.cuts.central.q2.min() );
-      kin.fill<double>( "q2max", params_.kinematics.cuts.central.q2.max() );
-      kin.fill<double>( "qtmin", params_.kinematics.cuts.central.qt.min() );
-      kin.fill<double>( "qtmax", params_.kinematics.cuts.central.qt.max() );
+      kin.fill<double>( "q2min", params_->kinematics.cuts.central.q2.min() );
+      kin.fill<double>( "q2max", params_->kinematics.cuts.central.q2.max() );
+      kin.fill<double>( "qtmin", params_->kinematics.cuts.central.qt.min() );
+      kin.fill<double>( "qtmax", params_->kinematics.cuts.central.qt.max() );
       //--- outgoing remnants
-      kin.fill<double>( "mxmin", params_.kinematics.cuts.remnants.mass_single.min() );
-      kin.fill<double>( "mxmax", params_.kinematics.cuts.remnants.mass_single.max() );
+      kin.fill<double>( "mxmin", params_->kinematics.cuts.remnants.mass_single.min() );
+      kin.fill<double>( "mxmax", params_->kinematics.cuts.remnants.mass_single.max() );
       const Limits xi_rng = { kin.get<double>( "ximin", 0. ), kin.get<double>( "ximax", 1. ) };
       if ( xi_rng.valid() )
-        params_.kinematics.cuts.remnants.energy_single = -( xi_rng-1. )*0.5*params_.kinematics.sqrtS();
+        params_->kinematics.cuts.remnants.energy_single = -( xi_rng-1. )*0.5*params_->kinematics.sqrtS();
       //--- central system
-      kin.fill<double>( "ptmin", params_.kinematics.cuts.central.pt_single.min() );
-      kin.fill<double>( "ptmax", params_.kinematics.cuts.central.pt_single.max() );
-      kin.fill<double>( "etamin", params_.kinematics.cuts.central.eta_single.min() );
-      kin.fill<double>( "etamax", params_.kinematics.cuts.central.eta_single.max() );
-      kin.fill<double>( "rapmin", params_.kinematics.cuts.central.rapidity_single.min() );
-      kin.fill<double>( "rapmax", params_.kinematics.cuts.central.rapidity_single.max() );
-      kin.fill<double>( "ptsummin", params_.kinematics.cuts.central.pt_sum.min() );
-      kin.fill<double>( "ptsummax", params_.kinematics.cuts.central.pt_sum.max() );
-      kin.fill<double>( "msummin", params_.kinematics.cuts.central.mass_sum.min() );
-      kin.fill<double>( "msummax", params_.kinematics.cuts.central.mass_sum.max() );
+      kin.fill<double>( "ptmin", params_->kinematics.cuts.central.pt_single.min() );
+      kin.fill<double>( "ptmax", params_->kinematics.cuts.central.pt_single.max() );
+      kin.fill<double>( "etamin", params_->kinematics.cuts.central.eta_single.min() );
+      kin.fill<double>( "etamax", params_->kinematics.cuts.central.eta_single.max() );
+      kin.fill<double>( "rapmin", params_->kinematics.cuts.central.rapidity_single.min() );
+      kin.fill<double>( "rapmax", params_->kinematics.cuts.central.rapidity_single.max() );
+      kin.fill<double>( "ptsummin", params_->kinematics.cuts.central.pt_sum.min() );
+      kin.fill<double>( "ptsummax", params_->kinematics.cuts.central.pt_sum.max() );
+      kin.fill<double>( "msummin", params_->kinematics.cuts.central.mass_sum.min() );
+      kin.fill<double>( "msummax", params_->kinematics.cuts.central.mass_sum.max() );
 
       //----- integration
-      pars.fill<ParametersList>( "integrator", *params_.integrator );
+      pars.fill<ParametersList>( "integrator", *params_->integrator );
 
       //----- events generation
       const auto& gen = pars.get<ParametersList>( "generation" );
-      params_.generation().maxgen = (unsigned long)gen.get<int>( "ngen", 10000 );
-      params_.generation().enabled = params_.generation().maxgen > 1;
+      params_->generation().maxgen = (unsigned long)gen.get<int>( "ngen", 10000 );
+      params_->generation().enabled = params_->generation().maxgen > 1;
       if ( gen.has<int>( "nthreads" ) )
-        params_.generation().num_threads = gen.get<int>( "nthreads" );
+        params_->generation().num_threads = gen.get<int>( "nthreads" );
       if ( gen.has<int>( "nprn" ) )
-        params_.generation().gen_print_every = gen.get<int>( "nprn" );
+        params_->generation().gen_print_every = gen.get<int>( "nprn" );
       if ( gen.has<int>( "seed" ) )
-        params_.integrator->set<int>( "seed", gen.get<int>( "seed" ) );
+        params_->integrator->set<int>( "seed", gen.get<int>( "seed" ) );
 
       //----- event modification modules
       const auto& mod = pars.get<ParametersList>( "eventmod" );
       if ( !mod.keys( true ).empty() ) {
-        params_.addModifier( EventModifierFactory::get().build( mod ) );
-        (*params_.eventModifiersSequence().rbegin())->setParameters( params );
+        params_->addModifier( EventModifierFactory::get().build( mod ) );
+        (*params_->eventModifiersSequence().rbegin())->setParameters( *params_ );
       }
 
       //----- output modules definition
       const auto& out = pars.get<ParametersList>( "output" );
       if ( !out.keys( true ).empty() )
-        params_.addOutputModule( io::ExportModuleFactory::get().build( out ) );
+        params_->addOutputModule( io::ExportModuleFactory::get().build( out ) );
       return params_;
     }
 
