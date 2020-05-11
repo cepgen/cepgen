@@ -239,7 +239,6 @@ changelog_render_changeset = "https://phab.hepforge.org/rCEPGEN%s"
 changelog_render_pullreq = "https://phab.hepforge.org/D%s"
 
 def setup(app):
-#    app.add_css_file('hacks.css')
-    app.add_stylesheet('hacks.css')
+    app.add_css_file('hacks.css')
 #    app.add_js_file('mathconf.js', type='text/x-mathjax-config')
 #    app.add_js_file('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML', async=True)
