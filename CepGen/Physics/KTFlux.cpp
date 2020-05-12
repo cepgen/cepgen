@@ -26,14 +26,19 @@ namespace cepgen
   ktFlux( const KTFlux& type, double x, double kt2, strfun::Parameterisation& sf, double mi2, double mf2 )
   {
     switch ( type ) {
-      case KTFlux::P_Photon_Elastic: {
+      case KTFlux::P_Photon_Elastic:
+      case KTFlux::P_Photon_Elastic_Budnev: {
         const double x2 = x*x;
         const double q2min = x2*mi2/( 1.-x ), q2 = q2min + kt2/( 1.-x );
         //--- proton electromagnetic form factors
         const auto& ff = FormFactors::protonElastic( q2 );
-        const double f_D = ff.FE*( 1.-x )*( 1.-q2min/q2 );
-        const double f_C = ff.FM;
-        return constants::ALPHA_EM*M_1_PI*( 1.-x )/q2*( f_D+0.5*x2*f_C );
+        if ( type == KTFlux::P_Photon_Elastic )
+          return constants::ALPHA_EM*M_1_PI*ff.FE*std::pow( kt2/( kt2+x2*mi2 ), 2 )/q2;
+        else {
+          const double f_D = ff.FE*( 1.-x )*( 1.-q2min/q2 );
+          const double f_C = ff.FM;
+          return constants::ALPHA_EM*M_1_PI*( 1.-x )/q2*( f_D+0.5*x2*f_C );
+        }
       } break;
       case KTFlux::P_Photon_Inelastic:
       case KTFlux::P_Photon_Inelastic_Budnev: {
@@ -45,7 +50,7 @@ namespace cepgen
         //--- proton structure functions
         auto& str_fun = sf( xbj, q2 );
         if ( type == KTFlux::P_Photon_Inelastic ) {
-          const double f_aux = str_fun.F2*denom*( 1.-( q2-kt2 )/q2 )*pow( kt2/( kt2+x*( mf2-mi2 )+x2*mi2 ), 2 );
+          const double f_aux = str_fun.F2*denom*( 1.-( q2-kt2 )/q2 )*std::pow( kt2/( kt2+x*( mf2-mi2 )+x2*mi2 ), 2 );
           return constants::ALPHA_EM*M_1_PI*( 1.-x )*f_aux/kt2;
         }
         else {
@@ -112,6 +117,8 @@ namespace cepgen
     switch ( type ) {
       case KTFlux::P_Photon_Elastic:
         return os << "elastic photon from proton";
+      case KTFlux::P_Photon_Elastic_Budnev:
+        return os << "elastic photon from proton (Budnev)";
       case KTFlux::P_Photon_Inelastic:
         return os << "inelastic photon from proton";
       case KTFlux::P_Photon_Inelastic_Budnev:
@@ -121,7 +128,7 @@ namespace cepgen
       case KTFlux::HI_Photon_Elastic:
         return os << "elastic photon from HI";
       case KTFlux::invalid: default:
-        return os << "unrecognized flux (" << (int)type << ")";
+        return os << "unrecognised flux (" << (int)type << ")";
     }
   }
 }

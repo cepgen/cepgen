@@ -50,7 +50,9 @@ namespace cepgen
     chisq_cut_( params.get<double>( "chiSqCut", 1.5 ) ),
     treat_( params.get<bool>( "treat", true ) ),
     r_boxes_( 0ull )
-  {}
+  {
+    verbosity_ = params.get<int>( "verbose", -1 ); // supersede the parent default verbosity level
+  }
 
   void
   IntegratorVegas::integrate( double& result, double& abserr )

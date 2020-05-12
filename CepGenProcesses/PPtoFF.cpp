@@ -33,7 +33,9 @@ namespace cepgen
         double onShellME() const;
         double offShellME() const;
 
-        const enum class Mode { onShell = 0, offShell = 1 } method_;
+        const enum class Mode {
+          onShell = 0, offShell = 1, offShellLegacy = 2
+        } method_;
 
         ParametersList alphas_params_;
         std::shared_ptr<AlphaS> alphas_;
@@ -58,10 +60,10 @@ namespace cepgen
       prefactor_( 1. ), p_mat1_( 0 ), p_mat2_( 0 ),
       p_term_ll_( 0 ), p_term_lt_( 0 ), p_term_tt1_( 0 ), p_term_tt2_( 0 )
     {
-      if ( method_ == Mode::offShell ) { // off-shell matrix element
+      if ( method_ == Mode::offShell || method_ == Mode::offShellLegacy ) { // off-shell matrix element
         const auto& ofp = params.get<ParametersList>( "offShellParameters" );
-        p_mat1_ = ofp.get<int>( "mat1", 1 );
-        p_mat2_ = ofp.get<int>( "mat2", 1 );
+        p_mat1_ = ofp.get<int>( "mat1", method_ == Mode::offShell ? 1 : 2 );
+        p_mat2_ = ofp.get<int>( "mat2", method_ == Mode::offShell ? 1 : 0 );
         p_term_ll_ = ofp.get<int>( "termLL", 1 );
         p_term_lt_ = ofp.get<int>( "termLT", 1 );
         p_term_tt1_ = ofp.get<int>( "termTT", 1 );
@@ -131,6 +133,7 @@ namespace cepgen
         case Mode::onShell:
           mat_el = onShellME(); break;
         case Mode::offShell:
+        case Mode::offShellLegacy:
           mat_el = offShellME(); break;
         default:
           throw CG_FATAL( "PPtoFF" )
@@ -234,8 +237,17 @@ namespace cepgen
       //=================================================================
 
       // Marta's version
-      const double amat2_1 = aux2_1*2.*z1 / q2_.pt2();
-      const double amat2_2 = aux2_2*2.*z2 / q1_.pt2();
+      double amat2_1 = 2.*aux2_1*z1, amat2_2 = 2.*aux2_2*z2;
+      const double inv_q1t2 = 1./q1_.pt2(), inv_q2t2 = 1./q2_.pt2();
+      if ( method_ == Mode::offShell ) {
+        amat2_1 *= inv_q2t2;
+        amat2_2 *= inv_q1t2;
+      }
+      else if ( method_ == Mode::offShellLegacy ) {
+        amat2_1 *= ( t1abs*inv_q1t2*inv_q2t2 )*( t2abs*inv_q2t2 );
+        amat2_2 *= ( t2abs*inv_q1t2*inv_q2t2 );
+      }
+
 
       //=================================================================
       //     symmetrization

@@ -18,6 +18,7 @@ namespace cepgen
   {
     invalid = -1, ///< Invalid flux
     P_Photon_Elastic = 0, ///< Elastic photon emission from proton
+    P_Photon_Elastic_Budnev = 10, ///< Elastic photon emission from proton (Budnev flux approximation)
     P_Photon_Inelastic = 1, ///< Inelastic photon emission from proton
     P_Photon_Inelastic_Budnev = 11, ///< Inelastic photon emission from proton (Budnev flux approximation)
     P_Gluon_KMR = 20, ///< Inelastic gluon emission from proton (KMR flux modelling)

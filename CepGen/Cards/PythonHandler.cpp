@@ -96,7 +96,7 @@ namespace cepgen
 
       PyObject* cfg = PyImport_ImportModule( filename.c_str() ); // new
       if ( !cfg )
-        throwPythonError( "Failed to import the configuration card '"+file+"'" );
+        throwPythonError( "Failed to import the configuration card '"+file+"'\n (parsed as '"+filename+"')" );
 
       //--- timekeeper definition
       if ( PyObject_HasAttrString( cfg, TIMER_NAME ) == 1 ) {

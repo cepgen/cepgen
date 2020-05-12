@@ -51,7 +51,7 @@ namespace cepgen
         void init();
         std::shared_ptr<ParametersList> proc_params_;
         bool timer_;
-        int str_fun_, sr_type_;
+        int str_fun_, sr_type_, lepton_id_;
         double xi_min_, xi_max_;
         std::string proc_name_, evt_mod_name_, out_mod_name_;
         std::string out_file_name_;

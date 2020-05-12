@@ -40,7 +40,8 @@ namespace cepgen
     LpairHandler::LpairHandler( const ParametersList& params ) :
       proc_params_( new ParametersList ),
       timer_( false ),
-      str_fun_( 11 ), sr_type_( 1 ), xi_min_( 0. ), xi_max_( 1. ),
+      str_fun_( 11 ), sr_type_( 1 ), lepton_id_( 0 ),
+      xi_min_( 0. ), xi_max_( 1. ),
       pdg_input_path_( "External/mass_width_2019.mcd" ), iend_( 1 ),
       hi_1_( { 0, 0 } ), hi_2_( { 0, 0 } )
     {
@@ -52,27 +53,31 @@ namespace cepgen
     Parameters*
     LpairHandler::parse( const std::string& file, Parameters* params )
     {
-      std::ifstream f( file, std::fstream::in );
-      if ( !f.is_open() )
-        throw CG_FATAL( "LpairHandler" ) << "Failed to parse file \"" << file << "%s\".";
-
-      init();
-
-      //--- parse all fields
-      std::string key, value;
-      std::ostringstream os;
-      while ( f >> key >> value ) {
-        if ( key[0] == '#' ) // FIXME need to ensure there is no extra space before!
-          continue;
-        setParameter( key, value );
-        if ( description( key ) != "null" )
-          os << "\n>> " << key << " = " << std::setw( 25 ) << parameter( key )
-             << " (" << description( key ) << ")";
-      }
-      f.close();
       params_ = params;
+      std::ostringstream os;
+      { //--- file parsing part
+        std::ifstream f( file, std::fstream::in );
+        if ( !f.is_open() )
+          throw CG_FATAL( "LpairHandler" ) << "Failed to parse file \"" << file << "%s\".";
 
-      CG_INFO( "LpairHandler" ) << "File '" << file << "' succesfully opened!\n\t"
+        init();
+
+        //--- parse all fields
+        std::string line, key, value;
+        while ( getline( f, line ) ) {
+          std::istringstream iss( line );
+          iss >> key >> value;
+          if ( key[0] == '#' ) // FIXME need to ensure there is no extra space before!
+            continue;
+          setParameter( key, value );
+          if ( description( key ) != "null" )
+            os << "\n>> " << std::setw( 8 ) << key << " = " << std::setw( 25 ) << parameter( key )
+               << " (" << description( key ) << ")";
+        }
+        f.close();
+      }
+
+      CG_INFO( "LpairHandler" ) << "File '" << file << "' succesfully retrieved!\n\t"
         << "The following parameters are set:" << os.str() << "\n\t"
         << "Now parsing the configuration.";
 
@@ -92,6 +97,8 @@ namespace cepgen
           throw CG_FATAL( "LpairHandler" ) << "Process name not specified!";
         if ( params_->hasProcess() && params_->process().name() == proc_name_ )
           *proc_params_ = ParametersList( params_->process().parameters() )+*proc_params_;
+        if ( proc_name_ == "pptoff" && lepton_id_ != 0 )
+          proc_params_->operator[]<int>( "pair" ) = 11+( lepton_id_-1 )*2;
         params_->setProcess( proc::ProcessesFactory::get().build( proc_name_, *proc_params_ ) );
       }
 
@@ -223,6 +230,24 @@ namespace cepgen
       registerParameter<double>( "MXMX", "Maximal invariant mass of proton remnants", &params_->kinematics.cuts.remnants.mass_single.max() );
       registerParameter<double>( "XIMN", "Minimal fractional momentum loss of outgoing proton (ξ)", &xi_min_ );
       registerParameter<double>( "XIMX", "Maximal fractional momentum loss of outgoing proton (ξ)", &xi_max_ );
+
+      //-------------------------------------------------------------------------------------------
+      // PPtoLL cards backward compatibility
+      //-------------------------------------------------------------------------------------------
+
+      registerParameter<bool>( "NTREAT", "Smoothen the integrand", &params_->integrator->operator[]<bool>( "treat" ) );
+      registerParameter<int>( "ITMX", "Number of integration iterations", (int*)&params_->integrator->operator[]<int>( "iterations" ) );
+      registerParameter<int>( "NCVG", "Number of points to probe", (int*)&params_->generation().num_points );
+      registerParameter<int>( "METHOD", "Computation method (kT-factorisation)", &proc_params_->operator[]<int>( "method" ) );
+      registerParameter<int>( "LEPTON", "Outgoing leptons' flavour", &lepton_id_ );
+      registerParameter<double>( "PTMIN", "Minimal transverse momentum (single central outgoing particle)", &params_->kinematics.cuts.central.pt_single.min() );
+      registerParameter<double>( "PTMAX", "Maximal transverse momentum (single central outgoing particle)", &params_->kinematics.cuts.central.pt_single.max() );
+      registerParameter<double>( "Q1TMIN", "Minimal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt.min() );
+      registerParameter<double>( "Q1TMAX", "Maximal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt.max() );
+      registerParameter<double>( "Q2TMIN", "Minimal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt.min() );
+      registerParameter<double>( "Q2TMAX", "Maximal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt.max() );
+      registerParameter<double>( "MXMIN", "Minimal invariant mass of proton remnants", &params_->kinematics.cuts.remnants.mass_single.min() );
+      registerParameter<double>( "MXMAX", "Maximal invariant mass of proton remnants", &params_->kinematics.cuts.remnants.mass_single.max() );
     }
 
     void
