@@ -58,7 +58,8 @@ namespace cepgen
       alphas_params_( params.get<ParametersList>( "alphaS", ParametersList().setName<std::string>( "pegasus" ) ) ),
       gluon1_( false ), gluon2_( false ),
       prefactor_( 1. ), p_mat1_( 0 ), p_mat2_( 0 ),
-      p_term_ll_( 0 ), p_term_lt_( 0 ), p_term_tt1_( 0 ), p_term_tt2_( 0 )
+      p_term_ll_( 0 ), p_term_lt_( 0 ), p_term_tt1_( 0 ), p_term_tt2_( 0 ),
+      mf2_( 0. ), qf3_( 0 ), colf_( 0 )
     {
       if ( method_ == Mode::offShell || method_ == Mode::offShellLegacy ) { // off-shell matrix element
         const auto& ofp = params.get<ParametersList>( "offShellParameters" );

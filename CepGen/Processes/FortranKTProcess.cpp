@@ -7,7 +7,6 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Event/Event.h"
 
-#include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 

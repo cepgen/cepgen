@@ -30,12 +30,15 @@ namespace cepgen
       case KTFlux::P_Photon_Elastic_Budnev: {
         const double x2 = x*x;
         const double q2min = x2*mi2/( 1.-x ), q2 = q2min + kt2/( 1.-x );
+        const double qnorm = 1.-q2min/q2;
         //--- proton electromagnetic form factors
         const auto& ff = FormFactors::protonElastic( q2 );
-        if ( type == KTFlux::P_Photon_Elastic )
-          return constants::ALPHA_EM*M_1_PI*ff.FE*std::pow( kt2/( kt2+x2*mi2 ), 2 )/q2;
+        if ( type == KTFlux::P_Photon_Elastic ) {
+          const double f_aux = ff.FE*qnorm*qnorm;
+          return constants::ALPHA_EM*M_1_PI/q2*f_aux;
+        }
         else {
-          const double f_D = ff.FE*( 1.-x )*( 1.-q2min/q2 );
+          const double f_D = ff.FE*( 1.-x )*qnorm;
           const double f_C = ff.FM;
           return constants::ALPHA_EM*M_1_PI*( 1.-x )/q2*( f_D+0.5*x2*f_C );
         }
@@ -43,19 +46,20 @@ namespace cepgen
       case KTFlux::P_Photon_Inelastic:
       case KTFlux::P_Photon_Inelastic_Budnev: {
         const double x2 = x*x;
-        const double q2min = ( x*( mf2-mi2 ) + x2*mi2 )/( 1.-x );
+        const double q2min = ( x*( mf2-mi2 )+x2*mi2 )/( 1.-x );
         const double q2 = q2min + kt2/( 1.-x );
+        const double qnorm = 1.-q2min/q2;
+        //--- proton structure functions
         const double denom = 1./( q2+mf2-mi2 );
         const double xbj = denom*q2;
-        //--- proton structure functions
         auto& str_fun = sf( xbj, q2 );
         if ( type == KTFlux::P_Photon_Inelastic ) {
-          const double f_aux = str_fun.F2*denom*( 1.-( q2-kt2 )/q2 )*std::pow( kt2/( kt2+x*( mf2-mi2 )+x2*mi2 ), 2 );
-          return constants::ALPHA_EM*M_1_PI*( 1.-x )*f_aux/kt2;
+          const double f_aux = str_fun.F2*denom*qnorm*qnorm;
+          return constants::ALPHA_EM*M_1_PI*( 1.-x )/q2*f_aux;
         }
         else {
           str_fun.computeFL( xbj, q2 );
-          const double f_D = str_fun.F2*denom*( 1.-x )*( 1.-q2min/q2 );
+          const double f_D = str_fun.F2*denom*( 1.-x )*qnorm;
           const double f_C = str_fun.F1( xbj, q2 ) * 2./q2;
           return constants::ALPHA_EM*M_1_PI*( 1.-x )/q2*( f_D+0.5*x2*f_C );
         }

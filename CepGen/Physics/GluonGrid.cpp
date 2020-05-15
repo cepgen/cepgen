@@ -30,7 +30,7 @@ namespace kmr
       if ( !file.is_open() )
         throw CG_FATAL( "GluonGrid" ) << "Failed to load grid file \"" << grid_path_ << "\"!";
 
-      std::string line, x_tmp, kt2_tmp, mu2_tmp, fg_tmp;
+      std::string x_tmp, kt2_tmp, mu2_tmp, fg_tmp;
       while ( file >> x_tmp >> kt2_tmp >> mu2_tmp >> fg_tmp ) {
         const double x = stod( x_tmp ), kt2 = stod( kt2_tmp ), mu2 = stod( mu2_tmp ), fg = stod( fg_tmp );
         x_vals.insert( x );
