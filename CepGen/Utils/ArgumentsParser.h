@@ -61,6 +61,7 @@ namespace cepgen
         Parameter( std::string name, std::string description, std::vector<double>* var = nullptr, char sname = '\0' );
 
         void parse();
+        friend std::ostream& operator<<( std::ostream&, const Parameter& );
 
         //----- parameters attributes
 

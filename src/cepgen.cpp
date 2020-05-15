@@ -22,7 +22,7 @@ int main( int argc, char* argv[] )
 
   cepgen::ArgumentsParser parser( argc, argv );
   parser
-    .addArgument( "", "path to the configuration file", &input_card, 'i' )
+    .addArgument( "config", "path to the configuration file", &input_card, 'i' )
     .addOptionalArgument( "num-events", "number of events to generate", -1, &num_events, 'n' )
     .addOptionalArgument( "list-modules", "list all runtime modules", false, &list_mods, 'l' )
     .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )

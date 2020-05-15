@@ -60,6 +60,7 @@ int main( int argc, char* argv[] )
   }
   {
     cepgen::Canvas c( "test_scan" );
+    gStyle->SetPalette( kBeach );
     string xlabel, ylabel;
     switch ( dim.size() ) {
       case 0: case 1: {

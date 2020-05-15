@@ -363,5 +363,17 @@ namespace cepgen
       *vec_float_variable = vec_var;
     }
   }
+
+  std::ostream&
+  operator<<( std::ostream& os, const ArgumentsParser::Parameter& par )
+  {
+    return os << "Parameter{"
+      << "--" << par.name
+      << ",-" << std::string( 1, par.sname )
+      << ( !par.description.empty() ? ","+par.description : "" )
+      << par.value
+      << ",opt:" << std::boolalpha << par.optional
+      << "}";
+  }
 }
 
