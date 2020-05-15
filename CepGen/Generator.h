@@ -102,7 +102,7 @@ namespace cepgen
       /// Compute one single point from the total phase space
       /// \param[in] x the n-dimensional point to compute
       /// \return the function value for the given point
-      double computePoint( double* x );
+      double computePoint( const std::vector<double>& x );
 
    private:
       /// Physical Parameters used in the events generation and cross-section computation

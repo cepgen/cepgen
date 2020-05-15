@@ -1,5 +1,6 @@
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Processes/Process.h"
 
 #include "CepGen/Core/Exception.h"
 
@@ -20,14 +21,14 @@ int main( int argc, char* argv[] )
     .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
     .parse();
 
-  if ( point.size() < 2 ) {
-    point = vector<double>( ps_size, point[0] );
-    point.resize( ps_size );
-  }
-
   cepgen::Generator gen;
   gen.setParameters( cepgen::card::Handler::parse( input_card ) );
   CG_INFO( "main" ) << gen.parametersPtr();
+
+  if ( point.size() < 2 ) {
+    point = vector<double>( gen.parameters().process().ndim(), point[0] );
+    point.resize( ps_size );
+  }
 
   if ( !debug )
     cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debugInsideLoop;
@@ -37,7 +38,7 @@ int main( int argc, char* argv[] )
   for ( const auto& v : point )
     cout << delim << v, delim = ", ";
   cout << endl;
-  const double weight = gen.computePoint( &point[0] );
+  const double weight = gen.computePoint( point );
   cout << "weight: " << weight << endl;
 
   return 0;

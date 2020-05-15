@@ -111,17 +111,16 @@ namespace cepgen
   }
 
   double
-  Generator::computePoint( double* x )
+  Generator::computePoint( const std::vector<double>& coord )
   {
     clearRun();
     if ( !parameters_->hasProcess() )
       throw CG_FATAL( "Generator:computePoint" )
         << "Trying to compute a point with no process specified!";
     const size_t ndim = parameters_->process().ndim();
-    if ( ndim < 1 )
+    if ( coord.size() != ndim )
       throw CG_FATAL( "Generator:computePoint" )
         << "Invalid phase space dimension (ndim=" << ndim << ")!";
-    std::vector<double> coord( x, x+ndim );
     double res = generator_->integrand().eval( coord );
     CG_DEBUG( "Generator:computePoint" )
       << "Result for x[" << ndim << "] = " << coord << ":\n\t" << res << ".";
