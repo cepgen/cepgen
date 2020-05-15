@@ -113,7 +113,8 @@ namespace cepgen
   double
   Generator::computePoint( const std::vector<double>& coord )
   {
-    clearRun();
+    if ( !generator_ )
+      clearRun();
     if ( !parameters_->hasProcess() )
       throw CG_FATAL( "Generator:computePoint" )
         << "Trying to compute a point with no process specified!";

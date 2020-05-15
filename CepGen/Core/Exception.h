@@ -77,9 +77,11 @@ namespace cepgen
       template<typename T>
       inline friend const LoggedException& operator<<( const LoggedException& exc, std::vector<T> vec_var ) {
         LoggedException& nc_except = const_cast<LoggedException&>( exc );
-        std::string sep( "{" );
-        for ( const auto& var : vec_var )
-          nc_except.message_ << sep << var, sep = ", ";
+        nc_except.message_ << "{";
+        std::string sep;
+        if ( !vec_var.empty() )
+          for ( const auto& var : vec_var )
+            nc_except.message_ << sep << var, sep = ", ";
         nc_except.message_ << "}";
         return exc;
       }

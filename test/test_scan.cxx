@@ -59,16 +59,27 @@ int main( int argc, char* argv[] )
     }
   }
   {
-    cepgen::Canvas c( "test_diagonal_res" );
+    cepgen::Canvas c( "test_scan" );
+    string xlabel, ylabel;
     switch ( dim.size() ) {
       case 0: case 1: {
+        if ( dim.empty() )
+          xlabel = Form( "x_{i = 0, ..., %ld}", ndim-1 );
+        else
+          xlabel = Form( "x_{%d}", dim.at( 0 ) );
         gr_scan_1d.SetMarkerStyle( 24 );
+        c.SetTopLabel( Form( "%s variation, all others x_{i} at %g", xlabel.c_str(), def ) );
+        gr_scan_1d.SetTitle( Form( ";%s;d^{%ld}#sigma/d#bf{x}^{%ld}", xlabel.c_str(), ndim, ndim ) );
         gr_scan_1d.Draw( "ap" );
         c.Prettify( gr_scan_1d.GetHistogram() );
         c.SetLogy();
       } break;
       case 2: {
-        gr_scan_2d.Draw( "contz" );
+        xlabel = Form( "x_{%d}", dim.at( 0 ) );
+        ylabel = Form( "x_{%d}", dim.at( 1 ) );
+        c.SetTopLabel( Form( "(%s, %s) variation, all others x_{i} at %g", xlabel.c_str(), ylabel.c_str(), def ) );
+        gr_scan_2d.SetTitle( Form( ";%s;%s;d^{%ld}#sigma/d#bf{x}^{%ld}", xlabel.c_str(), ylabel.c_str(), ndim, ndim ) );
+        gr_scan_2d.Draw( "colz" );
         c.Prettify( (TH1*)gr_scan_2d.GetHistogram() );
         c.SetLogz();
       }
